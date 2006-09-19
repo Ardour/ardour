@@ -38,7 +38,7 @@
 #include <ardour/dB.h>
 #include <ardour/playlist.h>
 #include <ardour/audiofilter.h>
-#include <ardour/audiosource.h>
+#include <ardour/audiofilesource.h>
 
 #include "i18n.h"
 #include <locale.h>
@@ -71,6 +71,11 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, jack_nframes_t sta
 	  _fade_out (0.0, 2.0, 1.0, false),
 	  _envelope (0.0, 2.0, 1.0, false)
 {
+	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
+	if (afs) {
+		afs->HeaderPositionOffsetChanged.connect (mem_fun (*this, &AudioRegion::source_offset_changed));
+	}
+
 	_scale_amplitude = 1.0;
 
 	set_default_fades ();
@@ -88,6 +93,11 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, jack_nframes_t sta
 	, _fade_out (0.0, 2.0, 1.0, false)
 	, _envelope (0.0, 2.0, 1.0, false)
 {
+	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
+	if (afs) {
+		afs->HeaderPositionOffsetChanged.connect (mem_fun (*this, &AudioRegion::source_offset_changed));
+	}
+
 	_scale_amplitude = 1.0;
 
 	set_default_fades ();
@@ -180,6 +190,11 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& nod
 	, _fade_out (0.0, 2.0, 1.0, false)
 	, _envelope (0.0, 2.0, 1.0, false)
 {
+	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
+	if (afs) {
+		afs->HeaderPositionOffsetChanged.connect (mem_fun (*this, &AudioRegion::source_offset_changed));
+	}
+
 	set_default_fades ();
 
 	if (set_state (node)) {
@@ -1163,6 +1178,12 @@ AudioRegion::speed_mismatch (float sr) const
 	float fsr = audio_source()->sample_rate();
 
 	return fsr != sr;
+}
+
+void
+AudioRegion::source_offset_changed ()
+{
+	set_position (source()->natural_position() + start(), this);
 }
 
 boost::shared_ptr<AudioSource>

@@ -26,16 +26,12 @@ class AudioRegionGainLine : public AutomationLine
 
 	void remove_point (ControlPoint&);
 
-        PBD::ID id() { return _id; }
-
 
   private:
 	ARDOUR::Session& session;
 	AudioRegionView& rv;
 
 	UndoAction get_memento();
-
-        PBD::ID _id;
 };
 
 

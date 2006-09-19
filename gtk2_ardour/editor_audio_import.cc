@@ -270,7 +270,7 @@ Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool
 		idspec += string_compose(":%1", n);
 		
 		try {
-			source = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (DataType::AUDIO, idspec, (mode == ImportAsTrack ? AudioFileSource::Destructive : AudioFileSource::Flag (0))));
+			source = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (DataType::AUDIO, *session, idspec, (mode == ImportAsTrack ? AudioFileSource::Destructive : AudioFileSource::Flag (0))));
 			sources.push_back(source);
 		} 
 		

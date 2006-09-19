@@ -919,6 +919,33 @@ jack_nframes_t
 
 TempoMap::round_to_beat_subdivision (jack_nframes_t fr, int sub_num)
 {
+
+	BBT_Time the_beat;
+	uint32_t ticks_one_half_subdivisions_worth;
+	uint32_t ticks_one_subdivisions_worth;
+
+	bbt_time(fr, the_beat);
+
+	ticks_one_subdivisions_worth = (uint32_t)Meter::ticks_per_beat / sub_num;
+	ticks_one_half_subdivisions_worth = ticks_one_subdivisions_worth / 2;
+
+	if (the_beat.ticks % ticks_one_subdivisions_worth > ticks_one_half_subdivisions_worth) {
+	  uint32_t difference = ticks_one_subdivisions_worth - (the_beat.ticks % ticks_one_subdivisions_worth);
+	  if (the_beat.ticks + difference >= (uint32_t)Meter::ticks_per_beat) {
+	    the_beat.beats++;
+	    the_beat.ticks += difference;
+	    the_beat.ticks -= (uint32_t)Meter::ticks_per_beat;
+	  } else {  
+	    the_beat.ticks += difference;
+	  }
+	} else {
+	  the_beat.ticks -= the_beat.ticks % ticks_one_subdivisions_worth;
+	}
+
+	return frame_time (the_beat);
+
+	/* XXX just keeping this for reference
+
         TempoMap::BBTPointList::iterator i;
         TempoMap::BBTPointList *more_zoomed_bbt_points;
         jack_nframes_t frame_one_beats_worth;
@@ -970,6 +997,9 @@ TempoMap::round_to_beat_subdivision (jack_nframes_t fr, int sub_num)
 
         delete more_zoomed_bbt_points;
         return fr ;
+
+	*/
+
 }
 
 jack_nframes_t

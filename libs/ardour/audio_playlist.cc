@@ -899,3 +899,4 @@ AudioPlaylist::crossfades_at (jack_nframes_t frame, Crossfades& clist)
 		} 
 	}
 }
+

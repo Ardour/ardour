@@ -214,8 +214,7 @@ protected:
 	void map_frozen ();
 
 	void color_handler (ColorID, uint32_t);
-	bool select_me (GdkEventButton*);
-	
+
 	void region_view_added (RegionView*);
 	void add_ghost_to_redirect (RegionView*, AutomationTimeAxisView*);
 	

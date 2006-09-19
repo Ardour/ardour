@@ -109,7 +109,7 @@ protected:
 	
 	virtual void add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves) = 0;
 	virtual void remove_region_view (boost::shared_ptr<ARDOUR::Region> );
-	void         remove_rec_region (boost::shared_ptr<ARDOUR::Region>);
+	//void         remove_rec_region (boost::shared_ptr<ARDOUR::Region>); (unused)
 
 	void         display_diskstream (boost::shared_ptr<ARDOUR::Diskstream>);
 	virtual void undisplay_diskstream ();

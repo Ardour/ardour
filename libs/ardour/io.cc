@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <unistd.h>
 #include <locale.h>
+#include <errno.h>
 
 #include <sigc++/bind.h>
 
@@ -2143,8 +2144,8 @@ IO::load_automation (const string& path)
 		fullpath += path;
 		in.open (fullpath.c_str());
 		if (!in) {
-				error << string_compose(_("%1: cannot open automation event file \"%2\""), _name, fullpath) << endmsg;
-				return -1;
+			error << string_compose(_("%1: cannot open automation event file \"%2\" (%2)"), _name, fullpath, strerror (errno)) << endmsg;
+			return -1;
 		}
 	}
 

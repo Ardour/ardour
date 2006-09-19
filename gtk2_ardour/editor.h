@@ -143,8 +143,6 @@ class Editor : public PublicEditor
 	XMLNode& get_state ();
 	int set_state (const XMLNode& );
 
-        PBD::ID id() { return _id; }
-
 	void set_mouse_mode (Editing::MouseMode, bool force=true);
 	void step_mouse_mode (bool next);
 	Editing::MouseMode current_mouse_mode () { return mouse_mode; }
@@ -231,6 +229,7 @@ class Editor : public PublicEditor
 
 	void set_show_measures (bool yn);
 	bool show_measures () const { return _show_measures; }
+	bool initial_ruler_update_required;
 
 #ifdef FFT_ANALYSIS
 	/* analysis window */
@@ -302,6 +301,14 @@ class Editor : public PublicEditor
 	void set_meter_falloff (int);
 	void set_meter_hold (int32_t);
 
+	/* SMPTE timecode & video sync */
+
+	void smpte_fps_chosen (ARDOUR::Session::SmpteFormat format);
+	void video_pullup_chosen (ARDOUR::Session::PullupFormat pullup);
+
+	void update_smpte_mode();
+	void update_video_pullup();
+
 	/* xfades */
 
 	void toggle_auto_xfade ();
@@ -311,8 +318,8 @@ class Editor : public PublicEditor
 	void update_crossfade_model ();
 	void set_crossfade_model (ARDOUR::CrossfadeModel);
 
-	/* layers */
 
+	/* layers */
 	void set_layer_model (ARDOUR::Session::LayerModel);
 	void update_layering_model ();
 
@@ -348,8 +355,6 @@ class Editor : public PublicEditor
 	ARDOUR::Session     *session;
 	ARDOUR::AudioEngine& engine;
 	bool                 constructed;
-
-        PBD::ID _id;
 
 	PlaylistSelector* _playlist_selector;
 
@@ -683,7 +688,7 @@ class Editor : public PublicEditor
 
 	void tie_vertical_scrolling ();
 	void canvas_horizontally_scrolled ();
-	bool lazy_canvas_horizontally_scrolled ();
+
 	void reposition_and_zoom (jack_nframes_t sample, double fpu);
 	gint deferred_reposition_and_zoom (jack_nframes_t sample, double fpu);
 	void end_location_changed (ARDOUR::Location*);
@@ -1185,8 +1190,6 @@ class Editor : public PublicEditor
 	bool _follow_playhead;
 	bool _show_waveforms_recording;
 	
-	void add_bbt_marks (ARDOUR::TempoMap::BBTPointList&);
-
 	ARDOUR::TempoMap::BBTPointList *current_bbt_points;
 	
 	typedef vector<ArdourCanvas::SimpleLine*> TimeLineList;
@@ -1197,7 +1200,7 @@ class Editor : public PublicEditor
 	ArdourCanvas::SimpleLine* get_time_line ();
 	void hide_measures ();
 	void draw_measures ();
-	void draw_time_bars ();
+	bool lazy_hide_and_draw_measures ();
 
 	void new_tempo_section ();
 
@@ -1506,7 +1509,7 @@ class Editor : public PublicEditor
 	jack_nframes_t autoscroll_distance;
      
 	static gint _autoscroll_canvas (void *);
-	gint autoscroll_canvas ();
+	bool autoscroll_canvas ();
 	void start_canvas_autoscroll (int direction);
 	void stop_canvas_autoscroll ();
 	void maybe_autoscroll (GdkEvent*);

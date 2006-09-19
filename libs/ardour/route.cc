@@ -277,17 +277,17 @@ Route::process_output_buffers (BufferSet& bufs,
 	   -------------------------------------------------------------------------------------------------- */
 
 	if (declick > 0) {
-		Amp::run (bufs, nframes, 0.0, 1.0, _phase_invert);
+		Amp::run (bufs, nframes, 0.0, 1.0, false);
 		_pending_declick = 0;
 	} else if (declick < 0) {
-		Amp::run (bufs, nframes, 1.0, 0.0, _phase_invert);
+		Amp::run (bufs, nframes, 1.0, 0.0, false);
 		_pending_declick = 0;
 	} else {
 
 		/* no global declick */
 
 		if (solo_gain != dsg) {
-			Amp::run (bufs, nframes, solo_gain, dsg, _phase_invert);
+			Amp::run (bufs, nframes, solo_gain, dsg, false);
 			solo_gain = dsg;
 		}
 	}
@@ -302,7 +302,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	}
 
 	if (!_soloed && _mute_affects_pre_fader && (mute_gain != dmg)) {
-		Amp::run (bufs, nframes, mute_gain, dmg, _phase_invert);
+		Amp::run (bufs, nframes, mute_gain, dmg, false);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}
@@ -379,7 +379,7 @@ Route::process_output_buffers (BufferSet& bufs,
 
 	
 	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_post_fader) {
-		Amp::run (bufs, nframes, mute_gain, dmg, _phase_invert);
+		Amp::run (bufs, nframes, mute_gain, dmg, false);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}
@@ -543,7 +543,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	}
 
 	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_control_outs) {
-		Amp::run (bufs, nframes, mute_gain, dmg, _phase_invert);
+		Amp::run (bufs, nframes, mute_gain, dmg, false);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}
@@ -588,7 +588,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	   ----------------------------------------------------------------------*/
 
 	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_main_outs) {
-		Amp::run (bufs, nframes, mute_gain, dmg, _phase_invert);
+		Amp::run (bufs, nframes, mute_gain, dmg, false);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}

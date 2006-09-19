@@ -103,7 +103,7 @@ class Port : public sigc::trackable {
 	
 	void ensure_monitor_input (bool yn) {
 
-#ifdef WITH_JACK_PORT_ENSURE_MONITOR
+#ifdef HAVE_JACK_PORT_ENSURE_MONITOR
 		jack_port_ensure_monitor (_port, yn);
 #else
 		jack_port_request_monitor(_port, yn);

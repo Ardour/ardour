@@ -31,12 +31,12 @@ namespace ARDOUR {
 
 class DestructiveFileSource : public SndFileSource {
   public:
-	DestructiveFileSource (std::string path, SampleFormat samp_format, HeaderFormat hdr_format, jack_nframes_t rate,
+	DestructiveFileSource (Session&, std::string path, SampleFormat samp_format, HeaderFormat hdr_format, jack_nframes_t rate,
 			       Flag flags = AudioFileSource::Flag (AudioFileSource::Writable));
 
-	DestructiveFileSource (std::string path, Flag flags);
+	DestructiveFileSource (Session&, std::string path, Flag flags);
 
-	DestructiveFileSource (const XMLNode&);
+	DestructiveFileSource (Session&, const XMLNode&);
 	~DestructiveFileSource ();
 
 	jack_nframes_t last_capture_start_frame() const;

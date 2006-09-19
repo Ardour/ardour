@@ -82,8 +82,7 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 		}
 
 		try {
-			sources.push_back (boost::dynamic_pointer_cast<AudioFileSource> (
-				SourceFactory::createWritable (DataType::AUDIO, path, false, frame_rate())));
+			sources.push_back (boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (DataType::AUDIO, *this, path, false, frame_rate())));
 
 		} catch (failed_constructor& err) {
 			error << string_compose (_("tempoize: error creating new audio file %1 (%2)"), path, strerror (errno)) << endmsg;

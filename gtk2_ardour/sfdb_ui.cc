@@ -36,6 +36,7 @@
 #include <ardour/source_factory.h>
 
 #include "ardour_ui.h"
+#include "editing.h"
 #include "gui_thread.h"
 #include "prompter.h"
 #include "sfdb_ui.h"
@@ -197,7 +198,7 @@ SoundFileBox::play_btn_clicked ()
 		
 		for (int n = 0; n < sf_info.channels; ++n) {
 			try {
-				afs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (DataType::AUDIO, path+":"+string_compose("%1", n), AudioFileSource::Flag (0)));
+				afs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (DataType::AUDIO, *_session, path+":"+string_compose("%1", n), AudioFileSource::Flag (0)));
 				srclist.push_back(afs);
 
 			} catch (failed_constructor& err) {
@@ -305,6 +306,15 @@ SoundFileBox::field_selected ()
 	}
 }
 
+// this needs to be kept in sync with the ImportMode enum defined in editing.h and editing_syms.h.
+static const char *import_mode_strings[] = {
+	X_("Add to Region list"),
+	X_("Add to selected Track(s)"),
+	X_("Add as new Track(s)"),
+	X_("Add as new Tape Track(s)"),
+	0
+};
+
 SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s)
 	: ArdourDialog (title, false),
 	  chooser (Gtk::FILE_CHOOSER_ACTION_OPEN)
@@ -338,13 +348,6 @@ SoundFileChooser::SoundFileChooser (string title, ARDOUR::Session* s)
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	show_all ();
 }
-
-static const char *import_mode_strings[] = {
-	X_("Add to Region list"),
-	X_("Add as new Track(s)"),
-	X_("Add to selected Track(s)"),
-	0
-};
 
 vector<string> SoundFileOmega::mode_strings;
 

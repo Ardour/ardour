@@ -224,13 +224,13 @@ Plugin::save_preset (string name, string domain)
 	free(lrdf_add_preset(source.c_str(), name.c_str(), unique_id(), &defaults));
 
 	string path = string_compose("%1/.%2", envvar, domain);
-	if (mkdir(path.c_str(), 0775) && errno != EEXIST) {
+	if (g_mkdir_with_parents (path.c_str(), 0775)) {
 		warning << string_compose(_("Could not create %1.  Preset not saved. (%2)"), path, strerror(errno)) << endmsg;
 		return false;
 	}
 	
 	path += "/rdf";
-	if (mkdir(path.c_str(), 0775) && errno != EEXIST) {
+	if (g_mkdir_with_parents (path.c_str(), 0775)) {
 		warning << string_compose(_("Could not create %1.  Preset not saved. (%2)"), path, strerror(errno)) << endmsg;
 		return false;
 	}

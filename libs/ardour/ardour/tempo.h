@@ -242,7 +242,6 @@ class TempoMap : public StateManager, public PBD::StatefulDestructible
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&);
-        PBD::ID id() { return _id; }
 
 	void dump (std::ostream&) const;
 	void clear ();
@@ -319,8 +318,6 @@ class TempoMap : public StateManager, public PBD::StatefulDestructible
 	/* override state_manager::save_state so we can check in_set_state */
 
 	void save_state (std::string why);
-
-        PBD::ID _id;
 
 };
 

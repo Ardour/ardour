@@ -174,6 +174,7 @@ class AudioRegion : public Region
 	void recompute_at_end ();
 
 	void envelope_changed (Change);
+	void source_offset_changed ();
 
 	mutable Curve     _fade_in;
 	FadeShape         _fade_in_shape;

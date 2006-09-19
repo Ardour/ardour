@@ -111,6 +111,8 @@ class AudioPlaylist : public ARDOUR::Playlist
        bool region_changed (Change, boost::shared_ptr<Region>);
        void crossfade_changed (Change);
        void add_crossfade (Crossfade&);
+
+       void source_offset_changed (boost::shared_ptr<AudioRegion> region);
 };
 
 } /* namespace ARDOUR */

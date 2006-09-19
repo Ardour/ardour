@@ -68,6 +68,7 @@ AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 	_amplitude_above_axis = 1.0;
 
 	use_rec_regions = tv.editor.show_waveforms_recording ();
+
 }
 
 AudioStreamView::~AudioStreamView ()
@@ -215,9 +216,7 @@ AudioStreamView::playlist_modified ()
 
 	StreamView::playlist_modified();
 	
-	/* if the playlist is modified, make sure xfades are on top and all the regionviews are stacked 
-	   correctly.
-	*/
+	/* make sure xfades are on top and all the regionviews are stacked correctly. */
 
 	for (list<CrossfadeView *>::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
 		(*i)->get_canvas_group()->raise_to_top();
@@ -419,10 +418,11 @@ AudioStreamView::setup_rec_box ()
 				
 				boost::shared_ptr<AudioRegion> region (boost::dynamic_pointer_cast<AudioRegion>
 								       (RegionFactory::create (sources, start, 1 , "", 0, (Region::Flag)(Region::DefaultFlags | Region::DoNotSaveState), false)));
+				assert(region);
 				region->set_position (_trackview.session().transport_frame(), this);
 				rec_regions.push_back (region);
-				/* catch it if it goes away */
-				region->GoingAway.connect (bind (mem_fun (*this, &AudioStreamView::remove_rec_region), region));
+
+				// rec regions are destroyed in setup_rec_box
 
 				/* we add the region later */
 			}
@@ -504,6 +504,14 @@ AudioStreamView::setup_rec_box ()
 			
 			/* remove temp regions */
 			
+			for (list<boost::shared_ptr<Region> >::iterator iter = rec_regions.begin(); iter != rec_regions.end();) {
+				list<boost::shared_ptr<Region> >::iterator tmp;
+				tmp = iter;
+				++tmp;
+				(*iter)->drop_references ();
+				iter = tmp;
+			}
+				
 			rec_regions.clear();
 
 			// cerr << "\tclear " << rec_rects.size() << " rec rects\n";
@@ -567,9 +575,10 @@ AudioStreamView::update_rec_regions ()
 				continue;
 			}
 			
-			// FIXME
 			boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion>(*iter);
-			assert(region);
+			if (!region) {
+				continue;
+			}
 
 			jack_nframes_t origlen = region->length();
 

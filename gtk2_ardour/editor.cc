@@ -643,7 +643,7 @@ Editor::Editor (AudioEngine& eng)
 	edit_pane.pack1 (edit_packer, true, true);
 	edit_pane.pack2 (the_notebook, false, true);
 	
-	edit_pane.signal_size_allocate().connect_notify (bind (mem_fun(*this, &Editor::pane_allocation_handler), static_cast<Paned*> (&edit_pane)));
+	edit_pane.signal_size_allocate().connect (bind (mem_fun(*this, &Editor::pane_allocation_handler), static_cast<Paned*> (&edit_pane)));
 
 	top_hbox.pack_start (toolbar_frame, true, true);
 
@@ -700,6 +700,7 @@ Editor::Editor (AudioEngine& eng)
 	ControlProtocol::ZoomIn.connect (bind (mem_fun (*this, &Editor::temporal_zoom_step), false));
 	ControlProtocol::ZoomOut.connect (bind (mem_fun (*this, &Editor::temporal_zoom_step), true));
 	ControlProtocol::ScrollTimeline.connect (mem_fun (*this, &Editor::control_scroll));
+
 	constructed = true;
 	instant_save ();
 
@@ -882,6 +883,9 @@ Editor::reposition_x_origin (jack_nframes_t frame)
 		}
 
 		horizontal_adjustment.set_value (frame/frames_per_unit);
+	} else {
+		update_fixed_rulers();
+		tempo_map_changed (Change (0));
 	}
 }
 
@@ -965,20 +969,10 @@ void
 Editor::canvas_horizontally_scrolled ()
 {
 
-        Glib::signal_idle().connect (mem_fun(*this, &Editor::lazy_canvas_horizontally_scrolled));
-
-}
-
-bool
-Editor::lazy_canvas_horizontally_scrolled ()
-{
-
-	leftmost_frame = (jack_nframes_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
-
+  	leftmost_frame = (jack_nframes_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
 	update_fixed_rulers ();
 	tempo_map_changed (Change (0));
 
-	return false; 
 }
 
 void
@@ -996,7 +990,6 @@ Editor::deferred_reposition_and_zoom (jack_nframes_t frame, double nfpu)
 
 	set_frames_per_unit (nfpu);
 	reposition_x_origin  (frame);
-
 	repos_zoom_queued = false;
 	
 	return FALSE;
@@ -1031,6 +1024,10 @@ Editor::session_control_changed (Session::ControlType t)
 
 	case Session::LayeringModel:
 		update_layering_model ();
+		break;
+
+	case Session::SmpteMode:
+		update_smpte_mode ();
 		break;
 
 	default:
@@ -1179,6 +1176,9 @@ Editor::connect_to_session (Session *t)
 	session_connections.push_back (session->SMPTEOffsetChanged.connect (mem_fun(*this, &Editor::update_just_smpte)));
 	session_connections.push_back (session->SMPTETypeChanged.connect (mem_fun(*this, &Editor::update_just_smpte)));
 
+	session_connections.push_back (session->SMPTETypeChanged.connect (mem_fun(*this, &Editor::update_smpte_mode)));
+	session_connections.push_back (session->PullupChanged.connect (mem_fun(*this, &Editor::update_video_pullup)));
+
 	session_connections.push_back (session->tempo_map().StateChanged.connect (mem_fun(*this, &Editor::tempo_map_changed)));
 
 	edit_groups_changed ();
@@ -1266,9 +1266,12 @@ Editor::connect_to_session (Session *t)
 	}
 
 	/* xfade visibility state set from editor::set_state() */
-	
-	update_crossfade_model ();
-	update_layering_model ();
+
+	update_crossfade_model();
+	update_layering_model();
+
+	update_smpte_mode();
+	update_video_pullup();
 
 	handle_new_duration ();
 
@@ -1292,7 +1295,7 @@ Editor::connect_to_session (Session *t)
 	horizontal_adjustment.set_value (0);
 
 	restore_ruler_visibility ();
-	tempo_map_changed (Change (0));
+	//tempo_map_changed (Change (0));
 	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
 
 	edit_cursor->set_position (0);
@@ -1328,6 +1331,7 @@ Editor::connect_to_session (Session *t)
 	}
 
         /* register for undo history */
+
         session->register_with_memento_command_factory(_id, this);
 }
 
@@ -2110,6 +2114,9 @@ Editor::set_state (const XMLNode& node)
 	int x, y, xoff, yoff;
 	Gdk::Geometry g;
 
+	if ((prop = node.property ("id")) != 0) {
+		_id = prop->value ();
+	}
 
 	if ((geometry = find_named_node (node, "geometry")) == 0) {
 
@@ -2241,6 +2248,9 @@ Editor::get_state ()
 	XMLNode* node = new XMLNode ("Editor");
 	char buf[32];
 
+	_id.print (buf);
+	node->add_property ("id", buf);
+	
 	if (is_realized()) {
 		Glib::RefPtr<Gdk::Window> win = get_window();
 		
@@ -2250,7 +2260,7 @@ Editor::get_state ()
 		win->get_size(width, height);
 		
 		XMLNode* geometry = new XMLNode ("geometry");
-		char buf[32];
+
 		snprintf(buf, sizeof(buf), "%d", width);
 		geometry->add_property("x_size", string(buf));
 		snprintf(buf, sizeof(buf), "%d", height);
@@ -4085,6 +4095,7 @@ Editor::restore_editing_space ()
 {
 	mouse_mode_tearoff->set_visible (true);
 	tools_tearoff->set_visible (true);
+
 	edit_pane.set_position (pre_maximal_pane_position);
 
 	unfullscreen();
@@ -4139,6 +4150,87 @@ Editor::on_key_press_event (GdkEventKey* ev)
 }
 
 void
+Editor::update_smpte_mode ()
+{
+	ENSURE_GUI_THREAD(mem_fun(*this, &Editor::update_smpte_mode));
+
+	RefPtr<Action> act;
+
+	float frames = session->smpte_frames_per_second;
+	bool drop = session->smpte_drop_frames;
+
+	if ((frames < 23.976 * 1.0005) && !drop)
+		act = ActionManager::get_action (X_("Editor"), X_("Smpte23976"));
+	else if ((frames < 24 * 1.0005) && !drop)
+		act = ActionManager::get_action (X_("Editor"), X_("Smpte24"));
+	else if ((frames < 24.976 * 1.0005) && !drop)
+		act = ActionManager::get_action (X_("Editor"), X_("Smpte24976"));
+	else if ((frames < 25 * 1.0005) && !drop)
+		act = ActionManager::get_action (X_("Editor"), X_("Smpte25"));
+	else if ((frames < 29.97 * 1.0005) && !drop)
+		act = ActionManager::get_action (X_("Editor"), X_("Smpte2997"));
+	else if ((frames < 29.97 * 1.0005) && drop)
+		act = ActionManager::get_action (X_("Editor"), X_("Smpte2997drop"));
+	else if ((frames < 30 * 1.0005) && !drop)
+		act = ActionManager::get_action (X_("Editor"), X_("Smpte30"));
+	else if ((frames < 30 * 1.0005) && drop)
+		act = ActionManager::get_action (X_("Editor"), X_("Smpte30drop"));
+	else if ((frames < 59.94 * 1.0005) && !drop)
+		act = ActionManager::get_action (X_("Editor"), X_("Smpte5994"));
+	else if ((frames < 60 * 1.0005) && !drop)
+		act = ActionManager::get_action (X_("Editor"), X_("Smpte60"));
+	else
+		cerr << "Unexpected SMPTE value (" << frames << (drop ? "drop" : "") << ") in update_smpte_mode.  Menu is probably wrong\n" << endl;
+		
+
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && !ract->get_active()) {
+			ract->set_active (true);
+		}
+	}
+}
+
+void
+Editor::update_video_pullup ()
+{
+	ENSURE_GUI_THREAD (mem_fun(*this, &Editor::update_video_pullup));
+
+	RefPtr<Action> act;
+
+	float pullup = session->video_pullup;
+
+	if ( pullup < (-4.1667 - 0.1) * 0.99) {
+		act = ActionManager::get_action (X_("Editor"), X_("PullupMinus4Minus1"));
+	} else if ( pullup < (-4.1667) * 0.99 ) {
+		act = ActionManager::get_action (X_("Editor"), X_("PullupMinus4"));
+	} else if ( pullup < (-4.1667 + 0.1) * 0.99 ) {
+		act = ActionManager::get_action (X_("Editor"), X_("PullupMinus4Plus1"));
+	} else if ( pullup < (-0.1) * 0.99 ) {
+		act = ActionManager::get_action (X_("Editor"), X_("PullupMinus1"));
+	} else if (pullup > (4.1667 + 0.1) * 0.99 ) {
+		act = ActionManager::get_action (X_("Editor"), X_("PullupPlus4Plus1"));
+	} else if ( pullup > (4.1667) * 0.99 ) {
+		act = ActionManager::get_action (X_("Editor"), X_("PullupPlus4"));
+	} else if ( pullup > (4.1667 - 0.1) * 0.99) {
+		act = ActionManager::get_action (X_("Editor"), X_("PullupPlus4Minus1"));
+	} else if ( pullup > (0.1) * 0.99 ) {
+		act = ActionManager::get_action (X_("Editor"), X_("PullupPlus1"));
+	} else
+		act = ActionManager::get_action (X_("Editor"), X_("PullupNone"));
+
+
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && !ract->get_active()) {
+			ract->set_active (true);
+		}
+	}
+
+}
+
+
+void
 Editor::update_layering_model ()
 {
 	RefPtr<Action> act;
@@ -4162,7 +4254,6 @@ Editor::update_layering_model ()
 		}
 	}
 }
-
 
 void
 Editor::update_crossfade_model ()

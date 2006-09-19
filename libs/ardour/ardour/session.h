@@ -267,8 +267,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	bool dirty() const { return _state_of_the_state & Dirty; }
 	sigc::signal<void> DirtyChanged;
 
-	std::string sound_dir () const;
-	std::string tape_dir () const;
+	std::string sound_dir (bool with_path = true) const;
 	std::string peak_dir () const;
 	std::string dead_sound_dir () const;
 	std::string automation_dir () const;
@@ -281,7 +280,8 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	
 	static string change_audio_path_by_name (string oldpath, string oldname, string newname, bool destructive);
 	static string change_midi_path_by_name (string oldpath, string oldname, string newname, bool destructive);
-	static string peak_path_from_audio_path (string);
+	
+	string peak_path_from_audio_path (string) const;
 	string audio_path_from_name (string, uint32_t nchans, uint32_t chan, bool destructive);
 	string midi_path_from_name (string);
 
@@ -1713,9 +1713,10 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	uint32_t _total_free_4k_blocks;
 	Glib::Mutex space_lock;
 
+	static const char* old_sound_dir_name;
 	static const char* sound_dir_name;
-	static const char* tape_dir_name;
 	static const char* dead_sound_dir_name;
+	static const char* interchange_dir_name;
 	static const char* peak_dir_name;
 
 	string discover_best_sound_dir (bool destructive = false);

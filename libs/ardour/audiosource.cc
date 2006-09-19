@@ -50,8 +50,8 @@ int                          AudioSource::peak_request_pipe[2];
 bool AudioSource::_build_missing_peakfiles = false;
 bool AudioSource::_build_peakfiles = false;
 
-AudioSource::AudioSource (string name)
-	: Source (name, DataType::AUDIO)
+AudioSource::AudioSource (Session& s, string name)
+	: Source (s, name, DataType::AUDIO)
 {
 	if (pending_peak_sources_lock == 0) {
 		pending_peak_sources_lock = new Glib::Mutex;
@@ -63,8 +63,8 @@ AudioSource::AudioSource (string name)
 	_write_data_count = 0;
 }
 
-AudioSource::AudioSource (const XMLNode& node) 
-	: Source (node)
+AudioSource::AudioSource (Session& s, const XMLNode& node) 
+	: Source (s, node)
 {
 	if (pending_peak_sources_lock == 0) {
 		pending_peak_sources_lock = new Glib::Mutex;

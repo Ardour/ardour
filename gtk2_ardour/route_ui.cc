@@ -86,10 +86,10 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 		
 		update_rec_display ();
 	} 
-	
+
 	mute_button->unset_flags (Gtk::CAN_FOCUS);
 	solo_button->unset_flags (Gtk::CAN_FOCUS);
-
+	
 	/* map the current state */
 
 	map_frozen ();
@@ -100,7 +100,7 @@ RouteUI::~RouteUI()
 	delete mute_menu;
 }
 
-gint
+bool
 RouteUI::mute_press(GdkEventButton* ev)
 {
 	if (!ignore_toggle) {
@@ -161,7 +161,7 @@ RouteUI::mute_press(GdkEventButton* ev)
 	return true;
 }
 
-gint
+bool
 RouteUI::mute_release(GdkEventButton* ev)
 {
 	if (!ignore_toggle) {
@@ -175,7 +175,7 @@ RouteUI::mute_release(GdkEventButton* ev)
 	return true;
 }
 
-gint
+bool
 RouteUI::solo_press(GdkEventButton* ev)
 {
 	if (!ignore_toggle) {
@@ -255,7 +255,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 	return true;
 }
 
-gint
+bool
 RouteUI::solo_release(GdkEventButton* ev)
 {
 	if (!ignore_toggle) {
@@ -271,7 +271,7 @@ RouteUI::solo_release(GdkEventButton* ev)
 	return true;
 }
 
-gint
+bool
 RouteUI::rec_enable_press(GdkEventButton* ev)
 {
 	if (!ignore_toggle && is_track() && rec_enable_button) {

@@ -1090,7 +1090,7 @@ Panner::save () const
 	ofstream out (automation_path.c_str());
 	
 	if (!out) {
-		error << string_compose (_("cannot open pan automation file \"%1\" for saving (%s)"), automation_path, strerror (errno))
+		error << string_compose (_("cannot open pan automation file \"%1\" for saving (%2)"), automation_path, strerror (errno))
 		      << endmsg;
 		return -1;
 	}

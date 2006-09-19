@@ -1,3 +1,3 @@
 #!/bin/sh
 source `dirname "$0"`/ardev_common.sh
-exec gtk2_ardour/ardour.bin --novst "$*"
+exec gtk2_ardour/ardour.bin --novst $*

@@ -463,6 +463,7 @@ ARDOUR_UI::setup_session_options ()
 	session_control_changed (Session::AutoReturn);
 	session_control_changed (Session::AutoInput);
 	session_control_changed (Session::Clicking);
+	session_control_changed (Session::SmpteMode);
 	
 	session->ControlChanged.connect (mem_fun (*this, &ARDOUR_UI::queue_session_control_changed));
 }
@@ -555,7 +556,6 @@ ARDOUR_UI::session_control_changed (Session::ControlType t)
 	case Session::CrossfadingModel:
 		break;
 
-		
 	case Session::AutoPlay:
 		map_some_session_state ("Transport", "ToggleAutoPlay", &Session::get_auto_play);
 		break;

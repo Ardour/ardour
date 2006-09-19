@@ -131,10 +131,6 @@ ARDOUR_UI::connect_to_session (Session *s)
 	start_clocking ();
 	start_blinking ();
 
-	if (editor) {
-		editor->present();
-	}
-
 	transport_stopped ();
 
 	second_connection = Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::every_second), 1000);

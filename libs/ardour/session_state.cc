@@ -309,7 +309,6 @@ Session::second_stage_init (bool new_session)
 
 	if (!new_session) {
 		if (load_state (_current_snapshot_name)) {
-			cerr << "load state failed\n";
 			return -1;
 		}
 		remove_empty_sounds ();
@@ -371,7 +370,6 @@ Session::second_stage_init (bool new_session)
 		_end_location_is_free = false;
 	}
 	
-        restore_history(_current_snapshot_name);
 	return 0;
 }
 
@@ -436,16 +434,7 @@ Session::setup_raid_path (string path)
 		if (fspath[fspath.length()-1] != '/') {
 			fspath += '/';
 		}
-		fspath += sound_dir_name;
-		fspath += ':';
-
-		/* tape dir */
-
-		fspath += sp.path;
-		if (fspath[fspath.length()-1] != '/') {
-			fspath += '/';
-		}
-		fspath += tape_dir_name;
+		fspath += sound_dir (false);
 		
 		AudioFileSource::set_search_path (fspath);
 		SMFSource::set_search_path (fspath); // FIXME: should be different
@@ -467,16 +456,7 @@ Session::setup_raid_path (string path)
 		if (fspath[fspath.length()-1] != '/') {
 			fspath += '/';
 		}
-		fspath += sound_dir_name;
-		fspath += ':';
-
-		/* add tape dir to file search path */
-
-		fspath += sp.path;
-		if (fspath[fspath.length()-1] != '/') {
-			fspath += '/';
-		}
-		fspath += tape_dir_name;
+		fspath += sound_dir (false);
 		fspath += ':';
 
 		remaining = remaining.substr (colon+1);
@@ -492,14 +472,8 @@ Session::setup_raid_path (string path)
 		if (fspath[fspath.length()-1] != '/') {
 			fspath += '/';
 		}
-		fspath += sound_dir_name;
+		fspath += sound_dir (false);
 		fspath += ':';
-
-		fspath += sp.path;
-		if (fspath[fspath.length()-1] != '/') {
-			fspath += '/';
-		}
-		fspath += tape_dir_name;
 
 		session_dirs.push_back (sp);
 	}
@@ -518,61 +492,40 @@ int
 Session::create (bool& new_session, string* mix_template, jack_nframes_t initial_length)
 {
 	string dir;
+
+	new_session = !g_file_test (_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
 	
-	if (mkdir (_path.c_str(), 0755) < 0) {
-		if (errno == EEXIST) {
-			new_session = false;
-		} else {
-			error << string_compose(_("Session: cannot create session dir \"%1\" (%2)"), _path, strerror (errno)) << endmsg;
-			return -1;
-		}
-	} else {
-		new_session = true;
+	if (g_mkdir_with_parents (_path.c_str(), 0755) < 0) {
+		error << string_compose(_("Session: cannot create session dir \"%1\" (%2)"), _path, strerror (errno)) << endmsg;
+		return -1;
 	}
 
 	dir = peak_dir ();
 
-	if (mkdir (dir.c_str(), 0755) < 0) {
-		if (errno != EEXIST) {
-			error << string_compose(_("Session: cannot create session peakfile dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-			return -1;
-		}
+	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+		error << string_compose(_("Session: cannot create session peakfile dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+		return -1;
 	}
 
 	dir = sound_dir ();
 
-	if (mkdir (dir.c_str(), 0755) < 0) {
-		if (errno != EEXIST) {
-			error << string_compose(_("Session: cannot create session sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-			return -1;
-		}
-	}
-
-	dir = tape_dir ();
-
-	if (mkdir (dir.c_str(), 0755) < 0) {
-		if (errno != EEXIST) {
-			error << string_compose(_("Session: cannot create session tape dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-			return -1;
-		}
+	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+		error << string_compose(_("Session: cannot create session sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+		return -1;
 	}
 
 	dir = dead_sound_dir ();
 
-	if (mkdir (dir.c_str(), 0755) < 0) {
-		if (errno != EEXIST) {
-			error << string_compose(_("Session: cannot create session dead sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-			return -1;
-		}
+	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+		error << string_compose(_("Session: cannot create session dead sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+		return -1;
 	}
 
 	dir = automation_dir ();
 
-	if (mkdir (dir.c_str(), 0755) < 0) {
-		if (errno != EEXIST) {
-			error << string_compose(_("Session: cannot create session automation dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-			return -1;
-		}
+	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+		error << string_compose(_("Session: cannot create session automation dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+		return -1;
 	}
 
 	
@@ -724,6 +677,8 @@ Session::save_state (string snapshot_name, bool pending)
 		xml_path += _pending_suffix;
 
 	}
+
+	cerr << "actually writing state\n";
 
 	if (!tree.write (xml_path)) {
 		error << string_compose (_("state could not be saved to %1"), xml_path) << endmsg;
@@ -2031,13 +1986,12 @@ Session::load_sources (const XMLNode& node)
 boost::shared_ptr<Source>
 Session::XMLSourceFactory (const XMLNode& node)
 {
-
 	if (node.name() != "Source") {
 		return boost::shared_ptr<Source>();
 	}
 
 	try {
-		return SourceFactory::create (node);
+		return SourceFactory::create (*this, node);
 	}
 	
 	catch (failed_constructor& err) {
@@ -2062,7 +2016,7 @@ Session::save_template (string template_name)
 	if ((dp = opendir (dir.c_str()))) {
 		closedir (dp);
 	} else {
-		if (mkdir (dir.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH)<0) {
+		if (g_mkdir_with_parents (dir.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH)) {
 			error << string_compose(_("Could not create mix templates directory \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
 			return -1;
 		}
@@ -2142,11 +2096,9 @@ Session::ensure_sound_dir (string path, string& result)
 
 	/* Ensure that the parent directory exists */
 	
-	if (mkdir (path.c_str(), 0775)) {
-		if (errno != EEXIST) {
-			error << string_compose(_("cannot create session directory \"%1\"; ignored"), path) << endmsg;
-			return -1;
-		}
+	if (g_mkdir_with_parents (path.c_str(), 0775)) {
+		error << string_compose(_("cannot create session directory \"%1\"; ignored"), path) << endmsg;
+		return -1;
 	}
 	
 	/* Ensure that the sounds directory exists */
@@ -2155,33 +2107,27 @@ Session::ensure_sound_dir (string path, string& result)
 	result += '/';
 	result += sound_dir_name;
 	
-	if (mkdir (result.c_str(), 0775)) {
-		if (errno != EEXIST) {
-			error << string_compose(_("cannot create sounds directory \"%1\"; ignored"), result) << endmsg;
-			return -1;
-		}
+	if (g_mkdir_with_parents (result.c_str(), 0775)) {
+		error << string_compose(_("cannot create sounds directory \"%1\"; ignored"), result) << endmsg;
+		return -1;
 	}
 
 	dead = path;
 	dead += '/';
 	dead += dead_sound_dir_name;
 	
-	if (mkdir (dead.c_str(), 0775)) {
-		if (errno != EEXIST) {
-			error << string_compose(_("cannot create dead sounds directory \"%1\"; ignored"), dead) << endmsg;
-			return -1;
-		}
+	if (g_mkdir_with_parents (dead.c_str(), 0775)) {
+		error << string_compose(_("cannot create dead sounds directory \"%1\"; ignored"), dead) << endmsg;
+		return -1;
 	}
 
 	peak = path;
 	peak += '/';
 	peak += peak_dir_name;
 	
-	if (mkdir (peak.c_str(), 0775)) {
-		if (errno != EEXIST) {
-			error << string_compose(_("cannot create peak file directory \"%1\"; ignored"), peak) << endmsg;
-			return -1;
-		}
+	if (g_mkdir_with_parents (peak.c_str(), 0775)) {
+		error << string_compose(_("cannot create peak file directory \"%1\"; ignored"), peak) << endmsg;
+		return -1;
 	}
 	
 	/* callers expect this to be terminated ... */
@@ -2195,12 +2141,6 @@ Session::discover_best_sound_dir (bool destructive)
 {
 	vector<space_and_path>::iterator i;
 	string result;
-
-	/* destructive files all go into the same place */
-
-	if (destructive) {
-		return tape_dir();
-	}
 
 	/* handle common case without system calls */
 
@@ -2418,20 +2358,37 @@ Session::dead_sound_dir () const
 }
 
 string
-Session::sound_dir () const
+Session::sound_dir (bool with_path) const
 {
-	string res = _path;
+	/* support old session structure */
+
+	struct stat statbuf;
+	string old;
+
+	if (with_path) {
+		old = _path;
+	}
+
+	old += sound_dir_name;
+	old += '/';
+
+	if (stat (old.c_str(), &statbuf) == 0) {
+		return old;
+	}
+
+	string res;
+
+	if (with_path) {
+		res = _path;
+	}
+
+	res += interchange_dir_name;
+	res += '/';
+	res += legalize_for_path (_name);
+	res += '/';
 	res += sound_dir_name;
 	res += '/';
-	return res;
-}
 
-string
-Session::tape_dir () const
-{
-	string res = _path;
-	res += tape_dir_name;
-	res += '/';
 	return res;
 }
 
@@ -3427,8 +3384,7 @@ Session::save_history (string snapshot_name)
     XMLTree tree;
     string xml_path;
     string bak_path;
-
-
+    
     tree.set_root (&history.get_state());
 
     if (snapshot_name.empty()) {
@@ -3436,7 +3392,6 @@ Session::save_history (string snapshot_name)
     }
 
     xml_path = _path + snapshot_name + ".history"; 
-    cerr << "Saving history to " << xml_path << endmsg;
 
     bak_path = xml_path + ".bak";
 
@@ -3446,6 +3401,8 @@ Session::save_history (string snapshot_name)
         error << _("could not backup old history file, current history not saved.") << endmsg;
         return -1;
     }
+
+    cerr << "actually writing history\n";
 
     if (!tree.write (xml_path))
     {

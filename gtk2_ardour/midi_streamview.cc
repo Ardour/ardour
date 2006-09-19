@@ -183,8 +183,8 @@ MidiStreamView::setup_rec_box ()
 				assert(region);
 				region->set_position (_trackview.session().transport_frame(), this);
 				rec_regions.push_back (region);
-				/* catch it if it goes away */
-				region->GoingAway.connect (bind (mem_fun (*this, &MidiStreamView::remove_rec_region), region));
+				
+				// rec regions are destroyed in setup_rec_box
 
 				/* we add the region later */
 			}
@@ -252,6 +252,15 @@ MidiStreamView::setup_rec_box ()
 			last_rec_data_frame = 0;
 			
 			/* remove temp regions */
+			
+			for (list<boost::shared_ptr<Region> >::iterator iter = rec_regions.begin(); iter != rec_regions.end();) {
+				list<boost::shared_ptr<Region> >::iterator tmp;
+				tmp = iter;
+				++tmp;
+				(*iter)->drop_references ();
+				iter = tmp;
+			}
+			
 			rec_regions.clear();
 
 			// cerr << "\tclear " << rec_rects.size() << " rec rects\n";

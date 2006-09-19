@@ -20,15 +20,16 @@
 #ifndef __coreaudio_source_h__ 
 #define __coreaudio_source_h__
 
+#include <appleutility/CAAudioFile.h>
+
 #include <ardour/audiofilesource.h>
-#include <AudioToolbox/ExtendedAudioFile.h>
 
 namespace ARDOUR {
 
 class CoreAudioSource : public AudioFileSource {
   public:
-	CoreAudioSource (const XMLNode&);
-	CoreAudioSource (const string& path_plus_channel, Flag);
+	CoreAudioSource (ARDOUR::Session&, const XMLNode&);
+	CoreAudioSource (ARDOUR::Session&, const string& path_plus_channel, Flag);
 	~CoreAudioSource ();
 
 	float sample_rate() const;
@@ -45,7 +46,7 @@ class CoreAudioSource : public AudioFileSource {
 	
 
   private:
-	ExtAudioFileRef af;
+	mutable CAAudioFile af;
 	uint16_t n_channels;
 
 	mutable float *tmpbuf;

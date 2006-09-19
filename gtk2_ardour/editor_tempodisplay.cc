@@ -96,14 +96,36 @@ void
 Editor::tempo_map_changed (Change ignored)
 {
         ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::tempo_map_changed), ignored));
-	
+
+	BBT_Time previous_beat, next_beat; // the beats previous to the leftmost frame and after the rightmost frame
+
+	session->bbt_time(leftmost_frame, previous_beat);
+	session->bbt_time(leftmost_frame + current_page_frames(), next_beat);
+
+	if (previous_beat.beats > 1) {
+	        previous_beat.beats -= 1;
+	} else if (previous_beat.bars > 1) {
+ 	        previous_beat.bars--;
+		previous_beat.beats += 1;
+	}
+	previous_beat.ticks = 0;
+
+	if (session->tempo_map().meter_at(leftmost_frame + current_page_frames()).beats_per_bar () > next_beat.beats + 1) {
+	  next_beat.beats += 1;
+	} else {
+	  next_beat.bars += 1;
+	  next_beat.beats = 1;
+	}
+	next_beat.ticks = 0;
+
 	if (current_bbt_points) {
-		delete current_bbt_points;
+	        delete current_bbt_points;
 		current_bbt_points = 0;
 	}
 
 	if (session) {
-		current_bbt_points = session->tempo_map().get_points (leftmost_frame, leftmost_frame + current_page_frames());
+		current_bbt_points = session->tempo_map().get_points (session->tempo_map().frame_time (previous_beat), session->tempo_map().frame_time (next_beat));
+		update_tempo_based_rulers ();
 	} else {
 		current_bbt_points = 0;
 	}
@@ -114,11 +136,11 @@ Editor::tempo_map_changed (Change ignored)
 void
 Editor::redisplay_tempo ()
 {	
-	hide_measures ();
 
 	if (session && current_bbt_points) {
-		draw_measures ();
-		update_tempo_based_rulers ();
+		Glib::signal_idle().connect (mem_fun (*this, &Editor::lazy_hide_and_draw_measures));
+	} else {
+		hide_measures ();
 	}
 }
 
@@ -126,7 +148,7 @@ void
 Editor::hide_measures ()
 {
 	for (TimeLineList::iterator i = used_measure_lines.begin(); i != used_measure_lines.end(); ++i) {
-		(*i)->hide();
+      		(*i)->hide();
 		free_measure_lines.push_back (*i);
 	}
 	used_measure_lines.clear ();
@@ -149,6 +171,14 @@ Editor::get_time_line ()
 	return line;
 }
 
+bool
+Editor::lazy_hide_and_draw_measures ()
+{
+	hide_measures ();
+	draw_measures ();
+	return false;
+}
+
 void
 Editor::draw_measures ()
 {
@@ -156,86 +186,63 @@ Editor::draw_measures ()
 		return;
 	}
 
-	TempoMap::BBTPointList::iterator i = current_bbt_points->begin();
-	TempoMap::BBTPoint& p = (*i);
+	TempoMap::BBTPointList::iterator i;
 	ArdourCanvas::SimpleLine *line;
-	gdouble xpos, last_xpos;
-	uint32_t cnt;
+	gdouble xpos;
+	double x1, x2, y1, y2, beat_density;
+
+	uint32_t beats = 0;
+	uint32_t bars = 0;
 	uint32_t color;
 
 	if (current_bbt_points == 0 || current_bbt_points->empty()) {
 		return;
 	}
 
-	cnt = 0;
-	last_xpos = 0;
+	track_canvas.get_scroll_region (x1, y1, x2, y2);
 
 	/* get the first bar spacing */
 
-	gdouble last_beat = DBL_MAX;
-	gdouble beat_spacing = 0;
+	i = current_bbt_points->end();
+	i--;
+	bars = (*i).bar - (*current_bbt_points->begin()).bar;
+	beats = current_bbt_points->size() - bars;
 
-	for (i = current_bbt_points->begin(); i != current_bbt_points->end() && beat_spacing == 0; ++i) {
-		TempoMap::BBTPoint& p = (*i);
+	beat_density =  (beats * 10.0f) / track_canvas.get_width ();
 
-		switch (p.type) {
-		case TempoMap::Bar:
-			break;
-
-		case TempoMap::Beat:
-			xpos = frame_to_unit (p.frame);
-			if (last_beat < xpos) {
-				beat_spacing = xpos - last_beat;
-			}
-			last_beat = xpos;
-		}
-	}
-	
-	if (beat_spacing < 3.0) {
-	    /* if the lines are too close together, they become useless */
+	if (beat_density > 2.0f) {
+		/* if the lines are too close together, they become useless */
 		return;
 	}
-
-	double x1, x2, y1, y2;
-	track_canvas.get_scroll_region (x1, y1, x2, y2);
-	y2 = 1000000000.0f;
-
+	
 	for (i = current_bbt_points->begin(); i != current_bbt_points->end(); ++i) {
 
-	        p = (*i);
-
-		switch (p.type) {
+		switch ((*i).type) {
 		case TempoMap::Bar:
 			break;
 
 		case TempoMap::Beat:
-			xpos = frame_to_unit (p.frame);
 			
-			if (p.beat == 1) {
+			if ((*i).beat == 1) {
 				color = color_map[cMeasureLineBeat];
 			} else {
 				color = color_map[cMeasureLineBar];
 
-				/* only draw beat lines if the gaps between beats
-				   are large.
-				*/
+				/* only draw beat lines if the gaps between beats are large.  */
 
-				if (beat_spacing < 4.0) {
-					break;
+				if (beat_density > 0.25) {
+				  break;
 				}
 			}
-			
-			if (cnt == 0 || xpos - last_xpos > 4.0) {
-				line = get_time_line ();
-				line->property_x1() = xpos;
-				line->property_x2() = xpos;
-				line->property_y2() = y2;
-				line->property_color_rgba() = color;
-				line->raise_to_top();
-				line->show();
-				last_xpos = xpos;	
-				++cnt;
-			} 
+
+			xpos = frame_to_unit ((*i).frame);
+			line = get_time_line ();
+			line->property_x1() = xpos;
+			line->property_x2() = xpos;
+			line->property_y2() = y2;
+			line->property_color_rgba() = color;
+			//line->raise_to_top();
+			line->show();	
 			break;
 		}
 	}
@@ -244,6 +251,7 @@ Editor::draw_measures ()
 
 	cursor_group->raise_to_top();
 	time_line_group->lower_to_bottom();
+	return;
 }
 
 void

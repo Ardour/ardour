@@ -287,7 +287,7 @@ compute_equal_power_fades (jack_nframes_t nframes, float* in, float* out)
 
 	in[0] = 0.0f;
 	
-	for (int i = 1; i < nframes - 1; ++i) {
+	for (jack_nframes_t i = 1; i < nframes - 1; ++i) {
 		in[i] = in[i-1] + step;
 	}
 	

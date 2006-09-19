@@ -37,7 +37,6 @@ class XMLNode;
 namespace ARDOUR {
 
 class Playlist;
-class Source;
 
 enum RegionEditState {
 	EditChangesNothing = 0,
@@ -98,8 +97,6 @@ class Region : public PBD::StatefulDestructible, public StateManager, public boo
 	static Change HiddenChanged;
 
 	virtual ~Region();
-
-	const PBD::ID& id() const { return _id; }
 
 	/* Note: changing the name of a Region does not constitute an edit */
 

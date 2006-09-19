@@ -1590,7 +1590,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 			string region_name;
 			_session.region_name (region_name, channels[0].write_source->name(), false);
 			
-			cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add region " << region_name << endl;
+			// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add region " << region_name << endl;
 			
 			try {
 				boost::shared_ptr<Region> rx (RegionFactory::create (srcs, buffer_position, (*ci)->frames, region_name));
@@ -1948,7 +1948,7 @@ AudioDiskstream::use_new_write_source (uint32_t n)
 	
 	if (chan.write_source) {
 
-		if (AudioFileSource::is_empty (chan.write_source->path())) {
+		if (AudioFileSource::is_empty (_session, chan.write_source->path())) {
 			chan.write_source->mark_for_remove ();
 			chan.write_source.reset ();
 		} else {
@@ -2185,7 +2185,8 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 			}
 
 			try {
-				fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (DataType::AUDIO, prop->value(), false, _session.frame_rate()));
+				fs = boost::dynamic_pointer_cast<AudioFileSource> (
+					SourceFactory::createWritable (DataType::AUDIO, _session, prop->value(), false, _session.frame_rate()));
 			}
 
 			catch (failed_constructor& err) {

@@ -44,10 +44,10 @@ class SMFSource : public MidiSource {
 	};
 	
 	/** Constructor for existing external-to-session files */
-	SMFSource (std::string path, Flag flags = Flag(0));
+	SMFSource (Session& session, std::string path, Flag flags = Flag(0));
 
 	/* Constructor for existing in-session files */
-	SMFSource (const XMLNode&);
+	SMFSource (Session& session, const XMLNode&);
 
 	virtual ~SMFSource ();
 

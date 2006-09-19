@@ -81,13 +81,18 @@ Location::set_start (jack_nframes_t s)
 {
 	if (is_mark()) {
 		if (_start != s) {
+
 			_start = s;
 			_end = s;
+
 			start_changed(this); /* EMIT SIGNAL */
+
 			if ( is_start() ) {
+
 				Session::StartTimeChanged (); /* EMIT SIGNAL */
 				AudioFileSource::set_header_position_offset ( s );
 			}
+
 			if ( is_end() ) {
 				Session::EndTimeChanged (); /* EMIT SIGNAL */
 			}

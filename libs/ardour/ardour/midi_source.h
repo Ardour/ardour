@@ -43,8 +43,8 @@ class MidiRingBuffer;
 class MidiSource : public Source
 {
   public:
-	MidiSource (string name);
-	MidiSource (const XMLNode&);
+	MidiSource (Session& session, string name);
+	MidiSource (Session& session, const XMLNode&);
 	virtual ~MidiSource ();
 	
 	virtual jack_nframes_t read (MidiRingBuffer& dst, jack_nframes_t start, jack_nframes_t cnt, jack_nframes_t stamp_offset) const;

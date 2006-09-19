@@ -100,13 +100,11 @@ class OptionEditor : public Gtk::Dialog
 	Gtk::VBox sync_packer;
 
 	Gtk::ComboBoxText slave_type_combo;
-	Gtk::ComboBoxText smpte_fps_combo;
 	AudioClock smpte_offset_clock;
 	Gtk::CheckButton smpte_offset_negative_button;
 
 	void setup_sync_options ();
 
-	void smpte_fps_chosen ();
 	void smpte_offset_chosen ();
 	void smpte_offset_negative_clicked ();
 

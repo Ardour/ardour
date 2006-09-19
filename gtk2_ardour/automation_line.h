@@ -163,9 +163,8 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&);
 
-        PBD::ID id() { return _id; }
   protected:
-        PBD::ID _id;
+
 	string _name;
 	guint32 _height;
 	uint32_t _line_color;

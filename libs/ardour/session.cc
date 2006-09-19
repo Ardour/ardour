@@ -87,10 +87,11 @@ using boost::shared_ptr;
 const char* Session::_template_suffix = X_(".template");
 const char* Session::_statefile_suffix = X_(".ardour");
 const char* Session::_pending_suffix = X_(".pending");
-const char* Session::sound_dir_name = X_("sounds");
-const char* Session::tape_dir_name = X_("tapes");
+const char* Session::old_sound_dir_name = X_("sounds");
+const char* Session::sound_dir_name = X_("audiofiles");
 const char* Session::peak_dir_name = X_("peaks");
 const char* Session::dead_sound_dir_name = X_("dead_sounds");
+const char* Session::interchange_dir_name = X_("interchange");
 
 Session::compute_peak_t				Session::compute_peak 			= 0;
 Session::apply_gain_to_buffer_t		Session::apply_gain_to_buffer 	= 0;
@@ -2836,17 +2837,11 @@ Session::source_by_id (const PBD::ID& id)
 }
 
 string
-Session::peak_path_from_audio_path (string audio_path)
+Session::peak_path_from_audio_path (string audio_path) const
 {
-	/* XXX hardly bombproof! fix me */
-
 	string res;
 
-	res = Glib::path_get_dirname (audio_path);
-	res = Glib::path_get_dirname (res);
-	res += '/';
-	res += peak_dir_name;
-	res += '/';
+	res = peak_dir ();
 	res += PBD::basename_nosuffix (audio_path);
 	res += ".peak";
 
@@ -2992,11 +2987,7 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 
 			spath = (*i).path;
 
-			if (destructive) {
-				spath += tape_dir_name;
-			} else {
-				spath += sound_dir_name;
-			}
+			spath += sound_dir (false);
 
 			if (destructive) {
 				if (nchan < 2) {
@@ -3032,9 +3023,10 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 				}
 			}
 
-			if (access (buf, F_OK) == 0) {
+			if (g_file_test (buf, G_FILE_TEST_EXISTS)) {
 				existing++;
-			}
+			} 
+
 		}
 
 		if (existing == 0) {
@@ -3053,11 +3045,7 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 
 	string foo = buf;
 
-	if (destructive) {
-		spath = tape_dir ();
-	} else {
-		spath = discover_best_sound_dir ();
-	}
+	spath = discover_best_sound_dir ();
 
 	string::size_type pos = foo.find_last_of ('/');
 	
@@ -3074,7 +3062,8 @@ boost::shared_ptr<AudioFileSource>
 Session::create_audio_source_for_session (AudioDiskstream& ds, uint32_t chan, bool destructive)
 {
 	string spath = audio_path_from_name (ds.name(), ds.n_channels().get(DataType::AUDIO), chan, destructive);
-	return boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (DataType::AUDIO, spath, destructive, frame_rate()));
+	return boost::dynamic_pointer_cast<AudioFileSource> (
+		SourceFactory::createWritable (DataType::AUDIO, *this, spath, destructive, frame_rate()));
 }
 
 // FIXME: _terrible_ code duplication
@@ -3260,7 +3249,7 @@ Session::create_midi_source_for_session (MidiDiskstream& ds)
 {
 	string spath = midi_path_from_name (ds.name());
 	
-	return boost::dynamic_pointer_cast<SMFSource> (SourceFactory::createWritable (DataType::MIDI, spath, false, frame_rate()));
+	return boost::dynamic_pointer_cast<SMFSource> (SourceFactory::createWritable (DataType::MIDI, *this, spath, false, frame_rate()));
 }
 
 
@@ -3420,17 +3409,35 @@ Session::RoutePublicOrderSorter::operator() (boost::shared_ptr<Route> a, boost::
 void
 Session::remove_empty_sounds ()
 {
-
 	PathScanner scanner;
-	string dir;
 
-	dir = sound_dir ();
-
-	vector<string *>* possible_audiofiles = scanner (dir, "\\.wav$", false, true);
+	vector<string *>* possible_audiofiles = scanner (sound_dir(), "\\.(wav|aiff|caf|w64)$", false, true);
 	
-	for (vector<string *>::iterator i = possible_audiofiles->begin(); i != possible_audiofiles->end(); ++i) {
+	Glib::Mutex::Lock lm (source_lock);
+	
+	regex_t compiled_tape_track_pattern;
+	int err;
 
-		if (AudioFileSource::is_empty (*(*i))) {
+	if ((err = regcomp (&compiled_tape_track_pattern, "/T[0-9][0-9][0-9][0-9]-", REG_EXTENDED|REG_NOSUB))) {
+
+		char msg[256];
+		
+		regerror (err, &compiled_tape_track_pattern, msg, sizeof (msg));
+		
+		error << string_compose (_("Cannot compile tape track regexp for use (%1)"), msg) << endmsg;
+		return;
+	}
+
+	for (vector<string *>::iterator i = possible_audiofiles->begin(); i != possible_audiofiles->end(); ++i) {
+		
+		/* never remove files that appear to be a tape track */
+
+		if (regexec (&compiled_tape_track_pattern, (*i)->c_str(), 0, 0, 0) == 0) {
+			delete *i;
+			continue;
+		}
+			
+		if (AudioFileSource::is_empty (*this, *(*i))) {
 
 			unlink ((*i)->c_str());
 			
@@ -3610,7 +3617,7 @@ jack_nframes_t
 Session::available_capture_duration ()
 {
 	const double scale = 4096.0 / sizeof (Sample);
-	
+
 	if (_total_free_4k_blocks * scale > (double) max_frames) {
 		return max_frames;
 	}
@@ -3914,7 +3921,8 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 		}
 		
 		try {
-			fsource = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (DataType::AUDIO, buf, false, frame_rate()));
+			fsource = boost::dynamic_pointer_cast<AudioFileSource> (
+				SourceFactory::createWritable (DataType::AUDIO, *this, buf, false, frame_rate()));
 		}
 		
 		catch (failed_constructor& err) {
@@ -3931,7 +3939,7 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 	to_do = len;
 
 	/* create a set of reasonably-sized buffers */
-	buffers.ensure_buffers(nchans, chunk_size);
+buffers.ensure_buffers(nchans, chunk_size);
 	buffers.set_count(nchans);
 
 	while (to_do && !itt.cancel) {

@@ -79,6 +79,10 @@ ARDOUR_UI::connect_dependents_to_session (ARDOUR::Session *s)
 {
 	editor->connect_to_session (s);
 	mixer->connect_to_session (s);
+
+	/* its safe to do this now */
+
+	s->restore_history (s->snap_name());
 }
 
 void

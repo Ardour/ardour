@@ -42,11 +42,9 @@ using std::max;
 
 using namespace ARDOUR;
 
-sigc::signal<void,Source*> Source::SourceCreated;
-
-
-Source::Source (string name, DataType type)
-	: _type(type)
+Source::Source (Session& s, string name, DataType type)
+	: _session (s)
+	, _type(type)
 {
 	assert(_name.find("/") == string::npos);
 
@@ -55,8 +53,9 @@ Source::Source (string name, DataType type)
 	_length = 0;
 }
 
-Source::Source (const XMLNode& node) 
-	: _type(DataType::AUDIO)
+Source::Source (Session& s, const XMLNode& node) 
+	: _session (s)
+	, _type(DataType::AUDIO)
 {
 	_timestamp = 0;
 	_length = 0;

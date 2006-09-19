@@ -42,15 +42,15 @@ using namespace PBD;
 
 sigc::signal<void,MidiSource *> MidiSource::MidiSourceCreated;
 
-MidiSource::MidiSource (string name)
-	: Source (name, DataType::MIDI)
+MidiSource::MidiSource (Session& s, string name)
+	: Source (s, name, DataType::MIDI)
 {
 	_read_data_count = 0;
 	_write_data_count = 0;
 }
 
-MidiSource::MidiSource (const XMLNode& node) 
-	: Source (node)
+MidiSource::MidiSource (Session& s, const XMLNode& node) 
+	: Source (s, node)
 {
 	_read_data_count = 0;
 	_write_data_count = 0;

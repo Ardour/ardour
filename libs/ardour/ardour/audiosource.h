@@ -47,8 +47,8 @@ const jack_nframes_t frames_per_peak = 256;
 class AudioSource : public Source
 {
   public:
-	AudioSource (string name);
-	AudioSource (const XMLNode&);
+	AudioSource (Session&, string name);
+	AudioSource (Session&, const XMLNode&);
 	virtual ~AudioSource ();
 	
 	virtual jack_nframes_t available_peaks (double zoom) const;

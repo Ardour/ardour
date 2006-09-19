@@ -167,6 +167,9 @@ AudioEngine::stop ()
 bool
 AudioEngine::get_sync_offset (jack_nframes_t& offset) const
 {
+
+#ifdef HAVE_JACK_VIDEO_SUPPORT
+
 	jack_position_t pos;
 	
 	(void) jack_transport_query (_jack, &pos);
@@ -175,6 +178,8 @@ AudioEngine::get_sync_offset (jack_nframes_t& offset) const
 		offset = pos.video_offset;
 		return true;
 	}
+
+#endif
 
 	return false;
 }
