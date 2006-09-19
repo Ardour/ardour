@@ -556,7 +556,7 @@ AudioPlaylist::set_state (const XMLNode& node)
 				_crossfades.push_back (xfade);
 				xfade->Invalidated.connect (mem_fun (*this, &AudioPlaylist::crossfade_invalidated));
 				xfade->StateChanged.connect (mem_fun (*this, &AudioPlaylist::crossfade_changed));
-				/* no need to notify here */
+				NewCrossfade(xfade);
 			} else {
 				delete xfade;
 			}
