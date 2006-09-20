@@ -156,9 +156,9 @@ RedirectBox::~RedirectBox ()
 }
 
 void
-RedirectBox::object_drop (string type, uint32_t cnt, void** ptr)
+RedirectBox::object_drop (string type, uint32_t cnt, const boost::shared_ptr<Redirect>* ptr)
 {
-	if (type != "redirects" || cnt == 0 || ptr == 0) {
+	if (type != "redirects" || cnt == 0 || !ptr) {
 		return;
 	}
 
@@ -167,7 +167,7 @@ RedirectBox::object_drop (string type, uint32_t cnt, void** ptr)
 	list<boost::shared_ptr<Redirect> > redirects;
 	
 	for (uint32_t n = 0; n < cnt; ++n) {
-		redirects.push_back (boost::shared_ptr<Redirect> ((Redirect*) ptr[n]));
+		redirects.push_back (ptr[n]);
 	}
 	
 	paste_redirect_list (redirects);

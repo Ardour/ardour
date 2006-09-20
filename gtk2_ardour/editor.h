@@ -702,14 +702,15 @@ class Editor : public PublicEditor
 	    }
 	    Gtk::TreeModelColumn<Glib::ustring> name;
 	    Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Region> > region;
-		Gtk::TreeModelColumn<Gdk::Color> color_;
+	    Gtk::TreeModelColumn<Gdk::Color> color_;
 	};
 	    
-	RegionListDisplayModelColumns    region_list_columns;
-	Gtkmm2ext::DnDTreeView           region_list_display;
-	Glib::RefPtr<Gtk::TreeStore>     region_list_model;
-	Glib::RefPtr<Gtk::ToggleAction>  toggle_full_region_list_action;
-	Glib::RefPtr<Gtk::ToggleAction>  toggle_show_auto_regions_action;
+	RegionListDisplayModelColumns          region_list_columns;
+	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Region> > region_list_display;
+
+	Glib::RefPtr<Gtk::TreeStore>           region_list_model;
+	Glib::RefPtr<Gtk::ToggleAction>        toggle_full_region_list_action;
+	Glib::RefPtr<Gtk::ToggleAction>        toggle_show_auto_regions_action;
 
 	void region_list_selection_changed ();
 	bool region_list_selection_filter (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool yn);
@@ -772,7 +773,7 @@ class Editor : public PublicEditor
 	NamedSelectionDisplayModelColumns named_selection_columns;
 	Glib::RefPtr<Gtk::TreeStore>     named_selection_model;
 
-	Gtkmm2ext::DnDTreeView named_selection_display;
+	Gtkmm2ext::DnDTreeView<ARDOUR::NamedSelection*> named_selection_display;
 	Gtk::ScrolledWindow    named_selection_scroller;
 
 	void name_selection();
@@ -1429,9 +1430,9 @@ class Editor : public PublicEditor
 	Glib::RefPtr<Gtk::TreeSelection> route_display_selection;
 
 	gint route_list_compare_func (Gtk::TreeModel::iterator, Gtk::TreeModel::iterator);
-	Gtkmm2ext::DnDTreeView   route_list_display; 
-	Gtk::ScrolledWindow      route_list_scroller;
-	Gtk::Menu*               route_list_menu;
+	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Route> > route_list_display; 
+	Gtk::ScrolledWindow                   route_list_scroller;
+	Gtk::Menu*                            route_list_menu;
 
 	bool route_list_display_button_press (GdkEventButton*);
 	bool route_list_selection_filter (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool yn);

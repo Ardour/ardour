@@ -119,10 +119,10 @@ class RedirectBox : public Gtk::HBox
 	
 	Gtk::EventBox	       redirect_eventbox;
 	Gtk::HBox              redirect_hpacker;
-	Gtkmm2ext::DnDTreeView redirect_display;
+	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Redirect> > redirect_display;
 	Gtk::ScrolledWindow    redirect_scroller;
 
-	void object_drop (std::string type, uint32_t cnt, void**);
+	void object_drop (std::string type, uint32_t cnt, const boost::shared_ptr<ARDOUR::Redirect>*);
 
 	Width _width;
 	

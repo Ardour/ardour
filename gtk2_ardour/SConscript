@@ -7,6 +7,7 @@ import glob
 Import('env install_prefix final_prefix config_prefix libraries i18n version')
 
 gtkardour = env.Copy()
+gtkmmtests = env.Copy()
 
 #
 # this defines the version number of the GTK interface to ardour
@@ -47,6 +48,19 @@ gtkardour.Merge ([
     libraries['soundtouch'],
     libraries['samplerate'],
     libraries['jack']
+])
+
+gtkmmtests.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
+
+gtkmmtests.Merge ([
+    libraries['gtkmm2'],
+    libraries['glib2'],
+    libraries['glibmm2'],
+    libraries['pangomm'],
+    libraries['atkmm'],
+    libraries['gdkmm2'],
+    libraries['sigc2'],
+    libraries['gtk2']
 ])
 
 if gtkardour['DMALLOC']:
@@ -213,6 +227,10 @@ stest_files=Split("""
 stest.cc
 """)
 
+tt_files=Split ("""
+tt.cc
+""")
+
 extra_sources = []
 
 vst_files = [ 'vst_pluginui.cc' ]
@@ -249,6 +267,7 @@ ardourlib = gtkardour.SharedLibrary(target = 'ardourgtk', source = gtkardour_fil
 mtest = gtkardour.Program(target = 'mtest', source = mtest_files)
 itest = gtkardour.Program(target = 'itest', source = itest_files)
 rcu = gtkardour.Program(target = 'rcu', source = rcu_files)
+tt = gtkmmtests.Program(target = 'tt', source = tt_files)
 
 my_subst_dict = { }
 my_subst_dict['%INSTALL_PREFIX%'] = install_prefix

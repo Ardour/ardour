@@ -488,11 +488,12 @@ Editor::drop_regions (const RefPtr<Gdk::DragContext>& context,
 		      const SelectionData& data,
 		      guint info, guint time)
 {
-	const DnDTreeView::SerializedObjectPointers* sr = reinterpret_cast<const DnDTreeView::SerializedObjectPointers*> (data.get_data());
+	const SerializedObjectPointers<boost::shared_ptr<Region> >* sr = 
+		reinterpret_cast<const SerializedObjectPointers<boost::shared_ptr<Region> > *> (data.get_data());
 
 	for (uint32_t i = 0; i < sr->cnt; ++i) {
 
-		boost::shared_ptr<Region> r (reinterpret_cast<Region*> (sr->ptr[i]));
+		boost::shared_ptr<Region> r = sr->data[i];
 		boost::shared_ptr<AudioRegion> ar;
 
 		if ((ar = boost::dynamic_pointer_cast<AudioRegion>(r)) != 0) {
