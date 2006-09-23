@@ -2249,17 +2249,21 @@ Session::sound_dir (bool with_path) const
 	/* support old session structure */
 
 	struct stat statbuf;
-	string old;
+	string old_nopath;
+	string old_withpath;
 
-	if (with_path) {
-		old = _path;
-	}
+	old_nopath += old_sound_dir_name;
+	old_nopath += '/';
+	
+	old_withpath = _path;
+	old_withpath += old_sound_dir_name;
+	old_withpath += '/';
 
-	old += sound_dir_name;
-	old += '/';
-
-	if (stat (old.c_str(), &statbuf) == 0) {
-		return old;
+	if (stat (old_withpath.c_str(), &statbuf) == 0) {
+		if (with_path)
+			return old_withpath;
+		
+		return old_nopath;
 	}
 
 	string res;
