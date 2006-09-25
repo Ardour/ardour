@@ -59,6 +59,9 @@ std::string path_expand (std::string);
 
 void compute_equal_power_fades (jack_nframes_t nframes, float* in, float* out);
 
+const char* slave_source_to_string (ARDOUR::SlaveSource src);
+ARDOUR::SlaveSource string_to_slave_source (std::string str);
+
 #if defined(HAVE_COREAUDIO) || defined(HAVE_AUDIOUNITS)
 std::string CFStringRefToStdString(CFStringRef stringRef);
 #endif // HAVE_COREAUDIO

@@ -54,10 +54,10 @@ BasicUI::register_thread (std::string name)
 void
 BasicUI::loop_toggle () 
 {
-	if (session->get_auto_loop()) {
-		session->request_auto_loop (false);
+	if (Config->get_auto_loop()) {
+		session->request_play_loop (false);
 	} else {
-		session->request_auto_loop (true);
+		session->request_play_loop (true);
 		if (!session->transport_rolling()) {
 			session->request_transport_speed (1.0);
 		}
@@ -106,8 +106,8 @@ BasicUI::transport_play (bool from_last_start)
 {
 	bool rolling = session->transport_rolling ();
 
-	if (session->get_auto_loop()) {
-		session->request_auto_loop (false);
+	if (Config->get_auto_loop()) {
+		session->request_play_loop (false);
 	} 
 
 	if (session->get_play_range ()) {
@@ -208,13 +208,13 @@ BasicUI::toggle_all_rec_enables ()
 void
 BasicUI::toggle_punch_in ()
 {
-	session->set_punch_in (!session->get_punch_in());
+	Config->set_punch_in (!Config->get_punch_in());
 }
 
 void
 BasicUI::toggle_punch_out ()
 {
-	session->set_punch_out (!session->get_punch_out());
+	Config->set_punch_out (!Config->get_punch_out());
 }
 
 bool

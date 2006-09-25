@@ -57,16 +57,15 @@ Session::request_input_change_handling ()
 }
 
 void
-Session::request_slave_source (SlaveSource src, jack_nframes_t pos)
+Session::request_slave_source (SlaveSource src)
 {
-	Event* ev = new Event (Event::SetSlaveSource, Event::Add, Event::Immediate, pos, 0.0);
+	Event* ev = new Event (Event::SetSlaveSource, Event::Add, Event::Immediate, 0, 0.0);
 
-	if (src == Session::JACK) {
-	  /* could set_seamless_loop() be disposed of entirely?*/
-	  set_seamless_loop (false);
+	if (src == JACK) {
+		/* could set_seamless_loop() be disposed of entirely?*/
+		Config->set_seamless_loop (false);
 	} else {
-
-	  set_seamless_loop (true);
+		Config->set_seamless_loop (true);
 	}
 	ev->slave = src;
 	queue_event (ev);
@@ -109,7 +108,7 @@ Session::force_locate (jack_nframes_t target_frame, bool with_roll)
 }
 
 void
-Session::request_auto_loop (bool yn)
+Session::request_play_loop (bool yn)
 {
 	Event* ev;	
 	Location *location = _locations.auto_loop_location();
@@ -123,25 +122,10 @@ Session::request_auto_loop (bool yn)
 	ev = new Event (Event::SetLoop, Event::Add, Event::Immediate, 0, 0.0, yn);
 	queue_event (ev);
 
-	if (!yn && seamless_loop && transport_rolling()) {
+	if (!yn && Config->get_seamless_loop() && transport_rolling()) {
 		// request an immediate locate to refresh the diskstreams
 		// after disabling looping
 		request_locate (_transport_frame-1, true);
-	}
-}
-
-void
-Session::set_seamless_loop (bool yn)
-{
-	if (seamless_loop != yn) {
-		seamless_loop = yn;
-
-		if (auto_loop && transport_rolling()) {
-			// to reset diskstreams etc
-			request_auto_loop (true);
-		}
-		
-		ControlChanged (SeamlessLoop); /* EMIT */
 	}
 }
 
@@ -190,7 +174,7 @@ Session::realtime_stop (bool abort)
 		waiting_for_sync_offset = true;
 	}
 
-	transport_sub_state = (auto_return ? AutoReturning : 0);
+	transport_sub_state = (Config->get_auto_return() ? AutoReturning : 0);
 }
 
 void
@@ -357,13 +341,13 @@ Session::non_realtime_stop (bool abort)
 		update_latency_compensation (true, abort);
 	}
 
-	if (auto_return || (post_transport_work & PostTransportLocate) || synced_to_jack()) {
+	if (Config->get_auto_return() || (post_transport_work & PostTransportLocate) || synced_to_jack()) {
 
 		if (pending_locate_flush) {
 			flush_all_redirects ();
 		}
 
-		if ((auto_return || synced_to_jack()) && !(post_transport_work & PostTransportLocate)) {
+		if ((Config->get_auto_return() || synced_to_jack()) && !(post_transport_work & PostTransportLocate)) {
 
 			_transport_frame = last_stop_frame;
 
@@ -445,7 +429,7 @@ Session::non_realtime_stop (bool abort)
 
 	/* and start it up again if relevant */
 
-	if ((post_transport_work & PostTransportLocate) && _slave_type == None && pending_locate_roll) {
+	if ((post_transport_work & PostTransportLocate) && Config->get_slave_source() == None && pending_locate_roll) {
 		request_transport_speed (1.0);
 		pending_locate_roll = false;
 	}
@@ -476,7 +460,7 @@ Session::check_declick_out ()
 }
 
 void
-Session::set_auto_loop (bool yn)
+Session::set_play_loop (bool yn)
 {
 	/* Called from event-handling context */
 	
@@ -486,7 +470,7 @@ Session::set_auto_loop (bool yn)
 	
 	set_dirty();
 
-	if (yn && seamless_loop && synced_to_jack()) {
+	if (yn && Config->get_seamless_loop() && synced_to_jack()) {
 		warning << _("Seamless looping cannot be supported while Ardour is using JACK transport.\n"
 			     "Recommend changing the configured options")
 			<< endmsg;
@@ -494,14 +478,14 @@ Session::set_auto_loop (bool yn)
 	}
 
 	
-	if ((auto_loop = yn)) {
+	if ((play_loop = yn)) {
 
 		Location *loc;
 
 		
 		if ((loc = _locations.auto_loop_location()) != 0) {
 
-			if (seamless_loop) {
+			if (Config->get_seamless_loop()) {
 				// set all diskstreams to use internal looping
 				boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 				for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
@@ -551,8 +535,6 @@ Session::set_auto_loop (bool yn)
 		}
 		
 	}
-	
-	ControlChanged (AutoLoop); /* EMIT SIGNAL */
 }
 
 void
@@ -624,7 +606,7 @@ Session::locate (jack_nframes_t target_frame, bool with_roll, bool with_flush, b
 		} 
 	}
 
-	if (transport_rolling() && !auto_play && !with_roll && !(synced_to_jack() && auto_loop)) {
+	if (transport_rolling() && !Config->get_auto_play() && !with_roll && !(synced_to_jack() && play_loop)) {
 		realtime_stop (false);
 	} 
 
@@ -663,7 +645,7 @@ Session::locate (jack_nframes_t target_frame, bool with_roll, bool with_flush, b
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					//cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
-					(*i)->monitor_input (!auto_input);
+					(*i)->monitor_input (!Config->get_auto_input());
 				}
 			}
 		}
@@ -681,13 +663,13 @@ Session::locate (jack_nframes_t target_frame, bool with_roll, bool with_flush, b
 		}
 	}
 
-	/* cancel autoloop if transport pos outside of loop range */
-	if (auto_loop) {
+	/* cancel looped playback if transport pos outside of loop range */
+	if (play_loop) {
 		Location* al = _locations.auto_loop_location();
 		
 		if (al && (_transport_frame < al->start() || _transport_frame > al->end())) {
 			// cancel looping directly, this is called from event handling context
-			set_auto_loop(false);
+			set_play_loop (false);
 		}
 	}
 	
@@ -738,7 +720,7 @@ Session::set_transport_speed (float speed, bool abort)
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-				if (auto_input && (*i)->record_enabled ()) {
+				if (Config->get_auto_input() && (*i)->record_enabled ()) {
 					//cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
 					(*i)->monitor_input (false);	
 				}
@@ -851,7 +833,7 @@ Session::start_transport ()
 
 	switch (record_status()) {
 	case Enabled:
-		if (!punch_in) {
+		if (!Config->get_punch_in()) {
 			enable_record ();
 		}
 		break;
@@ -907,7 +889,7 @@ Session::post_transport ()
 
 	if (post_transport_work & PostTransportLocate) {
 
-		if ((auto_play && !_exporting) || (post_transport_work & PostTransportRoll)) {
+		if ((Config->get_auto_play() && !_exporting) || (post_transport_work & PostTransportRoll)) {
 			
 			start_transport ();
 			
@@ -919,14 +901,6 @@ Session::post_transport ()
 	set_next_event ();
 
 	post_transport_work = PostTransportWork (0);
-}
-
-void
-Session::set_rf_speed (float speed)
-{
-	rf_speed = speed;
-	cumulative_rf_motion = 0;
-	reset_rf_scale (0);
 }
 
 void
@@ -949,31 +923,24 @@ Session::reset_rf_scale (jack_nframes_t motion)
 	}
 }
 
-int
-Session::set_slave_source (SlaveSource src, jack_nframes_t frame)
+void
+Session::set_slave_source (SlaveSource src)
 {
 	bool reverse = false;
 	bool non_rt_required = false;
 
-	if (src == _slave_type) {
-		return 0;
-	} 
-
 	if (_transport_speed) {
 		error << _("please stop the transport before adjusting slave settings") << endmsg;
-		/* help out non-MVC friendly UI's by telling them the slave type changed */
-		ControlChanged (SlaveType); /* EMIT SIGNAL */
-		return 0;
+		return;
 	}
 
 // 	if (src == JACK && Config->get_jack_time_master()) {
-// 		return -1;
+// 		return;
 // 	}
 	
 	if (_slave) {
 		delete _slave;
 		_slave = 0;
-		_slave_type = None;
 	}
 
 	if (_transport_speed < 0.0) {
@@ -992,12 +959,12 @@ Session::set_slave_source (SlaveSource src, jack_nframes_t frame)
 			}
 
 			catch (failed_constructor& err) {
-				return -1;
+				return;
 			}
 
 		} else {
 			error << _("No MTC port defined: MTC slaving is impossible.") << endmsg;
-			return -1;
+			return;
 		}
 		_desired_transport_speed = _transport_speed;
 		break;
@@ -1007,9 +974,9 @@ Session::set_slave_source (SlaveSource src, jack_nframes_t frame)
 		_desired_transport_speed = _transport_speed;
 		break;
 	};
-	
-	_slave_type = src;
 
+	Config->set_slave_source (src);
+	
 	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		if (!(*i)->hidden()) {
@@ -1030,9 +997,6 @@ Session::set_slave_source (SlaveSource src, jack_nframes_t frame)
 	}
 
 	set_dirty();
-	ControlChanged (SlaveType); /* EMIT SIGNAL */
-	
-	return 0;
 }
 
 void
@@ -1081,8 +1045,6 @@ Session::set_play_range (bool yn)
 			Event* ev = new Event (Event::SetTransportSpeed, Event::Add, Event::Immediate, 0, 0.0f, false);
 			merge_event (ev);
 		}
-
- 		 ControlChanged (PlayRange); /* EMIT SIGNAL */
 	}
 }
 

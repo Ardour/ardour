@@ -294,7 +294,7 @@ Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool
 	
 	input_chan = finfo.channels;
 	
-	if (session->get_output_auto_connect() & Session::AutoConnectMaster) {
+	if (Config->get_output_auto_connect() & AutoConnectMaster) {
 		output_chan = (session->master_out() ? session->master_out()->n_inputs() : input_chan);
 	} else {
 		output_chan = input_chan;

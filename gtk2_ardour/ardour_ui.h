@@ -112,8 +112,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	int build_session (const string & path, const string & snapshot, 
 			   uint32_t ctl_chns, 
 			   uint32_t master_chns,
-			   ARDOUR::Session::AutoConnectOption input_connect,
-			   ARDOUR::Session::AutoConnectOption output_connect,
+			   ARDOUR::AutoConnectOption input_connect,
+			   ARDOUR::AutoConnectOption output_connect,
 			   uint32_t nphysin,
 			   uint32_t nphysout,
 			   jack_nframes_t initial_length);
@@ -373,16 +373,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_time_master ();
 	void toggle_video_sync ();
 
-	enum ShuttleBehaviour {
-		Sprung,
-		Wheel
-	};
-
-	enum ShuttleUnits {
-		Percentage,
-		Semitones
-	};
-
 	Gtk::DrawingArea  shuttle_box;
 	Gtk::EventBox     speed_display_box;
 	Gtk::Label        speed_display_label;
@@ -390,8 +380,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::ComboBoxText shuttle_style_button;
 	Gtk::Menu*        shuttle_unit_menu;
 	Gtk::Menu*        shuttle_style_menu;
-	ShuttleBehaviour  shuttle_behaviour;
-	ShuttleUnits      shuttle_units;
 	float             shuttle_max_speed;
 	Gtk::Menu*        shuttle_context_menu;
 
@@ -399,8 +387,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void show_shuttle_context_menu ();
 	void shuttle_style_changed();
 	void shuttle_unit_clicked ();
-	void set_shuttle_behaviour (ShuttleBehaviour);
-	void set_shuttle_units (ShuttleUnits);
 	void set_shuttle_max_speed (float);
 	void update_speed_display ();
 	float last_speed_displayed;
@@ -415,6 +401,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	bool   shuttle_grabbed;
 	double shuttle_fract;
+
+	static const double SHUTTLE_FRACT_SPEED1=0.48412291827; /* derived from A1,A2 */
 
 	Gtk::ToggleButton punch_in_button;
 	Gtk::ToggleButton punch_out_button;
@@ -565,7 +553,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void we_have_dependents ();
 	void setup_keybindings ();
 	void setup_session_options ();
-	void setup_config_options ();
 	
 	guint32  last_key_press_time;
 
@@ -670,9 +657,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	std::vector<std::string> positional_sync_strings;
 
-	void toggle_config_state (const char* group, const char* action, void (ARDOUR::Configuration::*set)(bool));
-	void toggle_session_state (const char* group, const char* action, void (ARDOUR::Session::*set)(bool), bool (ARDOUR::Session::*get)(void) const);
-	void toggle_session_state (const char* group, const char* action, sigc::slot<void> theSlot);
+	void toggle_config_state (const char* group, const char* action, bool (ARDOUR::Configuration::*set)(bool), bool (ARDOUR::Configuration::*get)(void) const);
+	void toggle_config_state (const char* group, const char* action, sigc::slot<void> theSlot);
 	void toggle_send_midi_feedback ();
 	void toggle_use_mmc ();
 	void toggle_send_mmc ();
@@ -699,9 +685,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_LatchedRecordEnable ();
 
 	void mtc_port_changed ();
-	void map_some_session_state (const char* group, const char* action, bool (ARDOUR::Session::*get)() const);
-	void queue_session_control_changed (ARDOUR::Session::ControlType t);
-	void session_control_changed (ARDOUR::Session::ControlType t);
+	void map_some_state (const char* group, const char* action, bool (ARDOUR::Configuration::*get)() const);
+	void parameter_changed (const char*);
 
 	void toggle_control_protocol (ARDOUR::ControlProtocolInfo*);
 };

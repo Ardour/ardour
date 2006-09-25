@@ -27,7 +27,7 @@ Editor::set_route_loop_selection ()
 		loc->set (start, end);
 
 		// enable looping, reposition and start rolling
-		session->request_auto_loop (true);
+		session->request_play_loop (true);
 		session->request_locate (loc->start(), true);
 	}
 

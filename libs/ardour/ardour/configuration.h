@@ -55,11 +55,17 @@ class Configuration : public Stateful
 
 	std::map<std::string,MidiPortDescriptor *> midi_ports;
 
+	void map_parameters (sigc::slot<void,const char*> theSlot);
+
 	int load_state ();
 	int save_state ();
 
 	int set_state (const XMLNode&);
 	XMLNode& get_state (void);
+	XMLNode& get_partial_state (ConfigVariableBase::Owner);
+	void set_variables (const XMLNode&, ConfigVariableBase::Owner owner);
+
+	void set_current_owner (ConfigVariableBase::Owner);
 
 	XMLNode* control_protocol_state () { return _control_protocol_state; }
 
@@ -71,14 +77,13 @@ class Configuration : public Stateful
 #undef  CONFIG_VARIABLE_SPECIAL
 #define CONFIG_VARIABLE(Type,var,name,value) \
         Type get_##var () const { return var.get(); } \
-        void set_##var (Type val) { var.set (val); var.set_is_user (user_configuration); ParameterChanged (name); }
+        bool set_##var (Type val) { bool ret = var.set (val, current_owner); if (ret) { ParameterChanged (name); } return ret;  }
 #define CONFIG_VARIABLE_SPECIAL(Type,var,name,value,mutator) \
         Type get_##var () const { return var.get(); } \
-        void set_##var (Type val) { var.set (val); var.set_is_user (user_configuration); ParameterChanged (name); }
+        bool set_##var (Type val) { bool ret = var.set (val, current_owner); if (ret) { ParameterChanged (name); } return ret; }
 #include "ardour/configuration_vars.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
-
 	
   private:
 
@@ -92,10 +97,10 @@ class Configuration : public Stateful
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL	
 
-	bool     user_configuration;
+	ConfigVariableBase::Owner current_owner;
 	XMLNode* _control_protocol_state;
 
-	XMLNode& state (bool user_only);
+	XMLNode& state (ConfigVariableBase::Owner);
 };
 
 extern Configuration *Config;

@@ -441,6 +441,7 @@ int main (int argc, char *argv[])
 
     	try {
 		ARDOUR::init (use_vst, try_hw_optimization);
+		Config->set_current_owner (ConfigVariableBase::Interface);
 		ui->set_engine (*engine);
 	} catch (failed_constructor& err) {
 		error << _("could not initialize Ardour.") << endmsg;

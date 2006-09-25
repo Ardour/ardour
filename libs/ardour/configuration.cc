@@ -56,13 +56,19 @@ Configuration::Configuration ()
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL	
 
-	user_configuration (false)
+	current_owner (ConfigVariableBase::Default)
 {
 	_control_protocol_state = 0;
 }
 
 Configuration::~Configuration ()
 {
+}
+
+void
+Configuration::set_current_owner (ConfigVariableBase::Owner owner)
+{
+	current_owner = owner;
 }
 
 int
@@ -85,15 +91,14 @@ Configuration::load_state ()
 			return -1;
 		}
 
+		current_owner = ConfigVariableBase::System;
+
 		if (set_state (*tree.root())) {
 			error << string_compose(_("Ardour: system configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
 			return -1;
 		}
 	}
 
-	/* from this point on, all configuration changes are user driven */
-
-	user_configuration = true;
 
 	/* now load configuration file for user */
 	
@@ -110,6 +115,8 @@ Configuration::load_state ()
 			return -1;
 		}
 
+		current_owner = ConfigVariableBase::Config;
+
 		if (set_state (*tree.root())) {
 			error << string_compose(_("Ardour: user configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
 			return -1;
@@ -125,15 +132,14 @@ Configuration::save_state()
 	XMLTree tree;
 	string rcfile;
 
-	/* Note: this only writes the per-user file, and therefore
-	   only saves variables marked as user-set or modified
+	/* Note: this only writes the state not touched by Session or Interface
 	*/
 
 	rcfile = get_user_ardour_path ();
 	rcfile += "ardour.rc";
 
 	if (rcfile.length()) {
-		tree.set_root (&state (true));
+		tree.set_root (&state (ConfigVariableBase::Config));
 		if (!tree.write (rcfile.c_str())){
 			error << string_compose (_("Config file %1 not saved"), rcfile) << endmsg;
 			return -1;
@@ -146,41 +152,56 @@ Configuration::save_state()
 XMLNode&
 Configuration::get_state ()
 {
-	return state (false);
+	return state (ConfigVariableBase::Config);
 }
 
 XMLNode&
-Configuration::state (bool user_only)
+Configuration::get_partial_state (ConfigVariableBase::Owner owner)
 {
-	XMLNode* root = new XMLNode("Ardour");
+	return state (owner);
+}
+
+XMLNode&
+Configuration::state (ConfigVariableBase::Owner owner)
+{
+	XMLNode* root;
+	XMLNode* node;
 	LocaleGuard lg (X_("POSIX"));
 
-	typedef map<string, MidiPortDescriptor*>::const_iterator CI;
-	for(CI m = midi_ports.begin(); m != midi_ports.end(); ++m){
-		root->add_child_nocopy(m->second->get_state());
-	}
+	node = new XMLNode("Config");
 
-	XMLNode* node = new XMLNode("Config");
-	
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL	
 #define CONFIG_VARIABLE(type,var,name,value) \
-         if (!user_only || var.is_user()) var.add_to_node (*node);
+         if (var.owner() <= owner) var.add_to_node (*node);
 #define CONFIG_VARIABLE_SPECIAL(type,var,name,value,mutator) \
-         if (!user_only || var.is_user()) var.add_to_node (*node);
+         if (var.owner() <= owner) var.add_to_node (*node);
 #include "ardour/configuration_vars.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL	
 
-	root->add_child_nocopy (*node);
+	if (owner == ConfigVariableBase::Config) {
 
-	if (_extra_xml) {
-		root->add_child_copy (*_extra_xml);
+		root = new XMLNode("Ardour");
+		typedef map<string, MidiPortDescriptor*>::const_iterator CI;
+		for(CI m = midi_ports.begin(); m != midi_ports.end(); ++m){
+			root->add_child_nocopy(m->second->get_state());
+		}
+
+		root->add_child_nocopy (*node);
+
+		if (_extra_xml) {
+			root->add_child_copy (*_extra_xml);
+		}
+		
+		root->add_child_nocopy (ControlProtocolManager::instance().get_state());
+		root->add_child_nocopy (Library->get_state());
+
+	} else {
+
+		root = node;
 	}
-
-	root->add_child_nocopy (ControlProtocolManager::instance().get_state());
-	root->add_child_nocopy (Library->get_state());
-
+		
 	return *root;
 }
 
@@ -213,18 +234,8 @@ Configuration::set_state (const XMLNode& root)
 			}
 
 		} else if (node->name() == "Config") {
-
-#undef  CONFIG_VARIABLE
-#undef  CONFIG_VARIABLE_SPECIAL	
-#define CONFIG_VARIABLE(type,var,name,value) \
-         var.set_from_node (*node); \
-  	 var.set_is_user (user_configuration);
-#define CONFIG_VARIABLE_SPECIAL(type,var,name,value,mutator) \
-         var.set_from_node (*node); \
-  	 var.set_is_user (user_configuration);
-#include "ardour/configuration_vars.h"
-#undef  CONFIG_VARIABLE
-#undef  CONFIG_VARIABLE_SPECIAL	
+			
+			set_variables (*node, ConfigVariableBase::Config);
 			
 		} else if (node->name() == "extra") {
 			_extra_xml = new XMLNode (*node);
@@ -239,6 +250,25 @@ Configuration::set_state (const XMLNode& root)
 	Diskstream::set_disk_io_chunk_frames (minimum_disk_io_bytes.get() / sizeof (Sample));
 
 	return 0;
+}
+
+void
+Configuration::set_variables (const XMLNode& node, ConfigVariableBase::Owner owner)
+{
+#undef  CONFIG_VARIABLE
+#undef  CONFIG_VARIABLE_SPECIAL	
+#define CONFIG_VARIABLE(type,var,name,value) \
+         if (var.set_from_node (node, owner)) { \
+		 ParameterChanged (name); \
+	 }
+#define CONFIG_VARIABLE_SPECIAL(type,var,name,value,mutator) \
+         if (var.set_from_node (node, owner)) { \
+		 ParameterChanged (name); \
+	 }
+#include "ardour/configuration_vars.h"
+#undef  CONFIG_VARIABLE
+#undef  CONFIG_VARIABLE_SPECIAL	
+
 }
 
 Configuration::MidiPortDescriptor::MidiPortDescriptor (const XMLNode& node)
@@ -287,3 +317,14 @@ Configuration::MidiPortDescriptor::get_state()
 	return *root;
 }
 
+void
+Configuration::map_parameters (sigc::slot<void,const char*> theSlot)
+{
+#undef  CONFIG_VARIABLE
+#undef  CONFIG_VARIABLE_SPECIAL	
+#define CONFIG_VARIABLE(type,var,name,value)                 theSlot (name);
+#define CONFIG_VARIABLE_SPECIAL(type,var,name,value,mutator) theSlot (name);
+#include "ardour/configuration_vars.h"
+#undef  CONFIG_VARIABLE
+#undef  CONFIG_VARIABLE_SPECIAL	
+}

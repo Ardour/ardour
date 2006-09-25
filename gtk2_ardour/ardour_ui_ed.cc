@@ -354,8 +354,8 @@ ARDOUR_UI::install_actions ()
 
 	Glib::RefPtr<ActionGroup> shuttle_actions = ActionGroup::create ("ShuttleActions");
 	
-	shuttle_actions->add (Action::create (X_("SetShuttleUnitsPercentage"), _("Percentage")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_units), Percentage));
-	shuttle_actions->add (Action::create (X_("SetShuttleUnitsSemitones"), _("Semitones")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_units), Semitones));
+	shuttle_actions->add (Action::create (X_("SetShuttleUnitsPercentage"), _("Percentage")), sigc::hide_return (sigc::bind (sigc::mem_fun (*Config, &Configuration::set_shuttle_units), Percentage)));
+	shuttle_actions->add (Action::create (X_("SetShuttleUnitsSemitones"), _("Semitones")), sigc::hide_return (sigc::bind (sigc::mem_fun (*Config, &Configuration::set_shuttle_units), Semitones)));
 
 	Glib::RefPtr<ActionGroup> option_actions = ActionGroup::create ("options");
 
@@ -437,10 +437,6 @@ ARDOUR_UI::install_actions ()
 	ActionManager::add_action_group (transport_actions);
 	ActionManager::add_action_group (main_actions);
 	ActionManager::add_action_group (common_actions);
-
-	/* initialize state of non-session dependent options */
-	
-	setup_config_options ();
 }
 
 void

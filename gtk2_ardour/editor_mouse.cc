@@ -3513,7 +3513,7 @@ Editor::show_verbose_time_cursor (jack_nframes_t frame, double offset, double xp
 	case AudioClock::MinSec:
 		/* XXX fix this to compute min/sec properly */
 		session->smpte_time (frame, smpte);
-		secs = smpte.seconds + ((float) smpte.frames / session->smpte_frames_per_second);
+		secs = smpte.seconds + ((float) smpte.frames / Config->get_smpte_frames_per_second());
 		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%.4f", smpte.hours, smpte.minutes, secs);
 		break;
 
@@ -3580,7 +3580,7 @@ Editor::show_verbose_duration_cursor (jack_nframes_t start, jack_nframes_t end, 
 	case AudioClock::MinSec:
 		/* XXX fix this to compute min/sec properly */
 		session->smpte_duration (end - start, smpte);
-		secs = smpte.seconds + ((float) smpte.frames / session->smpte_frames_per_second);
+		secs = smpte.seconds + ((float) smpte.frames / Config->get_smpte_frames_per_second());
 		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%.4f", smpte.hours, smpte.minutes, secs);
 		break;
 

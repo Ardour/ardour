@@ -311,7 +311,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 			
 			// TODO: this is probably wrong
 
-			(no_monitor && record_enabled() && (!_session.get_auto_input() || _session.actively_recording()))
+			(no_monitor && record_enabled() && (!Config->get_auto_input() || _session.actively_recording()))
 
 			) {
 			
@@ -390,7 +390,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 			
 			// rec-enabled but not s/w monitoring 
 			
-			(no_monitor && record_enabled() && (!_session.get_auto_input() || _session.actively_recording()))
+			(no_monitor && record_enabled() && (!Config->get_auto_input() || _session.actively_recording()))
 
 			) {
 			
@@ -553,7 +553,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 
 		    // recording but not s/w monitoring 
 			
-			(no_monitor && record_enabled() && (!_session.get_auto_input() || _session.actively_recording()))
+			(no_monitor && record_enabled() && (!Config->get_auto_input() || _session.actively_recording()))
 
 			) {
 
@@ -586,7 +586,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	    
 	    /* relax */
 
-	} else if (no_monitor && record_enabled() && (!_session.get_auto_input() || _session.actively_recording())) {
+	} else if (no_monitor && record_enabled() && (!Config->get_auto_input() || _session.actively_recording())) {
 		
 		IO::silence (nframes, offset);
 		
@@ -598,7 +598,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 		    
 		    // muted by solo of another track, but not using control outs for solo
 
-		    (!solo_audible && (_session.solo_model() != Session::SoloBus)) ||
+		    (!solo_audible && (Config->get_solo_model() != SoloBus)) ||
 		    
 		    // muted by mute of this track
 

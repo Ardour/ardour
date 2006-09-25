@@ -312,7 +312,15 @@ Session::process_event (Event* ev)
 
 	switch (ev->type) {
 	case Event::SetLoop:
-		set_auto_loop (ev->yes_or_no);
+		set_play_loop (ev->yes_or_no);
+		break;
+
+	case Event::AutoLoop:
+		if (play_loop) {
+			start_locate (ev->target_frame, true, false, Config->get_seamless_loop());
+		}
+		remove = false;
+		del = false;
 		break;
 
 	case Event::Locate:
@@ -341,7 +349,7 @@ Session::process_event (Event* ev)
 		
 	case Event::PunchIn:
 		// cerr << "PunchIN at " << transport_frame() << endl;
-		if (punch_in && record_status() == Enabled) {
+		if (Config->get_punch_in() && record_status() == Enabled) {
 			enable_record ();
 		}
 		remove = false;
@@ -350,7 +358,7 @@ Session::process_event (Event* ev)
 		
 	case Event::PunchOut:
 		// cerr << "PunchOUT at " << transport_frame() << endl;
-		if (punch_out) {
+		if (Config->get_punch_out()) {
 			step_back_from_record ();
 		}
 		remove = false;
@@ -380,14 +388,6 @@ Session::process_event (Event* ev)
 		del = false;
 		break;
 
-	case Event::AutoLoop:
-		if (auto_loop) {
-			start_locate (ev->target_frame, true, false, seamless_loop);
-		}
-		remove = false;
-		del = false;
-		break;
-
 	case Event::Overwrite:
 		overwrite_some_buffers (static_cast<AudioDiskstream*>(ev->ptr));
 		break;
@@ -397,7 +397,7 @@ Session::process_event (Event* ev)
 		break;
 
 	case Event::SetSlaveSource:
-		set_slave_source (ev->slave, ev->target_frame);
+		set_slave_source (ev->slave);
 		break;
 
 	case Event::Audition:

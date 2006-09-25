@@ -201,7 +201,7 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	gain_adjustment.signal_value_changed().connect (mem_fun(*this, &GainMeter::gain_adjusted));
 	peak_display.signal_button_release_event().connect (mem_fun(*this, &GainMeter::peak_button_release));
 
-	_session.MeterHoldChanged.connect (mem_fun(*this, &GainMeter::meter_hold_changed));
+	Config->ParameterChanged.connect (mem_fun (*this, &GainMeter::parameter_changed));
 
 	gain_changed (0);
 	update_gain_sensitive ();
@@ -346,17 +346,24 @@ GainMeter::update_meters ()
 }
 
 void
-GainMeter::meter_hold_changed()
+GainMeter::parameter_changed(const char* parameter_name)
 {
-	ENSURE_GUI_THREAD(mem_fun(*this, &GainMeter::meter_hold_changed));
+#define PARAM_IS(x) (!strcmp (parameter_name, (x)))
+
+	ENSURE_GUI_THREAD (bind (mem_fun(*this, &GainMeter::parameter_changed), parameter_name));
+
+	if (PARAM_IS ("meter-hold")) {
 	
-	vector<MeterInfo>::iterator i;
-	uint32_t n;
-	
-	for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
+		vector<MeterInfo>::iterator i;
+		uint32_t n;
 		
-		(*i).meter->set_hold_count ((uint32_t) floor(_session.meter_hold()));
+		for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
+			
+			(*i).meter->set_hold_count ((uint32_t) floor(Config->get_meter_hold()));
+		}
 	}
+
+#undef PARAM_IS
 }
 
 void
@@ -424,7 +431,7 @@ GainMeter::setup_meters ()
 	for (uint32_t n = 0; n < nmeters; ++n) {
 		if (meters[n].width != width) {
 			delete meters[n].meter;
-			meters[n].meter = new FastMeter ((uint32_t) floor (_session.meter_hold()), width, FastMeter::Vertical);
+			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, FastMeter::Vertical);
 			meters[n].width = width;
 
 			meters[n].meter->add_events (Gdk::BUTTON_RELEASE_MASK);

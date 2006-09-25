@@ -113,7 +113,7 @@ SendUI::update ()
 void
 SendUI::fast_update ()
 {
-	if (_session.meter_falloff() > 0.0f) {
+	if (Config->get_meter_falloff() > 0.0f) {
 		gpm.update_meters ();
 	}
 }

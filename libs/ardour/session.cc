@@ -96,8 +96,6 @@ sigc::signal<int> Session::AskAboutPendingState;
 sigc::signal<void> Session::SendFeedback;
 
 sigc::signal<void> Session::SMPTEOffsetChanged;
-sigc::signal<void> Session::SMPTETypeChanged;
-sigc::signal<void> Session::PullupChanged;
 sigc::signal<void> Session::StartTimeChanged;
 sigc::signal<void> Session::EndTimeChanged;
 
@@ -296,7 +294,7 @@ Session::Session (AudioEngine &eng,
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
 
-	Config->ParameterChanged.connect (mem_fun (*this, &Session::handle_configuration_change));
+	Config->ParameterChanged.connect (mem_fun (*this, &Session::config_changed));
 
 	if (was_dirty) {
 		DirtyChanged (); /* EMIT SIGNAL */
@@ -601,6 +599,8 @@ Session::when_engine_running ()
 	set_block_size (_engine.frames_per_cycle());
 	set_frame_rate (_engine.frame_rate());
 
+	Config->map_parameters (mem_fun (*this, &Session::config_changed));
+
 	/* every time we reconnect, recompute worst case output latencies */
 
 	_engine.Running.connect (mem_fun (*this, &Session::set_worst_io_latencies));
@@ -626,7 +626,7 @@ Session::when_engine_running ()
 			
 			if (_click_io->set_state (*child->children().front()) == 0) {
 				
-				_clicking = click_requested;
+				_clicking = Config->get_clicking ();
 
 			} else {
 
@@ -644,7 +644,7 @@ Session::when_engine_running ()
 				if (_click_io->add_output_port (first_physical_output, this)) {
 					// relax, even though its an error
 				} else {
-					_clicking = click_requested;
+					_clicking = Config->get_clicking ();
 				}
 			}
 		}
@@ -657,7 +657,7 @@ Session::when_engine_running ()
 	set_worst_io_latencies ();
 
 	if (_clicking) {
-		 ControlChanged (Clicking); /* EMIT SIGNAL */
+		// XXX HOW TO ALERT UI TO THIS ? DO WE NEED TO?
 	}
 
 	if (auditioner == 0) {
@@ -923,74 +923,10 @@ Session::record_enabling_legal () const
  	//	return false;
  	// }
 
-	if (all_safe) {
+	if (Config->get_all_safe()) {
 		return false;
 	}
 	return true;
-}
-
-void
-Session::set_auto_play (bool yn)
-{
-	if (auto_play != yn) {
-		auto_play = yn; 
-		set_dirty ();
-		ControlChanged (AutoPlay);
-	}
-}
-
-void
-Session::set_auto_return (bool yn)
-{
-	if (auto_return != yn) {
-		auto_return = yn; 
-		set_dirty ();
-		ControlChanged (AutoReturn);
-	}
-}
-
-void
-Session::set_crossfades_active (bool yn)
-{
-	if (crossfades_active != yn) {
-		crossfades_active = yn; 
-		set_dirty ();
-		ControlChanged (CrossFadesActive);
-	}
-}
-
-void
-Session::set_do_not_record_plugins (bool yn)
-{
-	if (do_not_record_plugins != yn) {
-		do_not_record_plugins = yn; 
-		set_dirty ();
-		ControlChanged (RecordingPlugins); 
-	}
-}
-
-void
-Session::set_auto_input (bool yn)
-{
-	if (auto_input != yn) {
-		auto_input = yn;
-		
-		if (Config->get_use_hardware_monitoring() && transport_rolling()) {
-			/* auto-input only makes a difference if we're rolling */
-			
-			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-
-			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-				if ((*i)->record_enabled ()) {
-					//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
-					(*i)->monitor_input (!auto_input);   
-				}
-			}
-		}
-
-		set_dirty();
-		ControlChanged (AutoInput);
-	}
 }
 
 void
@@ -1003,7 +939,7 @@ Session::reset_input_monitor_state ()
 		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if ((*i)->record_enabled ()) {
 				//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
-				(*i)->monitor_input (Config->get_use_hardware_monitoring() && !auto_input);
+				(*i)->monitor_input (Config->get_use_hardware_monitoring() && !Config->get_auto_input());
 			}
 		}
 	} else {
@@ -1011,36 +947,11 @@ Session::reset_input_monitor_state ()
 
 		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if ((*i)->record_enabled ()) {
-				//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
+				//cerr << "switching to input = " << !Config->get_auto_input() << __FILE__ << __LINE__ << endl << endl;
 				(*i)->monitor_input (Config->get_use_hardware_monitoring());
 			}
 		}
 	}
-}
-
-
-void
-Session::set_input_auto_connect (bool yn)
-{
-	if (yn) {
-		input_auto_connect = AutoConnectOption (input_auto_connect|AutoConnectPhysical);
-	} else {
-		input_auto_connect = AutoConnectOption (input_auto_connect|~AutoConnectPhysical);
-	}
-	set_dirty ();
-}
-
-bool
-Session::get_input_auto_connect () const
-{
-	return (input_auto_connect & AutoConnectPhysical);
-}
-
-void
-Session::set_output_auto_connect (AutoConnectOption aco)
-{
-	output_auto_connect = aco;
-	set_dirty ();
 }
 
 void
@@ -1048,7 +959,7 @@ Session::auto_punch_start_changed (Location* location)
 {
 	replace_event (Event::PunchIn, location->start());
 
-	if (get_record_enabled() && get_punch_in()) {
+	if (get_record_enabled() && Config->get_punch_in()) {
 		/* capture start has been changed, so save new pending state */
 		save_state ("", true);
 	}
@@ -1077,7 +988,7 @@ Session::auto_loop_changed (Location* location)
 {
 	replace_event (Event::AutoLoop, location->end(), location->start());
 
-	if (transport_rolling() && get_auto_loop()) {
+	if (transport_rolling() && play_loop) {
 
 		//if (_transport_frame < location->start() || _transport_frame > location->end()) {
 
@@ -1088,7 +999,7 @@ Session::auto_loop_changed (Location* location)
 			request_locate (location->start(), true);
 
 		}
-		else if (seamless_loop && !loop_changing) {
+		else if (Config->get_seamless_loop() && !loop_changing) {
 			
 			// schedule a locate-roll to refill the diskstreams at the
 			// previous loop end
@@ -1143,48 +1054,6 @@ Session::set_auto_punch_location (Location* location)
 
 	location->set_auto_punch (true, this);
 	auto_punch_location_changed (location);
-}
-
-void
-Session::set_punch_in (bool yn)
-{
-	if (punch_in == yn) {
-		return;
-	}
-
-	Location* location;
-
-	if ((location = _locations.auto_punch_location()) != 0) {
-		if ((punch_in = yn) == true) {
-			replace_event (Event::PunchIn, location->start());
-		} else {
-			remove_event (location->start(), Event::PunchIn);
-		}
-	}
-
-	set_dirty();
-	ControlChanged (PunchIn); /* EMIT SIGNAL */
-}
-
-void
-Session::set_punch_out (bool yn)
-{
-	if (punch_out == yn) {
-		return;
-	}
-
-	Location* location;
-
-	if ((location = _locations.auto_punch_location()) != 0) {
-		if ((punch_out = yn) == true) {
-			replace_event (Event::PunchOut, location->end());
-		} else {
-			clear_events (Event::PunchOut);
-		}
-	}
-
-	set_dirty();
-	ControlChanged (PunchOut); /* EMIT SIGNAL */
 }
 
 void
@@ -1280,7 +1149,7 @@ Session::enable_record ()
 		_last_record_location = _transport_frame;
 		send_mmc_in_another_thread (MIDI::MachineControl::cmdRecordStrobe);
 
-		if (Config->get_use_hardware_monitoring() && auto_input) {
+		if (Config->get_use_hardware_monitoring() && Config->get_auto_input()) {
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if ((*i)->record_enabled ()) {
@@ -1310,7 +1179,7 @@ Session::disable_record (bool rt_context, bool force)
 
 		send_mmc_in_another_thread (MIDI::MachineControl::cmdRecordExit);
 
-		if (Config->get_use_hardware_monitoring() && auto_input) {
+		if (Config->get_use_hardware_monitoring() && Config->get_auto_input()) {
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 			
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
@@ -1337,7 +1206,7 @@ Session::step_back_from_record ()
 		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 		
 		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-		        if (auto_input && (*i)->record_enabled ()) {
+		        if (Config->get_auto_input() && (*i)->record_enabled ()) {
 			        //cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
 		                (*i)->monitor_input (false);   
 			}
@@ -1357,7 +1226,7 @@ Session::maybe_enable_record ()
 	save_state ("", true);
 
 	if (_transport_speed) {
-		if (!punch_in) {
+		if (!Config->get_punch_in()) {
 			enable_record ();
 		} 
 	} else {
@@ -2164,16 +2033,6 @@ Session::route_solo_changed (void* src, shared_ptr<Route> route)
 	}
 
 	set_dirty();
-}
-
-void
-Session::set_solo_latched (bool yn)
-{
-	if (yn != _solo_latched) {
-		_solo_latched = yn;
-		set_dirty ();
-		ControlChanged (SoloLatch);
-	}
 }
 
 void
@@ -3456,23 +3315,6 @@ Session::connection_by_name (string name) const
 }
 
 void
-Session::set_edit_mode (EditMode mode)
-{
-	_edit_mode = mode;
-	
-	{ 
-		Glib::Mutex::Lock lm (playlist_lock);
-		
-		for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i) {
-			(*i)->set_edit_mode (mode);
-		}
-	}
-
-	set_dirty ();
-	ControlChanged (EditingMode); /* EMIT SIGNAL */
-}
-
-void
 Session::tempo_map_changed (Change ignored)
 {
 	clear_clicks ();
@@ -3616,16 +3458,6 @@ Session::n_playlists () const
 {
 	Glib::Mutex::Lock lm (playlist_lock);
 	return playlists.size();
-}
-
-void
-Session::set_solo_model (SoloModel sm)
-{
-	if (sm != _solo_model) {
-		_solo_model = sm;
-		ControlChanged (SoloingModel);
-		set_dirty ();
-	}
 }
 
 void
@@ -3867,36 +3699,6 @@ Session::nbusses () const
 	}
 
 	return n;
-}
-
-void
-Session::set_layer_model (LayerModel lm)
-{
-	if (lm != layer_model) {
-		layer_model = lm;
-		set_dirty ();
-		ControlChanged (LayeringModel);
-	}
-}
-
-void
-Session::set_xfade_model (CrossfadeModel xm)
-{
-	if (xm != xfade_model) {
-		xfade_model = xm;
-		set_dirty ();
-		ControlChanged (CrossfadingModel);
-	}
-}
-
-void
-Session::handle_configuration_change (const char* parameter)
-{
-	if (!strcmp (parameter, "use-video-sync")) {
-		if (_transport_speed == 0.0f) {
-			waiting_for_sync_offset = true;
-		}
-	}
 }
 
 void

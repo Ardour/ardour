@@ -99,10 +99,11 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	}
 
 	char buf[PATH_MAX+1];
-	if (!realpath(fullpath.c_str(), buf) && (errno != ENOENT)) {
+	if (!realpath (fullpath.c_str(), buf) && (errno != ENOENT)) {
 		error << string_compose(_("Could not use path %1 (%s)"), buf, strerror(errno)) << endmsg;
 		throw failed_constructor();
 	}
+
 	_path = string(buf);
 
 	if (_path[_path.length()-1] != '/') {
@@ -131,16 +132,8 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	start_location = new Location (0, 0, _("start"), Location::Flags ((Location::IsMark|Location::IsStart)));
 	_end_location_is_free = true;
 	g_atomic_int_set (&_record_status, Disabled);
-	auto_play = false;
-	punch_in = false;
-	punch_out = false;
-	auto_loop = false;
-	seamless_loop = false;
 	loop_changing = false;
-	auto_input = true;
-	crossfades_active = false;
-	all_safe = false;
-	auto_return = false;
+	play_loop = false;
 	_last_roll_location = 0;
 	_last_record_location = 0;
 	pending_locate_frame = 0;
@@ -153,8 +146,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	outbound_mtc_smpte_frame = 0;
 	next_quarter_frame_to_send = -1;
 	current_block_size = 0;
-	_solo_latched = true;
-	_solo_model = InverseMute;
 	solo_update_disabled = false;
 	currently_soloing = false;
 	_have_captured = false;
@@ -163,12 +154,12 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_worst_track_latency = 0;
 	_state_of_the_state = StateOfTheState(CannotSave|InitialConnecting|Loading);
 	_slave = 0;
-	_slave_type = None;
 	butler_mixdown_buffer = 0;
 	butler_gain_buffer = 0;
-	mmc_control = false;
-	midi_control = true;
 	mmc = 0;
+	session_send_mmc = false;
+	session_send_mtc = false;
+	session_midi_feedback = false;
 	post_transport_work = PostTransportWork (0);
 	g_atomic_int_set (&butler_should_do_transport_work, 0);
 	g_atomic_int_set (&butler_active, 0);
@@ -176,48 +167,37 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	g_atomic_int_set (&_capture_load, 100);
 	g_atomic_int_set (&_playback_load_min, 100);
 	g_atomic_int_set (&_capture_load_min, 100);
-	_edit_mode = Slide;
-	pending_edit_mode = _edit_mode;
+	pending_edit_mode = Config->get_edit_mode ();
 	_play_range = false;
-	input_auto_connect = AutoConnectOption (0);
-	output_auto_connect = AutoConnectOption (0);
 	waiting_to_start = false;
 	_exporting = false;
 	_gain_automation_buffer = 0;
 	_pan_automation_buffer = 0;
 	_npan_buffers = 0;
 	pending_abort = false;
-	layer_model = MoveAddHigher;
-	xfade_model = ShortCrossfade;
 	destructive_index = 0;
 	current_trans = 0;
-
+	
 	AudioDiskstream::allocate_working_buffers();
 	
 	/* default short fade = 15ms */
 
-	Crossfade::set_short_xfade_length ((jack_nframes_t) floor ((15.0 * frame_rate()) / 1000.0));
+	Crossfade::set_short_xfade_length ((jack_nframes_t) floor (Config->get_short_xfade_seconds() * frame_rate()));
 	DestructiveFileSource::setup_standard_crossfades (frame_rate());
 
 	last_mmc_step.tv_sec = 0;
 	last_mmc_step.tv_usec = 0;
 	step_speed = 0.0;
 
-	preroll.type = AnyTime::Frames;
-	preroll.frames = 0;
-	postroll.type = AnyTime::Frames;
-	postroll.frames = 0;
-
 	/* click sounds are unset by default, which causes us to internal
 	   waveforms for clicks.
 	*/
 	
-	_clicking = false;
-	click_requested = false;
 	click_data = 0;
 	click_emphasis_data = 0;
 	click_length = 0;
 	click_emphasis_length = 0;
+	_clicking = false;
 
 	process_function = &Session::process_with_events;
 
@@ -230,33 +210,17 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_current_frame_rate = 48000;
 	_base_frame_rate = 48000;
 
-	smpte_frames_per_second = 30;
-	video_pullup = 0.0;
-	smpte_drop_frames = false;
 	last_smpte_when = 0;
 	_smpte_offset = 0;
 	_smpte_offset_negative = true;
 	last_smpte_valid = false;
 
+	sync_time_vars ();
+
 	last_rr_session_dir = session_dirs.begin();
 	refresh_disk_space ();
 
 	// set_default_fade (0.2, 5.0); /* steepness, millisecs */
-
-	/* default configuration */
-
-	do_not_record_plugins = false;
-	over_length_short = 2;
-	over_length_long = 10;
-	send_midi_timecode = false;
-	send_midi_machine_control = false;
-	shuttle_speed_factor = 1.0;
-	shuttle_speed_threshold = 5;
-	rf_speed = 2.0;
-	_meter_hold = 100; // XXX unknown units: number of calls to meter::set()
-	_meter_falloff = 0.375f; // XXX unknown units: refresh_rate
-	max_level = 0;
-	min_level = 0;
 
 	/* slave stuff */
 
@@ -264,11 +228,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	have_first_delta_accumulator = false;
 	delta_accumulator_cnt = 0;
 	slave_state = Stopped;
-
-	/* default SMPTE type is 30 FPS, non-drop */
-
-	set_smpte_type (30.0, false);
-	set_video_pullup (0.0);
 
 	_engine.GraphReordered.connect (mem_fun (*this, &Session::graph_reordered));
 
@@ -380,14 +339,6 @@ Session::raid_path () const
 	}
 	
 	return path.substr (0, path.length() - 1); // drop final colon
-}
-
-void
-Session::set_raid_path (string path)
-{
-	/* public-access to setup_raid_path() */
-
-	setup_raid_path (path);
 }
 
 void
@@ -762,40 +713,9 @@ Session::load_options (const XMLNode& node)
 {
 	XMLNode* child;
 	XMLProperty* prop;
-	bool have_fade_msecs = false;
-	bool have_fade_steepness = false;
-	float fade_msecs = 0;
-	float fade_steepness = 0;
-	SlaveSource slave_src = None;
-	int x;
 	LocaleGuard lg (X_("POSIX"));
-	
-	if ((child = find_named_node (node, "input-auto-connect")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			sscanf (prop->value().c_str(), "%x", &x);
-			input_auto_connect = AutoConnectOption (x);
-		}
-	}
 
-	if ((child = find_named_node (node, "output-auto-connect")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			sscanf (prop->value().c_str(), "%x", &x);
-			output_auto_connect = AutoConnectOption (x);
-		}
-	}
-				
-	if ((child = find_named_node (node, "slave")) != 0) {
-		if ((prop = child->property ("type")) != 0) {
-			if (prop->value() == "none") {
-				slave_src = None;
-			} else if (prop->value() == "mtc") {
-				slave_src = MTC;
-			} else if (prop->value() == "jack") {
-				slave_src = JACK;
-			}
-			set_slave_source (slave_src, 0);
-		}
-	}
+	Config->set_variables (node, ConfigVariableBase::Session);
 
 	/* we cannot set edit mode if we are loading a session,
 	   because it might destroy the playlist's positioning
@@ -810,244 +730,11 @@ Session::load_options (const XMLNode& node)
 			} 
 		}
 	}
-				
-	if ((child = find_named_node (node, "send-midi-timecode")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			bool x = (prop->value() == "yes");
-			send_mtc = !x; /* force change in value */
-			set_send_mtc (x);
-		}
-	}
-	if ((child = find_named_node (node, "send-midi-machine-control")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			bool x = (prop->value() == "yes");
-			send_mmc = !x; /* force change in value */
-			set_send_mmc (prop->value() == "yes");
-		}
-	}
-	if ((child = find_named_node (node, "max-level")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			max_level = atoi (prop->value().c_str());
-		}
-	}
-	if ((child = find_named_node (node, "min-level")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			min_level = atoi (prop->value().c_str());
-		}
-	}
-	if ((child = find_named_node (node, "meter-hold")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			_meter_hold = atof (prop->value().c_str());
-		}
-	}
-	if ((child = find_named_node (node, "meter-falloff")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			_meter_falloff = atof (prop->value().c_str());
-		}
-	}
-	if ((child = find_named_node (node, "long-over-length")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			over_length_long = atoi (prop->value().c_str());
-		}
-	}
-	if ((child = find_named_node (node, "short-over-length")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			over_length_short = atoi (prop->value().c_str());
-		}
-	}
-	if ((child = find_named_node (node, "shuttle-speed-factor")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			shuttle_speed_factor = atof (prop->value().c_str());
-		}
-	}
-	if ((child = find_named_node (node, "shuttle-speed-threshold")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			shuttle_speed_threshold = atof (prop->value().c_str());
-		}
-	}
-	if ((child = find_named_node (node, "rf-speed")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			rf_speed = atof (prop->value().c_str());
-		}
-	}
-	if ((child = find_named_node (node, "video-pullup")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			set_video_pullup( atof (prop->value().c_str()) );
-		}
-	}
-	if ((child = find_named_node (node, "smpte-frames-per-second")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			set_smpte_type( atof (prop->value().c_str()), smpte_drop_frames );
-		}
-	}
-	if ((child = find_named_node (node, "smpte-drop-frames")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			set_smpte_type( smpte_frames_per_second, (prop->value() == "yes") );
-		}
-	}
-	if ((child = find_named_node (node, "smpte-offset")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			set_smpte_offset( atoi (prop->value().c_str()) );
-		}
-	}
-	if ((child = find_named_node (node, "smpte-offset-negative")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			set_smpte_offset_negative( (prop->value() == "yes") );
-		}
-	}
-	if ((child = find_named_node (node, "click-sound")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			click_sound = prop->value();
-		}
-	}
-	if ((child = find_named_node (node, "click-emphasis-sound")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			click_emphasis_sound = prop->value();
-		}
-	}
-
-	if ((child = find_named_node (node, "solo-model")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			if (prop->value() == "SoloBus")
-				_solo_model = SoloBus;
-			else
-				_solo_model = InverseMute;
-		}
-	}
-
-	/* BOOLEAN OPTIONS */
-
-	if ((child = find_named_node (node, "auto-play")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			set_auto_play (prop->value() == "yes");
-		}
-	}
-	if ((child = find_named_node (node, "auto-input")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			set_auto_input (prop->value() == "yes");
-		}
-	}
-	if ((child = find_named_node (node, "seamless-loop")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			set_seamless_loop (prop->value() == "yes");
-		}
-	}
-	if ((child = find_named_node (node, "punch-in")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			set_punch_in (prop->value() == "yes");
-		}
-	}
-	if ((child = find_named_node (node, "punch-out")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			set_punch_out (prop->value() == "yes");
-		}
-	}
-	if ((child = find_named_node (node, "auto-return")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			set_auto_return (prop->value() == "yes");
-		}
-	}
-	if ((child = find_named_node (node, "send-mtc")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			set_send_mtc (prop->value() == "yes");
-		}
-	}
-	if ((child = find_named_node (node, "mmc-control")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			set_mmc_control (prop->value() == "yes");
-		}
-	}
-	if ((child = find_named_node (node, "midi-control")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			set_midi_control (prop->value() == "yes");
-		}
-	}
-	if ((child = find_named_node (node, "midi-feedback")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			set_midi_feedback (prop->value() == "yes");
-		}
-	}
-	// Legacy support for <recording-plugins>
-	if ((child = find_named_node (node, "recording-plugins")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			set_do_not_record_plugins (prop->value() == "no");
-		}
-	}
-	if ((child = find_named_node (node, "do-not-record-plugins")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			set_do_not_record_plugins (prop->value() == "yes");
-		}
-	}
-	if ((child = find_named_node (node, "crossfades-active")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			set_crossfades_active (prop->value() == "yes");
-		}
-	}
-	if ((child = find_named_node (node, "audible-click")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			set_clicking (prop->value() == "yes");
-		}
-	}
 
 	if ((child = find_named_node (node, "end-marker-is-free")) != 0) {
 		if ((prop = child->property ("val")) != 0) {
 			_end_location_is_free = (prop->value() == "yes");
 		}
-	}
-
-	if ((child = find_named_node (node, "layer-model")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			if (prop->value() == X_("LaterHigher")) {
-				set_layer_model (LaterHigher);
-			} else if (prop->value() == X_("AddHigher")) {
-				set_layer_model (AddHigher);
-			} else {
-				set_layer_model (MoveAddHigher);
-			}
-		}
-	}
-
-	if ((child = find_named_node (node, "xfade-model")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			if (prop->value() == X_("Short")) {
-				set_xfade_model (ShortCrossfade);
-			} else {
-				set_xfade_model (FullCrossfade);
-			}
-		}
-	}
-
-	if ((child = find_named_node (node, "short-xfade-length")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			/* value is stored as a fractional seconds */
-			float secs = atof (prop->value().c_str());
-			Crossfade::set_short_xfade_length ((jack_nframes_t) floor (secs * frame_rate()));
-		} 
-	}
-
-	if ((child = find_named_node (node, "full-xfades-unmuted")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			crossfades_active = (prop->value() == "yes");
-		}
-	} 
-
-	/* TIED OPTIONS */
-
-	if ((child = find_named_node (node, "default-fade-steepness")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			fade_steepness = atof (prop->value().c_str());
-			have_fade_steepness = true;
-		}
-	}
-	if ((child = find_named_node (node, "default-fade-msec")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			fade_msecs = atof (prop->value().c_str());
-			have_fade_msecs = true;
-		}
-	}
-
-	if (have_fade_steepness || have_fade_msecs) {
-		// set_default_fade (fade_steepness, fade_msecs);
 	}
 
 	return 0;
@@ -1056,182 +743,17 @@ Session::load_options (const XMLNode& node)
 XMLNode&
 Session::get_options () const
 {
-	XMLNode* opthead;
 	XMLNode* child;
-	char buf[32];
 	LocaleGuard lg (X_("POSIX"));
 
-	opthead = new XMLNode ("Options");
+	XMLNode& option_root = Config->get_partial_state (ConfigVariableBase::Interface);
 
-	SlaveSource src = slave_source ();
-	string src_string;
-	switch (src) {
-	case None:
-		src_string = "none";
-		break;
-	case MTC:
-		src_string = "mtc";
-		break;
-	case JACK:
-		src_string = "jack";
-		break;
-	}
-	child = opthead->add_child ("slave");
-	child->add_property ("type", src_string);
-	
-	child = opthead->add_child ("send-midi-timecode");
-	child->add_property ("val", send_midi_timecode?"yes":"no");
-
-	child = opthead->add_child ("send-midi-machine-control");
-	child->add_property ("val", send_midi_machine_control?"yes":"no");
-
-	snprintf (buf, sizeof(buf)-1, "%x", (int) input_auto_connect);
-	child = opthead->add_child ("input-auto-connect");
-	child->add_property ("val", buf);
-
-	snprintf (buf, sizeof(buf)-1, "%x", (int) output_auto_connect);
-	child = opthead->add_child ("output-auto-connect");
-	child->add_property ("val", buf);
-
-	snprintf (buf, sizeof(buf)-1, "%d", max_level);
-	child = opthead->add_child ("max-level");
-	child->add_property ("val", buf);
-
-	snprintf (buf, sizeof(buf)-1, "%d", min_level);
-	child = opthead->add_child ("min-level");
-	child->add_property ("val", buf);
-
-	snprintf (buf, sizeof(buf)-1, "%f", _meter_hold);
-	child = opthead->add_child ("meter-hold");
-	child->add_property ("val", buf);
-
-	snprintf (buf, sizeof(buf)-1, "%f", _meter_falloff);
-	child = opthead->add_child ("meter-falloff");
-	child->add_property ("val", buf);
-	
-	snprintf (buf, sizeof(buf)-1, "%u", over_length_long);
-	child = opthead->add_child ("long-over-length");
-	child->add_property ("val", buf);
-
-	snprintf (buf, sizeof(buf)-1, "%u", over_length_short);
-	child = opthead->add_child ("short-over-length");
-	child->add_property ("val", buf);
-
-	snprintf (buf, sizeof(buf)-1, "%f", shuttle_speed_factor);
-	child = opthead->add_child ("shuttle-speed-factor");
-	child->add_property ("val", buf);
-
-	snprintf (buf, sizeof(buf)-1, "%f", shuttle_speed_threshold);
-	child = opthead->add_child ("shuttle-speed-threshold");
-	child->add_property ("val", buf);
-
-	snprintf (buf, sizeof(buf)-1, "%f", rf_speed);
-	child = opthead->add_child ("rf-speed");
-	child->add_property ("val", buf);
-
-	snprintf (buf, sizeof(buf)-1, "%.4f", video_pullup);
-	child = opthead->add_child ("video-pullup");
-	child->add_property ("val", buf);
-	
-	snprintf (buf, sizeof(buf)-1, "%.2f", smpte_frames_per_second);
-	child = opthead->add_child ("smpte-frames-per-second");
-	child->add_property ("val", buf);
-	
-	child = opthead->add_child ("smpte-drop-frames");
-	child->add_property ("val", smpte_drop_frames ? "yes" : "no");
-	
-	snprintf (buf, sizeof(buf)-1, "%u", smpte_offset ());
-	child = opthead->add_child ("smpte-offset");
-	child->add_property ("val", buf);
-	
-	child = opthead->add_child ("smpte-offset-negative");
-	child->add_property ("val", smpte_offset_negative () ? "yes" : "no");
-	
-	child = opthead->add_child ("edit-mode");
-	switch (_edit_mode) {
-	case Splice:
-		child->add_property ("val", "splice");
-		break;
-
-	case Slide:
-		child->add_property ("val", "slide");
-		break;
-	}
-
-	child = opthead->add_child ("auto-play");
-	child->add_property ("val", get_auto_play () ? "yes" : "no");
-	child = opthead->add_child ("auto-input");
-	child->add_property ("val", get_auto_input () ? "yes" : "no");
-	child = opthead->add_child ("seamless-loop");
-	child->add_property ("val", get_seamless_loop () ? "yes" : "no");
-	child = opthead->add_child ("punch-in");
-	child->add_property ("val", get_punch_in () ? "yes" : "no");
-	child = opthead->add_child ("punch-out");
-	child->add_property ("val", get_punch_out () ? "yes" : "no");
-	child = opthead->add_child ("all-safe");
-	child->add_property ("val", get_all_safe () ? "yes" : "no");
-	child = opthead->add_child ("auto-return");
-	child->add_property ("val", get_auto_return () ? "yes" : "no");
-	child = opthead->add_child ("mmc-control");
-	child->add_property ("val", get_mmc_control () ? "yes" : "no");
-	child = opthead->add_child ("midi-control");
-	child->add_property ("val", get_midi_control () ? "yes" : "no");
-	child = opthead->add_child ("midi-feedback");
-	child->add_property ("val", get_midi_feedback () ? "yes" : "no");
-	child = opthead->add_child ("do-not-record-plugins");
-	child->add_property ("val", get_do_not_record_plugins () ? "yes" : "no");
-	child = opthead->add_child ("auto-crossfade");
-	child->add_property ("val", get_crossfades_active () ? "yes" : "no");
-	child = opthead->add_child ("audible-click");
-	child->add_property ("val", get_clicking () ? "yes" : "no");
-	child = opthead->add_child ("end-marker-is-free");
+	child = option_root.add_child ("end-marker-is-free");
 	child->add_property ("val", _end_location_is_free ? "yes" : "no");
 
-	if (click_sound.length()) {
-		child = opthead->add_child ("click-sound");
-		child->add_property ("val", click_sound);
-	}
+	child = option_root.add_child ("full-xfades-unmuted");
 
-	if (click_emphasis_sound.length()) {
-		child = opthead->add_child ("click-emphasis-sound");
-		child->add_property ("val", click_emphasis_sound);
-	}
-
-	child = opthead->add_child ("solo-model");
-	child->add_property ("val", _solo_model == SoloBus ? "SoloBus" : "InverseMute");
-
-	child = opthead->add_child ("layer-model");
-	switch (layer_model) {
-	case LaterHigher:
-		child->add_property ("val", X_("LaterHigher"));
-		break;
-	case MoveAddHigher:
-		child->add_property ("val", X_("MoveAddHigher"));
-		break;
-	case AddHigher:
-		child->add_property ("val", X_("AddHigher"));
-		break;
-	}
-
-	child = opthead->add_child ("xfade-model");
-	switch (xfade_model) {
-	case FullCrossfade:
-		child->add_property ("val", X_("Full"));
-		break;
-	case ShortCrossfade:
-		child->add_property ("val", X_("Short"));
-	}
-
-	child = opthead->add_child ("short-xfade-length");
-	/* store as fractions of a second */
-	snprintf (buf, sizeof(buf)-1, "%f", 
-		  (float) Crossfade::short_xfade_length() / frame_rate());
-	child->add_property ("val", buf);
-
-	child = opthead->add_child ("full-xfades-unmuted");
-	child->add_property ("val", crossfades_active ? "yes" : "no");
-
-	return *opthead;
+	return option_root;
 }
 
 XMLNode&
@@ -1504,7 +1026,7 @@ Session::set_state (const XMLNode& node)
 	MIDI
 	Path
 	extra
-	Options
+	Options/Config
 	Sources
 	AudioRegions
 	AudioDiskstreams
@@ -1519,21 +1041,16 @@ Session::set_state (const XMLNode& node)
 	if (use_config_midi_ports ()) {
 	}
 
-	if ((child = find_named_node (node, "Path")) != 0) {
-		/* XXX this XML content stuff horrible API design */
-		string raid_path = _path + ':' + child->children().front()->content();
-		setup_raid_path (raid_path);
-	} else {
-		/* the path is already set */
-	}
-
 	if ((child = find_named_node (node, "extra")) != 0) {
 		_extra_xml = new XMLNode (*child);
 	}
 
-	if ((child = find_named_node (node, "Options")) == 0) {
+	if (((child = find_named_node (node, "Options")) != 0)) { /* old style */
+		load_options (*child);
+	} else if ((child = find_named_node (node, "Config")) != 0) { /* new style */
+		load_options (*child);
+	} else {
 		error << _("Session: XML state has no options section") << endmsg;
-	} else if (load_options (*child)) {
 	}
 
 	if ((child = find_named_node (node, "Sources")) == 0) {
@@ -1652,7 +1169,7 @@ Session::set_state (const XMLNode& node)
 	
 	/* OK, now we can set edit mode */
 
-	set_edit_mode (pending_edit_mode);
+	Config->set_edit_mode (pending_edit_mode);
 
 	/* here beginneth the second phase ... */
 
@@ -2537,21 +2054,6 @@ Session::edit_group_by_name (string name)
 }
 
 void
-Session::set_meter_hold (float val)
-{
-	_meter_hold = val;
-	MeterHoldChanged(); // emit
-}
-
-void
-Session::set_meter_falloff (float val)
-{
-	_meter_falloff = val;
-	MeterFalloffChanged(); // emit
-}
-
-
-void
 Session::begin_reversible_command (string name)
 {
 	current_trans = new UndoTransaction;
@@ -3373,4 +2875,160 @@ Session::restore_history (string snapshot_name)
     }
 
     return 0;
+}
+
+void
+Session::config_changed (const char* parameter_name)
+{
+#define PARAM_IS(x) (!strcmp (parameter_name, (x)))
+
+	if (PARAM_IS ("seamless-loop")) {
+		
+	} else if (PARAM_IS ("rf-speed")) {
+		
+	} else if (PARAM_IS ("auto-loop")) {
+		
+	} else if (PARAM_IS ("auto-input")) {
+
+		if (Config->get_use_hardware_monitoring() && transport_rolling()) {
+			/* auto-input only makes a difference if we're rolling */
+			
+			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+			
+			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
+				if ((*i)->record_enabled ()) {
+					//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
+					(*i)->monitor_input (!Config->get_auto_input());
+				}
+			}
+		}
+
+	} else if (PARAM_IS ("punch-in")) {
+
+		Location* location;
+		
+		if ((location = _locations.auto_punch_location()) != 0) {
+			
+			if (Config->get_punch_in ()) {
+				replace_event (Event::PunchIn, location->start());
+			} else {
+				remove_event (location->start(), Event::PunchIn);
+			}
+		}
+		
+	} else if (PARAM_IS ("punch-out")) {
+
+		Location* location;
+		
+		if ((location = _locations.auto_punch_location()) != 0) {
+			
+			if (Config->get_punch_out()) {
+				replace_event (Event::PunchOut, location->end());
+			} else {
+				clear_events (Event::PunchOut);
+			}
+		}
+
+	} else if (PARAM_IS ("edit-mode")) {
+
+		Glib::Mutex::Lock lm (playlist_lock);
+		
+		for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+			(*i)->set_edit_mode (Config->get_edit_mode ());
+		}
+
+	} else if (PARAM_IS ("use-video-sync")) {
+
+		if (transport_stopped()) {
+			if (Config->get_use_video_sync()) {
+				waiting_for_sync_offset = true;
+			}
+		}
+
+	} else if (PARAM_IS ("mmc-control")) {
+
+		poke_midi_thread ();
+
+	} else if (PARAM_IS ("midi-control")) {
+		
+		poke_midi_thread ();
+
+	} else if (PARAM_IS ("raid-path")) {
+
+		setup_raid_path (Config->get_raid_path());
+
+	} else if (PARAM_IS ("smpte-frames-per-second") || PARAM_IS ("smpte-drop-frames")) {
+
+		sync_time_vars ();
+
+	} else if (PARAM_IS ("video-pullup")) {
+
+		sync_time_vars ();
+
+	} else if (PARAM_IS ("seamless-loop")) {
+
+		if (play_loop && transport_rolling()) {
+			// to reset diskstreams etc
+			request_play_loop (true);
+		}
+
+	} else if (PARAM_IS ("rf-speed")) {
+
+		cumulative_rf_motion = 0;
+		reset_rf_scale (0);
+
+	} else if (PARAM_IS ("click-sound")) {
+
+		setup_click_sounds (1);
+
+	} else if (PARAM_IS ("click-emphasis-sound")) {
+
+		setup_click_sounds (-1);
+
+	} else if (PARAM_IS ("clicking")) {
+
+		if (Config->get_clicking()) {
+			if (_click_io && click_data) { // don't require emphasis data
+				_clicking = true;
+			}
+		} else {
+			_clicking = false;
+		}
+
+	} else if (PARAM_IS ("send-mtc")) {
+		
+		/* only set the internal flag if we have
+		   a port.
+		*/
+		
+		if (_mtc_port != 0) {
+			session_send_mtc = Config->get_send_mtc();
+		}
+
+	} else if (PARAM_IS ("send-mmc")) {
+		
+		/* only set the internal flag if we have
+		   a port.
+		*/
+		
+		if (_mmc_port != 0) {
+			session_send_mmc = Config->get_send_mmc();
+		}
+
+	} else if (PARAM_IS ("midi-feedback")) {
+		
+		/* only set the internal flag if we have
+		   a port.
+		*/
+		
+		if (_mtc_port != 0) {
+			session_midi_feedback = Config->get_midi_feedback();
+		}
+
+	}
+		
+	set_dirty ();
+		   
+#undef PARAM_IS
+
 }

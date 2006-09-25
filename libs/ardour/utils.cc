@@ -281,7 +281,7 @@ compute_equal_power_fades (jack_nframes_t nframes, float* in, float* out)
 
 	in[0] = 0.0f;
 	
-	for (int i = 1; i < nframes - 1; ++i) {
+	for (jack_nframes_t i = 1; i < nframes - 1; ++i) {
 		in[i] = in[i-1] + step;
 	}
 	
@@ -295,5 +295,42 @@ compute_equal_power_fades (jack_nframes_t nframes, float* in, float* out)
 		float outVal = 1 - inVal;
 		out[n] = outVal * (scale * outVal + 1.0f - scale);
 		in[n] = inVal * (scale * inVal + 1.0f - scale);
+	}
+}
+
+SlaveSource
+string_to_slave_source (string str)
+{
+	if (str == _("Internal")) {
+		return None;
+	}
+	
+	if (str == _("MTC")) {
+		return MTC;
+	}
+
+	if (str == _("JACK")) {
+		return JACK;
+	}
+
+	fatal << string_compose (_("programming error: unknown slave source string \"%1\""), str) << endmsg;
+	/*NOTREACHED*/
+	return None;
+}
+
+const char*
+slave_source_to_string (SlaveSource src)
+{
+	switch (src) {
+	case JACK:
+		return _("JACK");
+
+	case MTC:
+		return _("MTC");
+		
+	default:
+	case None:
+		return _("Internal");
+		
 	}
 }

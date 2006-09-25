@@ -248,16 +248,16 @@ OptionEditor::add_session_paths ()
 	click_emphasis_path_entry.set_sensitive (true);
 	session_raid_entry.set_sensitive (true);
 
-	if (session->click_sound.length() == 0) {
+	if (Config->get_click_sound().empty()) {
 		click_path_entry.set_text (_("internal"));
 	} else {
-		click_path_entry.set_text (session->click_sound);
+		click_path_entry.set_text (Config->get_click_sound());
 	}
 
-	if (session->click_emphasis_sound.length() == 0) {
+	if (Config->get_click_emphasis_sound().empty()) {
 		click_emphasis_path_entry.set_text (_("internal"));
 	} else {
-		click_emphasis_path_entry.set_text (session->click_emphasis_sound);
+		click_emphasis_path_entry.set_text (Config->get_click_emphasis_sound());
 	}
 
 	session_raid_entry.set_text(session->raid_path());
@@ -607,7 +607,7 @@ void
 OptionEditor::raid_path_changed ()
 {
 	if (session) {
-		session->set_raid_path (session_raid_entry.get_text());
+		Config->set_raid_path (session_raid_entry.get_text());
 	}
 }
 
@@ -655,22 +655,22 @@ OptionEditor::click_sound_changed ()
 	if (session) {
 		string path = click_path_entry.get_text();
 
-		if (path == session->click_sound) {
+		if (path == Config->get_click_sound()) {
 			return;
 		}
 
-		if (path.length() == 0) {
+		if (path.empty()) {
 
-			session->set_click_sound ("");
+			Config->set_click_sound ("");
 
 		} else {
 
 			strip_whitespace_edges (path);
 			
 			if (path == _("internal")) {
-				session->set_click_sound ("");
+				Config->set_click_sound ("");
 			} else {
-				session->set_click_sound (path);
+				Config->set_click_sound (path);
 			}
 		}
 	}
@@ -682,22 +682,22 @@ OptionEditor::click_emphasis_sound_changed ()
 	if (session) {
 		string path = click_emphasis_path_entry.get_text();
 
-		if (path == session->click_emphasis_sound) {
+		if (path == Config->get_click_emphasis_sound()) {
 			return;
 		}
 
-		if (path.length() == 0) {
+		if (path.empty()) {
 
-			session->set_click_emphasis_sound ("");
+			Config->set_click_emphasis_sound ("");
 
 		} else {
 
 			strip_whitespace_edges (path);
 
 			if (path == _("internal")) {
-				session->set_click_emphasis_sound ("");
+				Config->set_click_emphasis_sound ("");
 			} else {
-				session->set_click_emphasis_sound (path);
+				Config->set_click_emphasis_sound (path);
 			}
 		}
 	}

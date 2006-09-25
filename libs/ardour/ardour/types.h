@@ -150,6 +150,8 @@ namespace ARDOUR {
 		jack_nframes_t frames;
 		double         seconds;
 	    };
+
+	    AnyTime() { type = Frames; frames = 0; }
 	};
 
 	struct AudioRange {
@@ -216,6 +218,22 @@ namespace ARDOUR {
 		FullCrossfade,
 		ShortCrossfade
 	};
+	
+	enum LayerModel {
+		LaterHigher,
+		MoveAddHigher,
+		AddHigher
+	};
+
+	enum SoloModel {
+		InverseMute,
+		SoloBus
+	};
+
+	enum AutoConnectOption {
+		AutoConnectPhysical = 0x1,
+		AutoConnectMaster = 0x2
+	};
 
 	struct InterThreadInfo {
 	    volatile bool  done;
@@ -252,13 +270,37 @@ namespace ARDOUR {
 		LADSPA,
 		VST
 	};
-	
+
+	enum SlaveSource {
+		None = 0,
+		MTC,
+		JACK
+	};
+
+	enum ShuttleBehaviour {
+		Sprung,
+		Wheel
+	};
+
+	enum ShuttleUnits {
+		Percentage,
+		Semitones
+	};
+
 	typedef std::vector<boost::shared_ptr<AudioSource> > SourceList;
 
 } // namespace ARDOUR
 
 std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::HeaderFormat& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::AutoConnectOption& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::EditMode& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::SoloModel& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::LayerModel& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::CrossfadeModel& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::SlaveSource& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::ShuttleBehaviour& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::ShuttleUnits& sf);
 
 static inline jack_nframes_t
 session_frame_to_track_frame (jack_nframes_t session_frame, double speed)

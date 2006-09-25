@@ -462,7 +462,7 @@ Session::stop_audio_export (AudioExportSpecification& spec)
 	/* restart slaving */
 
 	if (post_export_slave != None) {
-		set_slave_source (post_export_slave, post_export_position);
+		Config->set_slave_source (post_export_slave);
 	} else {
 		locate (post_export_position, false, false, false);
 	}
@@ -517,10 +517,10 @@ Session::prepare_to_export (AudioExportSpecification& spec)
 	
 	/* no slaving */
 
-	post_export_slave = _slave_type;
+	post_export_slave = Config->get_slave_source ();
 	post_export_position = _transport_frame;
 
-	set_slave_source (None, 0);
+	Config->set_slave_source (None);
 
 	/* get transport ready */
 

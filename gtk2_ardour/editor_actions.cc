@@ -376,24 +376,24 @@ Editor::register_actions ()
 	    Slow    = 6.8dB/sec falloff at update rate of 40ms
 	*/
 
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffOff"), _("Off"), bind (mem_fun (*this, &Editor::set_meter_falloff), 0));
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffSlowest"), _("Slowest"), bind (mem_fun (*this, &Editor::set_meter_falloff), 1)); 
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffSlow"), _("Slow"), bind (mem_fun (*this, &Editor::set_meter_falloff), 2));
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffMedium"), _("Medium"), bind (mem_fun (*this, &Editor::set_meter_falloff), 3));
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffFast"), _("Fast"), bind (mem_fun (*this, &Editor::set_meter_falloff), 4));
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffFaster"), _("Faster"), bind (mem_fun (*this, &Editor::set_meter_falloff), 5));
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffFastest"), _("Fastest"), bind (mem_fun (*this, &Editor::set_meter_falloff), 6));
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffOff"), _("Off"), hide_return (bind (mem_fun (*Config, &Configuration::set_meter_falloff), 0.0f)));
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffSlowest"), _("Slowest"), hide_return (bind (mem_fun (*Config, &Configuration::set_meter_falloff), 1.0f)));
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffSlow"), _("Slow"), hide_return (bind (mem_fun (*Config, &Configuration::set_meter_falloff), 2.0f)));
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffMedium"), _("Medium"), hide_return (bind (mem_fun (*Config, &Configuration::set_meter_falloff), 3.0f)));
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffFast"), _("Fast"), hide_return (bind (mem_fun (*Config, &Configuration::set_meter_falloff), 4.0f)));
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffFaster"), _("Faster"), hide_return (bind (mem_fun (*Config, &Configuration::set_meter_falloff), 5.0f)));
+	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffFastest"), _("Fastest"), hide_return (bind (mem_fun (*Config, &Configuration::set_meter_falloff), 6.0f)));
 
-	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldOff"), _("Off"), bind (mem_fun (*this, &Editor::set_meter_hold), 0));
-	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldShort"), _("Short"), bind (mem_fun (*this, &Editor::set_meter_hold), 40));
-	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldMedium"), _("Medium"), bind (mem_fun (*this, &Editor::set_meter_hold), 100));
-	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldLong"), _("Long"), bind (mem_fun (*this, &Editor::set_meter_hold), 200));
+	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldOff"), _("Off"), hide_return (bind (mem_fun (*Config, &Configuration::set_meter_hold), 0.0f)));
+	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldShort"), _("Short"), hide_return (bind (mem_fun (*Config, &Configuration::set_meter_hold), 40.0f)));
+	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldMedium"), _("Medium"), hide_return (bind (mem_fun (*Config, &Configuration::set_meter_hold), 100.0f)));
+	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldLong"), _("Long"), hide_return (bind (mem_fun (*Config, &Configuration::set_meter_hold), 200.0f)));
 
 	RadioAction::Group layer_model_group;
 
-	ActionManager::register_radio_action (editor_actions, layer_model_group,  X_("LayerLaterHigher"), _("Later is Higher"), bind (mem_fun (*this, &Editor::set_layer_model), Session::LaterHigher));
-	ActionManager::register_radio_action (editor_actions, layer_model_group,  X_("LayerMoveAddHigher"), _("Most Recently Moved/Added is Higher"), bind (mem_fun (*this, &Editor::set_layer_model), Session::MoveAddHigher));
-	ActionManager::register_radio_action (editor_actions, layer_model_group,  X_("LayerAddHigher"), _("Most Recently Added is Higher"), bind (mem_fun (*this, &Editor::set_layer_model), Session::AddHigher));
+	ActionManager::register_radio_action (editor_actions, layer_model_group,  X_("LayerLaterHigher"), _("Later is Higher"), bind (mem_fun (*this, &Editor::set_layer_model), LaterHigher));
+	ActionManager::register_radio_action (editor_actions, layer_model_group,  X_("LayerMoveAddHigher"), _("Most Recently Moved/Added is Higher"), bind (mem_fun (*this, &Editor::set_layer_model), MoveAddHigher));
+	ActionManager::register_radio_action (editor_actions, layer_model_group,  X_("LayerAddHigher"), _("Most Recently Added is Higher"), bind (mem_fun (*this, &Editor::set_layer_model), AddHigher));
 
 	RadioAction::Group smpte_group;
 
@@ -473,7 +473,7 @@ Editor::toggle_xfades_active ()
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-xfades-active"));
 	if (session && act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		session->set_crossfades_active (tact->get_active());
+		Config->set_crossfades_active (tact->get_active());
 	}
 }
 
@@ -488,7 +488,7 @@ Editor::toggle_xfade_visibility ()
 }
 
 void
-Editor::set_layer_model (Session::LayerModel model)
+Editor::set_layer_model (LayerModel model)
 {
 	/* this is driven by a toggle on a radio group, and so is invoked twice,
 	   once for the item that became inactive and once for the one that became
@@ -499,13 +499,13 @@ Editor::set_layer_model (Session::LayerModel model)
 
 	if (session) {
 		switch (model) {
-		case Session::LaterHigher:
+		case LaterHigher:
 			act = ActionManager::get_action (X_("Editor"), X_("LayerLaterHigher"));
 			break;
-		case Session::MoveAddHigher:
+		case MoveAddHigher:
 			act = ActionManager::get_action (X_("Editor"), X_("LayerMoveAddHigher"));
 			break;
-		case Session::AddHigher:
+		case AddHigher:
 			act = ActionManager::get_action (X_("Editor"), X_("LayerAddHigher"));
 			break;
 		}
@@ -513,7 +513,7 @@ Editor::set_layer_model (Session::LayerModel model)
 		if (act) {
 			RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
 			if (ract && ract->get_active()) {
-				session->set_layer_model (model);
+				Config->set_layer_model (model);
 			}
 		}
 	}
@@ -656,7 +656,7 @@ Editor::video_pullup_chosen (Session::PullupFormat pullup)
 		if (act) {
 			RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
 			if (ract && ract->get_active()) {
-				session->set_video_pullup ( pull );
+				Config->set_video_pullup ( pull );
 			}
 		} else  cerr << "Editor::video_pullup_chosen could not find action to match pullup." << endl;
 	}
@@ -686,7 +686,7 @@ Editor::set_crossfade_model (CrossfadeModel model)
 		if (act) {
 			RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
 			if (ract && ract->get_active()) {
-				session->set_xfade_model (model);
+				Config->set_xfade_model (model);
 			}
 		}
 	}

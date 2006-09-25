@@ -1140,7 +1140,7 @@ AudioClock::get_frames (Field field,jack_nframes_t pos,int dir)
 		frames = session->frame_rate();
 		break;
 	case SMPTE_Frames:
-		frames = (jack_nframes_t) floor (session->frame_rate() / session->smpte_frames_per_second);
+		frames = (jack_nframes_t) floor (session->frame_rate() / Config->get_smpte_frames_per_second());
 		break;
 
 	case AudioFrames:
@@ -1248,7 +1248,7 @@ AudioClock::smpte_sanitize_display()
 		seconds_label.set_text("59");
 	}
 	
-	switch ((long)rint(session->smpte_frames_per_second)) {
+	switch ((long)rint(Config->get_smpte_frames_per_second())) {
 	case 24:
 		if (atoi(frames_label.get_text()) > 23) {
 			frames_label.set_text("23");
@@ -1268,7 +1268,7 @@ AudioClock::smpte_sanitize_display()
 		break;
 	}
 	
-	if (session->smpte_drop_frames) {
+	if (Config->get_smpte_drop_frames()) {
 		if ((atoi(minutes_label.get_text()) % 10) && (atoi(seconds_label.get_text()) == 0) && (atoi(frames_label.get_text()) < 2)) {
 			frames_label.set_text("02");
 		}

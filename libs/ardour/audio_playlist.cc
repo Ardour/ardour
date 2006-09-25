@@ -450,7 +450,7 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 					
 				} else {
 		
-					xfade = new Crossfade (other, region, _session.get_xfade_model(), _session.get_crossfades_active());
+					xfade = new Crossfade (other, region, Config->get_xfade_model(), Config->get_crossfades_active());
 					add_crossfade (*xfade);
 				}
 			} 

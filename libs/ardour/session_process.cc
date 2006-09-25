@@ -410,7 +410,7 @@ Session::process_with_events (jack_nframes_t nframes)
 		summon_butler ();
 	} 
 	
-	if (!_engine.freewheeling() && send_mtc) {
+	if (!_engine.freewheeling() && session_send_mtc) {
 		send_midi_time_code_in_another_thread ();
 	}
 
@@ -431,7 +431,7 @@ Session::transport_locked () const
 {
 	Slave* sl = _slave;
 
-	if (!locate_pending() && ((_slave_type == None) || (sl && sl->ok() && sl->locked()))) {
+	if (!locate_pending() && ((Config->get_slave_source() == None) || (sl && sl->ok() && sl->locked()))) {
 		return true;
 	}
 
@@ -449,7 +449,7 @@ Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 
 	if (!_slave->ok()) {
 		stop_transport ();
-		set_slave_source (None, 0);
+		Config->set_slave_source (None);
 		goto noroll;
 	}
 	
@@ -540,9 +540,9 @@ Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 
 				Location* al = _locations.auto_loop_location();
 
-				if (al && auto_loop && (slave_transport_frame < al->start() || slave_transport_frame > al->end())) {
+				if (al && play_loop && (slave_transport_frame < al->start() || slave_transport_frame > al->end())) {
 					// cancel looping
-					request_auto_loop(false);
+					request_play_loop(false);
 				}
 
 				if (slave_transport_frame != _transport_frame) {
@@ -614,7 +614,7 @@ Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 			// << " tf = " << _transport_frame
 			// << endl;
 			
-			if (_slave_type == JACK) {
+			if (Config->get_slave_source() == JACK) {
 				last_stop_frame = _transport_frame;
 			}
 
@@ -784,7 +784,7 @@ Session::process_without_events (jack_nframes_t nframes)
 		} else {
 			increment_transport_position (frames_moved);
 		}
-		
+
 		maybe_stop (stop_limit);
 		check_declick_out ();
 
@@ -794,7 +794,7 @@ Session::process_without_events (jack_nframes_t nframes)
 		summon_butler ();
 	} 
 	
-	if (!_engine.freewheeling() && send_mtc) {
+	if (!_engine.freewheeling() && session_send_mtc) {
 		send_midi_time_code_in_another_thread ();
 	}
 

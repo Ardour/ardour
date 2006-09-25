@@ -172,9 +172,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	shuttle_fract = 0.0;
 	shuttle_max_speed = 8.0f;
 
-	set_shuttle_units (Percentage);
-	set_shuttle_behaviour (Sprung);
-
 	shuttle_style_menu = 0;
 	shuttle_unit_menu = 0;
 
@@ -935,10 +932,11 @@ restart JACK with more ports."));
 void
 ARDOUR_UI::do_transport_locate (jack_nframes_t new_position)
 {
-	jack_nframes_t _preroll;
+	jack_nframes_t _preroll = 0;
 
 	if (session) {
-		_preroll = session->convert_to_frames_at (new_position, session->preroll);
+		// XXX CONFIG_CHANGE FIX - requires AnyTime handling
+		// _preroll = session->convert_to_frames_at (new_position, Config->get_preroll());
 
 		if (new_position > _preroll) {
 			new_position -= _preroll;
@@ -1013,8 +1011,8 @@ ARDOUR_UI::transport_stop ()
 		return;
 	}
 	
-	if (session->get_auto_loop()) {
-		session->request_auto_loop (false);
+	if (Config->get_auto_loop()) {
+		session->request_play_loop (false);
 	}
 	
 	session->request_stop ();
@@ -1068,8 +1066,8 @@ ARDOUR_UI::transport_roll ()
 
 	rolling = session->transport_rolling ();
 
-	if (session->get_auto_loop()) {
-		session->request_auto_loop (false);
+	if (Config->get_auto_loop()) {
+		session->request_play_loop (false);
 		auto_loop_button.set_active (false);
 		roll_button.set_active (true);
 	} else if (session->get_play_range ()) {
@@ -1086,7 +1084,7 @@ void
 ARDOUR_UI::transport_loop()
 {
 	if (session) {
-		if (session->get_auto_loop()) {
+		if (Config->get_auto_loop()) {
 			if (session->transport_rolling()) {
 				Location * looploc = session->locations()->auto_loop_location();
 				if (looploc) {
@@ -1095,7 +1093,7 @@ ARDOUR_UI::transport_loop()
 			}
 		}
 		else {
-			session->request_auto_loop (true);
+			session->request_play_loop (true);
 		}
 	}
 }
@@ -1725,8 +1723,8 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 							
 					uint32_t cchns;
 					uint32_t mchns;
-					Session::AutoConnectOption iconnect;
-					Session::AutoConnectOption oconnect;
+					AutoConnectOption iconnect;
+					AutoConnectOption oconnect;
 							
 					if (new_session_dialog->create_control_bus()) {
 						cchns = (uint32_t) new_session_dialog->control_channel_count();
@@ -1741,19 +1739,19 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 					}
 							
 					if (new_session_dialog->connect_inputs()) {
-						iconnect = Session::AutoConnectPhysical;
+						iconnect = AutoConnectPhysical;
 					} else {
-						iconnect = Session::AutoConnectOption (0);
+						iconnect = AutoConnectOption (0);
 					}
 							
 					/// @todo some minor tweaks.
 							
 					if (new_session_dialog->connect_outs_to_master()) {
-						oconnect = Session::AutoConnectMaster;
+						oconnect = AutoConnectMaster;
 					} else if (new_session_dialog->connect_outs_to_physical()) {
-						oconnect = Session::AutoConnectPhysical;
+						oconnect = AutoConnectPhysical;
 					} else {
-						oconnect = Session::AutoConnectOption (0);
+						oconnect = AutoConnectOption (0);
 					} 
 							
 					uint32_t nphysin = (uint32_t) new_session_dialog->input_limit_count();
@@ -1822,6 +1820,8 @@ This prevents the session from being loaded."));
 
 	connect_to_session (new_session);
 
+	Config->set_current_owner (ConfigVariableBase::Interface);
+
 	session_loaded = true;
 	return 0;
 }
@@ -1842,8 +1842,8 @@ int
 ARDOUR_UI::build_session (const string & path, const string & snap_name, 
 			  uint32_t control_channels,
 			  uint32_t master_channels, 
-			  Session::AutoConnectOption input_connect,
-			  Session::AutoConnectOption output_connect,
+			  AutoConnectOption input_connect,
+			  AutoConnectOption output_connect,
 			  uint32_t nphysin,
 			  uint32_t nphysout,
 			  jack_nframes_t initial_length)
@@ -2127,9 +2127,9 @@ ARDOUR_UI::add_route ()
 	string name_template = add_route_dialog->name_template ();
 	bool track = add_route_dialog->track ();
 
-	Session::AutoConnectOption oac = session->get_output_auto_connect();
+	AutoConnectOption oac = Config->get_output_auto_connect();
 
-	if (oac & Session::AutoConnectMaster) {
+	if (oac & AutoConnectMaster) {
 		output_chan = (session->master_out() ? session->master_out()->n_inputs() : input_chan);
 	} else {
 		output_chan = input_chan;

@@ -298,9 +298,6 @@ class Editor : public PublicEditor
 	void toggle_waveforms_while_recording ();
 	void toggle_measure_visibility ();
 
-	void set_meter_falloff (int);
-	void set_meter_hold (int32_t);
-
 	/* SMPTE timecode & video sync */
 
 	void smpte_fps_chosen (ARDOUR::Session::SmpteFormat format);
@@ -320,7 +317,7 @@ class Editor : public PublicEditor
 
 
 	/* layers */
-	void set_layer_model (ARDOUR::Session::LayerModel);
+	void set_layer_model (ARDOUR::LayerModel);
 	void update_layering_model ();
 
 	/* redirect shared ops menu. caller must free returned menu */
@@ -488,9 +485,7 @@ class Editor : public PublicEditor
 	ArdourCanvas::Text* verbose_canvas_cursor;
 	bool                 verbose_cursor_visible;
 
-	void session_control_changed (ARDOUR::Session::ControlType);
-	void queue_session_control_changed (ARDOUR::Session::ControlType);
-
+	void parameter_changed (const char *);
 	
 	bool track_canvas_motion (GdkEvent*);
 

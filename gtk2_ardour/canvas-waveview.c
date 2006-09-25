@@ -861,6 +861,7 @@ gnome_canvas_waveview_get_property (GObject      *object,
 
 	case PROP_RECTIFIED:
 		g_value_set_boolean (value, waveview->rectified);
+		break;
 
 	case PROP_REGION_START:
 		g_value_set_uint (value, waveview->region_start);

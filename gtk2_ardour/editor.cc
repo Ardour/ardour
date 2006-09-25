@@ -1003,36 +1003,28 @@ Editor::on_realize ()
 }
 
 void
-Editor::queue_session_control_changed (Session::ControlType t)
+Editor::parameter_changed (const char* parameter_name)
 {
-	Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &Editor::session_control_changed), t));
-}
+#define PARAM_IS(x) (!strcmp (parameter_name, (x)))
 
-void
-Editor::session_control_changed (Session::ControlType t)
-{
-	// right now we're only tracking some state here 
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::parameter_changed), parameter_name));
 
-	switch (t) {
-	case Session::AutoLoop:
+	if (PARAM_IS ("auto-loop")) {
 		update_loop_range_view (true);
-		break;
-	case Session::PunchIn:
-	case Session::PunchOut:
+	} else if (PARAM_IS ("punch-in")) {
 		update_punch_range_view (true);
-		break;
-
-	case Session::LayeringModel:
+	} else if (PARAM_IS ("punch-out")) {
+		update_punch_range_view (true);
+	} else if (PARAM_IS ("layer-model")) {
 		update_layering_model ();
-		break;
-
-	case Session::SmpteMode:
+	} else if (PARAM_IS ("smpte-frames-per-second") || PARAM_IS ("smpte-drop-frames")) {
 		update_smpte_mode ();
-		break;
+		update_just_smpte ();
+	} else if (PARAM_IS ("video-pullup")) {
+		update_video_pullup ();
+	} 
 
-	default:
-		break;
-	}
+#undef PARAM_IS
 }
 
 void
@@ -1174,10 +1166,6 @@ Editor::connect_to_session (Session *t)
 	session_connections.push_back (session->RegionHiddenChange.connect (mem_fun(*this, &Editor::region_hidden)));
 
 	session_connections.push_back (session->SMPTEOffsetChanged.connect (mem_fun(*this, &Editor::update_just_smpte)));
-	session_connections.push_back (session->SMPTETypeChanged.connect (mem_fun(*this, &Editor::update_just_smpte)));
-
-	session_connections.push_back (session->SMPTETypeChanged.connect (mem_fun(*this, &Editor::update_smpte_mode)));
-	session_connections.push_back (session->PullupChanged.connect (mem_fun(*this, &Editor::update_video_pullup)));
 
 	session_connections.push_back (session->tempo_map().StateChanged.connect (mem_fun(*this, &Editor::tempo_map_changed)));
 
@@ -1193,7 +1181,7 @@ Editor::connect_to_session (Session *t)
 		analysis_window->set_session (session);
 #endif
 
-	switch (session->get_edit_mode()) {
+	switch (Config->get_edit_mode()) {
 	case Splice:
 		edit_mode_selector.set_active_text (edit_mode_strings[splice_index]);
 		break;
@@ -1234,7 +1222,6 @@ Editor::connect_to_session (Session *t)
 	update_loop_range_view (true);
 	update_punch_range_view (true);
 	
-	session->ControlChanged.connect (mem_fun(*this, &Editor::queue_session_control_changed));
 	session->StateSaved.connect (mem_fun(*this, &Editor::session_state_saved));
 	
 	refresh_location_display ();
@@ -1251,7 +1238,7 @@ Editor::connect_to_session (Session *t)
 	if (act) {
 		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
 		/* do it twice to force the change */
-		yn = session->get_crossfades_active();
+		yn = Config->get_crossfades_active();
 		tact->set_active (!yn);
 		tact->set_active (yn);
 	}
@@ -3522,7 +3509,7 @@ Editor::edit_mode_selection_done ()
 		mode = Slide;
 	}
 
-	session->set_edit_mode (mode);
+	Config->set_edit_mode (mode);
 }	
 
 void
@@ -4156,8 +4143,8 @@ Editor::update_smpte_mode ()
 
 	RefPtr<Action> act;
 
-	float frames = session->smpte_frames_per_second;
-	bool drop = session->smpte_drop_frames;
+	float frames = Config->get_smpte_frames_per_second();
+	bool drop = Config->get_smpte_drop_frames();
 
 	if ((frames < 23.976 * 1.0005) && !drop)
 		act = ActionManager::get_action (X_("Editor"), X_("Smpte23976"));
@@ -4198,7 +4185,7 @@ Editor::update_video_pullup ()
 
 	RefPtr<Action> act;
 
-	float pullup = session->video_pullup;
+	float pullup = Config->get_video_pullup();
 
 	if ( pullup < (-4.1667 - 0.1) * 0.99) {
 		act = ActionManager::get_action (X_("Editor"), X_("PullupMinus4Minus1"));
@@ -4235,14 +4222,14 @@ Editor::update_layering_model ()
 {
 	RefPtr<Action> act;
 
-	switch (session->get_layer_model()) {
-	case Session::LaterHigher:
+	switch (Config->get_layer_model()) {
+	case LaterHigher:
 		act = ActionManager::get_action (X_("Editor"), X_("LayerLaterHigher"));
 		break;
-	case Session::MoveAddHigher:
+	case MoveAddHigher:
 		act = ActionManager::get_action (X_("Editor"), X_("LayerMoveAddHigher"));
 		break;
-	case Session::AddHigher:
+	case AddHigher:
 		act = ActionManager::get_action (X_("Editor"), X_("LayerAddHigher"));
 		break;
 	}
@@ -4260,7 +4247,7 @@ Editor::update_crossfade_model ()
 {
 	RefPtr<Action> act;
 
-	switch (session->get_xfade_model()) {
+	switch (Config->get_xfade_model()) {
 	case FullCrossfade:
 		act = ActionManager::get_action (X_("Editor"), X_("CrossfadesFull"));
 		break;

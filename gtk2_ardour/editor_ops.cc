@@ -90,87 +90,6 @@ Editor::redo (uint32_t n)
 	}
 }
 
-void
-Editor::set_meter_hold (int32_t cnt)
-{
-	Config->set_meter_hold_off(false);
-	Config->set_meter_hold_short(false);
-	Config->set_meter_hold_medium(false);
-	Config->set_meter_hold_long(false);
-
-	switch (cnt)
-	{
-		case 0:
-		 Config->set_meter_hold_off(true);
-		 break;
-		case 40:
-		 Config->set_meter_hold_short(true);
-		 break;
-		case 100:
-		 Config->set_meter_hold_medium(true);
-		 break;
-		case 200:
-		 Config->set_meter_hold_long(true);
-		 break;
-	}
-		 
-	if (session) {
-		session->set_meter_hold (cnt);
-	}
-}
-
-void
-Editor::set_meter_falloff (int intval)
-{
-	float val = 0.0f; /* off */
-	std::string str;
-
-	Config->set_meter_falloff_off(false);
-	Config->set_meter_falloff_slowest(false);
-	Config->set_meter_falloff_slow(false);
-	Config->set_meter_falloff_medium(false);
-	Config->set_meter_falloff_fast(false);
-	Config->set_meter_falloff_faster(false);
-	Config->set_meter_falloff_fastest(false);
-	
-	switch (intval)
-	{
-		case 0:
-		 val = 0.0f;
-		 Config->set_meter_falloff_off(true);
-		 break;
-		case 1:
-		 val = 0.125f;
-		 Config->set_meter_falloff_slowest(true);
-		 break;
-		case 2:
-		 val = 0.250f;
-		 Config->set_meter_falloff_slow(true);
-		 break;
-		case 3:
-		 val = 0.375f;
-		 Config->set_meter_falloff_medium(true);
-		 break;
-		case 4:
-		 val = 0.500f;
-		 Config->set_meter_falloff_fast(true);
-		 break;
-		case 5:
-		 val = 0.750f;
-		 Config->set_meter_falloff_faster(true);
-		 break;
-		case 6:
-		 val = 0.875f;
-		 Config->set_meter_falloff_fastest(true);
-		 break;
-	}
-	
-	if (session) {
-		session->set_meter_falloff (val);
-	}
-}
-
-
 int
 Editor::ensure_cursor (jack_nframes_t *pos)
 {
@@ -1898,9 +1817,9 @@ Editor::toggle_playback (bool with_abort)
 		return;
 	}
 
-	switch (session->slave_source()) {
-	case Session::None:
-	case Session::JACK:
+	switch (Config->get_slave_source()) {
+	case None:
+	case JACK:
 		break;
 	default:
 		/* transport controlled by the master */
@@ -1914,8 +1833,8 @@ Editor::toggle_playback (bool with_abort)
 	
 	if (session->transport_rolling()) {
 		session->request_stop (with_abort);
-		if (session->get_auto_loop()) {
-			session->request_auto_loop (false);
+		if (Config->get_auto_loop()) {
+			session->request_play_loop (false);
 		}
 	} else {
 		session->request_transport_speed (1.0f);
@@ -1961,7 +1880,7 @@ Editor::loop_selected_region ()
 			
 			// enable looping, reposition and start rolling
 
-			session->request_auto_loop (true);
+			session->request_play_loop (true);
 			session->request_locate (tll->start(), false);
 			session->request_transport_speed (1.0f);
 		}
@@ -1991,7 +1910,7 @@ Editor::loop_location (Location& location)
 		tll->set (location.start(), location.end());
 
 		// enable looping, reposition and start rolling
-		session->request_auto_loop (true);
+		session->request_play_loop (true);
 		session->request_locate (tll->start(), true);
 	}
 }

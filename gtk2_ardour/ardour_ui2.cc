@@ -130,20 +130,16 @@ ARDOUR_UI::transport_stopped ()
 	update_disk_space ();
 }
 
-static const double SHUTTLE_FRACT_SPEED1=0.48412291827; /* derived from A1,A2 */
-
 void
 ARDOUR_UI::transport_rolling ()
 {
 	stop_button.set_active (false);
 	if (session->get_play_range()) {
-
 		play_selection_button.set_active (true);
 		roll_button.set_active (false);
 		auto_loop_button.set_active (false);
 
-	} else if (session->get_auto_loop ()) {
-
+	} else if (Config->get_auto_loop ()) {
 		auto_loop_button.set_active (true);
 		play_selection_button.set_active (false);
 		roll_button.set_active (false);
@@ -396,9 +392,9 @@ ARDOUR_UI::setup_transport ()
 	sdframe->add (speed_display_box);
 
 	mtc_port_changed ();
-	sync_option_combo.set_active_text (positional_sync_strings.front());
 	sync_option_combo.signal_changed().connect (mem_fun (*this, &ARDOUR_UI::sync_option_changed));
-	Gtkmm2ext::set_size_request_to_display_given_text (sync_option_combo, "Internal", 22, 10);
+	const guint32 FUDGE = 25; // Combo's are stupid - they steal space from the entry for the button
+	set_size_request_to_display_given_text (sync_option_combo, X_("Igternal"), 2+FUDGE, 10);
 
 	shbox->pack_start (*sdframe, false, false);
 	shbox->pack_start (shuttle_units_button, true, true);
@@ -514,7 +510,7 @@ ARDOUR_UI::_auditioning_changed (bool onoff)
 void
 ARDOUR_UI::auditioning_changed (bool onoff)
 {
-	Gtkmm2ext::UI::instance()->call_slot(bind (mem_fun(*this, &ARDOUR_UI::_auditioning_changed), onoff));
+	UI::instance()->call_slot(bind (mem_fun(*this, &ARDOUR_UI::_auditioning_changed), onoff));
 }
 
 void
@@ -668,8 +664,8 @@ ARDOUR_UI::shuttle_box_button_release (GdkEventButton* ev)
 		mouse_shuttle (ev->x, true);
 		shuttle_grabbed = false;
 		shuttle_box.remove_modal_grab ();
-		if (shuttle_behaviour == Sprung) {
-			if (session->get_auto_play() || roll_button.get_state()) {
+		if (Config->get_shuttle_behaviour() == Sprung) {
+			if (Config->get_auto_play() || roll_button.get_state()) {
 				shuttle_fract = SHUTTLE_FRACT_SPEED1;				
 				session->request_transport_speed (1.0);
 				stop_button.set_active (false);
@@ -829,49 +825,14 @@ ARDOUR_UI::shuttle_unit_clicked ()
 }
 
 void
-ARDOUR_UI::set_shuttle_units (ShuttleUnits u)
-{
-	switch ((shuttle_units = u)) {
-	case Percentage:
-		shuttle_units_button.set_label("% ");
-		break;
-	case Semitones:
-		shuttle_units_button.set_label(_("ST"));
-		break;
-	}
-}
-
-void
 ARDOUR_UI::shuttle_style_changed ()
 {
 	ustring str = shuttle_style_button.get_active_text ();
 
 	if (str == _("sprung")) {
-		set_shuttle_behaviour (Sprung);
+		Config->set_shuttle_behaviour (Sprung);
 	} else if (str == _("wheel")) {
-		set_shuttle_behaviour (Wheel);
-	}
-}
-
-
-void
-ARDOUR_UI::set_shuttle_behaviour (ShuttleBehaviour b)
-{
-	switch ((shuttle_behaviour = b)) {
-	case Sprung:
-		shuttle_style_button.set_active_text (_("sprung"));
-		shuttle_fract = 0.0;
-		shuttle_box.queue_draw ();
-		if (session) {
-			if (session->transport_rolling()) {
-			        shuttle_fract = SHUTTLE_FRACT_SPEED1;
-				session->request_transport_speed (1.0);
-			}
-		}
-		break;
-	case Wheel:
-		shuttle_style_button.set_active_text (_("wheel"));
-		break;
+		Config->set_shuttle_behaviour (Wheel);
 	}
 }
 
@@ -892,7 +853,7 @@ ARDOUR_UI::update_speed_display ()
 	if (x != last_speed_displayed) {
 
 		if (x != 0) {
-			if (shuttle_units == Percentage) {
+			if (Config->get_shuttle_units() == Percentage) {
 				snprintf (buf, sizeof (buf), "%.2f", x);
 			} else {
 				if (x < 0) {
@@ -920,31 +881,19 @@ ARDOUR_UI::set_transport_sensitivity (bool yn)
 void
 ARDOUR_UI::editor_realized ()
 {
+	Config->map_parameters (mem_fun (*this, &ARDOUR_UI::parameter_changed));
+
 	set_size_request_to_display_given_text (speed_display_box, _("-0.55"), 2, 2);
-	/* XXX: this should really be saved in instant.xml or something similar and restored from there */
-	shuttle_style_button.set_active_text (_("sprung"));
-	const guint32 FUDGE = 20; // Combo's are stupid - they steal space from the entry for the button
+	const guint32 FUDGE = 25; // Combo's are stupid - they steal space from the entry for the button
 	set_size_request_to_display_given_text (shuttle_style_button, _("sprung"), 2+FUDGE, 10);
 }
 
 void
 ARDOUR_UI::sync_option_changed ()
 {
-	string which;
-
-	if (session == 0) {
-		return;
+	if (session) {
+		session->request_slave_source (string_to_slave_source (sync_option_combo.get_active_text()));
 	}
-
-	which = sync_option_combo.get_active_text();
-
-	if (which == positional_sync_strings[Session::None]) {
-		session->request_slave_source (Session::None);
-	} else if (which == positional_sync_strings[Session::MTC]) {
-		session->request_slave_source (Session::MTC);
-	} else if (which == positional_sync_strings[Session::JACK]) {
-		session->request_slave_source (Session::JACK);
-	} 
 }
 
 void

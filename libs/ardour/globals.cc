@@ -574,16 +574,22 @@ ARDOUR::coverage (jack_nframes_t sa, jack_nframes_t ea,
 
 /* not sure where to put these */
 
-std::istream& operator>>(std::istream& o, HeaderFormat& hf) {
+template<class T>
+std::istream& int_to_type (std::istream& o, T& hf) {
 	int val;
 	o >> val;
-	hf = (HeaderFormat) val;
+	hf = (T) val;
 	return o;
 }
 
-std::istream& operator>>(std::istream& o, SampleFormat& sf) {
-	int val;
-	o >> val;
-	sf = (SampleFormat) val;
-	return o;
-}
+std::istream& operator>>(std::istream& o, HeaderFormat& var) { return int_to_type<HeaderFormat> (o, var); }
+std::istream& operator>>(std::istream& o, SampleFormat& var) { return int_to_type<SampleFormat> (o, var); }
+std::istream& operator>>(std::istream& o, AutoConnectOption& var) { return int_to_type<AutoConnectOption> (o, var); }
+std::istream& operator>>(std::istream& o, EditMode& var) { return int_to_type<EditMode> (o, var); }
+std::istream& operator>>(std::istream& o, SoloModel& var) { return int_to_type<SoloModel> (o, var); }
+std::istream& operator>>(std::istream& o, LayerModel& var) { return int_to_type<LayerModel> (o, var); }
+std::istream& operator>>(std::istream& o, CrossfadeModel& var) { return int_to_type<CrossfadeModel> (o, var); }
+std::istream& operator>>(std::istream& o, SlaveSource& var) { return int_to_type<SlaveSource> (o, var); }
+std::istream& operator>>(std::istream& o, ShuttleBehaviour& var) { return int_to_type<ShuttleBehaviour> (o, var); }
+std::istream& operator>>(std::istream& o, ShuttleUnits& var) { return int_to_type<ShuttleUnits> (o, var); }
+
