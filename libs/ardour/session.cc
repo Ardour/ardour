@@ -277,9 +277,12 @@ Session::Session (AudioEngine &eng,
 
 	first_stage_init (fullpath, snapshot_name);
 	
-	if (create (new_session, mix_template, _engine.frame_rate() * 60 * 5)) {
-		cerr << "create failed\n";
-		throw failed_constructor ();
+	new_session = !g_file_test (_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
+	if (new_session) {
+		if (create (new_session, mix_template, _engine.frame_rate() * 60 * 5)) {
+			cerr << "create failed\n";
+			throw failed_constructor ();
+		}
 	}
 	
 	if (second_stage_init (new_session)) {
@@ -330,9 +333,12 @@ Session::Session (AudioEngine &eng,
 	n_physical_inputs = max (requested_physical_in, _engine.n_physical_inputs());
 
 	first_stage_init (fullpath, snapshot_name);
-	
-	if (create (new_session, 0, initial_length)) {
-		throw failed_constructor ();
+
+	new_session = !g_file_test (_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
+	if (new_session) {
+		if (create (new_session, 0, initial_length)) {
+			throw failed_constructor ();
+		}
 	}
 
 	if (control_out_channels) {

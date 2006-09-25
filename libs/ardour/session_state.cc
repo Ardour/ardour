@@ -114,7 +114,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	*/
 
 	_name = _current_snapshot_name = snapshot_name;
-	setup_raid_path (_path);
 
 	_current_frame_rate = _engine.frame_rate ();
 	_tempo_map = new TempoMap (_current_frame_rate);
@@ -315,10 +314,14 @@ Session::second_stage_init (bool new_session)
 		return -1;
 	}
 
+	// set_state() will call setup_raid_path(), but if it's a new session we need
+	// to call setup_raid_path() here.
 	if (state_tree) {
 		if (set_state (*state_tree->root())) {
 			return -1;
 		}
+	} else {
+		setup_raid_path(_path);
 	}
 
 	/* we can't save till after ::when_engine_running() is called,
@@ -484,8 +487,6 @@ Session::create (bool& new_session, string* mix_template, jack_nframes_t initial
 {
 	string dir;
 
-	new_session = !g_file_test (_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
-	
 	if (g_mkdir_with_parents (_path.c_str(), 0755) < 0) {
 		error << string_compose(_("Session: cannot create session dir \"%1\" (%2)"), _path, strerror (errno)) << endmsg;
 		return -1;
@@ -519,66 +520,57 @@ Session::create (bool& new_session, string* mix_template, jack_nframes_t initial
 		return -1;
 	}
 
-	
+
 	/* check new_session so we don't overwrite an existing one */
-	
+
 	if (mix_template) {
-		if (new_session){
-			std::string in_path = *mix_template;
+		std::string in_path = *mix_template;
 
-			ifstream in(in_path.c_str());
-			
-			if (in){
-				string out_path = _path;
-				out_path += _name;
-				out_path += _statefile_suffix;
-				
-				ofstream out(out_path.c_str());
+		ifstream in(in_path.c_str());
 
-				if (out){
-					out << in.rdbuf();
-					
-					// okay, session is set up.  Treat like normal saved
-					// session from now on.
-					
-					new_session = false;
-					return 0;
-					
-				} else {
-					error << string_compose (_("Could not open %1 for writing mix template"), out_path) 
-					      << endmsg;
-					return -1;
-				}
-				
+		if (in){
+			string out_path = _path;
+			out_path += _name;
+			out_path += _statefile_suffix;
+
+			ofstream out(out_path.c_str());
+
+			if (out){
+				out << in.rdbuf();
+
+				// okay, session is set up.  Treat like normal saved
+				// session from now on.
+
+				new_session = false;
+				return 0;
+
 			} else {
-				error << string_compose (_("Could not open mix template %1 for reading"), in_path) 
-				      << endmsg;
+				error << string_compose (_("Could not open %1 for writing mix template"), out_path) 
+					<< endmsg;
 				return -1;
 			}
-			
-			
+
 		} else {
-			warning << _("Session already exists.  Not overwriting") << endmsg;
+			error << string_compose (_("Could not open mix template %1 for reading"), in_path) 
+				<< endmsg;
 			return -1;
 		}
+
 	}
 
-	if (new_session) {
+	/* set initial start + end point */
 
-		/* set initial start + end point */
+	start_location->set_end (0);
+	_locations.add (start_location);
 
-		start_location->set_end (0);
-		_locations.add (start_location);
+	end_location->set_end (initial_length);
+	_locations.add (end_location);
 
-		end_location->set_end (initial_length);
-		_locations.add (end_location);
-		
-		_state_of_the_state = Clean;
+	_state_of_the_state = Clean;
 
-		if (save_state (_current_snapshot_name)) {
-                        save_history (_current_snapshot_name);
-			return -1;
-		}
+	if (save_state (_current_snapshot_name)) {
+		save_history (_current_snapshot_name);
+		return -1;
 	}
 
 	return 0;
@@ -1486,6 +1478,8 @@ Session::set_state (const XMLNode& node)
 	if ((prop = node.property ("name")) != 0) {
 		_name = prop->value ();
 	}
+
+	setup_raid_path(_path);
 
 	if ((prop = node.property (X_("id-counter"))) != 0) {
 		uint64_t x;
