@@ -167,7 +167,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	g_atomic_int_set (&_capture_load, 100);
 	g_atomic_int_set (&_playback_load_min, 100);
 	g_atomic_int_set (&_capture_load_min, 100);
-	pending_edit_mode = Config->get_edit_mode ();
 	_play_range = false;
 	waiting_to_start = false;
 	_exporting = false;
@@ -717,20 +716,6 @@ Session::load_options (const XMLNode& node)
 
 	Config->set_variables (node, ConfigVariableBase::Session);
 
-	/* we cannot set edit mode if we are loading a session,
-	   because it might destroy the playlist's positioning
-	*/
-
-	if ((child = find_named_node (node, "edit-mode")) != 0) {
-		if ((prop = child->property ("val")) != 0) {
-			if (prop->value() == "slide") {
-				pending_edit_mode = Slide;
-			} else if (prop->value() == "splice") {
-				pending_edit_mode = Splice;
-			} 
-		}
-	}
-
 	if ((child = find_named_node (node, "end-marker-is-free")) != 0) {
 		if ((prop = child->property ("val")) != 0) {
 			_end_location_is_free = (prop->value() == "yes");
@@ -1167,10 +1152,6 @@ Session::set_state (const XMLNode& node)
 		_click_io->set_state (*child);
 	}
 	
-	/* OK, now we can set edit mode */
-
-	Config->set_edit_mode (pending_edit_mode);
-
 	/* here beginneth the second phase ... */
 
 	StateReady (); /* EMIT SIGNAL */
