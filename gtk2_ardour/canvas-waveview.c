@@ -865,6 +865,8 @@ gnome_canvas_waveview_get_property (GObject      *object,
 
 	case PROP_REGION_START:
 		g_value_set_uint (value, waveview->region_start);
+		break;
+
 	default:
 	        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;
