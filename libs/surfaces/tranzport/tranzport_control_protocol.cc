@@ -718,13 +718,13 @@ TranzportControlProtocol::update_state ()
 
 	/* global */
 
-	if (session->get_auto_loop()) {
+	if (Config->get_auto_loop()) {
 		pending_lights[LightLoop] = true;
 	} else {
 		pending_lights[LightLoop] = false;
 	}
 
-	if (session->get_punch_in() || session->get_punch_out()) {
+	if (Config->get_punch_in() || Config->get_punch_out()) {
 		pending_lights[LightPunch] = true;
 	} else {
 		pending_lights[LightPunch] = false;
