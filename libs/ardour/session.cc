@@ -1986,7 +1986,7 @@ Session::route_solo_changed (void* src, shared_ptr<Route> route)
 				   then leave it as it is.
 				*/
 				
-				if (_solo_latched) {
+				if (Config->get_solo_latched()) {
 					continue;
 				} 
 			}

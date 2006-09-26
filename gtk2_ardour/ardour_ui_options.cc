@@ -420,7 +420,7 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		map_some_state ("options", "CrossfadesActive", &Configuration::get_crossfades_active);
 	} else if (PARAM_IS ("latched-record-enable")) {
 		map_some_state ("options", "LatchedRecordEnable", &Configuration::get_latched_record_enable);
-	} else if (PARAM_IS ("solo-latch")) {
+	} else if (PARAM_IS ("solo-latched")) {
 		map_some_state ("options", "LatchedSolo", &Configuration::get_solo_latched);
 	} else if (PARAM_IS ("solo-model")) {
 	} else if (PARAM_IS ("layer-model")) {

@@ -15,7 +15,7 @@ import SCons.Node.FS
 SConsignFile()
 EnsureSConsVersion(0, 96)
 
-version = '2.0beta2'
+version = '2.0beta3'
 
 subst_dict = { }
 
@@ -365,8 +365,8 @@ if env['VST']:
     answer = sys.stdin.readline ()
     answer = answer.rstrip().strip()
     if answer != "yes" and answer != "y":
-        print 'You cannot build Ardour with VST support for distribution to others.\nIt is a violation of several different licenses. VST support disabled.'
-        env['VST'] = 0;
+        print 'You cannot build Ardour with VST support for distribution to others.\nIt is a violation of several different licenses. Build with VST=false.'
+        sys.exit (-1);
     else:
         print "OK, VST support will be enabled"
 
@@ -680,9 +680,15 @@ if os.environ.has_key('DISTCC_HOSTS'):
     env['ENV']['HOME'] = os.environ['HOME']
 
 final_prefix = '$PREFIX'
-install_prefix = '$DESTDIR/$PREFIX'
 
-subst_dict['INSTALL_PREFIX'] = install_prefix;
+if env['DESTDIR'] :
+    install_prefix = '$DESTDIR/$PREFIX'
+else:
+    install_prefix = env['PREFIX']
+
+subst_dict['%INSTALL_PREFIX%'] = install_prefix;
+subst_dict['%FINAL_PREFIX%'] = final_prefix;
+subst_dict['%PREFIX%'] = final_prefix;
 
 if env['PREFIX'] == '/usr':
     final_config_prefix = '/etc'
@@ -690,7 +696,6 @@ else:
     final_config_prefix = env['PREFIX'] + '/etc'
 
 config_prefix = '$DESTDIR' + final_config_prefix
-
 
 # SCons should really do this for us
 

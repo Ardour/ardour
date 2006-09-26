@@ -4,7 +4,9 @@ import os
 import os.path
 import glob
 
-Import('env install_prefix final_prefix config_prefix libraries')
+from stat import *
+
+Import('env install_prefix final_prefix config_prefix subst_dict libraries')
 
 ardour_vst = env.Copy()
 
@@ -49,6 +51,27 @@ ardour_vst.Merge ([
     libraries['jack']
 ])
 
-wine_executable = ardour_vst.Program (target = 'ardour_vst', source = sources)
+#
+# run winegcc to build a mini-win32 executable that wine can run. note: this also
+# generates a script called 'ardour_vst' which we don't use
+#
 
-Default(wine_executable)
+wine_generated_executable = ardour_vst.Program (target = 'ardour_vst', source = sources)
+
+#
+# generate a shell script that will run the .exe file correctly
+# 
+
+wine_executable = ardour_vst.SubstInFile ('ardourvst', 'ardourvst.in', SUBST_DICT = subst_dict)
+
+# make sure the scripts are executable
+
+ardour_vst.AddPostAction (wine_executable, ardour_vst.Action (os.chmod ('ardevst', S_IRUSR|S_IROTH|S_IRGRP|S_IWUSR|S_IXUSR|S_IXOTH|S_IXGRP)))
+ardour_vst.AddPostAction (wine_executable, ardour_vst.Action (os.chmod ('ardourvst', S_IRUSR|S_IROTH|S_IRGRP|S_IWUSR|S_IXUSR|S_IXOTH|S_IXGRP)))
+
+Default([wine_generated_executable, wine_executable])
+
+# the wine script - into the bin dir
+env.Alias('install', env.Install(os.path.join(install_prefix, 'bin'), wine_executable))
+# the win32 executable - into the lib dir since the wine script will look for it there
+env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), 'ardour_vst.exe.so'))

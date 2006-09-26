@@ -402,8 +402,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	bool   shuttle_grabbed;
 	double shuttle_fract;
 
-	static const double SHUTTLE_FRACT_SPEED1=0.48412291827; /* derived from A1,A2 */
-
 	Gtk::ToggleButton punch_in_button;
 	Gtk::ToggleButton punch_out_button;
 	Gtk::ToggleButton auto_return_button;

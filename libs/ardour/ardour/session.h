@@ -1418,8 +1418,6 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 
 	/* mixer stuff */
 
-	bool      _solo_latched;
-	SoloModel _solo_model;
 	bool       solo_update_disabled;
 	bool       currently_soloing;
 	
@@ -1630,8 +1628,6 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 
 	vector<Route*> master_outs;
 	
-	EditMode pending_edit_mode;
-
 	/* range playback */
 
 	list<AudioRange> current_audio_range;
