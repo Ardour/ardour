@@ -39,6 +39,7 @@
 #include <ardour/playlist.h>
 #include <ardour/audiofilter.h>
 #include <ardour/audiofilesource.h>
+#include <ardour/destructive_filesource.h>
 
 #include "i18n.h"
 #include <locale.h>
@@ -412,6 +413,10 @@ AudioRegion::get_memento() const
 bool
 AudioRegion::verify_length (jack_nframes_t len)
 {
+	if (boost::dynamic_pointer_cast<DestructiveFileSource>(source())) {
+		return true;
+	}
+
 	for (uint32_t n=0; n < sources.size(); ++n) {
 		if (_start > sources[n]->length() - len) {
 			return false;
@@ -423,6 +428,10 @@ AudioRegion::verify_length (jack_nframes_t len)
 bool
 AudioRegion::verify_start_and_length (jack_nframes_t new_start, jack_nframes_t new_length)
 {
+	if (boost::dynamic_pointer_cast<DestructiveFileSource>(source())) {
+		return true;
+	}
+
 	for (uint32_t n=0; n < sources.size(); ++n) {
 		if (new_length > sources[n]->length() - new_start) {
 			return false;
@@ -433,6 +442,10 @@ AudioRegion::verify_start_and_length (jack_nframes_t new_start, jack_nframes_t n
 bool
 AudioRegion::verify_start (jack_nframes_t pos)
 {
+	if (boost::dynamic_pointer_cast<DestructiveFileSource>(source())) {
+		return true;
+	}
+
 	for (uint32_t n=0; n < sources.size(); ++n) {
 		if (pos > sources[n]->length() - _length) {
 			return false;
@@ -444,6 +457,10 @@ AudioRegion::verify_start (jack_nframes_t pos)
 bool
 AudioRegion::verify_start_mutable (jack_nframes_t& new_start)
 {
+	if (boost::dynamic_pointer_cast<DestructiveFileSource>(source())) {
+		return true;
+	}
+
 	for (uint32_t n=0; n < sources.size(); ++n) {
 		if (new_start > sources[n]->length() - _length) {
 			new_start = sources[n]->length() - _length;
@@ -1375,7 +1392,12 @@ AudioRegion::speed_mismatch (float sr) const
 void
 AudioRegion::source_offset_changed ()
 {
-	set_position (source()->natural_position() + start(), this);
+	if (boost::dynamic_pointer_cast<DestructiveFileSource> (source())) {
+		set_start (source()->natural_position(), this);
+		set_position (source()->natural_position(), this);
+	} else {
+		set_position (source()->natural_position() + start(), this);
+	}
 }
 
 extern "C" {
