@@ -86,7 +86,7 @@ ARDOUR_UI *ARDOUR_UI::theArdourUI = 0;
 sigc::signal<void,bool> ARDOUR_UI::Blink;
 sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
 sigc::signal<void>      ARDOUR_UI::SuperRapidScreenUpdate;
-sigc::signal<void,jack_nframes_t> ARDOUR_UI::Clock;
+sigc::signal<void,nframes_t> ARDOUR_UI::Clock;
 
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
@@ -488,7 +488,7 @@ ARDOUR_UI::every_point_zero_one_seconds ()
 }
 
 void
-ARDOUR_UI::update_sample_rate (jack_nframes_t ignored)
+ARDOUR_UI::update_sample_rate (nframes_t ignored)
 {
 	char buf[32];
 
@@ -500,7 +500,7 @@ ARDOUR_UI::update_sample_rate (jack_nframes_t ignored)
 
 	} else {
 
-		jack_nframes_t rate = engine->frame_rate();
+		nframes_t rate = engine->frame_rate();
 		
 		if (fmod (rate, 1000.0) != 0.0) {
 			snprintf (buf, sizeof (buf), _("%.1f kHz / %4.1f msecs"), 
@@ -554,7 +554,7 @@ ARDOUR_UI::update_disk_space()
 		return;
 	}
 
-	jack_nframes_t frames = session->available_capture_duration();
+	nframes_t frames = session->available_capture_duration();
 	char buf[64];
 
 	if (frames == max_frames) {
@@ -563,7 +563,7 @@ ARDOUR_UI::update_disk_space()
 		int hrs;
 		int mins;
 		int secs;
-		jack_nframes_t fr = session->frame_rate();
+		nframes_t fr = session->frame_rate();
 		
 		if (session->actively_recording()){
 			
@@ -930,9 +930,9 @@ restart JACK with more ports."));
 }
 
 void
-ARDOUR_UI::do_transport_locate (jack_nframes_t new_position)
+ARDOUR_UI::do_transport_locate (nframes_t new_position)
 {
-	jack_nframes_t _preroll = 0;
+	nframes_t _preroll = 0;
 
 	if (session) {
 		// XXX CONFIG_CHANGE FIX - requires AnyTime handling
@@ -986,7 +986,7 @@ void
 ARDOUR_UI::transport_goto_end ()
 {
 	if (session) {
-		jack_nframes_t frame = session->current_end_frame();
+		nframes_t frame = session->current_end_frame();
 		session->request_locate (frame);
 
 		/* force displayed area in editor to start no matter
@@ -1846,7 +1846,7 @@ ARDOUR_UI::build_session (const string & path, const string & snap_name,
 			  AutoConnectOption output_connect,
 			  uint32_t nphysin,
 			  uint32_t nphysout,
-			  jack_nframes_t initial_length)
+			  nframes_t initial_length)
 {
 	Session *new_session;
 	int x;
@@ -2317,7 +2317,7 @@ ARDOUR_UI::reconnect_to_jack ()
 }
 
 void
-ARDOUR_UI::set_jack_buffer_size (jack_nframes_t nframes)
+ARDOUR_UI::set_jack_buffer_size (nframes_t nframes)
 {
 	engine->request_buffer_size (nframes);
 	update_sample_rate (0);

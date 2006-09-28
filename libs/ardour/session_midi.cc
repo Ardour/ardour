@@ -617,7 +617,7 @@ Session::mmc_locate (MIDI::MachineControl &mmc, const MIDI::byte* mmc_tc)
 		return;
 	}
 
-	jack_nframes_t target_frame;
+	nframes_t target_frame;
 	SMPTE::Time smpte;
 
 	smpte.hours = mmc_tc[0] & 0xf;
@@ -703,8 +703,8 @@ Session::send_midi_time_code_in_another_thread ()
 void
 Session::send_time_code_in_another_thread (bool full)
 {
-	jack_nframes_t two_smpte_frames_duration;
-	jack_nframes_t quarter_frame_duration;
+	nframes_t two_smpte_frames_duration;
+	nframes_t quarter_frame_duration;
 
 	/* Duration of two smpte frames */
 	two_smpte_frames_duration = ((long) _frames_per_smpte_frame) << 1;
@@ -775,7 +775,7 @@ Session::send_full_time_code ()
 		if (((mtc_smpte_bits >> 5) != MIDI::MTC_25_FPS) && (transmitting_smpte_time.frames % 2)) {
 			// start MTC quarter frame transmission on an even frame
 			SMPTE::increment( transmitting_smpte_time );
-			outbound_mtc_smpte_frame += (jack_nframes_t) _frames_per_smpte_frame;
+			outbound_mtc_smpte_frame += (nframes_t) _frames_per_smpte_frame;
 		}
 	}
 
@@ -817,8 +817,8 @@ Session::send_midi_time_code ()
 		return 0;
 	}
 
-	jack_nframes_t two_smpte_frames_duration;
-	jack_nframes_t quarter_frame_duration;
+	nframes_t two_smpte_frames_duration;
+	nframes_t quarter_frame_duration;
 
 	/* Duration of two smpte frames */
 	two_smpte_frames_duration = ((long) _frames_per_smpte_frame) << 1;
@@ -892,7 +892,7 @@ Session::send_midi_time_code ()
 **********************************************************************/
 
 void
-Session::send_mmc_in_another_thread (MIDI::MachineControl::Command cmd, jack_nframes_t target_frame)
+Session::send_mmc_in_another_thread (MIDI::MachineControl::Command cmd, nframes_t target_frame)
 {
 	MIDIRequest* request;
 
@@ -910,7 +910,7 @@ Session::send_mmc_in_another_thread (MIDI::MachineControl::Command cmd, jack_nfr
 }
 
 void
-Session::deliver_mmc (MIDI::MachineControl::Command cmd, jack_nframes_t where)
+Session::deliver_mmc (MIDI::MachineControl::Command cmd, nframes_t where)
 {
 	using namespace MIDI;
 	int nbytes = 4;

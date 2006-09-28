@@ -308,7 +308,7 @@ OptionEditor::short_xfade_adjustment_changed ()
 		
 		/* val is in msecs */
 		
-		Crossfade::set_short_xfade_length ((jack_nframes_t) floor (session->frame_rate() * (val / 1000.0)));
+		Crossfade::set_short_xfade_length ((nframes_t) floor (session->frame_rate() * (val / 1000.0)));
 	}
 }
 
@@ -366,7 +366,7 @@ void
 OptionEditor::smpte_offset_chosen()
 {
 	if (session) {
-		jack_nframes_t frames = smpte_offset_clock.current_duration();
+		nframes_t frames = smpte_offset_clock.current_duration();
 		session->set_smpte_offset (frames);
 	}
 }

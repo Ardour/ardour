@@ -253,7 +253,7 @@ PluginInsert::parameter_changed (uint32_t which, float val)
 }
 
 void
-PluginInsert::set_block_size (jack_nframes_t nframes)
+PluginInsert::set_block_size (nframes_t nframes)
 {
 	for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->set_block_size (nframes);
@@ -277,7 +277,7 @@ PluginInsert::deactivate ()
 }
 
 void
-PluginInsert::connect_and_run (vector<Sample*>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset, bool with_auto, jack_nframes_t now)
+PluginInsert::connect_and_run (vector<Sample*>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset, bool with_auto, nframes_t now)
 {
 	int32_t in_index = 0;
 	int32_t out_index = 0;
@@ -317,7 +317,7 @@ PluginInsert::connect_and_run (vector<Sample*>& bufs, uint32_t nbufs, jack_nfram
 }
 
 void
-PluginInsert::automation_snapshot (jack_nframes_t now)
+PluginInsert::automation_snapshot (nframes_t now)
 {
 	map<uint32_t,AutomationList*>::iterator li;
 	
@@ -334,7 +334,7 @@ PluginInsert::automation_snapshot (jack_nframes_t now)
 }
 
 void
-PluginInsert::transport_stopped (jack_nframes_t now)
+PluginInsert::transport_stopped (nframes_t now)
 {
 	map<uint32_t,AutomationList*>::iterator li;
 
@@ -349,7 +349,7 @@ PluginInsert::transport_stopped (jack_nframes_t now)
 }
 
 void
-PluginInsert::silence (jack_nframes_t nframes, jack_nframes_t offset)
+PluginInsert::silence (nframes_t nframes, nframes_t offset)
 {
 	int32_t in_index = 0;
 	int32_t out_index = 0;
@@ -365,7 +365,7 @@ PluginInsert::silence (jack_nframes_t nframes, jack_nframes_t offset)
 }
 	
 void
-PluginInsert::run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset)
+PluginInsert::run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset)
 {
 	if (active()) {
 
@@ -404,11 +404,11 @@ PluginInsert::set_parameter (uint32_t port, float val)
 }
 
 void
-PluginInsert::automation_run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset)
+PluginInsert::automation_run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset)
 {
 	ControlEvent next_event (0, 0.0f);
-	jack_nframes_t now = _session.transport_frame ();
-	jack_nframes_t end = now + nframes;
+	nframes_t now = _session.transport_frame ();
+	nframes_t end = now + nframes;
 
 	Glib::Mutex::Lock lm (_automation_lock, Glib::TRY_LOCK);
 
@@ -427,7 +427,7 @@ PluginInsert::automation_run (vector<Sample *>& bufs, uint32_t nbufs, jack_nfram
 	
  	while (nframes) {
 
- 		jack_nframes_t cnt = min (((jack_nframes_t) floor (next_event.when) - now), nframes);
+ 		nframes_t cnt = min (((nframes_t) floor (next_event.when) - now), nframes);
   
  		connect_and_run (bufs, nbufs, cnt, offset, true, now);
  		
@@ -787,7 +787,7 @@ PluginInsert::describe_parameter (uint32_t what)
 	return _plugins[0]->describe_parameter (what);
 }
 
-jack_nframes_t 
+nframes_t 
 PluginInsert::latency() 
 {
 	return _plugins[0]->latency ();
@@ -901,7 +901,7 @@ PortInsert::~PortInsert ()
 }
 
 void
-PortInsert::run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset)
+PortInsert::run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset)
 {
 	if (n_outputs() == 0) {
 		return;
@@ -981,7 +981,7 @@ PortInsert::set_state(const XMLNode& node)
 	return 0;
 }
 
-jack_nframes_t 
+nframes_t 
 PortInsert::latency() 
 {
 	/* because we deliver and collect within the same cycle,

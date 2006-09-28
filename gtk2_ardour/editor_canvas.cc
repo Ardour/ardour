@@ -52,7 +52,7 @@ using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace Editing;
 
-/* XXX this is a hack. it ought to be the maximum value of an jack_nframes_t */
+/* XXX this is a hack. it ought to be the maximum value of an nframes_t */
 
 const double max_canvas_coordinate = (double) JACK_MAX_FRAMES;
 
@@ -279,7 +279,7 @@ Editor::track_canvas_allocate (Gtk::Allocation alloc)
 	canvas_width = alloc.get_width();
 	canvas_height = alloc.get_height();
 
-	zoom_range_clock.set ((jack_nframes_t) floor ((canvas_width * frames_per_unit)));
+	zoom_range_clock.set ((nframes_t) floor ((canvas_width * frames_per_unit)));
 	edit_cursor->set_position (edit_cursor->current_frame);
 	playhead_cursor->set_position (playhead_cursor->current_frame);
 
@@ -438,7 +438,7 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 	vector<ustring> paths;
 	string spath;
 	GdkEvent ev;
-	jack_nframes_t frame;
+	nframes_t frame;
 
 	if (convert_drop_to_paths (paths, context, x, y, data, info, time)) {
 		goto out;
@@ -466,7 +466,7 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 
 		/* drop onto canvas background: create new tracks */
 
-		jack_nframes_t pos = 0;
+		nframes_t pos = 0;
 		do_embed (paths, false, ImportAsTrack, 0, pos, false);
 		
 	} else if ((tv = dynamic_cast<AudioTimeAxisView*>(tvp)) != 0) {
@@ -507,8 +507,8 @@ Editor::drop_regions (const RefPtr<Gdk::DragContext>& context,
 void
 Editor::maybe_autoscroll (GdkEvent* event)
 {
-	jack_nframes_t rightmost_frame = leftmost_frame + current_page_frames();
-	jack_nframes_t frame = drag_info.current_pointer_frame;
+	nframes_t rightmost_frame = leftmost_frame + current_page_frames();
+	nframes_t frame = drag_info.current_pointer_frame;
 	bool startit = false;
 
 	static int last_autoscroll_direction = 0;
@@ -557,10 +557,10 @@ Editor::_autoscroll_canvas (void *arg)
 bool
 Editor::autoscroll_canvas ()
 {
-	jack_nframes_t new_frame;
-	jack_nframes_t limit = max_frames - current_page_frames();
+	nframes_t new_frame;
+	nframes_t limit = max_frames - current_page_frames();
 	GdkEventMotion ev;
-	jack_nframes_t target_frame;
+	nframes_t target_frame;
 
 	if (autoscroll_direction < 0) {
 		if (leftmost_frame < autoscroll_distance) {
@@ -610,17 +610,17 @@ Editor::autoscroll_canvas ()
 		
 		/* after about a while, speed up a bit by changing the timeout interval */
 
-		autoscroll_distance = (jack_nframes_t) floor (current_page_frames()/30.0f);
+		autoscroll_distance = (nframes_t) floor (current_page_frames()/30.0f);
 		
 	} else if (autoscroll_cnt == 150) { /* 1.0 seconds */
 
-		autoscroll_distance = (jack_nframes_t) floor (current_page_frames()/20.0f);
+		autoscroll_distance = (nframes_t) floor (current_page_frames()/20.0f);
 
 	} else if (autoscroll_cnt == 300) { /* 1.5 seconds */
 
 		/* after about another while, speed up by increasing the shift per callback */
 
-		autoscroll_distance =  (jack_nframes_t) floor (current_page_frames()/10.0f);
+		autoscroll_distance =  (nframes_t) floor (current_page_frames()/10.0f);
 
 	} 
 
@@ -637,7 +637,7 @@ Editor::start_canvas_autoscroll (int dir)
 	stop_canvas_autoscroll ();
 
 	autoscroll_direction = dir;
-	autoscroll_distance = (jack_nframes_t) floor (current_page_frames()/50.0);
+	autoscroll_distance = (nframes_t) floor (current_page_frames()/50.0);
 	autoscroll_cnt = 0;
 	
 	/* do it right now, which will start the repeated callbacks */

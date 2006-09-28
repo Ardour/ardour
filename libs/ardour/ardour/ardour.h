@@ -43,7 +43,7 @@ namespace ARDOUR {
 
 	extern OSC* osc;
 
-	static const jack_nframes_t max_frames = JACK_MAX_FRAMES;
+	static const nframes_t max_frames = JACK_MAX_FRAMES;
 
 	int init (bool with_vst, bool try_optimization);
 	int cleanup ();

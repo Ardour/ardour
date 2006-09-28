@@ -467,7 +467,7 @@ AudioRegionEditor::end_clock_changed ()
 void
 AudioRegionEditor::length_clock_changed ()
 {
-	jack_nframes_t frames = length_clock.current_time();
+	nframes_t frames = length_clock.current_time();
 	_region->trim_end (_region->position() + frames, this);
 
 	length_clock.set (_region->length());
@@ -632,12 +632,12 @@ void
 AudioRegionEditor::fade_in_changed ()
 {
 	float msecs = fade_in_length_adjustment.get_value();
-	jack_nframes_t sr = _session.frame_rate();
-	jack_nframes_t adj_frames = (jack_nframes_t) floor (msecs * (sr/1000.0f));
-	jack_nframes_t frames;
+	nframes_t sr = _session.frame_rate();
+	nframes_t adj_frames = (nframes_t) floor (msecs * (sr/1000.0f));
+	nframes_t frames;
 	bool x;
 
-	if (adj_frames != (frames = (jack_nframes_t) _region->fade_in().back()->when)) {
+	if (adj_frames != (frames = (nframes_t) _region->fade_in().back()->when)) {
 		fade_in_length_adjustment.set_value ((frames * 1000.0f) / sr);
 	}
 
@@ -650,11 +650,11 @@ void
 AudioRegionEditor::fade_out_changed ()
 {
 	float msecs = fade_out_length_adjustment.get_value();
-	jack_nframes_t sr = _session.frame_rate();
-	jack_nframes_t adj_frames = (jack_nframes_t) floor (msecs * (sr/1000.0f));
-	jack_nframes_t frames;
+	nframes_t sr = _session.frame_rate();
+	nframes_t adj_frames = (nframes_t) floor (msecs * (sr/1000.0f));
+	nframes_t frames;
 	bool x;
-	if (adj_frames != (frames = (jack_nframes_t) _region->fade_out().back()->when)) {
+	if (adj_frames != (frames = (nframes_t) _region->fade_out().back()->when)) {
 		fade_out_length_adjustment.set_value ((frames * 1000.0f) / sr);
 	}
 
@@ -666,8 +666,8 @@ AudioRegionEditor::fade_out_changed ()
 void
 AudioRegionEditor::fade_in_length_adjustment_changed ()
 {
-	jack_nframes_t fade_length = (jack_nframes_t) floor (fade_in_length_adjustment.get_value() * _session.frame_rate() * 0.001); 
-	fade_length = max (fade_length, (jack_nframes_t) 64);
+	nframes_t fade_length = (nframes_t) floor (fade_in_length_adjustment.get_value() * _session.frame_rate() * 0.001); 
+	fade_length = max (fade_length, (nframes_t) 64);
 	fade_length = min (fade_length, _region->length());
 	
 	_region->set_fade_in_length (fade_length);
@@ -678,8 +678,8 @@ AudioRegionEditor::fade_in_length_adjustment_changed ()
 void
 AudioRegionEditor::fade_out_length_adjustment_changed ()
 {
-	jack_nframes_t fade_length = (jack_nframes_t) floor (fade_out_length_adjustment.get_value() * _session.frame_rate() * 0.001); 
-	fade_length = max (fade_length, (jack_nframes_t) 64);
+	nframes_t fade_length = (nframes_t) floor (fade_out_length_adjustment.get_value() * _session.frame_rate() * 0.001); 
+	fade_length = max (fade_length, (nframes_t) 64);
 	fade_length = min (fade_length, _region->length());
 	
 	_region->set_fade_out_length (fade_length);	

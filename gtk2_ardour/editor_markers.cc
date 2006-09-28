@@ -271,8 +271,8 @@ Editor::LocationMarkers::set_name (const string& str)
 }
 
 void
-Editor::LocationMarkers::set_position (jack_nframes_t startf, 
-				       jack_nframes_t endf) 
+Editor::LocationMarkers::set_position (nframes_t startf, 
+				       nframes_t endf) 
 {
 	start->set_position (startf);
 	if (end) { end->set_position (endf); }
@@ -286,7 +286,7 @@ Editor::LocationMarkers::set_color_rgba (uint32_t rgba)
 }
 
 void
-Editor::mouse_add_new_marker (jack_nframes_t where)
+Editor::mouse_add_new_marker (nframes_t where)
 {
 	if (session) {
 		Location *location = new Location (where, where, "mark", Location::IsMark);

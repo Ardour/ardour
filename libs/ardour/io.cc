@@ -61,7 +61,7 @@ using namespace PBD;
 
 static float current_automation_version_number = 1.0;
 
-jack_nframes_t IO::_automation_interval = 0;
+nframes_t IO::_automation_interval = 0;
 const string IO::state_node_name = "IO";
 bool         IO::connecting_legal = false;
 bool         IO::ports_legal = false;
@@ -160,7 +160,7 @@ IO::~IO ()
 }
 
 void
-IO::silence (jack_nframes_t nframes, jack_nframes_t offset)
+IO::silence (nframes_t nframes, nframes_t offset)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
@@ -170,9 +170,9 @@ IO::silence (jack_nframes_t nframes, jack_nframes_t offset)
 }
 
 void
-IO::apply_declick (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, gain_t initial, gain_t target, bool invert_polarity)
+IO::apply_declick (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, gain_t initial, gain_t target, bool invert_polarity)
 {
-	jack_nframes_t declick = min ((jack_nframes_t)128, nframes);
+	nframes_t declick = min ((nframes_t)128, nframes);
 	gain_t delta;
 	Sample *buffer;
 	double fractional_shift;
@@ -196,7 +196,7 @@ IO::apply_declick (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframe
 		buffer = bufs[n];
 		fractional_pos = 1.0;
 
-		for (jack_nframes_t nx = 0; nx < declick; ++nx) {
+		for (nframes_t nx = 0; nx < declick; ++nx) {
 			buffer[nx] *= polscale * (initial + (delta * (0.5 + 0.5 * cos (M_PI * fractional_pos))));
 			fractional_pos += fractional_shift;
 		}
@@ -217,7 +217,7 @@ IO::apply_declick (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframe
 			if (this_target == 0.0) {
 				memset (&buffer[declick], 0, sizeof (Sample) * (nframes - declick));
 			} else if (this_target != 1.0) {
-				for (jack_nframes_t nx = declick; nx < nframes; ++nx) {
+				for (nframes_t nx = declick; nx < nframes; ++nx) {
 					buffer[nx] *= this_target;
 				}
 			}
@@ -226,7 +226,7 @@ IO::apply_declick (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframe
 }
 
 void
-IO::pan_automated (vector<Sample*>& bufs, uint32_t nbufs, jack_nframes_t start, jack_nframes_t end, jack_nframes_t nframes, jack_nframes_t offset)
+IO::pan_automated (vector<Sample*>& bufs, uint32_t nbufs, nframes_t start, nframes_t end, nframes_t nframes, nframes_t offset)
 {
 	Sample* dst;
 
@@ -273,7 +273,7 @@ IO::pan_automated (vector<Sample*>& bufs, uint32_t nbufs, jack_nframes_t start, 
 }
 
 void
-IO::pan (vector<Sample*>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset, gain_t gain_coeff)
+IO::pan (vector<Sample*>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset, gain_t gain_coeff)
 {
 	Sample* dst;
 	Sample* src;
@@ -314,7 +314,7 @@ IO::pan (vector<Sample*>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nfr
 			for (n = 1; n < nbufs; ++n) {
 				src = bufs[n];
 				
-				for (jack_nframes_t n = 0; n < nframes; ++n) {
+				for (nframes_t n = 0; n < nframes; ++n) {
 					dst[n] += src[n];
 				}
 			}
@@ -329,14 +329,14 @@ IO::pan (vector<Sample*>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nfr
 
 			src = bufs[0];
 			
-			for (jack_nframes_t n = 0; n < nframes; ++n) {
+			for (nframes_t n = 0; n < nframes; ++n) {
 				dst[n] = src[n] * gain_coeff;
 			}	
 
 			for (n = 1; n < nbufs; ++n) {
 				src = bufs[n];
 				
-				for (jack_nframes_t n = 0; n < nframes; ++n) {
+				for (nframes_t n = 0; n < nframes; ++n) {
 					dst[n] += src[n] * gain_coeff;
 				}	
 			}
@@ -380,7 +380,7 @@ IO::pan (vector<Sample*>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nfr
 }
 
 void
-IO::deliver_output (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset)
+IO::deliver_output (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
@@ -423,7 +423,7 @@ IO::deliver_output (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nfram
 }
 
 void
-IO::deliver_output_no_pan (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset)
+IO::deliver_output_no_pan (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
@@ -488,7 +488,7 @@ IO::deliver_output_no_pan (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_
 		} else if (actual_gain == 0.0f) {
 			memset (dst, 0, sizeof (Sample) * nframes);
 		} else {
-			for (jack_nframes_t x = 0; x < nframes; ++x) {
+			for (nframes_t x = 0; x < nframes; ++x) {
 				dst[x] = src[x] * actual_gain;
 			}
 		}
@@ -507,7 +507,7 @@ IO::deliver_output_no_pan (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_
 }
 
 void
-IO::collect_input (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset)
+IO::collect_input (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
@@ -547,8 +547,8 @@ IO::collect_input (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframe
 }
 
 void
-IO::just_meter_input (jack_nframes_t start_frame, jack_nframes_t end_frame, 
-		      jack_nframes_t nframes, jack_nframes_t offset)
+IO::just_meter_input (nframes_t start_frame, nframes_t end_frame, 
+		      nframes_t nframes, nframes_t offset)
 {
 	vector<Sample*>& bufs = _session.get_passthru_buffers ();
 	uint32_t nbufs = n_process_buffers ();
@@ -2005,7 +2005,7 @@ IO::set_output_maximum (int n)
 }
 
 void
-IO::set_port_latency (jack_nframes_t nframes)
+IO::set_port_latency (nframes_t nframes)
 {
 	Glib::Mutex::Lock lm (io_lock);
 
@@ -2014,11 +2014,11 @@ IO::set_port_latency (jack_nframes_t nframes)
 	}
 }
 
-jack_nframes_t
+nframes_t
 IO::output_latency () const
 {
-	jack_nframes_t max_latency;
-	jack_nframes_t latency;
+	nframes_t max_latency;
+	nframes_t latency;
 
 	max_latency = 0;
 
@@ -2033,11 +2033,11 @@ IO::output_latency () const
 	return max_latency;
 }
 
-jack_nframes_t
+nframes_t
 IO::input_latency () const
 {
-	jack_nframes_t max_latency;
-	jack_nframes_t latency;
+	nframes_t max_latency;
+	nframes_t latency;
 
 	max_latency = 0;
 
@@ -2397,7 +2397,7 @@ IO::save_automation (const string& path)
 	/* XXX use apply_to_points to get thread safety */
 	
 	for (AutomationList::iterator i = _gain_automation_curve.begin(); i != _gain_automation_curve.end(); ++i) {
-		out << "g " << (jack_nframes_t) floor ((*i)->when) << ' ' << (*i)->value << endl;
+		out << "g " << (nframes_t) floor ((*i)->when) << ' ' << (*i)->value << endl;
 	}
 
 	_panner->save ();
@@ -2436,7 +2436,7 @@ IO::load_automation (const string& path)
 
 	while (in.getline (line, sizeof(line), '\n')) {
 		char type;
-		jack_nframes_t when;
+		nframes_t when;
 		double value;
 
 		if (++linecnt == 1) {
@@ -2605,7 +2605,7 @@ IO::end_pan_touch (uint32_t which)
 }
 
 void
-IO::automation_snapshot (jack_nframes_t now)
+IO::automation_snapshot (nframes_t now)
 {
 	if (last_automation_snapshot > now || (now - last_automation_snapshot) > _automation_interval) {
 
@@ -2620,7 +2620,7 @@ IO::automation_snapshot (jack_nframes_t now)
 }
 
 void
-IO::transport_stopped (jack_nframes_t frame)
+IO::transport_stopped (nframes_t frame)
 {
 	_gain_automation_curve.reposition_for_rt_add (frame);
 

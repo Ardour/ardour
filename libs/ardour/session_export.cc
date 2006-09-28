@@ -153,7 +153,7 @@ AudioExportSpecification::clear ()
 }
 
 int
-AudioExportSpecification::prepare (jack_nframes_t blocksize, jack_nframes_t frate)
+AudioExportSpecification::prepare (nframes_t blocksize, nframes_t frate)
 {
 	char errbuf[256];
 	GDitherSize dither_size;
@@ -216,7 +216,7 @@ AudioExportSpecification::prepare (jack_nframes_t blocksize, jack_nframes_t frat
 		}
 		
 		src_data.src_ratio = sample_rate / (double) frame_rate;
-		out_samples_max = (jack_nframes_t) ceil (blocksize * src_data.src_ratio * channels);
+		out_samples_max = (nframes_t) ceil (blocksize * src_data.src_ratio * channels);
 		dataF2 = new float[out_samples_max];
 
  		max_leftover_frames = 4 * blocksize;
@@ -258,7 +258,7 @@ AudioExportSpecification::prepare (jack_nframes_t blocksize, jack_nframes_t frat
 }
 
 int
-AudioExportSpecification::process (jack_nframes_t nframes)
+AudioExportSpecification::process (nframes_t nframes)
 {
 	float* float_buffer = 0;
 	uint32_t chn;
@@ -266,7 +266,7 @@ AudioExportSpecification::process (jack_nframes_t nframes)
 	uint32_t i;
 	sf_count_t written;
 	char errbuf[256];
-	jack_nframes_t to_write = 0;
+	nframes_t to_write = 0;
 	int cnt = 0;
 
 	do {
@@ -413,7 +413,7 @@ AudioExportSpecification::process (jack_nframes_t nframes)
 			break;
 		}
 	
-		if ((jack_nframes_t) written != to_write) {
+		if ((nframes_t) written != to_write) {
 			sf_error_str (out, errbuf, sizeof (errbuf) - 1);
 			error << string_compose(_("Export: could not write data to output file (%1)"), errbuf) << endmsg;
 			return -1;
@@ -538,12 +538,12 @@ Session::prepare_to_export (AudioExportSpecification& spec)
 }
 
 int
-Session::process_export (jack_nframes_t nframes, AudioExportSpecification* spec)
+Session::process_export (nframes_t nframes, AudioExportSpecification* spec)
 {
 	uint32_t chn;
 	uint32_t x;
 	int ret = -1;
-	jack_nframes_t this_nframes;
+	nframes_t this_nframes;
 
 	/* This is not required to be RT-safe because we are running while freewheeling */
 

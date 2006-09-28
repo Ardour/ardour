@@ -6,9 +6,9 @@
 #include <ardour/utils.h>
 
 static inline float
-compute_peak (ARDOUR::Sample *buf, jack_nframes_t nsamples, float current) 
+compute_peak (ARDOUR::Sample *buf, nframes_t nsamples, float current) 
 {
-	for (jack_nframes_t i = 0; i < nsamples; ++i) {
+	for (nframes_t i = 0; i < nsamples; ++i) {
 		current = f_max (current, fabsf (buf[i]));
 	}
 	return current;

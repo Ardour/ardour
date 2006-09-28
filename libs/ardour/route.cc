@@ -215,8 +215,8 @@ Route::set_gain (gain_t val, void *src)
 
 void
 Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
-			       jack_nframes_t start_frame, jack_nframes_t end_frame, 
-			       jack_nframes_t nframes, jack_nframes_t offset, bool with_redirects, int declick,
+			       nframes_t start_frame, nframes_t end_frame, 
+			       nframes_t nframes, nframes_t offset, bool with_redirects, int declick,
 			       bool meter)
 {
 	uint32_t n;
@@ -429,7 +429,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 				for (n = 0; n < nbufs; ++n)  {
 					Sample *sp = bufs[n];
 					
-					for (jack_nframes_t nx = 0; nx < nframes; ++nx) {
+					for (nframes_t nx = 0; nx < nframes; ++nx) {
 						sp[nx] *= -gab[nx];
 					}
 				}
@@ -437,7 +437,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 				for (n = 0; n < nbufs; ++n) {
 					Sample *sp = bufs[n];
 					
-					for (jack_nframes_t nx = 0; nx < nframes; ++nx) {
+					for (nframes_t nx = 0; nx < nframes; ++nx) {
 						sp[nx] *= gab[nx];
 					}
 				}
@@ -663,7 +663,7 @@ Route::n_process_buffers ()
 
 void
 
-Route::passthru (jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset, int declick, bool meter_first)
+Route::passthru (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset, int declick, bool meter_first)
 {
 	vector<Sample*>& bufs = _session.get_passthru_buffers();
 	uint32_t limit = n_process_buffers ();
@@ -1014,7 +1014,7 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 	uint32_t i_cnt;
 	uint32_t s_cnt;
 	map<Placement,list<InsertCount> > insert_map;
-	jack_nframes_t initial_streams;
+	nframes_t initial_streams;
 
 	redirect_max_outs = 0;
 	i_cnt = 0;
@@ -1698,7 +1698,7 @@ Route::curve_reallocate ()
 }
 
 void
-Route::silence (jack_nframes_t nframes, jack_nframes_t offset)
+Route::silence (nframes_t nframes, nframes_t offset)
 {
 	if (!_silent) {
 
@@ -1935,7 +1935,7 @@ Route::set_active (bool yn)
 void
 Route::handle_transport_stopped (bool abort_ignored, bool did_locate, bool can_flush_redirects)
 {
-	jack_nframes_t now = _session.transport_frame();
+	nframes_t now = _session.transport_frame();
 
 	{
 		Glib::RWLock::ReaderLock lm (redirect_lock);
@@ -2004,7 +2004,7 @@ Route::pans_required () const
 }
 
 int 
-Route::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, 
+Route::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
 		   bool session_state_changing, bool can_record, bool rec_monitors_input)
 {
 	if (n_outputs() == 0) {
@@ -2027,8 +2027,8 @@ Route::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes
 	return 0;
 }
 
-jack_nframes_t
-Route::check_initial_delay (jack_nframes_t nframes, jack_nframes_t& offset, jack_nframes_t& transport_frame)
+nframes_t
+Route::check_initial_delay (nframes_t nframes, nframes_t& offset, nframes_t& transport_frame)
 {
 	if (_roll_delay > nframes) {
 
@@ -2053,7 +2053,7 @@ Route::check_initial_delay (jack_nframes_t nframes, jack_nframes_t& offset, jack
 }
 
 int
-Route::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, int declick,
+Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, int declick,
 	     bool can_record, bool rec_monitors_input)
 {
 	{
@@ -2070,7 +2070,7 @@ Route::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t 
 		return 0;
 	}
 	
-	jack_nframes_t unused = 0;
+	nframes_t unused = 0;
 
 	if ((nframes = check_initial_delay (nframes, offset, unused)) == 0) {
 		return 0;
@@ -2085,7 +2085,7 @@ Route::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t 
 		
 		if (am.locked() && _session.transport_rolling()) {
 			
-			jack_nframes_t start_frame = end_frame - nframes;
+			nframes_t start_frame = end_frame - nframes;
 			
 			if (gain_automation_playback()) {
 				apply_gain_automation = _gain_automation_curve.rt_safe_get_vector (start_frame, end_frame, _session.gain_automation_buffer(), nframes);
@@ -2099,7 +2099,7 @@ Route::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t 
 }
 
 int
-Route::silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, 
+Route::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
 		    bool can_record, bool rec_monitors_input)
 {
 	silence (nframes, offset);
@@ -2166,7 +2166,7 @@ Route::set_meter_point (MeterPoint p, void *src)
 	}
 }
 
-jack_nframes_t
+nframes_t
 Route::update_total_latency ()
 {
 	_own_latency = 0;
@@ -2192,7 +2192,7 @@ Route::update_total_latency ()
 }
 
 void
-Route::set_latency_delay (jack_nframes_t longest_session_latency)
+Route::set_latency_delay (nframes_t longest_session_latency)
 {
 	_initial_delay = longest_session_latency - _own_latency;
 
@@ -2202,7 +2202,7 @@ Route::set_latency_delay (jack_nframes_t longest_session_latency)
 }
 
 void
-Route::automation_snapshot (jack_nframes_t now)
+Route::automation_snapshot (nframes_t now)
 {
 	IO::automation_snapshot (now);
 
@@ -2254,7 +2254,7 @@ Route::ToggleControllable::get_value (void) const
 }
 
 void 
-Route::set_block_size (jack_nframes_t nframes)
+Route::set_block_size (nframes_t nframes)
 {
 	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
 		(*i)->set_block_size (nframes);

@@ -56,11 +56,11 @@ class AudioPlaylist : public ARDOUR::Playlist
 	AudioPlaylist (Session&, const XMLNode&, bool hidden = false);
 	AudioPlaylist (Session&, string name, bool hidden = false);
 	AudioPlaylist (const AudioPlaylist&, string name, bool hidden = false);
-	AudioPlaylist (const AudioPlaylist&, jack_nframes_t start, jack_nframes_t cnt, string name, bool hidden = false);
+	AudioPlaylist (const AudioPlaylist&, nframes_t start, nframes_t cnt, string name, bool hidden = false);
 
 	void clear (bool with_save = true);
 
-        jack_nframes_t read (Sample *dst, Sample *mixdown, float *gain_buffer, jack_nframes_t start, jack_nframes_t cnt, uint32_t chan_n=0);
+        nframes_t read (Sample *dst, Sample *mixdown, float *gain_buffer, nframes_t start, nframes_t cnt, uint32_t chan_n=0);
 
 	int set_state (const XMLNode&);
 	UndoAction get_memento() const;
@@ -68,7 +68,7 @@ class AudioPlaylist : public ARDOUR::Playlist
 	sigc::signal<void,Crossfade *> NewCrossfade; 
 
 	template<class T> void foreach_crossfade (T *t, void (T::*func)(Crossfade *));
-	void crossfades_at (jack_nframes_t frame, Crossfades&);
+	void crossfades_at (nframes_t frame, Crossfades&);
 
 	template<class T> void apply_to_history (T& obj, void (T::*method)(const ARDOUR::StateManager::StateMap&, state_id_t)) {
 		RegionLock rlock (this);

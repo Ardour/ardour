@@ -65,12 +65,12 @@ class AudioFileSource : public AudioSource {
 	   for files used in destructive recording.
 	*/
 
-	virtual jack_nframes_t last_capture_start_frame() const { return 0; }
-	virtual void           mark_capture_start (jack_nframes_t) {}
+	virtual nframes_t last_capture_start_frame() const { return 0; }
+	virtual void           mark_capture_start (nframes_t) {}
 	virtual void           mark_capture_end () {}
 	virtual void           clear_capture_marks() {}
 
-	virtual int update_header (jack_nframes_t when, struct tm&, time_t) = 0;
+	virtual int update_header (nframes_t when, struct tm&, time_t) = 0;
 	virtual int flush_header () = 0;
 
 	int move_to_trash (const string trash_dir_name);
@@ -86,7 +86,7 @@ class AudioFileSource : public AudioSource {
 	static void set_bwf_serial_number (int);
 	
 	static void set_search_path (string);
-	static void set_header_position_offset (jack_nframes_t offset );
+	static void set_header_position_offset (nframes_t offset );
 
 	static sigc::signal<void> HeaderPositionOffsetChanged;
 
@@ -132,7 +132,7 @@ class AudioFileSource : public AudioSource {
 
 	static uint64_t header_position_offset;
 
-	virtual void set_timeline_position (jack_nframes_t pos);
+	virtual void set_timeline_position (nframes_t pos);
 	virtual void set_header_timeline_position () = 0;
 
 	bool find (std::string path, bool must_exist, bool& is_new);

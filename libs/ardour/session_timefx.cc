@@ -48,8 +48,8 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 	string region_name;
 	string ident = X_("-TIMEFX-");
 	float percentage;
-	jack_nframes_t total_frames;
-	jack_nframes_t done;
+	nframes_t total_frames;
+	nframes_t done;
 
 	/* the soundtouch code wants a *tempo* change percentage, which is 
 	   of opposite sign to the length change.  
@@ -91,17 +91,17 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 	}
 	
 	try {
-		const jack_nframes_t bufsize = 16384;
+		const nframes_t bufsize = 16384;
 
 		for (uint32_t i = 0; i < sources.size(); ++i) {
 			gain_t gain_buffer[bufsize];
 			Sample buffer[bufsize];
-			jack_nframes_t pos = 0;
-			jack_nframes_t this_read = 0;
+			nframes_t pos = 0;
+			nframes_t this_read = 0;
 
 			st.clear();
 			while (tsr.running && pos < tsr.region->length()) {
-				jack_nframes_t this_time;
+				nframes_t this_time;
 			
 				this_time = min (bufsize, tsr.region->length() - pos);
 

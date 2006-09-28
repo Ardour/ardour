@@ -299,7 +299,7 @@ RegionView::lower_to_bottom ()
 }
 
 bool
-RegionView::set_position (jack_nframes_t pos, void* src, double* ignored)
+RegionView::set_position (nframes_t pos, void* src, double* ignored)
 {
 	double delta;
 	bool ret;
@@ -335,7 +335,7 @@ RegionView::set_samples_per_unit (gdouble spu)
 }
 
 bool
-RegionView::set_duration (jack_nframes_t frames, void *src)
+RegionView::set_duration (nframes_t frames, void *src)
 {
 	if (!TimeAxisViewItem::set_duration (frames, src)) {
 		return false;
@@ -417,7 +417,7 @@ RegionView::region_sync_changed ()
 	}
 
 	int sync_dir;
-	jack_nframes_t sync_offset;
+	nframes_t sync_offset;
 
 	sync_offset = _region->sync_offset (sync_dir);
 

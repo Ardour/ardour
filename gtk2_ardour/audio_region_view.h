@@ -89,8 +89,8 @@ class AudioRegionView : public RegionView
 	
 	GhostRegion* add_ghost (AutomationTimeAxisView&);
 	
-	void reset_fade_in_shape_width (jack_nframes_t);
-	void reset_fade_out_shape_width (jack_nframes_t);
+	void reset_fade_in_shape_width (nframes_t);
+	void reset_fade_out_shape_width (nframes_t);
 	void set_fade_in_active (bool);
 	void set_fade_out_active (bool);
 	

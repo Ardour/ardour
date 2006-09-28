@@ -42,21 +42,21 @@ Gain::operator= (const Gain& other)
 }
 
 void
-Gain::fill_linear_volume_fade_in (Gain& gain, jack_nframes_t frames)
+Gain::fill_linear_volume_fade_in (Gain& gain, nframes_t frames)
 {
 }
 
 void
-Gain::fill_linear_volume_fade_out (Gain& gain, jack_nframes_t frames)
+Gain::fill_linear_volume_fade_out (Gain& gain, nframes_t frames)
 {
 }
 
 void
-Gain::fill_linear_fade_in (Gain& gain, jack_nframes_t frames)
+Gain::fill_linear_fade_in (Gain& gain, nframes_t frames)
 {
 }
 
 void
-Gain::fill_linear_fade_out (Gain& gain, jack_nframes_t frames)
+Gain::fill_linear_fade_out (Gain& gain, nframes_t frames)
 {
 }

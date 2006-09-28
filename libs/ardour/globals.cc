@@ -494,8 +494,8 @@ ARDOUR::LocaleGuard::~LocaleGuard ()
 }
 
 ARDOUR::OverlapType
-ARDOUR::coverage (jack_nframes_t sa, jack_nframes_t ea, 
-		  jack_nframes_t sb, jack_nframes_t eb)
+ARDOUR::coverage (nframes_t sa, nframes_t ea, 
+		  nframes_t sb, nframes_t eb)
 {
 	/* OverlapType returned reflects how the second (B)
 	   range overlaps the first (A).

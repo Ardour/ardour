@@ -47,12 +47,12 @@ Reverse::run (boost::shared_ptr<AudioRegion> region)
 {
 	SourceList nsrcs;
 	SourceList::iterator si;
-	const jack_nframes_t blocksize = 256 * 1048;
+	const nframes_t blocksize = 256 * 1048;
 	Sample buf[blocksize];
-	jack_nframes_t fpos;
-	jack_nframes_t fend;
-	jack_nframes_t fstart;
-	jack_nframes_t to_read;
+	nframes_t fpos;
+	nframes_t fend;
+	nframes_t fstart;
+	nframes_t to_read;
 	int ret = -1;
 
 	/* create new sources */
@@ -88,7 +88,7 @@ Reverse::run (boost::shared_ptr<AudioRegion> region)
 			
 			/* swap memory order */
 			
-			for (jack_nframes_t i = 0; i < to_read/2; ++i) {
+			for (nframes_t i = 0; i < to_read/2; ++i) {
 				swap (buf[i],buf[to_read-1-i]);
 			}
 			

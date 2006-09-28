@@ -17,8 +17,8 @@ Editor::set_route_loop_selection ()
 		return;
 	}
 
-	jack_nframes_t start = selection->time[clicked_selection].start;
-	jack_nframes_t end = selection->time[clicked_selection].end;
+	nframes_t start = selection->time[clicked_selection].start;
+	nframes_t end = selection->time[clicked_selection].end;
 
 	Location* loc = transport_loop_location();
 

@@ -37,35 +37,35 @@ class AudioTrack : public Track
 	AudioTrack (Session&, const XMLNode&);
 	~AudioTrack ();
 
-	int roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, 
-		jack_nframes_t offset, int declick, bool can_record, bool rec_monitors_input);
+	int roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
+		nframes_t offset, int declick, bool can_record, bool rec_monitors_input);
 	
-	int no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, 
-		jack_nframes_t offset, bool state_changing, bool can_record, bool rec_monitors_input);
+	int no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
+		nframes_t offset, bool state_changing, bool can_record, bool rec_monitors_input);
 	
-	int silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, 
-		jack_nframes_t offset, bool can_record, bool rec_monitors_input);
+	int silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
+		nframes_t offset, bool can_record, bool rec_monitors_input);
 
 	boost::shared_ptr<AudioDiskstream> audio_diskstream() const;
 
 	int use_diskstream (string name);
 	int use_diskstream (const PBD::ID& id);
 	
-	int export_stuff (vector<Sample*>& buffers, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t end_frame);
+	int export_stuff (vector<Sample*>& buffers, uint32_t nbufs, nframes_t nframes, nframes_t end_frame);
 
 	void freeze (InterThreadInfo&);
 	void unfreeze ();
 
 	void bounce (InterThreadInfo&);
-	void bounce_range (jack_nframes_t start, jack_nframes_t end, InterThreadInfo&);
+	void bounce_range (nframes_t start, nframes_t end, InterThreadInfo&);
 
 	int set_state(const XMLNode& node);
 
   protected:
 	XMLNode& state (bool full);
 
-	void passthru_silence (jack_nframes_t start_frame, jack_nframes_t end_frame, 
-			       jack_nframes_t nframes, jack_nframes_t offset, int declick,
+	void passthru_silence (nframes_t start_frame, nframes_t end_frame, 
+			       nframes_t nframes, nframes_t offset, int declick,
 			       bool meter);
 
 	uint32_t n_process_buffers ();

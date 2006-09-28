@@ -273,7 +273,7 @@ CFStringRefToStdString(CFStringRef stringRef)
 #endif // HAVE_COREAUDIO
 
 void
-compute_equal_power_fades (jack_nframes_t nframes, float* in, float* out)
+compute_equal_power_fades (nframes_t nframes, float* in, float* out)
 {
 	double step;
 
@@ -281,7 +281,7 @@ compute_equal_power_fades (jack_nframes_t nframes, float* in, float* out)
 
 	in[0] = 0.0f;
 	
-	for (jack_nframes_t i = 1; i < nframes - 1; ++i) {
+	for (nframes_t i = 1; i < nframes - 1; ++i) {
 		in[i] = in[i-1] + step;
 	}
 	

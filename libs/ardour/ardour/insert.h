@@ -53,7 +53,7 @@ class Insert : public Redirect
 	
 	virtual ~Insert() { }
 
-	virtual void run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset) = 0;
+	virtual void run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset) = 0;
 	virtual void activate () {}
 	virtual void deactivate () {}
 
@@ -75,9 +75,9 @@ class PortInsert : public Insert
 	int set_state(const XMLNode&);
 
 	void init ();
-	void run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset);
+	void run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset);
 
-	jack_nframes_t latency();
+	nframes_t latency();
 	
 	uint32_t output_streams() const;
 	uint32_t input_streams() const;
@@ -113,12 +113,12 @@ class PluginInsert : public Insert
 	StateManager::State* state_factory (std::string why) const;
 	Change restore_state (StateManager::State&);
 
-	void run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset);
-	void silence (jack_nframes_t nframes, jack_nframes_t offset);
+	void run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset);
+	void silence (nframes_t nframes, nframes_t offset);
 	void activate ();
 	void deactivate ();
 
-	void set_block_size (jack_nframes_t nframes);
+	void set_block_size (nframes_t nframes);
 
 	uint32_t output_streams() const;
 	uint32_t input_streams() const;
@@ -154,10 +154,10 @@ class PluginInsert : public Insert
 
 	string describe_parameter (uint32_t);
 
-	jack_nframes_t latency();
+	nframes_t latency();
 
-	void transport_stopped (jack_nframes_t now);
-	void automation_snapshot (jack_nframes_t now);
+	void transport_stopped (nframes_t now);
+	void automation_snapshot (nframes_t now);
 
   protected:
 	void store_state (PluginInsertState&) const;
@@ -167,8 +167,8 @@ class PluginInsert : public Insert
 	void parameter_changed (uint32_t, float);
 	
 	vector<boost::shared_ptr<Plugin> > _plugins;
-	void automation_run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset);
-	void connect_and_run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset, bool with_auto, jack_nframes_t now = 0);
+	void automation_run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset);
+	void connect_and_run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset, bool with_auto, nframes_t now = 0);
 
 	void init ();
 	void set_automatable ();

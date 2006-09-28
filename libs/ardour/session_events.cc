@@ -59,21 +59,21 @@ static const char* event_names[] = {
 };
 
 void
-Session::add_event (jack_nframes_t frame, Event::Type type, jack_nframes_t target_frame)
+Session::add_event (nframes_t frame, Event::Type type, nframes_t target_frame)
 {
 	Event* ev = new Event (type, Event::Add, frame, target_frame, 0);
 	queue_event (ev);
 }
 
 void
-Session::remove_event (jack_nframes_t frame, Event::Type type)
+Session::remove_event (nframes_t frame, Event::Type type)
 {
 	Event* ev = new Event (type, Event::Remove, frame, 0, 0);
 	queue_event (ev);
 }
 
 void
-Session::replace_event (Event::Type type, jack_nframes_t frame, jack_nframes_t target)
+Session::replace_event (Event::Type type, nframes_t frame, nframes_t target)
 {
 	Event* ev = new Event (type, Event::Replace, frame, target, 0);
 	queue_event (ev);

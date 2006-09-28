@@ -13,7 +13,7 @@ using namespace Gtkmm2ext;
 using namespace ARDOUR;
 using namespace PBD;
 
-TempoDialog::TempoDialog (TempoMap& map, jack_nframes_t frame, const string & action)
+TempoDialog::TempoDialog (TempoMap& map, nframes_t frame, const string & action)
 	: ArdourDialog ("tempo dialog"),
 	  bpm_frame (_("Beats per minute")),
 	  ok_button (action),
@@ -194,7 +194,7 @@ TempoDialog::get_bbt_time (BBT_Time& requested)
 }
 
 
-MeterDialog::MeterDialog (TempoMap& map, jack_nframes_t frame, const string & action)
+MeterDialog::MeterDialog (TempoMap& map, nframes_t frame, const string & action)
 	: ArdourDialog ("meter dialog"),
 	  note_frame (_("Meter denominator")),
 	  bpb_frame (_("Beats per bar")),

@@ -469,7 +469,7 @@ RouteTimeAxisView::build_display_menu ()
 
 
 void
-RouteTimeAxisView::show_timestretch (jack_nframes_t start, jack_nframes_t end)
+RouteTimeAxisView::show_timestretch (nframes_t start, nframes_t end)
 {
 	double x1;
 	double x2;
@@ -902,7 +902,7 @@ RouteTimeAxisView::set_selected_regionviews (RegionSelection& regions)
 }
 
 void
-RouteTimeAxisView::get_selectables (jack_nframes_t start, jack_nframes_t end, double top, double bot, list<Selectable*>& results)
+RouteTimeAxisView::get_selectables (nframes_t start, nframes_t end, double top, double bot, list<Selectable*>& results)
 {
 	double speed = 1.0;
 	
@@ -910,8 +910,8 @@ RouteTimeAxisView::get_selectables (jack_nframes_t start, jack_nframes_t end, do
 		speed = get_diskstream()->speed();
 	}
 	
-	jack_nframes_t start_adjusted = session_frame_to_track_frame(start, speed);
-	jack_nframes_t end_adjusted   = session_frame_to_track_frame(end, speed);
+	nframes_t start_adjusted = session_frame_to_track_frame(start, speed);
+	nframes_t end_adjusted   = session_frame_to_track_frame(end, speed);
 
 	if (_view && ((top < 0.0 && bot < 0.0)) || touched (top, bot)) {
 		_view->get_selectables (start_adjusted, end_adjusted, results);
@@ -1005,7 +1005,7 @@ RouteTimeAxisView::hide_click ()
 }
 
 boost::shared_ptr<Region>
-RouteTimeAxisView::find_next_region (jack_nframes_t pos, RegionPoint point, int32_t dir)
+RouteTimeAxisView::find_next_region (nframes_t pos, RegionPoint point, int32_t dir)
 {
 	boost::shared_ptr<Diskstream> stream;
 	Playlist *playlist;
@@ -1070,7 +1070,7 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 }
 
 bool
-RouteTimeAxisView::paste (jack_nframes_t pos, float times, Selection& selection, size_t nth)
+RouteTimeAxisView::paste (nframes_t pos, float times, Selection& selection, size_t nth)
 {
 	if (!is_track()) {
 		return false;

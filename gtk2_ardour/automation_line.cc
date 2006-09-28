@@ -504,14 +504,14 @@ AutomationLine::model_representation (ControlPoint& cp, ModelRepresentation& mr)
 	   line to convert them to something relevant.
 	*/
 	
-	mr.xval = (jack_nframes_t) floor (cp.get_x());
+	mr.xval = (nframes_t) floor (cp.get_x());
 	mr.yval = 1.0 - (cp.get_y() / _height);
 
 
         /* if xval has not changed, set it directly from the model to avoid rounding errors */
 
 	if (mr.xval == trackview.editor.frame_to_unit((*cp.model)->when)) {
-		mr.xval = (jack_nframes_t) (*cp.model)->when;
+		mr.xval = (nframes_t) (*cp.model)->when;
 	} else {
 		mr.xval = trackview.editor.unit_to_frame (mr.xval);
 	}
@@ -526,7 +526,7 @@ AutomationLine::model_representation (ControlPoint& cp, ModelRepresentation& mr)
 	/* part 2: find out where the model point is now
 	 */
 
-	mr.xpos = (jack_nframes_t) (*cp.model)->when;
+	mr.xpos = (nframes_t) (*cp.model)->when;
 	mr.ypos = (*cp.model)->value;
 
 	/* part 3: get the position of the visual control
@@ -545,7 +545,7 @@ AutomationLine::model_representation (ControlPoint& cp, ModelRepresentation& mr)
 	after = nth (cp.view_index + 1);
 
 	if (before) {
-		mr.xmin = (jack_nframes_t) (*before->model)->when;
+		mr.xmin = (nframes_t) (*before->model)->when;
 		mr.ymin = (*before->model)->value;
 		mr.start = before->model;
 		++mr.start;
@@ -899,7 +899,7 @@ AutomationLine::start_drag (ControlPoint* cp, float fraction)
 }
 
 void
-AutomationLine::point_drag (ControlPoint& cp, jack_nframes_t x, float fraction, bool with_push) 
+AutomationLine::point_drag (ControlPoint& cp, nframes_t x, float fraction, bool with_push) 
 {
 	modify_view (cp, x, fraction, with_push);
 	drags++;
@@ -1027,14 +1027,14 @@ AutomationLine::remove_point (ControlPoint& cp)
 }
 
 void
-AutomationLine::get_selectables (jack_nframes_t& start, jack_nframes_t& end,
+AutomationLine::get_selectables (nframes_t& start, nframes_t& end,
 				 double botfrac, double topfrac, list<Selectable*>& results)
 {
 
 	double top;
 	double bot;
-	jack_nframes_t nstart;
-	jack_nframes_t nend;
+	nframes_t nstart;
+	nframes_t nend;
 	bool collecting = false;
 
 	/* Curse X11 and its inverted coordinate system! */
@@ -1047,7 +1047,7 @@ AutomationLine::get_selectables (jack_nframes_t& start, jack_nframes_t& end,
 
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 		
-		jack_nframes_t when = (jack_nframes_t) (*(*i)->model)->when;
+		nframes_t when = (nframes_t) (*(*i)->model)->when;
 
 		if (when >= start && when <= end) {
 			
@@ -1239,7 +1239,7 @@ AutomationLine::clear ()
 void
 AutomationLine::change_model (AutomationList::iterator i, double x, double y)
 {
-	alist.modify (i, (jack_nframes_t) x, y);
+	alist.modify (i, (nframes_t) x, y);
 }
 
 void

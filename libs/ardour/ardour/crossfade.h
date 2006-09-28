@@ -46,8 +46,8 @@ struct CrossfadeState : public StateManager::State {
 
     UndoAction fade_in_memento;
     UndoAction fade_out_memento;
-    jack_nframes_t position;
-    jack_nframes_t length;
+    nframes_t position;
+    nframes_t length;
     AnchorPoint    anchor_point;
     bool           follow_overlap;
     bool           active;
@@ -65,8 +65,8 @@ class Crossfade : public PBD::StatefulDestructible, public StateManager
 	/* constructor for "fixed" xfades at each end of an internal overlap */
 
 	Crossfade (boost::shared_ptr<ARDOUR::AudioRegion> in, boost::shared_ptr<ARDOUR::AudioRegion> out,
-		   jack_nframes_t position,
-		   jack_nframes_t initial_length,
+		   nframes_t position,
+		   nframes_t initial_length,
 		   AnchorPoint);
 
 	/* constructor for xfade between two regions that are overlapped in any way
@@ -93,11 +93,11 @@ class Crossfade : public PBD::StatefulDestructible, public StateManager
 	boost::shared_ptr<ARDOUR::AudioRegion> in() const { return _in; }
 	boost::shared_ptr<ARDOUR::AudioRegion> out() const { return _out; }
 	
-	jack_nframes_t read_at (Sample *buf, Sample *mixdown_buffer, 
-				float *gain_buffer, jack_nframes_t position, jack_nframes_t cnt, 
+	nframes_t read_at (Sample *buf, Sample *mixdown_buffer, 
+				float *gain_buffer, nframes_t position, nframes_t cnt, 
 				uint32_t chan_n,
-				jack_nframes_t read_frames = 0,
-				jack_nframes_t skip_frames = 0);
+				nframes_t read_frames = 0,
+				nframes_t skip_frames = 0);
 	
 	bool refresh ();
 
@@ -117,21 +117,21 @@ class Crossfade : public PBD::StatefulDestructible, public StateManager
 		return (_in == a && _out == b) || (_in == b && _out == a);
 	}
 
-	jack_nframes_t length() const { return _length; }
-	jack_nframes_t overlap_length() const;
-	jack_nframes_t position() const { return _position; }
+	nframes_t length() const { return _length; }
+	nframes_t overlap_length() const;
+	nframes_t position() const { return _position; }
 
 	sigc::signal<void,Crossfade*> Invalidated;
 
-	bool covers (jack_nframes_t frame) const {
+	bool covers (nframes_t frame) const {
 		return _position <= frame && frame < _position + _length;
 	}
 
-	OverlapType coverage (jack_nframes_t start, jack_nframes_t end) const;
+	OverlapType coverage (nframes_t start, nframes_t end) const;
 
 	UndoAction get_memento() const;	
 
-	static void set_buffer_size (jack_nframes_t);
+	static void set_buffer_size (nframes_t);
 
 	bool active () const { return _active; }
 	void set_active (bool yn);
@@ -143,10 +143,10 @@ class Crossfade : public PBD::StatefulDestructible, public StateManager
 	Curve& fade_in() { return _fade_in; } 
 	Curve& fade_out() { return _fade_out; }
 
-	jack_nframes_t set_length (jack_nframes_t);
+	nframes_t set_length (nframes_t);
 	
-	static jack_nframes_t short_xfade_length() { return _short_xfade_length; }
-	static void set_short_xfade_length (jack_nframes_t n);
+	static nframes_t short_xfade_length() { return _short_xfade_length; }
+	static void set_short_xfade_length (nframes_t n);
 
 	static Change ActiveChanged;
 
@@ -154,15 +154,15 @@ class Crossfade : public PBD::StatefulDestructible, public StateManager
 	friend struct CrossfadeComparePtr;
 	friend class AudioPlaylist;
 
-	static jack_nframes_t _short_xfade_length;
+	static nframes_t _short_xfade_length;
 
 	boost::shared_ptr<ARDOUR::AudioRegion> _in;
 	boost::shared_ptr<ARDOUR::AudioRegion> _out;
 	bool                 _active;
 	bool                 _in_update;
 	OverlapType           overlap_type;
-	jack_nframes_t       _length;
-	jack_nframes_t       _position;
+	nframes_t       _length;
+	nframes_t       _position;
 	AnchorPoint          _anchor_point;
 	bool                 _follow_overlap;
 	bool                 _fixed;

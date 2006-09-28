@@ -556,7 +556,7 @@ const Sample Session::default_click_emphasis[] = {
       0, 0,
 };
 
-const jack_nframes_t Session::default_click_emphasis_length = sizeof (default_click_emphasis) / sizeof (default_click_emphasis[0]);
+const nframes_t Session::default_click_emphasis_length = sizeof (default_click_emphasis) / sizeof (default_click_emphasis[0]);
 
 const Sample Session::default_click[] = {
               0, -0.014312744, -0.03338623, 0.019165039, 0.042541504,
@@ -1172,4 +1172,4 @@ const Sample Session::default_click[] = {
               0, 0, 0, 0, 0, 0, 0, 0,
 };
 
-const jack_nframes_t Session::default_click_length = sizeof (default_click) / sizeof (default_click[0]);
+const nframes_t Session::default_click_length = sizeof (default_click) / sizeof (default_click[0]);

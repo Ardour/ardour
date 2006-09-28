@@ -63,7 +63,7 @@ using namespace PBD;
  * default from configuration_vars.h).  0 is not a good value for
  * allocating buffer sizes..
  */
-jack_nframes_t Diskstream::disk_io_chunk_frames = 1024 * 256;
+nframes_t Diskstream::disk_io_chunk_frames = 1024 * 256;
 
 sigc::signal<void,list<boost::shared_ptr<Source> >*> Diskstream::DeleteSources;
 sigc::signal<void>                Diskstream::DiskOverrun;
@@ -168,7 +168,7 @@ Diskstream::non_realtime_set_speed ()
 
 	if (_seek_required) {
 		if (speed() != 1.0f || speed() != -1.0f) {
-			seek ((jack_nframes_t) (_session.transport_frame() * (double) speed()), true);
+			seek ((nframes_t) (_session.transport_frame() * (double) speed()), true);
 		}
 		else {
 			seek (_session.transport_frame(), true);
@@ -191,7 +191,7 @@ Diskstream::realtime_set_speed (double sp, bool global)
 	
 	if (new_speed != _actual_speed) {
 		
-		jack_nframes_t required_wrap_size = (jack_nframes_t) floor (_session.get_block_size() * 
+		nframes_t required_wrap_size = (nframes_t) floor (_session.get_block_size() * 
 									    fabs (new_speed)) + 1;
 		
 		if (required_wrap_size > wrap_buffer_size) {
@@ -266,7 +266,7 @@ Diskstream::set_loop (Location *location)
 	return 0;
 }
 
-jack_nframes_t
+nframes_t
 Diskstream::get_capture_start_frame (uint32_t n)
 {
 	Glib::Mutex::Lock lm (capture_info_lock);
@@ -279,7 +279,7 @@ Diskstream::get_capture_start_frame (uint32_t n)
 	}
 }
 
-jack_nframes_t
+nframes_t
 Diskstream::get_captured_frames (uint32_t n)
 {
 	Glib::Mutex::Lock lm (capture_info_lock);
@@ -293,7 +293,7 @@ Diskstream::get_captured_frames (uint32_t n)
 }
 
 void
-Diskstream::set_roll_delay (jack_nframes_t nframes)
+Diskstream::set_roll_delay (nframes_t nframes)
 {
 	_roll_delay = nframes;
 }

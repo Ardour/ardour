@@ -410,7 +410,7 @@ ImageFrameTimeAxisView::set_imageframe_duration_sec(double sec)
 {
 	if(selected_imageframe_group && selected_imageframe_view)
 	{
-		selected_imageframe_view->set_duration((jack_nframes_t) (sec * _trackview.editor.current_session()->frame_rate()), this) ;
+		selected_imageframe_view->set_duration((nframes_t) (sec * _trackview.editor.current_session()->frame_rate()), this) ;
 	}
 }
 

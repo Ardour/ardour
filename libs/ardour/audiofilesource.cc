@@ -119,6 +119,7 @@ AudioFileSource::init (string pathstr, bool must_exist)
 	bool is_new = false;
 
 	_length = 0;
+	timeline_position = 0;
 	next_peak_clear_should_notify = false;
 	
 	if (!find (pathstr, must_exist, is_new)) {
@@ -503,14 +504,14 @@ AudioFileSource::set_search_path (string p)
 }
 
 void
-AudioFileSource::set_header_position_offset (jack_nframes_t offset)
+AudioFileSource::set_header_position_offset (nframes_t offset)
 {
 	header_position_offset = offset;
 	HeaderPositionOffsetChanged ();
 }
 
 void
-AudioFileSource::set_timeline_position (jack_nframes_t pos)
+AudioFileSource::set_timeline_position (nframes_t pos)
 {
 	timeline_position = pos;
 }

@@ -195,7 +195,7 @@ ImageFrameTimeAxisGroup::apply_item_color(Gdk::Color& color)
  * @param src the identity of the object that initiated the change
  */
 ImageFrameView*
-ImageFrameTimeAxisGroup::add_imageframe_item(const string & frame_id, jack_nframes_t start, jack_nframes_t duration, unsigned char* rgb_data, uint32_t width, uint32_t height, uint32_t num_channels, void* src)
+ImageFrameTimeAxisGroup::add_imageframe_item(const string & frame_id, nframes_t start, nframes_t duration, unsigned char* rgb_data, uint32_t width, uint32_t height, uint32_t num_channels, void* src)
 {
 	ImageFrameView* ifv = 0 ;
 	

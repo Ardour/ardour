@@ -484,7 +484,7 @@ AudioRegionView::lower_to_bottom ()
 }
 
 bool
-AudioRegionView::set_position (jack_nframes_t pos, void* src, double* ignored)
+AudioRegionView::set_position (nframes_t pos, void* src, double* ignored)
 {
 	double delta;
 	bool ret;
@@ -576,11 +576,11 @@ AudioRegionView::reset_fade_shapes ()
 void
 AudioRegionView::reset_fade_in_shape ()
 {
-	reset_fade_in_shape_width ((jack_nframes_t) region.fade_in().back()->when);
+	reset_fade_in_shape_width ((nframes_t) region.fade_in().back()->when);
 }
 	
 void
-AudioRegionView::reset_fade_in_shape_width (jack_nframes_t width)
+AudioRegionView::reset_fade_in_shape_width (nframes_t width)
 {
 	if (fade_in_handle == 0) {
 		return;
@@ -588,7 +588,7 @@ AudioRegionView::reset_fade_in_shape_width (jack_nframes_t width)
 
 	/* smallest size for a fade is 64 frames */
 
-	width = std::max ((jack_nframes_t) 64, width);
+	width = std::max ((nframes_t) 64, width);
 
 	Points* points;
 	double pwidth = width / samples_per_unit;
@@ -660,11 +660,11 @@ AudioRegionView::reset_fade_in_shape_width (jack_nframes_t width)
 void
 AudioRegionView::reset_fade_out_shape ()
 {
-	reset_fade_out_shape_width ((jack_nframes_t) region.fade_out().back()->when);
+	reset_fade_out_shape_width ((nframes_t) region.fade_out().back()->when);
 }
 
 void
-AudioRegionView::reset_fade_out_shape_width (jack_nframes_t width)
+AudioRegionView::reset_fade_out_shape_width (nframes_t width)
 {	
 	if (fade_out_handle == 0) {
 		return;
@@ -672,7 +672,7 @@ AudioRegionView::reset_fade_out_shape_width (jack_nframes_t width)
 
 	/* smallest size for a fade is 64 frames */
 
-	width = std::max ((jack_nframes_t) 64, width);
+	width = std::max ((nframes_t) 64, width);
 
 	Points* points;
 	double pwidth = width / samples_per_unit;
@@ -765,7 +765,7 @@ AudioRegionView::set_samples_per_unit (gdouble spu)
 }
 
 bool
-AudioRegionView::set_duration (jack_nframes_t frames, void *src)
+AudioRegionView::set_duration (nframes_t frames, void *src)
 {
 	if (!TimeAxisViewItem::set_duration (frames, src)) {
 		return false;
@@ -887,7 +887,7 @@ AudioRegionView::region_sync_changed ()
 	}
 
 	int sync_dir;
-	jack_nframes_t sync_offset;
+	nframes_t sync_offset;
 
 	sync_offset = region.sync_offset (sync_dir);
 
@@ -1129,7 +1129,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 
 	item->w2i (x, y);
 
-	jack_nframes_t fx = trackview.editor.pixel_to_frame (x);
+	nframes_t fx = trackview.editor.pixel_to_frame (x);
 
 	if (fx > region.length()) {
 		return;

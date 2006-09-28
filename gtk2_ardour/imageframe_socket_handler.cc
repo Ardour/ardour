@@ -538,7 +538,7 @@ ImageFrameSocketHandler::send_imageframe_time_axis_group_renamed(const string & 
  * @param item the time axis item whos position has changed
  */
 void
-ImageFrameSocketHandler::send_imageframe_view_position_change(jack_nframes_t pos, void* src, ImageFrameView* item)
+ImageFrameSocketHandler::send_imageframe_view_position_change(nframes_t pos, void* src, ImageFrameView* item)
 {
 	// ENSURE_GUI_THREAD(bind (mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_view_position_change), pos, src, item));
 	
@@ -574,7 +574,7 @@ ImageFrameSocketHandler::send_imageframe_view_position_change(jack_nframes_t pos
  * @param item the item which has had a duration change
  */
 void
-ImageFrameSocketHandler::send_imageframe_view_duration_change(jack_nframes_t dur, void* src, ImageFrameView* item)
+ImageFrameSocketHandler::send_imageframe_view_duration_change(nframes_t dur, void* src, ImageFrameView* item)
 {
 	// ENSURE_GUI_THREAD(bind (mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_view_duration_change), dur, src, item));
 	
@@ -688,7 +688,7 @@ ImageFrameSocketHandler::send_imageframe_view_removed(const string & item_id, vo
  * @param item the time axis item whos position has changed
  */
 void
-ImageFrameSocketHandler::send_marker_view_position_change(jack_nframes_t pos, void* src, MarkerView* item)
+ImageFrameSocketHandler::send_marker_view_position_change(nframes_t pos, void* src, MarkerView* item)
 {
 	if(this == src || src == 0)
 	{
@@ -722,7 +722,7 @@ ImageFrameSocketHandler::send_marker_view_position_change(jack_nframes_t pos, vo
  * @param item the time axis item whos position has changed
  */
 void
-ImageFrameSocketHandler::send_marker_view_duration_change(jack_nframes_t dur, void* src, MarkerView* item)
+ImageFrameSocketHandler::send_marker_view_duration_change(nframes_t dur, void* src, MarkerView* item)
 {
 	if(this == src || src == 0)
 	{
@@ -1337,11 +1337,11 @@ ImageFrameSocketHandler::handle_insert_imageframe_view(const char* msg)
 	position += image_id_size ;
 	
 	// get the start frame value
-	jack_nframes_t start = strtoul((get_message_part(position,10,msg).c_str()),0,10) ;
+	nframes_t start = strtoul((get_message_part(position,10,msg).c_str()),0,10) ;
 	position += 10 ;
 	
 	// get the duration value
-	jack_nframes_t duration = strtoul((get_message_part(position,10,msg).c_str()),0,10) ;
+	nframes_t duration = strtoul((get_message_part(position,10,msg).c_str()),0,10) ;
 	position += 10 ;
 
 	//get the named time axis view we about to add an image to
@@ -1673,7 +1673,7 @@ ImageFrameSocketHandler::handle_imageframe_view_position_update(const char* msg)
 	
 	this->decompose_imageframe_item_desc(msg, position, track_id, track_id_size, scene_id, scene_id_size, item_id, item_id_size) ;
 	
-	jack_nframes_t start_frame = strtoul(get_message_part(position, ardourvis::TIME_VALUE_CHARS, msg).c_str(), 0, 10) ;
+	nframes_t start_frame = strtoul(get_message_part(position, ardourvis::TIME_VALUE_CHARS, msg).c_str(), 0, 10) ;
 	position += ardourvis::TIME_VALUE_CHARS ;
 	
 	// get the named time axis
@@ -1725,7 +1725,7 @@ ImageFrameSocketHandler::handle_imageframe_view_duration_update(const char* msg)
 	
 	this->decompose_imageframe_item_desc(msg, position, track_id, track_id_size, scene_id, scene_id_size, item_id, item_id_size) ;
 	
-	jack_nframes_t duration = strtoul(get_message_part(position,ardourvis::TIME_VALUE_CHARS,msg).c_str(),0,10) ;
+	nframes_t duration = strtoul(get_message_part(position,ardourvis::TIME_VALUE_CHARS,msg).c_str(),0,10) ;
 	position += ardourvis::TIME_VALUE_CHARS ;
 	
 	// get the named time axis
@@ -1828,7 +1828,7 @@ ImageFrameSocketHandler::handle_imageframe_view_max_duration_update(const char* 
 	
 	this->decompose_imageframe_item_desc(msg, position, track_id, track_id_size, group_id, group_id_size, item_id, item_id_size) ;
 	
-	jack_nframes_t max_duration = strtoul(get_message_part(position,ardourvis::TIME_VALUE_CHARS,msg).c_str(),0,10) ;
+	nframes_t max_duration = strtoul(get_message_part(position,ardourvis::TIME_VALUE_CHARS,msg).c_str(),0,10) ;
 	position += ardourvis::TIME_VALUE_CHARS ;
 	
 	int errcode ;
@@ -1916,7 +1916,7 @@ ImageFrameSocketHandler::handle_imageframe_view_min_duration_update(const char* 
 	
 	this->decompose_imageframe_item_desc(msg, position, track_id, track_id_size, group_id, group_id_size, item_id, item_id_size) ;
 	
-	jack_nframes_t min_duration = strtoul(get_message_part(position,ardourvis::TIME_VALUE_CHARS,msg).c_str(),0,10) ;
+	nframes_t min_duration = strtoul(get_message_part(position,ardourvis::TIME_VALUE_CHARS,msg).c_str(),0,10) ;
 	position += ardourvis::TIME_VALUE_CHARS ;
 	
 	int errcode ;

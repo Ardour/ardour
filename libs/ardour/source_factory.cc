@@ -130,7 +130,7 @@ SourceFactory::createReadable (Session& s, string idstr, AudioFileSource::Flag f
 #endif // HAVE_COREAUDIO
 
 boost::shared_ptr<Source>
-SourceFactory::createWritable (Session& s, std::string path, bool destructive, jack_nframes_t rate, bool announce)
+SourceFactory::createWritable (Session& s, std::string path, bool destructive, nframes_t rate, bool announce)
 {
 	/* this might throw failed_constructor(), which is OK */
 	

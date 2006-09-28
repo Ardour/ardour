@@ -104,7 +104,7 @@ Send::set_state(const XMLNode& node)
 }
 
 void
-Send::run (vector<Sample *>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset)
+Send::run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset)
 {
 	if (active()) {
 

@@ -87,18 +87,18 @@ virtual ~IO();
 	const string& name() const { return _name; }
 	virtual int set_name (string str, void *src);
 	
-	virtual void silence  (jack_nframes_t, jack_nframes_t offset);
+	virtual void silence  (nframes_t, nframes_t offset);
 
 	// These should be moved in to a separate object that manipulates an IO
 	
-	void pan (vector<Sample*>& bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset, gain_t gain_coeff);
-	void pan_automated (vector<Sample*>& bufs, uint32_t nbufs, jack_nframes_t start_frame, jack_nframes_t end_frame, 
-			    jack_nframes_t nframes, jack_nframes_t offset);
-	void collect_input  (vector<Sample*>&, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset);
-	void deliver_output (vector<Sample*>&, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset);
-	void deliver_output_no_pan (vector<Sample*>&, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset);
-	void just_meter_input (jack_nframes_t start_frame, jack_nframes_t end_frame, 
-			       jack_nframes_t nframes, jack_nframes_t offset);
+	void pan (vector<Sample*>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset, gain_t gain_coeff);
+	void pan_automated (vector<Sample*>& bufs, uint32_t nbufs, nframes_t start_frame, nframes_t end_frame, 
+			    nframes_t nframes, nframes_t offset);
+	void collect_input  (vector<Sample*>&, uint32_t nbufs, nframes_t nframes, nframes_t offset);
+	void deliver_output (vector<Sample*>&, uint32_t nbufs, nframes_t nframes, nframes_t offset);
+	void deliver_output_no_pan (vector<Sample*>&, uint32_t nbufs, nframes_t nframes, nframes_t offset);
+	void just_meter_input (nframes_t start_frame, nframes_t end_frame, 
+			       nframes_t nframes, nframes_t offset);
 
 	virtual uint32_t n_process_buffers () { return 0; }
 
@@ -134,9 +134,9 @@ virtual ~IO();
 	int disconnect_inputs (void *src);
 	int disconnect_outputs (void *src);
 
-	jack_nframes_t output_latency() const;
-	jack_nframes_t input_latency() const;
-	void           set_port_latency (jack_nframes_t);
+	nframes_t output_latency() const;
+	nframes_t input_latency() const;
+	void           set_port_latency (nframes_t);
 
 	Port *output (uint32_t n) const {
 		if (n < _noutputs) {
@@ -234,16 +234,16 @@ public:
 	AutoStyle gain_automation_style () const { return _gain_automation_curve.automation_style(); }
 	sigc::signal<void> gain_automation_style_changed;
 
-	static void set_automation_interval (jack_nframes_t frames) {
+	static void set_automation_interval (nframes_t frames) {
 		_automation_interval = frames;
 	}
 
-	static jack_nframes_t automation_interval() { 
+	static nframes_t automation_interval() { 
 		return _automation_interval;
 	}
 
-	virtual void transport_stopped (jack_nframes_t now);
-	virtual void automation_snapshot (jack_nframes_t now);
+	virtual void transport_stopped (nframes_t now);
+	virtual void automation_snapshot (nframes_t now);
 
 	ARDOUR::Curve& gain_automation_curve () { return _gain_automation_curve; }
 
@@ -291,7 +291,7 @@ public:
 
 	virtual uint32_t pans_required() const { return _ninputs; }
 
-	static void apply_declick (vector<Sample*>&, uint32_t nbufs, jack_nframes_t nframes, 
+	static void apply_declick (vector<Sample*>&, uint32_t nbufs, nframes_t nframes, 
 				   gain_t initial, gain_t target, bool invert_polarity);
 
 	struct GainControllable : public PBD::Controllable {
@@ -312,8 +312,8 @@ public:
 
 	/* automation */
 
-	jack_nframes_t last_automation_snapshot;
-	static jack_nframes_t _automation_interval;
+	nframes_t last_automation_snapshot;
+	static nframes_t _automation_interval;
 
     AutoState      _gain_automation_state;
 	AutoStyle      _gain_automation_style;

@@ -105,8 +105,8 @@ CoreAudioSource::~CoreAudioSource ()
 	cerr << "deletion done" << endl;
 }
 
-jack_nframes_t
-CoreAudioSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const
+nframes_t
+CoreAudioSource::read_unlocked (Sample *dst, nframes_t start, nframes_t cnt) const
 {
 	try {
 		af.Seek (start);
@@ -188,7 +188,7 @@ CoreAudioSource::sample_rate() const
 }
 
 int
-CoreAudioSource::update_header (jack_nframes_t when, struct tm&, time_t)
+CoreAudioSource::update_header (nframes_t when, struct tm&, time_t)
 {
 	return 0;
 }

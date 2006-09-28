@@ -42,11 +42,11 @@ class Slave {
 	Slave() { }
 	virtual ~Slave() {}
 
-	virtual bool speed_and_position (float&, jack_nframes_t&) = 0;
+	virtual bool speed_and_position (float&, nframes_t&) = 0;
 	virtual bool locked() const = 0;
 	virtual bool ok() const = 0;
 	virtual bool starting() const { return false; }
-	virtual jack_nframes_t resolution() const = 0;
+	virtual nframes_t resolution() const = 0;
 	virtual bool requires_seekahead () const = 0;
 };
 
@@ -57,13 +57,13 @@ class MTC_Slave : public Slave, public sigc::trackable {
 	~MTC_Slave ();
 
 	void rebind (MIDI::Port&);
-	bool speed_and_position (float&, jack_nframes_t&);
+	bool speed_and_position (float&, nframes_t&);
 
 	bool      locked() const;
 	bool      ok() const;
 	void      handle_locate (const MIDI::byte*);
 
-	jack_nframes_t resolution() const;
+	nframes_t resolution() const;
 	bool requires_seekahead () const { return true; }
 
   private:
@@ -76,8 +76,8 @@ class MTC_Slave : public Slave, public sigc::trackable {
 
 	    int guard1;
 	    //SMPTE_Time  mtc;
-	    jack_nframes_t   position;
-	    jack_nframes_t   timestamp;
+	    nframes_t   position;
+	    nframes_t   timestamp;
 	    int guard2;
 
 	    SafeTime() {
@@ -88,12 +88,12 @@ class MTC_Slave : public Slave, public sigc::trackable {
 	};
 
 	SafeTime         current;
-	jack_nframes_t   mtc_frame;               /* current time */
-	jack_nframes_t   last_inbound_frame;      /* when we got it; audio clocked */
+	nframes_t   mtc_frame;               /* current time */
+	nframes_t   last_inbound_frame;      /* when we got it; audio clocked */
 
 	float            mtc_speed;
-	jack_nframes_t   first_mtc_frame;
-	jack_nframes_t   first_mtc_time;
+	nframes_t   first_mtc_frame;
+	nframes_t   first_mtc_time;
 
 	static const int32_t accumulator_size = 128;
 	float   accumulator[accumulator_size];
@@ -113,7 +113,7 @@ class ADAT_Slave : public Slave
 	ADAT_Slave () {}
 	~ADAT_Slave () {}
 	
-	bool speed_and_position (float& speed, jack_nframes_t& pos) {
+	bool speed_and_position (float& speed, nframes_t& pos) {
 		speed = 0;
 		pos = 0;
 		return false;
@@ -121,7 +121,7 @@ class ADAT_Slave : public Slave
 
 	bool locked() const { return false; }
 	bool ok() const { return false; }
-	jack_nframes_t resolution() const { return 1; }
+	nframes_t resolution() const { return 1; }
 	bool requires_seekahead () const { return true; }
 };
 
@@ -131,12 +131,12 @@ class JACK_Slave : public Slave
 	JACK_Slave (jack_client_t*);
 	~JACK_Slave ();
 	
-	bool speed_and_position (float& speed, jack_nframes_t& pos);
+	bool speed_and_position (float& speed, nframes_t& pos);
 
 	bool starting() const { return _starting; }
 	bool locked() const;
 	bool ok() const;
-	jack_nframes_t resolution() const { return 1; }
+	nframes_t resolution() const { return 1; }
 	bool requires_seekahead () const { return false; }
 
   private:

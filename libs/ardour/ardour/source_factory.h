@@ -23,7 +23,7 @@ class SourceFactory {
 
 	// MIDI sources will have to be hacked in here somehow
 	static boost::shared_ptr<Source> createReadable (Session&, std::string idstr, AudioFileSource::Flag flags, bool announce = true);
-	static boost::shared_ptr<Source> createWritable (Session&, std::string name, bool destructive, jack_nframes_t rate, bool announce = true);
+	static boost::shared_ptr<Source> createWritable (Session&, std::string name, bool destructive, nframes_t rate, bool announce = true);
 };
 
 }

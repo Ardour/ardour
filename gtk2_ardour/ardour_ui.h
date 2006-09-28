@@ -116,7 +116,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 			   ARDOUR::AutoConnectOption output_connect,
 			   uint32_t nphysin,
 			   uint32_t nphysout,
-			   jack_nframes_t initial_length);
+			   nframes_t initial_length);
 	bool session_is_new() const { return _session_is_new; }
 
 	ARDOUR::Session* the_session() { return session; }
@@ -159,7 +159,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	static sigc::signal<void,bool> Blink;
 	static sigc::signal<void>      RapidScreenUpdate;
 	static sigc::signal<void>      SuperRapidScreenUpdate;
-	static sigc::signal<void,jack_nframes_t> Clock;
+	static sigc::signal<void,nframes_t> Clock;
 
 	/* this is a helper function to centralize the (complex) logic for
 	   blinking rec-enable buttons.
@@ -179,7 +179,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void save_ardour_state ();
 	gboolean configure_handler (GdkEventConfigure* conf);
 
-	void do_transport_locate (jack_nframes_t position);
+	void do_transport_locate (nframes_t position);
 	void halt_on_xrun_message ();
 
 	AudioClock primary_clock;
@@ -497,7 +497,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	Gtk::Label   sample_rate_label;
 	Gtk::EventBox sample_rate_box;
-	void update_sample_rate (jack_nframes_t);
+	void update_sample_rate (nframes_t);
 
 	gint every_second ();
 	gint every_point_one_seconds ();
@@ -640,7 +640,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	
 	void disconnect_from_jack ();
 	void reconnect_to_jack ();
-	void set_jack_buffer_size (jack_nframes_t);
+	void set_jack_buffer_size (nframes_t);
 
 	Gtk::MenuItem* jack_disconnect_item;
 	Gtk::MenuItem* jack_reconnect_item;

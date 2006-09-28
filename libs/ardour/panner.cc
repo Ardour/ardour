@@ -193,7 +193,7 @@ BaseStereoPanner::~BaseStereoPanner ()
 }
 
 void
-BaseStereoPanner::snapshot (jack_nframes_t now)
+BaseStereoPanner::snapshot (nframes_t now)
 {
 	if (_automation.automation_state() == Write || _automation.automation_state() == Touch) {
 		_automation.rt_add (now, x);
@@ -201,7 +201,7 @@ BaseStereoPanner::snapshot (jack_nframes_t now)
 }
 
 void
-BaseStereoPanner::transport_stopped (jack_nframes_t frame)
+BaseStereoPanner::transport_stopped (nframes_t frame)
 {
 	_automation.reposition_for_rt_add (frame);
 
@@ -246,7 +246,7 @@ BaseStereoPanner::save (ostream& out) const
 	out << "begin" << endl;
 
 	for (AutomationList::const_iterator i = _automation.const_begin(); i != _automation.const_end(); ++i) {
-		out << '\t' << (jack_nframes_t) floor ((*i)->when) << ' ' << (*i)->value << endl;
+		out << '\t' << (nframes_t) floor ((*i)->when) << ' ' << (*i)->value << endl;
 		if (!out) {
 			error << string_compose (_("error writing pan automation file (%s)"), strerror (errno)) << endmsg;
 			return -1;
@@ -266,7 +266,7 @@ BaseStereoPanner::load (istream& in, string path, uint32_t& linecnt)
 	_automation.clear ();
 
 	while (in.getline (line, sizeof (line), '\n')) {
-		jack_nframes_t when;
+		nframes_t when;
 		double value;
 
 		++linecnt;
@@ -292,7 +292,7 @@ BaseStereoPanner::load (istream& in, string path, uint32_t& linecnt)
 }
 
 void
-BaseStereoPanner::distribute (Sample* src, Sample** obufs, gain_t gain_coeff, jack_nframes_t nframes)
+BaseStereoPanner::distribute (Sample* src, Sample** obufs, gain_t gain_coeff, nframes_t nframes)
 {
 	pan_t delta;
 	Sample* dst;
@@ -310,8 +310,8 @@ BaseStereoPanner::distribute (Sample* src, Sample** obufs, gain_t gain_coeff, ja
 		
 		/* interpolate over 64 frames or nframes, whichever is smaller */
 		
-		jack_nframes_t limit = min ((jack_nframes_t)64, nframes);
-		jack_nframes_t n;
+		nframes_t limit = min ((nframes_t)64, nframes);
+		nframes_t n;
 
 		delta = -(delta / (float) (limit));
 		
@@ -360,8 +360,8 @@ BaseStereoPanner::distribute (Sample* src, Sample** obufs, gain_t gain_coeff, ja
 		
 		/* interpolate over 64 frames or nframes, whichever is smaller */
 		
-		jack_nframes_t limit = min ((jack_nframes_t)64, nframes);
-		jack_nframes_t n;
+		nframes_t limit = min ((nframes_t)64, nframes);
+		nframes_t n;
 
 		delta = -(delta / (float) (limit));
 
@@ -446,7 +446,7 @@ EqualPowerStereoPanner::update ()
 
 void
 EqualPowerStereoPanner::distribute_automated (Sample* src, Sample** obufs, 
-					      jack_nframes_t start, jack_nframes_t end, jack_nframes_t nframes,
+					      nframes_t start, nframes_t end, nframes_t nframes,
 					      pan_t** buffers)
 {
 	Sample* dst;
@@ -478,7 +478,7 @@ EqualPowerStereoPanner::distribute_automated (Sample* src, Sample** obufs,
 	const float pan_law_attenuation = -3.0f;
 	const float scale = 2.0f - 4.0f * powf (10.0f,pan_law_attenuation/20.0f);
 
-	for (jack_nframes_t n = 0; n < nframes; ++n) {
+	for (nframes_t n = 0; n < nframes; ++n) {
 
 		float panR = buffers[0][n];
 		float panL = 1 - panR;
@@ -492,7 +492,7 @@ EqualPowerStereoPanner::distribute_automated (Sample* src, Sample** obufs,
 	dst = obufs[0];
 	pbuf = buffers[0];
 	
-	for (jack_nframes_t n = 0; n < nframes; ++n) {
+	for (nframes_t n = 0; n < nframes; ++n) {
 		dst[n] += src[n] * pbuf[n];
 	}	
 
@@ -503,7 +503,7 @@ EqualPowerStereoPanner::distribute_automated (Sample* src, Sample** obufs,
 	dst = obufs[1];
 	pbuf = buffers[1];
 
-	for (jack_nframes_t n = 0; n < nframes; ++n) {
+	for (nframes_t n = 0; n < nframes; ++n) {
 		dst[n] += src[n] * pbuf[n];
 	}	
 	
@@ -592,13 +592,13 @@ Multi2dPanner::~Multi2dPanner ()
 }
 
 void
-Multi2dPanner::snapshot (jack_nframes_t now)
+Multi2dPanner::snapshot (nframes_t now)
 {
 	// how?
 }
 
 void
-Multi2dPanner::transport_stopped (jack_nframes_t frame)
+Multi2dPanner::transport_stopped (nframes_t frame)
 {
 	//what?
 }
@@ -648,7 +648,7 @@ Multi2dPanner::update ()
 }
 
 void
-Multi2dPanner::distribute (Sample* src, Sample** obufs, gain_t gain_coeff, jack_nframes_t nframes)
+Multi2dPanner::distribute (Sample* src, Sample** obufs, gain_t gain_coeff, nframes_t nframes)
 {
 	Sample* dst;
 	pan_t pan;
@@ -669,8 +669,8 @@ Multi2dPanner::distribute (Sample* src, Sample** obufs, gain_t gain_coeff, jack_
 			
 			/* interpolate over 64 frames or nframes, whichever is smaller */
 			
-			jack_nframes_t limit = min ((jack_nframes_t)64, nframes);
-			jack_nframes_t n;
+			nframes_t limit = min ((nframes_t)64, nframes);
+			nframes_t n;
 			
 			delta = -(delta / (float) (limit));
 		
@@ -695,7 +695,7 @@ Multi2dPanner::distribute (Sample* src, Sample** obufs, gain_t gain_coeff, jack_
 				
 				if (pan != 0.0f) {
 					
-					for (jack_nframes_t n = 0; n < nframes; ++n) {
+					for (nframes_t n = 0; n < nframes; ++n) {
 						dst[n] += src[n] * pan;
 					}      
 					
@@ -704,7 +704,7 @@ Multi2dPanner::distribute (Sample* src, Sample** obufs, gain_t gain_coeff, jack_
 				
 			} else {
 				
-				for (jack_nframes_t n = 0; n < nframes; ++n) {
+				for (nframes_t n = 0; n < nframes; ++n) {
 					dst[n] += src[n];
 				}      
 
@@ -720,7 +720,7 @@ Multi2dPanner::distribute (Sample* src, Sample** obufs, gain_t gain_coeff, jack_
 
 void
 Multi2dPanner::distribute_automated (Sample* src, Sample** obufs, 
-				     jack_nframes_t start, jack_nframes_t end, jack_nframes_t nframes,
+				     nframes_t start, nframes_t end, nframes_t nframes,
 				     pan_t** buffers)
 {
 	if (_muted) {
@@ -1050,7 +1050,7 @@ Panner::automation_style () const
 }
 
 void
-Panner::transport_stopped (jack_nframes_t frame)
+Panner::transport_stopped (nframes_t frame)
 {
 	for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
 		(*i)->transport_stopped (frame);
@@ -1058,7 +1058,7 @@ Panner::transport_stopped (jack_nframes_t frame)
 }	
 
 void
-Panner::snapshot (jack_nframes_t now)
+Panner::snapshot (nframes_t now)
 {
 	for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
 		(*i)->snapshot (now);

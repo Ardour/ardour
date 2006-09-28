@@ -73,19 +73,19 @@ public:
 
 	void set_samples_per_unit (double);
  	void set_height (TimeAxisView::TrackHeight);
-	void show_timestretch (jack_nframes_t start, jack_nframes_t end);
+	void show_timestretch (nframes_t start, nframes_t end);
 	void hide_timestretch ();
 	void selection_click (GdkEventButton*);
 	void set_selected_points (PointSelection&);
 	void set_selected_regionviews (RegionSelection&);
-	void get_selectables (jack_nframes_t start, jack_nframes_t end, double top, double bot, list<Selectable *>&);
+	void get_selectables (nframes_t start, nframes_t end, double top, double bot, list<Selectable *>&);
 	void get_inverted_selectables (Selection&, list<Selectable*>&);
 		
-	boost::shared_ptr<ARDOUR::Region> find_next_region (jack_nframes_t pos, ARDOUR::RegionPoint, int32_t dir);
+	boost::shared_ptr<ARDOUR::Region> find_next_region (nframes_t pos, ARDOUR::RegionPoint, int32_t dir);
 
 	/* Editing operations */
 	bool cut_copy_clear (Selection&, Editing::CutCopyOp);
-	bool paste (jack_nframes_t, float times, Selection&, size_t nth);
+	bool paste (nframes_t, float times, Selection&, size_t nth);
 
 	list<TimeAxisView*> get_child_list();
 
@@ -203,7 +203,7 @@ protected:
 	virtual void show_existing_automation ();
 	virtual void hide_all_automation ();
 
-	void timestretch (jack_nframes_t start, jack_nframes_t end);
+	void timestretch (nframes_t start, nframes_t end);
 
 	void visual_click ();
 	void hide_click ();

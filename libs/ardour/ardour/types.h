@@ -41,6 +41,13 @@
 typedef int intptr_t;
 #endif
 
+/* at some point move this into the ARDOUR namespace,
+   but for now its outside because it replaces the
+   old global "jack_nframes_t"
+*/
+
+typedef uint32_t                    nframes_t;
+
 namespace ARDOUR {
 
 	class Source;
@@ -66,8 +73,8 @@ namespace ARDOUR {
 		OverlapExternal   // overlap extends to (at least) begin+end
 	};
 
-	OverlapType coverage (jack_nframes_t start_a, jack_nframes_t end_a,
-			      jack_nframes_t start_b, jack_nframes_t end_b);
+	OverlapType coverage (nframes_t start_a, nframes_t end_a,
+			      nframes_t start_b, nframes_t end_b);
 
 	enum AutomationType {
 		GainAutomation = 0x1,
@@ -147,7 +154,7 @@ namespace ARDOUR {
 	    BBT_Time       bbt;
 
 	    union { 
-		jack_nframes_t frames;
+		nframes_t frames;
 		double         seconds;
 	    };
 
@@ -155,13 +162,13 @@ namespace ARDOUR {
 	};
 
 	struct AudioRange {
-	    jack_nframes_t start;
-	    jack_nframes_t end;
+	    nframes_t start;
+	    nframes_t end;
 	    uint32_t id;
 	    
-	    AudioRange (jack_nframes_t s, jack_nframes_t e, uint32_t i) : start (s), end (e) , id (i) {}
+	    AudioRange (nframes_t s, nframes_t e, uint32_t i) : start (s), end (e) , id (i) {}
 	    
-	    jack_nframes_t length() { return end - start + 1; } 
+	    nframes_t length() { return end - start + 1; } 
 
 	    bool operator== (const AudioRange& other) const {
 		    return start == other.start && end == other.end && id == other.id;
@@ -171,7 +178,7 @@ namespace ARDOUR {
 		    return start == other.start && end == other.end;
 	    }
 
-	    OverlapType coverage (jack_nframes_t s, jack_nframes_t e) const {
+	    OverlapType coverage (nframes_t s, nframes_t e) const {
 		    return ARDOUR::coverage (start, end, s, e);
 	    }
 	};
@@ -302,16 +309,16 @@ std::istream& operator>>(std::istream& o, ARDOUR::SlaveSource& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ShuttleBehaviour& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ShuttleUnits& sf);
 
-static inline jack_nframes_t
-session_frame_to_track_frame (jack_nframes_t session_frame, double speed)
+static inline nframes_t
+session_frame_to_track_frame (nframes_t session_frame, double speed)
 {
-	return (jack_nframes_t)( (double)session_frame * speed );
+	return (nframes_t)( (double)session_frame * speed );
 }
 
-static inline jack_nframes_t
-track_frame_to_session_frame (jack_nframes_t track_frame, double speed)
+static inline nframes_t
+track_frame_to_session_frame (nframes_t track_frame, double speed)
 {
-	return (jack_nframes_t)( (double)track_frame / speed );
+	return (nframes_t)( (double)track_frame / speed );
 }
 
 

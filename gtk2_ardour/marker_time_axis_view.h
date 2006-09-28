@@ -131,7 +131,7 @@ class MarkerTimeAxisView : public sigc::trackable
 		 * @param duration the duration the new item should be placed upon the timeline
 		 * @param src the identity of the object that initiated the change
 		 */
-		MarkerView* add_marker_view(ImageFrameView* ifv, std::string mark_type, std::string mark_id, jack_nframes_t start, jack_nframes_t dur, void* src) ;
+		MarkerView* add_marker_view(ImageFrameView* ifv, std::string mark_type, std::string mark_id, nframes_t start, nframes_t dur, void* src) ;
 		
 		/**
 		 * Returns the named MarkerView or 0 if the named marker does not exist

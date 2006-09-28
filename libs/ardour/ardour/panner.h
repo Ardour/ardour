@@ -64,14 +64,14 @@ class StreamPanner : public sigc::trackable, public Stateful
 
 	/* the basic panner API */
 
-	virtual void distribute (Sample* src, Sample** obufs, gain_t gain_coeff, jack_nframes_t nframes) = 0;
+	virtual void distribute (Sample* src, Sample** obufs, gain_t gain_coeff, nframes_t nframes) = 0;
 	virtual void distribute_automated (Sample* src, Sample** obufs, 
-				     jack_nframes_t start, jack_nframes_t end, jack_nframes_t nframes, pan_t** buffers) = 0;
+				     nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers) = 0;
 
 	/* automation */
 
-	virtual void snapshot (jack_nframes_t now) = 0;
-	virtual void transport_stopped (jack_nframes_t frame) = 0;
+	virtual void snapshot (nframes_t now) = 0;
+	virtual void transport_stopped (nframes_t frame) = 0;
 	virtual void set_automation_state (AutoState) = 0;
 	virtual void set_automation_style (AutoStyle) = 0;
 	
@@ -141,12 +141,12 @@ class BaseStereoPanner : public StreamPanner
 	   and a type name. See EqualPowerStereoPanner as an example.
 	*/
 
-	void distribute (Sample* src, Sample** obufs, gain_t gain_coeff, jack_nframes_t nframes);
+	void distribute (Sample* src, Sample** obufs, gain_t gain_coeff, nframes_t nframes);
 
 	int load (istream&, string path, uint32_t&);
 	int save (ostream&) const;
-	void snapshot (jack_nframes_t now);
-	void transport_stopped (jack_nframes_t frame);
+	void snapshot (nframes_t now);
+	void transport_stopped (nframes_t frame);
 	void set_automation_state (AutoState);
 	void set_automation_style (AutoStyle);
 
@@ -170,7 +170,7 @@ class EqualPowerStereoPanner : public BaseStereoPanner
 	~EqualPowerStereoPanner ();
 
 	void distribute_automated (Sample* src, Sample** obufs, 
-			     jack_nframes_t start, jack_nframes_t end, jack_nframes_t nframes, pan_t** buffers);
+			     nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
 
 	void get_current_coefficients (pan_t*) const;
 	void get_desired_coefficients (pan_t*) const;
@@ -192,8 +192,8 @@ class Multi2dPanner : public StreamPanner
 	Multi2dPanner (Panner& parent);
 	~Multi2dPanner ();
 
-	void snapshot (jack_nframes_t now);
-	void transport_stopped (jack_nframes_t frame);
+	void snapshot (nframes_t now);
+	void transport_stopped (nframes_t frame);
 	void set_automation_state (AutoState);
 	void set_automation_style (AutoStyle);
 
@@ -203,9 +203,9 @@ class Multi2dPanner : public StreamPanner
 
 	Curve& automation() { return _automation; }
 
-	void distribute (Sample* src, Sample** obufs, gain_t gain_coeff, jack_nframes_t nframes);
+	void distribute (Sample* src, Sample** obufs, gain_t gain_coeff, nframes_t nframes);
 	void distribute_automated (Sample* src, Sample** obufs, 
-			     jack_nframes_t start, jack_nframes_t end, jack_nframes_t nframes, pan_t** buffers);
+			     nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
 
 	int load (istream&, string path, uint32_t&);
 	int save (ostream&) const;
@@ -249,8 +249,8 @@ class Panner : public std::vector<StreamPanner*>, public Stateful, public sigc::
 	void clear ();
 	void reset (uint32_t noutputs, uint32_t npans);
 
-	void snapshot (jack_nframes_t now);
-	void transport_stopped (jack_nframes_t frame);
+	void snapshot (nframes_t now);
+	void transport_stopped (nframes_t frame);
 	
 	void clear_automation ();
 

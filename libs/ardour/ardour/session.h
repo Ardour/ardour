@@ -154,8 +154,8 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 
 	    Type           type;
 	    Action         action;
-	    jack_nframes_t action_frame;
-	    jack_nframes_t target_frame;
+	    nframes_t action_frame;
+	    nframes_t target_frame;
 	    float          speed;
 
 	    union {
@@ -170,7 +170,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	    list<AudioRange>     audio_range;
 	    list<MusicRange>     music_range;
 
-	    Event(Type t, Action a, jack_nframes_t when, jack_nframes_t where, float spd, bool yn = false)
+	    Event(Type t, Action a, nframes_t when, nframes_t where, float spd, bool yn = false)
 		    : type (t), 
 		      action (a),
 		      action_frame (when),
@@ -202,7 +202,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 		    pool.release (ptr);
 	    }
 
-	    static const jack_nframes_t Immediate = 0;
+	    static const nframes_t Immediate = 0;
 
 	 private:
 	    static MultiAllocSingleReleasePool pool;
@@ -226,7 +226,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 		 uint32_t master_out_channels,
 		 uint32_t n_physical_in,
 		 uint32_t n_physical_out,
-		 jack_nframes_t initial_length);
+		 nframes_t initial_length);
 	
 	virtual ~Session ();
 
@@ -261,7 +261,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	static string change_audio_path_by_name (string oldpath, string oldname, string newname, bool destructive);
 	string audio_path_from_name (string, uint32_t nchans, uint32_t chan, bool destructive);
 
-	void process (jack_nframes_t nframes);
+	void process (nframes_t nframes);
 
 	vector<Sample*>& get_passthru_buffers() { return _passthru_buffers; }
 	vector<Sample*>& get_silent_buffers (uint32_t howmany);
@@ -336,22 +336,22 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	/* Transport mechanism signals */
 
 	sigc::signal<void> TransportStateChange; /* generic */
-	sigc::signal<void,jack_nframes_t> PositionChanged; /* sent after any non-sequential motion */
+	sigc::signal<void,nframes_t> PositionChanged; /* sent after any non-sequential motion */
 	sigc::signal<void> DurationChanged;
 	sigc::signal<void> HaltOnXrun;
 
 	sigc::signal<void,RouteList&> RouteAdded;
 
 	void request_roll ();
-	void request_bounded_roll (jack_nframes_t start, jack_nframes_t end);
+	void request_bounded_roll (nframes_t start, nframes_t end);
 	void request_stop (bool abort = false);
-	void request_locate (jack_nframes_t frame, bool with_roll = false);
+	void request_locate (nframes_t frame, bool with_roll = false);
 	void request_play_loop (bool yn);
-	jack_nframes_t  last_transport_start() const { return _last_roll_location; }
+	nframes_t  last_transport_start() const { return _last_roll_location; }
 	void goto_end ()   { request_locate (end_location->start(), false);}
 	void goto_start () { request_locate (start_location->start(), false); }
-	void set_session_start (jack_nframes_t start) { start_location->set_start(start); }
-	void set_session_end (jack_nframes_t end) { end_location->set_start(end); _end_location_is_free = false; }
+	void set_session_start (nframes_t start) { start_location->set_start(start); }
+	void set_session_end (nframes_t end) { end_location->set_start(end); _end_location_is_free = false; }
 	void use_rf_shuttle_speed ();
 	void request_transport_speed (float speed);
 	void request_overwrite_buffer (Diskstream*);
@@ -365,14 +365,14 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 
 	int remove_region_from_region_list (boost::shared_ptr<Region>);
 
-	jack_nframes_t get_maximum_extent () const;
-	jack_nframes_t current_end_frame() const { return end_location->start(); }
-	jack_nframes_t current_start_frame() const { return start_location->start(); }
-	jack_nframes_t frame_rate() const   { return _current_frame_rate; }
-	jack_nframes_t frames_per_hour() const { return _frames_per_hour; }
+	nframes_t get_maximum_extent () const;
+	nframes_t current_end_frame() const { return end_location->start(); }
+	nframes_t current_start_frame() const { return start_location->start(); }
+	nframes_t frame_rate() const   { return _current_frame_rate; }
+	nframes_t frames_per_hour() const { return _frames_per_hour; }
 
 	double frames_per_smpte_frame() const { return _frames_per_smpte_frame; }
-	jack_nframes_t smpte_frames_per_hour() const { return _smpte_frames_per_hour; }
+	nframes_t smpte_frames_per_hour() const { return _smpte_frames_per_hour; }
 
 	/* Locations */
 
@@ -387,14 +387,14 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 
 	void reset_input_monitor_state ();
 
-	void add_event (jack_nframes_t action_frame, Event::Type type, jack_nframes_t target_frame = 0);
-	void remove_event (jack_nframes_t frame, Event::Type type);
+	void add_event (nframes_t action_frame, Event::Type type, nframes_t target_frame = 0);
+	void remove_event (nframes_t frame, Event::Type type);
 	void clear_events (Event::Type type);
 
-	jack_nframes_t get_block_size() const { return current_block_size; }
-	jack_nframes_t worst_output_latency () const { return _worst_output_latency; }
-	jack_nframes_t worst_input_latency () const { return _worst_input_latency; }
-	jack_nframes_t worst_track_latency () const { return _worst_track_latency; }
+	nframes_t get_block_size() const { return current_block_size; }
+	nframes_t worst_output_latency () const { return _worst_output_latency; }
+	nframes_t worst_input_latency () const { return _worst_input_latency; }
+	nframes_t worst_track_latency () const { return _worst_track_latency; }
 
 	int save_state (string snapshot_name, bool pending = false);
 	int restore_state (string snapshot_name);
@@ -473,8 +473,8 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 
 	/* Time */
 
-	jack_nframes_t transport_frame () const {return _transport_frame; }
-	jack_nframes_t audible_frame () const;
+	nframes_t transport_frame () const {return _transport_frame; }
+	nframes_t audible_frame () const;
 
 	enum SmpteFormat {
 		smpte_23976,
@@ -505,22 +505,22 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 
 	void sync_time_vars();
 
-	void bbt_time (jack_nframes_t when, BBT_Time&);
-	void smpte_to_sample( SMPTE::Time& smpte, jack_nframes_t& sample, bool use_offset, bool use_subframes ) const;
-	void sample_to_smpte( jack_nframes_t sample, SMPTE::Time& smpte, bool use_offset, bool use_subframes ) const;
+	void bbt_time (nframes_t when, BBT_Time&);
+	void smpte_to_sample( SMPTE::Time& smpte, nframes_t& sample, bool use_offset, bool use_subframes ) const;
+	void sample_to_smpte( nframes_t sample, SMPTE::Time& smpte, bool use_offset, bool use_subframes ) const;
 	void smpte_time (SMPTE::Time &);
-	void smpte_time (jack_nframes_t when, SMPTE::Time&);
-	void smpte_time_subframes (jack_nframes_t when, SMPTE::Time&);
+	void smpte_time (nframes_t when, SMPTE::Time&);
+	void smpte_time_subframes (nframes_t when, SMPTE::Time&);
 
-	void smpte_duration (jack_nframes_t, SMPTE::Time&) const;
-	void smpte_duration_string (char *, jack_nframes_t) const;
+	void smpte_duration (nframes_t, SMPTE::Time&) const;
+	void smpte_duration_string (char *, nframes_t) const;
 
-	void           set_smpte_offset (jack_nframes_t);
-	jack_nframes_t smpte_offset () const { return _smpte_offset; }
+	void           set_smpte_offset (nframes_t);
+	nframes_t smpte_offset () const { return _smpte_offset; }
 	void           set_smpte_offset_negative (bool);
 	bool           smpte_offset_negative () const { return _smpte_offset_negative; }
 
-	jack_nframes_t convert_to_frames_at (jack_nframes_t position, AnyTime&);
+	nframes_t convert_to_frames_at (nframes_t position, AnyTime&);
 
 	static sigc::signal<void> StartTimeChanged;
 	static sigc::signal<void> EndTimeChanged;
@@ -533,7 +533,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	bool        transport_stopped() const { return _transport_speed == 0.0f; }
 	bool        transport_rolling() const { return _transport_speed != 0.0f; }
 
-	int jack_slave_sync (jack_nframes_t);
+	int jack_slave_sync (nframes_t);
 
 	TempoMap& tempo_map() { return *_tempo_map; }
 	
@@ -574,7 +574,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	string build_tmp_convert_name (string file);
 
 	SlaveSource post_export_slave;
-	jack_nframes_t post_export_position;
+	nframes_t post_export_position;
 
 	int start_audio_export (ARDOUR::AudioExportSpecification&);
 	int stop_audio_export (ARDOUR::AudioExportSpecification&);
@@ -660,7 +660,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 
 	/* flattening stuff */
 
-	int write_one_audio_track (AudioTrack&, jack_nframes_t start, jack_nframes_t cnt, bool overwrite, vector<boost::shared_ptr<AudioSource> >&,
+	int write_one_audio_track (AudioTrack&, nframes_t start, nframes_t cnt, bool overwrite, vector<boost::shared_ptr<AudioSource> >&,
 				   InterThreadInfo& wot);
 	int freeze (InterThreadInfo&);
 
@@ -692,7 +692,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	
 	/* s/w "RAID" management */
 	
-	jack_nframes_t available_capture_duration();
+	nframes_t available_capture_duration();
 
 	/* I/O Connections */
 
@@ -729,10 +729,10 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 
 	/* Scrubbing */
 
-	void start_scrub (jack_nframes_t where);
+	void start_scrub (nframes_t where);
 	void stop_scrub ();
 	void set_scrub_speed (float);
-	jack_nframes_t scrub_buffer_size() const;
+	nframes_t scrub_buffer_size() const;
 	sigc::signal<void> ScrubReady;
 
 	/* History (for editors, mixers, UIs etc.) */
@@ -892,10 +892,10 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 				  void* ptr,
 				  float opt);
 
-	typedef float (*compute_peak_t)				(Sample *, jack_nframes_t, float);
-	typedef void  (*apply_gain_to_buffer_t)		(Sample *, jack_nframes_t, float);
-	typedef void  (*mix_buffers_with_gain_t)	(Sample *, Sample *, jack_nframes_t, float);
-	typedef void  (*mix_buffers_no_gain_t)		(Sample *, Sample *, jack_nframes_t);
+	typedef float (*compute_peak_t)				(Sample *, nframes_t, float);
+	typedef void  (*apply_gain_to_buffer_t)		(Sample *, nframes_t, float);
+	typedef void  (*mix_buffers_with_gain_t)	(Sample *, Sample *, nframes_t, float);
+	typedef void  (*mix_buffers_no_gain_t)		(Sample *, Sample *, nframes_t);
 
 	static compute_peak_t			compute_peak;
 	static apply_gain_to_buffer_t	apply_gain_to_buffer;
@@ -910,8 +910,8 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 
   protected:
 	friend class AudioEngine;
-	void set_block_size (jack_nframes_t nframes);
-	void set_frame_rate (jack_nframes_t nframes);
+	void set_block_size (nframes_t nframes);
+	void set_frame_rate (nframes_t nframes);
 
   protected:
 	friend class Diskstream;
@@ -924,7 +924,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	void update_latency_compensation (bool, bool);
 	
   private:
-	int  create (bool& new_session, string* mix_template, jack_nframes_t initial_length);
+	int  create (bool& new_session, string* mix_template, nframes_t initial_length);
 
 	static const char* _template_suffix;
 	static const char* _statefile_suffix;
@@ -943,34 +943,34 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	   maximise cache hits
 	*/
 
-	typedef void (Session::*process_function_type)(jack_nframes_t);
+	typedef void (Session::*process_function_type)(nframes_t);
 
 	AudioEngine            &_engine;
 	mutable gint            processing_prohibited;
 	process_function_type    process_function;
 	process_function_type    last_process_function;
 	bool                     waiting_for_sync_offset;
-	jack_nframes_t          _base_frame_rate;
-	jack_nframes_t          _current_frame_rate;  //this includes video pullup offset
+	nframes_t          _base_frame_rate;
+	nframes_t          _current_frame_rate;  //this includes video pullup offset
 	int                      transport_sub_state;
 	mutable gint           _record_status;
-	jack_nframes_t          _transport_frame;
+	nframes_t          _transport_frame;
 	Location*                end_location;
 	Location*                start_location;
 	Slave                  *_slave;
 	volatile float          _transport_speed;
 	volatile float          _desired_transport_speed;
 	float                   _last_transport_speed;
-	jack_nframes_t          _last_slave_transport_frame;
-	jack_nframes_t           maximum_output_latency;
-	jack_nframes_t           last_stop_frame;
+	nframes_t          _last_slave_transport_frame;
+	nframes_t           maximum_output_latency;
+	nframes_t           last_stop_frame;
 	vector<Sample *>        _passthru_buffers;
 	vector<Sample *>        _silent_buffers;
 	vector<Sample *>        _send_buffers;
-	jack_nframes_t           current_block_size;
-	jack_nframes_t          _worst_output_latency;
-	jack_nframes_t          _worst_input_latency;
-	jack_nframes_t          _worst_track_latency;
+	nframes_t           current_block_size;
+	nframes_t          _worst_output_latency;
+	nframes_t          _worst_input_latency;
+	nframes_t          _worst_track_latency;
 	bool                    _have_captured;
 	float                   _meter_hold;
 	float                   _meter_falloff;
@@ -985,11 +985,11 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 
 	void ensure_passthru_buffers (uint32_t howmany);
 	
-	void process_scrub          (jack_nframes_t);
-	void process_without_events (jack_nframes_t);
-	void process_with_events    (jack_nframes_t);
-	void process_audition       (jack_nframes_t);
-	int  process_export         (jack_nframes_t, ARDOUR::AudioExportSpecification*);
+	void process_scrub          (nframes_t);
+	void process_without_events (nframes_t);
+	void process_with_events    (nframes_t);
+	void process_audition       (nframes_t);
+	int  process_export         (nframes_t, ARDOUR::AudioExportSpecification*);
 	
 	/* slave tracking */
 
@@ -1007,19 +1007,19 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	};
 	
 	SlaveState slave_state;
-	jack_nframes_t slave_wait_end;
+	nframes_t slave_wait_end;
 
 	void reset_slave_state ();
-	bool follow_slave (jack_nframes_t, jack_nframes_t);
+	bool follow_slave (nframes_t, nframes_t);
 	void set_slave_source (SlaveSource);
 
 	bool _exporting;
 	int prepare_to_export (ARDOUR::AudioExportSpecification&);
 
 	void prepare_diskstreams ();
-	void commit_diskstreams (jack_nframes_t, bool& session_requires_butler);
-	int  process_routes (jack_nframes_t, jack_nframes_t);
-	int  silent_process_routes (jack_nframes_t, jack_nframes_t);
+	void commit_diskstreams (nframes_t, bool& session_requires_butler);
+	int  process_routes (nframes_t, nframes_t);
+	int  silent_process_routes (nframes_t, nframes_t);
 
 	bool get_rec_monitors_input () {
 		if (actively_recording()) {
@@ -1045,7 +1045,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 		}
 	}
 
-	bool maybe_stop (jack_nframes_t limit) {
+	bool maybe_stop (nframes_t limit) {
 		if ((_transport_speed > 0.0f && _transport_frame >= limit) || (_transport_speed < 0.0f && _transport_frame == 0)) {
 			stop_transport ();
 			return true;
@@ -1053,7 +1053,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 		return false;
 	}
 
-	bool maybe_sync_start (jack_nframes_t&, jack_nframes_t&);
+	bool maybe_sync_start (nframes_t&, nframes_t&);
 
 	void check_declick_out ();
 
@@ -1068,7 +1068,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	bool                     session_midi_feedback;
 	bool                     play_loop;
 	bool                     loop_changing;
-	jack_nframes_t           last_loopend;
+	nframes_t           last_loopend;
 
 	RingBuffer<Event*> pending_events;
 
@@ -1088,10 +1088,10 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	XMLNode& get_options () const;
 	int      load_state (string snapshot_name);
 
-	jack_nframes_t   _last_roll_location;
-	jack_nframes_t   _last_record_location;
+	nframes_t   _last_roll_location;
+	nframes_t   _last_record_location;
 	bool              pending_locate_roll;
-	jack_nframes_t    pending_locate_frame;
+	nframes_t    pending_locate_frame;
 
 	bool              pending_locate_flush;
 	bool              pending_abort;
@@ -1156,7 +1156,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	uint32_t    rf_scale;
 
 	void set_rf_speed (float speed);
-	void reset_rf_scale (jack_nframes_t frames_moved);
+	void reset_rf_scale (nframes_t frames_moved);
 
 	Locations        _locations;
 	void              locations_changed ();
@@ -1191,7 +1191,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	void dump_events () const;
 	void queue_event (Event *ev);
 	void merge_event (Event*);
-	void replace_event (Event::Type, jack_nframes_t action_frame, jack_nframes_t target = 0);
+	void replace_event (Event::Type, nframes_t action_frame, nframes_t target = 0);
 	bool _replace_event (Event*);
 	bool _remove_event (Event *);
 	void _clear_event_type (Event::Type);
@@ -1232,7 +1232,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 
 	/* MIDI Machine Control */
 
-	void deliver_mmc (MIDI::MachineControl::Command, jack_nframes_t);
+	void deliver_mmc (MIDI::MachineControl::Command, nframes_t);
 	void deliver_midi_message (MIDI::Port * port, MIDI::eventType ev, MIDI::channel_t, MIDI::EventTwoBytes);
 	void deliver_data (MIDI::Port* port, MIDI::byte*, int32_t size);
 
@@ -1268,14 +1268,14 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	MIDI::byte mtc_msg[16];
 	MIDI::byte mtc_smpte_bits;   /* encoding of SMTPE type for MTC */
 	MIDI::byte midi_msg[16];
-	jack_nframes_t  outbound_mtc_smpte_frame;
+	nframes_t  outbound_mtc_smpte_frame;
 	SMPTE::Time transmitting_smpte_time;
 	int next_quarter_frame_to_send;
 	
 	double _frames_per_smpte_frame; /* has to be floating point because of drop frame */
-	jack_nframes_t _frames_per_hour;
-	jack_nframes_t _smpte_frames_per_hour;
-	jack_nframes_t _smpte_offset;
+	nframes_t _frames_per_hour;
+	nframes_t _smpte_frames_per_hour;
+	nframes_t _smpte_offset;
 	bool _smpte_offset_negative;
 	
 	/* cache the most-recently requested time conversions.
@@ -1284,7 +1284,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	*/
 
 	bool       last_smpte_valid;
-	jack_nframes_t  last_smpte_when;
+	nframes_t  last_smpte_when;
 	SMPTE::Time last_smpte;
 
 	int send_full_time_code ();
@@ -1293,13 +1293,13 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	void send_full_time_code_in_another_thread ();
 	void send_midi_time_code_in_another_thread ();
 	void send_time_code_in_another_thread (bool full);
-	void send_mmc_in_another_thread (MIDI::MachineControl::Command, jack_nframes_t frame = 0);
+	void send_mmc_in_another_thread (MIDI::MachineControl::Command, nframes_t frame = 0);
 
-	jack_nframes_t adjust_apparent_position (jack_nframes_t frames);
+	nframes_t adjust_apparent_position (nframes_t frames);
 	
 	void reset_record_status ();
 	
-	int no_roll (jack_nframes_t nframes, jack_nframes_t offset);
+	int no_roll (nframes_t nframes, nframes_t offset);
 	
 	bool non_realtime_work_pending() const { return static_cast<bool>(post_transport_work); }
 	bool process_can_proceed() const { return !(post_transport_work & ProcessCannotProceedMask); }
@@ -1318,7 +1318,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	    
 	    Type type;
 	    MIDI::MachineControl::Command mmc_cmd;
-	    jack_nframes_t locate_frame;
+	    nframes_t locate_frame;
 
 	    // for SendMessage type
 
@@ -1367,9 +1367,9 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	void set_play_loop (bool yn);
 	void overwrite_some_buffers (Diskstream*);
 	void flush_all_redirects ();
-	void locate (jack_nframes_t, bool with_roll, bool with_flush, bool with_loop=false);
-	void start_locate (jack_nframes_t, bool with_roll, bool with_flush, bool with_loop=false);
-	void force_locate (jack_nframes_t frame, bool with_roll = false);
+	void locate (nframes_t, bool with_roll, bool with_flush, bool with_loop=false);
+	void start_locate (nframes_t, bool with_roll, bool with_flush, bool with_loop=false);
+	void force_locate (nframes_t frame, bool with_roll = false);
 	void set_diskstream_speed (Diskstream*, float speed);
 	void set_transport_speed (float speed, bool abort = false);
 	void stop_transport (bool abort = false);
@@ -1502,7 +1502,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 
 	/* FLATTEN */
 
-	int flatten_one_track (AudioTrack&, jack_nframes_t start, jack_nframes_t cnt);
+	int flatten_one_track (AudioTrack&, nframes_t start, nframes_t cnt);
 
 	/* INSERT AND SEND MANAGEMENT */
 	
@@ -1576,7 +1576,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	void set_global_solo (GlobalRouteBooleanState s, void *src);
 	void set_global_record_enable (GlobalRouteBooleanState s, void *src);
 
-	void jack_timebase_callback (jack_transport_state_t, jack_nframes_t, jack_position_t*, int);
+	void jack_timebase_callback (jack_transport_state_t, nframes_t, jack_position_t*, int);
 	int  jack_sync_callback (jack_transport_state_t, jack_position_t*);
 	void record_enable_change_all (bool yn);
 
@@ -1585,12 +1585,12 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	/* click track */
 
 	struct Click {
-	    jack_nframes_t start;
-	    jack_nframes_t duration;
-	    jack_nframes_t offset;
+	    nframes_t start;
+	    nframes_t duration;
+	    nframes_t offset;
 	    const Sample *data;
 
-	    Click (jack_nframes_t s, jack_nframes_t d, const Sample *b) 
+	    Click (nframes_t s, nframes_t d, const Sample *b) 
 		    : start (s), duration (d), data (b) { offset = 0; }
 	    
 	    void *operator new(size_t ignored) {
@@ -1612,19 +1612,19 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	boost::shared_ptr<IO> _click_io;
 	Sample*         click_data;
 	Sample*         click_emphasis_data;
-	jack_nframes_t  click_length;
-	jack_nframes_t  click_emphasis_length;
+	nframes_t  click_length;
+	nframes_t  click_emphasis_length;
 	mutable Glib::RWLock click_lock;
 
 	static const Sample         default_click[];
-	static const jack_nframes_t default_click_length;
+	static const nframes_t default_click_length;
 	static const Sample         default_click_emphasis[];
-	static const jack_nframes_t default_click_emphasis_length;
+	static const nframes_t default_click_emphasis_length;
 
 	Click *get_click();
 	void   setup_click_sounds (int which);
 	void   clear_clicks ();
-	void   click (jack_nframes_t start, jack_nframes_t nframes, jack_nframes_t offset);
+	void   click (nframes_t start, nframes_t nframes, nframes_t offset);
 
 	vector<Route*> master_outs;
 	
@@ -1646,7 +1646,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 
 	gain_t* _gain_automation_buffer;
 	pan_t** _pan_automation_buffer;
-	void allocate_pan_automation_buffers (jack_nframes_t nframes, uint32_t howmany, bool force);
+	void allocate_pan_automation_buffers (nframes_t nframes, uint32_t howmany, bool force);
 	uint32_t _npan_buffers;
 
 	/* VST support */

@@ -157,7 +157,7 @@ Editor::update_current_screen ()
 {
 	if (session && engine.running()) {
 
-		jack_nframes_t frame;
+		nframes_t frame;
 
 		frame = session->audible_frame();
 

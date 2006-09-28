@@ -333,7 +333,7 @@ StreamView::update_rec_box ()
 	if (rec_active && rec_rects.size() > 0) {
 		/* only update the last box */
 		RecBoxInfo & rect = rec_rects.back();
-		jack_nframes_t at = _trackview.get_diskstream()->current_capture_end();
+		nframes_t at = _trackview.get_diskstream()->current_capture_end();
 		double xstart;
 		double xend;
 		
@@ -398,7 +398,7 @@ StreamView::set_selected_regionviews (RegionSelection& regions)
 }
 
 void
-StreamView::get_selectables (jack_nframes_t start, jack_nframes_t end, list<Selectable*>& results)
+StreamView::get_selectables (nframes_t start, nframes_t end, list<Selectable*>& results)
 {
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		if ((*i)->region()->coverage(start, end) != OverlapNone) {

@@ -57,7 +57,7 @@ int touch_file(std::string path);
 std::string region_name_from_path (std::string path);
 std::string path_expand (std::string);
 
-void compute_equal_power_fades (jack_nframes_t nframes, float* in, float* out);
+void compute_equal_power_fades (nframes_t nframes, float* in, float* out);
 
 const char* slave_source_to_string (ARDOUR::SlaveSource src);
 ARDOUR::SlaveSource string_to_slave_source (std::string str);

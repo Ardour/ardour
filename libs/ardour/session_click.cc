@@ -37,10 +37,10 @@ using namespace PBD;
 Pool Session::Click::pool ("click", sizeof (Click), 128);
 
 void
-Session::click (jack_nframes_t start, jack_nframes_t nframes, jack_nframes_t offset)
+Session::click (nframes_t start, nframes_t nframes, nframes_t offset)
 {
 	TempoMap::BBTPointList *points;
-	jack_nframes_t end;
+	nframes_t end;
 	Sample *buf;
 	vector<Sample*> bufs;
 
@@ -90,8 +90,8 @@ Session::click (jack_nframes_t start, jack_nframes_t nframes, jack_nframes_t off
 
 	for (list<Click*>::iterator i = clicks.begin(); i != clicks.end(); ) {
 
-		jack_nframes_t copy;
-		jack_nframes_t internal_offset;
+		nframes_t copy;
+		nframes_t internal_offset;
 		Click *clk;
 		list<Click*>::iterator next;
 

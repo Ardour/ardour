@@ -50,9 +50,9 @@ class MeterBridgeStrip : public sigc::trackable
 			  ARDOUR::Session&,
 			  ARDOUR::Route&,
 			  string label,
-			  jack_nframes_t long_over,
-			  jack_nframes_t short_over,
-			  jack_nframes_t meter_hold);
+			  nframes_t long_over,
+			  nframes_t short_over,
+			  nframes_t meter_hold);
 	
 	void update ();  /* called by meter timeout handler from ARDOUR_UI */
 

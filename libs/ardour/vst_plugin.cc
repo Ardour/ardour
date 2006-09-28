@@ -103,7 +103,7 @@ VSTPlugin::~VSTPlugin ()
 }
 
 void
-VSTPlugin::set_block_size (jack_nframes_t nframes)
+VSTPlugin::set_block_size (nframes_t nframes)
 {
 	deactivate ();
 	_plugin->dispatcher (_plugin, effSetBlockSize, 0, nframes, NULL, 0.0f);
@@ -357,7 +357,7 @@ VSTPlugin::describe_parameter (uint32_t param)
 	return name;
 }
 
-jack_nframes_t
+nframes_t
 VSTPlugin::latency () const
 {
 	return _plugin->initialDelay;
@@ -376,7 +376,7 @@ VSTPlugin::automatable () const
 }
 
 int
-VSTPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in_index, int32_t& out_index, jack_nframes_t nframes, jack_nframes_t offset)
+VSTPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in_index, int32_t& out_index, nframes_t nframes, nframes_t offset)
 {
 	float *ins[_plugin->numInputs];
 	float *outs[_plugin->numOutputs];

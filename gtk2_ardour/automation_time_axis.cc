@@ -602,7 +602,7 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 }
 
 bool
-AutomationTimeAxisView::paste (jack_nframes_t pos, float times, Selection& selection, size_t nth)
+AutomationTimeAxisView::paste (nframes_t pos, float times, Selection& selection, size_t nth)
 {
 	bool ret = true;
 
@@ -614,7 +614,7 @@ AutomationTimeAxisView::paste (jack_nframes_t pos, float times, Selection& selec
 }
 
 bool
-AutomationTimeAxisView::paste_one (AutomationLine& line, jack_nframes_t pos, float times, Selection& selection, size_t nth)
+AutomationTimeAxisView::paste_one (AutomationLine& line, nframes_t pos, float times, Selection& selection, size_t nth)
 {
 	AutomationSelection::iterator p;
 	AutomationList& alist (line.the_list());
@@ -670,7 +670,7 @@ AutomationTimeAxisView::remove_ghost (GhostRegion* gr)
 }
 
 void
-AutomationTimeAxisView::get_selectables (jack_nframes_t start, jack_nframes_t end, double top, double bot, list<Selectable*>& results)
+AutomationTimeAxisView::get_selectables (nframes_t start, nframes_t end, double top, double bot, list<Selectable*>& results)
 {
 	if (!lines.empty() && touched (top, bot)) {
 		double topfrac;

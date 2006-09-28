@@ -148,7 +148,7 @@ RegionSelection::remove (RegionView* rv)
 				
 				/* reset current start */
 				
-				jack_nframes_t ref = max_frames;
+				nframes_t ref = max_frames;
 				
 				for (i = begin (); i != end(); ++i) {
 					if (region->first_frame() < ref) {
@@ -164,7 +164,7 @@ RegionSelection::remove (RegionView* rv)
 
 				/* reset current end */
 				
-				jack_nframes_t ref = 0;
+				nframes_t ref = 0;
 				
 				for (i = begin (); i != end(); ++i) {
 					if (region->first_frame() > ref) {

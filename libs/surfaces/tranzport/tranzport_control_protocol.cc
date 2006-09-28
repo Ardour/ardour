@@ -320,7 +320,7 @@ TranzportControlProtocol::show_meter ()
 void
 TranzportControlProtocol::show_transport_time ()
 {
-	jack_nframes_t where = session->transport_frame();
+	nframes_t where = session->transport_frame();
 	
 	if (where != last_where) {
 

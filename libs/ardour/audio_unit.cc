@@ -112,7 +112,7 @@ AUPlugin::default_value (uint32_t port)
 	return 0;
 }
 
-jack_nframes_t
+nframes_t
 AUPlugin::latency () const
 {
 	return unit->Latency ();
@@ -159,13 +159,13 @@ AUPlugin::deactivate ()
 }
 
 void
-AUPlugin::set_block_size (jack_nframes_t nframes)
+AUPlugin::set_block_size (nframes_t nframes)
 {
 	
 }
 
 int
-AUPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, int32_t& out, jack_nframes_t nframes, jack_nframes_t offset)
+AUPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, int32_t& out, nframes_t nframes, nframes_t offset)
 {
 	AudioUnitRenderActionFlags flags = 0;
 	AudioTimeStamp ts;

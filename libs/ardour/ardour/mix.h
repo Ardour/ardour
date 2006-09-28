@@ -28,47 +28,47 @@
 
 extern "C" {
 /* SSE functions */
-	float x86_sse_compute_peak			(ARDOUR::Sample *buf, jack_nframes_t nsamples, float current);
+	float x86_sse_compute_peak			(ARDOUR::Sample *buf, nframes_t nsamples, float current);
 
-	void  x86_sse_apply_gain_to_buffer	(ARDOUR::Sample *buf, jack_nframes_t nframes, float gain);
+	void  x86_sse_apply_gain_to_buffer	(ARDOUR::Sample *buf, nframes_t nframes, float gain);
 
-	void  x86_sse_mix_buffers_with_gain	(ARDOUR::Sample *dst, ARDOUR::Sample *src, jack_nframes_t nframes, float gain);
+	void  x86_sse_mix_buffers_with_gain	(ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes, float gain);
 
-	void  x86_sse_mix_buffers_no_gain	(ARDOUR::Sample *dst, ARDOUR::Sample *src, jack_nframes_t nframes);
+	void  x86_sse_mix_buffers_no_gain	(ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes);
 }
 
 /* debug wrappers for SSE functions */
 
-float debug_compute_peak			(ARDOUR::Sample *buf, jack_nframes_t nsamples, float current);
+float debug_compute_peak			(ARDOUR::Sample *buf, nframes_t nsamples, float current);
 
-void  debug_apply_gain_to_buffer	(ARDOUR::Sample *buf, jack_nframes_t nframes, float gain);
+void  debug_apply_gain_to_buffer	(ARDOUR::Sample *buf, nframes_t nframes, float gain);
 
-void  debug_mix_buffers_with_gain	(ARDOUR::Sample *dst, ARDOUR::Sample *src, jack_nframes_t nframes, float gain);
+void  debug_mix_buffers_with_gain	(ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes, float gain);
 
-void  debug_mix_buffers_no_gain		(ARDOUR::Sample *dst, ARDOUR::Sample *src, jack_nframes_t nframes);
+void  debug_mix_buffers_no_gain		(ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes);
 
 #endif
 
 #if defined (__APPLE__)
 
-float veclib_compute_peak              (ARDOUR::Sample *buf, jack_nframes_t nsamples, float current);
+float veclib_compute_peak              (ARDOUR::Sample *buf, nframes_t nsamples, float current);
 
-void  veclib_apply_gain_to_buffer      (ARDOUR::Sample *buf, jack_nframes_t nframes, float gain);
+void  veclib_apply_gain_to_buffer      (ARDOUR::Sample *buf, nframes_t nframes, float gain);
 
-void  veclib_mix_buffers_with_gain     (ARDOUR::Sample *dst, ARDOUR::Sample *src, jack_nframes_t nframes, float gain);
+void  veclib_mix_buffers_with_gain     (ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes, float gain);
 
-void  veclib_mix_buffers_no_gain       (ARDOUR::Sample *dst, ARDOUR::Sample *src, jack_nframes_t nframes);
+void  veclib_mix_buffers_no_gain       (ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes);
 
 #endif
 
 /* non-optimized functions */
 
-float compute_peak			(ARDOUR::Sample *buf, jack_nframes_t nsamples, float current);
+float compute_peak			(ARDOUR::Sample *buf, nframes_t nsamples, float current);
 
-void  apply_gain_to_buffer	(ARDOUR::Sample *buf, jack_nframes_t nframes, float gain);
+void  apply_gain_to_buffer	(ARDOUR::Sample *buf, nframes_t nframes, float gain);
 
-void  mix_buffers_with_gain	(ARDOUR::Sample *dst, ARDOUR::Sample *src, jack_nframes_t nframes, float gain);
+void  mix_buffers_with_gain	(ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes, float gain);
 
-void  mix_buffers_no_gain	(ARDOUR::Sample *dst, ARDOUR::Sample *src, jack_nframes_t nframes);
+void  mix_buffers_no_gain	(ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes);
 
 #endif /* __ardour_mix_h__ */

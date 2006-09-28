@@ -47,11 +47,11 @@ class AudioClock : public Gtk::HBox
 
 	Mode mode() const { return _mode; }
 	
-	void set (jack_nframes_t, bool force = false);
+	void set (nframes_t, bool force = false);
 	void set_mode (Mode);
 
-	jack_nframes_t current_time (jack_nframes_t position = 0) const;
-	jack_nframes_t current_duration (jack_nframes_t position = 0) const;
+	nframes_t current_time (nframes_t position = 0) const;
+	nframes_t current_duration (nframes_t position = 0) const;
 	void set_session (ARDOUR::Session *s);
 
 	sigc::signal<void> ValueChanged;
@@ -131,7 +131,7 @@ class AudioClock : public Gtk::HBox
 	Gtk::EventBox  clock_base;
 	Gtk::Frame     clock_frame;
 
-	jack_nframes_t last_when;
+	nframes_t last_when;
 
 	uint32_t last_hrs;
 	uint32_t last_mins;
@@ -158,19 +158,19 @@ class AudioClock : public Gtk::HBox
 	bool field_focus_in_event (GdkEventFocus *, Field);
 	bool field_focus_out_event (GdkEventFocus *, Field);
 
-	void set_smpte (jack_nframes_t, bool);
-	void set_bbt (jack_nframes_t, bool);
-	void set_minsec (jack_nframes_t, bool);
-	void set_frames (jack_nframes_t, bool);
+	void set_smpte (nframes_t, bool);
+	void set_bbt (nframes_t, bool);
+	void set_minsec (nframes_t, bool);
+	void set_frames (nframes_t, bool);
 
-	jack_nframes_t get_frames (Field,jack_nframes_t pos = 0,int dir=1);
+	nframes_t get_frames (Field,nframes_t pos = 0,int dir=1);
 	
 	void smpte_sanitize_display();
-	jack_nframes_t smpte_frame_from_display () const;
-	jack_nframes_t bbt_frame_from_display (jack_nframes_t) const;
-	jack_nframes_t bbt_frame_duration_from_display (jack_nframes_t) const;
-	jack_nframes_t minsec_frame_from_display () const;
-	jack_nframes_t audio_frame_from_display () const;
+	nframes_t smpte_frame_from_display () const;
+	nframes_t bbt_frame_from_display (nframes_t) const;
+	nframes_t bbt_frame_duration_from_display (nframes_t) const;
+	nframes_t minsec_frame_from_display () const;
+	nframes_t audio_frame_from_display () const;
 
 	void build_ops_menu ();
 	void setup_events ();

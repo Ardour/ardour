@@ -406,7 +406,7 @@ Redirect::mark_automation_visible (uint32_t what, bool yn)
 }
 
 bool
-Redirect::find_next_event (jack_nframes_t now, jack_nframes_t end, ControlEvent& next_event) const
+Redirect::find_next_event (nframes_t now, nframes_t end, ControlEvent& next_event) const
 {
 	map<uint32_t,AutomationList*>::const_iterator li;	
 	AutomationList::TimeComparator cmp;

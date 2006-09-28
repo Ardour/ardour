@@ -22,7 +22,7 @@ class PanAutomationTimeAxisView : public AutomationTimeAxisView
 
 		~PanAutomationTimeAxisView();
 
-		void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, jack_nframes_t, double);
+		void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, nframes_t, double);
 
 		void clear_lines ();
 		void add_line (AutomationLine&);

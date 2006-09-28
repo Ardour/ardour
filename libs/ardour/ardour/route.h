@@ -89,14 +89,14 @@ class Route : public IO
 	/* these are the core of the API of a Route. see the protected sections as well */
 
 
-	virtual int  roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, 
-			   jack_nframes_t offset, int declick, bool can_record, bool rec_monitors_input);
+	virtual int  roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
+			   nframes_t offset, int declick, bool can_record, bool rec_monitors_input);
 
-	virtual int  no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, 
-			      jack_nframes_t offset, bool state_changing, bool can_record, bool rec_monitors_input);
+	virtual int  no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
+			      nframes_t offset, bool state_changing, bool can_record, bool rec_monitors_input);
 
-	virtual int  silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, 
-				  jack_nframes_t offset, bool can_record, bool rec_monitors_input);
+	virtual int  silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
+				  nframes_t offset, bool can_record, bool rec_monitors_input);
 	virtual void toggle_monitor_input ();
 	virtual bool can_record() { return false; }
 	virtual void set_record_enable (bool yn, void *src) {}
@@ -174,9 +174,9 @@ class Route : public IO
 	void all_redirects_flip();
 	void all_redirects_active (bool state);
 
-	virtual jack_nframes_t update_total_latency();
-	jack_nframes_t signal_latency() const { return _own_latency; }
-	virtual void set_latency_delay (jack_nframes_t);
+	virtual nframes_t update_total_latency();
+	nframes_t signal_latency() const { return _own_latency; }
+	virtual void set_latency_delay (nframes_t);
 
 	sigc::signal<void,void*> solo_changed;
 	sigc::signal<void,void*> solo_safe_changed;
@@ -238,7 +238,7 @@ class Route : public IO
 		return _mute_control;
 	}
 	
-	void automation_snapshot (jack_nframes_t now);
+	void automation_snapshot (nframes_t now);
 
 	void protect_automation ();
 	
@@ -250,7 +250,7 @@ class Route : public IO
 	friend class Session;
 
 	void set_solo_mute (bool yn);
-	void set_block_size (jack_nframes_t nframes);
+	void set_block_size (nframes_t nframes);
 	bool has_external_redirects() const;
 	void curve_reallocate ();
 
@@ -283,11 +283,11 @@ class Route : public IO
 	gain_t                    desired_solo_gain;
 	gain_t                    desired_mute_gain;
 
-	jack_nframes_t            check_initial_delay (jack_nframes_t, jack_nframes_t&, jack_nframes_t&);
+	nframes_t            check_initial_delay (nframes_t, nframes_t&, nframes_t&);
 
-	jack_nframes_t           _initial_delay;
-	jack_nframes_t           _roll_delay;
-	jack_nframes_t           _own_latency;
+	nframes_t           _initial_delay;
+	nframes_t           _roll_delay;
+	nframes_t           _own_latency;
 	RedirectList             _redirects;
 	Glib::RWLock      redirect_lock;
 	IO                      *_control_outs;
@@ -300,12 +300,12 @@ class Route : public IO
 	ToggleControllable _solo_control;
 	ToggleControllable _mute_control;
 	
-	void passthru (jack_nframes_t start_frame, jack_nframes_t end_frame, 
-		       jack_nframes_t nframes, jack_nframes_t offset, int declick, bool meter_inputs);
+	void passthru (nframes_t start_frame, nframes_t end_frame, 
+		       nframes_t nframes, nframes_t offset, int declick, bool meter_inputs);
 
 	void process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
-				     jack_nframes_t start_frame, jack_nframes_t end_frame,
-				     jack_nframes_t nframes, jack_nframes_t offset, bool with_redirects, int declick,
+				     nframes_t start_frame, nframes_t end_frame,
+				     nframes_t nframes, nframes_t offset, bool with_redirects, int declick,
 				     bool meter);
 
   protected:
@@ -313,7 +313,7 @@ class Route : public IO
 
 	virtual XMLNode& state(bool);
 
-	void silence (jack_nframes_t nframes, jack_nframes_t offset);
+	void silence (nframes_t nframes, nframes_t offset);
 	sigc::connection input_signal_connection;
 
 	state_id_t _current_state_id;

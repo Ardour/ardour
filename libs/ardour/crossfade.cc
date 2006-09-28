@@ -35,7 +35,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-jack_nframes_t Crossfade::_short_xfade_length = 0;
+nframes_t Crossfade::_short_xfade_length = 0;
 Change Crossfade::ActiveChanged = new_change();
 
 /* XXX if and when we ever implement parallel processing of the process()
@@ -46,7 +46,7 @@ Sample* Crossfade::crossfade_buffer_out = 0;
 Sample* Crossfade::crossfade_buffer_in = 0;
 
 void
-Crossfade::set_buffer_size (jack_nframes_t sz)
+Crossfade::set_buffer_size (nframes_t sz)
 {
 	if (crossfade_buffer_out) {
 		delete [] crossfade_buffer_out;
@@ -71,8 +71,8 @@ Crossfade::operator== (const Crossfade& other)
 }
 
 Crossfade::Crossfade (boost::shared_ptr<AudioRegion> in, boost::shared_ptr<AudioRegion> out, 
-		      jack_nframes_t length,
-		      jack_nframes_t position,
+		      nframes_t length,
+		      nframes_t position,
 		      AnchorPoint ap)
 	: _fade_in (0.0, 2.0, 1.0), // linear (gain coefficient) => -inf..+6dB
 	  _fade_out (0.0, 2.0, 1.0) // linear (gain coefficient) => -inf..+6dB
@@ -240,7 +240,7 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 {
 	boost::shared_ptr<AudioRegion> top;
 	boost::shared_ptr<AudioRegion> bottom;
-	jack_nframes_t short_xfade_length;
+	nframes_t short_xfade_length;
 
 	short_xfade_length = _short_xfade_length; 
 
@@ -400,13 +400,13 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 	return 0;
 }
 
-jack_nframes_t 
+nframes_t 
 Crossfade::read_at (Sample *buf, Sample *mixdown_buffer, 
-		    float *gain_buffer, jack_nframes_t start, jack_nframes_t cnt, uint32_t chan_n,
-		    jack_nframes_t read_frames, jack_nframes_t skip_frames)
+		    float *gain_buffer, nframes_t start, nframes_t cnt, uint32_t chan_n,
+		    nframes_t read_frames, nframes_t skip_frames)
 {
-	jack_nframes_t offset;
-	jack_nframes_t to_write;
+	nframes_t offset;
+	nframes_t to_write;
 
 	if (!_active) {
 		return 0;
@@ -453,7 +453,7 @@ Crossfade::read_at (Sample *buf, Sample *mixdown_buffer,
 	   position and length, and so we know precisely how much data they could return. 
 	*/
 
-	for (jack_nframes_t n = 0; n < to_write; ++n) {
+	for (nframes_t n = 0; n < to_write; ++n) {
 		buf[n] = (crossfade_buffer_out[n] * fov[n]) + (crossfade_buffer_in[n] * fiv[n]);
 	}
 
@@ -464,9 +464,9 @@ Crossfade::read_at (Sample *buf, Sample *mixdown_buffer,
 }	
 
 OverlapType 
-Crossfade::coverage (jack_nframes_t start, jack_nframes_t end) const
+Crossfade::coverage (nframes_t start, nframes_t end) const
 {
-	jack_nframes_t my_end = _position + _length;
+	nframes_t my_end = _position + _length;
 
 	if ((start >= _position) && (end <= my_end)) {
 		return OverlapInternal;
@@ -534,7 +534,7 @@ Crossfade::refresh ()
 bool
 Crossfade::update (bool force)
 {
-	jack_nframes_t newlen;
+	nframes_t newlen;
 	bool save = false;
 
 	if (_follow_overlap) {
@@ -700,7 +700,7 @@ Crossfade::get_state ()
 
 		pnode = new XMLNode ("point");
 
-		snprintf (buf, sizeof (buf), "%" PRIu32, (jack_nframes_t) floor ((*ii)->when));
+		snprintf (buf, sizeof (buf), "%" PRIu32, (nframes_t) floor ((*ii)->when));
 		pnode->add_property ("x", buf);
 		snprintf (buf, sizeof (buf), "%.12g", (*ii)->value);
 		pnode->add_property ("y", buf);
@@ -714,7 +714,7 @@ Crossfade::get_state ()
 
 		pnode = new XMLNode ("point");
 
-		snprintf (buf, sizeof (buf), "%" PRIu32, (jack_nframes_t) floor ((*ii)->when));
+		snprintf (buf, sizeof (buf), "%" PRIu32, (nframes_t) floor ((*ii)->when));
 		pnode->add_property ("x", buf);
 		snprintf (buf, sizeof (buf), "%.12g", (*ii)->value);
 		pnode->add_property ("y", buf);
@@ -796,7 +796,7 @@ Crossfade::set_state (const XMLNode& node)
 	
 	for (i = children.begin(); i != children.end(); ++i) {
 		if ((*i)->name() == "point") {
-			jack_nframes_t x;
+			nframes_t x;
 			float y;
 			
 			prop = (*i)->property ("x");
@@ -817,7 +817,7 @@ Crossfade::set_state (const XMLNode& node)
 	
 	for (i = children.begin(); i != children.end(); ++i) {
 		if ((*i)->name() == "point") {
-			jack_nframes_t x;
+			nframes_t x;
 			float y;
 			XMLProperty* prop;
 
@@ -856,10 +856,10 @@ Crossfade::set_follow_overlap (bool yn)
 	}
 }
 
-jack_nframes_t
-Crossfade::set_length (jack_nframes_t len)
+nframes_t
+Crossfade::set_length (nframes_t len)
 {
-	jack_nframes_t limit;
+	nframes_t limit;
 
 	switch (_anchor_point) {
 	case StartOfIn:
@@ -894,7 +894,7 @@ Crossfade::set_length (jack_nframes_t len)
 	return len;
 }
 
-jack_nframes_t
+nframes_t
 Crossfade::overlap_length () const
 {
 	if (_fixed) {
@@ -904,7 +904,7 @@ Crossfade::overlap_length () const
 }
 
 void
-Crossfade::set_short_xfade_length (jack_nframes_t n)
+Crossfade::set_short_xfade_length (nframes_t n)
 {
 	_short_xfade_length = n;
 }

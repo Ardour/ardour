@@ -234,7 +234,7 @@ Selection::toggle (vector<RegionView*>& r)
 }
 
 long
-Selection::toggle (jack_nframes_t start, jack_nframes_t end)
+Selection::toggle (nframes_t start, nframes_t end)
 {
 	AudioRangeComparator cmp;
 
@@ -344,7 +344,7 @@ Selection::add (vector<RegionView*>& v)
 }
 
 long
-Selection::add (jack_nframes_t start, jack_nframes_t end)
+Selection::add (nframes_t start, nframes_t end)
 {
 	AudioRangeComparator cmp;
 
@@ -360,7 +360,7 @@ Selection::add (jack_nframes_t start, jack_nframes_t end)
 }
 
 void
-Selection::replace (uint32_t sid, jack_nframes_t start, jack_nframes_t end)
+Selection::replace (uint32_t sid, nframes_t start, nframes_t end)
 {
 	for (list<AudioRange>::iterator i = time.begin(); i != time.end(); ++i) {
 		if ((*i).id == sid) {
@@ -484,7 +484,7 @@ Selection::remove (uint32_t selection_id)
 }
 
 void
-Selection::remove (jack_nframes_t start, jack_nframes_t end)
+Selection::remove (nframes_t start, nframes_t end)
 {
 }
 
@@ -550,7 +550,7 @@ Selection::set (vector<RegionView*>& v)
 }
 
 long
-Selection::set (TimeAxisView* track, jack_nframes_t start, jack_nframes_t end)
+Selection::set (TimeAxisView* track, nframes_t start, nframes_t end)
 {
 	if ((start == 0 && end == 0) || end < start) {
 		return 0;

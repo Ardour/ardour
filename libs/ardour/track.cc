@@ -88,7 +88,7 @@ Track::toggle_monitor_input ()
 	}
 }
 
-jack_nframes_t
+nframes_t
 Track::update_total_latency ()
 {
 	_own_latency = 0;
@@ -218,7 +218,7 @@ Track::set_name (string str, void *src)
 }
 
 void
-Track::set_latency_delay (jack_nframes_t longest_session_latency)
+Track::set_latency_delay (nframes_t longest_session_latency)
 {
 	Route::set_latency_delay (longest_session_latency);
 	_diskstream->set_roll_delay (_roll_delay);

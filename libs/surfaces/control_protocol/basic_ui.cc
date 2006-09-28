@@ -79,7 +79,7 @@ BasicUI::goto_end ()
 void       
 BasicUI::add_marker ()
 {
-	jack_nframes_t when = session->audible_frame();
+	nframes_t when = session->audible_frame();
 	session->locations()->add (new Location (when, when, _("unnamed"), Location::IsMark));
 }
 
@@ -233,14 +233,14 @@ BasicUI::set_record_enable (bool yn)
 	}
 }
 
-jack_nframes_t
+nframes_t
 BasicUI::transport_frame ()
 {
 	return session->transport_frame();
 }
 
 void
-BasicUI::locate (jack_nframes_t where, bool roll_after_locate)
+BasicUI::locate (nframes_t where, bool roll_after_locate)
 {
 	session->request_locate (where, roll_after_locate);
 }
@@ -257,26 +257,26 @@ BasicUI::locked ()
 	return session->transport_locked ();
 }
 
-jack_nframes_t
+nframes_t
 BasicUI::smpte_frames_per_hour ()
 {
 	return session->smpte_frames_per_hour ();
 }
 
 void
-BasicUI::smpte_time (jack_nframes_t where, SMPTE::Time& smpte)
+BasicUI::smpte_time (nframes_t where, SMPTE::Time& smpte)
 {
 	session->smpte_time (where, *((SMPTE::Time *) &smpte));
 }
 
 void 
-BasicUI::smpte_to_sample (SMPTE::Time& smpte, jack_nframes_t& sample, bool use_offset, bool use_subframes) const
+BasicUI::smpte_to_sample (SMPTE::Time& smpte, nframes_t& sample, bool use_offset, bool use_subframes) const
 {
 	session->smpte_to_sample (*((SMPTE::Time*)&smpte), sample, use_offset, use_subframes);
 }
 
 void 
-BasicUI::sample_to_smpte (jack_nframes_t sample, SMPTE::Time& smpte, bool use_offset, bool use_subframes) const
+BasicUI::sample_to_smpte (nframes_t sample, SMPTE::Time& smpte, bool use_offset, bool use_subframes) const
 {
 	session->sample_to_smpte (sample, *((SMPTE::Time*)&smpte), use_offset, use_subframes);
 }

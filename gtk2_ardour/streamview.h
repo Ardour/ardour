@@ -44,8 +44,8 @@ namespace ARDOUR {
 
 struct RecBoxInfo {
 	ArdourCanvas::SimpleRect* rectangle;
-	jack_nframes_t            start;
-	jack_nframes_t            length;
+	nframes_t            start;
+	nframes_t            length;
 };
 
 class PublicEditor;
@@ -87,7 +87,7 @@ public:
 	void         foreach_regionview (sigc::slot<void,RegionView*> slot);
 
 	void set_selected_regionviews (RegionSelection&);
-	void get_selectables (jack_nframes_t start, jack_nframes_t end, list<Selectable* >&);
+	void get_selectables (nframes_t start, nframes_t end, list<Selectable* >&);
 	void get_inverted_selectables (Selection&, list<Selectable* >& results);
 
 	void add_region_view (boost::shared_ptr<ARDOUR::Region>);

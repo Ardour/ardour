@@ -25,7 +25,7 @@ class RedirectAutomationTimeAxisView : public AutomationTimeAxisView
 
 	~RedirectAutomationTimeAxisView();
 	
-	void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, jack_nframes_t, double);
+	void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, nframes_t, double);
 
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	void hide ();

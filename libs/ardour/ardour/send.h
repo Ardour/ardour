@@ -40,7 +40,7 @@ class Send : public Redirect {
 	Send (const Send&);
 	~Send ();
 	
-	void run (vector<Sample *> &bufs, uint32_t nbufs, jack_nframes_t nframes, jack_nframes_t offset);
+	void run (vector<Sample *> &bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset);
 	void activate() {}
 	void deactivate () {}
 

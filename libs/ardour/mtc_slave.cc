@@ -68,8 +68,8 @@ void
 MTC_Slave::update_mtc_qtr (Parser& p)
 {
 	cycles_t cnow = get_cycles ();
-	jack_nframes_t now = session.engine().frame_time();
-	jack_nframes_t qtr;
+	nframes_t now = session.engine().frame_time();
+	nframes_t qtr;
 	static cycles_t last_qtr = 0;
 
 	qtr = (long) (session.frames_per_smpte_frame() / 4);
@@ -87,7 +87,7 @@ MTC_Slave::update_mtc_qtr (Parser& p)
 void
 MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 {
-	jack_nframes_t now = session.engine().frame_time();
+	nframes_t now = session.engine().frame_time();
 	SMPTE::Time smpte;
 	
 	smpte.hours = msg[3];
@@ -217,12 +217,12 @@ MTC_Slave::ok() const
 }
 
 bool 
-MTC_Slave::speed_and_position (float& speed, jack_nframes_t& pos)
+MTC_Slave::speed_and_position (float& speed, nframes_t& pos)
 {
-	jack_nframes_t now = session.engine().frame_time();
+	nframes_t now = session.engine().frame_time();
 	SafeTime last;
-	jack_nframes_t frame_rate;
-	jack_nframes_t elapsed;
+	nframes_t frame_rate;
+	nframes_t elapsed;
 	float speed_now;
 
 	read_current (&last);
@@ -279,7 +279,7 @@ MTC_Slave::speed_and_position (float& speed, jack_nframes_t& pos)
 		/* scale elapsed time by the current MTC speed */
 		
 		if (last.timestamp && (now > last.timestamp)) {
-			elapsed = (jack_nframes_t) floor (mtc_speed * (now - last.timestamp));
+			elapsed = (nframes_t) floor (mtc_speed * (now - last.timestamp));
 		} else {
 			elapsed = 0; /* XXX is this right? */
 		}
@@ -293,10 +293,10 @@ MTC_Slave::speed_and_position (float& speed, jack_nframes_t& pos)
 	return true;
 }
 
-jack_nframes_t
+nframes_t
 MTC_Slave::resolution() const
 {
-	return (jack_nframes_t) session.frames_per_smpte_frame();
+	return (nframes_t) session.frames_per_smpte_frame();
 }
 
 void

@@ -248,7 +248,7 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 				
 				for (std::list<ARDOUR::AudioRange>::iterator j = ts.begin(); j != ts.end(); ++j) {
 
-					jack_nframes_t i = 0;
+					nframes_t i = 0;
 					int n;
 			
 					while ( i < (*j).length() ) {
@@ -289,7 +289,7 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 						continue;
 
 //					cerr << " - " << (*j)->region().name() << ": " << (*j)->region().length() << " samples starting at " << (*j)->region().position() << endl;
-					jack_nframes_t i = 0;
+					nframes_t i = 0;
 					int n;
 
 					while ( i < arv->region()->length() ) {

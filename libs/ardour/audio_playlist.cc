@@ -115,7 +115,7 @@ AudioPlaylist::AudioPlaylist (const AudioPlaylist& other, string name, bool hidd
 	}
 }
 
-AudioPlaylist::AudioPlaylist (const AudioPlaylist& other, jack_nframes_t start, jack_nframes_t cnt, string name, bool hidden)
+AudioPlaylist::AudioPlaylist (const AudioPlaylist& other, nframes_t start, nframes_t cnt, string name, bool hidden)
 	: Playlist (other, start, cnt, name, hidden)
 {
 	save_state (_("initial state"));
@@ -162,14 +162,14 @@ struct RegionSortByLayer {
     }
 };
 
-jack_nframes_t
-AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, jack_nframes_t start,
-		     jack_nframes_t cnt, unsigned chan_n)
+nframes_t
+AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nframes_t start,
+		     nframes_t cnt, unsigned chan_n)
 {
-	jack_nframes_t ret = cnt;
-	jack_nframes_t end;
-	jack_nframes_t read_frames;
-	jack_nframes_t skip_frames;
+	nframes_t ret = cnt;
+	nframes_t end;
+	nframes_t read_frames;
+	nframes_t skip_frames;
 
 	/* optimizing this memset() away involves a lot of conditionals
 	   that may well cause more of a hit due to cache misses 
@@ -204,7 +204,6 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, ja
 
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 		if ((*i)->coverage (start, end) != OverlapNone) {
-			
 			relevant_regions[(*i)->layer()].push_back (*i);
 			relevant_layers.push_back ((*i)->layer());
 		}
@@ -440,7 +439,7 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 					   audio engineering.
 					*/
 					
-					jack_nframes_t xfade_length = min ((jack_nframes_t) 720, top->length());
+					nframes_t xfade_length = min ((nframes_t) 720, top->length());
 					
 					                    /*  in,      out */
 					xfade = new Crossfade (top, bottom, xfade_length, top->first_frame(), StartOfIn);
@@ -882,12 +881,12 @@ AudioPlaylist::region_changed (Change what_changed, boost::shared_ptr<Region> re
 }
 
 void
-AudioPlaylist::crossfades_at (jack_nframes_t frame, Crossfades& clist)
+AudioPlaylist::crossfades_at (nframes_t frame, Crossfades& clist)
 {
 	RegionLock rlock (this);
 
 	for (Crossfades::iterator i = _crossfades.begin(); i != _crossfades.end(); ++i) {
-		jack_nframes_t start, end;
+		nframes_t start, end;
 
 		start = (*i)->position();
 		end = start + (*i)->overlap_length(); // not length(), important difference

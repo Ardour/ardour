@@ -412,7 +412,7 @@ AudioStreamView::setup_rec_box ()
 
 				// handle multi
 				
-				jack_nframes_t start = 0;
+				nframes_t start = 0;
 				if (rec_regions.size() > 0) {
 					start = rec_regions.back()->start() + _trackview.get_diskstream()->get_captured_frames(rec_regions.size()-1);
 				}
@@ -433,7 +433,7 @@ AudioStreamView::setup_rec_box ()
 
 			at = _trackview.audio_track(); /* we know what it is already */
 			boost::shared_ptr<AudioDiskstream> ds = at->audio_diskstream();
-			jack_nframes_t frame_pos = ds->current_capture_start ();
+			nframes_t frame_pos = ds->current_capture_start ();
 			gdouble xstart = _trackview.editor.frame_to_pixel (frame_pos);
 			gdouble xend;
 			uint32_t fill_color;
@@ -537,7 +537,7 @@ AudioStreamView::foreach_crossfadeview (void (CrossfadeView::*pmf)(void))
 }
 
 void
-AudioStreamView::rec_peak_range_ready (jack_nframes_t start, jack_nframes_t cnt, boost::shared_ptr<Source> src)
+AudioStreamView::rec_peak_range_ready (nframes_t start, nframes_t cnt, boost::shared_ptr<Source> src)
 {
 	// this is called from the peak building thread
 
@@ -580,13 +580,13 @@ AudioStreamView::update_rec_regions ()
 				continue;
 			}
 
-			jack_nframes_t origlen = region->length();
+			nframes_t origlen = region->length();
 
 			if (region == rec_regions.back() && rec_active) {
 
 				if (last_rec_peak_frame > region->start()) {
 
-					jack_nframes_t nlen = last_rec_peak_frame - region->start();
+					nframes_t nlen = last_rec_peak_frame - region->start();
 
 					if (nlen != region->length()) {
 
@@ -609,7 +609,7 @@ AudioStreamView::update_rec_regions ()
 
 			} else {
 
-				jack_nframes_t nlen = _trackview.get_diskstream()->get_captured_frames(n);
+				nframes_t nlen = _trackview.get_diskstream()->get_captured_frames(n);
 
 				if (nlen != region->length()) {
 

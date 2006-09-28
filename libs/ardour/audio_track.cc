@@ -405,14 +405,14 @@ AudioTrack::n_process_buffers ()
 }
 
 void
-AudioTrack::passthru_silence (jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset, int declick, bool meter)
+AudioTrack::passthru_silence (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset, int declick, bool meter)
 {
 	uint32_t nbufs = n_process_buffers ();
 	process_output_buffers (_session.get_silent_buffers (nbufs), nbufs, start_frame, end_frame, nframes, offset, true, declick, meter);
 }
 
 int 
-AudioTrack::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, 
+AudioTrack::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
 		     bool session_state_changing, bool can_record, bool rec_monitors_input)
 {
 	if (n_outputs() == 0) {
@@ -492,13 +492,13 @@ AudioTrack::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nf
 }
 
 int
-AudioTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, int declick,
+AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, int declick,
 		  bool can_record, bool rec_monitors_input)
 {
 	int dret;
 	Sample* b;
 	Sample* tmpb;
-	jack_nframes_t transport_frame;
+	nframes_t transport_frame;
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
 	
 	{
@@ -604,7 +604,7 @@ AudioTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nfram
 }
 
 int
-AudioTrack::silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, 
+AudioTrack::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
 			 bool can_record, bool rec_monitors_input)
 {
 	if (n_outputs() == 0 && _redirects.empty()) {
@@ -625,7 +625,7 @@ AudioTrack::silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jac
 }
 
 int
-AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, jack_nframes_t start, jack_nframes_t nframes)
+AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, nframes_t start, nframes_t nframes)
 {
 	gain_t  gain_automation[nframes];
 	gain_t  gain_buffer[nframes];
@@ -690,7 +690,7 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, jack_nframes
 
 		for (bi = buffers.begin(); bi != buffers.end(); ++bi) {
 			Sample *b = *bi;
-			for (jack_nframes_t n = 0; n < nframes; ++n) {
+			for (nframes_t n = 0; n < nframes; ++n) {
 				b[n] *= gain_automation[n];
 			}
 		}
@@ -699,7 +699,7 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, jack_nframes
 
 		for (bi = buffers.begin(); bi != buffers.end(); ++bi) {
 			Sample *b = *bi;
-			for (jack_nframes_t n = 0; n < nframes; ++n) {
+			for (nframes_t n = 0; n < nframes; ++n) {
 				b[n] *= this_gain;
 			}
 		}
@@ -734,7 +734,7 @@ AudioTrack::bounce (InterThreadInfo& itt)
 
 
 void
-AudioTrack::bounce_range (jack_nframes_t start, jack_nframes_t end, InterThreadInfo& itt)
+AudioTrack::bounce_range (nframes_t start, nframes_t end, InterThreadInfo& itt)
 {
 	vector<boost::shared_ptr<AudioSource> > srcs;
 	_session.write_one_audio_track (*this, start, end, false, srcs, itt);

@@ -181,7 +181,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	
 	/* default short fade = 15ms */
 
-	Crossfade::set_short_xfade_length ((jack_nframes_t) floor (Config->get_short_xfade_seconds() * frame_rate()));
+	Crossfade::set_short_xfade_length ((nframes_t) floor (Config->get_short_xfade_seconds() * frame_rate()));
 	DestructiveFileSource::setup_standard_crossfades (frame_rate());
 
 	last_mmc_step.tv_sec = 0;
@@ -433,7 +433,7 @@ Session::setup_raid_path (string path)
 }
 
 int
-Session::create (bool& new_session, string* mix_template, jack_nframes_t initial_length)
+Session::create (bool& new_session, string* mix_template, nframes_t initial_length)
 {
 	string dir;
 

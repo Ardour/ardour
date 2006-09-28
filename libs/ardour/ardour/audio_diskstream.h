@@ -131,7 +131,7 @@ class AudioDiskstream : public Diskstream
 		}
 	}
 
-	static void swap_by_ptr (Sample *first, Sample *last, jack_nframes_t n) {
+	static void swap_by_ptr (Sample *first, Sample *last, nframes_t n) {
 		while (n--) {
 			Sample tmp = *first;
 			*first++ = *last;
@@ -151,22 +151,22 @@ class AudioDiskstream : public Diskstream
 
 	void set_pending_overwrite(bool);
 	int  overwrite_existing_buffers ();
-	void set_block_size (jack_nframes_t);
-	int  internal_playback_seek (jack_nframes_t distance);
-	int  can_internal_playback_seek (jack_nframes_t distance);
+	void set_block_size (nframes_t);
+	int  internal_playback_seek (nframes_t distance);
+	int  can_internal_playback_seek (nframes_t distance);
 	int  rename_write_sources ();
 	void reset_write_sources (bool, bool force = false);
 	void non_realtime_input_change ();
 
   protected:
 	friend class Auditioner;
-	int  seek (jack_nframes_t which_sample, bool complete_refill = false);
+	int  seek (nframes_t which_sample, bool complete_refill = false);
 
   protected:
 	friend class AudioTrack;
 
-	int  process (jack_nframes_t transport_frame, jack_nframes_t nframes, jack_nframes_t offset, bool can_record, bool rec_monitors_input);
-	bool commit  (jack_nframes_t nframes);
+	int  process (nframes_t transport_frame, nframes_t nframes, nframes_t offset, bool can_record, bool rec_monitors_input);
+	bool commit  (nframes_t nframes);
 
   private:
 
@@ -197,7 +197,7 @@ class AudioDiskstream : public Diskstream
 
 		RingBufferNPT<CaptureTransition> * capture_transition_buf;
 		// the following are used in the butler thread only
-		jack_nframes_t                     curr_capture_cnt;
+		nframes_t                     curr_capture_cnt;
 	};
 
 	/* The two central butler operations */
@@ -207,7 +207,7 @@ class AudioDiskstream : public Diskstream
 	int do_refill_with_alloc();
 
 	int read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
-		jack_nframes_t& start, jack_nframes_t cnt, 
+		nframes_t& start, nframes_t cnt, 
 		ChannelInfo& channel_info, int channel, bool reversed);
 
 	void finish_capture (bool rec_monitors_input);
@@ -227,7 +227,7 @@ class AudioDiskstream : public Diskstream
 	int use_pending_capture_data (XMLNode& node);
 
 	void get_input_sources ();
-	void check_record_status (jack_nframes_t transport_frame, jack_nframes_t nframes, bool can_record);
+	void check_record_status (nframes_t transport_frame, nframes_t nframes, bool can_record);
 	void set_align_style_from_io();
 	void setup_destructive_playlist ();
 	void use_destructive_playlist ();

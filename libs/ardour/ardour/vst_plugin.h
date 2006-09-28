@@ -64,7 +64,7 @@ class VSTPlugin : public ARDOUR::Plugin
 	const char * maker() const;
 	uint32_t parameter_count() const;
 	float default_value (uint32_t port);
-	jack_nframes_t latency() const;
+	nframes_t latency() const;
 	void set_parameter (uint32_t port, float val);
 	float get_parameter (uint32_t port) const;
 	int get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
@@ -72,8 +72,8 @@ class VSTPlugin : public ARDOUR::Plugin
 	uint32_t nth_parameter (uint32_t port, bool& ok) const;
 	void activate ();
 	void deactivate ();
-	void set_block_size (jack_nframes_t nframes);
-	int connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, int32_t& out, jack_nframes_t nframes, jack_nframes_t offset);
+	void set_block_size (nframes_t nframes);
+	int connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, int32_t& out, nframes_t nframes, nframes_t offset);
 	void store_state (ARDOUR::PluginState&);
 	void restore_state (ARDOUR::PluginState&);
 	string describe_parameter (uint32_t);

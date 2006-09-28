@@ -79,7 +79,7 @@ Editor::kbd_set_edit_cursor ()
 void
 Editor::kbd_do_split (GdkEvent* ev)
 {
-	jack_nframes_t where = event_frame (ev);
+	nframes_t where = event_frame (ev);
 
 	if (entered_regionview) {
 		if (selection->regions.find (entered_regionview) != selection->regions.end()) {
@@ -122,7 +122,7 @@ Editor::kbd_set_sync_position ()
 void
 Editor::kbd_do_set_sync_position (GdkEvent* ev)
 {
-    jack_nframes_t where = event_frame (ev);
+    nframes_t where = event_frame (ev);
 	snap_to (where);
 
 	if (entered_regionview) {

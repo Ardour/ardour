@@ -33,24 +33,21 @@ class CoreAudioSource : public AudioFileSource {
 	~CoreAudioSource ();
 
 	float sample_rate() const;
-	int update_header (jack_nframes_t when, struct tm&, time_t);
+	int update_header (nframes_t when, struct tm&, time_t);
 
 	int flush_header () {return 0;};
 	void set_header_timeline_position () {};
 
   protected:
-	jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const;
-	
-	jack_nframes_t write_unlocked (Sample *dst, jack_nframes_t cnt) 
-	{ return 0; }
-	
+	nframes_t read_unlocked (Sample *dst, nframes_t start, nframes_t cnt) const;
+	nframes_t write_unlocked (Sample *dst, nframes_t cnt) { return 0; }
 
   private:
 	mutable CAAudioFile af;
 	uint16_t n_channels;
 
 	mutable float *tmpbuf;
-	mutable jack_nframes_t tmpbufsize;
+	mutable nframes_t tmpbufsize;
 	mutable Glib::Mutex _tmpbuf_lock;
 
 	void init (const string &str);

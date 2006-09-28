@@ -64,7 +64,7 @@ Session::import_audiofile (import_status& status)
 	long n;
 	string basepath;
 	string sounds_dir;
-	jack_nframes_t so_far;
+	nframes_t so_far;
 	char buf[PATH_MAX+1];
 	int ret = -1;
 	vector<string> new_paths;

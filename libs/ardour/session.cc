@@ -310,7 +310,7 @@ Session::Session (AudioEngine &eng,
 		  uint32_t master_out_channels,
 		  uint32_t requested_physical_in,
 		  uint32_t requested_physical_out,
-		  jack_nframes_t initial_length)
+		  nframes_t initial_length)
 
 	: _engine (eng),
 	  _mmc_port (default_mmc_port),
@@ -968,7 +968,7 @@ Session::auto_punch_start_changed (Location* location)
 void
 Session::auto_punch_end_changed (Location* location)
 {
-	jack_nframes_t when_to_stop = location->end();
+	nframes_t when_to_stop = location->end();
 	// when_to_stop += _worst_output_latency + _worst_input_latency;
 	replace_event (Event::PunchOut, when_to_stop);
 }	
@@ -976,7 +976,7 @@ Session::auto_punch_end_changed (Location* location)
 void
 Session::auto_punch_changed (Location* location)
 {
-	jack_nframes_t when_to_stop = location->end();
+	nframes_t when_to_stop = location->end();
 
 	replace_event (Event::PunchIn, location->start());
 	//when_to_stop += _worst_output_latency + _worst_input_latency;
@@ -1237,12 +1237,12 @@ Session::maybe_enable_record ()
 	set_dirty();
 }
 
-jack_nframes_t
+nframes_t
 Session::audible_frame () const
 {
-	jack_nframes_t ret;
-	jack_nframes_t offset;
-	jack_nframes_t tf;
+	nframes_t ret;
+	nframes_t offset;
+	nframes_t tf;
 
 	/* the first of these two possible settings for "offset"
 	   mean that the audible frame is stationary until 
@@ -1296,9 +1296,9 @@ Session::audible_frame () const
 }
 
 void
-Session::set_frame_rate (jack_nframes_t frames_per_second)
+Session::set_frame_rate (nframes_t frames_per_second)
 {
-	/** \fn void Session::set_frame_size(jack_nframes_t)
+	/** \fn void Session::set_frame_size(nframes_t)
 		the AudioEngine object that calls this guarantees 
 		that it will not be called while we are also in
 		::process(). Its fine to do things that block
@@ -1309,7 +1309,7 @@ Session::set_frame_rate (jack_nframes_t frames_per_second)
 
 	sync_time_vars();
 
-	Route::set_automation_interval ((jack_nframes_t) ceil ((double) frames_per_second * 0.25));
+	Route::set_automation_interval ((nframes_t) ceil ((double) frames_per_second * 0.25));
 
 	// XXX we need some equivalent to this, somehow
 	// DestructiveFileSource::setup_standard_crossfades (frames_per_second);
@@ -1320,7 +1320,7 @@ Session::set_frame_rate (jack_nframes_t frames_per_second)
 }
 
 void
-Session::set_block_size (jack_nframes_t nframes)
+Session::set_block_size (nframes_t nframes)
 {
 	/* the AudioEngine guarantees 
 	   that it will not be called while we are also in
@@ -1388,7 +1388,7 @@ void
 Session::set_default_fade (float steepness, float fade_msecs)
 {
 #if 0
-	jack_nframes_t fade_frames;
+	nframes_t fade_frames;
 	
 	/* Don't allow fade of less 1 frame */
 	
@@ -1399,7 +1399,7 @@ Session::set_default_fade (float steepness, float fade_msecs)
 
 	} else {
 		
-		fade_frames = (jack_nframes_t) floor (fade_msecs * _current_frame_rate * 0.001);
+		fade_frames = (nframes_t) floor (fade_msecs * _current_frame_rate * 0.001);
 		
 	}
 
@@ -2194,7 +2194,7 @@ Session::find_current_end ()
 		return;
 	}
 
-	jack_nframes_t max = get_maximum_extent ();
+	nframes_t max = get_maximum_extent ();
 
 	if (max > end_location->end()) {
 		end_location->set_end (max);
@@ -2203,11 +2203,11 @@ Session::find_current_end ()
 	}
 }
 
-jack_nframes_t
+nframes_t
 Session::get_maximum_extent () const
 {
-	jack_nframes_t max = 0;
-	jack_nframes_t me; 
+	nframes_t max = 0;
+	nframes_t me; 
 
 	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
@@ -3253,7 +3253,7 @@ Session::remove_redirect (Redirect* redirect)
 	set_dirty();
 }
 
-jack_nframes_t
+nframes_t
 Session::available_capture_duration ()
 {
 	const double scale = 4096.0 / sizeof (Sample);
@@ -3262,7 +3262,7 @@ Session::available_capture_duration ()
 		return max_frames;
 	}
 	
-	return (jack_nframes_t) floor (_total_free_4k_blocks * scale);
+	return (nframes_t) floor (_total_free_4k_blocks * scale);
 }
 
 void
@@ -3461,7 +3461,7 @@ Session::n_playlists () const
 }
 
 void
-Session::allocate_pan_automation_buffers (jack_nframes_t nframes, uint32_t howmany, bool force)
+Session::allocate_pan_automation_buffers (nframes_t nframes, uint32_t howmany, bool force)
 {
 	if (!force && howmany <= _npan_buffers) {
 		return;
@@ -3506,7 +3506,7 @@ Session::freeze (InterThreadInfo& itt)
 }
 
 int
-Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nframes_t len, 	
+Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t len, 	
 			       bool overwrite, vector<boost::shared_ptr<AudioSource> >& srcs, InterThreadInfo& itt)
 {
 	int ret = -1;
@@ -3516,13 +3516,13 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 	char buf[PATH_MAX+1];
 	string dir;
 	uint32_t nchans;
-	jack_nframes_t position;
-	jack_nframes_t this_chunk;
-	jack_nframes_t to_do;
+	nframes_t position;
+	nframes_t this_chunk;
+	nframes_t to_do;
 	vector<Sample*> buffers;
 
 	// any bigger than this seems to cause stack overflows in called functions
-	const jack_nframes_t chunk_size = (128 * 1024)/4;
+	const nframes_t chunk_size = (128 * 1024)/4;
 
 	g_atomic_int_set (&processing_prohibited, 1);
 	

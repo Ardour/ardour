@@ -47,13 +47,13 @@ class RegionSelection : public set<RegionView*, RegionComparator>, public sigc::
 
 	void clear_all();
 	
-	jack_nframes_t start () const {
+	nframes_t start () const {
 		return _current_start;
 	}
 
 	/* collides with list<>::end */
 
-	jack_nframes_t end_frame () const { 
+	nframes_t end_frame () const { 
 		return _current_end;
 	}
 
@@ -65,8 +65,8 @@ class RegionSelection : public set<RegionView*, RegionComparator>, public sigc::
 
 	void add_to_layer (RegionView *);
 	
-	jack_nframes_t _current_start;
-	jack_nframes_t _current_end;
+	nframes_t _current_start;
+	nframes_t _current_end;
 
 	list<RegionView *> _bylayer;
 };

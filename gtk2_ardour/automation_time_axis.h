@@ -48,7 +48,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void set_samples_per_unit (double);
 	std::string name() const { return _name; }
 
-	virtual void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, jack_nframes_t, double) = 0;
+	virtual void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, nframes_t, double) = 0;
 
 	virtual void clear_lines ();
 	virtual void add_line (AutomationLine&);
@@ -56,17 +56,17 @@ class AutomationTimeAxisView : public TimeAxisView {
 	vector<AutomationLine*> lines;
 
 	void set_selected_points (PointSelection&);
-	void get_selectables (jack_nframes_t start, jack_nframes_t end, double top, double bot, list<Selectable *>&);
+	void get_selectables (nframes_t start, nframes_t end, double top, double bot, list<Selectable *>&);
 	void get_inverted_selectables (Selection&, list<Selectable*>& results);
 
-	void show_timestretch (jack_nframes_t start, jack_nframes_t end) {}
+	void show_timestretch (nframes_t start, nframes_t end) {}
 	void hide_timestretch () {}
 
 	/* editing operations */
 	
 	bool cut_copy_clear (Selection&, Editing::CutCopyOp);
 	bool cut_copy_clear_objects (PointSelection&, Editing::CutCopyOp);
-	bool paste (jack_nframes_t, float times, Selection&, size_t nth);
+	bool paste (nframes_t, float times, Selection&, size_t nth);
 	void reset_objects (PointSelection&);
 
 	void add_ghost (GhostRegion*);
@@ -110,7 +110,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	bool cut_copy_clear_one (AutomationLine&, Selection&, Editing::CutCopyOp);
 	bool cut_copy_clear_objects_one (AutomationLine&, PointSelection&, Editing::CutCopyOp);
-	bool paste_one (AutomationLine&, jack_nframes_t, float times, Selection&, size_t nth);
+	bool paste_one (AutomationLine&, nframes_t, float times, Selection&, size_t nth);
 	void reset_objects_one (AutomationLine&, PointSelection&);
 
 	virtual void set_automation_state (ARDOUR::AutoState) = 0;

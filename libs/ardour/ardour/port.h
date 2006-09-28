@@ -36,7 +36,7 @@ class Port : public sigc::trackable {
 		free (_port);
 	}
 
-	Sample *get_buffer (jack_nframes_t nframes) {
+	Sample *get_buffer (nframes_t nframes) {
 		if (_flags & JackPortIsOutput) {
 			return _buffer;
 		} else {
@@ -116,8 +116,8 @@ class Port : public sigc::trackable {
 	uint32_t short_overs () const { return _short_overs; }
 	uint32_t long_overs ()  const { return _long_overs; }
 	
-	static void set_short_over_length (jack_nframes_t);
-	static void set_long_over_length (jack_nframes_t);
+	static void set_short_over_length (nframes_t);
+	static void set_long_over_length (nframes_t);
 
 	bool receives_input() const {
 		return _flags & JackPortIsInput;
@@ -150,11 +150,11 @@ class Port : public sigc::trackable {
 		jack_port_request_monitor (_port, yn);
 	}
 
-	jack_nframes_t latency () const {
+	nframes_t latency () const {
 		return jack_port_get_latency (_port);
 	}
 
-	void set_latency (jack_nframes_t nframes) {
+	void set_latency (nframes_t nframes) {
 		jack_port_set_latency (_port, nframes);
 	}
 
@@ -164,7 +164,7 @@ class Port : public sigc::trackable {
 	bool is_silent() const { return _silent; }
 
 	/** Assumes that the port is an audio output port */
-	void silence (jack_nframes_t nframes, jack_nframes_t offset) {
+	void silence (nframes_t nframes, nframes_t offset) {
 		if (!_silent) {
 			memset (_buffer + offset, 0, sizeof (Sample) * nframes);
 			if (offset == 0) {
@@ -203,15 +203,15 @@ class Port : public sigc::trackable {
 	bool                         _last_monitor : 1;
 	bool                         _silent : 1;
 	jack_port_t                 *_port;
-	jack_nframes_t               _overlen;
+	nframes_t               _overlen;
 	jack_default_audio_sample_t  _peak;
 	float                        _peak_db;
 	uint32_t                     _short_overs;
 	uint32_t                     _long_overs;
 	unsigned short               _metering;
 	
-	static jack_nframes_t        _long_over_length;
-	static jack_nframes_t        _short_over_length;
+	static nframes_t        _long_over_length;
+	static nframes_t        _short_over_length;
 };
  
 } // namespace ARDOUR

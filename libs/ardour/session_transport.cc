@@ -94,14 +94,14 @@ Session::request_stop (bool abort)
 }
 
 void
-Session::request_locate (jack_nframes_t target_frame, bool with_roll)
+Session::request_locate (nframes_t target_frame, bool with_roll)
 {
 	Event *ev = new Event (with_roll ? Event::LocateRoll : Event::Locate, Event::Add, Event::Immediate, target_frame, 0, false);
 	queue_event (ev);
 }
 
 void
-Session::force_locate (jack_nframes_t target_frame, bool with_roll)
+Session::force_locate (nframes_t target_frame, bool with_roll)
 {
 	Event *ev = new Event (with_roll ? Event::LocateRoll : Event::Locate, Event::Add, Event::Immediate, target_frame, 0, true);
 	queue_event (ev);
@@ -209,7 +209,7 @@ Session::butler_transport_work ()
 		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if (!(*i)->hidden()) {
 				if ((*i)->speed() != 1.0f || (*i)->speed() != -1.0f) {
-					(*i)->seek ((jack_nframes_t) (_transport_frame * (double) (*i)->speed()));
+					(*i)->seek ((nframes_t) (_transport_frame * (double) (*i)->speed()));
 				}
 				else {
 					(*i)->seek (_transport_frame);
@@ -363,7 +363,7 @@ Session::non_realtime_stop (bool abort)
 		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if (!(*i)->hidden()) {
 				if ((*i)->speed() != 1.0f || (*i)->speed() != -1.0f) {
-					(*i)->seek ((jack_nframes_t) (_transport_frame * (double) (*i)->speed()));
+					(*i)->seek ((nframes_t) (_transport_frame * (double) (*i)->speed()));
 				}
 				else {
 					(*i)->seek (_transport_frame);
@@ -548,12 +548,12 @@ Session::flush_all_redirects ()
 }
 
 void
-Session::start_locate (jack_nframes_t target_frame, bool with_roll, bool with_flush, bool with_loop)
+Session::start_locate (nframes_t target_frame, bool with_roll, bool with_flush, bool with_loop)
 {
 	if (synced_to_jack()) {
 
 		float sp;
-		jack_nframes_t pos;
+		nframes_t pos;
 
 		_slave->speed_and_position (sp, pos);
 
@@ -578,7 +578,7 @@ Session::start_locate (jack_nframes_t target_frame, bool with_roll, bool with_fl
 }
 
 void
-Session::locate (jack_nframes_t target_frame, bool with_roll, bool with_flush, bool with_loop)
+Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool with_loop)
 {
 	if (actively_recording()) {
 		return;
@@ -904,7 +904,7 @@ Session::post_transport ()
 }
 
 void
-Session::reset_rf_scale (jack_nframes_t motion)
+Session::reset_rf_scale (nframes_t motion)
 {
 	cumulative_rf_motion += motion;
 
@@ -1077,7 +1077,7 @@ Session::setup_auto_play ()
 			/* locating/stopping is subject to delays for declicking.
 			 */
 			
-			jack_nframes_t requested_frame = (*i).end;
+			nframes_t requested_frame = (*i).end;
 			
 			if (requested_frame > current_block_size) {
 				requested_frame -= current_block_size;
@@ -1110,7 +1110,7 @@ Session::setup_auto_play ()
 }
 
 void
-Session::request_bounded_roll (jack_nframes_t start, jack_nframes_t end)
+Session::request_bounded_roll (nframes_t start, nframes_t end)
 {
 	request_stop ();
 	Event *ev = new Event (Event::StopOnce, Event::Replace, Event::Immediate, end, 0.0);
@@ -1174,8 +1174,8 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 							(!(post_transport_work & PostTransportLocate) || pending_locate_flush));
 		}
 
-		jack_nframes_t old_latency = (*i)->signal_latency ();
-		jack_nframes_t track_latency = (*i)->update_total_latency ();
+		nframes_t old_latency = (*i)->signal_latency ();
+		nframes_t track_latency = (*i)->update_total_latency ();
 
 		if (old_latency != track_latency) {
 			update_jack = true;

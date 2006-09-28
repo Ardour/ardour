@@ -581,7 +581,7 @@ ExportDialog::save_state()
 }
 
 void
-ExportDialog::set_range (jack_nframes_t start, jack_nframes_t end)
+ExportDialog::set_range (nframes_t start, nframes_t end)
 {
 	spec.start_frame = start;
 	spec.end_frame = end;
@@ -595,7 +595,7 @@ ExportDialog::progress_timeout ()
 }
 
 void
-frames_to_cd_frames_string (char* buf, jack_nframes_t when, jack_nframes_t fr)
+frames_to_cd_frames_string (char* buf, nframes_t when, nframes_t fr)
 {
 
   long unsigned int remainder;
@@ -1022,7 +1022,7 @@ void
 ExportDialog::sample_rate_chosen ()
 {
 	string sr_str = sample_rate_combo.get_active_text();
-	jack_nframes_t rate;
+	nframes_t rate;
 
 	if (sr_str == N_("22.05kHz")) {
 		rate = 22050;
