@@ -1087,6 +1087,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	int      load_options (const XMLNode&);
 	XMLNode& get_options () const;
 	int      load_state (string snapshot_name);
+	bool     save_config_options_predicate (ConfigVariableBase::Owner owner) const;
 
 	nframes_t   _last_roll_location;
 	nframes_t   _last_record_location;

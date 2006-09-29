@@ -11,11 +11,11 @@ namespace ARDOUR {
 class ConfigVariableBase {
   public:
 	enum Owner {
-		Default,
-		System,
-		Config,
-		Session,
-		Interface
+		Default = 0x1,
+		System = 0x2,
+		Config = 0x4,
+		Session = 0x8,
+		Interface = 0x10
 	};
 
 	ConfigVariableBase (std::string str) : _name (str), _owner (Default) {}
@@ -44,7 +44,7 @@ class ConfigVariable : public ConfigVariableBase
 			return false;
 		}
 		value = val;
-		_owner = owner;
+		_owner = (ConfigVariableBase::Owner)(_owner |owner);
 		return true;
 	}
 
@@ -85,7 +85,7 @@ class ConfigVariable : public ConfigVariableBase
 								std::stringstream ss;
 								ss << prop->value();
 								ss >> value;
-								_owner = owner;
+								_owner = (ConfigVariableBase::Owner)(_owner |owner);
 								return true;
 							}
 						}
@@ -113,7 +113,7 @@ class ConfigVariable : public ConfigVariableBase
 						std::stringstream ss;
 						ss << opt_prop->value();
 						ss >> value;
-						_owner = owner;
+						_owner = (ConfigVariableBase::Owner)(_owner |owner);
 						return true;
 					}
 				}

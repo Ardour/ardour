@@ -132,14 +132,11 @@ Configuration::save_state()
 	XMLTree tree;
 	string rcfile;
 
-	/* Note: this only writes the state not touched by Session or Interface
-	*/
-
 	rcfile = get_user_ardour_path ();
 	rcfile += "ardour.rc";
 
 	if (rcfile.length()) {
-		tree.set_root (&state (ConfigVariableBase::Config));
+		tree.set_root (&get_state());
 		if (!tree.write (rcfile.c_str())){
 			error << string_compose (_("Config file %1 not saved"), rcfile) << endmsg;
 			return -1;
@@ -149,22 +146,42 @@ Configuration::save_state()
 	return 0;
 }
 
+bool
+Configuration::save_config_options_predicate (ConfigVariableBase::Owner owner)
+{
+	const ConfigVariableBase::Owner default_or_from_config_file = (ConfigVariableBase::Owner)
+		(ConfigVariableBase::Default|ConfigVariableBase::System|ConfigVariableBase::Config);
+	
+	return owner & default_or_from_config_file;
+}
+
 XMLNode&
 Configuration::get_state ()
 {
-	return state (ConfigVariableBase::Config);
-}
-
-XMLNode&
-Configuration::get_partial_state (ConfigVariableBase::Owner owner)
-{
-	return state (owner);
-}
-
-XMLNode&
-Configuration::state (ConfigVariableBase::Owner owner)
-{
 	XMLNode* root;
+	LocaleGuard lg (X_("POSIX"));
+
+	root = new XMLNode("Ardour");
+	typedef map<string, MidiPortDescriptor*>::const_iterator CI;
+	for(CI m = midi_ports.begin(); m != midi_ports.end(); ++m){
+		root->add_child_nocopy(m->second->get_state());
+	}
+	
+	root->add_child_nocopy (get_variables (sigc::mem_fun (*this, &Configuration::save_config_options_predicate)));
+	
+	if (_extra_xml) {
+		root->add_child_copy (*_extra_xml);
+	}
+	
+	root->add_child_nocopy (ControlProtocolManager::instance().get_state());
+	root->add_child_nocopy (Library->get_state());
+	
+	return *root;
+}
+
+XMLNode&
+Configuration::get_variables (sigc::slot<bool,ConfigVariableBase::Owner> predicate)
+{
 	XMLNode* node;
 	LocaleGuard lg (X_("POSIX"));
 
@@ -173,36 +190,14 @@ Configuration::state (ConfigVariableBase::Owner owner)
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL	
 #define CONFIG_VARIABLE(type,var,name,value) \
-         if (var.owner() <= owner) var.add_to_node (*node);
+         if (predicate (var.owner())) { var.add_to_node (*node); }
 #define CONFIG_VARIABLE_SPECIAL(type,var,name,value,mutator) \
-         if (var.owner() <= owner) var.add_to_node (*node);
+         if (predicate (var.owner())) { var.add_to_node (*node); }
 #include "ardour/configuration_vars.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL	
-
-	if (owner == ConfigVariableBase::Config) {
-
-		root = new XMLNode("Ardour");
-		typedef map<string, MidiPortDescriptor*>::const_iterator CI;
-		for(CI m = midi_ports.begin(); m != midi_ports.end(); ++m){
-			root->add_child_nocopy(m->second->get_state());
-		}
-
-		root->add_child_nocopy (*node);
-
-		if (_extra_xml) {
-			root->add_child_copy (*_extra_xml);
-		}
-		
-		root->add_child_nocopy (ControlProtocolManager::instance().get_state());
-		root->add_child_nocopy (Library->get_state());
-
-	} else {
-
-		root = node;
-	}
-		
-	return *root;
+	
+	return *node;
 }
 
 int

@@ -725,13 +725,22 @@ Session::load_options (const XMLNode& node)
 	return 0;
 }
 
+bool
+Session::save_config_options_predicate (ConfigVariableBase::Owner owner) const
+{
+	const ConfigVariableBase::Owner modified_by_session_or_user = (ConfigVariableBase::Owner)
+		(ConfigVariableBase::Session|ConfigVariableBase::Interface);
+
+	return owner & modified_by_session_or_user;
+}
+
 XMLNode&
 Session::get_options () const
 {
 	XMLNode* child;
 	LocaleGuard lg (X_("POSIX"));
 
-	XMLNode& option_root = Config->get_partial_state (ConfigVariableBase::Interface);
+	XMLNode& option_root = Config->get_variables (mem_fun (*this, &Session::save_config_options_predicate));
 
 	child = option_root.add_child ("end-marker-is-free");
 	child->add_property ("val", _end_location_is_free ? "yes" : "no");

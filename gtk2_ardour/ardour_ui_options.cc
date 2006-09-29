@@ -47,6 +47,8 @@ ARDOUR_UI::toggle_config_state (const char* group, const char* action, bool (Con
 
 		if (tact) {
 			bool x = (Config->*get)();
+
+			cerr << "\ttoggle config, action = " << tact->get_active() << " config = " << x << endl;
 			
 			if (x != tact->get_active()) {
 				(Config->*set) (!x);
@@ -382,18 +384,27 @@ ARDOUR_UI::map_some_state (const char* group, const char* action, bool (Configur
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 
 		if (tact) {
+			
 			bool x = (Config->*get)();
+
+			cerr << "\tmap state, action = " << tact->get_active() << " config = " << x << endl;
 			
 			if (tact->get_active() != x) {
 				tact->set_active (x);
 			}
+		} else {
+			cerr << "not a toggle\n";
 		}
+	} else {
+		cerr << group << ':' << action << " not an action\n";
 	}
 }
 
 void
 ARDOUR_UI::parameter_changed (const char* parameter_name)
 {
+	cerr << "Parameter changed : " << parameter_name << endl;
+
 #define PARAM_IS(x) (!strcmp (parameter_name, (x)))
 
 	if (PARAM_IS ("slave-source")) {
@@ -416,8 +427,12 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		map_some_state ("options", "UseMIDIcontrol", &Configuration::get_midi_control);
 	} else if (PARAM_IS ("do-not-record-plugins")) {
 		map_some_state ("options", "DoNotRunPluginsWhileRecording", &Configuration::get_do_not_record_plugins);
+	} else if (PARAM_IS ("automatic-crossfades")) {
+		map_some_state ("Editor", "toggle-auto-xfades", &Configuration::get_automatic_crossfades);
 	} else if (PARAM_IS ("crossfades-active")) {
-		map_some_state ("options", "CrossfadesActive", &Configuration::get_crossfades_active);
+		map_some_state ("Editor", "toggle-xfades-active", &Configuration::get_crossfades_active);
+	} else if (PARAM_IS ("crossfades-visible")) {
+		map_some_state ("Editor", "toggle-xfades-visible", &Configuration::get_crossfades_visible);
 	} else if (PARAM_IS ("latched-record-enable")) {
 		map_some_state ("options", "LatchedRecordEnable", &Configuration::get_latched_record_enable);
 	} else if (PARAM_IS ("solo-latched")) {

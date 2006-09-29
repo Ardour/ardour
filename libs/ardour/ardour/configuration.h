@@ -62,7 +62,7 @@ class Configuration : public Stateful
 
 	int set_state (const XMLNode&);
 	XMLNode& get_state (void);
-	XMLNode& get_partial_state (ConfigVariableBase::Owner);
+	XMLNode& get_variables (sigc::slot<bool,ConfigVariableBase::Owner>);
 	void set_variables (const XMLNode&, ConfigVariableBase::Owner owner);
 
 	void set_current_owner (ConfigVariableBase::Owner);
@@ -100,7 +100,8 @@ class Configuration : public Stateful
 	ConfigVariableBase::Owner current_owner;
 	XMLNode* _control_protocol_state;
 
-	XMLNode& state (ConfigVariableBase::Owner);
+	XMLNode& state (sigc::slot<bool,ConfigVariableBase::Owner>);
+	bool     save_config_options_predicate (ConfigVariableBase::Owner owner);
 };
 
 extern Configuration *Config;
