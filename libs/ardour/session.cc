@@ -358,8 +358,8 @@ Session::Session (AudioEngine &eng,
 		output_ac = AutoConnectOption (output_ac & ~AutoConnectMaster);
 	}
 
-	input_auto_connect = input_ac;
-	output_auto_connect = output_ac;
+	Config->set_input_auto_connect (input_ac);
+	Config->set_output_auto_connect (output_ac);
 
 	if (second_stage_init (new_session)) {
 		throw failed_constructor ();
@@ -939,7 +939,7 @@ Session::reset_input_monitor_state ()
 		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if ((*i)->record_enabled ()) {
 				//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
-				(*i)->monitor_input (Config->get_use_hardware_monitoring() && !Config->get_auto_input());
+				(*i)->monitor_input (Config->get_monitoring_model() == HardwareMonitoring && !Config->get_auto_input());
 			}
 		}
 	} else {
@@ -948,7 +948,7 @@ Session::reset_input_monitor_state ()
 		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if ((*i)->record_enabled ()) {
 				//cerr << "switching to input = " << !Config->get_auto_input() << __FILE__ << __LINE__ << endl << endl;
-				(*i)->monitor_input (Config->get_use_hardware_monitoring());
+				(*i)->monitor_input (Config->get_monitoring_model() == HardwareMonitoring);
 			}
 		}
 	}
@@ -1149,7 +1149,7 @@ Session::enable_record ()
 		_last_record_location = _transport_frame;
 		send_mmc_in_another_thread (MIDI::MachineControl::cmdRecordStrobe);
 
-		if (Config->get_use_hardware_monitoring() && Config->get_auto_input()) {
+		if (Config->get_monitoring_model() == HardwareMonitoring && Config->get_auto_input()) {
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if ((*i)->record_enabled ()) {
@@ -1179,7 +1179,7 @@ Session::disable_record (bool rt_context, bool force)
 
 		send_mmc_in_another_thread (MIDI::MachineControl::cmdRecordExit);
 
-		if (Config->get_use_hardware_monitoring() && Config->get_auto_input()) {
+		if (Config->get_monitoring_model() == HardwareMonitoring && Config->get_auto_input()) {
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 			
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
@@ -1202,7 +1202,7 @@ Session::step_back_from_record ()
 {
 	g_atomic_int_set (&_record_status, Enabled);
 
-	if (Config->get_use_hardware_monitoring()) {
+	if (Config->get_monitoring_model() == HardwareMonitoring) {
 		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 		
 		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
@@ -1610,13 +1610,13 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			
 		} while (track_id < (UINT_MAX-1));
 
-		if (input_auto_connect & AutoConnectPhysical) {
+		if (Config->get_input_auto_connect() & AutoConnectPhysical) {
 			nphysical_in = min (n_physical_inputs, (uint32_t) physinputs.size());
 		} else {
 			nphysical_in = 0;
 		}
 		
-		if (output_auto_connect & AutoConnectPhysical) {
+		if (Config->get_output_auto_connect() & AutoConnectPhysical) {
 			nphysical_out = min (n_physical_outputs, (uint32_t) physinputs.size());
 		} else {
 			nphysical_out = 0;
@@ -1636,7 +1636,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 					
 					port = "";
 					
-					if (input_auto_connect & AutoConnectPhysical) {
+					if (Config->get_input_auto_connect() & AutoConnectPhysical) {
 						port = physinputs[(channels_used+x)%nphysical_in];
 					} 
 					
@@ -1650,9 +1650,9 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 				
 				port = "";
 				
-				if (nphysical_out && (output_auto_connect & AutoConnectPhysical)) {
+				if (nphysical_out && (Config->get_output_auto_connect() & AutoConnectPhysical)) {
 					port = physoutputs[(channels_used+x)%nphysical_out];
-				} else if (output_auto_connect & AutoConnectMaster) {
+				} else if (Config->get_output_auto_connect() & AutoConnectMaster) {
 					if (_master_out) {
 						port = _master_out->input (x%_master_out->n_inputs())->name();
 					}
@@ -1756,7 +1756,7 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 				
 				port = "";
 				
-				if (input_auto_connect & AutoConnectPhysical) {
+				if (Config->get_input_auto_connect() & AutoConnectPhysical) {
 					port = physinputs[((n+x)%n_physical_inputs)];
 				} 
 				
@@ -1769,9 +1769,9 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 				
 				port = "";
 				
-				if (output_auto_connect & AutoConnectPhysical) {
+				if (Config->get_output_auto_connect() & AutoConnectPhysical) {
 					port = physoutputs[((n+x)%n_physical_outputs)];
-				} else if (output_auto_connect & AutoConnectMaster) {
+				} else if (Config->get_output_auto_connect() & AutoConnectMaster) {
 					if (_master_out) {
 						port = _master_out->input (x%_master_out->n_inputs())->name();
 					}

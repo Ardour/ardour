@@ -445,14 +445,14 @@ AudioTrack::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_fra
 	} else {
 
 		if (Config->get_auto_input()) {
-			if (Config->get_use_sw_monitoring()) {
+			if (Config->get_monitoring_model() == SoftwareMonitoring) {
 				send_silence = false;
 			} else {
 				send_silence = true;
 			}
 		} else {
 			if (_diskstream->record_enabled()) {
-				if (Config->get_use_sw_monitoring()) {
+				if (Config->get_monitoring_model() == SoftwareMonitoring) {
 					send_silence = false;
 				} else {
 					send_silence = true;

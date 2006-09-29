@@ -469,3 +469,30 @@ get_xpm (std::string name)
 	return (xpm_map[name]);
 }
 
+string
+longest (vector<string>& strings)
+{
+	if (strings.empty()) {
+		return string ("");
+	}
+
+	vector<string>::iterator longest = strings.begin();
+	string::size_type longest_length = (*longest).length();
+	
+	vector<string>::iterator i = longest;
+	++i;
+
+	while (i != strings.end()) {
+		
+		string::size_type len = (*i).length();
+		
+		if (len > longest_length) {
+			longest = i;
+			longest_length = len;
+		} 
+		
+		++i;
+	}
+	
+	return *longest;
+}

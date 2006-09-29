@@ -228,8 +228,17 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	IO *co;
 	bool mute_audible;
 	bool solo_audible;
-	bool no_monitor = (Config->get_use_hardware_monitoring() || !Config->get_use_sw_monitoring ());
+	bool no_monitor;
 	gain_t* gab = _session.gain_automation_buffer();
+
+	switch (Config->get_monitoring_model()) {
+	case HardwareMonitoring:
+	case ExternalMonitoring:
+		no_monitor = true;
+		break;
+	default:
+		no_monitor = false;
+	}
 
 	declick = _pending_declick;
 
@@ -417,11 +426,11 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 		
 		// h/w monitoring not in use 
 		
-		(!Config->get_use_hardware_monitoring() && 
+		(!Config->get_monitoring_model() == HardwareMonitoring && 
 
 		 // AND software monitoring required
 
-		 Config->get_use_sw_monitoring())) { 
+		 Config->get_monitoring_model() == SoftwareMonitoring)) { 
 		
 		if (apply_gain_automation) {
 			

@@ -176,7 +176,9 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	pending_abort = false;
 	destructive_index = 0;
 	current_trans = 0;
-	
+	first_file_data_format_reset = true;
+	first_file_header_format_reset = true;
+
 	AudioDiskstream::allocate_working_buffers();
 	
 	/* default short fade = 15ms */
@@ -744,8 +746,6 @@ Session::get_options () const
 
 	child = option_root.add_child ("end-marker-is-free");
 	child->add_property ("val", _end_location_is_free ? "yes" : "no");
-
-	child = option_root.add_child ("full-xfades-unmuted");
 
 	return option_root;
 }
@@ -2880,7 +2880,7 @@ Session::config_changed (const char* parameter_name)
 		
 	} else if (PARAM_IS ("auto-input")) {
 
-		if (Config->get_use_hardware_monitoring() && transport_rolling()) {
+		if (Config->get_monitoring_model() == HardwareMonitoring && transport_rolling()) {
 			/* auto-input only makes a difference if we're rolling */
 			
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
@@ -3015,6 +3015,25 @@ Session::config_changed (const char* parameter_name)
 			session_midi_feedback = Config->get_midi_feedback();
 		}
 
+	} else if (PARAM_IS ("jack-time-master")) {
+
+		engine().reset_timebase ();
+
+	} else if (PARAM_IS ("native-file-header-format")) {
+
+		if (!first_file_header_format_reset) {
+			reset_native_file_format ();
+		}
+
+		first_file_header_format_reset = false;
+
+	} else if (PARAM_IS ("native-file-data-format")) {
+
+		if (!first_file_data_format_reset) {
+			reset_native_file_format ();
+		}
+
+		first_file_data_format_reset = false;
 	}
 		
 	set_dirty ();

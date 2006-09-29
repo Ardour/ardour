@@ -315,7 +315,6 @@ class Editor : public PublicEditor
 	void update_crossfade_model ();
 	void set_crossfade_model (ARDOUR::CrossfadeModel);
 
-
 	/* layers */
 	void set_layer_model (ARDOUR::LayerModel);
 	void update_layering_model ();

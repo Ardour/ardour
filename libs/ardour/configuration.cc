@@ -149,10 +149,8 @@ Configuration::save_state()
 bool
 Configuration::save_config_options_predicate (ConfigVariableBase::Owner owner)
 {
-	const ConfigVariableBase::Owner default_or_from_config_file = (ConfigVariableBase::Owner)
-		(ConfigVariableBase::Default|ConfigVariableBase::System|ConfigVariableBase::Config);
-	
-	return owner & default_or_from_config_file;
+	/* only save things that were in the config file to start with */
+	return owner & ConfigVariableBase::Config;
 }
 
 XMLNode&

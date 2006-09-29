@@ -655,21 +655,17 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	std::vector<std::string> positional_sync_strings;
 
-	void toggle_config_state (const char* group, const char* action, bool (ARDOUR::Configuration::*set)(bool), bool (ARDOUR::Configuration::*get)(void) const);
-	void toggle_config_state (const char* group, const char* action, sigc::slot<void> theSlot);
 	void toggle_send_midi_feedback ();
 	void toggle_use_mmc ();
 	void toggle_send_mmc ();
 	void toggle_use_midi_control();
 	void toggle_send_mtc ();
 
-	void toggle_AutoConnectNewTrackInputsToHardware();
-	void toggle_AutoConnectNewTrackOutputsToHardware();
-	void toggle_AutoConnectNewTrackOutputsToMaster();
-	void toggle_ManuallyConnectNewTrackOutputs();
-	void toggle_UseHardwareMonitoring();
-	void toggle_UseSoftwareMonitoring();
-	void toggle_UseExternalMonitoring();
+	void set_input_auto_connect (ARDOUR::AutoConnectOption);
+	void set_output_auto_connect (ARDOUR::AutoConnectOption);
+	void set_solo_model (ARDOUR::SoloModel);
+	void set_monitor_model (ARDOUR::MonitorModel);
+
 	void toggle_StopPluginsWithTransport();
 	void toggle_DoNotRunPluginsWhileRecording();
 	void toggle_VerifyRemoveLastCapture();
@@ -678,13 +674,21 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_GainReduceFastTransport();
 	void toggle_LatchedSolo();
 	void toggle_SoloViaBus();
-	void toggle_AutomaticallyCreateCrossfades();
-	void toggle_UnmuteNewFullCrossfades();
 	void toggle_LatchedRecordEnable ();
 
 	void mtc_port_changed ();
-	void map_some_state (const char* group, const char* action, bool (ARDOUR::Configuration::*get)() const);
+	void map_solo_model ();
+	void map_monitor_model ();
+	void map_file_header_format ();
+	void map_file_data_format ();
+	void map_input_auto_connect ();
+	void map_output_auto_connect ();
 	void parameter_changed (const char*);
+
+	void set_meter_hold (ARDOUR::MeterHold);
+	void set_meter_falloff (ARDOUR::MeterFalloff);
+	void map_meter_hold ();
+	void map_meter_falloff ();
 
 	void toggle_control_protocol (ARDOUR::ControlProtocolInfo*);
 };

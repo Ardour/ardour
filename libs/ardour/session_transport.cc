@@ -638,7 +638,7 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 
 	if (with_roll) {
 		/* switch from input if we're going to roll */
-		if (Config->get_use_hardware_monitoring()) {
+		if (Config->get_monitoring_model() == HardwareMonitoring) {
 
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
@@ -651,7 +651,7 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 		}
 	} else {
 		/* otherwise we're going to stop, so do the opposite */
-		if (Config->get_use_hardware_monitoring()) {
+		if (Config->get_monitoring_model() == HardwareMonitoring) {
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
@@ -691,7 +691,7 @@ Session::set_transport_speed (float speed, bool abort)
 
 	if (transport_rolling() && speed == 0.0) {
 
-		if (Config->get_use_hardware_monitoring())
+		if (Config->get_monitoring_model() == HardwareMonitoring)
 		{
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
@@ -715,7 +715,7 @@ Session::set_transport_speed (float speed, bool abort)
 			return;
 		}
 
-		if (Config->get_use_hardware_monitoring()) {
+		if (Config->get_monitoring_model() == HardwareMonitoring) {
 
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 

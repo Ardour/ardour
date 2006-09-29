@@ -40,6 +40,7 @@ using namespace Gtk;
 using namespace Glib;
 using namespace sigc;
 using namespace PBD;
+using namespace ARDOUR;
 
 vector<RefPtr<Gtk::Action> > ActionManager::session_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::region_list_selection_sensitive_actions;
@@ -283,3 +284,57 @@ ActionManager::uncheck_toggleaction (const char * name)
 	delete [] group_name;
 }
 
+void
+ActionManager::toggle_config_state (const char* group, const char* action, bool (Configuration::*set)(bool), bool (Configuration::*get)(void) const)
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (group, action);
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		
+		if (tact) {
+			bool x = (Config->*get)();
+
+			cerr << "\ttoggle config, action = " << tact->get_active() << " config = " << x << endl;
+			
+			if (x != tact->get_active()) {
+				(Config->*set) (!x);
+			}
+		}
+	}
+}
+
+void
+ActionManager::toggle_config_state (const char* group, const char* action, sigc::slot<void> theSlot)
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (group, action);
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		if (tact->get_active()) {
+			theSlot ();
+		}
+	}
+}
+
+void
+ActionManager::map_some_state (const char* group, const char* action, bool (Configuration::*get)() const)
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (group, action);
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+
+		if (tact) {
+			
+			bool x = (Config->*get)();
+
+			cerr << "\tmap state, action = " << tact->get_active() << " config = " << x << endl;
+			
+			if (tact->get_active() != x) {
+				tact->set_active (x);
+			}
+		} else {
+			cerr << "not a toggle\n";
+		}
+	} else {
+		cerr << group << ':' << action << " not an action\n";
+	}
+}

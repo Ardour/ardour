@@ -298,6 +298,32 @@ compute_equal_power_fades (nframes_t nframes, float* in, float* out)
 	}
 }
 
+EditMode
+string_to_edit_mode (string str)
+{
+	if (str == _("Splice Edit")) {
+		return Splice;
+	} else if (str == _("Slide Edit")) {
+		return Slide;
+	}
+	fatal << string_compose (_("programming error: unknown edit mode string \"%1\""), str) << endmsg;
+	/*NOTREACHED*/
+	return Slide;
+}
+
+const char*
+edit_mode_to_string (EditMode mode)
+{
+	switch (mode) {
+	case Slide:
+		return _("Slide Edit");
+
+	default:
+	case Splice:
+		return _("Splice Edit");
+	}
+}
+
 SlaveSource
 string_to_slave_source (string str)
 {
@@ -332,5 +358,43 @@ slave_source_to_string (SlaveSource src)
 	case None:
 		return _("Internal");
 		
+	}
+}
+
+float
+meter_falloff_to_float (MeterFalloff falloff)
+{
+	switch (falloff) {
+	case MeterFalloffOff:
+		return 0.0f;
+	case MeterFalloffSlowest:
+		return 1.0f;
+	case MeterFalloffSlow:
+		return 2.0f;
+	case MeterFalloffMedium:
+		return 3.0f;
+	case MeterFalloffFast:
+		return 4.0f;
+	case MeterFalloffFaster:
+		return 5.0f;
+	case MeterFalloffFastest:
+	default:
+		return 6.0f;
+	}
+}
+
+float
+meter_hold_to_float (MeterHold hold)
+{
+	switch (hold) {
+	case MeterHoldOff:
+		return 0.0f;
+	case MeterHoldShort:
+		return 40.0f;
+	case MeterHoldMedium:
+		return 100.0f;
+	case MeterHoldLong:
+	default:
+		return 200.0f;
 	}
 }

@@ -1708,7 +1708,7 @@ AudioDiskstream::engage_record_enable ()
 
 	g_atomic_int_set (&_record_enabled, 1);
 	capturing_sources.clear ();
-	if (Config->get_use_hardware_monitoring())  {
+	if (Config->get_monitoring_model() == HardwareMonitoring) {
 		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
 			if ((*chan).source) {
 				(*chan).source->ensure_monitor_input (!(Config->get_auto_input() && rolling));
@@ -1728,7 +1728,7 @@ void
 AudioDiskstream::disengage_record_enable ()
 {
 	g_atomic_int_set (&_record_enabled, 0);
-	if (Config->get_use_hardware_monitoring()) {
+	if (Config->get_monitoring_model() == HardwareMonitoring) {
 		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
 			if ((*chan).source) {
 				(*chan).source->ensure_monitor_input (false);
@@ -1966,6 +1966,8 @@ AudioDiskstream::reset_write_sources (bool mark_write_complete, bool force)
 {
 	ChannelList::iterator chan;
 	uint32_t n;
+
+	cerr << _name << " RWS\n";
 
 	if (!recordable()) {
 		return;

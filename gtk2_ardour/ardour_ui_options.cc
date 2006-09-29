@@ -39,120 +39,241 @@ using namespace PBD;
 using namespace sigc;
 
 void
-ARDOUR_UI::toggle_config_state (const char* group, const char* action, bool (Configuration::*set)(bool), bool (Configuration::*get)(void) const)
-{
-	Glib::RefPtr<Action> act = ActionManager::get_action (group, action);
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-
-		if (tact) {
-			bool x = (Config->*get)();
-
-			cerr << "\ttoggle config, action = " << tact->get_active() << " config = " << x << endl;
-			
-			if (x != tact->get_active()) {
-				(Config->*set) (!x);
-			}
-		}
-	}
-}
-
-void
-ARDOUR_UI::toggle_config_state (const char* group, const char* action, sigc::slot<void> theSlot)
-{
-	if (session) {
-		Glib::RefPtr<Action> act = ActionManager::get_action (group, action);
-		if (act) {
-			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-			if (tact->get_active()) {
-				theSlot ();
-			}
-		}
-	}
-}
-
-void
 ARDOUR_UI::toggle_time_master ()
 {
-	toggle_config_state ("Transport", "ToggleTimeMaster", &Configuration::set_jack_time_master, &Configuration::get_jack_time_master);
-	if (session) {
-		session->engine().reset_timebase ();
-	}
+	ActionManager::toggle_config_state ("Transport", "ToggleTimeMaster", &Configuration::set_jack_time_master, &Configuration::get_jack_time_master);
 }
 
 void
 ARDOUR_UI::toggle_send_mtc ()
 {
-	toggle_config_state ("options", "SendMTC", &Configuration::set_send_mtc, &Configuration::get_send_mtc);
+	ActionManager::toggle_config_state ("options", "SendMTC", &Configuration::set_send_mtc, &Configuration::get_send_mtc);
 }
 
 void
 ARDOUR_UI::toggle_send_mmc ()
 {
-	toggle_config_state ("options", "SendMMC", &Configuration::set_send_mmc, &Configuration::get_send_mmc);
+	ActionManager::toggle_config_state ("options", "SendMMC", &Configuration::set_send_mmc, &Configuration::get_send_mmc);
 }
 
 void
 ARDOUR_UI::toggle_use_mmc ()
 {
-	toggle_config_state ("options", "UseMMC", &Configuration::set_mmc_control, &Configuration::get_mmc_control);
+	ActionManager::toggle_config_state ("options", "UseMMC", &Configuration::set_mmc_control, &Configuration::get_mmc_control);
 }
 
 void
 ARDOUR_UI::toggle_use_midi_control ()
 {
-	toggle_config_state ("options", "UseMIDIcontrol", &Configuration::set_midi_control, &Configuration::get_midi_control);
+	ActionManager::toggle_config_state ("options", "UseMIDIcontrol", &Configuration::set_midi_control, &Configuration::get_midi_control);
 }
 
 void
 ARDOUR_UI::toggle_send_midi_feedback ()
 {
-	toggle_config_state ("options", "SendMIDIfeedback", &Configuration::set_midi_feedback, &Configuration::get_midi_feedback);
+	ActionManager::toggle_config_state ("options", "SendMIDIfeedback", &Configuration::set_midi_feedback, &Configuration::get_midi_feedback);
 }
 
 void
-ARDOUR_UI::toggle_AutoConnectNewTrackInputsToHardware()
+ARDOUR_UI::set_native_file_header_format (HeaderFormat hf)
 {
-	toggle_config_state ("options", "AutoConnectNewTrackInputsToHardware", hide_return (bind (mem_fun (*Config, &Configuration::set_input_auto_connect), AutoConnectPhysical)));
+	const char *action;
+
+	switch (hf) {
+	case BWF:
+		action = X_("FileHeaderFormatBWF");
+		break;
+	case WAVE:
+		action = X_("FileHeaderFormatWAVE");
+		break;
+	case WAVE64:
+		action = X_("FileHeaderFormatWAVE64");
+		break;
+	case iXML:
+		action = X_("FileHeaderFormatiXML");
+		break;
+	case RF64:
+		action = X_("FileHeaderFormatRF64");
+		break;
+	case CAF:
+		action = X_("FileHeaderFormatCAF");
+		break;
+	case AIFF:
+		action = X_("FileHeaderFormatAIFF");
+		break;
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action ("options", action);
+
+	if (act) {
+		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && ract->get_active() && Config->get_native_file_header_format() != hf) {
+			Config->set_native_file_header_format (hf);
+		}
+	}
 }
+
 void
-ARDOUR_UI::toggle_AutoConnectNewTrackOutputsToHardware()
+ARDOUR_UI::set_native_file_data_format (SampleFormat sf)
 {
-	toggle_config_state ("options", "AutoConnectNewTrackOutputsToHardware", hide_return (bind (mem_fun (*Config, &Configuration::set_output_auto_connect), AutoConnectPhysical)));
+	const char* action;
+
+	switch (sf) {
+	case FormatFloat:
+		action = X_("FileDataFormatFloat");
+		break;
+	case FormatInt24:
+		action = X_("FileDataFormat24bit");
+		break;
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action ("options", action);
+
+	if (act) {
+		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && ract->get_active() && Config->get_native_file_data_format() != sf) {
+			Config->set_native_file_data_format (sf);
+		}
+	}
 }
+
 void
-ARDOUR_UI::toggle_AutoConnectNewTrackOutputsToMaster()
+ARDOUR_UI::set_input_auto_connect (AutoConnectOption option)
 {
-	toggle_config_state ("options", "AutoConnectNewTrackOutputsToHardware", hide_return (bind (mem_fun (*Config, &Configuration::set_output_auto_connect), AutoConnectMaster)));
+	const char* action;
+	
+	switch (option) {
+	case AutoConnectPhysical:
+		action = X_("InputAutoConnectPhysical");
+		break;
+	default:
+		action = X_("InputAutoConnectManual");
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action ("options", action);
+
+	if (act) {
+		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
+
+		if (ract && ract->get_active() && Config->get_input_auto_connect() != option) {
+			Config->set_input_auto_connect (option);
+		}
+	}
 }
+
 void
-ARDOUR_UI::toggle_ManuallyConnectNewTrackOutputs()
+ARDOUR_UI::set_output_auto_connect (AutoConnectOption option)
 {
-	toggle_config_state ("options", "AutoConnectNewTrackOutputsToHardware", hide_return (bind (mem_fun (*Config, &Configuration::set_output_auto_connect), AutoConnectOption (0))));
+	const char* action;
+	
+	switch (option) {
+	case AutoConnectPhysical:
+		action = X_("OutputAutoConnectPhysical");
+		break;
+	case AutoConnectMaster:
+		action = X_("OutputAutoConnectMaster");
+		break;
+	default:
+		action = X_("OutputAutoConnectManual");
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action ("options", action);
+
+	if (act) {
+		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
+
+		if (ract && ract->get_active() && Config->get_output_auto_connect() != option) {
+			Config->set_output_auto_connect (option);
+		}
+	}
+}
+
+void
+ARDOUR_UI::set_solo_model (SoloModel model)
+{
+	const char* action = 0;
+
+	switch (model) {
+	case SoloBus:
+		action = X_("SoloViaBus");
+		break;
+		
+	case InverseMute:
+		action = X_("SoloInPlace");
+		break;
+	default:
+		fatal << string_compose (_("programming error: unknown solo model in ARDOUR_UI::set_solo_model: %1"), model) << endmsg;
+		/*NOTREACHED*/
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action ("options", action);
+
+	if (act) {
+		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
+
+		if (ract && ract->get_active() && Config->get_solo_model() != model) {
+			Config->set_solo_model (model);
+		}
+	}
+
+}
+
+void
+ARDOUR_UI::set_monitor_model (MonitorModel model)
+{
+	const char* action = 0;
+
+	switch (model) {
+	case HardwareMonitoring:
+		action = X_("UseHardwareMonitoring");
+		break;
+		
+	case SoftwareMonitoring:
+		action = X_("UseSoftwareMonitoring");
+		break;
+	case ExternalMonitoring:
+		action = X_("UseExternalMonitoring");
+		break;
+
+	default:
+		fatal << string_compose (_("programming error: unknown solo model in ARDOUR_UI::set_solo_model: %1"), model) << endmsg;
+		/*NOTREACHED*/
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action ("options", action);
+
+	if (act) {
+		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
+
+		if (ract && ract->get_active() && Config->get_monitoring_model() != model) {
+			Config->set_monitoring_model (model);
+		}
+	}
+
 }
 
 void
 ARDOUR_UI::toggle_auto_input ()
 {
-	toggle_config_state ("Transport", "ToggleAutoInput", &Configuration::set_auto_input, &Configuration::get_auto_input);
+	ActionManager::toggle_config_state ("Transport", "ToggleAutoInput", &Configuration::set_auto_input, &Configuration::get_auto_input);
 }
 
 void
 ARDOUR_UI::toggle_auto_play ()
 {
-	toggle_config_state ("Transport", "ToggleAutoPlay", &Configuration::set_auto_play, &Configuration::get_auto_play);
+	ActionManager::toggle_config_state ("Transport", "ToggleAutoPlay", &Configuration::set_auto_play, &Configuration::get_auto_play);
 }
 
 void
 ARDOUR_UI::toggle_auto_return ()
 {
-	toggle_config_state ("Transport", "ToggleAutoReturn", &Configuration::set_auto_return, &Configuration::get_auto_return);
+	ActionManager::toggle_config_state ("Transport", "ToggleAutoReturn", &Configuration::set_auto_return, &Configuration::get_auto_return);
 }
 
 void
 ARDOUR_UI::toggle_click ()
 {
-	toggle_config_state ("Transport", "ToggleClick", &Configuration::set_clicking, &Configuration::get_clicking);
+	ActionManager::toggle_config_state ("Transport", "ToggleClick", &Configuration::set_clicking, &Configuration::get_clicking);
 }
 
 void
@@ -174,13 +295,13 @@ ARDOUR_UI::toggle_session_auto_loop ()
 void
 ARDOUR_UI::toggle_punch_in ()
 {
-	toggle_config_state ("Transport", "TogglePunchIn", &Configuration::set_punch_in, &Configuration::get_punch_in);
+	ActionManager::toggle_config_state ("Transport", "TogglePunchIn", &Configuration::set_punch_in, &Configuration::get_punch_in);
 }
 
 void
 ARDOUR_UI::toggle_punch_out ()
 {
-	toggle_config_state ("Transport", "TogglePunchOut", &Configuration::set_punch_out, &Configuration::get_punch_out);
+	ActionManager::toggle_config_state ("Transport", "TogglePunchOut", &Configuration::set_punch_out, &Configuration::get_punch_out);
 }
 
 void
@@ -208,90 +329,39 @@ ARDOUR_UI::toggle_editing_space()
 }
 
 void
-ARDOUR_UI::toggle_UseHardwareMonitoring()
-{
-	Glib::RefPtr<Action> act = ActionManager::get_action ("options", "UseHardwareMonitoring");
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		if (tact->get_active()) {
-			Config->set_use_hardware_monitoring (true);
-			Config->set_use_sw_monitoring (false);
-			Config->set_use_external_monitoring (false);
-			if (session) {
-				session->reset_input_monitor_state();
-			}
-		}
-	}
-}
-
-void
-ARDOUR_UI::toggle_UseSoftwareMonitoring()
-{
-	Glib::RefPtr<Action> act = ActionManager::get_action ("options", "UseSoftwareMonitoring");
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		if (tact->get_active()) {
-			Config->set_use_hardware_monitoring (false);
-			Config->set_use_sw_monitoring (true);
-			Config->set_use_external_monitoring (false);
-			if (session) {
-				session->reset_input_monitor_state();
-			}
-		}
-	}
-}
-
-void
-ARDOUR_UI::toggle_UseExternalMonitoring()
-{
-	Glib::RefPtr<Action> act = ActionManager::get_action ("options", "UseExternalMonitoring");
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		if (tact->get_active()) {
-			Config->set_use_hardware_monitoring (false);
-			Config->set_use_sw_monitoring (false);
-			Config->set_use_external_monitoring (true);
-			if (session) {
-				session->reset_input_monitor_state();
-			}
-		}
-	}
-}
-
-void
 ARDOUR_UI::toggle_StopPluginsWithTransport()
 {
-	toggle_config_state ("options", "StopPluginsWithTransport", &Configuration::set_plugins_stop_with_transport, &Configuration::get_plugins_stop_with_transport);
+	ActionManager::toggle_config_state ("options", "StopPluginsWithTransport", &Configuration::set_plugins_stop_with_transport, &Configuration::get_plugins_stop_with_transport);
 }
 
 void
 ARDOUR_UI::toggle_LatchedRecordEnable()
 {
-	toggle_config_state ("options", "LatchedRecordEnable", &Configuration::set_latched_record_enable, &Configuration::get_latched_record_enable);
+	ActionManager::toggle_config_state ("options", "LatchedRecordEnable", &Configuration::set_latched_record_enable, &Configuration::get_latched_record_enable);
 }
 
 void
 ARDOUR_UI::toggle_DoNotRunPluginsWhileRecording()
 {
-	toggle_config_state ("options", "DoNotRunPluginsWhileRecording", &Configuration::set_do_not_record_plugins, &Configuration::get_do_not_record_plugins);
+	ActionManager::toggle_config_state ("options", "DoNotRunPluginsWhileRecording", &Configuration::set_do_not_record_plugins, &Configuration::get_do_not_record_plugins);
 }
 
 void
 ARDOUR_UI::toggle_VerifyRemoveLastCapture()
 {
-	toggle_config_state ("options", "VerifyRemoveLastCapture", &Configuration::set_verify_remove_last_capture, &Configuration::get_verify_remove_last_capture);
+	ActionManager::toggle_config_state ("options", "VerifyRemoveLastCapture", &Configuration::set_verify_remove_last_capture, &Configuration::get_verify_remove_last_capture);
 }
 
 void
 ARDOUR_UI::toggle_StopRecordingOnXrun()
 {
-	toggle_config_state ("options", "StopRecordingOnXrun", &Configuration::set_stop_recording_on_xrun, &Configuration::get_stop_recording_on_xrun);
+	ActionManager::toggle_config_state ("options", "StopRecordingOnXrun", &Configuration::set_stop_recording_on_xrun, &Configuration::get_stop_recording_on_xrun);
 }
 
 void
 ARDOUR_UI::toggle_StopTransportAtEndOfSession()
 {
-	toggle_config_state ("options", "StopTransportAtEndOfSession", &Configuration::set_stop_at_session_end, &Configuration::get_stop_at_session_end);
+	ActionManager::toggle_config_state ("options", "StopTransportAtEndOfSession", &Configuration::set_stop_at_session_end, &Configuration::get_stop_at_session_end);
 }
 
 void
@@ -311,36 +381,7 @@ ARDOUR_UI::toggle_GainReduceFastTransport()
 void
 ARDOUR_UI::toggle_LatchedSolo()
 {
-	toggle_config_state ("options", "LatchedSolo", &Configuration::set_solo_latched, &Configuration::get_solo_latched);
-}
-
-void
-ARDOUR_UI::toggle_SoloViaBus()
-{
-	if (!session) {
-		return;
-	}
-
-	Glib::RefPtr<Action> act = ActionManager::get_action ("options", "SoloViaBus");
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-
-		if (tact->get_active()) {
-			Config->set_solo_model (SoloBus);
-		} else {
-			Config->set_solo_model (InverseMute);
-		}
-	}
-}
-
-void
-ARDOUR_UI::toggle_AutomaticallyCreateCrossfades()
-{
-}
-
-void
-ARDOUR_UI::toggle_UnmuteNewFullCrossfades()
-{
+	ActionManager::toggle_config_state ("options", "LatchedSolo", &Configuration::set_solo_latched, &Configuration::get_solo_latched);
 }
 
 void
@@ -376,27 +417,330 @@ ARDOUR_UI::setup_session_options ()
 	Config->ParameterChanged.connect (mem_fun (*this, &ARDOUR_UI::parameter_changed));
 }
 
+
 void
-ARDOUR_UI::map_some_state (const char* group, const char* action, bool (Configuration::*get)() const)
+ARDOUR_UI::map_solo_model ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (group, action);
+	const char* on;
+
+	if (Config->get_solo_model() == InverseMute) {
+		on = "SoloInPlace";
+	} else {
+		on = "SoloViaBus";
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action ("options", on);
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 
-		if (tact) {
-			
-			bool x = (Config->*get)();
-
-			cerr << "\tmap state, action = " << tact->get_active() << " config = " << x << endl;
-			
-			if (tact->get_active() != x) {
-				tact->set_active (x);
-			}
-		} else {
-			cerr << "not a toggle\n";
+		if (tact && !tact->get_active()) {
+			tact->set_active (true);
 		}
+	}
+}
+
+void
+ARDOUR_UI::map_monitor_model ()
+{
+	const char* on = 0;
+
+	switch (Config->get_monitoring_model()) {
+	case HardwareMonitoring:
+		on = X_("UseHardwareMonitoring");
+		break;
+	case SoftwareMonitoring:
+		on = X_("UseSoftwareMonitoring");
+		break;
+	case ExternalMonitoring:
+		on = X_("UseExternalMonitoring");
+		break;
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action ("options", on);
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+
+		if (tact && !tact->get_active()) {
+			tact->set_active (true);
+		}
+	}
+}
+
+void
+ARDOUR_UI::map_file_header_format ()
+{
+	const char* action = 0;
+
+	switch (Config->get_native_file_header_format()) {
+	case BWF:
+		action = X_("FileHeaderFormatBWF");
+		break;
+
+	case WAVE:
+		action = X_("FileHeaderFormatWAVE");
+		break;
+
+	case WAVE64:
+		action = X_("FileHeaderFormatWAVE64");
+		break;
+
+	case iXML:
+		action = X_("FileHeaderFormatiXML");
+		break;
+
+	case RF64:
+		action = X_("FileHeaderFormatRF64");
+		break;
+
+	case CAF:
+		action = X_("FileHeaderFormatCAF");
+		break;
+
+	default:
+		fatal << string_compose (_("programming error: unknown file header format passed to ARDOUR_UI::map_file_data_format: %1"), 
+					 Config->get_native_file_header_format()) << endmsg;
+		/*NOTREACHED*/
+	}
+
+
+	Glib::RefPtr<Action> act = ActionManager::get_action ("options", action);
+
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+
+		if (tact && !tact->get_active()) {
+			tact->set_active (true);
+		}
+	}
+}
+
+void
+ARDOUR_UI::map_file_data_format ()
+{
+	const char* action = 0;
+
+	switch (Config->get_native_file_data_format()) {
+	case FormatFloat:
+		action = X_("FileDataFormatFloat");
+		break;
+
+	case FormatInt24:
+		action = X_("FileDataFormat24bit");
+		break;
+
+	default:
+		fatal << string_compose (_("programming error: unknown file data format passed to ARDOUR_UI::map_file_data_format: %1"), 
+					 Config->get_native_file_data_format()) << endmsg;
+		/*NOTREACHED*/
+	}
+
+
+	Glib::RefPtr<Action> act = ActionManager::get_action ("options", action);
+
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+
+		if (tact && !tact->get_active()) {
+			tact->set_active (true);
+		}
+	}
+}
+
+void
+ARDOUR_UI::map_input_auto_connect ()
+{
+	const char* on;
+
+	if (Config->get_input_auto_connect() == (AutoConnectOption) 0) {
+		on = "InputAutoConnectManual";
 	} else {
-		cerr << group << ':' << action << " not an action\n";
+		on = "InputAutoConnectPhysical";
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action ("options", on);
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+
+		if (tact && !tact->get_active()) {
+			tact->set_active (true);
+		}
+	}
+}
+
+void
+ARDOUR_UI::map_output_auto_connect ()
+{
+	const char* on;
+
+	if (Config->get_output_auto_connect() == (AutoConnectOption) 0) {
+		on = "OutputAutoConnectManual";
+	} else if (Config->get_output_auto_connect() == AutoConnectPhysical) {
+		on = "OutputAutoConnectPhysical";
+	} else {
+		on = "OutputAutoConnectMaster";
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action ("options", on);
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		
+		if (tact && !tact->get_active()) {
+			tact->set_active (true);
+		}
+	}
+}
+
+void
+ARDOUR_UI::map_meter_falloff ()
+{
+	const char* action = 0;
+
+	/* XXX hack alert. Fix this. Please */
+
+	float val = Config->get_meter_falloff ();
+	MeterFalloff code = (MeterFalloff) (floor (val));
+
+	switch (code) {
+	case MeterFalloffOff:
+		action = X_("MeterFalloffOff");
+		break;
+	case MeterFalloffSlowest:
+		action = X_("MeterFalloffSlowest");
+		break;
+	case MeterFalloffSlow:
+		action = X_("MeterFalloffSlow");
+		break;
+	case MeterFalloffMedium:
+		action = X_("MeterFalloffMedium");
+		break;
+	case MeterFalloffFast:
+		action = X_("MeterFalloffFast");
+		break;
+	case MeterFalloffFaster:
+		action = X_("MeterFalloffFaster");
+		break;
+	case MeterFalloffFastest:
+		action = X_("MeterFalloffFastest");
+		break;
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("options"), action);
+
+	if (act) {
+		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && !ract->get_active()) {
+			ract->set_active (true);
+		}
+	}
+}
+
+void
+ARDOUR_UI::map_meter_hold ()
+{
+	const char* action = 0;
+
+	/* XXX hack alert. Fix this. Please */
+
+	float val = Config->get_meter_hold ();
+	MeterHold code = (MeterHold) (floor (val));
+
+	switch (code) {
+	case MeterHoldOff:
+		action = X_("MeterHoldOff");
+		break;
+	case MeterHoldShort:
+		action = X_("MeterHoldShort");
+		break;
+	case MeterHoldMedium:
+		action = X_("MeterHoldMedium");
+		break;
+	case MeterHoldLong:
+		action = X_("MeterHoldLong");
+		break;
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("options"), action);
+
+	if (act) {
+		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && !ract->get_active()) {
+			ract->set_active (true);
+		}
+	}
+}
+
+void 
+ARDOUR_UI::set_meter_hold (MeterHold val)
+{
+	const char* action = 0;
+	float fval;
+
+	fval = meter_hold_to_float (val);
+
+	switch (val) {
+	case MeterHoldOff:
+		action = X_("MeterHoldOff");
+		break;
+	case MeterHoldShort:
+		action = X_("MeterHoldShort");
+		break;
+	case MeterHoldMedium:
+		action = X_("MeterHoldMedium");
+		break;
+	case MeterHoldLong:
+		action = X_("MeterHoldLong");
+		break;
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("options"), action);
+	
+	if (act) {
+		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && ract->get_active() && Config->get_meter_hold() != fval) {
+			Config->set_meter_hold (fval);
+		}
+	}
+}
+
+void
+ARDOUR_UI::set_meter_falloff (MeterFalloff val)
+{
+	const char* action = 0;
+	float fval;
+
+	fval = meter_falloff_to_float (val);
+
+	switch (val) {
+	case MeterFalloffOff:
+		action = X_("MeterFalloffOff");
+		break;
+	case MeterFalloffSlowest:
+		action = X_("MeterFalloffSlowest");
+		break;
+	case MeterFalloffSlow:
+		action = X_("MeterFalloffSlow");
+		break;
+	case MeterFalloffMedium:
+		action = X_("MeterFalloffMedium");
+		break;
+	case MeterFalloffFast:
+		action = X_("MeterFalloffFast");
+		break;
+	case MeterFalloffFaster:
+		action = X_("MeterFalloffFaster");
+		break;
+	case MeterFalloffFastest:
+		action = X_("MeterFalloffFastest");
+		break;
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("options"), action);
+
+	if (act) {
+		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && ract->get_active() && Config->get_meter_falloff () != fval) {
+			Config->set_meter_falloff (fval);
+		}
 	}
 }
 
@@ -413,69 +757,58 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 
 	} else if (PARAM_IS ("send-mtc")) {
 
-		map_some_state ("options", "SendMTC", &Configuration::get_send_mtc);
+		ActionManager::map_some_state ("options", "SendMTC", &Configuration::get_send_mtc);
 
 	} else if (PARAM_IS ("send-mmc")) {
 
-		map_some_state ("options", "SendMMC", &Configuration::get_send_mmc);
+		ActionManager::map_some_state ("options", "SendMMC", &Configuration::get_send_mmc);
 
 	} else if (PARAM_IS ("mmc-control")) {
-		map_some_state ("options", "UseMMC", &Configuration::get_mmc_control);
+		ActionManager::map_some_state ("options", "UseMMC", &Configuration::get_mmc_control);
 	} else if (PARAM_IS ("midi-feedback")) {
-		map_some_state ("options", "SendMIDIfeedback", &Configuration::get_midi_feedback);
+		ActionManager::map_some_state ("options", "SendMIDIfeedback", &Configuration::get_midi_feedback);
 	} else if (PARAM_IS ("midi-control")) {
-		map_some_state ("options", "UseMIDIcontrol", &Configuration::get_midi_control);
+		ActionManager::map_some_state ("options", "UseMIDIcontrol", &Configuration::get_midi_control);
 	} else if (PARAM_IS ("do-not-record-plugins")) {
-		map_some_state ("options", "DoNotRunPluginsWhileRecording", &Configuration::get_do_not_record_plugins);
-	} else if (PARAM_IS ("automatic-crossfades")) {
-		map_some_state ("Editor", "toggle-auto-xfades", &Configuration::get_automatic_crossfades);
-	} else if (PARAM_IS ("crossfades-active")) {
-		map_some_state ("Editor", "toggle-xfades-active", &Configuration::get_crossfades_active);
-	} else if (PARAM_IS ("crossfades-visible")) {
-		map_some_state ("Editor", "toggle-xfades-visible", &Configuration::get_crossfades_visible);
+		ActionManager::map_some_state ("options", "DoNotRunPluginsWhileRecording", &Configuration::get_do_not_record_plugins);
 	} else if (PARAM_IS ("latched-record-enable")) {
-		map_some_state ("options", "LatchedRecordEnable", &Configuration::get_latched_record_enable);
+		ActionManager::map_some_state ("options", "LatchedRecordEnable", &Configuration::get_latched_record_enable);
 	} else if (PARAM_IS ("solo-latched")) {
-		map_some_state ("options", "LatchedSolo", &Configuration::get_solo_latched);
+		ActionManager::map_some_state ("options", "LatchedSolo", &Configuration::get_solo_latched);
 	} else if (PARAM_IS ("solo-model")) {
-	} else if (PARAM_IS ("layer-model")) {
-	} else if (PARAM_IS ("crossfade-model")) {
+		map_solo_model ();
 	} else if (PARAM_IS ("auto-play")) {
-		map_some_state ("Transport", "ToggleAutoPlay", &Configuration::get_auto_play);
+		ActionManager::map_some_state ("Transport", "ToggleAutoPlay", &Configuration::get_auto_play);
 	} else if (PARAM_IS ("auto-loop")) {
-		map_some_state ("Transport", "Loop", &Configuration::get_auto_loop);
+		ActionManager::map_some_state ("Transport", "Loop", &Configuration::get_auto_loop);
 	} else if (PARAM_IS ("auto-return")) {
-		map_some_state ("Transport", "ToggleAutoReturn", &Configuration::get_auto_return);
+		ActionManager::map_some_state ("Transport", "ToggleAutoReturn", &Configuration::get_auto_return);
 	} else if (PARAM_IS ("auto-input")) {
-		map_some_state ("Transport", "ToggleAutoInput", &Configuration::get_auto_input);
+		ActionManager::map_some_state ("Transport", "ToggleAutoInput", &Configuration::get_auto_input);
 	} else if (PARAM_IS ("punch-out")) {
-		map_some_state ("Transport", "TogglePunchOut", &Configuration::get_punch_out);
+		ActionManager::map_some_state ("Transport", "TogglePunchOut", &Configuration::get_punch_out);
 	} else if (PARAM_IS ("punch-in")) {
-		map_some_state ("Transport", "TogglePunchIn", &Configuration::get_punch_in);
+		ActionManager::map_some_state ("Transport", "TogglePunchIn", &Configuration::get_punch_in);
 	} else if (PARAM_IS ("clicking")) {
-		map_some_state ("Transport", "ToggleClick", &Configuration::get_clicking);
+		ActionManager::map_some_state ("Transport", "ToggleClick", &Configuration::get_clicking);
 	} else if (PARAM_IS ("jack-time-master")) {
-		map_some_state ("Transport",  "ToggleTimeMaster", &Configuration::get_jack_time_master);
+		ActionManager::map_some_state ("Transport",  "ToggleTimeMaster", &Configuration::get_jack_time_master);
 	} else if (PARAM_IS ("plugins-stop-with-transport")) {
-		map_some_state ("options",  "StopPluginsWithTransport", &Configuration::get_plugins_stop_with_transport);
+		ActionManager::map_some_state ("options",  "StopPluginsWithTransport", &Configuration::get_plugins_stop_with_transport);
 	} else if (PARAM_IS ("latched-record-enable")) {
-		map_some_state ("options", "LatchedRecordEnable", &Configuration::get_latched_record_enable);
+		ActionManager::map_some_state ("options", "LatchedRecordEnable", &Configuration::get_latched_record_enable);
 	} else if (PARAM_IS ("verify-remove-last-capture")) {
-		map_some_state ("options",  "VerifyRemoveLastCapture", &Configuration::get_verify_remove_last_capture);
+		ActionManager::map_some_state ("options",  "VerifyRemoveLastCapture", &Configuration::get_verify_remove_last_capture);
 	} else if (PARAM_IS ("stop-recording-on-xrun")) {
-		map_some_state ("options",  "StopRecordingOnXrun", &Configuration::get_stop_recording_on_xrun);
+		ActionManager::map_some_state ("options",  "StopRecordingOnXrun", &Configuration::get_stop_recording_on_xrun);
 	} else if (PARAM_IS ("stop-at-session-end")) {
-		map_some_state ("options",  "StopTransportAtEndOfSession", &Configuration::get_stop_at_session_end);
-	} else if (PARAM_IS ("use-hardware-monitoring")) {
-		map_some_state ("options",  "UseHardwareMonitoring", &Configuration::get_use_hardware_monitoring);
-	} else if (PARAM_IS ("use-sw-monitoring")) {
-		map_some_state ("options",  "UseSoftwareMonitoring", &Configuration::get_use_sw_monitoring);
-	} else if (PARAM_IS ("use-external-monitoring")) {
-		map_some_state ("options",  "UseExternalMonitoring", &Configuration::get_use_external_monitoring);
+		ActionManager::map_some_state ("options",  "StopTransportAtEndOfSession", &Configuration::get_stop_at_session_end);
+	} else if (PARAM_IS ("monitoring-model")) {
+		map_monitor_model ();
 	} else if (PARAM_IS ("use-video-sync")) {
-		map_some_state ("Transport",  "ToggleVideoSync", &Configuration::get_use_video_sync);
+		ActionManager::map_some_state ("Transport",  "ToggleVideoSync", &Configuration::get_use_video_sync);
 	} else if (PARAM_IS ("quieten-at-speed")) {
-		map_some_state ("options",  "GainReduceFastTransport", &Configuration::get_quieten_at_speed);
+		ActionManager::map_some_state ("options",  "GainReduceFastTransport", &Configuration::get_quieten_at_speed);
 	} else if (PARAM_IS ("shuttle-behaviour")) {
 
 		switch (Config->get_shuttle_behaviour ()) {
@@ -505,7 +838,19 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 			shuttle_units_button.set_label(_("ST"));
 			break;
 		}
+	} else if (PARAM_IS ("input-auto-connect")) {
+		map_input_auto_connect ();
+	} else if (PARAM_IS ("output-auto-connect")) {
+		map_output_auto_connect ();
+	} else if (PARAM_IS ("native-file-header-format")) {
+		map_file_header_format ();
+	} else if (PARAM_IS ("native-file-data-format")) {
+		map_file_data_format ();
+	} else if (PARAM_IS ("meter-hold")) {
+		map_meter_hold ();
+	} else if (PARAM_IS ("meter-falloff")) {
+		map_meter_falloff ();
 	}
-	
+
 #undef PARAM_IS
 }

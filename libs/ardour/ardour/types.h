@@ -200,6 +200,28 @@ namespace ARDOUR {
 	    }
 	};
 
+	/*
+	    Slowest = 6.6dB/sec falloff at update rate of 40ms
+	    Slow    = 6.8dB/sec falloff at update rate of 40ms
+	*/
+
+	enum MeterFalloff {
+		MeterFalloffOff = 0,
+		MeterFalloffSlowest = 1,
+		MeterFalloffSlow = 2,
+		MeterFalloffMedium = 3,
+		MeterFalloffFast = 4,
+		MeterFalloffFaster = 5,
+		MeterFalloffFastest = 6
+	};
+
+	enum MeterHold {
+		MeterHoldOff = 0,
+		MeterHoldShort = 40,
+		MeterHoldMedium = 100,
+		MeterHoldLong = 200
+	};
+
 	enum EditMode {
 		Slide,
 		Splice
@@ -219,6 +241,12 @@ namespace ARDOUR {
 	enum Placement {
 		PreFader,
 		PostFader
+	};
+
+	enum MonitorModel {
+		HardwareMonitoring,
+		SoftwareMonitoring,
+		ExternalMonitoring,
 	};
 
 	enum CrossfadeModel {
@@ -302,6 +330,7 @@ std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::HeaderFormat& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::AutoConnectOption& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::EditMode& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::MonitorModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::SoloModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::LayerModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::CrossfadeModel& sf);

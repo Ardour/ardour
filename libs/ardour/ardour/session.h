@@ -833,10 +833,6 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 
 	boost::shared_ptr<AudioRegion> tempoize_region (TimeStretchRequest&);
 
-	/* need to call this whenever we change native file formats */
-
-	void reset_native_file_format();
-
 	/* disk, buffer loads */
 
 	uint32_t playback_load ();
@@ -1642,9 +1638,6 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	boost::shared_ptr<IO> _master_out;
 	boost::shared_ptr<IO> _control_out;
 
-	AutoConnectOption input_auto_connect;
-	AutoConnectOption output_auto_connect;
-
 	gain_t* _gain_automation_buffer;
 	pan_t** _pan_automation_buffer;
 	void allocate_pan_automation_buffers (nframes_t nframes, uint32_t howmany, bool force);
@@ -1680,6 +1673,11 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 
 	void add_controllable (PBD::Controllable*);
 	void remove_controllable (PBD::Controllable*);
+
+
+	void reset_native_file_format();
+	bool first_file_data_format_reset;
+	bool first_file_header_format_reset;
 
 	void config_changed (const char*);
 };

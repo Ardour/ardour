@@ -98,15 +98,6 @@ const double Editor::timebar_height = 15.0;
 
 #include "editor_xpms"
 
-static const int32_t slide_index = 0;
-static const int32_t splice_index = 1;
-
-static const gchar *edit_mode_strings[] = {
-	N_("Slide Edit"),
-	N_("Splice Edit"),
-	0
-};
-
 static const gchar *snap_type_strings[] = {
 	N_("None"),
 	N_("CD Frames"),
@@ -1003,31 +994,6 @@ Editor::on_realize ()
 }
 
 void
-Editor::parameter_changed (const char* parameter_name)
-{
-#define PARAM_IS(x) (!strcmp (parameter_name, (x)))
-
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::parameter_changed), parameter_name));
-
-	if (PARAM_IS ("auto-loop")) {
-		update_loop_range_view (true);
-	} else if (PARAM_IS ("punch-in")) {
-		update_punch_range_view (true);
-	} else if (PARAM_IS ("punch-out")) {
-		update_punch_range_view (true);
-	} else if (PARAM_IS ("layer-model")) {
-		update_layering_model ();
-	} else if (PARAM_IS ("smpte-frames-per-second") || PARAM_IS ("smpte-drop-frames")) {
-		update_smpte_mode ();
-		update_just_smpte ();
-	} else if (PARAM_IS ("video-pullup")) {
-		update_video_pullup ();
-	} 
-
-#undef PARAM_IS
-}
-
-void
 Editor::start_scrolling ()
 {
 	scroll_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect 
@@ -1181,16 +1147,6 @@ Editor::connect_to_session (Session *t)
 		analysis_window->set_session (session);
 #endif
 
-	switch (Config->get_edit_mode()) {
-	case Splice:
-		edit_mode_selector.set_active_text (edit_mode_strings[splice_index]);
-		break;
-
-	case Slide:
-		edit_mode_selector.set_active_text (edit_mode_strings[slide_index]);
-		break;
-	}
-
 	Location* loc = session->locations()->auto_loop_location();
 	if (loc == 0) {
 		loc = new Location (0, session->current_end_frame(), _("Loop"),(Location::Flags) (Location::IsAutoLoop | Location::IsHidden));
@@ -1230,35 +1186,6 @@ Editor::connect_to_session (Session *t)
 	session->locations()->changed.connect (mem_fun(*this, &Editor::refresh_location_display));
 	session->locations()->StateChanged.connect (mem_fun(*this, &Editor::refresh_location_display_s));
 	session->locations()->end_location()->changed.connect (mem_fun(*this, &Editor::end_location_changed));
-
-	bool yn;
-	RefPtr<Action> act;
-
-	act = ActionManager::get_action (X_("Editor"), X_("toggle-xfades-active"));
-	if (act) {
-		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-		/* do it twice to force the change */
-		yn = Config->get_crossfades_active();
-		tact->set_active (!yn);
-		tact->set_active (yn);
-	}
-
-	act = ActionManager::get_action (X_("Editor"), X_("toggle-auto-xfades"));
-	if (act) {
-		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-		/* do it twice to force the change */
-		yn = Config->get_auto_xfade ();
-		tact->set_active (!yn);
-		tact->set_active (yn);
-	}
-
-	/* xfade visibility state set from editor::set_state() */
-
-	update_crossfade_model();
-	update_layering_model();
-
-	update_smpte_mode();
-	update_video_pullup();
 
 	handle_new_duration ();
 
@@ -2569,9 +2496,13 @@ Editor::setup_toolbar ()
 	mouse_mode_button_box.pack_start(mouse_audition_button, true, true);
 	mouse_mode_button_box.set_homogeneous(true);
 
+	vector<string> edit_mode_strings;
+	edit_mode_strings.push_back (edit_mode_to_string (Splice));
+	edit_mode_strings.push_back (edit_mode_to_string (Slide));
+
 	edit_mode_selector.set_name ("EditModeSelector");
-	Gtkmm2ext::set_size_request_to_display_given_text (edit_mode_selector, "Splice Edit", 2+FUDGE, 10);
-	set_popdown_strings (edit_mode_selector, internationalize (edit_mode_strings));
+	Gtkmm2ext::set_size_request_to_display_given_text (edit_mode_selector, longest (edit_mode_strings).c_str(), 2+FUDGE, 10);
+	set_popdown_strings (edit_mode_selector, edit_mode_strings);
 	edit_mode_selector.signal_changed().connect (mem_fun(*this, &Editor::edit_mode_selection_done));
 
 	mode_box->pack_start(edit_mode_selector);
@@ -4134,133 +4065,5 @@ bool
 Editor::on_key_press_event (GdkEventKey* ev)
 {
 	return key_press_focus_accelerator_handler (*this, ev);
-}
-
-void
-Editor::update_smpte_mode ()
-{
-	ENSURE_GUI_THREAD(mem_fun(*this, &Editor::update_smpte_mode));
-
-	RefPtr<Action> act;
-
-	float frames = Config->get_smpte_frames_per_second();
-	bool drop = Config->get_smpte_drop_frames();
-
-	if ((frames < 23.976 * 1.0005) && !drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte23976"));
-	else if ((frames < 24 * 1.0005) && !drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte24"));
-	else if ((frames < 24.976 * 1.0005) && !drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte24976"));
-	else if ((frames < 25 * 1.0005) && !drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte25"));
-	else if ((frames < 29.97 * 1.0005) && !drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte2997"));
-	else if ((frames < 29.97 * 1.0005) && drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte2997drop"));
-	else if ((frames < 30 * 1.0005) && !drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte30"));
-	else if ((frames < 30 * 1.0005) && drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte30drop"));
-	else if ((frames < 59.94 * 1.0005) && !drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte5994"));
-	else if ((frames < 60 * 1.0005) && !drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte60"));
-	else
-		cerr << "Unexpected SMPTE value (" << frames << (drop ? "drop" : "") << ") in update_smpte_mode.  Menu is probably wrong\n" << endl;
-		
-
-	if (act) {
-		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-		if (ract && !ract->get_active()) {
-			ract->set_active (true);
-		}
-	}
-}
-
-void
-Editor::update_video_pullup ()
-{
-	ENSURE_GUI_THREAD (mem_fun(*this, &Editor::update_video_pullup));
-
-	RefPtr<Action> act;
-
-	float pullup = Config->get_video_pullup();
-
-	if ( pullup < (-4.1667 - 0.1) * 0.99) {
-		act = ActionManager::get_action (X_("Editor"), X_("PullupMinus4Minus1"));
-	} else if ( pullup < (-4.1667) * 0.99 ) {
-		act = ActionManager::get_action (X_("Editor"), X_("PullupMinus4"));
-	} else if ( pullup < (-4.1667 + 0.1) * 0.99 ) {
-		act = ActionManager::get_action (X_("Editor"), X_("PullupMinus4Plus1"));
-	} else if ( pullup < (-0.1) * 0.99 ) {
-		act = ActionManager::get_action (X_("Editor"), X_("PullupMinus1"));
-	} else if (pullup > (4.1667 + 0.1) * 0.99 ) {
-		act = ActionManager::get_action (X_("Editor"), X_("PullupPlus4Plus1"));
-	} else if ( pullup > (4.1667) * 0.99 ) {
-		act = ActionManager::get_action (X_("Editor"), X_("PullupPlus4"));
-	} else if ( pullup > (4.1667 - 0.1) * 0.99) {
-		act = ActionManager::get_action (X_("Editor"), X_("PullupPlus4Minus1"));
-	} else if ( pullup > (0.1) * 0.99 ) {
-		act = ActionManager::get_action (X_("Editor"), X_("PullupPlus1"));
-	} else
-		act = ActionManager::get_action (X_("Editor"), X_("PullupNone"));
-
-
-	if (act) {
-		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-		if (ract && !ract->get_active()) {
-			ract->set_active (true);
-		}
-	}
-
-}
-
-
-void
-Editor::update_layering_model ()
-{
-	RefPtr<Action> act;
-
-	switch (Config->get_layer_model()) {
-	case LaterHigher:
-		act = ActionManager::get_action (X_("Editor"), X_("LayerLaterHigher"));
-		break;
-	case MoveAddHigher:
-		act = ActionManager::get_action (X_("Editor"), X_("LayerMoveAddHigher"));
-		break;
-	case AddHigher:
-		act = ActionManager::get_action (X_("Editor"), X_("LayerAddHigher"));
-		break;
-	}
-
-	if (act) {
-		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-		if (ract && !ract->get_active()) {
-			ract->set_active (true);
-		}
-	}
-}
-
-void
-Editor::update_crossfade_model ()
-{
-	RefPtr<Action> act;
-
-	switch (Config->get_xfade_model()) {
-	case FullCrossfade:
-		act = ActionManager::get_action (X_("Editor"), X_("CrossfadesFull"));
-		break;
-	case ShortCrossfade:
-		act = ActionManager::get_action (X_("Editor"), X_("CrossfadesShort"));
-		break;
-	}
-
-	if (act) {
-		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-		if (ract && !ract->get_active()) {
-			ract->set_active (true);
-		}
-	}
 }
 
