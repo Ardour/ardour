@@ -1,3 +1,3 @@
 #!/bin/sh
-source ardev_common.sh
+. ardev_common.sh
 exec valgrind  --num-callers=50 --tool=memcheck gtk2_ardour/ardour.bin --novst $*
