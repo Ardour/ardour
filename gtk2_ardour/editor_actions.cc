@@ -489,33 +489,38 @@ Editor::update_smpte_mode ()
 	ENSURE_GUI_THREAD(mem_fun(*this, &Editor::update_smpte_mode));
 
 	RefPtr<Action> act;
+	const char* action = 0;
 
 	float frames = Config->get_smpte_frames_per_second();
 	bool drop = Config->get_smpte_drop_frames();
 
 	if ((frames < 23.976 * 1.0005) && !drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte23976"));
+		action = X_("Smpte23976");
 	else if ((frames < 24 * 1.0005) && !drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte24"));
+		action = X_("Smpte24");
 	else if ((frames < 24.976 * 1.0005) && !drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte24976"));
+		action = X_("Smpte24976");
 	else if ((frames < 25 * 1.0005) && !drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte25"));
+		action = X_("Smpte25");
 	else if ((frames < 29.97 * 1.0005) && !drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte2997"));
+		action = X_("Smpte2997");
 	else if ((frames < 29.97 * 1.0005) && drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte2997drop"));
+		action = X_("Smpte2997drop");
 	else if ((frames < 30 * 1.0005) && !drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte30"));
+		action = X_("Smpte30");
 	else if ((frames < 30 * 1.0005) && drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte30drop"));
+		action = X_("Smpte30drop");
 	else if ((frames < 59.94 * 1.0005) && !drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte5994"));
+		action = X_("Smpte5994");
 	else if ((frames < 60 * 1.0005) && !drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte60"));
-	else
-		cerr << "Unexpected SMPTE value (" << frames << (drop ? "drop" : "") << ") in update_smpte_mode.  Menu is probably wrong\n" << endl;
-		
+		action = X_("Smpte60");
+	else {
+		fatal << string_compose (_("programming error: Unexpected SMPTE value (%1, drop = %2) in update_smpte_mode.  Menu is probably wrong."),
+					 frames, drop) << endmsg;
+		/*NOTREACHED*/
+	}
+
+	act = ActionManager::get_action (X_("Editor"), action);
 
 	if (act) {
 		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
@@ -531,28 +536,31 @@ Editor::update_video_pullup ()
 	ENSURE_GUI_THREAD (mem_fun(*this, &Editor::update_video_pullup));
 
 	RefPtr<Action> act;
+	const char* action = 0;
 
 	float pullup = Config->get_video_pullup();
 
 	if ( pullup < (-4.1667 - 0.1) * 0.99) {
-		act = ActionManager::get_action (X_("Editor"), X_("PullupMinus4Minus1"));
+		action = X_("PullupMinus4Minus1");
 	} else if ( pullup < (-4.1667) * 0.99 ) {
-		act = ActionManager::get_action (X_("Editor"), X_("PullupMinus4"));
+		action = X_("PullupMinus4");
 	} else if ( pullup < (-4.1667 + 0.1) * 0.99 ) {
-		act = ActionManager::get_action (X_("Editor"), X_("PullupMinus4Plus1"));
+		action = X_("PullupMinus4Plus1");
 	} else if ( pullup < (-0.1) * 0.99 ) {
-		act = ActionManager::get_action (X_("Editor"), X_("PullupMinus1"));
+		action = X_("PullupMinus1");
 	} else if (pullup > (4.1667 + 0.1) * 0.99 ) {
-		act = ActionManager::get_action (X_("Editor"), X_("PullupPlus4Plus1"));
+		action = X_("PullupPlus4Plus1");
 	} else if ( pullup > (4.1667) * 0.99 ) {
-		act = ActionManager::get_action (X_("Editor"), X_("PullupPlus4"));
+		action = X_("PullupPlus4");
 	} else if ( pullup > (4.1667 - 0.1) * 0.99) {
-		act = ActionManager::get_action (X_("Editor"), X_("PullupPlus4Minus1"));
+		action = X_("PullupPlus4Minus1");
 	} else if ( pullup > (0.1) * 0.99 ) {
-		act = ActionManager::get_action (X_("Editor"), X_("PullupPlus1"));
-	} else
-		act = ActionManager::get_action (X_("Editor"), X_("PullupNone"));
+		action = X_("PullupPlus1");
+	} else {
+		action = X_("PullupNone");
+	}
 
+	act = ActionManager::get_action (X_("Editor"), action);
 
 	if (act) {
 		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
@@ -560,7 +568,6 @@ Editor::update_video_pullup ()
 			ract->set_active (true);
 		}
 	}
-
 }
 
 void
@@ -705,59 +712,64 @@ Editor::video_pullup_chosen (Session::PullupFormat pullup)
 	   active.
 	*/
 
-	if (session) {
+	const char* action = 0;
 
-		RefPtr<Action> act;
-
-		float pull = 0.0;
-
-		switch (pullup) {
-			case Session::pullup_Plus4Plus1:{
-				pull = 4.1667 + 0.1;
-				act = ActionManager::get_action (X_("Editor"), X_("PullupPlus4Plus1"));
-			} break;
-			case Session::pullup_Plus4:{
-				pull = 4.1667;
-				act = ActionManager::get_action (X_("Editor"), X_("PullupPlus4"));
-			} break;
-			case Session::pullup_Plus4Minus1:{
-				pull = 4.1667 - 0.1;
-				act = ActionManager::get_action (X_("Editor"), X_("PullupPlus4Minus1"));
-			} break;
-			case Session::pullup_Plus1:{
-				pull = 0.1;
-				act = ActionManager::get_action (X_("Editor"), X_("PullupPlus1"));
-			} break;
-			case Session::pullup_None:{
-				pull = 0.0;
-				act = ActionManager::get_action (X_("Editor"), X_("PullupNone"));
-			} break;
-			case Session::pullup_Minus1:{
-				pull = -0.1;
-				act = ActionManager::get_action (X_("Editor"), X_("PullupMinus1"));
-			} break;
-			case Session::pullup_Minus4Plus1:{
-				pull = -4.1667 + 0.1;
-				act = ActionManager::get_action (X_("Editor"), X_("PullupMinus4Plus1"));
-			} break;
-			case Session::pullup_Minus4:{
-				pull = -4.1667;
-				act = ActionManager::get_action (X_("Editor"), X_("PullupMinus4"));
-			} break;
-			case Session::pullup_Minus4Minus1:{
-				pull = -4.1667 - 0.1;
-				act = ActionManager::get_action (X_("Editor"), X_("PullupMinus4Minus1"));
-			} break;
-			default:
-				cerr << "Session received unexpected pullup type" << endl;
+	RefPtr<Action> act;
+	
+	float pull = 0.0;
+	
+	switch (pullup) {
+	case Session::pullup_Plus4Plus1:
+		pull = 4.1667 + 0.1;
+		action = X_("PullupPlus4Plus1");
+		break;
+	case Session::pullup_Plus4:
+		pull = 4.1667;
+		action = X_("PullupPlus4");
+		break;
+	case Session::pullup_Plus4Minus1:
+		pull = 4.1667 - 0.1;
+		action = X_("PullupPlus4Minus1");
+		break;
+	case Session::pullup_Plus1:
+		pull = 0.1;
+		action = X_("PullupPlus1");
+		break;
+	case Session::pullup_None:
+		pull = 0.0;
+		action = X_("PullupNone");
+		break;
+	case Session::pullup_Minus1:
+		pull = -0.1;
+		action = X_("PullupMinus1");
+		break;
+	case Session::pullup_Minus4Plus1:
+		pull = -4.1667 + 0.1;
+		action = X_("PullupMinus4Plus1");
+		break;
+	case Session::pullup_Minus4:
+		pull = -4.1667;
+		action = X_("PullupMinus4");
+		break;
+	case Session::pullup_Minus4Minus1:
+		pull = -4.1667 - 0.1;
+		action = X_("PullupMinus4Minus1");
+		break;
+	default:
+		fatal << string_compose (_("programming error: %1"), "Session received unexpected pullup type") << endmsg;
+		/*NOTREACHED*/
+	}
+	
+	act = ActionManager::get_action (X_("Editor"), action);
+	
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && ract->get_active()) {
+			Config->set_video_pullup ( pull );
 		}
 		
-		if (act) {
-			RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-			if (ract && ract->get_active()) {
-				Config->set_video_pullup ( pull );
-			}
-		} else  cerr << "Editor::video_pullup_chosen could not find action to match pullup." << endl;
+	} else  {
+		error << string_compose (_("programming error: %1"), "Editor::video_pullup_chosen could not find action to match pullup.") << endmsg;
 	}
 }
 
@@ -807,10 +819,7 @@ Editor::parameter_changed (const char* parameter_name)
 		ActionManager::map_some_state ("Editor", "toggle-auto-xfade", &Configuration::get_auto_xfade);
 	} else if (PARAM_IS ("edit-mode")) {
 		edit_mode_selector.set_active_text (edit_mode_to_string (Config->get_edit_mode()));
-	} else if (PARAM_IS ("native-file-data-format")) {
 	}
-
-
 
 #undef PARAM_IS
 }

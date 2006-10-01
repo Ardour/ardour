@@ -850,6 +850,8 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		map_meter_hold ();
 	} else if (PARAM_IS ("meter-falloff")) {
 		map_meter_falloff ();
+	} else if (PARAM_IS ("verify-remove-last-capture")) {
+		ActionManager::map_some_state ("options", "VerifyRemoveLastCapture", &Configuration::get_verify_remove_last_capture);
 	}
 
 #undef PARAM_IS

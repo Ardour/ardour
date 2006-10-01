@@ -692,9 +692,10 @@ Editor::Editor (AudioEngine& eng)
 	ControlProtocol::ZoomOut.connect (bind (mem_fun (*this, &Editor::temporal_zoom_step), true));
 	ControlProtocol::ScrollTimeline.connect (mem_fun (*this, &Editor::control_scroll));
 
+	Config->ParameterChanged.connect (mem_fun (*this, &Editor::parameter_changed));
+
 	constructed = true;
 	instant_save ();
-
 }
 
 Editor::~Editor()
@@ -1175,8 +1176,7 @@ Editor::connect_to_session (Session *t)
 		loc->set_name (_("Punch"));
 	}
 
-	update_loop_range_view (true);
-	update_punch_range_view (true);
+	Config->map_parameters (mem_fun (*this, &Editor::parameter_changed));
 	
 	session->StateSaved.connect (mem_fun(*this, &Editor::session_state_saved));
 	

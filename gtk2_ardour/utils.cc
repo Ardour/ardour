@@ -71,8 +71,7 @@ fit_to_pixels (const ustring& str, int pixel_width, Pango::FontDescription& font
 			break;
 		}
 		
-		ustr.erase (last);
-		--last;
+		ustr.erase (last--);
 	}
 
 	return ustr;
