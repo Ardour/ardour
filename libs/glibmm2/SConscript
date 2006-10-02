@@ -18,14 +18,29 @@ glibmm2.Append(CXXFLAGS='-DG_LOG_DOMAIN=\\\"glibmm\\\"')
 
 libglibmm2 = glibmm2.SharedLibrary('glibmm2', glibmm2_files)
 
-glibmm2_configure_script = glibmm2.Command ('configure', 'configure.ac', 'cd libs/glibmm2; ./autogen.sh; cd -', ENV=os.environ)
-glibmm2_config_h = glibmm2.Command('glibmmconfig.h', [glibmm2_configure_script, 'glibmmconfig.h.in'], 'cd libs/glibmm2; ./configure; cd -', ENV=os.environ)
+if os.access ('autogen.sh', os.F_OK) :
+    glibmm2_configure_script = glibmm2.Command ('configure', 'configure.ac', 'cd libs/glibmm2; ./autogen.sh; cd -', ENV=os.environ)
+    glibmm2_config_h = glibmm2.Command('glibmmconfig.h', [glibmm2_configure_script, 'glibmmconfig.h.in'],
+                                       'cd libs/glibmm2; ./configure || exit 1; cd -', ENV=os.environ)
+else :
+    glibmm2_config_h = glibmm2.Command('glibmmconfig.h', ['configure', 'glibmmconfig.h.in'],
+                                       'cd libs/glibmm2; ./configure || exit 1; cd -', ENV=os.environ)
+
 Default([glibmm2_config_h, libglibmm2])
 
 env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libglibmm2))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
-                                     [ 'SConscript', 'glibmm.h','glibmmconfig.h'] +
+                                     [ 'SConscript',
+                                       'glibmm.h',
+                                       'configure',
+                                       'Makefile.in',
+                                       'glibmmconfig.h',
+                                       'glibmmconfig.h.in',
+                                       'glibmm-2.4.pc.in',
+                                       'glibmm/Makefile.in',
+                                       'scripts'
+                                       ] +
 				     glibmm2_files + 
 				     glob.glob('glibmm/*.h') +
 				     glob.glob('glibmm/private/*.h')
