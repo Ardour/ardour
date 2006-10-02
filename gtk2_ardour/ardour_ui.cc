@@ -1629,6 +1629,7 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 	do {
 	        response = new_session_dialog->run ();
 		//nsd_window ->set_cursor(Gdk::Cursor(Gdk::WATCH));
+
 		if(response == Gtk::RESPONSE_CANCEL || response == Gtk::RESPONSE_DELETE_EVENT) {
 		        quit();
 			return;
@@ -1645,7 +1646,6 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 			
 			if (session_name.empty()) {
 				response = Gtk::RESPONSE_NONE;
-				cerr << "session name is empty\n";
 				continue;
 			} 
 
@@ -1660,6 +1660,8 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 			
 		} else if (response == Gtk::RESPONSE_OK) {
 
+			session_name = new_session_dialog->session_name();
+			
 		        if (new_session_dialog->get_current_page() == 1) {
 		  
 			        /* XXX this is a bit of a hack.. 
@@ -1670,7 +1672,6 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 				
 				if (session_name.empty()) {
 					response = Gtk::RESPONSE_NONE;
-					cerr << "session name is empty 2\n";
 					continue;
 				} 
 				
@@ -1687,11 +1688,8 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 
 			        _session_is_new = true;
 			      
-				session_name = new_session_dialog->session_name();
-			
 				if (session_name.empty()) {
 					response = Gtk::RESPONSE_NONE;
-					cerr << "session name is empty 3\n";
 					continue;
 				} 
 

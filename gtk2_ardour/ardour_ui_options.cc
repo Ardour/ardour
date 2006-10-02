@@ -747,8 +747,6 @@ ARDOUR_UI::set_meter_falloff (MeterFalloff val)
 void
 ARDOUR_UI::parameter_changed (const char* parameter_name)
 {
-	cerr << "Parameter changed : " << parameter_name << endl;
-
 #define PARAM_IS(x) (!strcmp (parameter_name, (x)))
 
 	if (PARAM_IS ("slave-source")) {

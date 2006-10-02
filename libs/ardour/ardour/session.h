@@ -1419,7 +1419,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	bool       currently_soloing;
 	
 	void route_mute_changed (void *src);
-	void route_solo_changed (void *src, boost::shared_ptr<Route>);
+	void route_solo_changed (void *src, boost::weak_ptr<Route>);
 	void catch_up_on_solo ();
 	void update_route_solo_state ();
 	void modify_solo_mute (bool, bool);

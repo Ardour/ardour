@@ -235,6 +235,7 @@ Editor::redisplay_regions ()
 		for (list<boost::shared_ptr<AudioRegion> >::iterator r = tmp_audio_region_list.begin(); r != tmp_audio_region_list.end(); ++r) {
 			add_audio_region_to_region_display (*r);
 		}
+		tmp_audio_region_list.clear();
 		
 		region_list_display.set_model (region_list_model);
 	}

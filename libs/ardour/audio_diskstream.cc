@@ -1967,8 +1967,6 @@ AudioDiskstream::reset_write_sources (bool mark_write_complete, bool force)
 	ChannelList::iterator chan;
 	uint32_t n;
 
-	cerr << _name << " RWS\n";
-
 	if (!recordable()) {
 		return;
 	}

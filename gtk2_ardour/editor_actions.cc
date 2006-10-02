@@ -816,7 +816,7 @@ Editor::parameter_changed (const char* parameter_name)
 	} else if (PARAM_IS ("crossfades-visible")) {
 		ActionManager::map_some_state ("Editor", "toggle-xfades-visible", &Configuration::get_crossfades_visible);
 	} else if (PARAM_IS ("auto-xfade")) {
-		ActionManager::map_some_state ("Editor", "toggle-auto-xfade", &Configuration::get_auto_xfade);
+		ActionManager::map_some_state ("Editor", "toggle-auto-xfades", &Configuration::get_auto_xfade);
 	} else if (PARAM_IS ("edit-mode")) {
 		edit_mode_selector.set_active_text (edit_mode_to_string (Config->get_edit_mode()));
 	}

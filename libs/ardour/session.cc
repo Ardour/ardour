@@ -1825,7 +1825,10 @@ Session::add_routes (RouteList& new_routes, bool save)
 	}
 
 	for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
-		(*x)->solo_changed.connect (sigc::bind (mem_fun (*this, &Session::route_solo_changed), (*x)));
+		
+		boost::weak_ptr<Route> wpr (*x);
+
+		(*x)->solo_changed.connect (sigc::bind (mem_fun (*this, &Session::route_solo_changed), wpr));
 		(*x)->mute_changed.connect (mem_fun (*this, &Session::route_mute_changed));
 		(*x)->output_changed.connect (mem_fun (*this, &Session::set_worst_io_latencies_x));
 		(*x)->redirects_changed.connect (mem_fun (*this, &Session::update_latency_compensation_proxy));
@@ -1883,11 +1886,11 @@ Session::remove_route (shared_ptr<Route> route)
 		*/
 
 		if (route == _master_out) {
-			_master_out = shared_ptr<Route> ((Route*) 0);
+			_master_out = shared_ptr<Route> ();
 		}
 
 		if (route == _control_out) {
-			_control_out = shared_ptr<Route> ((Route*) 0);
+			_control_out = shared_ptr<Route> ();
 
 			/* cancel control outs for all routes */
 
@@ -1925,13 +1928,21 @@ Session::remove_route (shared_ptr<Route> route)
 	update_latency_compensation (false, false);
 	set_dirty();
 	
-	/* XXX should we disconnect from the Route's signals ? */
+	/* get rid of it from the dead wood collection in the route list manager */
 
-	save_state (_current_snapshot_name);
+	/* XXX i think this is unsafe as it currently stands, but i am not sure. (pd, october 2nd, 2006) */
+
+	routes.flush ();
 
 	/* try to cause everyone to drop their references */
 
 	route->drop_references ();
+
+	/* save the new state of the world */
+
+	if (save_state (_current_snapshot_name)) {
+		save_history (_current_snapshot_name);
+	}
 }	
 
 void
@@ -1941,7 +1952,7 @@ Session::route_mute_changed (void* src)
 }
 
 void
-Session::route_solo_changed (void* src, shared_ptr<Route> route)
+Session::route_solo_changed (void* src, boost::weak_ptr<Route> wpr)
 {      
 	if (solo_update_disabled) {
 		// We know already
@@ -1949,8 +1960,15 @@ Session::route_solo_changed (void* src, shared_ptr<Route> route)
 	}
 	
 	bool is_track;
-	
-	is_track = (dynamic_cast<AudioTrack*>(route.get()) != 0);
+	boost::shared_ptr<Route> route = wpr.lock ();
+
+	if (!route) {
+		/* should not happen */
+		error << string_compose (_("programming error: %1"), X_("invalid route weak ptr passed to route_solo_changed")) << endmsg;
+		return;
+	}
+
+	is_track = (boost::dynamic_pointer_cast<AudioTrack>(route) != 0);
 	
 	shared_ptr<RouteList> r = routes.reader ();
 

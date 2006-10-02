@@ -101,7 +101,6 @@ AudioFileSource::AudioFileSource (Session& s, const XMLNode& node)
 AudioFileSource::~AudioFileSource ()
 {
 	if (removable()) {
-		cerr << "Removing file " << _path << " because its removable\n";
 		unlink (_path.c_str());
 		unlink (peakpath.c_str());
 	}

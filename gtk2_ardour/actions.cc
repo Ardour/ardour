@@ -294,8 +294,6 @@ ActionManager::toggle_config_state (const char* group, const char* action, bool 
 		if (tact) {
 			bool x = (Config->*get)();
 
-			cerr << "\ttoggle config, action = " << tact->get_active() << " config = " << x << endl;
-			
 			if (x != tact->get_active()) {
 				(Config->*set) (!x);
 			}
@@ -326,13 +324,11 @@ ActionManager::map_some_state (const char* group, const char* action, bool (Conf
 			
 			bool x = (Config->*get)();
 
-			cerr << "\tmap state, action = " << tact->get_active() << " config = " << x << endl;
-			
 			if (tact->get_active() != x) {
 				tact->set_active (x);
 			}
 		} else {
-			cerr << "not a toggle\n";
+			cerr << group << ':' << action << " is not a toggle\n";
 		}
 	} else {
 		cerr << group << ':' << action << " not an action\n";
