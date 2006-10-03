@@ -15,7 +15,7 @@ import SCons.Node.FS
 SConsignFile()
 EnsureSConsVersion(0, 96)
 
-version = '2.0beta3.2'
+version = '2.0beta4'
 
 subst_dict = { }
 
@@ -948,7 +948,17 @@ env.Distribute (env['DISTTREE'],
                   'COPYING', 'PACKAGER_README', 'README',
                   'ardour.rc.in',
                   'ardour_system.rc',
-                  'tools/config.guess'
+                  'tools/config.guess',
+                  'icons/icon/ardour_icon_mac_mask.png',
+                  'icons/icon/ardour_icon_mac.png',
+                  'icons/icon/ardour_icon_tango_16px_blue.png',
+                  'icons/icon/ardour_icon_tango_16px_red.png',
+                  'icons/icon/ardour_icon_tango_22px_blue.png',
+                  'icons/icon/ardour_icon_tango_22px_red.png',
+                  'icons/icon/ardour_icon_tango_32px_blue.png',
+                  'icons/icon/ardour_icon_tango_32px_red.png',
+                  'icons/icon/ardour_icon_tango_48px_blue.png',
+                  'icons/icon/ardour_icon_tango_48px_red.png'
                   ] +
                 glob.glob ('DOCUMENTATION/AUTHORS*') +
                 glob.glob ('DOCUMENTATION/CONTRIBUTORS*') +

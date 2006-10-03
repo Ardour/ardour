@@ -15,7 +15,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
+    $Id: globals.cc 935 2006-09-29 21:39:39Z paul $
 */
 
 #include <cstdio> // Needed so that libraptor (included in lrdf) won't complain
@@ -355,6 +355,12 @@ ARDOUR::new_change ()
 	change_bit <<= 1;	// if it shifts too far, change_bit == 0
 
 	return c;
+}
+
+string
+ARDOUR::get_ardour_revision ()
+{
+	return "$Rev$";
 }
 
 string

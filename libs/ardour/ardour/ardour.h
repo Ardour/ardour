@@ -47,7 +47,8 @@ namespace ARDOUR {
 
 	int init (bool with_vst, bool try_optimization);
 	int cleanup ();
-
+	
+	std::string get_ardour_revision ();
 	
 	std::string get_user_ardour_path ();
 	std::string get_system_data_path ();
