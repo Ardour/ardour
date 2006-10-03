@@ -1755,7 +1755,7 @@ AudioDiskstream::get_state ()
 
 	node->add_property ("playlist", _playlist->name());
 	
-	snprintf (buf, sizeof(buf), "%f", _visible_speed);
+	snprintf (buf, sizeof(buf), "%.12g", _visible_speed);
 	node->add_property ("speed", buf);
 
 	node->add_property("name", _name);

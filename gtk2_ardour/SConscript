@@ -315,8 +315,13 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
                                         'ardour.menus', 'ardour.bindings', 'ardour.colors',
 					'editor_xpms'
                                         ] +
-                                      gtkardour_files + vst_files + pixmap_files +
-                                      glob.glob('po/*.po') + glob.glob('*.h')))
+                                      gtkardour_files +
+				      vst_files +
+				      pixmap_files +
+				      skipped_files +
+				      audiounit_files + 
+				      fft_analysis_files +
+				      glob.glob('po/*.po') + glob.glob('*.h')))
 
 # generate a prototype full-featured ardour_ui.rc file
 

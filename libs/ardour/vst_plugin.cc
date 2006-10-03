@@ -212,7 +212,7 @@ VSTPlugin::get_state()
 			char index[64];
 			char val[32];
 			snprintf (index, sizeof (index), "param_%ld", n);
-			snprintf (val, sizeof (val), "%f", _plugin->getParameter (_plugin, n));
+			snprintf (val, sizeof (val), "%.12g", _plugin->getParameter (_plugin, n));
 			parameters->add_property (index, val);
 		}
 
@@ -244,11 +244,12 @@ VSTPlugin::set_state(const XMLNode& node)
 
 		for (i = child->properties().begin(); i != child->properties().end(); ++i) {
 			long param;
-			float val;
-			sscanf ((*i)->name().c_str(), "param_%ld", &param);
-			sscanf ((*i)->value().c_str(), "%f", &val);
+			double val;
 
-			_plugin->setParameter (_plugin, param, val);
+			sscanf ((*i)->name().c_str(), "param_%ld", &param);
+			sscanf ((*i)->value().c_str(), "%g", &val);
+
+			_plugin->setParameter (_plugin, param, (float) val);
 		}
 
 		return 0;
