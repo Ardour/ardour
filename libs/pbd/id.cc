@@ -43,12 +43,12 @@ void
 ID::print (char* buf) const
 {
 	/* XXX sizeof buf is unknown. bad API design */
-	snprintf (buf, 16, "%" PRIu64, _id);
+	snprintf (buf, 32, "%" PRIu64, _id);
 }
 
 string ID::to_s() const
 {
-    char buf[16]; // see print()
+    char buf[32]; // see print()
     print(buf);
     return string(buf);
 }
