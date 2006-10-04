@@ -803,7 +803,7 @@ Crossfade::set_state (const XMLNode& node)
 			sscanf (prop->value().c_str(), "%" PRIu32, &x);
 			
 			prop = (*i)->property ("y");
-			sscanf (prop->value().c_str(), "%.12g", &y);
+			sscanf (prop->value().c_str(), "%f", &y);
 
 			_fade_in.add (x, y);
 		}
@@ -825,7 +825,7 @@ Crossfade::set_state (const XMLNode& node)
 			sscanf (prop->value().c_str(), "%" PRIu32, &x);
 
 			prop = (*i)->property ("y");
-			sscanf (prop->value().c_str(), "%.12g", &y);
+			sscanf (prop->value().c_str(), "%f", &y);
 			
 			_fade_out.add (x, y);
 		}
