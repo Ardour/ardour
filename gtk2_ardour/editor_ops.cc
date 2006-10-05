@@ -1782,16 +1782,23 @@ Editor::insert_region_list_selection (float times)
 		return;
 	}
 	
-	TreeModel::iterator i = region_list_display.get_selection()->get_selected();
-	boost::shared_ptr<Region> region = (*i)[region_list_columns.region];
+	TreeView::Selection::ListHandle_Path rows = selected->get_selected_rows ();
 
-	begin_reversible_command (_("insert region"));
-        XMLNode &before = playlist->get_state();
-	playlist->add_region ((RegionFactory::create (region)), edit_cursor->current_frame, times);
-	session->add_command(new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
-	commit_reversible_command ();
+	/* only one row selected, so rows.begin() is it */
+
+	TreeIter iter;
+
+	if ((iter = region_list_model->get_iter (*rows.begin()))) {
+
+		boost::shared_ptr<Region> region = (*iter)[region_list_columns.region];
+		
+		begin_reversible_command (_("insert region"));
+		XMLNode &before = playlist->get_state();
+		playlist->add_region ((RegionFactory::create (region)), edit_cursor->current_frame, times);
+		session->add_command(new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
+		commit_reversible_command ();
+	} 
 }
-
 
 /* BUILT-IN EFFECTS */
 
