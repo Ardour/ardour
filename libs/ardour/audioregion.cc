@@ -688,7 +688,7 @@ AudioRegion::state (bool full)
 
 	for (uint32_t n=0; n < sources.size(); ++n) {
 		snprintf (buf2, sizeof(buf2), "source-%d", n);
-		sources[n]->id().print (buf);
+		sources[n]->id().print (buf, sizeof (buf));
 		node.add_property (buf2, buf);
 	}
 

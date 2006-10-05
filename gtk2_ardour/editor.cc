@@ -2162,7 +2162,7 @@ Editor::get_state ()
 	XMLNode* node = new XMLNode ("Editor");
 	char buf[32];
 
-	_id.print (buf);
+	_id.print (buf, sizeof (buf));
 	node->add_property ("id", buf);
 	
 	if (is_realized()) {

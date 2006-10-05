@@ -98,9 +98,8 @@ class Plugin : public PBD::StatefulDestructible, public sigc::trackable
 	    float step;
 	    float smallstep;
 	    float largestep;
-
-		bool min_unbound;
-		bool max_unbound;
+	    bool min_unbound;
+	    bool max_unbound;
 	};
 
 	virtual uint32_t unique_id() const = 0;
@@ -162,7 +161,7 @@ class Plugin : public PBD::StatefulDestructible, public sigc::trackable
 	void setup_controls ();
 
 	struct PortControllable : public PBD::Controllable {
-	    PortControllable (Plugin&, uint32_t abs_port_id,
+	    PortControllable (std::string name, Plugin&, uint32_t abs_port_id,
 			      float lower, float upper, bool toggled, bool logarithmic);
 
 	    void set_value (float);

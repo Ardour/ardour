@@ -246,6 +246,10 @@ AudioTrack::set_state (const XMLNode& node)
 				sscanf (prop->value().c_str(), "%d", &x);
 				set_remote_control_id (x);
 			}
+
+		} else if (child->name() == X_("recenable")) {
+			_rec_enable_control.set_state (*child);
+			_session.add_controllable (&_rec_enable_control);
 		}
 	}
 
@@ -273,7 +277,7 @@ AudioTrack::state(bool full_state)
 
 		for (vector<FreezeRecordInsertInfo*>::iterator i = _freeze_record.insert_info.begin(); i != _freeze_record.insert_info.end(); ++i) {
 			inode = new XMLNode (X_("insert"));
-			(*i)->id.print (buf);
+			(*i)->id.print (buf, sizeof (buf));
 			inode->add_property (X_("id"), buf);
 			inode->add_child_copy ((*i)->state);
 		
@@ -317,8 +321,10 @@ AudioTrack::state(bool full_state)
 	   diskstream.
 	*/
 
-	_diskstream->id().print (buf);
+	_diskstream->id().print (buf, sizeof (buf));
 	root.add_property ("diskstream-id", buf);
+
+	root.add_child_nocopy (_rec_enable_control.get_state());
 
 	return root;
 }

@@ -93,7 +93,7 @@ class AudioRegion;
 class Region;
 class Playlist;
 class VSTPlugin;
-class ControlProtocolManager;
+class ControlProtocolInfo;
 
 struct AudioExportSpecification;
 struct RouteGroup;
@@ -415,7 +415,7 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	XMLNode& get_state();
 	int      set_state(const XMLNode& node); // not idempotent
 	XMLNode& get_template();
-
+	
 	void add_instant_xml (XMLNode&, const std::string& dir);
 
 	enum StateOfTheState {
@@ -903,6 +903,9 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	/* Controllables */
 
 	PBD::Controllable* controllable_by_id (const PBD::ID&);
+
+	void add_controllable (PBD::Controllable*);
+	void remove_controllable (PBD::Controllable*);
 
   protected:
 	friend class AudioEngine;
@@ -1667,19 +1670,19 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	LayerModel layer_model;
 	CrossfadeModel xfade_model;
 
-	typedef std::list<PBD::Controllable*> Controllables;
+	typedef std::set<PBD::Controllable*> Controllables;
 	Glib::Mutex controllables_lock;
 	Controllables controllables;
-
-	void add_controllable (PBD::Controllable*);
-	void remove_controllable (PBD::Controllable*);
-
 
 	void reset_native_file_format();
 	bool first_file_data_format_reset;
 	bool first_file_header_format_reset;
 
 	void config_changed (const char*);
+
+	void add_control_protocol (const ControlProtocolInfo* const, XMLNode*);
+	XMLNode& get_control_protocol_state ();
+	
 };
 
 } // namespace ARDOUR

@@ -71,7 +71,7 @@ Source::get_state ()
 	char buf[64];
 
 	node->add_property ("name", _name);
-	_id.print (buf);
+	_id.print (buf, sizeof (buf));
 	node->add_property ("id", buf);
 
 	if (_timestamp != 0) {

@@ -95,15 +95,17 @@ Plugin::get_nth_control (uint32_t n)
 		Plugin::ParameterDescriptor desc;
 
 		get_parameter_descriptor (n, desc);
-		
-		controls[n] = new PortControllable (*this, n, desc.lower, desc.upper, desc.toggled, desc.logarithmic);
+	
+		controls[n] = new PortControllable (describe_parameter (n), *this, n, 
+						    desc.lower, desc.upper, desc.toggled, desc.logarithmic);
 	} 
 
 	return controls[n];
 }
 
-Plugin::PortControllable::PortControllable (Plugin& p, uint32_t port_id, float low, float up, bool t, bool loga)
-	: plugin (p), absolute_port (port_id)
+Plugin::PortControllable::PortControllable (string name, Plugin& p, uint32_t port_id, 
+					    float low, float up, bool t, bool loga)
+	: Controllable (name), plugin (p), absolute_port (port_id)
 {
 	toggled = t;
 	logarithmic = loga;

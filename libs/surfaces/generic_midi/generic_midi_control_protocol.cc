@@ -39,7 +39,7 @@ using namespace PBD;
 #include "i18n.h"
 
 GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
-	: ControlProtocol  (s, _("GenericMIDI"))
+	: ControlProtocol  (s, _("Generic MIDI"))
 {
 	MIDI::Manager* mm = MIDI::Manager::instance();
 
@@ -173,7 +173,10 @@ GenericMidiControlProtocol::stop_learning (Controllable* c)
 XMLNode&
 GenericMidiControlProtocol::get_state () 
 {
-	XMLNode* node = new XMLNode (_name); /* node name must match protocol name */
+	XMLNode* node = new XMLNode ("Protocol"); 
+
+	node->add_property (X_("name"), _name);
+
 	XMLNode* children = new XMLNode (X_("controls"));
 
 	node->add_child_nocopy (*children);
@@ -215,19 +218,24 @@ GenericMidiControlProtocol::set_state (const XMLNode& node)
 		XMLProperty* prop;
 
 		if ((prop = (*niter)->property ("id")) != 0) {
-
+			
 			ID id = prop->value ();
-
+			
 			c = session->controllable_by_id (id);
-
+			
 			if (c) {
 				MIDIControllable* mc = new MIDIControllable (*_port, *c);
 				if (mc->set_state (**niter) == 0) {
 					controllables.insert (mc);
 				}
+				
+			} else {
+				warning << string_compose (_("Generic MIDI control: controllable %1 not found in session (ignored)"),
+							   id)
+					<< endmsg;
 			}
 		}
 	}
-	
+
 	return 0;
 }

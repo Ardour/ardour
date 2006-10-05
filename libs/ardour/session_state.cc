@@ -84,6 +84,8 @@
 #include <ardour/region_factory.h>
 #include <ardour/source_factory.h>
 
+#include <control_protocol/control_protocol.h>
+
 #include "i18n.h"
 #include <locale.h>
 
@@ -242,7 +244,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
         Curve::CurveCreated.connect (mem_fun (*this, &Session::add_curve));
         AutomationList::AutomationListCreated.connect (mem_fun (*this, &Session::add_automation_list));
 
-	Controllable::Created.connect (mem_fun (*this, &Session::add_controllable));
 	Controllable::GoingAway.connect (mem_fun (*this, &Session::remove_controllable));
 
 	IO::MoreOutputs.connect (mem_fun (*this, &Session::ensure_passthru_buffers));
@@ -967,11 +968,32 @@ Session::state(bool full_state)
 
 	node->add_child_nocopy (_tempo_map->get_state());
 
+	node->add_child_nocopy (get_control_protocol_state());
+
 	if (_extra_xml) {
 		node->add_child_copy (*_extra_xml);
 	}
 
 	return *node;
+}
+
+XMLNode&
+Session::get_control_protocol_state ()
+{
+	ControlProtocolManager& cpm (ControlProtocolManager::instance());
+	XMLNode* node = new XMLNode (X_("ControlProtocols"));
+
+	cpm.foreach_known_protocol (bind (mem_fun (*this, &Session::add_control_protocol), node));
+	
+	return *node;
+}
+
+void
+Session::add_control_protocol (const ControlProtocolInfo* const cpi, XMLNode* node)
+{
+	if (cpi->protocol) {
+		node->add_child_nocopy (cpi->protocol->get_state());
+	}
 }
 
 int
@@ -1030,6 +1052,7 @@ Session::set_state (const XMLNode& node)
 	EditGroups
 	MixGroups
 	Click
+	ControlProtocols
 	*/
 
 	if (use_config_midi_ports ()) {
@@ -1161,6 +1184,10 @@ Session::set_state (const XMLNode& node)
 		_click_io->set_state (*child);
 	}
 	
+	if ((child = find_named_node (node, "ControlProtocols")) != 0) {
+		ControlProtocolManager::instance().set_protocol_states (*child);
+	}
+
 	/* here beginneth the second phase ... */
 
 	StateReady (); /* EMIT SIGNAL */
@@ -2719,7 +2746,7 @@ void
 Session::add_controllable (Controllable* c)
 {
 	Glib::Mutex::Lock lm (controllables_lock);
-	controllables.push_back (c);
+	controllables.insert (c);
 }
 
 void
@@ -2730,7 +2757,12 @@ Session::remove_controllable (Controllable* c)
 	}
 
 	Glib::Mutex::Lock lm (controllables_lock);
-	controllables.remove (c);
+
+	Controllables::iterator x = controllables.find (c);
+
+	if (x != controllables.end()) {
+		controllables.erase (x);
+	}
 }	
 
 Controllable*

@@ -107,7 +107,7 @@ IO::IO (Session& s, string name,
 	: _session (s),
 	  _name (name),
 	  _default_type(default_type),
-	  _gain_control (*this),
+	  _gain_control (X_("gaincontrol"), *this),
 	  _gain_automation_curve (0.0, 2.0, 1.0),
 	  _input_minimum (input_min),
 	  _input_maximum (input_max),
@@ -1431,7 +1431,7 @@ IO::state (bool full_state)
 	Glib::Mutex::Lock lm (io_lock);
 
 	node->add_property("name", _name);
-	id().print (buf);
+	id().print (buf, sizeof (buf));
 	node->add_property("id", buf);
 
 	str = "";
@@ -1513,6 +1513,7 @@ IO::state (bool full_state)
 	}
 
 	node->add_child_nocopy (_panner->state (full_state));
+	node->add_child_nocopy (_gain_control.get_state ());
 
 	snprintf (buf, sizeof(buf), "%2.12f", gain());
 	node->add_property ("gain", buf);
@@ -1627,8 +1628,14 @@ IO::set_state (const XMLNode& node)
 	}
 
 	for (iter = node.children().begin(); iter != node.children().end(); ++iter) {
+
 		if ((*iter)->name() == "Panner") {
 			_panner->set_state (**iter);
+		}
+
+		if ((*iter)->name() == X_("gaincontrol")) {
+			_gain_control.set_state (**iter);
+			_session.add_controllable (&_gain_control);
 		}
 	}
 

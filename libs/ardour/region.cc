@@ -860,7 +860,7 @@ Region::state (bool full_state)
 	XMLNode *node = new XMLNode ("Region");
 	char buf[64];
 	
-	_id.print (buf);
+	_id.print (buf, sizeof (buf));
 	node->add_property ("id", buf);
 	node->add_property ("name", _name);
 	snprintf (buf, sizeof (buf), "%u", _start);

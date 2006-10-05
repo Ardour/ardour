@@ -233,7 +233,7 @@ Redirect::state (bool full_state)
 		
 		path = _session.snap_name();
 		path += "-redirect-";
-		id().print (buf);
+		id().print (buf, sizeof (buf));
 		path += buf;
 		path += ".automation";
 		

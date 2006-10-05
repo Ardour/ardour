@@ -295,7 +295,7 @@ public:
 				   gain_t initial, gain_t target, bool invert_polarity);
 
 	struct GainControllable : public PBD::Controllable {
-	    GainControllable (IO& i) : io (i) {}
+	    GainControllable (std::string name, IO& i) : Controllable (name), io (i) {}
 	 
 	    void set_value (float val);
 	    float get_value (void) const;

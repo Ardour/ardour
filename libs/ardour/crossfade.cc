@@ -679,9 +679,9 @@ Crossfade::get_state ()
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
 
-	_out->id().print (buf);
+	_out->id().print (buf, sizeof (buf));
 	node->add_property ("out", buf);
-	_in->id().print (buf);
+	_in->id().print (buf, sizeof (buf));
 	node->add_property ("in", buf);
 	node->add_property ("active", (_active ? "yes" : "no"));
 	node->add_property ("follow-overlap", (_follow_overlap ? "yes" : "no"));

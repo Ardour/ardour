@@ -1759,7 +1759,7 @@ AudioDiskstream::get_state ()
 	node->add_property ("speed", buf);
 
 	node->add_property("name", _name);
-	id().print (buf);
+	id().print (buf, sizeof (buf));
 	node->add_property("id", buf);
 
 	if (!capturing_sources.empty() && _session.get_record_enabled()) {

@@ -1420,7 +1420,7 @@ Playlist::state (bool full_state)
 	
 	node->add_property (X_("name"), _name);
 
-	_orig_diskstream_id.print (buf);
+	_orig_diskstream_id.print (buf, sizeof (buf));
 	node->add_property (X_("orig_diskstream_id"), buf);
 	node->add_property (X_("frozen"), _frozen ? "yes" : "no");
 

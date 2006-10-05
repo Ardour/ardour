@@ -266,7 +266,7 @@ Location::get_state (void)
 		node->add_child_nocopy(cd_info_node(m->first, m->second));
 	}
 
-	id().print (buf);
+	id().print (buf, sizeof (buf));
 	node->add_property("id", buf);
 	node->add_property ("name", name());
 	snprintf (buf, sizeof (buf), "%u", start());

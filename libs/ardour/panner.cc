@@ -67,7 +67,7 @@ static double direct_pan_to_control (pan_t val) {
 
 StreamPanner::StreamPanner (Panner& p)
 	: parent (p),
-	  _control (*this)
+	  _control (X_("panner"), *this)
 {
 	_muted = false;
 
@@ -543,6 +543,7 @@ EqualPowerStereoPanner::state (bool full_state)
 	root->add_property (X_("automation-style"), buf);
 
 	StreamPanner::add_state (*root);
+	root->add_child_nocopy (_control.get_state ());
 
 	return *root;
 }
@@ -575,6 +576,13 @@ EqualPowerStereoPanner::set_state (const XMLNode& node)
 	}
 
 	StreamPanner::set_state (node);
+
+	for (XMLNodeConstIterator iter = node.children().begin(); iter != node.children().end(); ++iter) {
+		if ((*iter)->name() == X_("panner")) {
+			_control.set_state (**iter);
+			parent.session().add_controllable (&_control);
+		}
+	}
 	
 	return 0;
 }

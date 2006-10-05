@@ -114,7 +114,7 @@ class StreamPanner : public sigc::trackable, public Stateful
 	bool             _muted;
 
 	struct PanControllable : public PBD::Controllable {
-	    PanControllable (StreamPanner& p) : panner (p) {}
+	    PanControllable (std::string name, StreamPanner& p) : Controllable (name), panner (p) {}
 	    
 	    StreamPanner& panner;
 	    

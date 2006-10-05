@@ -55,16 +55,16 @@ uint32_t Route::order_key_cnt = 0;
 Route::Route (Session& sess, string name, int input_min, int input_max, int output_min, int output_max, Flag flg, DataType default_type)
 	: IO (sess, name, input_min, input_max, output_min, output_max, default_type),
 	  _flags (flg),
-	  _solo_control (*this, ToggleControllable::SoloControl),
-	  _mute_control (*this, ToggleControllable::MuteControl)
+	  _solo_control (X_("solo"), *this, ToggleControllable::SoloControl),
+	  _mute_control (X_("mute"), *this, ToggleControllable::MuteControl)
 {
 	init ();
 }
 
 Route::Route (Session& sess, const XMLNode& node)
 	: IO (sess, "route"),
-	  _solo_control (*this, ToggleControllable::SoloControl),
-	  _mute_control (*this, ToggleControllable::MuteControl)
+	  _solo_control (X_("solo"), *this, ToggleControllable::SoloControl),
+	  _mute_control (X_("mute"), *this, ToggleControllable::MuteControl)
 {
 	init ();
 	set_state (node);
@@ -1379,6 +1379,8 @@ Route::state(bool full_state)
 	node->add_property ("order-keys", order_string);
 
 	node->add_child_nocopy (IO::state (full_state));
+	node->add_child_nocopy (_solo_control.get_state ());
+	node->add_child_nocopy (_mute_control.get_state ());
 
 	if (_control_outs) {
 		XMLNode* cnode = new XMLNode (X_("ControlOuts"));
@@ -1684,6 +1686,12 @@ Route::set_state (const XMLNode& node)
 
 		} else if (child->name() == "extra") {
 			_extra_xml = new XMLNode (*child);
+		} else if (child->name() == "solo") {
+			_solo_control.set_state (*child);
+			_session.add_controllable (&_solo_control);
+		} else if (child->name() == "mute") {
+			_mute_control.set_state (*child);
+			_session.add_controllable (&_mute_control);
 		}
 	}
 
@@ -2220,8 +2228,8 @@ Route::automation_snapshot (nframes_t now)
 	}
 }
 
-Route::ToggleControllable::ToggleControllable (Route& s, ToggleType tp)
-	: route (s), type(tp)
+Route::ToggleControllable::ToggleControllable (std::string name, Route& s, ToggleType tp)
+	: Controllable (name), route (s), type(tp)
 {
 	
 }

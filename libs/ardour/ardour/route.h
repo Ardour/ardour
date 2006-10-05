@@ -222,7 +222,7 @@ class Route : public IO
 		    SoloControl
 	    };
 	    
-	    ToggleControllable (Route&, ToggleType);
+	    ToggleControllable (std::string name, Route&, ToggleType);
 	    void set_value (float);
 	    float get_value (void) const;
 

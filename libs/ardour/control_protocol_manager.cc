@@ -50,7 +50,7 @@ ControlProtocolManager::set_session (Session& s)
 			instantiate (**i);
 			(*i)->requested = false;
 
-			if ((*i)->state) {
+			if ((*i)->protocol && (*i)->state) {
 				(*i)->protocol->set_state (*(*i)->state);
 			}
 		}
@@ -92,6 +92,10 @@ ControlProtocolManager::instantiate (ControlProtocolInfo& cpi)
 
 	Glib::Mutex::Lock lm (protocols_lock);
 	control_protocols.push_back (cpi.protocol);
+
+	if (cpi.state) {
+		cpi.protocol->set_state (*cpi.state);
+	}
 
 	return cpi.protocol;
 }
@@ -154,7 +158,7 @@ ControlProtocolManager::discover_control_protocols (string path)
 	vector<string *> *found;
 	PathScanner scanner;
 
-	cerr << "looking for control protocols in " << path << endl;
+	info << string_compose (_("looking for control protocols in %1"), path) << endmsg;
 
 	found = scanner (path, protocol_filter, 0, false, true);
 
@@ -261,11 +265,20 @@ ControlProtocolManager::set_state (const XMLNode& node)
 
 	for (citer = clist.begin(); citer != clist.end(); ++citer) {
 		if ((*citer)->name() == X_("Protocol")) {
+
 			prop = (*citer)->property (X_("active"));
+
 			if (prop && prop->value() == X_("yes")) {
 				if ((prop = (*citer)->property (X_("name"))) != 0) {
 					ControlProtocolInfo* cpi = cpi_by_name (prop->value());
 					if (cpi) {
+
+						if (!(*citer)->children().empty()) {
+							cpi->state = (*citer)->children().front ();
+						} else {
+							cpi->state = 0;
+						}
+						
 						if (_session) {
 							instantiate (*cpi);
 						} else {
@@ -293,4 +306,35 @@ ControlProtocolManager::get_state (void)
 	}
 
 	return *root;
+}
+
+void
+ControlProtocolManager::set_protocol_states (const XMLNode& node)
+{
+	XMLNodeList nlist;
+	XMLNodeConstIterator niter;
+	XMLProperty* prop;
+
+	nlist = node.children();
+
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+
+		XMLNode* child = (*niter);
+
+		if ((prop = child->property ("name")) == 0) {
+			error << _("control protocol XML node has no name property. Ignored.") << endmsg;
+			continue;
+		}
+
+		ControlProtocolInfo* cpi = cpi_by_name (prop->value());
+
+		if (!cpi) {
+			warning << string_compose (_("control protocol \"%1\" is not known. Ignored"), prop->value()) << endmsg;
+			continue;
+		}
+
+		/* copy the node so that ownership is clear */
+
+		cpi->state = new XMLNode (*child);
+	}
 }
