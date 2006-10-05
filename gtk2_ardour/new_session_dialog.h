@@ -96,11 +96,20 @@ protected:
 	Gtk::Label * session_name_label;
 	Gtk::Label * session_location_label;
 	Gtk::Label * session_template_label;
-	Gtk::Label * chan_count_label;
+	Gtk::Label * chan_count_label_1;
+	Gtk::Label * chan_count_label_2;
+	Gtk::Label * chan_count_label_3;
+	Gtk::Label * chan_count_label_4;
 	Gtk::Table * advanced_table;
 	Gtk::HBox * input_port_limit_hbox;
 	Gtk::VBox * input_port_vbox;
 	Gtk::Table * input_table;
+	Gtk::HBox * input_hbox;
+
+	Gtk::Label * bus_label;
+	Gtk::Frame * bus_frame;
+	Gtk::Table * bus_table;
+	Gtk::HBox * bus_hbox;
 
 	Gtk::Label * input_label;
 	Gtk::Frame * input_frame;
@@ -108,6 +117,7 @@ protected:
 	Gtk::VBox * output_port_vbox;
 	Gtk::VBox * output_conn_vbox;
 	Gtk::VBox * output_vbox;
+	Gtk::HBox * output_hbox;
 
 	Gtk::Label * output_label;
 	Gtk::Frame * output_frame;

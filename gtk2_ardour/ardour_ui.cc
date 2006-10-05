@@ -1624,11 +1624,8 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 	new_session_dialog->reset_recent();
 	new_session_dialog->show();
 
-	//Glib::RefPtr<Gdk::Window> nsd_window = new_session_dialog->get_window();
-
 	do {
 	        response = new_session_dialog->run ();
-		//nsd_window ->set_cursor(Gdk::Cursor(Gdk::WATCH));
 
 		if(response == Gtk::RESPONSE_CANCEL || response == Gtk::RESPONSE_DELETE_EVENT) {
 		        quit();
