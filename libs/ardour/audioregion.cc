@@ -1391,9 +1391,7 @@ AudioRegion::source_offset_changed ()
 	if (boost::dynamic_pointer_cast<DestructiveFileSource>(sources.front())) {
 		set_start (source()->natural_position(), this);
 		set_position (source()->natural_position(), this);
-	} else {
-		set_position (source()->natural_position() + start(), this);
-	}
+	} 
 }
 
 extern "C" {
