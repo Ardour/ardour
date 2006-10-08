@@ -627,7 +627,9 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 			
 		} else {
 			
-			if (_session.transport_speed() > 1.5f || _session.transport_speed() < -1.5f) {
+			if ((_session.transport_speed() > 1.5f || 
+			     _session.transport_speed() < -1.5f) &&
+			    Config->get_quieten_at_speed()) {
 				pan (bufs, nbufs, nframes, offset, speed_quietning); 
 			} else {
 				// cerr << _name << " panner state = " << _panner->automation_state() << endl;

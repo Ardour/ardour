@@ -367,15 +367,7 @@ ARDOUR_UI::toggle_StopTransportAtEndOfSession()
 void
 ARDOUR_UI::toggle_GainReduceFastTransport()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action ("options", "GainReduceFastTransport");
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		if (tact->get_active()) {
-			Config->set_quieten_at_speed (0.251189); // -12dB reduction for ffwd or rewind
-		} else {
-			Config->set_quieten_at_speed (1.0); /* no change */
-		}
-	}
+	ActionManager::toggle_config_state ("options", "GainReduceFastTransport", &Configuration::set_quieten_at_speed, &Configuration::get_quieten_at_speed);
 }
 
 void
@@ -748,7 +740,7 @@ void
 ARDOUR_UI::parameter_changed (const char* parameter_name)
 {
 #define PARAM_IS(x) (!strcmp (parameter_name, (x)))
-
+	
 	if (PARAM_IS ("slave-source")) {
 
 		sync_option_combo.set_active_text (slave_source_to_string (Config->get_slave_source()));
