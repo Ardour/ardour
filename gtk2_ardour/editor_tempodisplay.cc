@@ -210,12 +210,10 @@ Editor::draw_measures ()
 
 	beat_density =  (beats * 10.0f) / track_canvas.get_width ();
 
-	if (beat_density > 2.0f) {
-	        /* 
-		   if the lines are too close together, 
-		   they become useless 
-		*/
-	        return;
+	if (beat_density > 4.0f) {
+		/* if the lines are too close together, they become useless
+		 */
+		return;
 	}
 
 	for (i = current_bbt_points->begin(); i != current_bbt_points->end(); ++i) {
@@ -231,12 +229,10 @@ Editor::draw_measures ()
 			} else {
 				color = color_map[cMeasureLineBar];
 
-				/* only draw beat lines if the gaps between beats
-				   are large.
-				*/
-
-				if (beat_density > 0.25) {
-				  break;
+				if (beat_density > 2.0) {
+					/* only draw beat lines if the gaps between beats are large.
+					*/
+					break;
 				}
 			}
 
