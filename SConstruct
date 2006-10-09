@@ -992,7 +992,6 @@ for subdir in coredirs:
 
 for sublistdir in [ subdirs, gtk_subdirs, surface_subdirs ]:
     for subdir in sublistdir:
-        print "doing stuff in " + subdir + "\n"
         SConscript (subdir + '/SConscript')
 
 # cleanup
