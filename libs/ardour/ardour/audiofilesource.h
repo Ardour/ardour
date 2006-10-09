@@ -88,6 +88,8 @@ class AudioFileSource : public AudioSource {
 	static void set_search_path (string);
 	static void set_header_position_offset (nframes_t offset );
 
+	int setup_peakfile ();
+
 	static sigc::signal<void> HeaderPositionOffsetChanged;
 
 	XMLNode& get_state ();
@@ -122,6 +124,7 @@ class AudioFileSource : public AudioSource {
 	Flag          _flags;
 	string        _take_id;
 	uint64_t       timeline_position;
+	bool           file_is_new;
 
 	static string peak_dir;
 	static string search_path;

@@ -317,23 +317,6 @@ PluginInsert::connect_and_run (vector<Sample*>& bufs, uint32_t nbufs, nframes_t 
 }
 
 void
-PluginInsert::automation_snapshot (nframes_t now)
-{
-	map<uint32_t,AutomationList*>::iterator li;
-	
-	for (li = parameter_automation.begin(); li != parameter_automation.end(); ++li) {
-		
-		AutomationList *alist = ((*li).second);
-		if (alist != 0 && alist->automation_write ()) {
-			
-			float val = _plugins[0]->get_parameter ((*li).first);
-			alist->rt_add (now, val);
-			last_automation_snapshot = now;
-		}
-	}
-}
-
-void
 PluginInsert::transport_stopped (nframes_t now)
 {
 	map<uint32_t,AutomationList*>::iterator li;
@@ -468,7 +451,6 @@ PluginInsert::set_port_automation_state (uint32_t port, AutoState s)
 
 		if (s != al.automation_state()) {
 			al.set_automation_state (s);
-			last_automation_snapshot = 0;
 			_session.set_dirty ();
 		}
 	}

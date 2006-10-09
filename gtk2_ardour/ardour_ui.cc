@@ -178,7 +178,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	gettimeofday (&last_peak_grab, 0);
 	gettimeofday (&last_shuttle_request, 0);
 
-	ARDOUR::AudioDiskstream::DeleteSources.connect (mem_fun(*this, &ARDOUR_UI::delete_sources_in_the_right_thread));
 	ARDOUR::Diskstream::DiskOverrun.connect (mem_fun(*this, &ARDOUR_UI::disk_overrun_handler));
 	ARDOUR::Diskstream::DiskUnderrun.connect (mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
 
@@ -1041,8 +1040,7 @@ ARDOUR_UI::transport_record ()
 		switch (session->record_status()) {
 		case Session::Disabled:
 			if (session->ntracks() == 0) {
-				string txt = _("Please create 1 or more track\nbefore trying to record.\nCheck the Session menu.");
-				MessageDialog msg (*editor, txt);
+				MessageDialog msg (*editor, _("Please create 1 or more track\nbefore trying to record.\nCheck the Session menu."));
 				msg.run ();
 				return;
 			}
@@ -2195,18 +2193,6 @@ ARDOUR_UI::halt_on_xrun_message ()
 	MessageDialog msg (*editor,
 			   _("Recording was stopped because your system could not keep up."));
 	msg.run ();
-}
-
-void 
-ARDOUR_UI::delete_sources_in_the_right_thread (list<boost::shared_ptr<ARDOUR::Source> >* deletion_list)
-{
-	ENSURE_GUI_THREAD (bind (mem_fun(*this, &ARDOUR_UI::delete_sources_in_the_right_thread), deletion_list));
-
-	for (list<boost::shared_ptr<Source> >::iterator i = deletion_list->begin(); i != deletion_list->end(); ++i) {
-		(*i)->drop_references ();
-	}
-
-	delete deletion_list;
 }
 
 void

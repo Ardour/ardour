@@ -234,16 +234,7 @@ public:
 	AutoStyle gain_automation_style () const { return _gain_automation_curve.automation_style(); }
 	sigc::signal<void> gain_automation_style_changed;
 
-	static void set_automation_interval (nframes_t frames) {
-		_automation_interval = frames;
-	}
-
-	static nframes_t automation_interval() { 
-		return _automation_interval;
-	}
-
 	virtual void transport_stopped (nframes_t now);
-	virtual void automation_snapshot (nframes_t now);
 
 	ARDOUR::Curve& gain_automation_curve () { return _gain_automation_curve; }
 
@@ -310,12 +301,7 @@ public:
 	Change               restore_state (State&);
 	StateManager::State* state_factory (std::string why) const;
 
-	/* automation */
-
-	nframes_t last_automation_snapshot;
-	static nframes_t _automation_interval;
-
-    AutoState      _gain_automation_state;
+	AutoState      _gain_automation_state;
 	AutoStyle      _gain_automation_style;
 
 	bool     apply_gain_automation;

@@ -25,6 +25,9 @@
 #include <vector>
 #include <string>
 
+#include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
+
 #include <time.h>
 
 #include <glibmm/thread.h>
@@ -44,7 +47,7 @@ namespace ARDOUR {
 
 const nframes_t frames_per_peak = 256;
 
-class AudioSource : public Source
+ class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR::AudioSource>
 {
   public:
 	AudioSource (Session&, string name);
@@ -104,13 +107,15 @@ class AudioSource : public Source
 		_build_peakfiles = yn;
 	}
 
+	virtual int setup_peakfile () { return 0; }
+
   protected:
 	static bool _build_missing_peakfiles;
 	static bool _build_peakfiles;
 
 	bool                _peaks_built;
 	mutable Glib::Mutex _lock;
-	nframes_t      _length;
+	nframes_t           _length;
 	bool                 next_peak_clear_should_notify;
 	string               peakpath;
 	string              _captured_for;
@@ -143,10 +148,10 @@ class AudioSource : public Source
 	    };
 	};
 
-	static vector<AudioSource*> pending_peak_sources;
+	static vector<boost::shared_ptr<AudioSource> > pending_peak_sources;
 	static Glib::Mutex* pending_peak_sources_lock;
 
-	static void queue_for_peaks (AudioSource*);
+	static void queue_for_peaks (boost::shared_ptr<AudioSource>);
 	static void clear_queue_for_peaks ();
 	
 	struct PeakBuildRecord {

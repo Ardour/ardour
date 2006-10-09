@@ -157,7 +157,6 @@ class PluginInsert : public Insert
 	nframes_t latency();
 
 	void transport_stopped (nframes_t now);
-	void automation_snapshot (nframes_t now);
 
   protected:
 	void store_state (PluginInsertState&) const;

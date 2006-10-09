@@ -65,7 +65,6 @@ using namespace PBD;
  */
 nframes_t Diskstream::disk_io_chunk_frames = 1024 * 256;
 
-sigc::signal<void,list<boost::shared_ptr<Source> >*> Diskstream::DeleteSources;
 sigc::signal<void>                Diskstream::DiskOverrun;
 sigc::signal<void>                Diskstream::DiskUnderrun;
 

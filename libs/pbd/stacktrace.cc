@@ -9,7 +9,7 @@
 #include <stdlib.h>
 
 void
-PBD::stacktrace (std::ostream& out)
+PBD::stacktrace (std::ostream& out, int levels)
 {
 	void *array[200];
 	size_t size;
@@ -23,7 +23,7 @@ PBD::stacktrace (std::ostream& out)
 
 		printf ("Obtained %zd stack frames.\n", size);
 		
-		for (i = 0; i < size; i++) {
+		for (i = 0; i < size && (levels == 0 || i < levels); i++) {
 			out << strings[i] << std::endl;
 		}
 		
@@ -34,7 +34,7 @@ PBD::stacktrace (std::ostream& out)
 #else
 
 void
-PBD::stacktrace (std::ostream& out)
+PBD::stacktrace (std::ostream& out, int levels)
 {
 	out << "stack tracing is not enabled on this platform" << std::endl;
 }

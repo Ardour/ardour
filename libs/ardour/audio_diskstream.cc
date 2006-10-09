@@ -1484,28 +1484,20 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 
 	if (abort_capture) {
 		
-		ChannelList::iterator chan;
-		
-		list<boost::shared_ptr<Source> >* deletion_list = new list<boost::shared_ptr<Source> >;
+		if (destructive()) {
+			goto outout;
+		}
 
-		for ( chan = channels.begin(); chan != channels.end(); ++chan) {
+		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
 
 			if ((*chan).write_source) {
 				
 				(*chan).write_source->mark_for_remove ();
-				
-				deletion_list->push_back ((*chan).write_source);
-
+				(*chan).write_source->drop_references ();
 				(*chan).write_source.reset ();
 			}
 			
 			/* new source set up in "out" below */
-		}
-		
-		if (!deletion_list->empty()) {
-			DeleteSources (deletion_list);
-		} else {
-			delete deletion_list;
 		}
 
 		goto out;
@@ -1606,9 +1598,11 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 
 	mark_write_completed = true;
 
+  out:
 	reset_write_sources (mark_write_completed);
 
-  out:
+  outout:
+
 	for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 		delete *ci;
 	}
@@ -1933,13 +1927,8 @@ AudioDiskstream::use_new_write_source (uint32_t n)
 	ChannelInfo &chan = channels[n];
 	
 	if (chan.write_source) {
-
-		if (AudioFileSource::is_empty (_session, chan.write_source->path())) {
-			chan.write_source->mark_for_remove ();
-			chan.write_source.reset ();
-		} else {
-			chan.write_source.reset ();
-		}
+		chan.write_source->set_allow_remove_if_empty (true);
+		chan.write_source.reset ();
 	}
 
 	try {

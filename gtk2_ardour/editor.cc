@@ -132,8 +132,8 @@ static const gchar *zoom_focus_strings[] = {
 	N_("Focus Left"),
 	N_("Focus Right"),
 	N_("Focus Center"),
-	N_("Focus Play"),
-	N_("Focus Edit"),
+	N_("Focus Playhead"),
+ 	N_("Focus Edit Cursor"),
 	0
 };
 
@@ -801,8 +801,8 @@ Editor::set_frames_per_unit (double fpu)
 		return;
 	}
 
-	if (fpu < 1.0) {
-		fpu = 1.0;
+	if (fpu < 2.0) {
+		fpu = 2.0;
 	}
 
 	// convert fpu to frame count
@@ -814,6 +814,10 @@ Editor::set_frames_per_unit (double fpu)
 	*/
 
 	if (max_frames / fpu < 800.0) {
+		return;
+	}
+
+	if (fpu == frames_per_unit) {
 		return;
 	}
 

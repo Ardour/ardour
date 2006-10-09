@@ -161,7 +161,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	mmc = 0;
 	session_send_mmc = false;
 	session_send_mtc = false;
-	session_midi_feedback = false;
 	post_transport_work = PostTransportWork (0);
 	g_atomic_int_set (&butler_should_do_transport_work, 0);
 	g_atomic_int_set (&butler_active, 0);

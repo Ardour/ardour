@@ -238,8 +238,6 @@ class Route : public IO
 		return _mute_control;
 	}
 	
-	void automation_snapshot (nframes_t now);
-
 	void protect_automation ();
 	
 	void set_remote_control_id (uint32_t id);

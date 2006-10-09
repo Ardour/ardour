@@ -86,10 +86,7 @@ CoreAudioSource::init (const string& idstr)
 	}
 	
 	if (_build_peakfiles) {
-		if (initialize_peakfile (false, _path)) {
-			error << string_compose("CoreAudioSource: initialize peakfile failed (%1)", name()) << endmsg;
-			throw failed_constructor ();
-		}
+		_need_peakfile = true;
 	}
 }
 

@@ -507,15 +507,6 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 	nframes_t transport_frame;
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
 	
-	{
-		Glib::RWLock::ReaderLock lm (redirect_lock, Glib::TRY_LOCK);
-		if (lm.locked()) {
-			// automation snapshot can also be called from the non-rt context
-			// and it uses the redirect list, so we take the lock out here
-			automation_snapshot (start_frame);
-		}
-	}
-	
 	if (n_outputs() == 0 && _redirects.empty()) {
 		return 0;
 	}

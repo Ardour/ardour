@@ -44,7 +44,7 @@ using namespace PBD;
 
 pthread_t                    AudioSource::peak_thread;
 bool                         AudioSource::have_peak_thread = false;
-vector<AudioSource*>         AudioSource::pending_peak_sources;
+vector<boost::shared_ptr<AudioSource> > AudioSource::pending_peak_sources;
 Glib::Mutex*                 AudioSource::pending_peak_sources_lock = 0;
 int                          AudioSource::peak_request_pipe[2];
 
@@ -191,7 +191,7 @@ AudioSource::peak_thread_work (void* arg)
 
 		while (!pending_peak_sources.empty()) {
 
-			AudioSource* s = pending_peak_sources.front();
+			boost::shared_ptr<AudioSource> s = pending_peak_sources.front();
 			pending_peak_sources.erase (pending_peak_sources.begin());
 			
 			pending_peak_sources_lock->unlock ();
@@ -251,7 +251,7 @@ AudioSource::stop_peak_thread ()
 }
 
 void 
-AudioSource::queue_for_peaks (AudioSource* source)
+AudioSource::queue_for_peaks (boost::shared_ptr<AudioSource> source)
 {
 	if (have_peak_thread) {
 		
@@ -387,11 +387,11 @@ AudioSource::initialize_peakfile (bool newfile, string audio_path)
 			}
 		}
 	}
-
+	
 	if (!newfile && !_peaks_built && _build_missing_peakfiles && _build_peakfiles) {
 		build_peaks_from_scratch ();
 	} 
-
+	
 	return 0;
 }
 
@@ -847,7 +847,7 @@ AudioSource::build_peaks_from_scratch ()
 
 	next_peak_clear_should_notify = true;
 	pending_peak_builds.push_back (new PeakBuildRecord (0, _length));
-	queue_for_peaks (this);
+	queue_for_peaks (shared_from_this());
 }
 
 bool

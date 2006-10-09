@@ -128,6 +128,8 @@ AudioStreamView::set_amplitude_above_axis (gdouble app)
 void
 AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait_for_waves)
 {
+	AudioRegionView *region_view;
+
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::add_region_view), r));
 
 	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (r);
@@ -136,19 +138,16 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 		return;
 	}
 
-	AudioRegionView *region_view;
-	list<RegionView *>::iterator i;
-
-	for (i = region_views.begin(); i != region_views.end(); ++i) {
+	for (list<RegionView *>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		if ((*i)->region() == r) {
 			
 			/* great. we already have a AudioRegionView for this Region. use it again. */
-
+			
 			(*i)->set_valid (true);
 			return;
 		}
 	}
-	
+
 	switch (_trackview.audio_track()->mode()) {
 	case Normal:
 		region_view = new AudioRegionView (canvas_group, _trackview, region, 
@@ -170,15 +169,21 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 
 	/* catch regionview going away */
 
-	region->GoingAway.connect (bind (mem_fun (*this, &AudioStreamView::remove_region_view), region));
-	
+	region->GoingAway.connect (bind (mem_fun (*this, &AudioStreamView::remove_region_view), boost::weak_ptr<Region> (r)));
+
 	RegionViewAdded (region_view);
 }
 
 void
-AudioStreamView::remove_region_view (boost::shared_ptr<Region> r)
+AudioStreamView::remove_region_view (boost::weak_ptr<Region> weak_r)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::remove_region_view), r));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::remove_region_view), weak_r));
+
+	boost::shared_ptr<Region> r (weak_r.lock());
+
+	if (!r) {
+		return;
+	}
 
 	for (list<CrossfadeView *>::iterator i = crossfade_views.begin(); i != crossfade_views.end();) {
 		list<CrossfadeView*>::iterator tmp;
@@ -406,7 +411,7 @@ AudioStreamView::setup_rec_box ()
 					boost::shared_ptr<AudioFileSource> src = boost::static_pointer_cast<AudioFileSource> (ads->write_source (n));
 					if (src) {
 						sources.push_back (src);
-						peak_ready_connections.push_back (src->PeakRangeReady.connect (bind (mem_fun (*this, &AudioStreamView::rec_peak_range_ready), src))); 
+						peak_ready_connections.push_back (src->PeakRangeReady.connect (bind (mem_fun (*this, &AudioStreamView::rec_peak_range_ready), boost::weak_ptr<Source>(src))));
 					}
 				}
 
@@ -420,11 +425,8 @@ AudioStreamView::setup_rec_box ()
 				boost::shared_ptr<AudioRegion> region (boost::dynamic_pointer_cast<AudioRegion>
 								       (RegionFactory::create (sources, start, 1 , "", 0, (Region::Flag)(Region::DefaultFlags | Region::DoNotSaveState), false)));
 				region->set_position (_trackview.session().transport_frame(), this);
+
 				rec_regions.push_back (region);
-
-				// rec regions are destroyed in setup_rec_box
-
-				/* we add the region later */
 			}
 			
 			/* start a new rec box */
@@ -503,13 +505,9 @@ AudioStreamView::setup_rec_box ()
 			last_rec_peak_frame = 0;
 			
 			/* remove temp regions */
-			
-			for (list<boost::shared_ptr<Region> >::iterator iter = rec_regions.begin(); iter != rec_regions.end();) {
-				list<boost::shared_ptr<Region> >::iterator tmp;
-				tmp = iter;
-				++tmp;
+
+			for (list<boost::shared_ptr<Region> >::iterator iter = rec_regions.begin(); iter != rec_regions.end(); ++iter) {
 				(*iter)->drop_references ();
-				iter = tmp;
 			}
 				
 			rec_regions.clear();
@@ -537,18 +535,24 @@ AudioStreamView::foreach_crossfadeview (void (CrossfadeView::*pmf)(void))
 }
 
 void
-AudioStreamView::rec_peak_range_ready (nframes_t start, nframes_t cnt, boost::shared_ptr<Source> src)
+AudioStreamView::rec_peak_range_ready (nframes_t start, nframes_t cnt, boost::weak_ptr<Source> weak_src)
 {
-	// this is called from the peak building thread
+	ENSURE_GUI_THREAD(bind (mem_fun (*this, &AudioStreamView::rec_peak_range_ready), start, cnt, weak_src));
+	
+	boost::shared_ptr<Source> src (weak_src.lock());
 
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &AudioStreamView::rec_peak_range_ready), start, cnt, src));
+	if (!src) {
+		return; 
+	}
+
+	// this is called from the peak building thread
 	
 	if (rec_peak_ready_map.size() == 0 || start+cnt > last_rec_peak_frame) {
 		last_rec_peak_frame = start + cnt;
 	}
-
+	
 	rec_peak_ready_map[src] = true;
-
+	
 	if (rec_peak_ready_map.size() == _trackview.get_diskstream()->n_channels()) {
 		this->update_rec_regions ();
 		rec_peak_ready_map.clear();

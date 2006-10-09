@@ -45,6 +45,10 @@ class ControlProtocol : public sigc::trackable, public Stateful, public BasicUI 
 	virtual int set_active (bool yn) = 0;
 	bool get_active() const { return _active; }
 
+	virtual int set_feedback (bool yn) { return 0; }
+	virtual bool get_feedback () const { return false; }
+	virtual bool supports_feedback () const { return false; }
+
 	sigc::signal<void> ActiveChanged;
 
 	/* signals that a control protocol can emit and other (presumably graphical)

@@ -75,7 +75,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 
 	sources.push_back (src);
 	master_sources.push_back (src);
-	src->GoingAway.connect (bind (mem_fun (*this, &AudioRegion::source_deleted), src));
+	src->GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
 
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 	if (afs) {
@@ -102,7 +102,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 
 	sources.push_back (src);
 	master_sources.push_back (src);
-	src->GoingAway.connect (bind (mem_fun (*this, &AudioRegion::source_deleted), src));
+	src->GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
 
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 	if (afs) {
@@ -129,7 +129,7 @@ AudioRegion::AudioRegion (SourceList& srcs, nframes_t start, nframes_t length, c
 	for (SourceList::iterator i=srcs.begin(); i != srcs.end(); ++i) {
 		sources.push_back (*i);
 		master_sources.push_back (*i);
-		(*i)->GoingAway.connect (bind (mem_fun (*this, &AudioRegion::source_deleted), (*i)));
+		(*i)->GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
 		
 		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> ((*i));
 		if (afs) {
@@ -159,7 +159,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t 
 
 	for (SourceList::const_iterator i= other->sources.begin(); i != other->sources.end(); ++i) {
 		sources.push_back (*i);
-		(*i)->GoingAway.connect (bind (mem_fun (*this, &AudioRegion::source_deleted), *i));
+		(*i)->GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
 
 		pair<set<boost::shared_ptr<AudioSource> >::iterator,bool> result;
 
@@ -175,7 +175,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t 
 
 	for (SourceList::const_iterator i = other->master_sources.begin(); i != other->master_sources.end(); ++i) {
 		if (unique_srcs.find (*i) == unique_srcs.end()) {
-			(*i)->GoingAway.connect (bind (mem_fun (*this, &AudioRegion::source_deleted), *i));
+			(*i)->GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
 		}
 		master_sources.push_back (*i);
 	}
@@ -224,7 +224,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 
 	for (SourceList::const_iterator i = other->sources.begin(); i != other->sources.end(); ++i) {
 		sources.push_back (*i);
-		(*i)->GoingAway.connect (bind (mem_fun (*this, &AudioRegion::source_deleted), *i));
+		(*i)->GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
 		pair<set<boost::shared_ptr<AudioSource> >::iterator,bool> result;
 
 		result = unique_srcs.insert (*i);
@@ -240,7 +240,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	for (SourceList::const_iterator i = other->master_sources.begin(); i != other->master_sources.end(); ++i) {
 		master_sources.push_back (*i);
 		if (unique_srcs.find (*i) == unique_srcs.end()) {
-			(*i)->GoingAway.connect (bind (mem_fun (*this, &AudioRegion::source_deleted), *i));
+			(*i)->GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
 		}
 	}
 
@@ -263,7 +263,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& nod
 {
 	sources.push_back (src);
 	master_sources.push_back (src);
-	src->GoingAway.connect (bind (mem_fun (*this, &AudioRegion::source_deleted), src));
+	src->GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
 
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 	if (afs) {
@@ -291,7 +291,7 @@ AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 
 	for (SourceList::iterator i=srcs.begin(); i != srcs.end(); ++i) {
 		sources.push_back (*i);
-		(*i)->GoingAway.connect (bind (mem_fun (*this, &AudioRegion::source_deleted), *i));
+		(*i)->GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
 		pair<set<boost::shared_ptr<AudioSource> >::iterator,bool> result;
 
 		result = unique_srcs.insert (*i);
@@ -307,7 +307,7 @@ AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 	for (SourceList::iterator i = srcs.begin(); i != srcs.end(); ++i) {
 		master_sources.push_back (*i);
 		if (unique_srcs.find (*i) == unique_srcs.end()) {
-			(*i)->GoingAway.connect (bind (mem_fun (*this, &AudioRegion::source_deleted), *i));
+			(*i)->GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
 		}
 	}
 
@@ -1117,9 +1117,10 @@ AudioRegion::separate_by_channel (Session& session, vector<AudioRegion*>& v) con
 }
 
 void
-AudioRegion::source_deleted (boost::shared_ptr<Source> ignored)
+AudioRegion::source_deleted ()
 {
-	delete this;
+	sources.clear ();
+	drop_references ();
 }
 
 vector<string>

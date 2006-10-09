@@ -4,7 +4,7 @@
 #include <ostream>
 
 namespace PBD {
-	void stacktrace (std::ostream& out);
+	void stacktrace (std::ostream& out, int levels = 0);
 }
 
 #endif /* __libpbd_stacktrace_h__ */

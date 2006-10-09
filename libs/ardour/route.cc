@@ -1959,10 +1959,6 @@ Route::handle_transport_stopped (bool abort_ignored, bool did_locate, bool can_f
 	{
 		Glib::RWLock::ReaderLock lm (redirect_lock);
 
-		if (!did_locate) {
-			automation_snapshot (now);
-		}
-
 		for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
 			
 			if (Config->get_plugins_stop_with_transport() && can_flush_redirects) {
@@ -2075,15 +2071,6 @@ int
 Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, int declick,
 	     bool can_record, bool rec_monitors_input)
 {
-	{
-		Glib::RWLock::ReaderLock lm (redirect_lock, Glib::TRY_LOCK);
-		if (lm.locked()) {
-			// automation snapshot can also be called from the non-rt context
-			// and it uses the redirect list, so we take the lock out here
-			automation_snapshot (_session.transport_frame());
-		}
-	}
-		
 	if ((n_outputs() == 0 && _redirects.empty()) || n_inputs() == 0 || !_active) {
 		silence (nframes, offset);
 		return 0;
@@ -2217,16 +2204,6 @@ Route::set_latency_delay (nframes_t longest_session_latency)
 
 	if (_session.transport_stopped()) {
 		_roll_delay = _initial_delay;
-	}
-}
-
-void
-Route::automation_snapshot (nframes_t now)
-{
-	IO::automation_snapshot (now);
-
-	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
-		(*i)->automation_snapshot (now);
 	}
 }
 

@@ -61,7 +61,6 @@ using namespace PBD;
 
 static float current_automation_version_number = 1.0;
 
-nframes_t IO::_automation_interval = 0;
 const string IO::state_node_name = "IO";
 bool         IO::connecting_legal = false;
 bool         IO::ports_legal = false;
@@ -126,8 +125,6 @@ IO::IO (Session& s, string name,
 	deferred_state = 0;
 
 	apply_gain_automation = false;
-
-	last_automation_snapshot = 0;
 
 	_gain_automation_state = Off;
 	_gain_automation_style = Absolute;
@@ -2513,7 +2510,6 @@ IO::set_gain_automation_state (AutoState state)
 
 		if (state != _gain_automation_curve.automation_state()) {
 			changed = true;
-			last_automation_snapshot = 0;
 			_gain_automation_curve.set_automation_state (state);
 			
 			if (state != Off) {
@@ -2609,21 +2605,6 @@ IO::end_pan_touch (uint32_t which)
 		(*_panner)[which]->automation().stop_touch();
 	}
 
-}
-
-void
-IO::automation_snapshot (nframes_t now)
-{
-	if (last_automation_snapshot > now || (now - last_automation_snapshot) > _automation_interval) {
-
-		if (gain_automation_recording()) {
-			_gain_automation_curve.rt_add (now, gain());
-		}
-		
-		_panner->snapshot (now);
-
-		last_automation_snapshot = now;
-	}
 }
 
 void

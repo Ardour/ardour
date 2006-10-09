@@ -1220,8 +1220,8 @@ Session::maybe_enable_record ()
 {
 	g_atomic_int_set (&_record_status, Enabled);
 
-	/* XXX this save should really happen in another thread. its needed so that
-	   pending capture state can be recovered if we crash.
+	/* this function is currently called from somewhere other than an RT thread.
+	   this save_state() call therefore doesn't impact anything.
 	*/
 
 	save_state ("", true);
@@ -1309,8 +1309,6 @@ Session::set_frame_rate (nframes_t frames_per_second)
 	_base_frame_rate = frames_per_second;
 
 	sync_time_vars();
-
-	Route::set_automation_interval ((nframes_t) ceil ((double) frames_per_second * 0.25));
 
 	// XXX we need some equivalent to this, somehow
 	// DestructiveFileSource::setup_standard_crossfades (frames_per_second);
@@ -2472,7 +2470,7 @@ Session::remove_region (boost::shared_ptr<Region> region)
 	AudioRegionList::iterator i;
 	boost::shared_ptr<AudioRegion> ar;
 	bool removed = false;
-	
+
 	{ 
 		Glib::Mutex::Lock lm (region_lock);
 
@@ -2480,6 +2478,7 @@ Session::remove_region (boost::shared_ptr<Region> region)
 			if ((i = audio_regions.find (region->id())) != audio_regions.end()) {
 				audio_regions.erase (i);
 				removed = true;
+				cerr << "done\n";
 			}
 
 		} else {
@@ -2642,29 +2641,27 @@ Session::remove_source (boost::weak_ptr<Source> src)
 	boost::shared_ptr<Source> source = src.lock();
 
 	if (!source) {
-		cerr << "removing a source DEAD\n";
-	} else {
-		cerr << "removing a source " << source->name () << endl;
+		return;
+	} 
+
+	{ 
+		Glib::Mutex::Lock lm (audio_source_lock);
 		
-		{ 
-			Glib::Mutex::Lock lm (audio_source_lock);
-			
-			if ((i = audio_sources.find (source->id())) != audio_sources.end()) {
-				audio_sources.erase (i);
-			} 
-		}
-		
-		if (!_state_of_the_state & InCleanup) {
-			
-			/* save state so we don't end up with a session file
-			   referring to non-existent sources.
-			*/
-			
-			save_state (_current_snapshot_name);
-		}
-		
-		SourceRemoved(source); /* EMIT SIGNAL */
+		if ((i = audio_sources.find (source->id())) != audio_sources.end()) {
+			audio_sources.erase (i);
+		} 
 	}
+	
+	if (!_state_of_the_state & InCleanup) {
+		
+		/* save state so we don't end up with a session file
+		   referring to non-existent sources.
+		*/
+		
+		save_state (_current_snapshot_name);
+	}
+	
+	SourceRemoved(source); /* EMIT SIGNAL */
 }
 
 boost::shared_ptr<Source>

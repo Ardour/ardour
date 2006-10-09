@@ -261,11 +261,13 @@ Session::non_realtime_stop (bool abort)
 	struct tm* now;
 	time_t     xnow;
 	bool       did_record;
-	
-	did_record = false;
-	
-	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+	bool       saved;
 
+	did_record = false;
+	saved = false;
+
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+	
 	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		if ((*i)->get_captured_frames () != 0) {
 			did_record = true;
@@ -291,7 +293,7 @@ Session::non_realtime_stop (bool abort)
 		
 		Location* loc = _locations.end_location();
 		bool change_end = false;
-
+		
 		if (_transport_frame < loc->end()) {
 
 			/* stopped recording before current end */
@@ -332,17 +334,17 @@ Session::non_realtime_stop (bool abort)
 			(*i)->set_pending_declick (0);
 		}
 	}
-
+	
 	if (did_record) {
 		commit_reversible_command ();
 	}	
-
+	
 	if (_engine.running()) {
 		update_latency_compensation (true, abort);
 	}
 
 	if (Config->get_auto_return() || (post_transport_work & PostTransportLocate) || synced_to_jack()) {
-
+		
 		if (pending_locate_flush) {
 			flush_all_redirects ();
 		}
@@ -370,7 +372,7 @@ Session::non_realtime_stop (bool abort)
 				}
 			}
 		}
-
+		
 		deliver_mmc (MIDI::MachineControl::cmdLocate, _transport_frame);
 
 #ifdef LEAVE_TRANSPORT_UNADJUSTED
@@ -389,7 +391,7 @@ Session::non_realtime_stop (bool abort)
 		   when realtime_stop(), which has already executed,
 		   will have done this.
 		*/
-
+		
 		if (!Config->get_latched_record_enable()) {
 			g_atomic_int_set (&_record_status, Disabled);
 		} else {
@@ -401,6 +403,7 @@ Session::non_realtime_stop (bool abort)
 	if ((post_transport_work & PostTransportLocate) && get_record_enabled()) {
 		/* capture start has been changed, so save pending state */
 		save_state ("", true);
+		saved = true;
 	}
 
         /* always try to get rid of this */
@@ -409,7 +412,7 @@ Session::non_realtime_stop (bool abort)
 	
 	/* save the current state of things if appropriate */
 
-	if (did_record) {
+	if (did_record && !saved) {
 		save_state (_current_snapshot_name);
 	}
 
@@ -421,7 +424,7 @@ Session::non_realtime_stop (bool abort)
 		_play_range = false;
 
 		/* do not turn off autoloop on stop */
-
+		
 	}
 
 	PositionChanged (_transport_frame); /* EMIT SIGNAL */
@@ -708,7 +711,7 @@ Session::set_transport_speed (float speed, bool abort)
 		} else {
 			stop_transport (abort);
 		}
-
+		
 	} else if (transport_stopped() && speed == 1.0) {
 
 		if (!get_record_enabled() && Config->get_stop_at_session_end() && _transport_frame >= current_end_frame()) {
@@ -789,7 +792,7 @@ Session::stop_transport (bool abort)
 	if (_transport_speed == 0.0f) {
 		return;
 	}
-
+	
 	if (actively_recording() && !(transport_sub_state & StopPendingCapture) && 
 	    _worst_output_latency > current_block_size) 
 	{
@@ -812,9 +815,11 @@ Session::stop_transport (bool abort)
 		return;
 	} 
 
+
 	if ((transport_sub_state & PendingDeclickOut) == 0) {
 		transport_sub_state |= PendingDeclickOut;
 		/* we'll be called again after the declick */
+		pending_abort = abort;
 		return;
 	}
 
@@ -951,7 +956,7 @@ Session::set_slave_source (SlaveSource src)
 	case None:
 		stop_transport ();
 		break;
-
+		
 	case MTC:
 		if (_mtc_port) {
 			try {

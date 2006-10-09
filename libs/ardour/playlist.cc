@@ -1373,10 +1373,21 @@ Playlist::set_state (const XMLNode& node)
 		
 		if (child->name() == "Region") {
 
-			if ((region = RegionFactory::create (_session, *child, true)) == 0) {
-				error << _("Playlist: cannot create region from state file") << endmsg;
+#if 0
+			if ((prop = child->property ("id")) == 0) {
+				error << _("region state node has no ID, ignored") << endmsg;
 				continue;
 			}
+			
+			ID id = prop->value ();
+
+			if ((region = region_by_id (id)) == 0) {
+#endif
+				if ((region = RegionFactory::create (_session, *child, true)) == 0) {
+					error << _("Playlist: cannot create region from state file") << endmsg;
+					continue;
+				}
+//			}
 
 			add_region (region, region->position(), 1.0, false);
 

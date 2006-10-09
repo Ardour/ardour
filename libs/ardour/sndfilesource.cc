@@ -43,14 +43,6 @@ SndFileSource::SndFileSource (Session& s, const XMLNode& node)
 	if (open()) {
 		throw failed_constructor ();
 	}
-
-	if (_build_peakfiles) {
-		if (initialize_peakfile (false, _path)) {
-			sf_close (sf);
-			sf = 0;
-			throw failed_constructor ();
-		}
-	}
 }
 
 SndFileSource::SndFileSource (Session& s, string idstr, Flag flags)
@@ -62,14 +54,6 @@ SndFileSource::SndFileSource (Session& s, string idstr, Flag flags)
 	if (open()) {
 		throw failed_constructor ();
 	}
-
-	if (!(_flags & NoPeakFile) && _build_peakfiles) {
-		if (initialize_peakfile (false, _path)) {
-			sf_close (sf);
-			sf = 0;
-			throw failed_constructor ();
-		}
-	}
 }
 
 SndFileSource::SndFileSource (Session& s, string idstr, SampleFormat sfmt, HeaderFormat hf, nframes_t rate, Flag flags)
@@ -79,6 +63,12 @@ SndFileSource::SndFileSource (Session& s, string idstr, SampleFormat sfmt, Heade
 
 	init (idstr);
 
+	/* this constructor is used to construct new files, not open
+	   existing ones.
+	*/
+
+	file_is_new = true;
+	
 	switch (hf) {
 	case CAF:
 		fmt = SF_FORMAT_CAF;
@@ -170,14 +160,6 @@ SndFileSource::SndFileSource (Session& s, string idstr, SampleFormat sfmt, Heade
 			_broadcast_info = 0;
 		}
 		
-	}
-	
-	if (!(_flags & NoPeakFile) && _build_peakfiles) {
-		if (initialize_peakfile (true, _path)) {
-			sf_close (sf);
-			sf = 0;
-			throw failed_constructor ();
-		}
 	}
 }
 
@@ -413,7 +395,7 @@ SndFileSource::write_unlocked (Sample *data, nframes_t cnt)
 	
 	
 	if (_build_peakfiles) {
-		queue_for_peaks (this);
+		queue_for_peaks (shared_from_this ());
 	}
 
 	_write_data_count = cnt;
