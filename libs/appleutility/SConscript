@@ -15,8 +15,8 @@ appleutility.Append(LINKFLAGS='-framework CoreFoundation')
 appleutility.Append(LINKFLAGS='-framework CoreServices')
 
 libappleutility = appleutility.SharedLibrary('appleutility', appleutility_files)
-
-Default(libappleutility)
+if appleutility['COREAUDIO']:
+    Default(libappleutility)
 
 env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libappleutility))
 
