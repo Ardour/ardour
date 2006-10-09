@@ -65,8 +65,8 @@ cEnteredAutomationLine 0.87 0.39 0.39 1.00
 cEnteredMarker 0.87 0.39 0.39 1.00
 cMeterMarker 0.95 0.26 0.36 1.00
 cTempoMarker 0.95 0.26 0.36 1.00
-cMeasureLineBeat 0.7 0.7 0.7 0.94
-cMeasureLineBar 0.5 0.5 0.5 0.98
+cMeasureLineBeat 0.7 0.7 0.7 1.00
+cMeasureLineBar 0.5 0.5 0.5 1.00
 cGhostTrackBaseOutline 0.00 0.00 0.00 1.00
 cGhostTrackBaseFill 0.27 0.00 0.49 0.50
 cImageTrackBase 0.87 0.87 0.85 1.00
