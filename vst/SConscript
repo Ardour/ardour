@@ -67,7 +67,7 @@ wine_executable = ardour_vst.SubstInFile ('ardourvst', 'ardourvst.in', SUBST_DIC
 # make sure the scripts are executable
 
 if ardour_vst['VST']:
-    ardour_vst.AddPostAction (wine_executable, ardour_vst.Action (Chmod ('ardevst', 0755)))
+    ardour_vst.AddPostAction (wine_executable, ardour_vst.Action (Chmod ('vst/ardevst', 0755)))
     ardour_vst.AddPostAction (wine_executable, ardour_vst.Action (Chmod (wine_executable, 0755)))
     Default([wine_generated_executable, wine_executable])
     
