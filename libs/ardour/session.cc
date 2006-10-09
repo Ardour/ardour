@@ -1926,6 +1926,10 @@ Session::remove_route (shared_ptr<Route> route)
 	
 	update_latency_compensation (false, false);
 	set_dirty();
+
+	// We need to disconnect the routes inputs and outputs 
+	route->disconnect_inputs(NULL);
+	route->disconnect_outputs(NULL);
 	
 	/* get rid of it from the dead wood collection in the route list manager */
 

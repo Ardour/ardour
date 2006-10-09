@@ -44,6 +44,7 @@
 #include "rgb_macros.h"
 #include "gui_thread.h"
 #include "color.h"
+#include "time_axis_view.h"
 
 #include "i18n.h"
 
@@ -200,6 +201,7 @@ Editor::draw_measures ()
 	}
 
 	track_canvas.get_scroll_region (x1, y1, x2, y2);
+	y2 = TimeAxisView::hLargest*5000; // five thousand largest tracks should be enough.. :)
 
 	/* get the first bar spacing */
 

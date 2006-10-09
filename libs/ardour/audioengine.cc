@@ -551,6 +551,10 @@ AudioEngine::connect (const string& source, const string& destination)
 	if (ret == 0) {
 		pair<string,string> c (s, d);
 		port_connections.push_back (c);
+	} else if (ret == EEXIST) {
+		error << string_compose(_("AudioEngine: connection already exists: %1 (%2) to %3 (%4)"), 
+				 source, s, destination, d) 
+		      << endmsg;
 	} else {
 		error << string_compose(_("AudioEngine: cannot connect %1 (%2) to %3 (%4)"), 
 				 source, s, destination, d) 
