@@ -244,12 +244,12 @@ VSTPlugin::set_state(const XMLNode& node)
 
 		for (i = child->properties().begin(); i != child->properties().end(); ++i) {
 			long param;
-			double val;
+			float val;
 
 			sscanf ((*i)->name().c_str(), "param_%ld", &param);
-			sscanf ((*i)->value().c_str(), "%g", &val);
+			sscanf ((*i)->value().c_str(), "%f", &val);
 
-			_plugin->setParameter (_plugin, param, (float) val);
+			_plugin->setParameter (_plugin, param, val);
 		}
 
 		return 0;
