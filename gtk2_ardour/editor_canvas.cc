@@ -630,12 +630,13 @@ Editor::autoscroll_canvas ()
 void
 Editor::start_canvas_autoscroll (int dir)
 {
-	if (!session) {
+	if (!session || autoscroll_active) {
 		return;
 	}
 
 	stop_canvas_autoscroll ();
 
+	autoscroll_active = true;
 	autoscroll_direction = dir;
 	autoscroll_distance = (nframes_t) floor (current_page_frames()/50.0);
 	autoscroll_cnt = 0;
@@ -652,6 +653,8 @@ Editor::stop_canvas_autoscroll ()
 		g_source_remove (autoscroll_timeout_tag);
 		autoscroll_timeout_tag = -1;
 	}
+
+	autoscroll_active = false;
 }
 
 gint

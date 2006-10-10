@@ -248,6 +248,7 @@ Editor::Editor (AudioEngine& eng)
 	bbt_beat_subdivision = 4;
 	canvas_width = 0;
 	canvas_height = 0;
+	autoscroll_active = false;
 	autoscroll_timeout_tag = -1;
 	interthread_progress_window = 0;
 

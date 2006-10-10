@@ -1498,6 +1498,7 @@ class Editor : public PublicEditor
 
 	/* autoscrolling */
 
+	bool autoscroll_active;
 	int autoscroll_timeout_tag;
 	int autoscroll_direction;
 	uint32_t autoscroll_cnt;
