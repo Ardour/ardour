@@ -772,6 +772,9 @@ AudioRegionView::create_waves ()
 	}
 
 	if (create_zero_line) {
+		if (zero_line) {
+			delete zero_line;
+		}
 		zero_line = new ArdourCanvas::SimpleLine (*group);
 		zero_line->property_x1() = (gdouble) 1.0;
 		zero_line->property_x2() = (gdouble) (_region->length() / samples_per_unit) - 1.0;
