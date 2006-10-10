@@ -293,7 +293,7 @@ Region::move_to_natural_position (void *src)
 	if (!_playlist) {
 		return;
 	}
-
+	
 	boost::shared_ptr<Region> whole_file_region = get_parent();
 
 	if (whole_file_region) {

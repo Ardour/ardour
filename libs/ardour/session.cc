@@ -2524,7 +2524,7 @@ Session::find_whole_file_parent (boost::shared_ptr<AudioRegion> child)
 		}
 	} 
 
-	return boost::shared_ptr<AudioRegion> ((AudioRegion*) 0);
+	return boost::shared_ptr<AudioRegion> ();
 }	
 
 void
