@@ -468,6 +468,22 @@ get_xpm (std::string name)
 	return (xpm_map[name]);
 }
 
+Glib::RefPtr<Gdk::Pixbuf>	
+get_icon (const char* cname)
+{
+	string name = cname;
+	name += X_(".png");
+
+	string path = ARDOUR::find_data_file (name, "icons");
+
+	if (path.empty()) {
+		fatal << string_compose (_("cannot find icon image for %1"), name) << endmsg;
+		/*NOTREACHED*/
+	}
+
+	return Gdk::Pixbuf::create_from_file (path);
+}
+
 string
 longest (vector<string>& strings)
 {

@@ -326,34 +326,7 @@ AudioClock::on_realize ()
 
 	/* styles are not available until the widgets are bound to a window */
 
-	switch (_mode) {
-	case SMPTE:
-		Gtkmm2ext::set_size_request_to_display_given_text (hours_label, "-88", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (minutes_label, "88", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (seconds_label, "88", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (frames_label, "88", 0, 2);
-		break;
-
-	case BBT:
-		Gtkmm2ext::set_size_request_to_display_given_text (bars_label, "-888", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (beats_label, "88", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (ticks_label, "8888", 0, 2);
-		break;
-
-	case MinSec:
-		Gtkmm2ext::set_size_request_to_display_given_text (ms_hours_label, "99", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (ms_minutes_label, "99", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (ms_seconds_label, "99", 0, 2);
-		break;
-
-	case Frames:
-		Gtkmm2ext::set_size_request_to_display_given_text (audio_frames_label, "4294967296", 0, 2);
-		break;
-
-	case Off:
-		break;
-		
-	}
+	set_size_requests ();
 }
 
 void
@@ -436,13 +409,13 @@ AudioClock::set_minsec (nframes_t when, bool force)
 	secs = left / (float) session->frame_rate();
 
 	if (force || hrs != ms_last_hrs) {
-		sprintf (buf, "%d", hrs);
+		sprintf (buf, "%02d", hrs);
 		ms_hours_label.set_text (buf);
 		ms_last_hrs = hrs;
 	}
 
 	if (force || mins != ms_last_mins) {
-		sprintf (buf, "%d", mins);
+		sprintf (buf, "%02d", mins);
 		ms_minutes_label.set_text (buf);
 		ms_last_mins = mins;
 	}
@@ -1775,40 +1748,66 @@ AudioClock::set_mode (Mode m)
 	}
 	
 	_mode = m;
-	
+
 	switch (_mode) {
 	case SMPTE:
 		clock_base.add (smpte_packer_hbox);
-		Gtkmm2ext::set_size_request_to_display_given_text (hours_label, "-88", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (minutes_label, "88", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (seconds_label, "88", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (frames_label, "88", 0, 2);
 		break;
 
 	case BBT:
 		clock_base.add (bbt_packer_hbox);
-		Gtkmm2ext::set_size_request_to_display_given_text (bars_label, "-888", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (beats_label, "88", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (ticks_label, "8888", 0, 2);
 		break;
 
 	case MinSec:
 		clock_base.add (minsec_packer_hbox);
-		Gtkmm2ext::set_size_request_to_display_given_text (ms_hours_label, "99", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (ms_minutes_label, "99", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (ms_seconds_label, "99", 0, 2);
 		break;
 
 	case Frames:
 		clock_base.add (frames_packer_hbox);
-		Gtkmm2ext::set_size_request_to_display_given_text (audio_frames_label, "4294967296", 0, 2);
+		break;
 
 	case Off:
 		break;
 	}
 
+	set_size_requests ();
+	
 	set (last_when, true);
 	clock_base.show_all ();
 	key_entry_state = 0;
 }
 
+void
+AudioClock::set_size_requests ()
+{
+	/* note that in some fonts, "88" is narrower than "00", hence the 2 pixel padding */
+
+	switch (_mode) {
+	case SMPTE:
+		Gtkmm2ext::set_size_request_to_display_given_text (hours_label, "-88", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (minutes_label, "88", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (seconds_label, "88", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (frames_label, "88", 2, 2);
+		break;
+
+	case BBT:
+		Gtkmm2ext::set_size_request_to_display_given_text (bars_label, "-888", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (beats_label, "88", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (ticks_label, "8888", 2, 2);
+		break;
+
+	case MinSec:
+		Gtkmm2ext::set_size_request_to_display_given_text (ms_hours_label, "99", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (ms_minutes_label, "99", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (ms_seconds_label, "99.999", 2, 2);
+		break;
+
+	case Frames:
+		Gtkmm2ext::set_size_request_to_display_given_text (audio_frames_label, "4294967296", 2, 2);
+		break;
+
+	case Off:
+		break;
+		
+	}
+}

@@ -242,26 +242,26 @@ ARDOUR_UI::setup_transport ()
 	Widget* w;
 
 	stop_button.set_active (true);
-
-	w = manage (new Image (Stock::MEDIA_PREVIOUS, ICON_SIZE_BUTTON));
+	
+	w = manage (new Image (get_icon (X_("transport_start"))));
 	w->show();
 	goto_start_button.add (*w);
-	w = manage (new Image (Stock::MEDIA_NEXT, ICON_SIZE_BUTTON));
+	w = manage (new Image (get_icon (X_("transport_end"))));
 	w->show();
 	goto_end_button.add (*w);
-	w = manage (new Image (Stock::MEDIA_PLAY, ICON_SIZE_BUTTON));
+	w = manage (new Image (get_icon (X_("transport_play"))));
 	w->show();
 	roll_button.add (*w);
-	w = manage (new Image (Stock::MEDIA_STOP, ICON_SIZE_BUTTON));
+	w = manage (new Image (get_icon (X_("transport_stop"))));
 	w->show();
 	stop_button.add (*w);
-	w = manage (new Image (Stock::MEDIA_PLAY, ICON_SIZE_BUTTON));
+	w = manage (new Image (get_icon (X_("transport_range"))));
 	w->show();
 	play_selection_button.add (*w);
-	w = manage (new Image (Stock::MEDIA_RECORD, ICON_SIZE_BUTTON));
+	w = manage (new Image (get_icon (X_("transport_record"))));
 	w->show();
 	rec_button.add (*w);
-	w = manage (new Image (get_xpm("loop.xpm")));
+	w = manage (new Image (get_icon (X_("transport_loop"))));
 	w->show();
 	auto_loop_button.add (*w);
 

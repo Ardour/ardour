@@ -176,6 +176,7 @@ class AudioClock : public Gtk::HBox
 	void setup_events ();
 
 	void smpte_offset_changed ();
+	void set_size_requests ();
 
 	static const uint32_t field_length[(int)AudioFrames+1];
 };

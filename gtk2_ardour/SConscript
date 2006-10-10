@@ -206,7 +206,8 @@ fft_graph.cc
 fft_result.cc
 """)
 
-pixmap_files=glob.glob('pixmaps/*.xpm')
+pixmap_files = glob.glob('pixmaps/*.xpm')
+icon_files = glob.glob ('icons/*.png')
 
 intl_files = gtkardour_files + glob.glob('*.h')
 
@@ -304,6 +305,7 @@ env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour
 # data files
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2'), 'splash.ppm'))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/pixmaps'), pixmap_files))
+env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/icons'), icon_files))
 
 		
 #dist
@@ -318,6 +320,7 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
                                       gtkardour_files +
 				      vst_files +
 				      pixmap_files +
+				      icon_files +
 				      skipped_files +
 				      audiounit_files + 
 				      fft_analysis_files +

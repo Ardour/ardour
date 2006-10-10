@@ -666,8 +666,8 @@ Editor::Editor (AudioEngine& eng)
 
 	/* nudge stuff */
 
-	nudge_forward_button.add (*(manage (new Image (get_xpm("right_arrow.xpm")))));
-	nudge_backward_button.add (*(manage (new Image (get_xpm("left_arrow.xpm")))));
+	nudge_forward_button.add (*(manage (new Image (::get_icon("nudge_right")))));
+	nudge_backward_button.add (*(manage (new Image (::get_icon("nudge_left")))));
 
 	ARDOUR_UI::instance()->tooltips().set_tip (nudge_forward_button, _("Nudge Region/Selection Forwards"));
 	ARDOUR_UI::instance()->tooltips().set_tip (nudge_backward_button, _("Nudge Region/Selection Backwards"));
@@ -2468,22 +2468,22 @@ Editor::setup_toolbar ()
 
 	vector<ToggleButton *> mouse_mode_buttons;
 
-	mouse_move_button.add (*(manage (new Image (get_xpm("tool_object.xpm")))));
+	mouse_move_button.add (*(manage (new Image (::get_icon("tool_object")))));
 	mouse_move_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_move_button);
 	mouse_select_button.add (*(manage (new Image (get_xpm("tool_range.xpm")))));
 	mouse_select_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_select_button);
-	mouse_gain_button.add (*(manage (new Image (get_xpm("tool_gain.xpm")))));
+	mouse_gain_button.add (*(manage (new Image (::get_icon("tool_gain")))));
 	mouse_gain_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_gain_button);
-	mouse_zoom_button.add (*(manage (new Image (get_xpm("tool_zoom.xpm")))));
+	mouse_zoom_button.add (*(manage (new Image (::get_icon("tool_zoom")))));
 	mouse_zoom_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_zoom_button);
-	mouse_timefx_button.add (*(manage (new Image (get_xpm("tool_stretch.xpm")))));
+	mouse_timefx_button.add (*(manage (new Image (::get_icon("tool_stretch")))));
 	mouse_timefx_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_timefx_button);
-	mouse_audition_button.add (*(manage (new Image (get_xpm("tool_audition.xpm")))));
+	mouse_audition_button.add (*(manage (new Image (::get_icon("tool_audition")))));
 	mouse_audition_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_audition_button);
 	
@@ -2564,17 +2564,17 @@ Editor::setup_toolbar ()
 	zoom_box.set_border_width (2);
 
 	zoom_in_button.set_name ("EditorTimeButton");
-	zoom_in_button.add (*(manage (new Image (get_xpm("zoom_in.xpm")))));
+	zoom_in_button.add (*(manage (new Image (::get_icon("zoom_in")))));
 	zoom_in_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom_step), false));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_in_button, _("Zoom In"));
 	
 	zoom_out_button.set_name ("EditorTimeButton");
-	zoom_out_button.add (*(manage (new Image (get_xpm("zoom_out.xpm")))));
+	zoom_out_button.add (*(manage (new Image (::get_icon("zoom_out")))));
 	zoom_out_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom_step), true));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_button, _("Zoom Out"));
 
 	zoom_out_full_button.set_name ("EditorTimeButton");
-	zoom_out_full_button.add (*(manage (new Image (get_xpm("zoom_full.xpm")))));
+	zoom_out_full_button.add (*(manage (new Image (::get_icon("zoom_full")))));
 	zoom_out_full_button.signal_clicked().connect (mem_fun(*this, &Editor::temporal_zoom_session));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_full_button, _("Zoom to Session"));
 	
