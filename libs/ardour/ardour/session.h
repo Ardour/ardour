@@ -103,7 +103,7 @@ using std::string;
 using std::map;
 using std::set;
 
-class Session : public sigc::trackable, public PBD::StatefulDestructible
+class Session : public PBD::StatefulDestructible
 
 {
   private:
@@ -1434,10 +1434,9 @@ class Session : public sigc::trackable, public PBD::StatefulDestructible
 	typedef map<PBD::ID,boost::shared_ptr<AudioRegion> > AudioRegionList;
 	AudioRegionList audio_regions;
 	
-	void region_renamed (boost::shared_ptr<Region>);
-	void region_changed (Change, boost::shared_ptr<Region>);
 	void add_region (boost::shared_ptr<Region>);
-	void remove_region (boost::shared_ptr<Region>);
+	void region_changed (Change, boost::weak_ptr<Region>);
+	void remove_region (boost::weak_ptr<Region>);
 
 	int load_regions (const XMLNode& node);
 

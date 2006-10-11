@@ -96,7 +96,7 @@ class ControlPoint
 	ShapeType _shape;
 };
 
-class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
+class AutomationLine : public PBD::StatefulDestructible
 {
   public:
         AutomationLine (const string & name, TimeAxisView&, ArdourCanvas::Group&, ARDOUR::AutomationList&);

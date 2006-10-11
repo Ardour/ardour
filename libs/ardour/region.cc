@@ -147,9 +147,7 @@ Region::Region (const XMLNode& node)
 
 Region::~Region ()
 {
-	notify_callbacks ();
-
-	/* derived classes must emit GoingAway */
+	/* derived classes must call notify_callbacks() and then emit GoingAway */
 }
 
 void

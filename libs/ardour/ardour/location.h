@@ -42,7 +42,7 @@ using std::string;
 
 namespace ARDOUR {
 
-class Location : public sigc::trackable, public PBD::StatefulDestructible
+class Location : public PBD::StatefulDestructible
 {
   public:
 	enum Flags {

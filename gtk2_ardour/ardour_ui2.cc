@@ -452,23 +452,6 @@ ARDOUR_UI::setup_transport ()
 }
 
 void
-ARDOUR_UI::setup_clock ()
-{
-	ARDOUR_UI::Clock.connect (bind (mem_fun (big_clock, &AudioClock::set), false));
-	
-	big_clock_window = new Window (WINDOW_TOPLEVEL);
-	
-	big_clock_window->set_border_width (0);
-	big_clock_window->add  (big_clock);
-	big_clock_window->set_title (_("ardour: clock"));
-	big_clock_window->set_type_hint (Gdk::WINDOW_TYPE_HINT_MENU);
-	big_clock_window->signal_realize().connect (bind (sigc::ptr_fun (set_decoration), big_clock_window,  (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
-	big_clock_window->signal_unmap().connect (bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleBigClock")));
-
-	manage_window (*big_clock_window);
-}
-
-void
 ARDOUR_UI::manage_window (Window& win)
 {
 	win.signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), &win));

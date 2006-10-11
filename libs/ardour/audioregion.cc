@@ -31,6 +31,7 @@
 
 #include <pbd/basename.h>
 #include <pbd/xml++.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/audioregion.h>
 #include <ardour/session.h>
@@ -325,6 +326,7 @@ AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 
 AudioRegion::~AudioRegion ()
 {
+	notify_callbacks ();
 	GoingAway (); /* EMIT SIGNAL */
 }
 

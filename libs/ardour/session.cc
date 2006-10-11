@@ -463,8 +463,15 @@ Session::~Session ()
 	cerr << "delete audio regions\n";
 #endif /* TRACK_DESTRUCTION */
 	
-	for (AudioRegionList::iterator i = audio_regions.begin(); i != audio_regions.end(); ++i) {
+	for (AudioRegionList::iterator i = audio_regions.begin(); i != audio_regions.end(); ) {
+		AudioRegionList::iterator tmp;
+
+		tmp = i;
+		++tmp;
+
 		i->second->drop_references ();
+
+		i = tmp;
 	}
 
 	audio_regions.clear ();
@@ -2447,15 +2454,21 @@ Session::add_region (boost::shared_ptr<Region> region)
 	set_dirty();
 	
 	if (added) {
-		region->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_region), region));
-		region->StateChanged.connect (sigc::bind (mem_fun (*this, &Session::region_changed), region));
+		region->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_region), boost::weak_ptr<Region>(region)));
+		region->StateChanged.connect (sigc::bind (mem_fun (*this, &Session::region_changed), boost::weak_ptr<Region>(region)));
 		AudioRegionAdded (ar); /* EMIT SIGNAL */
 	}
 }
 
 void
-Session::region_changed (Change what_changed, boost::shared_ptr<Region> region)
+Session::region_changed (Change what_changed, boost::weak_ptr<Region> weak_region)
 {
+	boost::shared_ptr<Region> region (weak_region.lock ());
+
+	if (!region) {
+		return;
+	}
+
 	if (what_changed & Region::HiddenChanged) {
 		/* relay hidden changes */
 		RegionHiddenChange (region);
@@ -2463,15 +2476,15 @@ Session::region_changed (Change what_changed, boost::shared_ptr<Region> region)
 }
 
 void
-Session::region_renamed (boost::shared_ptr<Region> region)
-{
-	add_region (region);
-}
-
-void
-Session::remove_region (boost::shared_ptr<Region> region)
+Session::remove_region (boost::weak_ptr<Region> weak_region)
 {
 	AudioRegionList::iterator i;
+	boost::shared_ptr<Region> region (weak_region.lock ());
+
+	if (!region) {
+		return;
+	}
+
 	boost::shared_ptr<AudioRegion> ar;
 	bool removed = false;
 
@@ -2482,7 +2495,6 @@ Session::remove_region (boost::shared_ptr<Region> region)
 			if ((i = audio_regions.find (region->id())) != audio_regions.end()) {
 				audio_regions.erase (i);
 				removed = true;
-				cerr << "done\n";
 			}
 
 		} else {

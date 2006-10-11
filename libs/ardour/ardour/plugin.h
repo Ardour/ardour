@@ -77,7 +77,7 @@ class PluginInfo {
 typedef boost::shared_ptr<PluginInfo> PluginInfoPtr;
 typedef std::list<PluginInfoPtr> PluginInfoList;
 
-class Plugin : public PBD::StatefulDestructible, public sigc::trackable
+class Plugin : public PBD::StatefulDestructible
 {
   public:
 	Plugin (ARDOUR::AudioEngine&, ARDOUR::Session&);

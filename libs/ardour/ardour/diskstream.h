@@ -54,7 +54,7 @@ class Session;
 class Playlist;
 class IO;
 
- class Diskstream : public sigc::trackable, public PBD::StatefulDestructible
+ class Diskstream : public PBD::StatefulDestructible
 {	
   public:
 	enum Flag {
