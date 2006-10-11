@@ -483,7 +483,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 				
 				for (n = 0; n < nbufs; ++n) {
 					Sample *sp = bufs[n];
-					apply_gain_to_buffer(sp,nframes,this_gain);
+					Session::apply_gain_to_buffer(sp,nframes,this_gain);
 				}
 
 			} else if (_gain == 0) {
