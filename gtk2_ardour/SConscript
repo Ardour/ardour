@@ -303,7 +303,7 @@ env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.bindings'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.colors'))
 # data files
-env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2'), 'splash.ppm'))
+env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2'), 'splash.png'))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/pixmaps'), pixmap_files))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/icons'), icon_files))
 
@@ -313,7 +313,7 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
                                       [ 'SConscript',
                                         'i18n.h', 'gettext.h',
 					'ardour.sh.in',
-                                        'ardour2_ui.rc', 'splash.ppm',
+                                        'ardour2_ui.rc', 'splash.png',
                                         'ardour.menus', 'ardour.bindings', 'ardour.colors',
 					'editor_xpms'
                                         ] +
