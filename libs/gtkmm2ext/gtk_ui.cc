@@ -253,8 +253,7 @@ static bool idle_quit ()
 void
 UI::do_quit ()
 {
-	Gtk::Main::quit ();
-	// Glib::signal_idle().connect (sigc::ptr_fun (idle_quit));
+	Glib::signal_idle().connect (sigc::ptr_fun (idle_quit));
 }
 
 void
