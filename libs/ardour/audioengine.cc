@@ -43,8 +43,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-nframes_t Port::_short_over_length = 2;
-nframes_t Port::_long_over_length = 10;
+gint AudioEngine::m_meter_exit;
 
 AudioEngine::AudioEngine (string client_name) 
 	: ports (new Ports)
@@ -65,7 +64,7 @@ AudioEngine::AudioEngine (string client_name)
 	_freewheel_thread_registered = false;
 
 	m_meter_thread = 0;
-	m_meter_exit = false;
+	g_atomic_int_set (&m_meter_exit, 0);
 
 	if (connect_to_jack (client_name)) {
 		throw NoBackendAvailable ();
@@ -81,9 +80,7 @@ AudioEngine::~AudioEngine ()
 		jack_client_close (_jack);
 	}
 
-	if(m_meter_thread) {
-		g_atomic_int_inc(&m_meter_exit);
-	}
+	stop_metering_thread ();
 }
 
 void
@@ -366,10 +363,20 @@ AudioEngine::jack_bufsize_callback (nframes_t nframes)
 }
 
 void
+AudioEngine::stop_metering_thread ()
+{
+	if (m_meter_thread) {
+		g_atomic_int_set (&m_meter_exit, 1);
+	}
+	m_meter_thread->join ();
+	m_meter_thread = 0;
+}
+
+void
 AudioEngine::start_metering_thread ()
 {
-	if(m_meter_thread == 0) {
-		m_meter_thread = Glib::Thread::create (sigc::mem_fun(this, &AudioEngine::meter_thread), false);
+	if (m_meter_thread == 0) {
+		m_meter_thread = Glib::Thread::create (sigc::mem_fun(this, &AudioEngine::meter_thread), true);
 	}
 }
 
@@ -377,10 +384,9 @@ void
 AudioEngine::meter_thread ()
 {
 	while (g_atomic_int_get(&m_meter_exit) != true) {
-        Glib::usleep (10000); /* 1/100th sec interval */
-        IO::update_meters ();
+		Glib::usleep (10000); /* 1/100th sec interval */
+		IO::update_meters ();
 	}
-	return;
 }
 
 void 

@@ -185,19 +185,22 @@ AudioStreamView::remove_region_view (boost::weak_ptr<Region> weak_r)
 		return;
 	}
 
-	for (list<CrossfadeView *>::iterator i = crossfade_views.begin(); i != crossfade_views.end();) {
-		list<CrossfadeView*>::iterator tmp;
-		
-		tmp = i;
-		++tmp;
-		
-		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(r);
-		if (ar && (*i)->crossfade.involves (ar)) {
-			delete *i;
-			crossfade_views.erase (i);
+	if (!_trackview.session().deletion_in_progress()) {
+
+		for (list<CrossfadeView *>::iterator i = crossfade_views.begin(); i != crossfade_views.end();) {
+			list<CrossfadeView*>::iterator tmp;
+			
+			tmp = i;
+			++tmp;
+			
+			boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(r);
+			if (ar && (*i)->crossfade.involves (ar)) {
+				delete *i;
+				crossfade_views.erase (i);
+			}
+			
+			i = tmp;
 		}
-		
-		i = tmp;
 	}
 
 	StreamView::remove_region_view(r);

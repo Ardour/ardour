@@ -247,8 +247,10 @@ class AudioEngine : public sigc::trackable
 
 	void meter_thread ();
 	void start_metering_thread ();
-    Glib::Thread*    m_meter_thread;
-    mutable gint     m_meter_exit;
+	void stop_metering_thread ();
+
+	Glib::Thread*    m_meter_thread;
+	static gint      m_meter_exit;
 };
 
 } // namespace ARDOUR

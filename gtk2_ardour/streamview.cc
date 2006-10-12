@@ -170,6 +170,10 @@ StreamView::remove_region_view (boost::weak_ptr<Region> weak_r)
 
 	boost::shared_ptr<Region> r (weak_r.lock());
 
+	if (!r) {
+		return;
+	}
+
 	for (list<RegionView *>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		if (((*i)->region()) == r) {
 			delete *i;

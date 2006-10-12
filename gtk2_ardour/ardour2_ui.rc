@@ -217,6 +217,7 @@ style "mute_button" = "small_button"
 	bg[ACTIVE] = { 1.0, 0.98, 0.53 }
 	
 	fg[PRELIGHT] = { 0, 0, 0 }
+	fg[ACTIVE] = { 0, 0, 0 }
 }
 
 
