@@ -239,13 +239,13 @@ ARDOUR_UI::setup_transport ()
 	goto_start_button.set_colors (colors);
 	goto_end_button.set_colors (colors);
 	
-	stop_button.set_size_request(30, -1);
-	roll_button.set_size_request(30, -1);
-	auto_loop_button.set_size_request(30, -1);
-	play_selection_button.set_size_request(30, -1);
-	goto_start_button.set_size_request(30, -1);
-	goto_end_button.set_size_request(30, -1);
-	rec_button.set_size_request(30, -1);
+	stop_button.set_size_request(27, -1);
+	roll_button.set_size_request(27, -1);
+	auto_loop_button.set_size_request(27, -1);
+	play_selection_button.set_size_request(27, -1);
+	goto_start_button.set_size_request(27, -1);
+	goto_end_button.set_size_request(27, -1);
+	rec_button.set_size_request(27, -1);
 	
 	Widget* w;
 
