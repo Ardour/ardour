@@ -35,6 +35,7 @@ static ControlProtocolDescriptor tranzport_descriptor = {
 	ptr : 0,
 	module : 0,
 	mandatory : 0,
+	supports_feedback : false,
 	probe : probe_tranzport_protocol,
 	initialize : new_tranzport_protocol,
 	destroy : delete_tranzport_protocol

@@ -55,7 +55,7 @@ void
 Editor::export_session()
 {
 	if (session) {
-		export_range (0, session->current_end_frame());
+		export_range (session->current_start_frame(), session->current_end_frame());
 	}
 }
 

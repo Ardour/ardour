@@ -3288,7 +3288,19 @@ Session::remove_redirect (Redirect* redirect)
 nframes_t
 Session::available_capture_duration ()
 {
-	const double scale = 4096.0 / sizeof (Sample);
+	float sample_bytes_on_disk;
+
+	switch (Config->get_native_file_data_format()) {
+	case FormatFloat:
+		sample_bytes_on_disk = 4;
+		break;
+
+	case FormatInt24:
+		sample_bytes_on_disk = 3;
+		break;
+	}
+
+	double scale = 4096.0 / sample_bytes_on_disk;
 
 	if (_total_free_4k_blocks * scale > (double) max_frames) {
 		return max_frames;

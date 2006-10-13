@@ -479,9 +479,35 @@ ARDOUR_UI::toggle_control_protocol (ControlProtocolInfo* cpi)
 }
 
 void
+ARDOUR_UI::toggle_control_protocol_feedback (ControlProtocolInfo* cpi, const char* group, const char* action)
+{
+	if (!session) {
+		/* this happens when we build the menu bar when control protocol support
+		   has been used in the past for some given protocol - the item needs
+		   to be made active, but there is no session yet.
+		*/
+		return;
+	}
+
+	if (cpi->protocol) {
+		Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (group, action);
+
+		if (act) {
+			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+			bool x = tact->get_active();
+
+			if (tact && x != cpi->protocol->get_feedback()) {
+				cpi->protocol->set_feedback (!x);
+			}
+		}
+	}
+}
+
+void
 ARDOUR_UI::build_control_surface_menu ()
 {
 	list<ControlProtocolInfo*>::iterator i;
+	bool with_feedback;
 
 	/* !!! this has to match the top level entry from ardour.menus */
 
@@ -501,6 +527,8 @@ ARDOUR_UI::build_control_surface_menu ()
 											  (bind (mem_fun (*this, &ARDOUR_UI::toggle_control_protocol), *i)));
 			
 			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+
+			with_feedback = false;
 			
 			if ((*i)->protocol || (*i)->requested) {
 				tact->set_active ();
@@ -509,6 +537,34 @@ ARDOUR_UI::build_control_surface_menu ()
 			ui += "<menuitem action='";
 			ui += action_name;
 			ui += "'/>\n";
+
+			if ((*i)->supports_feedback) {
+
+				string submenu_name = action_name;
+				
+				submenu_name += "SubMenu";
+
+				ActionManager::register_action (editor->editor_actions, submenu_name.c_str(), _("Controls"));
+
+				action_name += "Feedback";
+
+				Glib::RefPtr<Action> act = ActionManager::register_toggle_action (editor->editor_actions, action_name.c_str(), _("Feedback"),
+												  (bind (mem_fun (*this, &ARDOUR_UI::toggle_control_protocol_feedback), 
+													 *i, 
+													 "Editor",
+													 action_name.c_str())));
+				
+				ui += "<menu action='";
+				ui += submenu_name;
+				ui += "'>\n<menuitem action='";
+				ui += action_name;
+				ui += "'/>\n</menu>\n";
+				
+				if ((*i)->protocol) {
+					Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+					tact->set_active ((*i)->protocol->get_feedback ());
+				}
+			}
 		}
 	}
 

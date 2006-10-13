@@ -47,7 +47,6 @@ class ControlProtocol : public sigc::trackable, public Stateful, public BasicUI 
 
 	virtual int set_feedback (bool yn) { return 0; }
 	virtual bool get_feedback () const { return false; }
-	virtual bool supports_feedback () const { return false; }
 
 	sigc::signal<void> ActiveChanged;
 
@@ -114,6 +113,7 @@ extern "C" {
 	    void*       ptr;       /* protocol can store a value here */
 	    void*       module;    /* not for public access */
 	    int         mandatory; /* if non-zero, always load and do not make optional */
+	    bool        supports_feedback; /* if true, protocol has toggleable feedback mechanism */
 	    bool             (*probe)(ControlProtocolDescriptor*);
 	    ControlProtocol* (*initialize)(ControlProtocolDescriptor*,Session*);
 	    void             (*destroy)(ControlProtocolDescriptor*,ControlProtocol*);

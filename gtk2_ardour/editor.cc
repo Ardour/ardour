@@ -129,11 +129,11 @@ static const gchar *snap_mode_strings[] = {
 };
 
 static const gchar *zoom_focus_strings[] = {
-	N_("Focus Left"),
-	N_("Focus Right"),
-	N_("Focus Center"),
-	N_("Focus Playhead"),
- 	N_("Focus Edit Cursor"),
+	N_("Left"),
+	N_("Right"),
+	N_("Center"),
+	N_("Playhead"),
+ 	N_("Edit Cursor"),
 	0
 };
 
@@ -2589,6 +2589,7 @@ Editor::setup_toolbar ()
 	Gtkmm2ext::set_size_request_to_display_given_text (zoom_focus_selector, "Focus Center", 2+FUDGE, 0);
 	set_popdown_strings (zoom_focus_selector, internationalize (zoom_focus_strings));
 	zoom_focus_selector.signal_changed().connect (mem_fun(*this, &Editor::zoom_focus_selection_done));
+	ARDOUR_UI::instance()->tooltips().set_tip (zoom_focus_selector, _("Zoom focus"));
 
 	zoom_box.pack_start (zoom_focus_selector, false, false);
 

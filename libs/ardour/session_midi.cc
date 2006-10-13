@@ -1111,7 +1111,7 @@ Session::terminate_midi_thread ()
 void
 Session::poke_midi_thread ()
 {
-	char c;
+	static char c = 0;
 
 	if (write (midi_request_pipe[1], &c, 1) != 1) {
 		error << string_compose(_("cannot send signal to midi thread! (%1)"), strerror (errno)) << endmsg;

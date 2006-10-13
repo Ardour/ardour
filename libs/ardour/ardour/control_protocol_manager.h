@@ -23,6 +23,7 @@ struct ControlProtocolInfo {
     std::string path;
     bool requested;
     bool mandatory;
+    bool supports_feedback;
     XMLNode* state;
 
     ControlProtocolInfo() : descriptor (0), protocol (0), state (0) {}

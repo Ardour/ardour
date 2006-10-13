@@ -34,7 +34,6 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 
 	int set_feedback (bool yn);
 	bool get_feedback () const;
-	bool supports_feedback () const { return true; }
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);

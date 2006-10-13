@@ -42,6 +42,7 @@ static ControlProtocolDescriptor generic_midi_descriptor = {
 	ptr : 0,
 	module : 0,
 	mandatory : 0,
+	supports_feedback : true,
 	probe : probe_generic_midi_protocol,
 	initialize : new_generic_midi_protocol,
 	destroy : delete_generic_midi_protocol

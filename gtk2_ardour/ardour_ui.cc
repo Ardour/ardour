@@ -564,21 +564,11 @@ ARDOUR_UI::update_disk_space()
 		int secs;
 		nframes_t fr = session->frame_rate();
 		
-		if (session->actively_recording()){
-			
-			rec_enabled_diskstreams = 0;
-			session->foreach_route (this, &ARDOUR_UI::count_recenabled_diskstreams);
-			
-			if (rec_enabled_diskstreams) {
-				frames /= rec_enabled_diskstreams;
-			}
-			
-		} else {
-			
-			/* hmmm. shall we divide by the route count? or the diskstream count?
-			   or what? for now, do nothing ...
-			*/
-			
+		rec_enabled_diskstreams = 0;
+		session->foreach_route (this, &ARDOUR_UI::count_recenabled_diskstreams);
+		
+		if (rec_enabled_diskstreams) {
+			frames /= rec_enabled_diskstreams;
 		}
 		
 		hrs  = frames / (fr * 3600);

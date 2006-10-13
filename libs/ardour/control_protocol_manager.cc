@@ -189,6 +189,7 @@ ControlProtocolManager::control_protocol_discover (string path)
 			cpi->protocol = 0;
 			cpi->requested = false;
 			cpi->mandatory = descriptor->mandatory;
+			cpi->supports_feedback = descriptor->supports_feedback;
 			cpi->state = 0;
 			
 			control_protocol_info.push_back (cpi);
