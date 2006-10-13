@@ -1687,7 +1687,7 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 
 				} else {
 
-					std::string session_path = new_session_dialog->session_folder();
+					session_path = new_session_dialog->session_folder();
 					
 				}
 			
