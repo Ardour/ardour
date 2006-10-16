@@ -271,7 +271,7 @@ rcu = gtkardour.Program(target = 'rcu', source = rcu_files)
 tt = gtkmmtests.Program(target = 'tt', source = tt_files)
 
 my_subst_dict = { }
-my_subst_dict['%INSTALL_PREFIX%'] = install_prefix
+my_subst_dict['%INSTALL_PREFIX%'] = final_prefix
 
 ardoursh = env.SubstInFile ('ardour.sh','ardour.sh.in', SUBST_DICT = my_subst_dict);
 env.AddPostAction (ardoursh, Chmod ('$TARGET', 0755))

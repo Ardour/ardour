@@ -585,12 +585,12 @@ ARDOUR_UI::map_output_auto_connect ()
 void
 ARDOUR_UI::map_meter_falloff ()
 {
-	const char* action = 0;
+	const char* action = X_("MeterFalloffMedium");
 
 	/* XXX hack alert. Fix this. Please */
 
 	float val = Config->get_meter_falloff ();
-	MeterFalloff code = (MeterFalloff) (floor (val));
+	MeterFalloff code = (MeterFalloff) (int) (floor (val));
 
 	switch (code) {
 	case MeterFalloffOff:
@@ -629,12 +629,12 @@ ARDOUR_UI::map_meter_falloff ()
 void
 ARDOUR_UI::map_meter_hold ()
 {
-	const char* action = 0;
+	const char* action = X_("MeterHoldMedium");
 
 	/* XXX hack alert. Fix this. Please */
 
 	float val = Config->get_meter_hold ();
-	MeterHold code = (MeterHold) (floor (val));
+	MeterHold code = (MeterHold) (int) (floor (val));
 
 	switch (code) {
 	case MeterHoldOff:

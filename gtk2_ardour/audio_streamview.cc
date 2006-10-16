@@ -126,7 +126,7 @@ AudioStreamView::set_amplitude_above_axis (gdouble app)
 }
 
 void
-AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait_for_waves)
+AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait_for_waves, bool watch_death)
 {
 	AudioRegionView *region_view;
 
@@ -167,9 +167,10 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 
 	region_view->set_waveform_visible(_trackview.editor.show_waveforms());
 
-	/* catch regionview going away */
-
-	region->GoingAway.connect (bind (mem_fun (*this, &AudioStreamView::remove_region_view), boost::weak_ptr<Region> (r)));
+	if (watch_death) {
+		/* catch regionview going away */
+		region->GoingAway.connect (bind (mem_fun (*this, &AudioStreamView::remove_region_view), boost::weak_ptr<Region> (r)));
+	}
 
 	RegionViewAdded (region_view);
 }
@@ -604,7 +605,7 @@ AudioStreamView::update_rec_regions ()
 
 						if (origlen == 1) {
 							/* our special initial length */
-							add_region_view_internal (region, false);
+							add_region_view_internal (region, false, false);
 						}
 
 						/* also update rect */
@@ -629,7 +630,7 @@ AudioStreamView::update_rec_regions ()
 						
 						if (origlen == 1) {
 							/* our special initial length */
-							add_region_view_internal (region, false);
+							add_region_view_internal (region, false, false);
 						}
 						
 						/* also hide rect */
