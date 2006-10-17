@@ -30,15 +30,34 @@
 using namespace std;
 using namespace sigc;
 
+/* grrr, strict C++ says that static member functions are not C functions, but we also want
+   to be able to pack this into a sigc::ptr_fun and not sigc::mem_fun, so we have to make
+   it a genuine function rather than a member.
+*/
+
+static void command_death (UndoTransaction* ut, Command* c)
+{
+	if (ut->clearing()) {
+		return;
+	}
+
+	ut->remove_command (c);
+
+	if (ut->empty()) {
+		delete ut;
+	}
+}
+
+
 UndoTransaction::UndoTransaction ()
 {
-	clearing = false;
+	_clearing = false;
 }
 
 UndoTransaction::UndoTransaction (const UndoTransaction& rhs)
 {
 	_name = rhs._name;
-	clearing = false;
+	_clearing = false;
 	clear ();
 	actions.insert(actions.end(),rhs.actions.begin(),rhs.actions.end());
 }
@@ -62,31 +81,31 @@ UndoTransaction::operator= (const UndoTransaction& rhs)
 void
 UndoTransaction::add_command (Command *const action)
 {
-	action->GoingAway.connect (bind (mem_fun (*this, &UndoTransaction::remove_command), action));
+	action->GoingAway.connect (bind (sigc::ptr_fun (command_death), this, const_cast<Command*>(action)));
 	actions.push_back (action);
 }
 
 void
 UndoTransaction::remove_command (Command* const action)
 {
-	if (clearing) {
-		return;
-	}
 	actions.remove (action);
-	if (actions.empty()) {
-		delete this;
-	}
+}
+
+bool
+UndoTransaction::empty () const
+{
+	return actions.empty();
 }
 
 void
 UndoTransaction::clear ()
 {
-	clearing = true;
+	_clearing = true;
 	for (list<Command*>::iterator i = actions.begin(); i != actions.end(); ++i) {
 		delete *i;
 	}
 	actions.clear ();
-	clearing = false;
+	_clearing = false;
 }
 
 void
@@ -131,7 +150,7 @@ XMLNode &UndoTransaction::get_state()
 
 UndoHistory::UndoHistory ()
 {
-	clearing = false;
+	_clearing = false;
 }
 
 void
@@ -146,7 +165,7 @@ UndoHistory::add (UndoTransaction* const ut)
 void
 UndoHistory::remove (UndoTransaction* const ut)
 {
-	if (clearing) {
+	if (_clearing) {
 		return;
 	}
 
@@ -185,17 +204,17 @@ UndoHistory::redo (unsigned int n)
 void
 UndoHistory::clear_redo ()
 {
-	clearing = true;
+	_clearing = true;
 	RedoList.clear ();
-	clearing = false;
+	_clearing = false;
 }
 
 void
 UndoHistory::clear_undo ()
 {
-	clearing = true;
+	_clearing = true;
 	UndoList.clear ();
-	clearing = false;
+	_clearing = false;
 }
 
 void
