@@ -310,9 +310,7 @@ TimeAxisViewItem::set_duration (nframes_t dur, void* src)
 
 	item_duration = dur;
 	
-	double pixel_width = trackview.editor.frame_to_pixel (dur);
-
-	reset_width_dependent_items (pixel_width);
+	reset_width_dependent_items (trackview.editor.frame_to_pixel (dur));
 	
 	DurationChanged (dur, src) ; /* EMIT_SIGNAL */
 	return true;
@@ -851,7 +849,7 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 				}
 			} else {
 				name_highlight->show();
-				if (name_text) {
+				if (name_text && !get_item_name().empty()) {
 					name_text->show();
 					reset_name_width (pixel_width);
 				}

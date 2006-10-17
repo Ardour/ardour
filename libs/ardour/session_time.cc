@@ -26,6 +26,7 @@
 #include <ardour/timestamps.h>
 
 #include <pbd/error.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/ardour.h>
 #include <ardour/configuration.h>

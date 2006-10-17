@@ -133,11 +133,6 @@ RegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	set_height (trackview.height);
 
-	region_muted ();
-	region_sync_changed ();
-	region_resized (BoundsChanged);
-	region_locked ();
-
 	_region->StateChanged.connect (mem_fun(*this, &RegionView::region_changed));
 
 	group->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_event), group, this));
@@ -235,8 +230,6 @@ RegionView::region_resized (Change what_changed)
 		set_duration (_region->length(), 0);
 
 		unit_length = _region->length() / samples_per_unit;
-		
-		reset_width_dependent_items (unit_length);
 		
  		for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 

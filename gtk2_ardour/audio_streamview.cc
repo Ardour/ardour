@@ -126,7 +126,7 @@ AudioStreamView::set_amplitude_above_axis (gdouble app)
 }
 
 void
-AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait_for_waves, bool watch_death)
+AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait_for_waves)
 {
 	AudioRegionView *region_view;
 
@@ -167,10 +167,8 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 
 	region_view->set_waveform_visible(_trackview.editor.show_waveforms());
 
-	if (watch_death) {
-		/* catch regionview going away */
-		region->GoingAway.connect (bind (mem_fun (*this, &AudioStreamView::remove_region_view), boost::weak_ptr<Region> (r)));
-	}
+	/* catch regionview going away */
+	region->GoingAway.connect (bind (mem_fun (*this, &AudioStreamView::remove_region_view), boost::weak_ptr<Region> (r)));
 
 	RegionViewAdded (region_view);
 }
@@ -510,8 +508,15 @@ AudioStreamView::setup_rec_box ()
 			
 			/* remove temp regions */
 
-			for (list<boost::shared_ptr<Region> >::iterator iter = rec_regions.begin(); iter != rec_regions.end(); ++iter) {
+			for (list<boost::shared_ptr<Region> >::iterator iter = rec_regions.begin(); iter != rec_regions.end(); ) {
+				list<boost::shared_ptr<Region> >::iterator tmp;
+
+				tmp = iter;
+				++tmp;
+
 				(*iter)->drop_references ();
+
+				iter = tmp;
 			}
 				
 			rec_regions.clear();
@@ -605,7 +610,7 @@ AudioStreamView::update_rec_regions ()
 
 						if (origlen == 1) {
 							/* our special initial length */
-							add_region_view_internal (region, false, false);
+							add_region_view_internal (region, false);
 						}
 
 						/* also update rect */
@@ -630,7 +635,7 @@ AudioStreamView::update_rec_regions ()
 						
 						if (origlen == 1) {
 							/* our special initial length */
-							add_region_view_internal (region, false, false);
+							add_region_view_internal (region, false);
 						}
 						
 						/* also hide rect */

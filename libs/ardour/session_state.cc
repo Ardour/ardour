@@ -1291,6 +1291,13 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 		nchans = atoi (prop->value().c_str());
 	}
 
+
+	if ((prop = node.property ("name")) == 0) {
+		cerr << "no name for this region\n";
+		abort ();
+	}
+	cerr << "name of this region = " << prop->value() << endl;
+
 	
 	if ((prop = node.property (X_("source-0"))) == 0) {
 		if ((prop = node.property ("source")) == 0) {

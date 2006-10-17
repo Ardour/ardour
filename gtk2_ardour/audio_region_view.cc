@@ -161,8 +161,6 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 		gain_line->show ();
 	}
 
-	reset_width_dependent_items ((double) _region->length() / samples_per_unit);
-
 	gain_line->reset ();
 
 	set_height (trackview.height);
