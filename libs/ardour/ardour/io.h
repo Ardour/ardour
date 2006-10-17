@@ -273,7 +273,9 @@ public:
 	Connection*         _output_connection;
 	bool                 no_panner_reset;
 	XMLNode*             deferred_state;
-	DataType        _default_type;
+	DataType            _default_type;
+	bool                _ignore_gain_on_deliver;
+	
 
 	virtual void set_deferred_state() {}
 

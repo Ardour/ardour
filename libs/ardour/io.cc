@@ -125,7 +125,8 @@ IO::IO (Session& s, string name,
 	deferred_state = 0;
 
 	apply_gain_automation = false;
-
+	_ignore_gain_on_deliver = false;
+	
 	_gain_automation_state = Off;
 	_gain_automation_style = Absolute;
 
@@ -431,7 +432,7 @@ IO::deliver_output_no_pan (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nfr
 	gain_t dg;
 	gain_t old_gain = _gain;
 
-	if (apply_gain_automation) {
+	if (apply_gain_automation || _ignore_gain_on_deliver) {
 
 		/* gain has already been applied by automation code. do nothing here except
 		   speed quietning.
@@ -498,7 +499,7 @@ IO::deliver_output_no_pan (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nfr
 		_gain = dg;
 	}
 
-	if (apply_gain_automation) {
+	if (apply_gain_automation || _ignore_gain_on_deliver) {
 		_gain = old_gain;
 	}
 }

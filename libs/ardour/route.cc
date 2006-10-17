@@ -89,7 +89,8 @@ Route::init ()
 	_declickable = false;
 	_pending_declick = true;
 	_remote_control_id = 0;
-
+	_ignore_gain_on_deliver = true;
+	
 	_edit_group = 0;
 	_mix_group = 0;
 
