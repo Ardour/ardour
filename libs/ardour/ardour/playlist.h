@@ -168,7 +168,7 @@ class Playlist : public StateManager, public PBD::StatefulDestructible {
 
 	friend class RegionLock;
 
-	RegionList       regions;
+	RegionList       regions;  /* the current list of regions in the playlist */
 	string          _name;
 	Session&        _session;
 	mutable gint    block_notifications;
@@ -221,7 +221,7 @@ class Playlist : public StateManager, public PBD::StatefulDestructible {
 
 	void mark_session_dirty();
 
-	void region_changed_proxy (Change, boost::shared_ptr<Region>);
+	void region_changed_proxy (Change, boost::weak_ptr<Region>);
 	virtual bool region_changed (Change, boost::shared_ptr<Region>);
 
 	void region_bounds_changed (Change, boost::shared_ptr<Region>);

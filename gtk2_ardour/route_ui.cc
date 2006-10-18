@@ -26,6 +26,8 @@
 
 #include <ardour/route_group.h>
 #include <pbd/memento_command.h>
+#include <pbd/stacktrace.h>
+#include <pbd/shiva.h>
 
 #include "route_ui.h"
 #include "keyboard.h"
@@ -43,7 +45,6 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
 using namespace PBD;
-
 
 RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, const char* m_name,
 		  const char* s_name, const char* r_name)
@@ -65,7 +66,8 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 		set_color (unique_random_color());
 	}
 
-	_route->GoingAway.connect (mem_fun (*this, &RouteUI::route_removed));
+	new Shiva<Route,RouteUI> (*_route, *this);
+
 	_route->active_changed.connect (mem_fun (*this, &RouteUI::route_active_changed));
 
         mute_button = manage (new BindableToggleButton (_route->mute_control(), m_name ));
@@ -95,6 +97,7 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 
 RouteUI::~RouteUI()
 {
+	GoingAway (); /* EMIT SIGNAL */
 	delete mute_menu;
 }
 
@@ -727,13 +730,6 @@ RouteUI::idle_remove_this_route (RouteUI *rui)
 {
 	rui->_session.remove_route (rui->_route);
 	return FALSE;
-}
-
-void
-RouteUI::route_removed ()
-{
-	ENSURE_GUI_THREAD(mem_fun (*this, &RouteUI::route_removed));
-	delete this;
 }
 
 void

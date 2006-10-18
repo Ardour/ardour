@@ -126,7 +126,6 @@ AudioPlaylist::AudioPlaylist (const AudioPlaylist& other, nframes_t start, nfram
 AudioPlaylist::~AudioPlaylist ()
 {
 	set<Crossfade*> all_xfades;
-	set<Region*> all_regions;
 
   	GoingAway (); /* EMIT SIGNAL */
 

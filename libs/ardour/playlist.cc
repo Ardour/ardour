@@ -532,7 +532,8 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, nframes_t posit
 		}
 	}
 
-	region->StateChanged.connect (sigc::bind (mem_fun (this, &Playlist::region_changed_proxy), region));
+	region->StateChanged.connect (sigc::bind (mem_fun (this, &Playlist::region_changed_proxy), 
+						  boost::weak_ptr<Region> (region)));
 }
 
 void
@@ -1148,8 +1149,14 @@ Playlist::region_bounds_changed (Change what_changed, boost::shared_ptr<Region> 
 }
 
 void
-Playlist::region_changed_proxy (Change what_changed, boost::shared_ptr<Region> region)
+Playlist::region_changed_proxy (Change what_changed, boost::weak_ptr<Region> weak_region)
 {
+	boost::shared_ptr<Region> region (weak_region.lock());
+
+	if (!region) {
+		return;
+	}
+
 	/* this makes a virtual call to the right kind of playlist ... */
 
 	region_changed (what_changed, region);
@@ -1373,21 +1380,15 @@ Playlist::set_state (const XMLNode& node)
 		
 		if (child->name() == "Region") {
 
-#if 0
 			if ((prop = child->property ("id")) == 0) {
 				error << _("region state node has no ID, ignored") << endmsg;
 				continue;
 			}
 			
-			ID id = prop->value ();
-
-			if ((region = region_by_id (id)) == 0) {
-#endif
-				if ((region = RegionFactory::create (_session, *child, true)) == 0) {
-					error << _("Playlist: cannot create region from state file") << endmsg;
-					continue;
-				}
-//			}
+			if ((region = RegionFactory::create (_session, *child, true)) == 0) {
+				error << _("Playlist: cannot create region from state file") << endmsg;
+				continue;
+			}
 
 			add_region (region, region->position(), 1.0, false);
 

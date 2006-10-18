@@ -951,8 +951,8 @@ Editor::scroll_forward (float pages)
 		}
 	}
 
-	if (ULONG_MAX - cnt < leftmost_frame) {
-		frame = ULONG_MAX - cnt;
+	if (max_frames - cnt < leftmost_frame) {
+		frame = max_frames - cnt;
 	} else {
 		frame = leftmost_frame + cnt;
 	}

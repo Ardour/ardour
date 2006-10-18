@@ -291,8 +291,6 @@
                <menuitem action='SendMTC'/>
                <menuitem action='SendMMC'/>
                <menuitem action='UseMMC'/>
-               <menuitem action='SendMIDIfeedback'/>
-               <menuitem action='UseMIDIcontrol'/>
                <separator/>
                <menuitem action='StopPluginsWithTransport'/>
                <menuitem action='DoNotRunPluginsWhileRecording'/>
