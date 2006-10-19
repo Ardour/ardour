@@ -254,7 +254,7 @@ AudioStreamView::add_crossfade (Crossfade *crossfade)
 	/* first see if we already have a CrossfadeView for this Crossfade */
 
 	for (list<CrossfadeView *>::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
-		if (&(*i)->crossfade == crossfade) {
+		if ((*i)->crossfade == *crossfade) {
 			if (!crossfades_visible) {
 				(*i)->hide();
 			} else {
@@ -313,7 +313,6 @@ AudioStreamView::redisplay_diskstream ()
 	list<RegionView *>::iterator i, tmp;
 	list<CrossfadeView*>::iterator xi, tmpx;
 
-	
 	for (i = region_views.begin(); i != region_views.end(); ++i) {
 		(*i)->set_valid (false);
 	}
@@ -327,6 +326,7 @@ AudioStreamView::redisplay_diskstream ()
 
 	if (_trackview.is_audio_track()) {
 		_trackview.get_diskstream()->playlist()->foreach_region (static_cast<StreamView*>(this), &StreamView::add_region_view);
+
 		AudioPlaylist* apl = dynamic_cast<AudioPlaylist*>(_trackview.get_diskstream()->playlist());
 		if (apl)
 			apl->foreach_crossfade (this, &AudioStreamView::add_crossfade);
@@ -358,7 +358,9 @@ AudioStreamView::redisplay_diskstream ()
 
 	/* now fix layering */
 
-	playlist_modified ();
+	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+		region_layered (*i);
+	}
 }
 
 void

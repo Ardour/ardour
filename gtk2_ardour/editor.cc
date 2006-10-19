@@ -3074,9 +3074,6 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 
 		switch (clicked_regionview->region()->coverage (first_frame, last_frame)) {
 		case OverlapNone:
-			cerr << "no overlap, first = " << first_frame << " last = " << last_frame << " region = " 
-			     << clicked_regionview->region()->first_frame() << " .. " << clicked_regionview->region()->last_frame() << endl;
-
 			if (last_frame < clicked_regionview->region()->first_frame()) {
 				first_frame = last_frame;
 				last_frame = clicked_regionview->region()->last_frame();
@@ -3087,9 +3084,6 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 			break;
 
 		case OverlapExternal:
-			cerr << "external overlap, first = " << first_frame << " last = " << last_frame << " region = " 
-			     << clicked_regionview->region()->first_frame() << " .. " << clicked_regionview->region()->last_frame() << endl;
-
 			if (last_frame < clicked_regionview->region()->first_frame()) {
 				first_frame = last_frame;
 				last_frame = clicked_regionview->region()->last_frame();
@@ -3100,9 +3094,6 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 			break;
 
 		case OverlapInternal:
-			cerr << "internal overlap, first = " << first_frame << " last = " << last_frame << " region = " 
-			     << clicked_regionview->region()->first_frame() << " .. " << clicked_regionview->region()->last_frame() << endl;
-
 			if (last_frame < clicked_regionview->region()->first_frame()) {
 				first_frame = last_frame;
 				last_frame = clicked_regionview->region()->last_frame();

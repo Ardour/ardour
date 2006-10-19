@@ -64,7 +64,6 @@ Region::Region (nframes_t start, nframes_t length, const string& name, layer_t l
 	_length = length; 
 	_position = 0; 
 	_layer = layer;
-	_current_state_id = 0;
 	_read_data_count = 0;
 	_first_edit = EditChangesNothing;
 	_last_layer_op = 0;
@@ -90,7 +89,6 @@ Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes
 	_position = 0; 
 	_layer = layer; 
 	_flags = Flag (flags & ~(Locked|WholeFile|Hidden));
-	_current_state_id = 0;
 	_first_edit = EditChangesNothing;
 	_last_layer_op = 0;
 }
@@ -120,7 +118,6 @@ Region::Region (boost::shared_ptr<const Region> other)
 	_position = other->_position; 
 	_layer = other->_layer; 
 	_flags = Flag (other->_flags & ~Locked);
-	_current_state_id = 0;
 	_last_layer_op = other->_last_layer_op;
 }
 
@@ -137,7 +134,6 @@ Region::Region (const XMLNode& node)
 	_position = 0; 
 	_layer = 0;
 	_flags = Flag (0);
-	_current_state_id = 0;
 	_first_edit = EditChangesNothing;
 
 	if (set_state (node)) {
@@ -157,69 +153,7 @@ Region::set_playlist (Playlist* pl)
 }
 
 void
-Region::store_state (RegionState& state) const
-{
-	state._start = _start;
-	state._length = _length;
-	state._position = _position;
-	state._flags = _flags;
-	state._sync_position = _sync_position;
-	state._layer = _layer;
-	state._name = _name;
-	state._first_edit = _first_edit;
-}	
-
-Change
-Region::restore_and_return_flags (RegionState& state)
-{
-	Change what_changed = Change (0);
-
-	{
-		Glib::Mutex::Lock lm (lock);
-		
-		if (_start != state._start) {
-			what_changed = Change (what_changed|StartChanged);	
-			_start = state._start;
-		}
-		if (_length != state._length) {
-			what_changed = Change (what_changed|LengthChanged);
-			_length = state._length;
-		}
-		if (_position != state._position) {
-			what_changed = Change (what_changed|PositionChanged);
-			_position = state._position;
-		} 
-		if (_sync_position != state._sync_position) {
-			_sync_position = state._sync_position;
-			what_changed = Change (what_changed|SyncOffsetChanged);
-		}
-		if (_layer != state._layer) {
-			what_changed = Change (what_changed|LayerChanged);
-			_layer = state._layer;
-		}
-
-		uint32_t old_flags = _flags;
-		_flags = Flag (state._flags);
-		
-		if ((old_flags ^ state._flags) & Muted) {
-			what_changed = Change (what_changed|MuteChanged);
-		}
-		if ((old_flags ^ state._flags) & Opaque) {
-			what_changed = Change (what_changed|OpacityChanged);
-		}
-		if ((old_flags ^ state._flags) & Locked) {
-			what_changed = Change (what_changed|LockChanged);
-		}
-
-		_first_edit = state._first_edit;
-	}
-
-	return what_changed;
-}
-
-void
 Region::set_name (string str)
-
 {
 	if (_name != str) {
 		_name = str; 
@@ -257,10 +191,6 @@ Region::set_length (nframes_t len, void *src)
 
 		if (!_frozen) {
 			recompute_at_end ();
-
-			char buf[64];
-			snprintf (buf, sizeof (buf), "length set to %u", len);
-			save_state (buf);
 		}
 
 		send_change (LengthChanged);
@@ -328,12 +258,6 @@ Region::set_position (nframes_t pos, void *src)
 		if (max_frames - _length < _position) {
 			_length = max_frames - _position;
 		}
-
-		if (!_frozen) {
-			char buf[64];
-			snprintf (buf, sizeof (buf), "position set to %u", pos);
-			save_state (buf);
-		}
 	}
 
 	/* do this even if the position is the same. this helps out
@@ -352,12 +276,6 @@ Region::set_position_on_top (nframes_t pos, void *src)
 
 	if (_position != pos) {
 		_position = pos;
-
-		if (!_frozen) {
-			char buf[64];
-			snprintf (buf, sizeof (buf), "position set to %u", pos);
-			save_state (buf);
-		}
 	}
 
 	_playlist->raise_region_to_top (boost::shared_ptr<Region>(this));
@@ -394,12 +312,6 @@ Region::nudge_position (long n, void *src)
 		}
 	}
 
-	if (!_frozen) {
-		char buf[64];
-		snprintf (buf, sizeof (buf), "position set to %u", _position);
-		save_state (buf);
-	}
-
 	send_change (PositionChanged);
 }
 
@@ -423,12 +335,6 @@ Region::set_start (nframes_t pos, void *src)
 		_start = pos;
 		_flags = Region::Flag (_flags & ~WholeFile);
 		first_edit ();
-
-		if (!_frozen) {
-			char buf[64];
-			snprintf (buf, sizeof (buf), "start set to %u", pos);
-			save_state (buf);
-		}
 
 		send_change (StartChanged);
 	}
@@ -479,12 +385,6 @@ Region::trim_start (nframes_t new_position, void *src)
 	_start = new_start;
 	_flags = Region::Flag (_flags & ~WholeFile);
 	first_edit ();
-
-	if (!_frozen) {
-		char buf[64];
-		snprintf (buf, sizeof (buf), "slipped start to %u", _start);
-		save_state (buf);
-	}
 
 	send_change (StartChanged);
 }
@@ -619,13 +519,6 @@ Region::trim_to_internal (nframes_t position, nframes_t length, void *src)
 	} 
 
 	if (what_changed) {
-		
-		if (!_frozen) {
-			char buf[64];
-			snprintf (buf, sizeof (buf), "trimmed to %u-%u", _position, _position+_length-1);
-			save_state (buf);
-		}
-
 		send_change (what_changed);
 	}
 }	
@@ -656,16 +549,6 @@ Region::set_muted (bool yn)
 			_flags = Flag (_flags & ~Muted);
 		}
 
-		if (!_frozen) {
-			char buf[64];
-			if (yn) {
-				snprintf (buf, sizeof (buf), "muted");
-			} else {
-				snprintf (buf, sizeof (buf), "unmuted");
-			}
-			save_state (buf);
-		}
-
 		send_change (MuteChanged);
 	}
 }
@@ -674,16 +557,10 @@ void
 Region::set_opaque (bool yn)
 {
 	if (opaque() != yn) {
-		if (!_frozen) {
-			char buf[64];
-			if (yn) {
-				snprintf (buf, sizeof (buf), "opaque");
-				_flags = Flag (_flags|Opaque);
-			} else {
-				snprintf (buf, sizeof (buf), "translucent");
-				_flags = Flag (_flags & ~Opaque);
-			}
-			save_state (buf);
+		if (yn) {
+			_flags = Flag (_flags|Opaque);
+		} else {
+			_flags = Flag (_flags & ~Opaque);
 		}
 		send_change (OpacityChanged);
 	}
@@ -693,16 +570,10 @@ void
 Region::set_locked (bool yn)
 {
 	if (locked() != yn) {
-		if (!_frozen) {
-			char buf[64];
-			if (yn) {
-				snprintf (buf, sizeof (buf), "locked");
-				_flags = Flag (_flags|Locked);
-			} else {
-				snprintf (buf, sizeof (buf), "unlocked");
-				_flags = Flag (_flags & ~Locked);
-			}
-			save_state (buf);
+		if (yn) {
+			_flags = Flag (_flags|Locked);
+		} else {
+			_flags = Flag (_flags & ~Locked);
 		}
 		send_change (LockChanged);
 	}
@@ -721,10 +592,7 @@ Region::set_sync_position (nframes_t absolute_pos)
 		_flags = Flag (_flags|SyncMarked);
 
 		if (!_frozen) {
-			char buf[64];
 			maybe_uncopy ();
-			snprintf (buf, sizeof (buf), "sync point set to %u", _sync_position);
-			save_state (buf);
 		}
 		send_change (SyncOffsetChanged);
 	}
@@ -738,7 +606,6 @@ Region::clear_sync_position ()
 
 		if (!_frozen) {
 			maybe_uncopy ();
-			save_state ("sync point removed");
 		}
 		send_change (SyncOffsetChanged);
 	}
@@ -842,12 +709,6 @@ Region::set_layer (layer_t l)
 	if (_layer != l) {
 		_layer = l;
 		
-		if (!_frozen) {
-			char buf[64];
-			snprintf (buf, sizeof (buf), "layer set to %" PRIu32, _layer);
-			save_state (buf);
-		}
-		
 		send_change (LayerChanged);
 	}
 }
@@ -857,7 +718,8 @@ Region::state (bool full_state)
 {
 	XMLNode *node = new XMLNode ("Region");
 	char buf[64];
-	
+	char* fe;
+
 	_id.print (buf, sizeof (buf));
 	node->add_property ("id", buf);
 	node->add_property ("name", _name);
@@ -867,6 +729,20 @@ Region::state (bool full_state)
 	node->add_property ("length", buf);
 	snprintf (buf, sizeof (buf), "%u", _position);
 	node->add_property ("position", buf);
+	
+	switch (_first_edit) {
+	case EditChangesNothing:
+		fe = X_("nothing");
+		break;
+	case EditChangesName:
+		fe = X_("name");
+		break;
+	case EditChangesID:
+		fe = X_("id");
+		break;
+	}
+
+	node->add_property ("first_edit", fe);
 
 	/* note: flags are stored by derived classes */
 
@@ -885,54 +761,83 @@ Region::get_state ()
 }
 
 int
-Region::set_state (const XMLNode& node)
+Region::set_live_state (const XMLNode& node, Change& what_changed, bool send)
 {
 	const XMLNodeList& nlist = node.children();
 	const XMLProperty *prop;
+	nframes_t val;
 
-	if (_extra_xml) {
-		delete _extra_xml;
-		_extra_xml = 0;
-	}
-
-	if ((prop = node.property ("id")) == 0) {
-		error << _("Session: XMLNode describing a Region is incomplete (no id)") << endmsg;
-		return -1;
-	}
-
-	_id = prop->value();
+	/* this is responsible for setting those aspects of Region state 
+	   that are mutable after construction.
+	*/
 
 	if ((prop = node.property ("name")) == 0) {
-		error << _("Session: XMLNode describing a Region is incomplete (no name)") << endmsg;
+		error << _("XMLNode describing a Region is incomplete (no name)") << endmsg;
 		return -1;
 	}
 
 	_name = prop->value();
 
 	if ((prop = node.property ("start")) != 0) {
-		sscanf (prop->value().c_str(), "%" PRIu32, &_start);
+		sscanf (prop->value().c_str(), "%" PRIu32, &val);
+		if (val != _start) {
+			what_changed = Change (what_changed|StartChanged);	
+			_start = val;
+		}
+	} else {
+		_start = 0;
 	}
 
 	if ((prop = node.property ("length")) != 0) {
-		sscanf (prop->value().c_str(), "%" PRIu32, &_length);
+		sscanf (prop->value().c_str(), "%" PRIu32, &val);
+		if (val != _length) {
+			what_changed = Change (what_changed|LengthChanged);
+			_length = val;
+		}
+	} else {
+		_length = 1;
 	}
 
 	if ((prop = node.property ("position")) != 0) {
-		sscanf (prop->value().c_str(), "%" PRIu32, &_position);
+		sscanf (prop->value().c_str(), "%" PRIu32, &val);
+		if (val != _position) {
+			what_changed = Change (what_changed|PositionChanged);
+			_position = val;
+		}
+	} else {
+		_position = 0;
 	}
 
 	if ((prop = node.property ("layer")) != 0) {
-		_layer = (layer_t) atoi (prop->value().c_str());
+		layer_t x;
+		x = (layer_t) atoi (prop->value().c_str());
+		if (x != _layer) {
+			what_changed = Change (what_changed|LayerChanged);
+			_layer = x;
+		}
+	} else {
+		_layer = 0;
 	}
 
-	/* note: derived classes set flags */
-
 	if ((prop = node.property ("sync-position")) != 0) {
-		sscanf (prop->value().c_str(), "%" PRIu32, &_sync_position);
+		sscanf (prop->value().c_str(), "%" PRIu32, &val);
+		if (val != _sync_position) {
+			what_changed = Change (what_changed|SyncOffsetChanged);
+			_sync_position = val;
+		}
 	} else {
 		_sync_position = _start;
 	}
+
+	/* XXX FIRST EDIT !!! */
 	
+	/* note: derived classes set flags */
+
+	if (_extra_xml) {
+		delete _extra_xml;
+		_extra_xml = 0;
+	}
+
 	for (XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		
 		XMLNode *child;
@@ -945,7 +850,31 @@ Region::set_state (const XMLNode& node)
 		}
 	}
 
+	if (send) {
+		send_change (what_changed);
+	}
+
+	return 0;
+}
+
+int
+Region::set_state (const XMLNode& node)
+{
+	const XMLProperty *prop;
+	Change what_changed = Change (0);
+
+	/* ID is not allowed to change, ever */
+
+	if ((prop = node.property ("id")) == 0) {
+		error << _("Session: XMLNode describing a Region is incomplete (no id)") << endmsg;
+		return -1;
+	}
+
+	_id = prop->value();
+	
 	_first_edit = EditChangesNothing;
+	
+	set_live_state (node, what_changed, true);
 
 	return 0;
 }
@@ -985,7 +914,6 @@ Region::thaw (const string& why)
 		recompute_at_end ();
 	}
 		
-	save_state (why);
 	StateChanged (what_changed);
 }
 
@@ -1000,7 +928,7 @@ Region::send_change (Change what_changed)
 		} 
 	}
 
-	StateManager::send_state_changed (what_changed);
+	StateChanged (what_changed);
 }
 
 void

@@ -58,14 +58,6 @@ Change AudioRegion::EnvelopeActiveChanged = ARDOUR::new_change();
 Change AudioRegion::ScaleAmplitudeChanged = ARDOUR::new_change();
 Change AudioRegion::EnvelopeChanged       = ARDOUR::new_change();
 
-AudioRegionState::AudioRegionState (string why)
-	: RegionState (why),
-	  _fade_in (0.0, 2.0, 1.0, false),
-	  _fade_out (0.0, 2.0, 1.0, false),
-	  _envelope (0.0, 2.0, 1.0, false)
-{
-}
-
 AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, nframes_t length)
 	: Region (start, length, PBD::basename_nosuffix(src->name()), 0,  Region::Flag(Region::DefaultFlags|Region::External)),
 	  _fade_in (0.0, 2.0, 1.0, false),
@@ -87,8 +79,6 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 
 	set_default_fades ();
 	set_default_envelope ();
-
-	save_state ("initial state");
 
 	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
 }
@@ -114,7 +104,6 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 
 	set_default_fades ();
 	set_default_envelope ();
-	save_state ("initial state");
 
 	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
 }
@@ -142,7 +131,6 @@ AudioRegion::AudioRegion (SourceList& srcs, nframes_t start, nframes_t length, c
 
 	set_default_fades ();
 	set_default_envelope ();
-	save_state ("initial state");
 
 	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
 }
@@ -208,8 +196,6 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t 
 
 	_scale_amplitude = other->_scale_amplitude;
 
-	save_state ("initial state");
-
 	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
 }
 
@@ -251,8 +237,6 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	_fade_in_disabled = 0;
 	_fade_out_disabled = 0;
 	
-	save_state ("initial state");
-
 	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
 }
 
@@ -276,8 +260,6 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& nod
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
-
-	save_state ("initial state");
 
 	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
 }
@@ -319,8 +301,6 @@ AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 		throw failed_constructor();
 	}
 
-	save_state ("initial state");
-
 	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
 }
 
@@ -328,88 +308,6 @@ AudioRegion::~AudioRegion ()
 {
 	notify_callbacks ();
 	GoingAway (); /* EMIT SIGNAL */
-}
-
-StateManager::State*
-AudioRegion::state_factory (std::string why) const
-{
-	AudioRegionState* state = new AudioRegionState (why);
-
-	Region::store_state (*state);
-
-	state->_fade_in = _fade_in;
-	state->_fade_out = _fade_out;
-	state->_envelope = _envelope;
-	state->_scale_amplitude = _scale_amplitude;
-	state->_fade_in_disabled = _fade_in_disabled;
-	state->_fade_out_disabled = _fade_out_disabled;
-
-	return state;
-}	
-
-Change
-AudioRegion::restore_state (StateManager::State& sstate) 
-{
-	AudioRegionState* state = dynamic_cast<AudioRegionState*> (&sstate);
-
-	Change what_changed = Region::restore_and_return_flags (*state);
-	
-	if (_flags != Flag (state->_flags)) {
-		
-		uint32_t old_flags = _flags;
-		
-		_flags = Flag (state->_flags);
-		
-		if ((old_flags ^ state->_flags) & EnvelopeActive) {
-			what_changed = Change (what_changed|EnvelopeActiveChanged);
-		}
-	}
-		
-	if (!(_fade_in == state->_fade_in)) {
-		_fade_in = state->_fade_in;
-		what_changed = Change (what_changed|FadeInChanged);
-	}
-
-	if (!(_fade_out == state->_fade_out)) {
-		_fade_out = state->_fade_out;
-		what_changed = Change (what_changed|FadeOutChanged);
-	}
-
-	if (_scale_amplitude != state->_scale_amplitude) {
-		_scale_amplitude = state->_scale_amplitude;
-		what_changed = Change (what_changed|ScaleAmplitudeChanged);
-	}
-
-	if (_fade_in_disabled != state->_fade_in_disabled) {
-		if (_fade_in_disabled == 0 && state->_fade_in_disabled) {
-			set_fade_in_active (false);
-		} else if (_fade_in_disabled && state->_fade_in_disabled == 0) {
-			set_fade_in_active (true);
-		}
-		_fade_in_disabled = state->_fade_in_disabled;
-	}
-		
-	if (_fade_out_disabled != state->_fade_out_disabled) {
-		if (_fade_out_disabled == 0 && state->_fade_out_disabled) {
-			set_fade_out_active (false);
-		} else if (_fade_out_disabled && state->_fade_out_disabled == 0) {
-			set_fade_out_active (true);
-		}
-		_fade_out_disabled = state->_fade_out_disabled;
-	}
-
-	/* XXX need a way to test stored state versus current for envelopes */
-
-	_envelope = state->_envelope;
-	what_changed = Change (what_changed);
-
-	return what_changed;
-}
-
-UndoAction
-AudioRegion::get_memento() const
-{
-	return sigc::bind (mem_fun (*(const_cast<AudioRegion *> (this)), &StateManager::use_state), _current_state_id);
 }
 
 bool
@@ -482,11 +380,7 @@ AudioRegion::set_envelope_active (bool yn)
 			snprintf (buf, sizeof (buf), "envelope off");
 			_flags = Flag (_flags & ~EnvelopeActive);
 		}
-		if (!_frozen) {
-			save_state (buf);
-		}
 		send_change (EnvelopeActiveChanged);
-
 	}
 }
 
@@ -706,6 +600,8 @@ AudioRegion::state (bool full)
 		} else {
 			_fade_in.store_state (*child);
 		}
+
+		child->add_property (X_("active"), _fade_in_disabled ? X_("no") : X_("yes"));
 		
 		child = node.add_child (X_("FadeOut"));
 		
@@ -714,6 +610,8 @@ AudioRegion::state (bool full)
 		} else {
 			_fade_out.store_state (*child);
 		}
+
+		child->add_property (X_("active"), _fade_out_disabled ? X_("no") : X_("yes"));
 	}
 	
 	child = node.add_child ("Envelope");
@@ -736,6 +634,7 @@ AudioRegion::state (bool full)
 		} else {
 			_envelope.store_state (*child);
 		}
+
 	} else {
 		child->add_property ("default", "yes");
 	}
@@ -748,19 +647,31 @@ AudioRegion::state (bool full)
 }
 
 int
-AudioRegion::set_state (const XMLNode& node)
+AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool send)
 {
 	const XMLNodeList& nlist = node.children();
 	const XMLProperty *prop;
 	LocaleGuard lg (X_("POSIX"));
 
-	Region::set_state (node);
+	Region::set_live_state (node, what_changed, false);
 
+	uint32_t old_flags = _flags;
+		
 	if ((prop = node.property ("flags")) != 0) {
 		_flags = Flag (strtol (prop->value().c_str(), (char **) 0, 16));
 
 		_flags = Flag (_flags & ~Region::LeftOfSplit);
 		_flags = Flag (_flags & ~Region::RightOfSplit);
+	}
+
+	if ((old_flags ^ _flags) & Muted) {
+		what_changed = Change (what_changed|MuteChanged);
+	}
+	if ((old_flags ^ _flags) & Opaque) {
+		what_changed = Change (what_changed|OpacityChanged);
+	}
+	if ((old_flags ^ _flags) & Locked) {
+		what_changed = Change (what_changed|LockChanged);
 	}
 
 	if ((prop = node.property ("scale-gain")) != 0) {
@@ -798,7 +709,6 @@ AudioRegion::set_state (const XMLNode& node)
 			if ((prop = child->property ("default")) != 0 || (prop = child->property ("steepness")) != 0) {
 				set_default_fade_in ();
 			} else {
-				
 				_fade_in.load_state (*child);
 			}
 
@@ -814,7 +724,22 @@ AudioRegion::set_state (const XMLNode& node)
 		} 
 	}
 
+	if (send) {
+		send_change (what_changed);
+	}
+
 	return 0;
+}
+
+int
+AudioRegion::set_state (const XMLNode& node)
+{
+	/* Region::set_state() calls the virtual set_live_state(),
+	   which will get us back to AudioRegion::set_live_state()
+	   to handle the relevant stuff.
+	*/
+
+	return Region::set_state (node);
 }
 
 void
@@ -886,10 +811,6 @@ AudioRegion::set_fade_in (FadeShape shape, nframes_t len)
 	_fade_in.thaw ();
 	_fade_in_shape = shape;
 
-	if (!_frozen) {
-		save_state (_("fade in change"));
-	}
-
 	send_change (FadeInChanged);
 }
 
@@ -948,10 +869,6 @@ AudioRegion::set_fade_out (FadeShape shape, nframes_t len)
 	_fade_out.thaw ();
 	_fade_out_shape = shape;
 
-	if (!_frozen) {
-		save_state (_("fade in change"));
-	}
-
 	send_change (FadeOutChanged);
 }
 
@@ -962,13 +879,6 @@ AudioRegion::set_fade_in_length (nframes_t len)
 
 	if (changed) {
 		_flags = Flag (_flags & ~DefaultFadeIn);
-
-		if (!_frozen) {
-			char buf[64];
-			snprintf (buf, sizeof (buf), "fade in length changed to %u", len);
-			save_state (buf);
-		}
-		
 		send_change (FadeInChanged);
 	}
 }
@@ -980,12 +890,6 @@ AudioRegion::set_fade_out_length (nframes_t len)
 
 	if (changed) {
 		_flags = Flag (_flags & ~DefaultFadeOut);
-		
-		if (!_frozen) {
-			char buf[64];
-			snprintf (buf, sizeof (buf), "fade out length changed to %u", len);
-			save_state (buf);
-		}
 	}
 
 	send_change (FadeOutChanged);
@@ -1324,12 +1228,6 @@ AudioRegion::normalize_to (float target_dB)
 
 	_scale_amplitude = target/maxamp;
 
-	if (!_frozen) {
-		char buf[64];
-		snprintf (buf, sizeof (buf), _("normalized to %.2fdB"), target_dB);
-		save_state (buf);
-	}
-
 	/* tell the diskstream we're in */
 
 	if (_playlist) {
@@ -1344,7 +1242,6 @@ AudioRegion::normalize_to (float target_dB)
 void
 AudioRegion::envelope_changed (Change ignored)
 {
-	save_state (_("envelope change"));
 	send_change (EnvelopeChanged);
 }
 

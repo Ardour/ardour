@@ -78,7 +78,7 @@ Auditioner::prepare_playlist ()
 	AudioPlaylist* const apl = dynamic_cast<AudioPlaylist*>(_diskstream->playlist());
 	assert(apl);
 
-	apl->clear (false);
+	apl->clear ();
 	return *apl;
 }
 
@@ -126,8 +126,8 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 	boost::shared_ptr<AudioRegion> the_region (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (region)));
 	the_region->set_position (0, this);
 
-	_diskstream->playlist()->clear (false);
-	_diskstream->playlist()->add_region (the_region, 0, 1, false);
+	_diskstream->playlist()->clear ();
+	_diskstream->playlist()->add_region (the_region, 0, 1);
 
 	while (_diskstream->n_channels() < the_region->n_channels()) {
 		audio_diskstream()->add_channel ();

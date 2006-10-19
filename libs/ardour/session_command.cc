@@ -28,22 +28,23 @@ Command *Session::memento_command_factory(XMLNode *n)
     id = PBD::ID(n->property("obj_id")->value());
 
     /* get before/after */
-    if (n->name() == "MementoCommand")
-    {
-        before = new XMLNode(*n->children().front());
-        after = new XMLNode(*n->children().back());
-	child = before;
-    } else if (n->name() == "MementoUndoCommand")
-    {
-        before = new XMLNode(*n->children().front());
-	child = before;
-    }
-    else if (n->name() == "MementoRedoCommand")
-    {
-        after = new XMLNode(*n->children().front());
-	child = after;
-    }
 
+    if (n->name() == "MementoCommand") {
+	    before = new XMLNode(*n->children().front());
+	    after = new XMLNode(*n->children().back());
+	    child = before;
+    } else if (n->name() == "MementoUndoCommand") {
+	    before = new XMLNode(*n->children().front());
+	    child = before;
+    } else if (n->name() == "MementoRedoCommand") {
+	    after = new XMLNode(*n->children().front());
+	    child = after;
+    } else if (n->name() == "PlaylistCommand") {
+	    before = new XMLNode(*n->children().front());
+	    after = new XMLNode(*n->children().back());
+	    child = before;
+    }
+		    
     if (!child)
     {
 	error << _("Tried to reconstitute a MementoCommand with no contents, failing. id=") << id.to_s() << endmsg;
@@ -53,43 +54,32 @@ Command *Session::memento_command_factory(XMLNode *n)
 
     /* create command */
     string obj_T = n->children().front()->name();
-    if (obj_T == "AudioRegion" || obj_T == "Region")
-    {
-        if (audio_regions.count(id))
-            return new MementoCommand<AudioRegion>(*audio_regions[id], before, after);
+    if (obj_T == "AudioRegion" || obj_T == "Region") {
+	    if (audio_regions.count(id))
+		    return new MementoCommand<AudioRegion>(*audio_regions[id], before, after);
+    } else if (obj_T == "AudioSource") {
+	    if (audio_sources.count(id))
+		    return new MementoCommand<AudioSource>(*audio_sources[id], before, after);
+    } else if (obj_T == "Location") {
+	    return new MementoCommand<Location>(*_locations.get_location_by_id(id), before, after);
+    } else if (obj_T == "Locations") {
+	    return new MementoCommand<Locations>(_locations, before, after);
+    } else if (obj_T == "TempoMap") {
+	    return new MementoCommand<TempoMap>(*_tempo_map, before, after);
+    } else if (obj_T == "Playlist" || obj_T == "AudioPlaylist") {
+	    if (Playlist *pl = playlist_by_name(child->property("name")->value()))
+		    return new MementoCommand<Playlist>(*pl, before, after);
+    } else if (obj_T == "Route") { // includes AudioTrack
+	    return new MementoCommand<Route>(*route_by_id(id), before, after);
+    } else if (obj_T == "Curve") {
+	    if (curves.count(id))
+		    return new MementoCommand<Curve>(*curves[id], before, after);
+    } else if (obj_T == "AutomationList") {
+	    if (automation_lists.count(id))
+		    return new MementoCommand<AutomationList>(*automation_lists[id], before, after);
+    } else if (registry.count(id)) { // For Editor and AutomationLine which are off-limits here
+	    return new MementoCommand<StatefulDestructible>(*registry[id], before, after);
     }
-    else if (obj_T == "AudioSource")
-    {
-        if (audio_sources.count(id))
-            return new MementoCommand<AudioSource>(*audio_sources[id], before, after);
-    }
-    else if (obj_T == "Location")
-        return new MementoCommand<Location>(*_locations.get_location_by_id(id), before, after);
-    else if (obj_T == "Locations")
-        return new MementoCommand<Locations>(_locations, before, after);
-    else if (obj_T == "TempoMap")
-        return new MementoCommand<TempoMap>(*_tempo_map, before, after);
-    else if (obj_T == "Playlist" || obj_T == "AudioPlaylist")
-    {
-        if (Playlist *pl = playlist_by_name(child->property("name")->value()))
-            return new MementoCommand<Playlist>(*pl, before, after);
-    }
-    else if (obj_T == "Route") // inlcudes AudioTrack
-        return new MementoCommand<Route>(*route_by_id(id), before, after);
-    else if (obj_T == "Curve")
-    {
-        if (curves.count(id))
-            return new MementoCommand<Curve>(*curves[id], before, after);
-    }
-    else if (obj_T == "AutomationList")
-    {
-        if (automation_lists.count(id))
-            return new MementoCommand<AutomationList>(*automation_lists[id], before, after);
-    }
-    // For Editor and AutomationLine which are off-limits here
-    else if (registry.count(id))
-        return new MementoCommand<StatefulDestructible>(*registry[id], before, after);
-
 
     /* we failed */
     error << _("could not reconstitute MementoCommand from XMLNode. id=") << id.to_s() << endmsg;

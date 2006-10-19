@@ -206,9 +206,7 @@ StreamView::playlist_modified ()
 {
 	ENSURE_GUI_THREAD (mem_fun (*this, &StreamView::playlist_modified));
 
-	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-		region_layered (*i);
-	}
+	redisplay_diskstream ();
 }
 
 void
@@ -231,18 +229,7 @@ StreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 
 	/* catch changes */
 
-	playlist_connections.push_back (ds->playlist()->RegionAdded.connect (mem_fun (*this, &StreamView::add_region_view)));
-	playlist_connections.push_back (ds->playlist()->RegionRemoved.connect (mem_fun (*this, &StreamView::remove_region_view)));
-	playlist_connections.push_back (ds->playlist()->StateChanged.connect (mem_fun (*this, &StreamView::playlist_state_changed)));
 	playlist_connections.push_back (ds->playlist()->Modified.connect (mem_fun (*this, &StreamView::playlist_modified)));
-}
-
-void
-StreamView::playlist_state_changed (Change ignored)
-{
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::playlist_state_changed), ignored));
-
-	redisplay_diskstream ();
 }
 
 void

@@ -151,28 +151,24 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 	}
 
 	_length = 0;
-	initialize(false);
+	initialize();
 	
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
-
-	save_state ("initial");
 }
 
 Crossfade::Crossfade (const Crossfade &orig, boost::shared_ptr<AudioRegion> newin, boost::shared_ptr<AudioRegion> newout)
 	: _fade_in(orig._fade_in),
 	  _fade_out(orig._fade_out)
 {
-	_active 			= orig._active;
-	_in_update 			= orig._in_update;
-	_length 			= orig._length;
-	_position 			= orig._position;
-	_anchor_point 		= orig._anchor_point;
-	_follow_overlap 	= orig._follow_overlap;
-	_fixed 				= orig._fixed;
-	_follow_overlap 	= orig._follow_overlap;
-	_short_xfade_length = orig._short_xfade_length;
+	_active           = orig._active;
+	_in_update        = orig._in_update;
+	_length           = orig._length;
+	_position         = orig._position;
+	_anchor_point     = orig._anchor_point;
+	_follow_overlap   = orig._follow_overlap;
+	_fixed            = orig._fixed;
 	
 	_in = newin;
 	_out = newout;
@@ -192,13 +188,10 @@ Crossfade::Crossfade (const Crossfade &orig, boost::shared_ptr<AudioRegion> newi
 
 Crossfade::~Crossfade ()
 {
-	for (StateMap::iterator i = states.begin(); i != states.end(); ++i) {
-		delete *i;
-	}
 }
 
 void
-Crossfade::initialize (bool savestate)
+Crossfade::initialize ()
 {
 	_in_update = false;
 	
@@ -225,14 +218,10 @@ Crossfade::initialize (bool savestate)
 	_fade_in.add (_length, 1.0);
 	_fade_in.thaw ();
 
-//	_in->StateChanged.connect (slot (*this, &Crossfade::member_changed));
-//	_out->StateChanged.connect (slot (*this, &Crossfade::member_changed));
+	_in->StateChanged.connect (sigc::mem_fun (*this, &Crossfade::member_changed));
+	_out->StateChanged.connect (sigc::mem_fun (*this, &Crossfade::member_changed));
 
 	overlap_type = _in->coverage (_out->position(), _out->last_frame());
-
-	if (savestate) {
-		save_state ("initial");
-	}
 }	
 
 int
@@ -488,8 +477,7 @@ Crossfade::set_active (bool yn)
 {
 	if (_active != yn) {
 		_active = yn;
-		save_state (_("active changed"));
-		send_state_changed (ActiveChanged);
+		StateChanged (ActiveChanged);
 	}
 }
 
@@ -535,7 +523,6 @@ bool
 Crossfade::update (bool force)
 {
 	nframes_t newlen;
-	bool save = false;
 
 	if (_follow_overlap) {
 		newlen = _out->first_frame() + _out->length() - _in->first_frame();
@@ -559,41 +546,32 @@ Crossfade::update (bool force)
 		
 		_length = newlen;
 
-		save = true;
-
 	} 
 
 	switch (_anchor_point) {
 	case StartOfIn:
 		if (_position != _in->first_frame()) {
 			_position = _in->first_frame();
-			save = true;
 		}
 		break;
 
 	case EndOfIn:
 		if (_position != _in->last_frame() - _length) {
 			_position = _in->last_frame() - _length;
-			save = true;
 		}
 		break;
 
 	case EndOfOut:
 		if (_position != _out->last_frame() - _length) {
 			_position = _out->last_frame() - _length;
-			save = true;
 		}
 	}
-
-	if (save) {
-		save_state ("updated");
-	} 
 
 	/* UI's may need to know that the overlap changed even 
 	   though the xfade length did not.
 	*/
 	
-	send_state_changed (BoundsChanged); /* EMIT SIGNAL */
+	StateChanged (BoundsChanged); /* EMIT SIGNAL */
 
 	_in_update = false;
 
@@ -610,65 +588,6 @@ Crossfade::member_changed (Change what_changed)
 	if (what_changed & what_we_care_about) {
 		refresh ();
 	}
-}
-
-Change
-Crossfade::restore_state (StateManager::State& state)
-{
-	CrossfadeState* xfstate = dynamic_cast<CrossfadeState*> (&state);
-	Change what_changed = Change (0);
-
-	_in_update = true;
-	
-	xfstate->fade_in_memento ();
-	xfstate->fade_out_memento ();
-
-	if (_length != xfstate->length) {
-		what_changed = Change (what_changed|LengthChanged);
-		_length = xfstate->length;
-	}
-	if (_active != xfstate->active) {
-		what_changed = Change (what_changed|ActiveChanged);
-		_active = xfstate->active;
-	}
-	if (_position != xfstate->position) {
-		what_changed = Change (what_changed|PositionChanged);
-		_position = xfstate->position;
-	}
-
-	/* XXX what to do about notifications for these? I don't
-	   think (G)UI cares about them because they are
-	   implicit in the bounds.
-	*/
-
-	_follow_overlap = xfstate->follow_overlap;
-	_anchor_point = xfstate->anchor_point;
-
-	_in_update = false;
-
-	return Change (what_changed);
-}
-
-StateManager::State*
-Crossfade::state_factory (std::string why) const
-{
-	CrossfadeState* state = new CrossfadeState (why);
-
-	state->fade_in_memento = _fade_in.get_memento ();
-	state->fade_out_memento = _fade_out.get_memento ();
-	state->active = _active;
-	state->length = _length;
-	state->position = _position;
-	state->follow_overlap = _follow_overlap;
-	state->anchor_point = _anchor_point;
-
-	return state;
-}
-	
-UndoAction
-Crossfade::get_memento() const
-{
-  return sigc::bind (mem_fun (*(const_cast<Crossfade *> (this)), &StateManager::use_state), _current_state_id);
 }
 
 XMLNode&
@@ -733,16 +652,26 @@ Crossfade::set_state (const XMLNode& node)
 	XMLNode* fo;
 	const XMLProperty* prop;
 	LocaleGuard lg (X_("POSIX"));
+	Change what_changed = Change (0);
+	nframes_t val;
 
 	if ((prop = node.property ("position")) != 0) {
-		_position = atoi (prop->value().c_str());
+		sscanf (prop->value().c_str(), "%" PRIu32, &val);
+		if (val != _position) {
+			_position = val;
+			what_changed = Change (what_changed | PositionChanged);
+		}
 	} else {
 		warning << _("old-style crossfade information - no position information") << endmsg;
 		_position = _in->first_frame();
 	}
 
 	if ((prop = node.property ("active")) != 0) {
-		_active = (prop->value() == "yes");
+		bool x = (prop->value() == "yes");
+		if (x != _active) {
+			_active = x;
+			what_changed = Change (what_changed | ActiveChanged);
+		}
 	} else {
 		_active = true;
 	}
@@ -767,7 +696,11 @@ Crossfade::set_state (const XMLNode& node)
 
 	if ((prop = node.property ("length")) != 0) {
 
-		_length = atol (prop->value().c_str());
+		sscanf (prop->value().c_str(), "%" PRIu32, &val);
+		if (val != _length) {
+			_length = atol (prop->value().c_str());
+			what_changed = Change (what_changed | LengthChanged);
+		}
 
 	} else {
 		
@@ -790,6 +723,7 @@ Crossfade::set_state (const XMLNode& node)
 
 	/* fade in */
 	
+	_fade_in.freeze ();
 	_fade_in.clear ();
 	
 	children = fi->children();
@@ -808,9 +742,12 @@ Crossfade::set_state (const XMLNode& node)
 			_fade_in.add (x, y);
 		}
 	}
+
+	_fade_in.thaw ();
 	
         /* fade out */
 	
+	_fade_in.freeze ();
 	_fade_out.clear ();
 
 	children = fo->children();
@@ -830,6 +767,10 @@ Crossfade::set_state (const XMLNode& node)
 			_fade_out.add (x, y);
 		}
 	}
+
+	_fade_out.thaw ();
+
+	StateChanged (what_changed); /* EMIT SIGNAL */
 
 	return 0;
 }
@@ -887,9 +828,7 @@ Crossfade::set_length (nframes_t len)
 	
 	_length = len;
 
-	save_state ("length changed");
-
-	send_state_changed (LengthChanged);
+	StateChanged (LengthChanged);
 
 	return len;
 }

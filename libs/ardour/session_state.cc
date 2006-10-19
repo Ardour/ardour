@@ -2434,13 +2434,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		delete *x;
 	}
 
-	/* step 2: clear the undo/redo history for all playlists */
-
-	for (PlaylistList::iterator x = playlists.begin(); x != playlists.end(); ++x) {
-		(*x)->drop_all_states ();
-	}
-
-	/* step 3: find all un-referenced sources */
+	/* step 2: find all un-referenced sources */
 
 	rep.paths.clear ();
 	rep.space = 0;
@@ -2470,7 +2464,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		i = tmp;
 	}
 
-	/* Step 4: get rid of all regions in the region list that use any dead sources
+	/* Step 3: get rid of all regions in the region list that use any dead sources
 	   in case the sources themselves don't go away (they might be referenced in
 	   other snapshots).
 	*/
@@ -2863,41 +2857,39 @@ Session::restore_history (string snapshot_name)
 
     /* replace history */
     history.clear();
-    for (XMLNodeConstIterator it  = tree.root()->children().begin();
-         it != tree.root()->children().end();
-         it++)
-    {
-        XMLNode *t = *it;
-        UndoTransaction* ut = new UndoTransaction ();
-        struct timeval tv;
 
-        ut->set_name(t->property("name")->value());
-        stringstream ss(t->property("tv_sec")->value());
-        ss >> tv.tv_sec;
-        ss.str(t->property("tv_usec")->value());
-        ss >> tv.tv_usec;
-        ut->set_timestamp(tv);
+    for (XMLNodeConstIterator it  = tree.root()->children().begin(); it != tree.root()->children().end(); it++) {
+	    
+	    XMLNode *t = *it;
+	    UndoTransaction* ut = new UndoTransaction ();
+	    struct timeval tv;
+	    
+	    ut->set_name(t->property("name")->value());
+	    stringstream ss(t->property("tv_sec")->value());
+	    ss >> tv.tv_sec;
+	    ss.str(t->property("tv_usec")->value());
+	    ss >> tv.tv_usec;
+	    ut->set_timestamp(tv);
+	    
+	    for (XMLNodeConstIterator child_it  = t->children().begin();
+		 child_it != t->children().end();
+		 child_it++)
+	    {
+		    XMLNode *n = *child_it;
+		    Command *c;
+	
+		    if (n->name() == "MementoCommand" ||
+			n->name() == "MementoUndoCommand" ||
+			n->name() == "MementoRedoCommand") {
+			    if ((c = memento_command_factory(n))) {
+				    ut->add_command(c);
+			    }
+		    } else {
+			    error << string_compose(_("Couldn't figure out how to make a Command out of a %1 XMLNode."), n->name()) << endmsg;
+		    }
+	    }
 
-        for (XMLNodeConstIterator child_it  = t->children().begin();
-             child_it != t->children().end();
-             child_it++)
-        {
-            XMLNode *n = *child_it;
-            Command *c;
-            if (n->name() == "MementoCommand" ||
-                n->name() == "MementoUndoCommand" ||
-                n->name() == "MementoRedoCommand")
-            {
-                c = memento_command_factory(n);
-                if (c)
-                    ut->add_command(c);
-            }
-            else
-            {
-                error << string_compose(_("Couldn't figure out how to make a Command out of a %1 XMLNode."), n->name()) << endmsg;
-            }
-        }
-        history.add(ut);
+	    history.add (ut);
     }
 
     return 0;

@@ -117,7 +117,6 @@ Playlist::Playlist (const Playlist& other, string namestr, bool hide)
 	subcnt = 0;
 	_read_data_count = 0;
 	_frozen = other._frozen;
-	save_on_thaw = false;
 	
 	layer_op_counter = other.layer_op_counter;
 	freeze_length = other.freeze_length;
@@ -238,7 +237,6 @@ Playlist::init (bool hide)
 	subcnt = 0;
 	_read_data_count = 0;
 	_frozen = false;
-	save_on_thaw = false;
 	layer_op_counter = 0;
 	freeze_length = 0;
 
@@ -333,9 +331,9 @@ void
 Playlist::notify_region_removed (boost::shared_ptr<Region> r)
 {
 	if (holding_state ()) {
-		pending_removals.insert (pending_removals.end(), r);
+		pending_modified = true;
+		pending_length = true;
 	} else {
-		RegionRemoved (r); /* EMIT SIGNAL */
 		/* this might not be true, but we have to act
 		   as though it could be.
 		*/
@@ -347,13 +345,14 @@ Playlist::notify_region_removed (boost::shared_ptr<Region> r)
 void
 Playlist::notify_region_added (boost::shared_ptr<Region> r)
 {
+	/* the length change might not be true, but we have to act
+	   as though it could be.
+	*/
+
 	if (holding_state()) {
-		pending_adds.insert (pending_adds.end(), r);
+		pending_modified = true;
+		pending_length = true;
 	} else {
-		RegionAdded (r); /* EMIT SIGNAL */
-		/* this might not be true, but we have to act
-		   as though it could be.
-		*/
 		LengthChanged (); /* EMIT SIGNAL */
 		Modified (); /* EMIT SIGNAL */
 	}
@@ -406,20 +405,8 @@ Playlist::flush_notifications ()
 		/* don't increment n again - its the same list */
 	}
 
-	for (a = pending_adds.begin(); a != pending_adds.end(); ++a) {
-		dependent_checks_needed.insert (*a);
-		RegionAdded (*a); /* EMIT SIGNAL */
-		n++;
-	}
-
 	for (set<boost::shared_ptr<Region> >::iterator x = dependent_checks_needed.begin(); x != dependent_checks_needed.end(); ++x) {
 		check_dependents (*x, false);
-	}
-
-	for (r = pending_removals.begin(); r != pending_removals.end(); ++r) {
-		remove_dependents (*r);
-		RegionRemoved (*r); /* EMIT SIGNAL */
-		n++;
 	}
 
 	if ((freeze_length != _get_maximum_extent()) || pending_length) {
@@ -437,15 +424,8 @@ Playlist::flush_notifications ()
 		Modified (); /* EMIT SIGNAL */
 	}
 
-	pending_adds.clear ();
-	pending_removals.clear ();
 	pending_bounds.clear ();
 
-	if (save_on_thaw) {
-		save_on_thaw = false;
-		save_state (last_save_reason);
-	}
-	
 	in_flush = false;
 }
 
@@ -454,7 +434,7 @@ Playlist::flush_notifications ()
  *************************************************************/
 
 void
-Playlist::add_region (boost::shared_ptr<Region> region, nframes_t position, float times, bool with_save) 
+Playlist::add_region (boost::shared_ptr<Region> region, nframes_t position, float times) 
 { 
 	RegionLock rlock (this);
 	
@@ -493,10 +473,6 @@ Playlist::add_region (boost::shared_ptr<Region> region, nframes_t position, floa
 		boost::shared_ptr<Region> sub = RegionFactory::create (region, 0, length, name, region->layer(), region->flags());
 		add_region_internal (sub, pos, true);
 	}
-	
-	if (with_save) {
-		maybe_save_state (_("add region"));
-	}
 }
 
 void
@@ -515,6 +491,7 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, nframes_t posit
 	timestamp_layer_op (region);
 
 	regions.insert (upper_bound (regions.begin(), regions.end(), region, cmp), region);
+	all_regions.insert (region);
 
 	if (!holding_state () && !in_set_state) {
 		/* layers get assigned from XML state */
@@ -547,8 +524,6 @@ Playlist::replace_region (boost::shared_ptr<Region> old, boost::shared_ptr<Regio
 	if (!holding_state ()) {
 		possibly_splice_unlocked ();
 	}
-
-	maybe_save_state (_("replace region"));
 }
 
 void
@@ -560,8 +535,6 @@ Playlist::remove_region (boost::shared_ptr<Region> region)
 	if (!holding_state ()) {
 		possibly_splice_unlocked ();
 	}
-
-	maybe_save_state (_("remove region"));
 }
 
 int
@@ -632,8 +605,6 @@ Playlist::partition (nframes_t start, nframes_t end, bool just_top_level)
 	for (RegionList::iterator i = thawlist.begin(); i != thawlist.end(); ++i) {
 		(*i)->thaw ("separation");
 	}
-
-	maybe_save_state (_("separate"));
 }
 
 void
@@ -897,8 +868,6 @@ Playlist::cut (nframes_t start, nframes_t cnt, bool result_is_hidden)
 		(*i)->thaw ("playlist cut");
 	}
 
-	maybe_save_state (_("cut"));
-
 	return the_copy;
 }
 
@@ -958,8 +927,6 @@ Playlist::paste (Playlist& other, nframes_t position, float times)
 		
 	}
 
-	maybe_save_state (_("paste"));
-
 	return 0;
 }
 
@@ -986,8 +953,6 @@ Playlist::duplicate (boost::shared_ptr<Region> region, nframes_t position, float
 		boost::shared_ptr<Region> sub = RegionFactory::create (region, 0, length, name, region->layer(), region->flags());
 		add_region_internal (sub, pos, true);
 	}
-
-	maybe_save_state (_("duplicate"));
 }
 
 void
@@ -1041,8 +1006,6 @@ Playlist::split_region (boost::shared_ptr<Region> region, nframes_t playlist_pos
 	if (remove_region_internal (region, true)) {
 		return;
 	}
-
-	maybe_save_state (_("split"));
 }
 
 void
@@ -1192,7 +1155,7 @@ Playlist::region_changed (Change what_changed, boost::shared_ptr<Region> region)
 }
 
 void
-Playlist::clear (bool with_save)
+Playlist::clear ()
 {
 	RegionList::iterator i;
 	RegionList tmp;
@@ -1205,10 +1168,6 @@ Playlist::clear (bool with_save)
 	
 	for (i = tmp.begin(); i != tmp.end(); ++i) {
 		notify_region_removed (*i);
-	}
-
-	if (with_save) {
-		maybe_save_state (_("clear"));
 	}
 }
 
@@ -1339,8 +1298,6 @@ Playlist::mark_session_dirty ()
 int
 Playlist::set_state (const XMLNode& node)
 {
-	in_set_state = true;
-
 	XMLNode *child;
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
@@ -1350,12 +1307,14 @@ Playlist::set_state (const XMLNode& node)
 	boost::shared_ptr<Region> region;
 	string region_name;
 
-	clear (false);
+	in_set_state = true;
 
 	if (node.name() != "Playlist") {
 		in_set_state = false;
 		return -1;
 	}
+
+	freeze ();
 
 	plist = node.properties();
 
@@ -1372,6 +1331,11 @@ Playlist::set_state (const XMLNode& node)
 		}
 	}
 
+	{ 
+		RegionLock rl (this);
+		regions.clear ();
+	}
+	
 	nlist = node.children();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
@@ -1385,19 +1349,29 @@ Playlist::set_state (const XMLNode& node)
 				continue;
 			}
 			
-			if ((region = RegionFactory::create (_session, *child, true)) == 0) {
-				error << _("Playlist: cannot create region from state file") << endmsg;
+			ID id = prop->value ();
+			
+			if ((region = region_by_id (id))) {
+
+				Change what_changed = Change (0);
+
+				if (region->set_live_state (*child, what_changed, true)) {
+					error << _("Playlist: cannot reset region state from XML") << endmsg;
+					continue;
+				}
+
+			} else if ((region = RegionFactory::create (_session, *child, true)) == 0) {
+				error << _("Playlist: cannot create region from XML") << endmsg;
 				continue;
 			}
 
-			add_region (region, region->position(), 1.0, false);
+			add_region (region, region->position(), 1.0);
 
 			// So that layer_op ordering doesn't get screwed up
 			region->set_last_layer_op( region->layer());
 
 		} 			
 	}
-
 	
  	/* update dependents, which was not done during add_region_internal 
 	   due to in_set_state being true 
@@ -1406,8 +1380,12 @@ Playlist::set_state (const XMLNode& node)
 	for (RegionList::iterator r = regions.begin(); r != regions.end(); ++r) {
 		check_dependents (*r, false);
 	}
-	
+
+	notify_modified ();
+
 	in_set_state = false;
+
+	thaw ();
 
 	return 0;
 }
@@ -1746,7 +1724,6 @@ Playlist::nudge_after (nframes_t start, nframes_t distance, bool forwards)
 
 	if (moved) {
 		_nudging = false;
-		maybe_save_state (_("nudged"));
 		notify_length_changed ();
 	}
 
@@ -1756,26 +1733,31 @@ boost::shared_ptr<Region>
 Playlist::find_region (const ID& id) const
 {
 	RegionLock rlock (const_cast<Playlist*> (this));
-	RegionList::const_iterator i;
-	boost::shared_ptr<Region> ret;
 
-	for (i = regions.begin(); i != regions.end(); ++i) {
+	/* searches all regions currently in use by the playlist */
+
+	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
 		if ((*i)->id() == id) {
-			ret = *i;
+			return *i;
 		}
 	}
 
-	return ret;
-}
-	
-void
-Playlist::save_state (std::string why)
-{
-	if (!in_set_state) {
-		StateManager::save_state (why);
-	}
+	return boost::shared_ptr<Region> ();
 }
 
+boost::shared_ptr<Region>
+Playlist::region_by_id (ID id)
+{
+	/* searches all regions ever added to this playlist */
+
+	for (set<boost::shared_ptr<Region> >::iterator i = all_regions.begin(); i != all_regions.end(); ++i) {
+		if ((*i)->id() == id) {
+			return *i;
+		}
+	}
+	return boost::shared_ptr<Region> ();
+}
+	
 void
 Playlist::dump () const
 {
@@ -1811,13 +1793,3 @@ Playlist::timestamp_layer_op (boost::shared_ptr<Region> region)
 	region->set_last_layer_op (++layer_op_counter);
 }
 
-void
-Playlist::maybe_save_state (string why)
-{
-	if (holding_state ()) {
-		save_on_thaw = true;
-		last_save_reason = why;
-	} else {
-		save_state (why);
-	}
-}
