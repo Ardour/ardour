@@ -442,8 +442,8 @@ SndFileSource::setup_broadcast_info (nframes_t when, struct tm& now, time_t tnow
 	int random_code = random() % 999999999;
 	
 	snprintf (_broadcast_info->originator_reference, sizeof (_broadcast_info->originator_reference), "%2s%3s%12s%02d%02d%02d%9d",
-		  bwf_country_code,
-		  bwf_organization_code,
+		  Config->get_bwf_country_code().c_str(),
+		  Config->get_bwf_organization_code().c_str(),
 		  bwf_serial_number,
 		  now.tm_hour,
 		  now.tm_min,

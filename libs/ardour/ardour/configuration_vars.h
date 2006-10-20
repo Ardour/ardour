@@ -48,8 +48,8 @@ CONFIG_VARIABLE (bool, use_overlap_equivalency, "use-overlap-equivalency", true)
 CONFIG_VARIABLE (CrossfadeModel, xfade_model, "xfade-model", FullCrossfade)
 CONFIG_VARIABLE (bool, auto_xfade, "auto-xfade", true)
 CONFIG_VARIABLE (float, short_xfade_seconds, "short-xfade-seconds", 0.015)
-CONFIG_VARIABLE (bool, crossfades_active, "crossfades-active", true)
-CONFIG_VARIABLE (bool, crossfades_visible, "crossfades-visible", true)
+CONFIG_VARIABLE (bool, xfades_active, "xfades-active", true)
+CONFIG_VARIABLE (bool, xfades_visible, "xfades-visible", true)
 CONFIG_VARIABLE (uint32_t, destructive_xfade_msecs,  "destructive-xfade-msecs", 2)
 
 /* editing related */
@@ -120,6 +120,11 @@ CONFIG_VARIABLE (bool, hiding_groups_deactivates_groups, "hiding-groups-deactiva
 CONFIG_VARIABLE (bool, verify_remove_last_capture, "verify-remove-last-capture", true)
 CONFIG_VARIABLE (bool, no_new_session_dialog, "no-new-session-dialog", false)
 CONFIG_VARIABLE (bool, use_vst, "use-vst", true)
+
+/* BWAV */
+
+CONFIG_VARIABLE (string, bwf_country_code, "bwf-country-code", "US")
+CONFIG_VARIABLE (string, bwf_organization_code, "bwf-organization-code", "US")
 
 /* these variables have custom set() methods (e.g. path globbing) */
 

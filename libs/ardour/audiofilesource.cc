@@ -59,10 +59,6 @@ string AudioFileSource::search_path;
 sigc::signal<void> AudioFileSource::HeaderPositionOffsetChanged;
 uint64_t           AudioFileSource::header_position_offset = 0;
 
-/* XXX turn this into a Config option */
-char   AudioFileSource::bwf_country_code[3] = "US";
-/* XXX turn this into a Config option */
-char   AudioFileSource::bwf_organization_code[4] = "LAS";
 /* XXX maybe this too */
 char   AudioFileSource::bwf_serial_number[13] = "000000000000";
 

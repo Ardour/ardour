@@ -81,8 +81,6 @@ class AudioFileSource : public AudioSource {
 	void   mark_take (string);
 	string take_id() const { return _take_id; }
 
-	static void set_bwf_country_code (string x);
-	static void set_bwf_organization_code (string x);
 	static void set_bwf_serial_number (int);
 	
 	static void set_search_path (string);

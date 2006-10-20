@@ -782,13 +782,13 @@ Editor::toggle_auto_xfade ()
 void
 Editor::toggle_xfades_active ()
 {
-	ActionManager::toggle_config_state ("Editor", "toggle-xfades-active", &Configuration::set_crossfades_active, &Configuration::get_crossfades_active);
+	ActionManager::toggle_config_state ("Editor", "toggle-xfades-active", &Configuration::set_xfades_active, &Configuration::get_xfades_active);
 }
 
 void
 Editor::toggle_xfade_visibility ()
 {
-	ActionManager::toggle_config_state ("Editor", "toggle-xfades-visibility", &Configuration::set_crossfades_visible, &Configuration::get_crossfades_visible);
+	ActionManager::toggle_config_state ("Editor", "toggle-xfades-visibility", &Configuration::set_xfades_visible, &Configuration::get_xfades_visible);
 }
 
 void
@@ -811,12 +811,14 @@ Editor::parameter_changed (const char* parameter_name)
 		update_just_smpte ();
 	} else if (PARAM_IS ("video-pullup")) {
 		update_video_pullup ();
-	} else if (PARAM_IS ("crossfades-active")) {
-		ActionManager::map_some_state ("Editor", "toggle-xfades-active", &Configuration::get_crossfades_active);
-	} else if (PARAM_IS ("crossfades-visible")) {
-		ActionManager::map_some_state ("Editor", "toggle-xfades-visible", &Configuration::get_crossfades_visible);
+	} else if (PARAM_IS ("xfades-active")) {
+		ActionManager::map_some_state ("Editor", "toggle-xfades-active", &Configuration::get_xfades_active);
+	} else if (PARAM_IS ("xfades-visible")) {
+		ActionManager::map_some_state ("Editor", "toggle-xfades-visible", &Configuration::get_xfades_visible);
 	} else if (PARAM_IS ("auto-xfade")) {
 		ActionManager::map_some_state ("Editor", "toggle-auto-xfades", &Configuration::get_auto_xfade);
+	} else if (PARAM_IS ("xfade-model")) {
+		update_crossfade_model ();
 	} else if (PARAM_IS ("edit-mode")) {
 		edit_mode_selector.set_active_text (edit_mode_to_string (Config->get_edit_mode()));
 	}
