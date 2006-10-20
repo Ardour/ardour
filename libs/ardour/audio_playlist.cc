@@ -237,9 +237,9 @@ AudioPlaylist::remove_dependents (boost::shared_ptr<Region> region)
 		tmp = i;
 		tmp++;
 
+		
 		if ((*i)->involves (r)) {
-			/* do not delete crossfades */
-			_crossfades.erase (i);
+			delete *i;
 		}
 		
 		i = tmp;
@@ -488,9 +488,7 @@ AudioPlaylist::set_state (const XMLNode& node)
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
 
-	if (!in_set_state) {
-		Playlist::set_state (node);
-	} 
+	Playlist::set_state (node);
 
 	nlist = node.children();
 
@@ -502,10 +500,12 @@ AudioPlaylist::set_state (const XMLNode& node)
 			continue;
 		}
 
-		Crossfade *xfade;
-		
 		try {
-			xfade = new Crossfade (*((const Playlist *)this), *child);
+			Crossfade* xfade = new Crossfade (*((const Playlist *)this), *child);
+			_crossfades.push_back (xfade);
+			xfade->Invalidated.connect (mem_fun (*this, &AudioPlaylist::crossfade_invalidated));
+			xfade->StateChanged.connect (mem_fun (*this, &AudioPlaylist::crossfade_changed));
+			NewCrossfade(xfade);
 		}
 		
 		catch (failed_constructor& err) {
@@ -514,44 +514,28 @@ AudioPlaylist::set_state (const XMLNode& node)
 			//    << endl;
 			continue;
 		}
-		
-		Crossfades::iterator ci;
-		
-		for (ci = _crossfades.begin(); ci != _crossfades.end(); ++ci) {
-			if (*(*ci) == *xfade) {
-				break;
-			}
-		}
-		
-		if (ci == _crossfades.end()) {
-			_crossfades.push_back (xfade);
-			xfade->Invalidated.connect (mem_fun (*this, &AudioPlaylist::crossfade_invalidated));
-			xfade->StateChanged.connect (mem_fun (*this, &AudioPlaylist::crossfade_changed));
-			NewCrossfade(xfade);
-		} else {
-
-			/* adjust the current state of the existing crossfade */
-
-			(*ci)->set_state (*child);
-
-			/* drop the new one */
-			delete xfade;
-		}
 	}
 
 	return 0;
 }
 
 void
-AudioPlaylist::clear ()
+AudioPlaylist::clear (bool with_signals)
 {
-	for (Crossfades::iterator i = _crossfades.begin(); i != _crossfades.end(); ++i) {
+	for (Crossfades::iterator i = _crossfades.begin(); i != _crossfades.end(); ) {
+
+		Crossfades::iterator tmp;
+		tmp = i;
+		++tmp;
+
 		delete *i;
+
+		i = tmp;
 	}
 
 	_crossfades.clear ();
 	
-	Playlist::clear ();
+	Playlist::clear (with_signals);
 }
 
 XMLNode&

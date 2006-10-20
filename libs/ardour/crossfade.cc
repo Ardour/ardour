@@ -37,6 +37,7 @@ using namespace PBD;
 
 nframes_t Crossfade::_short_xfade_length = 0;
 Change Crossfade::ActiveChanged = new_change();
+Change Crossfade::FollowOverlapChanged = new_change();
 
 /* XXX if and when we ever implement parallel processing of the process()
    callback, these will need to be handled on a per-thread basis.
@@ -82,8 +83,16 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> in, boost::shared_ptr<Audio
 	_length = length;
 	_position = position;
 	_anchor_point = ap;
-	_follow_overlap = false;
-	_active = true;
+
+	switch (Config->get_xfade_model()) {
+	case ShortCrossfade:
+		_follow_overlap = false;
+		break;
+	default:
+		_follow_overlap = true;
+	}
+
+	_active = Config->get_crossfades_active ();
 	_fixed = true;
 		
 	initialize ();
@@ -188,6 +197,7 @@ Crossfade::Crossfade (const Crossfade &orig, boost::shared_ptr<AudioRegion> newi
 
 Crossfade::~Crossfade ()
 {
+	Invalidated (this);
 }
 
 void
@@ -795,6 +805,8 @@ Crossfade::set_follow_overlap (bool yn)
 	} else {
 		set_length (_out->first_frame() + _out->length() - _in->first_frame());
 	}
+
+	StateChanged (FollowOverlapChanged);
 }
 
 nframes_t
@@ -846,4 +858,10 @@ void
 Crossfade::set_short_xfade_length (nframes_t n)
 {
 	_short_xfade_length = n;
+}
+
+void
+Crossfade::invalidate ()
+{
+	Invalidated (this); /* EMIT SIGNAL */
 }

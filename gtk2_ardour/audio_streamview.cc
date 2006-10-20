@@ -288,7 +288,7 @@ AudioStreamView::add_crossfade (Crossfade *crossfade)
 	crossfade->Invalidated.connect (mem_fun (*this, &AudioStreamView::remove_crossfade));
 	crossfade_views.push_back (cv);
 
-	if (!crossfades_visible) {
+	if (!Config->get_crossfades_visible() || !crossfades_visible) {
 		cv->hide ();
 	}
 }

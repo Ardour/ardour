@@ -108,6 +108,8 @@ class Crossfade : public PBD::StatefulDestructible
 	nframes_t overlap_length() const;
 	nframes_t position() const { return _position; }
 
+	void invalidate();
+
 	sigc::signal<void,Crossfade*> Invalidated;
 	sigc::signal<void,Change>     StateChanged;
 
@@ -135,6 +137,7 @@ class Crossfade : public PBD::StatefulDestructible
 	static void set_short_xfade_length (nframes_t n);
 
 	static Change ActiveChanged;
+	static Change FollowOverlapChanged;
 
   private:
 	friend struct CrossfadeComparePtr;

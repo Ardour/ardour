@@ -127,6 +127,10 @@ CrossfadeView::crossfade_changed (Change what_changed)
 		set_duration (crossfade.overlap_length(), this);
 		need_redraw_curves = true;
 	}
+
+	if (what_changed & Crossfade::FollowOverlapChanged) {
+		need_redraw_curves = true;
+	}
 	
 	if (what_changed & Crossfade::ActiveChanged) {
 		/* calls redraw_curves */
@@ -142,8 +146,14 @@ CrossfadeView::redraw_curves ()
 	Points* points; 
 	int32_t npoints;
 	float* vec;
-	
 	double h;
+
+	if (!crossfade.following_overlap()) {
+		/* curves should not be visible */
+		fade_in->hide ();
+		fade_out->hide ();
+		return;
+	}
 
 	/*
 	 At "height - 3.0" the bottom of the crossfade touches the name highlight or the bottom of the track (if the

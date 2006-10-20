@@ -55,7 +55,7 @@ class Playlist : public PBD::StatefulDestructible {
 	Playlist (const Playlist&, string name, bool hidden = false);
 	Playlist (const Playlist&, nframes_t start, nframes_t cnt, string name, bool hidden = false);
 
-	virtual void clear ();
+	virtual void clear (bool with_signals=true);
 	virtual void dump () const;
 
 	void ref();
@@ -171,6 +171,8 @@ class Playlist : public PBD::StatefulDestructible {
 	mutable gint    block_notifications;
 	mutable gint    ignore_state_changes;
 	mutable Glib::Mutex region_lock;
+	std::set<boost::shared_ptr<Region> > pending_adds;
+	std::set<boost::shared_ptr<Region> > pending_removes;
 	RegionList       pending_bounds;
 	bool             pending_modified;
 	bool             pending_length;

@@ -331,6 +331,7 @@ void
 Playlist::notify_region_removed (boost::shared_ptr<Region> r)
 {
 	if (holding_state ()) {
+		pending_removes.insert (r);
 		pending_modified = true;
 		pending_length = true;
 	} else {
@@ -350,6 +351,7 @@ Playlist::notify_region_added (boost::shared_ptr<Region> r)
 	*/
 
 	if (holding_state()) {
+		pending_adds.insert (r);
 		pending_modified = true;
 		pending_length = true;
 	} else {
@@ -372,9 +374,8 @@ Playlist::notify_length_changed ()
 void
 Playlist::flush_notifications ()
 {
-	RegionList::iterator r;
-	RegionList::iterator a;
 	set<boost::shared_ptr<Region> > dependent_checks_needed;
+	set<boost::shared_ptr<Region> >::iterator s;
 	uint32_t n = 0;
 
 	if (in_flush) {
@@ -405,8 +406,18 @@ Playlist::flush_notifications ()
 		/* don't increment n again - its the same list */
 	}
 
-	for (set<boost::shared_ptr<Region> >::iterator x = dependent_checks_needed.begin(); x != dependent_checks_needed.end(); ++x) {
-		check_dependents (*x, false);
+	for (s = pending_adds.begin(); s != pending_adds.end(); ++s) {
+		dependent_checks_needed.insert (*s);
+		n++;
+	}
+
+	for (s = dependent_checks_needed.begin(); s != dependent_checks_needed.end(); ++s) {
+		check_dependents (*s, false);
+	}
+
+	for (s = pending_removes.begin(); s != pending_removes.end(); ++s) {
+		remove_dependents (*s);
+		n++;
 	}
 
 	if ((freeze_length != _get_maximum_extent()) || pending_length) {
@@ -424,6 +435,8 @@ Playlist::flush_notifications ()
 		Modified (); /* EMIT SIGNAL */
 	}
 
+	pending_adds.clear ();
+	pending_removes.clear ();
 	pending_bounds.clear ();
 
 	in_flush = false;
@@ -543,7 +556,7 @@ Playlist::remove_region_internal (boost::shared_ptr<Region>region, bool delay_so
 	RegionList::iterator i;
 	nframes_t old_length = 0;
 
-	// cerr << "removing region " << region->name() << endl;
+	cerr << "removing region " << region->name() << " holding = " << holding_state() << endl;
 
 	if (!holding_state()) {
 		old_length = _get_maximum_extent();
@@ -1155,20 +1168,21 @@ Playlist::region_changed (Change what_changed, boost::shared_ptr<Region> region)
 }
 
 void
-Playlist::clear ()
+Playlist::clear (bool with_signals)
 {
-	RegionList::iterator i;
-	RegionList tmp;
-
 	{ 
 		RegionLock rl (this);
-		tmp = regions;
+		for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+			pending_removes.insert (*i);
+		}
 		regions.clear ();
 	}
-	
-	for (i = tmp.begin(); i != tmp.end(); ++i) {
-		notify_region_removed (*i);
+
+	if (with_signals) {
+		LengthChanged ();
+		Modified ();
 	}
+
 }
 
 /***********************************************************************
@@ -1331,10 +1345,7 @@ Playlist::set_state (const XMLNode& node)
 		}
 	}
 
-	{ 
-		RegionLock rl (this);
-		regions.clear ();
-	}
+	clear (false);
 	
 	nlist = node.children();
 

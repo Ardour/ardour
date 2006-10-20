@@ -45,7 +45,7 @@ class AudioPlaylist : public ARDOUR::Playlist
 	AudioPlaylist (const AudioPlaylist&, string name, bool hidden = false);
 	AudioPlaylist (const AudioPlaylist&, nframes_t start, nframes_t cnt, string name, bool hidden = false);
 
-	void clear ();
+	void clear (bool with_signals=true);
 
         nframes_t read (Sample *dst, Sample *mixdown, float *gain_buffer, nframes_t start, nframes_t cnt, uint32_t chan_n=0);
 
