@@ -1071,7 +1071,8 @@ AudioRegion::source_equivalent (boost::shared_ptr<const Region> o) const
 int
 AudioRegion::apply (AudioFilter& filter)
 {
-	return filter.run (boost::shared_ptr<AudioRegion> (this));
+	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (shared_from_this());
+	return filter.run (ar);
 }
 
 int

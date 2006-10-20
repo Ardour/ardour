@@ -28,6 +28,7 @@
 
 #include <glibmm/thread.h>
 #include <pbd/xml++.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/region.h>
 #include <ardour/playlist.h>
@@ -143,6 +144,8 @@ Region::Region (const XMLNode& node)
 
 Region::~Region ()
 {
+	// cerr << "====== " << _name << " DESTRUCTOR\n";
+	// stacktrace (cerr);
 	/* derived classes must call notify_callbacks() and then emit GoingAway */
 }
 
@@ -278,7 +281,7 @@ Region::set_position_on_top (nframes_t pos, void *src)
 		_position = pos;
 	}
 
-	_playlist->raise_region_to_top (boost::shared_ptr<Region>(this));
+	_playlist->raise_region_to_top (shared_from_this ());
 
 	/* do this even if the position is the same. this helps out
 	   a GUI that has moved its representation already.
@@ -669,7 +672,7 @@ Region::raise ()
 		return;
 	}
 
-	_playlist->raise_region (boost::shared_ptr<Region>(this));
+	_playlist->raise_region (shared_from_this ());
 }
 
 void
@@ -679,7 +682,7 @@ Region::lower ()
 		return;
 	}
 
-	_playlist->lower_region (boost::shared_ptr<Region>(this));
+	_playlist->lower_region (shared_from_this ());
 }
 
 void
@@ -690,7 +693,7 @@ Region::raise_to_top ()
 		return;
 	}
 
-	_playlist->raise_region_to_top (boost::shared_ptr<Region>(this));
+	_playlist->raise_region_to_top (shared_from_this());
 }
 
 void
@@ -700,7 +703,7 @@ Region::lower_to_bottom ()
 		return;
 	}
 
-	_playlist->lower_region_to_bottom (boost::shared_ptr<Region>(this));
+	_playlist->lower_region_to_bottom (shared_from_this());
 }
 
 void
