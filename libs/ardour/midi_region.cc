@@ -51,8 +51,6 @@ using namespace ARDOUR;
 MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, jack_nframes_t start, jack_nframes_t length)
 	: Region (src, start, length, PBD::basename_nosuffix(src->name()), DataType::MIDI, 0,  Region::Flag(Region::DefaultFlags|Region::External))
 {
-	save_state ("initial state");
-
 	assert(_name.find("/") == string::npos);
 }
 
@@ -60,8 +58,6 @@ MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, jack_nframes_t start,
 MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (src, start, length, name, DataType::MIDI, layer, flags)
 {
-	save_state ("initial state");
-
 	assert(_name.find("/") == string::npos);
 }
 
@@ -69,8 +65,6 @@ MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, jack_nframes_t start,
 MidiRegion::MidiRegion (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (srcs, start, length, name, DataType::MIDI, layer, flags)
 {
-	save_state ("initial state");
-
 	assert(_name.find("/") == string::npos);
 }
 
@@ -79,16 +73,12 @@ MidiRegion::MidiRegion (SourceList& srcs, jack_nframes_t start, jack_nframes_t l
 MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, jack_nframes_t offset, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (other, offset, length, name, layer, flags)
 {
-	save_state ("initial state");
-
 	assert(_name.find("/") == string::npos);
 }
 
 MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
 	: Region (other)
 {
-	save_state ("initial state");
-
 	assert(_name.find("/") == string::npos);
 }
 
@@ -98,8 +88,6 @@ MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, const XMLNode& node)
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
-
-	save_state ("initial state");
 
 	assert(_name.find("/") == string::npos);
 	assert(_type == DataType::MIDI);
@@ -112,8 +100,6 @@ MidiRegion::MidiRegion (SourceList& srcs, const XMLNode& node)
 		throw failed_constructor();
 	}
 
-	save_state ("initial state");
-
 	assert(_name.find("/") == string::npos);
 	assert(_type == DataType::MIDI);
 }
@@ -121,40 +107,6 @@ MidiRegion::MidiRegion (SourceList& srcs, const XMLNode& node)
 MidiRegion::~MidiRegion ()
 {
 	GoingAway (); /* EMIT SIGNAL */
-}
-
-StateManager::State*
-MidiRegion::state_factory (std::string why) const
-{
-	RegionState* state = new RegionState (why);
-
-	Region::store_state (*state);
-
-	return state;
-}	
-
-Change
-MidiRegion::restore_state (StateManager::State& sstate) 
-{
-	RegionState* state = dynamic_cast<RegionState*> (&sstate);
-	Change what_changed = Region::restore_and_return_flags (*state);
-	
-	if (_flags != Flag (state->_flags)) {
-		
-		//uint32_t old_flags = _flags;
-		
-		_flags = Flag (state->_flags);
-	}
-		
-	what_changed = Change (what_changed);
-
-	return what_changed;
-}
-
-UndoAction
-MidiRegion::get_memento() const
-{
-	return sigc::bind (mem_fun (*(const_cast<MidiRegion *> (this)), &StateManager::use_state), _current_state_id);
 }
 
 jack_nframes_t

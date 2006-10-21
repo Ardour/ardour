@@ -38,19 +38,6 @@ class AudioPlaylist : public ARDOUR::Playlist
 {
   public:
 	typedef std::list<Crossfade*> Crossfades;
-
-  private:
-	
-	struct State : public ARDOUR::StateManager::State {
-	    RegionList regions;
-	    std::list<UndoAction> region_states;
-	    
-	    Crossfades crossfades;
-	    std::list<UndoAction> crossfade_states;
-	    
-	    State (std::string why) : ARDOUR::StateManager::State (why) {}
-	    ~State ();
-	};
 	
    public:
 	AudioPlaylist (Session&, const XMLNode&, bool hidden = false);
@@ -58,34 +45,20 @@ class AudioPlaylist : public ARDOUR::Playlist
 	AudioPlaylist (const AudioPlaylist&, string name, bool hidden = false);
 	AudioPlaylist (const AudioPlaylist&, nframes_t start, nframes_t cnt, string name, bool hidden = false);
 
-	void clear (bool with_save = true);
+	void clear (bool with_signals=true);
 
         nframes_t read (Sample *dst, Sample *mixdown, float *gain_buffer, nframes_t start, nframes_t cnt, uint32_t chan_n=0);
 
 	int set_state (const XMLNode&);
-	UndoAction get_memento() const;
 
 	sigc::signal<void,Crossfade *> NewCrossfade; 
 
 	template<class T> void foreach_crossfade (T *t, void (T::*func)(Crossfade *));
 	void crossfades_at (nframes_t frame, Crossfades&);
 
-	template<class T> void apply_to_history (T& obj, void (T::*method)(const ARDOUR::StateManager::StateMap&, state_id_t)) {
-		RegionLock rlock (this);
-		(obj.*method) (states, _current_state_id);
-	}
-
 	bool destroy_region (boost::shared_ptr<Region>);
 
-	void drop_all_states ();
-
     protected:
-
-	/* state management */
-
-	StateManager::State* state_factory (std::string) const;
-	Change restore_state (StateManager::State&);
-	void send_state_change (Change);
 
 	/* playlist "callbacks" */
 	void notify_crossfade_added (Crossfade *);
@@ -101,7 +74,7 @@ class AudioPlaylist : public ARDOUR::Playlist
        ~AudioPlaylist (); /* public should use unref() */
 
     private:
-       Crossfades      _crossfades;
+       Crossfades      _crossfades;    /* xfades currently in use */
        Crossfades      _pending_xfade_adds;
 
        void crossfade_invalidated (Crossfade*);

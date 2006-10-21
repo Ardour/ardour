@@ -40,7 +40,6 @@
 #include <ardour/ardour.h>
 #include <ardour/crossfade_compare.h>
 #include <ardour/location.h>
-#include <ardour/state_manager.h>
 #include <ardour/data_type.h>
 
 namespace ARDOUR  {
@@ -48,7 +47,7 @@ namespace ARDOUR  {
 class Session;
 class Region;
 
-class Playlist : public StateManager, public PBD::StatefulDestructible {
+class Playlist : public PBD::StatefulDestructible {
   public:
 	typedef list<boost::shared_ptr<Region> >    RegionList;
 
@@ -57,9 +56,8 @@ class Playlist : public StateManager, public PBD::StatefulDestructible {
 	Playlist (const Playlist&, string name, bool hidden = false);
 	Playlist (const Playlist&, nframes_t start, nframes_t cnt, string name, bool hidden = false);
 
-	virtual void clear (bool with_save = true);
+	virtual void clear (bool with_signals=true);
 	virtual void dump () const;
-	virtual UndoAction get_memento() const = 0;
 
 	void ref();
 	void unref();
@@ -83,7 +81,7 @@ class Playlist : public StateManager, public PBD::StatefulDestructible {
 
 	/* Editing operations */
 
-	void add_region (boost::shared_ptr<Region>, nframes_t position, float times = 1, bool with_save = true);
+	void add_region (boost::shared_ptr<Region>, nframes_t position, float times = 1);
 	void remove_region (boost::shared_ptr<Region>);
 	void get_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
 	void get_region_list_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
@@ -114,8 +112,6 @@ class Playlist : public StateManager, public PBD::StatefulDestructible {
 	int set_state (const XMLNode&);
 	XMLNode& get_template ();
 
-	sigc::signal<void,boost::shared_ptr<Region> > RegionAdded;
-	sigc::signal<void,boost::shared_ptr<Region> > RegionRemoved;
 	sigc::signal<void,Playlist*,bool> InUse;
 	sigc::signal<void>                Modified;
 	sigc::signal<void>                NameChanged;
@@ -172,20 +168,21 @@ class Playlist : public StateManager, public PBD::StatefulDestructible {
 	friend class RegionLock;
 
 	RegionList       regions;  /* the current list of regions in the playlist */
+	std::set<boost::shared_ptr<Region> > all_regions; /* all regions ever added to this playlist */
 	string          _name;
 	Session&        _session;
 	DataType        _type;
 	mutable gint    block_notifications;
 	mutable gint    ignore_state_changes;
 	mutable Glib::Mutex region_lock;
-	RegionList       pending_removals;
-	RegionList       pending_adds;
+	std::set<boost::shared_ptr<Region> > pending_adds;
+	std::set<boost::shared_ptr<Region> > pending_removes;
 	RegionList       pending_bounds;
 	bool             pending_modified;
 	bool             pending_length;
 	bool             save_on_thaw;
 	string           last_save_reason;
-	bool             in_set_state;
+	uint32_t         in_set_state;
 	bool            _hidden;
 	bool            _splicing;
 	bool            _nudging;
@@ -248,10 +245,7 @@ class Playlist : public StateManager, public PBD::StatefulDestructible {
 
 	virtual XMLNode& state (bool);
 
-	/* override state_manager::save_state so we can check in_set_state() */
-
-	void save_state (std::string why);
-	void maybe_save_state (std::string why);
+	boost::shared_ptr<Region> region_by_id (PBD::ID);
 
 	void add_region_internal (boost::shared_ptr<Region>, nframes_t position, bool delay_sort = false);
 

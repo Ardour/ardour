@@ -441,7 +441,7 @@ class Editor : public PublicEditor
 	bool set_selected_regionview_from_click (bool press, Selection::Operation op = Selection::Set, bool no_track_remove=false);
 
 	void set_selected_regionview_from_region_list (boost::shared_ptr<ARDOUR::Region> region, Selection::Operation op = Selection::Set);
-	bool set_selected_regionview_from_map_event (GdkEventAny*, StreamView*, boost::shared_ptr<ARDOUR::Region>);
+	bool set_selected_regionview_from_map_event (GdkEventAny*, StreamView*, boost::weak_ptr<ARDOUR::Region>);
 	void collect_new_region_view (RegionView *);
 
 	Gtk::Menu track_context_menu;

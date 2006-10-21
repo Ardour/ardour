@@ -469,12 +469,21 @@ Session::~Session ()
 	cerr << "delete regions\n";
 #endif /* TRACK_DESTRUCTION */
 	
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+	for (RegionList::iterator i = regions.begin(); i != regions.end(); ) {
+		RegionList::iterator tmp;
+
+		tmp = i;
+		++tmp;
+
+		cerr << "dropping refs on a region (" << i->second->name() << " @ " << i->second << ") with UC = " << i->second.use_count() << endl;
 		i->second->drop_references ();
+		cerr << "AFTER: UC = " << i->second.use_count() << endl;
+
+		i = tmp;
 	}
 
 	regions.clear ();
-	
+
 #ifdef TRACK_DESTRUCTION
 	cerr << "delete routes\n";
 #endif /* TRACK_DESTRUCTION */

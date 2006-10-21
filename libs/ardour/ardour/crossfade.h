@@ -33,7 +33,6 @@
 #include <ardour/ardour.h>
 #include <ardour/curve.h>
 #include <ardour/audioregion.h>
-#include <ardour/state_manager.h>
 #include <ardour/crossfade_compare.h>
 
 namespace ARDOUR {
@@ -41,19 +40,7 @@ namespace ARDOUR {
 class AudioRegion;
 class Playlist;
 
-struct CrossfadeState : public StateManager::State {
-    CrossfadeState (std::string reason) : StateManager::State (reason) {}
-
-    UndoAction fade_in_memento;
-    UndoAction fade_out_memento;
-    nframes_t position;
-    nframes_t length;
-    AnchorPoint    anchor_point;
-    bool           follow_overlap;
-    bool           active;
-};
-
-class Crossfade : public PBD::StatefulDestructible, public StateManager
+class Crossfade : public PBD::StatefulDestructible
 {
   public:
 
@@ -121,15 +108,16 @@ class Crossfade : public PBD::StatefulDestructible, public StateManager
 	nframes_t overlap_length() const;
 	nframes_t position() const { return _position; }
 
+	void invalidate();
+
 	sigc::signal<void,Crossfade*> Invalidated;
+	sigc::signal<void,Change>     StateChanged;
 
 	bool covers (nframes_t frame) const {
 		return _position <= frame && frame < _position + _length;
 	}
 
 	OverlapType coverage (nframes_t start, nframes_t end) const;
-
-	UndoAction get_memento() const;	
 
 	static void set_buffer_size (nframes_t);
 
@@ -149,6 +137,7 @@ class Crossfade : public PBD::StatefulDestructible, public StateManager
 	static void set_short_xfade_length (nframes_t n);
 
 	static Change ActiveChanged;
+	static Change FollowOverlapChanged;
 
   private:
 	friend struct CrossfadeComparePtr;
@@ -172,15 +161,11 @@ class Crossfade : public PBD::StatefulDestructible, public StateManager
 	static Sample* crossfade_buffer_out;
 	static Sample* crossfade_buffer_in;
 
-	void initialize (bool savestate=true);
+	void initialize ();
 	int  compute (boost::shared_ptr<ARDOUR::AudioRegion>, boost::shared_ptr<ARDOUR::AudioRegion>, CrossfadeModel);
 	bool update (bool force);
 
-	StateManager::State* state_factory (std::string why) const;
-	Change restore_state (StateManager::State&);
-
 	void member_changed (ARDOUR::Change);
-
 };
 
 

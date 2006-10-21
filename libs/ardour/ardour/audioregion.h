@@ -42,18 +42,6 @@ class Session;
 class AudioFilter;
 class AudioSource;
 
-struct AudioRegionState : public RegionState 
-{
-	AudioRegionState (std::string why);
-
-	Curve    _fade_in;
-	Curve    _fade_out;
-	Curve    _envelope;
-	gain_t   _scale_amplitude;
-	uint32_t _fade_in_disabled;
-	uint32_t _fade_out_disabled;
-};
-
 class AudioRegion : public Region
 {
   public:
@@ -125,8 +113,6 @@ class AudioRegion : public Region
 
 	int separate_by_channel (ARDOUR::Session&, vector<AudioRegion*>&) const;
 
-	UndoAction get_memento() const;
-
 	/* filter */
 
 	int apply (AudioFilter&);
@@ -159,9 +145,6 @@ class AudioRegion : public Region
 	void set_default_fade_out ();
 	void set_default_envelope ();
 
-	StateManager::State* state_factory (std::string why) const;
-	Change restore_state (StateManager::State&);
-
 	void recompute_gain_at_end ();
 	void recompute_gain_at_start ();
 
@@ -185,6 +168,9 @@ class AudioRegion : public Region
 	gain_t            _scale_amplitude;
 	uint32_t          _fade_in_disabled;
 	uint32_t          _fade_out_disabled;
+
+  protected:
+	int set_live_state (const XMLNode&, Change&, bool send);
 };
 
 } /* namespace ARDOUR */

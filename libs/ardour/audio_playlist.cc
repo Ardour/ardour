@@ -39,21 +39,15 @@ using namespace sigc;
 using namespace std;
 using namespace PBD;
 
-AudioPlaylist::State::~State ()
-{
-}
-
 AudioPlaylist::AudioPlaylist (Session& session, const XMLNode& node, bool hidden)
 	: Playlist (session, node, DataType::AUDIO, hidden)
 {
 	const XMLProperty* prop = node.property("type");
 	assert(!prop || DataType(prop->value()) == DataType::AUDIO);
 
-	in_set_state = true;
+	in_set_state++;
 	set_state (node);
-	in_set_state = false;
-
-	save_state (_("initial state"));
+	in_set_state--;
 
 	if (!hidden) {
 		PlaylistCreated (this); /* EMIT SIGNAL */
@@ -63,8 +57,6 @@ AudioPlaylist::AudioPlaylist (Session& session, const XMLNode& node, bool hidden
 AudioPlaylist::AudioPlaylist (Session& session, string name, bool hidden)
 	: Playlist (session, name, DataType::AUDIO, hidden)
 {
-	save_state (_("initial state"));
-
 	if (!hidden) {
 		PlaylistCreated (this); /* EMIT SIGNAL */
 	}
@@ -74,8 +66,6 @@ AudioPlaylist::AudioPlaylist (Session& session, string name, bool hidden)
 AudioPlaylist::AudioPlaylist (const AudioPlaylist& other, string name, bool hidden)
 	: Playlist (other, name, hidden)
 {
-	save_state (_("initial state"));
-
 	RegionList::const_iterator in_o  = other.regions.begin();
 	RegionList::iterator in_n = regions.begin();
 
@@ -121,8 +111,6 @@ AudioPlaylist::AudioPlaylist (const AudioPlaylist& other, string name, bool hidd
 AudioPlaylist::AudioPlaylist (const AudioPlaylist& other, nframes_t start, nframes_t cnt, string name, bool hidden)
 	: Playlist (other, start, cnt, name, hidden)
 {
-	save_state (_("initial state"));
-
 	/* this constructor does NOT notify others (session) */
 }
 
@@ -135,27 +123,24 @@ AudioPlaylist::~AudioPlaylist ()
 	/* drop connections to signals */
 
 	notify_callbacks ();
+	
 
-	for (Crossfades::iterator x = _crossfades.begin(); x != _crossfades.end(); ++x) {
-		all_xfades.insert (*x);
+	cerr << "deleting crossfades "  << _crossfades.size() << endl;
+
+	for (Crossfades::iterator x = _crossfades.begin(); x != _crossfades.end(); ) {
+		Crossfades::iterator tmp;
+
+		tmp = x;
+		++tmp;
+
+		delete *x;
+
+		cerr << _crossfades.size() << " to go\n";
+
+		x = tmp;
 	}
 
-	for (StateMap::iterator i = states.begin(); i != states.end(); ++i) {
-
-		AudioPlaylist::State* apstate = dynamic_cast<AudioPlaylist::State*> (*i);
-
-		for (Crossfades::iterator xf = apstate->crossfades.begin(); xf != apstate->crossfades.end(); ++xf) {
-			all_xfades.insert (*xf);
-		}
-
-		delete apstate;
-	}
-
-	/* delete every crossfade */
-
-	for (set<Crossfade *>::iterator axf = all_xfades.begin(); axf != all_xfades.end(); ++axf) {
-		delete *axf;
-	}
+	cerr << "done\n";
 }
 
 struct RegionSortByLayer {
@@ -258,6 +243,10 @@ AudioPlaylist::remove_dependents (boost::shared_ptr<Region> region)
 {
 	Crossfades::iterator i, tmp;
 	boost::shared_ptr<AudioRegion> r = boost::dynamic_pointer_cast<AudioRegion> (region);
+
+	if (in_set_state) {
+		return;
+	}
 	
 	if (r == 0) {
 		fatal << _("programming error: non-audio Region passed to remove_overlap in audio playlist")
@@ -269,9 +258,9 @@ AudioPlaylist::remove_dependents (boost::shared_ptr<Region> region)
 		tmp = i;
 		tmp++;
 
+		
 		if ((*i)->involves (r)) {
-			/* do not delete crossfades */
-			_crossfades.erase (i);
+			delete *i;
 		}
 		
 		i = tmp;
@@ -386,6 +375,8 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 		return;
 	}
 
+	cerr << "Check dependents of " << r->name() << endl;
+
 	if ((region = boost::dynamic_pointer_cast<AudioRegion> (r)) == 0) {
 		fatal << _("programming error: non-audio Region tested for overlap in audio playlist")
 		      << endmsg;
@@ -450,8 +441,8 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 					add_crossfade (*xfade);
 					
 				} else {
-		
-					xfade = new Crossfade (other, region, Config->get_xfade_model(), Config->get_crossfades_active());
+
+					xfade = new Crossfade (other, region, Config->get_xfade_model(), Config->get_xfades_active());
 					add_crossfade (*xfade);
 				}
 			} 
@@ -473,7 +464,10 @@ AudioPlaylist::add_crossfade (Crossfade& xfade)
 {
 	Crossfades::iterator ci;
 
+	cerr << "adding xfade involving " << xfade.in()->name() << " and " << xfade.out()->name() << endl;
+
 	for (ci = _crossfades.begin(); ci != _crossfades.end(); ++ci) {
+		cerr << "\tcompare to " << (*ci)->in()->name() << " and " << (*ci)->out()->name() << endl;
 		if (*(*ci) == xfade) { // Crossfade::operator==()
 			break;
 		}
@@ -520,9 +514,10 @@ AudioPlaylist::set_state (const XMLNode& node)
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
 
-	if (!in_set_state) {
-		Playlist::set_state (node);
-	}
+	in_set_state++;
+	freeze ();
+
+	Playlist::set_state (node);
 
 	nlist = node.children();
 
@@ -530,155 +525,49 @@ AudioPlaylist::set_state (const XMLNode& node)
 
 		child = *niter;
 
-		if (child->name() == "Crossfade") {
-
-			Crossfade *xfade;
-			
-			try {
-				xfade = new Crossfade (*((const Playlist *)this), *child);
-			}
-
-			catch (failed_constructor& err) {
-			  //	cout << string_compose (_("could not create crossfade object in playlist %1"),
-			  //	  _name) 
-			  //    << endl;
-				continue;
-			}
-
-			Crossfades::iterator ci;
-
-			for (ci = _crossfades.begin(); ci != _crossfades.end(); ++ci) {
-				if (*(*ci) == *xfade) {
-					break;
-				}
-			}
-
-			if (ci == _crossfades.end()) {
-				_crossfades.push_back (xfade);
-				xfade->Invalidated.connect (mem_fun (*this, &AudioPlaylist::crossfade_invalidated));
-				xfade->StateChanged.connect (mem_fun (*this, &AudioPlaylist::crossfade_changed));
-				NewCrossfade(xfade);
-			} else {
-				delete xfade;
-			}
+		if (child->name() != "Crossfade") {
+			continue;
 		}
 
+		try {
+			Crossfade* xfade = new Crossfade (*((const Playlist *)this), *child);
+			_crossfades.push_back (xfade);
+			xfade->Invalidated.connect (mem_fun (*this, &AudioPlaylist::crossfade_invalidated));
+			xfade->StateChanged.connect (mem_fun (*this, &AudioPlaylist::crossfade_changed));
+			NewCrossfade(xfade);
+		}
+		
+		catch (failed_constructor& err) {
+			//	cout << string_compose (_("could not create crossfade object in playlist %1"),
+			//	  _name) 
+			//    << endl;
+			continue;
+		}
 	}
+
+	thaw ();
+	in_set_state++;
 
 	return 0;
 }
 
 void
-AudioPlaylist::drop_all_states ()
+AudioPlaylist::clear (bool with_signals)
 {
-	set<Crossfade*> all_xfades;
-	set<boost::shared_ptr<Region> > all_regions;
+	for (Crossfades::iterator i = _crossfades.begin(); i != _crossfades.end(); ) {
 
-	/* find every region we've ever used, and add it to the set of 
-	   all regions. same for xfades;
-	*/
+		Crossfades::iterator tmp;
+		tmp = i;
+		++tmp;
 
-	for (StateMap::iterator i = states.begin(); i != states.end(); ++i) {
-		
-		AudioPlaylist::State* apstate = dynamic_cast<AudioPlaylist::State*> (*i);
+		delete *i;
 
-		for (RegionList::iterator r = apstate->regions.begin(); r != apstate->regions.end(); ++r) {
-			all_regions.insert (*r);
-		}
-
-		for (Crossfades::iterator xf = apstate->crossfades.begin(); xf != apstate->crossfades.end(); ++xf) {
-			all_xfades.insert (*xf);
-		}
+		i = tmp;
 	}
 
-	/* now remove from the "all" lists every region that is in the current list. */
-
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-		set<boost::shared_ptr<Region> >::iterator x = all_regions.find (*i);
-		if (x != all_regions.end()) {
-			all_regions.erase (x);
-		}
-	}
-
-	/* ditto for every crossfade */
-
-	for (list<Crossfade*>::iterator i = _crossfades.begin(); i != _crossfades.end(); ++i) {
-		set<Crossfade*>::iterator x = all_xfades.find (*i);
-		if (x != all_xfades.end()) {
-			all_xfades.erase (x);
-		}
-	}
-
-	/* delete every crossfade that is left (ditto as per regions) */
-
-	for (set<Crossfade *>::iterator axf = all_xfades.begin(); axf != all_xfades.end(); ++axf) {
-		delete *axf;
-	}
-
-	/* Now do the generic thing ... */
-
-	StateManager::drop_all_states ();
-}
-
-StateManager::State*
-AudioPlaylist::state_factory (std::string why) const
-{
-	State* state = new State (why);
-
-	state->regions = regions;
-	state->region_states.clear ();
-	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-		state->region_states.push_back ((*i)->get_memento());
-	}
-
-	state->crossfades = _crossfades;
-	state->crossfade_states.clear ();
-	for (Crossfades::const_iterator i = _crossfades.begin(); i != _crossfades.end(); ++i) {
-		state->crossfade_states.push_back ((*i)->get_memento());
-	}
-	return state;
-}
-
-Change
-AudioPlaylist::restore_state (StateManager::State& state)
-{ 
-	{ 
-		RegionLock rlock (this);
-		State* apstate = dynamic_cast<State*> (&state);
-
-		in_set_state = true;
-
-		regions = apstate->regions;
-
-		for (list<UndoAction>::iterator s = apstate->region_states.begin(); s != apstate->region_states.end(); ++s) {
-			(*s) ();
-		}
-
-		_crossfades = apstate->crossfades;
-		
-		for (list<UndoAction>::iterator s = apstate->crossfade_states.begin(); s != apstate->crossfade_states.end(); ++s) {
-			(*s) ();
-		}
-
-		in_set_state = false;
-	}
-
-	notify_length_changed ();
-	return Change (~0);
-}
-
-UndoAction
-AudioPlaylist::get_memento () const
-{
-	return sigc::bind (mem_fun (*(const_cast<AudioPlaylist*> (this)), &StateManager::use_state), _current_state_id);
-}
-
-void
-AudioPlaylist::clear (bool with_save)
-{
 	_crossfades.clear ();
 	
-	Playlist::clear (with_save);
+	Playlist::clear (with_signals);
 }
 
 XMLNode&
@@ -779,52 +668,6 @@ AudioPlaylist::destroy_region (boost::shared_ptr<Region> region)
 		c = ctmp;
 	}
 
-	for (StateMap::iterator s = states.begin(); s != states.end(); ) {
-		StateMap::iterator tmp;
-
-		tmp = s;
-		++tmp;
-
-		State* astate = dynamic_cast<State*> (*s);
-		
-		for (c = astate->crossfades.begin(); c != astate->crossfades.end(); ) {
-
-			ctmp = c;
-			++ctmp;
-
-			if ((*c)->involves (r)) {
-				unique_xfades.insert (*c);
-				_crossfades.erase (c);
-			}
-
-			c = ctmp;
-		}
-
-		list<UndoAction>::iterator rsi, rsitmp;
-		RegionList::iterator ri, ritmp;
-
-		for (ri = astate->regions.begin(), rsi = astate->region_states.begin(); 
-		     ri != astate->regions.end() && rsi != astate->region_states.end();) {
-
-
-			ritmp = ri;
-			++ritmp;
-
-			rsitmp = rsi; 
-			++rsitmp;
-
-			if (region == (*ri)) {
-				astate->regions.erase (ri);
-				astate->region_states.erase (rsi);
-			}
-
-			ri = ritmp;
-			rsi = rsitmp;
-		}
-		
-		s = tmp;
-	}
-
 	for (set<Crossfade*>::iterator c = unique_xfades.begin(); c != unique_xfades.end(); ++c) {
 		delete *c;
 	}
@@ -850,8 +693,6 @@ AudioPlaylist::crossfade_changed (Change ignored)
 	   that occured.
 	*/
 
-	maybe_save_state (_("xfade change"));
-
 	notify_modified ();
 }
 
@@ -872,8 +713,6 @@ AudioPlaylist::region_changed (Change what_changed, boost::shared_ptr<Region> re
 	bool parent_wants_notify;
 
 	parent_wants_notify = Playlist::region_changed (what_changed, region);
-
-	maybe_save_state (_("region modified"));
 
 	if ((parent_wants_notify || (what_changed & our_interests))) {
 		notify_modified ();

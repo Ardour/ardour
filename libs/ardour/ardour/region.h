@@ -29,7 +29,6 @@
 #include <pbd/statefuldestructible.h> 
 
 #include <ardour/ardour.h>
-#include <ardour/state_manager.h>
 #include <ardour/data_type.h>
 
 class XMLNode;
@@ -44,21 +43,7 @@ enum RegionEditState {
 	EditChangesID      = 2
 };
 
-struct RegionState : public StateManager::State
-{
-	RegionState (std::string why) : StateManager::State (why) {}
-
-	nframes_t          _start;
-	nframes_t          _length;
-	nframes_t          _position;
-	uint32_t                _flags;
-	nframes_t          _sync_position;
-	layer_t        	        _layer;
-	string                  _name;        
-	mutable RegionEditState _first_edit;
-};
-
-class Region : public PBD::StatefulDestructible, public StateManager, public boost::enable_shared_from_this<Region>
+class Region : public PBD::StatefulDestructible, public boost::enable_shared_from_this<Region>
 {
   public:
 	typedef std::vector<boost::shared_ptr<Source> > SourceList;
@@ -95,6 +80,8 @@ class Region : public PBD::StatefulDestructible, public StateManager, public boo
 	static Change LockChanged;
 	static Change LayerChanged;
 	static Change HiddenChanged;
+
+	sigc::signal<void,Change> StateChanged;
 
 	virtual ~Region();
 
@@ -181,8 +168,6 @@ class Region : public PBD::StatefulDestructible, public StateManager, public boo
 
 	ARDOUR::Playlist* playlist() const { return _playlist; }
 
-	virtual UndoAction get_memento() const = 0;
-
 	void set_playlist (ARDOUR::Playlist*);
 
 	void source_deleted (boost::shared_ptr<Source>);
@@ -198,6 +183,7 @@ class Region : public PBD::StatefulDestructible, public StateManager, public boo
 	XMLNode&         get_state ();
 	virtual XMLNode& state (bool);
 	virtual int      set_state (const XMLNode&);
+	virtual int      set_live_state (const XMLNode&, Change&, bool send);
 
 	boost::shared_ptr<Region> get_parent();
 	
@@ -220,15 +206,8 @@ class Region : public PBD::StatefulDestructible, public StateManager, public boo
   protected:
 	XMLNode& get_short_state (); /* used only by Session */
 
-	/* state management */
-
 	void send_change (Change);
 
-	/* derived classes need these during their own state management calls */
-
-	void   store_state (RegionState&) const;
-	Change restore_and_return_flags (RegionState&);
-	
 	void trim_to_internal (nframes_t position, nframes_t length, void *src);
 
 	bool copied() const { return _flags & Copied; }

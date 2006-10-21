@@ -244,9 +244,6 @@ RouteTimeAxisView::set_playlist (Playlist *newplaylist)
 	assert(pl);
 
 	modified_connection.disconnect ();
-	state_changed_connection.disconnect ();
-	
-	state_changed_connection = pl->StateChanged.connect (mem_fun(*this, &RouteTimeAxisView::playlist_state_changed));
 	modified_connection = pl->Modified.connect (mem_fun(*this, &RouteTimeAxisView::playlist_modified));
 }
 

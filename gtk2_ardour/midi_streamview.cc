@@ -142,7 +142,9 @@ MidiStreamView::redisplay_diskstream ()
 
 	/* now fix layering */
 
-	playlist_modified ();
+	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+		region_layered (*i);
+	}
 }
 
 

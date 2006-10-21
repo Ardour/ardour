@@ -116,7 +116,6 @@ protected:
 	virtual void redisplay_diskstream () = 0;
 	void         diskstream_changed ();
 	
-	void         playlist_state_changed (ARDOUR::Change);
 	virtual void playlist_changed (boost::shared_ptr<ARDOUR::Diskstream>);
 	virtual void playlist_modified ();
 	

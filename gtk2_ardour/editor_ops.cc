@@ -2910,14 +2910,26 @@ Editor::cut_copy_points (CutCopyOp op)
 	}
 }
 
+struct PlaylistState {
+    Playlist* playlist;
+    XMLNode*  before;
+};
+
+struct lt_playlist {
+    bool operator () (const PlaylistState& a, const PlaylistState& b) {
+	    return a.playlist < b.playlist;
+    }
+};
+	
 void
 Editor::cut_copy_regions (CutCopyOp op)
 {
         typedef std::map<AudioPlaylist*,AudioPlaylist*> PlaylistMapping;
 	PlaylistMapping pmap;
 	nframes_t first_position = max_frames;
-	set<Playlist*> freezelist;
-	pair<set<Playlist*>::iterator,bool> insert_result;
+
+	set<PlaylistState, lt_playlist> freezelist;
+	pair<set<PlaylistState, lt_playlist>::iterator,bool> insert_result;
 
 	for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
 		first_position = min ((*x)->region()->position(), first_position);
@@ -2925,10 +2937,15 @@ Editor::cut_copy_regions (CutCopyOp op)
 		if (op == Cut || op == Clear) {
 			AudioPlaylist *pl = dynamic_cast<AudioPlaylist*>((*x)->region()->playlist());
 			if (pl) {
-				insert_result = freezelist.insert (pl);
+
+				PlaylistState before;
+				before.playlist = pl;
+				before.before = &pl->get_state();
+				
+				insert_result = freezelist.insert (before);
+
 				if (insert_result.second) {
 					pl->freeze ();
-                                        session->add_command (new MementoCommand<Playlist>(*pl, &pl->get_state(), 0));
 				}
 			}
 		}
@@ -2990,9 +3007,9 @@ Editor::cut_copy_regions (CutCopyOp op)
 		cut_buffer->set (foo);
 	}
 	
-	for (set<Playlist*>::iterator pl = freezelist.begin(); pl != freezelist.end(); ++pl) {
-		(*pl)->thaw ();
-		session->add_command (new MementoCommand<Playlist>(*(*pl), 0, &(*pl)->get_state()));
+	for (set<PlaylistState, lt_playlist>::iterator pl = freezelist.begin(); pl != freezelist.end(); ++pl) {
+		(*pl).playlist->thaw ();
+		session->add_command (new MementoCommand<Playlist>(*(*pl).playlist, (*pl).before, &(*pl).playlist->get_state()));
 	}
 }
 
@@ -3323,7 +3340,7 @@ Editor::normalize_region ()
 			continue;
  		XMLNode &before = arv->region()->get_state();
 		arv->audio_region()->normalize_to (0.0f);
-		session->add_command (new MementoCommand<Region>(*(arv->region().get()), &before, &arv->region()->get_state()));
+		// session->add_command (new MementoCommand<Region>(*(arv->region().get()), &before, &arv->region()->get_state()));
 	}
 
 	commit_reversible_command ();

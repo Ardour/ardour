@@ -40,9 +40,6 @@ using namespace ARDOUR;
 using namespace sigc;
 using namespace std;
 
-MidiPlaylist::State::~State ()
-{}
-
 MidiPlaylist::MidiPlaylist (Session& session, const XMLNode& node, bool hidden)
 		: Playlist (session, node, DataType::MIDI, hidden)
 {
@@ -53,8 +50,6 @@ MidiPlaylist::MidiPlaylist (Session& session, const XMLNode& node, bool hidden)
 	set_state (node);
 	in_set_state = false;
 
-	save_state (_("initial state"));
-
 	if (!hidden) {
 		PlaylistCreated (this); /* EMIT SIGNAL */
 	}
@@ -63,8 +58,6 @@ MidiPlaylist::MidiPlaylist (Session& session, const XMLNode& node, bool hidden)
 MidiPlaylist::MidiPlaylist (Session& session, string name, bool hidden)
 		: Playlist (session, name, DataType::MIDI, hidden)
 {
-	save_state (_("initial state"));
-
 	if (!hidden) {
 		PlaylistCreated (this); /* EMIT SIGNAL */
 	}
@@ -75,7 +68,6 @@ MidiPlaylist::MidiPlaylist (const MidiPlaylist& other, string name, bool hidden)
 		: Playlist (other, name, hidden)
 {
 	throw; // nope
-	save_state (_("initial state"));
 
 	/*
 	list<Region*>::const_iterator in_o  = other.regions.begin();
@@ -122,20 +114,12 @@ MidiPlaylist::MidiPlaylist (const MidiPlaylist& other, string name, bool hidden)
 MidiPlaylist::MidiPlaylist (const MidiPlaylist& other, jack_nframes_t start, jack_nframes_t dur, string name, bool hidden)
 		: Playlist (other, start, dur, name, hidden)
 {
-	save_state (_("initial state"));
-
 	/* this constructor does NOT notify others (session) */
 }
 
 MidiPlaylist::~MidiPlaylist ()
 {
   	GoingAway (); /* EMIT SIGNAL */
-
-	for (StateMap::iterator i = states.begin(); i != states.end(); ++i) {
-
-		MidiPlaylist::State* apstate = dynamic_cast<MidiPlaylist::State*> (*i);
-		delete apstate;
-	}
 }
 
 struct RegionSortByLayer {
@@ -283,84 +267,6 @@ MidiPlaylist::set_state (const XMLNode& node)
 	return 0;
 }
 
-void
-MidiPlaylist::drop_all_states ()
-{
-	set<boost::shared_ptr<Region> > all_regions;
-
-	/* find every region we've ever used, and add it to the set of 
-	   all regions. same for xfades;
-	*/
-
-	for (StateMap::iterator i = states.begin(); i != states.end(); ++i) {
-		
-		MidiPlaylist::State* apstate = dynamic_cast<MidiPlaylist::State*> (*i);
-
-		for (RegionList::iterator r = apstate->regions.begin(); r != apstate->regions.end(); ++r) {
-			all_regions.insert (*r);
-		}
-	}
-
-	/* now remove from the "all" lists every region that is in the current list. */
-
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-		set<boost::shared_ptr<Region> >::iterator x = all_regions.find (*i);
-		if (x != all_regions.end()) {
-			all_regions.erase (x);
-		}
-	}
-	
-	/* Now do the generic thing ... */
-
-	StateManager::drop_all_states ();
-}
-
-StateManager::State*
-MidiPlaylist::state_factory (std::string why) const
-{
-	State* state = new State (why);
-
-	state->regions = regions;
-	state->region_states.clear ();
-	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-		state->region_states.push_back ((*i)->get_memento());
-	}
-
-	return state;
-}
-
-Change
-MidiPlaylist::restore_state (StateManager::State& state)
-{
-	{
-		RegionLock rlock (this);
-		State* apstate = dynamic_cast<State*> (&state);
-
-		in_set_state = true;
-
-		regions = apstate->regions;
-
-		for (list<UndoAction>::iterator s = apstate->
-		                                    region_states.begin();
-		        s != apstate->region_states.end();
-		        ++s) {
-			(*s) ();
-		}
-
-		in_set_state = false;
-	}
-
-	notify_length_changed ();
-	return Change (~0);
-}
-
-UndoAction
-MidiPlaylist::get_memento () const
-{
-	return sigc::bind (mem_fun (*(const_cast<MidiPlaylist*> (this)), &StateManager::use_state), _current_state_id);
-}
-
-
 XMLNode&
 MidiPlaylist::state (bool full_state)
 {
@@ -422,39 +328,6 @@ MidiPlaylist::destroy_region (boost::shared_ptr<Region> region)
 		}
 	}
 
-	for (StateMap::iterator s = states.begin(); s != states.end(); ) {
-		StateMap::iterator tmp;
-
-		tmp = s;
-		++tmp;
-
-		State* astate = dynamic_cast<State*> (*s);
-
-		list<UndoAction>::iterator rsi, rsitmp;
-		RegionList::iterator ri, ritmp;
-
-		for (ri = astate->regions.begin(), rsi = astate->region_states.begin();
-		        ri != astate->regions.end() && rsi != astate->region_states.end();) {
-
-
-			ritmp = ri;
-			++ritmp;
-
-			rsitmp = rsi;
-			++rsitmp;
-
-			if (region == (*ri)) {
-				astate->regions.erase (ri);
-				astate->region_states.erase (rsi);
-			}
-
-			ri = ritmp;
-			rsi = rsitmp;
-		}
-
-		s = tmp;
-	}
-
 
 	if (changed) {
 		/* overload this, it normally means "removed", not destroyed */
@@ -483,8 +356,6 @@ MidiPlaylist::region_changed (Change what_changed, boost::shared_ptr<Region> reg
 	bool parent_wants_notify;
 
 	parent_wants_notify = Playlist::region_changed (what_changed, region);
-
-	maybe_save_state (_("region modified"));
 
 	if ((parent_wants_notify || (what_changed & our_interests))) {
 		notify_modified ();

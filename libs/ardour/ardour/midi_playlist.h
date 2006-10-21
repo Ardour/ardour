@@ -37,18 +37,6 @@ class MidiRingBuffer;
 
 class MidiPlaylist : public ARDOUR::Playlist
 {
-private:
-
-	struct State : public ARDOUR::StateManager::State
-	{
-		RegionList regions;
-		std::list<UndoAction> region_states;
-
-		State (std::string why) : ARDOUR::StateManager::State (why)
-		{}
-		~State ();
-	};
-
 public:
 	MidiPlaylist (Session&, const XMLNode&, bool hidden = false);
 	MidiPlaylist (Session&, string name, bool hidden = false);
@@ -56,30 +44,15 @@ public:
 	MidiPlaylist (const MidiPlaylist&, jack_nframes_t start, jack_nframes_t cnt,
 	              string name, bool hidden = false);
 
-	jack_nframes_t read (MidiRingBuffer& buf,
-	                     jack_nframes_t start, jack_nframes_t cnt, uint32_t chan_n=0);
+	nframes_t read (MidiRingBuffer& buf,
+			jack_nframes_t start, jack_nframes_t cnt, uint32_t chan_n=0);
 
 	int set_state (const XMLNode&);
 	UndoAction get_memento() const;
 
-	template<class T>
-	void apply_to_history (T& obj, void (T::*method)(const ARDOUR::StateManager::StateMap&, state_id_t))
-	{
-		RegionLock rlock (this);
-		(obj.*method) (states, _current_state_id);
-	}
-
 	bool destroy_region (boost::shared_ptr<Region>);
 
-	void drop_all_states ();
-
 protected:
-
-	/* state management */
-
-	StateManager::State* state_factory (std::string) const;
-	Change restore_state (StateManager::State&);
-	void send_state_change (Change);
 
 	/* playlist "callbacks" */
 	void flush_notifications ();

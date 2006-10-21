@@ -4833,7 +4833,7 @@ Editor::mouse_brush_insert_region (RegionView* rv, nframes_t pos)
 	
 	// playlist is frozen, so we have to update manually
 	
-	playlist->StateChanged (Change (~0)); /* EMIT SIGNAL */
+	playlist->Modified(); /* EMIT SIGNAL */
 }
 
 gint

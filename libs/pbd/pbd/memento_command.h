@@ -26,6 +26,7 @@ using std::cerr;
 using std::endl;
 
 #include <pbd/command.h>
+#include <pbd/stacktrace.h>
 #include <pbd/xml++.h>
 #include <sigc++/slot.h>
 #include <typeinfo>
@@ -36,6 +37,7 @@ using std::endl;
 */
 
 static void object_death (Command* mc) {
+	cerr << "\n\n\n---> OBJECT DEATH FIRED FOR " << mc << endl;
 	delete mc;
 }
 
@@ -53,6 +55,7 @@ class MementoCommand : public Command
                        XMLNode *after
                        ) 
             : obj(object), before(before), after(after) {
+		cerr << "MC @ " << this << " is a " << typeid (obj_T).name() << endl;
 		obj.GoingAway.connect (sigc::bind (sigc::ptr_fun (object_death), static_cast<Command*>(this)));
 	}
 
