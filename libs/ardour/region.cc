@@ -144,8 +144,6 @@ Region::Region (const XMLNode& node)
 
 Region::~Region ()
 {
-	// cerr << "====== " << _name << " DESTRUCTOR\n";
-	// stacktrace (cerr);
 	/* derived classes must call notify_callbacks() and then emit GoingAway */
 }
 

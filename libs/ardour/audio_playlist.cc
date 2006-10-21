@@ -42,9 +42,9 @@ using namespace PBD;
 AudioPlaylist::AudioPlaylist (Session& session, const XMLNode& node, bool hidden)
 	: Playlist (session, node, hidden)
 {
-	in_set_state = true;
+	in_set_state++;
 	set_state (node);
-	in_set_state = false;
+	in_set_state--;
 
 	if (!hidden) {
 		PlaylistCreated (this); /* EMIT SIGNAL */
@@ -120,10 +120,24 @@ AudioPlaylist::~AudioPlaylist ()
 	/* drop connections to signals */
 
 	notify_callbacks ();
+	
 
-	for (Crossfades::iterator x = _crossfades.begin(); x != _crossfades.end(); ++x) {
+	cerr << "deleting crossfades "  << _crossfades.size() << endl;
+
+	for (Crossfades::iterator x = _crossfades.begin(); x != _crossfades.end(); ) {
+		Crossfades::iterator tmp;
+
+		tmp = x;
+		++tmp;
+
 		delete *x;
+
+		cerr << _crossfades.size() << " to go\n";
+
+		x = tmp;
 	}
+
+	cerr << "done\n";
 }
 
 struct RegionSortByLayer {
@@ -226,6 +240,10 @@ AudioPlaylist::remove_dependents (boost::shared_ptr<Region> region)
 {
 	Crossfades::iterator i, tmp;
 	boost::shared_ptr<AudioRegion> r = boost::dynamic_pointer_cast<AudioRegion> (region);
+
+	if (in_set_state) {
+		return;
+	}
 	
 	if (r == 0) {
 		fatal << _("programming error: non-audio Region passed to remove_overlap in audio playlist")
@@ -354,6 +372,8 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 		return;
 	}
 
+	cerr << "Check dependents of " << r->name() << endl;
+
 	if ((region = boost::dynamic_pointer_cast<AudioRegion> (r)) == 0) {
 		fatal << _("programming error: non-audio Region tested for overlap in audio playlist")
 		      << endmsg;
@@ -441,7 +461,10 @@ AudioPlaylist::add_crossfade (Crossfade& xfade)
 {
 	Crossfades::iterator ci;
 
+	cerr << "adding xfade involving " << xfade.in()->name() << " and " << xfade.out()->name() << endl;
+
 	for (ci = _crossfades.begin(); ci != _crossfades.end(); ++ci) {
+		cerr << "\tcompare to " << (*ci)->in()->name() << " and " << (*ci)->out()->name() << endl;
 		if (*(*ci) == xfade) { // Crossfade::operator==()
 			break;
 		}
@@ -488,6 +511,9 @@ AudioPlaylist::set_state (const XMLNode& node)
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
 
+	in_set_state++;
+	freeze ();
+
 	Playlist::set_state (node);
 
 	nlist = node.children();
@@ -515,6 +541,9 @@ AudioPlaylist::set_state (const XMLNode& node)
 			continue;
 		}
 	}
+
+	thaw ();
+	in_set_state++;
 
 	return 0;
 }

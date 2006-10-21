@@ -1691,7 +1691,7 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 	   become selected.
 	*/
 
-	region_menu->signal_map_event().connect (bind (mem_fun(*this, &Editor::set_selected_regionview_from_map_event), sv, region));
+	region_menu->signal_map_event().connect (bind (mem_fun(*this, &Editor::set_selected_regionview_from_map_event), sv, boost::weak_ptr<Region>(region)));
 
 	items.push_back (MenuElem (_("Popup region editor"), mem_fun(*this, &Editor::edit_region)));
 	items.push_back (MenuElem (_("Raise to top layer"), mem_fun(*this, &Editor::raise_region_to_top)));
@@ -3198,9 +3198,15 @@ Editor::set_selected_regionview_from_region_list (boost::shared_ptr<Region> regi
 }
 
 bool
-Editor::set_selected_regionview_from_map_event (GdkEventAny* ev, StreamView* sv, boost::shared_ptr<Region> r)
+Editor::set_selected_regionview_from_map_event (GdkEventAny* ev, StreamView* sv, boost::weak_ptr<Region> weak_r)
 {
 	RegionView* rv;
+	boost::shared_ptr<Region> r (weak_r.lock());
+
+	if (!r) {
+		return true;
+	}
+
 	boost::shared_ptr<AudioRegion> ar;
 
 	if ((ar = boost::dynamic_pointer_cast<AudioRegion> (r)) == 0) {
@@ -3524,15 +3530,15 @@ Editor::zoom_focus_selection_done ()
 	string choice = zoom_focus_selector.get_active_text();
 	ZoomFocus focus_type = ZoomFocusLeft;
 
-	if (choice == _("Focus Left")) {
+	if (choice == _("Left")) {
 		focus_type = ZoomFocusLeft;
-	} else if (choice == _("Focus Right")) {
+	} else if (choice == _("Right")) {
 		focus_type = ZoomFocusRight;
-	} else if (choice == _("Focus Center")) {
+	} else if (choice == _("Center")) {
 		focus_type = ZoomFocusCenter;
-	} else if (choice == _("Focus Playhead")) {
+	} else if (choice == _("Playhead")) {
 		focus_type = ZoomFocusPlayhead;
-	} else if (choice == _("Focus Edit Cursor")) {
+	} else if (choice == _("Edit Cursor")) {
 		focus_type = ZoomFocusEdit;
 	} 
 

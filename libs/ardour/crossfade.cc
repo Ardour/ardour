@@ -197,7 +197,9 @@ Crossfade::Crossfade (const Crossfade &orig, boost::shared_ptr<AudioRegion> newi
 
 Crossfade::~Crossfade ()
 {
+	cerr << "Deleting xfade @ " << this << endl;
 	Invalidated (this);
+	cerr << "invalidation signal sent\n";
 }
 
 void

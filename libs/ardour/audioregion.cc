@@ -306,6 +306,7 @@ AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 
 AudioRegion::~AudioRegion ()
 {
+	cerr << "====== " << _name << " DESTRUCTOR @ " << this << endl;
 	notify_callbacks ();
 	GoingAway (); /* EMIT SIGNAL */
 }

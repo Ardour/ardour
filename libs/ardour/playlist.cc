@@ -99,19 +99,19 @@ Playlist::Playlist (const Playlist& other, string namestr, bool hide)
 	RegionList tmp;
 	other.copy_regions (tmp);
 	
-	in_set_state = true;
+	in_set_state++;
 
 	for (list<boost::shared_ptr<Region> >::iterator x = tmp.begin(); x != tmp.end(); ++x) {
 		add_region_internal( (*x), (*x)->position() );
 	}
 
-	in_set_state = false;
+	in_set_state--;
 
 	_splicing  = other._splicing;
 	_nudging   = other._nudging;
 	_edit_mode = other._edit_mode;
 
-	in_set_state = false;
+	in_set_state = 0;
 	in_flush = false;
 	in_partition = false;
 	subcnt = 0;
@@ -230,7 +230,7 @@ Playlist::init (bool hide)
 	_hidden = hide;
 	_splicing = false;
 	_nudging = false;
-	in_set_state = false;
+	in_set_state = 0;
 	_edit_mode = Config->get_edit_mode();
 	in_flush = false;
 	in_partition = false;
@@ -1321,10 +1321,10 @@ Playlist::set_state (const XMLNode& node)
 	boost::shared_ptr<Region> region;
 	string region_name;
 
-	in_set_state = true;
+	in_set_state++;
 
 	if (node.name() != "Playlist") {
-		in_set_state = false;
+		in_set_state--;
 		return -1;
 	}
 
@@ -1394,9 +1394,9 @@ Playlist::set_state (const XMLNode& node)
 
 	notify_modified ();
 
-	in_set_state = false;
-
 	thaw ();
+
+	in_set_state--;
 
 	return 0;
 }

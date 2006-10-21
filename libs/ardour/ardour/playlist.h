@@ -178,7 +178,7 @@ class Playlist : public PBD::StatefulDestructible {
 	bool             pending_length;
 	bool             save_on_thaw;
 	string           last_save_reason;
-	bool             in_set_state;
+	uint32_t         in_set_state;
 	bool            _hidden;
 	bool            _splicing;
 	bool            _nudging;

@@ -469,8 +469,9 @@ Session::~Session ()
 		tmp = i;
 		++tmp;
 
-		cerr << "dropping refs on an audio region (" << i->second->name() << ") with UC = " << i->second.use_count() << endl;
+		cerr << "dropping refs on an audio region (" << i->second->name() << " @ " << i->second << ") with UC = " << i->second.use_count() << endl;
 		i->second->drop_references ();
+		cerr << "AFTER: UC = " << i->second.use_count() << endl;
 
 		i = tmp;
 	}
