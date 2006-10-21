@@ -81,12 +81,12 @@ class Redirect : public IO
 	Placement placement() const { return _placement; }
 	void set_placement (Placement, void *src);
 
-	virtual void run (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset) = 0;
+	virtual void run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset) = 0;
 	virtual void activate () = 0;
 	virtual void deactivate () = 0;
-	virtual jack_nframes_t latency() { return 0; }
+	virtual nframes_t latency() { return 0; }
 
-	virtual void set_block_size (jack_nframes_t nframes) {}
+	virtual void set_block_size (nframes_t nframes) {}
 
 	sigc::signal<void,Redirect*,void*> active_changed;
 	sigc::signal<void,Redirect*,void*> placement_changed;
@@ -120,9 +120,9 @@ class Redirect : public IO
 	void mark_automation_visible (uint32_t, bool);
 	
 	AutomationList& automation_list (uint32_t);
-	bool find_next_event (jack_nframes_t, jack_nframes_t, ControlEvent&) const;
+	bool find_next_event (nframes_t, nframes_t, ControlEvent&) const;
 
-	virtual void transport_stopped (jack_nframes_t frame) {};
+	virtual void transport_stopped (nframes_t frame) {};
 	
   protected:
 	void set_placement (const string&, void *src);

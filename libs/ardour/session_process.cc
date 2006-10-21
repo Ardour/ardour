@@ -46,7 +46,7 @@ using namespace PBD;
 using namespace std;
 
 void
-Session::process (jack_nframes_t nframes)
+Session::process (nframes_t nframes)
 {
 	MIDI::Manager::instance()->cycle_start(nframes);
 
@@ -79,9 +79,9 @@ Session::prepare_diskstreams ()
 }
 
 int
-Session::no_roll (jack_nframes_t nframes, jack_nframes_t offset)
+Session::no_roll (nframes_t nframes, nframes_t offset)
 {
-	jack_nframes_t end_frame = _transport_frame + nframes; // FIXME: varispeed + no_roll ??
+	nframes_t end_frame = _transport_frame + nframes; // FIXME: varispeed + no_roll ??
 	int ret = 0;
 	bool declick = get_transport_declick_required();
 	boost::shared_ptr<RouteList> r = routes.reader ();
@@ -117,7 +117,7 @@ Session::no_roll (jack_nframes_t nframes, jack_nframes_t offset)
 }
 
 int
-Session::process_routes (jack_nframes_t nframes, jack_nframes_t offset)
+Session::process_routes (nframes_t nframes, nframes_t offset)
 {
 	bool record_active;
 	int  declick = get_transport_declick_required();
@@ -165,7 +165,7 @@ Session::process_routes (jack_nframes_t nframes, jack_nframes_t offset)
 }
 
 int
-Session::silent_process_routes (jack_nframes_t nframes, jack_nframes_t offset)
+Session::silent_process_routes (nframes_t nframes, nframes_t offset)
 {
 	bool record_active = actively_recording();
 	int  declick = get_transport_declick_required();
@@ -209,7 +209,7 @@ Session::silent_process_routes (jack_nframes_t nframes, jack_nframes_t offset)
 }
 
 void
-Session::commit_diskstreams (jack_nframes_t nframes, bool &needs_butler)
+Session::commit_diskstreams (nframes_t nframes, bool &needs_butler)
 {
 	int dret;
 	float pworst = 1.0f;
@@ -255,13 +255,13 @@ Session::commit_diskstreams (jack_nframes_t nframes, bool &needs_butler)
 
 
 void
-Session::process_with_events (jack_nframes_t nframes)
+Session::process_with_events (nframes_t nframes)
 {
 	Event*         ev;
-	jack_nframes_t this_nframes;
-	jack_nframes_t end_frame;
-	jack_nframes_t offset;
-	jack_nframes_t stop_limit;
+	nframes_t this_nframes;
+	nframes_t end_frame;
+	nframes_t offset;
+	nframes_t stop_limit;
 	long           frames_moved;
 	bool           session_needs_butler = false;
 
@@ -386,7 +386,7 @@ Session::process_with_events (jack_nframes_t nframes)
 				nframes -= this_nframes;
 				offset += this_nframes;
 				
-				frames_moved = (jack_nframes_t) floor (_transport_speed * this_nframes);
+				frames_moved = (nframes_t) floor (_transport_speed * this_nframes);
 			
 				if (frames_moved < 0) {
 					decrement_transport_position (-frames_moved);
@@ -446,7 +446,7 @@ Session::transport_locked () const
 {
 	Slave* sl = _slave;
 
-	if (!locate_pending() && ((_slave_type == None) || (sl && sl->ok() && sl->locked()))) {
+	if (!locate_pending() && ((Config->get_slave_source() == None) || (sl && sl->ok() && sl->locked()))) {
 		return true;
 	}
 
@@ -454,17 +454,17 @@ Session::transport_locked () const
 }
 
 bool
-Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
+Session::follow_slave (nframes_t nframes, nframes_t offset)
 {
 	float slave_speed;
-	jack_nframes_t slave_transport_frame;
-	jack_nframes_t this_delta;
+	nframes_t slave_transport_frame;
+	nframes_t this_delta;
 	int dir;
 	bool starting;
 
 	if (!_slave->ok()) {
 		stop_transport ();
-		set_slave_source (None, 0);
+		Config->set_slave_source (None);
 		goto noroll;
 	}
 	
@@ -555,9 +555,9 @@ Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 
 				Location* al = _locations.auto_loop_location();
 
-				if (al && auto_loop && (slave_transport_frame < al->start() || slave_transport_frame > al->end())) {
+				if (al && play_loop && (slave_transport_frame < al->start() || slave_transport_frame > al->end())) {
 					// cancel looping
-					request_auto_loop(false);
+					request_play_loop(false);
 				}
 
 				if (slave_transport_frame != _transport_frame) {
@@ -583,7 +583,7 @@ Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 				slave_state = Running;
 
 				bool ok = true;
-				jack_nframes_t frame_delta = slave_transport_frame - _transport_frame;
+				nframes_t frame_delta = slave_transport_frame - _transport_frame;
 
 				boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 				
@@ -605,7 +605,7 @@ Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 					/* XXX what? */
 				}
 
-				memset (delta_accumulator, 0, sizeof (jack_nframes_t) * delta_accumulator_size);
+				memset (delta_accumulator, 0, sizeof (nframes_t) * delta_accumulator_size);
 				average_slave_delta = 0;
 				this_delta = 0;
 			}
@@ -628,7 +628,7 @@ Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 			// << " tf = " << _transport_frame
 			// << endl;
 			
-			if (_slave_type == JACK) {
+			if (Config->get_slave_source() == JACK) {
 				last_stop_frame = _transport_frame;
 			}
 
@@ -676,7 +676,7 @@ Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 			request_transport_speed (adjusted_speed);
 			
 #if 1
-			if ((jack_nframes_t) average_slave_delta > _slave->resolution()) {
+			if ((nframes_t) average_slave_delta > _slave->resolution()) {
 				// cerr << "not locked\n";
 				goto silent_motion;
 			}
@@ -715,7 +715,7 @@ Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 			increment_transport_position (frames_moved);
 		}
 		
-		jack_nframes_t stop_limit;
+		nframes_t stop_limit;
 		
 		if (actively_recording()) {
 			stop_limit = max_frames;
@@ -737,12 +737,12 @@ Session::follow_slave (jack_nframes_t nframes, jack_nframes_t offset)
 }
 
 void
-Session::process_without_events (jack_nframes_t nframes)
+Session::process_without_events (nframes_t nframes)
 {
 	bool session_needs_butler = false;
-	jack_nframes_t stop_limit;
+	nframes_t stop_limit;
 	long frames_moved;
-	jack_nframes_t offset = 0;
+	nframes_t offset = 0;
 
 	{
 		if (post_transport_work & (PostTransportLocate|PostTransportStop)) {
@@ -800,7 +800,7 @@ Session::process_without_events (jack_nframes_t nframes)
 		} else {
 			increment_transport_position (frames_moved);
 		}
-		
+
 		maybe_stop (stop_limit);
 		check_declick_out ();
 
@@ -811,7 +811,7 @@ Session::process_without_events (jack_nframes_t nframes)
 }
 
 void
-Session::process_audition (jack_nframes_t nframes)
+Session::process_audition (nframes_t nframes)
 {
 	Event* ev;
 	boost::shared_ptr<RouteList> r = routes.reader ();
@@ -851,9 +851,9 @@ Session::process_audition (jack_nframes_t nframes)
 }
 
 bool
-Session::maybe_sync_start (jack_nframes_t& nframes, jack_nframes_t& offset)
+Session::maybe_sync_start (nframes_t& nframes, nframes_t& offset)
 {
-	jack_nframes_t sync_offset;
+	nframes_t sync_offset;
 	
 	if (!waiting_for_sync_offset) {
 		return false;

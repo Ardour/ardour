@@ -48,7 +48,7 @@ class Session;
 class LadspaPlugin : public ARDOUR::Plugin
 {
   public:
-	LadspaPlugin (void *module, ARDOUR::AudioEngine&, ARDOUR::Session&, uint32_t index, jack_nframes_t sample_rate);
+	LadspaPlugin (void *module, ARDOUR::AudioEngine&, ARDOUR::Session&, uint32_t index, nframes_t sample_rate);
 	LadspaPlugin (const LadspaPlugin &);
 	~LadspaPlugin ();
 
@@ -60,7 +60,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 	const char * maker() const                       { return descriptor->Maker; }
 	uint32_t parameter_count() const                 { return descriptor->PortCount; }
 	float default_value (uint32_t port);
-	jack_nframes_t latency() const;
+	nframes_t latency() const;
 	void set_parameter (uint32_t port, float val);
 	float get_parameter (uint32_t port) const;
 	int get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
@@ -81,9 +81,9 @@ class LadspaPlugin : public ARDOUR::Plugin
 			descriptor->cleanup (handle);
 		}
 	}
-	void set_block_size (jack_nframes_t nframes) {}
+	void set_block_size (nframes_t nframes) {}
 	
-	int connect_and_run (BufferSet& bufs, uint32_t& in, uint32_t& out, jack_nframes_t nframes, jack_nframes_t offset);
+	int connect_and_run (BufferSet& bufs, uint32_t& in, uint32_t& out, nframes_t nframes, nframes_t offset);
 	void store_state (ARDOUR::PluginState&);
 	void restore_state (ARDOUR::PluginState&);
 	string describe_parameter (uint32_t);
@@ -126,15 +126,15 @@ class LadspaPlugin : public ARDOUR::Plugin
 	void                    *module;
 	const LADSPA_Descriptor *descriptor;
 	LADSPA_Handle            handle;
-	jack_nframes_t           sample_rate;
+	nframes_t           sample_rate;
 	LADSPA_Data             *control_data;
 	LADSPA_Data             *shadow_data;
 	LADSPA_Data             *latency_control_port;
 	uint32_t                _index;
 	bool                     was_activated;
 
-	void init (void *mod, uint32_t index, jack_nframes_t rate);
-	void run (jack_nframes_t nsamples);
+	void init (void *mod, uint32_t index, nframes_t rate);
+	void run (nframes_t nsamples);
 	void latency_compute_run ();
 };
 

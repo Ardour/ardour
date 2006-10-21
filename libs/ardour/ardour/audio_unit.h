@@ -54,7 +54,7 @@ class AUPlugin : public ARDOUR::Plugin
 	const char * maker () const;
 	uint32_t parameter_count () const;
 	float default_value (uint32_t port);
-	jack_nframes_t latency () const;
+	nframes_t latency () const;
 	void set_parameter (uint32_t which, float val);
 	float get_parameter (uint32_t which) const;
     
@@ -62,9 +62,10 @@ class AUPlugin : public ARDOUR::Plugin
 	uint32_t nth_parameter (uint32_t which, bool& ok) const;
 	void activate ();
 	void deactivate ();
-	void set_block_size (jack_nframes_t nframes);
+	void set_block_size (nframes_t nframes);
     
-	int connect_and_run (BufferSet& bufs, uint32_t& in, uint32_t& out, jack_nframes_t nframes, jack_nframes_t offset);
+	int connect_and_run (BufferSet& bufs, uint32_t& in, uint32_t& out, nframes_t nframes, nframes_t offset);
+	
 	std::set<uint32_t> automatable() const;
 	void store_state (ARDOUR::PluginState&);
 	void restore_state (ARDOUR::PluginState&);

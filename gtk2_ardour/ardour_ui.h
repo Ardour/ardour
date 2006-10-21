@@ -112,11 +112,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	int build_session (const string & path, const string & snapshot, 
 			   uint32_t ctl_chns, 
 			   uint32_t master_chns,
-			   ARDOUR::Session::AutoConnectOption input_connect,
-			   ARDOUR::Session::AutoConnectOption output_connect,
+			   ARDOUR::AutoConnectOption input_connect,
+			   ARDOUR::AutoConnectOption output_connect,
 			   uint32_t nphysin,
 			   uint32_t nphysout,
-			   jack_nframes_t initial_length);
+			   nframes_t initial_length);
 	bool session_is_new() const { return _session_is_new; }
 
 	ARDOUR::Session* the_session() { return session; }
@@ -159,7 +159,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	static sigc::signal<void,bool> Blink;
 	static sigc::signal<void>      RapidScreenUpdate;
 	static sigc::signal<void>      SuperRapidScreenUpdate;
-	static sigc::signal<void,jack_nframes_t> Clock;
+	static sigc::signal<void,nframes_t> Clock;
 
 	/* this is a helper function to centralize the (complex) logic for
 	   blinking rec-enable buttons.
@@ -179,7 +179,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void save_ardour_state ();
 	gboolean configure_handler (GdkEventConfigure* conf);
 
-	void do_transport_locate (jack_nframes_t position);
+	void do_transport_locate (nframes_t position);
 	void halt_on_xrun_message ();
 
 	AudioClock primary_clock;
@@ -379,16 +379,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_time_master ();
 	void toggle_video_sync ();
 
-	enum ShuttleBehaviour {
-		Sprung,
-		Wheel
-	};
-
-	enum ShuttleUnits {
-		Percentage,
-		Semitones
-	};
-
 	Gtk::DrawingArea  shuttle_box;
 	Gtk::EventBox     speed_display_box;
 	Gtk::Label        speed_display_label;
@@ -396,8 +386,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::ComboBoxText shuttle_style_button;
 	Gtk::Menu*        shuttle_unit_menu;
 	Gtk::Menu*        shuttle_style_menu;
-	ShuttleBehaviour  shuttle_behaviour;
-	ShuttleUnits      shuttle_units;
 	float             shuttle_max_speed;
 	Gtk::Menu*        shuttle_context_menu;
 
@@ -405,8 +393,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void show_shuttle_context_menu ();
 	void shuttle_style_changed();
 	void shuttle_unit_clicked ();
-	void set_shuttle_behaviour (ShuttleBehaviour);
-	void set_shuttle_units (ShuttleUnits);
 	void set_shuttle_max_speed (float);
 	void update_speed_display ();
 	float last_speed_displayed;
@@ -517,7 +503,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	Gtk::Label   sample_rate_label;
 	Gtk::EventBox sample_rate_box;
-	void update_sample_rate (jack_nframes_t);
+	void update_sample_rate (nframes_t);
 
 	gint every_second ();
 	gint every_point_one_seconds ();
@@ -572,7 +558,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void we_have_dependents ();
 	void setup_keybindings ();
 	void setup_session_options ();
-	void setup_config_options ();
 	
 	guint32  last_key_press_time;
 
@@ -646,8 +631,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	struct timeval last_peak_grab;
 	struct timeval last_shuttle_request;
 
-	void delete_sources_in_the_right_thread (list<boost::shared_ptr<ARDOUR::Source> >*);
-
 	void editor_display_control_changed (Editing::DisplayControl c);
 
 	bool have_disk_overrun_displayed;
@@ -662,7 +645,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	
 	void disconnect_from_jack ();
 	void reconnect_to_jack ();
-	void set_jack_buffer_size (jack_nframes_t);
+	void set_jack_buffer_size (nframes_t);
 
 	Gtk::MenuItem* jack_disconnect_item;
 	Gtk::MenuItem* jack_reconnect_item;
@@ -677,22 +660,17 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	std::vector<std::string> positional_sync_strings;
 
-	void toggle_config_state (const char* group, const char* action, void (ARDOUR::Configuration::*set)(bool));
-	void toggle_session_state (const char* group, const char* action, void (ARDOUR::Session::*set)(bool), bool (ARDOUR::Session::*get)(void) const);
-	void toggle_session_state (const char* group, const char* action, sigc::slot<void> theSlot);
 	void toggle_send_midi_feedback ();
 	void toggle_use_mmc ();
 	void toggle_send_mmc ();
 	void toggle_use_midi_control();
 	void toggle_send_mtc ();
 
-	void toggle_AutoConnectNewTrackInputsToHardware();
-	void toggle_AutoConnectNewTrackOutputsToHardware();
-	void toggle_AutoConnectNewTrackOutputsToMaster();
-	void toggle_ManuallyConnectNewTrackOutputs();
-	void toggle_UseHardwareMonitoring();
-	void toggle_UseSoftwareMonitoring();
-	void toggle_UseExternalMonitoring();
+	void set_input_auto_connect (ARDOUR::AutoConnectOption);
+	void set_output_auto_connect (ARDOUR::AutoConnectOption);
+	void set_solo_model (ARDOUR::SoloModel);
+	void set_monitor_model (ARDOUR::MonitorModel);
+
 	void toggle_StopPluginsWithTransport();
 	void toggle_DoNotRunPluginsWhileRecording();
 	void toggle_VerifyRemoveLastCapture();
@@ -701,16 +679,24 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_GainReduceFastTransport();
 	void toggle_LatchedSolo();
 	void toggle_SoloViaBus();
-	void toggle_AutomaticallyCreateCrossfades();
-	void toggle_UnmuteNewFullCrossfades();
 	void toggle_LatchedRecordEnable ();
 
 	void mtc_port_changed ();
-	void map_some_session_state (const char* group, const char* action, bool (ARDOUR::Session::*get)() const);
-	void queue_session_control_changed (ARDOUR::Session::ControlType t);
-	void session_control_changed (ARDOUR::Session::ControlType t);
+	void map_solo_model ();
+	void map_monitor_model ();
+	void map_file_header_format ();
+	void map_file_data_format ();
+	void map_input_auto_connect ();
+	void map_output_auto_connect ();
+	void parameter_changed (const char*);
+
+	void set_meter_hold (ARDOUR::MeterHold);
+	void set_meter_falloff (ARDOUR::MeterFalloff);
+	void map_meter_hold ();
+	void map_meter_falloff ();
 
 	void toggle_control_protocol (ARDOUR::ControlProtocolInfo*);
+	void toggle_control_protocol_feedback (ARDOUR::ControlProtocolInfo*, const char* group_name, const char* action_name);
 };
 
 #endif /* __ardour_gui_h__ */

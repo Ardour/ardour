@@ -39,14 +39,14 @@ class Track : public Route
 	
 	int set_name (string str, void *src);
 
-	virtual int roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, 
-		jack_nframes_t offset, int declick, bool can_record, bool rec_monitors_input) = 0;
+	virtual int roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
+		nframes_t offset, int declick, bool can_record, bool rec_monitors_input) = 0;
 	
-	virtual int no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, 
-		jack_nframes_t offset, bool state_changing, bool can_record, bool rec_monitors_input) = 0;
+	virtual int no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
+		nframes_t offset, bool state_changing, bool can_record, bool rec_monitors_input) = 0;
 	
-	virtual int silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, 
-		jack_nframes_t offset, bool can_record, bool rec_monitors_input) = 0;
+	virtual int silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
+		nframes_t offset, bool can_record, bool rec_monitors_input) = 0;
 
 	void toggle_monitor_input ();
 
@@ -60,8 +60,8 @@ class Track : public Route
 	TrackMode mode() const { return _mode; }
 	void      set_mode (TrackMode m);
 
-	jack_nframes_t update_total_latency();
-	void           set_latency_delay (jack_nframes_t);
+	nframes_t update_total_latency();
+	void           set_latency_delay (nframes_t);
 
 	enum FreezeState {
 		NoFreeze,
@@ -75,7 +75,7 @@ class Track : public Route
 	virtual void unfreeze () = 0;
 
 	virtual void bounce (InterThreadInfo&) = 0;
-	virtual void bounce_range (jack_nframes_t start, jack_nframes_t end, InterThreadInfo&) = 0;
+	virtual void bounce_range (nframes_t start, nframes_t end, InterThreadInfo&) = 0;
 
 	XMLNode&    get_state();
 	XMLNode&    get_template();

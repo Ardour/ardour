@@ -116,11 +116,11 @@ class Port : public sigc::trackable {
 		jack_port_request_monitor (_port, yn);
 	}
 
-	jack_nframes_t latency () const {
+	nframes_t latency () const {
 		return jack_port_get_latency (_port);
 	}
 
-	void set_latency (jack_nframes_t nframes) {
+	void set_latency (nframes_t nframes) {
 		jack_port_set_latency (_port, nframes);
 	}
 

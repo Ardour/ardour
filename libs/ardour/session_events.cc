@@ -59,21 +59,21 @@ static const char* event_names[] = {
 };
 
 void
-Session::add_event (jack_nframes_t frame, Event::Type type, jack_nframes_t target_frame)
+Session::add_event (nframes_t frame, Event::Type type, nframes_t target_frame)
 {
 	Event* ev = new Event (type, Event::Add, frame, target_frame, 0);
 	queue_event (ev);
 }
 
 void
-Session::remove_event (jack_nframes_t frame, Event::Type type)
+Session::remove_event (nframes_t frame, Event::Type type)
 {
 	Event* ev = new Event (type, Event::Remove, frame, 0, 0);
 	queue_event (ev);
 }
 
 void
-Session::replace_event (Event::Type type, jack_nframes_t frame, jack_nframes_t target)
+Session::replace_event (Event::Type type, nframes_t frame, nframes_t target)
 {
 	Event* ev = new Event (type, Event::Replace, frame, target, 0);
 	queue_event (ev);
@@ -314,7 +314,15 @@ Session::process_event (Event* ev)
 
 	switch (ev->type) {
 	case Event::SetLoop:
-		set_auto_loop (ev->yes_or_no);
+		set_play_loop (ev->yes_or_no);
+		break;
+
+	case Event::AutoLoop:
+		if (play_loop) {
+			start_locate (ev->target_frame, true, false, Config->get_seamless_loop());
+		}
+		remove = false;
+		del = false;
 		break;
 
 	case Event::Locate:
@@ -345,7 +353,7 @@ Session::process_event (Event* ev)
 		
 	case Event::PunchIn:
 		// cerr << "PunchIN at " << transport_frame() << endl;
-		if (punch_in && record_status() == Enabled) {
+		if (Config->get_punch_in() && record_status() == Enabled) {
 			enable_record ();
 		}
 		remove = false;
@@ -354,7 +362,7 @@ Session::process_event (Event* ev)
 		
 	case Event::PunchOut:
 		// cerr << "PunchOUT at " << transport_frame() << endl;
-		if (punch_out) {
+		if (Config->get_punch_out()) {
 			step_back_from_record ();
 		}
 		remove = false;
@@ -384,14 +392,6 @@ Session::process_event (Event* ev)
 		del = false;
 		break;
 
-	case Event::AutoLoop:
-		if (auto_loop) {
-			start_locate (ev->target_frame, true, false, seamless_loop);
-		}
-		remove = false;
-		del = false;
-		break;
-
 	case Event::Overwrite:
 		overwrite_some_buffers (static_cast<AudioDiskstream*>(ev->ptr));
 		break;
@@ -401,7 +401,7 @@ Session::process_event (Event* ev)
 		break;
 
 	case Event::SetSlaveSource:
-		set_slave_source (ev->slave, ev->target_frame);
+		set_slave_source (ev->slave);
 		break;
 
 	case Event::Audition:

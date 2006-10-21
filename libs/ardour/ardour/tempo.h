@@ -57,7 +57,7 @@ class Tempo {
 	}
 
 	double beats_per_minute () const { return _beats_per_minute; }
-	double frames_per_beat (jack_nframes_t sr) const {
+	double frames_per_beat (nframes_t sr) const {
 		return  ((60.0 * sr) / _beats_per_minute);
 	}
 
@@ -85,7 +85,7 @@ class Meter {
 	double beats_per_bar () const { return _beats_per_bar; }
 	double note_divisor() const { return _note_type; }
 	
-	double frames_per_bar (const Tempo&, jack_nframes_t sr) const;
+	double frames_per_bar (const Tempo&, nframes_t sr) const;
 
   protected:
 
@@ -112,12 +112,12 @@ class MetricSection {
 	virtual ~MetricSection() {}
 
 	const BBT_Time& start() const { return _start; }
-	const jack_nframes_t frame() const { return _frame; }
+	const nframes_t frame() const { return _frame; }
 
 	void set_movable (bool yn) { _movable = yn; }
 	bool movable() const { return _movable; }
 
-	virtual void set_frame (jack_nframes_t f) {
+	virtual void set_frame (nframes_t f) {
 		_frame = f;
 	};
 
@@ -134,7 +134,7 @@ class MetricSection {
 
   private:
 	BBT_Time       _start;
-	jack_nframes_t _frame;
+	nframes_t _frame;
 	bool           _movable;
 };
 
@@ -176,7 +176,7 @@ class TempoMap : public StateManager, public PBD::StatefulDestructible
 {
   public:
 
-	TempoMap (jack_nframes_t frame_rate);
+	TempoMap (nframes_t frame_rate);
 	~TempoMap();
 
 	/* measure-based stuff */
@@ -188,13 +188,13 @@ class TempoMap : public StateManager, public PBD::StatefulDestructible
 
 	struct BBTPoint {
 	    BBTPointType type;
-	    jack_nframes_t frame;
+	    nframes_t frame;
 	    const Meter* meter;
 	    const Tempo* tempo;
 	    uint32_t bar;
 	    uint32_t beat;
 	    
-	    BBTPoint (const Meter& m, const Tempo& t, jack_nframes_t f, BBTPointType ty, uint32_t b, uint32_t e) 
+	    BBTPoint (const Meter& m, const Tempo& t, nframes_t f, BBTPointType ty, uint32_t b, uint32_t e) 
 		    : type (ty), frame (f), meter (&m), tempo (&t), bar (b), beat (e) {}
 	};
 
@@ -205,17 +205,17 @@ class TempoMap : public StateManager, public PBD::StatefulDestructible
 		(obj.*method)(*metrics);
 	}
 
-	BBTPointList *get_points (jack_nframes_t start, jack_nframes_t end) const;
+	BBTPointList *get_points (nframes_t start, nframes_t end) const;
 
-	void           bbt_time (jack_nframes_t when, BBT_Time&) const;
-	jack_nframes_t frame_time (const BBT_Time&) const;
-	jack_nframes_t bbt_duration_at (jack_nframes_t, const BBT_Time&, int dir) const;
+	void           bbt_time (nframes_t when, BBT_Time&) const;
+	nframes_t frame_time (const BBT_Time&) const;
+	nframes_t bbt_duration_at (nframes_t, const BBT_Time&, int dir) const;
 
 	static const Tempo& default_tempo() { return _default_tempo; }
 	static const Meter& default_meter() { return _default_meter; }
 
-	const Tempo& tempo_at (jack_nframes_t);
-	const Meter& meter_at (jack_nframes_t);
+	const Tempo& tempo_at (nframes_t);
+	const Meter& meter_at (nframes_t);
 
 	void add_tempo(const Tempo&, BBT_Time where);
 	void add_meter(const Meter&, BBT_Time where);
@@ -230,15 +230,15 @@ class TempoMap : public StateManager, public PBD::StatefulDestructible
 	void replace_meter (MeterSection& existing, const Meter& replacement);
 
 
-	jack_nframes_t round_to_bar  (jack_nframes_t frame, int dir);
+	nframes_t round_to_bar  (nframes_t frame, int dir);
 
-	jack_nframes_t round_to_beat (jack_nframes_t frame, int dir);
+	nframes_t round_to_beat (nframes_t frame, int dir);
 
-	jack_nframes_t round_to_beat_subdivision (jack_nframes_t fr, int sub_num);
+	nframes_t round_to_beat_subdivision (nframes_t fr, int sub_num);
 
-	jack_nframes_t round_to_tick (jack_nframes_t frame, int dir);
+	nframes_t round_to_tick (nframes_t frame, int dir);
 
-	void set_length (jack_nframes_t frames);
+	void set_length (nframes_t frames);
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&);
@@ -259,33 +259,33 @@ class TempoMap : public StateManager, public PBD::StatefulDestructible
 		
 		void set_tempo (const Tempo& t)    { _tempo = &t; }
 		void set_meter (const Meter& m)    { _meter = &m; }
-		void set_frame (jack_nframes_t f)  { _frame = f; }
+		void set_frame (nframes_t f)  { _frame = f; }
 		void set_start (const BBT_Time& t) { _start = t; }
 		
 		const Meter&    meter() const { return *_meter; }
 		const Tempo&    tempo() const { return *_tempo; }
-		jack_nframes_t  frame() const { return _frame; }
+		nframes_t  frame() const { return _frame; }
 		const BBT_Time& start() const { return _start; }
 		
 	  private:
 		const Meter*   _meter;
 		const Tempo*   _tempo;
-		jack_nframes_t _frame;
+		nframes_t _frame;
 		BBT_Time       _start;
 		
 	};
 
 	Metric metric_at (BBT_Time bbt) const;
-	Metric metric_at (jack_nframes_t) const;
-        void bbt_time_with_metric (jack_nframes_t, BBT_Time&, const Metric&) const;
+	Metric metric_at (nframes_t) const;
+        void bbt_time_with_metric (nframes_t, BBT_Time&, const Metric&) const;
 
   private:
 	static Tempo    _default_tempo;
 	static Meter    _default_meter;
 
 	Metrics            *metrics;
-	jack_nframes_t     _frame_rate;
-	jack_nframes_t      last_bbt_when;
+	nframes_t     _frame_rate;
+	nframes_t      last_bbt_when;
 	bool                last_bbt_valid;
 	BBT_Time            last_bbt;
 	mutable Glib::RWLock    lock;
@@ -293,19 +293,19 @@ class TempoMap : public StateManager, public PBD::StatefulDestructible
 	void timestamp_metrics ();
 
 
-	jack_nframes_t round_to_type (jack_nframes_t fr, int dir, BBTPointType);
+	nframes_t round_to_type (nframes_t fr, int dir, BBTPointType);
 
-	jack_nframes_t frame_time_unlocked (const BBT_Time&) const;
+	nframes_t frame_time_unlocked (const BBT_Time&) const;
 
-	void bbt_time_unlocked (jack_nframes_t, BBT_Time&) const;
+	void bbt_time_unlocked (nframes_t, BBT_Time&) const;
 
-	jack_nframes_t bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, int dir) const;
+	nframes_t bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, int dir) const;
 
 	const MeterSection& first_meter() const;
 	const TempoSection& first_tempo() const;
 
-	jack_nframes_t count_frames_between (const BBT_Time&, const BBT_Time&) const;
-	jack_nframes_t count_frames_between_metrics (const Meter&, const Tempo&, const BBT_Time&, const BBT_Time&) const;
+	nframes_t count_frames_between (const BBT_Time&, const BBT_Time&) const;
+	nframes_t count_frames_between_metrics (const Meter&, const Tempo&, const BBT_Time&, const BBT_Time&) const;
 
 	int move_metric_section (MetricSection&, const BBT_Time& to);
 	void do_insert (MetricSection* section);

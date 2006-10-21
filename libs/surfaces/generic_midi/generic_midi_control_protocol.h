@@ -32,6 +32,9 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	MIDI::Port* port () const { return _port; }
 	void set_feedback_interval (ARDOUR::microseconds_t);
 
+	int set_feedback (bool yn);
+	bool get_feedback () const;
+
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
 
@@ -40,6 +43,7 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	ARDOUR::microseconds_t _feedback_interval;
 	ARDOUR::microseconds_t last_feedback_time;
 
+	bool  do_feedback;
 	void _send_feedback ();
 	void  send_feedback ();
 

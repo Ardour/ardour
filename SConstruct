@@ -15,7 +15,7 @@ import SCons.Node.FS
 SConsignFile()
 EnsureSConsVersion(0, 96)
 
-version = '2.0beta2'
+version = '2.0beta5.1'
 
 subst_dict = { }
 
@@ -25,7 +25,7 @@ subst_dict = { }
 
 opts = Options('scache.conf')
 opts.AddOptions(
-  ('ARCH', 'Set architecture-specific compilation flags by hand (all flags as 1 argument)',''),
+    ('ARCH', 'Set architecture-specific compilation flags by hand (all flags as 1 argument)',''),
     BoolOption('AUDIOUNITS', 'Compile with Apple\'s AudioUnit library. (experimental)', 0),
     BoolOption('COREAUDIO', 'Compile with Apple\'s CoreAudio library', 0),
     BoolOption('DEBUG', 'Set to build with debugging information and no optimizations', 0),
@@ -365,8 +365,8 @@ if env['VST']:
     answer = sys.stdin.readline ()
     answer = answer.rstrip().strip()
     if answer != "yes" and answer != "y":
-        print 'You cannot build Ardour with VST support for distribution to others.\nIt is a violation of several different licenses. VST support disabled.'
-        env['VST'] = 0;
+        print 'You cannot build Ardour with VST support for distribution to others.\nIt is a violation of several different licenses. Build with VST=false.'
+        sys.exit (-1);
     else:
         print "OK, VST support will be enabled"
 
@@ -572,14 +572,17 @@ if env['SYSLIBS']:
         'libs/libsndfile',
         'libs/pbd',
         'libs/midi++2',
-        'libs/ardour'
+        'libs/ardour',
+    # these are unconditionally included but have
+    # tests internally to avoid compilation etc
+    # if VST is not set
+        'libs/fst',
+        'vst',
+    # this is unconditionally included but has
+    # tests internally to avoid compilation etc
+    # if COREAUDIO is not set
+        'libs/appleutility'
         ]
-    
-    if env['VST']:
-        subdirs = ['libs/fst'] + subdirs + ['vst']
-
-    if env['COREAUDIO']:
-        subdirs = subdirs + ['libs/appleutility']
     
     gtk_subdirs = [
 #        'libs/flowcanvas',
@@ -633,14 +636,17 @@ else:
         'libs/libsndfile',
         'libs/pbd',
         'libs/midi++2',
-        'libs/ardour'
+        'libs/ardour',
+    # these are unconditionally included but have
+    # tests internally to avoid compilation etc
+    # if VST is not set
+        'libs/fst',
+        'vst',
+    # this is unconditionally included but has
+    # tests internally to avoid compilation etc
+    # if COREAUDIO is not set
+        'libs/appleutility'
         ]
-    
-    if env['VST']:
-        subdirs = ['libs/fst'] + subdirs + ['vst']
-
-    if env['COREAUDIO']:
-        subdirs = subdirs + ['libs/appleutility']
     
     gtk_subdirs = [
 	'libs/glibmm2',
@@ -687,9 +693,15 @@ if os.environ.has_key('DISTCC_HOSTS'):
     env['ENV']['HOME'] = os.environ['HOME']
 
 final_prefix = '$PREFIX'
-install_prefix = '$DESTDIR/$PREFIX'
 
-subst_dict['INSTALL_PREFIX'] = install_prefix;
+if env['DESTDIR'] :
+    install_prefix = '$DESTDIR/$PREFIX'
+else:
+    install_prefix = env['PREFIX']
+
+subst_dict['%INSTALL_PREFIX%'] = install_prefix;
+subst_dict['%FINAL_PREFIX%'] = final_prefix;
+subst_dict['%PREFIX%'] = final_prefix;
 
 if env['PREFIX'] == '/usr':
     final_config_prefix = '/etc'
@@ -698,14 +710,13 @@ else:
 
 config_prefix = '$DESTDIR' + final_config_prefix
 
-# For colorgcc ( so says the wiki, but it's still not working :/  anyone? )
+# For colorgcc
 if os.environ.has_key('PATH'):
 	env['PATH'] = os.environ['PATH']
 if os.environ.has_key('TERM'):
 	env['TERM'] = os.environ['TERM']
 if os.environ.has_key('HOME'):
 	env['HOME'] = os.environ['HOME']
-
 
 # SCons should really do this for us
 
@@ -958,7 +969,17 @@ env.Distribute (env['DISTTREE'],
                   'COPYING', 'PACKAGER_README', 'README',
                   'ardour.rc.in',
                   'ardour_system.rc',
-                  'tools/config.guess'
+                  'tools/config.guess',
+                  'icons/icon/ardour_icon_mac_mask.png',
+                  'icons/icon/ardour_icon_mac.png',
+                  'icons/icon/ardour_icon_tango_16px_blue.png',
+                  'icons/icon/ardour_icon_tango_16px_red.png',
+                  'icons/icon/ardour_icon_tango_22px_blue.png',
+                  'icons/icon/ardour_icon_tango_22px_red.png',
+                  'icons/icon/ardour_icon_tango_32px_blue.png',
+                  'icons/icon/ardour_icon_tango_32px_red.png',
+                  'icons/icon/ardour_icon_tango_48px_blue.png',
+                  'icons/icon/ardour_icon_tango_48px_red.png'
                   ] +
                 glob.glob ('DOCUMENTATION/AUTHORS*') +
                 glob.glob ('DOCUMENTATION/CONTRIBUTORS*') +
@@ -970,6 +991,7 @@ env.Distribute (env['DISTTREE'],
 
 srcdist = env.Tarball(env['TARBALL'], env['DISTTREE'])
 env.Alias ('srctar', srcdist)
+
 #
 # don't leave the distree around
 #

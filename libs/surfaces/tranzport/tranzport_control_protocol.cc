@@ -320,7 +320,7 @@ TranzportControlProtocol::show_meter ()
 void
 TranzportControlProtocol::show_transport_time ()
 {
-	jack_nframes_t where = session->transport_frame();
+	nframes_t where = session->transport_frame();
 	
 	if (where != last_where) {
 
@@ -718,13 +718,13 @@ TranzportControlProtocol::update_state ()
 
 	/* global */
 
-	if (session->get_auto_loop()) {
+	if (Config->get_auto_loop()) {
 		pending_lights[LightLoop] = true;
 	} else {
 		pending_lights[LightLoop] = false;
 	}
 
-	if (session->get_punch_in() || session->get_punch_out()) {
+	if (Config->get_punch_in() || Config->get_punch_out()) {
 		pending_lights[LightPunch] = true;
 	} else {
 		pending_lights[LightPunch] = false;
@@ -1577,7 +1577,8 @@ TranzportControlProtocol::print (int row, int col, const char *text)
 XMLNode&
 TranzportControlProtocol::get_state () 
 {
-	XMLNode* node = new XMLNode (_name); /* node name must match protocol name */
+	XMLNode* node = new XMLNode (X_("Protocol"));
+	node->add_property (X_("name"), _name);
 	return *node;
 }
 

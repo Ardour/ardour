@@ -253,7 +253,11 @@ static bool idle_quit ()
 void
 UI::do_quit ()
 {
-	Glib::signal_idle().connect (sigc::ptr_fun (idle_quit));
+	if (getenv ("ARDOUR_RUNNING_UNDER_VALGRIND")) {
+		Main::quit ();
+	} else {
+		Glib::signal_idle().connect (sigc::ptr_fun (idle_quit));
+	}
 }
 
 void

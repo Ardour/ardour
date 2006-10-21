@@ -23,7 +23,11 @@ struct ControlProtocolInfo {
     std::string path;
     bool requested;
     bool mandatory;
+    bool supports_feedback;
     XMLNode* state;
+
+    ControlProtocolInfo() : descriptor (0), protocol (0), state (0) {}
+    ~ControlProtocolInfo() { if (state) { delete state; } }
 };
 
  class ControlProtocolManager : public sigc::trackable, public Stateful
@@ -45,6 +49,8 @@ struct ControlProtocolInfo {
 	std::list<ControlProtocolInfo*> control_protocol_info;
 
 	static const std::string state_node_name;
+
+	void set_protocol_states (const XMLNode&);
 
 	int set_state (const XMLNode&);
 	XMLNode& get_state (void);

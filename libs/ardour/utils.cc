@@ -18,6 +18,9 @@
     $Id$
 */
 
+#define __STDC_FORMAT_MACROS 1
+#include <stdint.h>
+
 #include <cstdio> /* for sprintf */
 #include <cmath>
 #include <cctype>
@@ -279,7 +282,7 @@ CFStringRefToStdString(CFStringRef stringRef)
 #endif // HAVE_COREAUDIO
 
 void
-compute_equal_power_fades (jack_nframes_t nframes, float* in, float* out)
+compute_equal_power_fades (nframes_t nframes, float* in, float* out)
 {
 	double step;
 
@@ -287,7 +290,7 @@ compute_equal_power_fades (jack_nframes_t nframes, float* in, float* out)
 
 	in[0] = 0.0f;
 	
-	for (jack_nframes_t i = 1; i < nframes - 1; ++i) {
+	for (nframes_t i = 1; i < nframes - 1; ++i) {
 		in[i] = in[i-1] + step;
 	}
 	
@@ -301,5 +304,106 @@ compute_equal_power_fades (jack_nframes_t nframes, float* in, float* out)
 		float outVal = 1 - inVal;
 		out[n] = outVal * (scale * outVal + 1.0f - scale);
 		in[n] = inVal * (scale * inVal + 1.0f - scale);
+	}
+}
+
+EditMode
+string_to_edit_mode (string str)
+{
+	if (str == _("Splice Edit")) {
+		return Splice;
+	} else if (str == _("Slide Edit")) {
+		return Slide;
+	}
+	fatal << string_compose (_("programming error: unknown edit mode string \"%1\""), str) << endmsg;
+	/*NOTREACHED*/
+	return Slide;
+}
+
+const char*
+edit_mode_to_string (EditMode mode)
+{
+	switch (mode) {
+	case Slide:
+		return _("Slide Edit");
+
+	default:
+	case Splice:
+		return _("Splice Edit");
+	}
+}
+
+SlaveSource
+string_to_slave_source (string str)
+{
+	if (str == _("Internal")) {
+		return None;
+	}
+	
+	if (str == _("MTC")) {
+		return MTC;
+	}
+
+	if (str == _("JACK")) {
+		return JACK;
+	}
+
+	fatal << string_compose (_("programming error: unknown slave source string \"%1\""), str) << endmsg;
+	/*NOTREACHED*/
+	return None;
+}
+
+const char*
+slave_source_to_string (SlaveSource src)
+{
+	switch (src) {
+	case JACK:
+		return _("JACK");
+
+	case MTC:
+		return _("MTC");
+		
+	default:
+	case None:
+		return _("Internal");
+		
+	}
+}
+
+float
+meter_falloff_to_float (MeterFalloff falloff)
+{
+	switch (falloff) {
+	case MeterFalloffOff:
+		return 0.0f;
+	case MeterFalloffSlowest:
+		return 1.0f;
+	case MeterFalloffSlow:
+		return 2.0f;
+	case MeterFalloffMedium:
+		return 3.0f;
+	case MeterFalloffFast:
+		return 4.0f;
+	case MeterFalloffFaster:
+		return 5.0f;
+	case MeterFalloffFastest:
+	default:
+		return 6.0f;
+	}
+}
+
+float
+meter_hold_to_float (MeterHold hold)
+{
+	switch (hold) {
+	case MeterHoldOff:
+		return 0.0f;
+	case MeterHoldShort:
+		return 40.0f;
+	case MeterHoldMedium:
+		return 100.0f;
+	case MeterHoldLong:
+	default:
+		return 200.0f;
 	}
 }

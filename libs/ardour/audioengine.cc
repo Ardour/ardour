@@ -46,6 +46,8 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+gint AudioEngine::m_meter_exit;
+
 AudioEngine::AudioEngine (string client_name) 
 	: ports (new Ports)
 {
@@ -65,7 +67,7 @@ AudioEngine::AudioEngine (string client_name)
 	_freewheel_thread_registered = false;
 
 	m_meter_thread = 0;
-	m_meter_exit = false;
+	g_atomic_int_set (&m_meter_exit, 0);
 
 	if (connect_to_jack (client_name)) {
 		throw NoBackendAvailable ();
@@ -81,9 +83,7 @@ AudioEngine::~AudioEngine ()
 		jack_client_close (_jack);
 	}
 
-	if(m_meter_thread) {
-		g_atomic_int_inc(&m_meter_exit);
-	}
+	stop_metering_thread ();
 }
 
 void
@@ -102,7 +102,7 @@ AudioEngine::start ()
 	if (!_running) {
 
 		if (session) {
-			jack_nframes_t blocksize = jack_get_buffer_size (_jack);
+			nframes_t blocksize = jack_get_buffer_size (_jack);
 
 			session->set_block_size (blocksize);
 			session->set_frame_rate (jack_get_sample_rate (_jack));
@@ -165,7 +165,7 @@ AudioEngine::stop ()
 
 	
 bool
-AudioEngine::get_sync_offset (jack_nframes_t& offset) const
+AudioEngine::get_sync_offset (nframes_t& offset) const
 {
 
 #ifdef HAVE_JACK_VIDEO_SUPPORT
@@ -185,14 +185,14 @@ AudioEngine::get_sync_offset (jack_nframes_t& offset) const
 }
 
 void
-AudioEngine::_jack_timebase_callback (jack_transport_state_t state, jack_nframes_t nframes,
+AudioEngine::_jack_timebase_callback (jack_transport_state_t state, nframes_t nframes,
 				      jack_position_t* pos, int new_position, void *arg)
 {
 	static_cast<AudioEngine*> (arg)->jack_timebase_callback (state, nframes, pos, new_position);
 }
 
 void
-AudioEngine::jack_timebase_callback (jack_transport_state_t state, jack_nframes_t nframes,
+AudioEngine::jack_timebase_callback (jack_transport_state_t state, nframes_t nframes,
 				     jack_position_t* pos, int new_position)
 {
 	if (session && session->synced_to_jack()) {
@@ -231,7 +231,7 @@ AudioEngine::_graph_order_callback (void *arg)
 }
 
 int
-AudioEngine::_process_callback (jack_nframes_t nframes, void *arg)
+AudioEngine::_process_callback (nframes_t nframes, void *arg)
 {
 	return static_cast<AudioEngine *> (arg)->process_callback (nframes);
 }
@@ -243,11 +243,11 @@ AudioEngine::_freewheel_callback (int onoff, void *arg)
 }
 
 int
-AudioEngine::process_callback (jack_nframes_t nframes)
+AudioEngine::process_callback (nframes_t nframes)
 {
 	// CycleTimer ct ("AudioEngine::process");
 	Glib::Mutex::Lock tm (_process_lock, Glib::TRY_LOCK);
-	jack_nframes_t next_processed_frames;
+	nframes_t next_processed_frames;
 	
 	/* handle wrap around of total frames counter */
 
@@ -324,13 +324,13 @@ AudioEngine::process_callback (jack_nframes_t nframes)
 }
 
 int
-AudioEngine::_sample_rate_callback (jack_nframes_t nframes, void *arg)
+AudioEngine::_sample_rate_callback (nframes_t nframes, void *arg)
 {
 	return static_cast<AudioEngine *> (arg)->jack_sample_rate_callback (nframes);
 }
 
 int
-AudioEngine::jack_sample_rate_callback (jack_nframes_t nframes)
+AudioEngine::jack_sample_rate_callback (nframes_t nframes)
 {
 	_frame_rate = nframes;
 	_usecs_per_cycle = (int) floor ((((double) frames_per_cycle() / nframes)) * 1000000.0);
@@ -350,13 +350,13 @@ AudioEngine::jack_sample_rate_callback (jack_nframes_t nframes)
 }
 
 int
-AudioEngine::_bufsize_callback (jack_nframes_t nframes, void *arg)
+AudioEngine::_bufsize_callback (nframes_t nframes, void *arg)
 {
 	return static_cast<AudioEngine *> (arg)->jack_bufsize_callback (nframes);
 }
 
 int
-AudioEngine::jack_bufsize_callback (jack_nframes_t nframes)
+AudioEngine::jack_bufsize_callback (nframes_t nframes)
 {
 	_buffer_size = nframes;
 	_usecs_per_cycle = (int) floor ((((double) nframes / frame_rate())) * 1000000.0);
@@ -376,10 +376,20 @@ AudioEngine::jack_bufsize_callback (jack_nframes_t nframes)
 }
 
 void
+AudioEngine::stop_metering_thread ()
+{
+	if (m_meter_thread) {
+		g_atomic_int_set (&m_meter_exit, 1);
+	}
+	m_meter_thread->join ();
+	m_meter_thread = 0;
+}
+
+void
 AudioEngine::start_metering_thread ()
 {
-	if(m_meter_thread == 0) {
-		m_meter_thread = Glib::Thread::create (sigc::mem_fun(this, &AudioEngine::meter_thread), false);
+	if (m_meter_thread == 0) {
+		m_meter_thread = Glib::Thread::create (sigc::mem_fun(this, &AudioEngine::meter_thread), true);
 	}
 }
 
@@ -387,10 +397,9 @@ void
 AudioEngine::meter_thread ()
 {
 	while (g_atomic_int_get(&m_meter_exit) != true) {
-        Glib::usleep (10000); /* 1/100th sec interval */
-        IO::update_meters ();
+		Glib::usleep (10000); /* 1/100th sec interval */
+		IO::update_meters ();
 	}
-	return;
 }
 
 void 
@@ -566,6 +575,10 @@ AudioEngine::connect (const string& source, const string& destination)
 	if (ret == 0) {
 		pair<string,string> c (s, d);
 		port_connections.push_back (c);
+	} else if (ret == EEXIST) {
+		error << string_compose(_("AudioEngine: connection already exists: %1 (%2) to %3 (%4)"), 
+				 source, s, destination, d) 
+		      << endmsg;
 	} else {
 		error << string_compose(_("AudioEngine: cannot connect %1 (%2) to %3 (%4)"), 
 				 source, s, destination, d) 
@@ -626,7 +639,7 @@ AudioEngine::disconnect (Port& port)
 
 }
 
-jack_nframes_t
+ARDOUR::nframes_t
 AudioEngine::frame_rate ()
 {
 	if (_jack) {
@@ -643,7 +656,7 @@ AudioEngine::frame_rate ()
 	}
 }
 
-jack_nframes_t
+ARDOUR::nframes_t
 AudioEngine::frames_per_cycle ()
 {
 	if (_jack) {
@@ -837,7 +850,7 @@ AudioEngine::get_nth_physical (DataType type, uint32_t n, int flag)
 	return ret;
 }
 
-jack_nframes_t
+ARDOUR::nframes_t
 AudioEngine::get_port_total_latency (const Port& port)
 {
 	if (!_jack) {
@@ -874,7 +887,7 @@ AudioEngine::transport_start ()
 }
 
 void
-AudioEngine::transport_locate (jack_nframes_t where)
+AudioEngine::transport_locate (nframes_t where)
 {
 	// cerr << "tell JACK to locate to " << where << endl;
 	if (_jack) {
@@ -1085,7 +1098,7 @@ AudioEngine::reconnect_to_jack ()
 
 
 	if (session) {
-		jack_nframes_t blocksize = jack_get_buffer_size (_jack);
+		nframes_t blocksize = jack_get_buffer_size (_jack);
 		session->set_block_size (blocksize);
 		session->set_frame_rate (jack_get_sample_rate (_jack));
 	}
@@ -1134,7 +1147,7 @@ AudioEngine::reconnect_to_jack ()
 }
 
 int
-AudioEngine::request_buffer_size (jack_nframes_t nframes)
+AudioEngine::request_buffer_size (nframes_t nframes)
 {
 	if (_jack) {
 		int ret = jack_set_buffer_size (_jack, nframes);

@@ -271,8 +271,8 @@ Editor::LocationMarkers::set_name (const string& str)
 }
 
 void
-Editor::LocationMarkers::set_position (jack_nframes_t startf, 
-				       jack_nframes_t endf) 
+Editor::LocationMarkers::set_position (nframes_t startf, 
+				       nframes_t endf) 
 {
 	start->set_position (startf);
 	if (end) { end->set_position (endf); }
@@ -286,7 +286,7 @@ Editor::LocationMarkers::set_color_rgba (uint32_t rgba)
 }
 
 void
-Editor::mouse_add_new_marker (jack_nframes_t where)
+Editor::mouse_add_new_marker (nframes_t where)
 {
 	if (session) {
 		Location *location = new Location (where, where, "mark", Location::IsMark);
@@ -745,7 +745,7 @@ Editor::marker_menu_loop_range ()
 			l2->set (l->start(), l->end());
 			
 			// enable looping, reposition and start rolling
-			session->request_auto_loop(true);
+			session->request_play_loop(true);
 			session->request_locate (l2->start(), true);
 		}
 	}
@@ -925,7 +925,7 @@ Editor::update_loop_range_view (bool visibility)
 
 	Location* tll;
 
-	if (session->get_auto_loop() && ((tll = transport_loop_location()) != 0)) {
+	if (Config->get_auto_loop() && ((tll = transport_loop_location()) != 0)) {
 
 		double x1 = frame_to_pixel (tll->start());
 		double x2 = frame_to_pixel (tll->end());
@@ -951,7 +951,7 @@ Editor::update_punch_range_view (bool visibility)
 
 	Location* tpl;
 
-	if ((session->get_punch_in() || session->get_punch_out()) && ((tpl = transport_punch_location()) != 0)) {
+	if ((Config->get_punch_in() || Config->get_punch_out()) && ((tpl = transport_punch_location()) != 0)) {
 
 		double x1 = frame_to_pixel (tpl->start());
 		double x2 = frame_to_pixel (tpl->end());

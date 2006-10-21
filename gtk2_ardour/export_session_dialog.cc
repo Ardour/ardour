@@ -47,7 +47,7 @@ ExportSessionDialog::export_audio_data ()
 
 
 void
-ExportSessionDialog::set_range (jack_nframes_t start, jack_nframes_t end)
+ExportSessionDialog::set_range (nframes_t start, nframes_t end)
 {	
 	ExportDialog::set_range (start, end);
 	

@@ -11,20 +11,29 @@ sigc2 = env.Copy()
 
 libsigc2 = sigc2.SharedLibrary('sigc++2', sigc2_files)
 
-if os.path.exists ('CVS') or os.path.exists ('.svn'):
+if os.access ('autogen.sh', os.F_OK) :
     sigc2_configure_script = sigc2.Command ('configure', 'configure.ac', 'cd libs/sigc++2 && ./autogen.sh && cd -', ENV=os.environ)
     sigc2_config_h = sigc2.Command('sigc++config.h', [sigc2_configure_script, 'sigc++config.h.in'], 'cd libs/sigc++2 && ./configure && cd -', ENV=os.environ)
-    Default([sigc2_config_h,libsigc2])
-else:
-    Default([libsigc2])
+else :
+    sigc2_config_h = sigc2.Command('sigc++config.h', ['configure', 'sigc++config.h.in'], 'cd libs/sigc++2 && ./configure && cd -', ENV=os.environ)
+    
+
+Default([sigc2_config_h,libsigc2])
 
 env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libsigc2))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'NEWS', 'README', 'AUTHORS', 'ChangeLog',
-                                       'configure', 'Makefile.am', 'SConscript',
-                                       'sigc++/Makefile.am', 
+                                       'configure', 'configure.ac', 'Makefile.am', 'SConscript',
+                                       'sigc++/Makefile.in', 
                                        'sigc++config.h',
+                                       'sigc++config.h.in',
+                                       'sigc++-2.0.pc.in',
+                                       'libsigc++-2.0.spec.in',
+                                       'install-sh',
+                                       'Makefile.in',
+                                       'scripts',
+                                       'missing',
                                        ] + sigc2_files +
                                      glob.glob('sigc++/*.h') +
                                      glob.glob('sigc++/functors/*.h') + glob.glob('sigc++/adaptors/lambda/*.h') +

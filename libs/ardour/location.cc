@@ -77,7 +77,7 @@ Location::operator= (const Location& other)
 }
 
 int
-Location::set_start (jack_nframes_t s)
+Location::set_start (nframes_t s)
 {
 	if (is_mark()) {
 		if (_start != s) {
@@ -113,7 +113,7 @@ Location::set_start (jack_nframes_t s)
 }
 
 int
-Location::set_end (jack_nframes_t e)
+Location::set_end (nframes_t e)
 {
 	if (is_mark()) {
 		if (_start != e) {
@@ -136,7 +136,7 @@ Location::set_end (jack_nframes_t e)
 }
 
 int
-Location::set (jack_nframes_t start, jack_nframes_t end)
+Location::set (nframes_t start, nframes_t end)
 {
 	if (is_mark() && start != end) {
 		return -1;
@@ -266,7 +266,7 @@ Location::get_state (void)
 		node->add_child_nocopy(cd_info_node(m->first, m->second));
 	}
 
-	id().print (buf);
+	id().print (buf, sizeof (buf));
 	node->add_property("id", buf);
 	node->add_property ("name", name());
 	snprintf (buf, sizeof (buf), "%u", start());
@@ -644,7 +644,7 @@ struct LocationStartLaterComparison
 };
 
 Location *
-Locations::first_location_before (jack_nframes_t frame)
+Locations::first_location_before (nframes_t frame)
 {
 	LocationList locs;
 
@@ -668,7 +668,7 @@ Locations::first_location_before (jack_nframes_t frame)
 }
 
 Location *
-Locations::first_location_after (jack_nframes_t frame)
+Locations::first_location_after (nframes_t frame)
 {
 	LocationList locs;
 
@@ -691,8 +691,8 @@ Locations::first_location_after (jack_nframes_t frame)
 	return 0;
 }
 
-jack_nframes_t
-Locations::first_mark_before (jack_nframes_t frame)
+nframes_t
+Locations::first_mark_before (nframes_t frame)
 {
 	LocationList locs;
 
@@ -728,8 +728,8 @@ Locations::first_mark_before (jack_nframes_t frame)
 	return 0;
 }
 
-jack_nframes_t
-Locations::first_mark_after (jack_nframes_t frame)
+nframes_t
+Locations::first_mark_after (nframes_t frame)
 {
 	LocationList locs;
 

@@ -56,7 +56,7 @@ void
 Editor::export_session()
 {
 	if (session) {
-		export_range (0, session->current_end_frame());
+		export_range (session->current_start_frame(), session->current_end_frame());
 	}
 }
 
@@ -75,7 +75,7 @@ Editor::export_selection ()
 }
 
 void
-Editor::export_range (jack_nframes_t start, jack_nframes_t end)
+Editor::export_range (nframes_t start, nframes_t end)
 {
 	if (session) {
 		if (export_dialog == 0) {
@@ -162,11 +162,11 @@ bool
 Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 {
 	boost::shared_ptr<AudioFileSource> fs;
-	const jack_nframes_t chunk_size = 4096;
-	jack_nframes_t to_read;
+	const nframes_t chunk_size = 4096;
+	nframes_t to_read;
 	Sample buf[chunk_size];
 	gain_t gain_buffer[chunk_size];
-	jack_nframes_t pos;
+	nframes_t pos;
 	char s[PATH_MAX+1];
 	uint32_t cnt;
 	vector<boost::shared_ptr<AudioFileSource> > sources;
@@ -229,7 +229,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 	pos = region->position();
 
 	while (to_read) {
-		jack_nframes_t this_time;
+		nframes_t this_time;
 
 		this_time = min (to_read, chunk_size);
 
@@ -306,11 +306,11 @@ bool
 Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list<AudioRange>& range)
 {
 	boost::shared_ptr<AudioFileSource> fs;
-	const jack_nframes_t chunk_size = 4096;
-	jack_nframes_t nframes;
+	const nframes_t chunk_size = 4096;
+	nframes_t nframes;
 	Sample buf[chunk_size];
 	gain_t gain_buffer[chunk_size];
-	jack_nframes_t pos;
+	nframes_t pos;
 	char s[PATH_MAX+1];
 	uint32_t cnt;
 	string path;
@@ -361,7 +361,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 		pos = (*i).start;
 		
 		while (nframes) {
-			jack_nframes_t this_time;
+			nframes_t this_time;
 			
 			this_time = min (nframes, chunk_size);
 
@@ -393,7 +393,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 
 			while (nframes) {
 
-				jack_nframes_t this_time = min (nframes, chunk_size);
+				nframes_t this_time = min (nframes, chunk_size);
 				memset (buf, 0, sizeof (Sample) * this_time);
 
 				for (uint32_t n=0; n < channels; ++n) {

@@ -771,7 +771,7 @@ void
 LocationUI::add_new_location()
 {
 	if (session) {
-		jack_nframes_t where = session->audible_frame();
+		nframes_t where = session->audible_frame();
 		Location *location = new Location (where, where, "mark", Location::IsMark);
 		session->begin_reversible_command (_("add marker"));
 		XMLNode &before = session->locations()->get_state();
@@ -787,7 +787,7 @@ void
 LocationUI::add_new_range()
 {
 	if (session) {
-		jack_nframes_t where = session->audible_frame();
+		nframes_t where = session->audible_frame();
 		Location *location = new Location (where, where, "unnamed", 
 											Location::IsRangeMarker);
 		session->begin_reversible_command (_("add range marker"));

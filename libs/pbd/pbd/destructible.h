@@ -5,7 +5,7 @@
 
 namespace PBD {
 
-class Destructible {
+class Destructible : public virtual sigc::trackable {
   public:
 	Destructible() {}
 	virtual ~Destructible () {}

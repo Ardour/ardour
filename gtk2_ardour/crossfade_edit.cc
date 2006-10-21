@@ -632,7 +632,7 @@ CrossfadeEditor::redraw ()
 		return;
 	}
 
-	jack_nframes_t len = xfade.length ();
+	nframes_t len = xfade.length ();
 
 	fade[current].normative_curve.clear ();
 	fade[current].gain_curve.clear ();
@@ -1078,12 +1078,12 @@ void
 CrossfadeEditor::audition_both ()
 {
 	AudioPlaylist& pl (session.the_auditioner()->prepare_playlist());
-	jack_nframes_t preroll;
-	jack_nframes_t postroll;
-	jack_nframes_t length;
-	jack_nframes_t left_start_offset;
-	jack_nframes_t right_length;
-	jack_nframes_t left_length;
+	nframes_t preroll;
+	nframes_t postroll;
+	nframes_t length;
+	nframes_t left_start_offset;
+	nframes_t right_length;
+	nframes_t left_length;
 
 	if (preroll_button.get_active()) {
 		preroll = ARDOUR_UI::instance()->preroll_clock.current_duration ();

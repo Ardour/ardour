@@ -37,10 +37,10 @@ class ExportRangeMarkersDialog : public ExportDialog
   
   private:
 	// keeps the duration of all range_markers before the current
-  	vector<jack_nframes_t>	range_markers_durations_aggregated;
-  	vector<jack_nframes_t>	range_markers_durations;
+  	vector<nframes_t>	range_markers_durations_aggregated;
+  	vector<nframes_t>	range_markers_durations;
 	// duration of all range markers
-  	jack_nframes_t	total_duration;
+  	nframes_t	total_duration;
   	// index of range marker, that get's exported right now
   	unsigned int	current_range_marker_index;
 	

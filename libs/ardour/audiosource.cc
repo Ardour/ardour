@@ -23,6 +23,7 @@
 #include <fcntl.h>
 #include <poll.h>
 #include <float.h>
+#include <utime.h>
 #include <cerrno>
 #include <ctime>
 #include <cmath>
@@ -43,7 +44,7 @@ using namespace PBD;
 
 pthread_t                    AudioSource::peak_thread;
 bool                         AudioSource::have_peak_thread = false;
-vector<AudioSource*>         AudioSource::pending_peak_sources;
+vector<boost::shared_ptr<AudioSource> > AudioSource::pending_peak_sources;
 Glib::Mutex*                 AudioSource::pending_peak_sources_lock = 0;
 int                          AudioSource::peak_request_pipe[2];
 
@@ -190,7 +191,7 @@ AudioSource::peak_thread_work (void* arg)
 
 		while (!pending_peak_sources.empty()) {
 
-			AudioSource* s = pending_peak_sources.front();
+			boost::shared_ptr<AudioSource> s = pending_peak_sources.front();
 			pending_peak_sources.erase (pending_peak_sources.begin());
 			
 			pending_peak_sources_lock->unlock ();
@@ -250,7 +251,7 @@ AudioSource::stop_peak_thread ()
 }
 
 void 
-AudioSource::queue_for_peaks (AudioSource* source)
+AudioSource::queue_for_peaks (boost::shared_ptr<AudioSource> source)
 {
 	if (have_peak_thread) {
 		
@@ -294,6 +295,23 @@ AudioSource::peaks_ready (sigc::slot<void> the_slot, sigc::connection& conn) con
 	}
 
 	return ret;
+}
+
+void
+AudioSource::touch_peakfile ()
+{
+	struct stat statbuf;
+
+	if (stat (peakpath.c_str(), &statbuf) != 0 || statbuf.st_size == 0) {
+		return;
+	}
+	
+	struct utimbuf tbuf;
+	
+	tbuf.actime = statbuf.st_atime;
+	tbuf.modtime = time ((time_t) 0);
+	
+	utime (peakpath.c_str(), &tbuf);
 }
 
 int
@@ -350,7 +368,6 @@ AudioSource::initialize_peakfile (bool newfile, string audio_path)
 				error << string_compose(_("AudioSource: cannot stat peakfile \"%1\""), peakpath) << endmsg;
 				return -1;
 			}
-
 		} else {
 			
 			/* we found it in the peaks dir */
@@ -370,30 +387,30 @@ AudioSource::initialize_peakfile (bool newfile, string audio_path)
 			}
 		}
 	}
-
+	
 	if (!newfile && !_peaks_built && _build_missing_peakfiles && _build_peakfiles) {
 		build_peaks_from_scratch ();
 	} 
-
+	
 	return 0;
 }
 
-jack_nframes_t
-AudioSource::read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const
+nframes_t
+AudioSource::read (Sample *dst, nframes_t start, nframes_t cnt) const
 {
 	Glib::Mutex::Lock lm (_lock);
 	return read_unlocked (dst, start, cnt);
 }
 
-jack_nframes_t
-AudioSource::write (Sample *dst, jack_nframes_t cnt)
+nframes_t
+AudioSource::write (Sample *dst, nframes_t cnt)
 {
 	Glib::Mutex::Lock lm (_lock);
 	return write_unlocked (dst, cnt);
 }
 
 int 
-AudioSource::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t start, jack_nframes_t cnt, double samples_per_visual_peak) const
+AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nframes_t cnt, double samples_per_visual_peak) const
 {
 	Glib::Mutex::Lock lm (_lock);
 	double scale;
@@ -402,7 +419,7 @@ AudioSource::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t 
 	PeakData::PeakDatum xmin;
 	int32_t to_read;
 	uint32_t nread;
-	jack_nframes_t zero_fill = 0;
+	nframes_t zero_fill = 0;
 	int ret = -1;
 	PeakData* staging = 0;
 	Sample* raw_staging = 0;
@@ -428,8 +445,8 @@ AudioSource::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t 
 	if (cnt > _length - start) {
 		// cerr << "too close to end @ " << _length << " given " << start << " + " << cnt << endl;
 		cnt = _length - start;
-		jack_nframes_t old = npeaks;
-		npeaks = min ((jack_nframes_t) floor (cnt / samples_per_visual_peak), npeaks);
+		nframes_t old = npeaks;
+		npeaks = min ((nframes_t) floor (cnt / samples_per_visual_peak), npeaks);
 		zero_fill = old - npeaks;
 	}
 
@@ -437,7 +454,7 @@ AudioSource::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t 
 	
 	if (npeaks == cnt) {
 
-		// cerr << "RAW DATA\n";
+		cerr << "RAW DATA\n";
 		
 		/* no scaling at all, just get the sample data and duplicate it for
 		   both max and min peak values.
@@ -450,7 +467,7 @@ AudioSource::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t 
 			return -1;
 		}
 
-		for (jack_nframes_t i = 0; i < npeaks; ++i) {
+		for (nframes_t i = 0; i < npeaks; ++i) {
 			peaks[i].max = raw_staging[i];
 			peaks[i].min = raw_staging[i];
 		}
@@ -499,7 +516,7 @@ AudioSource::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t 
 	}
 
 
-	jack_nframes_t tnp;
+	nframes_t tnp;
 
 	if (scale < 1.0) {
 
@@ -521,11 +538,11 @@ AudioSource::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t 
 		
 		/* compute the rounded up frame position  */
 	
-		jack_nframes_t current_frame = start;
-		jack_nframes_t current_stored_peak = (jack_nframes_t) ceil (current_frame / (double) frames_per_peak);
+		nframes_t current_frame = start;
+		nframes_t current_stored_peak = (nframes_t) ceil (current_frame / (double) frames_per_peak);
 		uint32_t       next_visual_peak  = (uint32_t) ceil (current_frame / samples_per_visual_peak);
 		double         next_visual_peak_frame = next_visual_peak * samples_per_visual_peak;
-		uint32_t       stored_peak_before_next_visual_peak = (jack_nframes_t) next_visual_peak_frame / frames_per_peak;
+		uint32_t       stored_peak_before_next_visual_peak = (nframes_t) next_visual_peak_frame / frames_per_peak;
 		uint32_t       nvisual_peaks = 0;
 		uint32_t       stored_peaks_read = 0;
 		uint32_t       i = 0;
@@ -546,7 +563,7 @@ AudioSource::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t 
 			if (i == stored_peaks_read) {
 
 				uint32_t       start_byte = current_stored_peak * sizeof(PeakData);
-				tnp = min ((_length/frames_per_peak - current_stored_peak), (jack_nframes_t) expected_peaks);
+				tnp = min ((_length/frames_per_peak - current_stored_peak), (nframes_t) expected_peaks);
 				to_read = min (chunksize, tnp);
 				
 				off_t fend = lseek (peakfile, 0, SEEK_END);
@@ -615,14 +632,14 @@ AudioSource::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t 
 		   data on the fly.
 		*/
 
-		jack_nframes_t frames_read = 0;
-		jack_nframes_t current_frame = start;
-		jack_nframes_t i = 0;
-		jack_nframes_t nvisual_peaks = 0;
-		jack_nframes_t chunksize = (jack_nframes_t) min (cnt, (jack_nframes_t) 4096);
+		nframes_t frames_read = 0;
+		nframes_t current_frame = start;
+		nframes_t i = 0;
+		nframes_t nvisual_peaks = 0;
+		nframes_t chunksize = (nframes_t) min (cnt, (nframes_t) 4096);
 		raw_staging = new Sample[chunksize];
 		
-		jack_nframes_t frame_pos = start;
+		nframes_t frame_pos = start;
 		double pixel_pos = floor (frame_pos / samples_per_visual_peak);
 		double next_pixel_pos = ceil (frame_pos / samples_per_visual_peak);
 		double pixels_per_frame = 1.0 / samples_per_visual_peak;
@@ -635,7 +652,7 @@ AudioSource::read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t 
 			if (i == frames_read) {
 				
 				to_read = min (chunksize, (_length - current_frame));
-				
+
 				if ((frames_read = read_unlocked (raw_staging, current_frame, to_read)) == 0) {
 					error << string_compose(_("AudioSource[%1]: peak read - cannot read %2 samples at offset %3")
 							 , _name, to_read, current_frame) 
@@ -745,15 +762,15 @@ AudioSource::build_peaks ()
 }
 
 int
-AudioSource::do_build_peak (jack_nframes_t first_frame, jack_nframes_t cnt)
+AudioSource::do_build_peak (nframes_t first_frame, nframes_t cnt)
 {
-	jack_nframes_t current_frame;
+	nframes_t current_frame;
 	Sample buf[frames_per_peak];
 	Sample xmin, xmax;
 	uint32_t  peaki;
 	PeakData* peakbuf;
-	jack_nframes_t frames_read;
-	jack_nframes_t frames_to_read;
+	nframes_t frames_read;
+	nframes_t frames_to_read;
 	off_t first_peak_byte;
 	int peakfile = -1;
 	int ret = -1;
@@ -791,7 +808,7 @@ AudioSource::do_build_peak (jack_nframes_t first_frame, jack_nframes_t cnt)
 		xmin = buf[0];
 		xmax = buf[0];
 
-		for (jack_nframes_t n = 1; n < frames_read; ++n) {
+		for (nframes_t n = 1; n < frames_read; ++n) {
 			xmax = max (xmax, buf[n]);
 			xmin = min (xmin, buf[n]);
 
@@ -830,7 +847,7 @@ AudioSource::build_peaks_from_scratch ()
 
 	next_peak_clear_should_notify = true;
 	pending_peak_builds.push_back (new PeakBuildRecord (0, _length));
-	queue_for_peaks (this);
+	queue_for_peaks (shared_from_this());
 }
 
 bool
@@ -849,7 +866,7 @@ AudioSource::file_changed (string path)
 	}
 }
 
-jack_nframes_t
+nframes_t
 AudioSource::available_peaks (double zoom_factor) const
 {
 	int peakfile;

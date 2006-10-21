@@ -383,13 +383,7 @@ int main (int argc, char *argv[])
 	cout << _("Ardour/GTK ") 
 	     << VERSIONSTRING
 	     << _("\n   (built using ")
-	     << gtk_ardour_major_version << '.'
-	     << gtk_ardour_minor_version << '.'
-	     << gtk_ardour_micro_version
-	     << _(" with libardour ")
-	     << libardour_major_version << '.'
-	     << libardour_minor_version << '.' 
-	     << libardour_micro_version 
+	     << ARDOUR::get_ardour_revision ()
 #ifdef __GNUC__
 	     << _(" and GCC version ") << __VERSION__ 
 #endif
@@ -441,6 +435,7 @@ int main (int argc, char *argv[])
 
     try {
 		ARDOUR::init (*engine, use_vst, try_hw_optimization);
+		Config->set_current_owner (ConfigVariableBase::Interface);
 		ui->set_engine (*engine);
 	} catch (failed_constructor& err) {
 		error << _("could not initialize Ardour.") << endmsg;

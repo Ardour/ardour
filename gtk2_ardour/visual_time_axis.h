@@ -251,7 +251,7 @@ class VisualTimeAxis : public TimeAxisView
 		 *
 		 * @todo should VisualTimeAxis handle this?
 		 */
-		void show_timestretch (jack_nframes_t start, jack_nframes_t end);
+		void show_timestretch (nframes_t start, nframes_t end);
 		
 		/**
 		 * Not handle by purely visual TimeAxis

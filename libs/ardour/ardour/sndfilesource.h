@@ -35,7 +35,7 @@ class SndFileSource : public AudioFileSource {
 
 	/* constructor to be called for new in-session files */
 
-	SndFileSource (Session&, std::string path, SampleFormat samp_format, HeaderFormat hdr_format, jack_nframes_t rate, 
+	SndFileSource (Session&, std::string path, SampleFormat samp_format, HeaderFormat hdr_format, nframes_t rate, 
 		       Flag flags = AudioFileSource::Flag (AudioFileSource::Writable|
 							   AudioFileSource::Removable|
 							   AudioFileSource::RemovableIfEmpty|
@@ -48,18 +48,18 @@ class SndFileSource : public AudioFileSource {
 	~SndFileSource ();
 
 	float sample_rate () const;
-	int update_header (jack_nframes_t when, struct tm&, time_t);
+	int update_header (nframes_t when, struct tm&, time_t);
 	int flush_header ();
 
-	jack_nframes_t natural_position () const;
+	nframes_t natural_position () const;
 
   protected:
 	void set_header_timeline_position ();
 
-	jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const;
-	jack_nframes_t write_unlocked (Sample *dst, jack_nframes_t cnt);
+	nframes_t read_unlocked (Sample *dst, nframes_t start, nframes_t cnt) const;
+	nframes_t write_unlocked (Sample *dst, nframes_t cnt);
 
-	jack_nframes_t write_float (Sample* data, jack_nframes_t pos, jack_nframes_t cnt);
+	nframes_t write_float (Sample* data, nframes_t pos, nframes_t cnt);
 
   private:
 	SNDFILE *sf;
@@ -67,12 +67,12 @@ class SndFileSource : public AudioFileSource {
 	SF_BROADCAST_INFO *_broadcast_info;
 
 	mutable float *interleave_buf;
-	mutable jack_nframes_t interleave_bufsize;
+	mutable nframes_t interleave_bufsize;
 
 	void init (const string &str);
 	int open();
 	void close();
-	int setup_broadcast_info (jack_nframes_t when, struct tm&, time_t);
+	int setup_broadcast_info (nframes_t when, struct tm&, time_t);
 };
 
 } // namespace ARDOUR

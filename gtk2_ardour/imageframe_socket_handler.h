@@ -195,7 +195,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param src the identity of the object that initiated the change
 		 * @param item the time axis item whos position has changed
 		 */
-		void send_imageframe_view_position_change(jack_nframes_t pos, void* src, ImageFrameView* item) ;
+		void send_imageframe_view_position_change(nframes_t pos, void* src, ImageFrameView* item) ;
 		
 		/**
 		 * Send a Image Frame View item duration changed message
@@ -204,7 +204,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param src the identity of the object that initiated the change
 		 * @param item the item which has had a duration change
 		 */
-		void send_imageframe_view_duration_change(jack_nframes_t dur, void* src, ImageFrameView* item) ;
+		void send_imageframe_view_duration_change(nframes_t dur, void* src, ImageFrameView* item) ;
 		
 		/**
 		 * Send a message indicating that an ImageFrameView has been renamed
@@ -234,7 +234,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param src the identity of the object that initiated the change
 		 * @param item the time axis item whos position has changed
 		 */
-		void send_marker_view_position_change(jack_nframes_t pos, void* src, MarkerView* item) ;
+		void send_marker_view_position_change(nframes_t pos, void* src, MarkerView* item) ;
 		
 		/**
 		 * Send a Marker View item duration changed message
@@ -243,7 +243,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param src the identity of the object that initiated the change
 		 * @param item the time axis item whos position has changed
 		 */
-		void send_marker_view_duration_change(jack_nframes_t dur, void* src, MarkerView* item) ;
+		void send_marker_view_duration_change(nframes_t dur, void* src, MarkerView* item) ;
 		
 		/**
 		 * Send a message indicating that a MarkerView has been renamed

@@ -31,6 +31,7 @@
 
 #include <pbd/basename.h>
 #include <pbd/xml++.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/audioregion.h>
 #include <ardour/session.h>
@@ -39,6 +40,7 @@
 #include <ardour/playlist.h>
 #include <ardour/audiofilter.h>
 #include <ardour/audiofilesource.h>
+#include <ardour/destructive_filesource.h>
 
 #include "i18n.h"
 #include <locale.h>
@@ -65,7 +67,7 @@ AudioRegionState::AudioRegionState (string why)
 }
 
 /** Basic AudioRegion constructor (one channel) */
-AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, jack_nframes_t start, jack_nframes_t length)
+AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, nframes_t length)
 	: Region (src, start, length, PBD::basename_nosuffix(src->name()), DataType::AUDIO, 0,  Region::Flag(Region::DefaultFlags|Region::External)),
 	  _fade_in (0.0, 2.0, 1.0, false),
 	  _fade_out (0.0, 2.0, 1.0, false),
@@ -87,7 +89,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, jack_nframes_t sta
 }
 
 /* Basic AudioRegion constructor (one channel) */
-AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
+AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (src, start, length, name, DataType::AUDIO, layer, flags)
 	, _fade_in (0.0, 2.0, 1.0, false)
 	, _fade_out (0.0, 2.0, 1.0, false)
@@ -108,7 +110,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, jack_nframes_t sta
 }
 
 /* Basic AudioRegion constructor (many channels) */
-AudioRegion::AudioRegion (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
+AudioRegion::AudioRegion (SourceList& srcs, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (srcs, start, length, name, DataType::AUDIO, layer, flags)
 	, _fade_in (0.0, 2.0, 1.0, false)
 	, _fade_out (0.0, 2.0, 1.0, false)
@@ -125,7 +127,7 @@ AudioRegion::AudioRegion (SourceList& srcs, jack_nframes_t start, jack_nframes_t
 
 
 /** Create a new AudioRegion, that is part of an existing one */
-AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, jack_nframes_t offset, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
+AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t offset, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (other, offset, length, name, layer, flags),
 	  _fade_in (other->_fade_in),
 	  _fade_out (other->_fade_out),
@@ -230,6 +232,7 @@ AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 
 AudioRegion::~AudioRegion ()
 {
+	notify_callbacks ();
 	GoingAway (); /* EMIT SIGNAL */
 }
 
@@ -335,8 +338,8 @@ AudioRegion::set_envelope_active (bool yn)
 	}
 }
 
-jack_nframes_t
-AudioRegion::read_peaks (PeakData *buf, jack_nframes_t npeaks, jack_nframes_t offset, jack_nframes_t cnt, uint32_t chan_n, double samples_per_unit) const
+ARDOUR::nframes_t
+AudioRegion::read_peaks (PeakData *buf, nframes_t npeaks, nframes_t offset, nframes_t cnt, uint32_t chan_n, double samples_per_unit) const
 {
 	if (chan_n >= _sources.size()) {
 		return 0; 
@@ -346,7 +349,7 @@ AudioRegion::read_peaks (PeakData *buf, jack_nframes_t npeaks, jack_nframes_t of
 		return 0;
 	} else {
 		if (_scale_amplitude != 1.0) {
-			for (jack_nframes_t n = 0; n < npeaks; ++n) {
+			for (nframes_t n = 0; n < npeaks; ++n) {
 				buf[n].max *= _scale_amplitude;
 				buf[n].min *= _scale_amplitude;
 			}
@@ -355,30 +358,30 @@ AudioRegion::read_peaks (PeakData *buf, jack_nframes_t npeaks, jack_nframes_t of
 	}
 }
 
-jack_nframes_t
-AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, jack_nframes_t position, 
-		      jack_nframes_t cnt, 
-		      uint32_t chan_n, jack_nframes_t read_frames, jack_nframes_t skip_frames) const
+ARDOUR::nframes_t
+AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nframes_t position, 
+		      nframes_t cnt, 
+		      uint32_t chan_n, nframes_t read_frames, nframes_t skip_frames) const
 {
 	return _read_at (_sources, buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, read_frames, skip_frames);
 }
 
-jack_nframes_t
-AudioRegion::master_read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, jack_nframes_t position, 
-			     jack_nframes_t cnt, uint32_t chan_n) const
+ARDOUR::nframes_t
+AudioRegion::master_read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nframes_t position, 
+			     nframes_t cnt, uint32_t chan_n) const
 {
 	return _read_at (_master_sources, buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, 0, 0);
 }
 
-jack_nframes_t
+ARDOUR::nframes_t
 AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
-		       jack_nframes_t position, jack_nframes_t cnt, 
-		       uint32_t chan_n, jack_nframes_t read_frames, jack_nframes_t skip_frames) const
+		       nframes_t position, nframes_t cnt, 
+		       uint32_t chan_n, nframes_t read_frames, nframes_t skip_frames) const
 {
-	jack_nframes_t internal_offset;
-	jack_nframes_t buf_offset;
-	jack_nframes_t to_read;
-	
+	nframes_t internal_offset;
+	nframes_t buf_offset;
+	nframes_t to_read;
+
 	/* precondition: caller has verified that we cover the desired section */
 
 	if (chan_n >= _sources.size()) {
@@ -397,7 +400,6 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 	if (internal_offset >= _length) {
 		return 0; /* read nothing */
 	}
-	
 
 	if ((to_read = min (cnt, _length - internal_offset)) == 0) {
 		return 0; /* read nothing */
@@ -427,19 +429,19 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 
 	if (_flags & FadeIn) {
 
-		jack_nframes_t fade_in_length = (jack_nframes_t) _fade_in.back()->when;
+		nframes_t fade_in_length = (nframes_t) _fade_in.back()->when;
 		
 		/* see if this read is within the fade in */
 
 		if (internal_offset < fade_in_length) {
 			
-			jack_nframes_t limit;
+			nframes_t limit;
 
 			limit = min (to_read, fade_in_length - internal_offset);
 
 			_fade_in.get_vector (internal_offset, internal_offset+limit, gain_buffer, limit);
 
-			for (jack_nframes_t n = 0; n < limit; ++n) {
+			for (nframes_t n = 0; n < limit; ++n) {
 				mixdown_buffer[n] *= gain_buffer[n];
 			}
 		}
@@ -448,9 +450,6 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 	/* fade out */
 
 	if (_flags & FadeOut) {
-	
-
-
 	
 		/* see if some part of this read is within the fade out */
 
@@ -471,20 +470,20 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 		*/
 
 	
-		jack_nframes_t fade_out_length = (jack_nframes_t) _fade_out.back()->when;
-		jack_nframes_t fade_interval_start = max(internal_offset, _length-fade_out_length);
-		jack_nframes_t fade_interval_end   = min(internal_offset + to_read, _length);
+		nframes_t fade_out_length = (nframes_t) _fade_out.back()->when;
+		nframes_t fade_interval_start = max(internal_offset, _length-fade_out_length);
+		nframes_t fade_interval_end   = min(internal_offset + to_read, _length);
 
 		if (fade_interval_end > fade_interval_start) {
 			/* (part of the) the fade out is  in this buffer */
 			
-			jack_nframes_t limit = fade_interval_end - fade_interval_start;
-			jack_nframes_t curve_offset = fade_interval_start - (_length-fade_out_length);
-			jack_nframes_t fade_offset = fade_interval_start - internal_offset;
+			nframes_t limit = fade_interval_end - fade_interval_start;
+			nframes_t curve_offset = fade_interval_start - (_length-fade_out_length);
+			nframes_t fade_offset = fade_interval_start - internal_offset;
 								       
 			_fade_out.get_vector (curve_offset,curve_offset+limit, gain_buffer, limit);
 
-			for (jack_nframes_t n = 0, m = fade_offset; n < limit; ++n, ++m) {
+			for (nframes_t n = 0, m = fade_offset; n < limit; ++n, ++m) {
 				mixdown_buffer[m] *= gain_buffer[n];
 			}
 		} 
@@ -497,11 +496,11 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 		_envelope.get_vector (internal_offset, internal_offset + to_read, gain_buffer, to_read);
 		
 		if (_scale_amplitude != 1.0f) {
-			for (jack_nframes_t n = 0; n < to_read; ++n) {
+			for (nframes_t n = 0; n < to_read; ++n) {
 				mixdown_buffer[n] *= gain_buffer[n] * _scale_amplitude;
 			}
 		} else {
-			for (jack_nframes_t n = 0; n < to_read; ++n) {
+			for (nframes_t n = 0; n < to_read; ++n) {
 				mixdown_buffer[n] *= gain_buffer[n];
 			}
 		}
@@ -516,7 +515,7 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 
 		buf += buf_offset;
 
-		for (jack_nframes_t n = 0; n < to_read; ++n) {
+		for (nframes_t n = 0; n < to_read; ++n) {
 			buf[n] += mixdown_buffer[n];
 		}
 	} 
@@ -540,7 +539,7 @@ AudioRegion::state (bool full)
 
 	for (uint32_t n=0; n < _sources.size(); ++n) {
 		snprintf (buf2, sizeof(buf2), "source-%d", n);
-		_sources[n]->id().print (buf);
+		_sources[n]->id().print (buf, sizeof (buf));
 		node.add_property (buf2, buf);
 	}
 
@@ -670,17 +669,17 @@ AudioRegion::set_state (const XMLNode& node)
 void
 AudioRegion::set_fade_in_shape (FadeShape shape)
 {
-	set_fade_in (shape, (jack_nframes_t) _fade_in.back()->when);
+	set_fade_in (shape, (nframes_t) _fade_in.back()->when);
 }
 
 void
 AudioRegion::set_fade_out_shape (FadeShape shape)
 {
-	set_fade_out (shape, (jack_nframes_t) _fade_out.back()->when);
+	set_fade_out (shape, (nframes_t) _fade_out.back()->when);
 }
 
 void
-AudioRegion::set_fade_in (FadeShape shape, jack_nframes_t len)
+AudioRegion::set_fade_in (FadeShape shape, nframes_t len)
 {
 	_fade_in.freeze ();
 	_fade_in.clear ();
@@ -744,7 +743,7 @@ AudioRegion::set_fade_in (FadeShape shape, jack_nframes_t len)
 }
 
 void
-AudioRegion::set_fade_out (FadeShape shape, jack_nframes_t len)
+AudioRegion::set_fade_out (FadeShape shape, nframes_t len)
 {
 	_fade_out.freeze ();
 	_fade_out.clear ();
@@ -806,7 +805,7 @@ AudioRegion::set_fade_out (FadeShape shape, jack_nframes_t len)
 }
 
 void
-AudioRegion::set_fade_in_length (jack_nframes_t len)
+AudioRegion::set_fade_in_length (nframes_t len)
 {
 	bool changed = _fade_in.extend_to (len);
 
@@ -824,7 +823,7 @@ AudioRegion::set_fade_in_length (jack_nframes_t len)
 }
 
 void
-AudioRegion::set_fade_out_length (jack_nframes_t len)
+AudioRegion::set_fade_out_length (nframes_t len)
 {
 	bool changed =	_fade_out.extend_to (len);
 
@@ -977,8 +976,8 @@ AudioRegion::apply (AudioFilter& filter)
 int
 AudioRegion::exportme (Session& session, AudioExportSpecification& spec)
 {
-	const jack_nframes_t blocksize = 4096;
-	jack_nframes_t to_read;
+	const nframes_t blocksize = 4096;
+	nframes_t to_read;
 	int status = -1;
 
 	spec.channels = _sources.size();
@@ -1013,7 +1012,7 @@ AudioRegion::exportme (Session& session, AudioExportSpecification& spec)
 					goto out;
 				}
 				
-				for (jack_nframes_t x = 0; x < to_read; ++x) {
+				for (nframes_t x = 0; x < to_read; ++x) {
 					spec.dataF[chan+(x*spec.channels)] = buf[x];
 				}
 			}
@@ -1057,11 +1056,11 @@ AudioRegion::set_scale_amplitude (gain_t g)
 void
 AudioRegion::normalize_to (float target_dB)
 {
-	const jack_nframes_t blocksize = 64 * 1024;
+	const nframes_t blocksize = 64 * 1024;
 	Sample buf[blocksize];
-	jack_nframes_t fpos;
-	jack_nframes_t fend;
-	jack_nframes_t to_read;
+	nframes_t fpos;
+	nframes_t fend;
+	nframes_t to_read;
 	double maxamp = 0;
 	gain_t target = dB_to_coefficient (target_dB);
 
@@ -1183,7 +1182,10 @@ AudioRegion::speed_mismatch (float sr) const
 void
 AudioRegion::source_offset_changed ()
 {
-	set_position (source()->natural_position() + start(), this);
+	if (boost::dynamic_pointer_cast<DestructiveFileSource>(_sources.front())) {
+		set_start (source()->natural_position(), this);
+		set_position (source()->natural_position(), this);
+	} 
 }
 
 boost::shared_ptr<AudioSource>
@@ -1197,7 +1199,7 @@ extern "C" {
 
 	int region_read_peaks_from_c (void *arg, uint32_t npeaks, uint32_t start, uint32_t cnt, intptr_t data, uint32_t n_chan, double samples_per_unit) 
 {
-	return ((AudioRegion *) arg)->read_peaks ((PeakData *) data, (jack_nframes_t) npeaks, (jack_nframes_t) start, (jack_nframes_t) cnt, n_chan,samples_per_unit);
+	return ((AudioRegion *) arg)->read_peaks ((PeakData *) data, (nframes_t) npeaks, (nframes_t) start, (nframes_t) cnt, n_chan,samples_per_unit);
 }
 
 uint32_t region_length_from_c (void *arg)

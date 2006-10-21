@@ -326,38 +326,11 @@ AudioClock::on_realize ()
 
 	/* styles are not available until the widgets are bound to a window */
 
-	switch (_mode) {
-	case SMPTE:
-		Gtkmm2ext::set_size_request_to_display_given_text (hours_label, "-88", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (minutes_label, "88", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (seconds_label, "88", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (frames_label, "88", 0, 2);
-		break;
-
-	case BBT:
-		Gtkmm2ext::set_size_request_to_display_given_text (bars_label, "-888", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (beats_label, "88", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (ticks_label, "8888", 0, 2);
-		break;
-
-	case MinSec:
-		Gtkmm2ext::set_size_request_to_display_given_text (ms_hours_label, "99", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (ms_minutes_label, "99", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (ms_seconds_label, "99", 0, 2);
-		break;
-
-	case Frames:
-		Gtkmm2ext::set_size_request_to_display_given_text (audio_frames_label, "4294967296", 0, 2);
-		break;
-
-	case Off:
-		break;
-		
-	}
+	set_size_requests ();
 }
 
 void
-AudioClock::set (jack_nframes_t when, bool force)
+AudioClock::set (nframes_t when, bool force)
 {
 
  	if ((!force && !is_visible()) || session == 0) {
@@ -395,7 +368,7 @@ AudioClock::set (jack_nframes_t when, bool force)
 void
 AudioClock::smpte_offset_changed ()
 {
-	jack_nframes_t current;
+	nframes_t current;
 
 	switch (_mode) {
 	case SMPTE:
@@ -412,7 +385,7 @@ AudioClock::smpte_offset_changed ()
 }
 
 void
-AudioClock::set_frames (jack_nframes_t when, bool force)
+AudioClock::set_frames (nframes_t when, bool force)
 {
 	char buf[32];
 	snprintf (buf, sizeof (buf), "%u", when);
@@ -420,29 +393,29 @@ AudioClock::set_frames (jack_nframes_t when, bool force)
 }	
 
 void
-AudioClock::set_minsec (jack_nframes_t when, bool force)
+AudioClock::set_minsec (nframes_t when, bool force)
 {
 	char buf[32];
-	jack_nframes_t left;
+	nframes_t left;
 	int hrs;
 	int mins;
 	float secs;
 	
 	left = when;
 	hrs = (int) floor (left / (session->frame_rate() * 60.0f * 60.0f));
-	left -= (jack_nframes_t) floor (hrs * session->frame_rate() * 60.0f * 60.0f);
+	left -= (nframes_t) floor (hrs * session->frame_rate() * 60.0f * 60.0f);
 	mins = (int) floor (left / (session->frame_rate() * 60.0f));
-	left -= (jack_nframes_t) floor (mins * session->frame_rate() * 60.0f);
+	left -= (nframes_t) floor (mins * session->frame_rate() * 60.0f);
 	secs = left / (float) session->frame_rate();
 
 	if (force || hrs != ms_last_hrs) {
-		sprintf (buf, "%d", hrs);
+		sprintf (buf, "%02d", hrs);
 		ms_hours_label.set_text (buf);
 		ms_last_hrs = hrs;
 	}
 
 	if (force || mins != ms_last_mins) {
-		sprintf (buf, "%d", mins);
+		sprintf (buf, "%02d", mins);
 		ms_minutes_label.set_text (buf);
 		ms_last_mins = mins;
 	}
@@ -455,7 +428,7 @@ AudioClock::set_minsec (jack_nframes_t when, bool force)
 }
 
 void
-AudioClock::set_smpte (jack_nframes_t when, bool force)
+AudioClock::set_smpte (nframes_t when, bool force)
 {
 	char buf[32];
 	SMPTE::Time smpte;
@@ -497,7 +470,7 @@ AudioClock::set_smpte (jack_nframes_t when, bool force)
 }
 
 void
-AudioClock::set_bbt (jack_nframes_t when, bool force)
+AudioClock::set_bbt (nframes_t when, bool force)
 {
 	char buf[16];
 	BBT_Time bbt;
@@ -952,7 +925,7 @@ AudioClock::field_button_press_event (GdkEventButton *ev, Field field)
 {
 	if (session == 0) return FALSE;
 
-	jack_nframes_t frames = 0;
+	nframes_t frames = 0;
 
 	switch (ev->button) {
 	case 1:
@@ -1029,7 +1002,7 @@ AudioClock::field_button_scroll_event (GdkEventScroll *ev, Field field)
 {
 	if (session == 0) return FALSE;
 
-	jack_nframes_t frames = 0;
+	nframes_t frames = 0;
 
 	switch (ev->direction) {
 
@@ -1098,8 +1071,8 @@ AudioClock::field_motion_notify_event (GdkEventMotion *ev, Field field)
 
 	if (trunc(drag_accum) != 0) {
 
-		jack_nframes_t frames;
-		jack_nframes_t pos ;
+		nframes_t frames;
+		nframes_t pos ;
 		int dir;
 		dir = (drag_accum < 0 ? 1:-1);
 		pos = current_time();
@@ -1107,7 +1080,7 @@ AudioClock::field_motion_notify_event (GdkEventMotion *ev, Field field)
 		
 		if (frames  != 0 &&  frames * drag_accum < current_time()) {
 		
-			set ((jack_nframes_t) floor (pos - drag_accum * frames), false); // minus because up is negative in computer-land
+			set ((nframes_t) floor (pos - drag_accum * frames), false); // minus because up is negative in computer-land
 		
 		} else {
 			set (0 , false);
@@ -1123,24 +1096,24 @@ AudioClock::field_motion_notify_event (GdkEventMotion *ev, Field field)
 	return TRUE;
 }
 
-jack_nframes_t
-AudioClock::get_frames (Field field,jack_nframes_t pos,int dir)
+nframes_t
+AudioClock::get_frames (Field field,nframes_t pos,int dir)
 {
 
-	jack_nframes_t frames = 0;
+	nframes_t frames = 0;
 	BBT_Time bbt;
 	switch (field) {
 	case SMPTE_Hours:
-		frames = (jack_nframes_t) floor (3600.0 * session->frame_rate());
+		frames = (nframes_t) floor (3600.0 * session->frame_rate());
 		break;
 	case SMPTE_Minutes:
-		frames = (jack_nframes_t) floor (60.0 * session->frame_rate());
+		frames = (nframes_t) floor (60.0 * session->frame_rate());
 		break;
 	case SMPTE_Seconds:
 		frames = session->frame_rate();
 		break;
 	case SMPTE_Frames:
-		frames = (jack_nframes_t) floor (session->frame_rate() / session->smpte_frames_per_second);
+		frames = (nframes_t) floor (session->frame_rate() / Config->get_smpte_frames_per_second());
 		break;
 
 	case AudioFrames:
@@ -1148,10 +1121,10 @@ AudioClock::get_frames (Field field,jack_nframes_t pos,int dir)
 		break;
 
 	case MS_Hours:
-		frames = (jack_nframes_t) floor (3600.0 * session->frame_rate());
+		frames = (nframes_t) floor (3600.0 * session->frame_rate());
 		break;
 	case MS_Minutes:
-		frames = (jack_nframes_t) floor (60.0 * session->frame_rate());
+		frames = (nframes_t) floor (60.0 * session->frame_rate());
 		break;
 	case MS_Seconds:
 		frames = session->frame_rate();
@@ -1180,10 +1153,10 @@ AudioClock::get_frames (Field field,jack_nframes_t pos,int dir)
 	return frames;
 }
 
-jack_nframes_t
-AudioClock::current_time (jack_nframes_t pos) const
+nframes_t
+AudioClock::current_time (nframes_t pos) const
 {
-	jack_nframes_t ret = 0;
+	nframes_t ret = 0;
 
 	switch (_mode) {
 	case SMPTE:
@@ -1208,10 +1181,10 @@ AudioClock::current_time (jack_nframes_t pos) const
 	return ret;
 }
 
-jack_nframes_t
-AudioClock::current_duration (jack_nframes_t pos) const
+nframes_t
+AudioClock::current_duration (nframes_t pos) const
 {
-	jack_nframes_t ret = 0;
+	nframes_t ret = 0;
 
 	switch (_mode) {
 	case SMPTE:
@@ -1248,7 +1221,7 @@ AudioClock::smpte_sanitize_display()
 		seconds_label.set_text("59");
 	}
 	
-	switch ((long)rint(session->smpte_frames_per_second)) {
+	switch ((long)rint(Config->get_smpte_frames_per_second())) {
 	case 24:
 		if (atoi(frames_label.get_text()) > 23) {
 			frames_label.set_text("23");
@@ -1268,14 +1241,14 @@ AudioClock::smpte_sanitize_display()
 		break;
 	}
 	
-	if (session->smpte_drop_frames) {
+	if (Config->get_smpte_drop_frames()) {
 		if ((atoi(minutes_label.get_text()) % 10) && (atoi(seconds_label.get_text()) == 0) && (atoi(frames_label.get_text()) < 2)) {
 			frames_label.set_text("02");
 		}
 	}
 }
 
-jack_nframes_t
+nframes_t
 AudioClock::smpte_frame_from_display () const
 {
 	if (session == 0) {
@@ -1283,7 +1256,7 @@ AudioClock::smpte_frame_from_display () const
 	}
 	
 	SMPTE::Time smpte;
-	jack_nframes_t sample;
+	nframes_t sample;
 	
 	smpte.hours = atoi (hours_label.get_text());
 	smpte.minutes = atoi (minutes_label.get_text());
@@ -1304,10 +1277,10 @@ AudioClock::smpte_frame_from_display () const
 
 	// Testcode for smpte<->sample conversions (P.S.)
 	SMPTE::Time smpte1;
-	jack_nframes_t sample1;
-	jack_nframes_t oldsample = 0;
+	nframes_t sample1;
+	nframes_t oldsample = 0;
 	SMPTE::Time smpte2;
-	jack_nframes_t sample_increment;
+	nframes_t sample_increment;
 
 	sample_increment = (long)rint(session->frame_rate() / session->smpte_frames_per_second);
 
@@ -1666,7 +1639,7 @@ AudioClock::smpte_frame_from_display () const
 	return sample;
 }
 
-jack_nframes_t
+nframes_t
 AudioClock::minsec_frame_from_display () const
 {
 	if (session == 0) {
@@ -1677,13 +1650,13 @@ AudioClock::minsec_frame_from_display () const
 	int mins = atoi (ms_minutes_label.get_text());
 	float secs = atof (ms_seconds_label.get_text());
 
-	jack_nframes_t sr = session->frame_rate();
+	nframes_t sr = session->frame_rate();
 
-	return (jack_nframes_t) floor ((hrs * 60.0f * 60.0f * sr) + (mins * 60.0f * sr) + (secs * sr));
+	return (nframes_t) floor ((hrs * 60.0f * 60.0f * sr) + (mins * 60.0f * sr) + (secs * sr));
 }
 
-jack_nframes_t
-AudioClock::bbt_frame_from_display (jack_nframes_t pos) const
+nframes_t
+AudioClock::bbt_frame_from_display (nframes_t pos) const
 {
 	if (session == 0) {
 		error << "AudioClock::current_time() called with BBT mode but without session!" << endmsg;
@@ -1697,14 +1670,14 @@ AudioClock::bbt_frame_from_display (jack_nframes_t pos) const
 	any.bbt.beats = atoi (beats_label.get_text());
 	any.bbt.ticks = atoi (ticks_label.get_text());
 
-	jack_nframes_t ret = session->convert_to_frames_at (pos, any);
+	nframes_t ret = session->convert_to_frames_at (pos, any);
 
 	return ret;
 }
 
 
-jack_nframes_t
-AudioClock::bbt_frame_duration_from_display (jack_nframes_t pos) const
+nframes_t
+AudioClock::bbt_frame_duration_from_display (nframes_t pos) const
 {
 	if (session == 0) {
 		error << "AudioClock::current_time() called with BBT mode but without session!" << endmsg;
@@ -1721,10 +1694,10 @@ AudioClock::bbt_frame_duration_from_display (jack_nframes_t pos) const
 	return session->tempo_map().bbt_duration_at(pos,bbt,1);
 }
 
-jack_nframes_t
+nframes_t
 AudioClock::audio_frame_from_display () const
 {
-	return (jack_nframes_t) atoi (audio_frames_label.get_text());
+	return (nframes_t) atoi (audio_frames_label.get_text());
 }
 
 void
@@ -1775,40 +1748,66 @@ AudioClock::set_mode (Mode m)
 	}
 	
 	_mode = m;
-	
+
 	switch (_mode) {
 	case SMPTE:
 		clock_base.add (smpte_packer_hbox);
-		Gtkmm2ext::set_size_request_to_display_given_text (hours_label, "-88", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (minutes_label, "88", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (seconds_label, "88", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (frames_label, "88", 0, 2);
 		break;
 
 	case BBT:
 		clock_base.add (bbt_packer_hbox);
-		Gtkmm2ext::set_size_request_to_display_given_text (bars_label, "-888", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (beats_label, "88", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (ticks_label, "8888", 0, 2);
 		break;
 
 	case MinSec:
 		clock_base.add (minsec_packer_hbox);
-		Gtkmm2ext::set_size_request_to_display_given_text (ms_hours_label, "99", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (ms_minutes_label, "99", 0, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (ms_seconds_label, "99", 0, 2);
 		break;
 
 	case Frames:
 		clock_base.add (frames_packer_hbox);
-		Gtkmm2ext::set_size_request_to_display_given_text (audio_frames_label, "4294967296", 0, 2);
+		break;
 
 	case Off:
 		break;
 	}
 
+	set_size_requests ();
+	
 	set (last_when, true);
 	clock_base.show_all ();
 	key_entry_state = 0;
 }
 
+void
+AudioClock::set_size_requests ()
+{
+	/* note that in some fonts, "88" is narrower than "00", hence the 2 pixel padding */
+
+	switch (_mode) {
+	case SMPTE:
+		Gtkmm2ext::set_size_request_to_display_given_text (hours_label, "-88", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (minutes_label, "88", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (seconds_label, "88", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (frames_label, "88", 2, 2);
+		break;
+
+	case BBT:
+		Gtkmm2ext::set_size_request_to_display_given_text (bars_label, "-888", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (beats_label, "88", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (ticks_label, "8888", 2, 2);
+		break;
+
+	case MinSec:
+		Gtkmm2ext::set_size_request_to_display_given_text (ms_hours_label, "99", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (ms_minutes_label, "99", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (ms_seconds_label, "99.999", 2, 2);
+		break;
+
+	case Frames:
+		Gtkmm2ext::set_size_request_to_display_given_text (audio_frames_label, "4294967296", 2, 2);
+		break;
+
+	case Off:
+		break;
+		
+	}
+}

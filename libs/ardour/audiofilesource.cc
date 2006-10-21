@@ -59,8 +59,11 @@ string AudioFileSource::search_path;
 sigc::signal<void> AudioFileSource::HeaderPositionOffsetChanged;
 uint64_t           AudioFileSource::header_position_offset = 0;
 
+/* XXX turn this into a Config option */
 char   AudioFileSource::bwf_country_code[3] = "US";
+/* XXX turn this into a Config option */
 char   AudioFileSource::bwf_organization_code[4] = "LAS";
+/* XXX maybe this too */
 char   AudioFileSource::bwf_serial_number[13] = "000000000000";
 
 AudioFileSource::AudioFileSource (Session& s, string idstr, Flag flags)
@@ -101,7 +104,6 @@ AudioFileSource::AudioFileSource (Session& s, const XMLNode& node)
 AudioFileSource::~AudioFileSource ()
 {
 	if (removable()) {
-		cerr << "Removing file " << _path << " because its removable\n";
 		unlink (_path.c_str());
 		unlink (peakpath.c_str());
 	}
@@ -119,8 +121,11 @@ AudioFileSource::init (string pathstr, bool must_exist)
 	bool is_new = false;
 
 	_length = 0;
+	timeline_position = 0;
 	next_peak_clear_should_notify = false;
-	
+	_peaks_built = false;
+	file_is_new = false;
+
 	if (!find (pathstr, must_exist, is_new)) {
 		return -1;
 	}
@@ -285,7 +290,8 @@ AudioFileSource::mark_for_remove ()
 	if (!writable()) {
 		return;
 	}
-	_flags = Flag (_flags | RemoveAtDestroy);
+
+	_flags = Flag (_flags | Removable | RemoveAtDestroy);
 }
 
 void
@@ -503,7 +509,7 @@ AudioFileSource::set_search_path (string p)
 }
 
 void
-AudioFileSource::set_header_position_offset (jack_nframes_t offset)
+AudioFileSource::set_header_position_offset (nframes_t offset)
 {
 	header_position_offset = offset;
 	HeaderPositionOffsetChanged ();
@@ -519,7 +525,7 @@ AudioFileSource::handle_header_position_change ()
 }
 
 void
-AudioFileSource::set_timeline_position (jack_nframes_t pos)
+AudioFileSource::set_timeline_position (nframes_t pos)
 {
 	timeline_position = pos;
 }
@@ -527,8 +533,14 @@ AudioFileSource::set_timeline_position (jack_nframes_t pos)
 void
 AudioFileSource::set_allow_remove_if_empty (bool yn)
 {
-	if (writable()) {
+	if (!writable()) {
+		return;
+	}
+
+	if (yn) {
 		_flags = Flag (_flags | RemovableIfEmpty);
+	} else {
+		_flags = Flag (_flags & ~RemovableIfEmpty);
 	}
 }
 
@@ -576,3 +588,12 @@ AudioFileSource::is_empty (Session& s, string path)
 	return ret;
 }
 
+int
+AudioFileSource::setup_peakfile ()
+{
+	if (!(_flags & NoPeakFile)) {
+		return initialize_peakfile (file_is_new, _path);
+	} else {
+		return 0;
+	}
+}

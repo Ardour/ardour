@@ -127,6 +127,8 @@ AudioStreamView::set_amplitude_above_axis (gdouble app)
 void
 AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait_for_waves)
 {
+	AudioRegionView *region_view;
+
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::add_region_view), r));
 
 	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (r);
@@ -135,19 +137,16 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 		return;
 	}
 
-	AudioRegionView *region_view;
-	list<RegionView *>::iterator i;
-
-	for (i = region_views.begin(); i != region_views.end(); ++i) {
+	for (list<RegionView *>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		if ((*i)->region() == r) {
 			
 			/* great. we already have a AudioRegionView for this Region. use it again. */
-
+			
 			(*i)->set_valid (true);
 			return;
 		}
 	}
-	
+
 	switch (_trackview.audio_track()->mode()) {
 	case Normal:
 		region_view = new AudioRegionView (canvas_group, _trackview, region, 
@@ -168,30 +167,38 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 	region_view->set_waveform_visible(_trackview.editor.show_waveforms());
 
 	/* catch regionview going away */
+	region->GoingAway.connect (bind (mem_fun (*this, &AudioStreamView::remove_region_view), boost::weak_ptr<Region> (r)));
 
-	region->GoingAway.connect (bind (mem_fun (*this, &AudioStreamView::remove_region_view), region));
-	
 	RegionViewAdded (region_view);
 }
 
 void
-AudioStreamView::remove_region_view (boost::shared_ptr<Region> r)
+AudioStreamView::remove_region_view (boost::weak_ptr<Region> weak_r)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::remove_region_view), r));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::remove_region_view), weak_r));
 
-	for (list<CrossfadeView *>::iterator i = crossfade_views.begin(); i != crossfade_views.end();) {
-		list<CrossfadeView*>::iterator tmp;
-		
-		tmp = i;
-		++tmp;
-		
-		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(r);
-		if (ar && (*i)->crossfade.involves (ar)) {
-			delete *i;
-			crossfade_views.erase (i);
+	boost::shared_ptr<Region> r (weak_r.lock());
+
+	if (!r) {
+		return;
+	}
+
+	if (!_trackview.session().deletion_in_progress()) {
+
+		for (list<CrossfadeView *>::iterator i = crossfade_views.begin(); i != crossfade_views.end();) {
+			list<CrossfadeView*>::iterator tmp;
+			
+			tmp = i;
+			++tmp;
+			
+			boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(r);
+			if (ar && (*i)->crossfade.involves (ar)) {
+				delete *i;
+				crossfade_views.erase (i);
+			}
+			
+			i = tmp;
 		}
-		
-		i = tmp;
 	}
 
 	StreamView::remove_region_view(r);
@@ -405,13 +412,15 @@ AudioStreamView::setup_rec_box ()
 					boost::shared_ptr<AudioFileSource> src = boost::static_pointer_cast<AudioFileSource> (ads->write_source (n));
 					if (src) {
 						sources.push_back (src);
-						rec_data_ready_connections.push_back (src->PeakRangeReady.connect (bind (mem_fun (*this, &AudioStreamView::rec_peak_range_ready), src))); 
+						
+						rec_data_ready_connections.push_back (src->PeakRangeReady.connect (bind
+							(mem_fun (*this, &AudioStreamView::rec_peak_range_ready), boost::weak_ptr<Source>(src)))); 
 					}
 				}
 
 				// handle multi
 				
-				jack_nframes_t start = 0;
+				nframes_t start = 0;
 				if (rec_regions.size() > 0) {
 					start = rec_regions.back()->start() + _trackview.get_diskstream()->get_captured_frames(rec_regions.size()-1);
 				}
@@ -420,11 +429,8 @@ AudioStreamView::setup_rec_box ()
 								       (RegionFactory::create (sources, start, 1 , "", 0, (Region::Flag)(Region::DefaultFlags | Region::DoNotSaveState), false)));
 				assert(region);
 				region->set_position (_trackview.session().transport_frame(), this);
+
 				rec_regions.push_back (region);
-
-				// rec regions are destroyed in setup_rec_box
-
-				/* we add the region later */
 			}
 			
 			/* start a new rec box */
@@ -433,7 +439,7 @@ AudioStreamView::setup_rec_box ()
 
 			at = _trackview.audio_track(); /* we know what it is already */
 			boost::shared_ptr<AudioDiskstream> ds = at->audio_diskstream();
-			jack_nframes_t frame_pos = ds->current_capture_start ();
+			nframes_t frame_pos = ds->current_capture_start ();
 			gdouble xstart = _trackview.editor.frame_to_pixel (frame_pos);
 			gdouble xend;
 			uint32_t fill_color;
@@ -503,12 +509,15 @@ AudioStreamView::setup_rec_box ()
 			last_rec_data_frame = 0;
 			
 			/* remove temp regions */
-			
-			for (list<boost::shared_ptr<Region> >::iterator iter = rec_regions.begin(); iter != rec_regions.end();) {
+
+			for (list<boost::shared_ptr<Region> >::iterator iter = rec_regions.begin(); iter != rec_regions.end(); ) {
 				list<boost::shared_ptr<Region> >::iterator tmp;
+
 				tmp = iter;
 				++tmp;
+
 				(*iter)->drop_references ();
+
 				iter = tmp;
 			}
 				
@@ -537,18 +546,24 @@ AudioStreamView::foreach_crossfadeview (void (CrossfadeView::*pmf)(void))
 }
 
 void
-AudioStreamView::rec_peak_range_ready (jack_nframes_t start, jack_nframes_t cnt, boost::shared_ptr<Source> src)
+AudioStreamView::rec_peak_range_ready (nframes_t start, nframes_t cnt, boost::weak_ptr<Source> weak_src)
 {
-	// this is called from the peak building thread
+	ENSURE_GUI_THREAD(bind (mem_fun (*this, &AudioStreamView::rec_peak_range_ready), start, cnt, weak_src));
+	
+	boost::shared_ptr<Source> src (weak_src.lock());
 
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &AudioStreamView::rec_peak_range_ready), start, cnt, src));
+	if (!src) {
+		return; 
+	}
+
+	// this is called from the peak building thread
 	
 	if (rec_data_ready_map.size() == 0 || start+cnt > last_rec_data_frame) {
 		last_rec_data_frame = start + cnt;
 	}
-
+	
 	rec_data_ready_map[src] = true;
-
+	
 	if (rec_data_ready_map.size() == _trackview.get_diskstream()->n_channels().get(DataType::AUDIO)) {
 		this->update_rec_regions ();
 		rec_data_ready_map.clear();
@@ -580,13 +595,13 @@ AudioStreamView::update_rec_regions ()
 				continue;
 			}
 
-			jack_nframes_t origlen = region->length();
+			nframes_t origlen = region->length();
 
 			if (region == rec_regions.back() && rec_active) {
 
 				if (last_rec_data_frame > region->start()) {
 
-					jack_nframes_t nlen = last_rec_data_frame - region->start();
+					nframes_t nlen = last_rec_data_frame - region->start();
 
 					if (nlen != region->length()) {
 
@@ -609,7 +624,7 @@ AudioStreamView::update_rec_regions ()
 
 			} else {
 
-				jack_nframes_t nlen = _trackview.get_diskstream()->get_captured_frames(n);
+				nframes_t nlen = _trackview.get_diskstream()->get_captured_frames(n);
 
 				if (nlen != region->length()) {
 

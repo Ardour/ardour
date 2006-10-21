@@ -29,7 +29,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 Playlist*
-Playlist::copyPlaylist (const Playlist& playlist, jack_nframes_t start, jack_nframes_t length,
+Playlist::copyPlaylist (const Playlist& playlist, nframes_t start, nframes_t length,
 			string name, bool result_is_hidden)
 {
 	const AudioPlaylist* apl;

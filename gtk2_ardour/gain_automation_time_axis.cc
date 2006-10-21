@@ -48,7 +48,7 @@ GainAutomationTimeAxisView::~GainAutomationTimeAxisView ()
 }
 
 void
-GainAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkEvent* event, jack_nframes_t when, double y)
+GainAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkEvent* event, nframes_t when, double y)
 {
 	double x = 0;
 

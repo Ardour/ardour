@@ -84,23 +84,24 @@ class AudioRegion : public Region
 	Curve& fade_out() { return _fade_out; }
 	Curve& envelope() { return _envelope; }
 
-	jack_nframes_t read_peaks (PeakData *buf, jack_nframes_t npeaks,
-			jack_nframes_t offset, jack_nframes_t cnt,
+	nframes_t read_peaks (PeakData *buf, nframes_t npeaks,
+			nframes_t offset, nframes_t cnt,
 			uint32_t chan_n=0, double samples_per_unit= 1.0) const;
 
-	virtual jack_nframes_t read_at (Sample *buf, Sample *mixdown_buf,
-			float *gain_buf, jack_nframes_t position, jack_nframes_t cnt, 
+	virtual nframes_t read_at (Sample *buf, Sample *mixdown_buf,
+			float *gain_buf, nframes_t position, nframes_t cnt, 
 			uint32_t       chan_n      = 0,
-			jack_nframes_t read_frames = 0,
-			jack_nframes_t skip_frames = 0) const;
+			nframes_t read_frames = 0,
+			nframes_t skip_frames = 0) const;
 
-	jack_nframes_t master_read_at (Sample *buf, Sample *mixdown_buf, float *gain_buf,
-			jack_nframes_t position, jack_nframes_t cnt, uint32_t chan_n=0) const;
+	nframes_t master_read_at (Sample *buf, Sample *mixdown_buf, 
+			float *gain_buf,
+			nframes_t position, nframes_t cnt, uint32_t chan_n=0) const;
 
 	XMLNode& state (bool);
 	int      set_state (const XMLNode&);
 
-	static void set_default_fade (float steepness, jack_nframes_t len);
+	static void set_default_fade (float steepness, nframes_t len);
 
 	enum FadeShape {
 		Linear,
@@ -112,13 +113,13 @@ class AudioRegion : public Region
 
 	void set_fade_in_active (bool yn);
 	void set_fade_in_shape (FadeShape);
-	void set_fade_in_length (jack_nframes_t);
-	void set_fade_in (FadeShape, jack_nframes_t);
+	void set_fade_in_length (nframes_t);
+	void set_fade_in (FadeShape, nframes_t);
 
 	void set_fade_out_active (bool yn);
 	void set_fade_out_shape (FadeShape);
-	void set_fade_out_length (jack_nframes_t);
-	void set_fade_out (FadeShape, jack_nframes_t);
+	void set_fade_out_length (nframes_t);
+	void set_fade_out (FadeShape, nframes_t);
 
 	void set_envelope_active (bool yn);
 
@@ -144,10 +145,10 @@ class AudioRegion : public Region
   private:
 	friend class RegionFactory;
 
-	AudioRegion (boost::shared_ptr<AudioSource>, jack_nframes_t start, jack_nframes_t length);
-	AudioRegion (boost::shared_ptr<AudioSource>, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
-	AudioRegion (SourceList &, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
-	AudioRegion (boost::shared_ptr<const AudioRegion>, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
+	AudioRegion (boost::shared_ptr<AudioSource>, nframes_t start, nframes_t length);
+	AudioRegion (boost::shared_ptr<AudioSource>, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
+	AudioRegion (SourceList &, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
+	AudioRegion (boost::shared_ptr<const AudioRegion>, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
 	AudioRegion (boost::shared_ptr<const AudioRegion>);
 	AudioRegion (boost::shared_ptr<AudioSource>, const XMLNode&);
 	AudioRegion (SourceList &, const XMLNode&);
@@ -164,11 +165,11 @@ class AudioRegion : public Region
 	void recompute_gain_at_end ();
 	void recompute_gain_at_start ();
 
-	jack_nframes_t _read_at (const SourceList&, Sample *buf, Sample *mixdown_buffer, 
-				 float *gain_buffer, jack_nframes_t position, jack_nframes_t cnt, 
+	nframes_t _read_at (const SourceList&, Sample *buf, Sample *mixdown_buffer, 
+				 float *gain_buffer, nframes_t position, nframes_t cnt, 
 				 uint32_t chan_n = 0,
-				 jack_nframes_t read_frames = 0,
-				 jack_nframes_t skip_frames = 0) const;
+				 nframes_t read_frames = 0,
+				 nframes_t skip_frames = 0) const;
 
 	void recompute_at_start ();
 	void recompute_at_end ();

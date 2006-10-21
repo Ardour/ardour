@@ -102,11 +102,11 @@ PeakMeter::meter ()
 			new_peak = minus_infinity();
 		}
 		
-		if (_session.meter_falloff() == 0.0f || new_peak > _visible_peak_power[n]) {
+		if (Config->get_meter_falloff() == 0.0f || new_peak > _visible_peak_power[n]) {
 			_visible_peak_power[n] = new_peak;
 		} else {
 			// do falloff
-			new_peak = _visible_peak_power[n] - _session.meter_falloff();
+			new_peak = _visible_peak_power[n] - Config->get_meter_falloff();
 			_visible_peak_power[n] = std::max (new_peak, -INFINITY);
 		}
 	}

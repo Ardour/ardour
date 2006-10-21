@@ -48,9 +48,9 @@ MeterBridgeStrip::MeterBridgeStrip (AudioEngine &eng,
 				    Session& s,
 				    Route& r, 
 				    string name,
-				    jack_nframes_t long_over,
-				    jack_nframes_t short_over, 
-				    jack_nframes_t meter_hold)
+				    nframes_t long_over,
+				    nframes_t short_over, 
+				    nframes_t meter_hold)
 	: engine (eng),
 	  session (s),
 	  _route (r),

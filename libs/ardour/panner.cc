@@ -18,6 +18,9 @@
     $Id$
 */
 
+#define __STDC_FORMAT_MACROS 1
+#include <inttypes.h>
+
 #include <cmath>
 #include <cerrno>
 #include <fstream>
@@ -68,7 +71,7 @@ static double direct_pan_to_control (pan_t val) {
 
 StreamPanner::StreamPanner (Panner& p)
 	: parent (p),
-	  _control (*this)
+	  _control (X_("panner"), *this)
 {
 	_muted = false;
 
@@ -194,7 +197,7 @@ BaseStereoPanner::~BaseStereoPanner ()
 }
 
 void
-BaseStereoPanner::snapshot (jack_nframes_t now)
+BaseStereoPanner::snapshot (nframes_t now)
 {
 	if (_automation.automation_state() == Write || _automation.automation_state() == Touch) {
 		_automation.rt_add (now, x);
@@ -202,7 +205,7 @@ BaseStereoPanner::snapshot (jack_nframes_t now)
 }
 
 void
-BaseStereoPanner::transport_stopped (jack_nframes_t frame)
+BaseStereoPanner::transport_stopped (nframes_t frame)
 {
 	_automation.reposition_for_rt_add (frame);
 
@@ -247,7 +250,7 @@ BaseStereoPanner::save (ostream& out) const
 	out << "begin" << endl;
 
 	for (AutomationList::const_iterator i = _automation.const_begin(); i != _automation.const_end(); ++i) {
-		out << '\t' << (jack_nframes_t) floor ((*i)->when) << ' ' << (*i)->value << endl;
+		out << '\t' << (nframes_t) floor ((*i)->when) << ' ' << (*i)->value << endl;
 		if (!out) {
 			error << string_compose (_("error writing pan automation file (%s)"), strerror (errno)) << endmsg;
 			return -1;
@@ -267,7 +270,7 @@ BaseStereoPanner::load (istream& in, string path, uint32_t& linecnt)
 	_automation.clear ();
 
 	while (in.getline (line, sizeof (line), '\n')) {
-		jack_nframes_t when;
+		nframes_t when;
 		double value;
 
 		++linecnt;
@@ -293,7 +296,7 @@ BaseStereoPanner::load (istream& in, string path, uint32_t& linecnt)
 }
 
 void
-BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coeff, jack_nframes_t nframes)
+BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes)
 {
 	assert(obufs.count().get(DataType::AUDIO) == 2);
 
@@ -315,8 +318,8 @@ BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 		
 		/* interpolate over 64 frames or nframes, whichever is smaller */
 		
-		jack_nframes_t limit = min ((jack_nframes_t)64, nframes);
-		jack_nframes_t n;
+		nframes_t limit = min ((nframes_t)64, nframes);
+		nframes_t n;
 
 		delta = -(delta / (float) (limit));
 		
@@ -365,8 +368,8 @@ BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 		
 		/* interpolate over 64 frames or nframes, whichever is smaller */
 		
-		jack_nframes_t limit = min ((jack_nframes_t)64, nframes);
-		jack_nframes_t n;
+		nframes_t limit = min ((nframes_t)64, nframes);
+		nframes_t n;
 
 		delta = -(delta / (float) (limit));
 
@@ -451,7 +454,7 @@ EqualPowerStereoPanner::update ()
 
 void
 EqualPowerStereoPanner::distribute_automated (AudioBuffer& srcbuf, BufferSet& obufs, 
-					      jack_nframes_t start, jack_nframes_t end, jack_nframes_t nframes,
+					      nframes_t start, nframes_t end, nframes_t nframes,
 					      pan_t** buffers)
 {
 	assert(obufs.count().get(DataType::AUDIO) == 2);
@@ -486,7 +489,7 @@ EqualPowerStereoPanner::distribute_automated (AudioBuffer& srcbuf, BufferSet& ob
 	const float pan_law_attenuation = -3.0f;
 	const float scale = 2.0f - 4.0f * powf (10.0f,pan_law_attenuation/20.0f);
 
-	for (jack_nframes_t n = 0; n < nframes; ++n) {
+	for (nframes_t n = 0; n < nframes; ++n) {
 
 		float panR = buffers[0][n];
 		float panL = 1 - panR;
@@ -500,7 +503,7 @@ EqualPowerStereoPanner::distribute_automated (AudioBuffer& srcbuf, BufferSet& ob
 	dst = obufs.get_audio(0).data(nframes);
 	pbuf = buffers[0];
 	
-	for (jack_nframes_t n = 0; n < nframes; ++n) {
+	for (nframes_t n = 0; n < nframes; ++n) {
 		dst[n] += src[n] * pbuf[n];
 	}	
 
@@ -511,7 +514,7 @@ EqualPowerStereoPanner::distribute_automated (AudioBuffer& srcbuf, BufferSet& ob
 	dst = obufs.get_audio(1).data(nframes);
 	pbuf = buffers[1];
 
-	for (jack_nframes_t n = 0; n < nframes; ++n) {
+	for (nframes_t n = 0; n < nframes; ++n) {
 		dst[n] += src[n] * pbuf[n];
 	}	
 	
@@ -551,6 +554,7 @@ EqualPowerStereoPanner::state (bool full_state)
 	root->add_property (X_("automation-style"), buf);
 
 	StreamPanner::add_state (*root);
+	root->add_child_nocopy (_control.get_state ());
 
 	return *root;
 }
@@ -583,6 +587,13 @@ EqualPowerStereoPanner::set_state (const XMLNode& node)
 	}
 
 	StreamPanner::set_state (node);
+
+	for (XMLNodeConstIterator iter = node.children().begin(); iter != node.children().end(); ++iter) {
+		if ((*iter)->name() == X_("panner")) {
+			_control.set_state (**iter);
+			parent.session().add_controllable (&_control);
+		}
+	}
 	
 	return 0;
 }
@@ -600,13 +611,13 @@ Multi2dPanner::~Multi2dPanner ()
 }
 
 void
-Multi2dPanner::snapshot (jack_nframes_t now)
+Multi2dPanner::snapshot (nframes_t now)
 {
 	// how?
 }
 
 void
-Multi2dPanner::transport_stopped (jack_nframes_t frame)
+Multi2dPanner::transport_stopped (nframes_t frame)
 {
 	//what?
 }
@@ -656,7 +667,7 @@ Multi2dPanner::update ()
 }
 
 void
-Multi2dPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coeff, jack_nframes_t nframes)
+Multi2dPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes)
 {
 	Sample* dst;
 	pan_t pan;
@@ -679,8 +690,8 @@ Multi2dPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
 			
 			/* interpolate over 64 frames or nframes, whichever is smaller */
 			
-			jack_nframes_t limit = min ((jack_nframes_t)64, nframes);
-			jack_nframes_t n;
+			nframes_t limit = min ((nframes_t)64, nframes);
+			nframes_t n;
 			
 			delta = -(delta / (float) (limit));
 		
@@ -705,7 +716,7 @@ Multi2dPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
 				
 				if (pan != 0.0f) {
 					
-					for (jack_nframes_t n = 0; n < nframes; ++n) {
+					for (nframes_t n = 0; n < nframes; ++n) {
 						dst[n] += src[n] * pan;
 					}      
 					
@@ -714,7 +725,7 @@ Multi2dPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
 				
 			} else {
 				
-				for (jack_nframes_t n = 0; n < nframes; ++n) {
+				for (nframes_t n = 0; n < nframes; ++n) {
 					dst[n] += src[n];
 				}      
 
@@ -730,7 +741,7 @@ Multi2dPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
 
 void
 Multi2dPanner::distribute_automated (AudioBuffer& src, BufferSet& obufs, 
-				     jack_nframes_t start, jack_nframes_t end, jack_nframes_t nframes,
+				     nframes_t start, nframes_t end, nframes_t nframes,
 				     pan_t** buffers)
 {
 	if (_muted) {
@@ -1060,7 +1071,7 @@ Panner::automation_style () const
 }
 
 void
-Panner::transport_stopped (jack_nframes_t frame)
+Panner::transport_stopped (nframes_t frame)
 {
 	for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
 		(*i)->transport_stopped (frame);
@@ -1068,7 +1079,7 @@ Panner::transport_stopped (jack_nframes_t frame)
 }	
 
 void
-Panner::snapshot (jack_nframes_t now)
+Panner::snapshot (nframes_t now)
 {
 	for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
 		(*i)->snapshot (now);
@@ -1489,7 +1500,7 @@ Panner::set_position (float xpos, float ypos, float zpos, StreamPanner& orig)
 }
 
 void
-Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, jack_nframes_t nframes, jack_nframes_t offset, gain_t gain_coeff)
+Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, nframes_t nframes, nframes_t offset, gain_t gain_coeff)
 {
 	if (outbufs.count().get(DataType::AUDIO) == 0) {
 		// Don't want to lose audio...
@@ -1558,7 +1569,7 @@ Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, jack_nf
 }
 
 void
-Panner::distribute (BufferSet& inbufs, BufferSet& outbufs, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset)
+Panner::distribute (BufferSet& inbufs, BufferSet& outbufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset)
 {	
 	if (outbufs.count().get(DataType::AUDIO) == 0) {
 		// Failing to deliver audio we were asked to deliver is a bug

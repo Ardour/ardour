@@ -48,11 +48,11 @@ struct RegionState : public StateManager::State
 {
 	RegionState (std::string why) : StateManager::State (why) {}
 
-	jack_nframes_t          _start;
-	jack_nframes_t          _length;
-	jack_nframes_t          _position;
+	nframes_t          _start;
+	nframes_t          _length;
+	nframes_t          _position;
 	uint32_t                _flags;
-	jack_nframes_t          _sync_position;
+	nframes_t          _sync_position;
 	layer_t        	        _layer;
 	string                  _name;        
 	mutable RegionEditState _first_edit;
@@ -105,20 +105,20 @@ class Region : public PBD::StatefulDestructible, public StateManager, public boo
 
 	const DataType& data_type() const { return _type; }
 
-	jack_nframes_t position () const { return _position; }
-	jack_nframes_t start ()    const { return _start; }
-	jack_nframes_t length()    const { return _length; }
-	layer_t        layer ()    const { return _layer; }
+	nframes_t position () const { return _position; }
+	nframes_t start ()    const { return _start; }
+	nframes_t length()    const { return _length; }
+	layer_t   layer ()    const { return _layer; }
 	
-	jack_nframes_t sync_offset(int& dir) const;
-	jack_nframes_t sync_position() const;
+	nframes_t sync_offset(int& dir) const;
+	nframes_t sync_position() const;
 
-	jack_nframes_t adjust_to_sync (jack_nframes_t);
+	nframes_t adjust_to_sync (nframes_t);
 	
 	/* first_frame() is an alias; last_frame() just hides some math */
 
-	jack_nframes_t first_frame() const { return _position; }
-	jack_nframes_t last_frame() const { return _position + _length - 1; }
+	nframes_t first_frame() const { return _position; }
+	nframes_t last_frame() const { return _position + _length - 1; }
 
 	Flag flags()      const { return _flags; }
 	bool hidden()     const { return _flags & Hidden; }
@@ -134,12 +134,12 @@ class Region : public PBD::StatefulDestructible, public StateManager, public boo
 	void freeze ();
 	void thaw (const string& why);
 
-	bool covers (jack_nframes_t frame) const {
-		return _position <= frame && frame < _position + _length;
+	bool covers (nframes_t frame) const {
+		return first_frame() <= frame && frame < last_frame();
 	}
 
-	OverlapType coverage (jack_nframes_t start, jack_nframes_t end) const {
-		return ARDOUR::coverage (_position, _position + _length - 1, start, end);
+	OverlapType coverage (nframes_t start, nframes_t end) const {
+		return ARDOUR::coverage (first_frame(), last_frame(), start, end);
 	}
 	
 	bool equivalent (boost::shared_ptr<const Region>) const;
@@ -150,19 +150,19 @@ class Region : public PBD::StatefulDestructible, public StateManager, public boo
 	
 	/* EDITING OPERATIONS */
 
-	void set_length (jack_nframes_t, void *src);
-	void set_start (jack_nframes_t, void *src);
-	void set_position (jack_nframes_t, void *src);
-	void set_position_on_top (jack_nframes_t, void *src);
-	void special_set_position (jack_nframes_t);
+	void set_length (nframes_t, void *src);
+	void set_start (nframes_t, void *src);
+	void set_position (nframes_t, void *src);
+	void set_position_on_top (nframes_t, void *src);
+	void special_set_position (nframes_t);
 	void nudge_position (long, void *src);
 
 	void move_to_natural_position (void *src);
 
-	void trim_start (jack_nframes_t new_position, void *src);
-	void trim_front (jack_nframes_t new_position, void *src);
-	void trim_end (jack_nframes_t new_position, void *src);
-	void trim_to (jack_nframes_t position, jack_nframes_t length, void *src);
+	void trim_start (nframes_t new_position, void *src);
+	void trim_front (nframes_t new_position, void *src);
+	void trim_end (nframes_t new_position, void *src);
+	void trim_to (nframes_t position, nframes_t length, void *src);
 	
 	void set_layer (layer_t l); /* ONLY Playlist can call this */
 	void raise ();
@@ -170,7 +170,7 @@ class Region : public PBD::StatefulDestructible, public StateManager, public boo
 	void raise_to_top ();
 	void lower_to_bottom ();
 
-	void set_sync_position (jack_nframes_t n);
+	void set_sync_position (nframes_t n);
 	void clear_sync_position ();
 	void set_hidden (bool yn);
 	void set_muted (bool yn);
@@ -207,11 +207,12 @@ class Region : public PBD::StatefulDestructible, public StateManager, public boo
   protected:
 	friend class RegionFactory;
 
-	Region (boost::shared_ptr<Source> src, jack_nframes_t start, jack_nframes_t length, 
+	Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length, 
 		const string& name, DataType type, layer_t = 0, Flag flags = DefaultFlags);
-	Region (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, 
+	Region (SourceList& srcs, nframes_t start, nframes_t length, 
 		const string& name, DataType type, layer_t = 0, Flag flags = DefaultFlags);
-	Region (boost::shared_ptr<const Region>, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Flag flags = DefaultFlags);
+	
+	Region (boost::shared_ptr<const Region>, nframes_t start, nframes_t length, const string& name, layer_t = 0, Flag flags = DefaultFlags);
 	Region (boost::shared_ptr<const Region>);
 	Region (boost::shared_ptr<Source> src, const XMLNode&);
 	Region (SourceList& srcs, const XMLNode&);
@@ -228,7 +229,7 @@ class Region : public PBD::StatefulDestructible, public StateManager, public boo
 	void   store_state (RegionState&) const;
 	Change restore_and_return_flags (RegionState&);
 	
-	void trim_to_internal (jack_nframes_t position, jack_nframes_t length, void *src);
+	void trim_to_internal (nframes_t position, nframes_t length, void *src);
 
 	bool copied() const { return _flags & Copied; }
 	void maybe_uncopy ();
@@ -246,10 +247,10 @@ class Region : public PBD::StatefulDestructible, public StateManager, public boo
 	string                  _name;
 	DataType                _type;
 	Flag                    _flags;
-	jack_nframes_t          _start;
-	jack_nframes_t          _length;
-	jack_nframes_t          _position;
-	jack_nframes_t          _sync_position;
+	nframes_t          _start;
+	nframes_t          _length;
+	nframes_t          _position;
+	nframes_t          _sync_position;
 	layer_t                 _layer;
 	mutable RegionEditState _first_edit;
 	int                     _frozen;

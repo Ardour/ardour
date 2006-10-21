@@ -55,7 +55,7 @@ using namespace Editing;
 void
 Editor::add_external_audio_action (ImportMode mode)
 {
-	jack_nframes_t& pos = edit_cursor->current_frame;
+	nframes_t& pos = edit_cursor->current_frame;
 	AudioTrack* track = 0;
 
 	if (!selection->tracks.empty()) {
@@ -69,7 +69,7 @@ Editor::add_external_audio_action (ImportMode mode)
 }
 
 void
-Editor::bring_in_external_audio (ImportMode mode, AudioTrack* track, jack_nframes_t& pos, bool prompt)
+Editor::bring_in_external_audio (ImportMode mode, AudioTrack* track, nframes_t& pos, bool prompt)
 {
 	if (session == 0) {
 		MessageDialog msg (0, _("You can't import or embed an audiofile until you have a session loaded."));
@@ -95,7 +95,7 @@ Editor::bring_in_external_audio (ImportMode mode, AudioTrack* track, jack_nframe
 }
 
 void
-Editor::do_import (vector<Glib::ustring> paths, bool split, ImportMode mode, AudioTrack* track, jack_nframes_t& pos, bool prompt)
+Editor::do_import (vector<Glib::ustring> paths, bool split, ImportMode mode, AudioTrack* track, nframes_t& pos, bool prompt)
 {
 	/* SFDB sets "multichan" to true to indicate "split channels"
 	   so reverse the setting to match the way libardour
@@ -120,7 +120,7 @@ Editor::do_import (vector<Glib::ustring> paths, bool split, ImportMode mode, Aud
 }
 
 void
-Editor::do_embed (vector<Glib::ustring> paths, bool split, ImportMode mode, AudioTrack* track, jack_nframes_t& pos, bool prompt)
+Editor::do_embed (vector<Glib::ustring> paths, bool split, ImportMode mode, AudioTrack* track, nframes_t& pos, bool prompt)
 {
 	bool multiple_files = paths.size() > 1;
 	bool check_sample_rate = true;
@@ -140,7 +140,7 @@ Editor::do_embed (vector<Glib::ustring> paths, bool split, ImportMode mode, Audi
 }
 
 int
-Editor::import_sndfile (Glib::ustring path, ImportMode mode, AudioTrack* track, jack_nframes_t& pos)
+Editor::import_sndfile (Glib::ustring path, ImportMode mode, AudioTrack* track, nframes_t& pos)
 {
 	interthread_progress_window->set_title (string_compose (_("ardour: importing %1"), path));
 	interthread_progress_window->set_position (Gtk::WIN_POS_MOUSE);
@@ -188,7 +188,7 @@ Editor::import_sndfile (Glib::ustring path, ImportMode mode, AudioTrack* track, 
 
 int
 Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool& check_sample_rate, ImportMode mode, 
-		       AudioTrack* track, jack_nframes_t& pos, bool prompt)
+		       AudioTrack* track, nframes_t& pos, bool prompt)
 {
 	boost::shared_ptr<AudioFileSource> source;
 	SourceList sources;
@@ -294,7 +294,7 @@ Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool
 	
 	input_chan = finfo.channels;
 	
-	if (session->get_output_auto_connect() & Session::AutoConnectMaster) {
+	if (Config->get_output_auto_connect() & AutoConnectMaster) {
 		output_chan = (session->master_out() ? session->master_out()->n_inputs().get(DataType::AUDIO) : input_chan);
 	} else {
 		output_chan = input_chan;
@@ -308,7 +308,7 @@ Editor::embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool
 }
 
 int
-Editor::finish_bringing_in_audio (boost::shared_ptr<AudioRegion> region, uint32_t in_chans, uint32_t out_chans, AudioTrack* track, jack_nframes_t& pos, ImportMode mode)
+Editor::finish_bringing_in_audio (boost::shared_ptr<AudioRegion> region, uint32_t in_chans, uint32_t out_chans, AudioTrack* track, nframes_t& pos, ImportMode mode)
 {
 	switch (mode) {
 	case ImportAsRegion:

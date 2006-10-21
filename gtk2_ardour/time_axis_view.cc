@@ -575,7 +575,7 @@ TimeAxisView::set_samples_per_unit (double spu)
 }
 
 void
-TimeAxisView::show_timestretch (jack_nframes_t start, jack_nframes_t end)
+TimeAxisView::show_timestretch (nframes_t start, nframes_t end)
 {
 	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i)->show_timestretch (start, end);
@@ -617,7 +617,7 @@ TimeAxisView::show_selection (TimeSelection& ts)
 	selection_group->raise_to_top();
 	
 	for (list<AudioRange>::iterator i = ts.begin(); i != ts.end(); ++i) {
-		jack_nframes_t start, end, cnt;
+		nframes_t start, end, cnt;
 
 		start = (*i).start;
 		end = (*i).end;
@@ -795,7 +795,7 @@ TimeAxisView::remove_child (TimeAxisView* child)
 }
 
 void
-TimeAxisView::get_selectables (jack_nframes_t start, jack_nframes_t end, double top, double bot, list<Selectable*>& result)
+TimeAxisView::get_selectables (nframes_t start, nframes_t end, double top, double bot, list<Selectable*>& result)
 {
 	return;
 }

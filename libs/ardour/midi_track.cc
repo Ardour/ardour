@@ -226,7 +226,7 @@ MidiTrack::state(bool full_state)
 
 		for (vector<FreezeRecordInsertInfo*>::iterator i = _freeze_record.insert_info.begin(); i != _freeze_record.insert_info.end(); ++i) {
 			inode = new XMLNode (X_("insert"));
-			(*i)->id.print (buf);
+			(*i)->id.print (buf, sizeof(buf));
 			inode->add_property (X_("id"), buf);
 			inode->add_child_copy ((*i)->state);
 		
@@ -270,7 +270,7 @@ MidiTrack::state(bool full_state)
 	   diskstream.
 	*/
 
-	_diskstream->id().print (buf);
+	_diskstream->id().print (buf, sizeof(buf));
 	root.add_property ("diskstream-id", buf);
 
 	return root;
@@ -385,15 +385,15 @@ MidiTrack::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nfr
 		send_silence = true;
 	} else {
 
-		if (_session.get_auto_input()) {
-			if (Config->get_use_sw_monitoring()) {
+		if (Config->get_auto_input()) {
+			if (Config->get_monitoring_model() == SoftwareMonitoring) {
 				send_silence = false;
 			} else {
 				send_silence = true;
 			}
 		} else {
 			if (_diskstream->record_enabled()) {
-				if (Config->get_use_sw_monitoring()) {
+				if (Config->get_monitoring_model() == SoftwareMonitoring) {
 					send_silence = false;
 				} else {
 					send_silence = true;
@@ -439,15 +439,6 @@ MidiTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframe
 	int dret;
 	boost::shared_ptr<MidiDiskstream> diskstream = midi_diskstream();
 
-	{
-		Glib::RWLock::ReaderLock lm (redirect_lock, Glib::TRY_LOCK);
-		if (lm.locked()) {
-			// automation snapshot can also be called from the non-rt context
-			// and it uses the redirect list, so we take the lock out here
-			automation_snapshot (start_frame);
-		}
-	}
-
 	if (n_outputs().get_total() == 0 && _redirects.empty()) {
 		return 0;
 	}
@@ -482,7 +473,7 @@ MidiTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframe
 		just_meter_input (start_frame, end_frame, nframes, offset);
 	}
 
-	if (diskstream->record_enabled() && !can_record && !_session.get_auto_input()) {
+	if (diskstream->record_enabled() && !can_record && !Config->get_auto_input()) {
 
 		/* not actually recording, but we want to hear the input material anyway,
 		   at least potentially (depending on monitoring options)
@@ -508,7 +499,7 @@ MidiTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframe
 		diskstream->get_playback(bufs.get_midi(0), start_frame, end_frame);
 
 		process_output_buffers (bufs, start_frame, end_frame, nframes, offset,
-				(!_session.get_record_enabled() || !_session.get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
+				(!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
 	
 	}
 

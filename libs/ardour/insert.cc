@@ -261,7 +261,7 @@ PluginInsert::parameter_changed (uint32_t which, float val)
 }
 
 void
-PluginInsert::set_block_size (jack_nframes_t nframes)
+PluginInsert::set_block_size (nframes_t nframes)
 {
 	for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->set_block_size (nframes);
@@ -285,7 +285,7 @@ PluginInsert::deactivate ()
 }
 
 void
-PluginInsert::connect_and_run (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset, bool with_auto, jack_nframes_t now)
+PluginInsert::connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t offset, bool with_auto, nframes_t now)
 {
 	uint32_t in_index = 0;
 	uint32_t out_index = 0;
@@ -325,24 +325,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, jack_nframes_t nframes, jack_nfr
 }
 
 void
-PluginInsert::automation_snapshot (jack_nframes_t now)
-{
-	map<uint32_t,AutomationList*>::iterator li;
-	
-	for (li = parameter_automation.begin(); li != parameter_automation.end(); ++li) {
-		
-		AutomationList *alist = ((*li).second);
-		if (alist != 0 && alist->automation_write ()) {
-			
-			float val = _plugins[0]->get_parameter ((*li).first);
-			alist->rt_add (now, val);
-			last_automation_snapshot = now;
-		}
-	}
-}
-
-void
-PluginInsert::transport_stopped (jack_nframes_t now)
+PluginInsert::transport_stopped (nframes_t now)
 {
 	map<uint32_t,AutomationList*>::iterator li;
 
@@ -357,7 +340,7 @@ PluginInsert::transport_stopped (jack_nframes_t now)
 }
 
 void
-PluginInsert::silence (jack_nframes_t nframes, jack_nframes_t offset)
+PluginInsert::silence (nframes_t nframes, nframes_t offset)
 {
 	uint32_t in_index = 0;
 	uint32_t out_index = 0;
@@ -373,7 +356,7 @@ PluginInsert::silence (jack_nframes_t nframes, jack_nframes_t offset)
 }
 	
 void
-PluginInsert::run (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset)
+PluginInsert::run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset)
 {
 	if (active()) {
 
@@ -414,11 +397,11 @@ PluginInsert::set_parameter (uint32_t port, float val)
 }
 
 void
-PluginInsert::automation_run (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset)
+PluginInsert::automation_run (BufferSet& bufs, nframes_t nframes, nframes_t offset)
 {
 	ControlEvent next_event (0, 0.0f);
-	jack_nframes_t now = _session.transport_frame ();
-	jack_nframes_t end = now + nframes;
+	nframes_t now = _session.transport_frame ();
+	nframes_t end = now + nframes;
 
 	Glib::Mutex::Lock lm (_automation_lock, Glib::TRY_LOCK);
 
@@ -437,7 +420,7 @@ PluginInsert::automation_run (BufferSet& bufs, jack_nframes_t nframes, jack_nfra
 	
  	while (nframes) {
 
- 		jack_nframes_t cnt = min (((jack_nframes_t) floor (next_event.when) - now), nframes);
+ 		nframes_t cnt = min (((nframes_t) floor (next_event.when) - now), nframes);
   
  		connect_and_run (bufs, cnt, offset, true, now);
  		
@@ -478,7 +461,6 @@ PluginInsert::set_port_automation_state (uint32_t port, AutoState s)
 
 		if (s != al.automation_state()) {
 			al.set_automation_state (s);
-			last_automation_snapshot = 0;
 			_session.set_dirty ();
 		}
 	}
@@ -797,7 +779,7 @@ PluginInsert::describe_parameter (uint32_t what)
 	return _plugins[0]->describe_parameter (what);
 }
 
-jack_nframes_t 
+ARDOUR::nframes_t 
 PluginInsert::latency() 
 {
 	return _plugins[0]->latency ();
@@ -911,7 +893,7 @@ PortInsert::~PortInsert ()
 }
 
 void
-PortInsert::run (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset)
+PortInsert::run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset)
 {
 	if (n_outputs().get(_default_type) == 0) {
 		return;
@@ -978,7 +960,7 @@ PortInsert::set_state(const XMLNode& node)
 	return 0;
 }
 
-jack_nframes_t 
+ARDOUR::nframes_t 
 PortInsert::latency() 
 {
 	/* because we deliver and collect within the same cycle,

@@ -67,30 +67,30 @@ class AudioEngine : public sigc::trackable
 
 	Glib::Mutex& process_lock() { return _process_lock; }
 
-	jack_nframes_t frame_rate();
-	jack_nframes_t frames_per_cycle();
+	nframes_t frame_rate();
+	nframes_t frames_per_cycle();
 
 	int usecs_per_cycle () const { return _usecs_per_cycle; }
 
-	bool get_sync_offset (jack_nframes_t& offset) const;
+	bool get_sync_offset (nframes_t& offset) const;
 
-	jack_nframes_t frames_since_cycle_start () {
+	nframes_t frames_since_cycle_start () {
 		if (!_running || !_jack) return 0;
 		return jack_frames_since_cycle_start (_jack);
 	}
-	jack_nframes_t frame_time () {
+	nframes_t frame_time () {
 		if (!_running || !_jack) return 0;
 		return jack_frame_time (_jack);
 	}
 
-	jack_nframes_t transport_frame () const {
+	nframes_t transport_frame () const {
 		if (!_running || !_jack) return 0;
 		return jack_get_current_transport_frame (_jack);
 	}
 	
-	int request_buffer_size (jack_nframes_t);
+	int request_buffer_size (nframes_t);
 	
-	jack_nframes_t set_monitor_check_interval (jack_nframes_t);
+	nframes_t set_monitor_check_interval (nframes_t);
 
 	float get_cpu_load() { 
 		if (!_running || !_jack) return 0;
@@ -134,7 +134,7 @@ class AudioEngine : public sigc::trackable
 		return get_nth_physical (type, n, JackPortIsOutput);
 	}
 
-	jack_nframes_t get_port_total_latency (const Port&);
+	nframes_t get_port_total_latency (const Port&);
 	void update_total_latencies ();
 
 	/** Caller may not delete the object pointed to by the return value
@@ -150,7 +150,7 @@ class AudioEngine : public sigc::trackable
 
 	void transport_start ();
 	void transport_stop ();
-	void transport_locate (jack_nframes_t);
+	void transport_locate (nframes_t);
 	TransportState transport_state ();
 
 	int  reset_timebase ();
@@ -164,7 +164,7 @@ class AudioEngine : public sigc::trackable
 	   the regular process() call to session->process() is not made.
 	*/
 
-	sigc::signal<int,jack_nframes_t> Freewheel;
+	sigc::signal<int,nframes_t> Freewheel;
 
 	sigc::signal<void> Xrun;
 
@@ -174,7 +174,7 @@ class AudioEngine : public sigc::trackable
 
 	/* this signal is emitted if the sample rate changes */
 
-	sigc::signal<void,jack_nframes_t> SampleRateChanged;
+	sigc::signal<void,nframes_t> SampleRateChanged;
 
 	/* this signal is sent if JACK ever disconnects us */
 
@@ -200,21 +200,21 @@ class AudioEngine : public sigc::trackable
 	bool                  session_remove_pending;
 	bool                 _running;
 	bool                 _has_run;
-	jack_nframes_t       _buffer_size;
-	jack_nframes_t       _frame_rate;
-	jack_nframes_t        monitor_check_interval;
-	jack_nframes_t        last_monitor_check;
-	jack_nframes_t       _processed_frames;
+	nframes_t       _buffer_size;
+	nframes_t       _frame_rate;
+	nframes_t        monitor_check_interval;
+	nframes_t        last_monitor_check;
+	nframes_t       _processed_frames;
 	bool                 _freewheeling;
 	bool                 _freewheel_thread_registered;
-	sigc::slot<int,jack_nframes_t>  freewheel_action;
+	sigc::slot<int,nframes_t>  freewheel_action;
 	bool                  reconnect_on_halt;
 	int                  _usecs_per_cycle;
 
 	typedef std::set<Port*> Ports;
 	SerializedRCUManager<Ports> ports;
 
-	int    process_callback (jack_nframes_t nframes);
+	int    process_callback (nframes_t nframes);
 	void   remove_all_ports ();
 
 	typedef std::pair<std::string,std::string> PortConnection;
@@ -227,17 +227,17 @@ class AudioEngine : public sigc::trackable
 
 	static int  _xrun_callback (void *arg);
 	static int  _graph_order_callback (void *arg);
-	static int  _process_callback (jack_nframes_t nframes, void *arg);
-	static int  _sample_rate_callback (jack_nframes_t nframes, void *arg);
-	static int  _bufsize_callback (jack_nframes_t nframes, void *arg);
-	static void _jack_timebase_callback (jack_transport_state_t, jack_nframes_t, jack_position_t*, int, void*);
+	static int  _process_callback (nframes_t nframes, void *arg);
+	static int  _sample_rate_callback (nframes_t nframes, void *arg);
+	static int  _bufsize_callback (nframes_t nframes, void *arg);
+	static void _jack_timebase_callback (jack_transport_state_t, nframes_t, jack_position_t*, int, void*);
 	static int  _jack_sync_callback (jack_transport_state_t, jack_position_t*, void *arg);
 	static void _freewheel_callback (int , void *arg);
 
-	void jack_timebase_callback (jack_transport_state_t, jack_nframes_t, jack_position_t*, int);
+	void jack_timebase_callback (jack_transport_state_t, nframes_t, jack_position_t*, int);
 	int  jack_sync_callback (jack_transport_state_t, jack_position_t*);
-	int  jack_bufsize_callback (jack_nframes_t);
-	int  jack_sample_rate_callback (jack_nframes_t);
+	int  jack_bufsize_callback (nframes_t);
+	int  jack_sample_rate_callback (nframes_t);
 
 	static void halted (void *);
 
@@ -245,8 +245,10 @@ class AudioEngine : public sigc::trackable
 
 	void meter_thread ();
 	void start_metering_thread ();
-    Glib::Thread*    m_meter_thread;
-    mutable gint     m_meter_exit;
+	void stop_metering_thread ();
+
+	Glib::Thread*    m_meter_thread;
+	static gint      m_meter_exit;
 };
 
 } // namespace ARDOUR

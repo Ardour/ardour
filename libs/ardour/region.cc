@@ -113,7 +113,7 @@ Region::Region (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, c
 }
 
 /** Create a new Region from part of an existing one */
-Region::Region (boost::shared_ptr<const Region> other, jack_nframes_t offset, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
+Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: _name(name)
 	, _type(other->data_type())
 	, _flags(Flag(flags & ~(Locked|WholeFile|Hidden)))
@@ -273,9 +273,7 @@ Region::Region (boost::shared_ptr<Source> src, const XMLNode& node)
 
 Region::~Region ()
 {
-	notify_callbacks ();
-
-	/* derived classes must emit GoingAway */
+	/* derived classes must call notify_callbacks() and then emit GoingAway */
 }
 
 void
@@ -356,13 +354,21 @@ Region::set_name (string str)
 }
 
 void
-Region::set_length (jack_nframes_t len, void *src)
+Region::set_length (nframes_t len, void *src)
 {
 	if (_flags & Locked) {
 		return;
 	}
 
 	if (_length != len && len != 0) {
+
+		/* check that the current _position wouldn't make the new 
+		   length impossible.
+		*/
+
+		if (max_frames - len < _position) {
+			return;
+		}
 
 		if (!verify_length (len)) {
 			return;
@@ -411,7 +417,7 @@ Region::move_to_natural_position (void *src)
 	if (!_playlist) {
 		return;
 	}
-
+	
 	boost::shared_ptr<Region> whole_file_region = get_parent();
 
 	if (whole_file_region) {
@@ -420,7 +426,7 @@ Region::move_to_natural_position (void *src)
 }
 	
 void
-Region::special_set_position (jack_nframes_t pos)
+Region::special_set_position (nframes_t pos)
 {
 	/* this is used when creating a whole file region as 
 	   a way to store its "natural" or "captured" position.
@@ -430,7 +436,7 @@ Region::special_set_position (jack_nframes_t pos)
 }
 
 void
-Region::set_position (jack_nframes_t pos, void *src)
+Region::set_position (nframes_t pos, void *src)
 {
 	if (_flags & Locked) {
 		return;
@@ -438,6 +444,16 @@ Region::set_position (jack_nframes_t pos, void *src)
 
 	if (_position != pos) {
 		_position = pos;
+
+		/* check that the new _position wouldn't make the current
+		   length impossible - if so, change the length. 
+
+		   XXX is this the right thing to do?
+		*/
+
+		if (max_frames - _length < _position) {
+			_length = max_frames - _position;
+		}
 
 		if (!_frozen) {
 			char buf[64];
@@ -454,7 +470,7 @@ Region::set_position (jack_nframes_t pos, void *src)
 }
 
 void
-Region::set_position_on_top (jack_nframes_t pos, void *src)
+Region::set_position_on_top (nframes_t pos, void *src)
 {
 	if (_flags & Locked) {
 		return;
@@ -497,7 +513,7 @@ Region::nudge_position (long n, void *src)
 			_position += n;
 		}
 	} else {
-		if (_position < (jack_nframes_t) -n) {
+		if (_position < (nframes_t) -n) {
 			_position = 0;
 		} else {
 			_position += n;
@@ -514,7 +530,7 @@ Region::nudge_position (long n, void *src)
 }
 
 void
-Region::set_start (jack_nframes_t pos, void *src)
+Region::set_start (nframes_t pos, void *src)
 {
 	if (_flags & Locked) {
 		return;
@@ -545,12 +561,12 @@ Region::set_start (jack_nframes_t pos, void *src)
 }
 
 void
-Region::trim_start (jack_nframes_t new_position, void *src)
+Region::trim_start (nframes_t new_position, void *src)
 {
 	if (_flags & Locked) {
 		return;
 	}
-	jack_nframes_t new_start;
+	nframes_t new_start;
 	int32_t start_shift;
 	
 	if (new_position > _position) {
@@ -573,7 +589,7 @@ Region::trim_start (jack_nframes_t new_position, void *src)
 
 	} else if (start_shift < 0) {
 
-		if (_start < (jack_nframes_t) -start_shift) {
+		if (_start < (nframes_t) -start_shift) {
 			new_start = 0;
 		} else {
 			new_start = _start + start_shift;
@@ -600,14 +616,14 @@ Region::trim_start (jack_nframes_t new_position, void *src)
 }
 
 void
-Region::trim_front (jack_nframes_t new_position, void *src)
+Region::trim_front (nframes_t new_position, void *src)
 {
 	if (_flags & Locked) {
 		return;
 	}
 
-	jack_nframes_t end = _position + _length - 1;
-	jack_nframes_t source_zero;
+	nframes_t end = last_frame();
+	nframes_t source_zero;
 
 	if (_position > _start) {
 		source_zero = _position - _start;
@@ -617,7 +633,7 @@ Region::trim_front (jack_nframes_t new_position, void *src)
 
 	if (new_position < end) { /* can't trim it zero or negative length */
 		
-		jack_nframes_t newlen;
+		nframes_t newlen;
 
 		/* can't trim it back passed where source position zero is located */
 		
@@ -638,7 +654,7 @@ Region::trim_front (jack_nframes_t new_position, void *src)
 }
 
 void
-Region::trim_end (jack_nframes_t new_endpoint, void *src)
+Region::trim_end (nframes_t new_endpoint, void *src)
 {
 	if (_flags & Locked) {
 		return;
@@ -653,7 +669,7 @@ Region::trim_end (jack_nframes_t new_endpoint, void *src)
 }
 
 void
-Region::trim_to (jack_nframes_t position, jack_nframes_t length, void *src)
+Region::trim_to (nframes_t position, nframes_t length, void *src)
 {
 	if (_flags & Locked) {
 		return;
@@ -668,10 +684,10 @@ Region::trim_to (jack_nframes_t position, jack_nframes_t length, void *src)
 }
 
 void
-Region::trim_to_internal (jack_nframes_t position, jack_nframes_t length, void *src)
+Region::trim_to_internal (nframes_t position, nframes_t length, void *src)
 {
 	int32_t start_shift;
-	jack_nframes_t new_start;
+	nframes_t new_start;
 
 	if (_flags & Locked) {
 		return;
@@ -694,7 +710,7 @@ Region::trim_to_internal (jack_nframes_t position, jack_nframes_t length, void *
 
 	} else if (start_shift < 0) {
 
-		if (_start < (jack_nframes_t) -start_shift) {
+		if (_start < (nframes_t) -start_shift) {
 			new_start = 0;
 		} else {
 			new_start = _start + start_shift;
@@ -819,9 +835,9 @@ Region::set_locked (bool yn)
 }
 
 void
-Region::set_sync_position (jack_nframes_t absolute_pos)
+Region::set_sync_position (nframes_t absolute_pos)
 {
-	jack_nframes_t file_pos;
+	nframes_t file_pos;
 
 	file_pos = _start + (absolute_pos - _position);
 
@@ -854,7 +870,7 @@ Region::clear_sync_position ()
 	}
 }
 
-jack_nframes_t
+nframes_t
 Region::sync_offset (int& dir) const
 {
 	/* returns the sync point relative the first frame of the region */
@@ -873,11 +889,11 @@ Region::sync_offset (int& dir) const
 	}
 }
 
-jack_nframes_t 
-Region::adjust_to_sync (jack_nframes_t pos)
+nframes_t 
+Region::adjust_to_sync (nframes_t pos)
 {
 	int sync_dir;
-	jack_nframes_t offset = sync_offset (sync_dir);
+	nframes_t offset = sync_offset (sync_dir);
 	
 	if (sync_dir > 0) {
 		if (max_frames - pos > offset) {
@@ -894,7 +910,7 @@ Region::adjust_to_sync (jack_nframes_t pos)
 	return pos;
 }
 
-jack_nframes_t
+nframes_t
 Region::sync_position() const
 {
 	if (_flags & SyncMarked) {
@@ -968,7 +984,7 @@ Region::state (bool full_state)
 	XMLNode *node = new XMLNode ("Region");
 	char buf[64];
 	
-	_id.print (buf);
+	_id.print (buf, sizeof (buf));
 	node->add_property ("id", buf);
 	node->add_property ("name", _name);
 	node->add_property ("type", _type.to_string());
@@ -1027,15 +1043,15 @@ Region::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("start")) != 0) {
-		_start = (jack_nframes_t) atoi (prop->value().c_str());
+		sscanf (prop->value().c_str(), "%" PRIu32, &_start);
 	}
 
 	if ((prop = node.property ("length")) != 0) {
-		_length = (jack_nframes_t) atoi (prop->value().c_str());
+		sscanf (prop->value().c_str(), "%" PRIu32, &_length);
 	}
 
 	if ((prop = node.property ("position")) != 0) {
-		_position = (jack_nframes_t) atoi (prop->value().c_str());
+		sscanf (prop->value().c_str(), "%" PRIu32, &_position);
 	}
 
 	if ((prop = node.property ("layer")) != 0) {
@@ -1045,7 +1061,7 @@ Region::set_state (const XMLNode& node)
 	/* note: derived classes set flags */
 
 	if ((prop = node.property ("sync-position")) != 0) {
-		_sync_position = (jack_nframes_t) atoi (prop->value().c_str());
+		sscanf (prop->value().c_str(), "%" PRIu32, &_sync_position);
 	} else {
 		_sync_position = _start;
 	}

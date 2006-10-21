@@ -23,6 +23,7 @@
 
 #include <pwd.h>
 #include <sys/utsname.h>
+#include <sys/stat.h>
 
 #include <glibmm/miscutils.h>
 
@@ -42,14 +43,6 @@ SndFileSource::SndFileSource (Session& s, const XMLNode& node)
 	if (open()) {
 		throw failed_constructor ();
 	}
-
-	if (_build_peakfiles) {
-		if (initialize_peakfile (false, _path)) {
-			sf_close (sf);
-			sf = 0;
-			throw failed_constructor ();
-		}
-	}
 }
 
 SndFileSource::SndFileSource (Session& s, string idstr, Flag flags)
@@ -61,23 +54,21 @@ SndFileSource::SndFileSource (Session& s, string idstr, Flag flags)
 	if (open()) {
 		throw failed_constructor ();
 	}
-
-	if (!(_flags & NoPeakFile) && _build_peakfiles) {
-		if (initialize_peakfile (false, _path)) {
-			sf_close (sf);
-			sf = 0;
-			throw failed_constructor ();
-		}
-	}
 }
 
-SndFileSource::SndFileSource (Session& s, string idstr, SampleFormat sfmt, HeaderFormat hf, jack_nframes_t rate, Flag flags)
+SndFileSource::SndFileSource (Session& s, string idstr, SampleFormat sfmt, HeaderFormat hf, nframes_t rate, Flag flags)
 	: AudioFileSource (s, idstr, flags, sfmt, hf)
 {
 	int fmt = 0;
 
 	init (idstr);
 
+	/* this constructor is used to construct new files, not open
+	   existing ones.
+	*/
+
+	file_is_new = true;
+	
 	switch (hf) {
 	case CAF:
 		fmt = SF_FORMAT_CAF;
@@ -170,14 +161,6 @@ SndFileSource::SndFileSource (Session& s, string idstr, SampleFormat sfmt, Heade
 		}
 		
 	}
-	
-	if (!(_flags & NoPeakFile) && _build_peakfiles) {
-		if (initialize_peakfile (true, _path)) {
-			sf_close (sf);
-			sf = 0;
-			throw failed_constructor ();
-		}
-	}
 }
 
 void 
@@ -266,6 +249,14 @@ SndFileSource::~SndFileSource ()
 	if (sf) {
 		sf_close (sf);
 		sf = 0;
+
+		/* stupid libsndfile updated the headers on close,
+		   so touch the peakfile if it exists and has data
+		   to make sure its time is as new as the audio
+		   file.
+		*/
+
+		touch_peakfile ();
 	}
 
 	if (interleave_buf) {
@@ -283,18 +274,13 @@ SndFileSource::sample_rate () const
 	return _info.samplerate;
 }
 
-jack_nframes_t
-SndFileSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const
+nframes_t
+SndFileSource::read_unlocked (Sample *dst, nframes_t start, nframes_t cnt) const
 {
 	int32_t nread;
 	float *ptr;
 	uint32_t real_cnt;
-	jack_nframes_t file_cnt;
-
-	//destructive (tape) tracks need to offset reads and writes by the timeline position
-	if (_flags && ARDOUR::Destructive == ARDOUR::Destructive) {
-		start -= timeline_position;
-	}
+	nframes_t file_cnt;
 
 	if (start > _length) {
 
@@ -325,14 +311,14 @@ SndFileSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t 
 		}
 		
 		if (_info.channels == 1) {
-			jack_nframes_t ret = sf_read_float (sf, dst, file_cnt);
+			nframes_t ret = sf_read_float (sf, dst, file_cnt);
 			_read_data_count = cnt * sizeof(float);
 			return ret;
 		}
 	}
 
 	if (file_cnt != cnt) {
-		jack_nframes_t delta = cnt - file_cnt;
+		nframes_t delta = cnt - file_cnt;
 		memset (dst+file_cnt, 0, sizeof (Sample) * delta);
 	}
 
@@ -363,8 +349,8 @@ SndFileSource::read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t 
 	return nread;
 }
 
-jack_nframes_t 
-SndFileSource::write_unlocked (Sample *data, jack_nframes_t cnt)
+nframes_t 
+SndFileSource::write_unlocked (Sample *data, nframes_t cnt)
 {
 	if (!writable()) {
 		return 0;
@@ -376,7 +362,7 @@ SndFileSource::write_unlocked (Sample *data, jack_nframes_t cnt)
 		return 0;
 	}
 	
-	jack_nframes_t oldlen;
+	nframes_t oldlen;
 	int32_t frame_pos = _length;
 	
 	if (write_float (data, frame_pos, cnt) != cnt) {
@@ -409,7 +395,7 @@ SndFileSource::write_unlocked (Sample *data, jack_nframes_t cnt)
 	
 	
 	if (_build_peakfiles) {
-		queue_for_peaks (this);
+		queue_for_peaks (shared_from_this ());
 	}
 
 	_write_data_count = cnt;
@@ -418,7 +404,7 @@ SndFileSource::write_unlocked (Sample *data, jack_nframes_t cnt)
 }
 
 int
-SndFileSource::update_header (jack_nframes_t when, struct tm& now, time_t tnow)
+SndFileSource::update_header (nframes_t when, struct tm& now, time_t tnow)
 {	
 	set_timeline_position (when);
 
@@ -437,12 +423,11 @@ SndFileSource::flush_header ()
 	if (!writable() || (sf == 0)) {
 		return -1;
 	}
-
 	return (sf_command (sf, SFC_UPDATE_HEADER_NOW, 0, 0) != SF_TRUE);
 }
 
 int
-SndFileSource::setup_broadcast_info (jack_nframes_t when, struct tm& now, time_t tnow)
+SndFileSource::setup_broadcast_info (nframes_t when, struct tm& now, time_t tnow)
 {
 	if (!writable()) {
 		return -1;
@@ -511,8 +496,8 @@ SndFileSource::set_header_timeline_position ()
 
 }
 
-jack_nframes_t
-SndFileSource::write_float (Sample* data, jack_nframes_t frame_pos, jack_nframes_t cnt)
+nframes_t
+SndFileSource::write_float (Sample* data, nframes_t frame_pos, nframes_t cnt)
 {
 	if (sf_seek (sf, frame_pos, SEEK_SET|SFM_WRITE) != frame_pos) {
 		error << string_compose (_("%1: cannot seek to %2"), _path, frame_pos) << endmsg;
@@ -526,7 +511,7 @@ SndFileSource::write_float (Sample* data, jack_nframes_t frame_pos, jack_nframes
 	return cnt;
 }
 
-jack_nframes_t
+nframes_t
 SndFileSource::natural_position() const
 {
 	return timeline_position;

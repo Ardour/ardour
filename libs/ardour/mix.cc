@@ -29,7 +29,7 @@
 // Debug wrappers
 
 float
-debug_compute_peak (ARDOUR::Sample *buf, jack_nframes_t nsamples, float current) 
+debug_compute_peak (ARDOUR::Sample *buf, nframes_t nsamples, float current) 
 {
 	if ( ((intptr_t)buf % 16) != 0) {
 		cerr << "compute_peak(): buffer unaligned!" << endl;
@@ -39,7 +39,7 @@ debug_compute_peak (ARDOUR::Sample *buf, jack_nframes_t nsamples, float current)
 }
 
 void
-debug_apply_gain_to_buffer (ARDOUR::Sample *buf, jack_nframes_t nframes, float gain)
+debug_apply_gain_to_buffer (ARDOUR::Sample *buf, nframes_t nframes, float gain)
 {
 	if ( ((intptr_t)buf % 16) != 0) {
 		cerr << "apply_gain_to_buffer(): buffer unaligned!" << endl;
@@ -49,7 +49,7 @@ debug_apply_gain_to_buffer (ARDOUR::Sample *buf, jack_nframes_t nframes, float g
 }
 
 void
-debug_mix_buffers_with_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, jack_nframes_t nframes, float gain)
+debug_mix_buffers_with_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes, float gain)
 {
 	if ( ((intptr_t)dst & 15) != 0) {
 		cerr << "mix_buffers_with_gain(): dst unaligned!" << endl;
@@ -64,7 +64,7 @@ debug_mix_buffers_with_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, jack_nfra
 }
 
 void
-debug_mix_buffers_no_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, jack_nframes_t nframes)
+debug_mix_buffers_no_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes)
 {
 	if ( ((intptr_t)dst & 15) != 0) {
 		cerr << "mix_buffers_no_gain(): dst unaligned!" << endl;
@@ -82,9 +82,9 @@ debug_mix_buffers_no_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, jack_nframe
 
 
 float
-compute_peak (ARDOUR::Sample *buf, jack_nframes_t nsamples, float current) 
+compute_peak (ARDOUR::Sample *buf, nframes_t nsamples, float current) 
 {
-	for (jack_nframes_t i = 0; i < nsamples; ++i) {
+	for (nframes_t i = 0; i < nsamples; ++i) {
 		current = f_max (current, fabsf (buf[i]));
 	}
 
@@ -92,24 +92,24 @@ compute_peak (ARDOUR::Sample *buf, jack_nframes_t nsamples, float current)
 }	
 
 void
-apply_gain_to_buffer (ARDOUR::Sample *buf, jack_nframes_t nframes, float gain)
+apply_gain_to_buffer (ARDOUR::Sample *buf, nframes_t nframes, float gain)
 {		
-	for (jack_nframes_t i=0; i<nframes; i++)
+	for (nframes_t i=0; i<nframes; i++)
 		buf[i] *= gain;
 }
 
 void
-mix_buffers_with_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, jack_nframes_t nframes, float gain)
+mix_buffers_with_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes, float gain)
 {
-	for (jack_nframes_t i = 0; i < nframes; i++) {
+	for (nframes_t i = 0; i < nframes; i++) {
 		dst[i] += src[i] * gain;
 	}
 }
 
 void
-mix_buffers_no_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, jack_nframes_t nframes)
+mix_buffers_no_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes)
 {
-	for (jack_nframes_t i=0; i < nframes; i++) {
+	for (nframes_t i=0; i < nframes; i++) {
 		dst[i] += src[i];
 	}
 }
@@ -118,7 +118,7 @@ mix_buffers_no_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, jack_nframes_t nf
 #include <Accelerate/Accelerate.h>
 
 float
-veclib_compute_peak (ARDOUR::Sample *buf, jack_nframes_t nsamples, float current)
+veclib_compute_peak (ARDOUR::Sample *buf, nframes_t nsamples, float current)
 {
 	float tmpmax = 0.0f;
         vDSP_maxmgv(buf, 1, &tmpmax, nsamples);
@@ -126,19 +126,19 @@ veclib_compute_peak (ARDOUR::Sample *buf, jack_nframes_t nsamples, float current
 }
 
 void
-veclib_apply_gain_to_buffer (ARDOUR::Sample *buf, jack_nframes_t nframes, float gain)
+veclib_apply_gain_to_buffer (ARDOUR::Sample *buf, nframes_t nframes, float gain)
 {
         vDSP_vsmul(buf, 1, &gain, buf, 1, nframes);
 }
 
 void
-veclib_mix_buffers_with_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, jack_nframes_t nframes, float gain)
+veclib_mix_buffers_with_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes, float gain)
 {
         vDSP_vsma(src, 1, &gain, dst, 1, dst, 1, nframes);
 }
 
 void
-veclib_mix_buffers_no_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, jack_nframes_t nframes)
+veclib_mix_buffers_no_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes)
 {
         // It seems that a vector mult only operation does not exist...
         float gain = 1.0f;

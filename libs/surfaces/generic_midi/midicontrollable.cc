@@ -345,6 +345,8 @@ MIDIControllable::set_state (const XMLNode& node)
 		return -1;
 	}
 
+	bind_midi (control_channel, control_type, control_additional);
+	
 	return 0;
 }
 

@@ -18,6 +18,9 @@
     $Id$
 */
 
+#define __STDC_FORMAT_MACROS 1
+#include <stdint.h>
+
 #include <sys/types.h>
 #include <cstdio>
 #include <lrdf.h>

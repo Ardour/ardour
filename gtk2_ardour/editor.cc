@@ -98,15 +98,6 @@ const double Editor::timebar_height = 15.0;
 
 #include "editor_xpms"
 
-static const int32_t slide_index = 0;
-static const int32_t splice_index = 1;
-
-static const gchar *edit_mode_strings[] = {
-	N_("Slide Edit"),
-	N_("Splice Edit"),
-	0
-};
-
 static const gchar *snap_type_strings[] = {
 	N_("None"),
 	N_("CD Frames"),
@@ -138,11 +129,11 @@ static const gchar *snap_mode_strings[] = {
 };
 
 static const gchar *zoom_focus_strings[] = {
-	N_("Focus Left"),
-	N_("Focus Right"),
-	N_("Focus Center"),
-	N_("Focus Play"),
-	N_("Focus Edit"),
+	N_("Left"),
+	N_("Right"),
+	N_("Center"),
+	N_("Playhead"),
+ 	N_("Edit Cursor"),
 	0
 };
 
@@ -257,6 +248,7 @@ Editor::Editor (AudioEngine& eng)
 	bbt_beat_subdivision = 4;
 	canvas_width = 0;
 	canvas_height = 0;
+	autoscroll_active = false;
 	autoscroll_timeout_tag = -1;
 	interthread_progress_window = 0;
 
@@ -674,8 +666,8 @@ Editor::Editor (AudioEngine& eng)
 
 	/* nudge stuff */
 
-	nudge_forward_button.add (*(manage (new Image (get_xpm("right_arrow.xpm")))));
-	nudge_backward_button.add (*(manage (new Image (get_xpm("left_arrow.xpm")))));
+	nudge_forward_button.add (*(manage (new Image (::get_icon("nudge_right")))));
+	nudge_backward_button.add (*(manage (new Image (::get_icon("nudge_left")))));
 
 	ARDOUR_UI::instance()->tooltips().set_tip (nudge_forward_button, _("Nudge Region/Selection Forwards"));
 	ARDOUR_UI::instance()->tooltips().set_tip (nudge_backward_button, _("Nudge Region/Selection Backwards"));
@@ -701,9 +693,10 @@ Editor::Editor (AudioEngine& eng)
 	ControlProtocol::ZoomOut.connect (bind (mem_fun (*this, &Editor::temporal_zoom_step), true));
 	ControlProtocol::ScrollTimeline.connect (mem_fun (*this, &Editor::control_scroll));
 
+	Config->ParameterChanged.connect (mem_fun (*this, &Editor::parameter_changed));
+
 	constructed = true;
 	instant_save ();
-
 }
 
 Editor::~Editor()
@@ -803,25 +796,29 @@ Editor::tie_vertical_scrolling ()
 void
 Editor::set_frames_per_unit (double fpu)
 {
-	jack_nframes_t frames;
+	nframes_t frames;
 
 	if (fpu == frames_per_unit) {
 		return;
 	}
 
-	if (fpu < 1.0) {
-		fpu = 1.0;
+	if (fpu < 2.0) {
+		fpu = 2.0;
 	}
 
 	// convert fpu to frame count
 
-	frames = (jack_nframes_t) floor (fpu * canvas_width);
+	frames = (nframes_t) floor (fpu * canvas_width);
 	
 	/* don't allow zooms that fit more than the maximum number
 	   of frames into an 800 pixel wide space.
 	*/
 
 	if (max_frames / fpu < 800.0) {
+		return;
+	}
+
+	if (fpu == frames_per_unit) {
 		return;
 	}
 
@@ -870,12 +867,12 @@ Editor::instant_save ()
 }
 
 void
-Editor::reposition_x_origin (jack_nframes_t frame)
+Editor::reposition_x_origin (nframes_t frame)
 {
 	if (frame != leftmost_frame) {
 		leftmost_frame = frame;
 		
-		jack_nframes_t rightmost_frame = leftmost_frame + current_page_frames ();
+		nframes_t rightmost_frame = leftmost_frame + current_page_frames ();
 
 		if (rightmost_frame > last_canvas_frame) {
 			last_canvas_frame = rightmost_frame;
@@ -909,10 +906,10 @@ Editor::zoom_adjustment_changed ()
 
 	if (fpu < 1.0) {
 		fpu = 1.0;
-		zoom_range_clock.set ((jack_nframes_t) floor (fpu * canvas_width));
+		zoom_range_clock.set ((nframes_t) floor (fpu * canvas_width));
 	} else if (fpu > session->current_end_frame() / canvas_width) {
 		fpu = session->current_end_frame() / canvas_width;
-		zoom_range_clock.set ((jack_nframes_t) floor (fpu * canvas_width));
+		zoom_range_clock.set ((nframes_t) floor (fpu * canvas_width));
 	}
 	
 	temporal_zoom (fpu);
@@ -928,14 +925,14 @@ Editor::control_scroll (float fraction)
 	}
 
 	double step = fraction * current_page_frames();
-	jack_nframes_t target;
+	nframes_t target;
 
-	if ((fraction < 0.0f) && (session->transport_frame() < (jack_nframes_t) fabs(step))) {
+	if ((fraction < 0.0f) && (session->transport_frame() < (nframes_t) fabs(step))) {
 		target = 0;
 	} else if ((fraction > 0.0f) && (max_frames - session->transport_frame() < step)) {
 		target = (max_frames - (current_page_frames()*2)); // allow room for slop in where the PH is on the screen
 	} else {
-		target = (session->transport_frame() + (jack_nframes_t) floor ((fraction * current_page_frames())));
+		target = (session->transport_frame() + (nframes_t) floor ((fraction * current_page_frames())));
 	}
 
 	/* move visuals, we'll catch up with it later */
@@ -959,7 +956,7 @@ Editor::control_scroll (float fraction)
 }
 
 bool
-Editor::deferred_control_scroll (jack_nframes_t target)
+Editor::deferred_control_scroll (nframes_t target)
 {
 	session->request_locate (target);
 	return false;
@@ -969,14 +966,14 @@ void
 Editor::canvas_horizontally_scrolled ()
 {
 
-  	leftmost_frame = (jack_nframes_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
+  	leftmost_frame = (nframes_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
 	update_fixed_rulers ();
 	tempo_map_changed (Change (0));
 
 }
 
 void
-Editor::reposition_and_zoom (jack_nframes_t frame, double nfpu)
+Editor::reposition_and_zoom (nframes_t frame, double nfpu)
 {
 	if (!repos_zoom_queued) {
 		repos_zoom_queued = true;
@@ -985,7 +982,7 @@ Editor::reposition_and_zoom (jack_nframes_t frame, double nfpu)
 }
 
 gint
-Editor::deferred_reposition_and_zoom (jack_nframes_t frame, double nfpu)
+Editor::deferred_reposition_and_zoom (nframes_t frame, double nfpu)
 {
 
 	set_frames_per_unit (nfpu);
@@ -1003,39 +1000,6 @@ Editor::on_realize ()
 }
 
 void
-Editor::queue_session_control_changed (Session::ControlType t)
-{
-	Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &Editor::session_control_changed), t));
-}
-
-void
-Editor::session_control_changed (Session::ControlType t)
-{
-	// right now we're only tracking some state here 
-
-	switch (t) {
-	case Session::AutoLoop:
-		update_loop_range_view (true);
-		break;
-	case Session::PunchIn:
-	case Session::PunchOut:
-		update_punch_range_view (true);
-		break;
-
-	case Session::LayeringModel:
-		update_layering_model ();
-		break;
-
-	case Session::SmpteMode:
-		update_smpte_mode ();
-		break;
-
-	default:
-		break;
-	}
-}
-
-void
 Editor::start_scrolling ()
 {
 	scroll_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect 
@@ -1049,7 +1013,7 @@ Editor::stop_scrolling ()
 }
 
 void
-Editor::map_position_change (jack_nframes_t frame)
+Editor::map_position_change (nframes_t frame)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &Editor::map_position_change), frame));
 
@@ -1062,7 +1026,7 @@ Editor::map_position_change (jack_nframes_t frame)
 }	
 
 void
-Editor::center_screen (jack_nframes_t frame)
+Editor::center_screen (nframes_t frame)
 {
 	double page = canvas_width * frames_per_unit;
 
@@ -1075,12 +1039,12 @@ Editor::center_screen (jack_nframes_t frame)
 }
 
 void
-Editor::center_screen_internal (jack_nframes_t frame, float page)
+Editor::center_screen_internal (nframes_t frame, float page)
 {
 	page /= 2;
 		
 	if (frame > page) {
-		frame -= (jack_nframes_t) page;
+		frame -= (nframes_t) page;
 	} else {
 		frame = 0;
 	}
@@ -1093,7 +1057,7 @@ Editor::handle_new_duration ()
 {
 	ENSURE_GUI_THREAD (mem_fun (*this, &Editor::handle_new_duration));
 
-	jack_nframes_t new_end = session->get_maximum_extent() + (jack_nframes_t) floorf (current_page_frames() * 0.10f);
+	nframes_t new_end = session->get_maximum_extent() + (nframes_t) floorf (current_page_frames() * 0.10f);
 				  
 	if (new_end > last_canvas_frame) {
 		last_canvas_frame = new_end;
@@ -1174,10 +1138,6 @@ Editor::connect_to_session (Session *t)
 	session_connections.push_back (session->RegionHiddenChange.connect (mem_fun(*this, &Editor::region_hidden)));
 
 	session_connections.push_back (session->SMPTEOffsetChanged.connect (mem_fun(*this, &Editor::update_just_smpte)));
-	session_connections.push_back (session->SMPTETypeChanged.connect (mem_fun(*this, &Editor::update_just_smpte)));
-
-	session_connections.push_back (session->SMPTETypeChanged.connect (mem_fun(*this, &Editor::update_smpte_mode)));
-	session_connections.push_back (session->PullupChanged.connect (mem_fun(*this, &Editor::update_video_pullup)));
 
 	session_connections.push_back (session->tempo_map().StateChanged.connect (mem_fun(*this, &Editor::tempo_map_changed)));
 
@@ -1192,16 +1152,6 @@ Editor::connect_to_session (Session *t)
 	if (analysis_window != 0)
 		analysis_window->set_session (session);
 #endif
-
-	switch (session->get_edit_mode()) {
-	case Splice:
-		edit_mode_selector.set_active_text (edit_mode_strings[splice_index]);
-		break;
-
-	case Slide:
-		edit_mode_selector.set_active_text (edit_mode_strings[slide_index]);
-		break;
-	}
 
 	Location* loc = session->locations()->auto_loop_location();
 	if (loc == 0) {
@@ -1231,10 +1181,8 @@ Editor::connect_to_session (Session *t)
 		loc->set_name (_("Punch"));
 	}
 
-	update_loop_range_view (true);
-	update_punch_range_view (true);
+	Config->map_parameters (mem_fun (*this, &Editor::parameter_changed));
 	
-	session->ControlChanged.connect (mem_fun(*this, &Editor::queue_session_control_changed));
 	session->StateSaved.connect (mem_fun(*this, &Editor::session_state_saved));
 	
 	refresh_location_display ();
@@ -1243,35 +1191,6 @@ Editor::connect_to_session (Session *t)
 	session->locations()->changed.connect (mem_fun(*this, &Editor::refresh_location_display));
 	session->locations()->StateChanged.connect (mem_fun(*this, &Editor::refresh_location_display_s));
 	session->locations()->end_location()->changed.connect (mem_fun(*this, &Editor::end_location_changed));
-
-	bool yn;
-	RefPtr<Action> act;
-
-	act = ActionManager::get_action (X_("Editor"), X_("toggle-xfades-active"));
-	if (act) {
-		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-		/* do it twice to force the change */
-		yn = session->get_crossfades_active();
-		tact->set_active (!yn);
-		tact->set_active (yn);
-	}
-
-	act = ActionManager::get_action (X_("Editor"), X_("toggle-auto-xfades"));
-	if (act) {
-		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-		/* do it twice to force the change */
-		yn = Config->get_auto_xfade ();
-		tact->set_active (!yn);
-		tact->set_active (yn);
-	}
-
-	/* xfade visibility state set from editor::set_state() */
-
-	update_crossfade_model();
-	update_layering_model();
-
-	update_smpte_mode();
-	update_video_pullup();
 
 	handle_new_duration ();
 
@@ -1439,10 +1358,10 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 }
 
 void
-Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, bool with_selection, jack_nframes_t frame)
+Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, bool with_selection, nframes_t frame)
 {
 	using namespace Menu_Helpers;
-	Menu* (Editor::*build_menu_function)(jack_nframes_t);
+	Menu* (Editor::*build_menu_function)(nframes_t);
 	Menu *menu;
 
 	switch (item_type) {
@@ -1554,7 +1473,7 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 }
 
 Menu*
-Editor::build_track_context_menu (jack_nframes_t ignored)
+Editor::build_track_context_menu (nframes_t ignored)
 {
 	using namespace Menu_Helpers;
 
@@ -1566,7 +1485,7 @@ Editor::build_track_context_menu (jack_nframes_t ignored)
 }
 
 Menu*
-Editor::build_track_bus_context_menu (jack_nframes_t ignored)
+Editor::build_track_bus_context_menu (nframes_t ignored)
 {
 	using namespace Menu_Helpers;
 
@@ -1578,7 +1497,7 @@ Editor::build_track_bus_context_menu (jack_nframes_t ignored)
 }
 
 Menu*
-Editor::build_track_region_context_menu (jack_nframes_t frame)
+Editor::build_track_region_context_menu (nframes_t frame)
 {
 	using namespace Menu_Helpers;
 	MenuList& edit_items  = track_region_context_menu.items();
@@ -1591,7 +1510,7 @@ Editor::build_track_region_context_menu (jack_nframes_t frame)
 		Playlist* pl;
 		
 		if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()))) {
-			Playlist::RegionList* regions = pl->regions_at ((jack_nframes_t) floor ( (double)frame * ds->speed()));
+			Playlist::RegionList* regions = pl->regions_at ((nframes_t) floor ( (double)frame * ds->speed()));
 			for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
 				add_region_context_items (atv->audio_view(), (*i), edit_items);
 			}
@@ -1605,7 +1524,7 @@ Editor::build_track_region_context_menu (jack_nframes_t frame)
 }
 
 Menu*
-Editor::build_track_crossfade_context_menu (jack_nframes_t frame)
+Editor::build_track_crossfade_context_menu (nframes_t frame)
 {
 	using namespace Menu_Helpers;
 	MenuList& edit_items  = track_crossfade_context_menu.items();
@@ -1685,7 +1604,7 @@ Editor::analyze_range_selection()
 
 
 Menu*
-Editor::build_track_selection_context_menu (jack_nframes_t ignored)
+Editor::build_track_selection_context_menu (nframes_t ignored)
 {
 	using namespace Menu_Helpers;
 	MenuList& edit_items  = track_selection_context_menu.items();
@@ -2248,7 +2167,7 @@ Editor::get_state ()
 	XMLNode* node = new XMLNode ("Editor");
 	char buf[32];
 
-	_id.print (buf);
+	_id.print (buf, sizeof (buf));
 	node->add_property ("id", buf);
 	
 	if (is_realized()) {
@@ -2330,7 +2249,7 @@ Editor::trackview_by_y_position (double y)
 }
 
 void
-Editor::snap_to (jack_nframes_t& start, int32_t direction, bool for_mark)
+Editor::snap_to (nframes_t& start, int32_t direction, bool for_mark)
 {
 	Location* before = 0;
 	Location* after = 0;
@@ -2339,10 +2258,10 @@ Editor::snap_to (jack_nframes_t& start, int32_t direction, bool for_mark)
 		return;
 	}
 
-	const jack_nframes_t one_second = session->frame_rate();
-	const jack_nframes_t one_minute = session->frame_rate() * 60;
+	const nframes_t one_second = session->frame_rate();
+	const nframes_t one_minute = session->frame_rate() * 60;
 
-	jack_nframes_t presnap = start;
+	nframes_t presnap = start;
 
 	switch (snap_type) {
 	case SnapToFrame:
@@ -2350,16 +2269,16 @@ Editor::snap_to (jack_nframes_t& start, int32_t direction, bool for_mark)
 
 	case SnapToCDFrame:
 		if (direction) {
-			start = (jack_nframes_t) ceil ((double) start / (one_second / 75)) * (one_second / 75);
+			start = (nframes_t) ceil ((double) start / (one_second / 75)) * (one_second / 75);
 		} else {
-			start = (jack_nframes_t) floor ((double) start / (one_second / 75)) * (one_second / 75);
+			start = (nframes_t) floor ((double) start / (one_second / 75)) * (one_second / 75);
 		}
 		break;
 	case SnapToSMPTEFrame:
 		if (direction) {
-			start = (jack_nframes_t) (ceil ((double) start / session->frames_per_smpte_frame()) * session->frames_per_smpte_frame());
+			start = (nframes_t) (ceil ((double) start / session->frames_per_smpte_frame()) * session->frames_per_smpte_frame());
 		} else {
-			start = (jack_nframes_t) (floor ((double) start / session->frames_per_smpte_frame()) *  session->frames_per_smpte_frame());
+			start = (nframes_t) (floor ((double) start / session->frames_per_smpte_frame()) *  session->frames_per_smpte_frame());
 		}
 		break;
 
@@ -2371,9 +2290,9 @@ Editor::snap_to (jack_nframes_t& start, int32_t direction, bool for_mark)
 			start -= session->smpte_offset ();
 		}    
 		if (direction > 0) {
-			start = (jack_nframes_t) ceil ((double) start / one_second) * one_second;
+			start = (nframes_t) ceil ((double) start / one_second) * one_second;
 		} else {
-			start = (jack_nframes_t) floor ((double) start / one_second) * one_second;
+			start = (nframes_t) floor ((double) start / one_second) * one_second;
 		}
 		
 		if (session->smpte_offset_negative())
@@ -2392,9 +2311,9 @@ Editor::snap_to (jack_nframes_t& start, int32_t direction, bool for_mark)
 			start -= session->smpte_offset ();
 		}
 		if (direction) {
-			start = (jack_nframes_t) ceil ((double) start / one_minute) * one_minute;
+			start = (nframes_t) ceil ((double) start / one_minute) * one_minute;
 		} else {
-			start = (jack_nframes_t) floor ((double) start / one_minute) * one_minute;
+			start = (nframes_t) floor ((double) start / one_minute) * one_minute;
 		}
 		if (session->smpte_offset_negative())
 		{
@@ -2406,17 +2325,17 @@ Editor::snap_to (jack_nframes_t& start, int32_t direction, bool for_mark)
 		
 	case SnapToSeconds:
 		if (direction) {
-			start = (jack_nframes_t) ceil ((double) start / one_second) * one_second;
+			start = (nframes_t) ceil ((double) start / one_second) * one_second;
 		} else {
-			start = (jack_nframes_t) floor ((double) start / one_second) * one_second;
+			start = (nframes_t) floor ((double) start / one_second) * one_second;
 		}
 		break;
 		
 	case SnapToMinutes:
 		if (direction) {
-			start = (jack_nframes_t) ceil ((double) start / one_minute) * one_minute;
+			start = (nframes_t) ceil ((double) start / one_minute) * one_minute;
 		} else {
-			start = (jack_nframes_t) floor ((double) start / one_minute) * one_minute;
+			start = (nframes_t) floor ((double) start / one_minute) * one_minute;
 		}
 		break;
 
@@ -2497,7 +2416,7 @@ Editor::snap_to (jack_nframes_t& start, int32_t direction, bool for_mark)
 	case SnapToRegionSync:
 	case SnapToRegionBoundary:
 		if (!region_boundary_cache.empty()) {
-			vector<jack_nframes_t>::iterator i;
+			vector<nframes_t>::iterator i;
 
 			if (direction > 0) {
 				i = std::upper_bound (region_boundary_cache.begin(), region_boundary_cache.end(), start);
@@ -2549,22 +2468,22 @@ Editor::setup_toolbar ()
 
 	vector<ToggleButton *> mouse_mode_buttons;
 
-	mouse_move_button.add (*(manage (new Image (get_xpm("tool_object.xpm")))));
+	mouse_move_button.add (*(manage (new Image (::get_icon("tool_object")))));
 	mouse_move_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_move_button);
 	mouse_select_button.add (*(manage (new Image (get_xpm("tool_range.xpm")))));
 	mouse_select_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_select_button);
-	mouse_gain_button.add (*(manage (new Image (get_xpm("tool_gain.xpm")))));
+	mouse_gain_button.add (*(manage (new Image (::get_icon("tool_gain")))));
 	mouse_gain_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_gain_button);
-	mouse_zoom_button.add (*(manage (new Image (get_xpm("tool_zoom.xpm")))));
+	mouse_zoom_button.add (*(manage (new Image (::get_icon("tool_zoom")))));
 	mouse_zoom_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_zoom_button);
-	mouse_timefx_button.add (*(manage (new Image (get_xpm("tool_stretch.xpm")))));
+	mouse_timefx_button.add (*(manage (new Image (::get_icon("tool_stretch")))));
 	mouse_timefx_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_timefx_button);
-	mouse_audition_button.add (*(manage (new Image (get_xpm("tool_audition.xpm")))));
+	mouse_audition_button.add (*(manage (new Image (::get_icon("tool_audition")))));
 	mouse_audition_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_audition_button);
 	
@@ -2582,9 +2501,13 @@ Editor::setup_toolbar ()
 	mouse_mode_button_box.pack_start(mouse_audition_button, true, true);
 	mouse_mode_button_box.set_homogeneous(true);
 
+	vector<string> edit_mode_strings;
+	edit_mode_strings.push_back (edit_mode_to_string (Splice));
+	edit_mode_strings.push_back (edit_mode_to_string (Slide));
+
 	edit_mode_selector.set_name ("EditModeSelector");
-	Gtkmm2ext::set_size_request_to_display_given_text (edit_mode_selector, "Splice Edit", 2+FUDGE, 10);
-	set_popdown_strings (edit_mode_selector, internationalize (edit_mode_strings));
+	Gtkmm2ext::set_size_request_to_display_given_text (edit_mode_selector, longest (edit_mode_strings).c_str(), 2+FUDGE, 10);
+	set_popdown_strings (edit_mode_selector, edit_mode_strings);
 	edit_mode_selector.signal_changed().connect (mem_fun(*this, &Editor::edit_mode_selection_done));
 
 	mode_box->pack_start(edit_mode_selector);
@@ -2641,17 +2564,17 @@ Editor::setup_toolbar ()
 	zoom_box.set_border_width (2);
 
 	zoom_in_button.set_name ("EditorTimeButton");
-	zoom_in_button.add (*(manage (new Image (get_xpm("zoom_in.xpm")))));
+	zoom_in_button.add (*(manage (new Image (::get_icon("zoom_in")))));
 	zoom_in_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom_step), false));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_in_button, _("Zoom In"));
 	
 	zoom_out_button.set_name ("EditorTimeButton");
-	zoom_out_button.add (*(manage (new Image (get_xpm("zoom_out.xpm")))));
+	zoom_out_button.add (*(manage (new Image (::get_icon("zoom_out")))));
 	zoom_out_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom_step), true));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_button, _("Zoom Out"));
 
 	zoom_out_full_button.set_name ("EditorTimeButton");
-	zoom_out_full_button.add (*(manage (new Image (get_xpm("zoom_full.xpm")))));
+	zoom_out_full_button.add (*(manage (new Image (::get_icon("zoom_full")))));
 	zoom_out_full_button.signal_clicked().connect (mem_fun(*this, &Editor::temporal_zoom_session));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_full_button, _("Zoom to Session"));
 	
@@ -2666,6 +2589,7 @@ Editor::setup_toolbar ()
 	Gtkmm2ext::set_size_request_to_display_given_text (zoom_focus_selector, "Focus Center", 2+FUDGE, 0);
 	set_popdown_strings (zoom_focus_selector, internationalize (zoom_focus_strings));
 	zoom_focus_selector.signal_changed().connect (mem_fun(*this, &Editor::zoom_focus_selection_done));
+	ARDOUR_UI::instance()->tooltips().set_tip (zoom_focus_selector, _("Zoom focus"));
 
 	zoom_box.pack_start (zoom_focus_selector, false, false);
 
@@ -2942,7 +2866,7 @@ Editor::set_selected_control_point_from_click (bool press, Selection::Operation 
 	/* select this point and any others that it represents */
 
 	double y1, y2;
-	jack_nframes_t x1, x2;
+	nframes_t x1, x2;
 
 	x1 = pixel_to_frame (clicked_control_point->get_x() - 10);
 	x2 = pixel_to_frame (clicked_control_point->get_x() + 10);
@@ -3125,8 +3049,8 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 	} else if (op == Selection::Extend) {
 
 		list<Selectable*> results;
-		jack_nframes_t last_frame;
-		jack_nframes_t first_frame;
+		nframes_t last_frame;
+		nframes_t first_frame;
 
 		/* 1. find the last selected regionview in the track that was clicked in */
 
@@ -3522,7 +3446,7 @@ Editor::edit_mode_selection_done ()
 		mode = Slide;
 	}
 
-	session->set_edit_mode (mode);
+	Config->set_edit_mode (mode);
 }	
 
 void
@@ -3904,10 +3828,10 @@ Editor::playlist_selector () const
 	return *_playlist_selector;
 }
 
-jack_nframes_t
-Editor::get_nudge_distance (jack_nframes_t pos, jack_nframes_t& next)
+nframes_t
+Editor::get_nudge_distance (nframes_t pos, nframes_t& next)
 {
-	jack_nframes_t ret;
+	nframes_t ret;
 
 	ret = nudge_clock.current_duration (pos);
 	next = ret + 1; /* XXXX fix me */
@@ -3957,7 +3881,7 @@ Editor::playlist_deletion_dialog (Playlist* pl)
 }
 
 bool
-Editor::audio_region_selection_covers (jack_nframes_t where)
+Editor::audio_region_selection_covers (nframes_t where)
 {
 	for (RegionSelection::iterator a = selection->regions.begin(); a != selection->regions.end(); ++a) {
 		if ((*a)->region()->covers (where)) {
@@ -4147,133 +4071,5 @@ bool
 Editor::on_key_press_event (GdkEventKey* ev)
 {
 	return key_press_focus_accelerator_handler (*this, ev);
-}
-
-void
-Editor::update_smpte_mode ()
-{
-	ENSURE_GUI_THREAD(mem_fun(*this, &Editor::update_smpte_mode));
-
-	RefPtr<Action> act;
-
-	float frames = session->smpte_frames_per_second;
-	bool drop = session->smpte_drop_frames;
-
-	if ((frames < 23.976 * 1.0005) && !drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte23976"));
-	else if ((frames < 24 * 1.0005) && !drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte24"));
-	else if ((frames < 24.976 * 1.0005) && !drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte24976"));
-	else if ((frames < 25 * 1.0005) && !drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte25"));
-	else if ((frames < 29.97 * 1.0005) && !drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte2997"));
-	else if ((frames < 29.97 * 1.0005) && drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte2997drop"));
-	else if ((frames < 30 * 1.0005) && !drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte30"));
-	else if ((frames < 30 * 1.0005) && drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte30drop"));
-	else if ((frames < 59.94 * 1.0005) && !drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte5994"));
-	else if ((frames < 60 * 1.0005) && !drop)
-		act = ActionManager::get_action (X_("Editor"), X_("Smpte60"));
-	else
-		cerr << "Unexpected SMPTE value (" << frames << (drop ? "drop" : "") << ") in update_smpte_mode.  Menu is probably wrong\n" << endl;
-		
-
-	if (act) {
-		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-		if (ract && !ract->get_active()) {
-			ract->set_active (true);
-		}
-	}
-}
-
-void
-Editor::update_video_pullup ()
-{
-	ENSURE_GUI_THREAD (mem_fun(*this, &Editor::update_video_pullup));
-
-	RefPtr<Action> act;
-
-	float pullup = session->video_pullup;
-
-	if ( pullup < (-4.1667 - 0.1) * 0.99) {
-		act = ActionManager::get_action (X_("Editor"), X_("PullupMinus4Minus1"));
-	} else if ( pullup < (-4.1667) * 0.99 ) {
-		act = ActionManager::get_action (X_("Editor"), X_("PullupMinus4"));
-	} else if ( pullup < (-4.1667 + 0.1) * 0.99 ) {
-		act = ActionManager::get_action (X_("Editor"), X_("PullupMinus4Plus1"));
-	} else if ( pullup < (-0.1) * 0.99 ) {
-		act = ActionManager::get_action (X_("Editor"), X_("PullupMinus1"));
-	} else if (pullup > (4.1667 + 0.1) * 0.99 ) {
-		act = ActionManager::get_action (X_("Editor"), X_("PullupPlus4Plus1"));
-	} else if ( pullup > (4.1667) * 0.99 ) {
-		act = ActionManager::get_action (X_("Editor"), X_("PullupPlus4"));
-	} else if ( pullup > (4.1667 - 0.1) * 0.99) {
-		act = ActionManager::get_action (X_("Editor"), X_("PullupPlus4Minus1"));
-	} else if ( pullup > (0.1) * 0.99 ) {
-		act = ActionManager::get_action (X_("Editor"), X_("PullupPlus1"));
-	} else
-		act = ActionManager::get_action (X_("Editor"), X_("PullupNone"));
-
-
-	if (act) {
-		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-		if (ract && !ract->get_active()) {
-			ract->set_active (true);
-		}
-	}
-
-}
-
-
-void
-Editor::update_layering_model ()
-{
-	RefPtr<Action> act;
-
-	switch (session->get_layer_model()) {
-	case Session::LaterHigher:
-		act = ActionManager::get_action (X_("Editor"), X_("LayerLaterHigher"));
-		break;
-	case Session::MoveAddHigher:
-		act = ActionManager::get_action (X_("Editor"), X_("LayerMoveAddHigher"));
-		break;
-	case Session::AddHigher:
-		act = ActionManager::get_action (X_("Editor"), X_("LayerAddHigher"));
-		break;
-	}
-
-	if (act) {
-		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-		if (ract && !ract->get_active()) {
-			ract->set_active (true);
-		}
-	}
-}
-
-void
-Editor::update_crossfade_model ()
-{
-	RefPtr<Action> act;
-
-	switch (session->get_xfade_model()) {
-	case FullCrossfade:
-		act = ActionManager::get_action (X_("Editor"), X_("CrossfadesFull"));
-		break;
-	case ShortCrossfade:
-		act = ActionManager::get_action (X_("Editor"), X_("CrossfadesShort"));
-		break;
-	}
-
-	if (act) {
-		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-		if (ract && !ract->get_active()) {
-			ract->set_active (true);
-		}
-	}
 }
 

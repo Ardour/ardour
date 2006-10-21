@@ -29,7 +29,7 @@
 #include "i18n.h"
 
 Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, const string& annotation, 
-		Type type, jack_nframes_t frame, bool handle_events)
+		Type type, nframes_t frame, bool handle_events)
 
 	: editor (ed), _type(type)
 {
@@ -289,7 +289,7 @@ Marker::set_name (const string& name)
 }
 
 void
-Marker::set_position (jack_nframes_t frame)
+Marker::set_position (nframes_t frame)
 {
 	double new_unit_position = editor.frame_to_unit (frame);
 	new_unit_position -= shift;

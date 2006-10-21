@@ -159,8 +159,6 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 		gain_line->show ();
 	}
 
-	reset_width_dependent_items ((double) _region->length() / samples_per_unit);
-
 	gain_line->reset ();
 
 	set_height (trackview.height);
@@ -471,11 +469,11 @@ AudioRegionView::reset_fade_shapes ()
 void
 AudioRegionView::reset_fade_in_shape ()
 {
-	reset_fade_in_shape_width ((jack_nframes_t) audio_region()->fade_in().back()->when);
+	reset_fade_in_shape_width ((nframes_t) audio_region()->fade_in().back()->when);
 }
 	
 void
-AudioRegionView::reset_fade_in_shape_width (jack_nframes_t width)
+AudioRegionView::reset_fade_in_shape_width (nframes_t width)
 {
 	if (fade_in_handle == 0) {
 		return;
@@ -483,7 +481,7 @@ AudioRegionView::reset_fade_in_shape_width (jack_nframes_t width)
 
 	/* smallest size for a fade is 64 frames */
 
-	width = std::max ((jack_nframes_t) 64, width);
+	width = std::max ((nframes_t) 64, width);
 
 	Points* points;
 	double pwidth = width / samples_per_unit;
@@ -555,11 +553,11 @@ AudioRegionView::reset_fade_in_shape_width (jack_nframes_t width)
 void
 AudioRegionView::reset_fade_out_shape ()
 {
-	reset_fade_out_shape_width ((jack_nframes_t) audio_region()->fade_out().back()->when);
+	reset_fade_out_shape_width ((nframes_t) audio_region()->fade_out().back()->when);
 }
 
 void
-AudioRegionView::reset_fade_out_shape_width (jack_nframes_t width)
+AudioRegionView::reset_fade_out_shape_width (nframes_t width)
 {	
 	if (fade_out_handle == 0) {
 		return;
@@ -567,7 +565,7 @@ AudioRegionView::reset_fade_out_shape_width (jack_nframes_t width)
 
 	/* smallest size for a fade is 64 frames */
 
-	width = std::max ((jack_nframes_t) 64, width);
+	width = std::max ((nframes_t) 64, width);
 
 	Points* points;
 	double pwidth = width / samples_per_unit;
@@ -794,6 +792,9 @@ AudioRegionView::create_waves ()
 	}
 
 	if (create_zero_line) {
+		if (zero_line) {
+			delete zero_line;
+		}
 		zero_line = new ArdourCanvas::SimpleLine (*group);
 		zero_line->property_x1() = (gdouble) 1.0;
 		zero_line->property_x2() = (gdouble) (_region->length() / samples_per_unit) - 1.0;
@@ -906,7 +907,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 
 	item->w2i (x, y);
 
-	jack_nframes_t fx = trackview.editor.pixel_to_frame (x);
+	nframes_t fx = trackview.editor.pixel_to_frame (x);
 
 	if (fx > _region->length()) {
 		return;

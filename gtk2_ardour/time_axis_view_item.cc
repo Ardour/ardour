@@ -68,7 +68,7 @@ double TimeAxisViewItem::NAME_HIGHLIGHT_THRESH;
  * @param duration the duration of this item
  */
 TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color& base_color, 
-				   jack_nframes_t start, jack_nframes_t duration,
+				   nframes_t start, nframes_t duration,
 				   Visibility vis)
 	: trackview (tv)
 {
@@ -242,7 +242,7 @@ TimeAxisViewItem::~TimeAxisViewItem()
  * @return true if the position change was a success, false otherwise
  */
 bool
-TimeAxisViewItem::set_position(jack_nframes_t pos, void* src, double* delta)
+TimeAxisViewItem::set_position(nframes_t pos, void* src, double* delta)
 {
 	if (position_locked) {
 		return false;
@@ -282,7 +282,7 @@ TimeAxisViewItem::set_position(jack_nframes_t pos, void* src, double* delta)
  *
  * @return the position of this item
  */
-jack_nframes_t
+nframes_t
 TimeAxisViewItem::get_position() const
 {
 	return frame_position;
@@ -296,7 +296,7 @@ TimeAxisViewItem::get_position() const
  * @return true if the duration change was succesful, false otherwise
  */
 bool
-TimeAxisViewItem::set_duration (jack_nframes_t dur, void* src)
+TimeAxisViewItem::set_duration (nframes_t dur, void* src)
 {
 	if ((dur > max_item_duration) || (dur < min_item_duration)) {
 		warning << string_compose (_("new duration %1 frames is out of bounds for %2"), get_item_name(), dur)
@@ -310,9 +310,7 @@ TimeAxisViewItem::set_duration (jack_nframes_t dur, void* src)
 
 	item_duration = dur;
 	
-	double pixel_width = trackview.editor.frame_to_pixel (dur);
-
-	reset_width_dependent_items (pixel_width);
+	reset_width_dependent_items (trackview.editor.frame_to_pixel (dur));
 	
 	DurationChanged (dur, src) ; /* EMIT_SIGNAL */
 	return true;
@@ -322,7 +320,7 @@ TimeAxisViewItem::set_duration (jack_nframes_t dur, void* src)
  * Returns the duration of this item
  *
  */
-jack_nframes_t
+nframes_t
 TimeAxisViewItem::get_duration() const
 {
 	return (item_duration);
@@ -335,7 +333,7 @@ TimeAxisViewItem::get_duration() const
  * @param src the identity of the object that initiated the change
  */
 void
-TimeAxisViewItem::set_max_duration(jack_nframes_t dur, void* src)
+TimeAxisViewItem::set_max_duration(nframes_t dur, void* src)
 {
 	max_item_duration = dur ;
 	MaxDurationChanged(max_item_duration, src) ; /* EMIT_SIGNAL */
@@ -346,7 +344,7 @@ TimeAxisViewItem::set_max_duration(jack_nframes_t dur, void* src)
  *
  * @return the maximum duration that this item may be set to
  */
-jack_nframes_t
+nframes_t
 TimeAxisViewItem::get_max_duration() const
 {
 	return (max_item_duration) ;
@@ -359,7 +357,7 @@ TimeAxisViewItem::get_max_duration() const
  * @param src the identity of the object that initiated the change
  */
 void
-TimeAxisViewItem::set_min_duration(jack_nframes_t dur, void* src)
+TimeAxisViewItem::set_min_duration(nframes_t dur, void* src)
 {
 	min_item_duration = dur ;
 	MinDurationChanged(max_item_duration, src) ; /* EMIT_SIGNAL */
@@ -370,7 +368,7 @@ TimeAxisViewItem::set_min_duration(jack_nframes_t dur, void* src)
  *
  * @return the nimum duration that this item mey be set to
  */
-jack_nframes_t
+nframes_t
 TimeAxisViewItem::get_min_duration() const
 {
 	return(min_item_duration) ;
@@ -851,7 +849,7 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 				}
 			} else {
 				name_highlight->show();
-				if (name_text) {
+				if (name_text && !get_item_name().empty()) {
 					name_text->show();
 					reset_name_width (pixel_width);
 				}

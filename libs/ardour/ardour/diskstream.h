@@ -54,7 +54,7 @@ class Session;
 class Playlist;
 class IO;
 
- class Diskstream : public sigc::trackable, public PBD::StatefulDestructible
+ class Diskstream : public PBD::StatefulDestructible
 {	
   public:
 	enum Flag {
@@ -83,8 +83,8 @@ class IO;
 	void       set_align_style (AlignStyle);
 	void       set_persistent_align_style (AlignStyle a) { _persistent_alignment_style = a; }
 	
-	jack_nframes_t roll_delay() const { return _roll_delay; }
-	void           set_roll_delay (jack_nframes_t);
+	nframes_t roll_delay() const { return _roll_delay; }
+	void           set_roll_delay (nframes_t);
 
 	bool         record_enabled() const { return g_atomic_int_get (&_record_enabled); }
 	virtual void set_record_enabled (bool yn) = 0;
@@ -109,14 +109,14 @@ class IO;
 	virtual int use_new_playlist () = 0;
 	virtual int use_copy_playlist () = 0;
 
-	jack_nframes_t current_capture_start() const { return capture_start_frame; }
-	jack_nframes_t current_capture_end()   const { return capture_start_frame + capture_captured; }
-	jack_nframes_t get_capture_start_frame (uint32_t n=0);
-	jack_nframes_t get_captured_frames (uint32_t n=0);
+	nframes_t current_capture_start() const { return capture_start_frame; }
+	nframes_t current_capture_end()   const { return capture_start_frame + capture_captured; }
+	nframes_t get_capture_start_frame (uint32_t n=0);
+	nframes_t get_captured_frames (uint32_t n=0);
 	
 	ChanCount n_channels() { return _n_channels; }
 
-	static jack_nframes_t disk_io_frames() { return disk_io_chunk_frames; }
+	static nframes_t disk_io_frames() { return disk_io_chunk_frames; }
 	static void set_disk_io_chunk_frames (uint32_t n) { disk_io_chunk_frames = n; }
 
 	/* Stateful */
@@ -125,7 +125,7 @@ class IO;
 	
 	virtual void monitor_input (bool) {}
 
-	jack_nframes_t capture_offset() const { return _capture_offset; }
+	nframes_t capture_offset() const { return _capture_offset; }
 	virtual void   set_capture_offset ();
 
 	bool slaved() const      { return _slaved; }
@@ -146,7 +146,6 @@ class IO;
 
 	static sigc::signal<void>                DiskOverrun;
 	static sigc::signal<void>                DiskUnderrun;
-	static sigc::signal<void,std::list<boost::shared_ptr<Source> >*> DeleteSources;
 
   protected:
 	friend class Session;
@@ -157,9 +156,9 @@ class IO;
 
 	virtual void set_pending_overwrite (bool) = 0;
 	virtual int  overwrite_existing_buffers () = 0;
-	virtual void set_block_size (jack_nframes_t) = 0;
-	virtual int  internal_playback_seek (jack_nframes_t distance) = 0;
-	virtual int  can_internal_playback_seek (jack_nframes_t distance) = 0;
+	virtual void set_block_size (nframes_t) = 0;
+	virtual int  internal_playback_seek (nframes_t distance) = 0;
+	virtual int  can_internal_playback_seek (nframes_t distance) = 0;
 	virtual int  rename_write_sources () = 0;
 	virtual void reset_write_sources (bool, bool force = false) = 0;
 	virtual void non_realtime_input_change () = 0;
@@ -169,14 +168,14 @@ class IO;
 
   protected:
 	friend class Auditioner;
-	virtual int  seek (jack_nframes_t which_sample, bool complete_refill = false) = 0;
+	virtual int  seek (nframes_t which_sample, bool complete_refill = false) = 0;
 
   protected:
 	friend class Track;
 
 	virtual void prepare ();
-	virtual int  process (jack_nframes_t transport_frame, jack_nframes_t nframes, jack_nframes_t offset, bool can_record, bool rec_monitors_input) = 0;
-	virtual bool commit  (jack_nframes_t nframes) = 0;
+	virtual int  process (nframes_t transport_frame, nframes_t nframes, nframes_t offset, bool can_record, bool rec_monitors_input) = 0;
+	virtual bool commit  (nframes_t nframes) = 0;
 	virtual void recover (); /* called if commit will not be called, but process was */
 
 	//private:
@@ -188,7 +187,7 @@ class IO;
 	
 	struct CaptureTransition {
 		TransitionType   type;
-		jack_nframes_t   capture_val; ///< The start or end file frame position
+		nframes_t   capture_val; ///< The start or end file frame position
 	};
 
 	/* The two central butler operations */
@@ -227,12 +226,12 @@ class IO;
 	virtual int use_pending_capture_data (XMLNode& node) = 0;
 
 	virtual void get_input_sources () = 0;
-	virtual void check_record_status (jack_nframes_t transport_frame, jack_nframes_t nframes, bool can_record) = 0;
+	virtual void check_record_status (nframes_t transport_frame, nframes_t nframes, bool can_record) = 0;
 	virtual void set_align_style_from_io() {}
 	virtual void setup_destructive_playlist () {}
 	virtual void use_destructive_playlist () {}
 
-	static jack_nframes_t disk_io_chunk_frames;
+	static nframes_t disk_io_chunk_frames;
 	vector<CaptureInfo*>  capture_info;
 	Glib::Mutex           capture_info_lock;
 
@@ -252,34 +251,34 @@ class IO;
 	bool                     _seek_required;
 	
 	bool                      force_refill;
-	jack_nframes_t            capture_start_frame;
-	jack_nframes_t            capture_captured;
+	nframes_t            capture_start_frame;
+	nframes_t            capture_captured;
 	bool                      was_recording;
-	jack_nframes_t            adjust_capture_position;
-	jack_nframes_t           _capture_offset;
-	jack_nframes_t           _roll_delay;
-	jack_nframes_t            first_recordable_frame;
-	jack_nframes_t            last_recordable_frame;
+	nframes_t            adjust_capture_position;
+	nframes_t           _capture_offset;
+	nframes_t           _roll_delay;
+	nframes_t            first_recordable_frame;
+	nframes_t            last_recordable_frame;
 	int                       last_possibly_recording;
 	AlignStyle               _alignment_style;
 	bool                     _scrubbing;
 	bool                     _slaved;
 	bool                     _processed;
 	Location*                 loop_location;
-	jack_nframes_t            overwrite_frame;
+	nframes_t            overwrite_frame;
 	off_t                     overwrite_offset;
 	bool                      pending_overwrite;
 	bool                      overwrite_queued;
 	IOChange                  input_change_pending;
-	jack_nframes_t            wrap_buffer_size;
-	jack_nframes_t            speed_buffer_size;
+	nframes_t            wrap_buffer_size;
+	nframes_t            speed_buffer_size;
 
 	uint64_t                  last_phase;
 	uint64_t                  phi;
 	
-	jack_nframes_t            file_frame;		
-	jack_nframes_t            playback_sample;
-	jack_nframes_t            playback_distance;
+	nframes_t            file_frame;		
+	nframes_t            playback_sample;
+	nframes_t            playback_distance;
 
 	uint32_t                 _read_data_count;
 	uint32_t                 _write_data_count;
@@ -290,9 +289,9 @@ class IO;
 
 	Glib::Mutex  state_lock;
 
-	jack_nframes_t scrub_start;
-	jack_nframes_t scrub_buffer_size;
-	jack_nframes_t scrub_offset;
+	nframes_t scrub_start;
+	nframes_t scrub_buffer_size;
+	nframes_t scrub_offset;
 
 	sigc::connection ports_created_c;
 	sigc::connection plmod_connection;

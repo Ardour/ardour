@@ -96,7 +96,7 @@ class ControlPoint
 	ShapeType _shape;
 };
 
-class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
+class AutomationLine : public PBD::StatefulDestructible
 {
   public:
         AutomationLine (const string & name, TimeAxisView&, ArdourCanvas::Group&, ARDOUR::AutomationList&);
@@ -107,7 +107,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	void clear();
 
 	void set_selected_points (PointSelection&);
-	void get_selectables (jack_nframes_t& start, jack_nframes_t& end,
+	void get_selectables (nframes_t& start, nframes_t& end,
 			      double botfrac, double topfrac, 
 			      list<Selectable*>& results);
 	void get_inverted_selectables (Selection&, list<Selectable*>& results);
@@ -118,7 +118,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	/* dragging API */
 
 	virtual void start_drag (ControlPoint*, float fraction);
-	virtual void point_drag(ControlPoint&, jack_nframes_t x, float, bool with_push);
+	virtual void point_drag(ControlPoint&, nframes_t x, float, bool with_push);
 	virtual void end_drag (ControlPoint*);
 	virtual void line_drag(uint32_t i1, uint32_t i2, float, bool with_push);
 
@@ -224,13 +224,13 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	struct ModelRepresentation {
 	    ARDOUR::AutomationList::iterator start;
 	    ARDOUR::AutomationList::iterator end;
-	    jack_nframes_t xpos;
+	    nframes_t xpos;
 	    double ypos;
-	    jack_nframes_t xmin;
+	    nframes_t xmin;
 	    double ymin;
-	    jack_nframes_t xmax;
+	    nframes_t xmax;
 	    double ymax;
-	    jack_nframes_t xval;
+	    nframes_t xval;
 	    double yval;
 	};
 

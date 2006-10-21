@@ -1,14 +1,16 @@
 #ifndef __midi_types_h__
 #define __midi_types_h__
 
+#include <inttypes.h>
+
 namespace MIDI {
 
 	typedef char           channel_t;
 	typedef float          controller_value_t;
 	typedef unsigned char  byte;
 	typedef unsigned short pitchbend_t;
-	typedef unsigned int   timestamp_t;
-	typedef unsigned int   nframes_t;
+	typedef uint32_t       nframes_t;
+	typedef uint32_t       timestamp_t;
 
 	enum eventType {
 	    none = 0x0,

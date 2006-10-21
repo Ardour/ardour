@@ -38,7 +38,7 @@ using namespace PBD;
 Pool Session::Click::pool ("click", sizeof (Click), 128);
 
 void
-Session::click (jack_nframes_t start, jack_nframes_t nframes, jack_nframes_t offset)
+Session::click (nframes_t start, nframes_t nframes, nframes_t offset)
 {
 	TempoMap::BBTPointList *points;
 	Sample *buf;
@@ -90,8 +90,8 @@ Session::click (jack_nframes_t start, jack_nframes_t nframes, jack_nframes_t off
 
 	for (list<Click*>::iterator i = clicks.begin(); i != clicks.end(); ) {
 
-		jack_nframes_t copy;
-		jack_nframes_t internal_offset;
+		nframes_t copy;
+		nframes_t internal_offset;
 		Click *clk;
 		list<Click*>::iterator next;
 
@@ -145,17 +145,19 @@ Session::setup_click_sounds (int which)
 			click_data = 0;
 		}
 
-		if (click_sound.length() == 0) {
+		string path = Config->get_click_emphasis_sound();
+
+		if (path.empty()) {
 
 			click_data = const_cast<Sample*> (default_click);
 			click_length = default_click_length;
 
 		} else {
 
-			if ((sndfile = sf_open (click_sound.c_str(), SFM_READ, &info)) == 0) {
+			if ((sndfile = sf_open (path.c_str(), SFM_READ, &info)) == 0) {
 				char errbuf[256];
 				sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-				warning << string_compose (_("cannot open click soundfile %1 (%2)"), click_sound, errbuf) << endmsg;
+				warning << string_compose (_("cannot open click soundfile %1 (%2)"), path, errbuf) << endmsg;
 				_clicking = false;
 				return;
 			}
@@ -182,14 +184,16 @@ Session::setup_click_sounds (int which)
 			click_emphasis_data = 0;
 		}
 
-		if (click_emphasis_sound.length() == 0) {
+		string path = Config->get_click_emphasis_sound();
+
+		if (path.empty()) {
 			click_emphasis_data = const_cast<Sample*> (default_click_emphasis);
 			click_emphasis_length = default_click_emphasis_length;
 		} else {
-			if ((sndfile = sf_open (click_emphasis_sound.c_str(), SFM_READ, &info)) == 0) {
+			if ((sndfile = sf_open (path.c_str(), SFM_READ, &info)) == 0) {
 				char errbuf[256];
 				sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-				warning << string_compose (_("cannot open click emphasis soundfile %1 (%2)"), click_emphasis_sound, errbuf) << endmsg;
+				warning << string_compose (_("cannot open click emphasis soundfile %1 (%2)"), path, errbuf) << endmsg;
 				return;
 			}
 			
@@ -218,46 +222,3 @@ Session::clear_clicks ()
 
 	clicks.clear ();
 }
-
-void
-Session::set_click_sound (string path)
-{
-	if (path != click_sound) {
-		click_sound = path;
-		setup_click_sounds (1);
-	}
-}
-
-void
-Session::set_click_emphasis_sound (string path)
-{
-	if (path != click_emphasis_sound) {
-		click_emphasis_sound = path;
-		setup_click_sounds (-1);
-	}
-}
-
-void
-Session::set_clicking (bool yn)
-{
-	if (click_requested != yn) {
-		click_requested = yn;
-		
-		if (yn) {
-			if (_click_io && click_data) {
-				_clicking = true;
-			}
-		} else {
-			_clicking = false;
-		}
-
-		 ControlChanged (Clicking); /* EMIT SIGNAL */
-	}
-}
-
-bool
-Session::get_clicking () const
-{
-	return click_requested;
-}
-

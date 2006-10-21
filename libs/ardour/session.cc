@@ -72,6 +72,7 @@
 #include <ardour/data_type.h>
 #include <ardour/buffer_set.h>
 #include <ardour/source_factory.h>
+#include <ardour/region_factory.h>
 
 #ifdef HAVE_LIBLO
 #include <ardour/osc.h>
@@ -102,8 +103,6 @@ sigc::signal<int> Session::AskAboutPendingState;
 sigc::signal<void> Session::SendFeedback;
 
 sigc::signal<void> Session::SMPTEOffsetChanged;
-sigc::signal<void> Session::SMPTETypeChanged;
-sigc::signal<void> Session::PullupChanged;
 sigc::signal<void> Session::StartTimeChanged;
 sigc::signal<void> Session::EndTimeChanged;
 
@@ -287,9 +286,12 @@ Session::Session (AudioEngine &eng,
 
 	first_stage_init (fullpath, snapshot_name);
 	
-	if (create (new_session, mix_template, _engine.frame_rate() * 60 * 5)) {
-		cerr << "create failed\n";
-		throw failed_constructor ();
+	new_session = !g_file_test (_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
+	if (new_session) {
+		if (create (new_session, mix_template, _engine.frame_rate() * 60 * 5)) {
+			cerr << "create failed\n";
+			throw failed_constructor ();
+		}
 	}
 	
 	if (second_stage_init (new_session)) {
@@ -303,7 +305,7 @@ Session::Session (AudioEngine &eng,
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
 
-	Config->ParameterChanged.connect (mem_fun (*this, &Session::handle_configuration_change));
+	Config->ParameterChanged.connect (mem_fun (*this, &Session::config_changed));
 
 	if (was_dirty) {
 		DirtyChanged (); /* EMIT SIGNAL */
@@ -319,7 +321,7 @@ Session::Session (AudioEngine &eng,
 		  uint32_t master_out_channels,
 		  uint32_t requested_physical_in,
 		  uint32_t requested_physical_out,
-		  jack_nframes_t initial_length)
+		  nframes_t initial_length)
 
 	: _engine (eng),
 	  _scratch_buffers(new BufferSet()),
@@ -344,9 +346,12 @@ Session::Session (AudioEngine &eng,
 	n_physical_inputs = max (requested_physical_in, _engine.n_physical_inputs());
 
 	first_stage_init (fullpath, snapshot_name);
-	
-	if (create (new_session, 0, initial_length)) {
-		throw failed_constructor ();
+
+	new_session = !g_file_test (_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
+	if (new_session) {
+		if (create (new_session, 0, initial_length)) {
+			throw failed_constructor ();
+		}
 	}
 
 	if (control_out_channels) {
@@ -368,8 +373,8 @@ Session::Session (AudioEngine &eng,
 		output_ac = AutoConnectOption (output_ac & ~AutoConnectMaster);
 	}
 
-	input_auto_connect = input_ac;
-	output_auto_connect = output_ac;
+	Config->set_input_auto_connect (input_ac);
+	Config->set_output_auto_connect (output_ac);
 
 	if (second_stage_init (new_session)) {
 		throw failed_constructor ();
@@ -601,6 +606,8 @@ Session::when_engine_running ()
 	set_block_size (_engine.frames_per_cycle());
 	set_frame_rate (_engine.frame_rate());
 
+	Config->map_parameters (mem_fun (*this, &Session::config_changed));
+
 	/* every time we reconnect, recompute worst case output latencies */
 
 	_engine.Running.connect (mem_fun (*this, &Session::set_worst_io_latencies));
@@ -626,7 +633,7 @@ Session::when_engine_running ()
 			
 			if (_click_io->set_state (*child->children().front()) == 0) {
 				
-				_clicking = click_requested;
+				_clicking = Config->get_clicking ();
 
 			} else {
 
@@ -644,7 +651,7 @@ Session::when_engine_running ()
 				if (_click_io->add_output_port (first_physical_output, this)) {
 					// relax, even though its an error
 				} else {
-					_clicking = click_requested;
+					_clicking = Config->get_clicking ();
 				}
 			}
 		}
@@ -657,7 +664,7 @@ Session::when_engine_running ()
 	set_worst_io_latencies ();
 
 	if (_clicking) {
-		 ControlChanged (Clicking); /* EMIT SIGNAL */
+		// XXX HOW TO ALERT UI TO THIS ? DO WE NEED TO?
 	}
 
 	if (auditioner == 0) {
@@ -925,74 +932,10 @@ Session::record_enabling_legal () const
  	//	return false;
  	// }
 
-	if (all_safe) {
+	if (Config->get_all_safe()) {
 		return false;
 	}
 	return true;
-}
-
-void
-Session::set_auto_play (bool yn)
-{
-	if (auto_play != yn) {
-		auto_play = yn; 
-		set_dirty ();
-		ControlChanged (AutoPlay);
-	}
-}
-
-void
-Session::set_auto_return (bool yn)
-{
-	if (auto_return != yn) {
-		auto_return = yn; 
-		set_dirty ();
-		ControlChanged (AutoReturn);
-	}
-}
-
-void
-Session::set_crossfades_active (bool yn)
-{
-	if (crossfades_active != yn) {
-		crossfades_active = yn; 
-		set_dirty ();
-		ControlChanged (CrossFadesActive);
-	}
-}
-
-void
-Session::set_do_not_record_plugins (bool yn)
-{
-	if (do_not_record_plugins != yn) {
-		do_not_record_plugins = yn; 
-		set_dirty ();
-		ControlChanged (RecordingPlugins); 
-	}
-}
-
-void
-Session::set_auto_input (bool yn)
-{
-	if (auto_input != yn) {
-		auto_input = yn;
-		
-		if (Config->get_use_hardware_monitoring() && transport_rolling()) {
-			/* auto-input only makes a difference if we're rolling */
-			
-			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-
-			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-				if ((*i)->record_enabled ()) {
-					//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
-					(*i)->monitor_input (!auto_input);   
-				}
-			}
-		}
-
-		set_dirty();
-		ControlChanged (AutoInput);
-	}
 }
 
 void
@@ -1005,7 +948,7 @@ Session::reset_input_monitor_state ()
 		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if ((*i)->record_enabled ()) {
 				//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
-				(*i)->monitor_input (Config->get_use_hardware_monitoring() && !auto_input);
+				(*i)->monitor_input (Config->get_monitoring_model() == HardwareMonitoring && !Config->get_auto_input());
 			}
 		}
 	} else {
@@ -1013,36 +956,11 @@ Session::reset_input_monitor_state ()
 
 		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if ((*i)->record_enabled ()) {
-				//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
-				(*i)->monitor_input (Config->get_use_hardware_monitoring());
+				//cerr << "switching to input = " << !Config->get_auto_input() << __FILE__ << __LINE__ << endl << endl;
+				(*i)->monitor_input (Config->get_monitoring_model() == HardwareMonitoring);
 			}
 		}
 	}
-}
-
-
-void
-Session::set_input_auto_connect (bool yn)
-{
-	if (yn) {
-		input_auto_connect = AutoConnectOption (input_auto_connect|AutoConnectPhysical);
-	} else {
-		input_auto_connect = AutoConnectOption (input_auto_connect|~AutoConnectPhysical);
-	}
-	set_dirty ();
-}
-
-bool
-Session::get_input_auto_connect () const
-{
-	return (input_auto_connect & AutoConnectPhysical);
-}
-
-void
-Session::set_output_auto_connect (AutoConnectOption aco)
-{
-	output_auto_connect = aco;
-	set_dirty ();
 }
 
 void
@@ -1050,7 +968,7 @@ Session::auto_punch_start_changed (Location* location)
 {
 	replace_event (Event::PunchIn, location->start());
 
-	if (get_record_enabled() && get_punch_in()) {
+	if (get_record_enabled() && Config->get_punch_in()) {
 		/* capture start has been changed, so save new pending state */
 		save_state ("", true);
 	}
@@ -1059,7 +977,7 @@ Session::auto_punch_start_changed (Location* location)
 void
 Session::auto_punch_end_changed (Location* location)
 {
-	jack_nframes_t when_to_stop = location->end();
+	nframes_t when_to_stop = location->end();
 	// when_to_stop += _worst_output_latency + _worst_input_latency;
 	replace_event (Event::PunchOut, when_to_stop);
 }	
@@ -1067,7 +985,7 @@ Session::auto_punch_end_changed (Location* location)
 void
 Session::auto_punch_changed (Location* location)
 {
-	jack_nframes_t when_to_stop = location->end();
+	nframes_t when_to_stop = location->end();
 
 	replace_event (Event::PunchIn, location->start());
 	//when_to_stop += _worst_output_latency + _worst_input_latency;
@@ -1079,7 +997,7 @@ Session::auto_loop_changed (Location* location)
 {
 	replace_event (Event::AutoLoop, location->end(), location->start());
 
-	if (transport_rolling() && get_auto_loop()) {
+	if (transport_rolling() && play_loop) {
 
 		//if (_transport_frame < location->start() || _transport_frame > location->end()) {
 
@@ -1090,7 +1008,7 @@ Session::auto_loop_changed (Location* location)
 			request_locate (location->start(), true);
 
 		}
-		else if (seamless_loop && !loop_changing) {
+		else if (Config->get_seamless_loop() && !loop_changing) {
 			
 			// schedule a locate-roll to refill the diskstreams at the
 			// previous loop end
@@ -1145,48 +1063,6 @@ Session::set_auto_punch_location (Location* location)
 
 	location->set_auto_punch (true, this);
 	auto_punch_location_changed (location);
-}
-
-void
-Session::set_punch_in (bool yn)
-{
-	if (punch_in == yn) {
-		return;
-	}
-
-	Location* location;
-
-	if ((location = _locations.auto_punch_location()) != 0) {
-		if ((punch_in = yn) == true) {
-			replace_event (Event::PunchIn, location->start());
-		} else {
-			remove_event (location->start(), Event::PunchIn);
-		}
-	}
-
-	set_dirty();
-	ControlChanged (PunchIn); /* EMIT SIGNAL */
-}
-
-void
-Session::set_punch_out (bool yn)
-{
-	if (punch_out == yn) {
-		return;
-	}
-
-	Location* location;
-
-	if ((location = _locations.auto_punch_location()) != 0) {
-		if ((punch_out = yn) == true) {
-			replace_event (Event::PunchOut, location->end());
-		} else {
-			clear_events (Event::PunchOut);
-		}
-	}
-
-	set_dirty();
-	ControlChanged (PunchOut); /* EMIT SIGNAL */
 }
 
 void
@@ -1282,7 +1158,7 @@ Session::enable_record ()
 		_last_record_location = _transport_frame;
 		deliver_mmc(MIDI::MachineControl::cmdRecordStrobe, _last_record_location);
 
-		if (Config->get_use_hardware_monitoring() && auto_input) {
+		if (Config->get_monitoring_model() == HardwareMonitoring && Config->get_auto_input()) {
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if ((*i)->record_enabled ()) {
@@ -1316,7 +1192,7 @@ Session::disable_record (bool rt_context, bool force)
 		if (rt_context)
 			deliver_mmc (MIDI::MachineControl::cmdRecordExit, _transport_frame);
 
-		if (Config->get_use_hardware_monitoring() && auto_input) {
+		if (Config->get_monitoring_model() == HardwareMonitoring && Config->get_auto_input()) {
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 			
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
@@ -1339,11 +1215,11 @@ Session::step_back_from_record ()
 {
 	g_atomic_int_set (&_record_status, Enabled);
 
-	if (Config->get_use_hardware_monitoring()) {
+	if (Config->get_monitoring_model() == HardwareMonitoring) {
 		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 		
 		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-		        if (auto_input && (*i)->record_enabled ()) {
+		        if (Config->get_auto_input() && (*i)->record_enabled ()) {
 			        //cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
 		                (*i)->monitor_input (false);   
 			}
@@ -1356,14 +1232,14 @@ Session::maybe_enable_record ()
 {
 	g_atomic_int_set (&_record_status, Enabled);
 
-	/* XXX this save should really happen in another thread. its needed so that
-	   pending capture state can be recovered if we crash.
+	/* this function is currently called from somewhere other than an RT thread.
+	   this save_state() call therefore doesn't impact anything.
 	*/
 
 	save_state ("", true);
 
 	if (_transport_speed) {
-		if (!punch_in) {
+		if (!Config->get_punch_in()) {
 			enable_record ();
 		} 
 	} else {
@@ -1374,12 +1250,12 @@ Session::maybe_enable_record ()
 	set_dirty();
 }
 
-jack_nframes_t
+nframes_t
 Session::audible_frame () const
 {
-	jack_nframes_t ret;
-	jack_nframes_t offset;
-	jack_nframes_t tf;
+	nframes_t ret;
+	nframes_t offset;
+	nframes_t tf;
 
 	/* the first of these two possible settings for "offset"
 	   mean that the audible frame is stationary until 
@@ -1433,9 +1309,9 @@ Session::audible_frame () const
 }
 
 void
-Session::set_frame_rate (jack_nframes_t frames_per_second)
+Session::set_frame_rate (nframes_t frames_per_second)
 {
-	/** \fn void Session::set_frame_size(jack_nframes_t)
+	/** \fn void Session::set_frame_size(nframes_t)
 		the AudioEngine object that calls this guarantees 
 		that it will not be called while we are also in
 		::process(). Its fine to do things that block
@@ -1446,8 +1322,6 @@ Session::set_frame_rate (jack_nframes_t frames_per_second)
 
 	sync_time_vars();
 
-	Route::set_automation_interval ((jack_nframes_t) ceil ((double) frames_per_second * 0.25));
-
 	// XXX we need some equivalent to this, somehow
 	// DestructiveFileSource::setup_standard_crossfades (frames_per_second);
 
@@ -1457,7 +1331,7 @@ Session::set_frame_rate (jack_nframes_t frames_per_second)
 }
 
 void
-Session::set_block_size (jack_nframes_t nframes)
+Session::set_block_size (nframes_t nframes)
 {
 	/* the AudioEngine guarantees 
 	   that it will not be called while we are also in
@@ -1497,7 +1371,7 @@ void
 Session::set_default_fade (float steepness, float fade_msecs)
 {
 #if 0
-	jack_nframes_t fade_frames;
+	nframes_t fade_frames;
 	
 	/* Don't allow fade of less 1 frame */
 	
@@ -1508,7 +1382,7 @@ Session::set_default_fade (float steepness, float fade_msecs)
 
 	} else {
 		
-		fade_frames = (jack_nframes_t) floor (fade_msecs * _current_frame_rate * 0.001);
+		fade_frames = (nframes_t) floor (fade_msecs * _current_frame_rate * 0.001);
 		
 	}
 
@@ -1799,13 +1673,13 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			
 		} while (track_id < (UINT_MAX-1));
 
-		if (input_auto_connect & AutoConnectPhysical) {
+		if (Config->get_input_auto_connect() & AutoConnectPhysical) {
 			nphysical_in = min (n_physical_inputs, (uint32_t) physinputs.size());
 		} else {
 			nphysical_in = 0;
 		}
 		
-		if (output_auto_connect & AutoConnectPhysical) {
+		if (Config->get_output_auto_connect() & AutoConnectPhysical) {
 			nphysical_out = min (n_physical_outputs, (uint32_t) physinputs.size());
 		} else {
 			nphysical_out = 0;
@@ -1825,7 +1699,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 					
 					port = "";
 					
-					if (input_auto_connect & AutoConnectPhysical) {
+					if (Config->get_input_auto_connect() & AutoConnectPhysical) {
 						port = physinputs[(channels_used+x)%nphysical_in];
 					} 
 					
@@ -1839,9 +1713,9 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 				
 				port = "";
 				
-				if (nphysical_out && (output_auto_connect & AutoConnectPhysical)) {
+				if (nphysical_out && (Config->get_output_auto_connect() & AutoConnectPhysical)) {
 					port = physoutputs[(channels_used+x)%nphysical_out];
-				} else if (output_auto_connect & AutoConnectMaster) {
+				} else if (Config->get_output_auto_connect() & AutoConnectMaster) {
 					if (_master_out) {
 						port = _master_out->input (x%_master_out->n_inputs().get(DataType::AUDIO))->name();
 					}
@@ -1945,7 +1819,7 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 				
 				port = "";
 				
-				if (input_auto_connect & AutoConnectPhysical) {
+				if (Config->get_input_auto_connect() & AutoConnectPhysical) {
 					port = physinputs[((n+x)%n_physical_inputs)];
 				} 
 				
@@ -1958,9 +1832,9 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 				
 				port = "";
 				
-				if (output_auto_connect & AutoConnectPhysical) {
+				if (Config->get_output_auto_connect() & AutoConnectPhysical) {
 					port = physoutputs[((n+x)%n_physical_outputs)];
-				} else if (output_auto_connect & AutoConnectMaster) {
+				} else if (Config->get_output_auto_connect() & AutoConnectMaster) {
 					if (_master_out) {
 						port = _master_out->input (x%_master_out->n_inputs().get(DataType::AUDIO))->name();
 					}
@@ -2014,7 +1888,10 @@ Session::add_routes (RouteList& new_routes, bool save)
 	}
 
 	for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
-		(*x)->solo_changed.connect (sigc::bind (mem_fun (*this, &Session::route_solo_changed), (*x)));
+		
+		boost::weak_ptr<Route> wpr (*x);
+
+		(*x)->solo_changed.connect (sigc::bind (mem_fun (*this, &Session::route_solo_changed), wpr));
 		(*x)->mute_changed.connect (mem_fun (*this, &Session::route_mute_changed));
 		(*x)->output_changed.connect (mem_fun (*this, &Session::set_worst_io_latencies_x));
 		(*x)->redirects_changed.connect (mem_fun (*this, &Session::update_latency_compensation_proxy));
@@ -2072,11 +1949,11 @@ Session::remove_route (shared_ptr<Route> route)
 		*/
 
 		if (route == _master_out) {
-			_master_out = shared_ptr<Route> ((Route*) 0);
+			_master_out = shared_ptr<Route> ();
 		}
 
 		if (route == _control_out) {
-			_control_out = shared_ptr<Route> ((Route*) 0);
+			_control_out = shared_ptr<Route> ();
 
 			/* cancel control outs for all routes */
 
@@ -2112,14 +1989,26 @@ Session::remove_route (shared_ptr<Route> route)
 	
 	update_latency_compensation (false, false);
 	set_dirty();
-	
-	/* XXX should we disconnect from the Route's signals ? */
 
-	save_state (_current_snapshot_name);
+	// We need to disconnect the routes inputs and outputs 
+	route->disconnect_inputs(NULL);
+	route->disconnect_outputs(NULL);
+	
+	/* get rid of it from the dead wood collection in the route list manager */
+
+	/* XXX i think this is unsafe as it currently stands, but i am not sure. (pd, october 2nd, 2006) */
+
+	routes.flush ();
 
 	/* try to cause everyone to drop their references */
 
 	route->drop_references ();
+
+	/* save the new state of the world */
+
+	if (save_state (_current_snapshot_name)) {
+		save_history (_current_snapshot_name);
+	}
 }	
 
 void
@@ -2129,7 +2018,7 @@ Session::route_mute_changed (void* src)
 }
 
 void
-Session::route_solo_changed (void* src, shared_ptr<Route> route)
+Session::route_solo_changed (void* src, boost::weak_ptr<Route> wpr)
 {      
 	if (solo_update_disabled) {
 		// We know already
@@ -2137,8 +2026,15 @@ Session::route_solo_changed (void* src, shared_ptr<Route> route)
 	}
 	
 	bool is_track;
-	
-	is_track = (dynamic_cast<Track*>(route.get()) != 0);
+	boost::shared_ptr<Route> route = wpr.lock ();
+
+	if (!route) {
+		/* should not happen */
+		error << string_compose (_("programming error: %1"), X_("invalid route weak ptr passed to route_solo_changed")) << endmsg;
+		return;
+	}
+
+	is_track = (boost::dynamic_pointer_cast<AudioTrack>(route) != 0);
 	
 	shared_ptr<RouteList> r = routes.reader ();
 
@@ -2174,7 +2070,7 @@ Session::route_solo_changed (void* src, shared_ptr<Route> route)
 				   then leave it as it is.
 				*/
 				
-				if (_solo_latched) {
+				if (Config->get_solo_latched()) {
 					continue;
 				} 
 			}
@@ -2221,16 +2117,6 @@ Session::route_solo_changed (void* src, shared_ptr<Route> route)
 	}
 
 	set_dirty();
-}
-
-void
-Session::set_solo_latched (bool yn)
-{
-	if (yn != _solo_latched) {
-		_solo_latched = yn;
-		set_dirty ();
-		ControlChanged (SoloLatch);
-	}
 }
 
 void
@@ -2392,7 +2278,7 @@ Session::find_current_end ()
 		return;
 	}
 
-	jack_nframes_t max = get_maximum_extent ();
+	nframes_t max = get_maximum_extent ();
 
 	if (max > end_location->end()) {
 		end_location->set_end (max);
@@ -2401,11 +2287,11 @@ Session::find_current_end ()
 	}
 }
 
-jack_nframes_t
+nframes_t
 Session::get_maximum_extent () const
 {
-	jack_nframes_t max = 0;
-	jack_nframes_t me; 
+	nframes_t max = 0;
+	nframes_t me; 
 
 	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
@@ -2615,15 +2501,21 @@ Session::add_region (boost::shared_ptr<Region> region)
 	set_dirty();
 	
 	if (added) {
-		region->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_region), region));
-		region->StateChanged.connect (sigc::bind (mem_fun (*this, &Session::region_changed), region));
+		region->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_region), boost::weak_ptr<Region>(region)));
+		region->StateChanged.connect (sigc::bind (mem_fun (*this, &Session::region_changed), boost::weak_ptr<Region>(region)));
 		RegionAdded (region); /* EMIT SIGNAL */
 	}
 }
 
 void
-Session::region_changed (Change what_changed, boost::shared_ptr<Region> region)
+Session::region_changed (Change what_changed, boost::weak_ptr<Region> weak_region)
 {
+	boost::shared_ptr<Region> region (weak_region.lock ());
+
+	if (!region) {
+		return;
+	}
+
 	if (what_changed & Region::HiddenChanged) {
 		/* relay hidden changes */
 		RegionHiddenChange (region);
@@ -2631,17 +2523,17 @@ Session::region_changed (Change what_changed, boost::shared_ptr<Region> region)
 }
 
 void
-Session::region_renamed (boost::shared_ptr<Region> region)
-{
-	add_region (region);
-}
-
-void
-Session::remove_region (boost::shared_ptr<Region> region)
+Session::remove_region (boost::weak_ptr<Region> weak_region)
 {
 	RegionList::iterator i;
+	boost::shared_ptr<Region> region (weak_region.lock ());
+
+	if (!region) {
+		return;
+	}
+
 	bool removed = false;
-	
+
 	{ 
 		Glib::Mutex::Lock lm (region_lock);
 
@@ -2682,7 +2574,7 @@ Session::find_whole_file_parent (Region& child)
 		}
 	} 
 
-	return boost::shared_ptr<AudioRegion> ((AudioRegion*) 0);
+	return boost::shared_ptr<AudioRegion> ();
 }	
 
 void
@@ -2795,9 +2687,11 @@ Session::remove_source (boost::weak_ptr<Source> src)
 	boost::shared_ptr<Source> source = src.lock();
 
 	if (!source) {
-		cerr << "removing a source DEAD\n";
-	} else {
-		cerr << "removing a source " << source->name () << endl;
+		return;
+	} 
+
+	{ 
+		Glib::Mutex::Lock lm (source_lock);
 		
 		{ 
 			Glib::Mutex::Lock lm (source_lock);
@@ -2806,18 +2700,18 @@ Session::remove_source (boost::weak_ptr<Source> src)
 				sources.erase (i);
 			} 
 		}
-		
-		if (!_state_of_the_state & InCleanup) {
-			
-			/* save state so we don't end up with a session file
-			   referring to non-existent sources.
-			*/
-			
-			save_state (_current_snapshot_name);
-		}
-		
-		SourceRemoved(source); /* EMIT SIGNAL */
 	}
+	
+	if (!_state_of_the_state & InCleanup) {
+		
+		/* save state so we don't end up with a session file
+		   referring to non-existent sources.
+		*/
+		
+		save_state (_current_snapshot_name);
+	}
+	
+	SourceRemoved(source); /* EMIT SIGNAL */
 }
 
 boost::shared_ptr<Source>
@@ -3613,16 +3507,28 @@ Session::remove_redirect (Redirect* redirect)
 	set_dirty();
 }
 
-jack_nframes_t
+nframes_t
 Session::available_capture_duration ()
 {
-	const double scale = 4096.0 / sizeof (Sample);
+	float sample_bytes_on_disk;
+
+	switch (Config->get_native_file_data_format()) {
+	case FormatFloat:
+		sample_bytes_on_disk = 4;
+		break;
+
+	case FormatInt24:
+		sample_bytes_on_disk = 3;
+		break;
+	}
+
+	double scale = 4096.0 / sample_bytes_on_disk;
 
 	if (_total_free_4k_blocks * scale > (double) max_frames) {
 		return max_frames;
 	}
 	
-	return (jack_nframes_t) floor (_total_free_4k_blocks * scale);
+	return (nframes_t) floor (_total_free_4k_blocks * scale);
 }
 
 void
@@ -3672,23 +3578,6 @@ Session::connection_by_name (string name) const
 	}
 
 	return 0;
-}
-
-void
-Session::set_edit_mode (EditMode mode)
-{
-	_edit_mode = mode;
-	
-	{ 
-		Glib::Mutex::Lock lm (playlist_lock);
-		
-		for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i) {
-			(*i)->set_edit_mode (mode);
-		}
-	}
-
-	set_dirty ();
-	ControlChanged (EditingMode); /* EMIT SIGNAL */
 }
 
 void
@@ -3816,17 +3705,7 @@ Session::n_playlists () const
 }
 
 void
-Session::set_solo_model (SoloModel sm)
-{
-	if (sm != _solo_model) {
-		_solo_model = sm;
-		ControlChanged (SoloingModel);
-		set_dirty ();
-	}
-}
-
-void
-Session::allocate_pan_automation_buffers (jack_nframes_t nframes, uint32_t howmany, bool force)
+Session::allocate_pan_automation_buffers (nframes_t nframes, uint32_t howmany, bool force)
 {
 	if (!force && howmany <= _npan_buffers) {
 		return;
@@ -3871,7 +3750,7 @@ Session::freeze (InterThreadInfo& itt)
 }
 
 int
-Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nframes_t len, 	
+Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t len, 	
 			       bool overwrite, vector<boost::shared_ptr<Source> >& srcs, InterThreadInfo& itt)
 {
 	boost::shared_ptr<AudioFileSource> fsource;
@@ -3888,7 +3767,7 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 	BufferSet        buffers;
 
 	// any bigger than this seems to cause stack overflows in called functions
-	const jack_nframes_t chunk_size = (128 * 1024)/4;
+	const nframes_t chunk_size = (128 * 1024)/4;
 
 	g_atomic_int_set (&processing_prohibited, 1);
 	
@@ -3939,7 +3818,7 @@ Session::write_one_audio_track (AudioTrack& track, jack_nframes_t start, jack_nf
 	to_do = len;
 
 	/* create a set of reasonably-sized buffers */
-buffers.ensure_buffers(nchans, chunk_size);
+	buffers.ensure_buffers(nchans, chunk_size);
 	buffers.set_count(nchans);
 
 	while (to_do && !itt.cancel) {
@@ -3991,7 +3870,12 @@ buffers.ensure_buffers(nchans, chunk_size);
 				afs->build_peaks ();
 			}
 		}
-		
+
+		/* construct a region to represent the bounced material */
+
+		boost::shared_ptr<Region> aregion = RegionFactory::create (srcs, 0, srcs.front()->length(), 
+									   region_name_from_path (srcs.front()->name()));
+
 		ret = 0;
 	}
 		
@@ -4074,36 +3958,6 @@ Session::nbusses () const
 	}
 
 	return n;
-}
-
-void
-Session::set_layer_model (LayerModel lm)
-{
-	if (lm != layer_model) {
-		layer_model = lm;
-		set_dirty ();
-		ControlChanged (LayeringModel);
-	}
-}
-
-void
-Session::set_xfade_model (CrossfadeModel xm)
-{
-	if (xm != xfade_model) {
-		xfade_model = xm;
-		set_dirty ();
-		ControlChanged (CrossfadingModel);
-	}
-}
-
-void
-Session::handle_configuration_change (const char* parameter)
-{
-	if (!strcmp (parameter, "use-video-sync")) {
-		if (_transport_speed == 0.0f) {
-			waiting_for_sync_offset = true;
-		}
-	}
 }
 
 void

@@ -62,8 +62,8 @@ ImageFrameView::ImageFrameView(const string & item_id,
 	ImageFrameTimeAxisGroup* item_group,
 	double spu,
        Gdk::Color& basic_color,
-	jack_nframes_t start,
-	jack_nframes_t duration,
+	nframes_t start,
+	nframes_t duration,
 	unsigned char* rgb_data,
 	uint32_t width,
 	uint32_t height,
@@ -172,9 +172,9 @@ delete imageframe;
  * @return true if the position change was a success, false otherwise
  */
 bool
-ImageFrameView::set_position(jack_nframes_t pos, void* src, double* delta)
+ImageFrameView::set_position(nframes_t pos, void* src, double* delta)
 {
-	jack_nframes_t old_pos = frame_position ;
+	nframes_t old_pos = frame_position ;
 	
 	// do the standard stuff
 	bool ret = TimeAxisViewItem::set_position(pos, src, delta) ;
@@ -186,7 +186,7 @@ ImageFrameView::set_position(jack_nframes_t pos, void* src, double* delta)
 		{
 			// calculate the offset of the marker
 			MarkerView* mv = (MarkerView*)*i ;
-			jack_nframes_t marker_old_pos = mv->get_position() ;
+			nframes_t marker_old_pos = mv->get_position() ;
 			
 			mv->set_position(pos + (marker_old_pos - old_pos), src) ;
 		}
@@ -203,7 +203,7 @@ ImageFrameView::set_position(jack_nframes_t pos, void* src, double* delta)
  * @return true if the duration change was succesful, false otherwise
  */
 bool
-ImageFrameView::set_duration(jack_nframes_t dur, void* src)
+ImageFrameView::set_duration(nframes_t dur, void* src)
 {
 	/* do the standard stuff */
 	bool ret = TimeAxisViewItem::set_duration(dur, src) ;

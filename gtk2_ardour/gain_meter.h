@@ -172,7 +172,7 @@ class GainMeter : public Gtk::VBox
 	bool wait_for_release;
 	ARDOUR::MeterPoint old_meter_point;
 
-	void meter_hold_changed();
+	void parameter_changed (const char*);
 
 	void reset_peak_display ();
 	void reset_group_peak_display (ARDOUR::RouteGroup*);

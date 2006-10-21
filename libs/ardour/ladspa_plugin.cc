@@ -18,6 +18,9 @@
     $Id$
 */
 
+#define __STDC_FORMAT_MACROS 1
+#include <inttypes.h>
+
 #include <vector>
 #include <string>
 
@@ -52,7 +55,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-LadspaPlugin::LadspaPlugin (void *mod, AudioEngine& e, Session& session, uint32_t index, jack_nframes_t rate)
+LadspaPlugin::LadspaPlugin (void *mod, AudioEngine& e, Session& session, uint32_t index, nframes_t rate)
 	: Plugin (e, session)
 {
 	init (mod, index, rate);
@@ -70,7 +73,7 @@ LadspaPlugin::LadspaPlugin (const LadspaPlugin &other)
 }
 
 void
-LadspaPlugin::init (void *mod, uint32_t index, jack_nframes_t rate)
+LadspaPlugin::init (void *mod, uint32_t index, nframes_t rate)
 {
 	LADSPA_Descriptor_Function dfunc;
 	uint32_t i, port_cnt;
@@ -490,11 +493,11 @@ LadspaPlugin::describe_parameter (uint32_t which)
 	}
 }
 
-jack_nframes_t
+ARDOUR::nframes_t
 LadspaPlugin::latency () const
 {
 	if (latency_control_port) {
-		return (jack_nframes_t) floor (*latency_control_port);
+		return (nframes_t) floor (*latency_control_port);
 	} else {
 		return 0;
 	}
@@ -517,7 +520,7 @@ LadspaPlugin::automatable () const
 }
 
 int
-LadspaPlugin::connect_and_run (BufferSet& bufs, uint32_t& in_index, uint32_t& out_index, jack_nframes_t nframes, jack_nframes_t offset)
+LadspaPlugin::connect_and_run (BufferSet& bufs, uint32_t& in_index, uint32_t& out_index, nframes_t nframes, nframes_t offset)
 {
 	uint32_t port_index = 0;
 	cycles_t then, now;
@@ -591,7 +594,7 @@ LadspaPlugin::print_parameter (uint32_t param, char *buf, uint32_t len) const
 }
 
 void
-LadspaPlugin::run (jack_nframes_t nframes)
+LadspaPlugin::run (nframes_t nframes)
 {
 	for (uint32_t i = 0; i < parameter_count(); ++i) {
 		if (LADSPA_IS_PORT_INPUT(port_descriptor (i)) && LADSPA_IS_PORT_CONTROL(port_descriptor (i))) {
@@ -617,7 +620,7 @@ LadspaPlugin::latency_compute_run ()
 	uint32_t port_index = 0;
 	uint32_t in_index = 0;
 	uint32_t out_index = 0;
-	const jack_nframes_t bufsize = 1024;
+	const nframes_t bufsize = 1024;
 	LADSPA_Data buffer[bufsize];
 
 	memset(buffer,0,sizeof(LADSPA_Data)*bufsize);

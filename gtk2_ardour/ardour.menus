@@ -239,11 +239,12 @@
                </menu>
                <separator/>
                <menu action='Autoconnect'>
-                   <menuitem action='AutoConnectNewTrackInputsToHardware'/>
+                   <menuitem action='InputAutoConnectPhysical'/>
+                   <menuitem action='InputAutoConnectManual'/>
     	           <separator/>
-                   <menuitem action='AutoConnectNewTrackOutputsToHardware'/>
-                   <menuitem action='AutoConnectNewTrackOutputsToMaster'/>
-                   <menuitem action='ManuallyConnectNewTrackOutputs'/>
+                   <menuitem action='OutputAutoConnectPhysical'/>
+                   <menuitem action='OutputAutoConnectMaster'/>
+                   <menuitem action='OutputAutoConnectManual'/>
                </menu>
 	       <menu action='ControlSurfaces'/>
                <menu action='Monitoring'>
@@ -277,7 +278,6 @@
 		   <menuitem action='toggle-xfades-active'/>
 		   <menuitem action='toggle-xfades-visible'/>
 		   <menuitem action='toggle-auto-xfades'/>
-                   <menuitem action='UnmuteNewFullCrossfades'/>
 		   <separator/>
 		   <menuitem action='CrossfadesFull'/>
 		   <menuitem action='CrossfadesShort'/>
@@ -291,8 +291,6 @@
                <menuitem action='SendMTC'/>
                <menuitem action='SendMMC'/>
                <menuitem action='UseMMC'/>
-               <menuitem action='SendMIDIfeedback'/>
-               <menuitem action='UseMIDIcontrol'/>
                <separator/>
                <menuitem action='StopPluginsWithTransport'/>
                <menuitem action='DoNotRunPluginsWhileRecording'/>

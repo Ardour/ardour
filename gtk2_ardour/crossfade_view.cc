@@ -108,8 +108,8 @@ CrossfadeView::reset_width_dependent_items (double pixel_width)
 void
 CrossfadeView::set_height (double height)
 {
-	if (height == TimeAxisView::Smaller ||
-		height == TimeAxisView::Small)
+	if (height == TimeAxisView::hSmaller ||
+	    height == TimeAxisView::hSmall)
 		TimeAxisViewItem::set_height (height - 3 );
 	else
 		TimeAxisViewItem::set_height (height - NAME_HIGHLIGHT_SIZE - 3 );
@@ -149,14 +149,12 @@ CrossfadeView::redraw_curves ()
 	 At "height - 3.0" the bottom of the crossfade touches the name highlight or the bottom of the track (if the
 	 track is either Small or Smaller.
 	 */
-	switch(get_time_axis_view().height) {
-		case TimeAxisView::Smaller:
-		case TimeAxisView::Small:
-			h = get_time_axis_view().height - 3.0;
-			break;
-
-		default:
-			h = get_time_axis_view().height - NAME_HIGHLIGHT_SIZE - 3.0;
+	double tav_height = get_time_axis_view().height;
+	if (tav_height == TimeAxisView::hSmaller ||
+	    tav_height == TimeAxisView::hSmall) {
+		h = tav_height - 3.0;
+	} else {
+		h = tav_height - NAME_HIGHLIGHT_SIZE - 3.0;
 	}
 
 	if (h < 0) {

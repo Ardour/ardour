@@ -66,9 +66,9 @@ using namespace PBD;
 
 gain_t* DestructiveFileSource::out_coefficient = 0;
 gain_t* DestructiveFileSource::in_coefficient = 0;
-jack_nframes_t DestructiveFileSource::xfade_frames = 64;
+nframes_t DestructiveFileSource::xfade_frames = 64;
 
-DestructiveFileSource::DestructiveFileSource (Session& s, string path, SampleFormat samp_format, HeaderFormat hdr_format, jack_nframes_t rate, Flag flags)
+DestructiveFileSource::DestructiveFileSource (Session& s, string path, SampleFormat samp_format, HeaderFormat hdr_format, nframes_t rate, Flag flags)
 	: SndFileSource (s, path, samp_format, hdr_format, rate, flags)
 {
 	init ();
@@ -106,13 +106,13 @@ DestructiveFileSource::~DestructiveFileSource()
 }
 
 void
-DestructiveFileSource::setup_standard_crossfades (jack_nframes_t rate)
+DestructiveFileSource::setup_standard_crossfades (nframes_t rate)
 {
 	/* This static method is assumed to have been called by the Session
 	   before any DFS's are created.
 	*/
 
-	xfade_frames = (jack_nframes_t) floor ((Config->get_destructive_xfade_msecs () / 1000.0) * rate);
+	xfade_frames = (nframes_t) floor ((Config->get_destructive_xfade_msecs () / 1000.0) * rate);
 
 	if (out_coefficient) {
 		delete [] out_coefficient;
@@ -129,7 +129,7 @@ DestructiveFileSource::setup_standard_crossfades (jack_nframes_t rate)
 }
 
 void
-DestructiveFileSource::mark_capture_start (jack_nframes_t pos)
+DestructiveFileSource::mark_capture_start (nframes_t pos)
 {
 	if (pos < timeline_position) {
 		_capture_start = false;
@@ -152,15 +152,15 @@ DestructiveFileSource::clear_capture_marks ()
 	_capture_end = false;
 }	
 
-jack_nframes_t
-DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in)
+nframes_t
+DestructiveFileSource::crossfade (Sample* data, nframes_t cnt, int fade_in)
 {
-	jack_nframes_t xfade = min (xfade_frames, cnt);
-	jack_nframes_t nofade = cnt - xfade;
+	nframes_t xfade = min (xfade_frames, cnt);
+	nframes_t nofade = cnt - xfade;
 	Sample* fade_data = 0;
-	jack_nframes_t fade_position = 0; // in frames
+	nframes_t fade_position = 0; // in frames
 	ssize_t retval;
-	jack_nframes_t file_cnt;
+	nframes_t file_cnt;
 
 	if (fade_in) {
 		fade_position = file_pos;
@@ -190,6 +190,7 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in)
 	}
 
 	if (file_cnt) {
+		
 		if ((retval = read_unlocked (xfade_buf, fade_position, file_cnt)) != (ssize_t) file_cnt) {
 			if (retval >= 0 && errno == EAGAIN) {
 				/* XXX - can we really trust that errno is meaningful here?  yes POSIX, i'm talking to you.
@@ -203,12 +204,12 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in)
 	} 
 
 	if (file_cnt != xfade) {
-		jack_nframes_t delta = xfade - file_cnt;
+		nframes_t delta = xfade - file_cnt;
 		memset (xfade_buf+file_cnt, 0, sizeof (Sample) * delta);
 	}
 	
 	if (nofade && !fade_in) {
-		if (write_float (data, file_pos - timeline_position, nofade) != nofade) {
+		if (write_float (data, file_pos, nofade) != nofade) {
 			error << string_compose(_("DestructiveFileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
 			return 0;
 		}
@@ -216,7 +217,7 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in)
 
 	if (xfade == xfade_frames) {
 
-		jack_nframes_t n;
+		nframes_t n;
 
 		/* use the standard xfade curve */
 		
@@ -247,20 +248,20 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in)
 
 		compute_equal_power_fades (xfade, in, out);
 
-		for (jack_nframes_t n = 0; n < xfade; ++n) {
+		for (nframes_t n = 0; n < xfade; ++n) {
 			xfade_buf[n] = (xfade_buf[n] * out[n]) + (fade_data[n] * in[n]);		
 		}
 	}
 
 	if (xfade) {
-		if (write_float (xfade_buf, fade_position - timeline_position, xfade) != xfade) {
+		if (write_float (xfade_buf, fade_position, xfade) != xfade) {
 			error << string_compose(_("DestructiveFileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
 			return 0;
 		}
 	}
 	
 	if (fade_in && nofade) {
-		if (write_float (data + xfade, file_pos + xfade - timeline_position, nofade) != nofade) {
+		if (write_float (data + xfade, file_pos + xfade, nofade) != nofade) {
 			error << string_compose(_("DestructiveFileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
 			return 0;
 		}
@@ -269,10 +270,10 @@ DestructiveFileSource::crossfade (Sample* data, jack_nframes_t cnt, int fade_in)
 	return cnt;
 }
 
-jack_nframes_t
-DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t cnt)
+nframes_t
+DestructiveFileSource::write_unlocked (Sample* data, nframes_t cnt)
 {
-	jack_nframes_t old_file_pos;
+	nframes_t old_file_pos;
 
 	if (!writable()) {
 		return 0;
@@ -291,8 +292,8 @@ DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t cnt)
 		file_pos = capture_start_frame;
 		
 		// split cnt in half
-		jack_nframes_t subcnt = cnt / 2;
-		jack_nframes_t ofilepos = file_pos;
+		nframes_t subcnt = cnt / 2;
+		nframes_t ofilepos = file_pos;
 		
 		// fade in
 		if (crossfade (data, subcnt, 1) != subcnt) {
@@ -320,8 +321,8 @@ DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t cnt)
 		_capture_end = false;
 		
 		/* move to the correct location place */
-		file_pos = capture_start_frame;
-		
+		file_pos = capture_start_frame - timeline_position;
+
 		if (crossfade (data, cnt, 1) != cnt) {
 			return 0;
 		}
@@ -343,7 +344,8 @@ DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t cnt)
 
 		/* in the middle of recording */
 		
-		if (write_float (data, file_pos - timeline_position, cnt) != cnt) {
+
+		if (write_float (data, file_pos, cnt) != cnt) {
 			return 0;
 		}
 	}
@@ -374,13 +376,13 @@ DestructiveFileSource::write_unlocked (Sample* data, jack_nframes_t cnt)
 	}
 
 	if (_build_peakfiles) {
-		queue_for_peaks (this);
+		queue_for_peaks (shared_from_this ());
 	}
 	
 	return cnt;
 }
 
-jack_nframes_t
+nframes_t
 DestructiveFileSource::last_capture_start_frame () const
 {
 	return capture_start_frame;
@@ -407,7 +409,7 @@ DestructiveFileSource::handle_header_position_change ()
 }
 
 void
-DestructiveFileSource::set_timeline_position (jack_nframes_t pos)
+DestructiveFileSource::set_timeline_position (nframes_t pos)
 {
 	//destructive track timeline postion does not change except at instantion or when header_position_offset (session start) changes
 }

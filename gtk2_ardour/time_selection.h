@@ -27,9 +27,9 @@ struct TimeSelection : public std::list<ARDOUR::AudioRange> {
 
     ARDOUR::AudioRange& operator[](uint32_t);
 
-    jack_nframes_t start();
-    jack_nframes_t end_frame();
-    jack_nframes_t length();
+    nframes_t start();
+    nframes_t end_frame();
+    nframes_t length();
 
     bool consolidate ();
 };

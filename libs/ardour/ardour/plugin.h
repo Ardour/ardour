@@ -78,7 +78,7 @@ class PluginInfo {
 typedef boost::shared_ptr<PluginInfo> PluginInfoPtr;
 typedef std::list<PluginInfoPtr> PluginInfoList;
 
-class Plugin : public PBD::StatefulDestructible, public sigc::trackable
+class Plugin : public PBD::StatefulDestructible
 {
   public:
 	Plugin (ARDOUR::AudioEngine&, ARDOUR::Session&);
@@ -99,9 +99,8 @@ class Plugin : public PBD::StatefulDestructible, public sigc::trackable
 	    float step;
 	    float smallstep;
 	    float largestep;
-
-		bool min_unbound;
-		bool max_unbound;
+	    bool min_unbound;
+	    bool max_unbound;
 	};
 
 	virtual uint32_t unique_id() const = 0;
@@ -110,7 +109,7 @@ class Plugin : public PBD::StatefulDestructible, public sigc::trackable
 	virtual const char * maker() const = 0;
 	virtual uint32_t parameter_count () const = 0;
 	virtual float default_value (uint32_t port) = 0;
-	virtual jack_nframes_t latency() const = 0;
+	virtual nframes_t latency() const = 0;
 	virtual void set_parameter (uint32_t which, float val) = 0;
 	virtual float get_parameter(uint32_t which) const = 0;
 
@@ -118,9 +117,10 @@ class Plugin : public PBD::StatefulDestructible, public sigc::trackable
 	virtual uint32_t nth_parameter (uint32_t which, bool& ok) const = 0;
 	virtual void activate () = 0;
 	virtual void deactivate () = 0;
-	virtual void set_block_size (jack_nframes_t nframes) = 0;
+	virtual void set_block_size (nframes_t nframes) = 0;
 
-	virtual int connect_and_run (BufferSet& bufs, uint32_t& in, uint32_t& out, jack_nframes_t nframes, jack_nframes_t offset) = 0;
+	virtual int connect_and_run (BufferSet& bufs, uint32_t& in, uint32_t& out, nframes_t nframes, nframes_t offset) = 0;
+	
 	virtual std::set<uint32_t> automatable() const = 0;
 	virtual void store_state (ARDOUR::PluginState&) = 0;
 	virtual void restore_state (ARDOUR::PluginState&) = 0;
@@ -163,7 +163,7 @@ class Plugin : public PBD::StatefulDestructible, public sigc::trackable
 	void setup_controls ();
 
 	struct PortControllable : public PBD::Controllable {
-	    PortControllable (Plugin&, uint32_t abs_port_id,
+	    PortControllable (std::string name, Plugin&, uint32_t abs_port_id,
 			      float lower, float upper, bool toggled, bool logarithmic);
 
 	    void set_value (float);

@@ -9,60 +9,136 @@
 
 namespace Gtkmm2ext {
 
-class DnDTreeView : public Gtk::TreeView 
-{
+template<class DataType>
+struct SerializedObjectPointers {
+    uint32_t size;
+    uint32_t cnt;
+    char     type[32];
+    DataType data[0];
+};
 
+class DnDTreeViewBase : public Gtk::TreeView 
+{
   private:
   public:
-	DnDTreeView ();
-	~DnDTreeView() {}
+	DnDTreeViewBase ();
+	~DnDTreeViewBase() {}
 
-	/* this is the structure pointed to if add_object_drag() is called
-	   and a drop happens on a destination which has declared itself
-	   willing to accept a target of the type named in the call
-	   to add_object_drag().
-	*/
-	
-	struct SerializedObjectPointers {
-	    uint32_t size;
-	    uint32_t cnt;
-	    char     type[32];
-	    void*    ptr[0];
-	};
-	
 	void add_drop_targets (std::list<Gtk::TargetEntry>&);
 	void add_object_drag (int column, std::string type_name);
-	sigc::signal<void,std::string,uint32_t,void**> signal_object_drop;
 	
-	void on_drag_begin(const Glib::RefPtr<Gdk::DragContext>& context) {
-		TreeView::on_drag_begin (context);
-	}
-	void on_drag_end(const Glib::RefPtr<Gdk::DragContext>& context) {
-		TreeView::on_drag_end (context);
-	}
-	void on_drag_data_delete(const Glib::RefPtr<Gdk::DragContext>& context) {
-		TreeView::on_drag_data_delete (context);
-	}
 	void on_drag_leave(const Glib::RefPtr<Gdk::DragContext>& context, guint time) {
-	    suggested_action = context->get_suggested_action();
-	    TreeView::on_drag_leave (context, time);
+		suggested_action = context->get_suggested_action();
+		TreeView::on_drag_leave (context, time);
 	}
+
 	bool on_drag_motion(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time) {
 		suggested_action = context->get_suggested_action();
 		return TreeView::on_drag_motion (context, x, y, time);
 	}
-	bool on_drag_drop(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time);
-	void on_drag_data_get(const Glib::RefPtr<Gdk::DragContext>& context, Gtk::SelectionData& selection_data, guint info, guint time);
-	void on_drag_data_received(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time);
 
-  private:
+	bool on_drag_drop(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time);
+
+  protected:
 	std::list<Gtk::TargetEntry> draggable;
 	Gdk::DragAction             suggested_action;
 	int                         data_column;
-	
-	SerializedObjectPointers* serialize_pointers (Glib::RefPtr<Gtk::TreeModel> m, 
-						      Gtk::TreeSelection::ListHandle_Path*,
-						      Glib::ustring type);
+};
+
+template<class DataType>
+class DnDTreeView : public DnDTreeViewBase
+{
+  public:
+	DnDTreeView() {} 
+	~DnDTreeView() {}
+
+	sigc::signal<void,std::string,uint32_t,const DataType*> signal_object_drop;
+
+	void on_drag_data_get(const Glib::RefPtr<Gdk::DragContext>& context, Gtk::SelectionData& selection_data, guint info, guint time) {
+		if (selection_data.get_target() == "GTK_TREE_MODEL_ROW") {
+			
+			TreeView::on_drag_data_get (context, selection_data, info, time);
+			
+		} else if (data_column >= 0) {
+			
+			Gtk::TreeSelection::ListHandle_Path selection = get_selection()->get_selected_rows ();
+			SerializedObjectPointers<DataType>* sr = serialize_pointers (get_model(), &selection, selection_data.get_target());
+			selection_data.set (8, (guchar*)sr, sr->size);
+		}
+	}
+
+	void on_drag_data_received(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time) {
+		if (suggested_action) {
+			/* this is a drag motion callback. just update the status to
+			   say that we are still dragging, and that's it.
+			*/
+			suggested_action = Gdk::DragAction (0);
+			TreeView::on_drag_data_received (context, x, y, selection_data, info, time);
+			return;
+		}
+		
+		if (selection_data.get_target() == "GTK_TREE_MODEL_ROW") {
+			
+			TreeView::on_drag_data_received (context, x, y, selection_data, info, time);
+			
+		} else if (data_column >= 0) {
+			
+			/* object D-n-D */
+			
+			const void* data = selection_data.get_data();
+			const SerializedObjectPointers<DataType>* sr = reinterpret_cast<const SerializedObjectPointers<DataType> *>(data);
+			
+			if (sr) {
+				signal_object_drop (sr->type, sr->cnt, sr->data);
+			}
+			
+		} else {
+			/* some kind of target type added by the app, which will be handled by a signal handler */
+		}
+	}
+
+  private:
+
+	SerializedObjectPointers<DataType>* serialize_pointers (Glib::RefPtr<Gtk::TreeModel> model, 
+								Gtk::TreeSelection::ListHandle_Path* selection,
+								Glib::ustring type) {
+
+		/* this nasty chunk of code is here because X's DnD protocol (probably other graphics UI's too) 
+		   requires that we package up the entire data collection for DnD in a single contiguous region
+		   (so that it can be trivially copied between address spaces). We don't know the type of DataType so
+		   we have to mix-and-match C and C++ programming techniques here to get the right result.
+
+		   The C trick is to use the "someType foo[0];" declaration trick to create a zero-sized array at the
+		   end of a SerializedObjectPointers<DataType object. Then we allocate a raw memory buffer that extends
+		   past that array and thus provides space for however many DataType items we actually want to pass
+		   around.
+
+		   The C++ trick is to use the placement operator new() syntax to initialize that extra
+		   memory properly.
+		*/
+		
+		uint32_t cnt = selection->size();
+		uint32_t sz = (sizeof (DataType) * cnt) + sizeof (SerializedObjectPointers<DataType>);
+
+		char* buf = new char[sz];
+		SerializedObjectPointers<DataType>* sr = (SerializedObjectPointers<DataType>*) buf;
+
+		for (uint32_t i = 0; i < cnt; ++i) {
+			new ((void *) &sr->data[i]) DataType ();
+		}
+		
+		sr->cnt = cnt;
+		sr->size = sz;
+		snprintf (sr->type, sizeof (sr->type), "%s", type.c_str());
+		
+		cnt = 0;
+		
+		for (Gtk::TreeSelection::ListHandle_Path::iterator x = selection->begin(); x != selection->end(); ++x, ++cnt) {
+			model->get_iter (*x)->get_value (data_column, sr->data[cnt]);
+		}
+
+		return sr;
+	}
 };
 
 } // namespace

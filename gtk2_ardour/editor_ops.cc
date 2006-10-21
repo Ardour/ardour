@@ -90,89 +90,8 @@ Editor::redo (uint32_t n)
 	}
 }
 
-void
-Editor::set_meter_hold (int32_t cnt)
-{
-	Config->set_meter_hold_off(false);
-	Config->set_meter_hold_short(false);
-	Config->set_meter_hold_medium(false);
-	Config->set_meter_hold_long(false);
-
-	switch (cnt)
-	{
-		case 0:
-		 Config->set_meter_hold_off(true);
-		 break;
-		case 40:
-		 Config->set_meter_hold_short(true);
-		 break;
-		case 100:
-		 Config->set_meter_hold_medium(true);
-		 break;
-		case 200:
-		 Config->set_meter_hold_long(true);
-		 break;
-	}
-		 
-	if (session) {
-		session->set_meter_hold (cnt);
-	}
-}
-
-void
-Editor::set_meter_falloff (int intval)
-{
-	float val = 0.0f; /* off */
-	std::string str;
-
-	Config->set_meter_falloff_off(false);
-	Config->set_meter_falloff_slowest(false);
-	Config->set_meter_falloff_slow(false);
-	Config->set_meter_falloff_medium(false);
-	Config->set_meter_falloff_fast(false);
-	Config->set_meter_falloff_faster(false);
-	Config->set_meter_falloff_fastest(false);
-	
-	switch (intval)
-	{
-		case 0:
-		 val = 0.0f;
-		 Config->set_meter_falloff_off(true);
-		 break;
-		case 1:
-		 val = 0.125f;
-		 Config->set_meter_falloff_slowest(true);
-		 break;
-		case 2:
-		 val = 0.250f;
-		 Config->set_meter_falloff_slow(true);
-		 break;
-		case 3:
-		 val = 0.375f;
-		 Config->set_meter_falloff_medium(true);
-		 break;
-		case 4:
-		 val = 0.500f;
-		 Config->set_meter_falloff_fast(true);
-		 break;
-		case 5:
-		 val = 0.750f;
-		 Config->set_meter_falloff_faster(true);
-		 break;
-		case 6:
-		 val = 0.875f;
-		 Config->set_meter_falloff_fastest(true);
-		 break;
-	}
-	
-	if (session) {
-		session->set_meter_falloff (val);
-	}
-}
-
-
 int
-Editor::ensure_cursor (jack_nframes_t *pos)
+Editor::ensure_cursor (nframes_t *pos)
 {
 	*pos = edit_cursor->current_frame;
 	return 0;
@@ -185,13 +104,13 @@ Editor::split_region ()
 }
 
 void
-Editor::split_region_at (jack_nframes_t where)
+Editor::split_region_at (nframes_t where)
 {
 	split_regions_at (where, selection->regions);
 }
 
 void
-Editor::split_regions_at (jack_nframes_t where, RegionSelection& regions)
+Editor::split_regions_at (nframes_t where, RegionSelection& regions)
 {
 	begin_reversible_command (_("split"));
 
@@ -291,7 +210,7 @@ Editor::select_region_for_operation (int dir, TimeAxisView **tv)
 {
 	RegionView* rv;
 	boost::shared_ptr<Region> region;
-	jack_nframes_t start = 0;
+	nframes_t start = 0;
 
 	if (selection->time.start () == selection->time.end_frame ()) {
 		
@@ -334,7 +253,7 @@ Editor::extend_selection_to_end_of_region (bool next)
 {
 	TimeAxisView *tv;
 	boost::shared_ptr<Region> region;
-	jack_nframes_t start;
+	nframes_t start;
 
 	if ((region = select_region_for_operation (next ? 1 : 0, &tv)) == 0) {
 		return;
@@ -362,7 +281,7 @@ Editor::extend_selection_to_start_of_region (bool previous)
 {
 	TimeAxisView *tv;
 	boost::shared_ptr<Region> region;
-	jack_nframes_t end;
+	nframes_t end;
 
 	if ((region = select_region_for_operation (previous ? -1 : 0, &tv)) == 0) {
 		return;
@@ -389,8 +308,8 @@ Editor::extend_selection_to_start_of_region (bool previous)
 void
 Editor::nudge_forward (bool next)
 {
-	jack_nframes_t distance;
-	jack_nframes_t next_distance;
+	nframes_t distance;
+	nframes_t next_distance;
 
 	if (!session) return;
 	
@@ -424,8 +343,8 @@ Editor::nudge_forward (bool next)
 void
 Editor::nudge_backward (bool next)
 {
-	jack_nframes_t distance;
-	jack_nframes_t next_distance;
+	nframes_t distance;
+	nframes_t next_distance;
 
 	if (!session) return;
 	
@@ -470,7 +389,7 @@ Editor::nudge_backward (bool next)
 void
 Editor::nudge_forward_capture_offset ()
 {
-	jack_nframes_t distance;
+	nframes_t distance;
 
 	if (!session) return;
 	
@@ -497,7 +416,7 @@ Editor::nudge_forward_capture_offset ()
 void
 Editor::nudge_backward_capture_offset ()
 {
-	jack_nframes_t distance;
+	nframes_t distance;
 
 	if (!session) return;
 	
@@ -543,7 +462,7 @@ Editor::move_to_end ()
 void
 Editor::build_region_boundary_cache ()
 {
-	jack_nframes_t pos = 0;
+	nframes_t pos = 0;
 	RegionPoint point;
 	boost::shared_ptr<Region> r;
 	TrackViewList tracks;
@@ -599,7 +518,7 @@ Editor::build_region_boundary_cache ()
 			}
 		}
 
-		jack_nframes_t rpos;
+		nframes_t rpos;
 		
 		switch (snap_type) {
 		case SnapToRegionStart:
@@ -642,20 +561,20 @@ Editor::build_region_boundary_cache ()
 }
 
 boost::shared_ptr<Region>
-Editor::find_next_region (jack_nframes_t frame, RegionPoint point, int32_t dir, TrackViewList& tracks, TimeAxisView **ontrack)
+Editor::find_next_region (nframes_t frame, RegionPoint point, int32_t dir, TrackViewList& tracks, TimeAxisView **ontrack)
 {
 	TrackViewList::iterator i;
-	jack_nframes_t closest = max_frames;
+	nframes_t closest = max_frames;
 	boost::shared_ptr<Region> ret;
-	jack_nframes_t rpos = 0;
+	nframes_t rpos = 0;
 
 	float track_speed;
-	jack_nframes_t track_frame;
+	nframes_t track_frame;
 	AudioTimeAxisView *atav;
 
 	for (i = tracks.begin(); i != tracks.end(); ++i) {
 
-		jack_nframes_t distance;
+		nframes_t distance;
 		boost::shared_ptr<Region> r;
 		
 		track_speed = 1.0f;
@@ -707,7 +626,7 @@ void
 Editor::cursor_to_region_point (Cursor* cursor, RegionPoint point, int32_t dir)
 {
 	boost::shared_ptr<Region> r;
-	jack_nframes_t pos = cursor->current_frame;
+	nframes_t pos = cursor->current_frame;
 
 	if (!session) {
 		return;
@@ -786,7 +705,7 @@ Editor::cursor_to_previous_region_point (Cursor* cursor, RegionPoint point)
 void
 Editor::cursor_to_selection_start (Cursor *cursor)
 {
-	jack_nframes_t pos = 0;
+	nframes_t pos = 0;
 	switch (mouse_mode) {
 	case MouseObject:
 		if (!selection->regions.empty()) {
@@ -814,7 +733,7 @@ Editor::cursor_to_selection_start (Cursor *cursor)
 void
 Editor::cursor_to_selection_end (Cursor *cursor)
 {
-	jack_nframes_t pos = 0;
+	nframes_t pos = 0;
 
 	switch (mouse_mode) {
 	case MouseObject:
@@ -843,8 +762,8 @@ Editor::cursor_to_selection_end (Cursor *cursor)
 void
 Editor::playhead_backward ()
 {
-	jack_nframes_t pos;
-	jack_nframes_t cnt;
+	nframes_t pos;
+	nframes_t cnt;
 	float prefix;
 	bool was_floating;
 
@@ -852,15 +771,15 @@ Editor::playhead_backward ()
 		cnt = 1;
 	} else {
 		if (was_floating) {
-			cnt = (jack_nframes_t) floor (prefix * session->frame_rate ());
+			cnt = (nframes_t) floor (prefix * session->frame_rate ());
 		} else {
-			cnt = (jack_nframes_t) prefix;
+			cnt = (nframes_t) prefix;
 		}
 	}
 
 	pos = playhead_cursor->current_frame;
 
-	if ((jack_nframes_t) pos < cnt) {
+	if ((nframes_t) pos < cnt) {
 		pos = 0;
 	} else {
 		pos -= cnt;
@@ -877,8 +796,8 @@ Editor::playhead_backward ()
 void
 Editor::playhead_forward ()
 {
-	jack_nframes_t pos;
-	jack_nframes_t cnt;
+	nframes_t pos;
+	nframes_t cnt;
 	bool was_floating;
 	float prefix;
 
@@ -886,9 +805,9 @@ Editor::playhead_forward ()
 		cnt = 1;
 	} else {
 		if (was_floating) {
-			cnt = (jack_nframes_t) floor (prefix * session->frame_rate ());
+			cnt = (nframes_t) floor (prefix * session->frame_rate ());
 		} else {
-			cnt = (jack_nframes_t) floor (prefix);
+			cnt = (nframes_t) floor (prefix);
 		}
 	}
 
@@ -917,8 +836,8 @@ Editor::cursor_align (bool playhead_to_edit)
 void
 Editor::edit_cursor_backward ()
 {
-	jack_nframes_t pos;
-	jack_nframes_t cnt;
+	nframes_t pos;
+	nframes_t cnt;
 	float prefix;
 	bool was_floating;
 
@@ -926,15 +845,15 @@ Editor::edit_cursor_backward ()
 		cnt = 1;
 	} else {
 		if (was_floating) {
-			cnt = (jack_nframes_t) floor (prefix * session->frame_rate ());
+			cnt = (nframes_t) floor (prefix * session->frame_rate ());
 		} else {
-			cnt = (jack_nframes_t) prefix;
+			cnt = (nframes_t) prefix;
 		}
 	}
 
 	pos = edit_cursor->current_frame;
 
-	if ((jack_nframes_t) pos < cnt) {
+	if ((nframes_t) pos < cnt) {
 		pos = 0;
 	} else {
 		pos -= cnt;
@@ -946,8 +865,8 @@ Editor::edit_cursor_backward ()
 void
 Editor::edit_cursor_forward ()
 {
-	jack_nframes_t pos;
-	jack_nframes_t cnt;
+	nframes_t pos;
+	nframes_t cnt;
 	bool was_floating;
 	float prefix;
 
@@ -955,9 +874,9 @@ Editor::edit_cursor_forward ()
 		cnt = 1;
 	} else {
 		if (was_floating) {
-			cnt = (jack_nframes_t) floor (prefix * session->frame_rate ());
+			cnt = (nframes_t) floor (prefix * session->frame_rate ());
 		} else {
-			cnt = (jack_nframes_t) floor (prefix);
+			cnt = (nframes_t) floor (prefix);
 		}
 	}
 
@@ -970,16 +889,16 @@ Editor::goto_frame ()
 {
 	float prefix;
 	bool was_floating;
-	jack_nframes_t frame;
+	nframes_t frame;
 
 	if (get_prefix (prefix, was_floating)) {
 		return;
 	}
 
 	if (was_floating) {
-		frame = (jack_nframes_t) floor (prefix * session->frame_rate());
+		frame = (nframes_t) floor (prefix * session->frame_rate());
 	} else {
-		frame = (jack_nframes_t) floor (prefix);
+		frame = (nframes_t) floor (prefix);
 	}
 
 	session->request_locate (frame);
@@ -988,19 +907,19 @@ Editor::goto_frame ()
 void
 Editor::scroll_backward (float pages)
 {
-	jack_nframes_t frame;
-	jack_nframes_t one_page = (jack_nframes_t) rint (canvas_width * frames_per_unit);
+	nframes_t frame;
+	nframes_t one_page = (nframes_t) rint (canvas_width * frames_per_unit);
 	bool was_floating;
 	float prefix;
-	jack_nframes_t cnt;
+	nframes_t cnt;
 	
 	if (get_prefix (prefix, was_floating)) {
-		cnt = (jack_nframes_t) floor (pages * one_page);
+		cnt = (nframes_t) floor (pages * one_page);
 	} else {
 		if (was_floating) {
-			cnt = (jack_nframes_t) floor (prefix * session->frame_rate());
+			cnt = (nframes_t) floor (prefix * session->frame_rate());
 		} else {
-			cnt = (jack_nframes_t) floor (prefix * one_page);
+			cnt = (nframes_t) floor (prefix * one_page);
 		}
 	}
 
@@ -1016,24 +935,24 @@ Editor::scroll_backward (float pages)
 void
 Editor::scroll_forward (float pages)
 {
-	jack_nframes_t frame;
-	jack_nframes_t one_page = (jack_nframes_t) rint (canvas_width * frames_per_unit);
+	nframes_t frame;
+	nframes_t one_page = (nframes_t) rint (canvas_width * frames_per_unit);
 	bool was_floating;
 	float prefix;
-	jack_nframes_t cnt;
+	nframes_t cnt;
 	
 	if (get_prefix (prefix, was_floating)) {
-		cnt = (jack_nframes_t) floor (pages * one_page);
+		cnt = (nframes_t) floor (pages * one_page);
 	} else {
 		if (was_floating) {
-			cnt = (jack_nframes_t) floor (prefix * session->frame_rate());
+			cnt = (nframes_t) floor (prefix * session->frame_rate());
 		} else {
-			cnt = (jack_nframes_t) floor (prefix * one_page);
+			cnt = (nframes_t) floor (prefix * one_page);
 		}
 	}
 
-	if (ULONG_MAX - cnt < leftmost_frame) {
-		frame = ULONG_MAX - cnt;
+	if (max_frames - cnt < leftmost_frame) {
+		frame = max_frames - cnt;
 	} else {
 		frame = leftmost_frame + cnt;
 	}
@@ -1123,17 +1042,17 @@ Editor::temporal_zoom (gdouble fpu)
 {
 	if (!session) return;
 	
-	jack_nframes_t current_page = current_page_frames();
-	jack_nframes_t current_leftmost = leftmost_frame;
-	jack_nframes_t current_rightmost;
-	jack_nframes_t current_center;
-	jack_nframes_t new_page;
-	jack_nframes_t leftmost_after_zoom = 0;
+	nframes_t current_page = current_page_frames();
+	nframes_t current_leftmost = leftmost_frame;
+	nframes_t current_rightmost;
+	nframes_t current_center;
+	nframes_t new_page;
+	nframes_t leftmost_after_zoom = 0;
 	double nfpu;
 
 	nfpu = fpu;
 	
-	new_page = (jack_nframes_t) floor (canvas_width * nfpu);
+	new_page = (nframes_t) floor (canvas_width * nfpu);
 
 	switch (zoom_focus) {
 	case ZoomFocusLeft:
@@ -1197,8 +1116,8 @@ Editor::temporal_zoom_selection ()
 		return;
 	}
 
-	jack_nframes_t start = selection->time[clicked_selection].start;
-	jack_nframes_t end = selection->time[clicked_selection].end;
+	nframes_t start = selection->time[clicked_selection].start;
+	nframes_t end = selection->time[clicked_selection].end;
 
 	temporal_zoom_by_frame (start, end, "zoom to selection");
 }
@@ -1214,7 +1133,7 @@ Editor::temporal_zoom_session ()
 }
 
 void
-Editor::temporal_zoom_by_frame (jack_nframes_t start, jack_nframes_t end, const string & op)
+Editor::temporal_zoom_by_frame (nframes_t start, nframes_t end, const string & op)
 {
 	if (!session) return;
 
@@ -1222,7 +1141,7 @@ Editor::temporal_zoom_by_frame (jack_nframes_t start, jack_nframes_t end, const 
 		return;
 	}
 
-	jack_nframes_t range = end - start;
+	nframes_t range = end - start;
 
 	double new_fpu = (double)range / (double)canvas_width;
 // 	double p2 = 1.0;
@@ -1232,9 +1151,9 @@ Editor::temporal_zoom_by_frame (jack_nframes_t start, jack_nframes_t end, const 
 // 	}
 // 	new_fpu = p2;
 	
-	jack_nframes_t new_page = (jack_nframes_t) floor (canvas_width * new_fpu);
-	jack_nframes_t middle = (jack_nframes_t) floor( (double)start + ((double)range / 2.0f ));
-	jack_nframes_t new_leftmost = (jack_nframes_t) floor( (double)middle - ((double)new_page/2.0f));
+	nframes_t new_page = (nframes_t) floor (canvas_width * new_fpu);
+	nframes_t middle = (nframes_t) floor( (double)start + ((double)range / 2.0f ));
+	nframes_t new_leftmost = (nframes_t) floor( (double)middle - ((double)new_page/2.0f));
 
 	if (new_leftmost > middle) new_leftmost = 0;
 
@@ -1247,7 +1166,7 @@ Editor::temporal_zoom_by_frame (jack_nframes_t start, jack_nframes_t end, const 
 }
 
 void 
-Editor::temporal_zoom_to_frame (bool coarser, jack_nframes_t frame)
+Editor::temporal_zoom_to_frame (bool coarser, nframes_t frame)
 {
 	if (!session) return;
 	
@@ -1266,7 +1185,7 @@ Editor::temporal_zoom_to_frame (bool coarser, jack_nframes_t frame)
 
 	if (new_fpu == frames_per_unit) return;
 
-	jack_nframes_t new_leftmost = frame - (jack_nframes_t)range_before;
+	nframes_t new_leftmost = frame - (nframes_t)range_before;
 
 	if (new_leftmost > frame) new_leftmost = 0;
 
@@ -1289,8 +1208,8 @@ Editor::add_location_from_selection ()
 		return;
 	}
 
-	jack_nframes_t start = selection->time[clicked_selection].start;
-	jack_nframes_t end = selection->time[clicked_selection].end;
+	nframes_t start = selection->time[clicked_selection].start;
+	nframes_t end = selection->time[clicked_selection].end;
 
 	Location *location = new Location (start, end, "selection");
 
@@ -1305,7 +1224,7 @@ Editor::add_location_from_selection ()
 void
 Editor::add_location_from_playhead_cursor ()
 {
-	jack_nframes_t where = session->audible_frame();
+	nframes_t where = session->audible_frame();
 	
 	Location *location = new Location (where, where, "mark", Location::IsMark);
 	session->begin_reversible_command (_("add marker"));
@@ -1414,7 +1333,7 @@ Editor::invert_selection ()
 }
 
 bool
-Editor::select_all_within (jack_nframes_t start, jack_nframes_t end, double top, double bot, Selection::Operation op)
+Editor::select_all_within (nframes_t start, nframes_t end, double top, double bot, Selection::Operation op)
 {
 	list<Selectable *> touched;
 	
@@ -1508,8 +1427,8 @@ Editor::select_all_selectables_using_time_selection ()
 		return;
 	}
 
-	jack_nframes_t start = selection->time[clicked_selection].start;
-	jack_nframes_t end = selection->time[clicked_selection].end;
+	nframes_t start = selection->time[clicked_selection].start;
+	nframes_t end = selection->time[clicked_selection].end;
 
 	if (end - start < 1)  {
 		return;
@@ -1575,8 +1494,8 @@ Editor::select_all_selectables_using_loop()
 void
 Editor::select_all_selectables_using_cursor (Cursor *cursor, bool after)
 {
-        jack_nframes_t start;
-	jack_nframes_t end;
+        nframes_t start;
+	nframes_t end;
 	list<Selectable *> touched;
 
 	if (after) {
@@ -1606,8 +1525,8 @@ Editor::select_all_selectables_using_cursor (Cursor *cursor, bool after)
 void
 Editor::select_all_selectables_between_cursors (Cursor *cursor, Cursor *other_cursor)
 {
-        jack_nframes_t start;
-	jack_nframes_t end;
+        nframes_t start;
+	nframes_t end;
 	list<Selectable *> touched;
 	bool  other_cursor_is_first = cursor->current_frame > other_cursor->current_frame;
 
@@ -1725,7 +1644,7 @@ Editor::jump_backward_to_mark ()
 void
 Editor::set_mark ()
 {
-	jack_nframes_t pos;
+	nframes_t pos;
 	float prefix;
 	bool was_floating;
 
@@ -1733,9 +1652,9 @@ Editor::set_mark ()
 		pos = session->audible_frame ();
 	} else {
 		if (was_floating) {
-			pos = (jack_nframes_t) floor (prefix * session->frame_rate ());
+			pos = (nframes_t) floor (prefix * session->frame_rate ());
 		} else {
-			pos = (jack_nframes_t) floor (prefix);
+			pos = (nframes_t) floor (prefix);
 		}
 	}
 
@@ -1796,7 +1715,7 @@ Editor::insert_region_list_drag (boost::shared_ptr<Region> region, int x, int y)
 	double wx, wy;
 	double cx, cy;
 	TimeAxisView *tv;
-	jack_nframes_t where;
+	nframes_t where;
 	AudioTimeAxisView *atv = 0;
 	Playlist *playlist;
 	
@@ -1863,16 +1782,23 @@ Editor::insert_region_list_selection (float times)
 		return;
 	}
 	
-	TreeModel::iterator i = region_list_display.get_selection()->get_selected();
-	boost::shared_ptr<Region> region = (*i)[region_list_columns.region];
+	TreeView::Selection::ListHandle_Path rows = selected->get_selected_rows ();
 
-	begin_reversible_command (_("insert region"));
-        XMLNode &before = playlist->get_state();
-	playlist->add_region ((RegionFactory::create (region)), edit_cursor->current_frame, times);
-	session->add_command(new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
-	commit_reversible_command ();
+	/* only one row selected, so rows.begin() is it */
+
+	TreeIter iter;
+
+	if ((iter = region_list_model->get_iter (*rows.begin()))) {
+
+		boost::shared_ptr<Region> region = (*iter)[region_list_columns.region];
+		
+		begin_reversible_command (_("insert region"));
+		XMLNode &before = playlist->get_state();
+		playlist->add_region ((RegionFactory::create (region)), edit_cursor->current_frame, times);
+		session->add_command(new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
+		commit_reversible_command ();
+	} 
 }
-
 
 /* BUILT-IN EFFECTS */
 
@@ -1898,9 +1824,9 @@ Editor::toggle_playback (bool with_abort)
 		return;
 	}
 
-	switch (session->slave_source()) {
-	case Session::None:
-	case Session::JACK:
+	switch (Config->get_slave_source()) {
+	case None:
+	case JACK:
 		break;
 	default:
 		/* transport controlled by the master */
@@ -1914,8 +1840,8 @@ Editor::toggle_playback (bool with_abort)
 	
 	if (session->transport_rolling()) {
 		session->request_stop (with_abort);
-		if (session->get_auto_loop()) {
-			session->request_auto_loop (false);
+		if (Config->get_auto_loop()) {
+			session->request_play_loop (false);
 		}
 	} else {
 		session->request_transport_speed (1.0f);
@@ -1961,7 +1887,7 @@ Editor::loop_selected_region ()
 			
 			// enable looping, reposition and start rolling
 
-			session->request_auto_loop (true);
+			session->request_play_loop (true);
 			session->request_locate (tll->start(), false);
 			session->request_transport_speed (1.0f);
 		}
@@ -1991,7 +1917,7 @@ Editor::loop_location (Location& location)
 		tll->set (location.start(), location.end());
 
 		// enable looping, reposition and start rolling
-		session->request_auto_loop (true);
+		session->request_play_loop (true);
 		session->request_locate (tll->start(), true);
 	}
 }
@@ -2177,17 +2103,17 @@ Editor::region_from_selection ()
 		return;
 	}
 
-	jack_nframes_t start = selection->time[clicked_selection].start;
-	jack_nframes_t end = selection->time[clicked_selection].end;
+	nframes_t start = selection->time[clicked_selection].start;
+	nframes_t end = selection->time[clicked_selection].end;
 
-	jack_nframes_t selection_cnt = end - start + 1;
+	nframes_t selection_cnt = end - start + 1;
 	
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 		boost::shared_ptr<AudioRegion> current;
 		boost::shared_ptr<Region> current_r;
 		Playlist *pl;
 
-		jack_nframes_t internal_start;
+		nframes_t internal_start;
 		string new_name;
 
 		if ((pl = (*i)->playlist()) == 0) {
@@ -2215,15 +2141,15 @@ Editor::create_region_from_selection (vector<boost::shared_ptr<AudioRegion> >& n
 		return;
 	}
 
-	jack_nframes_t start = selection->time[clicked_selection].start;
-	jack_nframes_t end = selection->time[clicked_selection].end;
+	nframes_t start = selection->time[clicked_selection].start;
+	nframes_t end = selection->time[clicked_selection].end;
 	
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 
 		boost::shared_ptr<AudioRegion> current;
 		boost::shared_ptr<Region> current_r;
 		Playlist* playlist;
-		jack_nframes_t internal_start;
+		nframes_t internal_start;
 		string new_name;
 
 		if ((playlist = (*i)->playlist()) == 0) {
@@ -2303,7 +2229,7 @@ Editor::separate_region_from_selection ()
 					double speed = atv->get_diskstream()->speed();
 
 					for (list<AudioRange>::iterator t = selection->time.begin(); t != selection->time.end(); ++t) {
-						playlist->partition ((jack_nframes_t)((*t).start * speed), (jack_nframes_t)((*t).end * speed), true);
+						playlist->partition ((nframes_t)((*t).start * speed), (nframes_t)((*t).end * speed), true);
 					}
 
 					if (doing_undo) 
@@ -2358,7 +2284,7 @@ Editor::separate_regions_using_location (Location& loc)
 					double speed = atv->get_diskstream()->speed();
 
 
-					playlist->partition ((jack_nframes_t)(loc.start() * speed), (jack_nframes_t)(loc.end() * speed), true);
+					playlist->partition ((nframes_t)(loc.start() * speed), (nframes_t)(loc.end() * speed), true);
 					if (doing_undo) 
                                             session->add_command(new MementoCommand<Playlist>(*playlist, before, &playlist->get_state()));
 				}
@@ -2404,9 +2330,9 @@ Editor::crop_region_to_selection ()
 
 	if (!playlists.empty()) {
 
-		jack_nframes_t start;
-		jack_nframes_t end;
-		jack_nframes_t cnt;
+		nframes_t start;
+		nframes_t end;
+		nframes_t cnt;
 
 		begin_reversible_command (_("trim to selection"));
 
@@ -2441,7 +2367,7 @@ Editor::crop_region_to_selection ()
 void
 Editor::region_fill_track ()
 {
-	jack_nframes_t end;
+	nframes_t end;
 
 	if (!session || selection->regions.empty()) {
 		return;
@@ -2500,8 +2426,8 @@ Editor::region_fill_selection ()
 	TreeModel::iterator i = region_list_display.get_selection()->get_selected();
 	boost::shared_ptr<Region> region = (*i)[region_list_columns.region];
 
-	jack_nframes_t start = selection->time[clicked_selection].start;
-	jack_nframes_t end = selection->time[clicked_selection].end;
+	nframes_t start = selection->time[clicked_selection].start;
+	nframes_t end = selection->time[clicked_selection].end;
 
 	Playlist *playlist; 
 
@@ -2509,7 +2435,7 @@ Editor::region_fill_selection ()
 		return;
 	}
 
-	jack_nframes_t selection_length = end - start;
+	nframes_t selection_length = end - start;
 	float times = (float)selection_length / region->length();
 	
 	begin_reversible_command (_("fill selection"));
@@ -2529,7 +2455,7 @@ Editor::region_fill_selection ()
 }
 
 void
-Editor::set_a_regions_sync_position (boost::shared_ptr<Region> region, jack_nframes_t position)
+Editor::set_a_regions_sync_position (boost::shared_ptr<Region> region, nframes_t position)
 {
 
 	if (!region->covers (position)) {
@@ -2614,14 +2540,14 @@ struct RegionSortByTime {
 };
 
 void
-Editor::align_selection_relative (RegionPoint point, jack_nframes_t position)
+Editor::align_selection_relative (RegionPoint point, nframes_t position)
 {
 	if (selection->regions.empty()) {
 		return;
 	}
 
-	jack_nframes_t distance;
-	jack_nframes_t pos = 0;
+	nframes_t distance;
+	nframes_t pos = 0;
 	int dir;
 
 	list<RegionView*> sorted;
@@ -2673,7 +2599,7 @@ Editor::align_selection_relative (RegionPoint point, jack_nframes_t position)
 }
 
 void
-Editor::align_selection (RegionPoint point, jack_nframes_t position)
+Editor::align_selection (RegionPoint point, nframes_t position)
 {
 	if (selection->regions.empty()) {
 		return;
@@ -2689,7 +2615,7 @@ Editor::align_selection (RegionPoint point, jack_nframes_t position)
 }
 
 void
-Editor::align_region (boost::shared_ptr<Region> region, RegionPoint point, jack_nframes_t position)
+Editor::align_region (boost::shared_ptr<Region> region, RegionPoint point, nframes_t position)
 {
 	begin_reversible_command (_("align region"));
 	align_region_internal (region, point, position);
@@ -2697,7 +2623,7 @@ Editor::align_region (boost::shared_ptr<Region> region, RegionPoint point, jack_
 }
 
 void
-Editor::align_region_internal (boost::shared_ptr<Region> region, RegionPoint point, jack_nframes_t position)
+Editor::align_region_internal (boost::shared_ptr<Region> region, RegionPoint point, nframes_t position)
 {
 	XMLNode &before = region->playlist()->get_state();
 
@@ -2855,9 +2781,9 @@ Editor::bounce_range_selection ()
 
 	TrackViewList *views = get_valid_views (selection->time.track, selection->time.group);
 
-	jack_nframes_t start = selection->time[clicked_selection].start;
-	jack_nframes_t end = selection->time[clicked_selection].end;
-	jack_nframes_t cnt = end - start + 1;
+	nframes_t start = selection->time[clicked_selection].start;
+	nframes_t end = selection->time[clicked_selection].end;
+	nframes_t cnt = end - start + 1;
 	
 	begin_reversible_command (_("bounce range"));
 
@@ -2989,7 +2915,7 @@ Editor::cut_copy_regions (CutCopyOp op)
 {
         typedef std::map<AudioPlaylist*,AudioPlaylist*> PlaylistMapping;
 	PlaylistMapping pmap;
-	jack_nframes_t first_position = max_frames;
+	nframes_t first_position = max_frames;
 	set<Playlist*> freezelist;
 	pair<set<Playlist*>::iterator,bool> insert_result;
 
@@ -3100,13 +3026,13 @@ Editor::mouse_paste ()
 	event.button.x = wx;
 	event.button.y = wy;
 	
-	jack_nframes_t where = event_frame (&event, 0, 0);
+	nframes_t where = event_frame (&event, 0, 0);
 	snap_to (where);
 	paste_internal (where, 1);
 }
 
 void
-Editor::paste_internal (jack_nframes_t position, float times)
+Editor::paste_internal (nframes_t position, float times)
 {
 	bool commit = false;
 
@@ -3312,9 +3238,9 @@ void
 Editor::nudge_track (bool use_edit_cursor, bool forwards)
 {
 	Playlist *playlist; 
-	jack_nframes_t distance;
-	jack_nframes_t next_distance;
-	jack_nframes_t start;
+	nframes_t distance;
+	nframes_t next_distance;
+	nframes_t start;
 
 	if (use_edit_cursor) {
 		start = edit_cursor->current_frame;
@@ -3525,7 +3451,7 @@ Editor::external_edit_region ()
 }
 
 void
-Editor::brush (jack_nframes_t pos)
+Editor::brush (nframes_t pos)
 {
 	RegionSelection sel;
 	snap_to (pos);

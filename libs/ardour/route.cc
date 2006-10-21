@@ -51,23 +51,22 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-
 uint32_t Route::order_key_cnt = 0;
 
 
 Route::Route (Session& sess, string name, int input_min, int input_max, int output_min, int output_max, Flag flg, DataType default_type)
 	: IO (sess, name, input_min, input_max, output_min, output_max, default_type),
 	  _flags (flg),
-	  _solo_control (*this, ToggleControllable::SoloControl),
-	  _mute_control (*this, ToggleControllable::MuteControl)
+	  _solo_control (X_("solo"), *this, ToggleControllable::SoloControl),
+	  _mute_control (X_("mute"), *this, ToggleControllable::MuteControl)
 {
 	init ();
 }
 
 Route::Route (Session& sess, const XMLNode& node)
 	: IO (sess, "route"),
-	  _solo_control (*this, ToggleControllable::SoloControl),
-	  _mute_control (*this, ToggleControllable::MuteControl)
+	  _solo_control (X_("solo"), *this, ToggleControllable::SoloControl),
+	  _mute_control (X_("mute"), *this, ToggleControllable::MuteControl)
 {
 	init ();
 	set_state (node);
@@ -92,7 +91,7 @@ Route::init ()
 	_declickable = false;
 	_pending_declick = true;
 	_remote_control_id = 0;
-
+	
 	_edit_group = 0;
 	_mix_group = 0;
 
@@ -229,8 +228,8 @@ Route::set_gain (gain_t val, void *src)
  */
 void
 Route::process_output_buffers (BufferSet& bufs,
-		jack_nframes_t start_frame, jack_nframes_t end_frame, 
-        jack_nframes_t nframes, jack_nframes_t offset, bool with_redirects, int declick,
+		nframes_t start_frame, nframes_t end_frame, 
+        nframes_t nframes, nframes_t offset, bool with_redirects, int declick,
 		bool meter)
 {
 	// This is definitely very audio-only for now
@@ -243,8 +242,17 @@ Route::process_output_buffers (BufferSet& bufs,
 	IO *co;
 	bool mute_audible;
 	bool solo_audible;
-	bool no_monitor = (Config->get_use_hardware_monitoring() || !Config->get_use_sw_monitoring ());
+	bool no_monitor;
 	gain_t* gab = _session.gain_automation_buffer();
+
+	switch (Config->get_monitoring_model()) {
+	case HardwareMonitoring:
+	case ExternalMonitoring:
+		no_monitor = true;
+		break;
+	default:
+		no_monitor = false;
+	}
 
 	declick = _pending_declick;
 
@@ -324,7 +332,7 @@ Route::process_output_buffers (BufferSet& bufs,
 			
 			// TODO: this is probably wrong
 
-			(no_monitor && record_enabled() && (!_session.get_auto_input() || _session.actively_recording()))
+			(no_monitor && record_enabled() && (!Config->get_auto_input() || _session.actively_recording()))
 
 			) {
 			
@@ -408,7 +416,7 @@ Route::process_output_buffers (BufferSet& bufs,
 			
 			// rec-enabled but not s/w monitoring 
 			
-			(no_monitor && record_enabled() && (!_session.get_auto_input() || _session.actively_recording()))
+			(no_monitor && record_enabled() && (!Config->get_auto_input() || _session.actively_recording()))
 
 			) {
 			
@@ -435,11 +443,11 @@ Route::process_output_buffers (BufferSet& bufs,
 		
 		// h/w monitoring not in use 
 		
-		(!Config->get_use_hardware_monitoring() && 
+		(!Config->get_monitoring_model() == HardwareMonitoring && 
 
 		 // AND software monitoring required
 
-		 Config->get_use_sw_monitoring())) { 
+		 Config->get_monitoring_model() == SoftwareMonitoring)) { 
 		
 		if (apply_gain_automation) {
 			
@@ -447,7 +455,7 @@ Route::process_output_buffers (BufferSet& bufs,
 				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
 					Sample* const sp = i->data(nframes);
 					
-					for (jack_nframes_t nx = 0; nx < nframes; ++nx) {
+					for (nframes_t nx = 0; nx < nframes; ++nx) {
 						sp[nx] *= -gab[nx];
 					}
 				}
@@ -455,7 +463,7 @@ Route::process_output_buffers (BufferSet& bufs,
 				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
 					Sample* const sp = i->data(nframes);
 					
-					for (jack_nframes_t nx = 0; nx < nframes; ++nx) {
+					for (nframes_t nx = 0; nx < nframes; ++nx) {
 						sp[nx] *= gab[nx];
 					}
 				}
@@ -492,7 +500,7 @@ Route::process_output_buffers (BufferSet& bufs,
 				
 				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
 					Sample* const sp = i->data(nframes);
-					apply_gain_to_buffer(sp,nframes,this_gain);
+					Session::apply_gain_to_buffer(sp,nframes,this_gain);
 				}
 
 			} else if (_gain == 0) {
@@ -571,7 +579,7 @@ Route::process_output_buffers (BufferSet& bufs,
 
 		    // recording but not s/w monitoring 
 			
-			(no_monitor && record_enabled() && (!_session.get_auto_input() || _session.actively_recording()))
+			(no_monitor && record_enabled() && (!Config->get_auto_input() || _session.actively_recording()))
 
 			) {
 
@@ -604,7 +612,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	    
 	    /* relax */
 
-	} else if (no_monitor && record_enabled() && (!_session.get_auto_input() || _session.actively_recording())) {
+	} else if (no_monitor && record_enabled() && (!Config->get_auto_input() || _session.actively_recording())) {
 		
 		IO::silence (nframes, offset);
 		
@@ -616,7 +624,7 @@ Route::process_output_buffers (BufferSet& bufs,
 		    
 		    // muted by solo of another track, but not using control outs for solo
 
-		    (!solo_audible && (_session.solo_model() != Session::SoloBus)) ||
+		    (!solo_audible && (Config->get_solo_model() != SoloBus)) ||
 		    
 		    // muted by mute of this track
 
@@ -662,7 +670,7 @@ Route::n_process_buffers ()
 }
 
 void
-Route::passthru (jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset, int declick, bool meter_first)
+Route::passthru (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset, int declick, bool meter_first)
 {
 	BufferSet& bufs = _session.get_scratch_buffers(n_process_buffers());
 
@@ -996,7 +1004,7 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 	uint32_t i_cnt;
 	uint32_t s_cnt;
 	map<Placement,list<InsertCount> > insert_map;
-	jack_nframes_t initial_streams;
+	nframes_t initial_streams;
 
 	redirect_max_outs.reset();
 	i_cnt = 0;
@@ -1352,6 +1360,8 @@ Route::state(bool full_state)
 	node->add_property ("order-keys", order_string);
 
 	node->add_child_nocopy (IO::state (full_state));
+	node->add_child_nocopy (_solo_control.get_state ());
+	node->add_child_nocopy (_mute_control.get_state ());
 
 	if (_control_outs) {
 		XMLNode* cnode = new XMLNode (X_("ControlOuts"));
@@ -1657,6 +1667,12 @@ Route::set_state (const XMLNode& node)
 
 		} else if (child->name() == "extra") {
 			_extra_xml = new XMLNode (*child);
+		} else if (child->name() == "solo") {
+			_solo_control.set_state (*child);
+			_session.add_controllable (&_solo_control);
+		} else if (child->name() == "mute") {
+			_mute_control.set_state (*child);
+			_session.add_controllable (&_mute_control);
 		}
 	}
 
@@ -1680,7 +1696,7 @@ Route::curve_reallocate ()
 }
 
 void
-Route::silence (jack_nframes_t nframes, jack_nframes_t offset)
+Route::silence (nframes_t nframes, nframes_t offset)
 {
 	if (!_silent) {
 
@@ -1915,14 +1931,10 @@ Route::set_active (bool yn)
 void
 Route::handle_transport_stopped (bool abort_ignored, bool did_locate, bool can_flush_redirects)
 {
-	jack_nframes_t now = _session.transport_frame();
+	nframes_t now = _session.transport_frame();
 
 	{
 		Glib::RWLock::ReaderLock lm (redirect_lock);
-
-		if (!did_locate) {
-			automation_snapshot (now);
-		}
 
 		for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
 			
@@ -1984,7 +1996,7 @@ Route::pans_required () const
 }
 
 int 
-Route::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, 
+Route::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
 		   bool session_state_changing, bool can_record, bool rec_monitors_input)
 {
 	if (n_outputs().get_total() == 0) {
@@ -2007,8 +2019,8 @@ Route::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes
 	return 0;
 }
 
-jack_nframes_t
-Route::check_initial_delay (jack_nframes_t nframes, jack_nframes_t& offset, jack_nframes_t& transport_frame)
+nframes_t
+Route::check_initial_delay (nframes_t nframes, nframes_t& offset, nframes_t& transport_frame)
 {
 	if (_roll_delay > nframes) {
 
@@ -2033,24 +2045,15 @@ Route::check_initial_delay (jack_nframes_t nframes, jack_nframes_t& offset, jack
 }
 
 int
-Route::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, int declick,
+Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, int declick,
 	     bool can_record, bool rec_monitors_input)
 {
-	{
-		Glib::RWLock::ReaderLock lm (redirect_lock, Glib::TRY_LOCK);
-		if (lm.locked()) {
-			// automation snapshot can also be called from the non-rt context
-			// and it uses the redirect list, so we take the lock out here
-			automation_snapshot (_session.transport_frame());
-		}
-	}
-		
 	if ((n_outputs().get_total() == 0 && _redirects.empty()) || n_inputs().get_total() == 0 || !_active) {
 		silence (nframes, offset);
 		return 0;
 	}
 	
-	jack_nframes_t unused = 0;
+	nframes_t unused = 0;
 
 	if ((nframes = check_initial_delay (nframes, offset, unused)) == 0) {
 		return 0;
@@ -2077,7 +2080,7 @@ Route::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t 
 }
 
 int
-Route::silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, 
+Route::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
 		    bool can_record, bool rec_monitors_input)
 {
 	silence (nframes, offset);
@@ -2143,7 +2146,7 @@ Route::set_meter_point (MeterPoint p, void *src)
 	}
 }
 
-jack_nframes_t
+nframes_t
 Route::update_total_latency ()
 {
 	_own_latency = 0;
@@ -2169,7 +2172,7 @@ Route::update_total_latency ()
 }
 
 void
-Route::set_latency_delay (jack_nframes_t longest_session_latency)
+Route::set_latency_delay (nframes_t longest_session_latency)
 {
 	_initial_delay = longest_session_latency - _own_latency;
 
@@ -2178,18 +2181,8 @@ Route::set_latency_delay (jack_nframes_t longest_session_latency)
 	}
 }
 
-void
-Route::automation_snapshot (jack_nframes_t now)
-{
-	IO::automation_snapshot (now);
-
-	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
-		(*i)->automation_snapshot (now);
-	}
-}
-
-Route::ToggleControllable::ToggleControllable (Route& s, ToggleType tp)
-	: route (s), type(tp)
+Route::ToggleControllable::ToggleControllable (std::string name, Route& s, ToggleType tp)
+	: Controllable (name), route (s), type(tp)
 {
 	
 }
@@ -2231,7 +2224,7 @@ Route::ToggleControllable::get_value (void) const
 }
 
 void 
-Route::set_block_size (jack_nframes_t nframes)
+Route::set_block_size (nframes_t nframes)
 {
 	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
 		(*i)->set_block_size (nframes);

@@ -44,6 +44,7 @@
 #include "rgb_macros.h"
 #include "gui_thread.h"
 #include "color.h"
+#include "time_axis_view.h"
 
 #include "i18n.h"
 
@@ -200,6 +201,7 @@ Editor::draw_measures ()
 	}
 
 	track_canvas.get_scroll_region (x1, y1, x2, y2);
+	y2 = TimeAxisView::hLargest*5000; // five thousand largest tracks should be enough.. :)
 
 	/* get the first bar spacing */
 
@@ -210,8 +212,9 @@ Editor::draw_measures ()
 
 	beat_density =  (beats * 10.0f) / track_canvas.get_width ();
 
-	if (beat_density > 2.0f) {
-		/* if the lines are too close together, they become useless */
+	if (beat_density > 4.0f) {
+		/* if the lines are too close together, they become useless
+		 */
 		return;
 	}
 	
@@ -228,10 +231,10 @@ Editor::draw_measures ()
 			} else {
 				color = color_map[cMeasureLineBar];
 
-				/* only draw beat lines if the gaps between beats are large.  */
-
-				if (beat_density > 0.25) {
-				  break;
+				if (beat_density > 2.0) {
+					/* only draw beat lines if the gaps between beats are large.
+					*/
+					break;
 				}
 			}
 
@@ -255,7 +258,7 @@ Editor::draw_measures ()
 }
 
 void
-Editor::mouse_add_new_tempo_event (jack_nframes_t frame)
+Editor::mouse_add_new_tempo_event (nframes_t frame)
 {
 	if (session == 0) {
 		return;
@@ -297,7 +300,7 @@ Editor::mouse_add_new_tempo_event (jack_nframes_t frame)
 }
 
 void
-Editor::mouse_add_new_meter_event (jack_nframes_t frame)
+Editor::mouse_add_new_meter_event (nframes_t frame)
 {
 	if (session == 0) {
 		return;

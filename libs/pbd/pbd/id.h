@@ -27,7 +27,7 @@ class ID {
 		return _id < other._id;
 	}
 
-	void print (char* buf) const;
+	void print (char* buf, uint32_t bufsize) const;
         std::string to_s() const;
 	
 	static uint64_t counter() { return _counter; }

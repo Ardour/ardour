@@ -52,13 +52,13 @@ class Marker : public sigc::trackable
 
 
 	Marker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text, Type, 
-		jack_nframes_t frame = 0, bool handle_events = true);
+		nframes_t frame = 0, bool handle_events = true);
 
 	virtual ~Marker ();
 
 	ArdourCanvas::Item& the_item() const;
 
-	void set_position (jack_nframes_t);
+	void set_position (nframes_t);
 	void set_name (const string&);
 	void set_color_rgba (uint32_t rgba);
 
@@ -76,7 +76,7 @@ class Marker : public sigc::trackable
 	ArdourCanvas::Points *points;
 
 	double    unit_position;
-	jack_nframes_t frame_position;
+	nframes_t frame_position;
 	unsigned char      shift; /* should be double, but its always small and integral */
 	Type      _type;
 	

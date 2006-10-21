@@ -166,7 +166,7 @@ ExportRangeMarkersDialog::init_progress_computing(Locations::LocationList& locat
 	// flush vector
 	range_markers_durations_aggregated.resize(0);
 	
-	jack_nframes_t duration_before_current_location = 0;
+	nframes_t duration_before_current_location = 0;
 	Locations::LocationList::iterator locationIter;
 		
 	for (locationIter = locations.begin(); locationIter != locations.end(); ++locationIter) {
@@ -176,7 +176,7 @@ ExportRangeMarkersDialog::init_progress_computing(Locations::LocationList& locat
 			range_markers_durations_aggregated.push_back(
 				duration_before_current_location);
 			
-			jack_nframes_t duration = 
+			nframes_t duration = 
 				currentLocation->end() - currentLocation->start();
 			
 			range_markers_durations.push_back(duration);

@@ -1217,7 +1217,7 @@ AutomationList::store_state (XMLNode& node) const
 		
 		XMLNode *pointnode = new XMLNode ("point");
 		
-		snprintf (buf, sizeof (buf), "%" PRIu32, (jack_nframes_t) floor ((*i)->when));
+		snprintf (buf, sizeof (buf), "%" PRIu32, (nframes_t) floor ((*i)->when));
 		pointnode->add_property ("x", buf);
 		snprintf (buf, sizeof (buf), "%.12g", (*i)->value);
 		pointnode->add_property ("y", buf);
@@ -1232,7 +1232,7 @@ AutomationList::load_state (const XMLNode& node)
 	const XMLNodeList& elist = node.children();
 	XMLNodeConstIterator i;
 	XMLProperty* prop;
-	jack_nframes_t x;
+	nframes_t x;
 	double y;
 
 	clear ();

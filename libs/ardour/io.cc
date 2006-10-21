@@ -60,10 +60,8 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-
 static float current_automation_version_number = 1.0;
 
-jack_nframes_t               IO::_automation_interval = 0;
 const string                 IO::state_node_name = "IO";
 bool                         IO::connecting_legal = false;
 bool                         IO::ports_legal = false;
@@ -105,7 +103,7 @@ IO::IO (Session& s, string name,
       _output_buffers(new BufferSet()),
 	  _name (name),
 	  _default_type(default_type),
-	  _gain_control (*this),
+	  _gain_control (X_("gaincontrol"), *this),
 	  _gain_automation_curve (0.0, 2.0, 1.0),
 	  _input_minimum (ChanCount::ZERO),
 	  _input_maximum (ChanCount::INFINITE),
@@ -138,9 +136,7 @@ IO::IO (Session& s, string name,
 	deferred_state = 0;
 
 	apply_gain_automation = false;
-
-	last_automation_snapshot = 0;
-
+	
 	_gain_automation_state = Off;
 	_gain_automation_style = Absolute;
 
@@ -177,7 +173,7 @@ IO::~IO ()
 }
 
 void
-IO::silence (jack_nframes_t nframes, jack_nframes_t offset)
+IO::silence (nframes_t nframes, nframes_t offset)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
@@ -192,10 +188,9 @@ IO::silence (jack_nframes_t nframes, jack_nframes_t offset)
  * to the outputs, eg applying gain or pan or whatever else needs to be done.
  */
 void
-IO::deliver_output (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset)
+IO::deliver_output (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset)
 {
 	// FIXME: type specific code doesn't actually need to be here, it will go away in time
-	
 
 	/* ********** AUDIO ********** */
 
@@ -210,6 +205,7 @@ IO::deliver_output (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t 
 			if (dm.locked()) {
 				dg = _desired_gain;
 			}
+
 		}
 
 		Amp::run(bufs, nframes, _gain, dg, _phase_invert);
@@ -248,7 +244,7 @@ IO::deliver_output (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t 
 }
 
 void
-IO::collect_input (BufferSet& outs, jack_nframes_t nframes, jack_nframes_t offset)
+IO::collect_input (BufferSet& outs, nframes_t nframes, nframes_t offset)
 {
 	assert(outs.available() >= n_inputs());
 
@@ -268,8 +264,8 @@ IO::collect_input (BufferSet& outs, jack_nframes_t nframes, jack_nframes_t offse
 }
 
 void
-IO::just_meter_input (jack_nframes_t start_frame, jack_nframes_t end_frame, 
-		      jack_nframes_t nframes, jack_nframes_t offset)
+IO::just_meter_input (nframes_t start_frame, nframes_t end_frame, 
+		      nframes_t nframes, nframes_t offset)
 {
 	BufferSet& bufs = _session.get_scratch_buffers (n_inputs());
 
@@ -1138,7 +1134,7 @@ IO::state (bool full_state)
 	Glib::Mutex::Lock lm (io_lock);
 
 	node->add_property("name", _name);
-	id().print (buf);
+	id().print (buf, sizeof (buf));
 	node->add_property("id", buf);
 
 	str = "";
@@ -1220,6 +1216,7 @@ IO::state (bool full_state)
 	}
 
 	node->add_child_nocopy (_panner->state (full_state));
+	node->add_child_nocopy (_gain_control.get_state ());
 
 	snprintf (buf, sizeof(buf), "%2.12f", gain());
 	node->add_property ("gain", buf);
@@ -1342,8 +1339,14 @@ IO::set_state (const XMLNode& node)
 	}
 
 	for (iter = node.children().begin(); iter != node.children().end(); ++iter) {
+
 		if ((*iter)->name() == "Panner") {
 			_panner->set_state (**iter);
+		}
+
+		if ((*iter)->name() == X_("gaincontrol")) {
+			_gain_control.set_state (**iter);
+			_session.add_controllable (&_gain_control);
 		}
 	}
 
@@ -1759,7 +1762,7 @@ IO::set_output_maximum (ChanCount n)
 }
 
 void
-IO::set_port_latency (jack_nframes_t nframes)
+IO::set_port_latency (nframes_t nframes)
 {
 	Glib::Mutex::Lock lm (io_lock);
 
@@ -1768,11 +1771,11 @@ IO::set_port_latency (jack_nframes_t nframes)
 	}
 }
 
-jack_nframes_t
+nframes_t
 IO::output_latency () const
 {
-	jack_nframes_t max_latency;
-	jack_nframes_t latency;
+	nframes_t max_latency;
+	nframes_t latency;
 
 	max_latency = 0;
 
@@ -1787,11 +1790,11 @@ IO::output_latency () const
 	return max_latency;
 }
 
-jack_nframes_t
+nframes_t
 IO::input_latency () const
 {
-	jack_nframes_t max_latency;
-	jack_nframes_t latency;
+	nframes_t max_latency;
+	nframes_t latency;
 
 	max_latency = 0;
 
@@ -2087,7 +2090,7 @@ IO::update_meters()
 void
 IO::meter ()
 {
-	// FIXME: Remove this function and just connect signal directly to PeakMeter::meter
+	// FIXME: Ugly.  Meter should manage the lock, if it's necessary
 	
 	Glib::Mutex::Lock lm (io_lock); // READER: meter thread.
 	_meter->meter();
@@ -2114,7 +2117,7 @@ IO::save_automation (const string& path)
 	/* XXX use apply_to_points to get thread safety */
 	
 	for (AutomationList::iterator i = _gain_automation_curve.begin(); i != _gain_automation_curve.end(); ++i) {
-		out << "g " << (jack_nframes_t) floor ((*i)->when) << ' ' << (*i)->value << endl;
+		out << "g " << (nframes_t) floor ((*i)->when) << ' ' << (*i)->value << endl;
 	}
 
 	_panner->save ();
@@ -2153,7 +2156,7 @@ IO::load_automation (const string& path)
 
 	while (in.getline (line, sizeof(line), '\n')) {
 		char type;
-		jack_nframes_t when;
+		nframes_t when;
 		double value;
 
 		if (++linecnt == 1) {
@@ -2223,7 +2226,6 @@ IO::set_gain_automation_state (AutoState state)
 
 		if (state != _gain_automation_curve.automation_state()) {
 			changed = true;
-			last_automation_snapshot = 0;
 			_gain_automation_curve.set_automation_state (state);
 			
 			if (state != Off) {
@@ -2322,22 +2324,7 @@ IO::end_pan_touch (uint32_t which)
 }
 
 void
-IO::automation_snapshot (jack_nframes_t now)
-{
-	if (last_automation_snapshot > now || (now - last_automation_snapshot) > _automation_interval) {
-
-		if (gain_automation_recording()) {
-			_gain_automation_curve.rt_add (now, gain());
-		}
-		
-		_panner->snapshot (now);
-
-		last_automation_snapshot = now;
-	}
-}
-
-void
-IO::transport_stopped (jack_nframes_t frame)
+IO::transport_stopped (nframes_t frame)
 {
 	_gain_automation_curve.reposition_for_rt_add (frame);
 

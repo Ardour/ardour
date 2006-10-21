@@ -30,10 +30,20 @@ using std::endl;
 #include <sigc++/slot.h>
 #include <typeinfo>
 
+/* grrr, strict C++ says that static member functions are not C functions, but we also want
+   to be able to pack this into a sigc::ptr_fun and not sigc::mem_fun, so we have to make
+   it a genuine function rather than a member.
+*/
+
+static void object_death (Command* mc) {
+	delete mc;
+}
+
 /** This command class is initialized with before and after mementos 
  * (from Stateful::get_state()), so undo becomes restoring the before
  * memento, and redo is restoring the after memento.
  */
+
 template <class obj_T>
 class MementoCommand : public Command
 {
@@ -43,8 +53,9 @@ class MementoCommand : public Command
                        XMLNode *after
                        ) 
             : obj(object), before(before), after(after) {
-		obj.GoingAway.connect (sigc::mem_fun (*this, &MementoCommand<obj_T>::object_death));
+		obj.GoingAway.connect (sigc::bind (sigc::ptr_fun (object_death), static_cast<Command*>(this)));
 	}
+
 	~MementoCommand () {
 		GoingAway();
 		if (before) {
@@ -91,10 +102,6 @@ class MementoCommand : public Command
     protected:
         obj_T &obj;
         XMLNode *before, *after;
-
-	void object_death () {
-		delete this;
-	}
 };
 
 #endif // __lib_pbd_memento_h__

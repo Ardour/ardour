@@ -166,7 +166,7 @@ class TimeAxisView : public virtual AxisView
 	virtual void show_selection (TimeSelection&);
 	virtual void hide_selection ();
 	virtual void reshow_selection (TimeSelection&);
-	virtual void show_timestretch (jack_nframes_t start, jack_nframes_t end);
+	virtual void show_timestretch (nframes_t start, nframes_t end);
 	virtual void hide_timestretch ();
 
 	virtual void hide_dependent_views (TimeAxisViewItem&) {}
@@ -175,18 +175,18 @@ class TimeAxisView : public virtual AxisView
 	/* editing operations */
 	
 	virtual bool cut_copy_clear (Selection&, Editing::CutCopyOp) { return false; }
-	virtual bool paste (jack_nframes_t, float times, Selection&, size_t nth) { return false; }
+	virtual bool paste (nframes_t, float times, Selection&, size_t nth) { return false; }
 	
 	virtual void set_selected_regionviews (RegionSelection&) {}
 	virtual void set_selected_points (PointSelection&) {}
 
-	virtual boost::shared_ptr<ARDOUR::Region> find_next_region (jack_nframes_t pos, ARDOUR::RegionPoint, int32_t dir) {
+	virtual boost::shared_ptr<ARDOUR::Region> find_next_region (nframes_t pos, ARDOUR::RegionPoint, int32_t dir) {
 		return boost::shared_ptr<ARDOUR::Region> ();
 	}
 
   	void order_selection_trims (ArdourCanvas::Item *item, bool put_start_on_top);
 
-	virtual void get_selectables (jack_nframes_t start, jack_nframes_t end, double top, double bot, list<Selectable*>& results);
+	virtual void get_selectables (nframes_t start, nframes_t end, double top, double bot, list<Selectable*>& results);
 	virtual void get_inverted_selectables (Selection&, list<Selectable *>& results);
 
 	/* state/serialization management */

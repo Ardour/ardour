@@ -86,114 +86,10 @@ Session::use_config_midi_ports ()
  MTC, MMC, etc.
 **********************************************************************/
 
-void
-Session::set_mmc_control (bool yn)
-{
-#if 0
-	if (mmc_control == yn) {
-		return;
-	}
-	
-	mmc_control = yn;
-	set_dirty();
-	poke_midi_thread ();
-#endif
-	ControlChanged (MMCControl); /* EMIT SIGNAL */
-}
-
-void
-Session::set_midi_control (bool yn)
-{
-#if 0
-	if (midi_control == yn) {
-		return;
-	}
-
-	midi_control = yn;
-	set_dirty();
-	poke_midi_thread ();
-#endif
-	ControlChanged (MidiControl); /* EMIT SIGNAL */
-}
-
-void
-Session::set_send_mtc (bool yn)
-{
-	/* set the persistent option value regardless */
-
-	send_midi_timecode = yn;
-	set_dirty();
-
-	/* only set the internal flag if we have
-	   a port.
-	*/
-
-	if (_mtc_port == 0 || send_mtc == yn) {
-		return;
-	}
-
-	send_mtc = yn;
-	ControlChanged (SendMTC); /* EMIT SIGNAL */
-}
-
-void
-Session::set_send_mmc (bool yn)
-{
-	cerr << "set send mmc " << yn << endl;
-
-	if (_mmc_port == 0) {
-		cerr << "\tno 1\n";
-		return;
-	}
-
-	if (send_midi_machine_control == yn) {
-		cerr << "\tno 2\n";
-		return;
-	}
-
-	/* only set the internal flag if we have
-	   a port.
-	*/
-
-	if (_mmc_port) {
-		cerr << "\tyes\n";
-		send_mmc = yn;
-	}
-
-	/* set the persistent option value regardless */
-
-	send_midi_machine_control = yn;
-	set_dirty();
-
-	ControlChanged (SendMMC); /* EMIT SIGNAL */
-}
-
-void
-Session::set_midi_feedback (bool yn)
-{
-}
-
-bool
-Session::get_midi_feedback () const
-{
-	return false;
-}
-
-bool
-Session::get_send_mtc () const
-{
-	return send_mtc;
-}
-
-bool
-Session::get_send_mmc () const
-{
-	return send_mmc;
-}
-
 int
 Session::set_mtc_port (string port_tag)
 {
+#if 0
 	MTC_Slave *ms;
 
 	if (port_tag.length() == 0) {
@@ -227,6 +123,7 @@ Session::set_mtc_port (string port_tag)
 	Config->set_mtc_port_name (port_tag);
 
   out:
+	#endif
 	MTC_PortChanged(); /* EMIT SIGNAL */
 	change_midi_ports ();
 	set_dirty();
@@ -236,6 +133,7 @@ Session::set_mtc_port (string port_tag)
 int
 Session::set_mmc_port (string port_tag)
 {
+#if 0
 	if (port_tag.length() == 0) {
 		if (_mmc_port == 0) {
 			return 0;
@@ -295,8 +193,8 @@ Session::set_mmc_port (string port_tag)
 	_mmc_port->input()->stop.connect (mem_fun (*this, &Session::spp_stop));
 	
 	Config->set_mmc_port_name (port_tag);
-
   out:
+#endif
 	MMC_PortChanged(); /* EMIT SIGNAL */
 	change_midi_ports ();
 	set_dirty();
@@ -306,6 +204,7 @@ Session::set_mmc_port (string port_tag)
 int
 Session::set_midi_port (string port_tag)
 {
+#if 0
 	if (port_tag.length() == 0) {
 		if (_midi_port == 0) {
 			return 0;
@@ -329,6 +228,7 @@ Session::set_midi_port (string port_tag)
 	Config->set_midi_port_name (port_tag);
 
   out:
+#endif
 	MIDI_PortChanged(); /* EMIT SIGNAL */
 	change_midi_ports ();
 	set_dirty();
@@ -338,6 +238,7 @@ Session::set_midi_port (string port_tag)
 void
 Session::set_trace_midi_input (bool yn, MIDI::Port* port)
 {
+#if 0
 	MIDI::Parser* input_parser;
 
 	if (port) {
@@ -364,6 +265,7 @@ Session::set_trace_midi_input (bool yn, MIDI::Port* port)
 			}
 		}
 	}
+#endif
 
 	Config->set_trace_midi_input (yn);
 }
@@ -371,6 +273,7 @@ Session::set_trace_midi_input (bool yn, MIDI::Port* port)
 void
 Session::set_trace_midi_output (bool yn, MIDI::Port* port)
 {
+#if 0
 	MIDI::Parser* output_parser;
 
 	if (port) {
@@ -397,6 +300,7 @@ Session::set_trace_midi_output (bool yn, MIDI::Port* port)
 		}
 
 	}
+#endif
 
 	Config->set_trace_midi_output (yn);
 }
@@ -404,6 +308,7 @@ Session::set_trace_midi_output (bool yn, MIDI::Port* port)
 bool
 Session::get_trace_midi_input(MIDI::Port *port)
 {
+#if 0
 	MIDI::Parser* input_parser;
 	if (port) {
 		if ((input_parser = port->input()) != 0) {
@@ -429,6 +334,7 @@ Session::get_trace_midi_input(MIDI::Port *port)
 			}
 		}
 	}
+#endif
 
 	return false;
 }
@@ -436,6 +342,7 @@ Session::get_trace_midi_input(MIDI::Port *port)
 bool
 Session::get_trace_midi_output(MIDI::Port *port)
 {
+#if 0
 	MIDI::Parser* output_parser;
 	if (port) {
 		if ((output_parser = port->output()) != 0) {
@@ -461,6 +368,7 @@ Session::get_trace_midi_output(MIDI::Port *port)
 			}
 		}
 	}
+#endif
 
 	return false;
 
@@ -492,21 +400,20 @@ Session::setup_midi_control ()
 
 	if (_mmc_port != 0) {
 
-		send_mmc = send_midi_machine_control;
+		Config->set_send_mmc (session_send_mmc);
 
 	} else {
 
 		mmc = 0;
-		send_mmc = false;
+		session_send_mmc = false;
 	}
 
 	if (_mtc_port != 0) {
 
-		send_mtc = send_midi_timecode;
+		Config->set_send_mtc (session_send_mtc);
 
 	} else {
-
-		send_mtc = false;
+		session_send_mtc = false;
 	}
 }
 
@@ -553,7 +460,7 @@ Session::midi_read (MIDI::Port* port)
 void
 Session::spp_start (Parser& ignored)
 {
-	if (mmc_control && (_slave_type != MTC)) {
+	if (Config->get_mmc_control() && (Config->get_slave_source() != MTC)) {
 		request_transport_speed (1.0);
 	}
 }
@@ -567,7 +474,7 @@ Session::spp_continue (Parser& ignored)
 void
 Session::spp_stop (Parser& ignored)
 {
-	if (mmc_control) {
+	if (Config->get_mmc_control()) {
 		request_stop ();
 	}
 }
@@ -575,7 +482,7 @@ Session::spp_stop (Parser& ignored)
 void
 Session::mmc_deferred_play (MIDI::MachineControl &mmc)
 {
-	if (mmc_control && (_slave_type != MTC)) {
+	if (Config->get_mmc_control() && (Config->get_slave_source() != MTC)) {
 		request_transport_speed (1.0);
 	}
 }
@@ -583,7 +490,7 @@ Session::mmc_deferred_play (MIDI::MachineControl &mmc)
 void
 Session::mmc_record_pause (MIDI::MachineControl &mmc)
 {
-	if (mmc_control) {
+	if (Config->get_mmc_control()) {
 		maybe_enable_record();
 	}
 }
@@ -591,7 +498,7 @@ Session::mmc_record_pause (MIDI::MachineControl &mmc)
 void
 Session::mmc_record_strobe (MIDI::MachineControl &mmc)
 {
-	if (!mmc_control) 
+	if (!Config->get_mmc_control()) 
 		return;
 
 	/* record strobe does an implicit "Play" command */
@@ -619,7 +526,7 @@ Session::mmc_record_strobe (MIDI::MachineControl &mmc)
 void
 Session::mmc_record_exit (MIDI::MachineControl &mmc)
 {
-	if (mmc_control) {
+	if (Config->get_mmc_control()) {
 		disable_record (false);
 	}
 }
@@ -627,7 +534,7 @@ Session::mmc_record_exit (MIDI::MachineControl &mmc)
 void
 Session::mmc_stop (MIDI::MachineControl &mmc)
 {
-	if (mmc_control) {
+	if (Config->get_mmc_control()) {
 		request_stop ();
 	}
 }
@@ -635,7 +542,7 @@ Session::mmc_stop (MIDI::MachineControl &mmc)
 void
 Session::mmc_pause (MIDI::MachineControl &mmc)
 {
-	if (mmc_control) {
+	if (Config->get_mmc_control()) {
 
 		/* We support RECORD_PAUSE, so the spec says that
 		   we must interpret PAUSE like RECORD_PAUSE if
@@ -655,7 +562,7 @@ static bool step_queued = false;
 void
 Session::mmc_step (MIDI::MachineControl &mmc, int steps)
 {
-	if (!mmc_control) {
+	if (!Config->get_mmc_control()) {
 		return;
 	}
 
@@ -674,7 +581,7 @@ Session::mmc_step (MIDI::MachineControl &mmc, int steps)
 	}
 	
 	double diff_secs = diff.tv_sec + (diff.tv_usec / 1000000.0);
-	double cur_speed = (((steps * 0.5) * smpte_frames_per_second) / diff_secs) / smpte_frames_per_second;
+	double cur_speed = (((steps * 0.5) * Config->get_smpte_frames_per_second()) / diff_secs) / Config->get_smpte_frames_per_second();
 	
 	if (_transport_speed == 0 || cur_speed * _transport_speed < 0) {
 		/* change direction */
@@ -706,7 +613,7 @@ Session::mmc_step (MIDI::MachineControl &mmc, int steps)
 void
 Session::mmc_rewind (MIDI::MachineControl &mmc)
 {
-	if (mmc_control) {
+	if (Config->get_mmc_control()) {
 		request_transport_speed(-8.0f);
 	}
 }
@@ -714,7 +621,7 @@ Session::mmc_rewind (MIDI::MachineControl &mmc)
 void
 Session::mmc_fast_forward (MIDI::MachineControl &mmc)
 {
-	if (mmc_control) {
+	if (Config->get_mmc_control()) {
 		request_transport_speed(8.0f);
 	}
 }
@@ -722,11 +629,11 @@ Session::mmc_fast_forward (MIDI::MachineControl &mmc)
 void
 Session::mmc_locate (MIDI::MachineControl &mmc, const MIDI::byte* mmc_tc)
 {
-	if (!mmc_control) {
+	if (!Config->get_mmc_control()) {
 		return;
 	}
 
-	jack_nframes_t target_frame;
+	nframes_t target_frame;
 	SMPTE::Time smpte;
 
 	smpte.hours = mmc_tc[0] & 0xf;
@@ -761,18 +668,14 @@ Session::mmc_locate (MIDI::MachineControl &mmc, const MIDI::byte* mmc_tc)
 void
 Session::mmc_shuttle (MIDI::MachineControl &mmc, float speed, bool forw)
 {
-	cerr << "MMC shuttle, speed = " << speed << endl;
-
-	if (!mmc_control) {
+	if (!Config->get_mmc_control()) {
 		return;
 	}
 
-	if (shuttle_speed_threshold >= 0 && speed > shuttle_speed_threshold) {
-		speed *= shuttle_speed_factor;
+	if (Config->get_shuttle_speed_threshold() >= 0 && speed > Config->get_shuttle_speed_threshold()) {
+		speed *= Config->get_shuttle_speed_factor();
 	}
 
-	cerr << "requested MMC control speed = " << speed << endl;
-	
 	if (forw) {
 		request_transport_speed (speed);
 	} else {
@@ -783,7 +686,7 @@ Session::mmc_shuttle (MIDI::MachineControl &mmc, float speed, bool forw)
 void
 Session::mmc_record_enable (MIDI::MachineControl &mmc, size_t trk, bool enabled)
 {
-	if (mmc_control) {
+	if (Config->get_mmc_control()) {
 
 		RouteList::iterator i;
 		boost::shared_ptr<RouteList> r = routes.reader();
@@ -832,7 +735,7 @@ Session::send_full_time_code(jack_nframes_t nframes)
 
 	_send_smpte_update = false;
 
-	if (_mtc_port == 0 || !send_mtc) {
+	if (_mtc_port == 0 || !session_send_mtc) {
 		return 0;
 	}
 	
@@ -897,7 +800,7 @@ Session::send_midi_time_code_for_cycle(jack_nframes_t nframes)
 		printf("Negative????\n");
 	}
 
-	if (_mtc_port == 0 || !send_mtc || transmitting_smpte_time.negative
+	if (_mtc_port == 0 || !session_send_mtc || transmitting_smpte_time.negative
 			/*|| (next_quarter_frame_to_send < 0)*/ ) {
 		//printf("(MTC) Not sending MTC\n");
 		return 0;
@@ -996,11 +899,11 @@ Session::send_midi_time_code_for_cycle(jack_nframes_t nframes)
 **********************************************************************/
 /*
 void
-Session::send_mmc_in_another_thread (MIDI::MachineControl::Command cmd, jack_nframes_t target_frame)
+Session::send_mmc_in_another_thread (MIDI::MachineControl::Command cmd, nframes_t target_frame)
 {
 	MIDIRequest* request;
 
-	if (_mtc_port == 0 || !send_mmc) {
+	if (_mtc_port == 0 || !session_send_mmc) {
 		return;
 	}
 
@@ -1020,13 +923,13 @@ Session::send_mmc_in_another_thread (MIDI::MachineControl::Command cmd, jack_nfr
  * this process cycle or horrible things will happen.
  */
 void
-Session::deliver_mmc (MIDI::MachineControl::Command cmd, jack_nframes_t where)
+Session::deliver_mmc (MIDI::MachineControl::Command cmd, nframes_t where)
 {
 	using namespace MIDI;
 	int nbytes = 4;
 	SMPTE::Time smpte;
 
-	if (_mmc_port == 0 || !send_mmc) {
+	if (_mmc_port == 0 || !session_send_mmc) {
 		//cerr << "Not delivering MMC " << _mmc_port << " - " << send_mmc << endl;
 		return;
 	}
@@ -1236,7 +1139,7 @@ Session::terminate_midi_thread ()
 void
 Session::poke_midi_thread ()
 {
-	char c;
+	static char c = 0;
 
 	if (write (midi_request_pipe[1], &c, 1) != 1) {
 		error << string_compose(_("cannot send signal to midi thread! (%1)"), strerror (errno)) << endmsg;
@@ -1294,7 +1197,7 @@ Session::midi_thread_work ()
 		   on the appropriate port.
 		*/
 
-		if (mmc_control && _mmc_port && _mmc_port->selectable() >= 0) {
+		if (Config->get_mmc_control() && _mmc_port && _mmc_port->selectable() >= 0) {
 			pfd[nfds].fd = _mmc_port->selectable();
 			pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
 			ports[nfds] = _mmc_port;
@@ -1306,14 +1209,14 @@ Session::midi_thread_work ()
 		   the relevant port.
 		*/
 
-		if (_mtc_port && (_mtc_port != _mmc_port || !mmc_control) && _mtc_port->selectable() >= 0) {
+		if (_mtc_port && (_mtc_port != _mmc_port || !Config->get_mmc_control()) && _mtc_port->selectable() >= 0) {
 			pfd[nfds].fd = _mtc_port->selectable();
 			pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
 			ports[nfds] = _mtc_port;
 			nfds++;
 		}
 
-		if (_midi_port && (_midi_port != _mmc_port || !mmc_control) && (_midi_port != _mtc_port) && _midi_port->selectable() >= 0) {
+		if (_midi_port && (_midi_port != _mmc_port || !Config->get_mmc_control()) && (_midi_port != _mtc_port) && _midi_port->selectable() >= 0) {
 			pfd[nfds].fd = _midi_port->selectable();
 			pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
 			ports[nfds] = _midi_port;
@@ -1473,14 +1376,3 @@ Session::midi_thread_work ()
 }
 #endif
 
-bool
-Session::get_mmc_control () const
-{
-	return mmc_control;
-}
-
-bool
-Session::get_midi_control () const
-{
-	return midi_control;
-}

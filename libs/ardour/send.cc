@@ -103,7 +103,7 @@ Send::set_state(const XMLNode& node)
 }
 
 void
-Send::run (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset)
+Send::run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset)
 {
 	if (active()) {
 

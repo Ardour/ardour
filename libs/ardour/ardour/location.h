@@ -42,7 +42,7 @@ using std::string;
 
 namespace ARDOUR {
 
-class Location : public sigc::trackable, public PBD::StatefulDestructible
+class Location : public PBD::StatefulDestructible
 {
   public:
 	enum Flags {
@@ -56,8 +56,8 @@ class Location : public sigc::trackable, public PBD::StatefulDestructible
 		IsStart = 0x80
 	};
 
-	Location (jack_nframes_t sample_start,
-		  jack_nframes_t sample_end,
+	Location (nframes_t sample_start,
+		  nframes_t sample_end,
 		  const string &name,
 		  Flags bits = Flags(0))		
 		
@@ -76,13 +76,13 @@ class Location : public sigc::trackable, public PBD::StatefulDestructible
 	Location (const XMLNode&);
 	Location* operator= (const Location& other);
 
-	jack_nframes_t start() { return _start; }
-	jack_nframes_t end() { return _end; }
-	jack_nframes_t length() { return _end - _start; }
+	nframes_t start() { return _start; }
+	nframes_t end() { return _end; }
+	nframes_t length() { return _end - _start; }
 
-	int set_start (jack_nframes_t s);
-	int set_end (jack_nframes_t e);
-	int set (jack_nframes_t start, jack_nframes_t end);
+	int set_start (nframes_t s);
+	int set_end (nframes_t e);
+	int set (nframes_t start, nframes_t end);
 
 	const string& name() { return _name; }
 	void set_name (const string &str) { _name = str; name_changed(this); }
@@ -123,8 +123,8 @@ class Location : public sigc::trackable, public PBD::StatefulDestructible
 
   private:
 	string        _name;
-	jack_nframes_t     _start;
-	jack_nframes_t     _end;
+	nframes_t     _start;
+	nframes_t     _end;
 	uint32_t _flags;
 
 	void set_mark (bool yn);
@@ -159,11 +159,11 @@ class Locations : public StateManager, public PBD::StatefulDestructible
 	int set_current (Location *, bool want_lock = true);
 	Location *current () const { return current_location; }
 
-	Location *first_location_before (jack_nframes_t);
-	Location *first_location_after (jack_nframes_t);
+	Location *first_location_before (nframes_t);
+	Location *first_location_after (nframes_t);
 
-	jack_nframes_t first_mark_before (jack_nframes_t);
-	jack_nframes_t first_mark_after (jack_nframes_t);
+	nframes_t first_mark_before (nframes_t);
+	nframes_t first_mark_after (nframes_t);
 
 	sigc::signal<void,Location*> current_changed;
 	sigc::signal<void>           changed;

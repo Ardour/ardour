@@ -98,7 +98,7 @@ class Selection : public sigc::trackable
 	void set (const list<TimeAxisView*>&);
 	void set (RegionView*);
 	void set (std::vector<RegionView*>&);
-	long set (TimeAxisView*, jack_nframes_t, jack_nframes_t);
+	long set (TimeAxisView*, nframes_t, nframes_t);
 	void set (ARDOUR::AutomationList*);
 	void set (ARDOUR::Playlist*);
 	void set (const list<ARDOUR::Playlist*>&);
@@ -109,7 +109,7 @@ class Selection : public sigc::trackable
 	void toggle (const list<TimeAxisView*>&);
 	void toggle (RegionView*);
 	void toggle (std::vector<RegionView*>&);
-	long toggle (jack_nframes_t, jack_nframes_t);
+	long toggle (nframes_t, nframes_t);
 	void toggle (ARDOUR::AutomationList*);
 	void toggle (ARDOUR::Playlist*);
 	void toggle (const list<ARDOUR::Playlist*>&);
@@ -119,7 +119,7 @@ class Selection : public sigc::trackable
 	void add (const list<TimeAxisView*>&);
 	void add (RegionView*);
 	void add (std::vector<RegionView*>&);
-	long add (jack_nframes_t, jack_nframes_t);
+	long add (nframes_t, nframes_t);
 	void add (ARDOUR::AutomationList*);
 	void add (ARDOUR::Playlist*);
 	void add (const list<ARDOUR::Playlist*>&);
@@ -129,13 +129,13 @@ class Selection : public sigc::trackable
 	void remove (const list<TimeAxisView*>&);
 	void remove (RegionView*);
 	void remove (uint32_t selection_id);
-	void remove (jack_nframes_t, jack_nframes_t);
+	void remove (nframes_t, nframes_t);
 	void remove (ARDOUR::AutomationList*);
 	void remove (ARDOUR::Playlist*);
 	void remove (const list<ARDOUR::Playlist*>&);
 	void remove (boost::shared_ptr<ARDOUR::Redirect>);
 
-	void replace (uint32_t time_index, jack_nframes_t start, jack_nframes_t end);
+	void replace (uint32_t time_index, nframes_t start, nframes_t end);
 	
 	void clear_regions();
 	void clear_tracks ();

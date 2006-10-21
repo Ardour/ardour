@@ -37,8 +37,8 @@ using namespace PBD;
 sigc::signal<void,boost::shared_ptr<Region> > RegionFactory::CheckNewRegion;
 
 boost::shared_ptr<Region>
-RegionFactory::create (boost::shared_ptr<Region> region, jack_nframes_t start, 
-			     jack_nframes_t length, std::string name, 
+RegionFactory::create (boost::shared_ptr<Region> region, nframes_t start, 
+			     nframes_t length, std::string name, 
 			     layer_t layer, Region::Flag flags, bool announce)
 {
 	boost::shared_ptr<const AudioRegion> other_a;
@@ -91,8 +91,8 @@ RegionFactory::create (boost::shared_ptr<Region> region)
 }
 
 boost::shared_ptr<Region>
-RegionFactory::create (boost::shared_ptr<AudioRegion> region, jack_nframes_t start, 
-			     jack_nframes_t length, std::string name, 
+RegionFactory::create (boost::shared_ptr<AudioRegion> region, nframes_t start, 
+			     nframes_t length, std::string name, 
 			     layer_t layer, Region::Flag flags, bool announce)
 {
 	return create (boost::static_pointer_cast<Region> (region), start, length, name, layer, flags, announce);
@@ -107,7 +107,7 @@ RegionFactory::create (Session& session, XMLNode& node, bool yn)
 }
 	
 boost::shared_ptr<Region> 
-RegionFactory::create (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Region::Flag flags, bool announce)
+RegionFactory::create (SourceList& srcs, nframes_t start, nframes_t length, const string& name, layer_t layer, Region::Flag flags, bool announce)
 {
 	if (srcs.empty()) {
 		return boost::shared_ptr<Region>();
@@ -159,7 +159,7 @@ RegionFactory::create (SourceList& srcs, const XMLNode& node)
 }
 
 boost::shared_ptr<Region> 
-RegionFactory::create (boost::shared_ptr<Source> src, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Region::Flag flags, bool announce)
+RegionFactory::create (boost::shared_ptr<Source> src, nframes_t start, nframes_t length, const string& name, layer_t layer, Region::Flag flags, bool announce)
 {
 	boost::shared_ptr<AudioSource> as;
 	boost::shared_ptr<MidiSource> ms;

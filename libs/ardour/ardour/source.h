@@ -34,7 +34,7 @@ namespace ARDOUR {
 
 class Session;
 
-class Source : public PBD::StatefulDestructible, public sigc::trackable
+class Source : public PBD::StatefulDestructible
 {
   public:
 	Source (Session&, std::string name, DataType type);

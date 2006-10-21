@@ -98,14 +98,6 @@ SendUI::outs_changed (IOChange change, void* ignored)
 }
 
 void
-SendUI::send_going_away ()
-{
-	ENSURE_GUI_THREAD (mem_fun (*this, &SendUI::send_going_away))
-
-	delete this;
-}
-
-void
 SendUI::update ()
 {
 }
@@ -113,7 +105,7 @@ SendUI::update ()
 void
 SendUI::fast_update ()
 {
-	if (_session.meter_falloff() > 0.0f) {
+	if (Config->get_meter_falloff() > 0.0f) {
 		gpm.update_meters ();
 	}
 }
@@ -146,7 +138,6 @@ void
 SendUIWindow::send_going_away ()
 {
 	ENSURE_GUI_THREAD (mem_fun (*this, &SendUIWindow::send_going_away));
-	
-	delete this;
+	delete_when_idle (this);
 }
 

@@ -26,6 +26,8 @@
 
 #include <pbd/pathscanner.h>
 
+#include <gtkmm2ext/utils.h>
+
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "audio_clock.h"
@@ -39,10 +41,13 @@
 
 #include "i18n.h"
 
+using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
-using namespace Gtk;
 using namespace Gtkmm2ext;
+using namespace Gtk;
+using namespace Glib;
+using namespace sigc;
 
 int
 ARDOUR_UI::create_editor ()
@@ -81,6 +86,9 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (main_actions, X_("AudioFileFormatHeader"), _("Header"));
 	ActionManager::register_action (main_actions, X_("AudioFileFormatData"), _("Data"));
 	ActionManager::register_action (main_actions, X_("ControlSurfaces"), _("Control Surfaces"));
+	ActionManager::register_action (main_actions, X_("Metering"), _("Metering"));
+	ActionManager::register_action (main_actions, X_("MeteringFallOffRate"), _("Fall off rate"));
+	ActionManager::register_action (main_actions, X_("MeteringHoldTime"), _("Hold Time"));
 
 	/* the real actions */
 
@@ -149,23 +157,23 @@ ARDOUR_UI::install_actions ()
 	
 	RadioAction::Group jack_latency_group;
 	
-	act = ActionManager::register_radio_action (jack_actions, jack_latency_group, X_("JACKLatency32"), X_("32"), bind (mem_fun(*this, &ARDOUR_UI::set_jack_buffer_size), (jack_nframes_t) 32));
+	act = ActionManager::register_radio_action (jack_actions, jack_latency_group, X_("JACKLatency32"), X_("32"), bind (mem_fun(*this, &ARDOUR_UI::set_jack_buffer_size), (nframes_t) 32));
 	ActionManager::jack_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (jack_actions, jack_latency_group, X_("JACKLatency64"), X_("64"), bind (mem_fun(*this, &ARDOUR_UI::set_jack_buffer_size), (jack_nframes_t) 64));
+	act = ActionManager::register_radio_action (jack_actions, jack_latency_group, X_("JACKLatency64"), X_("64"), bind (mem_fun(*this, &ARDOUR_UI::set_jack_buffer_size), (nframes_t) 64));
 	ActionManager::jack_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (jack_actions, jack_latency_group, X_("JACKLatency128"), X_("128"), bind (mem_fun(*this, &ARDOUR_UI::set_jack_buffer_size), (jack_nframes_t) 128));
+	act = ActionManager::register_radio_action (jack_actions, jack_latency_group, X_("JACKLatency128"), X_("128"), bind (mem_fun(*this, &ARDOUR_UI::set_jack_buffer_size), (nframes_t) 128));
 	ActionManager::jack_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (jack_actions, jack_latency_group, X_("JACKLatency256"), X_("256"), bind (mem_fun(*this, &ARDOUR_UI::set_jack_buffer_size), (jack_nframes_t) 256));
+	act = ActionManager::register_radio_action (jack_actions, jack_latency_group, X_("JACKLatency256"), X_("256"), bind (mem_fun(*this, &ARDOUR_UI::set_jack_buffer_size), (nframes_t) 256));
 	ActionManager::jack_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (jack_actions, jack_latency_group, X_("JACKLatency512"), X_("512"), bind (mem_fun(*this, &ARDOUR_UI::set_jack_buffer_size), (jack_nframes_t) 512));
+	act = ActionManager::register_radio_action (jack_actions, jack_latency_group, X_("JACKLatency512"), X_("512"), bind (mem_fun(*this, &ARDOUR_UI::set_jack_buffer_size), (nframes_t) 512));
 	ActionManager::jack_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (jack_actions, jack_latency_group, X_("JACKLatency1024"), X_("1024"), bind (mem_fun(*this, &ARDOUR_UI::set_jack_buffer_size), (jack_nframes_t) 1024));
+	act = ActionManager::register_radio_action (jack_actions, jack_latency_group, X_("JACKLatency1024"), X_("1024"), bind (mem_fun(*this, &ARDOUR_UI::set_jack_buffer_size), (nframes_t) 1024));
 	ActionManager::jack_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (jack_actions, jack_latency_group, X_("JACKLatency2048"), X_("2048"), bind (mem_fun(*this, &ARDOUR_UI::set_jack_buffer_size), (jack_nframes_t) 2048));
+	act = ActionManager::register_radio_action (jack_actions, jack_latency_group, X_("JACKLatency2048"), X_("2048"), bind (mem_fun(*this, &ARDOUR_UI::set_jack_buffer_size), (nframes_t) 2048));
 	ActionManager::jack_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (jack_actions, jack_latency_group, X_("JACKLatency4096"), X_("4096"), bind (mem_fun(*this, &ARDOUR_UI::set_jack_buffer_size), (jack_nframes_t) 4096));
+	act = ActionManager::register_radio_action (jack_actions, jack_latency_group, X_("JACKLatency4096"), X_("4096"), bind (mem_fun(*this, &ARDOUR_UI::set_jack_buffer_size), (nframes_t) 4096));
 	ActionManager::jack_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (jack_actions, jack_latency_group, X_("JACKLatency8192"), X_("8192"), bind (mem_fun(*this, &ARDOUR_UI::set_jack_buffer_size), (jack_nframes_t) 8192));
+	act = ActionManager::register_radio_action (jack_actions, jack_latency_group, X_("JACKLatency8192"), X_("8192"), bind (mem_fun(*this, &ARDOUR_UI::set_jack_buffer_size), (nframes_t) 8192));
 	ActionManager::jack_sensitive_actions.push_back (act);
 	
 	/* these actions are intended to be shared across all windows */
@@ -358,8 +366,8 @@ ARDOUR_UI::install_actions ()
 
 	Glib::RefPtr<ActionGroup> shuttle_actions = ActionGroup::create ("ShuttleActions");
 	
-	shuttle_actions->add (Action::create (X_("SetShuttleUnitsPercentage"), _("Percentage")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_units), Percentage));
-	shuttle_actions->add (Action::create (X_("SetShuttleUnitsSemitones"), _("Semitones")), bind (mem_fun(*this, &ARDOUR_UI::set_shuttle_units), Semitones));
+	shuttle_actions->add (Action::create (X_("SetShuttleUnitsPercentage"), _("Percentage")), hide_return (bind (mem_fun (*Config, &Configuration::set_shuttle_units), Percentage)));
+	shuttle_actions->add (Action::create (X_("SetShuttleUnitsSemitones"), _("Semitones")), hide_return (bind (mem_fun (*Config, &Configuration::set_shuttle_units), Semitones)));
 
 	Glib::RefPtr<ActionGroup> option_actions = ActionGroup::create ("options");
 
@@ -374,8 +382,36 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_toggle_action (option_actions, X_("UseMIDIcontrol"), _("Use MIDI control"), mem_fun (*this, &ARDOUR_UI::toggle_use_midi_control));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_toggle_action (option_actions, X_("AutoConnectNewTrackInputsToHardware"), _("Connect new track inputs to hardware"), mem_fun (*this, &ARDOUR_UI::toggle_AutoConnectNewTrackInputsToHardware));
+	ActionManager::register_toggle_action (option_actions, X_("StopPluginsWithTransport"), _("Stop plugins with transport"), mem_fun (*this, &ARDOUR_UI::toggle_StopPluginsWithTransport));
+	ActionManager::register_toggle_action (option_actions, X_("VerifyRemoveLastCapture"), _("Verify remove last capture"), mem_fun (*this, &ARDOUR_UI::toggle_VerifyRemoveLastCapture));
+	ActionManager::register_toggle_action (option_actions, X_("StopRecordingOnXrun"), _("Stop recording on xrun"), mem_fun (*this, &ARDOUR_UI::toggle_StopRecordingOnXrun));
+	ActionManager::register_toggle_action (option_actions, X_("StopTransportAtEndOfSession"), _("Stop transport at session end"), mem_fun (*this, &ARDOUR_UI::toggle_StopTransportAtEndOfSession));
+	ActionManager::register_toggle_action (option_actions, X_("GainReduceFastTransport"), _("-12dB gain reduce ffwd/rewind"), mem_fun (*this, &ARDOUR_UI::toggle_GainReduceFastTransport));
+	ActionManager::register_toggle_action (option_actions, X_("LatchedRecordEnable"), _("Rec-enable stays engaged at stop"), mem_fun (*this, &ARDOUR_UI::toggle_LatchedRecordEnable));
+
+	act = ActionManager::register_toggle_action (option_actions, X_("DoNotRunPluginsWhileRecording"), _("Do not run plugins while recording"), mem_fun (*this, &ARDOUR_UI::toggle_DoNotRunPluginsWhileRecording));
 	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_toggle_action (option_actions, X_("LatchedSolo"), _("Latched solo"), mem_fun (*this, &ARDOUR_UI::toggle_LatchedSolo));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	/* !!! REMEMBER THAT RADIO ACTIONS HAVE TO BE HANDLED WITH MORE FINESSE THAN SIMPLE TOGGLES !!! */
+
+	RadioAction::Group meter_falloff_group;
+	RadioAction::Group meter_hold_group;
+
+	ActionManager::register_radio_action (option_actions, meter_falloff_group, X_("MeterFalloffOff"), _("Off"), bind (mem_fun (*this, &ARDOUR_UI::set_meter_falloff), MeterFalloffOff));
+	ActionManager::register_radio_action (option_actions, meter_falloff_group, X_("MeterFalloffSlowest"), _("Slowest"), bind (mem_fun (*this, &ARDOUR_UI::set_meter_falloff), MeterFalloffSlowest));
+	ActionManager::register_radio_action (option_actions, meter_falloff_group, X_("MeterFalloffSlow"), _("Slow"), bind (mem_fun (*this, &ARDOUR_UI::set_meter_falloff), MeterFalloffSlow));
+	ActionManager::register_radio_action (option_actions, meter_falloff_group, X_("MeterFalloffMedium"), _("Medium"), bind (mem_fun (*this, &ARDOUR_UI::set_meter_falloff), MeterFalloffMedium));
+	ActionManager::register_radio_action (option_actions, meter_falloff_group, X_("MeterFalloffFast"), _("Fast"), bind (mem_fun (*this, &ARDOUR_UI::set_meter_falloff), MeterFalloffFast));
+	ActionManager::register_radio_action (option_actions, meter_falloff_group, X_("MeterFalloffFaster"), _("Faster"), bind (mem_fun (*this, &ARDOUR_UI::set_meter_falloff), MeterFalloffFaster));
+	ActionManager::register_radio_action (option_actions, meter_falloff_group, X_("MeterFalloffFastest"), _("Fastest"), bind (mem_fun (*this, &ARDOUR_UI::set_meter_falloff), MeterFalloffFastest));
+
+	ActionManager::register_radio_action (option_actions, meter_hold_group,  X_("MeterHoldOff"), _("Off"), bind (mem_fun (*this, &ARDOUR_UI::set_meter_hold), MeterHoldOff));
+	ActionManager::register_radio_action (option_actions, meter_hold_group,  X_("MeterHoldShort"), _("Short"), bind (mem_fun (*this, &ARDOUR_UI::set_meter_hold), MeterHoldShort));
+	ActionManager::register_radio_action (option_actions, meter_hold_group,  X_("MeterHoldMedium"), _("Medium"), bind (mem_fun (*this, &ARDOUR_UI::set_meter_hold), MeterHoldMedium));
+	ActionManager::register_radio_action (option_actions, meter_hold_group,  X_("MeterHoldLong"), _("Long"), bind (mem_fun (*this, &ARDOUR_UI::set_meter_hold), MeterHoldLong));
 
 	RadioAction::Group file_header_group;
 
@@ -391,48 +427,33 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_radio_action (option_actions, file_data_group, X_("FileDataFormatFloat"), X_("32-bit floating point"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_data_format), ARDOUR::FormatFloat));
 	act = ActionManager::register_radio_action (option_actions, file_data_group, X_("FileDataFormat24bit"), X_("24-bit signed integer"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_data_format), ARDOUR::FormatInt24));
 
-	RadioAction::Group connect_outputs_group;
-
-	act = ActionManager::register_radio_action (option_actions, connect_outputs_group, X_("AutoConnectNewTrackOutputsToHardware"), _("Connect new track outputs to hardware"), mem_fun (*this, &ARDOUR_UI::toggle_AutoConnectNewTrackOutputsToHardware));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (option_actions, connect_outputs_group, X_("AutoConnectNewTrackOutputsToMaster"), _("Connect new track outputs to master"), mem_fun (*this, &ARDOUR_UI::toggle_AutoConnectNewTrackOutputsToMaster));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (option_actions, connect_outputs_group, X_("ManuallyConnectNewTrackOutputs"), _("Manually connect new track outputs"), mem_fun (*this, &ARDOUR_UI::toggle_ManuallyConnectNewTrackOutputs));
-	ActionManager::session_sensitive_actions.push_back (act);
-
 	RadioAction::Group monitoring_group;
 
-	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseHardwareMonitoring"), _("Hardware monitoring"), mem_fun (*this, &ARDOUR_UI::toggle_UseHardwareMonitoring));
-	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseSoftwareMonitoring"), _("Software monitoring"), mem_fun (*this, &ARDOUR_UI::toggle_UseSoftwareMonitoring));
-	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseExternalMonitoring"), _("External monitoring"), mem_fun (*this, &ARDOUR_UI::toggle_UseExternalMonitoring));
-
-	/* Configuration object options (i.e. not session specific) */
-
-	ActionManager::register_toggle_action (option_actions, X_("StopPluginsWithTransport"), _("Stop plugins with transport"), mem_fun (*this, &ARDOUR_UI::toggle_StopPluginsWithTransport));
-	ActionManager::register_toggle_action (option_actions, X_("VerifyRemoveLastCapture"), _("Verify remove last capture"), mem_fun (*this, &ARDOUR_UI::toggle_VerifyRemoveLastCapture));
-	ActionManager::register_toggle_action (option_actions, X_("StopRecordingOnXrun"), _("Stop recording on xrun"), mem_fun (*this, &ARDOUR_UI::toggle_StopRecordingOnXrun));
-	ActionManager::register_toggle_action (option_actions, X_("StopTransportAtEndOfSession"), _("Stop transport at session end"), mem_fun (*this, &ARDOUR_UI::toggle_StopTransportAtEndOfSession));
-	ActionManager::register_toggle_action (option_actions, X_("GainReduceFastTransport"), _("-12dB gain reduce ffwd/rewind"), mem_fun (*this, &ARDOUR_UI::toggle_GainReduceFastTransport));
-	ActionManager::register_toggle_action (option_actions, X_("LatchedRecordEnable"), _("Rec-enable stays engaged at stop"), mem_fun (*this, &ARDOUR_UI::toggle_LatchedRecordEnable));
-
-	/* session options */
-	
-	act = ActionManager::register_toggle_action (option_actions, X_("DoNotRunPluginsWhileRecording"), _("Do not run plugins while recording"), mem_fun (*this, &ARDOUR_UI::toggle_DoNotRunPluginsWhileRecording));
-	ActionManager::session_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_toggle_action (option_actions, X_("LatchedSolo"), _("Latched solo"), mem_fun (*this, &ARDOUR_UI::toggle_LatchedSolo));
-	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseHardwareMonitoring"), _("Hardware monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), HardwareMonitoring));
+	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseSoftwareMonitoring"), _("Software monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), SoftwareMonitoring));
+	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseExternalMonitoring"), _("External monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), ExternalMonitoring));
 
 	RadioAction::Group solo_group;
 
-	act = ActionManager::register_radio_action (option_actions, solo_group, X_("SoloInPlace"), _("Solo in-place"), mem_fun (*this, &ARDOUR_UI::toggle_SoloViaBus));
+	act = ActionManager::register_radio_action (option_actions, solo_group, X_("SoloInPlace"), _("Solo in-place"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_solo_model), InverseMute)));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (option_actions, solo_group, X_("SoloViaBus"), _("Solo via bus"), mem_fun (*this, &ARDOUR_UI::toggle_SoloViaBus));
+	act = ActionManager::register_radio_action (option_actions, solo_group, X_("SoloViaBus"), _("Solo via bus"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_solo_model), SoloBus)));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (option_actions, X_("AutomaticallyCreateCrossfades"), _("Automatically create crossfades"), mem_fun (*this, &ARDOUR_UI::toggle_AutomaticallyCreateCrossfades));
+	RadioAction::Group input_auto_connect_group;
+
+	act = ActionManager::register_radio_action (option_actions, input_auto_connect_group, X_("InputAutoConnectPhysical"), _("Auto-connect inputs to physical inputs"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_input_auto_connect), AutoConnectPhysical)));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (option_actions, X_("UnmuteNewFullCrossfades"), _("Unmute new full crossfades"), mem_fun (*this, &ARDOUR_UI::toggle_UnmuteNewFullCrossfades));
+	act = ActionManager::register_radio_action (option_actions, input_auto_connect_group, X_("InputAutoConnectManual"), _("Manually connect inputs"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_input_auto_connect), (AutoConnectOption) 0)));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	RadioAction::Group output_auto_connect_group;
+
+	act = ActionManager::register_radio_action (option_actions, output_auto_connect_group, X_("OutputAutoConnectPhysical"), _("Auto-connect outputs to physical outs"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_output_auto_connect), AutoConnectPhysical)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_radio_action (option_actions, output_auto_connect_group, X_("OutputAutoConnectMaster"), _("Auto-connect outputs to master bus"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_output_auto_connect), AutoConnectMaster)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_radio_action (option_actions, output_auto_connect_group, X_("OutputAutoConnectManual"), _("Manually connect outputs"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_output_auto_connect), (AutoConnectOption) 0)));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	ActionManager::add_action_group (shuttle_actions);
@@ -441,10 +462,6 @@ ARDOUR_UI::install_actions ()
 	ActionManager::add_action_group (transport_actions);
 	ActionManager::add_action_group (main_actions);
 	ActionManager::add_action_group (common_actions);
-
-	/* initialize state of non-session dependent options */
-	
-	setup_config_options ();
 }
 
 void
@@ -466,9 +483,35 @@ ARDOUR_UI::toggle_control_protocol (ControlProtocolInfo* cpi)
 }
 
 void
+ARDOUR_UI::toggle_control_protocol_feedback (ControlProtocolInfo* cpi, const char* group, const char* action)
+{
+	if (!session) {
+		/* this happens when we build the menu bar when control protocol support
+		   has been used in the past for some given protocol - the item needs
+		   to be made active, but there is no session yet.
+		*/
+		return;
+	}
+
+	if (cpi->protocol) {
+		Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (group, action);
+
+		if (act) {
+			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+			bool x = tact->get_active();
+
+			if (tact && x != cpi->protocol->get_feedback()) {
+				cpi->protocol->set_feedback (!x);
+			}
+		}
+	}
+}
+
+void
 ARDOUR_UI::build_control_surface_menu ()
 {
 	list<ControlProtocolInfo*>::iterator i;
+	bool with_feedback;
 
 	/* !!! this has to match the top level entry from ardour.menus */
 
@@ -488,6 +531,8 @@ ARDOUR_UI::build_control_surface_menu ()
 											  (bind (mem_fun (*this, &ARDOUR_UI::toggle_control_protocol), *i)));
 			
 			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+
+			with_feedback = false;
 			
 			if ((*i)->protocol || (*i)->requested) {
 				tact->set_active ();
@@ -496,6 +541,34 @@ ARDOUR_UI::build_control_surface_menu ()
 			ui += "<menuitem action='";
 			ui += action_name;
 			ui += "'/>\n";
+
+			if ((*i)->supports_feedback) {
+
+				string submenu_name = action_name;
+				
+				submenu_name += "SubMenu";
+
+				ActionManager::register_action (editor->editor_actions, submenu_name.c_str(), _("Controls"));
+
+				action_name += "Feedback";
+
+				Glib::RefPtr<Action> act = ActionManager::register_toggle_action (editor->editor_actions, action_name.c_str(), _("Feedback"),
+												  (bind (mem_fun (*this, &ARDOUR_UI::toggle_control_protocol_feedback), 
+													 *i, 
+													 "Editor",
+													 action_name.c_str())));
+				
+				ui += "<menu action='";
+				ui += submenu_name;
+				ui += "'>\n<menuitem action='";
+				ui += action_name;
+				ui += "'/>\n</menu>\n";
+				
+				if ((*i)->protocol) {
+					Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+					tact->set_active ((*i)->protocol->get_feedback ());
+				}
+			}
 		}
 	}
 
@@ -548,4 +621,25 @@ ARDOUR_UI::build_menu_bar ()
 
 	menu_bar_base.set_name ("MainMenuBar");
 	menu_bar_base.add (menu_hbox);
+}
+
+void
+ARDOUR_UI::setup_clock ()
+{
+	ARDOUR_UI::Clock.connect (bind (mem_fun (big_clock, &AudioClock::set), false));
+	
+	big_clock_window = new Window (WINDOW_TOPLEVEL);
+	
+	big_clock_window->set_border_width (0);
+	big_clock_window->add  (big_clock);
+	big_clock_window->set_title (_("ardour: clock"));
+	big_clock_window->set_type_hint (Gdk::WINDOW_TYPE_HINT_MENU);
+	big_clock_window->signal_realize().connect (bind (sigc::ptr_fun (set_decoration), big_clock_window,  (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
+	big_clock_window->signal_unmap().connect (bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleBigClock")));
+
+	if (editor) {
+		editor->ensure_float (*big_clock_window);
+	}
+
+	manage_window (*big_clock_window);
 }

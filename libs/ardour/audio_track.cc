@@ -246,6 +246,10 @@ AudioTrack::set_state (const XMLNode& node)
 				sscanf (prop->value().c_str(), "%d", &x);
 				set_remote_control_id (x);
 			}
+
+		} else if (child->name() == X_("recenable")) {
+			_rec_enable_control.set_state (*child);
+			_session.add_controllable (&_rec_enable_control);
 		}
 	}
 
@@ -273,7 +277,7 @@ AudioTrack::state(bool full_state)
 
 		for (vector<FreezeRecordInsertInfo*>::iterator i = _freeze_record.insert_info.begin(); i != _freeze_record.insert_info.end(); ++i) {
 			inode = new XMLNode (X_("insert"));
-			(*i)->id.print (buf);
+			(*i)->id.print (buf, sizeof (buf));
 			inode->add_property (X_("id"), buf);
 			inode->add_child_copy ((*i)->state);
 		
@@ -317,8 +321,10 @@ AudioTrack::state(bool full_state)
 	   diskstream.
 	*/
 
-	_diskstream->id().print (buf);
+	_diskstream->id().print (buf, sizeof (buf));
 	root.add_property ("diskstream-id", buf);
+
+	root.add_child_nocopy (_rec_enable_control.get_state());
 
 	return root;
 }
@@ -399,7 +405,7 @@ AudioTrack::set_state_part_two ()
 }	
 
 int 
-AudioTrack::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, 
+AudioTrack::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
 		     bool session_state_changing, bool can_record, bool rec_monitors_input)
 {
 	if (n_outputs().get_total() == 0) {
@@ -431,15 +437,15 @@ AudioTrack::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nf
 		send_silence = true;
 	} else {
 
-		if (_session.get_auto_input()) {
-			if (Config->get_use_sw_monitoring()) {
+		if (Config->get_auto_input()) {
+			if (Config->get_monitoring_model() == SoftwareMonitoring) {
 				send_silence = false;
 			} else {
 				send_silence = true;
 			}
 		} else {
 			if (_diskstream->record_enabled()) {
-				if (Config->get_use_sw_monitoring()) {
+				if (Config->get_monitoring_model() == SoftwareMonitoring) {
 					send_silence = false;
 				} else {
 					send_silence = true;
@@ -479,23 +485,14 @@ AudioTrack::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nf
 }
 
 int
-AudioTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, int declick,
+AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, int declick,
 		  bool can_record, bool rec_monitors_input)
 {
 	int dret;
 	Sample* b;
 	Sample* tmpb;
-	jack_nframes_t transport_frame;
+	nframes_t transport_frame;
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
-	
-	{
-		Glib::RWLock::ReaderLock lm (redirect_lock, Glib::TRY_LOCK);
-		if (lm.locked()) {
-			// automation snapshot can also be called from the non-rt context
-			// and it uses the redirect list, so we take the lock out here
-			automation_snapshot (start_frame);
-		}
-	}
 	
 	if (n_outputs().get_total() == 0 && _redirects.empty()) {
 		return 0;
@@ -532,7 +529,7 @@ AudioTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nfram
 		just_meter_input (start_frame, end_frame, nframes, offset);
 	}
 
-	if (diskstream->record_enabled() && !can_record && !_session.get_auto_input()) {
+	if (diskstream->record_enabled() && !can_record && !Config->get_auto_input()) {
 
 		/* not actually recording, but we want to hear the input material anyway,
 		   at least potentially (depending on monitoring options)
@@ -579,7 +576,7 @@ AudioTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nfram
 			}
 		}
 
-		process_output_buffers (bufs, start_frame, end_frame, nframes, offset, (!_session.get_record_enabled() || !_session.get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
+		process_output_buffers (bufs, start_frame, end_frame, nframes, offset, (!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
 		
 	} else {
 		/* problem with the diskstream; just be quiet for a bit */
@@ -590,7 +587,7 @@ AudioTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nfram
 }
 
 int
-AudioTrack::silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, 
+AudioTrack::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
 			 bool can_record, bool rec_monitors_input)
 {
 	if (n_outputs().get_total() == 0 && _redirects.empty()) {
@@ -611,7 +608,7 @@ AudioTrack::silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jac
 }
 
 int
-AudioTrack::export_stuff (BufferSet& buffers, jack_nframes_t start, jack_nframes_t nframes)
+AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes)
 {
 	gain_t  gain_automation[nframes];
 	gain_t  gain_buffer[nframes];
@@ -676,7 +673,7 @@ AudioTrack::export_stuff (BufferSet& buffers, jack_nframes_t start, jack_nframes
 
 		for (BufferSet::audio_iterator bi = buffers.audio_begin(); bi != buffers.audio_end(); ++bi) {
 			Sample *b = bi->data(nframes);
-			for (jack_nframes_t n = 0; n < nframes; ++n) {
+			for (nframes_t n = 0; n < nframes; ++n) {
 				b[n] *= gain_automation[n];
 			}
 		}
@@ -685,7 +682,7 @@ AudioTrack::export_stuff (BufferSet& buffers, jack_nframes_t start, jack_nframes
 
 		for (BufferSet::audio_iterator bi = buffers.audio_begin(); bi != buffers.audio_end(); ++bi) {
 			Sample *b = bi->data(nframes);
-			for (jack_nframes_t n = 0; n < nframes; ++n) {
+			for (nframes_t n = 0; n < nframes; ++n) {
 				b[n] *= this_gain;
 			}
 		}
@@ -720,7 +717,7 @@ AudioTrack::bounce (InterThreadInfo& itt)
 
 
 void
-AudioTrack::bounce_range (jack_nframes_t start, jack_nframes_t end, InterThreadInfo& itt)
+AudioTrack::bounce_range (nframes_t start, nframes_t end, InterThreadInfo& itt)
 {
 	vector<boost::shared_ptr<Source> > srcs;
 	_session.write_one_audio_track (*this, start, end, false, srcs, itt);

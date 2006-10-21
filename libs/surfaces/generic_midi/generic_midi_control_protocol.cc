@@ -18,6 +18,9 @@
     $Id$
 */
 
+#define __STDC_FORMAT_MACROS 1
+#include <stdint.h>
+
 #include <algorithm>
 
 #include <pbd/error.h>
@@ -39,7 +42,7 @@ using namespace PBD;
 #include "i18n.h"
 
 GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
-	: ControlProtocol  (s, _("GenericMIDI"))
+	: ControlProtocol  (s, _("Generic MIDI"))
 {
 	MIDI::Manager* mm = MIDI::Manager::instance();
 
@@ -54,6 +57,7 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 		throw failed_constructor();
 	}
 
+	do_feedback = false;
 	_feedback_interval = 10000; // microseconds
 	last_feedback_time = 0;
 
@@ -82,6 +86,10 @@ GenericMidiControlProtocol::set_feedback_interval (microseconds_t ms)
 void 
 GenericMidiControlProtocol::send_feedback ()
 {
+	if (!do_feedback) {
+		return;
+	}
+
 	microseconds_t now = get_microseconds ();
 
 	if (last_feedback_time != 0) {
@@ -98,7 +106,7 @@ GenericMidiControlProtocol::send_feedback ()
 void 
 GenericMidiControlProtocol::_send_feedback ()
 {
-	const int32_t bufsize = 16 * 1024;
+	const int32_t bufsize = 16 * 1024; /* XXX too big */
 	MIDI::byte buf[bufsize];
 	int32_t bsize = bufsize;
 	MIDI::byte* end = buf;
@@ -174,7 +182,14 @@ GenericMidiControlProtocol::stop_learning (Controllable* c)
 XMLNode&
 GenericMidiControlProtocol::get_state () 
 {
-	XMLNode* node = new XMLNode (_name); /* node name must match protocol name */
+	XMLNode* node = new XMLNode ("Protocol"); 
+	char buf[32];
+
+	node->add_property (X_("name"), _name);
+	node->add_property (X_("feedback"), do_feedback ? "1" : "0");
+	snprintf (buf, sizeof (buf), "%" PRIu64, _feedback_interval);
+	node->add_property (X_("feedback_interval"), buf);
+
 	XMLNode* children = new XMLNode (X_("controls"));
 
 	node->add_child_nocopy (*children);
@@ -192,6 +207,22 @@ GenericMidiControlProtocol::set_state (const XMLNode& node)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
+	const XMLProperty* prop;
+
+	if ((prop = node.property ("feedback")) != 0) {
+		do_feedback = (bool) atoi (prop->value().c_str());
+	} else {
+		do_feedback = false;
+	}
+
+	if ((prop = node.property ("feedback_interval")) != 0) {
+		if (sscanf (prop->value().c_str(), "%" PRIu64, &_feedback_interval) != 1) {
+			_feedback_interval = 10000;
+		}
+	} else {
+		_feedback_interval = 10000;
+	}
+
 	Controllable* c;
 
 	{
@@ -213,22 +244,39 @@ GenericMidiControlProtocol::set_state (const XMLNode& node)
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
-		XMLProperty* prop;
-
 		if ((prop = (*niter)->property ("id")) != 0) {
-
+			
 			ID id = prop->value ();
-
+			
 			c = session->controllable_by_id (id);
-
+			
 			if (c) {
 				MIDIControllable* mc = new MIDIControllable (*_port, *c);
 				if (mc->set_state (**niter) == 0) {
 					controllables.insert (mc);
 				}
+				
+			} else {
+				warning << string_compose (_("Generic MIDI control: controllable %1 not found in session (ignored)"),
+							   id)
+					<< endmsg;
 			}
 		}
 	}
-	
+
 	return 0;
+}
+
+int
+GenericMidiControlProtocol::set_feedback (bool yn)
+{
+	do_feedback = yn;
+	last_feedback_time = 0;
+	return 0;
+}
+
+bool
+GenericMidiControlProtocol::get_feedback () const
+{
+	return do_feedback;
 }

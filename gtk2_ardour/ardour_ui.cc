@@ -18,6 +18,9 @@
     $Id$
 */
 
+#define __STDC_FORMAT_MACROS 1
+#include <stdint.h>
+
 #include <algorithm>
 #include <cmath>
 #include <fcntl.h>
@@ -87,7 +90,7 @@ ARDOUR_UI *ARDOUR_UI::theArdourUI = 0;
 sigc::signal<void,bool> ARDOUR_UI::Blink;
 sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
 sigc::signal<void>      ARDOUR_UI::SuperRapidScreenUpdate;
-sigc::signal<void,jack_nframes_t> ARDOUR_UI::Clock;
+sigc::signal<void,nframes_t> ARDOUR_UI::Clock;
 
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
@@ -173,16 +176,12 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	shuttle_fract = 0.0;
 	shuttle_max_speed = 8.0f;
 
-	set_shuttle_units (Percentage);
-	set_shuttle_behaviour (Sprung);
-
 	shuttle_style_menu = 0;
 	shuttle_unit_menu = 0;
 
 	gettimeofday (&last_peak_grab, 0);
 	gettimeofday (&last_shuttle_request, 0);
 
-	ARDOUR::AudioDiskstream::DeleteSources.connect (mem_fun(*this, &ARDOUR_UI::delete_sources_in_the_right_thread));
 	ARDOUR::Diskstream::DiskOverrun.connect (mem_fun(*this, &ARDOUR_UI::disk_overrun_handler));
 	ARDOUR::Diskstream::DiskUnderrun.connect (mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
 
@@ -492,7 +491,7 @@ ARDOUR_UI::every_point_zero_one_seconds ()
 }
 
 void
-ARDOUR_UI::update_sample_rate (jack_nframes_t ignored)
+ARDOUR_UI::update_sample_rate (nframes_t ignored)
 {
 	char buf[32];
 
@@ -504,7 +503,7 @@ ARDOUR_UI::update_sample_rate (jack_nframes_t ignored)
 
 	} else {
 
-		jack_nframes_t rate = engine->frame_rate();
+		nframes_t rate = engine->frame_rate();
 		
 		if (fmod (rate, 1000.0) != 0.0) {
 			snprintf (buf, sizeof (buf), _("%.1f kHz / %4.1f msecs"), 
@@ -558,7 +557,7 @@ ARDOUR_UI::update_disk_space()
 		return;
 	}
 
-	jack_nframes_t frames = session->available_capture_duration();
+	nframes_t frames = session->available_capture_duration();
 	char buf[64];
 
 	if (frames == max_frames) {
@@ -567,23 +566,13 @@ ARDOUR_UI::update_disk_space()
 		int hrs;
 		int mins;
 		int secs;
-		jack_nframes_t fr = session->frame_rate();
+		nframes_t fr = session->frame_rate();
 		
-		if (session->actively_recording()){
-			
-			rec_enabled_diskstreams = 0;
-			session->foreach_route (this, &ARDOUR_UI::count_recenabled_diskstreams);
-			
-			if (rec_enabled_diskstreams) {
-				frames /= rec_enabled_diskstreams;
-			}
-			
-		} else {
-			
-			/* hmmm. shall we divide by the route count? or the diskstream count?
-			   or what? for now, do nothing ...
-			*/
-			
+		rec_enabled_diskstreams = 0;
+		session->foreach_route (this, &ARDOUR_UI::count_recenabled_diskstreams);
+		
+		if (rec_enabled_diskstreams) {
+			frames /= rec_enabled_diskstreams;
 		}
 		
 		hrs  = frames / (fr * 3600);
@@ -968,12 +957,13 @@ restart JACK with more ports."));
 }
 
 void
-ARDOUR_UI::do_transport_locate (jack_nframes_t new_position)
+ARDOUR_UI::do_transport_locate (nframes_t new_position)
 {
-	jack_nframes_t _preroll;
+	nframes_t _preroll = 0;
 
 	if (session) {
-		_preroll = session->convert_to_frames_at (new_position, session->preroll);
+		// XXX CONFIG_CHANGE FIX - requires AnyTime handling
+		// _preroll = session->convert_to_frames_at (new_position, Config->get_preroll());
 
 		if (new_position > _preroll) {
 			new_position -= _preroll;
@@ -1023,7 +1013,7 @@ void
 ARDOUR_UI::transport_goto_end ()
 {
 	if (session) {
-		jack_nframes_t frame = session->current_end_frame();
+		nframes_t frame = session->current_end_frame();
 		session->request_locate (frame);
 
 		/* force displayed area in editor to start no matter
@@ -1048,8 +1038,8 @@ ARDOUR_UI::transport_stop ()
 		return;
 	}
 	
-	if (session->get_auto_loop()) {
-		session->request_auto_loop (false);
+	if (Config->get_auto_loop()) {
+		session->request_play_loop (false);
 	}
 	
 	session->request_stop ();
@@ -1078,8 +1068,7 @@ ARDOUR_UI::transport_record ()
 		switch (session->record_status()) {
 		case Session::Disabled:
 			if (session->ntracks() == 0) {
-				string txt = _("Please create 1 or more track\nbefore trying to record.\nCheck the Session menu.");
-				MessageDialog msg (*editor, txt);
+				MessageDialog msg (*editor, _("Please create 1 or more track\nbefore trying to record.\nCheck the Session menu."));
 				msg.run ();
 				return;
 			}
@@ -1103,8 +1092,8 @@ ARDOUR_UI::transport_roll ()
 
 	rolling = session->transport_rolling ();
 
-	if (session->get_auto_loop()) {
-		session->request_auto_loop (false);
+	if (Config->get_auto_loop()) {
+		session->request_play_loop (false);
 		auto_loop_button.set_active (false);
 		roll_button.set_active (true);
 	} else if (session->get_play_range ()) {
@@ -1121,7 +1110,7 @@ void
 ARDOUR_UI::transport_loop()
 {
 	if (session) {
-		if (session->get_auto_loop()) {
+		if (Config->get_auto_loop()) {
 			if (session->transport_rolling()) {
 				Location * looploc = session->locations()->auto_loop_location();
 				if (looploc) {
@@ -1130,7 +1119,7 @@ ARDOUR_UI::transport_loop()
 			}
 		}
 		else {
-			session->request_auto_loop (true);
+			session->request_play_loop (true);
 		}
 	}
 }
@@ -1661,11 +1650,9 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 	new_session_dialog->reset_recent();
 	new_session_dialog->show();
 
-	//Glib::RefPtr<Gdk::Window> nsd_window = new_session_dialog->get_window();
-
 	do {
 	        response = new_session_dialog->run ();
-		//nsd_window ->set_cursor(Gdk::Cursor(Gdk::WATCH));
+
 		if(response == Gtk::RESPONSE_CANCEL || response == Gtk::RESPONSE_DELETE_EVENT) {
 		        quit();
 			return;
@@ -1682,7 +1669,6 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 			
 			if (session_name.empty()) {
 				response = Gtk::RESPONSE_NONE;
-				cerr << "session name is empty\n";
 				continue;
 			} 
 
@@ -1697,6 +1683,8 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 			
 		} else if (response == Gtk::RESPONSE_OK) {
 
+			session_name = new_session_dialog->session_name();
+			
 		        if (new_session_dialog->get_current_page() == 1) {
 		  
 			        /* XXX this is a bit of a hack.. 
@@ -1707,7 +1695,6 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 				
 				if (session_name.empty()) {
 					response = Gtk::RESPONSE_NONE;
-					cerr << "session name is empty 2\n";
 					continue;
 				} 
 				
@@ -1724,11 +1711,8 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 
 			        _session_is_new = true;
 			      
-				session_name = new_session_dialog->session_name();
-			
 				if (session_name.empty()) {
 					response = Gtk::RESPONSE_NONE;
-					cerr << "session name is empty 3\n";
 					continue;
 				} 
 
@@ -1741,7 +1725,7 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 
 				} else {
 
-					std::string session_path = new_session_dialog->session_folder();
+					session_path = new_session_dialog->session_folder();
 					
 				}
 			
@@ -1760,8 +1744,8 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 							
 					uint32_t cchns;
 					uint32_t mchns;
-					Session::AutoConnectOption iconnect;
-					Session::AutoConnectOption oconnect;
+					AutoConnectOption iconnect;
+					AutoConnectOption oconnect;
 							
 					if (new_session_dialog->create_control_bus()) {
 						cchns = (uint32_t) new_session_dialog->control_channel_count();
@@ -1776,19 +1760,19 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 					}
 							
 					if (new_session_dialog->connect_inputs()) {
-						iconnect = Session::AutoConnectPhysical;
+						iconnect = AutoConnectPhysical;
 					} else {
-						iconnect = Session::AutoConnectOption (0);
+						iconnect = AutoConnectOption (0);
 					}
 							
 					/// @todo some minor tweaks.
 							
 					if (new_session_dialog->connect_outs_to_master()) {
-						oconnect = Session::AutoConnectMaster;
+						oconnect = AutoConnectMaster;
 					} else if (new_session_dialog->connect_outs_to_physical()) {
-						oconnect = Session::AutoConnectPhysical;
+						oconnect = AutoConnectPhysical;
 					} else {
-						oconnect = Session::AutoConnectOption (0);
+						oconnect = AutoConnectOption (0);
 					} 
 							
 					uint32_t nphysin = (uint32_t) new_session_dialog->input_limit_count();
@@ -1857,6 +1841,8 @@ This prevents the session from being loaded."));
 
 	connect_to_session (new_session);
 
+	Config->set_current_owner (ConfigVariableBase::Interface);
+
 	session_loaded = true;
 	return 0;
 }
@@ -1877,11 +1863,11 @@ int
 ARDOUR_UI::build_session (const string & path, const string & snap_name, 
 			  uint32_t control_channels,
 			  uint32_t master_channels, 
-			  Session::AutoConnectOption input_connect,
-			  Session::AutoConnectOption output_connect,
+			  AutoConnectOption input_connect,
+			  AutoConnectOption output_connect,
 			  uint32_t nphysin,
 			  uint32_t nphysout,
-			  jack_nframes_t initial_length)
+			  nframes_t initial_length)
 {
 	Session *new_session;
 	int x;
@@ -2162,9 +2148,9 @@ ARDOUR_UI::add_route ()
 	string name_template = add_route_dialog->name_template ();
 	bool track = add_route_dialog->track ();
 
-	Session::AutoConnectOption oac = session->get_output_auto_connect();
+	AutoConnectOption oac = Config->get_output_auto_connect();
 
-	if (oac & Session::AutoConnectMaster) {
+	if (oac & AutoConnectMaster) {
 		output_chan = (session->master_out() ? session->master_out()->n_inputs().get(DataType::AUDIO) : input_chan);
 	} else {
 		output_chan = input_chan;
@@ -2246,18 +2232,6 @@ ARDOUR_UI::halt_on_xrun_message ()
 	MessageDialog msg (*editor,
 			   _("Recording was stopped because your system could not keep up."));
 	msg.run ();
-}
-
-void 
-ARDOUR_UI::delete_sources_in_the_right_thread (list<boost::shared_ptr<ARDOUR::Source> >* deletion_list)
-{
-	ENSURE_GUI_THREAD (bind (mem_fun(*this, &ARDOUR_UI::delete_sources_in_the_right_thread), deletion_list));
-
-	for (list<boost::shared_ptr<Source> >::iterator i = deletion_list->begin(); i != deletion_list->end(); ++i) {
-		(*i)->drop_references ();
-	}
-
-	delete deletion_list;
 }
 
 void
@@ -2363,7 +2337,7 @@ ARDOUR_UI::reconnect_to_jack ()
 }
 
 void
-ARDOUR_UI::set_jack_buffer_size (jack_nframes_t nframes)
+ARDOUR_UI::set_jack_buffer_size (nframes_t nframes)
 {
 	engine->request_buffer_size (nframes);
 	update_sample_rate (0);
@@ -2387,72 +2361,6 @@ ARDOUR_UI::cmdline_new_session (string path)
 
 	_will_create_new_session_automatically = false; /* done it */
 	return FALSE; /* don't call it again */
-}
-
-void
-ARDOUR_UI::set_native_file_header_format (HeaderFormat hf)
-{
-	Glib::RefPtr<Action> act;
-	
-	switch (hf) {
-	case BWF:
-		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatBWF"));
-		break;
-	case WAVE:
-		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatWAVE"));
-		break;
-	case WAVE64:
-		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatWAVE64"));
-		break;
-	case iXML:
-		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatiXML"));
-		break;
-	case RF64:
-		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatRF64"));
-		break;
-	case CAF:
-		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatCAF"));
-		break;
-	case AIFF:
-		act = ActionManager::get_action (X_("options"), X_("FileHeaderFormatAIFF"));
-		break;
-	}
-
-	if (act) {
-		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
-		if (ract && ract->get_active() && Config->get_native_file_header_format() != hf) {
-			Config->set_native_file_header_format (hf);
-			if (session) {
-				session->reset_native_file_format ();
-			}
-		}
-	}
-}
-
-void
-ARDOUR_UI::set_native_file_data_format (SampleFormat sf)
-{
-	Glib::RefPtr<Action> act;
-	
-	switch (sf) {
-	case FormatFloat:
-		act = ActionManager::get_action (X_("options"), X_("FileDataFormatFloat"));
-		break;
-	case FormatInt24:
-		act = ActionManager::get_action (X_("options"), X_("FileDataFormat24bit"));
-		break;
-	}
-
-	if (act) {
-		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
-
-		if (ract && ract->get_active() && Config->get_native_file_data_format() != sf) {
-			Config->set_native_file_data_format (sf);
-			if (session) {
-				session->reset_native_file_format ();
-			}
-		}
-	}
 }
 
 void

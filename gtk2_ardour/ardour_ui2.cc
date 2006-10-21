@@ -130,20 +130,16 @@ ARDOUR_UI::transport_stopped ()
 	update_disk_space ();
 }
 
-static const double SHUTTLE_FRACT_SPEED1=0.48412291827; /* derived from A1,A2 */
-
 void
 ARDOUR_UI::transport_rolling ()
 {
 	stop_button.set_active (false);
 	if (session->get_play_range()) {
-
 		play_selection_button.set_active (true);
 		roll_button.set_active (false);
 		auto_loop_button.set_active (false);
 
-	} else if (session->get_auto_loop ()) {
-
+	} else if (Config->get_auto_loop ()) {
 		auto_loop_button.set_active (true);
 		play_selection_button.set_active (false);
 		roll_button.set_active (false);
@@ -243,29 +239,37 @@ ARDOUR_UI::setup_transport ()
 	goto_start_button.set_colors (colors);
 	goto_end_button.set_colors (colors);
 	
+	stop_button.set_size_request(29, -1);
+	roll_button.set_size_request(29, -1);
+	auto_loop_button.set_size_request(29, -1);
+	play_selection_button.set_size_request(29, -1);
+	goto_start_button.set_size_request(29, -1);
+	goto_end_button.set_size_request(29, -1);
+	rec_button.set_size_request(29, -1);
+	
 	Widget* w;
 
 	stop_button.set_active (true);
-
-	w = manage (new Image (Stock::MEDIA_PREVIOUS, ICON_SIZE_BUTTON));
+	
+	w = manage (new Image (get_icon (X_("transport_start"))));
 	w->show();
 	goto_start_button.add (*w);
-	w = manage (new Image (Stock::MEDIA_NEXT, ICON_SIZE_BUTTON));
+	w = manage (new Image (get_icon (X_("transport_end"))));
 	w->show();
 	goto_end_button.add (*w);
-	w = manage (new Image (Stock::MEDIA_PLAY, ICON_SIZE_BUTTON));
+	w = manage (new Image (get_icon (X_("transport_play"))));
 	w->show();
 	roll_button.add (*w);
-	w = manage (new Image (Stock::MEDIA_STOP, ICON_SIZE_BUTTON));
+	w = manage (new Image (get_icon (X_("transport_stop"))));
 	w->show();
 	stop_button.add (*w);
-	w = manage (new Image (Stock::MEDIA_PLAY, ICON_SIZE_BUTTON));
+	w = manage (new Image (get_icon (X_("transport_range"))));
 	w->show();
 	play_selection_button.add (*w);
-	w = manage (new Image (Stock::MEDIA_RECORD, ICON_SIZE_BUTTON));
+	w = manage (new Image (get_icon (X_("transport_record"))));
 	w->show();
 	rec_button.add (*w);
-	w = manage (new Image (get_xpm("loop.xpm")));
+	w = manage (new Image (get_icon (X_("transport_loop"))));
 	w->show();
 	auto_loop_button.add (*w);
 
@@ -359,6 +363,9 @@ ARDOUR_UI::setup_transport ()
 	auditioning_alert_button.set_name ("TransportAuditioningAlert");
 	auditioning_alert_button.signal_pressed().connect (mem_fun(*this,&ARDOUR_UI::audition_alert_toggle));
 
+	tooltips().set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
+	tooltips().set_tip (auditioning_alert_button, _("When active, auditioning is taking place\nClick to stop the audition"));
+
 	alert_box.pack_start (solo_alert_button, false, false);
 	alert_box.pack_start (auditioning_alert_button, false, false);
 
@@ -396,9 +403,9 @@ ARDOUR_UI::setup_transport ()
 	sdframe->add (speed_display_box);
 
 	mtc_port_changed ();
-	sync_option_combo.set_active_text (positional_sync_strings.front());
 	sync_option_combo.signal_changed().connect (mem_fun (*this, &ARDOUR_UI::sync_option_changed));
-	Gtkmm2ext::set_size_request_to_display_given_text (sync_option_combo, "Internal", 22, 10);
+	const guint32 FUDGE = 25; // Combo's are stupid - they steal space from the entry for the button
+	set_size_request_to_display_given_text (sync_option_combo, X_("Igternal"), 2+FUDGE, 10);
 
 	shbox->pack_start (*sdframe, false, false);
 	shbox->pack_start (shuttle_units_button, true, true);
@@ -456,23 +463,6 @@ ARDOUR_UI::setup_transport ()
 }
 
 void
-ARDOUR_UI::setup_clock ()
-{
-	ARDOUR_UI::Clock.connect (bind (mem_fun (big_clock, &AudioClock::set), false));
-	
-	big_clock_window = new Window (WINDOW_TOPLEVEL);
-	
-	big_clock_window->set_border_width (0);
-	big_clock_window->add  (big_clock);
-	big_clock_window->set_title (_("ardour: clock"));
-	big_clock_window->set_type_hint (Gdk::WINDOW_TYPE_HINT_MENU);
-	big_clock_window->signal_realize().connect (bind (sigc::ptr_fun (set_decoration), big_clock_window,  (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
-	big_clock_window->signal_unmap().connect (bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleBigClock")));
-
-	manage_window (*big_clock_window);
-}
-
-void
 ARDOUR_UI::manage_window (Window& win)
 {
 	win.signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), &win));
@@ -514,7 +504,7 @@ ARDOUR_UI::_auditioning_changed (bool onoff)
 void
 ARDOUR_UI::auditioning_changed (bool onoff)
 {
-	Gtkmm2ext::UI::instance()->call_slot(bind (mem_fun(*this, &ARDOUR_UI::_auditioning_changed), onoff));
+	UI::instance()->call_slot(bind (mem_fun(*this, &ARDOUR_UI::_auditioning_changed), onoff));
 }
 
 void
@@ -668,8 +658,8 @@ ARDOUR_UI::shuttle_box_button_release (GdkEventButton* ev)
 		mouse_shuttle (ev->x, true);
 		shuttle_grabbed = false;
 		shuttle_box.remove_modal_grab ();
-		if (shuttle_behaviour == Sprung) {
-			if (session->get_auto_play() || roll_button.get_state()) {
+		if (Config->get_shuttle_behaviour() == Sprung) {
+			if (Config->get_auto_play() || roll_button.get_state()) {
 				shuttle_fract = SHUTTLE_FRACT_SPEED1;				
 				session->request_transport_speed (1.0);
 				stop_button.set_active (false);
@@ -829,49 +819,14 @@ ARDOUR_UI::shuttle_unit_clicked ()
 }
 
 void
-ARDOUR_UI::set_shuttle_units (ShuttleUnits u)
-{
-	switch ((shuttle_units = u)) {
-	case Percentage:
-		shuttle_units_button.set_label("% ");
-		break;
-	case Semitones:
-		shuttle_units_button.set_label(_("ST"));
-		break;
-	}
-}
-
-void
 ARDOUR_UI::shuttle_style_changed ()
 {
 	ustring str = shuttle_style_button.get_active_text ();
 
 	if (str == _("sprung")) {
-		set_shuttle_behaviour (Sprung);
+		Config->set_shuttle_behaviour (Sprung);
 	} else if (str == _("wheel")) {
-		set_shuttle_behaviour (Wheel);
-	}
-}
-
-
-void
-ARDOUR_UI::set_shuttle_behaviour (ShuttleBehaviour b)
-{
-	switch ((shuttle_behaviour = b)) {
-	case Sprung:
-		shuttle_style_button.set_active_text (_("sprung"));
-		shuttle_fract = 0.0;
-		shuttle_box.queue_draw ();
-		if (session) {
-			if (session->transport_rolling()) {
-			        shuttle_fract = SHUTTLE_FRACT_SPEED1;
-				session->request_transport_speed (1.0);
-			}
-		}
-		break;
-	case Wheel:
-		shuttle_style_button.set_active_text (_("wheel"));
-		break;
+		Config->set_shuttle_behaviour (Wheel);
 	}
 }
 
@@ -892,7 +847,7 @@ ARDOUR_UI::update_speed_display ()
 	if (x != last_speed_displayed) {
 
 		if (x != 0) {
-			if (shuttle_units == Percentage) {
+			if (Config->get_shuttle_units() == Percentage) {
 				snprintf (buf, sizeof (buf), "%.2f", x);
 			} else {
 				if (x < 0) {
@@ -920,31 +875,19 @@ ARDOUR_UI::set_transport_sensitivity (bool yn)
 void
 ARDOUR_UI::editor_realized ()
 {
+	Config->map_parameters (mem_fun (*this, &ARDOUR_UI::parameter_changed));
+
 	set_size_request_to_display_given_text (speed_display_box, _("-0.55"), 2, 2);
-	/* XXX: this should really be saved in instant.xml or something similar and restored from there */
-	shuttle_style_button.set_active_text (_("sprung"));
-	const guint32 FUDGE = 20; // Combo's are stupid - they steal space from the entry for the button
+	const guint32 FUDGE = 25; // Combo's are stupid - they steal space from the entry for the button
 	set_size_request_to_display_given_text (shuttle_style_button, _("sprung"), 2+FUDGE, 10);
 }
 
 void
 ARDOUR_UI::sync_option_changed ()
 {
-	string which;
-
-	if (session == 0) {
-		return;
+	if (session) {
+		session->request_slave_source (string_to_slave_source (sync_option_combo.get_active_text()));
 	}
-
-	which = sync_option_combo.get_active_text();
-
-	if (which == positional_sync_strings[Session::None]) {
-		session->request_slave_source (Session::None);
-	} else if (which == positional_sync_strings[Session::MTC]) {
-		session->request_slave_source (Session::MTC);
-	} else if (which == positional_sync_strings[Session::JACK]) {
-		session->request_slave_source (Session::JACK);
-	} 
 }
 
 void

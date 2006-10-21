@@ -100,7 +100,7 @@ class IO : public PBD::StatefulDestructible, public ARDOUR::StateManager
 	const string& name() const { return _name; }
 	virtual int set_name (string str, void *src);
 	
-	virtual void silence  (jack_nframes_t, jack_nframes_t offset);
+	virtual void silence  (nframes_t, nframes_t offset);
 
 	void collect_input  (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset);
 	void deliver_output (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t end_frame,
@@ -144,9 +144,9 @@ class IO : public PBD::StatefulDestructible, public ARDOUR::StateManager
 	int disconnect_inputs (void *src);
 	int disconnect_outputs (void *src);
 
-	jack_nframes_t output_latency() const;
-	jack_nframes_t input_latency() const;
-	void           set_port_latency (jack_nframes_t);
+	nframes_t output_latency() const;
+	nframes_t input_latency() const;
+	void           set_port_latency (nframes_t);
 
 	const PortSet& inputs()  const { return _inputs; }
 	const PortSet& outputs() const { return _outputs; }
@@ -244,16 +244,7 @@ public:
 	AutoStyle gain_automation_style () const { return _gain_automation_curve.automation_style(); }
 	sigc::signal<void> gain_automation_style_changed;
 
-	static void set_automation_interval (jack_nframes_t frames) {
-		_automation_interval = frames;
-	}
-
-	static jack_nframes_t automation_interval() { 
-		return _automation_interval;
-	}
-
-	virtual void transport_stopped (jack_nframes_t now);
-	virtual void automation_snapshot (jack_nframes_t now);
+	virtual void transport_stopped (nframes_t now);
 
 	ARDOUR::Curve& gain_automation_curve () { return _gain_automation_curve; }
 
@@ -277,24 +268,24 @@ public:
 	mutable Glib::Mutex io_lock;
 
   protected:
-	Session&    _session;
-	Panner*     _panner;
-	BufferSet*  _output_buffers; //< Set directly to our output port buffers
-	gain_t      _gain;
-	gain_t      _effective_gain;
-	gain_t      _desired_gain;
-	Glib::Mutex declick_lock;
-	PortSet     _outputs;
-	PortSet     _inputs;
-	PeakMeter*  _meter;
-	string      _name;
-	Connection* _input_connection;
-	Connection* _output_connection;
-	bool         no_panner_reset;
-	bool        _phase_invert;
-	XMLNode*     deferred_state;
-	DataType    _default_type;
-
+	Session&            _session;
+	Panner*             _panner;
+	BufferSet*          _output_buffers; //< Set directly to output port buffers
+	gain_t              _gain;
+	gain_t              _effective_gain;
+	gain_t              _desired_gain;
+	Glib::Mutex         declick_lock;
+	PortSet             _outputs;
+	PortSet             _inputs;
+	PeakMeter*          _meter;
+	string              _name;
+	Connection*         _input_connection;
+	Connection*         _output_connection;
+	bool                 no_panner_reset;
+	bool                _phase_invert;
+	XMLNode*             deferred_state;
+	DataType            _default_type;
+	
 	virtual void set_deferred_state() {}
 
 	void reset_panner ();
@@ -303,7 +294,7 @@ public:
 		{ return _inputs.count().get(DataType::AUDIO); }
 
 	struct GainControllable : public PBD::Controllable {
-	    GainControllable (IO& i) : io (i) {}
+	    GainControllable (std::string name, IO& i) : Controllable (name), io (i) {}
 	 
 	    void set_value (float val);
 	    float get_value (void) const;
@@ -318,12 +309,7 @@ public:
 	Change               restore_state (State&);
 	StateManager::State* state_factory (std::string why) const;
 
-	/* automation */
-
-	jack_nframes_t last_automation_snapshot;
-	static jack_nframes_t _automation_interval;
-
-    AutoState      _gain_automation_state;
+	AutoState      _gain_automation_state;
 	AutoStyle      _gain_automation_style;
 
 	bool     apply_gain_automation;

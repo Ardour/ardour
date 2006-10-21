@@ -7,6 +7,7 @@ import glob
 Import('env install_prefix final_prefix config_prefix libraries i18n version')
 
 gtkardour = env.Copy()
+gtkmmtests = env.Copy()
 
 #
 # this defines the version number of the GTK interface to ardour
@@ -47,6 +48,19 @@ gtkardour.Merge ([
     libraries['soundtouch'],
     libraries['samplerate'],
     libraries['jack']
+])
+
+gtkmmtests.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
+
+gtkmmtests.Merge ([
+    libraries['gtkmm2'],
+    libraries['glib2'],
+    libraries['glibmm2'],
+    libraries['pangomm'],
+    libraries['atkmm'],
+    libraries['gdkmm2'],
+    libraries['sigc2'],
+    libraries['gtk2']
 ])
 
 if gtkardour['DMALLOC']:
@@ -195,7 +209,8 @@ fft_graph.cc
 fft_result.cc
 """)
 
-pixmap_files=glob.glob('pixmaps/*.xpm')
+pixmap_files = glob.glob('pixmaps/*.xpm')
+icon_files = glob.glob ('icons/*.png')
 
 intl_files = gtkardour_files + glob.glob('*.h')
 
@@ -214,6 +229,10 @@ itest.cc
 
 stest_files=Split("""
 stest.cc
+""")
+
+tt_files=Split ("""
+tt.cc
 """)
 
 extra_sources = []
@@ -252,9 +271,10 @@ ardourlib = gtkardour.SharedLibrary(target = 'ardourgtk', source = gtkardour_fil
 mtest = gtkardour.Program(target = 'mtest', source = mtest_files)
 itest = gtkardour.Program(target = 'itest', source = itest_files)
 rcu = gtkardour.Program(target = 'rcu', source = rcu_files)
+tt = gtkmmtests.Program(target = 'tt', source = tt_files)
 
 my_subst_dict = { }
-my_subst_dict['%INSTALL_PREFIX%'] = install_prefix
+my_subst_dict['%INSTALL_PREFIX%'] = final_prefix
 
 ardoursh = env.SubstInFile ('ardour.sh','ardour.sh.in', SUBST_DICT = my_subst_dict);
 env.AddPostAction (ardoursh, Chmod ('$TARGET', 0755))
@@ -286,8 +306,9 @@ env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.bindings'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.colors'))
 # data files
-env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2'), 'splash.ppm'))
+env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2'), 'splash.png'))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/pixmaps'), pixmap_files))
+env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/icons'), icon_files))
 
 		
 #dist
@@ -295,12 +316,18 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
                                       [ 'SConscript',
                                         'i18n.h', 'gettext.h',
 					'ardour.sh.in',
-                                        'ardour2_ui.rc', 'splash.ppm',
+                                        'ardour2_ui.rc', 'splash.png',
                                         'ardour.menus', 'ardour.bindings', 'ardour.colors',
 					'editor_xpms'
                                         ] +
-                                      gtkardour_files + vst_files + pixmap_files +
-                                      glob.glob('po/*.po') + glob.glob('*.h')))
+                                      gtkardour_files +
+				      vst_files +
+				      pixmap_files +
+				      icon_files +
+				      skipped_files +
+				      audiounit_files + 
+				      fft_analysis_files +
+				      glob.glob('po/*.po') + glob.glob('*.h')))
 
 # generate a prototype full-featured ardour_ui.rc file
 

@@ -165,7 +165,7 @@ About::About ()
 	string path;
 	string t;
 
-	path = find_data_file ("splash.ppm");
+	path = find_data_file ("splash.png");
 
 	Glib::RefPtr<Pixbuf> pixbuf = Gdk::Pixbuf::create_from_file (path);
 
@@ -178,13 +178,13 @@ About::About ()
 	}
 
 	set_translator_credits (t);
-	set_copyright (_("Copyright (C) 1999-2005 Paul Davis\n"));
+	set_copyright (_("Copyright (C) 1999-2006 Paul Davis\n"));
 	set_license (_("Ardour comes with ABSOLUTELY NO WARRANTY\n"
 		       "This is free software, and you are welcome to redistribute it\n"
 		       "under certain conditions; see the file COPYING for details.\n"));
 	set_name (X_("ardour"));
 	set_website (X_("http://ardour.org/"));
-	set_website_label (X_("ardour.org"));
+	set_website_label (X_("visit http://www.ardour.org/"));
 	set_version ((string_compose(_("%1\n(built with ardour/gtk %2.%3.%4 libardour: %5.%6.%7)"), 
 				     VERSIONSTRING, 
 				     gtk_ardour_major_version, 

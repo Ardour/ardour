@@ -22,7 +22,7 @@ class GainAutomationTimeAxisView : public AutomationTimeAxisView
 	
 	~GainAutomationTimeAxisView();
 
-	void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, jack_nframes_t, double);
+	void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, nframes_t, double);
 	
    private:
 	ARDOUR::Curve& curve;

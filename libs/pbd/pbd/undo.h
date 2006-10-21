@@ -40,8 +40,11 @@ class UndoTransaction : public Command
 	~UndoTransaction ();
 
 	void clear ();
+	bool empty() const;
+	bool clearing () const { return _clearing; }
 
 	void add_command (Command* const);
+	void remove_command (Command* const);
 
         void operator() ();
 	void undo();
@@ -66,8 +69,7 @@ class UndoTransaction : public Command
 	std::list<Command*>    actions;
 	struct timeval        _timestamp;
 	std::string           _name;
-	bool                   clearing;
-	void remove_command (Command* const);
+	bool                  _clearing;
 };
 
 class UndoHistory
@@ -94,7 +96,7 @@ class UndoHistory
         void save_state();
 
   private:
-	bool clearing;
+	bool _clearing;
 	std::list<UndoTransaction*> UndoList;
 	std::list<UndoTransaction*> RedoList;
 

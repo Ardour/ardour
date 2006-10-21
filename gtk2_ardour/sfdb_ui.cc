@@ -308,10 +308,10 @@ SoundFileBox::field_selected ()
 
 // this needs to be kept in sync with the ImportMode enum defined in editing.h and editing_syms.h.
 static const char *import_mode_strings[] = {
-	X_("Add to Region list"),
-	X_("Add to selected Track(s)"),
-	X_("Add as new Track(s)"),
-	X_("Add as new Tape Track(s)"),
+	N_("Add to Region list"),
+	N_("Add to selected Track(s)"),
+	N_("Add as new Track(s)"),
+	N_("Add as new Tape Track(s)"),
 	0
 };
 

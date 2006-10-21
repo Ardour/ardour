@@ -83,6 +83,7 @@ style "default_base" = "medium_text"
   GtkWidget::cursor_color =  {1.0, 1.0, 1.0 }
   GtkButton::default_border = { 0, 0, 0, 0 }
   GtkButton::default_outside_border = { 0, 0, 0, 0 }
+  GtkButton::button_relief = GTK_RELIEF_NONE
   GtkTreeView::vertical-padding = 0
   GtkTreeView::horizontal-padding = 0
   
@@ -92,8 +93,8 @@ style "default_base" = "medium_text"
   fg[INSENSITIVE] = { 0.80, 0.80, 0.80 }	
   fg[SELECTED] = { 0.80, 0.80, 0.80 }	
   
-  bg[NORMAL] = { 0.40, 0.40, 0.40 }
-  bg[ACTIVE] = { 0.40, 0.40, 0.40 }
+  bg[NORMAL] = { 0.40, 0.41, 0.41 }
+  bg[ACTIVE] = { 0.40, 0.41, 0.41 }
   bg[PRELIGHT] = "#565690"
   bg[INSENSITIVE] = { 0.10, 0.10, 0.10 }
   bg[SELECTED] = { 0, 0.40, 0.60 }
@@ -111,9 +112,9 @@ style "default_base" = "medium_text"
   base[SELECTED]     = { 0.25, 0.25, 0.25 }
   
   engine "clearlooks"  {
-    menubarstyle      = 1       # 0 = flat, 1 = sunken, 2 = flat gradient
-    menuitemstyle     = 1       # 0 = flat, 1 = 3d-ish (gradient), 2 = 3d-ish (button)
-    listviewitemstyle = 1       # 0 = flat, 1 = 3d-ish (gradient)
+    menubarstyle      = 0       # 0 = flat, 1 = sunken, 2 = flat gradient
+    menuitemstyle     = 0       # 0 = flat, 1 = 3d-ish (gradient), 2 = 3d-ish (button)
+    listviewitemstyle = 0       # 0 = flat, 1 = 3d-ish (gradient)
     progressbarstyle  = 0       # 0 = candy bar, 1 = flat
   }
 }
@@ -217,6 +218,7 @@ style "mute_button" = "small_button"
 	bg[ACTIVE] = { 1.0, 0.98, 0.53 }
 	
 	fg[PRELIGHT] = { 0, 0, 0 }
+	fg[ACTIVE] = { 0, 0, 0 }
 }
 
 

@@ -23,6 +23,7 @@
 
 #include <string>
 #include <cmath>
+#include <vector>
 #include <ardour/types.h>
 #include <libgnomecanvasmm/line.h>
 #include <gdkmm/types.h>
@@ -75,8 +76,10 @@ void set_color (Gdk::Color&, int);
 
 bool key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev);
 
-Glib::RefPtr<Gdk::Pixbuf> get_xpm(std::string);
+Glib::RefPtr<Gdk::Pixbuf> get_xpm (std::string);
+Glib::RefPtr<Gdk::Pixbuf> get_icon (const char*);
 static std::map<std::string, Glib::RefPtr<Gdk::Pixbuf> > xpm_map;
 const char* const *get_xpm_data (std::string path);
+std::string longest (std::vector<std::string>&);
 
 #endif /* __ardour_gtk_utils_h__ */

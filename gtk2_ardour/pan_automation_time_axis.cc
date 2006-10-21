@@ -52,7 +52,7 @@ PanAutomationTimeAxisView::~PanAutomationTimeAxisView ()
 }
 
 void
-PanAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkEvent* event, jack_nframes_t when, double y)
+PanAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkEvent* event, nframes_t when, double y)
 {
 	if (lines.empty()) {
 		/* no data, possibly caused by no outputs/inputs */

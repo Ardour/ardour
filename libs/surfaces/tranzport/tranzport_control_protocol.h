@@ -110,7 +110,7 @@ class TranzportControlProtocol : public ARDOUR::ControlProtocol
 	uint32_t       last_mins;
 	uint32_t       last_secs;
 	uint32_t       last_frames;
-	jack_nframes_t last_where;
+	nframes_t last_where;
 	ARDOUR::gain_t last_track_gain;
 	uint32_t       last_meter_fill;
 	struct timeval last_wheel_motion;

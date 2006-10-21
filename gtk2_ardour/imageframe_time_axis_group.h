@@ -139,7 +139,7 @@ class ImageFrameTimeAxisGroup : public sigc::trackable
 		 * @param num_channels the number of channles within the rgb_data
 		 * @param src the identity of the object that initiated the change
 		 */
-		ImageFrameView* add_imageframe_item(const string & item_id, jack_nframes_t start, jack_nframes_t duration, unsigned char* rgb_data, uint32_t width, uint32_t height, uint32_t num_channels, void* src) ;
+		ImageFrameView* add_imageframe_item(const string & item_id, nframes_t start, nframes_t duration, unsigned char* rgb_data, uint32_t width, uint32_t height, uint32_t num_channels, void* src) ;
 		
 		/**
 		 * Returns the named ImageFrameView or 0 if the named view does not exist on this view helper

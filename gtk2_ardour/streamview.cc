@@ -165,9 +165,15 @@ StreamView::add_region_view (boost::shared_ptr<Region> r)
 }
 
 void
-StreamView::remove_region_view (boost::shared_ptr<Region> r)
+StreamView::remove_region_view (boost::weak_ptr<Region> weak_r)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::remove_region_view), r));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::remove_region_view), weak_r));
+
+	boost::shared_ptr<Region> r (weak_r.lock());
+
+	if (!r) {
+		return;
+	}
 
 	for (list<RegionView *>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		if (((*i)->region()) == r) {
@@ -177,27 +183,6 @@ StreamView::remove_region_view (boost::shared_ptr<Region> r)
 		}
 	}
 }
-
-#if 0
-(unused)
-void
-StreamView::remove_rec_region (boost::shared_ptr<Region> r)
-{
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &StreamView::remove_rec_region), r));
-	
-	if (!Gtkmm2ext::UI::instance()->caller_is_ui_thread()) {
-		fatal << "region deleted from non-GUI thread!" << endmsg;
-		/*NOTREACHED*/
-	} 
-
-	for (list<boost::shared_ptr<Region> >::iterator i = rec_regions.begin(); i != rec_regions.end(); ++i) {
-		if (*i == r) {
-			rec_regions.erase (i);
-			break;
-		}
-	}
-}
-#endif
 
 void
 StreamView::undisplay_diskstream ()
@@ -334,7 +319,7 @@ StreamView::update_rec_box ()
 	if (rec_active && rec_rects.size() > 0) {
 		/* only update the last box */
 		RecBoxInfo & rect = rec_rects.back();
-		jack_nframes_t at = _trackview.get_diskstream()->current_capture_end();
+		nframes_t at = _trackview.get_diskstream()->current_capture_end();
 		double xstart;
 		double xend;
 		
@@ -399,7 +384,7 @@ StreamView::set_selected_regionviews (RegionSelection& regions)
 }
 
 void
-StreamView::get_selectables (jack_nframes_t start, jack_nframes_t end, list<Selectable*>& results)
+StreamView::get_selectables (nframes_t start, nframes_t end, list<Selectable*>& results)
 {
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		if ((*i)->region()->coverage(start, end) != OverlapNone) {

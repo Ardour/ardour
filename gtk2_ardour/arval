@@ -1,3 +1,4 @@
 #!/bin/sh
-source ardev_common.sh
+. ardev_common.sh
+export ARDOUR_RUNNING_UNDER_VALGRIND=TRUE
 exec valgrind  --num-callers=50 --tool=memcheck gtk2_ardour/ardour.bin --novst $*

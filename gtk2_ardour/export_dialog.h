@@ -53,7 +53,7 @@ class ExportDialog : public ArdourDialog
 	~ExportDialog ();
 
 	void connect_to_session (ARDOUR::Session*);
-	virtual void set_range (jack_nframes_t start, jack_nframes_t end);
+	virtual void set_range (nframes_t start, nframes_t end);
 	void start_export ();
 
   protected:

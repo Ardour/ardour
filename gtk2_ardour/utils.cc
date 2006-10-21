@@ -71,8 +71,7 @@ fit_to_pixels (const ustring& str, int pixel_width, Pango::FontDescription& font
 			break;
 		}
 		
-		ustr.erase (last);
-		--last;
+		ustr.erase (last--);
 	}
 
 	return ustr;
@@ -469,3 +468,46 @@ get_xpm (std::string name)
 	return (xpm_map[name]);
 }
 
+Glib::RefPtr<Gdk::Pixbuf>	
+get_icon (const char* cname)
+{
+	string name = cname;
+	name += X_(".png");
+
+	string path = ARDOUR::find_data_file (name, "icons");
+
+	if (path.empty()) {
+		fatal << string_compose (_("cannot find icon image for %1"), name) << endmsg;
+		/*NOTREACHED*/
+	}
+
+	return Gdk::Pixbuf::create_from_file (path);
+}
+
+string
+longest (vector<string>& strings)
+{
+	if (strings.empty()) {
+		return string ("");
+	}
+
+	vector<string>::iterator longest = strings.begin();
+	string::size_type longest_length = (*longest).length();
+	
+	vector<string>::iterator i = longest;
+	++i;
+
+	while (i != strings.end()) {
+		
+		string::size_type len = (*i).length();
+		
+		if (len > longest_length) {
+			longest = i;
+			longest_length = len;
+		} 
+		
+		++i;
+	}
+	
+	return *longest;
+}

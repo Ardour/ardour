@@ -17,8 +17,8 @@ Editor::set_route_loop_selection ()
 		return;
 	}
 
-	jack_nframes_t start = selection->time[clicked_selection].start;
-	jack_nframes_t end = selection->time[clicked_selection].end;
+	nframes_t start = selection->time[clicked_selection].start;
+	nframes_t end = selection->time[clicked_selection].end;
 
 	Location* loc = transport_loop_location();
 
@@ -27,7 +27,7 @@ Editor::set_route_loop_selection ()
 		loc->set (start, end);
 
 		// enable looping, reposition and start rolling
-		session->request_auto_loop (true);
+		session->request_play_loop (true);
 		session->request_locate (loc->start(), true);
 	}
 

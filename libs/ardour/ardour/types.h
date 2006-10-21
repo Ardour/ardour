@@ -52,6 +52,7 @@ namespace ARDOUR {
 	typedef float                       gain_t;
 	typedef uint32_t                    layer_t;
 	typedef uint64_t                    microseconds_t;
+	typedef uint32_t                    nframes_t;
 
 	typedef jack_midi_event_t MidiEvent;
 	typedef unsigned char     RawMidi;
@@ -70,8 +71,8 @@ namespace ARDOUR {
 		OverlapExternal   // overlap extends to (at least) begin+end
 	};
 
-	OverlapType coverage (jack_nframes_t start_a, jack_nframes_t end_a,
-			      jack_nframes_t start_b, jack_nframes_t end_b);
+	OverlapType coverage (nframes_t start_a, nframes_t end_a,
+			      nframes_t start_b, nframes_t end_b);
 
 	enum AutomationType {
 		GainAutomation = 0x1,
@@ -151,19 +152,21 @@ namespace ARDOUR {
 	    BBT_Time       bbt;
 
 	    union { 
-		jack_nframes_t frames;
+		nframes_t frames;
 		double         seconds;
 	    };
+
+	    AnyTime() { type = Frames; frames = 0; }
 	};
 
 	struct AudioRange {
-	    jack_nframes_t start;
-	    jack_nframes_t end;
+	    nframes_t start;
+	    nframes_t end;
 	    uint32_t id;
 	    
-	    AudioRange (jack_nframes_t s, jack_nframes_t e, uint32_t i) : start (s), end (e) , id (i) {}
+	    AudioRange (nframes_t s, nframes_t e, uint32_t i) : start (s), end (e) , id (i) {}
 	    
-	    jack_nframes_t length() { return end - start + 1; } 
+	    nframes_t length() { return end - start + 1; } 
 
 	    bool operator== (const AudioRange& other) const {
 		    return start == other.start && end == other.end && id == other.id;
@@ -173,7 +176,7 @@ namespace ARDOUR {
 		    return start == other.start && end == other.end;
 	    }
 
-	    OverlapType coverage (jack_nframes_t s, jack_nframes_t e) const {
+	    OverlapType coverage (nframes_t s, nframes_t e) const {
 		    return ARDOUR::coverage (start, end, s, e);
 	    }
 	};
@@ -193,6 +196,28 @@ namespace ARDOUR {
 	    bool equal (const MusicRange& other) const {
 		    return start == other.start && end == other.end;
 	    }
+	};
+
+	/*
+	    Slowest = 6.6dB/sec falloff at update rate of 40ms
+	    Slow    = 6.8dB/sec falloff at update rate of 40ms
+	*/
+
+	enum MeterFalloff {
+		MeterFalloffOff = 0,
+		MeterFalloffSlowest = 1,
+		MeterFalloffSlow = 2,
+		MeterFalloffMedium = 3,
+		MeterFalloffFast = 4,
+		MeterFalloffFaster = 5,
+		MeterFalloffFastest = 6
+	};
+
+	enum MeterHold {
+		MeterHoldOff = 0,
+		MeterHoldShort = 40,
+		MeterHoldMedium = 100,
+		MeterHoldLong = 200
 	};
 
 	enum EditMode {
@@ -216,9 +241,31 @@ namespace ARDOUR {
 		PostFader
 	};
 
+	enum MonitorModel {
+		HardwareMonitoring,
+		SoftwareMonitoring,
+		ExternalMonitoring,
+	};
+
 	enum CrossfadeModel {
 		FullCrossfade,
 		ShortCrossfade
+	};
+	
+	enum LayerModel {
+		LaterHigher,
+		MoveAddHigher,
+		AddHigher
+	};
+
+	enum SoloModel {
+		InverseMute,
+		SoloBus
+	};
+
+	enum AutoConnectOption {
+		AutoConnectPhysical = 0x1,
+		AutoConnectMaster = 0x2
 	};
 
 	struct InterThreadInfo {
@@ -256,23 +303,50 @@ namespace ARDOUR {
 		LADSPA,
 		VST
 	};
-	
+
+	enum SlaveSource {
+		None = 0,
+		MTC,
+		JACK
+	};
+
+	enum ShuttleBehaviour {
+		Sprung,
+		Wheel
+	};
+
+	enum ShuttleUnits {
+		Percentage,
+		Semitones
+	};
+
 	typedef std::vector<boost::shared_ptr<Source> > SourceList;
 } // namespace ARDOUR
 
 std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::HeaderFormat& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::AutoConnectOption& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::EditMode& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::MonitorModel& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::SoloModel& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::LayerModel& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::CrossfadeModel& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::SlaveSource& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::ShuttleBehaviour& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::ShuttleUnits& sf);
 
-static inline jack_nframes_t
-session_frame_to_track_frame (jack_nframes_t session_frame, double speed)
+using ARDOUR::nframes_t;
+
+static inline nframes_t
+session_frame_to_track_frame (nframes_t session_frame, double speed)
 {
-	return (jack_nframes_t)( (double)session_frame * speed );
+	return (nframes_t)( (double)session_frame * speed );
 }
 
-static inline jack_nframes_t
-track_frame_to_session_frame (jack_nframes_t track_frame, double speed)
+static inline nframes_t
+track_frame_to_session_frame (nframes_t track_frame, double speed)
 {
-	return (jack_nframes_t)( (double)track_frame / speed );
+	return (nframes_t)( (double)track_frame / speed );
 }
 
 

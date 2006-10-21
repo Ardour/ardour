@@ -26,6 +26,7 @@
 #include <ardour/timestamps.h>
 
 #include <pbd/error.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/ardour.h>
 #include <ardour/configuration.h>
@@ -41,7 +42,7 @@ using namespace PBD;
 /* BBT TIME*/
 
 void
-Session::bbt_time (jack_nframes_t when, BBT_Time& bbt)
+Session::bbt_time (nframes_t when, BBT_Time& bbt)
 {
 	_tempo_map->bbt_time (when, bbt);
 }
@@ -51,17 +52,17 @@ Session::bbt_time (jack_nframes_t when, BBT_Time& bbt)
 void
 Session::sync_time_vars ()
 {
-	_current_frame_rate = (jack_nframes_t) round (_base_frame_rate * (1.0 + (video_pullup/100.0)));
+	_current_frame_rate = (nframes_t) round (_base_frame_rate * (1.0 + (Config->get_video_pullup()/100.0)));
 	_frames_per_hour = _current_frame_rate * 3600;
-	_frames_per_smpte_frame = (double) _current_frame_rate / (double) smpte_frames_per_second;
-	_smpte_frames_per_hour = (unsigned long) (smpte_frames_per_second * 3600.0);
+	_frames_per_smpte_frame = (double) _current_frame_rate / (double) Config->get_smpte_frames_per_second();
+	_smpte_frames_per_hour = (unsigned long) (Config->get_smpte_frames_per_second() * 3600.0);
 }
 
 int
 Session::set_smpte_type (float fps, bool drop_frames)
 {
-	smpte_frames_per_second = fps;
-	smpte_drop_frames = drop_frames;
+	Config->set_smpte_frames_per_second (fps);
+	Config->set_smpte_drop_frames (drop_frames);
 
 	last_smpte_valid = false;
 	// smpte type bits are the middle two in the upper nibble
@@ -88,31 +89,11 @@ Session::set_smpte_type (float fps, bool drop_frames)
 		break;
 	};
 
-	sync_time_vars();
-
-	SMPTETypeChanged (); /* EMIT SIGNAL */
-
-	set_dirty();
-
-	return 0;
-}
-
-int
-Session::set_video_pullup (float pull)
-{
-	video_pullup = pull;
-
-	sync_time_vars();
-
-	PullupChanged (); /* EMIT SIGNAL */
-
-	set_dirty();
-
 	return 0;
 }
 
 void
-Session::set_smpte_offset (jack_nframes_t off)
+Session::set_smpte_offset (nframes_t off)
 {
 	_smpte_offset = off;
 	last_smpte_valid = false;
@@ -130,9 +111,9 @@ Session::set_smpte_offset_negative (bool neg)
 }
 
 void
-Session::smpte_to_sample( SMPTE::Time& smpte, jack_nframes_t& sample, bool use_offset, bool use_subframes ) const
+Session::smpte_to_sample( SMPTE::Time& smpte, nframes_t& sample, bool use_offset, bool use_subframes ) const
 {
-	if (smpte_drop_frames) {
+	if (Config->get_smpte_drop_frames()) {
 		// The drop frame format was created to better approximate the 30000/1001 = 29.97002997002997....
 		// framerate of NTSC color TV. The used frame rate of drop frame is 29.97, which drifts by about
 		// 0.108 frame per hour, or about 1.3 frames per 12 hours. This is not perfect, but a lot better
@@ -173,16 +154,16 @@ Session::smpte_to_sample( SMPTE::Time& smpte, jack_nframes_t& sample, bool use_o
 		//  Per Sigmond <per@sigmond.no>
     
 		// Samples inside time dividable by 10 minutes (real time accurate)
-		jack_nframes_t base_samples = ((smpte.hours * 60 * 60) + ((smpte.minutes / 10) * 10 * 60)) * frame_rate();
+		nframes_t base_samples = ((smpte.hours * 60 * 60) + ((smpte.minutes / 10) * 10 * 60)) * frame_rate();
 		// Samples inside time exceeding the nearest 10 minutes (always offset, see above)
 		long exceeding_df_minutes = smpte.minutes % 10;
 		long exceeding_df_seconds = (exceeding_df_minutes * 60) + smpte.seconds;
 		long exceeding_df_frames = (30 * exceeding_df_seconds) + smpte.frames - (2 * exceeding_df_minutes);
-		jack_nframes_t exceeding_samples = (jack_nframes_t) rint(exceeding_df_frames * _frames_per_smpte_frame);
+		nframes_t exceeding_samples = (nframes_t) rint(exceeding_df_frames * _frames_per_smpte_frame);
 		sample = base_samples + exceeding_samples;
 	} else {
 		// Non drop is easy:
-		sample = (((smpte.hours * 60 * 60) + (smpte.minutes * 60) + smpte.seconds) * frame_rate()) + (jack_nframes_t)rint(smpte.frames * _frames_per_smpte_frame);
+		sample = (((smpte.hours * 60 * 60) + (smpte.minutes * 60) + smpte.seconds) * frame_rate()) + (nframes_t)rint(smpte.frames * _frames_per_smpte_frame);
 	}
   
 	if (use_subframes) {
@@ -213,9 +194,9 @@ Session::smpte_to_sample( SMPTE::Time& smpte, jack_nframes_t& sample, bool use_o
 
 
 void
-Session::sample_to_smpte( jack_nframes_t sample, SMPTE::Time& smpte, bool use_offset, bool use_subframes ) const
+Session::sample_to_smpte( nframes_t sample, SMPTE::Time& smpte, bool use_offset, bool use_subframes ) const
 {
-	jack_nframes_t offset_sample;
+	nframes_t offset_sample;
 
 	if (!use_offset) {
 		offset_sample = sample;
@@ -259,7 +240,7 @@ Session::sample_to_smpte( jack_nframes_t sample, SMPTE::Time& smpte, bool use_of
 	// Extract hour-exceeding frames for minute, second and frame calculations
 	smpte_frames_left = ((long) floor( smpte_frames_left_exact ));
 
-	if (smpte_drop_frames) {
+	if (Config->get_smpte_drop_frames()) {
 		// See long explanation in smpte_to_sample()...
 
 		// Number of 10 minute chunks
@@ -295,10 +276,10 @@ Session::sample_to_smpte( jack_nframes_t sample, SMPTE::Time& smpte, bool use_of
 		}
 	} else {
 		// Non drop is easy
-		smpte.minutes = smpte_frames_left / ((long) smpte_frames_per_second * 60);
-		smpte_frames_left = smpte_frames_left % ((long) smpte_frames_per_second * 60);
-		smpte.seconds = smpte_frames_left / (long) smpte_frames_per_second;
-		smpte.frames = smpte_frames_left % (long) smpte_frames_per_second;
+		smpte.minutes = smpte_frames_left / ((long) Config->get_smpte_frames_per_second () * 60);
+		smpte_frames_left = smpte_frames_left % ((long) Config->get_smpte_frames_per_second () * 60);
+		smpte.seconds = smpte_frames_left / (long) Config->get_smpte_frames_per_second ();
+		smpte.frames = smpte_frames_left % (long) Config->get_smpte_frames_per_second ();
 	}
 
 	if (!use_subframes) {
@@ -307,7 +288,7 @@ Session::sample_to_smpte( jack_nframes_t sample, SMPTE::Time& smpte, bool use_of
 }
 
 void
-Session::smpte_time (jack_nframes_t when, SMPTE::Time& smpte)
+Session::smpte_time (nframes_t when, SMPTE::Time& smpte)
 {
 	if (last_smpte_valid && when == last_smpte_when) {
 		smpte = last_smpte;
@@ -322,7 +303,7 @@ Session::smpte_time (jack_nframes_t when, SMPTE::Time& smpte)
 }
 
 void
-Session::smpte_time_subframes (jack_nframes_t when, SMPTE::Time& smpte)
+Session::smpte_time_subframes (nframes_t when, SMPTE::Time& smpte)
 {
 	if (last_smpte_valid && when == last_smpte_when) {
 		smpte = last_smpte;
@@ -337,13 +318,13 @@ Session::smpte_time_subframes (jack_nframes_t when, SMPTE::Time& smpte)
 }
 
 void
-Session::smpte_duration (jack_nframes_t when, SMPTE::Time& smpte) const
+Session::smpte_duration (nframes_t when, SMPTE::Time& smpte) const
 {
 	sample_to_smpte( when, smpte, false /* use_offset */, true /* use_subframes */ );
 }
 
 void
-Session::smpte_duration_string (char* buf, jack_nframes_t when) const
+Session::smpte_duration_string (char* buf, nframes_t when) const
 {
 	SMPTE::Time smpte;
 
@@ -400,7 +381,7 @@ Session::jack_sync_callback (jack_transport_state_t state,
 
 void
 Session::jack_timebase_callback (jack_transport_state_t state,
-				 jack_nframes_t nframes,
+				 nframes_t nframes,
 				 jack_position_t* pos,
 				 int new_position)
 {
@@ -434,7 +415,7 @@ Session::jack_timebase_callback (jack_transport_state_t state,
 
 #ifdef HAVE_JACK_VIDEO_SUPPORT
 	//poke audio video ratio so Ardour can track Video Sync
-	pos->audio_frames_per_video_frame = frame_rate() / smpte_frames_per_second;
+	pos->audio_frames_per_video_frame = frame_rate() / Config->get_smpte_frames_per_second ();
 	pos->valid = jack_position_bits_t (pos->valid | JackAudioVideoRatio);
 #endif
 
@@ -442,11 +423,11 @@ Session::jack_timebase_callback (jack_transport_state_t state,
 	/* SMPTE info */
 
 	t.smpte_offset = _smpte_offset;
-	t.smpte_frame_rate = smpte_frames_per_second;
+	t.smpte_frame_rate = Config->get_smpte_frames_per_second ();
 
 	if (_transport_speed) {
 
-		if (auto_loop) {
+		if (play_loop) {
 
 			Location* location = _locations.auto_loop_location();
 
@@ -478,8 +459,8 @@ Session::jack_timebase_callback (jack_transport_state_t state,
 #endif		
 }
 
-jack_nframes_t
-Session::convert_to_frames_at (jack_nframes_t position, AnyTime& any)
+ARDOUR::nframes_t
+Session::convert_to_frames_at (nframes_t position, AnyTime& any)
 {
 	double secs;
 	
@@ -493,19 +474,19 @@ Session::convert_to_frames_at (jack_nframes_t position, AnyTime& any)
 		secs = any.smpte.hours * 60 * 60;
 		secs += any.smpte.minutes * 60;
 		secs += any.smpte.seconds;
-		secs += any.smpte.frames / smpte_frames_per_second;
+		secs += any.smpte.frames / Config->get_smpte_frames_per_second ();
 		if (_smpte_offset_negative) 
 		{
-			return (jack_nframes_t) floor (secs * frame_rate()) - _smpte_offset;
+			return (nframes_t) floor (secs * frame_rate()) - _smpte_offset;
 		}
 		else
 		{
-			return (jack_nframes_t) floor (secs * frame_rate()) + _smpte_offset;
+			return (nframes_t) floor (secs * frame_rate()) + _smpte_offset;
 		}
 		break;
 
 	case AnyTime::Seconds:
-		return (jack_nframes_t) floor (any.seconds * frame_rate());
+		return (nframes_t) floor (any.seconds * frame_rate());
 		break;
 
 	case AnyTime::Frames:

@@ -40,16 +40,15 @@ ID::string_assign (string str)
 }
 
 void
-ID::print (char* buf) const
+ID::print (char* buf, uint32_t bufsize) const
 {
-	/* XXX sizeof buf is unknown. bad API design */
-	snprintf (buf, 16, "%" PRIu64, _id);
+	snprintf (buf, bufsize, "%" PRIu64, _id);
 }
 
 string ID::to_s() const
 {
-    char buf[16]; // see print()
-    print(buf);
+    char buf[32]; // see print()
+    print(buf, sizeof (buf));
     return string(buf);
 }
 
@@ -64,7 +63,7 @@ ostream&
 operator<< (ostream& ostr, const ID& _id)
 {
 	char buf[32];
-	_id.print (buf);
+	_id.print (buf, sizeof (buf));
 	ostr << buf;
 	return ostr;
 }

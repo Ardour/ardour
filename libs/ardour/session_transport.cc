@@ -57,16 +57,15 @@ Session::request_input_change_handling ()
 }
 
 void
-Session::request_slave_source (SlaveSource src, jack_nframes_t pos)
+Session::request_slave_source (SlaveSource src)
 {
-	Event* ev = new Event (Event::SetSlaveSource, Event::Add, Event::Immediate, pos, 0.0);
+	Event* ev = new Event (Event::SetSlaveSource, Event::Add, Event::Immediate, 0, 0.0);
 
-	if (src == Session::JACK) {
-	  /* could set_seamless_loop() be disposed of entirely?*/
-	  set_seamless_loop (false);
+	if (src == JACK) {
+		/* could set_seamless_loop() be disposed of entirely?*/
+		Config->set_seamless_loop (false);
 	} else {
-
-	  set_seamless_loop (true);
+		Config->set_seamless_loop (true);
 	}
 	ev->slave = src;
 	queue_event (ev);
@@ -95,21 +94,21 @@ Session::request_stop (bool abort)
 }
 
 void
-Session::request_locate (jack_nframes_t target_frame, bool with_roll)
+Session::request_locate (nframes_t target_frame, bool with_roll)
 {
 	Event *ev = new Event (with_roll ? Event::LocateRoll : Event::Locate, Event::Add, Event::Immediate, target_frame, 0, false);
 	queue_event (ev);
 }
 
 void
-Session::force_locate (jack_nframes_t target_frame, bool with_roll)
+Session::force_locate (nframes_t target_frame, bool with_roll)
 {
 	Event *ev = new Event (with_roll ? Event::LocateRoll : Event::Locate, Event::Add, Event::Immediate, target_frame, 0, true);
 	queue_event (ev);
 }
 
 void
-Session::request_auto_loop (bool yn)
+Session::request_play_loop (bool yn)
 {
 	Event* ev;	
 	Location *location = _locations.auto_loop_location();
@@ -123,25 +122,10 @@ Session::request_auto_loop (bool yn)
 	ev = new Event (Event::SetLoop, Event::Add, Event::Immediate, 0, 0.0, yn);
 	queue_event (ev);
 
-	if (!yn && seamless_loop && transport_rolling()) {
+	if (!yn && Config->get_seamless_loop() && transport_rolling()) {
 		// request an immediate locate to refresh the diskstreams
 		// after disabling looping
 		request_locate (_transport_frame-1, true);
-	}
-}
-
-void
-Session::set_seamless_loop (bool yn)
-{
-	if (seamless_loop != yn) {
-		seamless_loop = yn;
-
-		if (auto_loop && transport_rolling()) {
-			// to reset diskstreams etc
-			request_auto_loop (true);
-		}
-		
-		ControlChanged (SeamlessLoop); /* EMIT */
 	}
 }
 
@@ -195,7 +179,7 @@ Session::realtime_stop (bool abort)
 		waiting_for_sync_offset = true;
 	}
 
-	transport_sub_state = (auto_return ? AutoReturning : 0);
+	transport_sub_state = (Config->get_auto_return() ? AutoReturning : 0);
 }
 
 void
@@ -230,7 +214,7 @@ Session::butler_transport_work ()
 		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if (!(*i)->hidden()) {
 				if ((*i)->speed() != 1.0f || (*i)->speed() != -1.0f) {
-					(*i)->seek ((jack_nframes_t) (_transport_frame * (double) (*i)->speed()));
+					(*i)->seek ((nframes_t) (_transport_frame * (double) (*i)->speed()));
 				}
 				else {
 					(*i)->seek (_transport_frame);
@@ -282,11 +266,13 @@ Session::non_realtime_stop (bool abort)
 	struct tm* now;
 	time_t     xnow;
 	bool       did_record;
-	
-	did_record = false;
-	
-	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+	bool       saved;
 
+	did_record = false;
+	saved = false;
+
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+	
 	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		if ((*i)->get_captured_frames () != 0) {
 			did_record = true;
@@ -312,7 +298,7 @@ Session::non_realtime_stop (bool abort)
 		
 		Location* loc = _locations.end_location();
 		bool change_end = false;
-
+		
 		if (_transport_frame < loc->end()) {
 
 			/* stopped recording before current end */
@@ -353,22 +339,22 @@ Session::non_realtime_stop (bool abort)
 			(*i)->set_pending_declick (0);
 		}
 	}
-
+	
 	if (did_record) {
 		commit_reversible_command ();
 	}	
-
+	
 	if (_engine.running()) {
 		update_latency_compensation (true, abort);
 	}
 
-	if (auto_return || (post_transport_work & PostTransportLocate) || synced_to_jack()) {
-
+	if (Config->get_auto_return() || (post_transport_work & PostTransportLocate) || synced_to_jack()) {
+		
 		if (pending_locate_flush) {
 			flush_all_redirects ();
 		}
 
-		if ((auto_return || synced_to_jack()) && !(post_transport_work & PostTransportLocate)) {
+		if ((Config->get_auto_return() || synced_to_jack()) && !(post_transport_work & PostTransportLocate)) {
 
 			_transport_frame = last_stop_frame;
 
@@ -384,14 +370,14 @@ Session::non_realtime_stop (bool abort)
 		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if (!(*i)->hidden()) {
 				if ((*i)->speed() != 1.0f || (*i)->speed() != -1.0f) {
-					(*i)->seek ((jack_nframes_t) (_transport_frame * (double) (*i)->speed()));
+					(*i)->seek ((nframes_t) (_transport_frame * (double) (*i)->speed()));
 				}
 				else {
 					(*i)->seek (_transport_frame);
 				}
 			}
 		}
-
+		
 		//FIXME
 		//deliver_mmc (MIDI::MachineControl::cmdLocate, _transport_frame);
 
@@ -407,7 +393,7 @@ Session::non_realtime_stop (bool abort)
 		   when realtime_stop(), which has already executed,
 		   will have done this.
 		*/
-
+		
 		if (!Config->get_latched_record_enable()) {
 			g_atomic_int_set (&_record_status, Disabled);
 		} else {
@@ -419,6 +405,7 @@ Session::non_realtime_stop (bool abort)
 	if ((post_transport_work & PostTransportLocate) && get_record_enabled()) {
 		/* capture start has been changed, so save pending state */
 		save_state ("", true);
+		saved = true;
 	}
 
         /* always try to get rid of this */
@@ -427,7 +414,7 @@ Session::non_realtime_stop (bool abort)
 	
 	/* save the current state of things if appropriate */
 
-	if (did_record) {
+	if (did_record && !saved) {
 		save_state (_current_snapshot_name);
 	}
 
@@ -439,7 +426,7 @@ Session::non_realtime_stop (bool abort)
 		_play_range = false;
 
 		/* do not turn off autoloop on stop */
-
+		
 	}
 
 	PositionChanged (_transport_frame); /* EMIT SIGNAL */
@@ -447,7 +434,7 @@ Session::non_realtime_stop (bool abort)
 
 	/* and start it up again if relevant */
 
-	if ((post_transport_work & PostTransportLocate) && _slave_type == None && pending_locate_roll) {
+	if ((post_transport_work & PostTransportLocate) && Config->get_slave_source() == None && pending_locate_roll) {
 		request_transport_speed (1.0);
 		pending_locate_roll = false;
 	}
@@ -478,7 +465,7 @@ Session::check_declick_out ()
 }
 
 void
-Session::set_auto_loop (bool yn)
+Session::set_play_loop (bool yn)
 {
 	/* Called from event-handling context */
 	
@@ -488,7 +475,7 @@ Session::set_auto_loop (bool yn)
 	
 	set_dirty();
 
-	if (yn && seamless_loop && synced_to_jack()) {
+	if (yn && Config->get_seamless_loop() && synced_to_jack()) {
 		warning << _("Seamless looping cannot be supported while Ardour is using JACK transport.\n"
 			     "Recommend changing the configured options")
 			<< endmsg;
@@ -496,14 +483,14 @@ Session::set_auto_loop (bool yn)
 	}
 
 	
-	if ((auto_loop = yn)) {
+	if ((play_loop = yn)) {
 
 		Location *loc;
 
 		
 		if ((loc = _locations.auto_loop_location()) != 0) {
 
-			if (seamless_loop) {
+			if (Config->get_seamless_loop()) {
 				// set all diskstreams to use internal looping
 				boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 				for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
@@ -553,8 +540,6 @@ Session::set_auto_loop (bool yn)
 		}
 		
 	}
-	
-	ControlChanged (AutoLoop); /* EMIT SIGNAL */
 }
 
 void
@@ -568,12 +553,12 @@ Session::flush_all_redirects ()
 }
 
 void
-Session::start_locate (jack_nframes_t target_frame, bool with_roll, bool with_flush, bool with_loop)
+Session::start_locate (nframes_t target_frame, bool with_roll, bool with_flush, bool with_loop)
 {
 	if (synced_to_jack()) {
 
 		float sp;
-		jack_nframes_t pos;
+		nframes_t pos;
 
 		_slave->speed_and_position (sp, pos);
 
@@ -598,7 +583,7 @@ Session::start_locate (jack_nframes_t target_frame, bool with_roll, bool with_fl
 }
 
 void
-Session::locate (jack_nframes_t target_frame, bool with_roll, bool with_flush, bool with_loop)
+Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool with_loop)
 {
 	if (actively_recording()) {
 		return;
@@ -631,7 +616,7 @@ Session::locate (jack_nframes_t target_frame, bool with_roll, bool with_flush, b
 		} 
 	}
 
-	if (transport_rolling() && !auto_play && !with_roll && !(synced_to_jack() && auto_loop)) {
+	if (transport_rolling() && !Config->get_auto_play() && !with_roll && !(synced_to_jack() && play_loop)) {
 		realtime_stop (false);
 	} 
 
@@ -663,20 +648,20 @@ Session::locate (jack_nframes_t target_frame, bool with_roll, bool with_flush, b
 
 	if (with_roll) {
 		/* switch from input if we're going to roll */
-		if (Config->get_use_hardware_monitoring()) {
+		if (Config->get_monitoring_model() == HardwareMonitoring) {
 
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					//cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
-					(*i)->monitor_input (!auto_input);
+					(*i)->monitor_input (!Config->get_auto_input());
 				}
 			}
 		}
 	} else {
 		/* otherwise we're going to stop, so do the opposite */
-		if (Config->get_use_hardware_monitoring()) {
+		if (Config->get_monitoring_model() == HardwareMonitoring) {
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
@@ -688,13 +673,13 @@ Session::locate (jack_nframes_t target_frame, bool with_roll, bool with_flush, b
 		}
 	}
 
-	/* cancel autoloop if transport pos outside of loop range */
-	if (auto_loop) {
+	/* cancel looped playback if transport pos outside of loop range */
+	if (play_loop) {
 		Location* al = _locations.auto_loop_location();
 		
 		if (al && (_transport_frame < al->start() || _transport_frame > al->end())) {
 			// cancel looping directly, this is called from event handling context
-			set_auto_loop(false);
+			set_play_loop (false);
 		}
 	}
 	
@@ -718,7 +703,7 @@ Session::set_transport_speed (float speed, bool abort)
 
 	if (transport_rolling() && speed == 0.0) {
 
-		if (Config->get_use_hardware_monitoring())
+		if (Config->get_monitoring_model() == HardwareMonitoring)
 		{
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
@@ -735,19 +720,19 @@ Session::set_transport_speed (float speed, bool abort)
 		} else {
 			stop_transport (abort);
 		}
-
+		
 	} else if (transport_stopped() && speed == 1.0) {
 
 		if (!get_record_enabled() && Config->get_stop_at_session_end() && _transport_frame >= current_end_frame()) {
 			return;
 		}
 
-		if (Config->get_use_hardware_monitoring()) {
+		if (Config->get_monitoring_model() == HardwareMonitoring) {
 
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-				if (auto_input && (*i)->record_enabled ()) {
+				if (Config->get_auto_input() && (*i)->record_enabled ()) {
 					//cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
 					(*i)->monitor_input (false);	
 				}
@@ -816,7 +801,7 @@ Session::stop_transport (bool abort)
 	if (_transport_speed == 0.0f) {
 		return;
 	}
-
+	
 	if (actively_recording() && !(transport_sub_state & StopPendingCapture) && 
 	    _worst_output_latency > current_block_size) 
 	{
@@ -839,9 +824,11 @@ Session::stop_transport (bool abort)
 		return;
 	} 
 
+
 	if ((transport_sub_state & PendingDeclickOut) == 0) {
 		transport_sub_state |= PendingDeclickOut;
 		/* we'll be called again after the declick */
+		pending_abort = abort;
 		return;
 	}
 
@@ -860,7 +847,7 @@ Session::start_transport ()
 
 	switch (record_status()) {
 	case Enabled:
-		if (!punch_in) {
+		if (!Config->get_punch_in()) {
 			enable_record ();
 		}
 		break;
@@ -919,7 +906,7 @@ Session::post_transport ()
 
 	if (post_transport_work & PostTransportLocate) {
 
-		if ((auto_play && !_exporting) || (post_transport_work & PostTransportRoll)) {
+		if ((Config->get_auto_play() && !_exporting) || (post_transport_work & PostTransportRoll)) {
 			
 			start_transport ();
 			
@@ -934,15 +921,7 @@ Session::post_transport ()
 }
 
 void
-Session::set_rf_speed (float speed)
-{
-	rf_speed = speed;
-	cumulative_rf_motion = 0;
-	reset_rf_scale (0);
-}
-
-void
-Session::reset_rf_scale (jack_nframes_t motion)
+Session::reset_rf_scale (nframes_t motion)
 {
 	cumulative_rf_motion += motion;
 
@@ -961,31 +940,24 @@ Session::reset_rf_scale (jack_nframes_t motion)
 	}
 }
 
-int
-Session::set_slave_source (SlaveSource src, jack_nframes_t frame)
+void
+Session::set_slave_source (SlaveSource src)
 {
 	bool reverse = false;
 	bool non_rt_required = false;
 
-	if (src == _slave_type) {
-		return 0;
-	} 
-
 	if (_transport_speed) {
 		error << _("please stop the transport before adjusting slave settings") << endmsg;
-		/* help out non-MVC friendly UI's by telling them the slave type changed */
-		ControlChanged (SlaveType); /* EMIT SIGNAL */
-		return 0;
+		return;
 	}
 
 // 	if (src == JACK && Config->get_jack_time_master()) {
-// 		return -1;
+// 		return;
 // 	}
 	
 	if (_slave) {
 		delete _slave;
 		_slave = 0;
-		_slave_type = None;
 	}
 
 	if (_transport_speed < 0.0) {
@@ -996,7 +968,7 @@ Session::set_slave_source (SlaveSource src, jack_nframes_t frame)
 	case None:
 		stop_transport ();
 		break;
-
+		
 	case MTC:
 		if (_mtc_port) {
 			try {
@@ -1004,12 +976,12 @@ Session::set_slave_source (SlaveSource src, jack_nframes_t frame)
 			}
 
 			catch (failed_constructor& err) {
-				return -1;
+				return;
 			}
 
 		} else {
 			error << _("No MTC port defined: MTC slaving is impossible.") << endmsg;
-			return -1;
+			return;
 		}
 		_desired_transport_speed = _transport_speed;
 		break;
@@ -1019,9 +991,9 @@ Session::set_slave_source (SlaveSource src, jack_nframes_t frame)
 		_desired_transport_speed = _transport_speed;
 		break;
 	};
-	
-	_slave_type = src;
 
+	Config->set_slave_source (src);
+	
 	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		if (!(*i)->hidden()) {
@@ -1042,9 +1014,6 @@ Session::set_slave_source (SlaveSource src, jack_nframes_t frame)
 	}
 
 	set_dirty();
-	ControlChanged (SlaveType); /* EMIT SIGNAL */
-	
-	return 0;
 }
 
 void
@@ -1093,8 +1062,6 @@ Session::set_play_range (bool yn)
 			Event* ev = new Event (Event::SetTransportSpeed, Event::Add, Event::Immediate, 0, 0.0f, false);
 			merge_event (ev);
 		}
-
- 		 ControlChanged (PlayRange); /* EMIT SIGNAL */
 	}
 }
 
@@ -1127,7 +1094,7 @@ Session::setup_auto_play ()
 			/* locating/stopping is subject to delays for declicking.
 			 */
 			
-			jack_nframes_t requested_frame = (*i).end;
+			nframes_t requested_frame = (*i).end;
 			
 			if (requested_frame > current_block_size) {
 				requested_frame -= current_block_size;
@@ -1160,7 +1127,7 @@ Session::setup_auto_play ()
 }
 
 void
-Session::request_bounded_roll (jack_nframes_t start, jack_nframes_t end)
+Session::request_bounded_roll (nframes_t start, nframes_t end)
 {
 	request_stop ();
 	Event *ev = new Event (Event::StopOnce, Event::Replace, Event::Immediate, end, 0.0);
@@ -1224,8 +1191,8 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 							(!(post_transport_work & PostTransportLocate) || pending_locate_flush));
 		}
 
-		jack_nframes_t old_latency = (*i)->signal_latency ();
-		jack_nframes_t track_latency = (*i)->update_total_latency ();
+		nframes_t old_latency = (*i)->signal_latency ();
+		nframes_t track_latency = (*i)->update_total_latency ();
 
 		if (old_latency != track_latency) {
 			update_jack = true;

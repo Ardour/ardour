@@ -66,14 +66,14 @@ class StreamPanner : public sigc::trackable, public Stateful
 
 	/* the basic StreamPanner API */
 
-	virtual void distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, jack_nframes_t nframes) = 0;
+	virtual void distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes) = 0;
 	virtual void distribute_automated (AudioBuffer& src, BufferSet& obufs,
-				     jack_nframes_t start, jack_nframes_t end, jack_nframes_t nframes, pan_t** buffers) = 0;
+				     nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers) = 0;
 
 	/* automation */
 
-	virtual void snapshot (jack_nframes_t now) = 0;
-	virtual void transport_stopped (jack_nframes_t frame) = 0;
+	virtual void snapshot (nframes_t now) = 0;
+	virtual void transport_stopped (nframes_t frame) = 0;
 	virtual void set_automation_state (AutoState) = 0;
 	virtual void set_automation_style (AutoStyle) = 0;
 	
@@ -116,7 +116,7 @@ class StreamPanner : public sigc::trackable, public Stateful
 	bool             _muted;
 
 	struct PanControllable : public PBD::Controllable {
-	    PanControllable (StreamPanner& p) : panner (p) {}
+	    PanControllable (std::string name, StreamPanner& p) : Controllable (name), panner (p) {}
 	    
 	    StreamPanner& panner;
 	    
@@ -143,12 +143,12 @@ class BaseStereoPanner : public StreamPanner
 	   and a type name. See EqualPowerStereoPanner as an example.
 	*/
 
-	void distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, jack_nframes_t nframes);
+	void distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
 
 	int load (istream&, string path, uint32_t&);
 	int save (ostream&) const;
-	void snapshot (jack_nframes_t now);
-	void transport_stopped (jack_nframes_t frame);
+	void snapshot (nframes_t now);
+	void transport_stopped (nframes_t frame);
 	void set_automation_state (AutoState);
 	void set_automation_style (AutoStyle);
 
@@ -172,7 +172,7 @@ class EqualPowerStereoPanner : public BaseStereoPanner
 	~EqualPowerStereoPanner ();
 
 	void distribute_automated (AudioBuffer& src, BufferSet& obufs, 
-			     jack_nframes_t start, jack_nframes_t end, jack_nframes_t nframes, pan_t** buffers);
+			     nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
 
 	void get_current_coefficients (pan_t*) const;
 	void get_desired_coefficients (pan_t*) const;
@@ -194,8 +194,8 @@ class Multi2dPanner : public StreamPanner
 	Multi2dPanner (Panner& parent);
 	~Multi2dPanner ();
 
-	void snapshot (jack_nframes_t now);
-	void transport_stopped (jack_nframes_t frame);
+	void snapshot (nframes_t now);
+	void transport_stopped (nframes_t frame);
 	void set_automation_state (AutoState);
 	void set_automation_style (AutoStyle);
 
@@ -205,9 +205,9 @@ class Multi2dPanner : public StreamPanner
 
 	Curve& automation() { return _automation; }
 
-	void distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, jack_nframes_t nframes);
+	void distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
 	void distribute_automated (AudioBuffer& src, BufferSet& obufs,
-			     jack_nframes_t start, jack_nframes_t end, jack_nframes_t nframes, pan_t** buffers);
+			     nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
 
 	int load (istream&, string path, uint32_t&);
 	int save (ostream&) const;
@@ -242,7 +242,7 @@ class Panner : public std::vector<StreamPanner*>, public Stateful, public sigc::
 	virtual ~Panner ();
 
 	/// The fundamental Panner function
-	void distribute(BufferSet& src, BufferSet& dest, jack_nframes_t start_frame, jack_nframes_t end_frames, jack_nframes_t nframes, jack_nframes_t offset);
+	void distribute(BufferSet& src, BufferSet& dest, nframes_t start_frame, nframes_t end_frames, nframes_t nframes, nframes_t offset);
 
 	void set_name (string);
 
@@ -254,8 +254,8 @@ class Panner : public std::vector<StreamPanner*>, public Stateful, public sigc::
 	void clear ();
 	void reset (uint32_t noutputs, uint32_t npans);
 
-	void snapshot (jack_nframes_t now);
-	void transport_stopped (jack_nframes_t frame);
+	void snapshot (nframes_t now);
+	void transport_stopped (nframes_t frame);
 	
 	void clear_automation ();
 
@@ -306,7 +306,7 @@ class Panner : public std::vector<StreamPanner*>, public Stateful, public sigc::
 	void set_position (float x, float y, float z, StreamPanner& orig);
 	
   private:
-	void distribute_no_automation(BufferSet& src, BufferSet& dest, jack_nframes_t nframes, jack_nframes_t offset, gain_t gain_coeff);
+	void distribute_no_automation(BufferSet& src, BufferSet& dest, nframes_t nframes, nframes_t offset, gain_t gain_coeff);
 
 
 	string            automation_path;

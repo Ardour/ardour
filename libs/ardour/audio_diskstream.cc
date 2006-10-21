@@ -250,7 +250,7 @@ AudioDiskstream::non_realtime_input_change ()
 	/* now refill channel buffers */
 
 	if (speed() != 1.0f || speed() != -1.0f) {
-		seek ((jack_nframes_t) (_session.transport_frame() * (double) speed()));
+		seek ((nframes_t) (_session.transport_frame() * (double) speed()));
 	} else {
 		seek (_session.transport_frame());
 	}
@@ -376,9 +376,7 @@ AudioDiskstream::setup_destructive_playlist ()
 
 	/* a single full-sized region */
 
-	cerr << "setup DS using " << srcs.front()->natural_position () << endl;
-
-	boost::shared_ptr<Region> region (RegionFactory::create (srcs, 0, max_frames, _name));
+	boost::shared_ptr<Region> region (RegionFactory::create (srcs, 0, max_frames - srcs.front()->natural_position(), _name));
 	_playlist->add_region (region, srcs.front()->natural_position());		
 }
 
@@ -391,20 +389,18 @@ AudioDiskstream::use_destructive_playlist ()
 	   with the (presumed single, full-extent) region.
 	*/
 
-	Playlist::RegionList* rl = _playlist->regions_at (0);
+	boost::shared_ptr<Region> rp = _playlist->find_next_region (_session.current_start_frame(), Start, 1);
 
-	if (rl->empty()) {
+	if (!rp) {
 		reset_write_sources (false, true);
 		return;
 	}
 
-	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (rl->front());
+	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (rp);
 
 	if (region == 0) {
 		throw failed_constructor();
 	}
-
-	delete rl;
 
 	uint32_t n;
 	ChannelList::iterator chan;
@@ -419,7 +415,7 @@ AudioDiskstream::use_destructive_playlist ()
 }
 
 void
-AudioDiskstream::check_record_status (jack_nframes_t transport_frame, jack_nframes_t nframes, bool can_record)
+AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nframes, bool can_record)
 {
 	int possibly_recording;
 	int rolling;
@@ -469,8 +465,7 @@ AudioDiskstream::check_record_status (jack_nframes_t transport_frame, jack_nfram
 
 			if (_alignment_style == ExistingMaterial) {
 
-
-				if (!_session.get_punch_in()) {
+				if (!Config->get_punch_in()) {
 
 					/* manual punch in happens at the correct transport frame
 					   because the user hit a button. but to get alignment correct 
@@ -499,7 +494,7 @@ AudioDiskstream::check_record_status (jack_nframes_t transport_frame, jack_nfram
 
 			} else {
 
-				if (_session.get_punch_in()) {
+				if (Config->get_punch_in()) {
 					first_recordable_frame += _roll_delay;
 				} else {
 					capture_start_frame -= _roll_delay;
@@ -544,13 +539,13 @@ AudioDiskstream::check_record_status (jack_nframes_t transport_frame, jack_nfram
 }
 
 int
-AudioDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes, jack_nframes_t offset, bool can_record, bool rec_monitors_input)
+AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_t offset, bool can_record, bool rec_monitors_input)
 {
 	uint32_t n;
 	ChannelList::iterator c;
 	int ret = -1;
-	jack_nframes_t rec_offset = 0;
-	jack_nframes_t rec_nframes = 0;
+	nframes_t rec_offset = 0;
+	nframes_t rec_nframes = 0;
 	bool nominally_recording;
 	bool re = record_enabled ();
 	bool collect_playback = false;
@@ -593,7 +588,7 @@ AudioDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes
 		(*c).current_playback_buffer  = 0;
 	}
 
-	if (nominally_recording || (_session.get_record_enabled() && _session.get_punch_in())) {
+	if (nominally_recording || (_session.get_record_enabled() && Config->get_punch_in())) {
 		OverlapType ot;
 		
 		ot = coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
@@ -673,7 +668,7 @@ AudioDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes
 
 			} else {
 
-				jack_nframes_t total = chan.capture_vector.len[0] + chan.capture_vector.len[1];
+				nframes_t total = chan.capture_vector.len[0] + chan.capture_vector.len[1];
 
 				if (rec_nframes > total) {
 					DiskOverrun ();
@@ -684,7 +679,7 @@ AudioDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes
 				assert(ap);
 
 				Sample* buf = ap->get_audio_buffer().data(nframes, offset);
-				jack_nframes_t first = chan.capture_vector.len[0];
+				nframes_t first = chan.capture_vector.len[0];
 
 				memcpy (chan.capture_wrap_buffer, buf, sizeof (Sample) * first);
 				memcpy (chan.capture_vector.buf[0], buf, sizeof (Sample) * first);
@@ -747,12 +742,12 @@ AudioDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes
 
 		/* we're doing playback */
 
-		jack_nframes_t necessary_samples;
+		nframes_t necessary_samples;
 
 		/* no varispeed playback if we're recording, because the output .... TBD */
 
 		if (rec_nframes == 0 && _actual_speed != 1.0f) {
-			necessary_samples = (jack_nframes_t) floor ((nframes * fabs (_actual_speed))) + 1;
+			necessary_samples = (nframes_t) floor ((nframes * fabs (_actual_speed))) + 1;
 		} else {
 			necessary_samples = nframes;
 		}
@@ -772,7 +767,7 @@ AudioDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes
 				chan.current_playback_buffer = chan.playback_vector.buf[0];
 
 			} else {
-				jack_nframes_t total = chan.playback_vector.len[0] + chan.playback_vector.len[1];
+				nframes_t total = chan.playback_vector.len[0] + chan.playback_vector.len[1];
 				
 				if (necessary_samples > total) {
 					DiskUnderrun ();
@@ -793,7 +788,7 @@ AudioDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes
 		if (rec_nframes == 0 && _actual_speed != 1.0f && _actual_speed != -1.0f) {
 			
 			uint64_t phase = last_phase;
-			jack_nframes_t i = 0;
+			nframes_t i = 0;
 
 			// Linearly interpolate into the alt buffer
 			// using 40.24 fixp maths (swh)
@@ -806,7 +801,7 @@ AudioDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes
 				i = 0;
 				phase = last_phase;
 
-				for (jack_nframes_t outsample = 0; outsample < nframes; ++outsample) {
+				for (nframes_t outsample = 0; outsample < nframes; ++outsample) {
 					i = phase >> 24;
 					fr = (phase & 0xFFFFFF) / 16777216.0f;
 					chan.speed_buffer[outsample] = 
@@ -845,7 +840,7 @@ AudioDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes
 }
 
 bool
-AudioDiskstream::commit (jack_nframes_t nframes)
+AudioDiskstream::commit (nframes_t nframes)
 {
 	bool need_butler = false;
 
@@ -905,7 +900,7 @@ AudioDiskstream::overwrite_existing_buffers ()
 	overwrite_queued = false;
 
 	/* assume all are the same size */
-	jack_nframes_t size = channels[0].playback_buf->bufsize();
+	nframes_t size = channels[0].playback_buf->bufsize();
 	
  	mixdown_buffer = new Sample[size];
  	gain_buffer = new float[size];
@@ -914,12 +909,12 @@ AudioDiskstream::overwrite_existing_buffers ()
 	size--;
 	
 	uint32_t n=0;
-	jack_nframes_t start;
+	nframes_t start;
 
 	for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan, ++n) {
 
 		start = overwrite_frame;
-		jack_nframes_t cnt = size;
+		nframes_t cnt = size;
 		
 		/* to fill the buffer without resetting the playback sample, we need to
 		   do it one or two chunks (normally two).
@@ -932,7 +927,7 @@ AudioDiskstream::overwrite_existing_buffers ()
 		   
 		*/
 		
-		jack_nframes_t to_read = size - overwrite_offset;
+		nframes_t to_read = size - overwrite_offset;
 
 		if (read ((*chan).playback_buf->buffer() + overwrite_offset, mixdown_buffer, gain_buffer, start, to_read, *chan, n, reversed)) {
 			error << string_compose(_("AudioDiskstream %1: when refilling, cannot read %2 from playlist at frame %3"),
@@ -963,7 +958,7 @@ AudioDiskstream::overwrite_existing_buffers ()
 }
 
 int
-AudioDiskstream::seek (jack_nframes_t frame, bool complete_refill)
+AudioDiskstream::seek (nframes_t frame, bool complete_refill)
 {
 	Glib::Mutex::Lock lm (state_lock);
 	uint32_t n;
@@ -994,7 +989,7 @@ AudioDiskstream::seek (jack_nframes_t frame, bool complete_refill)
 }
 
 int
-AudioDiskstream::can_internal_playback_seek (jack_nframes_t distance)
+AudioDiskstream::can_internal_playback_seek (nframes_t distance)
 {
 	ChannelList::iterator chan;
 
@@ -1007,7 +1002,7 @@ AudioDiskstream::can_internal_playback_seek (jack_nframes_t distance)
 }
 
 int
-AudioDiskstream::internal_playback_seek (jack_nframes_t distance)
+AudioDiskstream::internal_playback_seek (nframes_t distance)
 {
 	ChannelList::iterator chan;
 
@@ -1022,15 +1017,15 @@ AudioDiskstream::internal_playback_seek (jack_nframes_t distance)
 }
 
 int
-AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, jack_nframes_t& start, jack_nframes_t cnt, 
+AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, nframes_t& start, nframes_t cnt, 
 		  ChannelInfo& channel_info, int channel, bool reversed)
 {
-	jack_nframes_t this_read = 0;
+	nframes_t this_read = 0;
 	bool reloop = false;
-	jack_nframes_t loop_end = 0;
-	jack_nframes_t loop_start = 0;
-	jack_nframes_t loop_length = 0;
-	jack_nframes_t offset = 0;
+	nframes_t loop_end = 0;
+	nframes_t loop_start = 0;
+	nframes_t loop_length = 0;
+	nframes_t offset = 0;
 	Location *loc = 0;
 
 	if (!reversed) {
@@ -1130,14 +1125,14 @@ int
 AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 {
 	int32_t ret = 0;
-	jack_nframes_t to_read;
+	nframes_t to_read;
 	RingBufferNPT<Sample>::rw_vector vector;
 	bool reversed = (_visible_speed * _session.transport_speed()) < 0.0f;
-	jack_nframes_t total_space;
-	jack_nframes_t zero_fill;
+	nframes_t total_space;
+	nframes_t zero_fill;
 	uint32_t chan_n;
 	ChannelList::iterator i;
-	jack_nframes_t ts;
+	nframes_t ts;
 
 	assert(mixdown_buffer);
 	assert(gain_buffer);
@@ -1249,14 +1244,14 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 		}
 	}
 	
-	jack_nframes_t file_frame_tmp = 0;
+	nframes_t file_frame_tmp = 0;
 
 	for (chan_n = 0, i = channels.begin(); i != channels.end(); ++i, ++chan_n) {
 
 		ChannelInfo& chan (*i);
 		Sample* buf1;
 		Sample* buf2;
-		jack_nframes_t len1, len2;
+		nframes_t len1, len2;
 
 		chan.playback_buf->get_write_vector (&vector);
 
@@ -1337,7 +1332,7 @@ AudioDiskstream::do_flush (Session::RunContext context, bool force_flush)
 	int32_t ret = 0;
 	RingBufferNPT<Sample>::rw_vector vector;
 	RingBufferNPT<CaptureTransition>::rw_vector transvec;
-	jack_nframes_t total;
+	nframes_t total;
 
 	_write_data_count = 0;
 
@@ -1367,7 +1362,7 @@ AudioDiskstream::do_flush (Session::RunContext context, bool force_flush)
 			ret = 1;
 		} 
 
-		to_write = min (disk_io_chunk_frames, (jack_nframes_t) vector.len[0]);
+		to_write = min (disk_io_chunk_frames, (nframes_t) vector.len[0]);
 		
 		// check the transition buffer when recording destructive
 		// important that we get this after the capture buf
@@ -1437,7 +1432,7 @@ AudioDiskstream::do_flush (Session::RunContext context, bool force_flush)
 			   of vector.len[1] to be flushed to disk as well.
 			*/
 		
-			to_write = min ((jack_nframes_t)(disk_io_chunk_frames - to_write), (jack_nframes_t) vector.len[1]);
+			to_write = min ((nframes_t)(disk_io_chunk_frames - to_write), (nframes_t) vector.len[1]);
 		
 			if ((*chan).write_source->write (vector.buf[1], to_write) != to_write) {
 				error << string_compose(_("AudioDiskstream %1: cannot write to disk"), _id) << endmsg;
@@ -1462,7 +1457,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 	bool more_work = true;
 	int err = 0;
 	boost::shared_ptr<AudioRegion> region;
-	jack_nframes_t total_capture;
+	nframes_t total_capture;
 	SourceList srcs;
 	SourceList::iterator src;
 	ChannelList::iterator chan;
@@ -1498,28 +1493,20 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 
 	if (abort_capture) {
 		
-		ChannelList::iterator chan;
-		
-		list<boost::shared_ptr<Source> >* deletion_list = new list<boost::shared_ptr<Source> >;
+		if (destructive()) {
+			goto outout;
+		}
 
-		for ( chan = channels.begin(); chan != channels.end(); ++chan) {
+		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
 
 			if ((*chan).write_source) {
 				
 				(*chan).write_source->mark_for_remove ();
-				
-				deletion_list->push_back ((*chan).write_source);
-
+				(*chan).write_source->drop_references ();
 				(*chan).write_source.reset ();
 			}
 			
 			/* new source set up in "out" below */
-		}
-		
-		if (!deletion_list->empty()) {
-			DeleteSources (deletion_list);
-		} else {
-			delete deletion_list;
 		}
 
 		goto out;
@@ -1620,9 +1607,11 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 
 	mark_write_completed = true;
 
+  out:
 	reset_write_sources (mark_write_completed);
 
-  out:
+  outout:
+
 	for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 		delete *ci;
 	}
@@ -1722,10 +1711,10 @@ AudioDiskstream::engage_record_enable ()
 
 	g_atomic_int_set (&_record_enabled, 1);
 	capturing_sources.clear ();
-	if (Config->get_use_hardware_monitoring())  {
+	if (Config->get_monitoring_model() == HardwareMonitoring) {
 		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
 			if ((*chan).source) {
-				(*chan).source->ensure_monitor_input (!(_session.get_auto_input() && rolling));
+				(*chan).source->ensure_monitor_input (!(Config->get_auto_input() && rolling));
 			}
 			capturing_sources.push_back ((*chan).write_source);
 		}
@@ -1742,7 +1731,7 @@ void
 AudioDiskstream::disengage_record_enable ()
 {
 	g_atomic_int_set (&_record_enabled, 0);
-	if (Config->get_use_hardware_monitoring()) {
+	if (Config->get_monitoring_model() == HardwareMonitoring) {
 		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
 			if ((*chan).source) {
 				(*chan).source->ensure_monitor_input (false);
@@ -1769,11 +1758,11 @@ AudioDiskstream::get_state ()
 
 	node->add_property ("playlist", _playlist->name());
 	
-	snprintf (buf, sizeof(buf), "%f", _visible_speed);
+	snprintf (buf, sizeof(buf), "%.12g", _visible_speed);
 	node->add_property ("speed", buf);
 
 	node->add_property("name", _name);
-	id().print (buf);
+	id().print (buf, sizeof (buf));
 	node->add_property("id", buf);
 
 	if (!capturing_sources.empty() && _session.get_record_enabled()) {
@@ -1791,7 +1780,7 @@ AudioDiskstream::get_state ()
 
 		Location* pi;
 
-		if (_session.get_punch_in() && ((pi = _session.locations()->auto_punch_location()) != 0)) {
+		if (Config->get_punch_in() && ((pi = _session.locations()->auto_punch_location()) != 0)) {
 			snprintf (buf, sizeof (buf), "%" PRIu32, pi->start());
 		} else {
 			snprintf (buf, sizeof (buf), "%" PRIu32, _session.transport_frame());
@@ -1947,13 +1936,8 @@ AudioDiskstream::use_new_write_source (uint32_t n)
 	ChannelInfo &chan = channels[n];
 	
 	if (chan.write_source) {
-
-		if (AudioFileSource::is_empty (_session, chan.write_source->path())) {
-			chan.write_source->mark_for_remove ();
-			chan.write_source.reset ();
-		} else {
-			chan.write_source.reset ();
-		}
+		chan.write_source->set_allow_remove_if_empty (true);
+		chan.write_source.reset ();
 	}
 
 	try {
@@ -2035,7 +2019,7 @@ AudioDiskstream::rename_write_sources ()
 }
 
 void
-AudioDiskstream::set_block_size (jack_nframes_t nframes)
+AudioDiskstream::set_block_size (nframes_t nframes)
 {
 	if (_session.get_block_size() > speed_buffer_size) {
 		speed_buffer_size = _session.get_block_size();
@@ -2057,7 +2041,7 @@ AudioDiskstream::allocate_temporary_buffers ()
 	*/
 
 	double sp = max (fabsf (_actual_speed), 1.2f);
-	jack_nframes_t required_wrap_size = (jack_nframes_t) floor (_session.get_block_size() * sp) + 1;
+	nframes_t required_wrap_size = (nframes_t) floor (_session.get_block_size() * sp) + 1;
 
 	if (required_wrap_size > wrap_buffer_size) {
 
@@ -2167,7 +2151,7 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 	boost::shared_ptr<AudioFileSource> fs;
 	boost::shared_ptr<AudioFileSource> first_fs;
 	SourceList pending_sources;
-	jack_nframes_t position;
+	nframes_t position;
 
 	if ((prop = node.property (X_("at"))) == 0) {
 		return -1;

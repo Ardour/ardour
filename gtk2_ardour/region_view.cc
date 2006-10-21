@@ -133,11 +133,6 @@ RegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	set_height (trackview.height);
 
-	region_muted ();
-	region_sync_changed ();
-	region_resized (BoundsChanged);
-	region_locked ();
-
 	_region->StateChanged.connect (mem_fun(*this, &RegionView::region_changed));
 
 	group->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_event), group, this));
@@ -236,8 +231,6 @@ RegionView::region_resized (Change what_changed)
 
 		unit_length = _region->length() / samples_per_unit;
 		
-		reset_width_dependent_items (unit_length);
-		
  		for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 
  			(*i)->set_duration (unit_length);
@@ -307,7 +300,7 @@ RegionView::lower_to_bottom ()
 }
 
 bool
-RegionView::set_position (jack_nframes_t pos, void* src, double* ignored)
+RegionView::set_position (nframes_t pos, void* src, double* ignored)
 {
 	double delta;
 	bool ret;
@@ -343,7 +336,7 @@ RegionView::set_samples_per_unit (gdouble spu)
 }
 
 bool
-RegionView::set_duration (jack_nframes_t frames, void *src)
+RegionView::set_duration (nframes_t frames, void *src)
 {
 	if (!TimeAxisViewItem::set_duration (frames, src)) {
 		return false;
@@ -424,7 +417,7 @@ RegionView::region_sync_changed ()
 	}
 
 	int sync_dir;
-	jack_nframes_t sync_offset;
+	nframes_t sync_offset;
 
 	sync_offset = _region->sync_offset (sync_dir);
 

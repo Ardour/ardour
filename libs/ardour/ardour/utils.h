@@ -57,7 +57,16 @@ int touch_file(std::string path);
 std::string region_name_from_path (std::string path);
 std::string path_expand (std::string);
 
-void compute_equal_power_fades (jack_nframes_t nframes, float* in, float* out);
+void compute_equal_power_fades (nframes_t nframes, float* in, float* out);
+
+const char* slave_source_to_string (ARDOUR::SlaveSource src);
+ARDOUR::SlaveSource string_to_slave_source (std::string str);
+
+const char* edit_mode_to_string (ARDOUR::EditMode);
+ARDOUR::EditMode string_to_edit_mode (std::string);
+
+float meter_falloff_to_float (ARDOUR::MeterFalloff);
+float meter_hold_to_float (ARDOUR::MeterHold);
 
 #if defined(HAVE_COREAUDIO) || defined(HAVE_AUDIOUNITS)
 std::string CFStringRefToStdString(CFStringRef stringRef);

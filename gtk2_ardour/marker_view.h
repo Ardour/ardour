@@ -65,8 +65,8 @@ class MarkerView : public TimeAxisViewItem
 		        Gdk::Color& base_color,
 			std::string mark_type,
 			std::string mark_id,
-			jack_nframes_t start,
-			jack_nframes_t duration) ;
+			nframes_t start,
+			nframes_t duration) ;
 
 		/**
 		 * Destructor

@@ -27,7 +27,7 @@ class ExportSessionDialog : public ExportDialog
 {
   public:
 	ExportSessionDialog (PublicEditor&);
-  	void set_range (jack_nframes_t start, jack_nframes_t end);
+  	void set_range (nframes_t start, nframes_t end);
   
   protected:
 	void export_audio_data();

@@ -70,7 +70,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			event.button.x = wx;
 			event.button.y = wy;
 			
-			jack_nframes_t where = event_frame (&event, 0, 0);
+			nframes_t where = event_frame (&event, 0, 0);
 			temporal_zoom_to_frame (true, where);
 			return true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
@@ -101,7 +101,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			event.button.x = wx;
 			event.button.y = wy;
 			
-			jack_nframes_t where = event_frame (&event, 0, 0);
+			nframes_t where = event_frame (&event, 0, 0);
 			temporal_zoom_to_frame (false, where);
 			return true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {

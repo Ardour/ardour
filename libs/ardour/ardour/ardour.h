@@ -43,11 +43,12 @@ namespace ARDOUR {
 
 	extern OSC* osc;
 
-	static const jack_nframes_t max_frames = JACK_MAX_FRAMES;
+	static const nframes_t max_frames = JACK_MAX_FRAMES;
 
 	int init (AudioEngine& engine, bool with_vst, bool try_optimization);
 	int cleanup ();
-
+	
+	std::string get_ardour_revision ();
 	
 	std::string get_user_ardour_path ();
 	std::string get_system_data_path ();
@@ -74,6 +75,7 @@ namespace ARDOUR {
 	    const char* old;
 	};
 
+	static const double SHUTTLE_FRACT_SPEED1=0.48412291827; /* derived from A1,A2 */
 }
 
 /* how do we make these be within the Ardour namespace? */

@@ -79,7 +79,7 @@ Source::get_state ()
 
 	node->add_property ("name", _name);
 	node->add_property ("type", _type.to_string());
-	_id.print (buf);
+	_id.print (buf, sizeof (buf));
 	node->add_property ("id", buf);
 
 	if (_timestamp != 0) {

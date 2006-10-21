@@ -150,10 +150,10 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 }
 
 int
-Auditioner::play_audition (jack_nframes_t nframes)
+Auditioner::play_audition (nframes_t nframes)
 {
 	bool need_butler;
-	jack_nframes_t this_nframes;
+	nframes_t this_nframes;
 	int ret;
 
 	if (g_atomic_int_get (&_active) == 0) {

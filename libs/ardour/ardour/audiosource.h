@@ -25,6 +25,9 @@
 #include <vector>
 #include <string>
 
+#include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
+
 #include <time.h>
 
 #include <glibmm/thread.h>
@@ -42,19 +45,19 @@ using std::string;
 
 namespace ARDOUR {
 
-const jack_nframes_t frames_per_peak = 256;
+const nframes_t frames_per_peak = 256;
 
-class AudioSource : public Source
+ class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR::AudioSource>
 {
   public:
 	AudioSource (Session&, string name);
 	AudioSource (Session&, const XMLNode&);
 	virtual ~AudioSource ();
 	
-	virtual jack_nframes_t available_peaks (double zoom) const;
+	virtual nframes_t available_peaks (double zoom) const;
 
-	virtual jack_nframes_t read (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const;
-	virtual jack_nframes_t write (Sample *src, jack_nframes_t cnt);
+	virtual nframes_t read (Sample *dst, nframes_t start, nframes_t cnt) const;
+	virtual nframes_t write (Sample *src, nframes_t cnt);
 
 	virtual float sample_rate () const = 0;
 
@@ -67,12 +70,12 @@ class AudioSource : public Source
 	uint32_t read_data_count() const { return _read_data_count; }
 	uint32_t write_data_count() const { return _write_data_count; }
 
- 	int  read_peaks (PeakData *peaks, jack_nframes_t npeaks, jack_nframes_t start, jack_nframes_t cnt, double samples_per_unit) const;
+ 	int  read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nframes_t cnt, double samples_per_unit) const;
  	int  build_peaks ();
 	bool peaks_ready (sigc::slot<void>, sigc::connection&) const;
 
 	mutable sigc::signal<void>  PeaksReady;
-	mutable sigc::signal<void,jack_nframes_t,jack_nframes_t>  PeakRangeReady;
+	mutable sigc::signal<void,nframes_t,nframes_t>  PeakRangeReady;
 	
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
@@ -81,6 +84,7 @@ class AudioSource : public Source
 	static void stop_peak_thread ();
 
 	int rename_peakfile (std::string newpath);
+	void touch_peakfile ();
 
 	static void set_build_missing_peakfiles (bool yn) {
 		_build_missing_peakfiles = yn;
@@ -89,6 +93,8 @@ class AudioSource : public Source
 	static void set_build_peakfiles (bool yn) {
 		_build_peakfiles = yn;
 	}
+
+	virtual int setup_peakfile () { return 0; }
 
   protected:
 	static bool _build_missing_peakfiles;
@@ -106,10 +112,10 @@ class AudioSource : public Source
 	int initialize_peakfile (bool newfile, string path);
 	void build_peaks_from_scratch ();
 
-	int  do_build_peak (jack_nframes_t, jack_nframes_t);
+	int  do_build_peak (nframes_t, nframes_t);
 
-	virtual jack_nframes_t read_unlocked (Sample *dst, jack_nframes_t start, jack_nframes_t cnt) const = 0;
-	virtual jack_nframes_t write_unlocked (Sample *dst, jack_nframes_t cnt) = 0;
+	virtual nframes_t read_unlocked (Sample *dst, nframes_t start, nframes_t cnt) const = 0;
+	virtual nframes_t write_unlocked (Sample *dst, nframes_t cnt) = 0;
 	virtual string peak_path(string audio_path) = 0;
 	virtual string old_peak_path(string audio_path) = 0;
 	
@@ -126,17 +132,17 @@ class AudioSource : public Source
 	    };
 	};
 
-	static vector<AudioSource*> pending_peak_sources;
+	static vector<boost::shared_ptr<AudioSource> > pending_peak_sources;
 	static Glib::Mutex* pending_peak_sources_lock;
 
-	static void queue_for_peaks (AudioSource*);
+	static void queue_for_peaks (boost::shared_ptr<AudioSource>);
 	static void clear_queue_for_peaks ();
 	
 	struct PeakBuildRecord {
-	    jack_nframes_t frame;
-	    jack_nframes_t cnt;
+	    nframes_t frame;
+	    nframes_t cnt;
 
-	    PeakBuildRecord (jack_nframes_t f, jack_nframes_t c) 
+	    PeakBuildRecord (nframes_t f, nframes_t c) 
 		    : frame (f), cnt (c) {}
 	    PeakBuildRecord (const PeakBuildRecord& other) {
 		    frame = other.frame;

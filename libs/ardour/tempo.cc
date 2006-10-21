@@ -47,7 +47,7 @@ const double Meter::ticks_per_beat = 1920.0;
 /***********************************************************************/
 
 double
-Meter::frames_per_bar (const Tempo& tempo, jack_nframes_t sr) const
+Meter::frames_per_bar (const Tempo& tempo, nframes_t sr) const
 {
 	return ((60.0 * sr * _beats_per_bar) / tempo.beats_per_minute());
 }
@@ -200,7 +200,7 @@ struct MetricSectionSorter {
     }
 };
 
-TempoMap::TempoMap (jack_nframes_t fr)
+TempoMap::TempoMap (nframes_t fr)
 {
 	metrics = new Metrics;
 	_frame_rate = fr;
@@ -509,8 +509,8 @@ TempoMap::timestamp_metrics ()
 	const Tempo* tempo;
 	Meter *m;
 	Tempo *t;
-	jack_nframes_t current;
-	jack_nframes_t section_frames;
+	nframes_t current;
+	nframes_t section_frames;
 	BBT_Time start;
 	BBT_Time end;
 
@@ -542,7 +542,7 @@ TempoMap::timestamp_metrics ()
 }
 
 TempoMap::Metric
-TempoMap::metric_at (jack_nframes_t frame) const
+TempoMap::metric_at (nframes_t frame) const
 {
 	Metric m (first_meter(), first_tempo());
 	const Meter* meter;
@@ -610,7 +610,7 @@ TempoMap::metric_at (BBT_Time bbt) const
 }
 
 void
-TempoMap::bbt_time (jack_nframes_t frame, BBT_Time& bbt) const
+TempoMap::bbt_time (nframes_t frame, BBT_Time& bbt) const
 {
         {
 	        Glib::RWLock::ReaderLock lm (lock);
@@ -619,15 +619,15 @@ TempoMap::bbt_time (jack_nframes_t frame, BBT_Time& bbt) const
 }
 
 void
-TempoMap::bbt_time_unlocked (jack_nframes_t frame, BBT_Time& bbt) const
+TempoMap::bbt_time_unlocked (nframes_t frame, BBT_Time& bbt) const
 {
 	bbt_time_with_metric (frame, bbt, metric_at (frame));
 }
 
 void
-TempoMap::bbt_time_with_metric (jack_nframes_t frame, BBT_Time& bbt, const Metric& metric) const
+TempoMap::bbt_time_with_metric (nframes_t frame, BBT_Time& bbt, const Metric& metric) const
 {
-	jack_nframes_t frame_diff;
+	nframes_t frame_diff;
 
 	uint32_t xtra_bars = 0;
 	double xtra_beats = 0;
@@ -667,7 +667,7 @@ TempoMap::bbt_time_with_metric (jack_nframes_t frame, BBT_Time& bbt, const Metri
 }
 
 
-jack_nframes_t 
+nframes_t 
 TempoMap::count_frames_between ( const BBT_Time& start, const BBT_Time& end) const
 {
 
@@ -676,9 +676,9 @@ TempoMap::count_frames_between ( const BBT_Time& start, const BBT_Time& end) con
 	*/
 
 
-	jack_nframes_t frames = 0;
-	jack_nframes_t start_frame = 0;
-	jack_nframes_t end_frame = 0;
+	nframes_t frames = 0;
+	nframes_t start_frame = 0;
+	nframes_t end_frame = 0;
 
 	Metric m = metric_at(start);
 
@@ -688,7 +688,7 @@ TempoMap::count_frames_between ( const BBT_Time& start, const BBT_Time& end) con
 		+ start.ticks/Meter::ticks_per_beat;
 
 
-	start_frame = m.frame() + (jack_nframes_t) rint( beat_offset * m.tempo().frames_per_beat(_frame_rate));
+	start_frame = m.frame() + (nframes_t) rint( beat_offset * m.tempo().frames_per_beat(_frame_rate));
 
     	m =  metric_at(end);
 
@@ -697,7 +697,7 @@ TempoMap::count_frames_between ( const BBT_Time& start, const BBT_Time& end) con
 	beat_offset = bar_offset * m.meter().beats_per_bar() - (m.start().beats -1) + (end.beats - 1) 
 		+ end.ticks/Meter::ticks_per_beat;
 
-	end_frame = m.frame() + (jack_nframes_t) rint(beat_offset * m.tempo().frames_per_beat(_frame_rate));
+	end_frame = m.frame() + (nframes_t) rint(beat_offset * m.tempo().frames_per_beat(_frame_rate));
 
 	frames = end_frame - start_frame;
 
@@ -705,12 +705,12 @@ TempoMap::count_frames_between ( const BBT_Time& start, const BBT_Time& end) con
 	
 }	
 
-jack_nframes_t 
+nframes_t 
 TempoMap::count_frames_between_metrics (const Meter& meter, const Tempo& tempo, const BBT_Time& start, const BBT_Time& end) const
 {
         /*this is used in timestamping the metrics by actually counting the beats */ 
 
-	jack_nframes_t frames = 0;
+	nframes_t frames = 0;
 	uint32_t bar = start.bars;
 	double beat = (double) start.beats;
 	double beats_counted = 0;
@@ -739,13 +739,13 @@ TempoMap::count_frames_between_metrics (const Meter& meter, const Tempo& tempo, 
 		}
 	}
 	
-	frames = (jack_nframes_t) floor (beats_counted * beat_frames);
+	frames = (nframes_t) floor (beats_counted * beat_frames);
 
 	return frames;
 	
 }	
 
-jack_nframes_t 
+nframes_t 
 TempoMap::frame_time (const BBT_Time& bbt) const
 {
 	BBT_Time start ; /* 1|1|0 */
@@ -753,10 +753,10 @@ TempoMap::frame_time (const BBT_Time& bbt) const
 	return  count_frames_between ( start, bbt);
 }
 
-jack_nframes_t 
-TempoMap::bbt_duration_at (jack_nframes_t pos, const BBT_Time& bbt, int dir) const
+nframes_t 
+TempoMap::bbt_duration_at (nframes_t pos, const BBT_Time& bbt, int dir) const
 {
-	jack_nframes_t frames = 0;
+	nframes_t frames = 0;
 
 	BBT_Time when;
 	bbt_time(pos,when);
@@ -769,11 +769,11 @@ TempoMap::bbt_duration_at (jack_nframes_t pos, const BBT_Time& bbt, int dir) con
 	return frames;
 }
 
-jack_nframes_t 
+nframes_t 
 TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, int dir) const
 {
 
-	jack_nframes_t frames = 0;
+	nframes_t frames = 0;
 
 	double beats_per_bar;
 	BBT_Time result;
@@ -896,8 +896,8 @@ TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, i
 
 
 
-jack_nframes_t
-TempoMap::round_to_bar (jack_nframes_t fr, int dir)
+nframes_t
+TempoMap::round_to_bar (nframes_t fr, int dir)
 {
         {
 	        Glib::RWLock::ReaderLock lm (lock);
@@ -906,8 +906,8 @@ TempoMap::round_to_bar (jack_nframes_t fr, int dir)
 }
 
 
-jack_nframes_t
-TempoMap::round_to_beat (jack_nframes_t fr, int dir)
+nframes_t
+TempoMap::round_to_beat (nframes_t fr, int dir)
 {
         {
 	        Glib::RWLock::ReaderLock lm (lock);
@@ -915,9 +915,9 @@ TempoMap::round_to_beat (jack_nframes_t fr, int dir)
 	}
 }
 
-jack_nframes_t
+nframes_t
 
-TempoMap::round_to_beat_subdivision (jack_nframes_t fr, int sub_num)
+TempoMap::round_to_beat_subdivision (nframes_t fr, int sub_num)
 {
 
 	BBT_Time the_beat;
@@ -948,16 +948,16 @@ TempoMap::round_to_beat_subdivision (jack_nframes_t fr, int sub_num)
 
         TempoMap::BBTPointList::iterator i;
         TempoMap::BBTPointList *more_zoomed_bbt_points;
-        jack_nframes_t frame_one_beats_worth;
-        jack_nframes_t pos = 0;
-	jack_nframes_t next_pos = 0 ;
+        nframes_t frame_one_beats_worth;
+        nframes_t pos = 0;
+	nframes_t next_pos = 0 ;
         double tempo = 1;
         double frames_one_subdivisions_worth;
         bool fr_has_changed = false;
 
         int n;
 
-	frame_one_beats_worth = (jack_nframes_t) ::floor ((double)  _frame_rate *  60 / 20 ); //one beat @ 20 bpm
+	frame_one_beats_worth = (nframes_t) ::floor ((double)  _frame_rate *  60 / 20 ); //one beat @ 20 bpm
         {
 	  Glib::RWLock::ReaderLock lm (lock);
 	  more_zoomed_bbt_points = get_points((fr >= frame_one_beats_worth) ? 
@@ -982,7 +982,7 @@ TempoMap::round_to_beat_subdivision (jack_nframes_t fr, int sub_num)
 
 	for (n = sub_num; n > 0; n--) {
 		if (fr >= (pos + ((n - 0.5) * frames_one_subdivisions_worth))) {
-			fr = (jack_nframes_t) round(pos + (n  * frames_one_subdivisions_worth));
+			fr = (nframes_t) round(pos + (n  * frames_one_subdivisions_worth));
 		 	if (fr > next_pos) {
  				fr = next_pos;  //take care of fractional beats that don't match the subdivision asked
  			}
@@ -1002,9 +1002,9 @@ TempoMap::round_to_beat_subdivision (jack_nframes_t fr, int sub_num)
 
 }
 
-jack_nframes_t
+nframes_t
 
-TempoMap::round_to_type (jack_nframes_t frame, int dir, BBTPointType type)
+TempoMap::round_to_type (nframes_t frame, int dir, BBTPointType type)
 {
 	Metric metric = metric_at (frame);
 	BBT_Time bbt;
@@ -1055,7 +1055,7 @@ TempoMap::round_to_type (jack_nframes_t frame, int dir, BBTPointType type)
 }
 
 TempoMap::BBTPointList *
-TempoMap::get_points (jack_nframes_t lower, jack_nframes_t upper) const
+TempoMap::get_points (nframes_t lower, nframes_t upper) const
 {
 
 	Metrics::const_iterator i;
@@ -1071,7 +1071,7 @@ TempoMap::get_points (jack_nframes_t lower, jack_nframes_t upper) const
 	double beat_frame;
 	double beat_frames;
 	double frames_per_bar;
-	jack_nframes_t limit;
+	nframes_t limit;
 
 	meter = &first_meter ();
 	tempo = &first_tempo ();
@@ -1132,7 +1132,7 @@ TempoMap::get_points (jack_nframes_t lower, jack_nframes_t upper) const
 
 			if (beat == 1) {
 				if (current >= lower) {
-					points->push_back (BBTPoint (*meter, *tempo,(jack_nframes_t)rint(current), Bar, bar, 1));
+					points->push_back (BBTPoint (*meter, *tempo,(nframes_t)rint(current), Bar, bar, 1));
 
 				}
 			}
@@ -1143,7 +1143,7 @@ TempoMap::get_points (jack_nframes_t lower, jack_nframes_t upper) const
 
 			while (beat <= ceil( beats_per_bar) && beat_frame < limit) {
 				if (beat_frame >= lower) {
-					points->push_back (BBTPoint (*meter, *tempo, (jack_nframes_t) rint(beat_frame), Beat, bar, beat));
+					points->push_back (BBTPoint (*meter, *tempo, (nframes_t) rint(beat_frame), Beat, bar, beat));
 				}
 				beat_frame += beat_frames;
 				current+= beat_frames;
@@ -1206,7 +1206,7 @@ TempoMap::get_points (jack_nframes_t lower, jack_nframes_t upper) const
 }	
 
 const Tempo&
-TempoMap::tempo_at (jack_nframes_t frame)
+TempoMap::tempo_at (nframes_t frame)
 {
 	Metric m (metric_at (frame));
 	return m.tempo();
@@ -1214,7 +1214,7 @@ TempoMap::tempo_at (jack_nframes_t frame)
 
 
 const Meter&
-TempoMap::meter_at (jack_nframes_t frame)
+TempoMap::meter_at (nframes_t frame)
 {
 	Metric m (metric_at (frame));
 	return m.meter();

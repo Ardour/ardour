@@ -5,6 +5,7 @@
 #include "editing.h"
 #include "actions.h"
 #include "ardour_ui.h"
+#include "gui_thread.h"
 #include "i18n.h"
 
 using namespace Gtk;
@@ -41,9 +42,6 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("Layering"), _("Layering"));
 	ActionManager::register_action (editor_actions, X_("SMPTE"), _("SMPTE fps"));
 	ActionManager::register_action (editor_actions, X_("Pullup"), _("Pullup / Pulldown"));
-	ActionManager::register_action (editor_actions, X_("Metering"), _("Metering"));
-	ActionManager::register_action (editor_actions, X_("MeteringFallOffRate"), _("Fall off rate"));
-	ActionManager::register_action (editor_actions, X_("MeteringHoldTime"), _("Hold Time"));
 	ActionManager::register_action (editor_actions, X_("addExistingAudioFiles"), _("Add Existing Audio"));
 
 	/* add named actions for the editor */
@@ -368,32 +366,11 @@ Editor::register_actions ()
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformsWhileRecording"), _("Show Waveforms While Recording"), mem_fun (*this, &Editor::toggle_waveforms_while_recording));
 	act = ActionManager::register_toggle_action (editor_actions, X_("ToggleMeasureVisibility"), _("Show Measures"), mem_fun (*this, &Editor::toggle_measure_visibility));
 	
-	RadioAction::Group meter_falloff_group;
-	RadioAction::Group meter_hold_group;
-
-	/*
-	    Slowest = 6.6dB/sec falloff at update rate of 40ms
-	    Slow    = 6.8dB/sec falloff at update rate of 40ms
-	*/
-
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffOff"), _("Off"), bind (mem_fun (*this, &Editor::set_meter_falloff), 0));
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffSlowest"), _("Slowest"), bind (mem_fun (*this, &Editor::set_meter_falloff), 1)); 
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffSlow"), _("Slow"), bind (mem_fun (*this, &Editor::set_meter_falloff), 2));
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffMedium"), _("Medium"), bind (mem_fun (*this, &Editor::set_meter_falloff), 3));
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffFast"), _("Fast"), bind (mem_fun (*this, &Editor::set_meter_falloff), 4));
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffFaster"), _("Faster"), bind (mem_fun (*this, &Editor::set_meter_falloff), 5));
-	ActionManager::register_radio_action (editor_actions, meter_falloff_group, X_("MeterFalloffFastest"), _("Fastest"), bind (mem_fun (*this, &Editor::set_meter_falloff), 6));
-
-	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldOff"), _("Off"), bind (mem_fun (*this, &Editor::set_meter_hold), 0));
-	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldShort"), _("Short"), bind (mem_fun (*this, &Editor::set_meter_hold), 40));
-	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldMedium"), _("Medium"), bind (mem_fun (*this, &Editor::set_meter_hold), 100));
-	ActionManager::register_radio_action (editor_actions, meter_hold_group,  X_("MeterHoldLong"), _("Long"), bind (mem_fun (*this, &Editor::set_meter_hold), 200));
-
 	RadioAction::Group layer_model_group;
 
-	ActionManager::register_radio_action (editor_actions, layer_model_group,  X_("LayerLaterHigher"), _("Later is Higher"), bind (mem_fun (*this, &Editor::set_layer_model), Session::LaterHigher));
-	ActionManager::register_radio_action (editor_actions, layer_model_group,  X_("LayerMoveAddHigher"), _("Most Recently Moved/Added is Higher"), bind (mem_fun (*this, &Editor::set_layer_model), Session::MoveAddHigher));
-	ActionManager::register_radio_action (editor_actions, layer_model_group,  X_("LayerAddHigher"), _("Most Recently Added is Higher"), bind (mem_fun (*this, &Editor::set_layer_model), Session::AddHigher));
+	ActionManager::register_radio_action (editor_actions, layer_model_group,  X_("LayerLaterHigher"), _("Later is Higher"), bind (mem_fun (*this, &Editor::set_layer_model), LaterHigher));
+	ActionManager::register_radio_action (editor_actions, layer_model_group,  X_("LayerMoveAddHigher"), _("Most Recently Moved/Added is Higher"), bind (mem_fun (*this, &Editor::set_layer_model), MoveAddHigher));
+	ActionManager::register_radio_action (editor_actions, layer_model_group,  X_("LayerAddHigher"), _("Most Recently Added is Higher"), bind (mem_fun (*this, &Editor::set_layer_model), AddHigher));
 
 	RadioAction::Group smpte_group;
 
@@ -458,37 +435,168 @@ Editor::toggle_measure_visibility ()
 }
 
 void
-Editor::toggle_auto_xfade ()
+Editor::set_crossfade_model (CrossfadeModel model)
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-auto-xfades"));
+	RefPtr<Action> act;
+
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+	switch (model) {
+	case FullCrossfade:
+		act = ActionManager::get_action (X_("Editor"), X_("CrossfadesFull"));
+		break;
+	case ShortCrossfade:
+		act = ActionManager::get_action (X_("Editor"), X_("CrossfadesShort"));
+		break;
+	}
+	
 	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		Config->set_auto_xfade (tact->get_active());
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && ract->get_active()) {
+			Config->set_xfade_model (model);
+		}
 	}
 }
 
 void
-Editor::toggle_xfades_active ()
+Editor::update_crossfade_model ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-xfades-active"));
-	if (session && act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		session->set_crossfades_active (tact->get_active());
+	RefPtr<Action> act;
+
+	switch (Config->get_xfade_model()) {
+	case FullCrossfade:
+		act = ActionManager::get_action (X_("Editor"), X_("CrossfadesFull"));
+		break;
+	case ShortCrossfade:
+		act = ActionManager::get_action (X_("Editor"), X_("CrossfadesShort"));
+		break;
+	}
+
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && !ract->get_active()) {
+			ract->set_active (true);
+		}
 	}
 }
 
 void
-Editor::toggle_xfade_visibility ()
+Editor::update_smpte_mode ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-xfades-visible"));
-	if (session && act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		// set_xfade_visibility (tact->get_active());
+	ENSURE_GUI_THREAD(mem_fun(*this, &Editor::update_smpte_mode));
+
+	RefPtr<Action> act;
+	const char* action = 0;
+
+	float frames = Config->get_smpte_frames_per_second();
+	bool drop = Config->get_smpte_drop_frames();
+
+	if ((frames < 23.976 * 1.0005) && !drop)
+		action = X_("Smpte23976");
+	else if ((frames < 24 * 1.0005) && !drop)
+		action = X_("Smpte24");
+	else if ((frames < 24.976 * 1.0005) && !drop)
+		action = X_("Smpte24976");
+	else if ((frames < 25 * 1.0005) && !drop)
+		action = X_("Smpte25");
+	else if ((frames < 29.97 * 1.0005) && !drop)
+		action = X_("Smpte2997");
+	else if ((frames < 29.97 * 1.0005) && drop)
+		action = X_("Smpte2997drop");
+	else if ((frames < 30 * 1.0005) && !drop)
+		action = X_("Smpte30");
+	else if ((frames < 30 * 1.0005) && drop)
+		action = X_("Smpte30drop");
+	else if ((frames < 59.94 * 1.0005) && !drop)
+		action = X_("Smpte5994");
+	else if ((frames < 60 * 1.0005) && !drop)
+		action = X_("Smpte60");
+	else {
+		fatal << string_compose (_("programming error: Unexpected SMPTE value (%1, drop = %2) in update_smpte_mode.  Menu is probably wrong."),
+					 frames, drop) << endmsg;
+		/*NOTREACHED*/
+	}
+
+	act = ActionManager::get_action (X_("Editor"), action);
+
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && !ract->get_active()) {
+			ract->set_active (true);
+		}
 	}
 }
 
 void
-Editor::set_layer_model (Session::LayerModel model)
+Editor::update_video_pullup ()
+{
+	ENSURE_GUI_THREAD (mem_fun(*this, &Editor::update_video_pullup));
+
+	RefPtr<Action> act;
+	const char* action = 0;
+
+	float pullup = Config->get_video_pullup();
+
+	if ( pullup < (-4.1667 - 0.1) * 0.99) {
+		action = X_("PullupMinus4Minus1");
+	} else if ( pullup < (-4.1667) * 0.99 ) {
+		action = X_("PullupMinus4");
+	} else if ( pullup < (-4.1667 + 0.1) * 0.99 ) {
+		action = X_("PullupMinus4Plus1");
+	} else if ( pullup < (-0.1) * 0.99 ) {
+		action = X_("PullupMinus1");
+	} else if (pullup > (4.1667 + 0.1) * 0.99 ) {
+		action = X_("PullupPlus4Plus1");
+	} else if ( pullup > (4.1667) * 0.99 ) {
+		action = X_("PullupPlus4");
+	} else if ( pullup > (4.1667 - 0.1) * 0.99) {
+		action = X_("PullupPlus4Minus1");
+	} else if ( pullup > (0.1) * 0.99 ) {
+		action = X_("PullupPlus1");
+	} else {
+		action = X_("PullupNone");
+	}
+
+	act = ActionManager::get_action (X_("Editor"), action);
+
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && !ract->get_active()) {
+			ract->set_active (true);
+		}
+	}
+}
+
+void
+Editor::update_layering_model ()
+{
+	RefPtr<Action> act;
+
+	switch (Config->get_layer_model()) {
+	case LaterHigher:
+		act = ActionManager::get_action (X_("Editor"), X_("LayerLaterHigher"));
+		break;
+	case MoveAddHigher:
+		act = ActionManager::get_action (X_("Editor"), X_("LayerMoveAddHigher"));
+		break;
+	case AddHigher:
+		act = ActionManager::get_action (X_("Editor"), X_("LayerAddHigher"));
+		break;
+	}
+
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && !ract->get_active()) {
+			ract->set_active (true);
+		}
+	}
+}
+
+void
+Editor::set_layer_model (LayerModel model)
 {
 	/* this is driven by a toggle on a radio group, and so is invoked twice,
 	   once for the item that became inactive and once for the one that became
@@ -497,24 +605,22 @@ Editor::set_layer_model (Session::LayerModel model)
 
 	RefPtr<Action> act;
 
-	if (session) {
-		switch (model) {
-		case Session::LaterHigher:
-			act = ActionManager::get_action (X_("Editor"), X_("LayerLaterHigher"));
-			break;
-		case Session::MoveAddHigher:
-			act = ActionManager::get_action (X_("Editor"), X_("LayerMoveAddHigher"));
-			break;
-		case Session::AddHigher:
-			act = ActionManager::get_action (X_("Editor"), X_("LayerAddHigher"));
-			break;
-		}
-		
-		if (act) {
-			RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-			if (ract && ract->get_active()) {
-				session->set_layer_model (model);
-			}
+	switch (model) {
+	case LaterHigher:
+		act = ActionManager::get_action (X_("Editor"), X_("LayerLaterHigher"));
+		break;
+	case MoveAddHigher:
+		act = ActionManager::get_action (X_("Editor"), X_("LayerMoveAddHigher"));
+		break;
+	case AddHigher:
+		act = ActionManager::get_action (X_("Editor"), X_("LayerAddHigher"));
+		break;
+	}
+	
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && ract->get_active() && Config->get_layer_model() != model) {
+			Config->set_layer_model (model);
 		}
 	}
 }
@@ -606,88 +712,114 @@ Editor::video_pullup_chosen (Session::PullupFormat pullup)
 	   active.
 	*/
 
-	if (session) {
+	const char* action = 0;
 
-		RefPtr<Action> act;
-
-		float pull = 0.0;
-
-		switch (pullup) {
-			case Session::pullup_Plus4Plus1:{
-				pull = 4.1667 + 0.1;
-				act = ActionManager::get_action (X_("Editor"), X_("PullupPlus4Plus1"));
-			} break;
-			case Session::pullup_Plus4:{
-				pull = 4.1667;
-				act = ActionManager::get_action (X_("Editor"), X_("PullupPlus4"));
-			} break;
-			case Session::pullup_Plus4Minus1:{
-				pull = 4.1667 - 0.1;
-				act = ActionManager::get_action (X_("Editor"), X_("PullupPlus4Minus1"));
-			} break;
-			case Session::pullup_Plus1:{
-				pull = 0.1;
-				act = ActionManager::get_action (X_("Editor"), X_("PullupPlus1"));
-			} break;
-			case Session::pullup_None:{
-				pull = 0.0;
-				act = ActionManager::get_action (X_("Editor"), X_("PullupNone"));
-			} break;
-			case Session::pullup_Minus1:{
-				pull = -0.1;
-				act = ActionManager::get_action (X_("Editor"), X_("PullupMinus1"));
-			} break;
-			case Session::pullup_Minus4Plus1:{
-				pull = -4.1667 + 0.1;
-				act = ActionManager::get_action (X_("Editor"), X_("PullupMinus4Plus1"));
-			} break;
-			case Session::pullup_Minus4:{
-				pull = -4.1667;
-				act = ActionManager::get_action (X_("Editor"), X_("PullupMinus4"));
-			} break;
-			case Session::pullup_Minus4Minus1:{
-				pull = -4.1667 - 0.1;
-				act = ActionManager::get_action (X_("Editor"), X_("PullupMinus4Minus1"));
-			} break;
-			default:
-				cerr << "Session received unexpected pullup type" << endl;
+	RefPtr<Action> act;
+	
+	float pull = 0.0;
+	
+	switch (pullup) {
+	case Session::pullup_Plus4Plus1:
+		pull = 4.1667 + 0.1;
+		action = X_("PullupPlus4Plus1");
+		break;
+	case Session::pullup_Plus4:
+		pull = 4.1667;
+		action = X_("PullupPlus4");
+		break;
+	case Session::pullup_Plus4Minus1:
+		pull = 4.1667 - 0.1;
+		action = X_("PullupPlus4Minus1");
+		break;
+	case Session::pullup_Plus1:
+		pull = 0.1;
+		action = X_("PullupPlus1");
+		break;
+	case Session::pullup_None:
+		pull = 0.0;
+		action = X_("PullupNone");
+		break;
+	case Session::pullup_Minus1:
+		pull = -0.1;
+		action = X_("PullupMinus1");
+		break;
+	case Session::pullup_Minus4Plus1:
+		pull = -4.1667 + 0.1;
+		action = X_("PullupMinus4Plus1");
+		break;
+	case Session::pullup_Minus4:
+		pull = -4.1667;
+		action = X_("PullupMinus4");
+		break;
+	case Session::pullup_Minus4Minus1:
+		pull = -4.1667 - 0.1;
+		action = X_("PullupMinus4Minus1");
+		break;
+	default:
+		fatal << string_compose (_("programming error: %1"), "Session received unexpected pullup type") << endmsg;
+		/*NOTREACHED*/
+	}
+	
+	act = ActionManager::get_action (X_("Editor"), action);
+	
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && ract->get_active()) {
+			Config->set_video_pullup ( pull );
 		}
 		
-		if (act) {
-			RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-			if (ract && ract->get_active()) {
-				session->set_video_pullup ( pull );
-			}
-		} else  cerr << "Editor::video_pullup_chosen could not find action to match pullup." << endl;
+	} else  {
+		error << string_compose (_("programming error: %1"), "Editor::video_pullup_chosen could not find action to match pullup.") << endmsg;
 	}
 }
 
+void
+Editor::toggle_auto_xfade ()
+{
+	ActionManager::toggle_config_state ("Editor", "toggle-auto-xfades", &Configuration::set_auto_xfade, &Configuration::get_auto_xfade);
+}
 
 void
-Editor::set_crossfade_model (CrossfadeModel model)
+Editor::toggle_xfades_active ()
 {
-	RefPtr<Action> act;
+	ActionManager::toggle_config_state ("Editor", "toggle-xfades-active", &Configuration::set_crossfades_active, &Configuration::get_crossfades_active);
+}
 
-	/* this is driven by a toggle on a radio group, and so is invoked twice,
-	   once for the item that became inactive and once for the one that became
-	   active.
-	*/
+void
+Editor::toggle_xfade_visibility ()
+{
+	ActionManager::toggle_config_state ("Editor", "toggle-xfades-visibility", &Configuration::set_crossfades_visible, &Configuration::get_crossfades_visible);
+}
 
-	if (session) {
-		switch (model) {
-		case FullCrossfade:
-			act = ActionManager::get_action (X_("Editor"), X_("CrossfadesFull"));
-			break;
-		case ShortCrossfade:
-			act = ActionManager::get_action (X_("Editor"), X_("CrossfadesShort"));
-			break;
-		}
-		
-		if (act) {
-			RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-			if (ract && ract->get_active()) {
-				session->set_xfade_model (model);
-			}
-		}
+void
+Editor::parameter_changed (const char* parameter_name)
+{
+#define PARAM_IS(x) (!strcmp (parameter_name, (x)))
+
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::parameter_changed), parameter_name));
+
+	if (PARAM_IS ("auto-loop")) {
+		update_loop_range_view (true);
+	} else if (PARAM_IS ("punch-in")) {
+		update_punch_range_view (true);
+	} else if (PARAM_IS ("punch-out")) {
+		update_punch_range_view (true);
+	} else if (PARAM_IS ("layer-model")) {
+		update_layering_model ();
+	} else if (PARAM_IS ("smpte-frames-per-second") || PARAM_IS ("smpte-drop-frames")) {
+		update_smpte_mode ();
+		update_just_smpte ();
+	} else if (PARAM_IS ("video-pullup")) {
+		update_video_pullup ();
+	} else if (PARAM_IS ("crossfades-active")) {
+		ActionManager::map_some_state ("Editor", "toggle-xfades-active", &Configuration::get_crossfades_active);
+	} else if (PARAM_IS ("crossfades-visible")) {
+		ActionManager::map_some_state ("Editor", "toggle-xfades-visible", &Configuration::get_crossfades_visible);
+	} else if (PARAM_IS ("auto-xfade")) {
+		ActionManager::map_some_state ("Editor", "toggle-auto-xfades", &Configuration::get_auto_xfade);
+	} else if (PARAM_IS ("edit-mode")) {
+		edit_mode_selector.set_active_text (edit_mode_to_string (Config->get_edit_mode()));
 	}
+
+#undef PARAM_IS
 }
