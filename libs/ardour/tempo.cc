@@ -1071,6 +1071,9 @@ TempoMap::get_points (nframes_t lower, nframes_t upper) const
 	double beat_frame;
 	double beat_frames;
 	double frames_per_bar;
+	double delta_bars;
+	double delta_beats;
+	double dummy;
 	nframes_t limit;
 
 	meter = &first_meter ();
@@ -1100,6 +1103,10 @@ TempoMap::get_points (nframes_t lower, nframes_t upper) const
 	   Now start generating points.
 	*/
 
+	beats_per_bar = meter->beats_per_bar ();
+	frames_per_bar = meter->frames_per_bar (*tempo, _frame_rate);
+	beat_frames = tempo->frames_per_beat (_frame_rate);
+	
 	if (meter->frame() > tempo->frame()) {
 		bar = meter->start().bars;
 		beat = meter->start().beats;
@@ -1110,12 +1117,21 @@ TempoMap::get_points (nframes_t lower, nframes_t upper) const
 		current = tempo->frame();
 	}
 
+	/* initialize current to point to the bar/beat just prior to the
+	   lower frame bound passed in.  assumes that current is initialized
+	   above to be on a beat.
+	*/
+	
+	delta_bars = (lower-current) / frames_per_bar;
+	delta_beats = modf(delta_bars, &dummy) * beats_per_bar;
+	current += (floor(delta_bars) * frames_per_bar) +  (floor(delta_beats) * beat_frames);
+
+	// adjust bars and beats too
+	bar += (uint32_t) (floor(delta_bars));
+	beat += (uint32_t) (floor(delta_beats));
+
 	points = new BBTPointList;
 		
-	beats_per_bar = meter->beats_per_bar ();
-	frames_per_bar = meter->frames_per_bar (*tempo, _frame_rate);
-	beat_frames = tempo->frames_per_beat (_frame_rate);
-
 	do {
 
 		if (i == metrics->end()) {
@@ -1197,6 +1213,10 @@ TempoMap::get_points (nframes_t lower, nframes_t upper) const
 				beat = 1;
 			}
 
+			beats_per_bar = meter->beats_per_bar ();
+			frames_per_bar = meter->frames_per_bar (*tempo, _frame_rate);
+			beat_frames = tempo->frames_per_beat (_frame_rate);
+			
 			++i;
 		}
 
