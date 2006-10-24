@@ -66,11 +66,11 @@ AddRouteDialog::AddRouteDialog ()
 	  routes_spinner (routes_adjustment)
 {
 	if (channel_combo_strings.empty()) {
-		channel_combo_strings = PBD::internationalize (channel_setup_names);
+		channel_combo_strings = I18N (channel_setup_names);
 	}
 
 	if (track_mode_strings.empty()) {
-		track_mode_strings = PBD::internationalize (track_mode_names);
+		track_mode_strings = I18N (track_mode_names);
 	}
 
 	set_name ("AddRouteDialog");

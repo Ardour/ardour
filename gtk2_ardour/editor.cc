@@ -91,7 +91,6 @@ using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace Editing;
 
-using PBD::internationalize;
 using PBD::atoi;
 
 const double Editor::timebar_height = 15.0;
@@ -1997,7 +1996,7 @@ void
 Editor::set_snap_to (SnapType st)
 {
 	snap_type = st;
-	vector<string> txt = internationalize (snap_type_strings);
+	vector<string> txt = I18N (snap_type_strings);
 	snap_type_selector.set_active_text (txt[(int)st]);
 
 	instant_save ();
@@ -2019,7 +2018,7 @@ void
 Editor::set_snap_mode (SnapMode mode)
 {
 	snap_mode = mode;
-	vector<string> txt = internationalize (snap_mode_strings);
+	vector<string> txt = I18N (snap_mode_strings);
 	snap_mode_selector.set_active_text (txt[(int)mode]);
 
 	instant_save ();
@@ -2587,7 +2586,7 @@ Editor::setup_toolbar ()
 	
 	zoom_focus_selector.set_name ("ZoomFocusSelector");
 	Gtkmm2ext::set_size_request_to_display_given_text (zoom_focus_selector, "Focus Center", 2+FUDGE, 0);
-	set_popdown_strings (zoom_focus_selector, internationalize (zoom_focus_strings));
+	set_popdown_strings (zoom_focus_selector, I18N (zoom_focus_strings));
 	zoom_focus_selector.signal_changed().connect (mem_fun(*this, &Editor::zoom_focus_selection_done));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_focus_selector, _("Zoom focus"));
 
@@ -2601,13 +2600,13 @@ Editor::setup_toolbar ()
 
 	snap_type_selector.set_name ("SnapTypeSelector");
 	Gtkmm2ext::set_size_request_to_display_given_text (snap_type_selector, "SMPTE Seconds", 2+FUDGE, 10);
-	set_popdown_strings (snap_type_selector, internationalize (snap_type_strings));
+	set_popdown_strings (snap_type_selector, I18N (snap_type_strings));
 	snap_type_selector.signal_changed().connect (mem_fun(*this, &Editor::snap_type_selection_done));
 	ARDOUR_UI::instance()->tooltips().set_tip (snap_type_selector, _("Unit to snap cursors and ranges to"));
 
 	snap_mode_selector.set_name ("SnapModeSelector");
 	Gtkmm2ext::set_size_request_to_display_given_text (snap_mode_selector, "Magnetic Snap", 2+FUDGE, 10);
-	set_popdown_strings (snap_mode_selector, internationalize (snap_mode_strings));
+	set_popdown_strings (snap_mode_selector, I18N (snap_mode_strings));
 	snap_mode_selector.signal_changed().connect (mem_fun(*this, &Editor::snap_mode_selection_done));
 
 	snap_box.pack_start (edit_cursor_clock, false, false);
@@ -3673,7 +3672,7 @@ Editor::get_valid_views (TimeAxisView* track, RouteGroup* group)
 void
 Editor::set_zoom_focus (ZoomFocus f)
 {
-	vector<string> txt = internationalize (zoom_focus_strings);
+	vector<string> txt = I18N (zoom_focus_strings);
 	zoom_focus_selector.set_active_text (txt[(int)f]);
 	
 	if (zoom_focus != f) {

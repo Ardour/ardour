@@ -33,7 +33,7 @@ void   url_decode (std::string&);
 
 std::string length2string (const int32_t frames, const float sample_rate);
 
-std::vector<std::string> internationalize (const char **);
+std::vector<std::string> internationalize (const char *, const char **);
 
 } //namespace PBD
 

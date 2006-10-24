@@ -356,7 +356,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s)
 	  split_check (_("Split Channels"))
 {
 	if (mode_strings.empty()) {
-		mode_strings = PBD::internationalize (import_mode_strings);
+		mode_strings = I18N (import_mode_strings);
 	}
 
 	ARDOUR_UI::instance()->tooltips().set_tip(split_check, 

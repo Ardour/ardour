@@ -106,12 +106,12 @@ atof (const string& s)
 }
 
 vector<string>
-internationalize (const char **array)
+internationalize (const char *package_name, const char **array)
 {
 	vector<string> v;
 
 	for (uint32_t i = 0; array[i]; ++i) {
-		v.push_back (_(array[i]));
+		v.push_back (dgettext(package_name, array[i]));
 	}
 
 	return v;
