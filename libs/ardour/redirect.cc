@@ -144,9 +144,11 @@ Redirect::load_automation (string path)
 		tosave.insert (port);
 	}
 	
+#ifdef STATE_MANAGER
 	for (set<uint32_t>::iterator i = tosave.begin(); i != tosave.end(); ++i) {
 		automation_list (*i).save_state (_("loaded from disk"));
 	}
+#endif
 	
 	return 0;
 
@@ -464,7 +466,9 @@ void
 Redirect::set_active (bool yn, void* src)
 {
 	_active = yn; 
+#ifdef STATE_MANAGER
 	save_state (_("active_changed"));
+#endif
 	active_changed (this, src); 
 	_session.set_dirty ();
 }

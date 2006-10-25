@@ -206,7 +206,9 @@ TempoMap::TempoMap (nframes_t fr)
 	_frame_rate = fr;
 	last_bbt_valid = false;
 	BBT_Time start;
+#ifdef STATE_MANAGER
 	in_set_state = false;
+#endif
 	
 	start.bars = 1;
 	start.beats = 1;
@@ -223,7 +225,9 @@ TempoMap::TempoMap (nframes_t fr)
 	metrics->push_back (t);
 	metrics->push_back (m);
 	
+#ifdef STATE_MANAGER
 	save_state (_("initial"));
+#endif
 }
 
 TempoMap::~TempoMap ()
@@ -256,7 +260,9 @@ TempoMap::move_metric_section (MetricSection& section, const BBT_Time& when)
 	section.set_start (corrected);
 	metrics->sort (cmp);
 	timestamp_metrics ();
+#ifdef STATE_MANAGER
 	save_state (_("move metric"));
+#endif
 
 	return 0;
 }
@@ -265,7 +271,7 @@ void
 TempoMap::move_tempo (TempoSection& tempo, const BBT_Time& when)
 {
 	if (move_metric_section (tempo, when) == 0) {
-		send_state_changed (Change (0));
+		StateChanged (Change (0));
 	}
 }
 
@@ -273,7 +279,7 @@ void
 TempoMap::move_meter (MeterSection& meter, const BBT_Time& when)
 {
 	if (move_metric_section (meter, when) == 0) {
-		send_state_changed (Change (0));
+		StateChanged (Change (0));
 	}
 }
 		
@@ -301,7 +307,7 @@ TempoMap::remove_tempo (const TempoSection& tempo)
 	}
 
 	if (removed) {
-		send_state_changed (Change (0));
+		StateChanged (Change (0));
 	}
 }
 
@@ -327,12 +333,14 @@ TempoMap::remove_meter (const MeterSection& tempo)
 		}
 
 		if (removed) {
+#ifdef STATE_MANAGER
 			save_state (_("metric removed"));
+#endif
 		}
 	}
 
 	if (removed) {
-		send_state_changed (Change (0));
+		StateChanged (Change (0));
 	}
 }
 
@@ -370,10 +378,12 @@ TempoMap::add_tempo (const Tempo& tempo, BBT_Time where)
 		
 		do_insert (new TempoSection (where, tempo.beats_per_minute()));
 
+#ifdef STATE_MANAGER
 		save_state (_("add tempo"));
+#endif
 	}
 
-	send_state_changed (Change (0));
+	StateChanged (Change (0));
 }
 
 void
@@ -399,12 +409,14 @@ TempoMap::replace_tempo (TempoSection& existing, const Tempo& replacement)
 		}
 
 		if (replaced) {
+#ifdef STATE_MANAGER
 			save_state (_("replace tempo"));
+#endif
 		}
 	}
 	
 	if (replaced) {
-		send_state_changed (Change (0));
+		StateChanged (Change (0));
 	}
 }
 
@@ -432,10 +444,12 @@ TempoMap::add_meter (const Meter& meter, BBT_Time where)
 
 		do_insert (new MeterSection (where, meter.beats_per_bar(), meter.note_divisor()));
 
+#ifdef STATE_MANAGER
 		save_state (_("add meter"));
+#endif
 	}
 
-	send_state_changed (Change (0));
+	StateChanged (Change (0));
 }
 
 void
@@ -460,12 +474,14 @@ TempoMap::replace_meter (MeterSection& existing, const Meter& replacement)
 		}
 
 		if (replaced) {
+#ifdef STATE_MANAGER
 			save_state (_("replaced meter"));
+#endif
 		}
 	}
 	
 	if (replaced) {
-		send_state_changed (Change (0));
+		StateChanged (Change (0));
 	}
 }
 
@@ -1266,7 +1282,9 @@ TempoMap::set_state (const XMLNode& node)
 		XMLNodeConstIterator niter;
 		Metrics old_metrics (*metrics);
 		
+#ifdef STATE_MANAGER
 		in_set_state = true;
+#endif
 		
 		metrics->clear();
 
@@ -1308,7 +1326,9 @@ TempoMap::set_state (const XMLNode& node)
 			timestamp_metrics ();
 		}
 
+#ifdef STATE_MANAGER
 		in_set_state = false;
+#endif
 	}
 	
 	/* This state needs to be saved. This string will never be a part of the 
@@ -1318,9 +1338,12 @@ TempoMap::set_state (const XMLNode& node)
 
 	   If this state is not saved, there is no way to reach it through undo actions.
 	*/
+
+#ifdef STATE_MANAGER
 	save_state(_("load XML data"));
+#endif
 	
-	send_state_changed (Change (0));
+	StateChanged (Change (0));
 
 	return 0;
 }
@@ -1343,6 +1366,7 @@ TempoMap::dump (std::ostream& o) const
 	}
 }
 
+#ifdef STATE_MANAGER
 UndoAction
 TempoMap::get_memento () const
 {
@@ -1405,3 +1429,4 @@ TempoMap::save_state (std::string why)
 		StateManager::save_state (why);
 	}
 }
+#endif

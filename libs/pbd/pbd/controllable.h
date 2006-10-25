@@ -6,17 +6,16 @@
 #include <sigc++/trackable.h>
 #include <sigc++/signal.h>
 
-#include <pbd/stateful.h>
-#include <pbd/id.h>
+#include <pbd/statefuldestructible.h>
 
 class XMLNode;
 
 namespace PBD {
 
-class Controllable : public virtual sigc::trackable, public Stateful {
+class Controllable : public PBD::StatefulDestructible {
   public:
 	Controllable (std::string name);
-	virtual ~Controllable() { GoingAway (this); }
+	virtual ~Controllable() { Destroyed (this); }
 
 	virtual void set_value (float) = 0;
 	virtual float get_value (void) const = 0;
@@ -25,10 +24,10 @@ class Controllable : public virtual sigc::trackable, public Stateful {
 
 	sigc::signal<void> LearningFinished;
 
-	static sigc::signal<void,Controllable*> GoingAway;
-
 	static sigc::signal<bool,PBD::Controllable*> StartLearning;
 	static sigc::signal<void,PBD::Controllable*> StopLearning;
+
+	static sigc::signal<void,Controllable*> Destroyed;
 
 	sigc::signal<void> Changed;
 

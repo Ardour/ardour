@@ -5,14 +5,22 @@
 
 namespace PBD {
 
-class Destructible : public virtual sigc::trackable {
+/* be very very careful using this class. it does not inherit from sigc::trackable and thus
+   should only be used in multiple-inheritance situations involving another type
+   that does inherit from sigc::trackable (or sigc::trackable itself)
+*/
+
+class ThingWithGoingAway {
   public:
-	Destructible() {}
-	virtual ~Destructible () {}
-
+	virtual ~ThingWithGoingAway () {}
 	sigc::signal<void> GoingAway;
+};
 
+class Destructible : public sigc::trackable, public ThingWithGoingAway {
+  public:
+	virtual ~Destructible () {}
 	void drop_references () const { GoingAway(); }
+
 };
 
 }

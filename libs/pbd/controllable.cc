@@ -6,7 +6,7 @@
 
 using namespace PBD;
 
-sigc::signal<void,Controllable*> Controllable::GoingAway;
+sigc::signal<void,Controllable*> Controllable::Destroyed;
 sigc::signal<bool,Controllable*> Controllable::StartLearning;
 sigc::signal<void,Controllable*> Controllable::StopLearning;
 

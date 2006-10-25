@@ -757,11 +757,11 @@ class Session : public PBD::StatefulDestructible
 		current_trans->add_command (cmd);
 	}
 
-	std::map<PBD::ID, PBD::StatefulDestructible*> registry;
+	std::map<PBD::ID, PBD::StatefulThingWithGoingAway*> registry;
 
         // these commands are implemented in libs/ardour/session_command.cc
 	Command *memento_command_factory(XMLNode *n);
-        void register_with_memento_command_factory(PBD::ID, PBD::StatefulDestructible *);
+        void register_with_memento_command_factory(PBD::ID, PBD::StatefulThingWithGoingAway *);
 
         class GlobalSoloStateCommand : public Command
         {

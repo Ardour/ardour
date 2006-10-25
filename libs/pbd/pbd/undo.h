@@ -70,6 +70,8 @@ class UndoTransaction : public Command
 	struct timeval        _timestamp;
 	std::string           _name;
 	bool                  _clearing;
+
+	friend void command_death (UndoTransaction*, Command *);
 };
 
 class UndoHistory

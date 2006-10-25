@@ -89,7 +89,7 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 
 CrossfadeView::~CrossfadeView ()
 {
-	 GoingAway (this) ; /* EMIT_SIGNAL */
+	GoingAway (this) ; /* EMIT_SIGNAL */
 }
 
 void

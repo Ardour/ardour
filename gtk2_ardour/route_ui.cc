@@ -66,7 +66,7 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 		set_color (unique_random_color());
 	}
 
-	new Shiva<Route,RouteUI> (*_route, *this);
+	new PairedShiva<Route,RouteUI> (*_route, *this);
 
 	_route->active_changed.connect (mem_fun (*this, &RouteUI::route_active_changed));
 

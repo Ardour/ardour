@@ -59,7 +59,7 @@ class Panner;
  * An IO can contain ports of varying types, making routes/inserts/etc with
  * varied combinations of types (eg MIDI and audio) possible.
  */
-class IO : public PBD::StatefulDestructible, public ARDOUR::StateManager
+class IO : public PBD::StatefulDestructible
 {
 
   public:
@@ -167,8 +167,9 @@ virtual ~IO();
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&);
 
+#ifdef STATE_MANAGER
 	virtual UndoAction get_memento() const;
-
+#endif
 
 	static int  disable_connecting (void);
 
@@ -300,8 +301,10 @@ public:
 
 	/* state management */
 
+#ifdef STATE_MANAGER
 	Change               restore_state (State&);
 	StateManager::State* state_factory (std::string why) const;
+#endif
 
 	AutoState      _gain_automation_state;
 	AutoStyle      _gain_automation_style;

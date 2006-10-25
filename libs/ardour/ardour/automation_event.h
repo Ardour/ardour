@@ -54,7 +54,7 @@ struct ControlEvent {
 
 };
 
- class AutomationList : public StateManager, public PBD::StatefulDestructible
+class AutomationList : public PBD::StatefulDestructible
 {
   public:
 	typedef std::list<ControlEvent*> AutomationEventList;
@@ -151,7 +151,11 @@ struct ControlEvent {
 		(obj.*method)(*this);
 	}
 
+	sigc::signal<void,Change> StateChanged;
+
+#ifdef STATE_MANAGER
 	UndoAction get_memento () const;
+#endif 
 	
 	virtual void store_state (XMLNode& node) const;
 	virtual void load_state (const XMLNode&);
@@ -242,8 +246,10 @@ struct ControlEvent {
 
 	virtual double unlocked_eval (double where);
 
+#ifdef STATE_MANAGER
 	Change   restore_state (StateManager::State&);
 	StateManager::State* state_factory (std::string why) const;
+#endif
 
 	virtual ControlEvent* point_factory (double,double) const;
 	virtual ControlEvent* point_factory (const ControlEvent&) const;

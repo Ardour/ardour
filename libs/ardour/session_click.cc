@@ -64,30 +64,31 @@ Session::click (nframes_t start, nframes_t nframes, nframes_t offset)
 		goto run_clicks;
 	}
 
-	if (points->empty()) {
-		delete points;
-		goto run_clicks;
-	}
+	if (!points->empty()) {
 
-	for (TempoMap::BBTPointList::iterator i = points->begin(); i != points->end(); ++i) {
-		switch ((*i).type) {
-		case TempoMap::Beat:
-			if (click_emphasis_data == 0 || (click_emphasis_data && (*i).beat != 1)) {
-				clicks.push_back (new Click ((*i).frame, click_length, click_data));
+		for (TempoMap::BBTPointList::iterator i = points->begin(); i != points->end(); ++i) {
+			switch ((*i).type) {
+			case TempoMap::Beat:
+				if (click_emphasis_data == 0 || (click_emphasis_data && (*i).beat != 1)) {
+					clicks.push_back (new Click ((*i).frame, click_length, click_data));
+				}
+				break;
+				
+			case TempoMap::Bar:
+				if (click_emphasis_data) {
+					clicks.push_back (new Click ((*i).frame, click_emphasis_length, click_emphasis_data));
+				} 
+				break;
 			}
-			break;
-
-		case TempoMap::Bar:
-			if (click_emphasis_data) {
-				clicks.push_back (new Click ((*i).frame, click_emphasis_length, click_emphasis_data));
-			} 
-			break;
 		}
 	}
+	
+	delete points;
 
 	delete points;
 	
   run_clicks:
+	
 	memset (buf, 0, sizeof (Sample) * nframes);
 
 	for (list<Click*>::iterator i = clicks.begin(); i != clicks.end(); ) {

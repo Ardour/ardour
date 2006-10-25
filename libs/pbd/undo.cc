@@ -24,30 +24,12 @@
 
 #include <pbd/undo.h>
 #include <pbd/xml++.h>
+#include <pbd/shiva.h>
 
 #include <sigc++/bind.h>
 
 using namespace std;
 using namespace sigc;
-
-/* grrr, strict C++ says that static member functions are not C functions, but we also want
-   to be able to pack this into a sigc::ptr_fun and not sigc::mem_fun, so we have to make
-   it a genuine function rather than a member.
-*/
-
-static void command_death (UndoTransaction* ut, Command* c)
-{
-	if (ut->clearing()) {
-		return;
-	}
-
-	ut->remove_command (c);
-
-	if (ut->empty()) {
-		delete ut;
-	}
-}
-
 
 UndoTransaction::UndoTransaction ()
 {
@@ -68,6 +50,20 @@ UndoTransaction::~UndoTransaction ()
 	clear ();
 }
 
+void 
+command_death (UndoTransaction* ut, Command* c)
+{
+	if (ut->clearing()) {
+		return;
+	}
+
+	ut->remove_command (c);
+
+	if (ut->empty()) {
+		delete ut;
+	}
+}
+
 UndoTransaction& 
 UndoTransaction::operator= (const UndoTransaction& rhs)
 {
@@ -81,7 +77,8 @@ UndoTransaction::operator= (const UndoTransaction& rhs)
 void
 UndoTransaction::add_command (Command *const action)
 {
-	action->GoingAway.connect (bind (sigc::ptr_fun (command_death), this, const_cast<Command*>(action)));
+	/* catch death */
+	new PBD::ProxyShiva<Command,UndoTransaction> (*action, *this, &command_death);
 	actions.push_back (action);
 }
 

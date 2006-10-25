@@ -243,7 +243,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
         Curve::CurveCreated.connect (mem_fun (*this, &Session::add_curve));
         AutomationList::AutomationListCreated.connect (mem_fun (*this, &Session::add_automation_list));
 
-	Controllable::GoingAway.connect (mem_fun (*this, &Session::remove_controllable));
+	Controllable::Destroyed.connect (mem_fun (*this, &Session::remove_controllable));
 
 	IO::MoreOutputs.connect (mem_fun (*this, &Session::ensure_passthru_buffers));
 
@@ -1147,7 +1147,9 @@ Session::set_state (const XMLNode& node)
 		start_location = location;
 	}
 
+#ifdef STATE_MANAGER
 	_locations.save_state (_("initial state"));
+#endif
 
 	if ((child = find_named_node (node, "EditGroups")) == 0) {
 		error << _("Session: XML state has no edit groups section") << endmsg;

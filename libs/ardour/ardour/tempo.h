@@ -162,6 +162,7 @@ class TempoSection : public MetricSection, public Tempo {
 
 typedef list<MetricSection*> Metrics;
 
+#ifdef STATE_MANAGER
 class TempoMapState : public StateManager::State {
   public:
 	TempoMapState (std::string why) 
@@ -171,8 +172,9 @@ class TempoMapState : public StateManager::State {
 
 	Metrics *metrics;
 };
+#endif
 
-class TempoMap : public StateManager, public PBD::StatefulDestructible
+class TempoMap : public PBD::StatefulDestructible
 {
   public:
 
@@ -246,7 +248,9 @@ class TempoMap : public StateManager, public PBD::StatefulDestructible
 	void dump (std::ostream&) const;
 	void clear ();
 
+#ifdef STATE_MANAGER
 	UndoAction get_memento() const;
+#endif
 
 	/* this is a helper class that we use to be able to keep
 	   track of which meter *AND* tempo are in effect at
@@ -279,6 +283,8 @@ class TempoMap : public StateManager, public PBD::StatefulDestructible
 	Metric metric_at (nframes_t) const;
         void bbt_time_with_metric (nframes_t, BBT_Time&, const Metric&) const;
 
+	sigc::signal<void,ARDOUR::Change> StateChanged;
+
   private:
 	static Tempo    _default_tempo;
 	static Meter    _default_meter;
@@ -310,6 +316,7 @@ class TempoMap : public StateManager, public PBD::StatefulDestructible
 	int move_metric_section (MetricSection&, const BBT_Time& to);
 	void do_insert (MetricSection* section);
 
+#ifdef STATE_MANAGER
 	Change  restore_state (StateManager::State&);
 	StateManager::State* state_factory (std::string why) const;
 
@@ -318,7 +325,7 @@ class TempoMap : public StateManager, public PBD::StatefulDestructible
 	/* override state_manager::save_state so we can check in_set_state */
 
 	void save_state (std::string why);
-
+#endif
 };
 
 }; /* namespace ARDOUR */

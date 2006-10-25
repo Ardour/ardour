@@ -64,7 +64,9 @@ AutomationList::AutomationList (double defval, bool with_state)
 	lookup_cache.range.first = events.end();
 
 	if (!no_state) {
+#ifdef STATE_MANAGER
 		save_state (_("initial"));
+#endif
 	}
 
         AutomationListCreated(this);
@@ -133,14 +135,15 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 
 AutomationList::~AutomationList()
 {
-	std::set<ControlEvent*> all_events;
-	AutomationList::State* asp;
-
 	GoingAway ();
 
 	for (AutomationEventList::iterator x = events.begin(); x != events.end(); ++x) {
-		all_events.insert (*x);
+		delete (*x);
 	}
+
+#ifdef STATE_MANAGER
+	std::set<ControlEvent*> all_events;
+	AutomationList::State* asp;
 
 	for (StateMap::iterator i = states.begin(); i != states.end(); ++i) {
 
@@ -155,6 +158,7 @@ AutomationList::~AutomationList()
 	for (std::set<ControlEvent*>::iterator i = all_events.begin(); i != all_events.end(); ++i) {
 		delete (*i);
 	}
+#endif
 }
 
 bool
@@ -237,7 +241,9 @@ AutomationList::clear ()
 		Glib::Mutex::Lock lm (lock);
 		events.clear ();
 		if (!no_state) {
+#ifdef STATE_MANAGER
 			save_state (_("cleared"));
+#endif
 		}
 		mark_dirty ();
 	}
@@ -270,7 +276,9 @@ void AutomationList::_x_scale (double factor)
 		(*i)->when = floor ((*i)->when * factor);
 	}
 
+#ifdef STATE_MANAGER
 	save_state ("x-scaled");
+#endif
 	mark_dirty ();
 }
 
@@ -409,7 +417,9 @@ AutomationList::add (double when, double value, bool for_loading)
 		mark_dirty ();
 
 		if (!no_state && !for_loading) {
+#ifdef STATE_MANAGER
 			save_state (_("added event"));
+#endif
 		}
 	}
 
@@ -426,7 +436,9 @@ AutomationList::erase (AutomationList::iterator i)
 		events.erase (i);
 		reposition_for_rt_add (0);
 		if (!no_state) {
+#ifdef STATE_MANAGER
 			save_state (_("removed event"));
+#endif
 		}
 		mark_dirty ();
 	}
@@ -441,7 +453,9 @@ AutomationList::erase (AutomationList::iterator start, AutomationList::iterator 
 		events.erase (start, end);
 		reposition_for_rt_add (0);
 		if (!no_state) {
+#ifdef STATE_MANAGER
 			save_state (_("removed multiple events"));
+#endif
 		}
 		mark_dirty ();
 	}
@@ -472,7 +486,9 @@ AutomationList::reset_range (double start, double endt)
 			reset = true;
 
 			if (!no_state) {
+#ifdef STATE_MANAGER
 				save_state (_("removed range"));
+#endif
 			}
 
 			mark_dirty ();
@@ -503,7 +519,9 @@ AutomationList::erase_range (double start, double endt)
 			reposition_for_rt_add (0);
 			erased = true;
 			if (!no_state) {
+#ifdef STATE_MANAGER
 				save_state (_("removed range"));
+#endif
 			}
 			mark_dirty ();
 		}
@@ -533,7 +551,9 @@ AutomationList::move_range (iterator start, iterator end, double xdelta, double 
 		}
 
 		if (!no_state) {
+#ifdef STATE_MANAGER
 			save_state (_("event range adjusted"));
+#endif
 		}
 
 		mark_dirty ();
@@ -555,7 +575,9 @@ AutomationList::modify (iterator iter, double when, double val)
 		(*iter)->when = when;
 		(*iter)->value = val;
 		if (!no_state) {
+#ifdef STATE_MANAGER
 			save_state (_("event adjusted"));
+#endif
 		}
 
 		mark_dirty ();
@@ -613,6 +635,7 @@ AutomationList::thaw ()
 	}
 }
 
+#ifdef STATE_MANAGER
 StateManager::State*
 AutomationList::state_factory (std::string why) const
 {
@@ -646,6 +669,7 @@ AutomationList::get_memento () const
 {
   return sigc::bind (mem_fun (*(const_cast<AutomationList*> (this)), &StateManager::use_state), _current_state_id);
 }
+#endif
 
 void
 AutomationList::set_max_xval (double x)
@@ -1084,7 +1108,9 @@ AutomationList::cut_copy_clear (double start, double end, int op)
 		if (changed) {
 			reposition_for_rt_add (0);
 			if (!no_state) {
+#ifdef STATE_MANAGER
 				save_state (_("cut/copy/clear"));
+#endif
 			}
 		}
 
@@ -1117,7 +1143,9 @@ AutomationList::copy (iterator start, iterator end)
 		}
 
 		if (!no_state) {
+#ifdef STATE_MANAGER
 			save_state (_("copy"));
+#endif
 		}
 	}
 
@@ -1185,7 +1213,9 @@ AutomationList::paste (AutomationList& alist, double pos, float times)
 		reposition_for_rt_add (0);
 
 		if (!no_state) {
+#ifdef STATE_MANAGER
 			save_state (_("paste"));
+#endif
 		}
 
 		mark_dirty ();
@@ -1235,6 +1265,8 @@ AutomationList::load_state (const XMLNode& node)
 	nframes_t x;
 	double y;
 
+	freeze ();
+
 	clear ();
 	
 	for (i = elist.begin(); i != elist.end(); ++i) {
@@ -1253,6 +1285,8 @@ AutomationList::load_state (const XMLNode& node)
 		
 		add (x, y);
 	}
+
+	thaw ();
 }
 
 XMLNode &AutomationList::get_state ()

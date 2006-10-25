@@ -96,7 +96,7 @@ class ControlPoint
 	ShapeType _shape;
 };
 
-class AutomationLine : public PBD::StatefulDestructible
+class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoingAway
 {
   public:
         AutomationLine (const string & name, TimeAxisView&, ArdourCanvas::Group&, ARDOUR::AutomationList&);
@@ -206,7 +206,9 @@ class AutomationLine : public PBD::StatefulDestructible
 	void reset_callback (const ARDOUR::AutomationList&);
 	void list_changed (ARDOUR::Change);
 
+#ifdef STATE_MANAGER
 	UndoAction get_memento();
+#endif
 
 	virtual bool event_handler (GdkEvent*);
 	

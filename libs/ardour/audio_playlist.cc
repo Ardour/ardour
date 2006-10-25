@@ -120,9 +120,6 @@ AudioPlaylist::~AudioPlaylist ()
 	/* drop connections to signals */
 
 	notify_callbacks ();
-	
-
-	cerr << "deleting crossfades "  << _crossfades.size() << endl;
 
 	for (Crossfades::iterator x = _crossfades.begin(); x != _crossfades.end(); ) {
 		Crossfades::iterator tmp;
@@ -132,12 +129,8 @@ AudioPlaylist::~AudioPlaylist ()
 
 		delete *x;
 
-		cerr << _crossfades.size() << " to go\n";
-
 		x = tmp;
 	}
-
-	cerr << "done\n";
 }
 
 struct RegionSortByLayer {
@@ -372,8 +365,6 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 		return;
 	}
 
-	cerr << "Check dependents of " << r->name() << endl;
-
 	if ((region = boost::dynamic_pointer_cast<AudioRegion> (r)) == 0) {
 		fatal << _("programming error: non-audio Region tested for overlap in audio playlist")
 		      << endmsg;
@@ -461,10 +452,7 @@ AudioPlaylist::add_crossfade (Crossfade& xfade)
 {
 	Crossfades::iterator ci;
 
-	cerr << "adding xfade involving " << xfade.in()->name() << " and " << xfade.out()->name() << endl;
-
 	for (ci = _crossfades.begin(); ci != _crossfades.end(); ++ci) {
-		cerr << "\tcompare to " << (*ci)->in()->name() << " and " << (*ci)->out()->name() << endl;
 		if (*(*ci) == xfade) { // Crossfade::operator==()
 			break;
 		}

@@ -81,7 +81,9 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug, Placemen
 	
 	init ();
 
+#ifdef STATE_MANAGER
 	save_state (_("initial state"));
+#endif
 
 	{
 		Glib::Mutex::Lock em (_session.engine().process_lock());
@@ -100,7 +102,9 @@ PluginInsert::PluginInsert (Session& s, const XMLNode& node)
 
 	set_automatable ();
 
+#ifdef STATE_MANAGER
 	save_state (_("initial state"));
+#endif
 
 	_plugins[0]->ParameterChanged.connect (mem_fun (*this, &PluginInsert::parameter_changed));
 
@@ -125,7 +129,9 @@ PluginInsert::PluginInsert (const PluginInsert& other)
 
 	init ();
 
+#ifdef STATE_MANAGER
 	save_state (_("initial state"));
+#endif
 
 	RedirectCreated (this); /* EMIT SIGNAL */
 }
@@ -841,16 +847,22 @@ PortInsert::PortInsert (Session& s, Placement p)
 	: Insert (s, p, 1, -1, 1, -1)
 {
 	init ();
+#ifdef STATE_MANAGER
 	save_state (_("initial state"));
 	RedirectCreated (this); /* EMIT SIGNAL */
+#endif
+
 }
 
 PortInsert::PortInsert (const PortInsert& other)
 	: Insert (other._session, other.placement(), 1, -1, 1, -1)
 {
 	init ();
+#ifdef STATE_MANAGER
 	save_state (_("initial state"));
 	RedirectCreated (this); /* EMIT SIGNAL */
+#endif
+
 }
 
 void

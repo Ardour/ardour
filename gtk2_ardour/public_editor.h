@@ -53,7 +53,7 @@ class ImageFrameView;
 class ImageFrameTimeAxis;
 class MarkerView;
 
-class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
+class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway {
   public:
 	PublicEditor();
 	virtual ~PublicEditor();
@@ -135,6 +135,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	sigc::signal<void> ZoomChanged;
 	sigc::signal<void> Resized;
 	sigc::signal<void> Realized;
+	sigc::signal<void> GoingAway;
 
 	Glib::RefPtr<Gtk::ActionGroup> editor_actions;
 

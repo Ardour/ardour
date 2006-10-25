@@ -794,8 +794,9 @@ AudioTrack::freeze (InterThreadInfo& itt)
 				FreezeRecordInsertInfo* frii  = new FreezeRecordInsertInfo ((*r)->get_state(), insert);
 				
 				frii->id = insert->id();
+#ifdef STATE_MANAGER
 				frii->memento = (*r)->get_memento();
-				
+#endif				
 				_freeze_record.insert_info.push_back (frii);
 				
 				/* now deactivate the insert */

@@ -1169,12 +1169,14 @@ AutomationLine::hide_selection ()
 }
 
 
+#ifdef STATE_MANAGER
 // This is copied into AudioRegionGainLine
 UndoAction
 AutomationLine::get_memento ()
 {
 	return alist.get_memento();
 }
+#endif
 
 void
 AutomationLine::list_changed (Change ignored)

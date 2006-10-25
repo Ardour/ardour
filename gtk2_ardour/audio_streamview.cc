@@ -202,6 +202,7 @@ AudioStreamView::remove_region_view (boost::weak_ptr<Region> weak_r)
 		}
 	}
 
+
 	StreamView::remove_region_view(r);
 }
 

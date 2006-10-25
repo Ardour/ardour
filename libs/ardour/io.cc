@@ -2313,6 +2313,7 @@ IO::setup_peak_meters ()
 	}
 }
 
+#ifdef STATE_MANAGER
 UndoAction
 IO::get_memento() const
 {
@@ -2331,6 +2332,7 @@ IO::state_factory (std::string why) const
 	StateManager::State* state = new StateManager::State (why);
 	return state;
 }
+#endif
 
 /**
     Update the peak meters.
@@ -2488,7 +2490,9 @@ IO::load_automation (const string& path)
 		}
 	}
 
+#ifdef STATE_MANAGER
 	_gain_automation_curve.save_state (_("loaded from disk"));
+#endif
 
 	return 0;
 }
@@ -2615,9 +2619,11 @@ IO::transport_stopped (nframes_t frame)
 
 	if (_gain_automation_curve.automation_state() != Off) {
 		
+#ifdef STATE_MANAGER
 		if (gain_automation_recording()) {
 			_gain_automation_curve.save_state (_("automation write/touch"));
 		}
+#endif
 
 		/* the src=0 condition is a special signal to not propagate 
 		   automation gain changes into the mix group when locating.

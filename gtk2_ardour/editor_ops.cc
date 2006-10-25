@@ -3340,7 +3340,7 @@ Editor::normalize_region ()
 			continue;
  		XMLNode &before = arv->region()->get_state();
 		arv->audio_region()->normalize_to (0.0f);
-		// session->add_command (new MementoCommand<Region>(*(arv->region().get()), &before, &arv->region()->get_state()));
+		session->add_command (new MementoCommand<Region>(*(arv->region().get()), &before, &arv->region()->get_state()));
 	}
 
 	commit_reversible_command ();

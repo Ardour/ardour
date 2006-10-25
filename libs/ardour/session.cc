@@ -430,6 +430,10 @@ Session::~Session ()
  	}
 
 	AudioDiskstream::free_working_buffers();
+
+	/* this should cause deletion of the auditioner */
+
+	// auditioner.reset ();
 	
 #undef TRACK_DESTRUCTION
 #ifdef TRACK_DESTRUCTION
@@ -469,9 +473,7 @@ Session::~Session ()
 		tmp = i;
 		++tmp;
 
-		cerr << "dropping refs on an audio region (" << i->second->name() << " @ " << i->second << ") with UC = " << i->second.use_count() << endl;
 		i->second->drop_references ();
-		cerr << "AFTER: UC = " << i->second.use_count() << endl;
 
 		i = tmp;
 	}
@@ -1548,11 +1550,17 @@ Session::resort_routes_using (shared_ptr<RouteList> r)
 	
 	for (i = r->begin(); i != r->end(); ++i) {
 		trace_terminal (*i, *i);
-	}
-	
+	}	
+
 	RouteSorter cmp;
 	r->sort (cmp);
 	
+	/* don't leave dangling references to routes in Route::fed_by */
+
+	for (i = r->begin(); i != r->end(); ++i) {
+		(*i)->fed_by.clear ();
+	}
+
 #if 0
 	cerr << "finished route resort\n";
 	

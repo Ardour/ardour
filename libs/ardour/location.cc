@@ -372,13 +372,25 @@ Locations::Locations ()
 
 {
 	current_location = 0;
+#ifdef STATE_MANAGER
 	save_state (_("initial"));
+#endif
 }
 
 Locations::~Locations () 
 {
+	for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
+		LocationList::iterator tmp = i;
+		++tmp;
+		delete *i;
+		i = tmp;
+	}
+
+#ifdef STATE_MANAGER
+
 	std::set<Location*> all_locations;
 	
+
 	for (StateMap::iterator siter = states.begin(); siter != states.end(); ++siter) {
 
 		State* lstate = dynamic_cast<State*> (*siter);
@@ -393,6 +405,7 @@ Locations::~Locations ()
 	}
 
 	set_delete (&all_locations);
+#endif
 }
 
 int
@@ -445,7 +458,9 @@ Locations::clear ()
 		current_location = 0;
 	}
 
+#ifdef STATE_MANAGER
 	save_state (_("clear"));
+#endif
 	
 	changed (); /* EMIT SIGNAL */
 	current_changed (0); /* EMIT SIGNAL */
@@ -470,7 +485,9 @@ Locations::clear_markers ()
 		}
 	}
 
+#ifdef STATE_MANAGER
 	save_state (_("clear markers"));
+#endif
 	
 	changed (); /* EMIT SIGNAL */
 }	
@@ -498,7 +515,9 @@ Locations::clear_ranges ()
 		current_location = 0;
 	}
 
+#ifdef STATE_MANAGER
 	save_state (_("clear ranges"));
+#endif
 
 	changed (); /* EMIT SIGNAL */
 	current_changed (0); /* EMIT SIGNAL */
@@ -516,7 +535,9 @@ Locations::add (Location *loc, bool make_current)
 		}
 	}
 	
+#ifdef STATE_MANAGER
 	save_state (_("add"));
+#endif
 
 	added (loc); /* EMIT SIGNAL */
 
@@ -554,7 +575,9 @@ Locations::remove (Location *loc)
 	}
 	
 	if (was_removed) {
+#ifdef STATE_MANAGER
 		save_state (_("remove"));
+#endif
 
 		 removed (loc); /* EMIT SIGNAL */
 
@@ -569,7 +592,9 @@ Locations::remove (Location *loc)
 void
 Locations::location_changed (Location* loc)
 {
+#ifdef STATE_MANAGER
 	save_state (X_("location changed"));
+#endif
 	changed (); /* EMIT SIGNAL */
 }
 
@@ -809,6 +834,7 @@ Locations::auto_punch_location () const
        return 0;
 }	
 
+#ifdef STATE_MANAGER
 StateManager::State*
 Locations::state_factory (std::string why) const
 {
@@ -847,6 +873,7 @@ Locations::get_memento () const
 {
   return sigc::bind (mem_fun (*(const_cast<Locations*> (this)), &StateManager::use_state), _current_state_id);
 }
+#endif
 
 uint32_t
 Locations::num_range_markers () const

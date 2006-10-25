@@ -7,13 +7,15 @@
 #include <ardour/audiosource.h>
 #include <ardour/audioregion.h>
 #include <pbd/error.h>
-using namespace PBD;
-#include "i18n.h"
+#include <pbd/statefuldestructible.h>
 
+using namespace PBD;
+
+#include "i18n.h"
 
 namespace ARDOUR {
 
-void Session::register_with_memento_command_factory(PBD::ID id, StatefulDestructible *ptr)
+void Session::register_with_memento_command_factory(PBD::ID id, PBD::StatefulThingWithGoingAway *ptr)
 {
     registry[id] = ptr;
 }
@@ -78,7 +80,7 @@ Command *Session::memento_command_factory(XMLNode *n)
 	    if (automation_lists.count(id))
 		    return new MementoCommand<AutomationList>(*automation_lists[id], before, after);
     } else if (registry.count(id)) { // For Editor and AutomationLine which are off-limits here
-	    return new MementoCommand<StatefulDestructible>(*registry[id], before, after);
+	    return new MementoCommand<PBD::StatefulThingWithGoingAway>(*registry[id], before, after);
     }
 
     /* we failed */

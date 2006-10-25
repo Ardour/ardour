@@ -160,6 +160,8 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 	}
 
 	_length = 0;
+	_active = Config->get_xfades_active();
+
 	initialize();
 	
 	if (set_state (node)) {
@@ -197,9 +199,7 @@ Crossfade::Crossfade (const Crossfade &orig, boost::shared_ptr<AudioRegion> newi
 
 Crossfade::~Crossfade ()
 {
-	cerr << "Deleting xfade @ " << this << endl;
 	Invalidated (this);
-	cerr << "invalidation signal sent\n";
 }
 
 void
