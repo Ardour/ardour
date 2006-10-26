@@ -1873,10 +1873,6 @@ ARDOUR_UI::show ()
 
 		shown_flag = true;
 	}
-	
-	if (about) {
-		about->present ();
-	}
 }
 
 void
@@ -1886,6 +1882,7 @@ ARDOUR_UI::show_splash ()
 		about = new About();
 	}
 	about->present();
+	flush_pending ();
 }
 
 void

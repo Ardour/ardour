@@ -190,7 +190,7 @@ About::About ()
 	set_name (X_("ardour"));
 	set_website (X_("http://ardour.org/"));
 	set_website_label (X_("visit http://www.ardour.org/"));
-	set_version ((string_compose(_("%1\n(built from revision %s"),
+	set_version ((string_compose(_("%1\n(built from revision %2)"),
 				     VERSIONSTRING, 
 				     gtk_ardour_revision)));
 	

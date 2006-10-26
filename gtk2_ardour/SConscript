@@ -306,7 +306,7 @@ env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/pix
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/icons'), icon_files))
 
 env.AlwaysBuild ('version.cc')
-env.Alias ('version', gtkardour.VersionBuild(['version.cc','version.h'], ['..']))
+env.Alias ('version', gtkardour.VersionBuild(['version.cc','version.h'], 'SConscript'))
 		
 #dist
 env.Alias ('tarball', env.Distribute (env['DISTTREE'],

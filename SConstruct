@@ -9,6 +9,7 @@ import errno
 import time
 import platform
 import string
+import commands
 from sets import Set
 import SCons.Node.FS
 
@@ -236,35 +237,73 @@ def i18n (buildenv, sources, installenv):
 # note: requires that DOMAIN, MAJOR, MINOR, MICRO are set in the construction environment
 # note: assumes one source files, the header that declares the version variables
 #
+#def version_builder (target, source, env):
+#   text  = "int " + env['DOMAIN'] + "_major_version = " + str (env['MAJOR']) + ";\n"
+#   text += "int " + env['DOMAIN'] + "_minor_version = " + str (env['MINOR']) + ";\n"
+#   text += "int " + env['DOMAIN'] + "_micro_version = " + str (env['MICRO']) + ";\n"
+#   
+#   try:
+#      o = file (target[0].get_path(), 'w')
+#      o.write (text)
+#      o.close ()
+#   except IOError:
+#      print "Could not open", target[0].get_path(), " for writing\n"
+#      sys.exit (-1)
+#   
+#   text  = "#ifndef __" + env['DOMAIN'] + "_version_h__\n"
+#   text += "#define __" + env['DOMAIN'] + "_version_h__\n"
+#   text += "extern int " + env['DOMAIN'] + "_major_version;\n"
+#   text += "extern int " + env['DOMAIN'] + "_minor_version;\n"
+#   text += "extern int " + env['DOMAIN'] + "_micro_version;\n"
+#   text += "#endif /* __" + env['DOMAIN'] + "_version_h__ */\n"
+#   
+#   try:
+#      o = file (target[1].get_path(), 'w')
+#      o.write (text)
+#      o.close ();
+#   except IOError:
+#      print "Could not open", target[1].get_path(), " for writing\n"
+#      sys.exit (-1)
+#   
+#   return None
+
 def version_builder (target, source, env):
-   text  = "int " + env['DOMAIN'] + "_major_version = " + str (env['MAJOR']) + ";\n"
-   text += "int " + env['DOMAIN'] + "_minor_version = " + str (env['MINOR']) + ";\n"
-   text += "int " + env['DOMAIN'] + "_micro_version = " + str (env['MICRO']) + ";\n"
-   
-   try:
-      o = file (target[0].get_path(), 'w')
-      o.write (text)
-      o.close ()
-   except IOError:
-      print "Could not open", target[0].get_path(), " for writing\n"
-      sys.exit (-1)
-   
-   text  = "#ifndef __" + env['DOMAIN'] + "_version_h__\n"
-   text += "#define __" + env['DOMAIN'] + "_version_h__\n"
-   text += "extern int " + env['DOMAIN'] + "_major_version;\n"
-   text += "extern int " + env['DOMAIN'] + "_minor_version;\n"
-   text += "extern int " + env['DOMAIN'] + "_micro_version;\n"
-   text += "#endif /* __" + env['DOMAIN'] + "_version_h__ */\n"
-   
-   try:
-      o = file (target[1].get_path(), 'w')
-      o.write (text)
-      o.close ();
-   except IOError:
-      print "Could not open", target[1].get_path(), " for writing\n"
-      sys.exit (-1)
-   
-   return None
+    cmd = "svn info "
+    cmd += source[0].get_path()
+    cmd += " | awk '/^Revision:/ { print $2}'"
+    
+    rev = commands.getoutput (cmd)
+        
+    text  = "const char* " + env['DOMAIN'] + "_revision = \"" + rev + "\";\n"
+    text += "int " + env['DOMAIN'] + "_major_version = " + str (env['MAJOR']) + ";\n"
+    text += "int " + env['DOMAIN'] + "_minor_version = " + str (env['MINOR']) + ";\n"
+    text += "int " + env['DOMAIN'] + "_micro_version = " + str (env['MICRO']) + ";\n"
+    
+    try:
+        o = file (target[0].get_path(), 'w')
+        o.write (text)
+        o.close ()
+    except IOError:
+        print "Could not open", target[0].get_path(), " for writing\n"
+        sys.exit (-1)
+
+    text  = "#ifndef __" + env['DOMAIN'] + "_version_h__\n"
+    text += "#define __" + env['DOMAIN'] + "_version_h__\n"
+    text += "extern const char* " + env['DOMAIN'] + "_revision;\n"
+    text += "extern int " + env['DOMAIN'] + "_major_version;\n"
+    text += "extern int " + env['DOMAIN'] + "_minor_version;\n"
+    text += "extern int " + env['DOMAIN'] + "_micro_version;\n"
+    text += "#endif /* __" + env['DOMAIN'] + "_version_h__ */\n"
+    
+    try:
+        o = file (target[1].get_path(), 'w')
+        o.write (text)
+        o.close ();
+    except IOError:
+        print "Could not open", target[1].get_path(), " for writing\n"
+        sys.exit (-1)
+        
+    return None
 
 version_bld = Builder (action = version_builder)
 env.Append (BUILDERS = {'VersionBuild' : version_bld})
