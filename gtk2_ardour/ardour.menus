@@ -194,7 +194,6 @@
                <menuitem action='ToggleOptionsEditor'/>
                <menuitem action='ToggleSoundFileBrowser'/>
                <menuitem action='ToggleInspector'/>
-               <menuitem action='ToggleConnections'/>
                <menuitem action='ToggleLocations'/>
                <menuitem action='ToggleColorManager'/>
                <menuitem action='ToggleBigClock'/>
