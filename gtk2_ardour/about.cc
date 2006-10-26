@@ -141,6 +141,9 @@ static const char* authors[] = {
 	N_("Petter Sundlöf"),
 	N_("Thörsten Wilms"),
 	N_("Ben Loftis"),
+	N_("Stefan Kersten"),
+	N_("Christopher George"),
+	N_("Robert Jordens"),
 	0
 };
 
@@ -187,15 +190,10 @@ About::About ()
 	set_name (X_("ardour"));
 	set_website (X_("http://ardour.org/"));
 	set_website_label (X_("visit http://www.ardour.org/"));
-	set_version ((string_compose(_("%1\n(built with ardour/gtk %2.%3.%4 libardour: %5.%6.%7)"), 
+	set_version ((string_compose(_("%1\n(built from revision %s"),
 				     VERSIONSTRING, 
-				     gtk_ardour_major_version, 
-				     gtk_ardour_minor_version, 
-				     gtk_ardour_micro_version, 
-				     libardour_major_version, 
-				     libardour_minor_version, 
-				     libardour_micro_version))); 
-
+				     gtk_ardour_revision)));
+	
 
 #ifdef WITH_PAYMENT_OPTIONS
 	paypal_button.add (paypal_pixmap);

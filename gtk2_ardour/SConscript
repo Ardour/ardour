@@ -258,8 +258,6 @@ versionflag = '-DVERSIONSTRING=\\\"' + env['VERSION'] + '\\\"'
 
 gtkardour.Append(CXXFLAGS=versionflag)
 
-gtkardour.VersionBuild(['version.cc','version.h'], 'SConscript')
-
 executable = 'ardour.bin'
 
 ardour = gtkardour.Program(target = executable, source = gtkardour_files + extra_sources)
@@ -307,6 +305,8 @@ env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2'), 
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/pixmaps'), pixmap_files))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/icons'), icon_files))
 
+env.AlwaysBuild ('version.cc')
+env.Alias ('version', gtkardour.VersionBuild(['version.cc','version.h'], ['..']))
 		
 #dist
 env.Alias ('tarball', env.Distribute (env['DISTTREE'],
