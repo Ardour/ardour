@@ -604,6 +604,6 @@ x86_sse_compute_peak:
 #; end proc
 
 #ifdef __ELF__
-.section .note.GNU-statck,"",%progbits
+.section .note.GNU-stack,"",%progbits
 #endif
 
