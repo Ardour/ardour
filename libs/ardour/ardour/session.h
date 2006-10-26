@@ -162,7 +162,6 @@ class Session : public PBD::StatefulDestructible
 			void*                ptr;
 			bool                 yes_or_no;
 			SlaveSource slave;
-			Route*               route;
 	    };
 
 	    boost::shared_ptr<Region>   region;

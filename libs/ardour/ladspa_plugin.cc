@@ -158,33 +158,6 @@ LadspaPlugin::~LadspaPlugin ()
 	}
 }
 
-void
-LadspaPlugin::store_state (PluginState& state)
-{
-	state.parameters.clear ();
-	
-	for (uint32_t i = 0; i < parameter_count(); ++i){
-
-		if (LADSPA_IS_PORT_INPUT(port_descriptor (i)) && 
-		    LADSPA_IS_PORT_CONTROL(port_descriptor (i))){
-			pair<uint32_t,float> datum;
-
-			datum.first = i;
-			datum.second = shadow_data[i];
-
-			state.parameters.insert (datum);
-		}
-	}
-}
-
-void
-LadspaPlugin::restore_state (PluginState& state)
-{
-	for (map<uint32_t,float>::iterator i = state.parameters.begin(); i != state.parameters.end(); ++i) {
-		set_parameter (i->first, i->second);
-	}
-}
-
 float
 LadspaPlugin::default_value (uint32_t port)
 {

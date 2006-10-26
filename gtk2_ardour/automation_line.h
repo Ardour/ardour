@@ -206,10 +206,6 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	void reset_callback (const ARDOUR::AutomationList&);
 	void list_changed (ARDOUR::Change);
 
-#ifdef STATE_MANAGER
-	UndoAction get_memento();
-#endif
-
 	virtual bool event_handler (GdkEvent*);
 	
   private:

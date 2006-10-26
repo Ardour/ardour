@@ -206,13 +206,6 @@ BaseStereoPanner::transport_stopped (nframes_t frame)
 	_automation.reposition_for_rt_add (frame);
 
 	if (_automation.automation_state() != Off) {
-		
-		if (_automation.automation_write()) {
-#ifdef STATE_MANAGER
-			_automation.save_state (_("automation write pass"));
-#endif
-		}
-
 		set_position (_automation.eval (frame));
 	}
 }
@@ -287,9 +280,6 @@ BaseStereoPanner::load (istream& in, string path, uint32_t& linecnt)
 
 	/* now that we are done loading */
 
-#ifdef STATE_MANAGER
-	_automation.save_state (_("loaded from disk"));
-#endif
 	_automation.StateChanged (Change (0));
 
 	return 0;

@@ -81,10 +81,6 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug, Placemen
 	
 	init ();
 
-#ifdef STATE_MANAGER
-	save_state (_("initial state"));
-#endif
-
 	{
 		Glib::Mutex::Lock em (_session.engine().process_lock());
 		IO::MoreOutputs (output_streams ());
@@ -101,10 +97,6 @@ PluginInsert::PluginInsert (Session& s, const XMLNode& node)
 	}
 
 	set_automatable ();
-
-#ifdef STATE_MANAGER
-	save_state (_("initial state"));
-#endif
 
 	_plugins[0]->ParameterChanged.connect (mem_fun (*this, &PluginInsert::parameter_changed));
 
@@ -128,10 +120,6 @@ PluginInsert::PluginInsert (const PluginInsert& other)
 	_plugins[0]->ParameterChanged.connect (mem_fun (*this, &PluginInsert::parameter_changed));
 
 	init ();
-
-#ifdef STATE_MANAGER
-	save_state (_("initial state"));
-#endif
 
 	RedirectCreated (this); /* EMIT SIGNAL */
 }
@@ -781,35 +769,6 @@ PluginInsert::latency()
 	return _plugins[0]->latency ();
 }
 	
-void
-PluginInsert::store_state (PluginInsertState& state) const
-{
-	Redirect::store_state (state);
-	_plugins[0]->store_state (state.plugin_state);
-}
-
-Change
-PluginInsert::restore_state (StateManager::State& state)
-{
-	PluginInsertState* pistate = dynamic_cast<PluginInsertState*> (&state);
-
-	Redirect::restore_state (state);
-
-	_plugins[0]->restore_state (pistate->plugin_state);
-
-	return Change (0);
-}
-
-StateManager::State*
-PluginInsert::state_factory (std::string why) const
-{
-	PluginInsertState* state = new PluginInsertState (why);
-
-	store_state (*state);
-
-	return state;
-}
-
 ARDOUR::PluginType
 PluginInsert::type ()
 {
@@ -847,10 +806,7 @@ PortInsert::PortInsert (Session& s, Placement p)
 	: Insert (s, p, 1, -1, 1, -1)
 {
 	init ();
-#ifdef STATE_MANAGER
-	save_state (_("initial state"));
 	RedirectCreated (this); /* EMIT SIGNAL */
-#endif
 
 }
 
@@ -858,11 +814,7 @@ PortInsert::PortInsert (const PortInsert& other)
 	: Insert (other._session, other.placement(), 1, -1, 1, -1)
 {
 	init ();
-#ifdef STATE_MANAGER
-	save_state (_("initial state"));
 	RedirectCreated (this); /* EMIT SIGNAL */
-#endif
-
 }
 
 void

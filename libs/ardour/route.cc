@@ -1976,19 +1976,6 @@ Route::handle_transport_stopped (bool abort_ignored, bool did_locate, bool can_f
 	_roll_delay = _initial_delay;
 }
 
-UndoAction
-Route::get_memento() const
-{
-	void (Route::*pmf)(state_id_t) = &Route::set_state;
-	return sigc::bind (mem_fun (*(const_cast<Route *>(this)), pmf), _current_state_id);
-}
-
-void
-Route::set_state (state_id_t id)
-{
-	return;
-}
-
 void
 Route::input_change_handler (IOChange change, void *ignored)
 {

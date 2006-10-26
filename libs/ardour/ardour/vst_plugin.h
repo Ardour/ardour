@@ -74,8 +74,6 @@ class VSTPlugin : public ARDOUR::Plugin
 	void deactivate ();
 	void set_block_size (nframes_t nframes);
 	int connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, int32_t& out, nframes_t nframes, nframes_t offset);
-	void store_state (ARDOUR::PluginState&);
-	void restore_state (ARDOUR::PluginState&);
 	string describe_parameter (uint32_t);
 	string state_node_name() const { return "vst"; }
 	void print_parameter (uint32_t, char*, uint32_t len) const;

@@ -63,12 +63,6 @@ AutomationList::AutomationList (double defval, bool with_state)
 	lookup_cache.left = -1;
 	lookup_cache.range.first = events.end();
 
-	if (!no_state) {
-#ifdef STATE_MANAGER
-		save_state (_("initial"));
-#endif
-	}
-
         AutomationListCreated(this);
 }
 
@@ -140,25 +134,6 @@ AutomationList::~AutomationList()
 	for (AutomationEventList::iterator x = events.begin(); x != events.end(); ++x) {
 		delete (*x);
 	}
-
-#ifdef STATE_MANAGER
-	std::set<ControlEvent*> all_events;
-	AutomationList::State* asp;
-
-	for (StateMap::iterator i = states.begin(); i != states.end(); ++i) {
-
-		if ((asp = dynamic_cast<AutomationList::State*> (*i)) != 0) {
-			
-			for (AutomationEventList::iterator x = asp->events.begin(); x != asp->events.end(); ++x) {
-				all_events.insert (*x);
-			}
-		}
-	}
-
-	for (std::set<ControlEvent*>::iterator i = all_events.begin(); i != all_events.end(); ++i) {
-		delete (*i);
-	}
-#endif
 }
 
 bool
@@ -240,11 +215,6 @@ AutomationList::clear ()
 	{
 		Glib::Mutex::Lock lm (lock);
 		events.clear ();
-		if (!no_state) {
-#ifdef STATE_MANAGER
-			save_state (_("cleared"));
-#endif
-		}
 		mark_dirty ();
 	}
 
@@ -276,9 +246,6 @@ void AutomationList::_x_scale (double factor)
 		(*i)->when = floor ((*i)->when * factor);
 	}
 
-#ifdef STATE_MANAGER
-	save_state ("x-scaled");
-#endif
 	mark_dirty ();
 }
 
@@ -415,12 +382,6 @@ AutomationList::add (double when, double value, bool for_loading)
 		} 
 
 		mark_dirty ();
-
-		if (!no_state && !for_loading) {
-#ifdef STATE_MANAGER
-			save_state (_("added event"));
-#endif
-		}
 	}
 
 	if (!for_loading) {
@@ -452,11 +413,6 @@ AutomationList::erase (AutomationList::iterator start, AutomationList::iterator 
 		Glib::Mutex::Lock lm (lock);
 		events.erase (start, end);
 		reposition_for_rt_add (0);
-		if (!no_state) {
-#ifdef STATE_MANAGER
-			save_state (_("removed multiple events"));
-#endif
-		}
 		mark_dirty ();
 	}
 	maybe_signal_changed ();
@@ -485,12 +441,6 @@ AutomationList::reset_range (double start, double endt)
 			
 			reset = true;
 
-			if (!no_state) {
-#ifdef STATE_MANAGER
-				save_state (_("removed range"));
-#endif
-			}
-
 			mark_dirty ();
 		}
 	}
@@ -518,11 +468,6 @@ AutomationList::erase_range (double start, double endt)
 			events.erase (s, e);
 			reposition_for_rt_add (0);
 			erased = true;
-			if (!no_state) {
-#ifdef STATE_MANAGER
-				save_state (_("removed range"));
-#endif
-			}
 			mark_dirty ();
 		}
 		
@@ -550,12 +495,6 @@ AutomationList::move_range (iterator start, iterator end, double xdelta, double 
 			++start;
 		}
 
-		if (!no_state) {
-#ifdef STATE_MANAGER
-			save_state (_("event range adjusted"));
-#endif
-		}
-
 		mark_dirty ();
 	}
 
@@ -574,12 +513,6 @@ AutomationList::modify (iterator iter, double when, double val)
 		Glib::Mutex::Lock lm (lock);
 		(*iter)->when = when;
 		(*iter)->value = val;
-		if (!no_state) {
-#ifdef STATE_MANAGER
-			save_state (_("event adjusted"));
-#endif
-		}
-
 		mark_dirty ();
 	}
 	
@@ -634,42 +567,6 @@ AutomationList::thaw ()
 		 StateChanged(Change(0)); /* EMIT SIGNAL */
 	}
 }
-
-#ifdef STATE_MANAGER
-StateManager::State*
-AutomationList::state_factory (std::string why) const
-{
-	State* state = new State (why);
-
-	for (AutomationEventList::const_iterator x = events.begin(); x != events.end(); ++x) {
-		state->events.push_back (point_factory (**x));
-	}
-
-	return state;
-}
-
-Change
-AutomationList::restore_state (StateManager::State& state) 
-{
-	{
-		Glib::Mutex::Lock lm (lock);
-		State* lstate = dynamic_cast<State*> (&state);
-
-		events.clear ();
-		for (AutomationEventList::const_iterator x = lstate->events.begin(); x != lstate->events.end(); ++x) {
-			events.push_back (point_factory (**x));
-		}
-	}
-
-	return Change (0);
-}
-
-UndoAction
-AutomationList::get_memento () const
-{
-  return sigc::bind (mem_fun (*(const_cast<AutomationList*> (this)), &StateManager::use_state), _current_state_id);
-}
-#endif
 
 void
 AutomationList::set_max_xval (double x)
@@ -1107,11 +1004,6 @@ AutomationList::cut_copy_clear (double start, double end, int op)
 
 		if (changed) {
 			reposition_for_rt_add (0);
-			if (!no_state) {
-#ifdef STATE_MANAGER
-				save_state (_("cut/copy/clear"));
-#endif
-			}
 		}
 
 		mark_dirty ();
@@ -1140,12 +1032,6 @@ AutomationList::copy (iterator start, iterator end)
 			nal->events.push_back (point_factory (**x));
 			
 			x = tmp;
-		}
-
-		if (!no_state) {
-#ifdef STATE_MANAGER
-			save_state (_("copy"));
-#endif
 		}
 	}
 
@@ -1211,13 +1097,6 @@ AutomationList::paste (AutomationList& alist, double pos, float times)
 		}
 
 		reposition_for_rt_add (0);
-
-		if (!no_state) {
-#ifdef STATE_MANAGER
-			save_state (_("paste"));
-#endif
-		}
-
 		mark_dirty ();
 	}
 

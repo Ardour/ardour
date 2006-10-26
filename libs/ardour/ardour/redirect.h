@@ -47,14 +47,6 @@ namespace ARDOUR {
 
 class Session;
 
-struct RedirectState : public StateManager::State {
-    RedirectState (string why) 
-	    : StateManager::State (why) {}
-    ~RedirectState () {}
-
-    bool active;
-};
-
 class Redirect : public IO
 {
   public:
@@ -99,9 +91,6 @@ class Redirect : public IO
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&);
 
-	StateManager::State* state_factory (string why) const;
-	Change restore_state (StateManager::State&);
-
 	void *get_gui () const { return _gui; }
 	void  set_gui (void *p) { _gui = p; }
 
@@ -136,8 +125,6 @@ class Redirect : public IO
 
 	void can_automate (uint32_t);
 	set<uint32_t> can_automate_list;
-
-	void store_state (RedirectState&) const;
 
 	virtual void automation_list_creation_callback (uint32_t, AutomationList&) {}
 

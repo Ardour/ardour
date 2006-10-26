@@ -205,11 +205,6 @@ class Route : public IO
 
 	sigc::signal<void,void*> SelectedChanged;
 
-	/* undo */
-
-	UndoAction get_memento() const;
-	void set_state (state_id_t);
-
 	int set_control_outs (const vector<std::string>& ports);
 	IO* control_outs() { return _control_outs; }
 
@@ -314,7 +309,6 @@ class Route : public IO
 	void silence (nframes_t nframes, nframes_t offset);
 	sigc::connection input_signal_connection;
 
-	state_id_t _current_state_id;
 	uint32_t redirect_max_outs;
 	uint32_t _remote_control_id;
 

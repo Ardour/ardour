@@ -36,10 +36,7 @@ Send::Send (Session& s, Placement p)
 {
 	_metering = false;
 	expected_inputs = 0;
-#ifdef STATE_MANAGER
-	save_state (_("initial state"));
-#endif
-	 RedirectCreated (this); /* EMIT SIGNAL */
+	RedirectCreated (this); /* EMIT SIGNAL */
 }
 
 Send::Send (Session& s, const XMLNode& node)
@@ -52,11 +49,7 @@ Send::Send (Session& s, const XMLNode& node)
 		throw failed_constructor();
 	}
 
-#ifdef STATE_MANAGER
-	save_state (_("initial state"));
-#endif
-
-	 RedirectCreated (this); /* EMIT SIGNAL */
+	RedirectCreated (this); /* EMIT SIGNAL */
 }
 
 Send::Send (const Send& other)
@@ -64,9 +57,6 @@ Send::Send (const Send& other)
 {
 	_metering = false;
 	expected_inputs = 0;
-#ifdef STATE_MANAGER
-	save_state (_("initial state"));
-#endif
 
 	RedirectCreated (this); /* EMIT SIGNAL */
 }

@@ -34,7 +34,6 @@
 #include <sigc++/signal.h>
 
 #include <ardour/ardour.h>
-#include <ardour/state_manager.h>
 
 class XMLNode;
 
@@ -162,18 +161,6 @@ class TempoSection : public MetricSection, public Tempo {
 
 typedef list<MetricSection*> Metrics;
 
-#ifdef STATE_MANAGER
-class TempoMapState : public StateManager::State {
-  public:
-	TempoMapState (std::string why) 
-		: StateManager::State (why) {
-		metrics = new Metrics;
-	}
-
-	Metrics *metrics;
-};
-#endif
-
 class TempoMap : public PBD::StatefulDestructible
 {
   public:
@@ -248,10 +235,6 @@ class TempoMap : public PBD::StatefulDestructible
 	void dump (std::ostream&) const;
 	void clear ();
 
-#ifdef STATE_MANAGER
-	UndoAction get_memento() const;
-#endif
-
 	/* this is a helper class that we use to be able to keep
 	   track of which meter *AND* tempo are in effect at
 	   a given point in time.
@@ -315,17 +298,6 @@ class TempoMap : public PBD::StatefulDestructible
 
 	int move_metric_section (MetricSection&, const BBT_Time& to);
 	void do_insert (MetricSection* section);
-
-#ifdef STATE_MANAGER
-	Change  restore_state (StateManager::State&);
-	StateManager::State* state_factory (std::string why) const;
-
-	bool        in_set_state;
-
-	/* override state_manager::save_state so we can check in_set_state */
-
-	void save_state (std::string why);
-#endif
 };
 
 }; /* namespace ARDOUR */

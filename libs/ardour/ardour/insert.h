@@ -28,7 +28,6 @@
 #include <sigc++/signal.h>
 #include <ardour/ardour.h>
 #include <ardour/redirect.h>
-#include <ardour/plugin_state.h>
 #include <ardour/types.h>
 
 class XMLNode;
@@ -87,15 +86,6 @@ class PortInsert : public Insert
 	int32_t compute_output_streams (int32_t cnt) const;
 };
 
-struct PluginInsertState : public RedirectState
-{
-    PluginInsertState (std::string why) 
-	    : RedirectState (why) {}
-    ~PluginInsertState() {}
-
-    PluginState plugin_state;
-};
-
 class PluginInsert : public Insert
 {
   public:
@@ -109,9 +99,6 @@ class PluginInsert : public Insert
 	XMLNode& state(bool);
 	XMLNode& get_state(void);
 	int set_state(const XMLNode&);
-
-	StateManager::State* state_factory (std::string why) const;
-	Change restore_state (StateManager::State&);
 
 	void run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset);
 	void silence (nframes_t nframes, nframes_t offset);
@@ -157,9 +144,6 @@ class PluginInsert : public Insert
 	nframes_t latency();
 
 	void transport_stopped (nframes_t now);
-
-  protected:
-	void store_state (PluginInsertState&) const;
 
   private:
 

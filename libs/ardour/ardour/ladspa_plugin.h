@@ -33,7 +33,6 @@
 
 #include <jack/types.h>
 #include <ardour/ladspa.h>
-#include <ardour/plugin_state.h>
 #include <ardour/plugin.h>
 #include <ardour/ladspa_plugin.h>
 
@@ -84,8 +83,6 @@ class LadspaPlugin : public ARDOUR::Plugin
 	void set_block_size (nframes_t nframes) {}
 	
 	int connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, int32_t& out, nframes_t nframes, nframes_t offset);
-	void store_state (ARDOUR::PluginState&);
-	void restore_state (ARDOUR::PluginState&);
 	string describe_parameter (uint32_t);
 	string state_node_name() const { return "ladspa"; }
 	void print_parameter (uint32_t, char*, uint32_t len) const;

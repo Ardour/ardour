@@ -435,15 +435,6 @@ Curve::point_factory (const ControlEvent& other) const
 	return new CurvePoint (other.when, other.value);
 }
 
-#ifdef STATE_MANAGER
-Change
-Curve::restore_state (StateManager::State& state)
-{
-	mark_dirty ();
-	return AutomationList::restore_state (state);
-}
-#endif 
-
 extern "C" {
 
 void 

@@ -30,10 +30,6 @@ class AudioRegionGainLine : public AutomationLine
   private:
 	ARDOUR::Session& session;
 	AudioRegionView& rv;
-
-#ifdef STATE_MANAGER
-	UndoAction get_memento();
-#endif
 };
 
 

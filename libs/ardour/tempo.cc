@@ -206,9 +206,6 @@ TempoMap::TempoMap (nframes_t fr)
 	_frame_rate = fr;
 	last_bbt_valid = false;
 	BBT_Time start;
-#ifdef STATE_MANAGER
-	in_set_state = false;
-#endif
 	
 	start.bars = 1;
 	start.beats = 1;
@@ -224,10 +221,6 @@ TempoMap::TempoMap (nframes_t fr)
 	
 	metrics->push_back (t);
 	metrics->push_back (m);
-	
-#ifdef STATE_MANAGER
-	save_state (_("initial"));
-#endif
 }
 
 TempoMap::~TempoMap ()
@@ -260,9 +253,6 @@ TempoMap::move_metric_section (MetricSection& section, const BBT_Time& when)
 	section.set_start (corrected);
 	metrics->sort (cmp);
 	timestamp_metrics ();
-#ifdef STATE_MANAGER
-	save_state (_("move metric"));
-#endif
 
 	return 0;
 }
@@ -331,12 +321,6 @@ TempoMap::remove_meter (const MeterSection& tempo)
 				}
 			}
 		}
-
-		if (removed) {
-#ifdef STATE_MANAGER
-			save_state (_("metric removed"));
-#endif
-		}
 	}
 
 	if (removed) {
@@ -377,10 +361,6 @@ TempoMap::add_tempo (const Tempo& tempo, BBT_Time where)
 		where.ticks = 0;
 		
 		do_insert (new TempoSection (where, tempo.beats_per_minute()));
-
-#ifdef STATE_MANAGER
-		save_state (_("add tempo"));
-#endif
 	}
 
 	StateChanged (Change (0));
@@ -406,12 +386,6 @@ TempoMap::replace_tempo (TempoSection& existing, const Tempo& replacement)
 				timestamp_metrics ();
 				break;
 			}
-		}
-
-		if (replaced) {
-#ifdef STATE_MANAGER
-			save_state (_("replace tempo"));
-#endif
 		}
 	}
 	
@@ -443,10 +417,6 @@ TempoMap::add_meter (const Meter& meter, BBT_Time where)
 		where.ticks = 0;
 
 		do_insert (new MeterSection (where, meter.beats_per_bar(), meter.note_divisor()));
-
-#ifdef STATE_MANAGER
-		save_state (_("add meter"));
-#endif
 	}
 
 	StateChanged (Change (0));
@@ -471,12 +441,6 @@ TempoMap::replace_meter (MeterSection& existing, const Meter& replacement)
 				timestamp_metrics ();
 				break;
 			}
-		}
-
-		if (replaced) {
-#ifdef STATE_MANAGER
-			save_state (_("replaced meter"));
-#endif
 		}
 	}
 	
@@ -1282,10 +1246,6 @@ TempoMap::set_state (const XMLNode& node)
 		XMLNodeConstIterator niter;
 		Metrics old_metrics (*metrics);
 		
-#ifdef STATE_MANAGER
-		in_set_state = true;
-#endif
-		
 		metrics->clear();
 
 		nlist = node.children();
@@ -1325,23 +1285,7 @@ TempoMap::set_state (const XMLNode& node)
 			metrics->sort (cmp);
 			timestamp_metrics ();
 		}
-
-#ifdef STATE_MANAGER
-		in_set_state = false;
-#endif
 	}
-	
-	/* This state needs to be saved. This string will never be a part of the 
-	   object's history though, because the allow_save flag is false during 
-	   session load. This state will eventually be tagged "initial state", 
-	   by a call to StateManager::allow_save from Session::set_state.
-
-	   If this state is not saved, there is no way to reach it through undo actions.
-	*/
-
-#ifdef STATE_MANAGER
-	save_state(_("load XML data"));
-#endif
 	
 	StateChanged (Change (0));
 
@@ -1366,67 +1310,3 @@ TempoMap::dump (std::ostream& o) const
 	}
 }
 
-#ifdef STATE_MANAGER
-UndoAction
-TempoMap::get_memento () const
-{
-	return sigc::bind (mem_fun (*(const_cast<TempoMap *> (this)), &StateManager::use_state), _current_state_id);
-}
-
-Change
-TempoMap::restore_state (StateManager::State& state)
-{
-	Glib::RWLock::ReaderLock lm (lock);
-
-	TempoMapState* tmstate = dynamic_cast<TempoMapState*> (&state);
-
-	/* We can't just set the metrics pointer to the address of the metrics list 
-	   stored in the state, cause this would ruin this state for restoring in
-	   the future. If they have the same address, they are the same list.
-	   Thus we need to copy all the elements from the state metrics list to the 
-	   current metrics list.
-	*/
-	metrics->clear();
-	for (Metrics::iterator i = tmstate->metrics->begin(); i != tmstate->metrics->end(); ++i) {
-		TempoSection *ts;
-		MeterSection *ms;
-		
-		if ((ts = dynamic_cast<TempoSection*>(*i)) != 0) {
-			metrics->push_back (new TempoSection (*ts));
-		} else if ((ms = dynamic_cast<MeterSection*>(*i)) != 0) {
-			metrics->push_back (new MeterSection (*ms));
-		}
-	}
-	
-	last_bbt_valid = false;
-
-	return Change (0);
-}
-
-StateManager::State* 
-TempoMap::state_factory (std::string why) const
-{
-	TempoMapState* state = new TempoMapState (why);
-
-	for (Metrics::iterator i = metrics->begin(); i != metrics->end(); ++i) {
-		TempoSection *ts;
-		MeterSection *ms;
-		
-		if ((ts = dynamic_cast<TempoSection*>(*i)) != 0) {
-			state->metrics->push_back (new TempoSection (*ts));
-		} else if ((ms = dynamic_cast<MeterSection*>(*i)) != 0) {
-			state->metrics->push_back (new MeterSection (*ms));
-		}
-	}
-		
-	return state;
-}
-
-void
-TempoMap::save_state (std::string why)
-{
-	if (!in_set_state) {
-		StateManager::save_state (why);
-	}
-}
-#endif

@@ -89,11 +89,3 @@ AudioRegionGainLine::end_drag (ControlPoint* cp)
 }
 
 
-#ifdef STATE_MANAGER
-// This is a copy from AutomationList
-UndoAction
-AudioRegionGainLine::get_memento ()
-{
-	return alist.get_memento();
-}
-#endif

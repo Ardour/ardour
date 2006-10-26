@@ -144,12 +144,6 @@ Redirect::load_automation (string path)
 		tosave.insert (port);
 	}
 	
-#ifdef STATE_MANAGER
-	for (set<uint32_t>::iterator i = tosave.begin(); i != tosave.end(); ++i) {
-		automation_list (*i).save_state (_("loaded from disk"));
-	}
-#endif
-	
 	return 0;
 
   bad:
@@ -439,36 +433,9 @@ Redirect::find_next_event (nframes_t now, nframes_t end, ControlEvent& next_even
 }
 
 void
-Redirect::store_state (RedirectState& state) const
-{
-	state.active = _active;
-}
-
-Change
-Redirect::restore_state (StateManager::State& state)
-{
-	RedirectState* rstate = dynamic_cast<RedirectState*> (&state);
-	set_active (rstate->active, this);
-	return Change (0);
-}
-
-StateManager::State*
-Redirect::state_factory (std::string why) const
-{
-	RedirectState* state = new RedirectState (why);
-
-	store_state (*state);
-
-	return state;
-}
-
-void
 Redirect::set_active (bool yn, void* src)
 {
 	_active = yn; 
-#ifdef STATE_MANAGER
-	save_state (_("active_changed"));
-#endif
 	active_changed (this, src); 
 	_session.set_dirty ();
 }

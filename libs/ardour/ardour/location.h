@@ -36,7 +36,6 @@
 #include <pbd/statefuldestructible.h> 
 
 #include <ardour/ardour.h>
-#include <ardour/state_manager.h>
 
 using std::string;
 
@@ -181,30 +180,14 @@ class Locations : public PBD::StatefulDestructible
 		(obj.*method)(locations, arg);
 	}
 
-#ifdef STATE_MANAGER
-	UndoAction get_memento () const;
-#endif
-
   private:
 
-#ifdef STATE_MANAGER
-	struct State : public ARDOUR::StateManager::State {
-	    LocationList locations;
-	    LocationList states;
-
-	    State (std::string why) : ARDOUR::StateManager::State (why) {}
-	};
-#endif
 	LocationList       locations;
 	Location          *current_location;
 	mutable Glib::Mutex  lock;
 
 	int set_current_unlocked (Location *);
 	void location_changed (Location*);
-#ifdef STATE_MANAGER
-	Change   restore_state (StateManager::State&);
-	StateManager::State* state_factory (std::string why) const;
-#endif
 };
 
 } // namespace ARDOUR

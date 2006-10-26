@@ -33,7 +33,6 @@
 #include <pbd/statefuldestructible.h> 
 
 #include <ardour/ardour.h>
-#include <ardour/state_manager.h>
 
 namespace ARDOUR {
 	
@@ -153,10 +152,6 @@ class AutomationList : public PBD::StatefulDestructible
 
 	sigc::signal<void,Change> StateChanged;
 
-#ifdef STATE_MANAGER
-	UndoAction get_memento () const;
-#endif 
-	
 	virtual void store_state (XMLNode& node) const;
 	virtual void load_state (const XMLNode&);
 
@@ -191,12 +186,6 @@ class AutomationList : public PBD::StatefulDestructible
         static sigc::signal<void, AutomationList*> AutomationListCreated;
 
   protected:
-
-	struct State : public ARDOUR::StateManager::State {
-	    AutomationEventList events;
-
-	    State (std::string why) : ARDOUR::StateManager::State (why) {}
-	};
 
 	AutomationEventList events;
 	mutable Glib::Mutex lock;
@@ -246,14 +235,8 @@ class AutomationList : public PBD::StatefulDestructible
 
 	virtual double unlocked_eval (double where);
 
-#ifdef STATE_MANAGER
-	Change   restore_state (StateManager::State&);
-	StateManager::State* state_factory (std::string why) const;
-#endif
-
 	virtual ControlEvent* point_factory (double,double) const;
 	virtual ControlEvent* point_factory (const ControlEvent&) const;
-
 
 	AutomationList* cut_copy_clear (double, double, int op);
 };

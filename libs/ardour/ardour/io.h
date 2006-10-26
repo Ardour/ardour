@@ -36,7 +36,6 @@
 
 #include <ardour/ardour.h>
 #include <ardour/utils.h>
-#include <ardour/state_manager.h>
 #include <ardour/curve.h>
 #include <ardour/types.h>
 #include <ardour/data_type.h>
@@ -167,20 +166,11 @@ virtual ~IO();
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&);
 
-#ifdef STATE_MANAGER
-	virtual UndoAction get_memento() const;
-#endif
-
 	static int  disable_connecting (void);
-
 	static int  enable_connecting (void);
-
 	static int  disable_ports (void);
-
 	static int  enable_ports (void);
-
 	static int  disable_panners (void);
-
 	static int  reset_panners (void);
 	
 	static sigc::signal<int> PortsLegal;
@@ -298,13 +288,6 @@ public:
 	};
 
 	GainControllable _gain_control;
-
-	/* state management */
-
-#ifdef STATE_MANAGER
-	Change               restore_state (State&);
-	StateManager::State* state_factory (std::string why) const;
-#endif
 
 	AutoState      _gain_automation_state;
 	AutoStyle      _gain_automation_style;

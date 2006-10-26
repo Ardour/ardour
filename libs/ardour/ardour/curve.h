@@ -66,10 +66,6 @@ class Curve : public AutomationList
 	ControlEvent* point_factory (double,double) const;
 	ControlEvent* point_factory (const ControlEvent&) const;
 
-#ifdef STATE_MANAGER
-	Change   restore_state (StateManager::State&);
-#endif
-
   private:
 	AutomationList::iterator last_bound;
 

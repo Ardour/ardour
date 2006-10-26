@@ -1010,8 +1010,6 @@ Session::set_state (const XMLNode& node)
 		return -1;
 	}
 
-	StateManager::prohibit_save ();
-
 	if ((prop = node.property ("name")) != 0) {
 		_name = prop->value ();
 	}
@@ -1147,10 +1145,6 @@ Session::set_state (const XMLNode& node)
 		start_location = location;
 	}
 
-#ifdef STATE_MANAGER
-	_locations.save_state (_("initial state"));
-#endif
-
 	if ((child = find_named_node (node, "EditGroups")) == 0) {
 		error << _("Session: XML state has no edit groups section") << endmsg;
 		goto out;
@@ -1195,8 +1189,6 @@ Session::set_state (const XMLNode& node)
 
 	_state_of_the_state = Clean;
 
-	StateManager::allow_save (_("initial state"), true);
-
 	if (state_was_pending) {
 		save_state (_current_snapshot_name);
 		remove_pending_capture_state ();
@@ -1206,8 +1198,6 @@ Session::set_state (const XMLNode& node)
 	return 0;
 
   out:
-	/* we failed, re-enable state saving but don't actually save internal state */
-	StateManager::allow_save (X_("ignored"), false);
 	return ret;
 }
 
