@@ -245,8 +245,6 @@ if ardour['LIBLO']:
 if ardour['COREAUDIO'] or ardour['AUDIOUNITS']:
     ardour.Merge ([ libraries['appleutility'] ])
 
-ardour.VersionBuild(['version.cc', 'ardour/version.h'], 'SConscript')
-
 def SharedAsmObjectEmitter(target, source, env):
     for tgt in target:
         tgt.attributes.shared = 1
@@ -276,7 +274,10 @@ if env['NLS']:
 
 
 env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libardour))
-	      
+
+env.AlwaysBuild ('version.cc')	      
+env.Alias('version', ardour.VersionBuild(['version.cc', 'ardour/version.h'], 'SConscript'))
+
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
 				     [ 'SConscript', 'i18n.h', 'gettext.h', 'sse_functions.s', 'sse_functions_64bit.s' ] +
 				     ardour_files + osc_files + vst_files + coreaudio_files + audiounit_files +
