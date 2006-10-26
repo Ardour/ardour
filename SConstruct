@@ -16,7 +16,7 @@ import SCons.Node.FS
 SConsignFile()
 EnsureSConsVersion(0, 96)
 
-version = '2.0beta6'
+version = '2.0beta6.1'
 
 subst_dict = { }
 
@@ -237,35 +237,6 @@ def i18n (buildenv, sources, installenv):
 # note: requires that DOMAIN, MAJOR, MINOR, MICRO are set in the construction environment
 # note: assumes one source files, the header that declares the version variables
 #
-#def version_builder (target, source, env):
-#   text  = "int " + env['DOMAIN'] + "_major_version = " + str (env['MAJOR']) + ";\n"
-#   text += "int " + env['DOMAIN'] + "_minor_version = " + str (env['MINOR']) + ";\n"
-#   text += "int " + env['DOMAIN'] + "_micro_version = " + str (env['MICRO']) + ";\n"
-#   
-#   try:
-#      o = file (target[0].get_path(), 'w')
-#      o.write (text)
-#      o.close ()
-#   except IOError:
-#      print "Could not open", target[0].get_path(), " for writing\n"
-#      sys.exit (-1)
-#   
-#   text  = "#ifndef __" + env['DOMAIN'] + "_version_h__\n"
-#   text += "#define __" + env['DOMAIN'] + "_version_h__\n"
-#   text += "extern int " + env['DOMAIN'] + "_major_version;\n"
-#   text += "extern int " + env['DOMAIN'] + "_minor_version;\n"
-#   text += "extern int " + env['DOMAIN'] + "_micro_version;\n"
-#   text += "#endif /* __" + env['DOMAIN'] + "_version_h__ */\n"
-#   
-#   try:
-#      o = file (target[1].get_path(), 'w')
-#      o.write (text)
-#      o.close ();
-#   except IOError:
-#      print "Could not open", target[1].get_path(), " for writing\n"
-#      sys.exit (-1)
-#   
-#   return None
 
 def version_builder (target, source, env):
     cmd = "svn info "
