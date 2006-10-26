@@ -129,33 +129,9 @@ MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer& dst,
 		       jack_nframes_t position, jack_nframes_t dur, 
 		       uint32_t chan_n, jack_nframes_t read_frames, jack_nframes_t skip_frames) const
 {
-/*
-	MidiEvent ev;
-	RawMidi data[4];
 
-	const char note = rand()%30 + 30;
-	
-	ev.buffer = data;
-	ev.time = position;
-	ev.size = 3;
-	data[0] = 0x90;
-	data[1] = note;
-	data[2] = 120;
-	dst.write(ev);
-	
-	ev.buffer = data;
-	ev.time = (jack_nframes_t)(position + (9/10.0 * dur));
-	assert(ev.time < position + dur);
-	ev.size = 3;
-	data[0] = 0x80;
-	data[1] = note;
-	data[2] = 64;
-	dst.write(ev);
+	//cerr << _name << "._read_at(" << position << ") - " << _position << endl;
 
-	_read_data_count += dur;
-
-	return dur;
-*/
 	jack_nframes_t internal_offset = 0;
 	jack_nframes_t src_offset      = 0;
 	jack_nframes_t to_read         = 0;

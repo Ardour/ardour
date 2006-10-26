@@ -263,7 +263,7 @@ SMFSource::read_event(MidiEvent& ev) const
 		assert(!feof(_fd));
 		int type = fgetc(_fd);
 		if ((unsigned char)type == 0x2F) {
-			cerr << "SMF - hit EOT" << endl;
+			//cerr << "SMF - hit EOT" << endl;
 			return -1; // we hit the logical EOF anyway...
 		} else {
 			ev.size = 0;
@@ -290,7 +290,7 @@ SMFSource::read_event(MidiEvent& ev) const
 jack_nframes_t
 SMFSource::read_unlocked (MidiRingBuffer& dst, jack_nframes_t start, jack_nframes_t cnt, jack_nframes_t stamp_offset) const
 {
-	//cerr << "SMF - read " << start << " -- " << cnt;
+	//cerr << "SMF - read " << start << ", count=" << cnt << ", offset=" << stamp_offset << endl;
 
 	jack_nframes_t time = 0;
 

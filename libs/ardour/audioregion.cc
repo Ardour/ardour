@@ -273,6 +273,8 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 		       nframes_t position, nframes_t cnt, 
 		       uint32_t chan_n, nframes_t read_frames, nframes_t skip_frames) const
 {
+	//cerr << _name << "._read_at(" << position << ") - " << _position << endl;
+
 	nframes_t internal_offset;
 	nframes_t buf_offset;
 	nframes_t to_read;
