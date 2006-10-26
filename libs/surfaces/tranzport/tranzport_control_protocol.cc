@@ -760,6 +760,14 @@ TranzportControlProtocol::update_state ()
 		}
 	}
 
+	if (pending_lights[LightTrackrec] != lights[LightTrackrec]) {
+		if (pending_lights[LightTrackrec]) {
+			light_on (LightTrackrec);
+		} else {
+			light_off (LightTrackrec);
+		}
+	}
+
 	if (pending_lights[LightTrackmute] != lights[LightTrackmute]) {
 		if (pending_lights[LightTrackmute]) {
 			light_on (LightTrackmute);
