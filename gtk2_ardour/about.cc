@@ -139,7 +139,7 @@ static const char* authors[] = {
 	N_("Per Sigmond"),
 	N_("Doug Mclain"),
 	N_("Petter Sundlöf"),
-	N_("Thörsten Wilms"),
+	N_("Thorsten Wilms"),
 	N_("Ben Loftis"),
 	N_("Stefan Kersten"),
 	N_("Christopher George"),
