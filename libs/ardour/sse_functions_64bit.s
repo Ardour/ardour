@@ -602,3 +602,8 @@ x86_sse_compute_peak:
 
 .size	x86_sse_compute_peak, .-x86_sse_compute_peak
 #; end proc
+
+#ifdef __ELF__
+.section .note.GNU-statck,"",%progbits
+#endif
+
