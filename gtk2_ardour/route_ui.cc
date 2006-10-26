@@ -72,7 +72,17 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 
         mute_button = manage (new BindableToggleButton (_route->mute_control(), m_name ));
         solo_button = manage (new BindableToggleButton (_route->solo_control(), s_name ));
+
+	mute_button->unset_flags (Gtk::CAN_FOCUS);
+	solo_button->unset_flags (Gtk::CAN_FOCUS);
+
+	_route->mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed));
+	_route->solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
+	_route->solo_safe_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
 	
+	update_solo_display ();
+	update_mute_display ();
+
 	if (is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 
@@ -86,9 +96,6 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 		
 		update_rec_display ();
 	} 
-
-	mute_button->unset_flags (Gtk::CAN_FOCUS);
-	solo_button->unset_flags (Gtk::CAN_FOCUS);
 	
 	/* map the current state */
 

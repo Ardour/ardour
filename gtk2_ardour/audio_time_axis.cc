@@ -98,18 +98,10 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	ignore_toggle = false;
 
-	mute_button->set_active (false);
-	solo_button->set_active (false);
-	
 	if (is_audio_track())
 		controls_ebox.set_name ("AudioTimeAxisViewControlsBaseUnselected");
 	else // bus
 		controls_ebox.set_name ("AudioBusControlsBaseUnselected");
-
-	/* map current state of the route */
-
-	redirects_changed (0);
-	reset_redirect_automation_curves ();
 
 	ensure_xml_node ();
 

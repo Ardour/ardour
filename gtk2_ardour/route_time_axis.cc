@@ -104,9 +104,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	ignore_toggle = false;
 
-	mute_button->set_active (false);
-	solo_button->set_active (false);
-	
 	mute_button->set_name ("TrackMuteButton");
 	solo_button->set_name ("SoloButton");
 	edit_group_button.set_name ("TrackGroupButton");
@@ -131,7 +128,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	mute_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::mute_release), false);
 
 	if (is_track()) {
-		rec_enable_button->set_active (false);
 		rec_enable_button->set_name ("TrackRecordEnableButton");
 		rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press));
 		controls_table.attach (*rec_enable_button, 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
@@ -177,18 +173,12 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	/* map current state of the route */
 
 	update_diskstream_display ();
-	solo_changed(0);
-	mute_changed(0);
-	//redirects_changed (0);
-	//reset_redirect_automation_curves ();
+	redirects_changed (0);
+	reset_redirect_automation_curves ();
 	y_position = -1;
 
-	_route->mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed));
-	_route->solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
 	_route->redirects_changed.connect (mem_fun(*this, &RouteTimeAxisView::redirects_changed));
 	_route->name_changed.connect (mem_fun(*this, &RouteTimeAxisView::route_name_changed));
-	_route->solo_safe_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
-
 
 	if (is_track()) {
 
