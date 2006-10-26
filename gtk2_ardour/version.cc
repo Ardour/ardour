@@ -1,1 +1,1 @@
-const char* gtk_ardour_revision = $Revision$;
+const char* gtk_ardour_revision = "$Revision$";
