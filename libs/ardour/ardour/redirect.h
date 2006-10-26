@@ -99,9 +99,6 @@ class Redirect : public IO
 		return 1.0f;
 	}
 
-	int load_automation (string path);
-	int save_automation (string path);
-
 	void what_has_automation (set<uint32_t>&) const;
 	void what_has_visible_automation (set<uint32_t>&) const;
 	const set<uint32_t>& what_can_be_automated () const { return can_automate_list; }
@@ -127,6 +124,9 @@ class Redirect : public IO
 	set<uint32_t> can_automate_list;
 
 	virtual void automation_list_creation_callback (uint32_t, AutomationList&) {}
+
+	int set_automation_state (const XMLNode&);
+	XMLNode& get_automation_state ();
 
   private:
 	bool _active;

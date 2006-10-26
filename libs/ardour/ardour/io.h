@@ -295,10 +295,10 @@ public:
 	bool     apply_gain_automation;
 	Curve    _gain_automation_curve;
 	
-	int  save_automation (const string&);
-	int  load_automation (const string&);
-	
 	Glib::Mutex automation_lock;
+
+	virtual int set_automation_state (const XMLNode&);
+	virtual XMLNode& get_automation_state ();
 
 	/* AudioTrack::deprecated_use_diskstream_connections() needs these */
 

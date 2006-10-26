@@ -22,6 +22,7 @@
 #include <climits>
 #include <float.h>
 #include <cmath>
+#include <sstream>
 #include <algorithm>
 #include <sigc++/bind.h>
 #include <ardour/automation_event.h>
@@ -348,7 +349,7 @@ AutomationList::rt_add (double when, double value)
 #undef last_rt_insertion_point
 
 void
-AutomationList::add (double when, double value, bool for_loading)
+AutomationList::add (double when, double value)
 {
 	/* this is for graphical editing and loading data from storage */
 
@@ -384,9 +385,7 @@ AutomationList::add (double when, double value, bool for_loading)
 		mark_dirty ();
 	}
 
-	if (!for_loading) {
-		maybe_signal_changed ();
-	}
+	maybe_signal_changed ();
 }
 
 void
@@ -1116,68 +1115,91 @@ AutomationList::point_factory (const ControlEvent& other) const
 	return new ControlEvent (other);
 }
 
-void
-AutomationList::store_state (XMLNode& node) const
+XMLNode&
+AutomationList::get_state ()
 {
-	LocaleGuard lg (X_("POSIX"));
+	stringstream str;
+	XMLNode* node = new XMLNode (X_("events"));
+	iterator xx;
 
-	for (const_iterator i = const_begin(); i != const_end(); ++i) {
-		char buf[64];
-		
-		XMLNode *pointnode = new XMLNode ("point");
-		
-		snprintf (buf, sizeof (buf), "%" PRIu32, (nframes_t) floor ((*i)->when));
-		pointnode->add_property ("x", buf);
-		snprintf (buf, sizeof (buf), "%.12g", (*i)->value);
-		pointnode->add_property ("y", buf);
-
-		node.add_child_nocopy (*pointnode);
+	for (xx = events.begin(); xx != events.end(); ++xx) {
+		str << (double) (*xx)->when;
+		str << ' ';
+		str <<(double) (*xx)->value;
+		str << '\n';
 	}
+
+	node->add_content (str.str());
+
+	return *node;
 }
 
-void
-AutomationList::load_state (const XMLNode& node)
+int
+AutomationList::set_state (const XMLNode& node)
 {
 	const XMLNodeList& elist = node.children();
 	XMLNodeConstIterator i;
 	XMLProperty* prop;
-	nframes_t x;
-	double y;
 
 	freeze ();
 
 	clear ();
 	
 	for (i = elist.begin(); i != elist.end(); ++i) {
+
+		if ((*i)->name() == X_("events")) {
+
+			/* new style */
+
+			stringstream str (node.content());
+
+			double x;
+			double y;
+			bool ok = true;
+
+			while (str) {
+				str >> x;
+				if (!str) {
+					ok = false;
+					break;
+				}
+				str >> y;
+				if (!str) {
+					ok = false;
+					break;
+				}
+				add (x, y);
+			}
+
+			if (!ok) {
+				clear ();
+				error << _("automation list: cannot load coordinates from XML, all points ignored") << endmsg;
+			}
+
+		} else {
+
+			/* old style */
 		
-		if ((prop = (*i)->property ("x")) == 0) {
-			error << _("automation list: no x-coordinate stored for control point (point ignored)") << endmsg;
-			continue;
+			nframes_t x;
+			double y;
+
+			if ((prop = (*i)->property ("x")) == 0) {
+				error << _("automation list: no x-coordinate stored for control point (point ignored)") << endmsg;
+				continue;
+			}
+			x = atoi (prop->value().c_str());
+			
+			if ((prop = (*i)->property ("y")) == 0) {
+				error << _("automation list: no y-coordinate stored for control point (point ignored)") << endmsg;
+				continue;
+			}
+			y = atof (prop->value().c_str());
+			
+			add (x, y);
 		}
-		x = atoi (prop->value().c_str());
-		
-		if ((prop = (*i)->property ("y")) == 0) {
-			error << _("automation list: no y-coordinate stored for control point (point ignored)") << endmsg;
-			continue;
-		}
-		y = atof (prop->value().c_str());
-		
-		add (x, y);
 	}
 
 	thaw ();
-}
-
-XMLNode &AutomationList::get_state ()
-{
-    XMLNode *node = new XMLNode("AutomationList");
-    store_state(*node);
-    return *node;
-}
-
-int AutomationList::set_state(const XMLNode &s)
-{
-    load_state(s);
-    return 0;
+	return 0;
 }
 

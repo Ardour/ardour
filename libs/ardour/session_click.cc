@@ -84,8 +84,6 @@ Session::click (nframes_t start, nframes_t nframes, nframes_t offset)
 	}
 	
 	delete points;
-
-	delete points;
 	
   run_clicks:
 	

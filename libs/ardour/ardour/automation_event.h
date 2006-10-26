@@ -84,8 +84,7 @@ class AutomationList : public PBD::StatefulDestructible
 
 	void reposition_for_rt_add (double when);
 	void rt_add (double when, double value);
-	iterator add (double when, double value, iterator, bool ignore_mode = false);
-	void add (double when, double value, bool for_loading = false);
+	void add (double when, double value);
 
 	void reset_range (double start, double end);
 	void erase_range (double start, double end);
@@ -151,9 +150,6 @@ class AutomationList : public PBD::StatefulDestructible
 	}
 
 	sigc::signal<void,Change> StateChanged;
-
-	virtual void store_state (XMLNode& node) const;
-	virtual void load_state (const XMLNode&);
 
 	XMLNode &get_state(void); 
 	int set_state (const XMLNode &s);

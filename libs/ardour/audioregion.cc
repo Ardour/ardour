@@ -598,7 +598,7 @@ AudioRegion::state (bool full)
 		if ((_flags & DefaultFadeIn)) {
 			child->add_property (X_("default"), X_("yes"));
 		} else {
-			_fade_in.store_state (*child);
+			child->add_child_nocopy (_fade_in.get_state ());
 		}
 
 		child->add_property (X_("active"), _fade_in_disabled ? X_("no") : X_("yes"));
@@ -608,9 +608,9 @@ AudioRegion::state (bool full)
 		if ((_flags & DefaultFadeOut)) {
 			child->add_property (X_("default"), X_("yes"));
 		} else {
-			_fade_out.store_state (*child);
+			child->add_child_nocopy (_fade_out.get_state ());
 		}
-
+		
 		child->add_property (X_("active"), _fade_out_disabled ? X_("no") : X_("yes"));
 	}
 	
@@ -621,6 +621,7 @@ AudioRegion::state (bool full)
 		
 		// If there are only two points, the points are in the start of the region and the end of the region
 		// so, if they are both at 1.0f, that means the default region.
+
 		if (_envelope.size() == 2 &&
 		    _envelope.front()->value == 1.0f &&
 		    _envelope.back()->value==1.0f) {
@@ -632,7 +633,7 @@ AudioRegion::state (bool full)
 		if (default_env) {
 			child->add_property ("default", "yes");
 		} else {
-			_envelope.store_state (*child);
+			child->add_child_nocopy (_envelope.get_state ());
 		}
 
 	} else {
@@ -696,7 +697,7 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 			if ((prop = child->property ("default")) != 0) {
 				set_default_envelope ();
 			} else {
-				_envelope.load_state (*child);
+				_envelope.set_state (*child);
 			}
 
 			_envelope.set_max_xval (_length);
@@ -709,7 +710,7 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 			if ((prop = child->property ("default")) != 0 || (prop = child->property ("steepness")) != 0) {
 				set_default_fade_in ();
 			} else {
-				_fade_in.load_state (*child);
+				_fade_in.set_state (*child);
 			}
 
 		} else if (child->name() == "FadeOut") {
@@ -719,7 +720,7 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 			if ((prop = child->property ("default")) != 0 || (prop = child->property ("steepness")) != 0) {
 				set_default_fade_out ();
 			} else {
-				_fade_out.load_state (*child);
+				_fade_out.set_state (*child);
 			}
 		} 
 	}

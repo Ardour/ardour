@@ -109,96 +109,90 @@ Redirect::set_placement (const string& str, void *src)
 }
 
 int
-Redirect::load_automation (string path)
+Redirect::set_automation_state (const XMLNode& node)
 {
-	string fullpath;
+	/* NODE STRUCTURE 
 
-	if (path[0] == '/') { // legacy
-		fullpath = path;
-	} else {
-		fullpath = _session.automation_dir();
-		fullpath += path;
-	}
-	ifstream in (fullpath.c_str());
-
-	if (!in) {
-		warning << string_compose(_("%1: cannot open %2 to load automation data (%3)"), _name, fullpath, strerror (errno)) << endmsg;
-		return 1;
-	}
+	   <Automation [optionally with visible="...." ]>
+             <parameter-N>
+               <events>
+               X1 Y1
+	       X2 Y2
+	       ....
+	       </events>
+             </parameter-N>
+            <Automation>
+ 
+	*/
 
 	Glib::Mutex::Lock lm (_automation_lock);
-	set<uint32_t> tosave;
+
 	parameter_automation.clear ();
 
-	while (in) {
-		double when;
-		double value;
-		uint32_t port;
+	XMLNodeList nlist = node.children();
+	XMLNodeIterator niter;
 
-		in >> port;     if (!in) break;
-		in >> when;  if (!in) goto bad;
-		in >> value; if (!in) goto bad;
-		
-		AutomationList& al = automation_list (port);
-		al.add (when, value);
-		tosave.insert (port);
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		uint32_t param;
+
+		if (sscanf ((*niter)->name().c_str(), "parameter-%" PRIu32, &param) != 1) {
+			error << string_compose (_("%2: badly formatted node name in XML automation state, ignored"), _name) << endmsg;
+			continue;
+		}
+
+		AutomationList& al = automation_list (param);
+		if (al.set_state (*(*niter)->children().front())) {
+			goto bad;
+		}
 	}
-	
+
 	return 0;
 
   bad:
-	error << string_compose(_("%1: cannot load automation data from %2"), _name, fullpath) << endmsg;
+	error << string_compose(_("%1: cannot load automation data from XML"), _name) << endmsg;
 	parameter_automation.clear ();
 	return -1;
 }
 
-int
-Redirect::save_automation (string path)
+XMLNode&
+Redirect::get_automation_state ()
 {
+	/* NODE STRUCTURE 
+
+	   <Automation [optionally with visible="...." ]>
+             <parameter-N>
+               <events>
+               X1 Y1
+	       X2 Y2
+	       ....
+	       </events>
+             </parameter-N>
+            <Automation>
+ 
+	*/
+
 	Glib::Mutex::Lock lm (_automation_lock);
+	XMLNode* node = new XMLNode (X_("Automation"));
 	string fullpath;
 
 	if (parameter_automation.empty()) {
-		return 1;
+		return *node;
 	}
 
-	fullpath = _session.automation_dir();
-	fullpath += path;
-
-	ofstream out (fullpath.c_str());
-
-	if (!out) {
-		error << string_compose(_("%1: cannot open %2 to store automation data (%3)"), _name, fullpath, strerror (errno)) << endmsg;
-		return -1;
-	}
-
-	AutomationList::const_iterator i;
 	map<uint32_t,AutomationList*>::iterator li;
 	
 	for (li = parameter_automation.begin(); li != parameter_automation.end(); ++li) {
-		for (i = (*li).second->begin(); i != (*li).second->end(); ++i) {
-			
-			out << (*li).first << ' ' << (*i)->when << ' ' << (*i)->value << endl;
-			
-			if (!out) {
-				break;
-			}
-		}
+	
+		XMLNode* child;
 		
-		if (i != (*li).second->end()) {
-			unlink (fullpath.c_str());
-			error << string_compose(_("%1: could not save automation state to %2"), _name, fullpath) << endmsg;
-			return -1;
-		}
+		char buf[64];
+		stringstream str;
+		snprintf (buf, sizeof (buf), "parameter-%" PRIu32, li->first);
+		child = new XMLNode (buf);
+		child->add_child_nocopy (li->second->get_state ());
 	}
 
-	if (li != parameter_automation.end()) {
-		unlink (fullpath.c_str());
-		error << string_compose(_("%1: could not save automation state to %2"), _name, fullpath) << endmsg;
-		return -1;
-	}
-
-	return 0;
+	return *node;
 }
 
 XMLNode&
@@ -210,7 +204,6 @@ Redirect::get_state (void)
 XMLNode&
 Redirect::state (bool full_state)
 {
-	char buf[64];
 	XMLNode* node = new XMLNode (state_node_name);
 	stringstream sstr;
 
@@ -224,38 +217,32 @@ Redirect::state (bool full_state)
 	
 	if (full_state) {
 
-		string path;
-		string legal_name;
-		
-		path = _session.snap_name();
-		path += "-redirect-";
-		id().print (buf, sizeof (buf));
-		path += buf;
-		path += ".automation";
-		
-		/* XXX we didn't ask for a state save, we asked for the current state.
-		   FIX ME!
+		/* NODE STRUCTURE 
+		   
+		<Automation [optionally with visible="...." ]>
+		   <parameter-N>
+		     <events>
+                     X1 Y1
+	             X2 Y2
+	             ....
+	             </events>
+                  </parameter-N>
+                <Automation>
+ 
 		*/
+
+		XMLNode& automation = get_automation_state(); 
 		
-		switch (save_automation (path)) {
-		case -1:
-			error << string_compose(_("Could not get state from Redirect (%1).  Problem with save_automation"), _name) << endmsg;
-			break;
-			
-		case 0:
-			XMLNode *aevents = node->add_child("Automation");
-			
-			for (set<uint32_t>::iterator x = visible_parameter_automation.begin(); x != visible_parameter_automation.end(); ++x) {
-				if (x != visible_parameter_automation.begin()) {
-					sstr << ' ';
-				}
-				sstr << *x;
+		for (set<uint32_t>::iterator x = visible_parameter_automation.begin(); x != visible_parameter_automation.end(); ++x) {
+			if (x != visible_parameter_automation.begin()) {
+				sstr << ' ';
 			}
-			
-			aevents->add_property ("path", path);
-			aevents->add_property ("visible", sstr.str());
-			break;
+			sstr << *x;
 		}
+
+		automation.add_property ("visible", sstr.str());
+
+		node->add_child_nocopy (automation);
 	}
 
 	return *node;
@@ -309,9 +296,9 @@ Redirect::set_state (const XMLNode& node)
 			XMLProperty *prop;
 			
 			if ((prop = (*niter)->property ("path")) != 0) {
-				load_automation (prop->value());
+				warning << string_compose (_("old automation data found for %1, ignored"), _name) << endmsg;
 			} else {
-				warning << string_compose(_("%1: Automation node has no path property"), _name) << endmsg;
+				set_automation_state (*(*niter));
 			}
 
 			if ((prop = (*niter)->property ("visible")) != 0) {

@@ -1527,11 +1527,13 @@ IO::state (bool full_state)
 	/* automation */
 
 	if (full_state) {
+		node->add_child_nocopy (get_automation_state ());
 		snprintf (buf, sizeof (buf), "0x%x", (int) _gain_automation_curve.automation_state());
 	} else {
 		/* never store anything except Off for automation state in a template */
 		snprintf (buf, sizeof (buf), "0x%x", ARDOUR::Off); 
 	}
+
 	node->add_property ("automation-state", buf);
 	snprintf (buf, sizeof (buf), "0x%x", (int) _gain_automation_curve.automation_style());
 	node->add_property ("automation-style", buf);
@@ -2362,116 +2364,6 @@ IO::meter ()
 	}
 }
 
-int
-IO::save_automation (const string& path)
-{
-	string fullpath;
-	ofstream out;
-
-	fullpath = _session.automation_dir();
-	fullpath += path;
-
-	out.open (fullpath.c_str());
-
-	if (!out) {
-		error << string_compose(_("%1: could not open automation event file \"%2\""), _name, fullpath) << endmsg;
-		return -1;
-	}
-
-	out << X_("version ") << current_automation_version_number << endl;
-
-	/* XXX use apply_to_points to get thread safety */
-	
-	for (AutomationList::iterator i = _gain_automation_curve.begin(); i != _gain_automation_curve.end(); ++i) {
-		out << "g " << (nframes_t) floor ((*i)->when) << ' ' << (*i)->value << endl;
-	}
-
-	_panner->save ();
-
-	return 0;
-}
-
-int
-IO::load_automation (const string& path)
-{
-	string fullpath;
-	ifstream in;
-	char line[128];
-	uint32_t linecnt = 0;
-	float version;
-	LocaleGuard lg (X_("POSIX"));
-
-	fullpath = _session.automation_dir();
-	fullpath += path;
-
-	in.open (fullpath.c_str());
-
-	if (!in) {
-		fullpath = _session.automation_dir();
-		fullpath += _session.snap_name();
-		fullpath += '-';
-		fullpath += path;
-		in.open (fullpath.c_str());
-		if (!in) {
-			error << string_compose(_("%1: cannot open automation event file \"%2\" (%2)"), _name, fullpath, strerror (errno)) << endmsg;
-			return -1;
-		}
-	}
-
-	clear_automation ();
-
-	while (in.getline (line, sizeof(line), '\n')) {
-		char type;
-		nframes_t when;
-		double value;
-
-		if (++linecnt == 1) {
-			if (memcmp (line, "version", 7) == 0) {
-				if (sscanf (line, "version %f", &version) != 1) {
-					error << string_compose(_("badly formed version number in automation event file \"%1\""), path) << endmsg;
-					return -1;
-				}
-			} else {
-				error << string_compose(_("no version information in automation event file \"%1\""), path) << endmsg;
-				return -1;
-			}
-
-			if (version != current_automation_version_number) {
-				error << string_compose(_("mismatched automation event file version (%1)"), version) << endmsg;
-				return -1;
-			}
-
-			continue;
-		}
-
-		if (sscanf (line, "%c %" PRIu32 " %lf", &type, &when, &value) != 3) {
-			warning << string_compose(_("badly formatted automation event record at line %1 of %2 (ignored)"), linecnt, path) << endmsg;
-			continue;
-		}
-
-		switch (type) {
-		case 'g':
-			_gain_automation_curve.add (when, value, true);
-			break;
-
-		case 's':
-			break;
-
-		case 'm':
-			break;
-
-		case 'p':
-			/* older (pre-1.0) versions of ardour used this */
-			break;
-
-		default:
-			warning << _("dubious automation event found (and ignored)") << endmsg;
-		}
-	}
-
-	return 0;
-}
-	
 void
 IO::clear_automation ()
 {

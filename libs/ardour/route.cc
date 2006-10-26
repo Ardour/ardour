@@ -1396,26 +1396,6 @@ Route::state(bool full_state)
 		cmt->add_content (_comment);
 	}
 
-	if (full_state) {
-		string path;
-
-		path = _session.snap_name();
-		path += "-gain-";
-		path += legalize_for_path (_name);
-		path += ".automation";
-
-		/* XXX we didn't ask for a state save, we asked for the current state.
-		   FIX ME!
-		*/
-
-		if (save_automation (path)) {
-			error << _("Could not get state of route.  Problem with save_automation") << endmsg;
-		}
-
-		aevents = node->add_child ("Automation");
-		aevents->add_property ("path", path);
-	}	
-
 	for (i = _redirects.begin(); i != _redirects.end(); ++i) {
 		node->add_child_nocopy((*i)->state (full_state));
 	}
@@ -1668,7 +1648,9 @@ Route::set_state (const XMLNode& node)
 			for (piter = plist.begin(); piter != plist.end(); ++piter) {
 				prop = *piter;
 				if (prop->name() == "path") {
-					load_automation (prop->value());
+					warning << string_compose (_("old automation data found for %1, ignored"), _name) << endmsg;
+				} else {
+					set_automation_state (*(*piter));
 				}
 			}
 
