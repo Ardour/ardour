@@ -81,6 +81,8 @@ class AudioFileSource : public AudioSource {
 	void   mark_take (string);
 	string take_id() const { return _take_id; }
 
+	bool is_embedded() const { return _is_embedded; }
+
 	static void set_bwf_serial_number (int);
 	
 	static void set_search_path (string);
@@ -123,6 +125,9 @@ class AudioFileSource : public AudioSource {
 	string        _take_id;
 	uint64_t       timeline_position;
 	bool           file_is_new;
+
+	bool          _is_embedded;
+	static bool determine_embeddedness(string path);
 
 	static string peak_dir;
 	static string search_path;

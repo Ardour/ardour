@@ -66,6 +66,7 @@ AudioFileSource::AudioFileSource (Session& s, string idstr, Flag flags)
 	: AudioSource (s, idstr), _flags (flags)
 {
 	/* constructor used for existing external to session files. file must exist already */
+	_is_embedded = AudioFileSource::determine_embeddedness (idstr);
 
 	if (init (idstr, true)) {
 		throw failed_constructor ();
@@ -77,6 +78,7 @@ AudioFileSource::AudioFileSource (Session& s, std::string path, Flag flags, Samp
 	: AudioSource (s, path), _flags (flags)
 {
 	/* constructor used for new internal-to-session files. file cannot exist */
+	_is_embedded = false;
 
 	if (init (path, false)) {
 		throw failed_constructor ();
@@ -103,6 +105,12 @@ AudioFileSource::~AudioFileSource ()
 		unlink (_path.c_str());
 		unlink (peakpath.c_str());
 	}
+}
+
+bool
+AudioFileSource::determine_embeddedness (std::string path)
+{
+	return (path.find("/") == 0);
 }
 
 bool
@@ -277,6 +285,12 @@ AudioFileSource::set_state (const XMLNode& node)
 
 	}
 
+	if ((prop = node.property (X_("name"))) != 0) {
+		_is_embedded = AudioFileSource::determine_embeddedness (prop->value());
+	} else {
+		_is_embedded = false;
+	}
+
 	return 0;
 }
 
@@ -318,6 +332,11 @@ AudioFileSource::mark_take (string id)
 int
 AudioFileSource::move_to_trash (const string trash_dir_name)
 {
+	if (is_embedded()) {
+		cerr << "tried to move an embedded region to trash" << endl;
+		return -1;
+	}
+
 	string newpath;
 
 	if (!writable()) {
@@ -465,7 +484,11 @@ AudioFileSource::find (string pathstr, bool must_exist, bool& isnew)
 		/* external files and/or very very old style sessions include full paths */
 		
 		_path = pathstr;
-		_name = pathstr.substr (pathstr.find_last_of ('/') + 1);
+		if (is_embedded()) {
+			_name = pathstr;
+		} else {
+			_name = pathstr.substr (pathstr.find_last_of ('/') + 1);
+		}
 		
 		if (access (_path.c_str(), R_OK) != 0) {
 

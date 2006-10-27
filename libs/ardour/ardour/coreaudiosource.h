@@ -50,7 +50,7 @@ class CoreAudioSource : public AudioFileSource {
 	mutable nframes_t tmpbufsize;
 	mutable Glib::Mutex _tmpbuf_lock;
 
-	void init (const string &str);
+	void init (string str);
 };
 
 }; /* namespace ARDOUR */

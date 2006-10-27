@@ -164,7 +164,7 @@ SndFileSource::SndFileSource (Session& s, string idstr, SampleFormat sfmt, Heade
 }
 
 void 
-SndFileSource::init (const string& idstr)
+SndFileSource::init (string idstr)
 {
 	string::size_type pos;
 	string file;
@@ -174,12 +174,20 @@ SndFileSource::init (const string& idstr)
 	sf = 0;
 	_broadcast_info = 0;
 
+	string tmp_name;
+
 	if ((pos = idstr.find_last_of (':')) == string::npos) {
 		channel = 0;
-		_name = Glib::path_get_basename (idstr);
+		tmp_name = idstr;
 	} else {
 		channel = atoi (idstr.substr (pos+1).c_str());
-		_name = Glib::path_get_basename (idstr.substr (0, pos));
+		tmp_name = idstr.substr (0, pos);
+	}
+
+	if (is_embedded()) {
+		_name = tmp_name;
+	} else {
+		_name = Glib::path_get_basename (tmp_name);
 	}
 
 	/* although libsndfile says we don't need to set this,

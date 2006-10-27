@@ -43,7 +43,7 @@ CoreAudioSource::CoreAudioSource (Session& s, const string& idstr, Flag flags)
 }
 
 void 
-CoreAudioSource::init (const string& idstr)
+CoreAudioSource::init (string idstr)
 {
 	string::size_type pos;
 

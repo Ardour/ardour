@@ -69,7 +69,7 @@ class SndFileSource : public AudioFileSource {
 	mutable float *interleave_buf;
 	mutable nframes_t interleave_bufsize;
 
-	void init (const string &str);
+	void init (string str);
 	int open();
 	void close();
 	int setup_broadcast_info (nframes_t when, struct tm&, time_t);
