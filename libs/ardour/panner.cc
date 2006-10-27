@@ -511,7 +511,7 @@ EqualPowerStereoPanner::set_state (const XMLNode& node)
 		if ((*iter)->name() == X_("panner")) {
 			_control.set_state (**iter);
 		} else if ((*iter)->name() == X_("Automation")) {
-			_automation.set_state (**iter);
+			_automation.set_state (*((*iter)->children().front()));
 		}
 	}
 	
@@ -1027,10 +1027,6 @@ Panner::state (bool full)
 {
 	XMLNode* root = new XMLNode (X_("Panner"));
 	char buf[32];
-
-	for (iterator p = begin(); p != end(); ++p) {
-		root->add_child_nocopy ((*p)->state (full));
-	}
 
 	root->add_property (X_("linked"), (_linked ? "yes" : "no"));
 	snprintf (buf, sizeof (buf), "%d", _link_direction);

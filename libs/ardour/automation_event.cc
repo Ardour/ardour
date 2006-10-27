@@ -1141,69 +1141,39 @@ AutomationList::get_state ()
 int
 AutomationList::set_state (const XMLNode& node)
 {
-	const XMLNodeList& elist = node.children();
-	XMLNodeConstIterator i;
-	XMLProperty* prop;
+	if (node.name() != X_("events")) {
+		warning << _("automation list: passed XML node not called \"events\" - ignored.") << endmsg;
+		return -1;
+	}
 
 	freeze ();
-
 	clear ();
-	
-	for (i = elist.begin(); i != elist.end(); ++i) {
 
-		if ((*i)->name() == X_("events")) {
-
-			/* new style */
-
-			if (!node.content().empty()) {
-				
-				stringstream str (node.content());
-				
-				double x;
-				double y;
-				bool ok = true;
-				
-				
-				while (str) {
-					str >> x;
-					if (!str) {
-						ok = false;
-						break;
-					}
-					str >> y;
-					if (!str) {
-						ok = false;
-						break;
-					}
-					add (x, y);
-				}
-				
-				if (!ok) {
-					clear ();
-					error << _("automation list: cannot load coordinates from XML, all points ignored") << endmsg;
-				}
+	if (!node.content().empty()) {
+		
+		stringstream str (node.content());
+		
+		double x;
+		double y;
+		bool ok = true;
+		
+		while (str) {
+			str >> x;
+			if (!str) {
+				ok = false;
+				break;
 			}
-
-		} else {
-
-			/* old style */
-
-			nframes_t x;
-			double y;
-
-			if ((prop = (*i)->property ("x")) == 0) {
-				error << _("automation list: no x-coordinate stored for control point (point ignored)") << endmsg;
-				continue;
+			str >> y;
+			if (!str) {
+				ok = false;
+				break;
 			}
-			x = atoi (prop->value().c_str());
-			
-			if ((prop = (*i)->property ("y")) == 0) {
-				error << _("automation list: no y-coordinate stored for control point (point ignored)") << endmsg;
-				continue;
-			}
-			y = atof (prop->value().c_str());
-			
 			add (x, y);
+		}
+		
+		if (!ok) {
+			clear ();
+			error << _("automation list: cannot load coordinates from XML, all points ignored") << endmsg;
 		}
 	}
 

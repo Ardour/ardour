@@ -1589,7 +1589,8 @@ IO::set_state (const XMLNode& node)
 		}
 
 		if ((*iter)->name() == X_("Automation")) {
-			set_automation_state (*(*iter));
+
+			set_automation_state (*(*iter)->children().front());
 		}
 
 		if ((*iter)->name() == X_("gaincontrol")) {
@@ -1649,14 +1650,7 @@ IO::set_state (const XMLNode& node)
 int
 IO::set_automation_state (const XMLNode& node)
 {
-	/* IO has only one automation sub-node, and it should always be the
-	   first one (i.e. derived classes should always call
-	   IO::set_automation_state() if they need the IO's automation
-	   state. Note that Plugin + Insert Redirects do not need this, so they
-	   don't call it at all, though Sends do.
-	*/
-
-	return _gain_automation_curve.set_state (*node.children().front());
+	return _gain_automation_curve.set_state (node);
 }
 
 XMLNode&
