@@ -1335,7 +1335,6 @@ XMLNode&
 Route::state(bool full_state)
 {
 	XMLNode *node = new XMLNode("Route");
-	XMLNode *aevents;
 	RedirectList:: iterator i;
 	char buf[32];
 
@@ -1636,22 +1635,6 @@ Route::set_state (const XMLNode& node)
 			} else {
 				
 				add_redirect_from_xml (*child);
-			}
-
-		} else if (child->name() == "Automation") {
-
-			XMLPropertyList plist;
-			XMLPropertyConstIterator piter;
-			XMLProperty *prop;
-			
-			plist = child->properties();
-			for (piter = plist.begin(); piter != plist.end(); ++piter) {
-				prop = *piter;
-				if (prop->name() == "path") {
-					warning << string_compose (_("old automation data found for %1, ignored"), _name) << endmsg;
-				} else {
-					set_automation_state (*(*piter));
-				}
 			}
 
 		} else if (child->name() == "ControlOuts") {

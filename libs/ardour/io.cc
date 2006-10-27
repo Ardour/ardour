@@ -58,9 +58,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-
-static float current_automation_version_number = 1.0;
-
 const string IO::state_node_name = "IO";
 bool         IO::connecting_legal = false;
 bool         IO::ports_legal = false;
@@ -136,11 +133,12 @@ IO::IO (Session& s, string name,
 		Glib::Mutex::Lock guard (m_meter_signal_lock);
 		m_meter_connection = Meter.connect (mem_fun (*this, &IO::meter));
 	}
+
+	_session.add_controllable (&_gain_control);
 }
 
 IO::~IO ()
 {
-
 	Glib::Mutex::Lock guard (m_meter_signal_lock);
 	
 	Glib::Mutex::Lock lm (io_lock);
@@ -1392,7 +1390,6 @@ int
 IO::panners_became_legal ()
 {
 	_panner->reset (_noutputs, pans_required());
-	_panner->load (); // automation
 	panner_legal_c.disconnect ();
 	return 0;
 }
@@ -1527,7 +1524,11 @@ IO::state (bool full_state)
 	/* automation */
 
 	if (full_state) {
-		node->add_child_nocopy (get_automation_state ());
+
+		XMLNode* autonode = new XMLNode (X_("Automation"));
+		autonode->add_child_nocopy (get_automation_state());
+		node->add_child_nocopy (*autonode);
+
 		snprintf (buf, sizeof (buf), "0x%x", (int) _gain_automation_curve.automation_state());
 	} else {
 		/* never store anything except Off for automation state in a template */
@@ -1538,56 +1539,10 @@ IO::state (bool full_state)
 	snprintf (buf, sizeof (buf), "0x%x", (int) _gain_automation_curve.automation_style());
 	node->add_property ("automation-style", buf);
 
-	/* XXX same for pan etc. */
-
 	return *node;
 }
 
-int
-IO::connecting_became_legal ()
-{
-	int ret;
 
-	if (pending_state_node == 0) {
-		fatal << _("IO::connecting_became_legal() called without a pending state node") << endmsg;
-		/*NOTREACHED*/
-		return -1;
-	}
-
-	connection_legal_c.disconnect ();
-
-	ret = make_connections (*pending_state_node);
-
-	if (ports_legal) {
-		delete pending_state_node;
-		pending_state_node = 0;
-	}
-
-	return ret;
-}
-
-int
-IO::ports_became_legal ()
-{
-	int ret;
-
-	if (pending_state_node == 0) {
-		fatal << _("IO::ports_became_legal() called without a pending state node") << endmsg;
-		/*NOTREACHED*/
-		return -1;
-	}
-
-	port_legal_c.disconnect ();
-
-	ret = create_ports (*pending_state_node);
-
-	if (connecting_legal) {
-		delete pending_state_node;
-		pending_state_node = 0;
-	}
-
-	return ret;
-}
 
 int
 IO::set_state (const XMLNode& node)
@@ -1607,7 +1562,7 @@ IO::set_state (const XMLNode& node)
 
 	if ((prop = node.property ("name")) != 0) {
 		_name = prop->value();
-		_panner->set_name (_name);
+		/* used to set panner name with this, but no more */
 	} 
 
 	if ((prop = node.property ("id")) != 0) {
@@ -1633,9 +1588,12 @@ IO::set_state (const XMLNode& node)
 			_panner->set_state (**iter);
 		}
 
+		if ((*iter)->name() == X_("Automation")) {
+			set_automation_state (*(*iter));
+		}
+
 		if ((*iter)->name() == X_("gaincontrol")) {
 			_gain_control.set_state (**iter);
-			_session.add_controllable (&_gain_control);
 		}
 	}
 
@@ -1686,6 +1644,70 @@ IO::set_state (const XMLNode& node)
 	}
 
 	return 0;
+}
+
+int
+IO::set_automation_state (const XMLNode& node)
+{
+	/* IO has only one automation sub-node, and it should always be the
+	   first one (i.e. derived classes should always call
+	   IO::set_automation_state() if they need the IO's automation
+	   state. Note that Plugin + Insert Redirects do not need this, so they
+	   don't call it at all, though Sends do.
+	*/
+
+	return _gain_automation_curve.set_state (*node.children().front());
+}
+
+XMLNode&
+IO::get_automation_state ()
+{
+	return (_gain_automation_curve.get_state ());
+}
+
+int
+IO::connecting_became_legal ()
+{
+	int ret;
+
+	if (pending_state_node == 0) {
+		fatal << _("IO::connecting_became_legal() called without a pending state node") << endmsg;
+		/*NOTREACHED*/
+		return -1;
+	}
+
+	connection_legal_c.disconnect ();
+
+	ret = make_connections (*pending_state_node);
+
+	if (ports_legal) {
+		delete pending_state_node;
+		pending_state_node = 0;
+	}
+
+	return ret;
+}
+int
+IO::ports_became_legal ()
+{
+	int ret;
+
+	if (pending_state_node == 0) {
+		fatal << _("IO::ports_became_legal() called without a pending state node") << endmsg;
+		/*NOTREACHED*/
+		return -1;
+	}
+
+	port_legal_c.disconnect ();
+
+	ret = create_ports (*pending_state_node);
+
+	if (connecting_legal) {
+		delete pending_state_node;
+		pending_state_node = 0;
+	}
+
+	return ret;
 }
 
 int

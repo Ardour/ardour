@@ -76,7 +76,7 @@ XMLNode&
 Send::state(bool full)
 {
 	XMLNode *node = new XMLNode("Send");
-	node->add_child_nocopy (Redirect::state(full));
+	node->add_child_nocopy (Redirect::state (full));
 	return *node;
 }
 
@@ -85,11 +85,15 @@ Send::set_state(const XMLNode& node)
 {
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
-	
+
+	/* Send has regular IO automation (gain, pan) */
+
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() == Redirect::state_node_name) {
 			Redirect::set_state (**niter);
 			break;
+		} else if ((*niter)->name() == X_("Automation")) {
+			IO::set_automation_state (*(*niter));
 		}
 	}
 

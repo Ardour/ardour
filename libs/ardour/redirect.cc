@@ -248,27 +248,6 @@ Redirect::state (bool full_state)
 	return *node;
 }
 
-void
-Redirect::what_has_automation (set<uint32_t>& s) const
-{
-	Glib::Mutex::Lock lm (_automation_lock);
-	map<uint32_t,AutomationList*>::const_iterator li;
-	
-	for (li = parameter_automation.begin(); li != parameter_automation.end(); ++li) {
-		s.insert  ((*li).first);
-	}
-}
-
-void
-Redirect::what_has_visible_automation (set<uint32_t>& s) const
-{
-	Glib::Mutex::Lock lm (_automation_lock);
-	set<uint32_t>::const_iterator li;
-	
-	for (li = visible_parameter_automation.begin(); li != visible_parameter_automation.end(); ++li) {
-		s.insert  (*li);
-	}
-}
 
 int
 Redirect::set_state (const XMLNode& node)
@@ -291,7 +270,7 @@ Redirect::set_state (const XMLNode& node)
 			IO::set_state (**niter);
 			have_io = true;
 
-		} else if ((*niter)->name() == "Automation") {
+		} else if ((*niter)->name() == X_("Automation")) {
 
 			XMLProperty *prop;
 			
@@ -347,6 +326,27 @@ Redirect::set_state (const XMLNode& node)
 	return 0;
 }
 
+void
+Redirect::what_has_automation (set<uint32_t>& s) const
+{
+	Glib::Mutex::Lock lm (_automation_lock);
+	map<uint32_t,AutomationList*>::const_iterator li;
+	
+	for (li = parameter_automation.begin(); li != parameter_automation.end(); ++li) {
+		s.insert  ((*li).first);
+	}
+}
+
+void
+Redirect::what_has_visible_automation (set<uint32_t>& s) const
+{
+	Glib::Mutex::Lock lm (_automation_lock);
+	set<uint32_t>::const_iterator li;
+	
+	for (li = visible_parameter_automation.begin(); li != visible_parameter_automation.end(); ++li) {
+		s.insert  (*li);
+	}
+}
 AutomationList&
 Redirect::automation_list (uint32_t parameter)
 {

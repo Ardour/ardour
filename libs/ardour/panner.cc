@@ -71,6 +71,8 @@ StreamPanner::StreamPanner (Panner& p)
 {
 	_muted = false;
 
+	parent.session().add_controllable (&_control);
+
 	x = 0.5;
 	y = 0.5;
 	z = 0.5;
@@ -227,62 +229,6 @@ BaseStereoPanner::set_automation_state (AutoState state)
 			set_position (_automation.eval (parent.session().transport_frame()));
 		}
 	}
-}
-
-int
-BaseStereoPanner::save (ostream& out) const
-{
-	LocaleGuard lg (X_("POSIX"));
-
-	/* force a single format for numeric data to ease session interchange
-	   across national boundaries.
-	*/
-
-	out << "begin" << endl;
-
-	for (AutomationList::const_iterator i = _automation.const_begin(); i != _automation.const_end(); ++i) {
-		out << '\t' << (nframes_t) floor ((*i)->when) << ' ' << (*i)->value << endl;
-		if (!out) {
-			error << string_compose (_("error writing pan automation file (%s)"), strerror (errno)) << endmsg;
-			return -1;
-		}
-	}
-	out << "end" << endl;
-
-	return 0;
-}
-				
-int
-BaseStereoPanner::load (istream& in, string path, uint32_t& linecnt)
-{
-	char line[128];
-	LocaleGuard lg (X_("POSIX"));
-	
-	_automation.clear ();
-
-	while (in.getline (line, sizeof (line), '\n')) {
-		nframes_t when;
-		double value;
-
-		++linecnt;
-
-		if (strcmp (line, "end") == 0) {
-			break;
-		}
-
-		if (sscanf (line, "%" PRIu32 " %lf", &when, &value) != 2) {
-			warning << string_compose(_("badly formatted pan automation event record at line %1 of %2 (ignored) [%3]"), linecnt, path, line) << endmsg;
-			continue;
-		}
-
-		_automation.add (when, value, true);
-	}
-
-	/* now that we are done loading */
-
-	_automation.StateChanged (Change (0));
-
-	return 0;
 }
 
 void
@@ -526,12 +472,16 @@ EqualPowerStereoPanner::state (bool full_state)
 	snprintf (buf, sizeof (buf), "%.12g", x); 
 	root->add_property (X_("x"), buf);
 	root->add_property (X_("type"), EqualPowerStereoPanner::name);
+
 	if (full_state) {
-		snprintf (buf, sizeof (buf), "0x%x", _automation.automation_state()); 
+		XMLNode* autonode = new XMLNode (X_("Automation"));
+		autonode->add_child_nocopy (_automation.get_state ());
+		root->add_child_nocopy (*autonode);
 	} else {
 		/* never store automation states other than off in a template */
 		snprintf (buf, sizeof (buf), "0x%x", ARDOUR::Off); 
 	}
+
 	root->add_property (X_("automation-state"), buf);
 	snprintf (buf, sizeof (buf), "0x%x", _automation.automation_style()); 
 	root->add_property (X_("automation-style"), buf);
@@ -555,6 +505,16 @@ EqualPowerStereoPanner::set_state (const XMLNode& node)
 		set_position (pos, true);
 	} 
 
+	StreamPanner::set_state (node);
+
+	for (XMLNodeConstIterator iter = node.children().begin(); iter != node.children().end(); ++iter) {
+		if ((*iter)->name() == X_("panner")) {
+			_control.set_state (**iter);
+		} else if ((*iter)->name() == X_("Automation")) {
+			_automation.set_state (**iter);
+		}
+	}
+	
 	if ((prop = node.property (X_("automation-state")))) {
 		sscanf (prop->value().c_str(), "0x%x", &x);
 		_automation.set_automation_state ((AutoState) x);
@@ -569,15 +529,6 @@ EqualPowerStereoPanner::set_state (const XMLNode& node)
 		_automation.set_automation_style ((AutoStyle) x);
 	}
 
-	StreamPanner::set_state (node);
-
-	for (XMLNodeConstIterator iter = node.children().begin(); iter != node.children().end(); ++iter) {
-		if ((*iter)->name() == X_("panner")) {
-			_control.set_state (**iter);
-			parent.session().add_controllable (&_control);
-		}
-	}
-	
 	return 0;
 }
 
@@ -740,18 +691,6 @@ Multi2dPanner::factory (Panner& p)
 	return new Multi2dPanner (p);
 }
 
-int
-Multi2dPanner::load (istream& in, string path, uint32_t& linecnt)
-{
-	return 0;
-}
-
-int
-Multi2dPanner::save (ostream& out) const
-{
-	return 0;
-}
-
 XMLNode&
 Multi2dPanner::get_state (void)
 {
@@ -770,6 +709,8 @@ Multi2dPanner::state (bool full_state)
 	snprintf (buf, sizeof (buf), "%.12g", y); 
 	root->add_property (X_("y"), buf);
 	root->add_property (X_("type"), Multi2dPanner::name);
+
+	/* XXX no meaningful automation yet */
 
 	return *root;
 }
@@ -807,7 +748,6 @@ Multi2dPanner::set_state (const XMLNode& node)
 Panner::Panner (string name, Session& s)
 	: _session (s)
 {
-	set_name (name);
 	_linked = false;
 	_link_direction = SameDirection;
 	_bypassed = false;
@@ -838,17 +778,6 @@ Panner::set_link_direction (LinkDirection ld)
 }
 
 void
-Panner::set_name (string str)
-{
-	automation_path = _session.automation_dir();
-	automation_path += _session.snap_name();
-	automation_path += "-pan-";
-	automation_path += legalize_for_path (str);
-	automation_path += ".automation";
-}
-
-
-void
 Panner::set_bypassed (bool yn)
 {
 	if (yn != _bypassed) {
@@ -863,7 +792,6 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 {
 	uint32_t n;
 	bool changed = false;
-
 
 	if (nouts < 2 || (nouts == outputs.size() && npans == size())) {
 		return;
@@ -1076,102 +1004,6 @@ Panner::clear_automation ()
 	_session.set_dirty ();
 }	
 
-int
-Panner::save () const
-{
-	ofstream out (automation_path.c_str());
-	
-	if (!out) {
-		error << string_compose (_("cannot open pan automation file \"%1\" for saving (%2)"), automation_path, strerror (errno))
-		      << endmsg;
-		return -1;
-	}
-
-	out << X_("version ") << current_automation_version_number << endl;
-
-	for (vector<StreamPanner*>::const_iterator i = begin(); i != end(); ++i) {
-		if ((*i)->save (out)) {
-			return -1;
-		}
-	}
-
-	return 0;
-}
-
-int
-Panner::load ()
-{
-	char line[128];
-	uint32_t linecnt = 0;
-	float version;
-	iterator sp;
-	LocaleGuard lg (X_("POSIX"));
-
-	if (automation_path.length() == 0) {
-		return 0;
-	}
-	
-	if (access (automation_path.c_str(), F_OK)) {
-		return 0;
-	}
-
-	ifstream in (automation_path.c_str());
-
-	if (!in) {
-		error << string_compose (_("cannot open pan automation file %1 (%2)"),
-				  automation_path, strerror (errno))
-		      << endmsg;
-		return -1;
-	}
-
-	sp = begin();
-
-	while (in.getline (line, sizeof(line), '\n')) {
-
-		if (++linecnt == 1) {
-			if (memcmp (line, X_("version"), 7) == 0) {
-				if (sscanf (line, "version %f", &version) != 1) {
-					error << string_compose(_("badly formed version number in pan automation event file \"%1\""), automation_path) << endmsg;
-					return -1;
-				}
-			} else {
-				error << string_compose(_("no version information in pan automation event file \"%1\" (first line = %2)"), 
-						 automation_path, line) << endmsg;
-				return -1;
-			}
-
-			if (version != current_automation_version_number) {
-				error << string_compose(_("mismatched pan automation event file version (%1)"), version) << endmsg;
-				return -1;
-			}
-
-			continue;
-		}
-
-		if (strlen (line) == 0 || line[0] == '#') {
-			continue;
-		}
-
-		if (strcmp (line, "begin") == 0) {
-			
-			if (sp == end()) {
-				error << string_compose (_("too many panner states found in pan automation file %1"),
-						  automation_path)
-				      << endmsg;
-				return -1;
-			}
-
-			if ((*sp)->load (in, automation_path, linecnt)) {
-				return -1;
-			}
-			
-			++sp;
-		}
-	}
-
-	return 0;
-}
-
 struct PanPlugins {
     string name;
     uint32_t nouts;
@@ -1216,10 +1048,8 @@ Panner::state (bool full)
 		root->add_child_nocopy (*onode);
 	}
 
-	if (full) {
-		if (save () == 0) {
-			root->add_property (X_("automation"), Glib::path_get_basename (automation_path));
-		}
+	for (vector<StreamPanner*>::const_iterator i = begin(); i != end(); ++i) {
+		root->add_child_nocopy ((*i)->state (full));
 	}
 
 	return *root;
@@ -1309,16 +1139,6 @@ Panner::set_state (const XMLNode& node)
 
 		} 	
 	}
-
-	/* don't try to load automation if it wasn't marked as existing */
-
-	if ((prop = node.property (X_("automation")))) {
-
-		/* automation path is relative */
-		
-		automation_path = _session.automation_dir();
-		automation_path += prop->value ();
-	} 
 
 	return 0;
 }

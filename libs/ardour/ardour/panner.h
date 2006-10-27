@@ -83,16 +83,12 @@ class StreamPanner : public sigc::trackable, public Stateful
 
 	virtual Curve& automation() = 0;
 
-	virtual int load (istream&, string path, uint32_t&) = 0;
-
-	virtual int save (ostream&) const = 0;
-
 	sigc::signal<void> Changed;      /* for position */
 	sigc::signal<void> StateChanged; /* for mute */
 
 	int set_state (const XMLNode&);
 	virtual XMLNode& state (bool full_state) = 0;
-
+	
 	Panner & get_parent() { return parent; }
 	
   protected:
@@ -143,8 +139,6 @@ class BaseStereoPanner : public StreamPanner
 
 	void distribute (Sample* src, Sample** obufs, gain_t gain_coeff, nframes_t nframes);
 
-	int load (istream&, string path, uint32_t&);
-	int save (ostream&) const;
 	void snapshot (nframes_t now);
 	void transport_stopped (nframes_t frame);
 	void set_automation_state (AutoState);
@@ -205,10 +199,7 @@ class Multi2dPanner : public StreamPanner
 
 	void distribute (Sample* src, Sample** obufs, gain_t gain_coeff, nframes_t nframes);
 	void distribute_automated (Sample* src, Sample** obufs, 
-			     nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
-
-	int load (istream&, string path, uint32_t&);
-	int save (ostream&) const;
+				   nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
 
 	static StreamPanner* factory (Panner&);
 	static string name;
@@ -239,8 +230,6 @@ class Panner : public std::vector<StreamPanner*>, public Stateful, public sigc::
 	Panner (string name, Session&);
 	virtual ~Panner ();
 
-	void set_name (string);
-
 	bool bypassed() const { return _bypassed; }
 	void set_bypassed (bool yn);
 
@@ -259,9 +248,6 @@ class Panner : public std::vector<StreamPanner*>, public Stateful, public sigc::
 	void set_automation_style (AutoStyle);
 	AutoStyle automation_style() const;
 	bool touching() const;
-
-	int load ();
-	int save () const;
 
 	XMLNode& get_state (void);
 	XMLNode& state (bool full);
@@ -302,7 +288,6 @@ class Panner : public std::vector<StreamPanner*>, public Stateful, public sigc::
 	
   private:
 
-	string            automation_path;
 	Session&         _session;
 	uint32_t     current_outs;
 	bool             _linked;

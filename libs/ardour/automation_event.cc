@@ -1122,6 +1122,10 @@ AutomationList::get_state ()
 	XMLNode* node = new XMLNode (X_("events"));
 	iterator xx;
 
+	if (events.empty()) {
+		return *node;
+	}
+
 	for (xx = events.begin(); xx != events.end(); ++xx) {
 		str << (double) (*xx)->when;
 		str << ' ';
@@ -1151,35 +1155,39 @@ AutomationList::set_state (const XMLNode& node)
 
 			/* new style */
 
-			stringstream str (node.content());
-
-			double x;
-			double y;
-			bool ok = true;
-
-			while (str) {
-				str >> x;
-				if (!str) {
-					ok = false;
-					break;
+			if (!node.content().empty()) {
+				
+				stringstream str (node.content());
+				
+				double x;
+				double y;
+				bool ok = true;
+				
+				
+				while (str) {
+					str >> x;
+					if (!str) {
+						ok = false;
+						break;
+					}
+					str >> y;
+					if (!str) {
+						ok = false;
+						break;
+					}
+					add (x, y);
 				}
-				str >> y;
-				if (!str) {
-					ok = false;
-					break;
+				
+				if (!ok) {
+					clear ();
+					error << _("automation list: cannot load coordinates from XML, all points ignored") << endmsg;
 				}
-				add (x, y);
-			}
-
-			if (!ok) {
-				clear ();
-				error << _("automation list: cannot load coordinates from XML, all points ignored") << endmsg;
 			}
 
 		} else {
 
 			/* old style */
-		
+
 			nframes_t x;
 			double y;
 
