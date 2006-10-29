@@ -244,11 +244,6 @@ class Editor : public PublicEditor
 	void export_session();
 	void export_selection();
 
-	/* this is what actually does it */
-	
-	void export_audiofile (ARDOUR::AudioExportSpecification&);
-
-	/* */
 
 	void add_toplevel_controls (Gtk::Container&);
 
@@ -355,10 +350,8 @@ class Editor : public PublicEditor
 	PlaylistSelector* _playlist_selector;
 
 	void          set_frames_per_unit (double);
-	void          frames_per_unit_modified ();
 
 	Editing::MouseMode mouse_mode;
-	void      mouse_insert (GdkEventButton *);
 
 	int  pre_maximal_pane_position;
 	void pane_allocation_handler (Gtk::Allocation&, Gtk::Paned*);
@@ -494,9 +487,6 @@ class Editor : public PublicEditor
 	void hide_verbose_canvas_cursor();
 
 	bool verbose_cursor_on; // so far unused
-
-	void flush_track_canvas ();
-	void flush_time_canvas ();
 
 	Gtk::EventBox      time_canvas_event_box;
 	Gtk::EventBox      track_canvas_event_box;
@@ -668,9 +658,6 @@ class Editor : public PublicEditor
 	Gtk::Menu *edit_controls_left_menu;
 	Gtk::Menu *edit_controls_right_menu;
 
-	void track_canvas_scroller_realized ();
-	void time_canvas_scroller_realized ();
-
 	Gtk::VBox           track_canvas_vbox;
 	Gtk::VBox           time_canvas_vbox;
 	Gtk::VBox           edit_controls_vbox;
@@ -807,9 +794,6 @@ class Editor : public PublicEditor
 	
 	void update_current_screen ();
 	
-	gint show_track_context_menu (GdkEventButton *);
-	void hide_track_context_menu ();
-
 	void session_going_away ();
 
 	nframes_t cut_buffer_start;
@@ -865,7 +849,6 @@ class Editor : public PublicEditor
 	void align_selection_relative (ARDOUR::RegionPoint point, nframes_t position);
 	void align_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, nframes_t position);
 	void align_region_internal (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, nframes_t position);
-	void remove_some_regions ();
 	void remove_clicked_region ();
 	void destroy_clicked_region ();
 	void edit_region ();
@@ -898,7 +881,6 @@ class Editor : public PublicEditor
 	void keyboard_paste ();
 	void keyboard_duplicate_region ();
 	void keyboard_duplicate_selection ();
-	void keyboard_nudge ();
 	void keyboard_insert_region_list_selection ();
 
 	void region_from_selection ();
@@ -909,10 +891,8 @@ class Editor : public PublicEditor
 	void rename_region_finished (bool);
 
 	void play_from_start ();
-	void play_from_edit_cursor ();
 	void play_selected_region ();
 	void audition_selected_region ();
-	void toggle_loop_playback ();
 	void loop_selected_region ();
 	void play_location (ARDOUR::Location&);
 	void loop_location (ARDOUR::Location&);
@@ -1030,10 +1010,6 @@ class Editor : public PublicEditor
 	Editing::SnapMode snap_mode;
 	double snap_threshold;
 
-	void soundfile_chosen_for_insert (const string & selection, bool split_channels);
-	void soundfile_chosen_for_embed (const string & selection, bool split_channels);
-	void soundfile_chosen_for_import (const string & selection, bool split_channels);
-
 	void handle_gui_changes (const string &, void *);
 
 	void    hide_all_tracks (bool with_select);
@@ -1058,7 +1034,6 @@ class Editor : public PublicEditor
 	std::set<ARDOUR::Playlist*> motion_frozen_playlists;
 	void region_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void region_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
-	void region_copy_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 
 	void cursor_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void cursor_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
@@ -1146,11 +1121,7 @@ class Editor : public PublicEditor
 	bool track_canvas_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool track_canvas_scroll (GdkEventScroll* event);
 
-	bool track_canvas_button_press_event (GdkEventButton *);
-	bool track_canvas_button_release_event (GdkEventButton *);
-	
 	void track_canvas_allocate (Gtk::Allocation alloc);
-	void time_canvas_allocate (Gtk::Allocation alloc);
 
 	void set_edit_cursor (GdkEvent* event);
 	void set_playhead_cursor (GdkEvent* event);
@@ -1176,7 +1147,6 @@ class Editor : public PublicEditor
 	void handle_new_duration ();
 	void initialize_canvas ();
 	void reset_scrolling_region (Gtk::Allocation* alloc = 0);
-	void scroll_canvas ();
 
 	/* display control */
 	
@@ -1312,7 +1282,6 @@ class Editor : public PublicEditor
 
 	Gtk::HBox           zoom_box;
 
-	void                update_zoom_indicator ();
 	void                zoom_adjustment_changed();
 
 	void                edit_cursor_clock_changed();
@@ -1333,8 +1302,6 @@ class Editor : public PublicEditor
 	void track_selection_changed ();
 	void region_selection_changed ();
 	void point_selection_changed ();
-	void audio_track_selection_changed ();
-	void line_selection_changed ();
 
 	enum SelectionOp {
 		CreateSelection,
@@ -1423,7 +1390,6 @@ class Editor : public PublicEditor
 	Glib::RefPtr<Gtk::ListStore>     route_display_model;
 	Glib::RefPtr<Gtk::TreeSelection> route_display_selection;
 
-	gint route_list_compare_func (Gtk::TreeModel::iterator, Gtk::TreeModel::iterator);
 	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Route> > route_list_display; 
 	Gtk::ScrolledWindow                   route_list_scroller;
 	Gtk::Menu*                            route_list_menu;
@@ -1438,7 +1404,6 @@ class Editor : public PublicEditor
 	void route_list_reordered (const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter, int* what);
 	bool ignore_route_list_reorder;
 	bool no_route_list_redisplay;
-	void queue_route_list_reordered ();
 
 	void build_route_list_menu ();
 	void show_route_list_menu ();
@@ -1486,9 +1451,6 @@ class Editor : public PublicEditor
 	void new_edit_group ();
 	void edit_group_list_button_clicked ();
 	gint edit_group_list_button_press_event (GdkEventButton* ev);
-	void edit_group_selection_changed ();
-	void fake_add_edit_group (ARDOUR::RouteGroup* group);
-	void fake_remove_edit_group (ARDOUR::RouteGroup* group);
 	void add_edit_group (ARDOUR::RouteGroup* group);
 	void remove_selected_edit_group ();
 	void edit_groups_changed ();
@@ -1604,8 +1566,6 @@ class Editor : public PublicEditor
 	UndoHistory visual_history;
 	UndoTransaction current_visual_command;
 
-	void begin_reversible_visual_command (const string & cmd_name);
-	void commit_reversible_visual_command ();
 
 	void update_title ();	
 	void update_title_s (const string & snapshot_name);
@@ -1750,7 +1710,6 @@ class Editor : public PublicEditor
 	void toggle_xfade_active (ARDOUR::Crossfade*);
 	void toggle_xfade_length (ARDOUR::Crossfade*);
 	void edit_xfade (ARDOUR::Crossfade*);
-	void remove_xfade ();
 	void xfade_edit_left_region ();
 	void xfade_edit_right_region ();
 

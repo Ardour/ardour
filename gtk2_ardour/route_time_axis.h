@@ -134,14 +134,6 @@ protected:
 	
 	gint edit_click  (GdkEventButton *);
 
-	void build_redirect_window ();
-	void redirect_click ();
-	void redirect_add ();
-	void redirect_remove ();
-	void redirect_edit ();
-	void redirect_relist ();
-	void redirect_row_selected (gint row, gint col, GdkEvent *ev);
-	void add_to_redirect_display (ARDOUR::Redirect *);
 	void redirects_changed (void *);
 	
 	void add_redirect_to_subplugin_menu (boost::shared_ptr<ARDOUR::Redirect>);
@@ -164,13 +156,9 @@ protected:
 	
 	void reset_redirect_automation_curves ();
 
-	void update_automation_view (ARDOUR::AutomationType);
-	
 	void take_name_changed (void *);
 	void route_name_changed (void *);
 	void name_entry_changed ();
-
-	void on_area_realize ();
 
 	virtual void label_view ();
 	
@@ -195,7 +183,6 @@ protected:
 	void         playlist_state_changed (ARDOUR::Change);
 	void         playlist_modified ();
 
-	void add_playlist_to_playlist_menu (ARDOUR::Playlist*);
 	void rename_current_playlist ();
 	
 	void         automation_click ();
@@ -207,7 +194,6 @@ protected:
 
 	void visual_click ();
 	void hide_click ();
-	gint when_displayed (GdkEventAny*);
 
 	void speed_changed ();
 	
