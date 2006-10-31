@@ -538,11 +538,11 @@ ARDOUR_UI::update_buffer_load ()
 }
 
 void
-ARDOUR_UI::count_recenabled_diskstreams (Route& route)
+ARDOUR_UI::count_recenabled_streams (Route& route)
 {
 	Track* track = dynamic_cast<Track*>(&route);
 	if (track && track->diskstream()->record_enabled()) {
-		rec_enabled_diskstreams++;
+		rec_enabled_streams += track->n_inputs();
 	}
 }
 
@@ -564,11 +564,11 @@ ARDOUR_UI::update_disk_space()
 		int secs;
 		nframes_t fr = session->frame_rate();
 		
-		rec_enabled_diskstreams = 0;
-		session->foreach_route (this, &ARDOUR_UI::count_recenabled_diskstreams);
+		rec_enabled_streams = 0;
+		session->foreach_route (this, &ARDOUR_UI::count_recenabled_streams);
 		
-		if (rec_enabled_diskstreams) {
-			frames /= rec_enabled_diskstreams;
+		if (rec_enabled_streams) {
+			frames /= rec_enabled_streams;
 		}
 		
 		hrs  = frames / (fr * 3600);
