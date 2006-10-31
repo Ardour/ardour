@@ -508,7 +508,9 @@ nframes_t
 SndFileSource::write_float (Sample* data, nframes_t frame_pos, nframes_t cnt)
 {
 	if (sf_seek (sf, frame_pos, SEEK_SET|SFM_WRITE) != frame_pos) {
-		error << string_compose (_("%1: cannot seek to %2"), _path, frame_pos) << endmsg;
+		char errbuf[256];
+		sf_error_str (0, errbuf, sizeof (errbuf) - 1);
+		error << string_compose (_("%1: cannot seek to %2 (libsndfile error: %3"), _path, frame_pos, errbuf) << endmsg;
 		return 0;
 	}
 	

@@ -694,15 +694,13 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 			
 			_envelope.clear ();
 
-			if ((prop = child->property ("default")) != 0) {
+			if ((prop = child->property ("default")) != 0 || _envelope.set_state (*child)) {
 				set_default_envelope ();
-			} else {
-				_envelope.set_state (*child);
 			}
 
 			_envelope.set_max_xval (_length);
 			_envelope.truncate_end (_length);
-			
+
 		} else if (child->name() == "FadeIn") {
 			
 			_fade_in.clear ();

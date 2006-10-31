@@ -610,10 +610,6 @@ AutomationList::truncate_end (double last_coordinate)
 		double last_val;
 
 		if (events.empty()) {
-			fatal << _("programming error:")
-			      << "AutomationList::truncate_end() called on an empty list"
-			      << endmsg;
-			/*NOTREACHED*/
 			return;
 		}
 
@@ -1258,6 +1254,38 @@ AutomationList::set_state (const XMLNode& node)
 		return deserialize_events (node);
 	}
 	
+	if (node.name() == X_("Envelope")) {
+
+		/* old school */
+
+		const XMLNodeList& elist = node.children();
+		XMLNodeConstIterator i;
+		XMLProperty* prop;
+		jack_nframes_t x;
+		double y;
+		
+		clear ();
+		
+		for (i = elist.begin(); i != elist.end(); ++i) {
+			
+			if ((prop = (*i)->property ("x")) == 0) {
+				error << _("automation list: no x-coordinate stored for control point (point ignored)") << endmsg;
+				continue;
+			}
+			x = atoi (prop->value().c_str());
+			
+			if ((prop = (*i)->property ("y")) == 0) {
+				error << _("automation list: no y-coordinate stored for control point (point ignored)") << endmsg;
+				continue;
+			}
+			y = atof (prop->value().c_str());
+			
+			add (x, y);
+		}
+		
+		return 0;
+	}
+
 	if (node.name() != X_("AutomationList") ) {
 		error << string_compose (_("AutomationList: passed XML node called %1, not \"AutomationList\" - ignored"), node.name()) << endmsg;
 		return -1;
