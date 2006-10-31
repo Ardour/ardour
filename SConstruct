@@ -552,7 +552,7 @@ if env['SYSLIBS']:
 # cannot use system one for the time being
 #
     
-    libraries['sndfile'] = LibraryInfo(LIBS='libsndfile',
+    libraries['sndfile-ardour'] = LibraryInfo(LIBS='libsndfile-ardour',
                                     LIBPATH='#libs/libsndfile',
                                     CPPPATH=['#libs/libsndfile', '#libs/libsndfile/src'])
 
@@ -619,7 +619,7 @@ else:
     libraries['soundtouch'] = LibraryInfo(LIBS='soundtouch',
                                           LIBPATH='#libs/soundtouch',
                                           CPPPATH=['#libs', '#libs/soundtouch'])
-    libraries['sndfile'] = LibraryInfo(LIBS='libsndfile',
+    libraries['sndfile-ardour'] = LibraryInfo(LIBS='libsndfile-ardour',
                                     LIBPATH='#libs/libsndfile',
                                     CPPPATH=['#libs/libsndfile', '#libs/libsndfile/src'])
 #    libraries['libglademm'] = LibraryInfo(LIBS='libglademm',

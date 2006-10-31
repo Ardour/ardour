@@ -227,7 +227,7 @@ ardour = conf.Finish ()
 ardour.Merge ([
 	     libraries['core'],
 	     libraries['xml'],
-	     libraries['sndfile'],
+	     libraries['sndfile-ardour'],
 	     libraries['raptor'],
 	     libraries['lrdf'],
 	     libraries['samplerate'],

@@ -35,7 +35,7 @@ ardour_vst.Merge ([
     libraries['libgnomecanvas2'],
     libraries['libgnomecanvasmm'],
     libraries['sysmidi'],
-    libraries['sndfile'],
+    libraries['sndfile-ardour'],
     libraries['flac'],
     libraries['lrdf'],
     libraries['glibmm2'],
