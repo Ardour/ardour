@@ -146,8 +146,6 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	void show_selection();
 	void hide_selection ();
 
-	void set_point_size (double size);
-
 	virtual string  get_verbose_cursor_string (float);
 	virtual void view_to_model_y (double&) = 0;
 	virtual void model_to_view_y (double&) = 0;
@@ -218,6 +216,8 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	void modify_view_point(ControlPoint&, double, double, bool with_push);
 	void reset_line_coords (ControlPoint&);
 	void update_line ();
+
+	uint32_t control_point_box_size ();
 
 	struct ModelRepresentation {
 	    ARDOUR::AutomationList::iterator start;

@@ -271,14 +271,6 @@ AutomationLine::queue_reset ()
 }
 
 void
-AutomationLine::set_point_size (double sz)
-{
-	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		(*i)->set_size (sz);
-	}
-}	
-
-void
 AutomationLine::show () 
 {
 	line->show();
@@ -302,18 +294,27 @@ AutomationLine::hide ()
 	_visible = false;
 }
 
+uint32_t
+AutomationLine::control_point_box_size ()
+{
+	if (_height > TimeAxisView::hLarger) {
+		return 8.0;
+	} else if (_height > (guint32) TimeAxisView::hNormal) {
+		return 6.0;
+	} 
+	return 4.0;
+}
+
 void
 AutomationLine::set_height (guint32 h)
 {
 	if (h != _height) {
 		_height = h;
 
-		if (_height > (guint32) TimeAxisView::Larger) {
-			set_point_size (8.0);
-		} else if (_height > (guint32) TimeAxisView::Normal) {
-			set_point_size (6.0);
-		} else {
-			set_point_size (4.0);
+		uint32_t bsz = control_point_box_size();
+
+		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
+			(*i)->set_size (bsz);
 		}
 
 		reset ();
@@ -700,13 +701,8 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 		slope[n] = ydelta/xdelta;
 	}
 
-	if (_height > (guint32) TimeAxisView::Larger) {
-		box_size = 8.0;
-	} else if (_height > (guint32) TimeAxisView::Normal) {
-		box_size = 6.0;
-	} else {
-		box_size = 4.0;
-			}
+	box_size = control_point_box_size ();
+
 	/* read all points and decide which ones to show as control points */
 
 	view_index = 0;
