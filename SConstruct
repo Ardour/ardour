@@ -526,7 +526,7 @@ elif conf.CheckCHeader('/System/Library/Frameworks/CoreMIDI.framework/Headers/Co
     subst_dict['%MIDITAG%'] = "ardour"
     subst_dict['%MIDITYPE%'] = "coremidi"
 else:
-    print "It appears you don't have the required MIDI libraries installed."
+    print "It appears you don't have the required MIDI libraries installed. For Linux this means you are missing the development package for ALSA libraries."
     sys.exit (1)
 
 env = conf.Finish()
