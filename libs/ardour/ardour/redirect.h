@@ -127,12 +127,15 @@ class Redirect : public IO
 
 	int set_automation_state (const XMLNode&);
 	XMLNode& get_automation_state ();
-
+	
   private:
 	bool _active;
 	Placement _placement;
 	uint32_t _sort_key;
 	void* _gui;  /* generic, we don't know or care what this is */
+
+	int old_set_automation_state (const XMLNode&);
+	int load_automation (std::string path);
 };
 
 } // namespace ARDOUR

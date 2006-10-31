@@ -91,6 +91,10 @@ class StreamPanner : public sigc::trackable, public Stateful
 	
 	Panner & get_parent() { return parent; }
 	
+	/* old school automation loading */
+
+	virtual int load (istream&, string path, uint32_t&) = 0;
+
   protected:
 	friend class Panner;
 	Panner& parent;
@@ -145,6 +149,10 @@ class BaseStereoPanner : public StreamPanner
 	void set_automation_style (AutoStyle);
 
 	Curve& automation() { return _automation; }
+
+	/* old school automation loading */
+
+	int load (istream&, string path, uint32_t&);
 
   protected:
 	float left;
@@ -207,6 +215,10 @@ class Multi2dPanner : public StreamPanner
 	XMLNode& state (bool full_state); 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&);
+
+	/* old school automation loading */
+
+	int load (istream&, string path, uint32_t&);
 
   private:
 	Curve _automation;
@@ -285,7 +297,11 @@ class Panner : public std::vector<StreamPanner*>, public Stateful, public sigc::
 	void set_position (float x, StreamPanner& orig);
 	void set_position (float x, float y, StreamPanner& orig);
 	void set_position (float x, float y, float z, StreamPanner& orig);
-	
+
+	/* old school automation */
+
+	int load ();
+
   private:
 
 	Session&         _session;
@@ -295,6 +311,11 @@ class Panner : public std::vector<StreamPanner*>, public Stateful, public sigc::
 	LinkDirection    _link_direction;
 
 	static float current_automation_version_number;
+
+	/* old school automation handling */
+
+	std::string automation_path;
+	void set_name (std::string);
 };
 
 } // namespace ARDOUR

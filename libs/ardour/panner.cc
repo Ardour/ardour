@@ -231,6 +231,39 @@ BaseStereoPanner::set_automation_state (AutoState state)
 	}
 }
 
+int
+BaseStereoPanner::load (istream& in, string path, uint32_t& linecnt)
+{
+	char line[128];
+	LocaleGuard lg (X_("POSIX"));
+	
+	_automation.clear ();
+
+	while (in.getline (line, sizeof (line), '\n')) {
+		jack_nframes_t when;
+		double value;
+
+		++linecnt;
+
+		if (strcmp (line, "end") == 0) {
+			break;
+		}
+
+		if (sscanf (line, "%" PRIu32 " %lf", &when, &value) != 2) {
+			warning << string_compose(_("badly formatted pan automation event record at line %1 of %2 (ignored) [%3]"), linecnt, path, line) << endmsg;
+			continue;
+		}
+
+		_automation.fast_simple_add (when, value);
+	}
+
+	/* now that we are done loading */
+
+	_automation.StateChanged (Change (0));
+
+	return 0;
+}
+
 void
 BaseStereoPanner::distribute (Sample* src, Sample** obufs, gain_t gain_coeff, nframes_t nframes)
 {
@@ -676,6 +709,12 @@ Multi2dPanner::factory (Panner& p)
 	return new Multi2dPanner (p);
 }
 
+int
+Multi2dPanner::load (istream& in, string path, uint32_t& linecnt)
+{
+	return 0;
+}
+
 XMLNode&
 Multi2dPanner::get_state (void)
 {
@@ -733,6 +772,8 @@ Multi2dPanner::set_state (const XMLNode& node)
 Panner::Panner (string name, Session& s)
 	: _session (s)
 {
+	set_name (name);
+
 	_linked = false;
 	_link_direction = SameDirection;
 	_bypassed = false;
@@ -1121,6 +1162,16 @@ Panner::set_state (const XMLNode& node)
 		} 	
 	}
 
+	/* don't try to do old-school automation loading if it wasn't marked as existing */
+
+	if ((prop = node.property (X_("automation")))) {
+
+		/* automation path is relative */
+		
+		automation_path = _session.automation_dir();
+		automation_path += prop->value ();
+	} 
+
 	return 0;
 }
 
@@ -1279,4 +1330,85 @@ Panner::set_position (float xpos, float ypos, float zpos, StreamPanner& orig)
 			}
 		}
 	}
+}
+
+/* old school automation handling */
+
+void
+Panner::set_name (string str)
+{
+	automation_path = _session.automation_dir();
+	automation_path += _session.snap_name();
+	automation_path += "-pan-";
+	automation_path += legalize_for_path (str);
+	automation_path += ".automation";
+}
+
+int
+Panner::load ()
+{
+	char line[128];
+	uint32_t linecnt = 0;
+	float version;
+	iterator sp;
+	LocaleGuard lg (X_("POSIX"));
+
+	if (automation_path.length() == 0) {
+		return 0;
+	}
+	
+	if (access (automation_path.c_str(), F_OK)) {
+		return 0;
+	}
+
+	ifstream in (automation_path.c_str());
+
+	if (!in) {
+		error << string_compose (_("cannot open pan automation file %1 (%2)"),
+				  automation_path, strerror (errno))
+		      << endmsg;
+		return -1;
+	}
+
+	sp = begin();
+
+	while (in.getline (line, sizeof(line), '\n')) {
+
+		if (++linecnt == 1) {
+			if (memcmp (line, X_("version"), 7) == 0) {
+				if (sscanf (line, "version %f", &version) != 1) {
+					error << string_compose(_("badly formed version number in pan automation event file \"%1\""), automation_path) << endmsg;
+					return -1;
+				}
+			} else {
+				error << string_compose(_("no version information in pan automation event file \"%1\" (first line = %2)"), 
+						 automation_path, line) << endmsg;
+				return -1;
+			}
+
+			continue;
+		}
+
+		if (strlen (line) == 0 || line[0] == '#') {
+			continue;
+		}
+
+		if (strcmp (line, "begin") == 0) {
+			
+			if (sp == end()) {
+				error << string_compose (_("too many panner states found in pan automation file %1"),
+						  automation_path)
+				      << endmsg;
+				return -1;
+			}
+
+			if ((*sp)->load (in, automation_path, linecnt)) {
+				return -1;
+			}
+			
+			++sp;
+		}
+	}
+
+	return 0;
 }

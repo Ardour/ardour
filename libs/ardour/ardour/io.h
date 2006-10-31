@@ -313,6 +313,7 @@ public:
 
 	virtual int set_automation_state (const XMLNode&);
 	virtual XMLNode& get_automation_state ();
+	virtual int load_automation (std::string path);
 
 	/* AudioTrack::deprecated_use_diskstream_connections() needs these */
 

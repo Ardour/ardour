@@ -1499,7 +1499,7 @@ Route::_set_state (const XMLNode& node, bool call_base)
 		return -1;
 	}
 
-	if ((prop = node.property ("flags")) != 0) {
+	if ((prop = node.property (X_("flags"))) != 0) {
 		int x;
 		sscanf (prop->value().c_str(), "0x%x", &x);
 		_flags = Flag (x);
@@ -1507,20 +1507,20 @@ Route::_set_state (const XMLNode& node, bool call_base)
 		_flags = Flag (0);
 	}
 	
-	if ((prop = node.property ("default-type")) != 0) {
+	if ((prop = node.property (X_("default-type"))) != 0) {
 		_default_type = DataType(prop->value());
 		assert(_default_type != DataType::NIL);
 	}
 
-	if ((prop = node.property ("phase-invert")) != 0) {
+	if ((prop = node.property (X_("phase-invert"))) != 0) {
 		set_phase_invert(prop->value()=="yes"?true:false, this);
 	}
 
-	if ((prop = node.property ("active")) != 0) {
+	if ((prop = node.property (X_("active"))) != 0) {
 		set_active (prop->value() == "yes");
 	}
 
-	if ((prop = node.property ("muted")) != 0) {
+	if ((prop = node.property (X_("muted"))) != 0) {
 		bool yn = prop->value()=="yes"?true:false; 
 
 		/* force reset of mute status */
@@ -1530,7 +1530,7 @@ Route::_set_state (const XMLNode& node, bool call_base)
 		mute_gain = desired_mute_gain;
 	}
 
-	if ((prop = node.property ("soloed")) != 0) {
+	if ((prop = node.property (X_("soloed"))) != 0) {
 		bool yn = prop->value()=="yes"?true:false; 
 
 		/* force reset of solo status */
@@ -1540,23 +1540,23 @@ Route::_set_state (const XMLNode& node, bool call_base)
 		solo_gain = desired_solo_gain;
 	}
 
-	if ((prop = node.property ("mute-affects-pre-fader")) != 0) {
+	if ((prop = node.property (X_("mute-affects-pre-fader"))) != 0) {
 		_mute_affects_pre_fader = (prop->value()=="yes")?true:false;
 	}
 
-	if ((prop = node.property ("mute-affects-post-fader")) != 0) {
+	if ((prop = node.property (X_("mute-affects-post-fader"))) != 0) {
 		_mute_affects_post_fader = (prop->value()=="yes")?true:false;
 	}
 
-	if ((prop = node.property ("mute-affects-control-outs")) != 0) {
+	if ((prop = node.property (X_("mute-affects-control-outs"))) != 0) {
 		_mute_affects_control_outs = (prop->value()=="yes")?true:false;
 	}
 
-	if ((prop = node.property ("mute-affects-main-outs")) != 0) {
+	if ((prop = node.property (X_("mute-affects-main-outs"))) != 0) {
 		_mute_affects_main_outs = (prop->value()=="yes")?true:false;
 	}
 
-	if ((prop = node.property ("edit-group")) != 0) {
+	if ((prop = node.property (X_("edit-group"))) != 0) {
 		RouteGroup* edit_group = _session.edit_group_by_name(prop->value());
 		if(edit_group == 0) {
 			error << string_compose(_("Route %1: unknown edit group \"%2 in saved state (ignored)"), _name, prop->value()) << endmsg;
@@ -1565,7 +1565,7 @@ Route::_set_state (const XMLNode& node, bool call_base)
 		}
 	}
 
-	if ((prop = node.property ("order-keys")) != 0) {
+	if ((prop = node.property (X_("order-keys"))) != 0) {
 
 		long n;
 
@@ -1602,7 +1602,7 @@ Route::_set_state (const XMLNode& node, bool call_base)
 		delete deferred_state;
 	}
 
-	deferred_state = new XMLNode("deferred state");
+	deferred_state = new XMLNode(X_("deferred state"));
 
 	/* set parent class properties before anything else */
 
@@ -1621,7 +1621,7 @@ Route::_set_state (const XMLNode& node, bool call_base)
 
 		child = *niter;
 			
-		if (child->name() == "Send") {
+		if (child->name() == X_("Send")) {
 
 
 			if (!IO::ports_legal) {
@@ -1632,7 +1632,7 @@ Route::_set_state (const XMLNode& node, bool call_base)
 				add_redirect_from_xml (*child);
 			}
 
-		} else if (child->name() == "Insert") {
+		} else if (child->name() == X_("Insert")) {
 			
 			if (!IO::ports_legal) {
 				
@@ -1643,7 +1643,13 @@ Route::_set_state (const XMLNode& node, bool call_base)
 				add_redirect_from_xml (*child);
 			}
 
-		} else if (child->name() == "ControlOuts") {
+		} else if (child->name() == X_("Automation")) {
+			
+			if ((prop = child->property (X_("path"))) != 0)  {
+				load_automation (prop->value());
+			}
+
+		} else if (child->name() == X_("ControlOuts")) {
 			
 			string coutname = _name;
 			coutname += _("[control]");
@@ -1651,25 +1657,25 @@ Route::_set_state (const XMLNode& node, bool call_base)
 			_control_outs = new IO (_session, coutname);
 			_control_outs->set_state (**(child->children().begin()));
 
-		} else if (child->name() == "Comment") {
+		} else if (child->name() == X_("Comment")) {
 
 			/* XXX this is a terrible API design in libxml++ */
 
 			XMLNode *cmt = *(child->children().begin());
 			_comment = cmt->content();
 
-		} else if (child->name() == "extra") {
+		} else if (child->name() == X_("extra")) {
 			_extra_xml = new XMLNode (*child);
-		} else if (child->name() == "solo") {
+		} else if (child->name() == X_("solo")) {
 			_solo_control.set_state (*child);
 			_session.add_controllable (&_solo_control);
-		} else if (child->name() == "mute") {
+		} else if (child->name() == X_("mute")) {
 			_mute_control.set_state (*child);
 			_session.add_controllable (&_mute_control);
 		}
 	}
 
-	if ((prop = node.property ("mix-group")) != 0) {
+	if ((prop = node.property (X_("mix-group"))) != 0) {
 		RouteGroup* mix_group = _session.mix_group_by_name(prop->value());
 		if (mix_group == 0) {
 			error << string_compose(_("Route %1: unknown mix group \"%2 in saved state (ignored)"), _name, prop->value()) << endmsg;

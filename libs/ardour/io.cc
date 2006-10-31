@@ -1425,6 +1425,7 @@ int
 IO::panners_became_legal ()
 {
 	_panner->reset (_noutputs, pans_required());
+	_panner->load (); // automation
 	panner_legal_c.disconnect ();
 	return 0;
 }
@@ -1611,6 +1612,10 @@ IO::set_state (const XMLNode& node)
 		_gain = _desired_gain;
 	}
 
+	if ((prop = node.property ("automation-state")) != 0 || (prop = node.property ("automation-style")) != 0) {
+		/* old school automation handling */
+	}
+
 	for (iter = node.children().begin(); iter != node.children().end(); ++iter) {
 
 		if ((*iter)->name() == "Panner") {
@@ -1677,6 +1682,84 @@ XMLNode&
 IO::get_automation_state ()
 {
 	return (_gain_automation_curve.get_state ());
+}
+
+int
+IO::load_automation (string path)
+{
+	string fullpath;
+	ifstream in;
+	char line[128];
+	uint32_t linecnt = 0;
+	float version;
+	LocaleGuard lg (X_("POSIX"));
+
+	fullpath = _session.automation_dir();
+	fullpath += path;
+
+	in.open (fullpath.c_str());
+
+	if (!in) {
+		fullpath = _session.automation_dir();
+		fullpath += _session.snap_name();
+		fullpath += '-';
+		fullpath += path;
+
+		in.open (fullpath.c_str());
+
+		if (!in) {
+			error << string_compose(_("%1: cannot open automation event file \"%2\""), _name, fullpath) << endmsg;
+			return -1;
+		}
+	}
+
+	clear_automation ();
+
+	while (in.getline (line, sizeof(line), '\n')) {
+		char type;
+		jack_nframes_t when;
+		double value;
+
+		if (++linecnt == 1) {
+			if (memcmp (line, "version", 7) == 0) {
+				if (sscanf (line, "version %f", &version) != 1) {
+					error << string_compose(_("badly formed version number in automation event file \"%1\""), path) << endmsg;
+					return -1;
+				}
+			} else {
+				error << string_compose(_("no version information in automation event file \"%1\""), path) << endmsg;
+				return -1;
+			}
+
+			continue;
+		}
+
+		if (sscanf (line, "%c %" PRIu32 " %lf", &type, &when, &value) != 3) {
+			warning << string_compose(_("badly formatted automation event record at line %1 of %2 (ignored)"), linecnt, path) << endmsg;
+			continue;
+		}
+
+		switch (type) {
+		case 'g':
+			_gain_automation_curve.fast_simple_add (when, value);
+			break;
+
+		case 's':
+			break;
+
+		case 'm':
+			break;
+
+		case 'p':
+			/* older (pre-1.0) versions of ardour used this */
+			break;
+
+		default:
+			warning << _("dubious automation event found (and ignored)") << endmsg;
+		}
+	}
+
+	return 0;
 }
 
 int

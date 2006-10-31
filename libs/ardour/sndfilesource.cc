@@ -507,14 +507,10 @@ SndFileSource::set_header_timeline_position ()
 nframes_t
 SndFileSource::write_float (Sample* data, nframes_t frame_pos, nframes_t cnt)
 {
-	nframes_t where;
-	
-	where = sf_seek (sf, frame_pos, SEEK_SET|SFM_WRITE);
-
-	if (where != frame_pos) {
+	if (sf_seek (sf, frame_pos, SEEK_SET|SFM_WRITE) < 0) {
 		char errbuf[256];
 		sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-		error << string_compose (_("%1: cannot seek to %2, now at %3 (libsndfile error: %4"), _path, frame_pos, where, errbuf) << endmsg;
+		error << string_compose (_("%1: cannot seek to %2 (libsndfile error: %3"), _path, frame_pos, errbuf) << endmsg;
 		return 0;
 	}
 	

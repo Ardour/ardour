@@ -244,10 +244,11 @@ Redirect::set_state (const XMLNode& node)
 
 		} else if ((*niter)->name() == X_("Automation")) {
 
+
 			XMLProperty *prop;
 			
 			if ((prop = (*niter)->property ("path")) != 0) {
-				warning << string_compose (_("old automation data found for %1, ignored"), _name) << endmsg;
+				old_set_automation_state (*(*niter));
 			} else {
 				set_automation_state (*(*niter));
 			}
@@ -297,6 +298,81 @@ Redirect::set_state (const XMLNode& node)
 
 	return 0;
 }
+
+int
+Redirect::old_set_automation_state (const XMLNode& node)
+{
+	const XMLProperty *prop;
+			
+	if ((prop = node.property ("path")) != 0) {
+		load_automation (prop->value());
+	} else {
+		warning << string_compose(_("%1: Automation node has no path property"), _name) << endmsg;
+	}
+	
+	if ((prop = node.property ("visible")) != 0) {
+		uint32_t what;
+		stringstream sstr;
+		
+		visible_parameter_automation.clear ();
+		
+		sstr << prop->value();
+		while (1) {
+			sstr >> what;
+			if (sstr.fail()) {
+				break;
+			}
+			mark_automation_visible (what, true);
+		}
+	}
+
+	return 0;
+}
+
+int
+Redirect::load_automation (string path)
+{
+	string fullpath;
+
+	if (path[0] == '/') { // legacy
+		fullpath = path;
+	} else {
+		fullpath = _session.automation_dir();
+		fullpath += path;
+	}
+	ifstream in (fullpath.c_str());
+
+	if (!in) {
+		warning << string_compose(_("%1: cannot open %2 to load automation data (%3)"), _name, fullpath, strerror (errno)) << endmsg;
+		return 1;
+	}
+
+	Glib::Mutex::Lock lm (_automation_lock);
+	set<uint32_t> tosave;
+	parameter_automation.clear ();
+
+	while (in) {
+		double when;
+		double value;
+		uint32_t port;
+
+		in >> port;     if (!in) break;
+		in >> when;  if (!in) goto bad;
+		in >> value; if (!in) goto bad;
+		
+		AutomationList& al = automation_list (port);
+		al.add (when, value);
+		tosave.insert (port);
+	}
+	
+	return 0;
+
+  bad:
+	error << string_compose(_("%1: cannot load automation data from %2"), _name, fullpath) << endmsg;
+	parameter_automation.clear ();
+	return -1;
+}
+
 
 void
 Redirect::what_has_automation (set<uint32_t>& s) const
