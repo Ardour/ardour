@@ -311,7 +311,7 @@ AutomationLine::set_height (guint32 h)
 	if (h != _height) {
 		_height = h;
 
-		uint32_t bsz = control_point_box_size();
+		double bsz = control_point_box_size();
 
 		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 			(*i)->set_size (bsz);
@@ -671,7 +671,7 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 	uint32_t this_ry = 0;
  	uint32_t prev_ry = 0;	
 	double* slope;
-	double box_size;
+	uint32_t box_size;
 	uint32_t cpsize;
 
 	/* hide all existing points, and the line */
@@ -701,7 +701,7 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 		slope[n] = ydelta/xdelta;
 	}
 
-	box_size = control_point_box_size ();
+	box_size = (uint32_t) control_point_box_size ();
 
 	/* read all points and decide which ones to show as control points */
 
