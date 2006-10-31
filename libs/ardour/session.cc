@@ -1321,6 +1321,8 @@ Session::set_frame_rate (nframes_t frames_per_second)
 
 	sync_time_vars();
 
+	Route::set_automation_interval ((jack_nframes_t) ceil ((double) frames_per_second * 0.25));
+
 	// XXX we need some equivalent to this, somehow
 	// DestructiveFileSource::setup_standard_crossfades (frames_per_second);
 
@@ -3761,13 +3763,7 @@ Session::nbusses () const
 }
 
 void
-Session::add_curve(Curve *curve)
-{
-    curves[curve->id()] = curve;
-}
-
-void
 Session::add_automation_list(AutomationList *al)
 {
-    automation_lists[al->id()] = al;
+	automation_lists[al->id()] = al;
 }

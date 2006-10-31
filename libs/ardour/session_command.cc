@@ -3,6 +3,8 @@
 #include <pbd/memento_command.h>
 #include <ardour/diskstream.h>
 #include <ardour/playlist.h>
+#include <ardour/audioplaylist.h>
+#include <ardour/audio_track.h>
 #include <ardour/tempo.h>
 #include <ardour/audiosource.h>
 #include <ardour/audioregion.h>
@@ -53,30 +55,26 @@ Command *Session::memento_command_factory(XMLNode *n)
 	return 0;
     }
 
-
     /* create command */
-    string obj_T = n->children().front()->name();
-    if (obj_T == "AudioRegion" || obj_T == "Region") {
+    string obj_T = n->property ("type_name")->value();
+    if (obj_T == typeid (AudioRegion).name() || obj_T == typeid (Region).name()) {
 	    if (audio_regions.count(id))
 		    return new MementoCommand<AudioRegion>(*audio_regions[id], before, after);
-    } else if (obj_T == "AudioSource") {
+    } else if (obj_T == typeid (AudioSource).name()) {
 	    if (audio_sources.count(id))
 		    return new MementoCommand<AudioSource>(*audio_sources[id], before, after);
-    } else if (obj_T == "Location") {
+    } else if (obj_T == typeid (Location).name()) {
 	    return new MementoCommand<Location>(*_locations.get_location_by_id(id), before, after);
-    } else if (obj_T == "Locations") {
+    } else if (obj_T == typeid (Locations).name()) {
 	    return new MementoCommand<Locations>(_locations, before, after);
-    } else if (obj_T == "TempoMap") {
+    } else if (obj_T == typeid (TempoMap).name()) {
 	    return new MementoCommand<TempoMap>(*_tempo_map, before, after);
-    } else if (obj_T == "Playlist" || obj_T == "AudioPlaylist") {
+    } else if (obj_T == typeid (Playlist).name() || obj_T == typeid (AudioPlaylist).name()) {
 	    if (Playlist *pl = playlist_by_name(child->property("name")->value()))
 		    return new MementoCommand<Playlist>(*pl, before, after);
-    } else if (obj_T == "Route") { // includes AudioTrack
+    } else if (obj_T == typeid (Route).name() || obj_T == typeid (AudioTrack).name()) { 
 	    return new MementoCommand<Route>(*route_by_id(id), before, after);
-    } else if (obj_T == "Curve") {
-	    if (curves.count(id))
-		    return new MementoCommand<Curve>(*curves[id], before, after);
-    } else if (obj_T == "AutomationList") {
+    } else if (obj_T == typeid (Curve).name() || obj_T == typeid (AutomationList).name()) {
 	    if (automation_lists.count(id))
 		    return new MementoCommand<AutomationList>(*automation_lists[id], before, after);
     } else if (registry.count(id)) { // For Editor and AutomationLine which are off-limits here
@@ -84,8 +82,8 @@ Command *Session::memento_command_factory(XMLNode *n)
     }
 
     /* we failed */
-    error << _("could not reconstitute MementoCommand from XMLNode. id=") << id.to_s() << endmsg;
-    return 0;
+    error << string_compose (_("could not reconstitute MementoCommand from XMLNode. object type = %1 id = %2"), obj_T, id.to_s()) << endmsg;
+    return 0 ;
 }
 
 // solo

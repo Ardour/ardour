@@ -108,23 +108,23 @@ Redirect::set_placement (const string& str, void *src)
 	}
 }
 
+/* NODE STRUCTURE 
+   
+    <Automation [optionally with visible="...." ]>
+       <parameter-N>
+         <AutomationList id=N>
+	   <events>
+	   X1 Y1
+	   X2 Y2
+	   ....
+	   </events>
+       </parameter-N>
+    <Automation>
+*/
+
 int
 Redirect::set_automation_state (const XMLNode& node)
 {
-	/* NODE STRUCTURE 
-
-	   <Automation [optionally with visible="...." ]>
-             <parameter-N>
-               <events>
-               X1 Y1
-	       X2 Y2
-	       ....
-	       </events>
-             </parameter-N>
-            <Automation>
- 
-	*/
-
 	Glib::Mutex::Lock lm (_automation_lock);
 
 	parameter_automation.clear ();
@@ -157,20 +157,6 @@ Redirect::set_automation_state (const XMLNode& node)
 XMLNode&
 Redirect::get_automation_state ()
 {
-	/* NODE STRUCTURE 
-
-	   <Automation [optionally with visible="...." ]>
-             <parameter-N>
-               <events>
-               X1 Y1
-	       X2 Y2
-	       ....
-	       </events>
-             </parameter-N>
-            <Automation>
- 
-	*/
-
 	Glib::Mutex::Lock lm (_automation_lock);
 	XMLNode* node = new XMLNode (X_("Automation"));
 	string fullpath;
@@ -216,20 +202,6 @@ Redirect::state (bool full_state)
 	}
 	
 	if (full_state) {
-
-		/* NODE STRUCTURE 
-		   
-		<Automation [optionally with visible="...." ]>
-		   <parameter-N>
-		     <events>
-                     X1 Y1
-	             X2 Y2
-	             ....
-	             </events>
-                  </parameter-N>
-                <Automation>
- 
-		*/
 
 		XMLNode& automation = get_automation_state(); 
 		

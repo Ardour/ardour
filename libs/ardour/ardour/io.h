@@ -67,9 +67,11 @@ class IO : public PBD::StatefulDestructible
 	IO (Session&, string name, 
 	    int input_min = -1, int input_max = -1, 
 	    int output_min = -1, int output_max = -1,
-		DataType default_type = DataType::AUDIO);
+	    DataType default_type = DataType::AUDIO);
 
-virtual ~IO();
+	IO (Session&, const XMLNode&, DataType default_type = DataType::AUDIO);
+
+	virtual ~IO();
 
 	int input_minimum() const { return _input_minimum; }
 	int input_maximum() const { return _input_maximum; }
@@ -205,6 +207,14 @@ public:
 
 	/* automation */
 
+	static void set_automation_interval (jack_nframes_t frames) {
+		_automation_interval = frames;
+	}
+
+	static jack_nframes_t automation_interval() { 
+		return _automation_interval;
+	}
+
 	void clear_automation ();
 
 	bool gain_automation_recording() const { 
@@ -226,6 +236,7 @@ public:
 	sigc::signal<void> gain_automation_style_changed;
 
 	virtual void transport_stopped (nframes_t now);
+	void automation_snapshot (nframes_t now);
 
 	ARDOUR::Curve& gain_automation_curve () { return _gain_automation_curve; }
 
@@ -288,6 +299,9 @@ public:
 	};
 
 	GainControllable _gain_control;
+
+	nframes_t last_automation_snapshot;
+	static nframes_t _automation_interval;
 
 	AutoState      _gain_automation_state;
 	AutoStyle      _gain_automation_style;

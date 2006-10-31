@@ -50,8 +50,8 @@ Track::Track (Session& sess, string name, Route::Flag flag, TrackMode mode, Data
 }
 
 Track::Track (Session& sess, const XMLNode& node, DataType default_type)
-	: Route (sess, "to be renamed", 0, 0, -1, -1, Route::Flag(0), default_type)
-	, _rec_enable_control (*this)
+	: Route (sess, node),
+	  _rec_enable_control (*this)
 {
 	_freeze_record.state = NoFreeze;
 	_declickable = true;

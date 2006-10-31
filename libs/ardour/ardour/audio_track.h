@@ -69,6 +69,8 @@ class AudioTrack : public Track
 			       bool meter);
 
 	uint32_t n_process_buffers ();
+
+	int _set_state (const XMLNode&, bool call_base);
 	
   private:
 	int  set_diskstream (boost::shared_ptr<AudioDiskstream>, void *);

@@ -473,20 +473,12 @@ EqualPowerStereoPanner::state (bool full_state)
 	root->add_property (X_("x"), buf);
 	root->add_property (X_("type"), EqualPowerStereoPanner::name);
 
-	if (full_state) {
-		XMLNode* autonode = new XMLNode (X_("Automation"));
-		autonode->add_child_nocopy (_automation.get_state ());
-		root->add_child_nocopy (*autonode);
-	} else {
-		/* never store automation states other than off in a template */
-		snprintf (buf, sizeof (buf), "0x%x", ARDOUR::Off); 
-	}
-
-	root->add_property (X_("automation-state"), buf);
-	snprintf (buf, sizeof (buf), "0x%x", _automation.automation_style()); 
-	root->add_property (X_("automation-style"), buf);
+	XMLNode* autonode = new XMLNode (X_("Automation"));
+	autonode->add_child_nocopy (_automation.state (full_state));
+	root->add_child_nocopy (*autonode);
 
 	StreamPanner::add_state (*root);
+
 	root->add_child_nocopy (_control.get_state ());
 
 	return *root;
@@ -496,7 +488,6 @@ int
 EqualPowerStereoPanner::set_state (const XMLNode& node)
 {
 	const XMLProperty* prop;
-	int x;
 	float pos;
 	LocaleGuard lg (X_("POSIX"));
 
@@ -508,25 +499,19 @@ EqualPowerStereoPanner::set_state (const XMLNode& node)
 	StreamPanner::set_state (node);
 
 	for (XMLNodeConstIterator iter = node.children().begin(); iter != node.children().end(); ++iter) {
+
 		if ((*iter)->name() == X_("panner")) {
+
 			_control.set_state (**iter);
+
 		} else if ((*iter)->name() == X_("Automation")) {
+
 			_automation.set_state (*((*iter)->children().front()));
-		}
-	}
-	
-	if ((prop = node.property (X_("automation-state")))) {
-		sscanf (prop->value().c_str(), "0x%x", &x);
-		_automation.set_automation_state ((AutoState) x);
 
-		if (x != Off) {
-			set_position (_automation.eval (parent.session().transport_frame()));
+			if (_automation.automation_state() != Off) {
+				set_position (_automation.eval (parent.session().transport_frame()));
+			}
 		}
-	}
-
-	if ((prop = node.property (X_("automation-style")))) {
-		sscanf (prop->value().c_str(), "0x%x", &x);
-		_automation.set_automation_style ((AutoStyle) x);
 	}
 
 	return 0;

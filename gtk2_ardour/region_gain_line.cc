@@ -50,7 +50,7 @@ AudioRegionGainLine::start_drag (ControlPoint* cp, float fraction)
 	if (!rv.audio_region()->envelope_active()) {
                 trackview.session().add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), &rv.audio_region()->get_state(), 0));
                 rv.audio_region()->set_envelope_active(false);
-	}
+	} 
 }
 
 // This is an extended copy from AutomationList
@@ -65,12 +65,12 @@ AudioRegionGainLine::remove_point (ControlPoint& cp)
         XMLNode &before = get_state();
 
 	if (!rv.audio_region()->envelope_active()) {
-                XMLNode &before = rv.audio_region()->get_state();
+                XMLNode &region_before = rv.audio_region()->get_state();
 		rv.audio_region()->set_envelope_active(true);
-                XMLNode &after = rv.audio_region()->get_state();
-                trackview.session().add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), &before, &after));
-	}
-
+                XMLNode &region_after = rv.audio_region()->get_state();
+                trackview.session().add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), &region_before, &region_after));
+	} 
+	
 	alist.erase (mr.start, mr.end);
 
 	trackview.editor.current_session()->add_command (new MementoCommand<AudioRegionGainLine>(*this, &before, &get_state()));
@@ -84,7 +84,8 @@ AudioRegionGainLine::end_drag (ControlPoint* cp)
 	if (!rv.audio_region()->envelope_active()) {
 		rv.audio_region()->set_envelope_active(true);
                 trackview.session().add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), 0, &rv.audio_region()->get_state()));
-	}
+	} 
+
 	AutomationLine::end_drag(cp);
 }
 

@@ -72,8 +72,7 @@ class Route : public IO
 
 	Route (Session&, std::string name, int input_min, int input_max, int output_min, int output_max,
 	       Flag flags = Flag(0), DataType default_type = DataType::AUDIO);
-	
-	Route (Session&, const XMLNode&);
+	Route (Session&, const XMLNode&, DataType default_type = DataType::AUDIO);
 	virtual ~Route();
 
 	std::string comment() { return _comment; }
@@ -233,6 +232,7 @@ class Route : public IO
 		return _mute_control;
 	}
 	
+	void automation_snapshot (nframes_t now);
 	void protect_automation ();
 	
 	void set_remote_control_id (uint32_t id);
@@ -314,6 +314,8 @@ class Route : public IO
 
 	uint32_t pans_required() const;
 	uint32_t n_process_buffers ();
+
+	virtual int _set_state (const XMLNode&, bool call_base);
 
   private:
 	void init ();

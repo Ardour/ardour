@@ -60,7 +60,8 @@ class AutomationList : public PBD::StatefulDestructible
 	typedef AutomationEventList::iterator iterator;
 	typedef AutomationEventList::const_iterator const_iterator;
 
-	AutomationList(double default_value, bool no_state = false);
+	AutomationList (double default_value);
+	AutomationList (const XMLNode&);
 	~AutomationList();
 
 	AutomationList (const AutomationList&);
@@ -151,8 +152,10 @@ class AutomationList : public PBD::StatefulDestructible
 
 	sigc::signal<void,Change> StateChanged;
 
-	XMLNode &get_state(void); 
+	XMLNode& get_state(void); 
 	int set_state (const XMLNode &s);
+	XMLNode& state (bool full);
+	XMLNode& serialize_events ();
 
 	void set_max_xval (double);
 	double get_max_xval() const { return max_xval; }
@@ -204,11 +207,11 @@ class AutomationList : public PBD::StatefulDestructible
 	double min_yval;
 	double max_yval;
 	double default_value;
-	bool   no_state;
 
 	iterator rt_insertion_point;
 	double   rt_pos;
 
+	void fast_simple_add (double when, double value);
 	void maybe_signal_changed ();
 	void mark_dirty ();
 	void _x_scale (double factor);
@@ -235,6 +238,8 @@ class AutomationList : public PBD::StatefulDestructible
 	virtual ControlEvent* point_factory (const ControlEvent&) const;
 
 	AutomationList* cut_copy_clear (double, double, int op);
+
+	int deserialize_events (const XMLNode&);
 };
 
 } // namespace

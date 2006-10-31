@@ -58,6 +58,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+nframes_t    IO::_automation_interval = 0;
 const string IO::state_node_name = "IO";
 bool         IO::connecting_legal = false;
 bool         IO::ports_legal = false;
@@ -124,6 +125,8 @@ IO::IO (Session& s, string name,
 	apply_gain_automation = false;
 	_ignore_gain_on_deliver = false;
 	
+	last_automation_snapshot = 0;
+
 	_gain_automation_state = Off;
 	_gain_automation_style = Absolute;
 
@@ -136,6 +139,38 @@ IO::IO (Session& s, string name,
 
 	_session.add_controllable (&_gain_control);
 }
+
+IO::IO (Session& s, const XMLNode& node, DataType dt)
+	: _session (s),
+	  _default_type (dt),
+	  _gain_control (X_("gaincontrol"), *this),
+	  _gain_automation_curve (0, 0, 0) // all reset in set_state()
+{
+	_panner = 0;
+	deferred_state = 0;
+	no_panner_reset = false;
+	_desired_gain = 1.0;
+	_gain = 1.0;
+	_input_connection = 0;
+	_output_connection = 0;
+	_ninputs = 0;
+	_noutputs = 0;
+
+	apply_gain_automation = false;
+	_ignore_gain_on_deliver = false;
+
+	set_state (node);
+
+	{
+		// IO::Meter is emitted from another thread so the
+		// Meter signal must be protected.
+		Glib::Mutex::Lock guard (m_meter_signal_lock);
+		m_meter_connection = Meter.connect (mem_fun (*this, &IO::meter));
+	}
+
+	_session.add_controllable (&_gain_control);
+}
+	
 
 IO::~IO ()
 {
@@ -1535,14 +1570,8 @@ IO::state (bool full_state)
 		snprintf (buf, sizeof (buf), "0x%x", ARDOUR::Off); 
 	}
 
-	node->add_property ("automation-state", buf);
-	snprintf (buf, sizeof (buf), "0x%x", (int) _gain_automation_curve.automation_style());
-	node->add_property ("automation-style", buf);
-
 	return *node;
 }
-
-
 
 int
 IO::set_state (const XMLNode& node)
@@ -1585,6 +1614,9 @@ IO::set_state (const XMLNode& node)
 	for (iter = node.children().begin(); iter != node.children().end(); ++iter) {
 
 		if ((*iter)->name() == "Panner") {
+			if (_panner == 0) {
+				_panner = new Panner (_name, _session);
+			}
 			_panner->set_state (**iter);
 		}
 
@@ -1598,20 +1630,6 @@ IO::set_state (const XMLNode& node)
 		}
 	}
 
-	if ((prop = node.property ("automation-state")) != 0) {
-
-		long int x;
-		x = strtol (prop->value().c_str(), 0, 16);
-		set_gain_automation_state (AutoState (x));
-	}
-
-	if ((prop = node.property ("automation-style")) != 0) {
-
-	       long int x;
-		x = strtol (prop->value().c_str(), 0, 16);
-		set_gain_automation_style (AutoStyle (x));
-	}
-	
 	if (ports_legal) {
 
 		if (create_ports (node)) {
@@ -1643,6 +1661,8 @@ IO::set_state (const XMLNode& node)
 	if (!ports_legal || !connecting_legal) {
 		pending_state_node = new XMLNode (node);
 	}
+
+	last_automation_snapshot = 0;
 
 	return 0;
 }
@@ -2398,6 +2418,7 @@ IO::set_gain_automation_state (AutoState state)
 
 		if (state != _gain_automation_curve.automation_state()) {
 			changed = true;
+			last_automation_snapshot = 0;
 			_gain_automation_curve.set_automation_state (state);
 			
 			if (state != Off) {
@@ -2493,6 +2514,21 @@ IO::end_pan_touch (uint32_t which)
 		(*_panner)[which]->automation().stop_touch();
 	}
 
+}
+
+void
+IO::automation_snapshot (nframes_t now)
+{
+	if (last_automation_snapshot > now || (now - last_automation_snapshot) > _automation_interval) {
+
+		if (gain_automation_recording()) {
+			_gain_automation_curve.rt_add (now, gain());
+		}
+		
+		_panner->snapshot (now);
+
+		last_automation_snapshot = now;
+	}
 }
 
 void

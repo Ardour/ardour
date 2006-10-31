@@ -398,3 +398,68 @@ meter_hold_to_float (MeterHold hold)
 		return 200.0f;
 	}
 }
+
+AutoState 
+ARDOUR::string_to_auto_state (std::string str)
+{
+	if (str == X_("Off")) {
+		return Off;
+	} else if (str == X_("Play")) {
+		return Play;
+	} else if (str == X_("Write")) {
+		return Write;
+	} else if (str == X_("Touch")) {
+		return Touch;
+	}
+
+	fatal << string_compose (_("programming error: %1 %2"), "illegal AutoState string: ", str) << endmsg;
+	/*NOTREACHED*/
+}
+
+string 
+ARDOUR::auto_state_to_string (AutoState as)
+{
+	/* to be used only for XML serialization, no i18n done */
+
+	switch (as) {
+	case Off:
+		return X_("Off");
+		break;
+	case Play:
+		return X_("Play");
+		break;
+	case Write:
+		return X_("Write");
+		break;
+	case Touch:
+		return X_("Touch");
+	}
+}
+
+AutoStyle 
+ARDOUR::string_to_auto_style (std::string str)
+{
+	if (str == X_("Absolute")) {
+		return Absolute;
+	} else if (str == X_("Trim")) {
+		return Trim;
+	}
+
+	fatal << string_compose (_("programming error: %1 %2"), "illegal AutoStyle string: ", str) << endmsg;
+	/*NOTREACHED*/
+}
+
+string 
+ARDOUR::auto_style_to_string (AutoStyle as)
+{
+	/* to be used only for XML serialization, no i18n done */
+
+	switch (as) {
+	case Absolute:
+		return X_("Absolute");
+		break;
+	case Trim:
+		return X_("Trim");
+		break;
+	}
+}

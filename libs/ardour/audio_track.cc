@@ -65,7 +65,7 @@ AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode 
 AudioTrack::AudioTrack (Session& sess, const XMLNode& node)
 	: Track (sess, node)
 {
-	set_state (node);
+	_set_state (node, false);
 }
 
 AudioTrack::~AudioTrack ()
@@ -188,11 +188,19 @@ AudioTrack::audio_diskstream() const
 int
 AudioTrack::set_state (const XMLNode& node)
 {
+	return _set_state (node, true);
+}
+
+int
+AudioTrack::_set_state (const XMLNode& node, bool call_base)
+{
 	const XMLProperty *prop;
 	XMLNodeConstIterator iter;
 
-	if (Route::set_state (node)) {
-		return -1;
+	if (call_base) {
+		if (Route::set_state (node)) {
+			return -1;
+		}
 	}
 
 	if ((prop = node.property (X_("mode"))) != 0) {
@@ -506,6 +514,16 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 	Sample* tmpb;
 	nframes_t transport_frame;
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
+	
+	{
+		Glib::RWLock::ReaderLock lm (redirect_lock, Glib::TRY_LOCK);
+		if (lm.locked()) {
+			// automation snapshot can also be called from the non-rt context
+			// and it uses the redirect list, so we take the lock out here
+			automation_snapshot (start_frame);
+		}
+	}
+
 	
 	if (n_outputs() == 0 && _redirects.empty()) {
 		return 0;

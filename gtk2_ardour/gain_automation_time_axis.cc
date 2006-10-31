@@ -63,12 +63,10 @@ GainAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkE
 	lines.front()->view_to_model_y (y);
 
 	_session.begin_reversible_command (_("add gain automation event"));
-
-        XMLNode &before = curve.get_state();
+        XMLNode& before = curve.get_state();
 	curve.add (when, y);
-        XMLNode &after = curve.get_state();
-        _session.add_command(new MementoCommand<ARDOUR::Curve>(curve, &before, &after));
-	_session.commit_reversible_command ();
+        XMLNode& after = curve.get_state();
+	_session.commit_reversible_command (new MementoCommand<ARDOUR::Curve>(curve, &before, &after));
 	_session.set_dirty ();
 }
 

@@ -305,7 +305,6 @@ env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2'), 
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/pixmaps'), pixmap_files))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/icons'), icon_files))
 
-env.AlwaysBuild ('version.cc')
 env.Alias ('version', gtkardour.VersionBuild(['version.cc','version.h'], 'SConscript'))
 		
 #dist

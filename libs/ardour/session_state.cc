@@ -240,7 +240,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	Playlist::PlaylistCreated.connect (mem_fun (*this, &Session::add_playlist));
 	Redirect::RedirectCreated.connect (mem_fun (*this, &Session::add_redirect));
 	NamedSelection::NamedSelectionCreated.connect (mem_fun (*this, &Session::add_named_selection));
-        Curve::CurveCreated.connect (mem_fun (*this, &Session::add_curve));
         AutomationList::AutomationListCreated.connect (mem_fun (*this, &Session::add_automation_list));
 
 	Controllable::Destroyed.connect (mem_fun (*this, &Session::remove_controllable));

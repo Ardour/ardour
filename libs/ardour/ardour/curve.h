@@ -51,6 +51,7 @@ class Curve : public AutomationList
 	~Curve ();
 	Curve (const Curve& other);
 	Curve (const Curve& other, double start, double end);
+	Curve (const XMLNode&);
 
 	bool rt_safe_get_vector (double x0, double x1, float *arg, int32_t veclen);
 	void get_vector (double x0, double x1, float *arg, int32_t veclen);

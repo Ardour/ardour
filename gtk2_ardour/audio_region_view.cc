@@ -902,12 +902,11 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 	trackview.session().begin_reversible_command (_("add gain control point"));
 	XMLNode &before = audio_region()->envelope().get_state();
 
-
 	if (!audio_region()->envelope_active()) {
-		XMLNode &before = audio_region()->get_state();
+		XMLNode &region_before = audio_region()->get_state();
 		audio_region()->set_envelope_active(true);
-		XMLNode &after = audio_region()->get_state();
-		trackview.session().add_command (new MementoCommand<AudioRegion>(*(audio_region().get()), &before, &after));
+		XMLNode &region_after = audio_region()->get_state();
+		trackview.session().add_command (new MementoCommand<AudioRegion>(*(audio_region().get()), &region_before, &region_after));
 	}
 
 	audio_region()->envelope().add (fx, y);

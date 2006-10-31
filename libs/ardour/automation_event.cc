@@ -47,14 +47,13 @@ static void dumpit (const AutomationList& al, string prefix = "")
 }
 #endif
 
-AutomationList::AutomationList (double defval, bool with_state)
+AutomationList::AutomationList (double defval)
 {
 	_frozen = false;
 	changed_when_thawed = false;
 	_state = Off;
 	_style = Absolute;
 	_touching = false;
-	no_state = with_state;
 	min_yval = FLT_MIN;
 	max_yval = FLT_MAX;
 	max_xval = 0; // means "no limit" 
@@ -80,7 +79,6 @@ AutomationList::AutomationList (const AutomationList& other)
 	_touching = other._touching;
 	_dirty = false;
 	rt_insertion_point = events.end();
-	no_state = other.no_state;
 	lookup_cache.left = -1;
 	lookup_cache.range.first = events.end();
 
@@ -108,7 +106,6 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 	_touching = other._touching;
 	_dirty = false;
 	rt_insertion_point = events.end();
-	no_state = other.no_state;
 	lookup_cache.left = -1;
 	lookup_cache.range.first = events.end();
 
@@ -125,13 +122,34 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 	delete section;
 
 	mark_dirty ();
+
+        AutomationListCreated(this);
+}
+
+AutomationList::AutomationList (const XMLNode& node)
+{
+	_frozen = false;
+	changed_when_thawed = false;
+	_touching = false;
+	min_yval = FLT_MIN;
+	max_yval = FLT_MAX;
+	max_xval = 0; // means "no limit" 
+	_dirty = false;
+	_state = Off;
+	_style = Absolute;
+	rt_insertion_point = events.end();
+	lookup_cache.left = -1;
+	lookup_cache.range.first = events.end();
+	
+	set_state (node);
+
         AutomationListCreated(this);
 }
 
 AutomationList::~AutomationList()
 {
 	GoingAway ();
-
+	
 	for (AutomationEventList::iterator x = events.begin(); x != events.end(); ++x) {
 		delete (*x);
 	}
@@ -346,12 +364,19 @@ AutomationList::rt_add (double when, double value)
 	maybe_signal_changed ();
 }
 
+void
+AutomationList::fast_simple_add (double when, double value)
+{
+	/* to be used only for loading pre-sorted data from saved state */
+	events.insert (events.end(), point_factory (when, value));
+}
+
 #undef last_rt_insertion_point
 
 void
 AutomationList::add (double when, double value)
 {
-	/* this is for graphical editing and loading data from storage */
+	/* this is for graphical editing */
 
 	{
 		Glib::Mutex::Lock lm (lock);
@@ -395,11 +420,6 @@ AutomationList::erase (AutomationList::iterator i)
 		Glib::Mutex::Lock lm (lock);
 		events.erase (i);
 		reposition_for_rt_add (0);
-		if (!no_state) {
-#ifdef STATE_MANAGER
-			save_state (_("removed event"));
-#endif
-		}
 		mark_dirty ();
 	}
 	maybe_signal_changed ();
@@ -1118,66 +1138,179 @@ AutomationList::point_factory (const ControlEvent& other) const
 XMLNode&
 AutomationList::get_state ()
 {
-	stringstream str;
-	XMLNode* node = new XMLNode (X_("events"));
-	iterator xx;
+	return state (true);
+}
 
-	if (events.empty()) {
-		return *node;
+XMLNode&
+AutomationList::state (bool full)
+{
+	XMLNode* root = new XMLNode (X_("AutomationList"));
+	char buf[64];
+	LocaleGuard lg (X_("POSIX"));
+
+	root->add_property ("id", _id.to_s());
+
+	snprintf (buf, sizeof (buf), "%.12g", default_value);
+	root->add_property ("default", buf);
+	snprintf (buf, sizeof (buf), "%.12g", min_yval);
+	root->add_property ("min_yval", buf);
+	snprintf (buf, sizeof (buf), "%.12g", max_yval);
+	root->add_property ("max_yval", buf);
+	snprintf (buf, sizeof (buf), "%.12g", max_xval);
+	root->add_property ("max_xval", buf);
+
+	if (full) {
+		root->add_property ("state", auto_state_to_string (_state));
+	} else {
+		/* never save anything but Off for automation state to a template */
+		root->add_property ("state", auto_state_to_string (Off));
 	}
 
-	for (xx = events.begin(); xx != events.end(); ++xx) {
+	root->add_property ("style", auto_style_to_string (_style));
+
+	if (!events.empty()) {
+		root->add_child_nocopy (serialize_events());
+	}
+
+	return *root;
+}
+
+XMLNode&
+AutomationList::serialize_events ()
+{
+	XMLNode* node = new XMLNode (X_("events"));
+	stringstream str;
+
+	for (iterator xx = events.begin(); xx != events.end(); ++xx) {
 		str << (double) (*xx)->when;
 		str << ' ';
 		str <<(double) (*xx)->value;
 		str << '\n';
 	}
 
-	node->add_content (str.str());
+	/* XML is a bit wierd */
+
+	XMLNode* content_node = new XMLNode (X_("foo")); /* it gets renamed by libxml when we set content */
+	content_node->set_content (str.str());
+
+	node->add_child_nocopy (*content_node);
 
 	return *node;
 }
 
 int
-AutomationList::set_state (const XMLNode& node)
+AutomationList::deserialize_events (const XMLNode& node)
 {
-	if (node.name() != X_("events")) {
-		warning << _("automation list: passed XML node not called \"events\" - ignored.") << endmsg;
+	if (node.children().empty()) {
+		return -1;
+	}
+
+	XMLNode* content_node = node.children().front();
+
+	if (content_node->content().empty()) {
 		return -1;
 	}
 
 	freeze ();
 	clear ();
-
-	if (!node.content().empty()) {
-		
-		stringstream str (node.content());
-		
-		double x;
-		double y;
-		bool ok = true;
-		
-		while (str) {
-			str >> x;
-			if (!str) {
-				ok = false;
-				break;
-			}
-			str >> y;
-			if (!str) {
-				ok = false;
-				break;
-			}
-			add (x, y);
+	
+	stringstream str (content_node->content());
+	
+	double x;
+	double y;
+	bool ok = true;
+	
+	while (str) {
+		str >> x;
+		if (!str) {
+			break;
 		}
-		
-		if (!ok) {
-			clear ();
-			error << _("automation list: cannot load coordinates from XML, all points ignored") << endmsg;
+		str >> y;
+		if (!str) {
+			ok = false;
+			break;
 		}
+		fast_simple_add (x, y);
+	}
+	
+	if (!ok) {
+		clear ();
+		error << _("automation list: cannot load coordinates from XML, all points ignored") << endmsg;
+	} else {
+		mark_dirty ();
+		reposition_for_rt_add (0);
+		maybe_signal_changed ();
 	}
 
 	thaw ();
+	return 0;
+}
+
+int
+AutomationList::set_state (const XMLNode& node)
+{
+	XMLNodeList nlist = node.children();
+	XMLNodeIterator niter;
+	const XMLProperty* prop;
+
+	if (node.name() == X_("events")) {
+		/* partial state setting*/
+		return deserialize_events (node);
+	}
+	
+	if (node.name() != X_("AutomationList") ) {
+		error << string_compose (_("AutomationList: passed XML node called %1, not \"AutomationList\" - ignored"), node.name()) << endmsg;
+		return -1;
+	}
+	
+	if ((prop = node.property ("id")) != 0) {
+		_id = prop->value ();
+		/* update session AL list */
+		AutomationListCreated(this);
+	}
+	
+	if ((prop = node.property (X_("default"))) != 0){ 
+		default_value = atof (prop->value());
+	} else {
+		default_value = 0.0;
+	}
+
+	if ((prop = node.property (X_("style"))) != 0) {
+		_style = string_to_auto_style (prop->value());
+	} else {
+		_style = Absolute;
+	}
+
+	if ((prop = node.property (X_("state"))) != 0) {
+		_state = string_to_auto_state (prop->value());
+	} else {
+		_state = Off;
+	}
+
+	if ((prop = node.property (X_("min_yval"))) != 0) {
+		min_yval = atof (prop->value ());
+	} else {
+		min_yval = FLT_MIN;
+	}
+
+	if ((prop = node.property (X_("max_yval"))) != 0) {
+		max_yval = atof (prop->value ());
+	} else {
+		max_yval = FLT_MAX;
+	}
+
+	if ((prop = node.property (X_("max_xval"))) != 0) {
+		max_xval = atof (prop->value ());
+	} else {
+		max_xval = 0; // means "no limit ;
+	}
+
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		if ((*niter)->name() == X_("events")) {
+			deserialize_events (*(*niter));
+		}
+	}
+	
 	return 0;
 }
 

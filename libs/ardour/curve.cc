@@ -40,14 +40,11 @@ using namespace ARDOUR;
 using namespace sigc;
 using namespace PBD;
 
-sigc::signal<void, Curve*> Curve::CurveCreated;
-
 Curve::Curve (double minv, double maxv, double canv, bool nostate)
-	: AutomationList (canv, nostate)
+	: AutomationList (canv)
 {
 	min_yval = minv;
 	max_yval = maxv;
-        CurveCreated(this);
 }
 
 Curve::Curve (const Curve& other)
@@ -55,7 +52,6 @@ Curve::Curve (const Curve& other)
 {
 	min_yval = other.min_yval;
 	max_yval = other.max_yval;
-        CurveCreated(this);
 }
 
 Curve::Curve (const Curve& other, double start, double end)
@@ -63,7 +59,11 @@ Curve::Curve (const Curve& other, double start, double end)
 {
 	min_yval = other.min_yval;
 	max_yval = other.max_yval;
-        CurveCreated(this);
+}
+
+Curve::Curve (const XMLNode& node)
+	: AutomationList (node)
+{
 }
 
 Curve::~Curve ()
