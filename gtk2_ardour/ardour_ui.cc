@@ -1608,18 +1608,22 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 	int response = Gtk::RESPONSE_NONE;
 
 	new_session_dialog->set_modal(true);
-	new_session_dialog->set_name(predetermined_path);
+	new_session_dialog->set_name (predetermined_path);
 	new_session_dialog->reset_recent();
 	new_session_dialog->show();
 
 	do {
 	        response = new_session_dialog->run ();
+		
+		_session_is_new = false;
 
-		if(response == Gtk::RESPONSE_CANCEL || response == Gtk::RESPONSE_DELETE_EVENT) {
+		if (response == Gtk::RESPONSE_CANCEL || response == Gtk::RESPONSE_DELETE_EVENT) {
+
 		        quit();
 			return;
 
 		} else if (response == Gtk::RESPONSE_NONE) {
+
 		        /* Clear was pressed */
 		        new_session_dialog->reset();
 
@@ -1671,8 +1675,6 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 			
 			} else {
 
-			        _session_is_new = true;
-			      
 				if (session_name.empty()) {
 					response = Gtk::RESPONSE_NONE;
 					continue;
@@ -1688,14 +1690,43 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 				} else {
 
 					session_path = new_session_dialog->session_folder();
-					
+
 				}
-			
+				
 				//XXX This is needed because session constructor wants a 
 				//non-existant path. hopefully this will be fixed at some point.
 				
 				session_path = Glib::build_filename (session_path, session_name);
 						
+				if (g_file_test (session_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
+
+					Glib::ustring str = string_compose (_("This session\n%1\nalready exists. Do you want to open it?"), session_path);
+
+					MessageDialog msg (str,
+							   false,
+							   Gtk::MESSAGE_WARNING,
+							   Gtk::BUTTONS_YES_NO,
+							   true);
+
+
+					msg.set_name (X_("CleanupDialog"));
+					msg.set_wmclass (_("existing_session"), "Ardour");
+					msg.set_position (Gtk::WIN_POS_MOUSE);
+					
+					switch (msg.run()) {
+					case RESPONSE_YES:
+						load_session (session_path, session_name);
+						goto done;
+						break;
+					default:
+						response = RESPONSE_NONE;
+						new_session_dialog->reset ();
+						continue;
+					}
+				}
+
+			        _session_is_new = true;
+
 				std::string template_name = new_session_dialog->session_template_name();
 						
 				if (new_session_dialog->use_session_template()) {
@@ -1755,6 +1786,7 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 		
 	} while (response == Gtk::RESPONSE_NONE);
 
+  done:
 	show();
 	new_session_dialog->get_window()->set_cursor();
 	new_session_dialog->hide();

@@ -294,7 +294,7 @@ AutomationLine::hide ()
 	_visible = false;
 }
 
-uint32_t
+double
 AutomationLine::control_point_box_size ()
 {
 	if (_height > TimeAxisView::hLarger) {

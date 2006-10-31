@@ -217,7 +217,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	void reset_line_coords (ControlPoint&);
 	void update_line ();
 
-	uint32_t control_point_box_size ();
+	double control_point_box_size ();
 
 	struct ModelRepresentation {
 	    ARDOUR::AutomationList::iterator start;

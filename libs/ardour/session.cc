@@ -334,6 +334,7 @@ Session::Session (AudioEngine &eng,
 	first_stage_init (fullpath, snapshot_name);
 
 	new_session = !g_file_test (_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
+
 	if (new_session) {
 		if (create (new_session, 0, initial_length)) {
 			throw failed_constructor ();
