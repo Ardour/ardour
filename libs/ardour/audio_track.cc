@@ -198,7 +198,7 @@ AudioTrack::_set_state (const XMLNode& node, bool call_base)
 	XMLNodeConstIterator iter;
 
 	if (call_base) {
-		if (Route::set_state (node)) {
+		if (Route::_set_state (node, call_base)) {
 			return -1;
 		}
 	}

@@ -701,8 +701,6 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 			_envelope.set_max_xval (_length);
 			_envelope.truncate_end (_length);
 
-			cerr << "envelope for " << _name << " has " << _envelope.size() << " points\n";
-
 		} else if (child->name() == "FadeIn") {
 			
 			_fade_in.clear ();

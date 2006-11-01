@@ -258,15 +258,15 @@ Editor::register_actions ()
 	Glib::RefPtr<ActionGroup> zoom_actions = ActionGroup::create (X_("Zoom"));
 	RadioAction::Group zoom_group;
 
-	ActionManager::register_radio_action (zoom_actions, zoom_group, "zoom-focus-left", _("Zoom Focus Left"), bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusLeft));
+	ActionManager::register_radio_action (zoom_actions, zoom_group, "zoom-focus-left", _("Zoom Focus Left"), bind (mem_fun(*this, &Editor::zoom_focus_chosen), Editing::ZoomFocusLeft));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::register_radio_action (zoom_actions, zoom_group, "zoom-focus-right", _("Zoom Focus Right"), bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusRight));
+	ActionManager::register_radio_action (zoom_actions, zoom_group, "zoom-focus-right", _("Zoom Focus Right"), bind (mem_fun(*this, &Editor::zoom_focus_chosen), Editing::ZoomFocusRight));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::register_radio_action (zoom_actions, zoom_group, "zoom-focus-center", _("Zoom Focus Center"), bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusCenter));
+	ActionManager::register_radio_action (zoom_actions, zoom_group, "zoom-focus-center", _("Zoom Focus Center"), bind (mem_fun(*this, &Editor::zoom_focus_chosen), Editing::ZoomFocusCenter));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::register_radio_action (zoom_actions, zoom_group, "zoom-focus-playhead", _("Zoom Focus Playhead"), bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusPlayhead));
+	ActionManager::register_radio_action (zoom_actions, zoom_group, "zoom-focus-playhead", _("Zoom Focus Playhead"), bind (mem_fun(*this, &Editor::zoom_focus_chosen), Editing::ZoomFocusPlayhead));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::register_radio_action (zoom_actions, zoom_group, "zoom-focus-edit", _("Zoom Focus Edit"), bind (mem_fun(*this, &Editor::set_zoom_focus), Editing::ZoomFocusEdit));
+	ActionManager::register_radio_action (zoom_actions, zoom_group, "zoom-focus-edit", _("Zoom Focus Edit"), bind (mem_fun(*this, &Editor::zoom_focus_chosen), Editing::ZoomFocusEdit));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	Glib::RefPtr<ActionGroup> mouse_mode_actions = ActionGroup::create (X_("MouseMode"));
@@ -278,31 +278,36 @@ Editor::register_actions ()
 	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-zoom", _("Zoom Tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseZoom, false));
 	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Timefx Tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseTimeFX, false));
 
+	ActionManager::register_action (editor_actions, X_("SnapTo"), _("Snap To"));
+	ActionManager::register_action (editor_actions, X_("SnapMode"), _("Snap Mode"));
+
+	RadioAction::Group snap_mode_group;
+	ActionManager::register_radio_action (editor_actions, snap_mode_group, X_("snap-normal"), _("Normal"), (bind (mem_fun(*this, &Editor::snap_mode_chosen), Editing::SnapNormal)));
+	ActionManager::register_radio_action (editor_actions, snap_mode_group, X_("snap-magnetic"), _("Magnetic"), (bind (mem_fun(*this, &Editor::snap_mode_chosen), Editing::SnapMagnetic)));
+
 	Glib::RefPtr<ActionGroup> snap_actions = ActionGroup::create (X_("Snap"));
 	RadioAction::Group snap_choice_group;
 
-	ActionManager::register_action (editor_actions, X_("SnapTo"), _("Snap To"));
-
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-frame"), _("Snap to frame"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToFrame)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-cd-frame"), _("Snap to cd frame"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToCDFrame)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-smpte-frame"), _("Snap to SMPTE frame"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToSMPTEFrame)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-smpte-seconds"), _("Snap to SMPTE seconds"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToSMPTESeconds)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-smpte-minutes"), _("Snap to SMPTE minutes"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToSMPTEMinutes)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-seconds"), _("Snap to seconds"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToSeconds)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-minutes"), _("Snap to minutes"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToMinutes)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-thirtyseconds"), _("Snap to thirtyseconds"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToAThirtysecondBeat)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-asixteenthbeat"), _("Snap to asixteenthbeat"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToASixteenthBeat)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-eighths"), _("Snap to eighths"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToAEighthBeat)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-quarters"), _("Snap to quarters"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToAQuarterBeat)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-thirds"), _("Snap to thirds"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToAThirdBeat)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-beat"), _("Snap to beat"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToBeat)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-bar"), _("Snap to bar"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToBar)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-mark"), _("Snap to mark"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToMark)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-edit-cursor"), _("Snap to edit cursor"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToEditCursor)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-start"), _("Snap to region start"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToRegionStart)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-end"), _("Snap to region end"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToRegionEnd)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-sync"), _("Snap to region sync"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToRegionSync)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-boundary"), _("Snap to region boundary"), (bind (mem_fun(*this, &Editor::set_snap_to), Editing::SnapToRegionBoundary)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-frame"), _("Snap to frame"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToFrame)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-cd-frame"), _("Snap to cd frame"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToCDFrame)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-smpte-frame"), _("Snap to SMPTE frame"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToSMPTEFrame)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-smpte-seconds"), _("Snap to SMPTE seconds"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToSMPTESeconds)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-smpte-minutes"), _("Snap to SMPTE minutes"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToSMPTEMinutes)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-seconds"), _("Snap to seconds"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToSeconds)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-minutes"), _("Snap to minutes"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToMinutes)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-thirtyseconds"), _("Snap to thirtyseconds"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToAThirtysecondBeat)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-asixteenthbeat"), _("Snap to asixteenthbeat"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToASixteenthBeat)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-eighths"), _("Snap to eighths"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToAEighthBeat)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-quarters"), _("Snap to quarters"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToAQuarterBeat)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-thirds"), _("Snap to thirds"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToAThirdBeat)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-beat"), _("Snap to beat"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeat)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-bar"), _("Snap to bar"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBar)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-mark"), _("Snap to mark"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToMark)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-edit-cursor"), _("Snap to edit cursor"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToEditCursor)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-start"), _("Snap to region start"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToRegionStart)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-end"), _("Snap to region end"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToRegionEnd)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-sync"), _("Snap to region sync"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToRegionSync)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-boundary"), _("Snap to region boundary"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToRegionBoundary)));
 
 	/* REGION LIST */
 
@@ -622,6 +627,206 @@ Editor::set_layer_model (LayerModel model)
 		if (ract && ract->get_active() && Config->get_layer_model() != model) {
 			Config->set_layer_model (model);
 		}
+	}
+}
+
+RefPtr<RadioAction>
+Editor::snap_type_action (SnapType type)
+{
+
+	const char* action = 0;
+	RefPtr<Action> act;
+	
+	switch (type) {
+	case Editing::SnapToFrame:
+		action = "snap-to-frame";
+		break;
+	case Editing::SnapToCDFrame:
+		action = "snap-to-cd-frame";
+		break;
+	case Editing::SnapToSMPTEFrame:
+		action = "snap-to-smpte-frame";
+		break;
+	case Editing::SnapToSMPTESeconds:
+		action = "snap-to-smpte-seconds";
+		break;
+	case Editing::SnapToSMPTEMinutes:
+		action = "snap-to-smpte-minutes";
+		break;
+	case Editing::SnapToSeconds:
+		action = "snap-to-seconds";
+		break;
+	case Editing::SnapToMinutes:
+		action = "snap-to-minutes";
+		break;
+	case Editing::SnapToAThirtysecondBeat:
+		action = "snap-to-thirtyseconds";
+		break;
+	case Editing::SnapToASixteenthBeat:
+		action = "snap-to-asixteenthbeat";
+		break;
+	case Editing::SnapToAEighthBeat:
+		action = "snap-to-eighths";
+		break;
+	case Editing::SnapToAQuarterBeat:
+		action = "snap-to-quarters";
+		break;
+	case Editing::SnapToAThirdBeat:
+		action = "snap-to-thirds";
+		break;
+	case Editing::SnapToBeat:
+		action = "snap-to-beat";
+		break;
+	case Editing::SnapToBar:
+		action = "snap-to-bar";
+		break;
+	case Editing::SnapToMark:
+		action = "snap-to-mark";
+		break;
+	case Editing::SnapToEditCursor:
+		action = "snap-to-edit-cursor";
+		break;
+	case Editing::SnapToRegionStart:
+		action = "snap-to-region-start";
+		break;
+	case Editing::SnapToRegionEnd:
+		action = "snap-to-region-end";
+		break;
+	case Editing::SnapToRegionSync:
+		action = "snap-to-region-sync";
+		break;
+	case Editing::SnapToRegionBoundary:
+		action = "snap-to-region-boundary";
+		break;
+	default:
+		fatal << string_compose (_("programming error: %1: %2"), "Editor: impossible snap-to type", (int) type) << endmsg;
+		/*NOTREACHED*/
+	}
+
+	act = ActionManager::get_action (X_("Snap"), action);
+
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		return ract;
+
+	} else  {
+		error << string_compose (_("programming error: %1"), "Editor::snap_type_chosen could not find action to match type.") << endmsg;
+		return RefPtr<RadioAction>();
+	}
+}
+
+void
+Editor::snap_type_chosen (SnapType type)
+{
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+	RefPtr<RadioAction> ract = snap_type_action (type);
+
+	if (ract && ract->get_active()) {
+		set_snap_to (type);
+	}
+}
+
+RefPtr<RadioAction>
+Editor::snap_mode_action (SnapMode mode)
+{
+	const char* action = 0;
+	RefPtr<Action> act;
+	
+	switch (mode) {
+	case Editing::SnapNormal:
+		action = X_("snap-normal");
+		break;
+	case Editing::SnapMagnetic:
+		action = X_("snap-magnetic");
+		break;
+	default:
+		fatal << string_compose (_("programming error: %1: %2"), "Editor: impossible snap mode type", (int) mode) << endmsg;
+		/*NOTREACHED*/
+	}
+	
+	act = ActionManager::get_action (X_("Editor"), action);
+	
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		return ract;
+		
+	} else  {
+		error << string_compose (_("programming error: %1: %2"), "Editor::snap_mode_chosen could not find action to match mode.", action) << endmsg;
+		return RefPtr<RadioAction> ();
+	}
+}
+
+void
+Editor::snap_mode_chosen (SnapMode mode)
+{
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+	RefPtr<RadioAction> ract = snap_mode_action (mode);
+
+	if (ract && ract->get_active()) {
+		set_snap_mode (mode);
+	}
+}
+
+
+RefPtr<RadioAction>
+Editor::zoom_focus_action (ZoomFocus focus)
+{
+	const char* action = 0;
+	RefPtr<Action> act;
+	
+	switch (focus) {
+	case ZoomFocusLeft:
+		action = X_("zoom-focus-left");
+		break;
+	case ZoomFocusRight:
+		action = X_("zoom-focus-right");
+		break;
+	case ZoomFocusCenter:
+		action = X_("zoom-focus-center");
+		break;
+	case ZoomFocusPlayhead:
+		action = X_("zoom-focus-playhead");
+		break;
+	case ZoomFocusEdit:
+		action = X_("zoom-focus-edit");
+		break;
+	default:
+		fatal << string_compose (_("programming error: %1: %2"), "Editor: impossible focus type", (int) focus) << endmsg;
+		/*NOTREACHED*/
+	}
+	
+	act = ActionManager::get_action (X_("Zoom"), action);
+	
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		return ract;
+	} else {
+		error << string_compose (_("programming error: %1: %2"), "Editor::zoom_focus_action could not find action to match focus.", action) << endmsg;
+	}
+
+	return RefPtr<RadioAction> ();
+}
+
+void
+Editor::zoom_focus_chosen (ZoomFocus focus)
+{
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+	RefPtr<RadioAction> ract = zoom_focus_action (focus);
+
+	if (ract && ract->get_active()) {
+		set_zoom_focus (focus);
 	}
 }
 

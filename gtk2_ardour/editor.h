@@ -1272,13 +1272,26 @@ class Editor : public PublicEditor
 	Gtk::ComboBoxText snap_mode_selector;
 	Gtk::HBox         snap_box;
 
+	std::vector<std::string> snap_type_strings;
+	std::vector<std::string> snap_mode_strings;
+
 	void snap_type_selection_done ();
 	void snap_mode_selection_done ();
-	
+	void snap_mode_chosen (Editing::SnapMode);
+	void snap_type_chosen (Editing::SnapType);
+
+	Glib::RefPtr<Gtk::RadioAction> snap_type_action (Editing::SnapType);
+	Glib::RefPtr<Gtk::RadioAction> snap_mode_action (Editing::SnapMode);
+
 	Gtk::ComboBoxText zoom_focus_selector;
-	Gtk::VBox                zoom_focus_box;
+	Gtk::VBox         zoom_focus_box;
+
+	std::vector<std::string> zoom_focus_strings;
 	
 	void zoom_focus_selection_done ();
+	void zoom_focus_chosen (Editing::ZoomFocus);
+
+	Glib::RefPtr<Gtk::RadioAction> zoom_focus_action (Editing::ZoomFocus);
 
 	Gtk::HBox           zoom_box;
 
