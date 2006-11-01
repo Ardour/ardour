@@ -701,25 +701,23 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 			_envelope.set_max_xval (_length);
 			_envelope.truncate_end (_length);
 
+			cerr << "envelope for " << _name << " has " << _envelope.size() << " points\n";
+
 		} else if (child->name() == "FadeIn") {
 			
 			_fade_in.clear ();
 			
-			if ((prop = child->property ("default")) != 0 || (prop = child->property ("steepness")) != 0) {
+			if ((prop = child->property ("default")) != 0 || (prop = child->property ("steepness")) != 0 || _fade_in.set_state (*child)) {
 				set_default_fade_in ();
-			} else {
-				_fade_in.set_state (*child);
-			}
+			} 
 
 		} else if (child->name() == "FadeOut") {
 			
 			_fade_out.clear ();
 
-			if ((prop = child->property ("default")) != 0 || (prop = child->property ("steepness")) != 0) {
+			if ((prop = child->property ("default")) != 0 || (prop = child->property ("steepness")) != 0 || _fade_out.set_state (*child)) {
 				set_default_fade_out ();
-			} else {
-				_fade_out.set_state (*child);
-			}
+			} 
 		} 
 	}
 

@@ -1254,7 +1254,7 @@ AutomationList::set_state (const XMLNode& node)
 		return deserialize_events (node);
 	}
 	
-	if (node.name() == X_("Envelope")) {
+	if (node.name() == X_("Envelope") || node.name() == X_("FadeOut") || node.name() == X_("FadeIn")) {
 
 		/* old school */
 
