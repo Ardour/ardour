@@ -744,7 +744,7 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 		*/
 
 		this_rx = (uint32_t) rint (tx);
-      		this_ry = (unsigned long) rint (ty); 
+      		this_ry = (uint32_t) rint (ty); 
  
  		if (view_index && pi != npoints && (this_rx == prev_rx) && (this_ry == prev_ry) || 
 		    ((this_rx - prev_rx) < (box_size + 2))) {

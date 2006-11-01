@@ -155,6 +155,8 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	gain_line = new AudioRegionGainLine (foo, trackview.session(), *this, *group, audio_region()->envelope());
 
+	cerr << "Initializing RV for " << audio_region()->name() << " with " << audio_region()->envelope().size() << " points\n";
+
 	if (!(_flags & EnvelopeVisible)) {
 		gain_line->hide ();
 	} else {
