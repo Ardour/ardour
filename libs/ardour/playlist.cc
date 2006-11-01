@@ -1252,6 +1252,7 @@ Playlist::find_next_region (nframes_t frame, RegionPoint point, int dir)
 	boost::shared_ptr<Region> ret;
 	nframes_t closest = max_frames;
 
+
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 
 		nframes_t distance;
@@ -1273,7 +1274,7 @@ Playlist::find_next_region (nframes_t frame, RegionPoint point, int dir)
 		switch (dir) {
 		case 1: /* forwards */
 
-			if (pos > frame) {
+			if (pos >= frame) {
 				if ((distance = pos - frame) < closest) {
 					closest = distance;
 					ret = r;
@@ -1284,7 +1285,7 @@ Playlist::find_next_region (nframes_t frame, RegionPoint point, int dir)
 
 		default: /* backwards */
 
-			if (pos < frame) {
+			if (pos <= frame) {
 				if ((distance = frame - pos) < closest) {
 					closest = distance;
 					ret = r;
