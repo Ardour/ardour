@@ -746,10 +746,13 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 		this_rx = (uint32_t) rint (tx);
       		this_ry = (uint32_t) rint (ty); 
  
- 		if (view_index && pi != npoints && (this_rx == prev_rx) && (this_ry == prev_ry) || 
-		    ((this_rx - prev_rx) < (box_size + 2))) {
+ 		if (view_index && pi != npoints && /* not the first, not the last */
+		    
+		    /* same point or too close to the last one horizontally */
+
+		    (((this_rx == prev_rx) && (this_ry == prev_ry)) || ((this_rx - prev_rx) < (box_size + 2)))) {
   			continue;
-		} 
+		}
 
 		/* ok, we should display this point */
 
@@ -810,8 +813,6 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 	}
 
 	/* discard extra CP's to avoid confusing ourselves */
-
-	cerr << "here we are, view_index = " << view_index << " cp size = " << control_points.size() << " np = " << npoints << endl;
 
 	while (control_points.size() > view_index) {
 		ControlPoint* cp = control_points.back();
