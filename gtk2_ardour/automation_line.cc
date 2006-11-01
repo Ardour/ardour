@@ -811,6 +811,8 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 
 	/* discard extra CP's to avoid confusing ourselves */
 
+	cerr << "here we are, view_index = " << view_index << " cp size = " << control_points.size() << " np = " << npoints << endl;
+
 	while (control_points.size() > view_index) {
 		ControlPoint* cp = control_points.back();
 		control_points.pop_back ();
