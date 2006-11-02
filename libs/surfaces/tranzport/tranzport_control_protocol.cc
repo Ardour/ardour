@@ -718,7 +718,7 @@ TranzportControlProtocol::update_state ()
 
 	/* global */
 
-	if (Config->get_auto_loop()) {
+	if (session->get_play_loop()) {
 		pending_lights[LightLoop] = true;
 	} else {
 		pending_lights[LightLoop] = false;
