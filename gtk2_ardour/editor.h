@@ -1665,6 +1665,7 @@ class Editor : public PublicEditor
 	/* editor-mixer strip */
 
 	MixerStrip *current_mixer_strip;
+	bool show_editor_mixer_when_tracks_arrive;
 	Gtk::VBox current_mixer_strip_vbox;
 	void cms_deleted ();
 	void current_mixer_strip_hidden ();

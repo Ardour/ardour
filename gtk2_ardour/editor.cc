@@ -288,6 +288,7 @@ Editor::Editor (AudioEngine& eng)
 	transport_marker_menu = 0;
 	new_transport_marker_menu = 0;
 	editor_mixer_strip_width = Wide;
+	show_editor_mixer_when_tracks_arrive = false;
 	repos_zoom_queued = false;
 	region_edit_menu_split_item = 0;
 	temp_location = 0;
@@ -2156,6 +2157,7 @@ Editor::set_state (const XMLNode& node)
 
 		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
 		if (act) {
+
 			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 			bool yn = (prop->value() == X_("yes"));
 
