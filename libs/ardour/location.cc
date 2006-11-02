@@ -578,7 +578,10 @@ Locations::set_state (const XMLNode& node)
 	}
 	
 	nlist = node.children();
-	
+
+	locations.clear (); // dangerous
+	current_location = 0;
+
 	{
 		Glib::Mutex::Lock lm (lock);
 
