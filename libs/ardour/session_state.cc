@@ -1039,11 +1039,11 @@ Session::set_state (const XMLNode& node)
 	Path
 	extra
 	Options/Config
+	Locations
 	Sources
 	AudioRegions
 	AudioDiskstreams
 	Connections
-	Locations
 	Routes
 	EditGroups
 	MixGroups
@@ -1065,6 +1065,39 @@ Session::set_state (const XMLNode& node)
 	} else {
 		error << _("Session: XML state has no options section") << endmsg;
 	}
+
+	if ((child = find_named_node (node, "Locations")) == 0) {
+		error << _("Session: XML state has no locations section") << endmsg;
+		goto out;
+	} else if (_locations.set_state (*child)) {
+		goto out;
+	}
+
+	Location* location;
+
+	if ((location = _locations.auto_loop_location()) != 0) {
+		set_auto_loop_location (location);
+	}
+
+	if ((location = _locations.auto_punch_location()) != 0) {
+		set_auto_punch_location (location);
+	}
+
+	if ((location = _locations.end_location()) == 0) {
+		_locations.add (end_location);
+	} else {
+		delete end_location;
+		end_location = location;
+	}
+
+	if ((location = _locations.start_location()) == 0) {
+		_locations.add (start_location);
+	} else {
+		delete start_location;
+		start_location = location;
+	}
+
+	AudioFileSource::set_header_position_offset (start_location->start());
 
 	if ((child = find_named_node (node, "Sources")) == 0) {
 		error << _("Session: XML state has no sources section") << endmsg;
@@ -1111,37 +1144,6 @@ Session::set_state (const XMLNode& node)
 		goto out;
 	} else if (load_connections (*child)) {
 		goto out;
-	}
-
-	if ((child = find_named_node (node, "Locations")) == 0) {
-		error << _("Session: XML state has no locations section") << endmsg;
-		goto out;
-	} else if (_locations.set_state (*child)) {
-		goto out;
-	}
-
-	Location* location;
-
-	if ((location = _locations.auto_loop_location()) != 0) {
-		set_auto_loop_location (location);
-	}
-
-	if ((location = _locations.auto_punch_location()) != 0) {
-		set_auto_punch_location (location);
-	}
-
-	if ((location = _locations.end_location()) == 0) {
-		_locations.add (end_location);
-	} else {
-		delete end_location;
-		end_location = location;
-	}
-
-	if ((location = _locations.start_location()) == 0) {
-		_locations.add (start_location);
-	} else {
-		delete start_location;
-		start_location = location;
 	}
 
 	if ((child = find_named_node (node, "EditGroups")) == 0) {

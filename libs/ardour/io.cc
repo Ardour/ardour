@@ -170,7 +170,6 @@ IO::IO (Session& s, const XMLNode& node, DataType dt)
 
 	_session.add_controllable (&_gain_control);
 }
-	
 
 IO::~IO ()
 {

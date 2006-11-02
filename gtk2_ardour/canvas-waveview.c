@@ -977,7 +977,7 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 
 #if 0
 	printf ("0x%x r (%d..%d)(%d..%d) bbox (%d..%d)(%d..%d)"
-		" b/e %d..%d s= %lu..%lu\n",
+		" b/e %d..%d s= %lu..%lu @ %f\n",
 		waveview,
 		buf->rect.x0,
 		buf->rect.x1,
@@ -987,7 +987,8 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 		waveview->bbox_lrx,
 		waveview->bbox_uly,
 		waveview->bbox_lry,
-		begin, end, s1, s2);
+		begin, end, s1, s2,
+		waveview->samples_per_unit);
 #endif
 
 	/* now ensure that the cache is full and properly

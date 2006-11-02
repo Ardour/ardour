@@ -55,6 +55,7 @@ typedef off_t off64_t;
 #include <fcntl.h>
 
 #include <pbd/error.h>
+#include <pbd/stacktrace.h>
 #include <ardour/destructive_filesource.h>
 #include <ardour/utils.h>
 #include <ardour/session.h>
@@ -290,7 +291,7 @@ DestructiveFileSource::write_unlocked (Sample* data, nframes_t cnt)
 		_capture_end = false;
 		
 		/* move to the correct location place */
-		file_pos = capture_start_frame;
+		file_pos = capture_start_frame - timeline_position;
 		
 		// split cnt in half
 		nframes_t subcnt = cnt / 2;
@@ -344,13 +345,12 @@ DestructiveFileSource::write_unlocked (Sample* data, nframes_t cnt)
 	} else {
 
 		/* in the middle of recording */
-		
 
 		if (write_float (data, file_pos, cnt) != cnt) {
 			return 0;
 		}
 	}
-	
+
 	old_file_pos = file_pos;
 	update_length (file_pos, cnt);
 	file_pos += cnt;
@@ -418,6 +418,7 @@ DestructiveFileSource::set_timeline_position (nframes_t pos)
 int
 DestructiveFileSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nframes_t cnt, double samples_per_unit) const
 {
+	// cerr << _name << " read peaks at " << start << " for " << cnt << " tpos = " << timeline_position << endl;
 	return AudioFileSource::read_peaks (peaks, npeaks, start, cnt, samples_per_unit);
 }
 	

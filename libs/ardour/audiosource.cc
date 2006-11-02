@@ -704,7 +704,7 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 	return ret;
 }
 
-#define DEBUG_PEAK_BUILD
+#undef DEBUG_PEAK_BUILD
 
 int
 AudioSource::build_peaks ()
