@@ -41,7 +41,7 @@ opts.AddOptions(
     PathOption('PREFIX', 'Set the install "prefix"', '/usr/local'),
     BoolOption('SURFACES', 'Build support for control surfaces', 0),
     BoolOption('SYSLIBS', 'USE AT YOUR OWN RISK: CANCELS ALL SUPPORT FROM ARDOUR AUTHORS: Use existing system versions of various libraries instead of internal ones', 0),
-    BoolOption('VERSIONED', 'Add version information to ardour/gtk executable name inside the build directory', 0),
+    BoolOption('VERSIONED', 'Add revision information to ardour/gtk executable name inside the build directory', 0),
     BoolOption('VST', 'Compile with support for VST', 0)
 )
 
@@ -288,32 +288,18 @@ env.Append (BUILDERS = {'VersionBuild' : version_bld})
 #
 
 def versioned_builder(target,source,env):
-    # build ID is composed of a representation of the date of the last CVS transaction
-    # for this (SConscript) file
+    w, r = os.popen2( "svn info | awk '/^Revision:/ { print $2}'")
     
-    try:
-        o = file (source[0].get_dir().get_path() +  '/CVS/Entries', "r")
-    except IOError:
-        print "Could not CVS/Entries for reading"
+    last_revision = r.readline().strip()
+    w.close()
+    r.close()
+    if last_revision == "":
+        print "No SVN info found - versioned executable cannot be built"
         return -1
     
-    last_date = ""
-    lines = o.readlines()
-    for line in lines:
-        if line[0:12] == '/SConscript/':
-            parts = line.split ("/")
-            last_date = parts[3]
-            break
-    o.close ()
+    print "The current build ID is " + last_revision
     
-    if last_date == "":
-        print "No SConscript CVS update info found - versioned executable cannot be built"
-        return -1
-    
-    tag = time.strftime ('%Y%M%d%H%m', time.strptime (last_date))
-    print "The current build ID is " + tag
-    
-    tagged_executable = source[0].get_path() + '-' + tag
+    tagged_executable = source[0].get_path() + '-' + last_revision
     
     if os.path.exists (tagged_executable):
         print "Replacing existing executable with the same build tag."
