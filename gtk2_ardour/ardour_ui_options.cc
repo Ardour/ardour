@@ -280,7 +280,7 @@ void
 ARDOUR_UI::toggle_session_auto_loop ()
 {
 	if (session) {
-		if (Config->get_auto_loop()) {
+		if (session->get_play_loop()) {
 			if (session->transport_rolling()) {
 				transport_roll();
 			} else {
@@ -769,8 +769,6 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		map_solo_model ();
 	} else if (PARAM_IS ("auto-play")) {
 		ActionManager::map_some_state ("Transport", "ToggleAutoPlay", &Configuration::get_auto_play);
-	} else if (PARAM_IS ("auto-loop")) {
-		ActionManager::map_some_state ("Transport", "Loop", &Configuration::get_auto_loop);
 	} else if (PARAM_IS ("auto-return")) {
 		ActionManager::map_some_state ("Transport", "ToggleAutoReturn", &Configuration::get_auto_return);
 	} else if (PARAM_IS ("auto-input")) {

@@ -420,17 +420,19 @@ Locations::clear ()
 {
 	{
 		Glib::Mutex::Lock lm (lock);
-		LocationList::iterator tmp;
+
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
-			tmp = i;
+
+			LocationList::iterator tmp = i;
 			++tmp;
+
 			if (!(*i)->is_end() && !(*i)->is_start()) {
 				locations.erase (i);
 			}
+
 			i = tmp;
 		}
 
-		locations.clear ();
 		current_location = 0;
 	}
 
@@ -579,7 +581,7 @@ Locations::set_state (const XMLNode& node)
 	
 	nlist = node.children();
 
-	locations.clear (); // dangerous
+	locations.clear ();
 	current_location = 0;
 
 	{

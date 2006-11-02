@@ -1840,7 +1840,7 @@ Editor::toggle_playback (bool with_abort)
 	
 	if (session->transport_rolling()) {
 		session->request_stop (with_abort);
-		if (Config->get_auto_loop()) {
+		if (session->get_play_loop()) {
 			session->request_play_loop (false);
 		}
 	} else {

@@ -1000,7 +1000,7 @@ ARDOUR_UI::transport_stop ()
 		return;
 	}
 	
-	if (Config->get_auto_loop()) {
+	if (session->get_play_loop ()) {
 		session->request_play_loop (false);
 	}
 	
@@ -1054,7 +1054,7 @@ ARDOUR_UI::transport_roll ()
 
 	rolling = session->transport_rolling ();
 
-	if (Config->get_auto_loop()) {
+	if (session->get_play_loop()) {
 		session->request_play_loop (false);
 		auto_loop_button.set_active (false);
 		roll_button.set_active (true);
@@ -1072,7 +1072,7 @@ void
 ARDOUR_UI::transport_loop()
 {
 	if (session) {
-		if (Config->get_auto_loop()) {
+		if (session->get_play_loop()) {
 			if (session->transport_rolling()) {
 				Location * looploc = session->locations()->auto_loop_location();
 				if (looploc) {
