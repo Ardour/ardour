@@ -472,7 +472,7 @@ libraries['flac'] = conf.Finish ()
 
 libraries['boost'] = LibraryInfo ()
 conf = Configure (libraries['boost'])
-if conf.CheckHeader ('boost/shared_ptr.hpp', language='CXX') == 0:
+if conf.CheckHeader ('boost/shared_ptr.hpp', language='CXX') == False:
         print "Boost header files do not appear to be installed."
         sys.exit (1)
     

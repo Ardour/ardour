@@ -83,7 +83,7 @@ PluginManager::PluginManager ()
 	}
 
 	refresh ();
-
+	cerr << "ladspa_path = " << ladspa_path << endl;//DEBUG
 	if (_manager == 0) {
 		_manager = this;
 	}
@@ -106,7 +106,8 @@ PluginManager::ladspa_refresh ()
 	_ladspa_plugin_info.clear ();
 
 	if (ladspa_path.length() == 0) {
-		ladspa_path = "/usr/local/lib64/ladspa:/usr/local/lib/ladspa:/usr/lib64/ladspa:/usr/lib/ladspa";
+		ladspa_path = "/usr/local/lib64/ladspa:/usr/local/lib/ladspa:/usr/lib64/ladspa:/usr/lib/ladspa:/Library/Audio/Plug-Ins/LADSPA";
+		cerr << "ladspa_path set" << endl; //DEBUG
 	}
 
 	ladspa_discover_from_path (ladspa_path);
