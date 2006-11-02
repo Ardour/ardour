@@ -116,9 +116,7 @@ style "default_base" = "medium_text"
     menuitemstyle     = 1       # 0 = flat, 1 = 3d-ish (gradient), 2 = 3d-ish (button)
     listviewitemstyle = 1       # 0 = flat, 1 = 3d-ish (gradient)
     progressbarstyle  = 1       # 0 = candy bar, 1 = fancy candy bar, 2 = flat
-    animation         = FALSE
   }
-  
 }
 
 style "base_frame"
