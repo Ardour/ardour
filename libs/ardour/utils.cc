@@ -35,6 +35,7 @@
 #endif
 
 #include <pbd/error.h>
+#include <pbd/stacktrace.h>
 #include <pbd/xml++.h>
 #include <ardour/utils.h>
 
@@ -462,4 +463,8 @@ ARDOUR::auto_style_to_string (AutoStyle as)
 		return X_("Trim");
 		break;
 	}
+}
+
+extern "C" {
+	void c_stacktrace() { stacktrace (cerr); }
 }

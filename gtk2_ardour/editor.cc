@@ -2828,33 +2828,29 @@ Editor::commit_reversible_command ()
 }
 
 bool
-Editor::set_selected_track_from_click (bool press, Selection::Operation op, bool with_undo, bool no_remove)
+Editor::set_selected_track (TimeAxisView& view, Selection::Operation op, bool no_remove)
 {
 	bool commit = false;
 
-	if (!clicked_trackview) {
-		return false;
-	}
-
 	switch (op) {
 	case Selection::Toggle:
-		if (selection->selected (clicked_trackview)) {
+		if (selection->selected (&view)) {
 			if (!no_remove) {
-				selection->remove (clicked_trackview);
+				selection->remove (&view);
 				commit = true;
 			}
 		} else {
-			selection->add (clicked_trackview);
+			selection->add (&view);
 			commit = false;
 		}
 		break;
 
 	case Selection::Set:
-		if (selection->selected (clicked_trackview) && selection->tracks.size() == 1) {
+		if (selection->selected (&view) && selection->tracks.size() == 1) {
 			/* no commit necessary */
 		} 
 
-		selection->set (clicked_trackview);
+		selection->set (&view);
 		break;
 		
 	case Selection::Extend:
@@ -2866,7 +2862,17 @@ Editor::set_selected_track_from_click (bool press, Selection::Operation op, bool
 }
 
 bool
-Editor::set_selected_control_point_from_click (bool press, Selection::Operation op, bool with_undo, bool no_remove)
+Editor::set_selected_track_from_click (Selection::Operation op, bool no_remove)
+{
+	if (!clicked_trackview) {
+		return false;
+	}
+	
+	return set_selected_track (*clicked_trackview, op, no_remove);
+}
+
+bool
+Editor::set_selected_control_point_from_click (Selection::Operation op, bool no_remove)
 {
 	if (!clicked_control_point) {
 		return false;

@@ -31,6 +31,7 @@
 #include <ardour/audiosource.h>
 #include <ardour/audio_diskstream.h>
 #include <pbd/memento_command.h>
+#include <pbd/stacktrace.h>
 
 #include "streamview.h"
 #include "audio_region_view.h"

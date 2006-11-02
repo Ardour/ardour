@@ -16,6 +16,7 @@
 #include "editing.h"
 #include "keyboard_target.h"
 #include "canvas.h"
+#include "selection.h"
 
 namespace ARDOUR {
 	class Session;
@@ -110,6 +111,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void new_playlists () = 0;
 	virtual void copy_playlists () = 0;
 	virtual void clear_playlists () = 0;
+	virtual bool set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove = false) = 0;
 	virtual void set_selected_mixer_strip (TimeAxisView&) = 0;
 	virtual void hide_track_in_display (TimeAxisView& tv) = 0;
 	virtual void set_follow_playhead (bool yn) = 0;

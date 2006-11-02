@@ -316,14 +316,14 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 
 	switch (item_type) {
 	case RegionItem:
-		c1 = set_selected_track_from_click (press, op, true, true);
+		c1 = set_selected_track_from_click (op, true);
 		c2 = set_selected_regionview_from_click (press, op, true);
 		commit = (c1 || c2);
 		break;
 		
 	case RegionViewNameHighlight:
 	case RegionViewName:
-		c1 = set_selected_track_from_click (press, op, true, true);
+		c1 = set_selected_track_from_click (op, true);
 		c2 = set_selected_regionview_from_click (press, op, true);
 		commit = (c1 || c2);
 		break;
@@ -331,17 +331,17 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	case GainAutomationControlPointItem:
 	case PanAutomationControlPointItem:
 	case RedirectAutomationControlPointItem:
-		c1 = set_selected_track_from_click (press, op, true, true);
-		c2 = set_selected_control_point_from_click (press, op, false);
+		c1 = set_selected_track_from_click (op, true);
+		c2 = set_selected_control_point_from_click (op, false);
 		commit = (c1 || c2);
 		break;
 		
 	case StreamItem:
-		commit = set_selected_track_from_click (press, op, true, true);
+		commit = set_selected_track_from_click (op, true);
 		break;
 		    
 	case AutomationTrackItem:
-		commit = set_selected_track_from_click (press, op, true, true);
+		commit = set_selected_track_from_click (op, true);
 		break;
 		
 	default:
@@ -360,7 +360,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		case StreamItem:
 		case RegionItem:
 		case AutomationTrackItem:
-			commit = set_selected_track_from_click (press, op, true, true);
+			commit = set_selected_track_from_click (op, true);
 			break;
 
 		default:

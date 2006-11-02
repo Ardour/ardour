@@ -556,8 +556,6 @@ Playlist::remove_region_internal (boost::shared_ptr<Region>region, bool delay_so
 	RegionList::iterator i;
 	nframes_t old_length = 0;
 
-	cerr << "removing region " << region->name() << " holding = " << holding_state() << endl;
-
 	if (!holding_state()) {
 		old_length = _get_maximum_extent();
 	}

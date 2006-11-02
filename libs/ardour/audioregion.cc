@@ -390,7 +390,7 @@ AudioRegion::read_peaks (PeakData *buf, nframes_t npeaks, nframes_t offset, nfra
 	if (chan_n >= sources.size()) {
 		return 0; 
 	}
-	
+
 	if (sources[chan_n]->read_peaks (buf, npeaks, offset, cnt, samples_per_unit)) {
 		return 0;
 	} else {
@@ -1290,7 +1290,7 @@ void
 AudioRegion::source_offset_changed ()
 {
 	if (boost::dynamic_pointer_cast<DestructiveFileSource>(sources.front())) {
-		set_start (source()->natural_position(), this);
+		// set_start (source()->natural_position(), this);
 		set_position (source()->natural_position(), this);
 	} 
 }

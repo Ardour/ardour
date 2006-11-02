@@ -57,6 +57,7 @@ typedef off_t off64_t;
 #include <pbd/error.h>
 #include <ardour/destructive_filesource.h>
 #include <ardour/utils.h>
+#include <ardour/session.h>
 
 #include "i18n.h"
 
@@ -353,7 +354,7 @@ DestructiveFileSource::write_unlocked (Sample* data, nframes_t cnt)
 	old_file_pos = file_pos;
 	update_length (file_pos, cnt);
 	file_pos += cnt;
-	
+
 	if (_build_peakfiles) {
 		PeakBuildRecord *pbr = 0;
 		
@@ -413,3 +414,10 @@ DestructiveFileSource::set_timeline_position (nframes_t pos)
 {
 	//destructive track timeline postion does not change except at instantion or when header_position_offset (session start) changes
 }
+
+int
+DestructiveFileSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nframes_t cnt, double samples_per_unit) const
+{
+	return AudioFileSource::read_peaks (peaks, npeaks, start, cnt, samples_per_unit);
+}
+	

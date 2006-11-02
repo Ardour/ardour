@@ -1,4 +1,4 @@
- /*
+/*
      Copyright (C) 2000-2002 Paul Davis 
 
      This program is free software; you can redistribute it and/or modify
@@ -16,20 +16,22 @@
      Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
      $Id$
- */
+*/
 
- #include <stdio.h>
- #include <math.h>
- #include <libgnomecanvas/libgnomecanvas.h>
- #include <string.h>
- #include <limits.h>
+#include <stdio.h>
+#include <math.h>
+#include <libgnomecanvas/libgnomecanvas.h>
+#include <string.h>
+#include <limits.h>
 
- #include <ardour/dB.h>
+#include <ardour/dB.h>
 
- #include "canvas-waveview.h"
- #include "rgb_macros.h"
+#include "canvas-waveview.h"
+#include "rgb_macros.h"
 
- enum {
+extern void c_stacktrace();
+
+enum {
 	 PROP_0,
 	 PROP_DATA_SRC,
 	 PROP_CHANNEL,
@@ -48,66 +50,66 @@
 	 PROP_WAVE_COLOR,
 	 PROP_RECTIFIED,
 	 PROP_REGION_START
- };
+};
 
- static void gnome_canvas_waveview_class_init     (GnomeCanvasWaveViewClass *class);
+static void gnome_canvas_waveview_class_init     (GnomeCanvasWaveViewClass *class);
 
- static void gnome_canvas_waveview_init           (GnomeCanvasWaveView      *waveview);
+static void gnome_canvas_waveview_init           (GnomeCanvasWaveView      *waveview);
 
- static void gnome_canvas_waveview_destroy        (GtkObject            *object);
+static void gnome_canvas_waveview_destroy        (GtkObject            *object);
 
- static void gnome_canvas_waveview_set_property   (GObject        *object,
+static void gnome_canvas_waveview_set_property   (GObject        *object,
 						   guint           prop_id,
 						   const GValue   *value,
 						   GParamSpec     *pspec);
- static void gnome_canvas_waveview_get_property   (GObject        *object,
+static void gnome_canvas_waveview_get_property   (GObject        *object,
 						   guint           prop_id,
 						   GValue         *value,
 						   GParamSpec     *pspec);
 
- static void   gnome_canvas_waveview_update       (GnomeCanvasItem *item,
+static void   gnome_canvas_waveview_update       (GnomeCanvasItem *item,
 						   double          *affine,
 						   ArtSVP          *clip_path,
 						   int              flags);
 
- static void   gnome_canvas_waveview_bounds       (GnomeCanvasItem *item,
+static void   gnome_canvas_waveview_bounds       (GnomeCanvasItem *item,
 						   double          *x1,
 						   double          *y1,
 						   double          *x2,
 						   double          *y2);
 
- static double gnome_canvas_waveview_point        (GnomeCanvasItem  *item,
+static double gnome_canvas_waveview_point        (GnomeCanvasItem  *item,
 						   double            x,
 						   double            y,
 						   int               cx,
 						   int               cy,
 						   GnomeCanvasItem **actual_item);
 
- static void gnome_canvas_waveview_render         (GnomeCanvasItem *item,
+static void gnome_canvas_waveview_render         (GnomeCanvasItem *item,
 						   GnomeCanvasBuf  *buf);
 
- static void gnome_canvas_waveview_draw           (GnomeCanvasItem *item,
+static void gnome_canvas_waveview_draw           (GnomeCanvasItem *item,
 						   GdkDrawable     *drawable,
 						   int              x,
 						   int              y,
 						   int              w,
 						   int              h);
 
- static void gnome_canvas_waveview_set_data_src   (GnomeCanvasWaveView *,
+static void gnome_canvas_waveview_set_data_src   (GnomeCanvasWaveView *,
 						   void *);
 
- static void gnome_canvas_waveview_set_channel    (GnomeCanvasWaveView *,
+static void gnome_canvas_waveview_set_channel    (GnomeCanvasWaveView *,
 						   guint32);
 
- static gint32 gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview,
+static gint32 gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview,
 						   gulong               start_sample,
 						   gulong               end_sample);
 
- static GnomeCanvasItemClass *parent_class;
+static GnomeCanvasItemClass *parent_class;
 
- GType
- gnome_canvas_waveview_get_type (void)
- {
+GType
+gnome_canvas_waveview_get_type (void)
+{
 	 static GType waveview_type;
 
 	 if (!waveview_type) {
@@ -131,9 +133,9 @@
 	 return waveview_type;
  }
 
- static void
- gnome_canvas_waveview_class_init (GnomeCanvasWaveViewClass *class)
- {
+static void
+gnome_canvas_waveview_class_init (GnomeCanvasWaveViewClass *class)
+{
 	 GObjectClass *gobject_class;
 	 GtkObjectClass *object_class;
 	 GnomeCanvasItemClass *item_class;
@@ -266,7 +268,7 @@
 	 item_class->point = gnome_canvas_waveview_point;
 	 item_class->render = gnome_canvas_waveview_render;
 	 item_class->draw = gnome_canvas_waveview_draw;
- }
+}
 
 GnomeCanvasWaveViewCache*
 gnome_canvas_waveview_cache_new ()
@@ -331,6 +333,7 @@ gnome_canvas_waveview_destroy (GtkObject *object)
 }
 
 #define DEBUG_CACHE 0
+#undef CACHE_MEMMOVE_OPTIMIZATION
 
 static gint32
 gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_sample, gulong end_sample)
@@ -345,6 +348,10 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 	gulong copied;
 	GnomeCanvasWaveViewCache *cache;
 	float* gain;
+#ifdef CACHE_MEMMOVE_OPTIMIZATION
+	gulong present_frames;
+	gulong present_entries;
+#endif
 
 	cache = waveview->cache;
 
@@ -422,7 +429,6 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 
 	ostart = new_cache_start;
 
-#undef CACHE_MEMMOVE_OPTIMIZATION
 #ifdef CACHE_MEMMOVE_OPTIMIZATION
 	
 	/* data is not entirely in the cache, so go fetch it, making sure to fill the cache */

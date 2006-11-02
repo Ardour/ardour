@@ -429,8 +429,10 @@ class Editor : public PublicEditor
 
 	void catch_vanishing_regionview (RegionView *);
 
-	bool set_selected_control_point_from_click (bool press, Selection::Operation op = Selection::Set, bool with_undo = true, bool no_remove=false);
-	bool set_selected_track_from_click (bool press, Selection::Operation op = Selection::Set, bool with_undo = true, bool no_remove=false);
+	bool set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove=false);
+
+	bool set_selected_control_point_from_click (Selection::Operation op = Selection::Set, bool no_remove=false);
+	bool set_selected_track_from_click (Selection::Operation op = Selection::Set, bool no_remove=false);
 	bool set_selected_regionview_from_click (bool press, Selection::Operation op = Selection::Set, bool no_track_remove=false);
 
 	void set_selected_regionview_from_region_list (boost::shared_ptr<ARDOUR::Region> region, Selection::Operation op = Selection::Set);

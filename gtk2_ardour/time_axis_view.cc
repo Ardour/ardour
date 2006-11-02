@@ -286,18 +286,8 @@ TimeAxisView::controls_ebox_button_release (GdkEventButton* ev)
 void
 TimeAxisView::selection_click (GdkEventButton* ev)
 {
-	if (Keyboard::modifier_state_contains (ev->state, Keyboard::Shift)) {
-
-		if (editor.get_selection().selected (this)) {
-			editor.get_selection().remove (this);
-		} else {
-			editor.get_selection().add (this);
-		}
-
-	} else {
-
-		editor.get_selection().set (this);
-	}
+	Selection::Operation op = Keyboard::selection_type (ev->state);
+	editor.set_selected_track (*this, op, false);
 }
 
 void
