@@ -110,7 +110,7 @@ XMLTree::write(void) const
 	doc = xmlNewDoc((xmlChar *) "1.0");
 	xmlSetDocCompressMode(doc, _compression);
 	writenode(doc, _root, doc->children, 1);
-	result = xmlSaveFormatFile(_filename.c_str(), doc, 1);
+	result = xmlSaveFormatFileEnc(_filename.c_str(), doc, "UTF-8", 1);
 	xmlFreeDoc(doc);
 	
 	if (result == -1) {
