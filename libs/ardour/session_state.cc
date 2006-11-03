@@ -185,7 +185,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	/* default short fade = 15ms */
 
 	Crossfade::set_short_xfade_length ((nframes_t) floor (Config->get_short_xfade_seconds() * frame_rate()));
-	DestructiveFileSource::setup_standard_crossfades (frame_rate());
+	SndFileSource::setup_standard_crossfades (frame_rate());
 
 	last_mmc_step.tv_sec = 0;
 	last_mmc_step.tv_usec = 0;
@@ -838,13 +838,12 @@ Session::state(bool full_state)
 			boost::shared_ptr<AudioFileSource> fs;
 
 			if ((fs = boost::dynamic_pointer_cast<AudioFileSource> (siter->second)) != 0) {
-				boost::shared_ptr<DestructiveFileSource> dfs = boost::dynamic_pointer_cast<DestructiveFileSource> (fs);
 
 				/* destructive file sources are OK if they are empty, because
 				   we will re-use them every time.
 				*/
 
-				if (!dfs) {
+				if (!fs->destructive()) {
 					if (fs->length() == 0) {
 						continue;
 					}

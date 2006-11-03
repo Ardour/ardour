@@ -313,7 +313,9 @@ AudioRegion::~AudioRegion ()
 bool
 AudioRegion::verify_length (nframes_t len)
 {
-	if (boost::dynamic_pointer_cast<DestructiveFileSource>(source())) {
+	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(source());
+
+	if (afs && afs->destructive()) {
 		return true;
 	}
 
@@ -328,7 +330,9 @@ AudioRegion::verify_length (nframes_t len)
 bool
 AudioRegion::verify_start_and_length (nframes_t new_start, nframes_t new_length)
 {
-	if (boost::dynamic_pointer_cast<DestructiveFileSource>(source())) {
+	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(source());
+
+	if (afs && afs->destructive()) {
 		return true;
 	}
 
@@ -342,7 +346,9 @@ AudioRegion::verify_start_and_length (nframes_t new_start, nframes_t new_length)
 bool
 AudioRegion::verify_start (nframes_t pos)
 {
-	if (boost::dynamic_pointer_cast<DestructiveFileSource>(source())) {
+	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(source());
+
+	if (afs && afs->destructive()) {
 		return true;
 	}
 
@@ -357,7 +363,9 @@ AudioRegion::verify_start (nframes_t pos)
 bool
 AudioRegion::verify_start_mutable (nframes_t& new_start)
 {
-	if (boost::dynamic_pointer_cast<DestructiveFileSource>(source())) {
+	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(source());
+
+	if (afs && afs->destructive()) {
 		return true;
 	}
 
@@ -1289,7 +1297,9 @@ AudioRegion::speed_mismatch (float sr) const
 void
 AudioRegion::source_offset_changed ()
 {
-	if (boost::dynamic_pointer_cast<DestructiveFileSource>(sources.front())) {
+	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(sources.front());
+
+	if (afs && afs->destructive()) {
 		// set_start (source()->natural_position(), this);
 		set_position (source()->natural_position(), this);
 	} 

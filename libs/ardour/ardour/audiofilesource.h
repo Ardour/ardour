@@ -95,6 +95,9 @@ class AudioFileSource : public AudioSource {
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
 
+	bool destructive() const { return (_flags & Destructive); }
+	virtual bool set_destructive (bool yn) { return false; }
+
 	/* this should really be protected, but C++ is getting stricter
 	   and creating slots from protected member functions is starting
 	   to cause issues.

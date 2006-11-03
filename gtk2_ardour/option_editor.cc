@@ -318,8 +318,11 @@ OptionEditor::destructo_xfade_adjustment_changed ()
 	float val = destructo_xfade_adjustment.get_value();
 
 	/* val is in msecs */
+
 	
 	Config->set_destructive_xfade_msecs ((uint32_t) floor (val));
+
+	cerr << "set destructo fade to " << Config->get_destructive_xfade_msecs () << endl;
 
 	if (session) {
 		SndFileSource::setup_standard_crossfades (session->frame_rate());

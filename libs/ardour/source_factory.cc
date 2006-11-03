@@ -55,37 +55,25 @@ SourceFactory::setup_peakfile (boost::shared_ptr<Source> s)
 boost::shared_ptr<Source>
 SourceFactory::create (Session& s, const XMLNode& node)
 {
-	if (node.property (X_("destructive")) != 0) {
-
-		boost::shared_ptr<Source> ret (new DestructiveFileSource (s, node));
+	try {
+		boost::shared_ptr<Source> ret (new CoreAudioSource (s, node));
 		if (setup_peakfile (ret)) {
 			return boost::shared_ptr<Source>();
 		}
 		SourceCreated (ret);
 		return ret;
-		
-	} else {
-		
-		try {
-			boost::shared_ptr<Source> ret (new CoreAudioSource (s, node));
-			if (setup_peakfile (ret)) {
-				return boost::shared_ptr<Source>();
-			}
-			SourceCreated (ret);
-			return ret;
-		} 
-		
-		
-		catch (failed_constructor& err) {
-			boost::shared_ptr<Source> ret (new SndFileSource (s, node));
-			if (setup_peakfile (ret)) {
-				return boost::shared_ptr<Source>();
-			}
-			SourceCreated (ret);
-			return ret;
-		}
-	}
+	} 
 	
+	
+	catch (failed_constructor& err) {
+		boost::shared_ptr<Source> ret (new SndFileSource (s, node));
+		if (setup_peakfile (ret)) {
+			return boost::shared_ptr<Source>();
+		}
+		SourceCreated (ret);
+		return ret;
+	}
+
 	return boost::shared_ptr<Source>();
 }
 
@@ -94,24 +82,12 @@ SourceFactory::create (Session& s, const XMLNode& node)
 boost::shared_ptr<Source>
 SourceFactory::create (Session& s, const XMLNode& node)
 {
-	if (node.property (X_("destructive")) != 0) {
-		
-		boost::shared_ptr<Source> ret (new DestructiveFileSource (s, node));
-		if (setup_peakfile (ret)) {
-			return boost::shared_ptr<Source>();
-		}
-		SourceCreated (ret);
-		return ret;
-		
-	} else {
-		
-		boost::shared_ptr<Source> ret (new SndFileSource (s, node));
-		if (setup_peakfile (ret)) {
-			return boost::shared_ptr<Source>();
-		}
-		SourceCreated (ret);
-		return ret;
+	boost::shared_ptr<Source> ret (new SndFileSource (s, node));
+	if (setup_peakfile (ret)) {
+		return boost::shared_ptr<Source>();
 	}
+	SourceCreated (ret);
+	return ret;
 }
 
 #endif // HAVE_COREAUDIO
@@ -120,37 +96,42 @@ SourceFactory::create (Session& s, const XMLNode& node)
 boost::shared_ptr<Source>
 SourceFactory::createReadable (Session& s, string idstr, AudioFileSource::Flag flags, bool announce)
 {
-	if (flags & Destructive) {
-		boost::shared_ptr<Source> ret (new DestructiveFileSource (s, idstr, flags));
-		if (setup_peakfile (ret)) {
-			return boost::shared_ptr<Source>();
-		}
-		if (announce) {
-			SourceCreated (ret);
-		}
-		return ret;
-	}
+	if (!(flags & Destructive)) {
 
-	try {
-		boost::shared_ptr<Source> ret (new CoreAudioSource (s, idstr, flags));
-		if (setup_peakfile (ret)) {
-			return boost::shared_ptr<Source>();
+		try {
+			boost::shared_ptr<Source> ret (new CoreAudioSource (s, idstr, flags));
+			if (setup_peakfile (ret)) {
+				return boost::shared_ptr<Source>();
+			}
+			if (announce) {
+				SourceCreated (ret);
+			}
+			return ret;
 		}
-		if (announce) {
-			SourceCreated (ret);
+		
+		catch (failed_constructor& err) {
+			boost::shared_ptr<Source> ret (new SndFileSource (s, idstr, flags));
+			if (setup_peakfile (ret)) {
+				return boost::shared_ptr<Source>();
+			}
+			if (announce) {
+				SourceCreated (ret);
+			}
+			return ret;
 		}
-		return ret;
-	}
 
-	catch (failed_constructor& err) {
-		boost::shared_ptr<Source> ret (new SndFileSource (s, idstr, flags));
-		if (setup_peakfile (ret)) {
-			return boost::shared_ptr<Source>();
+	} else {
+
+		catch (failed_constructor& err) {
+			boost::shared_ptr<Source> ret (new SndFileSource (s, idstr, flags));
+			if (setup_peakfile (ret)) {
+				return boost::shared_ptr<Source>();
+			}
+			if (announce) {
+				SourceCreated (ret);
+			}
+			return ret;
 		}
-		if (announce) {
-			SourceCreated (ret);
-		}
-		return ret;
 	}
 
 	return boost::shared_ptr<Source>();
@@ -178,30 +159,20 @@ SourceFactory::createWritable (Session& s, std::string path, bool destructive, n
 {
 	/* this might throw failed_constructor(), which is OK */
 	
-	if (destructive) {
-		boost::shared_ptr<Source> ret (new DestructiveFileSource (s, path,
-									  Config->get_native_file_data_format(),
-									  Config->get_native_file_header_format(),
-									  rate));
-		if (setup_peakfile (ret)) {
-			return boost::shared_ptr<Source>();
-		}
-		if (announce) {
-			SourceCreated (ret);
-		}
-		return ret;
-		
-	} else {
-		boost::shared_ptr<Source> ret (new SndFileSource (s, path, 
-								  Config->get_native_file_data_format(),
-								  Config->get_native_file_header_format(),
-								  rate));
-		if (setup_peakfile (ret)) {
-			return boost::shared_ptr<Source>();
-		}
-		if (announce) {
-			SourceCreated (ret);
-		}
-		return ret;
+	boost::shared_ptr<Source> ret (new SndFileSource 
+				       (s, path, 
+					Config->get_native_file_data_format(),
+					Config->get_native_file_header_format(),
+					rate,
+					(destructive ? SndFileSource::default_writable_flags : 
+					 AudioFileSource::Flag 
+					 (SndFileSource::default_writable_flags | AudioFileSource::Destructive))));
+
+	if (setup_peakfile (ret)) {
+		return boost::shared_ptr<Source>();
 	}
+	if (announce) {
+		SourceCreated (ret);
+	}
+	return ret;
 }

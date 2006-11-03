@@ -291,6 +291,11 @@ AudioFileSource::set_state (const XMLNode& node)
 		_is_embedded = false;
 	}
 
+	if ((prop = node.property (X_("destructive"))) != 0) {
+		/* old style, from the period when we had DestructiveFileSource */
+		_flags = Flag (_flags | Destructive);
+	}
+
 	return 0;
 }
 
