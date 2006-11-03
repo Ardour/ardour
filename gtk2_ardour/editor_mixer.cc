@@ -49,7 +49,7 @@ Editor::cms_deleted ()
 void
 Editor::show_editor_mixer (bool yn)
 {
-	show_editor_mixer_when_tracks_arrive = true;
+	show_editor_mixer_when_tracks_arrive = false;
 
 	if (yn) {
 

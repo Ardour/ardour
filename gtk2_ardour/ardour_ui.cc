@@ -1619,7 +1619,10 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 
 		if (response == Gtk::RESPONSE_CANCEL || response == Gtk::RESPONSE_DELETE_EVENT) {
 
-		        quit();
+			if (!session) {
+				quit();
+			}
+			new_session_dialog->hide ();
 			return;
 
 		} else if (response == Gtk::RESPONSE_NONE) {

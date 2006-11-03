@@ -322,7 +322,7 @@ OptionEditor::destructo_xfade_adjustment_changed ()
 	Config->set_destructive_xfade_msecs ((uint32_t) floor (val));
 
 	if (session) {
-		DestructiveFileSource::setup_standard_crossfades (session->frame_rate());
+		SndFileSource::setup_standard_crossfades (session->frame_rate());
 	} 
 }
 
