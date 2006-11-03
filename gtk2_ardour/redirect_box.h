@@ -49,18 +49,19 @@
 
 class MotionController;
 class PluginSelector;
+class PluginUIWindow;
 class RouteRedirectSelection;
 
 namespace ARDOUR {
+	class Connection;
+	class Insert;
+	class Plugin;
+	class PluginInsert;
+	class PortInsert;
 	class Route;
 	class Send;
-	class Insert;
 	class Session;
-	class PortInsert;
-	class Connection;
-	class Plugin;
 }
-
 
 class RedirectBox : public Gtk::HBox
 {
@@ -217,6 +218,9 @@ class RedirectBox : public Gtk::HBox
 	static void rb_activate_all ();
 	static void rb_deactivate_all ();
 	static void rb_edit ();
+	
+	void route_name_changed (void* src, PluginUIWindow* plugin_ui, boost::shared_ptr<ARDOUR::PluginInsert> pi);
+	std::string generate_redirect_title (boost::shared_ptr<ARDOUR::PluginInsert> pi);
 };
 
 #endif /* __ardour_gtk_redirect_box__ */

@@ -118,6 +118,7 @@ PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, bool scr
 PluginUIWindow::~PluginUIWindow ()
 {
 }
+
 bool
 PluginUIWindow::on_key_press_event (GdkEventKey* event)
 {

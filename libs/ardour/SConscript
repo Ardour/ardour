@@ -14,7 +14,7 @@ ardour = env.Copy()
 
 domain = 'libardour'
 
-ardour.Append(DOMAIN = domain, MAJOR = 1, MINOR = 0, MICRO = 0)
+ardour.Append(DOMAIN = domain, MAJOR = 2, MINOR = 0, MICRO = 0)
 ardour.Append(CXXFLAGS = "-DPACKAGE=\\\"" + domain + "\\\"")
 ardour.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
 ardour.Append(PACKAGE = domain)

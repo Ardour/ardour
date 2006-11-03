@@ -759,6 +759,36 @@ MixerStrip::output_changed (IOChange change, void *src)
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &MixerStrip::update_output_display));
 }
 
+void 
+MixerStrip::comment_editor_done_editing() {
+	string str =  comment_area->get_buffer()->get_text();
+	if (_route->comment() != str) {
+		_route->set_comment (str, this);
+
+		switch (_width) {
+		   
+		case Wide:
+			if (! str.empty()) {
+				comment_button.set_label (_("*Comments*"));
+			} else {
+				comment_button.set_label (_("Comments"));
+			}
+			break;
+		   
+		case Narrow:
+			if (! str.empty()) {
+				comment_button.set_label (_("*Cmt*"));
+			} else {
+				comment_button.set_label (_("Cmt"));
+			} 
+			break;
+		}
+		 
+		ARDOUR_UI::instance()->tooltips().set_tip (comment_button, 
+				str.empty() ? _("Click to Add/Edit Comments") : str);
+	}
+}
+
 void
 MixerStrip::comment_button_clicked ()
 {
@@ -766,38 +796,13 @@ MixerStrip::comment_button_clicked ()
 		setup_comment_editor ();
 	}
 
-        int x, y, cw_width, cw_height;
+    int x, y, cw_width, cw_height;
 
 	if (comment_window->is_visible()) {
-	       string str =  comment_area->get_buffer()->get_text();
-	       if (_route->comment() != str) {
-		 _route->set_comment (str, this);
+		comment_window->hide ();
+		return;
+	}
 
-		 switch (_width) {
-		   
-		 case Wide:
-		   if (! str.empty()) {
-		     comment_button.set_label (_("*Comments*"));
-		   } else {
-		     comment_button.set_label (_("Comments"));
-		      }
-		   break;
-		   
-		 case Narrow:
-		   if (! str.empty()) {
-		     comment_button.set_label (_("*Cmt*"));
-		   } else {
-		     comment_button.set_label (_("Cmt"));
-		   } 
-		   break;
-		 }
-		 
-		 ARDOUR_UI::instance()->tooltips().set_tip (comment_button, 
-							    str.empty() ? _("Click to Add/Edit Comments") : str);
-	       }
-	       comment_window->hide ();
-	       return;
-	} 
 	comment_window->get_size (cw_width, cw_height);
 	comment_window->get_position(x, y);
 	comment_window->move(x, y - (cw_height / 2) - 45);
@@ -808,7 +813,6 @@ MixerStrip::comment_button_clicked ()
 
 	comment_window->show();
 	comment_window->present();
-
 }
 
 void
@@ -821,6 +825,7 @@ MixerStrip::setup_comment_editor ()
 	comment_window = new ArdourDialog (title, false);
 	comment_window->set_position (Gtk::WIN_POS_MOUSE);
 	comment_window->set_skip_taskbar_hint (true);
+	comment_window->signal_hide().connect (mem_fun(*this, &MixerStrip::comment_editor_done_editing));
 
 	comment_area = manage (new TextView());
 	comment_area->set_name ("MixerTrackCommentArea");

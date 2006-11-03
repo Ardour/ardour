@@ -189,7 +189,7 @@ About::About ()
 		       "under certain conditions; see the file COPYING for details.\n"));
 	set_name (X_("ardour"));
 	set_website (X_("http://ardour.org/"));
-	set_website_label (X_("visit http://www.ardour.org/"));
+	set_website_label (_("visit http://www.ardour.org/"));
 	set_version ((string_compose(_("%1\n(built from revision %2)"),
 				     VERSIONSTRING, 
 				     gtk_ardour_revision)));

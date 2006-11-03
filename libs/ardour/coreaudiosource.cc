@@ -84,10 +84,6 @@ CoreAudioSource::init (string idstr)
 		error << string_compose ("CoreAudioSource: %1 (%2)", cax.mOperation, name()) << endmsg;
 		throw failed_constructor ();
 	}
-	
-	if (_build_peakfiles) {
-		_need_peakfile = true;
-	}
 }
 
 CoreAudioSource::~CoreAudioSource ()
