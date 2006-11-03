@@ -156,15 +156,14 @@ boost::shared_ptr<Source>
 SourceFactory::createWritable (Session& s, std::string path, bool destructive, nframes_t rate, bool announce)
 {
 	/* this might throw failed_constructor(), which is OK */
-	
+
 	boost::shared_ptr<Source> ret (new SndFileSource 
 				       (s, path, 
 					Config->get_native_file_data_format(),
 					Config->get_native_file_header_format(),
 					rate,
-					(destructive ? SndFileSource::default_writable_flags : 
-					 AudioFileSource::Flag 
-					 (SndFileSource::default_writable_flags | AudioFileSource::Destructive))));
+					(destructive ? AudioFileSource::Flag (SndFileSource::default_writable_flags | AudioFileSource::Destructive) :
+					 SndFileSource::default_writable_flags)));	
 
 	if (setup_peakfile (ret)) {
 		return boost::shared_ptr<Source>();

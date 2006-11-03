@@ -291,7 +291,7 @@ compute_equal_power_fades (nframes_t nframes, float* in, float* out)
 	const float pan_law_attenuation = -3.0f;
 	const float scale = 2.0f - 4.0f * powf (10.0f,pan_law_attenuation/20.0f);
 
-	for (unsigned long n = 0; n < nframes; ++n) {
+	for (nframes_t n = 0; n < nframes; ++n) {
 		float inVal = in[n];
 		float outVal = 1 - inVal;
 		out[n] = outVal * (scale * outVal + 1.0f - scale);

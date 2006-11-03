@@ -805,7 +805,7 @@ SndFileSource::crossfade (Sample* data, nframes_t cnt, int fade_in)
 			}
 		}
 
-	} else if (xfade) {
+	} else if (xfade < xfade_frames) {
 
 		gain_t in[xfade];
 		gain_t out[xfade];
@@ -817,6 +817,11 @@ SndFileSource::crossfade (Sample* data, nframes_t cnt, int fade_in)
 		for (nframes_t n = 0; n < xfade; ++n) {
 			xfade_buf[n] = (xfade_buf[n] * out[n]) + (fade_data[n] * in[n]);		
 		}
+
+	} else if (xfade) {
+
+		/* long xfade length, has to be computed across several calls */
+
 	}
 
 	if (xfade) {
@@ -864,8 +869,6 @@ SndFileSource::setup_standard_crossfades (nframes_t rate)
 	*/
 
 	xfade_frames = (nframes_t) floor ((Config->get_destructive_xfade_msecs () / 1000.0) * rate);
-
-	cerr << "based on " << Config->get_destructive_xfade_msecs() << " msecs, xfade_frames = " << xfade_frames << endl;
 
 	if (out_coefficient) {
 		delete [] out_coefficient;
