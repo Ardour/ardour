@@ -880,7 +880,20 @@ Session::state(bool full_state)
 		}
 	}
 
-	node->add_child_nocopy (_locations.get_state());
+	if (full_state) {
+		node->add_child_nocopy (_locations.get_state());
+	} else {
+		// for a template, just create a new Locations, populate it
+		// with the default start and end, and get the state for that.
+		Locations loc;
+		Location* start = new Location(0, 0, _("start"), Location::Flags ((Location::IsMark|Location::IsStart)));
+		Location* end = new Location(0, 0, _("end"), Location::Flags ((Location::IsMark|Location::IsEnd)));
+		start->set_end(0);
+		loc.add (start);
+		end->set_end(compute_initial_length());
+		loc.add (end);
+		node->add_child_nocopy (loc.get_state());
+	}
 	
 	child = node->add_child ("Connections");
 	{
