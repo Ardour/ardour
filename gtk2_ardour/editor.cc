@@ -4004,7 +4004,17 @@ Editor::redisplay_snapshots ()
 	for (vector<string*>::iterator i = states->begin(); i != states->end(); ++i) {
 		string statename = *(*i);
 		TreeModel::Row row = *(snapshot_display_model->append());
-		row[snapshot_display_columns.visible_name] = statename;
+		
+		// we don't have a way of changing the rendering in just one TreeView 
+		// cell so just put an asterisk on each side of the name for now.
+		string display_name;
+		if (statename == session->snap_name()) {
+			display_name = "*"+statename+"*";
+		} else {
+			display_name = statename;
+		}
+		
+		row[snapshot_display_columns.visible_name] = display_name;
 		row[snapshot_display_columns.real_name] = statename;
 	}
 

@@ -973,7 +973,7 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 					} else {
 						ARDOUR_UI::instance()->the_editor().ensure_float (*plugin_ui);
 					}
-					plugin_ui->set_title (RedirectBox::generate_redirect_title (plugin_insert));
+					plugin_ui->set_title (generate_redirect_title (plugin_insert));
 					plugin_insert->set_gui (plugin_ui);
 					
 					// change window title when route name is changed
@@ -1234,7 +1234,7 @@ RedirectBox::route_name_changed (void* src, PluginUIWindow* plugin_ui, boost::sh
 {
 	ENSURE_GUI_THREAD(bind (mem_fun (*this, &RedirectBox::route_name_changed), src, plugin_ui, pi));
 	
-	plugin_ui->set_title (RedirectBox::generate_redirect_title (pi));
+	plugin_ui->set_title (generate_redirect_title (pi));
 }
 
 string 

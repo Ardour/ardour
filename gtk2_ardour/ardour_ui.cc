@@ -1433,7 +1433,6 @@ ARDOUR_UI::snapshot_session ()
 
 	prompter.set_name ("Prompter");
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
-	prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
 	prompter.set_prompt (_("Name of New Snapshot"));
 	prompter.set_initial_text (now);
 	

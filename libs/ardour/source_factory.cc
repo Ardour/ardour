@@ -122,16 +122,14 @@ SourceFactory::createReadable (Session& s, string idstr, AudioFileSource::Flag f
 
 	} else {
 
-		catch (failed_constructor& err) {
-			boost::shared_ptr<Source> ret (new SndFileSource (s, idstr, flags));
-			if (setup_peakfile (ret)) {
-				return boost::shared_ptr<Source>();
-			}
-			if (announce) {
-				SourceCreated (ret);
-			}
-			return ret;
+		boost::shared_ptr<Source> ret (new SndFileSource (s, idstr, flags));
+		if (setup_peakfile (ret)) {
+			return boost::shared_ptr<Source>();
 		}
+		if (announce) {
+			SourceCreated (ret);
+		}
+		return ret;
 	}
 
 	return boost::shared_ptr<Source>();

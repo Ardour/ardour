@@ -179,6 +179,8 @@ SndFileSource::init (string idstr)
 	string::size_type pos;
 	string file;
 
+	// lets try to keep the object initalizations here at the top
+	xfade_buf = 0;
 	interleave_buf = 0;
 	interleave_bufsize = 0;
 	sf = 0;
@@ -213,7 +215,7 @@ SndFileSource::init (string idstr)
 	if (destructive()) {
 		xfade_buf = new Sample[xfade_frames];
 		timeline_position = header_position_offset;
-	} 
+	}
 
 	AudioFileSource::HeaderPositionOffsetChanged.connect (mem_fun (*this, &SndFileSource::handle_header_position_change));
 }
