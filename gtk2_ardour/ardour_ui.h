@@ -309,6 +309,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void control_methods_adjusted ();
 	void mmc_device_id_adjusted ();
 
+	void about_signal_response(int response);
+
   private:
 	Gtk::VBox     top_packer;
 

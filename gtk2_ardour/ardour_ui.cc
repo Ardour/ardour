@@ -1913,9 +1913,16 @@ ARDOUR_UI::show_splash ()
 {
 	if (about == 0) {
 		about = new About();
+		about->signal_response().connect(mem_fun (*this, &ARDOUR_UI::about_signal_response) );
 	}
 	about->present();
 	flush_pending ();
+}
+
+void
+ARDOUR_UI::about_signal_response(int response)
+{
+	hide_splash();
 }
 
 void
