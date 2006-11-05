@@ -38,17 +38,18 @@ ClickBox::ClickBox (Gtk::Adjustment *adjp, const string &name, bool round_to_ste
 	twidth = 0;
 	theight = 0;
 
-	set_name (name);
+
 	add_events (Gdk::BUTTON_RELEASE_MASK|
 		    Gdk::BUTTON_PRESS_MASK|
 		    Gdk::ENTER_NOTIFY_MASK|
 		    Gdk::LEAVE_NOTIFY_MASK);
-	set_label ();
 
 	get_adjustment().signal_value_changed().connect (mem_fun (*this, &ClickBox::set_label));
-
+	signal_style_changed().connect (mem_fun (*this, &ClickBox::style_changed));
 	signal_button_press_event().connect (mem_fun (*this, &ClickBox::button_press_handler));
 	signal_button_release_event().connect (mem_fun (*this, &ClickBox::button_release_handler));
+	set_name (name);
+	set_label ();
 }
 
 ClickBox::~ClickBox ()
@@ -102,6 +103,14 @@ ClickBox::set_label ()
 	queue_draw ();
 }
 
+void
+ClickBox::style_changed (const Glib::RefPtr<Gtk::Style>& ignored)
+{
+
+	layout->context_changed (); 
+	layout->get_pixel_size (twidth, theight);
+}
+
 bool
 ClickBox::on_expose_event (GdkEventExpose *ev)
 {
@@ -136,7 +145,7 @@ ClickBox::on_expose_event (GdkEventExpose *ev)
 		win->draw_rectangle (bg_gc, true, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
 
 		if (twidth && theight) {
-			win->draw_layout (fg_gc, width - (twidth + 2), (height - theight) + 2, layout);
+		  win->draw_layout (fg_gc, (width - twidth) / 2, (height - theight) / 2, layout);
 		}
 	}
 
