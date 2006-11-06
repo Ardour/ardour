@@ -190,9 +190,11 @@ SoundFileBox::play_btn_clicked ()
 		return;
 	}
 
-	static std::map<string, boost::shared_ptr<AudioRegion> > region_cache;
+	typedef std::map<string, boost::shared_ptr<AudioRegion> > RegionCache; 
+	static  RegionCache region_cache;
+	RegionCache::iterator the_region;
 
-	if (region_cache.find (path) == region_cache.end()) {
+	if ((the_region = region_cache.find (path)) == region_cache.end()) {
 		SourceList srclist;
 		boost::shared_ptr<AudioFileSource> afs;
 		
@@ -216,13 +218,18 @@ SoundFileBox::play_btn_clicked ()
 		_session->region_name (newpair.first, Glib::path_get_basename(srclist[0]->name()), false);
 		newpair.second = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (srclist, 0, srclist[0]->length(), newpair.first, 0, Region::DefaultFlags, false));
 
-		region_cache.insert (newpair);
+		pair<RegionCache::iterator,bool> res;
+
+		res = region_cache.insert (newpair);
+		the_region = res.first;
 	}
 
 	play_btn.hide();
 	stop_btn.show();
 
-	_session->audition_region(region_cache[path]);
+	boost::shared_ptr<Region> r = boost::static_pointer_cast<Region> (the_region->second);
+
+	_session->audition_region(r);
 }
 
 void
