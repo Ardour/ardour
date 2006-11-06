@@ -1865,7 +1865,7 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 	MenuList& play_items = play_menu->items();
 	play_menu->set_name ("ArdourContextMenu");
 	
-	play_items.push_back (MenuElem (_("Play from edit cursor")));
+	play_items.push_back (MenuElem (_("Play from edit cursor"), mem_fun(*this, &Editor::play_from_edit_cursor)));
 	play_items.push_back (MenuElem (_("Play from start"), mem_fun(*this, &Editor::play_from_start)));
 	play_items.push_back (MenuElem (_("Play region"), mem_fun(*this, &Editor::play_selected_region)));
 	play_items.push_back (SeparatorElem());
@@ -1950,7 +1950,7 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 	MenuList& play_items = play_menu->items();
 	play_menu->set_name ("ArdourContextMenu");
 	
-	play_items.push_back (MenuElem (_("Play from edit cursor")));
+	play_items.push_back (MenuElem (_("Play from edit cursor"), mem_fun(*this, &Editor::play_from_edit_cursor)));
 	play_items.push_back (MenuElem (_("Play from start"), mem_fun(*this, &Editor::play_from_start)));
 	edit_items.push_back (MenuElem (_("Play"), *play_menu));
 

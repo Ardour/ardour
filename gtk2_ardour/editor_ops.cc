@@ -1088,7 +1088,7 @@ Editor::temporal_zoom (gdouble fpu)
 
 	case ZoomFocusEdit:
 		/* try to keep the edit cursor in the center */
-		if (edit_cursor->current_frame > leftmost_frame + (new_page/2)) {
+		if (edit_cursor->current_frame > new_page/2) {
 			leftmost_after_zoom = edit_cursor->current_frame - (new_page/2);
 		} else {
 			leftmost_after_zoom = 0;
@@ -1852,6 +1852,12 @@ void
 Editor::play_from_start ()
 {
 	session->request_locate (session->current_start_frame(), true);
+}
+
+void
+Editor::play_from_edit_cursor ()
+{
+       session->request_locate (edit_cursor->current_frame, true);
 }
 
 void

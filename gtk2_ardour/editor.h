@@ -893,6 +893,7 @@ class Editor : public PublicEditor
 	void rename_region_finished (bool);
 
 	void play_from_start ();
+	void play_from_edit_cursor ();
 	void play_selected_region ();
 	void audition_selected_region ();
 	void loop_selected_region ();
