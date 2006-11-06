@@ -232,6 +232,8 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 							_route->comment());
 
 	comment_button.signal_clicked().connect (mem_fun(*this, &MixerStrip::comment_button_clicked));
+	comment_button.signal_enter().connect (mem_fun(*this, &MixerStrip::comment_button_refresh));
+	comment_button.signal_leave().connect (mem_fun(*this, &MixerStrip::comment_button_refresh));
 	
 	global_vpacker.set_border_width (0);
 	global_vpacker.set_spacing (0);
@@ -759,6 +761,13 @@ MixerStrip::output_changed (IOChange change, void *src)
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &MixerStrip::update_output_display));
 }
 
+void
+MixerStrip::comment_button_refresh() {
+	if (! _route->comment().empty()) {
+		comment_button.set_state (Gtk::STATE_ACTIVE);
+	}
+}
+
 void 
 MixerStrip::comment_editor_done_editing() {
 	string str =  comment_area->get_buffer()->get_text();
@@ -786,6 +795,12 @@ MixerStrip::comment_editor_done_editing() {
 		 
 		ARDOUR_UI::instance()->tooltips().set_tip (comment_button, 
 				str.empty() ? _("Click to Add/Edit Comments") : str);
+	}
+
+	if (! _route->comment().empty()) {
+		comment_button.set_state (Gtk::STATE_ACTIVE);
+	} else {
+		comment_button.set_state (Gtk::STATE_NORMAL);
 	}
 }
 
