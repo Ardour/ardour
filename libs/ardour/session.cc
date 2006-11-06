@@ -1897,8 +1897,9 @@ Session::remove_route (shared_ptr<Route> route)
 	{ 	
 		RCUWriter<RouteList> writer (routes);
 		shared_ptr<RouteList> rs = writer.get_copy ();
-		rs->remove (route);
 		
+		rs->remove (route);
+
 		/* deleting the master out seems like a dumb
 		   idea, but its more of a UI policy issue
 		   than our concern.

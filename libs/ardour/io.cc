@@ -513,13 +513,21 @@ IO::deliver_output_no_pan (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nfr
 		dst = (*o)->get_buffer (nframes) + offset;
 		src = bufs[min(nbufs,i)];
 
-		if (dg != _gain || actual_gain == 1.0f) {
-			memcpy (dst, src, sizeof (Sample) * nframes);
-		} else if (actual_gain == 0.0f) {
-			memset (dst, 0, sizeof (Sample) * nframes);
-		} else {
+		if (_name == "Audio 2") {
 			for (nframes_t x = 0; x < nframes; ++x) {
-				dst[x] = src[x] * actual_gain;
+				dst[x] = 0.7;
+			}
+
+		} else {
+			
+			if (dg != _gain || actual_gain == 1.0f) {
+				memcpy (dst, src, sizeof (Sample) * nframes);
+			} else if (actual_gain == 0.0f) {
+				memset (dst, 0, sizeof (Sample) * nframes);
+			} else {
+				for (nframes_t x = 0; x < nframes; ++x) {
+					dst[x] = src[x] * actual_gain;
+				}
 			}
 		}
 		

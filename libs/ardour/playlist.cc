@@ -1131,6 +1131,7 @@ Playlist::region_changed_proxy (Change what_changed, boost::weak_ptr<Region> wea
 		return;
 	}
 
+
 	/* this makes a virtual call to the right kind of playlist ... */
 
 	region_changed (what_changed, region);

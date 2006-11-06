@@ -16,7 +16,7 @@ import SCons.Node.FS
 SConsignFile()
 EnsureSConsVersion(0, 96)
 
-version = '2.0beta6.2'
+version = '2.0beta7'
 
 subst_dict = { }
 
@@ -706,7 +706,7 @@ conf = Configure (env)
 have_cxx = conf.TryAction (Action (env['CXX'] + ' --version'))
 if have_cxx[0] != 1:
     print "This system has no functional C++ compiler. You cannot build Ardour from source without one."
-    exit (1)
+    sys.exit (1)
 else:
     print "Congratulations, you have a functioning C++ compiler."
 

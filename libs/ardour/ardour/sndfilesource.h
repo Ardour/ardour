@@ -91,6 +91,8 @@ class SndFileSource : public AudioFileSource {
 	bool          _capture_end;
 	nframes_t      capture_start_frame;
 	nframes_t      file_pos; // unit is frames
+	nframes_t      xfade_out_count;
+	nframes_t      xfade_in_count;
 	Sample*        xfade_buf;
 
 	nframes_t crossfade (Sample* data, nframes_t cnt, int dir);

@@ -2,6 +2,7 @@
 
 import os
 import os.path
+import sys
 import glob
 
 fst_src = glob.glob('*.c')
@@ -22,7 +23,12 @@ c = fst.Object ('vstwin', 'vstwin.c')
 d = fst.Object ('vsti', 'vsti.c')
 
 if fst['VST']:
-    Default([hackSDK,a,b,c,d])
+    if os.access ('vst/aeffectx.h', os.F_OK):
+        Default([hackSDK,a,b,c,d])
+    else:
+        print 'You have not installed the VST SDK in the correct location.'
+        print 'Please see http://ardour.org/building_vst_support for more information'
+        sys.exit (1)
     
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      fst_src + ['SConscript',

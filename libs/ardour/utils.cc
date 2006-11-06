@@ -213,7 +213,7 @@ region_name_from_path (string path)
 	/* remove any "?R", "?L" or "?[a-z]" channel identifier */
 	
 	string::size_type len = path.length();
-	
+
 	if (len > 3 && (path[len-2] == '%' || path[len-2] == '?') && 
 	    (path[len-1] == 'R' || path[len-1] == 'L' || (islower (path[len-1])))) {
 		
