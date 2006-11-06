@@ -864,10 +864,6 @@ void
 AudioRegionView::peaks_ready_handler (uint32_t which)
 {
 	Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &AudioRegionView::create_one_wave), which, false));
-	if (!waves.empty()) {
-		/* all waves created, don't hook into peaks ready anymore */
-		data_ready_connection.disconnect ();		
-	}
 }
 
 void

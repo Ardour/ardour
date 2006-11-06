@@ -531,7 +531,7 @@ AudioPlaylist::set_state (const XMLNode& node)
 	}
 
 	thaw ();
-	in_set_state++;
+	in_set_state--;
 
 	return 0;
 }

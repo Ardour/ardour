@@ -1535,6 +1535,9 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 
 	} else {
 
+		string whole_file_region_name;
+		whole_file_region_name = region_name_from_path (channels[0].write_source->name());
+
 		/* Register a new region with the Session that
 		   describes the entire source. Do this first
 		   so that any sub-regions will obviously be
@@ -1543,7 +1546,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 		
 		try {
 			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, channels[0].write_source->last_capture_start_frame(), total_capture, 
-									     region_name_from_path (channels[0].write_source->name()), 
+									     whole_file_region_name,
 									     0, AudioRegion::Flag (AudioRegion::DefaultFlags|AudioRegion::Automatic|AudioRegion::WholeFile)));
 
 			region = boost::dynamic_pointer_cast<AudioRegion> (rx);
@@ -1566,7 +1569,8 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 		for (buffer_position = channels[0].write_source->last_capture_start_frame(), ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 			
 			string region_name;
-			_session.region_name (region_name, channels[0].write_source->name(), false);
+
+			_session.region_name (region_name, whole_file_region_name, false);
 			
 			// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add region " << region_name << endl;
 			
