@@ -213,12 +213,16 @@ SoundFileBox::play_btn_clicked ()
 			return;
 		}
 
+		string rname;
+
+		_session->region_name (rname, Glib::path_get_basename(srclist[0]->name()), false);
+
 		pair<string,boost::shared_ptr<AudioRegion> > newpair;
-
-		_session->region_name (newpair.first, Glib::path_get_basename(srclist[0]->name()), false);
-		newpair.second = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (srclist, 0, srclist[0]->length(), newpair.first, 0, Region::DefaultFlags, false));
-
 		pair<RegionCache::iterator,bool> res;
+
+		newpair.first = path;
+		newpair.second = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (srclist, 0, srclist[0]->length(), rname, 0, Region::DefaultFlags, false));
+
 
 		res = region_cache.insert (newpair);
 		the_region = res.first;
