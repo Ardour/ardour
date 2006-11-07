@@ -415,6 +415,7 @@ ARDOUR::string_to_auto_state (std::string str)
 
 	fatal << string_compose (_("programming error: %1 %2"), "illegal AutoState string: ", str) << endmsg;
 	/*NOTREACHED*/
+	return Touch;
 }
 
 string 
@@ -435,6 +436,10 @@ ARDOUR::auto_state_to_string (AutoState as)
 	case Touch:
 		return X_("Touch");
 	}
+
+	fatal << string_compose (_("programming error: %1 %2"), "illegal AutoState type: ", as) << endmsg;
+	/*NOTREACHED*/
+	return "";
 }
 
 AutoStyle 
