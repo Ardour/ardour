@@ -328,8 +328,16 @@ Session::Session (AudioEngine &eng,
 
 	cerr << "Loading session " << fullpath << " using snapshot " << snapshot_name << " (2)" << endl;
 
-	n_physical_outputs = max (requested_physical_out, _engine.n_physical_outputs());
-	n_physical_inputs = max (requested_physical_in, _engine.n_physical_inputs());
+	n_physical_outputs = _engine.n_physical_outputs();
+	n_physical_inputs = _engine.n_physical_inputs();
+
+	if (n_physical_inputs) {
+		n_physical_inputs = max (requested_physical_in, n_physical_inputs);
+	}
+
+	if (n_physical_outputs) {
+		n_physical_outputs = max (requested_physical_out, n_physical_outputs);
+	}
 
 	first_stage_init (fullpath, snapshot_name);
 
@@ -1771,12 +1779,12 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 				      << endmsg;
 			}
 			
-			for (uint32_t x = 0; x < bus->n_inputs(); ++x) {
+			for (uint32_t x = 0; n_physical_inputs && x < bus->n_inputs(); ++x) {
 				
 				port = "";
-				
+
 				if (Config->get_input_auto_connect() & AutoConnectPhysical) {
-					port = physinputs[((n+x)%n_physical_inputs)];
+						port = physinputs[((n+x)%n_physical_inputs)];
 				} 
 				
 				if (port.length() && bus->connect_input (bus->input (x), port, this)) {
@@ -1784,7 +1792,7 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 				}
 			}
 			
-			for (uint32_t x = 0; x < bus->n_outputs(); ++x) {
+			for (uint32_t x = 0; n_physical_outputs && x < bus->n_outputs(); ++x) {
 				
 				port = "";
 				
