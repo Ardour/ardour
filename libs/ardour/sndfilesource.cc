@@ -844,7 +844,11 @@ SndFileSource::crossfade (Sample* data, nframes_t cnt, int fade_in)
 nframes_t
 SndFileSource::last_capture_start_frame () const
 {
-	return capture_start_frame;
+	if (destructive()) {
+		return capture_start_frame;
+	} else {
+		return 0;
+	}
 }
 
 void

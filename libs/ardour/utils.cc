@@ -448,6 +448,7 @@ ARDOUR::string_to_auto_style (std::string str)
 
 	fatal << string_compose (_("programming error: %1 %2"), "illegal AutoStyle string: ", str) << endmsg;
 	/*NOTREACHED*/
+	return Trim;
 }
 
 string 
@@ -463,6 +464,10 @@ ARDOUR::auto_style_to_string (AutoStyle as)
 		return X_("Trim");
 		break;
 	}
+
+	fatal << string_compose (_("programming error: %1 %2"), "illegal AutoStyle type: ", as) << endmsg;
+	/*NOTREACHED*/
+	return "";
 }
 
 extern "C" {
