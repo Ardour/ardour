@@ -138,6 +138,34 @@ Editor::ruler_button_press (GdkEventButton* ev)
 		ruler_grabbed_widget = grab_widget;
 	}
 
+	gint x,y;
+	Gdk::ModifierType state;
+
+	/* need to use the correct x,y, the event lies */
+	time_canvas_event_box.get_window()->get_pointer (x, y, state);
+
+	nframes_t where = leftmost_frame + pixel_to_frame (x);
+
+	switch (ev->button) {
+	case 1:
+		/* transport playhead */
+		snap_to (where);
+		session->request_locate (where);
+		break;
+
+	case 2:
+		/* edit cursor */
+		if (snap_type != Editing::SnapToEditCursor) {
+			snap_to (where);
+		}
+		edit_cursor->set_position (where);
+		edit_cursor_clock.set (where);
+		break;
+
+	default:
+		break;
+	}
+
 	return TRUE;
 }
 
@@ -149,7 +177,6 @@ Editor::ruler_button_release (GdkEventButton* ev)
 
 	/* need to use the correct x,y, the event lies */
 	time_canvas_event_box.get_window()->get_pointer (x, y, state);
-
 
 	ruler_pressed_button = 0;
 	
