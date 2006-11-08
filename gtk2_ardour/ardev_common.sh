@@ -8,3 +8,6 @@ export LD_LIBRARY_PATH=libs/surfaces/control_protocol:libs/ardour:libs/midi++2:l
 
 # DYLD_LIBRARY_PATH is for darwin.
 export DYLD_LIBRARY_PATH=$LD_LIBRARY_PATH
+# For the internal clearlooks engine
+export GTK_PATH=$PWD/../libs/clearlooks:~/.ardour2
+

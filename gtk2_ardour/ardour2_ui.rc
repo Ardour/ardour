@@ -85,7 +85,7 @@ style "default_base" = "medium_text"
   GtkButton::default_outside_border = { 0, 0, 0, 0 }
   GtkTreeView::vertical-padding = 0
   GtkTreeView::horizontal-padding = 0
-  GtkTreeView::even-row-color = { 0.10, 0.10, 0.10 }
+  GtkTreeView::even-row-color = { 0, 0, 0.12 }
   GtkTreeView::odd-row-color = { 0, 0, 0 }
   
   fg[NORMAL] = { 0.80, 0.80, 0.80 }	
@@ -94,8 +94,8 @@ style "default_base" = "medium_text"
   fg[INSENSITIVE] = { 0.80, 0.80, 0.80 }	
   fg[SELECTED] = { 0.80, 0.80, 0.80 }	
   
-  bg[NORMAL] = { 0.40, 0.40, 0.40 }
-  bg[ACTIVE] = { 0.40, 0.40, 0.40 }
+  bg[NORMAL] = { 0.35, 0.35, 0.40 }
+  bg[ACTIVE] = { 0.35, 0.35, 0.40 }
   bg[PRELIGHT] = "#565690"
   bg[INSENSITIVE] = { 0.10, 0.10, 0.10 }
   bg[SELECTED] = { 0, 0.40, 0.60 }
@@ -124,7 +124,7 @@ style "default_base" = "medium_text"
 style "base_frame"
 {
 	fg[NORMAL] = { 0.80, 0.80, 0.80 }
-	bg[NORMAL] = { 0.40, 0.40, 0.40 }
+	bg[NORMAL] = { 0.35, 0.35, 0.40 }
 }
 
 style "transport_base" = "medium_bold_text"
@@ -147,11 +147,11 @@ style "default_buttons_menus"
   font_name = "sans 8"
   fg[ACTIVE] = { 1.0, 1.0, 1.0 }
   
-  bg[NORMAL] = { 0.35, 0.35, 0.35 }
+  bg[NORMAL] = { 0.30, 0.30, 0.35 }
   bg[ACTIVE] = "#565690"
-  bg[PRELIGHT] = { 0.20, 0.20, 0.20 }
-  bg[INSENSITIVE] = { 0.20, 0.20, 0.20 }
-  bg[SELECTED] = { 0.20, 0.20, 0.20 }	
+  bg[PRELIGHT] = { 0.15, 0.15, 0.20 }
+  bg[INSENSITIVE] = { 0.15, 0.15, 0.20 }
+  bg[SELECTED] = { 0.15, 0.15, 0.20 }	
 }
 
 style "very_small_button" = "default_buttons_menus"
@@ -250,8 +250,8 @@ style "mixer_red_active_button" = "very_small_button"
 	fg[ACTIVE] = { 0, 1.0, 1.0 }
 	bg[ACTIVE] = { 0.7, 0, 0 }
 
- 	base[INSENSITIVE] = { 0.21, 0.21, 0.21 }
- 	bg[INSENSITIVE] = { 0.21, 0.21, 0.21 }
+ 	base[INSENSITIVE] = { 0.16, 0.16, 0.21 }
+ 	bg[INSENSITIVE] = { 0.16, 0.16, 0.21 }
 }
 
 style "time_button" = "default_buttons_menus"
@@ -279,9 +279,9 @@ style "shuttle_control" = "very_small_text"
 	fg[SELECTED] = { 0.85, 0.92, 0.98 }
 	fg[INSENSITIVE] = { 0.85, 0.92, 0.98 }
 
-	bg[NORMAL] = { 0.31, 0.31, 0.31 }
-	bg[PRELIGHT] = { 0.31, 0.31, 0.31 }
-	bg[INSENSITIVE] = { 0.31, 0.31, 0.31 }
+	bg[NORMAL] = { 0.26, 0.26, 0.31 }
+	bg[PRELIGHT] = { 0.26, 0.26, 0.31 }
+	bg[INSENSITIVE] = { 0.26, 0.26, 0.31 }
 	bg[ACTIVE] = { 0.50, 1.0, 0.50 }
 	bg[SELECTED] = { 1.0, 0.04, 0.04 }
 }
@@ -311,16 +311,16 @@ style "option_entry"  = "default_base"
 	fg[ACTIVE] = { 0.50, 1.0, 1.0 }
 	fg[INSENSITIVE] = { 0.80, 0.80, 0.80 }
 	
-	base[INSENSITIVE] = { 0.12, 0.12, 0.12 }
+	base[INSENSITIVE] = { 0.07, 0.07, 0.12 }
 	
-	bg[NORMAL] = { 0.40, 0.40, 0.40 }
-	bg[ACTIVE] = { 0.40, 0.40, 0.40 }
+	bg[NORMAL] = { 0.35, 0.35, 0.40 }
+	bg[ACTIVE] = { 0.35, 0.35, 0.40 }
 }
 
 style "red_when_active" = "medium_text"
 {
 	fg[NORMAL] = { 0.80, 0.80, 0.80 }
-	bg[NORMAL] = { 0.31, 0.31, 0.31 }
+	bg[NORMAL] = { 0.26, 0.26, 0.31 }
 
 	fg[ACTIVE] = { 0.80, 0.80, 0.80 }
 	bg[ACTIVE] = { 1.0, 0, 0}
