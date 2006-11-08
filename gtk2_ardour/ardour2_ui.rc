@@ -395,7 +395,7 @@ style "medium_entry" = "medium_text"
 	fg[ACTIVE] = { 0.50, 1.0, 1.0 }
 	fg[SELECTED] = { 0.50, 1.0, 0.50 }
 	
-	bg[NORMAL] = { 0.40, 0.40, 0.40 }
+	bg[NORMAL] = { 0.35, 0.35, 0.40 }
 	
 	base[NORMAL] = { 0, 0, 0 }
 	base[ACTIVE] = { 0, 0, 0 }
@@ -417,7 +417,7 @@ style "medium_bold_entry"  = "medium_bold_text"
 	fg[NORMAL] = { 0.50, 1.0, 1.0 }
 	fg[ACTIVE] = { 0.50, 1.0, 1.0 }
 	
-	bg[NORMAL] = { 0.40, 0.40, 0.40 }
+	bg[NORMAL] = { 0.35, 0.35, 0.40 }
 	
 	base[NORMAL] = { 0, 0, 0 }
 	base[ACTIVE] = { 0, 0, 0 }
@@ -446,7 +446,7 @@ style "small_bold_entry" = "small_bold_text"
 	fg[NORMAL] = { 0.50, 1.0, 1.0 }
 	fg[ACTIVE] = { 0.50, 1.0, 1.0 }
 	
-	bg[NORMAL] = { 0.40, 0.40, 0.40 }
+	bg[NORMAL] = { 0.35, 0.35, 0.40 }
 	
 	base[NORMAL] = { 0, 0, 0 }
 	base[ACTIVE] = { 0, 0, 0 }
@@ -529,7 +529,8 @@ style "audio_bus_base"
   font_name = "sans 6"
   fg[NORMAL] = { 0.77, 0.77, 0.72 }	
   fg[NORMAL] = { 0.7, 0.8, 0.2 }	
-  bg[NORMAL] = {0, 0.36, 0.40 }	
+  #bg[NORMAL] = {0, 0.36, 0.40 }
+  bg[NORMAL] = "#464666"	
 }
 
 style "track_name_display"
@@ -553,7 +554,7 @@ style "active_track_name_display"
 
 style "track_separator"
 {
-	bg[NORMAL] = { 0.40, 0.40, 0.40 }
+	bg[NORMAL] = { 0.35, 0.35, 0.40 }
 }
 
 #
@@ -668,7 +669,7 @@ style "plugin_slider"
 
 	fg[NORMAL] = { 0.37, 0.43, 0.52 }
 	fg[ACTIVE] = { 0.37, 0.43, 0.52 }
-	fg[INSENSITIVE] = {0.40, 0.40, 0.40 } # matches default_base
+	fg[INSENSITIVE] = {0.35, 0.35, 0.40 } # matches default_base
 	fg[SELECTED] = { 0.37, 0.43, 0.52 }
 	fg[PRELIGHT] = { 0.37, 0.43, 0.52 }
 
@@ -795,7 +796,7 @@ style "selected_strip_frame"
 style "flashing_alert" = "very_small_text"
 {
 	fg[NORMAL] = { 0.80, 0.80, 0.80 }
-	bg[NORMAL] = { 0.31, 0.31, 0.31 }
+	bg[NORMAL] = { 0.26, 0.26, 0.31 }
 
 	fg[ACTIVE] = { 0.80, 0.80, 0.80 }
 	bg[ACTIVE] = { 1.0, 0, 0}
