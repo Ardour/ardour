@@ -232,8 +232,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 							_route->comment());
 
 	comment_button.signal_clicked().connect (mem_fun(*this, &MixerStrip::comment_button_clicked));
-	comment_button.signal_enter().connect (mem_fun(*this, &MixerStrip::comment_button_refresh));
-	comment_button.signal_leave().connect (mem_fun(*this, &MixerStrip::comment_button_refresh));
 	
 	global_vpacker.set_border_width (0);
 	global_vpacker.set_spacing (0);
@@ -420,8 +418,10 @@ MixerStrip::set_width (Width w)
 		solo_button->set_label (_("solo"));
 
 		if (_route->comment() == "") {
+		       comment_button.unset_bg (STATE_NORMAL);
 		       comment_button.set_label (_("comments"));
 		} else {
+		       comment_button.modify_bg (STATE_NORMAL, color());
 		       comment_button.set_label (_("*comments*"));
 		}
 
@@ -443,8 +443,10 @@ MixerStrip::set_width (Width w)
 		solo_button->set_label (_("S"));
 
 		if (_route->comment() == "") {
+		       comment_button.unset_bg (STATE_NORMAL);
 		       comment_button.set_label (_("Cmt"));
 		} else {
+		       comment_button.modify_bg (STATE_NORMAL, color());
 		       comment_button.set_label (_("*Cmt*"));
 		}
 
@@ -761,12 +763,6 @@ MixerStrip::output_changed (IOChange change, void *src)
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &MixerStrip::update_output_display));
 }
 
-void
-MixerStrip::comment_button_refresh() {
-	if (! _route->comment().empty()) {
-		comment_button.set_state (Gtk::STATE_ACTIVE);
-	}
-}
 
 void 
 MixerStrip::comment_editor_done_editing() {
@@ -778,16 +774,20 @@ MixerStrip::comment_editor_done_editing() {
 		   
 		case Wide:
 			if (! str.empty()) {
+			        comment_button.modify_bg (STATE_NORMAL, color());
 				comment_button.set_label (_("*Comments*"));
 			} else {
+			        comment_button.unset_bg (STATE_NORMAL);
 				comment_button.set_label (_("Comments"));
 			}
 			break;
 		   
 		case Narrow:
 			if (! str.empty()) {
+			        comment_button.modify_bg (STATE_NORMAL, color());
 				comment_button.set_label (_("*Cmt*"));
 			} else {
+			        comment_button.unset_bg (STATE_NORMAL);
 				comment_button.set_label (_("Cmt"));
 			} 
 			break;
@@ -797,11 +797,6 @@ MixerStrip::comment_editor_done_editing() {
 				str.empty() ? _("Click to Add/Edit Comments") : str);
 	}
 
-	if (! _route->comment().empty()) {
-		comment_button.set_state (Gtk::STATE_ACTIVE);
-	} else {
-		comment_button.set_state (Gtk::STATE_NORMAL);
-	}
 }
 
 void

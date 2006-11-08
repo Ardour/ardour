@@ -377,11 +377,11 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s)
 	ARDOUR_UI::instance()->tooltips().set_tip(*btn, 
 			_("Link to an external file"));
 
+	add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_CLOSE);
+
 	btn = add_button (_("Import"), ResponseImport);
 	ARDOUR_UI::instance()->tooltips().set_tip(*btn, 
 			_("Copy a file to the session folder"));
-
-	add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_CLOSE);
 
 	Gtk::HBox *box = manage (new Gtk::HBox());
 

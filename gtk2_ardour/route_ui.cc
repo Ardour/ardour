@@ -119,7 +119,7 @@ RouteUI::mute_press(GdkEventButton* ev)
 				build_mute_menu();
 			}
 
-			mute_menu->popup(0,0);
+			mute_menu->popup(0,ev->time);
 
 		} else {
 
@@ -194,7 +194,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 				build_solo_menu ();
 			}
 
-			solo_menu->popup (1, 0);
+			solo_menu->popup (1, ev->time);
 
 		} else {
 
@@ -494,7 +494,7 @@ RouteUI::build_solo_menu (void)
 	items.push_back (CheckMenuElem(*check));
 	check->show_all();
 
-	items.push_back (SeparatorElem());
+	//items.push_back (SeparatorElem());
 	// items.push_back (MenuElem (_("MIDI Bind"), mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
 	
 }
@@ -537,7 +537,7 @@ RouteUI::build_mute_menu(void)
 	items.push_back (CheckMenuElem(*check));
 	check->show_all();
 
-	items.push_back (SeparatorElem());
+	//items.push_back (SeparatorElem());
 	// items.push_back (MenuElem (_("MIDI Bind"), mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
 }
 
