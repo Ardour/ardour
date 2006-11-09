@@ -412,7 +412,7 @@ class Editor : public PublicEditor
 	CrossfadeView*     clicked_crossfadeview;
 	ControlPoint*      clicked_control_point;
 
-	void get_relevant_audio_tracks (AudioTimeAxisView& base, std::set<AudioTimeAxisView*>& relevant_tracks);
+	void get_relevant_audio_tracks (std::set<AudioTimeAxisView*>& relevant_tracks);
 	void mapover_audio_tracks (sigc::slot<void,AudioTimeAxisView&,uint32_t> sl);
 
 	/* functions to be passed to mapover_audio_tracks(), possibly with sigc::bind()-supplied arguments */
@@ -814,8 +814,8 @@ class Editor : public PublicEditor
 
 	int ensure_cursor (nframes_t* pos);
 
-	void handle_new_audio_region (boost::shared_ptr<ARDOUR::AudioRegion>);
-	void handle_audio_region_removed (boost::shared_ptr<ARDOUR::AudioRegion>);
+	void handle_new_audio_region (boost::weak_ptr<ARDOUR::AudioRegion>);
+	void handle_audio_region_removed (boost::weak_ptr<ARDOUR::AudioRegion>);
 	void add_audio_region_to_region_display (boost::shared_ptr<ARDOUR::AudioRegion>);
 	void region_hidden (boost::shared_ptr<ARDOUR::Region>);
 	void redisplay_regions ();

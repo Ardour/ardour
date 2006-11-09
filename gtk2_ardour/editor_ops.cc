@@ -162,9 +162,9 @@ Editor::remove_clicked_region ()
 void
 Editor::destroy_clicked_region ()
 {
-	int32_t selected = selection->regions.size();
+	uint32_t selected = selection->regions.size();
 
-	if (!session || clicked_regionview == 0 && selected == 0) {
+	if (!session || !selected) {
 		return;
 	}
 
@@ -191,7 +191,7 @@ Do you really want to destroy %1 ?"),
 		return;
 	}
 
-	if (selected > 0) {
+	if (selected) {
 		list<boost::shared_ptr<Region> > r;
 
 		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
@@ -199,9 +199,6 @@ Do you really want to destroy %1 ?"),
 		}
 
 		session->destroy_regions (r);
-
-	} else if (clicked_regionview) {
-		session->destroy_region (clicked_regionview->region());
 	} 
 }
 
@@ -1275,6 +1272,9 @@ Editor::select_all_in_track (Selection::Operation op)
 	case Selection::Extend:
 		/* not defined yet */
 		break;
+	case Selection::Add:
+		selection->add (touched);
+		break;
 	}
 }
 
@@ -1291,6 +1291,7 @@ Editor::select_all (Selection::Operation op)
 	}
 	begin_reversible_command (_("select all"));
 	switch (op) {
+	case Selection::Add:
 	case Selection::Toggle:
 		selection->add (touched);
 		break;
@@ -1348,6 +1349,7 @@ Editor::select_all_within (nframes_t start, nframes_t end, double top, double bo
 
 	begin_reversible_command (_("select all within"));
 	switch (op) {
+	case Selection::Add:
 	case Selection::Toggle:
 		cerr << "toggle\n";
 		selection->add (touched);

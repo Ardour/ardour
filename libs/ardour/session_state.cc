@@ -520,7 +520,6 @@ Session::create (bool& new_session, string* mix_template, nframes_t initial_leng
 	_state_of_the_state = Clean;
 
 	if (save_state (_current_snapshot_name)) {
-		save_history (_current_snapshot_name);
 		return -1;
 	}
 
@@ -2455,6 +2454,8 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		   to them. otherwise we remove the current "nascent"
 		   capture files.
 		*/
+
+		cerr << "checking out source " << i->second->name() << " use_count = " << i->second.use_count() << endl;
 
 		if (i->second.use_count() == 1 && i->second->length() > 0) {
 			dead_sources.push_back (i->second);

@@ -163,10 +163,7 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 
 	ARDOUR::Playlist* playlist() const { return _playlist; }
 
-	void set_playlist (ARDOUR::Playlist*);
-
-	virtual void lock_sources () {}
-	virtual void unlock_sources () {}
+	virtual void set_playlist (ARDOUR::Playlist*);
 
 	/* serialization */
 	

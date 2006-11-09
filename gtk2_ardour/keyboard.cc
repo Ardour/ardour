@@ -796,6 +796,8 @@ Keyboard::modifier_state_equals (guint state, ModifierMask mask)
 Selection::Operation
 Keyboard::selection_type (guint state)
 {
+	/* note that there is no modifier for "Add" */
+
 	if (modifier_state_equals (state, Shift)) {
 		return Selection::Extend;
 	} else if (modifier_state_equals (state, Control)) {

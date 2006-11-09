@@ -1946,7 +1946,7 @@ ARDOUR_UI::display_cleanup_results (Session::cleanup_report& rep, const gchar* l
 				    _("No audio files were ready for cleanup"), 
 				    true,
 				    Gtk::MESSAGE_INFO,
-				    (Gtk::ButtonsType)(Gtk::BUTTONS_CLOSE)  );
+				    (Gtk::ButtonsType)(Gtk::BUTTONS_OK)  );
 		msgd.set_secondary_text (_("If this seems suprising, \n\
 check for any existing snapshots.\n\
 These may still include regions that\n\

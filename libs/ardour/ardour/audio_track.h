@@ -37,6 +37,8 @@ class AudioTrack : public Track
 	AudioTrack (Session&, const XMLNode&);
 	~AudioTrack ();
 
+	int set_mode (TrackMode m); 
+
 	int roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 		nframes_t offset, int declick, bool can_record, bool rec_monitors_input);
 	

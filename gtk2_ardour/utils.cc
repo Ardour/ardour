@@ -362,7 +362,7 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	if (focus) {
 		if (GTK_IS_ENTRY(focus)) {
 			special_handling_of_unmodified_accelerators = true;
-		}
+		} 
 	} 
 
 	/* This exists to allow us to override the way GTK handles

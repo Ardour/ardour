@@ -381,7 +381,7 @@ AudioDiskstream::setup_destructive_playlist ()
 void
 AudioDiskstream::use_destructive_playlist ()
 {
-	/* this is called from the XML-based constructor. when its done,
+	/* this is called from the XML-based constructor or ::set_destructive. when called,
 	   we already have a playlist and a region, but we need to
 	   set up our sources for write. we use the sources associated 
 	   with the (presumed single, full-extent) region.
@@ -400,6 +400,10 @@ AudioDiskstream::use_destructive_playlist ()
 		throw failed_constructor();
 	}
 
+	/* be sure to stretch the region out to the maximum length */
+
+	region->set_length (max_frames - region->position(), this);
+
 	uint32_t n;
 	ChannelList::iterator chan;
 
@@ -407,6 +411,10 @@ AudioDiskstream::use_destructive_playlist ()
 		(*chan).write_source = boost::dynamic_pointer_cast<AudioFileSource>(region->source (n));
 		assert((*chan).write_source);
 		(*chan).write_source->set_allow_remove_if_empty (false);
+
+		/* this might be false if we switched modes, so force it */
+
+		(*chan).write_source->set_destructive (true);
 	}
 
 	/* the source list will never be reset for a destructive track */
@@ -1584,9 +1592,9 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 				continue; /* XXX is this OK? */
 			}
 			
-			_last_capture_regions.push_back (region);
+			region->GoingAway.connect (bind (mem_fun (*this, &Diskstream::remove_region_from_last_capture), boost::weak_ptr<Region>(region)));
 			
-			// cerr << "add new region, buffer position = " << buffer_position << " @ " << (*ci)->start << endl;
+			_last_capture_regions.push_back (region);
 			
 			i_am_the_modifier++;
 			_playlist->add_region (region, (*ci)->start);
@@ -2227,4 +2235,61 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 	_playlist->add_region (region, position);
 
 	return 0;
+}
+
+int
+AudioDiskstream::set_destructive (bool yn)
+{
+	if (yn != destructive()) {
+		
+		if (yn) {
+			if (!can_become_destructive ()) {
+				return -1;
+			}
+			_flags |= Destructive;
+			use_destructive_playlist ();
+		} else {
+			_flags &= ~Destructive;
+			reset_write_sources (true, true);
+		}
+	}
+
+	return 0;
+}
+
+bool
+AudioDiskstream::can_become_destructive () const
+{
+	if (!_playlist) {
+		return false;
+	}
+
+	/* is there only one region ? */
+
+	if (_playlist->n_regions() != 1) {
+		return false;
+	}
+
+	boost::shared_ptr<Region> first = _playlist->find_next_region (_session.current_start_frame(), Start, 1);
+	assert (first);
+
+	/* do the source(s) for the region cover the session start position ? */
+	
+	if (first->position() != _session.current_start_frame()) {
+		if (first->start() > _session.current_start_frame()) {
+			return false;
+		}
+	}
+
+	/* is the source used by only 1 playlist ? */
+
+	boost::shared_ptr<AudioRegion> afirst = boost::dynamic_pointer_cast<AudioRegion> (first);
+
+	assert (afirst);
+
+	if (afirst->source()->used() > 1) {
+		return false;
+	}
+
+	return true;
 }

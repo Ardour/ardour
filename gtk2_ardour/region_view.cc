@@ -149,8 +149,6 @@ RegionView::~RegionView ()
 {
 	in_destructor = true;
 
-	RegionViewGoingAway (this); /* EMIT_SIGNAL */
-
 	for (vector<GhostRegion*>::iterator g = ghosts.begin(); g != ghosts.end(); ++g) {
 		delete *g;
 	}

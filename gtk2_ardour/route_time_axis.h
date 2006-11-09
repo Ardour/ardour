@@ -180,7 +180,6 @@ protected:
 	void         playlist_click ();
 	void         show_playlist_selector ();
 	void         playlist_changed ();
-	void         playlist_state_changed (ARDOUR::Change);
 	void         playlist_modified ();
 
 	void rename_current_playlist ();
@@ -224,12 +223,19 @@ protected:
 	Gtk::Menu           edit_group_menu;
 	Gtk::RadioMenuItem* align_existing_item;
 	Gtk::RadioMenuItem* align_capture_item;
+	Gtk::RadioMenuItem* normal_track_mode_item;
+	Gtk::RadioMenuItem* destructive_track_mode_item;
 	Gtk::Menu*          playlist_menu;
 	Gtk::Menu*          playlist_action_menu;
 	Gtk::MenuItem*      playlist_item;
 
+	void use_playlist (ARDOUR::Playlist*);
+
 	ArdourCanvas::SimpleRect* timestretch_rect;
-	
+
+	void set_track_mode (ARDOUR::TrackMode);
+	void track_mode_changed ();
+
 	list<RedirectAutomationInfo*>   redirect_automation;
 	vector<RedirectAutomationLine*> redirect_automation_curves;
 

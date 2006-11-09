@@ -475,12 +475,14 @@ TimeAxisView::popup_display_menu (guint32 when)
 	if (display_menu == 0) {
 		build_display_menu ();
 	}
+	editor.set_selected_track (*this, Selection::Add);
 	display_menu->popup (1, when);	
 }
 
 gint
 TimeAxisView::size_click (GdkEventButton *ev)
 {
+	editor.set_selected_track (*this, Selection::Add);
 	popup_size_menu (ev->time);
 	return TRUE;
 }

@@ -968,11 +968,13 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 				if (plugin_insert->get_gui() == 0) {
 								
 					plugin_ui = new PluginUIWindow (plugin_insert);
+
 					if (_owner_is_mixer) {
 						ARDOUR_UI::instance()->the_mixer()->ensure_float (*plugin_ui);
 					} else {
 						ARDOUR_UI::instance()->the_editor().ensure_float (*plugin_ui);
 					}
+
 					plugin_ui->set_title (generate_redirect_title (plugin_insert));
 					plugin_insert->set_gui (plugin_ui);
 					

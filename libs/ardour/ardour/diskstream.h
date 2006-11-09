@@ -90,7 +90,7 @@ class IO;
 	virtual void set_record_enabled (bool yn) = 0;
 
 	bool destructive() const { return _flags & Destructive; }
-	virtual void set_destructive (bool yn);
+	virtual int set_destructive (bool yn) { return -1; }
 
 	bool           hidden()      const { return _flags & Hidden; }
 	bool           recordable()  const { return _flags & Recordable; }
@@ -137,6 +137,8 @@ class IO;
 	std::list<boost::shared_ptr<Region> >& last_capture_regions () { return _last_capture_regions; }
 
 	void handle_input_change (IOChange, void *src);
+
+	void remove_region_from_last_capture (boost::weak_ptr<Region> wregion);
 
 	sigc::signal<void>            RecordEnableChanged;
 	sigc::signal<void>            SpeedChanged;
@@ -224,6 +226,7 @@ class IO;
 	virtual bool realtime_set_speed (double, bool global_change);
 
 	std::list<boost::shared_ptr<Region> > _last_capture_regions;
+
 	virtual int use_pending_capture_data (XMLNode& node) = 0;
 
 	virtual void get_input_sources () = 0;

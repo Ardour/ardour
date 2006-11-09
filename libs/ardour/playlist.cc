@@ -85,10 +85,8 @@ Playlist::Playlist (Session& sess, const XMLNode& node, bool hide)
 {
 	init (hide);
 	_name = "unnamed"; /* reset by set_state */
-	
-	if (set_state (node)) {
-		throw failed_constructor();
-	}
+
+	/* derived class calls set_state() */
 }
 
 Playlist::Playlist (const Playlist& other, string namestr, bool hide)
@@ -257,11 +255,19 @@ Playlist::Playlist (Playlist& pl)
 
 Playlist::~Playlist ()
 {
+	{ 
+		RegionLock rl (this);
+
+		for (set<boost::shared_ptr<Region> >::iterator i = all_regions.begin(); i != all_regions.end(); ++i) {
+			(*i)->set_playlist (0);
+		}
+	}
+
 	/* GoingAway must be emitted by derived classes */
 }
 
 void
-Playlist::set_name (const string& str)
+Playlist::set_name (string str)
 {
 	/* in a typical situation, a playlist is being used
 	   by one diskstream and also is referenced by the
@@ -1442,13 +1448,21 @@ Playlist::state (bool full_state)
 bool
 Playlist::empty() const
 {
+	RegionLock rlock (const_cast<Playlist *>(this), false);
 	return regions.empty();
+}
+
+uint32_t
+Playlist::n_regions() const
+{
+	RegionLock rlock (const_cast<Playlist *>(this), false);
+	return regions.size();
 }
 
 nframes_t
 Playlist::get_maximum_extent () const
 {
-	RegionLock rlock (const_cast<Playlist *>(this));
+	RegionLock rlock (const_cast<Playlist *>(this), false);
 	return _get_maximum_extent ();
 }
 
@@ -1475,7 +1489,7 @@ Playlist::bump_name (string name, Session &session)
 
 	do {
 		newname = Playlist::bump_name_once (newname);
-	} while (session.playlist_by_name(newname)!=NULL);
+	} while (session.playlist_by_name (newname)!=NULL);
 
 	return newname;
 }

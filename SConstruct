@@ -703,7 +703,7 @@ config_prefix = '$DESTDIR' + final_config_prefix
 
 conf = Configure (env)
 
-have_cxx = conf.TryAction (Action (env['CXX'] + ' --version'))
+have_cxx = conf.TryAction (Action (str(env['CXX']) + ' --version'))
 if have_cxx[0] != 1:
     print "This system has no functional C++ compiler. You cannot build Ardour from source without one."
     sys.exit (1)

@@ -40,6 +40,7 @@
 #include <gtkmm2ext/utils.h>
 
 #include <ardour/playlist.h>
+#include <ardour/audioplaylist.h>
 #include <ardour/diskstream.h>
 #include <ardour/insert.h>
 #include <ardour/ladspa_plugin.h>
@@ -182,6 +183,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	if (is_track()) {
 
+		track()->TrackModeChanged.connect (mem_fun(*this, &RouteTimeAxisView::track_mode_changed));
 		track()->FreezeChange.connect (mem_fun(*this, &RouteTimeAxisView::map_frozen));
 		track()->DiskstreamChanged.connect (mem_fun(*this, &RouteTimeAxisView::diskstream_changed));
 		get_diskstream()->SpeedChanged.connect (mem_fun(*this, &RouteTimeAxisView::speed_changed));
@@ -276,8 +278,6 @@ RouteTimeAxisView::add_edit_group_menu_item (RouteGroup *eg, RadioMenuItem::Grou
 
 	MenuList &items = edit_group_menu.items();
 
-	cerr << "adding edit group " << eg->name() << endl;
-
 	items.push_back (RadioMenuElem (*group, eg->name(), bind (mem_fun(*this, &RouteTimeAxisView::set_edit_group_from_menu), eg)));
 	if (_route->edit_group() == eg) {
 		static_cast<RadioMenuItem*>(&items.back())->set_active ();
@@ -286,16 +286,8 @@ RouteTimeAxisView::add_edit_group_menu_item (RouteGroup *eg, RadioMenuItem::Grou
 
 void
 RouteTimeAxisView::set_edit_group_from_menu (RouteGroup *eg)
-
 {
 	_route->set_edit_group (eg, this);
-}
-
-void
-RouteTimeAxisView::playlist_state_changed (Change ignored)
-{
-	// ENSURE_GUI_THREAD (bind (mem_fun(*this, &RouteTimeAxisView::playlist_state_changed), ignored));
-	// why are we here ?
 }
 
 void
@@ -342,13 +334,15 @@ RouteTimeAxisView::playlist_click ()
 {
 	// always build a new action menu
 	
-	if (playlist_action_menu == 0) {
-		playlist_action_menu = new Menu;
-		playlist_action_menu->set_name ("ArdourContextMenu");
-	}
-	
- 	build_playlist_menu(playlist_action_menu);
+	if (playlist_action_menu != 0) {
+		delete playlist_action_menu;
+	} 
 
+	playlist_action_menu = new Menu;
+	playlist_action_menu->set_name ("ArdourContextMenu");
+	
+ 	build_playlist_menu (playlist_action_menu);
+	editor.set_selected_track (*this, Selection::Add);
 	playlist_action_menu->popup (1, 0);
 }
 
@@ -361,6 +355,7 @@ RouteTimeAxisView::automation_click ()
 		*/
 		build_display_menu ();
 	}
+	editor.set_selected_track (*this, Selection::Add);
 	automation_action_menu->popup (1, 0);
 }
 
@@ -443,6 +438,24 @@ RouteTimeAxisView::build_display_menu ()
 
 		get_diskstream()->AlignmentStyleChanged.connect (
 			mem_fun(*this, &RouteTimeAxisView::align_style_changed));
+
+		RadioMenuItem::Group mode_group;
+		items.push_back (RadioMenuElem (mode_group, _("Normal mode"),
+						bind (mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::Normal)));
+		normal_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
+		items.push_back (RadioMenuElem (mode_group, _("Tape mode"),
+						bind (mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::Destructive)));
+		destructive_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
+				 
+		
+		switch (track()->mode()) {
+		case ARDOUR::Destructive:
+			destructive_track_mode_item->set_active ();
+			break;
+		case ARDOUR::Normal:
+			normal_track_mode_item->set_active ();
+			break;
+		}
 	}
 
 	items.push_back (SeparatorElem());
@@ -454,6 +467,63 @@ RouteTimeAxisView::build_display_menu ()
 	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &RouteUI::remove_this_route)));
 }
 
+static bool __reset_item (RadioMenuItem* item)
+{
+	cerr << "reset item to true\n";
+	item->set_active ();
+	return false;
+}
+
+void
+RouteTimeAxisView::set_track_mode (TrackMode mode)
+{
+	RadioMenuItem* item;
+	RadioMenuItem* other_item;
+
+	cerr << "STM, mode = " << mode;
+
+	switch (mode) {
+	case ARDOUR::Normal:
+		item = normal_track_mode_item;
+		other_item = destructive_track_mode_item;
+		break;
+	case ARDOUR::Destructive:
+		item = destructive_track_mode_item;
+		other_item = normal_track_mode_item;
+		break;
+	default:
+		fatal << string_compose (_("programming error: %1 %2"), "illegal track mode in RouteTimeAxisView::set_track_mode", mode) << endmsg;
+		/*NOTREACHED*/
+		return;
+	}
+
+	if (item->get_active () && track()->mode() != mode) {
+		if (track()->set_mode (mode)) {
+			Glib::signal_idle().connect (bind (sigc::ptr_fun (__reset_item), other_item));
+		}
+	}
+}
+
+void
+RouteTimeAxisView::track_mode_changed ()
+{
+	RadioMenuItem* item;
+	
+	switch (track()->mode()) {
+	case ARDOUR::Normal:
+		item = normal_track_mode_item;
+		break;
+	case ARDOUR::Destructive:
+		item = destructive_track_mode_item;
+		break;
+	default:
+		fatal << string_compose (_("programming error: %1 %2"), "illegal track mode in RouteTimeAxisView::set_track_mode", track()->mode()) << endmsg;
+		/*NOTREACHED*/
+		return;
+	}
+
+	item->set_active ();
+}
 
 void
 RouteTimeAxisView::show_timestretch (nframes_t start, nframes_t end)
@@ -700,7 +770,24 @@ RouteTimeAxisView::align_style_changed ()
 void
 RouteTimeAxisView::set_align_style (AlignStyle style)
 {
-	get_diskstream()->set_align_style (style);
+	RadioMenuItem* item;
+
+	switch (style) {
+	case ExistingMaterial:
+		item = align_existing_item;
+		break;
+	case CaptureTime:
+		item = align_capture_item;
+		break;
+	default:
+		fatal << string_compose (_("programming error: %1 %2"), "illegal align style in RouteTimeAxisView::set_align_style", style) << endmsg;
+		/*NOTREACHED*/
+		return;
+	}
+
+	if (item->get_active()) {
+		get_diskstream()->set_align_style (style);
+	}
 }
 
 void
@@ -772,7 +859,7 @@ RouteTimeAxisView::use_copy_playlist (bool prompt)
 
 	if (name.length()) {
 		ds->use_copy_playlist ();
-		pl->set_name (name);
+		ds->playlist()->set_name (name);
 	}
 }
 
@@ -799,7 +886,7 @@ RouteTimeAxisView::use_new_playlist (bool prompt)
 		prompter.set_initial_text (name);
 		prompter.add_button (Gtk::Stock::NEW, Gtk::RESPONSE_ACCEPT);
 		prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
-		
+
 		switch (prompter.run ()) {
 		case Gtk::RESPONSE_ACCEPT:
 			prompter.get_result (name);
@@ -812,7 +899,7 @@ RouteTimeAxisView::use_new_playlist (bool prompt)
 
 	if (name.length()) {
 		ds->use_new_playlist ();
-		pl->set_name (name);
+		ds->playlist()->set_name (name);
 	}
 }
 
@@ -868,6 +955,10 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
 
 	case Selection::Extend:
 		/* not defined yet */
+		break;
+
+	case Selection::Add:
+		editor.get_selection().add (*tracks);
 		break;
 	}
 
@@ -1114,12 +1205,28 @@ RouteTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
 	if (playlist_menu) {
 		delete playlist_menu;
 	}
+
 	playlist_menu = new Menu;
 	playlist_menu->set_name ("ArdourContextMenu");
 
-	playlist_items.push_back (MenuElem (string_compose (_("Current: %1"), get_diskstream()->playlist()->name())));
-	playlist_items.push_back (SeparatorElem());
+	vector<Playlist*> playlists;
+	boost::shared_ptr<Diskstream> ds = get_diskstream();
+	RadioMenuItem::Group playlist_group;
+
+	_session.get_playlists (playlists);
 	
+	for (vector<Playlist*>::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+
+		if ((*i)->get_orig_diskstream_id() == ds->id()) {
+			playlist_items.push_back (RadioMenuElem (playlist_group, (*i)->name(), bind (mem_fun (*this, &RouteTimeAxisView::use_playlist), (*i))));
+
+			if (ds->playlist()->id() == (*i)->id()) {
+				static_cast<RadioMenuItem*>(&playlist_items.back())->set_active();
+			}
+		}
+	}
+
+	playlist_items.push_back (SeparatorElem());
 	playlist_items.push_back (MenuElem (_("Rename"), mem_fun(*this, &RouteTimeAxisView::rename_current_playlist)));
 	playlist_items.push_back (SeparatorElem());
 
@@ -1128,8 +1235,20 @@ RouteTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
 	playlist_items.push_back (SeparatorElem());
 	playlist_items.push_back (MenuElem (_("Clear Current"), mem_fun(editor, &PublicEditor::clear_playlists)));
 	playlist_items.push_back (SeparatorElem());
-	playlist_items.push_back (MenuElem(_("Select"), mem_fun(*this, &RouteTimeAxisView::show_playlist_selector)));
 
+	playlist_items.push_back (MenuElem(_("Select from all ..."), mem_fun(*this, &RouteTimeAxisView::show_playlist_selector)));
+}
+
+void
+RouteTimeAxisView::use_playlist (Playlist* pl)
+{
+	AudioPlaylist* apl = dynamic_cast<AudioPlaylist*> (pl);
+	
+	assert (is_track());
+
+	if (apl) {
+		get_diskstream()->use_playlist (apl);
+	}
 }
 
 void

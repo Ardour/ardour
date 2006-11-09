@@ -73,6 +73,23 @@ AudioTrack::~AudioTrack ()
 }
 
 int
+AudioTrack::set_mode (TrackMode m)
+{
+	if (m != _mode) {
+
+		if (_diskstream->set_destructive (m == Destructive)) {
+			return -1;
+		}
+
+		_mode = m;
+		
+		TrackModeChanged (); /* EMIT SIGNAL */
+	}
+
+	return 0;
+}
+
+int
 AudioTrack::deprecated_use_diskstream_connections ()
 {
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();

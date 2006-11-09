@@ -48,22 +48,27 @@ using namespace Glib;
 using namespace Editing;
 
 void
-Editor::handle_audio_region_removed (boost::shared_ptr<AudioRegion> region)
+Editor::handle_audio_region_removed (boost::weak_ptr<AudioRegion> wregion)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::handle_audio_region_removed), region));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::handle_audio_region_removed), wregion));
 	redisplay_regions ();
 }
 
 void
-Editor::handle_new_audio_region (boost::shared_ptr<AudioRegion> region)
+Editor::handle_new_audio_region (boost::weak_ptr<AudioRegion> wregion)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::handle_new_audio_region), region));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::handle_new_audio_region), wregion));
 
 	/* don't copy region - the one we are being notified
 	   about belongs to the session, and so it will
 	   never be edited.
 	*/
-	add_audio_region_to_region_display (region);
+
+	boost::shared_ptr<AudioRegion> region (wregion.lock());
+	
+	if (region) {
+		add_audio_region_to_region_display (region);
+	}
 }
 
 void

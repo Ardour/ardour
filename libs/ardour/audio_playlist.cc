@@ -624,12 +624,10 @@ AudioPlaylist::destroy_region (boost::shared_ptr<Region> region)
 
 	{ 
 		RegionLock rlock (this);
-		RegionList::iterator i;
-		RegionList::iterator tmp;
 
-		for (i = regions.begin(); i != regions.end(); ) {
+		for (RegionList::iterator i = regions.begin(); i != regions.end(); ) {
 			
-			tmp = i;
+			RegionList::iterator tmp = i;
 			++tmp;
 			
 			if ((*i) == region) {
@@ -639,6 +637,21 @@ AudioPlaylist::destroy_region (boost::shared_ptr<Region> region)
 			
 			i = tmp;
 		}
+
+		for (set<boost::shared_ptr<Region> >::iterator x = all_regions.begin(); x != all_regions.end(); ) {
+
+			set<boost::shared_ptr<Region> >::iterator xtmp = x;
+			++xtmp;
+			
+			if ((*x) == region) {
+				all_regions.erase (x);
+				changed = true;
+			}
+			
+			x = xtmp;
+		}
+
+		region->set_playlist (0);
 	}
 
 	for (c = _crossfades.begin(); c != _crossfades.end(); ) {

@@ -542,8 +542,8 @@ class Session : public PBD::StatefulDestructible
 	
 	/* region info  */
 
-	sigc::signal<void,boost::shared_ptr<AudioRegion> > AudioRegionAdded;
-	sigc::signal<void,boost::shared_ptr<AudioRegion> > AudioRegionRemoved;
+	sigc::signal<void,boost::weak_ptr<AudioRegion> > AudioRegionAdded;
+	sigc::signal<void,boost::weak_ptr<AudioRegion> > AudioRegionRemoved;
 
 	int region_name (string& result, string base = string(""), bool newlevel = false) const;
 	string new_region_name (string);
@@ -630,6 +630,7 @@ class Session : public PBD::StatefulDestructible
 	uint32_t n_playlists() const;
 
 	template<class T> void foreach_playlist (T *obj, void (T::*func)(Playlist *));
+	void get_playlists (std::vector<Playlist*>&);
 
 	/* named selections */
 

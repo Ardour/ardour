@@ -62,6 +62,7 @@
 #include "selection.h"
 #include "audio_streamview.h"
 #include "time_axis_view.h"
+#include "audio_time_axis.h"
 #include "utils.h"
 #include "crossfade_view.h"
 #include "editing.h"
@@ -1695,7 +1696,7 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 	   become selected.
 	*/
 
-	region_menu->signal_map_event().connect (bind (mem_fun(*this, &Editor::set_selected_regionview_from_map_event), sv, boost::weak_ptr<Region>(region)));
+	// region_menu->signal_map_event().connect (bind (mem_fun(*this, &Editor::set_selected_regionview_from_map_event), sv, boost::weak_ptr<Region>(region)));
 
 	items.push_back (MenuElem (_("Popup region editor"), mem_fun(*this, &Editor::edit_region)));
 	items.push_back (MenuElem (_("Raise to top layer"), mem_fun(*this, &Editor::raise_region_to_top)));
@@ -1793,8 +1794,6 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 	items.push_back (MenuElem (_("Fill Track"), (mem_fun(*this, &Editor::region_fill_track))));
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &Editor::remove_clicked_region)));
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Destroy"), mem_fun(*this, &Editor::destroy_clicked_region)));
 
 	/* OK, stick the region submenu at the top of the list, and then add
 	   the standard items.
@@ -2847,6 +2846,13 @@ Editor::set_selected_track (TimeAxisView& view, Selection::Operation op, bool no
 		}
 		break;
 
+	case Selection::Add:
+		if (!selection->selected (&view)) {
+			selection->add (&view);
+			commit = true;
+		}
+		break;
+
 	case Selection::Set:
 		if (selection->selected (&view) && selection->tracks.size() == 1) {
 			/* no commit necessary */
@@ -2894,7 +2900,7 @@ Editor::set_selected_control_point_from_click (Selection::Operation op, bool no_
 }
 
 void
-Editor::get_relevant_audio_tracks (AudioTimeAxisView& base, set<AudioTimeAxisView*>& relevant_tracks)
+Editor::get_relevant_audio_tracks (set<AudioTimeAxisView*>& relevant_tracks)
 {
 	/* step one: get all selected tracks and all tracks in the relevant edit groups */
 
@@ -2923,14 +2929,9 @@ Editor::get_relevant_audio_tracks (AudioTimeAxisView& base, set<AudioTimeAxisVie
 					}
 				}
 			}
-
 		} else {
-
-			/* no active group, or no group */
-
-			relevant_tracks.insert (&base);
+			relevant_tracks.insert (atv);
 		}
-
 	}
 }
 
@@ -2939,14 +2940,10 @@ Editor::mapover_audio_tracks (slot<void,AudioTimeAxisView&,uint32_t> sl)
 {
 	set<AudioTimeAxisView*> relevant_tracks;
 
-	if (!clicked_audio_trackview) {
-		return;
-	}
-
-	get_relevant_audio_tracks (*clicked_audio_trackview, relevant_tracks);
+	get_relevant_audio_tracks (relevant_tracks);
 
 	uint32_t sz = relevant_tracks.size();
-	
+
 	for (set<AudioTimeAxisView*>::iterator ati = relevant_tracks.begin(); ati != relevant_tracks.end(); ++ati) {
 		sl (**ati, sz);
 	}
@@ -3134,7 +3131,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 
 		set<AudioTimeAxisView*> relevant_tracks;
 		
-		get_relevant_audio_tracks (*clicked_audio_trackview, relevant_tracks);
+		get_relevant_audio_tracks (relevant_tracks);
 		
 		for (set<AudioTimeAxisView*>::iterator t = relevant_tracks.begin(); t != relevant_tracks.end(); ++t) {
 			(*t)->get_selectables (first_frame, last_frame, -1.0, -1.0, results);
@@ -3207,6 +3204,9 @@ Editor::set_selected_regionview_from_region_list (boost::shared_ptr<Region> regi
 		selection->set (all_equivalent_regions);
 		break;
 	case Selection::Extend:
+		selection->add (all_equivalent_regions);
+		break;
+	case Selection::Add:
 		selection->add (all_equivalent_regions);
 		break;
 	}

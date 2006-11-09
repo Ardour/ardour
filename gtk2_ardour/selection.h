@@ -56,6 +56,7 @@ class Selection : public sigc::trackable
 
 	enum Operation {
 		Set,
+		Add,
 		Toggle,
 		Extend
 	};

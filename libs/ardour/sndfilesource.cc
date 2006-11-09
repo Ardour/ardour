@@ -212,7 +212,7 @@ SndFileSource::init (string idstr)
 	_capture_end = false;
 	file_pos = 0;
 
-	if (destructive()) {
+	if (destructive()) {	
 		xfade_buf = new Sample[xfade_frames];
 		timeline_position = header_position_offset;
 	}
@@ -680,11 +680,15 @@ SndFileSource::set_destructive (bool yn)
 {
 	if (yn) {
 		_flags = Flag (_flags | Destructive);
+		if (!xfade_buf) {
+			xfade_buf = new Sample[xfade_frames];
+		}
 		clear_capture_marks ();
 		timeline_position = header_position_offset;
 	} else {
 		_flags = Flag (_flags & ~Destructive);
 		timeline_position = 0;
+		/* leave xfade buf alone in case we need it again later */
 	}
 
 	return true;

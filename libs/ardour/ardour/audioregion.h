@@ -136,6 +136,8 @@ class AudioRegion : public Region
 	void resume_fade_in ();
 	void resume_fade_out ();
 
+	void set_playlist (Playlist *);
+
   private:
 	friend class RegionFactory;
 

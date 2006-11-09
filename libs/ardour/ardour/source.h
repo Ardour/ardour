@@ -22,6 +22,7 @@
 #define __ardour_source_h__
 
 #include <string>
+#include <set>
 
 #include <sigc++/signal.h>
 
@@ -32,6 +33,7 @@
 namespace ARDOUR {
 
 class Session;
+class Playlist;
 
 class Source : public PBD::StatefulDestructible
 {
@@ -49,13 +51,23 @@ class Source : public PBD::StatefulDestructible
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
 
+	void use () { _in_use++; }
+	void disuse () { if (_in_use) { _in_use--; } }
+
+	void add_playlist (ARDOUR::Playlist*);
+	void remove_playlist (ARDOUR::Playlist*);
+
+	uint32_t used() const;
 
   protected:
 	Session&          _session;
 	string            _name;
 	time_t            _timestamp;
 
+	std::set<ARDOUR::Playlist*> _playlists;
+
   private:
+	uint32_t          _in_use;
 };
 
 }

@@ -183,18 +183,6 @@ Track::set_record_enable (bool yn, void *src)
 	_rec_enable_control.Changed ();
 }
 
-void
-Track::set_mode (TrackMode m)
-{
-	if (_diskstream) {
-		if (_mode != m) {
-			_mode = m;
-			_diskstream->set_destructive (m == Destructive);
-			ModeChanged();
-		}
-	}
-}
-
 int
 Track::set_name (string str, void *src)
 {

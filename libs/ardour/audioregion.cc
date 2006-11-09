@@ -306,6 +306,12 @@ AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 
 AudioRegion::~AudioRegion ()
 {
+	if (_playlist) {
+		for (SourceList::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+			(*i)->remove_playlist (_playlist);
+		}
+	}
+
 	notify_callbacks ();
 	GoingAway (); /* EMIT SIGNAL */
 }
@@ -1145,8 +1151,6 @@ AudioRegion::exportme (Session& session, AudioExportSpecification& spec)
 boost::shared_ptr<Region>
 AudioRegion::get_parent()
 {
-	boost::shared_ptr<Region> r;
-
 	if (_playlist) {
 		boost::shared_ptr<AudioRegion> ar;
 		boost::shared_ptr<AudioRegion> grrr2 = boost::dynamic_pointer_cast<AudioRegion> (shared_from_this());
@@ -1156,7 +1160,7 @@ AudioRegion::get_parent()
 		}
 	}
 	
-	return r;
+	return boost::shared_ptr<Region>();
 }
 
 void
@@ -1303,6 +1307,37 @@ AudioRegion::source_offset_changed ()
 		// set_start (source()->natural_position(), this);
 		set_position (source()->natural_position(), this);
 	} 
+}
+
+void
+AudioRegion::set_playlist (Playlist* pl)
+{
+	if (pl == _playlist) {
+		return;
+	}
+
+	Playlist* old_playlist = _playlist;
+
+	Region::set_playlist (pl);
+
+	if (pl) {
+		if (old_playlist) {
+			for (SourceList::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+				(*i)->remove_playlist (old_playlist);	
+				(*i)->add_playlist (_playlist);
+			}
+		} else {
+			for (SourceList::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+				(*i)->add_playlist (_playlist);
+			}
+		}
+	} else {
+		if (old_playlist) {
+			for (SourceList::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+				(*i)->remove_playlist (old_playlist);
+			}
+		}
+	}
 }
 
 extern "C" {

@@ -34,6 +34,7 @@
 #include <pbd/pthread_utils.h>
 
 #include <ardour/source.h>
+#include <ardour/playlist.h>
 
 #include "i18n.h"
 
@@ -47,12 +48,14 @@ Source::Source (Session& s, string name)
 {
 	_name = name;
 	_timestamp = 0;
+	_in_use = 0;
 }
 
 Source::Source (Session& s, const XMLNode& node) 
 	: _session (s)
 {
 	_timestamp = 0;
+	_in_use = 0;
 
 	if (set_state (node)) {
 		throw failed_constructor();
@@ -106,3 +109,24 @@ Source::set_state (const XMLNode& node)
 	return 0;
 }
 
+void
+Source::add_playlist (Playlist* pl)
+{
+	_playlists.insert (pl);
+}
+
+void
+Source::remove_playlist (Playlist* pl)
+{
+	std::set<Playlist*>::iterator x;
+
+	if ((x = _playlists.find (pl)) != _playlists.end()) {
+		_playlists.erase (x);
+	}
+}
+
+uint32_t
+Source::used () const
+{
+	return _playlists.size();
+}

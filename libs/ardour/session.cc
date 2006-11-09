@@ -2535,7 +2535,7 @@ Session::remove_region (boost::weak_ptr<Region> weak_region)
 	set_dirty();
 
 	if (removed) {
-		 AudioRegionRemoved(ar); /* EMIT SIGNAL */
+		AudioRegionRemoved (ar); /* EMIT SIGNAL */
 	}
 }
 
@@ -2571,32 +2571,38 @@ Session::find_equivalent_playlist_regions (boost::shared_ptr<Region> region, vec
 int
 Session::destroy_region (boost::shared_ptr<Region> region)
 {
-	boost::shared_ptr<AudioRegion> aregion;
-
-	if ((aregion = boost::dynamic_pointer_cast<AudioRegion> (region)) == 0) {
-		return 0;
-	}
-	
-	if (aregion->playlist()) {
-		aregion->playlist()->destroy_region (region);
-	}
-
 	vector<boost::shared_ptr<Source> > srcs;
-	
-	for (uint32_t n = 0; n < aregion->n_channels(); ++n) {
-		srcs.push_back (aregion->source (n));
+		
+	{
+		boost::shared_ptr<AudioRegion> aregion;
+		
+		if ((aregion = boost::dynamic_pointer_cast<AudioRegion> (region)) == 0) {
+			return 0;
+		}
+		
+		if (aregion->playlist()) {
+			aregion->playlist()->destroy_region (region);
+		}
+		
+		for (uint32_t n = 0; n < aregion->n_channels(); ++n) {
+			srcs.push_back (aregion->source (n));
+		}
 	}
+
+	region->drop_references ();
 
 	for (vector<boost::shared_ptr<Source> >::iterator i = srcs.begin(); i != srcs.end(); ++i) {
-		
-		if ((*i).use_count() == 1) {
-			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*i);
 
+		if (!(*i)->used()) {
+			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*i);
+			
 			if (afs) {
 				(afs)->mark_for_remove ();
 			}
 			
 			(*i)->drop_references ();
+			
+			cerr << "source was not used by any playlist\n";
 		}
 	}
 
@@ -2986,6 +2992,20 @@ Session::add_playlist (Playlist* playlist)
 	set_dirty();
 
 	PlaylistAdded (playlist); /* EMIT SIGNAL */
+}
+
+void
+Session::get_playlists (vector<Playlist*>& s)
+{
+	{ 
+		Glib::Mutex::Lock lm (playlist_lock);
+		for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+			s.push_back (*i);
+		}
+		for (PlaylistList::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+			s.push_back (*i);
+		}
+	}
 }
 
 void
