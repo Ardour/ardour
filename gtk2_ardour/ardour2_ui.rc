@@ -106,8 +106,8 @@ style "default_base" = "medium_text"
   text[INSENSITIVE] = { 0.80, 0.80, 0.80}	
   text[SELECTED] = { 1.0, 1.0, 1.0 }
   
-  base[ACTIVE]     = "#2f272f"
-  base[NORMAL]      =  "#1c1e21"
+  base[ACTIVE]     = "#272a2f"
+  base[NORMAL]      =  "#1a1e20"
   base[PRELIGHT]     = { 0.20, 0.20, 0.20 }
   base[INSENSITIVE]  = "#4c5159"
   base[SELECTED]     = { 0.25, 0.25, 0.25 }
@@ -138,8 +138,8 @@ style "transport_base" = "medium_bold_text"
 
 style "black_mackie_menu_bar" = "medium_bold_text"
 {
-      fg[NORMAL] = { 1.0, 1.0, 1.0 }
-      bg[NORMAL] = { 0, 0, 0 }
+  fg[NORMAL] = { 1.0, 1.0, 1.0 }
+  bg[NORMAL] = { 0, 0, 0 }
 }
 
 style "default_buttons_menus" 
@@ -340,13 +340,13 @@ style "xrun_warn"
 	bg[ACTIVE] = { 0.09, 1.0, 0.46 }
 }
 
-style "menu_bar_base"
+style "menu_bar_base" = "default_base"
 {
-  bg[NORMAL] = { 0, 0, 0 }	
-  bg[ACTIVE] = { 0, 0, 0 }
-  bg[PRELIGHT] = { 0, 0, 0 }
-  bg[INSENSITIVE] = { 0, 0, 0 }
-  bg[SELECTED] = { 0, 0, 0 }
+	bg[NORMAL] = { 0.2, 0.2, 0.3 }
+	bg[ACTIVE] = { 0, 0, 0 }
+	bg[PRELIGHT] = { 0, 0, 0 }
+	bg[INSENSITIVE] = { 0, 0, 0 }
+	bg[SELECTED] = { 0, 0, 0 }
 }
 
 style "fatal_message" = "medium_text"
@@ -517,7 +517,7 @@ style "audio_track_base" = "default_base"
 {
   font_name = "sans 6"
   fg[NORMAL] = { 0.77, 0.77, 0.72 }	
-  bg[NORMAL] = { 0.18, 0.18, 0.22 }
+  bg[NORMAL] = { 0.18, 0.19, 0.22 }
   bg[ACTIVE] = { 0.20, 0.20, 0.20 }	
   bg[PRELIGHT] = { 0.20, 0.20, 0.20 }
   bg[INSENSITIVE] = { 0.20, 0.20, 0.20 }
@@ -530,7 +530,7 @@ style "audio_bus_base"
   fg[NORMAL] = { 0.77, 0.77, 0.72 }	
   fg[NORMAL] = { 0.7, 0.8, 0.2 }	
   #bg[NORMAL] = {0, 0.36, 0.40 }
-  bg[NORMAL] = "#464666"	
+  bg[NORMAL] = "#444466"	
 }
 
 style "track_name_display"
@@ -622,11 +622,11 @@ style "region_list_display" = "small_bold_text"
 
 style "main_canvas_area"
 {
-	bg[NORMAL] = { 0.38, 0.38, 0.38 }
-	bg[ACTIVE] = { 0.38, 0.38, 0.38 }
-	bg[INSENSITIVE] = { 0.38, 0.38, 0.38 }
-	bg[SELECTED] = { 0.38, 0.38, 0.38 }
-	bg[PRELIGHT] = { 0.38, 0.38, 0.38 }
+	bg[NORMAL] = { 0.32, 0.32, 0.36 }
+	bg[ACTIVE] = { 0.38, 0.38, 0.42 }
+	bg[INSENSITIVE] = { 0.38, 0.38, 0.42 }
+	bg[SELECTED] = { 0.38, 0.38, 0.42 }
+	bg[PRELIGHT] = { 0.38, 0.38, 0.42 }
 }
 
 style "track_controls_inactive"
@@ -750,12 +750,6 @@ style "pan_zone" = "default_base"
 {
 	fg[NORMAL] = { 0.34, 0.95, 0.92 }
 	fg[ACTIVE] = { 0.95, 0.48, 0.11 }
-}
-
-style "wall_clock" = "medium_bold_text"
-{
-	fg[NORMAL] = { 1.0, 1.0, 1.0 }
-	bg[NORMAL] = { 0, 0, 0 }
 }
 
 style "paler_red_when_active" = "medium_text"
@@ -1094,8 +1088,6 @@ widget "*MixerTrackDisplayList" style "track_list_display"
 widget "*MixerSnapshotDisplayList" style "track_list_display"
 widget "*MixerAuxDisplayList" style "track_list_display"
 widget "*MixerGroupList" style "track_list_display"
-widget "*WallClock" style "wall_clock"
-widget "*CPULoad" style "wall_clock"
 widget "*RegionEditorLabel" style "medium_text"
 widget "*RegionEditorSmallLabel" style "small_text"
 widget "*RegionEditorEntry" style "medium_entry"
