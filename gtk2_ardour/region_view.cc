@@ -398,6 +398,7 @@ RegionView::region_renamed ()
 
 	set_item_name (str, this);
 	set_name_text (str);
+	reset_width_dependent_items (_pixel_width);
 }
 
 void
