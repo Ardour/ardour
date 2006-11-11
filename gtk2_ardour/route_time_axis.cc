@@ -129,6 +129,20 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	mute_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::mute_release), false);
 
 	if (is_track()) {
+
+		/* use icon */
+
+		rec_enable_button->remove ();
+		switch (track()->mode()) {
+		case ARDOUR::Normal:
+			rec_enable_button->add (*(manage (new Image (::get_icon (X_("record_normal_red"))))));
+			break;
+		case ARDOUR::Destructive:
+			rec_enable_button->add (*(manage (new Image (::get_icon (X_("record_tape_red"))))));
+			break;
+		}
+		rec_enable_button->show_all ();
+
 		rec_enable_button->set_name ("TrackRecordEnableButton");
 		rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press));
 		controls_table.attach (*rec_enable_button, 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
@@ -518,6 +532,18 @@ RouteTimeAxisView::_set_track_mode (Track* track, TrackMode mode, RadioMenuItem*
 	}
 
 	track->set_mode (mode);
+
+	rec_enable_button->remove ();
+	switch (mode) {
+	case ARDOUR::Normal:
+		rec_enable_button->add (*(manage (new Image (::get_icon (X_("record_normal_red"))))));
+		break;
+	case ARDOUR::Destructive:
+		rec_enable_button->add (*(manage (new Image (::get_icon (X_("record_tape_red"))))));
+		break;
+	}
+	rec_enable_button->show_all ();
+
 }
 
 void
