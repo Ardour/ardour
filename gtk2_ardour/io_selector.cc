@@ -480,8 +480,10 @@ IOSelector::display_ports ()
 	if (!selected_port_tview) {
 		selected_port_tview = firsttview;
 	}
-	
-	select_treeview (selected_port_tview);
+
+	if (selected_port_tview) {
+		select_treeview (selected_port_tview);
+	}
 }
 
 bool
@@ -645,6 +647,10 @@ IOSelector::select_next_treeview ()
 {
 	slist<TreeView*>::iterator next;
 
+	if (port_displays.empty() || port_displays.size() == 1) {
+		return;
+	}
+
 	for (slist<TreeView *>::iterator i = port_displays.begin(); i != port_displays.end(); ++i) {
 
 		if ((*i)->get_name() == "IOSelectorPortListSelected") {
@@ -700,8 +706,6 @@ IOSelector::select_treeview (TreeView* tview)
 			gtk_widget_set_name (ccol->button, "IOSelectorPortList");
 			gtk_widget_queue_draw (ccol->button);
 		}
-		
-		Port* port = reinterpret_cast<Port *> ((*i)->get_data (_("port")));
 		
 		(*i)->set_name ("IOSelectorPortList");
 		(*i)->queue_draw ();
