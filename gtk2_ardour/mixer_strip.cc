@@ -111,7 +111,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	comment_area = 0;
 
 	width_button.add (*(manage (new Gtk::Image (get_xpm("lr.xpm")))));
-	hide_button.add (*(manage (new Gtk::Image (get_xpm("small_x.xpm")))));
+	hide_button.add (*(manage (new Gtk::Image (::get_icon("hide")))));
 
 	input_label.set_text (_("Input"));
 	input_button.add (input_label);

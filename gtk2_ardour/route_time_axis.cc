@@ -114,7 +114,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	visual_button.set_name ("TrackVisualButton");
 	hide_button.set_name ("TrackRemoveButton");
 
-	hide_button.add (*(manage (new Image (get_xpm("small_x.xpm")))));
+	hide_button.add (*(manage (new Image (::get_icon("hide")))));
 	hide_button.show_all ();
 
  	edit_group_button.signal_button_release_event().connect (mem_fun(*this, &RouteTimeAxisView::edit_click), false);
