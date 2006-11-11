@@ -1246,6 +1246,7 @@ int
 AutomationList::set_state (const XMLNode& node)
 {
 	XMLNodeList nlist = node.children();
+	XMLNode* nsos;
 	XMLNodeIterator niter;
 	const XMLProperty* prop;
 
@@ -1254,6 +1255,11 @@ AutomationList::set_state (const XMLNode& node)
 		return deserialize_events (node);
 	}
 	
+	if (node.name() == X_("Envelope") && (nsos = node.child (X_("AutomationList")))) {
+		/* new school in old school clothing */
+		return set_state (*nsos);
+	}
+
 	if (node.name() == X_("Envelope") || node.name() == X_("FadeOut") || node.name() == X_("FadeIn")) {
 
 		/* old school */

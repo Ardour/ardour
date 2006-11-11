@@ -38,6 +38,7 @@ class AudioTrack : public Track
 	~AudioTrack ();
 
 	int set_mode (TrackMode m); 
+	bool can_use_mode (TrackMode m, bool& bounce_required);
 
 	int roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 		nframes_t offset, int declick, bool can_record, bool rec_monitors_input);

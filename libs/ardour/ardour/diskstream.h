@@ -91,6 +91,7 @@ class IO;
 
 	bool destructive() const { return _flags & Destructive; }
 	virtual int set_destructive (bool yn) { return -1; }
+	virtual	bool can_become_destructive (bool& requires_bounce) const { return false; }
 
 	bool           hidden()      const { return _flags & Hidden; }
 	bool           recordable()  const { return _flags & Recordable; }

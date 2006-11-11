@@ -89,6 +89,19 @@ AudioTrack::set_mode (TrackMode m)
 	return 0;
 }
 
+bool
+AudioTrack::can_use_mode (TrackMode m, bool& bounce_required)
+{
+	switch (m) {
+	case Normal:
+		bounce_required = false;
+		return true;
+		
+	case Destructive:
+		return _diskstream->can_become_destructive (bounce_required);
+	}
+}
+
 int
 AudioTrack::deprecated_use_diskstream_connections ()
 {
@@ -810,7 +823,7 @@ AudioTrack::freeze (InterThreadInfo& itt)
 		return;
 	}
 
-	if (_session.write_one_audio_track (*this, 0, _session.current_end_frame(), true, srcs, itt)) {
+	if (_session.write_one_audio_track (*this, _session.current_start_frame(), _session.current_end_frame(), true, srcs, itt)) {
 		return;
 	}
 
@@ -830,9 +843,6 @@ AudioTrack::freeze (InterThreadInfo& itt)
 				
 				frii->id = insert->id();
 
-#ifdef FIX_ME_TO_WORK_WITHOUT_STATE_MANAGER
-				frii->memento = (*r)->get_memento();
-#endif				
 				_freeze_record.insert_info.push_back (frii);
 				
 				/* now deactivate the insert */
@@ -853,7 +863,7 @@ AudioTrack::freeze (InterThreadInfo& itt)
 								 false));
 
 	new_playlist->set_orig_diskstream_id (diskstream->id());
-	new_playlist->add_region (region, 0);
+	new_playlist->add_region (region, _session.current_start_frame());
 	new_playlist->set_frozen (true);
 	region->set_locked (true);
 

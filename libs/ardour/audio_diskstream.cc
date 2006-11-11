@@ -2240,10 +2240,15 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 int
 AudioDiskstream::set_destructive (bool yn)
 {
+	bool bounce_ignored;
+
 	if (yn != destructive()) {
 		
 		if (yn) {
-			if (!can_become_destructive ()) {
+			/* requestor should already have checked this and
+			   bounced if necessary and desired 
+			*/
+			if (!can_become_destructive (bounce_ignored)) {
 				return -1;
 			}
 			_flags |= Destructive;
@@ -2258,15 +2263,17 @@ AudioDiskstream::set_destructive (bool yn)
 }
 
 bool
-AudioDiskstream::can_become_destructive () const
+AudioDiskstream::can_become_destructive (bool& requires_bounce) const
 {
 	if (!_playlist) {
+		requires_bounce = false;
 		return false;
 	}
 
 	/* is there only one region ? */
 
 	if (_playlist->n_regions() != 1) {
+		requires_bounce = true;
 		return false;
 	}
 
@@ -2277,6 +2284,7 @@ AudioDiskstream::can_become_destructive () const
 	
 	if (first->position() != _session.current_start_frame()) {
 		if (first->start() > _session.current_start_frame()) {
+			requires_bounce = true;
 			return false;
 		}
 	}
@@ -2288,8 +2296,10 @@ AudioDiskstream::can_become_destructive () const
 	assert (afirst);
 
 	if (afirst->source()->used() > 1) {
+		requires_bounce = true; 
 		return false;
 	}
 
+	requires_bounce = false;
 	return true;
 }

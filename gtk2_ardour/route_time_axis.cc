@@ -480,8 +480,6 @@ RouteTimeAxisView::set_track_mode (TrackMode mode)
 	RadioMenuItem* item;
 	RadioMenuItem* other_item;
 
-	cerr << "STM, mode = " << mode;
-
 	switch (mode) {
 	case ARDOUR::Normal:
 		item = normal_track_mode_item;
@@ -498,10 +496,28 @@ RouteTimeAxisView::set_track_mode (TrackMode mode)
 	}
 
 	if (item->get_active () && track()->mode() != mode) {
-		if (track()->set_mode (mode)) {
-			Glib::signal_idle().connect (bind (sigc::ptr_fun (__reset_item), other_item));
+		_set_track_mode (track(), mode, other_item);
+	}
+}
+
+void
+RouteTimeAxisView::_set_track_mode (Track* track, TrackMode mode, RadioMenuItem* reset_item)
+{
+	bool needs_bounce;
+
+	if (!track->can_use_mode (mode, needs_bounce)) {
+
+		if (!needs_bounce) {
+			/* cannot be done */
+			Glib::signal_idle().connect (bind (sigc::ptr_fun (__reset_item), reset_item));
+			return;
+		} else {
+			cerr << "would bounce this one\n";
+			return;
 		}
 	}
+
+	track->set_mode (mode);
 }
 
 void
