@@ -344,7 +344,6 @@ IOSelector::rescan ()
 			row[port_display_columns.full_name] = s->second;
 		}
 
-		//display->get_selection()->signal_changed().connect (bind (mem_fun(*this, &IOSelector::port_selection_changed), display));
 		display->signal_button_release_event().connect (bind (mem_fun(*this, &IOSelector::port_selection_changed), display));
 		Label *tab_label = manage (new Label);
 
@@ -360,7 +359,7 @@ IOSelector::rescan ()
 	}
 
 	notebook.set_current_page (current_page);
-	//notebook.signal_show().connect (bind (mem_fun (notebook, &Notebook::set_current_page), current_page));
+	notebook.signal_show().connect (bind (mem_fun (notebook, &Notebook::set_current_page), current_page));
 	selector_box.show_all ();
 }	
 
@@ -369,33 +368,31 @@ IOSelector::display_ports ()
 {
 	TreeView *firsttview = 0;
 	TreeView *selected_port_tview = 0;
-
 	{
 		Glib::Mutex::Lock lm  (port_display_lock);
 		Port *port;
 		uint32_t limit;
-
+		
 		if (for_input) {
 			limit = io->n_inputs();
 		} else {
 			limit = io->n_outputs();
 		}
-
-		for (slist<TreeView *>::iterator i = port_displays.begin(); i != port_displays.end(); ) {
 		
+		for (slist<TreeView *>::iterator i = port_displays.begin(); i != port_displays.end(); ) {
+			
 			slist<TreeView *>::iterator tmp;
-
+			
 			tmp = i;
 			++tmp;
-
+			
 			port_box.remove (**i);
 			delete *i;
 			port_displays.erase (i);
-
+			
 			i = tmp;
 		} 
-
-
+		
 		for (uint32_t n = 0; n < limit; ++n) {
 			
 			TreeView* tview;
@@ -409,13 +406,13 @@ IOSelector::display_ports ()
 			}
 			
 			/* we know there is '/' because we put it there */
-
+			
 			really_short_name = port->short_name();
 			really_short_name = really_short_name.substr (really_short_name.find ('/') + 1);
-
+			
 			tview = manage (new TreeView());
 			RefPtr<ListStore> port_model = ListStore::create (port_display_columns);
-
+			
 			if (!firsttview) {
 				firsttview = tview;
 			}
@@ -432,9 +429,9 @@ IOSelector::display_ports ()
 			
 			/* now fill the clist with the current connections */
 			
-
+			
 			const char **connections = port->get_connections ();
-
+			
 			if (connections) {
 				for (uint32_t c = 0; connections[c]; ++c) {
 					TreeModel::Row row = *(port_model->append());
@@ -453,9 +450,9 @@ IOSelector::display_ports ()
 						selected_port_tview = tview;
 					}
 				}
-			
+				
 			} else {
-
+				
 				if (io->output_maximum() == 1) {
 					selected_port = port;
 					selected_port_tview = tview;
@@ -465,40 +462,26 @@ IOSelector::display_ports ()
 					}
 				}
 			}
-
+			
 			TreeViewColumn* col = tview->get_column (0);
 			
 			col->set_clickable (true);
-
-			/* handle button events on the column header and within the treeview itself */
+			
+			/* handle button events on the column header ... */
 			col->signal_clicked().connect (bind (mem_fun(*this, &IOSelector::select_treeview), tview));
+
+			/* ... and within the treeview itself */
 			tview->signal_button_release_event().connect (bind (mem_fun(*this, &IOSelector::connection_button_release), tview));
 		}
-
+		
 		port_box.show_all ();
-
-		if (selected_port_tview) {
-			// GTK2FIX
-			// selected_port_tview->click_column(0);
-			selected_port_tview->set_name ("IOSelectorPortListSelected");
-			for (slist<TreeView *>::iterator i = port_displays.begin(); i != port_displays.end(); ++i) {
-				if (*i != selected_port_tview) {
-					(*i)->set_name ("IOSelectorPortList");
-					(*i)->queue_draw ();
-				}
-			}
-		} else {
-			selected_port = 0;
-			selector_box.hide_all ();
-		}
 	}
 	
-	if (selected_port_tview) {
-		select_treeview (selected_port_tview);
-	} else if (firsttview) {
-		// select first
-		select_treeview (firsttview);
+	if (!selected_port_tview) {
+		selected_port_tview = firsttview;
 	}
+	
+	select_treeview (selected_port_tview);
 }
 
 bool
@@ -635,15 +618,10 @@ IOSelector::connection_button_release (GdkEventButton *ev, TreeView *treeview)
 		return false;
 	}
 	
-	if (!(Keyboard::is_delete_event (ev))) {
-		//return false;
-	}
-
 	if (!treeview->get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		return false;
 	}
-	cerr << "path = " << path.to_string() << endl;
-	
+
 	if ((iter = treeview->get_model()->get_iter (path.to_string()))) {
 
 		/* path is valid */
@@ -660,41 +638,6 @@ IOSelector::connection_button_release (GdkEventButton *ev, TreeView *treeview)
 	}
 
 	return true;
-}
-
-gint
-IOSelector::port_column_button_release (GdkEventButton* event, TreeView* treeview)
-{
-	/* this handles button release on the button at the top of a single-column
-	   treeview (representing a port)
-	*/
-	cerr << "IOSelector::port_column_button_release() called" << endl;
-	
-	if (Keyboard::is_delete_event (event)) {
-		Port* port;
-		{
-			Glib::Mutex::Lock lm  (port_display_lock);
-			
-			port = static_cast<Port *> (treeview->get_data (_("port")));
-			
-			if (port == selected_port) {
-				selected_port = 0;
-				treeview->set_name ("IOSelectorPortList");
-				treeview->queue_draw();
-			}
-		}
-
-		/* remove the port when idle - if we do it here, we will destroy the widget
-		   for whom we are handling an event. not good.
-		*/
-
-		signal_idle().connect (bind (mem_fun(*this, &IOSelector::remove_port_when_idle), port));
-
-	} else {
-		select_treeview (treeview);
-	}
-
-	return TRUE;
 }
 
 void
@@ -729,20 +672,42 @@ IOSelector::select_treeview (TreeView* tview)
 
 	Glib::Mutex::Lock lm  (port_display_lock);
  	Port* port = reinterpret_cast<Port *> (tview->get_data (_("port")));
+
+	selected_port = port;
+
+	tview->set_name ("IOSelectorPortListSelected");
+	tview->queue_draw ();
+
+	/* ugly hack to force the column header button to change as well */
+
+	TreeViewColumn* col = tview->get_column (0);
+	GtkTreeViewColumn* ccol = col->gobj();
 	
-	if (port != selected_port) {
-		selected_port = port;
-		
-		tview->set_name ("IOSelectorPortListSelected");
-		
-		for (slist<TreeView*>::iterator i = port_displays.begin(); i != port_displays.end(); ++i) {
-			if (*i != tview) {
-				(*i)->set_name ("IOSelectorPortList");
-				(*i)->queue_draw ();
-			}
-		}
-		selector_box.show_all ();
+	if (ccol->button) {
+		gtk_widget_set_name (ccol->button, "IOSelectorPortListSelected");	
+		gtk_widget_queue_draw (ccol->button);
 	}
+
+	for (slist<TreeView*>::iterator i = port_displays.begin(); i != port_displays.end(); ++i) {
+		if (*i == tview) {
+			continue;
+		}
+		
+		col = (*i)->get_column (0);
+		ccol = col->gobj();
+		
+		if (ccol->button) {
+			gtk_widget_set_name (ccol->button, "IOSelectorPortList");
+			gtk_widget_queue_draw (ccol->button);
+		}
+		
+		Port* port = reinterpret_cast<Port *> ((*i)->get_data (_("port")));
+		
+		(*i)->set_name ("IOSelectorPortList");
+		(*i)->queue_draw ();
+	}
+
+	selector_box.show_all ();
 }
 
 void

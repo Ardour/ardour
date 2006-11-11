@@ -796,20 +796,72 @@ style "flashing_alert" = "very_small_text"
 	bg[ACTIVE] = { 1.0, 0, 0}
 }
 
-style "selected_io_selector_port_list" = "medium_text"
+style "selected_io_selector_port_list" = "medium_bold_text"
 {
-	fg[NORMAL] = { 0.50, 1.0, 1.0 }
-	fg[SELECTED] = { 0.50, 1.0, 1.0 }
-	base[NORMAL] = { 0, 0, 0 }
-	base[SELECTED] = { 0, 0, 0 }
+	GtkTreeView::even-row-color = { 0.64, 0.68, 0.54 }
+	GtkTreeView::odd-row-color = { 0.64, 0.68, 0.54 }
+
+# fg is used to color the fg (text) of the column header button
+
+	fg[NORMAL] = { 0.80, 0.80, 0.70 }
+	fg[SELECTED] = { 0.80, 0.80, 0.70 }
+	fg[ACTIVE] = { 0.80, 0.80, 0.70 }
+	fg[PRELIGHT] = { 0.80, 0.80, 0.70 }
+	fg[INSENSITIVE] = { 0.80, 0.80, 0.70 }
+
+# bg is used used to color the background of the column header button
+
+	bg[NORMAL] = { 0.30, 0.30, 0.35 }
+	bg[ACTIVE] = { 0.30, 0.30, 0.35 }
+	bg[PRELIGHT] = { 0.30, 0.30, 0.35 }
+	bg[INSENSITIVE] = { 0.30, 0.30, 0.35 }
+	bg[SELECTED] = { 0.30, 0.30, 0.35 }
+
+# text is used to color the treeview row text
+
+	text[NORMAL] = { 0.80, 0.80, 0.70 }
+	text[SELECTED] = { 0.80, 0.80, 0.70 }
+
+# base is used to color a treeview with no rows
+
+	base[NORMAL] = { 0.64, 0.68, 0.54 }
+	base[ACTIVE] = { 0.64, 0.68, 0.54 }
+	base[PRELIGHT] = { 0.64, 0.68, 0.54 }
+	base[INSENSITIVE] = { 0.64, 0.68, 0.54 }
+	base[SELECTED] = { 0.64, 0.68, 0.54 }
 }
 
 style "io_selector_port_list" = "medium_text"
 {
-	fg[NORMAL] = {0.80, 0.80, 0.70 }
-	fg[SELECTED] = {0.80, 0.80, 0.70 }
-	base[NORMAL] = { 0.26, 0.26, 0.26 }
-	base[SELECTED] = { 0.26, 0.26, 0.26 }
+
+# fg is used to color the fg (text) of the column header button
+
+	fg[NORMAL] = { 0.80, 0.80, 0.70 }
+	fg[SELECTED] = { 0.80, 0.80, 0.70 }
+	fg[ACTIVE] = { 0.80, 0.80, 0.70 }
+	fg[PRELIGHT] = { 0.80, 0.80, 0.70 }
+	fg[INSENSITIVE] = { 0.80, 0.80, 0.70 }
+
+# bg is used used to color the background of the column header button
+
+	bg[NORMAL] = { 0.30, 0.30, 0.35 }
+	bg[ACTIVE] = { 0.30, 0.30, 0.35 }
+	bg[PRELIGHT] = { 0.30, 0.30, 0.35 }
+	bg[INSENSITIVE] = { 0.30, 0.30, 0.35 }
+	bg[SELECTED] = { 0.30, 0.30, 0.35 }
+
+# text is used to color the treeview row text
+
+	text[NORMAL] = { 0.80, 0.80, 0.70 }
+	text[SELECTED] = { 0.80, 0.80, 0.70 }
+
+# base is used to color a treeview with no rows
+
+	base[NORMAL] = { 0, 0, 0 }
+	base[ACTIVE] = { 0, 0, 0 }
+	base[PRELIGHT] = { 0, 0, 0 }
+	base[INSENSITIVE] = { 0, 0, 0 }
+	base[SELECTED] = { 0, 0, 0 }
 }
 
 style "io_selector_notebook" = "default_base"
@@ -1121,7 +1173,9 @@ widget "*IOSelectorButton" style "default_buttons_menus"
 widget "*IOSelectorButton*" style "default_buttons_menus"
 widget "*IOSelectorList" style "medium_entry_noselection_fg"
 widget "*IOSelectorPortList" style "io_selector_port_list"
+widget "*IOSelectorPortList.*" style "io_selector_port_list"
 widget "*IOSelectorPortListSelected" style "selected_io_selector_port_list"
+widget "*IOSelectorPortListSelected.*" style "selected_io_selector_port_list"
 widget "*IOSelectorNotebook" style "io_selector_notebook"
 widget "*IOSelectorNotebookTab" style "io_selector_notebook"
 widget "*IOSelectorFrame" style "base_frame"

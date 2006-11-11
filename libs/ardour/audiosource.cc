@@ -368,26 +368,29 @@ AudioSource::initialize_peakfile (bool newfile, string audio_path)
 				error << string_compose(_("AudioSource: cannot stat peakfile \"%1\""), peakpath) << endmsg;
 				return -1;
 			}
-		} else {
 			
-			/* we found it in the peaks dir */
-		}
-		
-		if (statbuf.st_size == 0) {
 			_peaks_built = false;
+
 		} else {
-			// Check if the audio file has changed since the peakfile was built.
-			struct stat stat_file;
-			int err = stat (audio_path.c_str(), &stat_file);
 			
-			if (!err && stat_file.st_mtime > statbuf.st_mtime){
+			/* we found it in the peaks dir, so check it out */
+
+			if (statbuf.st_size == 0) {
 				_peaks_built = false;
 			} else {
-				_peaks_built = true;
+				// Check if the audio file has changed since the peakfile was built.
+				struct stat stat_file;
+				int err = stat (audio_path.c_str(), &stat_file);
+				
+				if (!err && stat_file.st_mtime > statbuf.st_mtime){
+					_peaks_built = false;
+				} else {
+					_peaks_built = true;
+				}
 			}
 		}
 	}
-	
+
 	if (!newfile && !_peaks_built && _build_missing_peakfiles && _build_peakfiles) {
 		build_peaks_from_scratch ();
 	} 
