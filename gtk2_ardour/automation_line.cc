@@ -747,10 +747,9 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
       		this_ry = (uint32_t) rint (ty); 
  
  		if (view_index && pi != npoints && /* not the first, not the last */
-		    
-		    /* same point or too close to the last one horizontally */
-
-		    (((this_rx == prev_rx) && (this_ry == prev_ry)) || ((this_rx - prev_rx) < (box_size + 2)))) {
+		    (((this_rx == prev_rx) && (this_ry == prev_ry)) || /* same point */
+		     (((this_rx - prev_rx) < (box_size + 2)) &&  /* too close horizontally */
+		      ((abs ((int)(this_ry - prev_ry)) < (box_size + 2)))))) { /* too close vertically */
   			continue;
 		}
 
