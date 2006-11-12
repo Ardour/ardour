@@ -188,7 +188,9 @@ class IO : public PBD::StatefulDestructible
 	/* Peak metering */
 
 	float peak_input_power (uint32_t n) { 
-		if (n < std::max (_ninputs, _noutputs)) {
+		if (_ninputs == 0) {
+			return minus_infinity();
+		} else if (n < std::max (_ninputs, _noutputs)) {
 			return _visible_peak_power[n];
 		} else {
 			return minus_infinity();
