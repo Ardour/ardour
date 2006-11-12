@@ -4010,6 +4010,7 @@ Editor::redisplay_snapshots ()
 		string display_name;
 		if (statename == session->snap_name()) {
 			display_name = "*"+statename+"*";
+			snapshot_display.get_selection()->select(row);
 		} else {
 			display_name = statename;
 		}
