@@ -55,7 +55,7 @@ utils.cc
 version.cc
 """)
 
-gtkmm2ext.VersionBuild(['version.cc','gtkmm2ext/version.h'], 'SConscript')
+gtkmm2ext.VersionBuild(['version.cc','gtkmm2ext/version.h'], [])
 
 gtkmm2ext.Append(CCFLAGS="-D_REENTRANT")
 gtkmm2ext.Append(CCFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")

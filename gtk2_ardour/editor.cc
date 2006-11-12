@@ -177,7 +177,7 @@ Editor::Editor (AudioEngine& eng)
 
 	  minsec_label (_("Mins:Secs")),
 	  bbt_label (_("Bars:Beats")),
-	  smpte_label (_("SMPTE")),
+	  smpte_label (_("Timecode")),
 	  frame_label (_("Frames")),
 	  tempo_label (_("Tempo")),
 	  meter_label (_("Meter")),

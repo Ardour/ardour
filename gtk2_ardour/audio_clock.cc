@@ -1712,7 +1712,7 @@ AudioClock::build_ops_menu ()
 	MenuList& mode_items = mode_menu->items();
 	mode_menu->set_name ("ArdourContextMenu");
 	
-	mode_items.push_back (MenuElem (_("SMPTE"), bind (mem_fun(*this, &AudioClock::set_mode), SMPTE)));
+	mode_items.push_back (MenuElem (_("Timecode"), bind (mem_fun(*this, &AudioClock::set_mode), SMPTE)));
 	mode_items.push_back (MenuElem (_("Bars:Beats"), bind (mem_fun(*this, &AudioClock::set_mode), BBT)));
 	mode_items.push_back (MenuElem (_("Minutes:Seconds"), bind (mem_fun(*this, &AudioClock::set_mode), MinSec)));
 	mode_items.push_back (MenuElem (_("Audio Frames"), bind (mem_fun(*this, &AudioClock::set_mode), Frames)));

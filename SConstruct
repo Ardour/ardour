@@ -16,7 +16,7 @@ import SCons.Node.FS
 SConsignFile()
 EnsureSConsVersion(0, 96)
 
-version = '2.0beta7.1'
+version = '2.0beta8'
 
 subst_dict = { }
 
@@ -231,6 +231,48 @@ def i18n (buildenv, sources, installenv):
         moname = domain + '.mo'
         installenv.Alias('install', installenv.InstallAs (os.path.join (modir, moname), lang + '.mo'))
 
+
+def fetch_svn_revision (path):
+    cmd = "svn info "
+    cmd += path
+    cmd += " | awk '/^Revision:/ { print $2}'"
+    return commands.getoutput (cmd)
+
+def recreate_stored_revision(target = None, source = None, env = None):
+    os.unlink ('svn_revision.h')
+    print "===========> Forcing recreation of svn_revision.h"
+    create_stored_revision ()
+    
+def create_stored_revision(target = None, source = None, env = None):
+    if os.path.exists('.svn'):    
+        rev = fetch_svn_revision ('.');
+        try:
+            text  = "#ifndef __ardour_svn_revision_h__\n"
+            text += "#define __ardour_svn_revision_h__\n"
+            text += "static const char* ardour_svn_revision = \"" + rev + "\";\n";
+            text += "#endif\n"
+            print '============> writing svn revision info to svn_revision.h\n'
+            o = file ('svn_revision.h', 'w')
+            o.write (text)
+            o.close ()
+        except IOError:
+            print "Could not open svn_revision.h for writing\n"
+            sys.exit (-1)
+    else:
+        if os.path.exists ('svn_revision.h') == False:
+            print "\n\nYou are missing svn_revision.h, which should have been included."
+            print "This is caused either by a packaging error, "
+            print "	or a configuration error with your system."
+            print "Please report this issue to the ardour-dev mailing list."
+            print "(See http://ardour.org/support for details)\n\n"
+            sys.exit (-1)
+
+#
+# if it exists, do not remove it
+#
+
+Precious('svn_revision.h')
+    
 #
 # A generic builder for version.cc files
 #
@@ -239,14 +281,8 @@ def i18n (buildenv, sources, installenv):
 #
 
 def version_builder (target, source, env):
-    cmd = "svn info "
-    cmd += source[0].get_path()
-    cmd += " | awk '/^Revision:/ { print $2}'"
-    
-    rev = commands.getoutput (cmd)
-        
-    text  = "const char* " + env['DOMAIN'] + "_revision = \"" + rev + "\";\n"
-    text += "int " + env['DOMAIN'] + "_major_version = " + str (env['MAJOR']) + ";\n"
+
+    text  = "int " + env['DOMAIN'] + "_major_version = " + str (env['MAJOR']) + ";\n"
     text += "int " + env['DOMAIN'] + "_minor_version = " + str (env['MINOR']) + ";\n"
     text += "int " + env['DOMAIN'] + "_micro_version = " + str (env['MICRO']) + ";\n"
     
@@ -269,7 +305,7 @@ def version_builder (target, source, env):
     try:
         o = file (target[1].get_path(), 'w')
         o.write (text)
-        o.close ();
+        o.close ()
     except IOError:
         print "Could not open", target[1].get_path(), " for writing\n"
         sys.exit (-1)
@@ -931,6 +967,13 @@ env = conf.Finish()
 
 rcbuild = env.SubstInFile ('ardour.rc','ardour.rc.in', SUBST_DICT = subst_dict)
 
+#
+# making this into an Alias directly prevents scons from understanding how to build
+# svn_revision.h
+#
+
+the_revision = env.Command ('svn_revision.h', [], create_stored_revision)
+
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour_system.rc'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.rc'))
 
@@ -940,13 +983,8 @@ Default (rcbuild)
 
 Precious (env['DISTTREE'])
 
-#
-# note the special "cleanfirst" source name. this triggers removal
-# of the existing disttree
-#
-
 env.Distribute (env['DISTTREE'],
-                [ 'SConstruct',
+                [ 'SConstruct', 'svn_revision.h',
                   'COPYING', 'PACKAGER_README', 'README',
                   'ardour.rc.in',
                   'ardour_system.rc',
@@ -976,7 +1014,9 @@ env.Alias ('srctar', srcdist)
 #
 # don't leave the distree around
 #
+
 env.AddPreAction (env['DISTTREE'], Action ('rm -rf ' + str (File (env['DISTTREE']))))
+env.AddPreAction (srcdist, Action (recreate_stored_revision))
 env.AddPostAction (srcdist, Action ('rm -rf ' + str (File (env['DISTTREE']))))
 
 #

@@ -40,7 +40,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("Monitoring"), _("Monitoring"));
 	ActionManager::register_action (editor_actions, X_("Autoconnect"), _("Autoconnect"));
 	ActionManager::register_action (editor_actions, X_("Layering"), _("Layering"));
-	ActionManager::register_action (editor_actions, X_("SMPTE"), _("SMPTE fps"));
+	ActionManager::register_action (editor_actions, X_("Timecode"), _("Timecode fps"));
 	ActionManager::register_action (editor_actions, X_("Pullup"), _("Pullup / Pulldown"));
 	ActionManager::register_action (editor_actions, X_("addExistingAudioFiles"), _("Add Existing Audio"));
 

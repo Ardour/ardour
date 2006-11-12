@@ -235,7 +235,7 @@
 		        <menuitem action='FileHeaderFormatCAF'/>
 		   </menu>
                </menu>
-	       <menu action='SMPTE'>
+	       <menu action='Timecode'>
 		   <menuitem action='Smpte23976'/>
 		   <menuitem action='Smpte24'/>
 		   <menuitem action='Smpte24976'/>

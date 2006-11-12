@@ -44,6 +44,7 @@
 #include <gtkmm2ext/popup.h>
 #include <gtkmm2ext/utils.h>
 
+#include "svn_revision.h"
 #include "version.h"
 #include "ardour_ui.h"
 #include "opts.h"
@@ -384,7 +385,7 @@ int main (int argc, char *argv[])
 	cout << _("Ardour/GTK ") 
 	     << VERSIONSTRING
 	     << _("\n   (built using ")
-	     << gtk_ardour_revision
+	     << ardour_svn_revision
 #ifdef __GNUC__
 	     << _(" and GCC version ") << __VERSION__ 
 #endif

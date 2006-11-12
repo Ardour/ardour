@@ -32,6 +32,7 @@
 #include "utils.h"
 #include "version.h"
 
+#include "svn_revision.h"
 #include "about.h"
 #include "rgb_macros.h"
 #include "ardour_ui.h"
@@ -192,7 +193,7 @@ About::About ()
 	set_website_label (_("visit http://www.ardour.org/"));
 	set_version ((string_compose(_("%1\n(built from revision %2)"),
 				     VERSIONSTRING, 
-				     gtk_ardour_revision)));
+				     ardour_svn_revision)));
 	
 
 #ifdef WITH_PAYMENT_OPTIONS

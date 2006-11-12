@@ -274,7 +274,7 @@ if env['NLS']:
 
 env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libardour))
 
-env.Alias('version', ardour.VersionBuild(['version.cc', 'ardour/version.h'], 'SConscript'))
+env.Alias('version', ardour.VersionBuild(['version.cc', 'ardour/version.h'], []))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
 				     [ 'SConscript', 'i18n.h', 'gettext.h', 'sse_functions.s', 'sse_functions_64bit.s' ] +
