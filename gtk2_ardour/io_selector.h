@@ -124,7 +124,7 @@ class IOSelector : public Gtk::VBox {
 
 	void add_port ();
 	void remove_port ();
-	gint remove_port_when_idle (ARDOUR::Port *);
+	void set_button_sensitivity ();
 
 	gint connection_button_release (GdkEventButton *, Gtk::TreeView*);
 	

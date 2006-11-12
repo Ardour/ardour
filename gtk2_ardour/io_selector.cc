@@ -184,40 +184,7 @@ IOSelector::IOSelector (Session& sess, boost::shared_ptr<IO> ior, bool input)
 	port_button_box.set_border_width (5);
 
 	port_button_box.pack_start (add_port_button, false, false);
-
-	if (for_input) {
-		if (io->input_maximum() < 0 || io->input_maximum() > (int) io->n_inputs()) {
-			add_port_button.set_sensitive (true);
-		} else {
-			add_port_button.set_sensitive (false);
-		}
-
-	} else {
-		if (io->output_maximum() < 0 || io->output_maximum() > (int) io->n_outputs()) {
-			add_port_button.set_sensitive (true);
-		} else {
-			add_port_button.set_sensitive (false);
-		}
-			
-	}
-
 	port_button_box.pack_start (remove_port_button, false, false);
-
-	if (for_input) {
-		if (io->input_minimum() < 0 || io->input_minimum() < (int) io->n_inputs()) {
-			remove_port_button.set_sensitive (true);
-		} else {
-			remove_port_button.set_sensitive (false);
-		}
-			
-	} else {
-		if (io->output_minimum() < 0 || io->output_minimum() < (int) io->n_outputs()) {
-			remove_port_button.set_sensitive (true);
-		} else {
-			remove_port_button.set_sensitive (false);
-		}
-	}
-
 	port_button_box.pack_start (clear_connections_button, false, false);
 
 	port_and_button_box.set_border_width (5);
@@ -254,6 +221,44 @@ IOSelector::IOSelector (Session& sess, boost::shared_ptr<IO> ior, bool input)
 IOSelector::~IOSelector ()
 {
 }
+
+void 
+IOSelector::set_button_sensitivity ()
+{
+	if (for_input) {
+
+		if (io->input_maximum() < 0 || io->input_maximum() > (int) io->n_inputs()) {
+			add_port_button.set_sensitive (true);
+		} else {
+			add_port_button.set_sensitive (false);
+		}
+
+	} else {
+
+		if (io->output_maximum() < 0 || io->output_maximum() > (int) io->n_outputs()) {
+			add_port_button.set_sensitive (true);
+		} else {
+			add_port_button.set_sensitive (false);
+		}
+			
+	}
+
+	if (for_input) {
+		if (io->n_inputs() && (io->input_minimum() < 0 || io->input_minimum() < (int) io->n_inputs())) {
+			remove_port_button.set_sensitive (true);
+		} else {
+			remove_port_button.set_sensitive (false);
+		}
+			
+	} else {
+		if (io->n_outputs() && (io->output_minimum() < 0 || io->output_minimum() < (int) io->n_outputs())) {
+			remove_port_button.set_sensitive (true);
+		} else {
+			remove_port_button.set_sensitive (false);
+		}
+	}
+}
+
 
 void
 IOSelector::name_changed (void* src)
@@ -551,14 +556,6 @@ IOSelector::add_port ()
 			msg.run ();
 		}
 
-		if (io->input_maximum() >= 0 && io->input_maximum() <= (int) io->n_inputs()) {
-			add_port_button.set_sensitive (false);
-		}
-		
-		if (io->input_minimum() < (int) io->n_inputs()) {
-			remove_port_button.set_sensitive (true);
-		}
-
 	} else {
 
 		try {
@@ -569,11 +566,9 @@ IOSelector::add_port ()
 			MessageDialog msg (0, _("There are no more JACK ports available."));
 			msg.run ();
 		}
-
-		if (io->output_maximum() >= 0 && io->output_maximum() <= (int) io->n_outputs()) {
-			add_port_button.set_sensitive (false);
-		}
 	}
+		
+	set_button_sensitivity ();
 }
 
 void
@@ -587,26 +582,14 @@ IOSelector::remove_port ()
 		if ((nports = io->n_inputs()) > 0) {
 			io->remove_input_port (io->input(nports-1), this);
 		}
-		if (io->input_minimum() == (int) io->n_inputs()) {
-		        remove_port_button.set_sensitive (false);
-		}
+
 	} else {
 		if ((nports = io->n_outputs()) > 0) {
 			io->remove_output_port (io->output(nports-1), this);
 		}
 	}
-}
-
-gint
-IOSelector::remove_port_when_idle (Port *port)
-{
-	if (for_input) {
-		io->remove_input_port (port, this);
-	} else {
-		io->remove_output_port (port, this);
-	}
-
-	return FALSE;
+	
+	set_button_sensitivity ();
 }
 
 gint
