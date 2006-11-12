@@ -285,7 +285,12 @@ IOSelector::rescan ()
 	gint current_page;
 	vector<string> rowdata;
 
+	page_selection_connection.disconnect ();
+
 	current_page = notebook.get_current_page ();
+
+	cerr << "clear notebook\n";
+
 	pages.clear ();
 
 	/* get relevant current JACK ports */
@@ -293,6 +298,7 @@ IOSelector::rescan ()
 	ports = session.engine().get_ports ("", JACK_DEFAULT_AUDIO_TYPE, for_input ? JackPortIsOutput : JackPortIsInput);
 
 	if (ports == 0) {
+		cerr << "no ports\n";
 		return;
 	}
 
@@ -358,8 +364,10 @@ IOSelector::rescan ()
 		pages.push_back (TabElem (*client_box, *tab_label));
 	}
 
+	cerr << "notebook should have " << portmap.size() << " pages\n";
+
 	notebook.set_current_page (current_page);
-	notebook.signal_show().connect (bind (mem_fun (notebook, &Notebook::set_current_page), current_page));
+	page_selection_connection = notebook.signal_show().connect (bind (mem_fun (notebook, &Notebook::set_current_page), current_page));
 	selector_box.show_all ();
 }	
 

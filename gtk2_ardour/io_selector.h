@@ -72,6 +72,7 @@ class IOSelector : public Gtk::VBox {
 	boost::shared_ptr<ARDOUR::IO> io;
 	bool for_input;
 	ARDOUR::Port *selected_port;
+	sigc::connection page_selection_connection;
 
 	Gtk::VBox main_box;
 	Gtk::HBox port_and_selector_box;
