@@ -18,7 +18,10 @@
     $Id$
 */
 
+#include <pbd/memento_command.h>
+
 #include <ardour/audioregion.h>
+#include <ardour/playlist.h>
 #include <ardour/utils.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/stop_signal.h>
@@ -282,7 +285,7 @@ AudioRegionEditor::breleased (GdkEventButton* ev, Gtk::SpinButton* but, void (Au
 void
 AudioRegionEditor::connect_editor_events ()
 {
-  name_entry.signal_changed().connect (mem_fun(*this, &AudioRegionEditor::name_entry_changed));
+	name_entry.signal_changed().connect (mem_fun(*this, &AudioRegionEditor::name_entry_changed));
 
 	start_clock.ValueChanged.connect (mem_fun(*this, &AudioRegionEditor::start_clock_changed));
 	end_clock.ValueChanged.connect (mem_fun(*this, &AudioRegionEditor::end_clock_changed));
@@ -303,13 +306,35 @@ AudioRegionEditor::connect_editor_events ()
 void
 AudioRegionEditor::start_clock_changed ()
 {
-	_region->set_position (start_clock.current_time(), this);
+	_session.begin_reversible_command (_("change region start position"));
+
+	Playlist* const pl = _region->playlist();
+
+	if (pl) {
+		XMLNode &before = pl->get_state();
+		_region->set_position (start_clock.current_time(), this);
+		XMLNode &after = pl->get_state();
+		_session.add_command(new MementoCommand<Playlist>(*pl, &before, &after));
+	}
+
+	_session.commit_reversible_command ();
 }
 
 void
 AudioRegionEditor::end_clock_changed ()
 {
-	_region->trim_end (end_clock.current_time(), this);
+	_session.begin_reversible_command (_("change region end position"));
+
+	Playlist* const pl = _region->playlist();
+
+	if (pl) {
+		XMLNode &before = pl->get_state();
+		_region->trim_end (end_clock.current_time(), this);
+		XMLNode &after = pl->get_state();
+		_session.add_command(new MementoCommand<Playlist>(*pl, &before, &after));
+	}
+
+	_session.commit_reversible_command ();
 
 	end_clock.set (_region->position() + _region->length(), true);
 }
@@ -318,7 +343,19 @@ void
 AudioRegionEditor::length_clock_changed ()
 {
 	nframes_t frames = length_clock.current_time();
-	_region->trim_end (_region->position() + frames, this);
+	
+	_session.begin_reversible_command (_("change region length"));
+	
+	Playlist* const pl = _region->playlist();
+
+	if (pl) {
+		XMLNode &before = pl->get_state();
+		_region->trim_end (_region->position() + frames, this);
+		XMLNode &after = pl->get_state();
+		_session.add_command(new MementoCommand<Playlist>(*pl, &before, &after));
+	}
+
+	_session.commit_reversible_command ();
 
 	length_clock.set (_region->length());
 }
