@@ -345,7 +345,13 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 				for (i = _redirects.begin(); i != _redirects.end(); ++i) {
 					switch ((*i)->placement()) {
 					case PreFader:
-						(*i)->run (bufs, nbufs, nframes, offset);
+						if (dsg == 0) {
+							if (boost::dynamic_pointer_cast<Send>(*i) || boost::dynamic_pointer_cast<PortInsert>(*i)) {
+								(*i)->silence (nframes, offset);
+							}
+						} else {
+							(*i)->run (bufs, nbufs, nframes, offset);
+						}
 						break;
 					case PostFader:
 						post_fader_work = true;
@@ -516,7 +522,13 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 					case PreFader:
 						break;
 					case PostFader:
-						(*i)->run (bufs, nbufs, nframes, offset);
+						if (dsg == 0) {
+							if (boost::dynamic_pointer_cast<Send>(*i) || boost::dynamic_pointer_cast<PortInsert>(*i)) {
+								(*i)->silence (nframes, offset);
+							}
+						} else {
+							(*i)->run (bufs, nbufs, nframes, offset);
+						}
 						break;
 					}
 				}
