@@ -216,6 +216,24 @@ Region::first_edit ()
 	}
 }
 
+bool
+Region::at_natural_position () const
+{
+	if (!_playlist) {
+		return false;
+	}
+	
+	boost::shared_ptr<Region> whole_file_region = get_parent();
+
+	if (whole_file_region) {
+		if (_position == whole_file_region->position() + _start) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void
 Region::move_to_natural_position (void *src)
 {

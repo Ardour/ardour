@@ -69,21 +69,6 @@ class AudioRegionEditor : public RegionEditor
 	Gtk::HBox  top_row_hbox;
 	Gtk::HBox  top_row_button_hbox;
 
-	Gtk::ToggleButton lock_button;
-	Gtk::ToggleButton mute_button;
-	Gtk::ToggleButton opaque_button;
-	Gtk::ToggleButton envelope_active_button;
-	Gtk::ToggleButton envelope_view_button;
-
-	Gtk::Button       raise_button;
-	Gtk::Arrow        raise_arrow;
-	Gtk::Button       lower_button;
-	Gtk::Arrow        lower_arrow;
-	Gtk::Frame        layer_frame;
-	Gtk::Label        layer_value_label;
-	Gtk::Label        layer_label;
-	Gtk::HBox         layer_hbox;
-
 	Gtk::ToggleButton  audition_button;
 
 	Gtk::HBox  lower_hbox;
@@ -102,11 +87,6 @@ class AudioRegionEditor : public RegionEditor
 	AudioClock length_clock;
 	AudioClock sync_offset_clock;
 
-	Gtk::Table  envelope_loop_table;
-	Gtk::Button loop_button;
-	Gtk::Label  loop_label;
-	Gtk::Label  envelope_label;
-
 	Gtk::HSeparator sep3;
 	Gtk::VSeparator sep1;
 	Gtk::VSeparator sep2;
@@ -114,11 +94,6 @@ class AudioRegionEditor : public RegionEditor
 	void region_changed (ARDOUR::Change);
 	void bounds_changed (ARDOUR::Change);
 	void name_changed ();
-	void opacity_changed ();
-	void mute_changed ();
-	void envelope_active_changed ();
-	void lock_changed ();
-	void layer_changed ();
 
 	void audition_state_changed (bool);
 
@@ -129,16 +104,7 @@ class AudioRegionEditor : public RegionEditor
 	void end_clock_changed ();
 	void length_clock_changed ();
 
-	gint envelope_active_button_press (GdkEventButton *);
-	gint envelope_active_button_release (GdkEventButton *);
-
 	void audition_button_toggled ();
-	void envelope_view_button_toggled ();
-	void lock_button_clicked ();
-	void mute_button_clicked ();
-	void opaque_button_clicked ();
-	void raise_button_clicked ();
-	void lower_button_clicked ();
 
 	gint bpressed (GdkEventButton* ev, Gtk::SpinButton* but, void (AudioRegionEditor::*pmf)());
 	gint breleased (GdkEventButton* ev, Gtk::SpinButton* but, void (AudioRegionEditor::*pmf)());

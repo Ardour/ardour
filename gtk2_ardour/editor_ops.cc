@@ -1930,28 +1930,6 @@ Editor::loop_location (Location& location)
 	}
 }
 
-void 
-Editor::toggle_region_mute ()
-{
-	if (clicked_regionview) {
-		clicked_regionview->region()->set_muted (!clicked_regionview->region()->muted());
-	} else if (!selection->regions.empty()) {
-		bool yn = ! (*selection->regions.begin())->region()->muted();
-		selection->foreach_region (&Region::set_muted, yn);
-	}
-}
-
-void
-Editor::toggle_region_opaque ()
-{
-	if (clicked_regionview) {
-		clicked_regionview->region()->set_opaque (!clicked_regionview->region()->opaque());
-	} else if (!selection->regions.empty()) {
-		bool yn = ! (*selection->regions.begin())->region()->opaque();
-		selection->foreach_region (&Region::set_opaque, yn);
-	}
-}
-
 void
 Editor::raise_region ()
 {
@@ -3501,8 +3479,12 @@ Editor::toggle_gain_envelope_visibility ()
 {
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-		if (arv)
-			arv->set_envelope_visible (!arv->envelope_visible());
+		if (arv) {
+			bool x = region_envelope_visible_item->get_active();
+			if (x != arv->envelope_visible()) {
+				arv->set_envelope_visible (x);
+			}
+		}
 	}
 }
 
@@ -3511,7 +3493,53 @@ Editor::toggle_gain_envelope_active ()
 {
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-		if (arv)
-			arv->audio_region()->set_envelope_active (true);
+		if (arv) {
+			bool x = region_envelope_active_item->get_active();
+			if (x != arv->audio_region()->envelope_active()) {
+				arv->audio_region()->set_envelope_active (x);
+			}
+		}
+	}
+}
+
+void
+Editor::toggle_region_lock ()
+{
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+		if (arv) {
+			bool x = region_lock_item->get_active();
+			if (x != arv->audio_region()->locked()) {
+				arv->audio_region()->set_locked (x);
+			}
+		}
+	}
+}
+
+void
+Editor::toggle_region_mute ()
+{
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+		if (arv) {
+			bool x = region_mute_item->get_active();
+			if (x != arv->audio_region()->muted()) {
+				arv->audio_region()->set_muted (x);
+			}
+		}
+	}
+}
+
+void
+Editor::toggle_region_opaque ()
+{
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+		if (arv) {
+			bool x = region_opaque_item->get_active();
+			if (x != arv->audio_region()->opaque()) {
+				arv->audio_region()->set_opaque (x);
+			}
+		}
 	}
 }

@@ -127,7 +127,7 @@ class AudioRegion : public Region
 
 	int exportme (ARDOUR::Session&, ARDOUR::AudioExportSpecification&);
 
-	boost::shared_ptr<Region> get_parent();
+	boost::shared_ptr<Region> get_parent() const;
 
 	/* xfade/fade interactions */
 

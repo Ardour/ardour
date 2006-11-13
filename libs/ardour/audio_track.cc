@@ -98,6 +98,7 @@ AudioTrack::can_use_mode (TrackMode m, bool& bounce_required)
 		return true;
 		
 	case Destructive:
+	default:
 		return _diskstream->can_become_destructive (bounce_required);
 	}
 }

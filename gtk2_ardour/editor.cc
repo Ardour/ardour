@@ -1716,32 +1716,48 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 
 	items.push_back (SeparatorElem());
 
-	/* XXX hopefully this nonsense will go away with SigC++ 2.X, where the compiler
-	   might be able to figure out which overloaded member function to use in
-	   a bind() call ...
-	*/
-
-	void (Editor::*type_A_pmf)(void (Region::*pmf)(bool), bool) = &Editor::region_selection_op;
-
-	items.push_back (MenuElem (_("Lock"), bind (mem_fun(*this, type_A_pmf), &Region::set_locked, true)));
-	items.push_back (MenuElem (_("Unlock"), bind (mem_fun(*this, type_A_pmf), &Region::set_locked, false)));
-	items.push_back (SeparatorElem());
-
-	if (region->muted()) {
-		items.push_back (MenuElem (_("Unmute"), bind (mem_fun(*this, type_A_pmf), &Region::set_muted, false)));
-	} else {
-		items.push_back (MenuElem (_("Mute"), bind (mem_fun(*this, type_A_pmf), &Region::set_muted, true)));
+	items.push_back (CheckMenuElem (_("Lock"), mem_fun(*this, &Editor::toggle_region_lock)));
+	region_lock_item = static_cast<CheckMenuItem*>(&items.back());
+	if (region->locked()) {
+		region_lock_item->set_active();
 	}
-	items.push_back (SeparatorElem());
+	items.push_back (CheckMenuElem (_("Mute"), mem_fun(*this, &Editor::toggle_region_mute)));
+	region_mute_item = static_cast<CheckMenuItem*>(&items.back());
+	if (region->muted()) {
+		region_mute_item->set_active();
+	}
+	items.push_back (CheckMenuElem (_("Opaque"), mem_fun(*this, &Editor::toggle_region_opaque)));
+	region_opaque_item = static_cast<CheckMenuItem*>(&items.back());
+	if (region->opaque()) {
+		region_opaque_item->set_active();
+	}
 
-	items.push_back (MenuElem (_("Original position"), mem_fun(*this, &Editor::naturalize)));
-	items.push_back (SeparatorElem());
+	items.push_back (CheckMenuElem (_("Original position"), mem_fun(*this, &Editor::naturalize)));
+	if (region->at_natural_position()) {
+		items.back().set_sensitive (false);
+	}
 
+	items.push_back (SeparatorElem());
 
 	if (ar) {
+		
+		RegionView* rv = sv->find_view (ar);
+		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(rv);
+		
+		items.push_back (CheckMenuElem (_("Envelope visible"), mem_fun(*this, &Editor::toggle_gain_envelope_visibility)));
+		region_envelope_visible_item = static_cast<CheckMenuItem*> (&items.back());
 
-		items.push_back (MenuElem (_("Toggle envelope visibility"), mem_fun(*this, &Editor::toggle_gain_envelope_visibility)));
-		items.push_back (MenuElem (_("Toggle envelope active"), mem_fun(*this, &Editor::toggle_gain_envelope_active)));
+		if (arv->envelope_visible()) {
+			region_envelope_visible_item->set_active (true);
+		}
+
+		items.push_back (CheckMenuElem (_("Envelope active"), mem_fun(*this, &Editor::toggle_gain_envelope_active)));
+		region_envelope_active_item = static_cast<CheckMenuItem*> (&items.back());
+
+		if (ar->envelope_active()) {
+			region_envelope_active_item->set_active (true);
+		}
+
 		items.push_back (SeparatorElem());
 
 		if (ar->scale_amplitude() != 1.0f) {

@@ -2540,7 +2540,7 @@ Session::remove_region (boost::weak_ptr<Region> weak_region)
 }
 
 boost::shared_ptr<AudioRegion>
-Session::find_whole_file_parent (boost::shared_ptr<AudioRegion> child)
+Session::find_whole_file_parent (boost::shared_ptr<AudioRegion const> child)
 {
 	AudioRegionList::iterator i;
 	boost::shared_ptr<AudioRegion> region;

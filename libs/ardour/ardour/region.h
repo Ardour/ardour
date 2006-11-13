@@ -139,6 +139,7 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	void special_set_position (nframes_t);
 	void nudge_position (long, void *src);
 
+	bool at_natural_position () const;
 	void move_to_natural_position (void *src);
 
 	void trim_start (nframes_t new_position, void *src);
@@ -172,7 +173,7 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	virtual int      set_state (const XMLNode&);
 	virtual int      set_live_state (const XMLNode&, Change&, bool send);
 
-	virtual boost::shared_ptr<Region> get_parent() = 0;
+	virtual boost::shared_ptr<Region> get_parent() const = 0;
 	
 	uint64_t last_layer_op() const { return _last_layer_op; }
 	void set_last_layer_op (uint64_t when);

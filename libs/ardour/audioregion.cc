@@ -1149,11 +1149,11 @@ AudioRegion::exportme (Session& session, AudioExportSpecification& spec)
 }
 
 boost::shared_ptr<Region>
-AudioRegion::get_parent()
+AudioRegion::get_parent() const
 {
 	if (_playlist) {
 		boost::shared_ptr<AudioRegion> ar;
-		boost::shared_ptr<AudioRegion> grrr2 = boost::dynamic_pointer_cast<AudioRegion> (shared_from_this());
+		boost::shared_ptr<AudioRegion const> grrr2 = boost::dynamic_pointer_cast<AudioRegion const> (shared_from_this());
 		
 		if (grrr2 && (ar = _playlist->session().find_whole_file_parent (grrr2))) {
 			return boost::static_pointer_cast<Region> (ar);

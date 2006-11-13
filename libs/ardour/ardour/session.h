@@ -549,7 +549,7 @@ class Session : public PBD::StatefulDestructible
 	string new_region_name (string);
 	string path_from_region_name (string name, string identifier);
 
-	boost::shared_ptr<AudioRegion> find_whole_file_parent (boost::shared_ptr<AudioRegion>);
+	boost::shared_ptr<AudioRegion> find_whole_file_parent (boost::shared_ptr<AudioRegion const>);
 	void find_equivalent_playlist_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >& result);
 
 	boost::shared_ptr<AudioRegion> XMLRegionFactory (const XMLNode&, bool full);

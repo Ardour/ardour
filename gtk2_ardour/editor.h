@@ -835,6 +835,7 @@ class Editor : public PublicEditor
 	
 	void reset_point_selection ();
 	void toggle_region_mute ();
+	void toggle_region_lock ();
 	void toggle_region_opaque ();
 	void raise_region ();
 	void raise_region_to_top ();
@@ -1772,6 +1773,12 @@ class Editor : public PublicEditor
 
 	void toggle_gain_envelope_visibility ();
 	void toggle_gain_envelope_active ();
+
+	Gtk::CheckMenuItem* region_envelope_visible_item;
+	Gtk::CheckMenuItem* region_envelope_active_item;
+	Gtk::CheckMenuItem* region_mute_item;
+	Gtk::CheckMenuItem* region_lock_item;
+	Gtk::CheckMenuItem* region_opaque_item;
 	
 	bool on_key_press_event (GdkEventKey*);
 
