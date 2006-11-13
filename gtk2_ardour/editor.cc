@@ -516,7 +516,7 @@ Editor::Editor (AudioEngine& eng)
 	edit_group_display.signal_button_press_event().connect (mem_fun(*this, &Editor::edit_group_list_button_press_event), false);
 
 	VBox* edit_group_display_packer = manage (new VBox());
-	HButtonBox* edit_group_display_button_box = manage (new HButtonBox());
+	HBox* edit_group_display_button_box = manage (new HBox());
 	edit_group_display_button_box->set_homogeneous (true);
 
 	Button* edit_group_add_button = manage (new Button ());
