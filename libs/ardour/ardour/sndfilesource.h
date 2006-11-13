@@ -60,6 +60,8 @@ class SndFileSource : public AudioFileSource {
 	static void setup_standard_crossfades (nframes_t sample_rate);
 	static const AudioFileSource::Flag default_writable_flags;
 
+	static int get_soundfile_info (string path, SoundFileInfo& _info, string& error_msg);
+
   protected:
 	void set_header_timeline_position ();
 
@@ -96,10 +98,12 @@ class SndFileSource : public AudioFileSource {
 	Sample*        xfade_buf;
 
 	nframes_t crossfade (Sample* data, nframes_t cnt, int dir);
-	void set_timeline_position (nframes_t);
+	void set_timeline_position (int64_t);
 	nframes_t destructive_write_unlocked (Sample *dst, nframes_t cnt);
 	nframes_t nondestructive_write_unlocked (Sample *dst, nframes_t cnt);
 	void handle_header_position_change ();
+
+	static int64_t get_timecode_info (SNDFILE* sf, SF_BROADCAST_INFO* binfo, bool& exists);
 };
 
 } // namespace ARDOUR

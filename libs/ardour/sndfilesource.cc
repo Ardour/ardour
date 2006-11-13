@@ -28,7 +28,7 @@
 #include <glibmm/miscutils.h>
 
 #include <ardour/sndfilesource.h>
-
+#include <ardour/sndfile_helpers.h>
 #include <ardour/utils.h>
 
 #include "i18n.h"
@@ -243,27 +243,14 @@ SndFileSource::open ()
 	_broadcast_info = new SF_BROADCAST_INFO;
 	memset (_broadcast_info, 0, sizeof (*_broadcast_info));
 	
-	/* lookup broadcast info */
-	
-	if (sf_command (sf, SFC_GET_BROADCAST_INFO, _broadcast_info, sizeof (*_broadcast_info)) != SF_TRUE) {
+	bool timecode_info_exists;
 
-		/* if the file has data but no broadcast info, then clearly, there is no broadcast info */
+	set_timeline_position (get_timecode_info (sf, _broadcast_info, timecode_info_exists));
 
-		if (_length) {
-			delete _broadcast_info;
-			_broadcast_info = 0;
-			_flags = Flag (_flags & ~Broadcast);
-		}
-
-		set_timeline_position (header_position_offset);
-
-	} else {
-	
-		/* XXX 64 bit alert: when JACK switches to a 64 bit frame count, this needs to use the high bits
-		   of the time reference.
-		*/
-
-		set_timeline_position ( _broadcast_info->time_reference_low );
+	if (!timecode_info_exists) {
+		delete _broadcast_info;
+		_broadcast_info = 0;
+		_flags = Flag (_flags & ~Broadcast);
 	}
 
 	if (writable()) {
@@ -893,7 +880,7 @@ SndFileSource::setup_standard_crossfades (nframes_t rate)
 }
 
 void
-SndFileSource::set_timeline_position (nframes_t pos)
+SndFileSource::set_timeline_position (int64_t pos)
 {
 	// destructive track timeline postion does not change
 	// except at instantion or when header_position_offset 
@@ -902,4 +889,58 @@ SndFileSource::set_timeline_position (nframes_t pos)
 	if (!destructive()) {
 		AudioFileSource::set_timeline_position (pos);
 	} 
+}
+
+int
+SndFileSource::get_soundfile_info (string path, SoundFileInfo& info, string& error_msg)
+{
+	SNDFILE *sf;
+	SF_INFO sf_info;
+	SF_BROADCAST_INFO binfo;
+	bool timecode_exists;
+
+	sf_info.format = 0; // libsndfile says to clear this before sf_open().
+
+	if ((sf = sf_open ((char*) path.c_str(), SFM_READ, &sf_info)) == 0) { 
+		char errbuf[256];
+		error_msg = sf_error_str (0, errbuf, sizeof (errbuf) - 1);
+		return false;
+	}
+
+	info.samplerate  = sf_info.samplerate;
+	info.channels    = sf_info.channels;
+	info.length      = sf_info.frames;
+	info.format_name = string_compose("Format: %1, %2",
+					   sndfile_major_format(sf_info.format),
+					   sndfile_minor_format(sf_info.format));
+
+	memset (&binfo, 0, sizeof (binfo));
+	info.timecode  = get_timecode_info (sf, &binfo, timecode_exists);
+
+	if (!timecode_exists) {
+		info.timecode = 0;
+	}
+	
+	sf_close (sf);
+
+	return true;
+}
+
+int64_t
+SndFileSource::get_timecode_info (SNDFILE* sf, SF_BROADCAST_INFO* binfo, bool& exists)
+{
+	if (sf_command (sf, SFC_GET_BROADCAST_INFO, binfo, sizeof (*binfo)) != SF_TRUE) {
+		exists = false;
+		return (header_position_offset);
+	} 
+	
+	/* XXX 64 bit alert: when JACK switches to a 64 bit frame count, this needs to use the high bits
+	   of the time reference.
+	*/
+	
+	exists = true;
+	int64_t ret = (uint32_t) binfo->time_reference_high;
+	ret <<= 32;
+	ret |= (uint32_t) binfo->time_reference_low;
+	return ret;
 }

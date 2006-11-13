@@ -68,7 +68,7 @@ class DestructiveFileSource : public SndFileSource {
 
 	void init ();
 	nframes_t crossfade (Sample* data, nframes_t cnt, int dir);
-	void set_timeline_position (nframes_t);
+	void set_timeline_position (int64_t);
 };
 
 }

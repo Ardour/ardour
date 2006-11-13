@@ -67,7 +67,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	base_rect->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_automation_track_event),
 						 base_rect, this));
 
-	hide_button.add (*(manage (new Gtk::Image (get_xpm("small_x.xpm")))));
+	hide_button.add (*(manage (new Gtk::Image (::get_icon("hide")))));
 
 	height_button.set_name ("TrackSizeButton");
 	auto_button.set_name ("TrackVisualButton");

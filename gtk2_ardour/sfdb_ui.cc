@@ -74,6 +74,7 @@ SoundFileBox::SoundFileBox ()
 	main_box.pack_start(format, false, false);
 	main_box.pack_start(channels, false, false);
 	main_box.pack_start(samplerate, false, false);
+	main_box.pack_start(timecode, false, false);
 	main_box.pack_start(field_view, true, true);
 	main_box.pack_start(top_box, false, false);
 	main_box.pack_start(bottom_box, false, false);
@@ -129,21 +130,25 @@ SoundFileBox::setup_labels (string filename)
 	path = filename;
 
 	string error_msg;
+
 	if(!AudioFileSource::get_soundfile_info (filename, sf_info, error_msg)) {
 		return false;
 	}
 
 	length.set_alignment (0.0f, 0.0f);
-	length.set_text (string_compose("Length: %1", PBD::length2string(sf_info.length, sf_info.samplerate)));
+	length.set_text (string_compose(_("Length: %1"), PBD::length2string(sf_info.length, sf_info.samplerate)));
 
 	format.set_alignment (0.0f, 0.0f);
 	format.set_text (sf_info.format_name);
 
 	channels.set_alignment (0.0f, 0.0f);
-	channels.set_text (string_compose("Channels: %1", sf_info.channels));
+	channels.set_text (string_compose(_("Channels: %1"), sf_info.channels));
 
 	samplerate.set_alignment (0.0f, 0.0f);
-	samplerate.set_text (string_compose("Samplerate: %1", sf_info.samplerate));
+	samplerate.set_text (string_compose(_("Samplerate: %1"), sf_info.samplerate));
+
+	timecode.set_alignment (0.0f, 0.0f);
+	timecode.set_text (string_compose (_("Timecode: %1"), PBD::length2string(sf_info.timecode, sf_info.samplerate)));
 
 	setup_fields ();
 

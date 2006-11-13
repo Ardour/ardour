@@ -36,7 +36,6 @@
 #include <ardour/audiofilesource.h>
 #include <ardour/sndfile_helpers.h>
 #include <ardour/sndfilesource.h>
-#include <ardour/destructive_filesource.h>
 #include <ardour/session.h>
 #include <ardour/source_factory.h>
 
@@ -178,80 +177,16 @@ bool
 AudioFileSource::get_soundfile_info (string path, SoundFileInfo& _info, string& error_msg)
 {
 #ifdef HAVE_COREAUDIO
-	OSStatus err = noErr;
-    FSRef ref; 
-	ExtAudioFileRef af = 0;
-	size_t size;
-    CFStringRef name;
-
-    err = FSPathMakeRef ((UInt8*)path.c_str(), &ref, 0);
-	if (err != noErr) {
-        ExtAudioFileDispose (af);
-		goto libsndfile;
+	if (CoreAudioSource::get_soundfile_info (path, _info, error_msg) == 0) {
+		return true;
 	}
-
-	err = ExtAudioFileOpen(&ref, &af);
-	if (err != noErr) {
-        ExtAudioFileDispose (af);
-		goto libsndfile;
-	}
-
-	AudioStreamBasicDescription absd;
-	memset(&absd, 0, sizeof(absd));
-	size = sizeof(AudioStreamBasicDescription);
-	err = ExtAudioFileGetProperty(af,
-			kExtAudioFileProperty_FileDataFormat, &size, &absd);
-	if (err != noErr) {
-        ExtAudioFileDispose (af);
-		goto libsndfile;
-	}
-
-	_info.samplerate = absd.mSampleRate;
-	_info.channels   = absd.mChannelsPerFrame;
-
-    size = sizeof(_info.length);
-    err = ExtAudioFileGetProperty(af, kExtAudioFileProperty_FileLengthFrames, &size, &_info.length);
-    if (err != noErr) {
-        ExtAudioFileDispose (af);
-		goto libsndfile;
-    }
-
-	size = sizeof(CFStringRef);
-	err = AudioFormatGetProperty(
-			kAudioFormatProperty_FormatName, sizeof(absd), &absd, &size, &name);
-	if (err != noErr) {
-        ExtAudioFileDispose (af);
-		goto libsndfile;
-	}
-
-	_info.format_name = CFStringRefToStdString(name);
-
-    ExtAudioFileDispose (af);
-	return true;
-	
-libsndfile:
 #endif // HAVE_COREAUDIO
 
-	SNDFILE *sf;
-	SF_INFO sf_info;
-
-	sf_info.format = 0; // libsndfile says to clear this before sf_open().
-
-	if ((sf = sf_open ((char*) path.c_str(), SFM_READ, &sf_info)) == 0) { 
-		char errbuf[256];
-		error_msg = sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-		return false;
+	if (SndFileSource::get_soundfile_info (path, _info, error_msg) != 0) {
+		return true;
 	}
 
-	sf_close (sf);
-
-	_info.samplerate  = sf_info.samplerate;
-	_info.channels    = sf_info.channels;
-	_info.length      = sf_info.frames;
-	_info.format_name = string_compose("Format: %1, %2",
-					   sndfile_major_format(sf_info.format),
-					   sndfile_minor_format(sf_info.format));
-	return true;
+	return false;
 }
 
 XMLNode&
@@ -540,7 +475,7 @@ AudioFileSource::set_header_position_offset (nframes_t offset)
 }
 
 void
-AudioFileSource::set_timeline_position (nframes_t pos)
+AudioFileSource::set_timeline_position (int64_t pos)
 {
 	timeline_position = pos;
 }

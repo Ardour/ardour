@@ -77,6 +77,7 @@ class SoundFileBox : public Gtk::VBox
     Gtk::Label format;
     Gtk::Label channels;
     Gtk::Label samplerate;
+    Gtk::Label timecode;
 
     Gtk::TreeView field_view;
     Glib::RefPtr<Gtk::ListStore> fields;

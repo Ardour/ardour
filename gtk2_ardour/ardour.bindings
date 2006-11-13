@@ -37,10 +37,10 @@
 
 (gtk_accel_path "<Actions>/Common/goto-editor" "<alt>e")
 (gtk_accel_path "<Actions>/Common/goto-mixer" "<alt>m")
-(gtk-accel_path "<Actions>/Common/ToggleSoundFileBrowser" "<alt>f")
-(gtk-accel_path "<Actions>/Common/ToggleLocations" "<alt>l")
-(gtk-accel_path "<Actions>/Common/ToggleBigClock" "<alt>b")
-(gtk-accel_path "<Actions>/Common/ToggleColorManager" "<alt>c")
+(gtk_accel_path "<Actions>/Common/ToggleSoundFileBrowser" "<alt>f")
+(gtk_accel_path "<Actions>/Common/ToggleLocations" "<alt>l")
+(gtk_accel_path "<Actions>/Common/ToggleBigClock" "<alt>b")
+(gtk_accel_path "<Actions>/Common/ToggleColorManager" "<alt>c")
 
 (gtk_accel_path "<Actions>/Editor/editor-copy" "<control>c")
 (gtk_accel_path "<Actions>/Common/Quit" "<control>q")

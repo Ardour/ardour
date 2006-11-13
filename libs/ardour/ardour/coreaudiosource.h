@@ -38,6 +38,8 @@ class CoreAudioSource : public AudioFileSource {
 	int flush_header () {return 0;};
 	void set_header_timeline_position () {};
 
+	static int get_soundfile_info (string path, SoundFileInfo& _info, string& error_msg);
+
   protected:
 	nframes_t read_unlocked (Sample *dst, nframes_t start, nframes_t cnt) const;
 	nframes_t write_unlocked (Sample *dst, nframes_t cnt) { return 0; }
