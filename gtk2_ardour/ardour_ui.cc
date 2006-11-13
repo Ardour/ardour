@@ -1231,7 +1231,6 @@ ARDOUR_UI::engine_stopped ()
 	ActionManager::set_sensitive (ActionManager::jack_opposite_sensitive_actions, true);
 }
 
-
 void
 ARDOUR_UI::engine_running ()
 {

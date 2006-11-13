@@ -500,7 +500,7 @@ MixerStrip::output_press (GdkEventButton *ev)
 		citems.push_back (SeparatorElem());
 		
 		_session.foreach_connection (this, &MixerStrip::add_connection_to_output_menu);
-		
+
 		output_menu.popup (1, ev->time);
 		break;
 		
@@ -556,13 +556,13 @@ MixerStrip::input_press (GdkEventButton *ev)
 	switch (ev->button) {
 
 	case 1:
-
 		citems.push_back (MenuElem (_("Edit"), mem_fun(*this, &MixerStrip::edit_input_configuration)));
 		citems.push_back (SeparatorElem());
 		citems.push_back (MenuElem (_("Disconnect"), mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::disconnect_input)));
 		citems.push_back (SeparatorElem());
 		
 		_session.foreach_connection (this, &MixerStrip::add_connection_to_input_menu);
+
 		input_menu.popup (1, ev->time);
 		break;
 		
@@ -1177,21 +1177,11 @@ MixerStrip::mix_group() const
 void
 MixerStrip::engine_stopped ()
 {
-        input_button.set_sensitive (false);
-	if (rec_enable_button) {
-		rec_enable_button->set_sensitive (false);
-	}
-	output_button.set_sensitive (false);
 }
 
 void
 MixerStrip::engine_running ()
 {
-        input_button.set_sensitive (true);
-	if (rec_enable_button) {
-		rec_enable_button->set_sensitive (true);
-	}
-	output_button.set_sensitive (true);
 }
 
 void

@@ -1058,8 +1058,12 @@ RedirectBox::register_actions ()
 
 	/* new stuff */
 	ActionManager::register_action (popup_act_grp, X_("newplugin"), _("New Plugin ..."),  sigc::ptr_fun (RedirectBox::rb_choose_plugin));
-	ActionManager::register_action (popup_act_grp, X_("newinsert"), _("New Insert"),  sigc::ptr_fun (RedirectBox::rb_choose_insert));
-	ActionManager::register_action (popup_act_grp, X_("newsend"), _("New Send ..."),  sigc::ptr_fun (RedirectBox::rb_choose_send));
+
+	act = ActionManager::register_action (popup_act_grp, X_("newinsert"), _("New Insert"),  sigc::ptr_fun (RedirectBox::rb_choose_insert));
+	ActionManager::jack_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (popup_act_grp, X_("newsend"), _("New Send ..."),  sigc::ptr_fun (RedirectBox::rb_choose_send));
+	ActionManager::jack_sensitive_actions.push_back (act);
+
 	ActionManager::register_action (popup_act_grp, X_("clear"), _("Clear"),  sigc::ptr_fun (RedirectBox::rb_clear));
 
 	/* standard editing stuff */
@@ -1086,6 +1090,8 @@ RedirectBox::register_actions ()
 	ActionManager::plugin_selection_sensitive_actions.push_back(act);
 
 	ActionManager::add_action_group (popup_act_grp);
+
+
 }
 
 void
@@ -1256,3 +1262,4 @@ RedirectBox::generate_redirect_title (boost::shared_ptr<PluginInsert> pi)
 
 	return string_compose(_("ardour: %1: %2 (by %3)"), _route->name(), pi->name(), maker);	
 }
+

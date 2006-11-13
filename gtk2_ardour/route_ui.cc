@@ -36,6 +36,8 @@
 #include "gui_thread.h"
 
 #include <ardour/route.h>
+#include <ardour/session.h>
+#include <ardour/audioengine.h>
 #include <ardour/audio_track.h>
 #include <ardour/audio_diskstream.h>
 
@@ -281,6 +283,12 @@ RouteUI::solo_release(GdkEventButton* ev)
 bool
 RouteUI::rec_enable_press(GdkEventButton* ev)
 {
+	if (!_session.engine().connected()) {
+	        MessageDialog msg (_("Not connected to JACK - cannot engage record"));
+		msg.run ();
+		return true;
+	}
+
 	if (!ignore_toggle && is_track() && rec_enable_button) {
 
 		if (ev->button == 2 && Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
