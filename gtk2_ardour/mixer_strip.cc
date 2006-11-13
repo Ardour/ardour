@@ -124,34 +124,31 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	output_label.set_name ("MixerIOButtonLabel");
 
 	_route->meter_change.connect (mem_fun(*this, &MixerStrip::meter_changed));
-		meter_point_button.add (meter_point_label);
-		meter_point_button.set_name ("MixerStripMeterPreButton");
-		meter_point_label.set_name ("MixerStripMeterPreButton");
+	meter_point_button.add (meter_point_label);
+	meter_point_button.set_name ("MixerStripMeterPreButton");
+	meter_point_label.set_name ("MixerStripMeterPreButton");
+	
+	switch (_route->meter_point()) {
+	case MeterInput:
+		meter_point_label.set_text (_("input"));
+		break;
 		
-		switch (_route->meter_point()) {
-		case MeterInput:
-			meter_point_label.set_text (_("input"));
-			break;
-			
-		case MeterPreFader:
-			meter_point_label.set_text (_("pre"));
-			break;
-			
-		case MeterPostFader:
-			meter_point_label.set_text (_("post"));
-			break;
-		}
+	case MeterPreFader:
+		meter_point_label.set_text (_("pre"));
+		break;
 		
-		/* TRANSLATORS: this string should be longest of the strings
-		   used to describe meter points. In english, its "input".
-		*/
-		
-		set_size_request_to_display_given_text (meter_point_button, _("tupni"), 5, 5);
-
-
-		bottom_button_table.attach (meter_point_button, 1, 2, 0, 1);
-
-
+	case MeterPostFader:
+		meter_point_label.set_text (_("post"));
+		break;
+	}
+	
+	/* TRANSLATORS: this string should be longest of the strings
+	   used to describe meter points. In english, it's "input".
+	*/
+	set_size_request_to_display_given_text (meter_point_button, _("tupni"), 5, 5);
+    
+	bottom_button_table.attach (meter_point_button, 1, 2, 0, 1);
+    
 	meter_point_button.signal_button_press_event().connect (mem_fun (gpm, &GainMeter::meter_press), false);
 	/* XXX what is this meant to do? */
 	//meter_point_button.signal_button_release_event().connect (mem_fun (gpm, &GainMeter::meter_release), false);
@@ -1092,11 +1089,17 @@ MixerStrip::width_clicked ()
 void
 MixerStrip::hide_clicked ()
 {
+    // LAME fix to reset the button status for when it is redisplayed (part 1)
+    hide_button.set_sensitive(false);
+    
 	if (_embedded) {
 		 Hiding(); /* EMIT_SIGNAL */
 	} else {
 		_mixer.hide_strip (this);
 	}
+	
+    // (part 2)
+	hide_button.set_sensitive(true);
 }
 
 void

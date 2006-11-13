@@ -402,8 +402,13 @@ AutomationTimeAxisView::set_samples_per_unit (double spu)
 void
 AutomationTimeAxisView::hide_clicked ()
 {
+	// LAME fix for refreshing the hide button
+	hide_button.set_sensitive(false);
+	
 	set_marked_for_display (false);
 	hide ();
+	
+	hide_button.set_sensitive(true);
 }
 
 void

@@ -199,7 +199,12 @@ VisualTimeAxis::visual_click()
 void
 VisualTimeAxis::hide_click()
 {
+	// LAME fix for hide_button display refresh
+	hide_button.set_sensitive(false);
+	
 	editor.hide_track_in_display (*this);
+	
+	hide_button.set_sensitive(true);
 }
 
 

@@ -393,11 +393,11 @@ Mixer_UI::disconnect_from_session ()
 void
 Mixer_UI::show_strip (MixerStrip* ms)
 {
-        TreeModel::Children rows = track_model->children();
+	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator i;
-
+	
 	for (i = rows.begin(); i != rows.end(); ++i) {
-
+	
 		MixerStrip* strip = (*i)[track_columns.strip];
 		if (strip == ms) {
 			(*i)[track_columns.visible] = true;
@@ -409,7 +409,7 @@ Mixer_UI::show_strip (MixerStrip* ms)
 void
 Mixer_UI::hide_strip (MixerStrip* ms)
 {
-        TreeModel::Children rows = track_model->children();
+	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator i;
 	
 	for (i = rows.begin(); i != rows.end(); ++i) {
@@ -419,37 +419,37 @@ Mixer_UI::hide_strip (MixerStrip* ms)
 			(*i)[track_columns.visible] = false;
 			break;
 		}
-	 }
- }
+	}
+}
 
- gint
- Mixer_UI::start_updating ()
- {
-	 fast_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (mem_fun(*this, &Mixer_UI::fast_update_strips));
-	 return 0;
- }
+gint
+Mixer_UI::start_updating ()
+{
+    fast_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (mem_fun(*this, &Mixer_UI::fast_update_strips));
+    return 0;
+}
 
- gint
- Mixer_UI::stop_updating ()
- {
-	 fast_screen_update_connection.disconnect();
-	 return 0;
- }
+gint
+Mixer_UI::stop_updating ()
+{
+    fast_screen_update_connection.disconnect();
+    return 0;
+}
 
- void
- Mixer_UI::fast_update_strips ()
- {
-	 if (is_mapped () && session) {
-		 for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
-			 (*i)->fast_update ();
-		 }
-	 }
- }
+void
+Mixer_UI::fast_update_strips ()
+{
+	if (is_mapped () && session) {
+		for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
+			(*i)->fast_update ();
+		}
+	}
+}
 
 void
 Mixer_UI::set_all_strips_visibility (bool yn)
 {
-        TreeModel::Children rows = track_model->children();
+	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator i;
 
 	no_track_list_redisplay = true;

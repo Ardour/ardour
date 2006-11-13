@@ -1122,7 +1122,12 @@ RouteTimeAxisView::visual_click ()
 void
 RouteTimeAxisView::hide_click ()
 {
+	// LAME fix for hide_button refresh fix
+	hide_button.set_sensitive(false);
+	
 	editor.hide_track_in_display (*this);
+	
+	hide_button.set_sensitive(true);
 }
 
 boost::shared_ptr<Region>
