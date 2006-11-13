@@ -85,7 +85,7 @@ style "default_base" = "medium_text"
   GtkButton::default_outside_border = { 0, 0, 0, 0 }
   GtkTreeView::vertical-padding = 0
   GtkTreeView::horizontal-padding = 0
-  GtkTreeView::even-row-color = { 0, 0, 0.12 }
+  GtkTreeView::even-row-color = { 0, 0, 0 }
   GtkTreeView::odd-row-color = { 0, 0, 0 }
   
   fg[NORMAL] = { 0.80, 0.80, 0.80 }	
@@ -282,7 +282,7 @@ style "shuttle_control" = "very_small_text"
 	bg[NORMAL] = { 0.26, 0.26, 0.31 }
 	bg[PRELIGHT] = { 0.26, 0.26, 0.31 }
 	bg[INSENSITIVE] = { 0.26, 0.26, 0.31 }
-	bg[ACTIVE] = { 0.50, 1.0, 0.50 }
+	bg[ACTIVE] = { 0.70, 0.70, 0.70 }
 	bg[SELECTED] = { 1.0, 0.04, 0.04 }
 }
 
@@ -307,8 +307,8 @@ style "options_window"  = "default_base"
 
 style "option_entry"  = "default_base"
 {
-	fg[NORMAL] = { 0.50, 1.0, 1.0 }
-	fg[ACTIVE] = { 0.50, 1.0, 1.0 }
+	fg[NORMAL] = { 1.0, 1.0, 1.0 }
+	fg[ACTIVE] = { 1.0, 1.0, 1.0 }
 	fg[INSENSITIVE] = { 0.80, 0.80, 0.80 }
 	
 	base[INSENSITIVE] = { 0.07, 0.07, 0.12 }
@@ -391,15 +391,15 @@ style "warning_message" = "medium_text"
 
 style "medium_entry" = "medium_text"
 {
-	fg[NORMAL] = { 0.50, 1.0, 1.0 }
-	fg[ACTIVE] = { 0.50, 1.0, 1.0 }
-	fg[SELECTED] = { 0.50, 1.0, 0.50 }
+	fg[NORMAL] = { 0.70, 0.70, 0.70 }
+	fg[ACTIVE] = { 0.70, 0.70, 0.70 }
+	fg[SELECTED] = { 1.0, 1.0, 1.0 }
 	
 	bg[NORMAL] = { 0.35, 0.35, 0.40 }
 	
 	base[NORMAL] = { 0, 0, 0 }
 	base[ACTIVE] = { 0, 0, 0 }
-	base[SELECTED] = { 0.5, 0.5, 1.0 }
+	base[SELECTED] = { 0.70, 0.70, 0.70 }
 }
 
 style "medium_entry_noselection_fg" = "medium_entry"
@@ -409,13 +409,13 @@ style "medium_entry_noselection_fg" = "medium_entry"
 
 style "medium_entry_noselection_bg" = "medium_entry"
 {
-	bg[SELECTED] = { 0.50, 1.0, 1.0 }
+	bg[SELECTED] = { 1.0, 1.0, 1.0 }
 }
 
 style "medium_bold_entry"  = "medium_bold_text"
 {
-	fg[NORMAL] = { 0.50, 1.0, 1.0 }
-	fg[ACTIVE] = { 0.50, 1.0, 1.0 }
+	fg[NORMAL] = { 0.70, 0.70, 0.70 }
+	fg[ACTIVE] = { 0.70, 0.70, 0.70 }
 	
 	bg[NORMAL] = { 0.35, 0.35, 0.40 }
 	
@@ -427,8 +427,8 @@ style "medium_bold_entry"  = "medium_bold_text"
 
 style "small_entry" = "small_text"
 {
-	fg[NORMAL] = { 0.50, 1.0, 1.0 }
-	fg[ACTIVE] = { 0.50, 1.0, 1.0 }
+	fg[NORMAL] = { 0.70, 0.70, 0.70 }
+	fg[ACTIVE] = { 0.70, 0.70, 0.70 }
 	bg[NORMAL] = { 0.0, 0.0, 0.0 }
 	base[NORMAL] = { 0, 0, 0 }
 	base[ACTIVE] = { 0, 0, 0 }
@@ -443,8 +443,8 @@ style "red_active_small_entry" = "small_entry"
 
 style "small_bold_entry" = "small_bold_text"
 {
-	fg[NORMAL] = { 0.50, 1.0, 1.0 }
-	fg[ACTIVE] = { 0.50, 1.0, 1.0 }
+	fg[NORMAL] = { 0.70, 0.70, 0.70 }
+	fg[ACTIVE] = { 0.70, 0.70, 0.70 }
 	
 	bg[NORMAL] = { 0.35, 0.35, 0.40 }
 	
@@ -610,7 +610,7 @@ style "region_list_display" = "small_bold_text"
 {
 	fg[NORMAL] = { 0.80, 0.80, 0.80 }
 	fg[ACTIVE] = { 0.80, 0.80, 0.80 }
-	fg[SELECTED] = { 0.50, 1.0, 1.0 }
+	fg[SELECTED] = { 0.70, 0.70, 0.70 }
 	bg[NORMAL] = { 0, 0, 0 }
 	bg[ACTIVE] = { 0, 0, 0 }
 	bg[SELECTED] = { 0, 0, 0 }
@@ -622,11 +622,11 @@ style "region_list_display" = "small_bold_text"
 
 style "main_canvas_area"
 {
-	bg[NORMAL] = { 0.32, 0.32, 0.36 }
-	bg[ACTIVE] = { 0.38, 0.38, 0.42 }
-	bg[INSENSITIVE] = { 0.38, 0.38, 0.42 }
-	bg[SELECTED] = { 0.38, 0.38, 0.42 }
-	bg[PRELIGHT] = { 0.38, 0.38, 0.42 }
+	bg[NORMAL] = { 0.20, 0.20, 0.25 }
+	bg[ACTIVE] = { 0.20, 0.20, 0.25 }
+	bg[INSENSITIVE] = { 0.20, 0.20, 0.25 }
+	bg[SELECTED] = { 0.20, 0.20, 0.25 }
+	bg[PRELIGHT] = { 0.20, 0.20, 0.25 }
 }
 
 style "track_controls_inactive"
@@ -720,7 +720,7 @@ style "redirect_list_display"
 
 	font_name = "sans 7"
 	text[NORMAL] = { 0.80, 0.80, 0.80 }
- 	text[ACTIVE] = { 0.5, 0.5, 0.9 }
+ 	text[ACTIVE] = { 0.70, 0.70, 0.70 }
  	text[INSENSITIVE] = { 0, 0, 0 }
  	text[SELECTED] = { 0.9, 0.3, 0.3 }
 
@@ -733,7 +733,7 @@ style "redirect_list_display"
         # text
 
 	fg[NORMAL] = { 0.5, 0.5, 0.5 }  # used for inactive
-	fg[ACTIVE] = { 0.5, 1.0, 1.0 }  # used for active
+	fg[ACTIVE] = { 1.0, 1.0, 1.0 }  # used for active
 }
 
 style "inspector_redirect_list_display" = "redirect_list_display"
@@ -798,6 +798,7 @@ style "flashing_alert" = "very_small_text"
 
 style "selected_io_selector_port_list" = "medium_bold_text"
 {
+
 	GtkTreeView::even-row-color = { 0.64, 0.68, 0.54 }
 	GtkTreeView::odd-row-color = { 0.64, 0.68, 0.54 }
 
@@ -829,6 +830,7 @@ style "selected_io_selector_port_list" = "medium_bold_text"
 	base[PRELIGHT] = { 0.64, 0.68, 0.54 }
 	base[INSENSITIVE] = { 0.64, 0.68, 0.54 }
 	base[SELECTED] = { 0.64, 0.68, 0.54 }
+
 }
 
 style "io_selector_port_list" = "medium_text"
@@ -866,7 +868,7 @@ style "io_selector_port_list" = "medium_text"
 
 style "io_selector_notebook" = "default_base"
 {
-	fg[NORMAL] = { 0.50, 1.0, 1.0 }
+	fg[NORMAL] = { 1.0, 1.0, 1.0 }
         font_name ="sans bold 8"
 }
 
@@ -910,11 +912,11 @@ style "pan_slider"
 	bg[SELECTED] = { 0, 0, 0 }
 	bg[PRELIGHT] = { 0, 0, 0 }
 
-	text[NORMAL] = { 0.85, 0.92, 0.98 }
-	text[ACTIVE] = { 0.85, 0.92, 0.98 }
-	text[INSENSITIVE] = { 0.85, 0.92, 0.98 }
-	text[SELECTED] = { 0.85, 0.92, 0.98 }
-	text[PRELIGHT] = { 0.85, 0.92, 0.98 }
+	text[NORMAL] = { 0.70, 0.70, 0.70 }
+	text[ACTIVE] = { 0.70, 0.70, 0.70 }
+	text[INSENSITIVE] = { 0.70, 0.70, 0.70 }
+	text[SELECTED] = { 0.70, 0.70, 0.70 }
+	text[PRELIGHT] = { 0.70, 0.70, 0.70 }
 }
 
 style "region_list_whole_file"
