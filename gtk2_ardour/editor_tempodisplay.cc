@@ -231,9 +231,9 @@ Editor::draw_measures ()
 		case TempoMap::Beat:
 			
 			if ((*i).beat == 1) {
-				color = color_map[cMeasureLineBeat];
-			} else {
 				color = color_map[cMeasureLineBar];
+			} else {
+				color = color_map[cMeasureLineBeat];
 
 				if (beat_density > 2.0) {
 					/* only draw beat lines if the gaps between beats are large.
