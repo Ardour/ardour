@@ -428,9 +428,9 @@ IOSelector::display_ports ()
 			tview->set_model (port_model);
 			tview->append_column (really_short_name, port_display_columns.displayed_name);
 			tview->get_selection()->set_mode (SELECTION_SINGLE);
-			tview->set_data ("port", port);
+			tview->set_data (X_("port"), port);
 			tview->set_headers_visible (true);
-			tview->set_name ("IOSelectorPortList");
+			tview->set_name (X_("IOSelectorPortList"));
 			
 			port_box.pack_start (*tview);
 			port_displays.insert (port_displays.end(), tview);
@@ -614,7 +614,7 @@ IOSelector::connection_button_release (GdkEventButton *ev, TreeView *treeview)
 
 		/* path is valid */
 		ustring connected_port_name = (*iter)[port_display_columns.full_name];
-		Port *port = reinterpret_cast<Port *> (treeview->get_data (_("port")));
+		Port *port = reinterpret_cast<Port *> (treeview->get_data (X_("port")));
 		
 		if (for_input) {
 			Port *p = session.engine().get_port_by_name (connected_port_name);
@@ -663,7 +663,7 @@ IOSelector::select_treeview (TreeView* tview)
 	*/
 
 	Glib::Mutex::Lock lm  (port_display_lock);
- 	Port* port = reinterpret_cast<Port *> (tview->get_data (_("port")));
+ 	Port* port = reinterpret_cast<Port *> (tview->get_data (X_("port")));
 
 	selected_port = port;
 

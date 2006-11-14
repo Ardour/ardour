@@ -250,7 +250,7 @@ LocationEditRow::set_location (Location *loc)
 		   the row spacing, so make it insensitive (paul).
 		*/
 
-		if (location->is_end()) {
+		if (location->is_end() || location->is_start()) {
 			remove_button.set_sensitive (false);
 		}
 
