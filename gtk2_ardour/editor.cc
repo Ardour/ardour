@@ -551,7 +551,6 @@ Editor::Editor (AudioEngine& eng)
 	region_list_display.set_model (region_list_model);
 	region_list_display.append_column (_("Regions"), region_list_columns.name);
 	region_list_display.set_headers_visible (false);
-	region_list_display.set_hover_expand (true);
 
 	region_list_display.get_selection()->set_select_function (mem_fun (*this, &Editor::region_list_selection_filter));
 	

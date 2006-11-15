@@ -1,5 +1,0 @@
-CCFLAGS = ' `pkg-config --cflags gtk+-2.0` '
-LINKFLAGS = ' `pkg-config --libs gtk+-2.0` '
-
-env = Environment(CCFLAGS=CCFLAGS, LINKFLAGS=LINKFLAGS)
-env.SharedLibrary('clearlooks', ['clearlooks_draw.c', 'clearlooks_rc_style.c', 'clearlooks_style.c', 'clearlooks_theme_main.c', 'support.c'])

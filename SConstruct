@@ -612,7 +612,8 @@ if env['SYSLIBS']:
     gtk_subdirs = [
 #        'libs/flowcanvas',
         'libs/gtkmm2ext',
-        'gtk2_ardour'
+        'gtk2_ardour',
+        'libs/clearlooks'
         ]
 
 else:
@@ -681,8 +682,9 @@ else:
 	'libs/gtkmm2/gtk',
 	'libs/libgnomecanvasmm',
 #	'libs/flowcanvas',
-    'libs/gtkmm2ext',
-    'gtk2_ardour'
+        'libs/gtkmm2ext',
+        'gtk2_ardour',
+        'libs/clearlooks'
         ]
 
 #
@@ -974,6 +976,7 @@ rcbuild = env.SubstInFile ('ardour.rc','ardour.rc.in', SUBST_DICT = subst_dict)
 
 the_revision = env.Command ('svn_revision.h', [], create_stored_revision)
 
+env.Alias('revision', the_revision)
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour_system.rc'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.rc'))
 

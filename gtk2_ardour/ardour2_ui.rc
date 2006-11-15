@@ -205,7 +205,24 @@ style "solo_button" = "small_button"
 	fg[ACTIVE] = { 0, 0, 0 }
 }
 
+style "safe_solo_button" = "small_button"
+{
+	bg[PRELIGHT] = { 0, 1.0, 0 }
+	bg[ACTIVE] = { 0.19, 0.97, 0.69 }
+
+	fg[PRELIGHT] = { 0, 0, 0 }
+	fg[ACTIVE] = { 0, 0, 0 }
+}
+
 style "mixer_solo_button" = "solo_button"
+{
+	font_name = "sans 7"
+	xthickness = 0
+	ythickness = 0
+
+}
+
+style "mixer_safe_solo_button" = "safe_solo_button"
 {
 	font_name = "sans 7"
 	xthickness = 0
@@ -1002,8 +1019,8 @@ widget "*EditorTimeButton*" style "time_button"
 widget "*EditorMixerButton*" style "default_buttons_menus"
 widget "*SoloButton*" style "solo_button"
 widget "*SoloButton.*" style "solo_button"
-widget "*SafeSoloButton*" style "solo_button"
-widget "*SafeSoloButton.*" style "solo_button"
+widget "*SafeSoloButton*" style "safe_solo_button"
+widget "*SafeSoloButton.*" style "safe_solo_button"
 widget "*MixerPhaseInvertButton*" style "very_small_button"
 widget "*MixerPhaseInvertButton.*" style "very_small_button"
 widget "*MixerAutomationRecordingButton*" style "very_small_button"

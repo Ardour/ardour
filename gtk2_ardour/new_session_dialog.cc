@@ -313,7 +313,6 @@ NewSessionDialog::NewSessionDialog()
 	m_treeview->set_enable_search(true);
 	m_treeview->set_fixed_height_mode(false);
 	m_treeview->set_hover_selection(false);
-	m_treeview->set_hover_expand(true);
 	m_treeview->set_size_request(-1, 150);
 	recent_scrolledwindow->set_flags(Gtk::CAN_FOCUS);
 	recent_scrolledwindow->set_border_width(6);

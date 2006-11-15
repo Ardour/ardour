@@ -75,8 +75,8 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
         mute_button = manage (new BindableToggleButton (_route->mute_control(), m_name ));
         solo_button = manage (new BindableToggleButton (_route->solo_control(), s_name ));
 
-	mute_button->unset_flags (Gtk::CAN_FOCUS);
-	solo_button->unset_flags (Gtk::CAN_FOCUS);
+	// mute_button->unset_flags (Gtk::CAN_FOCUS);
+	// solo_button->unset_flags (Gtk::CAN_FOCUS);
 
 	_route->mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed));
 	_route->solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
@@ -130,6 +130,8 @@ RouteUI::mute_press(GdkEventButton* ev)
 				
 				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::Control))) {
 					wait_for_release = true;
+				} else {
+					return false;
 				}
 			}
 
@@ -206,6 +208,8 @@ RouteUI::solo_press(GdkEventButton* ev)
 				
 				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::Control))) {
 					wait_for_release = true;
+				} else {
+					return false;
 				}
 			}
 
