@@ -393,23 +393,28 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 		allviews = editor.get_valid_views (0);
 		if (allviews != 0) {
 			i = find (allviews->begin(), allviews->end(), this);
-			if (i != allviews->end()) {
-				do {
-					if(ev->keyval == GDK_Tab) {
-						if(++i == allviews->end()) { return true; }
-					} else {
-						if(i-- == allviews->begin()) { return true; }
-					}
-				} while((*i)->hidden());
-				
-				if((*i)->height_style == Small) {
-					(*i)->set_height(Smaller);
+			if (ev->keyval == GDK_Tab) {
+				if (i != allviews->end()) {
+					do {
+						if (++i == allviews->end()) { return true; }
+					} while((*i)->hidden());
 				}
-
-				(*i)->name_entry.grab_focus();
+			} else {
+				if (i != allviews->begin()) {
+					do {
+						if (--i == allviews->begin()) { return true; }
+					} while ((*i)->hidden());
+				}
 			}
+
+			if ((*i)->height_style == Small) {
+				(*i)->set_height(Smaller);
+			}
+			
+			(*i)->name_entry.grab_focus();
 		}
 		return true;
+
 	case GDK_Up:
 	case GDK_Down:
 		name_entry_changed ();

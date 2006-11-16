@@ -64,6 +64,8 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
+int MixerStrip::scrollbar_height = 0;
+
 #ifdef VARISPEED_IN_MIXER_STRIP
 static void 
 speed_printer (char buf[32], Gtk::Adjustment& adj, void* arg)
@@ -110,7 +112,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	comment_window = 0;
 	comment_area = 0;
 
-	width_button.add (*(manage (new Gtk::Image (get_xpm("lr.xpm")))));
+	width_button.add (*(manage (new Gtk::Image (::get_icon("strip_width")))));
 	hide_button.add (*(manage (new Gtk::Image (::get_icon("hide")))));
 
 	input_label.set_text (_("Input"));
@@ -259,6 +261,21 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (comment_button, Gtk::PACK_SHRINK);
+
+	if (route()->master() || route()->control()) {
+		
+		if (scrollbar_height == 0) {
+			HScrollbar scrollbar;
+			Gtk::Requisition requisition;
+			scrollbar.size_request (requisition);
+			scrollbar_height = requisition.height;
+			cerr << "scrollbar height = " << scrollbar_height << endl;
+		}
+
+		EventBox* spacer = manage (new EventBox);
+		spacer->set_size_request (-1, scrollbar_height);
+		global_vpacker.pack_start (*spacer, false, false);
+	}
 
 	global_frame.add (global_vpacker);
 	global_frame.set_shadow_type (Gtk::SHADOW_IN);

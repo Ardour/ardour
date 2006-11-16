@@ -246,6 +246,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void engine_running();
 	void engine_stopped();
 
+	static int scrollbar_height;
 };
 
 #endif /* __ardour_mixer_strip__ */
