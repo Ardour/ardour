@@ -238,12 +238,7 @@ def fetch_svn_revision (path):
     cmd += " | awk '/^Revision:/ { print $2}'"
     return commands.getoutput (cmd)
 
-def recreate_stored_revision(target = None, source = None, env = None):
-    os.unlink ('svn_revision.h')
-    print "===========> Forcing recreation of svn_revision.h"
-    create_stored_revision ()
-    
-def create_stored_revision(target = None, source = None, env = None):
+def create_master_stored_revision (target = None, source = None, env = None):
     if os.path.exists('.svn'):    
         rev = fetch_svn_revision ('.');
         try:
@@ -251,28 +246,21 @@ def create_stored_revision(target = None, source = None, env = None):
             text += "#define __ardour_svn_revision_h__\n"
             text += "static const char* ardour_svn_revision = \"" + rev + "\";\n";
             text += "#endif\n"
-            print '============> writing svn revision info to svn_revision.h\n'
-            o = file ('svn_revision.h', 'w')
+            print '============> writing svn revision info to saved_svn_revision.h\n'
+            o = file ('saved_svn_revision.h', 'w')
             o.write (text)
             o.close ()
         except IOError:
-            print "Could not open svn_revision.h for writing\n"
+            print "Could not open saved.h for writing\n"
             sys.exit (-1)
     else:
-        if os.path.exists ('svn_revision.h') == False:
-            print "\n\nYou are missing svn_revision.h, which should have been included."
-            print "This is caused either by a packaging error, "
-            print "	or a configuration error with your system."
-            print "Please report this issue to the ardour-dev mailing list."
-            print "(See http://ardour.org/support for details)\n\n"
-            sys.exit (-1)
+        print "You cannot use \"scons revision\" on without using a checked out"
+        print "copy of the Ardour source code repository"
+        sys.exit (-1)
 
-#
-# if it exists, do not remove it
-#
+def create_stored_revision (target = None, source = None, env = None):
+    shutil.copy ('saved_svn_revision.h', target[0].path)
 
-Precious('svn_revision.h')
-    
 #
 # A generic builder for version.cc files
 #
@@ -969,14 +957,9 @@ env = conf.Finish()
 
 rcbuild = env.SubstInFile ('ardour.rc','ardour.rc.in', SUBST_DICT = subst_dict)
 
-#
-# making this into an Alias directly prevents scons from understanding how to build
-# svn_revision.h
-#
+svn_revision_h = env.Command ('svn_revision.h', [], create_stored_revision)
 
-the_revision = env.Command ('svn_revision.h', [], create_stored_revision)
-
-env.Alias('revision', the_revision)
+env.Alias('revision', env.Command ('saved_svn_revision.h', '.svn/entries', create_master_stored_revision))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour_system.rc'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.rc'))
 
@@ -1019,7 +1002,7 @@ env.Alias ('srctar', srcdist)
 #
 
 env.AddPreAction (env['DISTTREE'], Action ('rm -rf ' + str (File (env['DISTTREE']))))
-env.AddPreAction (srcdist, Action (recreate_stored_revision))
+env.AddPreAction (srcdist, Action (create_master_stored_revision))
 env.AddPostAction (srcdist, Action ('rm -rf ' + str (File (env['DISTTREE']))))
 
 #
