@@ -43,24 +43,15 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	ignore_state_request = false;
 	first_call_to_set_height = true;
 
-	//	base_rect = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_display),
-	//			 gnome_canvas_simplerect_get_type(),
-	//			 "x1", 0.0,
-	//			 "y1", 0.0,
-	//			 "x2", 1000000.0,
-	//			 "outline_color_rgba", color_map[cAutomationTrackOutline],
-	//			 /* outline ends and bottom */
-	//			 "outline_what", (guint32) (0x1|0x2|0x8),
-	//			 "fill_color_rgba", color_map[cAutomationTrackFill],
-	//			 NULL);
 	base_rect = new SimpleRect(*canvas_display);
 	base_rect->property_x1() = 0.0;
 	base_rect->property_y1() = 0.0;
-	base_rect->property_x2() = 1000000.0;
+	base_rect->property_x2() = max_frames;
 	base_rect->property_outline_color_rgba() = color_map[cAutomationTrackOutline];
 	/* outline ends and bottom */
 	base_rect->property_outline_what() = (guint32) (0x1|0x2|0x8);
 	base_rect->property_fill_color_rgba() = color_map[cAutomationTrackFill];
+	//base_rect->property_fill_color_rgba() = color_map[cEnteredControlPoint];
 	
 	base_rect->set_data ("trackview", this);
 

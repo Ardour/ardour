@@ -192,7 +192,7 @@ AutomationList::maybe_signal_changed ()
 	if (_frozen) {
 		changed_when_thawed = true;
 	} else {
-		StateChanged (Change (0));
+		StateChanged ();
 	}
 }
 
@@ -583,7 +583,7 @@ AutomationList::thaw ()
 {
 	_frozen = false;
 	if (changed_when_thawed) {
-		 StateChanged(Change(0)); /* EMIT SIGNAL */
+		StateChanged(); /* EMIT SIGNAL */
 	}
 }
 
@@ -1255,12 +1255,12 @@ AutomationList::set_state (const XMLNode& node)
 		return deserialize_events (node);
 	}
 	
-	if (node.name() == X_("Envelope") && (nsos = node.child (X_("AutomationList")))) {
-		/* new school in old school clothing */
-		return set_state (*nsos);
-	}
-
 	if (node.name() == X_("Envelope") || node.name() == X_("FadeOut") || node.name() == X_("FadeIn")) {
+
+		if ((nsos = node.child (X_("AutomationList")))) {
+			/* new school in old school clothing */
+			return set_state (*nsos);
+		}
 
 		/* old school */
 

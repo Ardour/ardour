@@ -74,7 +74,7 @@ class UndoTransaction : public Command
 	friend void command_death (UndoTransaction*, Command *);
 };
 
-class UndoHistory
+class UndoHistory : public sigc::trackable
 {
   public:
 	UndoHistory();
@@ -96,6 +96,8 @@ class UndoHistory
 
         XMLNode &get_state();
         void save_state();
+
+	sigc::signal<void> Changed;
 
   private:
 	bool _clearing;

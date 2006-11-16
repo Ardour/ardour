@@ -2097,7 +2097,7 @@ Session::commit_reversible_command (Command *cmd)
 	gettimeofday (&now, 0);
 	current_trans->set_timestamp (now);
 
-	history.add (current_trans);
+	_history.add (current_trans);
 }
 
 Session::GlobalRouteBooleanState 
@@ -2647,7 +2647,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 
 	/* dump the history list */
 
-	history.clear ();
+	_history.clear ();
 
 	/* save state so we don't end up a session file
 	   referring to non-existent sources.
@@ -2798,7 +2798,7 @@ Session::save_history (string snapshot_name)
     string xml_path;
     string bak_path;
     
-    tree.set_root (&history.get_state());
+    tree.set_root (&_history.get_state());
 
     if (snapshot_name.empty()) {
 	snapshot_name = _current_snapshot_name;
@@ -2825,14 +2825,13 @@ Session::save_history (string snapshot_name)
          * possible to fix.
          */
 
-        if (unlink (xml_path.c_str())) 
-        {
-            error << string_compose (_("could not remove corrupt history file %1"), xml_path) << endmsg;
+        if (unlink (xml_path.c_str())) {
+		error << string_compose (_("could not remove corrupt history file %1"), xml_path) << endmsg;
         } else {
-            if (rename (bak_path.c_str(), xml_path.c_str())) 
-            {
-                error << string_compose (_("could not restore history file from backup %1"), bak_path) << endmsg;
-            }
+		if (rename (bak_path.c_str(), xml_path.c_str())) 
+		{
+			error << string_compose (_("could not restore history file from backup %1"), bak_path) << endmsg;
+		}
         }
 
         return -1;
@@ -2862,7 +2861,7 @@ Session::restore_history (string snapshot_name)
     }
 
     /* replace history */
-    history.clear();
+    _history.clear();
 
     for (XMLNodeConstIterator it  = tree.root()->children().begin(); it != tree.root()->children().end(); it++) {
 	    
@@ -2895,7 +2894,7 @@ Session::restore_history (string snapshot_name)
 		    }
 	    }
 
-	    history.add (ut);
+	    _history.add (ut);
     }
 
     return 0;

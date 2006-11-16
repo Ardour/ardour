@@ -157,6 +157,8 @@ UndoHistory::add (UndoTransaction* const ut)
 	UndoList.push_back (ut);
 
 	/* we are now owners of the transaction */
+
+	Changed (); /* EMIT SIGNAL */
 }
 
 void
@@ -168,6 +170,8 @@ UndoHistory::remove (UndoTransaction* const ut)
 
 	UndoList.remove (ut);
 	RedoList.remove (ut);
+
+	Changed (); /* EMIT SIGNAL */
 }
 
 void
@@ -182,6 +186,8 @@ UndoHistory::undo (unsigned int n)
 		ut->undo ();
 		RedoList.push_back (ut);
 	}
+
+	Changed (); /* EMIT SIGNAL */
 }
 
 void
@@ -196,6 +202,8 @@ UndoHistory::redo (unsigned int n)
 		ut->redo ();
 		UndoList.push_back (ut);
 	}
+
+	Changed (); /* EMIT SIGNAL */
 }
 
 void
@@ -204,6 +212,9 @@ UndoHistory::clear_redo ()
 	_clearing = true;
 	RedoList.clear ();
 	_clearing = false;
+
+	Changed (); /* EMIT SIGNAL */
+
 }
 
 void
@@ -212,6 +223,8 @@ UndoHistory::clear_undo ()
 	_clearing = true;
 	UndoList.clear ();
 	_clearing = false;
+
+	Changed (); /* EMIT SIGNAL */
 }
 
 void
@@ -219,6 +232,8 @@ UndoHistory::clear ()
 {
 	clear_undo ();
 	clear_redo ();
+
+	Changed (); /* EMIT SIGNAL */
 }
 
 XMLNode & UndoHistory::get_state()

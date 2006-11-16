@@ -259,7 +259,7 @@ BaseStereoPanner::load (istream& in, string path, uint32_t& linecnt)
 
 	/* now that we are done loading */
 
-	_automation.StateChanged (Change (0));
+	_automation.StateChanged ();
 
 	return 0;
 }

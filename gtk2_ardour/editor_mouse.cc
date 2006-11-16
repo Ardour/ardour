@@ -1818,12 +1818,13 @@ Editor::fade_in_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* even
 	}
 
 	begin_reversible_command (_("change fade in length"));
-        XMLNode &before = arv->audio_region()->get_state();
+	AutomationList& alist = arv->audio_region()->fade_in();
+        XMLNode &before = alist.get_state();
 
 	arv->audio_region()->set_fade_in_length (fade_length);
 
-        XMLNode &after = arv->audio_region()->get_state();
-        session->add_command(new MementoCommand<ARDOUR::AudioRegion>(*arv->audio_region().get(), &before, &after));
+        XMLNode &after = alist.get_state();
+        session->add_command(new MementoCommand<AutomationList>(alist, &before, &after));
 	commit_reversible_command ();
 	fade_in_drag_motion_callback (item, event);
 }
@@ -1913,12 +1914,13 @@ Editor::fade_out_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* eve
 	}
 
 	begin_reversible_command (_("change fade out length"));
-        XMLNode &before = arv->region()->get_state();
+	AutomationList& alist = arv->audio_region()->fade_out();
+        XMLNode &before = alist.get_state();
 
 	arv->audio_region()->set_fade_out_length (fade_length);
 
-        XMLNode &after = arv->region()->get_state();
-        session->add_command(new MementoCommand<ARDOUR::Region>(*arv->region().get(), &before, &after));
+        XMLNode &after = alist.get_state();
+        session->add_command(new MementoCommand<AutomationList>(alist, &before, &after));
 	commit_reversible_command ();
 
 	fade_out_drag_motion_callback (item, event);

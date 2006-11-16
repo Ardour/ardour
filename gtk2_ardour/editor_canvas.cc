@@ -275,9 +275,32 @@ Editor::initialize_canvas ()
 void
 Editor::track_canvas_allocate (Gtk::Allocation alloc)
 {
+	canvas_allocation = alloc;
 
-	canvas_width = alloc.get_width();
-	canvas_height = alloc.get_height();
+	if (!initial_ruler_update_required) {
+		if (!canvas_idle_queued) {
+			/* call this first so that we do stuff before any pending redraw */
+			Glib::signal_idle().connect (mem_fun (*this, &Editor::track_canvas_idle), false);
+			canvas_idle_queued = true;
+		}
+		return;
+	} 
+
+	initial_ruler_update_required = false;
+	
+	track_canvas_idle ();
+}
+
+bool
+Editor::track_canvas_idle ()
+{
+
+	if (canvas_idle_queued) {
+		canvas_idle_queued = false;
+	}
+
+	canvas_width = canvas_allocation.get_width();
+	canvas_height = canvas_allocation.get_height();
 
 	zoom_range_clock.set ((nframes_t) floor ((canvas_width * frames_per_unit)));
 	edit_cursor->set_position (edit_cursor->current_frame);
@@ -319,18 +342,12 @@ Editor::track_canvas_allocate (Gtk::Allocation alloc)
 		transport_punchout_line->property_y2() = canvas_height;
 	}
 		
-       	if (is_visible() && initial_ruler_update_required) {
-	  /*
-	    this is really dumb, but signal_size_allocate() gets emitted intermittently 
-	     depending on whether the canvas contents are visible or not. 
-	     we only want to do this once 
-	  */
-		update_fixed_rulers();
-		tempo_map_changed (Change (0));
-		initial_ruler_update_required = false;
-	} 
+	update_fixed_rulers();
+	tempo_map_changed (Change (0));
 	
 	Resized (); /* EMIT_SIGNAL */
+
+	return false;
 }
 
 void

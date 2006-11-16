@@ -174,8 +174,6 @@ class Editor : public PublicEditor
 
 	/* undo related */
 
-	void set_edit_menu (Gtk::Menu&);
-
 	nframes_t unit_to_frame (double unit) {
 		return (nframes_t) rint (unit * frames_per_unit);
 	}
@@ -354,6 +352,7 @@ class Editor : public PublicEditor
 	Editing::MouseMode mouse_mode;
 
 	int  pre_maximal_pane_position;
+	int  pre_maximal_editor_width;
 	void pane_allocation_handler (Gtk::Allocation&, Gtk::Paned*);
 
 	Gtk::Notebook the_notebook;
@@ -1125,7 +1124,10 @@ class Editor : public PublicEditor
 	bool track_canvas_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool track_canvas_scroll (GdkEventScroll* event);
 
+	Gtk::Allocation canvas_allocation;
+	bool canvas_idle_queued;
 	void track_canvas_allocate (Gtk::Allocation alloc);
+	bool track_canvas_idle ();
 
 	void set_edit_cursor (GdkEvent* event);
 	void set_playhead_cursor (GdkEvent* event);
@@ -1621,11 +1623,6 @@ class Editor : public PublicEditor
 
 	void duplicate_dialog (bool for_region);
 	
-	/* edit menu */
-
-	Gtk::Menu* edit_menu;
-	bool edit_menu_map_handler (GdkEventAny*);
-
 	nframes_t event_frame (GdkEvent*, double* px = 0, double* py = 0);
 
 	void time_fx_motion (ArdourCanvas::Item*, GdkEvent*);
@@ -1783,6 +1780,12 @@ class Editor : public PublicEditor
 	bool on_key_press_event (GdkEventKey*);
 
 	void session_state_saved (string);
+
+	Glib::RefPtr<Gtk::Action>              undo_action;
+	Glib::RefPtr<Gtk::Action>              redo_action;
+
+	void history_changed ();
+
 };
 
 #endif /* __ardour_editor_h__ */

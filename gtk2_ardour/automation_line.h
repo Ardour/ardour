@@ -202,7 +202,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	virtual void change_model_range (ARDOUR::AutomationList::iterator,ARDOUR::AutomationList::iterator, double delta, float ydelta);
 
 	void reset_callback (const ARDOUR::AutomationList&);
-	void list_changed (ARDOUR::Change);
+	void list_changed ();
 
 	virtual bool event_handler (GdkEvent*);
 	

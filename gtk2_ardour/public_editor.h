@@ -86,7 +86,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void new_region_from_selection () = 0;
 	virtual void separate_region_from_selection () = 0;
 	virtual void toggle_playback (bool with_abort) = 0;
-	virtual void set_edit_menu (Gtk::Menu&) = 0;
 	virtual nframes_t unit_to_frame (double unit) = 0;
 	virtual double frame_to_unit (nframes_t frame) = 0;
 	virtual double frame_to_unit (double frame) = 0;
@@ -114,6 +113,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual bool set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove = false) = 0;
 	virtual void set_selected_mixer_strip (TimeAxisView&) = 0;
 	virtual void hide_track_in_display (TimeAxisView& tv) = 0;
+	virtual void show_track_in_display (TimeAxisView& tv) = 0;
 	virtual void set_follow_playhead (bool yn) = 0;
 	virtual void toggle_follow_playhead () = 0;
 	virtual bool follow_playhead() const = 0;

@@ -171,8 +171,11 @@ class AudioRegion : public Region
 	void recompute_at_start ();
 	void recompute_at_end ();
 
-	void envelope_changed (Change);
+	void envelope_changed ();
+	void fade_in_changed ();
+	void fade_out_changed ();
 	void source_offset_changed ();
+	void listen_to_my_curves ();
 
 	void source_deleted ();
 	

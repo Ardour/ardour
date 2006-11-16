@@ -405,7 +405,7 @@ Session::~Session ()
 
 	/* clear history so that no references to objects are held any more */
 
-	history.clear ();
+	_history.clear ();
 
 	/* clear state tree so that no references to objects are held any more */
 	

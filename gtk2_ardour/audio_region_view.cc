@@ -251,15 +251,51 @@ AudioRegionView::fade_out_changed ()
 }
 
 void
+AudioRegionView::set_fade_in_shape (AudioRegion::FadeShape shape)
+{
+	AutomationList& alist = audio_region()->fade_in();
+	XMLNode& before (alist.get_state());
+	trackview.session().begin_reversible_command ("fade in shape");
+	audio_region()->set_fade_in_shape (shape);
+	XMLNode& after (alist.get_state());
+	trackview.session().add_command (new MementoCommand<AutomationList>(alist, &before, &after));
+	trackview.session().commit_reversible_command ();
+}
+
+void
+AudioRegionView::set_fade_out_shape (AudioRegion::FadeShape shape)
+{
+	AutomationList& alist = audio_region()->fade_out();
+	XMLNode& before (alist.get_state());
+	trackview.session().begin_reversible_command ("fade out shape");
+	audio_region()->set_fade_out_shape (shape);
+	XMLNode& after (alist.get_state());
+	trackview.session().add_command (new MementoCommand<AutomationList>(alist, &before, &after));
+	trackview.session().commit_reversible_command ();
+}
+
+void
 AudioRegionView::set_fade_in_active (bool yn)
 {
+	AutomationList& alist = audio_region()->fade_in();
+	XMLNode& before (alist.get_state());
+	trackview.session().begin_reversible_command ("fade in shape");
 	audio_region()->set_fade_in_active (yn);
+	XMLNode& after (alist.get_state());
+	trackview.session().add_command (new MementoCommand<AutomationList>(alist, &before, &after));
+	trackview.session().commit_reversible_command ();
 }
 
 void
 AudioRegionView::set_fade_out_active (bool yn)
 {
+	AutomationList& alist = audio_region()->fade_out();
+	XMLNode& before (alist.get_state());
+	trackview.session().begin_reversible_command ("fade out shape");
 	audio_region()->set_fade_out_active (yn);
+	XMLNode& after (alist.get_state());
+	trackview.session().add_command (new MementoCommand<AutomationList>(alist, &before, &after));
+	trackview.session().commit_reversible_command ();
 }
 
 void

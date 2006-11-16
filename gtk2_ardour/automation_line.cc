@@ -1179,7 +1179,7 @@ AutomationLine::hide_selection ()
 }
 
 void
-AutomationLine::list_changed (Change ignored)
+AutomationLine::list_changed ()
 {
 	queue_reset ();
 }

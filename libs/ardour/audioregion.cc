@@ -80,7 +80,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 	set_default_fades ();
 	set_default_envelope ();
 
-	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
+	listen_to_my_curves ();
 }
 
 AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
@@ -105,7 +105,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 	set_default_fades ();
 	set_default_envelope ();
 
-	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
+	listen_to_my_curves ();
 }
 
 AudioRegion::AudioRegion (SourceList& srcs, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
@@ -132,7 +132,7 @@ AudioRegion::AudioRegion (SourceList& srcs, nframes_t start, nframes_t length, c
 	set_default_fades ();
 	set_default_envelope ();
 
-	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
+	listen_to_my_curves ();
 }
 
 
@@ -196,7 +196,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t 
 
 	_scale_amplitude = other->_scale_amplitude;
 
-	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
+	listen_to_my_curves ();
 }
 
 AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
@@ -237,7 +237,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	_fade_in_disabled = 0;
 	_fade_out_disabled = 0;
 	
-	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
+	listen_to_my_curves ();
 }
 
 AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& node)
@@ -261,7 +261,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& nod
 		throw failed_constructor();
 	}
 
-	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
+	listen_to_my_curves ();
 }
 
 AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
@@ -301,7 +301,7 @@ AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 		throw failed_constructor();
 	}
 
-	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
+	listen_to_my_curves ();
 }
 
 AudioRegion::~AudioRegion ()
@@ -314,6 +314,14 @@ AudioRegion::~AudioRegion ()
 
 	notify_callbacks ();
 	GoingAway (); /* EMIT SIGNAL */
+}
+
+void
+AudioRegion::listen_to_my_curves ()
+{
+	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
+	_fade_in.StateChanged.connect (mem_fun (*this, &AudioRegion::fade_in_changed));
+	_fade_out.StateChanged.connect (mem_fun (*this, &AudioRegion::fade_out_changed));
 }
 
 bool
@@ -1248,7 +1256,19 @@ AudioRegion::normalize_to (float target_dB)
 }
 
 void
-AudioRegion::envelope_changed (Change ignored)
+AudioRegion::fade_in_changed ()
+{
+	send_change (FadeInChanged);
+}
+
+void
+AudioRegion::fade_out_changed ()
+{
+	send_change (FadeOutChanged);
+}
+
+void
+AudioRegion::envelope_changed ()
 {
 	send_change (EnvelopeChanged);
 }

@@ -307,6 +307,7 @@ Editor::Editor (AudioEngine& eng)
 	edit_cursor = 0;
 	playhead_cursor = 0;
 	button_release_can_deselect = true;
+	canvas_idle_queued = false;
 
 	location_marker_color = color_map[cLocationMarker];
 	location_range_color = color_map[cLocationRange];
@@ -1120,6 +1121,7 @@ Editor::connect_to_session (Session *t)
 	update_title ();
 
 	session->GoingAway.connect (mem_fun(*this, &Editor::session_going_away));
+	session->history().Changed.connect (mem_fun (*this, &Editor::history_changed));
 
 	/* These signals can all be emitted by a non-GUI thread. Therefore the
 	   handlers for them must not attempt to directly interact with the GUI,
@@ -1312,7 +1314,6 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 	}
 
 	MenuList& items (fade_context_menu.items());
-	AudioRegion& ar (*arv->audio_region().get()); // FIXME
 
 	items.clear ();
 
@@ -1327,11 +1328,11 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 		
 		items.push_back (SeparatorElem());
 		
-		items.push_back (MenuElem (_("Linear"), bind (mem_fun (ar, &AudioRegion::set_fade_in_shape), AudioRegion::Linear)));
-		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (ar, &AudioRegion::set_fade_in_shape), AudioRegion::LogB)));
-		items.push_back (MenuElem (_("Slow"), bind (mem_fun (ar, &AudioRegion::set_fade_in_shape), AudioRegion::Fast)));
-		items.push_back (MenuElem (_("Fast"), bind (mem_fun (ar, &AudioRegion::set_fade_in_shape), AudioRegion::LogA)));
-		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (ar, &AudioRegion::set_fade_in_shape), AudioRegion::Slow)));
+		items.push_back (MenuElem (_("Linear"), bind (mem_fun (*arv, &AudioRegionView::set_fade_in_shape), AudioRegion::Linear)));
+		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (*arv, &AudioRegionView::set_fade_in_shape), AudioRegion::LogB)));
+		items.push_back (MenuElem (_("Slow"), bind (mem_fun (*arv, &AudioRegionView::set_fade_in_shape), AudioRegion::Fast)));
+		items.push_back (MenuElem (_("Fast"), bind (mem_fun (*arv, &AudioRegionView::set_fade_in_shape), AudioRegion::LogA)));
+		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (*arv, &AudioRegionView::set_fade_in_shape), AudioRegion::Slow)));
 		break;
 
 	case FadeOutItem:
@@ -1344,13 +1345,14 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 		
 		items.push_back (SeparatorElem());
 		
-		items.push_back (MenuElem (_("Linear"), bind (mem_fun (ar, &AudioRegion::set_fade_out_shape), AudioRegion::Linear)));
-		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (ar, &AudioRegion::set_fade_out_shape), AudioRegion::Fast)));
-		items.push_back (MenuElem (_("Slow"), bind (mem_fun (ar, &AudioRegion::set_fade_out_shape), AudioRegion::LogB)));
-		items.push_back (MenuElem (_("Fast"), bind (mem_fun (ar, &AudioRegion::set_fade_out_shape), AudioRegion::LogA)));
-		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (ar, &AudioRegion::set_fade_out_shape), AudioRegion::Slow)));
+		items.push_back (MenuElem (_("Linear"), bind (mem_fun (*arv, &AudioRegionView::set_fade_out_shape), AudioRegion::Linear)));
+		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (*arv, &AudioRegionView::set_fade_out_shape), AudioRegion::Fast)));
+		items.push_back (MenuElem (_("Slow"), bind (mem_fun (*arv, &AudioRegionView::set_fade_out_shape), AudioRegion::LogB)));
+		items.push_back (MenuElem (_("Fast"), bind (mem_fun (*arv, &AudioRegionView::set_fade_out_shape), AudioRegion::LogA)));
+		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (*arv, &AudioRegionView::set_fade_out_shape), AudioRegion::Slow)));
 
 		break;
+
 	default:
 		fatal << _("programming error: ")
 		      << X_("non-fade canvas item passed to popup_fade_context_menu()")
@@ -3291,89 +3293,27 @@ Editor::set_edit_group_mute (Route& route, bool yn)
 }
 		
 void
-Editor::set_edit_menu (Menu& menu)
+Editor::history_changed ()
 {
-	edit_menu = &menu;
-	edit_menu->signal_map_event().connect (mem_fun(*this, &Editor::edit_menu_map_handler));
-}
-
-bool
-Editor::edit_menu_map_handler (GdkEventAny* ev)
-{
-	using namespace Menu_Helpers;
-	MenuList& edit_items = edit_menu->items();
 	string label;
 
-	/* Nuke all the old items */
-		
-	edit_items.clear ();
-
-	if (session == 0) {
-		return false;
-	}
-
-	if (session->undo_depth() == 0) {
-		label = _("Undo");
-	} else {
-		label = string_compose(_("Undo (%1)"), session->next_undo());
-	}
-	
-	edit_items.push_back (MenuElem (label, bind (mem_fun(*this, &Editor::undo), 1U)));
-	
-	if (session->undo_depth() == 0) {
-		edit_items.back().set_sensitive (false);
-	}
-	
-	if (session->redo_depth() == 0) {
-		label = _("Redo");
-	} else {
-		label = string_compose(_("Redo (%1)"), session->next_redo());
-	}
-	
-	edit_items.push_back (MenuElem (label, bind (mem_fun(*this, &Editor::redo), 1U)));
-	if (session->redo_depth() == 0) {
-		edit_items.back().set_sensitive (false);
-	}
-
-	vector<MenuItem*> mitems;
-
-	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Cut"), mem_fun(*this, &Editor::cut)));
-	mitems.push_back (&edit_items.back());
-	edit_items.push_back (MenuElem (_("Copy"), mem_fun(*this, &Editor::copy)));
-	mitems.push_back (&edit_items.back());
-	edit_items.push_back (MenuElem (_("Paste"), bind (mem_fun(*this, &Editor::paste), 1.0f)));
-	mitems.push_back (&edit_items.back());
-	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Align"), bind (mem_fun(*this, &Editor::align), ARDOUR::SyncPoint)));
-	mitems.push_back (&edit_items.back());
-	edit_items.push_back (MenuElem (_("Align Relative"), bind (mem_fun(*this, &Editor::align_relative), ARDOUR::SyncPoint)));
-	mitems.push_back (&edit_items.back());
-	edit_items.push_back (SeparatorElem());
-
-	if (selection->empty()) {
-		for (vector<MenuItem*>::iterator i = mitems.begin(); i != mitems.end(); ++i) {
-			(*i)->set_sensitive (false);
+	if (undo_action && session) {
+		if (session->undo_depth() == 0) {
+			label = _("Undo");
+		} else {
+			label = string_compose(_("Undo (%1)"), session->next_undo());
 		}
+		undo_action->property_label() = label;
 	}
 
-	Menu* import_menu = manage (new Menu());
-	import_menu->set_name ("ArdourContextMenu");
-	MenuList& import_items = import_menu->items();
-	
-	import_items.push_back (MenuElem (_("... as new track"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsTrack)));
-	import_items.push_back (MenuElem (_("... as new region"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion)));
-
-	edit_items.push_back (MenuElem (_("Import audio (copy)"), *import_menu));
-	edit_items.push_back (SeparatorElem());
-
-	edit_items.push_back (MenuElem (_("Remove last capture"), mem_fun(*this, &Editor::remove_last_capture)));
-
-	if (!session->have_captured()) {
-		edit_items.back().set_sensitive (false);
+	if (redo_action && session) {
+		if (session->redo_depth() == 0) {
+			label = _("Redo");
+		} else {
+			label = string_compose(_("Redo (%1)"), session->next_redo());
+		}
+		redo_action->property_label() = label;
 	}
-
-	return false;
 }
 
 void
@@ -4047,11 +3987,16 @@ Editor::session_state_saved (string snap_name)
 void
 Editor::maximise_editing_space ()
 {
+	initial_ruler_update_required = true;
+
 	mouse_mode_tearoff->set_visible (false);
 	tools_tearoff->set_visible (false);
 
 	pre_maximal_pane_position = edit_pane.get_position();
+	pre_maximal_editor_width = this->get_width();
+
 	edit_pane.set_position (edit_pane.get_width());
+
 
 	fullscreen();
 }
@@ -4059,12 +4004,17 @@ Editor::maximise_editing_space ()
 void
 Editor::restore_editing_space ()
 {
+	initial_ruler_update_required = true;
+
+	unfullscreen();
+
 	mouse_mode_tearoff->set_visible (true);
 	tools_tearoff->set_visible (true);
 
-	edit_pane.set_position (pre_maximal_pane_position);
 
-	unfullscreen();
+	edit_pane.set_position (
+		pre_maximal_pane_position + abs(this->get_width() - pre_maximal_editor_width)
+	);
 }
 
 void 

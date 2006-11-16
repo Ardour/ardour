@@ -234,7 +234,7 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 		
 		if (canvas_item_visible ((*i)->canvas_display)) {
 			++nth;
-			effective_height += (*i)->show_at (y + effective_height, nth, parent);
+			effective_height += (*i)->show_at (y + 1 + effective_height, nth, parent);
 		}
 	}
 
@@ -373,8 +373,43 @@ TimeAxisView::set_height_pixels (uint32_t h)
 bool
 TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 {
+	PublicEditor::TrackViewList *allviews = 0;
+	PublicEditor::TrackViewList::iterator i;
+
 	switch (ev->keyval) {
+	case GDK_Escape:
+		name_entry.select_region (0,0);
+		controls_ebox.grab_focus ();
+		name_entry_changed ();
+		return true;
+
+	/* Shift+Tab Keys Pressed. Note that for Shift+Tab, GDK actually
+	 * generates a different ev->keyval, rather than setting 
+	 * ev->state.
+	 */
+	case GDK_ISO_Left_Tab:
 	case GDK_Tab:
+		name_entry_changed ();
+		allviews = editor.get_valid_views (0);
+		if (allviews != 0) {
+			i = find (allviews->begin(), allviews->end(), this);
+			if (i != allviews->end()) {
+				do {
+					if(ev->keyval == GDK_Tab) {
+						if(++i == allviews->end()) { return true; }
+					} else {
+						if(i-- == allviews->begin()) { return true; }
+					}
+				} while((*i)->hidden());
+				
+				if((*i)->height_style == Small) {
+					(*i)->set_height(Smaller);
+				}
+
+				(*i)->name_entry.grab_focus();
+			}
+		}
+		return true;
 	case GDK_Up:
 	case GDK_Down:
 		name_entry_changed ();
@@ -424,6 +459,7 @@ TimeAxisView::name_entry_focus_out (GdkEventFocus* ev)
 	last_name_entry_key_press_event = 0;
 	name_entry_key_timeout.disconnect ();
 	name_entry.set_name ("EditorTrackNameDisplay");
+	name_entry.select_region (0,0);
 	
 	/* do the real stuff */
 

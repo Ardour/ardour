@@ -742,16 +742,19 @@ class Session : public PBD::StatefulDestructible
 	/* History (for editors, mixers, UIs etc.) */
 
 	void undo (uint32_t n) {
-		history.undo (n);
-	}
-	void redo (uint32_t n) {
-		history.redo (n);
+		_history.undo (n);
 	}
 
-	uint32_t undo_depth() const { return history.undo_depth(); }
-	uint32_t redo_depth() const { return history.redo_depth(); }
-	string next_undo() const { return history.next_undo(); }
-	string next_redo() const { return history.next_redo(); }
+	void redo (uint32_t n) {
+		_history.redo (n);
+	}
+
+	UndoHistory& history() { return _history; }
+	
+	uint32_t undo_depth() const { return _history.undo_depth(); }
+	uint32_t redo_depth() const { return _history.redo_depth(); }
+	string next_undo() const { return _history.next_undo(); }
+	string next_redo() const { return _history.next_redo(); }
 
 	void begin_reversible_command (string cmd_name);
 	void commit_reversible_command (Command* cmd = 0);
@@ -1568,7 +1571,7 @@ class Session : public PBD::StatefulDestructible
 
 	void reverse_diskstream_buffers ();
 
-	UndoHistory history;
+	UndoHistory _history;
 	UndoTransaction* current_trans;
 
 	GlobalRouteBooleanState get_global_route_boolean (bool (Route::*method)(void) const);

@@ -152,7 +152,7 @@ class AutomationList : public PBD::StatefulDestructible
 		(obj.*method)(*this);
 	}
 
-	sigc::signal<void,Change> StateChanged;
+	sigc::signal<void> StateChanged;
 
 	XMLNode& get_state(void); 
 	int set_state (const XMLNode &s);
