@@ -72,41 +72,43 @@ Manager::add_port (PortRequest &req)
 	PortMap::iterator existing;
 	pair<string, Port *> newpair;
 
-	if ((existing = ports_by_device.find (req.devname)) !=
-	    ports_by_device.end()) {
-		
-		port = (*existing).second;
-		if (port->mode() == req.mode) {
+	if (!PortFactory::ignore_duplicate_devices (req.type)) {
+
+		if ((existing = ports_by_device.find (req.devname)) != ports_by_device.end()) {
 			
-			/* Same mode - reuse the port, and just
-			   create a new tag entry.
+			port = (*existing).second;
+			
+			if (port->mode() == req.mode) {
+				
+				/* Same mode - reuse the port, and just
+				   create a new tag entry.
+				*/
+				
+				newpair.first = req.tagname;
+				newpair.second = port;
+				
+				ports_by_tag.insert (newpair);
+				return port;
+			}
+			
+			/* If the existing is duplex, and this request
+			   is not, then fail, because most drivers won't
+			   allow opening twice with duplex and non-duplex
+			   operation.
 			*/
-
-			newpair.first = req.tagname;
-			newpair.second = port;
-
-			ports_by_tag.insert (newpair);
-			return port;
-		}
-
-		/* If the existing is duplex, and this request
-		   is not, then fail, because most drivers won't
-		   allow opening twice with duplex and non-duplex
-		   operation.
-		*/
-		
-		if ((req.mode == O_RDWR && port->mode() != O_RDWR) ||
-		    (req.mode != O_RDWR && port->mode() == O_RDWR)) {
-			error << "MIDIManager: port tagged \""
-			      << req.tagname
-			      << "\" cannot be opened duplex and non-duplex"
-			      << endmsg;
-			return 0;
-		}
-
-		/* modes must be different or complementary */
-	}
 			
+			if ((req.mode == O_RDWR && port->mode() != O_RDWR) ||
+			    (req.mode != O_RDWR && port->mode() == O_RDWR)) {
+				error << "MIDIManager: port tagged \""
+				      << req.tagname
+				      << "\" cannot be opened duplex and non-duplex"
+				      << endmsg;
+				return 0;
+			}
+			
+			/* modes must be different or complementary */
+		}
+	}
 	
 	port = factory.create_port (req);
 	

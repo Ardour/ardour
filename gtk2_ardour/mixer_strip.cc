@@ -269,7 +269,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 			Gtk::Requisition requisition;
 			scrollbar.size_request (requisition);
 			scrollbar_height = requisition.height;
-			cerr << "scrollbar height = " << scrollbar_height << endl;
 		}
 
 		EventBox* spacer = manage (new EventBox);

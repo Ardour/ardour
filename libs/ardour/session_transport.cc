@@ -372,9 +372,6 @@ Session::non_realtime_stop (bool abort)
 				}
 			}
 		}
-		
-		deliver_mmc (MIDI::MachineControl::cmdLocate, _transport_frame);
-
 #ifdef LEAVE_TRANSPORT_UNADJUSTED
 	}
 #endif

@@ -76,20 +76,28 @@ PortFactory::create_port (PortRequest &req)
 	return port;
 }
 
-void
-PortFactory::add_port_request (vector<PortRequest *> &reqs, 
-			           const string &str)
-	
+bool 
+PortFactory::ignore_duplicate_devices (Port::Type type)
 {
-	PortRequest *req;
+	bool ret = false;
 
-	req = new PortRequest;
-	req->devname = strdup (str.c_str());
-	req->tagname = strdup (str.c_str());
+	switch (type) {
+#ifdef WITH_ALSA
+	case Port::ALSA_Sequencer:
+		ret = true;
+		break;
+#endif // WITH_ALSA
 
-	req->mode = O_RDWR;
-	req->type = Port::ALSA_RawMidi;
+#if WITH_COREMIDI
+	case Port::CoreMidi_MidiPort:
+		ret = true;
+		break;
+#endif // WITH_COREMIDI
 
-	reqs.push_back (req);
+	default:
+		break;
+	}
+
+	return ret;
 }
 

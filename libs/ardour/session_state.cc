@@ -3026,6 +3026,10 @@ Session::config_changed (const char* parameter_name)
 		
 		if (_mtc_port != 0) {
 			session_send_mtc = Config->get_send_mtc();
+			if (session_send_mtc) {
+				/* mark us ready to send */
+				next_quarter_frame_to_send = 0;
+			}
 		}
 
 	} else if (PARAM_IS ("send-mmc")) {

@@ -127,6 +127,8 @@ setup_midi ()
 		}
 		
 		MIDI::Manager::instance()->add_port (request);
+
+		nports++;
 	}
 
 	if (nports > 1) {
