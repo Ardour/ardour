@@ -3475,6 +3475,29 @@ Editor::brush (nframes_t pos)
 }
 
 void
+Editor::reset_region_gain_envelopes ()
+{
+	if (!session || selection->regions.empty()) {
+		return;
+	}
+
+	session->begin_reversible_command (_("reset region gain"));
+
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+		if (arv) {
+			AutomationList& alist (arv->audio_region()->envelope());
+			XMLNode& before (alist.get_state());
+
+			arv->audio_region()->set_default_envelope ();
+			session->add_command (new MementoCommand<AutomationList>(arv->audio_region()->envelope(), &before, &alist.get_state()));
+		}
+	}
+
+	session->commit_reversible_command ();
+}
+
+void
 Editor::toggle_gain_envelope_visibility ()
 {
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {

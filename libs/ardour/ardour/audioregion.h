@@ -116,6 +116,7 @@ class AudioRegion : public Region
 	void set_fade_out (FadeShape, nframes_t);
 
 	void set_envelope_active (bool yn);
+	void set_default_envelope ();
 
 	int separate_by_channel (ARDOUR::Session&, vector<AudioRegion*>&) const;
 
@@ -153,7 +154,6 @@ class AudioRegion : public Region
 	void set_default_fades ();
 	void set_default_fade_in ();
 	void set_default_fade_out ();
-	void set_default_envelope ();
 
 	void recompute_gain_at_end ();
 	void recompute_gain_at_start ();

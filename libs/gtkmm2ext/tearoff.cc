@@ -109,7 +109,7 @@ TearOff::tearoff_click (GdkEventButton* ev)
 	own_window.show_all ();
 	hide ();
 	Detach ();
-	return TRUE;
+	return true;
 }
 
 gint
@@ -121,19 +121,25 @@ TearOff::close_click (GdkEventButton* ev)
 	own_window.hide ();
 	show_all ();
 	Attach ();
-	return TRUE;
+	return true;
 }		
 
 gint
 TearOff::window_button_press (GdkEventButton* ev)
 {
+	if (dragging) {
+		dragging = false;
+		own_window.remove_modal_grab();
+		return true;
+	}
+
 	dragging = true;
 	drag_x = ev->x_root;
 	drag_y = ev->y_root;
 
 	own_window.add_modal_grab();
 
-	return TRUE;
+	return true;
 }
 
 gint
@@ -141,7 +147,7 @@ TearOff::window_button_release (GdkEventButton* ev)
 {
 	dragging = false;
 	own_window.remove_modal_grab();
-	return TRUE;
+	return true;
 }
 
 gint
@@ -163,7 +169,7 @@ TearOff::window_motion (GdkEventMotion* ev)
 	own_window.get_pointer (mx, my);
 
 	if (!dragging) {
-		return TRUE;
+		return true;
 	}
 
 	x_delta = ev->x_root - drag_x;
@@ -175,7 +181,7 @@ TearOff::window_motion (GdkEventMotion* ev)
 	drag_x = ev->x_root;
 	drag_y = ev->y_root;
 	
-	return TRUE;
+	return true;
 }
 
 bool

@@ -1744,15 +1744,17 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 		
 		RegionView* rv = sv->find_view (ar);
 		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(rv);
+
+		items.push_back (MenuElem (_("Reset Envelope"), mem_fun(*this, &Editor::reset_region_gain_envelopes)));
 		
-		items.push_back (CheckMenuElem (_("Envelope visible"), mem_fun(*this, &Editor::toggle_gain_envelope_visibility)));
+		items.push_back (CheckMenuElem (_("Envelope Visible"), mem_fun(*this, &Editor::toggle_gain_envelope_visibility)));
 		region_envelope_visible_item = static_cast<CheckMenuItem*> (&items.back());
 
 		if (arv->envelope_visible()) {
 			region_envelope_visible_item->set_active (true);
 		}
 
-		items.push_back (CheckMenuElem (_("Envelope active"), mem_fun(*this, &Editor::toggle_gain_envelope_active)));
+		items.push_back (CheckMenuElem (_("Envelope Active"), mem_fun(*this, &Editor::toggle_gain_envelope_active)));
 		region_envelope_active_item = static_cast<CheckMenuItem*> (&items.back());
 
 		if (ar->envelope_active()) {
@@ -1774,7 +1776,7 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 	/* range related stuff */
 
 	items.push_back (MenuElem (_("Add Range Markers"), mem_fun (*this, &Editor::add_location_from_audio_region)));
-	items.push_back (MenuElem (_("Set Range"), mem_fun (*this, &Editor::set_selection_from_audio_region)));
+	items.push_back (MenuElem (_("Set Range Selection"), mem_fun (*this, &Editor::set_selection_from_audio_region)));
 	items.push_back (SeparatorElem());
 			 
 	/* Nudge region */

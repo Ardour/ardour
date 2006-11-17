@@ -1770,6 +1770,7 @@ class Editor : public PublicEditor
 
 	void toggle_gain_envelope_visibility ();
 	void toggle_gain_envelope_active ();
+	void reset_region_gain_envelopes ();
 
 	Gtk::CheckMenuItem* region_envelope_visible_item;
 	Gtk::CheckMenuItem* region_envelope_active_item;
