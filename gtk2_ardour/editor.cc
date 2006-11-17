@@ -637,6 +637,8 @@ Editor::Editor (AudioEngine& eng)
 	the_notebook.popup_enable ();
 	the_notebook.set_tab_pos (Gtk::POS_RIGHT);
 
+	post_maximal_editor_width = 0;
+	post_maximal_pane_position = 0;
 	edit_pane.pack1 (edit_packer, true, true);
 	edit_pane.pack2 (the_notebook, false, true);
 	
@@ -3997,10 +3999,18 @@ Editor::maximise_editing_space ()
 	pre_maximal_pane_position = edit_pane.get_position();
 	pre_maximal_editor_width = this->get_width();
 
-	edit_pane.set_position (edit_pane.get_width());
+	if(post_maximal_pane_position == 0) {
+		post_maximal_pane_position = edit_pane.get_width();
+	}
 
 
 	fullscreen();
+	if(post_maximal_editor_width) {
+		edit_pane.set_position (post_maximal_pane_position - 
+			abs(post_maximal_editor_width - pre_maximal_editor_width));
+	} else {
+		edit_pane.set_position (post_maximal_pane_position);
+	}
 }
 
 void
@@ -4008,10 +4018,16 @@ Editor::restore_editing_space ()
 {
 	initial_ruler_update_required = true;
 
+	// user changed width of pane during fullscreen
+	if(post_maximal_pane_position != edit_pane.get_position()) {
+		post_maximal_pane_position = edit_pane.get_position();
+	}
+
 	unfullscreen();
 
 	mouse_mode_tearoff->set_visible (true);
 	tools_tearoff->set_visible (true);
+	post_maximal_editor_width = this->get_width();
 
 
 	edit_pane.set_position (

@@ -351,6 +351,8 @@ class Editor : public PublicEditor
 
 	Editing::MouseMode mouse_mode;
 
+	int  post_maximal_editor_width;
+	int  post_maximal_pane_position;
 	int  pre_maximal_pane_position;
 	int  pre_maximal_editor_width;
 	void pane_allocation_handler (Gtk::Allocation&, Gtk::Paned*);
