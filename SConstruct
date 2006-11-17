@@ -238,7 +238,7 @@ def fetch_svn_revision (path):
     cmd += " | awk '/^Revision:/ { print $2}'"
     return commands.getoutput (cmd)
 
-def create_master_stored_revision (target = None, source = None, env = None):
+def create_stored_revision (target = None, source = None, env = None):
     if os.path.exists('.svn'):    
         rev = fetch_svn_revision ('.');
         try:
@@ -246,20 +246,17 @@ def create_master_stored_revision (target = None, source = None, env = None):
             text += "#define __ardour_svn_revision_h__\n"
             text += "static const char* ardour_svn_revision = \"" + rev + "\";\n";
             text += "#endif\n"
-            print '============> writing svn revision info to saved_svn_revision.h\n'
-            o = file ('saved_svn_revision.h', 'w')
+            print '============> writing svn revision info to svn_revision.h\n'
+            o = file ('svn_revision.h', 'w')
             o.write (text)
             o.close ()
         except IOError:
-            print "Could not open saved.h for writing\n"
+            print "Could not open svn_revision.h for writing\n"
             sys.exit (-1)
     else:
         print "You cannot use \"scons revision\" on without using a checked out"
         print "copy of the Ardour source code repository"
         sys.exit (-1)
-
-def create_stored_revision (target = None, source = None, env = None):
-    shutil.copy ('saved_svn_revision.h', target[0].path)
 
 #
 # A generic builder for version.cc files
@@ -381,7 +378,7 @@ env.Append (BUILDERS = {'Tarball' : tarball_bld})
 #
 
 if env['VST']:
-    sys.stdout.write ("Are you building Ardour for personal use (rather than distributiont to others)? [no]: ")
+    sys.stdout.write ("Are you building Ardour for personal use (rather than distribution to others)? [no]: ")
     answer = sys.stdin.readline ()
     answer = answer.rstrip().strip()
     if answer != "yes" and answer != "y":
@@ -957,9 +954,9 @@ env = conf.Finish()
 
 rcbuild = env.SubstInFile ('ardour.rc','ardour.rc.in', SUBST_DICT = subst_dict)
 
-svn_revision_h = env.Command ('svn_revision.h', [], create_stored_revision)
+the_revision = env.Command ('frobnicatory_decoy', [], create_stored_revision)
 
-env.Alias('revision', env.Command ('saved_svn_revision.h', '.svn/entries', create_master_stored_revision))
+env.Alias('revision', the_revision)
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour_system.rc'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.rc'))
 
@@ -970,7 +967,7 @@ Default (rcbuild)
 Precious (env['DISTTREE'])
 
 env.Distribute (env['DISTTREE'],
-                [ 'SConstruct', 'svn_revision.h',
+               [ 'SConstruct', 'svn_revision.h',
                   'COPYING', 'PACKAGER_README', 'README',
                   'ardour.rc.in',
                   'ardour_system.rc',
@@ -994,7 +991,7 @@ env.Distribute (env['DISTTREE'],
                 glob.glob ('DOCUMENTATION/README*')
                 )
 
-srcdist = env.Tarball(env['TARBALL'], env['DISTTREE'])
+srcdist = env.Tarball(env['TARBALL'], [ env['DISTTREE'], the_revision ])
 env.Alias ('srctar', srcdist)
 
 #
@@ -1002,7 +999,6 @@ env.Alias ('srctar', srcdist)
 #
 
 env.AddPreAction (env['DISTTREE'], Action ('rm -rf ' + str (File (env['DISTTREE']))))
-env.AddPreAction (srcdist, Action (create_master_stored_revision))
 env.AddPostAction (srcdist, Action ('rm -rf ' + str (File (env['DISTTREE']))))
 
 #
