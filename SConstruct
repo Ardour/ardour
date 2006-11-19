@@ -9,13 +9,14 @@ import errno
 import time
 import platform
 import string
+import commands
 from sets import Set
 import SCons.Node.FS
 
 SConsignFile()
 EnsureSConsVersion(0, 96)
 
-version = '2.0beta5.1'
+version = '2.0beta8'
 
 subst_dict = { }
 
@@ -40,7 +41,7 @@ opts.AddOptions(
     PathOption('PREFIX', 'Set the install "prefix"', '/usr/local'),
     BoolOption('SURFACES', 'Build support for control surfaces', 0),
     BoolOption('SYSLIBS', 'USE AT YOUR OWN RISK: CANCELS ALL SUPPORT FROM ARDOUR AUTHORS: Use existing system versions of various libraries instead of internal ones', 0),
-    BoolOption('VERSIONED', 'Add version information to ardour/gtk executable name inside the build directory', 0),
+    BoolOption('VERSIONED', 'Add revision information to ardour/gtk executable name inside the build directory', 0),
     BoolOption('VST', 'Compile with support for VST', 0)
 )
 
@@ -230,41 +231,71 @@ def i18n (buildenv, sources, installenv):
         moname = domain + '.mo'
         installenv.Alias('install', installenv.InstallAs (os.path.join (modir, moname), lang + '.mo'))
 
+
+def fetch_svn_revision (path):
+    cmd = "svn info "
+    cmd += path
+    cmd += " | awk '/^Revision:/ { print $2}'"
+    return commands.getoutput (cmd)
+
+def create_stored_revision (target = None, source = None, env = None):
+    if os.path.exists('.svn'):    
+        rev = fetch_svn_revision ('.');
+        try:
+            text  = "#ifndef __ardour_svn_revision_h__\n"
+            text += "#define __ardour_svn_revision_h__\n"
+            text += "static const char* ardour_svn_revision = \"" + rev + "\";\n";
+            text += "#endif\n"
+            print '============> writing svn revision info to svn_revision.h\n'
+            o = file ('svn_revision.h', 'w')
+            o.write (text)
+            o.close ()
+        except IOError:
+            print "Could not open svn_revision.h for writing\n"
+            sys.exit (-1)
+    else:
+        print "You cannot use \"scons revision\" on without using a checked out"
+        print "copy of the Ardour source code repository"
+        sys.exit (-1)
+
 #
 # A generic builder for version.cc files
 #
 # note: requires that DOMAIN, MAJOR, MINOR, MICRO are set in the construction environment
 # note: assumes one source files, the header that declares the version variables
 #
+
 def version_builder (target, source, env):
-   text  = "int " + env['DOMAIN'] + "_major_version = " + str (env['MAJOR']) + ";\n"
-   text += "int " + env['DOMAIN'] + "_minor_version = " + str (env['MINOR']) + ";\n"
-   text += "int " + env['DOMAIN'] + "_micro_version = " + str (env['MICRO']) + ";\n"
-   
-   try:
-      o = file (target[0].get_path(), 'w')
-      o.write (text)
-      o.close ()
-   except IOError:
-      print "Could not open", target[0].get_path(), " for writing\n"
-      sys.exit (-1)
-   
-   text  = "#ifndef __" + env['DOMAIN'] + "_version_h__\n"
-   text += "#define __" + env['DOMAIN'] + "_version_h__\n"
-   text += "extern int " + env['DOMAIN'] + "_major_version;\n"
-   text += "extern int " + env['DOMAIN'] + "_minor_version;\n"
-   text += "extern int " + env['DOMAIN'] + "_micro_version;\n"
-   text += "#endif /* __" + env['DOMAIN'] + "_version_h__ */\n"
-   
-   try:
-      o = file (target[1].get_path(), 'w')
-      o.write (text)
-      o.close ();
-   except IOError:
-      print "Could not open", target[1].get_path(), " for writing\n"
-      sys.exit (-1)
-   
-   return None
+
+    text  = "int " + env['DOMAIN'] + "_major_version = " + str (env['MAJOR']) + ";\n"
+    text += "int " + env['DOMAIN'] + "_minor_version = " + str (env['MINOR']) + ";\n"
+    text += "int " + env['DOMAIN'] + "_micro_version = " + str (env['MICRO']) + ";\n"
+    
+    try:
+        o = file (target[0].get_path(), 'w')
+        o.write (text)
+        o.close ()
+    except IOError:
+        print "Could not open", target[0].get_path(), " for writing\n"
+        sys.exit (-1)
+
+    text  = "#ifndef __" + env['DOMAIN'] + "_version_h__\n"
+    text += "#define __" + env['DOMAIN'] + "_version_h__\n"
+    text += "extern const char* " + env['DOMAIN'] + "_revision;\n"
+    text += "extern int " + env['DOMAIN'] + "_major_version;\n"
+    text += "extern int " + env['DOMAIN'] + "_minor_version;\n"
+    text += "extern int " + env['DOMAIN'] + "_micro_version;\n"
+    text += "#endif /* __" + env['DOMAIN'] + "_version_h__ */\n"
+    
+    try:
+        o = file (target[1].get_path(), 'w')
+        o.write (text)
+        o.close ()
+    except IOError:
+        print "Could not open", target[1].get_path(), " for writing\n"
+        sys.exit (-1)
+        
+    return None
 
 version_bld = Builder (action = version_builder)
 env.Append (BUILDERS = {'VersionBuild' : version_bld})
@@ -278,32 +309,18 @@ env.Append (BUILDERS = {'VersionBuild' : version_bld})
 #
 
 def versioned_builder(target,source,env):
-    # build ID is composed of a representation of the date of the last CVS transaction
-    # for this (SConscript) file
+    w, r = os.popen2( "svn info | awk '/^Revision:/ { print $2}'")
     
-    try:
-        o = file (source[0].get_dir().get_path() +  '/CVS/Entries', "r")
-    except IOError:
-        print "Could not CVS/Entries for reading"
+    last_revision = r.readline().strip()
+    w.close()
+    r.close()
+    if last_revision == "":
+        print "No SVN info found - versioned executable cannot be built"
         return -1
     
-    last_date = ""
-    lines = o.readlines()
-    for line in lines:
-        if line[0:12] == '/SConscript/':
-            parts = line.split ("/")
-            last_date = parts[3]
-            break
-    o.close ()
+    print "The current build ID is " + last_revision
     
-    if last_date == "":
-        print "No SConscript CVS update info found - versioned executable cannot be built"
-        return -1
-    
-    tag = time.strftime ('%Y%M%d%H%m', time.strptime (last_date))
-    print "The current build ID is " + tag
-    
-    tagged_executable = source[0].get_path() + '-' + tag
+    tagged_executable = source[0].get_path() + '-' + last_revision
     
     if os.path.exists (tagged_executable):
         print "Replacing existing executable with the same build tag."
@@ -361,7 +378,7 @@ env.Append (BUILDERS = {'Tarball' : tarball_bld})
 #
 
 if env['VST']:
-    sys.stdout.write ("Are you building Ardour for personal use (rather than distributiont to others)? [no]: ")
+    sys.stdout.write ("Are you building Ardour for personal use (rather than distribution to others)? [no]: ")
     answer = sys.stdin.readline ()
     answer = answer.rstrip().strip()
     if answer != "yes" and answer != "y":
@@ -462,7 +479,7 @@ libraries['flac'] = conf.Finish ()
 
 libraries['boost'] = LibraryInfo ()
 conf = Configure (libraries['boost'])
-if conf.CheckHeader ('boost/shared_ptr.hpp', language='CXX') == 0:
+if conf.CheckHeader ('boost/shared_ptr.hpp', language='CXX') == False:
         print "Boost header files do not appear to be installed."
         sys.exit (1)
     
@@ -523,7 +540,7 @@ elif conf.CheckCHeader('/System/Library/Frameworks/CoreMIDI.framework/Headers/Co
     subst_dict['%MIDITYPE%'] = "coremidi"
     print "Using CoreMIDI"
 else:
-    print "It appears you don't have the required MIDI libraries installed."
+    print "It appears you don't have the required MIDI libraries installed. For Linux this means you are missing the development package for ALSA libraries."
     sys.exit (1)
 
 env = conf.Finish()
@@ -549,7 +566,7 @@ if env['SYSLIBS']:
 # cannot use system one for the time being
 #
     
-    libraries['sndfile'] = LibraryInfo(LIBS='libsndfile',
+    libraries['sndfile-ardour'] = LibraryInfo(LIBS='libsndfile-ardour',
                                     LIBPATH='#libs/libsndfile',
                                     CPPPATH=['#libs/libsndfile', '#libs/libsndfile/src'])
 
@@ -587,7 +604,8 @@ if env['SYSLIBS']:
     gtk_subdirs = [
 #        'libs/flowcanvas',
         'libs/gtkmm2ext',
-        'gtk2_ardour'
+        'gtk2_ardour',
+        'libs/clearlooks'
         ]
 
 else:
@@ -616,7 +634,7 @@ else:
     libraries['soundtouch'] = LibraryInfo(LIBS='soundtouch',
                                           LIBPATH='#libs/soundtouch',
                                           CPPPATH=['#libs', '#libs/soundtouch'])
-    libraries['sndfile'] = LibraryInfo(LIBS='libsndfile',
+    libraries['sndfile-ardour'] = LibraryInfo(LIBS='libsndfile-ardour',
                                     LIBPATH='#libs/libsndfile',
                                     CPPPATH=['#libs/libsndfile', '#libs/libsndfile/src'])
 #    libraries['libglademm'] = LibraryInfo(LIBS='libglademm',
@@ -656,8 +674,9 @@ else:
 	'libs/gtkmm2/gtk',
 	'libs/libgnomecanvasmm',
 #	'libs/flowcanvas',
-    'libs/gtkmm2ext',
-    'gtk2_ardour'
+        'libs/gtkmm2ext',
+        'gtk2_ardour',
+        'libs/clearlooks'
         ]
 
 #
@@ -722,10 +741,10 @@ if os.environ.has_key('HOME'):
 
 conf = Configure (env)
 
-have_cxx = conf.TryAction (Action (env['CXX'] + ' --version'))
+have_cxx = conf.TryAction (Action (str(env['CXX']) + ' --version'))
 if have_cxx[0] != 1:
     print "This system has no functional C++ compiler. You cannot build Ardour from source without one."
-    exit (1)
+    sys.exit (1)
 else:
     print "Congratulations, you have a functioning C++ compiler."
 
@@ -950,6 +969,9 @@ env = conf.Finish()
 
 rcbuild = env.SubstInFile ('ardour.rc','ardour.rc.in', SUBST_DICT = subst_dict)
 
+the_revision = env.Command ('frobnicatory_decoy', [], create_stored_revision)
+
+env.Alias('revision', the_revision)
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour_system.rc'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.rc'))
 
@@ -959,13 +981,8 @@ Default (rcbuild)
 
 Precious (env['DISTTREE'])
 
-#
-# note the special "cleanfirst" source name. this triggers removal
-# of the existing disttree
-#
-
 env.Distribute (env['DISTTREE'],
-                [ 'SConstruct',
+               [ 'SConstruct', 'svn_revision.h',
                   'COPYING', 'PACKAGER_README', 'README',
                   'ardour.rc.in',
                   'ardour_system.rc',
@@ -989,12 +1006,13 @@ env.Distribute (env['DISTTREE'],
                 glob.glob ('DOCUMENTATION/README*')
                 )
 
-srcdist = env.Tarball(env['TARBALL'], env['DISTTREE'])
+srcdist = env.Tarball(env['TARBALL'], [ env['DISTTREE'], the_revision ])
 env.Alias ('srctar', srcdist)
 
 #
 # don't leave the distree around
 #
+
 env.AddPreAction (env['DISTTREE'], Action ('rm -rf ' + str (File (env['DISTTREE']))))
 env.AddPostAction (srcdist, Action ('rm -rf ' + str (File (env['DISTTREE']))))
 

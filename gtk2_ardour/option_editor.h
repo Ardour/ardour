@@ -116,9 +116,9 @@ class OptionEditor : public Gtk::Dialog
 	Gtk::RadioButton::Group mmc_button_group;
 	Gtk::RadioButton::Group midi_button_group;
 
-	gint port_online_toggled (GdkEventButton*,MIDI::Port*,Gtk::ToggleButton*);
-	gint port_trace_in_toggled (GdkEventButton*,MIDI::Port*,Gtk::ToggleButton*);
-	gint port_trace_out_toggled (GdkEventButton*,MIDI::Port*,Gtk::ToggleButton*);
+	void port_online_toggled (MIDI::Port*,Gtk::ToggleButton*);
+	void port_trace_in_toggled (MIDI::Port*,Gtk::ToggleButton*);
+	void port_trace_out_toggled (MIDI::Port*,Gtk::ToggleButton*);
 	
 	void mmc_port_chosen (MIDI::Port*,Gtk::RadioButton*);
 	void mtc_port_chosen (MIDI::Port*,Gtk::RadioButton*);

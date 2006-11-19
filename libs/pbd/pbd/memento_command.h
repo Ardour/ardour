@@ -28,18 +28,10 @@ using std::endl;
 #include <pbd/command.h>
 #include <pbd/stacktrace.h>
 #include <pbd/xml++.h>
+#include <pbd/shiva.h>
+
 #include <sigc++/slot.h>
 #include <typeinfo>
-
-/* grrr, strict C++ says that static member functions are not C functions, but we also want
-   to be able to pack this into a sigc::ptr_fun and not sigc::mem_fun, so we have to make
-   it a genuine function rather than a member.
-*/
-
-static void object_death (Command* mc) {
-	cerr << "\n\n\n---> OBJECT DEATH FIRED FOR " << mc << endl;
-	delete mc;
-}
 
 /** This command class is initialized with before and after mementos 
  * (from Stateful::get_state()), so undo becomes restoring the before
@@ -55,8 +47,8 @@ class MementoCommand : public Command
                        XMLNode *after
                        ) 
             : obj(object), before(before), after(after) {
-		cerr << "MC @ " << this << " is a " << typeid (obj_T).name() << endl;
-		obj.GoingAway.connect (sigc::bind (sigc::ptr_fun (object_death), static_cast<Command*>(this)));
+		/* catch destruction of the object */
+		new PBD::Shiva<obj_T,MementoCommand<obj_T> > (object, *this);
 	}
 
 	~MementoCommand () {

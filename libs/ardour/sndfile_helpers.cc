@@ -106,11 +106,11 @@ sndfile_endian_format_from_string (string str)
 
 string
 sndfile_file_ending_from_string (string str)
-{
+{	
 	static vector<string> file_endings;
 
 	if (file_endings.empty()) {
-		file_endings = PBD::internationalize((const char **) sndfile_file_endings_strings);
+		file_endings = I18N((const char **) sndfile_file_endings_strings);
 	}
 
 	for (int n = 0; sndfile_header_formats_strings[n]; ++n) {

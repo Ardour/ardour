@@ -34,6 +34,7 @@
 #include <pbd/pthread_utils.h>
 
 #include <ardour/source.h>
+#include <ardour/playlist.h>
 
 #include "i18n.h"
 
@@ -51,6 +52,7 @@ Source::Source (Session& s, string name, DataType type)
 	_name = name;
 	_timestamp = 0;
 	_length = 0;
+	_in_use = 0;
 }
 
 Source::Source (Session& s, const XMLNode& node) 
@@ -59,6 +61,7 @@ Source::Source (Session& s, const XMLNode& node)
 {
 	_timestamp = 0;
 	_length = 0;
+	_in_use = 0;
 
 	if (set_state (node) || _type == DataType::NIL) {
 		throw failed_constructor();
@@ -127,3 +130,24 @@ Source::update_length (jack_nframes_t pos, jack_nframes_t cnt)
 	}
 }
 
+void
+Source::add_playlist (Playlist* pl)
+{
+	_playlists.insert (pl);
+}
+
+void
+Source::remove_playlist (Playlist* pl)
+{
+	std::set<Playlist*>::iterator x;
+
+	if ((x = _playlists.find (pl)) != _playlists.end()) {
+		_playlists.erase (x);
+	}
+}
+
+uint32_t
+Source::used () const
+{
+	return _playlists.size();
+}

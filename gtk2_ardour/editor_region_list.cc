@@ -48,22 +48,27 @@ using namespace Glib;
 using namespace Editing;
 
 void
-Editor::handle_region_removed (boost::shared_ptr<Region> region)
+Editor::handle_region_removed (boost::weak_ptr<Region> wregion)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::handle_region_removed), region));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::handle_region_removed), wregion));
 	redisplay_regions ();
 }
 
 void
-Editor::handle_new_region (boost::shared_ptr<Region> region)
+Editor::handle_new_region (boost::weak_ptr<Region> wregion)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::handle_new_region), region));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::handle_new_region), wregion));
 
 	/* don't copy region - the one we are being notified
 	   about belongs to the session, and so it will
 	   never be edited.
 	*/
-	add_region_to_region_display (region);
+
+	boost::shared_ptr<Region> region (wregion.lock());
+	
+	if (region) {
+		add_region_to_region_display (region);
+	}
 }
 
 void

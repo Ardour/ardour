@@ -718,7 +718,7 @@ TranzportControlProtocol::update_state ()
 
 	/* global */
 
-	if (Config->get_auto_loop()) {
+	if (session->get_play_loop()) {
 		pending_lights[LightLoop] = true;
 	} else {
 		pending_lights[LightLoop] = false;
@@ -757,6 +757,14 @@ TranzportControlProtocol::update_state ()
 			light_on (LightTracksolo);
 		} else {
 			light_off (LightTracksolo);
+		}
+	}
+
+	if (pending_lights[LightTrackrec] != lights[LightTrackrec]) {
+		if (pending_lights[LightTrackrec]) {
+			light_on (LightTrackrec);
+		} else {
+			light_off (LightTrackrec);
 		}
 	}
 

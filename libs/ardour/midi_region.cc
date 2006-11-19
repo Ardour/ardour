@@ -106,7 +106,6 @@ MidiRegion::MidiRegion (SourceList& srcs, const XMLNode& node)
 
 MidiRegion::~MidiRegion ()
 {
-	GoingAway (); /* EMIT SIGNAL */
 }
 
 jack_nframes_t

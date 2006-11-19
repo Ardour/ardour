@@ -36,10 +36,7 @@ class SndFileSource : public AudioFileSource {
 	/* constructor to be called for new in-session files */
 
 	SndFileSource (Session&, std::string path, SampleFormat samp_format, HeaderFormat hdr_format, nframes_t rate, 
-		       Flag flags = AudioFileSource::Flag (AudioFileSource::Writable|
-							   AudioFileSource::Removable|
-							   AudioFileSource::RemovableIfEmpty|
-							   AudioFileSource::CanRename));
+		       Flag flags = SndFileSource::default_writable_flags);
 		       
 	/* constructor to be called for existing in-session files */
 	
@@ -52,6 +49,18 @@ class SndFileSource : public AudioFileSource {
 	int flush_header ();
 
 	nframes_t natural_position () const;
+
+	nframes_t last_capture_start_frame() const;
+	void mark_capture_start (nframes_t);
+	void mark_capture_end ();
+	void clear_capture_marks();
+
+	bool set_destructive (bool yn);
+
+	static void setup_standard_crossfades (nframes_t sample_rate);
+	static const AudioFileSource::Flag default_writable_flags;
+
+	static int get_soundfile_info (string path, SoundFileInfo& _info, string& error_msg);
 
   protected:
 	void set_header_timeline_position ();
@@ -69,10 +78,32 @@ class SndFileSource : public AudioFileSource {
 	mutable float *interleave_buf;
 	mutable nframes_t interleave_bufsize;
 
-	void init (const string &str);
+	void init (string str);
 	int open();
 	void close();
 	int setup_broadcast_info (nframes_t when, struct tm&, time_t);
+
+	/* destructive */
+
+	static nframes_t xfade_frames;
+	static gain_t* out_coefficient;
+	static gain_t* in_coefficient;
+
+	bool          _capture_start;
+	bool          _capture_end;
+	nframes_t      capture_start_frame;
+	nframes_t      file_pos; // unit is frames
+	nframes_t      xfade_out_count;
+	nframes_t      xfade_in_count;
+	Sample*        xfade_buf;
+
+	nframes_t crossfade (Sample* data, nframes_t cnt, int dir);
+	void set_timeline_position (int64_t);
+	nframes_t destructive_write_unlocked (Sample *dst, nframes_t cnt);
+	nframes_t nondestructive_write_unlocked (Sample *dst, nframes_t cnt);
+	void handle_header_position_change ();
+
+	static int64_t get_timecode_info (SNDFILE* sf, SF_BROADCAST_INFO* binfo, bool& exists);
 };
 
 } // namespace ARDOUR

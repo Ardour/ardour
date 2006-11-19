@@ -55,7 +55,7 @@ pbd.Merge ([ libraries['sigc2'],
              libraries['glibmm2'],
              libraries['glib2'] ])
 
-pbd.VersionBuild(['version.cc','pbd/version.h'], 'SConscript')
+pbd.VersionBuild(['version.cc','pbd/version.h'], [])
 
 libpbd = pbd.SharedLibrary('pbd', pbd_files)
 Default(libpbd)

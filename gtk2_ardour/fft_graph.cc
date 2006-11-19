@@ -123,8 +123,9 @@ FFTGraph::setWindowSize_internal(int windowSize)
 	}
 	
 	_logScale = (int *) malloc(sizeof(int) * _dataSize);
+	float count = 0;
 	for (int i = 0; i < _dataSize; i++) {
-		_logScale[i] = (int)floor(log10( 1.0 + i * 9.0 / (double)_dataSize) * (double)scaleWidth);
+		_logScale[i] = 0;
 	}
 	_plan = fftwf_plan_r2r_1d(_windowSize, _in, _out, FFTW_R2HC, FFTW_ESTIMATE);
 }
@@ -241,8 +242,11 @@ FFTGraph::draw_scales(Glib::RefPtr<Gdk::Window> window)
 		int rate_at_pos = (int)((double)(SR/2) * (double)logscale_pos / (double)_dataSize);
 		
 		char buf[32];
-		snprintf(buf,32,"%dhz",rate_at_pos);
-		
+		if (rate_at_pos < 1000)
+			snprintf(buf,32,"%dHz",rate_at_pos);
+		else
+			snprintf(buf,32,"%dk",(int)floor( (float)rate_at_pos/(float)1000) );
+
 		std::string label = buf;
 		
 		layout->set_text(label);
@@ -371,12 +375,22 @@ FFTGraph::on_size_request(Gtk::Requisition* requisition)
 	if (_logScale != 0) {
 		free(_logScale);
 	}
-
 	_logScale = (int *) malloc(sizeof(int) * _dataSize);
-	//cerr << "LogScale: " << endl;
+
+	float SR = 44100;
+	float FFT_START = SR/(double)_dataSize;
+	float FFT_END = SR/2.0;
+	float FFT_RANGE = log( FFT_END / FFT_START);
+	float pixel = 0;
 	for (int i = 0; i < _dataSize; i++) {
-		_logScale[i] = (int)floor(log10( 1.0 + i * 9.0 / (double)_dataSize) * (double)scaleWidth);
-		//cerr << i << ":\t" << _logScale[i] << endl;
+		float freq_at_bin = (SR/2.0) * ((double)i / (double)_dataSize);
+		float freq_at_pixel = FFT_START * exp( FFT_RANGE * pixel / (double)scaleWidth );
+		while (freq_at_bin > freq_at_pixel) {
+			pixel++;
+			freq_at_pixel = FFT_START * exp( FFT_RANGE * pixel / (double)scaleWidth );
+		}
+		_logScale[i] = floor(pixel);
+//printf("logscale at %d = %3.3f, freq_at_pixel %3.3f, freq_at_bin %3.3f, scaleWidth %d\n", i, pixel, freq_at_pixel, freq_at_bin, scaleWidth);
 	}
 
 	requisition->width  = width;;

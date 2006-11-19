@@ -79,23 +79,19 @@ RegionSelection::clear_all()
 {
 	clear();
 	_bylayer.clear();
+	_current_start = 0;
+	_current_end = 0;
 }
 
 bool RegionSelection::contains (RegionView* rv)
 {
-	if (this->find (rv) != end()) {
-		return true;
-	}
-	else {
-		return false;
-	}
-	
+	return this->find (rv) != end();
 }
 
 void
 RegionSelection::add (RegionView* rv, bool dosort)
 {
-	if (this->find (rv) != end()) {
+	if (contains (rv)) {
 		/* we already have it */
 		return;
 	}

@@ -3,9 +3,13 @@
 #include <pbd/memento_command.h>
 #include <ardour/diskstream.h>
 #include <ardour/playlist.h>
+#include <ardour/audioplaylist.h>
+#include <ardour/audio_track.h>
 #include <ardour/tempo.h>
 #include <ardour/audiosource.h>
 #include <ardour/audioregion.h>
+#include <ardour/midi_source.h>
+#include <ardour/midi_region.h>
 #include <pbd/error.h>
 using namespace PBD;
 #include "i18n.h"
@@ -13,7 +17,7 @@ using namespace PBD;
 
 namespace ARDOUR {
 
-void Session::register_with_memento_command_factory(PBD::ID id, StatefulDestructible *ptr)
+void Session::register_with_memento_command_factory(PBD::ID id, PBD::StatefulThingWithGoingAway *ptr)
 {
     registry[id] = ptr;
 }
@@ -49,41 +53,37 @@ Command *Session::memento_command_factory(XMLNode *n)
     {
 	error << _("Tried to reconstitute a MementoCommand with no contents, failing. id=") << id.to_s() << endmsg;
 	return 0;
-	}
-    
-	
-	/* create command */
-    string obj_T = n->children().front()->name();
-    if (obj_T == "AudioRegion" || obj_T == "MidiRegion" || obj_T == "Region") {
+    }
+
+    /* create command */
+    string obj_T = n->property ("type_name")->value();
+    if (obj_T == typeid (AudioRegion).name() || obj_T == typeid (MidiRegion).name() || obj_T == typeid (Region).name()) {
 	    if (regions.count(id))
 		    return new MementoCommand<Region>(*regions[id], before, after);
-    } else if (obj_T == "AudioSource" || obj_T == "MidiSource") {
+    } else if (obj_T == typeid (AudioSource).name() || obj_T == typeid (MidiSource).name()) {
 	    if (sources.count(id))
 		    return new MementoCommand<Source>(*sources[id], before, after);
-    } else if (obj_T == "Location") {
+    } else if (obj_T == typeid (Location).name()) {
 	    return new MementoCommand<Location>(*_locations.get_location_by_id(id), before, after);
-    } else if (obj_T == "Locations") {
+    } else if (obj_T == typeid (Locations).name()) {
 	    return new MementoCommand<Locations>(_locations, before, after);
-    } else if (obj_T == "TempoMap") {
+    } else if (obj_T == typeid (TempoMap).name()) {
 	    return new MementoCommand<TempoMap>(*_tempo_map, before, after);
-    } else if (obj_T == "Playlist" || obj_T == "AudioPlaylist") {
+    } else if (obj_T == typeid (Playlist).name() || obj_T == typeid (AudioPlaylist).name()) {
 	    if (Playlist *pl = playlist_by_name(child->property("name")->value()))
 		    return new MementoCommand<Playlist>(*pl, before, after);
-    } else if (obj_T == "Route") { // includes AudioTrack
+    } else if (obj_T == typeid (Route).name() || obj_T == typeid (AudioTrack).name()) { 
 	    return new MementoCommand<Route>(*route_by_id(id), before, after);
-    } else if (obj_T == "Curve") {
-	    if (curves.count(id))
-		    return new MementoCommand<Curve>(*curves[id], before, after);
-    } else if (obj_T == "AutomationList") {
+    } else if (obj_T == typeid (Curve).name() || obj_T == typeid (AutomationList).name()) {
 	    if (automation_lists.count(id))
 		    return new MementoCommand<AutomationList>(*automation_lists[id], before, after);
     } else if (registry.count(id)) { // For Editor and AutomationLine which are off-limits here
-	    return new MementoCommand<StatefulDestructible>(*registry[id], before, after);
+	    return new MementoCommand<PBD::StatefulThingWithGoingAway>(*registry[id], before, after);
     }
 
     /* we failed */
-    error << _("could not reconstitute MementoCommand from XMLNode. id=") << id.to_s() << endmsg;
-    return 0;
+    error << string_compose (_("could not reconstitute MementoCommand from XMLNode. object type = %1 id = %2"), obj_T, id.to_s()) << endmsg;
+    return 0 ;
 }
 
 // solo

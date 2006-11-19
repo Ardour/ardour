@@ -234,7 +234,7 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 		
 		if (canvas_item_visible ((*i)->canvas_display)) {
 			++nth;
-			effective_height += (*i)->show_at (y + effective_height, nth, parent);
+			effective_height += (*i)->show_at (y + 1 + effective_height, nth, parent);
 		}
 	}
 
@@ -286,18 +286,8 @@ TimeAxisView::controls_ebox_button_release (GdkEventButton* ev)
 void
 TimeAxisView::selection_click (GdkEventButton* ev)
 {
-	if (Keyboard::modifier_state_contains (ev->state, Keyboard::Shift)) {
-
-		if (editor.get_selection().selected (this)) {
-			editor.get_selection().remove (this);
-		} else {
-			editor.get_selection().add (this);
-		}
-
-	} else {
-
-		editor.get_selection().set (this);
-	}
+	Selection::Operation op = Keyboard::selection_type (ev->state);
+	editor.set_selected_track (*this, op, false);
 }
 
 void
@@ -383,8 +373,48 @@ TimeAxisView::set_height_pixels (uint32_t h)
 bool
 TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 {
+	PublicEditor::TrackViewList *allviews = 0;
+	PublicEditor::TrackViewList::iterator i;
+
 	switch (ev->keyval) {
+	case GDK_Escape:
+		name_entry.select_region (0,0);
+		controls_ebox.grab_focus ();
+		name_entry_changed ();
+		return true;
+
+	/* Shift+Tab Keys Pressed. Note that for Shift+Tab, GDK actually
+	 * generates a different ev->keyval, rather than setting 
+	 * ev->state.
+	 */
+	case GDK_ISO_Left_Tab:
 	case GDK_Tab:
+		name_entry_changed ();
+		allviews = editor.get_valid_views (0);
+		if (allviews != 0) {
+			i = find (allviews->begin(), allviews->end(), this);
+			if (ev->keyval == GDK_Tab) {
+				if (i != allviews->end()) {
+					do {
+						if (++i == allviews->end()) { return true; }
+					} while((*i)->hidden());
+				}
+			} else {
+				if (i != allviews->begin()) {
+					do {
+						if (--i == allviews->begin()) { return true; }
+					} while ((*i)->hidden());
+				}
+			}
+
+			if ((*i)->height_style == Small) {
+				(*i)->set_height(Smaller);
+			}
+			
+			(*i)->name_entry.grab_focus();
+		}
+		return true;
+
 	case GDK_Up:
 	case GDK_Down:
 		name_entry_changed ();
@@ -434,6 +464,7 @@ TimeAxisView::name_entry_focus_out (GdkEventFocus* ev)
 	last_name_entry_key_press_event = 0;
 	name_entry_key_timeout.disconnect ();
 	name_entry.set_name ("EditorTrackNameDisplay");
+	name_entry.select_region (0,0);
 	
 	/* do the real stuff */
 
@@ -485,12 +516,14 @@ TimeAxisView::popup_display_menu (guint32 when)
 	if (display_menu == 0) {
 		build_display_menu ();
 	}
+	editor.set_selected_track (*this, Selection::Add);
 	display_menu->popup (1, when);	
 }
 
 gint
 TimeAxisView::size_click (GdkEventButton *ev)
 {
+	editor.set_selected_track (*this, Selection::Add);
 	popup_size_menu (ev->time);
 	return TRUE;
 }

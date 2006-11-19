@@ -144,6 +144,7 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	void special_set_position (nframes_t);
 	void nudge_position (long, void *src);
 
+	bool at_natural_position () const;
 	void move_to_natural_position (void *src);
 
 	void trim_start (nframes_t new_position, void *src);
@@ -171,7 +172,7 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	void set_playlist (ARDOUR::Playlist*);
 
 	void source_deleted (boost::shared_ptr<Source>);
-
+	
 	boost::shared_ptr<Source> source (uint32_t n=0) const { return _sources[ (n < _sources.size()) ? n : 0 ]; }
 	uint32_t                  n_channels()          const { return _sources.size(); }
 
@@ -185,7 +186,7 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	virtual int      set_state (const XMLNode&);
 	virtual int      set_live_state (const XMLNode&, Change&, bool send);
 
-	boost::shared_ptr<Region> get_parent();
+	virtual boost::shared_ptr<Region> get_parent() const;
 	
 	uint64_t last_layer_op() const { return _last_layer_op; }
 	void set_last_layer_op (uint64_t when);
@@ -214,10 +215,10 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	void maybe_uncopy ();
 	void first_edit ();
 	
-	bool verify_start (jack_nframes_t);
-	bool verify_start_and_length (jack_nframes_t, jack_nframes_t);
-	bool verify_start_mutable (jack_nframes_t&_start);
-	bool verify_length (jack_nframes_t);
+	virtual bool verify_start (jack_nframes_t);
+	virtual bool verify_start_and_length (jack_nframes_t, jack_nframes_t);
+	virtual bool verify_start_mutable (jack_nframes_t&_start);
+	virtual bool verify_length (jack_nframes_t);
 	virtual void recompute_at_start () = 0;
 	virtual void recompute_at_end () = 0;
 	

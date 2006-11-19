@@ -72,6 +72,7 @@ class IOSelector : public Gtk::VBox {
 	boost::shared_ptr<ARDOUR::IO> io;
 	bool for_input;
 	ARDOUR::Port *selected_port;
+	sigc::connection page_selection_connection;
 
 	Gtk::VBox main_box;
 	Gtk::HBox port_and_selector_box;
@@ -123,9 +124,8 @@ class IOSelector : public Gtk::VBox {
 
 	void add_port ();
 	void remove_port ();
-	gint remove_port_when_idle (ARDOUR::Port *);
+	void set_button_sensitivity ();
 
-	gint port_column_button_release (GdkEventButton *, Gtk::TreeView*);
 	gint connection_button_release (GdkEventButton *, Gtk::TreeView*);
 	
 	void select_treeview(Gtk::TreeView*);

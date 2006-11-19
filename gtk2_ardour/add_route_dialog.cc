@@ -38,20 +38,20 @@ using namespace std;
 using namespace PBD;
 
 static const char* channel_setup_names[] = {
-	"Mono",
-	"Stereo",
-	"3 Channels",
-	"4 Channels",
-	"6 Channels",
-	"8 Channels",
-	"Manual Setup",
+	N_("Mono"),
+	N_("Stereo"),
+	N_("3 Channels"),
+	N_("4 Channels"),
+	N_("6 Channels"),
+	N_("8 Channels"),
+	N_("Manual Setup"),
 	"MIDI",
 	0
 };
 
 static const char* track_mode_names[] = {
-	"Normal",
-	"Tape",
+	N_("Normal"),
+	N_("Tape"),
 	0
 };
 
@@ -67,11 +67,11 @@ AddRouteDialog::AddRouteDialog ()
 	  routes_spinner (routes_adjustment)
 {
 	if (channel_combo_strings.empty()) {
-		channel_combo_strings = PBD::internationalize (channel_setup_names);
+		channel_combo_strings = I18N (channel_setup_names);
 	}
 
 	if (track_mode_strings.empty()) {
-		track_mode_strings = PBD::internationalize (track_mode_names);
+		track_mode_strings = I18N (track_mode_names);
 	}
 
 	set_name ("AddRouteDialog");

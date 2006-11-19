@@ -36,7 +36,6 @@
 
 #include <ardour/ardour.h>
 #include <ardour/utils.h>
-#include <ardour/state_manager.h>
 #include <ardour/curve.h>
 #include <ardour/types.h>
 #include <ardour/data_type.h>
@@ -65,7 +64,7 @@ class BufferSet;
  * An IO can contain ports of varying types, making routes/inserts/etc with
  * varied combinations of types (eg MIDI and audio) possible.
  */
-class IO : public PBD::StatefulDestructible, public ARDOUR::StateManager
+class IO : public PBD::StatefulDestructible
 {
 
   public:
@@ -74,7 +73,9 @@ class IO : public PBD::StatefulDestructible, public ARDOUR::StateManager
 	IO (Session&, string name, 
 	    int input_min = -1, int input_max = -1, 
 	    int output_min = -1, int output_max = -1,
-		DataType default_type = DataType::AUDIO);
+	    DataType default_type = DataType::AUDIO);
+	
+	IO (Session&, const XMLNode&, DataType default_type = DataType::AUDIO);
 	
 	virtual ~IO();
 
@@ -82,18 +83,12 @@ class IO : public PBD::StatefulDestructible, public ARDOUR::StateManager
 	ChanCount input_maximum() const { return _input_maximum; }
 	ChanCount output_minimum() const { return _output_minimum; }
 	ChanCount output_maximum() const { return _output_maximum; }
-
+	
 	void set_input_minimum (ChanCount n);
 	void set_input_maximum (ChanCount n);
 	void set_output_minimum (ChanCount n);
 	void set_output_maximum (ChanCount n);
 	
-	// Do not write any new code using these
-	void set_input_minimum (int n);
-	void set_input_maximum (int n);
-	void set_output_minimum (int n);
-	void set_output_maximum (int n);
-
 	DataType default_type() const         { return _default_type; }
 	void     set_default_type(DataType t) { _default_type = t; }
 
@@ -187,9 +182,6 @@ class IO : public PBD::StatefulDestructible, public ARDOUR::StateManager
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&);
 
-	virtual UndoAction get_memento() const;
-
-
 	static int  disable_connecting (void);
 
 	static int  enable_connecting (void);
@@ -224,6 +216,14 @@ public:
 
 	/* automation */
 
+	static void set_automation_interval (jack_nframes_t frames) {
+		_automation_interval = frames;
+	}
+
+	static jack_nframes_t automation_interval() { 
+		return _automation_interval;
+	}
+
 	void clear_automation ();
 
 	bool gain_automation_recording() const { 
@@ -245,6 +245,7 @@ public:
 	sigc::signal<void> gain_automation_style_changed;
 
 	virtual void transport_stopped (nframes_t now);
+	void automation_snapshot (nframes_t now);
 
 	ARDOUR::Curve& gain_automation_curve () { return _gain_automation_curve; }
 
@@ -304,10 +305,8 @@ public:
 
 	GainControllable _gain_control;
 
-	/* state management */
-
-	Change               restore_state (State&);
-	StateManager::State* state_factory (std::string why) const;
+	nframes_t last_automation_snapshot;
+	static nframes_t _automation_interval;
 
 	AutoState      _gain_automation_state;
 	AutoStyle      _gain_automation_style;
@@ -315,10 +314,11 @@ public:
 	bool     apply_gain_automation;
 	Curve    _gain_automation_curve;
 	
-	int  save_automation (const string&);
-	int  load_automation (const string&);
-	
 	Glib::Mutex automation_lock;
+
+	virtual int set_automation_state (const XMLNode&);
+	virtual XMLNode& get_automation_state ();
+	virtual int load_automation (std::string path);
 
 	/* AudioTrack::deprecated_use_diskstream_connections() needs these */
 

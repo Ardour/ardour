@@ -149,8 +149,6 @@ RegionView::~RegionView ()
 {
 	in_destructor = true;
 
-	RegionViewGoingAway (this); /* EMIT_SIGNAL */
-
 	for (vector<GhostRegion*>::iterator g = ghosts.begin(); g != ghosts.end(); ++g) {
 		delete *g;
 	}
@@ -407,6 +405,7 @@ RegionView::region_renamed ()
 
 	set_item_name (str, this);
 	set_name_text (str);
+	reset_width_dependent_items (_pixel_width);
 }
 
 void

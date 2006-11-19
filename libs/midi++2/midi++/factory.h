@@ -30,9 +30,8 @@ namespace MIDI {
 class PortFactory {
   public:
 	Port *create_port (PortRequest &req, void* data);
-	
-	static void add_port_request (std::vector<PortRequest *> &reqs,
-				      const std::string &reqstr);
+
+	static bool ignore_duplicate_devices (Port::Type);
 };
 
 } // namespace MIDI

@@ -1,0 +1,5865 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ardour-gtk 1.0.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2006-06-12 22:09+0200\n"
+"PO-Revision-Date: 2006-06-26 23:57+GMT+1\n"
+"Last-Translator: Petter Sundlöf <petter.sundlof@findus.dhs.org>\n"
+"Language-Team: Svenska <sv@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../about.cc:119
+msgid "Paul Davis"
+msgstr ""
+
+#: ../about.cc:120
+msgid "Jesse Chappell"
+msgstr ""
+
+#: ../about.cc:121
+msgid "Taybin Rutkin"
+msgstr ""
+
+#: ../about.cc:122
+msgid "Marcus Andersson"
+msgstr ""
+
+#: ../about.cc:123
+msgid "Jeremy Hall"
+msgstr ""
+
+#: ../about.cc:124
+msgid "Steve Harris"
+msgstr ""
+
+#: ../about.cc:125
+msgid "Tim Mayberry"
+msgstr ""
+
+#: ../about.cc:126
+msgid "Mark Stewart"
+msgstr ""
+
+#: ../about.cc:127
+msgid "Sam Chessman"
+msgstr ""
+
+#: ../about.cc:128
+msgid "Jack O'Quin"
+msgstr ""
+
+#: ../about.cc:129
+msgid "Matt Krai"
+msgstr ""
+
+#: ../about.cc:130
+msgid "Ben Bell"
+msgstr ""
+
+#: ../about.cc:131
+msgid "Gerard van Dongen"
+msgstr ""
+
+#: ../about.cc:132
+msgid "Thomas Charbonnel"
+msgstr ""
+
+#: ../about.cc:133
+msgid "Nick Mainsbridge"
+msgstr ""
+
+#: ../about.cc:134
+msgid "Colin Law"
+msgstr ""
+
+#: ../about.cc:135
+msgid "Sampo Savolainen"
+msgstr ""
+
+#: ../about.cc:136
+msgid "Joshua Leach"
+msgstr ""
+
+#: ../about.cc:137
+msgid "Rob Holland"
+msgstr ""
+
+#: ../about.cc:138
+msgid "Per Sigmond"
+msgstr ""
+
+#: ../about.cc:139
+msgid "Doug Mclain"
+msgstr ""
+
+#: ../about.cc:140
+msgid "Petter Sundlöf"
+msgstr ""
+
+#: ../about.cc:145
+msgid ""
+"French:\n"
+"\tAlain Fréhel <alain.frehel@free.fr>\n"
+msgstr ""
+
+#: ../about.cc:146
+msgid ""
+"German:\n"
+"\tKarsten Petersen <kapet@kapet.de>\n"
+msgstr ""
+
+#: ../about.cc:147
+msgid ""
+"Italian:\n"
+"\tFilippo Pappalardo <filippo@email.it>\n"
+msgstr ""
+
+#: ../about.cc:148
+msgid ""
+"Portuguese:\n"
+"\tRui Nuno Capela <rncbc@rncbc.org>\n"
+msgstr ""
+
+#: ../about.cc:149
+msgid ""
+"Brazilian Portuguese:\n"
+"\tAlexander da Franca Fernandes <alexander@nautae.eti.br>\n"
+"\tChris Ross <chris@tebibyte.org>\n"
+msgstr ""
+
+#: ../about.cc:151
+msgid ""
+"Spanish:\n"
+"\t Alex Krohn <alexkrohn@fastmail.fm>\n"
+msgstr ""
+
+#: ../about.cc:152
+msgid ""
+"Russian:\n"
+"\t Igor Blinov <pitstop@nm.ru>\n"
+msgstr ""
+
+#: ../about.cc:180
+msgid "Copyright (C) 1999-2005 Paul Davis\n"
+msgstr ""
+
+#: ../about.cc:181
+msgid ""
+"Ardour comes with ABSOLUTELY NO WARRANTY\n"
+"This is free software, and you are welcome to redistribute it\n"
+"under certain conditions; see the file COPYING for details.\n"
+msgstr ""
+
+#: ../about.cc:187
+msgid ""
+"%1\n"
+"(built with ardour/gtk %2.%3.%4 libardour: %5.%6.%7)"
+msgstr ""
+"%1\n"
+"(kompilerat med ardour/gtk %2.%3.%4 libardour: %5.%6.%7)"
+
+#: ../actions.cc:260
+msgid "programmer error: %1 %2"
+msgstr ""
+
+#: ../add_route_dialog.cc:61
+msgid "ardour: add track/bus"
+msgstr "ardour: lägg till spår/buss(ar)"
+
+#. path = "1"
+#: ../add_route_dialog.cc:62 ../editor_route_list.cc:72
+msgid "Tracks"
+msgstr "Spår"
+
+#. path = "0"
+#: ../add_route_dialog.cc:63 ../editor_route_list.cc:69
+msgid "Busses"
+msgstr "Bussar"
+
+#: ../add_route_dialog.cc:95 ../plugin_ui.cc:832
+msgid "Add"
+msgstr "Lägg till"
+
+#: ../add_route_dialog.cc:113
+msgid "Name (template)"
+msgstr "Namn (mall)"
+
+#: ../add_route_dialog.cc:119
+msgid "Channel Configuration"
+msgstr "Kanalkonfiguration"
+
+#: ../add_route_dialog.cc:176 ../editor.cc:133 ../editor.cc:3687
+#: ../time_axis_view.cc:551
+msgid "Normal"
+msgstr ""
+
+#: gtk2_ardour/add_route_dialog.cc:179
+msgid "Tape"
+msgstr "Band"
+
+#: ../add_route_dialog.cc:195
+msgid "Mono"
+msgstr ""
+
+#: ../add_route_dialog.cc:197
+msgid "Stereo"
+msgstr ""
+
+#: gtk2_ardour/add_route_dialog.cc:43
+msgid "3 Channels"
+msgstr "3 Kanaler"
+
+#: gtk2_ardour/add_route_dialog.cc:44
+msgid "4 Channels"
+msgstr "4 Kanaler"
+
+#: gtk2_ardour/add_route_dialog.cc:45
+msgid "6 Channels"
+msgstr "6 Kanaler"
+
+#: gtk2_ardour/add_route_dialog.cc:46
+msgid "8 Channels"
+msgstr "8 Kanaler"
+
+#: gtk2_ardour/add_route_dialog.cc:47
+msgid "Manual Setup"
+msgstr "Manuellt"
+
+#. preroll stuff
+#: ../ardour_ui.cc:105
+msgid ""
+"pre\n"
+"roll"
+msgstr ""
+"för-\n"
+"roll"
+
+#: ../ardour_ui.cc:106
+msgid ""
+"post\n"
+"roll"
+msgstr ""
+"efter-\n"
+"roll"
+
+#. transport
+#: ../ardour_ui.cc:114
+msgid ""
+"time\n"
+"master"
+msgstr ""
+"huvud-\n"
+"klocka"
+
+#: ../ardour_ui.cc:116
+msgid "% "
+msgstr ""
+
+#: ../ardour_ui.cc:118
+msgid ""
+"punch\n"
+"in"
+msgstr ""
+"punch-\n"
+"in"
+
+#: ../ardour_ui.cc:119
+msgid ""
+"punch\n"
+"out"
+msgstr ""
+"punch-\n"
+"ut"
+
+#: ../ardour_ui.cc:120
+msgid ""
+"auto\n"
+"return"
+msgstr ""
+"auto-\n"
+"återvänd"
+
+#: ../ardour_ui.cc:121
+msgid ""
+"auto\n"
+"play"
+msgstr ""
+"auto-\n"
+"spela"
+
+#: ../ardour_ui.cc:122
+msgid ""
+"auto\n"
+"input"
+msgstr ""
+"auto-\n"
+"inljud"
+
+#: ../ardour_ui.cc:123
+msgid "click"
+msgstr "klick"
+
+#: gtk2_ardour/ardour_ui.cc:125
+msgid "AUDITION"
+msgstr "AVLYSSNING"
+
+#: gtk2_ardour/ardour_ui.cc:126
+msgid "SOLO"
+msgstr ""
+
+#: ../ardour_ui.cc:374
+msgid "quit"
+msgstr "avsluta"
+
+#: ../ardour_ui.cc:383
+msgid ""
+"Ardour was unable to save your session.\n"
+"\n"
+"If you still wish to quit, please use the\n"
+"\n"
+"\"Just quit\" option."
+msgstr ""
+"Ardour kunde inte spara din session.\n"
+"\n"
+"Om du fortfarande vill avsluta, välj\n"
+"\n"
+"\"Avsluta bara\"-alternativet."
+
+#: ../ardour_ui.cc:402
+msgid "ardour: save session?"
+msgstr "ardour: spara sessionen?"
+
+#: ../ardour_ui.cc:409
+msgid "Don't %1"
+msgstr "Stäng inte"
+
+#: ../ardour_ui.cc:411
+msgid "Just %1"
+msgstr "Stäng utan att spara"
+
+#: ../ardour_ui.cc:413
+msgid "Save and %1"
+msgstr "Spara och stäng"
+
+#: ../ardour_ui.cc:425
+msgid "session"
+msgstr "Sessionen"
+
+#: ../ardour_ui.cc:427
+msgid "snapshot"
+msgstr "ögonblickskopia"
+
+#: ../ardour_ui.cc:429
+msgid ""
+"The %1\"%2\"\n"
+"has not been saved.\n"
+"\n"
+"Any changes made this time\n"
+"will be lost unless you save it.\n"
+"\n"
+"What do you want to do?"
+msgstr ""
+"%1\n"
+"\"%2\"\n"
+"har ej sparats.\n"
+"\n"
+"Ändringar du gjort kommer\n"
+"att förloras ifall du inte sparar.\n"
+"\n"
+"Vad vill du göra?"
+
+#: ../ardour_ui.cc:443
+msgid "Prompter"
+msgstr "Fråga"
+
+#: ../ardour_ui.cc:502
+#, c-format
+msgid "disconnected"
+msgstr "frånkopplad"
+
+#: ../ardour_ui.cc:509
+#, c-format
+msgid "SR: %.1f kHz / %4.1f msecs"
+msgstr "Samplingsfrekvens: %.1f kHz / %4.1f msek"
+
+#: ../ardour_ui.cc:513
+#, c-format
+msgid "SR: %u kHz / %4.1f msecs"
+msgstr "Samplingsfrekvens: %u kHz / %4.1f msek"
+
+#: ../ardour_ui.cc:526
+#, c-format
+msgid "DSP Load: %.1f%%"
+msgstr "DSP-belastning: %.1f%%"
+
+#: ../ardour_ui.cc:536
+#, c-format
+msgid "Buffers p:%<PRIu32>%% c:%<PRIu32>%%"
+msgstr "Buffertar u-s:%<PRIu32>%% i-s:%<PRIu32>%%"
+
+#: ../ardour_ui.cc:563
+msgid "space: 24hrs+"
+msgstr "Utrymme: 24h+"
+
+#: ../ardour_ui.cc:593
+#, c-format
+msgid "space: %02dh:%02dm:%02ds"
+msgstr "Utrymme: %02dh:%02dm:%02ds"
+
+#: ../ardour_ui.cc:632
+msgid "programming error: impossible control method"
+msgstr "programmeringsfel: omöjlig kontroll-metod"
+
+#: ../ardour_ui.cc:740 ../new_session_dialog.cc:294
+msgid "Recent Sessions"
+msgstr "Tidigare Sessioner"
+
+#. ardour sessions are folders
+#: ../ardour_ui.cc:833
+msgid "open session"
+msgstr "öppna session"
+
+#: ../ardour_ui.cc:839
+msgid "Ardour sessions"
+msgstr "Sessioner"
+
+#: ../ardour_ui.cc:872
+msgid "Patience is a virtue.\n"
+msgstr "Tålamod är en dygd.\n"
+
+#: ../ardour_ui.cc:881
+msgid "You cannot add a track without a session already loaded."
+msgstr "Du kan inte lägga till ett spår utan en session laddad."
+
+#: ../ardour_ui.cc:888
+msgid "could not create new audio track"
+msgstr "kunde inte skapa nytt ljudspår"
+
+#: ../ardour_ui.cc:892
+msgid "could not create new audio bus"
+msgstr "kunde inte skapa ny ljudbuss"
+
+#: ../ardour_ui.cc:911
+msgid ""
+"There are insufficient JACK ports available\n"
+"to create a new track or bus.\n"
+"You should save Ardour, exit and\n"
+"restart JACK with more ports."
+msgstr ""
+"Det finns inte tillräckligt med JACK-portar\n"
+"för att skapa ett nytt spår eller en y buss.\n"
+"Du bör spara, avsluta och\n"
+"starta om JACK med fler portar."
+
+#: ../ardour_ui.cc:1035
+msgid ""
+"Please create 1 or more track\n"
+"before trying to record.\n"
+"Check the Session menu."
+msgstr ""
+"Skapa 1 eller fler spår\n"
+"innan du försöker spela in.\n"
+"Se Session-menyn."
+
+#: ../ardour_ui.cc:1264
+msgid ""
+"JACK has either been shutdown or it\n"
+"disconnected Ardour because Ardour\n"
+"was not fast enough. You can save the\n"
+"session and/or try to reconnect to JACK ."
+msgstr ""
+"JACK har stängts av eller så har\n"
+"det kopplat bort Ardour eftersom\n"
+"Ardour inte var snabb nog. Du kan spara\n"
+"och/eller försöka återansluta till JACK ."
+
+#: ../ardour_ui.cc:1281
+msgid "Unable to create all required ports"
+msgstr "Kan ej skapa alla nödvändiga portar"
+
+#: ../ardour_ui.cc:1289
+msgid "Unable to start the session running"
+msgstr "Kan ej starta sessionen"
+
+#: ../ardour_ui.cc:1425
+msgid "No Stream"
+msgstr "Ingen ljudström"
+
+#: ../ardour_ui.cc:1452 ../ardour_ui.cc:1471
+msgid "none"
+msgstr "ingen"
+
+#: ../ardour_ui.cc:1461 ../ardour_ui.cc:1480
+msgid "off"
+msgstr "av"
+
+#: ../ardour_ui.cc:1504
+msgid "Name of New Snapshot"
+msgstr "Namn för ögonblickskopia"
+
+#: ../ardour_ui.cc:1650
+msgid "Name for mix template:"
+msgstr "Namn för mixmall: "
+
+#: ../ardour_ui.cc:1651
+msgid "-template"
+msgstr "-mall"
+
+#: ../ardour_ui.cc:1808
+msgid ""
+"You do not have write access to this session.\n"
+"This prevents the session from being loaded."
+msgstr ""
+"Du har ej skrivrättigheter till denna session.\n"
+"Detta hindrar sessionen från att laddas."
+
+#: ../ardour_ui.cc:1821 ../ardour_ui.cc:1876
+msgid "Session \"%1 (snapshot %2)\" did not load successfully"
+msgstr "Session \"%1 (ögonblickskopia %2)\" kunde inte laddas"
+
+#: ../ardour_ui.cc:1932
+msgid "No audio files were ready for cleanup"
+msgstr "Inga ljudfiler var redo för rensning"
+
+#: ../ardour_ui.cc:1936
+msgid ""
+"If this seems suprising, \n"
+"check for any existing snapshots.\n"
+"These may still include regions that\n"
+"require some unused files to continue to exist."
+msgstr ""
+"Om detta är överraskande, sök efter existerande\n"
+"ögonblickskopior. Dessa kan använda regioner som\n"
+"använder oanvända filer för att kunna fungera."
+
+#: ../ardour_ui.cc:1945
+msgid "ardour: cleanup"
+msgstr "ardour: rensning"
+
+#: ../ardour_ui.cc:1981 ../ardour_ui.cc:1987
+msgid "files were"
+msgstr "filer"
+
+#: ../ardour_ui.cc:1983 ../ardour_ui.cc:1989
+msgid "file was"
+msgstr "fil"
+
+#: ../ardour_ui.cc:2030
+msgid "Are you sure you want to cleanup?"
+msgstr "Är du säker på att du vill göra en rensning?"
+
+#: ../ardour_ui.cc:2035
+msgid ""
+"Cleanup is a destructive operation.\n"
+"ALL undo/redo information will be lost if you cleanup.\n"
+"After cleanup, unused audio files will be moved to a \"dead sounds\" "
+"location."
+msgstr ""
+"Rensning är en destruktiv funktion.\n"
+"ALL ångra-/gör om-information kommer att förloras om du rensar.\n"
+"Oanvända filer kommer att flyttas till en \"döda ljud\"-plats."
+
+#: ../ardour_ui.cc:2041
+msgid "Clean Up"
+msgstr "Rensning"
+
+#: ../ardour_ui.cc:2044
+msgid "CleanupDialog"
+msgstr "Rensningsdialog"
+
+#: ../ardour_ui.cc:2045
+msgid "ardour_cleanup"
+msgstr "ardour_rensning"
+
+#: ../ardour_ui.cc:2064
+msgid "cleaned files"
+msgstr "rensade filer"
+
+#: ../ardour_ui.cc:2065
+msgid ""
+"The following %1 %2 not in use and \n"
+"have been moved to:\n"
+"%3. \n"
+"\n"
+"Flushing the wastebasket will \n"
+"release an additional\n"
+"%4 %5bytes of disk space.\n"
+msgstr ""
+"Följande %1 %2 användes inte \n"
+"och har flyttats till:\n"
+"%3. \n"
+"\n"
+"Tömma papperskorgen kommer att \n"
+"frigöra ytterligarel\n"
+"%4 %5byte diskutrymme.\n"
+
+#: ../ardour_ui.cc:2090
+msgid "deleted file"
+msgstr "raderad fil"
+
+#: ../ardour_ui.cc:2091
+msgid ""
+"The following %1 %2 deleted from\n"
+"%3,\n"
+"releasing %4 %5bytes of disk space"
+msgstr ""
+"Följande %1 %2 raderades från\n"
+"%3,\n"
+"vilket frigjorde %4 %5byte diskutrymme"
+
+#: ../ardour_ui.cc:2214
+msgid "Recording was stopped because your system could not keep up."
+msgstr "Inspelningen avstannades eftersom ditt system inte kunde hänga med."
+
+#: ../ardour_ui.cc:2237
+msgid ""
+"The disk system on your computer\n"
+"was not able to keep up with Ardour.\n"
+"\n"
+"Specifically, it failed to write data to disk\n"
+"quickly enough to keep up with recording.\n"
+msgstr ""
+"Hårddisksystemet på din dator\n"
+"kunde inte matcha Ardour.\n"
+"\n"
+"Närmare bestämt, det kunde inte skriva data till disk\n"
+"snabbt nog för att matcha inspelningen.\n"
+
+#: ../ardour_ui.cc:2256
+msgid ""
+"The disk system on your computer\n"
+"was not able to keep up with Ardour.\n"
+"\n"
+"Specifically, it failed to read data from disk\n"
+"quickly enough to keep up with playback.\n"
+msgstr ""
+"Hårddisksystemet på din dator\n"
+"kunde inte matcha Ardour.\n"
+"\n"
+"Närmare bestämt, det kunde inte läsa data från disk\n"
+"snabbt nog för att matcha uppspelningen.\n"
+
+#: ../ardour_ui.cc:2282
+msgid ""
+"This session appears to have been in\n"
+"middle of recording when ardour or\n"
+"the computer was shutdown.\n"
+"\n"
+"Ardour can recover any captured audio for\n"
+"you, or it can ignore it. Please decide\n"
+"what you would like to do.\n"
+msgstr ""
+"Denna session tycks ha varit\n"
+"mitt i inspelning när ardour eller\n"
+"datorn stängdes av.\n"
+"\n"
+"Ardour kan återhämta inspelade ljud åt\n"
+"dig, eller ignorera dem. Välj\n"
+"vad du vill göra.\n"
+
+#: ../ardour_ui.cc:2292
+msgid "Recover from crash"
+msgstr "Återhämta från krasch"
+
+#: ../ardour_ui.cc:2293
+msgid "Ignore crash data"
+msgstr "Ignorera kraschdata"
+
+#: ../ardour_ui.cc:2311
+msgid "Could not disconnect from JACK"
+msgstr "Kunde inte koppla loss från JACK"
+
+#: ../ardour_ui.cc:2324
+msgid "Could not reconnect to JACK"
+msgstr "Kunde inte återansluta till JACK"
+
+#: ../ardour_ui2.cc:59
+msgid "UI: cannot setup editor"
+msgstr "Gränssnitt: kan ej konfigurera editorn"
+
+#: ../ardour_ui2.cc:64
+msgid "UI: cannot setup mixer"
+msgstr "Gränssnitt: kan inte konfigurera mixern"
+
+#: ../ardour_ui2.cc:90
+msgid "MMC + Local"
+msgstr "MMC + Lokal"
+
+#: ../ardour_ui2.cc:91
+msgid "MMC"
+msgstr ""
+
+#: ../ardour_ui2.cc:92
+msgid "Local"
+msgstr "Lokal"
+
+#: ../ardour_ui2.cc:109
+msgid "MMC ID"
+msgstr "MMC-ID"
+
+#: ../ardour_ui2.cc:290
+msgid "Play from playhead"
+msgstr "Spela från startmarkören"
+
+#: ../ardour_ui2.cc:291
+msgid "Stop playback"
+msgstr "Stanna uppspelning"
+
+#: ../ardour_ui2.cc:292
+msgid "Play range/selection"
+msgstr "Spela omfång/markering"
+
+#: ../ardour_ui2.cc:293
+msgid "Go to start of session"
+msgstr "Gå till början av sessionen"
+
+#: ../ardour_ui2.cc:294
+msgid "Go to end of session"
+msgstr "Gå till slutet av sessionen"
+
+#: ../ardour_ui2.cc:295
+msgid "Play loop range"
+msgstr "Spela loop-omfång"
+
+#: ../ardour_ui2.cc:296
+msgid "Return to last playback start when stopped"
+msgstr "Återvänd till senaste startmarkörpunkten vid stopp"
+
+#: ../ardour_ui2.cc:297
+msgid "Start playback after any locate"
+msgstr "Starta uppspelning vid markörsplacering"
+
+#: ../ardour_ui2.cc:298
+msgid "Be sensible about input monitoring"
+msgstr "Rimlig inljudsmedhörning"
+
+#: ../ardour_ui2.cc:299
+msgid "Start recording at auto-punch start"
+msgstr "Starta inspelning vid auto-punch-start"
+
+#: ../ardour_ui2.cc:300
+msgid "Stop recording at auto-punch end"
+msgstr "Stanna inspelning vid auto-punch-slut"
+
+#: ../ardour_ui2.cc:301
+msgid "Enable/Disable audio click"
+msgstr "Slå på/av audio-klick"
+
+#: ../ardour_ui2.cc:302
+msgid "Positional sync source"
+msgstr "Källa till positionell synk."
+
+#: ../ardour_ui2.cc:303
+msgid "Does Ardour control the time?"
+msgstr "Är Ardour huvudklocka?"
+
+#: ../ardour_ui2.cc:304
+msgid "Shuttle speed control"
+msgstr "Shuttle-hastighetskontrol"
+
+#: ../ardour_ui2.cc:305
+#, c-format
+msgid "Select semitones or %%-age for speed display"
+msgstr "Välj halvtoner eller %% för hastighetsvisning"
+
+#: ../ardour_ui2.cc:306
+msgid "Current transport speed"
+msgstr "Nuvarande uppspelningshastighet"
+
+#: ../ardour_ui2.cc:329
+msgid "Primary clock"
+msgstr "Primär klocka"
+
+#: ../ardour_ui2.cc:330
+msgid "secondary clock"
+msgstr "sekundär klocka"
+
+#. XXX: this should really be saved in instant.xml or something similar and restored from there
+#. Combo's are stupid - they steal space from the entry for the button
+#: ../ardour_ui2.cc:387 ../ardour_ui2.cc:832 ../ardour_ui2.cc:845
+#: ../ardour_ui2.cc:908 ../ardour_ui2.cc:910
+msgid "sprung"
+msgstr "fjäder"
+
+#: ../ardour_ui2.cc:388 ../ardour_ui2.cc:834 ../ardour_ui2.cc:856
+msgid "wheel"
+msgstr "hjul"
+
+#: ../ardour_ui2.cc:450
+msgid "ardour: clock"
+msgstr "ardour: klocka"
+
+#: ../ardour_ui2.cc:595
+msgid "Maximum speed"
+msgstr "Maxhastighet"
+
+#: ../ardour_ui2.cc:822
+msgid "st"
+msgstr "halvtoner"
+
+#: ../ardour_ui2.cc:866 ../ardour_ui2.cc:889 ../ardour_ui2.cc:906
+msgid "stopped"
+msgstr "stannad"
+
+#: ../ardour_ui_dialogs.cc:152 ../playlist_selector.cc:69
+msgid "close"
+msgstr "stäng"
+
+#: ../ardour_ui_dialogs.cc:359 ../ardour_ui_ed.cc:183
+msgid "Sound File Browser"
+msgstr "Ljudfilsbibliotek"
+
+#. menus + submenus that need action items
+#: ../ardour_ui_ed.cc:71
+msgid "Session"
+msgstr ""
+
+#: ../ardour_ui_ed.cc:72 ../ardour_ui_ed.cc:129 ../editor.cc:1835
+#: ../export_dialog.cc:349 ../export_dialog.cc:1058 ../export_dialog.cc:1062
+msgid "Export"
+msgstr "Exportera"
+
+#: ../ardour_ui_ed.cc:73
+msgid "Cleanup"
+msgstr "Upprensning"
+
+#: ../ardour_ui_ed.cc:74 ../option_editor.cc:125
+msgid "Sync"
+msgstr "Synk."
+
+#: ../ardour_ui_ed.cc:75 ../ardour_ui_ed.cc:76
+msgid "Options"
+msgstr "Inställningar"
+
+#: ../ardour_ui_ed.cc:77
+msgid "Help"
+msgstr "Hjälp"
+
+#: ../ardour_ui_ed.cc:78
+msgid "KeyMouse Actions"
+msgstr "Tangent-/musåtgärder"
+
+#: ../ardour_ui_ed.cc:79
+msgid "Audio File Format"
+msgstr "Ljudfilsformat"
+
+#: ../ardour_ui_ed.cc:80
+msgid "Header"
+msgstr ""
+
+#: ../ardour_ui_ed.cc:81
+msgid "Data"
+msgstr ""
+
+#: ../ardour_ui_ed.cc:82
+msgid "Control Surfaces"
+msgstr "Kontrollytor"
+
+#. the real actions
+#: ../ardour_ui_ed.cc:86 ../audio_time_axis.cc:1853
+#: ../new_session_dialog.cc:524
+msgid "New"
+msgstr "Ny"
+
+#: ../ardour_ui_ed.cc:88 ../new_session_dialog.cc:512
+msgid "Open"
+msgstr "Öppna"
+
+#: ../ardour_ui_ed.cc:89
+msgid "Recent"
+msgstr "Tidigare"
+
+#: ../ardour_ui_ed.cc:90 ../io_selector.cc:57 ../io_selector.cc:791
+msgid "Close"
+msgstr "Stäng"
+
+#: ../ardour_ui_ed.cc:93 ../route_params_ui.cc:513
+msgid "Add Track/Bus"
+msgstr "Lägg till Spår/Buss"
+
+#: ../ardour_ui_ed.cc:104
+msgid "Connect"
+msgstr "Anslut"
+
+#. </CMT Additions>
+#: ../ardour_ui_ed.cc:112
+msgid "Snapshot"
+msgstr "Ögonblickskopia"
+
+#: ../ardour_ui_ed.cc:115
+msgid "Save Template..."
+msgstr "Spara mall..."
+
+#: ../ardour_ui_ed.cc:118
+msgid "Export session to audiofile..."
+msgstr "Exportera sessionen till ljudfil"
+
+#: ../ardour_ui_ed.cc:121
+msgid "Export selection to audiofile..."
+msgstr "Exportera markeringen till ljudfil"
+
+#: ../ardour_ui_ed.cc:125
+msgid "Export range markers to audiofile..."
+msgstr "Exportera omfånget till ljudfil"
+
+#: ../ardour_ui_ed.cc:132
+msgid "Cleanup unused sources"
+msgstr "Rensa oanvända källor"
+
+#: ../ardour_ui_ed.cc:134
+msgid "Flush wastebasket"
+msgstr "Töm papperskorgen"
+
+#: ../ardour_ui_ed.cc:140 ../ardour_ui_options.cc:409
+#: ../ardour_ui_options.cc:418 ../ardour_ui_options.cc:490
+msgid "JACK"
+msgstr ""
+
+#: ../ardour_ui_ed.cc:141
+msgid "Latency"
+msgstr "Fördröjning"
+
+#: ../ardour_ui_ed.cc:143
+msgid "Reconnect"
+msgstr "Återanslut"
+
+#: ../ardour_ui_ed.cc:146 ../mixer_strip.cc:497 ../mixer_strip.cc:565
+msgid "Disconnect"
+msgstr "Koppla ifrån"
+
+#: ../ardour_ui_ed.cc:173
+msgid "Windows"
+msgstr "Fönster"
+
+#: ../ardour_ui_ed.cc:174
+msgid "start prefix"
+msgstr "start-prefix"
+
+#: ../ardour_ui_ed.cc:175
+msgid "Quit"
+msgstr "Avsluta"
+
+#. windows visibility actions
+#: ../ardour_ui_ed.cc:179
+msgid "Maximise Editor Space"
+msgstr "Fullskärmsläge"
+
+#: ../ardour_ui_ed.cc:181
+msgid "Show Editor"
+msgstr "Visa Redigerare"
+
+#: ../ardour_ui_ed.cc:182
+msgid "Show Mixer"
+msgstr "Visa Mixer"
+
+#: ../ardour_ui_ed.cc:184
+msgid "Options Editor"
+msgstr "Inställningar"
+
+#: ../ardour_ui_ed.cc:185
+msgid "Track/Bus Inspector"
+msgstr "Spår/Buss-inspektör"
+
+#: ../ardour_ui_ed.cc:187
+msgid "Connections"
+msgstr "Anslutningar"
+
+#: ../ardour_ui_ed.cc:189
+msgid "Locations"
+msgstr "Platser"
+
+#: ../ardour_ui_ed.cc:191
+msgid "Big Clock"
+msgstr "Stor klocka"
+
+#: ../ardour_ui_ed.cc:193
+msgid "About"
+msgstr "Om"
+
+#: ../ardour_ui_ed.cc:194
+msgid "Colors"
+msgstr "Färger"
+
+#: ../ardour_ui_ed.cc:196
+msgid "Add Audio Track"
+msgstr "Lägg till spår"
+
+#: ../ardour_ui_ed.cc:198
+msgid "Add Audio Bus"
+msgstr "Lägg till buss"
+
+#: ../ardour_ui_ed.cc:200
+msgid "Save"
+msgstr "Spara"
+
+#: ../ardour_ui_ed.cc:202 ../editor_actions.cc:254
+msgid "Remove Last Capture"
+msgstr "Ta bort senaste inspelningen"
+
+#. do-nothing action for the "transport" menu bar item
+#: ../ardour_ui_ed.cc:209
+msgid "Transport"
+msgstr "Uppspelning"
+
+#. these two are not used by key bindings, instead use ToggleRoll for that. these two do show up in
+#. menus and via button proxies.
+#.
+#: ../ardour_ui_ed.cc:215 ../sfdb_ui.cc:56
+msgid "Stop"
+msgstr "Stopp"
+
+#: ../ardour_ui_ed.cc:218
+msgid "Roll"
+msgstr ""
+
+#: ../ardour_ui_ed.cc:222
+msgid "Start/Stop"
+msgstr "Start/Stopp"
+
+#: ../ardour_ui_ed.cc:225
+msgid "Stop + Forget Capture"
+msgstr "Stanna + Glöm inspelning"
+
+#: ../ardour_ui_ed.cc:228
+msgid "Play Loop Range"
+msgstr "Spela loop-omfång"
+
+#: ../ardour_ui_ed.cc:231
+msgid "Play Selection"
+msgstr "Spela markering"
+
+#: ../ardour_ui_ed.cc:235
+msgid "Enable Record"
+msgstr "Tillåt inspelning"
+
+#: ../ardour_ui_ed.cc:238
+msgid "Rewind"
+msgstr "Bakåtspolning"
+
+#: ../ardour_ui_ed.cc:241
+msgid "Rewind (Slow)"
+msgstr "Bakåtspolning (långsam)"
+
+#: ../ardour_ui_ed.cc:244
+msgid "Rewind (Fast)"
+msgstr "Bakåtspolning (snabb)"
+
+#: ../ardour_ui_ed.cc:247
+msgid "Forward"
+msgstr "Framspolning"
+
+#: ../ardour_ui_ed.cc:250
+msgid "Forward (Slow)"
+msgstr "Framspolning (långsam)"
+
+#: ../ardour_ui_ed.cc:253
+msgid "Forward (Fast)"
+msgstr "Framspolning (snabb)"
+
+#: ../ardour_ui_ed.cc:256
+msgid "Goto Zero"
+msgstr "Gå till noll"
+
+#: ../ardour_ui_ed.cc:259
+msgid "Goto Start"
+msgstr "Gå till början"
+
+#: ../ardour_ui_ed.cc:262
+msgid "Goto End"
+msgstr "Gå till slutet"
+
+#. XXX the newline in the displayed names of these action is really wrong, but its because we want the button
+#. that proxies for these action to be more compact. It would be nice to find a way to override the action
+#. name appearance on the buttons.
+#.
+
+#: gtk2_ardour/ardour_ui.cc:119 gtk2_ardour/ardour_ui_ed.cc:267
+msgid "Punch In"
+msgstr "Punch-in"
+
+#: gtk2_ardour/ardour_ui.cc:120 gtk2_ardour/ardour_ui_ed.cc:270
+msgid "Punch Out"
+msgstr "Punch-ut"
+
+#: gtk2_ardour/ardour_ui.cc:121 gtk2_ardour/ardour_ui_ed.cc:282
+msgid "Auto Return"
+msgstr "Autoåtervänd"
+
+#: gtk2_ardour/ardour_ui.cc:122
+msgid "Auto Play"
+msgstr "Autospela"
+
+#: gtk2_ardour/ardour_ui.cc:123 gtk2_ardour/ardour_ui_ed.cc:276
+msgid "Auto Input"
+msgstr "Autoinljud"
+
+#: gtk2_ardour/ardour_ui.cc:124 gtk2_ardour/ardour_ui_ed.cc:273
+#: gtk2_ardour/option_editor.cc:128
+msgid "Click"
+msgstr "Klick"
+
+#: gtk2_ardour/ardour_ui_ed.cc:287
+msgid "Time master"
+msgstr "Huvudklocka"
+
+#: gtk2_ardour/ardour_ui_ed.cc:290
+msgid "Sync startup to video"
+msgstr "Synka start till video"
+
+#: ../ardour_ui_ed.cc:293
+msgid "Toggle Record Enable Track1"
+msgstr "Ändra inspelningsläge för Spår1"
+
+#: ../ardour_ui_ed.cc:295
+msgid "Toggle Record Enable Track2"
+msgstr "Ändra inspelningsläge för Spår2"
+
+#: ../ardour_ui_ed.cc:297
+msgid "Toggle Record Enable Track3"
+msgstr "Ändra inspelningsläge för Spår3"
+
+#: ../ardour_ui_ed.cc:299
+msgid "Toggle Record Enable Track4"
+msgstr "Ändra inspelningsläge för Spår4"
+
+#: ../ardour_ui_ed.cc:301
+msgid "Toggle Record Enable Track5"
+msgstr "Ändra inspelningsläge för Spår5"
+
+#: ../ardour_ui_ed.cc:303
+msgid "Toggle Record Enable Track6"
+msgstr "Ändra inspelningsläge för Spår6"
+
+#: ../ardour_ui_ed.cc:305
+msgid "Toggle Record Enable Track7"
+msgstr "Ändra inspelningsläge för Spår7"
+
+#: ../ardour_ui_ed.cc:307
+msgid "Toggle Record Enable Track8"
+msgstr "Ändra inspelningsläge för Spår8"
+
+#: ../ardour_ui_ed.cc:309
+msgid "Toggle Record Enable Track9"
+msgstr "Ändra inspelningsläge för Spår9"
+
+#: ../ardour_ui_ed.cc:311
+msgid "Toggle Record Enable Track10"
+msgstr "Ändra inspelningsläge för Spår10"
+
+#: ../ardour_ui_ed.cc:313
+msgid "Toggle Record Enable Track11"
+msgstr "Ändra inspelningsläge för Spår11"
+
+#: ../ardour_ui_ed.cc:315
+msgid "Toggle Record Enable Track12"
+msgstr "Ändra inspelningsläge för Spår12"
+
+#: ../ardour_ui_ed.cc:317
+msgid "Toggle Record Enable Track13"
+msgstr "Ändra inspelningsläge för Spår13"
+
+#: ../ardour_ui_ed.cc:319
+msgid "Toggle Record Enable Track14"
+msgstr "Ändra inspelningsläge för Spår14"
+
+#: ../ardour_ui_ed.cc:321
+msgid "Toggle Record Enable Track15"
+msgstr "Ändra inspelningsläge för Spår15"
+
+#: ../ardour_ui_ed.cc:323
+msgid "Toggle Record Enable Track16"
+msgstr "Ändra inspelningsläge för Spår16"
+
+#: ../ardour_ui_ed.cc:325
+msgid "Toggle Record Enable Track17"
+msgstr "Ändra inspelningsläge för Spår17"
+
+#: ../ardour_ui_ed.cc:327
+msgid "Toggle Record Enable Track18"
+msgstr "Ändra inspelningsläge för Spår18"
+
+#: ../ardour_ui_ed.cc:329
+msgid "Toggle Record Enable Track19"
+msgstr "Ändra inspelningsläge för Spår19"
+
+#: ../ardour_ui_ed.cc:331
+msgid "Toggle Record Enable Track20"
+msgstr "Ändra inspelningsläge för Spår20"
+
+#: ../ardour_ui_ed.cc:333
+msgid "Toggle Record Enable Track21"
+msgstr "Ändra inspelningsläge för Spår21"
+
+#: ../ardour_ui_ed.cc:335
+msgid "Toggle Record Enable Track22"
+msgstr "Ändra inspelningsläge för Spår22"
+
+#: ../ardour_ui_ed.cc:337
+msgid "Toggle Record Enable Track23"
+msgstr "Ändra inspelningsläge för Spår23"
+
+#: ../ardour_ui_ed.cc:339
+msgid "Toggle Record Enable Track24"
+msgstr "Ändra inspelningsläge för Spår24"
+
+#: ../ardour_ui_ed.cc:341
+msgid "Toggle Record Enable Track25"
+msgstr "Ändra inspelningsläge för Spår25"
+
+#: ../ardour_ui_ed.cc:343
+msgid "Toggle Record Enable Track26"
+msgstr "Ändra inspelningsläge för Spår26"
+
+#: ../ardour_ui_ed.cc:345
+msgid "Toggle Record Enable Track27"
+msgstr "Ändra inspelningsläge för Spår27"
+
+#: ../ardour_ui_ed.cc:347
+msgid "Toggle Record Enable Track28"
+msgstr "Ändra inspelningsläge för Spår28"
+
+#: ../ardour_ui_ed.cc:349
+msgid "Toggle Record Enable Track29"
+msgstr "Ändra inspelningsläge för Spår29"
+
+#: ../ardour_ui_ed.cc:351
+msgid "Toggle Record Enable Track30"
+msgstr "Ändra inspelningsläge för Spår30"
+
+#: ../ardour_ui_ed.cc:353
+msgid "Toggle Record Enable Track31"
+msgstr "Ändra inspelningsläge för Spår31"
+
+#: ../ardour_ui_ed.cc:355
+msgid "Toggle Record Enable Track32"
+msgstr "Ändra inspelningsläge för Spår32"
+
+#: ../ardour_ui_ed.cc:360
+msgid "Percentage"
+msgstr "Procent"
+
+#: ../ardour_ui_ed.cc:361
+msgid "Semitones"
+msgstr "Halvtoner"
+
+#: ../ardour_ui_ed.cc:365
+msgid "Send MTC"
+msgstr "Skicka MTC"
+
+#: ../ardour_ui_ed.cc:367
+msgid "Send MMC"
+msgstr "Skicka MMC"
+
+#: ../ardour_ui_ed.cc:369
+msgid "Use MMC"
+msgstr "Använd MMC"
+
+#: ../ardour_ui_ed.cc:371
+msgid "Send MIDI feedback"
+msgstr "Skicka MIDI-gensvar"
+
+#: ../ardour_ui_ed.cc:373
+msgid "Use MIDI control"
+msgstr "Använd MIDI-kontroll"
+
+#: gtk2_ardour/ardour_ui_ed.cc:437
+msgid "Auto-connect inputs to physical inputs"
+msgstr "Anslut automatiskt ingångar till fysiska ingångar"
+
+#: gtk2_ardour/ardour_ui_ed.cc:439
+msgid "Manually connect inputs"
+msgstr "Anslut ingångar manuellt"
+
+#: gtk2_ardour/ardour_ui_ed.cc:444
+msgid "Auto-connect outputs to physical outs"
+msgstr "Anslut automatiskt utgångar till fysiska utgångar"
+
+#: gtk2_ardour/ardour_ui_ed.cc:446
+msgid "Auto-connect outputs to master bus"
+msgstr "Ansluta automatiskt utgångar till master-bussen"
+
+#: gtk2_ardour/ardour_ui_ed.cc:448
+msgid "Manually connect outputs"
+msgstr "Anslut utgångar manuellt"
+
+#: ../ardour_ui_ed.cc:376
+msgid "Connect new track inputs to hardware"
+msgstr "Koppla nya ingångar till hårdvara"
+
+#: ../ardour_ui_ed.cc:394
+msgid "Connect new track outputs to hardware"
+msgstr "Koppla nya utgångar till hårdvara"
+
+#: ../ardour_ui_ed.cc:396
+msgid "Connect new track outputs to master"
+msgstr "Koppla nya utgångar till master"
+
+#: ../ardour_ui_ed.cc:398
+msgid "Manually connect new track outputs"
+msgstr "Manuell koppling av nya utgångar"
+
+#: ../ardour_ui_ed.cc:403
+msgid "Hardware monitoring"
+msgstr "Hårdvarumedhörning"
+
+#: ../ardour_ui_ed.cc:404
+msgid "Software monitoring"
+msgstr "Mjukvarumedhörning"
+
+#: ../ardour_ui_ed.cc:405
+msgid "External monitoring"
+msgstr "Extern medhörning"
+
+#. Configuration object options (i.e. not session specific)
+#: ../ardour_ui_ed.cc:409
+msgid "Stop plugins with transport"
+msgstr "Stoppa insticksprogram vid stopp"
+
+#: ../ardour_ui_ed.cc:410
+msgid "Verify remove last capture"
+msgstr "Bekräfta borttagning av senaste inspelade ljudet"
+
+#: ../ardour_ui_ed.cc:411
+msgid "Stop recording on xrun"
+msgstr "Stanna inspelning vid xrun-förekomst"
+
+#: ../ardour_ui_ed.cc:412
+msgid "Stop transport at session end"
+msgstr "Stanna uppspelning vid slutet av sessionen"
+
+#: ../ardour_ui_ed.cc:413
+msgid "-12dB gain reduce ffwd/rewind"
+msgstr "-12dB volymreduktion för snabbspolning"
+
+#: ../ardour_ui_ed.cc:414
+msgid "Rec-enable stays engaged at stop"
+msgstr "Inspelningsläge ändras ej vid stopp"
+
+#. session options
+#: ../ardour_ui_ed.cc:418
+msgid "Do not run plugins while recording"
+msgstr "Kör ej insticksprogram vid inspelning"
+
+#: ../ardour_ui_ed.cc:421
+msgid "Latched solo"
+msgstr "Låst solo"
+
+#: ../ardour_ui_ed.cc:426
+msgid "Solo in-place"
+msgstr "In place-solo "
+
+#: ../ardour_ui_ed.cc:428
+msgid "Solo via bus"
+msgstr "Solo via buss"
+
+#: ../ardour_ui_ed.cc:431
+msgid "Automatically create crossfades"
+msgstr "Skapa övertoningar automatiskt"
+
+#: ../ardour_ui_ed.cc:433
+msgid "Unmute new full crossfades"
+msgstr "Nya fulla övertoningar är påslagna"
+
+#: gtk2_ardour/ardour_ui_options.cc:490
+msgid "ST"
+msgstr "HT"
+
+#: ../ardour_ui_options.cc:407 ../ardour_ui_options.cc:417
+#: ../ardour_ui_options.cc:484
+msgid "Internal"
+msgstr "Intern"
+
+#: ../ardour_ui_options.cc:408 ../ardour_ui_options.cc:487
+msgid "MTC"
+msgstr ""
+
+#: ../audio_clock.cc:1720 ../editor.cc:187
+msgid "SMPTE"
+msgstr ""
+
+#: ../audio_clock.cc:1721 ../editor.cc:186 ../editor_rulers.cc:359
+msgid "Bars:Beats"
+msgstr "Takt:Slag"
+
+#: ../audio_clock.cc:1722
+msgid "Minutes:Seconds"
+msgstr "Minuter:Sekunder"
+
+#: ../audio_clock.cc:1723
+msgid "Audio Frames"
+msgstr ""
+
+#.
+#. Slowest = 6.6dB/sec falloff at update rate of 40ms
+#. Slow    = 6.8dB/sec falloff at update rate of 40ms
+#.
+#: ../audio_clock.cc:1724 ../editor_actions.cc:374 ../editor_actions.cc:382
+#: ../gain_meter.cc:171 ../panner_ui.cc:88 ../plugin_ui.cc:391
+#: ../plugin_ui.cc:634
+msgid "Off"
+msgstr "Av"
+
+#: ../audio_clock.cc:1726
+msgid "Mode"
+msgstr "Visningsläge"
+
+#: ../audio_time_axis.cc:90
+msgid "m"
+msgstr ""
+
+#: ../audio_time_axis.cc:90
+msgid "s"
+msgstr ""
+
+#: ../audio_time_axis.cc:90
+msgid "r"
+msgstr ""
+
+#: ../audio_time_axis.cc:94
+msgid "g"
+msgstr ""
+
+#. group
+#: ../audio_time_axis.cc:95
+msgid "p"
+msgstr ""
+
+#: ../audio_time_axis.cc:96 ../automation_time_axis.cc:31
+#: ../visual_time_axis.cc:73
+msgid "h"
+msgstr ""
+
+#. height
+#: ../audio_time_axis.cc:97
+msgid "a"
+msgstr ""
+
+#: ../audio_time_axis.cc:98 ../visual_time_axis.cc:72
+msgid "v"
+msgstr ""
+
+#: ../audio_time_axis.cc:167 ../mixer_strip.cc:85
+msgid "Record"
+msgstr "Spela in"
+
+#: ../audio_time_axis.cc:168 ../editor_actions.cc:36 ../mixer_strip.cc:85
+msgid "Solo"
+msgstr ""
+
+#: ../audio_time_axis.cc:169 ../editor.cc:1759 ../editor.cc:1858
+#: ../mixer_strip.cc:85 ../panner_ui.cc:426
+msgid "Mute"
+msgstr "Tysta"
+
+#: ../audio_time_axis.cc:170
+msgid "Edit Group"
+msgstr "Redigera Grupp"
+
+#: ../audio_time_axis.cc:171 ../visual_time_axis.cc:91
+msgid "Display Height"
+msgstr "Visningshöjd"
+
+#: ../audio_time_axis.cc:172
+msgid "Playlist"
+msgstr "Spellista"
+
+#: ../audio_time_axis.cc:173 ../audio_time_axis.cc:740
+msgid "Automation"
+msgstr "Automatisering"
+
+#: ../audio_time_axis.cc:174 ../visual_time_axis.cc:92
+msgid "Visual options"
+msgstr "Visuella inställningar"
+
+#: ../audio_time_axis.cc:175 ../visual_time_axis.cc:93
+msgid "Hide this track"
+msgstr "Dölj detta spår"
+
+#: ../audio_time_axis.cc:332 ../mixer_strip.cc:927
+msgid "No group"
+msgstr "Ingen grupp"
+
+#: ../audio_time_axis.cc:701 ../automation_time_axis.cc:449
+#: ../imageframe_time_axis.cc:254 ../marker_time_axis.cc:210
+msgid "Height"
+msgstr "Höjd"
+
+#: ../audio_time_axis.cc:702 ../color_manager.cc:40
+#: ../imageframe_time_axis.cc:255 ../marker_time_axis.cc:211
+msgid "Color"
+msgstr "Färg"
+
+#: ../audio_time_axis.cc:706
+msgid "Hide all crossfades"
+msgstr "Dölj alla övertoningar"
+
+#: ../audio_time_axis.cc:707
+msgid "Show all crossfades"
+msgstr "Visa alla övertoningar"
+
+#: ../audio_time_axis.cc:711 ../mixer_strip.cc:1011
+msgid "Remote Control ID"
+msgstr "Fjärrstyrnings-ID"
+
+#: ../audio_time_axis.cc:717
+msgid "Show all automation"
+msgstr "Visa all automatisering"
+
+#: ../audio_time_axis.cc:720
+msgid "Show existing automation"
+msgstr "Visa existerande automatisering"
+
+#: ../audio_time_axis.cc:723
+msgid "Hide all automation"
+msgstr "Göm all automatisering"
+
+#: ../audio_time_axis.cc:728
+msgid "Fader"
+msgstr "Volym"
+
+#: ../audio_time_axis.cc:733
+msgid "Pan"
+msgstr "Panorering"
+
+#: ../audio_time_axis.cc:738
+msgid "Plugins"
+msgstr "Insticksprogram"
+
+#: ../audio_time_axis.cc:746
+msgid "Show waveforms"
+msgstr "Visa vågformer"
+
+#: ../audio_time_axis.cc:754
+msgid "Traditional"
+msgstr "Traditionell"
+
+#: ../audio_time_axis.cc:757
+msgid "Rectified"
+msgstr "Korrigerad"
+
+#: ../audio_time_axis.cc:760
+msgid "Waveform"
+msgstr "Vågform"
+
+#: ../audio_time_axis.cc:770
+msgid "Align with existing material"
+msgstr "Efter existerande material"
+
+#: ../audio_time_axis.cc:775
+msgid "Align with capture time"
+msgstr "Efter inspelningstiden"
+
+#: ../audio_time_axis.cc:781
+msgid "Alignment"
+msgstr "Justera"
+
+#: ../audio_time_axis.cc:787 ../editor.cc:526 ../editor_actions.cc:59
+#: ../mixer_strip.cc:1000 ../mixer_ui.cc:110
+msgid "Active"
+msgstr "Aktiva"
+
+#: ../audio_time_axis.cc:792 ../editor.cc:1921 ../editor_actions.cc:319
+#: ../editor_markers.cc:507 ../imageframe_time_axis.cc:258
+#: ../location_ui.cc:56 ../marker_time_axis.cc:214 ../mixer_strip.cc:1014
+msgid "Remove"
+msgstr "Ta bort"
+
+#: ../audio_time_axis.cc:832
+msgid "Name for playlist"
+msgstr "Spellistans namn"
+
+#: ../audio_time_axis.cc:834 ../audio_time_axis.cc:1850
+#: ../editor_markers.cc:826 ../editor_mouse.cc:4672
+#: ../imageframe_time_axis.cc:247 ../marker_time_axis.cc:207
+#: ../meter_bridge_strip.cc:223 ../mixer_strip.cc:998 ../redirect_box.cc:750
+#: ../redirect_box.cc:1064 ../route_ui.cc:732 ../visual_time_axis.cc:325
+msgid "Rename"
+msgstr "Döp om"
+
+#: ../audio_time_axis.cc:867 ../audio_time_axis.cc:907
+msgid "Name for Playlist"
+msgstr "Spellistans namn"
+
+#: ../audio_time_axis.cc:1125 ../visual_time_axis.cc:382
+msgid "a track already exists with that name"
+msgstr "ett spår med det namnet existerar redan"
+
+#: ../audio_time_axis.cc:1166 ../editor.cc:217
+msgid "gain"
+msgstr "volym"
+
+#: ../audio_time_axis.cc:1206
+msgid "pan"
+msgstr "panorering"
+
+#: ../audio_time_axis.cc:1409 ../editor.cc:1482 ../selection.cc:633
+msgid "programming error: "
+msgstr "programmeringsfel: "
+
+#: ../audio_time_axis.cc:1847
+msgid "Current: %1"
+msgstr "Aktuell: %1"
+
+#: ../audio_time_axis.cc:1854
+msgid "New Copy"
+msgstr "Ny kopia"
+
+#: ../audio_time_axis.cc:1856
+msgid "Clear Current"
+msgstr "Rensa aktuell"
+
+#: ../audio_time_axis.cc:1858 ../editor.cc:2023 ../editor.cc:2099
+msgid "Select"
+msgstr "Välj"
+
+#: ../automation_line.cc:883
+msgid "automation event move"
+msgstr "automatiseringshändelse: förflyttning"
+
+#: ../automation_line.cc:885
+msgid "automation range drag"
+msgstr "automatiseringsomfång: dragning"
+
+#: ../automation_line.cc:1014 ../region_gain_line.cc:61
+msgid "remove control point"
+msgstr "ta bort kontrollpunkt"
+
+#: ../automation_time_axis.cc:32 ../editor_ops.cc:2886
+msgid "clear"
+msgstr "rensa"
+
+#: ../automation_time_axis.cc:74
+msgid "track height"
+msgstr "spårhöjd"
+
+#: ../automation_time_axis.cc:75
+msgid "automation state"
+msgstr "automatiseringstillstånd"
+
+#: ../automation_time_axis.cc:76
+msgid "clear track"
+msgstr "rensa spår"
+
+#: ../automation_time_axis.cc:77
+msgid "hide track"
+msgstr "dölj spår"
+
+#: ../automation_time_axis.cc:183 ../automation_time_axis.cc:212
+#: ../automation_time_axis.cc:460
+msgid "Manual"
+msgstr "Manuell"
+
+#: ../automation_time_axis.cc:185 ../automation_time_axis.cc:223
+#: ../automation_time_axis.cc:464 ../editor.cc:2000 ../editor.cc:2081
+#: ../gain_meter.cc:173 ../panner_ui.cc:90 ../plugin_ui.cc:394
+#: ../plugin_ui.cc:636 ../sfdb_ui.cc:55
+msgid "Play"
+msgstr "Spela"
+
+#: ../automation_time_axis.cc:187 ../automation_time_axis.cc:234
+#: ../automation_time_axis.cc:468 ../gain_meter.cc:175 ../panner_ui.cc:92
+#: ../plugin_ui.cc:397 ../plugin_ui.cc:638
+msgid "Write"
+msgstr "Skriv"
+
+#: ../automation_time_axis.cc:189 ../automation_time_axis.cc:245
+#: ../automation_time_axis.cc:472 ../gain_meter.cc:177 ../panner_ui.cc:94
+#: ../plugin_ui.cc:400 ../plugin_ui.cc:640
+msgid "Touch"
+msgstr "Beröring"
+
+#: ../automation_time_axis.cc:256 ../option_editor.cc:182
+#: ../option_editor.cc:188 ../plugin_ui.cc:403
+msgid "???"
+msgstr ""
+
+#: ../automation_time_axis.cc:270
+msgid "clear automation"
+msgstr "rensa automatisering"
+
+#: ../automation_time_axis.cc:451 ../editor_actions.cc:317
+msgid "Hide"
+msgstr "Göm"
+
+#: ../automation_time_axis.cc:453 ../crossfade_edit.cc:76
+#: ../redirect_box.cc:1056
+msgid "Clear"
+msgstr "Rensa"
+
+#: ../automation_time_axis.cc:476
+msgid "State"
+msgstr "Tillstånd"
+
+#: ../canvas-imageframe.c:104
+msgid "pixbuf"
+msgstr ""
+
+#: ../canvas-imageframe.c:105
+msgid "the pixbuf"
+msgstr ""
+
+#: ../canvas-imageframe.c:110
+msgid "x"
+msgstr ""
+
+#: ../canvas-imageframe.c:111 ../canvas-simpleline.c:111
+#: ../canvas-simplerect.c:107
+msgid "x coordinate of upper left corner of rect"
+msgstr ""
+
+#: ../canvas-imageframe.c:120
+msgid "y"
+msgstr ""
+
+#: ../canvas-imageframe.c:121 ../canvas-simpleline.c:121
+#: ../canvas-simplerect.c:117
+msgid "y coordinate of upper left corner of rect "
+msgstr ""
+
+#: ../canvas-imageframe.c:129
+msgid "width"
+msgstr "bredd"
+
+#: ../canvas-imageframe.c:130
+msgid "the width"
+msgstr "bredden"
+
+#: ../canvas-imageframe.c:139
+msgid "drawwidth"
+msgstr ""
+
+#: ../canvas-imageframe.c:140
+msgid "drawn width"
+msgstr "uppritningsbredd"
+
+#: ../canvas-imageframe.c:148
+msgid "height"
+msgstr "höjd"
+
+#: ../canvas-imageframe.c:149
+msgid "the height"
+msgstr "höjden"
+
+#: ../canvas-imageframe.c:157
+msgid "anchor"
+msgstr "ankare"
+
+#: ../canvas-imageframe.c:158
+msgid "the anchor"
+msgstr "ankaret"
+
+#: ../canvas-simpleline.c:110 ../canvas-simplerect.c:106
+msgid "x1"
+msgstr ""
+
+#: ../canvas-simpleline.c:120 ../canvas-simplerect.c:116
+msgid "y1"
+msgstr ""
+
+#: ../canvas-simpleline.c:131 ../canvas-simplerect.c:127
+msgid "x2"
+msgstr ""
+
+#: ../canvas-simpleline.c:132 ../canvas-simplerect.c:128
+msgid "x coordinate of lower right corner of rect"
+msgstr ""
+
+#: ../canvas-simpleline.c:141 ../canvas-simplerect.c:137
+msgid "y2"
+msgstr ""
+
+#: ../canvas-simpleline.c:142 ../canvas-simplerect.c:138
+msgid "y coordinate of lower right corner of rect "
+msgstr ""
+
+#: ../canvas-simpleline.c:150
+msgid "color rgba"
+msgstr ""
+
+#: ../canvas-simpleline.c:151
+msgid "color of line"
+msgstr ""
+
+#: ../canvas-simplerect.c:148
+msgid "outline pixels"
+msgstr ""
+
+#: ../canvas-simplerect.c:149
+msgid "width in pixels of outline"
+msgstr ""
+
+#: ../canvas-simplerect.c:159
+msgid "outline what"
+msgstr ""
+
+#: ../canvas-simplerect.c:160
+msgid "which boundaries to outline (mask)"
+msgstr ""
+
+#: ../canvas-simplerect.c:171
+msgid "fill"
+msgstr ""
+
+#: ../canvas-simplerect.c:172
+msgid "fill rectangle"
+msgstr ""
+
+#: ../canvas-simplerect.c:179
+msgid "draw"
+msgstr ""
+
+#: ../canvas-simplerect.c:180
+msgid "draw rectangle"
+msgstr ""
+
+#: ../canvas-simplerect.c:188
+msgid "outline color rgba"
+msgstr ""
+
+#: ../canvas-simplerect.c:189
+msgid "color of outline"
+msgstr ""
+
+#: ../canvas-simplerect.c:199
+msgid "fill color rgba"
+msgstr ""
+
+#: ../canvas-simplerect.c:200
+msgid "color of fill"
+msgstr ""
+
+#: ../color_manager.cc:39
+msgid "Object"
+msgstr "Objekt"
+
+#: ../color_manager.cc:77
+msgid "cannot open color definition file %1: %2"
+msgstr "kan ej öppna färgdefinitionsfil %1: %2"
+
+#: ../crossfade_edit.cc:73
+msgid "ardour: x-fade edit"
+msgstr "ardour: övertoningsredigerare"
+
+#: ../crossfade_edit.cc:77 ../panner_ui.cc:442
+msgid "Reset"
+msgstr "Nollställ"
+
+#: ../crossfade_edit.cc:78
+msgid "Fade"
+msgstr "Tona"
+
+#: ../crossfade_edit.cc:79
+msgid "Out (dry)"
+msgstr "Ut (torr)"
+
+#: ../crossfade_edit.cc:80
+msgid "Out"
+msgstr "Ut"
+
+#: ../crossfade_edit.cc:81
+msgid "In (dry)"
+msgstr "In (torr)"
+
+#: ../crossfade_edit.cc:82
+msgid "In"
+msgstr ""
+
+#: ../crossfade_edit.cc:84
+msgid "With Pre-roll"
+msgstr "Med För-rull"
+
+#: ../crossfade_edit.cc:85
+msgid "With Post-roll"
+msgstr "Med Efter-rull"
+
+#: ../crossfade_edit.cc:93
+msgid "Fade In"
+msgstr "Tona In"
+
+#: ../crossfade_edit.cc:94
+msgid "Fade Out"
+msgstr "Tona Ut"
+
+#: ../crossfade_edit.cc:170 ../editor.cc:1834 ../editor_actions.cc:315
+#: ../option_editor.cc:129
+msgid "Audition"
+msgstr "Avlyssna"
+
+
+#: gtk2_ardour/editor.cc:105 gtk2_ardour/editor.cc:3517
+msgid "Slide Edit"
+msgstr "Glidred."
+
+#: gtk2_ardour/editor.cc:106 gtk2_ardour/editor.cc:3515
+msgid "Splice Edit"
+msgstr "Fogred."
+
+#: gtk2_ardour/editor.cc:111 gtk2_ardour/editor.cc:3572
+#: gtk2_ardour/export_dialog.cc:78 gtk2_ardour/export_dialog.cc:92
+#: gtk2_ardour/export_dialog.cc:893 gtk2_ardour/export_dialog.cc:1225
+#: gtk2_ardour/route_ui.cc:438
+msgid "None"
+msgstr "Ingen"
+
+#: gtk2_ardour/editor.cc:112 gtk2_ardour/editor.cc:3560
+msgid "CD Frames"
+msgstr "CD-frames"
+
+#: gtk2_ardour/editor.cc:113 gtk2_ardour/editor.cc:3562
+msgid "SMPTE Frames"
+msgstr "SMPTE-frames"
+
+#: gtk2_ardour/editor.cc:114 gtk2_ardour/editor.cc:3564
+msgid "SMPTE Seconds"
+msgstr "SMPTE-sekunder"
+
+#: gtk2_ardour/editor.cc:115 gtk2_ardour/editor.cc:3566
+msgid "SMPTE Minutes"
+msgstr "SMPTE-minuter"
+
+#: gtk2_ardour/editor.cc:116 gtk2_ardour/editor.cc:3568
+msgid "Seconds"
+msgstr "Sekunder"
+
+#: gtk2_ardour/editor.cc:117 gtk2_ardour/editor.cc:3570
+msgid "Minutes"
+msgstr "Minuter"
+
+#: gtk2_ardour/editor.cc:109 gtk2_ardour/editor.cc:3464
+msgid "Beats/32"
+msgstr "Slag/32"
+
+#: gtk2_ardour/editor.cc:119 gtk2_ardour/editor.cc:3540
+msgid "Beats/16"
+msgstr "Slag/16"
+
+#: gtk2_ardour/editor.cc:120 gtk2_ardour/editor.cc:3538
+msgid "Beats/8"
+msgstr "Slag/8"
+
+#: gtk2_ardour/editor.cc:121 gtk2_ardour/editor.cc:3536
+msgid "Beats/4"
+msgstr "Slag/4"
+
+#: gtk2_ardour/editor.cc:122 gtk2_ardour/editor.cc:3534
+msgid "Beats/3"
+msgstr "Slag/3"
+
+#: gtk2_ardour/editor.cc:123 gtk2_ardour/editor.cc:3544
+msgid "Beats"
+msgstr "Slag"
+
+#: gtk2_ardour/editor.cc:124 gtk2_ardour/editor.cc:3546
+msgid "Bars"
+msgstr "Takter"
+
+#: gtk2_ardour/editor.cc:125 gtk2_ardour/editor.cc:3548
+msgid "Marks"
+msgstr "Markörer"
+
+#: gtk2_ardour/editor.cc:126 gtk2_ardour/editor.cc:3550
+msgid "Edit Cursor"
+msgstr "Redigeringsmarkör"
+
+#: gtk2_ardour/editor.cc:127 gtk2_ardour/editor.cc:3552
+msgid "Region starts"
+msgstr "Region börjar"
+
+#: gtk2_ardour/editor.cc:128 gtk2_ardour/editor.cc:3554
+msgid "Region ends"
+msgstr "Region slutar"
+
+#: gtk2_ardour/editor.cc:129 gtk2_ardour/editor.cc:3558
+msgid "Region syncs"
+msgstr "Region synkar"
+
+#: gtk2_ardour/editor.cc:130 gtk2_ardour/editor.cc:3556
+msgid "Region bounds"
+msgstr "Region gränsar"
+
+#: gtk2_ardour/editor.cc:126 gtk2_ardour/editor.cc:3511
+msgid "Normal Snap"
+msgstr "Vanligt fästläge "
+
+#: gtk2_ardour/editor.cc:127 gtk2_ardour/editor.cc:3513
+msgid "Magnetic Snap"
+msgstr "Magnetiskt fästläge"
+
+#: gtk2_ardour/editor.cc:132 gtk2_ardour/editor.cc:3530
+msgid "Focus Left"
+msgstr "Fokus: vänster"
+
+#: gtk2_ardour/editor.cc:133 gtk2_ardour/editor.cc:3532
+msgid "Focus Right"
+msgstr "Fokus: höger"
+
+#: gtk2_ardour/editor.cc:134 gtk2_ardour/editor.cc:3534
+msgid "Focus Center"
+msgstr "Fokus: mitten"
+
+#: gtk2_ardour/editor.cc:135
+msgid "Focus Play"
+msgstr "Fokus: spelhuvud"
+
+#: gtk2_ardour/editor.cc:136
+msgid "Focus Edit"
+msgstr "Fokus: redigeringsmarkör"
+
+#. time display buttons
+#: ../editor.cc:185
+msgid "Mins:Secs"
+msgstr "Min:Sek"
+
+#: ../editor.cc:188 ../editor_rulers.cc:353
+msgid "Frames"
+msgstr "Rutor"
+
+#: ../editor.cc:189 ../editor_rulers.cc:373
+msgid "Tempo"
+msgstr ""
+
+#: ../editor.cc:190 ../editor_rulers.cc:367
+msgid "Meter"
+msgstr "Taktart"
+
+#: ../editor.cc:191 ../editor_rulers.cc:379
+msgid "Location Markers"
+msgstr "Platsmarkörer"
+
+#: ../editor.cc:192 ../editor_rulers.cc:385
+msgid "Range Markers"
+msgstr "Omfångsmarkörer"
+
+#: ../editor.cc:193 ../editor_rulers.cc:391
+msgid "Loop/Punch Ranges"
+msgstr "Loop-/punch-markörer"
+
+#: ../editor.cc:215
+msgid "range"
+msgstr "omfång"
+
+#: ../editor.cc:216
+msgid "object"
+msgstr "objekt"
+
+#: ../editor.cc:218
+msgid "zoom"
+msgstr ""
+
+#: ../editor.cc:219
+msgid "timefx"
+msgstr "tidsfx"
+
+#: ../editor.cc:220
+msgid "listen"
+msgstr "lyssna"
+
+#: ../editor.cc:222
+msgid "mode"
+msgstr "läge"
+
+#: ../editor.cc:223
+msgid "automation"
+msgstr "automatisering"
+
+#: ../editor.cc:225
+msgid "Edit Mode"
+msgstr "Redigeringsläge"
+
+#: ../editor.cc:226 ../editor_actions.cc:283
+msgid "Snap To"
+msgstr "Fäst mot"
+
+#: ../editor.cc:227
+msgid "Snap Mode"
+msgstr "Fästläge"
+
+#: ../editor.cc:228
+msgid "Zoom Focus"
+msgstr "Zoomfokus"
+
+#. </CMT Additions>
+#. nudge
+#: ../editor.cc:236 ../editor.cc:1899 ../editor.cc:2065 ../editor.cc:2121
+msgid "Nudge"
+msgstr "Knuffa"
+
+#: ../editor.cc:469
+msgid "Zoom in"
+msgstr "Zooma in"
+
+#: ../editor.cc:470
+msgid "Zoom out"
+msgstr "Zooma ut"
+
+#: ../editor.cc:473
+msgid "Zoom to session"
+msgstr "Zooma in/ut till hela sessionen"
+
+#: ../editor.cc:488
+msgid "Zoom Span"
+msgstr "Zoom-räckvidd"
+
+#: ../editor.cc:501 ../editor.cc:527 ../editor_actions.cc:61 ../mixer_ui.cc:85
+#: ../mixer_ui.cc:111
+msgid "Visible"
+msgstr "Synliga"
+
+#: ../editor.cc:502 ../editor.cc:525
+msgid "Name"
+msgstr "Namn"
+
+#: ../editor.cc:601 ../editor.cc:668
+msgid "Regions"
+msgstr "Regioner"
+
+#: ../editor.cc:641 ../editor.cc:680
+msgid "Chunks"
+msgstr "Bitar"
+
+#: ../editor.cc:671
+msgid "Tracks/Busses"
+msgstr "Spår/Bussar"
+
+#: ../editor.cc:674
+msgid "Snapshots"
+msgstr "Ögonblickskopior"
+
+#: ../editor.cc:677
+msgid "Edit Groups"
+msgstr "Redigeringsgrupper"
+
+#: gtk2_ardour/editor.cc:680
+msgid "Nudge Region/Selection Forwards"
+msgstr "Knuffa region/markering framåt"
+
+#: gtk2_ardour/editor.cc:681
+msgid "Nudge Region/Selection Backwards"
+msgstr "Knuffa region/markering bakåt"
+
+#: ../editor.cc:734 ../editor_mixer.cc:299
+msgid "ardour: editor"
+msgstr "ardour: redigerare"
+
+#: ../editor.cc:735
+msgid "ardour_editor"
+msgstr ""
+
+#: ../editor.cc:1182
+msgid "ardour: editor: "
+msgstr "ardour: redigerare: "
+
+#. force name
+#: ../editor.cc:1267 ../editor.cc:1276 ../editor_markers.cc:869
+msgid "Loop"
+msgstr ""
+
+#. force name
+#: ../editor.cc:1281 ../editor.cc:1290 ../editor_markers.cc:895
+msgid "Punch"
+msgstr ""
+
+#: ../editor.cc:1438 ../editor_mouse.cc:1741
+msgid "programming error: fade in canvas item has no regionview data pointer!"
+msgstr ""
+
+#: ../editor.cc:1450 ../editor.cc:1467 ../redirect_box.cc:1072
+msgid "Deactivate"
+msgstr "Avaktivera"
+
+#. activation
+#: ../editor.cc:1452 ../editor.cc:1469 ../redirect_box.cc:1070
+msgid "Activate"
+msgstr "Aktivera"
+
+#: ../editor.cc:1457 ../editor.cc:1474
+msgid "Linear"
+msgstr "Linjär"
+
+#: ../editor.cc:1458 ../editor.cc:1475 ../editor_actions.cc:375
+msgid "Slowest"
+msgstr "Långsammast"
+
+#: ../editor.cc:1459 ../editor.cc:1476 ../editor_actions.cc:376
+msgid "Slow"
+msgstr "Långsam"
+
+#: ../editor.cc:1460 ../editor.cc:1477 ../editor_actions.cc:378
+msgid "Fast"
+msgstr "Snabb"
+
+#: ../editor.cc:1461 ../editor.cc:1478 ../editor_actions.cc:380
+msgid "Fastest"
+msgstr "Snabbast"
+
+#: ../editor.cc:1588 ../editor.cc:1596
+msgid "Freeze"
+msgstr "Frys"
+
+#: ../editor.cc:1592
+msgid "Unfreeze"
+msgstr "Ofrys"
+
+#: ../editor.cc:1761 ../editor.cc:1856
+msgid "Unmute"
+msgstr "Sluta tysta"
+
+#. non-operative menu items for menu bar
+#. show editors
+#: ../editor.cc:1765 ../editor.cc:2045 ../editor.cc:2747
+#: ../editor_actions.cc:26 ../editor_markers.cc:506 ../mixer_strip.cc:495
+#: ../mixer_strip.cc:563 ../redirect_box.cc:1078
+msgid "Edit"
+msgstr "Redigera"
+
+#: ../editor.cc:1770
+msgid "Convert to short"
+msgstr "Konvertera till kort"
+
+#: ../editor.cc:1772
+msgid "Convert to full"
+msgstr "Konvertera till full"
+
+#: ../editor.cc:1783
+msgid "Crossfade"
+msgstr "Övertoning"
+
+#: ../editor.cc:1826
+msgid "Popup region editor"
+msgstr "Visa regionsredigerare"
+
+#: ../editor.cc:1827
+msgid "Raise to top layer"
+msgstr "Höj till översta lagret"
+
+#: ../editor.cc:1828
+msgid "Lower to bottom layer"
+msgstr "Sänk till lägsta lagret"
+
+#: ../editor.cc:1830
+msgid "Define sync point"
+msgstr "Definiera synk.-punkt"
+
+#: ../editor.cc:1831
+msgid "Remove sync point"
+msgstr "Ta bort synk.-punkt"
+
+#: ../editor.cc:1836
+msgid "Bounce"
+msgstr "Skriv till disk"
+
+#: ../editor.cc:1839
+msgid "Analyze region"
+msgstr "Analysera regioner"
+
+#: ../editor.cc:1851
+msgid "Lock"
+msgstr "Lås"
+
+#: ../editor.cc:1852
+msgid "Unlock"
+msgstr "Lås upp"
+
+#: ../editor.cc:1862
+msgid "Original position"
+msgstr "Ursprunglig position"
+
+#: ../editor.cc:1868
+msgid "Toggle envelope visibility"
+msgstr "Ändra konvolutsvisning"
+
+#: ../editor.cc:1869
+msgid "Toggle envelope active"
+msgstr "Slå på/av konvolut"
+
+#: ../editor.cc:1873
+msgid "DeNormalize"
+msgstr "Avnormalisera"
+
+#: ../editor.cc:1875
+msgid "Normalize"
+msgstr "Normalisera"
+
+#: ../editor.cc:1878
+msgid "Reverse"
+msgstr "Motsatt riktning"
+
+#. range related stuff
+#: ../editor.cc:1884
+msgid "Add Range Markers"
+msgstr "Lägg till omfångsmarkörer"
+
+#: ../editor.cc:1885
+msgid "Set Range"
+msgstr "Definiera omfång"
+
+#: ../editor.cc:1894
+msgid "Nudge fwd"
+msgstr "Knuffa framåt"
+
+#: ../editor.cc:1895
+msgid "Nudge bwd"
+msgstr "Knuffa bakåt"
+
+#: ../editor.cc:1896
+msgid "Nudge fwd by capture offset"
+msgstr "Knuffa framåt utifrån inspelningskompensation"
+
+#: ../editor.cc:1897
+msgid "Nudge bwd by capture offset"
+msgstr "Knuffa bakåt utifrån inspelningskompensation"
+
+#: ../editor.cc:1906
+msgid "Start to edit cursor"
+msgstr "Början till redigeringsmarkören"
+
+#: ../editor.cc:1907
+msgid "Edit cursor to end"
+msgstr "Redigeringsmarkör till slutet"
+
+#: ../editor.cc:1909 ../gain_meter.cc:180 ../gain_meter.cc:808
+#: ../panner_ui.cc:97 ../panner_ui.cc:802
+msgid "Trim"
+msgstr "Beskära"
+
+#: ../editor.cc:1912
+msgid "Split"
+msgstr "Dela"
+
+#: ../editor.cc:1915
+msgid "Make mono regions"
+msgstr "Skapa monoregioner"
+
+#: ../editor.cc:1918
+msgid "Duplicate"
+msgstr "Duplicera"
+
+#: ../editor.cc:1919
+msgid "Fill Track"
+msgstr "Fyll spåret"
+
+#: ../editor.cc:1923
+msgid "Destroy"
+msgstr "Förstör"
+
+#: ../editor.cc:1953
+msgid "Play range"
+msgstr "Spela omfång"
+
+#: ../editor.cc:1954
+msgid "Loop range"
+msgstr "Loop-omfång"
+
+#: ../editor.cc:1958
+msgid "Analyze range"
+msgstr "Analysera omfång"
+
+#: ../editor.cc:1962
+msgid "Separate range to track"
+msgstr "Separera omfång till spår"
+
+#: ../editor.cc:1963
+msgid "Separate range to region list"
+msgstr "Separera omfång till regionlista"
+
+#: ../editor.cc:1966
+msgid "Select all in range"
+msgstr "Välj allt i omfång"
+
+#: ../editor.cc:1968 ../editor.cc:2013
+msgid "Set range to loop range"
+msgstr "Ställ in omfång till loop-omfånget"
+
+#: ../editor.cc:1969 ../editor.cc:2014
+msgid "Set range to punch range"
+msgstr "Ställ in omfång till punch-omfånget"
+
+#: ../editor.cc:1971
+msgid "Crop region to range"
+msgstr "Beskär region till omfång"
+
+#: ../editor.cc:1972
+msgid "Fill range with region"
+msgstr "Fyll omfång med region"
+
+#: ../editor.cc:1973
+msgid "Duplicate range"
+msgstr "Duplicera region"
+
+#: ../editor.cc:1974
+msgid "Create chunk from range"
+msgstr "Skapa bit från omfång"
+
+#: ../editor.cc:1976
+msgid "Bounce range"
+msgstr "Omfång till disk"
+
+#: ../editor.cc:1977
+msgid "Export range"
+msgstr "Exportera omfång"
+
+#: ../editor.cc:1979
+msgid "Range"
+msgstr "Omfång"
+
+#: ../editor.cc:1994 ../editor.cc:2079
+msgid "Play from edit cursor"
+msgstr "Spela från redigeringsmarkören"
+
+#: ../editor.cc:1995 ../editor.cc:2080
+msgid "Play from start"
+msgstr "Spela från början"
+
+#: ../editor.cc:1996
+msgid "Play region"
+msgstr "Spela region"
+
+#: ../editor.cc:1998
+msgid "Loop Region"
+msgstr "Loopa region"
+
+#: ../editor.cc:2008 ../editor.cc:2089
+msgid "Select All in track"
+msgstr "Välj allt i spåret"
+
+#: ../editor.cc:2009 ../editor.cc:2090 ../redirect_box.cc:1066
+msgid "Select All"
+msgstr "Välj allt"
+
+#: ../editor.cc:2010 ../editor.cc:2091
+msgid "Invert selection in track"
+msgstr "Invertera i spåret"
+
+#: ../editor.cc:2011 ../editor.cc:2092
+msgid "Invert selection"
+msgstr "Invertera"
+
+#: ../editor.cc:2016 ../editor.cc:2094
+msgid "Select all after edit cursor"
+msgstr "Välj allt efter redigeringsmarkören"
+
+#: ../editor.cc:2017 ../editor.cc:2095
+msgid "Select all before edit cursor"
+msgstr "Välj allt innan redigeringsmarkören"
+
+#: ../editor.cc:2018 ../editor.cc:2096
+msgid "Select all after playhead"
+msgstr "Välj allt efter startmarkören"
+
+#: ../editor.cc:2019 ../editor.cc:2097
+msgid "Select all before playhead"
+msgstr "Välj allt innan startmarkören"
+
+#: ../editor.cc:2020
+msgid "Select all between cursors"
+msgstr "Välj allt mellan markörerna"
+
+#. standard editing stuff
+#: ../editor.cc:2031 ../editor.cc:2107 ../editor.cc:3482
+#: ../editor_actions.cc:213 ../redirect_box.cc:1059
+msgid "Cut"
+msgstr "Klipp"
+
+#: ../editor.cc:2032 ../editor.cc:2108 ../editor.cc:3484
+#: ../editor_actions.cc:218 ../redirect_box.cc:1061
+msgid "Copy"
+msgstr "Kopiera"
+
+#: ../editor.cc:2033
+msgid "Paste at edit cursor"
+msgstr "Klistra in vid redigeringsmarkören"
+
+#: ../editor.cc:2034
+msgid "Paste at mouse"
+msgstr "Klistra in vid muspekaren"
+
+#: ../editor.cc:2038 ../editor.cc:3489
+msgid "Align"
+msgstr "Justera"
+
+#: ../editor.cc:2039 ../editor.cc:3491
+msgid "Align Relative"
+msgstr "Justera relativt"
+
+#: ../editor.cc:2043
+msgid "Insert chunk"
+msgstr "Infoga bit"
+
+#: ../editor.cc:2050
+msgid "Insert Selected Region"
+msgstr "Infoga vald region"
+
+#: ../editor.cc:2051
+msgid "Insert Existing Audio"
+msgstr "Infoga ljudfil"
+
+#: ../editor.cc:2060 ../editor.cc:2116
+msgid "Nudge entire track fwd"
+msgstr "Knuffa hela spåret framåt"
+
+#: ../editor.cc:2061 ../editor.cc:2117
+msgid "Nudge track after edit cursor fwd"
+msgstr "Knuffa spåret framåt efter redigeringsmarkören"
+
+#: ../editor.cc:2062 ../editor.cc:2118
+msgid "Nudge entire track bwd"
+msgstr "Knuffa hela spåret bakåt"
+
+#: ../editor.cc:2063 ../editor.cc:2119
+msgid "Nudge track after edit cursor bwd"
+msgstr "Knuffa spåret bakåt efter redigeringsmarkören"
+
+#: ../editor.cc:2109 ../editor.cc:3486 ../editor_actions.cc:220
+#: ../redirect_box.cc:1063
+msgid "Paste"
+msgstr "Klistra in"
+
+#: gtk2_ardour/editor.cc:2608
+msgid "Select/Move Objects"
+msgstr "Välj/flytta objekt"
+
+#: gtk2_ardour/editor.cc:2609
+msgid "Select/Move Ranges"
+msgstr "Välj/flytta omfång"
+
+#: gtk2_ardour/editor.cc:2610
+msgid "Draw Gain Automation"
+msgstr "Rita volymautomatisering"
+
+#: gtk2_ardour/editor.cc:2611
+msgid "Select Zoom Range"
+msgstr "Välj zoom-omfång"
+
+#: gtk2_ardour/editor.cc:2612
+msgid "Stretch/Shrink Regions"
+msgstr "Förläng/förkorta regioner"
+
+#: gtk2_ardour/editor.cc:2613
+msgid "Listen to Specific Regions"
+msgstr "Lyssna på specifika regioner"
+
+
+#: ../editor.cc:2745
+msgid "Start:"
+msgstr "Början:"
+
+#: ../editor.cc:2746
+msgid "End:"
+msgstr "Slut:"
+
+#: ../editor.cc:3361 ../editor.cc:3401
+msgid "set selected regions"
+msgstr "ställ in valda regioner"
+
+#: ../editor.cc:3457 ../editor_actions.cc:203
+msgid "Undo"
+msgstr "Ångra"
+
+#: ../editor.cc:3459
+msgid "Undo (%1)"
+msgstr "Ångra (%1)"
+
+#: ../editor.cc:3469 ../editor_actions.cc:205
+msgid "Redo"
+msgstr "Gör om"
+
+#: ../editor.cc:3471
+msgid "Redo (%1)"
+msgstr "Gör om (%1)"
+
+#: ../editor.cc:3505
+msgid "... as new track"
+msgstr "... som ny region"
+
+#: ../editor.cc:3506
+msgid "... as new region"
+msgstr "... som ny region"
+
+#: ../editor.cc:3508
+msgid "Import audio (copy)"
+msgstr "Importera ljudfil (kopiera)"
+
+#: ../editor.cc:3511
+msgid "Remove last capture"
+msgstr "Ta bort senaste inspelningen"
+
+#: ../editor.cc:3535
+msgid "Duplicate how many times?"
+msgstr "Duplicera hur många gånger?"
+
+#: ../editor.cc:4021
+msgid ""
+"Playlist %1 is currently unused.\n"
+"If left alone, no audio files used by it will be cleaned.\n"
+"If deleted, audio files used by it alone by will cleaned."
+msgstr ""
+"Spellista %1 används inte.\n"
+"Om den lämnas ifred kommer inga filer använda av den rensas.\n"
+"Om den tas bort kommer filer som används av den att rensas."
+
+#: ../editor.cc:4029
+msgid "Delete playlist"
+msgstr "Radera spellista"
+
+#: ../editor.cc:4030
+msgid "Keep playlist"
+msgstr "Behåll spellista"
+
+#: ../editor.cc:4031 ../editor_audio_import.cc:236 ../editor_ops.cc:2049
+#: ../editor_timefx.cc:70 ../export_dialog.cc:970 ../io_selector.cc:58
+#: ../io_selector.cc:792 ../redirect_box.cc:902 ../tempo_dialog.cc:19
+#: ../tempo_dialog.cc:36 ../tempo_dialog.cc:201 ../tempo_dialog.cc:219
+msgid "Cancel"
+msgstr "Avbryt"
+
+#: ../editor.cc:4198
+msgid "new playlists"
+msgstr "nya spellistor"
+
+#: ../editor.cc:4206
+msgid "copy playlists"
+msgstr "kopiera spellistor"
+
+#: ../editor.cc:4214
+msgid "clear playlists"
+msgstr "rensa spellistor"
+
+#: ../editor_actions.cc:27
+msgid "Select regions"
+msgstr "Välj regioner"
+
+#: ../editor_actions.cc:28
+msgid "Select range operations"
+msgstr "Välj omfångsåtgärder"
+
+#: ../editor_actions.cc:29
+msgid "Move edit cursor"
+msgstr "Flytta redigeringsmarkör"
+
+#: ../editor_actions.cc:30
+msgid "Region operations"
+msgstr "Regionsåtgärder"
+
+#: ../editor_actions.cc:31
+msgid "Tools"
+msgstr "Verktyg"
+
+#: ../editor_actions.cc:32
+msgid "View"
+msgstr "Visa"
+
+#: ../editor_actions.cc:33
+msgid "ZoomFocus"
+msgstr "Zoomfokus"
+
+#: ../editor_actions.cc:34
+msgid "Meter hold"
+msgstr "Nivåmätartopphållning"
+
+#: ../editor_actions.cc:35
+msgid "Meter falloff"
+msgstr "Nivåmätarnedfall"
+
+#: ../editor_actions.cc:37
+msgid "Crossfades"
+msgstr "Övertoningar"
+
+#: ../editor_actions.cc:38
+msgid "Monitoring"
+msgstr "Medhörning"
+
+#: ../editor_actions.cc:39
+msgid "Autoconnect"
+msgstr "Automatisk anslutning"
+
+#: ../editor_actions.cc:40
+msgid "Layering"
+msgstr "Lager"
+
+#: ../editor_actions.cc:41
+msgid "Metering"
+msgstr "Nivåmätning"
+
+#: ../editor_actions.cc:42
+msgid "Fall off rate"
+msgstr "Nedfallshastighet"
+
+#: ../editor_actions.cc:43
+msgid "Hold Time"
+msgstr "Hållningslängd"
+
+#: ../editor_actions.cc:44
+msgid "Add Existing Audio"
+msgstr "Lägg till ljudfil"
+
+#. add named actions for the editor
+#: ../editor_actions.cc:49
+msgid "Show Editor Mixer"
+msgstr "Visa redigeringsmixer"
+
+#: ../editor_actions.cc:54
+msgid "Span Entire Overlap"
+msgstr "Sträck över hela överlappnngen"
+
+#: ../editor_actions.cc:56 ../editor_actions.cc:383
+msgid "Short"
+msgstr "Kort"
+
+#: ../editor_actions.cc:63
+msgid "Created Automatically"
+msgstr "Skapas automatiskt"
+
+#: ../editor_actions.cc:66
+msgid "Playhead to Next Region Start"
+msgstr "Startmarkören till nästa regionstart"
+
+#: ../editor_actions.cc:68
+msgid "Playhead to Next Region End"
+msgstr "Startmarkören till nästa regionslut"
+
+#: ../editor_actions.cc:70
+msgid "Playhead to Next Region Sync"
+msgstr "Startmarkören till nästa"
+
+#: ../editor_actions.cc:73
+msgid "Playhead to Previous Region Start"
+msgstr "Startmarkören till förra regionstarten"
+
+#: ../editor_actions.cc:75
+msgid "Playhead to Previous Region End"
+msgstr "Startmarkören till förra regionslutet"
+
+#: ../editor_actions.cc:77
+msgid "Playhead to Previous Region Sync"
+msgstr "Startmarkören till förra regionsynk.-punkten"
+
+#: ../editor_actions.cc:80
+msgid "Edit Cursor to Next Region Start"
+msgstr "Redigeringsmarkören till nästa regionstart"
+
+#: ../editor_actions.cc:82
+msgid "Edit Cursor to Next Region End"
+msgstr "Redigeringsmarkören till nästa regionslut"
+
+#: ../editor_actions.cc:84
+msgid "Edit Cursor to Next Region Sync"
+msgstr "Redigeringsmarkören till nästa regionssynk.-punkt"
+
+#: ../editor_actions.cc:87
+msgid "Edit Cursor to Previous Region Start"
+msgstr "Redigeringsmarkören till förra regionstart"
+
+#: ../editor_actions.cc:89
+msgid "Edit Cursor to Previous Region End"
+msgstr "Redigeringsmarkören till förra regionslutet"
+
+#: ../editor_actions.cc:91
+msgid "Edit Cursor to Previous Region Sync"
+msgstr "Redigeringsmarkören till förra regionssynk.-punkten"
+
+#: ../editor_actions.cc:94
+msgid "Playhead to Range Start"
+msgstr "Startmarkören till regionstarten"
+
+#: ../editor_actions.cc:96
+msgid "Playhead to Range End"
+msgstr "Startmarkören till regionslutet"
+
+#: ../editor_actions.cc:99
+msgid "Edit Cursor to Range Start"
+msgstr "Redigeringsmarkören till regionstarten"
+
+#: ../editor_actions.cc:101
+msgid "Edit Cursor to Range End"
+msgstr "Redigeringsmarkören till regionslutet"
+
+#: ../editor_actions.cc:104 ../editor_ops.cc:1364
+msgid "select all"
+msgstr "välj allt"
+
+#: ../editor_actions.cc:106
+msgid "Select All After Edit Cursor"
+msgstr "Välj allt efter redigeringsmarkören"
+
+#: ../editor_actions.cc:108
+msgid "Select All Before Edit Cursor"
+msgstr "Välj allt innan redigeringsmarkören"
+
+#: ../editor_actions.cc:111
+msgid "Select All After Playhead"
+msgstr "Välj allt efter startmarkören"
+
+#: ../editor_actions.cc:113
+msgid "Select All Before Playhead"
+msgstr "Välj allt innan startmarkören"
+
+#: ../editor_actions.cc:115
+msgid "Select All Between Cursors"
+msgstr "Välj allt mellan markörerna"
+
+#: ../editor_actions.cc:118
+msgid "Select All in Punch Range"
+msgstr "Välj allt i punch-omfånget"
+
+#: ../editor_actions.cc:120
+msgid "Select All in Loop Range"
+msgstr "Välj allt i loop-omfånget"
+
+#: ../editor_actions.cc:123
+msgid "Jump Forward to Mark"
+msgstr "Hoppa framåt till markör"
+
+#: ../editor_actions.cc:125
+msgid "Jump Backward to Mark"
+msgstr "Hoppa framåt till markör"
+
+#: ../editor_actions.cc:127
+msgid "Add Location from Playhead"
+msgstr "Lägg till Plats från startmarkören"
+
+#: ../editor_actions.cc:130
+msgid "Nudge Forward"
+msgstr "Knuffa framåt"
+
+#: ../editor_actions.cc:132
+msgid "Nudge Next Forward"
+msgstr "Knuffa nästa framåt"
+
+#: ../editor_actions.cc:134
+msgid "Nudge Backward"
+msgstr "Knuffa bakåt"
+
+#: ../editor_actions.cc:136
+msgid "Nudge Next Backward"
+msgstr "Knuffa nästa bakåt"
+
+#: ../editor_actions.cc:139
+msgid "Zoom Out"
+msgstr "Zooma ut"
+
+#: ../editor_actions.cc:141
+msgid "Zoom In"
+msgstr "Zooma in"
+
+#: ../editor_actions.cc:143
+msgid "Zoom to Session"
+msgstr "Zooma in/ut till hela sessionen"
+
+#: ../editor_actions.cc:146
+msgid "Scroll Tracks Up"
+msgstr "Skrolla spår uppåt"
+
+#: ../editor_actions.cc:148
+msgid "Scroll Tracks Down"
+msgstr "Skrolla spår ner"
+
+#: ../editor_actions.cc:150
+msgid "Step Tracks Up"
+msgstr "Stega spår uppåt"
+
+#: ../editor_actions.cc:152
+msgid "Step Tracks Down"
+msgstr "Stega spår neråt"
+
+#: ../editor_actions.cc:155
+msgid "Scroll Backward"
+msgstr "Skrolla bakåt"
+
+#: ../editor_actions.cc:157
+msgid "Scroll Forward"
+msgstr "Skrolla framåt"
+
+#: ../editor_actions.cc:159
+msgid "goto"
+msgstr "gå till"
+
+#: ../editor_actions.cc:161
+msgid "Center Playhead"
+msgstr "Centrera startmarkören"
+
+#: ../editor_actions.cc:163
+msgid "Center Edit Cursor"
+msgstr "Centrera redigeringsmarkören"
+
+#: ../editor_actions.cc:165
+msgid "Playhead Forward"
+msgstr "Startmarkören framåt"
+
+#: ../editor_actions.cc:167
+msgid "Playhead Backward"
+msgstr "Startmarkören bakåt"
+
+#: ../editor_actions.cc:169
+msgid "Playhead to Edit"
+msgstr "Startmarkören till redigeringsmarkören"
+
+#: ../editor_actions.cc:171
+msgid "Edit to Playhead"
+msgstr "Redigeringsmarkören till Startmarkören"
+
+#: ../editor_actions.cc:174
+msgid "Align Regions Start"
+msgstr "Justera regioners start"
+
+#: ../editor_actions.cc:176
+msgid "Align Regions Start Relative"
+msgstr "Justera regioners start relativt"
+
+#: ../editor_actions.cc:178
+msgid "Align Regions End"
+msgstr "Justera regions slut"
+
+#: ../editor_actions.cc:180
+msgid "Align Regions End Relative"
+msgstr "Justera regions slut relativt"
+
+#: ../editor_actions.cc:183
+msgid "Align Regions Sync"
+msgstr "Justera regions synk."
+
+#: ../editor_actions.cc:185
+msgid "Align Regions Sync Relative"
+msgstr "Justera regions synk. relativt"
+
+#: ../editor_actions.cc:188
+msgid "Audition at Mouse"
+msgstr "Avlyssning vid muspekaren"
+
+#: ../editor_actions.cc:190
+msgid "Brush at Mouse"
+msgstr "Måla vid mus"
+
+#: ../editor_actions.cc:192
+msgid "Set Edit Cursor"
+msgstr "Placera redigeringsmarkör"
+
+#: ../editor_actions.cc:194
+msgid "Mute/Unmute Region"
+msgstr "Tysta/stäng av tysta region"
+
+#: ../editor_actions.cc:196
+msgid "Set Playhead"
+msgstr "Placera startmarkör"
+
+#: ../editor_actions.cc:198
+msgid "Split Region"
+msgstr "Dela region"
+
+#: ../editor_actions.cc:200
+msgid "Set Region Sync Position"
+msgstr "Definiera regionssynk.-position"
+
+#: ../editor_actions.cc:208
+msgid "Export Session"
+msgstr "Exportera session"
+
+#: ../editor_actions.cc:210
+msgid "Export Range"
+msgstr "Expoerta omfång"
+
+#. Note: for now, editor-delete does the exact same thing as editor-cut
+#: ../editor_actions.cc:216
+msgid "Delete"
+msgstr "Radera"
+
+#: ../editor_actions.cc:222
+msgid "Duplicate Region"
+msgstr "Duplicera region"
+
+#: ../editor_actions.cc:224
+msgid "Duplicate Range"
+msgstr "Duplicera omfång"
+
+#: ../editor_actions.cc:226
+msgid "Insert Region"
+msgstr "Infoga region"
+
+#: ../editor_actions.cc:228
+msgid "Reverse Region"
+msgstr "Motsatt riktning"
+
+#: ../editor_actions.cc:230
+msgid "Normalize Region"
+msgstr "Normalisera region"
+
+#: ../editor_actions.cc:232
+msgid "crop"
+msgstr "beskär"
+
+#: ../editor_actions.cc:234
+msgid "Insert Chunk"
+msgstr "Infoga bit"
+
+#: ../editor_actions.cc:237
+msgid "Split at edit cursor"
+msgstr "Dela vid redigeringsmarkör"
+
+#: ../editor_actions.cc:240
+msgid "Start Range"
+msgstr "Startomfång"
+
+#: ../editor_actions.cc:242
+msgid "Finish Range"
+msgstr "Slutomfång"
+
+#: ../editor_actions.cc:244
+msgid "Finish add Range"
+msgstr "Lägg till slutomfång"
+
+#: ../editor_actions.cc:247
+msgid "Extend Range to End of Region"
+msgstr "Utöka omfång till slutet av regionen"
+
+#: ../editor_actions.cc:249
+msgid "Extend Range to Start of Region"
+msgstr "Utöka omfång till början av regionen"
+
+#: ../editor_actions.cc:252
+msgid "Follow Playhead"
+msgstr "Följ startmarkören"
+
+#: ../editor_actions.cc:260
+msgid "Zoom Focus Left"
+msgstr "Zoomfokus: vänster"
+
+#: ../editor_actions.cc:262
+msgid "Zoom Focus Right"
+msgstr "Zoomfokus: höger"
+
+#: ../editor_actions.cc:264
+msgid "Zoom Focus Center"
+msgstr "Zoomfokus: center"
+
+#: ../editor_actions.cc:266
+msgid "Zoom Focus Playhead"
+msgstr "Zoomfokus: startmarkören"
+
+#: ../editor_actions.cc:268
+msgid "Zoom Focus Edit"
+msgstr "Zoomfokus: redigeringsmarkör"
+
+#: ../editor_actions.cc:274
+msgid "Object Tool"
+msgstr "Objektverktyg"
+
+#: ../editor_actions.cc:275
+msgid "Range Tool"
+msgstr "Omfångsverktyg"
+
+#: ../editor_actions.cc:276
+msgid "Gain Tool"
+msgstr "Volymverktyg"
+
+#: ../editor_actions.cc:277
+msgid "Zoom Tool"
+msgstr "Zoomverktyg"
+
+#: ../editor_actions.cc:278
+msgid "Timefx Tool"
+msgstr "TidsFX-verktyg"
+
+#: ../editor_actions.cc:285
+msgid "Snap to frame"
+msgstr "Fäst mot frames"
+
+#: ../editor_actions.cc:286
+msgid "Snap to cd frame"
+msgstr "Fäst mot CD-frames"
+
+#: ../editor_actions.cc:287
+msgid "Snap to SMPTE frame"
+msgstr "Fäst mot SMPTE-frames"
+
+#: ../editor_actions.cc:288
+msgid "Snap to SMPTE seconds"
+msgstr "Fäst mot SMPTE-sekunder"
+
+#: ../editor_actions.cc:289
+msgid "Snap to SMPTE minutes"
+msgstr "Fäst mot SMPTE-minuter"
+
+#: ../editor_actions.cc:290
+msgid "Snap to seconds"
+msgstr "Fäst mot sekunder"
+
+#: ../editor_actions.cc:291
+msgid "Snap to minutes"
+msgstr "Fäst mot minuter"
+
+#: ../editor_actions.cc:292
+msgid "Snap to thirtyseconds"
+msgstr "Fäst mot trettio sekunder"
+
+#: ../editor_actions.cc:293
+msgid "Snap to asixteenthbeat"
+msgstr "Fäst mot en sextondel"
+
+#: ../editor_actions.cc:294
+msgid "Snap to eighths"
+msgstr "Fäst mot åttondelar"
+
+#: ../editor_actions.cc:295
+msgid "Snap to quarters"
+msgstr "Fäst mot fjärdedelar"
+
+#: ../editor_actions.cc:296
+msgid "Snap to thirds"
+msgstr "Fäst mot redjedelar"
+
+#: ../editor_actions.cc:297
+msgid "Snap to beat"
+msgstr "Fäst mot slag"
+
+#: ../editor_actions.cc:298
+msgid "Snap to bar"
+msgstr "Fäst mot takt"
+
+#: ../editor_actions.cc:299
+msgid "Snap to mark"
+msgstr "Fäst mot markörer"
+
+#: ../editor_actions.cc:300
+msgid "Snap to edit cursor"
+msgstr "Fäst mot redigeringsmarkören"
+
+#: ../editor_actions.cc:301
+msgid "Snap to region start"
+msgstr "Fäst mot regionstart"
+
+#: ../editor_actions.cc:302
+msgid "Snap to region end"
+msgstr "Fäst mot regionslut"
+
+#: ../editor_actions.cc:303
+msgid "Snap to region sync"
+msgstr "Fäst mot regionssynk.-punkt"
+
+#: ../editor_actions.cc:304
+msgid "Snap to region boundary"
+msgstr "Fäst mot regionsgräns"
+
+#. the region list popup menu
+#: ../editor_actions.cc:313
+msgid "Sort"
+msgstr "Sortera"
+
+#: ../editor_actions.cc:321
+msgid "Show all"
+msgstr "Visa allt"
+
+#: ../editor_actions.cc:322
+msgid "Show automatic regions"
+msgstr "Visa automatiska regioner"
+
+#: ../editor_actions.cc:324
+msgid "Ascending"
+msgstr "Stigande"
+
+#: ../editor_actions.cc:326
+msgid "Descending"
+msgstr "Fallande"
+
+#: ../editor_actions.cc:329
+msgid "By Region Name"
+msgstr "utifrån Regionsnamn"
+
+#: ../editor_actions.cc:331
+msgid "By Region Length"
+msgstr "utifrån Regionslängd"
+
+#: ../editor_actions.cc:333
+msgid "By Region Position"
+msgstr "utifrån Regionsposition"
+
+#: ../editor_actions.cc:335
+msgid "By Region Timestamp"
+msgstr "utifrån Regionstiddstämpel"
+
+#: ../editor_actions.cc:337
+msgid "By Region Start in File"
+msgstr "utifrån Regionens start i filen"
+
+#: ../editor_actions.cc:339
+msgid "By Region End in File"
+msgstr "utifrån Regionens slut i filen"
+
+#: ../editor_actions.cc:341
+msgid "By Source File Name"
+msgstr "utifrån Källfilnamn"
+
+#: ../editor_actions.cc:343
+msgid "By Source File Length"
+msgstr "utifrån Källfillängd"
+
+#: ../editor_actions.cc:345
+msgid "By Source File Creation Date"
+msgstr ""
+
+#: ../editor_actions.cc:347
+msgid "By Source Filesystem"
+msgstr "utifrån Källfilsskapelsedatum"
+
+#. the next two are duplicate items with different names for use in two different contexts
+#: ../editor_actions.cc:353
+msgid "Add External Audio"
+msgstr "Lägg till ljudfil"
+
+#: ../editor_actions.cc:355
+msgid "as Region(s)"
+msgstr "som region(er)"
+
+#: ../editor_actions.cc:357
+msgid "as Tracks"
+msgstr "som spår"
+
+#: gtk2_ardour/editor_actions.cc:360
+msgid "as Tape Tracks"
+msgstr "som rullbandsspår"
+
+#: ../editor_actions.cc:359
+msgid "to Tracks"
+msgstr "till spår"
+
+#: ../editor_actions.cc:362
+msgid "Show Waveforms"
+msgstr "Visa vågformer"
+
+#: ../editor_actions.cc:363
+msgid "Show Waveforms While Recording"
+msgstr "Visa vågformer vid inspelning"
+
+#: ../editor_actions.cc:364
+msgid "Show Measures"
+msgstr "Visa rutnät"
+
+#: ../editor_actions.cc:377 ../editor_actions.cc:384
+msgid "Medium"
+msgstr ""
+
+#: ../editor_actions.cc:379
+msgid "Faster"
+msgstr "Snabbare"
+
+#: ../editor_actions.cc:385
+msgid "Long"
+msgstr "Lång"
+
+#: ../editor_actions.cc:389
+msgid "Later is Higher"
+msgstr "Senare är högre"
+
+#: ../editor_actions.cc:390
+msgid "Most Recently Moved/Added is Higher"
+msgstr "Senast flyttade/tillagda är högre"
+
+#: ../editor_actions.cc:391
+msgid "Most Recently Added is Higher"
+msgstr "Senast tillagda är högre"
+
+#: ../editor_audio_import.cc:72
+msgid "You can't import or embed an audiofile until you have a session loaded."
+msgstr "Du kan inte importera en ljudfil innan du har laddat en session."
+
+#: ../editor_audio_import.cc:77
+msgid "Add existing audio to session"
+msgstr "Lägg till ljudfil(er) till sessionen"
+
+#: ../editor_audio_import.cc:142
+msgid "ardour: importing %1"
+msgstr "ardour: importerar %1"
+
+#: ../editor_audio_import.cc:146
+msgid "Cancel Import"
+msgstr "Avbryt importering"
+
+#: ../editor_audio_import.cc:224
+msgid "Editor: cannot open file \"%1\", (%2)"
+msgstr "Redigerare: kan inte öppna filen \"%1\" (%2)"
+
+#: ../editor_audio_import.cc:232
+msgid "Cancel entire import"
+msgstr "Avbryt hela importen"
+
+#: ../editor_audio_import.cc:233
+msgid "Don't embed it"
+msgstr "Infoga inte"
+
+#: ../editor_audio_import.cc:234
+msgid "Embed all without questions"
+msgstr "Infoga alla"
+
+#: ../editor_audio_import.cc:239
+msgid "Embed it anyway"
+msgstr "Infoga ändå"
+
+#: ../editor_audio_import.cc:242
+msgid ""
+"%1\n"
+"This audiofile's sample rate doesn't match the session sample rate!"
+msgstr ""
+"%1\n"
+"Denna ljudfils samplingsfrekvens matchar inte sessionens!"
+
+#: ../editor_audio_import.cc:275
+msgid "could not open %1"
+msgstr "kunde inte öppna %1"
+
+#: ../editor_audio_import.cc:320
+msgid "insert sndfile"
+msgstr "infoga ljudfil"
+
+#. stuff for the verbose canvas cursor
+#: ../editor_canvas.cc:117
+msgid "VerboseCanvasCursor"
+msgstr ""
+
+#: ../editor_edit_groups.cc:52 ../mixer_ui.cc:735
+msgid "Activate All"
+msgstr "Aktivera alla"
+
+#: ../editor_edit_groups.cc:53 ../mixer_ui.cc:736
+msgid "Disable All"
+msgstr "Avaktivera alla"
+
+#: ../editor_edit_groups.cc:55 ../mixer_ui.cc:738
+msgid "Add group"
+msgstr "Lägg till grupp"
+
+#: ../editor_edit_groups.cc:228 ../mixer_ui.cc:969
+msgid "unnamed"
+msgstr "namnlös"
+
+#: ../editor_edit_groups.cc:257 ../mixer_ui.cc:833
+msgid "-all-"
+msgstr "-alla-"
+
+#: ../editor_export_audio.cc:64
+msgid ""
+"There is no selection to export.\n"
+"\n"
+"Select a selection using the range mouse mode"
+msgstr ""
+"Det finns ingen markering att exportera.\n"
+"\n"
+"Välj en markering i omfångsläget"
+
+#: ../editor_export_audio.cc:109
+msgid ""
+"There are no ranges to export.\n"
+"\n"
+"Create 1 or more ranges by dragging the mouse in the range bar"
+msgstr ""
+"TDet finns inga omfång att exportera.\n"
+"\n"
+"Skapa 1 eller flera omfång genom att dra musen i omfångs-fältet."
+
+#: ../editor_imageframe.cc:624 ../editor_imageframe.cc:654
+msgid "programming error: no ImageFrameView selected"
+msgstr ""
+
+#: ../editor_imageframe.cc:847 ../editor_imageframe.cc:869
+msgid "programming error: no MarkerView selected"
+msgstr ""
+
+#: ../editor_keyboard.cc:104
+msgid "mute region"
+msgstr "tysta region"
+
+#: ../editor_keys.cc:45
+msgid "keyboard selection"
+msgstr "tangentbordsmarkering"
+
+#: ../editor_markers.cc:291 ../editor_ops.cc:1291 ../editor_ops.cc:1304
+#: ../editor_ops.cc:1322 ../location_ui.cc:773
+msgid "add marker"
+msgstr ""
+
+#: ../editor_markers.cc:306 ../editor_markers.cc:379 ../editor_markers.cc:551
+#: ../editor_markers.cc:569 ../editor_markers.cc:588 ../editor_markers.cc:607
+#: ../editor_markers.cc:637 ../editor_markers.cc:665 ../editor_markers.cc:693
+#: ../editor_markers.cc:731 ../editor_markers.cc:758 ../editor_markers.cc:781
+#: ../editor_markers.cc:800 ../editor_mouse.cc:2014 ../editor_mouse.cc:4274
+msgid "programming error: marker canvas item has no marker object pointer!"
+msgstr ""
+
+#: ../editor_markers.cc:330 ../location_ui.cc:655
+msgid "remove marker"
+msgstr "ta bort markör"
+
+#: ../editor_markers.cc:457
+msgid "Locate to Mark"
+msgstr "Placera startmarkör här"
+
+#: ../editor_markers.cc:458
+msgid "Play from Mark"
+msgstr "Spela from markör"
+
+#: ../editor_markers.cc:459
+msgid "Set Mark from Playhead"
+msgstr "Placera markör från startmarkören"
+
+#: ../editor_markers.cc:463
+msgid "Rename Mark"
+msgstr "Byt namn på markör"
+
+#: ../editor_markers.cc:464
+msgid "Hide Mark"
+msgstr "Göm markör"
+
+#: ../editor_markers.cc:465
+msgid "Remove Mark"
+msgstr "Ta bort markör"
+
+#: ../editor_markers.cc:478 ../editor_markers.cc:534
+msgid "Locate to Range Mark"
+msgstr "Flytta starmarköer till omfångsmarkör"
+
+#: ../editor_markers.cc:479 ../editor_markers.cc:535
+msgid "Play from Range Mark"
+msgstr "Spela från omfångmarkör"
+
+#: ../editor_markers.cc:480
+msgid "Loop Range"
+msgstr "Loopa omfång"
+
+#: ../editor_markers.cc:481 ../editor_markers.cc:536
+msgid "Set Range Mark from Playhead"
+msgstr "Placera omfångsmarkör från startmarkören"
+
+#: ../editor_markers.cc:482 ../editor_markers.cc:537
+msgid "Set Range from Range Selection"
+msgstr "Sätt omfång från omfångsmarkering"
+
+#: ../editor_markers.cc:486
+msgid "Rename Range"
+msgstr "Byt namn på omfång"
+
+#: ../editor_markers.cc:487 ../editor_markers.cc:539
+msgid "Hide Range"
+msgstr "Göm omfång"
+
+#: ../editor_markers.cc:488
+msgid "Remove Range"
+msgstr "Ta bort omfång"
+
+#: ../editor_markers.cc:492 ../editor_markers.cc:541
+msgid "Separate Regions in Range"
+msgstr "Separera regioner i omfånget"
+
+#: ../editor_markers.cc:493 ../editor_markers.cc:542
+msgid "Select All in Range"
+msgstr "Välj allt i omfånget"
+
+#: ../editor_markers.cc:519
+msgid "Set Loop Range"
+msgstr "Sätt loop-omfång här"
+
+#: ../editor_markers.cc:520
+msgid "Set Punch Range"
+msgstr "Sätt punch-omfång här"
+
+#: ../editor_markers.cc:814
+msgid "New Name:"
+msgstr "Nytt namn:"
+
+#: ../editor_markers.cc:817
+msgid "ardour: rename mark"
+msgstr "ardour: byt namn på markör"
+
+#: ../editor_markers.cc:819
+msgid "ardour: rename range"
+msgstr "ardour: byt namn på omfång"
+
+#: ../editor_markers.cc:839
+msgid "rename marker"
+msgstr "byt namn på markör"
+
+#: ../editor_markers.cc:864
+msgid "set loop range"
+msgstr "ställ in loop-omfång"
+
+#: ../editor_markers.cc:890
+msgid "set punch range"
+msgstr "ställ in punch-omfång"
+
+#: ../editor_mouse.cc:102
+msgid "Editor::event_frame() used on unhandled event type %1"
+msgstr ""
+
+#: ../editor_mouse.cc:312
+msgid "select on click"
+msgstr ""
+
+#: ../editor_mouse.cc:1589
+msgid "programming error: start_grab called without drag item"
+msgstr ""
+
+#: ../editor_mouse.cc:1813
+msgid "change fade in length"
+msgstr "ändra intoningslängd"
+
+#: ../editor_mouse.cc:1831
+msgid "programming error: fade out canvas item has no regionview data pointer!"
+msgstr ""
+
+#: ../editor_mouse.cc:1905
+msgid "change fade out length"
+msgstr "ändra uttoningslängd"
+
+#: ../editor_mouse.cc:1924
+msgid "programming error: cursor canvas item has no cursor data pointer!"
+msgstr ""
+
+#: ../editor_mouse.cc:2141
+msgid "move marker"
+msgstr "flytta markör"
+
+#: ../editor_mouse.cc:2164 ../editor_mouse.cc:2195
+#: ../editor_tempodisplay.cc:458
+msgid ""
+"programming error: meter marker canvas item has no marker object pointer!"
+msgstr ""
+
+#: ../editor_mouse.cc:2263
+msgid "copy meter mark"
+msgstr "kopiera taktartsmarkör"
+
+#: ../editor_mouse.cc:2273
+msgid "move meter mark"
+msgstr "flytta taktartsmarkör"
+
+#: ../editor_mouse.cc:2288 ../editor_mouse.cc:2321
+#: ../editor_tempodisplay.cc:330 ../editor_tempodisplay.cc:408
+#: ../editor_tempodisplay.cc:427
+msgid ""
+"programming error: tempo marker canvas item has no marker object pointer!"
+msgstr ""
+
+#: ../editor_mouse.cc:2293 ../editor_mouse.cc:2326
+#: ../editor_tempodisplay.cc:335 ../editor_tempodisplay.cc:413
+msgid "programming error: marker for tempo is not a tempo marker!"
+msgstr ""
+
+#: ../editor_mouse.cc:2393
+msgid "copy tempo mark"
+msgstr "kopiera tempomarkör"
+
+#: ../editor_mouse.cc:2403
+msgid "move tempo mark"
+msgstr "flytta tempomarkör"
+
+#: ../editor_mouse.cc:2417 ../editor_mouse.cc:2436 ../editor_mouse.cc:2449
+msgid ""
+"programming error: control point canvas item has no control point object "
+"pointer!"
+msgstr ""
+
+#: ../editor_mouse.cc:2554
+msgid "programming error: line canvas item has no line pointer!"
+msgstr ""
+
+#: ../editor_mouse.cc:2663
+msgid "move region(s)"
+msgstr "flytta region(er)"
+
+#: ../editor_mouse.cc:2726
+msgid "Drag region brush"
+msgstr "Dra regionspensel"
+
+#. don't copy again
+#. this is committed in the grab finished callback.
+#: ../editor_mouse.cc:2750
+msgid "Drag region copy"
+msgstr "Dra regionskopia"
+
+#. A selection grab currently creates two undo/redo operations, one for
+#. creating the new region and another for moving it.
+#.
+#: ../editor_mouse.cc:3608
+msgid "selection grab"
+msgstr "markeringsgrepp"
+
+#: ../editor_mouse.cc:3649
+msgid "cancel selection"
+msgstr "avbryt markering"
+
+#: ../editor_mouse.cc:3759
+msgid "range selection"
+msgstr "omfångsmarkering"
+
+#: ../editor_mouse.cc:3775
+msgid "trim selection start"
+msgstr "beskär markerings början"
+
+#: ../editor_mouse.cc:3791
+msgid "trim selection end"
+msgstr "beskär markerings slut"
+
+#: ../editor_mouse.cc:3808
+msgid "move selection"
+msgstr "flytta markering"
+
+#: ../editor_mouse.cc:4194
+msgid "Start point trim"
+msgstr "Beskär startpunkt"
+
+#: ../editor_mouse.cc:4222
+msgid "End point trim"
+msgstr "Beskär slutpunkt"
+
+#: ../editor_mouse.cc:4261
+msgid "trimmed region"
+msgstr "Beskuren region"
+
+#: ../editor_mouse.cc:4399
+msgid "new range marker"
+msgstr "ny omfångsmarkör"
+
+#: ../editor_mouse.cc:4641
+msgid "select regions"
+msgstr "välj regioner"
+
+#: ../editor_mouse.cc:4670
+msgid "Name for region:"
+msgstr "Namnge region:"
+
+#: ../editor_mouse.cc:4734
+msgid "timestretch"
+msgstr "tidstänjning"
+
+#: ../editor_ops.cc:196
+msgid "split"
+msgstr "dela"
+
+#: ../editor_ops.cc:232
+msgid "remove region"
+msgstr "ta bort region"
+
+#: ../editor_ops.cc:251
+msgid ""
+" This is destructive, will possibly delete audio files\n"
+"It cannot be undone\n"
+"Do you really want to destroy %1 ?"
+msgstr ""
+" Detta är en destruktiv operation, kommer möjligt radera filer\n"
+"Detta kan ej ångras\n"
+"Vill du verkligen radera %1 ?"
+
+#: ../editor_ops.cc:255
+msgid "these regions"
+msgstr "dessa regioner"
+
+#: ../editor_ops.cc:255
+msgid "this region"
+msgstr "denna region"
+
+#: ../editor_ops.cc:257 ../editor_ops.cc:3319 ../route_ui.cc:700
+#: ../visual_time_axis.cc:277
+msgid "No, do nothing."
+msgstr "Nej, gör ingenting."
+
+#: ../editor_ops.cc:260
+msgid "Yes, destroy them."
+msgstr "Ja, radera dem."
+
+#: ../editor_ops.cc:262 ../editor_ops.cc:3320
+msgid "Yes, destroy it."
+msgstr "Ja, radera den."
+
+#: ../editor_ops.cc:353 ../editor_ops.cc:381
+msgid "extend selection"
+msgstr "utöka markeringen"
+
+#: ../editor_ops.cc:397 ../editor_ops.cc:431 ../editor_ops.cc:475
+#: ../editor_ops.cc:501
+msgid "nudge forward"
+msgstr "knuffa framåt"
+
+#: ../editor_ops.cc:565
+msgid "build_region_boundary_cache called with snap_type = %1"
+msgstr ""
+
+#: ../editor_ops.cc:1421
+msgid "select all within"
+msgstr "välj allt inom"
+
+#: ../editor_ops.cc:1453
+msgid "set selection from region"
+msgstr "ställ in markering från region"
+
+#: ../editor_ops.cc:1486
+msgid "set selection from range"
+msgstr "ställ markering från omfång"
+
+#: ../editor_ops.cc:1516
+msgid "select all from range"
+msgstr "välj allt inom omfång"
+
+#: ../editor_ops.cc:1538
+msgid "select all from punch"
+msgstr "välj allt från punch"
+
+#: ../editor_ops.cc:1560
+msgid "select all from loop"
+msgstr "välj allt från loop"
+
+#: ../editor_ops.cc:1574
+msgid "select all after cursor"
+msgstr "välj allt efter markör"
+
+#: ../editor_ops.cc:1579
+msgid "select all before cursor"
+msgstr "välj allt före markör"
+
+#: ../editor_ops.cc:1609
+msgid "select all between cursors"
+msgstr "välj allt mellan markörerna"
+
+#: ../editor_ops.cc:1740
+msgid "clear markers"
+msgstr "rensa markörer"
+
+#: ../editor_ops.cc:1752
+msgid "clear ranges"
+msgstr "rensa omfång"
+
+#: ../editor_ops.cc:1771
+msgid "clear locations"
+msgstr "rensa platser"
+
+#: ../editor_ops.cc:1821
+msgid "insert dragged region"
+msgstr "infoga dragen region"
+
+#: ../editor_ops.cc:1857
+msgid "insert region"
+msgstr "infoga region"
+
+#: ../editor_ops.cc:2048 ../io_selector.cc:57 ../io_selector.cc:791
+msgid "OK"
+msgstr ""
+
+#: ../editor_ops.cc:2055
+msgid "ardour: rename region"
+msgstr "ardour: byt namn på region"
+
+#: ../editor_ops.cc:2278 ../editor_ops.cc:2327
+msgid "separate"
+msgstr "separera"
+
+#: ../editor_ops.cc:2389
+msgid "trim to selection"
+msgstr "beskär till markeringen"
+
+#: ../editor_ops.cc:2429
+msgid "region fill"
+msgstr "regionsfyllning"
+
+#: ../editor_ops.cc:2488
+msgid "fill selection"
+msgstr "fyll markeringen"
+
+#: ../editor_ops.cc:2509
+msgid "Programming error. that region doesn't cover that position"
+msgstr ""
+
+#: ../editor_ops.cc:2512
+msgid "set region sync position"
+msgstr "Ställ in regionssynk.-punkt"
+
+#: ../editor_ops.cc:2527
+msgid "Place the edit cursor at the desired sync point"
+msgstr "Placera redigerinsmarkören på avsedd synk.-punkt"
+
+#: ../editor_ops.cc:2532
+msgid "set sync from edit cursor"
+msgstr "ställ synk. från redigeringsmarkör"
+
+#: ../editor_ops.cc:2544
+msgid "remove sync"
+msgstr "ta bort synk."
+
+#: ../editor_ops.cc:2558
+msgid "naturalize"
+msgstr "naturalisera"
+
+#: ../editor_ops.cc:2622
+msgid "align selection (relative)"
+msgstr "justera markering (relativt)"
+
+#: ../editor_ops.cc:2650
+msgid "align selection"
+msgstr "justera markering"
+
+#: ../editor_ops.cc:2662
+msgid "align region"
+msgstr "justera region"
+
+#: ../editor_ops.cc:2709 ../editor_ops.cc:2734
+msgid "trim to edit"
+msgstr "beskär till redigering"
+
+#: ../editor_ops.cc:2785
+msgid "ardour: freeze"
+msgstr "ardour: frys"
+
+#: ../editor_ops.cc:2790
+msgid "Cancel Freeze"
+msgstr "Avbryt frysning"
+
+#: ../editor_ops.cc:2827
+msgid "bounce range"
+msgstr "omfång till disk"
+
+#: ../editor_ops.cc:2880
+msgid "cut"
+msgstr "klipp"
+
+#: ../editor_ops.cc:2883
+msgid "copy"
+msgstr "kopiera"
+
+#: ../editor_ops.cc:2896
+msgid " objects"
+msgstr " objekt"
+
+#: ../editor_ops.cc:2922
+msgid " range"
+msgstr " omfång"
+
+#: ../editor_ops.cc:3079
+msgid "paste"
+msgstr "klistra"
+
+#: ../editor_ops.cc:3117
+msgid "paste chunk"
+msgstr "klistra bit"
+
+#. clear (below) will clear the argument list
+#: ../editor_ops.cc:3158
+msgid "duplicate region"
+msgstr "duplicera region"
+
+#: ../editor_ops.cc:3203
+msgid "duplicate selection"
+msgstr "duplicera markering"
+
+#: ../editor_ops.cc:3260
+msgid "clear playlist"
+msgstr "rensa spellista"
+
+#: ../editor_ops.cc:3289
+msgid "nudge track"
+msgstr "knuffa spår"
+
+#: ../editor_ops.cc:3316
+msgid ""
+"Do you really want to destroy the last capture?\n"
+"(This is destructive and cannot be undone)"
+msgstr ""
+"Vill du verkligen radera den senaste inspelningen?\n"
+"(Detta är en destruktiv handling och kan ej ångras)"
+
+#: ../editor_ops.cc:3344
+msgid "normalize"
+msgstr "normalisera"
+
+#: ../editor_ops.cc:3391
+msgid "reverse regions"
+msgstr "regioner till motsatt riktning"
+
+#: ../editor_region_list.cc:96 ../editor_region_list.cc:101
+#: ../editor_region_list.cc:104 ../location_ui.cc:55
+msgid "Hidden"
+msgstr "Dold"
+
+#. added a new fresh one at the end
+#: ../editor_route_list.cc:101 ../editor_route_list.cc:102
+#: ../editor_route_list.cc:246
+msgid "editor"
+msgstr "redigerare"
+
+#: ../editor_route_list.cc:309 ../mixer_ui.cc:698
+msgid "Show All"
+msgstr "Visa Alla"
+
+#: ../editor_route_list.cc:310 ../mixer_ui.cc:699
+msgid "Hide All"
+msgstr "Dölj Alla"
+
+#: ../editor_route_list.cc:311 ../mixer_ui.cc:700
+msgid "Show All Audio Tracks"
+msgstr "Visa alla spår"
+
+#: ../editor_route_list.cc:312 ../mixer_ui.cc:701
+msgid "Hide All Audio Tracks"
+msgstr "Dölj alla spår"
+
+#: ../editor_route_list.cc:313 ../mixer_ui.cc:702
+msgid "Show All Audio Busses"
+msgstr "Visa alla bussar"
+
+#: ../editor_route_list.cc:314 ../mixer_ui.cc:703
+msgid "Hide All Audio Busses"
+msgstr "Dölj alla bussar"
+
+#: ../editor_rulers.cc:311
+msgid "New location marker"
+msgstr "Ny platsmarkör"
+
+#: ../editor_rulers.cc:312
+msgid "Clear all locations"
+msgstr "Rensa alla platsmarkörer"
+
+#. ruler_items.push_back (MenuElem (_("New Range")));
+#: ../editor_rulers.cc:317
+msgid "Clear all ranges"
+msgstr "Rensa alla omfång"
+
+#: ../editor_rulers.cc:326
+msgid "New Tempo"
+msgstr "Nytt tempo"
+
+#: ../editor_rulers.cc:327
+msgid "Clear tempo"
+msgstr "Ta bort tempo"
+
+#: ../editor_rulers.cc:332
+msgid "New Meter"
+msgstr "Ny taktart"
+
+
+#: ../editor_rulers.cc:333
+msgid "Clear meter"
+msgstr "Ta bort taktart"
+
+#: ../editor_rulers.cc:341
+msgid "Min:Secs"
+msgstr "Min:Sek"
+
+#: ../editor_selection_list.cc:107
+msgid "Name for Chunk:"
+msgstr "Namn för bit:"
+
+#: ../editor_selection_list.cc:110
+msgid "Create Chunk"
+msgstr "Skapa bit"
+
+#: ../editor_selection_list.cc:110
+msgid "Forget it"
+msgstr "Glöm det"
+
+#: ../editor_tempodisplay.cc:252 ../editor_tempodisplay.cc:292
+msgid "add"
+msgstr "lägg till"
+
+#: ../editor_tempodisplay.cc:274
+msgid "add tempo mark"
+msgstr "lägg till tempomarkör"
+
+#: ../editor_tempodisplay.cc:314
+msgid "add meter mark"
+msgstr "lägg till taktartsmarkör"
+
+#: ../editor_tempodisplay.cc:347 ../editor_tempodisplay.cc:375
+msgid "done"
+msgstr "klar"
+
+#: ../editor_tempodisplay.cc:365 ../editor_tempodisplay.cc:393
+msgid "replace tempo mark"
+msgstr "ersätt tempomarkör"
+
+#: ../editor_tempodisplay.cc:432 ../editor_tempodisplay.cc:463
+msgid "programming error: marker for meter is not a meter marker!"
+msgstr ""
+
+#: ../editor_tempodisplay.cc:442 ../editor_tempodisplay.cc:475
+msgid "remove tempo mark"
+msgstr "ta bort tempomarkör"
+
+#: ../editor_timefx.cc:50
+msgid "Quick but Ugly"
+msgstr "Snabbt men Fult"
+
+#: ../editor_timefx.cc:51
+msgid "Skip Anti-aliasing"
+msgstr "Hoppa över Anti-aliasing"
+
+#: ../editor_timefx.cc:55
+msgid "ardour: timestretch"
+msgstr "ardour: tidstänjning"
+
+#: ../editor_timefx.cc:56
+msgid "TimeStretchDialog"
+msgstr "TidsTänjningsDialog"
+
+#: ../editor_timefx.cc:69
+msgid "Stretch/Shrink it"
+msgstr "Förläng/Förkorta den"
+
+#: ../editor_timefx.cc:72 ../editor_timefx.cc:73
+msgid "TimeStretchButton"
+msgstr "TidsTänjningsKnapp"
+
+#: ../editor_timefx.cc:74
+msgid "TimeStretchProgress"
+msgstr "TidsTänjningsFörlopp"
+
+#: ../editor_timefx.cc:138
+msgid "timestretch cannot be started - thread creation error"
+msgstr "tidstänjning kan inte startas - trådskapningsfel"
+
+#: ../export_dialog.cc:58 ../export_dialog.cc:398 ../export_dialog.cc:1026
+#: ../export_dialog.cc:1194
+msgid "22.05kHz"
+msgstr ""
+
+#: ../export_dialog.cc:59 ../export_dialog.cc:401 ../export_dialog.cc:416
+#: ../export_dialog.cc:1028 ../export_dialog.cc:1196
+msgid "44.1kHz"
+msgstr ""
+
+#: ../export_dialog.cc:60 ../export_dialog.cc:404 ../export_dialog.cc:1030
+#: ../export_dialog.cc:1198
+msgid "48kHz"
+msgstr ""
+
+#: ../export_dialog.cc:61 ../export_dialog.cc:407 ../export_dialog.cc:1032
+#: ../export_dialog.cc:1200
+msgid "88.2kHz"
+msgstr ""
+
+#: ../export_dialog.cc:62 ../export_dialog.cc:410 ../export_dialog.cc:1034
+#: ../export_dialog.cc:1202
+msgid "96kHz"
+msgstr ""
+
+#: ../export_dialog.cc:63 ../export_dialog.cc:413 ../export_dialog.cc:1036
+#: ../export_dialog.cc:1204
+msgid "192kHz"
+msgstr ""
+
+#: ../export_dialog.cc:68
+msgid "best"
+msgstr "bäst"
+
+#: ../export_dialog.cc:69 ../export_dialog.cc:1211
+msgid "fastest"
+msgstr "snabbast"
+
+#: ../export_dialog.cc:70 ../export_dialog.cc:1213
+msgid "linear"
+msgstr "linjär"
+
+#: ../export_dialog.cc:71 ../export_dialog.cc:1215
+msgid "better"
+msgstr "bättre"
+
+#: ../export_dialog.cc:72 ../export_dialog.cc:1217
+msgid "intermediate"
+msgstr "mellanliggande"
+
+#: ../export_dialog.cc:78 ../export_dialog.cc:1226
+msgid "Rectangular"
+msgstr "Rektangulär"
+
+#: ../export_dialog.cc:79
+msgid "Shaped Noise"
+msgstr "Format Oväsen"
+
+#: ../export_dialog.cc:80 ../export_dialog.cc:1228
+msgid "Triangular"
+msgstr "Triangulär"
+
+#: ../export_dialog.cc:85
+msgid "stereo"
+msgstr ""
+
+#. default is to use all
+#: ../export_dialog.cc:86 ../export_dialog.cc:485 ../export_dialog.cc:1054
+#: ../export_dialog.cc:1176
+msgid "mono"
+msgstr ""
+
+#: ../export_dialog.cc:92
+msgid "CUE"
+msgstr ""
+
+#: ../export_dialog.cc:93
+msgid "TOC"
+msgstr ""
+
+#: ../export_dialog.cc:101
+msgid "Format"
+msgstr ""
+
+#: ../export_dialog.cc:102
+msgid "CD Marker File Type"
+msgstr "CD-markörsfiltyp"
+
+#: ../export_dialog.cc:102
+msgid "Channels"
+msgstr "Kanaler"
+
+#: ../export_dialog.cc:104
+msgid "File Type"
+msgstr "Filtyp"
+
+#: ../export_dialog.cc:105
+msgid "Sample Format"
+msgstr "Samplingsformat"
+
+#: ../export_dialog.cc:106
+msgid "Sample Endianness"
+msgstr "Samplings-endian"
+
+#: ../export_dialog.cc:107
+msgid "Sample Rate"
+msgstr "Samplingsfrekvens"
+
+#: ../export_dialog.cc:108
+msgid "Conversion Quality"
+msgstr "Konverteringskvalitet"
+
+#: ../export_dialog.cc:109
+msgid "Dither Type"
+msgstr "Dither-typ"
+
+#: ../export_dialog.cc:110
+msgid "Export CD Marker File Only"
+msgstr "Expoertera endast CD-markörsfil"
+
+#: ../export_dialog.cc:111
+msgid "Export to File"
+msgstr "Exportera till fil"
+
+#: ../export_dialog.cc:112 ../option_editor.cc:82 ../option_editor.cc:83
+msgid "Browse"
+msgstr "Bläddra"
+
+#: ../export_dialog.cc:113
+msgid "Specific tracks ..."
+msgstr "Enstaka spår..."
+
+#: ../export_dialog.cc:124
+msgid "ardour: export"
+msgstr "ardour: exportera"
+
+#: ../export_dialog.cc:125
+msgid "ardour_export"
+msgstr ""
+
+#: ../export_dialog.cc:138 ../export_dialog.cc:154 ../mixer_strip.cc:123
+#: ../mixer_strip.cc:767
+msgid "Output"
+msgstr "Utgång"
+
+#: ../export_dialog.cc:632
+msgid "Editor: cannot open \"%1\" as export file for CD toc file"
+msgstr "Redigerare: kan ej öppna \"%1\" som exportfil för CD-TOC-fil"
+
+#: ../export_dialog.cc:758
+msgid "Editor: cannot open \"%1\" as export file for CD cue file"
+msgstr "Redigerare: kan ej öppna \"%1\" som exportfil för CD-CUE-fil"
+
+#: ../export_dialog.cc:777
+msgid "WAV"
+msgstr ""
+
+#: ../export_dialog.cc:911
+msgid "Stop Export"
+msgstr "Avbryt Export"
+
+#: ../export_dialog.cc:1130
+msgid "Please enter a valid filename."
+msgstr "Var vänlig använd ett giltigt filnamn."
+
+#: ../export_dialog.cc:1140
+msgid "Please specify a complete filename for the audio file."
+msgstr "Var vänlig skriv in ett fullständigt filnamn för ljudfilen"
+
+#: ../export_dialog.cc:1146
+msgid "File already exists, do you want to overwrite it?"
+msgstr "Filen existerar redan, vill du skriva över den?"
+
+#: ../export_dialog.cc:1158 ../export_range_markers_dialog.cc:152
+msgid "Cannot write file in: "
+msgstr "Kan ej skriva till fil i: "
+
+#. warning dialog
+#: ../export_range_markers_dialog.cc:134
+msgid "Please enter a valid target directory."
+msgstr "Var vänlig välj en giltig katalog."
+
+#: ../export_range_markers_dialog.cc:142
+msgid ""
+"Please select an existing target directory. Files\n"
+"are not allowed!"
+msgstr ""
+"Var vänliga välj en existerande katalog. Filer\n"
+"är inte tillåtna!"
+
+#: ../gain_automation_time_axis.cc:61
+msgid "add gain automation event"
+msgstr "lägg till volymautomatiseringshändelse"
+
+#: ../gain_meter.cc:66
+msgid "cannot find images for fader slider"
+msgstr "kan inte hitta bilder för reglage"
+
+#: ../gain_meter.cc:73
+msgid "cannot find images for fader rail"
+msgstr "kan inte hitta bilder för reglageräcke"
+
+#: ../gain_meter.cc:129 ../gain_meter.cc:489 ../gain_meter.cc:534
+msgid "-inf"
+msgstr ""
+
+#: ../gain_meter.cc:139
+msgid "Fader automation mode"
+msgstr "Automatiseringsläge för reglage"
+
+#: ../gain_meter.cc:140
+msgid "Fader automation type"
+msgstr "Automatiseringstyp för reglage"
+
+#. XXX it might different in different languages
+#: ../gain_meter.cc:181 ../gain_meter.cc:812 ../panner_ui.cc:98
+#: ../panner_ui.cc:806
+msgid "Abs"
+msgstr ""
+
+#: ../gain_meter.cc:467
+msgid "-Inf"
+msgstr ""
+
+#: ../gain_meter.cc:776 ../mixer_strip.cc:770 ../panner_ui.cc:770
+msgid "O"
+msgstr ""
+
+#: ../gain_meter.cc:779 ../panner_ui.cc:773
+msgid "P"
+msgstr ""
+
+#: ../gain_meter.cc:782 ../panner_ui.cc:776
+msgid "T"
+msgstr ""
+
+#: ../gain_meter.cc:785 ../panner_ui.cc:779
+msgid "W"
+msgstr ""
+
+#: ../gtk-custom-ruler.c:126
+msgid "Lower"
+msgstr "Lägre"
+
+#: ../gtk-custom-ruler.c:127
+msgid "Lower limit of ruler"
+msgstr "Lägre gräns för räcke"
+
+#: ../gtk-custom-ruler.c:136
+msgid "Upper"
+msgstr "Övre"
+
+#: ../gtk-custom-ruler.c:137
+msgid "Upper limit of ruler"
+msgstr "Övre gräns för räcke"
+
+#: ../gtk-custom-ruler.c:146
+msgid "Position"
+msgstr ""
+
+#: ../gtk-custom-ruler.c:147
+msgid "Position of mark on the ruler"
+msgstr "Position för märke på räcke"
+
+#: ../gtk-custom-ruler.c:156
+msgid "Max Size"
+msgstr "Max storlek"
+
+#: ../gtk-custom-ruler.c:157
+msgid "Maximum size of the ruler"
+msgstr "Max storlek för räcket"
+
+#: ../gtk-custom-ruler.c:166
+msgid "Show Position"
+msgstr "Visa position"
+
+#: ../gtk-custom-ruler.c:167
+msgid "Draw current ruler position"
+msgstr "Rita upp räckets aktuellt position"
+
+#. end-of-file, other end closed or shutdown?
+#: ../imageframe_socket_handler.cc:126
+msgid "Image Compositor Socket has been shutdown/closed"
+msgstr ""
+
+#: ../imageframe_time_axis.cc:285
+msgid "0.5 seconds"
+msgstr "0.5 sekunder"
+
+#: ../imageframe_time_axis.cc:286 ../marker_time_axis.cc:241
+msgid "1 seconds"
+msgstr "1 sekund"
+
+#: ../imageframe_time_axis.cc:287 ../marker_time_axis.cc:242
+msgid "1.5 seconds"
+msgstr "1.5 sekunder"
+
+#: ../imageframe_time_axis.cc:288 ../marker_time_axis.cc:243
+msgid "2 seconds"
+msgstr "2 sekunder"
+
+#: ../imageframe_time_axis.cc:289 ../marker_time_axis.cc:244
+msgid "2.5 seconds"
+msgstr "2.5 sekunder"
+
+#: ../imageframe_time_axis.cc:290 ../marker_time_axis.cc:245
+msgid "3 seconds"
+msgstr "3 sekunder"
+
+#. duration_items.push_back(SeparatorElem()) ;
+#. duration_items.push_back(MenuElem (_("custom"), mem_fun(*this, &ImageFrameTimeAxis::set_marker_duration_custom))) ;
+#: ../imageframe_time_axis.cc:295 ../marker_time_axis.cc:250
+msgid "Duration (sec)"
+msgstr "Varaktighet (sekunder)"
+
+#: ../imageframe_time_axis.cc:300
+msgid "Remove Frame"
+msgstr "Ta bort ruta"
+
+#: ../imageframe_time_axis.cc:303
+msgid "Image Frame"
+msgstr "Bildruta"
+
+#: ../imageframe_time_axis.cc:304 ../marker_time_axis.cc:256
+msgid "Rename Track"
+msgstr "Döp om spår"
+
+#: ../io_selector.cc:59 ../io_selector.cc:793
+msgid "Rescan"
+msgstr "Uppdatera"
+
+#: ../io_selector.cc:67
+msgid "%1 input"
+msgstr "%1-ingång"
+
+#: ../io_selector.cc:69
+msgid "%1 output"
+msgstr "%1-utgång"
+
+#: ../io_selector.cc:141 ../route_params_ui.cc:106
+msgid "Inputs"
+msgstr "Ingångar"
+
+#: ../io_selector.cc:141 ../route_params_ui.cc:107
+msgid "Outputs"
+msgstr "Utgångar"
+
+#: ../io_selector.cc:142
+msgid "Add Input"
+msgstr "Lägg till ingång"
+
+#: ../io_selector.cc:142
+msgid "Add Output"
+msgstr "Lägg till utgång"
+
+#: ../io_selector.cc:143
+msgid "Remove Input"
+msgstr "Ta bort ingång"
+
+#: ../io_selector.cc:143
+msgid "Remove Output"
+msgstr "Ta bort utgång"
+
+#: ../io_selector.cc:144
+msgid "Disconnect All"
+msgstr "Koppla från alla"
+
+#: ../io_selector.cc:158
+msgid "Available connections"
+msgstr "Tillgängliga anslutningar"
+
+#: ../io_selector.cc:554 ../io_selector.cc:573
+msgid "There are no more JACK ports available."
+msgstr "Det finns inga fler JACK-portar tillgängliga"
+
+#: ../io_selector.cc:648 ../io_selector.cc:675 ../io_selector.cc:728
+msgid "port"
+msgstr ""
+
+#: ../io_selector.cc:797
+msgid "ardour: "
+msgstr ""
+
+#: ../keyboard.cc:297
+msgid "KeyboardTarget: keyname \"%1\" is unknown."
+msgstr "KeyboardTarget: tangent \"%1\" är okänd."
+
+#: ../keyboard.cc:523
+msgid ""
+"Your system is completely broken - NumLock uses \"%1\"as its modifier. This "
+"is madness - see the man page for xmodmap to find out how to fix this."
+msgstr ""
+"Ditt system är totalt trasigt - NumLock använder \"%1\" som sin modifikator. "
+"Detta är galenskap - se xmodmaps manualsida för att fixa detta."
+
+#: ../keyboard.cc:531
+msgid ""
+"Your system generates \"%1\" when the NumLock key is pressed. This can cause "
+"problems when editing so Ardour will use %2 to mean Meta rather than %1"
+msgstr ""
+"Ditt system genererar \"%1\" när NumLock trycks. Detta kan orsaka problem "
+"vid redigering, så Ardour kommer att använda %2 som Meta snarare än %1"
+
+#: ../keyboard.cc:592
+msgid "You have %1 keys bound to \"mod1\""
+msgstr "Du har %1 tangenter bundna till \"mod1\""
+
+#: ../keyboard.cc:607
+msgid "You have %1 keys bound to \"mod2\""
+msgstr "Du har %1 tangenter bundna till \"mod2\""
+
+#: ../keyboard.cc:622
+msgid "You have %1 keys bound to \"mod3\""
+msgstr "Du har %1 tangenter bundna till \"mod3\""
+
+#: ../keyboard.cc:637
+msgid "You have %1 keys bound to \"mod4\""
+msgstr "Du har %1 tangenter bundna till \"mod4\""
+
+#: ../keyboard.cc:652
+msgid "You have %1 keys bound to \"mod5\""
+msgstr "Du har %1 tangenter bundna till \"mod5\""
+
+#: ../location_ui.cc:47 ../location_ui.cc:50
+msgid "Set"
+msgstr "Ställ in"
+
+#: ../location_ui.cc:48 ../location_ui.cc:51
+msgid "Go"
+msgstr "Gå till"
+
+#: ../location_ui.cc:54
+msgid "CD"
+msgstr ""
+
+#: ../location_ui.cc:57
+msgid "SCMS"
+msgstr ""
+
+#: ../location_ui.cc:58
+msgid "Pre-Emphasis"
+msgstr ""
+
+#: ../location_ui.cc:569
+msgid "Add New Location"
+msgstr "Lägg till ny Plats"
+
+#: ../location_ui.cc:570
+msgid "Add New Range"
+msgstr "Lägg till nytt Omfång"
+
+#: ../location_ui.cc:574
+msgid "ardour: locations"
+msgstr "ardour: platser"
+
+#: ../location_ui.cc:575
+msgid "ardour_locations"
+msgstr ""
+
+#: ../location_ui.cc:603
+msgid "Location (CD Index) Markers"
+msgstr "Plats-markörer (CD-Index)"
+
+#: ../location_ui.cc:623
+msgid "Range (CD Track) Markers"
+msgstr "Omfång-markörer (CD-spår)"
+
+#: ../location_ui.cc:789
+msgid "add range marker"
+msgstr "lägg till omfångsmarkör"
+
+#: ../main.cc:71
+msgid "ardour is killing itself for a clean exit\n"
+msgstr "ardour dödar sig själv för ett rent avslut\n"
+
+#: ../main.cc:80
+msgid "stopping user interface\n"
+msgstr "stoppar användargränssnittet\n"
+
+#. XXX its doubtful that snprintf() is async-safe
+#: ../main.cc:99
+#, c-format
+msgid "%d(%d): received signal %d\n"
+msgstr "%d(%d): mottog signal %d\n"
+
+#: ../main.cc:185
+msgid "cannot become new process group leader (%1)"
+msgstr "kan inte bli ny processgruppledare (%1)"
+
+#: ../main.cc:212
+msgid "cannot setup signal handling for %1"
+msgstr "kan ej konfigurera signalhantering för %1"
+
+#: ../main.cc:223
+msgid "cannot set default signal mask (%1)"
+msgstr "kan inte ställa in standardsignalmask (%1)"
+
+#: ../main.cc:253
+msgid ""
+"Without a UI style file, ardour will look strange.\n"
+" Please set ARDOUR2_UI_RC to point to a valid UI style file"
+msgstr ""
+"Utan en UI-stilfil kommer Ardour att se underligt ut.\n"
+" Ställ in ARDOUR2_UI_RC så att det pekar till en giltig UI-stilfil"
+
+#: ../main.cc:275
+msgid "Ardour could not connect to JACK."
+msgstr "Ardour kunde inte ansluta till JACK"
+
+#: ../main.cc:279
+msgid ""
+"There are several possible reasons:\n"
+"\n"
+"1) JACK is not running.\n"
+"2) JACK is running as another user, perhaps root.\n"
+"3) There is already another client called \"ardour\".\n"
+"\n"
+"Please consider the possibilities, and perhaps (re)start JACK."
+msgstr ""
+"Det finns flera möjliga anledningar:\n"
+"\n"
+"1) JACK är inte igång.\n"
+"2) JACK är startat av en annan användare, kanske root.\n"
+"3) Det finns redan en annan klient som heter \"ardour\".\n"
+"\n"
+"Överväg dessa möjligheter, och starta måhända (om) JACK."
+
+#: ../main.cc:309
+msgid "could not load command line session \"%1\""
+msgstr "kunde inte ladda kommandopromptssessionen \"%1\""
+
+#. it wasn't new, but we require a new session
+#: ../main.cc:329
+msgid ""
+"\n"
+"\n"
+"A session named \"%1\" already exists.\n"
+"To avoid this message, start ardour as \"ardour %1"
+msgstr ""
+"\n"
+"\n"
+"En session med namnet \"%1\" existerar redan.\n"
+"För att undvika detta meddelande, starta Ardour som \"ardour %1"
+
+#: ../main.cc:340
+msgid ""
+"\n"
+"\n"
+"No session named \"%1\" exists.\n"
+"To create it from the command line, start ardour as \"ardour --new %1"
+msgstr ""
+"\n"
+"\n"
+"Ingen session med namnet \"%1\" existerar.\n"
+"För att skapa den från kommandoprompten, starta Ardour som följer: \"ardour "
+"--new %1"
+
+#: ../main.cc:395
+msgid "Ardour/GTK "
+msgstr ""
+
+#: ../main.cc:397
+msgid ""
+"\n"
+"   (built using "
+msgstr ""
+"\n"
+"   (kompilerat med "
+
+#: ../main.cc:401
+msgid " with libardour "
+msgstr " med libardour"
+
+#: ../main.cc:406
+msgid " and GCC version "
+msgstr " och GCC version "
+
+#: ../main.cc:416
+msgid "Copyright (C) 1999-2006 Paul Davis"
+msgstr ""
+
+#: ../main.cc:417
+msgid ""
+"Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel "
+"Baker"
+msgstr ""
+"Vissa delar Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel "
+"Baker"
+
+#: ../main.cc:419
+msgid "Ardour comes with ABSOLUTELY NO WARRANTY"
+msgstr ""
+
+#: ../main.cc:420
+msgid "not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+msgstr ""
+
+#: ../main.cc:421
+msgid "This is free software, and you are welcome to redistribute it "
+msgstr ""
+
+#: ../main.cc:422
+msgid "under certain conditions; see the source for copying conditions."
+msgstr ""
+
+#: ../main.cc:431
+msgid "could not create ARDOUR GUI"
+msgstr "kunde inte skapa ARDOUR GUI"
+
+#: ../main.cc:449
+msgid "Could not connect to JACK server as  \"%1\""
+msgstr "Kunde inte ansluta till JACK-servern som \"%1\""
+
+#: ../main.cc:452
+msgid "could not initialize Ardour."
+msgstr "kunde inte initialisera Ardour."
+
+#: ../marker.cc:244
+msgid "MarkerText"
+msgstr "MarkörText"
+
+#: ../marker_time_axis.cc:253
+msgid "Remove Marker"
+msgstr "Ta bort markör"
+
+#: ../marker_time_axis.cc:255
+msgid "Marker"
+msgstr "Markör"
+
+#: ../meter_bridge.cc:77
+msgid "ardour: meter bridge"
+msgstr "ardour: taktartsbrygga"
+
+#: ../meter_bridge.cc:78
+msgid "ardour_meter_bridge"
+msgstr ""
+
+#: ../meter_bridge_strip.cc:79 ../meter_bridge_strip.cc:93
+#, c-format
+msgid "# of %u-sample overs"
+msgstr "# %u-samplings-över"
+
+#: ../meter_bridge_strip.cc:221
+msgid "New Name for Meter:"
+msgstr "Nytt namn för taktart"
+
+#: ../mixer_strip.cc:94 ../mixer_strip.cc:140 ../mixer_strip.cc:1227
+msgid "pre"
+msgstr "för"
+
+#: ../mixer_strip.cc:95 ../mixer_strip.cc:822
+msgid "Comments"
+msgstr "Kommentarer"
+
+#: ../mixer_strip.cc:118
+msgid "Input"
+msgstr "Ingång"
+
+#: ../mixer_strip.cc:136 ../mixer_strip.cc:1223
+msgid "input"
+msgstr "ingång"
+
+#: ../mixer_strip.cc:144 ../mixer_strip.cc:1231
+msgid "post"
+msgstr "efter"
+
+#. TRANSLATORS: this string should be longest of the strings
+#. used to describe meter points. In english, its "input".
+#.
+#: ../mixer_strip.cc:152
+msgid "tupni"
+msgstr "gnågni"
+
+#: ../mixer_strip.cc:207
+msgid "Varispeed"
+msgstr "variabel hastighet"
+
+#: ../mixer_strip.cc:233 ../mixer_strip.cc:836
+msgid "Click to Add/Edit Comments"
+msgstr "Klicka för att lägga till/redigera kommentarer"
+
+#: ../mixer_strip.cc:374
+msgid "unknown strip width \"%1\" in XML GUI information"
+msgstr "okänd strip-bredd \"%1\" i XML-GUI-informationen"
+
+#: ../mixer_strip.cc:417
+msgid "record"
+msgstr "spela in"
+
+#: ../mixer_strip.cc:418 ../region_editor.cc:46
+msgid "mute"
+msgstr "tysta"
+
+#: ../mixer_strip.cc:419
+msgid "solo"
+msgstr ""
+
+#: ../mixer_strip.cc:422
+msgid "comments"
+msgstr "kommentarer"
+
+#: ../mixer_strip.cc:424
+msgid "*comments*"
+msgstr "*kommentarer*"
+
+#: ../mixer_strip.cc:438
+msgid "Rec"
+msgstr "Spela in"
+
+#: ../mixer_strip.cc:439
+msgid "M"
+msgstr ""
+
+#: ../mixer_strip.cc:440
+msgid "S"
+msgstr ""
+
+#: ../mixer_strip.cc:443 ../mixer_strip.cc:830
+msgid "Cmt"
+msgstr "Kmt"
+
+#: ../mixer_strip.cc:445 ../mixer_strip.cc:828
+msgid "*Cmt*"
+msgstr "*Kmt*"
+
+#: ../mixer_strip.cc:483 ../mixer_strip.cc:549 ../redirect_box.cc:1005
+msgid "Not connected to JACK - no I/O changes are possible"
+msgstr "Inte ansluten till JACK - in/ut-ändringar är inte möjliga"
+
+#: ../mixer_strip.cc:560
+msgid "Track"
+msgstr "Spår"
+
+#: ../mixer_strip.cc:588 ../mixer_strip.cc:604
+msgid "could not register new ports required for that connection"
+msgstr "kunde inte registrera nya porter nödvändiga för anslutningen"
+
+#: ../mixer_strip.cc:747
+msgid " Input"
+msgstr " Ingång"
+
+#: ../mixer_strip.cc:750
+msgid "I"
+msgstr ""
+
+#: ../mixer_strip.cc:820
+msgid "*Comments*"
+msgstr "*Kommentarer"
+
+#: ../mixer_strip.cc:859
+msgid ": comment editor"
+msgstr ""
+
+#: ../mixer_strip.cc:953
+msgid "Grp"
+msgstr ""
+
+#: ../mixer_strip.cc:956
+msgid "~G"
+msgstr ""
+
+#: ../mixer_strip.cc:1004
+msgid "Invert Polarity"
+msgstr "Invertera polaritet"
+
+#: ../mixer_ui.cc:84
+msgid "Strips"
+msgstr "Remsor"
+
+#: ../mixer_ui.cc:109
+msgid "Group"
+msgstr "Grupp"
+
+#: ../mixer_ui.cc:210 ../mixer_ui.cc:369
+msgid "ardour: mixer"
+msgstr ""
+
+#: ../mixer_ui.cc:211
+msgid "ardour_mixer"
+msgstr ""
+
+#: ../mixer_ui.cc:345
+msgid "ardour: mixer: "
+msgstr ""
+
+#: ../mixer_ui.cc:572
+msgid "signal"
+msgstr ""
+
+#: ../mixer_ui.cc:722
+msgid "track display list item for renamed strip not found!"
+msgstr "hittade inte spårvisningslisteobjekt för omdöpt remsor!"
+
+#: ../new_session_dialog.cc:39
+msgid "New Session Name :"
+msgstr "Sessionens namn:"
+
+#: gtk2_ardour/new_session_dialog.cc:70
+msgid "Name :"
+msgstr "Namn:"
+
+#: gtk2_ardour/new_session_dialog.cc:79
+msgid "Create Folder In :"
+msgstr "Skapa katalog i:"
+
+#: gtk2_ardour/new_session_dialog.cc:72
+msgid "Template :"
+msgstr "Använd mall:"
+
+#: ../new_session_dialog.cc:45
+msgid "Channel Count"
+msgstr "Antal kanaler"
+
+#: ../new_session_dialog.cc:46
+msgid "Create Monitor Bus"
+msgstr "Skapa medhörningsbuss"
+
+#: ../new_session_dialog.cc:53
+msgid "Create Master Bus"
+msgstr "Skapa master-buss"
+
+#: ../new_session_dialog.cc:55
+msgid "Automatically Connect Inputs"
+msgstr "Anslut automatiskt ingångar"
+
+#: gtk2_ardour/new_session_dialog.cc:84 gtk2_ardour/new_session_dialog.cc:97
+msgid "Use only"
+msgstr "Använd endast"
+
+#: gtk2_ardour/new_session_dialog.cc:105
+msgid "... to Master Bus"
+msgstr "...till Master-bussen"
+
+#: gtk2_ardour/new_session_dialog.cc:106
+msgid "... to Physical Outputs"
+msgstr "...till fysiska utgångar"
+
+
+#: ../new_session_dialog.cc:56 ../new_session_dialog.cc:67
+msgid "Port Limit"
+msgstr "Portgräns"
+
+#: ../new_session_dialog.cc:64
+msgid "<b>Track/Bus Inputs</b>"
+msgstr "<b>Spår/bussingångar</b>"
+
+#: ../new_session_dialog.cc:66
+msgid "Automatically Connect Outputs"
+msgstr "Anslut automatiskt utgångar"
+
+#: ../new_session_dialog.cc:75
+msgid "Connect to Master Bus"
+msgstr "Anslut till master-bussen"
+
+#: gtk2_ardour/new_session_dialog.cc:83
+msgid "Automatically Connect to Physical Inputs"
+msgstr "Anslut automatiskt till fysiska utgångar"
+
+#: ../new_session_dialog.cc:80
+msgid "<b>Track/Bus Outputs</b>"
+msgstr "<b>Spår/bussutgångar</b>"
+
+#: ../new_session_dialog.cc:83
+msgid "Advanced Options"
+msgstr "Avancerade inställningar"
+
+#: gtk2_ardour/new_session_dialog.cc:66
+msgid "<b>Busses</b>"
+msgstr "<b>Bussar</b>"
+
+#: gtk2_ardour/new_session_dialog.cc:67
+msgid "<b>Inputs</b>"
+msgstr "<b>Ingångar</b>"
+
+#: gtk2_ardour/new_session_dialog.cc:68
+msgid "<b>Outputs</b>"
+msgstr "<b>Utgångar</b>"
+
+
+#: gtk2_ardour/new_session_dialog.cc:120
+msgid "Recent:"
+msgstr "Tidigare:"
+
+#: gtk2_ardour/new_session_dialog.cc:157
+msgid "Browse:"
+msgstr "Bläddra:"
+
+#: ../new_session_dialog.cc:274
+msgid "New Session"
+msgstr "Ny session"
+
+#: ../new_session_dialog.cc:276
+msgid "Open Session"
+msgstr "Öppna session"
+
+#: ../new_session_dialog.cc:281
+msgid "ardour: session control"
+msgstr "ardour: session"
+
+#: ../new_session_dialog.cc:305
+msgid "select template"
+msgstr "välj mall"
+
+#: ../new_session_dialog.cc:311
+msgid "select session file"
+msgstr "välj sessionsfil"
+
+#: ../new_session_dialog.cc:320
+msgid "select directory"
+msgstr "välj katalog"
+
+#: ../option_editor.cc:75
+msgid "SMPTE offset is negative"
+msgstr "SMPTE-förskjutning är negativ"
+
+#: ../option_editor.cc:101
+msgid "ardour: options editor"
+msgstr "ardour: inställningar"
+
+#: ../option_editor.cc:102
+msgid "ardour_option_editor"
+msgstr ""
+
+#: ../option_editor.cc:126
+msgid "Paths/Files"
+msgstr "Sökvägar/filer"
+
+#: ../option_editor.cc:127
+msgid "Kbd/Mouse"
+msgstr "Tangentbord/mus"
+
+#: ../option_editor.cc:130
+msgid "Layers & Fades"
+msgstr "Lager & Toningar"
+
+#: ../option_editor.cc:134
+msgid "MIDI"
+msgstr ""
+
+#: ../option_editor.cc:176
+msgid "24 FPS"
+msgstr ""
+
+#: ../option_editor.cc:178
+msgid "25 FPS"
+msgstr ""
+
+#: ../option_editor.cc:180
+msgid "30 FPS"
+msgstr ""
+
+#: ../option_editor.cc:186
+msgid "30 FPS drop"
+msgstr "30 FPS-drop"
+
+#: ../option_editor.cc:243
+msgid "session RAID path"
+msgstr "Sessionens RAID-sökväg"
+
+#: ../option_editor.cc:248
+msgid "Soundfile Search Paths"
+msgstr "Sökvägar för ljudfiler"
+
+#: ../option_editor.cc:253
+msgid "Paths"
+msgstr "Sökvägar"
+
+#: ../option_editor.cc:267 ../option_editor.cc:273 ../option_editor.cc:722
+#: ../option_editor.cc:749
+msgid "internal"
+msgstr "intern"
+
+#: ../option_editor.cc:286
+msgid "Short crossfade length (msecs)"
+msgstr "Kort övertonings längd (msek)"
+
+#: ../option_editor.cc:298
+msgid "Destructive crossfade length (msecs)"
+msgstr "Destruktiv övertonings längd (msek)"
+
+#: ../option_editor.cc:366
+msgid "SMPTE Frames/second"
+msgstr "SMPTE-Frames/sekund"
+
+#: ../option_editor.cc:367
+msgid "SMPTE Offset"
+msgstr "SMPTE-förskjutning"
+
+#: ../option_editor.cc:461 ../option_editor.cc:468 ../option_editor.cc:471
+#: ../option_editor.cc:617
+msgid "online"
+msgstr "ansluten"
+
+#. remember, we have to handle the i18n case where the relative
+#. lengths of the strings in language N is different than in english.
+#.
+#: ../option_editor.cc:468 ../option_editor.cc:469 ../option_editor.cc:614
+msgid "offline"
+msgstr "frånkopplad"
+
+#: ../option_editor.cc:669
+msgid "Choose Click"
+msgstr "Välj klick"
+
+#: ../option_editor.cc:688
+msgid "Choose Click Emphasis"
+msgstr "Välj klickbetoning"
+
+#: ../option_editor.cc:802
+msgid "Click audio file"
+msgstr "Klickljudfil"
+
+#: ../option_editor.cc:808
+msgid "Click emphasis audiofile"
+msgstr "Betoningsljudfil"
+
+#: ../option_editor.cc:845
+msgid ""
+"The auditioner is a dedicated mixer strip used\n"
+"for listening to specific regions outside the context\n"
+"of the overall mix. It can be connected just like any\n"
+"other mixer strip."
+msgstr ""
+"Avlyssnaren är en dedikerad mixerremsa som används\n"
+"för att lyssna på specifika regioner utanför den\n"
+"generalla mixen. Den kan anslutas precis som vilken\n"
+"annan mixerremsa."
+
+#: ../option_editor.cc:918
+msgid "Edit using"
+msgstr "Redigera med"
+
+#: ../option_editor.cc:925 ../option_editor.cc:952
+msgid "+ button"
+msgstr "+ musknapp"
+
+#: ../option_editor.cc:945
+msgid "Delete using"
+msgstr "Radera med"
+
+#: ../option_editor.cc:972
+msgid "Ignore snap using"
+msgstr "Ignorera fästläge med"
+
+#: ../opts.cc:46
+msgid "Usage: "
+msgstr "Användning: "
+
+#: ../opts.cc:47
+msgid "  -v, --version                    Show version information\n"
+msgstr "  -v, --version                    Visa versionsinformation\n"
+
+#: ../opts.cc:48
+msgid "  -h, --help                       Print this message\n"
+msgstr "  -h, --help                       Visa detta meddelande\n"
+
+#: ../opts.cc:49
+msgid ""
+"  -b, --bindings                   Print all possible keyboard binding "
+"names\n"
+msgstr ""
+"  -b, --bindings                   Visa alla möjliga kortkommandonamn\n"
+
+#: ../opts.cc:50
+msgid "  -n, --show-splash                Show splash screen\n"
+msgstr "  -n, --show-splash                Visa splash-bilden\n"
+
+#: ../opts.cc:51
+msgid ""
+"  -c, --name  name                 Use a specific jack client name, default "
+"is ardour\n"
+msgstr ""
+"  -c, --name  name                 Använd ett specifikt jack-klientnamn, "
+"standard är ardour\n"
+
+#: ../opts.cc:52
+msgid ""
+"  -N, --new session-name           Create a new session from the command "
+"line\n"
+msgstr ""
+"  -N, --new session-name           Skapa en ny session från kammando- "
+"prompten\n"
+
+#: ../opts.cc:53
+msgid ""
+"  -o, --use-hw-optimizations        Try to use h/w specific optimizations\n"
+msgstr ""
+"  -o, --use-hw-optimizations        Försök använda hårdvaruspecifik optimering\n"
+
+#: ../opts.cc:55
+msgid "  -V, --novst                      Do not use VST support\n"
+msgstr "  -V, --novst                      Slå av VST-stödet\n"
+
+#: ../opts.cc:57
+msgid "  [session-name]                   Name of session to load\n"
+msgstr "  [session-name]                   Namn för sessionen som ska laddas\n"
+
+#: ../opts.cc:58
+msgid "  -C, --curvetest filename         Curve algorithm debugger\n"
+msgstr ""
+
+#: ../opts.cc:59
+msgid "  -g, --gtktheme                   Allow GTK to load a theme\n"
+msgstr " -g, --gtktheme                   Tillåt GTK att ladda ett tema\n"	
+
+#: ../pan_automation_time_axis.cc:59
+msgid "You can't graphically edit panning of more than stream"
+msgstr "Du kan inte grafiskt redigera panorering för mer en än en ström"
+
+#: ../pan_automation_time_axis.cc:79
+msgid "add pan automation event"
+msgstr "lägg till panoreringsautomatiseringshändelse"
+
+#: ../panner2d.cc:588 ../panner_ui.cc:434 ../plugin_ui.cc:833
+msgid "Bypass"
+msgstr "Förbigå"
+
+#: ../panner_ui.cc:57 ../panner_ui.cc:224
+msgid "link"
+msgstr "länka"
+
+#: ../panner_ui.cc:68
+msgid "Pan automation mode"
+msgstr "panoreringsautomatiseringsläge"
+
+#: ../panner_ui.cc:69
+msgid "Pan automation type"
+msgstr "panoreringsuatomtiseringstyp"
+
+#: ../panner_ui.cc:80
+msgid "panning link control"
+msgstr "kontroll för panoreringslänkning"
+
+#: ../panner_ui.cc:82
+msgid "panning link direction"
+msgstr "riktning för panoreringslänkning"
+
+#: ../panner_ui.cc:234
+msgid "L"
+msgstr "V"
+
+#: ../panner_ui.cc:334
+#, c-format
+msgid "panner for channel %lu"
+msgstr ""
+
+#: ../panner_ui.cc:336
+#, c-format
+msgid "panner for channel %u"
+msgstr "panorering för kanal %u"
+
+#: ../panner_ui.cc:444
+msgid "Reset all"
+msgstr "Nollställ alla"
+
+#: ../playlist_selector.cc:51
+msgid "ardour: playlists"
+msgstr "ardour: spellistor"
+
+#: ../playlist_selector.cc:58
+msgid "Playlists grouped by track"
+msgstr "Spellista grupperad utifrån spår"
+
+#: ../playlist_selector.cc:97
+msgid "ardour: playlist for "
+msgstr "ardour: spellista för "
+
+#: ../playlist_selector.cc:113
+msgid "Other tracks"
+msgstr "Andra spår"
+
+#: ../playlist_selector.cc:129
+msgid "unassigned"
+msgstr "otilldelad"
+
+#: ../plugin_selector.cc:42
+msgid "ardour: plugins"
+msgstr "ardour: insticksprogram"
+
+#: ../plugin_selector.cc:55
+msgid "Available LADSPA Plugins"
+msgstr "Tillgängliga LADSPA-insticksprogram"
+
+#: ../plugin_selector.cc:56
+msgid "Type"
+msgstr "Typ"
+
+#: ../plugin_selector.cc:57 ../plugin_selector.cc:80
+msgid "# Inputs"
+msgstr "# Ingångar"
+
+#: ../plugin_selector.cc:58 ../plugin_selector.cc:81
+msgid "# Outputs"
+msgstr "# Utångar"
+
+#: ../plugin_selector.cc:67
+msgid "Plugins to be Connected to Insert"
+msgstr "Insticksprogram att anslutas till Anslutningspunkt"
+
+#: ../plugin_selector.cc:79
+msgid "Available plugins"
+msgstr "Tillgänliga insticksprogram"
+
+#: ../plugin_selector.cc:97
+msgid "Add a plugin to the effect list"
+msgstr "Lägg till ett insticksprogram till effektlistan"
+
+#: ../plugin_selector.cc:101
+msgid "Remove a plugin from the effect list"
+msgstr "Ta bort ett insticksprogram från effektlistan"
+
+#: ../plugin_selector.cc:103
+msgid "Update available plugins"
+msgstr "Uppdatera tillgängliga insticksprogram"
+
+#: ../plugin_selector.cc:125
+msgid "LADSPA"
+msgstr ""
+
+#: ../plugin_selector.cc:128
+msgid "VST"
+msgstr ""
+
+#: ../plugin_ui.cc:83
+msgid ""
+"unknown type of editor-supplying plugin (note: no VST support in this "
+"version of ardour)"
+msgstr ""
+"okänd typ av editor-levererande insticksprogram (N.B.: inget VST-stöd i "
+"denna version av ardour)"
+
+#: ../plugin_ui.cc:138
+msgid "<span size=\"large\">Presets</span>"
+msgstr "<span size=\"large\">Förinställningar</span>"
+
+#: ../plugin_ui.cc:229
+msgid "Controls"
+msgstr "Kontroller"
+
+#: ../plugin_ui.cc:266
+msgid "Plugin Editor: could not build control element for port %1"
+msgstr ""
+"Insticksprogramsredigerare: kunde inte bygga kontrollelement för port%1"
+
+#: ../plugin_ui.cc:357
+msgid "Automation control"
+msgstr "Automatiseringskontroll"
+
+#: ../plugin_ui.cc:853
+msgid "Plugin preset %1 not found"
+msgstr "Insticksprogram-förinställning %1 hittades inte"
+
+#: ../plugin_ui.cc:863
+msgid "Name of New Preset:"
+msgstr "Namn för insticksprogramsinställningar:"
+
+#: ../redirect_automation_line.cc:53
+msgid "redirect automation created for non-plugin"
+msgstr "omdirigera automatisering skapa för icke-insticksprogram"
+
+#: ../redirect_automation_time_axis.cc:93
+msgid "add automation event to "
+msgstr "lägg till automatiseringshändelse till"
+
+#: ../redirect_box.cc:222
+msgid "New send"
+msgstr "Ny Sänd"
+
+#: ../redirect_box.cc:223
+msgid "Show send controls"
+msgstr "msgstr Visa Sändkontroller"
+
+#: ../redirect_box.cc:382
+msgid ""
+"You attempted to add a plugin (%1).\n"
+"The plugin has %2 inputs\n"
+"but at the insertion point, there are\n"
+"%3 active signal streams.\n"
+"\n"
+"This makes no sense - you are throwing away\n"
+"part of the signal."
+msgstr ""
+"Du försökte lägga till ett insticksprogram (%1).\n"
+"Det har %2 ingångar\n"
+"men vid punkten det infogades finns bara\n"
+"%3 aktiva signalströmmar.\n"
+"\n"
+"Detta är orimligt - du slängers bort\n"
+"en del av signalen."
+
+#: ../redirect_box.cc:394
+msgid ""
+"You attempted to add a plugin (%1).\n"
+"The plugin has %2 inputs\n"
+"but at the insertion point there are\n"
+"only %3 active signal streams.\n"
+"\n"
+"This makes no sense - unless the plugin supports\n"
+"side-chain inputs. A future version of Ardour will\n"
+"support this type of configuration."
+msgstr ""
+"Du försökte lägga till ett insticksprogram (%1).\n"
+"Det har %2 ingångar\n"
+"men vid punkten det infogades finns bara\n"
+"%3 aktiva signalströmmar.\n"
+"\n"
+"Detta är orimligt - förutom om insticksprogrammet\n"
+"stödjer sidokedjeingångar. Framtida versioner av\n"
+"Ardour kommer att stödja detta."
+
+#: ../redirect_box.cc:407
+msgid ""
+"You attempted to add a plugin (%1).\n"
+"\n"
+"The I/O configuration doesn't make sense:\n"
+"\n"
+"The plugin has %2 inputs and %3 outputs.\n"
+"The track/bus has %4 inputs and %5 outputs.\n"
+"The insertion point, has %6 active signals.\n"
+"\n"
+"Ardour does not understand what to do in such situations.\n"
+msgstr ""
+"Du försökte lägga till ett insticksprogram (%1).\n"
+"\n"
+"In/Ut-konfigurationen är orimlig:\n"
+"\n"
+"Insticksprogrammet har %2 ingångar och %3 ut.\n"
+"Spåret/bussen har %4 ingångar och %5 ut.\n"
+"Infogningspunkten har %6 aktiva signaler.\n"
+"\n"
+"Ardour förstår inte vad det ska göra i sådana situationer.\n"
+
+#: ../redirect_box.cc:494
+msgid "Pre-fader inserts, sends & plugins:"
+msgstr "För-nivåreglage-anslutningspunkter, sändningar & insticksprogram:"
+
+#: ../redirect_box.cc:497
+msgid "Post-fader inserts, sends & plugins:"
+msgstr "Efter-nivåreglage-anslutningspunkter, sändningar & insticksprogram:"
+
+#: ../redirect_box.cc:643
+msgid ""
+"You cannot reorder this set of redirects\n"
+"in that way because the inputs and\n"
+"outputs do not work correctly."
+msgstr ""
+"Du kan inte omarrangera dessa omdirigeringar\n"
+"på det sättet eftersom ingångar och\n"
+"utgångarna inte fungerar korrekt."
+
+#: ../redirect_box.cc:748
+msgid "rename redirect"
+msgstr "döp om omdirigering"
+
+#: ../redirect_box.cc:825 ../redirect_box.cc:873
+msgid ""
+"Copying the set of redirects on the clipboard failed,\n"
+"probably because the I/O configuration of the plugins\n"
+"could not match the configuration of this track."
+msgstr ""
+"Kopieringen av omdirigeringarna på klippbordet misslyckades,\n"
+"förmodligen på grund av att I/O-konfiguration av insticksprogrammen\n"
+"inte kunde matcha konfiurationen av detta spåret."
+
+#: ../redirect_box.cc:895
+msgid ""
+"Do you really want to remove all redirects from this track?\n"
+"(this cannot be undone)"
+msgstr ""
+"Vill du verkligen radera alla omdirigeringar från detta spåret?\n"
+"(detta kan inte ångras)"
+
+#: ../redirect_box.cc:898
+msgid ""
+"Do you really want to remove all redirects from this bus?\n"
+"(this cannot be undone)"
+msgstr ""
+"Vill du verkligen radera alla omdirigeringar från denna bussen?\n"
+"(detta kan inte ångras)"
+
+#: ../redirect_box.cc:903
+msgid "Yes, remove them all"
+msgstr "Ja, ta bort alla"
+
+#: ../redirect_box.cc:939
+msgid "ardour: %1"
+msgstr ""
+
+#: ../redirect_box.cc:981
+msgid "ardour: %1: %2 (by %3)"
+msgstr "ardour: %1: %2 (av %3)"
+
+#. new stuff
+#: ../redirect_box.cc:1053
+msgid "New Plugin ..."
+msgstr "Nytt Insticksprogram..."
+
+#: ../redirect_box.cc:1054
+msgid "New Insert"
+msgstr "Ny Anslutningspunkt"
+
+#: ../redirect_box.cc:1055
+msgid "New Send ..."
+msgstr "Ny Sänd..."
+
+#: ../redirect_box.cc:1067
+msgid "Deselect All"
+msgstr "Avmarkera allt"
+
+#: ../redirect_box.cc:1074
+msgid "Activate all"
+msgstr "Aktivera alla"
+
+#: ../redirect_box.cc:1075
+msgid "Deactivate all"
+msgstr "Aktivera alla"
+
+#: ../region_editor.cc:44
+msgid "NAME:"
+msgstr "NAMN:"
+
+#: ../region_editor.cc:45
+msgid "lock"
+msgstr "lås"
+
+#: ../region_editor.cc:47
+msgid "opaque"
+msgstr "ogenomskinlig"
+
+#: ../region_editor.cc:48 ../region_editor.cc:191 ../region_editor.cc:225
+msgid "active"
+msgstr "aktivt"
+
+#: ../region_editor.cc:49
+msgid "visible"
+msgstr "synligt"
+
+#: ../region_editor.cc:52
+msgid "Layer"
+msgstr "Lager"
+
+#: ../region_editor.cc:53
+msgid "play"
+msgstr "spela"
+
+#: ../region_editor.cc:60
+msgid "ENVELOPE"
+msgstr "KONVOLUT"
+
+#: ../region_editor.cc:106
+msgid "mute this region"
+msgstr "tysta denna region"
+
+#: ../region_editor.cc:107
+msgid "regions underneath this one cannot be heard"
+msgstr "regoner under denna kan inte höras"
+
+#: ../region_editor.cc:108
+msgid "prevent any changes to this region"
+msgstr "förhindra ändringar för denna region"
+
+#: ../region_editor.cc:109
+msgid "use the gain envelope during playback"
+msgstr "använd volymkonvolutet under uppspelning"
+
+#: ../region_editor.cc:110
+msgid "show the gain envelope"
+msgstr "visa volymkonvolutet"
+
+#: ../region_editor.cc:111
+msgid "use fade in curve during playback"
+msgstr "använd intoningskurvan under uppspelning"
+
+#: ../region_editor.cc:112
+msgid "use fade out curve during playback"
+msgstr "använd uttoningskurvan under uppspelning"
+
+#: ../region_editor.cc:113
+msgid "audition this region"
+msgstr "avlyssna denna region"
+
+#: ../region_editor.cc:146
+msgid "START:"
+msgstr ""
+
+#: ../region_editor.cc:148
+msgid "END:"
+msgstr "SLUT:"
+
+#: ../region_editor.cc:150
+msgid "LENGTH:"
+msgstr "LÄNGD:"
+
+#: ../region_editor.cc:190
+msgid "FADE IN"
+msgstr "TONA IN"
+
+#: ../region_editor.cc:192 ../region_editor.cc:226
+msgid "msecs"
+msgstr ""
+
+#: ../region_editor.cc:224
+msgid "FADE OUT"
+msgstr "TONA UT"
+
+#: ../region_editor.cc:264
+msgid "ardour: region "
+msgstr ""
+
+#: ../region_editor.cc:401
+msgid "fade in edit"
+msgstr "intoningsredigering"
+
+#: ../region_editor.cc:413
+msgid "fade out edit"
+msgstr "uttoningsredigering"
+
+#: ../regionview.cc:1144
+msgid "add gain control point"
+msgstr "lägg till volymkontrollspunkt"
+
+#: ../route_params_ui.cc:88
+msgid "Tracks/Buses"
+msgstr "Spår/Bussar"
+
+#: ../route_params_ui.cc:108
+msgid "Pre-fader Redirects"
+msgstr "För-omdirigeringar"
+
+#: ../route_params_ui.cc:109
+msgid "Post-fader Redirects"
+msgstr "Efter-omdirigeringar"
+
+#: ../route_params_ui.cc:143
+msgid "ardour: track/bus inspector"
+msgstr "ardour: spår/buss-inspektör"
+
+#: ../route_params_ui.cc:144
+msgid "ardour_route_parameters"
+msgstr ""
+
+#: ../route_params_ui.cc:201
+msgid "route display list item for renamed route not found!"
+msgstr "ruttvisningslisteobjekt för omdöpt rutt hittades inte!"
+
+#: ../route_params_ui.cc:452
+msgid "NO TRACK"
+msgstr "INGET SPÅR"
+
+#: ../route_params_ui.cc:694
+msgid "ardour: track/bus inspector: "
+msgstr "ardour: spår/buss-inspektör"
+
+#: ../route_params_ui.cc:698
+msgid "No Route Selected"
+msgstr "Ingen Rutt Vald"
+
+#: ../route_params_ui.cc:699
+msgid "ardour: track/bus/inspector: no route selected"
+msgstr "ardour: spår/buss-inspektör: ingen rutt vald"
+
+#. ctrl-shift-click applies change to all routes
+#: ../route_ui.cc:133
+msgid "mute change"
+msgstr "ändra tystning"
+
+#. ctrl-shift-click applies change to all routes
+#. ctrl-alt-click: exclusively solo this track, not a toggle */
+#: ../route_ui.cc:208 ../route_ui.cc:218
+msgid "solo change"
+msgstr "ändra solo"
+
+#: ../route_ui.cc:281
+msgid "rec-enable change"
+msgstr "ändra inspelningsläge"
+
+#: ../route_ui.cc:472
+msgid "Solo-safe"
+msgstr "Solo-säker"
+
+#: ../route_ui.cc:480 ../route_ui.cc:523
+msgid "MIDI Bind"
+msgstr "MIDI-bindning"
+
+#: ../route_ui.cc:494
+msgid "Pre Fader"
+msgstr "Före-nivåreglage"
+
+#: ../route_ui.cc:501
+msgid "Post Fader"
+msgstr "Efter-nivåreglage"
+
+#: ../route_ui.cc:508
+msgid "Control Outs"
+msgstr "Kontrollutgångar"
+
+#: ../route_ui.cc:515
+msgid "Main Outs"
+msgstr "Huvudutgångar"
+
+#: ../route_ui.cc:552
+msgid "mix group solo  change"
+msgstr "mixgrupp-solo-ändring"
+
+#: ../route_ui.cc:586
+msgid "mix group mute change"
+msgstr "mixgrupp-tystnings-ändring"
+
+#: ../route_ui.cc:602
+msgid "mix group rec-enable change"
+msgstr "mixgrupp-inspelningsmöjliggörning-ändring"
+
+#: ../route_ui.cc:619 ../visual_time_axis.cc:236
+msgid "ardour: color selection"
+msgstr "ardour: färgval"
+
+#: ../route_ui.cc:695
+msgid ""
+"Do you really want to remove track \"%1\" ?\n"
+"\n"
+"You may also lose the playlist used by this track.\n"
+"(cannot be undone)"
+msgstr ""
+"Vill du verkligen ta bort spår \"%1\" ?\n"
+"Du kanske också förlorar spellista använd av detta spår.\n"
+"(detta kan inte ångras)"
+
+#: ../route_ui.cc:697
+msgid ""
+"Do you really want to remove bus \"%1\" ?\n"
+"(cannot be undone)"
+msgstr ""
+"Vill du verkligen ta bort buss \"%1\" ?\n"
+"(detta kan inte ångras)"
+
+#: ../route_ui.cc:701 ../visual_time_axis.cc:278
+msgid "Yes, remove it."
+msgstr "Ja, ta bort den."
+
+#: ../route_ui.cc:730
+msgid "New Name: "
+msgstr "Nytt namn: "
+
+#: ../sfdb_ui.cc:57
+msgid "Add Field..."
+msgstr "Lägg till fält..."
+
+#: ../sfdb_ui.cc:58
+msgid "Remove Field"
+msgstr "Ta bort fält"
+
+#: ../sfdb_ui.cc:61
+msgid "Soundfile Info"
+msgstr "Ljudfilsinformation"
+
+#: ../sfdb_ui.cc:79
+msgid "Field"
+msgstr "Fält"
+
+#: ../sfdb_ui.cc:80
+msgid "Value"
+msgstr "Värde"
+
+#: ../sfdb_ui.cc:160
+msgid "channels"
+msgstr "kanal(er)"
+
+#: ../sfdb_ui.cc:160
+msgid "samplerate"
+msgstr "samplingsfrekvens"
+
+#: ../sfdb_ui.cc:161
+msgid "resolution"
+msgstr "upplösning"
+
+#: ../sfdb_ui.cc:161
+msgid "format"
+msgstr "format"
+
+#: ../sfdb_ui.cc:182
+msgid "Could not read file: %1 (%2)."
+msgstr "Kunde inte läsa fil: %1 (%2)."
+
+#: ../sfdb_ui.cc:198
+msgid "Could not access soundfile: "
+msgstr "Dela kanaler"
+
+#: ../sfdb_ui.cc:235
+msgid "Name for Field"
+msgstr "Ange namn för fält"
+
+#: ../sfdb_ui.cc:334
+msgid "Split Channels"
+msgstr "Dela kanaler"
+
+#: ../sfdb_ui.cc:341
+msgid "Create a region for each channel"
+msgstr "Skapa en region för varje kanal"
+
+#: ../sfdb_ui.cc:343
+msgid "Embed"
+msgstr "Infoga"
+
+#: ../sfdb_ui.cc:345
+msgid "Link to an external file"
+msgstr "Länka till en extern fil"
+
+#: ../sfdb_ui.cc:347
+msgid "Import"
+msgstr "Importera"
+
+#: ../sfdb_ui.cc:349
+msgid "Copy a file to the session folder"
+msgstr "Kopiera en fil till sessionskatalogen"
+
+#: ../sfdb_ui.cc:413
+msgid "programming error: %1"
+msgstr ""
+
+#: ../tempo_dialog.cc:17 ../tempo_dialog.cc:34
+msgid "Beats per minute"
+msgstr "Slag per minut"
+
+#: ../tempo_dialog.cc:20 ../tempo_dialog.cc:37 ../tempo_dialog.cc:202
+#: ../tempo_dialog.cc:220
+msgid "Bar"
+msgstr "Takt"
+
+#: ../tempo_dialog.cc:21 ../tempo_dialog.cc:38 ../tempo_dialog.cc:203
+#: ../tempo_dialog.cc:221
+msgid "Beat"
+msgstr "Slag"
+
+#: ../tempo_dialog.cc:23 ../tempo_dialog.cc:40 ../tempo_dialog.cc:204
+#: ../tempo_dialog.cc:222
+msgid "Location"
+msgstr "Plats"
+
+#: ../tempo_dialog.cc:198 ../tempo_dialog.cc:216
+msgid "Meter denominator"
+msgstr "Taktartsnämnare"
+
+#: ../tempo_dialog.cc:199 ../tempo_dialog.cc:217
+msgid "Beats per bar"
+msgstr "Slag per takt"
+
+#: ../tempo_dialog.cc:235 ../tempo_dialog.cc:246
+msgid "whole (1)"
+msgstr "hel (1)"
+
+#: ../tempo_dialog.cc:236 ../tempo_dialog.cc:248
+msgid "second (2)"
+msgstr "sekond (2)"
+
+#: ../tempo_dialog.cc:237 ../tempo_dialog.cc:250
+msgid "third (3)"
+msgstr "ters (3)"
+
+#: ../tempo_dialog.cc:238 ../tempo_dialog.cc:252 ../tempo_dialog.cc:260
+msgid "quarter (4)"
+msgstr "kvart (4)"
+
+#: ../tempo_dialog.cc:239 ../tempo_dialog.cc:254
+msgid "eighth (8)"
+msgstr "åttondel (8)"
+
+#: ../tempo_dialog.cc:240 ../tempo_dialog.cc:256
+msgid "sixteenth (16)"
+msgstr "sextondel (16)"
+
+#: ../tempo_dialog.cc:241 ../tempo_dialog.cc:258
+msgid "thirty-second (32)"
+msgstr "trettiotvåondel (32)"
+
+#: ../tempo_dialog.cc:419
+msgid "garbaged note type entry (%1)"
+msgstr "skräpad nottypsvärde (%1)"
+
+#: ../tempo_dialog.cc:429
+msgid "incomprehensible note type entry (%1)"
+msgstr "orimlig nottypsvärde (%1)"
+
+#: ../time_axis_view.cc:111
+msgid "gTortnam"
+msgstr ""
+
+#: ../time_axis_view.cc:548
+msgid "Largest"
+msgstr "Störst"
+
+#: ../time_axis_view.cc:549
+msgid "Large"
+msgstr "Större"
+
+#: ../time_axis_view.cc:550
+msgid "Larger"
+msgstr "Stor"
+
+#: ../time_axis_view.cc:552
+msgid "Smaller"
+msgstr "Mindre"
+
+#: ../time_axis_view.cc:553
+msgid "Small"
+msgstr "Liten"
+
+#: ../time_axis_view.cc:869
+msgid "unknown track height name \"%1\" in XML GUI information"
+msgstr "okänt spårhöjdsnamn \"%1\" i XML-GUI-informationen"
+
+#. first constructed item sets up font info
+#: ../time_axis_view_item.cc:78
+msgid "TimeAxisViewItemName"
+msgstr ""
+
+#: ../time_axis_view_item.cc:297
+msgid "new duration %1 frames is out of bounds for %2"
+msgstr "ny varaktighet %1 frames är utom räckvidd för %2"
+
+#: ../time_selection.cc:40
+msgid "programming error: request for non-existent audio range (%1)!"
+msgstr ""
+
+#: ../utils.cc:106 ../utils.cc:149
+msgid "bad XPM header %1"
+msgstr ""
+
+#: ../utils.cc:331
+msgid "missing RGBA style for \"%1\""
+msgstr "saknar RGBA-stil för \"%1\""
+
+#: ../visual_time_axis.cc:275
+msgid ""
+"Do you really want to remove track \"%1\" ?\n"
+"(cannot be undone)"
+msgstr ""
+"Vill du verkligen ta bort spår \"%1\" ?\n"
+"(detta kan inte ångras)"
+
+
+#: ../visual_time_axis.cc:324
+msgid "new name: "
+msgstr "nytt namn: "
+
+#: ../visual_time_axis.cc:335
+msgid "A track already exists with that name"
+msgstr "Ett spår med det namnet existerar redan"

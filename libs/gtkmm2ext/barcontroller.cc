@@ -423,6 +423,7 @@ BarController::switch_to_spinner ()
 	remove ();
 	add (spinner);
 	spinner.show ();
+	spinner.select_region (0, spinner.get_text_length());
 	spinner.grab_focus ();
 
 	switching = false;

@@ -153,6 +153,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::TextView* comment_area;
 	Gtk::Button    comment_button;
 
+	void comment_editor_done_editing();
 	void setup_comment_editor ();
 	void comment_button_clicked ();
 
@@ -245,6 +246,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void engine_running();
 	void engine_stopped();
 
+	static int scrollbar_height;
 };
 
 #endif /* __ardour_mixer_strip__ */

@@ -542,11 +542,11 @@ ARDOUR_UI::update_buffer_load ()
 }
 
 void
-ARDOUR_UI::count_recenabled_diskstreams (Route& route)
+ARDOUR_UI::count_recenabled_streams (Route& route)
 {
 	Track* track = dynamic_cast<Track*>(&route);
 	if (track && track->diskstream()->record_enabled()) {
-		rec_enabled_diskstreams++;
+		rec_enabled_streams += track->n_inputs().get_total();
 	}
 }
 
@@ -568,11 +568,11 @@ ARDOUR_UI::update_disk_space()
 		int secs;
 		nframes_t fr = session->frame_rate();
 		
-		rec_enabled_diskstreams = 0;
-		session->foreach_route (this, &ARDOUR_UI::count_recenabled_diskstreams);
+		rec_enabled_streams = 0;
+		session->foreach_route (this, &ARDOUR_UI::count_recenabled_streams);
 		
-		if (rec_enabled_diskstreams) {
-			frames /= rec_enabled_diskstreams;
+		if (rec_enabled_streams) {
+			frames /= rec_enabled_streams;
 		}
 		
 		hrs  = frames / (fr * 3600);
@@ -1038,7 +1038,7 @@ ARDOUR_UI::transport_stop ()
 		return;
 	}
 	
-	if (Config->get_auto_loop()) {
+	if (session->get_play_loop ()) {
 		session->request_play_loop (false);
 	}
 	
@@ -1092,7 +1092,7 @@ ARDOUR_UI::transport_roll ()
 
 	rolling = session->transport_rolling ();
 
-	if (Config->get_auto_loop()) {
+	if (session->get_play_loop()) {
 		session->request_play_loop (false);
 		auto_loop_button.set_active (false);
 		roll_button.set_active (true);
@@ -1110,7 +1110,7 @@ void
 ARDOUR_UI::transport_loop()
 {
 	if (session) {
-		if (Config->get_auto_loop()) {
+		if (session->get_play_loop()) {
 			if (session->transport_rolling()) {
 				Location * looploc = session->locations()->auto_loop_location();
 				if (looploc) {
@@ -1268,7 +1268,6 @@ ARDOUR_UI::engine_stopped ()
 	ActionManager::set_sensitive (ActionManager::jack_sensitive_actions, false);
 	ActionManager::set_sensitive (ActionManager::jack_opposite_sensitive_actions, true);
 }
-
 
 void
 ARDOUR_UI::engine_running ()
@@ -1471,7 +1470,6 @@ ARDOUR_UI::snapshot_session ()
 
 	prompter.set_name ("Prompter");
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
-	prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
 	prompter.set_prompt (_("Name of New Snapshot"));
 	prompter.set_initial_text (now);
 	
@@ -1621,7 +1619,6 @@ ARDOUR_UI::save_template ()
 	prompter.set_prompt (_("Name for mix template:"));
 	prompter.set_initial_text(session->name() + _("-template"));
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
-	prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
 
 	switch (prompter.run()) {
 	case RESPONSE_ACCEPT:
@@ -1646,18 +1643,25 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 	int response = Gtk::RESPONSE_NONE;
 
 	new_session_dialog->set_modal(true);
-	new_session_dialog->set_name(predetermined_path);
+	new_session_dialog->set_name (predetermined_path);
 	new_session_dialog->reset_recent();
 	new_session_dialog->show();
 
 	do {
 	        response = new_session_dialog->run ();
+		
+		_session_is_new = false;
 
-		if(response == Gtk::RESPONSE_CANCEL || response == Gtk::RESPONSE_DELETE_EVENT) {
-		        quit();
+		if (response == Gtk::RESPONSE_CANCEL || response == Gtk::RESPONSE_DELETE_EVENT) {
+
+			if (!session) {
+				quit();
+			}
+			new_session_dialog->hide ();
 			return;
 
 		} else if (response == Gtk::RESPONSE_NONE) {
+
 		        /* Clear was pressed */
 		        new_session_dialog->reset();
 
@@ -1709,8 +1713,6 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 			
 			} else {
 
-			        _session_is_new = true;
-			      
 				if (session_name.empty()) {
 					response = Gtk::RESPONSE_NONE;
 					continue;
@@ -1726,14 +1728,43 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 				} else {
 
 					session_path = new_session_dialog->session_folder();
-					
+
 				}
-			
+				
 				//XXX This is needed because session constructor wants a 
 				//non-existant path. hopefully this will be fixed at some point.
 				
 				session_path = Glib::build_filename (session_path, session_name);
 						
+				if (g_file_test (session_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
+
+					Glib::ustring str = string_compose (_("This session\n%1\nalready exists. Do you want to open it?"), session_path);
+
+					MessageDialog msg (str,
+							   false,
+							   Gtk::MESSAGE_WARNING,
+							   Gtk::BUTTONS_YES_NO,
+							   true);
+
+
+					msg.set_name (X_("CleanupDialog"));
+					msg.set_wmclass (_("existing_session"), "Ardour");
+					msg.set_position (Gtk::WIN_POS_MOUSE);
+					
+					switch (msg.run()) {
+					case RESPONSE_YES:
+						load_session (session_path, session_name);
+						goto done;
+						break;
+					default:
+						response = RESPONSE_NONE;
+						new_session_dialog->reset ();
+						continue;
+					}
+				}
+
+			        _session_is_new = true;
+
 				std::string template_name = new_session_dialog->session_template_name();
 						
 				if (new_session_dialog->use_session_template()) {
@@ -1793,6 +1824,7 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 		
 	} while (response == Gtk::RESPONSE_NONE);
 
+  done:
 	show();
 	new_session_dialog->get_window()->set_cursor();
 	new_session_dialog->hide();
@@ -1844,6 +1876,9 @@ This prevents the session from being loaded."));
 	Config->set_current_owner (ConfigVariableBase::Interface);
 
 	session_loaded = true;
+
+	goto_editor_window ();
+
 	return 0;
 }
 
@@ -1911,10 +1946,6 @@ ARDOUR_UI::show ()
 
 		shown_flag = true;
 	}
-	
-	if (about) {
-		about->present ();
-	}
 }
 
 void
@@ -1922,8 +1953,16 @@ ARDOUR_UI::show_splash ()
 {
 	if (about == 0) {
 		about = new About();
+		about->signal_response().connect(mem_fun (*this, &ARDOUR_UI::about_signal_response) );
 	}
 	about->present();
+	flush_pending ();
+}
+
+void
+ARDOUR_UI::about_signal_response(int response)
+{
+	hide_splash();
 }
 
 void
@@ -1947,7 +1986,7 @@ ARDOUR_UI::display_cleanup_results (Session::cleanup_report& rep, const gchar* l
 				    _("No audio files were ready for cleanup"), 
 				    true,
 				    Gtk::MESSAGE_INFO,
-				    (Gtk::ButtonsType)(Gtk::BUTTONS_CLOSE)  );
+				    (Gtk::ButtonsType)(Gtk::BUTTONS_OK)  );
 		msgd.set_secondary_text (_("If this seems suprising, \n\
 check for any existing snapshots.\n\
 These may still include regions that\n\

@@ -372,27 +372,16 @@ Locations::Locations ()
 
 {
 	current_location = 0;
-	save_state (_("initial"));
 }
 
 Locations::~Locations () 
 {
-	std::set<Location*> all_locations;
-	
-	for (StateMap::iterator siter = states.begin(); siter != states.end(); ++siter) {
-
-		State* lstate = dynamic_cast<State*> (*siter);
-
-		for (LocationList::iterator liter = lstate->locations.begin(); liter != lstate->locations.end(); ++liter) {
-			all_locations.insert (*liter);
-		}
-
-		for (LocationList::iterator siter = lstate->states.begin(); siter != lstate->states.end(); ++siter) {
-			all_locations.insert (*siter);
-		}
+	for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
+		LocationList::iterator tmp = i;
+		++tmp;
+		delete *i;
+		i = tmp;
 	}
-
-	set_delete (&all_locations);
 }
 
 int
@@ -431,22 +420,22 @@ Locations::clear ()
 {
 	{
 		Glib::Mutex::Lock lm (lock);
-		LocationList::iterator tmp;
+
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
-			tmp = i;
+
+			LocationList::iterator tmp = i;
 			++tmp;
+
 			if (!(*i)->is_end() && !(*i)->is_start()) {
 				locations.erase (i);
 			}
+
 			i = tmp;
 		}
 
-		locations.clear ();
 		current_location = 0;
 	}
 
-	save_state (_("clear"));
-	
 	changed (); /* EMIT SIGNAL */
 	current_changed (0); /* EMIT SIGNAL */
 }	
@@ -470,8 +459,6 @@ Locations::clear_markers ()
 		}
 	}
 
-	save_state (_("clear markers"));
-	
 	changed (); /* EMIT SIGNAL */
 }	
 
@@ -498,8 +485,6 @@ Locations::clear_ranges ()
 		current_location = 0;
 	}
 
-	save_state (_("clear ranges"));
-
 	changed (); /* EMIT SIGNAL */
 	current_changed (0); /* EMIT SIGNAL */
 }	
@@ -516,8 +501,6 @@ Locations::add (Location *loc, bool make_current)
 		}
 	}
 	
-	save_state (_("add"));
-
 	added (loc); /* EMIT SIGNAL */
 
 	if (make_current) {
@@ -554,9 +537,8 @@ Locations::remove (Location *loc)
 	}
 	
 	if (was_removed) {
-		save_state (_("remove"));
-
-		 removed (loc); /* EMIT SIGNAL */
+		
+		removed (loc); /* EMIT SIGNAL */
 
 		if (was_current) {
 			 current_changed (0); /* EMIT SIGNAL */
@@ -569,7 +551,6 @@ Locations::remove (Location *loc)
 void
 Locations::location_changed (Location* loc)
 {
-	save_state (X_("location changed"));
 	changed (); /* EMIT SIGNAL */
 }
 
@@ -599,7 +580,10 @@ Locations::set_state (const XMLNode& node)
 	}
 	
 	nlist = node.children();
-	
+
+	locations.clear ();
+	current_location = 0;
+
 	{
 		Glib::Mutex::Lock lm (lock);
 
@@ -808,45 +792,6 @@ Locations::auto_punch_location () const
 	}
        return 0;
 }	
-
-StateManager::State*
-Locations::state_factory (std::string why) const
-{
-	State* state = new State (why);
-
-	state->locations = locations;
-	
-	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
-		state->states.push_back (new Location (**i));
-	}
-
-	return state;
-}
-
-Change
-Locations::restore_state (StateManager::State& state) 
-{
-	{
-		Glib::Mutex::Lock lm (lock);
-		State* lstate = dynamic_cast<State*> (&state);
-
-		locations = lstate->locations;
-		LocationList& states = lstate->states;
-		LocationList::iterator l, s;
-
-		for (l = locations.begin(), s = states.begin(); s != states.end(); ++s, ++l) {
-			(*l) = (*s);
-		}
-	}
-
-	return Change (0);
-}
-
-UndoAction
-Locations::get_memento () const
-{
-  return sigc::bind (mem_fun (*(const_cast<Locations*> (this)), &StateManager::use_state), _current_state_id);
-}
 
 uint32_t
 Locations::num_range_markers () const

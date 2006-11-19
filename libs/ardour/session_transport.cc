@@ -125,7 +125,7 @@ Session::request_play_loop (bool yn)
 	if (!yn && Config->get_seamless_loop() && transport_rolling()) {
 		// request an immediate locate to refresh the diskstreams
 		// after disabling looping
-		request_locate (_transport_frame-1, true);
+		request_locate (_transport_frame-1, false);
 	}
 }
 
@@ -377,9 +377,6 @@ Session::non_realtime_stop (bool abort)
 				}
 			}
 		}
-		
-		//FIXME
-		//deliver_mmc (MIDI::MachineControl::cmdLocate, _transport_frame);
 
 #ifdef LEAVE_TRANSPORT_UNADJUSTED
 	}

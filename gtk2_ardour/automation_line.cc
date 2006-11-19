@@ -245,7 +245,7 @@ AutomationLine::AutomationLine (const string & name, TimeAxisView& tv, ArdourCan
 
 	alist.StateChanged.connect (mem_fun(*this, &AutomationLine::list_changed));
 
-        trackview.session().register_with_memento_command_factory(_id, this);
+        trackview.session().register_with_memento_command_factory(alist.id(), this);
 
 }
 
@@ -271,14 +271,6 @@ AutomationLine::queue_reset ()
 }
 
 void
-AutomationLine::set_point_size (double sz)
-{
-	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		(*i)->set_size (sz);
-	}
-}	
-
-void
 AutomationLine::show () 
 {
 	line->show();
@@ -302,18 +294,27 @@ AutomationLine::hide ()
 	_visible = false;
 }
 
+double
+AutomationLine::control_point_box_size ()
+{
+	if (_height > TimeAxisView::hLarger) {
+		return 8.0;
+	} else if (_height > (guint32) TimeAxisView::hNormal) {
+		return 6.0;
+	} 
+	return 4.0;
+}
+
 void
 AutomationLine::set_height (guint32 h)
 {
 	if (h != _height) {
 		_height = h;
 
-		if (_height > (guint32) TimeAxisView::Larger) {
-			set_point_size (8.0);
-		} else if (_height > (guint32) TimeAxisView::Normal) {
-			set_point_size (6.0);
-		} else {
-			set_point_size (4.0);
+		double bsz = control_point_box_size();
+
+		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
+			(*i)->set_size (bsz);
 		}
 
 		reset ();
@@ -670,11 +671,16 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 	uint32_t this_ry = 0;
  	uint32_t prev_ry = 0;	
 	double* slope;
+	uint32_t box_size;
+	uint32_t cpsize;
 
 	/* hide all existing points, and the line */
+
+	cpsize = 0;
 	
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 		(*i)->hide();
+		++cpsize;
 	}
 
 	line->hide ();
@@ -694,6 +700,8 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 		double ydelta = points[n+1].y - points[n].y;
 		slope[n] = ydelta/xdelta;
 	}
+
+	box_size = (uint32_t) control_point_box_size ();
 
 	/* read all points and decide which ones to show as control points */
 
@@ -736,29 +744,27 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 		*/
 
 		this_rx = (uint32_t) rint (tx);
-      		this_ry = (unsigned long) rint (ty); 
+      		this_ry = (uint32_t) rint (ty); 
  
- 		if (view_index && pi != npoints && (this_rx == prev_rx) && (this_ry == prev_ry)) {
- 
+ 		if (view_index && pi != npoints && /* not the first, not the last */
+		    (((this_rx == prev_rx) && (this_ry == prev_ry)) || /* same point */
+		     (((this_rx - prev_rx) < (box_size + 2)) &&  /* too close horizontally */
+		      ((abs ((int)(this_ry - prev_ry)) < (int) (box_size + 2)))))) { /* too close vertically */
   			continue;
-		} 
+		}
 
 		/* ok, we should display this point */
 
-		if (view_index >= control_points.size()) {
+		if (view_index >= cpsize) {
+
 			/* make sure we have enough control points */
 
 			ControlPoint* ncp = new ControlPoint (*this);
-
-			if (_height > (guint32) TimeAxisView::Larger) {
-				ncp->set_size (8.0);
-			} else if (_height > (guint32) TimeAxisView::Normal) {
-				ncp->set_size (6.0); 
-			} else {
-				ncp->set_size (4.0);
-			}
+			
+			ncp->set_size (box_size); 
 
 			control_points.push_back (ncp);
+			++cpsize;
 		}
 
 		ControlPoint::ShapeType shape;
@@ -827,6 +833,10 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 
 		while (line_points.size() < npoints) {
 			line_points.push_back (Art::Point (0,0));
+		}
+
+		while (line_points.size() > npoints) {
+			line_points.pop_back ();
 		}
 
 		for (view_index = 0; view_index < npoints; ++view_index) {
@@ -1168,16 +1178,8 @@ AutomationLine::hide_selection ()
 //	show_selection ();
 }
 
-
-// This is copied into AudioRegionGainLine
-UndoAction
-AutomationLine::get_memento ()
-{
-	return alist.get_memento();
-}
-
 void
-AutomationLine::list_changed (Change ignored)
+AutomationLine::list_changed ()
 {
 	queue_reset ();
 }
@@ -1201,9 +1203,7 @@ AutomationLine::reset_callback (const AutomationList& events)
 
 	for (ai = events.const_begin(); ai != events.const_end(); ++ai) {
 
-		double translated_y;
-		
-		translated_y = (*ai)->value;
+		double translated_y = (*ai)->value;
 		model_to_view_y (translated_y);
 
 		tmp_points.push_back (ALPoint (trackview.editor.frame_to_unit ((*ai)->when),
@@ -1271,16 +1271,16 @@ AutomationLine::hide_all_but_selected_control_points ()
 	}
 }
 
-XMLNode &AutomationLine::get_state(void)
+XMLNode &
+AutomationLine::get_state (void)
 {
-    XMLNode *node = new XMLNode("AutomationLine");
-    node->add_child_nocopy(alist.get_state());
-    return *node;
+	/* function as a proxy for the model */
+	return alist.get_state();
 }
 
-int AutomationLine::set_state(const XMLNode &node)
+int 
+AutomationLine::set_state (const XMLNode &node)
 {
-    // TODO
-    //alist.set_state(node);
-    return 0;
+	/* function as a proxy for the model */
+	return alist.set_state (node);
 }

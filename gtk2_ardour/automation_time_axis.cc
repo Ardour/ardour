@@ -43,31 +43,22 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	ignore_state_request = false;
 	first_call_to_set_height = true;
 
-	//	base_rect = gnome_canvas_item_new (GNOME_CANVAS_GROUP(canvas_display),
-	//			 gnome_canvas_simplerect_get_type(),
-	//			 "x1", 0.0,
-	//			 "y1", 0.0,
-	//			 "x2", 1000000.0,
-	//			 "outline_color_rgba", color_map[cAutomationTrackOutline],
-	//			 /* outline ends and bottom */
-	//			 "outline_what", (guint32) (0x1|0x2|0x8),
-	//			 "fill_color_rgba", color_map[cAutomationTrackFill],
-	//			 NULL);
 	base_rect = new SimpleRect(*canvas_display);
 	base_rect->property_x1() = 0.0;
 	base_rect->property_y1() = 0.0;
-	base_rect->property_x2() = 1000000.0;
+	base_rect->property_x2() = max_frames;
 	base_rect->property_outline_color_rgba() = color_map[cAutomationTrackOutline];
 	/* outline ends and bottom */
 	base_rect->property_outline_what() = (guint32) (0x1|0x2|0x8);
 	base_rect->property_fill_color_rgba() = color_map[cAutomationTrackFill];
+	//base_rect->property_fill_color_rgba() = color_map[cEnteredControlPoint];
 	
 	base_rect->set_data ("trackview", this);
 
 	base_rect->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_automation_track_event),
 						 base_rect, this));
 
-	hide_button.add (*(manage (new Gtk::Image (get_xpm("small_x.xpm")))));
+	hide_button.add (*(manage (new Gtk::Image (::get_icon("hide")))));
 
 	height_button.set_name ("TrackSizeButton");
 	auto_button.set_name ("TrackVisualButton");
@@ -402,8 +393,13 @@ AutomationTimeAxisView::set_samples_per_unit (double spu)
 void
 AutomationTimeAxisView::hide_clicked ()
 {
+	// LAME fix for refreshing the hide button
+	hide_button.set_sensitive(false);
+	
 	set_marked_for_display (false);
 	hide ();
+	
+	hide_button.set_sensitive(true);
 }
 
 void

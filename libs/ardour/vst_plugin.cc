@@ -110,16 +110,6 @@ VSTPlugin::set_block_size (nframes_t nframes)
 	activate ();
 }
 
-void
-VSTPlugin::store_state (PluginState& state)
-{
-}
-
-void
-VSTPlugin::restore_state (PluginState& state)
-{
-}
-
 float
 VSTPlugin::default_value (uint32_t port)
 {

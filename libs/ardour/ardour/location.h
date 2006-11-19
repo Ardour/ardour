@@ -36,7 +36,6 @@
 #include <pbd/statefuldestructible.h> 
 
 #include <ardour/ardour.h>
-#include <ardour/state_manager.h>
 
 using std::string;
 
@@ -131,7 +130,7 @@ class Location : public PBD::StatefulDestructible
 	bool set_flag_internal (bool yn, Flags flag);
 };
 
-class Locations : public StateManager, public PBD::StatefulDestructible
+class Locations : public PBD::StatefulDestructible
 {
   public:
 	typedef std::list<Location *> LocationList;
@@ -169,6 +168,7 @@ class Locations : public StateManager, public PBD::StatefulDestructible
 	sigc::signal<void>           changed;
 	sigc::signal<void,Location*> added;
 	sigc::signal<void,Location*> removed;
+	sigc::signal<void,Change>    StateChanged;
 
 	template<class T> void apply (T& obj, void (T::*method)(LocationList&)) {
 		Glib::Mutex::Lock lm (lock);
@@ -180,16 +180,7 @@ class Locations : public StateManager, public PBD::StatefulDestructible
 		(obj.*method)(locations, arg);
 	}
 
-	UndoAction get_memento () const;
-
   private:
-
-	struct State : public ARDOUR::StateManager::State {
-	    LocationList locations;
-	    LocationList states;
-
-	    State (std::string why) : ARDOUR::StateManager::State (why) {}
-	};
 
 	LocationList       locations;
 	Location          *current_location;
@@ -197,9 +188,6 @@ class Locations : public StateManager, public PBD::StatefulDestructible
 
 	int set_current_unlocked (Location *);
 	void location_changed (Location*);
-
-	Change   restore_state (StateManager::State&);
-	StateManager::State* state_factory (std::string why) const;
 };
 
 } // namespace ARDOUR

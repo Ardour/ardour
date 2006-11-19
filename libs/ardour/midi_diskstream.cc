@@ -295,11 +295,12 @@ MidiDiskstream::use_copy_playlist ()
 
 /** Overloaded from parent to die horribly
  */
-void
+int
 MidiDiskstream::set_destructive (bool yn)
 {
 	assert( ! destructive());
 	assert( ! yn);
+	return -1;
 }
 
 void

@@ -195,7 +195,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	/* default short fade = 15ms */
 
 	Crossfade::set_short_xfade_length ((nframes_t) floor (Config->get_short_xfade_seconds() * frame_rate()));
-	DestructiveFileSource::setup_standard_crossfades (frame_rate());
+	SndFileSource::setup_standard_crossfades (frame_rate());
 
 	last_mmc_step.tv_sec = 0;
 	last_mmc_step.tv_usec = 0;
@@ -250,10 +250,9 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	Playlist::PlaylistCreated.connect (mem_fun (*this, &Session::add_playlist));
 	Redirect::RedirectCreated.connect (mem_fun (*this, &Session::add_redirect));
 	NamedSelection::NamedSelectionCreated.connect (mem_fun (*this, &Session::add_named_selection));
-	Curve::CurveCreated.connect (mem_fun (*this, &Session::add_curve));
 	AutomationList::AutomationListCreated.connect (mem_fun (*this, &Session::add_automation_list));
 
-	Controllable::GoingAway.connect (mem_fun (*this, &Session::remove_controllable));
+	Controllable::Destroyed.connect (mem_fun (*this, &Session::remove_controllable));
 
 	IO::MoreChannels.connect (mem_fun (*this, &Session::ensure_buffers));
 
@@ -533,7 +532,6 @@ Session::create (bool& new_session, string* mix_template, nframes_t initial_leng
 	_state_of_the_state = Clean;
 
 	if (save_state (_current_snapshot_name)) {
-		save_history (_current_snapshot_name);
 		return -1;
 	}
 
@@ -858,13 +856,15 @@ Session::state(bool full_state)
 			boost::shared_ptr<AudioFileSource> fs;
 
 			if ((fs = boost::dynamic_pointer_cast<AudioFileSource> (siter->second)) != 0) {
-				boost::shared_ptr<DestructiveFileSource> dfs = boost::dynamic_pointer_cast<DestructiveFileSource> (fs);
 
 				/* Don't save sources that are empty, unless they're destructive (which are OK
 				   if they are empty, because we will re-use them every time.)
 				*/
-				if ( ! dfs && siter->second->length() == 0) {
-					continue;
+
+				if (!fs->destructive()) {
+					if (fs->length() == 0) {
+						continue;
+					}
 				}
 			}
 			
@@ -898,7 +898,20 @@ Session::state(bool full_state)
 		}
 	}
 
-	node->add_child_nocopy (_locations.get_state());
+	if (full_state) {
+		node->add_child_nocopy (_locations.get_state());
+	} else {
+		// for a template, just create a new Locations, populate it
+		// with the default start and end, and get the state for that.
+		Locations loc;
+		Location* start = new Location(0, 0, _("start"), Location::Flags ((Location::IsMark|Location::IsStart)));
+		Location* end = new Location(0, 0, _("end"), Location::Flags ((Location::IsMark|Location::IsEnd)));
+		start->set_end(0);
+		loc.add (start);
+		end->set_end(compute_initial_length());
+		loc.add (end);
+		node->add_child_nocopy (loc.get_state());
+	}
 	
 	child = node->add_child ("Connections");
 	{
@@ -1026,8 +1039,6 @@ Session::set_state (const XMLNode& node)
 		return -1;
 	}
 
-	StateManager::prohibit_save ();
-
 	if ((prop = node.property ("name")) != 0) {
 		_name = prop->value ();
 	}
@@ -1058,11 +1069,11 @@ Session::set_state (const XMLNode& node)
 	Path
 	extra
 	Options/Config
+	Locations
 	Sources
 	AudioRegions
 	AudioDiskstreams
 	Connections
-	Locations
 	Routes
 	EditGroups
 	MixGroups
@@ -1084,6 +1095,39 @@ Session::set_state (const XMLNode& node)
 	} else {
 		error << _("Session: XML state has no options section") << endmsg;
 	}
+
+	if ((child = find_named_node (node, "Locations")) == 0) {
+		error << _("Session: XML state has no locations section") << endmsg;
+		goto out;
+	} else if (_locations.set_state (*child)) {
+		goto out;
+	}
+
+	Location* location;
+
+	if ((location = _locations.auto_loop_location()) != 0) {
+		set_auto_loop_location (location);
+	}
+
+	if ((location = _locations.auto_punch_location()) != 0) {
+		set_auto_punch_location (location);
+	}
+
+	if ((location = _locations.end_location()) == 0) {
+		_locations.add (end_location);
+	} else {
+		delete end_location;
+		end_location = location;
+	}
+
+	if ((location = _locations.start_location()) == 0) {
+		_locations.add (start_location);
+	} else {
+		delete start_location;
+		start_location = location;
+	}
+
+	AudioFileSource::set_header_position_offset (start_location->start());
 
 	if ((child = find_named_node (node, "Sources")) == 0) {
 		error << _("Session: XML state has no sources section") << endmsg;
@@ -1132,39 +1176,6 @@ Session::set_state (const XMLNode& node)
 		goto out;
 	}
 
-	if ((child = find_named_node (node, "Locations")) == 0) {
-		error << _("Session: XML state has no locations section") << endmsg;
-		goto out;
-	} else if (_locations.set_state (*child)) {
-		goto out;
-	}
-
-	Location* location;
-
-	if ((location = _locations.auto_loop_location()) != 0) {
-		set_auto_loop_location (location);
-	}
-
-	if ((location = _locations.auto_punch_location()) != 0) {
-		set_auto_punch_location (location);
-	}
-
-	if ((location = _locations.end_location()) == 0) {
-		_locations.add (end_location);
-	} else {
-		delete end_location;
-		end_location = location;
-	}
-
-	if ((location = _locations.start_location()) == 0) {
-		_locations.add (start_location);
-	} else {
-		delete start_location;
-		start_location = location;
-	}
-
-	_locations.save_state (_("initial state"));
-
 	if ((child = find_named_node (node, "EditGroups")) == 0) {
 		error << _("Session: XML state has no edit groups section") << endmsg;
 		goto out;
@@ -1209,8 +1220,6 @@ Session::set_state (const XMLNode& node)
 
 	_state_of_the_state = Clean;
 
-	StateManager::allow_save (_("initial state"), true);
-
 	if (state_was_pending) {
 		save_state (_current_snapshot_name);
 		remove_pending_capture_state ();
@@ -1220,8 +1229,6 @@ Session::set_state (const XMLNode& node)
 	return 0;
 
   out:
-	/* we failed, re-enable state saving but don't actually save internal state */
-	StateManager::allow_save (X_("ignored"), false);
 	return ret;
 }
 
@@ -2210,7 +2217,7 @@ Session::commit_reversible_command (Command *cmd)
 	gettimeofday (&now, 0);
 	current_trans->set_timestamp (now);
 
-	history.add (current_trans);
+	_history.add (current_trans);
 }
 
 Session::GlobalRouteBooleanState 
@@ -2568,6 +2575,8 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		   capture files.
 		*/
 
+		cerr << "checking out source " << i->second->name() << " use_count = " << i->second.use_count() << endl;
+
 		if (i->second.use_count() == 1 && i->second->length() > 0) {
 			dead_sources.push_back (i->second);
 
@@ -2757,7 +2766,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 
 	/* dump the history list */
 
-	history.clear ();
+	_history.clear ();
 
 	/* save state so we don't end up a session file
 	   referring to non-existent sources.
@@ -2908,7 +2917,7 @@ Session::save_history (string snapshot_name)
     string xml_path;
     string bak_path;
     
-    tree.set_root (&history.get_state());
+    tree.set_root (&_history.get_state());
 
     if (snapshot_name.empty()) {
 	snapshot_name = _current_snapshot_name;
@@ -2935,14 +2944,13 @@ Session::save_history (string snapshot_name)
          * possible to fix.
          */
 
-        if (unlink (xml_path.c_str())) 
-        {
-            error << string_compose (_("could not remove corrupt history file %1"), xml_path) << endmsg;
+        if (unlink (xml_path.c_str())) {
+		error << string_compose (_("could not remove corrupt history file %1"), xml_path) << endmsg;
         } else {
-            if (rename (bak_path.c_str(), xml_path.c_str())) 
-            {
-                error << string_compose (_("could not restore history file from backup %1"), bak_path) << endmsg;
-            }
+		if (rename (bak_path.c_str(), xml_path.c_str())) 
+		{
+			error << string_compose (_("could not restore history file from backup %1"), bak_path) << endmsg;
+		}
         }
 
         return -1;
@@ -2972,7 +2980,7 @@ Session::restore_history (string snapshot_name)
     }
 
     /* replace history */
-    history.clear();
+    _history.clear();
 
     for (XMLNodeConstIterator it  = tree.root()->children().begin(); it != tree.root()->children().end(); it++) {
 	    
@@ -3005,7 +3013,7 @@ Session::restore_history (string snapshot_name)
 		    }
 	    }
 
-	    history.add (ut);
+	    _history.add (ut);
     }
 
     return 0;
@@ -3137,6 +3145,10 @@ Session::config_changed (const char* parameter_name)
 		
 		if (_mtc_port != 0) {
 			session_send_mtc = Config->get_send_mtc();
+			if (session_send_mtc) {
+				/* mark us ready to send */
+				next_quarter_frame_to_send = 0;
+			}
 		}
 
 	} else if (PARAM_IS ("send-mmc")) {

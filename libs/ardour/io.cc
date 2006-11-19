@@ -60,7 +60,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-static float current_automation_version_number = 1.0;
+nframes_t    IO::_automation_interval = 0;
 
 const string                 IO::state_node_name = "IO";
 bool                         IO::connecting_legal = false;
@@ -137,6 +137,8 @@ IO::IO (Session& s, string name,
 
 	apply_gain_automation = false;
 	
+	last_automation_snapshot = 0;
+
 	_gain_automation_state = Off;
 	_gain_automation_style = Absolute;
 
@@ -149,6 +151,43 @@ IO::IO (Session& s, string name,
 	
 	// Connect to our own MoreChannels signal to connect output buffers
 	IO::MoreChannels.connect (mem_fun (*this, &IO::attach_buffers));
+
+	_session.add_controllable (&_gain_control);
+}
+
+IO::IO (Session& s, const XMLNode& node, DataType dt)
+	: _session (s),
+      _output_buffers(new BufferSet()),
+	  _default_type (dt),
+	  _gain_control (X_("gaincontrol"), *this),
+	  _gain_automation_curve (0, 0, 0) // all reset in set_state()
+{
+	// FIXME: hack
+	_meter = new PeakMeter (_session);
+
+	_panner = 0;
+	deferred_state = 0;
+	no_panner_reset = false;
+	_desired_gain = 1.0;
+	_gain = 1.0;
+	_input_connection = 0;
+	_output_connection = 0;
+
+	apply_gain_automation = false;
+
+	set_state (node);
+
+	{
+		// IO::Meter is emitted from another thread so the
+		// Meter signal must be protected.
+		Glib::Mutex::Lock guard (m_meter_signal_lock);
+		m_meter_connection = Meter.connect (mem_fun (*this, &IO::meter));
+	}
+	
+	// Connect to our own MoreChannels signal to connect output buffers
+	IO::MoreChannels.connect (mem_fun (*this, &IO::attach_buffers));
+
+	_session.add_controllable (&_gain_control);
 }
 
 IO::~IO ()
@@ -1234,64 +1273,18 @@ IO::state (bool full_state)
 	/* automation */
 
 	if (full_state) {
+
+		XMLNode* autonode = new XMLNode (X_("Automation"));
+		autonode->add_child_nocopy (get_automation_state());
+		node->add_child_nocopy (*autonode);
+
 		snprintf (buf, sizeof (buf), "0x%x", (int) _gain_automation_curve.automation_state());
 	} else {
 		/* never store anything except Off for automation state in a template */
 		snprintf (buf, sizeof (buf), "0x%x", ARDOUR::Off); 
 	}
-	node->add_property ("automation-state", buf);
-	snprintf (buf, sizeof (buf), "0x%x", (int) _gain_automation_curve.automation_style());
-	node->add_property ("automation-style", buf);
-
-	/* XXX same for pan etc. */
 
 	return *node;
-}
-
-int
-IO::connecting_became_legal ()
-{
-	int ret;
-
-	if (pending_state_node == 0) {
-		fatal << _("IO::connecting_became_legal() called without a pending state node") << endmsg;
-		/*NOTREACHED*/
-		return -1;
-	}
-
-	connection_legal_c.disconnect ();
-
-	ret = make_connections (*pending_state_node);
-
-	if (ports_legal) {
-		delete pending_state_node;
-		pending_state_node = 0;
-	}
-
-	return ret;
-}
-
-int
-IO::ports_became_legal ()
-{
-	int ret;
-
-	if (pending_state_node == 0) {
-		fatal << _("IO::ports_became_legal() called without a pending state node") << endmsg;
-		/*NOTREACHED*/
-		return -1;
-	}
-
-	port_legal_c.disconnect ();
-
-	ret = create_ports (*pending_state_node);
-
-	if (connecting_legal) {
-		delete pending_state_node;
-		pending_state_node = 0;
-	}
-
-	return ret;
 }
 
 int
@@ -1312,7 +1305,7 @@ IO::set_state (const XMLNode& node)
 
 	if ((prop = node.property ("name")) != 0) {
 		_name = prop->value();
-		_panner->set_name (_name);
+		/* used to set panner name with this, but no more */
 	} 
 
 	if ((prop = node.property ("id")) != 0) {
@@ -1338,32 +1331,29 @@ IO::set_state (const XMLNode& node)
 		_gain = _desired_gain;
 	}
 
+	if ((prop = node.property ("automation-state")) != 0 || (prop = node.property ("automation-style")) != 0) {
+		/* old school automation handling */
+	}
+
 	for (iter = node.children().begin(); iter != node.children().end(); ++iter) {
 
 		if ((*iter)->name() == "Panner") {
+			if (_panner == 0) {
+				_panner = new Panner (_name, _session);
+			}
 			_panner->set_state (**iter);
+		}
+
+		if ((*iter)->name() == X_("Automation")) {
+
+			set_automation_state (*(*iter)->children().front());
 		}
 
 		if ((*iter)->name() == X_("gaincontrol")) {
 			_gain_control.set_state (**iter);
-			_session.add_controllable (&_gain_control);
 		}
 	}
 
-	if ((prop = node.property ("automation-state")) != 0) {
-
-		long int x;
-		x = strtol (prop->value().c_str(), 0, 16);
-		set_gain_automation_state (AutoState (x));
-	}
-
-	if ((prop = node.property ("automation-style")) != 0) {
-
-	       long int x;
-		x = strtol (prop->value().c_str(), 0, 16);
-		set_gain_automation_style (AutoStyle (x));
-	}
-	
 	if (ports_legal) {
 
 		if (create_ports (node)) {
@@ -1396,7 +1386,144 @@ IO::set_state (const XMLNode& node)
 		pending_state_node = new XMLNode (node);
 	}
 
+	last_automation_snapshot = 0;
+
 	return 0;
+}
+
+int
+IO::set_automation_state (const XMLNode& node)
+{
+	return _gain_automation_curve.set_state (node);
+}
+
+XMLNode&
+IO::get_automation_state ()
+{
+	return (_gain_automation_curve.get_state ());
+}
+
+int
+IO::load_automation (string path)
+{
+	string fullpath;
+	ifstream in;
+	char line[128];
+	uint32_t linecnt = 0;
+	float version;
+	LocaleGuard lg (X_("POSIX"));
+
+	fullpath = _session.automation_dir();
+	fullpath += path;
+
+	in.open (fullpath.c_str());
+
+	if (!in) {
+		fullpath = _session.automation_dir();
+		fullpath += _session.snap_name();
+		fullpath += '-';
+		fullpath += path;
+
+		in.open (fullpath.c_str());
+
+		if (!in) {
+			error << string_compose(_("%1: cannot open automation event file \"%2\""), _name, fullpath) << endmsg;
+			return -1;
+		}
+	}
+
+	clear_automation ();
+
+	while (in.getline (line, sizeof(line), '\n')) {
+		char type;
+		jack_nframes_t when;
+		double value;
+
+		if (++linecnt == 1) {
+			if (memcmp (line, "version", 7) == 0) {
+				if (sscanf (line, "version %f", &version) != 1) {
+					error << string_compose(_("badly formed version number in automation event file \"%1\""), path) << endmsg;
+					return -1;
+				}
+			} else {
+				error << string_compose(_("no version information in automation event file \"%1\""), path) << endmsg;
+				return -1;
+			}
+
+			continue;
+		}
+
+		if (sscanf (line, "%c %" PRIu32 " %lf", &type, &when, &value) != 3) {
+			warning << string_compose(_("badly formatted automation event record at line %1 of %2 (ignored)"), linecnt, path) << endmsg;
+			continue;
+		}
+
+		switch (type) {
+		case 'g':
+			_gain_automation_curve.fast_simple_add (when, value);
+			break;
+
+		case 's':
+			break;
+
+		case 'm':
+			break;
+
+		case 'p':
+			/* older (pre-1.0) versions of ardour used this */
+			break;
+
+		default:
+			warning << _("dubious automation event found (and ignored)") << endmsg;
+		}
+	}
+
+	return 0;
+}
+
+int
+IO::connecting_became_legal ()
+{
+	int ret;
+
+	if (pending_state_node == 0) {
+		fatal << _("IO::connecting_became_legal() called without a pending state node") << endmsg;
+		/*NOTREACHED*/
+		return -1;
+	}
+
+	connection_legal_c.disconnect ();
+
+	ret = make_connections (*pending_state_node);
+
+	if (ports_legal) {
+		delete pending_state_node;
+		pending_state_node = 0;
+	}
+
+	return ret;
+}
+int
+IO::ports_became_legal ()
+{
+	int ret;
+
+	if (pending_state_node == 0) {
+		fatal << _("IO::ports_became_legal() called without a pending state node") << endmsg;
+		/*NOTREACHED*/
+		return -1;
+	}
+
+	port_legal_c.disconnect ();
+
+	ret = create_ports (*pending_state_node);
+
+	if (connecting_legal) {
+		delete pending_state_node;
+		pending_state_node = 0;
+	}
+
+	return ret;
 }
 
 int
@@ -1699,42 +1826,6 @@ IO::set_name (string name, void* src)
 	 name_changed (src); /* EMIT SIGNAL */
 
 	 return 0;
-}
-
-void
-IO::set_input_minimum (int n)
-{
-	if (n < 0)
-		_input_minimum = ChanCount::ZERO;
-	else
-		_input_minimum = ChanCount(_default_type, n);
-}
-
-void
-IO::set_input_maximum (int n)
-{
-	if (n < 0)
-		_input_maximum = ChanCount::INFINITE;
-	else
-		_input_maximum = ChanCount(_default_type, n);
-}
-
-void
-IO::set_output_minimum (int n)
-{
-	if (n < 0)
-		_output_minimum = ChanCount::ZERO;
-	else
-		_output_minimum = ChanCount(_default_type, n);
-}
-
-void
-IO::set_output_maximum (int n)
-{
-	if (n < 0)
-		_output_maximum = ChanCount::INFINITE;
-	else
-		_output_maximum = ChanCount(_default_type, n);
 }
 
 void
@@ -2046,25 +2137,6 @@ IO::GainControllable::get_value (void) const
 	return direct_gain_to_control (io.effective_gain());
 }
 
-UndoAction
-IO::get_memento() const
-{
-  return sigc::bind (mem_fun (*(const_cast<IO *>(this)), &StateManager::use_state), _current_state_id);
-}
-
-Change
-IO::restore_state (StateManager::State& state)
-{
-	return Change (0);
-}
-
-StateManager::State*
-IO::state_factory (std::string why) const
-{
-	StateManager::State* state = new StateManager::State (why);
-	return state;
-}
-
 void
 IO::setup_peak_meters()
 {
@@ -2096,118 +2168,6 @@ IO::meter ()
 	_meter->meter();
 }
 
-int
-IO::save_automation (const string& path)
-{
-	string fullpath;
-	ofstream out;
-
-	fullpath = _session.automation_dir();
-	fullpath += path;
-
-	out.open (fullpath.c_str());
-
-	if (!out) {
-		error << string_compose(_("%1: could not open automation event file \"%2\""), _name, fullpath) << endmsg;
-		return -1;
-	}
-
-	out << X_("version ") << current_automation_version_number << endl;
-
-	/* XXX use apply_to_points to get thread safety */
-	
-	for (AutomationList::iterator i = _gain_automation_curve.begin(); i != _gain_automation_curve.end(); ++i) {
-		out << "g " << (nframes_t) floor ((*i)->when) << ' ' << (*i)->value << endl;
-	}
-
-	_panner->save ();
-
-	return 0;
-}
-
-int
-IO::load_automation (const string& path)
-{
-	string fullpath;
-	ifstream in;
-	char line[128];
-	uint32_t linecnt = 0;
-	float version;
-	LocaleGuard lg (X_("POSIX"));
-
-	fullpath = _session.automation_dir();
-	fullpath += path;
-
-	in.open (fullpath.c_str());
-
-	if (!in) {
-		fullpath = _session.automation_dir();
-		fullpath += _session.snap_name();
-		fullpath += '-';
-		fullpath += path;
-		in.open (fullpath.c_str());
-		if (!in) {
-			error << string_compose(_("%1: cannot open automation event file \"%2\" (%2)"), _name, fullpath, strerror (errno)) << endmsg;
-			return -1;
-		}
-	}
-
-	clear_automation ();
-
-	while (in.getline (line, sizeof(line), '\n')) {
-		char type;
-		nframes_t when;
-		double value;
-
-		if (++linecnt == 1) {
-			if (memcmp (line, "version", 7) == 0) {
-				if (sscanf (line, "version %f", &version) != 1) {
-					error << string_compose(_("badly formed version number in automation event file \"%1\""), path) << endmsg;
-					return -1;
-				}
-			} else {
-				error << string_compose(_("no version information in automation event file \"%1\""), path) << endmsg;
-				return -1;
-			}
-
-			if (version != current_automation_version_number) {
-				error << string_compose(_("mismatched automation event file version (%1)"), version) << endmsg;
-				return -1;
-			}
-
-			continue;
-		}
-
-		if (sscanf (line, "%c %" PRIu32 " %lf", &type, &when, &value) != 3) {
-			warning << string_compose(_("badly formatted automation event record at line %1 of %2 (ignored)"), linecnt, path) << endmsg;
-			continue;
-		}
-
-		switch (type) {
-		case 'g':
-			_gain_automation_curve.add (when, value, true);
-			break;
-
-		case 's':
-			break;
-
-		case 'm':
-			break;
-
-		case 'p':
-			/* older (pre-1.0) versions of ardour used this */
-			break;
-
-		default:
-			warning << _("dubious automation event found (and ignored)") << endmsg;
-		}
-	}
-
-	_gain_automation_curve.save_state (_("loaded from disk"));
-
-	return 0;
-}
-	
 void
 IO::clear_automation ()
 {
@@ -2226,6 +2186,7 @@ IO::set_gain_automation_state (AutoState state)
 
 		if (state != _gain_automation_curve.automation_state()) {
 			changed = true;
+			last_automation_snapshot = 0;
 			_gain_automation_curve.set_automation_state (state);
 			
 			if (state != Off) {
@@ -2324,16 +2285,27 @@ IO::end_pan_touch (uint32_t which)
 }
 
 void
+IO::automation_snapshot (nframes_t now)
+{
+	if (last_automation_snapshot > now || (now - last_automation_snapshot) > _automation_interval) {
+
+		if (gain_automation_recording()) {
+			_gain_automation_curve.rt_add (now, gain());
+		}
+		
+		_panner->snapshot (now);
+
+		last_automation_snapshot = now;
+	}
+}
+
+void
 IO::transport_stopped (nframes_t frame)
 {
 	_gain_automation_curve.reposition_for_rt_add (frame);
 
 	if (_gain_automation_curve.automation_state() != Off) {
 		
-		if (gain_automation_recording()) {
-			_gain_automation_curve.save_state (_("automation write/touch"));
-		}
-
 		/* the src=0 condition is a special signal to not propagate 
 		   automation gain changes into the mix group when locating.
 		*/

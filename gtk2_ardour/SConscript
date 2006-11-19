@@ -19,6 +19,7 @@ gtkardour.Append(DOMAIN=domain, MAJOR=1,MINOR=0,MICRO=2)
 gtkardour.Append(CCFLAGS="-DPACKAGE=\\\"" + domain + "\\\"")
 gtkardour.Append(CXXFLAGS="-DPACKAGE=\\\"" + domain + "\\\"")
 gtkardour.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
+gtkardour.Append(CPPPATH="#/")  # for top level svn_revision.h
 #gtkardour.Append(CXXFLAGS="-DFLOWCANVAS_AA")
 gtkardour.Append(PACKAGE=domain)
 gtkardour.Append(POTFILE=domain + '.pot')
@@ -34,7 +35,7 @@ gtkardour.Merge ([
     libraries['libgnomecanvas2'],
     libraries['libgnomecanvasmm'],
     libraries['sysmidi'],
-    libraries['sndfile'],
+    libraries['sndfile-ardour'],
     libraries['flac'],
     libraries['lrdf'],
     libraries['glibmm2'],
@@ -261,8 +262,6 @@ versionflag = '-DVERSIONSTRING=\\\"' + env['VERSION'] + '\\\"'
 
 gtkardour.Append(CXXFLAGS=versionflag)
 
-gtkardour.VersionBuild(['version.cc','version.h'], 'SConscript')
-
 executable = 'ardour.bin'
 
 ardour = gtkardour.Program(target = executable, source = gtkardour_files + extra_sources)
@@ -310,6 +309,7 @@ env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2'), 
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/pixmaps'), pixmap_files))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/icons'), icon_files))
 
+env.Alias ('version', gtkardour.VersionBuild(['version.cc','version.h'], []))
 		
 #dist
 env.Alias ('tarball', env.Distribute (env['DISTTREE'],

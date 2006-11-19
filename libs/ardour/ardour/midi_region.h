@@ -84,9 +84,6 @@ class MidiRegion : public Region
 	friend class Playlist;
 
   private:
-	StateManager::State* state_factory (std::string why) const;
-	Change restore_state (StateManager::State&);
-
 	jack_nframes_t _read_at (const SourceList&, MidiRingBuffer& dst,
 		jack_nframes_t position,
 		jack_nframes_t dur, 

@@ -40,14 +40,11 @@ using namespace ARDOUR;
 using namespace sigc;
 using namespace PBD;
 
-sigc::signal<void, Curve*> Curve::CurveCreated;
-
 Curve::Curve (double minv, double maxv, double canv, bool nostate)
-	: AutomationList (canv, nostate)
+	: AutomationList (canv)
 {
 	min_yval = minv;
 	max_yval = maxv;
-        CurveCreated(this);
 }
 
 Curve::Curve (const Curve& other)
@@ -55,7 +52,6 @@ Curve::Curve (const Curve& other)
 {
 	min_yval = other.min_yval;
 	max_yval = other.max_yval;
-        CurveCreated(this);
 }
 
 Curve::Curve (const Curve& other, double start, double end)
@@ -63,7 +59,11 @@ Curve::Curve (const Curve& other, double start, double end)
 {
 	min_yval = other.min_yval;
 	max_yval = other.max_yval;
-        CurveCreated(this);
+}
+
+Curve::Curve (const XMLNode& node)
+	: AutomationList (node)
+{
 }
 
 Curve::~Curve ()
@@ -73,7 +73,7 @@ Curve::~Curve ()
 void
 Curve::solve ()
 {
-	size_t npoints;
+	uint32_t npoints;
 
 	if (!_dirty) {
 		return;
@@ -88,7 +88,7 @@ Curve::solve ()
 
 		double x[npoints];
 		double y[npoints];
-		size_t i;
+		uint32_t i;
 		AutomationEventList::iterator xx;
 
 		for (i = 0, xx = events.begin(); xx != events.end(); ++xx, ++i) {
@@ -207,7 +207,7 @@ Curve::solve ()
 }
 
 bool
-Curve::rt_safe_get_vector (double x0, double x1, float *vec, size_t veclen)
+Curve::rt_safe_get_vector (double x0, double x1, float *vec, int32_t veclen)
 {
 	Glib::Mutex::Lock lm (lock, Glib::TRY_LOCK);
 
@@ -220,19 +220,19 @@ Curve::rt_safe_get_vector (double x0, double x1, float *vec, size_t veclen)
 }
 
 void
-Curve::get_vector (double x0, double x1, float *vec, size_t veclen)
+Curve::get_vector (double x0, double x1, float *vec, int32_t veclen)
 {
 	Glib::Mutex::Lock lm (lock);
 	_get_vector (x0, x1, vec, veclen);
 }
 
 void
-Curve::_get_vector (double x0, double x1, float *vec, size_t veclen)
+Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 {
 	double rx, dx, lx, hx, max_x, min_x;
-	size_t i;
-	size_t original_veclen;
-	size_t npoints;
+	int32_t i;
+	int32_t original_veclen;
+	int32_t npoints;
 
         if ((npoints = events.size()) == 0) {
                  for (i = 0; i < veclen; ++i) {
@@ -263,7 +263,7 @@ Curve::_get_vector (double x0, double x1, float *vec, size_t veclen)
 		*/
 
 		double frac = (min_x - x0) / (x1 - x0);
-		size_t subveclen = (size_t) floor (veclen * frac);
+		int32_t subveclen = (int32_t) floor (veclen * frac);
 		
 		subveclen = min (subveclen, veclen);
 
@@ -281,7 +281,7 @@ Curve::_get_vector (double x0, double x1, float *vec, size_t veclen)
 
 		double frac = (x1 - max_x) / (x1 - x0);
 
-		size_t subveclen = lrintf (original_veclen * frac);
+		int32_t subveclen = (int32_t) floor (original_veclen * frac);
 
 		float val;
 		
@@ -435,18 +435,10 @@ Curve::point_factory (const ControlEvent& other) const
 	return new CurvePoint (other.when, other.value);
 }
 
-Change
-Curve::restore_state (StateManager::State& state)
-{
-	mark_dirty ();
-	return AutomationList::restore_state (state);
-}
-
-
 extern "C" {
 
 void 
-curve_get_vector_from_c (void *arg, double x0, double x1, float* vec, size_t vecsize)
+curve_get_vector_from_c (void *arg, double x0, double x1, float* vec, int32_t vecsize)
 {
 	static_cast<Curve*>(arg)->get_vector (x0, x1, vec, vecsize);
 }

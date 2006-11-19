@@ -44,6 +44,7 @@
 #include <gtkmm2ext/popup.h>
 #include <gtkmm2ext/utils.h>
 
+#include "svn_revision.h"
 #include "version.h"
 #include "ardour_ui.h"
 #include "opts.h"
@@ -259,7 +260,6 @@ show_ui_callback (void *arg)
  	ARDOUR_UI * ui = (ARDOUR_UI *) arg;
 
 	ui->hide_splash();
-	ui->show ();
 	
 	return FALSE;
 }
@@ -286,7 +286,7 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 	win.set_position (Gtk::WIN_POS_CENTER);
 
 	if (!no_splash) {
-	  ui->hide_splash ();
+		ui->hide_splash ();
 	}
 
 	/* we just don't care about the result, but we want to block */
@@ -329,10 +329,12 @@ To create it from the command line, start ardour as \"ardour --new %1"), path) <
 		ui->load_session (path, name);
 
 	} else {
-	  /*  TODO: This bit of code doesn't work properly yet
-		Glib::signal_idle().connect (bind (mem_fun (*ui, &ARDOUR_UI::cmdline_new_session), path));
-		ui->set_will_create_new_session_automatically (true); */
 
+		/*  TODO: This bit of code doesn't work properly yet
+		    Glib::signal_idle().connect (bind (mem_fun (*ui, &ARDOUR_UI::cmdline_new_session), path));
+		    ui->set_will_create_new_session_automatically (true); 
+		*/
+		
 		/* Show the NSD */
 		ui->hide_splash ();
 		if (!Config->get_no_new_session_dialog()) {
@@ -383,7 +385,7 @@ int main (int argc, char *argv[])
 	cout << _("Ardour/GTK ") 
 	     << VERSIONSTRING
 	     << _("\n   (built using ")
-	     << ARDOUR::get_ardour_revision ()
+	     << ardour_svn_revision
 #ifdef __GNUC__
 	     << _(" and GCC version ") << __VERSION__ 
 #endif

@@ -87,7 +87,7 @@ class MidiDiskstream : public Diskstream
 
 	boost::shared_ptr<SMFSource> write_source () { return _write_source; }
 	
-	void set_destructive (bool yn); // doom!
+	int set_destructive (bool yn); // doom!
 
   protected:
 	friend class Session;

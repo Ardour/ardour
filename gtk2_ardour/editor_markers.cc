@@ -925,7 +925,7 @@ Editor::update_loop_range_view (bool visibility)
 
 	Location* tll;
 
-	if (Config->get_auto_loop() && ((tll = transport_loop_location()) != 0)) {
+	if (session->get_play_loop() && ((tll = transport_loop_location()) != 0)) {
 
 		double x1 = frame_to_pixel (tll->start());
 		double x2 = frame_to_pixel (tll->end());

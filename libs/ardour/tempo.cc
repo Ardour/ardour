@@ -206,7 +206,6 @@ TempoMap::TempoMap (nframes_t fr)
 	_frame_rate = fr;
 	last_bbt_valid = false;
 	BBT_Time start;
-	in_set_state = false;
 	
 	start.bars = 1;
 	start.beats = 1;
@@ -222,8 +221,6 @@ TempoMap::TempoMap (nframes_t fr)
 	
 	metrics->push_back (t);
 	metrics->push_back (m);
-	
-	save_state (_("initial"));
 }
 
 TempoMap::~TempoMap ()
@@ -256,7 +253,6 @@ TempoMap::move_metric_section (MetricSection& section, const BBT_Time& when)
 	section.set_start (corrected);
 	metrics->sort (cmp);
 	timestamp_metrics ();
-	save_state (_("move metric"));
 
 	return 0;
 }
@@ -265,7 +261,7 @@ void
 TempoMap::move_tempo (TempoSection& tempo, const BBT_Time& when)
 {
 	if (move_metric_section (tempo, when) == 0) {
-		send_state_changed (Change (0));
+		StateChanged (Change (0));
 	}
 }
 
@@ -273,7 +269,7 @@ void
 TempoMap::move_meter (MeterSection& meter, const BBT_Time& when)
 {
 	if (move_metric_section (meter, when) == 0) {
-		send_state_changed (Change (0));
+		StateChanged (Change (0));
 	}
 }
 		
@@ -301,7 +297,7 @@ TempoMap::remove_tempo (const TempoSection& tempo)
 	}
 
 	if (removed) {
-		send_state_changed (Change (0));
+		StateChanged (Change (0));
 	}
 }
 
@@ -325,14 +321,10 @@ TempoMap::remove_meter (const MeterSection& tempo)
 				}
 			}
 		}
-
-		if (removed) {
-			save_state (_("metric removed"));
-		}
 	}
 
 	if (removed) {
-		send_state_changed (Change (0));
+		StateChanged (Change (0));
 	}
 }
 
@@ -369,11 +361,9 @@ TempoMap::add_tempo (const Tempo& tempo, BBT_Time where)
 		where.ticks = 0;
 		
 		do_insert (new TempoSection (where, tempo.beats_per_minute()));
-
-		save_state (_("add tempo"));
 	}
 
-	send_state_changed (Change (0));
+	StateChanged (Change (0));
 }
 
 void
@@ -397,14 +387,10 @@ TempoMap::replace_tempo (TempoSection& existing, const Tempo& replacement)
 				break;
 			}
 		}
-
-		if (replaced) {
-			save_state (_("replace tempo"));
-		}
 	}
 	
 	if (replaced) {
-		send_state_changed (Change (0));
+		StateChanged (Change (0));
 	}
 }
 
@@ -431,11 +417,9 @@ TempoMap::add_meter (const Meter& meter, BBT_Time where)
 		where.ticks = 0;
 
 		do_insert (new MeterSection (where, meter.beats_per_bar(), meter.note_divisor()));
-
-		save_state (_("add meter"));
 	}
 
-	send_state_changed (Change (0));
+	StateChanged (Change (0));
 }
 
 void
@@ -458,14 +442,10 @@ TempoMap::replace_meter (MeterSection& existing, const Meter& replacement)
 				break;
 			}
 		}
-
-		if (replaced) {
-			save_state (_("replaced meter"));
-		}
 	}
 	
 	if (replaced) {
-		send_state_changed (Change (0));
+		StateChanged (Change (0));
 	}
 }
 
@@ -1071,6 +1051,9 @@ TempoMap::get_points (nframes_t lower, nframes_t upper) const
 	double beat_frame;
 	double beat_frames;
 	double frames_per_bar;
+	double delta_bars;
+	double delta_beats;
+	double dummy;
 	nframes_t limit;
 
 	meter = &first_meter ();
@@ -1100,6 +1083,10 @@ TempoMap::get_points (nframes_t lower, nframes_t upper) const
 	   Now start generating points.
 	*/
 
+	beats_per_bar = meter->beats_per_bar ();
+	frames_per_bar = meter->frames_per_bar (*tempo, _frame_rate);
+	beat_frames = tempo->frames_per_beat (_frame_rate);
+	
 	if (meter->frame() > tempo->frame()) {
 		bar = meter->start().bars;
 		beat = meter->start().beats;
@@ -1110,12 +1097,21 @@ TempoMap::get_points (nframes_t lower, nframes_t upper) const
 		current = tempo->frame();
 	}
 
+	/* initialize current to point to the bar/beat just prior to the
+	   lower frame bound passed in.  assumes that current is initialized
+	   above to be on a beat.
+	*/
+	
+	delta_bars = (lower-current) / frames_per_bar;
+	delta_beats = modf(delta_bars, &dummy) * beats_per_bar;
+	current += (floor(delta_bars) * frames_per_bar) +  (floor(delta_beats) * beat_frames);
+
+	// adjust bars and beats too
+	bar += (uint32_t) (floor(delta_bars));
+	beat += (uint32_t) (floor(delta_beats));
+
 	points = new BBTPointList;
 		
-	beats_per_bar = meter->beats_per_bar ();
-	frames_per_bar = meter->frames_per_bar (*tempo, _frame_rate);
-	beat_frames = tempo->frames_per_beat (_frame_rate);
-
 	do {
 
 		if (i == metrics->end()) {
@@ -1197,6 +1193,10 @@ TempoMap::get_points (nframes_t lower, nframes_t upper) const
 				beat = 1;
 			}
 
+			beats_per_bar = meter->beats_per_bar ();
+			frames_per_bar = meter->frames_per_bar (*tempo, _frame_rate);
+			beat_frames = tempo->frames_per_beat (_frame_rate);
+			
 			++i;
 		}
 
@@ -1246,8 +1246,6 @@ TempoMap::set_state (const XMLNode& node)
 		XMLNodeConstIterator niter;
 		Metrics old_metrics (*metrics);
 		
-		in_set_state = true;
-		
 		metrics->clear();
 
 		nlist = node.children();
@@ -1287,20 +1285,9 @@ TempoMap::set_state (const XMLNode& node)
 			metrics->sort (cmp);
 			timestamp_metrics ();
 		}
-
-		in_set_state = false;
 	}
 	
-	/* This state needs to be saved. This string will never be a part of the 
-	   object's history though, because the allow_save flag is false during 
-	   session load. This state will eventually be tagged "initial state", 
-	   by a call to StateManager::allow_save from Session::set_state.
-
-	   If this state is not saved, there is no way to reach it through undo actions.
-	*/
-	save_state(_("load XML data"));
-	
-	send_state_changed (Change (0));
+	StateChanged (Change (0));
 
 	return 0;
 }
@@ -1323,65 +1310,3 @@ TempoMap::dump (std::ostream& o) const
 	}
 }
 
-UndoAction
-TempoMap::get_memento () const
-{
-	return sigc::bind (mem_fun (*(const_cast<TempoMap *> (this)), &StateManager::use_state), _current_state_id);
-}
-
-Change
-TempoMap::restore_state (StateManager::State& state)
-{
-	Glib::RWLock::ReaderLock lm (lock);
-
-	TempoMapState* tmstate = dynamic_cast<TempoMapState*> (&state);
-
-	/* We can't just set the metrics pointer to the address of the metrics list 
-	   stored in the state, cause this would ruin this state for restoring in
-	   the future. If they have the same address, they are the same list.
-	   Thus we need to copy all the elements from the state metrics list to the 
-	   current metrics list.
-	*/
-	metrics->clear();
-	for (Metrics::iterator i = tmstate->metrics->begin(); i != tmstate->metrics->end(); ++i) {
-		TempoSection *ts;
-		MeterSection *ms;
-		
-		if ((ts = dynamic_cast<TempoSection*>(*i)) != 0) {
-			metrics->push_back (new TempoSection (*ts));
-		} else if ((ms = dynamic_cast<MeterSection*>(*i)) != 0) {
-			metrics->push_back (new MeterSection (*ms));
-		}
-	}
-	
-	last_bbt_valid = false;
-
-	return Change (0);
-}
-
-StateManager::State* 
-TempoMap::state_factory (std::string why) const
-{
-	TempoMapState* state = new TempoMapState (why);
-
-	for (Metrics::iterator i = metrics->begin(); i != metrics->end(); ++i) {
-		TempoSection *ts;
-		MeterSection *ms;
-		
-		if ((ts = dynamic_cast<TempoSection*>(*i)) != 0) {
-			state->metrics->push_back (new TempoSection (*ts));
-		} else if ((ms = dynamic_cast<MeterSection*>(*i)) != 0) {
-			state->metrics->push_back (new MeterSection (*ms));
-		}
-	}
-		
-	return state;
-}
-
-void
-TempoMap::save_state (std::string why)
-{
-	if (!in_set_state) {
-		StateManager::save_state (why);
-	}
-}

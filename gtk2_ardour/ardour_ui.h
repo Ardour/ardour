@@ -151,7 +151,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_big_clock_window ();
 	void toggle_connection_editor ();
 	void toggle_route_params_window ();
-	void toggle_tempo_window ();
 	void toggle_editing_space();
 
 	Gtk::Tooltips& tooltips() { return _tooltips; }
@@ -168,7 +167,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void rec_enable_button_blink (bool onoff, ARDOUR::AudioDiskstream *, Gtk::Widget *w);
 
 	void name_io_setup (ARDOUR::AudioEngine&, string&, ARDOUR::IO& io, bool in);
-	void choose_io (ARDOUR::IO&, bool input);
 
 	static gint hide_and_quit (GdkEventAny *ev, ArdourDialog *);
 
@@ -227,7 +225,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_click ();
 
 	void toggle_session_auto_loop ();
-	void toggle_session_punch_in ();
 	
 	void toggle_options_window ();
 
@@ -284,14 +281,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::Table          option_table;
 
 	int  setup_windows ();
-	void setup_session_menu ();
 	void setup_transport ();
 	void setup_clock ();
-	void setup_session_info ();
 	void setup_adjustables ();
 
-	Gtk::MenuBar* make_menubar ();
-	
 	static ARDOUR_UI *theArdourUI;
 
 	void startup ();
@@ -299,8 +292,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void finish();
 	int  ask_about_saving_session (const string & why);
-	gint ask_about_save_deleted (GdkEventAny*);
-	void save_session_choice_made (int);
 	int  save_the_session;
 
 	void queue_transport_change ();
@@ -314,8 +305,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void use_config ();
 
-	void clear_meters ();
-
 	static gint _blink  (void *);
 	void blink ();
 	gint blink_timeout_tag;
@@ -325,6 +314,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void control_methods_adjusted ();
 	void mmc_device_id_adjusted ();
+
+	void about_signal_response(int response);
 
   private:
 	Gtk::VBox     top_packer;
@@ -444,8 +435,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void allow_mmc_and_local ();
 	void allow_local_only ();
 
-	static void rate_printer (char buf[32], Gtk::Adjustment &, void *);
-
 	Gtk::Menu*        session_popup_menu;
 
 	struct RecentSessionModelColumns : public Gtk::TreeModel::ColumnRecord {
@@ -465,7 +454,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::FileChooserDialog* open_session_selector;
 	
 	void build_session_selector();
-	void recent_session_selection_changed ();
 	void redisplay_recent_sessions();
 	void recent_session_row_activated (const Gtk::TreePath& path, Gtk::TreeViewColumn* col);
 
@@ -483,7 +471,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void build_menu_bar ();
 	void build_control_surface_menu ();
-	void pack_toplevel_controls();
 
 	Gtk::Label   wall_clock_label;
 	Gtk::EventBox wall_clock_box;
@@ -521,8 +508,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	
 	void open_session ();
 	void open_recent_session ();
-	void open_ok_clicked ();
-
 	void save_template ();
 
 	void session_add_audio_route (bool disk, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode, uint32_t how_many);
@@ -544,14 +529,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void transport_rewind (int option);
 	void transport_loop ();
 
-	void transport_locating ();
 	void transport_rolling ();
 	void transport_rewinding ();
 	void transport_forwarding ();
 	void transport_stopped ();
 
-	void send_all_midi_feedback ();
-	
 	bool _session_is_new;
 	void connect_to_session (ARDOUR::Session *);
 	void connect_dependents_to_session (ARDOUR::Session *);
@@ -562,9 +544,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	guint32  last_key_press_time;
 
 	void snapshot_session ();
-
-	void map_record_state ();
-	void queue_map_record_state ();
 
 	Mixer_UI   *mixer;
 	int         create_mixer ();
@@ -591,7 +570,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	/* route dialog */
 
 	AddRouteDialog *add_route_dialog;
-	void add_route_dialog_done (int status);
 
 	/* SoundFile Browser */
 	SoundFileBrowser *sfdb;
@@ -604,15 +582,13 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	/* Keymap handling */
 
-	Glib::RefPtr<Gtk::ActionGroup> get_common_actions();
 	void install_actions ();
-	void test_binding_action (const char *);
 	void start_keyboard_prefix();
 
 	void toggle_record_enable (uint32_t);
 
-	uint32_t rec_enabled_diskstreams;
-	void count_recenabled_diskstreams (ARDOUR::Route&);
+	uint32_t rec_enabled_streams;
+	void count_recenabled_streams (ARDOUR::Route&);
 
 	About* about;
 	bool shown_flag;
@@ -630,8 +606,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	struct timeval last_peak_grab;
 	struct timeval last_shuttle_request;
-
-	void editor_display_control_changed (Editing::DisplayControl c);
 
 	bool have_disk_overrun_displayed;
 	bool have_disk_underrun_displayed;
@@ -678,7 +652,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_StopTransportAtEndOfSession();
 	void toggle_GainReduceFastTransport();
 	void toggle_LatchedSolo();
-	void toggle_SoloViaBus();
 	void toggle_LatchedRecordEnable ();
 
 	void mtc_port_changed ();

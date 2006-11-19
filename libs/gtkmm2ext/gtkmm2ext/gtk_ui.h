@@ -101,6 +101,8 @@ class UI : public Receiver, public AbstractUI<UIRequest>
 
 	bool caller_is_ui_thread ();
 
+	static pthread_t thread_id() { return gui_thread; }
+
 	/* Gtk-UI specific interfaces */
 
 	bool running ();

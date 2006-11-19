@@ -62,6 +62,7 @@
 #include "selection.h"
 #include "audio_streamview.h"
 #include "time_axis_view.h"
+#include "audio_time_axis.h"
 #include "utils.h"
 #include "crossfade_view.h"
 #include "editing.h"
@@ -98,7 +99,7 @@ const double Editor::timebar_height = 15.0;
 
 #include "editor_xpms"
 
-static const gchar *snap_type_strings[] = {
+static const gchar *_snap_type_strings[] = {
 	N_("None"),
 	N_("CD Frames"),
 	N_("SMPTE Frames"),
@@ -122,13 +123,13 @@ static const gchar *snap_type_strings[] = {
 	0
 };
 
-static const gchar *snap_mode_strings[] = {
-	N_("Normal Snap"),
-	N_("Magnetic Snap"),
+static const gchar *_snap_mode_strings[] = {
+	N_("Normal"),
+	N_("Magnetic"),
 	0
 };
 
-static const gchar *zoom_focus_strings[] = {
+static const gchar *_zoom_focus_strings[] = {
 	N_("Left"),
 	N_("Right"),
 	N_("Center"),
@@ -177,7 +178,7 @@ Editor::Editor (AudioEngine& eng)
 
 	  minsec_label (_("Mins:Secs")),
 	  bbt_label (_("Bars:Beats")),
-	  smpte_label (_("SMPTE")),
+	  smpte_label (_("Timecode")),
 	  frame_label (_("Frames")),
 	  tempo_label (_("Tempo")),
 	  meter_label (_("Meter")),
@@ -240,6 +241,10 @@ Editor::Editor (AudioEngine& eng)
 	current_mixer_strip = 0;
 	current_bbt_points = 0;
 
+	snap_type_strings = I18N (_snap_type_strings);
+	snap_mode_strings = I18N (_snap_mode_strings);
+	zoom_focus_strings = I18N(_zoom_focus_strings);
+
 	snap_type = SnapToFrame;
 	set_snap_to (snap_type);
 	snap_mode = SnapNormal;
@@ -285,6 +290,7 @@ Editor::Editor (AudioEngine& eng)
 	transport_marker_menu = 0;
 	new_transport_marker_menu = 0;
 	editor_mixer_strip_width = Wide;
+	show_editor_mixer_when_tracks_arrive = false;
 	repos_zoom_queued = false;
 	region_edit_menu_split_item = 0;
 	temp_location = 0;
@@ -302,6 +308,7 @@ Editor::Editor (AudioEngine& eng)
 	edit_cursor = 0;
 	playhead_cursor = 0;
 	button_release_can_deselect = true;
+	canvas_idle_queued = false;
 
 	location_marker_color = color_map[cLocationMarker];
 	location_range_color = color_map[cLocationRange];
@@ -511,7 +518,7 @@ Editor::Editor (AudioEngine& eng)
 	edit_group_display.signal_button_press_event().connect (mem_fun(*this, &Editor::edit_group_list_button_press_event), false);
 
 	VBox* edit_group_display_packer = manage (new VBox());
-	HButtonBox* edit_group_display_button_box = manage (new HButtonBox());
+	HBox* edit_group_display_button_box = manage (new HBox());
 	edit_group_display_button_box->set_homogeneous (true);
 
 	Button* edit_group_add_button = manage (new Button ());
@@ -546,7 +553,6 @@ Editor::Editor (AudioEngine& eng)
 	region_list_display.set_model (region_list_model);
 	region_list_display.append_column (_("Regions"), region_list_columns.name);
 	region_list_display.set_headers_visible (false);
-	region_list_display.set_hover_expand (true);
 
 	region_list_display.get_selection()->set_select_function (mem_fun (*this, &Editor::region_list_selection_filter));
 	
@@ -632,6 +638,8 @@ Editor::Editor (AudioEngine& eng)
 	the_notebook.popup_enable ();
 	the_notebook.set_tab_pos (Gtk::POS_RIGHT);
 
+	post_maximal_editor_width = 0;
+	post_maximal_pane_position = 0;
 	edit_pane.pack1 (edit_packer, true, true);
 	edit_pane.pack2 (the_notebook, false, true);
 	
@@ -1116,6 +1124,7 @@ Editor::connect_to_session (Session *t)
 	update_title ();
 
 	session->GoingAway.connect (mem_fun(*this, &Editor::session_going_away));
+	session->history().Changed.connect (mem_fun (*this, &Editor::history_changed));
 
 	/* These signals can all be emitted by a non-GUI thread. Therefore the
 	   handlers for them must not attempt to directly interact with the GUI,
@@ -1308,7 +1317,6 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 	}
 
 	MenuList& items (fade_context_menu.items());
-	AudioRegion& ar (*arv->audio_region().get()); // FIXME
 
 	items.clear ();
 
@@ -1323,11 +1331,11 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 		
 		items.push_back (SeparatorElem());
 		
-		items.push_back (MenuElem (_("Linear"), bind (mem_fun (ar, &AudioRegion::set_fade_in_shape), AudioRegion::Linear)));
-		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (ar, &AudioRegion::set_fade_in_shape), AudioRegion::LogB)));
-		items.push_back (MenuElem (_("Slow"), bind (mem_fun (ar, &AudioRegion::set_fade_in_shape), AudioRegion::Fast)));
-		items.push_back (MenuElem (_("Fast"), bind (mem_fun (ar, &AudioRegion::set_fade_in_shape), AudioRegion::LogA)));
-		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (ar, &AudioRegion::set_fade_in_shape), AudioRegion::Slow)));
+		items.push_back (MenuElem (_("Linear"), bind (mem_fun (*arv, &AudioRegionView::set_fade_in_shape), AudioRegion::Linear)));
+		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (*arv, &AudioRegionView::set_fade_in_shape), AudioRegion::LogB)));
+		items.push_back (MenuElem (_("Slow"), bind (mem_fun (*arv, &AudioRegionView::set_fade_in_shape), AudioRegion::Fast)));
+		items.push_back (MenuElem (_("Fast"), bind (mem_fun (*arv, &AudioRegionView::set_fade_in_shape), AudioRegion::LogA)));
+		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (*arv, &AudioRegionView::set_fade_in_shape), AudioRegion::Slow)));
 		break;
 
 	case FadeOutItem:
@@ -1340,13 +1348,14 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 		
 		items.push_back (SeparatorElem());
 		
-		items.push_back (MenuElem (_("Linear"), bind (mem_fun (ar, &AudioRegion::set_fade_out_shape), AudioRegion::Linear)));
-		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (ar, &AudioRegion::set_fade_out_shape), AudioRegion::Fast)));
-		items.push_back (MenuElem (_("Slow"), bind (mem_fun (ar, &AudioRegion::set_fade_out_shape), AudioRegion::LogB)));
-		items.push_back (MenuElem (_("Fast"), bind (mem_fun (ar, &AudioRegion::set_fade_out_shape), AudioRegion::LogA)));
-		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (ar, &AudioRegion::set_fade_out_shape), AudioRegion::Slow)));
+		items.push_back (MenuElem (_("Linear"), bind (mem_fun (*arv, &AudioRegionView::set_fade_out_shape), AudioRegion::Linear)));
+		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (*arv, &AudioRegionView::set_fade_out_shape), AudioRegion::Fast)));
+		items.push_back (MenuElem (_("Slow"), bind (mem_fun (*arv, &AudioRegionView::set_fade_out_shape), AudioRegion::LogB)));
+		items.push_back (MenuElem (_("Fast"), bind (mem_fun (*arv, &AudioRegionView::set_fade_out_shape), AudioRegion::LogA)));
+		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (*arv, &AudioRegionView::set_fade_out_shape), AudioRegion::Slow)));
 
 		break;
+
 	default:
 		fatal << _("programming error: ")
 		      << X_("non-fade canvas item passed to popup_fade_context_menu()")
@@ -1691,7 +1700,7 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 	   become selected.
 	*/
 
-	region_menu->signal_map_event().connect (bind (mem_fun(*this, &Editor::set_selected_regionview_from_map_event), sv, boost::weak_ptr<Region>(region)));
+	// region_menu->signal_map_event().connect (bind (mem_fun(*this, &Editor::set_selected_regionview_from_map_event), sv, boost::weak_ptr<Region>(region)));
 
 	items.push_back (MenuElem (_("Popup region editor"), mem_fun(*this, &Editor::edit_region)));
 	items.push_back (MenuElem (_("Raise to top layer"), mem_fun(*this, &Editor::raise_region_to_top)));
@@ -1711,32 +1720,50 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 
 	items.push_back (SeparatorElem());
 
-	/* XXX hopefully this nonsense will go away with SigC++ 2.X, where the compiler
-	   might be able to figure out which overloaded member function to use in
-	   a bind() call ...
-	*/
-
-	void (Editor::*type_A_pmf)(void (Region::*pmf)(bool), bool) = &Editor::region_selection_op;
-
-	items.push_back (MenuElem (_("Lock"), bind (mem_fun(*this, type_A_pmf), &Region::set_locked, true)));
-	items.push_back (MenuElem (_("Unlock"), bind (mem_fun(*this, type_A_pmf), &Region::set_locked, false)));
-	items.push_back (SeparatorElem());
-
-	if (region->muted()) {
-		items.push_back (MenuElem (_("Unmute"), bind (mem_fun(*this, type_A_pmf), &Region::set_muted, false)));
-	} else {
-		items.push_back (MenuElem (_("Mute"), bind (mem_fun(*this, type_A_pmf), &Region::set_muted, true)));
+	items.push_back (CheckMenuElem (_("Lock"), mem_fun(*this, &Editor::toggle_region_lock)));
+	region_lock_item = static_cast<CheckMenuItem*>(&items.back());
+	if (region->locked()) {
+		region_lock_item->set_active();
 	}
-	items.push_back (SeparatorElem());
+	items.push_back (CheckMenuElem (_("Mute"), mem_fun(*this, &Editor::toggle_region_mute)));
+	region_mute_item = static_cast<CheckMenuItem*>(&items.back());
+	if (region->muted()) {
+		region_mute_item->set_active();
+	}
+	items.push_back (CheckMenuElem (_("Opaque"), mem_fun(*this, &Editor::toggle_region_opaque)));
+	region_opaque_item = static_cast<CheckMenuItem*>(&items.back());
+	if (region->opaque()) {
+		region_opaque_item->set_active();
+	}
 
-	items.push_back (MenuElem (_("Original position"), mem_fun(*this, &Editor::naturalize)));
-	items.push_back (SeparatorElem());
+	items.push_back (CheckMenuElem (_("Original position"), mem_fun(*this, &Editor::naturalize)));
+	if (region->at_natural_position()) {
+		items.back().set_sensitive (false);
+	}
 
+	items.push_back (SeparatorElem());
 
 	if (ar) {
+		
+		RegionView* rv = sv->find_view (ar);
+		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(rv);
 
-		items.push_back (MenuElem (_("Toggle envelope visibility"), mem_fun(*this, &Editor::toggle_gain_envelope_visibility)));
-		items.push_back (MenuElem (_("Toggle envelope active"), mem_fun(*this, &Editor::toggle_gain_envelope_active)));
+		items.push_back (MenuElem (_("Reset Envelope"), mem_fun(*this, &Editor::reset_region_gain_envelopes)));
+		
+		items.push_back (CheckMenuElem (_("Envelope Visible"), mem_fun(*this, &Editor::toggle_gain_envelope_visibility)));
+		region_envelope_visible_item = static_cast<CheckMenuItem*> (&items.back());
+
+		if (arv->envelope_visible()) {
+			region_envelope_visible_item->set_active (true);
+		}
+
+		items.push_back (CheckMenuElem (_("Envelope Active"), mem_fun(*this, &Editor::toggle_gain_envelope_active)));
+		region_envelope_active_item = static_cast<CheckMenuItem*> (&items.back());
+
+		if (ar->envelope_active()) {
+			region_envelope_active_item->set_active (true);
+		}
+
 		items.push_back (SeparatorElem());
 
 		if (ar->scale_amplitude() != 1.0f) {
@@ -1752,7 +1779,7 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 	/* range related stuff */
 
 	items.push_back (MenuElem (_("Add Range Markers"), mem_fun (*this, &Editor::add_location_from_audio_region)));
-	items.push_back (MenuElem (_("Set Range"), mem_fun (*this, &Editor::set_selection_from_audio_region)));
+	items.push_back (MenuElem (_("Set Range Selection"), mem_fun (*this, &Editor::set_selection_from_audio_region)));
 	items.push_back (SeparatorElem());
 			 
 	/* Nudge region */
@@ -1789,8 +1816,6 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 	items.push_back (MenuElem (_("Fill Track"), (mem_fun(*this, &Editor::region_fill_track))));
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &Editor::remove_clicked_region)));
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Destroy"), mem_fun(*this, &Editor::destroy_clicked_region)));
 
 	/* OK, stick the region submenu at the top of the list, and then add
 	   the standard items.
@@ -1861,7 +1886,7 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 	MenuList& play_items = play_menu->items();
 	play_menu->set_name ("ArdourContextMenu");
 	
-	play_items.push_back (MenuElem (_("Play from edit cursor")));
+	play_items.push_back (MenuElem (_("Play from edit cursor"), mem_fun(*this, &Editor::play_from_edit_cursor)));
 	play_items.push_back (MenuElem (_("Play from start"), mem_fun(*this, &Editor::play_from_start)));
 	play_items.push_back (MenuElem (_("Play region"), mem_fun(*this, &Editor::play_selected_region)));
 	play_items.push_back (SeparatorElem());
@@ -1946,7 +1971,7 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 	MenuList& play_items = play_menu->items();
 	play_menu->set_name ("ArdourContextMenu");
 	
-	play_items.push_back (MenuElem (_("Play from edit cursor")));
+	play_items.push_back (MenuElem (_("Play from edit cursor"), mem_fun(*this, &Editor::play_from_edit_cursor)));
 	play_items.push_back (MenuElem (_("Play from start"), mem_fun(*this, &Editor::play_from_start)));
 	edit_items.push_back (MenuElem (_("Play"), *play_menu));
 
@@ -1995,10 +2020,13 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 
 void
 Editor::set_snap_to (SnapType st)
-{
+{	
 	snap_type = st;
-	vector<string> txt = internationalize (snap_type_strings);
-	snap_type_selector.set_active_text (txt[(int)st]);
+	string str = snap_type_strings[(int) st];
+
+	if (str != snap_type_selector.get_active_text()) {
+		snap_type_selector.set_active_text (str);
+	}
 
 	instant_save ();
 
@@ -2019,8 +2047,11 @@ void
 Editor::set_snap_mode (SnapMode mode)
 {
 	snap_mode = mode;
-	vector<string> txt = internationalize (snap_mode_strings);
-	snap_mode_selector.set_active_text (txt[(int)mode]);
+	string str = snap_mode_strings[(int)mode];
+
+	if (str != snap_mode_selector.get_active_text ()) {
+		snap_mode_selector.set_active_text (str);
+	}
 
 	instant_save ();
 }
@@ -2147,6 +2178,7 @@ Editor::set_state (const XMLNode& node)
 
 		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
 		if (act) {
+
 			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 			bool yn = (prop->value() == X_("yes"));
 
@@ -2584,10 +2616,10 @@ Editor::setup_toolbar ()
 	zoom_box.pack_start (zoom_out_full_button, false, false);
 	
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_range_clock, _("Current Zoom Range\n(Width of visible area)"));
-	
+
 	zoom_focus_selector.set_name ("ZoomFocusSelector");
 	Gtkmm2ext::set_size_request_to_display_given_text (zoom_focus_selector, "Focus Center", 2+FUDGE, 0);
-	set_popdown_strings (zoom_focus_selector, internationalize (zoom_focus_strings));
+	set_popdown_strings (zoom_focus_selector, zoom_focus_strings);
 	zoom_focus_selector.signal_changed().connect (mem_fun(*this, &Editor::zoom_focus_selection_done));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_focus_selector, _("Zoom focus"));
 
@@ -2601,13 +2633,13 @@ Editor::setup_toolbar ()
 
 	snap_type_selector.set_name ("SnapTypeSelector");
 	Gtkmm2ext::set_size_request_to_display_given_text (snap_type_selector, "SMPTE Seconds", 2+FUDGE, 10);
-	set_popdown_strings (snap_type_selector, internationalize (snap_type_strings));
+	set_popdown_strings (snap_type_selector, snap_type_strings);
 	snap_type_selector.signal_changed().connect (mem_fun(*this, &Editor::snap_type_selection_done));
 	ARDOUR_UI::instance()->tooltips().set_tip (snap_type_selector, _("Unit to snap cursors and ranges to"));
 
 	snap_mode_selector.set_name ("SnapModeSelector");
 	Gtkmm2ext::set_size_request_to_display_given_text (snap_mode_selector, "Magnetic Snap", 2+FUDGE, 10);
-	set_popdown_strings (snap_mode_selector, internationalize (snap_mode_strings));
+	set_popdown_strings (snap_mode_selector, snap_mode_strings);
 	snap_mode_selector.signal_changed().connect (mem_fun(*this, &Editor::snap_mode_selection_done));
 
 	snap_box.pack_start (edit_cursor_clock, false, false);
@@ -2819,33 +2851,36 @@ Editor::commit_reversible_command ()
 }
 
 bool
-Editor::set_selected_track_from_click (bool press, Selection::Operation op, bool with_undo, bool no_remove)
+Editor::set_selected_track (TimeAxisView& view, Selection::Operation op, bool no_remove)
 {
 	bool commit = false;
 
-	if (!clicked_axisview) {
-		return false;
-	}
-
 	switch (op) {
 	case Selection::Toggle:
-		if (selection->selected (clicked_axisview)) {
+		if (selection->selected (&view)) {
 			if (!no_remove) {
-				selection->remove (clicked_axisview);
+				selection->remove (&view);
 				commit = true;
 			}
 		} else {
-			selection->add (clicked_axisview);
+			selection->add (&view);
 			commit = false;
 		}
 		break;
 
+	case Selection::Add:
+		if (!selection->selected (&view)) {
+			selection->add (&view);
+			commit = true;
+		}
+		break;
+
 	case Selection::Set:
-		if (selection->selected (clicked_axisview) && selection->tracks.size() == 1) {
+		if (selection->selected (&view) && selection->tracks.size() == 1) {
 			/* no commit necessary */
 		} 
 
-		selection->set (clicked_axisview);
+		selection->set (&view);
 		break;
 		
 	case Selection::Extend:
@@ -2857,7 +2892,17 @@ Editor::set_selected_track_from_click (bool press, Selection::Operation op, bool
 }
 
 bool
-Editor::set_selected_control_point_from_click (bool press, Selection::Operation op, bool with_undo, bool no_remove)
+Editor::set_selected_track_from_click (Selection::Operation op, bool no_remove)
+{
+	if (!clicked_routeview) {
+		return false;
+	}
+	
+	return set_selected_track (*clicked_routeview, op, no_remove);
+}
+
+bool
+Editor::set_selected_control_point_from_click (Selection::Operation op, bool no_remove)
 {
 	if (!clicked_control_point) {
 		return false;
@@ -2877,7 +2922,7 @@ Editor::set_selected_control_point_from_click (bool press, Selection::Operation 
 }
 
 void
-Editor::get_relevant_tracks (RouteTimeAxisView& base, set<RouteTimeAxisView*>& relevant_tracks)
+Editor::get_relevant_tracks (set<RouteTimeAxisView*>& relevant_tracks)
 {
 	/* step one: get all selected tracks and all tracks in the relevant edit groups */
 
@@ -2906,14 +2951,9 @@ Editor::get_relevant_tracks (RouteTimeAxisView& base, set<RouteTimeAxisView*>& r
 					}
 				}
 			}
-
 		} else {
-
-			/* no active group, or no group */
-
-			relevant_tracks.insert (&base);
+			relevant_tracks.insert (atv);
 		}
-
 	}
 }
 
@@ -2922,14 +2962,10 @@ Editor::mapover_tracks (slot<void,RouteTimeAxisView&,uint32_t> sl)
 {
 	set<RouteTimeAxisView*> relevant_tracks;
 
-	if (!clicked_routeview) {
-		return;
-	}
-
-	get_relevant_tracks (*clicked_routeview, relevant_tracks);
+	get_relevant_tracks (relevant_tracks);
 
 	uint32_t sz = relevant_tracks.size();
-	
+
 	for (set<RouteTimeAxisView*>::iterator ati = relevant_tracks.begin(); ati != relevant_tracks.end(); ++ati) {
 		sl (**ati, sz);
 	}
@@ -3117,7 +3153,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 
 		set<RouteTimeAxisView*> relevant_tracks;
 		
-		get_relevant_tracks (*clicked_routeview, relevant_tracks);
+		get_relevant_tracks (relevant_tracks);
 		
 		for (set<RouteTimeAxisView*>::iterator t = relevant_tracks.begin(); t != relevant_tracks.end(); ++t) {
 			(*t)->get_selectables (first_frame, last_frame, -1.0, -1.0, results);
@@ -3192,6 +3228,9 @@ Editor::set_selected_regionview_from_region_list (boost::shared_ptr<Region> regi
 	case Selection::Extend:
 		selection->add (all_equivalent_regions);
 		break;
+	case Selection::Add:
+		selection->add (all_equivalent_regions);
+		break;
 	}
 
 	commit_reversible_command () ;
@@ -3259,89 +3298,27 @@ Editor::set_edit_group_mute (Route& route, bool yn)
 }
 		
 void
-Editor::set_edit_menu (Menu& menu)
+Editor::history_changed ()
 {
-	edit_menu = &menu;
-	edit_menu->signal_map_event().connect (mem_fun(*this, &Editor::edit_menu_map_handler));
-}
-
-bool
-Editor::edit_menu_map_handler (GdkEventAny* ev)
-{
-	using namespace Menu_Helpers;
-	MenuList& edit_items = edit_menu->items();
 	string label;
 
-	/* Nuke all the old items */
-		
-	edit_items.clear ();
-
-	if (session == 0) {
-		return false;
-	}
-
-	if (session->undo_depth() == 0) {
-		label = _("Undo");
-	} else {
-		label = string_compose(_("Undo (%1)"), session->next_undo());
-	}
-	
-	edit_items.push_back (MenuElem (label, bind (mem_fun(*this, &Editor::undo), 1U)));
-	
-	if (session->undo_depth() == 0) {
-		edit_items.back().set_sensitive (false);
-	}
-	
-	if (session->redo_depth() == 0) {
-		label = _("Redo");
-	} else {
-		label = string_compose(_("Redo (%1)"), session->next_redo());
-	}
-	
-	edit_items.push_back (MenuElem (label, bind (mem_fun(*this, &Editor::redo), 1U)));
-	if (session->redo_depth() == 0) {
-		edit_items.back().set_sensitive (false);
-	}
-
-	vector<MenuItem*> mitems;
-
-	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Cut"), mem_fun(*this, &Editor::cut)));
-	mitems.push_back (&edit_items.back());
-	edit_items.push_back (MenuElem (_("Copy"), mem_fun(*this, &Editor::copy)));
-	mitems.push_back (&edit_items.back());
-	edit_items.push_back (MenuElem (_("Paste"), bind (mem_fun(*this, &Editor::paste), 1.0f)));
-	mitems.push_back (&edit_items.back());
-	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Align"), bind (mem_fun(*this, &Editor::align), ARDOUR::SyncPoint)));
-	mitems.push_back (&edit_items.back());
-	edit_items.push_back (MenuElem (_("Align Relative"), bind (mem_fun(*this, &Editor::align_relative), ARDOUR::SyncPoint)));
-	mitems.push_back (&edit_items.back());
-	edit_items.push_back (SeparatorElem());
-
-	if (selection->empty()) {
-		for (vector<MenuItem*>::iterator i = mitems.begin(); i != mitems.end(); ++i) {
-			(*i)->set_sensitive (false);
+	if (undo_action && session) {
+		if (session->undo_depth() == 0) {
+			label = _("Undo");
+		} else {
+			label = string_compose(_("Undo (%1)"), session->next_undo());
 		}
+		undo_action->property_label() = label;
 	}
 
-	Menu* import_menu = manage (new Menu());
-	import_menu->set_name ("ArdourContextMenu");
-	MenuList& import_items = import_menu->items();
-	
-	import_items.push_back (MenuElem (_("... as new track"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsTrack)));
-	import_items.push_back (MenuElem (_("... as new region"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion)));
-
-	edit_items.push_back (MenuElem (_("Import audio (copy)"), *import_menu));
-	edit_items.push_back (SeparatorElem());
-
-	edit_items.push_back (MenuElem (_("Remove last capture"), mem_fun(*this, &Editor::remove_last_capture)));
-
-	if (!session->have_captured()) {
-		edit_items.back().set_sensitive (false);
+	if (redo_action && session) {
+		if (session->redo_depth() == 0) {
+			label = _("Redo");
+		} else {
+			label = string_compose(_("Redo (%1)"), session->next_redo());
+		}
+		redo_action->property_label() = label;
 	}
-
-	return false;
 }
 
 void
@@ -3449,10 +3426,6 @@ Editor::edit_mode_selection_done ()
 void
 Editor::snap_type_selection_done ()
 {
-	if (session == 0) {
-		return;
-	}
-
 	string choice = snap_type_selector.get_active_text();
 	SnapType snaptype = SnapToFrame;
 
@@ -3498,35 +3471,34 @@ Editor::snap_type_selection_done ()
 		snaptype = SnapToFrame;
 	}
 
-	set_snap_to (snaptype);
+	RefPtr<RadioAction> ract = snap_type_action (snaptype);
+	if (ract) {
+		ract->set_active ();
+	}
 }	
 
 void
 Editor::snap_mode_selection_done ()
 {
-	if(session == 0) {
-		return;
-	}
-
 	string choice = snap_mode_selector.get_active_text();
 	SnapMode mode = SnapNormal;
 
-	if (choice == _("Normal Snap")) {
+	if (choice == _("Normal")) {
 		mode = SnapNormal;
-	} else if (choice == _("Magnetic Snap")) {
+	} else if (choice == _("Magnetic")) {
 		mode = SnapMagnetic;
 	}
 
-	set_snap_mode (mode);
+	RefPtr<RadioAction> ract = snap_mode_action (mode);
+
+	if (ract) {
+		ract->set_active (true);
+	}
 }
 
 void
 Editor::zoom_focus_selection_done ()
 {
-	if (session == 0) {
-		return;
-	}
-
 	string choice = zoom_focus_selector.get_active_text();
 	ZoomFocus focus_type = ZoomFocusLeft;
 
@@ -3541,8 +3513,12 @@ Editor::zoom_focus_selection_done ()
 	} else if (choice == _("Edit Cursor")) {
 		focus_type = ZoomFocusEdit;
 	} 
+	
+	RefPtr<RadioAction> ract = zoom_focus_action (focus_type);
 
-	set_zoom_focus (focus_type);
+	if (ract) {
+		ract->set_active ();
+	}
 }	
 
 gint
@@ -3673,8 +3649,11 @@ Editor::get_valid_views (TimeAxisView* track, RouteGroup* group)
 void
 Editor::set_zoom_focus (ZoomFocus f)
 {
-	vector<string> txt = internationalize (zoom_focus_strings);
-	zoom_focus_selector.set_active_text (txt[(int)f]);
+	string str = zoom_focus_strings[(int)f];
+
+	if (str != zoom_focus_selector.get_active_text()) {
+		zoom_focus_selector.set_active_text (str);
+	}
 	
 	if (zoom_focus != f) {
 		zoom_focus = f;
@@ -3985,7 +3964,18 @@ Editor::redisplay_snapshots ()
 	for (vector<string*>::iterator i = states->begin(); i != states->end(); ++i) {
 		string statename = *(*i);
 		TreeModel::Row row = *(snapshot_display_model->append());
-		row[snapshot_display_columns.visible_name] = statename;
+		
+		// we don't have a way of changing the rendering in just one TreeView 
+		// cell so just put an asterisk on each side of the name for now.
+		string display_name;
+		if (statename == session->snap_name()) {
+			display_name = "*"+statename+"*";
+			snapshot_display.get_selection()->select(row);
+		} else {
+			display_name = statename;
+		}
+		
+		row[snapshot_display_columns.visible_name] = display_name;
 		row[snapshot_display_columns.real_name] = statename;
 	}
 
@@ -4002,24 +3992,48 @@ Editor::session_state_saved (string snap_name)
 void
 Editor::maximise_editing_space ()
 {
+	initial_ruler_update_required = true;
+
 	mouse_mode_tearoff->set_visible (false);
 	tools_tearoff->set_visible (false);
 
 	pre_maximal_pane_position = edit_pane.get_position();
-	edit_pane.set_position (edit_pane.get_width());
+	pre_maximal_editor_width = this->get_width();
+
+	if(post_maximal_pane_position == 0) {
+		post_maximal_pane_position = edit_pane.get_width();
+	}
+
 
 	fullscreen();
+	if(post_maximal_editor_width) {
+		edit_pane.set_position (post_maximal_pane_position - 
+			abs(post_maximal_editor_width - pre_maximal_editor_width));
+	} else {
+		edit_pane.set_position (post_maximal_pane_position);
+	}
 }
 
 void
 Editor::restore_editing_space ()
 {
-	mouse_mode_tearoff->set_visible (true);
-	tools_tearoff->set_visible (true);
+	initial_ruler_update_required = true;
 
-	edit_pane.set_position (pre_maximal_pane_position);
+	// user changed width of pane during fullscreen
+	if(post_maximal_pane_position != edit_pane.get_position()) {
+		post_maximal_pane_position = edit_pane.get_position();
+	}
 
 	unfullscreen();
+
+	mouse_mode_tearoff->set_visible (true);
+	tools_tearoff->set_visible (true);
+	post_maximal_editor_width = this->get_width();
+
+
+	edit_pane.set_position (
+		pre_maximal_pane_position + abs(this->get_width() - pre_maximal_editor_width)
+	);
 }
 
 void 

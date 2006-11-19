@@ -31,7 +31,6 @@
 #include <sigc++/signal.h>
 #include <pbd/stateful.h> 
 #include <jack/types.h>
-#include <ardour/plugin_state.h>
 #include <ardour/plugin.h>
 
 using std::string;

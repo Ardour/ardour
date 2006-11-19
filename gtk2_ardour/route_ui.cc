@@ -36,6 +36,8 @@
 #include "gui_thread.h"
 
 #include <ardour/route.h>
+#include <ardour/session.h>
+#include <ardour/audioengine.h>
 #include <ardour/audio_track.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/midi_track.h>
@@ -72,8 +74,15 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 
 	_route->active_changed.connect (mem_fun (*this, &RouteUI::route_active_changed));
 
-        mute_button = manage (new BindableToggleButton (_route->mute_control(), m_name ));
-        solo_button = manage (new BindableToggleButton (_route->solo_control(), s_name ));
+	mute_button = manage (new BindableToggleButton (_route->mute_control(), m_name ));
+	solo_button = manage (new BindableToggleButton (_route->solo_control(), s_name ));
+
+	// mute_button->unset_flags (Gtk::CAN_FOCUS);
+	// solo_button->unset_flags (Gtk::CAN_FOCUS);
+
+	_route->mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed));
+	_route->solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
+	_route->solo_safe_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
 	
 	if (is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
@@ -83,7 +92,6 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 		_session.RecordStateChanged.connect (mem_fun (*this, &RouteUI::session_rec_enable_changed));
 
 		rec_enable_button = manage (new BindableToggleButton (t->rec_enable_control(), r_name ));
-
 		rec_enable_button->unset_flags (Gtk::CAN_FOCUS);
 		
 		update_rec_display ();
@@ -114,7 +122,7 @@ RouteUI::mute_press(GdkEventButton* ev)
 				build_mute_menu();
 			}
 
-			mute_menu->popup(0,0);
+			mute_menu->popup(0,ev->time);
 
 		} else {
 
@@ -124,6 +132,8 @@ RouteUI::mute_press(GdkEventButton* ev)
 				
 				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::Control))) {
 					wait_for_release = true;
+				} else {
+					return false;
 				}
 			}
 
@@ -189,7 +199,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 				build_solo_menu ();
 			}
 
-			solo_menu->popup (1, 0);
+			solo_menu->popup (1, ev->time);
 
 		} else {
 
@@ -200,6 +210,8 @@ RouteUI::solo_press(GdkEventButton* ev)
 				
 				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::Control))) {
 					wait_for_release = true;
+				} else {
+					return false;
 				}
 			}
 
@@ -277,6 +289,12 @@ RouteUI::solo_release(GdkEventButton* ev)
 bool
 RouteUI::rec_enable_press(GdkEventButton* ev)
 {
+	if (!_session.engine().connected()) {
+	        MessageDialog msg (_("Not connected to JACK - cannot engage record"));
+		msg.run ();
+		return true;
+	}
+
 	if (!ignore_toggle && is_track() && rec_enable_button) {
 
 		if (ev->button == 2 && Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
@@ -489,7 +507,7 @@ RouteUI::build_solo_menu (void)
 	items.push_back (CheckMenuElem(*check));
 	check->show_all();
 
-	items.push_back (SeparatorElem());
+	//items.push_back (SeparatorElem());
 	// items.push_back (MenuElem (_("MIDI Bind"), mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
 	
 }
@@ -532,7 +550,7 @@ RouteUI::build_mute_menu(void)
 	items.push_back (CheckMenuElem(*check));
 	check->show_all();
 
-	items.push_back (SeparatorElem());
+	//items.push_back (SeparatorElem());
 	// items.push_back (MenuElem (_("MIDI Bind"), mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
 }
 

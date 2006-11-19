@@ -54,6 +54,7 @@ class ClickBox : public Gtk::DrawingArea, public AutoSpin
 	int theight;
 
 	void set_label ();
+	void style_changed (const Glib::RefPtr<Gtk::Style> &);
 	bool button_press_handler (GdkEventButton *);
 	bool button_release_handler (GdkEventButton *);
 

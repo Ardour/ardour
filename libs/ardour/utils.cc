@@ -38,6 +38,7 @@
 #endif
 
 #include <pbd/error.h>
+#include <pbd/stacktrace.h>
 #include <pbd/xml++.h>
 #include <ardour/utils.h>
 
@@ -221,7 +222,7 @@ region_name_from_path (string path)
 	/* remove any "?R", "?L" or "?[a-z]" channel identifier */
 	
 	string::size_type len = path.length();
-	
+
 	if (len > 3 && (path[len-2] == '%' || path[len-2] == '?') && 
 	    (path[len-1] == 'R' || path[len-1] == 'L' || (islower (path[len-1])))) {
 		
@@ -299,7 +300,7 @@ compute_equal_power_fades (nframes_t nframes, float* in, float* out)
 	const float pan_law_attenuation = -3.0f;
 	const float scale = 2.0f - 4.0f * powf (10.0f,pan_law_attenuation/20.0f);
 
-	for (unsigned long n = 0; n < nframes; ++n) {
+	for (nframes_t n = 0; n < nframes; ++n) {
 		float inVal = in[n];
 		float outVal = 1 - inVal;
 		out[n] = outVal * (scale * outVal + 1.0f - scale);
@@ -406,4 +407,83 @@ meter_hold_to_float (MeterHold hold)
 	default:
 		return 200.0f;
 	}
+}
+
+AutoState 
+ARDOUR::string_to_auto_state (std::string str)
+{
+	if (str == X_("Off")) {
+		return Off;
+	} else if (str == X_("Play")) {
+		return Play;
+	} else if (str == X_("Write")) {
+		return Write;
+	} else if (str == X_("Touch")) {
+		return Touch;
+	}
+
+	fatal << string_compose (_("programming error: %1 %2"), "illegal AutoState string: ", str) << endmsg;
+	/*NOTREACHED*/
+	return Touch;
+}
+
+string 
+ARDOUR::auto_state_to_string (AutoState as)
+{
+	/* to be used only for XML serialization, no i18n done */
+
+	switch (as) {
+	case Off:
+		return X_("Off");
+		break;
+	case Play:
+		return X_("Play");
+		break;
+	case Write:
+		return X_("Write");
+		break;
+	case Touch:
+		return X_("Touch");
+	}
+
+	fatal << string_compose (_("programming error: %1 %2"), "illegal AutoState type: ", as) << endmsg;
+	/*NOTREACHED*/
+	return "";
+}
+
+AutoStyle 
+ARDOUR::string_to_auto_style (std::string str)
+{
+	if (str == X_("Absolute")) {
+		return Absolute;
+	} else if (str == X_("Trim")) {
+		return Trim;
+	}
+
+	fatal << string_compose (_("programming error: %1 %2"), "illegal AutoStyle string: ", str) << endmsg;
+	/*NOTREACHED*/
+	return Trim;
+}
+
+string 
+ARDOUR::auto_style_to_string (AutoStyle as)
+{
+	/* to be used only for XML serialization, no i18n done */
+
+	switch (as) {
+	case Absolute:
+		return X_("Absolute");
+		break;
+	case Trim:
+		return X_("Trim");
+		break;
+	}
+
+	fatal << string_compose (_("programming error: %1 %2"), "illegal AutoStyle type: ", as) << endmsg;
+	/*NOTREACHED*/
+	return "";
+}
+
+extern "C" {
+	void c_stacktrace() { stacktrace (cerr); }
 }

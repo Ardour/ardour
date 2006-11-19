@@ -32,6 +32,7 @@
 #include "utils.h"
 #include "version.h"
 
+#include "svn_revision.h"
 #include "about.h"
 #include "rgb_macros.h"
 #include "ardour_ui.h"
@@ -139,11 +140,16 @@ static const char* authors[] = {
 	N_("Per Sigmond"),
 	N_("Doug Mclain"),
 	N_("Petter Sundlöf"),
+	N_("Thorsten Wilms"),
+	N_("Ben Loftis"),
+	N_("Stefan Kersten"),
+	N_("Christopher George"),
+	N_("Robert Jordens"),
 	0
 };
 
 static const char* translators[] = {
-	N_("French:\n\tAlain Fréhel <alain.frehel@free.fr>\n"),
+	N_("French:\n\tAlain Fréhel <alain.frehel@free.fr>\n\tChristophe Combelles <ccomb@free.fr>\n"),
 	N_("German:\n\tKarsten Petersen <kapet@kapet.de>\n"),
 	N_("Italian:\n\tFilippo Pappalardo <filippo@email.it>\n"),
 	N_("Portuguese:\n\tRui Nuno Capela <rncbc@rncbc.org>\n"),
@@ -184,16 +190,11 @@ About::About ()
 		       "under certain conditions; see the file COPYING for details.\n"));
 	set_name (X_("ardour"));
 	set_website (X_("http://ardour.org/"));
-	set_website_label (X_("visit http://www.ardour.org/"));
-	set_version ((string_compose(_("%1\n(built with ardour/gtk %2.%3.%4 libardour: %5.%6.%7)"), 
+	set_website_label (_("visit http://www.ardour.org/"));
+	set_version ((string_compose(_("%1\n(built from revision %2)"),
 				     VERSIONSTRING, 
-				     gtk_ardour_major_version, 
-				     gtk_ardour_minor_version, 
-				     gtk_ardour_micro_version, 
-				     libardour_major_version, 
-				     libardour_minor_version, 
-				     libardour_micro_version))); 
-
+				     ardour_svn_revision)));
+	
 
 #ifdef WITH_PAYMENT_OPTIONS
 	paypal_button.add (paypal_pixmap);

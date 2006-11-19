@@ -24,30 +24,12 @@
 
 #include <pbd/undo.h>
 #include <pbd/xml++.h>
+#include <pbd/shiva.h>
 
 #include <sigc++/bind.h>
 
 using namespace std;
 using namespace sigc;
-
-/* grrr, strict C++ says that static member functions are not C functions, but we also want
-   to be able to pack this into a sigc::ptr_fun and not sigc::mem_fun, so we have to make
-   it a genuine function rather than a member.
-*/
-
-static void command_death (UndoTransaction* ut, Command* c)
-{
-	if (ut->clearing()) {
-		return;
-	}
-
-	ut->remove_command (c);
-
-	if (ut->empty()) {
-		delete ut;
-	}
-}
-
 
 UndoTransaction::UndoTransaction ()
 {
@@ -68,6 +50,20 @@ UndoTransaction::~UndoTransaction ()
 	clear ();
 }
 
+void 
+command_death (UndoTransaction* ut, Command* c)
+{
+	if (ut->clearing()) {
+		return;
+	}
+
+	ut->remove_command (c);
+
+	if (ut->empty()) {
+		delete ut;
+	}
+}
+
 UndoTransaction& 
 UndoTransaction::operator= (const UndoTransaction& rhs)
 {
@@ -81,7 +77,8 @@ UndoTransaction::operator= (const UndoTransaction& rhs)
 void
 UndoTransaction::add_command (Command *const action)
 {
-	action->GoingAway.connect (bind (sigc::ptr_fun (command_death), this, const_cast<Command*>(action)));
+	/* catch death */
+	new PBD::ProxyShiva<Command,UndoTransaction> (*action, *this, &command_death);
 	actions.push_back (action);
 }
 
@@ -160,6 +157,8 @@ UndoHistory::add (UndoTransaction* const ut)
 	UndoList.push_back (ut);
 
 	/* we are now owners of the transaction */
+
+	Changed (); /* EMIT SIGNAL */
 }
 
 void
@@ -171,6 +170,8 @@ UndoHistory::remove (UndoTransaction* const ut)
 
 	UndoList.remove (ut);
 	RedoList.remove (ut);
+
+	Changed (); /* EMIT SIGNAL */
 }
 
 void
@@ -185,6 +186,8 @@ UndoHistory::undo (unsigned int n)
 		ut->undo ();
 		RedoList.push_back (ut);
 	}
+
+	Changed (); /* EMIT SIGNAL */
 }
 
 void
@@ -199,6 +202,8 @@ UndoHistory::redo (unsigned int n)
 		ut->redo ();
 		UndoList.push_back (ut);
 	}
+
+	Changed (); /* EMIT SIGNAL */
 }
 
 void
@@ -207,6 +212,9 @@ UndoHistory::clear_redo ()
 	_clearing = true;
 	RedoList.clear ();
 	_clearing = false;
+
+	Changed (); /* EMIT SIGNAL */
+
 }
 
 void
@@ -215,6 +223,8 @@ UndoHistory::clear_undo ()
 	_clearing = true;
 	UndoList.clear ();
 	_clearing = false;
+
+	Changed (); /* EMIT SIGNAL */
 }
 
 void
@@ -222,6 +232,8 @@ UndoHistory::clear ()
 {
 	clear_undo ();
 	clear_redo ();
+
+	Changed (); /* EMIT SIGNAL */
 }
 
 XMLNode & UndoHistory::get_state()

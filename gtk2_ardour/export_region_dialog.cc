@@ -31,7 +31,7 @@
 ExportRegionDialog::ExportRegionDialog (PublicEditor& editor, boost::shared_ptr<ARDOUR::Region> region) 
 	: ExportDialog(editor)
 {
-	boost::shared_ptr<ARDOUR::AudioRegion> audio_region = boost::dynamic_pointer_cast<ARDOUR::AudioRegion>(region);
+	audio_region = boost::dynamic_pointer_cast<ARDOUR::AudioRegion>(region);
 	assert(audio_region);
 
 	do_not_allow_track_and_master_selection();

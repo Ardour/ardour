@@ -317,14 +317,14 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 
 	switch (item_type) {
 	case RegionItem:
-		c1 = set_selected_track_from_click (press, op, true, true);
+		c1 = set_selected_track_from_click (op, true);
 		c2 = set_selected_regionview_from_click (press, op, true);
 		commit = (c1 || c2);
 		break;
 		
 	case RegionViewNameHighlight:
 	case RegionViewName:
-		c1 = set_selected_track_from_click (press, op, true, true);
+		c1 = set_selected_track_from_click (op, true);
 		c2 = set_selected_regionview_from_click (press, op, true);
 		commit = (c1 || c2);
 		break;
@@ -332,17 +332,17 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	case GainAutomationControlPointItem:
 	case PanAutomationControlPointItem:
 	case RedirectAutomationControlPointItem:
-		c1 = set_selected_track_from_click (press, op, true, true);
-		c2 = set_selected_control_point_from_click (press, op, false);
+		c1 = set_selected_track_from_click (op, true);
+		c2 = set_selected_control_point_from_click (op, false);
 		commit = (c1 || c2);
 		break;
 		
 	case StreamItem:
-		commit = set_selected_track_from_click (press, op, true, true);
+		commit = set_selected_track_from_click (op, true);
 		break;
 		    
 	case AutomationTrackItem:
-		commit = set_selected_track_from_click (press, op, true, true);
+		commit = set_selected_track_from_click (op, true);
 		break;
 		
 	default:
@@ -361,7 +361,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		case StreamItem:
 		case RegionItem:
 		case AutomationTrackItem:
-			commit = set_selected_track_from_click (press, op, true, true);
+			commit = set_selected_track_from_click (op, true);
 			break;
 
 		default:
@@ -1819,12 +1819,13 @@ Editor::fade_in_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* even
 	}
 
 	begin_reversible_command (_("change fade in length"));
-        XMLNode &before = arv->audio_region()->get_state();
+	AutomationList& alist = arv->audio_region()->fade_in();
+        XMLNode &before = alist.get_state();
 
 	arv->audio_region()->set_fade_in_length (fade_length);
 
-        XMLNode &after = arv->audio_region()->get_state();
-        session->add_command(new MementoCommand<ARDOUR::AudioRegion>(*arv->audio_region().get(), &before, &after));
+        XMLNode &after = alist.get_state();
+        session->add_command(new MementoCommand<AutomationList>(alist, &before, &after));
 	commit_reversible_command ();
 	fade_in_drag_motion_callback (item, event);
 }
@@ -1914,12 +1915,13 @@ Editor::fade_out_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* eve
 	}
 
 	begin_reversible_command (_("change fade out length"));
-        XMLNode &before = arv->region()->get_state();
+	AutomationList& alist = arv->audio_region()->fade_out();
+        XMLNode &before = alist.get_state();
 
 	arv->audio_region()->set_fade_out_length (fade_length);
 
-        XMLNode &after = arv->region()->get_state();
-        session->add_command(new MementoCommand<ARDOUR::Region>(*arv->region().get(), &before, &after));
+        XMLNode &after = alist.get_state();
+        session->add_command(new MementoCommand<AutomationList>(alist, &before, &after));
 	commit_reversible_command ();
 
 	fade_out_drag_motion_callback (item, event);

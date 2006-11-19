@@ -110,7 +110,7 @@ XMLTree::write(void) const
 	doc = xmlNewDoc((xmlChar *) "1.0");
 	xmlSetDocCompressMode(doc, _compression);
 	writenode(doc, _root, doc->children, 1);
-	result = xmlSaveFormatFile(_filename.c_str(), doc, 1);
+	result = xmlSaveFormatFileEnc(_filename.c_str(), doc, "UTF-8", 1);
 	xmlFreeDoc(doc);
 	
 	if (result == -1) {
@@ -216,13 +216,35 @@ XMLNode::set_content(const string & c)
 	return _content;
 }
 
-const XMLNodeList & 
-XMLNode::children(const string & n) const
+XMLNode*
+XMLNode::child (const char *name) const
 {
+	/* returns first child matching name */
+
+	XMLNodeConstIterator cur;
+	
+	if (name == 0) {
+		return 0;
+	}
+	    
+	for (cur = _children.begin(); cur != _children.end(); ++cur) {
+		if ((*cur)->name() == name) {
+			return *cur;
+		}
+	}
+	    
+	return 0;
+}
+
+const XMLNodeList & 
+XMLNode::children(const string& n) const
+{
+	/* returns all children matching name */
+
 	static XMLNodeList retval;
 	XMLNodeConstIterator cur;
 	
-	if (n.length() == 0) {
+	if (n.empty()) {
 		return _children;
 	}
 	    

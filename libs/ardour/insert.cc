@@ -85,8 +85,6 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug, Placemen
 	
 	init ();
 
-	save_state (_("initial state"));
-
 	{
 		Glib::Mutex::Lock em (_session.engine().process_lock());
 		IO::MoreChannels (max(input_streams(), output_streams()));
@@ -103,8 +101,6 @@ PluginInsert::PluginInsert (Session& s, const XMLNode& node)
 	}
 
 	set_automatable ();
-
-	save_state (_("initial state"));
 
 	_plugins[0]->ParameterChanged.connect (mem_fun (*this, &PluginInsert::parameter_changed));
 
@@ -128,8 +124,6 @@ PluginInsert::PluginInsert (const PluginInsert& other)
 	_plugins[0]->ParameterChanged.connect (mem_fun (*this, &PluginInsert::parameter_changed));
 
 	init ();
-
-	save_state (_("initial state"));
 
 	RedirectCreated (this); /* EMIT SIGNAL */
 }
@@ -322,6 +316,23 @@ PluginInsert::connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t off
 	}
 
 	/* leave remaining channel buffers alone */
+}
+
+void
+PluginInsert::automation_snapshot (nframes_t now)
+{
+	map<uint32_t,AutomationList*>::iterator li;
+	
+	for (li = parameter_automation.begin(); li != parameter_automation.end(); ++li) {
+		
+		AutomationList *alist = ((*li).second);
+		if (alist != 0 && alist->automation_write ()) {
+			
+			float val = _plugins[0]->get_parameter ((*li).first);
+			alist->rt_add (now, val);
+			last_automation_snapshot = now;
+		}
+	}
 }
 
 void
@@ -785,35 +796,6 @@ PluginInsert::latency()
 	return _plugins[0]->latency ();
 }
 	
-void
-PluginInsert::store_state (PluginInsertState& state) const
-{
-	Redirect::store_state (state);
-	_plugins[0]->store_state (state.plugin_state);
-}
-
-Change
-PluginInsert::restore_state (StateManager::State& state)
-{
-	PluginInsertState* pistate = dynamic_cast<PluginInsertState*> (&state);
-
-	Redirect::restore_state (state);
-
-	_plugins[0]->restore_state (pistate->plugin_state);
-
-	return Change (0);
-}
-
-StateManager::State*
-PluginInsert::state_factory (std::string why) const
-{
-	PluginInsertState* state = new PluginInsertState (why);
-
-	store_state (*state);
-
-	return state;
-}
-
 ARDOUR::PluginType
 PluginInsert::type ()
 {
@@ -851,7 +833,6 @@ PortInsert::PortInsert (Session& s, Placement p)
 	: Insert (s, p, 1, -1, 1, -1)
 {
 	init ();
-	save_state (_("initial state"));
 	RedirectCreated (this); /* EMIT SIGNAL */
 }
 
@@ -859,7 +840,6 @@ PortInsert::PortInsert (const PortInsert& other)
 	: Insert (other._session, other.placement(), 1, -1, 1, -1)
 {
 	init ();
-	save_state (_("initial state"));
 	RedirectCreated (this); /* EMIT SIGNAL */
 }
 
@@ -1013,10 +993,10 @@ PortInsert::configure_io (int32_t ignored_magic, int32_t in, int32_t out)
 	   to the number of input ports we need.
 	*/
 
-	set_output_maximum (in);
-	set_output_minimum (in);
-	set_input_maximum (out);
-	set_input_minimum (out);
+	set_output_maximum (ChanCount(_default_type, in));
+	set_output_minimum (ChanCount(_default_type, in));
+	set_input_maximum (ChanCount(_default_type, out));
+	set_input_minimum (ChanCount(_default_type, out));
 
 	if (in < 0) {
 		in = n_outputs ().get(_default_type);
@@ -1026,8 +1006,7 @@ PortInsert::configure_io (int32_t ignored_magic, int32_t in, int32_t out)
 		out = n_inputs ().get(_default_type);
 	}
 
-	// FIXME
-	return ensure_io (ChanCount(_default_type, in), ChanCount(_default_type, out), false, this);
+	return ensure_io (ChanCount(_default_type, out), ChanCount(_default_type, in), false, this);
 }
 
 int32_t

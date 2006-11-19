@@ -33,7 +33,6 @@
 #include <pbd/statefuldestructible.h> 
 
 #include <ardour/ardour.h>
-#include <ardour/state_manager.h>
 
 namespace ARDOUR {
 	
@@ -54,14 +53,15 @@ struct ControlEvent {
 
 };
 
- class AutomationList : public StateManager, public PBD::StatefulDestructible
+class AutomationList : public PBD::StatefulDestructible
 {
   public:
 	typedef std::list<ControlEvent*> AutomationEventList;
 	typedef AutomationEventList::iterator iterator;
 	typedef AutomationEventList::const_iterator const_iterator;
 
-	AutomationList(double default_value, bool no_state = false);
+	AutomationList (double default_value);
+	AutomationList (const XMLNode&);
 	~AutomationList();
 
 	AutomationList (const AutomationList&);
@@ -85,8 +85,9 @@ struct ControlEvent {
 
 	void reposition_for_rt_add (double when);
 	void rt_add (double when, double value);
-	iterator add (double when, double value, iterator, bool ignore_mode = false);
-	void add (double when, double value, bool for_loading = false);
+	void add (double when, double value);
+	/* this should be private but old-school automation loading needs it in IO/Redirect */
+	void fast_simple_add (double when, double value);
 
 	void reset_range (double start, double end);
 	void erase_range (double start, double end);
@@ -151,13 +152,12 @@ struct ControlEvent {
 		(obj.*method)(*this);
 	}
 
-	UndoAction get_memento () const;
-	
-	virtual void store_state (XMLNode& node) const;
-	virtual void load_state (const XMLNode&);
+	sigc::signal<void> StateChanged;
 
-	XMLNode &get_state(void); 
+	XMLNode& get_state(void); 
 	int set_state (const XMLNode &s);
+	XMLNode& state (bool full);
+	XMLNode& serialize_events ();
 
 	void set_max_xval (double);
 	double get_max_xval() const { return max_xval; }
@@ -188,12 +188,6 @@ struct ControlEvent {
 
   protected:
 
-	struct State : public ARDOUR::StateManager::State {
-	    AutomationEventList events;
-
-	    State (std::string why) : ARDOUR::StateManager::State (why) {}
-	};
-
 	AutomationEventList events;
 	mutable Glib::Mutex lock;
 	bool   _frozen;
@@ -215,7 +209,6 @@ struct ControlEvent {
 	double min_yval;
 	double max_yval;
 	double default_value;
-	bool   no_state;
 
 	iterator rt_insertion_point;
 	double   rt_pos;
@@ -242,14 +235,12 @@ struct ControlEvent {
 
 	virtual double unlocked_eval (double where);
 
-	Change   restore_state (StateManager::State&);
-	StateManager::State* state_factory (std::string why) const;
-
 	virtual ControlEvent* point_factory (double,double) const;
 	virtual ControlEvent* point_factory (const ControlEvent&) const;
 
-
 	AutomationList* cut_copy_clear (double, double, int op);
+
+	int deserialize_events (const XMLNode&);
 };
 
 } // namespace

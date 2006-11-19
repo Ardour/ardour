@@ -43,7 +43,7 @@ CoreAudioSource::CoreAudioSource (Session& s, const string& idstr, Flag flags)
 }
 
 void 
-CoreAudioSource::init (const string& idstr)
+CoreAudioSource::init (string idstr)
 {
 	string::size_type pos;
 
@@ -83,10 +83,6 @@ CoreAudioSource::init (const string& idstr)
 	} catch (CAXException& cax) {
 		error << string_compose ("CoreAudioSource: %1 (%2)", cax.mOperation, name()) << endmsg;
 		throw failed_constructor ();
-	}
-	
-	if (_build_peakfiles) {
-		_need_peakfile = true;
 	}
 }
 
@@ -188,4 +184,54 @@ int
 CoreAudioSource::update_header (nframes_t when, struct tm&, time_t)
 {
 	return 0;
+}
+
+int
+CoreAudioSource::get_soundfile_info (string path, SoundFileInfo& _info, string& error_msg)
+{
+	FSRef ref; 
+	ExtAudioFileRef af = 0;
+	size_t size;
+	CFStringRef name;
+	int ret = -1;
+
+	if (FSPathMakeRef ((UInt8*)path.c_str(), &ref, 0) != noErr) {
+		goto out;
+	}
+	
+	if (ExtAudioFileOpen(&ref, &af) != noErr) {
+		goto out;
+	}
+	
+	AudioStreamBasicDescription absd;
+	memset(&absd, 0, sizeof(absd));
+	size = sizeof(AudioStreamBasicDescription);
+	if (ExtAudioFileGetProperty (af, kExtAudioFileProperty_FileDataFormat, &size, &absd) != noErr) {
+		goto out;
+	}
+	
+	_info.samplerate = absd.mSampleRate;
+	_info.channels   = absd.mChannelsPerFrame;
+
+	size = sizeof(_info.length);
+	if (ExtAudioFileGetProperty(af, kExtAudioFileProperty_FileLengthFrames, &size, &_info.length) != noErr) {
+		goto out;
+	}
+	
+	size = sizeof(CFStringRef);
+	if (AudioFormatGetProperty(kAudioFormatProperty_FormatName, sizeof(absd), &absd, &size, &name) != noErr) {
+		goto out;
+	}
+
+	_info.format_name = CFStringRefToStdString(name);
+
+	// XXX it would be nice to find a way to get this information if it exists
+
+	_info.timecode = 0;
+	ret = 0;
+	
+  out:
+	ExtAudioFileDispose (af);
+	return ret;
+	
 }

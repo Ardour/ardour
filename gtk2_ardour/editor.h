@@ -174,8 +174,6 @@ class Editor : public PublicEditor
 
 	/* undo related */
 
-	void set_edit_menu (Gtk::Menu&);
-
 	nframes_t unit_to_frame (double unit) {
 		return (nframes_t) rint (unit * frames_per_unit);
 	}
@@ -244,11 +242,6 @@ class Editor : public PublicEditor
 	void export_session();
 	void export_selection();
 
-	/* this is what actually does it */
-	
-	void export_audiofile (ARDOUR::AudioExportSpecification&);
-
-	/* */
 
 	void add_toplevel_controls (Gtk::Container&);
 
@@ -355,12 +348,13 @@ class Editor : public PublicEditor
 	PlaylistSelector* _playlist_selector;
 
 	void          set_frames_per_unit (double);
-	void          frames_per_unit_modified ();
 
 	Editing::MouseMode mouse_mode;
-	void      mouse_insert (GdkEventButton *);
 
+	int  post_maximal_editor_width;
+	int  post_maximal_pane_position;
 	int  pre_maximal_pane_position;
+	int  pre_maximal_editor_width;
 	void pane_allocation_handler (Gtk::Allocation&, Gtk::Paned*);
 
 	Gtk::Notebook the_notebook;
@@ -419,7 +413,7 @@ class Editor : public PublicEditor
 	CrossfadeView*     clicked_crossfadeview;
 	ControlPoint*      clicked_control_point;
 
-	void get_relevant_tracks (RouteTimeAxisView& base, std::set<RouteTimeAxisView*>& relevant_tracks);
+	void get_relevant_tracks (std::set<RouteTimeAxisView*>& relevant_tracks);
 	void mapover_tracks (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl);
 
 	/* functions to be passed to mapover_tracks(), possibly with sigc::bind()-supplied arguments */
@@ -436,8 +430,10 @@ class Editor : public PublicEditor
 
 	void catch_vanishing_regionview (RegionView *);
 
-	bool set_selected_control_point_from_click (bool press, Selection::Operation op = Selection::Set, bool with_undo = true, bool no_remove=false);
-	bool set_selected_track_from_click (bool press, Selection::Operation op = Selection::Set, bool with_undo = true, bool no_remove=false);
+	bool set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove=false);
+
+	bool set_selected_control_point_from_click (Selection::Operation op = Selection::Set, bool no_remove=false);
+	bool set_selected_track_from_click (Selection::Operation op = Selection::Set, bool no_remove=false);
 	bool set_selected_regionview_from_click (bool press, Selection::Operation op = Selection::Set, bool no_track_remove=false);
 
 	void set_selected_regionview_from_region_list (boost::shared_ptr<ARDOUR::Region> region, Selection::Operation op = Selection::Set);
@@ -494,9 +490,6 @@ class Editor : public PublicEditor
 	void hide_verbose_canvas_cursor();
 
 	bool verbose_cursor_on; // so far unused
-
-	void flush_track_canvas ();
-	void flush_time_canvas ();
 
 	Gtk::EventBox      time_canvas_event_box;
 	Gtk::EventBox      track_canvas_event_box;
@@ -668,9 +661,6 @@ class Editor : public PublicEditor
 	Gtk::Menu *edit_controls_left_menu;
 	Gtk::Menu *edit_controls_right_menu;
 
-	void track_canvas_scroller_realized ();
-	void time_canvas_scroller_realized ();
-
 	Gtk::VBox           track_canvas_vbox;
 	Gtk::VBox           time_canvas_vbox;
 	Gtk::VBox           edit_controls_vbox;
@@ -807,9 +797,6 @@ class Editor : public PublicEditor
 	
 	void update_current_screen ();
 	
-	gint show_track_context_menu (GdkEventButton *);
-	void hide_track_context_menu ();
-
 	void session_going_away ();
 
 	nframes_t cut_buffer_start;
@@ -828,8 +815,8 @@ class Editor : public PublicEditor
 
 	int ensure_cursor (nframes_t* pos);
 
-	void handle_new_region (boost::shared_ptr<ARDOUR::Region>);
-	void handle_region_removed (boost::shared_ptr<ARDOUR::Region>);
+	void handle_new_region (boost::weak_ptr<ARDOUR::Region>);
+	void handle_region_removed (boost::weak_ptr<ARDOUR::Region>);
 	void add_region_to_region_display (boost::shared_ptr<ARDOUR::Region>);
 	void region_hidden (boost::shared_ptr<ARDOUR::Region>);
 	void redisplay_regions ();
@@ -849,6 +836,7 @@ class Editor : public PublicEditor
 	
 	void reset_point_selection ();
 	void toggle_region_mute ();
+	void toggle_region_lock ();
 	void toggle_region_opaque ();
 	void raise_region ();
 	void raise_region_to_top ();
@@ -865,7 +853,6 @@ class Editor : public PublicEditor
 	void align_selection_relative (ARDOUR::RegionPoint point, nframes_t position);
 	void align_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, nframes_t position);
 	void align_region_internal (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, nframes_t position);
-	void remove_some_regions ();
 	void remove_clicked_region ();
 	void destroy_clicked_region ();
 	void edit_region ();
@@ -898,7 +885,6 @@ class Editor : public PublicEditor
 	void keyboard_paste ();
 	void keyboard_duplicate_region ();
 	void keyboard_duplicate_selection ();
-	void keyboard_nudge ();
 	void keyboard_insert_region_list_selection ();
 
 	void region_from_selection ();
@@ -912,7 +898,6 @@ class Editor : public PublicEditor
 	void play_from_edit_cursor ();
 	void play_selected_region ();
 	void audition_selected_region ();
-	void toggle_loop_playback ();
 	void loop_selected_region ();
 	void play_location (ARDOUR::Location&);
 	void loop_location (ARDOUR::Location&);
@@ -1030,10 +1015,6 @@ class Editor : public PublicEditor
 	Editing::SnapMode snap_mode;
 	double snap_threshold;
 
-	void soundfile_chosen_for_insert (const string & selection, bool split_channels);
-	void soundfile_chosen_for_embed (const string & selection, bool split_channels);
-	void soundfile_chosen_for_import (const string & selection, bool split_channels);
-
 	void handle_gui_changes (const string &, void *);
 
 	void    hide_all_tracks (bool with_select);
@@ -1058,7 +1039,6 @@ class Editor : public PublicEditor
 	std::set<ARDOUR::Playlist*> motion_frozen_playlists;
 	void region_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void region_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
-	void region_copy_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 
 	void cursor_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void cursor_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
@@ -1146,11 +1126,10 @@ class Editor : public PublicEditor
 	bool track_canvas_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool track_canvas_scroll (GdkEventScroll* event);
 
-	bool track_canvas_button_press_event (GdkEventButton *);
-	bool track_canvas_button_release_event (GdkEventButton *);
-	
+	Gtk::Allocation canvas_allocation;
+	bool canvas_idle_queued;
 	void track_canvas_allocate (Gtk::Allocation alloc);
-	void time_canvas_allocate (Gtk::Allocation alloc);
+	bool track_canvas_idle ();
 
 	void set_edit_cursor (GdkEvent* event);
 	void set_playhead_cursor (GdkEvent* event);
@@ -1176,7 +1155,6 @@ class Editor : public PublicEditor
 	void handle_new_duration ();
 	void initialize_canvas ();
 	void reset_scrolling_region (Gtk::Allocation* alloc = 0);
-	void scroll_canvas ();
 
 	/* display control */
 	
@@ -1302,17 +1280,29 @@ class Editor : public PublicEditor
 	Gtk::ComboBoxText snap_mode_selector;
 	Gtk::HBox         snap_box;
 
+	std::vector<std::string> snap_type_strings;
+	std::vector<std::string> snap_mode_strings;
+
 	void snap_type_selection_done ();
 	void snap_mode_selection_done ();
-	
+	void snap_mode_chosen (Editing::SnapMode);
+	void snap_type_chosen (Editing::SnapType);
+
+	Glib::RefPtr<Gtk::RadioAction> snap_type_action (Editing::SnapType);
+	Glib::RefPtr<Gtk::RadioAction> snap_mode_action (Editing::SnapMode);
+
 	Gtk::ComboBoxText zoom_focus_selector;
-	Gtk::VBox                zoom_focus_box;
+	Gtk::VBox         zoom_focus_box;
+
+	std::vector<std::string> zoom_focus_strings;
 	
 	void zoom_focus_selection_done ();
+	void zoom_focus_chosen (Editing::ZoomFocus);
+
+	Glib::RefPtr<Gtk::RadioAction> zoom_focus_action (Editing::ZoomFocus);
 
 	Gtk::HBox           zoom_box;
 
-	void                update_zoom_indicator ();
 	void                zoom_adjustment_changed();
 
 	void                edit_cursor_clock_changed();
@@ -1333,8 +1323,6 @@ class Editor : public PublicEditor
 	void track_selection_changed ();
 	void region_selection_changed ();
 	void point_selection_changed ();
-	void audio_track_selection_changed ();
-	void line_selection_changed ();
 
 	enum SelectionOp {
 		CreateSelection,
@@ -1423,7 +1411,6 @@ class Editor : public PublicEditor
 	Glib::RefPtr<Gtk::ListStore>     route_display_model;
 	Glib::RefPtr<Gtk::TreeSelection> route_display_selection;
 
-	gint route_list_compare_func (Gtk::TreeModel::iterator, Gtk::TreeModel::iterator);
 	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Route> > route_list_display; 
 	Gtk::ScrolledWindow                   route_list_scroller;
 	Gtk::Menu*                            route_list_menu;
@@ -1438,7 +1425,6 @@ class Editor : public PublicEditor
 	void route_list_reordered (const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter, int* what);
 	bool ignore_route_list_reorder;
 	bool no_route_list_redisplay;
-	void queue_route_list_reordered ();
 
 	void build_route_list_menu ();
 	void show_route_list_menu ();
@@ -1486,9 +1472,6 @@ class Editor : public PublicEditor
 	void new_edit_group ();
 	void edit_group_list_button_clicked ();
 	gint edit_group_list_button_press_event (GdkEventButton* ev);
-	void edit_group_selection_changed ();
-	void fake_add_edit_group (ARDOUR::RouteGroup* group);
-	void fake_remove_edit_group (ARDOUR::RouteGroup* group);
 	void add_edit_group (ARDOUR::RouteGroup* group);
 	void remove_selected_edit_group ();
 	void edit_groups_changed ();
@@ -1605,8 +1588,6 @@ class Editor : public PublicEditor
 	UndoHistory visual_history;
 	UndoTransaction current_visual_command;
 
-	void begin_reversible_visual_command (const string & cmd_name);
-	void commit_reversible_visual_command ();
 
 	void update_title ();	
 	void update_title_s (const string & snapshot_name);
@@ -1645,11 +1626,6 @@ class Editor : public PublicEditor
 
 	void duplicate_dialog (bool for_region);
 	
-	/* edit menu */
-
-	Gtk::Menu* edit_menu;
-	bool edit_menu_map_handler (GdkEventAny*);
-
 	nframes_t event_frame (GdkEvent*, double* px = 0, double* py = 0);
 
 	void time_fx_motion (ArdourCanvas::Item*, GdkEvent*);
@@ -1691,6 +1667,7 @@ class Editor : public PublicEditor
 	/* editor-mixer strip */
 
 	MixerStrip *current_mixer_strip;
+	bool show_editor_mixer_when_tracks_arrive;
 	Gtk::VBox current_mixer_strip_vbox;
 	void cms_deleted ();
 	void current_mixer_strip_hidden ();
@@ -1751,7 +1728,6 @@ class Editor : public PublicEditor
 	void toggle_xfade_active (ARDOUR::Crossfade*);
 	void toggle_xfade_length (ARDOUR::Crossfade*);
 	void edit_xfade (ARDOUR::Crossfade*);
-	void remove_xfade ();
 	void xfade_edit_left_region ();
 	void xfade_edit_right_region ();
 
@@ -1797,10 +1773,23 @@ class Editor : public PublicEditor
 
 	void toggle_gain_envelope_visibility ();
 	void toggle_gain_envelope_active ();
+	void reset_region_gain_envelopes ();
+
+	Gtk::CheckMenuItem* region_envelope_visible_item;
+	Gtk::CheckMenuItem* region_envelope_active_item;
+	Gtk::CheckMenuItem* region_mute_item;
+	Gtk::CheckMenuItem* region_lock_item;
+	Gtk::CheckMenuItem* region_opaque_item;
 	
 	bool on_key_press_event (GdkEventKey*);
 
 	void session_state_saved (string);
+
+	Glib::RefPtr<Gtk::Action>              undo_action;
+	Glib::RefPtr<Gtk::Action>              redo_action;
+
+	void history_changed ();
+
 };
 
 #endif /* __ardour_editor_h__ */

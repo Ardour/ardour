@@ -96,6 +96,10 @@ Editor::draw_metric_marks (const Metrics& metrics)
 void
 Editor::tempo_map_changed (Change ignored)
 {
+	if (!session) {
+		return;
+	}
+
         ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::tempo_map_changed), ignored));
 
 	BBT_Time previous_beat, next_beat; // the beats previous to the leftmost frame and after the rightmost frame
@@ -112,13 +116,13 @@ Editor::tempo_map_changed (Change ignored)
 	previous_beat.ticks = 0;
 
 	if (session->tempo_map().meter_at(leftmost_frame + current_page_frames()).beats_per_bar () > next_beat.beats + 1) {
-	  next_beat.beats += 1;
+		next_beat.beats += 1;
 	} else {
-	  next_beat.bars += 1;
-	  next_beat.beats = 1;
+		next_beat.bars += 1;
+		next_beat.beats = 1;
 	}
 	next_beat.ticks = 0;
-
+	
 	if (current_bbt_points) {
 	        delete current_bbt_points;
 		current_bbt_points = 0;
@@ -227,9 +231,9 @@ Editor::draw_measures ()
 		case TempoMap::Beat:
 			
 			if ((*i).beat == 1) {
-				color = color_map[cMeasureLineBeat];
-			} else {
 				color = color_map[cMeasureLineBar];
+			} else {
+				color = color_map[cMeasureLineBeat];
 
 				if (beat_density > 2.0) {
 					/* only draw beat lines if the gaps between beats are large.

@@ -62,6 +62,8 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
+int MixerStrip::scrollbar_height = 0;
+
 #ifdef VARISPEED_IN_MIXER_STRIP
 static void 
 speed_printer (char buf[32], Gtk::Adjustment& adj, void* arg)
@@ -108,8 +110,8 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	comment_window = 0;
 	comment_area = 0;
 
-	width_button.add (*(manage (new Gtk::Image (get_xpm("lr.xpm")))));
-	hide_button.add (*(manage (new Gtk::Image (get_xpm("small_x.xpm")))));
+	width_button.add (*(manage (new Gtk::Image (::get_icon("strip_width")))));
+	hide_button.add (*(manage (new Gtk::Image (::get_icon("hide")))));
 
 	input_label.set_text (_("Input"));
 	input_button.add (input_label);
@@ -122,34 +124,31 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	output_label.set_name ("MixerIOButtonLabel");
 
 	_route->meter_change.connect (mem_fun(*this, &MixerStrip::meter_changed));
-		meter_point_button.add (meter_point_label);
-		meter_point_button.set_name ("MixerStripMeterPreButton");
-		meter_point_label.set_name ("MixerStripMeterPreButton");
+	meter_point_button.add (meter_point_label);
+	meter_point_button.set_name ("MixerStripMeterPreButton");
+	meter_point_label.set_name ("MixerStripMeterPreButton");
+	
+	switch (_route->meter_point()) {
+	case MeterInput:
+		meter_point_label.set_text (_("input"));
+		break;
 		
-		switch (_route->meter_point()) {
-		case MeterInput:
-			meter_point_label.set_text (_("input"));
-			break;
-			
-		case MeterPreFader:
-			meter_point_label.set_text (_("pre"));
-			break;
-			
-		case MeterPostFader:
-			meter_point_label.set_text (_("post"));
-			break;
-		}
+	case MeterPreFader:
+		meter_point_label.set_text (_("pre"));
+		break;
 		
-		/* TRANSLATORS: this string should be longest of the strings
-		   used to describe meter points. In english, its "input".
-		*/
-		
-		set_size_request_to_display_given_text (meter_point_button, _("tupni"), 5, 5);
-
-
-		bottom_button_table.attach (meter_point_button, 1, 2, 0, 1);
-
-
+	case MeterPostFader:
+		meter_point_label.set_text (_("post"));
+		break;
+	}
+	
+	/* TRANSLATORS: this string should be longest of the strings
+	   used to describe meter points. In english, it's "input".
+	*/
+	set_size_request_to_display_given_text (meter_point_button, _("tupni"), 5, 5);
+    
+	bottom_button_table.attach (meter_point_button, 1, 2, 0, 1);
+    
 	meter_point_button.signal_button_press_event().connect (mem_fun (gpm, &GainMeter::meter_press), false);
 	/* XXX what is this meant to do? */
 	//meter_point_button.signal_button_release_event().connect (mem_fun (gpm, &GainMeter::meter_release), false);
@@ -260,6 +259,20 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (comment_button, Gtk::PACK_SHRINK);
+
+	if (route()->master() || route()->control()) {
+		
+		if (scrollbar_height == 0) {
+			HScrollbar scrollbar;
+			Gtk::Requisition requisition;
+			scrollbar.size_request (requisition);
+			scrollbar_height = requisition.height;
+		}
+
+		EventBox* spacer = manage (new EventBox);
+		spacer->set_size_request (-1, scrollbar_height);
+		global_vpacker.pack_start (*spacer, false, false);
+	}
 
 	global_frame.add (global_vpacker);
 	global_frame.set_shadow_type (Gtk::SHADOW_IN);
@@ -416,8 +429,10 @@ MixerStrip::set_width (Width w)
 		solo_button->set_label (_("solo"));
 
 		if (_route->comment() == "") {
+		       comment_button.unset_bg (STATE_NORMAL);
 		       comment_button.set_label (_("comments"));
 		} else {
+		       comment_button.modify_bg (STATE_NORMAL, color());
 		       comment_button.set_label (_("*comments*"));
 		}
 
@@ -439,8 +454,10 @@ MixerStrip::set_width (Width w)
 		solo_button->set_label (_("S"));
 
 		if (_route->comment() == "") {
+		       comment_button.unset_bg (STATE_NORMAL);
 		       comment_button.set_label (_("Cmt"));
 		} else {
+		       comment_button.modify_bg (STATE_NORMAL, color());
 		       comment_button.set_label (_("*Cmt*"));
 		}
 
@@ -497,7 +514,7 @@ MixerStrip::output_press (GdkEventButton *ev)
 		citems.push_back (SeparatorElem());
 		
 		_session.foreach_connection (this, &MixerStrip::add_connection_to_output_menu);
-		
+
 		output_menu.popup (1, ev->time);
 		break;
 		
@@ -553,13 +570,13 @@ MixerStrip::input_press (GdkEventButton *ev)
 	switch (ev->button) {
 
 	case 1:
-
 		citems.push_back (MenuElem (_("Edit"), mem_fun(*this, &MixerStrip::edit_input_configuration)));
 		citems.push_back (SeparatorElem());
 		citems.push_back (MenuElem (_("Disconnect"), mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::disconnect_input)));
 		citems.push_back (SeparatorElem());
 		
 		_session.foreach_connection (this, &MixerStrip::add_connection_to_input_menu);
+
 		input_menu.popup (1, ev->time);
 		break;
 		
@@ -757,6 +774,42 @@ MixerStrip::output_changed (IOChange change, void *src)
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &MixerStrip::update_output_display));
 }
 
+
+void 
+MixerStrip::comment_editor_done_editing() {
+	string str =  comment_area->get_buffer()->get_text();
+	if (_route->comment() != str) {
+		_route->set_comment (str, this);
+
+		switch (_width) {
+		   
+		case Wide:
+			if (! str.empty()) {
+			        comment_button.modify_bg (STATE_NORMAL, color());
+				comment_button.set_label (_("*Comments*"));
+			} else {
+			        comment_button.unset_bg (STATE_NORMAL);
+				comment_button.set_label (_("Comments"));
+			}
+			break;
+		   
+		case Narrow:
+			if (! str.empty()) {
+			        comment_button.modify_bg (STATE_NORMAL, color());
+				comment_button.set_label (_("*Cmt*"));
+			} else {
+			        comment_button.unset_bg (STATE_NORMAL);
+				comment_button.set_label (_("Cmt"));
+			} 
+			break;
+		}
+		 
+		ARDOUR_UI::instance()->tooltips().set_tip (comment_button, 
+				str.empty() ? _("Click to Add/Edit Comments") : str);
+	}
+
+}
+
 void
 MixerStrip::comment_button_clicked ()
 {
@@ -764,38 +817,13 @@ MixerStrip::comment_button_clicked ()
 		setup_comment_editor ();
 	}
 
-        int x, y, cw_width, cw_height;
+    int x, y, cw_width, cw_height;
 
 	if (comment_window->is_visible()) {
-	       string str =  comment_area->get_buffer()->get_text();
-	       if (_route->comment() != str) {
-		 _route->set_comment (str, this);
+		comment_window->hide ();
+		return;
+	}
 
-		 switch (_width) {
-		   
-		 case Wide:
-		   if (! str.empty()) {
-		     comment_button.set_label (_("*Comments*"));
-		   } else {
-		     comment_button.set_label (_("Comments"));
-		      }
-		   break;
-		   
-		 case Narrow:
-		   if (! str.empty()) {
-		     comment_button.set_label (_("*Cmt*"));
-		   } else {
-		     comment_button.set_label (_("Cmt"));
-		   } 
-		   break;
-		 }
-		 
-		 ARDOUR_UI::instance()->tooltips().set_tip (comment_button, 
-							    str.empty() ? _("Click to Add/Edit Comments") : str);
-	       }
-	       comment_window->hide ();
-	       return;
-	} 
 	comment_window->get_size (cw_width, cw_height);
 	comment_window->get_position(x, y);
 	comment_window->move(x, y - (cw_height / 2) - 45);
@@ -806,7 +834,6 @@ MixerStrip::comment_button_clicked ()
 
 	comment_window->show();
 	comment_window->present();
-
 }
 
 void
@@ -819,6 +846,7 @@ MixerStrip::setup_comment_editor ()
 	comment_window = new ArdourDialog (title, false);
 	comment_window->set_position (Gtk::WIN_POS_MOUSE);
 	comment_window->set_skip_taskbar_hint (true);
+	comment_window->signal_hide().connect (mem_fun(*this, &MixerStrip::comment_editor_done_editing));
 
 	comment_area = manage (new TextView());
 	comment_area->set_name ("MixerTrackCommentArea");
@@ -1075,11 +1103,17 @@ MixerStrip::width_clicked ()
 void
 MixerStrip::hide_clicked ()
 {
+    // LAME fix to reset the button status for when it is redisplayed (part 1)
+    hide_button.set_sensitive(false);
+    
 	if (_embedded) {
 		 Hiding(); /* EMIT_SIGNAL */
 	} else {
 		_mixer.hide_strip (this);
 	}
+	
+    // (part 2)
+	hide_button.set_sensitive(true);
 }
 
 void
@@ -1165,21 +1199,11 @@ MixerStrip::mix_group() const
 void
 MixerStrip::engine_stopped ()
 {
-        input_button.set_sensitive (false);
-	if (rec_enable_button) {
-		rec_enable_button->set_sensitive (false);
-	}
-	output_button.set_sensitive (false);
 }
 
 void
 MixerStrip::engine_running ()
 {
-        input_button.set_sensitive (true);
-	if (rec_enable_button) {
-		rec_enable_button->set_sensitive (true);
-	}
-	output_button.set_sensitive (true);
 }
 
 void

@@ -14,7 +14,7 @@ ardour = env.Copy()
 
 domain = 'libardour'
 
-ardour.Append(DOMAIN = domain, MAJOR = 1, MINOR = 0, MICRO = 0)
+ardour.Append(DOMAIN = domain, MAJOR = 2, MINOR = 0, MICRO = 0)
 ardour.Append(CXXFLAGS = "-DPACKAGE=\\\"" + domain + "\\\"")
 ardour.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
 ardour.Append(PACKAGE = domain)
@@ -44,6 +44,7 @@ buffer_set.cc
 meter.cc
 amp.cc
 panner.cc
+destructive_filesource.cc
 audiofilesource.cc
 audiofilter.cc
 audioregion.cc
@@ -64,7 +65,6 @@ crossfade.cc
 curve.cc
 cycle_timer.cc
 default_click.cc
-destructive_filesource.cc
 gain.cc
 gdither.cc
 globals.cc
@@ -105,7 +105,6 @@ sndfile_helpers.cc
 sndfilesource.cc
 source.cc
 source_factory.cc
-state_manager.cc
 tempo.cc
 utils.cc
 version.cc
@@ -242,7 +241,7 @@ ardour = conf.Finish ()
 ardour.Merge ([
 	     libraries['core'],
 	     libraries['xml'],
-	     libraries['sndfile'],
+	     libraries['sndfile-ardour'],
 	     libraries['raptor'],
 	     libraries['lrdf'],
 	     libraries['samplerate'],
@@ -259,8 +258,6 @@ if ardour['LIBLO']:
 
 if ardour['COREAUDIO'] or ardour['AUDIOUNITS']:
     ardour.Merge ([ libraries['appleutility'] ])
-
-ardour.VersionBuild(['version.cc', 'ardour/version.h'], 'SConscript')
 
 def SharedAsmObjectEmitter(target, source, env):
     for tgt in target:
@@ -291,7 +288,9 @@ if env['NLS']:
 
 
 env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libardour))
-	      
+
+env.Alias('version', ardour.VersionBuild(['version.cc', 'ardour/version.h'], []))
+
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
 				     [ 'SConscript', 'i18n.h', 'gettext.h', 'sse_functions.s', 'sse_functions_64bit.s' ] +
 				     ardour_files + osc_files + vst_files + coreaudio_files + audiounit_files +

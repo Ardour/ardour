@@ -85,18 +85,18 @@ class StreamPanner : public sigc::trackable, public Stateful
 
 	virtual Curve& automation() = 0;
 
-	virtual int load (istream&, string path, uint32_t&) = 0;
-
-	virtual int save (ostream&) const = 0;
-
 	sigc::signal<void> Changed;      /* for position */
 	sigc::signal<void> StateChanged; /* for mute */
 
 	int set_state (const XMLNode&);
 	virtual XMLNode& state (bool full_state) = 0;
-
+	
 	Panner & get_parent() { return parent; }
 	
+	/* old school automation loading */
+
+	virtual int load (istream&, string path, uint32_t&) = 0;
+
   protected:
 	friend class Panner;
 	Panner& parent;
@@ -145,14 +145,16 @@ class BaseStereoPanner : public StreamPanner
 
 	void distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
 
-	int load (istream&, string path, uint32_t&);
-	int save (ostream&) const;
 	void snapshot (nframes_t now);
 	void transport_stopped (nframes_t frame);
 	void set_automation_state (AutoState);
 	void set_automation_style (AutoStyle);
 
 	Curve& automation() { return _automation; }
+
+	/* old school automation loading */
+
+	int load (istream&, string path, uint32_t&);
 
   protected:
 	float left;
@@ -207,10 +209,7 @@ class Multi2dPanner : public StreamPanner
 
 	void distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
 	void distribute_automated (AudioBuffer& src, BufferSet& obufs,
-			     nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
-
-	int load (istream&, string path, uint32_t&);
-	int save (ostream&) const;
+				   nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
 
 	static StreamPanner* factory (Panner&);
 	static string name;
@@ -218,6 +217,10 @@ class Multi2dPanner : public StreamPanner
 	XMLNode& state (bool full_state); 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&);
+
+	/* old school automation loading */
+
+	int load (istream&, string path, uint32_t&);
 
   private:
 	Curve _automation;
@@ -244,8 +247,6 @@ class Panner : public std::vector<StreamPanner*>, public Stateful, public sigc::
 	/// The fundamental Panner function
 	void distribute(BufferSet& src, BufferSet& dest, nframes_t start_frame, nframes_t end_frames, nframes_t nframes, nframes_t offset);
 
-	void set_name (string);
-
 	bool bypassed() const { return _bypassed; }
 	void set_bypassed (bool yn);
 
@@ -264,9 +265,6 @@ class Panner : public std::vector<StreamPanner*>, public Stateful, public sigc::
 	void set_automation_style (AutoStyle);
 	AutoStyle automation_style() const;
 	bool touching() const;
-
-	int load ();
-	int save () const;
 
 	XMLNode& get_state (void);
 	XMLNode& state (bool full);
@@ -304,12 +302,14 @@ class Panner : public std::vector<StreamPanner*>, public Stateful, public sigc::
 	void set_position (float x, StreamPanner& orig);
 	void set_position (float x, float y, StreamPanner& orig);
 	void set_position (float x, float y, float z, StreamPanner& orig);
-	
+
+	/* old school automation */
+
+	int load ();
+
   private:
 	void distribute_no_automation(BufferSet& src, BufferSet& dest, nframes_t nframes, nframes_t offset, gain_t gain_coeff);
 
-
-	string            automation_path;
 	Session&         _session;
 	uint32_t     current_outs;
 	bool             _linked;
@@ -317,6 +317,11 @@ class Panner : public std::vector<StreamPanner*>, public Stateful, public sigc::
 	LinkDirection    _link_direction;
 
 	static float current_automation_version_number;
+
+	/* old school automation handling */
+
+	std::string automation_path;
+	void set_name (std::string);
 };
 
 } // namespace ARDOUR

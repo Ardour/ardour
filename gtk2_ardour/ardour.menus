@@ -131,9 +131,31 @@
                    <menuitem action='zoom-focus-playhead'/>
                    <menuitem action='zoom-focus-edit'/>
                </menu>
+	       <menu name='SnapMode' action='SnapMode'>
+		   <menuitem action='snap-normal'/>
+		   <menuitem action='snap-magnetic'/>
+	       </menu>
                <menu name='SnapTo' action='SnapTo'>
-                   <menuitem action='snap-to-beat'/>
-                   <menuitem action='snap-to-bar'/>
+		   <menuitem action='snap-to-frame'/>
+		   <menuitem action='snap-to-cd-frame'/>
+		   <menuitem action='snap-to-smpte-frame'/>
+		   <menuitem action='snap-to-smpte-seconds'/>
+		   <menuitem action='snap-to-smpte-minutes'/>
+		   <menuitem action='snap-to-seconds'/>
+		   <menuitem action='snap-to-minutes'/>
+		   <menuitem action='snap-to-thirtyseconds'/>
+		   <menuitem action='snap-to-asixteenthbeat'/>
+		   <menuitem action='snap-to-eighths'/>
+		   <menuitem action='snap-to-quarters'/>
+		   <menuitem action='snap-to-thirds'/>
+		   <menuitem action='snap-to-beat'/>
+		   <menuitem action='snap-to-bar'/>
+		   <menuitem action='snap-to-mark'/>
+		   <menuitem action='snap-to-edit-cursor'/>
+		   <menuitem action='snap-to-region-start'/>
+		   <menuitem action='snap-to-region-end'/>
+		   <menuitem action='snap-to-region-sync'/>
+		   <menuitem action='snap-to-region-boundary'/>
                </menu>
                <menu name='MeterFalloff' action='MeterFalloff'>
                     <menuitem action='MeterFalloffOff'/>
@@ -194,7 +216,6 @@
                <menuitem action='ToggleOptionsEditor'/>
                <menuitem action='ToggleSoundFileBrowser'/>
                <menuitem action='ToggleInspector'/>
-               <menuitem action='ToggleConnections'/>
                <menuitem action='ToggleLocations'/>
                <menuitem action='ToggleColorManager'/>
                <menuitem action='ToggleBigClock'/>
@@ -214,7 +235,7 @@
 		        <menuitem action='FileHeaderFormatCAF'/>
 		   </menu>
                </menu>
-	       <menu action='SMPTE'>
+	       <menu action='Timecode'>
 		   <menuitem action='Smpte23976'/>
 		   <menuitem action='Smpte24'/>
 		   <menuitem action='Smpte24976'/>

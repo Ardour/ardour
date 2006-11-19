@@ -69,21 +69,6 @@ class AudioRegionEditor : public RegionEditor
 	Gtk::HBox  top_row_hbox;
 	Gtk::HBox  top_row_button_hbox;
 
-	Gtk::ToggleButton lock_button;
-	Gtk::ToggleButton mute_button;
-	Gtk::ToggleButton opaque_button;
-	Gtk::ToggleButton envelope_active_button;
-	Gtk::ToggleButton envelope_view_button;
-
-	Gtk::Button       raise_button;
-	Gtk::Arrow        raise_arrow;
-	Gtk::Button       lower_button;
-	Gtk::Arrow        lower_arrow;
-	Gtk::Frame        layer_frame;
-	Gtk::Label        layer_value_label;
-	Gtk::Label        layer_label;
-	Gtk::HBox         layer_hbox;
-
 	Gtk::ToggleButton  audition_button;
 
 	Gtk::HBox  lower_hbox;
@@ -102,31 +87,6 @@ class AudioRegionEditor : public RegionEditor
 	AudioClock length_clock;
 	AudioClock sync_offset_clock;
 
-	Gtk::Table  envelope_loop_table;
-	Gtk::Button loop_button;
-	Gtk::Label  loop_label;
-	Gtk::Label  envelope_label;
-
-	Gtk::Table fade_in_table;
-	Gtk::Label fade_in_label;
-	Gtk::Alignment fade_in_label_align;
-	Gtk::Label fade_in_active_button_label;
-	Gtk::ToggleButton fade_in_active_button;
-	Gtk::Label fade_in_length_label;
-
-	Gtk::Adjustment fade_in_length_adjustment;
-	Gtk::SpinButton fade_in_length_spinner;
-
-	Gtk::Table fade_out_table;
-	Gtk::Label fade_out_label;
-	Gtk::Alignment fade_out_label_align;
-	Gtk::Label fade_out_active_button_label;
-	Gtk::ToggleButton fade_out_active_button;
-	Gtk::Label fade_out_length_label;
-
-	Gtk::Adjustment fade_out_length_adjustment;
-	Gtk::SpinButton fade_out_length_spinner;
-
 	Gtk::HSeparator sep3;
 	Gtk::VSeparator sep1;
 	Gtk::VSeparator sep2;
@@ -134,16 +94,7 @@ class AudioRegionEditor : public RegionEditor
 	void region_changed (ARDOUR::Change);
 	void bounds_changed (ARDOUR::Change);
 	void name_changed ();
-	void opacity_changed ();
-	void mute_changed ();
-	void envelope_active_changed ();
-	void lock_changed ();
-	void layer_changed ();
 
-	void fade_in_length_adjustment_changed ();
-	void fade_out_length_adjustment_changed ();
-	void fade_in_changed ();
-	void fade_out_changed ();
 	void audition_state_changed (bool);
 
 	void activation ();
@@ -153,29 +104,7 @@ class AudioRegionEditor : public RegionEditor
 	void end_clock_changed ();
 	void length_clock_changed ();
 
-	gint envelope_active_button_press (GdkEventButton *);
-	gint envelope_active_button_release (GdkEventButton *);
-
 	void audition_button_toggled ();
-	void envelope_view_button_toggled ();
-	void lock_button_clicked ();
-	void mute_button_clicked ();
-	void opaque_button_clicked ();
-	void raise_button_clicked ();
-	void lower_button_clicked ();
-
-	void fade_in_active_toggled ();
-	void fade_out_active_toggled ();
-	void fade_in_active_changed ();
-	void fade_out_active_changed ();
-
-	void fade_in_realized ();
-	void fade_out_realized ();
-
-	void start_editing_fade_in ();
-	void start_editing_fade_out ();
-	void stop_editing_fade_in ();
-	void stop_editing_fade_out ();
 
 	gint bpressed (GdkEventButton* ev, Gtk::SpinButton* but, void (AudioRegionEditor::*pmf)());
 	gint breleased (GdkEventButton* ev, Gtk::SpinButton* but, void (AudioRegionEditor::*pmf)());

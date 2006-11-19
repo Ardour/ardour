@@ -110,7 +110,7 @@ SourceFactory::create (Session& s, const XMLNode& node)
 		return ret;
 
 	}
-	
+
 	return boost::shared_ptr<Source>();
 }
 
@@ -163,7 +163,6 @@ SourceFactory::create (Session& s, const XMLNode& node)
 boost::shared_ptr<Source>
 SourceFactory::createReadable (DataType type, Session& s, string idstr, AudioFileSource::Flag flags, bool announce)
 {
-<<<<<<< .working
 	if (type == DataType::AUDIO) {
 		if (flags & Destructive) {
 			boost::shared_ptr<Source> ret (new DestructiveFileSource (s, idstr, flags));
@@ -197,7 +196,7 @@ SourceFactory::createReadable (DataType type, Session& s, string idstr, AudioFil
 		return ret;
 
 	}
-
+	
 	return boost::shared_ptr<Source>();
 }
 
@@ -220,9 +219,6 @@ SourceFactory::createReadable (DataType type, Session& s, string idstr, AudioFil
 	} else if (type == DataType::MIDI) {
 
 		boost::shared_ptr<Source> ret (new SMFSource (s, idstr, SMFSource::Flag(0))); // FIXME: flags?
-		if (setup_peakfile (ret)) {
-			return boost::shared_ptr<Source>();
-		}
 		if (announce) {
 			SourceCreated (ret);
 		}
@@ -239,7 +235,6 @@ boost::shared_ptr<Source>
 SourceFactory::createWritable (DataType type, Session& s, std::string path, bool destructive, nframes_t rate, bool announce)
 {
 	/* this might throw failed_constructor(), which is OK */
-
 	if (type == DataType::AUDIO) {
 	
 		if (destructive) {

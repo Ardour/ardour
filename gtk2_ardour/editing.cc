@@ -2,6 +2,8 @@
 
 #include "editing.h"
 
+#include "i18n.h"
+
 using namespace std;
 
 // This involves some cpp magic. --taybin
@@ -24,6 +26,13 @@ str2snaptype (const string & str) {
 	#include "editing_syms.h"
 	return SnapToBar;
 }
+
+#undef SNAPTYPE
+#define SNAPTYPE(s) N_(#s),
+const char *snaptypestrs[] = {
+	#include "editing_syms.h"
+	0
+};
 #undef SNAPTYPE
 #define SNAPTYPE(a) /*empty*/
 
@@ -36,8 +45,16 @@ str2snapmode (const string & str) {
 	#include "editing_syms.h"
 	return SnapNormal;
 }
+
+#undef SNAPMODE
+#define SNAPMODE(s) N_(#s),
+const char *snapmodestrs[] = {
+	#include "editing_syms.h"
+	0
+};
 #undef SNAPMODE
 #define SNAPMODE(a) /*empty*/
+
 
 // REGIONLISTSORTTYPE
 #undef REGIONLISTSORTTYPE
@@ -48,6 +65,13 @@ str2regionlistsorttype (const string & str) {
 	#include "editing_syms.h"
 	return ByName;
 }
+
+#undef REGIONLISTSORTTYPE
+#define REGIONLISTSORTTYPE(s) N_(#s),
+const char *regionlistsorttypestrs[] = {
+	#include "editing_syms.h"
+	0
+};
 #undef REGIONLISTSORTTYPE
 #define REGIONLISTSORTTYPE(a) /*empty*/
 
@@ -60,6 +84,13 @@ str2mousemode (const string & str) {
 	#include "editing_syms.h"
 	return MouseObject;
 }
+
+#undef MOUSEMODE
+#define MOUSEMODE(s) N_(#s),
+const char *mousemodestrs[] = {
+	#include "editing_syms.h"
+	0
+};
 #undef MOUSEMODE
 #define MOUSEMODE(a) /*empty*/
 
@@ -72,6 +103,13 @@ str2zoomfocus (const string & str) {
 	#include "editing_syms.h"
 	return ZoomFocusPlayhead;
 }
+
+#undef ZOOMFOCUS
+#define ZOOMFOCUS(s) N_(#s),
+const char *zoomfocusstrs[] = {
+	#include "editing_syms.h"
+	0
+};
 #undef ZOOMFOCUS
 #define ZOOMFOCUS(a) /*empty*/
 
@@ -84,7 +122,25 @@ str2displaycontrol (const string & str) {
 	#include "editing_syms.h"
 	return FollowPlayhead;
 }
+
+#undef DISPLAYCONTROL
+#define DISPLAYCONTROL(s) N_(#s),
+const char *displaycontrolstrs[] = {
+	#include "editing_syms.h"
+	0
+};
 #undef DISPLAYCONTROL
 #define DISPLAYCONTROL(a) /*empty*/
 
+//IMPORTMODE
+#undef IMPORTMODE
+#define IMPORTMODE(s) N_(#s),
+const char *importmodestrs[] = {
+	#include "editing_syms.h"
+	0
+};
+#undef IMPORTMODE
+#define IMPORTMODE(a) /*empty*/
+
 } // namespace Editing
+

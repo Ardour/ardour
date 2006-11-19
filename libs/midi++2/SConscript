@@ -51,7 +51,7 @@ elif env['SYSMIDI'] == 'CoreMIDI':
 midi2.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
 midi2.Append(CCFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
 
-midi2.VersionBuild(['version.cc','midi++/version.h'], 'SConscript')
+midi2.VersionBuild(['version.cc','midi++/version.h'],  [])
 
 libmidi2 = midi2.SharedLibrary('midi++', [ sources, sysdep_src ])
 

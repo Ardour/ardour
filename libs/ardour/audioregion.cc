@@ -75,7 +75,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 	set_default_fades ();
 	set_default_envelope ();
 
-	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
+	listen_to_my_curves ();
 }
 
 /* Basic AudioRegion constructor (one channel) */
@@ -95,7 +95,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 	set_default_fades ();
 	set_default_envelope ();
 
-	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
+	listen_to_my_curves ();
 }
 
 /* Basic AudioRegion constructor (many channels) */
@@ -110,7 +110,7 @@ AudioRegion::AudioRegion (SourceList& srcs, nframes_t start, nframes_t length, c
 	set_default_fades ();
 	set_default_envelope ();
 
-	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
+	listen_to_my_curves ();
 }
 
 
@@ -148,7 +148,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t 
 
 	_scale_amplitude = other->_scale_amplitude;
 
-	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
+	listen_to_my_curves ();
 	
 	assert(_type == DataType::AUDIO);
 }
@@ -165,7 +165,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	_fade_in_disabled = 0;
 	_fade_out_disabled = 0;
 	
-	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
+	listen_to_my_curves ();
 
 	assert(_type == DataType::AUDIO);
 }
@@ -187,7 +187,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& nod
 		throw failed_constructor();
 	}
 
-	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
+	listen_to_my_curves ();
 
 	assert(_type == DataType::AUDIO);
 }
@@ -205,16 +205,69 @@ AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 		throw failed_constructor();
 	}
 
-	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
+	listen_to_my_curves ();
 
 	assert(_type == DataType::AUDIO);
 }
 
 AudioRegion::~AudioRegion ()
 {
-	cerr << "====== " << _name << " DESTRUCTOR @ " << this << endl;
-	notify_callbacks ();
-	GoingAway (); /* EMIT SIGNAL */
+}
+
+void
+AudioRegion::listen_to_my_curves ()
+{
+	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
+	_fade_in.StateChanged.connect (mem_fun (*this, &AudioRegion::fade_in_changed));
+	_fade_out.StateChanged.connect (mem_fun (*this, &AudioRegion::fade_out_changed));
+}
+
+bool
+AudioRegion::verify_length (nframes_t len)
+{
+	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(source());
+
+	if (afs && afs->destructive()) {
+		return true;
+	} else {
+		return Region::verify_length(len);
+	}
+}
+
+bool
+AudioRegion::verify_start_and_length (nframes_t new_start, nframes_t new_length)
+{
+	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(source());
+
+	if (afs && afs->destructive()) {
+		return true;
+	} else {
+		return verify_start_and_length(new_start, new_length);
+	}
+}
+
+bool
+AudioRegion::verify_start (nframes_t pos)
+{
+	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(source());
+
+	if (afs && afs->destructive()) {
+		return true;
+	} else {
+		return verify_start(pos);
+	}
+}
+
+bool
+AudioRegion::verify_start_mutable (nframes_t& new_start)
+{
+	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(source());
+
+	if (afs && afs->destructive()) {
+		return true;
+	} else {
+		return verify_start_mutable(new_start);
+	}
 }
 
 void
@@ -239,7 +292,7 @@ AudioRegion::read_peaks (PeakData *buf, nframes_t npeaks, nframes_t offset, nfra
 	if (chan_n >= _sources.size()) {
 		return 0; 
 	}
-	
+
 	if (audio_source(chan_n)->read_peaks (buf, npeaks, offset, cnt, samples_per_unit)) {
 		return 0;
 	} else {
@@ -450,7 +503,7 @@ AudioRegion::state (bool full)
 		if ((_flags & DefaultFadeIn)) {
 			child->add_property (X_("default"), X_("yes"));
 		} else {
-			_fade_in.store_state (*child);
+			child->add_child_nocopy (_fade_in.get_state ());
 		}
 
 		child->add_property (X_("active"), _fade_in_disabled ? X_("no") : X_("yes"));
@@ -460,9 +513,9 @@ AudioRegion::state (bool full)
 		if ((_flags & DefaultFadeOut)) {
 			child->add_property (X_("default"), X_("yes"));
 		} else {
-			_fade_out.store_state (*child);
+			child->add_child_nocopy (_fade_out.get_state ());
 		}
-
+		
 		child->add_property (X_("active"), _fade_out_disabled ? X_("no") : X_("yes"));
 	}
 	
@@ -473,6 +526,7 @@ AudioRegion::state (bool full)
 		
 		// If there are only two points, the points are in the start of the region and the end of the region
 		// so, if they are both at 1.0f, that means the default region.
+
 		if (_envelope.size() == 2 &&
 		    _envelope.front()->value == 1.0f &&
 		    _envelope.back()->value==1.0f) {
@@ -484,7 +538,7 @@ AudioRegion::state (bool full)
 		if (default_env) {
 			child->add_property ("default", "yes");
 		} else {
-			_envelope.store_state (*child);
+			child->add_child_nocopy (_envelope.get_state ());
 		}
 
 	} else {
@@ -545,34 +599,28 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 			
 			_envelope.clear ();
 
-			if ((prop = child->property ("default")) != 0) {
+			if ((prop = child->property ("default")) != 0 || _envelope.set_state (*child)) {
 				set_default_envelope ();
-			} else {
-				_envelope.load_state (*child);
 			}
 
 			_envelope.set_max_xval (_length);
 			_envelope.truncate_end (_length);
-			
+
 		} else if (child->name() == "FadeIn") {
 			
 			_fade_in.clear ();
 			
-			if ((prop = child->property ("default")) != 0 || (prop = child->property ("steepness")) != 0) {
+			if ((prop = child->property ("default")) != 0 || (prop = child->property ("steepness")) != 0 || _fade_in.set_state (*child)) {
 				set_default_fade_in ();
-			} else {
-				_fade_in.load_state (*child);
-			}
+			} 
 
 		} else if (child->name() == "FadeOut") {
 			
 			_fade_out.clear ();
 
-			if ((prop = child->property ("default")) != 0 || (prop = child->property ("steepness")) != 0) {
+			if ((prop = child->property ("default")) != 0 || (prop = child->property ("steepness")) != 0 || _fade_out.set_state (*child)) {
 				set_default_fade_out ();
-			} else {
-				_fade_out.load_state (*child);
-			}
+			} 
 		} 
 	}
 
@@ -1030,7 +1078,19 @@ AudioRegion::normalize_to (float target_dB)
 }
 
 void
-AudioRegion::envelope_changed (Change ignored)
+AudioRegion::fade_in_changed ()
+{
+	send_change (FadeInChanged);
+}
+
+void
+AudioRegion::fade_out_changed ()
+{
+	send_change (FadeOutChanged);
+}
+
+void
+AudioRegion::envelope_changed ()
 {
 	send_change (EnvelopeChanged);
 }
@@ -1083,8 +1143,10 @@ AudioRegion::speed_mismatch (float sr) const
 void
 AudioRegion::source_offset_changed ()
 {
-	if (boost::dynamic_pointer_cast<DestructiveFileSource>(_sources.front())) {
-		set_start (source()->natural_position(), this);
+	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(_sources.front());
+
+	if (afs && afs->destructive()) {
+		// set_start (source()->natural_position(), this);
 		set_position (source()->natural_position(), this);
 	} 
 }

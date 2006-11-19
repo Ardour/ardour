@@ -51,9 +51,10 @@ class Curve : public AutomationList
 	~Curve ();
 	Curve (const Curve& other);
 	Curve (const Curve& other, double start, double end);
+	Curve (const XMLNode&);
 
-	bool rt_safe_get_vector (double x0, double x1, float *arg, size_t veclen);
-	void get_vector (double x0, double x1, float *arg, size_t veclen);
+	bool rt_safe_get_vector (double x0, double x1, float *arg, int32_t veclen);
+	void get_vector (double x0, double x1, float *arg, int32_t veclen);
 
 	AutomationEventList::iterator closest_control_point_before (double xval);
 	AutomationEventList::iterator closest_control_point_after (double xval);
@@ -66,22 +67,20 @@ class Curve : public AutomationList
 	ControlEvent* point_factory (double,double) const;
 	ControlEvent* point_factory (const ControlEvent&) const;
 
-	Change   restore_state (StateManager::State&);
-
   private:
 	AutomationList::iterator last_bound;
 
 	double unlocked_eval (double where);
 	double multipoint_eval (double x);
 
-	void _get_vector (double x0, double x1, float *arg, size_t veclen);
+	void _get_vector (double x0, double x1, float *arg, int32_t veclen);
 
 };
 
 } // namespace ARDOUR
 
 extern "C" {
-	void curve_get_vector_from_c (void *arg, double, double, float*, size_t);
+	void curve_get_vector_from_c (void *arg, double, double, float*, int32_t);
 }
 
 #endif /* __ardour_curve_h__ */

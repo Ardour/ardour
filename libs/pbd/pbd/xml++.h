@@ -87,9 +87,10 @@ public:
   const string & set_content (const string &);
   XMLNode *add_content(const string & = string());
 
-  const XMLNodeList & children (const string & = string()) const;
+  const XMLNodeList & children (const string& str = string()) const;
   XMLNode *add_child (const char *);
   XMLNode *add_child_copy (const XMLNode&);
+  XMLNode *child (const char*) const;
   void add_child_nocopy (XMLNode&);
 
   const XMLPropertyList & properties() const { return _proplist; };

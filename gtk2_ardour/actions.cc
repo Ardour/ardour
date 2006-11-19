@@ -86,15 +86,6 @@ ActionManager::init ()
 }
 
 RefPtr<Action>
-ActionManager::register_action (RefPtr<ActionGroup> group, const char * name, const char * label, slot<void> sl, guint key, Gdk::ModifierType mods)
-{
-	RefPtr<Action> act = register_action (group, name, label, sl);
-	AccelMap::add_entry (act->get_accel_path(), key, mods);
-
-	return act;
-}
-
-RefPtr<Action>
 ActionManager::register_action (RefPtr<ActionGroup> group, const char * name, const char * label, slot<void> sl)
 {
 	RefPtr<Action> act;
@@ -118,30 +109,12 @@ ActionManager::register_action (RefPtr<ActionGroup> group, const char * name, co
 
 
 RefPtr<Action>
-ActionManager::register_radio_action (RefPtr<ActionGroup> group, RadioAction::Group& rgroup, const char * name, const char * label, slot<void> sl, guint key, Gdk::ModifierType mods)
-{
-	RefPtr<Action> act = register_radio_action (group, rgroup, name, label, sl);
-	AccelMap::add_entry (act->get_accel_path(), key, mods);
-
-	return act;
-}
-
-RefPtr<Action>
 ActionManager::register_radio_action (RefPtr<ActionGroup> group, RadioAction::Group& rgroup, const char * name, const char * label, slot<void> sl)
 {
 	RefPtr<Action> act;
 
 	act = RadioAction::create (rgroup, name, label);
 	group->add (act, sl);
-
-	return act;
-}
-
-RefPtr<Action>
-ActionManager::register_toggle_action (RefPtr<ActionGroup> group, const char * name, const char * label, slot<void> sl, guint key, Gdk::ModifierType mods)
-{
-	RefPtr<Action> act = register_toggle_action (group,name, label, sl);
-	AccelMap::add_entry (act->get_accel_path(), key, mods);
 
 	return act;
 }

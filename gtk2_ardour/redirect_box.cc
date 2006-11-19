@@ -923,7 +923,7 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 	
 	if ((insert = boost::dynamic_pointer_cast<Insert> (redirect)) == 0) {
 		
-		/* its a send */
+		/* it's a send */
 		
 		if (!_session.engine().connected()) {
 			return;
@@ -967,30 +967,21 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 				PluginUIWindow *plugin_ui;
 			
 				if (plugin_insert->get_gui() == 0) {
-				
-					string title;
-					string maker = plugin_insert->plugin()->maker();
-					string::size_type email_pos;
-				
-					if ((email_pos = maker.find_first_of ('<')) != string::npos) {
-						maker = maker.substr (0, email_pos - 1);
-					}
-				
-					if (maker.length() > 32) {
-						maker = maker.substr (0, 32);
-						maker += " ...";
-					}
-
-					title = string_compose(_("ardour: %1: %2 (by %3)"), _route->name(), plugin_insert->name(), maker);	
-				
+								
 					plugin_ui = new PluginUIWindow (plugin_insert);
+
 					if (_owner_is_mixer) {
 						ARDOUR_UI::instance()->the_mixer()->ensure_float (*plugin_ui);
 					} else {
 						ARDOUR_UI::instance()->the_editor().ensure_float (*plugin_ui);
 					}
-					plugin_ui->set_title (title);
+
+					plugin_ui->set_title (generate_redirect_title (plugin_insert));
 					plugin_insert->set_gui (plugin_ui);
+					
+					// change window title when route name is changed
+					_route->name_changed.connect (bind (mem_fun(*this, &RedirectBox::route_name_changed), plugin_ui, plugin_insert));
+					
 				
 				} else {
 					plugin_ui = reinterpret_cast<PluginUIWindow *> (plugin_insert->get_gui());
@@ -1069,8 +1060,12 @@ RedirectBox::register_actions ()
 
 	/* new stuff */
 	ActionManager::register_action (popup_act_grp, X_("newplugin"), _("New Plugin ..."),  sigc::ptr_fun (RedirectBox::rb_choose_plugin));
-	ActionManager::register_action (popup_act_grp, X_("newinsert"), _("New Insert"),  sigc::ptr_fun (RedirectBox::rb_choose_insert));
-	ActionManager::register_action (popup_act_grp, X_("newsend"), _("New Send ..."),  sigc::ptr_fun (RedirectBox::rb_choose_send));
+
+	act = ActionManager::register_action (popup_act_grp, X_("newinsert"), _("New Insert"),  sigc::ptr_fun (RedirectBox::rb_choose_insert));
+	ActionManager::jack_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (popup_act_grp, X_("newsend"), _("New Send ..."),  sigc::ptr_fun (RedirectBox::rb_choose_send));
+	ActionManager::jack_sensitive_actions.push_back (act);
+
 	ActionManager::register_action (popup_act_grp, X_("clear"), _("Clear"),  sigc::ptr_fun (RedirectBox::rb_clear));
 
 	/* standard editing stuff */
@@ -1097,6 +1092,8 @@ RedirectBox::register_actions ()
 	ActionManager::plugin_selection_sensitive_actions.push_back(act);
 
 	ActionManager::add_action_group (popup_act_grp);
+
+
 }
 
 void
@@ -1240,5 +1237,31 @@ RedirectBox::rb_edit ()
 	}
 
 	_current_redirect_box->for_selected_redirects (&RedirectBox::edit_redirect);
+}
+
+void
+RedirectBox::route_name_changed (void* src, PluginUIWindow* plugin_ui, boost::shared_ptr<PluginInsert> pi)
+{
+	ENSURE_GUI_THREAD(bind (mem_fun (*this, &RedirectBox::route_name_changed), src, plugin_ui, pi));
+	
+	plugin_ui->set_title (generate_redirect_title (pi));
+}
+
+string 
+RedirectBox::generate_redirect_title (boost::shared_ptr<PluginInsert> pi)
+{
+	string maker = pi->plugin()->maker();
+	string::size_type email_pos;
+
+	if ((email_pos = maker.find_first_of ('<')) != string::npos) {
+		maker = maker.substr (0, email_pos - 1);
+	}
+
+	if (maker.length() > 32) {
+		maker = maker.substr (0, 32);
+		maker += " ...";
+	}
+
+	return string_compose(_("ardour: %1: %2 (by %3)"), _route->name(), pi->name(), maker);	
 }
 

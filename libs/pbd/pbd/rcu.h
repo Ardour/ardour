@@ -17,7 +17,7 @@ class RCUManager
  
 	virtual ~RCUManager() { delete m_rcu_value; }
  
-        boost::shared_ptr<T> reader () const { return *((boost::shared_ptr<T> *) g_atomic_pointer_get (&m_rcu_value)); }
+        boost::shared_ptr<T> reader () const { return *((boost::shared_ptr<T> *) g_atomic_pointer_get (the_pointer())); }
  
 	virtual boost::shared_ptr<T> write_copy () = 0;
 	virtual bool update (boost::shared_ptr<T> new_value) = 0;

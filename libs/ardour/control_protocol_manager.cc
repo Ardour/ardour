@@ -36,6 +36,13 @@ ControlProtocolManager::~ControlProtocolManager()
 	}
 
 	control_protocols.clear ();
+
+	
+	for (list<ControlProtocolInfo*>::iterator p = control_protocol_info.begin(); p != control_protocol_info.end(); ++p) {
+		delete (*p);
+	}
+
+	control_protocol_info.clear();
 		
 }
 
@@ -68,6 +75,12 @@ ControlProtocolManager::drop_session ()
 			delete *p;
 		}
 		control_protocols.clear ();
+
+		for (list<ControlProtocolInfo*>::iterator p = control_protocol_info.begin(); p != control_protocol_info.end(); ++p) {
+			delete *p;
+		}
+
+		control_protocol_info.clear();
 	}
 }
 
@@ -122,6 +135,15 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
 		list<ControlProtocol*>::iterator p = find (control_protocols.begin(), control_protocols.end(), cpi.protocol);
 		if (p != control_protocols.end()) {
 			control_protocols.erase (p);
+		} else {
+			cerr << "Programming error: ControlProtocolManager::teardown() called for " << cpi.name << ", but it was not found in control_protocols" << endl;
+		}
+
+		list<ControlProtocolInfo*>::iterator p2 = find (control_protocol_info.begin(), control_protocol_info.end(), &cpi);
+		if (p2 != control_protocol_info.end()) {
+			control_protocol_info.erase (p2);
+		} else {
+			cerr << "Programming error: ControlProtocolManager::teardown() called for " << cpi.name << ", but it was not found in control_protocol_info" << endl;
 		}
 	}
 	

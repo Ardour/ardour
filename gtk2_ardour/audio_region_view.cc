@@ -29,6 +29,7 @@
 #include <ardour/audiosource.h>
 #include <ardour/audio_diskstream.h>
 #include <pbd/memento_command.h>
+#include <pbd/stacktrace.h>
 
 #include "streamview.h"
 #include "audio_region_view.h"
@@ -248,15 +249,51 @@ AudioRegionView::fade_out_changed ()
 }
 
 void
+AudioRegionView::set_fade_in_shape (AudioRegion::FadeShape shape)
+{
+	AutomationList& alist = audio_region()->fade_in();
+	XMLNode& before (alist.get_state());
+	trackview.session().begin_reversible_command ("fade in shape");
+	audio_region()->set_fade_in_shape (shape);
+	XMLNode& after (alist.get_state());
+	trackview.session().add_command (new MementoCommand<AutomationList>(alist, &before, &after));
+	trackview.session().commit_reversible_command ();
+}
+
+void
+AudioRegionView::set_fade_out_shape (AudioRegion::FadeShape shape)
+{
+	AutomationList& alist = audio_region()->fade_out();
+	XMLNode& before (alist.get_state());
+	trackview.session().begin_reversible_command ("fade out shape");
+	audio_region()->set_fade_out_shape (shape);
+	XMLNode& after (alist.get_state());
+	trackview.session().add_command (new MementoCommand<AutomationList>(alist, &before, &after));
+	trackview.session().commit_reversible_command ();
+}
+
+void
 AudioRegionView::set_fade_in_active (bool yn)
 {
+	AutomationList& alist = audio_region()->fade_in();
+	XMLNode& before (alist.get_state());
+	trackview.session().begin_reversible_command ("fade in shape");
 	audio_region()->set_fade_in_active (yn);
+	XMLNode& after (alist.get_state());
+	trackview.session().add_command (new MementoCommand<AutomationList>(alist, &before, &after));
+	trackview.session().commit_reversible_command ();
 }
 
 void
 AudioRegionView::set_fade_out_active (bool yn)
 {
+	AutomationList& alist = audio_region()->fade_out();
+	XMLNode& before (alist.get_state());
+	trackview.session().begin_reversible_command ("fade out shape");
 	audio_region()->set_fade_out_active (yn);
+	XMLNode& after (alist.get_state());
+	trackview.session().add_command (new MementoCommand<AutomationList>(alist, &before, &after));
+	trackview.session().commit_reversible_command ();
 }
 
 void
@@ -868,6 +905,9 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 		waves = tmp_waves;
 		tmp_waves.clear ();
 
+		/* all waves created, don't hook into peaks ready anymore */
+		data_ready_connection.disconnect ();		
+
 		if (!zero_line) {
 			zero_line = new ArdourCanvas::SimpleLine (*group);
 			zero_line->property_x1() = (gdouble) 1.0;
@@ -882,11 +922,6 @@ void
 AudioRegionView::peaks_ready_handler (uint32_t which)
 {
 	Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &AudioRegionView::create_one_wave), which, false));
-
-	if (!waves.empty()) {
-		/* all waves created, don't hook into peaks ready anymore */
-		data_ready_connection.disconnect ();		
-	}
 }
 
 void
@@ -924,12 +959,11 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 	trackview.session().begin_reversible_command (_("add gain control point"));
 	XMLNode &before = audio_region()->envelope().get_state();
 
-
 	if (!audio_region()->envelope_active()) {
-		XMLNode &before = audio_region()->get_state();
+		XMLNode &region_before = audio_region()->get_state();
 		audio_region()->set_envelope_active(true);
-		XMLNode &after = audio_region()->get_state();
-		trackview.session().add_command (new MementoCommand<AudioRegion>(*(audio_region().get()), &before, &after));
+		XMLNode &region_after = audio_region()->get_state();
+		trackview.session().add_command (new MementoCommand<AudioRegion>(*(audio_region().get()), &region_before, &region_after));
 	}
 
 	audio_region()->envelope().add (fx, y);

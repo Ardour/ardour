@@ -49,15 +49,18 @@ Editor::cms_deleted ()
 void
 Editor::show_editor_mixer (bool yn)
 {
+	show_editor_mixer_when_tracks_arrive = false;
+
 	if (yn) {
 
 		if (current_mixer_strip == 0) {
 
 			if (selection->tracks.empty()) {
 				
-				if (track_views.empty()) {
+				if (track_views.empty()) {	
+					show_editor_mixer_when_tracks_arrive = true;
 					return;
-				}
+				} 
 				
 				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 					AudioTimeAxisView* atv;

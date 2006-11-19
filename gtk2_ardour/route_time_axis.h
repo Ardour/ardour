@@ -134,14 +134,6 @@ protected:
 	
 	gint edit_click  (GdkEventButton *);
 
-	void build_redirect_window ();
-	void redirect_click ();
-	void redirect_add ();
-	void redirect_remove ();
-	void redirect_edit ();
-	void redirect_relist ();
-	void redirect_row_selected (gint row, gint col, GdkEvent *ev);
-	void add_to_redirect_display (ARDOUR::Redirect *);
 	void redirects_changed (void *);
 	
 	void add_redirect_to_subplugin_menu (boost::shared_ptr<ARDOUR::Redirect>);
@@ -164,13 +156,9 @@ protected:
 	
 	void reset_redirect_automation_curves ();
 
-	void update_automation_view (ARDOUR::AutomationType);
-	
 	void take_name_changed (void *);
 	void route_name_changed (void *);
 	void name_entry_changed ();
-
-	void on_area_realize ();
 
 	virtual void label_view ();
 	
@@ -192,10 +180,8 @@ protected:
 	void         playlist_click ();
 	void         show_playlist_selector ();
 	void         playlist_changed ();
-	void         playlist_state_changed (ARDOUR::Change);
 	void         playlist_modified ();
 
-	void add_playlist_to_playlist_menu (ARDOUR::Playlist*);
 	void rename_current_playlist ();
 	
 	void         automation_click ();
@@ -207,7 +193,6 @@ protected:
 
 	void visual_click ();
 	void hide_click ();
-	gint when_displayed (GdkEventAny*);
 
 	void speed_changed ();
 	
@@ -238,12 +223,20 @@ protected:
 	Gtk::Menu           edit_group_menu;
 	Gtk::RadioMenuItem* align_existing_item;
 	Gtk::RadioMenuItem* align_capture_item;
+	Gtk::RadioMenuItem* normal_track_mode_item;
+	Gtk::RadioMenuItem* destructive_track_mode_item;
 	Gtk::Menu*          playlist_menu;
 	Gtk::Menu*          playlist_action_menu;
 	Gtk::MenuItem*      playlist_item;
 
+	void use_playlist (ARDOUR::Playlist*);
+
 	ArdourCanvas::SimpleRect* timestretch_rect;
-	
+
+	void set_track_mode (ARDOUR::TrackMode);
+	void _set_track_mode (ARDOUR::Track* track, ARDOUR::TrackMode mode, Gtk::RadioMenuItem* reset_item);
+	void track_mode_changed ();
+
 	list<RedirectAutomationInfo*>   redirect_automation;
 	vector<RedirectAutomationLine*> redirect_automation_curves;
 

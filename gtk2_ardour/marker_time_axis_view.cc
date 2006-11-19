@@ -57,7 +57,7 @@ MarkerTimeAxisView::MarkerTimeAxisView(MarkerTimeAxis& tv)
 	canvas_rect =  new ArdourCanvas::SimpleRect (*canvas_group);
 	canvas_rect->property_x1() = 0.0;
 	canvas_rect->property_y1() = 0.0;
-	canvas_rect->property_x2() = 1000000.0;
+	canvas_rect->property_x2() = max_frames;
 	canvas_rect->property_y2() = (double)20;
 	canvas_rect->property_outline_color_rgba() = color_map[cMarkerTrackOutline];
 	canvas_rect->property_fill_color_rgba() = stream_base_color;

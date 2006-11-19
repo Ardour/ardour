@@ -65,11 +65,42 @@ AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode 
 AudioTrack::AudioTrack (Session& sess, const XMLNode& node)
 	: Track (sess, node)
 {
-	set_state (node);
+	_set_state (node, false);
 }
 
 AudioTrack::~AudioTrack ()
 {
+}
+
+int
+AudioTrack::set_mode (TrackMode m)
+{
+	if (m != _mode) {
+
+		if (_diskstream->set_destructive (m == Destructive)) {
+			return -1;
+		}
+
+		_mode = m;
+		
+		TrackModeChanged (); /* EMIT SIGNAL */
+	}
+
+	return 0;
+}
+
+bool
+AudioTrack::can_use_mode (TrackMode m, bool& bounce_required)
+{
+	switch (m) {
+	case Normal:
+		bounce_required = false;
+		return true;
+		
+	case Destructive:
+	default:
+		return _diskstream->can_become_destructive (bounce_required);
+	}
 }
 
 int
@@ -88,10 +119,10 @@ AudioTrack::deprecated_use_diskstream_connections ()
 
 	diskstream->deprecated_io_node = 0;
 
-	set_input_minimum (-1);
-	set_input_maximum (-1);
-	set_output_minimum (-1);
-	set_output_maximum (-1);
+	set_input_minimum (ChanCount::ZERO);
+	set_input_maximum (ChanCount::INFINITE);
+	set_output_minimum (ChanCount::ZERO);
+	set_output_maximum (ChanCount::INFINITE);
 	
 	if ((prop = node.property ("gain")) != 0) {
 		set_gain (atof (prop->value().c_str()), this);
@@ -188,11 +219,19 @@ AudioTrack::audio_diskstream() const
 int
 AudioTrack::set_state (const XMLNode& node)
 {
+	return _set_state (node, true);
+}
+
+int
+AudioTrack::_set_state (const XMLNode& node, bool call_base)
+{
 	const XMLProperty *prop;
 	XMLNodeConstIterator iter;
 
-	if (Route::set_state (node)) {
-		return -1;
+	if (call_base) {
+		if (Route::_set_state (node, call_base)) {
+			return -1;
+		}
 	}
 
 	if ((prop = node.property (X_("mode"))) != 0) {
@@ -494,6 +533,16 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 	nframes_t transport_frame;
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
 	
+	{
+		Glib::RWLock::ReaderLock lm (redirect_lock, Glib::TRY_LOCK);
+		if (lm.locked()) {
+			// automation snapshot can also be called from the non-rt context
+			// and it uses the redirect list, so we take the lock out here
+			automation_snapshot (start_frame);
+		}
+	}
+
+	
 	if (n_outputs().get_total() == 0 && _redirects.empty()) {
 		return 0;
 	}
@@ -761,7 +810,7 @@ AudioTrack::freeze (InterThreadInfo& itt)
 		return;
 	}
 
-	if (_session.write_one_audio_track (*this, 0, _session.current_end_frame(), true, srcs, itt)) {
+	if (_session.write_one_audio_track (*this, _session.current_start_frame(), _session.current_end_frame(), true, srcs, itt)) {
 		return;
 	}
 
@@ -780,8 +829,7 @@ AudioTrack::freeze (InterThreadInfo& itt)
 				FreezeRecordInsertInfo* frii  = new FreezeRecordInsertInfo ((*r)->get_state(), insert);
 				
 				frii->id = insert->id();
-				frii->memento = (*r)->get_memento();
-				
+
 				_freeze_record.insert_info.push_back (frii);
 				
 				/* now deactivate the insert */
@@ -802,7 +850,7 @@ AudioTrack::freeze (InterThreadInfo& itt)
 								 false));
 
 	new_playlist->set_orig_diskstream_id (diskstream->id());
-	new_playlist->add_region (region, 0);
+	new_playlist->add_region (region, _session.current_start_frame());
 	new_playlist->set_frozen (true);
 	region->set_locked (true);
 

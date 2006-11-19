@@ -162,9 +162,9 @@ Editor::remove_clicked_region ()
 void
 Editor::destroy_clicked_region ()
 {
-	int32_t selected = selection->regions.size();
+	uint32_t selected = selection->regions.size();
 
-	if (!session || clicked_regionview == 0 && selected == 0) {
+	if (!session || !selected) {
 		return;
 	}
 
@@ -191,7 +191,7 @@ Do you really want to destroy %1 ?"),
 		return;
 	}
 
-	if (selected > 0) {
+	if (selected) {
 		list<boost::shared_ptr<Region> > r;
 
 		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
@@ -199,9 +199,6 @@ Do you really want to destroy %1 ?"),
 		}
 
 		session->destroy_regions (r);
-
-	} else if (clicked_regionview) {
-		session->destroy_region (clicked_regionview->region());
 	} 
 }
 
@@ -1088,7 +1085,7 @@ Editor::temporal_zoom (gdouble fpu)
 
 	case ZoomFocusEdit:
 		/* try to keep the edit cursor in the center */
-		if (edit_cursor->current_frame > leftmost_frame + (new_page/2)) {
+		if (edit_cursor->current_frame > new_page/2) {
 			leftmost_after_zoom = edit_cursor->current_frame - (new_page/2);
 		} else {
 			leftmost_after_zoom = 0;
@@ -1275,6 +1272,9 @@ Editor::select_all_in_track (Selection::Operation op)
 	case Selection::Extend:
 		/* not defined yet */
 		break;
+	case Selection::Add:
+		selection->add (touched);
+		break;
 	}
 }
 
@@ -1291,6 +1291,7 @@ Editor::select_all (Selection::Operation op)
 	}
 	begin_reversible_command (_("select all"));
 	switch (op) {
+	case Selection::Add:
 	case Selection::Toggle:
 		selection->add (touched);
 		break;
@@ -1348,6 +1349,7 @@ Editor::select_all_within (nframes_t start, nframes_t end, double top, double bo
 
 	begin_reversible_command (_("select all within"));
 	switch (op) {
+	case Selection::Add:
 	case Selection::Toggle:
 		cerr << "toggle\n";
 		selection->add (touched);
@@ -1840,7 +1842,7 @@ Editor::toggle_playback (bool with_abort)
 	
 	if (session->transport_rolling()) {
 		session->request_stop (with_abort);
-		if (Config->get_auto_loop()) {
+		if (session->get_play_loop()) {
 			session->request_play_loop (false);
 		}
 	} else {
@@ -1852,6 +1854,12 @@ void
 Editor::play_from_start ()
 {
 	session->request_locate (session->current_start_frame(), true);
+}
+
+void
+Editor::play_from_edit_cursor ()
+{
+       session->request_locate (edit_cursor->current_frame, true);
 }
 
 void
@@ -1919,28 +1927,6 @@ Editor::loop_location (Location& location)
 		// enable looping, reposition and start rolling
 		session->request_play_loop (true);
 		session->request_locate (tll->start(), true);
-	}
-}
-
-void 
-Editor::toggle_region_mute ()
-{
-	if (clicked_regionview) {
-		clicked_regionview->region()->set_muted (!clicked_regionview->region()->muted());
-	} else if (!selection->regions.empty()) {
-		bool yn = ! (*selection->regions.begin())->region()->muted();
-		selection->foreach_region (&Region::set_muted, yn);
-	}
-}
-
-void
-Editor::toggle_region_opaque ()
-{
-	if (clicked_regionview) {
-		clicked_regionview->region()->set_opaque (!clicked_regionview->region()->opaque());
-	} else if (!selection->regions.empty()) {
-		bool yn = ! (*selection->regions.begin())->region()->opaque();
-		selection->foreach_region (&Region::set_opaque, yn);
 	}
 }
 
@@ -3340,7 +3326,7 @@ Editor::normalize_region ()
 			continue;
  		XMLNode &before = arv->region()->get_state();
 		arv->audio_region()->normalize_to (0.0f);
-		// session->add_command (new MementoCommand<Region>(*(arv->region().get()), &before, &arv->region()->get_state()));
+		session->add_command (new MementoCommand<Region>(*(arv->region().get()), &before, &arv->region()->get_state()));
 	}
 
 	commit_reversible_command ();
@@ -3489,12 +3475,39 @@ Editor::brush (nframes_t pos)
 }
 
 void
+Editor::reset_region_gain_envelopes ()
+{
+	if (!session || selection->regions.empty()) {
+		return;
+	}
+
+	session->begin_reversible_command (_("reset region gain"));
+
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+		if (arv) {
+			AutomationList& alist (arv->audio_region()->envelope());
+			XMLNode& before (alist.get_state());
+
+			arv->audio_region()->set_default_envelope ();
+			session->add_command (new MementoCommand<AutomationList>(arv->audio_region()->envelope(), &before, &alist.get_state()));
+		}
+	}
+
+	session->commit_reversible_command ();
+}
+
+void
 Editor::toggle_gain_envelope_visibility ()
 {
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-		if (arv)
-			arv->set_envelope_visible (!arv->envelope_visible());
+		if (arv) {
+			bool x = region_envelope_visible_item->get_active();
+			if (x != arv->envelope_visible()) {
+				arv->set_envelope_visible (x);
+			}
+		}
 	}
 }
 
@@ -3503,7 +3516,53 @@ Editor::toggle_gain_envelope_active ()
 {
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-		if (arv)
-			arv->audio_region()->set_envelope_active (true);
+		if (arv) {
+			bool x = region_envelope_active_item->get_active();
+			if (x != arv->audio_region()->envelope_active()) {
+				arv->audio_region()->set_envelope_active (x);
+			}
+		}
+	}
+}
+
+void
+Editor::toggle_region_lock ()
+{
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+		if (arv) {
+			bool x = region_lock_item->get_active();
+			if (x != arv->audio_region()->locked()) {
+				arv->audio_region()->set_locked (x);
+			}
+		}
+	}
+}
+
+void
+Editor::toggle_region_mute ()
+{
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+		if (arv) {
+			bool x = region_mute_item->get_active();
+			if (x != arv->audio_region()->muted()) {
+				arv->audio_region()->set_muted (x);
+			}
+		}
+	}
+}
+
+void
+Editor::toggle_region_opaque ()
+{
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+		if (arv) {
+			bool x = region_opaque_item->get_active();
+			if (x != arv->audio_region()->opaque()) {
+				arv->audio_region()->set_opaque (x);
+			}
+		}
 	}
 }

@@ -258,6 +258,46 @@ IOSelector::~IOSelector ()
 {
 }
 
+void 
+IOSelector::set_button_sensitivity ()
+{
+	DataType t = io->default_type();
+
+	if (for_input) {
+
+		if (io->input_maximum().get(t) < 0 || io->input_maximum().get(t) > io->n_inputs().get(t)) {
+			add_port_button.set_sensitive (true);
+		} else {
+			add_port_button.set_sensitive (false);
+		}
+
+	} else {
+
+		if (io->output_maximum().get(t) < 0 || io->output_maximum().get(t) > io->n_outputs().get(t)) {
+			add_port_button.set_sensitive (true);
+		} else {
+			add_port_button.set_sensitive (false);
+		}
+			
+	}
+
+	if (for_input) {
+		if (io->n_inputs().get(t) && (io->input_minimum().get(t) < 0 || io->input_minimum().get(t) < io->n_inputs().get(t))) {
+			remove_port_button.set_sensitive (true);
+		} else {
+			remove_port_button.set_sensitive (false);
+		}
+			
+	} else {
+		if (io->n_outputs().get(t) && (io->output_minimum().get(t) < 0 || io->output_minimum().get(t) < io->n_outputs().get(t))) {
+			remove_port_button.set_sensitive (true);
+		} else {
+			remove_port_button.set_sensitive (false);
+		}
+	}
+}
+
+
 void
 IOSelector::name_changed (void* src)
 {
@@ -288,7 +328,10 @@ IOSelector::rescan ()
 	gint current_page;
 	vector<string> rowdata;
 
+	page_selection_connection.disconnect ();
+
 	current_page = notebook.get_current_page ();
+
 	pages.clear ();
 
 	/* get relevant current JACK ports */
@@ -347,7 +390,6 @@ IOSelector::rescan ()
 			row[port_display_columns.full_name] = s->second;
 		}
 
-		//display->get_selection()->signal_changed().connect (bind (mem_fun(*this, &IOSelector::port_selection_changed), display));
 		display->signal_button_release_event().connect (bind (mem_fun(*this, &IOSelector::port_selection_changed), display));
 		Label *tab_label = manage (new Label);
 
@@ -363,7 +405,7 @@ IOSelector::rescan ()
 	}
 
 	notebook.set_current_page (current_page);
-	//notebook.signal_show().connect (bind (mem_fun (notebook, &Notebook::set_current_page), current_page));
+	page_selection_connection = notebook.signal_show().connect (bind (mem_fun (notebook, &Notebook::set_current_page), current_page));
 	selector_box.show_all ();
 }	
 
@@ -372,12 +414,11 @@ IOSelector::display_ports ()
 {
 	TreeView *firsttview = 0;
 	TreeView *selected_port_tview = 0;
-
 	{
 		Glib::Mutex::Lock lm  (port_display_lock);
 		Port *port;
 		uint32_t limit;
-
+		
 		// The IO selector only works for single typed IOs
 		const ARDOUR::DataType t = io->default_type();
 
@@ -386,22 +427,21 @@ IOSelector::display_ports ()
 		} else {
 			limit = io->n_outputs().get(t);
 		}
-
-		for (slist<TreeView *>::iterator i = port_displays.begin(); i != port_displays.end(); ) {
 		
+		for (slist<TreeView *>::iterator i = port_displays.begin(); i != port_displays.end(); ) {
+			
 			slist<TreeView *>::iterator tmp;
-
+			
 			tmp = i;
 			++tmp;
-
+			
 			port_box.remove (**i);
 			delete *i;
 			port_displays.erase (i);
-
+			
 			i = tmp;
 		} 
-
-
+		
 		for (uint32_t n = 0; n < limit; ++n) {
 			
 			TreeView* tview;
@@ -415,13 +455,13 @@ IOSelector::display_ports ()
 			}
 			
 			/* we know there is '/' because we put it there */
-
+			
 			really_short_name = port->short_name();
 			really_short_name = really_short_name.substr (really_short_name.find ('/') + 1);
-
+			
 			tview = manage (new TreeView());
 			RefPtr<ListStore> port_model = ListStore::create (port_display_columns);
-
+			
 			if (!firsttview) {
 				firsttview = tview;
 			}
@@ -429,18 +469,18 @@ IOSelector::display_ports ()
 			tview->set_model (port_model);
 			tview->append_column (really_short_name, port_display_columns.displayed_name);
 			tview->get_selection()->set_mode (SELECTION_SINGLE);
-			tview->set_data ("port", port);
+			tview->set_data (X_("port"), port);
 			tview->set_headers_visible (true);
-			tview->set_name ("IOSelectorPortList");
+			tview->set_name (X_("IOSelectorPortList"));
 			
 			port_box.pack_start (*tview);
 			port_displays.insert (port_displays.end(), tview);
 			
 			/* now fill the clist with the current connections */
 			
-
+			
 			const char **connections = port->get_connections ();
-
+			
 			if (connections) {
 				for (uint32_t c = 0; connections[c]; ++c) {
 					TreeModel::Row row = *(port_model->append());
@@ -459,9 +499,9 @@ IOSelector::display_ports ()
 						selected_port_tview = tview;
 					}
 				}
-			
+				
 			} else {
-
+				
 				if (io->output_maximum().get(t) == 1) {
 					selected_port = port;
 					selected_port_tview = tview;
@@ -471,39 +511,27 @@ IOSelector::display_ports ()
 					}
 				}
 			}
-
+			
 			TreeViewColumn* col = tview->get_column (0);
 			
 			col->set_clickable (true);
-
-			/* handle button events on the column header and within the treeview itself */
+			
+			/* handle button events on the column header ... */
 			col->signal_clicked().connect (bind (mem_fun(*this, &IOSelector::select_treeview), tview));
+
+			/* ... and within the treeview itself */
 			tview->signal_button_release_event().connect (bind (mem_fun(*this, &IOSelector::connection_button_release), tview));
 		}
-
+		
 		port_box.show_all ();
-
-		if (selected_port_tview) {
-			// GTK2FIX
-			// selected_port_tview->click_column(0);
-			selected_port_tview->set_name ("IOSelectorPortListSelected");
-			for (slist<TreeView *>::iterator i = port_displays.begin(); i != port_displays.end(); ++i) {
-				if (*i != selected_port_tview) {
-					(*i)->set_name ("IOSelectorPortList");
-					(*i)->queue_draw ();
-				}
-			}
-		} else {
-			selected_port = 0;
-			selector_box.hide_all ();
-		}
 	}
 	
+	if (!selected_port_tview) {
+		selected_port_tview = firsttview;
+	}
+
 	if (selected_port_tview) {
 		select_treeview (selected_port_tview);
-	} else if (firsttview) {
-		// select first
-		select_treeview (firsttview);
 	}
 }
 
@@ -569,14 +597,6 @@ IOSelector::add_port ()
 			msg.run ();
 		}
 
-		if (io->input_maximum().get(t) >= 0 && io->input_maximum().get(t) <= (size_t) io->n_inputs().get(t)) {
-			add_port_button.set_sensitive (false);
-		}
-		
-		if (io->input_minimum().get(t) < (size_t) io->n_inputs().get(t)) {
-			remove_port_button.set_sensitive (true);
-		}
-
 	} else {
 
 		try {
@@ -587,11 +607,9 @@ IOSelector::add_port ()
 			MessageDialog msg (0, _("There are no more JACK ports available."));
 			msg.run ();
 		}
-
-		if (io->output_maximum().get(t) >= 0 && io->output_maximum().get(t) <= (size_t) io->n_outputs().get(t)) {
-			add_port_button.set_sensitive (false);
-		}
 	}
+		
+	set_button_sensitivity ();
 }
 
 void
@@ -608,26 +626,13 @@ IOSelector::remove_port ()
 		if ((nports = io->n_inputs().get(t)) > 0) {
 			io->remove_input_port (io->input(nports-1), this);
 		}
-		if (io->input_minimum().get(t) == (size_t) io->n_inputs().get(t)) {
-		        remove_port_button.set_sensitive (false);
-		}
 	} else {
 		if ((nports = io->n_outputs().get(t)) > 0) {
 			io->remove_output_port (io->output(nports-1), this);
 		}
 	}
-}
-
-gint
-IOSelector::remove_port_when_idle (Port *port)
-{
-	if (for_input) {
-		io->remove_input_port (port, this);
-	} else {
-		io->remove_output_port (port, this);
-	}
-
-	return FALSE;
+	
+	set_button_sensitivity ();
 }
 
 gint
@@ -649,20 +654,15 @@ IOSelector::connection_button_release (GdkEventButton *ev, TreeView *treeview)
 		return false;
 	}
 	
-	if (!(Keyboard::is_delete_event (ev))) {
-		//return false;
-	}
-
 	if (!treeview->get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		return false;
 	}
-	cerr << "path = " << path.to_string() << endl;
-	
+
 	if ((iter = treeview->get_model()->get_iter (path.to_string()))) {
 
 		/* path is valid */
 		ustring connected_port_name = (*iter)[port_display_columns.full_name];
-		Port *port = reinterpret_cast<Port *> (treeview->get_data (_("port")));
+		Port *port = reinterpret_cast<Port *> (treeview->get_data (X_("port")));
 		
 		if (for_input) {
 			Port *p = session.engine().get_port_by_name (connected_port_name);
@@ -678,45 +678,14 @@ IOSelector::connection_button_release (GdkEventButton *ev, TreeView *treeview)
 	return true;
 }
 
-gint
-IOSelector::port_column_button_release (GdkEventButton* event, TreeView* treeview)
-{
-	/* this handles button release on the button at the top of a single-column
-	   treeview (representing a port)
-	*/
-	cerr << "IOSelector::port_column_button_release() called" << endl;
-	
-	if (Keyboard::is_delete_event (event)) {
-		Port* port;
-		{
-			Glib::Mutex::Lock lm  (port_display_lock);
-			
-			port = static_cast<Port *> (treeview->get_data (_("port")));
-			
-			if (port == selected_port) {
-				selected_port = 0;
-				treeview->set_name ("IOSelectorPortList");
-				treeview->queue_draw();
-			}
-		}
-
-		/* remove the port when idle - if we do it here, we will destroy the widget
-		   for whom we are handling an event. not good.
-		*/
-
-		signal_idle().connect (bind (mem_fun(*this, &IOSelector::remove_port_when_idle), port));
-
-	} else {
-		select_treeview (treeview);
-	}
-
-	return TRUE;
-}
-
 void
 IOSelector::select_next_treeview ()
 {
 	slist<TreeView*>::iterator next;
+
+	if (port_displays.empty() || port_displays.size() == 1) {
+		return;
+	}
 
 	for (slist<TreeView *>::iterator i = port_displays.begin(); i != port_displays.end(); ++i) {
 
@@ -744,21 +713,41 @@ IOSelector::select_treeview (TreeView* tview)
 	*/
 
 	Glib::Mutex::Lock lm  (port_display_lock);
- 	Port* port = reinterpret_cast<Port *> (tview->get_data (_("port")));
+ 	Port* port = reinterpret_cast<Port *> (tview->get_data (X_("port")));
+
+	selected_port = port;
+
+	tview->set_name ("IOSelectorPortListSelected");
+	tview->queue_draw ();
+
+	/* ugly hack to force the column header button to change as well */
+
+	TreeViewColumn* col = tview->get_column (0);
+	GtkTreeViewColumn* ccol = col->gobj();
 	
-	if (port != selected_port) {
-		selected_port = port;
-		
-		tview->set_name ("IOSelectorPortListSelected");
-		
-		for (slist<TreeView*>::iterator i = port_displays.begin(); i != port_displays.end(); ++i) {
-			if (*i != tview) {
-				(*i)->set_name ("IOSelectorPortList");
-				(*i)->queue_draw ();
-			}
-		}
-		selector_box.show_all ();
+	if (ccol->button) {
+		gtk_widget_set_name (ccol->button, "IOSelectorPortListSelected");	
+		gtk_widget_queue_draw (ccol->button);
 	}
+
+	for (slist<TreeView*>::iterator i = port_displays.begin(); i != port_displays.end(); ++i) {
+		if (*i == tview) {
+			continue;
+		}
+		
+		col = (*i)->get_column (0);
+		ccol = col->gobj();
+		
+		if (ccol->button) {
+			gtk_widget_set_name (ccol->button, "IOSelectorPortList");
+			gtk_widget_queue_draw (ccol->button);
+		}
+		
+		(*i)->set_name ("IOSelectorPortList");
+		(*i)->queue_draw ();
+	}
+
+	selector_box.show_all ();
 }
 
 void

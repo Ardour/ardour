@@ -128,6 +128,8 @@ setup_midi (AudioEngine& engine	)
 		}
 		
 		MIDI::Manager::instance()->add_port (request);
+
+		nports++;
 	}
 
 	if (nports > 1) {

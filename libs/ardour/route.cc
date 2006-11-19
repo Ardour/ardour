@@ -63,13 +63,13 @@ Route::Route (Session& sess, string name, int input_min, int input_max, int outp
 	init ();
 }
 
-Route::Route (Session& sess, const XMLNode& node)
-	: IO (sess, "route"),
+Route::Route (Session& sess, const XMLNode& node, DataType default_type)
+	: IO (sess, *node.child ("IO"), default_type),
 	  _solo_control (X_("solo"), *this, ToggleControllable::SoloControl),
 	  _mute_control (X_("mute"), *this, ToggleControllable::MuteControl)
 {
 	init ();
-	set_state (node);
+	_set_state (node, false);
 }
 
 void
@@ -1313,7 +1313,6 @@ XMLNode&
 Route::state(bool full_state)
 {
 	XMLNode *node = new XMLNode("Route");
-	XMLNode *aevents;
 	RedirectList:: iterator i;
 	char buf[32];
 
@@ -1373,26 +1372,6 @@ Route::state(bool full_state)
 		XMLNode *cmt = node->add_child ("Comment");
 		cmt->add_content (_comment);
 	}
-
-	if (full_state) {
-		string path;
-
-		path = _session.snap_name();
-		path += "-gain-";
-		path += legalize_for_path (_name);
-		path += ".automation";
-
-		/* XXX we didn't ask for a state save, we asked for the current state.
-		   FIX ME!
-		*/
-
-		if (save_automation (path)) {
-			error << _("Could not get state of route.  Problem with save_automation") << endmsg;
-		}
-
-		aevents = node->add_child ("Automation");
-		aevents->add_property ("path", path);
-	}	
 
 	for (i = _redirects.begin(); i != _redirects.end(); ++i) {
 		node->add_child_nocopy((*i)->state (full_state));
@@ -1481,6 +1460,12 @@ Route::add_redirect_from_xml (const XMLNode& node)
 int
 Route::set_state (const XMLNode& node)
 {
+	return _set_state (node, true);
+}
+
+int
+Route::_set_state (const XMLNode& node, bool call_base)
+{
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
 	XMLNode *child;
@@ -1492,7 +1477,7 @@ Route::set_state (const XMLNode& node)
 		return -1;
 	}
 
-	if ((prop = node.property ("flags")) != 0) {
+	if ((prop = node.property (X_("flags"))) != 0) {
 		int x;
 		sscanf (prop->value().c_str(), "0x%x", &x);
 		_flags = Flag (x);
@@ -1500,20 +1485,20 @@ Route::set_state (const XMLNode& node)
 		_flags = Flag (0);
 	}
 	
-	if ((prop = node.property ("default-type")) != 0) {
+	if ((prop = node.property (X_("default-type"))) != 0) {
 		_default_type = DataType(prop->value());
 		assert(_default_type != DataType::NIL);
 	}
 
-	if ((prop = node.property ("phase-invert")) != 0) {
+	if ((prop = node.property (X_("phase-invert"))) != 0) {
 		set_phase_invert(prop->value()=="yes"?true:false, this);
 	}
 
-	if ((prop = node.property ("active")) != 0) {
+	if ((prop = node.property (X_("active"))) != 0) {
 		set_active (prop->value() == "yes");
 	}
 
-	if ((prop = node.property ("muted")) != 0) {
+	if ((prop = node.property (X_("muted"))) != 0) {
 		bool yn = prop->value()=="yes"?true:false; 
 
 		/* force reset of mute status */
@@ -1523,7 +1508,7 @@ Route::set_state (const XMLNode& node)
 		mute_gain = desired_mute_gain;
 	}
 
-	if ((prop = node.property ("soloed")) != 0) {
+	if ((prop = node.property (X_("soloed"))) != 0) {
 		bool yn = prop->value()=="yes"?true:false; 
 
 		/* force reset of solo status */
@@ -1533,23 +1518,23 @@ Route::set_state (const XMLNode& node)
 		solo_gain = desired_solo_gain;
 	}
 
-	if ((prop = node.property ("mute-affects-pre-fader")) != 0) {
+	if ((prop = node.property (X_("mute-affects-pre-fader"))) != 0) {
 		_mute_affects_pre_fader = (prop->value()=="yes")?true:false;
 	}
 
-	if ((prop = node.property ("mute-affects-post-fader")) != 0) {
+	if ((prop = node.property (X_("mute-affects-post-fader"))) != 0) {
 		_mute_affects_post_fader = (prop->value()=="yes")?true:false;
 	}
 
-	if ((prop = node.property ("mute-affects-control-outs")) != 0) {
+	if ((prop = node.property (X_("mute-affects-control-outs"))) != 0) {
 		_mute_affects_control_outs = (prop->value()=="yes")?true:false;
 	}
 
-	if ((prop = node.property ("mute-affects-main-outs")) != 0) {
+	if ((prop = node.property (X_("mute-affects-main-outs"))) != 0) {
 		_mute_affects_main_outs = (prop->value()=="yes")?true:false;
 	}
 
-	if ((prop = node.property ("edit-group")) != 0) {
+	if ((prop = node.property (X_("edit-group"))) != 0) {
 		RouteGroup* edit_group = _session.edit_group_by_name(prop->value());
 		if(edit_group == 0) {
 			error << string_compose(_("Route %1: unknown edit group \"%2 in saved state (ignored)"), _name, prop->value()) << endmsg;
@@ -1558,7 +1543,7 @@ Route::set_state (const XMLNode& node)
 		}
 	}
 
-	if ((prop = node.property ("order-keys")) != 0) {
+	if ((prop = node.property (X_("order-keys"))) != 0) {
 
 		long n;
 
@@ -1595,7 +1580,7 @@ Route::set_state (const XMLNode& node)
 		delete deferred_state;
 	}
 
-	deferred_state = new XMLNode("deferred state");
+	deferred_state = new XMLNode(X_("deferred state"));
 
 	/* set parent class properties before anything else */
 
@@ -1603,7 +1588,7 @@ Route::set_state (const XMLNode& node)
 
 		child = *niter;
 
-		if (child->name() == IO::state_node_name) {
+		if (child->name() == IO::state_node_name && call_base) {
 
 			IO::set_state (*child);
 			break;
@@ -1614,7 +1599,7 @@ Route::set_state (const XMLNode& node)
 
 		child = *niter;
 			
-		if (child->name() == "Send") {
+		if (child->name() == X_("Send")) {
 
 
 			if (!IO::ports_legal) {
@@ -1625,7 +1610,7 @@ Route::set_state (const XMLNode& node)
 				add_redirect_from_xml (*child);
 			}
 
-		} else if (child->name() == "Insert") {
+		} else if (child->name() == X_("Insert")) {
 			
 			if (!IO::ports_legal) {
 				
@@ -1636,21 +1621,13 @@ Route::set_state (const XMLNode& node)
 				add_redirect_from_xml (*child);
 			}
 
-		} else if (child->name() == "Automation") {
-
-			XMLPropertyList plist;
-			XMLPropertyConstIterator piter;
-			XMLProperty *prop;
+		} else if (child->name() == X_("Automation")) {
 			
-			plist = child->properties();
-			for (piter = plist.begin(); piter != plist.end(); ++piter) {
-				prop = *piter;
-				if (prop->name() == "path") {
-					load_automation (prop->value());
-				}
+			if ((prop = child->property (X_("path"))) != 0)  {
+				load_automation (prop->value());
 			}
 
-		} else if (child->name() == "ControlOuts") {
+		} else if (child->name() == X_("ControlOuts")) {
 			
 			string coutname = _name;
 			coutname += _("[control]");
@@ -1658,25 +1635,25 @@ Route::set_state (const XMLNode& node)
 			_control_outs = new IO (_session, coutname);
 			_control_outs->set_state (**(child->children().begin()));
 
-		} else if (child->name() == "Comment") {
+		} else if (child->name() == X_("Comment")) {
 
 			/* XXX this is a terrible API design in libxml++ */
 
 			XMLNode *cmt = *(child->children().begin());
 			_comment = cmt->content();
 
-		} else if (child->name() == "extra") {
+		} else if (child->name() == X_("extra")) {
 			_extra_xml = new XMLNode (*child);
-		} else if (child->name() == "solo") {
+		} else if (child->name() == X_("solo")) {
 			_solo_control.set_state (*child);
 			_session.add_controllable (&_solo_control);
-		} else if (child->name() == "mute") {
+		} else if (child->name() == X_("mute")) {
 			_mute_control.set_state (*child);
 			_session.add_controllable (&_mute_control);
 		}
 	}
 
-	if ((prop = node.property ("mix-group")) != 0) {
+	if ((prop = node.property (X_("mix-group"))) != 0) {
 		RouteGroup* mix_group = _session.mix_group_by_name(prop->value());
 		if (mix_group == 0) {
 			error << string_compose(_("Route %1: unknown mix group \"%2 in saved state (ignored)"), _name, prop->value()) << endmsg;
@@ -1936,6 +1913,10 @@ Route::handle_transport_stopped (bool abort_ignored, bool did_locate, bool can_f
 	{
 		Glib::RWLock::ReaderLock lm (redirect_lock);
 
+		if (!did_locate) {
+			automation_snapshot (now);
+		}
+
 		for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
 			
 			if (Config->get_plugins_stop_with_transport() && can_flush_redirects) {
@@ -1950,19 +1931,6 @@ Route::handle_transport_stopped (bool abort_ignored, bool did_locate, bool can_f
 	IO::transport_stopped (now);
  
 	_roll_delay = _initial_delay;
-}
-
-UndoAction
-Route::get_memento() const
-{
-	void (Route::*pmf)(state_id_t) = &Route::set_state;
-	return sigc::bind (mem_fun (*(const_cast<Route *>(this)), pmf), _current_state_id);
-}
-
-void
-Route::set_state (state_id_t id)
-{
-	return;
 }
 
 void
@@ -2048,6 +2016,15 @@ int
 Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, int declick,
 	     bool can_record, bool rec_monitors_input)
 {
+	{
+		Glib::RWLock::ReaderLock lm (redirect_lock, Glib::TRY_LOCK);
+		if (lm.locked()) {
+			// automation snapshot can also be called from the non-rt context
+			// and it uses the redirect list, so we take the lock out here
+			automation_snapshot (_session.transport_frame());
+		}
+	}
+
 	if ((n_outputs().get_total() == 0 && _redirects.empty()) || n_inputs().get_total() == 0 || !_active) {
 		silence (nframes, offset);
 		return 0;
@@ -2178,6 +2155,16 @@ Route::set_latency_delay (nframes_t longest_session_latency)
 
 	if (_session.transport_stopped()) {
 		_roll_delay = _initial_delay;
+	}
+}
+
+void
+Route::automation_snapshot (nframes_t now)
+{
+	IO::automation_snapshot (now);
+
+	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+		(*i)->automation_snapshot (now);
 	}
 }
 

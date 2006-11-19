@@ -48,6 +48,8 @@ class DestructiveFileSource : public SndFileSource {
 
 	static void setup_standard_crossfades (nframes_t sample_rate);
 
+	int read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nframes_t cnt, double samples_per_unit) const;
+
   protected:
 	nframes_t write_unlocked (Sample *src, nframes_t cnt);
 
@@ -66,7 +68,7 @@ class DestructiveFileSource : public SndFileSource {
 
 	void init ();
 	nframes_t crossfade (Sample* data, nframes_t cnt, int dir);
-	void set_timeline_position (nframes_t);
+	void set_timeline_position (int64_t);
 };
 
 }

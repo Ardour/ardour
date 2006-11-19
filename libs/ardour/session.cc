@@ -288,7 +288,7 @@ Session::Session (AudioEngine &eng,
 	
 	new_session = !g_file_test (_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
 	if (new_session) {
-		if (create (new_session, mix_template, _engine.frame_rate() * 60 * 5)) {
+		if (create (new_session, mix_template, compute_initial_length())) {
 			cerr << "create failed\n";
 			throw failed_constructor ();
 		}
@@ -342,12 +342,21 @@ Session::Session (AudioEngine &eng,
 
 	cerr << "Loading session " << fullpath << " using snapshot " << snapshot_name << " (2)" << endl;
 
-	n_physical_outputs = max (requested_physical_out, _engine.n_physical_outputs());
-	n_physical_inputs = max (requested_physical_in, _engine.n_physical_inputs());
+	n_physical_outputs = _engine.n_physical_outputs();
+	n_physical_inputs = _engine.n_physical_inputs();
+
+	if (n_physical_inputs) {
+		n_physical_inputs = max (requested_physical_in, n_physical_inputs);
+	}
+
+	if (n_physical_outputs) {
+		n_physical_outputs = max (requested_physical_out, n_physical_outputs);
+	}
 
 	first_stage_init (fullpath, snapshot_name);
 
 	new_session = !g_file_test (_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
+
 	if (new_session) {
 		if (create (new_session, 0, initial_length)) {
 			throw failed_constructor ();
@@ -410,7 +419,7 @@ Session::~Session ()
 
 	/* clear history so that no references to objects are held any more */
 
-	history.clear ();
+	_history.clear ();
 
 	/* clear state tree so that no references to objects are held any more */
 	
@@ -1331,8 +1340,10 @@ Session::set_frame_rate (nframes_t frames_per_second)
 
 	sync_time_vars();
 
+	Route::set_automation_interval ((jack_nframes_t) ceil ((double) frames_per_second * 0.25));
+
 	// XXX we need some equivalent to this, somehow
-	// DestructiveFileSource::setup_standard_crossfades (frames_per_second);
+	// SndFileSource::setup_standard_crossfades (frames_per_second);
 
 	set_dirty();
 
@@ -1824,12 +1835,12 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 				      << endmsg;
 			}
 			
-			for (uint32_t x = 0; x < bus->n_inputs().get(DataType::AUDIO); ++x) {
+			for (uint32_t x = 0; n_physical_inputs && x < bus->n_inputs().get(DataType::AUDIO); ++x) {
 				
 				port = "";
-				
+
 				if (Config->get_input_auto_connect() & AutoConnectPhysical) {
-					port = physinputs[((n+x)%n_physical_inputs)];
+						port = physinputs[((n+x)%n_physical_inputs)];
 				} 
 				
 				if (port.length() && bus->connect_input (bus->input (x), port, this)) {
@@ -1837,7 +1848,7 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 				}
 			}
 			
-			for (uint32_t x = 0; x < bus->n_outputs().get(DataType::AUDIO); ++x) {
+			for (uint32_t x = 0; n_physical_outputs && x < bus->n_outputs().get(DataType::AUDIO); ++x) {
 				
 				port = "";
 				
@@ -1950,8 +1961,9 @@ Session::remove_route (shared_ptr<Route> route)
 	{ 	
 		RCUWriter<RouteList> writer (routes);
 		shared_ptr<RouteList> rs = writer.get_copy ();
-		rs->remove (route);
 		
+		rs->remove (route);
+
 		/* deleting the master out seems like a dumb
 		   idea, but its more of a UI policy issue
 		   than our concern.
@@ -2564,7 +2576,7 @@ Session::remove_region (boost::weak_ptr<Region> weak_region)
 }
 
 boost::shared_ptr<Region>
-Session::find_whole_file_parent (Region& child)
+Session::find_whole_file_parent (boost::shared_ptr<Region const> child)
 {
 	RegionList::iterator i;
 	boost::shared_ptr<Region> region;
@@ -2577,13 +2589,13 @@ Session::find_whole_file_parent (Region& child)
 
 		if (region->whole_file()) {
 
-			if (child.source_equivalent (region)) {
+			if (child->source_equivalent (region)) {
 				return region;
 			}
 		}
 	} 
 
-	return boost::shared_ptr<AudioRegion> ();
+	return boost::shared_ptr<Region> ();
 }	
 
 void
@@ -2596,32 +2608,38 @@ Session::find_equivalent_playlist_regions (boost::shared_ptr<Region> region, vec
 int
 Session::destroy_region (boost::shared_ptr<Region> region)
 {
-	boost::shared_ptr<AudioRegion> aregion;
-
-	if ((aregion = boost::dynamic_pointer_cast<AudioRegion> (region)) == 0) {
-		return 0;
-	}
-	
-	if (aregion->playlist()) {
-		aregion->playlist()->destroy_region (region);
-	}
-
 	vector<boost::shared_ptr<Source> > srcs;
-	
-	for (uint32_t n = 0; n < aregion->n_channels(); ++n) {
-		srcs.push_back (aregion->source (n));
+		
+	{
+		boost::shared_ptr<AudioRegion> aregion;
+		
+		if ((aregion = boost::dynamic_pointer_cast<AudioRegion> (region)) == 0) {
+			return 0;
+		}
+		
+		if (aregion->playlist()) {
+			aregion->playlist()->destroy_region (region);
+		}
+		
+		for (uint32_t n = 0; n < aregion->n_channels(); ++n) {
+			srcs.push_back (aregion->source (n));
+		}
 	}
+
+	region->drop_references ();
 
 	for (vector<boost::shared_ptr<Source> >::iterator i = srcs.begin(); i != srcs.end(); ++i) {
-		
-		if ((*i).use_count() == 1) {
-			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*i);
 
+		if (!(*i)->used()) {
+			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*i);
+			
 			if (afs) {
 				(afs)->mark_for_remove ();
 			}
 			
 			(*i)->drop_references ();
+			
+			cerr << "source was not used by any playlist\n";
 		}
 	}
 
@@ -3195,6 +3213,20 @@ Session::add_playlist (Playlist* playlist)
 	set_dirty();
 
 	PlaylistAdded (playlist); /* EMIT SIGNAL */
+}
+
+void
+Session::get_playlists (vector<Playlist*>& s)
+{
+	{ 
+		Glib::Mutex::Lock lm (playlist_lock);
+		for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+			s.push_back (*i);
+		}
+		for (PlaylistList::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+			s.push_back (*i);
+		}
+	}
 }
 
 void
@@ -3970,13 +4002,14 @@ Session::nbusses () const
 }
 
 void
-Session::add_curve(Curve *curve)
-{
-    curves[curve->id()] = curve;
-}
-
-void
 Session::add_automation_list(AutomationList *al)
 {
-    automation_lists[al->id()] = al;
+	automation_lists[al->id()] = al;
 }
+
+nframes_t
+Session::compute_initial_length ()
+{
+	return _engine.frame_rate() * 60 * 5;
+}
+

@@ -77,6 +77,8 @@ class AudioDiskstream : public Diskstream
 	}
 
 	void set_record_enabled (bool yn);
+	int set_destructive (bool yn);
+	bool can_become_destructive (bool& requires_bounce) const;
 
 	float peak_power(uint32_t n=0) { 
 		float x = channels[n].peak_power;

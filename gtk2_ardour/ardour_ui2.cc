@@ -139,7 +139,7 @@ ARDOUR_UI::transport_rolling ()
 		roll_button.set_active (false);
 		auto_loop_button.set_active (false);
 
-	} else if (Config->get_auto_loop ()) {
+	} else if (session->get_play_loop ()) {
 		auto_loop_button.set_active (true);
 		play_selection_button.set_active (false);
 		roll_button.set_active (false);

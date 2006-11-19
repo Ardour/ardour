@@ -50,8 +50,8 @@ Track::Track (Session& sess, string name, Route::Flag flag, TrackMode mode, Data
 }
 
 Track::Track (Session& sess, const XMLNode& node, DataType default_type)
-	: Route (sess, "to be renamed", 0, 0, -1, -1, Route::Flag(0), default_type)
-	, _rec_enable_control (*this)
+	: Route (sess, node),
+	  _rec_enable_control (*this)
 {
 	_freeze_record.state = NoFreeze;
 	_declickable = true;
@@ -181,18 +181,6 @@ Track::set_record_enable (bool yn, void *src)
 	}
 
 	_rec_enable_control.Changed ();
-}
-
-void
-Track::set_mode (TrackMode m)
-{
-	if (_diskstream) {
-		if (_mode != m) {
-			_mode = m;
-			_diskstream->set_destructive (m == Destructive);
-			ModeChanged();
-		}
-	}
 }
 
 int

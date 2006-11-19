@@ -619,14 +619,21 @@ MidiTrack::unfreeze ()
 	FreezeChange (); /* EMIT SIGNAL */
 }
 
-void
+int
 MidiTrack::set_mode (TrackMode m)
 {
-	if (_diskstream) {
-		if (_mode != m) {
-			_mode = m;
-			_diskstream->set_destructive (m == Destructive);
-			ModeChanged();
+	assert(_diskstream);
+
+	if (m != _mode) {
+
+		if (_diskstream->set_destructive (m == Destructive)) {
+			return -1;
 		}
+
+		_mode = m;
+		
+		TrackModeChanged (); /* EMIT SIGNAL */
 	}
+
+	return 0;
 }

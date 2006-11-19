@@ -265,13 +265,43 @@ Region::Region (boost::shared_ptr<Source> src, const XMLNode& node)
 
 Region::~Region ()
 {
-	/* derived classes must call notify_callbacks() and then emit GoingAway */
+	if (_playlist) {
+		for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
+			(*i)->remove_playlist (_playlist);
+		}
+	}
+	
+	notify_callbacks ();
+	GoingAway (); /* EMIT SIGNAL */
 }
 
 void
 Region::set_playlist (Playlist* pl)
 {
-	_playlist = pl;
+	if (pl == _playlist) {
+		return;
+	}
+
+	Playlist* old_playlist = _playlist;
+
+	if (pl) {
+		if (old_playlist) {
+			for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
+				(*i)->remove_playlist (old_playlist);	
+				(*i)->add_playlist (_playlist);
+			}
+		} else {
+			for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
+				(*i)->add_playlist (_playlist);
+			}
+		}
+	} else {
+		if (old_playlist) {
+			for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
+				(*i)->remove_playlist (old_playlist);
+			}
+		}
+	}
 }
 
 void
@@ -335,6 +365,24 @@ Region::first_edit ()
 		send_change (NameChanged);
 		RegionFactory::CheckNewRegion (shared_from_this());
 	}
+}
+
+bool
+Region::at_natural_position () const
+{
+	if (!_playlist) {
+		return false;
+	}
+	
+	boost::shared_ptr<Region> whole_file_region = get_parent();
+
+	if (whole_file_region) {
+		if (_position == whole_file_region->position() + _start) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void
@@ -1180,14 +1228,17 @@ Region::verify_start_mutable (jack_nframes_t& new_start)
 }
 
 boost::shared_ptr<Region>
-Region::get_parent()
+Region::get_parent() const
 {
-	boost::shared_ptr<Region> r;
-
 	if (_playlist) {
-		r = _playlist->session().find_whole_file_parent (*this);
+		boost::shared_ptr<Region> r;
+		boost::shared_ptr<Region const> grrr2 = boost::dynamic_pointer_cast<Region const> (shared_from_this());
+		
+		if (grrr2 && (r = _playlist->session().find_whole_file_parent (grrr2))) {
+			return boost::static_pointer_cast<Region> (r);
+		}
 	}
 	
-	return r;
+	return boost::shared_ptr<Region>();
 }
 

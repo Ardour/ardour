@@ -22,9 +22,11 @@
 #include <climits>
 #include <float.h>
 #include <cmath>
+#include <sstream>
 #include <algorithm>
 #include <sigc++/bind.h>
 #include <ardour/automation_event.h>
+#include <pbd/convert.h>
 
 #include "i18n.h"
 
@@ -46,14 +48,13 @@ static void dumpit (const AutomationList& al, string prefix = "")
 }
 #endif
 
-AutomationList::AutomationList (double defval, bool with_state)
+AutomationList::AutomationList (double defval)
 {
 	_frozen = false;
 	changed_when_thawed = false;
 	_state = Off;
 	_style = Absolute;
 	_touching = false;
-	no_state = with_state;
 	min_yval = FLT_MIN;
 	max_yval = FLT_MAX;
 	max_xval = 0; // means "no limit" 
@@ -62,10 +63,6 @@ AutomationList::AutomationList (double defval, bool with_state)
 	rt_insertion_point = events.end();
 	lookup_cache.left = -1;
 	lookup_cache.range.first = events.end();
-
-	if (!no_state) {
-		save_state (_("initial"));
-	}
 
         AutomationListCreated(this);
 }
@@ -83,7 +80,6 @@ AutomationList::AutomationList (const AutomationList& other)
 	_touching = other._touching;
 	_dirty = false;
 	rt_insertion_point = events.end();
-	no_state = other.no_state;
 	lookup_cache.left = -1;
 	lookup_cache.range.first = events.end();
 
@@ -111,7 +107,6 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 	_touching = other._touching;
 	_dirty = false;
 	rt_insertion_point = events.end();
-	no_state = other.no_state;
 	lookup_cache.left = -1;
 	lookup_cache.range.first = events.end();
 
@@ -128,32 +123,36 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 	delete section;
 
 	mark_dirty ();
+
+        AutomationListCreated(this);
+}
+
+AutomationList::AutomationList (const XMLNode& node)
+{
+	_frozen = false;
+	changed_when_thawed = false;
+	_touching = false;
+	min_yval = FLT_MIN;
+	max_yval = FLT_MAX;
+	max_xval = 0; // means "no limit" 
+	_dirty = false;
+	_state = Off;
+	_style = Absolute;
+	rt_insertion_point = events.end();
+	lookup_cache.left = -1;
+	lookup_cache.range.first = events.end();
+	
+	set_state (node);
+
         AutomationListCreated(this);
 }
 
 AutomationList::~AutomationList()
 {
-	std::set<ControlEvent*> all_events;
-	AutomationList::State* asp;
-
 	GoingAway ();
-
+	
 	for (AutomationEventList::iterator x = events.begin(); x != events.end(); ++x) {
-		all_events.insert (*x);
-	}
-
-	for (StateMap::iterator i = states.begin(); i != states.end(); ++i) {
-
-		if ((asp = dynamic_cast<AutomationList::State*> (*i)) != 0) {
-			
-			for (AutomationEventList::iterator x = asp->events.begin(); x != asp->events.end(); ++x) {
-				all_events.insert (*x);
-			}
-		}
-	}
-
-	for (std::set<ControlEvent*>::iterator i = all_events.begin(); i != all_events.end(); ++i) {
-		delete (*i);
+		delete (*x);
 	}
 }
 
@@ -194,7 +193,7 @@ AutomationList::maybe_signal_changed ()
 	if (_frozen) {
 		changed_when_thawed = true;
 	} else {
-		StateChanged (Change (0));
+		StateChanged ();
 	}
 }
 
@@ -236,9 +235,6 @@ AutomationList::clear ()
 	{
 		Glib::Mutex::Lock lm (lock);
 		events.clear ();
-		if (!no_state) {
-			save_state (_("cleared"));
-		}
 		mark_dirty ();
 	}
 
@@ -270,7 +266,6 @@ void AutomationList::_x_scale (double factor)
 		(*i)->when = floor ((*i)->when * factor);
 	}
 
-	save_state ("x-scaled");
 	mark_dirty ();
 }
 
@@ -370,12 +365,19 @@ AutomationList::rt_add (double when, double value)
 	maybe_signal_changed ();
 }
 
+void
+AutomationList::fast_simple_add (double when, double value)
+{
+	/* to be used only for loading pre-sorted data from saved state */
+	events.insert (events.end(), point_factory (when, value));
+}
+
 #undef last_rt_insertion_point
 
 void
-AutomationList::add (double when, double value, bool for_loading)
+AutomationList::add (double when, double value)
 {
-	/* this is for graphical editing and loading data from storage */
+	/* this is for graphical editing */
 
 	{
 		Glib::Mutex::Lock lm (lock);
@@ -407,15 +409,9 @@ AutomationList::add (double when, double value, bool for_loading)
 		} 
 
 		mark_dirty ();
-
-		if (!no_state && !for_loading) {
-			save_state (_("added event"));
-		}
 	}
 
-	if (!for_loading) {
-		maybe_signal_changed ();
-	}
+	maybe_signal_changed ();
 }
 
 void
@@ -425,9 +421,6 @@ AutomationList::erase (AutomationList::iterator i)
 		Glib::Mutex::Lock lm (lock);
 		events.erase (i);
 		reposition_for_rt_add (0);
-		if (!no_state) {
-			save_state (_("removed event"));
-		}
 		mark_dirty ();
 	}
 	maybe_signal_changed ();
@@ -440,9 +433,6 @@ AutomationList::erase (AutomationList::iterator start, AutomationList::iterator 
 		Glib::Mutex::Lock lm (lock);
 		events.erase (start, end);
 		reposition_for_rt_add (0);
-		if (!no_state) {
-			save_state (_("removed multiple events"));
-		}
 		mark_dirty ();
 	}
 	maybe_signal_changed ();
@@ -471,10 +461,6 @@ AutomationList::reset_range (double start, double endt)
 			
 			reset = true;
 
-			if (!no_state) {
-				save_state (_("removed range"));
-			}
-
 			mark_dirty ();
 		}
 	}
@@ -502,9 +488,6 @@ AutomationList::erase_range (double start, double endt)
 			events.erase (s, e);
 			reposition_for_rt_add (0);
 			erased = true;
-			if (!no_state) {
-				save_state (_("removed range"));
-			}
 			mark_dirty ();
 		}
 		
@@ -532,10 +515,6 @@ AutomationList::move_range (iterator start, iterator end, double xdelta, double 
 			++start;
 		}
 
-		if (!no_state) {
-			save_state (_("event range adjusted"));
-		}
-
 		mark_dirty ();
 	}
 
@@ -554,10 +533,6 @@ AutomationList::modify (iterator iter, double when, double val)
 		Glib::Mutex::Lock lm (lock);
 		(*iter)->when = when;
 		(*iter)->value = val;
-		if (!no_state) {
-			save_state (_("event adjusted"));
-		}
-
 		mark_dirty ();
 	}
 	
@@ -609,42 +584,8 @@ AutomationList::thaw ()
 {
 	_frozen = false;
 	if (changed_when_thawed) {
-		 StateChanged(Change(0)); /* EMIT SIGNAL */
+		StateChanged(); /* EMIT SIGNAL */
 	}
-}
-
-StateManager::State*
-AutomationList::state_factory (std::string why) const
-{
-	State* state = new State (why);
-
-	for (AutomationEventList::const_iterator x = events.begin(); x != events.end(); ++x) {
-		state->events.push_back (point_factory (**x));
-	}
-
-	return state;
-}
-
-Change
-AutomationList::restore_state (StateManager::State& state) 
-{
-	{
-		Glib::Mutex::Lock lm (lock);
-		State* lstate = dynamic_cast<State*> (&state);
-
-		events.clear ();
-		for (AutomationEventList::const_iterator x = lstate->events.begin(); x != lstate->events.end(); ++x) {
-			events.push_back (point_factory (**x));
-		}
-	}
-
-	return Change (0);
-}
-
-UndoAction
-AutomationList::get_memento () const
-{
-  return sigc::bind (mem_fun (*(const_cast<AutomationList*> (this)), &StateManager::use_state), _current_state_id);
 }
 
 void
@@ -670,10 +611,6 @@ AutomationList::truncate_end (double last_coordinate)
 		double last_val;
 
 		if (events.empty()) {
-			fatal << _("programming error:")
-			      << "AutomationList::truncate_end() called on an empty list"
-			      << endmsg;
-			/*NOTREACHED*/
 			return;
 		}
 
@@ -1083,9 +1020,6 @@ AutomationList::cut_copy_clear (double start, double end, int op)
 
 		if (changed) {
 			reposition_for_rt_add (0);
-			if (!no_state) {
-				save_state (_("cut/copy/clear"));
-			}
 		}
 
 		mark_dirty ();
@@ -1114,10 +1048,6 @@ AutomationList::copy (iterator start, iterator end)
 			nal->events.push_back (point_factory (**x));
 			
 			x = tmp;
-		}
-
-		if (!no_state) {
-			save_state (_("copy"));
 		}
 	}
 
@@ -1183,11 +1113,6 @@ AutomationList::paste (AutomationList& alist, double pos, float times)
 		}
 
 		reposition_for_rt_add (0);
-
-		if (!no_state) {
-			save_state (_("paste"));
-		}
-
 		mark_dirty ();
 	}
 
@@ -1207,64 +1132,220 @@ AutomationList::point_factory (const ControlEvent& other) const
 	return new ControlEvent (other);
 }
 
-void
-AutomationList::store_state (XMLNode& node) const
+XMLNode&
+AutomationList::get_state ()
 {
+	return state (true);
+}
+
+XMLNode&
+AutomationList::state (bool full)
+{
+	XMLNode* root = new XMLNode (X_("AutomationList"));
+	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
 
-	for (const_iterator i = const_begin(); i != const_end(); ++i) {
-		char buf[64];
-		
-		XMLNode *pointnode = new XMLNode ("point");
-		
-		snprintf (buf, sizeof (buf), "%" PRIu32, (nframes_t) floor ((*i)->when));
-		pointnode->add_property ("x", buf);
-		snprintf (buf, sizeof (buf), "%.12g", (*i)->value);
-		pointnode->add_property ("y", buf);
+	root->add_property ("id", _id.to_s());
 
-		node.add_child_nocopy (*pointnode);
+	snprintf (buf, sizeof (buf), "%.12g", default_value);
+	root->add_property ("default", buf);
+	snprintf (buf, sizeof (buf), "%.12g", min_yval);
+	root->add_property ("min_yval", buf);
+	snprintf (buf, sizeof (buf), "%.12g", max_yval);
+	root->add_property ("max_yval", buf);
+	snprintf (buf, sizeof (buf), "%.12g", max_xval);
+	root->add_property ("max_xval", buf);
+
+	if (full) {
+		root->add_property ("state", auto_state_to_string (_state));
+	} else {
+		/* never save anything but Off for automation state to a template */
+		root->add_property ("state", auto_state_to_string (Off));
 	}
+
+	root->add_property ("style", auto_style_to_string (_style));
+
+	if (!events.empty()) {
+		root->add_child_nocopy (serialize_events());
+	}
+
+	return *root;
 }
 
-void
-AutomationList::load_state (const XMLNode& node)
+XMLNode&
+AutomationList::serialize_events ()
 {
-	const XMLNodeList& elist = node.children();
-	XMLNodeConstIterator i;
-	XMLProperty* prop;
-	nframes_t x;
-	double y;
+	XMLNode* node = new XMLNode (X_("events"));
+	stringstream str;
 
+	for (iterator xx = events.begin(); xx != events.end(); ++xx) {
+		str << (double) (*xx)->when;
+		str << ' ';
+		str <<(double) (*xx)->value;
+		str << '\n';
+	}
+
+	/* XML is a bit wierd */
+
+	XMLNode* content_node = new XMLNode (X_("foo")); /* it gets renamed by libxml when we set content */
+	content_node->set_content (str.str());
+
+	node->add_child_nocopy (*content_node);
+
+	return *node;
+}
+
+int
+AutomationList::deserialize_events (const XMLNode& node)
+{
+	if (node.children().empty()) {
+		return -1;
+	}
+
+	XMLNode* content_node = node.children().front();
+
+	if (content_node->content().empty()) {
+		return -1;
+	}
+
+	freeze ();
 	clear ();
 	
-	for (i = elist.begin(); i != elist.end(); ++i) {
-		
-		if ((prop = (*i)->property ("x")) == 0) {
-			error << _("automation list: no x-coordinate stored for control point (point ignored)") << endmsg;
-			continue;
+	stringstream str (content_node->content());
+	
+	double x;
+	double y;
+	bool ok = true;
+	
+	while (str) {
+		str >> x;
+		if (!str) {
+			break;
 		}
-		x = atoi (prop->value().c_str());
-		
-		if ((prop = (*i)->property ("y")) == 0) {
-			error << _("automation list: no y-coordinate stored for control point (point ignored)") << endmsg;
-			continue;
+		str >> y;
+		if (!str) {
+			ok = false;
+			break;
 		}
-		y = atof (prop->value().c_str());
-		
-		add (x, y);
+		fast_simple_add (x, y);
 	}
+	
+	if (!ok) {
+		clear ();
+		error << _("automation list: cannot load coordinates from XML, all points ignored") << endmsg;
+	} else {
+		mark_dirty ();
+		reposition_for_rt_add (0);
+		maybe_signal_changed ();
+	}
+
+	thaw ();
+	return 0;
 }
 
-XMLNode &AutomationList::get_state ()
+int
+AutomationList::set_state (const XMLNode& node)
 {
-    XMLNode *node = new XMLNode("AutomationList");
-    store_state(*node);
-    return *node;
-}
+	XMLNodeList nlist = node.children();
+	XMLNode* nsos;
+	XMLNodeIterator niter;
+	const XMLProperty* prop;
 
-int AutomationList::set_state(const XMLNode &s)
-{
-    load_state(s);
-    return 0;
+	if (node.name() == X_("events")) {
+		/* partial state setting*/
+		return deserialize_events (node);
+	}
+	
+	if (node.name() == X_("Envelope") || node.name() == X_("FadeOut") || node.name() == X_("FadeIn")) {
+
+		if ((nsos = node.child (X_("AutomationList")))) {
+			/* new school in old school clothing */
+			return set_state (*nsos);
+		}
+
+		/* old school */
+
+		const XMLNodeList& elist = node.children();
+		XMLNodeConstIterator i;
+		XMLProperty* prop;
+		jack_nframes_t x;
+		double y;
+		
+		clear ();
+		
+		for (i = elist.begin(); i != elist.end(); ++i) {
+			
+			if ((prop = (*i)->property ("x")) == 0) {
+				error << _("automation list: no x-coordinate stored for control point (point ignored)") << endmsg;
+				continue;
+			}
+			x = atoi (prop->value().c_str());
+			
+			if ((prop = (*i)->property ("y")) == 0) {
+				error << _("automation list: no y-coordinate stored for control point (point ignored)") << endmsg;
+				continue;
+			}
+			y = atof (prop->value().c_str());
+			
+			add (x, y);
+		}
+		
+		return 0;
+	}
+
+	if (node.name() != X_("AutomationList") ) {
+		error << string_compose (_("AutomationList: passed XML node called %1, not \"AutomationList\" - ignored"), node.name()) << endmsg;
+		return -1;
+	}
+	
+	if ((prop = node.property ("id")) != 0) {
+		_id = prop->value ();
+		/* update session AL list */
+		AutomationListCreated(this);
+	}
+	
+	if ((prop = node.property (X_("default"))) != 0){ 
+		default_value = atof (prop->value());
+	} else {
+		default_value = 0.0;
+	}
+
+	if ((prop = node.property (X_("style"))) != 0) {
+		_style = string_to_auto_style (prop->value());
+	} else {
+		_style = Absolute;
+	}
+
+	if ((prop = node.property (X_("state"))) != 0) {
+		_state = string_to_auto_state (prop->value());
+	} else {
+		_state = Off;
+	}
+
+	if ((prop = node.property (X_("min_yval"))) != 0) {
+		min_yval = atof (prop->value ());
+	} else {
+		min_yval = FLT_MIN;
+	}
+
+	if ((prop = node.property (X_("max_yval"))) != 0) {
+		max_yval = atof (prop->value ());
+	} else {
+		max_yval = FLT_MAX;
+	}
+
+	if ((prop = node.property (X_("max_xval"))) != 0) {
+		max_xval = atof (prop->value ());
+	} else {
+		max_xval = 0; // means "no limit ;
+	}
+
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		if ((*niter)->name() == X_("events")) {
+			deserialize_events (*(*niter));
+		}
+	}
+	
+	return 0;
 }
 

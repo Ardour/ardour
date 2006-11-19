@@ -359,11 +359,24 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	GtkWidget* focus = gtk_window_get_focus (win);
 	bool special_handling_of_unmodified_accelerators = false;
 
+#undef  DEBUG_ACCELERATOR_HANDLING
+#ifdef  DEBUG_ACCELERATOR_HANDLING
+	bool debug = (getenv ("ARDOUR_DEBUG_ACCELERATOR_HANDLING") != 0);
+#endif
+
 	if (focus) {
 		if (GTK_IS_ENTRY(focus)) {
 			special_handling_of_unmodified_accelerators = true;
-		}
+		} 
 	} 
+
+#ifdef DEBUG_ACCELERATOR_HANDLING
+	if (debug) {
+		cerr << "Key event: code = " << ev->keyval << " state = " << hex << ev->state << dec << " focus is an entry ? " 
+		     << special_handling_of_unmodified_accelerators
+		     << endl;
+	}
+#endif
 
 	/* This exists to allow us to override the way GTK handles
 	   key events. The normal sequence is:
@@ -441,20 +454,40 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 
 		/* no special handling or modifiers in effect: accelerate first */
 
+#ifdef DEBUG_ACCELERATOR_HANDLING
+		if (debug) {
+			cerr << "\tactivate, then propagate\n";
+		}
+#endif
 		if (!gtk_window_activate_key (win, ev)) {
 			return gtk_window_propagate_key_event (win, ev);
 		} else {
+#ifdef DEBUG_ACCELERATOR_HANDLING
+		if (debug) {
+			cerr << "\tnot handled\n";
+		}
+#endif
 			return true;
 		} 
 	}
 	
 	/* no modifiers, propagate first */
 	
+#ifdef DEBUG_ACCELERATOR_HANDLING
+		if (debug) {
+			cerr << "\tactivate, then propagate\n";
+		}
+#endif
 	if (!gtk_window_propagate_key_event (win, ev)) {
 		return gtk_window_activate_key (win, ev);
 	} 
 
 
+#ifdef DEBUG_ACCELERATOR_HANDLING
+	if (debug) {
+		cerr << "\tnot handled\n";
+	}
+#endif
 	return true;
 }
 

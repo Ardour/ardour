@@ -55,7 +55,7 @@ BasicUI::register_thread (std::string name)
 void
 BasicUI::loop_toggle () 
 {
-	if (Config->get_auto_loop()) {
+	if (session->get_play_loop()) {
 		session->request_play_loop (false);
 	} else {
 		session->request_play_loop (true);
@@ -107,7 +107,7 @@ BasicUI::transport_play (bool from_last_start)
 {
 	bool rolling = session->transport_rolling ();
 
-	if (Config->get_auto_loop()) {
+	if (session->get_play_loop()) {
 		session->request_play_loop (false);
 	} 
 

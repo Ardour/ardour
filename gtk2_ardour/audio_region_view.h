@@ -24,7 +24,7 @@
 #include <libgnomecanvasmm.h>
 #include <libgnomecanvasmm/polygon.h>
 #include <sigc++/signal.h>
-#include <ardour/region.h>
+#include <ardour/audioregion.h>
 
 #include "region_view.h"
 #include "route_time_axis.h"
@@ -93,7 +93,9 @@ class AudioRegionView : public RegionView
 	void reset_fade_out_shape_width (nframes_t);
 	void set_fade_in_active (bool);
 	void set_fade_out_active (bool);
-	
+	void set_fade_in_shape (ARDOUR::AudioRegion::FadeShape);
+	void set_fade_out_shape (ARDOUR::AudioRegion::FadeShape);
+
 	virtual void entered ();
 	virtual void exited ();
 	

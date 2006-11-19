@@ -84,7 +84,7 @@ Session::click (nframes_t start, nframes_t nframes, nframes_t offset)
 			break;
 		}
 	}
-
+	
   run_clicks:
 	memset (buf, 0, sizeof (Sample) * nframes);
 

@@ -63,8 +63,8 @@ class Playlist : public PBD::StatefulDestructible {
 	void unref();
 	uint32_t refcnt() const { return _refcnt; }
 
-	const string& name() const { return _name; }
-	void set_name (const string& str);
+	std::string name() const { return _name; }
+	void set_name (std::string str);
 
 	const DataType& data_type() const { return _type; }
 
@@ -73,6 +73,7 @@ class Playlist : public PBD::StatefulDestructible {
 
 	bool hidden() const { return _hidden; }
 	bool empty() const;
+	uint32_t n_regions() const;
 	nframes_t get_maximum_extent () const;
 	layer_t top_layer() const;
 
@@ -91,19 +92,15 @@ class Playlist : public PBD::StatefulDestructible {
 	void duplicate (boost::shared_ptr<Region>, nframes_t position, float times);
 	void nudge_after (nframes_t start, nframes_t distance, bool forwards);
 
-	boost::shared_ptr<Region> find_region (const PBD::ID&) const;
-
 	Playlist* cut  (list<AudioRange>&, bool result_is_hidden = true);
 	Playlist* copy (list<AudioRange>&, bool result_is_hidden = true);
 	int       paste (Playlist&, nframes_t position, float times);
 
-	uint32_t read_data_count() { return _read_data_count; }
-
-	RegionList* regions_at (nframes_t frame);
-	RegionList* regions_touched (nframes_t start, nframes_t end);
+	RegionList*                regions_at (nframes_t frame);
+	RegionList*                regions_touched (nframes_t start, nframes_t end);
+	boost::shared_ptr<Region>  find_region (const PBD::ID&) const;
 	boost::shared_ptr<Region>  top_region_at (nframes_t frame);
-
-	boost::shared_ptr<Region>     find_next_region (nframes_t frame, RegionPoint point, int dir);
+	boost::shared_ptr<Region>  find_next_region (nframes_t frame, RegionPoint point, int dir);
 
 	template<class T> void foreach_region (T *t, void (T::*func)(boost::shared_ptr<Region>, void *), void *arg);
 	template<class T> void foreach_region (T *t, void (T::*func)(boost::shared_ptr<Region>));

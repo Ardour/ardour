@@ -31,6 +31,7 @@ struct SoundFileInfo {
     uint16_t    channels;
     int64_t     length;
     std::string format_name;
+    int64_t     timecode;
 };
 
 class AudioFileSource : public AudioSource {
@@ -81,6 +82,8 @@ class AudioFileSource : public AudioSource {
 	void   mark_take (string);
 	string take_id() const { return _take_id; }
 
+	bool is_embedded() const { return _is_embedded; }
+
 	static void set_bwf_serial_number (int);
 	
 	static void set_search_path (string);
@@ -92,6 +95,9 @@ class AudioFileSource : public AudioSource {
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
+
+	bool destructive() const { return (_flags & Destructive); }
+	virtual bool set_destructive (bool yn) { return false; }
 
 	/* this should really be protected, but C++ is getting stricter
 	   and creating slots from protected member functions is starting
@@ -121,8 +127,11 @@ class AudioFileSource : public AudioSource {
 	string        _path;
 	Flag          _flags;
 	string        _take_id;
-	uint64_t       timeline_position;
+	int64_t       timeline_position;
 	bool           file_is_new;
+
+	bool          _is_embedded;
+	static bool determine_embeddedness(string path);
 
 	static string peak_dir;
 	static string search_path;
@@ -133,7 +142,7 @@ class AudioFileSource : public AudioSource {
 
 	static uint64_t header_position_offset;
 
-	virtual void set_timeline_position (nframes_t pos);
+	virtual void set_timeline_position (int64_t pos);
 	virtual void set_header_timeline_position () = 0;
 
 	bool find (std::string path, bool must_exist, bool& is_new);

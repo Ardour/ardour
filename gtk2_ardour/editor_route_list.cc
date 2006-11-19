@@ -118,6 +118,10 @@ Editor::handle_new_route (Session::RouteList& routes)
 		tv->GoingAway.connect (bind (mem_fun(*this, &Editor::remove_route), tv));
 	}
 
+	if (show_editor_mixer_when_tracks_arrive) {
+		show_editor_mixer (true);
+	}
+
 	editor_mixer_button.set_sensitive(true);
 }
 

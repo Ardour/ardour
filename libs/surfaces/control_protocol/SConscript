@@ -33,6 +33,7 @@ cp.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
 
 cp.Merge ([
     libraries['ardour'],
+    libraries['sndfile-ardour'],
     libraries['sigc2'],
     libraries['pbd'],
     libraries['midi++2'],

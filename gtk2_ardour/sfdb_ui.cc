@@ -74,6 +74,7 @@ SoundFileBox::SoundFileBox ()
 	main_box.pack_start(format, false, false);
 	main_box.pack_start(channels, false, false);
 	main_box.pack_start(samplerate, false, false);
+	main_box.pack_start(timecode, false, false);
 	main_box.pack_start(field_view, true, true);
 	main_box.pack_start(top_box, false, false);
 	main_box.pack_start(bottom_box, false, false);
@@ -129,21 +130,25 @@ SoundFileBox::setup_labels (string filename)
 	path = filename;
 
 	string error_msg;
+
 	if(!AudioFileSource::get_soundfile_info (filename, sf_info, error_msg)) {
 		return false;
 	}
 
 	length.set_alignment (0.0f, 0.0f);
-	length.set_text (string_compose("Length: %1", PBD::length2string(sf_info.length, sf_info.samplerate)));
+	length.set_text (string_compose(_("Length: %1"), PBD::length2string(sf_info.length, sf_info.samplerate)));
 
 	format.set_alignment (0.0f, 0.0f);
 	format.set_text (sf_info.format_name);
 
 	channels.set_alignment (0.0f, 0.0f);
-	channels.set_text (string_compose("Channels: %1", sf_info.channels));
+	channels.set_text (string_compose(_("Channels: %1"), sf_info.channels));
 
 	samplerate.set_alignment (0.0f, 0.0f);
-	samplerate.set_text (string_compose("Samplerate: %1", sf_info.samplerate));
+	samplerate.set_text (string_compose(_("Samplerate: %1"), sf_info.samplerate));
+
+	timecode.set_alignment (0.0f, 0.0f);
+	timecode.set_text (string_compose (_("Timecode: %1"), PBD::length2string(sf_info.timecode, sf_info.samplerate)));
 
 	setup_fields ();
 
@@ -190,9 +195,11 @@ SoundFileBox::play_btn_clicked ()
 		return;
 	}
 
-	static std::map<string, boost::shared_ptr<AudioRegion> > region_cache;
+	typedef std::map<string, boost::shared_ptr<AudioRegion> > RegionCache; 
+	static  RegionCache region_cache;
+	RegionCache::iterator the_region;
 
-	if (region_cache.find (path) == region_cache.end()) {
+	if ((the_region = region_cache.find (path)) == region_cache.end()) {
 		SourceList srclist;
 		boost::shared_ptr<AudioFileSource> afs;
 		
@@ -211,18 +218,27 @@ SoundFileBox::play_btn_clicked ()
 			return;
 		}
 
+		string rname;
+
+		_session->region_name (rname, Glib::path_get_basename(srclist[0]->name()), false);
+
 		pair<string,boost::shared_ptr<AudioRegion> > newpair;
+		pair<RegionCache::iterator,bool> res;
 
-		_session->region_name (newpair.first, Glib::path_get_basename(srclist[0]->name()), false);
-		newpair.second = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (srclist, 0, srclist[0]->length(), newpair.first, 0, Region::DefaultFlags, false));
+		newpair.first = path;
+		newpair.second = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (srclist, 0, srclist[0]->length(), rname, 0, Region::DefaultFlags, false));
 
-		region_cache.insert (newpair);
+
+		res = region_cache.insert (newpair);
+		the_region = res.first;
 	}
 
 	play_btn.hide();
 	stop_btn.show();
 
-	_session->audition_region(region_cache[path]);
+	boost::shared_ptr<Region> r = boost::static_pointer_cast<Region> (the_region->second);
+
+	_session->audition_region(r);
 }
 
 void
@@ -356,7 +372,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s)
 	  split_check (_("Split Channels"))
 {
 	if (mode_strings.empty()) {
-		mode_strings = PBD::internationalize (import_mode_strings);
+		mode_strings = I18N (import_mode_strings);
 	}
 
 	ARDOUR_UI::instance()->tooltips().set_tip(split_check, 
@@ -366,11 +382,11 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s)
 	ARDOUR_UI::instance()->tooltips().set_tip(*btn, 
 			_("Link to an external file"));
 
+	add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_CLOSE);
+
 	btn = add_button (_("Import"), ResponseImport);
 	ARDOUR_UI::instance()->tooltips().set_tip(*btn, 
 			_("Copy a file to the session folder"));
-
-	add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_CLOSE);
 
 	Gtk::HBox *box = manage (new Gtk::HBox());
 

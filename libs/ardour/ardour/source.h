@@ -22,6 +22,7 @@
 #define __ardour_source_h__
 
 #include <string>
+#include <set>
 
 #include <sigc++/signal.h>
 
@@ -33,6 +34,7 @@
 namespace ARDOUR {
 
 class Session;
+class Playlist;
 
 class Source : public PBD::StatefulDestructible
 {
@@ -57,22 +59,34 @@ class Source : public PBD::StatefulDestructible
 
 	virtual void mark_for_remove() = 0;
 	virtual void mark_streaming_write_completed () = 0;
-
+	
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
+	
+	void use () { _in_use++; }
+	void disuse () { if (_in_use) { _in_use--; } }
+	
+	void add_playlist (ARDOUR::Playlist*);
+	void remove_playlist (ARDOUR::Playlist*);
+
+	uint32_t used() const;
+
 	
 	static sigc::signal<void,Source*> SourceCreated;
 
   protected:
 	void update_length (jack_nframes_t pos, jack_nframes_t cnt);
-
+	
 	Session&          _session;
 	string            _name;
 	DataType          _type;
 	time_t            _timestamp;
 	jack_nframes_t    _length;
 
+	std::set<ARDOUR::Playlist*> _playlists;
+
   private:
+	uint32_t          _in_use;
 };
 
 }

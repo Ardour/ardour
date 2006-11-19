@@ -318,11 +318,12 @@ OptionEditor::destructo_xfade_adjustment_changed ()
 	float val = destructo_xfade_adjustment.get_value();
 
 	/* val is in msecs */
+
 	
 	Config->set_destructive_xfade_msecs ((uint32_t) floor (val));
 
 	if (session) {
-		DestructiveFileSource::setup_standard_crossfades (session->frame_rate());
+		SndFileSource::setup_standard_crossfades (session->frame_rate());
 	} 
 }
 
@@ -420,19 +421,19 @@ OptionEditor::setup_midi_options ()
 		}
 
 		tb->set_active (!(*i).second->input()->offline());
-		tb->signal_button_press_event().connect (bind (mem_fun(*this, &OptionEditor::port_online_toggled), (*i).second, tb));
+		tb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::port_online_toggled), (*i).second, tb));
 		(*i).second->input()->OfflineStatusChanged.connect (bind (mem_fun(*this, &OptionEditor::map_port_online), (*i).second, tb));
 		table->attach (*tb, 1, 2, n+2, n+3, FILL|EXPAND, FILL);
 
 		tb = manage (new ToggleButton ());
 		tb->set_name ("OptionEditorToggleButton");
-		tb->signal_button_press_event().connect (bind (mem_fun(*this, &OptionEditor::port_trace_in_toggled), (*i).second, tb));
+		tb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::port_trace_in_toggled), (*i).second, tb));
 		tb->set_size_request (10, 10);
 		table->attach (*tb, 2, 3, n+2, n+3, FILL|EXPAND, FILL);
 
 		tb = manage (new ToggleButton ());
 		tb->set_name ("OptionEditorToggleButton");
-		tb->signal_button_press_event().connect (bind (mem_fun(*this, &OptionEditor::port_trace_out_toggled), (*i).second, tb));
+		tb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::port_trace_out_toggled), (*i).second, tb));
 		tb->set_size_request (10, 10);
 		table->attach (*tb, 3, 4, n+2, n+3, FILL|EXPAND, FILL);
 
@@ -544,15 +545,14 @@ OptionEditor::midi_port_chosen (MIDI::Port* port, Gtk::RadioButton* rb)
 	}
 }
 
-gint
-OptionEditor::port_online_toggled (GdkEventButton* ev, MIDI::Port* port, ToggleButton* tb)
+void
+OptionEditor::port_online_toggled (MIDI::Port* port, ToggleButton* tb)
 {
-	bool wanted = tb->get_active(); /* it hasn't changed at this point */
-
+	bool wanted = tb->get_active();
+	
 	if (wanted != port->input()->offline()) {
 		port->input()->set_offline (wanted);
 	} 
-	return stop_signal (*tb, "button_press_event");
 }
 
 void
@@ -567,24 +567,24 @@ OptionEditor::map_port_online (MIDI::Port* port, ToggleButton* tb)
 	}
 }
 
-gint
-OptionEditor::port_trace_in_toggled (GdkEventButton* ev, MIDI::Port* port, ToggleButton* tb)
+void
+OptionEditor::port_trace_in_toggled (MIDI::Port* port, ToggleButton* tb)
 {
-	/* XXX not very good MVC style here */
+	bool trace = tb->get_active();
 
-	port->input()->trace (!tb->get_active(), &cerr, string (port->name()) + string (" input: "));
-	tb->set_active (!tb->get_active());
-	return stop_signal (*tb, "button_press_event");
+	if (port->input()->tracing() != trace) {
+		port->output()->trace (trace, &cerr, string (port->name()) + string (" input: "));
+	}
 }
 
-gint
-OptionEditor::port_trace_out_toggled (GdkEventButton* ev,MIDI::Port* port, ToggleButton* tb)
+void
+OptionEditor::port_trace_out_toggled (MIDI::Port* port, ToggleButton* tb)
 {
-	/* XXX not very good MVC style here */
+	bool trace = tb->get_active();
 
-	port->output()->trace (!tb->get_active(), &cerr, string (port->name()) + string (" output: "));
-	tb->set_active (!tb->get_active());
-	return stop_signal (*tb, "button_press_event");
+	if (port->output()->tracing() != trace) {
+		port->output()->trace (trace, &cerr, string (port->name()) + string (" output: "));
+	}
 }
 
 void

@@ -359,7 +359,10 @@ class Session : public PBD::StatefulDestructible
 	void request_bounded_roll (nframes_t start, nframes_t end);
 	void request_stop (bool abort = false);
 	void request_locate (nframes_t frame, bool with_roll = false);
+
 	void request_play_loop (bool yn);
+	bool get_play_loop () const { return play_loop; }
+
 	nframes_t  last_transport_start() const { return _last_roll_location; }
 	void goto_end ()   { request_locate (end_location->start(), false);}
 	void goto_start () { request_locate (start_location->start(), false); }
@@ -562,7 +565,8 @@ class Session : public PBD::StatefulDestructible
 	string new_region_name (string);
 	string path_from_region_name (string name, string identifier);
 
-	boost::shared_ptr<Region> find_whole_file_parent (Region&);
+	boost::shared_ptr<Region> find_whole_file_parent (boost::shared_ptr<Region const>);
+	
 	void find_equivalent_playlist_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >& result);
 
 	boost::shared_ptr<Region>      XMLRegionFactory (const XMLNode&, bool full);
@@ -646,6 +650,7 @@ class Session : public PBD::StatefulDestructible
 	uint32_t n_playlists() const;
 
 	template<class T> void foreach_playlist (T *obj, void (T::*func)(Playlist *));
+	void get_playlists (std::vector<Playlist*>&);
 
 	/* named selections */
 
@@ -757,16 +762,19 @@ class Session : public PBD::StatefulDestructible
 	/* History (for editors, mixers, UIs etc.) */
 
 	void undo (uint32_t n) {
-		history.undo (n);
-	}
-	void redo (uint32_t n) {
-		history.redo (n);
+		_history.undo (n);
 	}
 
-	uint32_t undo_depth() const { return history.undo_depth(); }
-	uint32_t redo_depth() const { return history.redo_depth(); }
-	string next_undo() const { return history.next_undo(); }
-	string next_redo() const { return history.next_redo(); }
+	void redo (uint32_t n) {
+		_history.redo (n);
+	}
+
+	UndoHistory& history() { return _history; }
+	
+	uint32_t undo_depth() const { return _history.undo_depth(); }
+	uint32_t redo_depth() const { return _history.redo_depth(); }
+	string next_undo() const { return _history.next_undo(); }
+	string next_redo() const { return _history.next_redo(); }
 
 	void begin_reversible_command (string cmd_name);
 	void commit_reversible_command (Command* cmd = 0);
@@ -775,11 +783,11 @@ class Session : public PBD::StatefulDestructible
 		current_trans->add_command (cmd);
 	}
 
-	std::map<PBD::ID, PBD::StatefulDestructible*> registry;
+	std::map<PBD::ID, PBD::StatefulThingWithGoingAway*> registry;
 
         // these commands are implemented in libs/ardour/session_command.cc
 	Command *memento_command_factory(XMLNode *n);
-        void register_with_memento_command_factory(PBD::ID, PBD::StatefulDestructible *);
+        void register_with_memento_command_factory(PBD::ID, PBD::StatefulThingWithGoingAway *);
 
         class GlobalSoloStateCommand : public Command
         {
@@ -943,6 +951,8 @@ class Session : public PBD::StatefulDestructible
 	
   private:
 	int  create (bool& new_session, string* mix_template, nframes_t initial_length);
+
+	nframes_t compute_initial_length ();
 
 	static const char* _template_suffix;
 	static const char* _statefile_suffix;
@@ -1566,7 +1576,7 @@ class Session : public PBD::StatefulDestructible
 
 	void reverse_diskstream_buffers ();
 
-	UndoHistory history;
+	UndoHistory _history;
 	UndoTransaction* current_trans;
 
 	GlobalRouteBooleanState get_global_route_boolean (bool (Route::*method)(void) const);
@@ -1658,7 +1668,7 @@ class Session : public PBD::StatefulDestructible
 			    void* ptr,
 			    float opt);
 
-	/* number of hardware audio ports we're using,
+	/* number of hardware ports we're using,
 	   based on max (requested,available)
 	*/
 

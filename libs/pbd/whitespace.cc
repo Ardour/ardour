@@ -11,6 +11,10 @@ strip_whitespace_edges (string& str)
 			            
     len = str.length();
 
+    if (len == 1) {
+	    return;
+    }
+
     /* strip front */
 				        
     for (i = 0; i < len; ++i) {
@@ -19,12 +23,21 @@ strip_whitespace_edges (string& str)
         }
     }
 
+    if (i == len) {
+	    /* its all whitespace, not much we can do */
+	    return;
+    }
+
     /* strip back */
     
     if (len > 1) {
     
 	    s = i;
 	    i = len - 1;
+
+	    if (s == i) {
+		    return;
+	    }
 	    
 	    do {
 		    if (isgraph (str[i]) || i == 0) {

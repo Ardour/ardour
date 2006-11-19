@@ -21,10 +21,9 @@
 #ifndef __lib_pbd_command_h__
 #define __lib_pbd_command_h__
 
-#include <pbd/stateful.h>
-#include <pbd/destructible.h>
+#include <pbd/statefuldestructible.h>
 
-class Command : public Stateful, public PBD::Destructible
+class Command : public PBD::StatefulDestructible
 {
     public:
 	virtual ~Command() {}

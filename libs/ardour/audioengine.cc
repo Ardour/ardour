@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <cerrno>
 #include <vector>
+#include <exception>
 
 #include <glibmm/timer.h>
 #include <pbd/pthread_utils.h>

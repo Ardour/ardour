@@ -110,6 +110,7 @@ class AudioRegion : public Region
 	void set_fade_out (FadeShape, nframes_t);
 
 	void set_envelope_active (bool yn);
+	void set_default_envelope ();
 
 	int separate_by_channel (ARDOUR::Session&, vector<AudioRegion*>&) const;
 
@@ -143,7 +144,6 @@ class AudioRegion : public Region
 	void set_default_fades ();
 	void set_default_fade_in ();
 	void set_default_fade_out ();
-	void set_default_envelope ();
 
 	void recompute_gain_at_end ();
 	void recompute_gain_at_start ();
@@ -157,8 +157,11 @@ class AudioRegion : public Region
 	void recompute_at_start ();
 	void recompute_at_end ();
 
-	void envelope_changed (Change);
+	void envelope_changed ();
+	void fade_in_changed ();
+	void fade_out_changed ();
 	void source_offset_changed ();
+	void listen_to_my_curves ();
 
 	mutable Curve     _fade_in;
 	FadeShape         _fade_in_shape;
@@ -171,6 +174,13 @@ class AudioRegion : public Region
 
   protected:
 	int set_live_state (const XMLNode&, Change&, bool send);
+	
+	virtual bool verify_start (jack_nframes_t);
+	virtual bool verify_start_and_length (jack_nframes_t, jack_nframes_t);
+	virtual bool verify_start_mutable (jack_nframes_t&_start);
+	virtual bool verify_length (jack_nframes_t);
+	/*virtual void recompute_at_start () = 0;
+	virtual void recompute_at_end () = 0;*/
 };
 
 } /* namespace ARDOUR */

@@ -96,7 +96,7 @@ class ControlPoint
 	ShapeType _shape;
 };
 
-class AutomationLine : public PBD::StatefulDestructible
+class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoingAway
 {
   public:
         AutomationLine (const string & name, TimeAxisView&, ArdourCanvas::Group&, ARDOUR::AutomationList&);
@@ -145,8 +145,6 @@ class AutomationLine : public PBD::StatefulDestructible
 
 	void show_selection();
 	void hide_selection ();
-
-	void set_point_size (double size);
 
 	virtual string  get_verbose_cursor_string (float);
 	virtual void view_to_model_y (double&) = 0;
@@ -204,9 +202,7 @@ class AutomationLine : public PBD::StatefulDestructible
 	virtual void change_model_range (ARDOUR::AutomationList::iterator,ARDOUR::AutomationList::iterator, double delta, float ydelta);
 
 	void reset_callback (const ARDOUR::AutomationList&);
-	void list_changed (ARDOUR::Change);
-
-	UndoAction get_memento();
+	void list_changed ();
 
 	virtual bool event_handler (GdkEvent*);
 	
@@ -220,6 +216,8 @@ class AutomationLine : public PBD::StatefulDestructible
 	void modify_view_point(ControlPoint&, double, double, bool with_push);
 	void reset_line_coords (ControlPoint&);
 	void update_line ();
+
+	double control_point_box_size ();
 
 	struct ModelRepresentation {
 	    ARDOUR::AutomationList::iterator start;

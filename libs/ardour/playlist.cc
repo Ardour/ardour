@@ -90,10 +90,8 @@ Playlist::Playlist (Session& sess, const XMLNode& node, DataType type, bool hide
 
 	init (hide);
 	_name = "unnamed"; /* reset by set_state */
-	
-	if (set_state (node)) {
-		throw failed_constructor();
-	}
+
+	/* derived class calls set_state() */
 }
 
 Playlist::Playlist (const Playlist& other, string namestr, bool hide)
@@ -264,11 +262,19 @@ Playlist::Playlist (Playlist& pl)
 
 Playlist::~Playlist ()
 {
+	{ 
+		RegionLock rl (this);
+
+		for (set<boost::shared_ptr<Region> >::iterator i = all_regions.begin(); i != all_regions.end(); ++i) {
+			(*i)->set_playlist (0);
+		}
+	}
+
 	/* GoingAway must be emitted by derived classes */
 }
 
 void
-Playlist::set_name (const string& str)
+Playlist::set_name (string str)
 {
 	/* in a typical situation, a playlist is being used
 	   by one diskstream and also is referenced by the
@@ -562,8 +568,6 @@ Playlist::remove_region_internal (boost::shared_ptr<Region>region, bool delay_so
 {
 	RegionList::iterator i;
 	nframes_t old_length = 0;
-
-	cerr << "removing region " << region->name() << " holding = " << holding_state() << endl;
 
 	if (!holding_state()) {
 		old_length = _get_maximum_extent();
@@ -1140,6 +1144,7 @@ Playlist::region_changed_proxy (Change what_changed, boost::weak_ptr<Region> wea
 		return;
 	}
 
+
 	/* this makes a virtual call to the right kind of playlist ... */
 
 	region_changed (what_changed, region);
@@ -1259,6 +1264,7 @@ Playlist::find_next_region (nframes_t frame, RegionPoint point, int dir)
 	boost::shared_ptr<Region> ret;
 	nframes_t closest = max_frames;
 
+
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 
 		nframes_t distance;
@@ -1280,7 +1286,7 @@ Playlist::find_next_region (nframes_t frame, RegionPoint point, int dir)
 		switch (dir) {
 		case 1: /* forwards */
 
-			if (pos > frame) {
+			if (pos >= frame) {
 				if ((distance = pos - frame) < closest) {
 					closest = distance;
 					ret = r;
@@ -1291,7 +1297,7 @@ Playlist::find_next_region (nframes_t frame, RegionPoint point, int dir)
 
 		default: /* backwards */
 
-			if (pos < frame) {
+			if (pos <= frame) {
 				if ((distance = frame - pos) < closest) {
 					closest = distance;
 					ret = r;
@@ -1455,13 +1461,21 @@ Playlist::state (bool full_state)
 bool
 Playlist::empty() const
 {
+	RegionLock rlock (const_cast<Playlist *>(this), false);
 	return regions.empty();
 }
 
-ARDOUR::nframes_t
+uint32_t
+Playlist::n_regions() const
+{
+	RegionLock rlock (const_cast<Playlist *>(this), false);
+	return regions.size();
+}
+
+nframes_t
 Playlist::get_maximum_extent () const
 {
-	RegionLock rlock (const_cast<Playlist *>(this));
+	RegionLock rlock (const_cast<Playlist *>(this), false);
 	return _get_maximum_extent ();
 }
 
@@ -1488,7 +1502,7 @@ Playlist::bump_name (string name, Session &session)
 
 	do {
 		newname = Playlist::bump_name_once (newname);
-	} while (session.playlist_by_name(newname)!=NULL);
+	} while (session.playlist_by_name (newname)!=NULL);
 
 	return newname;
 }

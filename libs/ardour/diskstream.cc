@@ -390,14 +390,14 @@ Diskstream::set_name (string str)
 }
 
 void
-Diskstream::set_destructive (bool yn)
+Diskstream::remove_region_from_last_capture (boost::weak_ptr<Region> wregion)
 {
-	if (yn != destructive()) {
-		reset_write_sources (true, true);
-		if (yn) {
-			_flags |= Destructive;
-		} else {
-			_flags &= ~Destructive;
-		}
+	boost::shared_ptr<Region> region (wregion.lock());
+
+	if (!region) {
+		return;
 	}
+	
+	_last_capture_regions.remove (region);
 }
+

@@ -39,6 +39,11 @@ class Track : public Route
 	
 	int set_name (string str, void *src);
 
+	TrackMode mode () const { return _mode; }
+	virtual int set_mode (TrackMode m) { return false; }
+	virtual bool can_use_mode (TrackMode m, bool& bounce_required) { return false; }
+	sigc::signal<void> TrackModeChanged;
+
 	virtual int roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 		nframes_t offset, int declick, bool can_record, bool rec_monitors_input) = 0;
 	
@@ -56,9 +61,6 @@ class Track : public Route
 
 	virtual int use_diskstream (string name) = 0;
 	virtual int use_diskstream (const PBD::ID& id) = 0;
-
-	TrackMode mode() const { return _mode; }
-	void      set_mode (TrackMode m);
 
 	nframes_t update_total_latency();
 	void           set_latency_delay (nframes_t);
@@ -88,7 +90,6 @@ class Track : public Route
 	
 	void set_meter_point (MeterPoint, void* src);
 	
-	sigc::signal<void> ModeChanged;
 	sigc::signal<void> DiskstreamChanged;
 	sigc::signal<void> FreezeChange;
 
