@@ -840,6 +840,14 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		map_meter_falloff ();
 	} else if (PARAM_IS ("verify-remove-last-capture")) {
 		ActionManager::map_some_state ("options", "VerifyRemoveLastCapture", &Configuration::get_verify_remove_last_capture);
+	} else if (PARAM_IS ("video-pullup") || PARAM_IS ("smpte-frames-per-second")) {
+		if (session) {
+			primary_clock.set (session->audible_frame(), true);
+			secondary_clock.set (session->audible_frame(), true);
+		} else {
+			primary_clock.set (0, true);
+			secondary_clock.set (0, true);
+		}
 	}
 
 #undef PARAM_IS

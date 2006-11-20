@@ -112,6 +112,11 @@ class AudioClock : public Gtk::HBox
 	Gtk::Label  frames_label;
 	Gtk::Label  colon1, colon2, colon3;
 
+	Gtk::Label*  framerate_label;
+	Gtk::Label*  pullup_label;
+
+	Gtk::VBox   rate_pullup_box;
+
 	Gtk::Label  ms_hours_label;
 	Gtk::Label  ms_minutes_label;
 	Gtk::Label  ms_seconds_label;

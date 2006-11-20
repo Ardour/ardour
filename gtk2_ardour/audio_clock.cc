@@ -58,7 +58,7 @@ const uint32_t AudioClock::field_length[(int) AudioClock::AudioFrames+1] = {
 	10   /* Audio Frame */
 };
 
-AudioClock::AudioClock (const string& name, bool allow_edit, bool duration, bool with_tempo_and_meter) 
+AudioClock::AudioClock (const string& name, bool allow_edit, bool duration, bool with_extras) 
 	: is_duration (duration),
 	  editable (allow_edit),
 	  colon1 (":"),
@@ -110,7 +110,19 @@ AudioClock::AudioClock (const string& name, bool allow_edit, bool duration, bool
 	bbt_packer.pack_start (b2, false, false);
 	bbt_packer.pack_start (ticks_ebox, false, false);
 
-	if (with_tempo_and_meter) {
+	if (with_extras) {
+
+		framerate_label = manage (new Label);
+		pullup_label = manage (new Label);
+
+		framerate_label->set_name ("BBTMeterLabel");
+		pullup_label->set_name ("BBTTempoLabel");
+
+		rate_pullup_box.pack_start (*framerate_label, true, true);
+		rate_pullup_box.pack_start (*pullup_label, true, true);
+
+		smpte_packer.pack_start (rate_pullup_box, false,false, 5);
+
 		meter_label = manage (new Label);
 		tempo_label = manage (new Label);
 
@@ -122,6 +134,8 @@ AudioClock::AudioClock (const string& name, bool allow_edit, bool duration, bool
 
 		bbt_packer.pack_start (tempo_meter_box, false, false, 5);
 	} else {
+		framerate_label = 0;
+		pullup_label = 0;
 		meter_label = 0;
 		tempo_label = 0;
 	}
@@ -466,6 +480,20 @@ AudioClock::set_smpte (nframes_t when, bool force)
 		sprintf (buf, "%02" PRIu32, smpte.frames);
 		frames_label.set_text (buf);
 		last_frames = smpte.frames;
+	}
+
+	if (framerate_label) {
+		sprintf (buf, "%-5.2f", Config->get_smpte_frames_per_second());
+		framerate_label->set_text (buf);
+
+		float x = Config->get_video_pullup();
+
+		if (x == 0.0) {
+			pullup_label->set_text (_("none"));
+		} else {
+			sprintf (buf, "%-6.4f", x);
+			pullup_label->set_text (buf);
+		}
 	}
 }
 
