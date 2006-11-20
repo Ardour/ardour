@@ -1098,6 +1098,7 @@ Editor::parameter_changed (const char* parameter_name)
 		edit_mode_selector.set_active_text (edit_mode_to_string (Config->get_edit_mode()));
 	} else if (PARAM_IS ("subframes_per_frame")) {
 		update_subframes_per_frame ();
+		update_just_smpte ();
 	}
 
 #undef PARAM_IS

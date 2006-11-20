@@ -20,6 +20,7 @@
 #define SMPTE_IS_ZERO( sm ) (!(sm).frames && !(sm).seconds && !(sm).minutes && !(sm).hours && !(sm.subframes))
 
 #include <control_protocol/smpte.h>
+#include <ardour/configuration.h>
 
 namespace SMPTE {
 
@@ -38,7 +39,7 @@ increment( Time& smpte )
 	if (smpte.negative) {
 		if (SMPTE_IS_AROUND_ZERO(smpte) && smpte.subframes) {
 			// We have a zero transition involving only subframes
-			smpte.subframes = 80 - smpte.subframes;
+			smpte.subframes = ARDOUR::Config->get_subframes_per_frame() - smpte.subframes;
 			smpte.negative = false;
 			return SECONDS;
 		}
@@ -121,7 +122,7 @@ decrement( Time& smpte )
 		return wrap;
 	} else if (SMPTE_IS_AROUND_ZERO(smpte) && smpte.subframes) {
 		// We have a zero transition involving only subframes
-		smpte.subframes = 80 - smpte.subframes;
+		smpte.subframes = ARDOUR::Config->get_subframes_per_frame() - smpte.subframes;
 		smpte.negative = true;
 		return SECONDS;
 	}
@@ -212,7 +213,7 @@ increment_subframes( Time& smpte )
 	}
   
 	smpte.subframes++;
-	if (smpte.subframes >= 80) {
+	if (smpte.subframes >= ARDOUR::Config->get_subframes_per_frame()) {
 		smpte.subframes = 0;
 		increment( smpte );
 		return FRAMES;

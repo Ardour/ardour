@@ -853,7 +853,7 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble upp
 	if (range < (2 * session->frames_per_smpte_frame())) { /* 0 - 2 frames */
 		show_bits = true;
 		mark_modulo = 20;
-		nmarks = 1 + 160;
+		nmarks = 1 + (2 * Config->get_subframes_per_frame());
 	} else if (range <= (fr / 4)) { /* 2 frames - 0.250 second */
 		show_frames = true;
 		mark_modulo = 1;

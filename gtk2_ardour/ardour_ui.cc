@@ -108,7 +108,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
 	  /* big clock */
 
-	  big_clock ("BigClockDisplay", true),
+	  big_clock ("BigClockDisplay", true, false, true),
 
 	  /* transport */
 
