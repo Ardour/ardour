@@ -150,7 +150,13 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	controls_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
 
 	XMLNode* xml_node = get_parent_with_state()->get_child_xml_node (_state_name);
-	set_state (*xml_node);
+
+	if (xml_node) {
+		set_state (*xml_node);
+	} else {
+		cerr << _name << ": looked for state named \"" << _state_name << "\" in parent ("
+		     << get_parent_with_state()->name() << ") but found nothing\n";
+	}
 
 	/* make sure labels etc. are correct */
 
