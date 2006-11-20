@@ -42,6 +42,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("Layering"), _("Layering"));
 	ActionManager::register_action (editor_actions, X_("Timecode"), _("Timecode fps"));
 	ActionManager::register_action (editor_actions, X_("Pullup"), _("Pullup / Pulldown"));
+	ActionManager::register_action (editor_actions, X_("Subframes"), _("Subframes"));
 	ActionManager::register_action (editor_actions, X_("addExistingAudioFiles"), _("Add Existing Audio"));
 
 	/* add named actions for the editor */
@@ -401,6 +402,11 @@ Editor::register_actions ()
 	ActionManager::register_radio_action (editor_actions, pullup_group,  X_("PullupMinus4Plus1"), _("-4.1667% + 0.1%"), bind (mem_fun (*this, &Editor::video_pullup_chosen), Session::pullup_Minus4Plus1));
 	ActionManager::register_radio_action (editor_actions, pullup_group,  X_("PullupMinus4"), _("-4.1667%"), bind (mem_fun (*this, &Editor::video_pullup_chosen), Session::pullup_Minus4));
 	ActionManager::register_radio_action (editor_actions, pullup_group,  X_("PullupMinus4Minus1"), _("-4.1667% - 0.1%"), bind (mem_fun (*this, &Editor::video_pullup_chosen), Session::pullup_Minus4Minus1));
+
+	RadioAction::Group subframe_group;
+
+	ActionManager::register_radio_action (editor_actions, pullup_group,  X_("Subframes80"), _("80 per frame"), bind (mem_fun (*this, &Editor::subframes_per_frame_chosen), 80));
+	ActionManager::register_radio_action (editor_actions, pullup_group,  X_("Subframes100"), _("100 per frame"), bind (mem_fun (*this, &Editor::subframes_per_frame_chosen), 100));
 
 	ActionManager::add_action_group (rl_actions);
 	ActionManager::add_action_group (zoom_actions);
@@ -979,6 +985,70 @@ Editor::video_pullup_chosen (Session::PullupFormat pullup)
 }
 
 void
+Editor::update_subframes_per_frame ()
+{
+	ENSURE_GUI_THREAD (mem_fun(*this, &Editor::update_subframes_per_frame));
+
+	RefPtr<Action> act;
+	const char* action = 0;
+
+	uint32_t sfpf = Config->get_subframes_per_frame();
+
+	if (sfpf == 80) {
+		action = X_("Subframes80");
+	} else if (sfpf == 100) {
+		action = X_("Subframes100");
+	} else {
+		warning << string_compose (_("Configuraton is using unhandled subframes per frame value: %1"), sfpf) << endmsg;
+		/*NOTREACHED*/
+		return;
+	}
+
+	act = ActionManager::get_action (X_("Editor"), action);
+
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && !ract->get_active()) {
+			ract->set_active (true);
+		}
+	}
+}
+
+void
+Editor::subframes_per_frame_chosen (uint32_t sfpf)
+{
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+	const char* action = 0;
+
+	RefPtr<Action> act;
+	
+	if (sfpf == 80) {
+		action = X_("Subframes80");
+	} else if (sfpf == 100) {	
+		action = X_("Subframes100");
+	} else {
+		fatal << string_compose (_("programming error: %1 %2"), "Session received unexpected subframes per frame value: ", sfpf) << endmsg;
+		/*NOTREACHED*/
+	}
+	
+	act = ActionManager::get_action (X_("Editor"), action);
+	
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && ract->get_active()) {
+			Config->set_subframes_per_frame ((uint32_t) rint (sfpf));
+		}
+		
+	} else  {
+		error << string_compose (_("programming error: %1"), "Editor::subframes_per_frame_chosen could not find action to match value.") << endmsg;
+	}
+}
+
+void
 Editor::toggle_auto_xfade ()
 {
 	ActionManager::toggle_config_state ("Editor", "toggle-auto-xfades", &Configuration::set_auto_xfade, &Configuration::get_auto_xfade);
@@ -1026,6 +1096,8 @@ Editor::parameter_changed (const char* parameter_name)
 		update_crossfade_model ();
 	} else if (PARAM_IS ("edit-mode")) {
 		edit_mode_selector.set_active_text (edit_mode_to_string (Config->get_edit_mode()));
+	} else if (PARAM_IS ("subframes_per_frame")) {
+		update_subframes_per_frame ();
 	}
 
 #undef PARAM_IS

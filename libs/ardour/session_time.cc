@@ -163,7 +163,7 @@ Session::smpte_to_sample( SMPTE::Time& smpte, nframes_t& sample, bool use_offset
 	}
   
 	if (use_subframes) {
-		sample += (long) (((double)smpte.subframes * _frames_per_smpte_frame) / 80.0);
+		sample += (long) (((double)smpte.subframes * _frames_per_smpte_frame) / Config->get_subframes_per_frame());
 	}
   
 	if (use_offset) {
@@ -224,10 +224,10 @@ Session::sample_to_smpte( nframes_t sample, SMPTE::Time& smpte, bool use_offset,
 	// Calculate exact number of (exceeding) smpte frames and fractional frames
 	smpte_frames_left_exact = (double) offset_sample / _frames_per_smpte_frame;
 	smpte_frames_fraction = smpte_frames_left_exact - floor( smpte_frames_left_exact );
-	smpte.subframes = (long) rint(smpte_frames_fraction * 80.0);
+	smpte.subframes = (long) rint(smpte_frames_fraction * Config->get_subframes_per_frame());
   
 	// XXX Not sure if this is necessary anymore...
-	if (smpte.subframes == 80) {
+	if (smpte.subframes == Config->get_subframes_per_frame()) {
 		// This can happen with 24 fps (and 29.97 fps ?)
 		smpte_frames_left_exact = ceil( smpte_frames_left_exact );
 		smpte.subframes = 0;

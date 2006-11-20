@@ -258,6 +258,10 @@
 		   <menuitem action='PullupMinus4'/>
 		   <menuitem action='PullupMinus4Minus1'/>
                </menu>
+	       <menu action='Subframes'>
+		   <menuitem action='Subframes80'/>
+		   <menuitem action='Subframes100'/>
+               </menu>
                <separator/>
                <menu action='Autoconnect'>
                    <menuitem action='InputAutoConnectPhysical'/>

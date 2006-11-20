@@ -295,10 +295,11 @@ class Editor : public PublicEditor
 
 	void smpte_fps_chosen (ARDOUR::Session::SmpteFormat format);
 	void video_pullup_chosen (ARDOUR::Session::PullupFormat pullup);
+	void subframes_per_frame_chosen (uint32_t);
 
 	void update_smpte_mode();
 	void update_video_pullup();
-
+	void update_subframes_per_frame ();
 	/* xfades */
 
 	void toggle_auto_xfade ();
