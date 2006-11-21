@@ -41,7 +41,7 @@ PixFader::PixFader (Glib::RefPtr<Pixbuf> belt, Gtk::Adjustment& adj)
 	view.width = pixbuf->get_width();
 	view.height = pixheight / 2;
 
-	unity_y = (int) rint (view.height - (default_value * view.height));
+	unity_y = (int) rint (view.height - (default_value * view.height)) - 1;
 
 	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
 
