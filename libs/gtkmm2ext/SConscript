@@ -43,6 +43,7 @@ gtk_ui.cc
 hexentry.cc
 idle_adjustment.cc
 pathlist.cc
+pixfader.cc
 pixscroller.cc
 popup.cc
 prompter.cc

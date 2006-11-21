@@ -22,7 +22,7 @@
 
 #include <gtkmm.h>
 #include <gtkmm2ext/popup.h>
-#include <gtkmm2ext/pixscroller.h>
+#include <gtkmm2ext/pixfader.h>
 #include <gtkmm2ext/binding_proxy.h>
 
 namespace Gtkmm2ext {
@@ -35,7 +35,7 @@ namespace PBD {
 
 namespace Gtkmm2ext {
 
-class SliderController : public Gtkmm2ext::PixScroller
+class SliderController : public Gtkmm2ext::PixFader
 {
   public:
 	SliderController (Glib::RefPtr<Gdk::Pixbuf> slider,
