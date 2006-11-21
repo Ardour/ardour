@@ -28,13 +28,12 @@
 using namespace Gtkmm2ext;
 using namespace PBD;
 
-SliderController::SliderController (Glib::RefPtr<Gdk::Pixbuf> slide,
-				    Glib::RefPtr<Gdk::Pixbuf> rail,
+SliderController::SliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 				    Gtk::Adjustment *adj,
 				    Controllable& c,
 				    bool with_numeric)
 
-	: PixFader (slide, rail, *adj),
+	: PixFader (image, *adj),
 	  binding_proxy (c),
 	  spin (*adj, 0, 2)
 {			  
@@ -59,13 +58,12 @@ SliderController::on_button_press_event (GdkEventButton *ev)
 	return PixFader::on_button_press_event (ev);
 }
 
-VSliderController::VSliderController (Glib::RefPtr<Gdk::Pixbuf> slide,
-				      Glib::RefPtr<Gdk::Pixbuf> rail,
+VSliderController::VSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 				      Gtk::Adjustment *adj,
 				      Controllable& control,
 				      bool with_numeric)
 
-	: SliderController (slide, rail, adj, control, with_numeric)
+	: SliderController (image, adj, control, with_numeric)
 {
 	if (with_numeric) {
 		spin_frame.add (spin);
@@ -76,13 +74,12 @@ VSliderController::VSliderController (Glib::RefPtr<Gdk::Pixbuf> slide,
 	}
 }
 
-HSliderController::HSliderController (Glib::RefPtr<Gdk::Pixbuf> slide,
-				      Glib::RefPtr<Gdk::Pixbuf> rail,
+HSliderController::HSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 				      Gtk::Adjustment *adj,
 				      Controllable& control,
 				      bool with_numeric)
 	
-	: SliderController (slide, rail, adj, control, with_numeric)
+	: SliderController (image, adj, control, with_numeric)
 {
 	if (with_numeric) {
 		spin_frame.add (spin);
