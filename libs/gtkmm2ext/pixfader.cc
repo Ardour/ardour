@@ -38,8 +38,8 @@ PixFader::PixFader (Glib::RefPtr<Pixbuf> belt, Gtk::Adjustment& adj)
 
 	view.x = 0;
 	view.y = 0;
-	view.width  = pixbuf->get_width();
-	view.height  = pixheight / 2;
+	view.width = pixbuf->get_width();
+	view.height = pixheight / 2;
 
 	unity_y = (int) rint (view.height - (default_value * view.height));
 
@@ -63,7 +63,7 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 	if (gdk_rectangle_intersect (&view, &ev->area, &intersection)) {
 		get_window()->draw_pixbuf(get_style()->get_fg_gc(get_state()), pixbuf, 
 					  intersection.x, offset_into_pixbuf + intersection.y,
-					  0, 0,
+					  intersection.x, intersection.y,
 					  intersection.width, intersection.height,
 					  Gdk::RGB_DITHER_NONE, 0, 0);
 	}
