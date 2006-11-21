@@ -62,26 +62,7 @@ map<string,Glib::RefPtr<Gdk::Pixmap> > GainMeter::metric_pixmaps;
 int
 GainMeter::setup_slider_pix ()
 {
-#if 0
-	string path = ARDOUR::find_data_file("vslider02_slider.xpm", "pixmaps");
-	if (path.empty()) {
-		error << _("cannot find images for fader slider") << endmsg;
-		return -1;
-	}
-	slider = Gdk::Pixbuf::create_from_file (path);
-#endif
-	slider = ::get_icon ("gain_fader_handle");
-	
-#if 0
-	path = ARDOUR::find_data_file("vslider02_rail.xpm", "pixmaps");
-	if (path.empty()) {
-		error << _("cannot find images for fader rail") << endmsg;
-		return -1;
-	}
-	rail = Gdk::Pixbuf::create_from_file (path);
-#endif
-	rail = ::get_icon ("gain_fader_base");
-
+	slider = ::get_icon ("fader_belt");
 	return 0;
 }
 
@@ -103,7 +84,7 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	ignore_toggle = false;
 	meter_menu = 0;
 	
-	gain_slider = manage (new VSliderController (slider, rail,
+	gain_slider = manage (new VSliderController (slider,
 						     &gain_adjustment,
 						     _io->gain_control(),
 						     false));
