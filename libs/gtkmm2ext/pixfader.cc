@@ -89,13 +89,11 @@ PixFader::on_button_press_event (GdkEventButton* ev)
 	switch (ev->button) {
 	case 1:
 	case 2:
-		if (!(ev->state & Gdk::SHIFT_MASK)) {
-			add_modal_grab();
-			grab_y = ev->y;
-			grab_start = ev->y;
-			grab_window = ev->window;
-			dragging = true;
-		}
+		add_modal_grab();
+		grab_y = ev->y;
+		grab_start = ev->y;
+		grab_window = ev->window;
+		dragging = true;
 		break;
 	default:
 		break;
@@ -108,19 +106,8 @@ PixFader::on_button_press_event (GdkEventButton* ev)
 bool
 PixFader::on_button_release_event (GdkEventButton* ev)
 {
-	double scale;
 	double fract;
 	
-	if (ev->state & GDK_CONTROL_MASK) {
-		if (ev->state & GDK_MOD1_MASK) {
-			scale = 0.05;
-		} else {
-			scale = 0.1;
-		}
-	} else {
-		scale = 1.0;
-	}
-
 	switch (ev->button) {
 	case 1:
 		if (dragging) {
@@ -128,9 +115,14 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 			dragging = false;
 
 			if (ev->y == grab_start) {
+
 				/* no motion - just a click */
 
-				if (ev->y < view.height - display_height()) {
+				if (ev->state & Gdk::SHIFT_MASK) {
+					adjustment.set_value (default_value);
+				} else if (ev->state & GDK_CONTROL_MASK) {
+					adjustment.set_value (adjustment.get_lower());
+				} else if (ev->y < view.height - display_height()) {
 					/* above the current display height, remember X Window coords */
 					adjustment.set_value (adjustment.get_value() + adjustment.get_step_increment());
 				} else {
@@ -138,12 +130,7 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 				}
 			}
 
-		} else {
-			
-			if (ev->state & Gdk::SHIFT_MASK) {
-				adjustment.set_value (default_value);
-			}
-		}
+		} 
 		break;
 		
 	case 2:
@@ -156,7 +143,7 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 			fract = min (1.0, fract);
 			fract = max (0.0, fract);
 			
-			adjustment.set_value (scale * fract * (adjustment.get_upper() - adjustment.get_lower()));
+			adjustment.set_value (fract * (adjustment.get_upper() - adjustment.get_lower()));
 		}
 		break;
 
