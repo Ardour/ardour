@@ -470,7 +470,7 @@ Editor::show_route_list_menu()
 		build_route_list_menu ();
 	}
 
-	route_list_menu->popup (1, 0);
+	route_list_menu->popup (1, gtk_get_current_event_time());
 }
 
 bool

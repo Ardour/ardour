@@ -119,7 +119,7 @@ Editor::edit_group_list_button_press_event (GdkEventButton* ev)
 		if (edit_group_list_menu == 0) {
 			build_edit_group_list_menu ();
 		}
-		edit_group_list_menu->popup (1, 0);
+		edit_group_list_menu->popup (1, ev->time);
 		return true;
 	}
 

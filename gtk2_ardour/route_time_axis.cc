@@ -358,7 +358,7 @@ RouteTimeAxisView::playlist_click ()
 	
  	build_playlist_menu (playlist_action_menu);
 	editor.set_selected_track (*this, Selection::Add);
-	playlist_action_menu->popup (1, 0);
+	playlist_action_menu->popup (1, gtk_get_current_event_time());
 }
 
 void
@@ -371,7 +371,7 @@ RouteTimeAxisView::automation_click ()
 		build_display_menu ();
 	}
 	editor.set_selected_track (*this, Selection::Add);
-	automation_action_menu->popup (1, 0);
+	automation_action_menu->popup (1, gtk_get_current_event_time());
 }
 
 void

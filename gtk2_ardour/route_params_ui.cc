@@ -510,7 +510,7 @@ RouteParams_UI::show_track_menu()
 				(MenuElem (_("Add Track/Bus"), 
 					   mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::add_route)));
 	}
-	track_menu->popup (1, 0);
+	track_menu->popup (1, gtk_get_current_event_time());
 }
 
 

@@ -192,7 +192,7 @@ AutomationTimeAxisView::auto_clicked ()
 					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Touch)));
 	}
 
-	automation_menu->popup (1, 0);
+	automation_menu->popup (1, gtk_get_current_event_time());
 }
 
 

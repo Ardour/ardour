@@ -421,7 +421,7 @@ Editor::popup_ruler_menu (nframes_t where, ItemType t)
  		mitem->set_active(true);
  	}
 	
-        editor_ruler_menu->popup (1, 0);
+        editor_ruler_menu->popup (1, gtk_get_current_event_time());
 
 	no_ruler_shown_update = false;
 }

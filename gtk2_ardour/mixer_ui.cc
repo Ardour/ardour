@@ -656,7 +656,7 @@ Mixer_UI::show_track_list_menu ()
 		build_track_menu ();
 	}
 
-	track_menu->popup (1, 0);
+	track_menu->popup (1, gtk_get_current_event_time());
 }
 
 bool
@@ -765,7 +765,7 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
 		if (mix_group_context_menu == 0) {
 			build_mix_group_context_menu ();
 		}
-		mix_group_context_menu->popup (1, 0);
+		mix_group_context_menu->popup (1, ev->time);
 		return true;
 	}
 
