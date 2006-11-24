@@ -209,7 +209,7 @@ if conf.CheckJackVideoFrameOffset():
 	ardour.Append(CXXFLAGS="-DHAVE_JACK_VIDEO_SUPPORT")
 	
 if conf.CheckJackEnsureMonitorInput():
-	env.Append(CCFLAGS='-DHAVE_JACK_PORT_ENSURE_MONITOR')
+	ardour.Append(CXXFLAGS='-DHAVE_JACK_PORT_ENSURE_MONITOR')
 else:
     print '\nWARNING: You need at least svn revision 985 of jack for hardware monitoring to work correctly.\n'
 
