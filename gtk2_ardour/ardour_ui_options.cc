@@ -236,7 +236,7 @@ ARDOUR_UI::set_monitor_model (MonitorModel model)
 		break;
 
 	default:
-		fatal << string_compose (_("programming error: unknown solo model in ARDOUR_UI::set_solo_model: %1"), model) << endmsg;
+		fatal << string_compose (_("programming error: unknown monitor model in ARDOUR_UI::set_monitor_model: %1"), model) << endmsg;
 		/*NOTREACHED*/
 	}
 
