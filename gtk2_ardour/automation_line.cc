@@ -21,6 +21,7 @@
 #include <cmath>
 #include <climits>
 #include <vector>
+#include <fstream>
 
 #include <pbd/stl_delete.h>
 #include <pbd/memento_command.h>
@@ -416,7 +417,7 @@ AutomationLine::modify_view_point (ControlPoint& cp, double x, double y, bool wi
 			ControlPoint* after;
 			
 			/* find the first point that can't move */
-			
+
 			for (uint32_t n = cp.view_index + 1; (after = nth (n)) != 0; ++n) {
 				if (!after->can_slide) {
 					x_limit = after->get_x() - 1.0;
@@ -748,7 +749,8 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
  
  		if (view_index && pi != npoints && /* not the first, not the last */
 		    (((this_rx == prev_rx) && (this_ry == prev_ry)) || /* same point */
-		     (((this_rx - prev_rx) < (box_size + 2)) &&  /* too close horizontally */
+		     (this_rx == prev_rx) || /* identical x coordinate */
+		     (((this_rx - prev_rx) < (box_size + 2)) &&  /* not identical, but still too close horizontally */
 		      ((abs ((int)(this_ry - prev_ry)) < (int) (box_size + 2)))))) { /* too close vertically */
   			continue;
 		}
@@ -849,9 +851,11 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 		if (_visible) {
 			line->show ();
 		}
+
 	} 
 
 	set_selected_points (trackview.editor.get_selection().points);
+
 }
 
 string
@@ -901,7 +905,7 @@ AutomationLine::start_drag (ControlPoint* cp, float fraction)
 	}
 
 	trackview.editor.current_session()->begin_reversible_command (str);
-	trackview.editor.current_session()->add_command (new MementoCommand<AutomationLine>(*this, &get_state(), 0));
+	trackview.editor.current_session()->add_command (new MementoCommand<AutomationList>(alist, &get_state(), 0));
 	
 	first_drag_fraction = fraction;
 	last_drag_fraction = fraction;
@@ -950,7 +954,7 @@ AutomationLine::end_drag (ControlPoint* cp)
 
 		update_pending = false;
 
-		trackview.editor.current_session()->add_command (new MementoCommand<AutomationLine>(*this, 0, &get_state()));
+		trackview.editor.current_session()->add_command (new MementoCommand<AutomationList>(alist, 0, &alist.get_state()));
 		trackview.editor.current_session()->commit_reversible_command ();
 		trackview.editor.current_session()->set_dirty ();
 	}
@@ -1027,11 +1031,11 @@ AutomationLine::remove_point (ControlPoint& cp)
 	model_representation (cp, mr);
 
 	trackview.editor.current_session()->begin_reversible_command (_("remove control point"));
-        XMLNode &before = get_state();
+        XMLNode &before = alist.get_state();
 
 	alist.erase (mr.start, mr.end);
 
-	trackview.editor.current_session()->add_command(new MementoCommand<AutomationLine>(*this, &before, &get_state()));
+	trackview.editor.current_session()->add_command(new MementoCommand<AutomationList>(alist, &before, &alist.get_state()));
 	trackview.editor.current_session()->commit_reversible_command ();
 	trackview.editor.current_session()->set_dirty ();
 }

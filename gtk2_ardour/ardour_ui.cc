@@ -444,7 +444,7 @@ ARDOUR_UI::ask_about_saving_session (const string & what)
 
 	save_the_session = 0;
 
-	editor->ensure_float (window);
+	window.present ();
 
 	ResponseType r = (ResponseType) window.run();
 

@@ -779,49 +779,49 @@ AudioRegion::set_fade_in (FadeShape shape, nframes_t len)
 
 	switch (shape) {
 	case Linear:
-		_fade_in.add (0.0, 0.0);
-		_fade_in.add (len, 1.0);
+		_fade_in.fast_simple_add (0.0, 0.0);
+		_fade_in.fast_simple_add (len, 1.0);
 		break;
 
 	case Fast:
-		_fade_in.add (0, 0);
-		_fade_in.add (len * 0.389401, 0.0333333);
-		_fade_in.add (len * 0.629032, 0.0861111);
-		_fade_in.add (len * 0.829493, 0.233333);
-		_fade_in.add (len * 0.9447, 0.483333);
-		_fade_in.add (len * 0.976959, 0.697222);
-		_fade_in.add (len, 1);
+		_fade_in.fast_simple_add (0, 0);
+		_fade_in.fast_simple_add (len * 0.389401, 0.0333333);
+		_fade_in.fast_simple_add (len * 0.629032, 0.0861111);
+		_fade_in.fast_simple_add (len * 0.829493, 0.233333);
+		_fade_in.fast_simple_add (len * 0.9447, 0.483333);
+		_fade_in.fast_simple_add (len * 0.976959, 0.697222);
+		_fade_in.fast_simple_add (len, 1);
 		break;
 
 	case Slow:
-		_fade_in.add (0, 0);
-		_fade_in.add (len * 0.0207373, 0.197222);
-		_fade_in.add (len * 0.0645161, 0.525);
-		_fade_in.add (len * 0.152074, 0.802778);
-		_fade_in.add (len * 0.276498, 0.919444);
-		_fade_in.add (len * 0.481567, 0.980556);
-		_fade_in.add (len * 0.767281, 1);
-		_fade_in.add (len, 1);
+		_fade_in.fast_simple_add (0, 0);
+		_fade_in.fast_simple_add (len * 0.0207373, 0.197222);
+		_fade_in.fast_simple_add (len * 0.0645161, 0.525);
+		_fade_in.fast_simple_add (len * 0.152074, 0.802778);
+		_fade_in.fast_simple_add (len * 0.276498, 0.919444);
+		_fade_in.fast_simple_add (len * 0.481567, 0.980556);
+		_fade_in.fast_simple_add (len * 0.767281, 1);
+		_fade_in.fast_simple_add (len, 1);
 		break;
 
 	case LogA:
-		_fade_in.add (0, 0);
-		_fade_in.add (len * 0.0737327, 0.308333);
-		_fade_in.add (len * 0.246544, 0.658333);
-		_fade_in.add (len * 0.470046, 0.886111);
-		_fade_in.add (len * 0.652074, 0.972222);
-		_fade_in.add (len * 0.771889, 0.988889);
-		_fade_in.add (len, 1);
+		_fade_in.fast_simple_add (0, 0);
+		_fade_in.fast_simple_add (len * 0.0737327, 0.308333);
+		_fade_in.fast_simple_add (len * 0.246544, 0.658333);
+		_fade_in.fast_simple_add (len * 0.470046, 0.886111);
+		_fade_in.fast_simple_add (len * 0.652074, 0.972222);
+		_fade_in.fast_simple_add (len * 0.771889, 0.988889);
+		_fade_in.fast_simple_add (len, 1);
 		break;
 
 	case LogB:
-		_fade_in.add (0, 0);
-		_fade_in.add (len * 0.304147, 0.0694444);
-		_fade_in.add (len * 0.529954, 0.152778);
-		_fade_in.add (len * 0.725806, 0.333333);
-		_fade_in.add (len * 0.847926, 0.558333);
-		_fade_in.add (len * 0.919355, 0.730556);
-		_fade_in.add (len, 1);
+		_fade_in.fast_simple_add (0, 0);
+		_fade_in.fast_simple_add (len * 0.304147, 0.0694444);
+		_fade_in.fast_simple_add (len * 0.529954, 0.152778);
+		_fade_in.fast_simple_add (len * 0.725806, 0.333333);
+		_fade_in.fast_simple_add (len * 0.847926, 0.558333);
+		_fade_in.fast_simple_add (len * 0.919355, 0.730556);
+		_fade_in.fast_simple_add (len, 1);
 		break;
 	}
 
@@ -839,47 +839,47 @@ AudioRegion::set_fade_out (FadeShape shape, nframes_t len)
 
 	switch (shape) {
 	case Fast:
-		_fade_out.add (len * 0, 1);
-		_fade_out.add (len * 0.023041, 0.697222);
-		_fade_out.add (len * 0.0553,   0.483333);
-		_fade_out.add (len * 0.170507, 0.233333);
-		_fade_out.add (len * 0.370968, 0.0861111);
-		_fade_out.add (len * 0.610599, 0.0333333);
-		_fade_out.add (len * 1, 0);
+		_fade_out.fast_simple_add (len * 0, 1);
+		_fade_out.fast_simple_add (len * 0.023041, 0.697222);
+		_fade_out.fast_simple_add (len * 0.0553,   0.483333);
+		_fade_out.fast_simple_add (len * 0.170507, 0.233333);
+		_fade_out.fast_simple_add (len * 0.370968, 0.0861111);
+		_fade_out.fast_simple_add (len * 0.610599, 0.0333333);
+		_fade_out.fast_simple_add (len * 1, 0);
 		break;
 
 	case LogA:
-		_fade_out.add (len * 0, 1);
-		_fade_out.add (len * 0.228111, 0.988889);
-		_fade_out.add (len * 0.347926, 0.972222);
-		_fade_out.add (len * 0.529954, 0.886111);
-		_fade_out.add (len * 0.753456, 0.658333);
-		_fade_out.add (len * 0.9262673, 0.308333);
-		_fade_out.add (len * 1, 0);
+		_fade_out.fast_simple_add (len * 0, 1);
+		_fade_out.fast_simple_add (len * 0.228111, 0.988889);
+		_fade_out.fast_simple_add (len * 0.347926, 0.972222);
+		_fade_out.fast_simple_add (len * 0.529954, 0.886111);
+		_fade_out.fast_simple_add (len * 0.753456, 0.658333);
+		_fade_out.fast_simple_add (len * 0.9262673, 0.308333);
+		_fade_out.fast_simple_add (len * 1, 0);
 		break;
 
 	case Slow:
-		_fade_out.add (len * 0, 1);
-		_fade_out.add (len * 0.305556, 1);
-		_fade_out.add (len * 0.548611, 0.991736);
-		_fade_out.add (len * 0.759259, 0.931129);
-		_fade_out.add (len * 0.918981, 0.68595);
-		_fade_out.add (len * 0.976852, 0.22865);
-		_fade_out.add (len * 1, 0);
+		_fade_out.fast_simple_add (len * 0, 1);
+		_fade_out.fast_simple_add (len * 0.305556, 1);
+		_fade_out.fast_simple_add (len * 0.548611, 0.991736);
+		_fade_out.fast_simple_add (len * 0.759259, 0.931129);
+		_fade_out.fast_simple_add (len * 0.918981, 0.68595);
+		_fade_out.fast_simple_add (len * 0.976852, 0.22865);
+		_fade_out.fast_simple_add (len * 1, 0);
 		break;
 
 	case LogB:
-		_fade_out.add (len * 0, 1);
-		_fade_out.add (len * 0.080645, 0.730556);
-		_fade_out.add (len * 0.277778, 0.289256);
-		_fade_out.add (len * 0.470046, 0.152778);
-		_fade_out.add (len * 0.695853, 0.0694444);
-		_fade_out.add (len * 1, 0);
+		_fade_out.fast_simple_add (len * 0, 1);
+		_fade_out.fast_simple_add (len * 0.080645, 0.730556);
+		_fade_out.fast_simple_add (len * 0.277778, 0.289256);
+		_fade_out.fast_simple_add (len * 0.470046, 0.152778);
+		_fade_out.fast_simple_add (len * 0.695853, 0.0694444);
+		_fade_out.fast_simple_add (len * 1, 0);
 		break;
 
 	case Linear:
-		_fade_out.add (len * 0, 1);
-		_fade_out.add (len * 1, 0);
+		_fade_out.fast_simple_add (len * 0, 1);
+		_fade_out.fast_simple_add (len * 1, 0);
 		break;
 	}
 
@@ -968,8 +968,8 @@ AudioRegion::set_default_envelope ()
 {
 	_envelope.freeze ();
 	_envelope.clear ();
-	_envelope.add (0, 1.0f);
-	_envelope.add (_length, 1.0f);
+	_envelope.fast_simple_add (0, 1.0f);
+	_envelope.fast_simple_add (_length, 1.0f);
 	_envelope.thaw ();
 }
 

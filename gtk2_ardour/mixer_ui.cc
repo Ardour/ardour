@@ -81,7 +81,7 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	track_model = ListStore::create (track_columns);
 	track_display.set_model (track_model);
 	track_display.append_column (_("Strips"), track_columns.text);
-	track_display.append_column (_("Visible"), track_columns.visible);
+	track_display.append_column (_("Show"), track_columns.visible);
 	track_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
 	track_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
 	track_display.get_column (0)->set_expand(true);
@@ -107,7 +107,7 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	group_display.set_model (group_model);
 	group_display.append_column (_("Group"), group_columns.text);
 	group_display.append_column (_("Active"), group_columns.active);
-	group_display.append_column (_("Visible"), group_columns.visible);
+	group_display.append_column (_("Show"), group_columns.visible);
 	group_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
 	group_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
 	group_display.get_column (2)->set_data (X_("colnum"), GUINT_TO_POINTER(2));

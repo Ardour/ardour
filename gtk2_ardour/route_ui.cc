@@ -672,7 +672,7 @@ RouteUI::set_color (const Gdk::Color & c)
 	snprintf (buf, sizeof (buf), "%d:%d:%d", c.get_red(), c.get_green(), c.get_blue());
 	xml_node->add_property ("color", buf);
 
-	 _route->gui_changed ("color", (void *) 0); /* EMIT_SIGNAL */
+	_route->gui_changed ("color", (void *) 0); /* EMIT_SIGNAL */
 }
 
 

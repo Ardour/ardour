@@ -450,7 +450,7 @@ Editor::Editor (AudioEngine& eng)
 
 	route_display_model = ListStore::create(route_display_columns);
 	route_list_display.set_model (route_display_model);
-	route_list_display.append_column (_("Visible"), route_display_columns.visible);
+	route_list_display.append_column (_("Show"), route_display_columns.visible);
 	route_list_display.append_column (_("Name"), route_display_columns.text);
 	route_list_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
 	route_list_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
@@ -476,7 +476,7 @@ Editor::Editor (AudioEngine& eng)
 	edit_group_display.set_model (group_model);
 	edit_group_display.append_column (_("Name"), group_columns.text);
 	edit_group_display.append_column (_("Active"), group_columns.is_active);
-	edit_group_display.append_column (_("Visible"), group_columns.is_visible);
+	edit_group_display.append_column (_("Show"), group_columns.is_visible);
 	edit_group_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
 	edit_group_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
 	edit_group_display.get_column (2)->set_data (X_("colnum"), GUINT_TO_POINTER(2));

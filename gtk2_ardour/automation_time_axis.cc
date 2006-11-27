@@ -153,10 +153,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 
 	if (xml_node) {
 		set_state (*xml_node);
-	} else {
-		cerr << _name << ": looked for state named \"" << _state_name << "\" in parent ("
-		     << get_parent_with_state()->name() << ") but found nothing\n";
-	}
+	} 
 
 	/* make sure labels etc. are correct */
 

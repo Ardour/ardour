@@ -61,7 +61,7 @@ AnalysisWindow::AnalysisWindow()
 	tlmodel = Gtk::ListStore::create(tlcols);
 	track_list.set_model (tlmodel);
 	track_list.append_column(_("Track"), tlcols.trackname);
-	track_list.append_column_editable(_("Visible"), tlcols.visible);
+	track_list.append_column_editable(_("Show"), tlcols.visible);
 	track_list.set_headers_visible(true);
 	track_list.set_reorderable(false);
 	track_list.get_selection()->set_mode (Gtk::SELECTION_NONE);

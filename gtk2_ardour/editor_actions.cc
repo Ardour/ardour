@@ -60,7 +60,7 @@ Editor::register_actions ()
 
 	act = ActionManager::register_toggle_action (editor_actions, "toggle-xfades-active", _("Active"), mem_fun(*this, &Editor::toggle_xfades_active));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (editor_actions, "toggle-xfades-visible", _("Visible"), mem_fun(*this, &Editor::toggle_xfade_visibility));
+	act = ActionManager::register_toggle_action (editor_actions, "toggle-xfades-visible", _("Show"), mem_fun(*this, &Editor::toggle_xfade_visibility));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (editor_actions, "toggle-auto-xfades", _("Created Automatically"), mem_fun(*this, &Editor::toggle_auto_xfade));
 	ActionManager::session_sensitive_actions.push_back (act);

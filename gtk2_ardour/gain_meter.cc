@@ -72,7 +72,6 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	  gain_slider (0),
 	  // 0.781787 is the value needed for gain to be set to 0.
 	  gain_adjustment (0.781787, 0.0, 1.0, 0.01, 0.1),
-	  gain_display (&gain_adjustment, "MixerStripGainDisplay"),
 	  gain_automation_style_button (""),
 	  gain_automation_state_button ("")
 	
@@ -93,23 +92,19 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	gain_slider->signal_button_release_event().connect (mem_fun(*this, &GainMeter::end_gain_touch));
 	gain_slider->set_name ("MixerGainMeter");
 
-	gain_display.set_print_func (_gain_printer, this);
+	gain_display.set_name ("MixerStripGainDisplay");
+	set_size_request_to_display_given_text (gain_display, "-86.g", 2, 6); /* note the descender */
+	gain_display.signal_activate().connect (mem_fun (*this, &GainMeter::gain_entered));
 
-	gain_display_box.set_spacing (2);
-	set_size_request_to_display_given_text (gain_display_frame, "-86.g", 2, 6); /* note the descender */
-	gain_display_frame.set_shadow_type (Gtk::SHADOW_IN);
-	gain_display_frame.set_name ("BaseFrame");
-	gain_display_frame.add (gain_display);
-	gain_display_box.pack_start (gain_display_frame,  Gtk::PACK_SHRINK);
+	gain_display_box.set_homogeneous (true);
+	gain_display_box.pack_start (gain_display, true, true);
 
 	peak_display.set_name ("MixerStripPeakDisplay");
-	peak_display.add (peak_display_label);
-	set_size_request_to_display_given_text (peak_display_frame, "-86.g", 2, 6); /* note the descender */
-	peak_display_frame.set_shadow_type (Gtk::SHADOW_IN);
-	peak_display_frame.set_name ("BaseFrame");
-	peak_display_frame.add (peak_display);
+	peak_display.set_editable (false);
+	set_size_request_to_display_given_text  (peak_display, "-86.g", 2, 6); /* note the descender */
 	max_peak = minus_infinity();
-	peak_display_label.set_text (_("-inf"));
+	peak_display.set_text (_("-inf"));
+	peak_display.unset_flags (Gtk::CAN_FOCUS);
 
 	meter_metric_area.set_size_request (25, -1);
 	meter_metric_area.set_name ("MeterMetricsStrip");
@@ -128,24 +123,28 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	gain_automation_state_button.set_size_request(15, 15);
 	gain_automation_style_button.set_size_request(15, 15);
 
+	HBox* fader_centering_box = manage (new HBox);
+	fader_centering_box->pack_start (*gain_slider, false, true);
+
 	fader_vbox = manage (new Gtk::VBox());
 	fader_vbox->set_spacing (0);
-	fader_vbox->pack_start (*gain_slider, false, false, 0);
+	fader_vbox->pack_start (*fader_centering_box, false, false, 0);
 
-	hbox.set_spacing (0);
-	hbox.pack_start (*fader_vbox, false, false, 2);
+	hbox.set_spacing (2);
+	hbox.pack_start (*fader_vbox, true, true, 7);
 
 	set_width(Narrow);
 
 	Route* r;
 
 	if ((r = dynamic_cast<Route*> (_io.get())) != 0) {
+
 	        /* 
-		   if we don't have a route (if we're the click), 
+		   if we have a route (ie. we're not the click), 
 		   pack some route-dependent stuff.
 		*/
 
-	        gain_display_box.pack_end (peak_display_frame,  Gtk::PACK_SHRINK);
+	        gain_display_box.pack_end (peak_display, true, true);
 
 		hbox.pack_start (meter_packer, true, false);
 
@@ -177,7 +176,7 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	}
 
 
-	set_spacing (4);
+	set_spacing (2);
 
 	pack_start (gain_display_box,  Gtk::PACK_SHRINK);
 	pack_start (hbox,  Gtk::PACK_SHRINK);
@@ -186,13 +185,16 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 
 	meter_metric_area.signal_expose_event().connect (mem_fun(*this, &GainMeter::meter_metrics_expose));
 	gain_adjustment.signal_value_changed().connect (mem_fun(*this, &GainMeter::gain_adjusted));
-	peak_display.signal_button_release_event().connect (mem_fun(*this, &GainMeter::peak_button_release));
+	peak_display.signal_button_release_event().connect (mem_fun(*this, &GainMeter::peak_button_release), false);
+	gain_display.signal_key_press_event().connect (mem_fun(*this, &GainMeter::gain_key_press), false);
 
 	Config->ParameterChanged.connect (mem_fun (*this, &GainMeter::parameter_changed));
 
 	gain_changed (0);
-	update_gain_sensitive ();
+	show_gain ();
 
+	update_gain_sensitive ();
+	
 	ResetAllPeakDisplays.connect (mem_fun(*this, &GainMeter::reset_peak_display));
 	ResetGroupPeakDisplays.connect (mem_fun(*this, &GainMeter::reset_group_peak_display));
 }
@@ -202,10 +204,10 @@ GainMeter::set_width (Width w)
 {
 	switch (w) {
 	case Wide:
-		peak_display_frame.show_all();
+		peak_display.show();
 		break;
 	case Narrow:
-		peak_display_frame.hide_all();
+		peak_display.hide();
 		break;
 	}
 
@@ -315,13 +317,13 @@ GainMeter::update_meters ()
 			(*i).meter->set (log_meter (peak), peak);
 						
 			if (peak > max_peak) {
-            	max_peak = peak;
-                /* set peak display */
+				max_peak = peak;
+				/* set peak display */
 				if (max_peak <= -200.0f) {
-					peak_display_label.set_text (_("-inf"));
+					peak_display.set_text (_("-inf"));
 				} else {
 					snprintf (buf, sizeof(buf), "%.1f", max_peak);
-					peak_display_label.set_text (buf);
+					peak_display.set_text (buf);
 				}
 
 				if (max_peak >= 0.0f) {
@@ -436,7 +438,58 @@ GainMeter::setup_meters ()
 	}
 }	
 
-gint
+bool
+GainMeter::gain_key_press (GdkEventKey* ev)
+{
+	cerr << "kp " << ev->keyval << endl;
+
+	switch (ev->keyval) {
+	case GDK_minus:
+	case GDK_plus:
+	case GDK_period:
+	case GDK_comma:
+	case GDK_0:
+	case GDK_1:
+	case GDK_2:
+	case GDK_3:
+	case GDK_4:
+	case GDK_5:
+	case GDK_6:
+	case GDK_7:
+	case GDK_8:
+	case GDK_9:
+	case GDK_KP_Add:
+	case GDK_KP_Subtract:
+	case GDK_KP_Decimal:
+	case GDK_KP_0:
+	case GDK_KP_1:
+	case GDK_KP_2:
+	case GDK_KP_3:
+	case GDK_KP_4:
+	case GDK_KP_5:
+	case GDK_KP_6:
+	case GDK_KP_7:
+	case GDK_KP_8:
+	case GDK_KP_9:
+	case GDK_Return:
+	case GDK_BackSpace:
+	case GDK_Delete:
+	case GDK_KP_Enter:
+	case GDK_Home:
+	case GDK_End:
+	case GDK_Left:
+	case GDK_Right:
+		cerr << "allow " << ev->keyval << " to drop through\n";
+		return false;
+		
+	default:
+		break;
+	}
+
+	return true;
+}
+
+bool
 GainMeter::peak_button_release (GdkEventButton* ev)
 {
 	/* reset peak label */
@@ -451,14 +504,15 @@ GainMeter::peak_button_release (GdkEventButton* ev)
 	} else {
 		reset_peak_display ();
 	}
-	return TRUE;
+
+	return true;
 }
 
 void
 GainMeter::reset_peak_display ()
 {
 	max_peak = minus_infinity();
-	peak_display_label.set_text (_("-Inf"));
+	peak_display.set_text (_("-Inf"));
 	peak_display.set_name ("MixerStripPeakDisplay");
 }
 
@@ -480,7 +534,7 @@ GainMeter::meter_button_release (GdkEventButton* ev, uint32_t which)
 	case 1:
 		meters[which].meter->clear();
 		max_peak = minus_infinity();
-		peak_display_label.set_text (_("-inf"));
+		peak_display.set_text (_("-inf"));
 		peak_display.set_name ("MixerStripPeakDisplay");
 		break;
 
@@ -514,21 +568,34 @@ GainMeter::popup_meter_menu (GdkEventButton *ev)
 }
 
 void
-GainMeter::_gain_printer (char buf[32], Gtk::Adjustment& adj, void *arg)
+GainMeter::gain_entered ()
 {
-	static_cast<GainMeter *>(arg)->gain_printer (buf, adj);
+	float f;
+
+	if (sscanf (gain_display.get_text().c_str(), "%f", &f) == 1) {
+
+		/* clamp to displayable values */
+
+		f = min (f, 6.0f);
+
+		_io->set_gain (dB_to_coefficient (f), this);
+	}
 }
 
 void
-GainMeter::gain_printer (char buf[32], Gtk::Adjustment& adj)
+GainMeter::show_gain ()
 {
-	float v = adj.get_value();
+	char buf[32];
 
+	float v = gain_adjustment.get_value();
+	
 	if (v == 0.0) {
 		strcpy (buf, _("-inf"));
 	} else {
 		snprintf (buf, 32, "%.1f", coefficient_to_dB (slider_position_to_gain (v)));
 	}
+	
+	gain_display.set_text (buf);
 }
 
 void
@@ -537,6 +604,7 @@ GainMeter::gain_adjusted ()
 	if (!ignore_toggle) {
 		_io->set_gain (slider_position_to_gain (gain_adjustment.get_value()), this);
 	}
+	show_gain ();
 }
 
 void
@@ -545,7 +613,7 @@ GainMeter::effective_gain_display ()
 	gfloat value = gain_to_slider_position (_io->effective_gain());
 	
 	if (gain_adjustment.get_value() != value) {
-		ignore_toggle = true;
+		ignore_toggle = true; 
 		gain_adjustment.set_value (value);
 		ignore_toggle = false;
 	}

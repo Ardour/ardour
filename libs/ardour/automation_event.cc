@@ -401,7 +401,7 @@ AutomationList::add (double when, double value)
 		}
 
 		if (insert) {
-
+			
 			events.insert (insertion_point, point_factory (when, value));
 			reposition_for_rt_add (0);
 
@@ -511,6 +511,9 @@ AutomationList::move_range (iterator start, iterator end, double xdelta, double 
 		while (start != end) {
 			(*start)->when += xdelta;
 			(*start)->value += ydelta;
+			if (isnan ((*start)->value)) {
+				abort ();
+			}
 			++start;
 		}
 
@@ -532,6 +535,9 @@ AutomationList::modify (iterator iter, double when, double val)
 		Glib::Mutex::Lock lm (lock);
 		(*iter)->when = when;
 		(*iter)->value = val;
+		if (isnan (val)) {
+			abort ();
+		}
 		mark_dirty ();
 	}
 	
@@ -1239,6 +1245,7 @@ AutomationList::deserialize_events (const XMLNode& node)
 	}
 
 	thaw ();
+
 	return 0;
 }
 
@@ -1270,6 +1277,7 @@ AutomationList::set_state (const XMLNode& node)
 		jack_nframes_t x;
 		double y;
 		
+		freeze ();
 		clear ();
 		
 		for (i = elist.begin(); i != elist.end(); ++i) {
@@ -1286,9 +1294,11 @@ AutomationList::set_state (const XMLNode& node)
 			}
 			y = atof (prop->value().c_str());
 			
-			add (x, y);
+			fast_simple_add (x, y);
 		}
 		
+		thaw ();
+
 		return 0;
 	}
 
