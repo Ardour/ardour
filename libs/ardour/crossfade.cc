@@ -759,7 +759,7 @@ Crossfade::set_state (const XMLNode& node)
 	
         /* fade out */
 	
-	_fade_in.freeze ();
+	_fade_out.freeze ();
 	_fade_out.clear ();
 
 	children = fo->children();
