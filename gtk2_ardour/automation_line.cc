@@ -824,7 +824,11 @@ AutomationLine::point_drag (ControlPoint& cp, nframes_t x, float fraction, bool 
 	drag_x = x;
 
 	modify_view_point (cp, x, fraction, with_push);
-	line->property_points() = line_points;
+
+	if (line_points.size() > 1) {
+		line->property_points() = line_points;
+	}
+
 	drags++;
 	did_push = with_push;
 }
@@ -848,6 +852,9 @@ AutomationLine::line_drag (uint32_t i1, uint32_t i2, float fraction, bool with_p
 		modify_view_point (*cp, trackview.editor.unit_to_frame (cp->get_x()), ((_height - cp->get_y()) /_height) + ydelta, with_push);
 	}
 
+	if (line_points.size() > 1) {
+		line->property_points() = line_points;
+	}
 
 	drags++;
 }
