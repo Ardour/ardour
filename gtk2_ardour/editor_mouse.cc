@@ -2724,6 +2724,7 @@ Editor::start_region_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	drag_info.want_move_threshold = true;
 	drag_info.motion_callback = &Editor::region_drag_motion_callback;
 	drag_info.finished_callback = &Editor::region_drag_finished_callback;
+	show_verbose_time_cursor (drag_info.last_frame_position, 10);
 }
 
 void
@@ -2771,8 +2772,6 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	bool clamp_y_axis = false;
 	vector<int32_t>  height_list(512) ;
 	vector<int32_t>::iterator j;
-
-	show_verbose_time_cursor (drag_info.last_frame_position, 10);
 
 	if (drag_info.copy && drag_info.move_threshold_passed && drag_info.want_move_threshold) {
 
@@ -3136,6 +3135,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 		rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
 		rv->get_canvas_group()->i2w (ix1, iy1);
+		rv->region()->set_opaque(false);
 		TimeAxisView* tvp2 = trackview_by_y_position (iy1);
 		AudioTimeAxisView* canvas_atv = dynamic_cast<AudioTimeAxisView*>(tvp2);
 		AudioTimeAxisView* temp_atv;
@@ -3350,6 +3350,8 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			(*i)->get_canvas_group()->i2w (ix1, iy1);
 			TimeAxisView* tvp2 = trackview_by_y_position (iy1);
 			AudioTimeAxisView* atv2 = dynamic_cast<AudioTimeAxisView*>(tvp2);
+
+			(*i)->region()->set_opaque (true);
 	    
 			from_playlist = (*i)->region()->playlist();
 			to_playlist = atv2->playlist();
@@ -3443,6 +3445,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			/* no need to add an undo here, we did that when we added this playlist to motion_frozen playlists */
 			
 			rv->region()->set_position (where, (void *) this);
+			rv->region()->set_opaque (true);
 		}
 	}
 
@@ -4005,6 +4008,7 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		begin_reversible_command (trim_type);
 
 		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
+			(*i)->region()->set_opaque(false);
 			(*i)->region()->freeze ();
 		
 			AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
@@ -4199,6 +4203,7 @@ Editor::trim_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			     i != selection->regions.by_layer().end(); ++i)
 			{
 				thaw_region_after_trim (**i);
+				(*i)->region()->set_opaque(true);
 			}
 		}
 		
