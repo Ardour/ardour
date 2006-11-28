@@ -614,14 +614,8 @@ PluginInsert::state (bool full)
 		XMLNode* child = new XMLNode("port");
 		snprintf(buf, sizeof(buf), "%" PRIu32, *x);
 		child->add_property("number", string(buf));
-		
-		if (full) {
-			snprintf(buf, sizeof(buf), "0x%x", automation_list (*x).automation_state ());
-		} else {
-			snprintf(buf, sizeof(buf), "0x%x", ARDOUR::Off);
-		}
-		child->add_property("auto", string(buf));
-		
+
+		child->add_child_nocopy (automation_list (*x).state (full));
 		autonode->add_child_nocopy (*child);
 	}
 
@@ -725,43 +719,62 @@ PluginInsert::set_state(const XMLNode& node)
 	/* look for port automation node */
 	
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() == port_automation_node_name) {
-			XMLNodeList cnodes;
-			XMLProperty *cprop;
-			XMLNodeConstIterator iter;
-			XMLNode *child;
-			const char *port;
-			uint32_t port_id;
 
-			cnodes = (*niter)->children ("port");
-	
-			for(iter = cnodes.begin(); iter != cnodes.end(); ++iter){
-				
-				child = *iter;
-				
-				if ((cprop = child->property("number")) != 0) {
-					port = cprop->value().c_str();
-				} else {
-					warning << _("PluginInsert: Auto: no ladspa port number") << endmsg;
-					continue;
-				}
+		if ((*niter)->name() != port_automation_node_name) {
+			continue;
+		}
 
-				sscanf (port, "%" PRIu32, &port_id);
+		XMLNodeList cnodes;
+		XMLProperty *cprop;
+		XMLNodeConstIterator iter;
+		XMLNode *child;
+		const char *port;
+		uint32_t port_id;
+		
+		cnodes = (*niter)->children ("port");
+		
+		for(iter = cnodes.begin(); iter != cnodes.end(); ++iter){
+			
+			child = *iter;
+			
+			if ((cprop = child->property("number")) != 0) {
+				port = cprop->value().c_str();
+			} else {
+				warning << _("PluginInsert: Auto: no ladspa port number") << endmsg;
+				continue;
+			}
+			
+			sscanf (port, "%" PRIu32, &port_id);
+			
+			if (port_id >= _plugins[0]->parameter_count()) {
+				warning << _("PluginInsert: Auto: port id out of range") << endmsg;
+				continue;
+			}
 
-				if (port_id >= _plugins[0]->parameter_count()) {
-					warning << _("PluginInsert: Auto: port id out of range") << endmsg;
-					continue;
-				}
-				
+			if (!child->children().empty()) {
+				automation_list (port_id).set_state (*child->children().front());
+			} else {
 				if ((cprop = child->property("auto")) != 0) {
+					
+					/* old school */
+
 					int x;
 					sscanf (cprop->value().c_str(), "0x%x", &x);
 					automation_list (port_id).set_automation_state (AutoState (x));
+
+				} else {
+					
+					/* missing */
+					
+					automation_list (port_id).set_automation_state (Off);
 				}
 			}
-			
-			break;
+
 		}
+
+		/* done */
+
+		break;
 	} 
 
 	if (niter == nlist.end()) {
