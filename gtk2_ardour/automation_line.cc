@@ -349,13 +349,6 @@ AutomationLine::nth (uint32_t n)
 }
 
 void
-AutomationLine::modify_view (ControlPoint& cp, double x, double y, bool with_push)
-{
-	modify_view_point (cp, x, y, with_push);
-	update_line ();
-}
-
-void
 AutomationLine::modify_view_point (ControlPoint& cp, double x, double y, bool with_push)
 {
 	double delta = 0.0;
@@ -477,12 +470,6 @@ AutomationLine::reset_line_coords (ControlPoint& cp)
 }
 
 void
-AutomationLine::update_line ()
-{
-	line->property_points() = line_points;
-}
-
-void
 AutomationLine::sync_model_with_view_line (uint32_t start, uint32_t end)
 {
 
@@ -492,10 +479,8 @@ AutomationLine::sync_model_with_view_line (uint32_t start, uint32_t end)
 
 	for (uint32_t i = start; i <= end; ++i) {
 		p = nth(i);
-		sync_model_with_view_point(*p);
+		sync_model_with_view_point (*p, false, 0);
 	}
-	
-	
 }
 
 void
@@ -509,7 +494,6 @@ AutomationLine::model_representation (ControlPoint& cp, ModelRepresentation& mr)
 	mr.xval = (nframes_t) floor (cp.get_x());
 	mr.yval = 1.0 - (cp.get_y() / _height);
 
-
         /* if xval has not changed, set it directly from the model to avoid rounding errors */
 
 	if (mr.xval == trackview.editor.frame_to_unit((*cp.model)->when)) {
@@ -517,7 +501,6 @@ AutomationLine::model_representation (ControlPoint& cp, ModelRepresentation& mr)
 	} else {
 		mr.xval = trackview.editor.unit_to_frame (mr.xval);
 	}
-
 
 	/* virtual call: this will do the right thing
 	   for whatever particular type of line we are.
@@ -565,98 +548,6 @@ AutomationLine::model_representation (ControlPoint& cp, ModelRepresentation& mr)
 		mr.end = cp.model;
 		++mr.end;
 	}
-}
-
-void
-AutomationLine::sync_model_from (ControlPoint& cp)
-{
-	ControlPoint* p;
-	uint32_t lasti;
-
-	sync_model_with_view_point (cp);
-
-	/* we might have moved all points after `cp' by some amount
-	   if we pressed the with_push modifyer some of the time during the drag
-	   so all subsequent points have to be resynced
-	*/
-
-	lasti = control_points.size() - 1;
-	p = nth (lasti);
-
-	update_pending = true;
-
-	while (p != &cp && lasti) {
-		sync_model_with_view_point (*p);
-		--lasti;
-		p = nth (lasti);
-	}
-}
-
-void
-AutomationLine::sync_model_with_view_point (ControlPoint& cp)
-{
-	ModelRepresentation mr;
-	double ydelta;
-
-	model_representation (cp, mr);
-
-	/* part 4: how much are we changing the central point by */ 
-
-	ydelta = mr.yval - mr.ypos;
-
-	/* IMPORTANT: changing the model when the x-coordinate changes
-	   may invalidate the iterators that we are using. this means that we have
-	   to change the points before+after the one corresponding to the visual CP
-	   first (their x-coordinate doesn't change). then we change the
-	   "main" point.
-
-	   apply the full change to the central point, and interpolate
-	   in each direction to cover all model points represented
-	   by the control point.
-	*/
-
-	/* part 5: change all points before the primary point */
-
-	for (AutomationList::iterator i = mr.start; i != cp.model; ++i) {
-
-		double delta;
-
-		delta = ydelta * ((*i)->when - mr.xmin) / (mr.xpos - mr.xmin);
-
-		/* x-coordinate (generally time) stays where it is,
-		   y-coordinate moves by a certain amount.
-		*/
-		
-		update_pending = true;
-		change_model (i, (*i)->when, mr.yval + delta);
-	}
-
-	/* part 6: change later points */
-
-	AutomationList::iterator i = cp.model;
-
-	++i;
-
-	while (i != mr.end) {
-
-		double delta;
-		
-		delta = ydelta * (mr.xmax - (*i)->when) / (mr.xmax - mr.xpos);
-
-		/* x-coordinate (generally time) stays where it is,
-		   y-coordinate moves by a certain amount.
-		*/
-		
-		update_pending = true;
-		change_model (i, (*i)->when, (*i)->value + delta);
-		
-		++i;
-	}
-
-	/* part 7: change the primary point */
-
-	update_pending = true;
-	change_model (cp.model, mr.xval, mr.yval);
 }
 
 void
@@ -708,10 +599,14 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 
 	view_index = 0;
 
+	ofstream oout ("orig_coordinates");
+
 	for (model = alist.begin(), pi = 0; pi < npoints; ++model, ++pi) {
 
 		double tx = points[pi].x;
 		double ty = points[pi].y;
+
+		oout << tx << ' ' << ty << endl;
 
 		/* now ensure that the control_points vector reflects the current curve
 		   state, but don't plot control points too close together. also, don't
@@ -812,6 +707,8 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 
 		view_index++;
 	}
+	
+	oout.close ();
 
 	/* discard extra CP's to avoid confusing ourselves */
 
@@ -890,7 +787,7 @@ AutomationLine::invalidate_point (ALPoints& p, uint32_t index)
 }
 
 void
-AutomationLine::start_drag (ControlPoint* cp, float fraction) 
+AutomationLine::start_drag (ControlPoint* cp, nframes_t x, float fraction) 
 {
 	if (trackview.editor.current_session() == 0) { /* how? */
 		return;
@@ -907,22 +804,37 @@ AutomationLine::start_drag (ControlPoint* cp, float fraction)
 	trackview.editor.current_session()->begin_reversible_command (str);
 	trackview.editor.current_session()->add_command (new MementoCommand<AutomationList>(alist, &get_state(), 0));
 	
+	drag_x = x;
+	drag_distance = 0;
 	first_drag_fraction = fraction;
 	last_drag_fraction = fraction;
 	drags = 0;
+	did_push = false;
 }
 
 void
 AutomationLine::point_drag (ControlPoint& cp, nframes_t x, float fraction, bool with_push) 
 {
-	modify_view (cp, x, fraction, with_push);
+	if (x > drag_x) {
+		drag_distance += (x - drag_x);
+	} else {
+		drag_distance -= (drag_x - x);
+	}
+
+	drag_x = x;
+
+	modify_view_point (cp, x, fraction, with_push);
+	line->property_points() = line_points;
 	drags++;
+	did_push = with_push;
 }
 
 void
 AutomationLine::line_drag (uint32_t i1, uint32_t i2, float fraction, bool with_push) 
 {
 	double ydelta = fraction - last_drag_fraction;
+
+	did_push = with_push;
 	
 	last_drag_fraction = fraction;
 
@@ -936,7 +848,6 @@ AutomationLine::line_drag (uint32_t i1, uint32_t i2, float fraction, bool with_p
 		modify_view_point (*cp, trackview.editor.unit_to_frame (cp->get_x()), ((_height - cp->get_y()) /_height) + ydelta, with_push);
 	}
 
-	update_line ();
 
 	drags++;
 }
@@ -944,20 +855,95 @@ AutomationLine::line_drag (uint32_t i1, uint32_t i2, float fraction, bool with_p
 void
 AutomationLine::end_drag (ControlPoint* cp) 
 {
-	if (drags) {
-
-		if (cp) {
-			sync_model_from (*cp);
-		} else {
-			sync_model_with_view_line (line_drag_cp1, line_drag_cp2);
-		}
-
-		update_pending = false;
-
-		trackview.editor.current_session()->add_command (new MementoCommand<AutomationList>(alist, 0, &alist.get_state()));
-		trackview.editor.current_session()->commit_reversible_command ();
-		trackview.editor.current_session()->set_dirty ();
+	if (!drags) {
+		return;
 	}
+
+	alist.freeze ();
+
+	if (cp) {
+		sync_model_with_view_point (*cp, did_push, drag_distance);
+	} else {
+		sync_model_with_view_line (line_drag_cp1, line_drag_cp2);
+	}
+	
+	alist.thaw ();
+
+	update_pending = false;
+
+	trackview.editor.current_session()->add_command (new MementoCommand<AutomationList>(alist, 0, &alist.get_state()));
+	trackview.editor.current_session()->commit_reversible_command ();
+	trackview.editor.current_session()->set_dirty ();
+}
+
+
+void
+AutomationLine::sync_model_with_view_point (ControlPoint& cp, bool did_push, int64_t distance)
+{
+	ModelRepresentation mr;
+	double ydelta;
+
+	model_representation (cp, mr);
+
+	/* how much are we changing the central point by */ 
+
+	ydelta = mr.yval - mr.ypos;
+
+	/*
+	   apply the full change to the central point, and interpolate
+	   on both axes to cover all model points represented
+	   by the control point.
+	*/
+
+	/* change all points before the primary point */
+
+	for (AutomationList::iterator i = mr.start; i != cp.model; ++i) {
+		
+		double fract = ((*i)->when - mr.xmin) / (mr.xpos - mr.xmin);
+		double y_delta = ydelta * fract;
+		double x_delta = distance * fract;
+
+		/* interpolate */
+		
+		if (y_delta || x_delta) {
+			alist.modify (i, (*i)->when + x_delta, mr.ymin + y_delta);
+		}
+	}
+
+	/* change the primary point */
+
+	update_pending = true;
+	alist.modify (cp.model, mr.xval, mr.yval);
+
+
+	/* change later points */
+	
+	AutomationList::iterator i = cp.model;
+	
+	++i;
+	
+	while (i != mr.end) {
+		
+		double delta = ydelta * (mr.xmax - (*i)->when) / (mr.xmax - mr.xpos);
+
+		/* all later points move by the same distance along the x-axis as the main point */
+		
+		if (delta) {
+			alist.modify (i, (*i)->when + distance, (*i)->value + delta);
+		}
+		
+		++i;
+	}
+		
+	if (did_push) {
+
+		/* move all points after the range represented by the view by the same distance
+		   as the main point moved.
+		*/
+
+		alist.slide (mr.end, drag_distance);
+	}
+
 }
 
 bool 
@@ -1153,8 +1139,6 @@ AutomationLine::show_selection ()
 {
 	TimeSelection& time (trackview.editor.get_selection().time);
 
-	// cerr << "show selection\n";
-
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 		
 		(*i)->selected = false;
@@ -1178,7 +1162,6 @@ AutomationLine::show_selection ()
 void
 AutomationLine::hide_selection ()
 {
-	// cerr << "hide selection\n";
 //	show_selection ();
 }
 
@@ -1243,7 +1226,6 @@ AutomationLine::clear ()
 void
 AutomationLine::change_model (AutomationList::iterator i, double x, double y)
 {
-	alist.modify (i, (nframes_t) x, y);
 }
 
 void

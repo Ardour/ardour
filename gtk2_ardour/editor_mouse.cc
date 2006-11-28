@@ -2489,7 +2489,7 @@ Editor::start_control_point_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	start_grab (event, fader_cursor);
 
-	control_point->line.start_drag (control_point, 0);
+	control_point->line.start_drag (control_point, drag_info.grab_frame, 0);
 
 	float fraction = 1.0 - (control_point->get_y() / control_point->line.height());
 	set_verbose_canvas_cursor (control_point->line.get_verbose_cursor_string (fraction), 
@@ -2622,7 +2622,7 @@ Editor::start_line_grab (AutomationLine* line, GdkEvent* event)
 
 	double fraction = 1.0 - (cy / line->height());
 
-	line->start_drag (0, fraction);
+	line->start_drag (0, drag_info.grab_frame, fraction);
 	
 	set_verbose_canvas_cursor (line->get_verbose_cursor_string (fraction),
 				   drag_info.current_pointer_x + 20, drag_info.current_pointer_y + 20);

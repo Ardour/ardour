@@ -36,6 +36,11 @@ using namespace PBD;
 
 sigc::signal<void,AutomationList *> AutomationList::AutomationListCreated;
 
+static bool sort_events_by_time (ControlEvent* a, ControlEvent* b)
+{
+	return a->when < b->when;
+}
+
 #if 0
 static void dumpit (const AutomationList& al, string prefix = "")
 {
@@ -49,7 +54,7 @@ static void dumpit (const AutomationList& al, string prefix = "")
 
 AutomationList::AutomationList (double defval)
 {
-	_frozen = false;
+	_frozen = 0;
 	changed_when_thawed = false;
 	_state = Off;
 	_style = Absolute;
@@ -62,13 +67,14 @@ AutomationList::AutomationList (double defval)
 	rt_insertion_point = events.end();
 	lookup_cache.left = -1;
 	lookup_cache.range.first = events.end();
+	sort_pending = false;
 
         AutomationListCreated(this);
 }
 
 AutomationList::AutomationList (const AutomationList& other)
 {
-	_frozen = false;
+	_frozen = 0;
 	changed_when_thawed = false;
 	_style = other._style;
 	min_yval = other.min_yval;
@@ -81,6 +87,7 @@ AutomationList::AutomationList (const AutomationList& other)
 	rt_insertion_point = events.end();
 	lookup_cache.left = -1;
 	lookup_cache.range.first = events.end();
+	sort_pending = false;
 
 	for (const_iterator i = other.events.begin(); i != other.events.end(); ++i) {
 		/* we have to use other point_factory() because
@@ -95,7 +102,7 @@ AutomationList::AutomationList (const AutomationList& other)
 
 AutomationList::AutomationList (const AutomationList& other, double start, double end)
 {
-	_frozen = false;
+	_frozen = 0;
 	changed_when_thawed = false;
 	_style = other._style;
 	min_yval = other.min_yval;
@@ -108,6 +115,7 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 	rt_insertion_point = events.end();
 	lookup_cache.left = -1;
 	lookup_cache.range.first = events.end();
+	sort_pending = false;
 
 	/* now grab the relevant points, and shift them back if necessary */
 
@@ -128,7 +136,7 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 
 AutomationList::AutomationList (const XMLNode& node)
 {
-	_frozen = false;
+	_frozen = 0;
 	changed_when_thawed = false;
 	_touching = false;
 	min_yval = FLT_MIN;
@@ -140,6 +148,7 @@ AutomationList::AutomationList (const XMLNode& node)
 	rt_insertion_point = events.end();
 	lookup_cache.left = -1;
 	lookup_cache.range.first = events.end();
+	sort_pending = false;
 	
 	set_state (node);
 
@@ -517,7 +526,32 @@ AutomationList::move_range (iterator start, iterator end, double xdelta, double 
 			++start;
 		}
 
+		if (!_frozen) {
+			events.sort (sort_events_by_time);
+		} else {
+			sort_pending = true;
+		}
+
 		mark_dirty ();
+	}
+
+	maybe_signal_changed ();
+}
+
+void
+AutomationList::slide (iterator before, double distance)
+{
+	{
+		Glib::Mutex::Lock lm (lock);
+
+		if (before == events.end()) {
+			return;
+		}
+		
+		while (before != events.end()) {
+			(*before)->when += distance;
+			++before;
+		}
 	}
 
 	maybe_signal_changed ();
@@ -533,14 +567,23 @@ AutomationList::modify (iterator iter, double when, double val)
 
 	{
 		Glib::Mutex::Lock lm (lock);
+
 		(*iter)->when = when;
 		(*iter)->value = val;
+
 		if (isnan (val)) {
 			abort ();
 		}
+
+		if (!_frozen) {
+			events.sort (sort_events_by_time);
+		} else {
+			sort_pending = true;
+		}
+
 		mark_dirty ();
 	}
-	
+
 	maybe_signal_changed ();
 }
 
@@ -581,13 +624,30 @@ AutomationList::control_points_adjacent (double xval)
 void
 AutomationList::freeze ()
 {
-	_frozen = true;
+	_frozen++;
 }
 
 void
 AutomationList::thaw ()
 {
-	_frozen = false;
+	if (_frozen == 0) {
+		fatal << string_compose (_("programming error: %1"), X_("AutomationList::thaw() called while not frozen")) << endmsg;
+		/*NOTREACHED*/
+	}
+
+	if (--_frozen > 0) {
+		return;
+	}
+
+	{
+		Glib::Mutex::Lock lm (lock);
+
+		if (sort_pending) {
+			events.sort (sort_events_by_time);
+			sort_pending = false;
+		}
+	}
+
 	if (changed_when_thawed) {
 		StateChanged(); /* EMIT SIGNAL */
 	}
@@ -1354,7 +1414,7 @@ AutomationList::set_state (const XMLNode& node)
 			deserialize_events (*(*niter));
 		}
 	}
-	
+
 	return 0;
 }
 

@@ -44,9 +44,9 @@ AudioRegionGainLine::model_to_view_y (double& y)
 }
 
 void
-AudioRegionGainLine::start_drag (ControlPoint* cp, float fraction) 
+AudioRegionGainLine::start_drag (ControlPoint* cp, nframes_t x, float fraction) 
 {
-	AutomationLine::start_drag(cp,fraction);
+	AutomationLine::start_drag (cp, x, fraction);
 	if (!rv.audio_region()->envelope_active()) {
                 trackview.session().add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), &rv.audio_region()->get_state(), 0));
                 rv.audio_region()->set_envelope_active(false);
