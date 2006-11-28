@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <sigc++/bind.h>
 #include <ardour/automation_event.h>
+#include <pbd/stacktrace.h>
 
 #include "i18n.h"
 
@@ -631,6 +632,7 @@ void
 AutomationList::thaw ()
 {
 	if (_frozen == 0) {
+		PBD::stacktrace (cerr);
 		fatal << string_compose (_("programming error: %1"), X_("AutomationList::thaw() called while not frozen")) << endmsg;
 		/*NOTREACHED*/
 	}
