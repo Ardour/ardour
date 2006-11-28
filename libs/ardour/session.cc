@@ -835,6 +835,11 @@ Session::when_engine_running ()
 		}
 	}
 
+
+	/* its safe to do this now */
+
+	restore_history (snap_name());
+	
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~(CannotSave|Dirty));
 
 	/* hook us up to the engine */
