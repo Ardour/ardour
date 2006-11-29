@@ -17,16 +17,19 @@ c = fst.Object ('vstwin', 'vstwin.c')
 d = fst.Object ('vsti', 'vsti.c')
 
 if fst['VST']:
+    if os.access ('vst_sdk2_3.zip', os.F_OK):
+        fst.Execute ("unzip -o vst_sdk2_3.zip vstsdk2.3.zip")
     if os.access ('vstsdk2.3.zip', os.F_OK):
         fst.Execute ("unzip -o vstsdk2.3.zip")
-        fst.Execute (Delete ("vst"))
-        fst.Execute (Copy ("vst", "vstsdk2.3/source/common"))
-        fst.Execute ("sed -i '/struct VstFileType\|struct VstFileSelect/,/};/d' vst/aeffectx.h")
-        Default([a,b,c,d])
     else:
-        print 'Did not find libs/fst/vstsdk2.3.zip.  Make sure the file is in the correct location and correctly named'
+        print 'Did not find libs/fst/vst_sdk2_3.zip.  Make sure the file is in the correct location and correctly named'
         print 'Please see http://ardour.org/building_vst_support for more information'
-        sys.exit (1)
+        sys.exit (1)    
+    fst.Execute (Delete ("vst"))
+    fst.Execute (Copy ("vst", "vstsdk2.3/source/common"))
+    fst.Execute ("sed -i '/struct VstFileType\|struct VstFileSelect/,/};/d' vst/aeffectx.h")
+    Default([a,b,c,d])
+    
     
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      fst_src + ['SConscript',
