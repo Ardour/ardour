@@ -22,7 +22,7 @@ if fst['VST']:
     if os.access ('vstsdk2.3.zip', os.F_OK):
         fst.Execute ("unzip -o vstsdk2.3.zip")
     else:
-        print 'Did not find libs/fst/vst_sdk2_3.zip.  Make sure the file is in the correct location and correctly named'
+        print 'Did not find vst_sdk2_3.zip or vstsdk2.3.zip in libs/fst.  Make sure the correct file is in the correct location and correctly named'
         print 'Please see http://ardour.org/building_vst_support for more information'
         sys.exit (1)    
     fst.Execute (Delete ("vst"))
