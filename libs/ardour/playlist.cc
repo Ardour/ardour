@@ -404,21 +404,13 @@ Playlist::flush_notifications ()
 			timestamp_layer_op (*r);
 		}
 		pending_length = true;
-		n++;
-	}
-
-	for (RegionList::iterator r = pending_bounds.begin(); r != pending_bounds.end(); ++r) {
 		dependent_checks_needed.insert (*r);
-		/* don't increment n again - its the same list */
+		n++;
 	}
 
 	for (s = pending_adds.begin(); s != pending_adds.end(); ++s) {
 		dependent_checks_needed.insert (*s);
 		n++;
-	}
-
-	for (s = dependent_checks_needed.begin(); s != dependent_checks_needed.end(); ++s) {
-		check_dependents (*s, false);
 	}
 
 	for (s = pending_removes.begin(); s != pending_removes.end(); ++s) {
@@ -439,6 +431,10 @@ Playlist::flush_notifications ()
 		}
 		pending_modified = false;
 		Modified (); /* EMIT SIGNAL */
+	}
+
+	for (s = dependent_checks_needed.begin(); s != dependent_checks_needed.end(); ++s) {
+		check_dependents (*s, false);
 	}
 
 	pending_adds.clear ();
@@ -1111,7 +1107,6 @@ Playlist::region_bounds_changed (Change what_changed, boost::shared_ptr<Region> 
 	}
 
 	if (what_changed & Change (ARDOUR::PositionChanged|ARDOUR::LengthChanged)) {
-	
 		if (holding_state ()) {
 			pending_bounds.push_back (region);
 		} else {
@@ -1121,9 +1116,9 @@ Playlist::region_bounds_changed (Change what_changed, boost::shared_ptr<Region> 
 			}
 			
 			possibly_splice ();
-			check_dependents (region, false);
 			notify_length_changed ();
 			relayer ();
+			check_dependents (region, false);
 		}
 	}
 }

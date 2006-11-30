@@ -425,8 +425,15 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 					                    /*  in,      out */
 					xfade = new Crossfade (top, bottom, xfade_length, top->first_frame(), StartOfIn);
 					add_crossfade (*xfade);
-					xfade = new Crossfade (bottom, top, xfade_length, top->last_frame() - xfade_length, EndOfOut);
-					add_crossfade (*xfade);
+
+					if (top_region_at (top->last_frame() - 1) == top) {
+					  /* 
+					     only add a fade out if there is no region on top of the end of 'top' (which 
+					     would cover it).
+					  */
+					  xfade = new Crossfade (bottom, top, xfade_length, top->last_frame() - xfade_length, EndOfOut);
+					  add_crossfade (*xfade);
+					}
 					
 				} else {
 
