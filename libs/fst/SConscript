@@ -18,17 +18,24 @@ d = fst.Object ('vsti', 'vsti.c')
 
 if fst['VST']:
     if os.access ('vst_sdk2_3.zip', os.F_OK):
-        fst.Execute ("unzip -o vst_sdk2_3.zip vstsdk2.3.zip")
-    if os.access ('vstsdk2.3.zip', os.F_OK):
-        fst.Execute ("unzip -o vstsdk2.3.zip")
+        vst_sdk = fst.Command ('vstsdk2.3.zip', 'vst_sdk2_3.zip', "unzip -o $SOURCES")
     else:
-        print 'Did not find vst_sdk2_3.zip or vstsdk2.3.zip in libs/fst.  Make sure the correct file is in the correct location and correctly named'
-        print 'Please see http://ardour.org/building_vst_support for more information'
-        sys.exit (1)    
-    fst.Execute (Delete ("vst"))
-    fst.Execute (Copy ("vst", "vstsdk2.3/source/common"))
-    fst.Execute ("sed -i '/struct VstFileType\|struct VstFileSelect/,/};/d' vst/aeffectx.h")
-    Default([a,b,c,d])
+        if os.access ('vstsdk2.3.zip', os.F_OK) != 1:
+            print 'Did not find vst_sdk2_3.zip or vstsdk2.3.zip in libs/fst.'
+            print 'Make sure the correct file is in the correct location and correctly named.'
+            print 'Please see http://ardour.org/building_vst_support for more information.'
+            sys.exit (1)    
+        else:
+            vst_sdk = File ('vstsdk2.3.zip')
+    vst_dir = Dir ('vst')
+    vst_sdk_dir = Dir ('vstsdk2.3')
+    vst_headers = fst.Command ('vst/aeffectx.h', vst_sdk, [
+        "unzip -qq -o $SOURCE",
+        Delete ('$TARGET.dir'),
+        Copy ('${TARGET.dir}', 'vstsdk2.3/source/common'),
+        "sed -i '/struct VstFileType\|struct VstFileSelect/,/};/d' $TARGET"
+        ])
+    Default([vst_headers, a,b,c,d])
     
     
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
