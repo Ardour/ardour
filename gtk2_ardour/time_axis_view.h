@@ -31,6 +31,8 @@
 #include <gtkmm/entry.h>
 #include <gtkmm/label.h>
 
+#include <gtkmm2ext/focus_entry.h>
+
 #include <ardour/types.h>
 #include <ardour/region.h>
 
@@ -120,7 +122,7 @@ class TimeAxisView : public virtual AxisView
 	Gtk::VBox     controls_vbox;
 	Gtk::HBox     name_hbox;
 	Gtk::Frame    name_frame;
- 	Gtk::Entry    name_entry;
+ 	Gtkmm2ext::FocusEntry name_entry;
 
 	void hide_name_label ();
 	void hide_name_entry ();

@@ -108,7 +108,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
 	  /* big clock */
 
-	  big_clock ("BigClockDisplay", true, false, true),
+	  big_clock ("BigClockNonRecording", true, false, true),
 
 	  /* transport */
 
@@ -2400,4 +2400,33 @@ ARDOUR_UI::use_config ()
 		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
 		ract->set_active ();
 	}	
+}
+
+void
+ARDOUR_UI::update_transport_clocks (nframes_t pos)
+{
+	primary_clock.set (pos);
+	secondary_clock.set (pos);
+
+	if (big_clock_window) {
+		big_clock.set (pos);
+	}
+}
+
+void
+ARDOUR_UI::record_state_changed ()
+{
+	if (!session || !big_clock_window) {
+		/* why bother - the clock isn't visible */
+		return;
+	}
+
+	switch (session->record_status()) {
+	case Session::Recording:
+		big_clock.set_name ("BigClockRecording");
+		break;
+	default:
+		big_clock.set_name ("BigClockNonRecording");
+		break;
+	}
 }

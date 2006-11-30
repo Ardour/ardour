@@ -43,19 +43,21 @@ class AudioClock : public Gtk::HBox
 		Off
 	};
 	
-	AudioClock (const string& name, bool editable, bool is_duration = false, bool with_tempo_meter = false);
+	AudioClock (std::string name, bool editable, bool is_duration = false, bool with_info = false);
 
 	Mode mode() const { return _mode; }
 	
 	void set (nframes_t, bool force = false);
 	void set_mode (Mode);
+	
+	void set_name (std::string);
 
 	nframes_t current_time (nframes_t position = 0) const;
 	nframes_t current_duration (nframes_t position = 0) const;
 	void set_session (ARDOUR::Session *s);
 
 	sigc::signal<void> ValueChanged;
-
+	
   private:
 	ARDOUR::Session  *session;
 	Mode             _mode;
@@ -75,6 +77,7 @@ class AudioClock : public Gtk::HBox
 	Gtk::HBox   bbt_packer;
 
 	Gtk::HBox   frames_packer_hbox;
+	Gtk::HBox   frames_packer;
        
 	enum Field {
 		SMPTE_Hours,
@@ -112,11 +115,6 @@ class AudioClock : public Gtk::HBox
 	Gtk::Label  frames_label;
 	Gtk::Label  colon1, colon2, colon3;
 
-	Gtk::Label*  framerate_label;
-	Gtk::Label*  pullup_label;
-
-	Gtk::VBox   rate_pullup_box;
-
 	Gtk::Label  ms_hours_label;
 	Gtk::Label  ms_minutes_label;
 	Gtk::Label  ms_seconds_label;
@@ -128,10 +126,18 @@ class AudioClock : public Gtk::HBox
 	Gtk::Label  b1;
 	Gtk::Label  b2;
 
-	Gtk::Label*  tempo_label;
-	Gtk::Label*  meter_label;
+	Gtk::Label*  frames_upper_info_label;
+	Gtk::Label*  frames_lower_info_label;
 
-	Gtk::VBox   tempo_meter_box;
+	Gtk::Label*  smpte_upper_info_label;
+	Gtk::Label*  smpte_lower_info_label;
+	
+	Gtk::Label*  bbt_upper_info_label;
+	Gtk::Label*  bbt_lower_info_label;
+
+	Gtk::VBox   frames_info_box;
+	Gtk::VBox   smpte_info_box;
+	Gtk::VBox   bbt_info_box;
 
 	Gtk::EventBox  clock_base;
 	Gtk::Frame     clock_frame;

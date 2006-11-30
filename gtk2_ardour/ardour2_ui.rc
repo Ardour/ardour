@@ -127,13 +127,6 @@ style "base_frame"
 	bg[NORMAL] = { 0.35, 0.35, 0.40 }
 }
 
-
-style "red_frame"
-{
-	fg[NORMAL] = { 1.0, 0.0, 0.0 }
-	bg[NORMAL] = { 1.0, 0.0, 0.0 }
-}
-
 style "transport_base" = "medium_bold_text"
 {
   bg[NORMAL] = { 0.10, 0.10, 0.10 }
@@ -498,9 +491,25 @@ style "small_red_on_black_entry"  = "small_bold_text"
        bg[ACTIVE] = { 0.0, 0.0, 0.0 }
 }
 
-style "big_clock_display" = "medium_entry"
+style "non_recording_big_clock_display" = "medium_entry"
 {
-	font_name = "courier bold 34"
+	font_name = "sans 60"
+
+	fg[NORMAL] = { 0.50, 1.0, 0.50 }
+	fg[ACTIVE] = { 1.0, 0, 0.0 }
+	fg[SELECTED] = { 1.0, 0, 0 }
+	fg[PRELIGHT] = { 1.0, 0, 0.0 }
+	fg[INSENSITIVE] = { 1.0, 0, 0.0 }
+	
+	base[NORMAL] = { 0.0, 0.0, 0.0 }
+	base[ACTIVE] = { 0.0, 0.0, 0.0 }
+	bg[NORMAL] = { 0.0, 0.0, 0.0 }
+	bg[ACTIVE] = { 0.7, 0.0, 0.0 }	
+}
+
+style "recording_big_clock_display" = "non_recording_big_clock_display"
+{
+	fg[NORMAL] = { 1.0, 0, 0 }
 }
 
 style "transport_clock_display"
@@ -521,7 +530,7 @@ style "transport_clock_display"
 
 style "tempo_meter_clock_display"
 {
-	font_name = "sans 8"
+	font_name = "sans 7"
 	fg[NORMAL] = { 1.0, 1.0, 1.0 }
 	fg[ACTIVE] = { 1.0, 1.0, 0.0 }
 	fg[SELECTED] = { 1.0, 0, 0 }
@@ -1075,11 +1084,16 @@ widget "*ErrorMessage" style "error_message"
 widget "*FatalMessage" style "fatal_message"
 widget "*InfoMessage" style "info_message"
 widget "*WarningMessage" style "warning_message"
-widget "*BigClockDisplay" style "big_clock_display"
+widget "*BigClockNonRecording" style "non_recording_big_clock_display"
+widget "*BigClockRecording" style "recording_big_clock_display"
 widget "*TransportClockDisplay" style "transport_clock_display"
 widget "*SecondaryClockDisplay" style "transport_clock_display"
-widget "*BBTTempoLabel" style "tempo_meter_clock_display"
-widget "*BBTMeterLabel" style "tempo_meter_clock_display"
+widget "*AudioClockFramesUpperInfo" style "tempo_meter_clock_display"
+widget "*AudioClockFramesLowerInfo" style "tempo_meter_clock_display"
+widget "*AudioClockSMPTEUpperInfo" style "tempo_meter_clock_display"
+widget "*AudioClockSMPTELowerInfo" style "tempo_meter_clock_display"
+widget "*AudioClockBBTUpperInfo" style "tempo_meter_clock_display"
+widget "*AudioClockBBTLowerInfo" style "tempo_meter_clock_display"
 widget "*SelectionStartClock" style "default_clock_display"
 widget "*SelectionEndClock" style "default_clock_display"
 widget "*EditCursorClock" style "default_clock_display"
@@ -1110,7 +1124,6 @@ widget "*BBTRuler" style "editor_time_ruler"
 widget "*FramesRuler" style "editor_time_ruler"
 widget "*MinSecRuler" style "editor_time_ruler"
 widget "*BaseFrame" style "base_frame"
-widget "*RedFrame" style "red_frame"
 widget "*AudioTrackStripBase" style "audio_track_base"
 widget "*TimeAxisViewControlsBaseUnselected" style "audio_track_base"
 widget "*AudioTrackControlsBaseUnselected" style "audio_track_base"

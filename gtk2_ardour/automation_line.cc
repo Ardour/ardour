@@ -465,8 +465,10 @@ AutomationLine::modify_view_point (ControlPoint& cp, double x, double y, bool wi
 void
 AutomationLine::reset_line_coords (ControlPoint& cp)
 {	
-	line_points[cp.view_index].set_x (cp.get_x());
-	line_points[cp.view_index].set_y (cp.get_y());
+	if (cp.view_index < line_points.size()) {
+		line_points[cp.view_index].set_x (cp.get_x());
+		line_points[cp.view_index].set_y (cp.get_y());
+	}
 }
 
 void

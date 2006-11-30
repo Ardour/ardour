@@ -128,8 +128,6 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 	name_changed ();
 	bounds_changed (Change (StartChanged|LengthChanged|PositionChanged));
 
-	XMLNode *node  = _region->extra_xml ("GUI");
-
 	_region->StateChanged.connect (mem_fun(*this, &AudioRegionEditor::region_changed));
 	
 	spin_arrow_grab = false;

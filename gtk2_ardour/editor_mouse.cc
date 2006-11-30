@@ -1978,6 +1978,8 @@ Editor::cursor_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	
 	if (cursor == edit_cursor) {
 		edit_cursor_clock.set (cursor->current_frame);
+	} else {
+		UpdateAllTransportClocks (cursor->current_frame);
 	}
 
 	show_verbose_time_cursor (cursor->current_frame, 10);

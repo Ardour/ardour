@@ -325,6 +325,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::Frame   big_clock_frame;
 	Gtk::Window* big_clock_window;
 
+	void update_transport_clocks (nframes_t pos);
+	void record_state_changed ();
+
 	/* Transport Control */
 
 	void detach_tearoff (Gtk::Box* parent, Gtk::Widget* contents);
