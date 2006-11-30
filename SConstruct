@@ -16,7 +16,7 @@ import SCons.Node.FS
 SConsignFile()
 EnsureSConsVersion(0, 96)
 
-version = '2.0beta8'
+version = '2.0beta9'
 
 subst_dict = { }
 
@@ -42,7 +42,8 @@ opts.AddOptions(
     BoolOption('SURFACES', 'Build support for control surfaces', 0),
     BoolOption('SYSLIBS', 'USE AT YOUR OWN RISK: CANCELS ALL SUPPORT FROM ARDOUR AUTHORS: Use existing system versions of various libraries instead of internal ones', 0),
     BoolOption('VERSIONED', 'Add revision information to ardour/gtk executable name inside the build directory', 0),
-    BoolOption('VST', 'Compile with support for VST', 0)
+    BoolOption('VST', 'Compile with support for VST', 0),
+    BoolOption('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 0)
 )
 
 #----------------------------------------------------------------------
@@ -673,15 +674,17 @@ else:
         ]
 
 #
-# always build the LGPL control protocol lib, since we link against it ourselves
-# ditto for generic MIDI
+# * always build the LGPL control protocol lib, since we link against it from libardour
+# * ditto for generic MIDI
+# * tranzport checks whether it should build internally, but we need here so that
+#   its included in the tarball
 #
 
-surface_subdirs = [ 'libs/surfaces/control_protocol', 'libs/surfaces/generic_midi' ]
+surface_subdirs = [ 'libs/surfaces/control_protocol', 'libs/surfaces/generic_midi', 'libs/surfaces/tranzport' ]
 
 if env['SURFACES']:
     if have_libusb:
-        surface_subdirs += [ 'libs/surfaces/tranzport' ]
+        env['TRANZPORT'] = 'yes'
     if os.access ('libs/surfaces/sony9pin', os.F_OK):
         surface_subdirs += [ 'libs/surfaces/sony9pin' ]
 
