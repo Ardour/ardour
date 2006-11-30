@@ -3346,7 +3346,7 @@ Editor::duplicate_dialog (bool dup_region)
 
 	entry.set_text ("1");
 	set_size_request_to_display_given_text (entry, X_("12345678"), 20, 15);
-	entry.select_region (0, entry.get_text_length());
+	entry.select_region (0, -1);
 	entry.grab_focus ();
 
 

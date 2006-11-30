@@ -82,7 +82,8 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 
 	ignore_toggle = false;
 	meter_menu = 0;
-	
+	next_release_selects = false;
+
 	gain_slider = manage (new VSliderController (slider,
 						     &gain_adjustment,
 						     _io->gain_control(),
@@ -90,24 +91,29 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 
 	gain_slider->signal_button_press_event().connect (mem_fun(*this, &GainMeter::start_gain_touch));
 	gain_slider->signal_button_release_event().connect (mem_fun(*this, &GainMeter::end_gain_touch));
-	gain_slider->set_name ("MixerGainMeter");
+	gain_slider->set_name ("GainFader");
 
 	gain_display.set_name ("MixerStripGainDisplay");
-	set_size_request_to_display_given_text (gain_display, "-86.g", 2, 6); /* note the descender */
-	gain_display.signal_activate().connect (mem_fun (*this, &GainMeter::gain_entered));
+	gain_display.set_has_frame (false);
+	set_size_request_to_display_given_text (gain_display, "-80.g", 2, 6); /* note the descender */
+	gain_display.signal_activate().connect (mem_fun (*this, &GainMeter::gain_activated));
+	gain_display.signal_focus_in_event().connect (mem_fun (*this, &GainMeter::gain_focused), false);
+	gain_display.signal_focus_out_event().connect (mem_fun (*this, &GainMeter::gain_focused), false);
 
 	gain_display_box.set_homogeneous (true);
+	gain_display_box.set_spacing (2);
 	gain_display_box.pack_start (gain_display, true, true);
 
 	peak_display.set_name ("MixerStripPeakDisplay");
+	peak_display.set_has_frame (false);
 	peak_display.set_editable (false);
-	set_size_request_to_display_given_text  (peak_display, "-86.g", 2, 6); /* note the descender */
+	set_size_request_to_display_given_text  (peak_display, "-80.g", 2, 6); /* note the descender */
 	max_peak = minus_infinity();
 	peak_display.set_text (_("-inf"));
 	peak_display.unset_flags (Gtk::CAN_FOCUS);
 
-	meter_metric_area.set_size_request (25, -1);
 	meter_metric_area.set_name ("MeterMetricsStrip");
+	set_size_request_to_display_given_text (meter_metric_area, "-50", 0, 0);
 
 	meter_packer.set_spacing (2);
 
@@ -124,14 +130,14 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	gain_automation_style_button.set_size_request(15, 15);
 
 	HBox* fader_centering_box = manage (new HBox);
-	fader_centering_box->pack_start (*gain_slider, false, true);
+	fader_centering_box->pack_start (*gain_slider, true, false);
 
 	fader_vbox = manage (new Gtk::VBox());
 	fader_vbox->set_spacing (0);
 	fader_vbox->pack_start (*fader_centering_box, false, false, 0);
 
 	hbox.set_spacing (2);
-	hbox.pack_start (*fader_vbox, true, true, 7);
+	hbox.pack_start (*fader_vbox, true, true);
 
 	set_width(Narrow);
 
@@ -146,7 +152,7 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 
 	        gain_display_box.pack_end (peak_display, true, true);
 
-		hbox.pack_start (meter_packer, true, false);
+		hbox.pack_end (meter_packer, true, true);
 
 		using namespace Menu_Helpers;
 	
@@ -175,11 +181,10 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 		gain_automation_state_changed ();
 	}
 
-
 	set_spacing (2);
 
-	pack_start (gain_display_box,  Gtk::PACK_SHRINK);
-	pack_start (hbox,  Gtk::PACK_SHRINK);
+	pack_start (gain_display_box, Gtk::PACK_SHRINK);
+	pack_start (hbox, Gtk::PACK_SHRINK);
 
 	_io->gain_changed.connect (mem_fun(*this, &GainMeter::gain_changed));
 
@@ -417,7 +422,14 @@ GainMeter::setup_meters ()
 		meters.push_back (MeterInfo());
 	}
 
-	for (uint32_t n = 0; n < nmeters; ++n) {
+	/* pack them backwards */
+
+	if (_width == Wide) {
+	        meter_packer.pack_end (meter_metric_area, false, false);
+		meter_metric_area.show_all ();
+	}
+
+	for (int32_t n = nmeters-1; nmeters && n >= 0 ; --n) {
 		if (meters[n].width != width) {
 			delete meters[n].meter;
 			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, FastMeter::Vertical);
@@ -427,65 +439,20 @@ GainMeter::setup_meters ()
 			meters[n].meter->signal_button_release_event().connect (bind (mem_fun(*this, &GainMeter::meter_button_release), n));
 		}
 
-		meter_packer.pack_start (*meters[n].meter, Gtk::PACK_SHRINK);
+		meter_packer.pack_end (*meters[n].meter, false, false);
 		meters[n].meter->show_all ();
 		meters[n].packed = true;
-	}
-
-	if (_width == Wide) {
-	        meter_packer.pack_start (meter_metric_area, Gtk::PACK_SHRINK);
-		meter_metric_area.show_all ();
 	}
 }	
 
 bool
 GainMeter::gain_key_press (GdkEventKey* ev)
 {
-	cerr << "kp " << ev->keyval << endl;
-
-	switch (ev->keyval) {
-	case GDK_minus:
-	case GDK_plus:
-	case GDK_period:
-	case GDK_comma:
-	case GDK_0:
-	case GDK_1:
-	case GDK_2:
-	case GDK_3:
-	case GDK_4:
-	case GDK_5:
-	case GDK_6:
-	case GDK_7:
-	case GDK_8:
-	case GDK_9:
-	case GDK_KP_Add:
-	case GDK_KP_Subtract:
-	case GDK_KP_Decimal:
-	case GDK_KP_0:
-	case GDK_KP_1:
-	case GDK_KP_2:
-	case GDK_KP_3:
-	case GDK_KP_4:
-	case GDK_KP_5:
-	case GDK_KP_6:
-	case GDK_KP_7:
-	case GDK_KP_8:
-	case GDK_KP_9:
-	case GDK_Return:
-	case GDK_BackSpace:
-	case GDK_Delete:
-	case GDK_KP_Enter:
-	case GDK_Home:
-	case GDK_End:
-	case GDK_Left:
-	case GDK_Right:
-		cerr << "allow " << ev->keyval << " to drop through\n";
+	if (key_is_legal_for_numeric_entry (ev->keyval)) {
+		/* drop through to normal handling */
 		return false;
-		
-	default:
-		break;
 	}
-
+	/* illegal key for gain entry */
 	return true;
 }
 
@@ -567,8 +534,19 @@ GainMeter::popup_meter_menu (GdkEventButton *ev)
 	meter_menu->popup (1, ev->time);
 }
 
+bool
+GainMeter::gain_focused (GdkEventFocus* ev)
+{
+	if (ev->in) {
+		gain_display.select_region (0, -1);
+	} else {
+		gain_display.select_region (0, 0);
+	}
+	return false;
+}
+
 void
-GainMeter::gain_entered ()
+GainMeter::gain_activated ()
 {
 	float f;
 

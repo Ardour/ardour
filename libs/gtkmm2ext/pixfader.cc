@@ -59,18 +59,24 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 	GdkRectangle intersection;
 	int dh = display_height ();
 	int offset_into_pixbuf = (int) floor (view.height / ((float) view.height / dh));
+	Glib::RefPtr<Gdk::GC> fg_gc (get_style()->get_fg_gc(get_state()));
 
 	if (gdk_rectangle_intersect (&view, &ev->area, &intersection)) {
-		get_window()->draw_pixbuf(get_style()->get_fg_gc(get_state()), pixbuf, 
-					  intersection.x, offset_into_pixbuf + intersection.y,
-					  intersection.x, intersection.y,
-					  intersection.width, intersection.height,
-					  Gdk::RGB_DITHER_NONE, 0, 0);
+		get_window()->draw_pixbuf (fg_gc, pixbuf, 
+					   intersection.x, offset_into_pixbuf + intersection.y,
+					   intersection.x, intersection.y,
+					   intersection.width, intersection.height,
+					   Gdk::RGB_DITHER_NONE, 0, 0);
+		
+		get_window()->draw_line (get_style()->get_bg_gc(STATE_ACTIVE), 0, 0, view.width - 1, 0); /* top */
+		get_window()->draw_line (get_style()->get_bg_gc(STATE_ACTIVE), 0, 0, 0, view.height - 1); /* left */
+		get_window()->draw_line (get_style()->get_bg_gc(STATE_NORMAL), view.width - 1, 0, view.width - 1, view.height - 1); /* right */
+		get_window()->draw_line (get_style()->get_bg_gc(STATE_NORMAL), 0, view.height - 1, view.width - 1, view.height - 1); /* bottom */
 	}
 
 	/* always draw the line */
 
-	get_window()->draw_line (get_style()->get_fg_gc(get_state()), 0, unity_y, view.width - 2, unity_y);
+	get_window()->draw_line (fg_gc, 1, unity_y, view.width - 2, unity_y);
 
 	last_drawn = dh;
 	return true;

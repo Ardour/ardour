@@ -141,7 +141,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	color_manager = new ColorManager();
 
 	std::string color_file = ARDOUR::find_config_file("ardour.colors");
-	
+
 	color_manager->load (color_file);
 
 	editor = 0;

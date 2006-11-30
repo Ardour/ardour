@@ -39,6 +39,7 @@ choice.cc
 click_box.cc
 dndtreeview.cc
 fastmeter.cc
+focus_entry.cc
 gtk_ui.cc
 hexentry.cc
 idle_adjustment.cc

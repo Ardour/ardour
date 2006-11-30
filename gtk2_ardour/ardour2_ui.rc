@@ -127,6 +127,13 @@ style "base_frame"
 	bg[NORMAL] = { 0.35, 0.35, 0.40 }
 }
 
+
+style "red_frame"
+{
+	fg[NORMAL] = { 1.0, 0.0, 0.0 }
+	bg[NORMAL] = { 1.0, 0.0, 0.0 }
+}
+
 style "transport_base" = "medium_bold_text"
 {
   bg[NORMAL] = { 0.10, 0.10, 0.10 }
@@ -187,6 +194,12 @@ style "track_rec_enable_button" = "small_button"
 	bg[SELECTED] =   { 1.0, 0.0, 0.0 }
 	bg[ACTIVE] =   { 0.91, 0.68, 0.68}
 	bg[PRELIGHT] =   { 1.0, 0.0, 0.0 }
+}
+
+style "gain_fader"
+{
+	bg[NORMAL] =   { 0.269, 0.269, 0.300}
+	bg[ACTIVE] =   { 0.152, 0.152, 0.168 }
 }
 
 style "mixer_rec_enable_button" = "track_rec_enable_button"
@@ -441,12 +454,17 @@ style "medium_bold_entry"  = "medium_bold_text"
 	base[SELECTED] = { 0, 0, 0 }
 }
 
-
 style "small_entry" = "small_text"
 {
 	fg[NORMAL] = { 0.70, 0.70, 0.70 }
-	fg[ACTIVE] = { 0.70, 0.70, 0.70 }
+	fg[ACTIVE] = { 0, 1.0, 0 }
+	fg[SELECTED] = { 0, 1.0, 0 }
+	text[NORMAL] = { 0.70, 0.70, 0.70 }
+	text[ACTIVE] = { 0, 1.0, 0 }
+	text[SELECTED] = { 0, 1.0, 0 }
 	bg[NORMAL] = { 0.0, 0.0, 0.0 }
+	bg[SELECTED] = { 0.0, 0.0, 0.0 }
+	bg[SELECTED] = { 0.0, 0.0, 0.0 }
 	base[NORMAL] = { 0, 0, 0 }
 	base[ACTIVE] = { 0, 0, 0 }
 	base[SELECTED] = { 0, 0, 0 }
@@ -1092,13 +1110,14 @@ widget "*BBTRuler" style "editor_time_ruler"
 widget "*FramesRuler" style "editor_time_ruler"
 widget "*MinSecRuler" style "editor_time_ruler"
 widget "*BaseFrame" style "base_frame"
+widget "*RedFrame" style "red_frame"
 widget "*AudioTrackStripBase" style "audio_track_base"
 widget "*TimeAxisViewControlsBaseUnselected" style "audio_track_base"
 widget "*AudioTrackControlsBaseUnselected" style "audio_track_base"
-widget "*AudioTrackFader" style "audio_track_base"
+widget "*AudioTrackFader" style "gain_fader"
 widget "*AudioBusStripBase" style "audio_bus_base"
 widget "*BusControlsBaseUnselected" style "audio_bus_base"
-widget "*AudioBusFader" style "audio_bus_base"
+widget "*AudioBusFader" style "gain_fader"
 widget "*TrackSeparator" style "track_separator"
 widget "*TrackEditIndicator0*" style "edit_group_0"
 widget "*TrackEditIndicator1*" style "edit_group_1"

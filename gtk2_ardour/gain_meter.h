@@ -35,6 +35,7 @@
 #include <ardour/types.h>
 
 #include <gtkmm2ext/click_box.h>
+#include <gtkmm2ext/focus_entry.h>
 #include <gtkmm2ext/slider_controller.h>
 
 #include "enums.h"
@@ -79,10 +80,11 @@ class GainMeter : public Gtk::VBox
 	ARDOUR::Session& _session;
 
 	bool ignore_toggle;
+	bool next_release_selects;
 
 	Gtkmm2ext::VSliderController *gain_slider;
 	Gtk::Adjustment              gain_adjustment;
-	Gtk::Entry                   gain_display;
+	Gtkmm2ext::FocusEntry        gain_display;
 	Gtk::Entry                   peak_display;
 	Gtk::HBox                    gain_display_box;
 	Gtk::HBox                    fader_box;
@@ -120,7 +122,8 @@ class GainMeter : public Gtk::VBox
 	gint meter_metrics_expose (GdkEventExpose *);
 
 	void show_gain ();
-	void gain_entered ();
+	void gain_activated ();
+	bool gain_focused (GdkEventFocus*);
 
 	struct MeterInfo {
 	    Gtkmm2ext::FastMeter *meter;

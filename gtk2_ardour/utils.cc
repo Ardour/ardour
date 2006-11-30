@@ -544,3 +544,52 @@ longest (vector<string>& strings)
 	
 	return *longest;
 }
+
+bool
+key_is_legal_for_numeric_entry (guint keyval)
+{
+	switch (keyval) {
+	case GDK_minus:
+	case GDK_plus:
+	case GDK_period:
+	case GDK_comma:
+	case GDK_0:
+	case GDK_1:
+	case GDK_2:
+	case GDK_3:
+	case GDK_4:
+	case GDK_5:
+	case GDK_6:
+	case GDK_7:
+	case GDK_8:
+	case GDK_9:
+	case GDK_KP_Add:
+	case GDK_KP_Subtract:
+	case GDK_KP_Decimal:
+	case GDK_KP_0:
+	case GDK_KP_1:
+	case GDK_KP_2:
+	case GDK_KP_3:
+	case GDK_KP_4:
+	case GDK_KP_5:
+	case GDK_KP_6:
+	case GDK_KP_7:
+	case GDK_KP_8:
+	case GDK_KP_9:
+	case GDK_Return:
+	case GDK_BackSpace:
+	case GDK_Delete:
+	case GDK_KP_Enter:
+	case GDK_Home:
+	case GDK_End:
+	case GDK_Left:
+	case GDK_Right:
+		return true;
+		
+	default:
+		break;
+	}
+
+	return false;
+}
+
