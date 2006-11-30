@@ -11,32 +11,33 @@ Import('env install_prefix')
 fst = env.Copy(CC="winegcc")
 fst.Append (CPPPATH=".")
 
-a = fst.Object ('fst', 'fst.c')
-b = fst.Object ('fstinfofile', 'fstinfofile.c')
-c = fst.Object ('vstwin', 'vstwin.c')
-d = fst.Object ('vsti', 'vsti.c')
-
 if fst['VST']:
+    vst_sdk = File ('vstsdk2.3.zip')
+    vst_dir = Dir ('libs/vst')
+    vst_sdk_dir = Dir ('vstsdk2.3')
+
     if os.access ('vst_sdk2_3.zip', os.F_OK):
-        vst_sdk = fst.Command ('vstsdk2.3.zip', 'vst_sdk2_3.zip', "unzip -o $SOURCES")
+        vst_sdk_zip = fst.Command (vst_sdk, 'vst_sdk2_3.zip',  "unzip -o -d ${TARGET.dir} $SOURCES vstsdk2.3.zip" )
     else:
         if os.access ('vstsdk2.3.zip', os.F_OK) != 1:
             print 'Did not find vst_sdk2_3.zip or vstsdk2.3.zip in libs/fst.'
             print 'Make sure the correct file is in the correct location and correctly named.'
             print 'Please see http://ardour.org/building_vst_support for more information.'
             sys.exit (1)    
-        else:
-            vst_sdk = File ('vstsdk2.3.zip')
-    vst_dir = Dir ('vst')
-    vst_sdk_dir = Dir ('vstsdk2.3')
-    vst_headers = fst.Command ('vst/aeffectx.h', vst_sdk, [
-        "unzip -qq -o $SOURCE",
+
+    vst_headers = fst.Command ([ 'vst/aeffectx.h', 'vst/AEffect.h' ], vst_sdk_zip, [
+        "unzip -qq -d ${SOURCE.dir} -o $SOURCE",
         Delete ('$TARGET.dir'),
-        Copy ('${TARGET.dir}', 'vstsdk2.3/source/common'),
+        Copy ('${TARGET.dir}', 'libs/fst/vstsdk2.3/source/common'),
         "sed -i '/struct VstFileType\|struct VstFileSelect/,/};/d' $TARGET"
         ])
-    Default([vst_headers, a,b,c,d])
-    
+
+    a = fst.Object ('fst', 'fst.c')
+    b = fst.Object ('fstinfofile', 'fstinfofile.c')
+    c = fst.Object ('vstwin', 'vstwin.c')
+    d = fst.Object ('vsti', 'vsti.c')
+
+    Default([vst_headers,a,b,c,d])
     
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      fst_src + ['SConscript',
