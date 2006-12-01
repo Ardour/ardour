@@ -12,12 +12,21 @@ fst = env.Copy(CC="winegcc")
 fst.Append (CPPPATH=".")
 
 if fst['VST']:
-    vst_sdk = File ('vstsdk2.3.zip')
-    vst_dir = Dir ('libs/vst')
+    vst_dir     = Dir ('libs/vst')
     vst_sdk_dir = Dir ('vstsdk2.3')
+    #
+    # if it exists, try to use the Steinberg zip package
+    #
+    vst_sdk_zip = File ('vstsdk2.3.zip')
 
-    if os.access ('vst_sdk2_3.zip', os.F_OK):
-        vst_sdk_zip = fst.Command (vst_sdk, 'vst_sdk2_3.zip',  "unzip -o -d ${TARGET.dir} $SOURCES vstsdk2.3.zip" )
+    if os.access (vst_sdk_zip.abspath, os.F_OK):
+        print 'VST package discovered.'
+    elif os.access ('vst_sdk2_3.zip', os.F_OK):
+        #
+        # redefine vst_sdk_zip as a build target that relies on unpacking the Steinberg "meta" zip package
+        #
+        vst_meta_zip = fst.Command (vst_sdk_zip, 'vst_sdk2_3.zip',  "unzip -o -d ${TARGET.dir} $SOURCES vstsdk2.3.zip" )
+        print 'VST meta-package discovered.'
     else:
         if os.access ('vstsdk2.3.zip', os.F_OK) != 1:
             print 'Did not find vst_sdk2_3.zip or vstsdk2.3.zip in libs/fst.'
