@@ -1310,7 +1310,9 @@ ARDOUR_UI::start_engine ()
 void
 ARDOUR_UI::update_clocks ()
 {
-	 Clock (session->audible_frame()); /* EMIT_SIGNAL */
+	if (!editor || !editor->dragging_playhead()) {
+		Clock (session->audible_frame()); /* EMIT_SIGNAL */
+	}
 }
 
 void

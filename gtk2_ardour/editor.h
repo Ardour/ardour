@@ -286,6 +286,7 @@ class Editor : public PublicEditor
 	void set_follow_playhead (bool yn);
 	void toggle_follow_playhead ();
 	bool follow_playhead() const { return _follow_playhead; }
+	bool dragging_playhead () const { return _dragging_playhead; }
 
 	void toggle_waveform_visibility ();
 	void toggle_waveforms_while_recording ();
@@ -1040,6 +1041,8 @@ class Editor : public PublicEditor
 	std::set<ARDOUR::Playlist*> motion_frozen_playlists;
 	void region_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void region_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
+
+	bool _dragging_playhead;
 
 	void cursor_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void cursor_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);

@@ -308,6 +308,7 @@ Editor::Editor (AudioEngine& eng)
 	playhead_cursor = 0;
 	button_release_can_deselect = true;
 	canvas_idle_queued = false;
+	_dragging_playhead = false;
 
 	location_marker_color = color_map[cLocationMarker];
 	location_range_color = color_map[cLocationRange];

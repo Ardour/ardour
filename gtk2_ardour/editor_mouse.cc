@@ -1942,8 +1942,10 @@ Editor::start_cursor_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	Cursor* cursor = (Cursor *) drag_info.data;
 
-	if (session && cursor == playhead_cursor) {
-		if (drag_info.was_rolling) {
+	if (cursor == playhead_cursor) {
+		_dragging_playhead = true;
+		
+		if (session && drag_info.was_rolling) {
 			session->request_stop ();
 		} 
 	}
@@ -1994,6 +1996,8 @@ Editor::cursor_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	if (drag_info.first_move) return;
 	
 	cursor_drag_motion_callback (item, event);
+
+	_dragging_playhead = false;
 	
 	if (item == &playhead_cursor->canvas_item) {
 		if (session) {

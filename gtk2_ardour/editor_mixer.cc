@@ -164,11 +164,16 @@ Editor::update_current_screen ()
 
 		frame = session->audible_frame();
 
+		if (_dragging_playhead) {
+			goto almost_done;
+		}
+
 		/* only update if the playhead is on screen or we are following it */
 
 		if (_follow_playhead) {
 
-		  playhead_cursor->canvas_item.show();
+			playhead_cursor->canvas_item.show();
+
 			if (frame != last_update_frame) {
 
 				if (frame < leftmost_frame || frame > leftmost_frame + current_page_frames()) {
@@ -198,6 +203,7 @@ Editor::update_current_screen ()
 			}
 		}
 
+	  almost_done:
 		last_update_frame = frame;
 
 		if (current_mixer_strip) {
