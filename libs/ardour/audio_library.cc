@@ -19,6 +19,8 @@
 
 #include <sstream>
 
+#include <libxml/uri.h>
+
 #include <lrdf.h>
 
 #include <pbd/compose.h>
@@ -59,8 +61,19 @@ AudioLibrary::save_changes ()
 string
 AudioLibrary::path2uri (string path)
 {
+	xmlURI temp;
+	memset(&temp, 0, sizeof(temp));
+	
+	xmlChar *cal = xmlCanonicPath((xmlChar*) path.c_str());
+	temp.path = (char *) cal;
+	xmlChar *ret = xmlSaveUri(&temp);
+	xmlFree(cal);
+	
 	stringstream uri;
-	uri << "file:" << path;
+	uri << "file:" << (const char*) ret;
+	
+	xmlFree (ret);
+	
 	return uri.str();
 }
 
