@@ -1,6 +1,5 @@
 /*
-    Copyright (C) 2005 Paul Davis 
-    Written by Taybin Rutkin
+    Copyright (C) 2005-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,16 +15,17 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-
 */
 
 #include <map>
 #include <cerrno>
+#include <sstream>
 
 #include <gtkmm/box.h>
 #include <gtkmm/stock.h>
 
 #include <pbd/convert.h>
+#include <pbd/whitespace.h>
 
 #include <gtkmm2ext/utils.h>
 
@@ -52,14 +52,12 @@ SoundFileBox::SoundFileBox ()
 	:
 	_session(0),
 	current_pid(0),
-	fields(Gtk::ListStore::create(label_columns)),
 	main_box (false, 3),
 	top_box (true, 4),
 	bottom_box (true, 4),
 	play_btn(_("Play")),
 	stop_btn(_("Stop")),
-	add_field_btn(_("Add Field...")),
-	remove_field_btn(_("Remove Field"))
+	apply_btn(_("Apply"))
 {
 	set_name (X_("SoundFileBox"));
 	border_frame.set_label (_("Soundfile Info"));
@@ -75,38 +73,21 @@ SoundFileBox::SoundFileBox ()
 	main_box.pack_start(channels, false, false);
 	main_box.pack_start(samplerate, false, false);
 	main_box.pack_start(timecode, false, false);
-	main_box.pack_start(field_view, true, true);
+	main_box.pack_start(tags_entry, true, true);
 	main_box.pack_start(top_box, false, false);
 	main_box.pack_start(bottom_box, false, false);
 
-	field_view.set_model (fields);
-	field_view.set_size_request(200, 150);
-	field_view.append_column (_("Field"), label_columns.field);
-	field_view.append_column_editable (_("Value"), label_columns.data);
-
 	top_box.set_homogeneous(true);
-	top_box.pack_start(add_field_btn);
-	top_box.pack_start(remove_field_btn);
-
-	remove_field_btn.set_sensitive(false);
+	top_box.pack_start(apply_btn);
 
 	bottom_box.set_homogeneous(true);
 	bottom_box.pack_start(play_btn);
 	bottom_box.pack_start(stop_btn);
 
+//	tags_entry.signal_focus_out_event().connect (mem_fun (*this, &SoundFileBox::tags_entry_left));
 	play_btn.signal_clicked().connect (mem_fun (*this, &SoundFileBox::play_btn_clicked));
 	stop_btn.signal_clicked().connect (mem_fun (*this, &SoundFileBox::stop_btn_clicked));
-
-	add_field_btn.signal_clicked().connect
-	                (mem_fun (*this, &SoundFileBox::add_field_clicked));
-	remove_field_btn.signal_clicked().connect
-	                (mem_fun (*this, &SoundFileBox::remove_field_clicked));
-	
-	Gtk::CellRendererText* cell(dynamic_cast<Gtk::CellRendererText*>(field_view.get_column_cell_renderer(1)));
-	cell->signal_edited().connect (mem_fun (*this, &SoundFileBox::field_edited));
-
-	field_view.get_selection()->signal_changed().connect (mem_fun (*this, &SoundFileBox::field_selected));
-	Library->fields_changed.connect (mem_fun (*this, &SoundFileBox::setup_fields));
+	apply_btn.signal_clicked().connect (mem_fun (*this, &SoundFileBox::apply_btn_clicked));
 
 	show_all();
 	stop_btn.hide();
@@ -136,7 +117,7 @@ SoundFileBox::setup_labels (string filename)
 	}
 
 	length.set_alignment (0.0f, 0.0f);
-	length.set_text (string_compose(_("Length: %1"), PBD::length2string(sf_info.length, sf_info.samplerate)));
+	length.set_text (string_compose(_("Length: %1"), length2string(sf_info.length, sf_info.samplerate)));
 
 	format.set_alignment (0.0f, 0.0f);
 	format.set_text (sf_info.format_name);
@@ -148,37 +129,28 @@ SoundFileBox::setup_labels (string filename)
 	samplerate.set_text (string_compose(_("Samplerate: %1"), sf_info.samplerate));
 
 	timecode.set_alignment (0.0f, 0.0f);
-	timecode.set_text (string_compose (_("Timecode: %1"), PBD::length2string(sf_info.timecode, sf_info.samplerate)));
+	timecode.set_text (string_compose (_("Timecode: %1"), length2string(sf_info.timecode, sf_info.samplerate)));
 
-	setup_fields ();
-
+	vector<string> tags = Library->get_tags (filename);
+	
+	stringstream tag_string;
+	for (vector<string>::iterator i = tags.begin(); i != tags.end(); ++i) {
+		if (i != tags.begin()) {
+			tag_string << ", ";
+		}
+		tag_string << *i;
+	}
+	tags_entry.set_text (tag_string.str());
+	
 	return true;
 }
 
-void
-SoundFileBox::setup_fields ()
-{
-	ENSURE_GUI_THREAD(mem_fun (*this, &SoundFileBox::setup_fields));
-
-	fields->clear ();
-
-	vector<string> field_list;
-	Library->get_fields(field_list);
-
-	vector<string>::iterator i;
-	Gtk::TreeModel::iterator iter;
-	Gtk::TreeModel::Row row;
-	for (i = field_list.begin(); i != field_list.end(); ++i) {
-		if (!(*i == _("channels") || *i == _("samplerate") ||
-			*i == _("resolution") || *i == _("format"))) {
-			iter = fields->append();
-			row = *iter;
-
-			string value = Library->get_field(path, *i);
-			row[label_columns.field] = *i;
-			row[label_columns.data]  = value;
-		}
-	}
+bool
+SoundFileBox::tags_entry_left (GdkEventFocus* event)
+{	
+	apply_btn_clicked ();
+	
+	return true;
 }
 
 void
@@ -228,7 +200,6 @@ SoundFileBox::play_btn_clicked ()
 		newpair.first = path;
 		newpair.second = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (srclist, 0, srclist[0]->length(), rname, 0, Region::DefaultFlags, false));
 
-
 		res = region_cache.insert (newpair);
 		the_region = res.first;
 	}
@@ -252,54 +223,33 @@ SoundFileBox::stop_btn_clicked ()
 }
 
 void
-SoundFileBox::add_field_clicked ()
+SoundFileBox::apply_btn_clicked ()
 {
-    ArdourPrompter prompter (true);
-    string name;
+	string tag_string = tags_entry.get_text ();
 
-    prompter.set_prompt (_("Name for Field"));
-    prompter.add_button (Gtk::Stock::ADD, Gtk::RESPONSE_ACCEPT);
-    prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
+	vector<string> tags;
 
-    switch (prompter.run ()) {
-		case Gtk::RESPONSE_ACCEPT:
-	        prompter.get_result (name);
-			if (name.length()) {
-				Library->add_field (name);
-				Library->save_changes ();
-			}
-	        break;
+	static const string DELIMITERS = ",";
+	
+	// Skip delimiters at beginning.
+    string::size_type last_pos = tag_string.find_first_not_of(DELIMITERS, 0);
+    // Find first "non-delimiter".
+    string::size_type pos = tag_string.find_first_of(DELIMITERS, last_pos);
 
-	    default:
-	        break;
+    while (string::npos != pos || string::npos != last_pos) {
+		string x = tag_string.substr(last_pos, pos - last_pos);
+		strip_whitespace_edges (x);
+		if (x.length()) {
+			tags.push_back (x);
+		}
+        // Skip delimiters.  Note the "not_of"
+        last_pos = tag_string.find_first_not_of(DELIMITERS, pos);
+        // Find next "non-delimiter"
+        pos = tag_string.find_first_of(DELIMITERS, last_pos);
     }
-}
-
-void
-SoundFileBox::remove_field_clicked ()
-{
-	field_view.get_selection()->selected_foreach_iter(mem_fun(*this, &SoundFileBox::delete_row));
-
+    
+	Library->set_tags (path, tags);
 	Library->save_changes ();
-}
-
-void
-SoundFileBox::field_edited (const Glib::ustring& str1, const Glib::ustring& str2)
-{
-	Gtk::TreeModel::Children rows(fields->children());
-	Gtk::TreeModel::Row row(rows[atoi(str1.c_str())]);
-	
-	Library->set_field (path, row[label_columns.field], str2);
-	
-	Library->save_changes ();
-}
-
-void
-SoundFileBox::delete_row (const Gtk::TreeModel::iterator& iter)
-{
-	Gtk::TreeModel::Row row = *iter;
-
-	Library->remove_field(row[label_columns.field]);
 }
 
 void
@@ -309,16 +259,6 @@ SoundFileBox::audition_status_changed (bool active)
 	
 	if (!active) {
 		stop_btn_clicked ();
-	}
-}
-
-void
-SoundFileBox::field_selected ()
-{
-	if (field_view.get_selection()->count_selected_rows()) {
-		remove_field_btn.set_sensitive(true);
-	} else {
-		remove_field_btn.set_sensitive(false);
 	}
 }
 
@@ -335,6 +275,7 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s)
 	: ArdourDialog (title, false),
 	  chooser (Gtk::FILE_CHOOSER_ACTION_OPEN)
 {
+	set_default_size (700, 500);
 	get_vbox()->pack_start(chooser);
 	chooser.set_preview_widget(preview);
 	chooser.set_select_multiple (true);

@@ -86,7 +86,7 @@ Prompter::get_result (string &str, bool strip)
 {
 	str = entry.get_text ();
 	if (strip) {
-		strip_whitespace_edges (str);
+		PBD::strip_whitespace_edges (str);
 	}
 }
 

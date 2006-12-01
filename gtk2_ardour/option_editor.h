@@ -33,8 +33,6 @@
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/comboboxtext.h>
 
-#include <gtkmm2ext/pathlist.h>
-
 #include <ardour/session.h>
 
 #include "ardour_dialog.h"
@@ -75,13 +73,10 @@ class OptionEditor : public Gtk::Dialog
 	Gtk::Table	path_table;
 	Gtk::Entry	session_raid_entry;
 
-	Gtkmm2ext::PathList sfdb_path_view;
-
 	void setup_path_options();
 	void add_session_paths ();
 	void remove_session_paths ();
 	void raid_path_changed ();
-	void sfdb_paths_changed ();
 
 	/* fades */
 

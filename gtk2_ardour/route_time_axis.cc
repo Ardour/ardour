@@ -1105,17 +1105,17 @@ RouteTimeAxisView::name_entry_changed ()
 		return;
 	}
 
+	strip_whitespace_edges(x);
+
 	if (x.length() == 0) {
 		name_entry.set_text (_route->name());
 		return;
 	}
 
-	strip_whitespace_edges(x);
-
 	if (_session.route_name_unique (x)) {
 		_route->set_name (x, this);
 	} else {
-		ARDOUR_UI::instance()->popup_error (_("a track already exists with that name"));
+		ARDOUR_UI::instance()->popup_error (_("A track already exists with that name"));
 		name_entry.set_text (_route->name());
 	}
 }

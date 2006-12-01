@@ -12,4 +12,4 @@ file) will be removed.
 (2) STANDARD TEMPLATES
 
 The templates in ./templates are intended for installation in
-$prefix/share/ardour/templates.
+$prefix/share/ardour2/templates.

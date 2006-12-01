@@ -20,7 +20,6 @@
 
 #include <pbd/whitespace.h>
 
-#include <ardour/audio_library.h>
 #include <ardour/session.h>
 #include <ardour/audioengine.h>
 #include <ardour/configuration.h>
@@ -60,7 +59,6 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 
 	  /* Paths */
 	  path_table (11, 2),
-	  sfdb_path_view(),
 
 	  /* Fades */
 
@@ -224,21 +222,7 @@ OptionEditor::setup_path_options()
 	path_table.attach (*label, 0, 1, 0, 1, FILL|EXPAND, FILL);
 	path_table.attach (session_raid_entry, 1, 3, 0, 1, Gtk::FILL|Gtk::EXPAND, FILL);
 
-	label = manage(new Label(_("Soundfile Search Paths")));
-	label->set_name("OptionsLabel");
-	path_table.attach(*label, 0, 1, 2, 3, FILL|EXPAND, FILL);
-	path_table.attach(sfdb_path_view, 1, 3, 2, 3, Gtk::FILL|Gtk::EXPAND, FILL);
-
-	sfdb_path_view.set_paths(Library->get_paths());
-	sfdb_path_view.PathsUpdated.connect (mem_fun(*this, &OptionEditor::sfdb_paths_changed));
-
 	path_table.show_all();
-}
-
-void
-OptionEditor::sfdb_paths_changed ()
-{
-	Library->set_paths (sfdb_path_view.get_paths());
 }
 
 void
@@ -659,19 +643,12 @@ OptionEditor::click_sound_changed ()
 			return;
 		}
 
-		if (path.empty()) {
+		strip_whitespace_edges (path);
 
+		if (path == _("internal")) {
 			Config->set_click_sound ("");
-
 		} else {
-
-			strip_whitespace_edges (path);
-			
-			if (path == _("internal")) {
-				Config->set_click_sound ("");
-			} else {
-				Config->set_click_sound (path);
-			}
+			Config->set_click_sound (path);
 		}
 	}
 }
@@ -686,19 +663,12 @@ OptionEditor::click_emphasis_sound_changed ()
 			return;
 		}
 
-		if (path.empty()) {
+		strip_whitespace_edges (path);
 
+		if (path == _("internal")) {
 			Config->set_click_emphasis_sound ("");
-
 		} else {
-
-			strip_whitespace_edges (path);
-
-			if (path == _("internal")) {
-				Config->set_click_emphasis_sound ("");
-			} else {
-				Config->set_click_emphasis_sound (path);
-			}
+			Config->set_click_emphasis_sound (path);
 		}
 	}
 }
