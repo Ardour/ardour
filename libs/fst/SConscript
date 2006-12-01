@@ -23,7 +23,7 @@ if fst['VST']:
         print 'VST package discovered.'
     elif os.access ('vst_sdk2_3.zip', os.F_OK):
         #
-        # redefine vst_sdk_zip as a build target that relies on unpacking the Steinberg "meta" zip package
+        # add a build target that unpacks the zip package the Steinberg "meta" zip package
         #
         vst_meta_zip = fst.Command (vst_sdk_zip, 'vst_sdk2_3.zip',  "unzip -o -d ${TARGET.dir} $SOURCES vstsdk2.3.zip" )
         print 'VST meta-package discovered.'
