@@ -3141,7 +3141,6 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 		rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
 		rv->get_canvas_group()->i2w (ix1, iy1);
-		rv->region()->set_opaque(false);
 		TimeAxisView* tvp2 = trackview_by_y_position (iy1);
 		AudioTimeAxisView* canvas_atv = dynamic_cast<AudioTimeAxisView*>(tvp2);
 		AudioTimeAxisView* temp_atv;
@@ -3249,6 +3248,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 					}
 				}
 			}
+			rv->region()->set_opaque(false);
 		}
 
 		if (drag_info.brushing) {

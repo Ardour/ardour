@@ -1385,6 +1385,10 @@ Playlist::set_state (const XMLNode& node)
 		} 			
 	}
 	
+	notify_modified ();
+
+	thaw ();
+
  	/* update dependents, which was not done during add_region_internal 
 	   due to in_set_state being true 
 	*/
@@ -1392,10 +1396,6 @@ Playlist::set_state (const XMLNode& node)
 	for (RegionList::iterator r = regions.begin(); r != regions.end(); ++r) {
 		check_dependents (*r, false);
 	}
-
-	notify_modified ();
-
-	thaw ();
 
 	in_set_state--;
 
