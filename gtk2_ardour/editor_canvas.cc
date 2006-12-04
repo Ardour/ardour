@@ -294,13 +294,33 @@ Editor::track_canvas_allocate (Gtk::Allocation alloc)
 bool
 Editor::track_canvas_idle ()
 {
-
 	if (canvas_idle_queued) {
 		canvas_idle_queued = false;
 	}
 
 	canvas_width = canvas_allocation.get_width();
 	canvas_height = canvas_allocation.get_height();
+
+	full_canvas_height = canvas_height;
+
+	if (session) {
+		TrackViewList::iterator i;
+		double height = 0;
+
+		for (i = track_views.begin(); i != track_views.end(); ++i) {
+			if ((*i)->control_parent) {
+				height += (*i)->effective_height;
+				height += track_spacing;
+			}
+		}
+		
+		if (height) {
+			height -= track_spacing;
+		}
+
+		full_canvas_height = height;
+	}
+
 
 	zoom_range_clock.set ((nframes_t) floor ((canvas_width * frames_per_unit)));
 	edit_cursor->set_position (edit_cursor->current_frame);

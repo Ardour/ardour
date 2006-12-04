@@ -2794,6 +2794,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		set<Playlist*> affected_playlists;
 		pair<set<Playlist*>::iterator,bool> insert_result;
 		
+		// TODO: Crossfades need to be copied!
 		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
 			RegionView* rv;
 			
@@ -2835,6 +2836,8 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 				new_regionviews.push_back (latest_regionview);
 			}
 		}
+
+		
 		
 		if (new_regionviews.empty()) {
 			return;
@@ -4599,7 +4602,7 @@ Editor::reposition_zoom_rect (nframes_t start, nframes_t end)
 {
 	double x1 = frame_to_pixel (start);
 	double x2 = frame_to_pixel (end);
-	double y2 = canvas_height - 2;
+	double y2 = full_canvas_height - 1.0;
 
 	zoom_rect->property_x1() = x1;
 	zoom_rect->property_y1() = 1.0;

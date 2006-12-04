@@ -654,6 +654,7 @@ class Editor : public PublicEditor
 
 	double canvas_width;
 	double canvas_height;
+	double full_canvas_height;
 	nframes_t last_canvas_frame;
 
 	bool track_canvas_map_handler (GdkEventAny*);
