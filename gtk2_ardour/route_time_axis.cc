@@ -926,7 +926,12 @@ RouteTimeAxisView::use_new_playlist (bool prompt)
 	if (!pl)
 		return;
 
-	name = Playlist::bump_name (pl->name(), _session);
+	name = pl->name();
+
+	do {
+		name = Playlist::bump_name (name, _session);
+	} while (_session.playlist_by_name(name));
+
 
 	if (prompt) {
 		
@@ -935,7 +940,7 @@ RouteTimeAxisView::use_new_playlist (bool prompt)
 		prompter.set_prompt (_("Name for Playlist"));
 		prompter.set_initial_text (name);
 		prompter.add_button (Gtk::Stock::NEW, Gtk::RESPONSE_ACCEPT);
-		prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
+		prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, true);
 
 		switch (prompter.run ()) {
 		case Gtk::RESPONSE_ACCEPT:
