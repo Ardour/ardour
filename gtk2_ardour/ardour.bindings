@@ -47,6 +47,7 @@
 (gtk_accel_path "<Actions>/Editor/redo" "<control>r")
 (gtk_accel_path "<Actions>/Common/Save" "<control>s")
 (gtk_accel_path "<Actions>/Editor/editor-paste" "<control>v")
+(gtk_accel_path "<Actions>/Editor/remove-last-capture" "<control>Delete")
 (gtk_accel_path "<Actions>/Editor/editor-cut" "<control>x")
 (gtk_accel_path "<Actions>/Editor/editor-delete" "Delete")
 (gtk_accel_path "<Actions>/Editor/undo" "<control>z")

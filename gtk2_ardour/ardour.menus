@@ -81,6 +81,7 @@
                <menuitem action='editor-delete'/>
                <menuitem action='editor-copy'/>
                <menuitem action='editor-paste'/>
+	       <menuitem action='remove-last-capture'/>
                <separator/>       
                <menu action="EditSelectRangeOptions">
                    <menuitem action='extend-range-to-start-of-region'/>
