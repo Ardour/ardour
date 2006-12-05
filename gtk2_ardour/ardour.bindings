@@ -19,7 +19,7 @@
 (gtk_accel_path "<Actions>/Editor/insert-region" "i")
 (gtk_accel_path "<Actions>/Editor/normalize-region" "n")
 (gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-object" "o")
-(gtk_accel_path "<Actions>/Transport/loop" "l")
+(gtk_accel_path "<Actions>/Transport/Loop" "l")
 (gtk_accel_path "<Actions>/Editor/set-playhead" "p")
 (gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-range" "r")
 (gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-timefx" "t")
