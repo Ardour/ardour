@@ -1283,8 +1283,14 @@ RouteTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
 			if (ds->playlist()->id() == (*i)->id()) {
 				static_cast<RadioMenuItem*>(&playlist_items.back())->set_active();
 			}
+		} else if (ds->playlist()->id() == (*i)->id()) {
+			playlist_items.push_back (RadioMenuElem (playlist_group, (*i)->name(), bind (mem_fun (*this, &RouteTimeAxisView::use_playlist), (*i))));
+			static_cast<RadioMenuItem*>(&playlist_items.back())->set_active();
+			
 		}
 	}
+
+	
 
 	playlist_items.push_back (SeparatorElem());
 	playlist_items.push_back (MenuElem (_("Rename"), mem_fun(*this, &RouteTimeAxisView::rename_current_playlist)));
