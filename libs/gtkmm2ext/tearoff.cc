@@ -127,7 +127,7 @@ TearOff::close_click (GdkEventButton* ev)
 gint
 TearOff::window_button_press (GdkEventButton* ev)
 {
-	if (dragging) {
+	if (dragging || ev->button != 1) {
 		dragging = false;
 		own_window.remove_modal_grab();
 		return true;
@@ -169,6 +169,12 @@ TearOff::window_motion (GdkEventMotion* ev)
 	own_window.get_pointer (mx, my);
 
 	if (!dragging) {
+		return true;
+	}
+
+	if (!(ev->state & GDK_BUTTON1_MASK)) {
+		dragging = false;
+		own_window.remove_modal_grab();
 		return true;
 	}
 

@@ -389,6 +389,57 @@ if env['VST']:
         print "OK, VST support will be enabled"
 
 
+#######################
+# Dependency Checking #
+#######################
+
+deps = \
+{
+	'glib-2.0'             : '2.10.1',
+	'gthread-2.0'          : '2.10.1',
+	'gtk+-2.0'             : '2.8.1',
+	'libxml-2.0'           : '2.6.0',
+	'samplerate'           : '0.1.2',
+	'raptor'               : '1.4.8',
+	'lrdf'                 : '0.4.0',
+	'jack'                 : '0.101.1',
+	'libgnomecanvas-2.0'   : '2.0'
+}
+
+def DependenciesRequiredMessage():
+	print 'You do not have the necessary dependencies required to build ardour'
+	print 'Please consult http://ardour.org/building for more information'
+
+def CheckPKGConfig(context, version):
+     context.Message( 'Checking for pkg-config version >= %s... ' %version )
+     ret = context.TryAction('pkg-config --atleast-pkgconfig-version=%s' % version)[0]
+     context.Result( ret )
+     return ret
+
+def CheckPKGVersion(context, name, version):
+     context.Message( 'Checking for %s... ' % name )
+     ret = context.TryAction('pkg-config --atleast-version=%s %s' %(version,name) )[0]
+     context.Result( ret )
+     return ret
+
+conf = Configure(env, custom_tests = { 'CheckPKGConfig' : CheckPKGConfig,
+                                       'CheckPKGVersion' : CheckPKGVersion })
+
+# I think a more recent version is needed on win32
+min_pkg_config_version = '0.8.0'
+
+if not conf.CheckPKGConfig(min_pkg_config_version):
+     print 'pkg-config >= %s not found.' % min_pkg_config_version
+     Exit(1)
+
+for pkg, version in deps.iteritems():
+	if not conf.CheckPKGVersion( pkg, version ):
+		print '%s >= %s not found.' %(pkg, version)
+		DependenciesRequiredMessage()
+		Exit(1)
+
+env = conf.Finish()
+
 # ----------------------------------------------------------------------
 # Construction environment setup
 # ----------------------------------------------------------------------
@@ -540,6 +591,24 @@ else:
 env = conf.Finish()
 
 if env['SYSLIBS']:
+
+    syslibdeps = \
+    {
+        'sigc++-2.0'           : '2.0',
+        'gtkmm-2.4'            : '2.8',
+        'libgnomecanvasmm-2.6' : '2.12.0'
+    }
+
+    conf = Configure(env, custom_tests = { 'CheckPKGConfig' : CheckPKGConfig,
+                    'CheckPKGVersion' : CheckPKGVersion })
+
+    for pkg, version in syslibdeps.iteritems():
+        if not conf.CheckPKGVersion( pkg, version ):
+            print '%s >= %s not found.' %(pkg, version)
+            DependenciesRequiredMessage()
+            Exit(1)
+	
+    env = conf.Finish()
     
     libraries['sigc2'] = LibraryInfo()
     libraries['sigc2'].ParseConfig('pkg-config --cflags --libs sigc++-2.0')

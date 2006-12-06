@@ -3313,6 +3313,8 @@ Session::remove_redirect (Redirect* redirect)
 	PortInsert* port_insert;
 	PluginInsert* plugin_insert;
 
+	cerr << "Removing a redirect!\n";
+
 	if ((insert = dynamic_cast<Insert *> (redirect)) != 0) {
 		if ((port_insert = dynamic_cast<PortInsert *> (insert)) != 0) {
 			_port_inserts.remove (port_insert);
@@ -3323,7 +3325,9 @@ Session::remove_redirect (Redirect* redirect)
 			/*NOTREACHED*/
 		}
 	} else if ((send = dynamic_cast<Send *> (redirect)) != 0) {
+		cerr << "Remove send, used to have " << _sends.size() << endl;
 		_sends.remove (send);
+		cerr << "post removal, have " << _sends.size() << endl;
 	} else {
 		fatal << _("programming error: unknown type of Redirect deleted!") << endmsg;
 		/*NOTREACHED*/
@@ -3451,9 +3455,15 @@ Session::ensure_passthru_buffers (uint32_t howmany)
 string
 Session::next_send_name ()
 {
-	char buf[32];
-	snprintf (buf, sizeof (buf), "send %" PRIu32, ++send_cnt);
-	return buf;
+	uint32_t cnt = 0;
+	
+	shared_ptr<RouteList> r = routes.reader ();
+	
+	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
+		cnt += (*i)->count_sends ();
+	}
+
+	return string_compose (_("send %1"), ++cnt);
 }
 
 string

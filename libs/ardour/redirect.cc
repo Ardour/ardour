@@ -58,6 +58,7 @@ Redirect::Redirect (Session& s, const string& name, Placement p,
 
 Redirect::~Redirect ()
 {
+	notify_callbacks ();
 }
 
 boost::shared_ptr<Redirect>

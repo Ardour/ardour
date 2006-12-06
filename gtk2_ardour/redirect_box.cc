@@ -19,6 +19,7 @@
 */
 
 #include <cmath>
+#include <iostream>
 
 #include <sigc++/bind.h>
 
@@ -285,7 +286,7 @@ RedirectBox::redirect_button_press_event (GdkEventButton *ev)
 	
 	if (redirect && Keyboard::is_delete_event (ev)) {
 		
-		Glib::signal_idle().connect (bind (mem_fun(*this, &RedirectBox::idle_delete_redirect), redirect));
+		Glib::signal_idle().connect (bind (mem_fun(*this, &RedirectBox::idle_delete_redirect), boost::weak_ptr<Redirect>(redirect)));
 		ret = true;
 		
 	} else if (redirect && (Keyboard::is_edit_event (ev) || (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS && ev->state == 0))) {
@@ -362,7 +363,7 @@ RedirectBox::insert_plugin_chosen (boost::shared_ptr<Plugin> plugin)
 
 		boost::shared_ptr<Redirect> redirect (new PluginInsert (_session, plugin, _placement));
 		
-		redirect->active_changed.connect (mem_fun(*this, &RedirectBox::show_redirect_active));
+		redirect->active_changed.connect (bind (mem_fun (*this, &RedirectBox::show_redirect_active), boost::weak_ptr<Redirect>(redirect), (void*) 0));
 
 		uint32_t err_streams;
 
@@ -440,7 +441,7 @@ void
 RedirectBox::choose_insert ()
 {
 	boost::shared_ptr<Redirect> redirect (new PortInsert (_session, _placement));
-	redirect->active_changed.connect (mem_fun(*this, &RedirectBox::show_redirect_active));
+	redirect->active_changed.connect (bind (mem_fun(*this, &RedirectBox::show_redirect_active), boost::weak_ptr<Redirect>(redirect)));
 	_route->add_redirect (redirect, this);
 }
 
@@ -456,15 +457,24 @@ RedirectBox::choose_send ()
 	IOSelectorWindow *ios = new IOSelectorWindow (_session, send, false, true);
 	
 	ios->show_all ();
-	ios->selector().Finished.connect (bind (mem_fun(*this, &RedirectBox::send_io_finished), boost::static_pointer_cast<Redirect>(send), ios));
+
+	boost::shared_ptr<Redirect> r = boost::static_pointer_cast<Redirect>(send);
+
+	ios->selector().Finished.connect (bind (mem_fun(*this, &RedirectBox::send_io_finished), boost::weak_ptr<Redirect>(r), ios));
 }
 
 void
-RedirectBox::send_io_finished (IOSelector::Result r, boost::shared_ptr<Redirect> redirect, IOSelectorWindow* ios)
+RedirectBox::send_io_finished (IOSelector::Result r, boost::weak_ptr<Redirect> weak_redirect, IOSelectorWindow* ios)
 {
+	boost::shared_ptr<Redirect> redirect (weak_redirect.lock());
+
+	if (!redirect) {
+		return;
+	}
+
 	switch (r) {
 	case IOSelector::Cancelled:
-		// delete redirect; XXX SHAREDPTR HOW TO DESTROY THE REDIRECT ? do we even need to think about it?
+		// redirect will go away when all shared_ptrs to it vanish
 		break;
 
 	case IOSelector::Accepted:
@@ -481,9 +491,10 @@ RedirectBox::redisplay_redirects (void *src)
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RedirectBox::redisplay_redirects), src));
 
 	if (no_redirect_redisplay) {
+		cerr << "redisplay redirects skipped, no redisplay set\n";
 		return;
 	}
-
+	
 	ignore_delete = true;
 	model->clear ();
 	ignore_delete = false;
@@ -514,16 +525,22 @@ RedirectBox::add_redirect_to_display (boost::shared_ptr<Redirect> redirect)
 	Gtk::TreeModel::Row row = *(model->append());
 	row[columns.text] = redirect_name (redirect);
 	row[columns.redirect] = redirect;
-	
-	show_redirect_active (redirect.get(), this);
 
-	redirect_active_connections.push_back (redirect->active_changed.connect (mem_fun(*this, &RedirectBox::show_redirect_active)));
-	redirect_name_connections.push_back (redirect->name_changed.connect (bind (mem_fun(*this, &RedirectBox::show_redirect_name), redirect)));
+	show_redirect_active (redirect, this);
+
+	redirect_active_connections.push_back (redirect->active_changed.connect (bind (mem_fun(*this, &RedirectBox::show_redirect_active), boost::weak_ptr<Redirect>(redirect))));
+	redirect_name_connections.push_back (redirect->name_changed.connect (bind (mem_fun(*this, &RedirectBox::show_redirect_name), boost::weak_ptr<Redirect>(redirect))));
 }
 
 string
-RedirectBox::redirect_name (boost::shared_ptr<Redirect> redirect)
+RedirectBox::redirect_name (boost::weak_ptr<Redirect> weak_redirect)
 {
+	boost::shared_ptr<Redirect> redirect (weak_redirect.lock());
+
+	if (!redirect) {
+		return string();
+	}
+
 	boost::shared_ptr<Send> send;
 	string name_display;
 
@@ -585,16 +602,22 @@ RedirectBox::build_redirect_tooltip (EventBox& box, string start)
 }
 
 void
-RedirectBox::show_redirect_name (void* src, boost::shared_ptr<Redirect> redirect)
+RedirectBox::show_redirect_name (void* src, boost::weak_ptr<Redirect> redirect)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RedirectBox::show_redirect_name), src, redirect));
-	show_redirect_active (redirect.get(), src);
+	show_redirect_active (redirect, src);
 }
 
 void
-RedirectBox::show_redirect_active (Redirect* redirect, void *src)
+RedirectBox::show_redirect_active (void *src, boost::weak_ptr<Redirect> weak_redirect)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RedirectBox::show_redirect_active), redirect, src));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RedirectBox::show_redirect_active), weak_redirect, src));
+	
+	boost::shared_ptr<Redirect> redirect (weak_redirect.lock());
+	
+	if (!redirect) {
+		return;
+	}
 
 	Gtk::TreeModel::Children children = model->children();
 	Gtk::TreeModel::Children::iterator iter = children.begin();
@@ -603,7 +626,7 @@ RedirectBox::show_redirect_active (Redirect* redirect, void *src)
 
 		boost::shared_ptr<Redirect> r = (*iter)[columns.redirect];
 
-		if (r.get() == redirect) {
+		if (r == redirect) {
 			(*iter)[columns.text] = redirect_name (r);
 			
 			if (redirect->active()) {
@@ -698,6 +721,7 @@ RedirectBox::cut_redirects ()
 	
 	_rr_selection.set (to_be_removed);
 
+	no_redirect_redisplay = true;
 	for (vector<boost::shared_ptr<Redirect> >::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i) {
 		
 		void* gui = (*i)->get_gui ();
@@ -712,6 +736,8 @@ RedirectBox::cut_redirects ()
 		}
 
 	}
+	no_redirect_redisplay = false;
+	redisplay_redirects (this);
 }
 
 void
@@ -734,12 +760,22 @@ RedirectBox::copy_redirects ()
 }
 
 gint
-RedirectBox::idle_delete_redirect (boost::shared_ptr<Redirect> redirect)
+RedirectBox::idle_delete_redirect (boost::weak_ptr<Redirect> weak_redirect)
 {
+	boost::shared_ptr<Redirect> redirect (weak_redirect.lock());
+
+	if (!redirect) {
+		return false;
+	}
+
 	/* NOT copied to _mixer.selection() */
 
+	no_redirect_redisplay = true;
 	_route->remove_redirect (redirect, this);
-	return FALSE;
+	no_redirect_redisplay = false;
+	redisplay_redirects (this);
+
+	return false;
 }
 
 void
@@ -783,9 +819,12 @@ RedirectBox::cut_redirect (boost::shared_ptr<Redirect> redirect)
 		static_cast<Gtk::Widget*>(gui)->hide ();
 	}
 	
+	no_redirect_redisplay = true;
 	if (_route->remove_redirect (redirect, this)) {
 		_rr_selection.remove (redirect);
 	}
+	no_redirect_redisplay = false;
+	redisplay_redirects (this);
 }
 
 void
@@ -979,7 +1018,7 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 					plugin_insert->set_gui (plugin_ui);
 					
 					// change window title when route name is changed
-					_route->name_changed.connect (bind (mem_fun(*this, &RedirectBox::route_name_changed), plugin_ui, plugin_insert));
+					_route->name_changed.connect (bind (mem_fun(*this, &RedirectBox::route_name_changed), plugin_ui, boost::weak_ptr<PluginInsert> (plugin_insert)));
 					
 				
 				} else {
@@ -1238,11 +1277,13 @@ RedirectBox::rb_edit ()
 }
 
 void
-RedirectBox::route_name_changed (void* src, PluginUIWindow* plugin_ui, boost::shared_ptr<PluginInsert> pi)
+RedirectBox::route_name_changed (void* src, PluginUIWindow* plugin_ui, boost::weak_ptr<PluginInsert> wpi)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &RedirectBox::route_name_changed), src, plugin_ui, pi));
-	
-	plugin_ui->set_title (generate_redirect_title (pi));
+	ENSURE_GUI_THREAD(bind (mem_fun (*this, &RedirectBox::route_name_changed), src, plugin_ui, wpi));
+	boost::shared_ptr<PluginInsert> pi (wpi.lock());
+	if (pi) {
+		plugin_ui->set_title (generate_redirect_title (pi));
+	}
 }
 
 string 

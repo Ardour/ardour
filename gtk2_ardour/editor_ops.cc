@@ -1208,7 +1208,7 @@ Editor::add_location_from_selection ()
 	nframes_t start = selection->time[clicked_selection].start;
 	nframes_t end = selection->time[clicked_selection].end;
 
-	Location *location = new Location (start, end, "selection");
+	Location *location = new Location (start, end, "selection", Location::IsRangeMarker);
 
 	session->begin_reversible_command (_("add marker"));
         XMLNode &before = session->locations()->get_state();
@@ -1242,7 +1242,7 @@ Editor::add_location_from_audio_region ()
 	RegionView* rv = *(selection->regions.begin());
 	boost::shared_ptr<Region> region = rv->region();
 	
-	Location *location = new Location (region->position(), region->last_frame(), region->name());
+	Location *location = new Location (region->position(), region->last_frame(), region->name(), Location::IsRangeMarker);
 	session->begin_reversible_command (_("add marker"));
         XMLNode &before = session->locations()->get_state();
 	session->locations()->add (location, true);

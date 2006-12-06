@@ -123,7 +123,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_tempo_map->StateChanged.connect (mem_fun (*this, &Session::tempo_map_changed));
 
 	g_atomic_int_set (&processing_prohibited, 0);
-	send_cnt = 0;
 	insert_cnt = 0;
 	_transport_speed = 0;
 	_last_transport_speed = 0;

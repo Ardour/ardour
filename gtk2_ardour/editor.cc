@@ -685,6 +685,27 @@ Editor::Editor (AudioEngine& eng)
 
 	fade_context_menu.set_name ("ArdourContextMenu");
 
+	/* icons, titles, WM stuff */
+
+	list<Glib::RefPtr<Gdk::Pixbuf> > window_icons;
+	Glib::RefPtr<Gdk::Pixbuf> icon;
+
+	if ((icon = ::get_icon ("ardour_icon_16px")) != 0) {
+		window_icons.push_back (icon);
+	}
+	if ((icon = ::get_icon ("ardour_icon_22px")) != 0) {
+		window_icons.push_back (icon);
+	}
+	if ((icon = ::get_icon ("ardour_icon_32px")) != 0) {
+		window_icons.push_back (icon);
+	}
+	if ((icon = ::get_icon ("ardour_icon_48px")) != 0) {
+		window_icons.push_back (icon);
+	}
+	if (!window_icons.empty()) {
+		set_icon_list (window_icons);
+		set_default_icon_list (window_icons);
+	}
 	set_title (_("ardour: editor"));
 	set_wmclass (_("ardour_editor"), "Ardour");
 
@@ -1860,6 +1881,7 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Select all in range"), mem_fun(*this, &Editor::select_all_selectables_using_time_selection)));
 	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Add Range Markers"), mem_fun (*this, &Editor::add_location_from_selection)));
 	items.push_back (MenuElem (_("Set range to loop range"), mem_fun(*this, &Editor::set_selection_from_loop)));
 	items.push_back (MenuElem (_("Set range to punch range"), mem_fun(*this, &Editor::set_selection_from_punch)));
 	items.push_back (SeparatorElem());

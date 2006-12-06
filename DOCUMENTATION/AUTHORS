@@ -59,6 +59,8 @@ mantis and some not, fairly continuously for several months. He then
 moved on to write SSE assembler routines to handle the CPU-hungry
 metering and mixing routines.
 
+Brian Ahr contributed many small fixes for ardour 2.0.
+
 Smaller (but not necessarily minor) patches were received from the
 following people:
 
@@ -73,3 +75,4 @@ following people:
   Rob Holland
   Joshua Leachman
   Per Sigmond
+  Nimal Ratnayake

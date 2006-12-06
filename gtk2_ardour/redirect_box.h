@@ -97,7 +97,9 @@ class RedirectBox : public Gtk::HBox
 
 	PluginSelector     & _plugin_selector;
 	RouteRedirectSelection  & _rr_selection;
-	
+
+	void route_going_away ();
+
 	struct ModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    ModelColumns () {
 		    add (text);
@@ -140,7 +142,7 @@ class RedirectBox : public Gtk::HBox
 	void show_redirect_menu (gint arg);
 
 	void choose_send ();
-	void send_io_finished (IOSelector::Result, boost::shared_ptr<ARDOUR::Redirect>, IOSelectorWindow*);
+	void send_io_finished (IOSelector::Result, boost::weak_ptr<ARDOUR::Redirect>, IOSelectorWindow*);
 	void choose_insert ();
 	void choose_plugin ();
 	void insert_plugin_chosen (boost::shared_ptr<ARDOUR::Plugin>);
@@ -152,15 +154,15 @@ class RedirectBox : public Gtk::HBox
 	void redisplay_redirects (void* src);
 	void add_redirect_to_display (boost::shared_ptr<ARDOUR::Redirect>);
 	void row_deleted (const Gtk::TreeModel::Path& path);
-	void show_redirect_name (void*, boost::shared_ptr<ARDOUR::Redirect>);
+	void show_redirect_name (void*, boost::weak_ptr<ARDOUR::Redirect>);
 
 	/* these are handlers for Redirect signals, so they take Redirect*
 	   directly, rather than shared_ptr<Redirect>
 	*/
 
-	void show_redirect_active (ARDOUR::Redirect*, void *);
+	void show_redirect_active (boost::weak_ptr<ARDOUR::Redirect>, void *);
 
-	string redirect_name (boost::shared_ptr<ARDOUR::Redirect>);
+	string redirect_name (boost::weak_ptr<ARDOUR::Redirect>);
 
 	void remove_redirect_gui (boost::shared_ptr<ARDOUR::Redirect>);
 
@@ -195,7 +197,7 @@ class RedirectBox : public Gtk::HBox
 	void hide_redirect_editor (boost::shared_ptr<ARDOUR::Redirect>);
 	void rename_redirect (boost::shared_ptr<ARDOUR::Redirect>);
 
-	gint idle_delete_redirect (boost::shared_ptr<ARDOUR::Redirect>);
+	gint idle_delete_redirect (boost::weak_ptr<ARDOUR::Redirect>);
 
 	void wierd_plugin_dialog (ARDOUR::Plugin& p, uint32_t streams, boost::shared_ptr<ARDOUR::IO> io);
 
@@ -219,7 +221,7 @@ class RedirectBox : public Gtk::HBox
 	static void rb_deactivate_all ();
 	static void rb_edit ();
 	
-	void route_name_changed (void* src, PluginUIWindow* plugin_ui, boost::shared_ptr<ARDOUR::PluginInsert> pi);
+	void route_name_changed (void* src, PluginUIWindow* plugin_ui, boost::weak_ptr<ARDOUR::PluginInsert> pi);
 	std::string generate_redirect_title (boost::shared_ptr<ARDOUR::PluginInsert> pi);
 };
 

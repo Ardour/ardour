@@ -53,6 +53,8 @@ class Send : public Redirect {
 	uint32_t pans_required() const { return expected_inputs; }
 	void expect_inputs (uint32_t);
 
+	static uint32_t how_many_sends();
+
   private:
 	bool _metering;
 	uint32_t expected_inputs;

@@ -780,6 +780,21 @@ Route::set_mute (bool yn, void *src)
 	}
 }
 
+uint32_t
+Route::count_sends ()
+{
+	uint32_t cnt = 0;
+	Glib::RWLock::ReaderLock lm (redirect_lock);
+
+	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+		if (boost::dynamic_pointer_cast<Send> (*i)) {
+			++cnt;
+		}
+	}
+
+	return cnt;
+}
+
 int
 Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* err_streams)
 {
@@ -923,6 +938,10 @@ Route::clear_redirects (void *src)
 
 	{
 		Glib::RWLock::WriterLock lm (redirect_lock);
+		RedirectList::iterator i;
+		for (i = _redirects.begin(); i != _redirects.end(); ++i) {
+			(*i)->drop_references ();
+		}
 		_redirects.clear ();
 	}
 
@@ -1018,6 +1037,8 @@ Route::remove_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_
 	if (old_rmo != redirect_max_outs) {
 		reset_panner ();
 	}
+
+	redirect->drop_references ();
 
 	redirects_changed (src); /* EMIT SIGNAL */
 	return 0;

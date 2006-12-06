@@ -444,6 +444,7 @@ ARDOUR_UI::ask_about_saving_session (const string & what)
 
 	save_the_session = 0;
 
+	window.set_keep_above (true);
 	window.present ();
 
 	ResponseType r = (ResponseType) window.run();
