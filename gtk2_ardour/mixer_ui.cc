@@ -199,9 +199,6 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	rhs_pane1.set_data ("collapse-direction", (gpointer) 0);
 	list_hpane.set_data ("collapse-direction", (gpointer) 1);
 
-	rhs_pane1.signal_button_release_event().connect (bind (sigc::ptr_fun (pane_handler), static_cast<Paned*>(&rhs_pane1)));
-	list_hpane.signal_button_release_event().connect (bind (sigc::ptr_fun (pane_handler), static_cast<Paned*>(&list_hpane)));
-	
 	global_vpacker.pack_start (list_hpane, true, true);
 
 	add (global_vpacker);

@@ -12,6 +12,7 @@
 (gtk_accel_path "<Actions>/Editor/crop" "c")
 (gtk_accel_path "<Actions>/Editor/duplicate-region" "d")
 (gtk_accel_path "<Actions>/Editor/set-edit-cursor" "e")
+(gtk_accel_path "<Actions>/Editor/toggle-follow-playhead" "f")
 (gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-gain" "g")
 (gtk_accel_path "<Actions>/Editor/split-region" "s")
 (gtk_accel_path "<Actions>/Editor/set-region-sync-position" "v")

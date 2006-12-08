@@ -224,64 +224,6 @@ get_font_for_style (string widgetname)
 	return style->get_font();
 }
 
-gint
-pane_handler (GdkEventButton* ev, Gtk::Paned* pane)
-{
-	if (ev->window != Gtkmm2ext::get_paned_handle (*pane)) {
-		return FALSE;
-	}
-
-	if (Keyboard::is_delete_event (ev)) {
-
-		gint pos;
-		gint cmp;
-		
-		pos = pane->get_position ();
-
-		if (dynamic_cast<VPaned*>(pane)) {
-			cmp = pane->get_height();
-		} else {
-			cmp = pane->get_width();
-		}
-
-		/* we have to use approximations here because we can't predict the
-		   exact position or sizes of the pane (themes, etc)
-		*/
-
-		if (pos < 10 || abs (pos - cmp) < 10) {
-
-			/* already collapsed: restore it (note that this is cast from a pointer value to int, which is tricky on 64bit */
-			
-			pane->set_position ((intptr_t) pane->get_data ("rpos"));
-
-		} else {	
-
-			int collapse_direction;
-
-			/* store the current position */
-
-			pane->set_data ("rpos", (gpointer) pos);
-
-			/* collapse to show the relevant child in full */
-			
-			collapse_direction = (intptr_t) pane->get_data ("collapse-direction");
-
-			if (collapse_direction) {
-				pane->set_position (1);
-			} else {
-				if (dynamic_cast<VPaned*>(pane)) {
-					pane->set_position (pane->get_height());
-				} else {
-					pane->set_position (pane->get_width());
-				}
-			}
-		}
-
-		return TRUE;
-	} 
-
-	return FALSE;
-}
 uint32_t
 rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a, string attr, int state, bool rgba)
 {

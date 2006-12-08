@@ -65,7 +65,6 @@ ArdourCanvas::Points* get_canvas_points (std::string who, uint32_t npoints);
 
 Pango::FontDescription get_font_for_style (std::string widgetname);
 
-gint pane_handler (GdkEventButton*, Gtk::Paned*);
 uint32_t rgba_from_style (std::string, uint32_t, uint32_t, uint32_t, uint32_t, std::string = "fg", int = Gtk::STATE_NORMAL, bool = true);
 
 void decorate (Gtk::Window& w, Gdk::WMDecoration d);
