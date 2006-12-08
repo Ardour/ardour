@@ -137,11 +137,12 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, boost::shared_ptr<Rout
 	pack_start (redirect_eventbox, true, true);
 
 	_route->redirects_changed.connect (mem_fun(*this, &RedirectBox::redisplay_redirects));
+	_route->GoingAway.connect (mem_fun (*this, &RedirectBox::route_going_away));
 
 	redirect_eventbox.signal_enter_notify_event().connect (bind (sigc::ptr_fun (RedirectBox::enter_box), this));
 
 	redirect_display.signal_button_press_event().connect (mem_fun(*this, &RedirectBox::redirect_button_press_event), false);
-	redirect_display.signal_button_release_event().connect (mem_fun(*this, &RedirectBox::redirect_button_press_event));
+	redirect_display.signal_button_release_event().connect (mem_fun(*this, &RedirectBox::redirect_button_release_event));
 
 	/* start off as a passthru strip. we'll correct this, if necessary,
 	   in update_diskstream_display().
@@ -154,6 +155,13 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, boost::shared_ptr<Rout
 
 RedirectBox::~RedirectBox ()
 {
+}
+
+void
+RedirectBox::route_going_away ()
+{
+	/* don't keep updating display as redirects are deleted */
+	no_redirect_redisplay = true;
 }
 
 void
@@ -283,18 +291,49 @@ RedirectBox::redirect_button_press_event (GdkEventButton *ev)
 		}
 		
 	}
-	
-	if (redirect && Keyboard::is_delete_event (ev)) {
-		
-		Glib::signal_idle().connect (bind (mem_fun(*this, &RedirectBox::idle_delete_redirect), boost::weak_ptr<Redirect>(redirect)));
-		ret = true;
-		
-	} else if (redirect && (Keyboard::is_edit_event (ev) || (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS && ev->state == 0))) {
+
+	if (redirect && (Keyboard::is_edit_event (ev) || (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS && ev->state == 0))) {
 		
 		if (_session.engine().connected()) {
 			/* XXX giving an error message here is hard, because we may be in the midst of a button press */
 			edit_redirect (redirect);
 		}
+		ret = true;
+		
+	} else if (redirect && ev->button == 1 && selected) {
+
+		// this is purely informational but necessary
+		RedirectSelected (redirect); // emit
+	}
+	
+	return ret;
+}
+
+bool
+RedirectBox::redirect_button_release_event (GdkEventButton *ev)
+{
+	TreeIter iter;
+	TreeModel::Path path;
+	TreeViewColumn* column;
+	int cellx;
+	int celly;
+	boost::shared_ptr<Redirect> redirect;
+	int ret = false;
+	bool selected = false;
+
+	if (redirect_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
+		if ((iter = model->get_iter (path))) {
+			redirect = (*iter)[columns.redirect];
+			selected = redirect_display.get_selection()->is_selected (iter);
+		}
+		
+	}
+
+	if (redirect && Keyboard::is_delete_event (ev)) {
+
+		cerr << " redirect clicked was " << redirect->name() << endl;
+		
+		Glib::signal_idle().connect (bind (mem_fun(*this, &RedirectBox::idle_delete_redirect), boost::weak_ptr<Redirect>(redirect)));
 		ret = true;
 		
 	} else if (Keyboard::is_context_menu_event (ev)) {
@@ -308,12 +347,7 @@ RedirectBox::redirect_button_press_event (GdkEventButton *ev)
 		ret = true;
 
 	} 
-	else if (redirect && ev->button == 1 && selected) {
 
-		// this is purely informational but necessary
-		RedirectSelected (redirect); // emit
-	}
-	
 	return ret;
 }
 
@@ -363,7 +397,7 @@ RedirectBox::insert_plugin_chosen (boost::shared_ptr<Plugin> plugin)
 
 		boost::shared_ptr<Redirect> redirect (new PluginInsert (_session, plugin, _placement));
 		
-		redirect->active_changed.connect (bind (mem_fun (*this, &RedirectBox::show_redirect_active), boost::weak_ptr<Redirect>(redirect), (void*) 0));
+		redirect->active_changed.connect (bind (mem_fun (*this, &RedirectBox::show_redirect_active_r), boost::weak_ptr<Redirect>(redirect)));
 
 		uint32_t err_streams;
 
@@ -441,7 +475,7 @@ void
 RedirectBox::choose_insert ()
 {
 	boost::shared_ptr<Redirect> redirect (new PortInsert (_session, _placement));
-	redirect->active_changed.connect (bind (mem_fun(*this, &RedirectBox::show_redirect_active), boost::weak_ptr<Redirect>(redirect)));
+	redirect->active_changed.connect (bind (mem_fun(*this, &RedirectBox::show_redirect_active_r), boost::weak_ptr<Redirect>(redirect)));
 	_route->add_redirect (redirect, this);
 }
 
@@ -491,7 +525,6 @@ RedirectBox::redisplay_redirects (void *src)
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RedirectBox::redisplay_redirects), src));
 
 	if (no_redirect_redisplay) {
-		cerr << "redisplay redirects skipped, no redisplay set\n";
 		return;
 	}
 	
@@ -526,9 +559,9 @@ RedirectBox::add_redirect_to_display (boost::shared_ptr<Redirect> redirect)
 	row[columns.text] = redirect_name (redirect);
 	row[columns.redirect] = redirect;
 
-	show_redirect_active (redirect, this);
+	show_redirect_active (redirect);
 
-	redirect_active_connections.push_back (redirect->active_changed.connect (bind (mem_fun(*this, &RedirectBox::show_redirect_active), boost::weak_ptr<Redirect>(redirect))));
+	redirect_active_connections.push_back (redirect->active_changed.connect (bind (mem_fun(*this, &RedirectBox::show_redirect_active_r), boost::weak_ptr<Redirect>(redirect))));
 	redirect_name_connections.push_back (redirect->name_changed.connect (bind (mem_fun(*this, &RedirectBox::show_redirect_name), boost::weak_ptr<Redirect>(redirect))));
 }
 
@@ -605,13 +638,19 @@ void
 RedirectBox::show_redirect_name (void* src, boost::weak_ptr<Redirect> redirect)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RedirectBox::show_redirect_name), src, redirect));
-	show_redirect_active (redirect, src);
+	show_redirect_active (redirect);
 }
 
 void
-RedirectBox::show_redirect_active (void *src, boost::weak_ptr<Redirect> weak_redirect)
+RedirectBox::show_redirect_active_r (Redirect* r, void *src, boost::weak_ptr<Redirect> weak_redirect)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RedirectBox::show_redirect_active), weak_redirect, src));
+	show_redirect_active (weak_redirect);
+}
+
+void
+RedirectBox::show_redirect_active (boost::weak_ptr<Redirect> weak_redirect)
+{
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RedirectBox::show_redirect_active), weak_redirect));
 	
 	boost::shared_ptr<Redirect> redirect (weak_redirect.lock());
 	

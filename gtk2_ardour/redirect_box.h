@@ -151,17 +151,13 @@ class RedirectBox : public Gtk::HBox
 	bool ignore_delete;
 
 	bool redirect_button_press_event (GdkEventButton *);
+	bool redirect_button_release_event (GdkEventButton *);
 	void redisplay_redirects (void* src);
 	void add_redirect_to_display (boost::shared_ptr<ARDOUR::Redirect>);
 	void row_deleted (const Gtk::TreeModel::Path& path);
-	void show_redirect_name (void*, boost::weak_ptr<ARDOUR::Redirect>);
-
-	/* these are handlers for Redirect signals, so they take Redirect*
-	   directly, rather than shared_ptr<Redirect>
-	*/
-
-	void show_redirect_active (boost::weak_ptr<ARDOUR::Redirect>, void *);
-
+	void show_redirect_active_r (ARDOUR::Redirect*, void *, boost::weak_ptr<ARDOUR::Redirect>);
+	void show_redirect_active (boost::weak_ptr<ARDOUR::Redirect>);
+	void show_redirect_name (void* src, boost::weak_ptr<ARDOUR::Redirect>);
 	string redirect_name (boost::weak_ptr<ARDOUR::Redirect>);
 
 	void remove_redirect_gui (boost::shared_ptr<ARDOUR::Redirect>);

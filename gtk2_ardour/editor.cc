@@ -597,7 +597,7 @@ Editor::Editor (AudioEngine& eng)
 	
 	named_selection_display.get_selection()->set_mode (SELECTION_SINGLE);
 	named_selection_display.set_size_request (100, -1);
-	named_selection_display.signal_button_press_event().connect (mem_fun(*this, &Editor::named_selection_display_button_press), false);
+	named_selection_display.signal_button_release_event().connect (mem_fun(*this, &Editor::named_selection_display_button_press), false);
 	named_selection_display.get_selection()->signal_changed().connect (mem_fun (*this, &Editor::named_selection_display_selection_changed));
 
 	/* SNAPSHOTS */
@@ -1537,7 +1537,7 @@ Editor::build_track_region_context_menu (nframes_t frame)
 
 	if (atv) {
 		boost::shared_ptr<Diskstream> ds;
-		Playlist* pl;
+		Playlist* pl = 0;
 		
 		if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()))) {
 			Playlist::RegionList* regions = pl->regions_at ((nframes_t) floor ( (double)frame * ds->speed()));
@@ -1564,8 +1564,8 @@ Editor::build_track_crossfade_context_menu (nframes_t frame)
 
 	if (atv) {
 		boost::shared_ptr<Diskstream> ds;
-		Playlist* pl;
-		AudioPlaylist* apl;
+		Playlist* pl = 0;
+		AudioPlaylist* apl = 0;
 
 		if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()) != 0) && ((apl = dynamic_cast<AudioPlaylist*> (pl)) != 0)) {
 

@@ -399,8 +399,8 @@ deps = \
 	'gthread-2.0'          : '2.10.1',
 	'gtk+-2.0'             : '2.8.1',
 	'libxml-2.0'           : '2.6.0',
-	'samplerate'           : '0.1.2',
-	'raptor'               : '1.4.8',
+	'samplerate'           : '0.1.0',
+	'raptor'               : '1.4.2',
 	'lrdf'                 : '0.4.0',
 	'jack'                 : '0.101.1',
 	'libgnomecanvas-2.0'   : '2.0'

@@ -342,18 +342,13 @@ Editor::region_list_display_button_press (GdkEventButton *ev)
 		}
 	}
 
-	if (region == 0) {
-		return false;
-	}
-
-	if (Keyboard::is_delete_event (ev)) {
-		session->remove_region_from_region_list (region);
-		return true;
-	}
-
 	if (Keyboard::is_context_menu_event (ev)) {
 		show_region_list_display_context_menu (ev->button, ev->time);
 		return true;
+	}
+
+	if (region == 0) {
+		return false;
 	}
 
 	switch (ev->button) {

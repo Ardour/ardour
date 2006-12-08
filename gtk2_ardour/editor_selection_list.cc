@@ -79,7 +79,7 @@ Editor::named_selection_display_button_press (GdkEventButton *ev)
 			case 1:
 			        if (Keyboard::is_delete_event (ev)) {
 				        session->remove_named_selection ((*i)[named_selection_columns.selection]);
-					return stop_signal (named_selection_display, "button_press_event");
+					return true;
 				}
 				break;
 			case 2:

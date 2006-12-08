@@ -40,6 +40,7 @@
 #include <pbd/pathscanner.h>
 #include <pbd/stl_delete.h>
 #include <pbd/basename.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/audioengine.h>
 #include <ardour/configuration.h>
@@ -3313,21 +3314,19 @@ Session::remove_redirect (Redirect* redirect)
 	PortInsert* port_insert;
 	PluginInsert* plugin_insert;
 
-	cerr << "Removing a redirect!\n";
-
 	if ((insert = dynamic_cast<Insert *> (redirect)) != 0) {
 		if ((port_insert = dynamic_cast<PortInsert *> (insert)) != 0) {
 			_port_inserts.remove (port_insert);
 		} else if ((plugin_insert = dynamic_cast<PluginInsert *> (insert)) != 0) {
 			_plugin_inserts.remove (plugin_insert);
 		} else {
-			fatal << _("programming error: unknown type of Insert deleted!") << endmsg;
+			fatal << string_compose (_("programming error: %1"),
+						 X_("unknown type of Insert deleted!")) 
+			      << endmsg;
 			/*NOTREACHED*/
 		}
 	} else if ((send = dynamic_cast<Send *> (redirect)) != 0) {
-		cerr << "Remove send, used to have " << _sends.size() << endl;
 		_sends.remove (send);
-		cerr << "post removal, have " << _sends.size() << endl;
 	} else {
 		fatal << _("programming error: unknown type of Redirect deleted!") << endmsg;
 		/*NOTREACHED*/
@@ -3349,6 +3348,13 @@ Session::available_capture_duration ()
 	case FormatInt24:
 		sample_bytes_on_disk = 3;
 		break;
+
+	default: 
+		/* impossible, but keep some gcc versions happy */
+		fatal << string_compose (_("programming error: %1"),
+					 X_("illegal native file data format"))
+		      << endmsg;
+		/*NOTREACHED*/
 	}
 
 	double scale = 4096.0 / sample_bytes_on_disk;

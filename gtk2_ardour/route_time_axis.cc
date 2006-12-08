@@ -1146,7 +1146,7 @@ boost::shared_ptr<Region>
 RouteTimeAxisView::find_next_region (nframes_t pos, RegionPoint point, int32_t dir)
 {
 	boost::shared_ptr<Diskstream> stream;
-	Playlist *playlist;
+	Playlist *playlist = 0;
 
 	if ((stream = get_diskstream()) != 0 && (playlist = stream->playlist()) != 0) {
 		return playlist->find_next_region (pos, point, dir);
