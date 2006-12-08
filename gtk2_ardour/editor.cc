@@ -444,6 +444,7 @@ Editor::Editor (AudioEngine& eng)
 	edit_packer.attach (controls_layout,         1, 2, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
 	edit_packer.attach (track_canvas_event_box,  2, 3, 1, 2,    FILL|EXPAND, FILL|EXPAND, 0, 0);
 
+	edit_packer.attach (zoom_box,                1, 2, 2, 3,    FILL,         FILL, 0, 0);
 	edit_packer.attach (edit_hscrollbar,         2, 3, 2, 3,    FILL|EXPAND,  FILL, 0, 0);
 
 	bottom_hbox.set_border_width (2);
@@ -2632,13 +2633,6 @@ Editor::setup_toolbar ()
 	zoom_out_full_button.signal_clicked().connect (mem_fun(*this, &Editor::temporal_zoom_session));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_full_button, _("Zoom to Session"));
 	
-	zoom_box.pack_start (zoom_out_button, false, false);
-	zoom_box.pack_start (zoom_in_button, false, false);
- 	zoom_box.pack_start (zoom_range_clock, false, false);	
-	zoom_box.pack_start (zoom_out_full_button, false, false);
-	
-	ARDOUR_UI::instance()->tooltips().set_tip (zoom_range_clock, _("Current Zoom Range\n(Width of visible area)"));
-
 	zoom_focus_selector.set_name ("ZoomFocusSelector");
 	Gtkmm2ext::set_size_request_to_display_given_text (zoom_focus_selector, "Focus Center", 2+FUDGE, 0);
 	set_popdown_strings (zoom_focus_selector, zoom_focus_strings);
@@ -2646,7 +2640,12 @@ Editor::setup_toolbar ()
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_focus_selector, _("Zoom focus"));
 
 	zoom_box.pack_start (zoom_focus_selector, false, false);
-
+	zoom_box.pack_start (zoom_out_button, false, false);
+	zoom_box.pack_start (zoom_in_button, false, false);
+ 	//zoom_box.pack_start (zoom_range_clock, false, false);	
+	zoom_box.pack_start (zoom_out_full_button, false, false);
+	
+	ARDOUR_UI::instance()->tooltips().set_tip (zoom_range_clock, _("Current Zoom Range\n(Width of visible area)"));
 
 	/* Edit Cursor / Snap */
 
@@ -2708,7 +2707,7 @@ Editor::setup_toolbar ()
 
 	
 	hbox->pack_start (snap_box, false, false);
-	hbox->pack_start (zoom_box, false, false); 
+	// hbox->pack_start (zoom_box, false, false); 
 	hbox->pack_start (*nudge_box, false, false);
 
 	hbox->show_all ();
