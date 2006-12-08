@@ -281,6 +281,9 @@ Session::sample_to_smpte( nframes_t sample, SMPTE::Time& smpte, bool use_offset,
 	if (!use_subframes) {
 		smpte.subframes = 0;
 	}
+	/* set frame rate and drop frame */
+	smpte.rate = Config->get_smpte_frames_per_second ();
+	smpte.drop = Config->get_smpte_drop_frames();
 }
 
 void

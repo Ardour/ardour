@@ -31,28 +31,18 @@ enum Wrap {
 	HOURS
 };
 
-/** SMPTE frame rate (in frames per second).
- *
- * This should be eliminated in favour of a float to support arbitrary rates.
- */
-enum FPS {
-    MTC_24_FPS = 0,
-    MTC_25_FPS = 1,
-    MTC_30_FPS_DROP = 2,
-    MTC_30_FPS = 3
-};
-
 struct Time {
 	bool       negative;
 	uint32_t   hours;
 	uint32_t   minutes;
 	uint32_t   seconds;
-	uint32_t   frames;       ///< SMPTE frames (not audio samples)
-	uint32_t   subframes;    ///< Typically unused
-	FPS        rate;         ///< Frame rate of this Time
-	static FPS default_rate; ///< Rate to use for default constructor
+	uint32_t   frames;        ///< SMPTE frames (not audio samples)
+	uint32_t   subframes;     ///< Typically unused
+	float      rate;          ///< Frame rate of this Time
+	static float default_rate;///< Rate to use for default constructor
+	bool       drop;          ///< Whether this Time uses dropframe SMPTE
 
-	Time(FPS a_rate = default_rate) {
+	Time(float a_rate = default_rate) {
 		negative = false;
 		hours = 0;
 		minutes = 0;
