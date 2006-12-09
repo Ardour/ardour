@@ -40,8 +40,8 @@
 #ifdef HAVE_SYS_VFS_H
 #include <sys/vfs.h>
 #else
-#include <sys/mount.h>
 #include <sys/param.h>
+#include <sys/mount.h>
 #endif
 
 #include <glibmm.h>
