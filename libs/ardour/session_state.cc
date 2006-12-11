@@ -2796,13 +2796,8 @@ Session::save_history (string snapshot_name)
     XMLTree tree;
     string xml_path;
     string bak_path;
-    XMLNode& history_node (history.get_state (Config->get_saved_history_depth()));
 
-    if (history_node.children().empty()) {
-	    return 0;
-    }
-
-    tree.set_root (
+    tree.set_root (&_history.get_state (Config->get_saved_history_depth()));
 
     if (snapshot_name.empty()) {
 	snapshot_name = _current_snapshot_name;
