@@ -120,6 +120,7 @@ CONFIG_VARIABLE (bool, verify_remove_last_capture, "verify-remove-last-capture",
 CONFIG_VARIABLE (bool, no_new_session_dialog, "no-new-session-dialog", false)
 CONFIG_VARIABLE (bool, use_vst, "use-vst", true)
 CONFIG_VARIABLE (uint32_t, subframes_per_frame, "subframes-per-frame", 100)
+CONFIG_VARIABLE (uint32_t, saved_history_depth, "save-history-depth", 100)
 
 /* BWAV */
 

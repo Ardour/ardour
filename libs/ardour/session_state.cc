@@ -2796,8 +2796,13 @@ Session::save_history (string snapshot_name)
     XMLTree tree;
     string xml_path;
     string bak_path;
-    
-    tree.set_root (&_history.get_state());
+    XMLNode& history_node (history.get_state (Config->get_saved_history_depth()));
+
+    if (history_node.children().empty()) {
+	    return 0;
+    }
+
+    tree.set_root (
 
     if (snapshot_name.empty()) {
 	snapshot_name = _current_snapshot_name;
@@ -2850,13 +2855,13 @@ Session::restore_history (string snapshot_name)
     cerr << string_compose(_("Loading history from '%1'."), xmlpath) << endmsg;
 
     if (access (xmlpath.c_str(), F_OK)) {
-        error << string_compose(_("%1: session history file \"%2\" doesn't exist!"), _name, xmlpath) << endmsg;
-        return 1;
+	    info << string_compose (_("%1: no history file \"%2\" for this session."), _name, xmlpath) << endmsg;
+	    return 1;
     }
 
     if (!tree.read (xmlpath)) {
-        error << string_compose(_("Could not understand ardour file %1"), xmlpath) << endmsg;
-        return -1;
+	    error << string_compose (_("Could not understand session history file \"%1\""), xmlpath) << endmsg;
+	    return -1;
     }
 
     /* replace history */
