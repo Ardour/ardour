@@ -601,14 +601,10 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 
 	view_index = 0;
 
-	ofstream oout ("orig_coordinates");
-
 	for (model = alist.begin(), pi = 0; pi < npoints; ++model, ++pi) {
 
 		double tx = points[pi].x;
 		double ty = points[pi].y;
-
-		oout << tx << ' ' << ty << endl;
 
 		/* now ensure that the control_points vector reflects the current curve
 		   state, but don't plot control points too close together. also, don't
@@ -710,8 +706,6 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 		view_index++;
 	}
 	
-	oout.close ();
-
 	/* discard extra CP's to avoid confusing ourselves */
 
 	while (control_points.size() > view_index) {
