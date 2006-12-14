@@ -230,7 +230,12 @@ FSTInfo *fst_get_info( char *dllpath ) {
 	FSTInfo *info;
 	char *fstpath;
 
-	if( !(h = fst_load( dllpath )) ) return NULL;
+	fprintf (stderr, "no valid FST file, direct load plugin\n");
+
+	if( !(h = fst_load( dllpath )) ) {
+		fprintf (stderr, "fst_load failed\n");
+		return NULL;
+	}
 	if( !(fst = fst_instantiate( h, simple_master_callback, NULL )) ) {
 	    fst_unload( h );
 	    fst_error( "instantiate failed\n" );
