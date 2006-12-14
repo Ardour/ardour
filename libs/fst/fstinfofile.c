@@ -44,6 +44,7 @@ static FSTInfo *load_fst_info_file( char *filename ) {
     fp = fopen( filename, "r" );
     
     if( fp == NULL ) {
+	    fprintf (stderr, "cannot open FST info file %s\n", filename);
 	free( info );
 	return NULL;
     }
@@ -215,6 +216,8 @@ FSTInfo *fst_get_info( char *dllpath ) {
     if( fst_info_file_is_valid( dllpath ) ) {
 	FSTInfo *info;
 	char *fstpath = fst_dllpath_to_infopath( dllpath );
+
+	fprintf (stderr, "have FST info file for %s, loading\n", dllpath);
 
 	info = load_fst_info_file( fstpath );
 	free( fstpath );
