@@ -359,7 +359,7 @@ PluginManager::vst_discover_from_path (string path)
 	plugin_objects = scanner (vst_path, vst_filter, 0, true, true);
 
 	if (plugin_objects) {
-		cerr << "Discovered " << plugin_objects.size() << " possible plugins\n";
+		cerr << "Discovered " << plugin_objects->size() << " possible plugins\n";
 	} else {
 		cerr << "No plugins discovered at all\n";
 	}
