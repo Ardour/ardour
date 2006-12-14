@@ -201,7 +201,7 @@ AudioRegionEditor::start_clock_changed ()
 {
 	_session.begin_reversible_command (_("change region start position"));
 
-	Playlist* const pl = _region->playlist();
+	boost::shared_ptr<Playlist> pl = _region->playlist();
 
 	if (pl) {
 		XMLNode &before = pl->get_state();
@@ -218,8 +218,8 @@ AudioRegionEditor::end_clock_changed ()
 {
 	_session.begin_reversible_command (_("change region end position"));
 
-	Playlist* const pl = _region->playlist();
-
+	boost::shared_ptr<Playlist> pl = _region->playlist();
+	
 	if (pl) {
 		XMLNode &before = pl->get_state();
 		_region->trim_end (end_clock.current_time(), this);
@@ -239,7 +239,7 @@ AudioRegionEditor::length_clock_changed ()
 	
 	_session.begin_reversible_command (_("change region length"));
 	
-	Playlist* const pl = _region->playlist();
+	boost::shared_ptr<Playlist> pl = _region->playlist();
 
 	if (pl) {
 		XMLNode &before = pl->get_state();

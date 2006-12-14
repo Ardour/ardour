@@ -1538,7 +1538,7 @@ Editor::build_track_region_context_menu (nframes_t frame)
 
 	if (atv) {
 		boost::shared_ptr<Diskstream> ds;
-		Playlist* pl = 0;
+		boost::shared_ptr<Playlist> pl;
 		
 		if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()))) {
 			Playlist::RegionList* regions = pl->regions_at ((nframes_t) floor ( (double)frame * ds->speed()));
@@ -1565,10 +1565,10 @@ Editor::build_track_crossfade_context_menu (nframes_t frame)
 
 	if (atv) {
 		boost::shared_ptr<Diskstream> ds;
-		Playlist* pl = 0;
-		AudioPlaylist* apl = 0;
+		boost::shared_ptr<Playlist> pl;
+		boost::shared_ptr<AudioPlaylist> apl;
 
-		if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()) != 0) && ((apl = dynamic_cast<AudioPlaylist*> (pl)) != 0)) {
+		if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()) != 0) && ((apl = boost::dynamic_pointer_cast<AudioPlaylist> (pl)) != 0)) {
 
 			Playlist::RegionList* regions = pl->regions_at (frame);
 			AudioPlaylist::Crossfades xfades;
@@ -2996,7 +2996,7 @@ void
 Editor::mapped_set_selected_regionview_from_click (RouteTimeAxisView& tv, uint32_t ignored, 
 						   RegionView* basis, vector<RegionView*>* all_equivs)
 {
-	Playlist* pl;
+	boost::shared_ptr<Playlist> pl;
 	vector<boost::shared_ptr<Region> > results;
 	RegionView* marv;
 	boost::shared_ptr<Diskstream> ds;
@@ -3012,7 +3012,7 @@ Editor::mapped_set_selected_regionview_from_click (RouteTimeAxisView& tv, uint32
 	}
 
 	
-	if ((pl = dynamic_cast<Playlist*>(ds->playlist())) != 0) {
+	if ((pl = ds->playlist()) != 0) {
 		pl->get_equivalent_regions (basis->region(), results);
 	}
 	
@@ -3213,7 +3213,7 @@ Editor::set_selected_regionview_from_region_list (boost::shared_ptr<Region> regi
 		
 		if ((tatv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
 			
-			Playlist* pl;
+			boost::shared_ptr<Playlist> pl;
 			vector<boost::shared_ptr<Region> > results;
 			RegionView* marv;
 			boost::shared_ptr<Diskstream> ds;
@@ -3222,8 +3222,8 @@ Editor::set_selected_regionview_from_region_list (boost::shared_ptr<Region> regi
 				/* bus */
 				continue;
 			}
-
-			if ((pl = dynamic_cast<Playlist*>(ds->playlist())) != 0) {
+			
+			if ((pl = (ds->playlist())) != 0) {
 				pl->get_region_list_equivalent_regions (region, results);
 			}
 			
@@ -3844,16 +3844,18 @@ Editor::end_location_changed (Location* location)
 }
 
 int
-Editor::playlist_deletion_dialog (Playlist* pl)
+Editor::playlist_deletion_dialog (boost::shared_ptr<Playlist> pl)
 {
 	ArdourDialog dialog ("playlist deletion dialog");
 	Label  label (string_compose (_("Playlist %1 is currently unused.\n"
-				 "If left alone, no audio files used by it will be cleaned.\n"
-				 "If deleted, audio files used by it alone by will cleaned."),
-			       pl->name()));
-
+					"If left alone, no audio files used by it will be cleaned.\n"
+					"If deleted, audio files used by it alone by will cleaned."),
+				      pl->name()));
+	
 	dialog.set_position (WIN_POS_CENTER);
 	dialog.get_vbox()->pack_start (label);
+
+	label.show ();
 
 	dialog.add_button (_("Delete playlist"), RESPONSE_ACCEPT);
 	dialog.add_button (_("Keep playlist"), RESPONSE_CANCEL);

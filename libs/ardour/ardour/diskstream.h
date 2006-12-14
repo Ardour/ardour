@@ -104,9 +104,9 @@ class IO;
 	void set_speed (double);
 	void non_realtime_set_speed ();
 
-	Playlist* playlist () { return _playlist; }
+	boost::shared_ptr<Playlist> playlist () { return _playlist; }
 
-	virtual int use_playlist (Playlist *);
+	virtual int use_playlist (boost::shared_ptr<Playlist>);
 	virtual int use_new_playlist () = 0;
 	virtual int use_copy_playlist () = 0;
 
@@ -206,7 +206,7 @@ class IO;
 
 	virtual void playlist_changed (Change);
 	virtual void playlist_modified ();
-	virtual void playlist_deleted (Playlist*);
+	virtual void playlist_deleted (boost::weak_ptr<Playlist>);
 
 	virtual void finish_capture (bool rec_monitors_input) = 0;
 	virtual void transport_stopped (struct tm&, time_t, bool abort) = 0;
@@ -246,7 +246,8 @@ class IO;
 	ARDOUR::Session&  _session;
 	ARDOUR::IO*       _io;
 	uint32_t          _n_channels;
-	Playlist*         _playlist;
+
+	boost::shared_ptr<Playlist> _playlist;
 
 	mutable gint             _record_enabled;
 	double                   _visible_speed;
@@ -300,7 +301,6 @@ class IO;
 
 	sigc::connection ports_created_c;
 	sigc::connection plmod_connection;
-	sigc::connection plstate_connection;
 	sigc::connection plgone_connection;
 	
 	unsigned char _flags;

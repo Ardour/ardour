@@ -75,7 +75,7 @@ AudioPlaylist&
 Auditioner::prepare_playlist ()
 {
 	// FIXME auditioner is still audio-only
-	AudioPlaylist* const apl = dynamic_cast<AudioPlaylist*>(_diskstream->playlist());
+	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(_diskstream->playlist());
 	assert(apl);
 
 	apl->clear ();

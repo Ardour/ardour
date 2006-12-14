@@ -42,8 +42,10 @@ class AudioPlaylist : public ARDOUR::Playlist
    public:
 	AudioPlaylist (Session&, const XMLNode&, bool hidden = false);
 	AudioPlaylist (Session&, string name, bool hidden = false);
-	AudioPlaylist (const AudioPlaylist&, string name, bool hidden = false);
-	AudioPlaylist (const AudioPlaylist&, nframes_t start, nframes_t cnt, string name, bool hidden = false);
+	AudioPlaylist (boost::shared_ptr<const AudioPlaylist>, string name, bool hidden = false);
+	AudioPlaylist (boost::shared_ptr<const AudioPlaylist>, nframes_t start, nframes_t cnt, string name, bool hidden = false);
+
+       ~AudioPlaylist (); /* public should use unref() */
 
 	void clear (bool with_signals=true);
 
@@ -69,9 +71,6 @@ class AudioPlaylist : public ARDOUR::Playlist
         void refresh_dependents (boost::shared_ptr<Region> region);
         void check_dependents (boost::shared_ptr<Region> region, bool norefresh);
         void remove_dependents (boost::shared_ptr<Region> region);
-
-    protected:
-       ~AudioPlaylist (); /* public should use unref() */
 
     private:
        Crossfades      _crossfades;    /* xfades currently in use */

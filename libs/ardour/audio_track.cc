@@ -32,6 +32,7 @@
 #include <ardour/route_group_specialized.h>
 #include <ardour/insert.h>
 #include <ardour/audioplaylist.h>
+#include <ardour/playlist_factory.h>
 #include <ardour/panner.h>
 #include <ardour/utils.h>
 
@@ -395,11 +396,11 @@ AudioTrack::set_state_part_two ()
 		_freeze_record.insert_info.clear ();
 		
 		if ((prop = fnode->property (X_("playlist"))) != 0) {
-			Playlist* pl = _session.playlist_by_name (prop->value());
+			boost::shared_ptr<Playlist> pl = _session.playlist_by_name (prop->value());
 			if (pl) {
-				_freeze_record.playlist = dynamic_cast<AudioPlaylist*> (pl);
+				_freeze_record.playlist = boost::dynamic_pointer_cast<AudioPlaylist> (pl);
 			} else {
-				_freeze_record.playlist = 0;
+				_freeze_record.playlist.reset ();
 				_freeze_record.state = NoFreeze;
 			return;
 			}
@@ -685,8 +686,7 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, nframes_t st
 	
 	Glib::RWLock::ReaderLock rlock (redirect_lock);
 
-	// FIXME
-	AudioPlaylist* const apl = dynamic_cast<AudioPlaylist*>(diskstream->playlist());
+	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(diskstream->playlist());
 	assert(apl);
 
 	if (apl->read (buffers[0], mix_buffer, gain_buffer, start, nframes) != nframes) {
@@ -791,12 +791,12 @@ AudioTrack::freeze (InterThreadInfo& itt)
 {
 	vector<boost::shared_ptr<AudioSource> > srcs;
 	string new_playlist_name;
-	Playlist* new_playlist;
+	boost::shared_ptr<Playlist> new_playlist;
 	string dir;
 	string region_name;
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
 	
-	if ((_freeze_record.playlist = dynamic_cast<AudioPlaylist*>(diskstream->playlist())) == 0) {
+	if ((_freeze_record.playlist = boost::dynamic_pointer_cast<AudioPlaylist>(diskstream->playlist())) == 0) {
 		return;
 	}
 
@@ -853,7 +853,7 @@ AudioTrack::freeze (InterThreadInfo& itt)
 		}
 	}
 
-	new_playlist = new AudioPlaylist (_session, new_playlist_name, false);
+	new_playlist = PlaylistFactory::create (_session, new_playlist_name, false);
 	region_name = new_playlist_name;
 
 	/* create a new region from all filesources, keep it private */
@@ -868,7 +868,7 @@ AudioTrack::freeze (InterThreadInfo& itt)
 	new_playlist->set_frozen (true);
 	region->set_locked (true);
 
-	diskstream->use_playlist (dynamic_cast<AudioPlaylist*>(new_playlist));
+	diskstream->use_playlist (boost::dynamic_pointer_cast<AudioPlaylist>(new_playlist));
 	diskstream->set_record_enabled (false);
 
 	_freeze_record.state = Frozen;
@@ -900,7 +900,7 @@ AudioTrack::unfreeze ()
 			}
 		}
 		
-		_freeze_record.playlist = 0;
+		_freeze_record.playlist.reset ();
 	}
 
 	_freeze_record.state = UnFrozen;

@@ -132,7 +132,7 @@ Selection::clear_playlists ()
 	/* Selections own their playlists */
 
 	for (PlaylistSelection::iterator i = playlists.begin(); i != playlists.end(); ++i) {
-		(*i)->unref ();
+		(*i)->release ();
 	}
 
 	if (!playlists.empty()) {
@@ -165,12 +165,12 @@ Selection::toggle (boost::shared_ptr<Redirect> r)
 }
 
 void
-Selection::toggle (Playlist* pl)
+Selection::toggle (boost::shared_ptr<Playlist> pl)
 {
 	PlaylistSelection::iterator i;
 
 	if ((i = find (playlists.begin(), playlists.end(), pl)) == playlists.end()) {
-		pl->ref ();
+		pl->use ();
 		playlists.push_back(pl);
 	} else {
 		playlists.erase (i);
@@ -260,23 +260,23 @@ Selection::add (boost::shared_ptr<Redirect> r)
 }
 
 void
-Selection::add (Playlist* pl)
+Selection::add (boost::shared_ptr<Playlist> pl)
 {
 	if (find (playlists.begin(), playlists.end(), pl) == playlists.end()) {
-		pl->ref ();
+		pl->use ();
 		playlists.push_back(pl);
 		PlaylistsChanged ();
 	}
 }
 
 void
-Selection::add (const list<Playlist*>& pllist)
+Selection::add (const list<boost::shared_ptr<Playlist> >& pllist)
 {
 	bool changed = false;
 
-	for (list<Playlist*>::const_iterator i = pllist.begin(); i != pllist.end(); ++i) {
+	for (list<boost::shared_ptr<Playlist> >::const_iterator i = pllist.begin(); i != pllist.end(); ++i) {
 		if (find (playlists.begin(), playlists.end(), (*i)) == playlists.end()) {
-			(*i)->ref ();
+			(*i)->use ();
 			playlists.push_back (*i);
 			changed = true;
 		}
@@ -429,9 +429,9 @@ Selection::remove (const list<TimeAxisView*>& track_list)
 }
 
 void
-Selection::remove (Playlist* track)
+Selection::remove (boost::shared_ptr<Playlist> track)
 {
-	list<Playlist*>::iterator i;
+	list<boost::shared_ptr<Playlist> >::iterator i;
 	if ((i = find (playlists.begin(), playlists.end(), track)) != playlists.end()) {
 		playlists.erase (i);
 		PlaylistsChanged();
@@ -439,13 +439,13 @@ Selection::remove (Playlist* track)
 }
 
 void
-Selection::remove (const list<Playlist*>& pllist)
+Selection::remove (const list<boost::shared_ptr<Playlist> >& pllist)
 {
 	bool changed = false;
 
-	for (list<Playlist*>::const_iterator i = pllist.begin(); i != pllist.end(); ++i) {
+	for (list<boost::shared_ptr<Playlist> >::const_iterator i = pllist.begin(); i != pllist.end(); ++i) {
 
-		list<Playlist*>::iterator x;
+		list<boost::shared_ptr<Playlist> >::iterator x;
 
 		if ((x = find (playlists.begin(), playlists.end(), (*i))) != playlists.end()) {
 			playlists.erase (x);
@@ -520,14 +520,14 @@ Selection::set (const list<TimeAxisView*>& track_list)
 }
 
 void
-Selection::set (Playlist* playlist)
+Selection::set (boost::shared_ptr<Playlist> playlist)
 {
 	clear_playlists ();
 	add (playlist);
 }
 
 void
-Selection::set (const list<Playlist*>& pllist)
+Selection::set (const list<boost::shared_ptr<Playlist> >& pllist)
 {
 	clear_playlists ();
 	add (pllist);

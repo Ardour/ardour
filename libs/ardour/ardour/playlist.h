@@ -26,6 +26,7 @@
 #include <map>
 #include <list>
 #include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
 #include <sys/stat.h>
 
@@ -46,21 +47,25 @@ namespace ARDOUR  {
 class Session;
 class Region;
 
-class Playlist : public PBD::StatefulDestructible {
+class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_from_this<Playlist> {
   public:
 	typedef list<boost::shared_ptr<Region> >    RegionList;
 
 	Playlist (Session&, const XMLNode&, bool hidden = false);
 	Playlist (Session&, string name, bool hidden = false);
-	Playlist (const Playlist&, string name, bool hidden = false);
-	Playlist (const Playlist&, nframes_t start, nframes_t cnt, string name, bool hidden = false);
+	Playlist (boost::shared_ptr<const Playlist>, string name, bool hidden = false);
+	Playlist (boost::shared_ptr<const Playlist>, nframes_t start, nframes_t cnt, string name, bool hidden = false);
+
+	virtual ~Playlist ();  
+
+	void set_region_ownership ();
 
 	virtual void clear (bool with_signals=true);
 	virtual void dump () const;
 
-	void ref();
-	void unref();
-	uint32_t refcnt() const { return _refcnt; }
+	void use();
+	void release();
+	bool used () const { return _refcnt != 0; }
 
 	std::string name() const { return _name; }
 	void set_name (std::string str);
@@ -89,9 +94,9 @@ class Playlist : public PBD::StatefulDestructible {
 	void duplicate (boost::shared_ptr<Region>, nframes_t position, float times);
 	void nudge_after (nframes_t start, nframes_t distance, bool forwards);
 
-	Playlist* cut  (list<AudioRange>&, bool result_is_hidden = true);
-	Playlist* copy (list<AudioRange>&, bool result_is_hidden = true);
-	int       paste (Playlist&, nframes_t position, float times);
+	boost::shared_ptr<Playlist> cut  (list<AudioRange>&, bool result_is_hidden = true);
+	boost::shared_ptr<Playlist> copy (list<AudioRange>&, bool result_is_hidden = true);
+	int                         paste (boost::shared_ptr<Playlist>, nframes_t position, float times);
 
 	RegionList*                regions_at (nframes_t frame);
 	RegionList*                regions_touched (nframes_t start, nframes_t end);
@@ -106,14 +111,11 @@ class Playlist : public PBD::StatefulDestructible {
 	int set_state (const XMLNode&);
 	XMLNode& get_template ();
 
-	sigc::signal<void,Playlist*,bool> InUse;
-	sigc::signal<void>                Modified;
-	sigc::signal<void>                NameChanged;
-	sigc::signal<void>                LengthChanged;
-	sigc::signal<void>                LayeringChanged;
-	sigc::signal<void>                StatePushed;
-
-	static sigc::signal<void,Playlist*> PlaylistCreated;
+	sigc::signal<void,bool> InUse;
+	sigc::signal<void>      Modified;
+	sigc::signal<void>      NameChanged;
+	sigc::signal<void>      LengthChanged;
+	sigc::signal<void>      LayeringChanged;
 
 	static string bump_name (string old_name, Session&);
 	static string bump_name_once (string old_name);
@@ -139,7 +141,6 @@ class Playlist : public PBD::StatefulDestructible {
 
   protected:
 	friend class Session;
-	virtual ~Playlist ();  /* members of the public use unref() */
 
   protected:
 	struct RegionLock {
@@ -240,26 +241,23 @@ class Playlist : public PBD::StatefulDestructible {
 
 	boost::shared_ptr<Region> region_by_id (PBD::ID);
 
-	void add_region_internal (boost::shared_ptr<Region>, nframes_t position, bool delay_sort = false);
-
-	int remove_region_internal (boost::shared_ptr<Region>, bool delay_sort = false);
+	void add_region_internal (boost::shared_ptr<Region>, nframes_t position);
+	
+	int remove_region_internal (boost::shared_ptr<Region>);
 	RegionList *find_regions_at (nframes_t frame);
 	void copy_regions (RegionList&) const;
 	void partition_internal (nframes_t start, nframes_t end, bool cutting, RegionList& thawlist);
 
 	nframes_t _get_maximum_extent() const;
 
-	Playlist* cut_copy (Playlist* (Playlist::*pmf)(nframes_t, nframes_t, bool), 
-			    list<AudioRange>& ranges, bool result_is_hidden);
-	Playlist *cut (nframes_t start, nframes_t cnt, bool result_is_hidden);
-	Playlist *copy (nframes_t start, nframes_t cnt, bool result_is_hidden);
+	boost::shared_ptr<Playlist> cut_copy (boost::shared_ptr<Playlist> (Playlist::*pmf)(nframes_t, nframes_t, bool), 
+					      list<AudioRange>& ranges, bool result_is_hidden);
+	boost::shared_ptr<Playlist> cut (nframes_t start, nframes_t cnt, bool result_is_hidden);
+	boost::shared_ptr<Playlist> copy (nframes_t start, nframes_t cnt, bool result_is_hidden);
 
 
 	int move_region_to_layer (layer_t, boost::shared_ptr<Region> r, int dir);
 	void relayer ();
-
-	static Playlist* copyPlaylist (const Playlist&, nframes_t start, nframes_t length,
-				       string name, bool result_is_hidden);
 	
 	void unset_freeze_parent (Playlist*);
 	void unset_freeze_child (Playlist*);

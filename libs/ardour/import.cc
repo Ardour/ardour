@@ -111,14 +111,14 @@ Session::import_audiofile (import_status& status)
 		do {
 			if (info.channels == 2) {
 				if (n == 0) {
-					snprintf (buf, sizeof(buf), "%s%s-L.wav", sounds_dir.c_str(), basepath.c_str());
+					snprintf (buf, sizeof(buf), "%s/%s-L.wav", sounds_dir.c_str(), basepath.c_str());
 				} else {
-					snprintf (buf, sizeof(buf), "%s%s-R.wav", sounds_dir.c_str(), basepath.c_str());
+					snprintf (buf, sizeof(buf), "%s/%s-R.wav", sounds_dir.c_str(), basepath.c_str());
 				}
 			} else if (info.channels > 1) {
-				snprintf (buf, sizeof(buf), "%s%s-c%lu.wav", sounds_dir.c_str(), basepath.c_str(), n+1);
+				snprintf (buf, sizeof(buf), "%s/%s-c%lu.wav", sounds_dir.c_str(), basepath.c_str(), n+1);
 			} else {
-				snprintf (buf, sizeof(buf), "%s%s.wav", sounds_dir.c_str(), basepath.c_str());
+				snprintf (buf, sizeof(buf), "%s/%s.wav", sounds_dir.c_str(), basepath.c_str());
 			}
 
 			if (::access (buf, F_OK) == 0) {

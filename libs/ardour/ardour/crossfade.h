@@ -64,12 +64,13 @@ class Crossfade : public PBD::StatefulDestructible
 
 
 	/* copy constructor to copy a crossfade with new regions. used (for example)
-	   when a playlist copy is made */
+	   when a playlist copy is made 
+	*/
 	Crossfade (const Crossfade &, boost::shared_ptr<ARDOUR::AudioRegion>, boost::shared_ptr<ARDOUR::AudioRegion>);
 	
 	/* the usual XML constructor */
 
-	Crossfade (const ARDOUR::Playlist&, XMLNode&);
+	Crossfade (const Playlist&, XMLNode&);
 	virtual ~Crossfade();
 
 	bool operator== (const ARDOUR::Crossfade&);

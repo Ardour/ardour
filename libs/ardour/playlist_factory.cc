@@ -22,24 +22,75 @@
 
 #include <ardour/playlist.h>
 #include <ardour/audioplaylist.h>
+#include <ardour/playlist_factory.h>
 
 #include "i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;
 
-Playlist*
-Playlist::copyPlaylist (const Playlist& playlist, nframes_t start, nframes_t length,
-			string name, bool result_is_hidden)
-{
-	const AudioPlaylist* apl;
+sigc::signal<void,boost::shared_ptr<Playlist> > PlaylistFactory::PlaylistCreated;
 
-	if ((apl = dynamic_cast<const AudioPlaylist*> (&playlist)) != 0) {
-		return new AudioPlaylist (*apl, start, length, name, result_is_hidden);
-	} else {
-		fatal << _("programming error: Playlist::copyPlaylist called with unknown Playlist type")
-		      << endmsg;
-		/*NOTREACHED*/
-		return 0;
+boost::shared_ptr<Playlist> 
+PlaylistFactory::create (Session& s, const XMLNode& node, bool hidden) 
+{
+	boost::shared_ptr<Playlist> pl;
+
+	pl = boost::shared_ptr<Playlist> (new AudioPlaylist (s, node, hidden));
+
+	pl->set_region_ownership ();
+
+	if (!hidden) {
+		PlaylistCreated (pl);
 	}
+	return pl;
+}
+
+boost::shared_ptr<Playlist> 
+PlaylistFactory::create (Session& s, string name, bool hidden) 
+{
+	boost::shared_ptr<Playlist> pl;
+
+	pl = boost::shared_ptr<Playlist> (new AudioPlaylist (s, name, hidden));
+
+	if (!hidden) {
+		PlaylistCreated (pl);
+	}
+
+	return pl;
+}
+
+boost::shared_ptr<Playlist> 
+PlaylistFactory::create (boost::shared_ptr<const Playlist> old, string name, bool hidden) 
+{
+	boost::shared_ptr<Playlist> pl;
+	boost::shared_ptr<const AudioPlaylist> apl;
+
+	if ((apl = boost::dynamic_pointer_cast<const AudioPlaylist> (old)) != 0) {
+		pl = boost::shared_ptr<Playlist> (new AudioPlaylist (apl, name, hidden));
+		pl->set_region_ownership ();
+	}
+
+	if (!hidden) {
+		PlaylistCreated (pl);
+	}
+
+	return pl;
+}
+
+boost::shared_ptr<Playlist> 
+PlaylistFactory::create (boost::shared_ptr<const Playlist> old, nframes_t start, nframes_t cnt, string name, bool hidden) 
+{
+	boost::shared_ptr<Playlist> pl;
+	boost::shared_ptr<const AudioPlaylist> apl;
+	
+	if ((apl = boost::dynamic_pointer_cast<const AudioPlaylist> (old)) != 0) {
+		pl = boost::shared_ptr<Playlist> (new AudioPlaylist (apl, start, cnt, name, hidden));
+		pl->set_region_ownership ();
+	}
+
+
+	/* this factory method does NOT notify others */
+
+	return pl;
 }

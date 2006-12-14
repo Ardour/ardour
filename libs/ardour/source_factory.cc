@@ -83,10 +83,13 @@ boost::shared_ptr<Source>
 SourceFactory::create (Session& s, const XMLNode& node)
 {
 	boost::shared_ptr<Source> ret (new SndFileSource (s, node));
+
 	if (setup_peakfile (ret)) {
 		return boost::shared_ptr<Source>();
 	}
+
 	SourceCreated (ret);
+
 	return ret;
 }
 
@@ -141,12 +144,15 @@ boost::shared_ptr<Source>
 SourceFactory::createReadable (Session& s, string idstr, AudioFileSource::Flag flags, bool announce)
 {
 	boost::shared_ptr<Source> ret (new SndFileSource (s, idstr, flags));
+
 	if (setup_peakfile (ret)) {
 		return boost::shared_ptr<Source>();
 	}
+
 	if (announce) {
 		SourceCreated (ret);
 	}
+
 	return ret;
 }
 

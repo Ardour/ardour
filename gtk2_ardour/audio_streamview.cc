@@ -239,7 +239,7 @@ AudioStreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 
 	StreamView::playlist_changed(ds);
 
-	AudioPlaylist* apl = dynamic_cast<AudioPlaylist*>(ds->playlist());
+	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(ds->playlist());
 	if (apl)
 		playlist_connections.push_back (apl->NewCrossfade.connect (mem_fun (*this, &AudioStreamView::add_crossfade)));
 }
@@ -328,7 +328,7 @@ AudioStreamView::redisplay_diskstream ()
 	if (_trackview.is_audio_track()) {
 		_trackview.get_diskstream()->playlist()->foreach_region (static_cast<StreamView*>(this), &StreamView::add_region_view);
 
-		AudioPlaylist* apl = dynamic_cast<AudioPlaylist*>(_trackview.get_diskstream()->playlist());
+		boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(_trackview.get_diskstream()->playlist());
 		if (apl)
 			apl->foreach_crossfade (this, &AudioStreamView::add_crossfade);
 	}

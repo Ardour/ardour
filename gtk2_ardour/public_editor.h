@@ -106,7 +106,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual gdouble   get_current_zoom () = 0;
 	virtual PlaylistSelector& playlist_selector() const = 0;
 	virtual void route_name_changed (TimeAxisView *) = 0;
-	virtual void clear_playlist (ARDOUR::Playlist&) = 0;
+	virtual void clear_playlist (boost::shared_ptr<ARDOUR::Playlist>) = 0;
 	virtual void new_playlists () = 0;
 	virtual void copy_playlists () = 0;
 	virtual void clear_playlists () = 0;

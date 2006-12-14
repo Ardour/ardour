@@ -2791,8 +2791,8 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		
 		vector<RegionView*> new_regionviews;
 		
-		set<Playlist*> affected_playlists;
-		pair<set<Playlist*>::iterator,bool> insert_result;
+		set<boost::shared_ptr<Playlist> > affected_playlists;
+		pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
 		
 		// TODO: Crossfades need to be copied!
 		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
@@ -2800,7 +2800,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			
 			rv = (*i);
 			
-			Playlist* to_playlist = rv->region()->playlist();
+			boost::shared_ptr<Playlist> to_playlist = rv->region()->playlist();
 			RouteTimeAxisView* atv = dynamic_cast<RouteTimeAxisView*>(&rv->get_time_axis_view());
 			
 			insert_result = affected_playlists.insert (to_playlist);
@@ -3128,7 +3128,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
                         MOTION								      
 	************************************************************/
 
-	pair<set<Playlist*>::iterator,bool> insert_result;
+	pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
 	const list<RegionView*>& layered_regions = selection->regions.by_layer();
 
 	for (list<RegionView*>::const_iterator i = layered_regions.begin(); i != layered_regions.end(); ++i) {
@@ -3240,7 +3240,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 			AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (&rv->get_time_axis_view());
 			if (atv && atv->is_audio_track()) {
-				AudioPlaylist* pl = dynamic_cast<AudioPlaylist*>(atv->get_diskstream()->playlist());
+				boost::shared_ptr<AudioPlaylist> pl = boost::dynamic_pointer_cast<AudioPlaylist>(atv->get_diskstream()->playlist());
 				if (pl) {
 					/* only freeze and capture state once */
 
@@ -3278,7 +3278,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 {
 	nframes_t where;
 	RegionView* rv = reinterpret_cast<RegionView *> (drag_info.data);
-	pair<set<Playlist*>::iterator,bool> insert_result;
+	pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
 	bool nocommit = true;
 	double speed;
 	RouteTimeAxisView* atv;
@@ -3350,8 +3350,8 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 		for (list<RegionView*>::const_iterator i = new_selection.begin(); i != new_selection.end();i++ ) {
 
-			Playlist* from_playlist;
-			Playlist* to_playlist;
+			boost::shared_ptr<Playlist> from_playlist;
+			boost::shared_ptr<Playlist> to_playlist;
 				
 			double ix1, ix2, iy1, iy2;
 	    
@@ -3387,8 +3387,8 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 		for (list<RegionView*>::const_iterator i = new_selection.begin(); i != new_selection.end();i++ ) {
 
-			Playlist* from_playlist;
-			Playlist* to_playlist;
+			boost::shared_ptr<Playlist> from_playlist;
+			boost::shared_ptr<Playlist> to_playlist;
 				
 			double ix1, ix2, iy1, iy2;
 	    
@@ -3459,9 +3459,9 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	}
 
   out:
-	for (set<Playlist*>::iterator p = motion_frozen_playlists.begin(); p != motion_frozen_playlists.end(); ++p) {
+	for (set<boost::shared_ptr<Playlist> >::iterator p = motion_frozen_playlists.begin(); p != motion_frozen_playlists.end(); ++p) {
 		(*p)->thaw ();
-		session->add_command (new MementoCommand<Playlist>(*(*p), 0, & (*p)->get_state()));
+		session->add_command (new MementoCommand<Playlist>(*((*p).get()), 0, & (*p)->get_state()));
 	}
 
 	motion_frozen_playlists.clear ();
@@ -3654,7 +3654,7 @@ Editor::start_selection_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	begin_reversible_command (_("selection grab"));
 
-	Playlist* playlist = clicked_trackview->playlist();
+	boost::shared_ptr<Playlist> playlist = clicked_trackview->playlist();
 
         XMLNode *before = &(playlist->get_state());
 	clicked_trackview->playlist()->add_region (region, selection->time[clicked_selection].start);
@@ -3978,7 +3978,7 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	double speed = 1.0;
 	TimeAxisView* tvp = clicked_trackview;
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
-	pair<set<Playlist*>::iterator,bool> insert_result;
+	pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
 
 	if (tv && tv->is_audio_track()) {
 		speed = tv->get_diskstream()->speed();
@@ -4024,7 +4024,7 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			if (arv)
 				arv->temporarily_hide_envelope ();
 
-			Playlist * pl = (*i)->region()->playlist();
+			boost::shared_ptr<Playlist> pl = (*i)->region()->playlist();
 			insert_result = motion_frozen_playlists.insert (pl);
 			if (insert_result.second) {
                                 session->add_command(new MementoCommand<Playlist>(*pl, &pl->get_state(), 0));
@@ -4216,9 +4216,9 @@ Editor::trim_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			}
 		}
 		
-		for (set<Playlist*>::iterator p = motion_frozen_playlists.begin(); p != motion_frozen_playlists.end(); ++p) {
+		for (set<boost::shared_ptr<Playlist> >::iterator p = motion_frozen_playlists.begin(); p != motion_frozen_playlists.end(); ++p) {
 			//(*p)->thaw ();
-                        session->add_command (new MementoCommand<Playlist>(*(*p), 0, &(*p)->get_state()));
+                        session->add_command (new MementoCommand<Playlist>(*(*p).get(), 0, &(*p)->get_state()));
                 }
 		
 		motion_frozen_playlists.clear ();
@@ -4252,22 +4252,22 @@ Editor::point_trim (GdkEvent* event)
 			     i != selection->regions.by_layer().end(); ++i)
 			{
 				if (!(*i)->region()->locked()) {
-                                        Playlist *pl = (*i)->region()->playlist();
+					boost::shared_ptr<Playlist> pl = (*i)->region()->playlist();
                                         XMLNode &before = pl->get_state();
 					(*i)->region()->trim_front (new_bound, this);	
                                         XMLNode &after = pl->get_state();
-                                        session->add_command(new MementoCommand<Playlist>(*pl, &before, &after));
+                                        session->add_command(new MementoCommand<Playlist>(*pl.get(), &before, &after));
 				}
 			}
 
 		} else {
 
 			if (!rv->region()->locked()) {
-                                Playlist *pl = rv->region()->playlist();
+				boost::shared_ptr<Playlist> pl = rv->region()->playlist();
 				XMLNode &before = pl->get_state();
 				rv->region()->trim_front (new_bound, this);	
                                 XMLNode &after = pl->get_state();
-				session->add_command(new MementoCommand<Playlist>(*pl, &before, &after));
+				session->add_command(new MementoCommand<Playlist>(*pl.get(), &before, &after));
 			}
 		}
 
@@ -4283,22 +4283,22 @@ Editor::point_trim (GdkEvent* event)
 			for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i)
 			{
 				if (!(*i)->region()->locked()) {
-                                        Playlist *pl = (*i)->region()->playlist();
+					boost::shared_ptr<Playlist> pl = (*i)->region()->playlist();
 					XMLNode &before = pl->get_state();
 					(*i)->region()->trim_end (new_bound, this);
 					XMLNode &after = pl->get_state();
-					session->add_command(new MementoCommand<Playlist>(*pl, &before, &after));
+					session->add_command(new MementoCommand<Playlist>(*pl.get(), &before, &after));
 				}
 			}
 
 		} else {
 
 			if (!rv->region()->locked()) {
-                                Playlist *pl = rv->region()->playlist();
+				boost::shared_ptr<Playlist> pl = rv->region()->playlist();
 				XMLNode &before = pl->get_state();
 				rv->region()->trim_end (new_bound, this);
                                 XMLNode &after = pl->get_state();
-				session->add_command (new MementoCommand<Playlist>(*pl, &before, &after));
+				session->add_command (new MementoCommand<Playlist>(*pl.get(), &before, &after));
 			}
 		}
 
@@ -4843,13 +4843,13 @@ Editor::mouse_brush_insert_region (RegionView* rv, nframes_t pos)
 		return;
 	}
 
-	Playlist* playlist = atv->playlist();
+	boost::shared_ptr<Playlist> playlist = atv->playlist();
 	double speed = atv->get_diskstream()->speed();
 	
         XMLNode &before = playlist->get_state();
 	playlist->add_region (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (arv->audio_region())), (nframes_t) (pos * speed));
         XMLNode &after = playlist->get_state();
-	session->add_command(new MementoCommand<Playlist>(*playlist, &before, &after));
+	session->add_command(new MementoCommand<Playlist>(*playlist.get(), &before, &after));
 	
 	// playlist is frozen, so we have to update manually
 	

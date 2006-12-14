@@ -604,8 +604,7 @@ class Session : public PBD::StatefulDestructible
 	   this playlist.
 	*/
 	
-	sigc::signal<int,ARDOUR::Playlist*> AskAboutPlaylistDeletion;
-
+	sigc::signal<int,boost::shared_ptr<ARDOUR::Playlist> > AskAboutPlaylistDeletion;
 
 	/* handlers should return !0 for use pending state, 0 for
 	   ignore it.
@@ -613,24 +612,21 @@ class Session : public PBD::StatefulDestructible
 
 	static sigc::signal<int> AskAboutPendingState;
 	
-	sigc::signal<void,boost::shared_ptr<Source> > SourceAdded;
-	sigc::signal<void,boost::shared_ptr<Source> > SourceRemoved;
-
 	boost::shared_ptr<AudioFileSource> create_audio_source_for_session (ARDOUR::AudioDiskstream&, uint32_t which_channel, bool destructive);
 
 	boost::shared_ptr<Source> source_by_id (const PBD::ID&);
 
 	/* playlist management */
 
-	Playlist* playlist_by_name (string name);
-	void add_playlist (Playlist *);
-	sigc::signal<void,Playlist*> PlaylistAdded;
-	sigc::signal<void,Playlist*> PlaylistRemoved;
+	boost::shared_ptr<Playlist> playlist_by_name (string name);
+	void add_playlist (boost::shared_ptr<Playlist>);
+	sigc::signal<void,boost::shared_ptr<Playlist> > PlaylistAdded;
+	sigc::signal<void,boost::shared_ptr<Playlist> > PlaylistRemoved;
 
 	uint32_t n_playlists() const;
 
-	template<class T> void foreach_playlist (T *obj, void (T::*func)(Playlist *));
-	void get_playlists (std::vector<Playlist*>&);
+	template<class T> void foreach_playlist (T *obj, void (T::*func)(boost::shared_ptr<Playlist>));
+	void get_playlists (std::vector<boost::shared_ptr<Playlist> >&);
 
 	/* named selections */
 
@@ -1464,19 +1460,19 @@ class Session : public PBD::StatefulDestructible
 	/* PLAYLISTS */
 	
 	mutable Glib::Mutex playlist_lock;
-	typedef set<Playlist *> PlaylistList;
+	typedef set<boost::shared_ptr<Playlist> > PlaylistList;
 	PlaylistList playlists;
 	PlaylistList unused_playlists;
 
 	int load_playlists (const XMLNode&);
 	int load_unused_playlists (const XMLNode&);
-	void remove_playlist (Playlist *);
-	void track_playlist (Playlist *, bool);
+	void remove_playlist (boost::weak_ptr<Playlist>);
+	void track_playlist (bool, boost::weak_ptr<Playlist>);
 
-	Playlist *playlist_factory (string name);
-	Playlist *XMLPlaylistFactory (const XMLNode&);
+	boost::shared_ptr<Playlist> playlist_factory (string name);
+	boost::shared_ptr<Playlist> XMLPlaylistFactory (const XMLNode&);
 
-	void playlist_length_changed (Playlist *);
+	void playlist_length_changed ();
 	void diskstream_playlist_changed (boost::shared_ptr<Diskstream>);
 
 	/* NAMED SELECTIONS */

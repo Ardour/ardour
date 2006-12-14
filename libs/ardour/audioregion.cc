@@ -306,9 +306,11 @@ AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 
 AudioRegion::~AudioRegion ()
 {
-	if (_playlist) {
+	boost::shared_ptr<Playlist> pl (playlist());
+
+	if (pl) {
 		for (SourceList::const_iterator i = sources.begin(); i != sources.end(); ++i) {
-			(*i)->remove_playlist (_playlist);
+			(*i)->remove_playlist (pl);
 		}
 	}
 
@@ -1159,11 +1161,13 @@ AudioRegion::exportme (Session& session, AudioExportSpecification& spec)
 boost::shared_ptr<Region>
 AudioRegion::get_parent() const
 {
-	if (_playlist) {
+	boost::shared_ptr<Playlist> pl (playlist());
+
+	if (pl) {
 		boost::shared_ptr<AudioRegion> ar;
 		boost::shared_ptr<AudioRegion const> grrr2 = boost::dynamic_pointer_cast<AudioRegion const> (shared_from_this());
 		
-		if (grrr2 && (ar = _playlist->session().find_whole_file_parent (grrr2))) {
+		if (grrr2 && (ar = pl->session().find_whole_file_parent (grrr2))) {
 			return boost::static_pointer_cast<Region> (ar);
 		}
 	}
@@ -1174,12 +1178,14 @@ AudioRegion::get_parent() const
 void
 AudioRegion::set_scale_amplitude (gain_t g)
 {
+	boost::shared_ptr<Playlist> pl (playlist());
+
 	_scale_amplitude = g;
 
 	/* tell the diskstream we're in */
-
-	if (_playlist) {
-		_playlist->Modified();
+	
+	if (pl) {
+		pl->Modified();
 	}
 
 	/* tell everybody else */
@@ -1246,8 +1252,10 @@ AudioRegion::normalize_to (float target_dB)
 
 	/* tell the diskstream we're in */
 
-	if (_playlist) {
-		_playlist->Modified();
+	boost::shared_ptr<Playlist> pl (playlist());
+
+	if (pl) {
+		pl->Modified();
 	}
 
 	/* tell everybody else */
@@ -1330,31 +1338,32 @@ AudioRegion::source_offset_changed ()
 }
 
 void
-AudioRegion::set_playlist (Playlist* pl)
+AudioRegion::set_playlist (boost::weak_ptr<Playlist> wpl)
 {
-	if (pl == _playlist) {
+	boost::shared_ptr<Playlist> old_playlist = (_playlist.lock());
+	boost::shared_ptr<Playlist> pl (wpl.lock());
+
+	if (old_playlist == pl) {
 		return;
 	}
 
-	Playlist* old_playlist = _playlist;
-
-	Region::set_playlist (pl);
+	Region::set_playlist (wpl);
 
 	if (pl) {
 		if (old_playlist) {
 			for (SourceList::const_iterator i = sources.begin(); i != sources.end(); ++i) {
-				(*i)->remove_playlist (old_playlist);	
-				(*i)->add_playlist (_playlist);
+				(*i)->remove_playlist (_playlist);	
+				(*i)->add_playlist (pl);
 			}
 		} else {
 			for (SourceList::const_iterator i = sources.begin(); i != sources.end(); ++i) {
-				(*i)->add_playlist (_playlist);
+				(*i)->add_playlist (pl);
 			}
 		}
 	} else {
 		if (old_playlist) {
 			for (SourceList::const_iterator i = sources.begin(); i != sources.end(); ++i) {
-				(*i)->remove_playlist (old_playlist);
+				(*i)->remove_playlist (_playlist);
 			}
 		}
 	}

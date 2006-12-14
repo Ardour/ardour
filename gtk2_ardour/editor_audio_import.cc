@@ -325,7 +325,7 @@ Editor::finish_bringing_in_audio (boost::shared_ptr<AudioRegion> region, uint32_
 		
 	case ImportToTrack:
 		if (track) {
-			Playlist* playlist  = track->diskstream()->playlist();
+			boost::shared_ptr<Playlist> playlist = track->diskstream()->playlist();
 			
 			boost::shared_ptr<AudioRegion> copy (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (region)));
 			begin_reversible_command (_("insert sndfile"));

@@ -45,39 +45,31 @@ AudioPlaylist::AudioPlaylist (Session& session, const XMLNode& node, bool hidden
 	in_set_state++;
 	set_state (node);
 	in_set_state--;
-
-	if (!hidden) {
-		PlaylistCreated (this); /* EMIT SIGNAL */
-	}
 }
 
 AudioPlaylist::AudioPlaylist (Session& session, string name, bool hidden)
 	: Playlist (session, name, hidden)
 {
-	if (!hidden) {
-		PlaylistCreated (this); /* EMIT SIGNAL */
-	}
-
 }
 
-AudioPlaylist::AudioPlaylist (const AudioPlaylist& other, string name, bool hidden)
+AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, string name, bool hidden)
 	: Playlist (other, name, hidden)
 {
-	RegionList::const_iterator in_o  = other.regions.begin();
+	RegionList::const_iterator in_o  = other->regions.begin();
 	RegionList::iterator in_n = regions.begin();
 
-	while (in_o != other.regions.end()) {
+	while (in_o != other->regions.end()) {
 		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(*in_o);
 
 		// We look only for crossfades which begin with the current region, so we don't get doubles
-		for (list<Crossfade *>::const_iterator xfades = other._crossfades.begin(); xfades != other._crossfades.end(); ++xfades) {
+		for (list<Crossfade *>::const_iterator xfades = other->_crossfades.begin(); xfades != other->_crossfades.end(); ++xfades) {
 			if ((*xfades)->in() == ar) {
 				// We found one! Now copy it!
 
-				RegionList::const_iterator out_o = other.regions.begin();
+				RegionList::const_iterator out_o = other->regions.begin();
 				RegionList::const_iterator out_n = regions.begin();
 
-				while (out_o != other.regions.end()) {
+				while (out_o != other->regions.end()) {
 					
 					boost::shared_ptr<AudioRegion>ar2 = boost::dynamic_pointer_cast<AudioRegion>(*out_o);
 					
@@ -99,13 +91,9 @@ AudioPlaylist::AudioPlaylist (const AudioPlaylist& other, string name, bool hidd
 		in_o++;
 		in_n++;
 	}
-
-	if (!hidden) {
-		PlaylistCreated (this); /* EMIT SIGNAL */
-	}
 }
 
-AudioPlaylist::AudioPlaylist (const AudioPlaylist& other, nframes_t start, nframes_t cnt, string name, bool hidden)
+AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, nframes_t start, nframes_t cnt, string name, bool hidden)
 	: Playlist (other, start, cnt, name, hidden)
 {
 	/* this constructor does NOT notify others (session) */
@@ -658,7 +646,7 @@ AudioPlaylist::destroy_region (boost::shared_ptr<Region> region)
 			x = xtmp;
 		}
 
-		region->set_playlist (0);
+		region->set_playlist (boost::shared_ptr<Playlist>());
 	}
 
 	for (c = _crossfades.begin(); c != _crossfades.end(); ) {

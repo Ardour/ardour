@@ -245,9 +245,9 @@ RouteTimeAxisView::~RouteTimeAxisView ()
 }
 
 void
-RouteTimeAxisView::set_playlist (Playlist *newplaylist)
+RouteTimeAxisView::set_playlist (boost::shared_ptr<Playlist> newplaylist)
 {
-	Playlist *pl = playlist();
+	boost::shared_ptr<Playlist> pl = playlist();
 	assert(pl);
 
 	modified_connection.disconnect ();
@@ -312,7 +312,7 @@ RouteTimeAxisView::playlist_changed ()
 	label_view ();
 
 	if (is_track()) {
-		set_playlist (dynamic_cast<Playlist*>(get_diskstream()->playlist()));
+		set_playlist (get_diskstream()->playlist());
 	}
 }
 
@@ -843,7 +843,7 @@ RouteTimeAxisView::rename_current_playlist ()
 	if (!ds || ds->destructive())
 		return;
 
-	Playlist *const pl = ds->playlist();
+	boost::shared_ptr<Playlist> pl = ds->playlist();
 	if (!pl)
 		return;
 
@@ -874,7 +874,7 @@ RouteTimeAxisView::use_copy_playlist (bool prompt)
 	if (!ds || ds->destructive())
 		return;
 
-	Playlist *const pl = ds->playlist();
+	boost::shared_ptr<const Playlist> pl = ds->playlist();
 	if (!pl)
 		return;
 
@@ -922,7 +922,7 @@ RouteTimeAxisView::use_new_playlist (bool prompt)
 	if (!ds || ds->destructive())
 		return;
 
-	Playlist *const pl = ds->playlist();
+	boost::shared_ptr<const Playlist> pl = ds->playlist();
 	if (!pl)
 		return;
 
@@ -955,6 +955,7 @@ RouteTimeAxisView::use_new_playlist (bool prompt)
 	if (name.length()) {
 		ds->use_new_playlist ();
 		ds->playlist()->set_name (name);
+		cerr << " installed new PL, UC = " << ds->playlist().use_count() << endl;
 	}
 }
 
@@ -965,11 +966,11 @@ RouteTimeAxisView::clear_playlist ()
 	if (!ds || ds->destructive())
 		return;
 
-	Playlist *const pl = ds->playlist();
+	boost::shared_ptr<Playlist> pl = ds->playlist();
 	if (!pl)
 		return;
 
-	editor.clear_playlist (*pl);
+	editor.clear_playlist (pl);
 }
 
 void
@@ -1087,7 +1088,7 @@ RouteTimeAxisView::name() const
 	return _route->name();
 }
 
-Playlist *
+boost::shared_ptr<Playlist>
 RouteTimeAxisView::playlist () const 
 {
 	boost::shared_ptr<Diskstream> ds;
@@ -1095,7 +1096,7 @@ RouteTimeAxisView::playlist () const
 	if ((ds = get_diskstream()) != 0) {
 		return ds->playlist(); 
 	} else {
-		return 0; 
+		return boost::shared_ptr<Playlist> ();
 	}
 }
 
@@ -1146,7 +1147,7 @@ boost::shared_ptr<Region>
 RouteTimeAxisView::find_next_region (nframes_t pos, RegionPoint point, int32_t dir)
 {
 	boost::shared_ptr<Diskstream> stream;
-	Playlist *playlist = 0;
+	boost::shared_ptr<Playlist> playlist;
 
 	if ((stream = get_diskstream()) != 0 && (playlist = stream->playlist()) != 0) {
 		return playlist->find_next_region (pos, point, dir);
@@ -1158,9 +1159,9 @@ RouteTimeAxisView::find_next_region (nframes_t pos, RegionPoint point, int32_t d
 bool
 RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 {
-	Playlist* what_we_got;
+	boost::shared_ptr<Playlist> what_we_got;
 	boost::shared_ptr<Diskstream> ds = get_diskstream();
-	Playlist* playlist;
+	boost::shared_ptr<Playlist> playlist;
 	bool ret = false;
 
 	if (ds == 0) {
@@ -1185,7 +1186,7 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 	case Cut:
 		if ((what_we_got = playlist->cut (time)) != 0) {
 			editor.get_cut_buffer().add (what_we_got);
-			_session.add_command( new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
+			_session.add_command( new MementoCommand<Playlist>(*playlist.get(), &before, &playlist->get_state()));
 			ret = true;
 		}
 		break;
@@ -1198,7 +1199,7 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 	case Clear:
 		if ((what_we_got = playlist->cut (time)) != 0) {
 			_session.add_command( new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
-			what_we_got->unref ();
+			what_we_got->release ();
 			ret = true;
 		}
 		break;
@@ -1214,7 +1215,7 @@ RouteTimeAxisView::paste (nframes_t pos, float times, Selection& selection, size
 		return false;
 	}
 
-	Playlist* playlist = get_diskstream()->playlist();
+	boost::shared_ptr<Playlist> playlist = get_diskstream()->playlist();
 	PlaylistSelection::iterator p;
 	
 	for (p = selection.playlists.begin(); p != selection.playlists.end() && nth; ++p, --nth);
@@ -1227,7 +1228,7 @@ RouteTimeAxisView::paste (nframes_t pos, float times, Selection& selection, size
 		pos = session_frame_to_track_frame(pos, get_diskstream()->speed() );
 	
 	XMLNode &before = playlist->get_state();
-	playlist->paste (**p, pos, times);
+	playlist->paste (*p, pos, times);
 	_session.add_command( new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
 
 	return true;
@@ -1269,28 +1270,28 @@ RouteTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
 	playlist_menu = new Menu;
 	playlist_menu->set_name ("ArdourContextMenu");
 
-	vector<Playlist*> playlists;
+	vector<boost::shared_ptr<Playlist> > playlists;
 	boost::shared_ptr<Diskstream> ds = get_diskstream();
 	RadioMenuItem::Group playlist_group;
 
 	_session.get_playlists (playlists);
 	
-	for (vector<Playlist*>::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+	for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 
 		if ((*i)->get_orig_diskstream_id() == ds->id()) {
-			playlist_items.push_back (RadioMenuElem (playlist_group, (*i)->name(), bind (mem_fun (*this, &RouteTimeAxisView::use_playlist), (*i))));
+			playlist_items.push_back (RadioMenuElem (playlist_group, (*i)->name(), bind (mem_fun (*this, &RouteTimeAxisView::use_playlist),
+												     boost::weak_ptr<Playlist> (*i))));
 
 			if (ds->playlist()->id() == (*i)->id()) {
 				static_cast<RadioMenuItem*>(&playlist_items.back())->set_active();
 			}
 		} else if (ds->playlist()->id() == (*i)->id()) {
-			playlist_items.push_back (RadioMenuElem (playlist_group, (*i)->name(), bind (mem_fun (*this, &RouteTimeAxisView::use_playlist), (*i))));
+			playlist_items.push_back (RadioMenuElem (playlist_group, (*i)->name(), bind (mem_fun (*this, &RouteTimeAxisView::use_playlist), 
+												     boost::weak_ptr<Playlist>(*i))));
 			static_cast<RadioMenuItem*>(&playlist_items.back())->set_active();
 			
 		}
 	}
-
-	
 
 	playlist_items.push_back (SeparatorElem());
 	playlist_items.push_back (MenuElem (_("Rename"), mem_fun(*this, &RouteTimeAxisView::rename_current_playlist)));
@@ -1306,12 +1307,18 @@ RouteTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
 }
 
 void
-RouteTimeAxisView::use_playlist (Playlist* pl)
+RouteTimeAxisView::use_playlist (boost::weak_ptr<Playlist> wpl)
 {
-	AudioPlaylist* apl = dynamic_cast<AudioPlaylist*> (pl);
-	
 	assert (is_track());
 
+	boost::shared_ptr<Playlist> pl (wpl.lock());
+
+	if (!pl) {
+		return;
+	}
+
+	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist> (pl);
+	
 	if (apl) {
 		get_diskstream()->use_playlist (apl);
 	}

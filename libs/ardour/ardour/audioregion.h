@@ -137,7 +137,7 @@ class AudioRegion : public Region
 	void resume_fade_in ();
 	void resume_fade_out ();
 
-	void set_playlist (Playlist *);
+	void set_playlist (boost::weak_ptr<Playlist>);
 
   private:
 	friend class RegionFactory;

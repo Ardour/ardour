@@ -168,7 +168,7 @@ class TimeAxisView : public virtual AxisView
 	virtual void step_height (bool bigger);
 
 	virtual ARDOUR::RouteGroup* edit_group() const { return 0; }
-	virtual ARDOUR::Playlist* playlist() const { return 0; }
+	virtual boost::shared_ptr<ARDOUR::Playlist> playlist() const { return boost::shared_ptr<ARDOUR::Playlist> (); }
 
 	virtual void set_samples_per_unit (double);
 	virtual void show_selection (TimeSelection&);

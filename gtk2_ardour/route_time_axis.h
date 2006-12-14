@@ -99,7 +99,7 @@ public:
 	string              name() const;
 	StreamView*         view() const { return _view; }
 	ARDOUR::RouteGroup* edit_group() const;
-	ARDOUR::Playlist*   playlist() const;
+	boost::shared_ptr<ARDOUR::Playlist> playlist() const;
 
 protected:
 	friend class StreamView;
@@ -176,7 +176,7 @@ protected:
 	void align_style_changed ();
 	void set_align_style (ARDOUR::AlignStyle);
 	
-	virtual void set_playlist (ARDOUR::Playlist *);
+	virtual void set_playlist (boost::shared_ptr<ARDOUR::Playlist>);
 	void         playlist_click ();
 	void         show_playlist_selector ();
 	void         playlist_changed ();
@@ -229,7 +229,7 @@ protected:
 	Gtk::Menu*          playlist_action_menu;
 	Gtk::MenuItem*      playlist_item;
 
-	void use_playlist (ARDOUR::Playlist*);
+	void use_playlist (boost::weak_ptr<ARDOUR::Playlist>);
 
 	ArdourCanvas::SimpleRect* timestretch_rect;
 

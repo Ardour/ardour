@@ -150,12 +150,12 @@ Editor::create_named_selection (const string & name)
 		return;
 	}
 
-	Playlist*       what_we_found;
-	list<Playlist*> thelist;
+	boost::shared_ptr<Playlist>        what_we_found;
+	list<boost::shared_ptr<Playlist> > thelist;
 
 	for (TrackViewList::iterator i = views->begin(); i != views->end(); ++i) {
 		
-		Playlist *pl = (*i)->playlist();
+		boost::shared_ptr<Playlist> pl = (*i)->playlist();
 		
 		if (pl) {
 			

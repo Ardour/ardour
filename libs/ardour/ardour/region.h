@@ -162,9 +162,8 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 
 	virtual uint32_t read_data_count() const { return _read_data_count; }
 
-	ARDOUR::Playlist* playlist() const { return _playlist; }
-
-	virtual void set_playlist (ARDOUR::Playlist*);
+	boost::shared_ptr<ARDOUR::Playlist> playlist() const { return _playlist.lock(); }
+	virtual void set_playlist (boost::weak_ptr<ARDOUR::Playlist>);
 
 	/* serialization */
 	
@@ -217,7 +216,7 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	mutable RegionEditState _first_edit;
 	int                     _frozen;
 	Glib::Mutex             lock;
-	ARDOUR::Playlist*       _playlist;
+	boost::weak_ptr<ARDOUR::Playlist> _playlist;
 	mutable uint32_t        _read_data_count; // modified in read()
 	Change                   pending_changed;
 	uint64_t                _last_layer_op; // timestamp

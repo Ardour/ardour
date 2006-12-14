@@ -44,6 +44,7 @@
 #include <ardour/audio_track.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/region_factory.h>
+#include <ardour/playlist_factory.h>
 #include <ardour/reverse.h>
 
 #include "ardour_ui.h"
@@ -122,7 +123,7 @@ Editor::split_regions_at (nframes_t where, RegionSelection& regions)
 		tmp = a;
 		++tmp;
 
-		Playlist* pl = (*a)->region()->playlist();
+		boost::shared_ptr<Playlist> pl = (*a)->region()->playlist();
 
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*a);
 		if (arv)
@@ -149,7 +150,7 @@ Editor::remove_clicked_region ()
 		return;
 	}
 
-	Playlist* playlist = clicked_audio_trackview->playlist();
+	boost::shared_ptr<Playlist> playlist = clicked_audio_trackview->playlist();
 	
 	begin_reversible_command (_("remove region"));
         XMLNode &before = playlist->get_state();
@@ -232,7 +233,7 @@ Editor::select_region_for_operation (int dir, TimeAxisView **tv)
 		RouteTimeAxisView* rtv;
 
 		if ((rtv = dynamic_cast<RouteTimeAxisView*> (*tv)) != 0) {
-			Playlist *pl;
+			boost::shared_ptr<Playlist> pl;
 			
 			if ((pl = rtv->playlist()) == 0) {
 				return region;
@@ -1719,7 +1720,7 @@ Editor::insert_region_list_drag (boost::shared_ptr<AudioRegion> region, int x, i
 	TimeAxisView *tv;
 	nframes_t where;
 	AudioTimeAxisView *atv = 0;
-	Playlist *playlist;
+	boost::shared_ptr<Playlist> playlist;
 	
 	track_canvas.window_to_world (x, y, wx, wy);
 	wx += horizontal_adjustment.get_value();
@@ -1749,20 +1750,26 @@ Editor::insert_region_list_drag (boost::shared_ptr<AudioRegion> region, int x, i
 		return;
 	}
 	
+	cerr << "drop target playlist, UC  = " << playlist.use_count() << endl;
+
 	snap_to (where);
 	
 	begin_reversible_command (_("insert dragged region"));
         XMLNode &before = playlist->get_state();
+	cerr << "pre add target playlist, UC  = " << playlist.use_count() << endl;
 	playlist->add_region (RegionFactory::create (region), where, 1.0);
+	cerr << "post add target playlist, UC  = " << playlist.use_count() << endl;
 	session->add_command(new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
 	commit_reversible_command ();
+
+	cerr << "post drop target playlist, UC  = " << playlist.use_count() << endl;
 }
 
 void
 Editor::insert_region_list_selection (float times)
 {
 	RouteTimeAxisView *tv = 0;
-	Playlist *playlist;
+	boost::shared_ptr<Playlist> playlist;
 
 	if (clicked_audio_trackview != 0) {
 		tv = clicked_audio_trackview;
@@ -2097,7 +2104,7 @@ Editor::region_from_selection ()
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 		boost::shared_ptr<AudioRegion> current;
 		boost::shared_ptr<Region> current_r;
-		Playlist *pl;
+		boost::shared_ptr<Playlist> pl;
 
 		nframes_t internal_start;
 		string new_name;
@@ -2134,7 +2141,7 @@ Editor::create_region_from_selection (vector<boost::shared_ptr<AudioRegion> >& n
 
 		boost::shared_ptr<AudioRegion> current;
 		boost::shared_ptr<Region> current_r;
-		Playlist* playlist;
+		boost::shared_ptr<Playlist> playlist;
 		nframes_t internal_start;
 		string new_name;
 
@@ -2189,7 +2196,7 @@ Editor::separate_region_from_selection ()
 		return;
 	}
 
-	Playlist *playlist;
+	boost::shared_ptr<Playlist> playlist;
 		
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 
@@ -2235,7 +2242,7 @@ Editor::separate_regions_using_location (Location& loc)
 		return;
 	}
 
-	Playlist *playlist;
+	boost::shared_ptr<Playlist> playlist;
 
 	/* XXX i'm unsure as to whether this should operate on selected tracks only 
 	   or the entire enchillada. uncomment the below line to correct the behaviour 
@@ -2284,8 +2291,8 @@ Editor::crop_region_to_selection ()
 		return;
 	}
 
-	vector<Playlist*> playlists;
-	Playlist *playlist;
+	vector<boost::shared_ptr<Playlist> > playlists;
+	boost::shared_ptr<Playlist> playlist;
 
 	if (clicked_trackview != 0) {
 
@@ -2321,7 +2328,7 @@ Editor::crop_region_to_selection ()
 
 		begin_reversible_command (_("trim to selection"));
 
-		for (vector<Playlist*>::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 			
 			boost::shared_ptr<Region> region;
 			
@@ -2371,7 +2378,7 @@ Editor::region_fill_track ()
 		if (!ar)
 			continue;
 
-		Playlist* pl = region->playlist();
+		boost::shared_ptr<Playlist> pl = region->playlist();
 
 		if (end <= region->last_frame()) {
 			return;
@@ -2415,7 +2422,7 @@ Editor::region_fill_selection ()
 	nframes_t start = selection->time[clicked_selection].start;
 	nframes_t end = selection->time[clicked_selection].end;
 
-	Playlist *playlist; 
+	boost::shared_ptr<Playlist> playlist; 
 
 	if (selection->tracks.empty()) {
 		return;
@@ -2781,7 +2788,7 @@ Editor::bounce_range_selection ()
 			continue;
 		}
 		
-		Playlist* playlist;
+		boost::shared_ptr<Playlist> playlist;
 		
 		if ((playlist = atv->playlist()) == 0) {
 			return;
@@ -2897,7 +2904,7 @@ Editor::cut_copy_points (CutCopyOp op)
 }
 
 struct PlaylistState {
-    Playlist* playlist;
+    boost::shared_ptr<Playlist> playlist;
     XMLNode*  before;
 };
 
@@ -2910,7 +2917,7 @@ struct lt_playlist {
 void
 Editor::cut_copy_regions (CutCopyOp op)
 {
-        typedef std::map<AudioPlaylist*,AudioPlaylist*> PlaylistMapping;
+        typedef std::map<boost::shared_ptr<AudioPlaylist>,boost::shared_ptr<AudioPlaylist> > PlaylistMapping;
 	PlaylistMapping pmap;
 	nframes_t first_position = max_frames;
 
@@ -2921,7 +2928,8 @@ Editor::cut_copy_regions (CutCopyOp op)
 		first_position = min ((*x)->region()->position(), first_position);
 
 		if (op == Cut || op == Clear) {
-			AudioPlaylist *pl = dynamic_cast<AudioPlaylist*>((*x)->region()->playlist());
+			boost::shared_ptr<AudioPlaylist> pl = boost::dynamic_pointer_cast<AudioPlaylist>((*x)->region()->playlist());
+
 			if (pl) {
 
 				PlaylistState before;
@@ -2939,8 +2947,8 @@ Editor::cut_copy_regions (CutCopyOp op)
 
 	for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ) {
 
-		AudioPlaylist *pl = dynamic_cast<AudioPlaylist*>((*x)->region()->playlist());
-		AudioPlaylist* npl;
+		boost::shared_ptr<AudioPlaylist> pl = boost::dynamic_pointer_cast<AudioPlaylist>((*x)->region()->playlist());
+		boost::shared_ptr<AudioPlaylist> npl;
 		RegionSelection::iterator tmp;
 		
 		tmp = x;
@@ -2951,7 +2959,7 @@ Editor::cut_copy_regions (CutCopyOp op)
 			PlaylistMapping::iterator pi = pmap.find (pl);
 			
 			if (pi == pmap.end()) {
-				npl = new AudioPlaylist (*session, "cutlist", true);
+				npl = boost::dynamic_pointer_cast<AudioPlaylist> (PlaylistFactory::create (*session, "cutlist", true));
 				npl->freeze();
 				pmap[pl] = npl;
 			} else {
@@ -2983,7 +2991,7 @@ Editor::cut_copy_regions (CutCopyOp op)
 		x = tmp;
 	}
 
-	list<Playlist*> foo;
+	list<boost::shared_ptr<Playlist> > foo;
 
 	for (PlaylistMapping::iterator i = pmap.begin(); i != pmap.end(); ++i) {
 		foo.push_back (i->second);
@@ -3080,8 +3088,8 @@ Editor::paste_named_selection (float times)
 	TreeModel::iterator i = selected->get_selected();
 	NamedSelection* ns = (*i)[named_selection_columns.selection];
 
-	list<Playlist*>::iterator chunk;
-	list<Playlist*>::iterator tmp;
+	list<boost::shared_ptr<Playlist> >::iterator chunk;
+	list<boost::shared_ptr<Playlist> >::iterator tmp;
 
 	chunk = ns->playlists.begin();
 		
@@ -3090,8 +3098,8 @@ Editor::paste_named_selection (float times)
 	for (t = selection->tracks.begin(); t != selection->tracks.end(); ++t) {
 		
 		AudioTimeAxisView* atv;
-		Playlist* pl;
-		AudioPlaylist* apl;
+		boost::shared_ptr<Playlist> pl;
+		boost::shared_ptr<AudioPlaylist> apl;
 
 		if ((atv = dynamic_cast<AudioTimeAxisView*> (*t)) == 0) {
 			continue;
@@ -3100,8 +3108,8 @@ Editor::paste_named_selection (float times)
 		if ((pl = atv->playlist()) == 0) {
 			continue;
 		}
-
-		if ((apl = dynamic_cast<AudioPlaylist*> (pl)) == 0) {
+		
+		if ((apl = boost::dynamic_pointer_cast<AudioPlaylist> (pl)) == 0) {
 			continue;
 		}
 
@@ -3109,7 +3117,7 @@ Editor::paste_named_selection (float times)
 		++tmp;
 
                 XMLNode &before = apl->get_state();
-		apl->paste (**chunk, edit_cursor->current_frame, times);
+		apl->paste (*chunk, edit_cursor->current_frame, times);
 		session->add_command(new MementoCommand<AudioPlaylist>(*apl, &before, &apl->get_state()));
 
 		if (tmp != ns->playlists.end()) {
@@ -3123,7 +3131,7 @@ Editor::paste_named_selection (float times)
 void
 Editor::duplicate_some_regions (RegionSelection& regions, float times)
 {
-	Playlist *playlist; 
+	boost::shared_ptr<Playlist> playlist; 
 	RegionSelection sel = regions; // clear (below) will clear the argument list
 		
 	begin_reversible_command (_("duplicate region"));
@@ -3161,7 +3169,7 @@ Editor::duplicate_selection (float times)
 		return;
 	}
 
-	Playlist *playlist; 
+	boost::shared_ptr<Playlist> playlist; 
 	vector<boost::shared_ptr<AudioRegion> > new_regions;
 	vector<boost::shared_ptr<AudioRegion> >::iterator ri;
 		
@@ -3227,20 +3235,20 @@ Editor::center_edit_cursor ()
 }
 
 void
-Editor::clear_playlist (Playlist& playlist)
+Editor::clear_playlist (boost::shared_ptr<Playlist> playlist)
 {
 	begin_reversible_command (_("clear playlist"));
-        XMLNode &before = playlist.get_state();
-	playlist.clear ();
-        XMLNode &after = playlist.get_state();
-	session->add_command (new MementoCommand<Playlist>(playlist, &before, &after));
+        XMLNode &before = playlist->get_state();
+	playlist->clear ();
+        XMLNode &after = playlist->get_state();
+	session->add_command (new MementoCommand<Playlist>(*playlist.get(), &before, &after));
 	commit_reversible_command ();
 }
 
 void
 Editor::nudge_track (bool use_edit_cursor, bool forwards)
 {
-	Playlist *playlist; 
+	boost::shared_ptr<Playlist> playlist; 
 	nframes_t distance;
 	nframes_t next_distance;
 	nframes_t start;
@@ -3388,7 +3396,7 @@ Editor::apply_filter (AudioFilter& filter, string command)
 		if (!arv)
 			continue;
 
-		Playlist* playlist = arv->region()->playlist();
+		boost::shared_ptr<Playlist> playlist = arv->region()->playlist();
 
 		RegionSelection::iterator tmp;
 		

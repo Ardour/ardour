@@ -83,6 +83,7 @@
 #include <ardour/control_protocol_manager.h>
 #include <ardour/region_factory.h>
 #include <ardour/source_factory.h>
+#include <ardour/playlist_factory.h>
 
 #include <control_protocol/control_protocol.h>
 
@@ -236,7 +237,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	RegionFactory::CheckNewRegion.connect (mem_fun (*this, &Session::add_region));
 	SourceFactory::SourceCreated.connect (mem_fun (*this, &Session::add_source));
-	Playlist::PlaylistCreated.connect (mem_fun (*this, &Session::add_playlist));
+	PlaylistFactory::PlaylistCreated.connect (mem_fun (*this, &Session::add_playlist));
 	Redirect::RedirectCreated.connect (mem_fun (*this, &Session::add_redirect));
 	NamedSelection::NamedSelectionCreated.connect (mem_fun (*this, &Session::add_named_selection));
         AutomationList::AutomationListCreated.connect (mem_fun (*this, &Session::add_automation_list));
@@ -380,6 +381,7 @@ Session::setup_raid_path (string path)
 		if (fspath[fspath.length()-1] != '/') {
 			fspath += '/';
 		}
+
 		fspath += sound_dir (false);
 		
 		AudioFileSource::set_search_path (fspath);
@@ -1681,7 +1683,7 @@ Session::load_playlists (const XMLNode& node)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
-	Playlist *playlist;
+	boost::shared_ptr<Playlist> playlist;
 
 	nlist = node.children();
 
@@ -1702,7 +1704,7 @@ Session::load_unused_playlists (const XMLNode& node)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
-	Playlist *playlist;
+	boost::shared_ptr<Playlist> playlist;
 
 	nlist = node.children();
 
@@ -1717,22 +1719,22 @@ Session::load_unused_playlists (const XMLNode& node)
 
 		// now manually untrack it
 
-		track_playlist (playlist, false);
+		track_playlist (false, boost::weak_ptr<Playlist> (playlist));
 	}
 
 	return 0;
 }
 
 
-Playlist *
+boost::shared_ptr<Playlist>
 Session::XMLPlaylistFactory (const XMLNode& node)
 {
 	try {
-		return new AudioPlaylist (*this, node);
+		return PlaylistFactory::create (*this, node);
 	}
 
 	catch (failed_constructor& err) {
-		return 0;
+		return boost::shared_ptr<Playlist>();
 	}
 }
 
@@ -1792,7 +1794,6 @@ Session::sound_dir (bool with_path) const
 	
 	old_withpath = _path;
 	old_withpath += old_sound_dir_name;
-	old_withpath += '/';
 
 	if (stat (old_withpath.c_str(), &statbuf) == 0) {
 		if (with_path)
@@ -1812,7 +1813,6 @@ Session::sound_dir (bool with_path) const
 	res += legalize_for_path (_name);
 	res += '/';
 	res += sound_dir_name;
-	res += '/';
 
 	return res;
 }
@@ -2385,11 +2385,22 @@ Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_th
 	return 0;
 }
 
+struct RegionCounter {
+    typedef std::map<PBD::ID,boost::shared_ptr<AudioSource> > AudioSourceList;
+    AudioSourceList::iterator iter;
+    boost::shared_ptr<Region> region;
+    uint32_t count;
+    
+    RegionCounter() : count (0) {}
+};
+
 int
 Session::cleanup_sources (Session::cleanup_report& rep)
 {
-	vector<boost::shared_ptr<Source> > dead_sources;
-	vector<Playlist*> playlists_tbd;
+	typedef map<boost::shared_ptr<Source>, RegionCounter> SourceRegionMap;
+	SourceRegionMap dead_sources;
+
+	vector<boost::shared_ptr<Playlist> > playlists_tbd;
 	PathScanner scanner;
 	string sound_path;
 	vector<space_and_path>::iterator i;
@@ -2428,72 +2439,112 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 
 	/* now delete any that were marked for deletion */
 
-	for (vector<Playlist*>::iterator x = playlists_tbd.begin(); x != playlists_tbd.end(); ++x) {
-		PlaylistList::iterator foo;
-
-		if ((foo = unused_playlists.find (*x)) != unused_playlists.end()) {
-			unused_playlists.erase (foo);
-		}
-		delete *x;
+	for (vector<boost::shared_ptr<Playlist> >::iterator x = playlists_tbd.begin(); x != playlists_tbd.end(); ++x) {
+		(*x)->drop_references ();
 	}
+
+	playlists_tbd.clear ();
 
 	/* step 2: find all un-referenced sources */
 
 	rep.paths.clear ();
 	rep.space = 0;
 
-	for (AudioSourceList::iterator i = audio_sources.begin(); i != audio_sources.end(); ) {
+	for (AudioSourceList::iterator i = audio_sources.begin(); i != audio_sources.end(); ++i) {
+		
+		/* we expect the use_count() to be at least 2: one for the shared_ptr<> in the sources
+		   list and one for the iterator. if its used by 1 region, we'd expect a value of 3.
 
-		AudioSourceList::iterator tmp;
+		   do not bother with files that are zero size, otherwise we remove the current "nascent"
+		   capture files.
+		*/
+
+		if (i->second.use_count() <= 3 && i->second->length() > 0) {
+
+			pair<boost::shared_ptr<Source>, RegionCounter> newpair;
+
+			newpair.first = i->second;
+			newpair.second.iter = i;
+
+			dead_sources.insert (newpair);
+		} 
+	}
+
+	/* Search the region list to find out the state of the supposedly unreferenced regions 
+	 */
+
+	for (SourceRegionMap::iterator i = dead_sources.begin(); i != dead_sources.end();++i) {
+
+		for (AudioRegionList::iterator r = audio_regions.begin(); r != audio_regions.end(); ++r) {
+			
+			boost::shared_ptr<AudioRegion> ar = r->second;
+
+			for (uint32_t n = 0; n < ar->n_channels(); ++n) {
+
+				if (ar->source (n) == i->first) {
+					
+					/* this region uses this source */
+
+					i->second.region = ar;
+					i->second.count++;
+
+					if (i->second.count > 1) {
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	/* next, get rid of all regions in the region list that use any dead sources
+	   in case the sources themselves don't go away (they might be referenced in
+	   other snapshots).
+
+	   this is also where we remove the apparently unused sources from our source
+	   list. this doesn't rename them or delete them, but it means they are
+	   potential candidates for renaming after we find all soundfiles
+	   and scan for use across all snapshots (including this one).
+	*/
+	
+	for (SourceRegionMap::iterator i = dead_sources.begin(); i != dead_sources.end(); ) {
+
+		SourceRegionMap::iterator tmp;
 
 		tmp = i;
 		++tmp;
 
-		/* only remove files that are not in use and have some size
-		   to them. otherwise we remove the current "nascent"
-		   capture files.
-		*/
+		if (i->second.count == 0) {
 
-		cerr << "checking out source " << i->second->name() << " use_count = " << i->second.use_count() << endl;
-
-		if (i->second.use_count() == 1 && i->second->length() > 0) {
-			dead_sources.push_back (i->second);
+			/* no regions use this source */
 
 			/* remove this source from our own list to avoid us
 			   adding it to the list of all sources below
 			*/
 
-			audio_sources.erase (i);
+			audio_sources.erase (i->second.iter);
+
+ 		} else if (i->second.count == 1) {
+
+			/* the use_count for the source was 3. this means that there is only reference to it in addition to the source
+			   list and an iterator used to traverse that list. since there is a single region using the source, that
+			   must be the extra reference. this implies that its a whole-file region
+			   with no children, so remove the region and the source.
+			*/
+
+			remove_region (i->second.region);
+
+			/* remove this source from our own list to avoid us
+			   adding it to the list of all sources below
+			*/
+
+			audio_sources.erase (i->second.iter);
+
+		} else {
+			/* more than one region uses this source, do not remove it */
+			dead_sources.erase (i);
 		}
 
 		i = tmp;
-	}
-
-	/* Step 3: get rid of all regions in the region list that use any dead sources
-	   in case the sources themselves don't go away (they might be referenced in
-	   other snapshots).
-	*/
-		
-	for (vector<boost::shared_ptr<Source> >::iterator i = dead_sources.begin(); i != dead_sources.end();++i) {
-
-		for (AudioRegionList::iterator r = audio_regions.begin(); r != audio_regions.end(); ) {
-			AudioRegionList::iterator tmp;
-			boost::shared_ptr<AudioRegion> ar;
-
-			tmp = r;
-			++tmp;
-			
-			ar = r->second;
-
-			for (uint32_t n = 0; n < ar->n_channels(); ++n) {
-				if (ar->source (n) == (*i)) {
-					/* this region is dead */
-					remove_region (ar);
-				}
-			}
-			
-			r = tmp;
-		}
 	}
 
 	/* build a list of all the possible sound directories for the session */
@@ -2504,7 +2555,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		++nexti;
 
 		sound_path += (*i).path;
-		sound_path += sound_dir_name;
+		sound_path += sound_dir (false);
 
 		if (nexti != session_dirs.end()) {
 			sound_path += ':';
@@ -2512,7 +2563,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 
 		i = nexti;
 	}
-	
+
 	/* now do the same thing for the files that ended up in the sounds dir(s) 
 	   but are not referenced as sources in any snapshot.
 	*/
@@ -2577,8 +2628,12 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		   on whichever filesystem it was already on.
 		*/
 
-		newpath = Glib::path_get_dirname (*x);
-		newpath = Glib::path_get_dirname (newpath);
+		/* XXX this is a hack ... go up 4 levels */
+
+		newpath = Glib::path_get_dirname (*x);      // "audiofiles" 
+		newpath = Glib::path_get_dirname (newpath); // "session-name"
+		newpath = Glib::path_get_dirname (newpath); // "interchange"
+		newpath = Glib::path_get_dirname (newpath); // "session-dir"
 
 		newpath += '/';
 		newpath += dead_sound_dir_name;
@@ -2639,7 +2694,6 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 				goto out;
 			}
 		}
-
 	}
 
 	ret = 0;

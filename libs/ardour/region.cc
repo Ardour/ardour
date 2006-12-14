@@ -54,7 +54,6 @@ Region::Region (nframes_t start, nframes_t length, const string& name, layer_t l
 	/* basic Region constructor */
 
 	_flags = flags;
-	_playlist = 0;
 	_read_data_count = 0;
 	_frozen = 0;
 	pending_changed = Change (0);
@@ -76,7 +75,6 @@ Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes
 
 	_frozen = 0;
 	pending_changed = Change (0);
-	_playlist = 0;
 	_read_data_count = 0;
 
 	_start = other->_start + offset; 
@@ -100,7 +98,6 @@ Region::Region (boost::shared_ptr<const Region> other)
 
 	_frozen = 0;
 	pending_changed = Change (0);
-	_playlist = 0;
 	_read_data_count = 0;
 
 	_first_edit = EditChangesID;
@@ -126,7 +123,6 @@ Region::Region (const XMLNode& node)
 {
 	_frozen = 0;
 	pending_changed = Change (0);
-	_playlist = 0;
 	_read_data_count = 0;
 	_start = 0; 
 	_sync_position = _start;
@@ -148,7 +144,7 @@ Region::~Region ()
 }
 
 void
-Region::set_playlist (Playlist* pl)
+Region::set_playlist (boost::weak_ptr<Playlist> pl)
 {
 	_playlist = pl;
 }
@@ -206,9 +202,11 @@ Region::maybe_uncopy ()
 void
 Region::first_edit ()
 {
-	if (_first_edit != EditChangesNothing && _playlist) {
+	boost::shared_ptr<Playlist> pl (playlist());
 
-		_name = _playlist->session().new_region_name (_name);
+	if (_first_edit != EditChangesNothing && pl) {
+
+		_name = pl->session().new_region_name (_name);
 		_first_edit = EditChangesNothing;
 
 		send_change (NameChanged);
@@ -219,7 +217,9 @@ Region::first_edit ()
 bool
 Region::at_natural_position () const
 {
-	if (!_playlist) {
+	boost::shared_ptr<Playlist> pl (playlist());
+
+	if (!pl) {
 		return false;
 	}
 	
@@ -237,7 +237,9 @@ Region::at_natural_position () const
 void
 Region::move_to_natural_position (void *src)
 {
-	if (!_playlist) {
+	boost::shared_ptr<Playlist> pl (playlist());
+
+	if (!pl) {
 		return;
 	}
 	
@@ -297,7 +299,11 @@ Region::set_position_on_top (nframes_t pos, void *src)
 		_position = pos;
 	}
 
-	_playlist->raise_region_to_top (shared_from_this ());
+	boost::shared_ptr<Playlist> pl (playlist());
+
+	if (pl) {
+		pl->raise_region_to_top (shared_from_this ());
+	}
 
 	/* do this even if the position is the same. this helps out
 	   a GUI that has moved its representation already.
@@ -684,42 +690,37 @@ Region::sync_position() const
 void
 Region::raise ()
 {
-	if (_playlist == 0) {
-		return;
+	boost::shared_ptr<Playlist> pl (playlist());
+	if (pl) {
+		pl->raise_region (shared_from_this ());
 	}
-
-	_playlist->raise_region (shared_from_this ());
 }
 
 void
 Region::lower ()
 {
-	if (_playlist == 0) {
-		return;
+	boost::shared_ptr<Playlist> pl (playlist());
+	if (pl) {
+		pl->lower_region (shared_from_this ());
 	}
-
-	_playlist->lower_region (shared_from_this ());
 }
 
 void
 Region::raise_to_top ()
 {
-
-	if (_playlist == 0) {
-		return;
+	boost::shared_ptr<Playlist> pl (playlist());
+	if (pl) {
+		pl->raise_region_to_top (shared_from_this());
 	}
-
-	_playlist->raise_region_to_top (shared_from_this());
 }
 
 void
 Region::lower_to_bottom ()
 {
-	if (_playlist == 0) {
-		return;
+	boost::shared_ptr<Playlist> pl (playlist());
+	if (pl) {
+		pl->lower_region_to_bottom (shared_from_this());
 	}
-
-	_playlist->lower_region_to_bottom (shared_from_this());
 }
 
 void

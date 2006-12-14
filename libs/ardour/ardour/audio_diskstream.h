@@ -90,9 +90,9 @@ class AudioDiskstream : public Diskstream
 		}
 	}
 	
-	AudioPlaylist* audio_playlist () { return dynamic_cast<AudioPlaylist*>(_playlist); }
+	boost::shared_ptr<AudioPlaylist> audio_playlist () { return boost::dynamic_pointer_cast<AudioPlaylist>(_playlist); }
 
-	int use_playlist (Playlist *);
+	int use_playlist (boost::shared_ptr<Playlist>);
 	int use_new_playlist ();
 	int use_copy_playlist ();
 

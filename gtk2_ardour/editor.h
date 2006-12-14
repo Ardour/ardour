@@ -257,7 +257,7 @@ class Editor : public PublicEditor
 	void route_name_changed (TimeAxisView *);
 	gdouble        frames_per_unit;
 	nframes_t leftmost_frame;
-	void clear_playlist (ARDOUR::Playlist&);
+	void clear_playlist (boost::shared_ptr<ARDOUR::Playlist>);
 
 	void new_playlists ();
 	void copy_playlists ();
@@ -1039,7 +1039,7 @@ class Editor : public PublicEditor
 	void fade_in_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 	void fade_out_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 	
-	std::set<ARDOUR::Playlist*> motion_frozen_playlists;
+	std::set<boost::shared_ptr<ARDOUR::Playlist> > motion_frozen_playlists;
 	void region_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void region_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 
@@ -1754,7 +1754,7 @@ class Editor : public PublicEditor
 
 	/* handling cleanup */
 
-	int playlist_deletion_dialog (ARDOUR::Playlist*);
+	int playlist_deletion_dialog (boost::shared_ptr<ARDOUR::Playlist>);
 
 	vector<sigc::connection> session_connections;
 
