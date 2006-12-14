@@ -44,7 +44,6 @@ static FSTInfo *load_fst_info_file( char *filename ) {
     fp = fopen( filename, "r" );
     
     if( fp == NULL ) {
-	    fprintf (stderr, "cannot open FST info file %s\n", filename);
 	free( info );
 	return NULL;
     }
@@ -217,8 +216,6 @@ FSTInfo *fst_get_info( char *dllpath ) {
 	FSTInfo *info;
 	char *fstpath = fst_dllpath_to_infopath( dllpath );
 
-	fprintf (stderr, "have FST info file for %s, loading\n", dllpath);
-
 	info = load_fst_info_file( fstpath );
 	free( fstpath );
 	return info;
@@ -233,7 +230,6 @@ FSTInfo *fst_get_info( char *dllpath ) {
 	fprintf (stderr, "no valid FST file, direct load plugin\n");
 
 	if( !(h = fst_load( dllpath )) ) {
-		fprintf (stderr, "fst_load failed\n");
 		return NULL;
 	}
 	if( !(fst = fst_instantiate( h, simple_master_callback, NULL )) ) {

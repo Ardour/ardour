@@ -341,8 +341,6 @@ static bool vst_filter (const string& str, void *arg)
 {
 	/* Not a dotfile, has a prefix before a period, suffix is "dll" */
 
-	cerr << "VST filter: looking at " << str << endl;
-	
 	return str[0] != '.' && (str.length() > 4 && str.find (".dll") == (str.length() - 4));
 }
 
@@ -359,14 +357,7 @@ PluginManager::vst_discover_from_path (string path)
 	plugin_objects = scanner (vst_path, vst_filter, 0, true, true);
 
 	if (plugin_objects) {
-		cerr << "Discovered " << plugin_objects->size() << " possible plugins\n";
-	} else {
-		cerr << "No plugins discovered at all\n";
-	}
-
-	if (plugin_objects) {
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
-			cerr << "checking out " << **x << endl;
 			vst_discover (**x);
 		}
 	}
@@ -381,7 +372,7 @@ PluginManager::vst_discover (string path)
 	FSTInfo* finfo;
 
 	if ((finfo = fst_get_info (const_cast<char *> (path.c_str()))) == 0) {
-		cerr << "Cannot get VST info from " << path << endl;
+		warning << "Cannot get VST information from " << path << endmsg;
 		return -1;
 	}
 
