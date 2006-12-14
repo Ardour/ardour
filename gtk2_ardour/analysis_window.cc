@@ -229,7 +229,7 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 	
 		for (TrackSelection::iterator i = s.tracks.begin(); i != s.tracks.end(); ++i) {
 			boost::shared_ptr<AudioPlaylist> pl
-				= boost::dynamic_pointer_cast<AudioPlaylist*>((*i)->playlist());
+				= boost::dynamic_pointer_cast<AudioPlaylist>((*i)->playlist());
 
 			if (!pl)
 				continue;
