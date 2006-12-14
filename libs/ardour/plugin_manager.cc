@@ -381,6 +381,7 @@ PluginManager::vst_discover (string path)
 	FSTInfo* finfo;
 
 	if ((finfo = fst_get_info (const_cast<char *> (path.c_str()))) == 0) {
+		cerr << "Cannot get VST info from " << path << endl;
 		return -1;
 	}
 
