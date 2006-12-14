@@ -46,11 +46,13 @@ using namespace Glib;
 using namespace PBD;
 
 ustring
-fit_to_pixels (const ustring& str, int pixel_width, Pango::FontDescription& font, int& actual_width)
+fit_to_pixels (const ustring& str, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses)
 {
 	Label foo;
 	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout ("");
-	
+	ustring::size_type shorter_by = 0;
+	ustring txt;
+
 	layout->set_font_description (font);
 
 	actual_width = 0;
@@ -59,9 +61,11 @@ fit_to_pixels (const ustring& str, int pixel_width, Pango::FontDescription& font
 	ustring::iterator last = ustr.end();
 	--last; /* now points at final entry */
 
+	txt = ustr;
+
 	while (!ustr.empty()) {
 
-		layout->set_text (ustr);
+		layout->set_text (txt);
 
 		int width, height;
 		Gtkmm2ext::get_ink_pixel_size (layout, width, height);
@@ -72,9 +76,17 @@ fit_to_pixels (const ustring& str, int pixel_width, Pango::FontDescription& font
 		}
 		
 		ustr.erase (last--);
+		shorter_by++;
+
+		if (with_ellipses && shorter_by > 3) {
+			txt = ustr;
+			txt += "...";
+		} else {
+			txt = ustr;
+		}
 	}
 
-	return ustr;
+	return txt;
 }
 
 gint

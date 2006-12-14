@@ -58,6 +58,11 @@ style "plugin_maker_text"
 	fg[NORMAL] = { 0.80, 0.80, 0.80 }
 }
 
+style "automation_track_name"
+{
+	font_name = "sans italic 8"
+}
+
 style "first_action_message" 
 {
 	font_name = "sans medium 34"
@@ -1157,6 +1162,7 @@ widget "*EditorMainCanvas" style "main_canvas_area"
 widget "*AudioTrackControlsBaseInactiveUnselected" style "track_controls_inactive"
 widget "*BusControlsBaseInactiveUnselected" style "track_controls_inactive"
 widget "*AutomationTrackControlsBaseInactiveUnselected" style "track_controls_inactive"
+widget "*AutomationTrackName" style "automation_track_name"
 widget "*AudioTrackControlsBaseInactiveSelected" style "track_controls_inactive"
 widget "*BusControlsBaseInactiveSelected" style "track_controls_inactive"
 widget "*AutomationTrackControlsBaseInactiveSelected" style "track_controls_inactive"

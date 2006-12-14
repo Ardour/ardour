@@ -21,6 +21,9 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Editing;
 
+Pango::FontDescription AutomationTimeAxisView::name_font;
+bool AutomationTimeAxisView::have_name_font = false;
+
 AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Route> r, PublicEditor& e, TimeAxisView& rent, 
 						ArdourCanvas::Canvas& canvas, const string & nom, 
 						const string & state_name, const string & nomparent)
@@ -34,6 +37,11 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	  clear_button (_("clear")),
 	  auto_button (X_("")) /* force addition of a label */
 {
+	if (!have_name_font) {
+		name_font = get_font_for_style (X_("AutomationTrackName"));
+		have_name_font = true;
+	}
+
 	automation_menu = 0;
 	in_destructor = false;
 	auto_off_item = 0;
@@ -84,14 +92,14 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 
 	string shortpname = _name;
 	bool shortened = false;
-	
-	if (_name.length()) {
-		if (shortpname.length() > 18) {
-			shortpname = shortpname.substr (0, 16);
-			shortpname += "...";
-			shortened = true;
-		}
+
+	int ignore_width;
+	shortpname = fit_to_pixels (_name, 60, name_font, ignore_width, true);
+
+	if (shortpname != _name ){
+		shortened = true;
 	}
+
 	name_label.set_text (shortpname);
 	name_label.set_alignment (Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
 
@@ -99,11 +107,8 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 
 		/* limit the plug name string */
 
-		string pname = nomparent;
-
-		if (pname.length() > 14) {
-			pname = pname.substr (0, 11);
-			pname += "...";
+		string pname = fit_to_pixels (nomparent, 60, name_font, ignore_width, true);
+		if (pname != nomparent) {
 			shortened = true;
 		}
 

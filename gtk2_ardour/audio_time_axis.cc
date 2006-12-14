@@ -124,6 +124,8 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 		controls_base_selected_name = "AudioBusControlsBaseSelected";
 		controls_base_unselected_name = "AudioBusControlsBaseUnselected";
 	}
+
+	post_construct ();
 }
 
 AudioTimeAxisView::~AudioTimeAxisView ()

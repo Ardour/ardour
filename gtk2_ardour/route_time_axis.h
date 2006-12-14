@@ -241,6 +241,8 @@ protected:
 	vector<RedirectAutomationLine*> redirect_automation_curves;
 
 	sigc::connection modified_connection;
+
+	void post_construct ();
 };
 
 #endif /* __ardour_route_time_axis_h__ */

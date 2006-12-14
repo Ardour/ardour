@@ -53,7 +53,7 @@ slider_position_to_gain (double pos)
 	return pow (2.0,(sqrt(sqrt(sqrt(pos)))*198.0-192.0)/6.0);
 }
 
-Glib::ustring fit_to_pixels (const Glib::ustring&, int pixel_width, Pango::FontDescription& font, int& actual_width);
+Glib::ustring fit_to_pixels (const Glib::ustring&, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses = false);
 
 gint   just_hide_it (GdkEventAny*, Gtk::Window*);
 void   allow_keyboard_focus (bool);

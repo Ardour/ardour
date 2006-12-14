@@ -186,11 +186,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	hide_button.unset_flags (Gtk::CAN_FOCUS);
 	visual_button.unset_flags (Gtk::CAN_FOCUS);
 
-	/* map current state of the route */
-
-	update_diskstream_display ();
-	redirects_changed (0);
-	reset_redirect_automation_curves ();
 	y_position = -1;
 
 	_route->redirects_changed.connect (mem_fun(*this, &RouteTimeAxisView::redirects_changed));
@@ -203,11 +198,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 		track()->DiskstreamChanged.connect (mem_fun(*this, &RouteTimeAxisView::diskstream_changed));
 		get_diskstream()->SpeedChanged.connect (mem_fun(*this, &RouteTimeAxisView::speed_changed));
 
-		/* ask for notifications of any new RegionViews */
-		// FIXME: _view is NULL, but it would be nice to attach this here :/
-		//_view->RegionViewAdded.connect (mem_fun(*this, &RouteTimeAxisView::region_view_added));
-		//_view->attach ();
-
 		/* pick up the correct freeze state */
 		map_frozen ();
 
@@ -215,7 +205,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	editor.ZoomChanged.connect (mem_fun(*this, &RouteTimeAxisView::reset_samples_per_unit));
 	ColorChanged.connect (mem_fun (*this, &RouteTimeAxisView::color_handler));
-
 }
 
 RouteTimeAxisView::~RouteTimeAxisView ()
@@ -242,6 +231,17 @@ RouteTimeAxisView::~RouteTimeAxisView ()
 		delete _view;
 		_view = 0;
 	}
+}
+
+void
+RouteTimeAxisView::post_construct ()
+{
+	/* map current state of the route */
+
+	update_diskstream_display ();
+	_route->foreach_redirect (this, &RouteTimeAxisView::add_redirect_to_subplugin_menu);
+	_route->foreach_redirect (this, &RouteTimeAxisView::add_existing_redirect_automation_curves);
+	reset_redirect_automation_curves ();
 }
 
 void
@@ -663,7 +663,9 @@ RouteTimeAxisView::set_height (TrackHeight h)
 
 	ensure_xml_node ();
 
-	_view->set_height ((double) height);
+	if (_view) {
+		_view->set_height ((double) height);
+	}
 
 	switch (height_style) {
 	case Largest:
@@ -1032,7 +1034,9 @@ RouteTimeAxisView::set_selected_points (PointSelection& points)
 void
 RouteTimeAxisView::set_selected_regionviews (RegionSelection& regions)
 {
-	_view->set_selected_regionviews (regions);
+	if (_view) {
+		_view->set_selected_regionviews (regions);
+	}
 }
 
 void
@@ -1549,7 +1553,9 @@ RouteTimeAxisView::add_redirect_automation_curve (boost::shared_ptr<Redirect> re
 
 	add_child (ran->view);
 
-	_view->foreach_regionview (bind (mem_fun(*this, &RouteTimeAxisView::add_ghost_to_redirect), ran->view));
+	if (_view) {
+		_view->foreach_regionview (bind (mem_fun(*this, &RouteTimeAxisView::add_ghost_to_redirect), ran->view));
+	}
 
 	redirect->mark_automation_visible (what, true);
 }
