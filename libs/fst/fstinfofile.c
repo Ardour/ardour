@@ -227,8 +227,6 @@ FSTInfo *fst_get_info( char *dllpath ) {
 	FSTInfo *info;
 	char *fstpath;
 
-	fprintf (stderr, "no valid FST file, direct load plugin\n");
-
 	if( !(h = fst_load( dllpath )) ) {
 		return NULL;
 	}
