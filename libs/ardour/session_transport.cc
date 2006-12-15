@@ -30,7 +30,6 @@
 #include <glibmm/thread.h>
 #include <pbd/pthread_utils.h>
 #include <pbd/memento_command.h>
-#include <pbd/stacktrace.h>
 
 #include <midi++/mmc.h>
 #include <midi++/port.h>
@@ -54,7 +53,6 @@ void
 Session::request_input_change_handling ()
 {
 	if (!(_state_of_the_state & (InitialConnecting|Deletion))) {
-		stacktrace (cerr);
 		Event* ev = new Event (Event::InputConfigurationChange, Event::Add, Event::Immediate, 0, 0.0);
 		queue_event (ev);
 	}
