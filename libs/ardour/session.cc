@@ -630,8 +630,6 @@ Session::when_engine_running ()
 
 	/* we don't want to run execute this again */
 
-	first_time_running.disconnect ();
-
 	set_block_size (_engine.frames_per_cycle());
 	set_frame_rate (_engine.frame_rate());
 
@@ -694,23 +692,6 @@ Session::when_engine_running ()
 
 	if (_clicking) {
 		// XXX HOW TO ALERT UI TO THIS ? DO WE NEED TO?
-	}
-
-	if (auditioner == 0) {
-
-		/* we delay creating the auditioner till now because
-		   it makes its own connections to ports named
-		   in the ARDOUR_RC config file. the engine has
-		   to be running for this to work.
-		*/
-
-		try {
-			auditioner.reset (new Auditioner (*this));
-		}
-
-		catch (failed_constructor& err) {
-			warning << _("cannot create Auditioner: no auditioning of regions possible") << endmsg;
-		}
 	}
 
 	/* Create a set of Connection objects that map
@@ -880,6 +861,23 @@ Session::hookup_io ()
 	*/
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state | InitialConnecting);
+	cerr << "InitialConnecting set\n";
+
+	if (auditioner == 0) {
+		
+		/* we delay creating the auditioner till now because
+		   it makes its own connections to ports.
+		   the engine has to be running for this to work.
+		*/
+		
+		try {
+			auditioner.reset (new Auditioner (*this));
+		}
+		
+		catch (failed_constructor& err) {
+			warning << _("cannot create Auditioner: no auditioning of regions possible") << endmsg;
+		}
+	}
 
 	/* Tell all IO objects to create their ports */
 
@@ -919,6 +917,7 @@ Session::hookup_io ()
 	IOConnectionsComplete (); /* EMIT SIGNAL */
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~InitialConnecting);
+	cerr << "InitialConnectingUN set\n";
 
 	/* now handle the whole enchilada as if it was one
 	   graph reorder event.
@@ -3259,6 +3258,12 @@ Session::graph_reordered ()
 	if (_state_of_the_state & InitialConnecting) {
 		return;
 	}
+
+	/* every track/bus asked for this to be handled but it was deferred because
+	   we were connecting. do it now.
+	*/
+
+	request_input_change_handling ();
 
 	resort_routes ();
 

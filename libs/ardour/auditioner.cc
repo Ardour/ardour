@@ -24,6 +24,7 @@
 
 #include <ardour/audio_diskstream.h>
 #include <ardour/audioregion.h>
+#include <ardour/audioengine.h>
 #include <ardour/route.h>
 #include <ardour/session.h>
 #include <ardour/auditioner.h>
@@ -43,8 +44,17 @@ Auditioner::Auditioner (Session& s)
 {
 	string left = Config->get_auditioner_output_left();
 	string right = Config->get_auditioner_output_right();
+
+	if (left == "default") {
+		left = _session.engine().get_nth_physical_output (0);	
+	}
+
+	if (right == "default") {
+		right = _session.engine().get_nth_physical_output (1);
+	}
 	
 	if ((left.length() == 0) && (right.length() == 0)) {
+		warning << _("no outputs available for auditioner - manual connection required") << endmsg;
 		return;
 	}
 
@@ -182,18 +192,34 @@ Auditioner::play_audition (nframes_t nframes)
 void
 Auditioner::output_changed (IOChange change, void* src)
 {
+	string phys;
+
 	if (change & ConnectionsChanged) {
 		const char ** connections;
 		connections =  output (0)->get_connections ();
 		if (connections) {
-			Config->set_auditioner_output_left (connections[0]);
+			phys = _session.engine().get_nth_physical_output (0);
+			if (phys != connections[0]) {
+				Config->set_auditioner_output_left (connections[0]);
+			} else {
+				Config->set_auditioner_output_left ("default");
+			}
 			free (connections);
+		} else {
+			Config->set_auditioner_output_left ("");
 		}
 		
 		connections = output (1)->get_connections ();
 		if (connections) {
-			Config->set_auditioner_output_right (connections[0]);
+			phys = _session.engine().get_nth_physical_output (1);
+			if (phys != connections[0]) {
+				Config->set_auditioner_output_right (connections[0]);
+			} else {
+				Config->set_auditioner_output_right ("default");
+			}
 			free (connections);
+		} else {
+			Config->set_auditioner_output_right ("");
 		}
 	}
 }

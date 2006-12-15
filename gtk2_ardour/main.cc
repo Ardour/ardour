@@ -444,7 +444,8 @@ int main (int argc, char *argv[])
 		return -1;
 	} 
 
-
+	ui->start_engine ();
+	
 	if (maybe_load_session ()) {
 		ui->run (text_receiver);
 		ui = 0;

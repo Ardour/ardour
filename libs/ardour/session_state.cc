@@ -54,6 +54,7 @@
 #include <pbd/pathscanner.h>
 #include <pbd/pthread_utils.h>
 #include <pbd/strsplit.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/audioengine.h>
 #include <ardour/configuration.h>
@@ -306,11 +307,7 @@ Session::second_stage_init (bool new_session)
 	_engine.Halted.connect (mem_fun (*this, &Session::engine_halted));
 	_engine.Xrun.connect (mem_fun (*this, &Session::xrun_recovery));
 
-	if (_engine.running()) {
-		when_engine_running();
-	} else {
-		first_time_running = _engine.Running.connect (mem_fun (*this, &Session::when_engine_running));
-	}
+	when_engine_running();
 
 	send_full_time_code ();
 	_engine.transport_locate (0);
@@ -586,15 +583,34 @@ Session::save_state (string snapshot_name, bool pending)
 		xml_path = _path;
 		xml_path += snapshot_name;
 		xml_path += _statefile_suffix;
+
 		bak_path = xml_path;
 		bak_path += ".bak";
 		
-		// Make backup of state file
+		if (g_file_test (xml_path.c_str(), G_FILE_TEST_EXISTS)) {
+
+			// Make backup of state file
 		
-		if ((access (xml_path.c_str(), F_OK) == 0) &&
-		    (rename(xml_path.c_str(), bak_path.c_str()))) {
-			error << _("could not backup old state file, current state not saved.")	<< endmsg;
-			return -1;
+			ifstream in (xml_path.c_str());
+			ofstream out (bak_path.c_str());
+
+			if (!in) {
+				error << string_compose (_("Could not open existing session file %1 for backup"), xml_path) << endmsg;
+				return -1;
+			}
+
+			if (!out) {
+				error << string_compose (_("Could not open backup session file %1"), bak_path) << endmsg;
+				return -1;
+			}
+
+			out << in.rdbuf();
+
+			if (!in || !out) {
+				error << string_compose (_("Could not copy existing session file %1 to %2 for backup"), xml_path, bak_path) << endmsg;
+				unlink (bak_path.c_str());
+				return -1;
+			}
 		}
 
 	} else {
@@ -605,30 +621,31 @@ Session::save_state (string snapshot_name, bool pending)
 
 	}
 
+	string tmp_path;
+
+	tmp_path = _path;
+	tmp_path += snapshot_name;
+	tmp_path += ".tmp";
+
 	cerr << "actually writing state\n";
 
-	if (!tree.write (xml_path)) {
-		error << string_compose (_("state could not be saved to %1"), xml_path) << endmsg;
-
-		/* don't leave a corrupt file lying around if it is
-		   possible to fix.
-		*/
-
-		if (unlink (xml_path.c_str())) {
-			error << string_compose (_("could not remove corrupt state file %1"), xml_path) << endmsg;
-		} else {
-			if (!pending) {
-				if (rename (bak_path.c_str(), xml_path.c_str())) {
-					error << string_compose (_("could not restore state file from backup %1"), bak_path) << endmsg;
-				}
-			}
-		}
-
+	if (!tree.write (tmp_path)) {
+		error << string_compose (_("state could not be saved to %1"), tmp_path) << endmsg;
+		unlink (tmp_path.c_str());
 		return -1;
+
+	} else {
+
+		if (rename (tmp_path.c_str(), xml_path.c_str()) != 0) {
+			error << string_compose (_("could not rename temporary session file %1 to %2"), tmp_path, xml_path) << endmsg;
+			unlink (tmp_path.c_str());
+			return -1;
+		}
 	}
 
 	if (!pending) {
-                save_history(snapshot_name);
+
+                save_history (snapshot_name);
 
 		bool was_dirty = dirty();
 

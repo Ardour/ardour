@@ -148,11 +148,17 @@ AudioEngine::start ()
 }
 
 int
-AudioEngine::stop ()
+AudioEngine::stop (bool forever)
 {
 	if (_running) {
 		_running = false;
-		jack_deactivate (_jack);
+		if (forever) {
+			jack_client_t* foo = _jack;
+			_jack = 0;
+			jack_client_close (foo);
+		} else {
+			jack_deactivate (_jack);
+		}
 		Stopped(); /* EMIT SIGNAL */
 	}
 
@@ -192,7 +198,7 @@ void
 AudioEngine::jack_timebase_callback (jack_transport_state_t state, nframes_t nframes,
 				     jack_position_t* pos, int new_position)
 {
-	if (session && session->synced_to_jack()) {
+	if (_jack && session && session->synced_to_jack()) {
 		session->jack_timebase_callback (state, nframes, pos, new_position);
 	}
 }
@@ -206,7 +212,7 @@ AudioEngine::_jack_sync_callback (jack_transport_state_t state, jack_position_t*
 int
 AudioEngine::jack_sync_callback (jack_transport_state_t state, jack_position_t* pos)
 {
-	if (session) {
+	if (_jack && session) {
 		return session->jack_sync_callback (state, pos);
 	} else {
 		return true;
@@ -216,14 +222,20 @@ AudioEngine::jack_sync_callback (jack_transport_state_t state, jack_position_t* 
 int
 AudioEngine::_xrun_callback (void *arg)
 {
-	 static_cast<AudioEngine *>(arg)->Xrun (); /* EMIT SIGNAL */
+	AudioEngine* ae = static_cast<AudioEngine*> (arg);
+	if (ae->jack()) {
+		ae->Xrun (); /* EMIT SIGNAL */
+	}
 	return 0;
 }
 
 int
 AudioEngine::_graph_order_callback (void *arg)
 {
-	static_cast<AudioEngine *>(arg)->GraphReordered (); /* EMIT SIGNAL */
+	AudioEngine* ae = static_cast<AudioEngine*> (arg);
+	if (ae->jack()) {
+		ae->GraphReordered (); /* EMIT SIGNAL */
+	}
 	return 0;
 }
 
@@ -416,7 +428,6 @@ AudioEngine::remove_session ()
 	}
 	
 	remove_all_ports ();
-
 }
 
 Port *
@@ -718,7 +729,7 @@ AudioEngine::get_ports (const string& port_name_pattern, const string& type_name
 void
 AudioEngine::halted (void *arg)
 {
-	AudioEngine *ae = reinterpret_cast<AudioEngine *> (arg);
+	AudioEngine* ae = static_cast<AudioEngine *> (arg);
 
 	ae->_running = false;
 	ae->_jack = 0;

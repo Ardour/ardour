@@ -198,6 +198,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void session_add_midi_track ();
 
 	void set_engine (ARDOUR::AudioEngine&);
+	gint start_engine ();
 
 	gint exit_on_main_window_close (GdkEventAny *);
 
@@ -291,7 +292,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void queue_transport_change ();
 	void map_transport_state ();
 	int32_t do_engine_start ();
-	gint start_engine ();
 	
 	void engine_halted ();
 	void engine_stopped ();

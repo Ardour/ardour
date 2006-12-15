@@ -332,7 +332,12 @@ Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 		plgone_connection = _playlist->GoingAway.connect (bind (mem_fun (*this, &Diskstream::playlist_deleted), boost::weak_ptr<Playlist>(_playlist)));
 	}
 
-	if (!overwrite_queued) {
+	/* don't do this if we've already asked for it *or* if we are setting up
+	   the diskstream for the very first time - the input changed handling will
+	   take care of the buffer refill.
+	*/
+
+	if (!overwrite_queued && !(_session.state_of_the_state() & Session::CannotSave)) {
 		_session.request_overwrite_buffer (this);
 		overwrite_queued = true;
 	}

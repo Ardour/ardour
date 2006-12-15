@@ -353,14 +353,7 @@ ARDOUR_UI::save_ardour_state ()
 void
 ARDOUR_UI::startup ()
 {
-	/* Once the UI is up and running, start the audio engine. Doing
-	   this before the UI is up and running can cause problems
-	   when not running with SCHED_FIFO, because the amount of
-	   CPU and disk work needed to get the UI started can interfere
-	   with the scheduling of the audio thread.
-	*/
-
-	Glib::signal_idle().connect (mem_fun(*this, &ARDOUR_UI::start_engine));
+	// relax
 }
 
 void
@@ -388,6 +381,8 @@ If you still wish to quit, please use the\n\n\
 			break;
 		}
 	}
+
+	engine->stop (true);
 	Config->save_state();
 	quit ();
 }

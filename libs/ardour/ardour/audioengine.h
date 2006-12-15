@@ -61,7 +61,7 @@ class AudioEngine : public sigc::trackable
 	bool will_reconnect_at_halt ();
 	void set_reconnect_at_halt (bool);
 
-	int stop ();
+	int stop (bool forever = false);
 	int start ();
 	bool running() const { return _running; }
 

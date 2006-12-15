@@ -1078,7 +1078,6 @@ class Session : public PBD::StatefulDestructible
 
 	void hookup_io ();
 	void when_engine_running ();
-	sigc::connection first_time_running;
 	void graph_reordered ();
 
 	string _current_snapshot_name;
@@ -1110,6 +1109,8 @@ class Session : public PBD::StatefulDestructible
 	bool              butler_should_run;
 	mutable gint      butler_should_do_transport_work;
 	int               butler_request_pipe[2];
+
+	inline bool transport_work_requested() const { return g_atomic_int_get(&butler_should_do_transport_work); }
 	
 	struct ButlerRequest {
 	    enum Type {
@@ -1383,9 +1384,8 @@ class Session : public PBD::StatefulDestructible
 	void realtime_stop (bool abort);
 	void non_realtime_start_scrub ();
 	void non_realtime_set_speed ();
-	void non_realtime_stop (bool abort);
-	void non_realtime_overwrite ();
-	void non_realtime_buffer_fill ();
+	void non_realtime_stop (bool abort, int entry_request_count, bool& finished);
+	void non_realtime_overwrite (int entry_request_count, bool& finished);
 	void butler_transport_work ();
 	void post_transport ();
 	void engine_halted ();

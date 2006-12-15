@@ -3,13 +3,8 @@
 CONFIG_VARIABLE (AutoConnectOption, output_auto_connect, "output-auto-connect", AutoConnectOption (0))
 CONFIG_VARIABLE (AutoConnectOption, input_auto_connect, "input-auto-connect", AutoConnectOption (0))
 
-#ifdef __APPLE__
-CONFIG_VARIABLE (std::string, auditioner_output_left, "auditioner-output-left",  "coreaudio:Built-in Audio:in1")
-CONFIG_VARIABLE (std::string, auditioner_output_right, "auditioner-output-right", "coreaudio:Built-in Audio:in2")
-#else
-CONFIG_VARIABLE (std::string, auditioner_output_left, "auditioner-output-left", "alsa_pcm:playback_1")
-CONFIG_VARIABLE (std::string, auditioner_output_right, "auditioner-output-right", "alsa_pcm:playback_2")
-#endif
+CONFIG_VARIABLE (std::string, auditioner_output_left, "auditioner-output-left", "default")
+CONFIG_VARIABLE (std::string, auditioner_output_right, "auditioner-output-right", "default")
 
 /* MIDI and MIDI related */
 

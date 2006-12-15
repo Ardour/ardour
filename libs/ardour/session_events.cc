@@ -305,9 +305,14 @@ Session::process_event (Event* ev)
 	*/
 
 	if (non_realtime_work_pending()) {
-		immediate_events.insert (immediate_events.end(), ev);
-		_remove_event (ev);
-		return;
+		
+		/* except locates, which we have the capability to handle */
+
+		if (ev->type != Event::Locate) {
+			immediate_events.insert (immediate_events.end(), ev);
+			_remove_event (ev);
+			return;
+		}
 	}
 
 	switch (ev->type) {
