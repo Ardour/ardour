@@ -26,6 +26,7 @@
 
 #include <ardour/dB.h>
 
+#include "logmeter.h"
 #include "canvas-waveview.h"
 #include "rgb_macros.h"
 
@@ -49,7 +50,8 @@ enum {
 	 PROP_HEIGHT,
 	 PROP_WAVE_COLOR,
 	 PROP_RECTIFIED,
-	 PROP_REGION_START
+	 PROP_REGION_START,
+	 PROP_LOGSCALED,
 };
 
 static void gnome_canvas_waveview_class_init     (GnomeCanvasWaveViewClass *class);
@@ -253,6 +255,13 @@ gnome_canvas_waveview_class_init (GnomeCanvasWaveViewClass *class)
 		  g_param_spec_boolean ("rectified", NULL, NULL,
 					FALSE,
 					(G_PARAM_READABLE | G_PARAM_WRITABLE)));
+
+	 g_object_class_install_property
+		 (gobject_class,
+		  PROP_LOGSCALED,
+		  g_param_spec_boolean ("logscaled", NULL, NULL,
+					FALSE,
+					(G_PARAM_READABLE | G_PARAM_WRITABLE)));
 	 
 	 g_object_class_install_property
 		 (gobject_class,
@@ -308,6 +317,7 @@ gnome_canvas_waveview_init (GnomeCanvasWaveView *waveview)
 	waveview->gain_curve_function = NULL;
 	waveview->gain_src = NULL;
 	waveview->rectified = FALSE;
+	waveview->logscaled = FALSE;
 	waveview->region_start = 0;
 	waveview->samples_per_unit = 1.0;
 	waveview->amplitude_above_axis = 1.0;
@@ -577,7 +587,29 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 		free (gain);
 	
 	}
+
+	/* do optional log scaling.  this implementation is not particularly efficient */
 	
+	if (waveview->logscaled) {
+		guint32 n;
+		GnomeCanvasWaveViewCacheEntry* buf = cache->data;
+		
+		for (n = 0; n < cache->data_size; ++n) {
+
+			if (buf[n].max > 0.0f) {
+				buf[n].max = alt_log_meter(coefficient_to_dB(buf[n].max));
+			} else if (buf[n].max < 0.0f) {
+				buf[n].max = -alt_log_meter(coefficient_to_dB(-buf[n].max));
+			}
+			
+			if (buf[n].min > 0.0f) {
+				buf[n].min = alt_log_meter(coefficient_to_dB(buf[n].min));
+			} else if (buf[n].min < 0.0f) {
+				buf[n].min = -alt_log_meter(coefficient_to_dB(-buf[n].min));
+			}
+		}
+	}
+
 	cache->start = ostart;
 	cache->end = new_cache_end;
 
@@ -770,6 +802,17 @@ gnome_canvas_waveview_set_property (GObject      *object,
 			redraw = TRUE;
 		}
 		break;
+	case PROP_LOGSCALED:
+		if (waveview->logscaled != g_value_get_boolean(value)) {
+			waveview->logscaled = g_value_get_boolean(value);
+			if (waveview->cache_updater) {
+				waveview->cache->start = 0;
+				waveview->cache->end = 0;
+			}
+			redraw = TRUE;
+			calc_bounds = TRUE;
+		}
+		break;
 	case PROP_REGION_START:
 		waveview->region_start = g_value_get_uint(value);
 		redraw = TRUE;
@@ -867,6 +910,10 @@ gnome_canvas_waveview_get_property (GObject      *object,
 
 	case PROP_RECTIFIED:
 		g_value_set_boolean (value, waveview->rectified);
+		break;
+
+	case PROP_LOGSCALED:
+		g_value_set_boolean (value, waveview->logscaled);
 		break;
 
 	case PROP_REGION_START:

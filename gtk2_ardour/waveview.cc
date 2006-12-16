@@ -268,6 +268,14 @@ Glib::PropertyProxy_ReadOnly<guint> WaveView::property_region_start() const
 {
 	return Glib::PropertyProxy_ReadOnly<guint> (this, "region_start");
 }
+Glib::PropertyProxy<gint> WaveView::property_logscaled()
+{
+	return Glib::PropertyProxy<gint> (this, "logscaled");
+}
+Glib::PropertyProxy_ReadOnly<gint> WaveView::property_logscaled() const
+{
+	return Glib::PropertyProxy_ReadOnly<gint> (this, "logscaled");
+}
 
 } // namespace Canvas
 

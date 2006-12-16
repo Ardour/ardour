@@ -253,13 +253,39 @@ AudioTimeAxisView::append_extra_display_menu_items ()
 	waveform_item->set_active (editor.show_waveforms());
 	ignore_toggle = false;
 
+	waveform_items.push_back (SeparatorElem());
+	
 	RadioMenuItem::Group group;
-
+	
 	waveform_items.push_back (RadioMenuElem (group, _("Traditional"), bind (mem_fun(*this, &AudioTimeAxisView::set_waveform_shape), Traditional)));
 	traditional_item = static_cast<RadioMenuItem *> (&waveform_items.back());
 
 	waveform_items.push_back (RadioMenuElem (group, _("Rectified"), bind (mem_fun(*this, &AudioTimeAxisView::set_waveform_shape), Rectified)));
 	rectified_item = static_cast<RadioMenuItem *> (&waveform_items.back());
+
+	waveform_items.push_back (SeparatorElem());
+	
+	RadioMenuItem::Group group2;
+
+	waveform_items.push_back (RadioMenuElem (group2, _("Linear"), bind (mem_fun(*this, &AudioTimeAxisView::set_waveform_scale), LinearWaveform)));
+	linearscale_item = static_cast<RadioMenuItem *> (&waveform_items.back());
+
+	waveform_items.push_back (RadioMenuElem (group2, _("Logarithmic"), bind (mem_fun(*this, &AudioTimeAxisView::set_waveform_scale), LogWaveform)));
+	logscale_item = static_cast<RadioMenuItem *> (&waveform_items.back());
+
+	// setting initial item state
+	AudioStreamView* asv = audio_view();
+	if (asv) {
+		ignore_toggle = true;
+		if (asv->get_waveform_shape() == Rectified) 
+			rectified_item->set_active(true);
+		else traditional_item->set_active(true);
+
+		if (asv->get_waveform_scale() == LogWaveform) 
+			logscale_item->set_active(true);
+		else linearscale_item->set_active(true);
+		ignore_toggle = false;
+	}
 
 	items.push_back (MenuElem (_("Waveform"), *waveform_menu));
 }
@@ -303,8 +329,20 @@ AudioTimeAxisView::set_waveform_shape (WaveformShape shape)
 {
 	AudioStreamView* asv = audio_view();
 
-	if (asv) {
+	if (asv && !ignore_toggle) {
 		asv->set_waveform_shape (shape);
+	}
+
+	map_frozen ();
+}	
+
+void
+AudioTimeAxisView::set_waveform_scale (WaveformScale scale)
+{
+	AudioStreamView* asv = audio_view();
+
+	if (asv && !ignore_toggle) {
+		asv->set_waveform_scale (scale);
 	}
 
 	map_frozen ();

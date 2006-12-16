@@ -59,6 +59,9 @@ class AudioStreamView : public StreamView
 	~AudioStreamView ();
 
 	void set_waveform_shape (WaveformShape);
+	WaveformShape get_waveform_shape () const;
+	void set_waveform_scale (WaveformScale);
+	WaveformScale get_waveform_scale () const;
 
 	int set_height (gdouble h);
 	int set_samples_per_unit (gdouble spp);

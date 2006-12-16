@@ -147,6 +147,8 @@ public:
   Glib::PropertyProxy_ReadOnly<gint> property_rectified() const;
   Glib::PropertyProxy<guint> property_region_start();
   Glib::PropertyProxy_ReadOnly<guint> property_region_start() const;
+  Glib::PropertyProxy<gint> property_logscaled();
+  Glib::PropertyProxy_ReadOnly<gint> property_logscaled() const;
 };
 
 } /* namespace Canvas */

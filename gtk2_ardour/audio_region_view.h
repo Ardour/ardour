@@ -72,8 +72,10 @@ class AudioRegionView : public RegionView
 	void set_envelope_visible (bool);
 	void set_waveform_visible (bool yn);
 	void set_waveform_shape (WaveformShape);
+	void set_waveform_scale (WaveformScale);
 	
 	bool waveform_rectified() const { return _flags & WaveformRectified; }
+	bool waveform_logscaled() const { return _flags & WaveformLogScaled; }
 	bool waveform_visible()   const { return _flags & WaveformVisible; }
 	bool envelope_visible()   const { return _flags & EnvelopeVisible; }
 	
@@ -116,7 +118,8 @@ class AudioRegionView : public RegionView
     enum Flags {
 	    EnvelopeVisible = 0x1,
 	    WaveformVisible = 0x4,
-	    WaveformRectified = 0x8
+	    WaveformRectified = 0x8,
+	    WaveformLogScaled = 0x10,
     };
     
     void reset_fade_shapes ();

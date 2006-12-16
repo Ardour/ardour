@@ -502,10 +502,184 @@ libraries['midi++2'] = LibraryInfo (LIBS='midi++', LIBPATH='#libs/midi++2', CPPP
 libraries['pbd']    = LibraryInfo (LIBS='pbd', LIBPATH='#libs/pbd', CPPPATH='#libs/pbd')
 libraries['gtkmm2ext'] = LibraryInfo (LIBS='gtkmm2ext', LIBPATH='#libs/gtkmm2ext', CPPPATH='#libs/gtkmm2ext')
 
+
+# SCons should really do this for us
+
+conf = Configure (env)
+
+have_cxx = conf.TryAction (Action (str(env['CXX']) + ' --version'))
+if have_cxx[0] != 1:
+    print "This system has no functional C++ compiler. You cannot build Ardour from source without one."
+    sys.exit (1)
+else:
+    print "Congratulations, you have a functioning C++ compiler."
+
+env = conf.Finish()
+
+
+#
+# Compiler flags and other system-dependent stuff
+#
+
+opt_flags = []
+debug_flags = [ '-g' ]
+
+# guess at the platform, used to define compiler flags
+
+config_guess = os.popen("tools/config.guess").read()[:-1]
+
+config_cpu = 0
+config_arch = 1
+config_kernel = 2
+config_os = 3
+config = config_guess.split ("-")
+
+print "system triple: " + config_guess
+
+# Autodetect
+if env['DIST_TARGET'] == 'auto':
+    if config[config_arch] == 'apple':
+        # The [.] matches to the dot after the major version, "." would match any character
+        if re.search ("darwin[0-7][.]", config[config_kernel]) != None:
+            env['DIST_TARGET'] = 'panther'
+        else:
+            env['DIST_TARGET'] = 'tiger'
+    else:
+        if re.search ("x86_64", config[config_cpu]) != None:
+            env['DIST_TARGET'] = 'x86_64'
+        elif re.search("i[0-5]86", config[config_cpu]) != None:
+            env['DIST_TARGET'] = 'i386'
+        elif re.search("powerpc", config[config_cpu]) != None:
+            env['DIST_TARGET'] = 'powerpc'
+        else:
+            env['DIST_TARGET'] = 'i686'
+    print "\n*******************************"
+    print "detected DIST_TARGET = " + env['DIST_TARGET']
+    print "*******************************\n"
+
+
+if config[config_cpu] == 'powerpc' and env['DIST_TARGET'] != 'none':
+    #
+    # Apple/PowerPC optimization options
+    #
+    # -mcpu=7450 does not reliably work with gcc 3.*
+    #
+    if env['DIST_TARGET'] == 'panther' or env['DIST_TARGET'] == 'tiger':
+        if config[config_arch] == 'apple':
+            opt_flags.extend ([ "-mcpu=7450", "-faltivec"])
+        else:
+            opt_flags.extend ([ "-mcpu=7400", "-maltivec", "-mabi=altivec"])
+    else:
+        opt_flags.extend([ "-mcpu=750", "-mmultiple" ])
+    opt_flags.extend (["-mhard-float", "-mpowerpc-gfxopt"])
+
+elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_64", config[config_cpu]) != None)) and env['DIST_TARGET'] != 'none':
+    
+    build_host_supports_sse = 0
+    
+    debug_flags.append ("-DARCH_X86")
+    opt_flags.append ("-DARCH_X86")
+    
+    if config[config_kernel] == 'linux' :
+        
+        if env['DIST_TARGET'] != 'i386':
+            
+            flag_line = os.popen ("cat /proc/cpuinfo | grep '^flags'").read()[:-1]
+            x86_flags = flag_line.split (": ")[1:][0].split (' ')
+            
+            if "mmx" in x86_flags:
+                opt_flags.append ("-mmmx")
+            if "sse" in x86_flags:
+                build_host_supports_sse = 1
+            if "3dnow" in x86_flags:
+                opt_flags.append ("-m3dnow")
+            
+            if config[config_cpu] == "i586":
+                opt_flags.append ("-march=i586")
+            elif config[config_cpu] == "i686":
+                opt_flags.append ("-march=i686")
+    
+    if ((env['DIST_TARGET'] == 'i686') or (env['DIST_TARGET'] == 'x86_64')) and build_host_supports_sse:
+        opt_flags.extend (["-msse", "-mfpmath=sse"])
+        debug_flags.extend (["-msse", "-mfpmath=sse"])
+# end of processor-specific section
+
+# optimization section
+if env['FPU_OPTIMIZATION']:
+    if env['DIST_TARGET'] == 'tiger':
+        opt_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS")
+        debug_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS")
+        libraries['core'].Append(LINKFLAGS= '-framework Accelerate')
+    elif env['DIST_TARGET'] == 'i686' or env['DIST_TARGET'] == 'x86_64':
+        opt_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
+        debug_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
+        if env['DIST_TARGET'] == 'x86_64':
+            opt_flags.append ("-DUSE_X86_64_ASM")
+            debug_flags.append ("-DUSE_X86_64_ASM")
+        if build_host_supports_sse != 1:
+            print "\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)"
+# end optimization section
+
+#
+# save off guessed arch element in an env
+#
+env.Append(CONFIG_ARCH=config[config_arch])
+
+
+#
+# ARCH="..." overrides all
+#
+
+if env['ARCH'] != '':
+    opt_flags = env['ARCH'].split()
+
+#
+# prepend boiler plate optimization flags
+#
+
+opt_flags[:0] = [
+    "-O3",
+    "-fomit-frame-pointer",
+    "-ffast-math",
+    "-fstrength-reduce"
+    ]
+
+if env['DEBUG'] == 1:
+    env.Append(CCFLAGS=" ".join (debug_flags))
+else:
+    env.Append(CCFLAGS=" ".join (opt_flags))
+
+#
+# warnings flags
+#
+
+env.Append(CCFLAGS="-Wall")
+env.Append(CXXFLAGS="-Woverloaded-virtual")
+
+if env['EXTRA_WARN']:
+    env.Append(CCFLAGS="-Wextra -pedantic")
+    env.Append(CXXFLAGS="-ansi")
+
+if env['LIBLO']:
+    env.Append(CCFLAGS="-DHAVE_LIBLO")
+
+
+#
+# fix scons nitpickiness on APPLE
+#
+
+
+def prep_libcheck(topenv, libinfo):
+    if topenv['DIST_TARGET'] == 'panther' or topenv['DIST_TARGET'] == 'tiger':
+        libinfo.Append(CCFLAGS="-I/opt/local/include", LINKFLAGS="-L/opt/local/lib")
+
+prep_libcheck(env, env)
+
 #
 # Check for libusb
 
 libraries['usb'] = LibraryInfo ()
+prep_libcheck(env, libraries['usb'])
 
 conf = Configure (libraries['usb'])
 if conf.CheckLib ('usb', 'usb_interrupt_write'):
@@ -519,6 +693,8 @@ libraries['usb'] = conf.Finish ()
 # Check for FLAC
 
 libraries['flac'] = LibraryInfo ()
+prep_libcheck(env, libraries['flac'])
+libraries['flac'].Append(CCFLAGS="-I/usr/local/include", LINKFLAGS="-L/usr/local/lib")
 
 conf = Configure (libraries['flac'])
 conf.CheckLib ('FLAC', 'FLAC__stream_decoder_new', language='CXX')
@@ -530,6 +706,8 @@ libraries['flac'] = conf.Finish ()
 # boost (we don't link against boost, just use some header files)
 
 libraries['boost'] = LibraryInfo ()
+prep_libcheck(env, libraries['boost'])
+libraries['boost'].Append(CCFLAGS="-I/usr/local/include", LINKFLAGS="-L/usr/local/lib")
 conf = Configure (libraries['boost'])
 if conf.CheckHeader ('boost/shared_ptr.hpp', language='CXX') == False:
         print "Boost header files do not appear to be installed."
@@ -542,7 +720,8 @@ libraries['boost'] = conf.Finish ()
 
 if env['LIBLO']:
     libraries['lo'] = LibraryInfo ()
-    
+    prep_libcheck(env, libraries['lo'])
+
     conf = Configure (libraries['lo'])
     if conf.CheckLib ('lo', 'lo_server_new') == False:
         print "liblo does not appear to be installed."
@@ -554,6 +733,7 @@ if env['LIBLO']:
 # Check for dmalloc
 
 libraries['dmalloc'] = LibraryInfo ()
+prep_libcheck(env, libraries['dmalloc'])
 
 #
 # look for the threaded version
@@ -794,177 +974,12 @@ else:
 
 config_prefix = '$DESTDIR' + final_config_prefix
 
-# SCons should really do this for us
-
-conf = Configure (env)
-
-have_cxx = conf.TryAction (Action (str(env['CXX']) + ' --version'))
-if have_cxx[0] != 1:
-    print "This system has no functional C++ compiler. You cannot build Ardour from source without one."
-    sys.exit (1)
-else:
-    print "Congratulations, you have a functioning C++ compiler."
-
-env = conf.Finish()
-
-#
-# Compiler flags and other system-dependent stuff
-#
-
-opt_flags = []
-debug_flags = [ '-g' ]
-
-# guess at the platform, used to define compiler flags
-
-config_guess = os.popen("tools/config.guess").read()[:-1]
-
-config_cpu = 0
-config_arch = 1
-config_kernel = 2
-config_os = 3
-config = config_guess.split ("-")
-
-print "system triple: " + config_guess
-
-# Autodetect
-if env['DIST_TARGET'] == 'auto':
-    if config[config_arch] == 'apple':
-        # The [.] matches to the dot after the major version, "." would match any character
-        if re.search ("darwin[0-7][.]", config[config_kernel]) != None:
-            env['DIST_TARGET'] = 'panther'
-        else:
-            env['DIST_TARGET'] = 'tiger'
-    else:
-        if re.search ("x86_64", config[config_cpu]) != None:
-            env['DIST_TARGET'] = 'x86_64'
-        elif re.search("i[0-5]86", config[config_cpu]) != None:
-            env['DIST_TARGET'] = 'i386'
-        elif re.search("powerpc", config[config_cpu]) != None:
-            env['DIST_TARGET'] = 'powerpc'
-        else:
-            env['DIST_TARGET'] = 'i686'
-    print "\n*******************************"
-    print "detected DIST_TARGET = " + env['DIST_TARGET']
-    print "*******************************\n"
-
-
-if config[config_cpu] == 'powerpc' and env['DIST_TARGET'] != 'none':
-    #
-    # Apple/PowerPC optimization options
-    #
-    # -mcpu=7450 does not reliably work with gcc 3.*
-    #
-    if env['DIST_TARGET'] == 'panther' or env['DIST_TARGET'] == 'tiger':
-        if config[config_arch] == 'apple':
-            opt_flags.extend ([ "-mcpu=7450", "-faltivec"])
-        else:
-            opt_flags.extend ([ "-mcpu=7400", "-maltivec", "-mabi=altivec"])
-    else:
-        opt_flags.extend([ "-mcpu=750", "-mmultiple" ])
-    opt_flags.extend (["-mhard-float", "-mpowerpc-gfxopt"])
-
-elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_64", config[config_cpu]) != None)) and env['DIST_TARGET'] != 'none':
-    
-    build_host_supports_sse = 0
-    
-    debug_flags.append ("-DARCH_X86")
-    opt_flags.append ("-DARCH_X86")
-    
-    if config[config_kernel] == 'linux' :
-        
-        if env['DIST_TARGET'] != 'i386':
-            
-            flag_line = os.popen ("cat /proc/cpuinfo | grep '^flags'").read()[:-1]
-            x86_flags = flag_line.split (": ")[1:][0].split (' ')
-            
-            if "mmx" in x86_flags:
-                opt_flags.append ("-mmmx")
-            if "sse" in x86_flags:
-                build_host_supports_sse = 1
-            if "3dnow" in x86_flags:
-                opt_flags.append ("-m3dnow")
-            
-            if config[config_cpu] == "i586":
-                opt_flags.append ("-march=i586")
-            elif config[config_cpu] == "i686":
-                opt_flags.append ("-march=i686")
-    
-    if ((env['DIST_TARGET'] == 'i686') or (env['DIST_TARGET'] == 'x86_64')) and build_host_supports_sse:
-        opt_flags.extend (["-msse", "-mfpmath=sse"])
-        debug_flags.extend (["-msse", "-mfpmath=sse"])
-# end of processor-specific section
-
-# optimization section
-if env['FPU_OPTIMIZATION']:
-    if env['DIST_TARGET'] == 'tiger':
-        opt_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS")
-        debug_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS")
-        libraries['core'].Append(LINKFLAGS= '-framework Accelerate')
-    elif env['DIST_TARGET'] == 'i686' or env['DIST_TARGET'] == 'x86_64':
-        opt_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
-        debug_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
-        if env['DIST_TARGET'] == 'x86_64':
-            opt_flags.append ("-DUSE_X86_64_ASM")
-            debug_flags.append ("-DUSE_X86_64_ASM")
-        if build_host_supports_sse != 1:
-            print "\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)"
-# end optimization section
-
-#
-# save off guessed arch element in an env
-#
-env.Append(CONFIG_ARCH=config[config_arch])
-
-
-#
-# ARCH="..." overrides all
-#
-
-if env['ARCH'] != '':
-    opt_flags = env['ARCH'].split()
-
-#
-# prepend boiler plate optimization flags
-#
-
-opt_flags[:0] = [
-    "-O3",
-    "-fomit-frame-pointer",
-    "-ffast-math",
-    "-fstrength-reduce"
-    ]
-
-if env['DEBUG'] == 1:
-    env.Append(CCFLAGS=" ".join (debug_flags))
-else:
-    env.Append(CCFLAGS=" ".join (opt_flags))
-
-#
-# warnings flags
-#
-
-env.Append(CCFLAGS="-Wall")
-env.Append(CXXFLAGS="-Woverloaded-virtual")
-
-if env['EXTRA_WARN']:
-    env.Append(CCFLAGS="-Wextra -pedantic")
-    env.Append(CXXFLAGS="-ansi")
-
-if env['LIBLO']:
-    env.Append(CCFLAGS="-DHAVE_LIBLO")
-
 #
 # everybody needs this
 #
 
 env.Merge ([ libraries['core'] ])
 
-#
-# fix scons nitpickiness on APPLE
-#
-
-if env['DIST_TARGET'] == 'panther' or env['DIST_TARGET'] == 'tiger':
-    env.Append(CCFLAGS="-I/opt/local/include", LINKFLAGS="-L/opt/local/lib")
 
 #
 # i18n support

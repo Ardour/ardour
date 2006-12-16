@@ -101,7 +101,8 @@ struct _GnomeCanvasWaveView
     uint32_t wave_color;
 
     char rectified;
-
+    char logscaled; 
+	
     /* These are updated by the update() routine
        to optimize the render() routine, which may
        be called several times after a single update().

@@ -383,7 +383,47 @@ AudioStreamView::set_waveform_shape (WaveformShape shape)
 			arv->set_waveform_shape (shape);
 	}
 }		
-		
+
+WaveformShape
+AudioStreamView::get_waveform_shape () const
+{
+	// assumes that the first represents all for our purposes
+
+	if (region_views.size() > 0) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(region_views.front());
+		if (arv) {
+			if (arv->waveform_rectified())
+				return Rectified;
+		}
+	}
+	return Traditional;
+}
+
+void
+AudioStreamView::set_waveform_scale (WaveformScale scale)
+{
+	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+		if (arv)
+			arv->set_waveform_scale (scale);
+	}
+}		
+
+WaveformScale
+AudioStreamView::get_waveform_scale () const
+{
+	// assumes that the first represents all for our purposes
+
+	if (region_views.size() > 0) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(region_views.front());
+		if (arv) {
+			if (arv->waveform_logscaled())
+				return LogWaveform;
+		}
+	}
+	return LinearWaveform;
+}
+
 void
 AudioStreamView::setup_rec_box ()
 {

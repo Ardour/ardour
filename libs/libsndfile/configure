@@ -12235,9 +12235,17 @@ rm -f conftest.$ac_objext
 if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>conftest.er1
   ac_status=$?
+ 
+  cat conftest.$ac_ext > blah1.c
+
+  echo $CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext > blah1
+
   grep -v '^ *+' conftest.er1 >conftest.err
   rm -f conftest.er1
   cat conftest.err >&5
+  
+  cat conftest.err > blah2
+  
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); } &&
 	 { ac_try='test -z "$ac_c_werror_flag"

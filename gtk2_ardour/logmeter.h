@@ -1,7 +1,7 @@
 #ifndef __ardour_gtk_log_meter_h__
 #define __ardour_gtk_log_meter_h__
 
-#if 0
+#if 1
 inline float
 _log_meter (float power, double lower_db, double upper_db, double non_linearity)
 {
@@ -9,7 +9,7 @@ _log_meter (float power, double lower_db, double upper_db, double non_linearity)
 }
 
 inline float
-log_meter (float power)
+alt_log_meter (float power)
 {
 	return _log_meter (power, -192.0, 0.0, 8.0);
 }
