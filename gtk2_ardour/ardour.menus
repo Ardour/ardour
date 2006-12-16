@@ -123,6 +123,21 @@
 	           <menuitem action="nudge-backward"/>
         	   <menuitem action="nudge-next-backward"/>
 	       </menu>
+	       <menu name='KeyMouse Actions' action='KeyMouse Actions'>
+	       		<menuitem action='audition-at-mouse'/>
+               		<menuitem action='brush-at-mouse'/>
+               		<menuitem action='set-edit-cursor'/>
+               		<menuitem action='mute-unmute-region'/>
+              	 	<menuitem action='set-playhead'/>
+	       		<menuitem action='split-region'/>
+	       		<menuitem action='set-region-sync-position'/>
+			<separator/>
+			<menuitem action='set-mouse-mode-object'/>
+			<menuitem action='set-mouse-mode-range'/>
+			<menuitem action='set-mouse-mode-gain'/>
+			<menuitem action='set-mouse-mode-zoom'/>
+			<menuitem action='set-mouse-mode-timefx'/>
+          </menu>
         </menu>         
         <menu name='View' action = 'View'>
                <menu name='ZoomFocus' action='ZoomFocus'>
@@ -221,7 +236,6 @@
                <menuitem action='ToggleColorManager'/>
                <menuitem action='ToggleBigClock'/>
    	       <separator/>
-	       <menuitem action='About'/>
         </menu>
         <menu name='Options' action='Options'>
 	       <menu action='AudioFileFormat'>
@@ -329,21 +343,7 @@
 	       <separator/>
          </menu>
 	 <menu name='Help' action='Help'>
-	       <menu name='KeyMouse Actions' action='KeyMouse Actions'>
-	       		<menuitem action='audition-at-mouse'/>
-               		<menuitem action='brush-at-mouse'/>
-               		<menuitem action='set-edit-cursor'/>
-               		<menuitem action='mute-unmute-region'/>
-              	 	<menuitem action='set-playhead'/>
-	       		<menuitem action='split-region'/>
-	       		<menuitem action='set-region-sync-position'/>
-			<separator/>
-			<menuitem action='set-mouse-mode-object'/>
-			<menuitem action='set-mouse-mode-range'/>
-			<menuitem action='set-mouse-mode-gain'/>
-			<menuitem action='set-mouse-mode-zoom'/>
-			<menuitem action='set-mouse-mode-timefx'/>
-               </menu>
+	     <menuitem action='About'/>
 	</menu>
      </menubar>
 
