@@ -1828,22 +1828,14 @@ This prevents the session from being loaded."));
 	Config->set_current_owner (ConfigVariableBase::Interface);
 
 	session_loaded = true;
-
+	
 	goto_editor_window ();
 
-	return 0;
-}
-
-int
-ARDOUR_UI::make_session_clean ()
-{
 	if (session) {
 		session->set_clean ();
 	}
 
-	show ();
-
-	return FALSE;
+	return 0;
 }
 
 int

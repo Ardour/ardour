@@ -1218,6 +1218,7 @@ Session::set_state (const XMLNode& node)
 	StateReady (); /* EMIT SIGNAL */
 
 	_state_of_the_state = Clean;
+	cerr << "session marked clean\n";
 
 	if (state_was_pending) {
 		save_state (_current_snapshot_name);
