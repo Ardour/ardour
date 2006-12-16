@@ -1290,14 +1290,6 @@ ARDOUR_UI::start_engine ()
 			*/
 			session->save_state ("");
 		}
-
-		/* there is too much going on, in too many threads, for us to 
-		   end up with a clean session. So wait 1 second after loading,
-		   and fix it up. its ugly, but until i come across a better
-		   solution, its what we have.
-		*/
-
-		Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::make_session_clean), 1000);
 	}
 
 	return FALSE;
