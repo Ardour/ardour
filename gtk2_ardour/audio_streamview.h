@@ -59,9 +59,9 @@ class AudioStreamView : public StreamView
 	~AudioStreamView ();
 
 	void set_waveform_shape (WaveformShape);
-	WaveformShape get_waveform_shape () const;
+	WaveformShape get_waveform_shape () const { return _waveform_shape; }
 	void set_waveform_scale (WaveformScale);
-	WaveformScale get_waveform_scale () const;
+	WaveformScale get_waveform_scale () const { return _waveform_scale; }
 
 	int set_height (gdouble h);
 	int set_samples_per_unit (gdouble spp);
@@ -108,7 +108,9 @@ class AudioStreamView : public StreamView
 	list<sigc::connection>     peak_ready_connections;
 	nframes_t             last_rec_peak_frame;
 	map<boost::shared_ptr<ARDOUR::Source>, bool> rec_peak_ready_map;
-	
+
+	WaveformShape     _waveform_shape;
+	WaveformScale     _waveform_scale;
 };
 
 #endif /* __ardour_audio_streamview_h__ */
