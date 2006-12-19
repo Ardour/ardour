@@ -2284,18 +2284,11 @@ Editor::get_state ()
 TimeAxisView *
 Editor::trackview_by_y_position (double y)
 {
-	TrackViewList::iterator iter;
-	TimeAxisView *tv;
+	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
 
-	for (iter = track_views.begin(); iter != track_views.end(); ++iter) {
+		TimeAxisView *tv;
 
-		tv = *iter;
-
-		if (tv->hidden()) {
-			continue;
-		}
-
-		if (tv->y_position <= y && y < ((tv->y_position + tv->height + track_spacing))) {
+		if ((tv = (*iter)->covers_y_position (y)) != 0) {
 			return tv;
 		}
 	}

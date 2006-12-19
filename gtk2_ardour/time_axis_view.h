@@ -160,6 +160,14 @@ class TimeAxisView : public virtual AxisView
 	void reset_height();
 
 	/**
+	 * Returns a TimeAxisView* if this object covers y, or one of its children does.
+	 *  If the covering object is a child axis, then the child is returned.
+	 * Returns 0 otherwise.
+	 */
+
+	TimeAxisView* covers_y_position (double y);
+
+	/**
 	 * Steps through the defined heights for this TrackView.
 	 * Sets bigger to true to step up in size, set to fals eot step smaller.
 	 *

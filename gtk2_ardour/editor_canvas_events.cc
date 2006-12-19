@@ -76,7 +76,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
-				if (!(current_stepping_trackview = dynamic_cast<AudioTimeAxisView*> (trackview_by_y_position (ev->y)))) {
+				if (!(current_stepping_trackview = trackview_by_y_position (ev->y))) {
 					return false;
 				}
 			}
@@ -107,7 +107,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
-				if (!(current_stepping_trackview = dynamic_cast<AudioTimeAxisView*> (trackview_by_y_position (ev->y)))) {
+				if (!(current_stepping_trackview = trackview_by_y_position (ev->y))) {
 					return false;
 				}
 			}

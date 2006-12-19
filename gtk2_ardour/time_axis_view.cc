@@ -1067,3 +1067,25 @@ TimeAxisView::color_handler (ColorID id, uint32_t val)
 		break;
 	}
 }
+
+TimeAxisView*
+TimeAxisView::covers_y_position (double y)
+{
+	if (hidden()) {
+		return 0;
+	}
+
+	if (y_position <= y && y < (y_position + height)) {
+		return this;
+	}
+
+	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
+		TimeAxisView* tv;
+
+		if ((tv = (*i)->covers_y_position (y)) != 0) {
+			return tv;
+		}
+	}
+
+	return 0;
+}
