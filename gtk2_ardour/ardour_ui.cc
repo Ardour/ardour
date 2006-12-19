@@ -156,7 +156,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	route_params = 0;
 	option_editor = 0;
 	location_ui = 0;
-	sfdb = 0;
 	open_session_selector = 0;
 	have_configure_timeout = false;
 	have_disk_overrun_displayed = false;

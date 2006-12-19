@@ -57,7 +57,6 @@
 #include "rgb_macros.h"
 #include "selection_templates.h"
 #include "selection.h"
-#include "sfdb_ui.h"
 #include "editing.h"
 #include "gtk-custom-hruler.h"
 #include "gui_thread.h"

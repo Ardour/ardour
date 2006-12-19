@@ -93,10 +93,6 @@ ARDOUR_UI::connect_to_session (Session *s)
 		option_editor->set_session (s);
 	}
 
-	if (sfdb) {
-		sfdb->set_session (s);
-	}
-
 	setup_session_options ();
 
 	Blink.connect (mem_fun(*this, &ARDOUR_UI::transport_rec_enable_blink));
@@ -343,36 +339,6 @@ ARDOUR_UI::toggle_route_params_window ()
 		} else {
 			route_params->hide ();
 		} 
-	}
-}
-
-int
-ARDOUR_UI::create_sound_file_browser ()
-{
-	if (sfdb == 0) {
-		sfdb = new SoundFileBrowser (_("Sound File Browser"), session);
-		sfdb->signal_unmap().connect (sigc::bind(sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleSoundFileBrowser")));
-	}
-	return 0;
-}
-	
-void
-ARDOUR_UI::toggle_sound_file_browser ()
-{
-	if (create_sound_file_browser()) {
-		return;
-	}
-
-	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleSoundFileBrowser"));
-	if (act) {
-		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-	
-		if (tact->get_active()) {
-			sfdb->show_all();
-			sfdb->present();
-		} else {
-			sfdb->hide ();
-		}
 	}
 }
 

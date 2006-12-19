@@ -230,7 +230,6 @@
                <menuitem action='goto-editor'/>
                <menuitem action='goto-mixer'/>
                <menuitem action='ToggleOptionsEditor'/>
-               <menuitem action='ToggleSoundFileBrowser'/>
                <menuitem action='ToggleInspector'/>
                <menuitem action='ToggleLocations'/>
                <menuitem action='ToggleColorManager'/>
