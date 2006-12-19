@@ -168,12 +168,18 @@ AudioDiskstream::destroy_channel (ChannelInfo &chan)
 
 AudioDiskstream::~AudioDiskstream ()
 {
-	Glib::Mutex::Lock lm (state_lock);
+	{
+		/* don't be holding this lock as we exit the destructor, glib will wince
+		   visibly since the mutex gets destroyed before we release it.
+		*/
 
-	for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan)
-		destroy_channel((*chan));
-	
-	channels.clear();
+		Glib::Mutex::Lock lm (state_lock);
+		
+		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan)
+			destroy_channel((*chan));
+		
+		channels.clear();
+	}
 }
 
 void
