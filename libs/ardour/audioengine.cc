@@ -156,6 +156,7 @@ AudioEngine::stop (bool forever)
 			jack_client_t* foo = _jack;
 			_jack = 0;
 			jack_client_close (foo);
+			stop_metering_thread ();
 		} else {
 			jack_deactivate (_jack);
 		}
@@ -379,9 +380,9 @@ AudioEngine::stop_metering_thread ()
 {
 	if (m_meter_thread) {
 		g_atomic_int_set (&m_meter_exit, 1);
+		m_meter_thread->join ();
+		m_meter_thread = 0;
 	}
-	m_meter_thread->join ();
-	m_meter_thread = 0;
 }
 
 void
@@ -395,8 +396,11 @@ AudioEngine::start_metering_thread ()
 void
 AudioEngine::meter_thread ()
 {
-	while (g_atomic_int_get(&m_meter_exit) != true) {
+	while (true) {
 		Glib::usleep (10000); /* 1/100th sec interval */
+		if (g_atomic_int_get(&m_meter_exit)) {
+			break;
+		}
 		IO::update_meters ();
 	}
 }

@@ -35,6 +35,7 @@
 #include <pbd/pthread_utils.h>
 
 #include <ardour/audiosource.h>
+#include <ardour/cycle_timer.h>
 
 #include "i18n.h"
 
@@ -431,7 +432,8 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 	expected_peaks = (cnt / (double) frames_per_peak);
 	scale = npeaks/expected_peaks;
 
-#if 0
+#undef DEBUG_READ_PEAKS
+#ifdef DEBUG_READ_PEAKS
 	cerr << "======>RP: npeaks = " << npeaks 
 	     << " start = " << start 
 	     << " cnt = " << cnt 
@@ -457,8 +459,9 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 	
 	if (npeaks == cnt) {
 
+#ifdef DEBUG_READ_PEAKS
 		cerr << "RAW DATA\n";
-		
+#endif		
 		/* no scaling at all, just get the sample data and duplicate it for
 		   both max and min peak values.
 		*/
@@ -490,7 +493,9 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 			return -1;
 		}
 
-		// cerr << "DIRECT PEAKS\n";
+#ifdef DEBUG_READ_PEAKS
+		cerr << "DIRECT PEAKS\n";
+#endif
 		
 		nread = ::pread (peakfile, peaks, sizeof (PeakData)* npeaks, first_peak_byte);
 		close (peakfile);
@@ -523,8 +528,9 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 
 	if (scale < 1.0) {
 
-		// cerr << "DOWNSAMPLE\n";
-
+#ifdef DEBUG_READ_PEAKS
+		cerr << "DOWNSAMPLE\n";
+#endif		
 		/* the caller wants:
 
 		    - more frames-per-peak (lower resolution) than the peakfile, or to put it another way,
@@ -535,7 +541,7 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 		    to avoid confusion, I'll refer to the requested peaks as visual_peaks and the peakfile peaks as stored_peaks  
 		*/
 
-		const uint32_t chunksize = (uint32_t) min (expected_peaks, 4096.0);
+		const uint32_t chunksize = (uint32_t) min (expected_peaks, 65536.0);
 		
 		staging = new PeakData[chunksize];
 		
@@ -569,10 +575,15 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 				tnp = min ((_length/frames_per_peak - current_stored_peak), (nframes_t) expected_peaks);
 				to_read = min (chunksize, tnp);
 				
-				off_t fend = lseek (peakfile, 0, SEEK_END);
+#ifdef DEBUG_READ_PEAKS
+				cerr << "read " << sizeof (PeakData) * to_read << " from peakfile @ " << start_byte << endl;
+#endif
 				
 				if ((nread = ::pread (peakfile, staging, sizeof (PeakData) * to_read, start_byte))
 				    != sizeof (PeakData) * to_read) {
+
+					off_t fend = lseek (peakfile, 0, SEEK_END);
+					
 					cerr << "AudioSource["
 					     << _name
 					     << "]: cannot read peak data from peakfile ("
@@ -589,11 +600,11 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 					     << endl;
 					goto out;
 				}
-
+				
 				i = 0;
 				stored_peaks_read = nread / sizeof(PeakData);
 			}
-
+			
 			xmax = -1.0;
 			xmin = 1.0;
 
@@ -624,8 +635,9 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 
 	} else {
 		
-		// cerr << "UPSAMPLE\n";
-
+#ifdef DEBUG_READ_PEAKS
+		cerr << "UPSAMPLE\n";
+#endif
 		/* the caller wants 
 
 		     - less frames-per-peak (more resolution)
@@ -704,6 +716,10 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 		delete [] raw_staging;
 	}
 
+#ifdef DEBUG_READ_PEAKS
+	cerr << "RP DONE\n";
+#endif
+
 	return ret;
 }
 
@@ -777,6 +793,7 @@ AudioSource::do_build_peak (nframes_t first_frame, nframes_t cnt)
 	off_t first_peak_byte;
 	int peakfile = -1;
 	int ret = -1;
+	off_t target_length;
 
 #ifdef DEBUG_PEAK_BUILD
 	cerr << pthread_self() << ": " << _name << ": building peaks for " << first_frame << " to " << first_frame + cnt - 1 << endl;
@@ -827,6 +844,20 @@ AudioSource::do_build_peak (nframes_t first_frame, nframes_t cnt)
 		current_frame += frames_read;
 		cnt -= frames_read;
 	}
+
+#define BLOCKSIZE (256 * 1024)
+
+	target_length = BLOCKSIZE * ((first_peak_byte + BLOCKSIZE + 1) / BLOCKSIZE);
+
+	/* on some filesystems (ext3, at least) this helps to reduce fragmentation of
+	   the peakfiles. its not guaranteed to do so, and even on ext3 (as of december 2006)
+	   it does not cause single-extent allocation even for peakfiles of 
+	   less than BLOCKSIZE bytes.
+	*/
+
+	ftruncate (peakfile, target_length);
+
+	/* error doesn't actually matter though, so continue on without testing */
 
 	if (::pwrite (peakfile, peakbuf, sizeof (PeakData) * peaki, first_peak_byte) != (ssize_t) (sizeof (PeakData) * peaki)) {
 		error << string_compose(_("%1: could not write peak file data (%2)"), _name, strerror (errno)) << endmsg;

@@ -1218,7 +1218,6 @@ Session::set_state (const XMLNode& node)
 	StateReady (); /* EMIT SIGNAL */
 
 	_state_of_the_state = Clean;
-	cerr << "session marked clean\n";
 
 	if (state_was_pending) {
 		save_state (_current_snapshot_name);
@@ -2818,6 +2817,12 @@ Session::set_clean ()
 }
 
 void
+Session::set_deletion_in_progress ()
+{
+	_state_of_the_state = StateOfTheState (_state_of_the_state | Deletion);
+}
+
+void
 Session::add_controllable (Controllable* c)
 {
 	Glib::Mutex::Lock lm (controllables_lock);
@@ -2917,6 +2922,10 @@ Session::restore_history (string snapshot_name)
     XMLTree tree;
     string xmlpath;
 
+    if (snapshot_name.empty()) {
+	    snapshot_name = _current_snapshot_name;
+    }
+
     /* read xml */
     xmlpath = _path + snapshot_name + ".history";
     cerr << string_compose(_("Loading history from '%1'."), xmlpath) << endmsg;
@@ -2957,10 +2966,21 @@ Session::restore_history (string snapshot_name)
 		    if (n->name() == "MementoCommand" ||
 			n->name() == "MementoUndoCommand" ||
 			n->name() == "MementoRedoCommand") {
+
 			    if ((c = memento_command_factory(n))) {
 				    ut->add_command(c);
 			    }
+			    
+		    } else if (n->name() == "GlobalRecordEnableStateCommand" ||
+			       n->name() == "GlobalSoloStateCommand" || 
+			       n->name() == "GlobalMuteStateCommand") {
+
+			    if ((c = global_state_command_factory (n))) {
+				    ut->add_command (c);
+			    }
+			    
 		    } else {
+
 			    error << string_compose(_("Couldn't figure out how to make a Command out of a %1 XMLNode."), n->name()) << endmsg;
 		    }
 	    }

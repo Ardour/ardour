@@ -164,6 +164,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	_will_create_new_session_automatically = false;
 	session_loaded = false;
 	last_speed_displayed = -1.0f;
+	keybindings_path = ARDOUR::find_config_file ("ardour.bindings");
 
 	last_configure_time.tv_sec = 0;
 	last_configure_time.tv_usec = 0;
@@ -345,9 +346,7 @@ ARDOUR_UI::save_ardour_state ()
 		Config->add_instant_xml (mnode, get_user_ardour_path());
 	}
 
-	/* keybindings */
-
-	AccelMap::save ("ardour.saved_bindings");
+	save_keybindings ();
 }
 
 void
@@ -382,6 +381,9 @@ If you still wish to quit, please use the\n\n\
 		}
 	}
 
+	if (session) {
+		session->set_deletion_in_progress ();
+	}
 	engine->stop (true);
 	Config->save_state();
 	quit ();
@@ -2411,4 +2413,16 @@ ARDOUR_UI::record_state_changed ()
 		big_clock.set_name ("BigClockNonRecording");
 		break;
 	}
+}
+
+void
+ARDOUR_UI::set_keybindings_path (string path)
+{
+	keybindings_path = path;
+}
+
+void
+ARDOUR_UI::save_keybindings ()
+{
+	AccelMap::save (keybindings_path);
 }

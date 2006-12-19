@@ -22,7 +22,8 @@ void Session::register_with_memento_command_factory(PBD::ID id, PBD::StatefulThi
     registry[id] = ptr;
 }
     
-Command *Session::memento_command_factory(XMLNode *n)
+Command *
+Session::memento_command_factory(XMLNode *n)
 {
     PBD::ID id;
     XMLNode *before = 0, *after = 0;
@@ -85,6 +86,13 @@ Command *Session::memento_command_factory(XMLNode *n)
     /* we failed */
     error << string_compose (_("could not reconstitute MementoCommand from XMLNode. object type = %1 id = %2"), obj_T, id.to_s()) << endmsg;
     return 0 ;
+}
+
+Command *
+Session::global_state_command_factory(XMLNode *n)
+{
+	error << string_compose (_("cannot reconstitute %1 from XML yet, ignored"), n->name()) << endmsg;
+	return 0 ;
 }
 
 // solo

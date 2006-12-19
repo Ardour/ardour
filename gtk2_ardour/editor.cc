@@ -2639,13 +2639,10 @@ Editor::setup_toolbar ()
 	zoom_focus_selector.signal_changed().connect (mem_fun(*this, &Editor::zoom_focus_selection_done));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_focus_selector, _("Zoom focus"));
 
-	zoom_box.pack_start (zoom_focus_selector, false, false);
+	zoom_box.pack_start (zoom_focus_selector, true, true);
 	zoom_box.pack_start (zoom_out_button, false, false);
 	zoom_box.pack_start (zoom_in_button, false, false);
- 	//zoom_box.pack_start (zoom_range_clock, false, false);	
 	zoom_box.pack_start (zoom_out_full_button, false, false);
-	
-	ARDOUR_UI::instance()->tooltips().set_tip (zoom_range_clock, _("Current Zoom Range\n(Width of visible area)"));
 
 	/* Edit Cursor / Snap */
 

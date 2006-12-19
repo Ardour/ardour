@@ -180,7 +180,7 @@ ControlProtocolManager::discover_control_protocols (string path)
 	vector<string *> *found;
 	PathScanner scanner;
 
-	info << string_compose (_("looking for control protocols in %1"), path) << endmsg;
+	// info << string_compose (_("looking for control protocols in %1"), path) << endmsg;
 
 	found = scanner (path, protocol_filter, 0, false, true);
 

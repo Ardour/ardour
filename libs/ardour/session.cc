@@ -831,10 +831,6 @@ Session::when_engine_running ()
 		}
 	}
 
-
-	/* its safe to do this now */
-
-	restore_history (snap_name());
 	
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~(CannotSave|Dirty));
 
@@ -861,7 +857,6 @@ Session::hookup_io ()
 	*/
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state | InitialConnecting);
-	cerr << "InitialConnecting set\n";
 
 	if (auditioner == 0) {
 		
@@ -917,7 +912,6 @@ Session::hookup_io ()
 	IOConnectionsComplete (); /* EMIT SIGNAL */
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~InitialConnecting);
-	cerr << "InitialConnectingUN set\n";
 
 	/* now handle the whole enchilada as if it was one
 	   graph reorder event.

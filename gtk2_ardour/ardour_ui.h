@@ -208,6 +208,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void set_native_file_header_format (ARDOUR::HeaderFormat sf);
 	void set_native_file_data_format (ARDOUR::SampleFormat sf);
 
+	void set_keybindings_path (std::string path);
+	void save_keybindings ();
+
   protected:
 	friend class PublicEditor;
 
@@ -534,6 +537,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void connect_to_session (ARDOUR::Session *);
 	void connect_dependents_to_session (ARDOUR::Session *);
 	void we_have_dependents ();
+	
+	std::string keybindings_path;
+
 	void setup_keybindings ();
 	void setup_session_options ();
 	
@@ -665,7 +671,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void map_meter_falloff ();
 
 	void toggle_control_protocol (ARDOUR::ControlProtocolInfo*);
-	void toggle_control_protocol_feedback (ARDOUR::ControlProtocolInfo*, const char* group_name, const char* action_name);
+	void toggle_control_protocol_feedback (ARDOUR::ControlProtocolInfo*, const char* group_name, std::string action_name);
 };
 
 #endif /* __ardour_gui_h__ */

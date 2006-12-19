@@ -715,8 +715,7 @@ AudioRegionView::show_region_editor ()
 		// trackview.editor.ensure_float (*editor);
 	} 
 
-	editor->show_all ();
-	editor->get_window()->raise();
+	editor->present ();
 }
 
 void

@@ -698,8 +698,6 @@ CrossfadeEditor::redraw ()
 
 	}
 
-	// GTK2FIX some odd math to fix up here
-
 	size_t last_spt = (npoints + 3) - 1;
 
 	for (size_t i = 0; i < npoints; ++i) {

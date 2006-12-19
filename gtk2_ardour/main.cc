@@ -417,6 +417,9 @@ int main (int argc, char *argv[])
 		exit (1);
 	}
 
+	if (!keybindings_path.empty()) {
+		ui->set_keybindings_path (keybindings_path);
+	}
 
 	if (!no_splash) {
 		ui->show_splash ();
@@ -445,7 +448,7 @@ int main (int argc, char *argv[])
 	} 
 
 	ui->start_engine ();
-	
+
 	if (maybe_load_session ()) {
 		ui->run (text_receiver);
 		ui = 0;

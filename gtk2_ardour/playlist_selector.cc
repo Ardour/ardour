@@ -61,9 +61,8 @@ PlaylistSelector::PlaylistSelector ()
 	scroller.add (tree);
 	scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 
-	// GTK2FIX do we need this stuff or is GTK applying some policy now?
-	//set_border_width (6);
-	// set_spacing (12);
+	get_vbox()->set_border_width (6);
+	get_vbox()->set_spacing (12);
 
 	get_vbox()->pack_start (scroller);
 

@@ -533,7 +533,7 @@ void
 OptionEditor::port_online_toggled (MIDI::Port* port, ToggleButton* tb)
 {
 	bool wanted = tb->get_active();
-	
+
 	if (wanted != port->input()->offline()) {
 		port->input()->set_offline (wanted);
 	} 
@@ -542,12 +542,16 @@ OptionEditor::port_online_toggled (MIDI::Port* port, ToggleButton* tb)
 void
 OptionEditor::map_port_online (MIDI::Port* port, ToggleButton* tb)
 {
-	if (port->input()->offline()) {
-		tb->set_label (_("offline"));
-		tb->set_active (false);
-	} else {
-		tb->set_label (_("online"));
-		tb->set_active (true);
+	bool bstate = tb->get_active ();
+
+	if (bstate != port->input()->offline()) {
+		if (port->input()->offline()) {
+			tb->set_label (_("offline"));
+			tb->set_active (false);
+		} else {
+			tb->set_label (_("online"));
+			tb->set_active (true);
+		}
 	}
 }
 

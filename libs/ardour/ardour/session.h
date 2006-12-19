@@ -242,6 +242,7 @@ class Session : public PBD::StatefulDestructible
 	void set_dirty ();
 	void set_clean ();
 	bool dirty() const { return _state_of_the_state & Dirty; }
+	void set_deletion_in_progress ();
 	bool deletion_in_progress() const { return _state_of_the_state & Deletion; }
 	sigc::signal<void> DirtyChanged;
 
@@ -762,8 +763,10 @@ class Session : public PBD::StatefulDestructible
 	std::map<PBD::ID, PBD::StatefulThingWithGoingAway*> registry;
 
         // these commands are implemented in libs/ardour/session_command.cc
-	Command *memento_command_factory(XMLNode *n);
-        void register_with_memento_command_factory(PBD::ID, PBD::StatefulThingWithGoingAway *);
+	Command* memento_command_factory(XMLNode* n);
+        void register_with_memento_command_factory(PBD::ID, PBD::StatefulThingWithGoingAway*);
+
+	Command* global_state_command_factory (XMLNode* n);
 
         class GlobalSoloStateCommand : public Command
         {

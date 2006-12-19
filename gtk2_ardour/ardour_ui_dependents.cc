@@ -60,19 +60,36 @@ ARDOUR_UI::we_have_dependents ()
 	editor->UpdateAllTransportClocks.connect (mem_fun (*this, &ARDOUR_UI::update_transport_clocks));
 }
 
+static void 
+accel_map_changed (GtkAccelMap* map,
+		   gchar* path,
+		   guint  key,
+		   GdkModifierType mod,
+		   gpointer arg)
+{
+	static_cast<ARDOUR_UI*>(arg)->save_keybindings ();
+}
+
 void
 ARDOUR_UI::setup_keybindings ()
 {
 	install_actions ();
 	RedirectBox::register_actions ();
 	
-	std::string key_binding_file = ARDOUR::find_config_file("ardour.bindings");
+	cerr << "loading bindings from " << keybindings_path << endl;
 
 	try {
-		AccelMap::load (key_binding_file);
+		AccelMap::load (keybindings_path);
 	} catch (...) {
-		error << "ardour key bindings file not found" << endmsg;
+		error << string_compose (_("Ardour key bindings file not found at \"%1\" or contains errors."), keybindings_path)
+		      << endmsg;
 	}
+
+	/* catch changes */
+
+	GtkAccelMap* accelmap = gtk_accel_map_get();
+	g_signal_connect (accelmap, "changed", (GCallback) accel_map_changed, this);
+
 }
 
 void
@@ -80,6 +97,10 @@ ARDOUR_UI::connect_dependents_to_session (ARDOUR::Session *s)
 {
 	editor->connect_to_session (s);
 	mixer->connect_to_session (s);
+
+	/* its safe to do this now */
+	
+	s->restore_history ("");
 }
 
 void

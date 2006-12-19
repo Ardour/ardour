@@ -479,7 +479,7 @@ ARDOUR_UI::toggle_control_protocol (ControlProtocolInfo* cpi)
 }
 
 void
-ARDOUR_UI::toggle_control_protocol_feedback (ControlProtocolInfo* cpi, const char* group, const char* action)
+ARDOUR_UI::toggle_control_protocol_feedback (ControlProtocolInfo* cpi, const char* group, string action)
 {
 	if (!session) {
 		/* this happens when we build the menu bar when control protocol support
@@ -490,14 +490,17 @@ ARDOUR_UI::toggle_control_protocol_feedback (ControlProtocolInfo* cpi, const cha
 	}
 
 	if (cpi->protocol) {
-		Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (group, action);
+		Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (group, action.c_str());
 
 		if (act) {
 			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-			bool x = tact->get_active();
 
-			if (tact && x != cpi->protocol->get_feedback()) {
-				cpi->protocol->set_feedback (!x);
+			if (tact) {
+				bool x = tact->get_active();
+
+				if (x != cpi->protocol->get_feedback()) {
+					cpi->protocol->set_feedback (x);
+				}
 			}
 		}
 	}
@@ -552,7 +555,7 @@ ARDOUR_UI::build_control_surface_menu ()
 												  (bind (mem_fun (*this, &ARDOUR_UI::toggle_control_protocol_feedback), 
 													 *i, 
 													 "Editor",
-													 action_name.c_str())));
+													 action_name)));
 				
 				ui += "<menu action='";
 				ui += submenu_name;
