@@ -1012,7 +1012,13 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
 		break;
 
 	case Selection::Extend:
-		/* not defined yet */
+		if (tracks->size() > 1) {
+			/* add each one, do not "extend" */
+			editor.get_selection().add (*tracks);
+		} else {
+			/* extend to the single track */
+			editor.extend_selection_to_track (*tracks->front());
+		}
 		break;
 
 	case Selection::Add:

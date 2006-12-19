@@ -217,6 +217,8 @@ class Editor : public PublicEditor
 	Selection& get_selection() const { return *selection; }
 	Selection& get_cut_buffer() const { return *cut_buffer; }
 
+	bool extend_selection_to_track (TimeAxisView&);
+
 	void play_selection ();
 	void select_all_in_track (Selection::Operation op);
 	void select_all (Selection::Operation op);

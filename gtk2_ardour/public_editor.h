@@ -93,6 +93,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual gulong frame_to_pixel (nframes_t frame) = 0;
 	virtual Selection& get_selection() const = 0;
 	virtual Selection& get_cut_buffer() const = 0;
+	virtual bool extend_selection_to_track (TimeAxisView&) = 0;
 	virtual void play_selection () = 0;
 	virtual void set_show_measures (bool yn) = 0;
 	virtual bool show_measures () const = 0;

@@ -2861,6 +2861,114 @@ Editor::commit_reversible_command ()
 	}
 }
 
+struct TrackViewByPositionSorter
+{
+    bool operator() (const TimeAxisView* a, const TimeAxisView *b) {
+	    return a->y_position < b->y_position;
+    }
+};
+
+bool
+Editor::extend_selection_to_track (TimeAxisView& view)
+{
+	if (selection->tracks.empty()) {
+
+		if (!selection->selected (&view)) {
+			selection->set (&view);
+			return true;
+		} else {
+			return false;
+		}
+	} 
+
+	/* something is already selected, so figure out which range of things to add */
+	
+	TrackViewList to_be_added;
+	TrackViewList sorted = track_views;
+	TrackViewByPositionSorter cmp;
+	bool passed_clicked = false;
+	bool forwards;
+
+	sorted.sort (cmp);
+
+	if (!selection->selected (&view)) {
+		to_be_added.push_back (&view);
+	}
+
+	/* figure out if we should go forward or backwards */
+
+	for (TrackViewList::iterator i = sorted.begin(); i != sorted.end(); ++i) {
+
+		if ((*i) == &view) {
+			passed_clicked = true;
+		}
+
+		if (selection->selected (*i)) {
+			if (passed_clicked) {
+				forwards = true;
+			} else {
+				forwards = false;
+			}
+			break;
+		}
+	}
+			
+	passed_clicked = false;
+
+	if (forwards) {
+
+		for (TrackViewList::iterator i = sorted.begin(); i != sorted.end(); ++i) {
+					
+			if ((*i) == &view) {
+				passed_clicked = true;
+				continue;
+			}
+					
+			if (passed_clicked) {
+				if ((*i)->hidden()) {
+					continue;
+				}
+				if (selection->selected (*i)) {
+					break;
+				} else if (!(*i)->hidden()) {
+					to_be_added.push_back (*i);
+				}
+			}
+		}
+
+	} else {
+
+		for (TrackViewList::reverse_iterator r = sorted.rbegin(); r != sorted.rend(); ++r) {
+					
+			if ((*r) == &view) {
+				passed_clicked = true;
+				continue;
+			}
+					
+			if (passed_clicked) {
+						
+				if ((*r)->hidden()) {
+					continue;
+				}
+						
+				if (selection->selected (*r)) {
+					break;
+				} else if (!(*r)->hidden()) {
+					to_be_added.push_back (*r);
+				}
+			}
+		}
+	}
+			
+	if (!to_be_added.empty()) {
+		selection->add (to_be_added);
+		return true;
+	}
+	
+	return false;
+}
+
+
 bool
 Editor::set_selected_track (TimeAxisView& view, Selection::Operation op, bool no_remove)
 {
@@ -2889,13 +2997,14 @@ Editor::set_selected_track (TimeAxisView& view, Selection::Operation op, bool no
 	case Selection::Set:
 		if (selection->selected (&view) && selection->tracks.size() == 1) {
 			/* no commit necessary */
-		} 
-
-		selection->set (&view);
+		} else {
+			selection->set (&view);
+			commit = true;
+		}
 		break;
 		
 	case Selection::Extend:
-		/* not defined yet */
+		commit = extend_selection_to_track (view);
 		break;
 	}
 

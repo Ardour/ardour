@@ -316,6 +316,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 
 	switch (item_type) {
 	case RegionItem:
+		/* XXX make tying track/region selection optional */
 		c1 = set_selected_track_from_click (op, true);
 		c2 = set_selected_regionview_from_click (press, op, true);
 		commit = (c1 || c2);
@@ -323,6 +324,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		
 	case RegionViewNameHighlight:
 	case RegionViewName:
+		/* XXX make tying track/region selection optional */
 		c1 = set_selected_track_from_click (op, true);
 		c2 = set_selected_regionview_from_click (press, op, true);
 		commit = (c1 || c2);
@@ -331,6 +333,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	case GainAutomationControlPointItem:
 	case PanAutomationControlPointItem:
 	case RedirectAutomationControlPointItem:
+		/* XXX make tying track/region selection optional */
 		c1 = set_selected_track_from_click (op, true);
 		c2 = set_selected_control_point_from_click (op, false);
 		commit = (c1 || c2);
