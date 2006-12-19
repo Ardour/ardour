@@ -328,8 +328,6 @@ RedirectBox::redirect_button_release_event (GdkEventButton *ev)
 	}
 
 	if (redirect && Keyboard::is_delete_event (ev)) {
-
-		cerr << " redirect clicked was " << redirect->name() << endl;
 		
 		Glib::signal_idle().connect (bind (mem_fun(*this, &RedirectBox::idle_delete_redirect), boost::weak_ptr<Redirect>(redirect)));
 		ret = true;
