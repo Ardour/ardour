@@ -80,7 +80,7 @@ style "marker_text"
 
 style "time_axis_view_item_name"
 {
-	font_name = "sans medium 8"
+	font_name = "sans 6"
 }
 
 style "default_base" = "medium_text"
@@ -141,8 +141,9 @@ style "transport_base" = "medium_bold_text"
   bg[SELECTED] = { 0, 0, 0 }
 }
 
-style "black_mackie_menu_bar" = "medium_bold_text"
+style "black_mackie_menu_bar"
 {
+  font_name = "sans bold 9"
   fg[NORMAL] = { 1.0, 1.0, 1.0 }
   bg[NORMAL] = { 0, 0, 0 }
 }
@@ -984,7 +985,7 @@ style "ardour_button" ="default_buttons_menus"
 widget "*FirstActionMessage" style "first_action_message"
 widget "*VerboseCanvasCursor" style "verbose_canvas_cursor"
 widget "*MarkerText" style "marker_text"
-widget "*TimeAxisViewItemName" style "time_axis_view_item_name"
+widget "*TimeAxisViewItemName*" style "time_axis_view_item_name"
 #widget "*ExportProgress" style "default_buttons_menus"
 widget "*ExportFileLabel" style "small_bold_text"
 widget "*ExportFormatLabel" style "medium_bold_text"
