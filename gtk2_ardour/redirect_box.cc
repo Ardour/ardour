@@ -327,8 +327,6 @@ RedirectBox::redirect_button_release_event (GdkEventButton *ev)
 		}
 	}
 
-	cerr << "button " << ev->button << " state " << ev->state << " redirect = " << redirect << endl;
-
 	if (redirect && Keyboard::is_delete_event (ev)) {
 
 		cerr << " redirect clicked was " << redirect->name() << endl;
