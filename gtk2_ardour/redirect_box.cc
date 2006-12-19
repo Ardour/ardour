@@ -319,15 +319,15 @@ RedirectBox::redirect_button_release_event (GdkEventButton *ev)
 	int celly;
 	boost::shared_ptr<Redirect> redirect;
 	int ret = false;
-	bool selected = false;
+
 
 	if (redirect_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		if ((iter = model->get_iter (path))) {
 			redirect = (*iter)[columns.redirect];
-			selected = redirect_display.get_selection()->is_selected (iter);
 		}
-		
 	}
+
+	cerr << "button " << ev->button << " state " << ev->state << " redirect = " << redirect << endl;
 
 	if (redirect && Keyboard::is_delete_event (ev)) {
 
@@ -341,7 +341,7 @@ RedirectBox::redirect_button_release_event (GdkEventButton *ev)
 		show_redirect_menu(ev->time);
 		ret = true;
 
-	} else if (redirect && ev->button == 2 && ev->state == 0) {
+	} else if (redirect && ev->button == 2 && ev->state == GDK_BUTTON2_MASK) {
 		
 		redirect->set_active (!redirect->active(), this);
 		ret = true;
