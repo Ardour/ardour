@@ -34,7 +34,7 @@ opts.AddOptions(
     EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'none' ), ignorecase=2),
     BoolOption('DMALLOC', 'Compile and link using the dmalloc library', 0),
     BoolOption('EXTRA_WARN', 'Compile with -Wextra, -ansi, and -pedantic.  Might break compilation.  For pedants', 0),
-    BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 1),
+    BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 0),
     BoolOption('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1),
     BoolOption('LIBLO', 'Compile with support for liblo library', 1),
     BoolOption('NLS', 'Set to turn on i18n support', 1),
@@ -234,7 +234,8 @@ def i18n (buildenv, sources, installenv):
 
 
 def fetch_svn_revision (path):
-    cmd = "svn info "
+    cmd = "LANG= "
+    cmd += "svn info "
     cmd += path
     cmd += " | awk '/^Revision:/ { print $2}'"
     return commands.getoutput (cmd)
@@ -463,6 +464,13 @@ libraries['samplerate'].ParseConfig('pkg-config --cflags --libs samplerate')
 if env['FFT_ANALYSIS']:
 	libraries['fftw3f'] = LibraryInfo()
 	libraries['fftw3f'].ParseConfig('pkg-config --cflags --libs fftw3f')
+        #
+        # Check for fftw3 header as well as the library
+        conf = Configure (libraries['fftw3f'])
+        if conf.CheckHeader ('fftw3.h') == False:
+                print "FFT Analysis cannot be compiled without the FFTW3 headers, which don't seem to be installed"
+                sys.exit (1)
+        libraries['fftw3f'] = conf.Finish();
 
 libraries['jack'] = LibraryInfo()
 libraries['jack'].ParseConfig('pkg-config --cflags --libs jack')
