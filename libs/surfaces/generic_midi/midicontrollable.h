@@ -80,8 +80,6 @@ class MIDIControllable : public Stateful
 	std::string     _control_description;
 	bool             feedback;
 	
-	static bool _send_feedback;
-
 	void midi_receiver (MIDI::Parser &p, MIDI::byte *, size_t);
 	void midi_sense_note (MIDI::Parser &, MIDI::EventTwoBytes *, bool is_on);
 	void midi_sense_note_on (MIDI::Parser &p, MIDI::EventTwoBytes *tb);

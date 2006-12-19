@@ -32,8 +32,6 @@ using namespace MIDI;
 using namespace PBD;
 using namespace ARDOUR;
 
-bool MIDIControllable::_send_feedback = false;
-
 MIDIControllable::MIDIControllable (Port& p, Controllable& c, bool is_bistate)
 	: controllable (c), _port (p), bistate (is_bistate)
 {
@@ -288,7 +286,7 @@ MIDIControllable::send_feedback ()
 {
 	byte msg[3];
 
-	if (setting || !_send_feedback || control_type == none) {
+	if (setting || !feedback || control_type == none) {
 		return;
 	}
 	
@@ -302,7 +300,7 @@ MIDIControllable::send_feedback ()
 MIDI::byte*
 MIDIControllable::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool force)
 {
-	if (control_type != none &&_send_feedback && bufsize > 2) {
+	if (control_type != none && feedback && bufsize > 2) {
 
 		MIDI::byte gm = (MIDI::byte) (controllable.get_value() * 127.0);
 		
@@ -345,6 +343,12 @@ MIDIControllable::set_state (const XMLNode& node)
 		return -1;
 	}
 
+	if ((prop = node.property ("feedback")) != 0) {
+		feedback = (prop->value() == "yes");
+	} else {
+		feedback = true; // default
+	}
+
 	bind_midi (control_channel, control_type, control_additional);
 	
 	return 0;
@@ -362,6 +366,7 @@ MIDIControllable::get_state ()
 	node.add_property ("channel", buf);
 	snprintf (buf, sizeof(buf), "0x%x", (int) control_additional);
 	node.add_property ("additional", buf);
+	node.add_property ("feedback", (feedback ? "yes" : "no"));
 
 	return node;
 }
