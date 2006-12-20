@@ -456,3 +456,10 @@ BarController::set_use_parent (bool yn)
 	use_parent = yn;
 	queue_draw ();
 }
+
+void
+BarController::set_sensitive (bool yn)
+{
+	Frame::set_sensitive (yn);
+	darea.set_sensitive (yn);
+}

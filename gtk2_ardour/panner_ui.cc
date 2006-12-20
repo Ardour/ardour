@@ -30,6 +30,7 @@
 #include "panner_ui.h"
 #include "panner2d.h"
 #include "utils.h"
+#include "panner.h"
 #include "gui_thread.h"
 
 #include <ardour/session.h>
@@ -217,7 +218,7 @@ PannerUI::set_width (Width w)
 		if (panner) {
 			panner->set_size_request (61, 61);
 		}
-		for (vector<BarController*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
+		for (vector<PannerBar*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
 				(*i)->set_size_request (61, 15);
 		}
 		panning_link_button.set_label (_("link"));
@@ -227,7 +228,7 @@ PannerUI::set_width (Width w)
 		if (panner) {
 			panner->set_size_request (31, 61);
 		}
-		for (vector<BarController*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
+		for (vector<PannerBar*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
 				(*i)->set_size_request (31, 15);
 		}
 		panning_link_button.set_label (_("L"));
@@ -244,7 +245,7 @@ PannerUI::~PannerUI ()
 		delete (*i);
 	}
 	
-	for (vector<BarController*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
+	for (vector<PannerBar*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
 		delete (*i);
 	}
 
@@ -302,7 +303,7 @@ PannerUI::setup_pan ()
 		while ((asz = pan_adjustments.size()) < npans) {
 
 			float x;
-			BarController* bc;
+			PannerBar* bc;
 
 			/* initialize adjustment with current value of panner */
 
@@ -313,9 +314,7 @@ PannerUI::setup_pan ()
 
 			_io->panner()[asz]->Changed.connect (bind (mem_fun(*this, &PannerUI::pan_value_changed), (uint32_t) asz));
 
-			bc = new BarController (*pan_adjustments[asz], 
-						_io->panner()[asz]->control(),
-						bind (mem_fun(*this, &PannerUI::pan_printer), pan_adjustments[asz]));
+			bc = new PannerBar (*pan_adjustments[asz], _io->panner()[asz]->control());
 			
 			bc->set_name ("PanSlider");
 			bc->set_shadow_type (Gtk::SHADOW_NONE);
@@ -341,7 +340,7 @@ PannerUI::setup_pan ()
 				break;
 			}
 
-			pan_bar_packer.pack_start (*pan_bars.back(), false, false);
+			pan_bar_packer.pack_start (*pan_bars.back(), true, true);
 		}
 
 		/* now that we actually have the pan bars,
@@ -631,7 +630,7 @@ PannerUI::update_pan_sensitive ()
 	case 1:
 		break;
 	case 2:
-		for (vector<BarController*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
+		for (vector<PannerBar*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
 			(*i)->set_sensitive (sensitive);
 		}
 		break;

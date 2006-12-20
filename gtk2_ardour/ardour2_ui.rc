@@ -968,6 +968,15 @@ style "pan_slider"
 	text[INSENSITIVE] = { 0.70, 0.70, 0.70 }
 	text[SELECTED] = { 0.70, 0.70, 0.70 }
 	text[PRELIGHT] = { 0.70, 0.70, 0.70 }
+
+	# used to draw the triangular indicators 
+
+	base[NORMAL] = { 0.93, 0.94, 0.71 }
+	base[ACTIVE] =  {0.93, 0.94, 0.71 }
+	base[INSENSITIVE] = {0.32, 0.39, 0.45 } # matches default_base
+	base[SELECTED] = { 0.93, 0.94, 0.71 }
+	base[PRELIGHT] = { 0.93, 0.94, 0.71 }
+
 }
 
 style "region_list_whole_file"

@@ -35,10 +35,6 @@ class BarController : public Gtk::Frame
 	BarController (Gtk::Adjustment& adj, PBD::Controllable&, sigc::slot<void,char*,unsigned int>);
 	virtual ~BarController () {}
 	
-	void set_sensitive (bool yn) {
-		darea.set_sensitive (yn);
-	}
-	
 	enum Style {
 		LeftToRight,
 		RightToLeft,
@@ -52,6 +48,8 @@ class BarController : public Gtk::Frame
 	void set_style (Style);
 	void set_with_text (bool yn);
 	void set_use_parent (bool yn);
+
+	void set_sensitive (bool yn);
 
 	Gtk::SpinButton& get_spin_button() { return spinner; }
 
@@ -79,12 +77,12 @@ class BarController : public Gtk::Frame
 	Gtk::SpinButton     spinner;
 	bool                use_parent;
 
-	bool button_press (GdkEventButton *);
-	bool button_release (GdkEventButton *);
-	bool motion (GdkEventMotion *);
-	bool expose (GdkEventExpose *);
-	bool scroll (GdkEventScroll *);
-	bool entry_focus_out (GdkEventFocus*);
+	virtual bool button_press (GdkEventButton *);
+	virtual bool button_release (GdkEventButton *);
+	virtual bool motion (GdkEventMotion *);
+	virtual bool expose (GdkEventExpose *);
+	virtual bool scroll (GdkEventScroll *);
+	virtual bool entry_focus_out (GdkEventFocus*);
 
 	gint mouse_control (double x, GdkWindow* w, double scaling);
 
