@@ -2871,6 +2871,11 @@ struct TrackViewByPositionSorter
 bool
 Editor::extend_selection_to_track (TimeAxisView& view)
 {
+	if (selection->selected (&view)) {
+		/* already selected, do nothing */
+		return false;
+	}
+
 	if (selection->tracks.empty()) {
 
 		if (!selection->selected (&view)) {
