@@ -708,7 +708,7 @@ Editor::Editor (AudioEngine& eng)
 		set_default_icon_list (window_icons);
 	}
 	set_title (_("ardour: editor"));
-	set_wmclass (_("ardour_editor"), "Ardour");
+	set_wmclass (X_("ardour_editor"), "Ardour");
 
 	add (vpacker);
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);

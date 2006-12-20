@@ -230,7 +230,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node)
 
 	controllables.clear ();
 
-	nlist = node.children();
+	nlist = node.children(); // "controls"
 
 	if (nlist.empty()) {
 		return 0;

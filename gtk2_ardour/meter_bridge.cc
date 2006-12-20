@@ -76,7 +76,7 @@ MeterBridge::MeterBridge ()
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 	set_name ("MeterBridgeWindow");
 	set_title (_("ardour: meter bridge"));
-	set_wmclass (_("ardour_meter_bridge"), "Ardour");
+	set_wmclass (X_("ardour_meter_bridge"), "Ardour");
 	// set_policy (false, false, false); // no user resizing of any kind
 
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), static_cast<Gtk::Window*>(this)));

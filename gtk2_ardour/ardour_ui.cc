@@ -1701,7 +1701,7 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 
 
 					msg.set_name (X_("CleanupDialog"));
-					msg.set_wmclass (_("existing_session"), "Ardour");
+					msg.set_wmclass (X_("existing_session"), "Ardour");
 					msg.set_position (Gtk::WIN_POS_MOUSE);
 					
 					switch (msg.run()) {
@@ -2041,7 +2041,7 @@ After cleanup, unused audio files will be moved to a \
 	checker.set_default_response (RESPONSE_CANCEL);
 
 	checker.set_name (_("CleanupDialog"));
-	checker.set_wmclass (_("ardour_cleanup"), "Ardour");
+	checker.set_wmclass (X_("ardour_cleanup"), "Ardour");
 	checker.set_position (Gtk::WIN_POS_MOUSE);
 
 	switch (checker.run()) {

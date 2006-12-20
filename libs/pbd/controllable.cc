@@ -18,8 +18,10 @@ Controllable::Controllable (std::string name)
 XMLNode&
 Controllable::get_state ()
 {
-	XMLNode* node = new XMLNode (_name);
+	XMLNode* node = new XMLNode (X_("controllable"));
 	char buf[64];
+
+	node->add_property (X_("name"), _name); // not reloaded from XML state, just there to look at
 	_id.print (buf, sizeof (buf));
 	node->add_property (X_("id"), buf);
 	return *node;

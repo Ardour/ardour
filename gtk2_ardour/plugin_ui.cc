@@ -102,6 +102,7 @@ PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, bool scr
 
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("PluginEditor");
+	set_wmclass (X_("ardour_plugin_editor"), "Ardour");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window*> (this)));

@@ -204,7 +204,7 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	add (global_vpacker);
 	set_name ("MixerWindow");
 	set_title (_("ardour: mixer"));
-	set_wmclass (_("ardour_mixer"), "Ardour");
+	set_wmclass (X_("ardour_mixer"), "Ardour");
 
 	add_accel_group (ActionManager::ui_manager->get_accel_group());
 
