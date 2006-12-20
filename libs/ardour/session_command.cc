@@ -9,13 +9,14 @@
 #include <ardour/audiosource.h>
 #include <ardour/audioregion.h>
 #include <pbd/error.h>
+#include <pbd/id.h>
 #include <pbd/statefuldestructible.h>
+#include <pbd/failed_constructor.h>
 
 using namespace PBD;
+using namespace ARDOUR;
 
 #include "i18n.h"
-
-namespace ARDOUR {
 
 void Session::register_with_memento_command_factory(PBD::ID id, PBD::StatefulThingWithGoingAway *ptr)
 {
@@ -89,106 +90,424 @@ Session::memento_command_factory(XMLNode *n)
 }
 
 Command *
-Session::global_state_command_factory(XMLNode *n)
+Session::global_state_command_factory (const XMLNode& node)
 {
-	error << string_compose (_("cannot reconstitute %1 from XML yet, ignored"), n->name()) << endmsg;
-	return 0 ;
+	const XMLProperty* prop;
+	Command* command = 0;
+
+	if ((prop = node.property ("type")) == 0) {
+		error << _("GlobalRouteStateCommand has no \"type\" node, ignoring") << endmsg;
+		return 0;
+	}
+	
+	try {
+
+		if (prop->value() == "solo") {
+			command = new GlobalSoloStateCommand (*this, node);
+		} else if (prop->value() == "mute") {
+			command = new GlobalMuteStateCommand (*this, node);
+		} else if (prop->value() == "rec-enable") {
+			command = new GlobalRecordEnableStateCommand (*this, node);
+		} else if (prop->value() == "metering") {
+			command = new GlobalMeteringStateCommand (*this, node);
+		} else {
+			error << string_compose (_("unknown type of GlobalRouteStateCommand (%1), ignored"), prop->value()) << endmsg;
+		}
+	}
+
+	catch (failed_constructor& err) {
+		return 0;
+	}
+
+	return command;
+}
+
+Session::GlobalRouteStateCommand::GlobalRouteStateCommand (Session& s, void* p)
+	: sess (s), src (p)
+{
+}
+
+Session::GlobalRouteStateCommand::GlobalRouteStateCommand (Session& s, const XMLNode& node)
+	: sess (s), src (this)
+{
+	if (set_state (node)) {
+		throw failed_constructor ();
+	}
+}
+
+int
+Session::GlobalRouteStateCommand::set_state (const XMLNode& node)
+{
+	GlobalRouteBooleanState states;
+	XMLNodeList nlist;
+	const XMLProperty* prop;
+	XMLNode* child;
+	XMLNodeConstIterator niter;
+	int loop;
+
+	before.clear ();
+	after.clear ();
+	
+	for (loop = 0; loop < 2; ++loop) {
+
+		const char *str;
+
+		if (loop) {
+			str = "after";
+		} else {
+			str = "before";
+		}
+		
+		if ((child = node.child (str)) == 0) {
+			warning << string_compose (_("global route state command has no \"%1\" node, ignoring entire command"), str) << endmsg;
+			return -1;
+		}
+
+		nlist = child->children();
+
+		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+			
+			RouteBooleanState rbs;
+			boost::shared_ptr<Route> route;
+			ID id;
+			
+			prop = (*niter)->property ("id");
+			id = prop->value ();
+			
+			if ((route = sess.route_by_id (id)) == 0) {
+				warning << string_compose (_("cannot find track/bus \"%1\" while rebuilding a global route state command, ignored"), id.to_s()) << endmsg;
+				continue;
+			}
+			
+			rbs.first = boost::weak_ptr<Route> (route);
+			
+			prop = (*niter)->property ("yn");
+			rbs.second = (prop->value() == "1");
+			
+			if (loop) {
+				after.push_back (rbs);
+			} else {
+				before.push_back (rbs);
+			}
+		}
+	}
+
+	return 0;
+}
+
+XMLNode&
+Session::GlobalRouteStateCommand::get_state ()
+{
+	XMLNode* node = new XMLNode (X_("GlobalRouteStateCommand"));
+	XMLNode* nbefore = new XMLNode (X_("before"));
+	XMLNode* nafter = new XMLNode (X_("after"));
+
+	for (Session::GlobalRouteBooleanState::iterator x = before.begin(); x != before.end(); ++x) {
+		XMLNode* child = new XMLNode ("s");
+		boost::shared_ptr<Route> r = x->first.lock();
+
+		if (r) {
+			child->add_property (X_("id"), r->id().to_s());
+			child->add_property (X_("yn"), (x->second ? "1" : "0"));
+			nbefore->add_child_nocopy (*child);
+		}
+	}
+
+	for (Session::GlobalRouteBooleanState::iterator x = after.begin(); x != after.end(); ++x) {
+		XMLNode* child = new XMLNode ("s");
+		boost::shared_ptr<Route> r = x->first.lock();
+
+		if (r) {
+			child->add_property (X_("id"), r->id().to_s());
+			child->add_property (X_("yn"), (x->second ? "1" : "0"));
+			nafter->add_child_nocopy (*child);
+		}
+	}
+
+	node->add_child_nocopy (*nbefore);
+	node->add_child_nocopy (*nafter);
+
+	return *node;
 }
 
 // solo
+
 Session::GlobalSoloStateCommand::GlobalSoloStateCommand(Session &sess, void *src)
-    : sess(sess), src(src)
+	: GlobalRouteStateCommand (sess, src)
 {
     after = before = sess.get_global_route_boolean(&Route::soloed);
 }
-void Session::GlobalSoloStateCommand::mark()
+
+Session::GlobalSoloStateCommand::GlobalSoloStateCommand (Session& sess, const XMLNode& node)
+	: Session::GlobalRouteStateCommand (sess, node)
+{
+}
+
+void 
+Session::GlobalSoloStateCommand::mark()
 {
     after = sess.get_global_route_boolean(&Route::soloed);
 }
-void Session::GlobalSoloStateCommand::operator()()
+
+void 
+Session::GlobalSoloStateCommand::operator()()
 {
     sess.set_global_solo(after, src);
 }
-void Session::GlobalSoloStateCommand::undo()
+
+void 
+Session::GlobalSoloStateCommand::undo()
 {
     sess.set_global_solo(before, src);
 }
-XMLNode &Session::GlobalSoloStateCommand::get_state()
+
+XMLNode&
+Session::GlobalSoloStateCommand::get_state()
 {
-    XMLNode *node = new XMLNode("GlobalSoloStateCommand");
-    return *node;
+	XMLNode& node = GlobalRouteStateCommand::get_state();
+	node.add_property ("type", "solo");
+	return node;
 }
 
 // mute
 Session::GlobalMuteStateCommand::GlobalMuteStateCommand(Session &sess, void *src)
-    : sess(sess), src(src)
+	: GlobalRouteStateCommand (sess, src)
 {
     after = before = sess.get_global_route_boolean(&Route::muted);
 }
-void Session::GlobalMuteStateCommand::mark()
+
+Session::GlobalMuteStateCommand::GlobalMuteStateCommand (Session& sess, const XMLNode& node)
+	: Session::GlobalRouteStateCommand (sess, node)
 {
-    after = sess.get_global_route_boolean(&Route::muted);
 }
-void Session::GlobalMuteStateCommand::operator()()
+
+void 
+Session::GlobalMuteStateCommand::mark()
 {
-    sess.set_global_mute(after, src);
+	after = sess.get_global_route_boolean(&Route::muted);
 }
-void Session::GlobalMuteStateCommand::undo()
+
+void 
+Session::GlobalMuteStateCommand::operator()()
 {
-    sess.set_global_mute(before, src);
+	sess.set_global_mute(after, src);
 }
-XMLNode &Session::GlobalMuteStateCommand::get_state()
+
+void 
+Session::GlobalMuteStateCommand::undo()
 {
-    XMLNode *node = new XMLNode("GlobalMuteStateCommand");
-    return *node;
+	sess.set_global_mute(before, src);
+}
+
+XMLNode&
+Session::GlobalMuteStateCommand::get_state()
+{
+	XMLNode& node = GlobalRouteStateCommand::get_state();
+	node.add_property ("type", "mute");
+	return node;
 }
 
 // record enable
 Session::GlobalRecordEnableStateCommand::GlobalRecordEnableStateCommand(Session &sess, void *src) 
-    : sess(sess), src(src)
+	: GlobalRouteStateCommand (sess, src)
 {
-    after = before = sess.get_global_route_boolean(&Route::record_enabled);
+	after = before = sess.get_global_route_boolean(&Route::record_enabled);
 }
-void Session::GlobalRecordEnableStateCommand::mark()
+
+Session::GlobalRecordEnableStateCommand::GlobalRecordEnableStateCommand (Session& sess, const XMLNode& node)
+	: Session::GlobalRouteStateCommand (sess, node)
 {
-    after = sess.get_global_route_boolean(&Route::record_enabled);
 }
-void Session::GlobalRecordEnableStateCommand::operator()()
+
+void 
+Session::GlobalRecordEnableStateCommand::mark()
 {
-    sess.set_global_record_enable(after, src);
+	after = sess.get_global_route_boolean(&Route::record_enabled);
 }
-void Session::GlobalRecordEnableStateCommand::undo()
+
+void 
+Session::GlobalRecordEnableStateCommand::operator()()
 {
-    sess.set_global_record_enable(before, src);
+	sess.set_global_record_enable(after, src);
 }
-XMLNode &Session::GlobalRecordEnableStateCommand::get_state()
+
+void 
+Session::GlobalRecordEnableStateCommand::undo()
 {
-    XMLNode *node = new XMLNode("GlobalRecordEnableStateCommand");
-    return *node;
+	sess.set_global_record_enable(before, src);
+}
+
+XMLNode& 
+Session::GlobalRecordEnableStateCommand::get_state()
+{
+	XMLNode& node = GlobalRouteStateCommand::get_state();
+	node.add_property ("type", "rec-enable");
+	return node;
 }
 
 // metering
-Session::GlobalMeteringStateCommand::GlobalMeteringStateCommand(Session &sess, void *src) 
-    : sess(sess), src(src)
+Session::GlobalMeteringStateCommand::GlobalMeteringStateCommand(Session &s, void *p) 
+	: sess (s), src (p)
 {
-    after = before = sess.get_global_route_metering();
-}
-void Session::GlobalMeteringStateCommand::mark()
-{
-    after = sess.get_global_route_metering();
-}
-void Session::GlobalMeteringStateCommand::operator()()
-{
-    sess.set_global_route_metering(after, src);
-}
-void Session::GlobalMeteringStateCommand::undo()
-{
-    sess.set_global_route_metering(before, src);
-}
-XMLNode &Session::GlobalMeteringStateCommand::get_state()
-{
-    XMLNode *node = new XMLNode("GlobalMeteringStateCommand");
-    return *node;
+	after = before = sess.get_global_route_metering();
 }
 
-} // namespace ARDOUR
+Session::GlobalMeteringStateCommand::GlobalMeteringStateCommand (Session& s, const XMLNode& node)
+	: sess (s), src (this)
+{
+	if (set_state (node)) {
+		throw failed_constructor();
+	}
+}
+
+void 
+Session::GlobalMeteringStateCommand::mark()
+{
+	after = sess.get_global_route_metering();
+}
+
+void 
+Session::GlobalMeteringStateCommand::operator()()
+{
+	sess.set_global_route_metering(after, src);
+}
+
+void 
+Session::GlobalMeteringStateCommand::undo()
+{
+	sess.set_global_route_metering(before, src);
+}
+
+XMLNode&
+Session::GlobalMeteringStateCommand::get_state()
+{
+	XMLNode* node = new XMLNode (X_("GlobalRouteStateCommand"));
+	XMLNode* nbefore = new XMLNode (X_("before"));
+	XMLNode* nafter = new XMLNode (X_("after"));
+
+	for (Session::GlobalRouteMeterState::iterator x = before.begin(); x != before.end(); ++x) {
+		XMLNode* child = new XMLNode ("s");
+		boost::shared_ptr<Route> r = x->first.lock();
+
+		if (r) {
+			child->add_property (X_("id"), r->id().to_s());
+
+			const char* meterstr;
+			
+			switch (x->second) {
+			case MeterInput:
+				meterstr = X_("input");
+				break;
+			case MeterPreFader:
+				meterstr = X_("pre");
+				break;
+			case MeterPostFader:
+				meterstr = X_("post");
+				break;
+			}
+
+			child->add_property (X_("meter"), meterstr);
+			nbefore->add_child_nocopy (*child);
+		}
+	}
+
+	for (Session::GlobalRouteMeterState::iterator x = after.begin(); x != after.end(); ++x) {
+		XMLNode* child = new XMLNode ("s");
+		boost::shared_ptr<Route> r = x->first.lock();
+
+		if (r) {
+			child->add_property (X_("id"), r->id().to_s());
+
+			const char* meterstr;
+			
+			switch (x->second) {
+			case MeterInput:
+				meterstr = X_("input");
+				break;
+			case MeterPreFader:
+				meterstr = X_("pre");
+				break;
+			case MeterPostFader:
+				meterstr = X_("post");
+				break;
+			}
+
+			child->add_property (X_("meter"), meterstr);
+			nafter->add_child_nocopy (*child);
+		}
+	}
+
+	node->add_child_nocopy (*nbefore);
+	node->add_child_nocopy (*nafter);
+
+	node->add_property ("type", "metering");
+
+	return *node;
+}
+
+int
+Session::GlobalMeteringStateCommand::set_state (const XMLNode& node)
+{
+	GlobalRouteBooleanState states;
+	XMLNodeList nlist;
+	const XMLProperty* prop;
+	XMLNode* child;
+	XMLNodeConstIterator niter;
+	int loop;
+
+	before.clear ();
+	after.clear ();
+	
+	for (loop = 0; loop < 2; ++loop) {
+
+		const char *str;
+
+		if (loop) {
+			str = "after";
+		} else {
+			str = "before";
+		}
+		
+		if ((child = node.child (str)) == 0) {
+			warning << string_compose (_("global route meter state command has no \"%1\" node, ignoring entire command"), str) << endmsg;
+			return -1;
+		}
+
+		nlist = child->children();
+
+		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+			
+			RouteMeterState rms;
+			boost::shared_ptr<Route> route;
+			ID id;
+			
+			prop = (*niter)->property ("id");
+			id = prop->value ();
+			
+			if ((route = sess.route_by_id (id)) == 0) {
+				warning << string_compose (_("cannot find track/bus \"%1\" while rebuilding a global route state command, ignored"), id.to_s()) << endmsg;
+				continue;
+			}
+			
+			rms.first = boost::weak_ptr<Route> (route);
+			
+			prop = (*niter)->property ("meter");
+
+			if (prop->value() == X_("pre")) {
+				rms.second = MeterPreFader;
+			} else if (prop->value() == X_("post")) {
+				rms.second = MeterPostFader;
+			} else {
+				rms.second = MeterInput;
+			}
+			
+			if (loop) {
+				after.push_back (rms);
+			} else {
+				before.push_back (rms);
+			}
+		}
+	}
+
+	return 0;
+}

@@ -107,9 +107,9 @@ class Session : public PBD::StatefulDestructible
 
 {
   private:
-	typedef std::pair<boost::shared_ptr<Route>,bool> RouteBooleanState;
+	typedef std::pair<boost::weak_ptr<Route>,bool> RouteBooleanState;
 	typedef vector<RouteBooleanState> GlobalRouteBooleanState;
-	typedef std::pair<boost::shared_ptr<Route>,MeterPoint> RouteMeterState;
+	typedef std::pair<boost::weak_ptr<Route>,MeterPoint> RouteMeterState;
 	typedef vector<RouteMeterState> GlobalRouteMeterState;
 
   public:
@@ -766,58 +766,72 @@ class Session : public PBD::StatefulDestructible
 	Command* memento_command_factory(XMLNode* n);
         void register_with_memento_command_factory(PBD::ID, PBD::StatefulThingWithGoingAway*);
 
-	Command* global_state_command_factory (XMLNode* n);
+	Command* global_state_command_factory (const XMLNode& n);
 
-        class GlobalSoloStateCommand : public Command
+	class GlobalRouteStateCommand : public Command
+	{
+	  public:
+		GlobalRouteStateCommand (Session&, void*);
+		GlobalRouteStateCommand (Session&, const XMLNode& node);
+		int set_state (const XMLNode&);
+		XMLNode& get_state ();
+
+	  protected:
+		GlobalRouteBooleanState before, after;
+		Session& sess;
+		void* src;
+		
+	};
+
+        class GlobalSoloStateCommand : public GlobalRouteStateCommand
         {
-            GlobalRouteBooleanState before, after;
-            Session &sess;
-            void *src;
-        public:
-            GlobalSoloStateCommand(Session &, void *src);
-            void operator()();
-            void undo();
-            XMLNode &get_state();
-            void mark();
+	  public:
+		GlobalSoloStateCommand (Session &, void *src);
+		GlobalSoloStateCommand (Session&, const XMLNode&);
+		void operator()(); //redo
+		void undo();
+		XMLNode &get_state();
+		void mark();
         };
 
-        class GlobalMuteStateCommand : public Command
+        class GlobalMuteStateCommand : public GlobalRouteStateCommand
         {
-            GlobalRouteBooleanState before, after;
-            Session &sess;
-            void *src;
-        public:
-            GlobalMuteStateCommand(Session &, void *src);
-            void operator()();
-            void undo();
-            XMLNode &get_state();
-            void mark();
+	  public:
+		GlobalMuteStateCommand(Session &, void *src);
+		GlobalMuteStateCommand (Session&, const XMLNode&);
+		void operator()(); // redo
+		void undo();
+		XMLNode &get_state();
+		void mark();
         };
 
-        class GlobalRecordEnableStateCommand : public Command
+        class GlobalRecordEnableStateCommand : public GlobalRouteStateCommand
         {
-            GlobalRouteBooleanState before, after;
-            Session &sess;
-            void *src;
-        public:
-            GlobalRecordEnableStateCommand(Session &, void *src);
-            void operator()();
-            void undo();
-            XMLNode &get_state();
-            void mark();
+	  public:
+		GlobalRecordEnableStateCommand(Session &, void *src);
+		GlobalRecordEnableStateCommand (Session&, const XMLNode&);
+		void operator()(); // redo
+		void undo();
+		XMLNode &get_state();
+		void mark();
         };
 
         class GlobalMeteringStateCommand : public Command
         {
-            GlobalRouteMeterState before, after;
-            Session &sess;
-            void *src;
-        public:
-            GlobalMeteringStateCommand(Session &, void *src);
-            void operator()();
-            void undo();
-            XMLNode &get_state();
-            void mark();
+	  public:
+		GlobalMeteringStateCommand(Session &, void *src);
+		GlobalMeteringStateCommand (Session&, const XMLNode&);
+		void operator()();
+		void undo();
+		XMLNode &get_state();
+		int set_state (const XMLNode&);
+		void mark();
+
+	  protected:
+		Session& sess;
+		void* src;
+		GlobalRouteMeterState before;
+		GlobalRouteMeterState after;
         };
 
 	/* clicking */

@@ -2161,7 +2161,12 @@ void
 Session::set_global_route_metering (GlobalRouteMeterState s, void* arg) 
 {
 	for (GlobalRouteMeterState::iterator i = s.begin(); i != s.end(); ++i) {
-		i->first->set_meter_point (i->second, arg);
+
+		boost::shared_ptr<Route> r = (i->first.lock());
+
+		if (r) {
+			r->set_meter_point (i->second, arg);
+		}
 	}
 }
 
@@ -2169,8 +2174,13 @@ void
 Session::set_global_route_boolean (GlobalRouteBooleanState s, void (Route::*method)(bool, void*), void* arg)
 {
 	for (GlobalRouteBooleanState::iterator i = s.begin(); i != s.end(); ++i) {
-		Route* r = i->first.get();
-		(r->*method) (i->second, arg);
+
+		boost::shared_ptr<Route> r = (i->first.lock());
+
+		if (r) {
+			Route* rp = r.get();
+			(rp->*method) (i->second, arg);
+		}
 	}
 }
 
@@ -2971,11 +2981,9 @@ Session::restore_history (string snapshot_name)
 				    ut->add_command(c);
 			    }
 			    
-		    } else if (n->name() == "GlobalRecordEnableStateCommand" ||
-			       n->name() == "GlobalSoloStateCommand" || 
-			       n->name() == "GlobalMuteStateCommand") {
+		    } else if (n->name() == X_("GlobalRouteStateCommand")) {
 
-			    if ((c = global_state_command_factory (n))) {
+			    if ((c = global_state_command_factory (*n))) {
 				    ut->add_command (c);
 			    }
 			    
