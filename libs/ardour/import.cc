@@ -215,8 +215,13 @@ Session::import_audiofile (import_status& status)
 			sources.push_back(newfiles[n]);
 		}
 
-		boost::shared_ptr<AudioRegion> r (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (sources, 0, newfiles[0]->length(), region_name_from_path (basepath, true),
-														   0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile))));
+		bool strip_paired_suffixes = (newfiles.size() > 1);
+
+		boost::shared_ptr<AudioRegion> r (boost::dynamic_pointer_cast<AudioRegion> 
+						  (RegionFactory::create (sources, 0, 
+									  newfiles[0]->length(), 
+									  region_name_from_path (basepath, strip_paired_suffixes),
+									  0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile))));
 		
 		status.new_regions.push_back (r);
 
@@ -229,11 +234,14 @@ Session::import_audiofile (import_status& status)
 
 			/* The sources had zero-length when created, which means that the Session
 			   did not bother to create whole-file AudioRegions for them. Do it now.
+
+			   Note: leave any trailing paired indicators from the file names as part
+			   of the region name.
 			*/
 		
 			status.new_regions.push_back (boost::dynamic_pointer_cast<AudioRegion> 
 						      (RegionFactory::create (boost::static_pointer_cast<Source> (newfiles[n]), 0, newfiles[n]->length(), 
-									      region_name_from_path (newfiles[n]->name(), true),
+									      region_name_from_path (newfiles[n]->name(), false),
 									      0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile | AudioRegion::Import))));
 		}
 	}
