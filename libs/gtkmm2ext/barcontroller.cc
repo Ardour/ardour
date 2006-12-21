@@ -281,22 +281,18 @@ BarController::expose (GdkEventExpose* event)
 			
 			if (parent) {
 				win->draw_rectangle (parent->get_style()->get_fg_gc (parent->get_state()),
-						    true,
-						    0, 0, darea.get_width(), darea.get_height());
+						     true,
+						     0, 0, darea.get_width(), darea.get_height());
 			}
-		} else {
-			win->draw_rectangle (get_style()->get_bg_gc (get_state()),
-					    true,
-					    0, 0, darea.get_width(), darea.get_height());
-		}
 
-		if (fract == 0.0) {
-			win->draw_rectangle (get_style()->get_fg_gc (get_state()),
-					    true, x1, 1, 2, darea.get_height() - 2);
 		} else {
-			win->draw_rectangle (get_style()->get_fg_gc (get_state()),
-					    true, x1 - 1, 1, 3, darea.get_height() - 2);
+
+			win->draw_rectangle (get_style()->get_bg_gc (get_state()),
+					     true,
+					     0, 0, darea.get_width(), darea.get_height());
 		}
+		
+		win->draw_line (get_style()->get_base_gc (get_state()), x1, 0, x1, darea.get_height());
 		break;
 
 	case CenterOut:
