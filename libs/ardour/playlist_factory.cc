@@ -89,7 +89,6 @@ PlaylistFactory::create (boost::shared_ptr<const Playlist> old, nframes_t start,
 		pl->set_region_ownership ();
 	}
 
-
 	/* this factory method does NOT notify others */
 
 	return pl;

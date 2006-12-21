@@ -122,11 +122,13 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, string namestr, boo
 Playlist::Playlist (boost::shared_ptr<const Playlist> other, nframes_t start, nframes_t cnt, string str, bool hide)
 	: _name (str), _session (other->_session), _orig_diskstream_id(other->_orig_diskstream_id)
 {
-	RegionLock rlock2 (&((Playlist&)other));
-	
+	RegionLock rlock2 (const_cast<Playlist*> (other.get()));
+
 	nframes_t end = start + cnt - 1;
 
 	init (hide);
+
+	in_set_state++;
 
 	for (RegionList::const_iterator i = other->regions.begin(); i != other->regions.end(); i++) {
 
@@ -178,6 +180,8 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, nframes_t start, nf
 		add_region_internal (new_region, position);
 	}
 	
+	in_set_state--;
+
 	/* this constructor does NOT notify others (session) */
 }
 

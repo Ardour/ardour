@@ -121,6 +121,8 @@ BarController::button_press (GdkEventButton* ev)
 bool
 BarController::button_release (GdkEventButton* ev)
 {
+	double fract;
+
 	switch (ev->button) {
 	case 1:
 		if (switch_on_release) {
@@ -150,16 +152,10 @@ BarController::button_release (GdkEventButton* ev)
 		break;
 
 	case 2:
-		if (true) { // XXX FIX ME
-			/* relax */
-		} else {
-			double fract;
-			fract = ev->x / (darea.get_width() - 2.0);
-			adjustment.set_value (adjustment.get_lower() + 
-					      fract * (adjustment.get_upper() - adjustment.get_lower()));
-		}
-		return true;
-
+		fract = ev->x / (darea.get_width() - 2.0);
+		adjustment.set_value (adjustment.get_lower() + fract * (adjustment.get_upper() - adjustment.get_lower()));
+		break;
+		
 	case 3:
 		return false;
 		

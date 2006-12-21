@@ -1181,7 +1181,6 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 
 	playlist = ds->playlist();
 
-
 	TimeSelection time (selection.time);
 	float speed = ds->speed();
 	if (speed != 1.0f) {

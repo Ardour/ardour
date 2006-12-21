@@ -761,8 +761,9 @@ TimeAxisView::get_selection_rect (uint32_t id)
 
 	for (list<SelectionRect*>::iterator i = free_selection_rects.begin(); i != free_selection_rects.end(); ++i) {
 		if ((*i)->id == id) {
+			SelectionRect* ret = (*i);
 			free_selection_rects.erase (i);
-			return (*i);
+			return ret;
 		}
 	}
 

@@ -971,11 +971,11 @@ style "pan_slider"
 
 	# used to draw the triangular indicators 
 
-	base[NORMAL] = { 0.803, 0.792, 0.619 }
-	base[ACTIVE] =  { 0.803, 0.792, 0.619 }
+	base[NORMAL] = { 0.80, 0.80, 0.80 }
+	base[ACTIVE] =  { 0.80, 0.80, 0.80 }
 	base[INSENSITIVE] = {0.32, 0.39, 0.45 } # matches default_base
-	base[SELECTED] = { 0.803, 0.792, 0.619 }
-	base[PRELIGHT] = { 0.803, 0.792, 0.619 }
+	base[SELECTED] = { 0.80, 0.80, 0.80 }
+	base[PRELIGHT] = { 0.80, 0.80, 0.80 }
 
 }
 
