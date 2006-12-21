@@ -45,6 +45,7 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace sigc;
 
+const int PannerUI::pan_bar_height = 30;
 
 PannerUI::PannerUI (boost::shared_ptr<IO> io, Session& s)
 	: _io (io),
@@ -219,7 +220,7 @@ PannerUI::set_width (Width w)
 			panner->set_size_request (61, 61);
 		}
 		for (vector<PannerBar*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
-				(*i)->set_size_request (61, 15);
+			(*i)->set_size_request (61, pan_bar_height);
 		}
 		panning_link_button.set_label (_("link"));
 		break;
@@ -229,7 +230,7 @@ PannerUI::set_width (Width w)
 			panner->set_size_request (31, 61);
 		}
 		for (vector<PannerBar*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
-				(*i)->set_size_request (31, 15);
+				(*i)->set_size_request (31, pan_bar_height);
 		}
 		panning_link_button.set_label (_("L"));
 		break;
@@ -318,7 +319,6 @@ PannerUI::setup_pan ()
 			
 			bc->set_name ("PanSlider");
 			bc->set_shadow_type (Gtk::SHADOW_NONE);
-			bc->set_style (BarController::Line);
 
 			bc->StartGesture.connect (bind (mem_fun (*_io, &IO::start_pan_touch), (uint32_t) asz));
 			bc->StopGesture.connect (bind (mem_fun (*_io, &IO::end_pan_touch), (uint32_t) asz));
@@ -333,14 +333,14 @@ PannerUI::setup_pan ()
 			pan_bars.push_back (bc);
 			switch (_width) {
 			case Wide:
-				pan_bars.back()->set_size_request (61, 15);
+				bc->set_size_request (61, pan_bar_height);
 				break;
 			case Narrow:
-				pan_bars.back()->set_size_request (31, 15);
+				bc->set_size_request (31, pan_bar_height);
 				break;
 			}
 
-			pan_bar_packer.pack_start (*pan_bars.back(), true, true);
+			pan_bar_packer.pack_start (*bc, false, false);
 		}
 
 		/* now that we actually have the pan bars,

@@ -9,6 +9,8 @@ class PannerBar : public Gtkmm2ext::BarController
 	PannerBar (Gtk::Adjustment& adj, PBD::Controllable&);
 	~PannerBar ();
 
+	void on_size_request (Gtk::Requisition*);
+
   protected:
 	bool expose (GdkEventExpose*);
 	bool button_press (GdkEventButton*);

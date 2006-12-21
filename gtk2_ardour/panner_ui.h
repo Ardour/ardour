@@ -78,6 +78,8 @@ class PannerUI : public Gtk::HBox
 	bool ignore_toggle;
 	bool in_pan_update;
 
+	static const int pan_bar_height;
+
 	Panner2d*   panner;
 
 	Gtk::VBox           pan_bar_packer;

@@ -4,7 +4,7 @@
 
 using namespace std;
 
-static const int triangle_size = 9;
+static const int triangle_size = 7;
 
 static void
 null_label_callback (char* buf, unsigned int bufsize)
@@ -37,8 +37,8 @@ PannerBar::expose (GdkEventExpose* ev)
 
 	GdkPoint points[3];
 
+	// left
 	
-
 	points[0].x = 0;
 	points[0].y = 0;
 
@@ -50,16 +50,20 @@ PannerBar::expose (GdkEventExpose* ev)
 
 	gdk_draw_polygon (win->gobj(), gc->gobj(), true, points, 3);
 
+	// center
+
 	points[0].x = darea.get_width()/2 - (triangle_size - 2);
 	points[0].y = 0;
 
 	points[1].x = darea.get_width()/2 + (triangle_size - 2);
 	points[1].y = 0;
 	
-	points[2].x = darea.get_width()/2;
-	points[2].y = triangle_size - 2;
+	points[2].x = darea.get_width()/2 - 1;
+	points[2].y = triangle_size - 3;
 
-	gdk_draw_polygon (win->gobj(), gc->gobj(), true, points, 3);
+	gdk_draw_polygon (win->gobj(), gc->gobj(), true, points, 3); 
+
+	// right
 
 	points[0].x = darea.get_width() - triangle_size;
 	points[0].y = 0;
@@ -110,4 +114,11 @@ PannerBar::button_release (GdkEventButton* ev)
 	}
 
 	return BarController::button_release (ev);
+}
+
+void
+PannerBar::on_size_request (Gtk::Requisition* req)
+{
+	req->width = -1;
+	req->height = 50;
 }
