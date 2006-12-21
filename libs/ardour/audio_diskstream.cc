@@ -1551,7 +1551,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 	} else {
 
 		string whole_file_region_name;
-		whole_file_region_name = region_name_from_path (channels[0].write_source->name());
+		whole_file_region_name = region_name_from_path (channels[0].write_source->name(), true);
 
 		/* Register a new region with the Session that
 		   describes the entire source. Do this first
@@ -2214,7 +2214,7 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 	
 	try {
 		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (pending_sources, 0, first_fs->length(),
-											  region_name_from_path (first_fs->name()), 
+											  region_name_from_path (first_fs->name(), true), 
 											  0, AudioRegion::Flag (AudioRegion::DefaultFlags|AudioRegion::Automatic|AudioRegion::WholeFile)));
 		region->special_set_position (0);
 	}
@@ -2228,7 +2228,7 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 	}
 
 	try {
-		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (pending_sources, 0, first_fs->length(), region_name_from_path (first_fs->name())));
+		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (pending_sources, 0, first_fs->length(), region_name_from_path (first_fs->name(), true)));
 	}
 
 	catch (failed_constructor& err) {

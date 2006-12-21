@@ -566,7 +566,7 @@ class Session : public PBD::StatefulDestructible
 	    bool multichan;
 	    bool sample_convert;
 	    volatile bool freeze;
-	    string pathname;
+	    std::vector<Glib::ustring> paths;
 	    
 	    /* result */
 	    std::vector<boost::shared_ptr<AudioRegion> > new_regions;

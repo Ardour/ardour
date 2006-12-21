@@ -26,7 +26,7 @@
 #include <pbd/basename.h>
 
 #include <ardour/audioregion.h>
-#include <ardour/audiosource.h>
+#include <ardour/audiofilesource.h>
 #include <ardour/session_region.h>
 
 #include <gtkmm2ext/stop_signal.h>
@@ -131,8 +131,15 @@ Editor::add_audio_region_to_region_display (boost::shared_ptr<AudioRegion> regio
 
 			if (region->whole_file()) {
 				str = ".../";
-				str += PBD::basename_nosuffix (region->source()->name());
-				
+
+				boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(region->source());
+
+				if (afs) {
+					str += region_name_from_path (afs->path(), region->n_channels() > 1);
+				} else {
+					str += region->source()->name();
+				}
+
 			} else {
 				str = region->name();
 			}

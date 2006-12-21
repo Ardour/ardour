@@ -191,41 +191,10 @@ setup_midi ()
 	return 0;
 }
 
-int
-ARDOUR::init (bool use_vst, bool try_optimization)
+void
+setup_hardware_optimization (bool try_optimization)
 {
         bool generic_mix_functions = true;
-
-	(void) bindtextdomain(PACKAGE, LOCALEDIR);
-
-	PBD::ID::init ();
-
-	lrdf_init();
-	Library = new AudioLibrary;
-
-	Config = new Configuration;
-
-	if (Config->load_state ()) {
-		return -1;
-	}
-
-	Config->set_use_vst (use_vst);
-
-	if (setup_midi ()) {
-		return -1;
-	}
-    
-#ifdef HAVE_LIBLO
-	if (setup_osc ()) {
-		return -1;
-	}
-#endif
-
-#ifdef VST_SUPPORT
-	if (Config->get_use_vst() && fst_init ()) {
-		return -1;
-	}
-#endif
 
 	if (try_optimization) {
 
@@ -260,7 +229,7 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 #endif /* USE_X86_64_ASM */
 		
 		if (use_sse) {
-			cerr << "Enabling SSE optimized routines" << endl;
+			info << "Using SSE optimized routines" << endmsg;
 	
 			// SSE SET
 			Session::compute_peak 			= x86_sse_compute_peak;
@@ -300,6 +269,43 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 		
 		info << "No H/W specific optimizations in use" << endmsg;
 	}
+}
+
+int
+ARDOUR::init (bool use_vst, bool try_optimization)
+{
+	(void) bindtextdomain(PACKAGE, LOCALEDIR);
+
+	PBD::ID::init ();
+
+	lrdf_init();
+	Library = new AudioLibrary;
+
+	Config = new Configuration;
+
+	if (Config->load_state ()) {
+		return -1;
+	}
+
+	Config->set_use_vst (use_vst);
+
+	if (setup_midi ()) {
+		return -1;
+	}
+    
+#ifdef HAVE_LIBLO
+	if (setup_osc ()) {
+		return -1;
+	}
+#endif
+
+#ifdef VST_SUPPORT
+	if (Config->get_use_vst() && fst_init ()) {
+		return -1;
+	}
+#endif
+
+	setup_hardware_optimization (try_optimization);
 
 	/* singleton - first object is "it" */
 	new PluginManager ();

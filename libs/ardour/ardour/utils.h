@@ -34,7 +34,7 @@
 class XMLNode;
 
 void elapsed_time_to_str (char *buf, uint32_t seconds);
-std::string legalize_for_path (std::string str);
+Glib::ustring legalize_for_path (Glib::ustring str);
 std::ostream& operator<< (std::ostream& o, const ARDOUR::BBT_Time& bbt);
 XMLNode* find_named_node (const XMLNode& node, std::string name);
 std::string placement_as_string (ARDOUR::Placement);
@@ -52,10 +52,11 @@ int cmp_nocase (const std::string& s, const std::string& s2);
 
 int tokenize_fullpath (std::string fullpath, std::string& path, std::string& name);
 
-int touch_file(std::string path);
+int touch_file(Glib::ustring path);
 
-std::string region_name_from_path (std::string path);
-std::string path_expand (std::string);
+Glib::ustring path_expand (Glib::ustring);
+Glib::ustring region_name_from_path (Glib::ustring path, bool strip_channels);
+bool path_is_paired (Glib::ustring path, Glib::ustring& pair_base);
 
 void compute_equal_power_fades (nframes_t nframes, float* in, float* out);
 

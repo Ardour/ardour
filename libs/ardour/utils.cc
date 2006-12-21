@@ -37,6 +37,7 @@
 #include <pbd/error.h>
 #include <pbd/stacktrace.h>
 #include <pbd/xml++.h>
+#include <pbd/basename.h>
 #include <ardour/utils.h>
 
 #include "i18n.h"
@@ -44,6 +45,7 @@
 using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
+using Glib::ustring;
 
 void
 elapsed_time_to_str (char *buf, uint32_t seconds)
@@ -87,6 +89,24 @@ elapsed_time_to_str (char *buf, uint32_t seconds)
 	}
 }
 
+ustring 
+legalize_for_path (ustring str)
+{
+	ustring::size_type pos;
+	ustring legal_chars = "abcdefghijklmnopqrtsuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_+=: ";
+	ustring legal;
+
+	legal = str;
+	pos = 0;
+
+	while ((pos = legal.find_first_not_of (legal_chars, pos)) != string::npos) {
+		legal.replace (pos, 1, "_");
+		pos += 1;
+	}
+
+	return legal;
+}
+#if 0
 string 
 legalize_for_path (string str)
 {
@@ -104,6 +124,7 @@ legalize_for_path (string str)
 
 	return legal;
 }
+#endif
 
 ostream&
 operator<< (ostream& o, const BBT_Time& bbt)
@@ -177,7 +198,7 @@ tokenize_fullpath (string fullpath, string& path, string& name)
 }
 
 int
-touch_file (string path)
+touch_file (ustring path)
 {
 	int fd = open (path.c_str(), O_RDWR|O_CREAT, 0660);
 	if (fd >= 0) {
@@ -199,10 +220,31 @@ placement_as_string (Placement p)
 	}
 }
 
-string
-region_name_from_path (string path)
+ustring
+region_name_from_path (ustring path, bool strip_channels)
 {
-	string::size_type pos;
+	path = PBD::basename_nosuffix (path);
+
+	if (strip_channels) {
+
+		/* remove any "?R", "?L" or "?[a-z]" channel identifier */
+		
+		ustring::size_type len = path.length();
+		
+		if (len > 3 && (path[len-2] == '%' || path[len-2] == '?' || path[len-2] == '.') && 
+		    (path[len-1] == 'R' || path[len-1] == 'L' || (islower (path[len-1])))) {
+			
+			path = path.substr (0, path.length() - 2);
+		}
+	}
+
+	return path;
+}	
+
+bool
+path_is_paired (ustring path, ustring& pair_base)
+{
+	ustring::size_type pos;
 
  	/* remove filename suffixes etc. */
 	
@@ -210,21 +252,23 @@ region_name_from_path (string path)
 		path = path.substr (0, pos);
 	}
 
-	/* remove any "?R", "?L" or "?[a-z]" channel identifier */
-	
-	string::size_type len = path.length();
+	ustring::size_type len = path.length();
 
-	if (len > 3 && (path[len-2] == '%' || path[len-2] == '?') && 
+	/* look for possible channel identifier: "?R", "%R", ".L" etc. */
+
+	if (len > 3 && (path[len-2] == '%' || path[len-2] == '?' || path[len-2] == '.') && 
 	    (path[len-1] == 'R' || path[len-1] == 'L' || (islower (path[len-1])))) {
 		
-		path = path.substr (0, path.length() - 2);
-	}
+		pair_base = path.substr (0, len-2);
+		return true;
 
-	return path;
-}	
+	} 
 
-string
-path_expand (string path)
+	return false;
+}
+
+ustring
+path_expand (ustring path)
 {
 #ifdef HAVE_WORDEXP
 	/* Handle tilde and environment variable expansion in session path */

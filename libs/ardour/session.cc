@@ -3768,7 +3768,7 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t le
 		/* construct a region to represent the bounced material */
 
 		boost::shared_ptr<Region> aregion = RegionFactory::create (srcs, 0, srcs.front()->length(), 
-									   region_name_from_path (srcs.front()->name()));
+									   region_name_from_path (srcs.front()->name(), true));
 
 		ret = 0;
 	}
