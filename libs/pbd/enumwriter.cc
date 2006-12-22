@@ -18,6 +18,8 @@
     $Id$
 */
 
+#include <stdlib.h>
+
 #include <pbd/enumwriter.h>
 #include <pbd/error.h>
 #include <pbd/compose.h>
@@ -149,6 +151,12 @@ EnumWriter::read_bits (EnumRegistration& er, string str)
 	bool found = false;
 	string::size_type comma;
 
+	/* catch old-style hex numerics */
+
+	if (str.length() > 2 && str[0] == '0' && str[1] == 'x') {
+		return strtol (str.c_str(), (char **) 0, 16);
+	}
+
 	do {
 		
 		comma = str.find_first_of (',');
@@ -181,6 +189,12 @@ EnumWriter::read_distinct (EnumRegistration& er, string str)
 {
 	vector<int>::iterator i;
 	vector<string>::iterator s;
+
+	/* catch old-style hex numerics */
+
+	if (str.length() > 2 && str[0] == '0' && str[1] == 'x') {
+		return strtol (str.c_str(), (char **) 0, 16);
+	}
 
 	for (i = er.values.begin(), s = er.names.begin(); i != er.values.end(); ++i, ++s) {
 		if (str == (*s)) {
