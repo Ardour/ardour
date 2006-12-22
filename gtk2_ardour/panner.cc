@@ -52,10 +52,10 @@ PannerBar::expose (GdkEventExpose* ev)
 
 	// center
 
-	points[0].x = (darea.get_width()/2 - (triangle_size/2)) - 1;
+	points[0].x = (darea.get_width()/2 - triangle_size);
 	points[0].y = 0;
 
-	points[1].x = (darea.get_width()/2 + (triangle_size/2)) - 1;
+	points[1].x = (darea.get_width()/2 + triangle_size) - 1;
 	points[1].y = 0;
 	
 	points[2].x = darea.get_width()/2 - 1;
@@ -65,7 +65,7 @@ PannerBar::expose (GdkEventExpose* ev)
 
 	// right
 
-	points[0].x = (darea.get_width() - triangle_size) - 1;
+	points[0].x = (darea.get_width() - triangle_size);
 	points[0].y = 0;
 
 	points[1].x = darea.get_width();
@@ -99,6 +99,8 @@ PannerBar::button_press (GdkEventButton* ev)
 bool
 PannerBar::button_release (GdkEventButton* ev)
 {
+	drop_grab();
+
 	if (ev->button == 1 && ev->type == GDK_BUTTON_RELEASE && ev->y < 10) {
 		if (ev->x < triangle_size) {
 			adjustment.set_value (adjustment.get_lower());

@@ -20,7 +20,8 @@
 #ifndef __gtkmm2ext_bar_controller_h__
 #define __gtkmm2ext_bar_controller_h__
 
-#include <gtkmm.h>
+#include <gtkmm/frame.h>
+#include <gtkmm/drawingarea.h>
 #include <gtkmm2ext/binding_proxy.h>
 
 namespace ARDOUR {
@@ -90,6 +91,7 @@ class BarController : public Gtk::Frame
 	gint switch_to_spinner ();
 
 	void entry_activated ();
+	void drop_grab ();
 };
 
 

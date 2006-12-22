@@ -70,8 +70,8 @@ BarController::BarController (Gtk::Adjustment& adj,
 
 	darea.signal_expose_event().connect (mem_fun (*this, &BarController::expose));
 	darea.signal_motion_notify_event().connect (mem_fun (*this, &BarController::motion));
-	darea.signal_button_press_event().connect (mem_fun (*this, &BarController::button_press));
-	darea.signal_button_release_event().connect (mem_fun (*this, &BarController::button_release));
+	darea.signal_button_press_event().connect (mem_fun (*this, &BarController::button_press), false);
+	darea.signal_button_release_event().connect (mem_fun (*this, &BarController::button_release), false);
 	darea.signal_scroll_event().connect (mem_fun (*this, &BarController::scroll));
 
 	spinner.signal_activate().connect (mem_fun (*this, &BarController::entry_activated));
@@ -80,6 +80,16 @@ BarController::BarController (Gtk::Adjustment& adj,
 
 	add (darea);
 	show_all ();
+}
+
+void
+BarController::drop_grab ()
+{
+	if (grabbed) {
+		grabbed = false;
+		darea.remove_modal_grab();
+		StopGesture ();
+	}
 }
 
 bool
@@ -93,8 +103,7 @@ BarController::button_press (GdkEventButton* ev)
 	case 1:
 		if (ev->type == GDK_2BUTTON_PRESS) {
 			switch_on_release = true;
-			grabbed = false;
-			darea.remove_modal_grab();
+			drop_grab ();
 		} else {
 			switch_on_release = false;
 			darea.add_modal_grab();
@@ -123,6 +132,8 @@ BarController::button_release (GdkEventButton* ev)
 {
 	double fract;
 
+	drop_grab ();
+	
 	switch (ev->button) {
 	case 1:
 		if (switch_on_release) {
@@ -145,10 +156,6 @@ BarController::button_release (GdkEventButton* ev)
 
 			mouse_control (ev->x, ev->window, scale);
 		}
-		darea.remove_modal_grab();
-		grabbed = false;
-		StopGesture ();
-		grabbed = false;
 		break;
 
 	case 2:
@@ -200,7 +207,7 @@ BarController::motion (GdkEventMotion* ev)
 	double scale;
 	
 	if (!grabbed) {
-		return TRUE;
+		return true;
 	}
 
 	if ((ev->state & (GDK_SHIFT_MASK|GDK_CONTROL_MASK)) == GDK_SHIFT_MASK) {
