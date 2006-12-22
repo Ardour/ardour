@@ -84,12 +84,12 @@ PannerBar::button_press (GdkEventButton* ev)
 {
 	if (ev->button == 1 && ev->type == GDK_BUTTON_PRESS && ev->y < 10) {
 		if (ev->x < triangle_size) {
-			return true;
+			adjustment.set_value (adjustment.get_lower());
 		} else if (ev->x > (darea.get_width() - triangle_size)) {
-			return true;
+			adjustment.set_value (adjustment.get_upper());
 		} else if (ev->x > (darea.get_width()/2 - triangle_size) &&
 			   ev->x < (darea.get_width()/2 + triangle_size)) {
-			return true;
+			adjustment.set_value (adjustment.get_lower() + ((adjustment.get_upper() - adjustment.get_lower()) / 2.0));
 		}
 	}
 
@@ -99,22 +99,6 @@ PannerBar::button_press (GdkEventButton* ev)
 bool
 PannerBar::button_release (GdkEventButton* ev)
 {
-	drop_grab();
-
-	if (ev->button == 1 && ev->type == GDK_BUTTON_RELEASE && ev->y < 10) {
-		if (ev->x < triangle_size) {
-			adjustment.set_value (adjustment.get_lower());
-			return true;
-		} else if (ev->x > (darea.get_width() - triangle_size)) {
-			adjustment.set_value (adjustment.get_upper());
-			return true;
-		} else if (ev->x > (darea.get_width()/2 - triangle_size) &&
-			   ev->x < (darea.get_width()/2 + triangle_size)) {
-			adjustment.set_value (adjustment.get_lower() + ((adjustment.get_upper() - adjustment.get_lower()) / 2.0));
-			return true;
-		}
-	}
-
 	return BarController::button_release (ev);
 }
 

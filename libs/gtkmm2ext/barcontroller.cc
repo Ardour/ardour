@@ -95,6 +95,8 @@ BarController::drop_grab ()
 bool
 BarController::button_press (GdkEventButton* ev)
 {
+	double fract;
+
 	if (binding_proxy.button_press_handler (ev)) {
 		return true;
 	}
@@ -116,6 +118,9 @@ BarController::button_press (GdkEventButton* ev)
 		break;
 
 	case 2:
+		fract = ev->x / (darea.get_width() - 2.0);
+		adjustment.set_value (adjustment.get_lower() + fract * (adjustment.get_upper() - adjustment.get_lower()));
+
 	case 3:
 		break;
 
@@ -130,8 +135,6 @@ BarController::button_press (GdkEventButton* ev)
 bool
 BarController::button_release (GdkEventButton* ev)
 {
-	double fract;
-
 	drop_grab ();
 	
 	switch (ev->button) {
@@ -159,8 +162,6 @@ BarController::button_release (GdkEventButton* ev)
 		break;
 
 	case 2:
-		fract = ev->x / (darea.get_width() - 2.0);
-		adjustment.set_value (adjustment.get_lower() + fract * (adjustment.get_upper() - adjustment.get_lower()));
 		break;
 		
 	case 3:

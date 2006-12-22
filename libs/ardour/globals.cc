@@ -398,8 +398,14 @@ ARDOUR::get_system_data_path ()
 {
 	string path;
 
-	path += DATA_DIR;
-	path += "/ardour2/";
+	char *envvar;
+
+	if ((envvar = getenv ("ARDOUR_DATA_PATH")) != 0) {
+		path = envvar;
+	} else {
+		path += DATA_DIR;
+		path += "/ardour2/";
+	}
 	
 	return path;
 }
@@ -408,9 +414,14 @@ string
 ARDOUR::get_system_module_path ()
 {
 	string path;
+	char *envvar;
 
-	path += MODULE_DIR;
-	path += "/ardour2/";
+	if ((envvar = getenv ("ARDOUR_MODULE_PATH")) != 0) {
+		path = envvar;
+	} else {
+		path += MODULE_DIR;
+		path += "/ardour2/";
+	}
 	
 	return path;
 }
