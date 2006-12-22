@@ -32,6 +32,7 @@
 #include <pbd/basename.h>
 #include <pbd/xml++.h>
 #include <pbd/stacktrace.h>
+#include <pbd/enumwriter.h>
 
 #include <ardour/audioregion.h>
 #include <ardour/session.h>
@@ -601,8 +602,10 @@ AudioRegion::state (bool full)
 	char buf2[64];
 	LocaleGuard lg (X_("POSIX"));
 	
-	snprintf (buf, sizeof (buf), "0x%x", (int) _flags);
-	node.add_property ("flags", buf);
+	// snprintf (buf, sizeof (buf), "0x%x", (int) _flags);
+	// node.add_property ("flags", buf);
+	node.add_property ("flags", enum_2_string (_flags));
+
 	snprintf (buf, sizeof(buf), "%.12g", _scale_amplitude);
 	node.add_property ("scale-gain", buf);
 
@@ -683,7 +686,9 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 	uint32_t old_flags = _flags;
 		
 	if ((prop = node.property ("flags")) != 0) {
-		_flags = Flag (strtol (prop->value().c_str(), (char **) 0, 16));
+		_flags = Flag (string_2_enum (prop->value(), _flags));
+
+		//_flags = Flag (strtol (prop->value().c_str(), (char **) 0, 16));
 
 		_flags = Flag (_flags & ~Region::LeftOfSplit);
 		_flags = Flag (_flags & ~Region::RightOfSplit);

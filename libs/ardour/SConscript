@@ -48,6 +48,7 @@ crossfade.cc
 curve.cc
 cycle_timer.cc
 default_click.cc
+enums.cc
 gain.cc
 gdither.cc
 globals.cc

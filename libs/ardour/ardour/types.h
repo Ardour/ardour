@@ -324,7 +324,7 @@ namespace ARDOUR {
 	};
 
 	enum ShuttleUnits {
-		Percentage,
+ 		Percentage,
 		Semitones
 	};
 

@@ -23,6 +23,7 @@ base_ui.cc
 convert.cc
 command.cc
 controllable.cc
+enumwriter.cc
 dmalloc.cc
 error.cc
 id.cc

@@ -2682,6 +2682,7 @@ Session::add_source (boost::shared_ptr<Source> source)
 			source->GoingAway.connect (sigc::bind (mem_fun (this, &Session::remove_source), boost::weak_ptr<Source> (source)));
 			set_dirty();
 		}
+
 	} 
 }
 

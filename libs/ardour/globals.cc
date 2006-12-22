@@ -274,9 +274,13 @@ setup_hardware_optimization (bool try_optimization)
 int
 ARDOUR::init (bool use_vst, bool try_optimization)
 {
+	extern void setup_enum_writer ();
+
 	(void) bindtextdomain(PACKAGE, LOCALEDIR);
 
 	PBD::ID::init ();
+
+	setup_enum_writer ();
 
 	lrdf_init();
 	Library = new AudioLibrary;

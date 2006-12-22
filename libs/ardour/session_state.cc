@@ -1429,6 +1429,7 @@ Session::load_sources (const XMLNode& node)
 		if ((source = XMLSourceFactory (**niter)) == 0) {
 			error << _("Session: cannot create Source from XML description.") << endmsg;
 		}
+
 	}
 
 	return 0;
