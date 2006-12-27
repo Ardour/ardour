@@ -1,0 +1,35 @@
+# GTK+ Input Method Modules file
+# Automatically generated file, do not edit
+#
+# ModulesPath = /var/root/.gtk-2.0/2.4.0/powerpc-apple-darwin7.6.0/immodules:/var/root/.gtk-2.0/2.4.0/immodules:/var/root/.gtk-2.0/powerpc-apple-darwin7.6.0/immodules:/var/root/.gtk-2.0/immodules:${CWD}/lib/gtk-2.0/2.4.0/powerpc-apple-darwin7.6.0/immodules:${CWD}/lib/gtk-2.0/2.4.0/immodules:${CWD}/lib/gtk-2.0/powerpc-apple-darwin7.6.0/immodules:${CWD}/lib/gtk-2.0/immodules
+#
+"${CWD}/lib/gtk-2.0/2.10.0/immodules/im-am-et.so" 
+"am_et" "Amharic (EZ+)" "gtk20" "${CWD}/share/locale" "am" 
+
+"${CWD}/lib/gtk-2.0/2.10.0/immodules/im-cedilla.so" 
+"cedilla" "Cedilla" "gtk+" "${CWD}/share/locale" "az:ca:co:fr:gv:oc:pt:sq:tr:wa" 
+
+"${CWD}/lib/gtk-2.0/2.10.0/immodules/im-cyrillic-translit.so" 
+"cyrillic_translit" "Cyrillic (Transliterated)" "gtk20" "${CWD}/share/locale" "" 
+
+"${CWD}/lib/gtk-2.0/2.10.0/immodules/im-inuktitut.so" 
+"inuktitut" "Inukitut (Transliterated)" "gtk20" "${CWD}/share/locale" "iu" 
+
+"${CWD}/lib/gtk-2.0/2.10.0/immodules/im-ipa.so" 
+"ipa" "IPA" "gtk20" "${CWD}/share/locale" "" 
+
+"${CWD}/lib/gtk-2.0/2.10.0/immodules/im-thai-broken.so" 
+"thai_broken" "Thai (Broken)" "gtk20" "${CWD}/share/locale" "" 
+
+"${CWD}/lib/gtk-2.0/2.10.0/immodules/im-ti-er.so" 
+"ti_er" "Tigrigna-Eritrean (EZ+)" "gtk20" "${CWD}/share/locale" "ti" 
+
+"${CWD}/lib/gtk-2.0/2.10.0/immodules/im-ti-et.so" 
+"ti_et" "Tigrigna-Ethiopian (EZ+)" "gtk20" "${CWD}/share/locale" "ti" 
+
+"${CWD}/lib/gtk-2.0/2.10.0/immodules/im-viqr.so" 
+"viqr" "Vietnamese (VIQR)" "gtk20" "${CWD}/share/locale" "vi" 
+
+"${CWD}/lib/gtk-2.0/2.10.0/immodules/im-xim.so" 
+"xim" "X Input Method" "gtk20" "${CWD}/share/locale" "ko:ja:th:zh" 
+

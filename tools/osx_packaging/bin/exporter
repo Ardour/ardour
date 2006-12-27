@@ -36,4 +36,7 @@ sed 's|${CWD}|'"$TOP|g" "$TOP/etc/gtk-2.0/gtk.immodules" > "$ETC/gtk.immodules"
 sed 's|${CWD}|'"$TOP|g" "$TOP/etc/gtk-2.0/gdk-pixbuf.loaders" \
     > "$ETC/gdk-pixbuf.loaders"
 
+# to prevent complaining
+mkdir -p "$HOME/.ardour2/templates"
+
 exec "$CWD/ardour" "$@"

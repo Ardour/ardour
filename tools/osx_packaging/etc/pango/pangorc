@@ -1,0 +1,5 @@
+[Pango]
+ModuleFiles = ${HOME}/Library/Application Support/Ardour/pango.modules
+
+[PangoX]
+AliasFiles = ${HOME}/Library/Application Support/Ardour/pangox.aliases

@@ -138,7 +138,7 @@ style "transport_base" = "medium_bold_text"
 
 style "black_mackie_menu_bar" = "medium_bold_text"
 {
-      font_name = "sans bold 12"
+      font_name = "sans bold 11"
       fg[NORMAL] = { 1.0, 1.0, 1.0 }
       bg[NORMAL] = { 0, 0, 0 }
 }
@@ -281,11 +281,6 @@ style "mixer_red_active_button" = "very_small_button"
 style "time_button" = "default_buttons_menus"
 {
 	font_name = "sans 10"
-}
-
-style "default_menus" = "default_buttons_menus"
-{
-	font_name = "sans 11"
 }
 
 style "transport_button"
@@ -999,7 +994,7 @@ widget "*EditModeSelector" style "medium_bold_entry"
 widget "*SnapTypeSelector" style "medium_bold_entry"
 widget "*SnapModeSelector" style "medium_bold_entry"
 widget "*ZoomFocusSelector" style "medium_bold_entry"
-widget "*ArdourContextMenu*" style "default_menus"
+widget "*ArdourContextMenu*" style "default_buttons_menus"
 widget "*EditGroupTitleButton*" style "default_buttons_menus"
 widget "*MixerGroupTitleButton*" style "default_buttons_menus"
 widget "*ErrorLogCloseButton" style "default_buttons_menus"
