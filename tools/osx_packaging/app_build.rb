@@ -3,7 +3,10 @@
 # Ruby script for pulling together a MacOSX app bundle.
 
 # it will be either powerpc or i386
-version = "beta9"
+versionline = `grep -m 1 '^version =' ../../SConstruct`
+version = versionline.split(" = ")[1].chomp().slice(1..-2)
+$stdout.printf("Version is %s\n", version)
+
 arch = `uname -p`.strip()
 libdir = "lib_" + arch
 bindir = "bin_" + arch
@@ -180,7 +183,7 @@ if File.exist?(ppc_libdir) and File.exist?(i386_libdir) then
 
   $stdout.print("\nRunning Playtpus to create Ardour2.app  ...\n");
 
-  `/usr/local/bin/platypus -D -X 'ardour' -a 'Ardour2' -t 'shell' -o 'None' -u 'Paul Davis' -i '/bin/sh' -V '2.0' -s 'ArDr' -I 'org.ardour.Ardour2' -f 'bin' -f 'lib' -i 'Ardour2.icns' -f 'MenuBar.nib' -f 'ProgressWindow.nib' -f 'init' -f 'openDoc' 'script' 'Ardour2.app'`
+  `/usr/local/bin/platypus -D -X 'ardour' -a 'Ardour2' -t 'shell' -o 'None' -u 'Paul Davis' -i '/bin/sh' -V "#{version}" -s 'ArDr' -I 'org.ardour.Ardour2' -f 'bin' -f 'lib' -i 'Ardour2.icns' -f 'MenuBar.nib' -f 'ProgressWindow.nib' -f 'init' -f 'openDoc' 'script' 'Ardour2.app'`
 
   $stdout.print("\nCopying other stuff to Ardour2.app  ...\n");
 
@@ -233,7 +236,7 @@ if File.exist?(ppc_libdir) and File.exist?(i386_libdir) then
   `rm -rf macdist`
   Dir.mkdir("macdist")
   `cp -r README.rtf COPYING Ardour2.app macdist/`
-  dmgname = "Ardour2-#{version}"
+  dmgname = "Ardour-#{version}"
   `rm -f #{dmgname}.dmg`
   $stdout.print("\nCreating DMG\n")
   `hdiutil create -fs HFS+ -volname #{dmgname} -srcfolder macdist #{dmgname}.dmg`
@@ -244,9 +247,10 @@ if File.exist?(ppc_libdir) and File.exist?(i386_libdir) then
 else
   # zip up libdir and bindir
   zipfile = "binlib_"+`uname -p`.strip() + ".zip" 
-  $stdout.print("\nZipping up #{libdir} and #{bindir} into #{zipfile}\n")
-  $stdout.print("Copy #{zipfile} to other platform's osx_packaging dir and run app_build.rb\nthere to complete universal build.\n")
+  $stdout.print("Zipping up #{libdir} and #{bindir} into #{zipfile}...\n")
   `zip -rq #{zipfile} #{libdir} #{bindir}`
+  $stdout.print("Copy #{zipfile} to other platform's osx_packaging dir and run app_build.rb\nthere to complete universal build.\n")
+
 
 end
 

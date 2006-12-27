@@ -154,9 +154,11 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
 
 static bool protocol_filter (const string& str, void *arg)
 {
-	/* Not a dotfile, has a prefix before a period, suffix is "so" */
+	/* Not a dotfile, has a prefix before a period, suffix is "so", or "dylib" */
 	
-	return str[0] != '.' && (str.length() > 3 && str.find (".so") == (str.length() - 3));
+	return str[0] != '.' 
+	  && ((str.length() > 3 && str.find (".so") == (str.length() - 3))
+	      || (str.length() > 6 && str.find (".dylib") == (str.length() - 6)));
 }
 
 void
@@ -180,7 +182,7 @@ ControlProtocolManager::discover_control_protocols (string path)
 	vector<string *> *found;
 	PathScanner scanner;
 
-	// info << string_compose (_("looking for control protocols in %1"), path) << endmsg;
+	info << string_compose (_("looking for control protocols in %1"), path) << endmsg;
 
 	found = scanner (path, protocol_filter, 0, false, true);
 

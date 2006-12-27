@@ -20,6 +20,7 @@ export LANG=`grep '\b'\`defaults read .GlobalPreferences AppleCollationOrder\`_\
 
 export ARDOUR2_UI_RC=ardour2_ui.rc
 export ARDOUR_CONFIG_PATH="$TOP/etc"
+export ARDOUR_MODULE_PATH="$TOP/lib/"
 export ARDOUR_DATA_PATH="$TOP/share"
 export ARDOUR_GLADE_PATH="$TOP/share/ardour2/glade"
 
