@@ -799,6 +799,7 @@ AudioSource::do_build_peak (nframes_t first_frame, nframes_t cnt)
 	int peakfile = -1;
 	int ret = -1;
 	off_t target_length;
+	off_t endpos;
 
 #ifdef DEBUG_PEAK_BUILD
 	cerr << pthread_self() << ": " << _name << ": building peaks for " << first_frame << " to " << first_frame + cnt - 1 << endl;
@@ -857,7 +858,7 @@ AudioSource::do_build_peak (nframes_t first_frame, nframes_t cnt)
 	   it does not cause single-extent allocation even for peakfiles of 
 	   less than BLOCKSIZE bytes.  only call ftruncate if we'll make the file larger.
 	*/
-	off_t endpos = lseek (peakfile, 0, SEEK_END);
+	endpos = lseek (peakfile, 0, SEEK_END);
 		
 	target_length = BLOCKSIZE * ((first_peak_byte + BLOCKSIZE + 1) / BLOCKSIZE);
 
@@ -874,7 +875,7 @@ AudioSource::do_build_peak (nframes_t first_frame, nframes_t cnt)
 		goto out;
 	}
 
-	_peak_byte_max = max(_peak_byte_max, first_peak_byte + sizeof(PeakData)*peaki);
+	_peak_byte_max = max(_peak_byte_max, (off_t) (first_peak_byte + sizeof(PeakData)*peaki));
 
 	ret = 0;
 
