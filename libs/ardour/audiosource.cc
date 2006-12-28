@@ -60,6 +60,7 @@ AudioSource::AudioSource (Session& s, string name)
 	}
 
 	_peaks_built = false;
+	_peak_byte_max = 0;
 	next_peak_clear_should_notify = true;
 	_read_data_count = 0;
 	_write_data_count = 0;
@@ -73,6 +74,7 @@ AudioSource::AudioSource (Session& s, const XMLNode& node)
 	}
 
 	_peaks_built = false;
+	_peak_byte_max = 0;
 	next_peak_clear_should_notify = true;
 	_read_data_count = 0;
 	_write_data_count = 0;
@@ -252,13 +254,13 @@ AudioSource::stop_peak_thread ()
 }
 
 void 
-AudioSource::queue_for_peaks (boost::shared_ptr<AudioSource> source)
+AudioSource::queue_for_peaks (boost::shared_ptr<AudioSource> source, bool notify)
 {
 	if (have_peak_thread) {
 		
 		Glib::Mutex::Lock lm (*pending_peak_sources_lock);
 		
-		source->next_peak_clear_should_notify = true;
+		source->next_peak_clear_should_notify = notify;
 		
 		if (find (pending_peak_sources.begin(),
 			  pending_peak_sources.end(),
@@ -385,8 +387,10 @@ AudioSource::initialize_peakfile (bool newfile, string audio_path)
 				
 				if (!err && stat_file.st_mtime > statbuf.st_mtime){
 					_peaks_built = false;
+					_peak_byte_max = 0;
 				} else {
 					_peaks_built = true;
+					_peak_byte_max = statbuf.st_size;
 				}
 			}
 		}
@@ -488,7 +492,7 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 
 		/* open, read, close */
 
-		if ((peakfile = ::open (peakpath.c_str(), O_RDWR|O_CREAT, 0664)) < 0) {
+		if ((peakfile = ::open (peakpath.c_str(), O_RDONLY, 0664)) < 0) {
 			error << string_compose(_("AudioSource: cannot open peakpath \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
 			return -1;
 		}
@@ -562,7 +566,7 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 
 		/* open ... close during out: handling */
 
-		if ((peakfile = ::open (peakpath.c_str(), O_RDWR|O_CREAT, 0664)) < 0) {
+		if ((peakfile = ::open (peakpath.c_str(), O_RDONLY, 0664)) < 0) {
 			error << string_compose(_("AudioSource: cannot open peakpath \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
 			return 0;
 		}
@@ -773,6 +777,7 @@ AudioSource::build_peaks ()
 		}
 
 		if (pr_signal) {
+			truncate_peakfile();
 			PeaksReady (); /* EMIT SIGNAL */
 		}
 	}
@@ -845,24 +850,31 @@ AudioSource::do_build_peak (nframes_t first_frame, nframes_t cnt)
 		cnt -= frames_read;
 	}
 
-#define BLOCKSIZE (256 * 1024)
-
-	target_length = BLOCKSIZE * ((first_peak_byte + BLOCKSIZE + 1) / BLOCKSIZE);
+#define BLOCKSIZE (128 * 1024)
 
 	/* on some filesystems (ext3, at least) this helps to reduce fragmentation of
 	   the peakfiles. its not guaranteed to do so, and even on ext3 (as of december 2006)
 	   it does not cause single-extent allocation even for peakfiles of 
-	   less than BLOCKSIZE bytes.
+	   less than BLOCKSIZE bytes.  only call ftruncate if we'll make the file larger.
 	*/
+	off_t endpos = lseek (peakfile, 0, SEEK_END);
+		
+	target_length = BLOCKSIZE * ((first_peak_byte + BLOCKSIZE + 1) / BLOCKSIZE);
 
-	ftruncate (peakfile, target_length);
+	if (endpos < target_length) {
+		// XXX - we really shouldn't be doing this for destructive source peaks
+		ftruncate (peakfile, target_length);
+		//cerr << "do build TRUNC: " << peakpath << "  " << target_length << endl;
 
-	/* error doesn't actually matter though, so continue on without testing */
+		/* error doesn't actually matter though, so continue on without testing */
+	}
 
 	if (::pwrite (peakfile, peakbuf, sizeof (PeakData) * peaki, first_peak_byte) != (ssize_t) (sizeof (PeakData) * peaki)) {
 		error << string_compose(_("%1: could not write peak file data (%2)"), _name, strerror (errno)) << endmsg;
 		goto out;
 	}
+
+	_peak_byte_max = max(_peak_byte_max, first_peak_byte + sizeof(PeakData)*peaki);
 
 	ret = 0;
 
@@ -881,7 +893,28 @@ AudioSource::build_peaks_from_scratch ()
 
 	next_peak_clear_should_notify = true;
 	pending_peak_builds.push_back (new PeakBuildRecord (0, _length));
-	queue_for_peaks (shared_from_this());
+	queue_for_peaks (shared_from_this(), true);
+}
+
+void
+AudioSource::truncate_peakfile ()
+{
+	int peakfile = -1;
+
+	/* truncate the peakfile down to its natural length if necessary */
+
+	if ((peakfile = ::open (peakpath.c_str(), O_RDWR)) >= 0) {
+		off_t end = lseek (peakfile, 0, SEEK_END);
+		
+		if (end > _peak_byte_max) {
+			ftruncate(peakfile, _peak_byte_max);
+			//cerr << "truncated " << peakpath << " to " << _peak_byte_max << " bytes" << endl;
+		}
+		else {
+			//cerr << "NOT truncated " << peakpath << " to " << _peak_byte_max << " end " << end << endl;
+		}
+		close (peakfile);
+	}
 }
 
 bool
@@ -903,26 +936,19 @@ AudioSource::file_changed (string path)
 nframes_t
 AudioSource::available_peaks (double zoom_factor) const
 {
-	int peakfile;
 	off_t end;
 
 	if (zoom_factor < frames_per_peak) {
 		return length(); // peak data will come from the audio file
 	} 
 	
-	/* peak data comes from peakfile */
+	/* peak data comes from peakfile, but the filesize might not represent
+	   the valid data due to ftruncate optimizations, so use _peak_byte_max state.
+	   XXX - there might be some atomicity issues here, we should probably add a lock,
+	   but _peak_byte_max only monotonically increases after initialization.
+	*/
 
-	if ((peakfile = ::open (peakpath.c_str(), O_RDONLY)) < 0) {
-		error << string_compose(_("AudioSource: cannot open peakpath \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
-		return 0;
-	}
-
-	{ 
-		Glib::Mutex::Lock lm (_lock);
-		end = lseek (peakfile, 0, SEEK_END);
-	}
-
-	close (peakfile);
+	end = _peak_byte_max;
 
 	return (end/sizeof(PeakData)) * frames_per_peak;
 }

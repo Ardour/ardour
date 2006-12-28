@@ -22,6 +22,7 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <errno.h>
 
 #include <pbd/mountpoint.h>
@@ -257,7 +258,7 @@ AudioFileSource::mark_streaming_write_completed ()
 
 	if (_peaks_built || pending_peak_builds.empty()) {
 		_peaks_built = true;
-		 PeaksReady (); /* EMIT SIGNAL */
+		PeaksReady (); /* EMIT SIGNAL */
 	}
 }
 
