@@ -1,3 +1,4 @@
+
 #ifndef ardour_tranzport_control_protocol_h
 #define ardour_tranzport_control_protocol_h
 
@@ -72,7 +73,8 @@ class TranzportControlProtocol : public ARDOUR::ControlProtocol
 	enum WheelShiftMode {
 		WheelShiftGain,
 		WheelShiftPan,
-		WheelShiftMaster
+		WheelShiftMaster,
+		WheelShiftMarker
 	};
 		
 	enum WheelMode {
@@ -81,29 +83,68 @@ class TranzportControlProtocol : public ARDOUR::ControlProtocol
 		WheelShuttle
 	};
 
+	// FIXME - look at gtk2_ardour for snap settings
+
+	enum WheelIncrement {
+	       WheelIncrSlave,
+	       WheelIncrScreen,
+	       WheelIncrSample,
+	       WheelIncrBeat,
+	       WheelIncrBar,
+	       WheelIncrSecond,
+	       WheelIncrMinute
+	};
+	  
 	enum DisplayMode {
 		DisplayNormal,
-		DisplayBigMeter
+		DisplayRecording,
+		DisplayRecordingMeter,
+		DisplayBigMeter,
+		DisplayConfig,
+		DisplayBling,
+		DisplayBlingMeter
+	};
+
+	enum BlingMode {
+	        BlingOff,
+	        BlingKit,
+	        BlingRotating,
+	        BlingPairs,
+	        BlingRows,
+	        BlingFlashAll
 	};
 	
 	pthread_t       thread;
 	uint32_t        buttonmask;
 	uint32_t        timeout;
+	uint32_t        inflight;
 	uint8_t        _datawheel;
 	uint8_t        _device_status;
-	usb_dev_handle* udev;
-
 	uint32_t        current_track_id;
 	WheelMode       wheel_mode;
 	WheelShiftMode  wheel_shift_mode;
 	DisplayMode     display_mode;
+	BlingMode       bling_mode;
+	WheelIncrement  wheel_increment;
+	usb_dev_handle* udev;
+
 	ARDOUR::gain_t  gain_fraction;
 
 	Glib::Mutex update_lock;
-	char current_screen[2][20];
-	char pending_screen[2][20];
-	bool lights[7];
-	bool pending_lights[7];
+
+	bool screen_invalid[2][20];
+	char screen_current[2][20];
+	char screen_pending[2][20];
+	char screen_flash[2][20];
+
+	bool lights_invalid[7];
+	bool lights_current[7];
+	bool lights_pending[7];
+	bool lights_flash[7];
+
+	uint32_t       last_bars;
+	uint32_t       last_beats;
+	uint32_t       last_ticks;
 
 	bool           last_negative;
 	uint32_t       last_hrs;
@@ -119,28 +160,94 @@ class TranzportControlProtocol : public ARDOUR::ControlProtocol
 	Glib::Mutex io_lock;
 
 	int open ();
-	int read (uint32_t timeout_override = 0);
+	int read (uint8_t *buf,uint32_t timeout_override = 0);
 	int write (uint8_t* cmd, uint32_t timeout_override = 0);
+	int write_noretry (uint8_t* cmd, uint32_t timeout_override = 0);
 	int close ();
+	int save(char *name = "default");
+	int load(char *name = "default");
+	void print (int row, int col, const char* text);
+	void print_noretry (int row, int col, const char* text);
+
+	int rtpriority_set(int priority = 52);
+	int rtpriority_unset(int priority = 0);
 
 	int open_core (struct usb_device*);
 
+	static void* _monitor_work (void* arg);
+	void* monitor_work ();
+
+	int process (uint8_t *);
+	int update_state();
+	void invalidate();
+	int flush();
+	// bool isuptodate(); // think on this. It seems futile to update more than 30/sec
+
+	// A screen is a cache of what should be on the lcd
+
+	void screen_init();
+	void screen_validate();
+	void screen_invalidate();
+	int  screen_flush();
+	void screen_clear();
+	// bool screen_isuptodate(); // think on this - 
+
+	// Commands to write to the lcd 
+
+	int  lcd_init();
+        bool lcd_damage();
+	bool lcd_isdamaged();
+
+        bool lcd_damage(int row, int col = 0, int length = 20);
+	bool lcd_isdamaged(int row, int col = 0, int length = 20);
+
+	int  lcd_flush();
+	int  lcd_write(uint8_t* cmd, uint32_t timeout_override = 0); // pedantic alias for write
+	void lcd_fill (uint8_t fill_char);
 	void lcd_clear ();
-	void print (int row, int col, const char* text);
+	void lcd_print (int row, int col, const char* text);
+	void lcd_print_noretry (int row, int col, const char* text);
+
+	// Commands to write to the lights
+	// FIXME - on some devices lights can have intensity and colors
+
+	void lights_init();
+	void lights_validate();
+	void lights_invalidate();
+	void light_validate(LightID light);
+	void light_invalidate(LightID light);
+	int  lights_flush();
+	int  lights_write(uint8_t* cmd,uint32_t timeout_override = 0); // pedantic alias to write
+
+	// a cache of what should be lit
+
+	void lights_off ();
+	void lights_on ();
+	int  light_set(LightID, bool offon = true);
 	int  light_on (LightID);
 	int  light_off (LightID);
-	void lights_off ();
+
+	// some modes for the lights, should probably be renamed
+
+	int  lights_show_normal();
+	int  lights_show_recording();
+	int  lights_show_tempo();
+	int  lights_show_bling();
 
 	void enter_big_meter_mode ();
 	void enter_normal_display_mode ();
+	void enter_config_mode();
+	void enter_recording_mode();
+	void enter_bling_mode();
 
 	void next_display_mode ();
-
 	void normal_update ();
 
 	void show_current_track ();
 	void show_track_gain ();
 	void show_transport_time ();
+	void show_bbt (nframes_t where);	
+	void show_smpte (nframes_t where);
 	void show_wheel_mode ();
 	void show_gain ();
 	void show_pan ();
@@ -150,6 +257,7 @@ class TranzportControlProtocol : public ARDOUR::ControlProtocol
 	void scrub ();
 	void scroll ();
 	void shuttle ();
+	void config ();
 
 	void next_wheel_mode ();
 	void next_wheel_shift_mode ();
@@ -162,8 +270,6 @@ class TranzportControlProtocol : public ARDOUR::ControlProtocol
 	void step_pan_right ();
 	void step_pan_left ();
 
-	static void* _monitor_work (void* arg);
-	void* monitor_work ();
 
 	void button_event_battery_press (bool shifted);
 	void button_event_battery_release (bool shifted);
@@ -206,8 +312,8 @@ class TranzportControlProtocol : public ARDOUR::ControlProtocol
 	void button_event_record_press (bool shifted);
 	void button_event_record_release (bool shifted);
 
-	int process (uint8_t *);
-	int update_state();
+	// new api
+	void button_event_mute (bool pressed, bool shifted);
 };
 
 
