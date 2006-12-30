@@ -716,6 +716,7 @@ AudioRegionView::show_region_editor ()
 	} 
 
 	editor->present ();
+	editor->show_all();
 }
 
 void

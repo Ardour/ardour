@@ -102,14 +102,16 @@ end
 Dir.chdir(odir)
 
 # copy ardour.bin to bindir/ardour
-$stdout.print("Copying bin to #{bindir} ...\n");
+
 
 if File.exist?("../../gtk2_ardour/ardour.bin") then
+   $stdout.print("Copying bin to #{bindir} ...\n");
    `cp ../../gtk2_ardour/ardour.bin #{bindir}/ardour`
 end
 
 `cp ../../libs/surfaces/*/*.dylib #{libdir}/surfaces`
 # remove the basenames from libdir that are in surfaces (copied earlier)
+`rm -f #{libdir}/surfaces/libardour_cp.dylib`
 begin
   Dir.foreach(libdir+"/surfaces") {|x| unless ( x[0] == 46 or x.include?("libardour_cp")) then File.delete(libdir + "/" +x) end}
 rescue
@@ -174,6 +176,7 @@ end
 if File.exist?(ppc_libdir) and File.exist?(i386_libdir) then
   $stdout.print("\nBoth platforms in place, lipo'ing...\n");
   `rm -rf lib/*`
+  `rm -f bin/ardour`
   lipo_platforms_recurse(ppc_libdir, i386_libdir, "lib")
   lipo_platforms_recurse(i386_libdir, ppc_libdir, "lib")
   lipo_platforms_recurse(i386_bindir+'/ardour', ppc_bindir+'/ardour', "bin/ardour")

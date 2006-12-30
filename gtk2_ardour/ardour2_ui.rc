@@ -951,13 +951,13 @@ style "pan_slider"
 {
  	font_name = "sans 8"
 
-	fg[NORMAL] = { 0.67, 0.23, 0.22 }
-	fg[ACTIVE] = { 0.67, 0.23, 0.22 }
+	fg[NORMAL] = { 0.22, 0.73, 0.22 }
+	fg[ACTIVE] = { 0.22, 0.73, 0.22 }
 	fg[INSENSITIVE] = {0.32, 0.39, 0.45 } # matches default_base
 	fg[SELECTED] = { 0.67, 0.23, 0.22 }
 	fg[PRELIGHT] = { 0.67, 0.23, 0.22 }
 
-	bg[NORMAL] = { 0, 0, 0 }
+	bg[NORMAL] = { 0.05, 0.05, 0.05 }
 	bg[ACTIVE] = { 0, 0, 0 }
 	bg[INSENSITIVE] = {0.32, 0.39, 0.45 } # matches default_base
 	bg[SELECTED] = { 0, 0, 0 }

@@ -229,7 +229,7 @@ BarController::motion (GdkEventMotion* ev)
 gint
 BarController::mouse_control (double x, GdkWindow* window, double scaling)
 {
-	double fract;
+	double fract = 0.0;
 	double delta;
 
 	if (window != grab_window) {
@@ -263,7 +263,7 @@ BarController::expose (GdkEventExpose* event)
 {
 	Glib::RefPtr<Gdk::Window> win (darea.get_window());
 	Widget* parent;
-	gint x1, x2, y1, y2;
+	gint x1=0, x2=0, y1=0, y2=0;
 	gint w, h;
 	double fract;
 
@@ -275,6 +275,7 @@ BarController::expose (GdkEventExpose* event)
 	
 	switch (_style) {
 	case Line:
+		h = darea.get_height();
 		x1 = (gint) floor (w * fract);
 		x2 = x1;
 		y1 = 0;
@@ -293,10 +294,10 @@ BarController::expose (GdkEventExpose* event)
 
 			win->draw_rectangle (get_style()->get_bg_gc (get_state()),
 					     true,
-					     0, 0, darea.get_width(), darea.get_height());
+					     0, 0, darea.get_width() - ((darea.get_width()+1) % 2), darea.get_height());
 		}
 		
-		win->draw_line (get_style()->get_base_gc (get_state()), x1, 0, x1, darea.get_height());
+		win->draw_line (get_style()->get_fg_gc (get_state()), x1, 0, x1, h);
 		break;
 
 	case CenterOut:

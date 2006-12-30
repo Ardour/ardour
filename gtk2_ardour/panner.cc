@@ -4,7 +4,7 @@
 
 using namespace std;
 
-static const int triangle_size = 7;
+static const int triangle_size = 5;
 
 static void
 null_label_callback (char* buf, unsigned int bufsize)
@@ -65,13 +65,13 @@ PannerBar::expose (GdkEventExpose* ev)
 
 	// right
 
-	points[0].x = (darea.get_width() - triangle_size);
+	points[0].x = (darea.get_width() - triangle_size) - 1;
 	points[0].y = 0;
 
-	points[1].x = darea.get_width();
+	points[1].x = darea.get_width() - 1;
 	points[1].y = 0;
 	
-	points[2].x = darea.get_width();
+	points[2].x = darea.get_width() - 1;
 	points[2].y = triangle_size;
 
 	gdk_draw_polygon (win->gobj(), gc->gobj(), true, points, 3);
