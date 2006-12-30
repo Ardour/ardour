@@ -220,6 +220,8 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	mutable uint32_t        _read_data_count; // modified in read()
 	Change                   pending_changed;
 	uint64_t                _last_layer_op; // timestamp
+
+	int compile_farmtest;
 };
 
 } /* namespace ARDOUR */
