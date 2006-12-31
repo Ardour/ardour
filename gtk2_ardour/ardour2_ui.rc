@@ -953,13 +953,13 @@ style "pan_slider"
 
 	fg[NORMAL] = { 0.22, 0.73, 0.22 }
 	fg[ACTIVE] = { 0.22, 0.73, 0.22 }
-	fg[INSENSITIVE] = {0.32, 0.39, 0.45 } # matches default_base
+	fg[INSENSITIVE] = {0.22, 0.53, 0.22 } 
 	fg[SELECTED] = { 0.67, 0.23, 0.22 }
 	fg[PRELIGHT] = { 0.67, 0.23, 0.22 }
 
 	bg[NORMAL] = { 0.05, 0.05, 0.05 }
 	bg[ACTIVE] = { 0, 0, 0 }
-	bg[INSENSITIVE] = {0.32, 0.39, 0.45 } # matches default_base
+	bg[INSENSITIVE] = {0.12, 0.19, 0.25 } 
 	bg[SELECTED] = { 0, 0, 0 }
 	bg[PRELIGHT] = { 0, 0, 0 }
 
@@ -973,7 +973,7 @@ style "pan_slider"
 
 	base[NORMAL] = { 0.80, 0.80, 0.80 }
 	base[ACTIVE] =  { 0.80, 0.80, 0.80 }
-	base[INSENSITIVE] = {0.32, 0.39, 0.45 } # matches default_base
+	base[INSENSITIVE] = {0.6, 0.6, 0.6 }
 	base[SELECTED] = { 0.80, 0.80, 0.80 }
 	base[PRELIGHT] = { 0.80, 0.80, 0.80 }
 
