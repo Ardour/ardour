@@ -1150,7 +1150,7 @@ void
 Session::request_bounded_roll (nframes_t start, nframes_t end)
 {
 	request_stop ();
-	Event *ev = new Event (Event::StopOnce, Event::Replace, Event::Immediate, end, 0.0);
+ 	Event *ev = new Event (Event::StopOnce, Event::Replace, end, Event::Immediate, 0.0);
 	queue_event (ev);
 	request_locate (start, true);
 }

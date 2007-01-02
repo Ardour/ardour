@@ -481,6 +481,7 @@ Editor::build_range_marker_menu ()
 
 	items.push_back (MenuElem (_("Locate to Range Mark"), mem_fun(*this, &Editor::marker_menu_set_playhead)));
 	items.push_back (MenuElem (_("Play from Range Mark"), mem_fun(*this, &Editor::marker_menu_play_from)));
+	items.push_back (MenuElem (_("Play Range"), mem_fun(*this, &Editor::marker_menu_play_range)));
 	items.push_back (MenuElem (_("Loop Range"), mem_fun(*this, &Editor::marker_menu_loop_range)));
 	items.push_back (MenuElem (_("Set Range Mark from Playhead"), mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
 	items.push_back (MenuElem (_("Set Range from Range Selection"), mem_fun(*this, &Editor::marker_menu_set_from_selection)));
@@ -722,6 +723,32 @@ Editor::marker_menu_set_from_selection ()
 					l->set_end (selection->regions.end_frame());
 				}
 			}
+		}
+	}
+}
+
+
+void
+Editor::marker_menu_play_range ()
+{
+	Marker* marker;
+
+	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
+		/*NOTREACHED*/
+	}
+
+	Location* l;
+	bool is_start;
+	
+	if ((l = find_location_from_marker (marker, is_start)) != 0) {
+
+		if (l->is_mark()) {
+			session->request_locate (l->start(), true);
+		}
+		else {
+			session->request_bounded_roll (l->start(), l->end());
+			
 		}
 	}
 }

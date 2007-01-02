@@ -1205,6 +1205,7 @@ class Editor : public PublicEditor
 	void marker_menu_select_all_selectables_using_range ();
 	void marker_menu_separate_regions_using_location ();
 	void marker_menu_play_from ();
+	void marker_menu_play_range ();
 	void marker_menu_set_playhead ();
 	void marker_menu_set_from_playhead ();
 	void marker_menu_set_from_selection ();

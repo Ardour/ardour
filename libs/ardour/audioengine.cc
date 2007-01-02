@@ -167,7 +167,6 @@ AudioEngine::stop (bool forever)
 }
 
 
-	
 bool
 AudioEngine::get_sync_offset (nframes_t& offset) const
 {
@@ -736,8 +735,6 @@ AudioEngine::halted (void *arg)
 	AudioEngine* ae = static_cast<AudioEngine *> (arg);
 
 	ae->_running = false;
-	ae->_jack = 0;
-
 	ae->_buffer_size = 0;
 	ae->_frame_rate = 0;
 
@@ -1045,9 +1042,7 @@ AudioEngine::disconnect_from_jack ()
 		return 0;
 	}
 
-	if (jack_client_close (_jack)) {
-		error << _("cannot shutdown connection to JACK") << endmsg;
-	}
+	jack_client_close (_jack);
 
 	_buffer_size = 0;
 	_frame_rate = 0;
