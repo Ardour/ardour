@@ -1346,6 +1346,8 @@ AudioClock::smpte_frame_from_display () const
 	smpte.minutes = atoi (minutes_label.get_text());
 	smpte.seconds = atoi (seconds_label.get_text());
 	smpte.frames = atoi (frames_label.get_text());
+	smpte.rate = session->smpte_frames_per_second();
+	smpte.drop= session->smpte_drop_frames();
 
 	session->smpte_to_sample( smpte, sample, false /* use_offset */, false /* use_subframes */ );
 	
