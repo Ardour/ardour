@@ -378,6 +378,9 @@ class Session : public PBD::StatefulDestructible
 	double frames_per_smpte_frame() const { return _frames_per_smpte_frame; }
 	nframes_t smpte_frames_per_hour() const { return _smpte_frames_per_hour; }
 
+	float smpte_frames_per_second() const;
+	bool smpte_drop_frames() const;
+
 	/* Locations */
 
 	Locations *locations() { return &_locations; }
@@ -480,19 +483,6 @@ class Session : public PBD::StatefulDestructible
 	nframes_t transport_frame () const {return _transport_frame; }
 	nframes_t audible_frame () const;
 
-	enum SmpteFormat {
-		smpte_23976,
-		smpte_24,
-		smpte_24976,
-		smpte_25,
-		smpte_2997,
-		smpte_2997drop,
-		smpte_30,
-		smpte_30drop,
-		smpte_5994,
-		smpte_60,
-	};
-
 	enum PullupFormat {
 		pullup_Plus4Plus1,
 		pullup_Plus4,
@@ -502,11 +492,10 @@ class Session : public PBD::StatefulDestructible
 		pullup_Minus1,
 		pullup_Minus4Plus1,
 		pullup_Minus4,
-		pullup_Minus4Minus1,
+		pullup_Minus4Minus1
 	};
 
-	int  set_smpte_type (float fps, bool drop_frames);
-
+	int  set_smpte_format (SmpteFormat);
 	void sync_time_vars();
 
 	void bbt_time (nframes_t when, BBT_Time&);
@@ -1300,7 +1289,7 @@ class Session : public PBD::StatefulDestructible
 	nframes_t _smpte_frames_per_hour;
 	nframes_t _smpte_offset;
 	bool _smpte_offset_negative;
-	
+
 	/* cache the most-recently requested time conversions.
 	   this helps when we have multiple clocks showing the
 	   same time (e.g. the transport frame)

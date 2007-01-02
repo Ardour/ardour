@@ -2308,7 +2308,8 @@ Editor::snap_to (nframes_t& start, int32_t direction, bool for_mark)
 
 	const nframes_t one_second = session->frame_rate();
 	const nframes_t one_minute = session->frame_rate() * 60;
-
+	const nframes_t one_smpte_second = (nframes_t)(rint(session->smpte_frames_per_second()) * session->frames_per_smpte_frame());
+	nframes_t one_smpte_minute = (nframes_t)(rint(session->smpte_frames_per_second()) * session->frames_per_smpte_frame() * 60);
 	nframes_t presnap = start;
 
 	switch (snap_type) {
@@ -2322,8 +2323,9 @@ Editor::snap_to (nframes_t& start, int32_t direction, bool for_mark)
 			start = (nframes_t) floor ((double) start / (one_second / 75)) * (one_second / 75);
 		}
 		break;
+
 	case SnapToSMPTEFrame:
-		if (direction) {
+	        if (fmod((double)start, (double)session->frames_per_smpte_frame()) > (session->frames_per_smpte_frame() / 2)) {
 			start = (nframes_t) (ceil ((double) start / session->frames_per_smpte_frame()) * session->frames_per_smpte_frame());
 		} else {
 			start = (nframes_t) (floor ((double) start / session->frames_per_smpte_frame()) *  session->frames_per_smpte_frame());
@@ -2337,10 +2339,10 @@ Editor::snap_to (nframes_t& start, int32_t direction, bool for_mark)
 		} else {
 			start -= session->smpte_offset ();
 		}    
-		if (direction > 0) {
-			start = (nframes_t) ceil ((double) start / one_second) * one_second;
+		if (start % one_smpte_second > one_smpte_second / 2) {
+			start = (nframes_t) ceil ((double) start / one_smpte_second) * one_smpte_second;
 		} else {
-			start = (nframes_t) floor ((double) start / one_second) * one_second;
+			start = (nframes_t) floor ((double) start / one_smpte_second) * one_smpte_second;
 		}
 		
 		if (session->smpte_offset_negative())
@@ -2358,10 +2360,10 @@ Editor::snap_to (nframes_t& start, int32_t direction, bool for_mark)
 		} else {
 			start -= session->smpte_offset ();
 		}
-		if (direction) {
-			start = (nframes_t) ceil ((double) start / one_minute) * one_minute;
+		if (start % one_smpte_minute > one_smpte_minute / 2) {
+			start = (nframes_t) ceil ((double) start / one_smpte_minute) * one_smpte_minute;
 		} else {
-			start = (nframes_t) floor ((double) start / one_minute) * one_minute;
+			start = (nframes_t) floor ((double) start / one_smpte_minute) * one_smpte_minute;
 		}
 		if (session->smpte_offset_negative())
 		{
@@ -2372,7 +2374,7 @@ Editor::snap_to (nframes_t& start, int32_t direction, bool for_mark)
 		break;
 		
 	case SnapToSeconds:
-		if (direction) {
+		if (start % one_second > one_second / 2) {
 			start = (nframes_t) ceil ((double) start / one_second) * one_second;
 		} else {
 			start = (nframes_t) floor ((double) start / one_second) * one_second;
@@ -2380,7 +2382,7 @@ Editor::snap_to (nframes_t& start, int32_t direction, bool for_mark)
 		break;
 		
 	case SnapToMinutes:
-		if (direction) {
+		if (start % one_minute > one_minute / 2) {
 			start = (nframes_t) ceil ((double) start / one_minute) * one_minute;
 		} else {
 			start = (nframes_t) floor ((double) start / one_minute) * one_minute;
@@ -2612,22 +2614,25 @@ Editor::setup_toolbar ()
 	zoom_box.set_border_width (2);
 
 	zoom_in_button.set_name ("EditorTimeButton");
+	zoom_in_button.set_size_request(-1,16);
 	zoom_in_button.add (*(manage (new Image (::get_icon("zoom_in")))));
 	zoom_in_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom_step), false));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_in_button, _("Zoom In"));
 	
 	zoom_out_button.set_name ("EditorTimeButton");
+	zoom_out_button.set_size_request(-1,16);
 	zoom_out_button.add (*(manage (new Image (::get_icon("zoom_out")))));
 	zoom_out_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom_step), true));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_button, _("Zoom Out"));
 
 	zoom_out_full_button.set_name ("EditorTimeButton");
+	zoom_out_full_button.set_size_request(-1,16);
 	zoom_out_full_button.add (*(manage (new Image (::get_icon("zoom_full")))));
 	zoom_out_full_button.signal_clicked().connect (mem_fun(*this, &Editor::temporal_zoom_session));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_full_button, _("Zoom to Session"));
 	
 	zoom_focus_selector.set_name ("ZoomFocusSelector");
-	Gtkmm2ext::set_size_request_to_display_given_text (zoom_focus_selector, "Edit Cursor", 2+FUDGE, 0);
+	Gtkmm2ext::set_size_request_to_display_given_text (zoom_focus_selector, "Edit Cursor", FUDGE, 0);
 	set_popdown_strings (zoom_focus_selector, zoom_focus_strings);
 	zoom_focus_selector.signal_changed().connect (mem_fun(*this, &Editor::zoom_focus_selection_done));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_focus_selector, _("Zoom focus"));

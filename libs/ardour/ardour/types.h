@@ -145,6 +145,18 @@ namespace ARDOUR {
 	    }
 	    
 	};
+	enum SmpteFormat {
+		smpte_23976,
+		smpte_24,
+		smpte_24976,
+		smpte_25,
+		smpte_2997,
+		smpte_2997drop,
+		smpte_30,
+		smpte_30drop,
+		smpte_5994,
+		smpte_60
+	};
 
 	struct AnyTime {
 	    enum Type {
@@ -343,6 +355,7 @@ std::istream& operator>>(std::istream& o, ARDOUR::CrossfadeModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::SlaveSource& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ShuttleBehaviour& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ShuttleUnits& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::SmpteFormat& sf);
 
 static inline nframes_t
 session_frame_to_track_frame (nframes_t session_frame, double speed)

@@ -90,6 +90,9 @@ AudioClock::AudioClock (std::string name, bool allow_edit, bool duration, bool w
 		bbt_upper_info_label->set_name ("AudioClockBBTUpperInfo");
 		bbt_lower_info_label->set_name ("AudioClockBBTLowerInfo");
 
+		Gtkmm2ext::set_size_request_to_display_given_text(*smpte_upper_info_label, "23.98",0,0);
+		Gtkmm2ext::set_size_request_to_display_given_text(*smpte_lower_info_label, "NDF",0,0);
+
 		frames_info_box.pack_start (*frames_upper_info_label, true, true);
 		frames_info_box.pack_start (*frames_lower_info_label, true, true);
 		smpte_info_box.pack_start (*smpte_upper_info_label, true, true);
@@ -530,7 +533,7 @@ AudioClock::set_smpte (nframes_t when, bool force)
 	}
 	
 	if (smpte_upper_info_label) {
-		float smpte_frames = Config->get_smpte_frames_per_second();
+		float smpte_frames = session->smpte_frames_per_second();
 		
 		if ( fmod(smpte_frames, 1.0) == 0.0) {
 			sprintf (buf, "%u", int (smpte_frames));
@@ -540,7 +543,7 @@ AudioClock::set_smpte (nframes_t when, bool force)
 		
 		smpte_upper_info_label->set_text (buf);
 		
-		if (Config->get_smpte_drop_frames()) {
+		if (session->smpte_drop_frames()) {
 			sprintf (buf, "DF");
 		} else {
 			sprintf (buf, "NDF");
@@ -1194,7 +1197,7 @@ AudioClock::get_frames (Field field,nframes_t pos,int dir)
 		frames = session->frame_rate();
 		break;
 	case SMPTE_Frames:
-		frames = (nframes_t) floor (session->frame_rate() / Config->get_smpte_frames_per_second());
+		frames = (nframes_t) floor (session->frame_rate() / session->smpte_frames_per_second());
 		break;
 
 	case AudioFrames:
@@ -1302,7 +1305,7 @@ AudioClock::smpte_sanitize_display()
 		seconds_label.set_text("59");
 	}
 	
-	switch ((long)rint(Config->get_smpte_frames_per_second())) {
+	switch ((long)rint(session->smpte_frames_per_second())) {
 	case 24:
 		if (atoi(frames_label.get_text()) > 23) {
 			frames_label.set_text("23");
@@ -1322,7 +1325,7 @@ AudioClock::smpte_sanitize_display()
 		break;
 	}
 	
-	if (Config->get_smpte_drop_frames()) {
+	if (session->smpte_drop_frames()) {
 		if ((atoi(minutes_label.get_text()) % 10) && (atoi(seconds_label.get_text()) == 0) && (atoi(frames_label.get_text()) < 2)) {
 			frames_label.set_text("02");
 		}

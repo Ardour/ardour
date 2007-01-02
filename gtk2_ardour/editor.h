@@ -296,7 +296,7 @@ class Editor : public PublicEditor
 
 	/* SMPTE timecode & video sync */
 
-	void smpte_fps_chosen (ARDOUR::Session::SmpteFormat format);
+	void smpte_fps_chosen (ARDOUR::SmpteFormat format);
 	void video_pullup_chosen (ARDOUR::Session::PullupFormat pullup);
 	void subframes_per_frame_chosen (uint32_t);
 

@@ -3512,6 +3512,8 @@ Editor::show_verbose_time_cursor (nframes_t frame, double offset, double xpos, d
 	char buf[128];
 	SMPTE::Time smpte;
 	BBT_Time bbt;
+	int hours, mins;
+	nframes_t frame_rate;
 	float secs;
 
 	if (session == 0) {
@@ -3530,10 +3532,14 @@ Editor::show_verbose_time_cursor (nframes_t frame, double offset, double xpos, d
 		break;
 
 	case AudioClock::MinSec:
-		/* XXX fix this to compute min/sec properly */
-		session->smpte_time (frame, smpte);
-		secs = smpte.seconds + ((float) smpte.frames / Config->get_smpte_frames_per_second());
-		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%.4f", smpte.hours, smpte.minutes, secs);
+		/* XXX this is copied from show_verbose_duration_cursor() */
+		frame_rate = session->frame_rate();
+		hours = frame / (frame_rate * 3600);
+		frame = frame % (frame_rate * 3600);
+		mins = frame / (frame_rate * 60);
+		frame = frame % (frame_rate * 60);
+		secs = (float) frame / (float) frame_rate;
+		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%.4f", hours, mins, secs);
 		break;
 
 	default:
@@ -3557,6 +3563,8 @@ Editor::show_verbose_duration_cursor (nframes_t start, nframes_t end, double off
 	SMPTE::Time smpte;
 	BBT_Time sbbt;
 	BBT_Time ebbt;
+	int hours, mins;
+	nframes_t distance, frame_rate;
 	float secs;
 	Meter meter_at_start(session->tempo_map().meter_at(start));
 
@@ -3597,10 +3605,15 @@ Editor::show_verbose_duration_cursor (nframes_t start, nframes_t end, double off
 		break;
 
 	case AudioClock::MinSec:
-		/* XXX fix this to compute min/sec properly */
-		session->smpte_duration (end - start, smpte);
-		secs = smpte.seconds + ((float) smpte.frames / Config->get_smpte_frames_per_second());
-		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%.4f", smpte.hours, smpte.minutes, secs);
+		/* XXX this stuff should be elsewhere.. */
+		distance = end - start;
+		frame_rate = session->frame_rate();
+		hours = distance / (frame_rate * 3600);
+		distance = distance % (frame_rate * 3600);
+		mins = distance / (frame_rate * 60);
+		distance = distance % (frame_rate * 60);
+		secs = (float) distance / (float) frame_rate;
+		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%.4f", hours, mins, secs);
 		break;
 
 	default:

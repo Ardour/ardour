@@ -95,11 +95,10 @@ CONFIG_VARIABLE (bool, quieten_at_speed, "quieten-at-speed", true)
 /* timecode and sync */
 
 CONFIG_VARIABLE (bool, jack_time_master, "jack-time-master", true)
+CONFIG_VARIABLE (SmpteFormat, smpte_format, "smpte-format", smpte_30)
 CONFIG_VARIABLE (bool, use_video_sync, "use-video-sync", false)
 CONFIG_VARIABLE (bool, timecode_source_is_synced, "timecode-source-is-synced", true)
-CONFIG_VARIABLE (float, smpte_frames_per_second, "smpte-frames-per-second", 30.0f)
 CONFIG_VARIABLE (float, video_pullup, "video-pullup", 0.0f)
-CONFIG_VARIABLE (bool,  smpte_drop_frames, "smpte-drop-frames", false)
 
 /* metering */
 

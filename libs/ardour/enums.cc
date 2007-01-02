@@ -43,7 +43,7 @@ setup_enum_writer ()
 	mute_type _mute_type;
 	Session::RecordState _Session_RecordState;
 	Session::Event::Type _Session_Event_Type;
-	Session::SmpteFormat _Session_SmpteFormat;
+	SmpteFormat _Session_SmpteFormat;
 	Session::PullupFormat _Session_PullupFormat;
 	AudioRegion::FadeShape _AudioRegion_FadeShape;
 	Panner::LinkDirection _Panner_LinkDirection;
@@ -222,16 +222,16 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Session, InCleanup);
 	REGISTER_BITS (_Session_StateOfTheState);
 
-	REGISTER_CLASS_ENUM (Session, smpte_23976);
-	REGISTER_CLASS_ENUM (Session, smpte_24);
-	REGISTER_CLASS_ENUM (Session, smpte_24976);
-	REGISTER_CLASS_ENUM (Session, smpte_25);
-	REGISTER_CLASS_ENUM (Session, smpte_2997);
-	REGISTER_CLASS_ENUM (Session, smpte_2997drop);
-	REGISTER_CLASS_ENUM (Session, smpte_30);
-	REGISTER_CLASS_ENUM (Session, smpte_30drop);
-	REGISTER_CLASS_ENUM (Session, smpte_5994);
-	REGISTER_CLASS_ENUM (Session, smpte_60);
+	REGISTER_ENUM (smpte_23976);
+	REGISTER_ENUM (smpte_24);
+	REGISTER_ENUM (smpte_24976);
+	REGISTER_ENUM (smpte_25);
+	REGISTER_ENUM (smpte_2997);
+	REGISTER_ENUM (smpte_2997drop);
+	REGISTER_ENUM (smpte_30);
+	REGISTER_ENUM (smpte_30drop);
+	REGISTER_ENUM (smpte_5994);
+	REGISTER_ENUM (smpte_60);
 	REGISTER (_Session_SmpteFormat);
 
 	REGISTER_CLASS_ENUM (Session, pullup_Plus4Plus1);

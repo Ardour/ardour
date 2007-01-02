@@ -254,10 +254,10 @@
 		   <menuitem action='Smpte24'/>
 		   <menuitem action='Smpte24976'/>
 		   <menuitem action='Smpte25'/>
-		   <menuitem action='Smpte2997drop'/>
 		   <menuitem action='Smpte2997'/>
-		   <menuitem action='Smpte30drop'/>
+		   <menuitem action='Smpte2997drop'/>
 		   <menuitem action='Smpte30'/>
+		   <menuitem action='Smpte30drop'/>
 		   <menuitem action='Smpte5994'/>
 		   <menuitem action='Smpte60'/>
                </menu>

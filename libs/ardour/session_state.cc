@@ -3020,7 +3020,6 @@ Session::config_changed (const char* parameter_name)
 			
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if ((*i)->record_enabled ()) {
-					//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
 					(*i)->monitor_input (!Config->get_auto_input());
 				}
 			}
@@ -3080,7 +3079,7 @@ Session::config_changed (const char* parameter_name)
 
 		setup_raid_path (Config->get_raid_path());
 
-	} else if (PARAM_IS ("smpte-frames-per-second") || PARAM_IS ("smpte-drop-frames")) {
+	} else if (PARAM_IS ("smpte-format")) {
 
 		sync_time_vars ();
 
