@@ -28,6 +28,7 @@
 #include <sigc++/bind.h>
 
 #include <pbd/xml++.h>
+#include <pbd/enumwriter.h>
 
 #include <ardour/redirect.h>
 #include <ardour/session.h>
@@ -94,18 +95,6 @@ Redirect::set_placement (Placement p, void *src)
 	if (_placement != p) {
 		_placement = p;
 		 placement_changed (this, src); /* EMIT SIGNAL */
-	}
-}
-
-void
-Redirect::set_placement (const string& str, void *src)
-{
-	if (str == _("pre")) {
-		set_placement (PreFader, this);
-	} else if (str == _("post")) {
-		set_placement (PostFader, this);
-	} else {
-		error << string_compose(_("Redirect: unknown placement string \"%1\" (ignored)"), str) << endmsg;
 	}
 }
 
@@ -195,7 +184,7 @@ Redirect::state (bool full_state)
 	stringstream sstr;
 
 	node->add_property("active", active() ? "yes" : "no");	
-	node->add_property("placement", placement_as_string (placement()));
+	node->add_property("placement", enum_2_string (_placement));
 	node->add_child_nocopy (IO::state (full_state));
 
 	if (_extra_xml){
@@ -295,7 +284,20 @@ Redirect::set_state (const XMLNode& node)
 		return -1;
 	}
 
-	set_placement (prop->value(), this);
+	/* hack to handle older sessions before we only used EnumWriter */
+
+	string pstr;
+
+	if (prop->value() == "pre") {
+		pstr = "PreFader";
+	} else if (prop->value() == "post") {
+		pstr = "PostFader";
+	} else {
+		pstr = prop->value();
+	}
+
+	Placement p = Placement (string_2_enum (pstr, p));
+	set_placement (p, this);
 
 	return 0;
 }

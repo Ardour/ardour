@@ -208,18 +208,6 @@ touch_file (ustring path)
 	return 1;
 }
 
-string
-placement_as_string (Placement p)
-{
-	switch (p) {
-	case PreFader:
-		return _("pre");
-	default: /* to get g++ to realize we have all the cases covered */
-	case PostFader:
-		return _("post");
-	}
-}
-
 ustring
 region_name_from_path (ustring path, bool strip_channels)
 {

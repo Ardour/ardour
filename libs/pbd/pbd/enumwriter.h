@@ -44,6 +44,8 @@ class EnumWriter {
 	std::string write (std::string type, int value);
 	int         read  (std::string type, std::string value);
 
+	void add_to_hack_table (std::string str, std::string hacked_str);
+
   private:
 	struct EnumRegistration {
 	    std::vector<int> values;
@@ -65,6 +67,7 @@ class EnumWriter {
 	int read_distinct (EnumRegistration&, std::string value);
 
 	static EnumWriter* _instance;
+	static std::map<std::string,std::string> hack_table;
 };
 
 }

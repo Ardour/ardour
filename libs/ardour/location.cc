@@ -28,6 +28,7 @@
 
 #include <pbd/stl_delete.h>
 #include <pbd/xml++.h>
+#include <pbd/enumwriter.h>
 
 #include <ardour/location.h>
 #include <ardour/session.h>
@@ -217,12 +218,12 @@ Location::set_flag_internal (bool yn, Flags flag)
 {
 	if (yn) {
 		if (!(_flags & flag)) {
-			_flags |= flag;
+			_flags = Flags (_flags | flag);
 			return true;
 		}
 	} else {
 		if (_flags & flag) {
-			_flags &= ~flag;
+			_flags = Flags (_flags & ~flag);
 			return true;
 		}
 	}
@@ -273,8 +274,7 @@ Location::get_state (void)
 	node->add_property ("start", buf);
 	snprintf (buf, sizeof (buf), "%u", end());
 	node->add_property ("end", buf);
-	snprintf (buf, sizeof (buf), "%" PRIu32, (uint32_t) _flags);
-	node->add_property ("flags", buf);
+	node->add_property ("flags", enum_2_string (_flags));
 
 	return *node;
 }
@@ -327,14 +327,12 @@ Location::set_state (const XMLNode& node)
 		
 	_end = atoi (prop->value().c_str());
 		
-	_flags = 0;
-		
 	if ((prop = node.property ("flags")) == 0) {
 		  error << _("XML node for Location has no flags information") << endmsg; 
 		  return -1;
 	}
 		
-	_flags = Flags (atoi (prop->value().c_str()));
+	_flags = Flags (string_2_enum (prop->value(), _flags));
 
 	for (cd_iter = cd_list.begin(); cd_iter != cd_list.end(); ++cd_iter) {
 		  

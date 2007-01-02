@@ -33,6 +33,7 @@
 #include <pbd/error.h>
 #include <pbd/failed_constructor.h>
 #include <pbd/xml++.h>
+#include <pbd/enumwriter.h>
 
 #include <ardour/session.h>
 #include <ardour/panner.h>
@@ -1055,8 +1056,7 @@ Panner::state (bool full)
 	char buf[32];
 
 	root->add_property (X_("linked"), (_linked ? "yes" : "no"));
-	snprintf (buf, sizeof (buf), "%d", _link_direction);
-	root->add_property (X_("link_direction"), buf);
+	root->add_property (X_("link_direction"), enum_2_string (_link_direction));
 	root->add_property (X_("bypassed"), (bypassed() ? "yes" : "no"));
 
 	/* add each output */
@@ -1100,8 +1100,8 @@ Panner::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property (X_("link_direction"))) != 0) {
-		sscanf (prop->value().c_str(), "%d", &i);
-		set_link_direction ((LinkDirection) (i));
+		LinkDirection ld; /* here to provide type information */
+		set_link_direction (LinkDirection (string_2_enum (prop->value(), ld)));
 	}
 
 	nlist = node.children();

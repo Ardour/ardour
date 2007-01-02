@@ -24,6 +24,7 @@
 
 #include <sigc++/bind.h>
 #include <pbd/xml++.h>
+#include <pbd/enumwriter.h>
 
 #include <ardour/timestamps.h>
 #include <ardour/buffer.h>
@@ -1372,8 +1373,7 @@ Route::state(bool full_state)
 	char buf[32];
 
 	if (_flags) {
-		snprintf (buf, sizeof (buf), "0x%x", _flags);
-		node->add_property("flags", buf);
+		node->add_property("flags", enum_2_string (_flags));
 	}
 	
 	node->add_property("default-type", _default_type.to_string());
@@ -1533,9 +1533,7 @@ Route::_set_state (const XMLNode& node, bool call_base)
 	}
 
 	if ((prop = node.property (X_("flags"))) != 0) {
-		int x;
-		sscanf (prop->value().c_str(), "0x%x", &x);
-		_flags = Flag (x);
+		_flags = Flag (string_2_enum (prop->value(), _flags));
 	} else {
 		_flags = Flag (0);
 	}

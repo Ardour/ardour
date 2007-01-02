@@ -768,7 +768,7 @@ Region::state (bool full_state)
 
 	snprintf (buf, sizeof (buf), "%d", (int) _layer);
 	node->add_property ("layer", buf);
-	snprintf (buf, sizeof (buf), "%u", _sync_position);
+	snprintf (buf, sizeof (buf), "%" PRIu32, _sync_position);
 	node->add_property ("sync-position", buf);
 
 	return *node;

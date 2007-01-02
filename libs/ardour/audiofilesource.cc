@@ -29,6 +29,7 @@
 #include <pbd/pathscanner.h>
 #include <pbd/stl_delete.h>
 #include <pbd/strsplit.h>
+#include <pbd/enumwriter.h>
 
 #include <sndfile.h>
 
@@ -194,9 +195,7 @@ XMLNode&
 AudioFileSource::get_state ()
 {
 	XMLNode& root (AudioSource::get_state());
-	char buf[16];
-	snprintf (buf, sizeof (buf), "0x%x", (int)_flags);
-	root.add_property ("flags", buf);
+	root.add_property ("flags", enum_2_string (_flags));
 	return root;
 }
 
@@ -211,9 +210,7 @@ AudioFileSource::set_state (const XMLNode& node)
 
 	if ((prop = node.property (X_("flags"))) != 0) {
 
-		int ival;
-		sscanf (prop->value().c_str(), "0x%x", &ival);
-		_flags = Flag (ival);
+		_flags = Flag (string_2_enum (prop->value(), _flags));
 
 	} else {
 

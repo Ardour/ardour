@@ -8,6 +8,7 @@
 #include <ardour/audioregion.h>
 #include <ardour/route_group.h>
 #include <ardour/panner.h>
+#include <ardour/track.h>
 
 using namespace std;
 using namespace PBD;
@@ -19,7 +20,6 @@ setup_enum_writer ()
 	EnumWriter* enum_writer = new EnumWriter();
 	vector<int> i;
 	vector<string> s;
-
 
 	OverlapType _OverlapType;
 	AlignStyle _AlignStyle;
@@ -59,6 +59,7 @@ setup_enum_writer ()
 	Location::Flags _Location_Flags;
 	RouteGroup::Flag _RouteGroup_Flag;
 	Region::Flag _Region_Flag;
+	Track::FreezeState _Track_FreezeState;
 
 #define REGISTER(e) enum_writer->register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer->register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -317,5 +318,10 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Region, Hidden);
 	REGISTER_CLASS_ENUM (Region, DoNotSaveState);
 	REGISTER_BITS (_Region_Flag);
+
+	REGISTER_CLASS_ENUM (Track, NoFreeze);
+	REGISTER_CLASS_ENUM (Track, Frozen);
+	REGISTER_CLASS_ENUM (Track, UnFrozen);
+	REGISTER (_Track_FreezeState);
 	
 }

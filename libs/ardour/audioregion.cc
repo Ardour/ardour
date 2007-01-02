@@ -602,8 +602,6 @@ AudioRegion::state (bool full)
 	char buf2[64];
 	LocaleGuard lg (X_("POSIX"));
 	
-	// snprintf (buf, sizeof (buf), "0x%x", (int) _flags);
-	// node.add_property ("flags", buf);
 	node.add_property ("flags", enum_2_string (_flags));
 
 	snprintf (buf, sizeof(buf), "%.12g", _scale_amplitude);

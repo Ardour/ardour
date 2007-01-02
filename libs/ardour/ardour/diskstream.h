@@ -76,8 +76,8 @@ class IO;
 	virtual float playback_buffer_load() const = 0;
 	virtual float capture_buffer_load() const = 0;
 
-	void set_flag (Flag f)   { _flags |= f; }
-	void unset_flag (Flag f) { _flags &= ~f; }
+	void set_flag (Flag f)   { _flags = Flag (_flags | f); }
+	void unset_flag (Flag f) { _flags = Flag (_flags & ~f); }
 
 	AlignStyle alignment_style() const { return _alignment_style; }
 	void       set_align_style (AlignStyle);
@@ -303,7 +303,7 @@ class IO;
 	sigc::connection plmod_connection;
 	sigc::connection plgone_connection;
 	
-	unsigned char _flags;
+	Flag _flags;
 };
 
 }; /* namespace ARDOUR */

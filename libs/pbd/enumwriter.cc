@@ -18,6 +18,9 @@
     $Id$
 */
 
+#include <ctype.h>
+
+#include <string.h>
 #include <stdlib.h>
 
 #include <pbd/enumwriter.h>
@@ -30,6 +33,35 @@ using namespace PBD;
 #include "i18n.h"
 
 EnumWriter* EnumWriter::_instance = 0;
+map<string,string> EnumWriter::hack_table;
+
+static int 
+nocase_cmp(const string & s1, const string& s2) 
+{
+	string::const_iterator it1 = s1.begin();
+	string::const_iterator it2 = s2.begin();
+	
+	while ((it1 != s1.end()) && (it2 != s2.end())) { 
+		if(::toupper(*it1) != ::toupper(*it2))  {//letters differ?
+			// return -1 to indicate 'smaller than', 1 otherwise
+			return (::toupper(*it1) < ::toupper(*it2)) ? -1 : 1; 
+		}
+
+		++it1;
+		++it2;
+	}
+
+	string::size_type size1 = s1.size();
+	string::size_type size2 = s2.size();
+
+	//return -1,0 or 1 according to strings' lengths
+
+	if (size1 == size2) {
+		return 0;
+	}
+
+	return (size1 < size2) ? -1 : 1;
+}
 
 EnumWriter::EnumWriter ()
 {
@@ -157,13 +189,19 @@ EnumWriter::read_bits (EnumRegistration& er, string str)
 		return strtol (str.c_str(), (char **) 0, 16);
 	}
 
+	/* catch old style dec numerics */
+
+	if (strspn (str.c_str(), "0123456789") == str.length()) {
+		return strtol (str.c_str(), (char **) 0, 10);
+	}
+
 	do {
 		
 		comma = str.find_first_of (',');
 		string segment = str.substr (0, comma);
 
 		for (i = er.values.begin(), s = er.names.begin(); i != er.values.end(); ++i, ++s) {
-			if (segment == (*s)) {
+			if (segment == *s || nocase_cmp (segment, *s) == 0) {
 				result |= (*i);
 				found = true;
 			}
@@ -196,13 +234,40 @@ EnumWriter::read_distinct (EnumRegistration& er, string str)
 		return strtol (str.c_str(), (char **) 0, 16);
 	}
 
+	/* catch old style dec numerics */
+
+	if (strspn (str.c_str(), "0123456789") == str.length()) {
+		return strtol (str.c_str(), (char **) 0, 10);
+	}
+
 	for (i = er.values.begin(), s = er.names.begin(); i != er.values.end(); ++i, ++s) {
-		if (str == (*s)) {
+		if (str == (*s) || nocase_cmp (str, *s) == 0) {
 			return (*i);
+		}
+	}
+
+	/* failed to find it as-is. check to see if there a hack for the name we're looking up */
+
+	map<string,string>::iterator x;
+
+	if ((x  = hack_table.find (str)) != hack_table.end()) {
+
+		cerr << "found hack for " << str << " = " << x->second << endl;
+
+		str = x->second;
+
+		for (i = er.values.begin(), s = er.names.begin(); i != er.values.end(); ++i, ++s) {
+			if (str == (*s) || nocase_cmp (str, *s) == 0) {
+				return (*i);
+			}
 		}
 	}
 
 	throw unknown_enumeration();
 }
 
-
+void
+EnumWriter::add_to_hack_table (string str, string hacked)
+{
+	hack_table[str] = hacked;
+}

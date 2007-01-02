@@ -35,6 +35,7 @@
 #include <glibmm/thread.h>
 #include <pbd/xml++.h>
 #include <pbd/memento_command.h>
+#include <pbd/enumwriter.h>
 
 #include <ardour/ardour.h>
 #include <ardour/audioengine.h>
@@ -1760,8 +1761,7 @@ AudioDiskstream::get_state ()
 	char buf[64] = "";
 	LocaleGuard lg (X_("POSIX"));
 
-	snprintf (buf, sizeof(buf), "0x%x", _flags);
-	node->add_property ("flags", buf);
+	node->add_property ("flags", enum_2_string (_flags));
 
 	snprintf (buf, sizeof(buf), "%zd", channels.size());
 	node->add_property ("channels", buf);
@@ -1848,7 +1848,7 @@ AudioDiskstream::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("flags")) != 0) {
-		_flags = strtol (prop->value().c_str(), 0, 0);
+		_flags = Flag (string_2_enum (prop->value(), _flags));
 	}
 
 	if ((prop = node.property ("channels")) != 0) {
@@ -2258,10 +2258,10 @@ AudioDiskstream::set_destructive (bool yn)
 			if (!can_become_destructive (bounce_ignored)) {
 				return -1;
 			}
-			_flags |= Destructive;
+			_flags = Flag (_flags | Destructive);
 			use_destructive_playlist ();
 		} else {
-			_flags &= ~Destructive;
+			_flags = Flag (_flags & ~Destructive);
 			reset_write_sources (true, true);
 		}
 	}
