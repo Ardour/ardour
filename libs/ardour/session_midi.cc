@@ -624,6 +624,8 @@ Session::mmc_locate (MIDI::MachineControl &mmc, const MIDI::byte* mmc_tc)
 	smpte.minutes = mmc_tc[1];
 	smpte.seconds = mmc_tc[2];
 	smpte.frames = mmc_tc[3];
+	smpte.rate = smpte_frames_per_second();
+	smpte.drop = smpte_drop_frames();
   
 	// Also takes smpte offset into account:
 	smpte_to_sample( smpte, target_frame, true /* use_offset */, false /* use_subframes */ );
