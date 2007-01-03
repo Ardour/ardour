@@ -79,8 +79,6 @@ shutdown (int status)
 	} else {
 
 		if (ui) {
-			msg = _("stopping user interface\n");
-			write (1, msg, strlen (msg));
 			ui->kill();
 		}
 		
@@ -301,7 +299,7 @@ maybe_load_session ()
 	if (!session_name.length()) {
 		ui->hide_splash ();
 		if (!Config->get_no_new_session_dialog()) {
-		       ui->new_session (true);
+		       ui->new_session ();
 		}
 
 		return true;
@@ -326,7 +324,10 @@ To create it from the command line, start ardour as \"ardour --new %1"), path) <
 			return false;
 		}
 
-		ui->load_session (path, name);
+		if (ui->load_session (path, name)) {
+			/* it failed */
+			return false;
+		}
 
 	} else {
 
@@ -338,7 +339,7 @@ To create it from the command line, start ardour as \"ardour --new %1"), path) <
 		/* Show the NSD */
 		ui->hide_splash ();
 		if (!Config->get_no_new_session_dialog()) {
-		       ui->new_session (true);
+		       ui->new_session ();
 		}
 	}
 

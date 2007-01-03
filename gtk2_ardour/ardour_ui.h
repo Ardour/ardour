@@ -128,7 +128,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 		_will_create_new_session_automatically = yn;
 	}
 
-        void new_session(bool startup = false, std::string path = string());
+        void new_session(std::string path = string());
 	gint cmdline_new_session (string path);
 	int  unload_session ();
 	void close_session(); 

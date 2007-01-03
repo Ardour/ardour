@@ -197,8 +197,7 @@ class AudioEngine : public sigc::trackable
 	jack_client_t       *_jack;
 	std::string           jack_client_name;
 	Glib::Mutex           _process_lock;
-	Glib::Mutex           session_remove_lock;
-    Glib::Cond            session_removed;
+	Glib::Cond            session_removed;
 	bool                  session_remove_pending;
 	bool                 _running;
 	bool                 _has_run;

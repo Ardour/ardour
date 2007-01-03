@@ -99,12 +99,14 @@ void
 Session::first_stage_init (string fullpath, string snapshot_name)
 {
 	if (fullpath.length() == 0) {
+		destroy ();
 		throw failed_constructor();
 	}
 
 	char buf[PATH_MAX+1];
 	if (!realpath (fullpath.c_str(), buf) && (errno != ENOENT)) {
 		error << string_compose(_("Could not use path %1 (%s)"), buf, strerror(errno)) << endmsg;
+		destroy ();
 		throw failed_constructor();
 	}
 
@@ -155,7 +157,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_worst_output_latency = 0;
 	_worst_input_latency = 0;
 	_worst_track_latency = 0;
-	_state_of_the_state = StateOfTheState(CannotSave|InitialConnecting|Loading);
+	_state_of_the_state = StateOfTheState(CannotSave|InitialConnecting|Loading|Deletion);
 	_slave = 0;
 	butler_mixdown_buffer = 0;
 	butler_gain_buffer = 0;
@@ -307,7 +309,13 @@ Session::second_stage_init (bool new_session)
 	_engine.Halted.connect (mem_fun (*this, &Session::engine_halted));
 	_engine.Xrun.connect (mem_fun (*this, &Session::xrun_recovery));
 
-	when_engine_running();
+	try {
+		when_engine_running();
+	}
+
+	catch (...) {
+		return -1;
+	}
 
 	send_full_time_code ();
 	_engine.transport_locate (0);

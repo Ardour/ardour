@@ -1262,14 +1262,6 @@ ARDOUR_UI::do_engine_start ()
 		engine->start();
 	}
 
-	catch (AudioEngine::PortRegistrationFailure& err) {
-		engine->stop ();
-		error << _("Unable to create all required ports")
-		      << endmsg;
-		unload_session ();
-		return -1;
-	}
-
 	catch (...) {
 		engine->stop ();
 		error << _("Unable to start the session running")
@@ -1588,7 +1580,7 @@ ARDOUR_UI::save_template ()
 }
 
 void
-ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
+ARDOUR_UI::new_session (std::string predetermined_path)
 {
 	string session_name;
 	string session_path;
@@ -1816,6 +1808,14 @@ This prevents the session from being loaded."));
 
 	try {
 		new_session = new Session (*engine, path, snap_name, mix_template);
+	}
+
+	/* handle this one in a different way than all others, so that its clear what happened */
+	
+	catch (AudioEngine::PortRegistrationFailure& err) {
+		error << _("Unable to create all required ports")
+		      << endmsg;
+		return -1;
 	}
 
 	catch (...) {
@@ -2330,7 +2330,7 @@ ARDOUR_UI::cmdline_new_session (string path)
 		path = str;
 	}
 
-	new_session (false, path);
+	new_session (path);
 
 	_will_create_new_session_automatically = false; /* done it */
 	return FALSE; /* don't call it again */

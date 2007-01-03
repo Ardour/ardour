@@ -281,12 +281,13 @@ Session::Session (AudioEngine &eng,
 	if (new_session) {
 		if (create (new_session, mix_template, compute_initial_length())) {
 			cerr << "create failed\n";
+			destroy ();
 			throw failed_constructor ();
 		}
 	}
 	
 	if (second_stage_init (new_session)) {
-		cerr << "2nd state failed\n";
+		destroy ();
 		throw failed_constructor ();
 	}
 	
@@ -346,6 +347,7 @@ Session::Session (AudioEngine &eng,
 
 	if (new_session) {
 		if (create (new_session, 0, initial_length)) {
+			destroy ();
 			throw failed_constructor ();
 		}
 	}
@@ -373,6 +375,7 @@ Session::Session (AudioEngine &eng,
 	Config->set_output_auto_connect (output_ac);
 
 	if (second_stage_init (new_session)) {
+		destroy ();
 		throw failed_constructor ();
 	}
 	
@@ -388,6 +391,12 @@ Session::Session (AudioEngine &eng,
 }
 
 Session::~Session ()
+{
+	destroy ();
+}
+
+void
+Session::destroy ()
 {
 	/* if we got to here, leaving pending capture state around
 	   is a mistake.
@@ -2930,6 +2939,7 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 
 		if (cnt > limit) {
 			error << string_compose(_("There are already %1 recordings for %2, which I consider too many."), limit, name) << endmsg;
+			destroy ();
 			throw failed_constructor();
 		}
 	}

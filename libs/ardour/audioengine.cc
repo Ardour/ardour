@@ -45,6 +45,12 @@ using namespace PBD;
 
 gint AudioEngine::m_meter_exit;
 
+static void 
+ardour_jack_error (const char* msg) 
+{
+	error << "JACK: " << msg << endmsg;
+}
+
 AudioEngine::AudioEngine (string client_name) 
 	: ports (new Ports)
 {
@@ -76,11 +82,16 @@ AudioEngine::AudioEngine (string client_name)
 
 AudioEngine::~AudioEngine ()
 {
-	if (_running) {
-		jack_client_close (_jack);
+	{
+		Glib::Mutex::Lock tm (_process_lock);
+		session_removed.signal ();
+		
+		if (_running) {
+			jack_client_close (_jack);
+		}
+		
+		stop_metering_thread ();
 	}
-
-	stop_metering_thread ();
 }
 
 void
@@ -407,8 +418,26 @@ AudioEngine::meter_thread ()
 void 
 AudioEngine::set_session (Session *s)
 {
+	Glib::Mutex::Lock pl (_process_lock);
+
 	if (!session) {
+
 		session = s;
+
+		nframes_t blocksize = jack_get_buffer_size (_jack);
+		
+		/* page in as much of the session process code as we
+		   can before we really start running.
+		*/
+		
+		session->process (blocksize);
+		session->process (blocksize);
+		session->process (blocksize);
+		session->process (blocksize);
+		session->process (blocksize);
+		session->process (blocksize);
+		session->process (blocksize);
+		session->process (blocksize);
 	}
 }
 
@@ -422,12 +451,10 @@ AudioEngine::remove_session ()
 		if (session) {
 			session_remove_pending = true;
 			session_removed.wait(_process_lock);
-		} 
+		}
 
 	} else {
-
 		session = 0;
-
 	}
 	
 	remove_all_ports ();
@@ -461,8 +488,6 @@ AudioEngine::register_input_port (DataType type, const string& portname)
 		return newport;
 
 	} else {
-
-		_process_lock.unlock();
 		throw PortRegistrationFailure();
 	}
 
@@ -501,8 +526,6 @@ AudioEngine::register_output_port (DataType type, const string& portname)
 		return newport;
 
 	} else {
-
-		_process_lock.unlock();
 		throw PortRegistrationFailure ();
 	}
 
@@ -1015,6 +1038,8 @@ AudioEngine::connect_to_jack (string client_name)
 	if (status & JackNameNotUnique) {
 		jack_client_name = jack_get_client_name (_jack);
 	}
+
+	jack_set_error_function (ardour_jack_error);
 	
 	return 0;
 }

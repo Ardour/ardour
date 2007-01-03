@@ -199,13 +199,13 @@ class IO : public PBD::StatefulDestructible
 
     static void update_meters();
 
-private: 
+  private: 
 
     static sigc::signal<void>   Meter;
     static Glib::StaticMutex    m_meter_signal_lock;
     sigc::connection            m_meter_connection;
 
-public:
+  public:
 
 	/* automation */
 

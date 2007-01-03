@@ -97,34 +97,6 @@ AudioDiskstream::AudioDiskstream (Session& sess, const XMLNode& node)
 }
 
 void
-AudioDiskstream::init_channel (ChannelInfo &chan)
-{
-	chan.playback_wrap_buffer = 0;
-	chan.capture_wrap_buffer = 0;
-	chan.speed_buffer = 0;
-	chan.peak_power = 0.0f;
-	chan.source = 0;
-	chan.current_capture_buffer = 0;
-	chan.current_playback_buffer = 0;
-	chan.curr_capture_cnt = 0;
-	
-	chan.playback_buf = new RingBufferNPT<Sample> (_session.diskstream_buffer_size());
-	chan.capture_buf = new RingBufferNPT<Sample> (_session.diskstream_buffer_size());
-	chan.capture_transition_buf = new RingBufferNPT<CaptureTransition> (128);
-	
-	
-	/* touch the ringbuffer buffers, which will cause
-	   them to be mapped into locked physical RAM if
-	   we're running with mlockall(). this doesn't do
-	   much if we're not.  
-	*/
-	memset (chan.playback_buf->buffer(), 0, sizeof (Sample) * chan.playback_buf->bufsize());
-	memset (chan.capture_buf->buffer(), 0, sizeof (Sample) * chan.capture_buf->bufsize());
-	memset (chan.capture_transition_buf->buffer(), 0, sizeof (CaptureTransition) * chan.capture_transition_buf->bufsize());
-}
-
-
-void
 AudioDiskstream::init (Diskstream::Flag f)
 {
 	Diskstream::init(f);
@@ -141,44 +113,19 @@ AudioDiskstream::init (Diskstream::Flag f)
 	assert(_n_channels == 1);
 }
 
-void
-AudioDiskstream::destroy_channel (ChannelInfo &chan)
-{
-	if (chan.write_source) {
-		chan.write_source.reset ();
-	}
-		
-	if (chan.speed_buffer) {
-		delete [] chan.speed_buffer;
-	}
-
-	if (chan.playback_wrap_buffer) {
-		delete [] chan.playback_wrap_buffer;
-	}
-	if (chan.capture_wrap_buffer) {
-		delete [] chan.capture_wrap_buffer;
-	}
-	
-	delete chan.playback_buf;
-	delete chan.capture_buf;
-	delete chan.capture_transition_buf;
-	
-	chan.playback_buf = 0;
-	chan.capture_buf = 0;
-}
-
 AudioDiskstream::~AudioDiskstream ()
 {
+	notify_callbacks ();
+
 	{
 		/* don't be holding this lock as we exit the destructor, glib will wince
 		   visibly since the mutex gets destroyed before we release it.
 		*/
 
 		Glib::Mutex::Lock lm (state_lock);
-		
-		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan)
-			destroy_channel((*chan));
-		
+		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
+			(*chan).release ();
+		}
 		channels.clear();
 	}
 }
@@ -2107,15 +2054,19 @@ AudioDiskstream::add_channel ()
 {
 	/* XXX need to take lock??? */
 
-	ChannelInfo chan;
+	/* this copies the ChannelInfo, which currently has no buffers. kind
+	   of pointless really, but we want the channels list to contain
+	   actual objects, not pointers to objects. mostly for convenience,
+	   which isn't much in evidence.
+	*/
 
-	init_channel (chan);
+	channels.push_back (ChannelInfo());
 
-	chan.speed_buffer = new Sample[speed_buffer_size];
-	chan.playback_wrap_buffer = new Sample[wrap_buffer_size];
-	chan.capture_wrap_buffer = new Sample[wrap_buffer_size];
+	/* now allocate the buffers */
 
-	channels.push_back (chan);
+	channels.back().init (_session.diskstream_buffer_size(), 
+			      speed_buffer_size,
+			      wrap_buffer_size);
 
 	_n_channels = channels.size();
 
@@ -2127,10 +2078,8 @@ AudioDiskstream::remove_channel ()
 {
 	if (channels.size() > 1) {
 		/* XXX need to take lock??? */
-		ChannelInfo & chan = channels.back();
-		destroy_channel (chan);
+		channels.back().release ();
 		channels.pop_back();
-
 		_n_channels = channels.size();
 		return 0;
 	}
@@ -2309,4 +2258,83 @@ AudioDiskstream::can_become_destructive (bool& requires_bounce) const
 
 	requires_bounce = false;
 	return true;
+}
+
+AudioDiskstream::ChannelInfo::ChannelInfo ()
+{
+	playback_wrap_buffer = 0;
+	capture_wrap_buffer = 0;
+	speed_buffer = 0;
+	peak_power = 0.0f;
+	source = 0;
+	current_capture_buffer = 0;
+	current_playback_buffer = 0;
+	curr_capture_cnt = 0;
+	playback_buf = 0;
+	capture_buf = 0;
+	capture_transition_buf = 0;
+}
+
+void
+AudioDiskstream::ChannelInfo::init (nframes_t bufsize, nframes_t speed_size, nframes_t wrap_size)
+{
+	speed_buffer = new Sample[speed_size];
+	playback_wrap_buffer = new Sample[wrap_size];
+	capture_wrap_buffer = new Sample[wrap_size];
+
+	playback_buf = new RingBufferNPT<Sample> (bufsize);
+	capture_buf = new RingBufferNPT<Sample> (bufsize);
+	capture_transition_buf = new RingBufferNPT<CaptureTransition> (128);
+	
+	/* touch the ringbuffer buffers, which will cause
+	   them to be mapped into locked physical RAM if
+	   we're running with mlockall(). this doesn't do
+	   much if we're not.  
+	*/
+
+	memset (playback_buf->buffer(), 0, sizeof (Sample) * playback_buf->bufsize());
+	memset (capture_buf->buffer(), 0, sizeof (Sample) * capture_buf->bufsize());
+	memset (capture_transition_buf->buffer(), 0, sizeof (CaptureTransition) * capture_transition_buf->bufsize());
+}
+
+AudioDiskstream::ChannelInfo::~ChannelInfo ()
+{
+}
+
+void
+AudioDiskstream::ChannelInfo::release ()
+{
+	if (write_source) {
+		write_source.reset ();
+	}
+		
+	if (speed_buffer) {
+		delete [] speed_buffer;
+		speed_buffer = 0;
+	}
+
+	if (playback_wrap_buffer) {
+		delete [] playback_wrap_buffer;
+		playback_wrap_buffer = 0;
+	}
+
+	if (capture_wrap_buffer) {
+		delete [] capture_wrap_buffer;
+		capture_wrap_buffer = 0;
+	}
+	
+	if (playback_buf) {
+		delete playback_buf;
+		playback_buf = 0;
+	}
+
+	if (capture_buf) {
+		delete capture_buf;
+		capture_buf = 0;
+	}
+
+	if (capture_transition_buf) {
+		delete capture_transition_buf;
+		capture_transition_buf = 0;
+	}
 }

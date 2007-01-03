@@ -53,6 +53,7 @@ extern "C" int isnan (double);
 extern "C" int isinf (double);
 #endif
 
+#define BLOCK_PROCESS_CALLBACK() Glib::Mutex::Lock em (_session.engine().process_lock())
 
 using namespace std;
 using namespace ARDOUR;
@@ -624,7 +625,7 @@ IO::disconnect_input (Port* our_port, string other_port, void* src)
 	}
 
 	{ 
-		Glib::Mutex::Lock em (_session.engine().process_lock());
+		BLOCK_PROCESS_CALLBACK ();
 		
 		{
 			Glib::Mutex::Lock lm (io_lock);
@@ -660,7 +661,7 @@ IO::connect_input (Port* our_port, string other_port, void* src)
 	}
 
 	{
-		Glib::Mutex::Lock em(_session.engine().process_lock());
+		BLOCK_PROCESS_CALLBACK ();
 		
 		{
 			Glib::Mutex::Lock lm (io_lock);
@@ -694,7 +695,7 @@ IO::disconnect_output (Port* our_port, string other_port, void* src)
 	}
 
 	{
-		Glib::Mutex::Lock em(_session.engine().process_lock());
+		BLOCK_PROCESS_CALLBACK ();
 		
 		{
 			Glib::Mutex::Lock lm (io_lock);
@@ -727,7 +728,8 @@ IO::connect_output (Port* our_port, string other_port, void* src)
 	}
 
 	{
-		Glib::Mutex::Lock em(_session.engine().process_lock());
+		BLOCK_PROCESS_CALLBACK ();
+
 		
 		{
 			Glib::Mutex::Lock lm (io_lock);
@@ -786,7 +788,8 @@ IO::remove_output_port (Port* port, void* src)
 	IOChange change (NoChange);
 
 	{
-		Glib::Mutex::Lock em(_session.engine().process_lock());
+		BLOCK_PROCESS_CALLBACK ();
+
 		
 		{
 			Glib::Mutex::Lock lm (io_lock);
@@ -844,7 +847,8 @@ IO::add_output_port (string destination, void* src, DataType type)
 		type = _default_type;
 
 	{
-		Glib::Mutex::Lock em(_session.engine().process_lock());
+		BLOCK_PROCESS_CALLBACK ();
+
 		
 		{ 
 			Glib::Mutex::Lock lm (io_lock);
@@ -896,7 +900,8 @@ IO::remove_input_port (Port* port, void* src)
 	IOChange change (NoChange);
 
 	{
-		Glib::Mutex::Lock em(_session.engine().process_lock());
+		BLOCK_PROCESS_CALLBACK ();
+
 		
 		{
 			Glib::Mutex::Lock lm (io_lock);
@@ -956,7 +961,7 @@ IO::add_input_port (string source, void* src, DataType type)
 		type = _default_type;
 
 	{
-		Glib::Mutex::Lock em (_session.engine().process_lock());
+		BLOCK_PROCESS_CALLBACK ();
 		
 		{ 
 			Glib::Mutex::Lock lm (io_lock);
@@ -1008,7 +1013,7 @@ int
 IO::disconnect_inputs (void* src)
 {
 	{ 
-		Glib::Mutex::Lock em (_session.engine().process_lock());
+		BLOCK_PROCESS_CALLBACK ();
 		
 		{
 			Glib::Mutex::Lock lm (io_lock);
@@ -1028,7 +1033,7 @@ int
 IO::disconnect_outputs (void* src)
 {
 	{
-		Glib::Mutex::Lock em (_session.engine().process_lock());
+		BLOCK_PROCESS_CALLBACK ();
 		
 		{
 			Glib::Mutex::Lock lm (io_lock);
@@ -1090,7 +1095,7 @@ IO::ensure_inputs_locked (uint32_t n, bool clear, void* src)
 			setup_peak_meters ();
 			reset_panner ();
 			/* pass it on */
-			throw err;
+			throw AudioEngine::PortRegistrationFailure();
 		}
 		
 		_inputs.push_back (input_port);
@@ -1140,7 +1145,7 @@ IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
 	}
 
 	{
-		Glib::Mutex::Lock em (_session.engine().process_lock());
+		BLOCK_PROCESS_CALLBACK ();
 		Glib::Mutex::Lock lm (io_lock);
 
 		Port* port;
@@ -1195,7 +1200,7 @@ IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
 				setup_peak_meters ();
 				reset_panner ();
 				/* pass it on */
-				throw err;
+				throw AudioEngine::PortRegistrationFailure();
 			}
 		
 			_inputs.push_back (port);
@@ -1228,7 +1233,7 @@ IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
 				setup_peak_meters ();
 				reset_panner ();
 				/* pass it on */
-				throw err;
+				throw AudioEngine::PortRegistrationFailure ();
 			}
 		
 			_outputs.push_back (port);
@@ -1289,7 +1294,7 @@ IO::ensure_inputs (uint32_t n, bool clear, bool lockit, void* src)
 	}
 	
 	if (lockit) {
-		Glib::Mutex::Lock em (_session.engine().process_lock());
+		BLOCK_PROCESS_CALLBACK ();
 		Glib::Mutex::Lock im (io_lock);
 		changed = ensure_inputs_locked (n, clear, src);
 	} else {
@@ -1391,7 +1396,7 @@ IO::ensure_outputs (uint32_t n, bool clear, bool lockit, void* src)
 	/* XXX caller should hold io_lock, but generally doesn't */
 
 	if (lockit) {
-		Glib::Mutex::Lock em (_session.engine().process_lock());
+		BLOCK_PROCESS_CALLBACK ();
 		Glib::Mutex::Lock im (io_lock);
 		changed = ensure_outputs_locked (n, clear, src);
 	} else {
@@ -2191,7 +2196,7 @@ IO::use_input_connection (Connection& c, void* src)
 	uint32_t limit;
 
 	{
-		Glib::Mutex::Lock lm (_session.engine().process_lock());
+		BLOCK_PROCESS_CALLBACK ();
 		Glib::Mutex::Lock lm2 (io_lock);
 		
 		limit = c.nports();
@@ -2269,7 +2274,7 @@ IO::use_output_connection (Connection& c, void* src)
 	uint32_t limit;	
 
 	{
-		Glib::Mutex::Lock lm (_session.engine().process_lock());
+		BLOCK_PROCESS_CALLBACK ();
 		Glib::Mutex::Lock lm2 (io_lock);
 
 		limit = c.nports();

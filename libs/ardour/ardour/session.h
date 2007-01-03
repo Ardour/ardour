@@ -933,6 +933,7 @@ class Session : public PBD::StatefulDestructible
 	
   private:
 	int  create (bool& new_session, string* mix_template, nframes_t initial_length);
+	void destroy ();
 
 	nframes_t compute_initial_length ();
 
