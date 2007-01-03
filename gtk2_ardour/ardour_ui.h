@@ -666,6 +666,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void toggle_control_protocol (ARDOUR::ControlProtocolInfo*);
 	void toggle_control_protocol_feedback (ARDOUR::ControlProtocolInfo*, const char* group_name, std::string action_name);
+
+	bool can_save_keybindings;
+	bool first_idle ();
 };
 
 #endif /* __ardour_gui_h__ */

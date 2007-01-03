@@ -165,6 +165,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	last_speed_displayed = -1.0f;
 	keybindings_path = ARDOUR::find_config_file ("ardour.bindings");
 
+	can_save_keybindings = false;
+	Glib::signal_idle().connect (mem_fun (*this, &ARDOUR_UI::first_idle));
+
 	last_configure_time.tv_sec = 0;
 	last_configure_time.tv_usec = 0;
 
@@ -2423,5 +2426,14 @@ ARDOUR_UI::set_keybindings_path (string path)
 void
 ARDOUR_UI::save_keybindings ()
 {
-	AccelMap::save (keybindings_path);
+	if (can_save_keybindings) {
+		AccelMap::save (keybindings_path);
+	} 
+}
+
+bool
+ARDOUR_UI::first_idle ()
+{
+	can_save_keybindings = true;
+	return false;
 }
