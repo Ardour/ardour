@@ -5,6 +5,6 @@ import glob
 pixmap_files = glob.glob('*.xpm')
 
 Import('env install_prefix')
-env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour/pixmaps'), pixmap_files))
+env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour', 'pixmaps'), pixmap_files))
 
 env.Alias('tarball', env.Distribute(env['DISTTREE'], [ 'SConscript' ] + pixmap_files))

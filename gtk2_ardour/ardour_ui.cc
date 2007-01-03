@@ -1813,14 +1813,6 @@ This prevents the session from being loaded."));
 		new_session = new Session (*engine, path, snap_name, mix_template);
 	}
 
-	/* handle this one in a different way than all others, so that its clear what happened */
-	
-	catch (AudioEngine::PortRegistrationFailure& err) {
-		error << _("Unable to create all required ports")
-		      << endmsg;
-		return -1;
-	}
-
 	catch (...) {
 
 		error << string_compose(_("Session \"%1 (snapshot %2)\" did not load successfully"), path, snap_name) << endmsg;

@@ -272,6 +272,7 @@ tt = gtkmmtests.Program(target = 'tt', source = tt_files)
 
 my_subst_dict = { }
 my_subst_dict['%INSTALL_PREFIX%'] = final_prefix
+my_subst_dict['%LIBDIR%'] = env['LIBDIR']
 
 ardoursh = env.SubstInFile ('ardour.sh','ardour.sh.in', SUBST_DICT = my_subst_dict);
 env.AddPostAction (ardoursh, Chmod ('$TARGET', 0755))
@@ -279,7 +280,7 @@ env.AddPostAction (ardoursh, Chmod ('$TARGET', 0755))
 if env['VST']:
 	Default(ardourlib)
 	# the library - into the library dir
-	env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), ardourlib))
+	env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), ardourlib))
 else:
 
 	if env['VERSIONED']:
@@ -290,7 +291,7 @@ else:
         #install
 
 	# the executable - into the library dir
-	env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), ardour))
+	env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), ardour))
 	# the script - into the bin dir
 	env.Alias('install', env.InstallAs(os.path.join(install_prefix, 'bin')+'/ardour2', ardoursh))
 
@@ -303,9 +304,9 @@ env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.bindings'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.colors'))
 # data files
-env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2'), 'splash.png'))
-env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/pixmaps'), pixmap_files))
-env.Alias('install', env.Install(os.path.join(install_prefix, 'share/ardour2/icons'), icon_files))
+env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour2'), 'splash.png'))
+env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour2', 'pixmaps'), pixmap_files))
+env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour2', 'icons'), icon_files))
 
 env.Alias ('version', gtkardour.VersionBuild(['version.cc','version.h'], []))
 		

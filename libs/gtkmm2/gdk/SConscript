@@ -14,7 +14,7 @@ gdkmm2.Append(CXXFLAGS="-Ilibs/gtkmm2/gtk")
 libgdkmm2 = gdkmm2.SharedLibrary('gdkmm2', gdkmm2_files)
 Default(libgdkmm2)
 
-env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libgdkmm2))
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), libgdkmm2))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'SConscript', 'gdkmmconfig.h', 'gdkmm.h'] + 

@@ -15,7 +15,7 @@ libglade = libglademm.SharedLibrary('libglademm', libglademm_files)
 
 Default(libglade)
 
-env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libglade))
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), libglade))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'SConscript', 'libglademmconfig.h', 'libglademm.h'] +

@@ -32,7 +32,7 @@ sndfile_h = sndfile.Command('src/sndfile.h', ['src/sndfile.h.in'], 'cd libs/libs
 
 Default([sndfile_h,libsndfile])
 
-env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libsndfile))
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), libsndfile))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'NEWS', 'README', 'AUTHORS', 'ChangeLog',

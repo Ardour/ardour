@@ -631,6 +631,13 @@ if env['FPU_OPTIMIZATION']:
             print "\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)"
 # end optimization section
 
+# handle x86/x86_64 libdir properly
+
+if env['DIST_TARGET'] == 'x86_64':
+    env['LIBDIR']='lib64'
+else:
+    env['LIBDIR']='lib'
+
 #
 # save off guessed arch element in an env
 #
