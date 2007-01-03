@@ -51,13 +51,13 @@ print_help (const char *execname)
 	     << _("  -n, --show-splash                Show splash screen\n")
 	     << _("  -c, --name  name                 Use a specific jack client name, default is ardour\n")
 	     << _("  -N, --new session-name           Create a new session from the command line\n")                       
-	     << _("  -o, --use-hw-optimizations        Try to use h/w specific optimizations\n")
+	     << _("  -O, --no-hw-optimizations        Disable h/w specific optimizations\n")
 #ifdef VST_SUPPORT
 	     << _("  -V, --novst                      Do not use VST support\n")
 #endif
 	     << _("  [session-name]                   Name of session to load\n")
 	     << _("  -C, --curvetest filename         Curve algorithm debugger\n")
-	     << _("  -k, --keybindings filename       Name of key bindings to load (default is ~/.ardour2/ardour.bindings)")
+	     << _("  -k, --keybindings filename       Name of key bindings to load (default is ~/.ardour2/ardour.bindings)\n")
 		;
 	return 1;
 
@@ -67,7 +67,7 @@ int
 GTK_ARDOUR::parse_opts (int argc, char *argv[])
 
 {
-	const char *optstring = "U:hbvVnoc:C:N:k:";
+	const char *optstring = "U:hbvVnOc:C:N:k:";
 	const char *execname = strrchr (argv[0], '/');
 
 	if (execname == 0) {
