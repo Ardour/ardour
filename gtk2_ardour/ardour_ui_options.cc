@@ -587,10 +587,8 @@ ARDOUR_UI::map_meter_falloff ()
 {
 	const char* action = X_("MeterFalloffMedium");
 
-	/* XXX hack alert. Fix this. Please */
-
 	float val = Config->get_meter_falloff ();
-	MeterFalloff code = (MeterFalloff) (int) (floor (val));
+	MeterFalloff code = meter_falloff_from_float(val);
 
 	switch (code) {
 	case MeterFalloffOff:

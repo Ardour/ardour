@@ -394,25 +394,65 @@ slave_source_to_string (SlaveSource src)
 	}
 }
 
+/* I don't really like hard-coding these falloff rates here
+ * Probably should use a map of some kind that could be configured
+ * These rates are db/sec.
+*/
+
+#define METER_FALLOFF_OFF     0.0f
+#define METER_FALLOFF_SLOWEST 6.6f // BBC standard
+#define METER_FALLOFF_SLOW    8.6f // BBC standard
+#define METER_FALLOFF_MEDIUM  20.0f
+#define METER_FALLOFF_FAST    32.0f
+#define METER_FALLOFF_FASTER  46.0f
+#define METER_FALLOFF_FASTEST 70.0f
+
 float
 meter_falloff_to_float (MeterFalloff falloff)
 {
 	switch (falloff) {
 	case MeterFalloffOff:
-		return 0.0f;
+		return METER_FALLOFF_OFF;
 	case MeterFalloffSlowest:
-		return 1.0f;
+		return METER_FALLOFF_SLOWEST;
 	case MeterFalloffSlow:
-		return 2.0f;
+		return METER_FALLOFF_SLOW;
 	case MeterFalloffMedium:
-		return 3.0f;
+		return METER_FALLOFF_MEDIUM;
 	case MeterFalloffFast:
-		return 4.0f;
+		return METER_FALLOFF_FAST;
 	case MeterFalloffFaster:
-		return 5.0f;
+		return METER_FALLOFF_FASTER;
 	case MeterFalloffFastest:
+		return METER_FALLOFF_FASTEST;
 	default:
-		return 6.0f;
+		return METER_FALLOFF_FAST;
+	}
+}
+
+MeterFalloff
+meter_falloff_from_float (float val)
+{
+	if (val == METER_FALLOFF_OFF) {
+		return MeterFalloffOff;
+	}
+	else if (val <= METER_FALLOFF_SLOWEST) {
+		return MeterFalloffSlowest;
+	}
+	else if (val <= METER_FALLOFF_SLOW) {
+		return MeterFalloffSlow;
+	}
+	else if (val <= METER_FALLOFF_MEDIUM) {
+		return MeterFalloffMedium;
+	}
+	else if (val <= METER_FALLOFF_FAST) {
+		return MeterFalloffFast;
+	}
+	else if (val <= METER_FALLOFF_FASTER) {
+		return MeterFalloffFaster;
+ 	}
+	else {
+		return MeterFalloffFastest;
 	}
 }
 

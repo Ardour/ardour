@@ -66,6 +66,8 @@ const char* edit_mode_to_string (ARDOUR::EditMode);
 ARDOUR::EditMode string_to_edit_mode (std::string);
 
 float meter_falloff_to_float (ARDOUR::MeterFalloff);
+ARDOUR::MeterFalloff meter_falloff_from_float (float);
+float meter_falloff_to_db_per_sec (float);
 float meter_hold_to_float (ARDOUR::MeterHold);
 
 #if defined(HAVE_COREAUDIO) || defined(HAVE_AUDIOUNITS)

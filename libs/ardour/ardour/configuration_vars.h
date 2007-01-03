@@ -103,7 +103,7 @@ CONFIG_VARIABLE (float, video_pullup, "video-pullup", 0.0f)
 /* metering */
 
 CONFIG_VARIABLE (float, meter_hold, "meter-hold", 100.0f)
-CONFIG_VARIABLE (float, meter_falloff, "meter-falloff", 0.375f)
+CONFIG_VARIABLE (float, meter_falloff, "meter-falloff", 27.0f)
 CONFIG_VARIABLE (nframes_t, over_length_short, "over-length-short", 2)
 CONFIG_VARIABLE (nframes_t, over_length_long, "over-length-long", 10)
 

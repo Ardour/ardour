@@ -2428,13 +2428,24 @@ IO::reset_peak_meters ()
 }
 
 void
+IO::reset_max_peak_meters ()
+{
+	uint32_t limit = max (_ninputs, _noutputs);
+
+	for (uint32_t i = 0; i < limit; ++i) {
+		_max_peak_power[i] = -INFINITY;
+	}
+}
+
+void
 IO::setup_peak_meters ()
 {
 	uint32_t limit = max (_ninputs, _noutputs);
 
 	while (_peak_power.size() < limit) {
 		_peak_power.push_back (0);
-		_visible_peak_power.push_back (0);
+		_visible_peak_power.push_back (-INFINITY);
+		_max_peak_power.push_back (-INFINITY);
 	}
 }
 
@@ -2468,20 +2479,25 @@ IO::meter ()
 
  		float new_peak = _peak_power[n];
 		_peak_power[n] = 0;
-		
+
 		/* compute new visible value using falloff */
 
-		if (new_peak > 0.0) {
+		if (new_peak > 0.0f) {
 			new_peak = coefficient_to_dB (new_peak);
 		} else {
-			new_peak = minus_infinity();
+			new_peak = -INFINITY;
 		}
+
+		/* update max peak */
+		
+		_max_peak_power[n] = max (new_peak, _max_peak_power[n]);
+		
 		
 		if (Config->get_meter_falloff() == 0.0f || new_peak > _visible_peak_power[n]) {
 			_visible_peak_power[n] = new_peak;
 		} else {
-			// do falloff
-			new_peak = _visible_peak_power[n] - Config->get_meter_falloff();
+			// do falloff, the config value is in dB/sec, we get updated at 100/sec currently (should be a var somewhere)
+			new_peak = _visible_peak_power[n] - (Config->get_meter_falloff() * 0.01f);
 			_visible_peak_power[n] = max (new_peak, -INFINITY);
 		}
 	}

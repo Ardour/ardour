@@ -845,7 +845,10 @@ Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* 
 			_peak_power.push_back(0);
 		}
 		while (_visible_peak_power.size() < potential_max_streams) {
-			_visible_peak_power.push_back(0);
+			_visible_peak_power.push_back(-INFINITY);
+		}
+		while (_max_peak_power.size() < potential_max_streams) {
+			_max_peak_power.push_back(-INFINITY);
 		}
 
 		_redirects.push_back (redirect);
@@ -903,7 +906,10 @@ Route::add_redirects (const RedirectList& others, void *src, uint32_t* err_strea
 				_peak_power.push_back(0);
 			}
 			while (_visible_peak_power.size() < potential_max_streams) {
-				_visible_peak_power.push_back(0);
+				_visible_peak_power.push_back(-INFINITY);
+			}
+			while (_max_peak_power.size() < potential_max_streams) {
+				_max_peak_power.push_back(-INFINITY);
 			}
 
 			_redirects.push_back (*i);

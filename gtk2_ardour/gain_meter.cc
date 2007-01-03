@@ -312,7 +312,7 @@ GainMeter::update_meters ()
 {
 	vector<MeterInfo>::iterator i;
 	uint32_t n;
-	float peak;
+	float peak, mpeak;
 	char buf[32];
 	
 	for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
@@ -320,9 +320,11 @@ GainMeter::update_meters ()
 			peak = _io->peak_input_power (n);
 
 			(*i).meter->set (log_meter (peak), peak);
-						
-			if (peak > max_peak) {
-				max_peak = peak;
+
+			mpeak = _io->max_peak_power(n);
+			
+			if (mpeak > max_peak) {
+				max_peak = mpeak;
 				/* set peak display */
 				if (max_peak <= -200.0f) {
 					peak_display.set_text (_("-inf"));
@@ -478,7 +480,12 @@ GainMeter::peak_button_release (GdkEventButton* ev)
 void
 GainMeter::reset_peak_display ()
 {
-	max_peak = minus_infinity();
+	Route * r;
+	if ((r = dynamic_cast<Route*> (_io.get())) != 0) {
+		r->reset_max_peak_meters();
+	}
+
+	max_peak = -INFINITY;
 	peak_display.set_text (_("-Inf"));
 	peak_display.set_name ("MixerStripPeakDisplay");
 }

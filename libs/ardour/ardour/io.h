@@ -197,6 +197,19 @@ class IO : public PBD::StatefulDestructible
 		}
 	}
 
+	float max_peak_power (uint32_t n) {
+		if (_ninputs == 0) {
+			return minus_infinity();
+		} else if (n < std::max (_ninputs, _noutputs)) {
+			return _max_peak_power[n];
+		} else {
+			return minus_infinity();
+		}
+	}
+
+	void reset_max_peak_meters ();
+
+	
     static void update_meters();
 
   private: 
@@ -272,6 +285,7 @@ class IO : public PBD::StatefulDestructible
 	vector<Port*>       _inputs;
 	vector<float>       _peak_power;
 	vector<float>       _visible_peak_power;
+	vector<float>       _max_peak_power;
 	string              _name;
 	Connection*         _input_connection;
 	Connection*         _output_connection;
