@@ -55,6 +55,7 @@
 #include <pbd/pthread_utils.h>
 #include <pbd/strsplit.h>
 #include <pbd/stacktrace.h>
+#include <pbd/copyfile.h>
 
 #include <ardour/audioengine.h>
 #include <ardour/configuration.h>
@@ -604,29 +605,7 @@ Session::save_state (string snapshot_name, bool pending)
 		bak_path += ".bak";
 		
 		if (g_file_test (xml_path.c_str(), G_FILE_TEST_EXISTS)) {
-
-			// Make backup of state file
-		
-			ifstream in (xml_path.c_str());
-			ofstream out (bak_path.c_str());
-
-			if (!in) {
-				error << string_compose (_("Could not open existing session file %1 for backup"), xml_path) << endmsg;
-				return -1;
-			}
-
-			if (!out) {
-				error << string_compose (_("Could not open backup session file %1"), bak_path) << endmsg;
-				return -1;
-			}
-
-			out << in.rdbuf();
-
-			if (!in || !out) {
-				error << string_compose (_("Could not copy existing session file %1 to %2 for backup"), xml_path, bak_path) << endmsg;
-				unlink (bak_path.c_str());
-				return -1;
-			}
+			copy_file (xml_path, bak_path);
 		}
 
 	} else {
@@ -730,15 +709,52 @@ Session::load_state (string snapshot_name)
 
 	set_dirty();
 
-	if (state_tree->read (xmlpath)) {
-		return 0;
-	} else {
+	if (!state_tree->read (xmlpath)) {
 		error << string_compose(_("Could not understand ardour file %1"), xmlpath) << endmsg;
+		delete state_tree;
+		state_tree = 0;
+		return -1;
 	}
 
-	delete state_tree;
-	state_tree = 0;
-	return -1;
+	XMLNode& root (*state_tree->root());
+	
+	if (root.name() != X_("Session")) {
+		error << string_compose (_("Session file %1 is not an Ardour session"), xmlpath) << endmsg;
+		delete state_tree;
+		state_tree = 0;
+		return -1;
+	}
+
+	const XMLProperty* prop;
+	bool is_old = false;
+
+	if ((prop = root.property ("version")) == 0) {
+		/* no version implies very old version of Ardour */
+		is_old = true;
+	} else {
+		int major_version;
+		major_version = atoi (prop->value()); // grab just the first number before the period
+		if (major_version < 2) {
+			is_old = true;
+		}
+	}
+
+	if (is_old) {
+		string backup_path;
+
+		backup_path = xmlpath;
+		backup_path += ".1";
+
+		info << string_compose (_("Copying old session file %1 to %2\nUse %2 with Ardour versions before 2.0 from now on"),
+					xmlpath, backup_path) 
+		     << endmsg;
+
+		copy_file (xmlpath, backup_path);
+
+		/* if it fails, don't worry. right? */
+	}
+
+	return 0;
 }
 
 int

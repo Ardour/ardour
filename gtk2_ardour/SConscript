@@ -4,7 +4,7 @@ import os
 import os.path
 import glob
 
-Import('env install_prefix final_prefix config_prefix libraries i18n version')
+Import('env install_prefix final_prefix config_prefix libraries i18n ardour_version')
 
 gtkardour = env.Copy()
 gtkmmtests = env.Copy()
@@ -260,7 +260,7 @@ versionflag = '-DVERSIONSTRING=\\\"' + env['VERSION'] + '\\\"'
 
 gtkardour.Append(CXXFLAGS=versionflag)
 
-executable = 'ardour.bin'
+executable = 'ardour-' + ardour_version
 
 ardour = gtkardour.Program(target = executable, source = gtkardour_files + extra_sources)
 ardourlib = gtkardour.SharedLibrary(target = 'ardourgtk', source = gtkardour_files + extra_sources)
@@ -273,9 +273,16 @@ tt = gtkmmtests.Program(target = 'tt', source = tt_files)
 my_subst_dict = { }
 my_subst_dict['%INSTALL_PREFIX%'] = final_prefix
 my_subst_dict['%LIBDIR%'] = env['LIBDIR']
+my_subst_dict['%VERSION%'] = ardour_version
 
 ardoursh = env.SubstInFile ('ardour.sh','ardour.sh.in', SUBST_DICT = my_subst_dict);
 env.AddPostAction (ardoursh, Chmod ('$TARGET', 0755))
+
+ardourdev = env.SubstInFile ('ardev','ardev.in', SUBST_DICT = my_subst_dict);
+env.AddPostAction (ardourdev, Chmod ('$TARGET', 0755))
+
+Default(ardourdev)
+Default(ardoursh)
 
 if env['VST']:
 	Default(ardourlib)

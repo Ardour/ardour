@@ -20,8 +20,9 @@ pbd.Append(POTFILE=domain + '.pot')
 pbd_files = Split("""
 basename.cc
 base_ui.cc
-convert.cc
 command.cc
+convert.cc
+copyfile.cc
 controllable.cc
 enumwriter.cc
 dmalloc.cc

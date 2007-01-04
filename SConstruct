@@ -16,7 +16,7 @@ import SCons.Node.FS
 SConsignFile()
 EnsureSConsVersion(0, 96)
 
-version = '2.0beta10'
+ardour_version = '2.0beta10'
 
 subst_dict = { }
 
@@ -76,11 +76,11 @@ class LibraryInfo(Environment):
 
 env = LibraryInfo (options = opts,
                    CPPPATH = [ '.' ],
-                   VERSION = version,
-                   TARBALL='ardour-' + version + '.tar.bz2',
+                   VERSION = ardour_version,
+                   TARBALL='ardour-' + ardour_version + '.tar.bz2',
                    DISTFILES = [ ],
-                   DISTTREE  = '#ardour-' + version,
-                   DISTCHECKDIR = '#ardour-' + version + '/check'
+                   DISTTREE  = '#ardour-' + ardour_version,
+                   DISTCHECKDIR = '#ardour-' + ardour_version + '/check'
                    )
 
 env.ENV_update(os.environ)
@@ -1034,7 +1034,7 @@ env = conf.Finish()
 if env['NLS'] == 1:
     env.Append(CCFLAGS="-DENABLE_NLS")
 
-Export('env install_prefix final_prefix config_prefix final_config_prefix libraries i18n version subst_dict')
+Export('env install_prefix final_prefix config_prefix final_config_prefix libraries i18n ardour_version subst_dict')
 
 #
 # the configuration file may be system dependent
