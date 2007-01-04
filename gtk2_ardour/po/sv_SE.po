@@ -553,7 +553,7 @@ msgstr "fil"
 
 #: ../ardour_ui.cc:2030
 msgid "Are you sure you want to cleanup?"
-msgstr "Är du säker på att du vill göra en rensning?"
+msgstr "Är du säker på att du vill rensa upp?"
 
 #: ../ardour_ui.cc:2035
 msgid ""
@@ -562,17 +562,17 @@ msgid ""
 "After cleanup, unused audio files will be moved to a \"dead sounds\" "
 "location."
 msgstr ""
-"Rensning är en destruktiv funktion.\n"
-"ALL ångra-/gör om-information kommer att förloras om du rensar.\n"
+"Att rensa är en destruktiv funktion.\n"
+"ALL ångra-/gör om-information kommer att gå förlorad om du rensar.\n"
 "Oanvända filer kommer att flyttas till en \"döda ljud\"-plats."
 
 #: ../ardour_ui.cc:2041
 msgid "Clean Up"
-msgstr "Rensning"
+msgstr "Rensa upp"
 
 #: ../ardour_ui.cc:2044
 msgid "CleanupDialog"
-msgstr "Rensningsdialog"
+msgstr "Rensadialog"
 
 #: ../ardour_ui.cc:2045
 msgid "ardour_cleanup"
@@ -596,7 +596,7 @@ msgstr ""
 "och har flyttats till:\n"
 "%3. \n"
 "\n"
-"Tömma papperskorgen kommer att \n"
+"Att tömma papperskorgen kommer att \n"
 "frigöra ytterligarel\n"
 "%4 %5byte diskutrymme.\n"
 
@@ -616,7 +616,7 @@ msgstr ""
 
 #: ../ardour_ui.cc:2214
 msgid "Recording was stopped because your system could not keep up."
-msgstr "Inspelningen avstannades eftersom ditt system inte kunde hänga med."
+msgstr "Inspelningen stoppades eftersom ditt system inte kunde hänga med."
 
 #: ../ardour_ui.cc:2237
 msgid ""
@@ -932,7 +932,7 @@ msgstr "Återanslut"
 
 #: ../ardour_ui_ed.cc:146 ../mixer_strip.cc:497 ../mixer_strip.cc:565
 msgid "Disconnect"
-msgstr "Koppla ifrån"
+msgstr "Koppla från"
 
 #: ../ardour_ui_ed.cc:173
 msgid "Windows"
@@ -1082,11 +1082,11 @@ msgstr "Gå till slutet"
 
 #: gtk2_ardour/ardour_ui.cc:119 gtk2_ardour/ardour_ui_ed.cc:267
 msgid "Punch In"
-msgstr "Punch-in"
+msgstr "Inslag"
 
 #: gtk2_ardour/ardour_ui.cc:120 gtk2_ardour/ardour_ui_ed.cc:270
 msgid "Punch Out"
-msgstr "Punch-ut"
+msgstr "Utslag"
 
 #: gtk2_ardour/ardour_ui.cc:121 gtk2_ardour/ardour_ui_ed.cc:282
 msgid "Auto Return"
@@ -1371,6 +1371,11 @@ msgstr "Nya fulla övertoningar är påslagna"
 msgid "ST"
 msgstr "HT"
 
+#: gtk2_ardour/audio_clock.cc:1796 gtk2_ardour/editor.cc:180
+msgid "Timecode"
+msgstr "Tidskod"
+
+
 #: ../ardour_ui_options.cc:407 ../ardour_ui_options.cc:417
 #: ../ardour_ui_options.cc:484
 msgid "Internal"
@@ -1560,10 +1565,18 @@ msgstr "Efter inspelningstiden"
 msgid "Alignment"
 msgstr "Justera"
 
+#: gtk2_ardour/route_time_axis.cc:458
+msgid "Normal mode"
+msgstr "Normalt läge"
+
+#: gtk2_ardour/route_time_axis.cc:461
+msgid "Tape mode"
+msgstr "Band-läge"
+
 #: ../audio_time_axis.cc:787 ../editor.cc:526 ../editor_actions.cc:59
 #: ../mixer_strip.cc:1000 ../mixer_ui.cc:110
 msgid "Active"
-msgstr "Aktiva"
+msgstr "Aktiv"
 
 #: ../audio_time_axis.cc:792 ../editor.cc:1921 ../editor_actions.cc:319
 #: ../editor_markers.cc:507 ../imageframe_time_axis.cc:258
@@ -1633,7 +1646,7 @@ msgstr "ta bort kontrollpunkt"
 
 #: ../automation_time_axis.cc:32 ../editor_ops.cc:2886
 msgid "clear"
-msgstr "rensa"
+msgstr "Rensa"
 
 #: ../automation_time_axis.cc:74
 msgid "track height"
@@ -1661,7 +1674,7 @@ msgstr "Manuell"
 #: ../gain_meter.cc:173 ../panner_ui.cc:90 ../plugin_ui.cc:394
 #: ../plugin_ui.cc:636 ../sfdb_ui.cc:55
 msgid "Play"
-msgstr "Spela"
+msgstr "Uppspelning"
 
 #: ../automation_time_axis.cc:187 ../automation_time_axis.cc:234
 #: ../automation_time_axis.cc:468 ../gain_meter.cc:175 ../panner_ui.cc:92
@@ -2109,8 +2122,8 @@ msgstr "Zoom-räckvidd"
 
 #: ../editor.cc:501 ../editor.cc:527 ../editor_actions.cc:61 ../mixer_ui.cc:85
 #: ../mixer_ui.cc:111
-msgid "Visible"
-msgstr "Synliga"
+msgid "Show"
+msgstr "Visa"
 
 #: ../editor.cc:502 ../editor.cc:525
 msgid "Name"
@@ -2263,6 +2276,10 @@ msgstr "Analysera regioner"
 msgid "Lock"
 msgstr "Lås"
 
+#: gtk2_ardour/editor.cc:1755
+msgid "Opaque"
+msgstr "Ogenomskinlig"
+
 #: ../editor.cc:1852
 msgid "Unlock"
 msgstr "Lås upp"
@@ -2270,6 +2287,18 @@ msgstr "Lås upp"
 #: ../editor.cc:1862
 msgid "Original position"
 msgstr "Ursprunglig position"
+
+#: gtk2_ardour/editor.cc:1773
+msgid "Reset Envelope"
+msgstr "Nollställ konvolut"
+
+#: gtk2_ardour/editor.cc:1775
+msgid "Envelope Visible"
+msgstr "Konvolut synligt"
+
+#: gtk2_ardour/editor.cc:1782
+msgid "Envelope Active"
+msgstr "Konvolut aktivt"
 
 #: ../editor.cc:1868
 msgid "Toggle envelope visibility"
@@ -2295,6 +2324,10 @@ msgstr "Motsatt riktning"
 #: ../editor.cc:1884
 msgid "Add Range Markers"
 msgstr "Lägg till omfångsmarkörer"
+
+#: gtk2_ardour/editor.cc:1804
+msgid "Set Range Selection"
+msgstr "Definiera omfångsmarkering"
 
 #: ../editor.cc:1885
 msgid "Set Range"
@@ -2683,6 +2716,26 @@ msgstr "Automatisk anslutning"
 msgid "Layering"
 msgstr "Lager"
 
+#: gtk2_ardour/editor_actions.cc:43
+msgid "Timecode fps"
+msgstr "Tidskod-FPS"
+
+#: gtk2_ardour/editor_actions.cc:44
+msgid "Pullup / Pulldown"
+msgstr "Uppåtdrag / Nedåtdrag"
+
+#: gtk2_ardour/editor_actions.cc:45
+msgid "Subframes"
+msgstr "Underrutor"
+
+#: gtk2_ardour/editor_actions.cc:388
+msgid "29.97 drop"
+msgstr "29.97 fall"
+
+#: gtk2_ardour/editor_actions.cc:390
+msgid "30 drop"
+msgstr "30 fall"
+
 #: ../editor_actions.cc:41
 msgid "Metering"
 msgstr "Nivåmätning"
@@ -2782,7 +2835,7 @@ msgstr "Redigeringsmarkören till regionslutet"
 
 #: ../editor_actions.cc:104 ../editor_ops.cc:1364
 msgid "select all"
-msgstr "välj allt"
+msgstr "Välj allt"
 
 #: ../editor_actions.cc:106
 msgid "Select All After Edit Cursor"
@@ -2991,7 +3044,7 @@ msgstr "Normalisera region"
 
 #: ../editor_actions.cc:232
 msgid "crop"
-msgstr "beskär"
+msgstr "Beskär"
 
 #: ../editor_actions.cc:234
 msgid "Insert Chunk"
@@ -3262,6 +3315,14 @@ msgstr "Senast flyttade/tillagda är högre"
 #: ../editor_actions.cc:391
 msgid "Most Recently Added is Higher"
 msgstr "Senast tillagda är högre"
+
+#: gtk2_ardour/editor_actions.cc:408
+msgid "80 per frame"
+msgstr "80 per ruta"
+
+#: gtk2_ardour/editor_actions.cc:409
+msgid "100 per frame"
+msgstr "100 per ruta"
 
 #: ../editor_audio_import.cc:72
 msgid "You can't import or embed an audiofile until you have a session loaded."
@@ -4242,19 +4303,19 @@ msgstr ""
 
 #: ../gain_meter.cc:776 ../mixer_strip.cc:770 ../panner_ui.cc:770
 msgid "O"
-msgstr ""
+msgstr "A"
 
 #: ../gain_meter.cc:779 ../panner_ui.cc:773
 msgid "P"
-msgstr ""
+msgstr "U"
 
 #: ../gain_meter.cc:782 ../panner_ui.cc:776
 msgid "T"
-msgstr ""
+msgstr "B"
 
 #: ../gain_meter.cc:785 ../panner_ui.cc:779
 msgid "W"
-msgstr ""
+msgstr "S"
 
 #: ../gtk-custom-ruler.c:126
 msgid "Lower"
@@ -4664,7 +4725,7 @@ msgstr "Nytt namn för taktart"
 
 #: ../mixer_strip.cc:94 ../mixer_strip.cc:140 ../mixer_strip.cc:1227
 msgid "pre"
-msgstr "för"
+msgstr "pre"
 
 #: ../mixer_strip.cc:95 ../mixer_strip.cc:822
 msgid "Comments"
@@ -4676,18 +4737,18 @@ msgstr "Ingång"
 
 #: ../mixer_strip.cc:136 ../mixer_strip.cc:1223
 msgid "input"
-msgstr "ingång"
+msgstr "in"
 
 #: ../mixer_strip.cc:144 ../mixer_strip.cc:1231
 msgid "post"
-msgstr "efter"
+msgstr "post"
 
 #. TRANSLATORS: this string should be longest of the strings
 #. used to describe meter points. In english, its "input".
 #.
 #: ../mixer_strip.cc:152
 msgid "tupni"
-msgstr "gnågni"
+msgstr "ni"
 
 #: ../mixer_strip.cc:207
 msgid "Varispeed"
@@ -4703,7 +4764,7 @@ msgstr "okänd strip-bredd \"%1\" i XML-GUI-informationen"
 
 #: ../mixer_strip.cc:417
 msgid "record"
-msgstr "spela in"
+msgstr "Spela in"
 
 #: ../mixer_strip.cc:418 ../region_editor.cc:46
 msgid "mute"
@@ -5431,7 +5492,7 @@ msgstr "Aktivera alla"
 
 #: ../redirect_box.cc:1075
 msgid "Deactivate all"
-msgstr "Aktivera alla"
+msgstr "Avaktivera alla"
 
 #: ../region_editor.cc:44
 msgid "NAME:"
@@ -5450,8 +5511,8 @@ msgid "active"
 msgstr "aktivt"
 
 #: ../region_editor.cc:49
-msgid "visible"
-msgstr "synligt"
+msgid "show"
+msgstr "visa"
 
 #: ../region_editor.cc:52
 msgid "Layer"
