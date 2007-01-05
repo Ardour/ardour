@@ -26,7 +26,6 @@
 
 #include <pbd/convert.h>
 #include <pbd/tokenizer.h>
-#include <pbd/whitespace.h>
 
 #include <gtkmm2ext/utils.h>
 
@@ -298,6 +297,8 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s)
 	notebook.append_page (chooser, _("Files"));
 	notebook.append_page (*vbox, _("Tags"));
 
+	found_list_view.get_selection()->set_mode (Gtk::SELECTION_MULTIPLE);
+
 	filter.add_custom (Gtk::FILE_FILTER_FILENAME, mem_fun(*this, &SoundFileBrowser::on_custom));
 	chooser.set_filter (filter);
 	chooser.set_select_multiple (true);
@@ -332,7 +333,16 @@ SoundFileBrowser::update_preview ()
 void
 SoundFileBrowser::found_list_view_selected ()
 {
+	string file;
 	
+	Gtk::TreeView::Selection::ListHandle_Path rows = found_list_view.get_selection()->get_selected_rows ();
+	
+	if (!rows.empty()) {
+		Gtk::TreeIter iter = found_list->get_iter(*rows.begin());
+		file = (*iter)[found_list_columns.pathname];
+		chooser.set_filename (file);
+	}
+	preview.setup_labels (file);
 }
 
 void
@@ -343,7 +353,7 @@ SoundFileBrowser::found_search_clicked ()
 	vector<string> tags;
 
     if (!PBD::tokenize (tag_string, string(","), std::back_inserter (tags), true)) {
-		warning << _("SoundFileBox: Could not tokenize string: ") << tag_string << endmsg;
+		warning << _("SoundFileBrowser: Could not tokenize string: ") << tag_string << endmsg;
 		return;
 	}
 
@@ -354,7 +364,6 @@ SoundFileBrowser::found_search_clicked ()
 	for (vector<string>::iterator i = results.begin(); i != results.end(); ++i) {
 		Gtk::TreeModel::iterator new_row = found_list->append();
 		Gtk::TreeModel::Row row = *new_row;
-		cout << *i << endl;
 		row[found_list_columns.pathname] = *i;
 	}
 }
@@ -366,7 +375,28 @@ SoundFileChooser::SoundFileChooser (string title, ARDOUR::Session* s)
 	add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	
+	chooser.set_select_multiple (false);
+	found_list_view.get_selection()->set_mode (Gtk::SELECTION_SINGLE);
 	show_all ();
+}
+
+string
+SoundFileChooser::get_filename ()
+{
+	Gtk::TreeModel::iterator iter;
+	Gtk::TreeModel::Row row;
+	
+	switch (notebook.get_current_page()) {
+		case 0:
+			return chooser.get_filename();
+		case 1:
+			iter = found_list_view.get_selection()->get_selected();
+			row = *iter;
+			return row[found_list_columns.pathname];
+		default:
+			/* NOT REACHED */
+			return "";
+	}
 }
 
 vector<string> SoundFileOmega::mode_strings;
@@ -375,8 +405,6 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s)
 	: SoundFileBrowser (title, s),
 	  split_check (_("Split Channels"))
 {
-//	add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_CLOSE);
-
 	ARDOUR_UI::instance()->tooltips().set_tip(split_check, 
 			_("Create a region for each channel"));
 
@@ -387,6 +415,8 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s)
 	btn = add_button (_("Import"), ResponseImport);
 	ARDOUR_UI::instance()->tooltips().set_tip(*btn, 
 			_("Copy a file to the session folder"));
+
+	add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_CLOSE);
 	
 	if (mode_strings.empty()) {
 		mode_strings = I18N (import_mode_strings);
@@ -412,7 +442,22 @@ SoundFileOmega::get_split ()
 vector<Glib::ustring>
 SoundFileOmega::get_paths ()
 {
-	return chooser.get_filenames();
+	int n = notebook.get_current_page ();
+	
+	if (n == 0) {
+		return chooser.get_filenames ();
+	}
+	
+	typedef Gtk::TreeView::Selection::ListHandle_Path ListPath;
+	
+	vector<Glib::ustring> results;
+	ListPath rows = found_list_view.get_selection()->get_selected_rows ();
+	for (ListPath::iterator i = rows.begin() ; i != rows.end(); ++i) {
+		Gtk::TreeIter iter = found_list->get_iter(*i);
+		string str = (*iter)[found_list_columns.pathname];
+		results.push_back (str);
+	}
+	return results;
 }
 
 void

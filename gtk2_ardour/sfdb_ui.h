@@ -28,10 +28,10 @@
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/checkbutton.h>
+#include <gtkmm/comboboxtext.h>
 #include <gtkmm/dialog.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/filechooserwidget.h>
-#include <gtkmm/comboboxtext.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
 
@@ -126,7 +126,7 @@ class SoundFileChooser : public SoundFileBrowser
 	SoundFileChooser (std::string title, ARDOUR::Session* _s = 0);
 	virtual ~SoundFileChooser () {};
 	
-	std::string get_filename () {return chooser.get_filename();};
+	std::string get_filename ();
 };
 
 class SoundFileOmega : public SoundFileBrowser
