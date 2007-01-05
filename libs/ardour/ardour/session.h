@@ -575,7 +575,6 @@ class Session : public PBD::StatefulDestructible
 	
 	void add_source (boost::shared_ptr<Source>);
 	void remove_source (boost::weak_ptr<Source>);
-	int  cleanup_audio_file_source (boost::shared_ptr<AudioFileSource>);
 
 	struct cleanup_report {
 	    vector<string> paths;

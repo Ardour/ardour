@@ -2457,9 +2457,7 @@ struct RegionCounter {
 int
 Session::cleanup_sources (Session::cleanup_report& rep)
 {
-	typedef map<boost::shared_ptr<Source>, RegionCounter> SourceRegionMap;
-	SourceRegionMap dead_sources;
-
+	vector<boost::shared_ptr<Source> > dead_sources;
 	vector<boost::shared_ptr<Playlist> > playlists_tbd;
 	PathScanner scanner;
 	string sound_path;
@@ -2505,104 +2503,26 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 
 	playlists_tbd.clear ();
 
-	/* step 2: find all un-referenced sources */
+	/* step 2: find all un-used sources */
 
 	rep.paths.clear ();
 	rep.space = 0;
 
-	for (AudioSourceList::iterator i = audio_sources.begin(); i != audio_sources.end(); ++i) {
+	for (AudioSourceList::iterator i = audio_sources.begin(); i != audio_sources.end(); ) {
 		
-		/* we expect the use_count() to be at least 2: one for the shared_ptr<> in the sources
-		   list and one for the iterator. if its used by 1 region, we'd expect a value of 3.
-
-		   do not bother with files that are zero size, otherwise we remove the current "nascent"
-		   capture files.
-		*/
-
-		if (i->second.use_count() <= 3 && i->second->length() > 0) {
-
-			pair<boost::shared_ptr<Source>, RegionCounter> newpair;
-
-			newpair.first = i->second;
-			newpair.second.iter = i;
-
-			dead_sources.insert (newpair);
-		} 
-	}
-
-	/* Search the region list to find out the state of the supposedly unreferenced regions 
-	 */
-
-	for (SourceRegionMap::iterator i = dead_sources.begin(); i != dead_sources.end();++i) {
-
-		for (AudioRegionList::iterator r = audio_regions.begin(); r != audio_regions.end(); ++r) {
-			
-			boost::shared_ptr<AudioRegion> ar = r->second;
-
-			for (uint32_t n = 0; n < ar->n_channels(); ++n) {
-
-				if (ar->source (n) == i->first) {
-					
-					/* this region uses this source */
-
-					i->second.region = ar;
-					i->second.count++;
-
-					if (i->second.count > 1) {
-						break;
-					}
-				}
-			}
-		}
-	}
-
-	/* next, get rid of all regions in the region list that use any dead sources
-	   in case the sources themselves don't go away (they might be referenced in
-	   other snapshots).
-
-	   this is also where we remove the apparently unused sources from our source
-	   list. this doesn't rename them or delete them, but it means they are
-	   potential candidates for renaming after we find all soundfiles
-	   and scan for use across all snapshots (including this one).
-	*/
-	
-	for (SourceRegionMap::iterator i = dead_sources.begin(); i != dead_sources.end(); ) {
-
-		SourceRegionMap::iterator tmp;
+		AudioSourceList::iterator tmp;
 
 		tmp = i;
 		++tmp;
 
-		if (i->second.count == 0) {
+		/* do not bother with files that are zero size, otherwise we remove the current "nascent"
+		   capture files.
+		*/
 
-			/* no regions use this source */
-
-			/* remove this source from our own list to avoid us
-			   adding it to the list of all sources below
-			*/
-
-			audio_sources.erase (i->second.iter);
-
- 		} else if (i->second.count == 1) {
-
-			/* the use_count for the source was 3. this means that there is only reference to it in addition to the source
-			   list and an iterator used to traverse that list. since there is a single region using the source, that
-			   must be the extra reference. this implies that its a whole-file region
-			   with no children, so remove the region and the source.
-			*/
-
-			remove_region (i->second.region);
-
-			/* remove this source from our own list to avoid us
-			   adding it to the list of all sources below
-			*/
-
-			audio_sources.erase (i->second.iter);
-
-		} else {
-			/* more than one region uses this source, do not remove it */
-			dead_sources.erase (i);
-		}
+ 		if (!i->second->used() && i->second->length() > 0) {
+			dead_sources.push_back (i->second);
+			i->second->GoingAway();
+		} 
 
 		i = tmp;
 	}
@@ -2663,7 +2583,6 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 				used = true;
 				break;
 			}
-
 		}
 
 		if (!used) {
@@ -2697,6 +2616,12 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 
 		newpath += '/';
 		newpath += dead_sound_dir_name;
+
+		if (g_mkdir_with_parents (newpath.c_str(), 0755) < 0) {
+			error << string_compose(_("Session: cannot create session peakfile dir \"%1\" (%2)"), newpath, strerror (errno)) << endmsg;
+			return -1;
+		}
+
 		newpath += '/';
 		newpath += Glib::path_get_basename ((*x));
 		
@@ -2736,7 +2661,6 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 			      << endmsg;
 			goto out;
 		}
-		
 
 		/* see if there an easy to find peakfile for this file, and remove it.
 		 */
@@ -2933,8 +2857,6 @@ Session::save_history (string snapshot_name)
         error << _("could not backup old history file, current history not saved.") << endmsg;
         return -1;
     }
-
-    cerr << "actually writing history\n";
 
     if (!tree.write (xml_path))
     {

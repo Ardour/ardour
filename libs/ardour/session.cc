@@ -3080,19 +3080,16 @@ Session::remove_playlist (boost::weak_ptr<Playlist> weak_playlist)
 
 	{ 
 		Glib::Mutex::Lock lm (playlist_lock);
-		cerr << "removing playlist: " << playlist->name() << endl;
 
 		PlaylistList::iterator i;
 
 		i = find (playlists.begin(), playlists.end(), playlist);
 		if (i != playlists.end()) {
-			cerr << "\tfound it in used playlist\n";
 			playlists.erase (i);
 		}
 
 		i = find (unused_playlists.begin(), unused_playlists.end(), playlist);
 		if (i != unused_playlists.end()) {
-			cerr << "\tfound it in unused playlist\n";
 			unused_playlists.erase (i);
 		}
 		
@@ -3638,12 +3635,6 @@ Session::route_name_unique (string n) const
 	}
 	
 	return true;
-}
-
-int
-Session::cleanup_audio_file_source (boost::shared_ptr<AudioFileSource> fs)
-{
-	return fs->move_to_trash (dead_sound_dir_name);
 }
 
 uint32_t

@@ -1630,7 +1630,7 @@ AudioDiskstream::finish_capture (bool rec_monitors_input)
 void
 AudioDiskstream::set_record_enabled (bool yn)
 {
-	if (!recordable() || !_session.record_enabling_legal()) {
+	if (!recordable() || !_session.record_enabling_legal() || _io->n_inputs() == 0) {
 		return;
 	}
 
@@ -1927,7 +1927,7 @@ AudioDiskstream::reset_write_sources (bool mark_write_complete, bool force)
 	}
 	
 	capturing_sources.clear ();
-	
+
 	for (chan = channels.begin(), n = 0; chan != channels.end(); ++chan, ++n) {
 		if (!destructive()) {
 

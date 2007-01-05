@@ -285,9 +285,11 @@ AudioFileSource::move_to_trash (const string trash_dir_name)
 	   stick it in the `trash_dir_name' directory
 	   on whichever filesystem it was already on.
 	*/
-
+	
 	newpath = Glib::path_get_dirname (_path);
-	newpath = Glib::path_get_dirname (newpath);
+	newpath = Glib::path_get_dirname (newpath); 
+
+	cerr << "from " << _path << " dead dir looks like " << newpath << endl;
 
 	newpath += '/';
 	newpath += trash_dir_name;
@@ -511,7 +513,7 @@ AudioFileSource::set_name (string newname, bool destructive)
 	}
 
 	if (rename (oldpath.c_str(), newpath.c_str()) != 0) {
-		error << string_compose (_("cannot rename audio file for %1 to %2"), _name, newpath) << endmsg;
+		error << string_compose (_("cannot rename audio file %1 to %2"), _name, newpath) << endmsg;
 		return -1;
 	}
 

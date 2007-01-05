@@ -957,7 +957,6 @@ RouteTimeAxisView::use_new_playlist (bool prompt)
 	if (name.length()) {
 		ds->use_new_playlist ();
 		ds->playlist()->set_name (name);
-		cerr << " installed new PL, UC = " << ds->playlist().use_count() << endl;
 	}
 }
 
