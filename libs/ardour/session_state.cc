@@ -2607,12 +2607,22 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		   on whichever filesystem it was already on.
 		*/
 
-		/* XXX this is a hack ... go up 4 levels */
+		if (_path.find ("/sounds/")) {
 
-		newpath = Glib::path_get_dirname (*x);      // "audiofiles" 
-		newpath = Glib::path_get_dirname (newpath); // "session-name"
-		newpath = Glib::path_get_dirname (newpath); // "interchange"
-		newpath = Glib::path_get_dirname (newpath); // "session-dir"
+			/* old school, go up 1 level */
+
+			newpath = Glib::path_get_dirname (*x);      // "sounds" 
+			newpath = Glib::path_get_dirname (newpath); // "session-name"
+
+		} else {
+
+			/* new school, go up 4 levels */
+			
+			newpath = Glib::path_get_dirname (*x);      // "audiofiles" 
+			newpath = Glib::path_get_dirname (newpath); // "session-name"
+			newpath = Glib::path_get_dirname (newpath); // "interchange"
+			newpath = Glib::path_get_dirname (newpath); // "session-dir"
+		}
 
 		newpath += '/';
 		newpath += dead_sound_dir_name;
