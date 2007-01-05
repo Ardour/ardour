@@ -70,7 +70,6 @@ class SoundFileBox : public Gtk::VBox
 	
 	Gtk::VBox main_box;
 	Gtk::VBox path_box;
-	Gtk::HBox top_box;
 	Gtk::HBox bottom_box;
 	
 	Gtk::Button play_btn;
@@ -95,9 +94,30 @@ class SoundFileBrowser : public ArdourDialog
 
   protected:
 	Gtk::FileChooserWidget chooser;
+	Gtk::FileFilter filter;
 	SoundFileBox preview;
 	
+	class FoundTagColumns : public Gtk::TreeModel::ColumnRecord
+	{
+	  public:
+		Gtk::TreeModelColumn<string> pathname;
+		
+		FoundTagColumns() { add(pathname); }
+	};
+	
+	FoundTagColumns found_list_columns;
+	Glib::RefPtr<Gtk::ListStore> found_list;
+	Gtk::TreeView found_list_view;
+	Gtk::Entry found_entry;
+	Gtk::Button found_search_btn;
+	
+	Gtk::Notebook notebook;
+	
 	void update_preview ();
+	void found_list_view_selected ();
+	void found_search_clicked ();
+	
+	bool on_custom (const Gtk::FileFilter::Info& filter_info);
 };
 
 class SoundFileChooser : public SoundFileBrowser

@@ -25,6 +25,7 @@
 #include <gtkmm/stock.h>
 
 #include <pbd/convert.h>
+#include <pbd/tokenizer.h>
 #include <pbd/whitespace.h>
 
 #include <gtkmm2ext/utils.h>
@@ -53,13 +54,15 @@ SoundFileBox::SoundFileBox ()
 	_session(0),
 	current_pid(0),
 	main_box (false, 3),
-	top_box (true, 4),
 	bottom_box (true, 4),
 	play_btn(_("Play")),
 	stop_btn(_("Stop")),
 	apply_btn(_("Apply"))
 {
 	set_name (X_("SoundFileBox"));
+	
+	set_size_request (250, 500);
+	
 	border_frame.set_label (_("Soundfile Info"));
 	border_frame.add (main_box);
 
@@ -74,11 +77,8 @@ SoundFileBox::SoundFileBox ()
 	main_box.pack_start(samplerate, false, false);
 	main_box.pack_start(timecode, false, false);
 	main_box.pack_start(tags_entry, true, true);
-	main_box.pack_start(top_box, false, false);
+	main_box.pack_start(apply_btn, false, false);
 	main_box.pack_start(bottom_box, false, false);
-
-	top_box.set_homogeneous(true);
-	top_box.pack_start(apply_btn);
 
 	bottom_box.set_homogeneous(true);
 	bottom_box.pack_start(play_btn);
@@ -89,8 +89,16 @@ SoundFileBox::SoundFileBox ()
 	stop_btn.signal_clicked().connect (mem_fun (*this, &SoundFileBox::stop_btn_clicked));
 	apply_btn.signal_clicked().connect (mem_fun (*this, &SoundFileBox::apply_btn_clicked));
 
-	show_all();
+	length.set_alignment (0.0f, 0.0f);
+	format.set_alignment (0.0f, 0.0f);
+	channels.set_alignment (0.0f, 0.0f);
+	samplerate.set_alignment (0.0f, 0.0f);
+	timecode.set_alignment (0.0f, 0.0f);
+
+	stop_btn.set_no_show_all (true);
 	stop_btn.hide();
+	
+	show_all();
 }
 
 void
@@ -113,22 +121,24 @@ SoundFileBox::setup_labels (string filename)
 	string error_msg;
 
 	if(!AudioFileSource::get_soundfile_info (filename, sf_info, error_msg)) {
+		length.set_text (_("Length: n/a"));
+		format.set_text (_("Format: n/a"));
+		channels.set_text (_("Channels: n/a"));
+		samplerate.set_text (_("Samplerate: n/a"));
+		timecode.set_text (_("Timecode: n/a"));
+		tags_entry.set_text ("");
+		
+		tags_entry.set_sensitive (false);
+		play_btn.set_sensitive (false);
+		apply_btn.set_sensitive (false);
+		
 		return false;
 	}
 
-	length.set_alignment (0.0f, 0.0f);
 	length.set_text (string_compose(_("Length: %1"), length2string(sf_info.length, sf_info.samplerate)));
-
-	format.set_alignment (0.0f, 0.0f);
 	format.set_text (sf_info.format_name);
-
-	channels.set_alignment (0.0f, 0.0f);
 	channels.set_text (string_compose(_("Channels: %1"), sf_info.channels));
-
-	samplerate.set_alignment (0.0f, 0.0f);
 	samplerate.set_text (string_compose(_("Samplerate: %1"), sf_info.samplerate));
-
-	timecode.set_alignment (0.0f, 0.0f);
 	timecode.set_text (string_compose (_("Timecode: %1"), length2string(sf_info.timecode, sf_info.samplerate)));
 
 	vector<string> tags = Library->get_tags (filename);
@@ -141,6 +151,12 @@ SoundFileBox::setup_labels (string filename)
 		tag_string << *i;
 	}
 	tags_entry.set_text (tag_string.str());
+	
+	tags_entry.set_sensitive (true);
+	if (_session) {
+		play_btn.set_sensitive (true);
+	}
+	apply_btn.set_sensitive (true);
 	
 	return true;
 }
@@ -229,25 +245,11 @@ SoundFileBox::apply_btn_clicked ()
 
 	vector<string> tags;
 
-	static const string DELIMITERS = ",";
+    if (!PBD::tokenize (tag_string, string(","), std::back_inserter (tags), true)) {
+		warning << _("SoundFileBox: Could not tokenize string: ") << tag_string << endmsg;
+		return;
+	}
 	
-	// Skip delimiters at beginning.
-    string::size_type last_pos = tag_string.find_first_not_of(DELIMITERS, 0);
-    // Find first "non-delimiter".
-    string::size_type pos = tag_string.find_first_of(DELIMITERS, last_pos);
-
-    while (string::npos != pos || string::npos != last_pos) {
-		string x = tag_string.substr(last_pos, pos - last_pos);
-		strip_whitespace_edges (x);
-		if (x.length()) {
-			tags.push_back (x);
-		}
-        // Skip delimiters.  Note the "not_of"
-        last_pos = tag_string.find_first_not_of(DELIMITERS, pos);
-        // Find next "non-delimiter"
-        pos = tag_string.find_first_of(DELIMITERS, last_pos);
-    }
-    
 	Library->set_tags (path, tags);
 	Library->save_changes ();
 }
@@ -273,15 +275,39 @@ static const char *import_mode_strings[] = {
 
 SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s)
 	: ArdourDialog (title, false),
-	  chooser (Gtk::FILE_CHOOSER_ACTION_OPEN)
+	  chooser (Gtk::FILE_CHOOSER_ACTION_OPEN),
+	  found_list (Gtk::ListStore::create(found_list_columns)),
+	  found_list_view (found_list),
+	  found_search_btn (_("Search"))
 {
 	set_default_size (700, 500);
-	get_vbox()->pack_start(chooser);
-	chooser.set_preview_widget(preview);
+	Gtk::HBox* hbox = manage(new Gtk::HBox);
+	hbox->pack_start(notebook);
+	hbox->pack_start(preview, Gtk::PACK_SHRINK);
+	get_vbox()->pack_start(*hbox);
+
+	hbox = manage(new Gtk::HBox);
+	hbox->pack_start (found_entry);
+	hbox->pack_start (found_search_btn);
+	
+	Gtk::VBox* vbox = manage(new Gtk::VBox);
+	vbox->pack_start (*hbox, Gtk::PACK_SHRINK);
+	vbox->pack_start (found_list_view);
+	found_list_view.append_column(_("Paths"), found_list_columns.pathname);
+	
+	notebook.append_page (chooser, _("Files"));
+	notebook.append_page (*vbox, _("Tags"));
+
+	filter.add_custom (Gtk::FILE_FILTER_FILENAME, mem_fun(*this, &SoundFileBrowser::on_custom));
+	chooser.set_filter (filter);
 	chooser.set_select_multiple (true);
-
 	chooser.signal_update_preview().connect(mem_fun(*this, &SoundFileBrowser::update_preview));
+	found_list_view.get_selection()->signal_changed().connect(mem_fun(*this, &SoundFileBrowser::found_list_view_selected));
+	
+	found_search_btn.signal_clicked().connect(mem_fun(*this, &SoundFileBrowser::found_search_clicked));
 
+	show_all ();
+	
 	set_session (s);
 }
 
@@ -291,10 +317,46 @@ SoundFileBrowser::set_session (Session* s)
 	preview.set_session(s);
 }
 
+bool
+SoundFileBrowser::on_custom (const Gtk::FileFilter::Info& filter_info)
+{
+	return AudioFileSource::safe_file_extension(filter_info.filename);
+}
+
 void
 SoundFileBrowser::update_preview ()
 {
-	chooser.set_preview_widget_active(preview.setup_labels(chooser.get_filename()));
+	preview.setup_labels(chooser.get_filename());
+}
+
+void
+SoundFileBrowser::found_list_view_selected ()
+{
+	
+}
+
+void
+SoundFileBrowser::found_search_clicked ()
+{
+	string tag_string = found_entry.get_text ();
+
+	vector<string> tags;
+
+    if (!PBD::tokenize (tag_string, string(","), std::back_inserter (tags), true)) {
+		warning << _("SoundFileBox: Could not tokenize string: ") << tag_string << endmsg;
+		return;
+	}
+
+	vector<string> results;
+	Library->search_members_and (results, tags);
+	
+	found_list->clear();
+	for (vector<string>::iterator i = results.begin(); i != results.end(); ++i) {
+		Gtk::TreeModel::iterator new_row = found_list->append();
+		Gtk::TreeModel::Row row = *new_row;
+		cout << *i << endl;
+		row[found_list_columns.pathname] = *i;
+	}
 }
 
 SoundFileChooser::SoundFileChooser (string title, ARDOUR::Session* s)
@@ -303,6 +365,7 @@ SoundFileChooser::SoundFileChooser (string title, ARDOUR::Session* s)
 {
 	add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	
 	show_all ();
 }
 
@@ -312,9 +375,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s)
 	: SoundFileBrowser (title, s),
 	  split_check (_("Split Channels"))
 {
-	if (mode_strings.empty()) {
-		mode_strings = I18N (import_mode_strings);
-	}
+//	add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_CLOSE);
 
 	ARDOUR_UI::instance()->tooltips().set_tip(split_check, 
 			_("Create a region for each channel"));
@@ -323,24 +384,21 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s)
 	ARDOUR_UI::instance()->tooltips().set_tip(*btn, 
 			_("Link to an external file"));
 
-	add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_CLOSE);
-
 	btn = add_button (_("Import"), ResponseImport);
 	ARDOUR_UI::instance()->tooltips().set_tip(*btn, 
 			_("Copy a file to the session folder"));
-
-	Gtk::HBox *box = manage (new Gtk::HBox());
-
+	
+	if (mode_strings.empty()) {
+		mode_strings = I18N (import_mode_strings);
+	}
 	Gtkmm2ext::set_popdown_strings (mode_combo, mode_strings);
 
 	set_mode (Editing::ImportAsRegion);
 
-	box->pack_start (split_check);
-	box->pack_start (mode_combo);
+	get_action_area()->pack_start (split_check);
+	get_action_area()->pack_start (mode_combo);
 
 	mode_combo.signal_changed().connect (mem_fun (*this, &SoundFileOmega::mode_changed));
-
-	chooser.set_extra_widget (*box);
 	
 	show_all ();
 }

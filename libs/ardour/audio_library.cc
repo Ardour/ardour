@@ -77,6 +77,13 @@ AudioLibrary::path2uri (string path)
 	return uri.str();
 }
 
+string
+AudioLibrary::uri2path (string uri)
+{
+	string path = xmlURIUnescapeString(uri.c_str(), 0, 0);
+	return path.substr(5);
+}
+
 void
 AudioLibrary::set_tags (string member, vector<string> tags)
 {
@@ -142,8 +149,8 @@ AudioLibrary::search_members_and (vector<string>& members, const vector<string> 
 	if (*head != 0) {
 		lrdf_uris* ulist = lrdf_match_multi(*head);
 		for (uint32_t j = 0; ulist && j < ulist->count; ++j) {
-//			printf("AND: %s\n", ulist->items[j]);
-			members.push_back(ulist->items[j]);
+//			cerr << "AND: " << uri2path(ulist->items[j]) << endl;
+			members.push_back(uri2path(ulist->items[j]));
 		}
 		lrdf_free_uris(ulist);
 
@@ -154,33 +161,9 @@ AudioLibrary::search_members_and (vector<string>& members, const vector<string> 
 	// memory clean up
 	pattern = *head;
 	while(pattern){
-		free(pattern->predicate);
 		free(pattern->object);
 		old = pattern;
 		pattern = pattern->next;
 		delete old;
 	}
-}
-
-bool
-AudioLibrary::safe_file_extension(string file)
-{
-	return !(file.rfind(".wav") == string::npos &&
-		file.rfind(".aiff")== string::npos &&
-		file.rfind(".aif") == string::npos &&
-		file.rfind(".snd") == string::npos &&
-		file.rfind(".au")  == string::npos &&
-		file.rfind(".raw") == string::npos &&
-		file.rfind(".sf")  == string::npos &&
-		file.rfind(".cdr") == string::npos &&
-		file.rfind(".smp") == string::npos &&
-		file.rfind(".maud")== string::npos &&
-		file.rfind(".vwe") == string::npos &&
-		file.rfind(".paf") == string::npos &&
-#ifdef HAVE_COREAUDIO
-		file.rfind(".mp3") == string::npos &&
-		file.rfind(".aac") == string::npos &&
-		file.rfind(".mp4") == string::npos &&
-#endif // HAVE_COREAUDIO
-		file.rfind(".voc") == string::npos);
 }

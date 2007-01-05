@@ -1,4 +1,4 @@
-; ardour.bin GtkAccelMap rc-file         -*- scheme -*-
+; ardour-2.0beta10 GtkAccelMap rc-file         -*- scheme -*-
 ; this file is an automated accelerator map dump
 ;
 ; (gtk_accel_path "<Actions>/RegionList/RegionListSort" "")

@@ -46,9 +46,8 @@ class AudioLibrary
   private:
 	string src;
 	
-	string path2uri (string);
-	
-	bool safe_file_extension (string);
+	string path2uri (string path);
+	string uri2path (string uri);	
 };
 
 extern AudioLibrary* Library;

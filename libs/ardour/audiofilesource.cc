@@ -543,3 +543,26 @@ AudioFileSource::setup_peakfile ()
 		return 0;
 	}
 }
+
+bool
+AudioFileSource::safe_file_extension(string file)
+{
+	return !(file.rfind(".wav") == string::npos &&
+		file.rfind(".aiff")== string::npos &&
+		file.rfind(".aif") == string::npos &&
+		file.rfind(".snd") == string::npos &&
+		file.rfind(".au")  == string::npos &&
+		file.rfind(".raw") == string::npos &&
+		file.rfind(".sf")  == string::npos &&
+		file.rfind(".cdr") == string::npos &&
+		file.rfind(".smp") == string::npos &&
+		file.rfind(".maud")== string::npos &&
+		file.rfind(".vwe") == string::npos &&
+		file.rfind(".paf") == string::npos &&
+#ifdef HAVE_COREAUDIO
+		file.rfind(".mp3") == string::npos &&
+		file.rfind(".aac") == string::npos &&
+		file.rfind(".mp4") == string::npos &&
+#endif // HAVE_COREAUDIO
+		file.rfind(".voc") == string::npos);
+}
