@@ -32,7 +32,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 Send::Send (Session& s, Placement p)
-	: Redirect (s, s.next_send_name(), p)
+	: Redirect (s, string_compose (_("send %1"), (bitslot = s.next_send_id()) + 1), p)
 {
 	_metering = false;
 	expected_inputs = 0;
@@ -53,7 +53,7 @@ Send::Send (Session& s, const XMLNode& node)
 }
 
 Send::Send (const Send& other)
-	: Redirect (other._session, other._session.next_send_name(), other.placement())
+	: Redirect (other._session, string_compose (_("send %1"), (bitslot = other._session.next_send_id()) + 1), other.placement())
 {
 	_metering = false;
 	expected_inputs = 0;
@@ -76,7 +76,10 @@ XMLNode&
 Send::state(bool full)
 {
 	XMLNode *node = new XMLNode("Send");
+	char buf[32];
 	node->add_child_nocopy (Redirect::state (full));
+	snprintf (buf, sizeof (buf), "%" PRIu32, bitslot);
+	node->add_property ("bitslot", buf);
 	return *node;
 }
 
@@ -85,6 +88,14 @@ Send::set_state(const XMLNode& node)
 {
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
+	const XMLProperty* prop;
+
+	if ((prop = node.property ("bitslot")) == 0) {
+		bitslot = _session.next_send_id();
+	} else {
+		sscanf (prop->value().c_str(), "%" PRIu32, &bitslot);
+		_session.mark_send_id (bitslot);
+	}
 
 	/* Send has regular IO automation (gain, pan) */
 

@@ -1,3 +1,0 @@
-#!/bin/sh
-. `dirname "$0"`/ardev_common.sh
-exec gtk2_ardour/ardour-%VERSION% $*

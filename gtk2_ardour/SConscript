@@ -278,7 +278,7 @@ my_subst_dict['%VERSION%'] = ardour_version
 ardoursh = env.SubstInFile ('ardour.sh','ardour.sh.in', SUBST_DICT = my_subst_dict);
 env.AddPostAction (ardoursh, Chmod ('$TARGET', 0755))
 
-ardourdev = env.SubstInFile ('ardev','ardev.in', SUBST_DICT = my_subst_dict);
+ardourdev = env.SubstInFile ('ardev_common.sh','ardev_common.sh.in', SUBST_DICT = my_subst_dict);
 env.AddPostAction (ardourdev, Chmod ('$TARGET', 0755))
 
 Default(ardourdev)

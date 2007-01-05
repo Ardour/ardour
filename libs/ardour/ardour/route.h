@@ -173,8 +173,6 @@ class Route : public IO
 	void all_redirects_flip();
 	void all_redirects_active (bool state);
 
-	uint32_t count_sends ();
-
 	virtual nframes_t update_total_latency();
 	nframes_t signal_latency() const { return _own_latency; }
 	virtual void set_latency_delay (nframes_t);

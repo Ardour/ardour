@@ -3347,10 +3347,14 @@ Session::remove_redirect (Redirect* redirect)
 	Insert* insert;
 	PortInsert* port_insert;
 	PluginInsert* plugin_insert;
-
+	
 	if ((insert = dynamic_cast<Insert *> (redirect)) != 0) {
 		if ((port_insert = dynamic_cast<PortInsert *> (insert)) != 0) {
-			_port_inserts.remove (port_insert);
+			list<PortInsert*>::iterator x = find (_port_inserts.begin(), _port_inserts.end(), port_insert);
+			if (x != _port_inserts.end()) {
+				insert_bitset[port_insert->bit_slot()] = false;
+				_port_inserts.erase (x);
+			}
 		} else if ((plugin_insert = dynamic_cast<PluginInsert *> (insert)) != 0) {
 			_plugin_inserts.remove (plugin_insert);
 		} else {
@@ -3360,7 +3364,11 @@ Session::remove_redirect (Redirect* redirect)
 			/*NOTREACHED*/
 		}
 	} else if ((send = dynamic_cast<Send *> (redirect)) != 0) {
-		_sends.remove (send);
+		list<Send*>::iterator x = find (_sends.begin(), _sends.end(), send);
+		if (x != _sends.end()) {
+			send_bitset[send->bit_slot()] = false;
+			_sends.erase (x);
+		}
 	} else {
 		fatal << _("programming error: unknown type of Redirect deleted!") << endmsg;
 		/*NOTREACHED*/
@@ -3492,26 +3500,70 @@ Session::ensure_passthru_buffers (uint32_t howmany)
 	allocate_pan_automation_buffers (current_block_size, howmany, false);
 }
 
-string
-Session::next_send_name ()
+uint32_t
+Session::next_insert_id ()
 {
-	uint32_t cnt = 0;
-	
-	shared_ptr<RouteList> r = routes.reader ();
-	
-	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
-		cnt += (*i)->count_sends ();
-	}
+	/* this doesn't really loop forever. just think about it */
 
-	return string_compose (_("send %1"), ++cnt);
+	while (true) {
+		for (boost::dynamic_bitset<uint32_t>::size_type n = 0; n < insert_bitset.size(); ++n) {
+			if (!insert_bitset[n]) {
+				insert_bitset[n] = true;
+				cerr << "Returning " << n << " as insert ID\n";
+				return n;
+				
+			}
+		}
+		
+		/* none available, so resize and try again */
+
+		insert_bitset.resize (insert_bitset.size() + 16, false);
+	}
 }
 
-string
-Session::next_insert_name ()
+uint32_t
+Session::next_send_id ()
 {
-	char buf[32];
-	snprintf (buf, sizeof (buf), "insert %" PRIu32, ++insert_cnt);
-	return buf;
+	/* this doesn't really loop forever. just think about it */
+
+	while (true) {
+		for (boost::dynamic_bitset<uint32_t>::size_type n = 0; n < send_bitset.size(); ++n) {
+			if (!send_bitset[n]) {
+				send_bitset[n] = true;
+				cerr << "Returning " << n << " as send ID\n";
+				return n;
+				
+			}
+		}
+		
+		/* none available, so resize and try again */
+
+		send_bitset.resize (send_bitset.size() + 16, false);
+	}
+}
+
+void
+Session::mark_send_id (uint32_t id)
+{
+	if (id >= send_bitset.size()) {
+		send_bitset.resize (id+16, false);
+	}
+	if (send_bitset[id]) {
+		warning << string_compose (_("send ID %1 appears to be in use already"), id) << endmsg;
+	}
+	send_bitset[id] = true;
+}
+
+void
+Session::mark_insert_id (uint32_t id)
+{
+	if (id >= insert_bitset.size()) {
+		insert_bitset.resize (id+16, false);
+	}
+	if (insert_bitset[id]) {
+		warning << string_compose (_("insert ID %1 appears to be in use already"), id) << endmsg;
+	}
+	insert_bitset[id] = true;
 }
 
 /* Named Selection management */

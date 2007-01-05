@@ -30,6 +30,7 @@
 #include <stack>
 
 #include <boost/weak_ptr.hpp>
+#include <boost/dynamic_bitset.hpp>
 
 #include <stdint.h>
 
@@ -677,9 +678,11 @@ class Session : public PBD::StatefulDestructible
 	uint32_t n_plugin_inserts() const { return _plugin_inserts.size(); }
 	uint32_t n_sends() const { return _sends.size(); }
 
-	string next_send_name();
-	string next_insert_name();
-	
+	uint32_t next_send_id();
+	uint32_t next_insert_id();
+	void mark_send_id (uint32_t);
+	void mark_insert_id (uint32_t);
+
 	/* s/w "RAID" management */
 	
 	nframes_t available_capture_duration();
@@ -1520,8 +1523,11 @@ class Session : public PBD::StatefulDestructible
 	list<PortInsert *>   _port_inserts;
 	list<PluginInsert *> _plugin_inserts;
 	list<Send *>         _sends;
+	boost::dynamic_bitset<uint32_t>  send_bitset;
+	boost::dynamic_bitset<uint32_t>  insert_bitset;
 	uint32_t          send_cnt;
 	uint32_t          insert_cnt;
+
 
 	void add_redirect (Redirect *);
 	void remove_redirect (Redirect *);

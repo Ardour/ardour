@@ -49,18 +49,13 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-Insert::Insert(Session& s, Placement p)
-	: Redirect (s, s.next_insert_name(), p)
-{
-}
-
-Insert::Insert(Session& s, Placement p, int imin, int imax, int omin, int omax)
-	: Redirect (s, s.next_insert_name(), p, imin, imax, omin, omax)
-{
-}
-
 Insert::Insert(Session& s, string name, Placement p)
 	: Redirect (s, name, p)
+{
+}
+
+Insert::Insert(Session& s, string name, Placement p, int imin, int imax, int omin, int omax)
+	: Redirect (s, name, p, imin, imax, omin, omax)
 {
 }
 
@@ -833,7 +828,7 @@ PluginInsert::type ()
  ***************************************************************/
 
 PortInsert::PortInsert (Session& s, Placement p)
-	: Insert (s, p, 1, -1, 1, -1)
+	: Insert (s, string_compose (_("insert %1"), (bitslot = s.next_insert_id()) + 1), p, 1, -1, 1, -1)
 {
 	init ();
 	RedirectCreated (this); /* EMIT SIGNAL */
@@ -841,7 +836,7 @@ PortInsert::PortInsert (Session& s, Placement p)
 }
 
 PortInsert::PortInsert (const PortInsert& other)
-	: Insert (other._session, other.placement(), 1, -1, 1, -1)
+	: Insert (other._session, string_compose (_("insert %1"), (bitslot = other._session.next_insert_id()) + 1), other.placement(), 1, -1, 1, -1)
 {
 	init ();
 	RedirectCreated (this); /* EMIT SIGNAL */
@@ -917,9 +912,11 @@ XMLNode&
 PortInsert::state (bool full)
 {
 	XMLNode *node = new XMLNode("Insert");
-
+	char buf[32];
 	node->add_child_nocopy (Redirect::state(full));	
-	node->add_property("type", "port");
+	node->add_property ("type", "port");
+	snprintf (buf, sizeof (buf), "%" PRIu32, bitslot);
+	node->add_property ("bitslot", buf);
 
 	return *node;
 }
@@ -940,6 +937,13 @@ PortInsert::set_state(const XMLNode& node)
 	if (prop->value() != "port") {
 		error << _("non-port insert XML used for port plugin insert") << endmsg;
 		return -1;
+	}
+
+	if ((prop = node.property ("bitslot")) == 0) {
+		bitslot = _session.next_insert_id();
+	} else {
+		sscanf (prop->value().c_str(), "%" PRIu32, &bitslot);
+		_session.mark_insert_id (bitslot);
 	}
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {

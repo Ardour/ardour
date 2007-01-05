@@ -835,7 +835,6 @@ RedirectBox::rename_redirect (boost::shared_ptr<Redirect> redirect)
 	}
 
 	return;
-  
 }
 
 void
@@ -920,8 +919,9 @@ RedirectBox::get_selected_redirects (vector<boost::shared_ptr<Redirect> >& redir
 {
     vector<Gtk::TreeModel::Path> pathlist = redirect_display.get_selection()->get_selected_rows();
  
-	for (vector<Gtk::TreeModel::Path>::iterator iter = pathlist.begin(); iter != pathlist.end(); ++iter)
-		redirects.push_back ((*(model->get_iter(*iter)))[columns.redirect]);
+    for (vector<Gtk::TreeModel::Path>::iterator iter = pathlist.begin(); iter != pathlist.end(); ++iter) {
+	    redirects.push_back ((*(model->get_iter(*iter)))[columns.redirect]);
+    }
 }
 
 void

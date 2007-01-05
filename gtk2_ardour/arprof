@@ -5,5 +5,5 @@ if [ gprofhelper.c -nt gprofhelper.so ] ; then
     gcc -shared -nostdlib -fPIC gprofhelper.c -o gprofhelper.so -lpthread -ldl || exit 1
 fi
 
-export LD_LIBRARY_PATH=../libs/ardour/.libs
-LDPRELOAD=./gprofhelper.so ./ardour $*
+. ardev_common.sh
+LDPRELOAD=./gprofhelper.so $EXECUTABLE $*

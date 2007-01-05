@@ -33,12 +33,15 @@
 
 namespace ARDOUR {
 
-class Send : public Redirect {
+class Send : public Redirect 
+{
   public:	
 	Send (Session&, Placement);
 	Send (Session&, const XMLNode&);
 	Send (const Send&);
 	~Send ();
+
+	uint32_t bit_slot() const { return bitslot; }
 	
 	void run (vector<Sample *> &bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset);
 	void activate() {}
@@ -58,6 +61,7 @@ class Send : public Redirect {
   private:
 	bool _metering;
 	uint32_t expected_inputs;
+	uint32_t bitslot;
 };
 
 } // namespace ARDOUR
