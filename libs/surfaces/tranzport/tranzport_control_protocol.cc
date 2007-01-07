@@ -1562,7 +1562,7 @@ TranzportControlProtocol::button_event_record_release (bool shifted)
 
 void button_event_mute (bool pressed, bool shifted)
 {
-	static int was_pressed = 0;
+	//static int was_pressed = 0;
 	//  if(pressed) { }
 }
 
