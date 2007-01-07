@@ -48,6 +48,7 @@
 #include "version.h"
 #include "ardour_ui.h"
 #include "opts.h"
+#include "enums.h"
 
 #include "i18n.h"
 
@@ -429,20 +430,21 @@ int main (int argc, char *argv[])
 		}
 	}
 
-
-    	try { 
-		engine = new ARDOUR::AudioEngine (jack_client_name);
-	} catch (AudioEngine::NoBackendAvailable& err) {
-		gui_jack_error ();
-		error << string_compose (_("Could not connect to JACK server as  \"%1\""), jack_client_name) <<  endmsg;
-		return -1;
-	}
- 
-
     	try {
 		ARDOUR::init (use_vst, try_hw_optimization);
+		setup_gtk_ardour_enums ();
 		Config->set_current_owner (ConfigVariableBase::Interface);
+
+		try { 
+			engine = new ARDOUR::AudioEngine (jack_client_name);
+		} catch (AudioEngine::NoBackendAvailable& err) {
+			gui_jack_error ();
+			error << string_compose (_("Could not connect to JACK server as  \"%1\""), jack_client_name) <<  endmsg;
+			return -1;
+		}
+		
 		ui->set_engine (*engine);
+
 	} catch (failed_constructor& err) {
 		error << _("could not initialize Ardour.") << endmsg;
 		return -1;

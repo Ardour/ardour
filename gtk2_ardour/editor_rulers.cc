@@ -467,7 +467,7 @@ Editor::store_ruler_visibility ()
 	session->add_extra_xml (*node);
 	session->set_dirty ();
 }
- 
+
 void 
 Editor::restore_ruler_visibility ()
 {

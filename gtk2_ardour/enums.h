@@ -32,4 +32,6 @@ struct SelectionRect {
     uint32_t id;
 };
 
+extern void setup_gtk_ardour_enums ();
+
 #endif /* __ardour_gtk_enums_h__ */

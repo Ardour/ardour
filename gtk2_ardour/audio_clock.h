@@ -61,7 +61,7 @@ class AudioClock : public Gtk::HBox
   private:
 	ARDOUR::Session  *session;
 	Mode             _mode;
-	uint32_t      key_entry_state;
+	uint32_t          key_entry_state;
 	bool              is_duration;
 	bool              editable;
 

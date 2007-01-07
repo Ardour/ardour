@@ -35,6 +35,7 @@
 #include <pbd/compose.h>
 #include <pbd/pathscanner.h>
 #include <pbd/failed_constructor.h>
+#include <pbd/enumwriter.h>
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/click_box.h>
@@ -2429,3 +2430,36 @@ ARDOUR_UI::first_idle ()
 	can_save_keybindings = true;
 	return false;
 }
+
+void
+ARDOUR_UI::store_clock_modes ()
+{
+	XMLNode* node = new XMLNode(X_("ClockModes"));
+
+	node->add_property (X_("primary"), enum_2_string (primary_clock.mode()));
+	node->add_property (X_("secondary"), enum_2_string (secondary_clock.mode()));
+
+	session->add_extra_xml (*node);
+	session->set_dirty ();
+}
+
+void
+ARDOUR_UI::restore_clock_modes ()
+{
+	XMLProperty* prop;
+	XMLNode * node = session->extra_xml (X_("ClockModes"));
+	AudioClock::Mode mode;
+
+	if (node) {
+		if ((prop = node->property ("primary")) != 0) {
+			mode = AudioClock::Mode (string_2_enum (prop->value(), mode));
+			primary_clock.set_mode (mode);
+		}
+
+		if ((prop = node->property ("secondary")) != 0) {
+			mode = AudioClock::Mode (string_2_enum (prop->value(), mode));
+			secondary_clock.set_mode (mode);
+		}
+	}
+}
+		

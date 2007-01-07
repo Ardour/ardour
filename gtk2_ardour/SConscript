@@ -110,6 +110,7 @@ color_manager.cc
 crossfade_edit.cc
 crossfade_view.cc
 curvetest.cc
+enums.cc
 editing.cc
 editor.cc
 editor_actions.cc
