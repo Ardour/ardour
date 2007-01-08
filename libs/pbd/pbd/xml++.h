@@ -95,8 +95,11 @@ public:
 
   const XMLPropertyList & properties() const { return _proplist; };
   XMLProperty *property(const char * );
+  XMLProperty *property(const std::string&);
   const XMLProperty *property(const char * n) const
 	{ return ((XMLNode *) this)->property(n); };
+  const XMLProperty *property(const std::string& ns) const
+	{ return ((XMLNode *) this)->property(ns); };
   XMLProperty *add_property(const char *, const string &);
   XMLProperty *add_property(const char *, const char * = "");
 

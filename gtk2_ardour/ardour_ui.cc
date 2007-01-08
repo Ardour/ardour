@@ -248,9 +248,10 @@ ARDOUR_UI::set_engine (AudioEngine& e)
 		throw failed_constructor();
 	}
 
-	/* listen to clock mode changes */
+	/* set default clock modes */
 
-	AudioClock::ModeChanged.connect (mem_fun (*this, &ARDOUR_UI::store_clock_modes));
+	primary_clock.set_mode (AudioClock::SMPTE);
+	secondary_clock.set_mode (AudioClock::BBT);
 
 	/* start the time-of-day-clock */
 	
