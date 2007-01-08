@@ -224,7 +224,7 @@ setup_hardware_optimization (bool try_optimization)
 				 "movq %%rdx, %0\n"
 		 	     : "=m" (use_sse)
 	   		     : 
- 	    		 : "%rax", "%rcx", "%rdx", "memory");
+ 	    		 : "%rax", "%rbx", "%rcx", "%rdx", "memory");
 
 #endif /* USE_X86_64_ASM */
 		
