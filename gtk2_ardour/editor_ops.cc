@@ -1197,6 +1197,8 @@ Editor::temporal_zoom_to_frame (bool coarser, nframes_t frame)
 void
 Editor::add_location_from_selection ()
 {
+	string rangename;
+
 	if (selection->time.empty()) {
 		return;
 	}
@@ -1208,7 +1210,8 @@ Editor::add_location_from_selection ()
 	nframes_t start = selection->time[clicked_selection].start;
 	nframes_t end = selection->time[clicked_selection].end;
 
-	Location *location = new Location (start, end, "selection", Location::IsRangeMarker);
+	session->locations()->next_available_name(rangename,"selection");
+	Location *location = new Location (start, end, rangename, Location::IsRangeMarker);
 
 	session->begin_reversible_command (_("add marker"));
         XMLNode &before = session->locations()->get_state();
@@ -1221,9 +1224,12 @@ Editor::add_location_from_selection ()
 void
 Editor::add_location_from_playhead_cursor ()
 {
+	string markername;
+
 	nframes_t where = session->audible_frame();
 	
-	Location *location = new Location (where, where, "mark", Location::IsMark);
+	session->locations()->next_available_name(markername,"mark");
+	Location *location = new Location (where, where, markername, Location::IsMark);
 	session->begin_reversible_command (_("add marker"));
         XMLNode &before = session->locations()->get_state();
 	session->locations()->add (location, true);
@@ -1649,6 +1655,7 @@ Editor::set_mark ()
 	nframes_t pos;
 	float prefix;
 	bool was_floating;
+	string markername;
 
 	if (get_prefix (prefix, was_floating)) {
 		pos = session->audible_frame ();
@@ -1660,7 +1667,8 @@ Editor::set_mark ()
 		}
 	}
 
-	session->locations()->add (new Location (pos, 0, "mark", Location::IsMark), true);
+	session->locations()->next_available_name(markername,"mark");
+	session->locations()->add (new Location (pos, 0, markername, Location::IsMark), true);
 }
 
 void
@@ -1707,6 +1715,28 @@ Editor::clear_locations ()
 	session->add_command(new MementoCommand<Locations>(*(session->locations()), &before, &after));
 	session->commit_reversible_command ();
 	session->locations()->clear ();
+}
+
+void
+Editor::unhide_markers ()
+{
+	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
+		Location *l = (*i).first;
+		if (l->is_hidden() && l->is_mark()) {
+			l->set_hidden(false, this);
+		}
+	}
+}
+
+void
+Editor::unhide_ranges ()
+{
+	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
+		Location *l = (*i).first;
+		if (l->is_hidden() && l->is_range_marker()) { 
+			l->set_hidden(false, this);
+		}
+	}
 }
 
 /* INSERT/REPLACE */

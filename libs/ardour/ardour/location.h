@@ -153,6 +153,7 @@ class Locations : public PBD::StatefulDestructible
 	Location* end_location() const;
 	Location* start_location() const;
 
+	int next_available_name(string& result,string base);
 	uint32_t num_range_markers() const;
 
 	int set_current (Location *, bool want_lock = true);

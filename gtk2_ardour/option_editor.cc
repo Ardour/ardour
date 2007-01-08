@@ -69,7 +69,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 
 	  /* Sync */
 
-	  smpte_offset_clock (X_("SMPTEOffsetClock"), true, true),
+	  smpte_offset_clock (X_("smpteoffset"), false, X_("SMPTEOffsetClock"), true, true),
 	  smpte_offset_negative_button (_("SMPTE offset is negative")),
 
 	  /* MIDI */

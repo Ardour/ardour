@@ -982,6 +982,8 @@ class Editor : public PublicEditor
 	void clear_markers ();
 	void clear_ranges ();
 	void clear_locations ();
+	void unhide_markers ();
+	void unhide_ranges ();
 	void jump_forward_to_mark ();
 	void jump_backward_to_mark ();
 	void cursor_align (bool playhead_to_edit);
@@ -1218,14 +1220,14 @@ class Editor : public PublicEditor
 	void tm_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void transport_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void new_transport_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
-	void build_range_marker_menu ();
-	void build_marker_menu ();
+	void build_range_marker_menu (bool loop_or_punch);
+	void build_marker_menu (bool start_or_end);
 	void build_tm_marker_menu ();
-	void build_transport_marker_menu ();
 	void build_new_transport_marker_menu ();
 
 	Gtk::Menu* tm_marker_menu;
 	Gtk::Menu* marker_menu;
+	Gtk::Menu* start_end_marker_menu;
 	Gtk::Menu* range_marker_menu;
 	Gtk::Menu* transport_marker_menu;
 	Gtk::Menu* new_transport_marker_menu;

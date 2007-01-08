@@ -320,8 +320,9 @@ maybe_load_session ()
 			
 		/* Loading a session, but the session doesn't exist */
 		if (isnew) {
-			error << string_compose (_("\n\nNo session named \"%1\" exists.\n\
-To create it from the command line, start ardour as \"ardour --new %1"), path) << endmsg;
+			error << string_compose (_("\n\nNo session named \"%1\" exists.\n"
+						   "To create it from the command line, start ardour as \"ardour --new %1"), path) 
+			      << endmsg;
 			return false;
 		}
 
@@ -362,14 +363,15 @@ int main (int argc, char *argv[])
 	ARDOUR::AudioEngine *engine;
 	vector<Glib::ustring> null_file_list;
 
+        Glib::thread_init();
 	gtk_set_locale ();
 
-	(void)   bindtextdomain (PACKAGE, LOCALEDIR);
+	(void) bindtextdomain (PACKAGE, LOCALEDIR);
 	(void) textdomain (PACKAGE);
 
 	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);
 
-	// catch_signals ();
+	// catch error message system signals ();
 
 	text_receiver.listen_to (error);
 	text_receiver.listen_to (info);
@@ -408,9 +410,6 @@ int main (int argc, char *argv[])
 		     << _("under certain conditions; see the source for copying conditions.")
 		     << endl;
 	}
-
-	// needs a better home.
-        Glib::thread_init();
 
         try { 
 		ui = new ARDOUR_UI (&argc, &argv, which_ui_rcfile());

@@ -48,11 +48,11 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	  item_table (1, 7, false),
 	  start_set_button (_("Set")),
 	  start_go_button (_("Go")),
-	  start_clock (X_("LocationEditRowClock"), true),
+	  start_clock (X_("locationstart"), true, X_("LocationEditRowClock"), true),
 	  end_set_button (_("Set")),
 	  end_go_button (_("Go")),
-	  end_clock (X_("LocationEditRowClock"), true),
-	  length_clock (X_("LocationEditRowClock"), true, true),
+	  end_clock (X_("locationend"), true, X_("LocationEditRowClock"), true),
+	  length_clock (X_("locationlength"), true, X_("LocationEditRowClock"), true, true),
 	  cd_check_button (_("CD")),
 	  hide_check_button (_("Hidden")),
 	  remove_button (_("Remove")),
@@ -215,7 +215,7 @@ LocationEditRow::set_location (Location *loc)
 	}
 	hide_check_button.set_active (location->is_hidden());
 	
-	if (location->is_auto_loop() || location->is_auto_punch()) {
+	if (location->is_auto_loop() || location-> is_auto_punch()) {
 		// use label instead of entry
 
 		name_label.set_text (location->name());
@@ -770,9 +770,12 @@ LocationUI::map_locations (Locations::LocationList& locations)
 void
 LocationUI::add_new_location()
 {
+	string markername;
+
 	if (session) {
 		nframes_t where = session->audible_frame();
-		Location *location = new Location (where, where, "mark", Location::IsMark);
+		session->locations()->next_available_name(markername,"mark");
+		Location *location = new Location (where, where, markername, Location::IsMark);
 		session->begin_reversible_command (_("add marker"));
 		XMLNode &before = session->locations()->get_state();
 		session->locations()->add (location, true);
@@ -786,10 +789,12 @@ LocationUI::add_new_location()
 void
 LocationUI::add_new_range()
 {
+	string rangename;
+
 	if (session) {
 		nframes_t where = session->audible_frame();
-		Location *location = new Location (where, where, "unnamed", 
-											Location::IsRangeMarker);
+		session->locations()->next_available_name(rangename,"unnamed");
+		Location *location = new Location (where, where, rangename, Location::IsRangeMarker);
 		session->begin_reversible_command (_("add range marker"));
 		XMLNode &before = session->locations()->get_state();
 		session->locations()->add (location, true);

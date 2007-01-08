@@ -337,11 +337,13 @@ Editor::popup_ruler_menu (nframes_t where, ItemType t)
 	case MarkerBarItem:
 		ruler_items.push_back (MenuElem (_("New location marker"), bind ( mem_fun(*this, &Editor::mouse_add_new_marker), where)));
 		ruler_items.push_back (MenuElem (_("Clear all locations"), mem_fun(*this, &Editor::clear_markers)));
+		ruler_items.push_back (MenuElem (_("Unhide locations"), mem_fun(*this, &Editor::unhide_markers)));
 		ruler_items.push_back (SeparatorElem ());
 		break;
 	case RangeMarkerBarItem:
 		//ruler_items.push_back (MenuElem (_("New Range")));
 		ruler_items.push_back (MenuElem (_("Clear all ranges"), mem_fun(*this, &Editor::clear_ranges)));
+		ruler_items.push_back (MenuElem (_("Unhide ranges"), mem_fun(*this, &Editor::unhide_ranges)));
 		ruler_items.push_back (SeparatorElem ());
 
 		break;

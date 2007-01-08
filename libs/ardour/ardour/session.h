@@ -392,6 +392,7 @@ class Session : public PBD::StatefulDestructible
 
 	void set_auto_punch_location (Location *);
 	void set_auto_loop_location (Location *);
+	int location_name(string& result, string base = string(""));
 
 	void reset_input_monitor_state ();
 

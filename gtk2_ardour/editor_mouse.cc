@@ -4472,6 +4472,7 @@ void
 Editor::end_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	Location * newloc = 0;
+	string rangename;
 	
 	if (!drag_info.first_move) {
 		drag_range_markerbar_op (item, event);
@@ -4481,7 +4482,8 @@ Editor::end_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 		    {
 			begin_reversible_command (_("new range marker"));
                         XMLNode &before = session->locations()->get_state();
-			newloc = new Location(temp_location->start(), temp_location->end(), "unnamed", Location::IsRangeMarker);
+			session->locations()->next_available_name(rangename,"unnamed");
+			newloc = new Location(temp_location->start(), temp_location->end(), rangename, Location::IsRangeMarker);
 			session->locations()->add (newloc, true);
                         XMLNode &after = session->locations()->get_state();
 			session->add_command(new MementoCommand<Locations>(*(session->locations()), &before, &after));

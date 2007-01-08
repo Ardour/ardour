@@ -22,6 +22,7 @@
 #include <cmath>
 
 #include <pbd/convert.h>
+#include <pbd/enumwriter.h>
 
 #include <gtkmm2ext/utils.h>
 
@@ -40,9 +41,13 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace sigc;
 using namespace Gtk;
+using namespace std;
 
 using PBD::atoi;
 using PBD::atof;
+
+sigc::signal<void> AudioClock::ModeChanged;
+vector<AudioClock*> AudioClock::clocks;
 
 const uint32_t AudioClock::field_length[(int) AudioClock::AudioFrames+1] = {
 	2,   /* SMPTE_Hours */
@@ -58,8 +63,10 @@ const uint32_t AudioClock::field_length[(int) AudioClock::AudioFrames+1] = {
 	10   /* Audio Frame */
 };
 
-AudioClock::AudioClock (std::string name, bool allow_edit, bool duration, bool with_info) 
-	: is_duration (duration),
+AudioClock::AudioClock (std::string clock_name, bool transient, std::string widget_name, bool allow_edit, bool duration, bool with_info) 
+	: _name (clock_name),
+	  is_transient (transient),
+	  is_duration (duration),
 	  editable (allow_edit),
 	  colon1 (":"),
 	  colon2 (":"),
@@ -177,7 +184,7 @@ AudioClock::AudioClock (std::string name, bool allow_edit, bool duration, bool w
 
 	clock_frame.add (clock_base);
 
-	set_name (name);
+	set_widget_name (widget_name);
 
 	_mode = BBT; /* lie to force mode switch */
 	set_mode (SMPTE);
@@ -205,10 +212,14 @@ AudioClock::AudioClock (std::string name, bool allow_edit, bool duration, bool w
 	}
 
 	set (last_when, true);
+
+	if (!is_transient) {
+		clocks.push_back (this);
+	}
 }
 
 void
-AudioClock::set_name (string name)
+AudioClock::set_widget_name (string name)
 {
 	Widget::set_name (name);
 
@@ -533,10 +544,10 @@ AudioClock::set_smpte (nframes_t when, bool force)
 	}
 	
 	if (smpte_upper_info_label) {
-		float smpte_frames = session->smpte_frames_per_second();
+		double smpte_frames = session->smpte_frames_per_second();
 		
 		if ( fmod(smpte_frames, 1.0) == 0.0) {
-			sprintf (buf, "%u", int (smpte_frames));
+			sprintf (buf, "%u", int (smpte_frames)); 
 		} else {
 			sprintf (buf, "%.2f", smpte_frames);
 		}
@@ -582,6 +593,18 @@ AudioClock::set_session (Session *s)
 	session = s;
 
 	if (s) {
+
+		XMLProperty* prop;
+		XMLNode* node = session->extra_xml (X_("ClockModes"));
+		AudioClock::Mode amode;
+		
+		if (node) {
+			if ((prop = node->property (_name.c_str())) != 0) {
+				amode = AudioClock::Mode (string_2_enum (prop->value(), amode));
+				set_mode (amode);
+			}
+		}
+
 		set (last_when, true);
 	}
 }
@@ -1861,6 +1884,10 @@ AudioClock::set_mode (Mode m)
 	set (last_when, true);
 	clock_base.show_all ();
 	key_entry_state = 0;
+
+	if (!is_transient) {
+		ModeChanged (); /* EMIT SIGNAL */
+	}
 }
 
 void

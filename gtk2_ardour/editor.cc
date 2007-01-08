@@ -196,8 +196,8 @@ Editor::Editor (AudioEngine& eng)
 
 	  /* tool bar related */
 
-	  edit_cursor_clock (X_("EditCursorClock"), true),
-	  zoom_range_clock (X_("ZoomRangeClock"), true, true),
+	  edit_cursor_clock (X_("editcursor"), false, X_("EditCursorClock"), true),
+	  zoom_range_clock (X_("zoomrange"), false, X_("ZoomRangeClock"), true, true),
 	  
 	  toolbar_selection_clock_table (2,3),
 	  
@@ -210,7 +210,7 @@ Editor::Editor (AudioEngine& eng)
 
 	  /* nudge */
 
-	  nudge_clock (X_("NudgeClock"), true, true)
+	  nudge_clock (X_("nudge"), false, X_("NudgeClock"), true, true)
 
 {
 	constructed = false;
@@ -283,6 +283,7 @@ Editor::Editor (AudioEngine& eng)
 	route_list_menu = 0;
 	region_list_menu = 0;
 	marker_menu = 0;
+	start_end_marker_menu = 0;
 	range_marker_menu = 0;
 	marker_menu_item = 0;
 	tm_marker_menu = 0;

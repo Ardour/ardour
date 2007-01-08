@@ -93,10 +93,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
 	: Gtkmm2ext::UI ("ardour", argcp, argvp, rcfile),
 	  
-	  primary_clock (X_("TransportClockDisplay"), true, false, true),
-	  secondary_clock (X_("SecondaryClockDisplay"), true, false, true),
-	  preroll_clock (X_("PreRollClock"), true, true),
-	  postroll_clock (X_("PostRollClock"), true, true),
+	  primary_clock (X_("primary"), false, X_("TransportClockDisplay"), true, false, true),
+	  secondary_clock (X_("secondary"), false, X_("SecondaryClockDisplay"), true, false, true),
+	  preroll_clock (X_("preroll"), false, X_("PreRollClock"), true, true),
+	  postroll_clock (X_("postroll"), false, X_("PostRollClock"), true, true),
 
 	  /* adjuster table */
 
@@ -109,7 +109,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
 	  /* big clock */
 
-	  big_clock ("BigClockNonRecording", true, false, true),
+	  big_clock (X_("bigclock"), false, "BigClockNonRecording", true, false, true),
 
 	  /* transport */
 
@@ -247,6 +247,10 @@ ARDOUR_UI::set_engine (AudioEngine& e)
 	if (AudioSource::start_peak_thread ()) {
 		throw failed_constructor();
 	}
+
+	/* listen to clock mode changes */
+
+	AudioClock::ModeChanged.connect (mem_fun (*this, &ARDOUR_UI::store_clock_modes));
 
 	/* start the time-of-day-clock */
 	
@@ -1803,9 +1807,8 @@ ARDOUR_UI::load_session (const string & path, const string & snap_name, string* 
 	/* if it already exists, we must have write access */
 
 	if (::access (path.c_str(), F_OK) == 0 && ::access (path.c_str(), W_OK)) {
-		MessageDialog msg (*editor, _("\
-You do not have write access to this session.\n\
-This prevents the session from being loaded."));
+		MessageDialog msg (*editor, _("You do not have write access to this session.\n"
+					      "This prevents the session from being loaded."));
 		msg.run ();
 		return -1;
 	}
@@ -2436,30 +2439,13 @@ ARDOUR_UI::store_clock_modes ()
 {
 	XMLNode* node = new XMLNode(X_("ClockModes"));
 
-	node->add_property (X_("primary"), enum_2_string (primary_clock.mode()));
-	node->add_property (X_("secondary"), enum_2_string (secondary_clock.mode()));
+	for (vector<AudioClock*>::iterator x = AudioClock::clocks.begin(); x != AudioClock::clocks.end(); ++x) {
+		node->add_property ((*x)->name().c_str(), enum_2_string ((*x)->mode()));
+	}
 
 	session->add_extra_xml (*node);
 	session->set_dirty ();
 }
 
-void
-ARDOUR_UI::restore_clock_modes ()
-{
-	XMLProperty* prop;
-	XMLNode * node = session->extra_xml (X_("ClockModes"));
-	AudioClock::Mode mode;
 
-	if (node) {
-		if ((prop = node->property ("primary")) != 0) {
-			mode = AudioClock::Mode (string_2_enum (prop->value(), mode));
-			primary_clock.set_mode (mode);
-		}
-
-		if ((prop = node->property ("secondary")) != 0) {
-			mode = AudioClock::Mode (string_2_enum (prop->value(), mode));
-			secondary_clock.set_mode (mode);
-		}
-	}
-}
 		

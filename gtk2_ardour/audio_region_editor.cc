@@ -47,10 +47,10 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 	  name_label (_("NAME:")),
 	  audition_button (_("play")),
 	  time_table (3, 2),
-	  start_clock ("AudioRegionEditorClock", true),
-	  end_clock ("AudioRegionEditorClock", true),
-	  length_clock ("AudioRegionEditorClock", true, true),
-	  sync_offset_clock ("AudioRegionEditorClock", true, true)
+	  start_clock (X_("regionstart"), true, X_("AudioRegionEditorClock"), true),
+	  end_clock (X_("regionend"), true, X_("AudioRegionEditorClock"), true),
+	  length_clock (X_("regionlength"), true, X_("AudioRegionEditorClock"), true, true),
+	  sync_offset_clock (X_("regionsyncoffset"), true, X_("AudioRegionEditorClock"), true, true)
 
 {
 	start_clock.set_session (&_session);

@@ -333,7 +333,7 @@ Editor::track_canvas_idle ()
 	if (playhead_cursor) playhead_cursor->set_length (canvas_height);
 
 	if (marker_drag_line) {
-		marker_drag_line_points.back().set_x(canvas_height);
+		marker_drag_line_points.back().set_y(canvas_height);
 		marker_drag_line->property_points() = marker_drag_line_points;
 	}
 
