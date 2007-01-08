@@ -207,9 +207,9 @@ setup_hardware_optimization (bool try_optimization)
 				 "mov $1, %%eax\n"
 				 "pushl %%ebx\n"
 				 "cpuid\n"
-				 "popl %%ebx\n"
 				 "andl $33554432, %%edx\n"
 				 "movl %%edx, %0\n"
+				 "popl %%ebx\n"
 		 	     : "=m" (use_sse)
 	   		     : 
  	    		 : "%eax", "%ecx", "%edx", "memory");
@@ -219,12 +219,12 @@ setup_hardware_optimization (bool try_optimization)
 				 "movq $1, %%rax\n"
 				 "pushq %%rbx\n"
 				 "cpuid\n"
-				 "popq %%rbx\n"
 				 "andq $33554432, %%rdx\n"
 				 "movq %%rdx, %0\n"
+				 "popq %%rbx\n"
 		 	     : "=m" (use_sse)
 	   		     : 
- 	    		 : "%rax", "%rbx", "%rcx", "%rdx", "memory");
+ 	    		 : "%rax", "%rcx", "%rdx", "memory");
 
 #endif /* USE_X86_64_ASM */
 		
