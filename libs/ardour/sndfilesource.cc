@@ -408,26 +408,25 @@ SndFileSource::nondestructive_write_unlocked (Sample *data, nframes_t cnt)
 		PeakBuildRecord *pbr = 0;
 		
 		if (pending_peak_builds.size()) {
-				pbr = pending_peak_builds.back();
-			}
+			pbr = pending_peak_builds.back();
+		}
 			
-			if (pbr && pbr->frame + pbr->cnt == oldlen) {
-				
-				/* the last PBR extended to the start of the current write,
-				   so just extend it again.
-				*/
+		if (pbr && pbr->frame + pbr->cnt == oldlen) {
+			
+			/* the last PBR extended to the start of the current write,
+			   so just extend it again.
+			*/
+			pbr->cnt += cnt;
+		} else {
+			pending_peak_builds.push_back (new PeakBuildRecord (oldlen, cnt));
+		}
 
-				pbr->cnt += cnt;
-			} else {
-				pending_peak_builds.push_back (new PeakBuildRecord (oldlen, cnt));
-			}
-			
-			_peaks_built = false;
+		_peaks_built = false;
 	}
 	
 	
 	if (_build_peakfiles) {
-		queue_for_peaks (shared_from_this ());
+		queue_for_peaks (shared_from_this (), false);
 	}
 
 	_write_data_count = cnt;
@@ -540,7 +539,7 @@ SndFileSource::destructive_write_unlocked (Sample* data, nframes_t cnt)
 	}
 
 	if (_build_peakfiles) {
-		queue_for_peaks (shared_from_this ());
+		queue_for_peaks (shared_from_this (), true);
 	}
 	
 	return cnt;

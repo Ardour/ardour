@@ -217,6 +217,8 @@ class Editor : public PublicEditor
 	Selection& get_selection() const { return *selection; }
 	Selection& get_cut_buffer() const { return *cut_buffer; }
 
+	bool extend_selection_to_track (TimeAxisView&);
+
 	void play_selection ();
 	void select_all_in_track (Selection::Operation op);
 	void select_all (Selection::Operation op);
@@ -257,7 +259,7 @@ class Editor : public PublicEditor
 	void route_name_changed (TimeAxisView *);
 	gdouble        frames_per_unit;
 	nframes_t leftmost_frame;
-	void clear_playlist (ARDOUR::Playlist&);
+	void clear_playlist (boost::shared_ptr<ARDOUR::Playlist>);
 
 	void new_playlists ();
 	void copy_playlists ();
@@ -286,6 +288,7 @@ class Editor : public PublicEditor
 	void set_follow_playhead (bool yn);
 	void toggle_follow_playhead ();
 	bool follow_playhead() const { return _follow_playhead; }
+	bool dragging_playhead () const { return _dragging_playhead; }
 
 	void toggle_waveform_visibility ();
 	void toggle_waveforms_while_recording ();
@@ -293,12 +296,13 @@ class Editor : public PublicEditor
 
 	/* SMPTE timecode & video sync */
 
-	void smpte_fps_chosen (ARDOUR::Session::SmpteFormat format);
+	void smpte_fps_chosen (ARDOUR::SmpteFormat format);
 	void video_pullup_chosen (ARDOUR::Session::PullupFormat pullup);
+	void subframes_per_frame_chosen (uint32_t);
 
 	void update_smpte_mode();
 	void update_video_pullup();
-
+	void update_subframes_per_frame ();
 	/* xfades */
 
 	void toggle_auto_xfade ();
@@ -652,6 +656,7 @@ class Editor : public PublicEditor
 
 	double canvas_width;
 	double canvas_height;
+	double full_canvas_height;
 	nframes_t last_canvas_frame;
 
 	bool track_canvas_map_handler (GdkEventAny*);
@@ -921,8 +926,8 @@ class Editor : public PublicEditor
 	void bring_in_external_audio (Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes_t& pos, bool prompt);
 	void do_import (vector<Glib::ustring> paths, bool split, Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes_t&, bool);
 	void do_embed (vector<Glib::ustring> paths, bool split, Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes_t&, bool);
-	int  import_sndfile (Glib::ustring path, Editing::ImportMode mode, ARDOUR::AudioTrack* track, nframes_t& pos);
-	int  embed_sndfile (Glib::ustring path, bool split, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode, 
+	int  import_sndfile (vector<Glib::ustring> paths, Editing::ImportMode mode, ARDOUR::AudioTrack* track, nframes_t& pos);
+	int  embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode, 
 			    ARDOUR::AudioTrack* track, nframes_t& pos, bool prompt);
 	int finish_bringing_in_audio (boost::shared_ptr<ARDOUR::AudioRegion> region, uint32_t, uint32_t, ARDOUR::AudioTrack* track, nframes_t& pos, Editing::ImportMode mode);
 
@@ -953,7 +958,7 @@ class Editor : public PublicEditor
 	/* to support this ... */
 
 	void import_audio (bool as_tracks);
-	void do_import (vector<string> paths, bool split, bool as_tracks);
+	void do_import (vector<Glib::ustring> paths, bool split, bool as_tracks);
 
 	void move_to_start ();
 	void move_to_end ();
@@ -977,6 +982,8 @@ class Editor : public PublicEditor
 	void clear_markers ();
 	void clear_ranges ();
 	void clear_locations ();
+	void unhide_markers ();
+	void unhide_ranges ();
 	void jump_forward_to_mark ();
 	void jump_backward_to_mark ();
 	void cursor_align (bool playhead_to_edit);
@@ -1036,9 +1043,11 @@ class Editor : public PublicEditor
 	void fade_in_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 	void fade_out_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 	
-	std::set<ARDOUR::Playlist*> motion_frozen_playlists;
+	std::set<boost::shared_ptr<ARDOUR::Playlist> > motion_frozen_playlists;
 	void region_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void region_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
+
+	bool _dragging_playhead;
 
 	void cursor_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void cursor_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
@@ -1198,6 +1207,7 @@ class Editor : public PublicEditor
 	void marker_menu_select_all_selectables_using_range ();
 	void marker_menu_separate_regions_using_location ();
 	void marker_menu_play_from ();
+	void marker_menu_play_range ();
 	void marker_menu_set_playhead ();
 	void marker_menu_set_from_playhead ();
 	void marker_menu_set_from_selection ();
@@ -1210,14 +1220,14 @@ class Editor : public PublicEditor
 	void tm_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void transport_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void new_transport_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
-	void build_range_marker_menu ();
-	void build_marker_menu ();
+	void build_range_marker_menu (bool loop_or_punch);
+	void build_marker_menu (bool start_or_end);
 	void build_tm_marker_menu ();
-	void build_transport_marker_menu ();
 	void build_new_transport_marker_menu ();
 
 	Gtk::Menu* tm_marker_menu;
 	Gtk::Menu* marker_menu;
+	Gtk::Menu* start_end_marker_menu;
 	Gtk::Menu* range_marker_menu;
 	Gtk::Menu* transport_marker_menu;
 	Gtk::Menu* new_transport_marker_menu;
@@ -1750,7 +1760,7 @@ class Editor : public PublicEditor
 
 	/* handling cleanup */
 
-	int playlist_deletion_dialog (ARDOUR::Playlist*);
+	int playlist_deletion_dialog (boost::shared_ptr<ARDOUR::Playlist>);
 
 	vector<sigc::connection> session_connections;
 

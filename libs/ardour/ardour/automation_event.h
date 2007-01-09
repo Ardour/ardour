@@ -82,7 +82,8 @@ class AutomationList : public PBD::StatefulDestructible
 	void clear ();
 	void x_scale (double factor);
 	bool extend_to (double);
-
+	void slide (iterator before, double distance);
+	
 	void reposition_for_rt_add (double when);
 	void rt_add (double when, double value);
 	void add (double when, double value);
@@ -190,7 +191,7 @@ class AutomationList : public PBD::StatefulDestructible
 
 	AutomationEventList events;
 	mutable Glib::Mutex lock;
-	bool   _frozen;
+	int8_t  _frozen;
 	bool    changed_when_thawed;
 	bool   _dirty;
 
@@ -209,6 +210,7 @@ class AutomationList : public PBD::StatefulDestructible
 	double min_yval;
 	double max_yval;
 	double default_value;
+	bool   sort_pending;
 
 	iterator rt_insertion_point;
 	double   rt_pos;

@@ -80,7 +80,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (main_actions, X_("Sync"), _("Sync"));
 	ActionManager::register_action (main_actions, X_("Options"), _("Options"));
 	ActionManager::register_action (main_actions, X_("TransportOptions"), _("Options"));
-        ActionManager::register_action (main_actions, X_("Help"), _("Help"));
+	ActionManager::register_action (main_actions, X_("Help"), _("Help"));
  	ActionManager::register_action (main_actions, X_("KeyMouse Actions"), _("KeyMouse Actions"));
 	ActionManager::register_action (main_actions, X_("AudioFileFormat"), _("Audio File Format"));
 	ActionManager::register_action (main_actions, X_("AudioFileFormatHeader"), _("Header"));
@@ -92,7 +92,7 @@ ARDOUR_UI::install_actions ()
 
 	/* the real actions */
 
-	act = ActionManager::register_action (main_actions, X_("New"), _("New"),  bind (mem_fun(*this, &ARDOUR_UI::new_session), false, string ()));
+	act = ActionManager::register_action (main_actions, X_("New"), _("New"),  bind (mem_fun(*this, &ARDOUR_UI::new_session), string ()));
 
 	ActionManager::register_action (main_actions, X_("Open"), _("Open"),  mem_fun(*this, &ARDOUR_UI::open_session));
 	ActionManager::register_action (main_actions, X_("Recent"), _("Recent"),  mem_fun(*this, &ARDOUR_UI::open_recent_session));
@@ -189,7 +189,6 @@ ARDOUR_UI::install_actions ()
 
 	ActionManager::register_action (common_actions, X_("goto-editor"), _("Show Editor"),  mem_fun(*this, &ARDOUR_UI::goto_editor_window));
 	ActionManager::register_action (common_actions, X_("goto-mixer"), _("Show Mixer"),  mem_fun(*this, &ARDOUR_UI::goto_mixer_window));
-	ActionManager::register_toggle_action (common_actions, X_("ToggleSoundFileBrowser"), _("Sound File Browser"), mem_fun(*this, &ARDOUR_UI::toggle_sound_file_browser));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleOptionsEditor"), _("Options Editor"), mem_fun(*this, &ARDOUR_UI::toggle_options_window));
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleInspector"), _("Track/Bus Inspector"), mem_fun(*this, &ARDOUR_UI::toggle_route_params_window));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -483,7 +482,7 @@ ARDOUR_UI::toggle_control_protocol (ControlProtocolInfo* cpi)
 }
 
 void
-ARDOUR_UI::toggle_control_protocol_feedback (ControlProtocolInfo* cpi, const char* group, const char* action)
+ARDOUR_UI::toggle_control_protocol_feedback (ControlProtocolInfo* cpi, const char* group, string action)
 {
 	if (!session) {
 		/* this happens when we build the menu bar when control protocol support
@@ -494,14 +493,17 @@ ARDOUR_UI::toggle_control_protocol_feedback (ControlProtocolInfo* cpi, const cha
 	}
 
 	if (cpi->protocol) {
-		Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (group, action);
+		Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (group, action.c_str());
 
 		if (act) {
 			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-			bool x = tact->get_active();
 
-			if (tact && x != cpi->protocol->get_feedback()) {
-				cpi->protocol->set_feedback (!x);
+			if (tact) {
+				bool x = tact->get_active();
+
+				if (x != cpi->protocol->get_feedback()) {
+					cpi->protocol->set_feedback (x);
+				}
 			}
 		}
 	}
@@ -556,7 +558,7 @@ ARDOUR_UI::build_control_surface_menu ()
 												  (bind (mem_fun (*this, &ARDOUR_UI::toggle_control_protocol_feedback), 
 													 *i, 
 													 "Editor",
-													 action_name.c_str())));
+													 action_name)));
 				
 				ui += "<menu action='";
 				ui += submenu_name;

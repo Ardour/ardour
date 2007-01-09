@@ -1,4 +1,4 @@
 #!/bin/sh
 dir=`dirname "$0"`
 . $dir/ardev_common.sh
-exec gdb gtk2_ardour/ardour.bin $*
+exec gdb $EXECUTABLE $*

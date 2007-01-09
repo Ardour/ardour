@@ -138,7 +138,7 @@ RouteParams_UI::RouteParams_UI (AudioEngine& eng)
 	set_name ("RouteParamsWindow");
 	set_default_size (620,370);
 	set_title (_("ardour: track/bus inspector"));
-	set_wmclass (_("ardour_route_parameters"), "Ardour");
+	set_wmclass (X_("ardour_route_parameters"), "Ardour");
 
 	// events
 	route_display.get_selection()->signal_changed().connect(mem_fun(*this, &RouteParams_UI::route_selected));
@@ -510,7 +510,7 @@ RouteParams_UI::show_track_menu()
 				(MenuElem (_("Add Track/Bus"), 
 					   mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::add_route)));
 	}
-	track_menu->popup (1, 0);
+	track_menu->popup (1, gtk_get_current_event_time());
 }
 
 

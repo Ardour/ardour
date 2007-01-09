@@ -40,9 +40,11 @@ class MidiPlaylist : public ARDOUR::Playlist
 public:
 	MidiPlaylist (Session&, const XMLNode&, bool hidden = false);
 	MidiPlaylist (Session&, string name, bool hidden = false);
-	MidiPlaylist (const MidiPlaylist&, string name, bool hidden = false);
-	MidiPlaylist (const MidiPlaylist&, jack_nframes_t start, jack_nframes_t cnt,
+	MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, string name, bool hidden = false);
+	MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, jack_nframes_t start, jack_nframes_t cnt,
 	              string name, bool hidden = false);
+
+	~MidiPlaylist ();
 
 	nframes_t read (MidiRingBuffer& buf,
 			jack_nframes_t start, jack_nframes_t cnt, uint32_t chan_n=0);
@@ -62,9 +64,6 @@ protected:
 	void check_dependents (boost::shared_ptr<Region> region, bool norefresh);
 	void refresh_dependents (boost::shared_ptr<Region> region);
 	void remove_dependents (boost::shared_ptr<Region> region);
-
-protected:
-	~MidiPlaylist (); /* public should use unref() */
 
 private:
 	XMLNode& state (bool full_state);

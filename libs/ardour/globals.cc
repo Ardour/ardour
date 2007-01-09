@@ -191,42 +191,11 @@ setup_midi (AudioEngine& engine	)
 
 	return 0;
 }
-
-int
-ARDOUR::init (ARDOUR::AudioEngine& engine, bool use_vst, bool try_optimization)
+	
+void
+setup_hardware_optimization (bool try_optimization)
 {
-	bool generic_mix_functions = true;
-
-	(void) bindtextdomain(PACKAGE, LOCALEDIR);
-
-	PBD::ID::init ();
-
-	lrdf_init();
-	Library = new AudioLibrary;
-
-	Config = new Configuration;
-
-	if (Config->load_state ()) {
-		return -1;
-	}
-
-	Config->set_use_vst (use_vst);
-
-	if (setup_midi (engine)) {
-		return -1;
-	}
-    
-#ifdef HAVE_LIBLO
-	if (setup_osc ()) {
-		return -1;
-	}
-#endif
-
-#ifdef VST_SUPPORT
-	if (Config->get_use_vst() && fst_init ()) {
-		return -1;
-	}
-#endif
+        bool generic_mix_functions = true;
 
 	if (try_optimization) {
 
@@ -261,7 +230,7 @@ ARDOUR::init (ARDOUR::AudioEngine& engine, bool use_vst, bool try_optimization)
 #endif /* USE_X86_64_ASM */
 		
 		if (use_sse) {
-			cerr << "Enabling SSE optimized routines" << endl;
+			info << "Using SSE optimized routines" << endmsg;
 	
 			// SSE SET
 			Session::compute_peak 			= x86_sse_compute_peak;
@@ -301,6 +270,47 @@ ARDOUR::init (ARDOUR::AudioEngine& engine, bool use_vst, bool try_optimization)
 		
 		info << "No H/W specific optimizations in use" << endmsg;
 	}
+}
+
+int
+ARDOUR::init (ARDOUR::AudioEngine& engine, bool use_vst, bool try_optimization)
+{
+	extern void setup_enum_writer ();
+
+	(void) bindtextdomain(PACKAGE, LOCALEDIR);
+
+	PBD::ID::init ();
+	
+	setup_enum_writer ();
+
+	lrdf_init();
+	Library = new AudioLibrary;
+
+	Config = new Configuration;
+
+	if (Config->load_state ()) {
+		return -1;
+	}
+
+	Config->set_use_vst (use_vst);
+
+	if (setup_midi (engine)) {
+		return -1;
+	}
+    
+#ifdef HAVE_LIBLO
+	if (setup_osc ()) {
+		return -1;
+	}
+#endif
+
+#ifdef VST_SUPPORT
+	if (Config->get_use_vst() && fst_init ()) {
+		return -1;
+	}
+#endif
+
+	setup_hardware_optimization (try_optimization);
 
 	/* singleton - first object is "it" */
 	new PluginManager ();
@@ -393,8 +403,14 @@ ARDOUR::get_system_data_path ()
 {
 	string path;
 
-	path += DATA_DIR;
-	path += "/ardour2/";
+	char *envvar;
+
+	if ((envvar = getenv ("ARDOUR_DATA_PATH")) != 0) {
+		path = envvar;
+	} else {
+		path += DATA_DIR;
+		path += "/ardour2/";
+	}
 	
 	return path;
 }
@@ -403,9 +419,14 @@ string
 ARDOUR::get_system_module_path ()
 {
 	string path;
+	char *envvar;
 
-	path += MODULE_DIR;
-	path += "/ardour2/";
+	if ((envvar = getenv ("ARDOUR_MODULE_PATH")) != 0) {
+		path = envvar;
+	} else {
+		path += MODULE_DIR;
+		path += "/ardour2/";
+	}
 	
 	return path;
 }
@@ -602,4 +623,5 @@ std::istream& operator>>(std::istream& o, CrossfadeModel& var) { return int_to_t
 std::istream& operator>>(std::istream& o, SlaveSource& var) { return int_to_type<SlaveSource> (o, var); }
 std::istream& operator>>(std::istream& o, ShuttleBehaviour& var) { return int_to_type<ShuttleBehaviour> (o, var); }
 std::istream& operator>>(std::istream& o, ShuttleUnits& var) { return int_to_type<ShuttleUnits> (o, var); }
+std::istream& operator>>(std::istream& o, SmpteFormat& var) { return int_to_type<SmpteFormat> (o, var); }
 

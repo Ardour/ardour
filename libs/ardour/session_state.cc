@@ -43,8 +43,8 @@
 #ifdef HAVE_SYS_VFS_H
 #include <sys/vfs.h>
 #else
-#include <sys/mount.h>
 #include <sys/param.h>
+#include <sys/mount.h>
 #endif
 
 #include <glibmm.h>
@@ -57,6 +57,8 @@
 #include <pbd/pathscanner.h>
 #include <pbd/pthread_utils.h>
 #include <pbd/strsplit.h>
+#include <pbd/stacktrace.h>
+#include <pbd/copyfile.h>
 
 #include <ardour/audioengine.h>
 #include <ardour/configuration.h>
@@ -93,6 +95,7 @@
 #include <ardour/control_protocol_manager.h>
 #include <ardour/region_factory.h>
 #include <ardour/source_factory.h>
+#include <ardour/playlist_factory.h>
 
 #include <control_protocol/control_protocol.h>
 
@@ -107,12 +110,14 @@ void
 Session::first_stage_init (string fullpath, string snapshot_name)
 {
 	if (fullpath.length() == 0) {
+		destroy ();
 		throw failed_constructor();
 	}
 
 	char buf[PATH_MAX+1];
 	if (!realpath (fullpath.c_str(), buf) && (errno != ENOENT)) {
 		error << string_compose(_("Could not use path %1 (%s)"), buf, strerror(errno)) << endmsg;
+		destroy ();
 		throw failed_constructor();
 	}
 
@@ -133,7 +138,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_tempo_map->StateChanged.connect (mem_fun (*this, &Session::tempo_map_changed));
 
 	g_atomic_int_set (&processing_prohibited, 0);
-	send_cnt = 0;
 	insert_cnt = 0;
 	_transport_speed = 0;
 	_last_transport_speed = 0;
@@ -164,7 +168,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_worst_output_latency = 0;
 	_worst_input_latency = 0;
 	_worst_track_latency = 0;
-	_state_of_the_state = StateOfTheState(CannotSave|InitialConnecting|Loading);
+	_state_of_the_state = StateOfTheState(CannotSave|InitialConnecting|Loading|Deletion);
 	_slave = 0;
 	butler_mixdown_buffer = 0;
 	butler_gain_buffer = 0;
@@ -247,7 +251,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	RegionFactory::CheckNewRegion.connect (mem_fun (*this, &Session::add_region));
 	SourceFactory::SourceCreated.connect (mem_fun (*this, &Session::add_source));
-	Playlist::PlaylistCreated.connect (mem_fun (*this, &Session::add_playlist));
+	PlaylistFactory::PlaylistCreated.connect (mem_fun (*this, &Session::add_playlist));
 	Redirect::RedirectCreated.connect (mem_fun (*this, &Session::add_redirect));
 	NamedSelection::NamedSelectionCreated.connect (mem_fun (*this, &Session::add_named_selection));
 	AutomationList::AutomationListCreated.connect (mem_fun (*this, &Session::add_automation_list));
@@ -316,10 +320,20 @@ Session::second_stage_init (bool new_session)
 	_engine.Halted.connect (mem_fun (*this, &Session::engine_halted));
 	_engine.Xrun.connect (mem_fun (*this, &Session::xrun_recovery));
 
-	if (_engine.running()) {
+	try {
 		when_engine_running();
-	} else {
-		first_time_running = _engine.Running.connect (mem_fun (*this, &Session::when_engine_running));
+	}
+
+	/* handle this one in a different way than all others, so that its clear what happened */
+	
+	catch (AudioEngine::PortRegistrationFailure& err) {
+		error << _("Unable to create all required ports")
+		      << endmsg;
+		return -1;
+	}
+
+	catch (...) {
+		return -1;
 	}
 
 	//send_full_time_code ();
@@ -391,6 +405,7 @@ Session::setup_raid_path (string path)
 		if (fspath[fspath.length()-1] != '/') {
 			fspath += '/';
 		}
+
 		fspath += sound_dir (false);
 		
 		AudioFileSource::set_search_path (fspath);
@@ -604,15 +619,12 @@ Session::save_state (string snapshot_name, bool pending)
 		xml_path = _path;
 		xml_path += snapshot_name;
 		xml_path += _statefile_suffix;
+
 		bak_path = xml_path;
 		bak_path += ".bak";
 		
-		// Make backup of state file
-		
-		if ((access (xml_path.c_str(), F_OK) == 0) &&
-		    (rename(xml_path.c_str(), bak_path.c_str()))) {
-			error << _("could not backup old state file, current state not saved.")	<< endmsg;
-			return -1;
+		if (g_file_test (xml_path.c_str(), G_FILE_TEST_EXISTS)) {
+			copy_file (xml_path, bak_path);
 		}
 
 	} else {
@@ -623,30 +635,31 @@ Session::save_state (string snapshot_name, bool pending)
 
 	}
 
+	string tmp_path;
+
+	tmp_path = _path;
+	tmp_path += snapshot_name;
+	tmp_path += ".tmp";
+
 	cerr << "actually writing state\n";
 
-	if (!tree.write (xml_path)) {
-		error << string_compose (_("state could not be saved to %1"), xml_path) << endmsg;
-
-		/* don't leave a corrupt file lying around if it is
-		   possible to fix.
-		*/
-
-		if (unlink (xml_path.c_str())) {
-			error << string_compose (_("could not remove corrupt state file %1"), xml_path) << endmsg;
-		} else {
-			if (!pending) {
-				if (rename (bak_path.c_str(), xml_path.c_str())) {
-					error << string_compose (_("could not restore state file from backup %1"), bak_path) << endmsg;
-				}
-			}
-		}
-
+	if (!tree.write (tmp_path)) {
+		error << string_compose (_("state could not be saved to %1"), tmp_path) << endmsg;
+		unlink (tmp_path.c_str());
 		return -1;
+
+	} else {
+
+		if (rename (tmp_path.c_str(), xml_path.c_str()) != 0) {
+			error << string_compose (_("could not rename temporary session file %1 to %2"), tmp_path, xml_path) << endmsg;
+			unlink (tmp_path.c_str());
+			return -1;
+		}
 	}
 
 	if (!pending) {
-                save_history(snapshot_name);
+
+                save_history (snapshot_name);
 
 		bool was_dirty = dirty();
 
@@ -715,15 +728,52 @@ Session::load_state (string snapshot_name)
 
 	set_dirty();
 
-	if (state_tree->read (xmlpath)) {
-		return 0;
-	} else {
+	if (!state_tree->read (xmlpath)) {
 		error << string_compose(_("Could not understand ardour file %1"), xmlpath) << endmsg;
+		delete state_tree;
+		state_tree = 0;
+		return -1;
 	}
 
-	delete state_tree;
-	state_tree = 0;
-	return -1;
+	XMLNode& root (*state_tree->root());
+	
+	if (root.name() != X_("Session")) {
+		error << string_compose (_("Session file %1 is not an Ardour session"), xmlpath) << endmsg;
+		delete state_tree;
+		state_tree = 0;
+		return -1;
+	}
+
+	const XMLProperty* prop;
+	bool is_old = false;
+
+	if ((prop = root.property ("version")) == 0) {
+		/* no version implies very old version of Ardour */
+		is_old = true;
+	} else {
+		int major_version;
+		major_version = atoi (prop->value()); // grab just the first number before the period
+		if (major_version < 2) {
+			is_old = true;
+		}
+	}
+
+	if (is_old) {
+		string backup_path;
+
+		backup_path = xmlpath;
+		backup_path += ".1";
+
+		info << string_compose (_("Copying old session file %1 to %2\nUse %2 with Ardour versions before 2.0 from now on"),
+					xmlpath, backup_path) 
+		     << endmsg;
+
+		copy_file (xmlpath, backup_path);
+
+		/* if it fails, don't worry. right? */
+	}
+
+	return 0;
 }
 
 int
@@ -1520,6 +1570,7 @@ Session::load_sources (const XMLNode& node)
 		if ((source = XMLSourceFactory (**niter)) == 0) {
 			error << _("Session: cannot create Source from XML description.") << endmsg;
 		}
+
 	}
 
 	return 0;
@@ -1791,7 +1842,7 @@ Session::load_playlists (const XMLNode& node)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
-	Playlist *playlist;
+	boost::shared_ptr<Playlist> playlist;
 
 	nlist = node.children();
 
@@ -1812,7 +1863,7 @@ Session::load_unused_playlists (const XMLNode& node)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
-	Playlist *playlist;
+	boost::shared_ptr<Playlist> playlist;
 
 	nlist = node.children();
 
@@ -1827,34 +1878,22 @@ Session::load_unused_playlists (const XMLNode& node)
 
 		// now manually untrack it
 
-		track_playlist (playlist, false);
+		track_playlist (false, boost::weak_ptr<Playlist> (playlist));
 	}
 
 	return 0;
 }
 
-Playlist *
+boost::shared_ptr<Playlist>
 Session::XMLPlaylistFactory (const XMLNode& node)
 {
-	const XMLProperty* type = node.property("type");
-
 	try {
-	
-	if ( !type || type->value() == "audio" ) {
-
-		return new AudioPlaylist (*this, node);
-	
-	} else if (type->value() == "midi") {
-
-		return new MidiPlaylist (*this, node);
-	
-	}
-	
-	} catch (failed_constructor& err) {
-		return 0;
+		return PlaylistFactory::create (*this, node);
 	}
 
-	return 0;
+	catch (failed_constructor& err) {
+		return boost::shared_ptr<Playlist>();
+	}
 }
 
 int
@@ -1913,7 +1952,6 @@ Session::sound_dir (bool with_path) const
 	
 	old_withpath = _path;
 	old_withpath += old_sound_dir_name;
-	old_withpath += '/';
 
 	if (stat (old_withpath.c_str(), &statbuf) == 0) {
 		if (with_path)
@@ -1933,7 +1971,6 @@ Session::sound_dir (bool with_path) const
 	res += legalize_for_path (_name);
 	res += '/';
 	res += sound_dir_name;
-	res += '/';
 
 	return res;
 }
@@ -2265,7 +2302,12 @@ void
 Session::set_global_route_metering (GlobalRouteMeterState s, void* arg) 
 {
 	for (GlobalRouteMeterState::iterator i = s.begin(); i != s.end(); ++i) {
-		i->first->set_meter_point (i->second, arg);
+
+		boost::shared_ptr<Route> r = (i->first.lock());
+
+		if (r) {
+			r->set_meter_point (i->second, arg);
+		}
 	}
 }
 
@@ -2273,8 +2315,13 @@ void
 Session::set_global_route_boolean (GlobalRouteBooleanState s, void (Route::*method)(bool, void*), void* arg)
 {
 	for (GlobalRouteBooleanState::iterator i = s.begin(); i != s.end(); ++i) {
-		Route* r = i->first.get();
-		(r->*method) (i->second, arg);
+
+		boost::shared_ptr<Route> r = (i->first.lock());
+
+		if (r) {
+			Route* rp = r.get();
+			(rp->*method) (i->second, arg);
+		}
 	}
 }
 
@@ -2506,11 +2553,20 @@ Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_th
 	return 0;
 }
 
+struct RegionCounter {
+    typedef std::map<PBD::ID,boost::shared_ptr<AudioSource> > AudioSourceList;
+    AudioSourceList::iterator iter;
+    boost::shared_ptr<Region> region;
+    uint32_t count;
+    
+    RegionCounter() : count (0) {}
+};
+
 int
 Session::cleanup_sources (Session::cleanup_report& rep)
 {
 	vector<boost::shared_ptr<Source> > dead_sources;
-	vector<Playlist*> playlists_tbd;
+	vector<boost::shared_ptr<Playlist> > playlists_tbd;
 	PathScanner scanner;
 	string sound_path;
 	vector<space_and_path>::iterator i;
@@ -2549,71 +2605,34 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 
 	/* now delete any that were marked for deletion */
 
-	for (vector<Playlist*>::iterator x = playlists_tbd.begin(); x != playlists_tbd.end(); ++x) {
-		PlaylistList::iterator foo;
-
-		if ((foo = unused_playlists.find (*x)) != unused_playlists.end()) {
-			unused_playlists.erase (foo);
-		}
-		delete *x;
+	for (vector<boost::shared_ptr<Playlist> >::iterator x = playlists_tbd.begin(); x != playlists_tbd.end(); ++x) {
+		(*x)->drop_references ();
 	}
 
-	/* step 2: find all un-referenced sources */
+	playlists_tbd.clear ();
+
+	/* step 2: find all un-used sources */
 
 	rep.paths.clear ();
 	rep.space = 0;
 
 	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ) {
-
+		
 		SourceMap::iterator tmp;
 
 		tmp = i;
 		++tmp;
 
-		/* only remove files that are not in use and have some size
-		   to them. otherwise we remove the current "nascent"
+		/* do not bother with files that are zero size, otherwise we remove the current "nascent"
 		   capture files.
 		*/
 
-		cerr << "checking out source " << i->second->name() << " use_count = " << i->second.use_count() << endl;
-
-		if (i->second.use_count() == 1 && i->second->length() > 0) {
+ 		if (!i->second->used() && i->second->length() > 0) {
 			dead_sources.push_back (i->second);
-
-			/* remove this source from our own list to avoid us
-			   adding it to the list of all sources below
-			*/
-
-			sources.erase (i);
-		}
+			i->second->GoingAway();
+		} 
 
 		i = tmp;
-	}
-
-	/* Step 3: get rid of all regions in the region list that use any dead sources
-	   in case the sources themselves don't go away (they might be referenced in
-	   other snapshots).
-	*/
-		
-	for (vector<boost::shared_ptr<Source> >::iterator i = dead_sources.begin(); i != dead_sources.end();++i) {
-
-		for (RegionList::iterator r = regions.begin(); r != regions.end(); ) {
-			RegionList::iterator tmp;
-
-			tmp = r;
-			++tmp;
-			
-			boost::shared_ptr<Region> reg = r->second;
-
-			for (uint32_t n = 0; n < reg->n_channels(); ++n) {
-				if (reg->source (n) == (*i)) {
-					/* this region is dead */
-					remove_region (reg);
-				}
-			}
-			
-			r = tmp;
-		}
 	}
 
 	/* build a list of all the possible sound directories for the session */
@@ -2624,7 +2643,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		++nexti;
 
 		sound_path += (*i).path;
-		sound_path += sound_dir_name;
+		sound_path += sound_dir (false);
 
 		if (nexti != session_dirs.end()) {
 			sound_path += ':';
@@ -2632,7 +2651,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 
 		i = nexti;
 	}
-	
+
 	/* now do the same thing for the files that ended up in the sounds dir(s) 
 	   but are not referenced as sources in any snapshot.
 	*/
@@ -2672,7 +2691,6 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 				used = true;
 				break;
 			}
-
 		}
 
 		if (!used) {
@@ -2697,11 +2715,31 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		   on whichever filesystem it was already on.
 		*/
 
-		newpath = Glib::path_get_dirname (*x);
-		newpath = Glib::path_get_dirname (newpath);
+		if (_path.find ("/sounds/")) {
+
+			/* old school, go up 1 level */
+
+			newpath = Glib::path_get_dirname (*x);      // "sounds" 
+			newpath = Glib::path_get_dirname (newpath); // "session-name"
+
+		} else {
+
+			/* new school, go up 4 levels */
+			
+			newpath = Glib::path_get_dirname (*x);      // "audiofiles" 
+			newpath = Glib::path_get_dirname (newpath); // "session-name"
+			newpath = Glib::path_get_dirname (newpath); // "interchange"
+			newpath = Glib::path_get_dirname (newpath); // "session-dir"
+		}
 
 		newpath += '/';
 		newpath += dead_sound_dir_name;
+
+		if (g_mkdir_with_parents (newpath.c_str(), 0755) < 0) {
+			error << string_compose(_("Session: cannot create session peakfile dir \"%1\" (%2)"), newpath, strerror (errno)) << endmsg;
+			return -1;
+		}
+
 		newpath += '/';
 		newpath += Glib::path_get_basename ((*x));
 		
@@ -2741,7 +2779,6 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 			      << endmsg;
 			goto out;
 		}
-		
 
 		/* see if there an easy to find peakfile for this file, and remove it.
 		 */
@@ -2759,7 +2796,6 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 				goto out;
 			}
 		}
-
 	}
 
 	ret = 0;
@@ -2866,6 +2902,12 @@ Session::set_clean ()
 }
 
 void
+Session::set_deletion_in_progress ()
+{
+	_state_of_the_state = StateOfTheState (_state_of_the_state | Deletion);
+}
+
+void
 Session::add_controllable (Controllable* c)
 {
 	Glib::Mutex::Lock lm (controllables_lock);
@@ -2916,8 +2958,8 @@ Session::save_history (string snapshot_name)
     XMLTree tree;
     string xml_path;
     string bak_path;
-    
-    tree.set_root (&_history.get_state());
+
+    tree.set_root (&_history.get_state (Config->get_saved_history_depth()));
 
     if (snapshot_name.empty()) {
 	snapshot_name = _current_snapshot_name;
@@ -2933,8 +2975,6 @@ Session::save_history (string snapshot_name)
         error << _("could not backup old history file, current history not saved.") << endmsg;
         return -1;
     }
-
-    cerr << "actually writing history\n";
 
     if (!tree.write (xml_path))
     {
@@ -2965,18 +3005,22 @@ Session::restore_history (string snapshot_name)
     XMLTree tree;
     string xmlpath;
 
+    if (snapshot_name.empty()) {
+	    snapshot_name = _current_snapshot_name;
+    }
+
     /* read xml */
     xmlpath = _path + snapshot_name + ".history";
     cerr << string_compose(_("Loading history from '%1'."), xmlpath) << endmsg;
 
     if (access (xmlpath.c_str(), F_OK)) {
-        error << string_compose(_("%1: session history file \"%2\" doesn't exist!"), _name, xmlpath) << endmsg;
-        return 1;
+	    info << string_compose (_("%1: no history file \"%2\" for this session."), _name, xmlpath) << endmsg;
+	    return 1;
     }
 
     if (!tree.read (xmlpath)) {
-        error << string_compose(_("Could not understand ardour file %1"), xmlpath) << endmsg;
-        return -1;
+	    error << string_compose (_("Could not understand session history file \"%1\""), xmlpath) << endmsg;
+	    return -1;
     }
 
     /* replace history */
@@ -3005,10 +3049,19 @@ Session::restore_history (string snapshot_name)
 		    if (n->name() == "MementoCommand" ||
 			n->name() == "MementoUndoCommand" ||
 			n->name() == "MementoRedoCommand") {
+
 			    if ((c = memento_command_factory(n))) {
 				    ut->add_command(c);
 			    }
+			    
+		    } else if (n->name() == X_("GlobalRouteStateCommand")) {
+
+			    if ((c = global_state_command_factory (*n))) {
+				    ut->add_command (c);
+			    }
+			    
 		    } else {
+
 			    error << string_compose(_("Couldn't figure out how to make a Command out of a %1 XMLNode."), n->name()) << endmsg;
 		    }
 	    }
@@ -3039,7 +3092,6 @@ Session::config_changed (const char* parameter_name)
 			
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if ((*i)->record_enabled ()) {
-					//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
 					(*i)->monitor_input (!Config->get_auto_input());
 				}
 			}
@@ -3099,7 +3151,7 @@ Session::config_changed (const char* parameter_name)
 
 		setup_raid_path (Config->get_raid_path());
 
-	} else if (PARAM_IS ("smpte-frames-per-second") || PARAM_IS ("smpte-drop-frames")) {
+	} else if (PARAM_IS ("smpte-format")) {
 
 		sync_time_vars ();
 

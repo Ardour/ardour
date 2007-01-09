@@ -21,7 +21,7 @@ class AudioRegionGainLine : public AutomationLine
 	void view_to_model_y (double&);
 	void model_to_view_y (double&);
 
-	void start_drag (ControlPoint*, float fraction);
+	void start_drag (ControlPoint*, nframes_t x, float fraction);
 	void end_drag (ControlPoint*);
 
 	void remove_point (ControlPoint&);

@@ -458,7 +458,7 @@ IOSelector::display_ports ()
 			
 			really_short_name = port->short_name();
 			really_short_name = really_short_name.substr (really_short_name.find ('/') + 1);
-			
+
 			tview = manage (new TreeView());
 			RefPtr<ListStore> port_model = ListStore::create (port_display_columns);
 			
@@ -478,7 +478,6 @@ IOSelector::display_ports ()
 			
 			/* now fill the clist with the current connections */
 			
-			
 			const char **connections = port->get_connections ();
 			
 			if (connections) {
@@ -487,7 +486,7 @@ IOSelector::display_ports ()
 					row[port_display_columns.displayed_name] = connections[c];
 					row[port_display_columns.full_name] = connections[c];
 				}
-			}
+			} 
 			
 			if (for_input) {
 				

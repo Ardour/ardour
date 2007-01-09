@@ -31,6 +31,8 @@
 #include <gtkmm/entry.h>
 #include <gtkmm/label.h>
 
+#include <gtkmm2ext/focus_entry.h>
+
 #include <ardour/types.h>
 #include <ardour/region.h>
 
@@ -118,7 +120,7 @@ class TimeAxisView : public virtual AxisView
 	Gtk::VBox     controls_vbox;
 	Gtk::HBox     name_hbox;
 	Gtk::Frame    name_frame;
- 	Gtk::Entry    name_entry;
+ 	Gtkmm2ext::FocusEntry name_entry;
 	
 	void hide_name_label ();
 	void hide_name_entry ();
@@ -152,7 +154,16 @@ class TimeAxisView : public virtual AxisView
 	virtual void set_height (TrackHeight h);
 	void reset_height();
 
-	/** Steps through the defined heights for this TrackView.
+	/**
+	 * Returns a TimeAxisView* if this object covers y, or one of its children does.
+	 *  If the covering object is a child axis, then the child is returned.
+	 * Returns 0 otherwise.
+	 */
+
+	TimeAxisView* covers_y_position (double y);
+
+	/**
+	 * Steps through the defined heights for this TrackView.
 	 * Sets bigger to true to step up in size, set to fals eot step smaller.
 	 *
 	 * @param bigger true if stepping should increase in size, false otherwise
@@ -160,7 +171,7 @@ class TimeAxisView : public virtual AxisView
 	virtual void step_height (bool bigger);
 
 	virtual ARDOUR::RouteGroup* edit_group() const { return 0; }
-	virtual ARDOUR::Playlist* playlist() const { return 0; }
+	virtual boost::shared_ptr<ARDOUR::Playlist> playlist() const { return boost::shared_ptr<ARDOUR::Playlist> (); }
 
 	virtual void set_samples_per_unit (double);
 	virtual void show_selection (TimeSelection&);

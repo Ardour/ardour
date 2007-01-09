@@ -66,8 +66,8 @@ class Source : public PBD::StatefulDestructible
 	void use () { _in_use++; }
 	void disuse () { if (_in_use) { _in_use--; } }
 	
-	void add_playlist (ARDOUR::Playlist*);
-	void remove_playlist (ARDOUR::Playlist*);
+	void add_playlist (boost::shared_ptr<ARDOUR::Playlist>);
+	void remove_playlist (boost::weak_ptr<ARDOUR::Playlist>);
 
 	uint32_t used() const;
 
@@ -83,7 +83,7 @@ class Source : public PBD::StatefulDestructible
 	time_t            _timestamp;
 	jack_nframes_t    _length;
 
-	std::set<ARDOUR::Playlist*> _playlists;
+	std::set<boost::shared_ptr<ARDOUR::Playlist> > _playlists;
 
   private:
 	uint32_t          _in_use;

@@ -90,9 +90,9 @@ class AudioDiskstream : public Diskstream
 		}
 	}
 	
-	AudioPlaylist* audio_playlist () { return dynamic_cast<AudioPlaylist*>(_playlist); }
+	boost::shared_ptr<AudioPlaylist> audio_playlist () { return boost::dynamic_pointer_cast<AudioPlaylist>(_playlist); }
 
-	int use_playlist (Playlist *);
+	int use_playlist (boost::shared_ptr<Playlist>);
 	int use_new_playlist ();
 	int use_copy_playlist ();
 
@@ -173,33 +173,39 @@ class AudioDiskstream : public Diskstream
   private:
 
 	struct ChannelInfo {
-
-		Sample     *playback_wrap_buffer;
-		Sample     *capture_wrap_buffer;
-		Sample     *speed_buffer;
-
-		float       peak_power;
 	    
-		boost::shared_ptr<AudioFileSource> fades_source;
-		boost::shared_ptr<AudioFileSource> write_source;
+	    ChannelInfo ();
+	    ~ChannelInfo ();
 
-		Port         *source;
-		Sample       *current_capture_buffer;
-		Sample       *current_playback_buffer;
+	    void init (nframes_t buffer_size, nframes_t speed_buffer_size, nframes_t wrap_buffer_size);
+	    void release ();
 
-		RingBufferNPT<Sample> *playback_buf;
-		RingBufferNPT<Sample> *capture_buf;
-
-		Sample* scrub_buffer;
-		Sample* scrub_forward_buffer;
-		Sample* scrub_reverse_buffer;
-
-		RingBufferNPT<Sample>::rw_vector playback_vector;
-		RingBufferNPT<Sample>::rw_vector capture_vector;
-
-		RingBufferNPT<CaptureTransition> * capture_transition_buf;
-		// the following are used in the butler thread only
-		nframes_t                     curr_capture_cnt;
+	    Sample     *playback_wrap_buffer;
+	    Sample     *capture_wrap_buffer;
+	    Sample     *speed_buffer;
+	    
+	    float       peak_power;
+	    
+	    boost::shared_ptr<AudioFileSource> fades_source;
+	    boost::shared_ptr<AudioFileSource> write_source;
+	    
+	    Port         *source;
+	    Sample       *current_capture_buffer;
+	    Sample       *current_playback_buffer;
+	    
+	    RingBufferNPT<Sample> *playback_buf;
+	    RingBufferNPT<Sample> *capture_buf;
+	    
+	    Sample* scrub_buffer;
+	    Sample* scrub_forward_buffer;
+	    Sample* scrub_reverse_buffer;
+	    
+	    RingBufferNPT<Sample>::rw_vector playback_vector;
+	    RingBufferNPT<Sample>::rw_vector capture_vector;
+	    
+	    RingBufferNPT<CaptureTransition> * capture_transition_buf;
+	    // the following are used in the butler thread only
+	    nframes_t                     curr_capture_cnt;
 	};
 
 	/* The two central butler operations */

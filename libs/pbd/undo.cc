@@ -236,13 +236,31 @@ UndoHistory::clear ()
 	Changed (); /* EMIT SIGNAL */
 }
 
-XMLNode & UndoHistory::get_state()
+XMLNode& 
+UndoHistory::get_state (uint32_t depth)
 {
     XMLNode *node = new XMLNode ("UndoHistory");
 
-    list<UndoTransaction*>::iterator it;
-    for (it = UndoList.begin(); it != UndoList.end(); it++) {
-	    node->add_child_nocopy((*it)->get_state());
+    if (depth == 0) {
+	    /* everything */
+
+	    for (list<UndoTransaction*>::iterator it = UndoList.begin(); it != UndoList.end(); ++it) {
+		    node->add_child_nocopy((*it)->get_state());
+	    }
+	    
+    } else {
+
+	    /* just the last "depth" transactions */
+
+	    list<UndoTransaction*> in_order;
+
+	    for (list<UndoTransaction*>::reverse_iterator it = UndoList.rbegin(); it != UndoList.rend() && depth; ++it, depth--) {
+		    in_order.push_front (*it);
+	    }
+
+	    for (list<UndoTransaction*>::iterator it = in_order.begin(); it != in_order.end(); it++) {
+		    node->add_child_nocopy((*it)->get_state());
+	    }
     }
 
     return *node;

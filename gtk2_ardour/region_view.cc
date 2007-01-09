@@ -367,7 +367,7 @@ void
 RegionView::set_frame_color ()
 {
 	if (_region->opaque()) {
-		fill_opacity = 180;
+		fill_opacity = 230;
 	} else {
 		fill_opacity = 100;
 	}

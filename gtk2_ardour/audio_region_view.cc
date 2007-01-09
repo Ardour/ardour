@@ -737,8 +737,8 @@ AudioRegionView::show_region_editor ()
 		// trackview.editor.ensure_float (*editor);
 	} 
 
-	editor->show_all ();
-	editor->get_window()->raise();
+	editor->present ();
+	editor->show_all();
 }
 
 void
@@ -873,6 +873,8 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 	wave->property_amplitude_above_axis() =  _amplitude_above_axis;
 	wave->property_wave_color() = _region->muted() ? color_map[cMutedWaveForm] : color_map[cWaveForm];
 	wave->property_region_start() = _region->start();
+	wave->property_rectified() = (bool) (_flags & WaveformRectified);
+	wave->property_logscaled() = (bool) (_flags & WaveformLogScaled);
 
 	if (!(_flags & WaveformVisible)) {
 		wave->hide();
@@ -987,6 +989,8 @@ AudioRegionView::store_flags()
 
 	node->add_property ("waveform-visible", (_flags & WaveformVisible) ? "yes" : "no");
 	node->add_property ("envelope-visible", (_flags & EnvelopeVisible) ? "yes" : "no");
+	node->add_property ("waveform-rectified", (_flags & WaveformRectified) ? "yes" : "no");
+	node->add_property ("waveform-logscaled", (_flags & WaveformLogScaled) ? "yes" : "no");
 
 	_region->add_extra_xml (*node);
 }
@@ -1005,6 +1009,18 @@ AudioRegionView::set_flags (XMLNode* node)
 	if ((prop = node->property ("envelope-visible")) != 0) {
 		if (prop->value() == "yes") {
 			_flags |= EnvelopeVisible;
+		}
+	}
+
+	if ((prop = node->property ("waveform-rectified")) != 0) {
+		if (prop->value() == "yes") {
+			_flags |= WaveformRectified;
+		}
+	}
+
+	if ((prop = node->property ("waveform-logscaled")) != 0) {
+		if (prop->value() == "yes") {
+			_flags |= WaveformLogScaled;
 		}
 	}
 }
@@ -1046,8 +1062,29 @@ AudioRegionView::set_waveform_shape (WaveformShape shape)
 		} else {
 			_flags &= ~WaveformRectified;
 		}
+		store_flags ();
 	}
 }
+
+void
+AudioRegionView::set_waveform_scale (WaveformScale scale)
+{
+	bool yn = (scale == LogWaveform);
+
+	if (yn != (bool) (_flags & WaveformLogScaled)) {
+		for (vector<WaveView *>::iterator wave = waves.begin(); wave != waves.end() ; ++wave) {
+			(*wave)->property_logscaled() = yn;
+		}
+
+		if (yn) {
+			_flags |= WaveformLogScaled;
+		} else {
+			_flags &= ~WaveformLogScaled;
+		}
+		store_flags ();
+	}
+}
+
 
 GhostRegion*
 AudioRegionView::add_ghost (AutomationTimeAxisView& atv)

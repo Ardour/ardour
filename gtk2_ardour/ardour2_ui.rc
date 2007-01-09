@@ -58,6 +58,11 @@ style "plugin_maker_text"
 	fg[NORMAL] = { 0.80, 0.80, 0.80 }
 }
 
+style "automation_track_name"
+{
+	font_name = "sans italic 8"
+}
+
 style "first_action_message" 
 {
 	font_name = "sans medium 34"
@@ -75,7 +80,7 @@ style "marker_text"
 
 style "time_axis_view_item_name"
 {
-	font_name = "sans medium 8"
+	font_name = "sans 6"
 }
 
 style "default_base" = "medium_text"
@@ -137,8 +142,9 @@ style "transport_base" = "medium_bold_text"
   bg[SELECTED] = { 0, 0, 0 }
 }
 /*
-style "black_mackie_menu_bar" = "medium_bold_text"
+style "black_mackie_menu_bar"
 {
+  font_name = "sans bold 9"
   fg[NORMAL] = { 1.0, 1.0, 1.0 }
   bg[NORMAL] = { 0, 0, 0 }
 }
@@ -188,6 +194,12 @@ style "track_rec_enable_button" = "small_button"
 	bg[SELECTED] =   { 1.0, 0.0, 0.0 }
 	bg[ACTIVE] =   { 0.91, 0.68, 0.68}
 	bg[PRELIGHT] =   { 1.0, 0.0, 0.0 }
+}
+
+style "gain_fader"
+{
+	bg[NORMAL] =   { 0.269, 0.269, 0.300}
+	bg[ACTIVE] =   { 0.152, 0.152, 0.168 }
 }
 
 style "mixer_rec_enable_button" = "track_rec_enable_button"
@@ -442,12 +454,17 @@ style "medium_bold_entry"  = "medium_bold_text"
 	base[SELECTED] = { 0, 0, 0 }
 }
 
-
 style "small_entry" = "small_text"
 {
 	fg[NORMAL] = { 0.70, 0.70, 0.70 }
-	fg[ACTIVE] = { 0.70, 0.70, 0.70 }
+	fg[ACTIVE] = { 0, 1.0, 0 }
+	fg[SELECTED] = { 0, 1.0, 0 }
+	text[NORMAL] = { 0.70, 0.70, 0.70 }
+	text[ACTIVE] = { 0, 1.0, 0 }
+	text[SELECTED] = { 0, 1.0, 0 }
 	bg[NORMAL] = { 0.0, 0.0, 0.0 }
+	bg[SELECTED] = { 0.0, 0.0, 0.0 }
+	bg[SELECTED] = { 0.0, 0.0, 0.0 }
 	base[NORMAL] = { 0, 0, 0 }
 	base[ACTIVE] = { 0, 0, 0 }
 	base[SELECTED] = { 0, 0, 0 }
@@ -481,9 +498,25 @@ style "small_red_on_black_entry"  = "small_bold_text"
        bg[ACTIVE] = { 0.0, 0.0, 0.0 }
 }
 
-style "big_clock_display" = "medium_entry"
+style "non_recording_big_clock_display" = "medium_entry"
 {
-	font_name = "courier bold 34"
+	font_name = "sans 60"
+
+	fg[NORMAL] = { 0.50, 1.0, 0.50 }
+	fg[ACTIVE] = { 1.0, 0, 0.0 }
+	fg[SELECTED] = { 1.0, 0, 0 }
+	fg[PRELIGHT] = { 1.0, 0, 0.0 }
+	fg[INSENSITIVE] = { 1.0, 0, 0.0 }
+	
+	base[NORMAL] = { 0.0, 0.0, 0.0 }
+	base[ACTIVE] = { 0.0, 0.0, 0.0 }
+	bg[NORMAL] = { 0.0, 0.0, 0.0 }
+	bg[ACTIVE] = { 0.7, 0.0, 0.0 }	
+}
+
+style "recording_big_clock_display" = "non_recording_big_clock_display"
+{
+	fg[NORMAL] = { 1.0, 0, 0 }
 }
 
 style "transport_clock_display"
@@ -504,7 +537,7 @@ style "transport_clock_display"
 
 style "tempo_meter_clock_display"
 {
-	font_name = "sans 8"
+	font_name = "sans 7"
 	fg[NORMAL] = { 1.0, 1.0, 1.0 }
 	fg[ACTIVE] = { 1.0, 1.0, 0.0 }
 	fg[SELECTED] = { 1.0, 0, 0 }
@@ -836,16 +869,16 @@ style "flashing_alert" = "very_small_text"
 style "selected_io_selector_port_list" = "medium_bold_text"
 {
 
-	GtkTreeView::even-row-color = { 0.64, 0.68, 0.54 }
-	GtkTreeView::odd-row-color = { 0.64, 0.68, 0.54 }
+	GtkTreeView::even-row-color = { 0, 0, 0 }
+	GtkTreeView::odd-row-color = { 0, 0, 0 }
 
 # fg is used to color the fg (text) of the column header button
 
-	fg[NORMAL] = { 0.80, 0.80, 0.70 }
-	fg[SELECTED] = { 0.80, 0.80, 0.70 }
-	fg[ACTIVE] = { 0.80, 0.80, 0.70 }
-	fg[PRELIGHT] = { 0.80, 0.80, 0.70 }
-	fg[INSENSITIVE] = { 0.80, 0.80, 0.70 }
+	fg[NORMAL] = { 0.85, 0.85, 0.85 }
+	fg[SELECTED] = { 0.85, 0.85, 0.85 }
+	fg[ACTIVE] = { 0.85, 0.85, 0.85 }
+	fg[PRELIGHT] = { 0.85, 0.85, 0.85 }
+	fg[INSENSITIVE] = { 0.85, 0.85, 0.85 }
 
 # bg is used used to color the background of the column header button
 
@@ -857,29 +890,30 @@ style "selected_io_selector_port_list" = "medium_bold_text"
 
 # text is used to color the treeview row text
 
-	text[NORMAL] = { 0.80, 0.80, 0.70 }
-	text[SELECTED] = { 0.80, 0.80, 0.70 }
+	text[NORMAL] = { 0.85, 0.85, 0.85 }
+	text[SELECTED] = { 0.85, 0.85, 0.85 }
 
 # base is used to color a treeview with no rows
 
-	base[NORMAL] = { 0.64, 0.68, 0.54 }
-	base[ACTIVE] = { 0.64, 0.68, 0.54 }
-	base[PRELIGHT] = { 0.64, 0.68, 0.54 }
-	base[INSENSITIVE] = { 0.64, 0.68, 0.54 }
-	base[SELECTED] = { 0.64, 0.68, 0.54 }
+	base[NORMAL] = { 0.20, 0.20, 0.25 }
+	base[ACTIVE] = { 0.20, 0.20, 0.25 }
+	base[PRELIGHT] = { 0.20, 0.20, 0.25 }
+	base[INSENSITIVE] = { 0.20, 0.20, 0.25 }
+	base[SELECTED] = { 0.20, 0.20, 0.25 }
 
 }
 
 style "io_selector_port_list" = "medium_text"
 {
-
+	GtkTreeView::even-row-color = { 0.20, 0.20, 0.25 }
+	GtkTreeView::odd-row-color = { 0.20, 0.20, 0.25 }
 # fg is used to color the fg (text) of the column header button
 
-	fg[NORMAL] = { 0.80, 0.80, 0.70 }
-	fg[SELECTED] = { 0.80, 0.80, 0.70 }
-	fg[ACTIVE] = { 0.80, 0.80, 0.70 }
-	fg[PRELIGHT] = { 0.80, 0.80, 0.70 }
-	fg[INSENSITIVE] = { 0.80, 0.80, 0.70 }
+	fg[NORMAL] = { 0.70, 0.70, 0.70 }
+	fg[SELECTED] = { 0.70, 0.70, 0.70 }
+	fg[ACTIVE] = { 0.70, 0.70, 0.70 }
+	fg[PRELIGHT] = { 0.70, 0.70, 0.70 }
+	fg[INSENSITIVE] = { 0.70, 0.70, 0.70 }
 
 # bg is used used to color the background of the column header button
 
@@ -891,16 +925,16 @@ style "io_selector_port_list" = "medium_text"
 
 # text is used to color the treeview row text
 
-	text[NORMAL] = { 0.80, 0.80, 0.70 }
-	text[SELECTED] = { 0.80, 0.80, 0.70 }
+	text[NORMAL] = { 0.80, 0.80, 0.80 }
+	text[SELECTED] = { 0.80, 0.80, 0.80 }
 
 # base is used to color a treeview with no rows
 
-	base[NORMAL] = { 0, 0, 0 }
-	base[ACTIVE] = { 0, 0, 0 }
-	base[PRELIGHT] = { 0, 0, 0 }
-	base[INSENSITIVE] = { 0, 0, 0 }
-	base[SELECTED] = { 0, 0, 0 }
+	base[NORMAL] = { 0.20, 0.20, 0.25 }
+	base[ACTIVE] = { 0.20, 0.20, 0.25 }
+	base[PRELIGHT] = { 0.20, 0.20, 0.25 }
+	base[INSENSITIVE] = { 0.20, 0.20, 0.25 }
+	base[SELECTED] = { 0.20, 0.20, 0.25 }
 }
 
 style "io_selector_notebook" = "default_base"
@@ -937,15 +971,15 @@ style "pan_slider"
 {
  	font_name = "sans 8"
 
-	fg[NORMAL] = { 0.67, 0.23, 0.22 }
-	fg[ACTIVE] = { 0.67, 0.23, 0.22 }
-	fg[INSENSITIVE] = {0.32, 0.39, 0.45 } # matches default_base
+	fg[NORMAL] = { 0.22, 0.73, 0.22 }
+	fg[ACTIVE] = { 0.22, 0.73, 0.22 }
+	fg[INSENSITIVE] = {0.22, 0.53, 0.22 } 
 	fg[SELECTED] = { 0.67, 0.23, 0.22 }
 	fg[PRELIGHT] = { 0.67, 0.23, 0.22 }
 
-	bg[NORMAL] = { 0, 0, 0 }
+	bg[NORMAL] = { 0.05, 0.05, 0.05 }
 	bg[ACTIVE] = { 0, 0, 0 }
-	bg[INSENSITIVE] = {0.32, 0.39, 0.45 } # matches default_base
+	bg[INSENSITIVE] = {0.12, 0.19, 0.25 } 
 	bg[SELECTED] = { 0, 0, 0 }
 	bg[PRELIGHT] = { 0, 0, 0 }
 
@@ -954,6 +988,15 @@ style "pan_slider"
 	text[INSENSITIVE] = { 0.70, 0.70, 0.70 }
 	text[SELECTED] = { 0.70, 0.70, 0.70 }
 	text[PRELIGHT] = { 0.70, 0.70, 0.70 }
+
+	# used to draw the triangular indicators 
+
+	base[NORMAL] = { 0.80, 0.80, 0.80 }
+	base[ACTIVE] =  { 0.80, 0.80, 0.80 }
+	base[INSENSITIVE] = {0.6, 0.6, 0.6 }
+	base[SELECTED] = { 0.80, 0.80, 0.80 }
+	base[PRELIGHT] = { 0.80, 0.80, 0.80 }
+
 }
 
 style "region_list_whole_file"
@@ -971,7 +1014,7 @@ style "ardour_button" ="default_buttons_menus"
 widget "*FirstActionMessage" style "first_action_message"
 widget "*VerboseCanvasCursor" style "verbose_canvas_cursor"
 widget "*MarkerText" style "marker_text"
-widget "*TimeAxisViewItemName" style "time_axis_view_item_name"
+widget "*TimeAxisViewItemName*" style "time_axis_view_item_name"
 #widget "*ExportProgress" style "default_buttons_menus"
 widget "*ExportFileLabel" style "small_bold_text"
 widget "*ExportFormatLabel" style "medium_bold_text"
@@ -1073,11 +1116,16 @@ widget "*ErrorMessage" style "error_message"
 widget "*FatalMessage" style "fatal_message"
 widget "*InfoMessage" style "info_message"
 widget "*WarningMessage" style "warning_message"
-widget "*BigClockDisplay" style "big_clock_display"
+widget "*BigClockNonRecording" style "non_recording_big_clock_display"
+widget "*BigClockRecording" style "recording_big_clock_display"
 widget "*TransportClockDisplay" style "transport_clock_display"
 widget "*SecondaryClockDisplay" style "transport_clock_display"
-widget "*BBTTempoLabel" style "tempo_meter_clock_display"
-widget "*BBTMeterLabel" style "tempo_meter_clock_display"
+widget "*AudioClockFramesUpperInfo" style "tempo_meter_clock_display"
+widget "*AudioClockFramesLowerInfo" style "tempo_meter_clock_display"
+widget "*AudioClockSMPTEUpperInfo" style "tempo_meter_clock_display"
+widget "*AudioClockSMPTELowerInfo" style "tempo_meter_clock_display"
+widget "*AudioClockBBTUpperInfo" style "tempo_meter_clock_display"
+widget "*AudioClockBBTLowerInfo" style "tempo_meter_clock_display"
 widget "*SelectionStartClock" style "default_clock_display"
 widget "*SelectionEndClock" style "default_clock_display"
 widget "*EditCursorClock" style "default_clock_display"
@@ -1115,9 +1163,9 @@ widget "*AudioBusControlsBaseSelected" style "edit_controls_base_selected"
 widget "*AudioTimeAxisViewControlsBaseUnselected" style "audio_track_base"
 widget "*AudioTrackStripBase" style "audio_track_base"
 widget "*AudioTrackControlsBaseUnselected" style "audio_track_base"
-widget "*AudioTrackFader" style "audio_track_base"
+widget "*AudioTrackFader" style "gain_fader"
 widget "*AudioBusStripBase" style "audio_bus_base"
-widget "*AudioBusFader" style "audio_bus_base"
+widget "*AudioBusFader" style "gain_fader"
 widget "*MidiBusControlsBaseUnselected" style "midi_bus_base"
 widget "*MidiBusControlsBaseInactiveUnselected" style "track_controls_inactive"
 widget "*MidiBusControlsBaseInactiveSelected" style "track_controls_inactive"
@@ -1153,6 +1201,7 @@ widget "*MouseModeButton*" style "default_buttons_menus"
 widget "*EditorMainCanvas" style "main_canvas_area"
 widget "*AudioTrackControlsBaseInactiveUnselected" style "track_controls_inactive"
 widget "*AutomationTrackControlsBaseInactiveUnselected" style "track_controls_inactive"
+widget "*AutomationTrackName" style "automation_track_name"
 widget "*AudioTrackControlsBaseInactiveSelected" style "track_controls_inactive"
 widget "*AutomationTrackControlsBaseInactiveSelected" style "track_controls_inactive"
 widget "*AudioTrackStripBaseInactive" style "track_controls_inactive"
@@ -1196,6 +1245,7 @@ widget "*MixerStripSpeedBase*" style "small_entry"
 widget "*MixerStripSpeedBaseNotOne" style "small_red_on_black_entry"
 widget "*MixerStripSpeedBaseNotOne*" style "small_red_on_black_entry"
 widget "*MixerStripGainDisplay" style "small_entry"
+widget "*MixerStripGainDisplay*" style "small_entry"
 widget "*MixerStripGainUnitButton" style "very_small_button"
 widget "*MixerStripGainUnitButton*" style "very_small_button"
 widget "*MixerStripMeterPreButton" style "very_small_button"

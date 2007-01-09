@@ -3,13 +3,8 @@
 CONFIG_VARIABLE (AutoConnectOption, output_auto_connect, "output-auto-connect", AutoConnectOption (0))
 CONFIG_VARIABLE (AutoConnectOption, input_auto_connect, "input-auto-connect", AutoConnectOption (0))
 
-#ifdef __APPLE__
-CONFIG_VARIABLE (std::string, auditioner_output_left, "auditioner-output-left",  "coreaudio:Built-in Audio:in1")
-CONFIG_VARIABLE (std::string, auditioner_output_right, "auditioner-output-right", "coreaudio:Built-in Audio:in2")
-#else
-CONFIG_VARIABLE (std::string, auditioner_output_left, "auditioner-output-left", "alsa_pcm:playback_1")
-CONFIG_VARIABLE (std::string, auditioner_output_right, "auditioner-output-right", "alsa_pcm:playback_2")
-#endif
+CONFIG_VARIABLE (std::string, auditioner_output_left, "auditioner-output-left", "default")
+CONFIG_VARIABLE (std::string, auditioner_output_right, "auditioner-output-right", "default")
 
 /* MIDI and MIDI related */
 
@@ -100,16 +95,15 @@ CONFIG_VARIABLE (bool, quieten_at_speed, "quieten-at-speed", true)
 /* timecode and sync */
 
 CONFIG_VARIABLE (bool, jack_time_master, "jack-time-master", true)
+CONFIG_VARIABLE (SmpteFormat, smpte_format, "smpte-format", smpte_30)
 CONFIG_VARIABLE (bool, use_video_sync, "use-video-sync", false)
 CONFIG_VARIABLE (bool, timecode_source_is_synced, "timecode-source-is-synced", true)
-CONFIG_VARIABLE (float, smpte_frames_per_second, "smpte-frames-per-second", 30.0f)
 CONFIG_VARIABLE (float, video_pullup, "video-pullup", 0.0f)
-CONFIG_VARIABLE (bool,  smpte_drop_frames, "smpte-drop-frames", false)
 
 /* metering */
 
 CONFIG_VARIABLE (float, meter_hold, "meter-hold", 100.0f)
-CONFIG_VARIABLE (float, meter_falloff, "meter-falloff", 0.375f)
+CONFIG_VARIABLE (float, meter_falloff, "meter-falloff", 27.0f)
 CONFIG_VARIABLE (nframes_t, over_length_short, "over-length-short", 2)
 CONFIG_VARIABLE (nframes_t, over_length_long, "over-length-long", 10)
 
@@ -119,6 +113,8 @@ CONFIG_VARIABLE (bool, hiding_groups_deactivates_groups, "hiding-groups-deactiva
 CONFIG_VARIABLE (bool, verify_remove_last_capture, "verify-remove-last-capture", true)
 CONFIG_VARIABLE (bool, no_new_session_dialog, "no-new-session-dialog", false)
 CONFIG_VARIABLE (bool, use_vst, "use-vst", true)
+CONFIG_VARIABLE (uint32_t, subframes_per_frame, "subframes-per-frame", 100)
+CONFIG_VARIABLE (uint32_t, saved_history_depth, "save-history-depth", 100)
 
 /* BWAV */
 
@@ -127,4 +123,4 @@ CONFIG_VARIABLE (string, bwf_organization_code, "bwf-organization-code", "US")
 
 /* these variables have custom set() methods (e.g. path globbing) */
 
-CONFIG_VARIABLE_SPECIAL(std::string, raid_path, "raid-path", "", path_expand)
+CONFIG_VARIABLE_SPECIAL(Glib::ustring, raid_path, "raid-path", "", path_expand)

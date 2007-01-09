@@ -8,6 +8,11 @@ enum WaveformShape {
 	Rectified
 };
 
+enum WaveformScale {
+	LinearWaveform=0,
+	LogWaveform,
+};
+
 
 enum Width {
 	Wide,
@@ -26,5 +31,7 @@ struct SelectionRect {
     Gnome::Canvas::SimpleRect *start_trim;
     uint32_t id;
 };
+
+extern void setup_gtk_ardour_enums ();
 
 #endif /* __ardour_gtk_enums_h__ */

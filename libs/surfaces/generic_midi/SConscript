@@ -34,6 +34,7 @@ genericmidi.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
 genericmidi.Merge ([
 	libraries['ardour'],
 	libraries['ardour_cp'],
+	libraries['sndfile-ardour'],
 	libraries['midi++2'],
 	libraries['pbd'],
 	libraries['sigc2'],
@@ -50,7 +51,7 @@ Default(libardour_genericmidi)
 if env['NLS']:
 	i18n (genericmidi, genericmidi_files, env)
 	      
-env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2/surfaces'), libardour_genericmidi))
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2', 'surfaces'), libardour_genericmidi))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
 				     [ 'SConscript' ] +

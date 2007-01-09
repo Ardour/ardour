@@ -50,7 +50,7 @@ Default(libardour_cp)
 if env['NLS']:
 	i18n (cp, cp_files, env)
 	      
-env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libardour_cp))
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), libardour_cp))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
 				     [ 'SConscript' ] +

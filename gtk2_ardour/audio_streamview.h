@@ -59,6 +59,9 @@ class AudioStreamView : public StreamView
 	~AudioStreamView ();
 
 	void set_waveform_shape (WaveformShape);
+	WaveformShape get_waveform_shape () const { return _waveform_shape; }
+	void set_waveform_scale (WaveformScale);
+	WaveformScale get_waveform_scale () const { return _waveform_scale; }
 
 	int set_height (gdouble h);
 	int set_samples_per_unit (gdouble spp);
@@ -100,6 +103,9 @@ class AudioStreamView : public StreamView
 	typedef list<CrossfadeView*> CrossfadeViewList;
 	CrossfadeViewList crossfade_views;
 	bool              crossfades_visible;
+
+	WaveformShape     _waveform_shape;
+	WaveformScale     _waveform_scale;
 };
 
 #endif /* __ardour_audio_streamview_h__ */

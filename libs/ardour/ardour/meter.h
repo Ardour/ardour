@@ -38,6 +38,7 @@ public:
 
 	void setup (const ChanCount& in);
 	void reset ();
+	void reset_max ();
 
 	/** Compute peaks */
 	void run (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset=0);
@@ -45,6 +46,14 @@ public:
 	float peak_power (uint32_t n) { 
 		if (n < _visible_peak_power.size()) {
 			return _visible_peak_power[n];
+		} else {
+			return minus_infinity();
+		}
+	}
+	
+	float max_peak_power (uint32_t n) {
+		if (n < _max_peak_power.size()) {
+			return _max_peak_power[n];
 		} else {
 			return minus_infinity();
 		}
@@ -58,6 +67,7 @@ private:
 	Session&           _session;
 	std::vector<float> _peak_power;
 	std::vector<float> _visible_peak_power;
+	std::vector<float> _max_peak_power;
 };
 
 

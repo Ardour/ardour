@@ -28,12 +28,15 @@
 
 #include <pbd/stl_delete.h>
 #include <pbd/xml++.h>
+#include <pbd/enumwriter.h>
 
 #include <ardour/location.h>
 #include <ardour/session.h>
 #include <ardour/audiofilesource.h>
 
 #include "i18n.h"
+
+#define SUFFIX_MAX 32
 
 using namespace std;
 using namespace ARDOUR;
@@ -217,12 +220,12 @@ Location::set_flag_internal (bool yn, Flags flag)
 {
 	if (yn) {
 		if (!(_flags & flag)) {
-			_flags |= flag;
+			_flags = Flags (_flags | flag);
 			return true;
 		}
 	} else {
 		if (_flags & flag) {
-			_flags &= ~flag;
+			_flags = Flags (_flags & ~flag);
 			return true;
 		}
 	}
@@ -273,8 +276,7 @@ Location::get_state (void)
 	node->add_property ("start", buf);
 	snprintf (buf, sizeof (buf), "%u", end());
 	node->add_property ("end", buf);
-	snprintf (buf, sizeof (buf), "%" PRIu32, (uint32_t) _flags);
-	node->add_property ("flags", buf);
+	node->add_property ("flags", enum_2_string (_flags));
 
 	return *node;
 }
@@ -327,14 +329,12 @@ Location::set_state (const XMLNode& node)
 		
 	_end = atoi (prop->value().c_str());
 		
-	_flags = 0;
-		
 	if ((prop = node.property ("flags")) == 0) {
 		  error << _("XML node for Location has no flags information") << endmsg; 
 		  return -1;
 	}
 		
-	_flags = Flags (atoi (prop->value().c_str()));
+	_flags = Flags (string_2_enum (prop->value(), _flags));
 
 	for (cd_iter = cd_list.begin(); cd_iter != cd_list.end(); ++cd_iter) {
 		  
@@ -401,6 +401,40 @@ Locations::set_current (Location *loc, bool want_lock)
 		 current_changed (current_location); /* EMIT SIGNAL */
 	}
 	return ret;
+}
+
+int
+Locations::next_available_name(string& result,string base)
+{
+	LocationList::iterator i;
+	Location* location;
+	string temp;
+	string::size_type l;
+	int suffix;
+	char buf[32];
+	bool available[SUFFIX_MAX+1];
+
+	result = base;
+	for (int k=1; k<SUFFIX_MAX; k++) {
+		available[k] = true;
+	}
+	l = base.length();
+	for (i = locations.begin(); i != locations.end(); ++i) {
+		location =* i;
+		temp = location->name();
+		if (l && !temp.find(base,0)) {
+			suffix = atoi(temp.substr(l,3));
+			if (suffix) available[suffix] = false;
+		}
+	}
+	for (int k=1; k<=SUFFIX_MAX; k++) {
+		if (available[k]) { 
+			snprintf (buf, 31, "%d", k);
+			result += buf;
+			return 1;
+		}
+	}
+	return 0;
 }
 
 int

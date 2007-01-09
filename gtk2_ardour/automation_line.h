@@ -117,7 +117,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	
 	/* dragging API */
 
-	virtual void start_drag (ControlPoint*, float fraction);
+	virtual void start_drag (ControlPoint*, nframes_t x, float fraction);
 	virtual void point_drag(ControlPoint&, nframes_t x, float, bool with_push);
 	virtual void end_drag (ControlPoint*);
 	virtual void line_drag(uint32_t i1, uint32_t i2, float, bool with_push);
@@ -174,7 +174,8 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	bool    update_pending : 1;
 	bool    no_draw : 1;
 	bool    points_visible : 1;
-	
+	bool    did_push;
+
 	ArdourCanvas::Group&  _parent_group;
 	ArdourCanvas::Group*   group;
 	ArdourCanvas::Line*   line; /* line */
@@ -193,10 +194,8 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	static bool invalid_point (ALPoints&, uint32_t index);
 	
 	void determine_visible_control_points (ALPoints&);
-	void sync_model_from (ControlPoint&);
-	void sync_model_with_view_point (ControlPoint&);
+	void sync_model_with_view_point (ControlPoint&, bool did_push, int64_t distance);
 	void sync_model_with_view_line (uint32_t, uint32_t);
-	void modify_view (ControlPoint&, double, double, bool with_push);
 	
 	virtual void change_model (ARDOUR::AutomationList::iterator, double x, double y);
 	virtual void change_model_range (ARDOUR::AutomationList::iterator,ARDOUR::AutomationList::iterator, double delta, float ydelta);
@@ -212,10 +211,11 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	double   last_drag_fraction;
 	uint32_t line_drag_cp1;
 	uint32_t line_drag_cp2;
+	int64_t  drag_x;
+	int64_t  drag_distance;
 
 	void modify_view_point(ControlPoint&, double, double, bool with_push);
 	void reset_line_coords (ControlPoint&);
-	void update_line ();
 
 	double control_point_box_size ();
 

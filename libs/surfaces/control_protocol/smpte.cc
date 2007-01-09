@@ -20,10 +20,11 @@
 #define SMPTE_IS_ZERO( sm ) (!(sm).frames && !(sm).seconds && !(sm).minutes && !(sm).hours && !(sm.subframes))
 
 #include <control_protocol/smpte.h>
+#include <ardour/configuration.h>
 
 namespace SMPTE {
 
-FPS Time::default_rate = MTC_30_FPS;
+float Time::default_rate = 30.0;
 
 
 /** Increment @a smpte by exactly one frame (keep subframes value).
@@ -38,7 +39,7 @@ increment( Time& smpte )
 	if (smpte.negative) {
 		if (SMPTE_IS_AROUND_ZERO(smpte) && smpte.subframes) {
 			// We have a zero transition involving only subframes
-			smpte.subframes = 80 - smpte.subframes;
+			smpte.subframes = ARDOUR::Config->get_subframes_per_frame() - smpte.subframes;
 			smpte.negative = false;
 			return SECONDS;
 		}
@@ -50,34 +51,42 @@ increment( Time& smpte )
 		}
 		return wrap;
 	}
-  
-	switch (smpte.rate) {
-	case MTC_24_FPS:
+
+	switch ((int)ceil(smpte.rate)) {
+	case 24:
 		if (smpte.frames == 23) {
 			smpte.frames = 0;
 			wrap = SECONDS;
 		}
 		break;
-	case MTC_25_FPS:
+	case 25:
 		if (smpte.frames == 24) {
 			smpte.frames = 0;
 			wrap = SECONDS;
 		}
 		break;
-	case MTC_30_FPS_DROP:
-		if (smpte.frames == 29) {
-			if ( ((smpte.minutes + 1) % 10) && (smpte.seconds == 59) ) {
-				smpte.frames = 2;
-			}
-			else {
-				smpte.frames = 0;
-			}
-			wrap = SECONDS;
+	case 30:
+	        if (smpte.drop) {
+		       if (smpte.frames == 29) {
+			      if ( ((smpte.minutes + 1) % 10) && (smpte.seconds == 59) ) {
+				     smpte.frames = 2;
+			      }
+			      else {
+				     smpte.frames = 0;
+			      }
+			      wrap = SECONDS;
+		       }
+		} else {
+
+		       if (smpte.frames == 29) {
+			      smpte.frames = 0;
+			      wrap = SECONDS;
+		       }
 		}
 		break;
-	case MTC_30_FPS:
-		if (smpte.frames == 29) {
-			smpte.frames = 0;
+	case 60:
+	        if (smpte.frames == 59) {
+		        smpte.frames = 0;
 			wrap = SECONDS;
 		}
 		break;
@@ -121,38 +130,46 @@ decrement( Time& smpte )
 		return wrap;
 	} else if (SMPTE_IS_AROUND_ZERO(smpte) && smpte.subframes) {
 		// We have a zero transition involving only subframes
-		smpte.subframes = 80 - smpte.subframes;
+		smpte.subframes = ARDOUR::Config->get_subframes_per_frame() - smpte.subframes;
 		smpte.negative = true;
 		return SECONDS;
 	}
   
-	switch (smpte.rate) {
-	case MTC_24_FPS:
+	switch ((int)ceil(smpte.rate)) {
+	case 24:
 		if (smpte.frames == 0) {
 			smpte.frames = 23;
 			wrap = SECONDS;
 		}
 		break;
-	case MTC_25_FPS:
+	case 25:
 		if (smpte.frames == 0) {
 			smpte.frames = 24;
 			wrap = SECONDS;
 		}
 		break;
-	case MTC_30_FPS_DROP:
-		if ((smpte.minutes % 10) && (smpte.seconds == 0)) {
-			if (smpte.frames <= 2) {
-				smpte.frames = 29;
+	case 30:
+	        if (smpte.drop) {
+		        if ((smpte.minutes % 10) && (smpte.seconds == 0)) {
+			        if (smpte.frames <= 2) {
+				        smpte.frames = 29;
+					wrap = SECONDS;
+				}
+			} else if (smpte.frames == 0) {
+			        smpte.frames = 29;
 				wrap = SECONDS;
 			}
-		} else if (smpte.frames == 0) {
-			smpte.frames = 29;
-			wrap = SECONDS;
+			
+		} else {
+		        if (smpte.frames == 0) {
+			        smpte.frames = 29;
+				wrap = SECONDS;
+			}
 		}
 		break;
-	case MTC_30_FPS:
-		if (smpte.frames == 0) {
-			smpte.frames = 29;
+	case 60:
+	        if (smpte.frames == 0) {
+		        smpte.frames = 59;
 			wrap = SECONDS;
 		}
 		break;
@@ -212,7 +229,7 @@ increment_subframes( Time& smpte )
 	}
   
 	smpte.subframes++;
-	if (smpte.subframes >= 80) {
+	if (smpte.subframes >= ARDOUR::Config->get_subframes_per_frame()) {
 		smpte.subframes = 0;
 		increment( smpte );
 		return FRAMES;
@@ -274,16 +291,18 @@ increment_seconds( Time& smpte )
 		}
 	} else {
 		// Go to highest possible frame in this second
-		switch (smpte.rate) {
-		case MTC_24_FPS:
+	  switch ((int)ceil(smpte.rate)) {
+		case 24:
 			smpte.frames = 23;
 			break;
-		case MTC_25_FPS:
+		case 25:
 			smpte.frames = 24;
 			break;
-		case MTC_30_FPS_DROP:
-		case MTC_30_FPS:
+		case 30:
 			smpte.frames = 29;
+			break;
+		case 60:
+			smpte.frames = 59;
 			break;
 		}
     
@@ -304,17 +323,20 @@ seconds_floor( Time& smpte )
 	frames_floor( smpte );
   
 	// Go to lowest possible frame in this second
-	switch (smpte.rate) {
-	case MTC_24_FPS:
-	case MTC_25_FPS:
-	case MTC_30_FPS:
-		smpte.frames = 0;
-		break;
-	case MTC_30_FPS_DROP:
-		if ((smpte.minutes % 10) && (smpte.seconds == 0)) {
-			smpte.frames = 2;
+	switch ((int)ceil(smpte.rate)) {
+	case 24:
+	case 25:
+	case 30:
+	case 60:
+	        if (!(smpte.drop)) {
+		        smpte.frames = 0;
 		} else {
-			smpte.frames = 0;
+
+		        if ((smpte.minutes % 10) && (smpte.seconds == 0)) {
+			        smpte.frames = 2;
+			} else {
+			        smpte.frames = 0;
+			}
 		}
 		break;
 	}

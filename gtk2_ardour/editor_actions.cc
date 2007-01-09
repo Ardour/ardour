@@ -42,6 +42,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("Layering"), _("Layering"));
 	ActionManager::register_action (editor_actions, X_("Timecode"), _("Timecode fps"));
 	ActionManager::register_action (editor_actions, X_("Pullup"), _("Pullup / Pulldown"));
+	ActionManager::register_action (editor_actions, X_("Subframes"), _("Subframes"));
 	ActionManager::register_action (editor_actions, X_("addExistingAudioFiles"), _("Add Existing Audio"));
 
 	/* add named actions for the editor */
@@ -59,7 +60,7 @@ Editor::register_actions ()
 
 	act = ActionManager::register_toggle_action (editor_actions, "toggle-xfades-active", _("Active"), mem_fun(*this, &Editor::toggle_xfades_active));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (editor_actions, "toggle-xfades-visible", _("Visible"), mem_fun(*this, &Editor::toggle_xfade_visibility));
+	act = ActionManager::register_toggle_action (editor_actions, "toggle-xfades-visible", _("Show"), mem_fun(*this, &Editor::toggle_xfade_visibility));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (editor_actions, "toggle-auto-xfades", _("Created Automatically"), mem_fun(*this, &Editor::toggle_auto_xfade));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -379,16 +380,16 @@ Editor::register_actions ()
 
 	RadioAction::Group smpte_group;
 
-	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte23976"), _("23.976"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), Session::smpte_23976));
-	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte24"), _("24"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), Session::smpte_24));
-	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte24976"), _("24.976"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), Session::smpte_24976));
-	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte25"), _("25"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), Session::smpte_25));
-	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte2997"), _("29.97"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), Session::smpte_2997));
-	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte2997drop"), _("29.97 drop"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), Session::smpte_2997drop));
-	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte30"), _("30"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), Session::smpte_30));
-	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte30drop"), _("30 drop"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), Session::smpte_30drop));
-	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte5994"), _("59.94"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), Session::smpte_5994));
-	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte60"), _("60"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), Session::smpte_60));
+	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte23976"), _("23.976"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), smpte_23976));
+	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte24"), _("24"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), smpte_24));
+	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte24976"), _("24.976"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), smpte_24976));
+	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte25"), _("25"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), smpte_25));
+	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte2997"), _("29.97"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), smpte_2997));
+	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte2997drop"), _("29.97 drop"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), smpte_2997drop));
+	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte30"), _("30"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), smpte_30));
+	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte30drop"), _("30 drop"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), smpte_30drop));
+	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte5994"), _("59.94"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), smpte_5994));
+	ActionManager::register_radio_action (editor_actions, smpte_group,  X_("Smpte60"), _("60"), bind (mem_fun (*this, &Editor::smpte_fps_chosen), smpte_60));
 
 	RadioAction::Group pullup_group;
 
@@ -401,6 +402,11 @@ Editor::register_actions ()
 	ActionManager::register_radio_action (editor_actions, pullup_group,  X_("PullupMinus4Plus1"), _("-4.1667% + 0.1%"), bind (mem_fun (*this, &Editor::video_pullup_chosen), Session::pullup_Minus4Plus1));
 	ActionManager::register_radio_action (editor_actions, pullup_group,  X_("PullupMinus4"), _("-4.1667%"), bind (mem_fun (*this, &Editor::video_pullup_chosen), Session::pullup_Minus4));
 	ActionManager::register_radio_action (editor_actions, pullup_group,  X_("PullupMinus4Minus1"), _("-4.1667% - 0.1%"), bind (mem_fun (*this, &Editor::video_pullup_chosen), Session::pullup_Minus4Minus1));
+
+	RadioAction::Group subframe_group;
+
+	ActionManager::register_radio_action (editor_actions, pullup_group,  X_("Subframes80"), _("80 per frame"), bind (mem_fun (*this, &Editor::subframes_per_frame_chosen), 80));
+	ActionManager::register_radio_action (editor_actions, pullup_group,  X_("Subframes100"), _("100 per frame"), bind (mem_fun (*this, &Editor::subframes_per_frame_chosen), 100));
 
 	ActionManager::add_action_group (rl_actions);
 	ActionManager::add_action_group (zoom_actions);
@@ -496,33 +502,37 @@ Editor::update_smpte_mode ()
 	RefPtr<Action> act;
 	const char* action = 0;
 
-	float frames = Config->get_smpte_frames_per_second();
-	bool drop = Config->get_smpte_drop_frames();
-
-	if ((frames < 23.976 * 1.0005) && !drop)
+	switch (Config->get_smpte_format()) {
+	case smpte_23976:
 		action = X_("Smpte23976");
-	else if ((frames < 24 * 1.0005) && !drop)
+		break;
+	case smpte_24:
 		action = X_("Smpte24");
-	else if ((frames < 24.976 * 1.0005) && !drop)
+		break;
+	case smpte_24976:
 		action = X_("Smpte24976");
-	else if ((frames < 25 * 1.0005) && !drop)
+		break;
+	case smpte_25:
 		action = X_("Smpte25");
-	else if ((frames < 29.97 * 1.0005) && !drop)
+		break;
+	case smpte_2997:
 		action = X_("Smpte2997");
-	else if ((frames < 29.97 * 1.0005) && drop)
+		break;
+	case smpte_2997drop:
 		action = X_("Smpte2997drop");
-	else if ((frames < 30 * 1.0005) && !drop)
+		break;
+	case smpte_30:
 		action = X_("Smpte30");
-	else if ((frames < 30 * 1.0005) && drop)
+		break;
+	case smpte_30drop:
 		action = X_("Smpte30drop");
-	else if ((frames < 59.94 * 1.0005) && !drop)
+		break;
+	case smpte_5994:
 		action = X_("Smpte5994");
-	else if ((frames < 60 * 1.0005) && !drop)
+		break;
+	case smpte_60:
 		action = X_("Smpte60");
-	else {
-		fatal << string_compose (_("programming error: Unexpected SMPTE value (%1, drop = %2) in update_smpte_mode.  Menu is probably wrong."),
-					 frames, drop) << endmsg;
-		/*NOTREACHED*/
+		break;
 	}
 
 	act = ActionManager::get_action (X_("Editor"), action);
@@ -831,7 +841,7 @@ Editor::zoom_focus_chosen (ZoomFocus focus)
 }
 
 void
-Editor::smpte_fps_chosen (Session::SmpteFormat format)
+Editor::smpte_fps_chosen (SmpteFormat format)
 {
 	/* this is driven by a toggle on a radio group, and so is invoked twice,
 	   once for the item that became inactive and once for the one that became
@@ -840,62 +850,39 @@ Editor::smpte_fps_chosen (Session::SmpteFormat format)
 
 	if (session) {
 
-		float fps = 10;
-		bool drop = false;
-
 		RefPtr<Action> act;
 
 		switch (format) {
-			case Session::smpte_23976: {
-				fps=23.976;
-				drop = false;
+			case smpte_23976: 
 				act = ActionManager::get_action (X_("Editor"), X_("Smpte23976"));
-			} break;
-			case Session::smpte_24: {
-				fps=24;
-				drop = false;
+			 break;
+			case smpte_24: 
 				act = ActionManager::get_action (X_("Editor"), X_("Smpte24"));
-			} break;
-			case Session::smpte_24976: {
-				fps=24.976;
-				drop = false;
+			 break;
+			case smpte_24976: 
 				act = ActionManager::get_action (X_("Editor"), X_("Smpte24976"));
-			} break;
-			case Session::smpte_25: {
-				fps=25;
-				drop = false;
+			 break;
+			case smpte_25: 
 				act = ActionManager::get_action (X_("Editor"), X_("Smpte25"));
-			} break;
-			case Session::smpte_2997: {
-				fps=29.97;
-				drop = false;
+			 break;
+			case smpte_2997: 
 				act = ActionManager::get_action (X_("Editor"), X_("Smpte2997"));
-			} break;
-			case Session::smpte_2997drop: {
-				fps=29.97;
-				drop = true;
+			 break;
+			case smpte_2997drop: 
 				act = ActionManager::get_action (X_("Editor"), X_("Smpte2997drop"));
-			} break;
-			case Session::smpte_30: {
-				fps=30;
-				drop = false;
+			 break;
+			case smpte_30: 
 				act = ActionManager::get_action (X_("Editor"), X_("Smpte30"));
-			} break;
-			case Session::smpte_30drop: {
-				fps=30;
-				drop = true;
+			 break;
+			case smpte_30drop: 
 				act = ActionManager::get_action (X_("Editor"), X_("Smpte30drop"));
-			} break;
-			case Session::smpte_5994: {
-				fps=59.94;
-				drop = false;
+			 break;
+			case smpte_5994: 
 				act = ActionManager::get_action (X_("Editor"), X_("Smpte5994"));
-			} break;
-			case Session::smpte_60: {
-				fps=60;
-				drop = false;
+			 break;
+			case smpte_60: 
 				act = ActionManager::get_action (X_("Editor"), X_("Smpte60"));
-			} break;
+			 break;
 			default:
 				cerr << "Editor received unexpected smpte type" << endl;
 		}
@@ -903,7 +890,7 @@ Editor::smpte_fps_chosen (Session::SmpteFormat format)
 		if (act) {
 			RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
 			if (ract && ract->get_active()) {
-				session->set_smpte_type (fps, drop);
+			        session->set_smpte_format (format);
 			}
 		}
 	}
@@ -979,6 +966,70 @@ Editor::video_pullup_chosen (Session::PullupFormat pullup)
 }
 
 void
+Editor::update_subframes_per_frame ()
+{
+	ENSURE_GUI_THREAD (mem_fun(*this, &Editor::update_subframes_per_frame));
+
+	RefPtr<Action> act;
+	const char* action = 0;
+
+	uint32_t sfpf = Config->get_subframes_per_frame();
+
+	if (sfpf == 80) {
+		action = X_("Subframes80");
+	} else if (sfpf == 100) {
+		action = X_("Subframes100");
+	} else {
+		warning << string_compose (_("Configuraton is using unhandled subframes per frame value: %1"), sfpf) << endmsg;
+		/*NOTREACHED*/
+		return;
+	}
+
+	act = ActionManager::get_action (X_("Editor"), action);
+
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && !ract->get_active()) {
+			ract->set_active (true);
+		}
+	}
+}
+
+void
+Editor::subframes_per_frame_chosen (uint32_t sfpf)
+{
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+	const char* action = 0;
+
+	RefPtr<Action> act;
+	
+	if (sfpf == 80) {
+		action = X_("Subframes80");
+	} else if (sfpf == 100) {	
+		action = X_("Subframes100");
+	} else {
+		fatal << string_compose (_("programming error: %1 %2"), "Session received unexpected subframes per frame value: ", sfpf) << endmsg;
+		/*NOTREACHED*/
+	}
+	
+	act = ActionManager::get_action (X_("Editor"), action);
+	
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && ract->get_active()) {
+			Config->set_subframes_per_frame ((uint32_t) rint (sfpf));
+		}
+		
+	} else  {
+		error << string_compose (_("programming error: %1"), "Editor::subframes_per_frame_chosen could not find action to match value.") << endmsg;
+	}
+}
+
+void
 Editor::toggle_auto_xfade ()
 {
 	ActionManager::toggle_config_state ("Editor", "toggle-auto-xfades", &Configuration::set_auto_xfade, &Configuration::get_auto_xfade);
@@ -1011,8 +1062,8 @@ Editor::parameter_changed (const char* parameter_name)
 		update_punch_range_view (true);
 	} else if (PARAM_IS ("layer-model")) {
 		update_layering_model ();
-	} else if (PARAM_IS ("smpte-frames-per-second") || PARAM_IS ("smpte-drop-frames")) {
-		update_smpte_mode ();
+	} else if (PARAM_IS ("smpte-format")) {
+	        update_smpte_mode ();
 		update_just_smpte ();
 	} else if (PARAM_IS ("video-pullup")) {
 		update_video_pullup ();
@@ -1026,6 +1077,9 @@ Editor::parameter_changed (const char* parameter_name)
 		update_crossfade_model ();
 	} else if (PARAM_IS ("edit-mode")) {
 		edit_mode_selector.set_active_text (edit_mode_to_string (Config->get_edit_mode()));
+	} else if (PARAM_IS ("subframes-per-frame")) {
+		update_subframes_per_frame ();
+		update_just_smpte ();
 	}
 
 #undef PARAM_IS

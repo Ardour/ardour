@@ -109,7 +109,7 @@ JACK_MidiPort::create_ports(PortRequest & req)
 		_jack_output_port = jack_port_register(_jack_client,
 			string(req.tagname).append("_out").c_str(),
 			JACK_DEFAULT_MIDI_TYPE, JackPortIsOutput, 0);
-  		jack_midi_reset_new_port(
+  		jack_midi_clear_buffer(
 			jack_port_get_buffer(_jack_output_port, nframes), nframes);
 		ret = ret && (_jack_output_port != NULL);
 	}
@@ -118,7 +118,7 @@ JACK_MidiPort::create_ports(PortRequest & req)
 		_jack_input_port = jack_port_register(_jack_client,
 			string(req.tagname).append("_in").c_str(),
 			JACK_DEFAULT_MIDI_TYPE, JackPortIsInput, 0);
-  		jack_midi_reset_new_port(
+  		jack_midi_clear_buffer(
 			jack_port_get_buffer(_jack_input_port, nframes), nframes);
 		ret = ret && (_jack_input_port != NULL);
 	}

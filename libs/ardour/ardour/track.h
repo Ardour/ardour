@@ -115,13 +115,12 @@ class Track : public Route
 
 	struct FreezeRecord {
 	    FreezeRecord()
-		: playlist(0)
-		, have_mementos(false)
+		: have_mementos(false)
 	    {}
 
 	    ~FreezeRecord();
 
-	    Playlist*                       playlist;
+	    boost::shared_ptr<Playlist>     playlist;
 	    vector<FreezeRecordInsertInfo*> insert_info;
 	    bool                            have_mementos;
 	    FreezeState                     state;

@@ -357,17 +357,29 @@ NewSessionDialog::NewSessionDialog()
 	m_treeview->get_selection()->set_mode (Gtk::SELECTION_SINGLE);
 
 	std::string path = ARDOUR::get_user_ardour_path();
+	
 	if (path.empty()) {
 	        path = ARDOUR::get_system_data_path();
 	}
+
+	const char * const template_dir_name = X_("templates");
+
 	if (!path.empty()) {
-	        m_template->set_current_folder (path + X_("templates/"));
+		string user_template_path = path + template_dir_name;
+
+		if (Glib::file_test(user_template_path, Glib::FILE_TEST_IS_DIR))
+		{
+			m_template->set_current_folder (user_template_path);
+		}
 	}
 
-	const std::string sys_templates_dir = ARDOUR::get_system_data_path() + X_("templates");
-	if (Glib::file_test(sys_templates_dir, Glib::FILE_TEST_IS_DIR))
-		m_template->add_shortcut_folder(sys_templates_dir);
+	const std::string sys_templates_dir = ARDOUR::get_system_data_path() + template_dir_name;
 	
+	if (Glib::file_test(sys_templates_dir, Glib::FILE_TEST_IS_DIR))
+	{
+		m_template->add_shortcut_folder(sys_templates_dir);
+	}
+
 	m_template->set_title(_("select template"));
 	Gtk::FileFilter* session_filter = manage (new (Gtk::FileFilter));
 	session_filter->add_pattern(X_("*.ardour"));

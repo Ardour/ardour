@@ -65,6 +65,7 @@ crossfade.cc
 curve.cc
 cycle_timer.cc
 default_click.cc
+enums.cc
 gain.cc
 gdither.cc
 globals.cc
@@ -127,10 +128,10 @@ if ardour['LIBLO']:
     extra_sources += osc_files
 
 ardour.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
-ardour.Append(CXXFLAGS="-DDATA_DIR=\\\""+final_prefix+"/share\\\"")
-ardour.Append(CXXFLAGS="-DMODULE_DIR=\\\""+final_prefix+"/lib\\\"")
-ardour.Append(CXXFLAGS="-DCONFIG_DIR=\\\""+final_config_prefix+"\\\"")
-ardour.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
+ardour.Append(CXXFLAGS="-DDATA_DIR=\\\"" + os.path.join (final_prefix, 'share') + "\\\"")
+ardour.Append(CXXFLAGS="-DMODULE_DIR=\\\"" + os.path.join (final_prefix, env['LIBDIR']) + "\\\"")
+ardour.Append(CXXFLAGS="-DCONFIG_DIR=\\\"" + final_config_prefix + "\\\"")
+ardour.Append(CXXFLAGS="-DLOCALEDIR=\\\"" + os.path.join (final_prefix, 'share', 'locale') + "\\\"")
 
 ardour.Merge ([ libraries['jack'] ])
 
@@ -180,17 +181,38 @@ int main(int argc, char** argv)
 	return 0;
 }
 """
-
 def CheckJackVideoFrameOffset(context):
 	context.Message('Checking for JackVideoFrameOffset in jack_position_bits_t enum...')
 	result = context.TryLink(jack_video_frame_offset_test, '.c')
 	context.Result(result)
 	return result
 
+#
+# See if JACK supports jack_port_ensure_monitor_input()
+#
+jack_ensure_monitor_input_test = """
+#include <jack/jack.h>
+int main(int argc, char** argv)
+{
+	    jack_port_t **port;
+
+	    jack_port_ensure_monitor (*port, 1);
+	    return 0;
+
+}
+"""
+
+def CheckJackEnsureMonitorInput(context):
+        context.Message('Checking for jack_port_ensure_monitor_input()...')
+        result = context.TryLink(jack_ensure_monitor_input_test, '.c')
+        context.Result(result)
+        return result
+
 conf = Configure(ardour, custom_tests = {
 	'CheckJackClientOpen' : CheckJackClientOpen,
 	'CheckJackRecomputeLatencies' : CheckJackRecomputeLatencies,
-	'CheckJackVideoFrameOffset' : CheckJackVideoFrameOffset
+	'CheckJackVideoFrameOffset' : CheckJackVideoFrameOffset,
+	'CheckJackEnsureMonitorInput' : CheckJackEnsureMonitorInput
 })
 
 if conf.CheckJackClientOpen():
@@ -201,9 +223,9 @@ if conf.CheckJackRecomputeLatencies():
 
 if conf.CheckJackVideoFrameOffset():
 	ardour.Append(CXXFLAGS="-DHAVE_JACK_VIDEO_SUPPORT")
-
-if conf.CheckFunc('jack_port_ensure_monitor'):
-    env.Append(CCFLAGS='-DHAVE_JACK_PORT_ENSURE_MONITOR')
+	
+if conf.CheckJackEnsureMonitorInput():
+	ardour.Append(CXXFLAGS='-DHAVE_JACK_PORT_ENSURE_MONITOR')
 else:
     print '\nWARNING: You need at least svn revision 985 of jack for hardware monitoring to work correctly.\n'
 
@@ -220,14 +242,19 @@ if conf.CheckCHeader('sys/vfs.h'):
 if conf.CheckCHeader('/System/Library/Frameworks/CoreMIDI.framework/Headers/CoreMIDI.h'):
     ardour.Append(LINKFLAGS="-framework CoreMIDI")
 
+if conf.CheckCHeader('/System/Library/Frameworks/AudioToolbox.framework/Headers/ExtendedAudioFile.h'):
+    ardour.Append(LINKFLAGS="-framework AudioToolbox")
+
+if conf.CheckCHeader('/System/Library/Frameworks/CoreAudio.framework/Headers/CoreAudio.h'):
+    ardour.Append(CXXFLAGS="-DHAVE_WEAK_COREAUDIO")
+
 if conf.CheckCHeader('/System/Library/Frameworks/AudioUnit.framework/Headers/AudioUnit.h') and ardour['AUDIOUNITS']:
     ardour.Append(CXXFLAGS="-DHAVE_AUDIOUNITS")
     ardour.Append(LINKFLAGS="-framework AudioUnit")
     extra_sources += audiounit_files
  
-if conf.CheckCHeader('/System/Library/Frameworks/AudioToolbox.framework/Headers/ExtendedAudioFile.h') and ardour['COREAUDIO']:
+if ardour['COREAUDIO']:
     ardour.Append(CXXFLAGS="-DHAVE_COREAUDIO")    
-    ardour.Append(LINKFLAGS="-framework AudioToolbox")
     extra_sources += coreaudio_files
 
 if env['CONFIG_ARCH'] == 'apple':
@@ -287,7 +314,7 @@ if env['NLS']:
 	i18n (ardour, ardour_files + vst_files + coreaudio_files + audiounit_files, env)
 
 
-env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libardour))
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), libardour))
 
 env.Alias('version', ardour.VersionBuild(['version.cc', 'ardour/version.h'], []))
 

@@ -20,7 +20,7 @@ gnomecanvasmm.Merge([libraries['glibmm2'],
 libgnomecanvasmm = gnomecanvasmm.SharedLibrary('libgnomecanvasmm', gnomecanvasmm_files)
 Default(libgnomecanvasmm)
 
-env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libgnomecanvasmm))
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), libgnomecanvasmm))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'SConscript', 'libgnomecanvasmmconfig.h', 'libgnomecanvasmm.h'] +

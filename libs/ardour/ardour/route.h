@@ -248,7 +248,7 @@ class Route : public IO
 	void curve_reallocate ();
 
   protected:
-	unsigned char _flags;
+	Flag _flags;
 
 	/* tight cache-line access here is more important than sheer speed of
 	   access.

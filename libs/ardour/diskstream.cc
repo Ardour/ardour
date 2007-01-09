@@ -71,14 +71,12 @@ sigc::signal<void>                Diskstream::DiskUnderrun;
 Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
 	: _name (name)
 	, _session (sess)
-	, _playlist(NULL)
 {
 	init (flag);
 }
 	
 Diskstream::Diskstream (Session& sess, const XMLNode& node)
 	: _session (sess)
-	, _playlist(NULL)
 {
 	init (Recordable);
 }
@@ -131,7 +129,7 @@ Diskstream::~Diskstream ()
 	//Glib::Mutex::Lock lm (state_lock);
 
 	if (_playlist)
-		_playlist->unref ();
+		_playlist->release ();
 }
 
 void
@@ -305,7 +303,7 @@ Diskstream::set_speed (double sp)
 }
 
 int
-Diskstream::use_playlist (Playlist* playlist)
+Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 {
 	{
 		Glib::Mutex::Lock lm (state_lock);
@@ -314,26 +312,30 @@ Diskstream::use_playlist (Playlist* playlist)
 			return 0;
 		}
 
-		plstate_connection.disconnect();
 		plmod_connection.disconnect ();
 		plgone_connection.disconnect ();
 
 		if (_playlist) {
-			_playlist->unref();
+			_playlist->release();
 		}
 			
 		_playlist = playlist;
-		_playlist->ref();
+		_playlist->use();
 
 		if (!in_set_state && recordable()) {
 			reset_write_sources (false);
 		}
 		
 		plmod_connection = _playlist->Modified.connect (mem_fun (*this, &Diskstream::playlist_modified));
-		plgone_connection = _playlist->GoingAway.connect (bind (mem_fun (*this, &Diskstream::playlist_deleted), _playlist));
+		plgone_connection = _playlist->GoingAway.connect (bind (mem_fun (*this, &Diskstream::playlist_deleted), boost::weak_ptr<Playlist>(_playlist)));
 	}
 
-	if (!overwrite_queued) {
+	/* don't do this if we've already asked for it *or* if we are setting up
+	   the diskstream for the very first time - the input changed handling will
+	   take care of the buffer refill.
+	*/
+
+	if (!overwrite_queued && !(_session.state_of_the_state() & Session::CannotSave)) {
 		_session.request_overwrite_buffer (this);
 		overwrite_queued = true;
 	}
@@ -360,14 +362,21 @@ Diskstream::playlist_modified ()
 }
 
 void
-Diskstream::playlist_deleted (Playlist* pl)
+Diskstream::playlist_deleted (boost::weak_ptr<Playlist> wpl)
 {
-	/* this catches an ordering issue with session destruction. playlists 
-	   are destroyed before diskstreams. we have to invalidate any handles
-	   we have to the playlist.
-	*/
+	boost::shared_ptr<Playlist> pl (wpl.lock());
 
-	_playlist = 0;
+	if (pl == _playlist) {
+
+		/* this catches an ordering issue with session destruction. playlists 
+		   are destroyed before diskstreams. we have to invalidate any handles
+		   we have to the playlist.
+		*/
+		
+		if (_playlist) {
+			_playlist.reset ();
+		} 
+	}
 }
 
 int

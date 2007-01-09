@@ -609,7 +609,7 @@ ARDOUR_UI::show_shuttle_context_menu ()
 		build_shuttle_context_menu ();
 	}
 
-	shuttle_context_menu->popup (1, 0);
+	shuttle_context_menu->popup (1, gtk_get_current_event_time());
 }
 
 void
@@ -815,7 +815,7 @@ ARDOUR_UI::shuttle_unit_clicked ()
 	if (shuttle_unit_menu == 0) {
 		shuttle_unit_menu = dynamic_cast<Menu*> (ActionManager::get_widget ("/ShuttleUnitPopup"));
 	}
-	shuttle_unit_menu->popup (1, 0);
+	shuttle_unit_menu->popup (1, gtk_get_current_event_time());
 }
 
 void

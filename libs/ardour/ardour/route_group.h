@@ -115,7 +115,7 @@ class RouteGroup : public Stateful, public sigc::trackable {
     Session& _session;
     list<Route *> routes;
     string _name;
-    uint32_t _flags;
+    Flag _flags;
 
     void remove_when_going_away (Route*);
 };

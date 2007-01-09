@@ -35,6 +35,7 @@
 #include <glibmm/thread.h>
 #include <pbd/xml++.h>
 #include <pbd/memento_command.h>
+#include <pbd/enumwriter.h>
 
 #include <ardour/ardour.h>
 #include <ardour/audioengine.h>
@@ -46,6 +47,7 @@
 #include <ardour/send.h>
 #include <ardour/region_factory.h>
 #include <ardour/audioplaylist.h>
+#include <ardour/playlist_factory.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/audioregion.h>
 #include <ardour/audio_port.h>
@@ -96,34 +98,6 @@ AudioDiskstream::AudioDiskstream (Session& sess, const XMLNode& node)
 }
 
 void
-AudioDiskstream::init_channel (ChannelInfo &chan)
-{
-	chan.playback_wrap_buffer = 0;
-	chan.capture_wrap_buffer = 0;
-	chan.speed_buffer = 0;
-	chan.peak_power = 0.0f;
-	chan.source = 0;
-	chan.current_capture_buffer = 0;
-	chan.current_playback_buffer = 0;
-	chan.curr_capture_cnt = 0;
-	
-	chan.playback_buf = new RingBufferNPT<Sample> (_session.diskstream_buffer_size());
-	chan.capture_buf = new RingBufferNPT<Sample> (_session.diskstream_buffer_size());
-	chan.capture_transition_buf = new RingBufferNPT<CaptureTransition> (128);
-	
-	
-	/* touch the ringbuffer buffers, which will cause
-	   them to be mapped into locked physical RAM if
-	   we're running with mlockall(). this doesn't do
-	   much if we're not.  
-	*/
-	memset (chan.playback_buf->buffer(), 0, sizeof (Sample) * chan.playback_buf->bufsize());
-	memset (chan.capture_buf->buffer(), 0, sizeof (Sample) * chan.capture_buf->bufsize());
-	memset (chan.capture_transition_buf->buffer(), 0, sizeof (CaptureTransition) * chan.capture_transition_buf->bufsize());
-}
-
-
-void
 AudioDiskstream::init (Diskstream::Flag f)
 {
 	Diskstream::init(f);
@@ -140,40 +114,21 @@ AudioDiskstream::init (Diskstream::Flag f)
 	assert(_n_channels == ChanCount(DataType::AUDIO, 1));
 }
 
-void
-AudioDiskstream::destroy_channel (ChannelInfo &chan)
-{
-	if (chan.write_source) {
-		chan.write_source.reset ();
-	}
-		
-	if (chan.speed_buffer) {
-		delete [] chan.speed_buffer;
-	}
-
-	if (chan.playback_wrap_buffer) {
-		delete [] chan.playback_wrap_buffer;
-	}
-	if (chan.capture_wrap_buffer) {
-		delete [] chan.capture_wrap_buffer;
-	}
-	
-	delete chan.playback_buf;
-	delete chan.capture_buf;
-	delete chan.capture_transition_buf;
-	
-	chan.playback_buf = 0;
-	chan.capture_buf = 0;
-}
-
 AudioDiskstream::~AudioDiskstream ()
 {
-	Glib::Mutex::Lock lm (state_lock);
+	notify_callbacks ();
 
-	for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan)
-		destroy_channel((*chan));
-	
-	channels.clear();
+	{
+		/* don't be holding this lock as we exit the destructor, glib will wince
+		   visibly since the mutex gets destroyed before we release it.
+		*/
+
+		Glib::Mutex::Lock lm (state_lock);
+		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
+			(*chan).release ();
+		}
+		channels.clear();
+	}
 }
 
 void
@@ -288,15 +243,13 @@ AudioDiskstream::get_input_sources ()
 int
 AudioDiskstream::find_and_use_playlist (const string& name)
 {
-	Playlist* pl;
-	AudioPlaylist* playlist;
+	boost::shared_ptr<AudioPlaylist> playlist;
 		
-	if ((pl = _session.playlist_by_name (name)) == 0) {
-		playlist = new AudioPlaylist(_session, name);
-		pl = playlist;
+	if ((playlist = boost::dynamic_pointer_cast<AudioPlaylist> (_session.playlist_by_name (name))) == 0) {
+		playlist = boost::dynamic_pointer_cast<AudioPlaylist> (PlaylistFactory::create (_session, name));
 	}
 
-	if ((playlist = dynamic_cast<AudioPlaylist*> (pl)) == 0) {
+	if (!playlist) {
 		error << string_compose(_("AudioDiskstream: Playlist \"%1\" isn't an audio playlist"), name) << endmsg;
 		return -1;
 	}
@@ -305,9 +258,9 @@ AudioDiskstream::find_and_use_playlist (const string& name)
 }
 
 int
-AudioDiskstream::use_playlist (Playlist* playlist)
+AudioDiskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 {
-	assert(dynamic_cast<AudioPlaylist*>(playlist));
+	assert(boost::dynamic_pointer_cast<AudioPlaylist>(playlist));
 
 	Diskstream::use_playlist(playlist);
 
@@ -318,7 +271,7 @@ int
 AudioDiskstream::use_new_playlist ()
 {
 	string newname;
-	AudioPlaylist* playlist;
+	boost::shared_ptr<AudioPlaylist> playlist;
 
 	if (!in_set_state && destructive()) {
 		return 0;
@@ -330,9 +283,11 @@ AudioDiskstream::use_new_playlist ()
 		newname = Playlist::bump_name (_name, _session);
 	}
 
-	if ((playlist = new AudioPlaylist (_session, newname, hidden())) != 0) {
+	if ((playlist = boost::dynamic_pointer_cast<AudioPlaylist> (PlaylistFactory::create (_session, newname, hidden()))) != 0) {
+		
 		playlist->set_orig_diskstream_id (id());
 		return use_playlist (playlist);
+
 	} else { 
 		return -1;
 	}
@@ -353,11 +308,11 @@ AudioDiskstream::use_copy_playlist ()
 	}
 
 	string newname;
-	AudioPlaylist* playlist;
+	boost::shared_ptr<AudioPlaylist> playlist;
 
 	newname = Playlist::bump_name (_playlist->name(), _session);
 	
-	if ((playlist  = new AudioPlaylist (*audio_playlist(), newname)) != 0) {
+	if ((playlist  = boost::dynamic_pointer_cast<AudioPlaylist>(PlaylistFactory::create (audio_playlist(), newname))) != 0) {
 		playlist->set_orig_diskstream_id (id());
 		return use_playlist (playlist);
 	} else { 
@@ -1553,7 +1508,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 	} else {
 
 		string whole_file_region_name;
-		whole_file_region_name = region_name_from_path (channels[0].write_source->name());
+		whole_file_region_name = region_name_from_path (channels[0].write_source->name(), true);
 
 		/* Register a new region with the Session that
 		   describes the entire source. Do this first
@@ -1684,7 +1639,7 @@ AudioDiskstream::finish_capture (bool rec_monitors_input)
 void
 AudioDiskstream::set_record_enabled (bool yn)
 {
-	if (!recordable() || !_session.record_enabling_legal()) {
+	if (!recordable() || !_session.record_enabling_legal() || _io->n_inputs().get(DataType::AUDIO) == 0) {
 		return;
 	}
 
@@ -1762,8 +1717,7 @@ AudioDiskstream::get_state ()
 	char buf[64] = "";
 	LocaleGuard lg (X_("POSIX"));
 
-	snprintf (buf, sizeof(buf), "0x%x", _flags);
-	node->add_property ("flags", buf);
+	node->add_property ("flags", enum_2_string (_flags));
 
 	snprintf (buf, sizeof(buf), "%zd", channels.size());
 	node->add_property ("channels", buf);
@@ -1850,7 +1804,7 @@ AudioDiskstream::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("flags")) != 0) {
-		_flags = strtol (prop->value().c_str(), 0, 0);
+		_flags = Flag (string_2_enum (prop->value(), _flags));
 	}
 
 	if ((prop = node.property ("channels")) != 0) {
@@ -1982,7 +1936,7 @@ AudioDiskstream::reset_write_sources (bool mark_write_complete, bool force)
 	}
 	
 	capturing_sources.clear ();
-	
+
 	for (chan = channels.begin(), n = 0; chan != channels.end(); ++chan, ++n) {
 		if (!destructive()) {
 
@@ -2109,15 +2063,19 @@ AudioDiskstream::add_channel ()
 {
 	/* XXX need to take lock??? */
 
-	ChannelInfo chan;
+	/* this copies the ChannelInfo, which currently has no buffers. kind
+	   of pointless really, but we want the channels list to contain
+	   actual objects, not pointers to objects. mostly for convenience,
+	   which isn't much in evidence.
+	*/
 
-	init_channel (chan);
+	channels.push_back (ChannelInfo());
 
-	chan.speed_buffer = new Sample[speed_buffer_size];
-	chan.playback_wrap_buffer = new Sample[wrap_buffer_size];
-	chan.capture_wrap_buffer = new Sample[wrap_buffer_size];
+	/* now allocate the buffers */
 
-	channels.push_back (chan);
+	channels.back().init (_session.diskstream_buffer_size(), 
+			      speed_buffer_size,
+			      wrap_buffer_size);
 
 	_n_channels.set(DataType::AUDIO, channels.size());
 
@@ -2129,10 +2087,8 @@ AudioDiskstream::remove_channel ()
 {
 	if (channels.size() > 1) {
 		/* XXX need to take lock??? */
-		ChannelInfo & chan = channels.back();
-		destroy_channel (chan);
+		channels.back().release ();
 		channels.pop_back();
-
 		_n_channels.set(DataType::AUDIO, channels.size());
 		return 0;
 	}
@@ -2217,7 +2173,7 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 	
 	try {
 		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (pending_sources, 0, first_fs->length(),
-											  region_name_from_path (first_fs->name()), 
+											  region_name_from_path (first_fs->name(), true), 
 											  0, AudioRegion::Flag (AudioRegion::DefaultFlags|AudioRegion::Automatic|AudioRegion::WholeFile)));
 		region->special_set_position (0);
 	}
@@ -2231,7 +2187,7 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 	}
 
 	try {
-		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (pending_sources, 0, first_fs->length(), region_name_from_path (first_fs->name())));
+		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (pending_sources, 0, first_fs->length(), region_name_from_path (first_fs->name(), true)));
 	}
 
 	catch (failed_constructor& err) {
@@ -2261,10 +2217,10 @@ AudioDiskstream::set_destructive (bool yn)
 			if (!can_become_destructive (bounce_ignored)) {
 				return -1;
 			}
-			_flags |= Destructive;
+			_flags = Flag (_flags | Destructive);
 			use_destructive_playlist ();
 		} else {
-			_flags &= ~Destructive;
+			_flags = Flag (_flags & ~Destructive);
 			reset_write_sources (true, true);
 		}
 	}
@@ -2312,4 +2268,83 @@ AudioDiskstream::can_become_destructive (bool& requires_bounce) const
 
 	requires_bounce = false;
 	return true;
+}
+
+AudioDiskstream::ChannelInfo::ChannelInfo ()
+{
+	playback_wrap_buffer = 0;
+	capture_wrap_buffer = 0;
+	speed_buffer = 0;
+	peak_power = 0.0f;
+	source = 0;
+	current_capture_buffer = 0;
+	current_playback_buffer = 0;
+	curr_capture_cnt = 0;
+	playback_buf = 0;
+	capture_buf = 0;
+	capture_transition_buf = 0;
+}
+
+void
+AudioDiskstream::ChannelInfo::init (nframes_t bufsize, nframes_t speed_size, nframes_t wrap_size)
+{
+	speed_buffer = new Sample[speed_size];
+	playback_wrap_buffer = new Sample[wrap_size];
+	capture_wrap_buffer = new Sample[wrap_size];
+
+	playback_buf = new RingBufferNPT<Sample> (bufsize);
+	capture_buf = new RingBufferNPT<Sample> (bufsize);
+	capture_transition_buf = new RingBufferNPT<CaptureTransition> (128);
+	
+	/* touch the ringbuffer buffers, which will cause
+	   them to be mapped into locked physical RAM if
+	   we're running with mlockall(). this doesn't do
+	   much if we're not.  
+	*/
+
+	memset (playback_buf->buffer(), 0, sizeof (Sample) * playback_buf->bufsize());
+	memset (capture_buf->buffer(), 0, sizeof (Sample) * capture_buf->bufsize());
+	memset (capture_transition_buf->buffer(), 0, sizeof (CaptureTransition) * capture_transition_buf->bufsize());
+}
+
+AudioDiskstream::ChannelInfo::~ChannelInfo ()
+{
+}
+
+void
+AudioDiskstream::ChannelInfo::release ()
+{
+	if (write_source) {
+		write_source.reset ();
+	}
+		
+	if (speed_buffer) {
+		delete [] speed_buffer;
+		speed_buffer = 0;
+	}
+
+	if (playback_wrap_buffer) {
+		delete [] playback_wrap_buffer;
+		playback_wrap_buffer = 0;
+	}
+
+	if (capture_wrap_buffer) {
+		delete [] capture_wrap_buffer;
+		capture_wrap_buffer = 0;
+	}
+	
+	if (playback_buf) {
+		delete playback_buf;
+		playback_buf = 0;
+	}
+
+	if (capture_buf) {
+		delete capture_buf;
+		capture_buf = 0;
+	}
+
+	if (capture_transition_buf) {
+		delete capture_transition_buf;
+		capture_transition_buf = 0;
+	}
 }

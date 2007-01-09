@@ -22,6 +22,7 @@
 #include <cmath>
 
 #include <pbd/convert.h>
+#include <pbd/enumwriter.h>
 
 #include <gtkmm2ext/utils.h>
 
@@ -40,9 +41,13 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace sigc;
 using namespace Gtk;
+using namespace std;
 
 using PBD::atoi;
 using PBD::atof;
+
+sigc::signal<void> AudioClock::ModeChanged;
+vector<AudioClock*> AudioClock::clocks;
 
 const uint32_t AudioClock::field_length[(int) AudioClock::AudioFrames+1] = {
 	2,   /* SMPTE_Hours */
@@ -58,8 +63,10 @@ const uint32_t AudioClock::field_length[(int) AudioClock::AudioFrames+1] = {
 	10   /* Audio Frame */
 };
 
-AudioClock::AudioClock (const string& name, bool allow_edit, bool duration, bool with_tempo_and_meter) 
-	: is_duration (duration),
+AudioClock::AudioClock (std::string clock_name, bool transient, std::string widget_name, bool allow_edit, bool duration, bool with_info) 
+	: _name (clock_name),
+	  is_transient (transient),
+	  is_duration (duration),
 	  editable (allow_edit),
 	  colon1 (":"),
 	  colon2 (":"),
@@ -75,9 +82,51 @@ AudioClock::AudioClock (const string& name, bool allow_edit, bool duration, bool
 	ops_menu = 0;
 	dragging = false;
 	
+	if (with_info) {
+		frames_upper_info_label = manage (new Label);
+		frames_lower_info_label = manage (new Label);
+		smpte_upper_info_label = manage (new Label);
+		smpte_lower_info_label = manage (new Label);
+		bbt_upper_info_label = manage (new Label);
+		bbt_lower_info_label = manage (new Label);
+		
+		frames_upper_info_label->set_name ("AudioClockFramesUpperInfo");
+		frames_lower_info_label->set_name ("AudioClockFramesLowerInfo");
+		smpte_upper_info_label->set_name ("AudioClockSMPTEUpperInfo");
+		smpte_lower_info_label->set_name ("AudioClockSMPTELowerInfo");
+		bbt_upper_info_label->set_name ("AudioClockBBTUpperInfo");
+		bbt_lower_info_label->set_name ("AudioClockBBTLowerInfo");
+
+		Gtkmm2ext::set_size_request_to_display_given_text(*smpte_upper_info_label, "23.98",0,0);
+		Gtkmm2ext::set_size_request_to_display_given_text(*smpte_lower_info_label, "NDF",0,0);
+
+		frames_info_box.pack_start (*frames_upper_info_label, true, true);
+		frames_info_box.pack_start (*frames_lower_info_label, true, true);
+		smpte_info_box.pack_start (*smpte_upper_info_label, true, true);
+		smpte_info_box.pack_start (*smpte_lower_info_label, true, true);
+		bbt_info_box.pack_start (*bbt_upper_info_label, true, true);
+		bbt_info_box.pack_start (*bbt_lower_info_label, true, true);
+		
+	} else {
+		frames_upper_info_label = 0;
+		frames_lower_info_label = 0;
+		smpte_upper_info_label = 0;
+		smpte_lower_info_label = 0;
+		bbt_upper_info_label = 0;
+		bbt_lower_info_label = 0;
+	}	
+	
 	audio_frames_ebox.add (audio_frames_label);
-	frames_packer_hbox.set_border_width (2);
-	frames_packer_hbox.pack_start (audio_frames_ebox, false, false);
+	
+	frames_packer.set_homogeneous (false);
+	frames_packer.set_border_width (2);
+	frames_packer.pack_start (audio_frames_ebox, false, false);
+	
+	if (with_info) {
+		frames_packer.pack_start (frames_info_box, false, false, 5);
+	}
+	
+	frames_packer_hbox.pack_start (frames_packer, true, false);
 
 	hours_ebox.add (hours_label);
 	minutes_ebox.add (minutes_label);
@@ -100,6 +149,10 @@ AudioClock::AudioClock (const string& name, bool allow_edit, bool duration, bool
 	smpte_packer.pack_start (colon3, false, false);
 	smpte_packer.pack_start (frames_ebox, false, false);
 
+	if (with_info) {
+		smpte_packer.pack_start (smpte_info_box, false, false, 5);
+	}
+
 	smpte_packer_hbox.pack_start (smpte_packer, true, false);
 
 	bbt_packer.set_homogeneous (false);
@@ -110,20 +163,8 @@ AudioClock::AudioClock (const string& name, bool allow_edit, bool duration, bool
 	bbt_packer.pack_start (b2, false, false);
 	bbt_packer.pack_start (ticks_ebox, false, false);
 
-	if (with_tempo_and_meter) {
-		meter_label = manage (new Label);
-		tempo_label = manage (new Label);
-
-		meter_label->set_name ("BBTMeterLabel");
-		tempo_label->set_name ("BBTTempoLabel");
-
-		tempo_meter_box.pack_start (*meter_label, true, true);
-		tempo_meter_box.pack_start (*tempo_label, true, true);
-
-		bbt_packer.pack_start (tempo_meter_box, false, false, 5);
-	} else {
-		meter_label = 0;
-		tempo_label = 0;
+	if (with_info) {
+		bbt_packer.pack_start (bbt_info_box, false, false, 5);
 	}
 
 	bbt_packer_hbox.pack_start (bbt_packer, true, false);
@@ -138,7 +179,50 @@ AudioClock::AudioClock (const string& name, bool allow_edit, bool duration, bool
 
 	minsec_packer_hbox.pack_start (minsec_packer, true, false);
 
-	set_name (name);
+	clock_frame.set_shadow_type (Gtk::SHADOW_IN);
+	clock_frame.set_name ("BaseFrame");
+
+	clock_frame.add (clock_base);
+
+	set_widget_name (widget_name);
+
+	_mode = BBT; /* lie to force mode switch */
+	set_mode (SMPTE);
+
+	pack_start (clock_frame, true, true);
+
+	/* the clock base handles button releases for menu popup regardless of
+	   editable status. if the clock is editable, the clock base is where
+	   we pass focus to after leaving the last editable "field", which
+	   will then shutdown editing till the user starts it up again.
+
+	   it does this because the focus out event on the field disables
+	   keyboard event handling, and we don't connect anything up to
+	   notice focus in on the clock base. hence, keyboard event handling
+	   stays disabled.
+	*/
+
+	clock_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
+	clock_base.signal_button_release_event().connect (bind (mem_fun (*this, &AudioClock::field_button_release_event), SMPTE_Hours));
+
+	Session::SMPTEOffsetChanged.connect (mem_fun (*this, &AudioClock::smpte_offset_changed));
+
+	if (editable) {
+		setup_events ();
+	}
+
+	set (last_when, true);
+
+	if (!is_transient) {
+		clocks.push_back (this);
+	}
+}
+
+void
+AudioClock::set_widget_name (string name)
+{
+	Widget::set_name (name);
+
 	clock_base.set_name (name);
 
 	audio_frames_label.set_name (name);
@@ -172,37 +256,7 @@ AudioClock::AudioClock (const string& name, bool allow_edit, bool duration, bool
 	b1.set_name (name);
 	b2.set_name (name);
 
-	clock_frame.set_shadow_type (Gtk::SHADOW_IN);
-	clock_frame.set_name ("BaseFrame");
-
-	clock_frame.add (clock_base);
-
-	_mode = BBT; /* lie to force mode switch */
-	set_mode (SMPTE);
-
-	pack_start (clock_frame, true, true);
-
-	/* the clock base handles button releases for menu popup regardless of
-	   editable status. if the clock is editable, the clock base is where
-	   we pass focus to after leaving the last editable "field", which
-	   will then shutdown editing till the user starts it up again.
-
-	   it does this because the focus out event on the field disables
-	   keyboard event handling, and we don't connect anything up to
-	   notice focus in on the clock base. hence, keyboard event handling
-	   stays disabled.
-	*/
-
-	clock_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
-	clock_base.signal_button_release_event().connect (bind (mem_fun (*this, &AudioClock::field_button_release_event), SMPTE_Hours));
-
-	Session::SMPTEOffsetChanged.connect (mem_fun (*this, &AudioClock::smpte_offset_changed));
-
-	if (editable) {
-		setup_events ();
-	}
-
-	set (last_when, true);
+	queue_draw ();
 }
 
 void
@@ -390,6 +444,27 @@ AudioClock::set_frames (nframes_t when, bool force)
 	char buf[32];
 	snprintf (buf, sizeof (buf), "%u", when);
 	audio_frames_label.set_text (buf);
+	
+	if (frames_upper_info_label) {
+		nframes_t rate = session->frame_rate();
+		
+		if (fmod (rate, 1000.0) == 0.000) {
+			sprintf (buf, "%uK", rate/1000);
+		} else {
+			sprintf (buf, "%.3fK", rate/1000.0f);
+		}
+		
+		frames_upper_info_label->set_text (buf);
+		
+		float vid_pullup = Config->get_video_pullup();
+		
+		if (vid_pullup == 0.0) {
+			frames_lower_info_label->set_text(_("none"));
+		} else {
+			sprintf (buf, "%-6.4f", vid_pullup);
+			frames_lower_info_label->set_text (buf);
+		}
+	}
 }	
 
 void
@@ -467,6 +542,26 @@ AudioClock::set_smpte (nframes_t when, bool force)
 		frames_label.set_text (buf);
 		last_frames = smpte.frames;
 	}
+	
+	if (smpte_upper_info_label) {
+		double smpte_frames = session->smpte_frames_per_second();
+		
+		if ( fmod(smpte_frames, 1.0) == 0.0) {
+			sprintf (buf, "%u", int (smpte_frames)); 
+		} else {
+			sprintf (buf, "%.2f", smpte_frames);
+		}
+		
+		smpte_upper_info_label->set_text (buf);
+		
+		if (session->smpte_drop_frames()) {
+			sprintf (buf, "DF");
+		} else {
+			sprintf (buf, "NDF");
+		}
+		
+		smpte_lower_info_label->set_text (buf);
+	}
 }
 
 void
@@ -483,12 +578,12 @@ AudioClock::set_bbt (nframes_t when, bool force)
 	sprintf (buf, "%04" PRIu32, bbt.ticks);
 	ticks_label.set_text (buf);
 	
-	if (meter_label) {
+	if (bbt_upper_info_label) {
 		TempoMap::Metric m (session->tempo_map().metric_at (when));
 		sprintf (buf, "%-5.2f", m.tempo().beats_per_minute());
-		tempo_label->set_text (buf);
+		bbt_lower_info_label->set_text (buf);
 		sprintf (buf, "%g|%g", m.meter().beats_per_bar(), m.meter().note_divisor());
-		meter_label->set_text (buf);
+		bbt_upper_info_label->set_text (buf);
 	}
 }
 
@@ -498,6 +593,18 @@ AudioClock::set_session (Session *s)
 	session = s;
 
 	if (s) {
+
+		XMLProperty* prop;
+		XMLNode* node = session->extra_xml (X_("ClockModes"));
+		AudioClock::Mode amode;
+		
+		if (node) {
+			if ((prop = node->property (_name.c_str())) != 0) {
+				amode = AudioClock::Mode (string_2_enum (prop->value(), amode));
+				set_mode (amode);
+			}
+		}
+
 		set (last_when, true);
 	}
 }
@@ -1113,7 +1220,7 @@ AudioClock::get_frames (Field field,nframes_t pos,int dir)
 		frames = session->frame_rate();
 		break;
 	case SMPTE_Frames:
-		frames = (nframes_t) floor (session->frame_rate() / Config->get_smpte_frames_per_second());
+		frames = (nframes_t) floor (session->frame_rate() / session->smpte_frames_per_second());
 		break;
 
 	case AudioFrames:
@@ -1221,7 +1328,7 @@ AudioClock::smpte_sanitize_display()
 		seconds_label.set_text("59");
 	}
 	
-	switch ((long)rint(Config->get_smpte_frames_per_second())) {
+	switch ((long)rint(session->smpte_frames_per_second())) {
 	case 24:
 		if (atoi(frames_label.get_text()) > 23) {
 			frames_label.set_text("23");
@@ -1241,7 +1348,7 @@ AudioClock::smpte_sanitize_display()
 		break;
 	}
 	
-	if (Config->get_smpte_drop_frames()) {
+	if (session->smpte_drop_frames()) {
 		if ((atoi(minutes_label.get_text()) % 10) && (atoi(seconds_label.get_text()) == 0) && (atoi(frames_label.get_text()) < 2)) {
 			frames_label.set_text("02");
 		}
@@ -1262,6 +1369,8 @@ AudioClock::smpte_frame_from_display () const
 	smpte.minutes = atoi (minutes_label.get_text());
 	smpte.seconds = atoi (seconds_label.get_text());
 	smpte.frames = atoi (frames_label.get_text());
+	smpte.rate = session->smpte_frames_per_second();
+	smpte.drop= session->smpte_drop_frames();
 
 	session->smpte_to_sample( smpte, sample, false /* use_offset */, false /* use_subframes */ );
 	
@@ -1775,6 +1884,10 @@ AudioClock::set_mode (Mode m)
 	set (last_when, true);
 	clock_base.show_all ();
 	key_entry_state = 0;
+
+	if (!is_transient) {
+		ModeChanged (); /* EMIT SIGNAL */
+	}
 }
 
 void
@@ -1784,26 +1897,26 @@ AudioClock::set_size_requests ()
 
 	switch (_mode) {
 	case SMPTE:
-		Gtkmm2ext::set_size_request_to_display_given_text (hours_label, "-88", 2, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (minutes_label, "88", 2, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (seconds_label, "88", 2, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (frames_label, "88", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (hours_label, "-00", 5, 5);
+		Gtkmm2ext::set_size_request_to_display_given_text (minutes_label, "00", 5, 5);
+		Gtkmm2ext::set_size_request_to_display_given_text (seconds_label, "00", 5, 5);
+		Gtkmm2ext::set_size_request_to_display_given_text (frames_label, "00", 5, 5);
 		break;
 
 	case BBT:
-		Gtkmm2ext::set_size_request_to_display_given_text (bars_label, "-888", 2, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (beats_label, "88", 2, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (ticks_label, "8888", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (bars_label, "-000", 5, 5);
+		Gtkmm2ext::set_size_request_to_display_given_text (beats_label, "00", 5, 5);
+		Gtkmm2ext::set_size_request_to_display_given_text (ticks_label, "0000", 5, 5);
 		break;
 
 	case MinSec:
-		Gtkmm2ext::set_size_request_to_display_given_text (ms_hours_label, "99", 2, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (ms_minutes_label, "99", 2, 2);
-		Gtkmm2ext::set_size_request_to_display_given_text (ms_seconds_label, "99.999", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (ms_hours_label, "00", 5, 5);
+		Gtkmm2ext::set_size_request_to_display_given_text (ms_minutes_label, "00", 5, 5);
+		Gtkmm2ext::set_size_request_to_display_given_text (ms_seconds_label, "00.000", 5, 5);
 		break;
 
 	case Frames:
-		Gtkmm2ext::set_size_request_to_display_given_text (audio_frames_label, "4294967296", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (audio_frames_label, "0000000000", 5, 5);
 		break;
 
 	case Off:

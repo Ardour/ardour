@@ -49,6 +49,12 @@ using namespace PBD;
 
 gint AudioEngine::m_meter_exit;
 
+static void 
+ardour_jack_error (const char* msg) 
+{
+	error << "JACK: " << msg << endmsg;
+}
+
 AudioEngine::AudioEngine (string client_name) 
 	: ports (new Ports)
 {
@@ -80,11 +86,16 @@ AudioEngine::AudioEngine (string client_name)
 
 AudioEngine::~AudioEngine ()
 {
-	if (_running) {
-		jack_client_close (_jack);
+	{
+		Glib::Mutex::Lock tm (_process_lock);
+		session_removed.signal ();
+		
+		if (_running) {
+			jack_client_close (_jack);
+		}
+		
+		stop_metering_thread ();
 	}
-
-	stop_metering_thread ();
 }
 
 void
@@ -152,11 +163,18 @@ AudioEngine::start ()
 }
 
 int
-AudioEngine::stop ()
+AudioEngine::stop (bool forever)
 {
 	if (_running) {
 		_running = false;
-		jack_deactivate (_jack);
+		if (forever) {
+			jack_client_t* foo = _jack;
+			_jack = 0;
+			jack_client_close (foo);
+			stop_metering_thread ();
+		} else {
+			jack_deactivate (_jack);
+		}
 		Stopped(); /* EMIT SIGNAL */
 	}
 
@@ -164,7 +182,6 @@ AudioEngine::stop ()
 }
 
 
-	
 bool
 AudioEngine::get_sync_offset (nframes_t& offset) const
 {
@@ -196,7 +213,7 @@ void
 AudioEngine::jack_timebase_callback (jack_transport_state_t state, nframes_t nframes,
 				     jack_position_t* pos, int new_position)
 {
-	if (session && session->synced_to_jack()) {
+	if (_jack && session && session->synced_to_jack()) {
 		session->jack_timebase_callback (state, nframes, pos, new_position);
 	}
 }
@@ -210,7 +227,7 @@ AudioEngine::_jack_sync_callback (jack_transport_state_t state, jack_position_t*
 int
 AudioEngine::jack_sync_callback (jack_transport_state_t state, jack_position_t* pos)
 {
-	if (session) {
+	if (_jack && session) {
 		return session->jack_sync_callback (state, pos);
 	} else {
 		return true;
@@ -220,14 +237,20 @@ AudioEngine::jack_sync_callback (jack_transport_state_t state, jack_position_t* 
 int
 AudioEngine::_xrun_callback (void *arg)
 {
-	 static_cast<AudioEngine *>(arg)->Xrun (); /* EMIT SIGNAL */
+	AudioEngine* ae = static_cast<AudioEngine*> (arg);
+	if (ae->jack()) {
+		ae->Xrun (); /* EMIT SIGNAL */
+	}
 	return 0;
 }
 
 int
 AudioEngine::_graph_order_callback (void *arg)
 {
-	static_cast<AudioEngine *>(arg)->GraphReordered (); /* EMIT SIGNAL */
+	AudioEngine* ae = static_cast<AudioEngine*> (arg);
+	if (ae->jack()) {
+		ae->GraphReordered (); /* EMIT SIGNAL */
+	}
 	return 0;
 }
 
@@ -381,9 +404,9 @@ AudioEngine::stop_metering_thread ()
 {
 	if (m_meter_thread) {
 		g_atomic_int_set (&m_meter_exit, 1);
+		m_meter_thread->join ();
+		m_meter_thread = 0;
 	}
-	m_meter_thread->join ();
-	m_meter_thread = 0;
 }
 
 void
@@ -397,8 +420,11 @@ AudioEngine::start_metering_thread ()
 void
 AudioEngine::meter_thread ()
 {
-	while (g_atomic_int_get(&m_meter_exit) != true) {
+	while (true) {
 		Glib::usleep (10000); /* 1/100th sec interval */
+		if (g_atomic_int_get(&m_meter_exit)) {
+			break;
+		}
 		IO::update_meters ();
 	}
 }
@@ -406,8 +432,26 @@ AudioEngine::meter_thread ()
 void 
 AudioEngine::set_session (Session *s)
 {
+	Glib::Mutex::Lock pl (_process_lock);
+
 	if (!session) {
+
 		session = s;
+
+		nframes_t blocksize = jack_get_buffer_size (_jack);
+		
+		/* page in as much of the session process code as we
+		   can before we really start running.
+		*/
+		
+		session->process (blocksize);
+		session->process (blocksize);
+		session->process (blocksize);
+		session->process (blocksize);
+		session->process (blocksize);
+		session->process (blocksize);
+		session->process (blocksize);
+		session->process (blocksize);
 	}
 }
 
@@ -421,16 +465,13 @@ AudioEngine::remove_session ()
 		if (session) {
 			session_remove_pending = true;
 			session_removed.wait(_process_lock);
-		} 
+		}
 
 	} else {
-
 		session = 0;
-
 	}
 	
 	remove_all_ports ();
-
 }
 
 Port *
@@ -468,8 +509,6 @@ AudioEngine::register_input_port (DataType type, const string& portname)
 		return newport;
 
 	} else {
-
-		_process_lock.unlock();
 		throw PortRegistrationFailure();
 	}
 
@@ -512,8 +551,6 @@ AudioEngine::register_output_port (DataType type, const string& portname)
 		return newport;
 		
 	} else {
-
-		_process_lock.unlock();
 		throw PortRegistrationFailure ();
 	}
 
@@ -719,11 +756,9 @@ AudioEngine::get_ports (const string& port_name_pattern, const string& type_name
 void
 AudioEngine::halted (void *arg)
 {
-	AudioEngine *ae = reinterpret_cast<AudioEngine *> (arg);
+	AudioEngine* ae = static_cast<AudioEngine *> (arg);
 
 	ae->_running = false;
-	ae->_jack = 0;
-
 	ae->_buffer_size = 0;
 	ae->_frame_rate = 0;
 
@@ -1006,6 +1041,8 @@ AudioEngine::connect_to_jack (string client_name)
 	if (status & JackNameNotUnique) {
 		jack_client_name = jack_get_client_name (_jack);
 	}
+
+	jack_set_error_function (ardour_jack_error);
 	
 	return 0;
 }
@@ -1033,9 +1070,7 @@ AudioEngine::disconnect_from_jack ()
 		return 0;
 	}
 
-	if (jack_client_close (_jack)) {
-		error << _("cannot shutdown connection to JACK") << endmsg;
-	}
+	jack_client_close (_jack);
 
 	_buffer_size = 0;
 	_frame_rate = 0;

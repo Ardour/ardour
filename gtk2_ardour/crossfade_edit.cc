@@ -96,7 +96,7 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 	  select_in_button (_("Fade In")),
 	  select_out_button (_("Fade Out"))
 {
-	set_wmclass ("ardour_automationedit", "Ardour");
+	set_wmclass (X_("ardour_automationedit"), "Ardour");
 	set_name ("CrossfadeEditWindow");
 	set_position (Gtk::WIN_POS_MOUSE);
 
@@ -697,8 +697,6 @@ CrossfadeEditor::redraw ()
 		spts[2].set_y (effective_height() + canvas_border);
 
 	}
-
-	// GTK2FIX some odd math to fix up here
 
 	size_t last_spt = (npoints + 3) - 1;
 

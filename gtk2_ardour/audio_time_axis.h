@@ -98,6 +98,7 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	void toggle_show_waveforms ();
 	void set_waveform_shape (WaveformShape);
 	void toggle_waveforms ();
+	void set_waveform_scale (WaveformScale);
 
 	void show_all_automation ();
 	void show_existing_automation ();
@@ -125,6 +126,8 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	Gtk::CheckMenuItem* waveform_item;
 	Gtk::RadioMenuItem* traditional_item;
 	Gtk::RadioMenuItem* rectified_item;
+	Gtk::RadioMenuItem* linearscale_item;
+	Gtk::RadioMenuItem* logscale_item;
 	Gtk::CheckMenuItem* gain_automation_item;
 	Gtk::CheckMenuItem* pan_automation_item;
 };

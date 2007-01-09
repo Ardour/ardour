@@ -57,7 +57,7 @@ Session::process (nframes_t nframes)
 	}
 
 	if (non_realtime_work_pending()) {
-		if (g_atomic_int_get (&butler_should_do_transport_work) == 0) {
+		if (!transport_work_requested ()) {
 			post_transport ();
 		} 
 	} 

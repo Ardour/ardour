@@ -47,8 +47,12 @@ typedef unsigned long   ulong;
 
     typedef unsigned int    BOOL;
 
+#ifndef FALSE
     #define FALSE   0
+#endif
+#ifndef TRUE
     #define TRUE    1
+#endif
 
 #endif  // _WINDEF_
 

@@ -233,15 +233,17 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	global_vpacker.set_border_width (0);
 	global_vpacker.set_spacing (0);
 
-	Gtk::VBox *whvbox = manage (new Gtk::VBox);
+	VBox *whvbox = manage (new VBox);
 
 	width_button.set_name ("MixerWidthButton");
 	hide_button.set_name ("MixerHideButton");
+	top_event_box.set_name ("MixerTopEventBox");
 
 	width_button.signal_clicked().connect (mem_fun(*this, &MixerStrip::width_clicked));
 	hide_button.signal_clicked().connect (mem_fun(*this, &MixerStrip::hide_clicked));
 
 	width_hide_box.pack_start (width_button, false, true);
+	width_hide_box.pack_start (top_event_box, true, true);
 	width_hide_box.pack_end (hide_button, false, true);
 	Gtk::Alignment *gain_meter_alignment = Gtk::manage(new Gtk::Alignment());
 	gain_meter_alignment->set_padding(0, 4, 0, 0);
@@ -425,8 +427,8 @@ MixerStrip::set_width (Width w)
 		if (rec_enable_button) {
 			rec_enable_button->set_label (_("record"));
 		}
-		mute_button->set_label  (_("mute"));
-		solo_button->set_label (_("solo"));
+		mute_button->set_label  (_("Mute"));
+		solo_button->set_label (_("Solo"));
 
 		if (_route->comment() == "") {
 		       comment_button.unset_bg (STATE_NORMAL);
@@ -962,6 +964,7 @@ void
 MixerStrip::show_route_color ()
 {
 	name_button.modify_bg (STATE_NORMAL, color());
+	top_event_box.modify_bg (STATE_NORMAL, color());
 	route_active_changed ();
 }
 

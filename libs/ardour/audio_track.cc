@@ -17,10 +17,13 @@
 
     $Id$
 */
-#include <pbd/error.h>
+
 #include <sigc++/retype.h>
 #include <sigc++/retype_return.h>
 #include <sigc++/bind.h>
+
+#include <pbd/error.h>
+#include <pbd/enumwriter.h>
 
 #include <ardour/audio_track.h>
 #include <ardour/audio_diskstream.h>
@@ -32,6 +35,7 @@
 #include <ardour/route_group_specialized.h>
 #include <ardour/insert.h>
 #include <ardour/audioplaylist.h>
+#include <ardour/playlist_factory.h>
 #include <ardour/panner.h>
 #include <ardour/utils.h>
 #include <ardour/buffer_set.h>
@@ -235,14 +239,7 @@ AudioTrack::_set_state (const XMLNode& node, bool call_base)
 	}
 
 	if ((prop = node.property (X_("mode"))) != 0) {
-		if (prop->value() == X_("normal")) {
-			_mode = Normal;
-		} else if (prop->value() == X_("destructive")) {
-			_mode = Destructive;
-		} else {
-			warning << string_compose ("unknown audio track mode \"%1\" seen and ignored", prop->value()) << endmsg;
-			_mode = Normal;
-		}
+		_mode = TrackMode (string_2_enum (prop->value(), _mode));
 	} else {
 		_mode = Normal;
 	}
@@ -311,8 +308,7 @@ AudioTrack::state(bool full_state)
 
 		freeze_node = new XMLNode (X_("freeze-info"));
 		freeze_node->add_property ("playlist", _freeze_record.playlist->name());
-		snprintf (buf, sizeof (buf), "%d", (int) _freeze_record.state);
-		freeze_node->add_property ("state", buf);
+		freeze_node->add_property ("state", enum_2_string (_freeze_record.state));
 
 		for (vector<FreezeRecordInsertInfo*>::iterator i = _freeze_record.insert_info.begin(); i != _freeze_record.insert_info.end(); ++i) {
 			inode = new XMLNode (X_("insert"));
@@ -329,15 +325,8 @@ AudioTrack::state(bool full_state)
 	/* Alignment: act as a proxy for the diskstream */
 	
 	XMLNode* align_node = new XMLNode (X_("alignment"));
-	switch (_diskstream->alignment_style()) {
-	case ExistingMaterial:
-		snprintf (buf, sizeof (buf), X_("existing"));
-		break;
-	case CaptureTime:
-		snprintf (buf, sizeof (buf), X_("capture"));
-		break;
-	}
-	align_node->add_property (X_("style"), buf);
+	AlignStyle as = _diskstream->alignment_style ();
+	align_node->add_property (X_("style"), enum_2_string (as));
 	root.add_child_nocopy (*align_node);
 
 	XMLNode* remote_control_node = new XMLNode (X_("remote_control"));
@@ -345,14 +334,7 @@ AudioTrack::state(bool full_state)
 	remote_control_node->add_property (X_("id"), buf);
 	root.add_child_nocopy (*remote_control_node);
 
-	switch (_mode) {
-	case Normal:
-		root.add_property (X_("mode"), X_("normal"));
-		break;
-	case Destructive:
-		root.add_property (X_("mode"), X_("destructive"));
-		break;
-	}
+	root.add_property (X_("mode"), enum_2_string (_mode));
 
 	/* we don't return diskstream state because we don't
 	   own the diskstream exclusively. control of the diskstream
@@ -395,18 +377,18 @@ AudioTrack::set_state_part_two ()
 		_freeze_record.insert_info.clear ();
 		
 		if ((prop = fnode->property (X_("playlist"))) != 0) {
-			Playlist* pl = _session.playlist_by_name (prop->value());
+			boost::shared_ptr<Playlist> pl = _session.playlist_by_name (prop->value());
 			if (pl) {
-				_freeze_record.playlist = dynamic_cast<AudioPlaylist*> (pl);
+				_freeze_record.playlist = boost::dynamic_pointer_cast<AudioPlaylist> (pl);
 			} else {
-				_freeze_record.playlist = 0;
+				_freeze_record.playlist.reset ();
 				_freeze_record.state = NoFreeze;
 			return;
 			}
 		}
 		
 		if ((prop = fnode->property (X_("state"))) != 0) {
-			_freeze_record.state = (FreezeState) atoi (prop->value().c_str());
+			_freeze_record.state = FreezeState (string_2_enum (prop->value(), _freeze_record.state));
 		}
 		
 		XMLNodeConstIterator citer;
@@ -433,11 +415,21 @@ AudioTrack::set_state_part_two ()
 	if ((fnode = find_named_node (*pending_state, X_("alignment"))) != 0) {
 
 		if ((prop = fnode->property (X_("style"))) != 0) {
-			if (prop->value() == "existing") {
-				_diskstream->set_persistent_align_style (ExistingMaterial);
-			} else if (prop->value() == "capture") {
-				_diskstream->set_persistent_align_style (CaptureTime);
+
+			/* fix for older sessions from before EnumWriter */
+
+			string pstr;
+
+			if (prop->value() == "capture") {
+				pstr = "CaptureTime";
+			} else if (prop->value() == "existing") {
+				pstr = "ExistingMaterial";
+			} else {
+				pstr = prop->value();
 			}
+
+			AlignStyle as = AlignStyle (string_2_enum (pstr, as));
+			_diskstream->set_persistent_align_style (as);
 		}
 	}
 	return;
@@ -669,8 +661,7 @@ AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes
 	
 	Glib::RWLock::ReaderLock rlock (redirect_lock);
 
-	// FIXME
-	AudioPlaylist* const apl = dynamic_cast<AudioPlaylist*>(diskstream->playlist());
+	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(diskstream->playlist());
 	assert(apl);
 
 	if (apl->read (buffers.get_audio(nframes).data(nframes),
@@ -777,12 +768,12 @@ AudioTrack::freeze (InterThreadInfo& itt)
 {
 	vector<boost::shared_ptr<Source> > srcs;
 	string new_playlist_name;
-	Playlist* new_playlist;
+	boost::shared_ptr<Playlist> new_playlist;
 	string dir;
 	string region_name;
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
 	
-	if ((_freeze_record.playlist = dynamic_cast<AudioPlaylist*>(diskstream->playlist())) == 0) {
+	if ((_freeze_record.playlist = boost::dynamic_pointer_cast<AudioPlaylist>(diskstream->playlist())) == 0) {
 		return;
 	}
 
@@ -839,7 +830,7 @@ AudioTrack::freeze (InterThreadInfo& itt)
 		}
 	}
 
-	new_playlist = new AudioPlaylist (_session, new_playlist_name, false);
+	new_playlist = PlaylistFactory::create (_session, new_playlist_name, false);
 	region_name = new_playlist_name;
 
 	/* create a new region from all filesources, keep it private */
@@ -854,7 +845,7 @@ AudioTrack::freeze (InterThreadInfo& itt)
 	new_playlist->set_frozen (true);
 	region->set_locked (true);
 
-	diskstream->use_playlist (dynamic_cast<AudioPlaylist*>(new_playlist));
+	diskstream->use_playlist (boost::dynamic_pointer_cast<AudioPlaylist>(new_playlist));
 	diskstream->set_record_enabled (false);
 
 	_freeze_record.state = Frozen;
@@ -886,7 +877,7 @@ AudioTrack::unfreeze ()
 			}
 		}
 		
-		_freeze_record.playlist = 0;
+		_freeze_record.playlist.reset ();
 	}
 
 	_freeze_record.state = UnFrozen;

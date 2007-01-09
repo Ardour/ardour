@@ -57,6 +57,14 @@ PeakMeter::reset ()
 }
 
 void
+PeakMeter::reset_max ()
+{
+	for (size_t i = 0; i < _max_peak_power.size(); ++i) {
+		_max_peak_power[i] = -INFINITY;
+	}
+}
+
+void
 PeakMeter::setup (const ChanCount& in)
 {
 	uint32_t limit = in.get(DataType::AUDIO);
@@ -68,11 +76,13 @@ PeakMeter::setup (const ChanCount& in)
 
 	while (_peak_power.size() < limit) {
 		_peak_power.push_back (0);
-		_visible_peak_power.push_back (0);
+		_visible_peak_power.push_back (minus_infinity());
+		_max_peak_power.push_back (minus_infinity());
 	}
 
 	assert(_peak_power.size() == limit);
 	assert(_visible_peak_power.size() == limit);
+	assert(_max_peak_power.size() == limit);
 }
 
 /** To be driven by the Meter signal from IO.
@@ -101,6 +111,10 @@ PeakMeter::meter ()
 		} else {
 			new_peak = minus_infinity();
 		}
+		
+		/* update max peak */
+		
+		_max_peak_power[n] = std::max (new_peak, _max_peak_power[n]);
 		
 		if (Config->get_meter_falloff() == 0.0f || new_peak > _visible_peak_power[n]) {
 			_visible_peak_power[n] = new_peak;

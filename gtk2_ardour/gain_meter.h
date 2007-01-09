@@ -35,6 +35,7 @@
 #include <ardour/types.h>
 
 #include <gtkmm2ext/click_box.h>
+#include <gtkmm2ext/focus_entry.h>
 #include <gtkmm2ext/slider_controller.h>
 
 #include "enums.h"
@@ -79,14 +80,12 @@ class GainMeter : public Gtk::VBox
 	ARDOUR::Session& _session;
 
 	bool ignore_toggle;
+	bool next_release_selects;
 
 	Gtkmm2ext::VSliderController *gain_slider;
 	Gtk::Adjustment              gain_adjustment;
-	Gtk::Frame                   gain_display_frame;
-	Gtkmm2ext::ClickBox           gain_display;
-	Gtk::Frame                   peak_display_frame;
-	Gtk::EventBox                peak_display;
-	Gtk::Label                   peak_display_label;
+	Gtkmm2ext::FocusEntry        gain_display;
+	Gtk::Entry                   peak_display;
 	Gtk::HBox                    gain_display_box;
 	Gtk::HBox                    fader_box;
 	Gtk::DrawingArea             meter_metric_area;
@@ -122,9 +121,10 @@ class GainMeter : public Gtk::VBox
 
 	gint meter_metrics_expose (GdkEventExpose *);
 
-	static void _gain_printer (char buf[32], Gtk::Adjustment&, void *);
-	void gain_printer (char buf[32], Gtk::Adjustment&);
-	
+	void show_gain ();
+	void gain_activated ();
+	bool gain_focused (GdkEventFocus*);
+
 	struct MeterInfo {
 	    Gtkmm2ext::FastMeter *meter;
 	    gint16          width;   
@@ -157,7 +157,8 @@ class GainMeter : public Gtk::VBox
 	gint meter_button_press (GdkEventButton*, uint32_t);
 	gint meter_button_release (GdkEventButton*, uint32_t);
 
-	gint peak_button_release (GdkEventButton*);
+	bool peak_button_release (GdkEventButton*);
+	bool gain_key_press (GdkEventKey*);
 	
 	Gtk::Menu* meter_menu;
 	void popup_meter_menu (GdkEventButton*);

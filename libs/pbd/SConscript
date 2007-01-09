@@ -20,9 +20,11 @@ pbd.Append(POTFILE=domain + '.pot')
 pbd_files = Split("""
 basename.cc
 base_ui.cc
-convert.cc
 command.cc
+convert.cc
+copyfile.cc
 controllable.cc
+enumwriter.cc
 dmalloc.cc
 error.cc
 id.cc
@@ -66,7 +68,7 @@ mount_env.Program('mountpoint', 'mountpoint.cc')
 if env['NLS']:
     i18n (pbd, pbd_files, env)
 
-env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libpbd))
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), libpbd))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'SConscript', 'i18n.h', 'gettext.h', 'pbd/abstract_ui.cc' ] +

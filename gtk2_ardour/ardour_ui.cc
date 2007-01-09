@@ -38,6 +38,7 @@
 #include <pbd/compose.h>
 #include <pbd/pathscanner.h>
 #include <pbd/failed_constructor.h>
+#include <pbd/enumwriter.h>
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/click_box.h>
@@ -96,10 +97,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
 	: Gtkmm2ext::UI ("ardour", argcp, argvp, rcfile),
 	  
-	  primary_clock (X_("TransportClockDisplay"), true, false, true),
-	  secondary_clock (X_("SecondaryClockDisplay"), true, false, true),
-	  preroll_clock (X_("PreRollClock"), true, true),
-	  postroll_clock (X_("PostRollClock"), true, true),
+	  primary_clock (X_("primary"), false, X_("TransportClockDisplay"), true, false, true),
+	  secondary_clock (X_("secondary"), false, X_("SecondaryClockDisplay"), true, false, true),
+	  preroll_clock (X_("preroll"), false, X_("PreRollClock"), true, true),
+	  postroll_clock (X_("postroll"), false, X_("PostRollClock"), true, true),
 
 	  /* adjuster table */
 
@@ -112,7 +113,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
 	  /* big clock */
 
-	  big_clock ("BigClockDisplay", true),
+	  big_clock (X_("bigclock"), false, "BigClockNonRecording", true, false, true),
 
 	  /* transport */
 
@@ -145,7 +146,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	color_manager = new ColorManager();
 
 	std::string color_file = ARDOUR::find_config_file("ardour.colors");
-	
+
 	color_manager->load (color_file);
 
 	editor = 0;
@@ -160,7 +161,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	route_params = 0;
 	option_editor = 0;
 	location_ui = 0;
-	sfdb = 0;
 	open_session_selector = 0;
 	have_configure_timeout = false;
 	have_disk_overrun_displayed = false;
@@ -168,6 +168,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	_will_create_new_session_automatically = false;
 	session_loaded = false;
 	last_speed_displayed = -1.0f;
+	keybindings_path = ARDOUR::find_config_file ("ardour.bindings");
+
+	can_save_keybindings = false;
+	Glib::signal_idle().connect (mem_fun (*this, &ARDOUR_UI::first_idle));
 
 	last_configure_time.tv_sec = 0;
 	last_configure_time.tv_usec = 0;
@@ -248,6 +252,10 @@ ARDOUR_UI::set_engine (AudioEngine& e)
 		throw failed_constructor();
 	}
 	
+	/* listen to clock mode changes */
+
+	AudioClock::ModeChanged.connect (mem_fun (*this, &ARDOUR_UI::store_clock_modes));
+
 	/* start the time-of-day-clock */
 	
 	update_wall_clock ();
@@ -349,22 +357,13 @@ ARDOUR_UI::save_ardour_state ()
 		Config->add_instant_xml (mnode, get_user_ardour_path());
 	}
 
-	/* keybindings */
-
-	AccelMap::save ("ardour.saved_bindings");
+	save_keybindings ();
 }
 
 void
 ARDOUR_UI::startup ()
 {
-	/* Once the UI is up and running, start the audio engine. Doing
-	   this before the UI is up and running can cause problems
-	   when not running with SCHED_FIFO, because the amount of
-	   CPU and disk work needed to get the UI started can interfere
-	   with the scheduling of the audio thread.
-	*/
-
-	Glib::signal_idle().connect (mem_fun(*this, &ARDOUR_UI::start_engine));
+	// relax
 }
 
 void
@@ -392,6 +391,11 @@ If you still wish to quit, please use the\n\n\
 			break;
 		}
 	}
+
+	if (session) {
+		session->set_deletion_in_progress ();
+	}
+	engine->stop (true);
 	Config->save_state();
 	quit ();
 }
@@ -448,7 +452,8 @@ ARDOUR_UI::ask_about_saving_session (const string & what)
 
 	save_the_session = 0;
 
-	editor->ensure_float (window);
+	window.set_keep_above (true);
+	window.present ();
 
 	ResponseType r = (ResponseType) window.run();
 
@@ -1303,14 +1308,6 @@ ARDOUR_UI::do_engine_start ()
 		engine->start();
 	}
 
-	catch (AudioEngine::PortRegistrationFailure& err) {
-		engine->stop ();
-		error << _("Unable to create all required ports")
-		      << endmsg;
-		unload_session ();
-		return -1;
-	}
-
 	catch (...) {
 		engine->stop ();
 		error << _("Unable to start the session running")
@@ -1332,14 +1329,6 @@ ARDOUR_UI::start_engine ()
 			*/
 			session->save_state ("");
 		}
-
-		/* there is too much going on, in too many threads, for us to 
-		   end up with a clean session. So wait 1 second after loading,
-		   and fix it up. its ugly, but until i come across a better
-		   solution, its what we have.
-		*/
-
-		Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::make_session_clean), 1000);
 	}
 
 	return FALSE;
@@ -1348,7 +1337,9 @@ ARDOUR_UI::start_engine ()
 void
 ARDOUR_UI::update_clocks ()
 {
-	 Clock (session->audible_frame()); /* EMIT_SIGNAL */
+	if (!editor || !editor->dragging_playhead()) {
+		Clock (session->audible_frame()); /* EMIT_SIGNAL */
+	}
 }
 
 void
@@ -1635,7 +1626,7 @@ ARDOUR_UI::save_template ()
 }
 
 void
-ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
+ARDOUR_UI::new_session (std::string predetermined_path)
 {
 	string session_name;
 	string session_path;
@@ -1748,7 +1739,7 @@ ARDOUR_UI::new_session (bool startup, std::string predetermined_path)
 
 
 					msg.set_name (X_("CleanupDialog"));
-					msg.set_wmclass (_("existing_session"), "Ardour");
+					msg.set_wmclass (X_("existing_session"), "Ardour");
 					msg.set_position (Gtk::WIN_POS_MOUSE);
 					
 					switch (msg.run()) {
@@ -1854,9 +1845,8 @@ ARDOUR_UI::load_session (const string & path, const string & snap_name, string* 
 	/* if it already exists, we must have write access */
 
 	if (::access (path.c_str(), F_OK) == 0 && ::access (path.c_str(), W_OK)) {
-		MessageDialog msg (*editor, _("\
-You do not have write access to this session.\n\
-This prevents the session from being loaded."));
+		MessageDialog msg (*editor, _("You do not have write access to this session.\n"
+					      "This prevents the session from being loaded."));
 		msg.run ();
 		return -1;
 	}
@@ -1876,22 +1866,14 @@ This prevents the session from being loaded."));
 	Config->set_current_owner (ConfigVariableBase::Interface);
 
 	session_loaded = true;
-
+	
 	goto_editor_window ();
 
-	return 0;
-}
-
-int
-ARDOUR_UI::make_session_clean ()
-{
 	if (session) {
 		session->set_clean ();
 	}
 
-	show ();
-
-	return FALSE;
+	return 0;
 }
 
 int
@@ -2096,7 +2078,7 @@ After cleanup, unused audio files will be moved to a \
 	checker.set_default_response (RESPONSE_CANCEL);
 
 	checker.set_name (_("CleanupDialog"));
-	checker.set_wmclass (_("ardour_cleanup"), "Ardour");
+	checker.set_wmclass (X_("ardour_cleanup"), "Ardour");
 	checker.set_position (Gtk::WIN_POS_MOUSE);
 
 	switch (checker.run()) {
@@ -2396,7 +2378,7 @@ ARDOUR_UI::cmdline_new_session (string path)
 		path = str;
 	}
 
-	new_session (false, path);
+	new_session (path);
 
 	_will_create_new_session_automatically = false; /* done it */
 	return FALSE; /* don't call it again */
@@ -2450,3 +2432,69 @@ ARDOUR_UI::use_config ()
 		ract->set_active ();
 	}	
 }
+
+void
+ARDOUR_UI::update_transport_clocks (nframes_t pos)
+{
+	primary_clock.set (pos);
+	secondary_clock.set (pos);
+
+	if (big_clock_window) {
+		big_clock.set (pos);
+	}
+}
+
+void
+ARDOUR_UI::record_state_changed ()
+{
+	if (!session || !big_clock_window) {
+		/* why bother - the clock isn't visible */
+		return;
+	}
+
+	switch (session->record_status()) {
+	case Session::Recording:
+		big_clock.set_name ("BigClockRecording");
+		break;
+	default:
+		big_clock.set_name ("BigClockNonRecording");
+		break;
+	}
+}
+
+void
+ARDOUR_UI::set_keybindings_path (string path)
+{
+	keybindings_path = path;
+}
+
+void
+ARDOUR_UI::save_keybindings ()
+{
+	if (can_save_keybindings) {
+		AccelMap::save (keybindings_path);
+	} 
+}
+
+bool
+ARDOUR_UI::first_idle ()
+{
+	can_save_keybindings = true;
+	return false;
+}
+
+void
+ARDOUR_UI::store_clock_modes ()
+{
+	XMLNode* node = new XMLNode(X_("ClockModes"));
+
+	for (vector<AudioClock*>::iterator x = AudioClock::clocks.begin(); x != AudioClock::clocks.end(); ++x) {
+		node->add_property ((*x)->name().c_str(), enum_2_string ((*x)->mode()));
+	}
+
+	session->add_extra_xml (*node);
+	session->set_dirty ();
+}
+
+
+		

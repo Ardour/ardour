@@ -26,6 +26,7 @@
 #include <sigc++/bind.h>
 
 #include <pbd/error.h>
+#include <pbd/enumwriter.h>
 
 #include <ardour/route_group.h>
 #include <ardour/audio_track.h>
@@ -125,11 +126,9 @@ RouteGroup::get_max_factor(gain_t factor)
 XMLNode&
 RouteGroup::get_state (void)
 {
-	char buf[32];
 	XMLNode *node = new XMLNode ("RouteGroup");
 	node->add_property ("name", _name);
-	snprintf (buf, sizeof (buf), "%" PRIu32, (uint32_t) _flags);
-	node->add_property ("flags", buf);
+	node->add_property ("flags", enum_2_string (_flags));
 	return *node;
 }
 
@@ -143,7 +142,7 @@ RouteGroup::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("flags")) != 0) {
-		_flags = atoi (prop->value().c_str());
+		_flags = Flag (string_2_enum (prop->value(), _flags));
 	}
 
 	return 0;
@@ -157,9 +156,9 @@ RouteGroup::set_active (bool yn, void *src)
 		return;
 	}
 	if (yn) {
-		_flags |= Active;
+		_flags = Flag (_flags | Active);
 	} else {
-		_flags &= ~Active;
+		_flags = Flag (_flags & ~Active);
 	}
 	_session.set_dirty ();
 	FlagsChanged (src); /* EMIT SIGNAL */
@@ -173,9 +172,9 @@ RouteGroup::set_relative (bool yn, void *src)
 		return;
 	}
 	if (yn) {
-		_flags |= Relative;
+		_flags = Flag (_flags | Relative);
 	} else {
-		_flags &= ~Relative;
+		_flags = Flag (_flags & ~Relative);
 	}
 	_session.set_dirty ();
 	FlagsChanged (src); /* EMIT SIGNAL */
@@ -189,14 +188,14 @@ RouteGroup::set_hidden (bool yn, void *src)
 		return;
 	}
 	if (yn) {
-		_flags |= Hidden;
+		_flags = Flag (_flags | Hidden);
 		if (Config->get_hiding_groups_deactivates_groups()) {
-			_flags &= ~Active;
+			_flags = Flag (_flags & ~Active);
 		}
 	} else {
-         	_flags &= ~Hidden;
+         	_flags = Flag (_flags & ~Hidden);
 		if (Config->get_hiding_groups_deactivates_groups()) {
-			_flags |= Active;
+			_flags = Flag (_flags | Active);
 		}
 	}
 	_session.set_dirty ();

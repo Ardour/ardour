@@ -50,21 +50,15 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-/* ********** FIXME: TYPE ************** */
-/* Inserts are still definitely audio only */
-
-Insert::Insert(Session& s, Placement p)
-	: Redirect (s, s.next_insert_name(), p)
-{
-}
-
-Insert::Insert(Session& s, Placement p, int imin, int imax, int omin, int omax)
-	: Redirect (s, s.next_insert_name(), p, imin, imax, omin, omax)
-{
-}
-
+/* ********** FIXME: TYPE **************
+ * Inserts are still definitely audio only */
 Insert::Insert(Session& s, string name, Placement p)
 	: Redirect (s, name, p)
+{
+}
+
+Insert::Insert(Session& s, string name, Placement p, int imin, int imax, int omin, int omax)
+	: Redirect (s, name, p, imin, imax, omin, omax)
 {
 }
 
@@ -624,14 +618,8 @@ PluginInsert::state (bool full)
 		XMLNode* child = new XMLNode("port");
 		snprintf(buf, sizeof(buf), "%" PRIu32, *x);
 		child->add_property("number", string(buf));
-		
-		if (full) {
-			snprintf(buf, sizeof(buf), "0x%x", automation_list (*x).automation_state ());
-		} else {
-			snprintf(buf, sizeof(buf), "0x%x", ARDOUR::Off);
-		}
-		child->add_property("auto", string(buf));
-		
+
+		child->add_child_nocopy (automation_list (*x).state (full));
 		autonode->add_child_nocopy (*child);
 	}
 
@@ -735,43 +723,62 @@ PluginInsert::set_state(const XMLNode& node)
 	/* look for port automation node */
 	
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() == port_automation_node_name) {
-			XMLNodeList cnodes;
-			XMLProperty *cprop;
-			XMLNodeConstIterator iter;
-			XMLNode *child;
-			const char *port;
-			uint32_t port_id;
 
-			cnodes = (*niter)->children ("port");
-	
-			for(iter = cnodes.begin(); iter != cnodes.end(); ++iter){
-				
-				child = *iter;
-				
-				if ((cprop = child->property("number")) != 0) {
-					port = cprop->value().c_str();
-				} else {
-					warning << _("PluginInsert: Auto: no ladspa port number") << endmsg;
-					continue;
-				}
+		if ((*niter)->name() != port_automation_node_name) {
+			continue;
+		}
 
-				sscanf (port, "%" PRIu32, &port_id);
+		XMLNodeList cnodes;
+		XMLProperty *cprop;
+		XMLNodeConstIterator iter;
+		XMLNode *child;
+		const char *port;
+		uint32_t port_id;
+		
+		cnodes = (*niter)->children ("port");
+		
+		for(iter = cnodes.begin(); iter != cnodes.end(); ++iter){
+			
+			child = *iter;
+			
+			if ((cprop = child->property("number")) != 0) {
+				port = cprop->value().c_str();
+			} else {
+				warning << _("PluginInsert: Auto: no ladspa port number") << endmsg;
+				continue;
+			}
+			
+			sscanf (port, "%" PRIu32, &port_id);
+			
+			if (port_id >= _plugins[0]->parameter_count()) {
+				warning << _("PluginInsert: Auto: port id out of range") << endmsg;
+				continue;
+			}
 
-				if (port_id >= _plugins[0]->parameter_count()) {
-					warning << _("PluginInsert: Auto: port id out of range") << endmsg;
-					continue;
-				}
-				
+			if (!child->children().empty()) {
+				automation_list (port_id).set_state (*child->children().front());
+			} else {
 				if ((cprop = child->property("auto")) != 0) {
+					
+					/* old school */
+
 					int x;
 					sscanf (cprop->value().c_str(), "0x%x", &x);
 					automation_list (port_id).set_automation_state (AutoState (x));
+
+				} else {
+					
+					/* missing */
+					
+					automation_list (port_id).set_automation_state (Off);
 				}
 			}
-			
-			break;
+
 		}
+
+		/* done */
+
+		break;
 	} 
 
 	if (niter == nlist.end()) {
@@ -830,14 +837,14 @@ PluginInsert::type ()
  ***************************************************************/
 
 PortInsert::PortInsert (Session& s, Placement p)
-	: Insert (s, p, 1, -1, 1, -1)
+	: Insert (s, string_compose (_("insert %1"), (bitslot = s.next_insert_id()) + 1), p, 1, -1, 1, -1)
 {
 	init ();
 	RedirectCreated (this); /* EMIT SIGNAL */
 }
 
 PortInsert::PortInsert (const PortInsert& other)
-	: Insert (other._session, other.placement(), 1, -1, 1, -1)
+	: Insert (other._session, string_compose (_("insert %1"), (bitslot = other._session.next_insert_id()) + 1), other.placement(), 1, -1, 1, -1)
 {
 	init ();
 	RedirectCreated (this); /* EMIT SIGNAL */
@@ -900,9 +907,11 @@ XMLNode&
 PortInsert::state (bool full)
 {
 	XMLNode *node = new XMLNode("Insert");
-
+	char buf[32];
 	node->add_child_nocopy (Redirect::state(full));	
-	node->add_property("type", "port");
+	node->add_property ("type", "port");
+	snprintf (buf, sizeof (buf), "%" PRIu32, bitslot);
+	node->add_property ("bitslot", buf);
 
 	return *node;
 }
@@ -923,6 +932,13 @@ PortInsert::set_state(const XMLNode& node)
 	if (prop->value() != "port") {
 		error << _("non-port insert XML used for port plugin insert") << endmsg;
 		return -1;
+	}
+
+	if ((prop = node.property ("bitslot")) == 0) {
+		bitslot = _session.next_insert_id();
+	} else {
+		sscanf (prop->value().c_str(), "%" PRIu32, &bitslot);
+		_session.mark_insert_id (bitslot);
 	}
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {

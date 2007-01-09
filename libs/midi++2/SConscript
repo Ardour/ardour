@@ -57,7 +57,7 @@ libmidi2 = midi2.SharedLibrary('midi++', [ sources, sysdep_src ])
 
 Default(libmidi2)
 
-env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libmidi2))
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), libmidi2))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'SConscript' ] + sources + sysdep_sources +

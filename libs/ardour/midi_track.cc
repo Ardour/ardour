@@ -303,11 +303,11 @@ MidiTrack::set_state_part_two ()
 		_freeze_record.insert_info.clear ();
 		
 		if ((prop = fnode->property (X_("playlist"))) != 0) {
-			Playlist* pl = _session.playlist_by_name (prop->value());
+			boost::shared_ptr<Playlist> pl = _session.playlist_by_name (prop->value());
 			if (pl) {
-				_freeze_record.playlist = dynamic_cast<MidiPlaylist*> (pl);
+				_freeze_record.playlist = boost::dynamic_pointer_cast<MidiPlaylist> (pl);
 			} else {
-				_freeze_record.playlist = 0;
+				_freeze_record.playlist.reset();
 				_freeze_record.state = NoFreeze;
 			return;
 			}

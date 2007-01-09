@@ -76,7 +76,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
-				if (!(current_stepping_trackview = dynamic_cast<AudioTimeAxisView*> (trackview_by_y_position (ev->y)))) {
+				if (!(current_stepping_trackview = trackview_by_y_position (ev->y))) {
 					return false;
 				}
 			}
@@ -107,7 +107,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
-				if (!(current_stepping_trackview = dynamic_cast<AudioTimeAxisView*> (trackview_by_y_position (ev->y)))) {
+				if (!(current_stepping_trackview = trackview_by_y_position (ev->y))) {
 					return false;
 				}
 			}
@@ -513,8 +513,8 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 
 		if (atv->is_audio_track()) {
 
-			AudioPlaylist* pl;
-			if ((pl = dynamic_cast<AudioPlaylist*> (atv->get_diskstream()->playlist())) != 0) {
+			boost::shared_ptr<AudioPlaylist> pl;
+			if ((pl = boost::dynamic_pointer_cast<AudioPlaylist> (atv->get_diskstream()->playlist())) != 0) {
 
 				Playlist::RegionList* rl = pl->regions_at (event_frame (event));
 

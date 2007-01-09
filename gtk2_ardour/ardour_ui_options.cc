@@ -236,7 +236,7 @@ ARDOUR_UI::set_monitor_model (MonitorModel model)
 		break;
 
 	default:
-		fatal << string_compose (_("programming error: unknown solo model in ARDOUR_UI::set_solo_model: %1"), model) << endmsg;
+		fatal << string_compose (_("programming error: unknown monitor model in ARDOUR_UI::set_monitor_model: %1"), model) << endmsg;
 		/*NOTREACHED*/
 	}
 
@@ -416,9 +416,9 @@ ARDOUR_UI::map_solo_model ()
 	const char* on;
 
 	if (Config->get_solo_model() == InverseMute) {
-		on = "SoloInPlace";
+		on = X_("SoloInPlace");
 	} else {
-		on = "SoloViaBus";
+		on = X_("SoloViaBus");
 	}
 
 	Glib::RefPtr<Action> act = ActionManager::get_action ("options", on);
@@ -587,10 +587,8 @@ ARDOUR_UI::map_meter_falloff ()
 {
 	const char* action = X_("MeterFalloffMedium");
 
-	/* XXX hack alert. Fix this. Please */
-
 	float val = Config->get_meter_falloff ();
-	MeterFalloff code = (MeterFalloff) (int) (floor (val));
+	MeterFalloff code = meter_falloff_from_float(val);
 
 	switch (code) {
 	case MeterFalloffOff:
@@ -840,6 +838,14 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		map_meter_falloff ();
 	} else if (PARAM_IS ("verify-remove-last-capture")) {
 		ActionManager::map_some_state ("options", "VerifyRemoveLastCapture", &Configuration::get_verify_remove_last_capture);
+	} else if (PARAM_IS ("video-pullup") || PARAM_IS ("smpte-format")) {
+		if (session) {
+			primary_clock.set (session->audible_frame(), true);
+			secondary_clock.set (session->audible_frame(), true);
+		} else {
+			primary_clock.set (0, true);
+			secondary_clock.set (0, true);
+		}
 	}
 
 #undef PARAM_IS

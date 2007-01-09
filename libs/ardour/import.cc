@@ -74,22 +74,22 @@ Session::import_audiofile (import_status& status)
 	
 	status.new_regions.clear ();
 
-	if ((in = sf_open (status.pathname.c_str(), SFM_READ, &info)) == 0) {
-		error << string_compose(_("Import: cannot open input sound file \"%1\""), status.pathname) << endmsg;
+	if ((in = sf_open (status.paths.front().c_str(), SFM_READ, &info)) == 0) {
+		error << string_compose(_("Import: cannot open input sound file \"%1\""), status.paths.front()) << endmsg;
 		return -1;
 	} else {
 		if ((uint32_t) info.samplerate != frame_rate()) {
 			sf_close(in);
 			status.doing_what = _("resampling audio");
 			// resample to session frame_rate
-			if (sample_rate_convert(status, status.pathname, tmp_convert_file)) {
+			if (sample_rate_convert(status, status.paths.front(), tmp_convert_file)) {
 				if ((in = sf_open (tmp_convert_file.c_str(), SFM_READ, &info)) == 0) {
 					error << string_compose(_("Import: cannot open converted sound file \"%1\""), tmp_convert_file) << endmsg;
 					return -1;
 				}
 			} else if (!status.cancel){
 				// error
-				error << string_compose(_("Import: error while resampling sound file \"%1\""), status.pathname) << endmsg;
+				error << string_compose(_("Import: error while resampling sound file \"%1\""), status.paths.front()) << endmsg;
 				return -1;
 			} else {
 				// canceled
@@ -103,7 +103,7 @@ Session::import_audiofile (import_status& status)
 	}
 
 	sounds_dir = discover_best_sound_dir ();
-	basepath = PBD::basename_nosuffix (status.pathname);
+	basepath = PBD::basename_nosuffix (status.paths.front());
 
 	for (n = 0; n < info.channels; ++n) {
 
@@ -112,14 +112,14 @@ Session::import_audiofile (import_status& status)
 		do {
 			if (info.channels == 2) {
 				if (n == 0) {
-					snprintf (buf, sizeof(buf), "%s%s-L.wav", sounds_dir.c_str(), basepath.c_str());
+					snprintf (buf, sizeof(buf), "%s/%s-L.wav", sounds_dir.c_str(), basepath.c_str());
 				} else {
-					snprintf (buf, sizeof(buf), "%s%s-R.wav", sounds_dir.c_str(), basepath.c_str());
+					snprintf (buf, sizeof(buf), "%s/%s-R.wav", sounds_dir.c_str(), basepath.c_str());
 				}
 			} else if (info.channels > 1) {
-				snprintf (buf, sizeof(buf), "%s%s-c%lu.wav", sounds_dir.c_str(), basepath.c_str(), n+1);
+				snprintf (buf, sizeof(buf), "%s/%s-c%lu.wav", sounds_dir.c_str(), basepath.c_str(), n+1);
 			} else {
-				snprintf (buf, sizeof(buf), "%s%s.wav", sounds_dir.c_str(), basepath.c_str());
+				snprintf (buf, sizeof(buf), "%s/%s.wav", sounds_dir.c_str(), basepath.c_str());
 			}
 
 			if (::access (buf, F_OK) == 0) {
@@ -217,8 +217,13 @@ Session::import_audiofile (import_status& status)
 			sources.push_back(newfiles[n]);
 		}
 
-		boost::shared_ptr<AudioRegion> r (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (sources, 0, newfiles[0]->length(), region_name_from_path (Glib::path_get_basename (basepath)),
-														   0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile))));
+		bool strip_paired_suffixes = (newfiles.size() > 1);
+
+		boost::shared_ptr<AudioRegion> r (boost::dynamic_pointer_cast<AudioRegion> 
+						  (RegionFactory::create (sources, 0, 
+									  newfiles[0]->length(), 
+									  region_name_from_path (basepath, strip_paired_suffixes),
+									  0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile))));
 		
 		status.new_regions.push_back (r);
 
@@ -231,11 +236,14 @@ Session::import_audiofile (import_status& status)
 
 			/* The sources had zero-length when created, which means that the Session
 			   did not bother to create whole-file AudioRegions for them. Do it now.
+
+			   Note: leave any trailing paired indicators from the file names as part
+			   of the region name.
 			*/
 		
 			status.new_regions.push_back (boost::dynamic_pointer_cast<AudioRegion> 
 						      (RegionFactory::create (boost::static_pointer_cast<Source> (newfiles[n]), 0, newfiles[n]->length(), 
-									      region_name_from_path (Glib::path_get_basename (newfiles[n]->name())),
+									      region_name_from_path (newfiles[n]->name(), false),
 									      0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile | AudioRegion::Import))));
 		}
 	}

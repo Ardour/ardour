@@ -924,7 +924,10 @@ TempoMap::round_to_beat_subdivision (nframes_t fr, int sub_num)
 
 	return frame_time (the_beat);
 
-	/* XXX just keeping this for reference
+
+
+	/*****************************  
+	XXX just keeping this for reference
 
         TempoMap::BBTPointList::iterator i;
         TempoMap::BBTPointList *more_zoomed_bbt_points;
@@ -978,7 +981,8 @@ TempoMap::round_to_beat_subdivision (nframes_t fr, int sub_num)
         delete more_zoomed_bbt_points;
         return fr ;
 
-	*/
+	******************************/
+
 
 }
 

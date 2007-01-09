@@ -14,8 +14,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-    $Id: diskstream.cc 567 2006-06-07 14:54:12Z trutkin $
 */
 
 #include <fstream>
@@ -36,6 +34,7 @@
 #include <glibmm/thread.h>
 #include <pbd/xml++.h>
 #include <pbd/memento_command.h>
+#include <pbd/enumwriter.h>
 
 #include <ardour/ardour.h>
 #include <ardour/audioengine.h>
@@ -47,6 +46,7 @@
 #include <ardour/send.h>
 #include <ardour/region_factory.h>
 #include <ardour/midi_playlist.h>
+#include <ardour/playlist_factory.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/midi_region.h>
 #include <ardour/midi_port.h>
@@ -220,16 +220,14 @@ MidiDiskstream::get_input_sources ()
 int
 MidiDiskstream::find_and_use_playlist (const string& name)
 {
-	Playlist* pl;
-	MidiPlaylist* playlist;
+	boost::shared_ptr<MidiPlaylist> playlist;
 		
-	if ((pl = _session.playlist_by_name (name)) == 0) {
-		playlist = new MidiPlaylist(_session, name);
-		pl = playlist;
+	if ((playlist = boost::dynamic_pointer_cast<MidiPlaylist> (_session.playlist_by_name (name))) == 0) {
+		playlist = boost::dynamic_pointer_cast<MidiPlaylist> (PlaylistFactory::create (_session, name));
 	}
 
-	if ((playlist = dynamic_cast<MidiPlaylist*> (pl)) == 0) {
-		error << string_compose(_("MidiDiskstream: Playlist \"%1\" isn't a midi playlist"), name) << endmsg;
+	if (!playlist) {
+		error << string_compose(_("MidiDiskstream: Playlist \"%1\" isn't an midi playlist"), name) << endmsg;
 		return -1;
 	}
 
@@ -237,18 +235,20 @@ MidiDiskstream::find_and_use_playlist (const string& name)
 }
 
 int
-MidiDiskstream::use_playlist (Playlist* playlist)
-{
-	assert(dynamic_cast<MidiPlaylist*>(playlist));
+MidiDiskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
+{	
+	assert(boost::dynamic_pointer_cast<MidiPlaylist>(playlist));
 
-	return Diskstream::use_playlist(playlist);
+	Diskstream::use_playlist(playlist);
+
+	return 0;
 }
 
 int
 MidiDiskstream::use_new_playlist ()
-{
+{	
 	string newname;
-	MidiPlaylist* playlist;
+	boost::shared_ptr<MidiPlaylist> playlist;
 
 	if (!in_set_state && destructive()) {
 		return 0;
@@ -260,9 +260,11 @@ MidiDiskstream::use_new_playlist ()
 		newname = Playlist::bump_name (_name, _session);
 	}
 
-	if ((playlist = new MidiPlaylist (_session, newname, hidden())) != 0) {
+	if ((playlist = boost::dynamic_pointer_cast<MidiPlaylist> (PlaylistFactory::create (_session, newname, hidden()))) != 0) {
+		
 		playlist->set_orig_diskstream_id (id());
 		return use_playlist (playlist);
+
 	} else { 
 		return -1;
 	}
@@ -271,6 +273,8 @@ MidiDiskstream::use_new_playlist ()
 int
 MidiDiskstream::use_copy_playlist ()
 {
+	assert(midi_playlist());
+
 	if (destructive()) {
 		return 0;
 	}
@@ -281,11 +285,11 @@ MidiDiskstream::use_copy_playlist ()
 	}
 
 	string newname;
-	MidiPlaylist* playlist;
+	boost::shared_ptr<MidiPlaylist> playlist;
 
 	newname = Playlist::bump_name (_playlist->name(), _session);
 	
-	if ((playlist  = new MidiPlaylist (*midi_playlist(), newname)) != 0) {
+	if ((playlist  = boost::dynamic_pointer_cast<MidiPlaylist>(PlaylistFactory::create (midi_playlist(), newname))) != 0) {
 		playlist->set_orig_diskstream_id (id());
 		return use_playlist (playlist);
 	} else { 
@@ -1039,6 +1043,8 @@ MidiDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_cap
 
 		}
 
+		string whole_file_region_name;
+		whole_file_region_name = region_name_from_path (_write_source->name(), true);
 		/* Register a new region with the Session that
 		   describes the entire source. Do this first
 		   so that any sub-regions will obviously be
@@ -1048,7 +1054,7 @@ MidiDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_cap
 			assert(_write_source);
 			
 			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, _write_source->last_capture_start_frame(), total_capture, 
-									     region_name_from_path (_write_source->name()), 
+									     whole_file_region_name, 
 									     0, Region::Flag (Region::DefaultFlags|Region::Automatic|Region::WholeFile)));
 
 			region = boost::dynamic_pointer_cast<MidiRegion> (rx);
@@ -1289,7 +1295,7 @@ MidiDiskstream::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("flags")) != 0) {
-		_flags = strtol (prop->value().c_str(), 0, 0);
+		_flags = Flag (string_2_enum (prop->value(), _flags));
 	}
 
 	if ((prop = node.property ("channels")) != 0) {

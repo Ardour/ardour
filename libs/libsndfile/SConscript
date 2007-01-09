@@ -6,8 +6,9 @@ import glob
 
 sndfile_files = glob.glob('src/*.c') + glob.glob('src/GSM610/*.c') + glob.glob('src/G72x/*.c')
 
-Import('env install_prefix')
+Import('env install_prefix libraries')
 sndfile = env.Copy()
+sndfile.Merge([libraries['flac'] ])
 
 domain = 'libsndfile'
 
@@ -31,7 +32,7 @@ sndfile_h = sndfile.Command('src/sndfile.h', ['src/sndfile.h.in'], 'cd libs/libs
 
 Default([sndfile_h,libsndfile])
 
-env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), libsndfile))
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), libsndfile))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'NEWS', 'README', 'AUTHORS', 'ChangeLog',

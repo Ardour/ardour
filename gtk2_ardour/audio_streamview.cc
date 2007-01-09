@@ -56,7 +56,9 @@ AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 	: StreamView (tv)
 {
 	crossfades_visible = true;
-
+	_waveform_scale = LinearWaveform;
+	_waveform_shape = Traditional;
+	
 	if (tv.is_track())
 		stream_base_color = color_map[cAudioTrackBase];
 	else
@@ -143,6 +145,14 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 			/* great. we already have a AudioRegionView for this Region. use it again. */
 			
 			(*i)->set_valid (true);
+
+			// this might not be necessary
+			AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+			if (arv) {
+				arv->set_waveform_scale (_waveform_scale);
+				arv->set_waveform_shape (_waveform_shape);
+			}
+				
 			return;
 		}
 	}
@@ -161,6 +171,27 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 	region_view->init (region_color, wait_for_waves);
 	region_view->set_amplitude_above_axis(_amplitude_above_axis);
 	region_views.push_front (region_view);
+
+	/* if this was the first one, then lets query the waveform scale and shape.
+	   otherwise, we set it to the current value */
+	   
+	if (region_views.size() == 1) {
+		if (region_view->waveform_logscaled()) {
+			_waveform_scale = LogWaveform;
+		} else {
+			_waveform_scale = LinearWaveform;
+		}
+
+		if (region_view->waveform_rectified()) {
+			_waveform_shape = Rectified;
+		} else {
+			_waveform_shape = Traditional;
+		}
+	}
+	else {
+		region_view->set_waveform_scale(_waveform_scale);
+		region_view->set_waveform_shape(_waveform_shape);
+	}
 	
 	/* follow global waveform setting */
 
@@ -237,7 +268,7 @@ AudioStreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 
 	StreamView::playlist_changed(ds);
 
-	AudioPlaylist* apl = dynamic_cast<AudioPlaylist*>(ds->playlist());
+	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(ds->playlist());
 	if (apl)
 		playlist_connections.push_back (apl->NewCrossfade.connect (mem_fun (*this, &AudioStreamView::add_crossfade)));
 }
@@ -326,7 +357,7 @@ AudioStreamView::redisplay_diskstream ()
 	if (_trackview.is_audio_track()) {
 		_trackview.get_diskstream()->playlist()->foreach_region (static_cast<StreamView*>(this), &StreamView::add_region_view);
 
-		AudioPlaylist* apl = dynamic_cast<AudioPlaylist*>(_trackview.get_diskstream()->playlist());
+		boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(_trackview.get_diskstream()->playlist());
 		if (apl)
 			apl->foreach_crossfade (this, &AudioStreamView::add_crossfade);
 	}
@@ -380,8 +411,20 @@ AudioStreamView::set_waveform_shape (WaveformShape shape)
 		if (arv)
 			arv->set_waveform_shape (shape);
 	}
+	_waveform_shape = shape;
 }		
-		
+
+void
+AudioStreamView::set_waveform_scale (WaveformScale scale)
+{
+	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+		if (arv) 
+			arv->set_waveform_scale (scale);
+	}
+	_waveform_scale = scale;
+}		
+
 void
 AudioStreamView::setup_rec_box ()
 {

@@ -72,9 +72,9 @@ class MidiDiskstream : public Diskstream
 
 	void set_record_enabled (bool yn);
 
-	MidiPlaylist* midi_playlist () { return dynamic_cast<MidiPlaylist*>(_playlist); }
+	boost::shared_ptr<MidiPlaylist> midi_playlist () { return boost::dynamic_pointer_cast<MidiPlaylist>(_playlist); }
 
-	int use_playlist (Playlist *);
+	int use_playlist (boost::shared_ptr<Playlist>);
 	int use_new_playlist ();
 	int use_copy_playlist ();
 

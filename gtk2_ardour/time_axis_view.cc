@@ -761,8 +761,9 @@ TimeAxisView::get_selection_rect (uint32_t id)
 
 	for (list<SelectionRect*>::iterator i = free_selection_rects.begin(); i != free_selection_rects.end(); ++i) {
 		if ((*i)->id == id) {
+			SelectionRect* ret = (*i);
 			free_selection_rects.erase (i);
-			return (*i);
+			return ret;
 		}
 	}
 
@@ -1068,3 +1069,24 @@ TimeAxisView::color_handler (ColorID id, uint32_t val)
 	}
 }
 
+TimeAxisView*
+TimeAxisView::covers_y_position (double y)
+{
+	if (hidden()) {
+		return 0;
+	}
+
+	if (y_position <= y && y < (y_position + height)) {
+		return this;
+	}
+
+	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
+		TimeAxisView* tv;
+
+		if ((tv = (*i)->covers_y_position (y)) != 0) {
+			return tv;
+		}
+	}
+
+	return 0;
+}

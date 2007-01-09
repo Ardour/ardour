@@ -123,7 +123,7 @@ FFTGraph::setWindowSize_internal(int windowSize)
 	}
 	
 	_logScale = (int *) malloc(sizeof(int) * _dataSize);
-	float count = 0;
+	//float count = 0;
 	for (int i = 0; i < _dataSize; i++) {
 		_logScale[i] = 0;
 	}
@@ -389,7 +389,7 @@ FFTGraph::on_size_request(Gtk::Requisition* requisition)
 			pixel++;
 			freq_at_pixel = FFT_START * exp( FFT_RANGE * pixel / (double)scaleWidth );
 		}
-		_logScale[i] = floor(pixel);
+		_logScale[i] = (int)floor(pixel);
 //printf("logscale at %d = %3.3f, freq_at_pixel %3.3f, freq_at_bin %3.3f, scaleWidth %d\n", i, pixel, freq_at_pixel, freq_at_bin, scaleWidth);
 	}
 

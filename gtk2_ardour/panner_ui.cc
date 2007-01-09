@@ -30,6 +30,7 @@
 #include "panner_ui.h"
 #include "panner2d.h"
 #include "utils.h"
+#include "panner.h"
 #include "gui_thread.h"
 
 #include <ardour/session.h>
@@ -44,6 +45,7 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace sigc;
 
+const int PannerUI::pan_bar_height = 30;
 
 PannerUI::PannerUI (boost::shared_ptr<IO> io, Session& s)
 	: _io (io),
@@ -71,7 +73,7 @@ PannerUI::PannerUI (boost::shared_ptr<IO> io, Session& s)
 	//set_size_request_to_display_given_text (pan_automation_style_button, X_("0"), 2, 2);
 
 	pan_bar_packer.set_size_request (-1, 61);
-	panning_viewport.set_size_request (61, 61);
+	panning_viewport.set_size_request (64, 61);
 
 	panning_viewport.set_name (X_("BaseFrame"));
 
@@ -131,7 +133,7 @@ PannerUI::PannerUI (boost::shared_ptr<IO> io, Session& s)
 	panning_up_arrow.set_name (X_("PanScrollerArrow"));
 	panning_down_arrow.set_name (X_("PanScrollerArrow"));
 
-	pan_vbox.set_spacing (4);
+	pan_vbox.set_spacing (2);
 	pan_vbox.pack_start (panning_viewport, Gtk::PACK_SHRINK);
 	pan_vbox.pack_start (panning_link_box, Gtk::PACK_SHRINK);
 
@@ -213,22 +215,22 @@ PannerUI::set_width (Width w)
 {
 	switch (w) {
 	case Wide:
-		panning_viewport.set_size_request (61, 61);
+		panning_viewport.set_size_request (64, 61);
 		if (panner) {
-			panner->set_size_request (61, 61);
+			panner->set_size_request (63, 61);
 		}
-		for (vector<BarController*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
-				(*i)->set_size_request (61, 15);
+		for (vector<PannerBar*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
+			(*i)->set_size_request (63, pan_bar_height);
 		}
 		panning_link_button.set_label (_("link"));
 		break;
 	case Narrow:
-		panning_viewport.set_size_request (31, 61);
+		panning_viewport.set_size_request (34, 61);
 		if (panner) {
-			panner->set_size_request (31, 61);
+			panner->set_size_request (33, 61);
 		}
-		for (vector<BarController*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
-				(*i)->set_size_request (31, 15);
+		for (vector<PannerBar*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
+			(*i)->set_size_request (33, pan_bar_height);
 		}
 		panning_link_button.set_label (_("L"));
 		break;
@@ -244,7 +246,7 @@ PannerUI::~PannerUI ()
 		delete (*i);
 	}
 	
-	for (vector<BarController*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
+	for (vector<PannerBar*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
 		delete (*i);
 	}
 
@@ -301,25 +303,36 @@ PannerUI::setup_pan ()
 
 		while ((asz = pan_adjustments.size()) < npans) {
 
-			float x;
-			BarController* bc;
+			float x, rx;
+			PannerBar* bc;
 
-			/* initialize adjustment with current value of panner */
+			/* initialize adjustment with 0.0 (L) or 1.0 (R) for the first and second panners,
+			   which serves as a default, otherwise use current value */
 
-			_io->panner()[asz]->get_position (x);
+			_io->panner()[asz]->get_position (rx);
+
+			if (npans == 1) {
+				x = 0.5;
+			} else if (asz == 0) {
+				x = 0.0;
+			} else if (asz == 1) {
+				x = 1.0;
+			} else {
+				x = rx;
+			}
 
 			pan_adjustments.push_back (new Adjustment (x, 0, 1.0, 0.05, 0.1));
+			bc = new PannerBar (*pan_adjustments[asz], _io->panner()[asz]->control());
+
+			/* now set adjustment with current value of panner, then connect the signals */
+			pan_adjustments.back()->set_value(rx);
 			pan_adjustments.back()->signal_value_changed().connect (bind (mem_fun(*this, &PannerUI::pan_adjustment_changed), (uint32_t) asz));
 
 			_io->panner()[asz]->Changed.connect (bind (mem_fun(*this, &PannerUI::pan_value_changed), (uint32_t) asz));
 
-			bc = new BarController (*pan_adjustments[asz], 
-						_io->panner()[asz]->control(),
-						bind (mem_fun(*this, &PannerUI::pan_printer), pan_adjustments[asz]));
 			
 			bc->set_name ("PanSlider");
 			bc->set_shadow_type (Gtk::SHADOW_NONE);
-			bc->set_style (BarController::Line);
 
 			bc->StartGesture.connect (bind (mem_fun (*_io, &IO::start_pan_touch), (uint32_t) asz));
 			bc->StopGesture.connect (bind (mem_fun (*_io, &IO::end_pan_touch), (uint32_t) asz));
@@ -334,14 +347,14 @@ PannerUI::setup_pan ()
 			pan_bars.push_back (bc);
 			switch (_width) {
 			case Wide:
-				pan_bars.back()->set_size_request (61, 15);
+				bc->set_size_request (63, pan_bar_height);
 				break;
 			case Narrow:
-				pan_bars.back()->set_size_request (31, 15);
+				bc->set_size_request (33, pan_bar_height);
 				break;
 			}
 
-			pan_bar_packer.pack_start (*pan_bars.back(), false, false);
+			pan_bar_packer.pack_start (*bc, false, false);
 		}
 
 		/* now that we actually have the pan bars,
@@ -361,10 +374,10 @@ PannerUI::setup_pan ()
 
 		switch (_width) {
 		case Wide:
-			w = 61;
+			w = 63;
 			break;
 		case Narrow:
-			w = 31;
+			w = 33;
 			break;
 		}
 
@@ -631,7 +644,7 @@ PannerUI::update_pan_sensitive ()
 	case 1:
 		break;
 	case 2:
-		for (vector<BarController*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
+		for (vector<PannerBar*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
 			(*i)->set_sensitive (sensitive);
 		}
 		break;

@@ -70,8 +70,8 @@ BarController::BarController (Gtk::Adjustment& adj,
 
 	darea.signal_expose_event().connect (mem_fun (*this, &BarController::expose));
 	darea.signal_motion_notify_event().connect (mem_fun (*this, &BarController::motion));
-	darea.signal_button_press_event().connect (mem_fun (*this, &BarController::button_press));
-	darea.signal_button_release_event().connect (mem_fun (*this, &BarController::button_release));
+	darea.signal_button_press_event().connect (mem_fun (*this, &BarController::button_press), false);
+	darea.signal_button_release_event().connect (mem_fun (*this, &BarController::button_release), false);
 	darea.signal_scroll_event().connect (mem_fun (*this, &BarController::scroll));
 
 	spinner.signal_activate().connect (mem_fun (*this, &BarController::entry_activated));
@@ -82,9 +82,21 @@ BarController::BarController (Gtk::Adjustment& adj,
 	show_all ();
 }
 
+void
+BarController::drop_grab ()
+{
+	if (grabbed) {
+		grabbed = false;
+		darea.remove_modal_grab();
+		StopGesture ();
+	}
+}
+
 bool
 BarController::button_press (GdkEventButton* ev)
 {
+	double fract;
+
 	if (binding_proxy.button_press_handler (ev)) {
 		return true;
 	}
@@ -93,8 +105,7 @@ BarController::button_press (GdkEventButton* ev)
 	case 1:
 		if (ev->type == GDK_2BUTTON_PRESS) {
 			switch_on_release = true;
-			grabbed = false;
-			darea.remove_modal_grab();
+			drop_grab ();
 		} else {
 			switch_on_release = false;
 			darea.add_modal_grab();
@@ -107,6 +118,9 @@ BarController::button_press (GdkEventButton* ev)
 		break;
 
 	case 2:
+		fract = ev->x / (darea.get_width() - 2.0);
+		adjustment.set_value (adjustment.get_lower() + fract * (adjustment.get_upper() - adjustment.get_lower()));
+
 	case 3:
 		break;
 
@@ -121,6 +135,8 @@ BarController::button_press (GdkEventButton* ev)
 bool
 BarController::button_release (GdkEventButton* ev)
 {
+	drop_grab ();
+	
 	switch (ev->button) {
 	case 1:
 		if (switch_on_release) {
@@ -143,23 +159,11 @@ BarController::button_release (GdkEventButton* ev)
 
 			mouse_control (ev->x, ev->window, scale);
 		}
-		darea.remove_modal_grab();
-		grabbed = false;
-		StopGesture ();
-		grabbed = false;
 		break;
 
 	case 2:
-		if (true) { // XXX FIX ME
-			/* relax */
-		} else {
-			double fract;
-			fract = ev->x / (darea.get_width() - 2.0);
-			adjustment.set_value (adjustment.get_lower() + 
-					      fract * (adjustment.get_upper() - adjustment.get_lower()));
-		}
-		return true;
-
+		break;
+		
 	case 3:
 		return false;
 		
@@ -204,7 +208,7 @@ BarController::motion (GdkEventMotion* ev)
 	double scale;
 	
 	if (!grabbed) {
-		return TRUE;
+		return true;
 	}
 
 	if ((ev->state & (GDK_SHIFT_MASK|GDK_CONTROL_MASK)) == GDK_SHIFT_MASK) {
@@ -225,7 +229,7 @@ BarController::motion (GdkEventMotion* ev)
 gint
 BarController::mouse_control (double x, GdkWindow* window, double scaling)
 {
-	double fract;
+	double fract = 0.0;
 	double delta;
 
 	if (window != grab_window) {
@@ -259,7 +263,7 @@ BarController::expose (GdkEventExpose* event)
 {
 	Glib::RefPtr<Gdk::Window> win (darea.get_window());
 	Widget* parent;
-	gint x1, x2, y1, y2;
+	gint x1=0, x2=0, y1=0, y2=0;
 	gint w, h;
 	double fract;
 
@@ -271,6 +275,7 @@ BarController::expose (GdkEventExpose* event)
 	
 	switch (_style) {
 	case Line:
+		h = darea.get_height();
 		x1 = (gint) floor (w * fract);
 		x2 = x1;
 		y1 = 0;
@@ -281,22 +286,18 @@ BarController::expose (GdkEventExpose* event)
 			
 			if (parent) {
 				win->draw_rectangle (parent->get_style()->get_fg_gc (parent->get_state()),
-						    true,
-						    0, 0, darea.get_width(), darea.get_height());
+						     true,
+						     0, 0, darea.get_width(), darea.get_height());
 			}
-		} else {
-			win->draw_rectangle (get_style()->get_bg_gc (get_state()),
-					    true,
-					    0, 0, darea.get_width(), darea.get_height());
-		}
 
-		if (fract == 0.0) {
-			win->draw_rectangle (get_style()->get_fg_gc (get_state()),
-					    true, x1, 1, 2, darea.get_height() - 2);
 		} else {
-			win->draw_rectangle (get_style()->get_fg_gc (get_state()),
-					    true, x1 - 1, 1, 3, darea.get_height() - 2);
+
+			win->draw_rectangle (get_style()->get_bg_gc (get_state()),
+					     true,
+					     0, 0, darea.get_width() - ((darea.get_width()+1) % 2), darea.get_height());
 		}
+		
+		win->draw_line (get_style()->get_fg_gc (get_state()), x1, 0, x1, h);
 		break;
 
 	case CenterOut:
@@ -455,4 +456,11 @@ BarController::set_use_parent (bool yn)
 {
 	use_parent = yn;
 	queue_draw ();
+}
+
+void
+BarController::set_sensitive (bool yn)
+{
+	Frame::set_sensitive (yn);
+	darea.set_sensitive (yn);
 }

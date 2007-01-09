@@ -111,8 +111,6 @@ class Redirect : public IO
 	virtual void transport_stopped (nframes_t frame) {};
 	
   protected:
-	void set_placement (const string&, void *src);
-
 	/* children may use this stuff as they see fit */
 
 	map<uint32_t,AutomationList*> parameter_automation;

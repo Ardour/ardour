@@ -593,7 +593,7 @@ Panner2d::show_context_menu ()
 	} 
 
 	bypass_menu_item->set_active (panner.bypassed());
-	context_menu->popup (1, 0);
+	context_menu->popup (1, gtk_get_current_event_time());
 }
 
 void

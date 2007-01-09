@@ -113,6 +113,9 @@ const nframes_t frames_per_peak = 256;
 	void build_peaks_from_scratch ();
 
 	int  do_build_peak (nframes_t, nframes_t);
+	void truncate_peakfile();
+
+	mutable off_t _peak_byte_max; // modified in do_build_peaks()
 
 	virtual nframes_t read_unlocked (Sample *dst, nframes_t start, nframes_t cnt) const = 0;
 	virtual nframes_t write_unlocked (Sample *dst, nframes_t cnt) = 0;
@@ -135,7 +138,7 @@ const nframes_t frames_per_peak = 256;
 	static vector<boost::shared_ptr<AudioSource> > pending_peak_sources;
 	static Glib::Mutex* pending_peak_sources_lock;
 
-	static void queue_for_peaks (boost::shared_ptr<AudioSource>);
+	static void queue_for_peaks (boost::shared_ptr<AudioSource>, bool notify=true);
 	static void clear_queue_for_peaks ();
 	
 	struct PeakBuildRecord {

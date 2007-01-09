@@ -81,7 +81,7 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	track_model = ListStore::create (track_columns);
 	track_display.set_model (track_model);
 	track_display.append_column (_("Strips"), track_columns.text);
-	track_display.append_column (_("Visible"), track_columns.visible);
+	track_display.append_column (_("Show"), track_columns.visible);
 	track_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
 	track_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
 	track_display.get_column (0)->set_expand(true);
@@ -107,7 +107,7 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	group_display.set_model (group_model);
 	group_display.append_column (_("Group"), group_columns.text);
 	group_display.append_column (_("Active"), group_columns.active);
-	group_display.append_column (_("Visible"), group_columns.visible);
+	group_display.append_column (_("Show"), group_columns.visible);
 	group_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
 	group_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
 	group_display.get_column (2)->set_data (X_("colnum"), GUINT_TO_POINTER(2));
@@ -199,15 +199,12 @@ Mixer_UI::Mixer_UI (AudioEngine& eng)
 	rhs_pane1.set_data ("collapse-direction", (gpointer) 0);
 	list_hpane.set_data ("collapse-direction", (gpointer) 1);
 
-	rhs_pane1.signal_button_release_event().connect (bind (sigc::ptr_fun (pane_handler), static_cast<Paned*>(&rhs_pane1)));
-	list_hpane.signal_button_release_event().connect (bind (sigc::ptr_fun (pane_handler), static_cast<Paned*>(&list_hpane)));
-	
 	global_vpacker.pack_start (list_hpane, true, true);
 
 	add (global_vpacker);
 	set_name ("MixerWindow");
 	set_title (_("ardour: mixer"));
-	set_wmclass (_("ardour_mixer"), "Ardour");
+	set_wmclass (X_("ardour_mixer"), "Ardour");
 
 	add_accel_group (ActionManager::ui_manager->get_accel_group());
 
@@ -656,7 +653,7 @@ Mixer_UI::show_track_list_menu ()
 		build_track_menu ();
 	}
 
-	track_menu->popup (1, 0);
+	track_menu->popup (1, gtk_get_current_event_time());
 }
 
 bool
@@ -765,7 +762,7 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
 		if (mix_group_context_menu == 0) {
 			build_mix_group_context_menu ();
 		}
-		mix_group_context_menu->popup (1, 0);
+		mix_group_context_menu->popup (1, ev->time);
 		return true;
 	}
 

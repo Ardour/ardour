@@ -23,6 +23,7 @@
 
 #include <string>
 #include <list>
+#include <boost/shared_ptr.hpp>
 
 #include <pbd/stateful.h> 
 
@@ -35,12 +36,12 @@ class Playlist;
 
 struct NamedSelection : public Stateful
 {
-    NamedSelection (std::string, std::list<Playlist*>&);
+    NamedSelection (std::string, std::list<boost::shared_ptr<Playlist> >&);
     NamedSelection (Session&, const XMLNode&);
     virtual ~NamedSelection ();
 
     std::string name;
-    std::list<Playlist*> playlists;
+    std::list<boost::shared_ptr<Playlist> > playlists;
 
     XMLNode& get_state (void);
 

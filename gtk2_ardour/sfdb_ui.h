@@ -1,6 +1,5 @@
 /*
-    Copyright (C) 2005 Paul Davis 
-    Written by Taybin Rutkin
+    Copyright (C) 2005-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-
 */
 
 #ifndef __ardour_sfdb_ui_h__
@@ -30,14 +28,12 @@
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/checkbutton.h>
+#include <gtkmm/comboboxtext.h>
 #include <gtkmm/dialog.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/filechooserwidget.h>
-#include <gtkmm/comboboxtext.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/treeview.h>
 
 #include <ardour/session.h>
 #include <ardour/audiofilesource.h>
@@ -48,117 +44,118 @@
 class SoundFileBox : public Gtk::VBox
 {
   public:
-    SoundFileBox ();
-    virtual ~SoundFileBox () {};
-
-    void set_session (ARDOUR::Session* s);
-    bool setup_labels (std::string filename);
+	SoundFileBox ();
+	virtual ~SoundFileBox () {};
+	
+	void set_session (ARDOUR::Session* s);
+	bool setup_labels (std::string filename);
 
   protected:
 	ARDOUR::Session* _session;
 	std::string path;
-
-    struct LabelModelColumns : public Gtk::TreeModel::ColumnRecord
-    {
-    public:
-      Gtk::TreeModelColumn<std::string> field;
-      Gtk::TreeModelColumn<std::string> data;
-
-      LabelModelColumns() { add(field); add(data); }
-    };
-
-    LabelModelColumns label_columns;
-    
-    ARDOUR::SoundFileInfo sf_info;
-
-    pid_t current_pid;
-
-    Gtk::Label length;
-    Gtk::Label format;
-    Gtk::Label channels;
-    Gtk::Label samplerate;
-    Gtk::Label timecode;
-
-    Gtk::TreeView field_view;
-    Glib::RefPtr<Gtk::ListStore> fields;
-    std::string selected_field;
-
-    Gtk::Frame border_frame;
-
-    Gtk::VBox main_box;
-    Gtk::VBox path_box;
-    Gtk::HBox top_box;
-    Gtk::HBox bottom_box;
-
-    Gtk::Button play_btn;
-    Gtk::Button stop_btn;
-    Gtk::Button add_field_btn;
-    Gtk::Button remove_field_btn;
-
-    void setup_fields ();
-
-    void play_btn_clicked ();
-    void stop_btn_clicked ();
-    void add_field_clicked ();
-    void remove_field_clicked ();
-	void field_edited (const Glib::ustring&, const Glib::ustring&);
-	void delete_row (const Gtk::TreeModel::iterator& iter);
-
-    void field_selected ();
-    void audition_status_changed (bool state);
+	
+	ARDOUR::SoundFileInfo sf_info;
+	
+	pid_t current_pid;
+	
+	Gtk::Label length;
+	Gtk::Label format;
+	Gtk::Label channels;
+	Gtk::Label samplerate;
+	Gtk::Label timecode;
+	
+	Gtk::Frame border_frame;
+	
+	Gtk::Entry tags_entry;
+	
+	Gtk::VBox main_box;
+	Gtk::VBox path_box;
+	Gtk::HBox bottom_box;
+	
+	Gtk::Button play_btn;
+	Gtk::Button stop_btn;
+	Gtk::Button apply_btn;
+	
+	bool tags_entry_left (GdkEventFocus* event);
+	void play_btn_clicked ();
+	void stop_btn_clicked ();
+	void apply_btn_clicked ();
+	
+	void audition_status_changed (bool state);
 };
 
 class SoundFileBrowser : public ArdourDialog
 {
   public:
-    SoundFileBrowser (std::string title, ARDOUR::Session* _s = 0);
-    virtual ~SoundFileBrowser () {}; 
-
-    virtual void set_session (ARDOUR::Session*);
+	SoundFileBrowser (std::string title, ARDOUR::Session* _s = 0);
+	virtual ~SoundFileBrowser () {}; 
+	
+	virtual void set_session (ARDOUR::Session*);
 
   protected:
-    Gtk::FileChooserWidget chooser;
-    SoundFileBox preview;
-
-    void update_preview ();
+	Gtk::FileChooserWidget chooser;
+	Gtk::FileFilter filter;
+	SoundFileBox preview;
+	
+	class FoundTagColumns : public Gtk::TreeModel::ColumnRecord
+	{
+	  public:
+		Gtk::TreeModelColumn<string> pathname;
+		
+		FoundTagColumns() { add(pathname); }
+	};
+	
+	FoundTagColumns found_list_columns;
+	Glib::RefPtr<Gtk::ListStore> found_list;
+	Gtk::TreeView found_list_view;
+	Gtk::Entry found_entry;
+	Gtk::Button found_search_btn;
+	
+	Gtk::Notebook notebook;
+	
+	void update_preview ();
+	void found_list_view_selected ();
+	void found_search_clicked ();
+	
+	bool on_custom (const Gtk::FileFilter::Info& filter_info);
 };
 
 class SoundFileChooser : public SoundFileBrowser
 {
   public:
-    SoundFileChooser (std::string title, ARDOUR::Session* _s = 0);
-    virtual ~SoundFileChooser () {};
-
-    std::string get_filename () {return chooser.get_filename();};
+	SoundFileChooser (std::string title, ARDOUR::Session* _s = 0);
+	virtual ~SoundFileChooser () {};
+	
+	std::string get_filename ();
 };
 
 class SoundFileOmega : public SoundFileBrowser
 {
   public:
-    SoundFileOmega (std::string title, ARDOUR::Session* _s);
-    virtual ~SoundFileOmega () {};
-
-    /* these are returned by the Dialog::run() method. note
-       that builtin GTK responses are all negative, leaving
-       positive values for application-defined responses.
-    */
-
-    const static int ResponseImport = 1;
-    const static int ResponseEmbed = 2;
-
-    std::vector<Glib::ustring> get_paths ();
-    bool get_split ();
-
-    void set_mode (Editing::ImportMode);
-    Editing::ImportMode get_mode ();
+	SoundFileOmega (std::string title, ARDOUR::Session* _s);
+	virtual ~SoundFileOmega () {};
+	
+	/* these are returned by the Dialog::run() method. note
+	   that builtin GTK responses are all negative, leaving
+	   positive values for application-defined responses.
+	*/
+	
+	const static int ResponseImport = 1;
+	const static int ResponseEmbed = 2;
+	
+	std::vector<Glib::ustring> get_paths ();
+	bool get_split ();
+	
+	void set_mode (Editing::ImportMode);
+	Editing::ImportMode get_mode ();
 
   protected:
-    Gtk::CheckButton  split_check;
-    Gtk::ComboBoxText mode_combo;
-
-    void mode_changed ();
-
-    static std::vector<std::string> mode_strings;
+	Gtk::CheckButton  split_check;
+	Gtk::ComboBoxText mode_combo;
+	
+	void mode_changed ();
+	
+	static std::vector<std::string> mode_strings;
 };
 
 #endif // __ardour_sfdb_ui_h__

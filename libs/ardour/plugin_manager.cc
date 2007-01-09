@@ -343,7 +343,7 @@ PluginManager::add_vst_directory (string path)
 static bool vst_filter (const string& str, void *arg)
 {
 	/* Not a dotfile, has a prefix before a period, suffix is "dll" */
-	
+
 	return str[0] != '.' && (str.length() > 4 && str.find (".dll") == (str.length() - 4));
 }
 
@@ -375,6 +375,7 @@ PluginManager::vst_discover (string path)
 	FSTInfo* finfo;
 
 	if ((finfo = fst_get_info (const_cast<char *> (path.c_str()))) == 0) {
+		warning << "Cannot get VST information from " << path << endmsg;
 		return -1;
 	}
 

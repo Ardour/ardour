@@ -68,7 +68,7 @@ class Location : public PBD::StatefulDestructible
 	Location () {
 		_start = 0;
 		_end = 0;
-		_flags = 0;	
+		_flags = Flags (0);
 	}
 
 	Location (const Location& other);
@@ -124,7 +124,7 @@ class Location : public PBD::StatefulDestructible
 	string        _name;
 	nframes_t     _start;
 	nframes_t     _end;
-	uint32_t _flags;
+	Flags         _flags;
 
 	void set_mark (bool yn);
 	bool set_flag_internal (bool yn, Flags flag);
@@ -153,6 +153,7 @@ class Locations : public PBD::StatefulDestructible
 	Location* end_location() const;
 	Location* start_location() const;
 
+	int next_available_name(string& result,string base);
 	uint32_t num_range_markers() const;
 
 	int set_current (Location *, bool want_lock = true);

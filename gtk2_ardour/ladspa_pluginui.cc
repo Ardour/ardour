@@ -575,7 +575,7 @@ LadspaPluginUI::astate_clicked (ControlUI* cui, uint32_t port)
 	items.push_back (MenuElem (_("Touch"),
 				   bind (mem_fun(*this, &LadspaPluginUI::set_automation_state), (AutoState) Touch, cui)));
 
-	automation_menu->popup (1, 0);
+	automation_menu->popup (1, gtk_get_current_event_time());
 }
 
 void

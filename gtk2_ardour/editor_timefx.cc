@@ -159,7 +159,7 @@ void
 Editor::do_timestretch (TimeStretchDialog& dialog)
 {
 	Track*    t;
-	Playlist* playlist;
+	boost::shared_ptr<Playlist> playlist;
 	boost::shared_ptr<Region>   new_region;
 
 	for (RegionSelection::iterator i = dialog.regions.begin(); i != dialog.regions.end(); ) {

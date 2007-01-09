@@ -61,7 +61,7 @@ class AudioEngine : public sigc::trackable
 	bool will_reconnect_at_halt ();
 	void set_reconnect_at_halt (bool);
 
-	int stop ();
+	int stop (bool forever = false);
 	int start ();
 	bool running() const { return _running; }
 
@@ -195,8 +195,7 @@ class AudioEngine : public sigc::trackable
 	jack_client_t       *_jack;
 	std::string           jack_client_name;
 	Glib::Mutex           _process_lock;
-	Glib::Mutex           session_remove_lock;
-    Glib::Cond            session_removed;
+	Glib::Cond            session_removed;
 	bool                  session_remove_pending;
 	bool                 _running;
 	bool                 _has_run;

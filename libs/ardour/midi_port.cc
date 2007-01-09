@@ -61,7 +61,7 @@ MidiPort::cycle_start (jack_nframes_t nframes)
 	void* jack_buffer = jack_port_get_buffer(_port, nframes);
 
 	const jack_nframes_t event_count
-		= jack_midi_port_get_info(jack_buffer, nframes)->event_count;
+		= jack_midi_get_event_count(jack_buffer, nframes);
 
 	assert(event_count < _buffer.capacity());
 

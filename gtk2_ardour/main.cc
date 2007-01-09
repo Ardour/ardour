@@ -48,6 +48,7 @@
 #include "version.h"
 #include "ardour_ui.h"
 #include "opts.h"
+#include "enums.h"
 
 #include "i18n.h"
 
@@ -79,8 +80,6 @@ shutdown (int status)
 	} else {
 
 		if (ui) {
-			msg = _("stopping user interface\n");
-			write (1, msg, strlen (msg));
 			ui->kill();
 		}
 		
@@ -301,7 +300,7 @@ maybe_load_session ()
 	if (!session_name.length()) {
 		ui->hide_splash ();
 		if (!Config->get_no_new_session_dialog()) {
-		       ui->new_session (true);
+		       ui->new_session ();
 		}
 
 		return true;
@@ -321,12 +320,16 @@ maybe_load_session ()
 			
 		/* Loading a session, but the session doesn't exist */
 		if (isnew) {
-			error << string_compose (_("\n\nNo session named \"%1\" exists.\n\
-To create it from the command line, start ardour as \"ardour --new %1"), path) << endmsg;
+			error << string_compose (_("\n\nNo session named \"%1\" exists.\n"
+						   "To create it from the command line, start ardour as \"ardour --new %1"), path) 
+			      << endmsg;
 			return false;
 		}
 
-		ui->load_session (path, name);
+		if (ui->load_session (path, name)) {
+			/* it failed */
+			return false;
+		}
 
 	} else {
 
@@ -338,7 +341,7 @@ To create it from the command line, start ardour as \"ardour --new %1"), path) <
 		/* Show the NSD */
 		ui->hide_splash ();
 		if (!Config->get_no_new_session_dialog()) {
-		       ui->new_session (true);
+		       ui->new_session ();
 		}
 	}
 
@@ -360,14 +363,15 @@ int main (int argc, char *argv[])
 	ARDOUR::AudioEngine *engine;
 	vector<Glib::ustring> null_file_list;
 
+        Glib::thread_init();
 	gtk_set_locale ();
 
-	(void)   bindtextdomain (PACKAGE, LOCALEDIR);
+	(void) bindtextdomain (PACKAGE, LOCALEDIR);
 	(void) textdomain (PACKAGE);
 
 	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);
 
-	// catch_signals ();
+	// catch error message system signals ();
 
 	text_receiver.listen_to (error);
 	text_receiver.listen_to (info);
@@ -407,9 +411,6 @@ int main (int argc, char *argv[])
 		     << endl;
 	}
 
-	// needs a better home.
-        Glib::thread_init();
-
         try { 
 		ui = new ARDOUR_UI (&argc, &argv, which_ui_rcfile());
 	} catch (failed_constructor& err) {
@@ -417,6 +418,9 @@ int main (int argc, char *argv[])
 		exit (1);
 	}
 
+	if (!keybindings_path.empty()) {
+		ui->set_keybindings_path (keybindings_path);
+	}
 
 	if (!no_splash) {
 		ui->show_splash ();
@@ -425,25 +429,27 @@ int main (int argc, char *argv[])
 		}
 	}
 
-
-    try { 
-		engine = new ARDOUR::AudioEngine (jack_client_name);
-	} catch (AudioEngine::NoBackendAvailable& err) {
-		gui_jack_error ();
-		error << string_compose (_("Could not connect to JACK server as  \"%1\""), jack_client_name) <<  endmsg;
-		return -1;
-	}
- 
-
     try {
 		ARDOUR::init (*engine, use_vst, try_hw_optimization);
+		setup_gtk_ardour_enums ();
 		Config->set_current_owner (ConfigVariableBase::Interface);
+
+		try { 
+			engine = new ARDOUR::AudioEngine (jack_client_name);
+		} catch (AudioEngine::NoBackendAvailable& err) {
+			gui_jack_error ();
+			error << string_compose (_("Could not connect to JACK server as  \"%1\""), jack_client_name) <<  endmsg;
+			return -1;
+		}
+		
 		ui->set_engine (*engine);
+
 	} catch (failed_constructor& err) {
 		error << _("could not initialize Ardour.") << endmsg;
 		return -1;
 	} 
 
+	ui->start_engine ();
 
 	if (maybe_load_session ()) {
 		ui->run (text_receiver);

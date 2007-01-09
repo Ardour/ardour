@@ -94,7 +94,7 @@ class UndoHistory : public sigc::trackable
 	void clear_undo ();
 	void clear_redo ();
 
-        XMLNode &get_state();
+        XMLNode &get_state(uint32_t depth = 0);
         void save_state();
 
 	sigc::signal<void> Changed;

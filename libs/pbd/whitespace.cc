@@ -2,6 +2,8 @@
 
 using namespace std;
 
+namespace PBD {
+	
 void
 strip_whitespace_edges (string& str)
 {   
@@ -24,7 +26,8 @@ strip_whitespace_edges (string& str)
     }
 
     if (i == len) {
-	    /* its all whitespace, not much we can do */
+	    /* it's all whitespace, not much we can do */
+		str = "";
 	    return;
     }
 
@@ -55,3 +58,4 @@ strip_whitespace_edges (string& str)
     }
 }
 
+} // namespace PBD

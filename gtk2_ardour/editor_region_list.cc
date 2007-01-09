@@ -26,7 +26,7 @@
 #include <pbd/basename.h>
 
 #include <ardour/audioregion.h>
-#include <ardour/audiosource.h>
+#include <ardour/audiofilesource.h>
 #include <ardour/session_region.h>
 
 #include <gtkmm2ext/stop_signal.h>
@@ -101,7 +101,8 @@ Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 			parent = *(region_list_model->append());
 			
 			parent[region_list_columns.name] = _("Hidden");
-			/// XXX FIX ME parent[region_list_columns.region]->reset ();
+			boost::shared_ptr<Region> proxy = parent[region_list_columns.region];
+			proxy.reset ();
 
 		} else {
 
@@ -109,7 +110,8 @@ Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 
 				parent = *(region_list_model->insert(iter));
 				parent[region_list_columns.name] = _("Hidden");
-				/// XXX FIX ME parent[region_list_columns.region]->reset ();
+				boost::shared_ptr<Region> proxy = parent[region_list_columns.region];
+				proxy.reset ();
 
 			} else {
 				parent = *iter;
@@ -129,8 +131,15 @@ Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 
 			if (region->whole_file()) {
 				str = ".../";
-				str += PBD::basename_nosuffix (region->source()->name());
-				
+
+				boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(region->source());
+
+				if (afs) {
+					str += region_name_from_path (afs->path(), region->n_channels() > 1);
+				} else {
+					str += region->source()->name();
+				}
+
 			} else {
 				str = region->name();
 			}
@@ -342,18 +351,13 @@ Editor::region_list_display_button_press (GdkEventButton *ev)
 		}
 	}
 
-	if (region == 0) {
-		return false;
-	}
-
-	if (Keyboard::is_delete_event (ev)) {
-		session->remove_region_from_region_list (region);
-		return true;
-	}
-
 	if (Keyboard::is_context_menu_event (ev)) {
 		show_region_list_display_context_menu (ev->button, ev->time);
 		return true;
+	}
+
+	if (region == 0) {
+		return false;
 	}
 
 	switch (ev->button) {

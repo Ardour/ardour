@@ -64,17 +64,6 @@ SourceFactory::create (Session& s, const XMLNode& node)
 
 	if (type == DataType::AUDIO) {
 
-		if (node.property (X_("destructive")) != 0) {
-
-			boost::shared_ptr<Source> ret (new DestructiveFileSource (s, node));
-			if (setup_peakfile (ret)) {
-				return boost::shared_ptr<Source>();
-			}
-			SourceCreated (ret);
-			return ret;
-
-		} else {
-		
 		try {
 			boost::shared_ptr<Source> ret (new CoreAudioSource (s, node));
 			if (setup_peakfile (ret)) {
@@ -82,29 +71,19 @@ SourceFactory::create (Session& s, const XMLNode& node)
 			}
 			SourceCreated (ret);
 			return ret;
-		
-		} catch (failed_constructor& err) {
+		} 
 
-			try {
-				boost::shared_ptr<Source> ret (new CoreAudioSource (node));
-				SourceCreated (ret);
-				return ret;
-			} 
-
-
-			catch (failed_constructor& err) {
-
-				boost::shared_ptr<Source> ret (new SndFileSource (s, node));
-				if (setup_peakfile (ret)) {
-					return boost::shared_ptr<Source>();
-				}
-				SourceCreated (ret);
-				return ret;
+		catch (failed_constructor& err) {
+			boost::shared_ptr<Source> ret (new SndFileSource (s, node));
+			if (setup_peakfile (ret)) {
+				return boost::shared_ptr<Source>();
 			}
+			SourceCreated (ret);
+			return ret;
 		}
 
 	} else if (type == DataType::MIDI) {
-		
+
 		boost::shared_ptr<Source> ret (new SMFSource (node));
 		SourceCreated (ret);
 		return ret;
@@ -127,33 +106,24 @@ SourceFactory::create (Session& s, const XMLNode& node)
 
 	if (type == DataType::AUDIO) {
 		
-		if (node.property (X_("destructive")) != 0) {
-			
-			boost::shared_ptr<Source> ret (new DestructiveFileSource (s, node));
-			if (setup_peakfile (ret)) {
-				return boost::shared_ptr<Source>();
-			}
-			SourceCreated (ret);
-			return ret;
+		boost::shared_ptr<Source> ret (new SndFileSource (s, node));
 
-		} else {
-			
-			boost::shared_ptr<Source> ret (new SndFileSource (s, node));
-			if (setup_peakfile (ret)) {
-				return boost::shared_ptr<Source>();
-			}
-			SourceCreated (ret);
-			return ret;
+		if (setup_peakfile (ret)) {
+			return boost::shared_ptr<Source>();
 		}
+		
+		SourceCreated (ret);
+		return ret;
 
 	} else if (type == DataType::MIDI) {
 
 		boost::shared_ptr<Source> ret (new SMFSource (s, node));
+		
 		SourceCreated (ret);
 		return ret;
 
 	}
-	
+
 	return boost::shared_ptr<Source> ();
 }
 
@@ -164,8 +134,34 @@ boost::shared_ptr<Source>
 SourceFactory::createReadable (DataType type, Session& s, string idstr, AudioFileSource::Flag flags, bool announce)
 {
 	if (type == DataType::AUDIO) {
-		if (flags & Destructive) {
-			boost::shared_ptr<Source> ret (new DestructiveFileSource (s, idstr, flags));
+
+		if (!(flags & Destructive)) {
+
+			try {
+				boost::shared_ptr<Source> ret (new CoreAudioSource (s, idstr, flags));
+				if (setup_peakfile (ret)) {
+					return boost::shared_ptr<Source>();
+				}
+				if (announce) {
+					SourceCreated (ret);
+				}
+				return ret;
+			}
+
+			catch (failed_constructor& err) {
+				boost::shared_ptr<Source> ret (new SndFileSource (s, idstr, flags));
+				if (setup_peakfile (ret)) {
+					return boost::shared_ptr<Source>();
+				}
+				if (announce) {
+					SourceCreated (ret);
+				}
+				return ret;
+			}
+
+		} else {
+
+			boost::shared_ptr<Source> ret (new SndFileSource (s, idstr, flags));
 			if (setup_peakfile (ret)) {
 				return boost::shared_ptr<Source>();
 			}
@@ -173,30 +169,18 @@ SourceFactory::createReadable (DataType type, Session& s, string idstr, AudioFil
 				SourceCreated (ret);
 			}
 			return ret;
-	
-			try {
-				boost::shared_ptr<Source> ret (new CoreAudioSource (s, idstr, flags));
-				if (announce) {
-					SourceCreated (ret);
-				}
-				return ret;
-		
-			} catch (failed_constructor& err) {
-				boost::shared_ptr<Source> ret (new SndFileSource (s, idstr, flags));
-				if (announce) {
-					SourceCreated (ret);
-				}
-				return ret;
-			}
+		}
 
 	} else if (type == DataType::MIDI) {
 
 		boost::shared_ptr<Source> ret (new SMFSource (s, node));
-		SourceCreated (ret);
+		if (announce) {
+			SourceCreated (ret);
+		}
 		return ret;
 
 	}
-	
+
 	return boost::shared_ptr<Source>();
 }
 
@@ -206,8 +190,50 @@ boost::shared_ptr<Source>
 SourceFactory::createReadable (DataType type, Session& s, string idstr, AudioFileSource::Flag flags, bool announce)
 {
 	if (type == DataType::AUDIO) {
-	
+
 		boost::shared_ptr<Source> ret (new SndFileSource (s, idstr, flags));
+
+		if (setup_peakfile (ret)) {
+			return boost::shared_ptr<Source>();
+		}
+
+		if (announce) {
+			SourceCreated (ret);
+		}
+
+		return ret;
+
+	} else if (type == DataType::MIDI) {
+
+		// FIXME: flags?
+		boost::shared_ptr<Source> ret (new SMFSource (s, idstr, SMFSource::Flag(0)));
+
+		if (announce) {
+			SourceCreated (ret);
+		}
+
+		return ret;
+	}
+
+	return boost::shared_ptr<Source>();
+}
+
+#endif // HAVE_COREAUDIO
+
+boost::shared_ptr<Source>
+SourceFactory::createWritable (DataType type, Session& s, std::string path, bool destructive, nframes_t rate, bool announce)
+{
+	/* this might throw failed_constructor(), which is OK */
+
+	if (type == DataType::AUDIO) {
+		boost::shared_ptr<Source> ret (new SndFileSource 
+				(s, path, 
+				 Config->get_native_file_data_format(),
+				 Config->get_native_file_header_format(),
+				 rate,
+				 (destructive ? AudioFileSource::Flag (SndFileSource::default_writable_flags | AudioFileSource::Destructive) :
+				  SndFileSource::default_writable_flags)));	
+
 		if (setup_peakfile (ret)) {
 			return boost::shared_ptr<Source>();
 		}
@@ -218,56 +244,13 @@ SourceFactory::createReadable (DataType type, Session& s, string idstr, AudioFil
 
 	} else if (type == DataType::MIDI) {
 
-		boost::shared_ptr<Source> ret (new SMFSource (s, idstr, SMFSource::Flag(0))); // FIXME: flags?
+		boost::shared_ptr<Source> ret (new SMFSource (s, path));
+		
 		if (announce) {
 			SourceCreated (ret);
 		}
 		return ret;
 
-	}
-	
-	return boost::shared_ptr<Source> ();
-}
-
-#endif // HAVE_COREAUDIO
-
-boost::shared_ptr<Source>
-SourceFactory::createWritable (DataType type, Session& s, std::string path, bool destructive, nframes_t rate, bool announce)
-{
-	/* this might throw failed_constructor(), which is OK */
-	if (type == DataType::AUDIO) {
-	
-		if (destructive) {
-			boost::shared_ptr<Source> ret (new DestructiveFileSource (s, path,
-						Config->get_native_file_data_format(),
-						Config->get_native_file_header_format(),
-						rate));
-			if (setup_peakfile (ret)) {
-				return boost::shared_ptr<Source>();
-			}
-			if (announce) {
-				SourceCreated (ret);
-			}
-		} else {
-			boost::shared_ptr<Source> ret (new SndFileSource (s, path, 
-						Config->get_native_file_data_format(),
-						Config->get_native_file_header_format(),
-						rate));
-			if (setup_peakfile (ret)) {
-				return boost::shared_ptr<Source>();
-			}
-			if (announce) {
-				SourceCreated (ret);
-			}
-			return ret;
-		}
-
-	} else if (type == DataType::MIDI) {
-
-		boost::shared_ptr<Source> ret (new SMFSource (s, path));
-		SourceCreated (ret);
-		return ret;
-	
 	}
 
 	return boost::shared_ptr<Source> ();

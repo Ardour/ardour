@@ -167,9 +167,8 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 
 	virtual uint32_t read_data_count() const { return _read_data_count; }
 
-	ARDOUR::Playlist* playlist() const { return _playlist; }
-
-	void set_playlist (ARDOUR::Playlist*);
+	boost::shared_ptr<ARDOUR::Playlist> playlist() const { return _playlist.lock(); }
+	virtual void set_playlist (boost::weak_ptr<ARDOUR::Playlist>);
 
 	void source_deleted (boost::shared_ptr<Source>);
 	
@@ -238,7 +237,7 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	Change                  _pending_changed;
 	uint64_t                _last_layer_op;  ///< timestamp
 	Glib::Mutex             _lock;
-	ARDOUR::Playlist*       _playlist;
+	boost::weak_ptr<ARDOUR::Playlist> _playlist;
 	SourceList              _sources;
 	/** Used when timefx are applied, so we can always use the original source */
 	SourceList              _master_sources;

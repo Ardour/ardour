@@ -29,6 +29,7 @@
 #include <stack>
 
 #include <boost/weak_ptr.hpp>
+#include <boost/dynamic_bitset.hpp>
 
 #include <stdint.h>
 
@@ -117,9 +118,9 @@ using std::set;
 class Session : public PBD::StatefulDestructible
 {
   private:
-	typedef std::pair<boost::shared_ptr<Route>,bool> RouteBooleanState;
+	typedef std::pair<boost::weak_ptr<Route>,bool> RouteBooleanState;
 	typedef vector<RouteBooleanState> GlobalRouteBooleanState;
-	typedef std::pair<boost::shared_ptr<Route>,MeterPoint> RouteMeterState;
+	typedef std::pair<boost::weak_ptr<Route>,MeterPoint> RouteMeterState;
 	typedef vector<RouteMeterState> GlobalRouteMeterState;
 
   public:
@@ -253,6 +254,7 @@ class Session : public PBD::StatefulDestructible
 	void set_dirty ();
 	void set_clean ();
 	bool dirty() const { return _state_of_the_state & Dirty; }
+	void set_deletion_in_progress ();
 	bool deletion_in_progress() const { return _state_of_the_state & Deletion; }
 	sigc::signal<void> DirtyChanged;
 
@@ -391,6 +393,9 @@ class Session : public PBD::StatefulDestructible
 	double frames_per_smpte_frame() const { return _frames_per_smpte_frame; }
 	nframes_t smpte_frames_per_hour() const { return _smpte_frames_per_hour; }
 
+	float smpte_frames_per_second() const;
+	bool smpte_drop_frames() const;
+
 	/* Locations */
 
 	Locations *locations() { return &_locations; }
@@ -401,6 +406,7 @@ class Session : public PBD::StatefulDestructible
 
 	void set_auto_punch_location (Location *);
 	void set_auto_loop_location (Location *);
+	int location_name(string& result, string base = string(""));
 
 	void reset_input_monitor_state ();
 
@@ -495,19 +501,6 @@ class Session : public PBD::StatefulDestructible
 	nframes_t transport_frame () const {return _transport_frame; }
 	nframes_t audible_frame () const;
 
-	enum SmpteFormat {
-		smpte_23976,
-		smpte_24,
-		smpte_24976,
-		smpte_25,
-		smpte_2997,
-		smpte_2997drop,
-		smpte_30,
-		smpte_30drop,
-		smpte_5994,
-		smpte_60,
-	};
-
 	enum PullupFormat {
 		pullup_Plus4Plus1,
 		pullup_Plus4,
@@ -517,11 +510,10 @@ class Session : public PBD::StatefulDestructible
 		pullup_Minus1,
 		pullup_Minus4Plus1,
 		pullup_Minus4,
-		pullup_Minus4Minus1,
+		pullup_Minus4Minus1
 	};
 
-	int  set_smpte_type (float fps, bool drop_frames);
-
+	int  set_smpte_format (SmpteFormat);
 	void sync_time_vars();
 
 	void bbt_time (nframes_t when, BBT_Time&);
@@ -584,7 +576,7 @@ class Session : public PBD::StatefulDestructible
 	    bool multichan;
 	    bool sample_convert;
 	    volatile bool freeze;
-	    string pathname;
+	    std::vector<Glib::ustring> paths;
 	    
 	    /* result */
 	    std::vector<boost::shared_ptr<Region> > new_regions;
@@ -602,7 +594,6 @@ class Session : public PBD::StatefulDestructible
 	
 	void add_source (boost::shared_ptr<Source>);
 	void remove_source (boost::weak_ptr<Source>);
-	int  cleanup_audio_file_source (boost::shared_ptr<AudioFileSource>);
 
 	struct cleanup_report {
 	    vector<string> paths;
@@ -622,8 +613,7 @@ class Session : public PBD::StatefulDestructible
 	   this playlist.
 	*/
 	
-	sigc::signal<int,ARDOUR::Playlist*> AskAboutPlaylistDeletion;
-
+	sigc::signal<int,boost::shared_ptr<ARDOUR::Playlist> > AskAboutPlaylistDeletion;
 
 	/* handlers should return !0 for use pending state, 0 for
 	   ignore it.
@@ -631,9 +621,6 @@ class Session : public PBD::StatefulDestructible
 
 	static sigc::signal<int> AskAboutPendingState;
 	
-	sigc::signal<void,boost::shared_ptr<Source> > SourceAdded;
-	sigc::signal<void,boost::shared_ptr<Source> > SourceRemoved;
-
 	boost::shared_ptr<AudioFileSource> create_audio_source_for_session (ARDOUR::AudioDiskstream&, uint32_t which_channel, bool destructive);
 
 	boost::shared_ptr<MidiSource> create_midi_source_for_session (ARDOUR::MidiDiskstream&);
@@ -642,15 +629,15 @@ class Session : public PBD::StatefulDestructible
 
 	/* playlist management */
 
-	Playlist* playlist_by_name (string name);
-	void add_playlist (Playlist *);
-	sigc::signal<void,Playlist*> PlaylistAdded;
-	sigc::signal<void,Playlist*> PlaylistRemoved;
+	boost::shared_ptr<Playlist> playlist_by_name (string name);
+	void add_playlist (boost::shared_ptr<Playlist>);
+	sigc::signal<void,boost::shared_ptr<Playlist> > PlaylistAdded;
+	sigc::signal<void,boost::shared_ptr<Playlist> > PlaylistRemoved;
 
 	uint32_t n_playlists() const;
 
-	template<class T> void foreach_playlist (T *obj, void (T::*func)(Playlist *));
-	void get_playlists (std::vector<Playlist*>&);
+	template<class T> void foreach_playlist (T *obj, void (T::*func)(boost::shared_ptr<Playlist>));
+	void get_playlists (std::vector<boost::shared_ptr<Playlist> >&);
 
 	/* named selections */
 
@@ -711,9 +698,11 @@ class Session : public PBD::StatefulDestructible
 	uint32_t n_plugin_inserts() const { return _plugin_inserts.size(); }
 	uint32_t n_sends() const { return _sends.size(); }
 
-	string next_send_name();
-	string next_insert_name();
-	
+	uint32_t next_send_id();
+	uint32_t next_insert_id();
+	void mark_send_id (uint32_t);
+	void mark_insert_id (uint32_t);
+
 	/* s/w "RAID" management */
 	
 	nframes_t available_capture_duration();
@@ -786,59 +775,75 @@ class Session : public PBD::StatefulDestructible
 	std::map<PBD::ID, PBD::StatefulThingWithGoingAway*> registry;
 
         // these commands are implemented in libs/ardour/session_command.cc
-	Command *memento_command_factory(XMLNode *n);
-        void register_with_memento_command_factory(PBD::ID, PBD::StatefulThingWithGoingAway *);
+	Command* memento_command_factory(XMLNode* n);
+        void register_with_memento_command_factory(PBD::ID, PBD::StatefulThingWithGoingAway*);
 
-        class GlobalSoloStateCommand : public Command
+	Command* global_state_command_factory (const XMLNode& n);
+
+	class GlobalRouteStateCommand : public Command
+	{
+	  public:
+		GlobalRouteStateCommand (Session&, void*);
+		GlobalRouteStateCommand (Session&, const XMLNode& node);
+		int set_state (const XMLNode&);
+		XMLNode& get_state ();
+
+	  protected:
+		GlobalRouteBooleanState before, after;
+		Session& sess;
+		void* src;
+		
+	};
+
+        class GlobalSoloStateCommand : public GlobalRouteStateCommand
         {
-            GlobalRouteBooleanState before, after;
-            Session &sess;
-            void *src;
-        public:
-            GlobalSoloStateCommand(Session &, void *src);
-            void operator()();
-            void undo();
-            XMLNode &get_state();
-            void mark();
+	  public:
+		GlobalSoloStateCommand (Session &, void *src);
+		GlobalSoloStateCommand (Session&, const XMLNode&);
+		void operator()(); //redo
+		void undo();
+		XMLNode &get_state();
+		void mark();
         };
 
-        class GlobalMuteStateCommand : public Command
+        class GlobalMuteStateCommand : public GlobalRouteStateCommand
         {
-            GlobalRouteBooleanState before, after;
-            Session &sess;
-            void *src;
-        public:
-            GlobalMuteStateCommand(Session &, void *src);
-            void operator()();
-            void undo();
-            XMLNode &get_state();
-            void mark();
+	  public:
+		GlobalMuteStateCommand(Session &, void *src);
+		GlobalMuteStateCommand (Session&, const XMLNode&);
+		void operator()(); // redo
+		void undo();
+		XMLNode &get_state();
+		void mark();
         };
 
-        class GlobalRecordEnableStateCommand : public Command
+        class GlobalRecordEnableStateCommand : public GlobalRouteStateCommand
         {
-            GlobalRouteBooleanState before, after;
-            Session &sess;
-            void *src;
-        public:
-            GlobalRecordEnableStateCommand(Session &, void *src);
-            void operator()();
-            void undo();
-            XMLNode &get_state();
-            void mark();
+	  public:
+		GlobalRecordEnableStateCommand(Session &, void *src);
+		GlobalRecordEnableStateCommand (Session&, const XMLNode&);
+		void operator()(); // redo
+		void undo();
+		XMLNode &get_state();
+		void mark();
         };
 
         class GlobalMeteringStateCommand : public Command
         {
-            GlobalRouteMeterState before, after;
-            Session &sess;
-            void *src;
-        public:
-            GlobalMeteringStateCommand(Session &, void *src);
-            void operator()();
-            void undo();
-            XMLNode &get_state();
-            void mark();
+	  public:
+		GlobalMeteringStateCommand(Session &, void *src);
+		GlobalMeteringStateCommand (Session&, const XMLNode&);
+		void operator()();
+		void undo();
+		XMLNode &get_state();
+		int set_state (const XMLNode&);
+		void mark();
+
+	  protected:
+		Session& sess;
+		void* src;
+		GlobalRouteMeterState before;
+		GlobalRouteMeterState after;
         };
 
 	/* clicking */
@@ -951,6 +956,7 @@ class Session : public PBD::StatefulDestructible
 	
   private:
 	int  create (bool& new_session, string* mix_template, nframes_t initial_length);
+	void destroy ();
 
 	nframes_t compute_initial_length ();
 
@@ -1102,7 +1108,6 @@ class Session : public PBD::StatefulDestructible
 
 	void hookup_io ();
 	void when_engine_running ();
-	sigc::connection first_time_running;
 	void graph_reordered ();
 
 	string _current_snapshot_name;
@@ -1134,6 +1139,8 @@ class Session : public PBD::StatefulDestructible
 	bool              butler_should_run;
 	mutable gint      butler_should_do_transport_work;
 	int               butler_request_pipe[2];
+
+	inline bool transport_work_requested() const { return g_atomic_int_get(&butler_should_do_transport_work); }
 	
 	struct ButlerRequest {
 	    enum Type {
@@ -1306,7 +1313,7 @@ class Session : public PBD::StatefulDestructible
 	nframes_t _smpte_frames_per_hour;
 	nframes_t _smpte_offset;
 	bool _smpte_offset_negative;
-	
+
 	/* cache the most-recently requested time conversions. This helps when we
 	 * have multiple clocks showing the same time (e.g. the transport frame) */
 	bool           last_smpte_valid;
@@ -1392,9 +1399,8 @@ class Session : public PBD::StatefulDestructible
 	void realtime_stop (bool abort);
 	void non_realtime_start_scrub ();
 	void non_realtime_set_speed ();
-	void non_realtime_stop (bool abort);
-	void non_realtime_overwrite ();
-	void non_realtime_buffer_fill ();
+	void non_realtime_stop (bool abort, int entry_request_count, bool& finished);
+	void non_realtime_overwrite (int entry_request_count, bool& finished);
 	void butler_transport_work ();
 	void post_transport ();
 	void engine_halted ();
@@ -1469,19 +1475,19 @@ class Session : public PBD::StatefulDestructible
 	/* PLAYLISTS */
 	
 	mutable Glib::Mutex playlist_lock;
-	typedef set<Playlist *> PlaylistList;
+	typedef set<boost::shared_ptr<Playlist> > PlaylistList;
 	PlaylistList playlists;
 	PlaylistList unused_playlists;
 
 	int load_playlists (const XMLNode&);
 	int load_unused_playlists (const XMLNode&);
-	void remove_playlist (Playlist *);
-	void track_playlist (Playlist *, bool);
+	void remove_playlist (boost::weak_ptr<Playlist>);
+	void track_playlist (bool, boost::weak_ptr<Playlist>);
 
-	Playlist *playlist_factory (string name);
-	Playlist *XMLPlaylistFactory (const XMLNode&);
+	boost::shared_ptr<Playlist> playlist_factory (string name);
+	boost::shared_ptr<Playlist> XMLPlaylistFactory (const XMLNode&);
 
-	void playlist_length_changed (Playlist *);
+	void playlist_length_changed ();
 	void diskstream_playlist_changed (boost::shared_ptr<Diskstream>);
 
 	/* NAMED SELECTIONS */
@@ -1522,8 +1528,11 @@ class Session : public PBD::StatefulDestructible
 	list<PortInsert *>   _port_inserts;
 	list<PluginInsert *> _plugin_inserts;
 	list<Send *>         _sends;
+	boost::dynamic_bitset<uint32_t>  send_bitset;
+	boost::dynamic_bitset<uint32_t>  insert_bitset;
 	uint32_t          send_cnt;
 	uint32_t          insert_cnt;
+
 
 	void add_redirect (Redirect *);
 	void remove_redirect (Redirect *);

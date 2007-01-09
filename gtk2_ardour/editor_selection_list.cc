@@ -79,7 +79,7 @@ Editor::named_selection_display_button_press (GdkEventButton *ev)
 			case 1:
 			        if (Keyboard::is_delete_event (ev)) {
 				        session->remove_named_selection ((*i)[named_selection_columns.selection]);
-					return stop_signal (named_selection_display, "button_press_event");
+					return true;
 				}
 				break;
 			case 2:
@@ -150,12 +150,12 @@ Editor::create_named_selection (const string & name)
 		return;
 	}
 
-	Playlist*       what_we_found;
-	list<Playlist*> thelist;
+	boost::shared_ptr<Playlist>        what_we_found;
+	list<boost::shared_ptr<Playlist> > thelist;
 
 	for (TrackViewList::iterator i = views->begin(); i != views->end(); ++i) {
 		
-		Playlist *pl = (*i)->playlist();
+		boost::shared_ptr<Playlist> pl = (*i)->playlist();
 		
 		if (pl) {
 			

@@ -290,7 +290,7 @@ Editor::write_audio_selection (TimeSelection& ts)
 
 		if (atv->is_audio_track()) {
 
-			AudioPlaylist* playlist = dynamic_cast<AudioPlaylist*>(atv->get_diskstream()->playlist());
+			boost::shared_ptr<AudioPlaylist> playlist = boost::dynamic_pointer_cast<AudioPlaylist>(atv->get_diskstream()->playlist());
 			
 			if (playlist && write_audio_range (*playlist, atv->get_diskstream()->n_channels(), ts) == 0) {
 				ret = -1;

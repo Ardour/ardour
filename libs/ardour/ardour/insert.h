@@ -46,10 +46,8 @@ class Plugin;
 class Insert : public Redirect
 {
   public:
-	Insert(Session& s, Placement p);
-	Insert(Session& s, string name, Placement p);
-
-	Insert(Session& s, Placement p, int imin, int imax, int omin, int omax);
+	Insert(Session& s, std::string name, Placement p);
+	Insert(Session& s, std::string name, Placement p, int imin, int imax, int omin, int omax);
 	
 	virtual ~Insert() { }
 
@@ -87,6 +85,11 @@ class PortInsert : public Insert
 	int32_t can_support_input_configuration (int32_t) const;
 	int32_t configure_io (int32_t magic, int32_t in, int32_t out);
 	int32_t compute_output_streams (int32_t cnt) const;
+
+	uint32_t bit_slot() const { return bitslot; }
+
+  private:
+	uint32_t bitslot;
 };
 
 class PluginInsert : public Insert

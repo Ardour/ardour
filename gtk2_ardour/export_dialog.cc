@@ -123,7 +123,7 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	export_cd_markers_allowed = true;
 	
 	set_title (_("ardour: export"));
-	set_wmclass (_("ardour_export"), "Ardour");
+	set_wmclass (X_("ardour_export"), "Ardour");
 	set_name ("ExportWindow");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 

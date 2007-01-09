@@ -227,7 +227,9 @@ FSTInfo *fst_get_info( char *dllpath ) {
 	FSTInfo *info;
 	char *fstpath;
 
-	if( !(h = fst_load( dllpath )) ) return NULL;
+	if( !(h = fst_load( dllpath )) ) {
+		return NULL;
+	}
 	if( !(fst = fst_instantiate( h, simple_master_callback, NULL )) ) {
 	    fst_unload( h );
 	    fst_error( "instantiate failed\n" );

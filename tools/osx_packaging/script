@@ -24,4 +24,5 @@ export "DISPLAY=`cat $TMP/display`"
 ps -wx -ocommand | grep -e '[X]11' > /dev/null || exit 11
 
 cd ~/
-exec "$CWD/bin/exporter" "$@"
+shift
+exec "$CWD/bin/exporter" "$*"

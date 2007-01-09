@@ -46,11 +46,13 @@ using namespace Glib;
 using namespace PBD;
 
 ustring
-fit_to_pixels (const ustring& str, int pixel_width, Pango::FontDescription& font, int& actual_width)
+fit_to_pixels (const ustring& str, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses)
 {
 	Label foo;
 	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout ("");
-	
+	ustring::size_type shorter_by = 0;
+	ustring txt;
+
 	layout->set_font_description (font);
 
 	actual_width = 0;
@@ -59,9 +61,11 @@ fit_to_pixels (const ustring& str, int pixel_width, Pango::FontDescription& font
 	ustring::iterator last = ustr.end();
 	--last; /* now points at final entry */
 
+	txt = ustr;
+
 	while (!ustr.empty()) {
 
-		layout->set_text (ustr);
+		layout->set_text (txt);
 
 		int width, height;
 		Gtkmm2ext::get_ink_pixel_size (layout, width, height);
@@ -72,9 +76,17 @@ fit_to_pixels (const ustring& str, int pixel_width, Pango::FontDescription& font
 		}
 		
 		ustr.erase (last--);
+		shorter_by++;
+
+		if (with_ellipses && shorter_by > 3) {
+			txt = ustr;
+			txt += "...";
+		} else {
+			txt = ustr;
+		}
 	}
 
-	return ustr;
+	return txt;
 }
 
 gint
@@ -224,64 +236,6 @@ get_font_for_style (string widgetname)
 	return style->get_font();
 }
 
-gint
-pane_handler (GdkEventButton* ev, Gtk::Paned* pane)
-{
-	if (ev->window != Gtkmm2ext::get_paned_handle (*pane)) {
-		return FALSE;
-	}
-
-	if (Keyboard::is_delete_event (ev)) {
-
-		gint pos;
-		gint cmp;
-		
-		pos = pane->get_position ();
-
-		if (dynamic_cast<VPaned*>(pane)) {
-			cmp = pane->get_height();
-		} else {
-			cmp = pane->get_width();
-		}
-
-		/* we have to use approximations here because we can't predict the
-		   exact position or sizes of the pane (themes, etc)
-		*/
-
-		if (pos < 10 || abs (pos - cmp) < 10) {
-
-			/* already collapsed: restore it (note that this is cast from a pointer value to int, which is tricky on 64bit */
-			
-			pane->set_position ((intptr_t) pane->get_data ("rpos"));
-
-		} else {	
-
-			int collapse_direction;
-
-			/* store the current position */
-
-			pane->set_data ("rpos", (gpointer) pos);
-
-			/* collapse to show the relevant child in full */
-			
-			collapse_direction = (intptr_t) pane->get_data ("collapse-direction");
-
-			if (collapse_direction) {
-				pane->set_position (1);
-			} else {
-				if (dynamic_cast<VPaned*>(pane)) {
-					pane->set_position (pane->get_height());
-				} else {
-					pane->set_position (pane->get_width());
-				}
-			}
-		}
-
-		return TRUE;
-	} 
-
-	return FALSE;
-}
 uint32_t
 rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a, string attr, int state, bool rgba)
 {
@@ -544,3 +498,52 @@ longest (vector<string>& strings)
 	
 	return *longest;
 }
+
+bool
+key_is_legal_for_numeric_entry (guint keyval)
+{
+	switch (keyval) {
+	case GDK_minus:
+	case GDK_plus:
+	case GDK_period:
+	case GDK_comma:
+	case GDK_0:
+	case GDK_1:
+	case GDK_2:
+	case GDK_3:
+	case GDK_4:
+	case GDK_5:
+	case GDK_6:
+	case GDK_7:
+	case GDK_8:
+	case GDK_9:
+	case GDK_KP_Add:
+	case GDK_KP_Subtract:
+	case GDK_KP_Decimal:
+	case GDK_KP_0:
+	case GDK_KP_1:
+	case GDK_KP_2:
+	case GDK_KP_3:
+	case GDK_KP_4:
+	case GDK_KP_5:
+	case GDK_KP_6:
+	case GDK_KP_7:
+	case GDK_KP_8:
+	case GDK_KP_9:
+	case GDK_Return:
+	case GDK_BackSpace:
+	case GDK_Delete:
+	case GDK_KP_Enter:
+	case GDK_Home:
+	case GDK_End:
+	case GDK_Left:
+	case GDK_Right:
+		return true;
+		
+	default:
+		break;
+	}
+
+	return false;
+}
+

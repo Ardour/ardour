@@ -74,7 +74,7 @@ if ardour_vst['VST']:
     # the wine script - into the bin dir
     env.Alias('install', env.Install(os.path.join(install_prefix, 'bin'), wine_executable))
     # the win32 executable - into the lib dir since the wine script will look for it there
-    env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2'), 'ardour_vst.exe.so'))
+    env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), 'ardour_vst.exe.so'))
 
 env.Alias ('tarball', env.Distribute (env['DISTTREE'],
                                       [ 'SConscript',

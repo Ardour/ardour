@@ -40,6 +40,7 @@
 #include <pbd/pathscanner.h>
 #include <pbd/stl_delete.h>
 #include <pbd/basename.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/audioengine.h>
 #include <ardour/configuration.h>
@@ -290,12 +291,13 @@ Session::Session (AudioEngine &eng,
 	if (new_session) {
 		if (create (new_session, mix_template, compute_initial_length())) {
 			cerr << "create failed\n";
+			destroy ();
 			throw failed_constructor ();
 		}
 	}
 	
 	if (second_stage_init (new_session)) {
-		cerr << "2nd state failed\n";
+		destroy ();
 		throw failed_constructor ();
 	}
 	
@@ -359,6 +361,7 @@ Session::Session (AudioEngine &eng,
 
 	if (new_session) {
 		if (create (new_session, 0, initial_length)) {
+			destroy ();
 			throw failed_constructor ();
 		}
 	}
@@ -386,6 +389,7 @@ Session::Session (AudioEngine &eng,
 	Config->set_output_auto_connect (output_ac);
 
 	if (second_stage_init (new_session)) {
+		destroy ();
 		throw failed_constructor ();
 	}
 	
@@ -401,6 +405,12 @@ Session::Session (AudioEngine &eng,
 }
 
 Session::~Session ()
+{
+	destroy ();
+}
+
+void
+Session::destroy ()
 {
 	/* if we got to here, leaving pending capture state around
 	   is a mistake.
@@ -469,10 +479,24 @@ Session::~Session ()
 		tmp = i;
 		++tmp;
 
-		delete *i;
+		(*i)->drop_references ();
 		
 		i = tmp;
 	}
+	
+	for (PlaylistList::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ) {
+		PlaylistList::iterator tmp;
+
+		tmp = i;
+		++tmp;
+
+		(*i)->drop_references ();
+		
+		i = tmp;
+	}
+	
+	playlists.clear ();
+	unused_playlists.clear ();
 
 #ifdef TRACK_DESTRUCTION
 	cerr << "delete regions\n";
@@ -619,8 +643,6 @@ Session::when_engine_running ()
 
 	/* we don't want to run execute this again */
 
-	first_time_running.disconnect ();
-
 	set_block_size (_engine.frames_per_cycle());
 	set_frame_rate (_engine.frame_rate());
 
@@ -683,23 +705,6 @@ Session::when_engine_running ()
 
 	if (_clicking) {
 		// XXX HOW TO ALERT UI TO THIS ? DO WE NEED TO?
-	}
-
-	if (auditioner == 0) {
-
-		/* we delay creating the auditioner till now because
-		   it makes its own connections to ports named
-		   in the ARDOUR_RC config file. the engine has
-		   to be running for this to work.
-		*/
-
-		try {
-			auditioner.reset (new Auditioner (*this));
-		}
-
-		catch (failed_constructor& err) {
-			warning << _("cannot create Auditioner: no auditioning of regions possible") << endmsg;
-		}
 	}
 
 	/* Create a set of Connection objects that map
@@ -841,6 +846,7 @@ Session::when_engine_running ()
 		}
 	}
 
+	
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~(CannotSave|Dirty));
 
 	/* hook us up to the engine */
@@ -866,6 +872,22 @@ Session::hookup_io ()
 	*/
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state | InitialConnecting);
+
+	if (auditioner == 0) {
+		
+		/* we delay creating the auditioner till now because
+		   it makes its own connections to ports.
+		   the engine has to be running for this to work.
+		*/
+		
+		try {
+			auditioner.reset (new Auditioner (*this));
+		}
+		
+		catch (failed_constructor& err) {
+			warning << _("cannot create Auditioner: no auditioning of regions possible") << endmsg;
+		}
+	}
 
 	/* Tell all IO objects to create their ports */
 
@@ -918,7 +940,7 @@ Session::hookup_io ()
 }
 
 void
-Session::playlist_length_changed (Playlist* pl)
+Session::playlist_length_changed ()
 {
 	/* we can't just increase end_location->end() if pl->get_maximum_extent() 
 	   if larger. if the playlist used to be the longest playlist,
@@ -932,10 +954,10 @@ Session::playlist_length_changed (Playlist* pl)
 void
 Session::diskstream_playlist_changed (boost::shared_ptr<Diskstream> dstream)
 {
-	Playlist *playlist;
+	boost::shared_ptr<Playlist> playlist;
 
 	if ((playlist = dstream->playlist()) != 0) {
-	  playlist->LengthChanged.connect (sigc::bind (mem_fun (this, &Session::playlist_length_changed), playlist));
+		playlist->LengthChanged.connect (mem_fun (this, &Session::playlist_length_changed));
 	}
 	
 	/* see comment in playlist_length_changed () */
@@ -2317,7 +2339,7 @@ Session::get_maximum_extent () const
 	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
 	for (DiskstreamList::const_iterator i = dsl->begin(); i != dsl->end(); ++i) {
-		Playlist* pl = (*i)->playlist();
+		boost::shared_ptr<Playlist> pl = (*i)->playlist();
 		if ((me = pl->get_maximum_extent()) > max) {
 			max = me;
 		}
@@ -2697,14 +2719,10 @@ Session::add_source (boost::shared_ptr<Source> source)
 		result = sources.insert (entry);
 	}
 
-	if (!result.second) {
-		cerr << "\tNOT inserted ? " << result.second << endl;
+	if (result.second) {
+		source->GoingAway.connect (sigc::bind (mem_fun (this, &Session::remove_source), boost::weak_ptr<Source> (source)));
+		set_dirty();
 	}
-
-	source->GoingAway.connect (sigc::bind (mem_fun (this, &Session::remove_source), boost::weak_ptr<Source> (source)));
-	set_dirty();
-	
-	SourceAdded (source); /* EMIT SIGNAL */
 }
 
 void
@@ -2737,8 +2755,6 @@ Session::remove_source (boost::weak_ptr<Source> src)
 		
 		save_state (_current_snapshot_name);
 	}
-	
-	SourceRemoved(source); /* EMIT SIGNAL */
 }
 
 boost::shared_ptr<Source>
@@ -2924,6 +2940,7 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 				} else {
 					snprintf (buf, sizeof(buf), "%s/T%04d-%s.wav", spath.c_str(), cnt, legalized.c_str());
 				}
+
 			} else {
 
 				spath += '/';
@@ -2956,6 +2973,7 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 
 		if (cnt > limit) {
 			error << string_compose(_("There are already %1 recordings for %2, which I consider too many."), limit, name) << endmsg;
+			destroy ();
 			throw failed_constructor();
 		}
 	}
@@ -2967,6 +2985,7 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 	string foo = buf;
 
 	spath = discover_best_sound_dir ();
+	spath += '/';
 
 	string::size_type pos = foo.find_last_of ('/');
 	
@@ -3176,7 +3195,7 @@ Session::create_midi_source_for_session (MidiDiskstream& ds)
 
 /* Playlist management */
 
-Playlist *
+boost::shared_ptr<Playlist>
 Session::playlist_by_name (string name)
 {
 	Glib::Mutex::Lock lm (playlist_lock);
@@ -3190,11 +3209,12 @@ Session::playlist_by_name (string name)
 			return* i;
 		}
 	}
-	return 0;
+
+	return boost::shared_ptr<Playlist>();
 }
 
 void
-Session::add_playlist (Playlist* playlist)
+Session::add_playlist (boost::shared_ptr<Playlist> playlist)
 {
 	if (playlist->hidden()) {
 		return;
@@ -3204,9 +3224,8 @@ Session::add_playlist (Playlist* playlist)
 		Glib::Mutex::Lock lm (playlist_lock);
 		if (find (playlists.begin(), playlists.end(), playlist) == playlists.end()) {
 			playlists.insert (playlists.begin(), playlist);
-			// playlist->ref();
-			playlist->InUse.connect (mem_fun (*this, &Session::track_playlist));
-			playlist->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_playlist), playlist));
+			playlist->InUse.connect (sigc::bind (mem_fun (*this, &Session::track_playlist), boost::weak_ptr<Playlist>(playlist)));
+			playlist->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_playlist), boost::weak_ptr<Playlist>(playlist)));
 		}
 	}
 
@@ -3216,7 +3235,7 @@ Session::add_playlist (Playlist* playlist)
 }
 
 void
-Session::get_playlists (vector<Playlist*>& s)
+Session::get_playlists (vector<boost::shared_ptr<Playlist> >& s)
 {
 	{ 
 		Glib::Mutex::Lock lm (playlist_lock);
@@ -3230,15 +3249,25 @@ Session::get_playlists (vector<Playlist*>& s)
 }
 
 void
-Session::track_playlist (Playlist* pl, bool inuse)
+Session::track_playlist (bool inuse, boost::weak_ptr<Playlist> wpl)
 {
+	boost::shared_ptr<Playlist> pl(wpl.lock());
+
+	if (!pl) {
+		return;
+	}
+
 	PlaylistList::iterator x;
+
+	if (pl->hidden()) {
+		/* its not supposed to be visible */
+		return;
+	}
 
 	{ 
 		Glib::Mutex::Lock lm (playlist_lock);
 
 		if (!inuse) {
-			//cerr << "shifting playlist to unused: " << pl->name() << endl;
 
 			unused_playlists.insert (pl);
 			
@@ -3248,8 +3277,7 @@ Session::track_playlist (Playlist* pl, bool inuse)
 
 			
 		} else {
-			//cerr << "shifting playlist to used: " << pl->name() << endl;
-			
+
 			playlists.insert (pl);
 			
 			if ((x = unused_playlists.find (pl)) != unused_playlists.end()) {
@@ -3260,20 +3288,24 @@ Session::track_playlist (Playlist* pl, bool inuse)
 }
 
 void
-Session::remove_playlist (Playlist* playlist)
+Session::remove_playlist (boost::weak_ptr<Playlist> weak_playlist)
 {
 	if (_state_of_the_state & Deletion) {
 		return;
 	}
 
+	boost::shared_ptr<Playlist> playlist (weak_playlist.lock());
+
+	if (!playlist) {
+		return;
+	}
+
 	{ 
 		Glib::Mutex::Lock lm (playlist_lock);
-		// cerr << "removing playlist: " << playlist->name() << endl;
 
 		PlaylistList::iterator i;
 
 		i = find (playlists.begin(), playlists.end(), playlist);
-
 		if (i != playlists.end()) {
 			playlists.erase (i);
 		}
@@ -3451,6 +3483,12 @@ Session::graph_reordered ()
 		return;
 	}
 	
+	/* every track/bus asked for this to be handled but it was deferred because
+	   we were connecting. do it now.
+	*/
+
+	request_input_change_handling ();
+
 	resort_routes ();
 
 	/* force all diskstreams to update their capture offset values to 
@@ -3528,18 +3566,28 @@ Session::remove_redirect (Redirect* redirect)
 	Insert* insert;
 	PortInsert* port_insert;
 	PluginInsert* plugin_insert;
-
+	
 	if ((insert = dynamic_cast<Insert *> (redirect)) != 0) {
 		if ((port_insert = dynamic_cast<PortInsert *> (insert)) != 0) {
-			_port_inserts.remove (port_insert);
+			list<PortInsert*>::iterator x = find (_port_inserts.begin(), _port_inserts.end(), port_insert);
+			if (x != _port_inserts.end()) {
+				insert_bitset[port_insert->bit_slot()] = false;
+				_port_inserts.erase (x);
+			}
 		} else if ((plugin_insert = dynamic_cast<PluginInsert *> (insert)) != 0) {
 			_plugin_inserts.remove (plugin_insert);
 		} else {
-			fatal << _("programming error: unknown type of Insert deleted!") << endmsg;
+			fatal << string_compose (_("programming error: %1"),
+						 X_("unknown type of Insert deleted!")) 
+			      << endmsg;
 			/*NOTREACHED*/
 		}
 	} else if ((send = dynamic_cast<Send *> (redirect)) != 0) {
-		_sends.remove (send);
+		list<Send*>::iterator x = find (_sends.begin(), _sends.end(), send);
+		if (x != _sends.end()) {
+			send_bitset[send->bit_slot()] = false;
+			_sends.erase (x);
+		}
 	} else {
 		fatal << _("programming error: unknown type of Redirect deleted!") << endmsg;
 		/*NOTREACHED*/
@@ -3561,6 +3609,13 @@ Session::available_capture_duration ()
 	case FormatInt24:
 		sample_bytes_on_disk = 3;
 		break;
+
+	default: 
+		/* impossible, but keep some gcc versions happy */
+		fatal << string_compose (_("programming error: %1"),
+					 X_("illegal native file data format"))
+		      << endmsg;
+		/*NOTREACHED*/
 	}
 
 	double scale = 4096.0 / sample_bytes_on_disk;
@@ -3642,20 +3697,70 @@ Session::ensure_buffers (ChanCount howmany)
 	allocate_pan_automation_buffers (current_block_size, howmany.get(DataType::AUDIO), false);
 }
 
-string
-Session::next_send_name ()
+uint32_t
+Session::next_insert_id ()
 {
-	char buf[32];
-	snprintf (buf, sizeof (buf), "send %" PRIu32, ++send_cnt);
-	return buf;
+	/* this doesn't really loop forever. just think about it */
+
+	while (true) {
+		for (boost::dynamic_bitset<uint32_t>::size_type n = 0; n < insert_bitset.size(); ++n) {
+			if (!insert_bitset[n]) {
+				insert_bitset[n] = true;
+				cerr << "Returning " << n << " as insert ID\n";
+				return n;
+				
+			}
+		}
+		
+		/* none available, so resize and try again */
+
+		insert_bitset.resize (insert_bitset.size() + 16, false);
+	}
 }
 
-string
-Session::next_insert_name ()
+uint32_t
+Session::next_send_id ()
 {
-	char buf[32];
-	snprintf (buf, sizeof (buf), "insert %" PRIu32, ++insert_cnt);
-	return buf;
+	/* this doesn't really loop forever. just think about it */
+
+	while (true) {
+		for (boost::dynamic_bitset<uint32_t>::size_type n = 0; n < send_bitset.size(); ++n) {
+			if (!send_bitset[n]) {
+				send_bitset[n] = true;
+				cerr << "Returning " << n << " as send ID\n";
+				return n;
+				
+			}
+		}
+		
+		/* none available, so resize and try again */
+
+		send_bitset.resize (send_bitset.size() + 16, false);
+	}
+}
+
+void
+Session::mark_send_id (uint32_t id)
+{
+	if (id >= send_bitset.size()) {
+		send_bitset.resize (id+16, false);
+	}
+	if (send_bitset[id]) {
+		warning << string_compose (_("send ID %1 appears to be in use already"), id) << endmsg;
+	}
+	send_bitset[id] = true;
+}
+
+void
+Session::mark_insert_id (uint32_t id)
+{
+	if (id >= insert_bitset.size()) {
+		insert_bitset.resize (id+16, false);
+	}
+	if (insert_bitset[id]) {
+		warning << string_compose (_("insert ID %1 appears to be in use already"), id) << endmsg;
+	}
+	insert_bitset[id] = true;
 }
 
 /* Named Selection management */
@@ -3732,12 +3837,6 @@ Session::route_name_unique (string n) const
 	return true;
 }
 
-int
-Session::cleanup_audio_file_source (boost::shared_ptr<AudioFileSource> fs)
-{
-	return fs->move_to_trash (dead_sound_dir_name);
-}
-
 uint32_t
 Session::n_playlists () const
 {
@@ -3794,18 +3893,17 @@ int
 Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t len, 	
 			       bool overwrite, vector<boost::shared_ptr<Source> >& srcs, InterThreadInfo& itt)
 {
+	int ret = -1;
+	boost::shared_ptr<Playlist> playlist;
 	boost::shared_ptr<AudioFileSource> fsource;
-	
-	int              ret = -1;
-	Playlist*        playlist = 0;
-	uint32_t         x;
-	char             buf[PATH_MAX+1];
-	string           dir;
-	ChanCount        nchans(track.audio_diskstream()->n_channels());
-	jack_nframes_t   position;
-	jack_nframes_t   this_chunk;
-	jack_nframes_t   to_do;
-	BufferSet        buffers;
+	uint32_t x;
+	char buf[PATH_MAX+1];
+	string dir;
+	ChanCount nchans(track.audio_diskstream()->n_channels());
+	nframes_t position;
+	nframes_t this_chunk;
+	nframes_t to_do;
+	BufferSet buffers;
 
 	// any bigger than this seems to cause stack overflows in called functions
 	const nframes_t chunk_size = (128 * 1024)/4;
@@ -3915,7 +4013,7 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t le
 		/* construct a region to represent the bounced material */
 
 		boost::shared_ptr<Region> aregion = RegionFactory::create (srcs, 0, srcs.front()->length(), 
-									   region_name_from_path (srcs.front()->name()));
+									   region_name_from_path (srcs.front()->name(), true));
 
 		ret = 0;
 	}

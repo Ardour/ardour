@@ -157,8 +157,6 @@ Session::_butler_thread_work (void* arg)
 	return 0;
 }
 
-#define transport_work_requested() g_atomic_int_get(&butler_should_do_transport_work)
-
 void *
 Session::butler_thread_work ()
 {

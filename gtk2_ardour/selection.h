@@ -101,8 +101,8 @@ class Selection : public sigc::trackable
 	void set (std::vector<RegionView*>&);
 	long set (TimeAxisView*, nframes_t, nframes_t);
 	void set (ARDOUR::AutomationList*);
-	void set (ARDOUR::Playlist*);
-	void set (const list<ARDOUR::Playlist*>&);
+	void set (boost::shared_ptr<ARDOUR::Playlist>);
+	void set (const list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void set (boost::shared_ptr<ARDOUR::Redirect>);
 	void set (AutomationSelectable*);
 
@@ -112,8 +112,8 @@ class Selection : public sigc::trackable
 	void toggle (std::vector<RegionView*>&);
 	long toggle (nframes_t, nframes_t);
 	void toggle (ARDOUR::AutomationList*);
-	void toggle (ARDOUR::Playlist*);
-	void toggle (const list<ARDOUR::Playlist*>&);
+	void toggle (boost::shared_ptr<ARDOUR::Playlist>);
+	void toggle (const list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void toggle (boost::shared_ptr<ARDOUR::Redirect>);
 
 	void add (TimeAxisView*);
@@ -122,8 +122,8 @@ class Selection : public sigc::trackable
 	void add (std::vector<RegionView*>&);
 	long add (nframes_t, nframes_t);
 	void add (ARDOUR::AutomationList*);
-	void add (ARDOUR::Playlist*);
-	void add (const list<ARDOUR::Playlist*>&);
+	void add (boost::shared_ptr<ARDOUR::Playlist>);
+	void add (const list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void add (boost::shared_ptr<ARDOUR::Redirect>);
 	
 	void remove (TimeAxisView*);
@@ -132,8 +132,8 @@ class Selection : public sigc::trackable
 	void remove (uint32_t selection_id);
 	void remove (nframes_t, nframes_t);
 	void remove (ARDOUR::AutomationList*);
-	void remove (ARDOUR::Playlist*);
-	void remove (const list<ARDOUR::Playlist*>&);
+	void remove (boost::shared_ptr<ARDOUR::Playlist>);
+	void remove (const list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void remove (boost::shared_ptr<ARDOUR::Redirect>);
 
 	void replace (uint32_t time_index, nframes_t start, nframes_t end);

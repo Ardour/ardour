@@ -13,3 +13,4 @@ export DYLD_LIBRARY_PATH=$LD_LIBRARY_PATH
 # For the internal clearlooks engine
 export GTK_PATH=$PWD/libs/clearlooks:~/.ardour2
 
+EXECUTABLE=gtk2_ardour/ardour-2.0beta10

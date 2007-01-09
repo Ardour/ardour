@@ -22,12 +22,14 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <errno.h>
 
 #include <pbd/mountpoint.h>
 #include <pbd/pathscanner.h>
 #include <pbd/stl_delete.h>
 #include <pbd/strsplit.h>
+#include <pbd/enumwriter.h>
 
 #include <sndfile.h>
 
@@ -193,9 +195,7 @@ XMLNode&
 AudioFileSource::get_state ()
 {
 	XMLNode& root (AudioSource::get_state());
-	char buf[16];
-	snprintf (buf, sizeof (buf), "0x%x", (int)_flags);
-	root.add_property ("flags", buf);
+	root.add_property ("flags", enum_2_string (_flags));
 	return root;
 }
 
@@ -210,9 +210,7 @@ AudioFileSource::set_state (const XMLNode& node)
 
 	if ((prop = node.property (X_("flags"))) != 0) {
 
-		int ival;
-		sscanf (prop->value().c_str(), "0x%x", &ival);
-		_flags = Flag (ival);
+		_flags = Flag (string_2_enum (prop->value(), _flags));
 
 	} else {
 
@@ -257,7 +255,7 @@ AudioFileSource::mark_streaming_write_completed ()
 
 	if (_peaks_built || pending_peak_builds.empty()) {
 		_peaks_built = true;
-		 PeaksReady (); /* EMIT SIGNAL */
+		PeaksReady (); /* EMIT SIGNAL */
 	}
 }
 
@@ -287,9 +285,11 @@ AudioFileSource::move_to_trash (const string trash_dir_name)
 	   stick it in the `trash_dir_name' directory
 	   on whichever filesystem it was already on.
 	*/
-
+	
 	newpath = Glib::path_get_dirname (_path);
-	newpath = Glib::path_get_dirname (newpath);
+	newpath = Glib::path_get_dirname (newpath); 
+
+	cerr << "from " << _path << " dead dir looks like " << newpath << endl;
 
 	newpath += '/';
 	newpath += trash_dir_name;
@@ -522,7 +522,7 @@ AudioFileSource::set_name (string newname, bool destructive)
 	}
 
 	if (rename (oldpath.c_str(), newpath.c_str()) != 0) {
-		error << string_compose (_("cannot rename audio file for %1 to %2"), _name, newpath) << endmsg;
+		error << string_compose (_("cannot rename audio file %1 to %2"), _name, newpath) << endmsg;
 		return -1;
 	}
 
@@ -555,4 +555,27 @@ AudioFileSource::setup_peakfile ()
 	} else {
 		return 0;
 	}
+}
+
+bool
+AudioFileSource::safe_file_extension(string file)
+{
+	return !(file.rfind(".wav") == string::npos &&
+		file.rfind(".aiff")== string::npos &&
+		file.rfind(".aif") == string::npos &&
+		file.rfind(".snd") == string::npos &&
+		file.rfind(".au")  == string::npos &&
+		file.rfind(".raw") == string::npos &&
+		file.rfind(".sf")  == string::npos &&
+		file.rfind(".cdr") == string::npos &&
+		file.rfind(".smp") == string::npos &&
+		file.rfind(".maud")== string::npos &&
+		file.rfind(".vwe") == string::npos &&
+		file.rfind(".paf") == string::npos &&
+#ifdef HAVE_COREAUDIO
+		file.rfind(".mp3") == string::npos &&
+		file.rfind(".aac") == string::npos &&
+		file.rfind(".mp4") == string::npos &&
+#endif // HAVE_COREAUDIO
+		file.rfind(".voc") == string::npos);
 }

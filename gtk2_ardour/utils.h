@@ -53,7 +53,7 @@ slider_position_to_gain (double pos)
 	return pow (2.0,(sqrt(sqrt(sqrt(pos)))*198.0-192.0)/6.0);
 }
 
-Glib::ustring fit_to_pixels (const Glib::ustring&, int pixel_width, Pango::FontDescription& font, int& actual_width);
+Glib::ustring fit_to_pixels (const Glib::ustring&, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses = false);
 
 gint   just_hide_it (GdkEventAny*, Gtk::Window*);
 void   allow_keyboard_focus (bool);
@@ -65,7 +65,6 @@ ArdourCanvas::Points* get_canvas_points (std::string who, uint32_t npoints);
 
 Pango::FontDescription get_font_for_style (std::string widgetname);
 
-gint pane_handler (GdkEventButton*, Gtk::Paned*);
 uint32_t rgba_from_style (std::string, uint32_t, uint32_t, uint32_t, uint32_t, std::string = "fg", int = Gtk::STATE_NORMAL, bool = true);
 
 void decorate (Gtk::Window& w, Gdk::WMDecoration d);
@@ -81,5 +80,6 @@ Glib::RefPtr<Gdk::Pixbuf> get_icon (const char*);
 static std::map<std::string, Glib::RefPtr<Gdk::Pixbuf> > xpm_map;
 const char* const *get_xpm_data (std::string path);
 std::string longest (std::vector<std::string>&);
+bool key_is_legal_for_numeric_entry (guint keyval);
 
 #endif /* __ardour_gtk_utils_h__ */

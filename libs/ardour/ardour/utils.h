@@ -34,10 +34,9 @@
 class XMLNode;
 
 void elapsed_time_to_str (char *buf, uint32_t seconds);
-std::string legalize_for_path (std::string str);
+Glib::ustring legalize_for_path (Glib::ustring str);
 std::ostream& operator<< (std::ostream& o, const ARDOUR::BBT_Time& bbt);
 XMLNode* find_named_node (const XMLNode& node, std::string name);
-std::string placement_as_string (ARDOUR::Placement);
 
 static inline float f_max(float x, float a) {
 	x -= a;
@@ -52,10 +51,11 @@ int cmp_nocase (const std::string& s, const std::string& s2);
 
 int tokenize_fullpath (std::string fullpath, std::string& path, std::string& name);
 
-int touch_file(std::string path);
+int touch_file(Glib::ustring path);
 
-std::string region_name_from_path (std::string path);
-std::string path_expand (std::string);
+Glib::ustring path_expand (Glib::ustring);
+Glib::ustring region_name_from_path (Glib::ustring path, bool strip_channels);
+bool path_is_paired (Glib::ustring path, Glib::ustring& pair_base);
 
 void compute_equal_power_fades (nframes_t nframes, float* in, float* out);
 
@@ -66,6 +66,8 @@ const char* edit_mode_to_string (ARDOUR::EditMode);
 ARDOUR::EditMode string_to_edit_mode (std::string);
 
 float meter_falloff_to_float (ARDOUR::MeterFalloff);
+ARDOUR::MeterFalloff meter_falloff_from_float (float);
+float meter_falloff_to_db_per_sec (float);
 float meter_hold_to_float (ARDOUR::MeterHold);
 
 #if defined(HAVE_COREAUDIO) || defined(HAVE_AUDIOUNITS)

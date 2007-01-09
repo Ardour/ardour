@@ -52,8 +52,10 @@ using namespace PBD;
 void
 Session::request_input_change_handling ()
 {
-	Event* ev = new Event (Event::InputConfigurationChange, Event::Add, Event::Immediate, 0, 0.0);
-	queue_event (ev);
+	if (!(_state_of_the_state & (InitialConnecting|Deletion))) {
+		Event* ev = new Event (Event::InputConfigurationChange, Event::Add, Event::Immediate, 0, 0.0);
+		queue_event (ev);
+	}
 }
 
 void
@@ -185,8 +187,13 @@ Session::realtime_stop (bool abort)
 void
 Session::butler_transport_work ()
 {
+  restart:
+	bool finished;
 	boost::shared_ptr<RouteList> r = routes.reader ();
 	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+
+	int on_entry = g_atomic_int_get (&butler_should_do_transport_work);
+	finished = true;
 
 	if (post_transport_work & PostTransportCurveRealloc) {
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -211,30 +218,48 @@ Session::butler_transport_work ()
 		cumulative_rf_motion = 0;
 		reset_rf_scale (0);
 
-		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-			if (!(*i)->hidden()) {
-				if ((*i)->speed() != 1.0f || (*i)->speed() != -1.0f) {
-					(*i)->seek ((nframes_t) (_transport_frame * (double) (*i)->speed()));
+		/* don't seek if locate will take care of that in non_realtime_stop() */
+
+		if (!(post_transport_work & PostTransportLocate)) {
+			
+			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
+				if (!(*i)->hidden()) {
+					if ((*i)->speed() != 1.0f || (*i)->speed() != -1.0f) {
+						(*i)->seek ((nframes_t) (_transport_frame * (double) (*i)->speed()));
+					}
+					else {
+						(*i)->seek (_transport_frame);
+					}
 				}
-				else {
-					(*i)->seek (_transport_frame);
+				if (on_entry != g_atomic_int_get (&butler_should_do_transport_work)) {
+					/* new request, stop seeking, and start again */
+					g_atomic_int_dec_and_test (&butler_should_do_transport_work);
+					goto restart;
 				}
 			}
 		}
 	}
 
 	if (post_transport_work & (PostTransportStop|PostTransportLocate)) {
-		non_realtime_stop (post_transport_work & PostTransportAbort);
+		non_realtime_stop (post_transport_work & PostTransportAbort, on_entry, finished);
+		if (!finished) {
+			g_atomic_int_dec_and_test (&butler_should_do_transport_work);
+			goto restart;
+		}
 	}
 
 	if (post_transport_work & PostTransportOverWrite) {
-		non_realtime_overwrite ();
+		non_realtime_overwrite (on_entry, finished);
+		if (!finished) {
+			g_atomic_int_dec_and_test (&butler_should_do_transport_work);
+			goto restart;
+		}
 	}
 
 	if (post_transport_work & PostTransportAudition) {
 		non_realtime_set_audition ();
 	}
-
+	
 	g_atomic_int_dec_and_test (&butler_should_do_transport_work);
 }
 
@@ -249,7 +274,7 @@ Session::non_realtime_set_speed ()
 }
 
 void
-Session::non_realtime_overwrite ()
+Session::non_realtime_overwrite (int on_entry, bool& finished)
 {
 	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
@@ -257,11 +282,15 @@ Session::non_realtime_overwrite ()
 		if ((*i)->pending_overwrite) {
 			(*i)->overwrite_existing_buffers ();
 		}
+		if (on_entry != g_atomic_int_get (&butler_should_do_transport_work)) {
+			finished = false;
+			return;
+		}
 	}
 }
 
 void
-Session::non_realtime_stop (bool abort)
+Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 {
 	struct tm* now;
 	time_t     xnow;
@@ -375,6 +404,11 @@ Session::non_realtime_stop (bool abort)
 				else {
 					(*i)->seek (_transport_frame);
 				}
+			}
+			if (on_entry != g_atomic_int_get (&butler_should_do_transport_work)) {
+				finished = false;
+				/* we will be back */
+				return;
 			}
 		}
 
@@ -628,6 +662,8 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 		schedule_butler_transport_work ();
 
 	} else {
+
+		cerr << "butler not requested\n";
 
 		/* this is functionally what clear_clicks() does but with a tentative lock */
 
@@ -904,7 +940,6 @@ Session::post_transport ()
 	if (post_transport_work & PostTransportLocate) {
 
 		if ((Config->get_auto_play() && !_exporting) || (post_transport_work & PostTransportRoll)) {
-			
 			start_transport ();
 			
 		} else {
@@ -1127,7 +1162,7 @@ void
 Session::request_bounded_roll (nframes_t start, nframes_t end)
 {
 	request_stop ();
-	Event *ev = new Event (Event::StopOnce, Event::Replace, Event::Immediate, end, 0.0);
+ 	Event *ev = new Event (Event::StopOnce, Event::Replace, end, Event::Immediate, 0.0);
 	queue_event (ev);
 	request_locate (start, true);
 }
@@ -1135,6 +1170,8 @@ Session::request_bounded_roll (nframes_t start, nframes_t end)
 void
 Session::engine_halted ()
 {
+	bool ignored;
+
 	/* there will be no more calls to process(), so
 	   we'd better clean up for ourselves, right now.
 
@@ -1147,7 +1184,7 @@ Session::engine_halted ()
 	stop_butler ();
 	
 	realtime_stop (false);
-	non_realtime_stop (false);
+	non_realtime_stop (false, 0, ignored);
 	transport_sub_state = 0;
 
 	TransportStateChange (); /* EMIT SIGNAL */

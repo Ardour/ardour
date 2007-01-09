@@ -47,10 +47,10 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 	  name_label (_("NAME:")),
 	  audition_button (_("play")),
 	  time_table (3, 2),
-	  start_clock ("AudioRegionEditorClock", true),
-	  end_clock ("AudioRegionEditorClock", true),
-	  length_clock ("AudioRegionEditorClock", true, true),
-	  sync_offset_clock ("AudioRegionEditorClock", true, true)
+	  start_clock (X_("regionstart"), true, X_("AudioRegionEditorClock"), true),
+	  end_clock (X_("regionend"), true, X_("AudioRegionEditorClock"), true),
+	  length_clock (X_("regionlength"), true, X_("AudioRegionEditorClock"), true, true),
+	  sync_offset_clock (X_("regionsyncoffset"), true, X_("AudioRegionEditorClock"), true, true)
 
 {
 	start_clock.set_session (&_session);
@@ -128,8 +128,6 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 	name_changed ();
 	bounds_changed (Change (StartChanged|LengthChanged|PositionChanged));
 
-	//XMLNode *node  = _region->extra_xml ("GUI");
-
 	_region->StateChanged.connect (mem_fun(*this, &AudioRegionEditor::region_changed));
 	
 	spin_arrow_grab = false;
@@ -203,7 +201,7 @@ AudioRegionEditor::start_clock_changed ()
 {
 	_session.begin_reversible_command (_("change region start position"));
 
-	Playlist* const pl = _region->playlist();
+	boost::shared_ptr<Playlist> pl = _region->playlist();
 
 	if (pl) {
 		XMLNode &before = pl->get_state();
@@ -220,8 +218,8 @@ AudioRegionEditor::end_clock_changed ()
 {
 	_session.begin_reversible_command (_("change region end position"));
 
-	Playlist* const pl = _region->playlist();
-
+	boost::shared_ptr<Playlist> pl = _region->playlist();
+	
 	if (pl) {
 		XMLNode &before = pl->get_state();
 		_region->trim_end (end_clock.current_time(), this);
@@ -241,7 +239,7 @@ AudioRegionEditor::length_clock_changed ()
 	
 	_session.begin_reversible_command (_("change region length"));
 	
-	Playlist* const pl = _region->playlist();
+	boost::shared_ptr<Playlist> pl = _region->playlist();
 
 	if (pl) {
 		XMLNode &before = pl->get_state();

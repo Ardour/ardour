@@ -100,16 +100,14 @@ Editor::scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item)
 	nframes_t offset = 0;
 
 	nframes_t x_pos = 0 ;
-	if(item->get_position() < offset)
-	{
+
+	if (item->get_position() < offset) {
 		x_pos = 0 ;
-	}
-	else
-	{
-		x_pos = item->get_position() - offset + (item->get_duration() / 2) ;
+	} else {
+		x_pos = item->get_position() - offset + (item->get_duration() / 2);
 	}
 	
-	reposition_x_origin(x_pos) ;
+	reposition_x_origin (x_pos);
 }
 
 void

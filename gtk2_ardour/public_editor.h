@@ -94,6 +94,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual gulong frame_to_pixel (nframes_t frame) = 0;
 	virtual Selection& get_selection() const = 0;
 	virtual Selection& get_cut_buffer() const = 0;
+	virtual bool extend_selection_to_track (TimeAxisView&) = 0;
 	virtual void play_selection () = 0;
 	virtual void set_show_measures (bool yn) = 0;
 	virtual bool show_measures () const = 0;
@@ -107,7 +108,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual gdouble   get_current_zoom () = 0;
 	virtual PlaylistSelector& playlist_selector() const = 0;
 	virtual void route_name_changed (TimeAxisView *) = 0;
-	virtual void clear_playlist (ARDOUR::Playlist&) = 0;
+	virtual void clear_playlist (boost::shared_ptr<ARDOUR::Playlist>) = 0;
 	virtual void new_playlists () = 0;
 	virtual void copy_playlists () = 0;
 	virtual void clear_playlists () = 0;
@@ -118,6 +119,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void set_follow_playhead (bool yn) = 0;
 	virtual void toggle_follow_playhead () = 0;
 	virtual bool follow_playhead() const = 0;
+	virtual bool dragging_playhead() const = 0;
 	virtual void ensure_float (Gtk::Window&) = 0;
 	virtual void show_window () = 0;
 	virtual TrackViewList* get_valid_views (TimeAxisView*, ARDOUR::RouteGroup* grp = 0) = 0;
@@ -138,6 +140,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	sigc::signal<void> ZoomChanged;
 	sigc::signal<void> Resized;
 	sigc::signal<void> Realized;
+	sigc::signal<void,nframes_t> UpdateAllTransportClocks;
 
 	Glib::RefPtr<Gtk::ActionGroup> editor_actions;
 

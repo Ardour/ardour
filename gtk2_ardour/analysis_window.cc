@@ -61,7 +61,7 @@ AnalysisWindow::AnalysisWindow()
 	tlmodel = Gtk::ListStore::create(tlcols);
 	track_list.set_model (tlmodel);
 	track_list.append_column(_("Track"), tlcols.trackname);
-	track_list.append_column_editable(_("Visible"), tlcols.visible);
+	track_list.append_column_editable(_("Show"), tlcols.visible);
 	track_list.set_headers_visible(true);
 	track_list.set_reorderable(false);
 	track_list.get_selection()->set_mode (Gtk::SELECTION_NONE);
@@ -228,8 +228,8 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 	
 	
 		for (TrackSelection::iterator i = s.tracks.begin(); i != s.tracks.end(); ++i) {
-			ARDOUR::AudioPlaylist *pl
-				= dynamic_cast<ARDOUR::AudioPlaylist*>((*i)->playlist());
+			boost::shared_ptr<AudioPlaylist> pl
+				= boost::dynamic_pointer_cast<AudioPlaylist>((*i)->playlist());
 
 			if (!pl)
 				continue;
@@ -246,7 +246,7 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 			if (source_selection_ranges_rb.get_active()) {
 //				cerr << "Analyzing ranges on track " << *&rui->route().name() << endl;
 				
-				for (std::list<ARDOUR::AudioRange>::iterator j = ts.begin(); j != ts.end(); ++j) {
+				for (std::list<AudioRange>::iterator j = ts.begin(); j != ts.end(); ++j) {
 
 					nframes_t i = 0;
 					int n;

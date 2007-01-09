@@ -49,22 +49,14 @@ MidiPlaylist::MidiPlaylist (Session& session, const XMLNode& node, bool hidden)
 	in_set_state = true;
 	set_state (node);
 	in_set_state = false;
-
-	if (!hidden) {
-		PlaylistCreated (this); /* EMIT SIGNAL */
-	}
 }
 
 MidiPlaylist::MidiPlaylist (Session& session, string name, bool hidden)
 		: Playlist (session, name, DataType::MIDI, hidden)
 {
-	if (!hidden) {
-		PlaylistCreated (this); /* EMIT SIGNAL */
-	}
-
 }
 
-MidiPlaylist::MidiPlaylist (const MidiPlaylist& other, string name, bool hidden)
+MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, string name, bool hidden)
 		: Playlist (other, name, hidden)
 {
 	throw; // nope
@@ -106,12 +98,9 @@ MidiPlaylist::MidiPlaylist (const MidiPlaylist& other, string name, bool hidden)
 		in_n++;
 	}
 */
-	if (!hidden) {
-		PlaylistCreated (this); /* EMIT SIGNAL */
-	}
 }
 
-MidiPlaylist::MidiPlaylist (const MidiPlaylist& other, jack_nframes_t start, jack_nframes_t dur, string name, bool hidden)
+MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, jack_nframes_t start, jack_nframes_t dur, string name, bool hidden)
 		: Playlist (other, start, dur, name, hidden)
 {
 	/* this constructor does NOT notify others (session) */

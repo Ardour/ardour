@@ -1,4 +1,14 @@
+# -*- python -*-
+
 import os.path
+import glob
+
+libclearlooks_files = [
+    'clearlooks_draw.c',
+    'clearlooks_rc_style.c',
+    'clearlooks_style.c',
+    'clearlooks_theme_main.c',
+    'support.c' ]
 
 Import ('env install_prefix')
 
@@ -7,17 +17,17 @@ clearlooks = env.Copy()
 clearlooks.Replace(CCFLAGS = ' `pkg-config --cflags gtk+-2.0` ',
                    LINKFLAGS = ' `pkg-config --libs gtk+-2.0` ')
 
-libclearlooks = clearlooks.SharedLibrary('clearlooks', [
-    'clearlooks_draw.c',
-    'clearlooks_rc_style.c',
-    'clearlooks_style.c',
-    'clearlooks_theme_main.c',
-    'support.c'
-])
+libclearlooks = clearlooks.SharedLibrary('clearlooks', libclearlooks_files) 
 
 usable_libclearlooks = clearlooks.Install ('engines', libclearlooks)
 Default (usable_libclearlooks)
 
 env.Alias('install',
-          env.Install(os.path.join(install_prefix,'lib/ardour2/engines'),
+          env.Install(os.path.join(install_prefix,env['LIBDIR'], 'ardour2', 'engines'),
                       libclearlooks))
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+                                     [ 'SConscript', 'bits.c'] +
+                                    libclearlooks_files +
+                                    glob.glob('*.h')
+                                    ))

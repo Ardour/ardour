@@ -20,7 +20,7 @@
 #include <string>
 
 #include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/pixscroller.h>
+#include <gtkmm2ext/pixfader.h>
 #include <gtkmm2ext/slider_controller.h>
 
 #include "i18n.h"
@@ -28,13 +28,12 @@
 using namespace Gtkmm2ext;
 using namespace PBD;
 
-SliderController::SliderController (Glib::RefPtr<Gdk::Pixbuf> slide,
-				    Glib::RefPtr<Gdk::Pixbuf> rail,
+SliderController::SliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 				    Gtk::Adjustment *adj,
 				    Controllable& c,
 				    bool with_numeric)
 
-	: PixScroller (*adj, slide, rail),
+	: PixFader (image, *adj),
 	  binding_proxy (c),
 	  spin (*adj, 0, 2)
 {			  
@@ -47,7 +46,7 @@ SliderController::SliderController (Glib::RefPtr<Gdk::Pixbuf> slide,
 void
 SliderController::set_value (float v)
 {
-	adj.set_value (v);
+	adjustment.set_value (v);
 }
 
 bool 
@@ -56,16 +55,15 @@ SliderController::on_button_press_event (GdkEventButton *ev)
 	if (binding_proxy.button_press_handler (ev)) {
 		return true;
 	}
-	return PixScroller::on_button_press_event (ev);
+	return PixFader::on_button_press_event (ev);
 }
 
-VSliderController::VSliderController (Glib::RefPtr<Gdk::Pixbuf> slide,
-				      Glib::RefPtr<Gdk::Pixbuf> rail,
+VSliderController::VSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 				      Gtk::Adjustment *adj,
 				      Controllable& control,
 				      bool with_numeric)
 
-	: SliderController (slide, rail, adj, control, with_numeric)
+	: SliderController (image, adj, control, with_numeric)
 {
 	if (with_numeric) {
 		spin_frame.add (spin);
@@ -76,13 +74,12 @@ VSliderController::VSliderController (Glib::RefPtr<Gdk::Pixbuf> slide,
 	}
 }
 
-HSliderController::HSliderController (Glib::RefPtr<Gdk::Pixbuf> slide,
-				      Glib::RefPtr<Gdk::Pixbuf> rail,
+HSliderController::HSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 				      Gtk::Adjustment *adj,
 				      Controllable& control,
 				      bool with_numeric)
 	
-	: SliderController (slide, rail, adj, control, with_numeric)
+	: SliderController (image, adj, control, with_numeric)
 {
 	if (with_numeric) {
 		spin_frame.add (spin);

@@ -37,6 +37,7 @@
 #include "enums.h"
 
 class Panner2d;
+class PannerBar;
 
 namespace ARDOUR {
 	class IO;
@@ -44,7 +45,6 @@ namespace ARDOUR {
 }
 namespace Gtkmm2ext {
 	class FastMeter;
-	class BarController;
 }
 
 namespace Gtk {
@@ -78,6 +78,8 @@ class PannerUI : public Gtk::HBox
 	bool ignore_toggle;
 	bool in_pan_update;
 
+	static const int pan_bar_height;
+
 	Panner2d*   panner;
 
 	Gtk::VBox           pan_bar_packer;
@@ -107,7 +109,7 @@ class PannerUI : public Gtk::HBox
 	void panning_link_direction_clicked ();
 
 	vector<Gtk::Adjustment*> pan_adjustments;
-	vector<Gtkmm2ext::BarController*> pan_bars;
+	vector<PannerBar*> pan_bars;
 
 	void pan_adjustment_changed (uint32_t which);
 	void pan_value_changed (uint32_t which);

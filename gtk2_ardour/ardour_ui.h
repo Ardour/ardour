@@ -70,7 +70,6 @@ class OptionEditor;
 class Mixer_UI;
 class ConnectionEditor;
 class RouteParams_UI;
-class SoundFileBrowser;
 class About;
 class AddRouteDialog;
 class NewSessionDialog;
@@ -129,7 +128,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 		_will_create_new_session_automatically = yn;
 	}
 
-        void new_session(bool startup = false, std::string path = string());
+        void new_session(std::string path = string());
 	gint cmdline_new_session (string path);
 	int  unload_session ();
 	void close_session(); 
@@ -185,6 +184,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	AudioClock preroll_clock;
 	AudioClock postroll_clock;
 
+	void store_clock_modes ();
+	void restore_clock_modes ();
+
 	void add_route ();
 	
 	void session_add_audio_track (int input_channels, int32_t output_channels, ARDOUR::TrackMode mode, uint32_t how_many) {
@@ -204,6 +206,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	}*/
 
 	void set_engine (ARDOUR::AudioEngine&);
+	gint start_engine ();
 
 	gint exit_on_main_window_close (GdkEventAny *);
 
@@ -212,6 +215,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void set_native_file_header_format (ARDOUR::HeaderFormat sf);
 	void set_native_file_data_format (ARDOUR::SampleFormat sf);
+
+	void set_keybindings_path (std::string path);
+	void save_keybindings ();
 
   protected:
 	friend class PublicEditor;
@@ -297,7 +303,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void queue_transport_change ();
 	void map_transport_state ();
 	int32_t do_engine_start ();
-	gint start_engine ();
 	
 	void engine_halted ();
 	void engine_stopped ();
@@ -330,6 +335,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	AudioClock   big_clock;
 	Gtk::Frame   big_clock_frame;
 	Gtk::Window* big_clock_window;
+
+	void update_transport_clocks (nframes_t pos);
+	void record_state_changed ();
 
 	/* Transport Control */
 
@@ -538,6 +546,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void connect_to_session (ARDOUR::Session *);
 	void connect_dependents_to_session (ARDOUR::Session *);
 	void we_have_dependents ();
+	
+	std::string keybindings_path;
+
 	void setup_keybindings ();
 	void setup_session_options ();
 	
@@ -570,11 +581,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	/* route dialog */
 
 	AddRouteDialog *add_route_dialog;
-
-	/* SoundFile Browser */
-	SoundFileBrowser *sfdb;
-	void toggle_sound_file_browser ();
-	int create_sound_file_browser ();
 	
 	/* Keyboard Handling */
 	
@@ -669,7 +675,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void map_meter_falloff ();
 
 	void toggle_control_protocol (ARDOUR::ControlProtocolInfo*);
-	void toggle_control_protocol_feedback (ARDOUR::ControlProtocolInfo*, const char* group_name, const char* action_name);
+	void toggle_control_protocol_feedback (ARDOUR::ControlProtocolInfo*, const char* group_name, std::string action_name);
+
+	bool can_save_keybindings;
+	bool first_idle ();
 };
 
 #endif /* __ardour_gui_h__ */

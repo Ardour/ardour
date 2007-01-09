@@ -52,7 +52,7 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 			      
 
 	: TimeAxisViewItem ("xfade" /*xf.name()*/, *parent, tv, spu, basic_color, xf.position(), 
-			    xf.overlap_length(), TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowFrame)),
+			    xf.length(), TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowFrame)),
 	  crossfade (xf),
 	  left_view (lview),
 	  right_view (rview)
@@ -124,7 +124,7 @@ CrossfadeView::crossfade_changed (Change what_changed)
 
 	if (what_changed & BoundsChanged) {
 		set_position (crossfade.position(), this);
-		set_duration (crossfade.overlap_length(), this);
+		set_duration (crossfade.length(), this);
 		need_redraw_curves = true;
 	}
 

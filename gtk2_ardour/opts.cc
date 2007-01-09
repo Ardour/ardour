@@ -37,6 +37,7 @@ bool GTK_ARDOUR::use_vst = true;
 bool GTK_ARDOUR::new_session = false;
 char* GTK_ARDOUR::curvetest_file = 0;
 bool GTK_ARDOUR::try_hw_optimization = true;
+string GTK_ARDOUR::keybindings_path = ""; /* empty means use builtin default */
 
 using namespace GTK_ARDOUR;
 
@@ -50,13 +51,13 @@ print_help (const char *execname)
 	     << _("  -n, --show-splash                Show splash screen\n")
 	     << _("  -c, --name  name                 Use a specific jack client name, default is ardour\n")
 	     << _("  -N, --new session-name           Create a new session from the command line\n")                       
-	     << _("  -o, --use-hw-optimizations        Try to use h/w specific optimizations\n")
+	     << _("  -O, --no-hw-optimizations        Disable h/w specific optimizations\n")
 #ifdef VST_SUPPORT
 	     << _("  -V, --novst                      Do not use VST support\n")
 #endif
 	     << _("  [session-name]                   Name of session to load\n")
 	     << _("  -C, --curvetest filename         Curve algorithm debugger\n")
-	     << _("  -g, --gtktheme                   Allow GTK to load a theme\n")
+	     << _("  -k, --keybindings filename       Name of key bindings to load (default is ~/.ardour2/ardour.bindings)\n")
 		;
 	return 1;
 
@@ -66,7 +67,7 @@ int
 GTK_ARDOUR::parse_opts (int argc, char *argv[])
 
 {
-	const char *optstring = "U:hbvVnoc:C:N:g";
+	const char *optstring = "U:hbvVnOc:C:N:k:";
 	const char *execname = strrchr (argv[0], '/');
 
 	if (execname == 0) {
@@ -85,7 +86,6 @@ GTK_ARDOUR::parse_opts (int argc, char *argv[])
 		{ "new", 1, 0, 'N' },
 		{ "no-hw-optimizations", 0, 0, 'O' },
 		{ "curvetest", 1, 0, 'C' },
-		{ "gtktheme", 0, 0, 'g' },
 		{ 0, 0, 0, 0 }
 	};
 
@@ -140,6 +140,10 @@ GTK_ARDOUR::parse_opts (int argc, char *argv[])
 
 		case 'C':
 			curvetest_file = optarg;
+			break;
+
+		case 'k':
+			keybindings_path = optarg;
 			break;
 
 		default:

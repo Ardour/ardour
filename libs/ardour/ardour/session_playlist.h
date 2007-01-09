@@ -27,7 +27,7 @@
 namespace ARDOUR {
 
 template<class T> void 
-Session::foreach_playlist (T *obj, void (T::*func)(Playlist *)) 
+Session::foreach_playlist (T *obj, void (T::*func)(boost::shared_ptr<Playlist>)) 
 {
 	Glib::Mutex::Lock lm (playlist_lock);
 	for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); i++) {

@@ -33,12 +33,15 @@
 
 namespace ARDOUR {
 
-class Send : public Redirect {
+class Send : public Redirect 
+{
   public:	
 	Send (Session&, Placement);
 	Send (Session&, const XMLNode&);
 	Send (const Send&);
 	~Send ();
+
+	uint32_t bit_slot() const { return bitslot; }
 	
 	void run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset);
 	
@@ -54,9 +57,12 @@ class Send : public Redirect {
 	uint32_t pans_required() const { return _expected_inputs.get(DataType::AUDIO); }
 	void expect_inputs (const ChanCount&);
 
+	static uint32_t how_many_sends();
+
   private:
 	bool      _metering;
 	ChanCount _expected_inputs;
+	uint32_t bitslot;
 };
 
 } // namespace ARDOUR

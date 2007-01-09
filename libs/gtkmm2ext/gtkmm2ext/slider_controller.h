@@ -22,7 +22,7 @@
 
 #include <gtkmm.h>
 #include <gtkmm2ext/popup.h>
-#include <gtkmm2ext/pixscroller.h>
+#include <gtkmm2ext/pixfader.h>
 #include <gtkmm2ext/binding_proxy.h>
 
 namespace Gtkmm2ext {
@@ -35,11 +35,10 @@ namespace PBD {
 
 namespace Gtkmm2ext {
 
-class SliderController : public Gtkmm2ext::PixScroller
+class SliderController : public Gtkmm2ext::PixFader
 {
   public:
-	SliderController (Glib::RefPtr<Gdk::Pixbuf> slider,
-			  Glib::RefPtr<Gdk::Pixbuf> rail,
+	SliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 			  Gtk::Adjustment* adj,
 			  PBD::Controllable&,
 			  bool with_numeric = true);
@@ -64,8 +63,7 @@ class SliderController : public Gtkmm2ext::PixScroller
 class VSliderController : public SliderController
 {
   public:
-	VSliderController (Glib::RefPtr<Gdk::Pixbuf> slider,
-			   Glib::RefPtr<Gdk::Pixbuf> rail,
+	VSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 			   Gtk::Adjustment *adj,
 			   PBD::Controllable&,
 			   bool with_numeric = true);
@@ -74,8 +72,7 @@ class VSliderController : public SliderController
 class HSliderController : public SliderController
 {
   public:
-	HSliderController (Glib::RefPtr<Gdk::Pixbuf> slider,
-			   Glib::RefPtr<Gdk::Pixbuf> rail,
+	HSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 			   Gtk::Adjustment *adj,
 			   PBD::Controllable&,
 			   bool with_numeric = true);

@@ -581,7 +581,7 @@ Session::mmc_step (MIDI::MachineControl &mmc, int steps)
 	}
 	
 	double diff_secs = diff.tv_sec + (diff.tv_usec / 1000000.0);
-	double cur_speed = (((steps * 0.5) * Config->get_smpte_frames_per_second()) / diff_secs) / Config->get_smpte_frames_per_second();
+	double cur_speed = (((steps * 0.5) * smpte_frames_per_second()) / diff_secs) / smpte_frames_per_second();
 	
 	if (_transport_speed == 0 || cur_speed * _transport_speed < 0) {
 		/* change direction */
@@ -640,6 +640,8 @@ Session::mmc_locate (MIDI::MachineControl &mmc, const MIDI::byte* mmc_tc)
 	smpte.minutes = mmc_tc[1];
 	smpte.seconds = mmc_tc[2];
 	smpte.frames = mmc_tc[3];
+	smpte.rate = smpte_frames_per_second();
+	smpte.drop = smpte_drop_frames();
   
 	// Also takes smpte offset into account:
 	smpte_to_sample( smpte, target_frame, true /* use_offset */, false /* use_subframes */ );

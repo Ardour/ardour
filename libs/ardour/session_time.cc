@@ -48,43 +48,141 @@ Session::bbt_time (nframes_t when, BBT_Time& bbt)
 }
 
 /* SMPTE TIME */
+float
+Session::smpte_frames_per_second() const
+{
+	switch (Config->get_smpte_format()) {
+		case smpte_23976: 
+			return 23.976;
 
+			break;
+		case smpte_24: 
+			return 24;
+
+			break;
+		case smpte_24976: 
+			return 24.976;
+
+			break;
+		case smpte_25: 
+			return 25;
+
+			break;
+		case smpte_2997: 
+			return 29.97;
+
+			break;
+		case smpte_2997drop: 
+			return 29.97;
+
+			break;
+		case smpte_30: 
+			return 30;
+
+			break;
+		case smpte_30drop: 
+			return 30;
+
+			break;
+		case smpte_5994: 
+			return 59.94;
+
+			break;
+		case smpte_60: 
+			return 60;
+
+			break;
+	        default:
+		  cerr << "Editor received unexpected smpte type" << endl;
+	}
+	return 30.0;
+}
+bool
+Session::smpte_drop_frames() const
+{
+	switch (Config->get_smpte_format()) {
+		case smpte_23976: 
+			return false;
+
+			break;
+		case smpte_24: 
+			return false;
+
+			break;
+		case smpte_24976: 
+			return false;
+
+			break;
+		case smpte_25: 
+			return false;
+
+			break;
+		case smpte_2997: 
+			return false;
+
+			break;
+		case smpte_2997drop: 
+			return true;
+
+			break;
+		case smpte_30: 
+			return false;
+
+			break;
+		case smpte_30drop: 
+			return true;
+
+			break;
+		case smpte_5994: 
+			return false;
+
+			break;
+		case smpte_60: 
+			return false;
+
+			break;
+	        default:
+			cerr << "Editor received unexpected smpte type" << endl;
+	}
+	return false;
+}
 void
 Session::sync_time_vars ()
 {
 	_current_frame_rate = (nframes_t) round (_base_frame_rate * (1.0 + (Config->get_video_pullup()/100.0)));
-	_frames_per_hour = _current_frame_rate * 3600;
-	_frames_per_smpte_frame = (double) _current_frame_rate / (double) Config->get_smpte_frames_per_second();
-	_smpte_frames_per_hour = (unsigned long) (Config->get_smpte_frames_per_second() * 3600.0);
+	_frames_per_smpte_frame = (double) _current_frame_rate / (double) smpte_frames_per_second();
+	if (smpte_drop_frames()) {
+	  _frames_per_hour = (long)(107892 * _frames_per_smpte_frame);
+	} else {
+	  _frames_per_hour = (long)(3600 * rint(smpte_frames_per_second()) * _frames_per_smpte_frame);
+	}
+	_smpte_frames_per_hour = (nframes_t)rint(smpte_frames_per_second() * 3600.0);
+
 }
 
 int
-Session::set_smpte_type (float fps, bool drop_frames)
+Session::set_smpte_format (SmpteFormat format)
 {
-	Config->set_smpte_frames_per_second (fps);
-	Config->set_smpte_drop_frames (drop_frames);
+
+	Config->set_smpte_format (format);
 
 	last_smpte_valid = false;
 	// smpte type bits are the middle two in the upper nibble
-	switch ((int) ceil (fps)) {
+	switch ((int) ceil (smpte_frames_per_second())) {
 	case 24:
 		mtc_smpte_bits = 0;
-		SMPTE::Time::default_rate = SMPTE::MTC_24_FPS;
 		break;
 
 	case 25:
 		mtc_smpte_bits = 0x20;
-		SMPTE::Time::default_rate = SMPTE::MTC_25_FPS;
 		break;
 
 	case 30:
 	default:
-		if (drop_frames) {
+		if (smpte_drop_frames()) {
 			mtc_smpte_bits = 0x40;
-			SMPTE::Time::default_rate = SMPTE::MTC_30_FPS_DROP;
 		} else {
 			mtc_smpte_bits =  0x60;
-	 		SMPTE::Time::default_rate = SMPTE::MTC_30_FPS;
 		}
 		break;
 	};
@@ -113,7 +211,8 @@ Session::set_smpte_offset_negative (bool neg)
 void
 Session::smpte_to_sample( SMPTE::Time& smpte, nframes_t& sample, bool use_offset, bool use_subframes ) const
 {
-	if (Config->get_smpte_drop_frames()) {
+
+	if (smpte.drop) {
 		// The drop frame format was created to better approximate the 30000/1001 = 29.97002997002997....
 		// framerate of NTSC color TV. The used frame rate of drop frame is 29.97, which drifts by about
 		// 0.108 frame per hour, or about 1.3 frames per 12 hours. This is not perfect, but a lot better
@@ -152,9 +251,10 @@ Session::smpte_to_sample( SMPTE::Time& smpte, nframes_t& sample, bool use_offset
 		//  0:10:00:00        0.0             0                   600.000         26460000 (accurate)
 		//
 		//  Per Sigmond <per@sigmond.no>
-    
+
 		// Samples inside time dividable by 10 minutes (real time accurate)
-		nframes_t base_samples = ((smpte.hours * 60 * 60) + ((smpte.minutes / 10) * 10 * 60)) * frame_rate();
+		nframes_t base_samples = (nframes_t) (((smpte.hours * 107892) + ((smpte.minutes / 10) * 17982)) * _frames_per_smpte_frame);
+
 		// Samples inside time exceeding the nearest 10 minutes (always offset, see above)
 		long exceeding_df_minutes = smpte.minutes % 10;
 		long exceeding_df_seconds = (exceeding_df_minutes * 60) + smpte.seconds;
@@ -162,12 +262,18 @@ Session::smpte_to_sample( SMPTE::Time& smpte, nframes_t& sample, bool use_offset
 		nframes_t exceeding_samples = (nframes_t) rint(exceeding_df_frames * _frames_per_smpte_frame);
 		sample = base_samples + exceeding_samples;
 	} else {
-		// Non drop is easy:
-		sample = (((smpte.hours * 60 * 60) + (smpte.minutes * 60) + smpte.seconds) * frame_rate()) + (nframes_t)rint(smpte.frames * _frames_per_smpte_frame);
+		/* 
+		   Non drop is easy.. just note the use of 
+		   rint(smpte.rate) * _frames_per_smpte_frame
+		   (frames per SMPTE second), which is larger than  
+		   frame_rate() in the non-integer SMPTE rate case.
+		*/
+
+		sample = (nframes_t)rint((((smpte.hours * 60 * 60) + (smpte.minutes * 60) + smpte.seconds) * (rint(smpte.rate) * _frames_per_smpte_frame)) + (smpte.frames * _frames_per_smpte_frame));
 	}
   
 	if (use_subframes) {
-		sample += (long) (((double)smpte.subframes * _frames_per_smpte_frame) / 80.0);
+		sample += (long) (((double)smpte.subframes * _frames_per_smpte_frame) / Config->get_subframes_per_frame());
 	}
   
 	if (use_offset) {
@@ -190,6 +296,7 @@ Session::smpte_to_sample( SMPTE::Time& smpte, nframes_t& sample, bool use_offset
 			}
 		}
 	}
+
 }
 
 
@@ -224,14 +331,14 @@ Session::sample_to_smpte( nframes_t sample, SMPTE::Time& smpte, bool use_offset,
 	// high sample numbers in the calculations that follow.
 	smpte.hours = offset_sample / _frames_per_hour;
 	offset_sample = offset_sample % _frames_per_hour;
-  
+
 	// Calculate exact number of (exceeding) smpte frames and fractional frames
 	smpte_frames_left_exact = (double) offset_sample / _frames_per_smpte_frame;
 	smpte_frames_fraction = smpte_frames_left_exact - floor( smpte_frames_left_exact );
-	smpte.subframes = (long) rint(smpte_frames_fraction * 80.0);
+	smpte.subframes = (long) rint(smpte_frames_fraction * Config->get_subframes_per_frame());
   
 	// XXX Not sure if this is necessary anymore...
-	if (smpte.subframes == 80) {
+	if (smpte.subframes == Config->get_subframes_per_frame()) {
 		// This can happen with 24 fps (and 29.97 fps ?)
 		smpte_frames_left_exact = ceil( smpte_frames_left_exact );
 		smpte.subframes = 0;
@@ -240,7 +347,7 @@ Session::sample_to_smpte( nframes_t sample, SMPTE::Time& smpte, bool use_offset,
 	// Extract hour-exceeding frames for minute, second and frame calculations
 	smpte_frames_left = ((long) floor( smpte_frames_left_exact ));
 
-	if (Config->get_smpte_drop_frames()) {
+	if (smpte_drop_frames()) {
 		// See long explanation in smpte_to_sample()...
 
 		// Number of 10 minute chunks
@@ -276,15 +383,18 @@ Session::sample_to_smpte( nframes_t sample, SMPTE::Time& smpte, bool use_offset,
 		}
 	} else {
 		// Non drop is easy
-		smpte.minutes = smpte_frames_left / ((long) Config->get_smpte_frames_per_second () * 60);
-		smpte_frames_left = smpte_frames_left % ((long) Config->get_smpte_frames_per_second () * 60);
-		smpte.seconds = smpte_frames_left / (long) Config->get_smpte_frames_per_second ();
-		smpte.frames = smpte_frames_left % (long) Config->get_smpte_frames_per_second ();
+		smpte.minutes = smpte_frames_left / ((long) rint (smpte_frames_per_second ()) * 60);
+		smpte_frames_left = smpte_frames_left % ((long) rint (smpte_frames_per_second ()) * 60);
+		smpte.seconds = smpte_frames_left / (long) rint(smpte_frames_per_second ());
+		smpte.frames = smpte_frames_left % (long) rint(smpte_frames_per_second ());
 	}
 
 	if (!use_subframes) {
 		smpte.subframes = 0;
 	}
+	/* set frame rate and drop frame */
+	smpte.rate = smpte_frames_per_second ();
+	smpte.drop = smpte_drop_frames();
 }
 
 void
@@ -415,7 +525,7 @@ Session::jack_timebase_callback (jack_transport_state_t state,
 
 #ifdef HAVE_JACK_VIDEO_SUPPORT
 	//poke audio video ratio so Ardour can track Video Sync
-	pos->audio_frames_per_video_frame = frame_rate() / Config->get_smpte_frames_per_second ();
+	pos->audio_frames_per_video_frame = frame_rate() / smpte_frames_per_second();
 	pos->valid = jack_position_bits_t (pos->valid | JackAudioVideoRatio);
 #endif
 
@@ -423,7 +533,7 @@ Session::jack_timebase_callback (jack_transport_state_t state,
 	/* SMPTE info */
 
 	t.smpte_offset = _smpte_offset;
-	t.smpte_frame_rate = Config->get_smpte_frames_per_second ();
+	t.smpte_frame_rate = smpte_frames_per_second();
 
 	if (_transport_speed) {
 
@@ -474,7 +584,7 @@ Session::convert_to_frames_at (nframes_t position, AnyTime& any)
 		secs = any.smpte.hours * 60 * 60;
 		secs += any.smpte.minutes * 60;
 		secs += any.smpte.seconds;
-		secs += any.smpte.frames / Config->get_smpte_frames_per_second ();
+		secs += any.smpte.frames / smpte_frames_per_second();
 		if (_smpte_offset_negative) 
 		{
 			return (nframes_t) floor (secs * frame_rate()) - _smpte_offset;

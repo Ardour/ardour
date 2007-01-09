@@ -65,7 +65,6 @@ Region::Region (boost::shared_ptr<Source> src, jack_nframes_t start, jack_nframe
 	, _read_data_count(0)
 	, _pending_changed(Change (0))
 	, _last_layer_op(0)
-	, _playlist(0)
 {
 	_sources.push_back (src);
 	_master_sources.push_back (src);
@@ -89,7 +88,6 @@ Region::Region (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, c
 	, _read_data_count(0)
 	, _pending_changed(Change (0))
 	, _last_layer_op(0)
-	, _playlist(0)
 {
 	
 	set<boost::shared_ptr<Source> > unique_srcs;
@@ -125,7 +123,6 @@ Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes
 	, _read_data_count(0)
 	, _pending_changed(Change (0))
 	, _last_layer_op(0)
-	, _playlist(0)
 {
 	if (other->_sync_position < offset)
 		_sync_position = other->_sync_position;
@@ -167,7 +164,6 @@ Region::Region (boost::shared_ptr<const Region> other)
 	, _read_data_count(0)
 	, _pending_changed(Change(0))
 	, _last_layer_op(other->_last_layer_op)
-	, _playlist(0)
 {
 	other->_first_edit = EditChangesName;
 
@@ -209,10 +205,7 @@ Region::Region (SourceList& srcs, const XMLNode& node)
 	, _read_data_count(0)
 	, _pending_changed(Change(0))
 	, _last_layer_op(0)
-	, _playlist(0)
-
 {
-
 	set<boost::shared_ptr<Source> > unique_srcs;
 
 	for (SourceList::iterator i=srcs.begin(); i != srcs.end(); ++i) {
@@ -250,7 +243,6 @@ Region::Region (boost::shared_ptr<Source> src, const XMLNode& node)
 	, _read_data_count(0)
 	, _pending_changed(Change(0))
 	, _last_layer_op(0)
-	, _playlist(0)
 {
 	_sources.push_back (src);
 
@@ -265,9 +257,11 @@ Region::Region (boost::shared_ptr<Source> src, const XMLNode& node)
 
 Region::~Region ()
 {
-	if (_playlist) {
+	boost::shared_ptr<Playlist> pl (playlist());
+
+	if (pl) {
 		for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
-			(*i)->remove_playlist (_playlist);
+			(*i)->remove_playlist (pl);
 		}
 	}
 	
@@ -276,29 +270,30 @@ Region::~Region ()
 }
 
 void
-Region::set_playlist (Playlist* pl)
+Region::set_playlist (boost::weak_ptr<Playlist> wpl)
 {
-	if (pl == _playlist) {
+	boost::shared_ptr<Playlist> old_playlist = (_playlist.lock());
+	boost::shared_ptr<Playlist> pl (wpl.lock());
+
+	if (old_playlist == pl) {
 		return;
 	}
-
-	Playlist* old_playlist = _playlist;
 
 	if (pl) {
 		if (old_playlist) {
 			for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
-				(*i)->remove_playlist (old_playlist);	
-				(*i)->add_playlist (_playlist);
+				(*i)->remove_playlist (_playlist);	
+				(*i)->add_playlist (pl);
 			}
 		} else {
 			for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
-				(*i)->add_playlist (_playlist);
+				(*i)->add_playlist (pl);
 			}
 		}
 	} else {
 		if (old_playlist) {
 			for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
-				(*i)->remove_playlist (old_playlist);
+				(*i)->remove_playlist (_playlist);
 			}
 		}
 	}
@@ -357,9 +352,11 @@ Region::maybe_uncopy ()
 void
 Region::first_edit ()
 {
-	if (_first_edit != EditChangesNothing && _playlist) {
+	boost::shared_ptr<Playlist> pl (playlist());
 
-		_name = _playlist->session().new_region_name (_name);
+	if (_first_edit != EditChangesNothing && pl) {
+
+		_name = pl->session().new_region_name (_name);
 		_first_edit = EditChangesNothing;
 
 		send_change (NameChanged);
@@ -370,7 +367,9 @@ Region::first_edit ()
 bool
 Region::at_natural_position () const
 {
-	if (!_playlist) {
+	boost::shared_ptr<Playlist> pl (playlist());
+
+	if (!pl) {
 		return false;
 	}
 	
@@ -388,7 +387,9 @@ Region::at_natural_position () const
 void
 Region::move_to_natural_position (void *src)
 {
-	if (!_playlist) {
+	boost::shared_ptr<Playlist> pl (playlist());
+
+	if (!pl) {
 		return;
 	}
 	
@@ -448,7 +449,11 @@ Region::set_position_on_top (nframes_t pos, void *src)
 		_position = pos;
 	}
 
-	_playlist->raise_region_to_top (shared_from_this ());
+	boost::shared_ptr<Playlist> pl (playlist());
+
+	if (pl) {
+		pl->raise_region_to_top (shared_from_this ());
+	}
 
 	/* do this even if the position is the same. this helps out
 	   a GUI that has moved its representation already.
@@ -835,42 +840,37 @@ Region::sync_position() const
 void
 Region::raise ()
 {
-	if (_playlist == 0) {
-		return;
+	boost::shared_ptr<Playlist> pl (playlist());
+	if (pl) {
+		pl->raise_region (shared_from_this ());
 	}
-
-	_playlist->raise_region (shared_from_this ());
 }
 
 void
 Region::lower ()
 {
-	if (_playlist == 0) {
-		return;
+	boost::shared_ptr<Playlist> pl (playlist());
+	if (pl) {
+		pl->lower_region (shared_from_this ());
 	}
-
-	_playlist->lower_region (shared_from_this ());
 }
 
 void
 Region::raise_to_top ()
 {
-
-	if (_playlist == 0) {
-		return;
+	boost::shared_ptr<Playlist> pl (playlist());
+	if (pl) {
+		pl->raise_region_to_top (shared_from_this());
 	}
-
-	_playlist->raise_region_to_top (shared_from_this());
 }
 
 void
 Region::lower_to_bottom ()
 {
-	if (_playlist == 0) {
-		return;
+	boost::shared_ptr<Playlist> pl (playlist());
+	if (pl) {
+		pl->lower_region_to_bottom (shared_from_this());
 	}
-
-	_playlist->lower_region_to_bottom (shared_from_this());
 }
 
 void
@@ -919,7 +919,7 @@ Region::state (bool full_state)
 
 	snprintf (buf, sizeof (buf), "%d", (int) _layer);
 	node->add_property ("layer", buf);
-	snprintf (buf, sizeof (buf), "%u", _sync_position);
+	snprintf (buf, sizeof (buf), "%" PRIu32, _sync_position);
 	node->add_property ("sync-position", buf);
 
 	return *node;
@@ -1230,11 +1230,13 @@ Region::verify_start_mutable (jack_nframes_t& new_start)
 boost::shared_ptr<Region>
 Region::get_parent() const
 {
-	if (_playlist) {
+	boost::shared_ptr<Playlist> pl (playlist());
+
+	if (pl) {
 		boost::shared_ptr<Region> r;
 		boost::shared_ptr<Region const> grrr2 = boost::dynamic_pointer_cast<Region const> (shared_from_this());
 		
-		if (grrr2 && (r = _playlist->session().find_whole_file_parent (grrr2))) {
+		if (grrr2 && (r = pl->session().find_whole_file_parent (grrr2))) {
 			return boost::static_pointer_cast<Region> (r);
 		}
 	}

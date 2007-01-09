@@ -20,7 +20,6 @@
 
 #include <pbd/whitespace.h>
 
-#include <ardour/audio_library.h>
 #include <ardour/session.h>
 #include <ardour/audioengine.h>
 #include <ardour/configuration.h>
@@ -60,7 +59,6 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 
 	  /* Paths */
 	  path_table (11, 2),
-	  sfdb_path_view(),
 
 	  /* Fades */
 
@@ -71,7 +69,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 
 	  /* Sync */
 
-	  smpte_offset_clock (X_("SMPTEOffsetClock"), true, true),
+	  smpte_offset_clock (X_("smpteoffset"), false, X_("SMPTEOffsetClock"), true, true),
 	  smpte_offset_negative_button (_("SMPTE offset is negative")),
 
 	  /* MIDI */
@@ -99,7 +97,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 
 	set_default_size (300, 300);
 	set_title (_("ardour: options editor"));
-	set_wmclass (_("ardour_option_editor"), "Ardour");
+	set_wmclass (X_("ardour_option_editor"), "Ardour");
 
 	set_name ("OptionsWindow");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
@@ -224,21 +222,7 @@ OptionEditor::setup_path_options()
 	path_table.attach (*label, 0, 1, 0, 1, FILL|EXPAND, FILL);
 	path_table.attach (session_raid_entry, 1, 3, 0, 1, Gtk::FILL|Gtk::EXPAND, FILL);
 
-	label = manage(new Label(_("Soundfile Search Paths")));
-	label->set_name("OptionsLabel");
-	path_table.attach(*label, 0, 1, 2, 3, FILL|EXPAND, FILL);
-	path_table.attach(sfdb_path_view, 1, 3, 2, 3, Gtk::FILL|Gtk::EXPAND, FILL);
-
-	sfdb_path_view.set_paths(Library->get_paths());
-	sfdb_path_view.PathsUpdated.connect (mem_fun(*this, &OptionEditor::sfdb_paths_changed));
-
 	path_table.show_all();
-}
-
-void
-OptionEditor::sfdb_paths_changed ()
-{
-	Library->set_paths (sfdb_path_view.get_paths());
 }
 
 void
@@ -549,7 +533,7 @@ void
 OptionEditor::port_online_toggled (MIDI::Port* port, ToggleButton* tb)
 {
 	bool wanted = tb->get_active();
-	
+
 	if (wanted != port->input()->offline()) {
 		port->input()->set_offline (wanted);
 	} 
@@ -558,12 +542,16 @@ OptionEditor::port_online_toggled (MIDI::Port* port, ToggleButton* tb)
 void
 OptionEditor::map_port_online (MIDI::Port* port, ToggleButton* tb)
 {
-	if (port->input()->offline()) {
-		tb->set_label (_("offline"));
-		tb->set_active (false);
-	} else {
-		tb->set_label (_("online"));
-		tb->set_active (true);
+	bool bstate = tb->get_active ();
+
+	if (bstate != port->input()->offline()) {
+		if (port->input()->offline()) {
+			tb->set_label (_("offline"));
+			tb->set_active (false);
+		} else {
+			tb->set_label (_("online"));
+			tb->set_active (true);
+		}
 	}
 }
 
@@ -659,19 +647,12 @@ OptionEditor::click_sound_changed ()
 			return;
 		}
 
-		if (path.empty()) {
+		strip_whitespace_edges (path);
 
+		if (path == _("internal")) {
 			Config->set_click_sound ("");
-
 		} else {
-
-			strip_whitespace_edges (path);
-			
-			if (path == _("internal")) {
-				Config->set_click_sound ("");
-			} else {
-				Config->set_click_sound (path);
-			}
+			Config->set_click_sound (path);
 		}
 	}
 }
@@ -686,19 +667,12 @@ OptionEditor::click_emphasis_sound_changed ()
 			return;
 		}
 
-		if (path.empty()) {
+		strip_whitespace_edges (path);
 
+		if (path == _("internal")) {
 			Config->set_click_emphasis_sound ("");
-
 		} else {
-
-			strip_whitespace_edges (path);
-
-			if (path == _("internal")) {
-				Config->set_click_emphasis_sound ("");
-			} else {
-				Config->set_click_emphasis_sound (path);
-			}
+			Config->set_click_emphasis_sound (path);
 		}
 	}
 }

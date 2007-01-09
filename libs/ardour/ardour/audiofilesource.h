@@ -59,6 +59,8 @@ class AudioFileSource : public AudioSource {
 
 	static bool get_soundfile_info (string path, SoundFileInfo& _info, string& error);
 
+	static bool safe_file_extension (string path);
+
 	void set_allow_remove_if_empty (bool yn);
 	void mark_for_remove();
 

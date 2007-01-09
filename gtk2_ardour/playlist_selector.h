@@ -20,6 +20,8 @@
 #ifndef __ardour_playlist_selector_h__
 #define __ardour_playlist_selector_h__
 
+#include <boost/shared_ptr.hpp>
+
 #include <gtkmm/box.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/button.h>
@@ -45,8 +47,11 @@ class PlaylistSelector : public ArdourDialog
 	void set_session (ARDOUR::Session*);
 	void show_for (RouteUI*);
 
+  protected:
+	bool on_unmap_event (GdkEventAny*);
+
   private:
-	typedef std::map<PBD::ID,std::list<ARDOUR::Playlist*>*> DSPL_Map;
+	typedef std::map<PBD::ID,std::list<boost::shared_ptr<ARDOUR::Playlist> >*> DSPL_Map;
 
 	ARDOUR::Session* session;
 	Gtk::ScrolledWindow scroller;
@@ -55,7 +60,7 @@ class PlaylistSelector : public ArdourDialog
 
 	sigc::connection select_connection;
 
-	void add_playlist_to_map (ARDOUR::Playlist*);
+	void add_playlist_to_map (boost::shared_ptr<ARDOUR::Playlist>);
 	void clear_map ();
 	void close_button_click ();
 	void selection_changed ();
@@ -66,7 +71,7 @@ class PlaylistSelector : public ArdourDialog
 		    add (playlist);
 	    }
 	    Gtk::TreeModelColumn<std::string> text;
-	    Gtk::TreeModelColumn<ARDOUR::Playlist*>   playlist;
+	    Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Playlist> >   playlist;
 	};
 
 	ModelColumns columns;
