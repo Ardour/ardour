@@ -200,39 +200,39 @@ setup_hardware_optimization (bool try_optimization)
 
 #if defined (ARCH_X86) && defined (BUILD_SSE_OPTIMIZATIONS)
 	
-		unsigned int use_sse = 0;
+		unsigned long use_sse = 0;
 
 #ifndef USE_X86_64_ASM
-		asm volatile (
+		asm (
 				 "mov $1, %%eax\n"
 				 "pushl %%ebx\n"
 				 "cpuid\n"
-				 "andl $33554432, %%edx\n"
 				 "movl %%edx, %0\n"
 				 "popl %%ebx\n"
-		 	     : "=m" (use_sse)
+		 	     : "=l" (use_sse)
 	   		     : 
  	    		 : "%eax", "%ecx", "%edx", "memory");
+
 #else
 
-		asm volatile (
+		asm (
 				 "movq $1, %%rax\n"
 				 "pushq %%rbx\n"
 				 "cpuid\n"
-				 "andq $33554432, %%rdx\n"
 				 "movq %%rdx, %0\n"
 				 "popq %%rbx\n"
-		 	     : "=m" (use_sse)
+		 	     : "=l" (use_sse)
 	   		     : 
  	    		 : "%rax", "%rcx", "%rdx", "memory");
 
 #endif /* USE_X86_64_ASM */
+		use_sse &= (1 << 25); // bit 25 = SSE support
 		
 		if (use_sse) {
 			info << "Using SSE optimized routines" << endmsg;
 	
 			// SSE SET
-			Session::compute_peak 			= x86_sse_compute_peak;
+			Session::compute_peak 		= x86_sse_compute_peak;
 			Session::apply_gain_to_buffer 	= x86_sse_apply_gain_to_buffer;
 			Session::mix_buffers_with_gain 	= x86_sse_mix_buffers_with_gain;
 			Session::mix_buffers_no_gain 	= x86_sse_mix_buffers_no_gain;
