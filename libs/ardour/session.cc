@@ -1615,6 +1615,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 	string port;
 	RouteList new_routes;
 	list<boost::shared_ptr<AudioTrack> > ret;
+	uint32_t control_id;
 
 	/* count existing audio tracks */
 
@@ -1638,6 +1639,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 	_engine.get_physical_outputs (physoutputs);
 	_engine.get_physical_inputs (physinputs);
+	control_id = 0;
 
 	while (how_many) {
 
@@ -1726,7 +1728,8 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			}
 			
 			track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
-			track->set_remote_control_id (ntracks());
+			track->set_remote_control_id (ntracks() + control_id + 1);
+			++control_id;
 
 			new_routes.push_back (track);
 			ret.push_back (track);
