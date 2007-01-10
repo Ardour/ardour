@@ -900,6 +900,8 @@ Editor::instant_save ()
 void
 Editor::reposition_x_origin (nframes_t frame)
 {
+	cerr << "repsosition to " << frame << endl;
+
 	if (frame != leftmost_frame) {
 		leftmost_frame = frame;
 		
@@ -1140,6 +1142,13 @@ Editor::connect_to_session (Session *t)
 {
 	session = t;
 
+	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
+	set_state (*node);
+
+	/* catch up with the playhead */
+
+	session->request_locate (playhead_cursor->current_frame);
+
 	if (first_action_message) {
 	        first_action_message->hide();
 	}
@@ -1236,26 +1245,11 @@ Editor::connect_to_session (Session *t)
 		(static_cast<TimeAxisView*>(*i))->set_samples_per_unit (frames_per_unit);
 	}
 
-	/* ::reposition_x_origin() doesn't work right here, since the old
-	   position may be zero already, and it does nothing in such
-	   circumstances.
-	*/
-
-	leftmost_frame = 0;
-	
-	horizontal_adjustment.set_value (0);
-
 	restore_ruler_visibility ();
 	//tempo_map_changed (Change (0));
 	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
 
-	edit_cursor->set_position (0);
-	playhead_cursor->set_position (0);
-
 	start_scrolling ();
-
-	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
-	set_state (*node);
 
 	/* don't show master bus in a new session */
 
@@ -2114,6 +2108,28 @@ Editor::set_state (const XMLNode& node)
 	set_default_size (g.base_width, g.base_height);
 	move (x, y);
 
+	if (session && (prop = node.property ("playhead"))) {
+		nframes_t pos = atol (prop->value().c_str());
+		playhead_cursor->set_position (pos);
+	} else {
+		playhead_cursor->set_position (0);
+
+		/* ::reposition_x_origin() doesn't work right here, since the old
+		   position may be zero already, and it does nothing in such
+		   circumstances.
+		*/
+		
+		leftmost_frame = 0;
+		horizontal_adjustment.set_value (0);
+	}
+
+	if (session && (prop = node.property ("edit-cursor"))) {
+		nframes_t pos = atol (prop->value().c_str());
+		edit_cursor->set_position (pos);
+	} else {
+		edit_cursor->set_position (0);
+	}
+
 	if ((prop = node.property ("zoom-focus"))) {
 		set_zoom_focus ((ZoomFocus) atoi (prop->value()));
 	}
@@ -2262,6 +2278,11 @@ Editor::get_state ()
 	node->add_property ("snap-to", buf);
 	snprintf (buf, sizeof(buf), "%d", (int) snap_mode);
 	node->add_property ("snap-mode", buf);
+
+	snprintf (buf, sizeof (buf), "%" PRIu32, playhead_cursor->current_frame);
+	node->add_property ("playhead", buf);
+	snprintf (buf, sizeof (buf), "%" PRIu32, edit_cursor->current_frame);
+	node->add_property ("edit-cursor", buf);
 
 	node->add_property ("show-waveforms", _show_waveforms ? "yes" : "no");
 	node->add_property ("show-waveforms-recording", _show_waveforms_recording ? "yes" : "no");

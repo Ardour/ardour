@@ -36,6 +36,7 @@
 #include <pbd/pathscanner.h>
 #include <pbd/failed_constructor.h>
 #include <pbd/enumwriter.h>
+#include <pbd/stacktrace.h>
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/click_box.h>
@@ -109,7 +110,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
 	  /* big clock */
 
-	  big_clock (X_("bigclock"), false, "BigClockNonRecording", true, false, true),
+	  big_clock (X_("bigclock"), false, "BigClockNonRecording", false, false, true),
 
 	  /* transport */
 
@@ -2400,6 +2401,8 @@ ARDOUR_UI::update_transport_clocks (nframes_t pos)
 void
 ARDOUR_UI::record_state_changed ()
 {
+	ENSURE_GUI_THREAD (mem_fun (*this, &ARDOUR_UI::record_state_changed));
+
 	if (!session || !big_clock_window) {
 		/* why bother - the clock isn't visible */
 		return;
