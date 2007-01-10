@@ -837,6 +837,8 @@ if env['SYSLIBS']:
 #    libraries['flowcanvas'] = LibraryInfo(LIBS='flowcanvas', LIBPATH='#/libs/flowcanvas', CPPPATH='#libs/flowcanvas')
     libraries['soundtouch'] = LibraryInfo()
     libraries['soundtouch'].ParseConfig ('pkg-config --cflags --libs soundtouch-1.0')
+    # Comment the previous line and uncomment this for Debian:
+	#libraries['soundtouch'].ParseConfig ('pkg-config --cflags --libs libSoundTouch')
 
     libraries['appleutility'] = LibraryInfo(LIBS='libappleutility',
                                             LIBPATH='#libs/appleutility',

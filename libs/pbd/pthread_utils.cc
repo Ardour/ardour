@@ -43,6 +43,16 @@ pthread_create_and_store (string name, pthread_t  *thread, pthread_attr_t *attr,
 {
 	int ret;
 
+	pthread_attr_t default_attr;
+	bool use_default_attr = (attr == NULL);
+	
+	if (use_default_attr) {
+		// set default stack size to sensible default for memlocking
+		pthread_attr_init(&default_attr);
+		pthread_attr_setstacksize(&default_attr, 500000);
+		attr = &default_attr;
+	}
+
 	if ((ret = pthread_create (thread, attr, start_routine, arg)) == 0) {
 		std::pair<string,pthread_t> newpair;
 		newpair.first = name;
@@ -52,6 +62,10 @@ pthread_create_and_store (string name, pthread_t  *thread, pthread_attr_t *attr,
 		all_threads.insert (newpair);
 
 		pthread_mutex_unlock (&thread_map_lock);
+	}
+
+	if (use_default_attr) {
+		pthread_attr_destroy(&default_attr);
 	}
 	
 	return ret;
