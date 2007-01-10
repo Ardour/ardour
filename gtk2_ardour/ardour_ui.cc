@@ -1797,6 +1797,7 @@ ARDOUR_UI::load_session (const string & path, const string & snap_name, string* 
 	Session *new_session;
 	int x;
 	session_loaded = false;
+	
 	x = unload_session ();
 
 	if (x < 0) {
@@ -2406,10 +2407,10 @@ ARDOUR_UI::record_state_changed ()
 
 	switch (session->record_status()) {
 	case Session::Recording:
-		big_clock.set_name ("BigClockRecording");
+		big_clock.set_widget_name ("BigClockRecording");
 		break;
 	default:
-		big_clock.set_name ("BigClockNonRecording");
+		big_clock.set_widget_name ("BigClockNonRecording");
 		break;
 	}
 }
