@@ -1649,7 +1649,7 @@ Editor::build_track_selection_context_menu (nframes_t ignored)
 }
 
 void
-Editor::add_crossfade_context_items (AudioStreamView* view, Crossfade* xfade, Menu_Helpers::MenuList& edit_items, bool many)
+Editor::add_crossfade_context_items (AudioStreamView* view, boost::shared_ptr<Crossfade> xfade, Menu_Helpers::MenuList& edit_items, bool many)
 {
 	using namespace Menu_Helpers;
 	Menu     *xfade_menu = manage (new Menu);
@@ -1663,8 +1663,8 @@ Editor::add_crossfade_context_items (AudioStreamView* view, Crossfade* xfade, Me
 		str = _("Unmute");
 	}
 
-	items.push_back (MenuElem (str, bind (mem_fun(*this, &Editor::toggle_xfade_active), xfade)));
-	items.push_back (MenuElem (_("Edit"), bind (mem_fun(*this, &Editor::edit_xfade), xfade)));
+	items.push_back (MenuElem (str, bind (mem_fun(*this, &Editor::toggle_xfade_active), boost::weak_ptr<Crossfade> (xfade))));
+	items.push_back (MenuElem (_("Edit"), bind (mem_fun(*this, &Editor::edit_xfade), boost::weak_ptr<Crossfade> (xfade))));
 
 	if (xfade->can_follow_overlap()) {
 
@@ -3900,21 +3900,33 @@ Editor::set_follow_playhead (bool yn)
 }
 
 void
-Editor::toggle_xfade_active (Crossfade* xfade)
+Editor::toggle_xfade_active (boost::weak_ptr<Crossfade> wxfade)
 {
-	xfade->set_active (!xfade->active());
+	boost::shared_ptr<Crossfade> xfade (wxfade.lock());
+	if (xfade) {
+		xfade->set_active (!xfade->active());
+	}
 }
 
 void
-Editor::toggle_xfade_length (Crossfade* xfade)
+Editor::toggle_xfade_length (boost::weak_ptr<Crossfade> wxfade)
 {
-	xfade->set_follow_overlap (!xfade->following_overlap());
+	boost::shared_ptr<Crossfade> xfade (wxfade.lock());
+	if (xfade) {
+		xfade->set_follow_overlap (!xfade->following_overlap());
+	}
 }
 
 void
-Editor::edit_xfade (Crossfade* xfade)
+Editor::edit_xfade (boost::weak_ptr<Crossfade> wxfade)
 {
-	CrossfadeEditor cew (*session, *xfade, xfade->fade_in().get_min_y(), 1.0);
+	boost::shared_ptr<Crossfade> xfade (wxfade.lock());
+
+	if (!xfade) {
+		return;
+	}
+
+	CrossfadeEditor cew (*session, xfade, xfade->fade_in().get_min_y(), 1.0);
 		
 	ensure_float (cew);
 	

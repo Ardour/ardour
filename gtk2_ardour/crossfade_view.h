@@ -35,14 +35,15 @@ struct CrossfadeView : public TimeAxisViewItem
 {
     CrossfadeView (ArdourCanvas::Group*, 
 		   RouteTimeAxisView&,
-		   ARDOUR::Crossfade&,
+		   boost::shared_ptr<ARDOUR::Crossfade>,
 		   double initial_samples_per_unit, 
 		   Gdk::Color& basic_color,
 		   AudioRegionView& leftview,
 		   AudioRegionView& rightview);
     ~CrossfadeView ();
 
-    ARDOUR::Crossfade& crossfade;  // ok, let 'em have it
+    boost::shared_ptr<ARDOUR::Crossfade> crossfade;  // ok, let 'em have it
+
     AudioRegionView& left_view;    // and these too
     AudioRegionView& right_view;
 

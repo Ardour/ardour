@@ -24,6 +24,7 @@
 #include <vector>
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
 #include <sigc++/signal.h>
 
@@ -40,7 +41,7 @@ namespace ARDOUR {
 class AudioRegion;
 class Playlist;
 
-class Crossfade : public PBD::StatefulDestructible
+class Crossfade : public PBD::StatefulDestructible, public boost::enable_shared_from_this<ARDOUR::Crossfade>
 {
   public:
 
@@ -111,7 +112,7 @@ class Crossfade : public PBD::StatefulDestructible
 
 	void invalidate();
 
-	sigc::signal<void,Crossfade*> Invalidated;
+	sigc::signal<void,boost::shared_ptr<Crossfade> > Invalidated;
 	sigc::signal<void,Change>     StateChanged;
 
 	bool covers (nframes_t frame) const {

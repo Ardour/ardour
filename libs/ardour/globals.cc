@@ -196,6 +196,7 @@ setup_hardware_optimization (bool try_optimization)
 {
         bool generic_mix_functions = true;
 
+
 	if (try_optimization) {
 
 #if defined (ARCH_X86) && defined (BUILD_SSE_OPTIMIZATIONS)
@@ -216,14 +217,14 @@ setup_hardware_optimization (bool try_optimization)
 #else
 
 		asm (
-				 "movq $1, %%rax\n"
 				 "pushq %%rbx\n"
+				 "movq $1, %%rax\n"
 				 "cpuid\n"
 				 "movq %%rdx, %0\n"
 				 "popq %%rbx\n"
 		 	     : "=l" (use_sse)
 	   		     : 
- 	    		 : "%rax", "%rcx", "%rdx", "memory");
+			 : "%rax", "%rcx", "%rdx", "memory");
 
 #endif /* USE_X86_64_ASM */
 		use_sse &= (1 << 25); // bit 25 = SSE support
