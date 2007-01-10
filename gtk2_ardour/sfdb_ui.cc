@@ -21,6 +21,8 @@
 #include <cerrno>
 #include <sstream>
 
+#include <sys/stat.h>
+
 #include <gtkmm/box.h>
 #include <gtkmm/stock.h>
 
@@ -390,17 +392,25 @@ SoundFileChooser::get_filename ()
 	Gtk::TreeModel::iterator iter;
 	Gtk::TreeModel::Row row;
 	
+	string filename;
 	switch (notebook.get_current_page()) {
 		case 0:
-			return chooser.get_filename();
+			filename = chooser.get_filename();
 		case 1:
 			iter = found_list_view.get_selection()->get_selected();
 			row = *iter;
-			return row[found_list_columns.pathname];
+			filename = row[found_list_columns.pathname];
 		default:
 			/* NOT REACHED */
 			return "";
 	}
+	
+	struct stat buf;
+	if (stat (filename.c_str(), &buf) || !S_ISREG(buf.st_mode)) {
+		return "";
+	}
+	
+	return filename;
 }
 
 vector<string> SoundFileOmega::mode_strings;
@@ -446,22 +456,34 @@ SoundFileOmega::get_split ()
 vector<Glib::ustring>
 SoundFileOmega::get_paths ()
 {
+	vector<Glib::ustring> results;
+	
 	int n = notebook.get_current_page ();
 	
 	if (n == 0) {
-		return chooser.get_filenames ();
+		vector<Glib::ustring> filenames = chooser.get_filenames();
+		vector<Glib::ustring>::iterator i;
+		for (i = filenames.begin(); i != filenames.end(); ++i) {
+			struct stat buf;
+			if ((!stat((*i).c_str(), &buf)) && S_ISREG(buf.st_mode)) {
+				results.push_back (*i);
+			}
+		}
+		return results;
+		
+	} else {
+		
+		typedef Gtk::TreeView::Selection::ListHandle_Path ListPath;
+		
+		ListPath rows = found_list_view.get_selection()->get_selected_rows ();
+		for (ListPath::iterator i = rows.begin() ; i != rows.end(); ++i) {
+			Gtk::TreeIter iter = found_list->get_iter(*i);
+			string str = (*iter)[found_list_columns.pathname];
+			
+			results.push_back (str);
+		}
+		return results;
 	}
-	
-	typedef Gtk::TreeView::Selection::ListHandle_Path ListPath;
-	
-	vector<Glib::ustring> results;
-	ListPath rows = found_list_view.get_selection()->get_selected_rows ();
-	for (ListPath::iterator i = rows.begin() ; i != rows.end(); ++i) {
-		Gtk::TreeIter iter = found_list->get_iter(*i);
-		string str = (*iter)[found_list_columns.pathname];
-		results.push_back (str);
-	}
-	return results;
 }
 
 void
