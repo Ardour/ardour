@@ -107,7 +107,7 @@ Editor::scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item)
 		x_pos = item->get_position() - offset + (item->get_duration() / 2);
 	}
 	
-	reposition_x_origin (x_pos);
+	reset_x_origin (x_pos);
 }
 
 void

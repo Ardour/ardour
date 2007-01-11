@@ -130,7 +130,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void scroll_tracks_up_line () = 0;
 	virtual bool new_regionviews_display_gain () = 0;
 	virtual void prepare_for_cleanup () = 0;
-	virtual void reposition_x_origin (nframes_t frame) = 0;
+	virtual void reset_x_origin (nframes_t frame) = 0;
 	virtual void remove_last_capture () = 0;
 	virtual void maximise_editing_space() = 0;
 	virtual void restore_editing_space() = 0;

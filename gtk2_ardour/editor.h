@@ -332,10 +332,12 @@ class Editor : public PublicEditor
 	bool new_regionviews_display_gain () { return _new_regionviews_show_envelope; }
 	void prepare_for_cleanup ();
 
-	void reposition_x_origin (nframes_t sample);
-
 	void maximise_editing_space();
 	void restore_editing_space();
+
+	void reset_x_origin (nframes_t);
+	void reset_zoom (double);
+	void reposition_and_zoom (nframes_t, double);
 
   protected:
 	void map_transport_state ();
@@ -678,10 +680,31 @@ class Editor : public PublicEditor
 	void tie_vertical_scrolling ();
 	void canvas_horizontally_scrolled ();
 
-	void reposition_and_zoom (nframes_t sample, double fpu);
-	gint deferred_reposition_and_zoom (nframes_t sample, double fpu);
+	struct VisualChange {
+	    enum Type { 
+		    TimeOrigin = 0x1,
+		    ZoomLevel = 0x2
+	    };
+
+	    Type pending;
+	    nframes_t time_origin;
+	    double frames_per_unit;
+
+	    int idle_handler_id;
+
+	    VisualChange() : pending ((VisualChange::Type) 0), time_origin (0), frames_per_unit (0), idle_handler_id (-1) {}
+	};
+
+
+	VisualChange pending_visual_change;
+
+	static int _idle_visual_changer (void *arg);
+	int idle_visual_changer ();
+
+	void queue_visual_change (nframes_t);
+	void queue_visual_change (double);
+
 	void end_location_changed (ARDOUR::Location*);
-	bool repos_zoom_queued;
 
 	struct RegionListDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    RegionListDisplayModelColumns() {
@@ -1799,7 +1822,6 @@ class Editor : public PublicEditor
 	Glib::RefPtr<Gtk::Action>              redo_action;
 
 	void history_changed ();
-
 };
 
 #endif /* __ardour_editor_h__ */

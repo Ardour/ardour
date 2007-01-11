@@ -292,7 +292,6 @@ Editor::Editor (AudioEngine& eng)
 	new_transport_marker_menu = 0;
 	editor_mixer_strip_width = Wide;
 	show_editor_mixer_when_tracks_arrive = false;
-	repos_zoom_queued = false;
 	region_edit_menu_split_item = 0;
 	temp_location = 0;
 	region_edit_menu_split_multichannel_item = 0;
@@ -323,7 +322,7 @@ Editor::Editor (AudioEngine& eng)
 	
 	set_mouse_mode (MouseObject, true);
 
-	frames_per_unit = 2048; /* too early to use set_frames_per_unit */
+	frames_per_unit = 2048; /* too early to use reset_zoom () */
 	reset_hscrollbar_stepping ();
 	
 	zoom_focus = ZoomFocusLeft;
@@ -826,65 +825,6 @@ Editor::tie_vertical_scrolling ()
 }
 
 void
-Editor::set_frames_per_unit (double fpu)
-{
-	nframes_t frames;
-
-	if (fpu == frames_per_unit) {
-		return;
-	}
-
-	if (fpu < 2.0) {
-		fpu = 2.0;
-	}
-
-	// convert fpu to frame count
-
-	frames = (nframes_t) floor (fpu * canvas_width);
-	
-	/* don't allow zooms that fit more than the maximum number
-	   of frames into an 800 pixel wide space.
-	*/
-
-	if (max_frames / fpu < 800.0) {
-		return;
-	}
-
-	if (fpu == frames_per_unit) {
-		return;
-	}
-
-	frames_per_unit = fpu;
-
-	if (frames != zoom_range_clock.current_duration()) {
-		zoom_range_clock.set (frames);
-	}
-
-	if (mouse_mode == MouseRange && selection->time.start () != selection->time.end_frame ()) {
-		if (!selection->tracks.empty()) {
-			for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-				(*i)->reshow_selection (selection->time);
-			}
-		} else {
-			for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-				(*i)->reshow_selection (selection->time);
-			}
-		}
-	}
-
-	ZoomChanged (); /* EMIT_SIGNAL */
-
-	reset_hscrollbar_stepping ();
-	reset_scrolling_region ();
-	
-	if (edit_cursor) edit_cursor->set_position (edit_cursor->current_frame);
-	if (playhead_cursor) playhead_cursor->set_position (playhead_cursor->current_frame);
-
-	instant_save ();
-
-}
-
-void
 Editor::instant_save ()
 {
 	if (!constructed || !ARDOUR_UI::instance()->session_loaded) {
@@ -895,28 +835,6 @@ Editor::instant_save ()
 		session->add_instant_xml(get_state(), session->path());
 	} else {
 		Config->add_instant_xml(get_state(), get_user_ardour_path());
-	}
-}
-
-void
-Editor::reposition_x_origin (nframes_t frame)
-{
-	cerr << "repsosition to " << frame << endl;
-
-	if (frame != leftmost_frame) {
-		leftmost_frame = frame;
-		
-		nframes_t rightmost_frame = leftmost_frame + current_page_frames ();
-
-		if (rightmost_frame > last_canvas_frame) {
-			last_canvas_frame = rightmost_frame;
-			reset_scrolling_region ();
-		}
-
-		horizontal_adjustment.set_value (frame/frames_per_unit);
-	} else {
-		update_fixed_rulers();
-		tempo_map_changed (Change (0));
 	}
 }
 
@@ -975,9 +893,9 @@ Editor::control_scroll (float fraction)
 
 	if (target > (current_page_frames() / 2)) {
 		/* try to center PH in window */
-		reposition_x_origin (target - (current_page_frames()/2));
+		reset_x_origin (target - (current_page_frames()/2));
 	} else {
-		reposition_x_origin (0);
+		reset_x_origin (0);
 	}
 
 	/* cancel the existing */
@@ -994,36 +912,6 @@ Editor::deferred_control_scroll (nframes_t target)
 {
 	session->request_locate (target);
 	return false;
-}
-
-void 
-Editor::canvas_horizontally_scrolled ()
-{
-
-  	leftmost_frame = (nframes_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
-	update_fixed_rulers ();
-	tempo_map_changed (Change (0));
-
-}
-
-void
-Editor::reposition_and_zoom (nframes_t frame, double nfpu)
-{
-	if (!repos_zoom_queued) {
-		repos_zoom_queued = true;
-		Glib::signal_idle().connect (bind (mem_fun(*this, &Editor::deferred_reposition_and_zoom), frame, nfpu));
-	}
-}
-
-gint
-Editor::deferred_reposition_and_zoom (nframes_t frame, double nfpu)
-{
-
-	set_frames_per_unit (nfpu);
-	reposition_x_origin  (frame);
-	repos_zoom_queued = false;
-	
-	return FALSE;
 }
 
 void
@@ -1083,7 +971,7 @@ Editor::center_screen_internal (nframes_t frame, float page)
 		frame = 0;
 	}
 
-    reposition_x_origin (frame);
+	reset_x_origin (frame);
 }
 
 void
@@ -2115,7 +2003,7 @@ Editor::set_state (const XMLNode& node)
 	} else {
 		playhead_cursor->set_position (0);
 
-		/* ::reposition_x_origin() doesn't work right here, since the old
+		/* reset_x_origin() doesn't work right here, since the old
 		   position may be zero already, and it does nothing in such
 		   circumstances.
 		*/
@@ -2136,7 +2024,7 @@ Editor::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("zoom"))) {
-		set_frames_per_unit (PBD::atof (prop->value()));
+		reset_zoom (PBD::atof (prop->value()));
 	}
 
 	if ((prop = node.property ("snap-to"))) {
@@ -4251,3 +4139,156 @@ Editor::on_key_press_event (GdkEventKey* ev)
 	return key_press_focus_accelerator_handler (*this, ev);
 }
 
+void
+Editor::reset_x_origin (nframes_t frame)
+{
+	queue_visual_change (frame);
+}
+
+void
+Editor::reset_zoom (double fpu)
+{
+	queue_visual_change (fpu);
+}
+
+void
+Editor::reposition_and_zoom (nframes_t frame, double fpu)
+{
+	reset_x_origin (frame);
+	reset_zoom (fpu);
+}
+
+void
+Editor::set_frames_per_unit (double fpu)
+{
+	nframes_t frames;
+
+	/* this is the core function that controls the zoom level of the canvas. it is called
+	   whenever one or more calls are made to reset_zoom(). it executes in an idle handler.
+	*/
+
+	if (fpu == frames_per_unit) {
+		return;
+	}
+
+	if (fpu < 2.0) {
+		fpu = 2.0;
+	}
+
+	// convert fpu to frame count
+
+	frames = (nframes_t) floor (fpu * canvas_width);
+	
+	/* don't allow zooms that fit more than the maximum number
+	   of frames into an 800 pixel wide space.
+	*/
+
+	if (max_frames / fpu < 800.0) {
+		return;
+	}
+
+	if (fpu == frames_per_unit) {
+		return;
+	}
+
+	frames_per_unit = fpu;
+
+	if (frames != zoom_range_clock.current_duration()) {
+		zoom_range_clock.set (frames);
+	}
+
+	if (mouse_mode == MouseRange && selection->time.start () != selection->time.end_frame ()) {
+		if (!selection->tracks.empty()) {
+			for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+				(*i)->reshow_selection (selection->time);
+			}
+		} else {
+			for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+				(*i)->reshow_selection (selection->time);
+			}
+		}
+	}
+
+	ZoomChanged (); /* EMIT_SIGNAL */
+
+	reset_hscrollbar_stepping ();
+	reset_scrolling_region ();
+	
+	if (edit_cursor) edit_cursor->set_position (edit_cursor->current_frame);
+	if (playhead_cursor) playhead_cursor->set_position (playhead_cursor->current_frame);
+
+	instant_save ();
+}
+
+void 
+Editor::canvas_horizontally_scrolled ()
+{
+	/* this is the core function that controls horizontal scrolling of the canvas. it is called
+	   whenever the horizontal_adjustment emits its "value_changed" signal. it executes in an
+	   idle handler.
+	*/
+
+  	leftmost_frame = (nframes_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
+	nframes_t rightmost_frame = leftmost_frame + current_page_frames ();
+	
+	if (rightmost_frame > last_canvas_frame) {
+		last_canvas_frame = rightmost_frame;
+		reset_scrolling_region ();
+	}
+	
+	update_fixed_rulers ();
+	tempo_map_changed (Change (0));
+}
+
+void
+Editor::queue_visual_change (nframes_t where)
+{
+	pending_visual_change.pending = VisualChange::Type (pending_visual_change.pending | VisualChange::TimeOrigin);
+	pending_visual_change.time_origin = where;
+
+	if (pending_visual_change.idle_handler_id < 0) {
+		pending_visual_change.idle_handler_id = g_idle_add (_idle_visual_changer, this);
+	}
+}
+
+void
+Editor::queue_visual_change (double fpu)
+{
+	pending_visual_change.pending = VisualChange::Type (pending_visual_change.pending | VisualChange::ZoomLevel);
+	pending_visual_change.frames_per_unit = fpu;
+
+	if (pending_visual_change.idle_handler_id < 0) {
+		pending_visual_change.idle_handler_id = g_idle_add_full (G_PRIORITY_HIGH_IDLE, _idle_visual_changer, this, 0);
+	}
+}
+
+int
+Editor::_idle_visual_changer (void* arg)
+{
+	return static_cast<Editor*>(arg)->idle_visual_changer ();
+}
+
+int
+Editor::idle_visual_changer ()
+{
+	VisualChange::Type p = pending_visual_change.pending;
+
+	pending_visual_change.pending = (VisualChange::Type) 0;
+	pending_visual_change.idle_handler_id = -1;
+	
+	if (p & VisualChange::ZoomLevel) {
+		set_frames_per_unit (pending_visual_change.frames_per_unit);
+	}
+
+	if (p & VisualChange::TimeOrigin) {
+		if (pending_visual_change.time_origin != leftmost_frame) {
+			horizontal_adjustment.set_value (pending_visual_change.time_origin/frames_per_unit);
+			/* the signal handler will do the rest */
+		} else {
+			update_fixed_rulers();
+			tempo_map_changed (Change (0));
+		}
+	}
+
+	return 0;
+}

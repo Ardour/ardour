@@ -635,7 +635,7 @@ Editor::autoscroll_canvas ()
 	} 
 
 	if (new_frame != leftmost_frame) {
-		reposition_x_origin (new_frame);
+		reset_x_origin (new_frame);
 	}
 
 	if (autoscroll_cnt == 50) { /* 0.5 seconds */
