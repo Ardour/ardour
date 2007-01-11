@@ -956,7 +956,7 @@ ARDOUR_UI::transport_goto_start ()
 		*/
 		
 		if (editor) {
-			editor->reposition_x_origin (session->current_start_frame());
+			editor->reset_x_origin (session->current_start_frame());
 		}
 	}
 }
@@ -973,7 +973,7 @@ ARDOUR_UI::transport_goto_zero ()
 		*/
 		
 		if (editor) {
-			editor->reposition_x_origin (0);
+			editor->reset_x_origin (0);
 		}
 	}
 }
@@ -990,7 +990,7 @@ ARDOUR_UI::transport_goto_end ()
 		*/
 		
 		if (editor) {
-			editor->reposition_x_origin (frame);
+			editor->reset_x_origin (frame);
 		}
 	}
 }

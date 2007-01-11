@@ -926,7 +926,7 @@ Editor::scroll_backward (float pages)
 		frame = leftmost_frame - cnt;
 	}
 
-	reposition_x_origin (frame);
+	reset_x_origin (frame);
 }
 
 void
@@ -954,7 +954,7 @@ Editor::scroll_forward (float pages)
 		frame = leftmost_frame + cnt;
 	}
 
-	reposition_x_origin (frame);
+	reset_x_origin (frame);
 }
 
 void
