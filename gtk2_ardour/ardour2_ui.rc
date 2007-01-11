@@ -663,7 +663,7 @@ style "treeview_parent_node"
 }
 
 style "treeview_display" = "small_bold_text"
-
+{
 	# expander arrow border and DnD "icon" text
 	fg[NORMAL] = { 0.8, 0.8, 0.8 } 
 
