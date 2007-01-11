@@ -464,7 +464,7 @@ class Editor : public PublicEditor
 	void add_dstream_context_items (Gtk::Menu_Helpers::MenuList&);
 	void add_bus_context_items (Gtk::Menu_Helpers::MenuList&);
 	void add_region_context_items (AudioStreamView*, boost::shared_ptr<ARDOUR::Region>, Gtk::Menu_Helpers::MenuList&);
-	void add_crossfade_context_items (AudioStreamView*, ARDOUR::Crossfade*, Gtk::Menu_Helpers::MenuList&, bool many);
+	void add_crossfade_context_items (AudioStreamView*, boost::shared_ptr<ARDOUR::Crossfade>, Gtk::Menu_Helpers::MenuList&, bool many);
 	void add_selection_context_items (Gtk::Menu_Helpers::MenuList&);
 
 	void handle_new_route (ARDOUR::Session::RouteList&);
@@ -1735,9 +1735,9 @@ class Editor : public PublicEditor
 	ImageFrameSocketHandler* image_socket_listener ;
 	/* </CMT Additions> */
 
-	void toggle_xfade_active (ARDOUR::Crossfade*);
-	void toggle_xfade_length (ARDOUR::Crossfade*);
-	void edit_xfade (ARDOUR::Crossfade*);
+	void toggle_xfade_active (boost::weak_ptr<ARDOUR::Crossfade>);
+	void toggle_xfade_length (boost::weak_ptr<ARDOUR::Crossfade>);
+	void edit_xfade (boost::weak_ptr<ARDOUR::Crossfade>);
 	void xfade_edit_left_region ();
 	void xfade_edit_right_region ();
 

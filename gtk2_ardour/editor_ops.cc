@@ -2779,8 +2779,14 @@ Editor::freeze_route ()
 	itt.done = false;
 	itt.cancel = false;
 	itt.progress = 0.0f;
+	
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	pthread_attr_setstacksize(&attr, 500000);
 
-	pthread_create (&itt.thread, 0, _freeze_thread, this);
+	pthread_create (&itt.thread, &attr, _freeze_thread, this);
+
+	pthread_attr_destroy(&attr);
 
 	track_canvas.get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
 

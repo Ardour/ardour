@@ -413,7 +413,8 @@ void
 AudioEngine::start_metering_thread ()
 {
 	if (m_meter_thread == 0) {
-		m_meter_thread = Glib::Thread::create (sigc::mem_fun(this, &AudioEngine::meter_thread), true);
+		m_meter_thread = Glib::Thread::create (sigc::mem_fun(this, &AudioEngine::meter_thread),
+				500000, true, true, Glib::THREAD_PRIORITY_NORMAL);
 	}
 }
 

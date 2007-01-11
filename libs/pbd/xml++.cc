@@ -289,11 +289,25 @@ XMLProperty *
 XMLNode::property(const char * n)
 {
 	string ns(n);
-	if (_propmap.find(ns) == _propmap.end()) {
-		return 0;
+	map<string,XMLProperty*>::iterator iter;
+
+	if ((iter = _propmap.find(ns)) != _propmap.end()) {
+		return iter->second;
+	}
+
+	return 0;
+}
+
+XMLProperty *
+XMLNode::property(const string & ns)
+{
+	map<string,XMLProperty*>::iterator iter;
+
+	if ((iter = _propmap.find(ns)) != _propmap.end()) {
+		return iter->second;
 	}
 	
-	return _propmap[ns];
+	return 0;
 }
 
 XMLProperty *

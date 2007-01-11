@@ -20,6 +20,8 @@
 
 #include <sigc++/bind.h>
 
+#include <pbd/stacktrace.h>
+
 #include <ardour/types.h>
 #include <ardour/crossfade.h>
 #include <ardour/crossfade_compare.h>
@@ -80,6 +82,7 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> in, boost::shared_ptr<Audio
 {
 	_in = in;
 	_out = out;
+	
 	_length = length;
 	_position = position;
 	_anchor_point = ap;
@@ -197,9 +200,8 @@ Crossfade::Crossfade (const Crossfade &orig, boost::shared_ptr<AudioRegion> newi
 
 Crossfade::~Crossfade ()
 {
-	cerr << "Deleting xfade @ " << this << endl;
-	Invalidated (this);
-	cerr << "invalidation signal sent\n";
+	cerr << "Crossfade deleted\n";
+	notify_callbacks ();
 }
 
 void
@@ -256,6 +258,8 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 	/* first check for matching ends */
 	
 	if (top->first_frame() == bottom->first_frame()) {
+
+		cerr << "same start\n";
 		
 		/* Both regions start at the same point */
 		
@@ -297,6 +301,8 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 		
 	} else if (top->last_frame() == bottom->last_frame()) {
 		
+		cerr << "same end\n";
+
 		/* Both regions end at the same point */
 		
 		if (top->first_frame() > bottom->first_frame()) {
@@ -335,17 +341,21 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 
 		OverlapType ot = top->coverage (bottom->first_frame(), bottom->last_frame());
 
+		cerr << "ot = " << ot << endl;
+
 		switch (ot) {
 		case OverlapNone:
 			/* should be NOTREACHED as a precondition of creating
 			   a new crossfade, but we need to handle it here.
 			*/
+			cerr << "no sir\n";
 			throw NoCrossfadeHere();
 			break;
 			
 		case OverlapInternal:
 		case OverlapExternal:
 			/* should be NOTREACHED because of tests above */
+			cerr << "nu-uh\n";
 			throw NoCrossfadeHere();
 			break;
 			
@@ -357,15 +367,16 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 
 			_in = bottom;
 			_out = top;
-			_position = bottom->first_frame();
 			_anchor_point = StartOfIn;
 
 			if (model == FullCrossfade) {
+				_position = bottom->first_frame(); // "{"
 				_length = _out->first_frame() + _out->length() - _in->first_frame();
 				/* leave active alone */
 				_follow_overlap = true;
 			} else {
 				_length = min (short_xfade_length, top->length());
+				_position = top->last_frame() - _length;  // "]" - length 
 				_active = true;
 				_follow_overlap = false;
 				
@@ -499,7 +510,13 @@ Crossfade::refresh ()
 	/* crossfades must be between non-muted regions */
 	
 	if (_out->muted() || _in->muted()) {
-		Invalidated (this);
+		Invalidated (shared_from_this());
+		return false;
+	}
+
+	if (_in->layer() < _out->layer()) {
+		cerr << "layer change, invalidated\n";
+		Invalidated (shared_from_this());
 		return false;
 	}
 
@@ -508,11 +525,11 @@ Crossfade::refresh ()
 	OverlapType ot;
 	
 	ot = _in->coverage (_out->first_frame(), _out->last_frame());
-	
+
 	switch (ot) {
 	case OverlapNone:
 	case OverlapInternal:
-		Invalidated (this);
+		Invalidated (shared_from_this());
 		return false;
 		
 	default:
@@ -522,7 +539,7 @@ Crossfade::refresh ()
 	/* overlap type must not have altered */
 	
 	if (ot != overlap_type) {
-		Invalidated (this);
+		Invalidated (shared_from_this());
 		return false;
 	} 
 
@@ -543,7 +560,7 @@ Crossfade::update (bool force)
 	}
 
 	if (newlen == 0) {
-		Invalidated (this);
+		Invalidated (shared_from_this());
 		return false;
 	}
 
@@ -563,7 +580,13 @@ Crossfade::update (bool force)
 	switch (_anchor_point) {
 	case StartOfIn:
 		if (_position != _in->first_frame()) {
-			_position = _in->first_frame();
+			if (_length > _short_xfade_length) {
+				/* assume FullCrossfade */
+				_position = _in->first_frame();
+			} else {
+				/* assume short xfade */
+				_position = _out->last_frame() - _length;
+			}
 		}
 		break;
 
@@ -865,5 +888,5 @@ Crossfade::set_short_xfade_length (nframes_t n)
 void
 Crossfade::invalidate ()
 {
-	Invalidated (this); /* EMIT SIGNAL */
+	Invalidated (shared_from_this()); /* EMIT SIGNAL */
 }

@@ -599,7 +599,7 @@ AudioClock::set_session (Session *s)
 		AudioClock::Mode amode;
 		
 		if (node) {
-			if ((prop = node->property (_name.c_str())) != 0) {
+			if ((prop = node->property (_name)) != 0) {
 				amode = AudioClock::Mode (string_2_enum (prop->value(), amode));
 				set_mode (amode);
 			}

@@ -325,9 +325,6 @@ ARDOUR_UI::setup_transport ()
 	ARDOUR_UI::Clock.connect (bind (mem_fun (primary_clock, &AudioClock::set), false));
 	ARDOUR_UI::Clock.connect (bind (mem_fun (secondary_clock, &AudioClock::set), false));
 
-	primary_clock.set_mode (AudioClock::SMPTE);
-	secondary_clock.set_mode (AudioClock::BBT);
-
 	primary_clock.ValueChanged.connect (mem_fun(*this, &ARDOUR_UI::primary_clock_value_changed));
 	secondary_clock.ValueChanged.connect (mem_fun(*this, &ARDOUR_UI::secondary_clock_value_changed));
 

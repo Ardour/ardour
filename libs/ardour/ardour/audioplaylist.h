@@ -37,7 +37,7 @@ class Source;
 class AudioPlaylist : public ARDOUR::Playlist
 {
   public:
-	typedef std::list<Crossfade*> Crossfades;
+	typedef std::list<boost::shared_ptr<Crossfade> > Crossfades;
 	
    public:
 	AudioPlaylist (Session&, const XMLNode&, bool hidden = false);
@@ -53,9 +53,9 @@ class AudioPlaylist : public ARDOUR::Playlist
 
 	int set_state (const XMLNode&);
 
-	sigc::signal<void,Crossfade *> NewCrossfade; 
+	sigc::signal<void,boost::shared_ptr<Crossfade> > NewCrossfade; 
 
-	template<class T> void foreach_crossfade (T *t, void (T::*func)(Crossfade *));
+	template<class T> void foreach_crossfade (T *t, void (T::*func)(boost::shared_ptr<Crossfade>));
 	void crossfades_at (nframes_t frame, Crossfades&);
 
 	bool destroy_region (boost::shared_ptr<Region>);
@@ -63,7 +63,7 @@ class AudioPlaylist : public ARDOUR::Playlist
     protected:
 
 	/* playlist "callbacks" */
-	void notify_crossfade_added (Crossfade *);
+	void notify_crossfade_added (boost::shared_ptr<Crossfade>);
 	void flush_notifications ();
 
 	void finalize_split_region (boost::shared_ptr<Region> orig, boost::shared_ptr<Region> left, boost::shared_ptr<Region> right);
@@ -73,16 +73,16 @@ class AudioPlaylist : public ARDOUR::Playlist
         void remove_dependents (boost::shared_ptr<Region> region);
 
     private:
-       Crossfades      _crossfades;    /* xfades currently in use */
+       Crossfades      _crossfades;
        Crossfades      _pending_xfade_adds;
 
-       void crossfade_invalidated (Crossfade*);
+       void crossfade_invalidated (boost::shared_ptr<Crossfade>);
        XMLNode& state (bool full_state);
        void dump () const;
 
        bool region_changed (Change, boost::shared_ptr<Region>);
        void crossfade_changed (Change);
-       void add_crossfade (Crossfade&);
+       void add_crossfade (boost::shared_ptr<Crossfade>);
 
        void source_offset_changed (boost::shared_ptr<AudioRegion> region);
 };

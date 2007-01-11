@@ -72,7 +72,7 @@ CrossfadeEditor::Half::Half ()
 {
 }
 
-CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double mxy)
+CrossfadeEditor::CrossfadeEditor (Session& s, boost::shared_ptr<Crossfade> xf, double my, double mxy)
 	: ArdourDialog (_("ardour: x-fade edit")),
 	  xfade (xf),
 	  session (s),
@@ -279,14 +279,14 @@ CrossfadeEditor::CrossfadeEditor (Session& s, Crossfade& xf, double my, double m
 //	vpacker.pack_start (*foobut, false, false);
 
 	current = In;
-	set (xfade.fade_in(), In);
+	set (xfade->fade_in(), In);
 
 	current = Out;
-	set (xfade.fade_out(), Out);
+	set (xfade->fade_out(), Out);
 
 	curve_select_clicked (In);
 
-	xfade.StateChanged.connect (mem_fun(*this, &CrossfadeEditor::xfade_changed));
+	xfade->StateChanged.connect (mem_fun(*this, &CrossfadeEditor::xfade_changed));
 
 	session.AuditionActive.connect (mem_fun(*this, &CrossfadeEditor::audition_state_changed));
 	show_all_children();
@@ -577,21 +577,21 @@ CrossfadeEditor::canvas_allocation (Gtk::Allocation& alloc)
 	redraw ();
 	current = old_current;
 
-	double spu = xfade.length() / (double) effective_width();
+	double spu = xfade->length() / (double) effective_width();
 
 	if (fade[In].waves.empty()) {
-		make_waves (xfade.in(), In);
+		make_waves (xfade->in(), In);
 	}
 
 	if (fade[Out].waves.empty()) {
-		make_waves (xfade.out(), Out);
+		make_waves (xfade->out(), Out);
 	}
 
 	double ht;
 	vector<ArdourCanvas::WaveView*>::iterator i;
 	uint32_t n;
 
-	ht = canvas->get_allocation().get_height() / xfade.in()->n_channels();
+	ht = canvas->get_allocation().get_height() / xfade->in()->n_channels();
 
 	for (n = 0, i = fade[In].waves.begin(); i != fade[In].waves.end(); ++i, ++n) {
 		double yoff;
@@ -603,7 +603,7 @@ CrossfadeEditor::canvas_allocation (Gtk::Allocation& alloc)
 		(*i)->property_samples_per_unit() = spu;
 	}
 
-	ht = canvas->get_allocation().get_height() / xfade.out()->n_channels();
+	ht = canvas->get_allocation().get_height() / xfade->out()->n_channels();
 
 	for (n = 0, i = fade[Out].waves.begin(); i != fade[Out].waves.end(); ++i, ++n) {
 		double yoff;
@@ -621,8 +621,8 @@ CrossfadeEditor::canvas_allocation (Gtk::Allocation& alloc)
 void
 CrossfadeEditor::xfade_changed (Change ignored)
 {
-	set (xfade.fade_in(), In);
-	set (xfade.fade_out(), Out);
+	set (xfade->fade_in(), In);
+	set (xfade->fade_out(), Out);
 }
 
 void
@@ -632,7 +632,7 @@ CrossfadeEditor::redraw ()
 		return;
 	}
 
-	nframes_t len = xfade.length ();
+	nframes_t len = xfade->length ();
 
 	fade[current].normative_curve.clear ();
 	fade[current].gain_curve.clear ();
@@ -741,11 +741,11 @@ CrossfadeEditor::apply_preset (Preset *preset)
 void
 CrossfadeEditor::apply ()
 {
-	_apply_to (&xfade);
+	_apply_to (xfade);
 }
 
 void
-CrossfadeEditor::_apply_to (Crossfade* xf)
+CrossfadeEditor::_apply_to (boost::shared_ptr<Crossfade> xf)
 {
 	ARDOUR::Curve& in (xf->fade_in());
 	ARDOUR::Curve& out (xf->fade_out());
@@ -796,7 +796,7 @@ CrossfadeEditor::_apply_to (Crossfade* xf)
 }
 
 void
-CrossfadeEditor::setup (Crossfade* xfade)
+CrossfadeEditor::setup (boost::shared_ptr<Crossfade> xfade)
 {
 	_apply_to (xfade);
 	xfade->set_active (true);
@@ -819,8 +819,8 @@ CrossfadeEditor::clear ()
 void
 CrossfadeEditor::reset ()
 {
-	set (xfade.fade_in(),  In);
-	set (xfade.fade_out(), Out);
+	set (xfade->fade_in(),  In);
+	set (xfade->fade_out(), Out);
 }
 
 void
@@ -1028,7 +1028,7 @@ CrossfadeEditor::make_waves (boost::shared_ptr<AudioRegion> region, WhichFade wh
 	}
 
 	ht = canvas->get_allocation().get_height() / (double) nchans;
-	spu = xfade.length() / (double) effective_width();
+	spu = xfade->length() / (double) effective_width();
 
 	for (uint32_t n = 0; n < nchans; ++n) {
 		
@@ -1095,25 +1095,25 @@ CrossfadeEditor::audition_both ()
 		postroll = 0;
 	}
 
- 	if ((left_start_offset = xfade.out()->length() - xfade.length()) >= preroll) {
+ 	if ((left_start_offset = xfade->out()->length() - xfade->length()) >= preroll) {
   		left_start_offset -= preroll;
   	} 
 
 	length = 0;
 
- 	if ((left_length = xfade.length()) < xfade.out()->length() - left_start_offset) {
+ 	if ((left_length = xfade->length()) < xfade->out()->length() - left_start_offset) {
   		length += postroll;
   	}
 
-	right_length = xfade.length();
+	right_length = xfade->length();
 
-	if (xfade.in()->length() - right_length < postroll) {
+	if (xfade->in()->length() - right_length < postroll) {
 		right_length += postroll;
 	}
 
-	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade.out(), left_start_offset, left_length, "xfade out", 
+	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->out(), left_start_offset, left_length, "xfade out", 
 													      0, Region::DefaultFlags, false)));
-	boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade.in(), 0, right_length, "xfade in", 
+	boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->in(), 0, right_length, "xfade in", 
 													       0, Region::DefaultFlags, false)));
 	
 	pl.add_region (left, 0);
@@ -1129,7 +1129,7 @@ CrossfadeEditor::audition_both ()
 void
 CrossfadeEditor::audition_left_dry ()
 {
-	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade.out(), xfade.out()->length() - xfade.length(), xfade.length(), "xfade left", 
+	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->out(), xfade->out()->length() - xfade->length(), xfade->length(), "xfade left", 
 													      0, Region::DefaultFlags, false)));
 	
 	session.audition_region (left);
@@ -1140,9 +1140,9 @@ CrossfadeEditor::audition_left ()
 {
 	AudioPlaylist& pl (session.the_auditioner()->prepare_playlist());
 
-	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade.out(), xfade.out()->length() - xfade.length(), xfade.length(), "xfade left", 
+	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->out(), xfade->out()->length() - xfade->length(), xfade->length(), "xfade left", 
 													      0, Region::DefaultFlags, false)));
-	boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade.in(), 0, xfade.length(), "xfade in", 
+	boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->in(), 0, xfade->length(), "xfade in", 
 													       0, Region::DefaultFlags, false)));
 
 	pl.add_region (left, 0);
@@ -1162,7 +1162,7 @@ CrossfadeEditor::audition_left ()
 void
 CrossfadeEditor::audition_right_dry ()
 {
-	boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade.in(), 0, xfade.length(), "xfade in", 
+	boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->in(), 0, xfade->length(), "xfade in", 
 													       0, Region::DefaultFlags, false)));
 	session.audition_region (right);
 }
@@ -1172,9 +1172,9 @@ CrossfadeEditor::audition_right ()
 {
 	AudioPlaylist& pl (session.the_auditioner()->prepare_playlist());
 
-	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade.out(), xfade.out()->length() - xfade.length(), xfade.length(), "xfade out", 
+	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->out(), xfade->out()->length() - xfade->length(), xfade->length(), "xfade out", 
 													      0, Region::DefaultFlags, false)));
-					     boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade.out(), 0, xfade.length(), "xfade out", 
+					     boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->out(), 0, xfade->length(), "xfade out", 
 													       0, Region::DefaultFlags, false)));
 
 	pl.add_region (left, 0);

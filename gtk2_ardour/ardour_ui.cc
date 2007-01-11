@@ -39,6 +39,7 @@
 #include <pbd/pathscanner.h>
 #include <pbd/failed_constructor.h>
 #include <pbd/enumwriter.h>
+#include <pbd/stacktrace.h>
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/click_box.h>
@@ -113,7 +114,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
 	  /* big clock */
 
-	  big_clock (X_("bigclock"), false, "BigClockNonRecording", true, false, true),
+	  big_clock (X_("bigclock"), false, "BigClockNonRecording", false, false, true),
 
 	  /* transport */
 
@@ -252,9 +253,10 @@ ARDOUR_UI::set_engine (AudioEngine& e)
 		throw failed_constructor();
 	}
 	
-	/* listen to clock mode changes */
+	/* set default clock modes */
 
-	AudioClock::ModeChanged.connect (mem_fun (*this, &ARDOUR_UI::store_clock_modes));
+	primary_clock.set_mode (AudioClock::SMPTE);
+	secondary_clock.set_mode (AudioClock::BBT);
 
 	/* start the time-of-day-clock */
 	
@@ -1834,6 +1836,7 @@ ARDOUR_UI::load_session (const string & path, const string & snap_name, string* 
 	Session *new_session;
 	int x;
 	session_loaded = false;
+	
 	x = unload_session ();
 
 	if (x < 0) {
@@ -2447,6 +2450,8 @@ ARDOUR_UI::update_transport_clocks (nframes_t pos)
 void
 ARDOUR_UI::record_state_changed ()
 {
+	ENSURE_GUI_THREAD (mem_fun (*this, &ARDOUR_UI::record_state_changed));
+
 	if (!session || !big_clock_window) {
 		/* why bother - the clock isn't visible */
 		return;
@@ -2454,10 +2459,10 @@ ARDOUR_UI::record_state_changed ()
 
 	switch (session->record_status()) {
 	case Session::Recording:
-		big_clock.set_name ("BigClockRecording");
+		big_clock.set_widget_name ("BigClockRecording");
 		break;
 	default:
-		big_clock.set_name ("BigClockNonRecording");
+		big_clock.set_widget_name ("BigClockNonRecording");
 		break;
 	}
 }

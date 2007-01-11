@@ -223,7 +223,7 @@ AudioStreamView::remove_region_view (boost::weak_ptr<Region> weak_r)
 			++tmp;
 			
 			boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(r);
-			if (ar && (*i)->crossfade.involves (ar)) {
+			if (ar && (*i)->crossfade->involves (ar)) {
 				delete *i;
 				crossfade_views.erase (i);
 			}
@@ -274,17 +274,17 @@ AudioStreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 }
 
 void
-AudioStreamView::add_crossfade (Crossfade *crossfade)
+AudioStreamView::add_crossfade (boost::shared_ptr<Crossfade> crossfade)
 {
 	AudioRegionView* lview = 0;
 	AudioRegionView* rview = 0;
-
+	
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::add_crossfade), crossfade));
 
 	/* first see if we already have a CrossfadeView for this Crossfade */
 
 	for (list<CrossfadeView *>::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
-		if ((*i)->crossfade == *crossfade) {
+		if ((*i)->crossfade == crossfade) {
 			if (!crossfades_visible) {
 				(*i)->hide();
 			} else {
@@ -310,7 +310,7 @@ AudioStreamView::add_crossfade (Crossfade *crossfade)
 
 	CrossfadeView *cv = new CrossfadeView (_trackview.canvas_display,
 					       _trackview,
-					       *crossfade,
+					        crossfade,
 					       _samples_per_unit,
 					       region_color,
 					       *lview, *rview);
@@ -324,12 +324,12 @@ AudioStreamView::add_crossfade (Crossfade *crossfade)
 }
 
 void
-AudioStreamView::remove_crossfade (Crossfade *xfade)
+AudioStreamView::remove_crossfade (boost::shared_ptr<Crossfade> xfade)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::remove_crossfade), xfade));
 
 	for (list<CrossfadeView*>::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
-		if (&(*i)->crossfade == xfade) {
+		if ((*i)->crossfade == xfade) {
 			delete *i;
 			crossfade_views.erase (i);
 			break;
@@ -716,7 +716,7 @@ void
 AudioStreamView::hide_xfades_involving (AudioRegionView& rv)
 {
 	for (list<CrossfadeView *>::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
-		if ((*i)->crossfade.involves (rv.audio_region())) {
+		if ((*i)->crossfade->involves (rv.audio_region())) {
 			(*i)->fake_hide ();
 		}
 	}
@@ -726,7 +726,7 @@ void
 AudioStreamView::reveal_xfades_involving (AudioRegionView& rv)
 {
 	for (list<CrossfadeView *>::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
-		if ((*i)->crossfade.involves (rv.audio_region()) && (*i)->visible()) {
+		if ((*i)->crossfade->involves (rv.audio_region()) && (*i)->visible()) {
 			(*i)->show ();
 		}
 	}

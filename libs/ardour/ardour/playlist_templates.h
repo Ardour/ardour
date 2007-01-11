@@ -23,7 +23,7 @@
 
 namespace ARDOUR {
 
-template<class T> void AudioPlaylist::foreach_crossfade (T *t, void (T::*func)(Crossfade *)) {
+template<class T> void AudioPlaylist::foreach_crossfade (T *t, void (T::*func)(boost::shared_ptr<Crossfade>)) {
 	RegionLock rlock (this, false);
 	for (Crossfades::iterator i = _crossfades.begin(); i != _crossfades.end(); i++) {	
 		(t->*func) (*i);

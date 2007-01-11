@@ -6,6 +6,13 @@ export LD_LIBRARY_PATH=%INSTALL_PREFIX%/%LIBDIR%/ardour2:$LD_LIBRARY_PATH
 # DYLD_LIBRARY_PATH is for Darwin
 export DYLD_LIBRARY_PATH=$LD_LIBRARY_PATH
 
+MLOCK_LIMIT=$(ulimit -l)
+if [ "$MLOCK_LIMIT" != "unlimited" ]; then
+	echo "WARNING: Your system has a limit for maximum amount of locked memory!"
+        echo "This might cause Ardour to run out of memory before your system runs out of memory. You can view the memory limit with 'ulimit -l', and it is normally controlled by /etc/security/limits.conf"
+
+fi
+
 exec %INSTALL_PREFIX%/%LIBDIR%/ardour2/ardour-%VERSION% $*
 
 

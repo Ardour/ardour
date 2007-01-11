@@ -21,6 +21,8 @@
 #include <cerrno>
 #include <sstream>
 
+#include <sys/stat.h>
+
 #include <gtkmm/box.h>
 #include <gtkmm/stock.h>
 
@@ -65,6 +67,8 @@ SoundFileBox::SoundFileBox ()
 	border_frame.set_label (_("Soundfile Info"));
 	border_frame.add (main_box);
 
+	Gtk::Label* tag_label = manage(new Gtk::Label(_("comma seperated tags")));
+
 	pack_start (border_frame);
 	set_border_width (4);
 
@@ -75,7 +79,8 @@ SoundFileBox::SoundFileBox ()
 	main_box.pack_start(channels, false, false);
 	main_box.pack_start(samplerate, false, false);
 	main_box.pack_start(timecode, false, false);
-	main_box.pack_start(tags_entry, true, true);
+	main_box.pack_start(*tag_label, false, false);
+	main_box.pack_start(tags_entry, false, false);
 	main_box.pack_start(apply_btn, false, false);
 	main_box.pack_start(bottom_box, false, false);
 
@@ -83,10 +88,10 @@ SoundFileBox::SoundFileBox ()
 	bottom_box.pack_start(play_btn);
 	bottom_box.pack_start(stop_btn);
 
-//	tags_entry.signal_focus_out_event().connect (mem_fun (*this, &SoundFileBox::tags_entry_left));
 	play_btn.signal_clicked().connect (mem_fun (*this, &SoundFileBox::play_btn_clicked));
 	stop_btn.signal_clicked().connect (mem_fun (*this, &SoundFileBox::stop_btn_clicked));
 	apply_btn.signal_clicked().connect (mem_fun (*this, &SoundFileBox::apply_btn_clicked));
+	tags_entry.signal_activate().connect (mem_fun (*this, &SoundFileBox::apply_btn_clicked));
 
 	length.set_alignment (0.0f, 0.0f);
 	format.set_alignment (0.0f, 0.0f);
@@ -306,7 +311,8 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s)
 	found_list_view.get_selection()->signal_changed().connect(mem_fun(*this, &SoundFileBrowser::found_list_view_selected));
 	
 	found_search_btn.signal_clicked().connect(mem_fun(*this, &SoundFileBrowser::found_search_clicked));
-
+	found_entry.signal_activate().connect(mem_fun(*this, &SoundFileBrowser::found_search_clicked));
+	
 	show_all ();
 	
 	set_session (s);
@@ -386,17 +392,25 @@ SoundFileChooser::get_filename ()
 	Gtk::TreeModel::iterator iter;
 	Gtk::TreeModel::Row row;
 	
+	string filename;
 	switch (notebook.get_current_page()) {
 		case 0:
-			return chooser.get_filename();
+			filename = chooser.get_filename();
 		case 1:
 			iter = found_list_view.get_selection()->get_selected();
 			row = *iter;
-			return row[found_list_columns.pathname];
+			filename = row[found_list_columns.pathname];
 		default:
 			/* NOT REACHED */
 			return "";
 	}
+	
+	struct stat buf;
+	if (stat (filename.c_str(), &buf) || !S_ISREG(buf.st_mode)) {
+		return "";
+	}
+	
+	return filename;
 }
 
 vector<string> SoundFileOmega::mode_strings;
@@ -442,22 +456,34 @@ SoundFileOmega::get_split ()
 vector<Glib::ustring>
 SoundFileOmega::get_paths ()
 {
+	vector<Glib::ustring> results;
+	
 	int n = notebook.get_current_page ();
 	
 	if (n == 0) {
-		return chooser.get_filenames ();
+		vector<Glib::ustring> filenames = chooser.get_filenames();
+		vector<Glib::ustring>::iterator i;
+		for (i = filenames.begin(); i != filenames.end(); ++i) {
+			struct stat buf;
+			if ((!stat((*i).c_str(), &buf)) && S_ISREG(buf.st_mode)) {
+				results.push_back (*i);
+			}
+		}
+		return results;
+		
+	} else {
+		
+		typedef Gtk::TreeView::Selection::ListHandle_Path ListPath;
+		
+		ListPath rows = found_list_view.get_selection()->get_selected_rows ();
+		for (ListPath::iterator i = rows.begin() ; i != rows.end(); ++i) {
+			Gtk::TreeIter iter = found_list->get_iter(*i);
+			string str = (*iter)[found_list_columns.pathname];
+			
+			results.push_back (str);
+		}
+		return results;
 	}
-	
-	typedef Gtk::TreeView::Selection::ListHandle_Path ListPath;
-	
-	vector<Glib::ustring> results;
-	ListPath rows = found_list_view.get_selection()->get_selected_rows ();
-	for (ListPath::iterator i = rows.begin() ; i != rows.end(); ++i) {
-		Gtk::TreeIter iter = found_list->get_iter(*i);
-		string str = (*iter)[found_list_columns.pathname];
-		results.push_back (str);
-	}
-	return results;
 }
 
 void

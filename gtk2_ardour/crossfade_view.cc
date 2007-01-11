@@ -44,15 +44,15 @@ sigc::signal<void,CrossfadeView*> CrossfadeView::GoingAway;
 
 CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent, 
 			      RouteTimeAxisView &tv, 
-			      Crossfade& xf, 
+			      boost::shared_ptr<Crossfade> xf, 
 			      double spu,
 			      Gdk::Color& basic_color,
 			      AudioRegionView& lview,
 			      AudioRegionView& rview)
 			      
 
-	: TimeAxisViewItem ("xfade" /*xf.name()*/, *parent, tv, spu, basic_color, xf.position(), 
-			    xf.length(), TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowFrame)),
+	: TimeAxisViewItem ("xfade" /*xf.name()*/, *parent, tv, spu, basic_color, xf->position(), 
+			    xf->length(), TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowFrame)),
 	  crossfade (xf),
 	  left_view (lview),
 	  right_view (rview)
@@ -84,7 +84,7 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 	
 	crossfade_changed (Change (~0));
 
-	crossfade.StateChanged.connect (mem_fun(*this, &CrossfadeView::crossfade_changed));
+	crossfade->StateChanged.connect (mem_fun(*this, &CrossfadeView::crossfade_changed));
 }
 
 CrossfadeView::~CrossfadeView ()
@@ -123,8 +123,8 @@ CrossfadeView::crossfade_changed (Change what_changed)
 	bool need_redraw_curves = false;
 
 	if (what_changed & BoundsChanged) {
-		set_position (crossfade.position(), this);
-		set_duration (crossfade.length(), this);
+		set_position (crossfade->position(), this);
+		set_duration (crossfade->length(), this);
 		need_redraw_curves = true;
 	}
 
@@ -148,7 +148,7 @@ CrossfadeView::redraw_curves ()
 	float* vec;
 	double h;
 
-	if (!crossfade.following_overlap()) {
+	if (!crossfade->following_overlap()) {
 		/* curves should not be visible */
 		fade_in->hide ();
 		fade_out->hide ();
@@ -172,10 +172,10 @@ CrossfadeView::redraw_curves ()
 		return;
 	}
 
-	npoints = get_time_axis_view().editor.frame_to_pixel (crossfade.length());
+	npoints = get_time_axis_view().editor.frame_to_pixel (crossfade->length());
 	npoints = std::min (gdk_screen_width(), npoints);
 
-	if (!_visible || !crossfade.active() || npoints < 3) {
+	if (!_visible || !crossfade->active() || npoints < 3) {
 		fade_in->hide();
 		fade_out->hide();
 		return;
@@ -187,7 +187,7 @@ CrossfadeView::redraw_curves ()
 	points = get_canvas_points ("xfade edit redraw", npoints);
 	vec = new float[npoints];
 
-	crossfade.fade_in().get_vector (0, crossfade.length(), vec, npoints);
+	crossfade->fade_in().get_vector (0, crossfade->length(), vec, npoints);
 	for (int i = 0, pci = 0; i < npoints; ++i) {
 		Art::Point &p = (*points)[pci++];
 		p.set_x(i);
@@ -195,7 +195,7 @@ CrossfadeView::redraw_curves ()
 	}
 	fade_in->property_points() = *points;
 
-	crossfade.fade_out().get_vector (0, crossfade.length(), vec, npoints);
+	crossfade->fade_out().get_vector (0, crossfade->length(), vec, npoints);
 	for (int i = 0, pci = 0; i < npoints; ++i) {
 		Art::Point &p = (*points)[pci++];
 		p.set_x(i);
@@ -217,7 +217,7 @@ CrossfadeView::redraw_curves ()
 void
 CrossfadeView::active_changed ()
 {
-	if (crossfade.active()) {
+	if (crossfade->active()) {
 		frame->property_fill_color_rgba() = color_map[cActiveCrossfade];
 	} else {
 		frame->property_fill_color_rgba() = color_map[cInactiveCrossfade];
