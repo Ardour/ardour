@@ -503,12 +503,11 @@ Editor::Editor (AudioEngine& eng)
 	active_cell->property_activatable() = true;
 	active_cell->property_radio() = false;
 
-	edit_group_display.set_name ("EditGroupList");
-
 	group_model->signal_row_changed().connect (mem_fun (*this, &Editor::edit_group_row_change));
 
 	edit_group_display.set_name ("EditGroupList");
 	edit_group_display.get_selection()->set_mode (SELECTION_SINGLE);
+	edit_group_display.set_headers_visible (false);
 	edit_group_display.set_reorderable (false);
 	edit_group_display.set_rules_hint (true);
 	edit_group_display.set_size_request (75, -1);
@@ -594,11 +593,12 @@ Editor::Editor (AudioEngine& eng)
 	named_selection_display.append_column (_("Chunks"), named_selection_columns.text);
 	named_selection_display.set_headers_visible (false);
 	named_selection_display.set_size_request (100, -1);
-	named_selection_display.set_name ("RegionListDisplay");
+	named_selection_display.set_name ("NamedSelectionDisplay");
 	
 	named_selection_display.get_selection()->set_mode (SELECTION_SINGLE);
 	named_selection_display.set_size_request (100, -1);
-	named_selection_display.signal_button_release_event().connect (mem_fun(*this, &Editor::named_selection_display_button_press), false);
+	named_selection_display.signal_button_release_event().connect (mem_fun(*this, &Editor::named_selection_display_button_release), false);
+	named_selection_display.signal_key_release_event().connect (mem_fun(*this, &Editor::named_selection_display_key_release), false);
 	named_selection_display.get_selection()->signal_changed().connect (mem_fun (*this, &Editor::named_selection_display_selection_changed));
 
 	/* SNAPSHOTS */
@@ -606,7 +606,7 @@ Editor::Editor (AudioEngine& eng)
 	snapshot_display_model = ListStore::create (snapshot_display_columns);
 	snapshot_display.set_model (snapshot_display_model);
 	snapshot_display.append_column (X_("snapshot"), snapshot_display_columns.visible_name);
-	snapshot_display.set_name ("SnapshotDisplayList");
+	snapshot_display.set_name ("SnapshotDisplay");
 	snapshot_display.set_size_request (75, -1);
 	snapshot_display.set_headers_visible (false);
 	snapshot_display.set_reorderable (false);
@@ -1772,7 +1772,7 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	items.push_back (MenuElem (_("Crop region to range"), mem_fun(*this, &Editor::crop_region_to_selection)));
 	items.push_back (MenuElem (_("Fill range with region"), mem_fun(*this, &Editor::region_fill_selection)));
 	items.push_back (MenuElem (_("Duplicate range"), bind (mem_fun(*this, &Editor::duplicate_dialog), false)));
-	items.push_back (MenuElem (_("Create chunk from range"), mem_fun(*this, &Editor::name_selection)));
+	items.push_back (MenuElem (_("Create chunk from range"), mem_fun(*this, &Editor::create_named_selection)));
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Bounce range"), mem_fun(*this, &Editor::bounce_range_selection)));
 	items.push_back (MenuElem (_("Export range"), mem_fun(*this, &Editor::export_selection)));
@@ -4019,15 +4019,16 @@ Editor::redisplay_snapshots ()
 		string statename = *(*i);
 		TreeModel::Row row = *(snapshot_display_model->append());
 		
-		// we don't have a way of changing the rendering in just one TreeView 
-		// cell so just put an asterisk on each side of the name for now.
+		/* this lingers on in case we ever want to change the visible
+		   name of the snapshot.
+		*/
+		
 		string display_name;
+		display_name = statename;
+
 		if (statename == session->snap_name()) {
-			display_name = "*"+statename+"*";
 			snapshot_display.get_selection()->select(row);
-		} else {
-			display_name = statename;
-		}
+		} 
 		
 		row[snapshot_display_columns.visible_name] = display_name;
 		row[snapshot_display_columns.real_name] = statename;

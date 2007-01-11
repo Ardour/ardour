@@ -50,7 +50,8 @@ using namespace Editing;
 void
 Editor::handle_audio_region_removed (boost::weak_ptr<AudioRegion> wregion)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::handle_audio_region_removed), wregion));
+	cerr << "removed region\n";
+	ENSURE_GUI_THREAD (mem_fun (*this, &Editor::redisplay_regions));
 	redisplay_regions ();
 }
 
@@ -253,12 +254,6 @@ Editor::redisplay_regions ()
 		
 		region_list_display.set_model (region_list_model);
 	}
-}
-
-void
-Editor::region_list_clear ()
-{
-	region_list_model->clear();
 }
 
 void
@@ -562,6 +557,7 @@ Editor::hide_a_region (boost::shared_ptr<Region> r)
 void
 Editor::remove_a_region (boost::shared_ptr<Region> r)
 {
+	cerr << "remove " << r->name();
 	session->remove_region_from_region_list (r);
 }
 
@@ -580,6 +576,7 @@ Editor::hide_region_from_region_list ()
 void
 Editor::remove_region_from_region_list ()
 {
+	cerr << "Mapping remove over region selection\n";
 	region_list_selection_mapover (mem_fun (*this, &Editor::remove_a_region));
 }
 

@@ -352,23 +352,34 @@ Session::Session (AudioEngine &eng,
 		}
 	}
 
-	if (control_out_channels) {
-		shared_ptr<Route> r (new Route (*this, _("monitor"), -1, control_out_channels, -1, control_out_channels, Route::ControlOut));
+	{
+		/* set up Master Out and Control Out if necessary */
+		
 		RouteList rl;
-		rl.push_back (r);
-		add_routes (rl);
-		_control_out = r;
-	}
-
-	if (master_out_channels) {
-		shared_ptr<Route> r (new Route (*this, _("master"), -1, master_out_channels, -1, master_out_channels, Route::MasterOut));
-		RouteList rl;
-		rl.push_back (r);
-		add_routes (rl);
-		_master_out = r;
-	} else {
-		/* prohibit auto-connect to master, because there isn't one */
-		output_ac = AutoConnectOption (output_ac & ~AutoConnectMaster);
+		int control_id = 1;
+		
+		if (control_out_channels) {
+			shared_ptr<Route> r (new Route (*this, _("monitor"), -1, control_out_channels, -1, control_out_channels, Route::ControlOut));
+			r->set_remote_control_id (control_id++);
+			
+			rl.push_back (r);
+		}
+		
+		if (master_out_channels) {
+			shared_ptr<Route> r (new Route (*this, _("master"), -1, master_out_channels, -1, master_out_channels, Route::MasterOut));
+			r->set_remote_control_id (control_id);
+			cerr << "master bus has remote control ID " << r->remote_control_id() << endl;
+			 
+			rl.push_back (r);
+		} else {
+			/* prohibit auto-connect to master, because there isn't one */
+			output_ac = AutoConnectOption (output_ac & ~AutoConnectMaster);
+		}
+		
+		if (!rl.empty()) {
+			add_routes (rl);
+		}
+		
 	}
 
 	Config->set_input_auto_connect (input_ac);
@@ -1639,7 +1650,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 	_engine.get_physical_outputs (physoutputs);
 	_engine.get_physical_inputs (physinputs);
-	control_id = 0;
+	control_id = ntracks() + nbusses() + 1;
 
 	while (how_many) {
 
@@ -1728,7 +1739,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			}
 			
 			track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
-			track->set_remote_control_id (ntracks() + control_id + 1);
+			track->set_remote_control_id (control_id);
 			++control_id;
 
 			new_routes.push_back (track);
@@ -1761,6 +1772,7 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 	uint32_t n = 0;
 	string port;
 	RouteList ret;
+	uint32_t control_id;
 
 	/* count existing audio busses */
 
@@ -1781,6 +1793,7 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 
 	_engine.get_physical_outputs (physoutputs);
 	_engine.get_physical_inputs (physinputs);
+	control_id = ntracks() + nbusses() + 1;
 
 	while (how_many) {
 
@@ -1843,6 +1856,9 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 				}
 				bus->set_control_outs (cports);
 			}
+
+			bus->set_remote_control_id (control_id);
+			++control_id;
 
 			ret.push_back (bus);
 		}
@@ -3588,9 +3604,13 @@ Session::add_named_selection (NamedSelection* named_selection)
 		named_selections.insert (named_selections.begin(), named_selection);
 	}
 
+	for (list<boost::shared_ptr<Playlist> >::iterator i = named_selection->playlists.begin(); i != named_selection->playlists.end(); ++i) {
+		add_playlist (*i);
+	}
+
 	set_dirty();
 
-	 NamedSelectionAdded (); /* EMIT SIGNAL */
+	NamedSelectionAdded (); /* EMIT SIGNAL */
 }
 
 void

@@ -87,13 +87,9 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> in, boost::shared_ptr<Audio
 	_position = position;
 	_anchor_point = ap;
 
-	switch (Config->get_xfade_model()) {
-	case ShortCrossfade:
-		_follow_overlap = false;
-		break;
-	default:
-		_follow_overlap = true;
-	}
+	_follow_overlap = false;
+
+	cerr << "A: follow overlap = " << _follow_overlap << endl;
 
 	_active = Config->get_xfades_active ();
 	_fixed = true;
@@ -116,6 +112,7 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioR
 
 	initialize ();
 
+	cerr << "K: follow overlap = " << _follow_overlap << endl;
 }
 
 Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
@@ -170,6 +167,9 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
+
+	cerr << "D: follow overlap = " << _follow_overlap << endl;
+
 }
 
 Crossfade::Crossfade (const Crossfade &orig, boost::shared_ptr<AudioRegion> newin, boost::shared_ptr<AudioRegion> newout)
@@ -197,12 +197,15 @@ Crossfade::Crossfade (const Crossfade &orig, boost::shared_ptr<AudioRegion> newi
 
 	// Let's make sure the fade isn't too long
 	set_length(_length);
+
+	cerr << "B: follow overlap = " << _follow_overlap << endl;
+
 }
 
 
 Crossfade::~Crossfade ()
 {
-	cerr << "Crossfade deleted\n";
+	cerr << this << " Crossfade deleted\n";
 	notify_callbacks ();
 }
 
@@ -261,8 +264,6 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 	
 	if (top->first_frame() == bottom->first_frame()) {
 
-		cerr << "same start\n";
-		
 		/* Both regions start at the same point */
 		
 		if (top->last_frame() < bottom->last_frame()) {
@@ -303,8 +304,6 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 		
 	} else if (top->last_frame() == bottom->last_frame()) {
 		
-		cerr << "same end\n";
-
 		/* Both regions end at the same point */
 		
 		if (top->first_frame() > bottom->first_frame()) {
@@ -343,21 +342,17 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 
 		OverlapType ot = top->coverage (bottom->first_frame(), bottom->last_frame());
 
-		cerr << "ot = " << ot << endl;
-
 		switch (ot) {
 		case OverlapNone:
 			/* should be NOTREACHED as a precondition of creating
 			   a new crossfade, but we need to handle it here.
 			*/
-			cerr << "no sir\n";
 			throw NoCrossfadeHere();
 			break;
 			
 		case OverlapInternal:
 		case OverlapExternal:
 			/* should be NOTREACHED because of tests above */
-			cerr << "nu-uh\n";
 			throw NoCrossfadeHere();
 			break;
 			
@@ -516,11 +511,11 @@ Crossfade::refresh ()
 		return false;
 	}
 
-	if (_in->layer() < _out->layer()) {
-		cerr << "layer change, invalidated\n";
-		Invalidated (shared_from_this());
-		return false;
-	}
+//	if (_in->layer() < _out->layer()) {
+//		cerr << this << " layer change, invalidated, in on " << _in->layer() << " out on " << _out->layer() << endl;
+//		Invalidated (shared_from_this());
+//		return false;
+//	}
 
 	/* overlap type must be Start, End or External */
 
@@ -528,19 +523,10 @@ Crossfade::refresh ()
 	
 	ot = _in->coverage (_out->first_frame(), _out->last_frame());
 
-	switch (ot) {
-	case OverlapNone:
-	case OverlapInternal:
-		Invalidated (shared_from_this());
-		return false;
-		
-	default:
-		break;
-	}
-		
 	/* overlap type must not have altered */
 	
 	if (ot != overlap_type) {
+		cerr << this << " Invalid B\n";
 		Invalidated (shared_from_this());
 		return false;
 	} 
@@ -555,13 +541,17 @@ Crossfade::update (bool force)
 {
 	nframes_t newlen;
 
+	cerr << this << " update, " << _in->name() << " + " << _out->name() << " length = " << _length << endl;
+
 	if (_follow_overlap) {
 		newlen = _out->first_frame() + _out->length() - _in->first_frame();
+		cerr << "\tmodify length\n";
 	} else {
 		newlen = _length;
 	}
 
 	if (newlen == 0) {
+		cerr << this << " Invalid C\n";
 		Invalidated (shared_from_this());
 		return false;
 	}
@@ -579,29 +569,19 @@ Crossfade::update (bool force)
 
 	} 
 
+	cerr << "\tFover = " << _follow_overlap << endl;
+
 	switch (_anchor_point) {
 	case StartOfIn:
-		if (_position != _in->first_frame()) {
-			if (_length > _short_xfade_length) {
-				/* assume FullCrossfade */
-				_position = _in->first_frame();
-			} else {
-				/* assume short xfade */
-				_position = _out->last_frame() - _length;
-			}
-		}
+		_position = _in->first_frame();
 		break;
 
 	case EndOfIn:
-		if (_position != _in->last_frame() - _length) {
-			_position = _in->last_frame() - _length;
-		}
+		_position = _in->last_frame() - _length;
 		break;
 
 	case EndOfOut:
-		if (_position != _out->last_frame() - _length) {
-			_position = _out->last_frame() - _length;
-		}
+		_position = _out->last_frame() - _length;
 	}
 
 	/* UI's may need to know that the overlap changed even 

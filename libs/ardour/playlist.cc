@@ -204,7 +204,6 @@ Playlist::release ()
 	}
 }
 
-
 void
 Playlist::copy_regions (RegionList& newlist) const
 {

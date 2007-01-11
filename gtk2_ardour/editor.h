@@ -788,16 +788,16 @@ class Editor : public PublicEditor
 	Gtkmm2ext::DnDTreeView<ARDOUR::NamedSelection*> named_selection_display;
 	Gtk::ScrolledWindow    named_selection_scroller;
 
-	void name_selection();
-	void named_selection_name_chosen ();
-	void create_named_selection (const string &);
+	void create_named_selection ();
 	void paste_named_selection (float times);
+	void remove_selected_named_selections ();
 
 	void handle_new_named_selection ();
 	void add_named_selection_to_named_selection_display (ARDOUR::NamedSelection&);
 	void redisplay_named_selections ();
 
-	gint named_selection_display_button_press (GdkEventButton *ev);
+	bool named_selection_display_button_release (GdkEventButton *ev);
+	bool named_selection_display_key_release (GdkEventKey *ev);
 	void named_selection_display_selection_changed ();
 
 	/* track views */

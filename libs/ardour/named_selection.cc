@@ -40,8 +40,18 @@ NamedSelection::NamedSelection (string n, PlaylistList& l)
 {
 	playlists = l;
 	for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		string new_name;
+
+		/* rename playlists to reflect our ownership */
+
+		new_name = name;
+		new_name += '/';
+		new_name += (*i)->name();
+
+		(*i)->set_name (new_name);
 		(*i)->use();
 	}
+
 	NamedSelectionCreated (this);
 }
 
@@ -90,7 +100,8 @@ NamedSelection::NamedSelection (Session& session, const XMLNode& node)
 NamedSelection::~NamedSelection ()
 {
 	for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i) {
-		(*i)->release();
+		(*i)->release ();
+		(*i)->GoingAway ();
 	}
 }
 

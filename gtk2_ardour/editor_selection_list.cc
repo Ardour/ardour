@@ -65,10 +65,48 @@ Editor::redisplay_named_selections ()
 	session->foreach_named_selection (*this, &Editor::add_named_selection_to_named_selection_display);
 }
 
-gint
-Editor::named_selection_display_button_press (GdkEventButton *ev)
+bool
+Editor::named_selection_display_key_release (GdkEventKey* ev)
 {
+	if (session == 0) {
+		return true;
+	}
 
+	switch (ev->keyval) {
+	case GDK_Delete:
+		remove_selected_named_selections ();
+		return true;
+		break;
+	default:
+		return false;
+		break;
+	}
+
+}
+
+void
+Editor::remove_selected_named_selections ()
+{
+	Glib::RefPtr<TreeSelection> selection = named_selection_display.get_selection();
+	TreeView::Selection::ListHandle_Path rows = selection->get_selected_rows ();
+
+	if (selection->count_selected_rows() == 0) {
+		return;
+	}
+
+	for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
+
+		TreeIter iter;
+
+		if ((iter = named_selection_model->get_iter (*i))) {
+			session->remove_named_selection ((*iter)[named_selection_columns.selection]);
+		}
+	}
+}
+
+bool
+Editor::named_selection_display_button_release (GdkEventButton *ev)
+{
 	TreeModel::Children rows = named_selection_model->children();
 	TreeModel::Children::iterator i;
 	Glib::RefPtr<TreeSelection> selection = named_selection_display.get_selection();
@@ -91,7 +129,8 @@ Editor::named_selection_display_button_press (GdkEventButton *ev)
 			}
 		}
 	}
-	return FALSE;
+
+	return false;
 }
 
 
@@ -101,37 +140,10 @@ Editor::named_selection_display_selection_changed ()
 }
 
 void
-Editor::name_selection ()
+Editor::create_named_selection ()
 {
-	ArdourPrompter p;
+	string name;
 
-	p.set_prompt (_("Name for Chunk:"));
-	p.add_button (Gtk::Stock::NEW, Gtk::RESPONSE_ACCEPT);
-	p.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
-	p.change_labels (_("Create Chunk"), _("Forget it"));
-	p.show_all ();
-
-	switch (p.run ()) {
-	case Gtk::RESPONSE_ACCEPT:
-	  string name;
-		p.get_result (name);
-		if (name.length()) {
-		  create_named_selection (name);
-		}	
-		break;
-	}
-
-}
-
-void
-Editor::named_selection_name_chosen ()
-{
-	Gtk::Main::quit ();
-}
-
-void
-Editor::create_named_selection (const string & name)
-{
 	if (session == 0) {
 		return;
 	}
@@ -141,7 +153,6 @@ Editor::create_named_selection (const string & name)
 	if (selection->time.empty()) {
 		return;
 	}
-
 	
 	TrackViewList *views = get_valid_views (selection->time.track, selection->time.group);
 
@@ -157,25 +168,42 @@ Editor::create_named_selection (const string & name)
 		
 		boost::shared_ptr<Playlist> pl = (*i)->playlist();
 		
-		if (pl) {
-			
-			if ((what_we_found = pl->copy (selection->time, false)) != 0) {
-
-				thelist.push_back (what_we_found);
-			}
+		if (pl && (what_we_found = pl->copy (selection->time, false)) != 0) {
+			thelist.push_back (what_we_found);
 		}
 	}
 
-	NamedSelection* ns;
-	TreeModel::Row row = *(named_selection_model->append());
+	if (!thelist.empty()) {
 
-	ns = new NamedSelection (name, thelist);
-	row[named_selection_columns.selection] = ns;
-	row[named_selection_columns.text] = name;
+		ArdourPrompter p;
+		
+		p.set_prompt (_("Name for Chunk:"));
+		p.add_button (Gtk::Stock::NEW, Gtk::RESPONSE_ACCEPT);
+		p.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
+		p.change_labels (_("Create Chunk"), _("Forget it"));
+		p.show_all ();
+		
+		switch (p.run ()) {
+			
+		case Gtk::RESPONSE_ACCEPT:
+			p.get_result (name);
+			if (name.empty()) {
+				return;
+			}	
+			break;
+		default:
+			return;
+		}
 
-	/* make the one we just added be selected */
+		new NamedSelection (name, thelist); // creation will add it to the model
 
-	named_selection_display.get_selection()->select (row);
-
+		/* make the one we just added be selected */
+		
+		TreeModel::Children::iterator added = named_selection_model->children().end();
+		--added;
+		named_selection_display.get_selection()->select (*added);
+	} else {
+		error << _("No selectable material found in the currently selected time range") << endmsg;
+	}
 }
 

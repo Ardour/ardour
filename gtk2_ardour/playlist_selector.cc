@@ -88,7 +88,6 @@ PlaylistSelector::clear_map ()
 bool
 PlaylistSelector::on_unmap_event (GdkEventAny* ev)
 {
-	cerr << "PLselector unmapped\n";
 	clear_map ();
 	if (model) {
 		model->clear ();
