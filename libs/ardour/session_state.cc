@@ -3134,8 +3134,11 @@ Session::config_changed (const char* parameter_name)
 		}
 
 		first_file_data_format_reset = false;
+
+	} else if (PARAM_IS ("slave-source")) {
+		set_slave_source (Config->get_slave_source());
 	}
-		
+
 	set_dirty ();
 		   
 #undef PARAM_IS
