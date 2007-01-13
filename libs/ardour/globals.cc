@@ -210,7 +210,7 @@ setup_hardware_optimization (bool try_optimization)
 				 "cpuid\n"
 				 "movl %%edx, %0\n"
 				 "popl %%ebx\n"
-		 	     : "=l" (use_sse)
+		 	     : "=r" (use_sse)
 	   		     : 
  	    		 : "%eax", "%ecx", "%edx", "memory");
 
@@ -222,7 +222,7 @@ setup_hardware_optimization (bool try_optimization)
 				 "cpuid\n"
 				 "movq %%rdx, %0\n"
 				 "popq %%rbx\n"
-		 	     : "=l" (use_sse)
+		 	     : "=r" (use_sse)
 	   		     : 
 			 : "%rax", "%rcx", "%rdx", "memory");
 
