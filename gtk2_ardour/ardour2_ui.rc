@@ -689,11 +689,11 @@ style "treeview_display" = "small_bold_text"
 
 style "main_canvas_area"
 {
-	bg[NORMAL] = { 0.20, 0.20, 0.25 }
-	bg[ACTIVE] = { 0.20, 0.20, 0.25 }
-	bg[INSENSITIVE] = { 0.20, 0.20, 0.25 }
-	bg[SELECTED] = { 0.20, 0.20, 0.25 }
-	bg[PRELIGHT] = { 0.20, 0.20, 0.25 }
+	bg[NORMAL] = { 0.30, 0.30, 0.34 }
+	bg[ACTIVE] = { 0.30, 0.30, 0.34 }
+	bg[INSENSITIVE] = { 0.30, 0.30, 0.34 }
+	bg[SELECTED] = { 0.30, 0.30, 0.34 }
+	bg[PRELIGHT] = { 0.30, 0.30, 0.34 }
 }
 
 style "track_controls_inactive"

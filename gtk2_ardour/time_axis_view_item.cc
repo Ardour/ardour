@@ -102,7 +102,7 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 	frame_position = start ;
 	item_duration = duration ;
 	name_connected = false;
-	fill_opacity = 230;
+	fill_opacity = 130;
 	position_locked = false ;
 	max_item_duration = ARDOUR::max_frames;
 	min_item_duration = 0 ;
