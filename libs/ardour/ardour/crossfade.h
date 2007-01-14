@@ -157,6 +157,7 @@ class Crossfade : public PBD::StatefulDestructible, public boost::enable_shared_
 	AnchorPoint          _anchor_point;
 	bool                 _follow_overlap;
 	bool                 _fixed;
+	int32_t               layer_relation;
 	Curve _fade_in;
 	Curve _fade_out;
 
@@ -165,7 +166,7 @@ class Crossfade : public PBD::StatefulDestructible, public boost::enable_shared_
 
 	void initialize ();
 	int  compute (boost::shared_ptr<ARDOUR::AudioRegion>, boost::shared_ptr<ARDOUR::AudioRegion>, CrossfadeModel);
-	bool update (bool force);
+	bool update ();
 
 	void member_changed (ARDOUR::Change);
 };

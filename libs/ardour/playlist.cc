@@ -1695,6 +1695,7 @@ Playlist::move_region_to_layer (layer_t target_layer, boost::shared_ptr<Region> 
 
 	region->set_layer (target_layer);
 
+#if 0
 	/* now check all dependents */
 
 	for (list<LayerInfo>::iterator x = layerinfo.begin(); x != layerinfo.end(); ++x) {
@@ -1702,6 +1703,7 @@ Playlist::move_region_to_layer (layer_t target_layer, boost::shared_ptr<Region> 
 	}
 	
 	check_dependents (region, false);
+#endif
 	
 	return 0;
 }

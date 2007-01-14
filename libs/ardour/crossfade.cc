@@ -89,8 +89,6 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> in, boost::shared_ptr<Audio
 
 	_follow_overlap = false;
 
-	cerr << "A: follow overlap = " << _follow_overlap << endl;
-
 	_active = Config->get_xfades_active ();
 	_fixed = true;
 		
@@ -111,8 +109,6 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioR
 	_active = act;
 
 	initialize ();
-
-	cerr << "K: follow overlap = " << _follow_overlap << endl;
 }
 
 Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
@@ -167,9 +163,6 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
-
-	cerr << "D: follow overlap = " << _follow_overlap << endl;
-
 }
 
 Crossfade::Crossfade (const Crossfade &orig, boost::shared_ptr<AudioRegion> newin, boost::shared_ptr<AudioRegion> newout)
@@ -194,18 +187,15 @@ Crossfade::Crossfade (const Crossfade &orig, boost::shared_ptr<AudioRegion> newi
 	_in->suspend_fade_in ();
 
 	overlap_type = _in->coverage (_out->position(), _out->last_frame());
+	layer_relation = (int32_t) (_in->layer() - _out->layer());
 
 	// Let's make sure the fade isn't too long
 	set_length(_length);
-
-	cerr << "B: follow overlap = " << _follow_overlap << endl;
-
 }
 
 
 Crossfade::~Crossfade ()
 {
-	cerr << this << " Crossfade deleted\n";
 	notify_callbacks ();
 }
 
@@ -237,11 +227,211 @@ Crossfade::initialize ()
 	_fade_in.add (_length, 1.0);
 	_fade_in.thaw ();
 
-	_in->StateChanged.connect (sigc::mem_fun (*this, &Crossfade::member_changed));
-	_out->StateChanged.connect (sigc::mem_fun (*this, &Crossfade::member_changed));
+	// _in->StateChanged.connect (sigc::mem_fun (*this, &Crossfade::member_changed));
+	// _out->StateChanged.connect (sigc::mem_fun (*this, &Crossfade::member_changed));
 
 	overlap_type = _in->coverage (_out->position(), _out->last_frame());
+	layer_relation = (int32_t) (_in->layer() - _out->layer());
 }	
+
+nframes_t 
+Crossfade::read_at (Sample *buf, Sample *mixdown_buffer, 
+		    float *gain_buffer, nframes_t start, nframes_t cnt, uint32_t chan_n,
+		    nframes_t read_frames, nframes_t skip_frames)
+{
+	nframes_t offset;
+	nframes_t to_write;
+
+	if (!_active) {
+		return 0;
+	}
+
+	if (start < _position) {
+
+		/* handle an initial section of the read area that we do not
+		   cover.
+		*/
+
+		offset = _position - start;
+
+		if (offset < cnt) {
+			cnt -= offset;
+		} else {
+			return 0;
+		}
+		
+		start = _position;
+		buf += offset;
+		to_write = min (_length, cnt);
+
+	} else {
+		
+		to_write = min (_length - (start - _position), cnt);
+		
+	}
+
+	offset = start - _position;
+
+	_out->read_at (crossfade_buffer_out, mixdown_buffer, gain_buffer, start, to_write, chan_n, read_frames, skip_frames);
+	_in->read_at (crossfade_buffer_in, mixdown_buffer, gain_buffer, start, to_write, chan_n, read_frames, skip_frames);
+
+	float* fiv = new float[to_write];
+	float* fov = new float[to_write];
+
+	_fade_in.get_vector (offset, offset+to_write, fiv, to_write);
+	_fade_out.get_vector (offset, offset+to_write, fov, to_write);
+
+	/* note: although we have not explicitly taken into account the return values
+	   from _out->read_at() or _in->read_at(), the length() function does this
+	   implicitly. why? because it computes a value based on the in+out regions'
+	   position and length, and so we know precisely how much data they could return. 
+	*/
+
+	for (nframes_t n = 0; n < to_write; ++n) {
+		buf[n] = (crossfade_buffer_out[n] * fov[n]) + (crossfade_buffer_in[n] * fiv[n]);
+	}
+
+	delete [] fov;
+	delete [] fiv;
+
+	return to_write;
+}	
+
+OverlapType 
+Crossfade::coverage (nframes_t start, nframes_t end) const
+{
+	nframes_t my_end = _position + _length;
+
+	if ((start >= _position) && (end <= my_end)) {
+		return OverlapInternal;
+	}
+	if ((end >= _position) && (end <= my_end)) {
+		return OverlapStart;
+	}
+	if ((start >= _position) && (start <= my_end)) {
+		return OverlapEnd;
+	}
+	if ((_position >= start) && (_position <= end) && (my_end <= end)) {
+		return OverlapExternal;
+	}
+	return OverlapNone;
+}
+
+void
+Crossfade::set_active (bool yn)
+{
+	if (_active != yn) {
+		_active = yn;
+		StateChanged (ActiveChanged);
+	}
+}
+
+bool
+Crossfade::refresh ()
+{
+	/* crossfades must be between non-muted regions */
+	
+	if (_out->muted() || _in->muted()) {
+		Invalidated (shared_from_this());
+		return false;
+	}
+
+	/* layer ordering cannot change */
+
+	int32_t new_layer_relation = (int32_t) (_in->layer() - _out->layer());
+
+	if (new_layer_relation * layer_relation < 0) { // different sign, layers rotated 
+		Invalidated (shared_from_this());
+		return false;
+	}
+
+	OverlapType ot = _in->coverage (_out->first_frame(), _out->last_frame());
+
+	if (ot == OverlapNone) {
+		Invalidated (shared_from_this());
+		return false;
+	} 
+
+	bool send_signal;
+
+	if (ot != overlap_type) {
+
+		if (_follow_overlap) {
+
+			try {
+				compute (_in, _out, Config->get_xfade_model());
+			} 
+
+			catch (NoCrossfadeHere& err) {
+				Invalidated (shared_from_this());
+				return false;
+			}
+
+			send_signal = true;
+
+		} else {
+
+			Invalidated (shared_from_this());
+			return false;
+		}
+
+	} else {
+
+		send_signal = update ();
+	}
+
+	if (send_signal) {
+		StateChanged (BoundsChanged); /* EMIT SIGNAL */
+	}
+
+	_in_update = false;
+
+	return true;
+}
+
+bool
+Crossfade::update ()
+{
+	nframes_t newlen;
+	
+	if (_follow_overlap) {
+		newlen = _out->first_frame() + _out->length() - _in->first_frame();
+	} else {
+		newlen = _length;
+	}
+	
+	if (newlen == 0) {
+		Invalidated (shared_from_this());
+		return false;
+	}
+	
+	_in_update = true;
+	
+	if ((_follow_overlap && newlen != _length) || (_length > newlen)) {
+		
+		double factor =  newlen / (double) _length;
+		
+		_fade_out.x_scale (factor);
+		_fade_in.x_scale (factor);
+		
+		_length = newlen;
+	} 
+		
+	switch (_anchor_point) {
+	case StartOfIn:
+		_position = _in->first_frame();
+		break;
+		
+	case EndOfIn:
+		_position = _in->last_frame() - _length;
+		break;
+		
+	case EndOfOut:
+		_position = _out->last_frame() - _length;
+	}
+
+	return true;
+}
 
 int
 Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioRegion> b, CrossfadeModel model)
@@ -409,192 +599,6 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 	return 0;
 }
 
-nframes_t 
-Crossfade::read_at (Sample *buf, Sample *mixdown_buffer, 
-		    float *gain_buffer, nframes_t start, nframes_t cnt, uint32_t chan_n,
-		    nframes_t read_frames, nframes_t skip_frames)
-{
-	nframes_t offset;
-	nframes_t to_write;
-
-	if (!_active) {
-		return 0;
-	}
-
-	if (start < _position) {
-
-		/* handle an initial section of the read area that we do not
-		   cover.
-		*/
-
-		offset = _position - start;
-
-		if (offset < cnt) {
-			cnt -= offset;
-		} else {
-			return 0;
-		}
-		
-		start = _position;
-		buf += offset;
-		to_write = min (_length, cnt);
-
-	} else {
-		
-		to_write = min (_length - (start - _position), cnt);
-		
-	}
-
-	offset = start - _position;
-
-	_out->read_at (crossfade_buffer_out, mixdown_buffer, gain_buffer, start, to_write, chan_n, read_frames, skip_frames);
-	_in->read_at (crossfade_buffer_in, mixdown_buffer, gain_buffer, start, to_write, chan_n, read_frames, skip_frames);
-
-	float* fiv = new float[to_write];
-	float* fov = new float[to_write];
-
-	_fade_in.get_vector (offset, offset+to_write, fiv, to_write);
-	_fade_out.get_vector (offset, offset+to_write, fov, to_write);
-
-	/* note: although we have not explicitly taken into account the return values
-	   from _out->read_at() or _in->read_at(), the length() function does this
-	   implicitly. why? because it computes a value based on the in+out regions'
-	   position and length, and so we know precisely how much data they could return. 
-	*/
-
-	for (nframes_t n = 0; n < to_write; ++n) {
-		buf[n] = (crossfade_buffer_out[n] * fov[n]) + (crossfade_buffer_in[n] * fiv[n]);
-	}
-
-	delete [] fov;
-	delete [] fiv;
-
-	return to_write;
-}	
-
-OverlapType 
-Crossfade::coverage (nframes_t start, nframes_t end) const
-{
-	nframes_t my_end = _position + _length;
-
-	if ((start >= _position) && (end <= my_end)) {
-		return OverlapInternal;
-	}
-	if ((end >= _position) && (end <= my_end)) {
-		return OverlapStart;
-	}
-	if ((start >= _position) && (start <= my_end)) {
-		return OverlapEnd;
-	}
-	if ((_position >= start) && (_position <= end) && (my_end <= end)) {
-		return OverlapExternal;
-	}
-	return OverlapNone;
-}
-
-void
-Crossfade::set_active (bool yn)
-{
-	if (_active != yn) {
-		_active = yn;
-		StateChanged (ActiveChanged);
-	}
-}
-
-bool
-Crossfade::refresh ()
-{
-	/* crossfades must be between non-muted regions */
-	
-	if (_out->muted() || _in->muted()) {
-		Invalidated (shared_from_this());
-		return false;
-	}
-
-//	if (_in->layer() < _out->layer()) {
-//		cerr << this << " layer change, invalidated, in on " << _in->layer() << " out on " << _out->layer() << endl;
-//		Invalidated (shared_from_this());
-//		return false;
-//	}
-
-	/* overlap type must be Start, End or External */
-
-	OverlapType ot;
-	
-	ot = _in->coverage (_out->first_frame(), _out->last_frame());
-
-	/* overlap type must not have altered */
-	
-	if (ot != overlap_type) {
-		cerr << this << " Invalid B\n";
-		Invalidated (shared_from_this());
-		return false;
-	} 
-
-	/* time to update */
-
-	return update (false);
-}
-
-bool
-Crossfade::update (bool force)
-{
-	nframes_t newlen;
-
-	cerr << this << " update, " << _in->name() << " + " << _out->name() << " length = " << _length << endl;
-
-	if (_follow_overlap) {
-		newlen = _out->first_frame() + _out->length() - _in->first_frame();
-		cerr << "\tmodify length\n";
-	} else {
-		newlen = _length;
-	}
-
-	if (newlen == 0) {
-		cerr << this << " Invalid C\n";
-		Invalidated (shared_from_this());
-		return false;
-	}
-
-	_in_update = true;
-
-	if (force || (_follow_overlap && newlen != _length) || (_length > newlen)) {
-
-		double factor =  newlen / (double) _length;
-		
-		_fade_out.x_scale (factor);
-		_fade_in.x_scale (factor);
-		
-		_length = newlen;
-
-	} 
-
-	cerr << "\tFover = " << _follow_overlap << endl;
-
-	switch (_anchor_point) {
-	case StartOfIn:
-		_position = _in->first_frame();
-		break;
-
-	case EndOfIn:
-		_position = _in->last_frame() - _length;
-		break;
-
-	case EndOfOut:
-		_position = _out->last_frame() - _length;
-	}
-
-	/* UI's may need to know that the overlap changed even 
-	   though the xfade length did not.
-	*/
-	
-	StateChanged (BoundsChanged); /* EMIT SIGNAL */
-
-	_in_update = false;
-
-	return true;
-}
-
 void
 Crossfade::member_changed (Change what_changed)
 {
@@ -603,7 +607,15 @@ Crossfade::member_changed (Change what_changed)
 					    BoundsChanged);
 
 	if (what_changed & what_we_care_about) {
-		refresh ();
+		try { 
+			if (what_changed & what_we_care_about) {
+				refresh ();
+			}
+		}
+
+		catch (NoCrossfadeHere& err) {
+			// relax, Invalidated inside refresh()
+		}
 	}
 }
 

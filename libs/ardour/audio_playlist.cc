@@ -274,9 +274,14 @@ AudioPlaylist::refresh_dependents (boost::shared_ptr<Region> r)
 		if ((*x)->involves (ar)) {
 
 			if (find (updated.begin(), updated.end(), *x) == updated.end()) {
-				if ((*x)->refresh ()) {
-					/* not invalidated by the refresh */
-					updated.insert (*x);
+				try { 
+					if ((*x)->refresh ()) {
+						updated.insert (*x);
+					}
+				}
+
+				catch (Crossfade::NoCrossfadeHere& err) {
+					// relax, Invalidated during refresh
 				}
 			}
 		}
@@ -348,6 +353,7 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 		refresh_dependents (r);
 	}
 
+
 	if (!Config->get_auto_xfade()) {
 		return;
 	}
@@ -405,7 +411,6 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 				xfade_length = min ((nframes_t) 720, top->length());
 				
 				xfade = boost::shared_ptr<Crossfade> (new Crossfade (top, bottom, xfade_length, top->first_frame(), StartOfIn));
-				cerr << "StartOfIn is " << xfade << endl;
 				add_crossfade (xfade);
 				
 				if (top_region_at (top->last_frame() - 1) == top) {
@@ -415,7 +420,6 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 					*/
 					
 					xfade = boost::shared_ptr<Crossfade> (new Crossfade (bottom, top, xfade_length, top->last_frame() - xfade_length, EndOfOut));
-					cerr << "EndofOut is " << xfade << endl;
 					add_crossfade (xfade);
 				}
 				break;
