@@ -260,7 +260,8 @@ MidiDiskstream::use_new_playlist ()
 		newname = Playlist::bump_name (_name, _session);
 	}
 
-	if ((playlist = boost::dynamic_pointer_cast<MidiPlaylist> (PlaylistFactory::create (_session, newname, hidden()))) != 0) {
+	if ((playlist = boost::dynamic_pointer_cast<MidiPlaylist> (PlaylistFactory::create (
+			DataType::MIDI, _session, newname, hidden()))) != 0) {
 		
 		playlist->set_orig_diskstream_id (id());
 		return use_playlist (playlist);

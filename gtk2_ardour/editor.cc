@@ -437,7 +437,7 @@ Editor::Editor (AudioEngine& eng)
 	edit_packer.set_border_width (0);
 	edit_packer.set_name ("EditorWindow");
 	
-	edit_packer.attach (edit_vscrollbar,         0, 1, 1, 3,    FILL,        FILL|EXPAND, 0, 0);
+	edit_packer.attach (edit_vscrollbar,         3, 4, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
 
 	edit_packer.attach (time_button_event_box,   1, 2, 0, 1,    FILL,        FILL, 0, 0);
 	edit_packer.attach (time_canvas_event_box,   2, 3, 0, 1,    FILL|EXPAND, FILL, 0, 0);
