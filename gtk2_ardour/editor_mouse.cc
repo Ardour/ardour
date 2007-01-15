@@ -2800,7 +2800,6 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		set<boost::shared_ptr<Playlist> > affected_playlists;
 		pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
 		
-		// TODO: Crossfades need to be copied!
 		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
 			RegionView* rv;
 			
@@ -2808,7 +2807,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			
 			boost::shared_ptr<Playlist> to_playlist = rv->region()->playlist();
 			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&rv->get_time_axis_view());
-			
+
 			insert_result = affected_playlists.insert (to_playlist);
 			if (insert_result.second) {
 				session->add_command (new MementoCommand<Playlist>(*to_playlist, &to_playlist->get_state(), 0));
@@ -3223,7 +3222,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 			/* hide any dependent views */
 
-//			rv->get_time_axis_view().hide_dependent_views (*rv);
+			rv->get_time_axis_view().hide_dependent_views (*rv);
 				
 			/* this is subtle. raising the regionview itself won't help,
 			   because raise_to_top() just puts the item on the top of

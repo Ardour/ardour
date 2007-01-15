@@ -87,13 +87,7 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> in, boost::shared_ptr<Audio
 	_position = position;
 	_anchor_point = ap;
 
-	switch (Config->get_xfade_model()) {
-	case ShortCrossfade:
-		_follow_overlap = false;
-		break;
-	default:
-		_follow_overlap = true;
-	}
+	_follow_overlap = false;
 
 	_active = Config->get_xfades_active ();
 	_fixed = true;
@@ -115,7 +109,6 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioR
 	_active = act;
 
 	initialize ();
-
 }
 
 Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
@@ -192,6 +185,7 @@ Crossfade::Crossfade (const Crossfade &orig, boost::shared_ptr<AudioRegion> newi
 	_in->suspend_fade_in ();
 
 	overlap_type = _in->coverage (_out->position(), _out->last_frame());
+	layer_relation = (int32_t) (_in->layer() - _out->layer());
 
 	// Let's make sure the fade isn't too long
 	set_length(_length);
@@ -200,7 +194,6 @@ Crossfade::Crossfade (const Crossfade &orig, boost::shared_ptr<AudioRegion> newi
 
 Crossfade::~Crossfade ()
 {
-	cerr << "Crossfade deleted\n";
 	notify_callbacks ();
 }
 
@@ -232,185 +225,12 @@ Crossfade::initialize ()
 	_fade_in.add (_length, 1.0);
 	_fade_in.thaw ();
 
-	_in->StateChanged.connect (sigc::mem_fun (*this, &Crossfade::member_changed));
-	_out->StateChanged.connect (sigc::mem_fun (*this, &Crossfade::member_changed));
+	// _in->StateChanged.connect (sigc::mem_fun (*this, &Crossfade::member_changed));
+	// _out->StateChanged.connect (sigc::mem_fun (*this, &Crossfade::member_changed));
 
 	overlap_type = _in->coverage (_out->position(), _out->last_frame());
+	layer_relation = (int32_t) (_in->layer() - _out->layer());
 }	
-
-int
-Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioRegion> b, CrossfadeModel model)
-{
-	boost::shared_ptr<AudioRegion> top;
-	boost::shared_ptr<AudioRegion> bottom;
-	nframes_t short_xfade_length;
-
-	short_xfade_length = _short_xfade_length; 
-
-	if (a->layer() < b->layer()) {
-		top = b;
-		bottom = a;
-	} else {
-		top = a;
-		bottom = b;
-	}
-	
-	/* first check for matching ends */
-	
-	if (top->first_frame() == bottom->first_frame()) {
-
-		cerr << "same start\n";
-		
-		/* Both regions start at the same point */
-		
-		if (top->last_frame() < bottom->last_frame()) {
-			
-			/* top ends before bottom, so put an xfade
-			   in at the end of top.
-			*/
-			
-			/* [-------- top ---------- ]
-                         * {====== bottom =====================}
-			 */
-
-			_in = bottom;
-			_out = top;
-
-			if (top->last_frame() < short_xfade_length) {
-				_position = 0;
-			} else {
-				_position = top->last_frame() - short_xfade_length;
-			}
-
-			_length = min (short_xfade_length, top->length());
-			_follow_overlap = false;
-			_anchor_point = EndOfIn;
-			_active = true;
-			_fixed = true;
-
-		} else {
-			/* top ends after (or same time) as bottom - no xfade
-			 */
-			
-			/* [-------- top ------------------------ ]
-                         * {====== bottom =====================}
-			 */
-
-			throw NoCrossfadeHere();
-		}
-		
-	} else if (top->last_frame() == bottom->last_frame()) {
-		
-		cerr << "same end\n";
-
-		/* Both regions end at the same point */
-		
-		if (top->first_frame() > bottom->first_frame()) {
-			
-			/* top starts after bottom, put an xfade in at the
-			   start of top
-			*/
-			
-			/*            [-------- top ---------- ]
-                         * {====== bottom =====================}
-			 */
-
-			_in = top;
-			_out = bottom;
-			_position = top->first_frame();
-			_length = min (short_xfade_length, top->length());
-			_follow_overlap = false;
-			_anchor_point = StartOfIn;
-			_active = true;
-			_fixed = true;
-			
-		} else {
-			/* top starts before bottom - no xfade
-			 */
-
-			/* [-------- top ------------------------ ]
-                         *    {====== bottom =====================}
-			 */
-
-			throw NoCrossfadeHere();
-		}
-
-	} else {
-	
-		/* OK, time to do more regular overlapping */
-
-		OverlapType ot = top->coverage (bottom->first_frame(), bottom->last_frame());
-
-		cerr << "ot = " << ot << endl;
-
-		switch (ot) {
-		case OverlapNone:
-			/* should be NOTREACHED as a precondition of creating
-			   a new crossfade, but we need to handle it here.
-			*/
-			cerr << "no sir\n";
-			throw NoCrossfadeHere();
-			break;
-			
-		case OverlapInternal:
-		case OverlapExternal:
-			/* should be NOTREACHED because of tests above */
-			cerr << "nu-uh\n";
-			throw NoCrossfadeHere();
-			break;
-			
-		case OverlapEnd: /* top covers start of bottom but ends within it */
-
-			/* [---- top ------------------------] 
-			 *                { ==== bottom ============ } 
-			 */ 
-
-			_in = bottom;
-			_out = top;
-			_anchor_point = StartOfIn;
-
-			if (model == FullCrossfade) {
-				_position = bottom->first_frame(); // "{"
-				_length = _out->first_frame() + _out->length() - _in->first_frame();
-				/* leave active alone */
-				_follow_overlap = true;
-			} else {
-				_length = min (short_xfade_length, top->length());
-				_position = top->last_frame() - _length;  // "]" - length 
-				_active = true;
-				_follow_overlap = false;
-				
-			}
-			break;
-			
-		case OverlapStart:   /* top starts within bottom but covers bottom's end */
-
-			/*                   { ==== top ============ } 
-			 *   [---- bottom -------------------] 
-			 */
-
-			_in = top;
-			_out = bottom;
-			_position = top->first_frame();
-			_anchor_point = StartOfIn;
-
-			if (model == FullCrossfade) {
-				_length = _out->first_frame() + _out->length() - _in->first_frame();
-				/* leave active alone */
-				_follow_overlap = true;
-			} else {
-				_length = min (short_xfade_length, top->length());
-				_active = true;
-				_follow_overlap = false;
-				
-			}
-			
-			break;
-		}
-	}
-	
-	return 0;
-}
 
 nframes_t 
 Crossfade::read_at (Sample *buf, Sample *mixdown_buffer, 
@@ -514,103 +334,267 @@ Crossfade::refresh ()
 		return false;
 	}
 
-	if (_in->layer() < _out->layer()) {
-		cerr << "layer change, invalidated\n";
+	/* layer ordering cannot change */
+
+	int32_t new_layer_relation = (int32_t) (_in->layer() - _out->layer());
+
+	if (new_layer_relation * layer_relation < 0) { // different sign, layers rotated 
 		Invalidated (shared_from_this());
 		return false;
 	}
 
-	/* overlap type must be Start, End or External */
+	OverlapType ot = _in->coverage (_out->first_frame(), _out->last_frame());
 
-	OverlapType ot;
-	
-	ot = _in->coverage (_out->first_frame(), _out->last_frame());
-
-	switch (ot) {
-	case OverlapNone:
-	case OverlapInternal:
-		Invalidated (shared_from_this());
-		return false;
-		
-	default:
-		break;
-	}
-		
-	/* overlap type must not have altered */
-	
-	if (ot != overlap_type) {
+	if (ot == OverlapNone) {
 		Invalidated (shared_from_this());
 		return false;
 	} 
 
-	/* time to update */
+	bool send_signal;
 
-	return update (false);
+	if (ot != overlap_type) {
+
+		if (_follow_overlap) {
+
+			try {
+				compute (_in, _out, Config->get_xfade_model());
+			} 
+
+			catch (NoCrossfadeHere& err) {
+				Invalidated (shared_from_this());
+				return false;
+			}
+
+			send_signal = true;
+
+		} else {
+
+			Invalidated (shared_from_this());
+			return false;
+		}
+
+	} else {
+
+		send_signal = update ();
+	}
+
+	if (send_signal) {
+		StateChanged (BoundsChanged); /* EMIT SIGNAL */
+	}
+
+	_in_update = false;
+
+	return true;
 }
 
 bool
-Crossfade::update (bool force)
+Crossfade::update ()
 {
 	nframes_t newlen;
-
+	
 	if (_follow_overlap) {
 		newlen = _out->first_frame() + _out->length() - _in->first_frame();
 	} else {
 		newlen = _length;
 	}
-
+	
 	if (newlen == 0) {
 		Invalidated (shared_from_this());
 		return false;
 	}
-
+	
 	_in_update = true;
-
-	if (force || (_follow_overlap && newlen != _length) || (_length > newlen)) {
-
+	
+	if ((_follow_overlap && newlen != _length) || (_length > newlen)) {
+		
 		double factor =  newlen / (double) _length;
 		
 		_fade_out.x_scale (factor);
 		_fade_in.x_scale (factor);
 		
 		_length = newlen;
-
 	} 
-
+		
 	switch (_anchor_point) {
 	case StartOfIn:
-		if (_position != _in->first_frame()) {
-			if (_length > _short_xfade_length) {
-				/* assume FullCrossfade */
-				_position = _in->first_frame();
-			} else {
-				/* assume short xfade */
-				_position = _out->last_frame() - _length;
-			}
-		}
+		_position = _in->first_frame();
 		break;
-
+		
 	case EndOfIn:
-		if (_position != _in->last_frame() - _length) {
-			_position = _in->last_frame() - _length;
-		}
+		_position = _in->last_frame() - _length;
 		break;
-
+		
 	case EndOfOut:
-		if (_position != _out->last_frame() - _length) {
-			_position = _out->last_frame() - _length;
-		}
+		_position = _out->last_frame() - _length;
 	}
 
-	/* UI's may need to know that the overlap changed even 
-	   though the xfade length did not.
-	*/
-	
-	StateChanged (BoundsChanged); /* EMIT SIGNAL */
-
-	_in_update = false;
-
 	return true;
+}
+
+int
+Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioRegion> b, CrossfadeModel model)
+{
+	boost::shared_ptr<AudioRegion> top;
+	boost::shared_ptr<AudioRegion> bottom;
+	nframes_t short_xfade_length;
+
+	short_xfade_length = _short_xfade_length; 
+
+	if (a->layer() < b->layer()) {
+		top = b;
+		bottom = a;
+	} else {
+		top = a;
+		bottom = b;
+	}
+	
+	/* first check for matching ends */
+	
+	if (top->first_frame() == bottom->first_frame()) {
+
+		/* Both regions start at the same point */
+		
+		if (top->last_frame() < bottom->last_frame()) {
+			
+			/* top ends before bottom, so put an xfade
+			   in at the end of top.
+			*/
+			
+			/* [-------- top ---------- ]
+                         * {====== bottom =====================}
+			 */
+
+			_in = bottom;
+			_out = top;
+
+			if (top->last_frame() < short_xfade_length) {
+				_position = 0;
+			} else {
+				_position = top->last_frame() - short_xfade_length;
+			}
+
+			_length = min (short_xfade_length, top->length());
+			_follow_overlap = false;
+			_anchor_point = EndOfIn;
+			_active = true;
+			_fixed = true;
+
+		} else {
+			/* top ends after (or same time) as bottom - no xfade
+			 */
+			
+			/* [-------- top ------------------------ ]
+                         * {====== bottom =====================}
+			 */
+
+			throw NoCrossfadeHere();
+		}
+		
+	} else if (top->last_frame() == bottom->last_frame()) {
+		
+		/* Both regions end at the same point */
+		
+		if (top->first_frame() > bottom->first_frame()) {
+			
+			/* top starts after bottom, put an xfade in at the
+			   start of top
+			*/
+			
+			/*            [-------- top ---------- ]
+                         * {====== bottom =====================}
+			 */
+
+			_in = top;
+			_out = bottom;
+			_position = top->first_frame();
+			_length = min (short_xfade_length, top->length());
+			_follow_overlap = false;
+			_anchor_point = StartOfIn;
+			_active = true;
+			_fixed = true;
+			
+		} else {
+			/* top starts before bottom - no xfade
+			 */
+
+			/* [-------- top ------------------------ ]
+                         *    {====== bottom =====================}
+			 */
+
+			throw NoCrossfadeHere();
+		}
+
+	} else {
+	
+		/* OK, time to do more regular overlapping */
+
+		OverlapType ot = top->coverage (bottom->first_frame(), bottom->last_frame());
+
+		switch (ot) {
+		case OverlapNone:
+			/* should be NOTREACHED as a precondition of creating
+			   a new crossfade, but we need to handle it here.
+			*/
+			throw NoCrossfadeHere();
+			break;
+			
+		case OverlapInternal:
+		case OverlapExternal:
+			/* should be NOTREACHED because of tests above */
+			throw NoCrossfadeHere();
+			break;
+			
+		case OverlapEnd: /* top covers start of bottom but ends within it */
+
+			/* [---- top ------------------------] 
+			 *                { ==== bottom ============ } 
+			 */ 
+
+			_in = bottom;
+			_out = top;
+			_anchor_point = StartOfIn;
+
+			if (model == FullCrossfade) {
+				_position = bottom->first_frame(); // "{"
+				_length = _out->first_frame() + _out->length() - _in->first_frame();
+				/* leave active alone */
+				_follow_overlap = true;
+			} else {
+				_length = min (short_xfade_length, top->length());
+				_position = top->last_frame() - _length;  // "]" - length 
+				_active = true;
+				_follow_overlap = false;
+				
+			}
+			break;
+			
+		case OverlapStart:   /* top starts within bottom but covers bottom's end */
+
+			/*                   { ==== top ============ } 
+			 *   [---- bottom -------------------] 
+			 */
+
+			_in = top;
+			_out = bottom;
+			_position = top->first_frame();
+			_anchor_point = StartOfIn;
+
+			if (model == FullCrossfade) {
+				_length = _out->first_frame() + _out->length() - _in->first_frame();
+				/* leave active alone */
+				_follow_overlap = true;
+			} else {
+				_length = min (short_xfade_length, top->length());
+				_active = true;
+				_follow_overlap = false;
+				
+			}
+			
+			break;
+		}
+	}
+	
+	return 0;
 }
 
 void
@@ -621,7 +605,15 @@ Crossfade::member_changed (Change what_changed)
 					    BoundsChanged);
 
 	if (what_changed & what_we_care_about) {
-		refresh ();
+		try { 
+			if (what_changed & what_we_care_about) {
+				refresh ();
+			}
+		}
+
+		catch (NoCrossfadeHere& err) {
+			// relax, Invalidated inside refresh()
+		}
 	}
 }
 

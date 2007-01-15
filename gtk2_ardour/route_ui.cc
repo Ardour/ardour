@@ -446,7 +446,7 @@ RouteUI::refresh_remote_control_menu ()
 
 	RadioMenuItem::Group rc_group;
 	CheckMenuItem* rc_active;
-	uint32_t limit = _session.ntracks();
+	uint32_t limit = _session.ntracks() + _session.nbusses();
 	char buf[32];
 
 	MenuList& rc_items = remote_control_menu->items();

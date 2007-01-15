@@ -277,9 +277,14 @@ AudioPlaylist::refresh_dependents (boost::shared_ptr<Region> r)
 		if ((*x)->involves (ar)) {
 
 			if (find (updated.begin(), updated.end(), *x) == updated.end()) {
-				if ((*x)->refresh ()) {
-					/* not invalidated by the refresh */
-					updated.insert (*x);
+				try { 
+					if ((*x)->refresh ()) {
+						updated.insert (*x);
+					}
+				}
+
+				catch (Crossfade::NoCrossfadeHere& err) {
+					// relax, Invalidated during refresh
 				}
 			}
 		}
@@ -352,6 +357,7 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 	if (!norefresh) {
 		refresh_dependents (r);
 	}
+
 
 	if (!Config->get_auto_xfade()) {
 		return;

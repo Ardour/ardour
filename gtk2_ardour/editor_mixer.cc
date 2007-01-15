@@ -282,10 +282,20 @@ Editor::session_going_away ()
 
 	/* rip everything out of the list displays */
 
-	region_list_clear (); // no clear() method in gtkmm 1.2 
+	region_list_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
+	route_list_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
+	named_selection_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
+	edit_group_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
+
+	region_list_model->clear ();
 	route_display_model->clear ();
 	named_selection_model->clear ();
 	group_model->clear ();
+
+	region_list_display.set_model (region_list_model);
+	route_list_display.set_model (route_display_model);
+	named_selection_display.set_model (named_selection_model);
+	edit_group_display.set_model (group_model);
 
 	edit_cursor_clock.set_session (0);
 	zoom_range_clock.set_session (0);

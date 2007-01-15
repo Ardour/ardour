@@ -367,9 +367,9 @@ void
 RegionView::set_frame_color ()
 {
 	if (_region->opaque()) {
-		fill_opacity = 230;
+		fill_opacity = 130;
 	} else {
-		fill_opacity = 100;
+		fill_opacity = 60;
 	}
 
 	TimeAxisViewItem::set_frame_color ();
