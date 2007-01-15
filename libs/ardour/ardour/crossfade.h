@@ -167,8 +167,6 @@ class Crossfade : public PBD::StatefulDestructible, public boost::enable_shared_
 	void initialize ();
 	int  compute (boost::shared_ptr<ARDOUR::AudioRegion>, boost::shared_ptr<ARDOUR::AudioRegion>, CrossfadeModel);
 	bool update ();
-
-	void member_changed (ARDOUR::Change);
 };
 
 
