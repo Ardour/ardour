@@ -278,7 +278,7 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 				
 				TimeAxisView *current_axis = (*i);
 				
-				for (std::set<RegionView *>::iterator j = ars.begin(); j != ars.end(); ++j) {
+				for (std::list<RegionView *>::iterator j = ars.begin(); j != ars.end(); ++j) {
 					// Check that the region is actually audio (so we can analyze it)
 					AudioRegionView* arv = dynamic_cast<AudioRegionView*>(*j);
 					if (!arv)
