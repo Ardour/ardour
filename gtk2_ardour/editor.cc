@@ -2808,7 +2808,7 @@ Editor::extend_selection_to_track (TimeAxisView& view)
 	TrackViewList sorted = track_views;
 	TrackViewByPositionSorter cmp;
 	bool passed_clicked = false;
-	bool forwards;
+	bool forwards = true;
 
 	sorted.sort (cmp);
 

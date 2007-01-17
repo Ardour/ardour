@@ -9,7 +9,7 @@ strip_whitespace_edges (string& str)
 {   
     string::size_type i; 
     string::size_type len;    
-    string::size_type s;
+    string::size_type s = 0;
 			            
     len = str.length();
 

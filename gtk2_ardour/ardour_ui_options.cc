@@ -102,6 +102,9 @@ ARDOUR_UI::set_native_file_header_format (HeaderFormat hf)
 	case AIFF:
 		action = X_("FileHeaderFormatAIFF");
 		break;
+	default:
+		fatal << string_compose (_("programming error: %1"), "illegal file header format in ::set_native_file_header_format") << endmsg;
+		/*NOTREACHED*/	
 	}
 
 	Glib::RefPtr<Action> act = ActionManager::get_action ("options", action);
@@ -126,6 +129,9 @@ ARDOUR_UI::set_native_file_data_format (SampleFormat sf)
 	case FormatInt24:
 		action = X_("FileDataFormat24bit");
 		break;
+	default:
+		fatal << string_compose (_("programming error: %1"), "illegal file data format in ::set_native_file_data_format") << endmsg;
+		/*NOTREACHED*/
 	}
 
 	Glib::RefPtr<Action> act = ActionManager::get_action ("options", action);

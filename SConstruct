@@ -659,7 +659,8 @@ opt_flags[:0] = [
     "-O3",
     "-fomit-frame-pointer",
     "-ffast-math",
-    "-fstrength-reduce"
+    "-fstrength-reduce",
+    "-fno-strict-aliasing"
     ]
 
 if env['DEBUG'] == 1:

@@ -3397,7 +3397,7 @@ Session::remove_redirect (Redirect* redirect)
 nframes_t
 Session::available_capture_duration ()
 {
-	float sample_bytes_on_disk;
+	float sample_bytes_on_disk = 4.0; // keep gcc happy
 
 	switch (Config->get_native_file_data_format()) {
 	case FormatFloat:

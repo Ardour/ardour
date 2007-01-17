@@ -2708,8 +2708,6 @@ Editor::start_region_grab (ArdourCanvas::Item* item, GdkEvent* event)
 void
 Editor::start_region_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 {
-	cerr << "start region copy grab, selected regions = " << selection->regions.size() << endl;
-
 	if (selection->regions.empty() || clicked_regionview == 0) {
 		return;
 	}
