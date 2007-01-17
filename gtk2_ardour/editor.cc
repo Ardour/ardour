@@ -359,6 +359,8 @@ Editor::Editor (AudioEngine& eng)
  	edit_hscrollbar.signal_button_release_event().connect (mem_fun(*this, &Editor::hscrollbar_button_release));
  	edit_hscrollbar.signal_size_allocate().connect (mem_fun(*this, &Editor::hscrollbar_allocate));
 
+	edit_hscrollbar.set_name ("EditorHScrollbar");
+
 	build_cursors ();
 	setup_toolbar ();
 
@@ -2541,7 +2543,7 @@ Editor::setup_toolbar ()
 	zoom_out_full_button.add (*(manage (new Image (::get_icon("zoom_full")))));
 	zoom_out_full_button.signal_clicked().connect (mem_fun(*this, &Editor::temporal_zoom_session));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_full_button, _("Zoom to Session"));
-	
+
 	zoom_focus_selector.set_name ("ZoomFocusSelector");
 	Gtkmm2ext::set_size_request_to_display_given_text (zoom_focus_selector, "Edit Cursor", FUDGE, 0);
 	set_popdown_strings (zoom_focus_selector, zoom_focus_strings);
