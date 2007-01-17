@@ -323,6 +323,7 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
                                       [ 'SConscript',
                                         'i18n.h', 'gettext.h',
 					'ardour.sh.in',
+					'ardev_common.sh.in',
                                         'ardour2_ui.rc', 'splash.png',
                                         'ardour.menus', 'ardour.bindings', 'ardour.colors',
 					'editor_xpms'
