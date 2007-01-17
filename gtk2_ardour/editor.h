@@ -44,7 +44,7 @@
 #include <ardour/session.h>
 #include <ardour/tempo.h>
 #include <ardour/location.h>
-#include <ardour/region.h>
+#include <ardour/audioregion.h>
 
 #include "audio_clock.h"
 #include "gtk-custom-ruler.h"
@@ -1068,6 +1068,12 @@ class Editor : public PublicEditor
 	void fade_out_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void fade_in_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 	void fade_out_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
+
+	void set_fade_in_shape (ARDOUR::AudioRegion::FadeShape);
+	void set_fade_out_shape (ARDOUR::AudioRegion::FadeShape);
+
+	void set_fade_in_active (bool);
+	void set_fade_out_active (bool);
 	
 	std::set<boost::shared_ptr<ARDOUR::Playlist> > motion_frozen_playlists;
 	void region_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);

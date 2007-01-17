@@ -3689,3 +3689,99 @@ Editor::toggle_region_opaque ()
 		}
 	}
 }
+
+void
+Editor::set_fade_in_shape (AudioRegion::FadeShape shape)
+{
+	begin_reversible_command (_("set fade in shape"));
+
+	for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
+		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*x);
+
+		if (!tmp) {
+			return;
+		}
+
+		AutomationList& alist = tmp->audio_region()->fade_in();
+		XMLNode &before = alist.get_state();
+
+		tmp->audio_region()->set_fade_in_shape (shape);
+		
+		XMLNode &after = alist.get_state();
+		session->add_command(new MementoCommand<AutomationList>(alist, &before, &after));
+	}
+
+	commit_reversible_command ();
+}
+
+void
+Editor::set_fade_out_shape (AudioRegion::FadeShape shape)
+{
+	begin_reversible_command (_("set fade out shape"));
+
+	for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
+		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*x);
+
+		if (!tmp) {
+			return;
+		}
+
+		AutomationList& alist = tmp->audio_region()->fade_out();
+		XMLNode &before = alist.get_state();
+
+		tmp->audio_region()->set_fade_out_shape (shape);
+		
+		XMLNode &after = alist.get_state();
+		session->add_command(new MementoCommand<AutomationList>(alist, &before, &after));
+	}
+
+	commit_reversible_command ();
+}
+
+void
+Editor::set_fade_in_active (bool yn)
+{
+	begin_reversible_command (_("set fade in active"));
+
+	for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
+		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*x);
+
+		if (!tmp) {
+			return;
+		}
+
+
+		boost::shared_ptr<AudioRegion> ar (tmp->audio_region());
+
+		XMLNode &before = ar->get_state();
+
+		ar->set_fade_in_active (yn);
+		
+		XMLNode &after = ar->get_state();
+		session->add_command(new MementoCommand<AudioRegion>(*ar, &before, &after));
+	}
+}
+
+void
+Editor::set_fade_out_active (bool yn)
+{
+	begin_reversible_command (_("set fade out active"));
+
+	for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
+		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*x);
+
+		if (!tmp) {
+			return;
+		}
+
+		boost::shared_ptr<AudioRegion> ar (tmp->audio_region());
+
+		XMLNode &before = ar->get_state();
+
+		ar->set_fade_out_active (yn);
+		
+		XMLNode &after = ar->get_state();
+		session->add_command(new MementoCommand<AudioRegion>(*ar, &before, &after));
+	}
+}
+
