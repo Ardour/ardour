@@ -757,6 +757,39 @@ Editor::cursor_to_selection_end (Cursor *cursor)
 }
 
 void
+Editor::scroll_playhead (bool forward)
+{
+	nframes_t pos = playhead_cursor->current_frame;
+	nframes_t delta = (nframes_t) floor (current_page_frames() / 0.8);
+
+	if (forward) {
+		if (pos == max_frames) {
+			return;
+		}
+
+		if (pos < max_frames - delta) {
+			pos += delta ;
+		} else {
+			pos = max_frames;
+		} 
+
+	} else {
+
+		if (pos == 0) {
+			return;
+		} 
+
+		if (pos > delta) {
+			pos -= delta;
+		} else {
+			pos = 0;
+		}
+	}
+
+	session->request_locate (pos);
+}
+
+void
 Editor::playhead_backward ()
 {
 	nframes_t pos;

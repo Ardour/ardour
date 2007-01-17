@@ -994,6 +994,7 @@ class Editor : public PublicEditor
 	void edit_cursor_forward ();
 	void playhead_backward ();
 	void playhead_forward ();
+	void scroll_playhead (bool forward);
 	void scroll_backward (float pages=0.8f);
 	void scroll_forward (float pages=0.8f);
 	void scroll_tracks_down ();

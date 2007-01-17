@@ -110,6 +110,8 @@
 ; (gtk_accel_path "<Actions>/Editor/toggle-xfades-visible" "")
 (gtk_accel_path "<Actions>/Editor/extend-range-to-end-of-region" "rightanglebracket")
 (gtk_accel_path "<Actions>/Editor/scroll-backward" "leftarrow")
+(gtk_accel_path "<Actions>/Editor/scroll-playhead-backward" "<Control>leftarrow")
+(gtk_accel_path "<Actions>/Editor/scroll-playhead-forward" "<Control>rightarrow")
 (gtk_accel_path "<Actions>/Editor/start-range" "<Control>KP_Down")
 ; (gtk_accel_path "<Actions>/ShuttleActions/SetShuttleUnitsSemitones" "")
 ; (gtk_accel_path "<Actions>/JACK/JACKLatency128" "")

@@ -203,6 +203,9 @@
                <menuitem action='scroll-forward'/>
                <menuitem action='scroll-backward'/>
    	       <separator/>
+               <menuitem action='scroll-playhead-forward'/>
+               <menuitem action='scroll-playhead-backward'/>
+   	       <separator/>
                <menuitem action='ToggleWaveformVisibility'/>
                <menuitem action='ToggleWaveformsWhileRecording'/>
                <menuitem action='ToggleMeasureVisibility'/>
