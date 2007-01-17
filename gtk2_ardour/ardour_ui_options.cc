@@ -744,6 +744,8 @@ ARDOUR_UI::set_meter_falloff (MeterFalloff val)
 void
 ARDOUR_UI::parameter_changed (const char* parameter_name)
 {
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &ARDOUR_UI::parameter_changed), parameter_name));
+
 #define PARAM_IS(x) (!strcmp (parameter_name, (x)))
 	
 	if (PARAM_IS ("slave-source")) {
