@@ -144,6 +144,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 
 	Glib::RefPtr<Gtk::ActionGroup> editor_actions;
 
+	virtual void reset_focus() = 0;
+
 	virtual bool canvas_control_point_event (GdkEvent* event,ArdourCanvas::Item*, ControlPoint*) = 0;
 	virtual bool canvas_line_event (GdkEvent* event,ArdourCanvas::Item*, AutomationLine*) = 0;
 	virtual bool canvas_selection_rect_event (GdkEvent* event,ArdourCanvas::Item*, SelectionRect*) = 0;

@@ -1086,3 +1086,9 @@ Editor::parameter_changed (const char* parameter_name)
 
 #undef PARAM_IS
 }
+
+void
+Editor::reset_focus ()
+{
+	track_canvas.grab_focus();
+}

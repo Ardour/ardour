@@ -906,6 +906,8 @@ class Editor : public PublicEditor
 	void align_relative (ARDOUR::RegionPoint);
 	void naturalize ();
 
+	void reset_focus ();
+
 	void cut ();
 	void copy ();
 	void paste (float times);
