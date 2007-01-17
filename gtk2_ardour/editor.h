@@ -419,6 +419,8 @@ class Editor : public PublicEditor
 	CrossfadeView*     clicked_crossfadeview;
 	ControlPoint*      clicked_control_point;
 
+	void sort_track_selection ();
+
 	void get_relevant_audio_tracks (std::set<AudioTimeAxisView*>& relevant_tracks);
 	void mapover_audio_tracks (sigc::slot<void,AudioTimeAxisView&,uint32_t> sl);
 

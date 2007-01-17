@@ -27,9 +27,13 @@ class ConfigVariableBase {
 	virtual void add_to_node (XMLNode& node) = 0;
 	virtual bool set_from_node (const XMLNode& node, Owner owner) = 0;
 
+
   protected:
 	std::string _name;
 	Owner _owner;
+
+	void notify ();
+	void miss ();
 };
 
 template<class T>
@@ -41,10 +45,12 @@ class ConfigVariable : public ConfigVariableBase
 
 	virtual bool set (T val, Owner owner) {
 		if (val == value) {
+			miss ();
 			return false;
 		}
 		value = val;
 		_owner = (ConfigVariableBase::Owner)(_owner |owner);
+		notify ();
 		return true;
 	}
 

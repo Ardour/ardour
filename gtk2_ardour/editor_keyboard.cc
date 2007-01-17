@@ -82,7 +82,7 @@ Editor::kbd_do_split (GdkEvent* ev)
 	nframes_t where = event_frame (ev);
 
 	if (entered_regionview) {
-		if (selection->regions.find (entered_regionview) != selection->regions.end()) {
+		if (selection->regions.contains (entered_regionview)) {
 			split_regions_at (where, selection->regions);
 		} else {
 			RegionSelection s;

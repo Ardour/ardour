@@ -1351,26 +1351,19 @@ Editor::select_all_within (nframes_t start, nframes_t end, double top, double bo
 		(*iter)->get_selectables (start, end, top, bot, touched);
 	}
 
-	cerr << "select all within found " << touched.size() << endl;
-
 	begin_reversible_command (_("select all within"));
 	switch (op) {
 	case Selection::Add:
 	case Selection::Toggle:
-		cerr << "toggle\n";
 		selection->add (touched);
 		break;
 	case Selection::Set:
-		cerr << "set\n";
 		selection->set (touched);
 		break;
 	case Selection::Extend:
-		cerr << "extend\n";
 		/* not defined yet */
 		break;
 	}
-
-	cerr << "selection now has " << selection->points.size() << endl;
 
 	commit_reversible_command ();
 	return !touched.empty();
@@ -2166,6 +2159,8 @@ Editor::create_region_from_selection (vector<boost::shared_ptr<AudioRegion> >& n
 	nframes_t start = selection->time[clicked_selection].start;
 	nframes_t end = selection->time[clicked_selection].end;
 	
+	sort_track_selection ();
+
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 
 		boost::shared_ptr<AudioRegion> current;
@@ -2227,6 +2222,8 @@ Editor::separate_region_from_selection ()
 
 	boost::shared_ptr<Playlist> playlist;
 		
+	sort_track_selection ();
+
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 
 		AudioTimeAxisView* atv;
@@ -2333,6 +2330,8 @@ Editor::crop_region_to_selection ()
 
 	} else {
 		
+		sort_track_selection ();
+
 		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 
 			AudioTimeAxisView* atv;
@@ -2949,17 +2948,33 @@ struct lt_playlist {
     }
 };
 	
+struct PlaylistMapping { 
+    TimeAxisView* tv;
+    boost::shared_ptr<AudioPlaylist> pl;
+
+    PlaylistMapping (TimeAxisView* tvp) : tv (tvp) {}
+};
+
 void
 Editor::cut_copy_regions (CutCopyOp op)
 {
-        typedef std::map<boost::shared_ptr<AudioPlaylist>,boost::shared_ptr<AudioPlaylist> > PlaylistMapping;
-	PlaylistMapping pmap;
-	nframes_t first_position = max_frames;
+	/* we can't use a std::map here because the ordering is important, and we can't trivially sort
+	   a map when we want ordered access to both elements. i think.
+	*/
 
+	vector<PlaylistMapping> pmap;
+
+	nframes_t first_position = max_frames;
+	
 	set<PlaylistState, lt_playlist> freezelist;
 	pair<set<PlaylistState, lt_playlist>::iterator,bool> insert_result;
+	
+	/* get ordering correct before we cut/copy */
+	
+	selection->regions.sort_by_position_and_track ();
 
 	for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
+
 		first_position = min ((*x)->region()->position(), first_position);
 
 		if (op == Cut || op == Clear) {
@@ -2972,66 +2987,94 @@ Editor::cut_copy_regions (CutCopyOp op)
 				before.before = &pl->get_state();
 				
 				insert_result = freezelist.insert (before);
-
+				
 				if (insert_result.second) {
 					pl->freeze ();
 				}
 			}
+		}
+
+		TimeAxisView* tv = &(*x)->get_trackview();
+		vector<PlaylistMapping>::iterator z;
+
+		for (z = pmap.begin(); z != pmap.end(); ++z) {
+			if ((*z).tv == tv) {
+				break;
+			}
+		}
+		
+		if (z == pmap.end()) {
+			pmap.push_back (PlaylistMapping (tv));
 		}
 	}
 
 	for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ) {
 
 		boost::shared_ptr<AudioPlaylist> pl = boost::dynamic_pointer_cast<AudioPlaylist>((*x)->region()->playlist());
+		
+		if (!pl) {
+			/* impossible, but this handles it for the future */
+			continue;
+		}
+
+		TimeAxisView& tv = (*x)->get_trackview();
 		boost::shared_ptr<AudioPlaylist> npl;
 		RegionSelection::iterator tmp;
 		
 		tmp = x;
 		++tmp;
 
-		if (pl) {
-
-			PlaylistMapping::iterator pi = pmap.find (pl);
+		vector<PlaylistMapping>::iterator z;
+		
+		for (z = pmap.begin(); z != pmap.end(); ++z) {
+			if ((*z).tv == &tv) {
+				break;
+			}
+		}
+		
+		assert (z != pmap.end());
+		
+		if (!(*z).pl) {
+			npl = boost::dynamic_pointer_cast<AudioPlaylist> (PlaylistFactory::create (*session, "cutlist", true));
+			npl->freeze();
+			(*z).pl = npl;
+		} else {
+			npl = (*z).pl;
+		}
+		
+		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>((*x)->region());
+		
+		switch (op) {
+		case Cut:
+			if (!ar) break;
 			
-			if (pi == pmap.end()) {
-				npl = boost::dynamic_pointer_cast<AudioPlaylist> (PlaylistFactory::create (*session, "cutlist", true));
-				npl->freeze();
-				pmap[pl] = npl;
-			} else {
-				npl = pi->second;
-			}
-
-			// FIXME
-			boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>((*x)->region());
-			switch (op) {
-			case Cut:
-				if (!ar) break;
-
-				npl->add_region (RegionFactory::create (ar), (*x)->region()->position() - first_position);
-				pl->remove_region (((*x)->region()));
-				break;
-
-			case Copy:
-				if (!ar) break;
-
-				npl->add_region (RegionFactory::create (ar), (*x)->region()->position() - first_position);
-				break;
-
-			case Clear:
-				pl->remove_region (((*x)->region()));
-				break;
-			}
+			npl->add_region (RegionFactory::create (ar), (*x)->region()->position() - first_position);
+			pl->remove_region (((*x)->region()));
+			break;
+			
+		case Copy:
+			if (!ar) break;
+			
+			npl->add_region (RegionFactory::create (ar), (*x)->region()->position() - first_position);
+			break;
+			
+		case Clear:
+			pl->remove_region (((*x)->region()));
+			break;
 		}
 
 		x = tmp;
 	}
-
+	
 	list<boost::shared_ptr<Playlist> > foo;
-
-	for (PlaylistMapping::iterator i = pmap.begin(); i != pmap.end(); ++i) {
-		foo.push_back (i->second);
+	
+	/* the pmap is in the same order as the tracks in which selected regions occured */
+	
+	for (vector<PlaylistMapping>::iterator i = pmap.begin(); i != pmap.end(); ++i) {
+		(*i).pl->thaw();
+		foo.push_back ((*i).pl);
 	}
-
+	
 	if (!foo.empty()) {
 		cut_buffer->set (foo);
 	}
@@ -3095,15 +3138,19 @@ Editor::paste_internal (nframes_t position, float times)
 	TrackSelection::iterator i;
 	size_t nth;
 
+	/* get everything in the correct order */
+
+	sort_track_selection ();
+
 	for (nth = 0, i = selection->tracks.begin(); i != selection->tracks.end(); ++i, ++nth) {
-		
+
 		/* undo/redo is handled by individual tracks */
 
 		if ((*i)->paste (position, times, *cut_buffer, nth)) {
 			commit = true;
 		}
 	}
-
+	
 	if (commit) {
 		commit_reversible_command ();
 	}
@@ -3129,6 +3176,8 @@ Editor::paste_named_selection (float times)
 	chunk = ns->playlists.begin();
 		
 	begin_reversible_command (_("paste chunk"));
+	
+	sort_track_selection ();
 
 	for (t = selection->tracks.begin(); t != selection->tracks.end(); ++t) {
 		
@@ -3241,8 +3290,6 @@ Editor::reset_point_selection ()
 {
 	/* reset all selected points to the relevant default value */
 
-	cerr << "point selection has " << selection->points.size() << " entries\n";
-	
 	for (PointSelection::iterator i = selection->points.begin(); i != selection->points.end(); ++i) {
 		
 		AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*>(&(*i).track);

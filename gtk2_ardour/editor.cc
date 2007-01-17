@@ -28,6 +28,7 @@
 
 #include <pbd/convert.h>
 #include <pbd/error.h>
+#include <pbd/stacktrace.h>
 #include <pbd/memento_command.h>
 
 #include <gtkmm/image.h>
@@ -3030,7 +3031,6 @@ Editor::mapped_set_selected_regionview_from_click (RouteTimeAxisView& tv, uint32
 		return;
 	}
 
-	
 	if ((pl = ds->playlist()) != 0) {
 		pl->get_equivalent_regions (basis->region(), results);
 	}
@@ -3050,6 +3050,10 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 
 	if (!clicked_regionview || !clicked_audio_trackview) {
 		return false;
+	}
+
+	if (press) {
+		button_release_can_deselect = false;
 	}
 
 	if (op == Selection::Toggle || op == Selection::Set) {
@@ -4292,3 +4296,17 @@ Editor::idle_visual_changer ()
 
 	return 0;
 }
+
+struct EditorOrderTimeAxisSorter {
+    bool operator() (const TimeAxisView* a, const TimeAxisView* b) const {
+	    return a->order < b->order;
+    }
+};
+	
+void
+Editor::sort_track_selection ()
+{
+	EditorOrderTimeAxisSorter cmp;
+	selection->tracks.sort (cmp);
+}
+

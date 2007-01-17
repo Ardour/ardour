@@ -19,6 +19,7 @@
 */
 
 #include <pbd/convert.h>
+#include <pbd/stacktrace.h>
 
 #include <gtkmm2ext/utils.h>
 

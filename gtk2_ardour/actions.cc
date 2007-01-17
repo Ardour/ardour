@@ -266,7 +266,7 @@ ActionManager::toggle_config_state (const char* group, const char* action, bool 
 		
 		if (tact) {
 			bool x = (Config->*get)();
-
+			
 			if (x != tact->get_active()) {
 				(Config->*set) (!x);
 			}

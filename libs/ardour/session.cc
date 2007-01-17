@@ -368,7 +368,6 @@ Session::Session (AudioEngine &eng,
 		if (master_out_channels) {
 			shared_ptr<Route> r (new Route (*this, _("master"), -1, master_out_channels, -1, master_out_channels, Route::MasterOut));
 			r->set_remote_control_id (control_id);
-			cerr << "master bus has remote control ID " << r->remote_control_id() << endl;
 			 
 			rl.push_back (r);
 		} else {
@@ -395,6 +394,8 @@ Session::Session (AudioEngine &eng,
 	bool was_dirty = dirty ();
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
+
+	Config->ParameterChanged.connect (mem_fun (*this, &Session::config_changed));
 
 	if (was_dirty) {
 		DirtyChanged (); /* EMIT SIGNAL */
