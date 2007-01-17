@@ -2921,7 +2921,17 @@ Editor::set_selected_track (TimeAxisView& view, Selection::Operation op, bool no
 		if (selection->selected (&view) && selection->tracks.size() == 1) {
 			/* no commit necessary */
 		} else {
-			selection->set (&view);
+			
+			/* reset track selection if there is only 1 other track
+			   selected OR if no_remove is not set (its there to 
+			   prevent deselecting a multi-track selection
+			   when clicking on an already selected track
+			   for some reason.
+			*/
+
+			if (selection->tracks.size() <= 1 || !no_remove) {
+				selection->set (&view);
+			}
 			commit = true;
 		}
 		break;

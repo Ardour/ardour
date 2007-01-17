@@ -1784,6 +1784,13 @@ Editor::fade_in_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		snap_to (pos);
 	}
 
+	if (pos < (arv->region()->position() + 64)) {
+		fade_length = 64; // this should be a minimum defined somewhere
+	} else if (pos > arv->region()->last_frame()) {
+		fade_length = arv->region()->length();
+	} else {
+		fade_length = pos - arv->region()->position();
+	}		
 	/* mapover the region selection */
 
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
@@ -1794,14 +1801,6 @@ Editor::fade_in_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			continue;
 		}
 	
-		if (pos < (tmp->region()->position() + 64)) {
-			fade_length = 64; // this should be a minimum defined somewhere
-		} else if (pos > tmp->region()->last_frame()) {
-			fade_length = tmp->region()->length();
-		} else {
-			fade_length = pos - tmp->region()->position();
-		}
-		
 		tmp->reset_fade_in_shape_width (fade_length);
 	}
 
@@ -1813,6 +1812,7 @@ Editor::fade_in_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 void
 Editor::fade_in_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
 {
+	AudioRegionView* arv = static_cast<AudioRegionView*>(drag_info.data);
 	nframes_t pos;
 	nframes_t fade_length;
 
@@ -1824,6 +1824,14 @@ Editor::fade_in_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* even
 		pos = 0;
 	}
 
+	if (pos < (arv->region()->position() + 64)) {
+		fade_length = 64; // this should be a minimum defined somewhere
+	} else if (pos > arv->region()->last_frame()) {
+		fade_length = arv->region()->length();
+	} else {
+		fade_length = pos - arv->region()->position();
+	}
+		
 	begin_reversible_command (_("change fade in length"));
 
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
@@ -1837,14 +1845,6 @@ Editor::fade_in_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* even
 		AutomationList& alist = tmp->audio_region()->fade_in();
 		XMLNode &before = alist.get_state();
 
-		if (pos < (tmp->region()->position() + 64)) {
-			fade_length = 64; // this should be a minimum defined somewhere
-		} else if (pos > tmp->region()->last_frame()) {
-			fade_length = tmp->region()->length();
-		} else {
-			fade_length = pos - tmp->region()->position();
-		}
-		
 		tmp->audio_region()->set_fade_in_length (fade_length);
 		
 		XMLNode &after = alist.get_state();
@@ -1890,7 +1890,17 @@ Editor::fade_out_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event
 	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
 		snap_to (pos);
 	}
-
+	
+	if (pos > (arv->region()->last_frame() - 64)) {
+		fade_length = 64; // this should really be a minimum fade defined somewhere
+	}
+	else if (pos < arv->region()->position()) {
+		fade_length = arv->region()->length();
+	}
+	else {
+		fade_length = arv->region()->last_frame() - pos;
+	}
+		
 	/* mapover the region selection */
 
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
@@ -1901,16 +1911,6 @@ Editor::fade_out_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event
 			continue;
 		}
 	
-		if (pos > (tmp->region()->last_frame() - 64)) {
-			fade_length = 64; // this should really be a minimum fade defined somewhere
-		}
-		else if (pos < arv->region()->position()) {
-			fade_length = tmp->region()->length();
-		}
-		else {
-			fade_length = tmp->region()->last_frame() - pos;
-		}
-		
 		tmp->reset_fade_out_shape_width (fade_length);
 	}
 
@@ -1939,6 +1939,16 @@ Editor::fade_out_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* eve
 		snap_to (pos);
 	}
 
+	if (pos > (arv->region()->last_frame() - 64)) {
+		fade_length = 64; // this should really be a minimum fade defined somewhere
+	}
+	else if (pos < arv->region()->position()) {
+		fade_length = arv->region()->length();
+	}
+	else {
+		fade_length = arv->region()->last_frame() - pos;
+	}
+
 	begin_reversible_command (_("change fade out length"));
 
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
@@ -1952,16 +1962,6 @@ Editor::fade_out_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* eve
 		AutomationList& alist = tmp->audio_region()->fade_out();
 		XMLNode &before = alist.get_state();
 		
-		if (pos > (tmp->region()->last_frame() - 64)) {
-			fade_length = 64; // this should really be a minimum fade defined somewhere
-		}
-		else if (pos < tmp->region()->position()) {
-			fade_length = tmp->region()->length();
-		}
-		else {
-			fade_length = tmp->region()->last_frame() - pos;
-		}
-
 		tmp->audio_region()->set_fade_out_length (fade_length);
 
 		XMLNode &after = alist.get_state();
