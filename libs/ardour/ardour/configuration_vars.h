@@ -36,7 +36,6 @@ CONFIG_VARIABLE (HeaderFormat, native_file_header_format,  "native-file-header-f
 
 CONFIG_VARIABLE (uint32_t, osc_port, "osc-port", 3819)
 CONFIG_VARIABLE (bool, use_osc, "use-osc", true)
-CONFIG_VARIABLE (bool, use_overlap_equivalency, "use-overlap-equivalency", true)
 
 /* crossfades */
 
@@ -115,6 +114,7 @@ CONFIG_VARIABLE (bool, no_new_session_dialog, "no-new-session-dialog", false)
 CONFIG_VARIABLE (bool, use_vst, "use-vst", true)
 CONFIG_VARIABLE (uint32_t, subframes_per_frame, "subframes-per-frame", 100)
 CONFIG_VARIABLE (uint32_t, saved_history_depth, "save-history-depth", 100)
+CONFIG_VARIABLE (bool, use_overlap_equivalency, "use-overlap-equivalency", false)
 
 /* BWAV */
 
