@@ -73,7 +73,7 @@ RegionSelection::clear_all()
 	_current_end = 0;
 }
 
-bool RegionSelection::contains (RegionView* rv)
+bool RegionSelection::contains (RegionView* rv) const
 {
 	return find (begin(), end(), rv) != end();
 }
@@ -241,3 +241,15 @@ RegionSelection::sort_by_position_and_track ()
 	RegionSortByTrack sorter;
 	sort (sorter);
 }
+
+bool
+RegionSelection::involves (const TimeAxisView& tv) const
+{
+	for (RegionSelection::const_iterator i = begin(); i != end(); ++i) {
+		if (&(*i)->get_trackview() == &tv) {
+			return true;
+		}
+	}
+	return false;
+}
+	

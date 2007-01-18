@@ -39,8 +39,10 @@ class RegionSelection : public std::list<RegionView*>, public sigc::trackable
 
 	void add (RegionView*);
 	bool remove (RegionView*);
-	bool contains (RegionView*);
 	void sort_by_position_and_track ();
+
+	bool contains (RegionView*) const;
+	bool involves (const TimeAxisView&) const;
 
 	void clear_all();
 	

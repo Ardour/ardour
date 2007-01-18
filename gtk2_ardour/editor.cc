@@ -2948,12 +2948,16 @@ Editor::set_selected_track (TimeAxisView& view, Selection::Operation op, bool no
 }
 
 bool
-Editor::set_selected_track_from_click (Selection::Operation op, bool no_remove)
+Editor::set_selected_track_from_click (bool press, Selection::Operation op, bool no_remove)
 {
 	if (!clicked_trackview) {
 		return false;
 	}
 	
+	if (!press) {
+		return false;
+	}
+
 	return set_selected_track (*clicked_trackview, op, no_remove);
 }
 

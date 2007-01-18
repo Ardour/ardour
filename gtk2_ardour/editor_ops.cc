@@ -1377,6 +1377,7 @@ Editor::select_all_within (nframes_t start, nframes_t end, double top, double bo
 {
 	list<Selectable*> touched;
 	list<Selectable*>::size_type n = 0;
+	TrackViewList touched_tracks;
 
 	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
 		if ((*iter)->hidden()) {
@@ -1388,10 +1389,15 @@ Editor::select_all_within (nframes_t start, nframes_t end, double top, double bo
 		(*iter)->get_selectables (start, end, top, bot, touched);
 
 		if (n != touched.size()) {
-			selection->add (*iter);
+			touched_tracks.push_back (*iter);
 		}
 	}
 
+	if (!touched_tracks.empty()) {
+		selection->clear_tracks();
+		selection->set (touched_tracks);
+	}
+		
 	begin_reversible_command (_("select all within"));
 	switch (op) {
 	case Selection::Add:

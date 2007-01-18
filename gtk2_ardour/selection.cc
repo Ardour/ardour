@@ -461,8 +461,13 @@ Selection::remove (const list<boost::shared_ptr<Playlist> >& pllist)
 void
 Selection::remove (RegionView* r)
 {
-	regions.remove (r);
-	RegionsChanged ();
+	if (regions.remove (r)) {
+		RegionsChanged ();
+	}
+
+	if (!regions.involves (r->get_trackview())) {
+		remove (&r->get_trackview());
+	}
 }
 
 

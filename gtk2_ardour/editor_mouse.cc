@@ -317,7 +317,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	switch (item_type) {
 	case RegionItem:
 		/* XXX make tying track/region selection optional */
-		c1 = set_selected_track_from_click (op, true);
+		c1 = set_selected_track_from_click (press, op, true);
 		c2 = set_selected_regionview_from_click (press, op, true);
 		commit = (c1 || c2);
 		break;
@@ -325,7 +325,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	case RegionViewNameHighlight:
 	case RegionViewName:
 		/* XXX make tying track/region selection optional */
-		c1 = set_selected_track_from_click (op, true);
+		c1 = set_selected_track_from_click (press, op, true);
 		c2 = set_selected_regionview_from_click (press, op, true);
 		commit = (c1 || c2);
 		break;
@@ -335,7 +335,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	case FadeOutHandleItem:
 	case FadeOutItem:
 		/* XXX make tying track/region selection optional */
-		c1 = set_selected_track_from_click (op, true);
+		c1 = set_selected_track_from_click (press, op, true);
 		c2 = set_selected_regionview_from_click (press, op, true);
 		commit = (c1 || c2);
 		
@@ -343,17 +343,17 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	case PanAutomationControlPointItem:
 	case RedirectAutomationControlPointItem:
 		/* XXX make tying track/region selection optional */
-		c1 = set_selected_track_from_click (op, true);
+		c1 = set_selected_track_from_click (press, op, true);
 		c2 = set_selected_control_point_from_click (op, false);
 		commit = (c1 || c2);
 		break;
 		
 	case StreamItem:
-		commit = set_selected_track_from_click (op, true);
+		commit = set_selected_track_from_click (press, op, true);
 		break;
 		    
 	case AutomationTrackItem:
-		commit = set_selected_track_from_click (op, true);
+		commit = set_selected_track_from_click (press, op, true);
 		break;
 		
 	default:
@@ -372,7 +372,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		case StreamItem:
 		case RegionItem:
 		case AutomationTrackItem:
-			commit = set_selected_track_from_click (op, true);
+			commit = set_selected_track_from_click (true, op, true);
 			break;
 
 		default:
@@ -4777,6 +4777,8 @@ Editor::end_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event)
 		}
 		
 	} else {
+		cerr << "Boo!\n";
+		selection->clear_tracks();
 		selection->clear_regions();
 		selection->clear_points ();
 		selection->clear_lines ();
