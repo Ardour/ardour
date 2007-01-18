@@ -209,9 +209,9 @@ Selection::toggle (RegionView* r)
 	RegionSelection::iterator i;
 
 	if ((i = find (regions.begin(), regions.end(), r)) == regions.end()) {
-		regions.add (r);
+		add (r);
 	} else {
-		regions.erase (i);
+		remove (*i);
 	}
 
 	RegionsChanged ();
@@ -224,9 +224,9 @@ Selection::toggle (vector<RegionView*>& r)
 
 	for (vector<RegionView*>::iterator x = r.begin(); x != r.end(); ++x) {
 		if ((i = find (regions.begin(), regions.end(), (*x))) == regions.end()) {
-			regions.add ((*x));
+			add ((*x));
 		} else {
-			regions.erase (i);
+			remove (*x);
 		}
 	}
 
@@ -322,6 +322,7 @@ Selection::add (RegionView* r)
 {
 	if (find (regions.begin(), regions.end(), r) == regions.end()) {
 		regions.add (r);
+		add (&r->get_trackview());
 		RegionsChanged ();
 	}
 }

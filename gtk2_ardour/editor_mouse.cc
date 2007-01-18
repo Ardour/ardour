@@ -349,7 +349,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		break;
 		
 	case StreamItem:
-		commit = set_selected_track_from_click (press, op, true);
+		// commit = set_selected_track_from_click (press, op, true);
 		break;
 		    
 	case AutomationTrackItem:
@@ -508,10 +508,9 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			break;
 			
 		case MouseObject:
-			if (Keyboard::modifier_state_contains (event->button.state, 
-							       Keyboard::ModifierMask(Keyboard::Control|Keyboard::Alt))
-				&& event->type == GDK_BUTTON_PRESS) {
-
+			if (Keyboard::modifier_state_contains (event->button.state, Keyboard::ModifierMask(Keyboard::Control|Keyboard::Alt)) &&
+			    event->type == GDK_BUTTON_PRESS) {
+				
 				start_rubberband_select (item, event);
 
 			} else if (event->type == GDK_BUTTON_PRESS) {
