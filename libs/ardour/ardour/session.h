@@ -1697,7 +1697,6 @@ class Session : public PBD::StatefulDestructible
 
 	void config_changed (const char*);
 
-	void add_control_protocol (const ControlProtocolInfo* const, XMLNode*);
 	XMLNode& get_control_protocol_state ();
 	
 };

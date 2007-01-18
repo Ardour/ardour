@@ -1687,13 +1687,19 @@ Route::_set_state (const XMLNode& node, bool call_base)
 			_comment = cmt->content();
 
 		} else if (child->name() == X_("extra")) {
+
 			_extra_xml = new XMLNode (*child);
-		} else if (child->name() == X_("solo")) {
-			_solo_control.set_state (*child);
-			_session.add_controllable (&_solo_control);
-		} else if (child->name() == X_("mute")) {
-			_mute_control.set_state (*child);
-			_session.add_controllable (&_mute_control);
+
+		} else if (child->name() == X_("controllable") && (prop = child->property("name")) != 0) {
+			
+			if (prop->value() == "solo") {
+				_solo_control.set_state (*child);
+				_session.add_controllable (&_solo_control);
+			}
+			else if (prop->value() == "mute") {
+				_mute_control.set_state (*child);
+				_session.add_controllable (&_mute_control);
+			}
 		}
 	}
 
