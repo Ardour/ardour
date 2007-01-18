@@ -290,8 +290,6 @@ void
 Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	bool commit = false;
-	bool c1; 
-	bool c2;
 
 	/* in object/audition/timefx mode, any button press sets
 	   the selection if the object can be selected. this is a
@@ -316,36 +314,25 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 
 	switch (item_type) {
 	case RegionItem:
-		/* XXX make tying track/region selection optional */
-		c1 = set_selected_track_from_click (press, op, true);
-		c2 = set_selected_regionview_from_click (press, op, true);
-		commit = (c1 || c2);
+		commit = set_selected_regionview_from_click (press, op, true);
 		break;
 		
 	case RegionViewNameHighlight:
 	case RegionViewName:
-		/* XXX make tying track/region selection optional */
-		c1 = set_selected_track_from_click (press, op, true);
-		c2 = set_selected_regionview_from_click (press, op, true);
-		commit = (c1 || c2);
+		commit = set_selected_regionview_from_click (press, op, true);
 		break;
 
 	case FadeInHandleItem:
 	case FadeInItem:
 	case FadeOutHandleItem:
 	case FadeOutItem:
-		/* XXX make tying track/region selection optional */
-		c1 = set_selected_track_from_click (press, op, true);
-		c2 = set_selected_regionview_from_click (press, op, true);
-		commit = (c1 || c2);
+		commit = set_selected_regionview_from_click (press, op, true);
+		break;
 		
 	case GainAutomationControlPointItem:
 	case PanAutomationControlPointItem:
 	case RedirectAutomationControlPointItem:
-		/* XXX make tying track/region selection optional */
-		c1 = set_selected_track_from_click (press, op, true);
-		c2 = set_selected_control_point_from_click (op, false);
-		commit = (c1 || c2);
+		commit = set_selected_control_point_from_click (op, false);
 		break;
 		
 	case StreamItem:

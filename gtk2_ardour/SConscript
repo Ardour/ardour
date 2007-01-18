@@ -134,6 +134,7 @@ editor_region_list.cc
 editor_route_list.cc
 editor_rulers.cc
 editor_scrub.cc
+editor_selection.cc
 editor_selection_list.cc
 editor_tempodisplay.cc
 editor_timefx.cc

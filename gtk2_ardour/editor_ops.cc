@@ -1331,6 +1331,8 @@ Editor::select_all (Selection::Operation op)
 	begin_reversible_command (_("select all"));
 	switch (op) {
 	case Selection::Add:
+		selection->add (touched);
+		break;
 	case Selection::Toggle:
 		selection->add (touched);
 		break;

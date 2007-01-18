@@ -422,11 +422,12 @@ class Editor : public PublicEditor
 	void sort_track_selection ();
 
 	void get_relevant_audio_tracks (std::set<AudioTimeAxisView*>& relevant_tracks);
+	void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&);
 	void mapover_audio_tracks (sigc::slot<void,AudioTimeAxisView&,uint32_t> sl);
 
 	/* functions to be passed to mapover_audio_tracks(), possibly with sigc::bind()-supplied arguments */
 
-	void mapped_set_selected_regionview_from_click (RouteTimeAxisView&, uint32_t, RegionView*, vector<RegionView*>*);
+	void mapped_get_equivalent_regions (RouteTimeAxisView&, uint32_t, RegionView*, vector<RegionView*>*);
 	void mapped_use_new_playlist (AudioTimeAxisView&, uint32_t);
 	void mapped_use_copy_playlist (AudioTimeAxisView&, uint32_t);
 	void mapped_clear_playlist (AudioTimeAxisView&, uint32_t);

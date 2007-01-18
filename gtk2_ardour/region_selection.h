@@ -37,7 +37,7 @@ class RegionSelection : public std::list<RegionView*>, public sigc::trackable
 
 	RegionSelection& operator= (const RegionSelection&);
 
-	void add (RegionView*);
+	bool add (RegionView*);
 	bool remove (RegionView*);
 	void sort_by_position_and_track ();
 

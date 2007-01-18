@@ -78,12 +78,12 @@ bool RegionSelection::contains (RegionView* rv) const
 	return find (begin(), end(), rv) != end();
 }
 
-void
+bool
 RegionSelection::add (RegionView* rv)
 {
 	if (contains (rv)) {
 		/* we already have it */
-		return;
+		return false;
 	}
 
 	rv->RegionViewGoingAway.connect (mem_fun(*this, &RegionSelection::remove_it));
@@ -101,6 +101,8 @@ RegionSelection::add (RegionView* rv)
 	// add to layer sorted list
 
 	add_to_layer (rv);
+
+	return true;
 }
 
 void

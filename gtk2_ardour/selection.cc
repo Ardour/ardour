@@ -334,8 +334,10 @@ Selection::add (vector<RegionView*>& v)
 
 	for (vector<RegionView*>::iterator i = v.begin(); i != v.end(); ++i) {
 		if (find (regions.begin(), regions.end(), (*i)) == regions.end()) {
-			regions.add ((*i));
-			changed = true;
+			changed = regions.add ((*i));
+			if (changed) {
+				add (&(*i)->get_trackview());
+			}
 		}
 	}
 
@@ -543,12 +545,14 @@ void
 Selection::set (RegionView* r)
 {
 	clear_regions ();
+	clear_tracks ();
 	add (r);
 }
 
 void
 Selection::set (vector<RegionView*>& v)
 {
+	clear_tracks ();
 	clear_regions ();
 	// make sure to deselect any automation selections
 	clear_points();
