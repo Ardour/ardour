@@ -1394,15 +1394,29 @@ Editor::select_all_within (nframes_t start, nframes_t end, double top, double bo
 	}
 
 	if (!touched_tracks.empty()) {
-		selection->clear_tracks();
-		selection->set (touched_tracks);
+		switch (op) {
+		case Selection::Add:
+			selection->add (touched_tracks);
+			break;
+		case Selection::Toggle:
+			selection->toggle (touched_tracks);
+			break;
+		case Selection::Set:
+			selection->set (touched_tracks);
+			break;
+		case Selection::Extend:
+			/* not defined yet */
+			break;
+		}
 	}
 		
 	begin_reversible_command (_("select all within"));
 	switch (op) {
 	case Selection::Add:
-	case Selection::Toggle:
 		selection->add (touched);
+		break;
+	case Selection::Toggle:
+		selection->toggle (touched);
 		break;
 	case Selection::Set:
 		selection->set (touched);

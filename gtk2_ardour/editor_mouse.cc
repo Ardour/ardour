@@ -4777,7 +4777,6 @@ Editor::end_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event)
 		}
 		
 	} else {
-		cerr << "Boo!\n";
 		selection->clear_tracks();
 		selection->clear_regions();
 		selection->clear_points ();
