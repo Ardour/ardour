@@ -2929,10 +2929,13 @@ Editor::set_selected_track (TimeAxisView& view, Selection::Operation op, bool no
 			   for some reason.
 			*/
 
-			if (selection->tracks.size() <= 1 || !no_remove) {
+			if (selection->tracks.empty()) {
 				selection->set (&view);
+				commit = true;
+			} else if (selection->tracks.size() == 1 || !no_remove) {
+				selection->set (&view);
+				commit = true;
 			}
-			commit = true;
 		}
 		break;
 		

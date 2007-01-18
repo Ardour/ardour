@@ -1375,13 +1375,21 @@ Editor::invert_selection ()
 bool
 Editor::select_all_within (nframes_t start, nframes_t end, double top, double bot, Selection::Operation op)
 {
-	list<Selectable *> touched;
-	
+	list<Selectable*> touched;
+	list<Selectable*>::size_type n = 0;
+
 	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
 		if ((*iter)->hidden()) {
 			continue;
 		}
+
+		n = touched.size();
+
 		(*iter)->get_selectables (start, end, top, bot, touched);
+
+		if (n != touched.size()) {
+			selection->add (*iter);
+		}
 	}
 
 	begin_reversible_command (_("select all within"));
