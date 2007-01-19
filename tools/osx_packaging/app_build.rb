@@ -101,12 +101,12 @@ end
 
 Dir.chdir(odir)
 
-# copy ardour.bin to bindir/ardour
+# copy ardour binary to bindir/ardour
 
 
-if File.exist?("../../gtk2_ardour/ardour.bin") then
+if File.exist?("../../gtk2_ardour/ardour-#{version}") then
    $stdout.print("Copying bin to #{bindir} ...\n");
-   `cp ../../gtk2_ardour/ardour.bin #{bindir}/ardour`
+   `cp ../../gtk2_ardour/ardour-#{version} #{bindir}/ardour`
 end
 
 `cp ../../libs/surfaces/*/*.dylib #{libdir}/surfaces`
