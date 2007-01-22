@@ -22,6 +22,7 @@
 #include <cerrno>
 
 #include <pbd/failed_constructor.h>
+#include <pbd/error.h>
 
 #include <midi++/types.h>
 #include <midi++/alsa_sequencer.h>
@@ -39,6 +40,7 @@
 
 using namespace std;
 using namespace MIDI;
+using namespace PBD;
 
 snd_seq_t* ALSA_SequencerMidiPort::seq = 0;
 
@@ -186,12 +188,20 @@ ALSA_SequencerMidiPort::CreatePorts (PortRequest &req)
 int
 ALSA_SequencerMidiPort::init_client (std::string name)
 {
-	int err;
+	static bool called = false;
 
-	if (0 <= (err = snd_seq_open (&seq, "default", SND_SEQ_OPEN_DUPLEX, 0))) {
+	if (called) {
+		return -1;
+	}
+
+	called = true;
+
+	if (snd_seq_open (&seq, "default", SND_SEQ_OPEN_DUPLEX, 0) >= 0) {
 		snd_seq_set_client_name (seq, name.c_str());
 		return 0;
 	} else {
-		return -err;
+		warning << "The ALSA MIDI system is not available. No ports based on it will be created"
+			<< endmsg;
+		return -1;
 	}
 }
