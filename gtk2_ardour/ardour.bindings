@@ -257,6 +257,8 @@
 ; (gtk_accel_path "<Actions>/Main/Snapshot" "")
 ; (gtk_accel_path "<Actions>/Transport/ToggleVideoSync" "")
 (gtk_accel_path "<Actions>/Transport/ToggleRoll" "space")
+(gtk_accel_path "<Actions>/Transport/TransitionToRoll" "<Ctrl>uparrow")
+(gtk_accel_path "<Actions>/Transport/TransitionToReverse" "<Ctrl>downarrow")
 ; (gtk_accel_path "<Actions>/RegionList/SortBySourceFilesystem" "")
 (gtk_accel_path "<Actions>/Common/ToggleColorManager" "<Alt>c")
 ; (gtk_accel_path "<Actions>/Common/About" "")

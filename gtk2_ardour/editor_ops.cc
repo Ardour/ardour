@@ -1912,6 +1912,30 @@ Editor::edit_envelope ()
 /* PLAYBACK */
 
 void
+Editor::transition_to_rolling (bool fwd)
+{
+	if (!session) {
+		return;
+	}
+
+	switch (Config->get_slave_source()) {
+	case None:
+	case JACK:
+		break;
+	default:
+		/* transport controlled by the master */
+		return;
+	}
+
+	if (session->is_auditioning()) {
+		session->cancel_audition ();
+		return;
+	}
+	
+	session->request_transport_speed (fwd ? 1.0f : -1.0f);
+}
+
+void
 Editor::toggle_playback (bool with_abort)
 {
 	if (!session) {

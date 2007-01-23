@@ -47,6 +47,9 @@
 	       <separator/>
                <menuitem action='Record'/>
                <separator/> 
+               <menuitem action='TransitionToRoll'/>
+               <menuitem action='TransitionToReverse'/>
+               <separator/> 
                <menuitem action='jump-forward-to-mark'/>
                <menuitem action='jump-backward-to-mark'/>
                <menuitem action='add-location-from-playhead'/>
