@@ -630,8 +630,16 @@ void
 Selection::toggle (const vector<AutomationSelectable*>& autos)
 {
 	for (vector<AutomationSelectable*>::const_iterator x = autos.begin(); x != autos.end(); ++x) {
-		(*x)->set_selected (!(*x)->get_selected());
+		if ((*x)->get_selected()) {
+			points.remove (**x);
+		} else {
+			points.push_back (**x);
+		}
+
+		delete *x;
 	}
+
+	PointsChanged (); /* EMIT SIGNAL */
 }
 
 void
@@ -717,7 +725,6 @@ Selection::add (vector<AutomationSelectable*>& autos)
 {
 	for (vector<AutomationSelectable*>::iterator i = autos.begin(); i != autos.end(); ++i) {
 		points.push_back (**i);
-		delete *i;
 	}
 
 	PointsChanged ();

@@ -23,6 +23,7 @@
 #include <ardour/route_group.h>
 
 #include "editor.h"
+#include "actions.h"
 #include "audio_time_axis.h"
 #include "audio_region_view.h"
 #include "audio_streamview.h"
@@ -595,5 +596,71 @@ Editor::set_selected_regionview_from_map_event (GdkEventAny* ev, StreamView* sv,
 	commit_reversible_command () ;
 
 	return true;
+}
+
+void
+Editor::track_selection_changed ()
+{
+	switch (selection->tracks.size()){
+	case 0:
+		break;
+	default:
+		set_selected_mixer_strip (*(selection->tracks.front()));
+		break;
+	}
+
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		(*i)->set_selected (false);
+		if (mouse_mode == MouseRange) {
+			(*i)->hide_selection ();
+		}
+	}
+
+	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+		(*i)->set_selected (true);
+		if (mouse_mode == MouseRange) {
+			(*i)->show_selection (selection->time);
+		}
+	}
+}
+
+void
+Editor::time_selection_changed ()
+{
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		(*i)->hide_selection ();
+	}
+
+	if (selection->tracks.empty()) {
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			(*i)->show_selection (selection->time);
+		}
+	} else {
+		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+			(*i)->show_selection (selection->time);
+		}
+	}
+
+	if (selection->time.empty()) {
+		ActionManager::set_sensitive (ActionManager::time_selection_sensitive_actions, false);
+	} else {
+		ActionManager::set_sensitive (ActionManager::time_selection_sensitive_actions, true);
+	}
+}
+
+void
+Editor::region_selection_changed ()
+{
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		(*i)->set_selected_regionviews (selection->regions);
+	}
+}
+
+void
+Editor::point_selection_changed ()
+{
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		(*i)->set_selected_points (selection->points);
+	}
 }
 

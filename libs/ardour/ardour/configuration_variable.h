@@ -61,6 +61,7 @@ class ConfigVariable : public ConfigVariableBase
 	void add_to_node (XMLNode& node) {
 		std::stringstream ss;
 		ss << value;
+		cerr << "Config variable " << _name << " stored as " << ss.str() << endl;
 		XMLNode* child = new XMLNode ("Option");
 		child->add_property ("name", _name);
 		child->add_property ("value", ss.str());

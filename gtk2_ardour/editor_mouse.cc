@@ -306,6 +306,16 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		
 		return;
 	}
+
+	if (event->type == GDK_BUTTON_PRESS || event->type == GDK_BUTTON_RELEASE) {
+
+		if ((event->button.state & Keyboard::RelevantModifierKeyMask) && event->button.button != 1) {
+			
+			/* no selection action on modified button-2 or button-3 events */
+			
+			return;
+		}
+	}
 	    
 	Selection::Operation op = Keyboard::selection_type (event->button.state);
 	bool press = (event->type == GDK_BUTTON_PRESS);
@@ -4681,16 +4691,15 @@ Editor::drag_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event)
 		return;
 	}
 
-// 	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-// 		snap_to (drag_info.current_pointer_frame);
-		
-// 		if (drag_info.first_move) {
-// 			snap_to (drag_info.grab_frame);
-// 		}
-// 	}
-		
+ 	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
+ 		if (drag_info.first_move) {
+ 			snap_to (drag_info.grab_frame);
+		} 
+		snap_to (drag_info.current_pointer_frame);
+ 	}
 
 	/* base start and end on initial click position */
+
 	if (drag_info.current_pointer_frame < drag_info.grab_frame) {
 		start = drag_info.current_pointer_frame;
 		end = drag_info.grab_frame;
@@ -4702,8 +4711,7 @@ Editor::drag_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event)
 	if (drag_info.current_pointer_y < drag_info.grab_y) {
 		y1 = drag_info.current_pointer_y;
 		y2 = drag_info.grab_y;
-	}
-	else {
+	} else {
 		y2 = drag_info.current_pointer_y;
 		y1 = drag_info.grab_y;
 	}
@@ -4750,7 +4758,7 @@ Editor::end_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event)
 		Selection::Operation op = Keyboard::selection_type (event->button.state);
 		bool commit;
 
-		begin_reversible_command (_("select regions"));
+		begin_reversible_command (_("rubberband selection"));
 
 		if (drag_info.grab_frame < drag_info.last_pointer_frame) {
 			commit = select_all_within (drag_info.grab_frame, drag_info.last_pointer_frame, y1, y2, op);

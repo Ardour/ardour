@@ -1309,7 +1309,7 @@ Editor::select_all_in_track (Selection::Operation op)
 		selection->set (touched);
 		break;
 	case Selection::Extend:
-		/* not defined yet */
+		/* meaningless, because we're selecting everything */
 		break;
 	case Selection::Add:
 		selection->add (touched);
@@ -1340,7 +1340,7 @@ Editor::select_all (Selection::Operation op)
 		selection->set (touched);
 		break;
 	case Selection::Extend:
-		/* not defined yet */
+		/* meaningless, because we're selecting everything */
 		break;
 	}
 	commit_reversible_command ();
