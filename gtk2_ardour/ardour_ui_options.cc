@@ -348,6 +348,12 @@ ARDOUR_UI::toggle_LatchedRecordEnable()
 }
 
 void
+ARDOUR_UI::toggle_RegionEquivalentsOverlap()
+{
+	ActionManager::toggle_config_state ("options", "RegionEquivalentsOverlap", &Configuration::set_use_overlap_equivalency, &Configuration::get_use_overlap_equivalency);
+}
+
+void
 ARDOUR_UI::toggle_DoNotRunPluginsWhileRecording()
 {
 	ActionManager::toggle_config_state ("options", "DoNotRunPluginsWhileRecording", &Configuration::set_do_not_record_plugins, &Configuration::get_do_not_record_plugins);
@@ -855,7 +861,10 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 			primary_clock.set (0, true);
 			secondary_clock.set (0, true);
 		}
+	} else if (PARAM_IS ("use-overlap-equivalency")) {
+		ActionManager::map_some_state ("options", "RegionEquivalentsOverlap", &Configuration::get_use_overlap_equivalency);
 	}
+			   
 
 #undef PARAM_IS
 }

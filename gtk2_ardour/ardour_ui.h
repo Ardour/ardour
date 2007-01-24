@@ -652,6 +652,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_GainReduceFastTransport();
 	void toggle_LatchedSolo();
 	void toggle_LatchedRecordEnable ();
+	void toggle_RegionEquivalentsOverlap ();
 
 	void mtc_port_changed ();
 	void map_solo_model ();

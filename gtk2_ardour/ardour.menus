@@ -340,6 +340,7 @@
                <menuitem action='StopPluginsWithTransport'/>
                <menuitem action='DoNotRunPluginsWhileRecording'/>
                <menuitem action='LatchedRecordEnable'/>
+               <menuitem action='RegionEquivalentsOverlap'/>
                <separator/>
                <menuitem action='VerifyRemoveLastCapture'/>
                <menuitem action='StopRecordingOnXrun'/>
