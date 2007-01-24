@@ -642,11 +642,10 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
  
  		if (view_index && pi != npoints && /* not the first, not the last */
 		    (((this_rx == prev_rx) && (this_ry == prev_ry)) || /* same point */
-		     (this_rx == prev_rx) || /* identical x coordinate */
 		     (((this_rx - prev_rx) < (box_size + 2)) &&  /* not identical, but still too close horizontally */
-		      ((abs ((int)(this_ry - prev_ry)) < (int) (box_size + 2)))))) { /* too close vertically */
+		      (abs ((int)(this_ry - prev_ry)) < (int) (box_size + 2))))) { /* too close vertically */
   			continue;
-		}
+		} 
 
 		/* ok, we should display this point */
 

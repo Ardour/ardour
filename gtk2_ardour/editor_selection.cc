@@ -497,8 +497,6 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 		
 		get_relevant_audio_tracks (relevant_tracks);
 
-		cerr << "finding selectables between " << first_frame << " and " << last_frame << endl;
-		
 		for (set<AudioTimeAxisView*>::iterator t = relevant_tracks.begin(); t != relevant_tracks.end(); ++t) {
 			(*t)->get_selectables (first_frame, last_frame, -1.0, -1.0, results);
 		}
