@@ -345,9 +345,14 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 		button_release_can_deselect = false;
 	}
 
+
 	if (op == Selection::Toggle || op == Selection::Set) {
 		
-		get_equivalent_regions (clicked_regionview, all_equivalent_regions);
+		if (selection->selected (clicked_audio_trackview)) {
+			get_equivalent_regions (clicked_regionview, all_equivalent_regions);
+		} else {
+			all_equivalent_regions.push_back (clicked_regionview);
+		}
 		
 		switch (op) {
 		case Selection::Toggle:
