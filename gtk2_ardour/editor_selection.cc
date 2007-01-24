@@ -18,6 +18,8 @@
     $Id: editor.cc 1353 2007-01-18 03:06:15Z paul $
 */
 
+#include <pbd/stacktrace.h>
+
 #include <ardour/diskstream.h>
 #include <ardour/playlist.h>
 #include <ardour/route_group.h>
@@ -313,7 +315,7 @@ Editor::mapped_get_equivalent_regions (RouteTimeAxisView& tv, uint32_t ignored, 
 	if ((pl = ds->playlist()) != 0) {
 		pl->get_equivalent_regions (basis->region(), results);
 	}
-	
+
 	for (vector<boost::shared_ptr<Region> >::iterator ir = results.begin(); ir != results.end(); ++ir) {
 		if ((marv = tv.view()->find_view (*ir)) != 0) {
 			all_equivs->push_back (marv);
@@ -343,17 +345,11 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 
 	if (press) {
 		button_release_can_deselect = false;
-	}
-
+	} 
 
 	if (op == Selection::Toggle || op == Selection::Set) {
-		
-		if (selection->selected (clicked_audio_trackview)) {
-			get_equivalent_regions (clicked_regionview, all_equivalent_regions);
-		} else {
-			all_equivalent_regions.push_back (clicked_regionview);
-		}
-		
+
+
 		switch (op) {
 		case Selection::Toggle:
 			
@@ -386,8 +382,17 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 			} else {
 
 				if (press) {
+
+					if (selection->selected (clicked_audio_trackview)) {
+						get_equivalent_regions (clicked_regionview, all_equivalent_regions);
+					} else {
+						all_equivalent_regions.push_back (clicked_regionview);
+					}
+
 					/* add all the equivalent regions, but only on button press */
 					
+
+
 					if (!all_equivalent_regions.empty()) {
 						commit = true;
 					}
@@ -399,6 +404,13 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 			
 		case Selection::Set:
 			if (!clicked_regionview->get_selected()) {
+
+				if (selection->selected (clicked_audio_trackview)) {
+					get_equivalent_regions (clicked_regionview, all_equivalent_regions);
+				} else {
+					all_equivalent_regions.push_back (clicked_regionview);
+				}
+
 				selection->set (all_equivalent_regions);
 				commit = true;
 			} else {
@@ -484,6 +496,8 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 		set<AudioTimeAxisView*> relevant_tracks;
 		
 		get_relevant_audio_tracks (relevant_tracks);
+
+		cerr << "finding selectables between " << first_frame << " and " << last_frame << endl;
 		
 		for (set<AudioTimeAxisView*>::iterator t = relevant_tracks.begin(); t != relevant_tracks.end(); ++t) {
 			(*t)->get_selectables (first_frame, last_frame, -1.0, -1.0, results);
