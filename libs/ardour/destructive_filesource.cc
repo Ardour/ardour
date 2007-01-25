@@ -410,7 +410,7 @@ DestructiveFileSource::handle_header_position_change ()
 }
 
 void
-DestructiveFileSource::set_timeline_position (nframes_t pos)
+DestructiveFileSource::set_timeline_position (int64_t pos)
 {
 	//destructive track timeline postion does not change except at instantion or when header_position_offset (session start) changes
 }

@@ -17,9 +17,9 @@
 	<array>
 		<dict>
 			<key>UTTypeIdentifier</key>
-			<string>com.yourcompany.yourUTI</string>
+			<string>org.ardour.yourUTI</string>
 			<key>UTTypeReferenceURL</key>
-			<string>http://www.company.com/yourproduct</string>
+			<string>http://www.ardour.org</string>
 			<key>UTTypeDescription</key>
 			<string>Your Document Kind String</string>
 			<key>UTTypeConformsTo</key>
