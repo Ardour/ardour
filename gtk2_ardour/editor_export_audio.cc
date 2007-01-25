@@ -208,7 +208,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 		
 			
 			try {
-				fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (*session, path, AudioFileSource::Flag (0)));
+				fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (*session, path, false, session->frame_rate()));
 			}
 			
 			catch (failed_constructor& err) {
@@ -256,6 +256,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 	
 	for (vector<boost::shared_ptr<AudioFileSource> >::iterator src = sources.begin(); src != sources.end(); ++src) {
 		(*src)->update_header (0, *now, tnow);
+		(*src)->mark_immutable ();
 	}
 
 	return true;
@@ -339,7 +340,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, uint32_t channels, list<Audi
 		path = s;
 		
 		try {
-			fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (*session, path, AudioFileSource::Flag (0)));
+			fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (*session, path, false, session->frame_rate()));
 		}
 		
 		catch (failed_constructor& err) {
@@ -412,8 +413,9 @@ Editor::write_audio_range (AudioPlaylist& playlist, uint32_t channels, list<Audi
 	time (&tnow);
 	now = localtime (&tnow);
 
-	for (uint32_t n=0; n < channels; ++n) {
-		sources[n]->update_header (0, *now, tnow);
+	for (vector<boost::shared_ptr<AudioFileSource> >::iterator s = sources.begin(); s != sources.end(); ++s) {
+		(*s)->update_header (0, *now, tnow);
+		(*s)->mark_immutable ();
 		// do we need to ref it again?
 	}
 	

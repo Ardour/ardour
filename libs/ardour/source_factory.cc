@@ -97,12 +97,12 @@ SourceFactory::create (Session& s, const XMLNode& node)
 
 #ifdef HAVE_COREAUDIO
 boost::shared_ptr<Source>
-SourceFactory::createReadable (Session& s, string idstr, AudioFileSource::Flag flags, bool announce)
+SourceFactory::createReadable (Session& s, string path, int chn, AudioFileSource::Flag flags, bool announce)
 {
 	if (!(flags & Destructive)) {
 
 		try {
-			boost::shared_ptr<Source> ret (new CoreAudioSource (s, idstr, flags));
+			boost::shared_ptr<Source> ret (new CoreAudioSource (s, path, chn, flags));
 			if (setup_peakfile (ret)) {
 				return boost::shared_ptr<Source>();
 			}
@@ -113,7 +113,7 @@ SourceFactory::createReadable (Session& s, string idstr, AudioFileSource::Flag f
 		}
 		
 		catch (failed_constructor& err) {
-			boost::shared_ptr<Source> ret (new SndFileSource (s, idstr, flags));
+			boost::shared_ptr<Source> ret (new SndFileSource (s, path, chn, flags));
 			if (setup_peakfile (ret)) {
 				return boost::shared_ptr<Source>();
 			}
@@ -125,7 +125,7 @@ SourceFactory::createReadable (Session& s, string idstr, AudioFileSource::Flag f
 
 	} else {
 
-		boost::shared_ptr<Source> ret (new SndFileSource (s, idstr, flags));
+		boost::shared_ptr<Source> ret (new SndFileSource (s, path, chn, flags));
 		if (setup_peakfile (ret)) {
 			return boost::shared_ptr<Source>();
 		}
@@ -141,9 +141,9 @@ SourceFactory::createReadable (Session& s, string idstr, AudioFileSource::Flag f
 #else
 
 boost::shared_ptr<Source>
-SourceFactory::createReadable (Session& s, string idstr, AudioFileSource::Flag flags, bool announce)
+SourceFactory::createReadable (Session& s, string path, int chn, AudioFileSource::Flag flags, bool announce)
 {
-	boost::shared_ptr<Source> ret (new SndFileSource (s, idstr, flags));
+	boost::shared_ptr<Source> ret (new SndFileSource (s, path, chn, flags));
 
 	if (setup_peakfile (ret)) {
 		return boost::shared_ptr<Source>();

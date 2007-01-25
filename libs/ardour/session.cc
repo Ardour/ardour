@@ -1738,6 +1738,10 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 				
 				track->set_control_outs (cports);
 			}
+
+			// assert (current_thread != RT_thread)
+			
+			track->audio_diskstream()->non_realtime_input_change();
 			
 			track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
 			track->set_remote_control_id (control_id);

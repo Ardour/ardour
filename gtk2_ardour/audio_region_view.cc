@@ -737,7 +737,7 @@ AudioRegionView::create_waves ()
 	for (uint32_t n = 0; n < nchans; ++n) {
 		tmp_waves.push_back (0);
 	}
-	
+
 	for (uint32_t n = 0; n < nchans; ++n) {
 		
 		if (n >= audio_region()->n_channels()) {
@@ -828,7 +828,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 			break;
 		}
 	}
-	
+
 	if (n == nwaves && waves.empty()) {
 		/* all waves are ready */
 		tmp_waves.resize(nwaves);

@@ -29,7 +29,7 @@ namespace ARDOUR {
 class CoreAudioSource : public AudioFileSource {
   public:
 	CoreAudioSource (ARDOUR::Session&, const XMLNode&);
-	CoreAudioSource (ARDOUR::Session&, const string& path_plus_channel, Flag);
+	CoreAudioSource (ARDOUR::Session&, const string& path, int chn, Flag);
 	~CoreAudioSource ();
 
 	float sample_rate() const;

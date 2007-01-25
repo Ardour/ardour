@@ -130,6 +130,8 @@ Editor::do_embed (vector<ustring> paths, bool split, ImportMode mode, AudioTrack
 	vector<ustring>::iterator a;
 
 	for (a = paths.begin(); a != paths.end(); ) {
+
+		cerr << "Considering embed of " << (*a) << endl;
 	
 		Glib::ustring path = *a;
 		Glib::ustring pair_base;
@@ -264,12 +266,12 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_fi
 	boost::shared_ptr<AudioFileSource> source;
 	SourceList sources;
 	boost::shared_ptr<AudioRegion> region;
-	string idspec;
 	string linked_path;
 	SoundFileInfo finfo;
 	ustring region_name;
 	uint32_t input_chan = 0;
 	uint32_t output_chan = 0;
+	int ret = 0;
 
 	track_canvas.get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
 	ARDOUR_UI::instance()->flush_pending ();
@@ -301,7 +303,7 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_fi
 		
 		if (!AudioFileSource::get_soundfile_info (path, finfo, error_msg)) {
 			error << string_compose(_("Editor: cannot open file \"%1\", (%2)"), selection, error_msg ) << endmsg;
-			return 0;
+			goto out;
 		}
 		
 		if (check_sample_rate  && (finfo.samplerate != (int) session->frame_rate())) {
@@ -311,27 +313,47 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_fi
 				choices.push_back (_("Cancel entire import"));
 				choices.push_back (_("Don't embed it"));
 				choices.push_back (_("Embed all without questions"));
+			
+				Gtkmm2ext::Choice rate_choice (
+					string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"), path),
+					choices, false);
+				
+				int resx = rate_choice.run ();
+				
+				switch (resx) {
+				case 0: /* stop a multi-file import */
+				case 1: /* don't import this one */
+					ret = -1;
+					goto out;
+				case 2: /* do it, and the rest without asking */
+					check_sample_rate = false;
+					break;
+				case 3: /* do it */
+					break;
+				default:
+					ret = -2;
+					goto out;
+				}
 			} else {
 				choices.push_back (_("Cancel"));
-			}
+				choices.push_back (_("Embed it anyway"));
 			
-			choices.push_back (_("Embed it anyway"));
-			
-			Gtkmm2ext::Choice rate_choice (
-				string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"), path),
-				choices, false);
-			
-			switch (rate_choice.run()) {
-			case 0: /* stop a multi-file import */
-			case 1: /* don't import this one */
-				return -1;
-			case 2: /* do it, and the rest without asking */
-				check_sample_rate = false;
-				break;
-			case 3: /* do it */
-				break;
-			default:
-				return -2;
+				Gtkmm2ext::Choice rate_choice (
+					string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"), path),
+					choices, false);
+				
+				int resx = rate_choice.run ();
+				
+				switch (resx) {
+				case 0: /* don't import */
+					ret = -1;
+					goto out;
+				case 1: /* do it */
+					break;
+				default:
+					ret = -2;
+					goto out;
+				}
 			}
 		}
 		
@@ -341,18 +363,16 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_fi
 		/* make the proper number of channels in the region */
 		
 		input_chan += finfo.channels;
-	
+
 		for (int n = 0; n < finfo.channels; ++n)
 		{
-			idspec = path;
-			idspec += string_compose(":%1", n);
-			
 			try {
 				source = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable 
-										       (*session, idspec, 
+										       (*session, path,  n,
 											(mode == ImportAsTapeTrack ? 
 											 AudioFileSource::Destructive : 
 											 AudioFileSource::Flag (0))));
+
 				sources.push_back(source);
 			} 
 			
@@ -377,7 +397,7 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_fi
 	
 	region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (sources, 0, sources[0]->length(), region_name, 0,
 										  Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External)));
-	
+
 	if (Config->get_output_auto_connect() & AutoConnectMaster) {
 		output_chan = (session->master_out() ? session->master_out()->n_inputs() : input_chan);
 	} else {
@@ -388,7 +408,7 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_fi
 	
   out:
 	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
-	return 0;
+	return ret;
 }
 
 int

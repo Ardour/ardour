@@ -63,20 +63,22 @@ uint64_t           AudioFileSource::header_position_offset = 0;
 /* XXX maybe this too */
 char   AudioFileSource::bwf_serial_number[13] = "000000000000";
 
-AudioFileSource::AudioFileSource (Session& s, string idstr, Flag flags)
-	: AudioSource (s, idstr), _flags (flags)
+AudioFileSource::AudioFileSource (Session& s, string path, Flag flags)
+	: AudioSource (s, path), _flags (flags),
+	  channel (0)
 {
 	/* constructor used for existing external to session files. file must exist already */
-	_is_embedded = AudioFileSource::determine_embeddedness (idstr);
+	_is_embedded = AudioFileSource::determine_embeddedness (path);
 
-	if (init (idstr, true)) {
+	if (init (path, true)) {
 		throw failed_constructor ();
 	}
 
 }
 
 AudioFileSource::AudioFileSource (Session& s, std::string path, Flag flags, SampleFormat samp_format, HeaderFormat hdr_format)
-	: AudioSource (s, path), _flags (flags)
+	: AudioSource (s, path), _flags (flags),
+	  channel (0)
 {
 	/* constructor used for new internal-to-session files. file cannot exist */
 	_is_embedded = false;
@@ -88,6 +90,7 @@ AudioFileSource::AudioFileSource (Session& s, std::string path, Flag flags, Samp
 
 AudioFileSource::AudioFileSource (Session& s, const XMLNode& node)
 	: AudioSource (s, node), _flags (Flag (Writable|CanRename))
+          /* channel is set in set_state() */
 {
 	/* constructor used for existing internal-to-session files. file must exist */
 
@@ -195,7 +198,10 @@ XMLNode&
 AudioFileSource::get_state ()
 {
 	XMLNode& root (AudioSource::get_state());
-	root.add_property ("flags", enum_2_string (_flags));
+	char buf[32];
+	root.add_property (X_("flags"), enum_2_string (_flags));
+	snprintf (buf, sizeof (buf), "%d", channel);
+	root.add_property (X_("channel"), buf);
 	return root;
 }
 
@@ -209,13 +215,16 @@ AudioFileSource::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property (X_("flags"))) != 0) {
-
 		_flags = Flag (string_2_enum (prop->value(), _flags));
-
 	} else {
-
 		_flags = Flag (0);
 
+	}
+
+	if ((prop = node.property (X_("channel"))) != 0) {
+		channel = atoi (prop->value());
+	} else {
+		channel = 0;
 	}
 
 	if ((prop = node.property (X_("name"))) != 0) {
@@ -527,7 +536,7 @@ bool
 AudioFileSource::is_empty (Session& s, string path)
 {
 	bool ret = false;
-	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (s, path, NoPeakFile, false));
+	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (s, path, 0, NoPeakFile, false));
 
 	if (afs) {
 		ret = (afs->length() == 0);
@@ -567,4 +576,10 @@ AudioFileSource::safe_file_extension(string file)
 		file.rfind(".mp4") == string::npos &&
 #endif // HAVE_COREAUDIO
 		file.rfind(".voc") == string::npos);
+}
+
+void
+AudioFileSource::mark_immutable ()
+{
+	_flags = Flag (_flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
 }

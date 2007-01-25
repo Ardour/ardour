@@ -101,6 +101,10 @@ class AudioFileSource : public AudioSource {
 	bool destructive() const { return (_flags & Destructive); }
 	virtual bool set_destructive (bool yn) { return false; }
 
+	Flag flags() const { return _flags; }
+
+	void mark_immutable ();
+
 	/* this should really be protected, but C++ is getting stricter
 	   and creating slots from protected member functions is starting
 	   to cause issues.
@@ -125,12 +129,12 @@ class AudioFileSource : public AudioSource {
 
 	int init (string idstr, bool must_exist);
 
-	uint16_t       channel;
 	string        _path;
 	Flag          _flags;
 	string        _take_id;
 	int64_t       timeline_position;
 	bool           file_is_new;
+	uint16_t       channel;
 
 	bool          _is_embedded;
 	static bool determine_embeddedness(string path);
