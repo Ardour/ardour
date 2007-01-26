@@ -1950,17 +1950,22 @@ Editor::create_region_from_selection (vector<boost::shared_ptr<AudioRegion> >& n
 void
 Editor::split_multichannel_region ()
 {
-	vector<AudioRegion*> v;
-
-	AudioRegionView* clicked_arv = dynamic_cast<AudioRegionView*>(clicked_regionview);
-	
-	if (!clicked_arv || clicked_arv->audio_region()->n_channels() < 2) {
+	if (selection->regions.empty()) {
 		return;
 	}
 
-	clicked_arv->audio_region()->separate_by_channel (*session, v);
+	vector<boost::shared_ptr<AudioRegion> > v;
 
-	/* nothing else to do, really */
+	for (list<RegionView*>::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
+
+		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(*x);
+		
+		if (!arv || arv->audio_region()->n_channels() < 2) {
+			continue;
+		}
+
+		(arv)->audio_region()->separate_by_channel (*session, v);
+	}
 }
 
 void

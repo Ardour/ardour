@@ -118,7 +118,7 @@ class AudioRegion : public Region
 	void set_envelope_active (bool yn);
 	void set_default_envelope ();
 
-	int separate_by_channel (ARDOUR::Session&, vector<AudioRegion*>&) const;
+	int separate_by_channel (ARDOUR::Session&, vector<boost::shared_ptr<AudioRegion> >&) const;
 
 	/* filter */
 
