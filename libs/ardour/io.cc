@@ -570,10 +570,17 @@ IO::collect_input (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nf
 
 	/* fill any excess outputs with the last input */
 	
-	while (n < nbufs && last) {
-		// the dest buffer's offset has already been applied
-		memcpy (bufs[n], last, sizeof (Sample) * nframes);
-		++n;
+	if (last) {
+		while (n < nbufs) {
+			// the dest buffer's offset has already been applied
+			memcpy (bufs[n], last, sizeof (Sample) * nframes);
+			++n;
+		}
+	} else {
+		while (n < nbufs) {
+			memset (bufs[n], 0, sizeof (Sample) * nframes);
+			++n;
+		}
 	}
 }
 
