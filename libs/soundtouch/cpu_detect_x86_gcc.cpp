@@ -80,6 +80,7 @@ uint detectCPUextensions(void)
     if (_dwDisabledISA == 0xffffffff) return 0;
 
     asm volatile(
+        "\n\tpushl   %%ebx"              // store ebx
         "\n\txor     %%esi, %%esi"       // clear %%esi = result register
         // check if 'cpuid' instructions is available by toggling eflags bit 21
 
@@ -128,6 +129,7 @@ uint detectCPUextensions(void)
     "\n\tend:"
 
         "\n\tmov     %%esi, %0"
+	"\n\tpopl    %%ebx"
 
       : "=r" (res)
       : /* no inputs */
