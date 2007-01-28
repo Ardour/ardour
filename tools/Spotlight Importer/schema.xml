@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ 
+<schema version="1.0" xmlns="http://www.apple.com/metadata"
+                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                      xsi:schemaLocation="http://www.apple.com/metadata file:///System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Resources/MetadataSchema.xsd">
+    <note>
+        Custom attributes that this metadata importer supports.  Below
+	is an example of a multivalued string attribute.  Other types
+	are CFNumber, CFDate, CFBoolean and CFData.		      
+    </note>
+    <attributes>
+        <attribute name="com_Foo_YourAttrName" multivalued="true" type="CFString"/>
+    </attributes>
+
+    <types>
+        <type name="SUPPORTED_UTI_TYPE">
+            <note>
+		The keys that this metadata importer handles.
+            </note>
+            <allattrs>
+	    com_Foo_YourAttrName
+            </allattrs>
+            <displayattrs>
+	    com_Foo_YourAttrName
+            </displayattrs>
+        </type>
+    </types>
+</schema>
+

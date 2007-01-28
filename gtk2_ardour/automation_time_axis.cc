@@ -573,7 +573,7 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 		case Cut:
 			if ((what_we_got = alist.cut ((*i).start, (*i).end)) != 0) {
 				editor.get_cut_buffer().add (what_we_got);
-				_session.add_command (new MementoCommand<AutomationList>(alist, &before, &alist.get_state()));
+				_session.add_command (new MementoCommand<AutomationList>(alist, new XMLNode (before), &alist.get_state()));
 				ret = true;
 			}
 			break;
@@ -585,7 +585,7 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 			
 		case Clear:
 			if ((what_we_got = alist.cut ((*i).start, (*i).end)) != 0) {
-				_session.add_command (new MementoCommand<AutomationList>(alist, &before, &alist.get_state()));
+				_session.add_command (new MementoCommand<AutomationList>(alist, new XMLNode (before), &alist.get_state()));
 				delete what_we_got;
 				what_we_got = 0;
 				ret = true;
@@ -593,7 +593,9 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 			break;
 		}
 	}
-		
+
+	delete &before;
+
 	if (what_we_got) {
 		for (AutomationList::iterator x = what_we_got->begin(); x != what_we_got->end(); ++x) {
 			double foo = (*x)->value;

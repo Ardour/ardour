@@ -16,7 +16,7 @@ import SCons.Node.FS
 SConsignFile()
 EnsureSConsVersion(0, 96)
 
-ardour_version = '2.0beta10'
+ardour_version = '2.0beta11.1'
 
 subst_dict = { }
 
@@ -659,7 +659,8 @@ opt_flags[:0] = [
     "-O3",
     "-fomit-frame-pointer",
     "-ffast-math",
-    "-fstrength-reduce"
+    "-fstrength-reduce",
+    "-fno-strict-aliasing"
     ]
 
 if env['DEBUG'] == 1:

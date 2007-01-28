@@ -29,11 +29,7 @@ using std::set;
 
 class RegionView;
 
-struct RegionComparator {
-    bool operator() (const RegionView* a, const RegionView* b) const;
-};
-
-class RegionSelection : public set<RegionView*, RegionComparator>, public sigc::trackable
+class RegionSelection : public std::list<RegionView*>, public sigc::trackable
 {
   public:
 	RegionSelection();
@@ -41,9 +37,12 @@ class RegionSelection : public set<RegionView*, RegionComparator>, public sigc::
 
 	RegionSelection& operator= (const RegionSelection&);
 
-	void add (RegionView*, bool dosort = true);
+	bool add (RegionView*);
 	bool remove (RegionView*);
-	bool contains (RegionView*);
+	void sort_by_position_and_track ();
+
+	bool contains (RegionView*) const;
+	bool involves (const TimeAxisView&) const;
 
 	void clear_all();
 	
@@ -51,14 +50,15 @@ class RegionSelection : public set<RegionView*, RegionComparator>, public sigc::
 		return _current_start;
 	}
 
-	/* collides with list<>::end */
+	/* "end" collides with list<>::end */
 
 	nframes_t end_frame () const { 
 		return _current_end;
 	}
 
-	const list<RegionView *> & by_layer() const { return _bylayer; }
-	void  by_position (list<RegionView*>&) const;
+	const std::list<RegionView *>& by_layer() const { return _bylayer; }
+	void  by_position (std::list<RegionView*>&) const;
+	void  by_track (std::list<RegionView*>&) const;
 	
   private:
 	void remove_it (RegionView*);

@@ -317,3 +317,16 @@ Configuration::map_parameters (sigc::slot<void,const char*> theSlot)
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL	
 }
+
+void
+ConfigVariableBase::notify ()
+{
+	// placeholder for any debugging desired when a config variable is modified
+}
+
+void
+ConfigVariableBase::miss ()
+{
+	// placeholder for any debugging desired when a config variable 
+	// is set but to the same value as it already has
+}

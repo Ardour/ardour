@@ -19,6 +19,7 @@
 */
 
 #include <pbd/convert.h>
+#include <pbd/stacktrace.h>
 
 #include <gtkmm2ext/utils.h>
 
@@ -101,6 +102,9 @@ ARDOUR_UI::set_native_file_header_format (HeaderFormat hf)
 	case AIFF:
 		action = X_("FileHeaderFormatAIFF");
 		break;
+	default:
+		fatal << string_compose (_("programming error: %1"), "illegal file header format in ::set_native_file_header_format") << endmsg;
+		/*NOTREACHED*/	
 	}
 
 	Glib::RefPtr<Action> act = ActionManager::get_action ("options", action);
@@ -125,6 +129,9 @@ ARDOUR_UI::set_native_file_data_format (SampleFormat sf)
 	case FormatInt24:
 		action = X_("FileDataFormat24bit");
 		break;
+	default:
+		fatal << string_compose (_("programming error: %1"), "illegal file data format in ::set_native_file_data_format") << endmsg;
+		/*NOTREACHED*/
 	}
 
 	Glib::RefPtr<Action> act = ActionManager::get_action ("options", action);
@@ -338,6 +345,12 @@ void
 ARDOUR_UI::toggle_LatchedRecordEnable()
 {
 	ActionManager::toggle_config_state ("options", "LatchedRecordEnable", &Configuration::set_latched_record_enable, &Configuration::get_latched_record_enable);
+}
+
+void
+ARDOUR_UI::toggle_RegionEquivalentsOverlap()
+{
+	ActionManager::toggle_config_state ("options", "RegionEquivalentsOverlap", &Configuration::set_use_overlap_equivalency, &Configuration::get_use_overlap_equivalency);
 }
 
 void
@@ -737,6 +750,8 @@ ARDOUR_UI::set_meter_falloff (MeterFalloff val)
 void
 ARDOUR_UI::parameter_changed (const char* parameter_name)
 {
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &ARDOUR_UI::parameter_changed), parameter_name));
+
 #define PARAM_IS(x) (!strcmp (parameter_name, (x)))
 	
 	if (PARAM_IS ("slave-source")) {
@@ -846,7 +861,10 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 			primary_clock.set (0, true);
 			secondary_clock.set (0, true);
 		}
+	} else if (PARAM_IS ("use-overlap-equivalency")) {
+		ActionManager::map_some_state ("options", "RegionEquivalentsOverlap", &Configuration::get_use_overlap_equivalency);
 	}
+			   
 
 #undef PARAM_IS
 }

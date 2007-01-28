@@ -31,7 +31,7 @@ class SndFileSource : public AudioFileSource {
   public:
 	/* constructor to be called for existing external-to-session files */
 
-	SndFileSource (Session&, std::string path, Flag flags);
+	SndFileSource (Session&, std::string path, int chn, Flag flags);
 
 	/* constructor to be called for new in-session files */
 
@@ -78,7 +78,7 @@ class SndFileSource : public AudioFileSource {
 	mutable float *interleave_buf;
 	mutable nframes_t interleave_bufsize;
 
-	void init (string str);
+	void init ();
 	int open();
 	void close();
 	int setup_broadcast_info (nframes_t when, struct tm&, time_t);

@@ -1354,8 +1354,10 @@ IO::set_state (const XMLNode& node)
 			set_automation_state (*(*iter)->children().front());
 		}
 
-		if ((*iter)->name() == X_("gaincontrol")) {
-			_gain_control.set_state (**iter);
+		if ((*iter)->name() == X_("controllable")) {
+			if ((prop = (*iter)->property("name")) != 0 && prop->value() == "gaincontrol") {
+				_gain_control.set_state (**iter);
+			}
 		}
 	}
 

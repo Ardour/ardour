@@ -323,6 +323,17 @@ style "ardour_adjusters" = "default_buttons_menus"
 	bg[ACTIVE] = { 0.06, 0.06, 0.06 }
 }
 
+style "editor_hscrollbar" = "ardour_adjusters"
+{
+	#
+	# special case: we want this scrollbar to be as tall as the
+	# zoom focus selector combobox. scrollbars don't expand to
+        # fill the space available to them, so we have to explicitly
+	# make it bigger.
+	# 
+	GtkRange::slider_width = 27
+}
+
 style "ardour_progressbars" = "default_buttons_menus"
 { 
   bg[NORMAL] = { 0, 0, 0 }
@@ -658,27 +669,44 @@ style "edit_group_3"
 	bg[SELECTED] = { 0.93, 0.34, 0.08 }
 }
 
-style "region_list_display" = "small_bold_text"
+style "treeview_parent_node"
 {
-	fg[NORMAL] = { 0.80, 0.80, 0.80 }
-	fg[ACTIVE] = { 0.80, 0.80, 0.80 }
-	fg[SELECTED] = { 0.70, 0.70, 0.70 }
-	bg[NORMAL] = { 0, 0, 0 }
-	bg[ACTIVE] = { 0, 0, 0 }
-	bg[SELECTED] = { 0, 0, 0 }
-	base[NORMAL] = { 0, 0, 0 }
- 	base[ACTIVE] = { 0, 1, 0 }
- 	base[INSENSITIVE] = { 0, 0, 0 }
- 	base[SELECTED] = { 0.80, 0.80, 0.80 }
+	# specifies *just* the color used for whole file rows when not selected
+	fg[NORMAL] = { 0.0, 0.6, 0.85 }
+}
+
+style "treeview_display" = "small_bold_text"
+{
+	# expander arrow border and DnD "icon" text
+	fg[NORMAL] = { 0.8, 0.8, 0.8 } 
+
+	# background with no rows or no selection, plus
+	# expander arrow core and DnD "icon" background
+	base[NORMAL] = { 0.20, 0.20, 0.25 }
+
+	# selected row bg when window does not have focus (including during DnD)
+ 	base[ACTIVE] = { 0.0, 0.60, 0.60 }    
+
+	# selected row bg when window has focus
+ 	base[SELECTED] = { 0, 0.75, 0.75 }
+
+	# row text when in normal state and not a parent
+	text[NORMAL] = { 0.80, 0.80, 0.80 }
+
+	# selected row text with window focus
+	text[SELECTED] = { 0, 1.0, 1.0 }  
+
+	# selected row text without window focus (including during DnD)
+	text[ACTIVE] = { 0, 1.0, 1.0 }  
 }
 
 style "main_canvas_area"
 {
-	bg[NORMAL] = { 0.20, 0.20, 0.25 }
-	bg[ACTIVE] = { 0.20, 0.20, 0.25 }
-	bg[INSENSITIVE] = { 0.20, 0.20, 0.25 }
-	bg[SELECTED] = { 0.20, 0.20, 0.25 }
-	bg[PRELIGHT] = { 0.20, 0.20, 0.25 }
+	bg[NORMAL] = { 0.30, 0.30, 0.34 }
+	bg[ACTIVE] = { 0.30, 0.30, 0.34 }
+	bg[INSENSITIVE] = { 0.30, 0.30, 0.34 }
+	bg[SELECTED] = { 0.30, 0.30, 0.34 }
+	bg[PRELIGHT] = { 0.30, 0.30, 0.34 }
 }
 
 style "track_controls_inactive"
@@ -955,13 +983,13 @@ style "pan_slider"
 
 	fg[NORMAL] = { 0.22, 0.73, 0.22 }
 	fg[ACTIVE] = { 0.22, 0.73, 0.22 }
-	fg[INSENSITIVE] = {0.22, 0.53, 0.22 }
+	fg[INSENSITIVE] = {0.22, 0.53, 0.22 } 
 	fg[SELECTED] = { 0.67, 0.23, 0.22 }
 	fg[PRELIGHT] = { 0.67, 0.23, 0.22 }
 
 	bg[NORMAL] = { 0.05, 0.05, 0.05 }
 	bg[ACTIVE] = { 0, 0, 0 }
-	bg[INSENSITIVE] = {0.12, 0.19, 0.25 }
+	bg[INSENSITIVE] = {0.12, 0.19, 0.25 } 
 	bg[SELECTED] = { 0, 0, 0 }
 	bg[PRELIGHT] = { 0, 0, 0 }
 
@@ -975,15 +1003,10 @@ style "pan_slider"
 
 	base[NORMAL] = { 0.80, 0.80, 0.80 }
 	base[ACTIVE] =  { 0.80, 0.80, 0.80 }
-	base[INSENSITIVE] = {0.32, 0.39, 0.45 } # matches default_base
+	base[INSENSITIVE] = {0.6, 0.6, 0.6 }
 	base[SELECTED] = { 0.80, 0.80, 0.80 }
 	base[PRELIGHT] = { 0.80, 0.80, 0.80 }
 
-}
-
-style "region_list_whole_file"
-{
-	fg[NORMAL] = { 0.4, 0.4, 0.9 }
 }
 
 style "ardour_button" ="default_buttons_menus"
@@ -1162,7 +1185,6 @@ widget "*EditorTrackNameDisplay" style "track_name_display"
 widget "*EditorTrackNameDisplay*" style "track_name_display"
 widget "*EditorActiveTrackNameDisplay" style "active_track_name_display"
 widget "*EditorActiveTrackNameDisplay*" style "active_track_name_display"
-widget "*EditorRegionList" style "region_list_display"
 widget "*CrossfadeEditAuditionButton" style "red_when_active"
 widget "*CrossfadeEditAuditionButton*" style "red_when_active"
 widget "*CrossfadeEditCurveButton" style "red_when_active"
@@ -1197,19 +1219,19 @@ widget "*ParameterValueDisplay" style "medium_bold_entry"
 widget "*PluginUIClickBox" style "medium_bold_entry"
 widget "*PluginUIClickBox*" style "medium_bold_entry"
 widget "*PluginSlider" style "plugin_slider"
-widget "*TrackListDisplay" style "track_list_display"
-widget "*TrackListDisplay.*" style "small_bold_text"
-widget "*EditGroupList" style "track_list_display"
-widget "*RegionListDisplay" style "small_bold_entry"
-widget "*RegionListDisplay.*" style "small_bold_text"
 widget "*RedirectSelector" style "redirect_list_display"
 widget "*RedirectSelector.*" style "redirect_list_display"
+widget "*EditGroupDisplay" style "treeview_display"
+widget "*TrackListDisplay" style "treeview_display"
+widget "*RegionListDisplay" style "treeview_display"
+widget "*NamedSelectionDisplay" style "treeview_display"
+widget "*SnapshotDisplay" style "treeview_display"
 widget "*MixerTrackCommentArea" style "option_entry"
 widget "*MixerPanZone" style "pan_zone"
-widget "*MixerTrackDisplayList" style "track_list_display"
-widget "*MixerSnapshotDisplayList" style "track_list_display"
-widget "*MixerAuxDisplayList" style "track_list_display"
-widget "*MixerGroupList" style "track_list_display"
+widget "*MixerTrackDisplayList" style "treeview_display"
+widget "*MixerSnapshotDisplayList" style "treeview_display"
+widget "*MixerAuxDisplayList" style "treeview_display"
+widget "*MixerGroupList" style "treeview_display"
 widget "*RegionEditorLabel" style "medium_text"
 widget "*RegionEditorSmallLabel" style "small_text"
 widget "*RegionEditorEntry" style "medium_entry"
@@ -1336,7 +1358,8 @@ widget "*PanningLinkDirectionButton" style "very_small_button"
 widget "*PanningLinkDirectionButton.*" style "very_small_button"
 widget "*ChannelCountSelector" style "medium_bold_entry"
 widget "*ChannelCountSelector.GtkArrow" style "default_buttons_menus"
-widget "*RegionListWholeFile" style "region_list_whole_file"
+widget "*RegionListWholeFile" style "treeview_parent_node"
+widget "*EditorHScrollbar" style "editor_hscrollbar"
 
 class "GtkWidget" style "default_base"
 class "GtkScrollbar" style "ardour_adjusters"

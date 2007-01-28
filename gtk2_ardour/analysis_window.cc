@@ -226,7 +226,6 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 		TimeSelection ts = s.time;
 		RegionSelection ars = s.regions;
 	
-	
 		for (TrackSelection::iterator i = s.tracks.begin(); i != s.tracks.end(); ++i) {
 			boost::shared_ptr<AudioPlaylist> pl
 				= boost::dynamic_pointer_cast<AudioPlaylist>((*i)->playlist());
@@ -278,7 +277,7 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 				
 				TimeAxisView *current_axis = (*i);
 				
-				for (std::set<RegionView *>::iterator j = ars.begin(); j != ars.end(); ++j) {
+				for (RegionSelection::iterator j = ars.begin(); j != ars.end(); ++j) {
 					// Check that the region is actually audio (so we can analyze it)
 					AudioRegionView* arv = dynamic_cast<AudioRegionView*>(*j);
 					if (!arv)

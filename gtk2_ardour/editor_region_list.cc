@@ -50,7 +50,6 @@ using namespace Editing;
 void
 Editor::handle_region_removed (boost::weak_ptr<Region> wregion)
 {
-	cerr << "removed region\n";
 	ENSURE_GUI_THREAD (mem_fun (*this, &Editor::redisplay_regions));
 	redisplay_regions ();
 }

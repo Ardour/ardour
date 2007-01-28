@@ -237,6 +237,22 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (transport_actions, X_("ToggleRollForgetCapture"), _("Stop + Forget Capture"), bind (mem_fun(*editor, &PublicEditor::toggle_playback), true));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
+
+	/* these two behave as follows:
+
+	   - if transport speed != 1.0 or != -1.0, change speed to 1.0 or -1.0 (respectively)
+	   - otherwise do nothing
+	*/
+
+	ActionManager::register_action (transport_actions, X_("TransitionToRoll"), _("Transition To Roll"), bind (mem_fun (*editor, &PublicEditor::transition_to_rolling), true));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	ActionManager::register_action (transport_actions, X_("TransitionToReverse"), _("Transition To Reverse"), bind (mem_fun (*editor, &PublicEditor::transition_to_rolling), false));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::session_sensitive_actions.push_back (act);
+
+
 	act = ActionManager::register_action (transport_actions, X_("Loop"), _("Play Loop Range"), mem_fun(*this, &ARDOUR_UI::toggle_session_auto_loop));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
@@ -387,6 +403,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_toggle_action (option_actions, X_("StopTransportAtEndOfSession"), _("Stop transport at session end"), mem_fun (*this, &ARDOUR_UI::toggle_StopTransportAtEndOfSession));
 	ActionManager::register_toggle_action (option_actions, X_("GainReduceFastTransport"), _("-12dB gain reduce ffwd/rewind"), mem_fun (*this, &ARDOUR_UI::toggle_GainReduceFastTransport));
 	ActionManager::register_toggle_action (option_actions, X_("LatchedRecordEnable"), _("Rec-enable stays engaged at stop"), mem_fun (*this, &ARDOUR_UI::toggle_LatchedRecordEnable));
+	ActionManager::register_toggle_action (option_actions, X_("RegionEquivalentsOverlap"), _("Region equivalents overlap"), mem_fun (*this, &ARDOUR_UI::toggle_RegionEquivalentsOverlap));
 
 	act = ActionManager::register_toggle_action (option_actions, X_("DoNotRunPluginsWhileRecording"), _("Do not run plugins while recording"), mem_fun (*this, &ARDOUR_UI::toggle_DoNotRunPluginsWhileRecording));
 	ActionManager::session_sensitive_actions.push_back (act);

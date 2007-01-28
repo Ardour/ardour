@@ -48,30 +48,34 @@ const AudioFileSource::Flag SndFileSource::default_writable_flags = AudioFileSou
 SndFileSource::SndFileSource (Session& s, const XMLNode& node)
 	: AudioFileSource (s, node)
 {
-	init (_name);
+	init ();
+
+	cerr << "SndFileSource @ " << _path << " channel = " << channel << endl;
 
 	if (open()) {
 		throw failed_constructor ();
 	}
 }
 
-SndFileSource::SndFileSource (Session& s, string idstr, Flag flags)
-	                                /* files created this way are never writable or removable */
-	: AudioFileSource (s, idstr, Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
+SndFileSource::SndFileSource (Session& s, string path, int chn, Flag flags)
+          /* files created this way are never writable or removable */
+	: AudioFileSource (s, path, Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
 {
-	init (idstr);
+	channel = chn;
+
+	init ();
 
 	if (open()) {
 		throw failed_constructor ();
 	}
 }
 
-SndFileSource::SndFileSource (Session& s, string idstr, SampleFormat sfmt, HeaderFormat hf, nframes_t rate, Flag flags)
-	: AudioFileSource (s, idstr, flags, sfmt, hf)
+SndFileSource::SndFileSource (Session& s, string path, SampleFormat sfmt, HeaderFormat hf, nframes_t rate, Flag flags)
+	: AudioFileSource (s, path, flags, sfmt, hf)
 {
 	int fmt = 0;
 
-	init (idstr);
+	init ();
 
 	/* this constructor is used to construct new files, not open
 	   existing ones.
@@ -174,9 +178,8 @@ SndFileSource::SndFileSource (Session& s, string idstr, SampleFormat sfmt, Heade
 }
 
 void 
-SndFileSource::init (string idstr)
+SndFileSource::init ()
 {
-	string::size_type pos;
 	string file;
 
 	// lets try to keep the object initalizations here at the top
@@ -186,20 +189,10 @@ SndFileSource::init (string idstr)
 	sf = 0;
 	_broadcast_info = 0;
 
-	string tmp_name;
-
-	if ((pos = idstr.find_last_of (':')) == string::npos) {
-		channel = 0;
-		tmp_name = idstr;
-	} else {
-		channel = atoi (idstr.substr (pos+1).c_str());
-		tmp_name = idstr.substr (0, pos);
-	}
-
 	if (is_embedded()) {
-		_name = tmp_name;
+		_name = _path;
 	} else {
-		_name = Glib::path_get_basename (tmp_name);
+		_name = Glib::path_get_basename (_path);
 	}
 
 	/* although libsndfile says we don't need to set this,
@@ -385,6 +378,7 @@ nframes_t
 SndFileSource::nondestructive_write_unlocked (Sample *data, nframes_t cnt)
 {
 	if (!writable()) {
+		warning << string_compose (_("attempt to write a non-writable audio file source (%1)"), _path) << endmsg;
 		return 0;
 	}
 
@@ -440,6 +434,7 @@ SndFileSource::destructive_write_unlocked (Sample* data, nframes_t cnt)
 	nframes_t old_file_pos;
 
 	if (!writable()) {
+		warning << string_compose (_("attempt to write a non-writable audio file source (%1)"), _path) << endmsg;
 		return 0;
 	}
 
@@ -563,6 +558,7 @@ int
 SndFileSource::flush_header ()
 {
 	if (!writable() || (sf == 0)) {
+		warning << string_compose (_("attempt to flush a non-writable audio file source (%1)"), _path) << endmsg;
 		return -1;
 	}
 	return (sf_command (sf, SFC_UPDATE_HEADER_NOW, 0, 0) != SF_TRUE);
@@ -572,6 +568,7 @@ int
 SndFileSource::setup_broadcast_info (nframes_t when, struct tm& now, time_t tnow)
 {
 	if (!writable()) {
+		warning << string_compose (_("attempt to store broadcast info in a non-writable audio file source (%1)"), _path) << endmsg;
 		return -1;
 	}
 

@@ -30,7 +30,7 @@ Session::memento_command_factory(XMLNode *n)
 {
     PBD::ID id;
     XMLNode *before = 0, *after = 0;
-    XMLNode *child;
+    XMLNode *child = 0;
 
     /* get id */
     id = PBD::ID(n->property("obj_id")->value());

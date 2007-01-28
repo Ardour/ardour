@@ -291,8 +291,6 @@ void
 Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	bool commit = false;
-	bool c1; 
-	bool c2;
 
 	/* in object/audition/timefx mode, any button press sets
 	   the selection if the object can be selected. this is a
@@ -309,6 +307,16 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		
 		return;
 	}
+
+	if (event->type == GDK_BUTTON_PRESS || event->type == GDK_BUTTON_RELEASE) {
+
+		if ((event->button.state & Keyboard::RelevantModifierKeyMask) && event->button.button != 1) {
+			
+			/* no selection action on modified button-2 or button-3 events */
+			
+			return;
+		}
+	}
 	    
 	Selection::Operation op = Keyboard::selection_type (event->button.state);
 	bool press = (event->type == GDK_BUTTON_PRESS);
@@ -317,35 +325,33 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 
 	switch (item_type) {
 	case RegionItem:
-		/* XXX make tying track/region selection optional */
-		c1 = set_selected_track_from_click (op, true);
-		c2 = set_selected_regionview_from_click (press, op, true);
-		commit = (c1 || c2);
+		commit = set_selected_regionview_from_click (press, op, true);
 		break;
 		
 	case RegionViewNameHighlight:
 	case RegionViewName:
-		/* XXX make tying track/region selection optional */
-		c1 = set_selected_track_from_click (op, true);
-		c2 = set_selected_regionview_from_click (press, op, true);
-		commit = (c1 || c2);
+		commit = set_selected_regionview_from_click (press, op, true);
+		break;
+
+	case FadeInHandleItem:
+	case FadeInItem:
+	case FadeOutHandleItem:
+	case FadeOutItem:
+		commit = set_selected_regionview_from_click (press, op, true);
 		break;
 		
 	case GainAutomationControlPointItem:
 	case PanAutomationControlPointItem:
 	case RedirectAutomationControlPointItem:
-		/* XXX make tying track/region selection optional */
-		c1 = set_selected_track_from_click (op, true);
-		c2 = set_selected_control_point_from_click (op, false);
-		commit = (c1 || c2);
+		commit = set_selected_control_point_from_click (op, false);
 		break;
 		
 	case StreamItem:
-		commit = set_selected_track_from_click (op, true);
+		// commit = set_selected_track_from_click (press, op, true);
 		break;
 		    
 	case AutomationTrackItem:
-		commit = set_selected_track_from_click (op, true);
+		commit = set_selected_track_from_click (press, op, true);
 		break;
 		
 	default:
@@ -364,7 +370,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		case StreamItem:
 		case RegionItem:
 		case AutomationTrackItem:
-			commit = set_selected_track_from_click (op, true);
+			commit = set_selected_track_from_click (true, op, true);
 			break;
 
 		default:
@@ -500,10 +506,9 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			break;
 			
 		case MouseObject:
-			if (Keyboard::modifier_state_contains (event->button.state, 
-							       Keyboard::ModifierMask(Keyboard::Control|Keyboard::Alt))
-				&& event->type == GDK_BUTTON_PRESS) {
-
+			if (Keyboard::modifier_state_contains (event->button.state, Keyboard::ModifierMask(Keyboard::Control|Keyboard::Alt)) &&
+			    event->type == GDK_BUTTON_PRESS) {
+				
 				start_rubberband_select (item, event);
 
 			} else if (event->type == GDK_BUTTON_PRESS) {
@@ -1765,7 +1770,7 @@ Editor::fade_in_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	nframes_t pos;
 	nframes_t fade_length;
 
-	if ((long)drag_info.current_pointer_frame > drag_info.pointer_frame_offset) {
+	if ((int32_t)drag_info.current_pointer_frame > drag_info.pointer_frame_offset) {
 		pos = drag_info.current_pointer_frame - drag_info.pointer_frame_offset;
 	}
 	else {
@@ -1775,16 +1780,26 @@ Editor::fade_in_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
 		snap_to (pos);
 	}
-	
+
 	if (pos < (arv->region()->position() + 64)) {
 		fade_length = 64; // this should be a minimum defined somewhere
 	} else if (pos > arv->region()->last_frame()) {
 		fade_length = arv->region()->length();
 	} else {
 		fade_length = pos - arv->region()->position();
-	}
+	}		
+	/* mapover the region selection */
+
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+
+		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*i);
+		
+		if (!tmp) {
+			continue;
+		}
 	
-	arv->reset_fade_in_shape_width (fade_length);
+		tmp->reset_fade_in_shape_width (fade_length);
+	}
 
 	show_verbose_duration_cursor (arv->region()->position(),  arv->region()->position() + fade_length, 10);
 
@@ -1794,43 +1809,46 @@ Editor::fade_in_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 void
 Editor::fade_in_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
 {
-	if (drag_info.first_move) return;
-
 	AudioRegionView* arv = static_cast<AudioRegionView*>(drag_info.data);
 	nframes_t pos;
 	nframes_t fade_length;
 
-	if ((long)drag_info.current_pointer_frame > drag_info.pointer_frame_offset) {
-		pos = drag_info.current_pointer_frame - drag_info.pointer_frame_offset;
-	}
-	else {
-		pos = 0;
-	}
+	if (drag_info.first_move) return;
 
-	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-		snap_to (pos);
+	if ((int32_t)drag_info.current_pointer_frame > drag_info.pointer_frame_offset) {
+		pos = drag_info.current_pointer_frame - drag_info.pointer_frame_offset;
+	} else {
+		pos = 0;
 	}
 
 	if (pos < (arv->region()->position() + 64)) {
 		fade_length = 64; // this should be a minimum defined somewhere
-	}
-	else if (pos > arv->region()->last_frame()) {
+	} else if (pos > arv->region()->last_frame()) {
 		fade_length = arv->region()->length();
-	}
-	else {
+	} else {
 		fade_length = pos - arv->region()->position();
 	}
-
+		
 	begin_reversible_command (_("change fade in length"));
-	AutomationList& alist = arv->audio_region()->fade_in();
-        XMLNode &before = alist.get_state();
 
-	arv->audio_region()->set_fade_in_length (fade_length);
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 
-        XMLNode &after = alist.get_state();
-        session->add_command(new MementoCommand<AutomationList>(alist, &before, &after));
+		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*i);
+		
+		if (!tmp) {
+			continue;
+		}
+	
+		AutomationList& alist = tmp->audio_region()->fade_in();
+		XMLNode &before = alist.get_state();
+
+		tmp->audio_region()->set_fade_in_length (fade_length);
+		
+		XMLNode &after = alist.get_state();
+		session->add_command(new MementoCommand<AutomationList>(alist, &before, &after));
+	}
+
 	commit_reversible_command ();
-	fade_in_drag_motion_callback (item, event);
 }
 
 void
@@ -1869,7 +1887,7 @@ Editor::fade_out_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event
 	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
 		snap_to (pos);
 	}
-
+	
 	if (pos > (arv->region()->last_frame() - 64)) {
 		fade_length = 64; // this should really be a minimum fade defined somewhere
 	}
@@ -1879,8 +1897,19 @@ Editor::fade_out_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event
 	else {
 		fade_length = arv->region()->last_frame() - pos;
 	}
+		
+	/* mapover the region selection */
+
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+
+		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*i);
+		
+		if (!tmp) {
+			continue;
+		}
 	
-	arv->reset_fade_out_shape_width (fade_length);
+		tmp->reset_fade_out_shape_width (fade_length);
+	}
 
 	show_verbose_duration_cursor (arv->region()->last_frame() - fade_length, arv->region()->last_frame(), 10);
 
@@ -1918,16 +1947,25 @@ Editor::fade_out_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* eve
 	}
 
 	begin_reversible_command (_("change fade out length"));
-	AutomationList& alist = arv->audio_region()->fade_out();
-        XMLNode &before = alist.get_state();
 
-	arv->audio_region()->set_fade_out_length (fade_length);
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 
-        XMLNode &after = alist.get_state();
-        session->add_command(new MementoCommand<AutomationList>(alist, &before, &after));
+		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*i);
+		
+		if (!tmp) {
+			continue;
+		}
+	
+		AutomationList& alist = tmp->audio_region()->fade_out();
+		XMLNode &before = alist.get_state();
+		
+		tmp->audio_region()->set_fade_out_length (fade_length);
+
+		XMLNode &after = alist.get_state();
+		session->add_command(new MementoCommand<AutomationList>(alist, &before, &after));
+	}
+
 	commit_reversible_command ();
-
-	fade_out_drag_motion_callback (item, event);
 }
 
 void
@@ -2709,8 +2747,6 @@ Editor::start_region_grab (ArdourCanvas::Item* item, GdkEvent* event)
 void
 Editor::start_region_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 {
-	cerr << "start region copy grab, selected regions = " << selection->regions.size() << endl;
-
 	if (selection->regions.empty() || clicked_regionview == 0) {
 		return;
 	}
@@ -4651,16 +4687,15 @@ Editor::drag_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event)
 		return;
 	}
 
-// 	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-// 		snap_to (drag_info.current_pointer_frame);
-		
-// 		if (drag_info.first_move) {
-// 			snap_to (drag_info.grab_frame);
-// 		}
-// 	}
-		
+ 	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
+ 		if (drag_info.first_move) {
+ 			snap_to (drag_info.grab_frame);
+		} 
+		snap_to (drag_info.current_pointer_frame);
+ 	}
 
 	/* base start and end on initial click position */
+
 	if (drag_info.current_pointer_frame < drag_info.grab_frame) {
 		start = drag_info.current_pointer_frame;
 		end = drag_info.grab_frame;
@@ -4672,8 +4707,7 @@ Editor::drag_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event)
 	if (drag_info.current_pointer_y < drag_info.grab_y) {
 		y1 = drag_info.current_pointer_y;
 		y2 = drag_info.grab_y;
-	}
-	else {
+	} else {
 		y2 = drag_info.current_pointer_y;
 		y1 = drag_info.grab_y;
 	}
@@ -4720,7 +4754,7 @@ Editor::end_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event)
 		Selection::Operation op = Keyboard::selection_type (event->button.state);
 		bool commit;
 
-		begin_reversible_command (_("select regions"));
+		begin_reversible_command (_("rubberband selection"));
 
 		if (drag_info.grab_frame < drag_info.last_pointer_frame) {
 			commit = select_all_within (drag_info.grab_frame, drag_info.last_pointer_frame, y1, y2, op);
@@ -4733,6 +4767,7 @@ Editor::end_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event)
 		}
 		
 	} else {
+		selection->clear_tracks();
 		selection->clear_regions();
 		selection->clear_points ();
 		selection->clear_lines ();

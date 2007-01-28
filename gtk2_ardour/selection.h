@@ -92,49 +92,52 @@ class Selection : public sigc::trackable
 	bool selected (TimeAxisView*);
 	bool selected (RegionView*);
 
-	void set (list<Selectable*>&);
-	void add (list<Selectable*>&);
+	void set (std::list<Selectable*>&);
+	void add (std::list<Selectable*>&);
+	void toggle (std::list<Selectable*>&);
 	
 	void set (TimeAxisView*);
-	void set (const list<TimeAxisView*>&);
+	void set (const std::list<TimeAxisView*>&);
 	void set (RegionView*);
 	void set (std::vector<RegionView*>&);
 	long set (TimeAxisView*, nframes_t, nframes_t);
 	void set (ARDOUR::AutomationList*);
 	void set (boost::shared_ptr<ARDOUR::Playlist>);
-	void set (const list<boost::shared_ptr<ARDOUR::Playlist> >&);
+	void set (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void set (boost::shared_ptr<ARDOUR::Redirect>);
 	void set (AutomationSelectable*);
 
 	void toggle (TimeAxisView*);
-	void toggle (const list<TimeAxisView*>&);
+	void toggle (const std::list<TimeAxisView*>&);
 	void toggle (RegionView*);
 	void toggle (std::vector<RegionView*>&);
 	long toggle (nframes_t, nframes_t);
 	void toggle (ARDOUR::AutomationList*);
 	void toggle (boost::shared_ptr<ARDOUR::Playlist>);
-	void toggle (const list<boost::shared_ptr<ARDOUR::Playlist> >&);
+	void toggle (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void toggle (boost::shared_ptr<ARDOUR::Redirect>);
+	void toggle (const std::vector<AutomationSelectable*>&);
 
 	void add (TimeAxisView*);
-	void add (const list<TimeAxisView*>&);
+	void add (const std::list<TimeAxisView*>&);
 	void add (RegionView*);
 	void add (std::vector<RegionView*>&);
 	long add (nframes_t, nframes_t);
 	void add (ARDOUR::AutomationList*);
 	void add (boost::shared_ptr<ARDOUR::Playlist>);
-	void add (const list<boost::shared_ptr<ARDOUR::Playlist> >&);
+	void add (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void add (boost::shared_ptr<ARDOUR::Redirect>);
 	
 	void remove (TimeAxisView*);
-	void remove (const list<TimeAxisView*>&);
+	void remove (const std::list<TimeAxisView*>&);
 	void remove (RegionView*);
 	void remove (uint32_t selection_id);
 	void remove (nframes_t, nframes_t);
 	void remove (ARDOUR::AutomationList*);
 	void remove (boost::shared_ptr<ARDOUR::Playlist>);
-	void remove (const list<boost::shared_ptr<ARDOUR::Playlist> >&);
+	void remove (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void remove (boost::shared_ptr<ARDOUR::Redirect>);
+	void remove (const list<Selectable*>&);
 
 	void replace (uint32_t time_index, nframes_t start, nframes_t end);
 	

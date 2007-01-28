@@ -757,6 +757,39 @@ Editor::cursor_to_selection_end (Cursor *cursor)
 }
 
 void
+Editor::scroll_playhead (bool forward)
+{
+	nframes_t pos = playhead_cursor->current_frame;
+	nframes_t delta = (nframes_t) floor (current_page_frames() / 0.8);
+
+	if (forward) {
+		if (pos == max_frames) {
+			return;
+		}
+
+		if (pos < max_frames - delta) {
+			pos += delta ;
+		} else {
+			pos = max_frames;
+		} 
+
+	} else {
+
+		if (pos == 0) {
+			return;
+		} 
+
+		if (pos > delta) {
+			pos -= delta;
+		} else {
+			pos = 0;
+		}
+	}
+
+	session->request_locate (pos);
+}
+
+void
 Editor::playhead_backward ()
 {
 	nframes_t pos;
@@ -1258,311 +1291,6 @@ Editor::add_location_from_audio_region ()
 }
 
 void
-Editor::select_all_in_track (Selection::Operation op)
-{
-	list<Selectable *> touched;
-
-	if (!clicked_axisview) {
-		return;
-	}
-	
-	clicked_axisview->get_selectables (0, max_frames, 0, DBL_MAX, touched);
-
-	switch (op) {
-	case Selection::Toggle:
-		selection->add (touched);
-		break;
-	case Selection::Set:
-		selection->set (touched);
-		break;
-	case Selection::Extend:
-		/* not defined yet */
-		break;
-	case Selection::Add:
-		selection->add (touched);
-		break;
-	}
-}
-
-void
-Editor::select_all (Selection::Operation op)
-{
-	list<Selectable *> touched;
-	
-	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
-		if ((*iter)->hidden()) {
-			continue;
-		}
-		(*iter)->get_selectables (0, max_frames, 0, DBL_MAX, touched);
-	}
-	begin_reversible_command (_("select all"));
-	switch (op) {
-	case Selection::Add:
-	case Selection::Toggle:
-		selection->add (touched);
-		break;
-	case Selection::Set:
-		selection->set (touched);
-		break;
-	case Selection::Extend:
-		/* not defined yet */
-		break;
-	}
-	commit_reversible_command ();
-}
-
-void
-Editor::invert_selection_in_track ()
-{
-	list<Selectable *> touched;
-
-	if (!clicked_axisview) {
-		return;
-	}
-	
-	clicked_axisview->get_inverted_selectables (*selection, touched);
-	selection->set (touched);
-}
-
-void
-Editor::invert_selection ()
-{
-	list<Selectable *> touched;
-	
-	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
-		if ((*iter)->hidden()) {
-			continue;
-		}
-		(*iter)->get_inverted_selectables (*selection, touched);
-	}
-
-	selection->set (touched);
-}
-
-bool
-Editor::select_all_within (nframes_t start, nframes_t end, double top, double bot, Selection::Operation op)
-{
-	list<Selectable *> touched;
-	
-	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
-		if ((*iter)->hidden()) {
-			continue;
-		}
-		(*iter)->get_selectables (start, end, top, bot, touched);
-	}
-
-	cerr << "select all within found " << touched.size() << endl;
-
-	begin_reversible_command (_("select all within"));
-	switch (op) {
-	case Selection::Add:
-	case Selection::Toggle:
-		cerr << "toggle\n";
-		selection->add (touched);
-		break;
-	case Selection::Set:
-		cerr << "set\n";
-		selection->set (touched);
-		break;
-	case Selection::Extend:
-		cerr << "extend\n";
-		/* not defined yet */
-		break;
-	}
-
-	cerr << "selection now has " << selection->points.size() << endl;
-
-	commit_reversible_command ();
-	return !touched.empty();
-}
-
-void
-Editor::set_selection_from_audio_region ()
-{
-	if (selection->regions.empty()) {
-		return;
-	}
-
-	RegionView* rv = *(selection->regions.begin());
-	boost::shared_ptr<Region> region = rv->region();
-	
-	begin_reversible_command (_("set selection from region"));
-	selection->set (0, region->position(), region->last_frame());
-	commit_reversible_command ();
-
-	set_mouse_mode (Editing::MouseRange, false);
-}
-
-void
-Editor::set_selection_from_punch()
-{
-	Location* location;
-
-	if ((location = session->locations()->auto_punch_location()) == 0)  {
-		return;
-	}
-
-	set_selection_from_range (*location);
-}
-
-void
-Editor::set_selection_from_loop()
-{
-	Location* location;
-
-	if ((location = session->locations()->auto_loop_location()) == 0)  {
-		return;
-	}
-	set_selection_from_range (*location);
-}
-
-void
-Editor::set_selection_from_range (Location& loc)
-{
-	begin_reversible_command (_("set selection from range"));
-	selection->set (0, loc.start(), loc.end());
-	commit_reversible_command ();
-
-	set_mouse_mode (Editing::MouseRange, false);
-}
-
-void
-Editor::select_all_selectables_using_time_selection ()
-{
-	list<Selectable *> touched;
-
-	if (selection->time.empty()) {
-		return;
-	}
-
-	nframes_t start = selection->time[clicked_selection].start;
-	nframes_t end = selection->time[clicked_selection].end;
-
-	if (end - start < 1)  {
-		return;
-	}
-
-	for (TrackViewList::iterator iter = selection->tracks.begin(); iter != selection->tracks.end(); ++iter) {
-		if ((*iter)->hidden()) {
-			continue;
-		}
-		(*iter)->get_selectables (start, end - 1, 0, DBL_MAX, touched);
-	}
-
-	begin_reversible_command (_("select all from range"));
-	selection->set (touched);
-	commit_reversible_command ();
-}
-
-
-void
-Editor::select_all_selectables_using_punch()
-{
-	Location* location = session->locations()->auto_punch_location();
-	list<Selectable *> touched;
-
-	if (location == 0 || (location->end() - location->start() <= 1))  {
-		return;
-	}
-
-	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
-		if ((*iter)->hidden()) {
-			continue;
-		}
-		(*iter)->get_selectables (location->start(), location->end() - 1, 0, DBL_MAX, touched);
-	}
-	begin_reversible_command (_("select all from punch"));
-	selection->set (touched);
-	commit_reversible_command ();
-
-}
-
-void
-Editor::select_all_selectables_using_loop()
-{
-	Location* location = session->locations()->auto_loop_location();
-	list<Selectable *> touched;
-
-	if (location == 0 || (location->end() - location->start() <= 1))  {
-		return;
-	}
-
-	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
-		if ((*iter)->hidden()) {
-			continue;
-		}
-		(*iter)->get_selectables (location->start(), location->end() - 1, 0, DBL_MAX, touched);
-	}
-	begin_reversible_command (_("select all from loop"));
-	selection->set (touched);
-	commit_reversible_command ();
-
-}
-
-void
-Editor::select_all_selectables_using_cursor (Cursor *cursor, bool after)
-{
-        nframes_t start;
-	nframes_t end;
-	list<Selectable *> touched;
-
-	if (after) {
-		begin_reversible_command (_("select all after cursor"));
-		start = cursor->current_frame ;
-		end = session->current_end_frame();
-	} else {
-		if (cursor->current_frame > 0) {
-			begin_reversible_command (_("select all before cursor"));
-			start = 0;
-			end = cursor->current_frame - 1;
-		} else {
-			return;
-		}
-	}
-
-	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
-		if ((*iter)->hidden()) {
-			continue;
-		}
-		(*iter)->get_selectables (start, end, 0, DBL_MAX, touched);
-	}
-	selection->set (touched);
-	commit_reversible_command ();
-}
-
-void
-Editor::select_all_selectables_between_cursors (Cursor *cursor, Cursor *other_cursor)
-{
-        nframes_t start;
-	nframes_t end;
-	list<Selectable *> touched;
-	bool  other_cursor_is_first = cursor->current_frame > other_cursor->current_frame;
-
-	if (cursor->current_frame == other_cursor->current_frame) {
-		return;
-	}
-
-	begin_reversible_command (_("select all between cursors"));
-	if (other_cursor_is_first) {
-		start = other_cursor->current_frame;
-		end = cursor->current_frame - 1;
-		
-	} else {
-		start = cursor->current_frame;
-		end = other_cursor->current_frame - 1;
-	}
-	
-	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
-		if ((*iter)->hidden()) {
-			continue;
-		}
-		(*iter)->get_selectables (start, end, 0, DBL_MAX, touched);
-	}
-	selection->set (touched);
-	commit_reversible_command ();
-}
-
-void
 Editor::amplitude_zoom_step (bool in)
 {
 	gdouble zoom = 1.0;
@@ -1854,6 +1582,30 @@ Editor::edit_envelope ()
 }
 
 /* PLAYBACK */
+
+void
+Editor::transition_to_rolling (bool fwd)
+{
+	if (!session) {
+		return;
+	}
+
+	switch (Config->get_slave_source()) {
+	case None:
+	case JACK:
+		break;
+	default:
+		/* transport controlled by the master */
+		return;
+	}
+
+	if (session->is_auditioning()) {
+		session->cancel_audition ();
+		return;
+	}
+	
+	session->request_transport_speed (fwd ? 1.0f : -1.0f);
+}
 
 void
 Editor::toggle_playback (bool with_abort)
@@ -2166,6 +1918,8 @@ Editor::create_region_from_selection (vector<boost::shared_ptr<AudioRegion> >& n
 	nframes_t start = selection->time[clicked_selection].start;
 	nframes_t end = selection->time[clicked_selection].end;
 	
+	sort_track_selection ();
+
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 
 		boost::shared_ptr<AudioRegion> current;
@@ -2196,17 +1950,22 @@ Editor::create_region_from_selection (vector<boost::shared_ptr<AudioRegion> >& n
 void
 Editor::split_multichannel_region ()
 {
-	vector<AudioRegion*> v;
-
-	AudioRegionView* clicked_arv = dynamic_cast<AudioRegionView*>(clicked_regionview);
-	
-	if (!clicked_arv || clicked_arv->audio_region()->n_channels() < 2) {
+	if (selection->regions.empty()) {
 		return;
 	}
 
-	clicked_arv->audio_region()->separate_by_channel (*session, v);
+	vector<boost::shared_ptr<AudioRegion> > v;
 
-	/* nothing else to do, really */
+	for (list<RegionView*>::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
+
+		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(*x);
+		
+		if (!arv || arv->audio_region()->n_channels() < 2) {
+			continue;
+		}
+
+		(arv)->audio_region()->separate_by_channel (*session, v);
+	}
 }
 
 void
@@ -2229,6 +1988,8 @@ Editor::separate_region_from_selection ()
 
 	boost::shared_ptr<Playlist> playlist;
 		
+	sort_track_selection ();
+
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 
 		AudioTimeAxisView* atv;
@@ -2337,6 +2098,8 @@ Editor::crop_region_to_selection ()
 
 	} else {
 		
+		sort_track_selection ();
+
 		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 
 			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*i);
@@ -2949,21 +2712,37 @@ struct lt_playlist {
     }
 };
 	
+struct PlaylistMapping { 
+    TimeAxisView* tv;
+    boost::shared_ptr<Playlist> pl;
+
+    PlaylistMapping (TimeAxisView* tvp) : tv (tvp) {}
+};
+
 void
 Editor::cut_copy_regions (CutCopyOp op)
-{
-        typedef std::map<boost::shared_ptr<AudioPlaylist>,boost::shared_ptr<AudioPlaylist> > PlaylistMapping;
-	PlaylistMapping pmap;
-	nframes_t first_position = max_frames;
+{	
+	/* we can't use a std::map here because the ordering is important, and we can't trivially sort
+	   a map when we want ordered access to both elements. i think.
+	*/
 
+	vector<PlaylistMapping> pmap;
+
+	nframes_t first_position = max_frames;
+	
 	set<PlaylistState, lt_playlist> freezelist;
 	pair<set<PlaylistState, lt_playlist>::iterator,bool> insert_result;
+	
+	/* get ordering correct before we cut/copy */
+	
+	selection->regions.sort_by_position_and_track ();
 
 	for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
+
 		first_position = min ((*x)->region()->position(), first_position);
 
 		if (op == Cut || op == Clear) {
-			boost::shared_ptr<AudioPlaylist> pl = boost::dynamic_pointer_cast<AudioPlaylist>((*x)->region()->playlist());
+			boost::shared_ptr<Playlist> pl = (*x)->region()->playlist();
 
 			if (pl) {
 
@@ -2972,67 +2751,94 @@ Editor::cut_copy_regions (CutCopyOp op)
 				before.before = &pl->get_state();
 				
 				insert_result = freezelist.insert (before);
-
+				
 				if (insert_result.second) {
 					pl->freeze ();
 				}
 			}
 		}
+
+		TimeAxisView* tv = &(*x)->get_trackview();
+		vector<PlaylistMapping>::iterator z;
+
+		for (z = pmap.begin(); z != pmap.end(); ++z) {
+			if ((*z).tv == tv) {
+				break;
+			}
+		}
+		
+		if (z == pmap.end()) {
+			pmap.push_back (PlaylistMapping (tv));
+		}
 	}
 
 	for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ) {
 
-		boost::shared_ptr<AudioPlaylist> pl = boost::dynamic_pointer_cast<AudioPlaylist>((*x)->region()->playlist());
-		boost::shared_ptr<AudioPlaylist> npl;
+		boost::shared_ptr<Playlist> pl = (*x)->region()->playlist();
+		
+		if (!pl) {
+			/* impossible, but this handles it for the future */
+			continue;
+		}
+
+		TimeAxisView& tv = (*x)->get_trackview();
+		boost::shared_ptr<Playlist> npl;
 		RegionSelection::iterator tmp;
 		
 		tmp = x;
 		++tmp;
 
-		if (pl) {
-
-			PlaylistMapping::iterator pi = pmap.find (pl);
+		vector<PlaylistMapping>::iterator z;
+		
+		for (z = pmap.begin(); z != pmap.end(); ++z) {
+			if ((*z).tv == &tv) {
+				break;
+			}
+		}
+		
+		assert (z != pmap.end());
+		
+		if (!(*z).pl) {
+			npl = PlaylistFactory::create (pl->data_type(), *session, "cutlist", true);
+			npl->freeze();
+			(*z).pl = npl;
+		} else {
+			npl = (*z).pl;
+		}
+		
+		boost::shared_ptr<Region> r = (*x)->region();
+		
+		switch (op) {
+		case Cut:
+			if (!r) break;
 			
-			if (pi == pmap.end()) {
-				// FIXME
-				npl = boost::dynamic_pointer_cast<AudioPlaylist> (PlaylistFactory::create (DataType::AUDIO, *session, "cutlist", true));
-				npl->freeze();
-				pmap[pl] = npl;
-			} else {
-				npl = pi->second;
-			}
-
-			// FIXME
-			boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>((*x)->region());
-			switch (op) {
-			case Cut:
-				if (!ar) break;
-
-				npl->add_region (RegionFactory::create (ar), (*x)->region()->position() - first_position);
-				pl->remove_region (((*x)->region()));
-				break;
-
-			case Copy:
-				if (!ar) break;
-
-				npl->add_region (RegionFactory::create (ar), (*x)->region()->position() - first_position);
-				break;
-
-			case Clear:
-				pl->remove_region (((*x)->region()));
-				break;
-			}
+			npl->add_region (RegionFactory::create (r), r->position() - first_position);
+			pl->remove_region (r);
+			break;
+			
+		case Copy:
+			if (!r) break;
+			
+			npl->add_region (RegionFactory::create (r), r->position() - first_position);
+			break;
+			
+		case Clear:
+			pl->remove_region (r);
+			break;
 		}
 
 		x = tmp;
 	}
-
+	
 	list<boost::shared_ptr<Playlist> > foo;
-
-	for (PlaylistMapping::iterator i = pmap.begin(); i != pmap.end(); ++i) {
-		foo.push_back (i->second);
+	
+	/* the pmap is in the same order as the tracks in which selected regions occured */
+	
+	for (vector<PlaylistMapping>::iterator i = pmap.begin(); i != pmap.end(); ++i) {
+		(*i).pl->thaw();
+		foo.push_back ((*i).pl);
 	}
-
+	
 	if (!foo.empty()) {
 		cut_buffer->set (foo);
 	}
@@ -3096,15 +2902,19 @@ Editor::paste_internal (nframes_t position, float times)
 	TrackSelection::iterator i;
 	size_t nth;
 
+	/* get everything in the correct order */
+
+	sort_track_selection ();
+
 	for (nth = 0, i = selection->tracks.begin(); i != selection->tracks.end(); ++i, ++nth) {
-		
+
 		/* undo/redo is handled by individual tracks */
 
 		if ((*i)->paste (position, times, *cut_buffer, nth)) {
 			commit = true;
 		}
 	}
-
+	
 	if (commit) {
 		commit_reversible_command ();
 	}
@@ -3130,6 +2940,8 @@ Editor::paste_named_selection (float times)
 	chunk = ns->playlists.begin();
 		
 	begin_reversible_command (_("paste chunk"));
+	
+	sort_track_selection ();
 
 	for (t = selection->tracks.begin(); t != selection->tracks.end(); ++t) {
 		
@@ -3242,8 +3054,6 @@ Editor::reset_point_selection ()
 {
 	/* reset all selected points to the relevant default value */
 
-	cerr << "point selection has " << selection->points.size() << " entries\n";
-	
 	for (PointSelection::iterator i = selection->points.begin(); i != selection->points.end(); ++i) {
 		
 		AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*>(&(*i).track);
@@ -3610,3 +3420,99 @@ Editor::toggle_region_opaque ()
 		}
 	}
 }
+
+void
+Editor::set_fade_in_shape (AudioRegion::FadeShape shape)
+{
+	begin_reversible_command (_("set fade in shape"));
+
+	for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
+		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*x);
+
+		if (!tmp) {
+			return;
+		}
+
+		AutomationList& alist = tmp->audio_region()->fade_in();
+		XMLNode &before = alist.get_state();
+
+		tmp->audio_region()->set_fade_in_shape (shape);
+		
+		XMLNode &after = alist.get_state();
+		session->add_command(new MementoCommand<AutomationList>(alist, &before, &after));
+	}
+
+	commit_reversible_command ();
+}
+
+void
+Editor::set_fade_out_shape (AudioRegion::FadeShape shape)
+{
+	begin_reversible_command (_("set fade out shape"));
+
+	for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
+		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*x);
+
+		if (!tmp) {
+			return;
+		}
+
+		AutomationList& alist = tmp->audio_region()->fade_out();
+		XMLNode &before = alist.get_state();
+
+		tmp->audio_region()->set_fade_out_shape (shape);
+		
+		XMLNode &after = alist.get_state();
+		session->add_command(new MementoCommand<AutomationList>(alist, &before, &after));
+	}
+
+	commit_reversible_command ();
+}
+
+void
+Editor::set_fade_in_active (bool yn)
+{
+	begin_reversible_command (_("set fade in active"));
+
+	for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
+		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*x);
+
+		if (!tmp) {
+			return;
+		}
+
+
+		boost::shared_ptr<AudioRegion> ar (tmp->audio_region());
+
+		XMLNode &before = ar->get_state();
+
+		ar->set_fade_in_active (yn);
+		
+		XMLNode &after = ar->get_state();
+		session->add_command(new MementoCommand<AudioRegion>(*ar, &before, &after));
+	}
+}
+
+void
+Editor::set_fade_out_active (bool yn)
+{
+	begin_reversible_command (_("set fade out active"));
+
+	for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
+		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*x);
+
+		if (!tmp) {
+			return;
+		}
+
+		boost::shared_ptr<AudioRegion> ar (tmp->audio_region());
+
+		XMLNode &before = ar->get_state();
+
+		ar->set_fade_out_active (yn);
+		
+		XMLNode &after = ar->get_state();
+		session->add_command(new MementoCommand<AudioRegion>(*ar, &before, &after));
+	}
+}
+

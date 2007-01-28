@@ -209,9 +209,9 @@ Selection::toggle (RegionView* r)
 	RegionSelection::iterator i;
 
 	if ((i = find (regions.begin(), regions.end(), r)) == regions.end()) {
-		regions.add (r);
+		add (r);
 	} else {
-		regions.erase (i);
+		remove (*i);
 	}
 
 	RegionsChanged ();
@@ -224,9 +224,9 @@ Selection::toggle (vector<RegionView*>& r)
 
 	for (vector<RegionView*>::iterator x = r.begin(); x != r.end(); ++x) {
 		if ((i = find (regions.begin(), regions.end(), (*x))) == regions.end()) {
-			regions.add ((*x));
+			add ((*x));
 		} else {
-			regions.erase (i);
+			remove (*x);
 		}
 	}
 
@@ -322,6 +322,7 @@ Selection::add (RegionView* r)
 {
 	if (find (regions.begin(), regions.end(), r) == regions.end()) {
 		regions.add (r);
+		add (&r->get_trackview());
 		RegionsChanged ();
 	}
 }
@@ -333,8 +334,10 @@ Selection::add (vector<RegionView*>& v)
 
 	for (vector<RegionView*>::iterator i = v.begin(); i != v.end(); ++i) {
 		if (find (regions.begin(), regions.end(), (*i)) == regions.end()) {
-			regions.add ((*i));
-			changed = true;
+			changed = regions.add ((*i));
+			if (changed) {
+				add (&(*i)->get_trackview());
+			}
 		}
 	}
 
@@ -461,8 +464,13 @@ Selection::remove (const list<boost::shared_ptr<Playlist> >& pllist)
 void
 Selection::remove (RegionView* r)
 {
-	regions.remove (r);
-	RegionsChanged ();
+	if (regions.remove (r)) {
+		RegionsChanged ();
+	}
+
+	if (!regions.involves (r->get_trackview())) {
+		remove (&r->get_trackview());
+	}
 }
 
 
@@ -537,12 +545,14 @@ void
 Selection::set (RegionView* r)
 {
 	clear_regions ();
+	clear_tracks ();
 	add (r);
 }
 
 void
 Selection::set (vector<RegionView*>& v)
 {
+	clear_tracks ();
 	clear_regions ();
 	// make sure to deselect any automation selections
 	clear_points();
@@ -617,6 +627,52 @@ Selection::empty ()
 }
 
 void
+Selection::toggle (const vector<AutomationSelectable*>& autos)
+{
+	for (vector<AutomationSelectable*>::const_iterator x = autos.begin(); x != autos.end(); ++x) {
+		if ((*x)->get_selected()) {
+			points.remove (**x);
+		} else {
+			points.push_back (**x);
+		}
+
+		delete *x;
+	}
+
+	PointsChanged (); /* EMIT SIGNAL */
+}
+
+void
+Selection::toggle (list<Selectable*>& selectables)
+{
+	RegionView* rv;
+	AutomationSelectable* as;
+	vector<RegionView*> rvs;
+	vector<AutomationSelectable*> autos;
+
+	for (std::list<Selectable*>::iterator i = selectables.begin(); i != selectables.end(); ++i) {
+		if ((rv = dynamic_cast<RegionView*> (*i)) != 0) {
+			rvs.push_back (rv);
+		} else if ((as = dynamic_cast<AutomationSelectable*> (*i)) != 0) {
+			autos.push_back (as);
+		} else {
+			fatal << _("programming error: ")
+			      << X_("unknown selectable type passed to Selection::toggle()")
+			      << endmsg;
+			/*NOTREACHED*/
+		}
+	}
+
+	if (!rvs.empty()) {
+		toggle (rvs);
+	} 
+
+	if (!autos.empty()) {
+		toggle (autos);
+	} 
+}
+
+void
 Selection::set (list<Selectable*>& selectables)
 {
 	clear_regions();
@@ -640,7 +696,7 @@ Selection::add (list<Selectable*>& selectables)
 			autos.push_back (as);
 		} else {
 			fatal << _("programming error: ")
-			      << X_("unknown selectable type passed to Selection::set()")
+			      << X_("unknown selectable type passed to Selection::add()")
 			      << endmsg;
 			/*NOTREACHED*/
 		}
@@ -669,7 +725,6 @@ Selection::add (vector<AutomationSelectable*>& autos)
 {
 	for (vector<AutomationSelectable*>::iterator i = autos.begin(); i != autos.end(); ++i) {
 		points.push_back (**i);
-		delete *i;
 	}
 
 	PointsChanged ();

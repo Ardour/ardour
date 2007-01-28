@@ -247,55 +247,6 @@ AudioRegionView::fade_out_changed ()
 {
 	reset_fade_out_shape ();
 }
-
-void
-AudioRegionView::set_fade_in_shape (AudioRegion::FadeShape shape)
-{
-	AutomationList& alist = audio_region()->fade_in();
-	XMLNode& before (alist.get_state());
-	trackview.session().begin_reversible_command ("fade in shape");
-	audio_region()->set_fade_in_shape (shape);
-	XMLNode& after (alist.get_state());
-	trackview.session().add_command (new MementoCommand<AutomationList>(alist, &before, &after));
-	trackview.session().commit_reversible_command ();
-}
-
-void
-AudioRegionView::set_fade_out_shape (AudioRegion::FadeShape shape)
-{
-	AutomationList& alist = audio_region()->fade_out();
-	XMLNode& before (alist.get_state());
-	trackview.session().begin_reversible_command ("fade out shape");
-	audio_region()->set_fade_out_shape (shape);
-	XMLNode& after (alist.get_state());
-	trackview.session().add_command (new MementoCommand<AutomationList>(alist, &before, &after));
-	trackview.session().commit_reversible_command ();
-}
-
-void
-AudioRegionView::set_fade_in_active (bool yn)
-{
-	AutomationList& alist = audio_region()->fade_in();
-	XMLNode& before (alist.get_state());
-	trackview.session().begin_reversible_command ("fade in shape");
-	audio_region()->set_fade_in_active (yn);
-	XMLNode& after (alist.get_state());
-	trackview.session().add_command (new MementoCommand<AutomationList>(alist, &before, &after));
-	trackview.session().commit_reversible_command ();
-}
-
-void
-AudioRegionView::set_fade_out_active (bool yn)
-{
-	AutomationList& alist = audio_region()->fade_out();
-	XMLNode& before (alist.get_state());
-	trackview.session().begin_reversible_command ("fade out shape");
-	audio_region()->set_fade_out_active (yn);
-	XMLNode& after (alist.get_state());
-	trackview.session().add_command (new MementoCommand<AutomationList>(alist, &before, &after));
-	trackview.session().commit_reversible_command ();
-}
-
 void
 AudioRegionView::fade_in_active_changed ()
 {
@@ -808,7 +759,7 @@ AudioRegionView::create_waves ()
 	for (uint32_t n = 0; n < nchans; ++n) {
 		tmp_waves.push_back (0);
 	}
-	
+
 	for (uint32_t n = 0; n < nchans; ++n) {
 		
 		if (n >= audio_region()->n_channels()) {
@@ -899,7 +850,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 			break;
 		}
 	}
-	
+
 	if (n == nwaves && waves.empty()) {
 		/* all waves are ready */
 		tmp_waves.resize(nwaves);

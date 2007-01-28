@@ -31,7 +31,7 @@
     <Option name="quieten-at-speed" value="1.000000"/>
     <Option name="use-vst" value="yes"/>
     <Option name="use-tranzport" value="yes"/>
-    <Option name="destructive-xfade-msecs" value="500"/>
+    <Option name="destructive-xfade-msecs" value="20"/>
   </Config>
   <extra>
     <Keyboard edit-button="3" edit-modifier="4" delete-button="3" delete-modifier="1" snap-modifier="32"/>

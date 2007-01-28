@@ -3,7 +3,7 @@
 # Ruby script for pulling together a MacOSX app bundle.
 
 # it will be either powerpc or i386
-versionline = `grep -m 1 '^version =' ../../SConstruct`
+versionline = `grep -m 1 '^ardour_version =' ../../SConstruct`
 version = versionline.split(" = ")[1].chomp().slice(1..-2)
 $stdout.printf("Version is %s\n", version)
 
@@ -57,7 +57,7 @@ end
 odir = Dir.getwd
 Dir.chdir("../..")
 
-result = `otool -L gtk2_ardour/ardour.bin`
+result = `otool -L gtk2_ardour/ardour-#{version}`
 results = result.split("\n")
 results.delete_at(0)
 
@@ -101,12 +101,12 @@ end
 
 Dir.chdir(odir)
 
-# copy ardour.bin to bindir/ardour
+# copy ardour binary to bindir/ardour
 
 
-if File.exist?("../../gtk2_ardour/ardour.bin") then
+if File.exist?("../../gtk2_ardour/ardour-#{version}") then
    $stdout.print("Copying bin to #{bindir} ...\n");
-   `cp ../../gtk2_ardour/ardour.bin #{bindir}/ardour`
+   `cp ../../gtk2_ardour/ardour-#{version} #{bindir}/ardour`
 end
 
 `cp ../../libs/surfaces/*/*.dylib #{libdir}/surfaces`

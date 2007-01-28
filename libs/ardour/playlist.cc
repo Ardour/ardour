@@ -606,11 +606,15 @@ Playlist::remove_region_internal (boost::shared_ptr<Region>region)
 void
 Playlist::get_equivalent_regions (boost::shared_ptr<Region> other, vector<boost::shared_ptr<Region> >& results)
 {
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-		if (Config->get_use_overlap_equivalency()) {
+	if (Config->get_use_overlap_equivalency()) {
+		for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 			if ((*i)->overlap_equivalent (other)) {
 				results.push_back ((*i));
-			} else if ((*i)->equivalent (other)) {
+			}
+		}
+	} else {
+		for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+			if ((*i)->equivalent (other)) {
 				results.push_back ((*i));
 			}
 		}

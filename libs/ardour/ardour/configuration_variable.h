@@ -27,9 +27,13 @@ class ConfigVariableBase {
 	virtual void add_to_node (XMLNode& node) = 0;
 	virtual bool set_from_node (const XMLNode& node, Owner owner) = 0;
 
+
   protected:
 	std::string _name;
 	Owner _owner;
+
+	void notify ();
+	void miss ();
 };
 
 template<class T>
@@ -41,10 +45,12 @@ class ConfigVariable : public ConfigVariableBase
 
 	virtual bool set (T val, Owner owner) {
 		if (val == value) {
+			miss ();
 			return false;
 		}
 		value = val;
 		_owner = (ConfigVariableBase::Owner)(_owner |owner);
+		notify ();
 		return true;
 	}
 
@@ -55,6 +61,7 @@ class ConfigVariable : public ConfigVariableBase
 	void add_to_node (XMLNode& node) {
 		std::stringstream ss;
 		ss << value;
+		cerr << "Config variable " << _name << " stored as " << ss.str() << endl;
 		XMLNode* child = new XMLNode ("Option");
 		child->add_property ("name", _name);
 		child->add_property ("value", ss.str());

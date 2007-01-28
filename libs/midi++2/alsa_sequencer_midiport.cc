@@ -21,6 +21,9 @@
 #include <fcntl.h>
 #include <cerrno>
 
+#include <pbd/failed_constructor.h>
+#include <pbd/error.h>
+
 #include <midi++/types.h>
 #include <midi++/alsa_sequencer.h>
 #include <midi++/port_request.h>
@@ -35,42 +38,54 @@
 #define TR_VAL(v)
 #endif
 
-
-
-
 using namespace std;
 using namespace MIDI;
+using namespace PBD;
+
+snd_seq_t* ALSA_SequencerMidiPort::seq = 0;
 
 ALSA_SequencerMidiPort::ALSA_SequencerMidiPort (PortRequest &req)
 	: Port (req)
-	, seq (0)
 	, decoder (0) 
 	, encoder (0) 
+	, port_id (-1)
 {
 	TR_FN();
 	int err;
-	if (0 <= (err = CreatePorts (req)) &&
-	    0 <= (err = snd_midi_event_new (1024, &decoder)) &&	// Length taken from ARDOUR::Session::midi_read ()
-	    0 <= (err = snd_midi_event_new (64, &encoder))) {	// Length taken from ARDOUR::Session::mmc_buffer
-		snd_midi_event_init (decoder);
-		snd_midi_event_init (encoder);
-		_ok = true;
-		req.status = PortRequest::OK;
-	} else
-		req.status = PortRequest::Unknown;
+
+	if (!seq && init_client (req.devname) < 0) {
+		_ok = false; 
+
+	} else {
+		
+		if (0 <= (err = CreatePorts (req)) &&
+		    0 <= (err = snd_midi_event_new (1024, &decoder)) &&	// Length taken from ARDOUR::Session::midi_read ()
+		    0 <= (err = snd_midi_event_new (64, &encoder))) {	// Length taken from ARDOUR::Session::mmc_buffer
+			snd_midi_event_init (decoder);
+			snd_midi_event_init (encoder);
+			_ok = true;
+			req.status = PortRequest::OK;
+		} else {
+			req.status = PortRequest::Unknown;
+		}
+	}
 }
 
 ALSA_SequencerMidiPort::~ALSA_SequencerMidiPort ()
 {
-	if (decoder)
+	if (decoder) {
 		snd_midi_event_free (decoder);
-	if (encoder)
+	}
+	if (encoder) {
 		snd_midi_event_free (encoder);
-	if (seq)
-		snd_seq_close (seq);
+	}
+	if (port_id >= 0) {
+		snd_seq_delete_port (seq, port_id);
+	}
 }
 
-int ALSA_SequencerMidiPort::selectable () const
+int 
+ALSA_SequencerMidiPort::selectable () const
 {
 	struct pollfd pfd[1];
 	if (0 <= snd_seq_poll_descriptors (seq, pfd, 1, POLLIN | POLLOUT)) {
@@ -118,7 +133,12 @@ int ALSA_SequencerMidiPort::write (byte *msg, size_t msglen, timestamp_t timesta
 	return totwritten;
 }
 
+<<<<<<< .working
 int ALSA_SequencerMidiPort::read (byte *buf, size_t max, timestamp_t timestamp)
+=======
+int 
+ALSA_SequencerMidiPort::read (byte *buf, size_t max)
+>>>>>>> .merge-right.r1393
 {
 	TR_FN();
 	int err;
@@ -142,27 +162,49 @@ int ALSA_SequencerMidiPort::read (byte *buf, size_t max, timestamp_t timestamp)
 	return -ENOENT == err ? 0 : err;
 }
 
-int ALSA_SequencerMidiPort::CreatePorts (PortRequest &req)
+int 
+ALSA_SequencerMidiPort::CreatePorts (PortRequest &req)
 {
 	int err;
-	if (0 <= (err = snd_seq_open(&seq, "default", SND_SEQ_OPEN_DUPLEX, 
-				     (req.mode & O_NONBLOCK) ? SND_SEQ_NONBLOCK : 0))) {
-		snd_seq_set_client_name (seq, req.devname);
-		unsigned int caps = 0;
-		if (req.mode == O_WRONLY  ||  req.mode == O_RDWR)
-			caps |= SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE;
-		if (req.mode == O_RDONLY  ||  req.mode == O_RDWR)
-			caps |= SND_SEQ_PORT_CAP_READ | SND_SEQ_PORT_CAP_SUBS_READ;
-		err = snd_seq_create_simple_port (seq, req.tagname, caps, SND_SEQ_PORT_TYPE_MIDI_GENERIC);
-		if (err >= 0) {
-			port_id = err;
-			snd_seq_ev_clear (&SEv);
-			snd_seq_ev_set_source (&SEv, port_id);
-			snd_seq_ev_set_subs (&SEv);
-			snd_seq_ev_set_direct (&SEv);
-		} else 
-			snd_seq_close (seq);
+	unsigned int caps = 0;
+
+	if (req.mode == O_WRONLY  ||  req.mode == O_RDWR)
+		caps |= SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE;
+	if (req.mode == O_RDONLY  ||  req.mode == O_RDWR)
+		caps |= SND_SEQ_PORT_CAP_READ | SND_SEQ_PORT_CAP_SUBS_READ;
+	
+	if (0 <= (err = snd_seq_create_simple_port (seq, req.tagname, caps, SND_SEQ_PORT_TYPE_MIDI_GENERIC))) {
+		
+		port_id = err;
+
+		snd_seq_ev_clear (&SEv);
+		snd_seq_ev_set_source (&SEv, port_id);
+		snd_seq_ev_set_subs (&SEv);
+		snd_seq_ev_set_direct (&SEv);
+		
+		return 0;
 	}
+
 	return err;
 }
 
+int
+ALSA_SequencerMidiPort::init_client (std::string name)
+{
+	static bool called = false;
+
+	if (called) {
+		return -1;
+	}
+
+	called = true;
+
+	if (snd_seq_open (&seq, "default", SND_SEQ_OPEN_DUPLEX, 0) >= 0) {
+		snd_seq_set_client_name (seq, name.c_str());
+		return 0;
+	} else {
+		warning << "The ALSA MIDI system is not available. No ports based on it will be created"
+			<< endmsg;
+		return -1;
+	}
+}

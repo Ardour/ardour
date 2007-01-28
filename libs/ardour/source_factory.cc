@@ -131,14 +131,13 @@ SourceFactory::create (Session& s, const XMLNode& node)
 
 #ifdef HAVE_COREAUDIO
 boost::shared_ptr<Source>
-SourceFactory::createReadable (DataType type, Session& s, string idstr, AudioFileSource::Flag flags, bool announce)
+SourceFactory::createReadable (DataType type, Session& s, string path, int chn, AudioFileSource::Flag flags, bool announce)
 {
 	if (type == DataType::AUDIO) {
-
 		if (!(flags & Destructive)) {
 
 			try {
-				boost::shared_ptr<Source> ret (new CoreAudioSource (s, idstr, flags));
+				boost::shared_ptr<Source> ret (new CoreAudioSource (s, path, chn, flags));
 				if (setup_peakfile (ret)) {
 					return boost::shared_ptr<Source>();
 				}
@@ -149,7 +148,7 @@ SourceFactory::createReadable (DataType type, Session& s, string idstr, AudioFil
 			}
 
 			catch (failed_constructor& err) {
-				boost::shared_ptr<Source> ret (new SndFileSource (s, idstr, flags));
+				boost::shared_ptr<Source> ret (new SndFileSource (s, path, chn, flags));
 				if (setup_peakfile (ret)) {
 					return boost::shared_ptr<Source>();
 				}
@@ -161,7 +160,7 @@ SourceFactory::createReadable (DataType type, Session& s, string idstr, AudioFil
 
 		} else {
 
-			boost::shared_ptr<Source> ret (new SndFileSource (s, idstr, flags));
+			boost::shared_ptr<Source> ret (new SndFileSource (s, path, chn, flags));
 			if (setup_peakfile (ret)) {
 				return boost::shared_ptr<Source>();
 			}
@@ -171,6 +170,7 @@ SourceFactory::createReadable (DataType type, Session& s, string idstr, AudioFil
 			return ret;
 		}
 
+		return boost::shared_ptr<Source>();
 	} else if (type == DataType::MIDI) {
 
 		boost::shared_ptr<Source> ret (new SMFSource (s, node));
@@ -187,11 +187,11 @@ SourceFactory::createReadable (DataType type, Session& s, string idstr, AudioFil
 #else
 
 boost::shared_ptr<Source>
-SourceFactory::createReadable (DataType type, Session& s, string idstr, AudioFileSource::Flag flags, bool announce)
+SourceFactory::createReadable (DataType type, Session& s, string path, int chn, AudioFileSource::Flag flags, bool announce)
 {
 	if (type == DataType::AUDIO) {
-
-		boost::shared_ptr<Source> ret (new SndFileSource (s, idstr, flags));
+	
+		boost::shared_ptr<Source> ret (new SndFileSource (s, path, chn, flags));
 
 		if (setup_peakfile (ret)) {
 			return boost::shared_ptr<Source>();
@@ -203,10 +203,11 @@ SourceFactory::createReadable (DataType type, Session& s, string idstr, AudioFil
 
 		return ret;
 
+
 	} else if (type == DataType::MIDI) {
 
 		// FIXME: flags?
-		boost::shared_ptr<Source> ret (new SMFSource (s, idstr, SMFSource::Flag(0)));
+		boost::shared_ptr<Source> ret (new SMFSource (s, path, SMFSource::Flag(0)));
 
 		if (announce) {
 			SourceCreated (ret);

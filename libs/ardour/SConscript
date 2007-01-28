@@ -44,7 +44,6 @@ buffer_set.cc
 meter.cc
 amp.cc
 panner.cc
-destructive_filesource.cc
 audiofilesource.cc
 audiofilter.cc
 audioregion.cc

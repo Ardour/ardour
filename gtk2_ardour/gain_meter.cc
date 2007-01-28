@@ -40,6 +40,7 @@
 #include "logmeter.h"
 #include "gui_thread.h"
 #include "keyboard.h"
+#include "public_editor.h"
 
 #include <ardour/session.h>
 #include <ardour/route.h>
@@ -567,7 +568,11 @@ GainMeter::gain_activated ()
 
 		f = min (f, 6.0f);
 
-		_io->set_gain (dB_to_coefficient (f), this);
+		_io->set_gain (dB_to_coefficient(f), this);
+
+		if (gain_display.has_focus()) {
+			PublicEditor::instance().reset_focus();
+		}
 	}
 }
 

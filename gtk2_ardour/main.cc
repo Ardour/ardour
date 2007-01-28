@@ -367,6 +367,11 @@ int main (int argc, char *argv[])
 	gtk_set_locale ();
 
 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+	/* our i18n translations are all in UTF-8, so make sure
+	   that even if the user locale doesn't specify UTF-8,
+	   we use that when handling them.
+	*/
+	(void) bind_textdomain_codeset (PACKAGE,"UTF-8");
 	(void) textdomain (PACKAGE);
 
 	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);

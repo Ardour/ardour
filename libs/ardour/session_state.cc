@@ -1059,19 +1059,7 @@ XMLNode&
 Session::get_control_protocol_state ()
 {
 	ControlProtocolManager& cpm (ControlProtocolManager::instance());
-	XMLNode* node = new XMLNode (X_("ControlProtocols"));
-
-	cpm.foreach_known_protocol (bind (mem_fun (*this, &Session::add_control_protocol), node));
-	
-	return *node;
-}
-
-void
-Session::add_control_protocol (const ControlProtocolInfo* const cpi, XMLNode* node)
-{
-	if (cpi->protocol) {
-		node->add_child_nocopy (cpi->protocol->get_state());
-	}
+	return cpm.get_state();
 }
 
 int

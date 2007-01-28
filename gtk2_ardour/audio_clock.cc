@@ -768,6 +768,17 @@ AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 				// Check SMPTE fields for sanity (may also adjust fields)
 				smpte_sanitize_display();
 				break;
+			case Bars:
+			case Beats:
+			case Ticks:
+				// Bars or beats should never be 0
+				if (atoi(bars_label.get_text()) == 0) {
+					bars_label.set_text("001");
+				}
+				if (atoi(beats_label.get_text()) == 0) {
+					beats_label.set_text("01");
+				}
+				break;
 			default:
 				break;
 			}

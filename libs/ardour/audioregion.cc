@@ -42,6 +42,7 @@
 #include <ardour/audiofilter.h>
 #include <ardour/audiofilesource.h>
 #include <ardour/destructive_filesource.h>
+#include <ardour/region_factory.h>
 
 #include "i18n.h"
 #include <locale.h>
@@ -327,7 +328,7 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 		       nframes_t position, nframes_t cnt, 
 		       uint32_t chan_n, nframes_t read_frames, nframes_t skip_frames) const
 {
-	//cerr << _name << "._read_at(" << position << ") - " << _position << endl;
+	cerr << _name << "._read_at(" << position << ") - " << _position << endl;
 
 	nframes_t internal_offset;
 	nframes_t buf_offset;
@@ -901,25 +902,44 @@ AudioRegion::recompute_at_start ()
 }
 
 int
-AudioRegion::separate_by_channel (Session& session, vector<AudioRegion*>& v) const
+AudioRegion::separate_by_channel (Session& session, vector<boost::shared_ptr<AudioRegion> >& v) const
 {
 	SourceList srcs;
 	string new_name;
+	int n;
 
-	for (SourceList::const_iterator i = _master_sources.begin(); i != _master_sources.end(); ++i) {
+	if (_sources.size() < 2) {
+		return 0;
+	}
+
+	n = 0;
+
+	for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
 
 		srcs.clear ();
 		srcs.push_back (*i);
 
-		/* generate a new name */
-		
-		if (session.region_name (new_name, _name)) {
-			return -1;
+		new_name = _name;
+
+		if (_sources.size() == 2) {
+			if (n == 0) {
+				new_name += "-L";
+			} else {
+				new_name += "-R";
+			}
+		} else {
+			new_name += '-';
+			new_name += ('0' + n + 1);
 		}
 
 		/* create a copy with just one source */
 
-		v.push_back (new AudioRegion (srcs, _start, _length, new_name, _layer, _flags));
+		boost::shared_ptr<Region> r = RegionFactory::create (srcs, _start, _length, new_name, _layer, _flags);
+		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
+
+		v.push_back (ar);
+		
+		++n;
 	}
 
 	return 0;

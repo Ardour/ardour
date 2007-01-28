@@ -233,6 +233,11 @@ class TimeAxisViewItem : public Selectable
 
 
     /**
+     * Returns the time axis that this item is upon
+     */
+    TimeAxisView& get_trackview() const { return trackview; }
+
+    /**
      * Sets the samples per unit of this item.
      * this item is used to determine the relative visual size and position of this item
      * based upon its duration and start value.

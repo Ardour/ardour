@@ -196,7 +196,7 @@ LadspaPluginUI::build ()
 					frame->add (*box);
 					hpacker.pack_start(*frame,true,true);
 
-					x = 0;
+					x = 1;
 				}
 			}
 

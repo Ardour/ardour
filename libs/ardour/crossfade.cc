@@ -225,9 +225,6 @@ Crossfade::initialize ()
 	_fade_in.add (_length, 1.0);
 	_fade_in.thaw ();
 
-	// _in->StateChanged.connect (sigc::mem_fun (*this, &Crossfade::member_changed));
-	// _out->StateChanged.connect (sigc::mem_fun (*this, &Crossfade::member_changed));
-
 	overlap_type = _in->coverage (_out->position(), _out->last_frame());
 	layer_relation = (int32_t) (_in->layer() - _out->layer());
 }	
@@ -595,26 +592,6 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 	}
 	
 	return 0;
-}
-
-void
-Crossfade::member_changed (Change what_changed)
-{
-	Change what_we_care_about = Change (Region::MuteChanged|
-					    Region::LayerChanged|
-					    BoundsChanged);
-
-	if (what_changed & what_we_care_about) {
-		try { 
-			if (what_changed & what_we_care_about) {
-				refresh ();
-			}
-		}
-
-		catch (NoCrossfadeHere& err) {
-			// relax, Invalidated inside refresh()
-		}
-	}
 }
 
 XMLNode&

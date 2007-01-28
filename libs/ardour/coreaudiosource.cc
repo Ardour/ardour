@@ -19,6 +19,7 @@
 
 #include <pbd/error.h>
 #include <ardour/coreaudiosource.h>
+#include <ardour/utils.h>
 
 #include <appleutility/CAAudioFile.h>
 #include <appleutility/CAStreamBasicDescription.h>
@@ -33,32 +34,21 @@ using namespace PBD;
 CoreAudioSource::CoreAudioSource (Session& s, const XMLNode& node)
 	: AudioFileSource (s, node)
 {
-	init (_name);
+	init ();
 }
 
-CoreAudioSource::CoreAudioSource (Session& s, const string& idstr, Flag flags)
-	: AudioFileSource(s, idstr, flags)
+CoreAudioSource::CoreAudioSource (Session& s, const string& path, int chn, Flag flags)
+	: AudioFileSource(s, path, flags),
 {
-	init (idstr);
+	channel = chn;
+	init ();
 }
 
 void 
-CoreAudioSource::init (string idstr)
+CoreAudioSource::init ()
 {
-	string::size_type pos;
-
 	tmpbuf = 0;
 	tmpbufsize = 0;
-
-	_name = idstr;
-
-	if ((pos = idstr.find_last_of (':')) == string::npos) {
-		channel = 0;
-		_path = idstr;
-	} else {
-		channel = atoi (idstr.substr (pos+1).c_str());
-		_path = idstr.substr (0, pos);
-	}
 
 	cerr << "CoreAudioSource::init() " << name() << endl;
 	

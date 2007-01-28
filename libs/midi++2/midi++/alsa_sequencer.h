@@ -48,12 +48,14 @@ class ALSA_SequencerMidiPort : public Port
 	int read (byte *buf, size_t max, timestamp_t timestamp);
 
   private:
-	snd_seq_t *seq;
 	snd_midi_event_t *decoder, *encoder;
 	int port_id;
 	snd_seq_event_t SEv;
+
 	int CreatePorts(PortRequest &req);
 
+	static int init_client (std::string name);
+	static snd_seq_t* seq;
 };
 
 }; /* namespace MIDI */

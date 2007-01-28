@@ -87,6 +87,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void new_region_from_selection () = 0;
 	virtual void separate_region_from_selection () = 0;
 	virtual void toggle_playback (bool with_abort) = 0;
+	virtual void transition_to_rolling (bool fwd) = 0;
 	virtual nframes_t unit_to_frame (double unit) = 0;
 	virtual double frame_to_unit (nframes_t frame) = 0;
 	virtual double frame_to_unit (double frame) = 0;
@@ -143,6 +144,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	sigc::signal<void,nframes_t> UpdateAllTransportClocks;
 
 	Glib::RefPtr<Gtk::ActionGroup> editor_actions;
+
+	virtual void reset_focus() = 0;
 
 	virtual bool canvas_control_point_event (GdkEvent* event,ArdourCanvas::Item*, ControlPoint*) = 0;
 	virtual bool canvas_line_event (GdkEvent* event,ArdourCanvas::Item*, AutomationLine*) = 0;

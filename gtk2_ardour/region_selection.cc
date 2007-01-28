@@ -22,21 +22,12 @@
 
 #include "region_view.h"
 #include "region_selection.h"
+#include "time_axis_view.h"
 
 using namespace ARDOUR;
 using namespace PBD;
 using namespace sigc;
 
-
-bool 
-RegionComparator::operator() (const RegionView* a, const RegionView* b) const
-{
- 	if (a == b) {
- 		return false;
- 	} else {
- 		return a < b;
- 	}
-}
 
 RegionSelection::RegionSelection ()
 {
@@ -46,9 +37,8 @@ RegionSelection::RegionSelection ()
 
 RegionSelection::RegionSelection (const RegionSelection& other)
 {
-
 	for (RegionSelection::const_iterator i = other.begin(); i != other.end(); ++i) {
-		add (*i, false);
+		add (*i);
 	}
 	_current_start = other._current_start;
 	_current_end = other._current_end;
@@ -64,7 +54,7 @@ RegionSelection::operator= (const RegionSelection& other)
 		clear_all();
 		
 		for (RegionSelection::const_iterator i = other.begin(); i != other.end(); ++i) {
-			add (*i, false);
+			add (*i);
 		}
 
 		_current_start = other._current_start;
@@ -83,17 +73,17 @@ RegionSelection::clear_all()
 	_current_end = 0;
 }
 
-bool RegionSelection::contains (RegionView* rv)
+bool RegionSelection::contains (RegionView* rv) const
 {
-	return this->find (rv) != end();
+	return find (begin(), end(), rv) != end();
 }
 
-void
-RegionSelection::add (RegionView* rv, bool dosort)
+bool
+RegionSelection::add (RegionView* rv)
 {
 	if (contains (rv)) {
 		/* we already have it */
-		return;
+		return false;
 	}
 
 	rv->RegionViewGoingAway.connect (mem_fun(*this, &RegionSelection::remove_it));
@@ -106,11 +96,13 @@ RegionSelection::add (RegionView* rv, bool dosort)
 		_current_end = rv->region()->last_frame();
 	}
 	
-	insert (rv);
+	push_back (rv);
 
 	// add to layer sorted list
+
 	add_to_layer (rv);
-	
+
+	return true;
 }
 
 void
@@ -124,7 +116,7 @@ RegionSelection::remove (RegionView* rv)
 {
 	RegionSelection::iterator i;
 
-	if ((i = this->find (rv)) != end()) {
+	if ((i = find (begin(), end(), rv)) != end()) {
 
 		erase (i);
 
@@ -198,7 +190,7 @@ RegionSelection::add_to_layer (RegionView * rv)
 }
 
 struct RegionSortByTime {
-    bool operator() (const RegionView* a, const RegionView* b) {
+    bool operator() (const RegionView* a, const RegionView* b) const {
 	    return a->region()->position() < b->region()->position();
     }
 };
@@ -217,3 +209,49 @@ RegionSelection::by_position (list<RegionView*>& foo) const
 	foo.sort (sorter);
 	return;
 }
+
+struct RegionSortByTrack {
+    bool operator() (const RegionView* a, const RegionView* b) const {
+	    
+	    /* really, track and position */
+
+	    if (a->get_trackview().order == b->get_trackview().order) {
+		    return a->region()->position() < b->region()->position();
+	    } else {
+		    return a->get_trackview().order < b->get_trackview().order;
+	    }
+    }
+};
+	
+void
+RegionSelection::by_track (list<RegionView*>& foo) const
+{
+	list<RegionView*>::const_iterator i;
+	RegionSortByTrack sorter;
+
+	for (i = _bylayer.begin(); i != _bylayer.end(); ++i) {
+		foo.push_back (*i);
+	}
+
+	foo.sort (sorter);
+	return;
+}
+
+void
+RegionSelection::sort_by_position_and_track ()
+{
+	RegionSortByTrack sorter;
+	sort (sorter);
+}
+
+bool
+RegionSelection::involves (const TimeAxisView& tv) const
+{
+	for (RegionSelection::const_iterator i = begin(); i != end(); ++i) {
+		if (&(*i)->get_trackview() == &tv) {
+			return true;
+		}
+	}
+	return false;
+}
+	

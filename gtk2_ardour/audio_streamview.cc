@@ -48,6 +48,8 @@
 #include "utils.h"
 #include "color.h"
 
+#include "i18n.h"
+
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
@@ -129,7 +131,7 @@ AudioStreamView::set_amplitude_above_axis (gdouble app)
 void
 AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait_for_waves)
 {
-	AudioRegionView *region_view;
+	AudioRegionView *region_view = 0;
 
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::add_region_view), r));
 
@@ -166,6 +168,10 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 		region_view = new TapeAudioRegionView (canvas_group, _trackview, region, 
 						       _samples_per_unit, region_color);
 		break;
+	default:
+		fatal << string_compose (_("programming error: %1"), "illegal track mode in ::add_region_view_internal") << endmsg;
+		/*NOTREACHED*/
+
 	}
 
 	region_view->init (region_color, wait_for_waves);

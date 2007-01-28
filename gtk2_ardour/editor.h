@@ -44,7 +44,7 @@
 #include <ardour/session.h>
 #include <ardour/tempo.h>
 #include <ardour/location.h>
-#include <ardour/region.h>
+#include <ardour/audioregion.h>
 
 #include "audio_clock.h"
 #include "gtk-custom-ruler.h"
@@ -171,6 +171,7 @@ class Editor : public PublicEditor
 	void separate_region_from_selection ();
 	void separate_regions_using_location (ARDOUR::Location&);
 	void toggle_playback (bool with_abort);
+	void transition_to_rolling (bool forward);
 
 	/* undo related */
 
@@ -419,12 +420,15 @@ class Editor : public PublicEditor
 	CrossfadeView*     clicked_crossfadeview;
 	ControlPoint*      clicked_control_point;
 
+	void sort_track_selection ();
+
 	void get_relevant_tracks (std::set<RouteTimeAxisView*>& relevant_tracks);
+	void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&);
 	void mapover_tracks (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl);
 
 	/* functions to be passed to mapover_tracks(), possibly with sigc::bind()-supplied arguments */
 
-	void mapped_set_selected_regionview_from_click (RouteTimeAxisView&, uint32_t, RegionView*, vector<RegionView*>*);
+	void mapped_get_equivalent_regions (RouteTimeAxisView&, uint32_t, RegionView*, vector<RegionView*>*);
 	void mapped_use_new_playlist (RouteTimeAxisView&, uint32_t);
 	void mapped_use_copy_playlist (RouteTimeAxisView&, uint32_t);
 	void mapped_clear_playlist (RouteTimeAxisView&, uint32_t);
@@ -439,7 +443,7 @@ class Editor : public PublicEditor
 	bool set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove=false);
 
 	bool set_selected_control_point_from_click (Selection::Operation op = Selection::Set, bool no_remove=false);
-	bool set_selected_track_from_click (Selection::Operation op = Selection::Set, bool no_remove=false);
+	bool set_selected_track_from_click (bool press, Selection::Operation op = Selection::Set, bool no_remove=false);
 	bool set_selected_regionview_from_click (bool press, Selection::Operation op = Selection::Set, bool no_track_remove=false);
 
 	void set_selected_regionview_from_region_list (boost::shared_ptr<ARDOUR::Region> region, Selection::Operation op = Selection::Set);
@@ -904,6 +908,8 @@ class Editor : public PublicEditor
 	void align_relative (ARDOUR::RegionPoint);
 	void naturalize ();
 
+	void reset_focus ();
+
 	void cut ();
 	void copy ();
 	void paste (float times);
@@ -992,6 +998,7 @@ class Editor : public PublicEditor
 	void edit_cursor_forward ();
 	void playhead_backward ();
 	void playhead_forward ();
+	void scroll_playhead (bool forward);
 	void scroll_backward (float pages=0.8f);
 	void scroll_forward (float pages=0.8f);
 	void scroll_tracks_down ();
@@ -1065,6 +1072,12 @@ class Editor : public PublicEditor
 	void fade_out_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void fade_in_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 	void fade_out_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
+
+	void set_fade_in_shape (ARDOUR::AudioRegion::FadeShape);
+	void set_fade_out_shape (ARDOUR::AudioRegion::FadeShape);
+
+	void set_fade_in_active (bool);
+	void set_fade_out_active (bool);
 	
 	std::set<boost::shared_ptr<ARDOUR::Playlist> > motion_frozen_playlists;
 	void region_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);

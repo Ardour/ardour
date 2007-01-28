@@ -323,6 +323,17 @@ style "ardour_adjusters" = "default_buttons_menus"
 	bg[ACTIVE] = { 0.06, 0.06, 0.06 }
 }
 
+style "editor_hscrollbar" = "ardour_adjusters"
+{
+	#
+	# special case: we want this scrollbar to be as tall as the
+	# zoom focus selector combobox. scrollbars don't expand to
+        # fill the space available to them, so we have to explicitly
+	# make it bigger.
+	# 
+	GtkRange::slider_width = 27
+}
+
 style "ardour_progressbars" = "default_buttons_menus"
 { 
   bg[NORMAL] = { 0, 0, 0 }
@@ -1372,6 +1383,7 @@ widget "*PanningLinkDirectionButton.*" style "very_small_button"
 widget "*ChannelCountSelector" style "medium_bold_entry"
 widget "*ChannelCountSelector.GtkArrow" style "default_buttons_menus"
 widget "*RegionListWholeFile" style "treeview_parent_node"
+widget "*EditorHScrollbar" style "editor_hscrollbar"
 
 class "GtkWidget" style "default_base"
 class "GtkScrollbar" style "ardour_adjusters"

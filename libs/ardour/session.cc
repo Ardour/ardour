@@ -382,7 +382,6 @@ Session::Session (AudioEngine &eng,
 		if (master_out_channels) {
 			shared_ptr<Route> r (new Route (*this, _("master"), -1, master_out_channels, -1, master_out_channels, Route::MasterOut));
 			r->set_remote_control_id (control_id);
-			cerr << "master bus has remote control ID " << r->remote_control_id() << endl;
 			 
 			rl.push_back (r);
 		} else {
@@ -409,6 +408,8 @@ Session::Session (AudioEngine &eng,
 	bool was_dirty = dirty ();
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
+
+	Config->ParameterChanged.connect (mem_fun (*this, &Session::config_changed));
 
 	if (was_dirty) {
 		DirtyChanged (); /* EMIT SIGNAL */
@@ -1793,6 +1794,10 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 				
 				track->set_control_outs (cports);
 			}
+
+			// assert (current_thread != RT_thread)
+			
+			track->audio_diskstream()->non_realtime_input_change();
 			
 			track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
 			track->set_remote_control_id (control_id);
@@ -3163,14 +3168,16 @@ Session::midi_path_from_name (string name)
 
 		for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 
+			spath = (*i).path;
+
 			// FIXME: different directory from audio?
-			spath = (*i).path + sound_dir_name + "/" + legalized;
+			spath += sound_dir(false) + "/" + legalized;
 
 			snprintf (buf, sizeof(buf), "%s-%u.mid", spath.c_str(), cnt);
 
-			if (access (buf, F_OK) == 0) {
+			if (g_file_test (buf, G_FILE_TEST_EXISTS)) {
 				existing++;
-			}
+			} 
 		}
 
 		if (existing == 0) {
@@ -3191,6 +3198,7 @@ Session::midi_path_from_name (string name)
 
 	// FIXME: different directory than audio?
 	spath = discover_best_sound_dir ();
+	spath += '/';
 
 	string::size_type pos = foo.find_last_of ('/');
 	
@@ -3618,7 +3626,7 @@ Session::remove_redirect (Redirect* redirect)
 nframes_t
 Session::available_capture_duration ()
 {
-	float sample_bytes_on_disk;
+	float sample_bytes_on_disk = 4.0; // keep gcc happy
 
 	switch (Config->get_native_file_data_format()) {
 	case FormatFloat:

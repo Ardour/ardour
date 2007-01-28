@@ -77,6 +77,9 @@ Editor::show_editor_mixer (bool yn)
 				}
 
 			} else {
+
+				sort_track_selection ();
+
 				for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 					AudioTimeAxisView* atv;
 

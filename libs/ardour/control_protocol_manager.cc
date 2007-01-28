@@ -324,10 +324,25 @@ ControlProtocolManager::get_state (void)
 	Glib::Mutex::Lock lm (protocols_lock);
 
 	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
-		XMLNode* child = new XMLNode (X_("Protocol"));
-		child->add_property (X_("name"), (*i)->name);
-		child->add_property (X_("active"), (*i)->protocol ? "yes" : "no");
-		root->add_child_nocopy (*child);
+
+		XMLNode * child;
+
+		if ((*i)->protocol) {
+			child = &((*i)->protocol->get_state());
+			child->add_property (X_("active"), "yes");
+			// should we update (*i)->state here?  probably.
+			root->add_child_nocopy (*child);
+		}
+		else if ((*i)->state) {
+			// keep ownership clear
+			root->add_child_copy (*(*i)->state);
+		}
+		else {
+			child = new XMLNode (X_("Protocol"));
+			child->add_property (X_("name"), (*i)->name);
+			child->add_property (X_("active"), "no");
+			root->add_child_nocopy (*child);
+		}
 	}
 
 	return *root;

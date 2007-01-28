@@ -93,10 +93,6 @@ class AudioRegionView : public RegionView
 	
 	void reset_fade_in_shape_width (nframes_t);
 	void reset_fade_out_shape_width (nframes_t);
-	void set_fade_in_active (bool);
-	void set_fade_out_active (bool);
-	void set_fade_in_shape (ARDOUR::AudioRegion::FadeShape);
-	void set_fade_out_shape (ARDOUR::AudioRegion::FadeShape);
 
 	virtual void entered ();
 	virtual void exited ();
