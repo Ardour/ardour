@@ -9,7 +9,7 @@ theme_init (GTypeModule *module)
 {
   clearlooks_rc_style_register_type (module);
   clearlooks_style_register_type (module);
-  printf("theme_init() called from internal clearlooks engine!\n");
+  printf("theme_init() called from internal clearlooks engine\n");
 }
 
 G_MODULE_EXPORT void
