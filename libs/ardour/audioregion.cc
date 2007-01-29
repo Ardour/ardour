@@ -1051,10 +1051,15 @@ AudioRegion::separate_by_channel (Session& session, vector<boost::shared_ptr<Aud
 			new_name += ('0' + n + 1);
 		}
 
-		/* create a copy with just one source */
+		/* create a copy with just one source. prevent if from being thought of as "whole file" even if 
+		   it covers the entire source file(s).
+		 */
 
-		boost::shared_ptr<Region> r = RegionFactory::create (srcs, _start, _length, new_name, _layer, _flags);
+		Flag f = Flag (_flags & ~WholeFile);
+
+		boost::shared_ptr<Region> r = RegionFactory::create (srcs, _start, _length, new_name, _layer, f);
 		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
+		cerr << "new region name is " << ar->name() << endl;
 
 		v.push_back (ar);
 		

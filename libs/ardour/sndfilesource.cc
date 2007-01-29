@@ -50,8 +50,6 @@ SndFileSource::SndFileSource (Session& s, const XMLNode& node)
 {
 	init ();
 
-	cerr << "SndFileSource @ " << _path << " channel = " << channel << endl;
-
 	if (open()) {
 		throw failed_constructor ();
 	}

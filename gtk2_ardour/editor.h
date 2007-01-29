@@ -1174,7 +1174,7 @@ class Editor : public PublicEditor
 	Gtk::Allocation canvas_allocation;
 	bool canvas_idle_queued;
 	void track_canvas_allocate (Gtk::Allocation alloc);
-	bool track_canvas_idle ();
+	bool track_canvas_size_allocated ();
 
 	void set_edit_cursor (GdkEvent* event);
 	void set_playhead_cursor (GdkEvent* event);
@@ -1275,7 +1275,7 @@ class Editor : public PublicEditor
 	void remove_metric_marks ();
 	void draw_metric_marks (const ARDOUR::Metrics& metrics);
 
-	void tempo_map_changed (ARDOUR::Change);
+	void tempo_map_changed (ARDOUR::Change, bool immediate_redraw);
 	void redisplay_tempo ();
 	
 	void snap_to (nframes_t& first, int32_t direction = 0, bool for_mark = false);

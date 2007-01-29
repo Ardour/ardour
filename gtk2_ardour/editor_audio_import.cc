@@ -40,6 +40,7 @@
 #include "sfdb_ui.h"
 #include "editing.h"
 #include "audio_time_axis.h"
+#include "utils.h"
 
 #include "i18n.h"
 
@@ -315,7 +316,8 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_fi
 				choices.push_back (_("Embed all without questions"));
 			
 				Gtkmm2ext::Choice rate_choice (
-					string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"), path),
+					string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"), 
+							short_path (path, 40)),
 					choices, false);
 				
 				int resx = rate_choice.run ();

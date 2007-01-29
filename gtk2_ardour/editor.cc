@@ -1071,7 +1071,7 @@ Editor::connect_to_session (Session *t)
 
 	session_connections.push_back (session->SMPTEOffsetChanged.connect (mem_fun(*this, &Editor::update_just_smpte)));
 
-	session_connections.push_back (session->tempo_map().StateChanged.connect (mem_fun(*this, &Editor::tempo_map_changed)));
+	session_connections.push_back (session->tempo_map().StateChanged.connect (bind (mem_fun(*this, &Editor::tempo_map_changed), false)));
 
 	edit_groups_changed ();
 
@@ -3625,7 +3625,8 @@ Editor::canvas_horizontally_scrolled ()
 {
 	/* this is the core function that controls horizontal scrolling of the canvas. it is called
 	   whenever the horizontal_adjustment emits its "value_changed" signal. it executes in an
-	   idle handler.
+	   idle handler, which is important because tempo_map_changed() should issue redraws immediately
+	   and not defer them to an idle handler.
 	*/
 
   	leftmost_frame = (nframes_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
@@ -3637,7 +3638,7 @@ Editor::canvas_horizontally_scrolled ()
 	}
 	
 	update_fixed_rulers ();
-	tempo_map_changed (Change (0));
+	tempo_map_changed (Change (0), true);
 }
 
 void
@@ -3686,7 +3687,7 @@ Editor::idle_visual_changer ()
 			/* the signal handler will do the rest */
 		} else {
 			update_fixed_rulers();
-			tempo_map_changed (Change (0));
+			tempo_map_changed (Change (0), true);
 		}
 	}
 

@@ -547,3 +547,35 @@ key_is_legal_for_numeric_entry (guint keyval)
 	return false;
 }
 
+ustring
+short_path (ustring path, uint32_t target_characters)
+{
+	ustring::size_type slash;
+	ustring::size_type len = path.length();
+	
+	if (len <= target_characters) {
+		return path;
+	}
+
+
+	slash = path.find_last_of ('/');
+
+	if (len - slash > target_characters) {
+		/* even the filename itself is too long, so just return it - its 
+		   the best we can do
+		*/
+		return path.substr (slash);
+	}
+	
+	uint32_t so_far = (len - slash) + 4; // allow for .../
+	uint32_t space_for = target_characters - so_far;
+	
+	if (slash < target_characters) {
+		return path;
+	}
+
+	string res = ".../";
+	res += path.substr (slash - space_for);
+
+	return res;
+}

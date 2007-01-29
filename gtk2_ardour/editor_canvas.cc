@@ -280,7 +280,7 @@ Editor::track_canvas_allocate (Gtk::Allocation alloc)
 	if (!initial_ruler_update_required) {
 		if (!canvas_idle_queued) {
 			/* call this first so that we do stuff before any pending redraw */
-			Glib::signal_idle().connect (mem_fun (*this, &Editor::track_canvas_idle), false);
+			Glib::signal_idle().connect (mem_fun (*this, &Editor::track_canvas_size_allocated), false);
 			canvas_idle_queued = true;
 		}
 		return;
@@ -288,11 +288,11 @@ Editor::track_canvas_allocate (Gtk::Allocation alloc)
 
 	initial_ruler_update_required = false;
 	
-	track_canvas_idle ();
+	track_canvas_size_allocated ();
 }
 
 bool
-Editor::track_canvas_idle ()
+Editor::track_canvas_size_allocated ()
 {
 	if (canvas_idle_queued) {
 		canvas_idle_queued = false;
@@ -320,7 +320,6 @@ Editor::track_canvas_idle ()
 
 		full_canvas_height = height;
 	}
-
 
 	zoom_range_clock.set ((nframes_t) floor ((canvas_width * frames_per_unit)));
 	edit_cursor->set_position (edit_cursor->current_frame);
@@ -363,7 +362,7 @@ Editor::track_canvas_idle ()
 	}
 		
 	update_fixed_rulers();
-	tempo_map_changed (Change (0));
+	tempo_map_changed (Change (0), true);
 	
 	Resized (); /* EMIT_SIGNAL */
 

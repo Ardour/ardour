@@ -39,4 +39,10 @@ PBD::stacktrace (std::ostream& out, int levels)
 	out << "stack tracing is not enabled on this platform" << std::endl;
 }
 
+void
+c_stacktrace ()
+{
+	PBD::stacktrace (cout);
+}
+
 #endif /* HAVE_EXECINFO */
