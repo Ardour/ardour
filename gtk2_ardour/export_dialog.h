@@ -86,6 +86,8 @@ class ExportDialog : public ArdourDialog
 	// audio data. spec has already been filled with user input before calling
 	// this method. The dialog will be closed after this function exited.
 	virtual void export_audio_data() = 0;
+
+	virtual bool wants_dir() { return false; }
 	
 	// reads the user input and fills spec with the according values
 	// filepath: complete path to the target file, including filename

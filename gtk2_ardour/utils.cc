@@ -547,35 +547,55 @@ key_is_legal_for_numeric_entry (guint keyval)
 	return false;
 }
 
+
 ustring
 short_path (ustring path, uint32_t target_characters)
 {
-	ustring::size_type slash;
+	ustring::size_type last_sep;
 	ustring::size_type len = path.length();
-	
+	const char separator = '/';
+
 	if (len <= target_characters) {
 		return path;
 	}
 
+	if ((last_sep = path.find_last_of (separator)) == ustring::npos) {
 
-	slash = path.find_last_of ('/');
+		/* just a filename, but its too long anyway */
 
-	if (len - slash > target_characters) {
-		/* even the filename itself is too long, so just return it - its 
-		   the best we can do
-		*/
-		return path.substr (slash);
+		if (target_characters > 3) {
+			return path.substr (0, target_characters - 3) + ustring ("...");
+		} else {
+			/* stupid caller, just hand back the whole thing */
+			return path;
+		}
+	}
+
+	if (len - last_sep >= target_characters) {
+
+		/* even the filename itself is too long */
+
+		if (target_characters > 3) {
+			return path.substr (last_sep+1, target_characters - 3) + ustring ("...");
+		} else {
+			/* stupid caller, just hand back the whole thing */
+			return path;
+		}
 	}
 	
-	uint32_t so_far = (len - slash) + 4; // allow for .../
+	uint32_t so_far = (len - last_sep);
 	uint32_t space_for = target_characters - so_far;
-	
-	if (slash < target_characters) {
-		return path;
+
+	if (space_for >= 3) {
+		ustring res = "...";
+		res += path.substr (last_sep - space_for);
+		return res;
+	} else {
+		/* remove part of the end */
+		ustring res = "...";
+		res += path.substr (last_sep - space_for, len - last_sep + space_for - 3);
+		res += "...";
+		return res;
+		
 	}
-
-	string res = ".../";
-	res += path.substr (slash - space_for);
-
-	return res;
 }

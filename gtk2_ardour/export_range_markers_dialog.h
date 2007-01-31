@@ -34,6 +34,8 @@ class ExportRangeMarkersDialog : public ExportDialog
 	virtual bool is_filepath_valid(string &filepath);
 
   	void export_audio_data();
+
+	bool wants_dir() { return true; }
   
   private:
 	// keeps the duration of all range_markers before the current

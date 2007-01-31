@@ -193,6 +193,31 @@ Editor::update_current_screen ()
 				}
 
 				playhead_cursor->set_position (frame);
+
+#undef CONTINUOUS_SCROLL
+#ifdef  CONTINUOUS_SCROLL
+
+				/* don't do continuous scroll till the new position is in the rightmost quarter of the 
+				   editor canvas
+				*/
+				
+#if 0
+				if (frame > leftmost_frame + (3 * current_page_frames() / 4)) {
+				
+					if (frame > playhead_cursor->current_frame) {
+						nframes_t delta = frame - playhead_cursor->current_frame;
+						horizontal_adjustment.set_value (horizontal_adjustment.get_value() + (delta/frames_per_unit));
+					} else {
+						nframes_t delta = playhead_cursor->current_frame - frame;
+						horizontal_adjustment.set_value (horizontal_adjustment.get_value() - (delta/frames_per_unit));
+					}
+				}
+#else
+				horizontal_adjustment.set_value (frame / frames_per_unit);
+#endif
+
+#endif // CONTINUOUS_SCROLL
+
 			}
 
 		} else {

@@ -24,6 +24,7 @@
 
 #include <glibmm/timer.h>
 #include <pbd/pthread_utils.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/audioengine.h>
 #include <ardour/buffer.h>
@@ -292,6 +293,7 @@ AudioEngine::process_callback (nframes_t nframes)
 
 	if (_freewheeling) {
 		if (Freewheel (nframes)) {
+			cerr << "Freewheeling returned non-zero!\n";
 			_freewheeling = false;
 			jack_set_freewheel (_jack, false);
 		}
@@ -963,6 +965,10 @@ AudioEngine::freewheel (bool onoff)
 			_freewheel_thread_registered = false;
 		}
 
+		if (!onoff) {
+			stacktrace (cout);
+		}
+
 		return jack_set_freewheel (_jack, onoff);
 
 	} else {
@@ -1184,8 +1190,13 @@ int
 AudioEngine::request_buffer_size (nframes_t nframes)
 {
 	if (_jack) {
-		int ret = jack_set_buffer_size (_jack, nframes);
-		return ret;
+
+		if (nframes == jack_get_buffer_size (_jack)) {
+			return 0;
+		}
+
+		return jack_set_buffer_size (_jack, nframes);
+
 	} else {
 		return -1;
 	}
@@ -1236,3 +1247,12 @@ AudioEngine::make_port_name_non_relative (string portname)
 	return str;
 }
 
+bool
+AudioEngine::is_realtime () const
+{
+	if (_jack) {
+		return jack_is_realtime (_jack);
+	} else {
+		return false;
+	}
+}

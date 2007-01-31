@@ -653,6 +653,7 @@ class Editor : public PublicEditor
 	void controls_layout_size_request (Gtk::Requisition*);
 
 	Gtk::HScrollbar     edit_hscrollbar;
+	bool                _dragging_hscrollbar;
 
 	void reset_hscrollbar_stepping ();
 	

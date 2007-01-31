@@ -35,6 +35,7 @@
 #include "actions.h"
 
 #include <ardour/session.h>
+#include <ardour/audioengine.h>
 #include <ardour/control_protocol_manager.h>
 
 #include <control_protocol/control_protocol.h>
@@ -517,6 +518,57 @@ ARDOUR_UI::toggle_control_protocol_feedback (ControlProtocolInfo* cpi, const cha
 				if (x != cpi->protocol->get_feedback()) {
 					cpi->protocol->set_feedback (x);
 				}
+			}
+		}
+	}
+}
+
+void
+ARDOUR_UI::set_jack_buffer_size (nframes_t nframes)
+{
+	Glib::RefPtr<Action> action;
+	char* action_name = 0;
+
+	switch (nframes) {
+	case 32:
+		action_name = X_("JACKLatency32");
+		break;
+	case 64:
+		action_name = X_("JACKLatency64");
+		break;
+	case 128:
+		action_name = X_("JACKLatency128");
+		break;
+	case 512:
+		action_name = X_("JACKLatency512");
+		break;
+	case 1024:
+		action_name = X_("JACKLatency1024");
+		break;
+	case 2048:
+		action_name = X_("JACKLatency2048");
+		break;
+	case 4096:
+		action_name = X_("JACKLatency4096");
+		break;
+	case 8192:
+		action_name = X_("JACKLatency8192");
+		break;
+	default:
+		/* XXX can we do anything useful ? */
+		break;
+	}
+
+	if (action_name) {
+
+		action = ActionManager::get_action (X_("JACK"), action_name);
+
+		if (action) {
+			Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (action);
+
+			if (ract && ract->get_active()) {
+				engine->request_buffer_size (nframes);
+				update_sample_rate (0);
 			}
 		}
 	}

@@ -53,6 +53,8 @@ class AudioEngine : public sigc::trackable
 	jack_client_t* jack() const { return _jack; }
 	bool connected() const { return _jack != 0; }
 
+	bool is_realtime () const;
+
 	std::string client_name() const { return jack_client_name; }
 
 	int reconnect_to_jack ();

@@ -915,7 +915,6 @@ ExportDialog::do_export ()
 	end_dialog ();
 }
 	
-
 void
 ExportDialog::end_dialog ()
 {
@@ -956,11 +955,13 @@ ExportDialog::start_export ()
 		string dir = session->path();
 		string::size_type last_slash;
 		
-		if ((last_slash = dir.find_last_of ('/')) != string::npos) {
+		if ((last_slash = dir.find_last_of ('/')) != string::npos && last_slash != 0) {
 			dir = dir.substr (0, last_slash+1);
 		}
 
-		dir = dir + "export.wav";
+		if (!wants_dir()) {
+			dir = dir + "export.wav";
+		}
 		
 		file_entry.set_text (dir);
 	}

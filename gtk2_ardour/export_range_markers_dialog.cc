@@ -90,7 +90,6 @@ ExportRangeMarkersDialog::process_range_markers_export(Locations::LocationList& 
 				}
 			}
 			
-			getSession().engine().freewheel (false);
 			current_range_marker_index++;
 		}
 	}
@@ -140,8 +139,7 @@ ExportRangeMarkersDialog::is_filepath_valid(string &filepath)
  	
 	if ( (stat (filepath.c_str(), &statbuf) != 0) || 
 		(!S_ISDIR (statbuf.st_mode)) ) {
-	 		string txt = _("Please select an existing target directory. Files\n"
-				"are not allowed!");
+	 		string txt = _("Please select an existing target directory. Files are not allowed!");
 			MessageDialog msg (*this, txt, false, MESSAGE_ERROR, BUTTONS_OK, true);
 			msg.run();
  			return false;

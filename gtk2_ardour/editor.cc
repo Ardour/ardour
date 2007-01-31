@@ -310,6 +310,7 @@ Editor::Editor (AudioEngine& eng)
 	button_release_can_deselect = true;
 	canvas_idle_queued = false;
 	_dragging_playhead = false;
+	_dragging_hscrollbar = false;
 
 	location_marker_color = color_map[cLocationMarker];
 	location_range_color = color_map[cLocationRange];
@@ -355,8 +356,8 @@ Editor::Editor (AudioEngine& eng)
 	edit_vscrollbar.set_adjustment (vertical_adjustment);
 	edit_hscrollbar.set_adjustment (horizontal_adjustment);
 
- 	edit_hscrollbar.signal_button_press_event().connect (mem_fun(*this, &Editor::hscrollbar_button_press));
- 	edit_hscrollbar.signal_button_release_event().connect (mem_fun(*this, &Editor::hscrollbar_button_release));
+ 	edit_hscrollbar.signal_button_press_event().connect (mem_fun(*this, &Editor::hscrollbar_button_press), false);
+ 	edit_hscrollbar.signal_button_release_event().connect (mem_fun(*this, &Editor::hscrollbar_button_release), false);
  	edit_hscrollbar.signal_size_allocate().connect (mem_fun(*this, &Editor::hscrollbar_allocate));
 
 	edit_hscrollbar.set_name ("EditorHScrollbar");
@@ -985,6 +986,7 @@ Editor::handle_new_duration ()
 				  
 	if (new_end > last_canvas_frame) {
 		last_canvas_frame = new_end;
+		horizontal_adjustment.set_upper (last_canvas_frame / frames_per_unit);
 		reset_scrolling_region ();
 	}
 
@@ -3618,27 +3620,6 @@ Editor::set_frames_per_unit (double fpu)
 	if (playhead_cursor) playhead_cursor->set_position (playhead_cursor->current_frame);
 
 	instant_save ();
-}
-
-void 
-Editor::canvas_horizontally_scrolled ()
-{
-	/* this is the core function that controls horizontal scrolling of the canvas. it is called
-	   whenever the horizontal_adjustment emits its "value_changed" signal. it executes in an
-	   idle handler, which is important because tempo_map_changed() should issue redraws immediately
-	   and not defer them to an idle handler.
-	*/
-
-  	leftmost_frame = (nframes_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
-	nframes_t rightmost_frame = leftmost_frame + current_page_frames ();
-	
-	if (rightmost_frame > last_canvas_frame) {
-		last_canvas_frame = rightmost_frame;
-		reset_scrolling_region ();
-	}
-	
-	update_fixed_rulers ();
-	tempo_map_changed (Change (0), true);
 }
 
 void

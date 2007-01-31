@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999-2002 Paul Davis 
+    Copyright (C) 1999-2007 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,6 +27,8 @@
 #include <fstream>
 
 #include <iostream>
+
+#include <sys/resource.h>
 
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/accelmap.h>
@@ -87,6 +89,7 @@ ARDOUR_UI *ARDOUR_UI::theArdourUI = 0;
 
 sigc::signal<void,bool> ARDOUR_UI::Blink;
 sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
+sigc::signal<void>      ARDOUR_UI::MidRapidScreenUpdate;
 sigc::signal<void>      ARDOUR_UI::SuperRapidScreenUpdate;
 sigc::signal<void,nframes_t> ARDOUR_UI::Clock;
 
@@ -361,7 +364,24 @@ ARDOUR_UI::save_ardour_state ()
 void
 ARDOUR_UI::startup ()
 {
-	// relax
+	if (engine->is_realtime()) {
+
+		struct rlimit limits;
+		
+		if (getrlimit (RLIMIT_MEMLOCK, &limits)) {
+			return;
+		}
+		
+		if (limits.rlim_cur != RLIM_INFINITY) {
+			MessageDialog msg (_("WARNING: Your system has a limit for maximum amount of locked memory. "
+					     "This might cause Ardour to run out of memory before your system "
+					     "runs out of memory. \n\n"
+					     "You can view the memory limit with 'ulimit -l', "
+					     "and it is normally controlled by /etc/security/limits.conf"));
+			
+			msg.run ();
+		}
+	}
 }
 
 void
@@ -484,6 +504,13 @@ ARDOUR_UI::every_point_one_seconds ()
 	update_speed_display ();
 	RapidScreenUpdate(); /* EMIT_SIGNAL */
 	return TRUE;
+}
+
+gint
+ARDOUR_UI::every_point_oh_five_seconds ()
+{
+	MidRapidScreenUpdate(); /* EMIT_SIGNAL */
+	return true;
 }
 
 gint
@@ -1244,6 +1271,49 @@ ARDOUR_UI::engine_running ()
 	ENSURE_GUI_THREAD (mem_fun(*this, &ARDOUR_UI::engine_running));
 	ActionManager::set_sensitive (ActionManager::jack_sensitive_actions, true);
 	ActionManager::set_sensitive (ActionManager::jack_opposite_sensitive_actions, false);
+
+	Glib::RefPtr<Action> action;
+	char* action_name = 0;
+
+	switch (engine->frames_per_cycle()) {
+	case 32:
+		action_name = X_("JACKLatency32");
+		break;
+	case 64:
+		action_name = X_("JACKLatency64");
+		break;
+	case 128:
+		action_name = X_("JACKLatency128");
+		break;
+	case 512:
+		action_name = X_("JACKLatency512");
+		break;
+	case 1024:
+		action_name = X_("JACKLatency1024");
+		break;
+	case 2048:
+		action_name = X_("JACKLatency2048");
+		break;
+	case 4096:
+		action_name = X_("JACKLatency4096");
+		break;
+	case 8192:
+		action_name = X_("JACKLatency8192");
+		break;
+	default:
+		/* XXX can we do anything useful ? */
+		break;
+	}
+
+	if (action_name) {
+
+		action = ActionManager::get_action (X_("JACK"), action_name);
+		
+		if (action) {
+			Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (action);
+			ract->set_active ();
+		}
+	}
 }
 
 void
@@ -1416,17 +1486,18 @@ ARDOUR_UI::snapshot_session ()
 {
 	ArdourPrompter prompter (true);
 	string snapname;
-	string now;
+	char timebuf[128];
 	time_t n;
+	struct tm local_time;
 
 	time (&n);
-	now = ctime (&n);
-	now = now.substr (20, 4) + now.substr (3, 16) + " (" + now.substr (0, 3) + ")";
+	localtime_r (&n, &local_time);
+	strftime (timebuf, sizeof(timebuf), "%FT%T", &local_time);
 
 	prompter.set_name ("Prompter");
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 	prompter.set_prompt (_("Name of New Snapshot"));
-	prompter.set_initial_text (now);
+	prompter.set_initial_text (timebuf);
 	
 	switch (prompter.run()) {
 	case RESPONSE_ACCEPT:
@@ -2309,13 +2380,6 @@ ARDOUR_UI::reconnect_to_jack ()
 
 		update_sample_rate (0);
 	}
-}
-
-void
-ARDOUR_UI::set_jack_buffer_size (nframes_t nframes)
-{
-	engine->request_buffer_size (nframes);
-	update_sample_rate (0);
 }
 
 int

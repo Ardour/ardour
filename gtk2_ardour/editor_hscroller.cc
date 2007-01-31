@@ -34,17 +34,20 @@ Editor::hscrollbar_allocate (Gtk::Allocation &alloc)
 bool
 Editor::hscrollbar_button_press (GdkEventButton *ev)
 {
-	return true;
+	_dragging_hscrollbar = true;
+	return false;
 }
 
 bool
 Editor::hscrollbar_button_release (GdkEventButton *ev)
 {
+	_dragging_hscrollbar = false;
+
 	if (session) {
 
 	}
 
-	return true;
+	return false;
 }
 
 void
