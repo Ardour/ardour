@@ -483,7 +483,6 @@ OptionEditor::mtc_port_chosen (MIDI::Port *port, Gtk::RadioButton* rb)
 {
 	if (session) {
 		if (rb->get_active()) {
-			cerr << "Activating MTC port " << port->name() << endl;
 			if (port) {
 				session->set_mtc_port (port->name());
 				Config->set_mtc_port_name (port->name());
@@ -500,7 +499,6 @@ OptionEditor::mmc_port_chosen (MIDI::Port* port, Gtk::RadioButton* rb)
 {
 	if (session) {
 		if (rb->get_active()) {
-			cerr << "Activating MMC port " << port->name() << endl;
 			if (port) {
 				session->set_mmc_port (port->name());
 				Config->set_mtc_port_name (port->name());
@@ -517,7 +515,6 @@ OptionEditor::midi_port_chosen (MIDI::Port* port, Gtk::RadioButton* rb)
 {
 	if (session) {
 		if (rb->get_active()) {
-			cerr << "Activating MIDI port " << port->name() << endl;
 			if (port) {
 				session->set_midi_port (port->name());
 				Config->set_midi_port_name (port->name());
