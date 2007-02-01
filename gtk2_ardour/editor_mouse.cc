@@ -346,7 +346,10 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		break;
 		
 	case StreamItem:
-		// commit = set_selected_track_from_click (press, op, true);
+		if (event->button.button == 3) {
+			/* for context click, select track */
+			commit = set_selected_track_from_click (press, op, true);
+		}
 		break;
 		    
 	case AutomationTrackItem:
