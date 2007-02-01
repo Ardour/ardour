@@ -20,7 +20,7 @@
 
 #include <gtkmm.h>
 
-#include "grouped_buttons.h"
+#include <gtkmm2ext/grouped_buttons.h>
 
 using namespace std;
 

@@ -35,6 +35,7 @@
 #include <gdkmm/color.h>
 #include <gdkmm/bitmap.h>
 
+#include <gtkmm2ext/grouped_buttons.h>
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/tearoff.h>
 #include <gtkmm2ext/utils.h>
@@ -54,7 +55,6 @@
 
 #include "ardour_ui.h"
 #include "editor.h"
-#include "grouped_buttons.h"
 #include "keyboard.h"
 #include "marker.h"
 #include "playlist_selector.h"
@@ -69,7 +69,6 @@
 #include "editing.h"
 #include "public_editor.h"
 #include "crossfade_edit.h"
-#include "audio_time_axis.h"
 #include "canvas_impl.h"
 #include "actions.h"
 #include "gui_thread.h"

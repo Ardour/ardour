@@ -145,7 +145,6 @@ export_range_markers_dialog.cc
 gain_automation_time_axis.cc
 gain_meter.cc
 ghostregion.cc
-grouped_buttons.cc
 gtk-custom-hruler.c
 gtk-custom-ruler.c
 imageframe.cc

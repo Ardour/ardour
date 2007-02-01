@@ -42,7 +42,7 @@ PBD::stacktrace (std::ostream& out, int levels)
 void
 c_stacktrace ()
 {
-	PBD::stacktrace (cout);
+	PBD::stacktrace (std::cout);
 }
 
 #endif /* HAVE_EXECINFO */
