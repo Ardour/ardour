@@ -1,0 +1,255 @@
+<?xml version="1.0" standalone="no"?>
+
+<!DOCTYPE glossary PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
+
+]>
+
+<glossary>
+	<title>Ardour Glossary</title>
+
+	<glossdiv>
+		<title>A</title>
+		<glossentry id="gt-alsa">
+			<glossterm><ulink url="http://www.alsa-project.org">Advanced Linux Sound Architecture</ulink></glossterm>
+			<acronym>ALSA</acronym>
+			<glossdef>
+				<para>
+					The Advanced Linux Sound Architecture (ALSA) provides audio and MIDI functionality to the Linux operating system.
+				</para>
+			</glossdef>
+		</glossentry>
+
+		<glossentry id="gt-auditioner">
+			<glossterm>Auditioner</glossterm>
+			<glossdef>
+				<para>
+					Some reasonable definition here.
+				</para>
+			</glossdef>
+		</glossentry>
+	</glossdiv>
+
+	<glossdiv>
+		<title>B</title>
+		<glossentry id="gt-bus">
+			<glossterm>Bus</glossterm>
+			<glossdef>
+				<para>
+					Some reasonable definition here.
+				</para>
+			</glossdef>
+		</glossentry>
+	</glossdiv>
+
+	<glossdiv>
+		<title>C</title>
+		<glossentry id="gt-crossfade">
+			<glossterm>Crossfade</glossterm>
+			<glossdef>
+				<para>
+					Some reasonable definition here.
+				</para>
+			</glossdef>
+		</glossentry>
+	</glossdiv>
+
+	<glossdiv>
+		<title>D</title>
+		<glossentry id="gt-daw">
+			<glossterm>Digital Audio Workstation</glossterm>
+			<acronym>DAW</acronym>
+			<glossdef>
+				<para>
+					Some reasonable definition here.
+				</para>
+			</glossdef>
+		</glossentry>
+	</glossdiv>
+
+	<glossdiv>
+		<title>E</title>
+		<glossentry id="gt-embed">
+			<glossterm>Embed</glossterm>
+			<glossdef>
+				<para>
+					Some reasonable definition here.
+				</para>
+			</glossdef>
+		</glossentry>
+	</glossdiv>
+
+	<glossdiv>
+		<title>H</title>
+		<glossentry id="gt-hdr">
+			<glossterm>Hard Disk Recorder</glossterm>
+			<acronym>HDR</acronym>
+			<glossdef>
+				<para>
+					Some reasonable definition here.
+				</para>
+			</glossdef>
+		</glossentry>
+	</glossdiv>
+
+	<glossdiv>
+		<title>I</title>
+		<glossentry id="gt-insert">
+			<glossterm>Insert</glossterm>
+			<glossdef>
+				<para>
+					Some reasonable definition here.
+				</para>
+			</glossdef>
+		</glossentry>
+	</glossdiv>
+
+	<glossdiv>
+		<title>J</title>
+		<glossentry id="gt-jack">
+			<glossterm><ulink url="http://jackaudio.org">Jack Audio Connection Kit</ulink></glossterm>
+			<acronym>JACK</acronym>
+			<glossdef>
+				<para>
+					Some reasonable definition here.
+				</para>
+			</glossdef>
+		</glossentry>
+	</glossdiv>
+
+	<glossdiv>
+		<title>L</title>
+		<glossentry id="gt-ladpsa">
+			<glossterm>Linux Audio Developers Simple Plugin API</glossterm>
+			<acronym>LADSPA</acronym>
+			<glossdef>
+				<para>
+					<ulink url="http://ladspa.org">Website</ulink>
+					Some reasonable definition here.
+				</para>
+			</glossdef>
+		</glossentry>
+	</glossdiv>
+
+	<glossdiv>
+		<title>M</title>
+		<glossentry id="gt-midi">
+			<glossterm>Musical Instrument Digital Interface</glossterm>
+			<acronym>MIDI</acronym>
+			<glossdef>
+				<para>
+					Some reasonable definition here.
+				</para>
+			</glossdef>
+		</glossentry>
+	</glossdiv>
+
+	<glossdiv>
+		<title>P</title>
+		<glossentry id="gt-playlist">
+			<glossterm>Playlist</glossterm>
+			<glossdef>
+				<para>
+					some reasonable definition here.
+				</para>
+			</glossdef>
+		</glossentry>
+
+		<glossentry id="gt-plugin">
+			<glossterm>plugin</glossterm>
+			<glossdef>
+				<para>
+					some reasonable definition here.
+				</para>
+				<!-- 
+				<glossseealso otherterm="gt-session"/>
+				-->
+			</glossdef>
+		</glossentry>
+
+		<glossentry id="gt-posix">
+			<glossterm>Portable Operating System Interface for uniX</glossterm>
+			<acronym>POSIX</acronym>
+			<glossdef>
+				<para>
+					Some reasonable definition here.
+				</para>
+			</glossdef>
+		</glossentry>
+	</glossdiv>
+
+	<glossdiv>
+		<title>R</title>
+
+		<glossentry id="gt-region">
+			<glossterm>Region</glossterm>
+			<glossdef>
+				<para>
+					Some reasonable definition here.
+				</para>
+			</glossdef>
+		</glossentry>
+
+		<glossentry id="gt-redirect">
+			<glossterm>Redirect</glossterm>
+			<glossdef>
+				<para>
+					Some reasonable definition here.
+				</para>
+			</glossdef>
+		</glossentry>
+	</glossdiv>
+
+	<glossdiv>
+		<title>S</title>
+		<glossentry id="gt-send">
+			<glossterm>Send</glossterm>
+			<glossdef>
+				<para>
+					Some reasonable definition here.
+				</para>
+			</glossdef>
+		</glossentry>
+		<glossentry id="gt-session">
+			<glossterm>Session</glossterm>
+			<glossdef>
+				<para>
+					Some reasonable definition here.
+				</para>
+			</glossdef>
+		</glossentry>
+		<glossentry id="gt-session-template">
+			<glossterm>Session Template</glossterm>
+			<glossdef>
+				<para>
+					Some reasonable definition here.
+				</para>
+				<glossseealso otherterm="gt-session"/>
+			</glossdef>
+		</glossentry>
+	</glossdiv>
+
+	<glossdiv>
+		<title>T</title>
+		<glossentry id="gt-track">
+			<glossterm>Track</glossterm>
+			<glossdef>
+				<para>
+					Some reasonable definition here.
+				</para>
+			</glossdef>
+		</glossentry>
+	</glossdiv>
+
+	<glossdiv>
+		<title>V</title>
+		<glossentry id="gt-vst">
+			<glossterm>Virtual Studio Technology</glossterm>
+			<acronym>VST</acronym>
+			<glossdef>
+				<para>
+					Some reasonable definition here.
+				</para>
+			</glossdef>
+		</glossentry>
+	</glossdiv>
+</glossary>

@@ -1,0 +1,61 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
+
+]>
+
+<section id="sn-editor-zoom-key-bindings">
+
+	<title>Zoom Key Bindings</title>
+
+	<table id="tbl-editor-zoom-key-bindings">
+		<title>Editor Zoom Key Bindings</title>
+		<tgroup cols = "2">
+			<colspec colnum="1" colname="Key Binding" colwidth="1"/>
+			<colspec colnum="2" colname="Action" colwidth= "2"/>
+			<thead>
+				<row>
+					<entry>
+						Key Binding
+					</entry>
+					<entry>
+						Action
+					</entry>
+				</row>
+			</thead>
+			<tbody>
+				<row>
+					<entry>
+						<keycombo><keycap>=</keycap>
+						</keycombo>
+					</entry>
+					<entry>
+						zoom in on timeline
+					</entry>
+				</row>
+				<row>
+					<entry>
+						<keycombo><keycap>-</keycap>
+						</keycombo>
+					</entry>
+					<entry>
+						zoom out on timeline
+					</entry>
+				</row>
+				<row>
+					<entry>
+						<keycombo><keycap>Z</keycap>
+						</keycombo>
+					</entry>
+					<entry>
+						switch zoom focus to playhead
+					</entry>
+				</row>
+			</tbody>
+		</tgroup>
+	</table>
+	<!--
+	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
+		href="Some_Subsection.xml" />
+	-->
+
+</section>

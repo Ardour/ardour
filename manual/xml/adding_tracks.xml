@@ -1,0 +1,53 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
+
+]>
+
+<section id="sn-adding-tracks">
+
+	<title>Adding Tracks</title>
+
+	<para>
+		To add a new Track or Bus activate the New Track Dialog
+	</para>
+
+	<itemizedlist>
+		<listitem>
+			<para>
+				<menuchoice>
+					<guimenu>Session</guimenu>
+					<guisubmenu>Add Track/Bus</guisubmenu>
+				</menuchoice> 
+			</para>
+		</listitem>
+	</itemizedlist>
+	
+	<mediaobject>
+		<imageobject>
+			<imagedata fileref="images/add_track_bus.png"/>
+		</imageobject>
+	</mediaobject>
+
+	<para>
+		In the Add Tracks dialog, choose whether you wish to add a new Track or a new Bus.
+	</para>
+
+	<itemizedlist>
+		<listitem>
+			<para>
+				Enter the number of new tracks/busses you want to add. 
+			</para>
+		</listitem>
+	</itemizedlist>
+	
+	<para>
+		Choose the I/O configuration of the tracks/busses you are adding using
+		the clickbox.
+	</para>
+
+	<!--
+	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
+		href="Some_Subsection.xml" />
+	-->
+
+</section>
