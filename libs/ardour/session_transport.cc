@@ -656,8 +656,6 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 
 	} else {
 
-		cerr << "butler not requested\n";
-
 		/* this is functionally what clear_clicks() does but with a tentative lock */
 
 		Glib::RWLock::WriterLock clickm (click_lock, Glib::TRY_LOCK);
