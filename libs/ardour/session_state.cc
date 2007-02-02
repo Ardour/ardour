@@ -589,6 +589,12 @@ Session::save_state (string snapshot_name, bool pending)
 		return 1;
 	}
 
+	if (!_engine.connected ()) {
+		error << _("Ardour's audio engine is not connected and state saving would lose all I/O connections. Session not saved")
+		      << endmsg;
+		return 1;
+	}
+
 	tree.set_root (&get_state());
 
 	if (snapshot_name.empty()) {
