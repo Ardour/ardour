@@ -799,7 +799,7 @@ Session::set_transport_speed (float speed, bool abort)
 		   before the last stop, then we have to do extra work.
 		*/
 
-		if ((_transport_speed && speed * _transport_speed < 0.0f) || (_last_transport_speed * speed < 0.0f)) {
+		if ((_transport_speed && speed * _transport_speed < 0.0f) || (_last_transport_speed * speed < 0.0f) || (_last_transport_speed == 0.0f && speed < 0.0f)) {
 			post_transport_work = PostTransportWork (post_transport_work | PostTransportReverse);
 		}
 		
