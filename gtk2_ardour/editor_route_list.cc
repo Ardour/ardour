@@ -266,6 +266,8 @@ Editor::redisplay_route_list ()
 		
 	}
 
+	full_canvas_height = position;
+
 	/* make sure the cursors stay on top of every newly added track */
 
 	cursor_group->raise_to_top ();

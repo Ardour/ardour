@@ -599,3 +599,4 @@ short_path (ustring path, uint32_t target_characters)
 		
 	}
 }
+
