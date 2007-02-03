@@ -379,6 +379,7 @@ ARDOUR_UI::startup ()
 					     "You can view the memory limit with 'ulimit -l', "
 					     "and it is normally controlled by /etc/security/limits.conf"));
 			
+			editor->ensure_float (msg);
 			msg.run ();
 		}
 	}
