@@ -59,6 +59,10 @@ procedure before
 	<xsl:call-template name="inline.boldseq"/>
 </xsl:template>
 
+<xsl:template match="mousebutton">
+	<xsl:call-template name="inline.boldseq"/>
+</xsl:template>
+
 <xsl:template match="filename">
 	<xsl:call-template name="inline.monoseq"/>
 </xsl:template>
