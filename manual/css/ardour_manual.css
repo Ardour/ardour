@@ -25,6 +25,25 @@ div.longdesc-link {
 	float:right;
 }
 
+/* Images */
+
+img {
+	display:block;
+	margin:	1.5em;
+}
+
+
+.screen {
+	background-color:#dddddd;
+	color:#333333;
+}
+
+pre,code{ 
+	padding:.3em 1em;
+	font-size:0.9em;
+	font-family:"Bitstream vera mono",monospace;
+}
+
 /* Headings */
 
 h1,h2,h3,h4,h5,h6 {
