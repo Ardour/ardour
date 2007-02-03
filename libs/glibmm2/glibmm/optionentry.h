@@ -64,7 +64,11 @@ public:
   {
     FLAG_HIDDEN = 1 << 0,
     FLAG_IN_MAIN = 1 << 1,
-    FLAG_REVERSE = 1 << 2
+    FLAG_REVERSE = 1 << 2,
+    FLAG_NO_ARG = 1 << 3,
+    FLAG_FILENAME = 1 << 4,
+    FLAG_OPTIONAL_ARG = 1 << 5,
+    FLAG_NOALIAS = 1 << 6
   } GOptionFlags;
 
   OptionEntry();
@@ -74,23 +78,23 @@ public:
   OptionEntry& operator=(const OptionEntry& src);
 
  
-  Glib::ustring get_long_name() const;
-  void set_long_name(const Glib::ustring& value);
-  
-  gchar get_short_name() const;
-  void set_short_name(const gchar& value);
-  
-  int get_flags() const;
-  void set_flags(const int& value);
-  
+   Glib::ustring get_long_name() const;
+    void set_long_name(const Glib::ustring& value);
+   
+   gchar get_short_name() const;
+    void set_short_name(const gchar& value);
+   
+   int get_flags() const;
+    void set_flags(const int& value);
+   
   //TODO: G_OPTION_ARG_CALLBACK,
     
-  Glib::ustring get_description() const;
-  void set_description(const Glib::ustring& value);
-  
-  Glib::ustring get_arg_description() const;
-  void set_arg_description(const Glib::ustring& value);
-  
+   Glib::ustring get_description() const;
+    void set_description(const Glib::ustring& value);
+   
+   Glib::ustring get_arg_description() const;
+    void set_arg_description(const Glib::ustring& value);
+   
   GOptionEntry*       gobj()       { return gobject_; }
   const GOptionEntry* gobj() const { return gobject_; }
   

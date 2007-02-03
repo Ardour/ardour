@@ -275,7 +275,7 @@ GParamSpec* Value<float>::create_param_spec(const Glib::ustring& name) const
 {
   return g_param_spec_float(
       name.c_str(), 0, 0,
-      G_MINFLOAT, G_MAXFLOAT, g_value_get_float(&gobject_),
+      -G_MAXFLOAT, G_MAXFLOAT, g_value_get_float(&gobject_),
       GParamFlags(G_PARAM_READABLE | G_PARAM_WRITABLE));
 }
 
@@ -302,7 +302,7 @@ GParamSpec* Value<double>::create_param_spec(const Glib::ustring& name) const
 {
   return g_param_spec_double(
       name.c_str(), 0, 0,
-      G_MINDOUBLE, G_MAXDOUBLE, g_value_get_double(&gobject_),
+      -G_MAXDOUBLE, G_MAXDOUBLE, g_value_get_double(&gobject_),
       GParamFlags(G_PARAM_READABLE | G_PARAM_WRITABLE));
 }
 

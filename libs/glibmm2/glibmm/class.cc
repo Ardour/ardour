@@ -106,10 +106,11 @@ void Class::custom_class_init_function(void* g_class, void* class_data)
   // the vfunc and default signal handler callbacks.
   (*self->class_init_func_)(g_class, 0);
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
   GObjectClass *const gobject_class = static_cast<GObjectClass*>(g_class);
-
   gobject_class->get_property = &Glib::custom_get_property_callback;
   gobject_class->set_property = &Glib::custom_set_property_callback;
+#endif //GLIBMM_PROPERTIES_ENABLED
 }
 
 } // namespace Glib

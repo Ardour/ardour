@@ -24,6 +24,8 @@
  */
 
 
+  #undef G_DISABLE_DEPRECATED //So we can use deprecated functions in our deprecated methods.
+ 
 #include <glibmm/ustring.h>
 
 #include <glib/gdate.h>
@@ -32,7 +34,6 @@
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 extern "C" { struct tm; }
 #endif
-
 
 namespace Glib
 {
@@ -118,15 +119,41 @@ enum DMY
    */
   void set_parse (const Glib::ustring& str);
 
-  //TODO: Add set_time_current() - see the docs comment below.?
+  #ifndef GLIBMM_DISABLE_DEPRECATED
+
   /** Sets the value of a date from a GTime (time_t) value. 
-   * To set the value of a date to the current day, you could write:
-   *
-   *set_time(time(NULL));
    *
    * @param time GTime value to set.
+   *
+   * @deprecated Please use set_time(time_t) or set_time(const GTimeVal&).
    */
   void set_time(GTime time);
+  #endif // GLIBMM_DISABLE_DEPRECATED
+
+
+  /** Sets the value of a date from a <type>time_t</type> value. 
+   *
+   * @param timet time_t value to set
+   *
+   * @see set_time_current()
+   *
+   * Since: 2.10
+   */
+  void set_time(time_t timet);
+
+  /** Sets the value of a date from a GTimeVal value.  Note that the
+   * tv_usec member is ignored, because Glib::Date can't make use of the
+   * additional precision.
+   *
+   * @see set_time_current()
+   * 
+   * @param timeval GTimeVal value to set
+   *
+   * Since: 2.10
+   */
+  void set_time(const GTimeVal& timeval);
+
+  void set_time_current();
 
   /** Sets the month of the year. If the resulting day-month-year triplet is invalid, the date will be invalid.
    * @param month Month to set.

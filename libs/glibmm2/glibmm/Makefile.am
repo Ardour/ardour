@@ -1,7 +1,7 @@
 ## Copyright (c) 2001
 ## The gtkmm development team.
 
-SUBDIRS = 
+SUBDIRS = private
 
 sublib_name = glibmm
 sublib_libname = glibmm-2.4
@@ -9,8 +9,9 @@ sublib_namespace = Glib
 sublib_cflags = $(GLIBMM_CFLAGS)
 
 sublib_files_extra_posix_cc =
+sublib_files_extra_win32_cc =
 
-sublib_files_general_cc = \
+sublib_files_extra_general_cc = \
   class.cc \
   containers.cc \
   debug.cc \
@@ -43,9 +44,10 @@ sublib_files_general_cc = \
   value_custom.cc \
   wrap.cc
 
-sublib_files_posix_h =
+sublib_files_extra_posix_h =
+sublib_files_extra_win32_h =
 
-sublib_files_general_h = \
+sublib_files_extra_general_h = \
   arrayhandle.h \
   class.h \
   containerhandle_shared.h  \
@@ -86,11 +88,15 @@ sublib_files_general_h = \
   value_custom.h \
   wrap.h
 
-files_built_general_cc  = value_basictypes.cc
-files_built_general_h  = signalproxy.h value_basictypes.h
+files_built_general_cc  += value_basictypes.cc
+files_built_general_h  += signalproxy.h value_basictypes.h
 
 lib_LTLIBRARIES = libglibmm-2.4.la
+if OS_WIN32
+libglibmm_2_4_la_SOURCES = $(files_all_general_cc) $(files_all_win32_cc)
+else
 libglibmm_2_4_la_SOURCES = $(files_all_general_cc) $(files_all_posix_cc)
+endif
 libglibmm_2_4_la_LDFLAGS = $(common_ldflags)
 libglibmm_2_4_la_LIBADD = $(GLIBMM_LIBS)
 

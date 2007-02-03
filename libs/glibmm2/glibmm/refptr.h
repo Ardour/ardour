@@ -140,6 +140,16 @@ public:
   template <class T_CastFrom>
   static inline RefPtr<T_CppObject> cast_static(const RefPtr<T_CastFrom>& src);
 
+  /** Cast to non-const.
+   *
+   * The RefPtr can't be cast with the usual notation so instead you can use
+   * @code
+   *   ptr_unconst = RefPtr<UnConstType>::cast_const(ptr_const);
+   * @endcode
+   */
+  template <class T_CastFrom>
+  static inline RefPtr<T_CppObject> cast_const(const RefPtr<T_CastFrom>& src);
+
 private:
   T_CppObject* pCppObject_;
 };
@@ -295,6 +305,19 @@ inline
 RefPtr<T_CppObject> RefPtr<T_CppObject>::cast_static(const RefPtr<T_CastFrom>& src)
 {
   T_CppObject *const pCppObject = static_cast<T_CppObject*>(src.operator->());
+
+  if(pCppObject)
+    pCppObject->reference();
+
+  return RefPtr<T_CppObject>(pCppObject);
+}
+
+template <class T_CppObject>
+  template <class T_CastFrom>
+inline
+RefPtr<T_CppObject> RefPtr<T_CppObject>::cast_const(const RefPtr<T_CastFrom>& src)
+{
+  T_CppObject *const pCppObject = const_cast<T_CppObject*>(src.operator->());
 
   if(pCppObject)
     pCppObject->reference();

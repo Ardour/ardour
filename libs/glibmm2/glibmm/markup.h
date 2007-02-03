@@ -95,7 +95,14 @@ public:
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 private:
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
   static void throw_func(GError* gobject);
+#else
+  //When not using exceptions, we just pass the Exception object around without throwing it:
+  static std::auto_ptr<Glib::Error> throw_func(GError* gobject);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
   friend void wrap_init(); // uses throw_func()
 #endif
 };
