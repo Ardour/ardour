@@ -39,6 +39,7 @@ gtkardour.Merge ([
     libraries['flac'],
     libraries['lrdf'],
     libraries['glibmm2'],
+    libraries['cairomm'],
     libraries['pangomm'],
     libraries['atkmm'],
     libraries['gdkmm2'],

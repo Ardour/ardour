@@ -88,8 +88,8 @@ sublib_files_extra_general_h = \
   value_custom.h \
   wrap.h
 
-files_built_general_cc  += value_basictypes.cc
-files_built_general_h  += signalproxy.h value_basictypes.h
+files_built_general_cc  = value_basictypes.cc
+files_built_general_h  = signalproxy.h value_basictypes.h
 
 lib_LTLIBRARIES = libglibmm-2.4.la
 if OS_WIN32

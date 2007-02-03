@@ -3,6 +3,7 @@
 #ifndef _LIBGNOMECANVASMM_BPATH_H
 #define _LIBGNOMECANVASMM_BPATH_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -95,9 +96,13 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
 
@@ -107,22 +112,26 @@ private:
 public:
   explicit Bpath(Group& parent);
 
-  // This property stores a pointer to GnomeCanvasPathDef
-  /** 
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy<gpointer> property_bpath() ;
-
+  //TODO: Use Glib::RefPtr<PathDef> when we can break ABI:
+  #ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
-  Glib::PropertyProxy_ReadOnly<gpointer> property_bpath() const;
+  Glib::PropertyProxy<GnomeCanvasPathDef*> property_bpath() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+/** 
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy_ReadOnly<GnomeCanvasPathDef*> property_bpath() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
   void set_bpath(const Glib::RefPtr<PathDef>& path);
@@ -143,6 +152,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gnome::Canvas::Bpath* wrap(GnomeCanvasBpath* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _LIBGNOMECANVASMM_BPATH_H */
 

@@ -15,7 +15,8 @@ gtkmm2ext.Merge ([
     libraries['pangomm'],
     libraries['atkmm'],
     libraries['gdkmm2'],
-    libraries['gtkmm2']
+    libraries['gtkmm2'],
+    libraries['cairomm']
     ])
 
 #

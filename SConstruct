@@ -398,13 +398,14 @@ deps = \
 {
 	'glib-2.0'             : '2.10.1',
 	'gthread-2.0'          : '2.10.1',
-	'gtk+-2.0'             : '2.8.1',
+	'gtk+-2.0'             : '2.10.0',
 	'libxml-2.0'           : '2.6.0',
 	'samplerate'           : '0.1.0',
 	'raptor'               : '1.4.2',
 	'lrdf'                 : '0.4.0',
 	'jack'                 : '0.101.1',
-	'libgnomecanvas-2.0'   : '2.0'
+	'libgnomecanvas-2.0'   : '2.0',
+        'cairo'                : '1.2.4'
 }
 
 def DependenciesRequiredMessage():
@@ -481,6 +482,12 @@ libraries['xml'].ParseConfig('pkg-config --cflags --libs libxml-2.0')
 libraries['xslt'] = LibraryInfo()
 libraries['xslt'].ParseConfig('pkg-config --cflags --libs libxslt')
 
+libraries['cairo'] = LibraryInfo()
+libraries['cairo'].ParseConfig ('pkg-config --cflags --libs cairo')
+
+libraries['pangocairo'] = LibraryInfo()
+libraries['pangocairo'].ParseConfig ('pkg-config --cflags --libs pangocairo')
+
 libraries['glib2'] = LibraryInfo()
 libraries['glib2'].ParseConfig ('pkg-config --cflags --libs glib-2.0')
 libraries['glib2'].ParseConfig ('pkg-config --cflags --libs gobject-2.0')
@@ -489,6 +496,9 @@ libraries['glib2'].ParseConfig ('pkg-config --cflags --libs gthread-2.0')
 
 libraries['gtk2'] = LibraryInfo()
 libraries['gtk2'].ParseConfig ('pkg-config --cflags --libs gtk+-2.0')
+
+libraries['gtk2-unix-print'] = LibraryInfo()
+libraries['gtk2-unix-print'].ParseConfig ('pkg-config --cflags --libs gtk+-unix-print-2.0')
 
 libraries['pango'] = LibraryInfo()
 libraries['pango'].ParseConfig ('pkg-config --cflags --libs pango')
@@ -832,9 +842,6 @@ if env['SYSLIBS']:
                                     LIBPATH='#libs/libsndfile',
                                     CPPPATH=['#libs/libsndfile', '#libs/libsndfile/src'])
 
-#    libraries['libglademm'] = LibraryInfo()
-#    libraries['libglademm'].ParseConfig ('pkg-config --cflags --libs libglademm-2.4')
-
 #    libraries['flowcanvas'] = LibraryInfo(LIBS='flowcanvas', LIBPATH='#/libs/flowcanvas', CPPPATH='#libs/flowcanvas')
     libraries['soundtouch'] = LibraryInfo()
     libraries['soundtouch'].ParseConfig ('pkg-config --cflags --libs soundtouch-1.0')
@@ -879,6 +886,9 @@ else:
     libraries['glibmm2'] = LibraryInfo(LIBS='glibmm2',
                                     LIBPATH='#libs/glibmm2',
                                     CPPPATH='#libs/glibmm2')
+    libraries['cairomm'] = LibraryInfo(LIBS='cairomm',
+                                    LIBPATH='#libs/cairomm',
+                                    CPPPATH='#libs/cairomm')
     libraries['pangomm'] = LibraryInfo(LIBS='pangomm',
                                     LIBPATH='#libs/gtkmm2/pango',
                                     CPPPATH='#libs/gtkmm2/pango')
@@ -901,9 +911,6 @@ else:
     libraries['sndfile-ardour'] = LibraryInfo(LIBS='libsndfile-ardour',
                                     LIBPATH='#libs/libsndfile',
                                     CPPPATH=['#libs/libsndfile', '#libs/libsndfile/src'])
-#    libraries['libglademm'] = LibraryInfo(LIBS='libglademm',
-#                                          LIBPATH='#libs/libglademm',
-#                                          CPPPATH='#libs/libglademm')
     libraries['appleutility'] = LibraryInfo(LIBS='libappleutility',
                                             LIBPATH='#libs/appleutility',
                                             CPPPATH='#libs/appleutility')
@@ -932,6 +939,7 @@ else:
     
     gtk_subdirs = [
 	'libs/glibmm2',
+        'libs/cairomm',
 	'libs/gtkmm2/pango',
 	'libs/gtkmm2/atk',
 	'libs/gtkmm2/gdk',
