@@ -103,7 +103,7 @@ void connection::set_slot(slot_base* sl)
 
 void* connection::notify(void* data)
 {
-  connection* self = (connection*)data;
+  connection* self = reinterpret_cast<connection*>(data);
   self->slot_ = 0;
   return 0;
 }

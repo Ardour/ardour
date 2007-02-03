@@ -20,6 +20,9 @@
 
 #include <sigc++/trackable.h>
 #include <iostream>
+
+SIGC_USING_STD(ostream)
+
 using namespace std;
 
 namespace sigc
