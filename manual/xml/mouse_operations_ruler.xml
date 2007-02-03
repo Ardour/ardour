@@ -77,7 +77,7 @@
 			<tbody>
 				<row>
 					<entry>
-						Button1 drag
+						<mousebutton>Button1</mousebutton> drag
 					</entry>
 					<entry>
 						define a new punch or loop range

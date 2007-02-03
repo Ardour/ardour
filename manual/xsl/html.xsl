@@ -88,4 +88,16 @@ section toc
 part toc
 </xsl:param>
 
+<xsl:template name="nongraphical.admonition">
+	<div class="{name(.)}">
+		<h2 class="title">
+			<xsl:call-template name="anchor"/>
+			<xsl:if test="$admon.textlabel != 0 or title">
+				<xsl:apply-templates select="." mode="object.title.markup"/>
+			</xsl:if>
+		</h2>
+		<xsl:apply-templates/>
+	</div>
+</xsl:template>
+
 </xsl:stylesheet>
