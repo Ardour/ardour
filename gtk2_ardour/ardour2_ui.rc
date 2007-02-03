@@ -143,7 +143,7 @@ style "transport_base" = "medium_bold_text"
 
 style "black_mackie_menu_bar"
 {
-  font_name = "sans bold 9"
+  font_name = "sans bold 7"
   fg[NORMAL] = { 1.0, 1.0, 1.0 }
   bg[NORMAL] = { 0, 0, 0 }
 }
