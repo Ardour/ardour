@@ -3,6 +3,7 @@
 #ifndef _GDKMM_DEVICE_H
 #define _GDKMM_DEVICE_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -198,23 +199,23 @@ public:
   /** Gets the name of this device.
    * @result The name of this device.
    */
-  Glib::ustring get_name() const;
-  
+   Glib::ustring get_name() const;
+   
   /** Gets the type of this device.
    * @result The type of this device.
    */
-  InputSource get_source() const;
-
+   InputSource get_source() const;
+ 
   /** Gets the mode of this device.
    * @result The mode of this device.
    */
-  InputMode get_mode() const;
-    
+   InputMode get_mode() const;
+     
   /** Discover whether the pointer follows device motion.
    * @result true if the pointer follows device motion.
    */
-  bool get_has_cursor() const;
-
+   bool get_has_cursor() const;
+ 
   //TODO: Add suitable accessor for the information in these fields. For now, people must use gobj() and access them directly.
   //gint num_axes	the length of the axes array.
   //GdkDeviceAxis *axes	an array of GdkDeviceAxis, describing the axes of this device.
@@ -227,11 +228,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

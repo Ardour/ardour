@@ -86,6 +86,8 @@ extern GTKMM_API const Gtk::BuiltinStockID FILE;             /*!< @image html st
 extern GTKMM_API const Gtk::BuiltinStockID FIND;             /*!< @image html stock_search_24.png              */
 extern GTKMM_API const Gtk::BuiltinStockID FIND_AND_REPLACE; /*!< @image html stock_search_replace_24.png      */
 extern GTKMM_API const Gtk::BuiltinStockID FLOPPY;           /*!< @image html stock_save_24.png                */
+extern GTKMM_API const Gtk::BuiltinStockID FULLSCREEN;       /*!< @image html stock_fullscreen_24.png                */
+extern GTKMM_API const Gtk::BuiltinStockID LEAVE_FULLSCREEN; /*!< @image html stock_leave_fullscreen_24.png                */
 extern GTKMM_API const Gtk::BuiltinStockID GOTO_BOTTOM;      /*!< @image html stock_bottom_24.png              */
 extern GTKMM_API const Gtk::BuiltinStockID GOTO_FIRST;       /*!< @image html stock_first_24.png               */
 extern GTKMM_API const Gtk::BuiltinStockID GOTO_LAST;        /*!< @image html stock_last_24.png                */
@@ -98,6 +100,7 @@ extern GTKMM_API const Gtk::BuiltinStockID HARDDISK;         /*!< @image html st
 extern GTKMM_API const Gtk::BuiltinStockID HELP;             /*!< @image html stock_help_24.png                */
 extern GTKMM_API const Gtk::BuiltinStockID HOME;             /*!< @image html stock_home_24.png                */
 extern GTKMM_API const Gtk::BuiltinStockID INDEX;            /*!< @image html stock_index_24.png               */
+extern GTKMM_API const Gtk::BuiltinStockID INFO;            /*!< @image html stock_info_24.png               */
 extern GTKMM_API const Gtk::BuiltinStockID INDENT;           /*!< @image html stock_indent_24.png              */
 extern GTKMM_API const Gtk::BuiltinStockID UNINDENT;         /*!< @image html stock_unindent_24.png            */
 extern GTKMM_API const Gtk::BuiltinStockID ITALIC;           /*!< @image html stock_text_italic_24.png         */

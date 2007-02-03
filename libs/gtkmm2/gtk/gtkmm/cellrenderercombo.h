@@ -3,6 +3,7 @@
 #ifndef _GTKMM_CELLRENDERERCOMBO_H
 #define _GTKMM_CELLRENDERERCOMBO_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -97,11 +98,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -110,14 +117,17 @@ public:
 
   CellRendererCombo();
 
-  /** The model containing the possible values for the combo box.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The model containing the possible values for the combo box.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy< Glib::RefPtr<Gtk::TreeModel> > property_model() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The model containing the possible values for the combo box.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -125,15 +135,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly< Glib::RefPtr<Gtk::TreeModel> > property_model() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** A column in the data source model to get the strings from.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** A column in the data source model to get the strings from.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_text_column() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** A column in the data source model to get the strings from.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -141,15 +155,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_text_column() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** If FALSE
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** If FALSE
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_has_entry() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** If FALSE
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -157,9 +175,14 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_has_entry() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
-  virtual Glib::PropertyProxy_Base _property_renderable(); //override
+#ifdef GLIBMM_PROPERTIES_ENABLED
+  virtual Glib::PropertyProxy_Base _property_renderable();
+#else
+  virtual Glib::ustring _property_renderable();
+#endif
 
 
 };
@@ -175,6 +198,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::CellRendererCombo* wrap(GtkCellRendererCombo* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_CELLRENDERERCOMBO_H */
 

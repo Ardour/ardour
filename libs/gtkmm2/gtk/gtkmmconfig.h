@@ -6,8 +6,8 @@
 
 /* version numbers */
 #define GTKMM_MAJOR_VERSION 2
-#define GTKMM_MINOR_VERSION 6
-#define GTKMM_MICRO_VERSION 1
+#define GTKMM_MINOR_VERSION 10
+#define GTKMM_MICRO_VERSION 7
 
 #ifdef GLIBMM_CONFIGURE
 /* compiler feature tests that are used during compile time and run-time
@@ -20,6 +20,7 @@
 
 /* #undef HAVE_FLOCKFILE */
 /* #undef HAVE_FUNLOCKFILE */
+/* #undef HAVE_MKFIFO */
 /* #undef GETC_UNLOCKED */
 
 #endif /* GLIBMM_CONFIGURE */

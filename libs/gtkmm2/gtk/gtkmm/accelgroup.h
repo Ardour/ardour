@@ -3,6 +3,7 @@
 #ifndef _GTKMM_ACCELGROUP_H
 #define _GTKMM_ACCELGROUP_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -164,7 +165,7 @@ public:
    * @param accelerator_mods Accelerator modifier mask.
    * @return A newly-allocated string representing the accelerator.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   static Glib::ustring get_label(guint accelerator_key, Gdk::ModifierType accelerator_mods);
 
@@ -208,11 +209,20 @@ public:
 
   //TODO: Discover real parameter names:
   
+/**
+   * @par Prototype:
+   * <tt>bool %accel_activate(const Glib::RefPtr<Glib::Object>& object, guint param2, Gdk::ModifierType param3)</tt>
+   */
 
   Glib::SignalProxy3< bool,const Glib::RefPtr<Glib::Object>&,guint,Gdk::ModifierType > signal_accel_activate();
    
   //TODO: The C type is unpleasant:
+  //This has C docs, but it isn't worth mentioning them for such a useless signal. murrayc.
   
+/**
+   * @par Prototype:
+   * <tt>void %accel_changed(guint keyval, Gdk::ModifierType modifier, GClosure* accel_closure)</tt>
+   */
 
   Glib::SignalProxy3< void,guint,Gdk::ModifierType,GClosure* > signal_accel_changed();
 
@@ -221,12 +231,18 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_accel_changed(guint keyval, Gdk::ModifierType modifier, GClosure* accel_closure);
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

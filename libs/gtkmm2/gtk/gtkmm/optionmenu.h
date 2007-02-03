@@ -3,6 +3,9 @@
 #ifndef _GTKMM_OPTIONMENU_H
 #define _GTKMM_OPTIONMENU_H
 
+#ifndef GTKMM_DISABLE_DEPRECATED
+
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -95,16 +98,23 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_changed();
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
 
+  
 public:
 
   OptionMenu();
@@ -128,6 +138,11 @@ public:
   void set_history(guint index);
 
   
+/**
+   * @par Prototype:
+   * <tt>void %changed()</tt>
+   */
+
   Glib::SignalProxy0< void > signal_changed();
 	
 
@@ -148,6 +163,11 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::OptionMenu* wrap(GtkOptionMenu* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
+#endif // GTKMM_DISABLE_DEPRECATED
+
+
 #endif /* _GTKMM_OPTIONMENU_H */
 

@@ -3,6 +3,7 @@
 #ifndef _GDKMM_VISUAL_H
 #define _GDKMM_VISUAL_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -210,14 +211,14 @@ public:
   /** Gets the screen to which this visual belongs
    * @return The screen to which this visual belongs.
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   Glib::RefPtr<Screen> get_screen();
    
   /** Gets the screen to which this visual belongs
    * @return The screen to which this visual belongs.
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   Glib::RefPtr<const Screen> get_screen() const;
 
@@ -226,11 +227,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

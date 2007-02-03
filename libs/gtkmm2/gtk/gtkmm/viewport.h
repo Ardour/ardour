@@ -3,6 +3,7 @@
 #ifndef _GTKMM_VIEWPORT_H
 #define _GTKMM_VIEWPORT_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -89,12 +90,18 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_set_scroll_adjustments(Gtk::Adjustment* hadjustment, Gtk::Adjustment* vadjustment);
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -161,17 +168,25 @@ public:
   ShadowType get_shadow_type() const;
 
   
+/**
+   * @par Prototype:
+   * <tt>void %set_scroll_adjustments(Gtk::Adjustment* hadjustment, Gtk::Adjustment* vadjustment)</tt>
+   */
+
   Glib::SignalProxy2< void,Gtk::Adjustment*,Gtk::Adjustment* > signal_set_scroll_adjustments();
 
 
-  /** The GtkAdjustment that determines the values of the horizontal position for this viewport.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The GtkAdjustment that determines the values of the horizontal position for this viewport.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Gtk::Adjustment*> property_hadjustment() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The GtkAdjustment that determines the values of the horizontal position for this viewport.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -179,15 +194,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Gtk::Adjustment*> property_hadjustment() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The GtkAdjustment that determines the values of the vertical position for this viewport.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The GtkAdjustment that determines the values of the vertical position for this viewport.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Gtk::Adjustment*> property_vadjustment() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The GtkAdjustment that determines the values of the vertical position for this viewport.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -195,15 +214,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Gtk::Adjustment*> property_vadjustment() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Determines how the shadowed box around the viewport is drawn.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Determines how the shadowed box around the viewport is drawn.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<ShadowType> property_shadow_type() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Determines how the shadowed box around the viewport is drawn.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -211,6 +234,7 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<ShadowType> property_shadow_type() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -226,6 +250,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Viewport* wrap(GtkViewport* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_VIEWPORT_H */
 

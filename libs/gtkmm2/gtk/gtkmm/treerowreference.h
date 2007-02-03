@@ -3,6 +3,7 @@
 #ifndef _GTKMM_TREEROWREFERENCE_H
 #define _GTKMM_TREEROWREFERENCE_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -92,6 +93,23 @@ public:
   TreeModel::Path get_path() const;
 
   
+  /** Returns the model which @a reference  is monitoring in order to appropriately
+   * the path.
+   * @return The model, or <tt>0</tt>.
+   * 
+   * @newin2p8.
+   */
+  Glib::RefPtr<TreeModel> get_model();
+  
+  /** Returns the model which @a reference  is monitoring in order to appropriately
+   * the path.
+   * @return The model, or <tt>0</tt>.
+   * 
+   * @newin2p8.
+   */
+  Glib::RefPtr<const TreeModel> get_model() const;
+
+  
   /** Returns <tt>true</tt> if the %reference is non-<tt>0</tt> and refers to a current valid
    * path.
    * @return <tt>true</tt> if %reference points to a valid path.
@@ -133,6 +151,7 @@ class Value<Gtk::TreeRowReference> : public Glib::Value_Boxed<Gtk::TreeRowRefere
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 } // namespace Glib
+
 
 #endif /* _GTKMM_TREEROWREFERENCE_H */
 

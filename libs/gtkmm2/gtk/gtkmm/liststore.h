@@ -3,6 +3,7 @@
 #ifndef _GTKMM_LISTSTORE_H
 #define _GTKMM_LISTSTORE_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -176,7 +177,7 @@ public:
   /** Swaps @a a  and @a b  in @a store . Note that this function only works with
    * unsorted stores.
    * 
-   * Since: 2.2
+   * @newin2p2
    * @param a A Gtk::TreeIter.
    * @param b Another Gtk::TreeIter.
    */
@@ -207,7 +208,7 @@ public:
    * @param iter A Gtk::TreeIter.
    * @return <tt>true</tt> if the iter is valid, <tt>false</tt> if the iter is invalid.
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   bool iter_is_valid(const iterator& iter) const;
 
@@ -219,11 +220,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

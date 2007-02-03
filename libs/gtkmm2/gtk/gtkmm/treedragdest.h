@@ -3,6 +3,7 @@
 #ifndef _GTKMM_TREEDRAGDEST_H
 #define _GTKMM_TREEDRAGDEST_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -125,20 +126,31 @@ public:
   bool row_drop_possible(const TreeModel::Path& dest_path, const SelectionData& selection_data) const;
                              
 protected:
-    virtual bool drag_data_received_vfunc(const TreeModel::Path& dest, const SelectionData& selection_data);
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual bool drag_data_received_vfunc(const TreeModel::Path& dest, const SelectionData& selection_data);
+#endif //GLIBMM_VFUNCS_ENABLED
 
-    virtual bool row_drop_possible_vfunc(const TreeModel::Path& dest, const SelectionData& selection_data) const;
+
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual bool row_drop_possible_vfunc(const TreeModel::Path& dest, const SelectionData& selection_data) const;
+#endif //GLIBMM_VFUNCS_ENABLED
 
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };
@@ -156,6 +168,7 @@ namespace Glib
   Glib::RefPtr<Gtk::TreeDragDest> wrap(GtkTreeDragDest* object, bool take_copy = false);
 
 } // namespace Glib
+
 
 #endif /* _GTKMM_TREEDRAGDEST_H */
 

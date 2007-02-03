@@ -3,6 +3,7 @@
 #ifndef _PANGOMM_ATTRIBUTES_H
 #define _PANGOMM_ATTRIBUTES_H
 
+
 #include <glibmm.h>
 
 /* attributes.h
@@ -64,7 +65,8 @@ enum AttrType
   ATTR_FALLBACK,
   ATTR_LETTER_SPACING,
   ATTR_UNDERLINE_COLOR,
-  ATTR_STRIKETHROUGH_COLOR
+  ATTR_STRIKETHROUGH_COLOR,
+  ATTR_ABSOLUTE_SIZE
 };
 
 } // namespace Pango
@@ -179,23 +181,23 @@ public:
   /** Gets the start index of the range.
    * @return The start index of the range.
    */
-  unsigned int get_start_index() const;
-
+   unsigned int get_start_index() const;
+ 
   /** Gets the end index of the range. The character at this index is not included in the range.
    * @return The end index of the range.
    */
-  unsigned int get_end_index() const;
-
+   unsigned int get_end_index() const;
+ 
   /** Sets the start index of the range.
    * @param value The new start index.
    */
-  void set_start_index(const unsigned int& value);
-
+   void set_start_index(const unsigned int& value);
+ 
   /** Sets the end index of the range. The character at this index is not included in the range.
    * @param value The new end index.
    */
-  void set_end_index(const unsigned int& value);
-
+   void set_end_index(const unsigned int& value);
+ 
   
   /** Compare two attributes for equality. This compares only the
    * actual value of the two attributes and not the ranges that the
@@ -352,8 +354,8 @@ public:
   /** Gets the string which is the value of the attribute.
    * @return The string value of the attribute.
    */
-  Glib::ustring get_string() const;
-
+   Glib::ustring get_string() const;
+ 
   /** Sets the string which is the value of the attribute.
    * @param string The new string value for the attribute.
    */
@@ -392,13 +394,13 @@ public:
   /** Gets the language which is the value of the attribute.
    * @return The language tag of the attribute.
    */
-  Language get_language() const;
-
+   Language get_language() const;
+ 
   /** Sets the language which is the value of the attribute.
    * @param value The new language tag for the attribute.
    */
-  void set_language(const Language& value);
-
+   void set_language(const Language& value);
+ 
   /// Provides access to the underlying C GObject.  
   PangoAttrLanguage*       gobj()       { return reinterpret_cast<PangoAttrLanguage*>(gobject_); }
   /// Provides access to the underlying C GObject.
@@ -432,13 +434,13 @@ public:
   /** Gets the color which is the value of the attribute.
    * @return The color value of the attribute.
    */
-  Color get_color() const;
-
+   Color get_color() const;
+ 
   /** Sets the color which is the value of the attribute.
    * @param value The new color value for the attribute.
    */
-  void set_color(const Color& value);
-
+   void set_color(const Color& value);
+ 
   /// Provides access to the underlying C GObject.  
   PangoAttrColor*       gobj()       { return reinterpret_cast<PangoAttrColor*>(gobject_); }
   /// Provides access to the underlying C GObject.
@@ -472,13 +474,13 @@ public:
   /** Gets the integer value of the attribute.
    * @return The integer value of the attribute.
    */
-  int get_value() const;
-
+   int get_value() const;
+ 
   /** Sets the integer value of the attribute.
    * @param value The new integer value for the attribute.
    */
-  void set_value(const int& value);
-
+   void set_value(const int& value);
+ 
   /// Provides access to the underlying C GObject.  
   PangoAttrInt*       gobj()       { return reinterpret_cast<PangoAttrInt*>(gobject_); }
   /// Provides access to the underlying C GObject.
@@ -512,13 +514,13 @@ public:
   /** Gets the floating point value of the attribute.
    * @return The floating point value of the attribute.
    */
-  double get_value() const;
-
+   double get_value() const;
+ 
   /** Sets the floating point value of the attribute.
    * @param value The new floating point value for the attribute.
    */
-  void set_value(const double& value);
-
+   void set_value(const double& value);
+ 
   /// Provides access to the underlying C GObject.
   PangoAttrFloat*       gobj()       { return reinterpret_cast<PangoAttrFloat*>(gobject_); }
   /// Provides access to the underlying C GObject.
@@ -552,8 +554,8 @@ public:
   /** Gets the font description which is the value of the attribute.
    * @return The font description of the attribute.
    */
-  FontDescription get_desc() const;
-
+   FontDescription get_desc() const;
+ 
   /** Sets the font description which is the value of the attribute.
    * @param desc The new font description for the attribute.
    */
@@ -592,23 +594,23 @@ public:
   /** Gets the ink rectangle to restrict to.
    * @return The ink rectangle of the attribute.
    */
-  Rectangle get_ink_rect() const;
-
+   Rectangle get_ink_rect() const;
+ 
   /** Gets the logical rectangle to restrict to.
    * @return The logical rectangle of the attribute.
    */
-  Rectangle get_logical_rect() const;
-
+   Rectangle get_logical_rect() const;
+ 
   /** Sets the ink rectangle to restrict to.
    * @param value The new ink rectangle for the attribute.
    */
-  void set_ink_rect(const Rectangle& value);
-
+   void set_ink_rect(const Rectangle& value);
+ 
   /** Sets the logical rectangle to restrict to.
    * @param value The new logical rectangle for the attribute.
    */
-  void set_logical_rect(const Rectangle& value);
-
+   void set_logical_rect(const Rectangle& value);
+ 
   /// Provides access to the underlying C GObject.  
   PangoAttrShape*       gobj()       { return reinterpret_cast<PangoAttrShape*>(gobject_); }
   /// Provides access to the underlying C GObject.

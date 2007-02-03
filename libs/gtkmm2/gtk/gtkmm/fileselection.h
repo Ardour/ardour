@@ -3,6 +3,9 @@
 #ifndef _GTKMM_FILESELECTION_H
 #define _GTKMM_FILESELECTION_H
 
+#ifndef GTKMM_DISABLE_DEPRECATED
+
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -103,11 +106,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -179,37 +188,40 @@ public:
   bool get_select_multiple() const;
 
   //: Accessors
-  TreeView* get_dir_list();
+   TreeView* get_dir_list();
   const TreeView* get_dir_list() const;
-  TreeView* get_file_list();
+    TreeView* get_file_list();
   const TreeView* get_file_list() const;
-  OptionMenu* get_history_pulldown();
+    OptionMenu* get_history_pulldown();
   const OptionMenu* get_history_pulldown() const;
-  Entry* get_selection_entry();
+    Entry* get_selection_entry();
   const Entry* get_selection_entry() const;
-  Label* get_selection_text();
+    Label* get_selection_text();
   const Label* get_selection_text() const;
-  VBox* get_main_vbox();
+    VBox* get_main_vbox();
   const VBox* get_main_vbox() const;
-  Button* get_ok_button();
+    Button* get_ok_button();
   const Button* get_ok_button() const;
-  Button* get_cancel_button();
+    Button* get_cancel_button();
   const Button* get_cancel_button() const;
-  Button* get_help_button();
+    Button* get_help_button();
   const Button* get_help_button() const;
-  HButtonBox* get_button_area();
+    HButtonBox* get_button_area();
   const HButtonBox* get_button_area() const;
-  HBox* get_action_area();
+    HBox* get_action_area();
   const HBox* get_action_area() const;
-
-  /** Whether buttons for creating/manipulating files should be displayed.
+ 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether buttons for creating/manipulating files should be displayed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_show_fileops() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether buttons for creating/manipulating files should be displayed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -217,15 +229,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_show_fileops() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The currently selected filename.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The currently selected filename.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<std::string> property_filename() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The currently selected filename.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -233,15 +249,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<std::string> property_filename() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Whether to allow multiple files to be selected.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether to allow multiple files to be selected.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_select_multiple() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether to allow multiple files to be selected.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -249,10 +269,10 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_select_multiple() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
-
 
 } // namespace Gtk
 
@@ -265,6 +285,11 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::FileSelection* wrap(GtkFileSelection* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
+#endif // GTKMM_DISABLE_DEPRECATED
+
+
 #endif /* _GTKMM_FILESELECTION_H */
 

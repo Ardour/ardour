@@ -3,6 +3,7 @@
 #ifndef _GTKMM_TEXTVIEW_H
 #define _GTKMM_TEXTVIEW_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -135,15 +136,21 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_set_scroll_adjustments(Adjustment* hadjustment, Adjustment* vadjustment);
   virtual void on_populate_popup(Menu* menu);
   virtual void on_set_anchor();
   virtual void on_insert_at_cursor(const Glib::ustring& str);
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -177,19 +184,20 @@ public:
   Glib::RefPtr<const TextBuffer> get_buffer() const;
 
   #ifndef GTKMM_DISABLE_DEPRECATED
+
   /** @deprecated Use scroll_to().
    */                            
   bool scroll_to_iter(TextBuffer::iterator& iter, double within_margin);
 
   /** @deprecated Use scroll_to().
-   */ 
+   */
   void scroll_to_mark(const Glib::RefPtr<TextBuffer::Mark>& mark, double within_margin);
 
   /** @deprecated Use scroll_to()
    */
   void scroll_mark_onscreen(const Glib::RefPtr<TextBuffer::Mark>& mark);
- 
-  #endif //GTKMM_DISABLE_DEPRECATED
+  #endif // GTKMM_DISABLE_DEPRECATED
+
 
   /** Scrolls the TextView so that @a iter is on the screen, by scrolling the minimal distance to get the mark onscreen,
    * possibly not scrolling at all. The effective screen for purposes of this function is reduced by a margin of size
@@ -305,12 +313,16 @@ public:
    * those to buffer coordinates with 
    * window_to_buffer_coords().
    * 
-   * Note that this is diffferent from get_iter_at_location(),
+   * Note that this is different from get_iter_at_location(),
    * which returns cursor locations, i.e. positions <em>between</em>
    * characters.
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param iter A Gtk::TextIter.
+   * @param trailing Location to store an integer indicating where
+   * in the grapheme the user clicked. It will either be
+   * zero, or the number of characters in the grapheme. 
+   * 0 represents the trailing edge of the grapheme.
    * @param x X position, in buffer coordinates.
    * @param y Y position, in buffer coordinates.
    */
@@ -653,9 +665,9 @@ public:
   void set_tabs(Pango::TabArray& tabs);
   
   /** Gets the default tabs for @a text_view . Tags in the buffer may
-   * override the defaults. The returned array will be <tt>0</tt> if
+   * override the defaults. The returned array will be empty if
    * "standard" (8-space) tabs are used.
-   * @return Copy of default tab array, or <tt>0</tt> if "standard" tabs are used.
+   * @return Copy of default tab array, or an empty array if "standard" tabs are used.
    */
   Pango::TabArray get_tabs() const;
   
@@ -671,7 +683,7 @@ public:
   
   /** Changes the Gtk::TextView overwrite mode.
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param overwrite <tt>true</tt> to turn on overwrite mode, <tt>false</tt> to turn it off.
    */
   void set_overwrite(bool overwrite = true);
@@ -679,7 +691,7 @@ public:
   /** Returns whether the Gtk::TextView is in overwrite mode or not.
    * @return Whether @a text_view  is in overwrite mode or not.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   bool get_overwrite() const;
   
@@ -688,7 +700,7 @@ public:
    * is <tt>true</tt> a tab character is inserted. If @a accepts_tab  is <tt>false</tt> the keyboard focus
    * is moved to the next widget in the focus chain.
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param accepts_tab <tt>true</tt> if pressing the Tab key should insert a tab character, <tt>false</tt>, if pressing the Tab key should move the keyboard focus.
    */
   void set_accepts_tab(bool accepts_tab = true);
@@ -697,34 +709,57 @@ public:
    * set_accepts_tab().
    * @return <tt>true</tt> if pressing the Tab key inserts a tab character, <tt>false</tt> if pressing the Tab key moves the keyboard focus.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   bool get_accepts_tab() const;
     
   
+/**
+   * @par Prototype:
+   * <tt>void %set_scroll_adjustments(Adjustment* hadjustment, Adjustment* vadjustment)</tt>
+   */
+
   Glib::SignalProxy2< void,Adjustment*,Adjustment* > signal_set_scroll_adjustments();
 
   
+/**
+   * @par Prototype:
+   * <tt>void %populate_popup(Menu* menu)</tt>
+   */
+
   Glib::SignalProxy1< void,Menu* > signal_populate_popup();
 
+
+/**
+   * @par Prototype:
+   * <tt>void %set_anchor()</tt>
+   */
 
   Glib::SignalProxy0< void > signal_set_anchor();
 
   
+/**
+   * @par Prototype:
+   * <tt>void %insert_at_cursor(const Glib::ustring& str)</tt>
+   */
+
   Glib::SignalProxy1< void,const Glib::ustring& > signal_insert_at_cursor();
 
   
   //Keybinding signals:
   
   
-  /** Pixels of blank space above paragraphs.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Pixels of blank space above paragraphs.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_pixels_above_lines() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Pixels of blank space above paragraphs.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -732,15 +767,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_pixels_above_lines() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Pixels of blank space below paragraphs.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Pixels of blank space below paragraphs.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_pixels_below_lines() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Pixels of blank space below paragraphs.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -748,15 +787,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_pixels_below_lines() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Pixels of blank space between wrapped lines in a paragraph.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Pixels of blank space between wrapped lines in a paragraph.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_pixels_inside_wrap() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Pixels of blank space between wrapped lines in a paragraph.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -764,15 +807,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_pixels_inside_wrap() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Whether the text can be modified by the user.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether the text can be modified by the user.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_editable() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the text can be modified by the user.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -780,15 +827,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_editable() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Whether to wrap lines never
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether to wrap lines never
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<WrapMode> property_wrap_mode() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether to wrap lines never
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -796,15 +847,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<WrapMode> property_wrap_mode() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Left
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Left
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Justification> property_justification() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Left
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -812,15 +867,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Justification> property_justification() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Width of the left margin in pixels.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Width of the left margin in pixels.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_left_margin() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Width of the left margin in pixels.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -828,15 +887,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_left_margin() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Width of the right margin in pixels.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Width of the right margin in pixels.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_right_margin() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Width of the right margin in pixels.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -844,15 +907,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_right_margin() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Amount to indent the paragraph
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Amount to indent the paragraph
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_indent() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Amount to indent the paragraph
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -860,15 +927,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_indent() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Custom tabs for this text.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Custom tabs for this text.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Pango::TabArray> property_tabs() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Custom tabs for this text.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -876,15 +947,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Pango::TabArray> property_tabs() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** If the insertion cursor is shown.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** If the insertion cursor is shown.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_cursor_visible() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** If the insertion cursor is shown.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -892,15 +967,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_cursor_visible() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The buffer which is displayed.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The buffer which is displayed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy< Glib::RefPtr<TextBuffer> > property_buffer() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The buffer which is displayed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -908,15 +987,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly< Glib::RefPtr<TextBuffer> > property_buffer() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Whether entered text overwrites existing contents.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether entered text overwrites existing contents.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_overwrite() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether entered text overwrites existing contents.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -924,15 +1007,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_overwrite() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Whether Tab will result in a tab character being entered.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether Tab will result in a tab character being entered.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_accepts_tab() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether Tab will result in a tab character being entered.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -940,6 +1027,7 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_accepts_tab() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -955,6 +1043,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::TextView* wrap(GtkTextView* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_TEXTVIEW_H */
 

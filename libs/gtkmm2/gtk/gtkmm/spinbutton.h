@@ -3,6 +3,7 @@
 #ifndef _GTKMM_SPINBUTTON_H
 #define _GTKMM_SPINBUTTON_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -162,14 +163,20 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual int on_input(double* new_value);
   virtual bool on_output();
   virtual void on_value_changed();
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -335,6 +342,10 @@ public:
    * @li <tt>Gtk::INPUT_ERROR</tt>: Conversion failed, don't call default handler.
    */
   
+/**
+   * @par Prototype:
+   * <tt>int %input(double* new_value)</tt>
+   */
 
   Glib::SignalProxy1< int,double* > signal_input();
 
@@ -346,9 +357,26 @@ public:
    * @li <tt>true</tt>: Conversion successful, don't call default handler.
    */
   
+/**
+   * @par Prototype:
+   * <tt>bool %output()</tt>
+   */
 
   Glib::SignalProxy0< bool > signal_output();
 
+
+/**
+   * @par Prototype:
+   * <tt>bool %wrapped()</tt>
+   */
+
+  Glib::SignalProxy0< bool > signal_wrapped();
+
+
+/**
+   * @par Prototype:
+   * <tt>void %value_changed()</tt>
+   */
 
   Glib::SignalProxy0< void > signal_value_changed();
 
@@ -356,14 +384,17 @@ public:
   //Keybinding signals:
   
 
-  /** The adjustment that holds the value of the spinbutton.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The adjustment that holds the value of the spinbutton.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Gtk::Adjustment*> property_adjustment() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The adjustment that holds the value of the spinbutton.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -371,15 +402,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Gtk::Adjustment*> property_adjustment() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The acceleration rate when you hold down a button.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The acceleration rate when you hold down a button.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<double> property_climb_rate() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The acceleration rate when you hold down a button.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -387,15 +422,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<double> property_climb_rate() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The number of decimal places to display.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The number of decimal places to display.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<guint> property_digits() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The number of decimal places to display.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -403,15 +442,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<guint> property_digits() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Whether erroneous values are automatically changed to a spin button's nearest step increment.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether erroneous values are automatically changed to a spin button's nearest step increment.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_snap_to_ticks() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether erroneous values are automatically changed to a spin button's nearest step increment.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -419,15 +462,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_snap_to_ticks() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Whether non-numeric characters should be ignored.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether non-numeric characters should be ignored.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_numeric() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether non-numeric characters should be ignored.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -435,15 +482,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_numeric() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Whether a spin button should wrap upon reaching its limits.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether a spin button should wrap upon reaching its limits.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_wrap() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether a spin button should wrap upon reaching its limits.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -451,15 +502,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_wrap() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Whether the spin button should update always
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether the spin button should update always
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<SpinButtonUpdatePolicy> property_update_policy() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the spin button should update always
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -467,15 +522,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<SpinButtonUpdatePolicy> property_update_policy() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Reads the current value
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Reads the current value
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<double> property_value() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Reads the current value
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -483,6 +542,7 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<double> property_value() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -498,6 +558,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::SpinButton* wrap(GtkSpinButton* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_SPINBUTTON_H */
 

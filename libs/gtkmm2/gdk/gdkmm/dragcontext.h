@@ -3,6 +3,7 @@
 #ifndef _GDKMM_DRAGCONTEXT_H
 #define _GDKMM_DRAGCONTEXT_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -269,20 +270,22 @@ public:
   
   void set_icon(const Glib::ustring& stock_id, int hot_x, int hot_y);
   
+  void set_icon_name(const Glib::ustring& name, int hot_x, int hot_y);
+  
   void set_icon();
 
   /** Get the the source window of this drag.
    * @result the source window of this drag.
    */
-  Glib::RefPtr<Window> get_source_window();
+   Glib::RefPtr<Window> get_source_window();
   Glib::RefPtr<const Window> get_source_window() const;
-
+ 
   /** Get the the source window of this drag.
    * @result the source window of this drag.
    */
-  Glib::RefPtr<Window> get_destination_window();
+   Glib::RefPtr<Window> get_destination_window();
   Glib::RefPtr<const Window> get_destination_window() const;
-    
+     
   /** Get a list of targets offered by the source.
    * @result a list of targets offered by the source.
    */
@@ -291,33 +294,33 @@ public:
   /** Get the DND protocol which governs this drag.
    * @result the DND protocol which governs this drag.
    */
-  DragProtocol get_protocol() const;
-  
+   DragProtocol get_protocol() const;
+   
   /** Discover whether the context is used on the source side.
    * @result true if the context is used on the source side.
    */
-  bool get_is_source() const;
-
+   bool get_is_source() const;
+ 
   /** Get a bitmask of actions proposed by the source when the suggested_action is Gdk::ACTION_ASK
    * @result a bitmask of actions proposed by the source when the suggested_action is Gdk::ACTION_ASK
    */
-  DragAction get_actions() const;
-
+   DragAction get_actions() const;
+ 
   /** Get the action suggested by the source.
    * @result The action suggested by the source.
    */
-  DragAction get_suggested_action() const;
-
+   DragAction get_suggested_action() const;
+ 
   /** Get the action chosen by the destination.
    * @result the action chosen byt the destination.
    */
-  DragAction get_action() const;
-
+   DragAction get_action() const;
+ 
   /** Get a timestamp recording the start time of this drag.
    * @result a timestamp recording the start time of this drag.
    */
-  guint32 get_start_time() const;
-
+   guint32 get_start_time() const;
+ 
   
   /** Finds the destination window and DND protocol to use at the
    * given pointer position. 
@@ -325,7 +328,7 @@ public:
    * This function is called by the drag source to obtain the 
    *  @a dest_window  and @a protocol  parameters for gdk_drag_motion().
    * 
-   * Since: 2.2
+   * @newin2p2
    * @param drag_window A window which may be at the pointer position, but
    * should be ignored, since it is put up by the drag source as an icon.
    * @param screen The screen where the destination window is sought.
@@ -342,11 +345,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

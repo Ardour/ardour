@@ -3,6 +3,7 @@
 #ifndef _GTKMM_ENTRY_H
 #define _GTKMM_ENTRY_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -43,6 +44,9 @@ namespace Gtk
 { class Entry_Class; } // namespace Gtk
 namespace Gtk
 {
+
+//TODO: This is used in Range too, so put it somewhere more appropriate:
+typedef GtkBorder Border;
 
 /** A single line text entry field.
  *
@@ -100,14 +104,20 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_populate_popup(Menu* menu);
   virtual void on_insert_at_cursor(const Glib::ustring& str);
   virtual void on_activate();
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -153,6 +163,12 @@ public:
    * @return Whether the entry has a beveled frame.
    */
   bool get_has_frame() const;
+
+  
+  void set_inner_border(const Border& border);
+  
+  Border get_inner_border() const;
+
   
   /** Sets the maximum allowed length of the contents of the widget. If
    * the current contents are longer than the given length, then they
@@ -215,8 +231,8 @@ public:
   /** Gets the Pango::Layout used to display the entry.
    * The layout is useful to e.g. convert text positions to
    * pixel positions, in combination with get_layout_offsets().
-   * The returned layout is owned by the entry so need not be
-   * freed by the caller.
+   * The returned layout is owned by the entry and must not be 
+   * modified or freed by the caller.
    * 
    * Keep in mind that the layout text may contain a preedit string, so
    * layout_index_to_text_index() and
@@ -229,8 +245,8 @@ public:
   /** Gets the Pango::Layout used to display the entry.
    * The layout is useful to e.g. convert text positions to
    * pixel positions, in combination with get_layout_offsets().
-   * The returned layout is owned by the entry so need not be
-   * freed by the caller.
+   * The returned layout is owned by the entry and must not be 
+   * modified or freed by the caller.
    * 
    * Keep in mind that the layout text may contain a preedit string, so
    * layout_index_to_text_index() and
@@ -287,7 +303,7 @@ public:
    * the horizontal positioning of the contents when the displayed
    * text is shorter than the width of the entry.
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param xalign The horizontal alignment, from 0 (left) to 1 (right).
    * Reversed for RTL layouts.
    */
@@ -297,7 +313,7 @@ public:
    * the horizontal positioning of the contents when the displayed
    * text is shorter than the width of the entry.
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param xalign The horizontal alignment, from 0 (left) to 1 (right).
    * Reversed for RTL layouts.
    */
@@ -306,7 +322,7 @@ public:
   /** Gets the value set by set_alignment().
    * @return The alignment
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   float get_alignment() const;
 
@@ -315,7 +331,7 @@ public:
    * All further configuration of the completion mechanism is done on
    *  @a completion  using the Gtk::EntryCompletion API.
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param completion The Gtk::EntryCompletion.
    */
   void set_completion(const Glib::RefPtr<EntryCompletion>& completion);
@@ -323,59 +339,83 @@ public:
   /** Returns the auxiliary completion object currently in use by @a entry .
    * @return The auxiliary completion object currently in use by @a entry .
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   Glib::RefPtr<EntryCompletion> get_completion();
   
   /** Returns the auxiliary completion object currently in use by @a entry .
    * @return The auxiliary completion object currently in use by @a entry .
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   Glib::RefPtr<const EntryCompletion> get_completion() const;
 
-  guint16 get_text_length() const;
-
+   guint16 get_text_length() const;
+ 
   
+/**
+   * @par Prototype:
+   * <tt>void %populate_popup(Menu* menu)</tt>
+   */
+
   Glib::SignalProxy1< void,Menu* > signal_populate_popup();
 
   
+/**
+   * @par Prototype:
+   * <tt>void %insert_at_cursor(const Glib::ustring& str)</tt>
+   */
+
   Glib::SignalProxy1< void,const Glib::ustring& > signal_insert_at_cursor();
 
 
   //Key-binding signals:
+
+  //This is a keybinding signal, but it is allowed:
+  // http://mail.gnome.org/archives/gtk-devel-list/2003-January/msg00108.html
+  // "activate is probably about the only exception"
   
+/**
+   * @par Prototype:
+   * <tt>void %activate()</tt>
+   */
 
   Glib::SignalProxy0< void > signal_activate();
- //TODO: ignore this too? It's used in an example.
-  
-  
-  /** The current position of the insertion cursor in chars.
+
+
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The current position of the insertion cursor in chars.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_cursor_position() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
-  /** The position of the opposite end of the selection from the cursor in chars.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The position of the opposite end of the selection from the cursor in chars.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_selection_bound() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
-  /** Whether the entry contents can be edited.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether the entry contents can be edited.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_editable() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the entry contents can be edited.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -383,15 +423,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_editable() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Maximum number of characters for this entry. Zero if no maximum.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Maximum number of characters for this entry. Zero if no maximum.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_max_length() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Maximum number of characters for this entry. Zero if no maximum.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -399,15 +443,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_max_length() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** FALSE displays the invisible char instead of the actual text (password mode).
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** FALSE displays the invisible char instead of the actual text (password mode).
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_visibility() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** FALSE displays the invisible char instead of the actual text (password mode).
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -415,15 +463,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_visibility() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** FALSE removes outside bevel from entry.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** FALSE removes outside bevel from entry.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_has_frame() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** FALSE removes outside bevel from entry.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -431,15 +483,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_has_frame() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The character to use when masking entry contents (in password mode).
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The character to use when masking entry contents (in password mode).
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<gunichar> property_invisible_char() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The character to use when masking entry contents (in password mode).
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -447,15 +503,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<gunichar> property_invisible_char() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Whether to activate the default widget (such as the default button in a dialog) when Enter is pressed.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether to activate the default widget (such as the default button in a dialog) when Enter is pressed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_activates_default() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether to activate the default widget (such as the default button in a dialog) when Enter is pressed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -463,15 +523,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_activates_default() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Number of characters to leave space for in the entry.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Number of characters to leave space for in the entry.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_width_chars() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Number of characters to leave space for in the entry.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -479,24 +543,30 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_width_chars() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Number of pixels of the entry scrolled off the screen to the left.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Number of pixels of the entry scrolled off the screen to the left.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_scroll_offset() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
-  /** The contents of the entry.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The contents of the entry.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_text() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The contents of the entry.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -504,6 +574,47 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_text() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The horizontal alignment
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy<float> property_xalign() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+/** The horizontal alignment
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy_ReadOnly<float> property_xalign() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether to truncate multiline pastes to one line.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy<bool> property_truncate_multiline() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether to truncate multiline pastes to one line.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy_ReadOnly<bool> property_truncate_multiline() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -519,6 +630,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Entry* wrap(GtkEntry* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_ENTRY_H */
 

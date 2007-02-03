@@ -3,6 +3,7 @@
 #ifndef _GTKMM_SEPARATOR_H
 #define _GTKMM_SEPARATOR_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -103,11 +104,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -171,11 +178,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -237,11 +250,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -263,7 +282,9 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Separator* wrap(GtkSeparator* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 namespace Glib
 {
   /** @relates Gtk::VSeparator
@@ -272,7 +293,9 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::VSeparator* wrap(GtkVSeparator* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 namespace Glib
 {
   /** @relates Gtk::HSeparator
@@ -281,6 +304,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::HSeparator* wrap(GtkHSeparator* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_SEPARATOR_H */
 
