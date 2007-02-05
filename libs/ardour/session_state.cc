@@ -64,6 +64,7 @@
 #include <ardour/utils.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/audiofilesource.h>
+#include <ardour/silentfilesource.h>
 #include <ardour/destructive_filesource.h>
 #include <ardour/sndfile_helpers.h>
 #include <ardour/auditioner.h>
@@ -1391,6 +1392,19 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 	
 	try {
 		boost::shared_ptr<AudioRegion> region (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (sources, node)));
+
+		/* a final detail: this is the one and only place that we know how long missing files are */
+
+		if (region->whole_file()) {
+			for (SourceList::iterator sx = sources.begin(); sx != sources.end(); ++sx) {
+				boost::shared_ptr<SilentFileSource> sfp = boost::dynamic_pointer_cast<SilentFileSource> (*sx);
+				if (sfp) {
+					sfp->set_length (region->length());
+				}
+			}
+		}
+
+
 		return region;
 						       
 	}
@@ -1452,10 +1466,16 @@ Session::load_sources (const XMLNode& node)
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
-		if ((source = XMLSourceFactory (**niter)) == 0) {
-			error << _("Session: cannot create Source from XML description.") << endmsg;
+		try {
+			if ((source = XMLSourceFactory (**niter)) == 0) {
+				error << _("Session: cannot create Source from XML description.") << endmsg;
+			}
 		}
 
+		catch (non_existent_source& err) {
+			warning << _("A sound file is missing. It will be replaced by silence.") << endmsg;
+			source = SourceFactory::createSilent (*this, **niter, max_frames, _current_frame_rate);
+		}
 	}
 
 	return 0;
@@ -1471,7 +1491,7 @@ Session::XMLSourceFactory (const XMLNode& node)
 	try {
 		return SourceFactory::create (*this, node);
 	}
-	
+
 	catch (failed_constructor& err) {
 		error << _("Found a sound file that cannot be used by Ardour. Talk to the progammers.") << endmsg;
 		return boost::shared_ptr<Source>();

@@ -22,6 +22,7 @@
 
 #include <ardour/source_factory.h>
 #include <ardour/sndfilesource.h>
+#include <ardour/silentfilesource.h>
 #include <ardour/destructive_filesource.h>
 #include <ardour/configuration.h>
 
@@ -51,6 +52,17 @@ SourceFactory::setup_peakfile (boost::shared_ptr<Source> s)
 	return 0;
 }
 
+boost::shared_ptr<Source>
+SourceFactory::createSilent (Session& s, const XMLNode& node, nframes_t nframes, float sr)
+{
+	boost::shared_ptr<Source> ret (new SilentFileSource (s, node, nframes, sr));
+	if (setup_peakfile (ret)) {
+		return boost::shared_ptr<Source>();
+	}
+	SourceCreated (ret);
+	return ret;
+}
+
 #ifdef HAVE_COREAUDIO
 boost::shared_ptr<Source>
 SourceFactory::create (Session& s, const XMLNode& node)
@@ -63,9 +75,12 @@ SourceFactory::create (Session& s, const XMLNode& node)
 		SourceCreated (ret);
 		return ret;
 	} 
-	
-	
-	catch (failed_constructor& err) {
+
+
+	catch (failed_constructor& err) {	
+
+		/* this is allowed to throw */
+
 		boost::shared_ptr<Source> ret (new SndFileSource (s, node));
 		if (setup_peakfile (ret)) {
 			return boost::shared_ptr<Source>();
@@ -82,14 +97,15 @@ SourceFactory::create (Session& s, const XMLNode& node)
 boost::shared_ptr<Source>
 SourceFactory::create (Session& s, const XMLNode& node)
 {
-	boost::shared_ptr<Source> ret (new SndFileSource (s, node));
+	/* this is allowed to throw */
 
+	boost::shared_ptr<Source> ret (new SndFileSource (s, node));
+	
 	if (setup_peakfile (ret)) {
 		return boost::shared_ptr<Source>();
 	}
-
+	
 	SourceCreated (ret);
-
 	return ret;
 }
 
@@ -113,6 +129,9 @@ SourceFactory::createReadable (Session& s, string path, int chn, AudioFileSource
 		}
 		
 		catch (failed_constructor& err) {
+
+			/* this is allowed to throw */
+
 			boost::shared_ptr<Source> ret (new SndFileSource (s, path, chn, flags));
 			if (setup_peakfile (ret)) {
 				return boost::shared_ptr<Source>();

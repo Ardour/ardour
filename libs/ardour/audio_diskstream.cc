@@ -1480,7 +1480,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 			srcs.push_back (s);
 			s->update_header (capture_info.front()->start, when, twhen);
 			s->set_captured_for (_name);
-			
+			s->mark_immutable ();
 		}
 	}
 

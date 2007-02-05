@@ -87,6 +87,7 @@ session_state.cc
 session_time.cc
 session_timefx.cc
 session_transport.cc
+silentfilesource.cc
 sndfile_helpers.cc
 sndfilesource.cc
 source.cc

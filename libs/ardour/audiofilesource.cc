@@ -88,7 +88,7 @@ AudioFileSource::AudioFileSource (Session& s, std::string path, Flag flags, Samp
 	}
 }
 
-AudioFileSource::AudioFileSource (Session& s, const XMLNode& node)
+AudioFileSource::AudioFileSource (Session& s, const XMLNode& node, bool must_exist)
 	: AudioSource (s, node), _flags (Flag (Writable|CanRename))
           /* channel is set in set_state() */
 {
@@ -98,7 +98,7 @@ AudioFileSource::AudioFileSource (Session& s, const XMLNode& node)
 		throw failed_constructor ();
 	}
 	
-	if (init (_name, true)) {
+	if (init (_name, must_exist)) {
 		throw failed_constructor ();
 	}
 }
@@ -135,7 +135,7 @@ AudioFileSource::init (string pathstr, bool must_exist)
 	file_is_new = false;
 
 	if (!find (pathstr, must_exist, is_new)) {
-		return -1;
+		throw non_existent_source ();
 	}
 
 	if (is_new && must_exist) {

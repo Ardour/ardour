@@ -20,11 +20,18 @@
 #ifndef __ardour_audiofilesource_h__ 
 #define __ardour_audiofilesource_h__
 
+#include <exception>
+
 #include <time.h>
 
 #include <ardour/audiosource.h>
 
 namespace ARDOUR {
+
+class non_existent_source : public std::exception {
+  public:
+	virtual const char *what() const throw() { return "audio file does not exist"; }
+};
 
 struct SoundFileInfo {
     float       samplerate;
@@ -125,7 +132,7 @@ class AudioFileSource : public AudioSource {
 
 	/* constructor to be called for existing in-session files */
 
-	AudioFileSource (Session&, const XMLNode&);
+	AudioFileSource (Session&, const XMLNode&, bool must_exit = true);
 
 	int init (string idstr, bool must_exist);
 

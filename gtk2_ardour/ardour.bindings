@@ -112,7 +112,6 @@
 (gtk_accel_path "<Actions>/Editor/extend-range-to-end-of-region" "rightanglebracket")
 (gtk_accel_path "<Actions>/Editor/scroll-backward" "leftarrow")
 (gtk_accel_path "<Actions>/Editor/start-range" "<Control>KP_Down")
-; (gtk_accel_path "<Actions>/Editor/ToggleTranzportSurface" "")
 ; (gtk_accel_path "<Actions>/ShuttleActions/SetShuttleUnitsSemitones" "")
 ; (gtk_accel_path "<Actions>/JACK/JACKLatency128" "")
 ; (gtk_accel_path "<Actions>/Snap/snap-to-beat" "")
