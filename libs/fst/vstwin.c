@@ -326,12 +326,12 @@ DWORD WINAPI gui_event_loop (LPVOID param)
 		fst_error ("cannot set timer on dummy window");
 	}
 
-	while (true) {
+	while (1) {
 
 		GetMessageA (&msg, NULL, 0,0);
 
-		if (msg.message == WM_QUIT) {
-			cerr << "WM QUIT received\n";
+		if (msg.message == WM_SYSTEMERROR) {
+			/* sent when this thread is supposed to exist */
 			break;
 		}
 		
@@ -416,6 +416,12 @@ fst_init ()
 	}
 
 	return 0;
+}
+
+void
+fst_finish ()
+{
+	PostThreadMessageA (gui_thread_id, WM_SYSTEMERROR, 0, 0);
 }
 
 int

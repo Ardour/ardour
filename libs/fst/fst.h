@@ -82,6 +82,7 @@ extern "C" {
 #endif
 
 extern int  fst_init ();
+extern void fst_finish ();
 
 extern FSTHandle* fst_load (const char*);
 extern int        fst_unload (FSTHandle*);

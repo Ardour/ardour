@@ -96,13 +96,14 @@ PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, bool scr
 		_pluginui = pu;
 		get_vbox()->add (*pu);
 		
+		set_wmclass (X_("ardour_plugin_editor"), "Ardour");
+
 		signal_map_event().connect (mem_fun (*pu, &LadspaPluginUI::start_updating));
 		signal_unmap_event().connect (mem_fun (*pu, &LadspaPluginUI::stop_updating));
 	}
 
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("PluginEditor");
-	set_wmclass (X_("ardour_plugin_editor"), "Ardour");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window*> (this)));
