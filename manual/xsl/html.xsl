@@ -88,6 +88,9 @@ section toc
 part toc
 </xsl:param>
 
+<!-- Limit TOC depth to 1 level -->
+<xsl:param name="toc.section.depth">1</xsl:param>
+
 <xsl:template name="nongraphical.admonition">
 	<div class="{name(.)}">
 		<h2 class="title">
