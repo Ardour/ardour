@@ -56,9 +56,6 @@ boost::shared_ptr<Source>
 SourceFactory::createSilent (Session& s, const XMLNode& node, nframes_t nframes, float sr)
 {
 	boost::shared_ptr<Source> ret (new SilentFileSource (s, node, nframes, sr));
-	if (setup_peakfile (ret)) {
-		return boost::shared_ptr<Source>();
-	}
 	SourceCreated (ret);
 	return ret;
 }

@@ -999,6 +999,18 @@ RouteTimeAxisView::update_diskstream_display ()
 void
 RouteTimeAxisView::selection_click (GdkEventButton* ev)
 {
+	if (Keyboard::modifier_state_equals (ev->state, (Keyboard::Shift|Keyboard::Control))) {
+
+		/* special case: select/deselect all tracks */
+		if (editor.get_selection().selected (this)) {
+			editor.get_selection().clear_tracks ();
+		} else {
+			editor.select_all_tracks ();
+		}
+
+		return;
+	} 
+
 	PublicEditor::TrackViewList* tracks = editor.get_valid_views (this, _route->edit_group());
 
 	switch (Keyboard::selection_type (ev->state)) {

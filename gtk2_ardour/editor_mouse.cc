@@ -301,7 +301,9 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 
 	if (((mouse_mode != MouseObject) &&
 	     (mouse_mode != MouseAudition || item_type != RegionItem) &&
-	     (mouse_mode != MouseTimeFX || item_type != RegionItem)) ||
+	     (mouse_mode != MouseTimeFX || item_type != RegionItem) &&
+	     (mouse_mode != MouseRange)) ||
+
 	    (event->type != GDK_BUTTON_PRESS && event->type != GDK_BUTTON_RELEASE || event->button.button > 3)) {
 		
 		return;
@@ -324,31 +326,41 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 
 	switch (item_type) {
 	case RegionItem:
-		commit = set_selected_regionview_from_click (press, op, true);
+		if (mouse_mode != MouseRange) {
+			commit = set_selected_regionview_from_click (press, op, true);
+		}
 		break;
 		
 	case RegionViewNameHighlight:
 	case RegionViewName:
-		commit = set_selected_regionview_from_click (press, op, true);
+		if (mouse_mode != MouseRange) {
+			commit = set_selected_regionview_from_click (press, op, true);
+		}
 		break;
 
 	case FadeInHandleItem:
 	case FadeInItem:
 	case FadeOutHandleItem:
 	case FadeOutItem:
-		commit = set_selected_regionview_from_click (press, op, true);
+		if (mouse_mode != MouseRange) {
+			commit = set_selected_regionview_from_click (press, op, true);
+		}
 		break;
 		
 	case GainAutomationControlPointItem:
 	case PanAutomationControlPointItem:
 	case RedirectAutomationControlPointItem:
-		commit = set_selected_control_point_from_click (op, false);
+		if (mouse_mode != MouseRange) {
+			commit = set_selected_control_point_from_click (op, false);
+		}
 		break;
 		
 	case StreamItem:
+		/* for context click or range selection, select track */
 		if (event->button.button == 3) {
-			/* for context click, select track */
 			commit = set_selected_track_from_click (press, op, true);
+		} else if (event->type == GDK_BUTTON_PRESS && mouse_mode == MouseRange) {
+			commit = set_selected_track_from_click (press, op, false);
 		}
 		break;
 		    
@@ -360,26 +372,6 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		break;
 	}
 	
-#define SELECT_TRACK_FROM_CANVAS_IN_RANGE_MODE
-#ifdef  SELECT_TRACK_FROM_CANVAS_IN_RANGE_MODE
-	/* in range mode, button 1/2/3 press potentially selects a track */
-
-	if (mouse_mode == MouseRange && 
-	    event->type == GDK_BUTTON_PRESS && 
-	    event->button.button <= 3) {
-		
-		switch (item_type) {
-		case StreamItem:
-		case RegionItem:
-		case AutomationTrackItem:
-			commit = set_selected_track_from_click (true, op, true);
-			break;
-
-		default:
-			break;
-		}
-	}
-#endif
 	if (commit) {
 		commit_reversible_command ();
 	}

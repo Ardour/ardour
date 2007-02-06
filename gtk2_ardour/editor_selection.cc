@@ -154,6 +154,11 @@ Editor::extend_selection_to_track (TimeAxisView& view)
 	return false;
 }
 
+void
+Editor::select_all_tracks ()
+{
+	selection->set (track_views);
+}
 
 bool
 Editor::set_selected_track (TimeAxisView& view, Selection::Operation op, bool no_remove)

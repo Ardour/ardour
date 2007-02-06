@@ -28,10 +28,17 @@ html:: xml
 
 test:: xml
 	xmllint --noout --postvalid --xinclude $(XMLFILE)
-	
+
 .PHONY : test
 
 clean::
 	@rm -rf tmp
 
 .PHONY : clean
+
+upload: html
+	cd tmp && tar cf - . | bzip2 > ../man.tar.bz2
+	scp man.tar.bz2 las@ardour.org:ardour.org
+
+.PHONY : upload
+

@@ -441,6 +441,7 @@ class Editor : public PublicEditor
 	void catch_vanishing_regionview (RegionView *);
 
 	bool set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove=false);
+	void select_all_tracks ();
 
 	bool set_selected_control_point_from_click (Selection::Operation op = Selection::Set, bool no_remove=false);
 	bool set_selected_track_from_click (bool press, Selection::Operation op = Selection::Set, bool no_remove=false);
