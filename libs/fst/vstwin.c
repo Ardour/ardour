@@ -326,9 +326,17 @@ DWORD WINAPI gui_event_loop (LPVOID param)
 		fst_error ("cannot set timer on dummy window");
 	}
 
-	while (GetMessageA (&msg, NULL, 0,0)) {
+	while (true) {
+
+		GetMessageA (&msg, NULL, 0,0);
+
+		if (msg.message == WM_QUIT) {
+			cerr << "WM QUIT received\n";
+			break;
+		}
 		
-	    if( msg.message == WM_KEYDOWN ) debreak();
+		if (msg.message == WM_KEYDOWN) debreak();
+
 		TranslateMessage( &msg );
 		DispatchMessageA (&msg);
 
@@ -336,7 +344,6 @@ DWORD WINAPI gui_event_loop (LPVOID param)
 		   and run idle callbacks 
 		*/
 		
-
 		if( msg.message == WM_TIMER ) {
 		    pthread_mutex_lock (&plugin_mutex);
 again:
