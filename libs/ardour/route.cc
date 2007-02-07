@@ -1147,9 +1147,16 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 			} else {
 				s->expect_inputs ((*prev)->output_streams());
 			}
-		}
 
-		redirect_max_outs = max ((*r)->output_streams (), redirect_max_outs);
+		} else {
+			
+			/* don't pay any attention to send output configuration, since it doesn't
+			   affect the route.
+			 */
+
+			redirect_max_outs = max ((*r)->output_streams (), redirect_max_outs);
+			
+		}
 	}
 
 	/* we're done */
