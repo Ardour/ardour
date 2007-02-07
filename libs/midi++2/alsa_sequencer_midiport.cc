@@ -133,12 +133,7 @@ int ALSA_SequencerMidiPort::write (byte *msg, size_t msglen, timestamp_t timesta
 	return totwritten;
 }
 
-<<<<<<< .working
 int ALSA_SequencerMidiPort::read (byte *buf, size_t max, timestamp_t timestamp)
-=======
-int 
-ALSA_SequencerMidiPort::read (byte *buf, size_t max)
->>>>>>> .merge-right.r1393
 {
 	TR_FN();
 	int err;
