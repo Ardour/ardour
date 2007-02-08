@@ -22,9 +22,6 @@
 		href="adding_tracks.xml" />
 
 	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
-		href="renaming_tracks.xml" />
-
-	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="opening_a_session.xml" />
 
 	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 

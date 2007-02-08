@@ -53,26 +53,10 @@
 				</para>
 			</listitem>
 		</orderedlist>
-		<para>
-			After the track is created, it is recommended that you change its name from
-			the generic name it will have been provided with. To rename a track:
-		</para>
-		<orderedlist>
-			<title>Renaming a Track</title>
-			<listitem>
-				<para>
-					In the editor or mixer, the track name, and select <guimenuitem>Rename</guimenuitem> from the
-					dialog that appears. This will cause the "New Track Name" dialog to appear.
-				</para>
-			</listitem>
-			<listitem>
-				<para>
-					In the New Track Name dialog, type a new track name, and then click the
-					<guibutton>OK</guibutton> button in that dialog.
-				</para>
-			</listitem>
-		</orderedlist>
 	</section>
+
+	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
+		href="renaming_tracks.xml" />
 
 	<section id="deleting-tracks">
 		<title>Deleting Tracks</title>
@@ -325,6 +309,15 @@
 			<para></para>
 		</section>
 	</section>
+
+	<section id="track-controls">
+		<title>Track Controls</title>
+		<para></para>
+	</section>
+
+	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
+		href="default_track_names.xml" />
+
 <!--
 			<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 				href="Some_Subsection.xml" />
