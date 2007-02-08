@@ -268,8 +268,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 		
 		if (scrollbar_height == 0) {
 			HScrollbar scrollbar;
-			Gtk::Requisition requisition;
-			scrollbar.size_request (requisition);
+			Gtk::Requisition requisition(scrollbar.size_request ());
 			scrollbar_height = requisition.height;
 		}
 
