@@ -227,11 +227,11 @@ GainMeter::render_metrics (Gtk::Widget& w)
 	Glib::RefPtr<Gdk::Window> win (w.get_window());
 	Glib::RefPtr<Gdk::GC> fg_gc (w.get_style()->get_fg_gc (Gtk::STATE_NORMAL));
 	Glib::RefPtr<Gdk::GC> bg_gc (w.get_style()->get_bg_gc (Gtk::STATE_NORMAL));
-	gint x, y, width, height, depth;
+	gint width, height;
 	int  db_points[] = { -50, -40, -20, -30, -10, -3, 0, 4 };
 	char buf[32];
 
-	win->get_geometry (x, y, width, height, depth);
+	win->get_size (width, height);
 	
 	Glib::RefPtr<Gdk::Pixmap> pixmap = Gdk::Pixmap::create (win, width, height);
 
@@ -270,9 +270,9 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 	Glib::RefPtr<Gdk::GC> bg_gc (meter_metric_area.get_style()->get_bg_gc (Gtk::STATE_NORMAL));
 	GdkRectangle base_rect;
 	GdkRectangle draw_rect;
-	gint x, y, width, height, depth;
+	gint width, height;
 
-	win->get_geometry (x, y, width, height, depth);
+	win->get_size (width, height);
 	
 	base_rect.width = width;
 	base_rect.height = height;
