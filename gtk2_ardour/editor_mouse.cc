@@ -328,6 +328,8 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	case RegionItem:
 		if (mouse_mode != MouseRange) {
 			commit = set_selected_regionview_from_click (press, op, true);
+		} else if (event->type == GDK_BUTTON_PRESS) {
+			commit = set_selected_track_from_click (press, op, false);
 		}
 		break;
 		
@@ -335,6 +337,8 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	case RegionViewName:
 		if (mouse_mode != MouseRange) {
 			commit = set_selected_regionview_from_click (press, op, true);
+		} else if (event->type == GDK_BUTTON_PRESS) {
+			commit = set_selected_track_from_click (press, op, false);
 		}
 		break;
 
@@ -344,6 +348,8 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	case FadeOutItem:
 		if (mouse_mode != MouseRange) {
 			commit = set_selected_regionview_from_click (press, op, true);
+		} else if (event->type == GDK_BUTTON_PRESS) {
+			commit = set_selected_track_from_click (press, op, false);
 		}
 		break;
 		
