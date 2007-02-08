@@ -969,13 +969,10 @@ TimeAxisView::compute_controls_size_info ()
 		buttons[i]->set_name ("TrackMuteButton");
 	}
 
-	Gtk::Requisition req;
-
 	one_row_table.attach (*buttons[0], 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 	
 	one_row_table.show_all ();
-	one_row_table.size_request (req);
-
+	Gtk::Requisition req (one_row_table.size_request ());
 
 	// height required to show 1 row of buttons
 
@@ -990,7 +987,7 @@ TimeAxisView::compute_controls_size_info ()
 	two_row_table.attach (*buttons[4], 8, 9, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 
 	two_row_table.show_all ();
-	two_row_table.size_request (req);
+	req = two_row_table.size_request ();
 
 	// height required to show all normal buttons 
 
