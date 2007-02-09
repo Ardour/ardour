@@ -30,15 +30,44 @@ namespace PBD {
 	class Controllable;
 }
 
-class BindableToggleButton : public Gtk::ToggleButton
+class BindableToggleButton : public Gtkmm2ext::StatefulToggleButton
 {
    public:
 	BindableToggleButton (PBD::Controllable& c) : binding_proxy (c) {}
-	explicit BindableToggleButton (PBD::Controllable& c, const std::string &label) : Gtk::ToggleButton (label), binding_proxy (c) {}
+
+	explicit BindableToggleButton (PBD::Controllable& c, const std::string &label)
+		: Gtkmm2ext::StatefulToggleButton (label), binding_proxy (c) {}
+
 	virtual ~BindableToggleButton() {}
 	
 	bool on_button_press_event (GdkEventButton *ev) {
-		return binding_proxy.button_press_handler (ev);
+		if (!binding_proxy.button_press_handler (ev)) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+  private:
+	BindingProxy binding_proxy;
+};
+
+class BindableButton : public Gtkmm2ext::StatefulButton
+{
+   public:
+	BindableButton (PBD::Controllable& c) : binding_proxy (c) {}
+
+	explicit BindableButton (PBD::Controllable& c, const std::string &label)
+		: Gtkmm2ext::StatefulButton (label), binding_proxy (c) {}
+
+	~BindableButton() {}
+	
+	bool on_button_press_event (GdkEventButton *ev) {
+		if (!binding_proxy.button_press_handler (ev)) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
   private:

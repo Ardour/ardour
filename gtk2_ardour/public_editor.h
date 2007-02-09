@@ -14,7 +14,6 @@
 #include <pbd/statefuldestructible.h> 
 
 #include "editing.h"
-#include "keyboard_target.h"
 #include "canvas.h"
 #include "selection.h"
 
@@ -73,11 +72,11 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void set_mouse_mode (Editing::MouseMode, bool force = false) = 0;
 	virtual void step_mouse_mode (bool next) = 0;
 	virtual Editing::MouseMode current_mouse_mode () = 0;
-	virtual void add_imageframe_time_axis(const string & track_name, void*)  = 0;
-	virtual void add_imageframe_marker_time_axis(const string & track_name, TimeAxisView* marked_track, void*)  = 0;
+	virtual void add_imageframe_time_axis(const std::string & track_name, void*)  = 0;
+	virtual void add_imageframe_marker_time_axis(const std::string & track_name, TimeAxisView* marked_track, void*)  = 0;
 	virtual void connect_to_image_compositor()  = 0;
 	virtual void scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item)  = 0;
-	virtual TimeAxisView* get_named_time_axis(const string & name)  = 0;
+	virtual TimeAxisView* get_named_time_axis(const std::string & name)  = 0;
 	virtual void consider_auditioning (boost::shared_ptr<ARDOUR::Region>) = 0;
 	virtual void set_show_waveforms (bool yn) = 0;
 	virtual bool show_waveforms() const = 0;

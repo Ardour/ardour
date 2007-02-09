@@ -416,6 +416,10 @@ int main (int argc, char *argv[])
 		     << endl;
 	}
 
+	/* some GUI objects need this */
+
+	PBD::ID::init ();
+
         try { 
 		ui = new ARDOUR_UI (&argc, &argv, which_ui_rcfile());
 	} catch (failed_constructor& err) {

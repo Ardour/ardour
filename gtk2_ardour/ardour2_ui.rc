@@ -143,7 +143,7 @@ style "transport_base" = "medium_bold_text"
 
 style "black_mackie_menu_bar"
 {
-  font_name = "sans bold 7"
+  font_name = "sans bold 9"
   fg[NORMAL] = { 1.0, 1.0, 1.0 }
   bg[NORMAL] = { 0, 0, 0 }
 }
@@ -291,7 +291,8 @@ style "time_button" = "default_buttons_menus"
 style "transport_button"
 {
 	bg[ACTIVE] = { 0.50, 1.0, 0.50 }
-	fg[ACTIVE] = { 0, 0, 0 }
+	fg[ACTIVE] = { 1, 1, 1 }
+	fg[PRELIGHT] = { 1, 1, 1 }
 }
 
 style "transport_rec_button"
@@ -1078,7 +1079,7 @@ widget "*MixerRecordEnableButton" style "mixer_rec_enable_button"
 widget "*MixerRecordEnableButton*" style "mixer_rec_enable_button"
 widget "*TrackRecordEnableButton" style "track_rec_enable_button"
 widget "*TrackRecordEnableButton*" style "track_rec_enable_button"
-widget "*TrackMuteButton*" style "mute_button"
+widget "*MuteButton*" style "mute_button"
 widget "*TrackLoopButton*" style "track_loop_button"
 widget "*PanAutomationLineSelector*" style "multiline_combo"
 widget "*EditorTimeButton*" style "time_button"
@@ -1095,10 +1096,6 @@ widget "*MixerAutomationModeButton*" style "very_small_button"
 widget "*MixerAutomationModeButton.*" style "very_small_button"
 widget "*MixerAutomationPlaybackButton*" style "very_small_button"
 widget "*MixerAutomationPlaybackButton.*" style "very_small_button"
-widget "*MixerMuteButton*" style "mixer_mute_button"
-widget "*MixerMuteButton.*" style "mixer_mute_button"
-widget "*MixerSoloButton*" style "mixer_solo_button"
-widget "*MixerSoloButton.*" style "mixer_solo_button"
 widget "*MixerNameButton" style "very_small_button"
 widget "*MixerNameButtonLabel" style "very_small_button"
 widget "*MixerGroupButton" style "very_small_button"

@@ -313,9 +313,11 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 
 		if ((event->button.state & Keyboard::RelevantModifierKeyMask) && event->button.button != 1) {
 			
-			/* no selection action on modified button-2 or button-3 events */
-			
-			return;
+			/* almost no selection action on modified button-2 or button-3 events */
+		
+			if (item_type != RegionItem && event->button.button != 2) {
+				return;
+			}
 		}
 	}
 	    

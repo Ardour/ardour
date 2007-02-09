@@ -33,6 +33,7 @@
 
 #include "editor.h"
 #include "editing.h"
+#include "keyboard.h"
 #include "ardour_ui.h"
 #include "gui_thread.h"
 #include "actions.h"

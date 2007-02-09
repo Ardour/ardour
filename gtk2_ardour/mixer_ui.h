@@ -38,7 +38,6 @@
 #include <ardour/ardour.h>
 #include <ardour/io.h>
 
-#include "keyboard_target.h"
 #include "route_redirect_selection.h"
 #include "enums.h"
 

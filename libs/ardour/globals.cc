@@ -279,8 +279,6 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 
 	(void) bindtextdomain(PACKAGE, LOCALEDIR);
 
-	PBD::ID::init ();
-
 	setup_enum_writer ();
 
 	lrdf_init();

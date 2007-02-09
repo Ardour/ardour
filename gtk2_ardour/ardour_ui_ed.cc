@@ -181,7 +181,6 @@ ARDOUR_UI::install_actions ()
 	
 	common_actions = ActionGroup::create (X_("Common"));
 	ActionManager::register_action (main_actions, X_("Windows"), _("Windows"));
-	ActionManager::register_action (common_actions, X_("Start-Prefix"), _("start prefix"), mem_fun(*this, &ARDOUR_UI::start_keyboard_prefix));
 	ActionManager::register_action (common_actions, X_("Quit"), _("Quit"), (mem_fun(*this, &ARDOUR_UI::finish)));
 
         /* windows visibility actions */

@@ -79,7 +79,7 @@ Route::init ()
 	_soloed = false;
 	_solo_safe = false;
 	_phase_invert = false;
-	order_keys[N_("signal")] = order_key_cnt++;
+	order_keys[strdup (N_("signal"))] = order_key_cnt++;
 	_active = true;
 	_silent = false;
 	_meter_point = MeterPostFader;
@@ -115,6 +115,10 @@ Route::~Route ()
 {
 	clear_redirects (this);
 
+	for (OrderKeys::iterator i = order_keys.begin(); i != order_keys.end(); ++i) {
+		free ((void*)(i->first));
+	}
+
 	if (_control_outs) {
 		delete _control_outs;
 	}
@@ -136,21 +140,23 @@ Route::remote_control_id() const
 }
 
 long
-Route::order_key (string name) const
+Route::order_key (const char* name) const
 {
 	OrderKeys::const_iterator i;
 	
-	if ((i = order_keys.find (name)) == order_keys.end()) {
-		return -1;
+	for (i = order_keys.begin(); i != order_keys.end(); ++i) {
+		if (!strcmp (name, i->first)) {
+			return i->second;
+		}
 	}
 
-	return (*i).second;
+	return -1;
 }
 
 void
-Route::set_order_key (string name, long n)
+Route::set_order_key (const char* name, long n)
 {
-	order_keys[name] = n;
+	order_keys[strdup(name)] = n;
 	_session.set_dirty ();
 }
 
@@ -1396,7 +1402,7 @@ Route::state(bool full_state)
 	OrderKeys::iterator x = order_keys.begin(); 
 
 	while (x != order_keys.end()) {
-		order_string += (*x).first;
+		order_string += string ((*x).first);
 		order_string += '=';
 		snprintf (buf, sizeof(buf), "%ld", (*x).second);
 		order_string += buf;
@@ -1611,7 +1617,7 @@ Route::_set_state (const XMLNode& node, bool call_base)
 					error << string_compose (_("badly formed order key string in state file! [%1] ... ignored."), remaining)
 					      << endmsg;
 				} else {
-					set_order_key (remaining.substr (0, equal), n);
+					set_order_key (remaining.substr (0, equal).c_str(), n);
 				}
 			}
 

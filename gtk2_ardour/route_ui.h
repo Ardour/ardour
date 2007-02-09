@@ -146,7 +146,10 @@ class RouteUI : public virtual AxisView
 
 	void update_rec_display ();
 	void update_mute_display ();
+
+	bool was_solo_safe;
 	void update_solo_display ();
+
 	virtual void map_frozen ();
 
 	void set_remote_control_id (uint32_t id, Gtk::CheckMenuItem* item);

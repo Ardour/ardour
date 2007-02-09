@@ -55,6 +55,7 @@
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/click_box.h>
 #include <gtkmm2ext/stateful_button.h>
+#include <gtkmm2ext/bindable_button.h>
 #include <ardour/ardour.h>
 #include <ardour/session.h>
 
@@ -355,18 +356,43 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::HBox                primary_clock_hbox;
 	Gtk::HBox                secondary_clock_hbox;
 
-	Gtkmm2ext::StatefulButton roll_button;
-	Gtkmm2ext::StatefulButton stop_button;
-	Gtkmm2ext::StatefulButton rewind_button;
-	Gtkmm2ext::StatefulButton forward_button;
-	Gtkmm2ext::StatefulButton goto_start_button;
-	Gtkmm2ext::StatefulButton goto_end_button;
-	Gtkmm2ext::StatefulButton auto_loop_button;
-	Gtkmm2ext::StatefulButton play_selection_button;
 
-	Gtkmm2ext::StatefulButton rec_button;
+	struct TransportControllable : public PBD::Controllable {
+	    enum ToggleType {
+		    Roll = 0,
+		    Stop,
+		    RecordEnable,
+		    GotoStart,
+		    GotoEnd,
+		    AutoLoop,
+		    PlaySelection
+		    
+	    };
+	    
+	    TransportControllable (std::string name, ARDOUR_UI&, ToggleType);
+	    void set_value (float);
+	    float get_value (void) const;
 
-	Gtk::ToggleButton time_master_button;
+	    ARDOUR_UI& ui;
+	    ToggleType type;
+	};
+
+	TransportControllable roll_controllable;
+	TransportControllable stop_controllable;
+	TransportControllable goto_start_controllable;
+	TransportControllable goto_end_controllable;
+	TransportControllable auto_loop_controllable;
+	TransportControllable play_selection_controllable;
+	TransportControllable rec_controllable;
+	
+	BindableButton roll_button;
+	BindableButton stop_button;
+	BindableButton goto_start_button;
+	BindableButton goto_end_button;
+	BindableButton auto_loop_button;
+	BindableButton play_selection_button;
+	BindableButton rec_button;
+
 	Gtk::ComboBoxText sync_option_combo;
 
 	void sync_option_changed ();
@@ -402,12 +428,14 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	bool   shuttle_grabbed;
 	double shuttle_fract;
 
-	Gtk::ToggleButton punch_in_button;
-	Gtk::ToggleButton punch_out_button;
-	Gtk::ToggleButton auto_return_button;
-	Gtk::ToggleButton auto_play_button;
-	Gtk::ToggleButton auto_input_button;
-	Gtk::ToggleButton click_button;
+	Gtkmm2ext::StatefulToggleButton punch_in_button;
+	Gtkmm2ext::StatefulToggleButton punch_out_button;
+	Gtkmm2ext::StatefulToggleButton auto_return_button;
+	Gtkmm2ext::StatefulToggleButton auto_play_button;
+	Gtkmm2ext::StatefulToggleButton auto_input_button;
+	Gtkmm2ext::StatefulToggleButton click_button;
+	Gtkmm2ext::StatefulToggleButton time_master_button;
+
 	Gtk::ToggleButton auditioning_alert_button;
 	Gtk::ToggleButton solo_alert_button;
 
@@ -585,7 +613,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	/* Keymap handling */
 
 	void install_actions ();
-	void start_keyboard_prefix();
 
 	void toggle_record_enable (uint32_t);
 

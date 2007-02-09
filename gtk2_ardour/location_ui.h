@@ -32,7 +32,6 @@
 #include <ardour/session.h>
 
 #include "ardour_dialog.h"
-#include "keyboard_target.h"
 
 namespace ARDOUR {
 	class LocationStack;

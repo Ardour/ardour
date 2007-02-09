@@ -42,7 +42,7 @@ BindableToggleButton::BindableToggleButton (MIDI::Controllable *mc)
 }
 
 BindableToggleButton::BindableToggleButton(MIDI::Controllable *mc, const string &label)
-	: ToggleButton (label),
+	: StatefulButton (label),
 	  prompter (Gtk::WIN_POS_MOUSE, 30000, false),
 	  midi_control (mc),
 	  bind_button (2),
@@ -87,17 +87,6 @@ BindableToggleButton::midi_learn()
 		prompting = true;
 		midi_control->learn_about_external_control ();
 	}
-}
-
-bool
-BindableToggleButton::on_button_press_event (GdkEventButton *ev)
-{
-	if ((ev->state & bind_statemask) && ev->button == bind_button) { 
-		midi_learn ();
-		return true;
-	}
-	
-	return false;
 }
 
 bool

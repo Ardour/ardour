@@ -37,6 +37,7 @@
 #include <ardour/audio_diskstream.h>
 #include <ardour/plugin_manager.h>
 
+#include "keyboard.h"
 #include "mixer_ui.h"
 #include "mixer_strip.h"
 #include "plugin_selector.h"

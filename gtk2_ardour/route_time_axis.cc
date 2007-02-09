@@ -105,8 +105,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	ignore_toggle = false;
 
-	mute_button->set_name ("TrackMuteButton");
-	solo_button->set_name ("SoloButton");
 	edit_group_button.set_name ("TrackGroupButton");
 	playlist_button.set_name ("TrackPlaylistButton");
 	automation_button.set_name ("TrackAutomationButton");
@@ -124,9 +122,9 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	visual_button.signal_clicked().connect (mem_fun(*this, &RouteTimeAxisView::visual_click));
 	hide_button.signal_clicked().connect (mem_fun(*this, &RouteTimeAxisView::hide_click));
 
-	solo_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::solo_press));
+	solo_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::solo_press), true);
 	solo_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::solo_release));
-	mute_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::mute_press));
+	mute_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::mute_press), true);
 	mute_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::mute_release));
 
 	if (is_track()) {
@@ -177,15 +175,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	/* remove focus from the buttons */
 	
-	automation_button.unset_flags (Gtk::CAN_FOCUS);
-	solo_button->unset_flags (Gtk::CAN_FOCUS);
-	mute_button->unset_flags (Gtk::CAN_FOCUS);
-	edit_group_button.unset_flags (Gtk::CAN_FOCUS);
-	size_button.unset_flags (Gtk::CAN_FOCUS);
-	playlist_button.unset_flags (Gtk::CAN_FOCUS);
-	hide_button.unset_flags (Gtk::CAN_FOCUS);
-	visual_button.unset_flags (Gtk::CAN_FOCUS);
-
 	y_position = -1;
 
 	_route->redirects_changed.connect (mem_fun(*this, &RouteTimeAxisView::redirects_changed));
@@ -484,7 +473,6 @@ RouteTimeAxisView::build_display_menu ()
 
 static bool __reset_item (RadioMenuItem* item)
 {
-	cerr << "reset item to true\n";
 	item->set_active ();
 	return false;
 }

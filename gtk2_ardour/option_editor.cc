@@ -31,6 +31,7 @@
 #include <gtkmm2ext/utils.h>
 
 #include "public_editor.h"
+#include "keyboard.h"
 #include "mixer_ui.h"
 #include "ardour_ui.h"
 #include "io_selector.h"

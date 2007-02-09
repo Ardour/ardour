@@ -147,11 +147,11 @@ class Editor : public PublicEditor
 	void step_mouse_mode (bool next);
 	Editing::MouseMode current_mouse_mode () { return mouse_mode; }
 
-	void add_imageframe_time_axis(const string & track_name, void*) ;
-	void add_imageframe_marker_time_axis(const string & track_name, TimeAxisView* marked_track, void*) ;
+	void add_imageframe_time_axis(const std::string & track_name, void*) ;
+	void add_imageframe_marker_time_axis(const std::string & track_name, TimeAxisView* marked_track, void*) ;
 	void connect_to_image_compositor() ;
 	void scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item) ;
-	TimeAxisView* get_named_time_axis(const string & name) ;
+	TimeAxisView* get_named_time_axis(const std::string & name) ;
 
 	void consider_auditioning (boost::shared_ptr<ARDOUR::Region>);
 	void hide_a_region (boost::shared_ptr<ARDOUR::Region>);

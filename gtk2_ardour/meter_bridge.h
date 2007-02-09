@@ -30,7 +30,6 @@
 #include <gtkmm/fixed.h>
 #include <gtkmm/frame.h>
 
-#include "keyboard_target.h"
 #include "ardour_dialog.h"
 
 class MeterBridgeStrip;

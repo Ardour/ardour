@@ -69,7 +69,6 @@
 #include "mixer_ui.h"
 #include "prompter.h"
 #include "opts.h"
-#include "keyboard_target.h"
 #include "add_route_dialog.h"
 #include "new_session_dialog.h"
 #include "about.h"
@@ -117,16 +116,32 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
 	  /* transport */
 
-	  time_master_button (_("time\nmaster")),
+	  roll_controllable ("transport roll", *this, TransportControllable::Roll),
+	  stop_controllable ("transport stop", *this, TransportControllable::Stop),
+	  goto_start_controllable ("transport goto start", *this, TransportControllable::GotoStart),
+	  goto_end_controllable ("transport goto end", *this, TransportControllable::GotoEnd),
+	  auto_loop_controllable ("transport auto loop", *this, TransportControllable::AutoLoop),
+	  play_selection_controllable ("transport play selection", *this, TransportControllable::PlaySelection),
+	  rec_controllable ("transport rec-enable", *this, TransportControllable::RecordEnable),
+
+	  roll_button (roll_controllable),
+	  stop_button (stop_controllable),
+	  goto_start_button (goto_start_controllable),
+	  goto_end_button (goto_end_controllable),
+	  auto_loop_button (auto_loop_controllable),
+	  play_selection_button (play_selection_controllable),
+	  rec_button (rec_controllable),
 
 	  shuttle_units_button (_("% ")),
 
 	  punch_in_button (_("Punch In")),
 	  punch_out_button (_("Punch Out")),
 	  auto_return_button (_("Auto Return")),
-	  auto_play_button (_("Autuo Play")),
+	  auto_play_button (_("Auto Play")),
 	  auto_input_button (_("Auto Input")),
 	  click_button (_("Click")),
+	  time_master_button (_("time\nmaster")),
+
 	  auditioning_alert_button (_("AUDITION")),
 	  solo_alert_button (_("SOLO")),
 	  shown_flag (false)
@@ -1061,6 +1076,8 @@ ARDOUR_UI::remove_last_capture()
 void
 ARDOUR_UI::transport_record ()
 {
+	cerr << "transport record\n";
+
 	if (session) {
 		switch (session->record_status()) {
 		case Session::Disabled:
@@ -1091,11 +1108,11 @@ ARDOUR_UI::transport_roll ()
 
 	if (session->get_play_loop()) {
 		session->request_play_loop (false);
-		auto_loop_button.set_active (false);
-		roll_button.set_active (true);
+		auto_loop_button.set_visual_state (1);
+		roll_button.set_visual_state (1);
 	} else if (session->get_play_range ()) {
 		session->request_play_range (false);
-		play_selection_button.set_active (false);
+		play_selection_button.set_visual_state (0);
 	} else if (rolling) {
 		session->request_locate (session->last_transport_start(), true);
 	}
@@ -1412,7 +1429,7 @@ ARDOUR_UI::_blink (void *arg)
 void
 ARDOUR_UI::blink ()
 {
-	 Blink (blink_on = !blink_on); /* EMIT_SIGNAL */
+	Blink (blink_on = !blink_on); /* EMIT_SIGNAL */
 }
 
 void
@@ -1605,18 +1622,18 @@ ARDOUR_UI::transport_rec_enable_blink (bool onoff)
 	switch (session->record_status()) {
 	case Session::Enabled:
 		if (onoff) {
-			rec_button.set_state (1);
+			rec_button.set_visual_state (1);
 		} else {
-			rec_button.set_state (0);
+			rec_button.set_visual_state (0);
 		}
 		break;
 
 	case Session::Recording:
-		rec_button.set_state (2);
+		rec_button.set_visual_state (2);
 		break;
 
 	default:
-		rec_button.set_state (0);
+		rec_button.set_visual_state (0);
 		break;
 	}
 }
@@ -1627,12 +1644,6 @@ ARDOUR_UI::hide_and_quit (GdkEventAny *ev, ArdourDialog *window)
 	window->hide();
 	Gtk::Main::quit ();
 	return TRUE;
-}
-
-void
-ARDOUR_UI::start_keyboard_prefix ()
-{
-	keyboard->start_prefix();
 }
 
 void
@@ -2519,3 +2530,82 @@ ARDOUR_UI::store_clock_modes ()
 
 
 		
+ARDOUR_UI::TransportControllable::TransportControllable (std::string name, ARDOUR_UI& u, ToggleType tp)
+	: Controllable (name), ui (u), type(tp)
+{
+	
+}
+
+void
+ARDOUR_UI::TransportControllable::set_value (float val)
+{
+	if (val < 0.5f) {
+		/* do nothing: these are radio-style actions */
+		return;
+	}
+
+	char *action = 0;
+
+	switch (type) {
+	case Roll:
+		action = X_("Roll");
+		break;
+	case Stop:
+		action = X_("Stop");
+		break;
+	case GotoStart:
+		action = X_("Goto Start");
+		break;
+	case GotoEnd:
+		action = X_("Goto End");
+		break;
+	case AutoLoop:
+		action = X_("Loop");
+		break;
+	case PlaySelection:
+		action = X_("Play Selection");
+		break;
+	case RecordEnable:
+		action = X_("Record");
+		break;
+	default:
+		break;
+	}
+
+	if (action == 0) {
+		return;
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action ("transport", action);
+
+	if (act) {
+		act->activate ();
+	}
+}
+
+float
+ARDOUR_UI::TransportControllable::get_value (void) const
+{
+	float val = 0.0f;
+	
+	switch (type) {
+	case Roll:
+		break;
+	case Stop:
+		break;
+	case GotoStart:
+		break;
+	case GotoEnd:
+		break;
+	case AutoLoop:
+		break;
+	case PlaySelection:
+		break;
+	case RecordEnable:
+		break;
+	default:
+		break;
+	}
+
+	return val;
+}

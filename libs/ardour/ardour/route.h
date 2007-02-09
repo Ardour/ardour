@@ -78,8 +78,8 @@ class Route : public IO
 	std::string comment() { return _comment; }
 	void set_comment (std::string str, void *src);
 
-	long order_key(std::string name) const;
-	void set_order_key (std::string name, long n);
+	long order_key (const char* name) const;
+	void set_order_key (const char* name, long n);
 
 	bool hidden() const { return _flags & Hidden; }
 	bool master() const { return _flags & MasterOut; }
@@ -321,7 +321,16 @@ class Route : public IO
 	void init ();
 
 	static uint32_t order_key_cnt;
-	typedef std::map<std::string,long> OrderKeys;
+
+	struct ltstr
+	{
+	    bool operator()(const char* s1, const char* s2) const
+	    {
+		    return strcmp(s1, s2) < 0;
+	    }
+	};
+
+	typedef std::map<const char*,long,ltstr> OrderKeys;
 	OrderKeys order_keys;
 
 	void input_change_handler (IOChange, void *src);

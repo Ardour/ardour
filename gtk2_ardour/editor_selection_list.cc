@@ -31,6 +31,7 @@
 #include <gtkmm2ext/stop_signal.h>
 
 #include "editor.h"
+#include "keyboard.h"
 #include "selection.h"
 #include "time_axis_view.h"
 #include "ardour_ui.h"

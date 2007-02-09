@@ -27,28 +27,55 @@
 
 namespace Gtkmm2ext {
 
-class StatefulButton : public Gtk::Button
+class StateButton 
 {
    public:
-	StatefulButton();
-	explicit StatefulButton(const std::string &label);
-	virtual ~StatefulButton() {}
+	StateButton();
+	virtual ~StateButton() {}
 
 	void set_colors (const std::vector<Gdk::Color>& colors);
-	void set_state (int);
-	int  get_state () { return current_state; }
-	void set_active (bool yn) {
-		set_state (yn ? 1 : 0);
-	}
-	
+	void set_visual_state (int);
+	int  get_visual_state () { return visual_state; }
 
   protected:
 	std::vector<Gdk::Color> colors;
-	int current_state;
+	int  visual_state;
 	Gdk::Color saved_bg;
 	bool have_saved_bg;
+	
+	virtual void bg_modify (Gtk::StateType, Gdk::Color) = 0;
+};
 
+
+class StatefulToggleButton : public StateButton, public Gtk::ToggleButton
+{
+   public:
+	StatefulToggleButton() {}
+	explicit StatefulToggleButton(const std::string &label) : Gtk::ToggleButton (label) {}
+	~StatefulToggleButton() {}
+
+  protected:
 	void on_realize ();
+	void on_toggled ();
+
+	void bg_modify (Gtk::StateType state, Gdk::Color col) { 
+		modify_bg (state, col);
+	}
+};
+
+class StatefulButton : public StateButton, public Gtk::Button
+{
+   public:
+	StatefulButton() {}
+	explicit StatefulButton(const std::string &label) : Gtk::Button (label) {}
+	virtual ~StatefulButton() {}
+
+  protected:
+	void on_realize ();
+
+	void bg_modify (Gtk::StateType state, Gdk::Color col) { 
+		modify_bg (state, col);
+	}
 };
 
 };

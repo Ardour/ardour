@@ -63,6 +63,7 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 	ignore_toggle = false;
 	wait_for_release = false;
 	route_active_menu_item = 0;
+	was_solo_safe = false;
 
 	if (set_color_from_route()) {
 		set_color (unique_random_color());
@@ -75,8 +76,23 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
         mute_button = manage (new BindableToggleButton (_route->mute_control(), m_name ));
         solo_button = manage (new BindableToggleButton (_route->solo_control(), s_name ));
 
-	// mute_button->unset_flags (Gtk::CAN_FOCUS);
-	// solo_button->unset_flags (Gtk::CAN_FOCUS);
+	mute_button->set_name ("MuteButton");
+	solo_button->set_name ("SoloButton");
+
+	vector<Gdk::Color> colors;
+	Gdk::Color c;
+
+	/* mute+solo buttons get 2 color states, so add one here to supplement the existing one */
+	::set_color(c, rgba_from_style (X_("MuteButton"), 0x7f, 0xff, 0x7f, 0, "bg", Gtk::STATE_ACTIVE, false ));
+	colors.push_back (c);
+	mute_button->set_colors (colors);
+
+	colors.clear ();
+	
+	/* mute+solo buttons get 2 color states, so add one here to supplement the existing one */
+	::set_color(c, rgba_from_style (X_("SoloButton"), 0x7f, 0xff, 0x7f, 0, "bg", Gtk::STATE_ACTIVE, false ));
+	colors.push_back (c);
+	solo_button->set_colors (colors);
 
 	_route->mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed));
 	_route->solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
@@ -93,7 +109,17 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 		_session.RecordStateChanged.connect (mem_fun (*this, &RouteUI::session_rec_enable_changed));
 
 		rec_enable_button = manage (new BindableToggleButton (t->rec_enable_control(), r_name ));
-		rec_enable_button->unset_flags (Gtk::CAN_FOCUS);
+
+		colors.clear ();
+
+		/* record button has 3 color states, so we set 2 extra here */
+		::set_color(c, rgba_from_style (X_("TrackRecordEnableButton"), 0xff, 0, 0, 0, "bg", Gtk::STATE_SELECTED, false ));
+		colors.push_back (c);
+		
+		::set_color(c, rgba_from_style (X_("TrackRecordEnableButton"), 0xff, 0, 0, 0, "bg", Gtk::STATE_ACTIVE, false ));
+		colors.push_back (c);
+		
+		rec_enable_button->set_colors (colors);
 		
 		update_rec_display ();
 	} 
@@ -342,6 +368,25 @@ void
 RouteUI::update_solo_display ()
 {
 	bool x;
+	vector<Gdk::Color> colors;
+	Gdk::Color c;
+
+	if (_route->solo_safe() != was_solo_safe){
+
+		if (_route->solo_safe()) {
+			/* show solo safe */
+			::set_color(c, rgba_from_style (safe_solo_button_name(), 0x7f, 0xff, 0x7f, 0, "bg", Gtk::STATE_ACTIVE, false ));
+			solo_button->set_name(safe_solo_button_name());
+		} else {
+			::set_color(c, rgba_from_style (solo_button_name(), 0x7f, 0xff, 0x7f, 0, "bg", Gtk::STATE_ACTIVE, false ));
+			solo_button->set_name(solo_button_name());
+		}
+
+		colors.push_back (c);
+		solo_button->set_colors (colors);
+
+		was_solo_safe = !was_solo_safe;
+	}
 
 	if (solo_button->get_active() != (x = _route->soloed())){
 		ignore_toggle = true;
@@ -349,13 +394,6 @@ RouteUI::update_solo_display ()
 		ignore_toggle = false;
 	}
 	
-	/* show solo safe */
-
-	if (_route->solo_safe()){
-		solo_button->set_name(safe_solo_button_name());
-	} else {
-		solo_button->set_name(solo_button_name());
-	}
 }
 
 void

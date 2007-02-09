@@ -41,7 +41,6 @@
 
 #include "io_selector.h"
 #include "ardour_dialog.h"
-#include "keyboard_target.h"
 #include "redirect_box.h"
 #include "route_redirect_selection.h"
 

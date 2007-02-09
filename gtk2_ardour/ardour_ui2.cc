@@ -38,6 +38,7 @@
 #include <ardour/route.h>
 
 #include "ardour_ui.h"
+#include "keyboard.h"
 #include "public_editor.h"
 #include "audio_clock.h"
 #include "actions.h"
@@ -118,11 +119,11 @@ ARDOUR_UI::setup_adjustables ()
 void
 ARDOUR_UI::transport_stopped ()
 {
-	stop_button.set_active (true);
+	stop_button.set_visual_state (1);
 	
-	roll_button.set_active (false);
-	play_selection_button.set_active (false);
-	auto_loop_button.set_active (false);
+	roll_button.set_visual_state (0);
+	play_selection_button.set_visual_state (0);
+	auto_loop_button.set_visual_state (0);
 
 	shuttle_fract = 0;
 	shuttle_box.queue_draw ();
@@ -133,22 +134,22 @@ ARDOUR_UI::transport_stopped ()
 void
 ARDOUR_UI::transport_rolling ()
 {
-	stop_button.set_active (false);
+	stop_button.set_visual_state (0);
 	if (session->get_play_range()) {
-		play_selection_button.set_active (true);
-		roll_button.set_active (false);
-		auto_loop_button.set_active (false);
+		play_selection_button.set_visual_state (1);
+		roll_button.set_visual_state (0);
+		auto_loop_button.set_visual_state (0);
 
 	} else if (session->get_play_loop ()) {
-		auto_loop_button.set_active (true);
-		play_selection_button.set_active (false);
-		roll_button.set_active (false);
+		auto_loop_button.set_visual_state (1);
+		play_selection_button.set_visual_state (0);
+		roll_button.set_visual_state (0);
 
 	} else {
 
-		roll_button.set_active (true);
-		play_selection_button.set_active (false);
-		auto_loop_button.set_active (false);
+		roll_button.set_visual_state (1);
+		play_selection_button.set_visual_state (0);
+		auto_loop_button.set_visual_state (0);
 	}
 
 	/* reset shuttle controller */
@@ -160,21 +161,35 @@ ARDOUR_UI::transport_rolling ()
 void
 ARDOUR_UI::transport_rewinding ()
 {
-	stop_button.set_active(false);
-	roll_button.set_active (true);
-	play_selection_button.set_active (false);
-	auto_loop_button.set_active (false);
+	stop_button.set_visual_state (0);
+	roll_button.set_visual_state (1);
+	play_selection_button.set_visual_state (0);
+	auto_loop_button.set_visual_state (0);
 }
 
 void
 ARDOUR_UI::transport_forwarding ()
 {
-	stop_button.set_active (false);
-	roll_button.set_active (true);
-	play_selection_button.set_active (false);
-	auto_loop_button.set_active (false);
+	stop_button.set_visual_state (0);
+	roll_button.set_visual_state (1);
+	play_selection_button.set_visual_state (0);
+	auto_loop_button.set_visual_state (0);
 }
 
+bool
+messagefoo (GdkEventButton* ev)
+{
+	cerr << " roll  button pressed\n";
+	return false;
+}
+
+bool
+messagefoo2 (GdkEventButton* ev)
+{
+	cerr << " roll  button release\n";
+	return false;
+}
+ 
 void
 ARDOUR_UI::setup_transport ()
 {
@@ -207,16 +222,29 @@ ARDOUR_UI::setup_transport ()
 	play_selection_button.set_name ("TransportButton");
 	rec_button.set_name ("TransportRecButton");
 	auto_loop_button.set_name ("TransportButton");
-	auto_return_button.set_name ("TransportButton");
-	auto_play_button.set_name ("TransportButton");
-	auto_input_button.set_name ("TransportButton");
-	punch_in_button.set_name ("TransportButton");
-	punch_out_button.set_name ("TransportButton");
-	click_button.set_name ("TransportButton");
-	time_master_button.set_name ("TransportButton");
 
 	vector<Gdk::Color> colors;
 	Gdk::Color c;
+
+	set_color(c, rgba_from_style ("TransportButton", 0xff, 0, 0, 0, "bg", Gtk::STATE_ACTIVE, false ));
+	colors.push_back (c);
+
+	auto_return_button.set_name ("TransportButton");
+	auto_return_button.set_colors (colors);	
+	auto_play_button.set_name ("TransportButton");
+	auto_play_button.set_colors (colors);	
+	auto_input_button.set_name ("TransportButton");
+	auto_input_button.set_colors (colors);	
+	punch_in_button.set_name ("TransportButton");
+	punch_in_button.set_colors (colors);	
+	punch_out_button.set_name ("TransportButton");
+	punch_out_button.set_colors (colors);	
+	click_button.set_name ("TransportButton");
+	click_button.set_colors (colors);	
+	time_master_button.set_name ("TransportButton");
+	time_master_button.set_colors (colors);	
+
+	colors.clear ();
 
 	/* record button has 3 color states, so we set 2 extra here */
 	set_color(c, rgba_from_style ("TransportRecButton", 0xff, 0, 0, 0, "bg", Gtk::STATE_PRELIGHT, false ));
@@ -249,7 +277,7 @@ ARDOUR_UI::setup_transport ()
 	
 	Widget* w;
 
-	stop_button.set_active (true);
+	stop_button.set_visual_state (1);
 	
 	w = manage (new Image (get_icon (X_("transport_start"))));
 	w->show();
@@ -275,6 +303,9 @@ ARDOUR_UI::setup_transport ()
 
 	RefPtr<Action> act;
 
+	roll_button.signal_button_press_event().connect (sigc::ptr_fun (messagefoo));
+	roll_button.signal_button_release_event().connect (sigc::ptr_fun (messagefoo2));
+
 	act = ActionManager::get_action (X_("Transport"), X_("Stop"));
 	act->connect_proxy (stop_button);
 	act = ActionManager::get_action (X_("Transport"), X_("Roll"));
@@ -298,6 +329,7 @@ ARDOUR_UI::setup_transport ()
 	ARDOUR_UI::instance()->tooltips().set_tip (goto_start_button, _("Go to start of session"));
 	ARDOUR_UI::instance()->tooltips().set_tip (goto_end_button, _("Go to end of session"));
 	ARDOUR_UI::instance()->tooltips().set_tip (auto_loop_button, _("Play loop range"));
+
 	ARDOUR_UI::instance()->tooltips().set_tip (auto_return_button, _("Return to last playback start when stopped"));
 	ARDOUR_UI::instance()->tooltips().set_tip (auto_play_button, _("Start playback after any locate"));
 	ARDOUR_UI::instance()->tooltips().set_tip (auto_input_button, _("Be sensible about input monitoring"));
@@ -338,12 +370,7 @@ ARDOUR_UI::setup_transport ()
 	ActionManager::get_action ("Transport", "TogglePunchIn")->connect_proxy (punch_in_button);
 	ActionManager::get_action ("Transport", "TogglePunchOut")->connect_proxy (punch_out_button);
 
-	preroll_button.unset_flags (CAN_FOCUS);
-	preroll_button.set_events (preroll_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 	preroll_button.set_name ("TransportButton");
-
-	postroll_button.unset_flags (CAN_FOCUS);
-	postroll_button.set_events (postroll_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 	postroll_button.set_name ("TransportButton");
 
 	preroll_clock.set_mode (AudioClock::MinSec);
@@ -659,8 +686,8 @@ ARDOUR_UI::shuttle_box_button_release (GdkEventButton* ev)
 			if (Config->get_auto_play() || roll_button.get_state()) {
 				shuttle_fract = SHUTTLE_FRACT_SPEED1;				
 				session->request_transport_speed (1.0);
-				stop_button.set_active (false);
-				roll_button.set_active (true);
+				stop_button.set_visual_state (0);
+				roll_button.set_visual_state (1);
 			} else {
 				shuttle_fract = 0;
 				session->request_transport_speed (0.0);
@@ -673,8 +700,8 @@ ARDOUR_UI::shuttle_box_button_release (GdkEventButton* ev)
 		if (session->transport_rolling()) {
 			shuttle_fract = SHUTTLE_FRACT_SPEED1;
 			session->request_transport_speed (1.0);
-			stop_button.set_active (false);
-			roll_button.set_active (true);
+			stop_button.set_visual_state (0);
+			roll_button.set_visual_state (1);
 		} else {
 			shuttle_fract = 0;
 		}

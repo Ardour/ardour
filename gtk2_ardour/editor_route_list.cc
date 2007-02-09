@@ -23,6 +23,7 @@
 #include <cmath>
 
 #include "editor.h"
+#include "keyboard.h"
 #include "ardour_ui.h"
 #include "audio_time_axis.h"
 #include "mixer_strip.h"

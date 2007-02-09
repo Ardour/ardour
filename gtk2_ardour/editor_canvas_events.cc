@@ -25,6 +25,7 @@
 #include <ardour/audioplaylist.h>
 
 #include "editor.h"
+#include "keyboard.h"
 #include "public_editor.h"
 #include "audio_region_view.h"
 #include "audio_streamview.h"

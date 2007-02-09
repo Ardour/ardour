@@ -155,9 +155,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	/* XXX what is this meant to do? */
 	//meter_point_button.signal_button_release_event().connect (mem_fun (gpm, &GainMeter::meter_release), false);
 
-	solo_button->set_name ("MixerSoloButton");
-	mute_button->set_name ("MixerMuteButton");
-
 	hide_button.set_events (hide_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 
 	width_button.unset_flags (Gtk::CAN_FOCUS);
