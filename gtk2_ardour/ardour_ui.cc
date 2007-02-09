@@ -360,16 +360,16 @@ ARDOUR_UI::set_transport_controllable_state (const XMLNode& node)
 	if ((prop = node.property ("stop")) != 0) {
 		stop_controllable.set_id (prop->value());
 	}
-	if ((prop = node.property ("goto start")) != 0) {
+	if ((prop = node.property ("goto_start")) != 0) {
 		goto_start_controllable.set_id (prop->value());
 	}
-	if ((prop = node.property ("goto end")) != 0) {
+	if ((prop = node.property ("goto_end")) != 0) {
 		goto_end_controllable.set_id (prop->value());
 	}
-	if ((prop = node.property ("auto loop")) != 0) {
+	if ((prop = node.property ("auto_loop")) != 0) {
 		auto_loop_controllable.set_id (prop->value());
 	}
-	if ((prop = node.property ("play selection")) != 0) {
+	if ((prop = node.property ("play_selection")) != 0) {
 		play_selection_controllable.set_id (prop->value());
 	}
 	if ((prop = node.property ("rec")) != 0) {
@@ -391,13 +391,13 @@ ARDOUR_UI::get_transport_controllable_state ()
 	stop_controllable.id().print (buf, sizeof (buf));
 	node->add_property (X_("stop"), buf);
 	goto_start_controllable.id().print (buf, sizeof (buf));
-	node->add_property (X_("goto start"), buf);
+	node->add_property (X_("goto_start"), buf);
 	goto_end_controllable.id().print (buf, sizeof (buf));
-	node->add_property (X_("goto end"), buf);
+	node->add_property (X_("goto_end"), buf);
 	auto_loop_controllable.id().print (buf, sizeof (buf));
-	node->add_property (X_("auto loop"), buf);
+	node->add_property (X_("auto_loop"), buf);
 	play_selection_controllable.id().print (buf, sizeof (buf));
-	node->add_property (X_("play selection"), buf);
+	node->add_property (X_("play_selection"), buf);
 	rec_controllable.id().print (buf, sizeof (buf));
 	node->add_property (X_("rec"), buf);
 	shuttle_controllable.id().print (buf, sizeof (buf));
@@ -2200,9 +2200,17 @@ After cleanup, unused audio files will be moved to a \
 
 	editor->prepare_for_cleanup ();
 
+	/* do not allow flush until a session is reloaded */
+
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Main"), X_("FlushWastebasket"));
+	if (act) {
+		act->set_sensitive (false);
+	}
+
 	if (session->cleanup_sources (rep)) {
 		return;
 	}
+
 	checker.hide();
 	display_cleanup_results (rep, 
 				 _("cleaned files"),
@@ -2214,6 +2222,9 @@ Flushing the wastebasket will \n\
 release an additional\n\
 %4 %5bytes of disk space.\n"
 					 ));
+
+
+
 }
 
 void

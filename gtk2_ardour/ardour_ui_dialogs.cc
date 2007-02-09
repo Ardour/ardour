@@ -62,6 +62,13 @@ ARDOUR_UI::connect_to_session (Session *s)
 		ActionManager::set_sensitive (ActionManager::range_sensitive_actions, false);
 	}
 
+	/* allow wastebasket flush again */
+
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Main"), X_("FlushWastebasket"));
+	if (act) {
+		act->set_sensitive (true);
+	}
+
 	/* there are never any selections on startup */
 
 	ActionManager::set_sensitive (ActionManager::region_selection_sensitive_actions, false);
