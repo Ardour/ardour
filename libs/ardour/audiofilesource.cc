@@ -581,5 +581,11 @@ AudioFileSource::safe_file_extension(string file)
 void
 AudioFileSource::mark_immutable ()
 {
-	_flags = Flag (_flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
+	/* destructive sources stay writable, and their other flags don't
+	   change.
+	*/
+
+	if (!(_flags & Destructive)) {
+		_flags = Flag (_flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
+	}
 }

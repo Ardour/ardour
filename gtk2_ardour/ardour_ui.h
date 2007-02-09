@@ -365,14 +365,17 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 		    GotoStart,
 		    GotoEnd,
 		    AutoLoop,
-		    PlaySelection
+		    PlaySelection,
+		    ShuttleControl
 		    
 	    };
 	    
 	    TransportControllable (std::string name, ARDOUR_UI&, ToggleType);
 	    void set_value (float);
 	    float get_value (void) const;
-
+	    
+	    void set_id (const std::string&);
+	    
 	    ARDOUR_UI& ui;
 	    ToggleType type;
 	};
@@ -384,7 +387,12 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	TransportControllable auto_loop_controllable;
 	TransportControllable play_selection_controllable;
 	TransportControllable rec_controllable;
-	
+	TransportControllable shuttle_controllable;
+	BindingProxy shuttle_controller_binding_proxy;
+
+	void set_transport_controllable_state (const XMLNode&);
+	XMLNode& get_transport_controllable_state ();
+
 	BindableButton roll_button;
 	BindableButton stop_button;
 	BindableButton goto_start_button;
@@ -424,6 +432,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	gint shuttle_box_expose (GdkEventExpose*);
 	gint mouse_shuttle (double x, bool force);
 	void use_shuttle_fract (bool force);
+	void set_shuttle_fract (double);
 
 	bool   shuttle_grabbed;
 	double shuttle_fract;

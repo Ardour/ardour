@@ -649,6 +649,10 @@ ARDOUR_UI::shuttle_box_button_press (GdkEventButton* ev)
 		return true;
 	}
 
+	if (shuttle_controller_binding_proxy.button_press_handler (ev)) {
+		return true;
+	}
+
 	if (Keyboard::is_context_menu_event (ev)) {
 		show_shuttle_context_menu ();
 		return true;
@@ -774,6 +778,13 @@ ARDOUR_UI::mouse_shuttle (double x, bool force)
 	shuttle_fract = distance / half_width;
 	use_shuttle_fract (force);
 	return true;
+}
+
+void
+ARDOUR_UI::set_shuttle_fract (double f)
+{
+	shuttle_fract = f;
+	use_shuttle_fract (false);
 }
 
 void

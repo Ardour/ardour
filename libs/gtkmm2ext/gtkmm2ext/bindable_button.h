@@ -42,6 +42,7 @@ class BindableToggleButton : public Gtkmm2ext::StatefulToggleButton
 	
 	bool on_button_press_event (GdkEventButton *ev) {
 		if (!binding_proxy.button_press_handler (ev)) {
+			StatefulToggleButton::on_button_press_event (ev);
 			return false;
 		} else {
 			return true;
@@ -64,6 +65,7 @@ class BindableButton : public Gtkmm2ext::StatefulButton
 	
 	bool on_button_press_event (GdkEventButton *ev) {
 		if (!binding_proxy.button_press_handler (ev)) {
+			StatefulButton::on_button_press_event (ev);
 			return false;
 		} else {
 			return true;

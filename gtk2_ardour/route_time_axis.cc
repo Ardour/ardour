@@ -122,9 +122,9 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	visual_button.signal_clicked().connect (mem_fun(*this, &RouteTimeAxisView::visual_click));
 	hide_button.signal_clicked().connect (mem_fun(*this, &RouteTimeAxisView::hide_click));
 
-	solo_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::solo_press), true);
+	solo_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::solo_press), false);
 	solo_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::solo_release));
-	mute_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::mute_press), true);
+	mute_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::mute_press), false);
 	mute_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::mute_release));
 
 	if (is_track()) {

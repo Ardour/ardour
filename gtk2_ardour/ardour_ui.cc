@@ -123,6 +123,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	  auto_loop_controllable ("transport auto loop", *this, TransportControllable::AutoLoop),
 	  play_selection_controllable ("transport play selection", *this, TransportControllable::PlaySelection),
 	  rec_controllable ("transport rec-enable", *this, TransportControllable::RecordEnable),
+	  shuttle_controllable ("shuttle", *this, TransportControllable::ShuttleControl),
+	  shuttle_controller_binding_proxy (shuttle_controllable),
 
 	  roll_button (roll_controllable),
 	  stop_button (stop_controllable),
@@ -131,7 +133,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	  auto_loop_button (auto_loop_controllable),
 	  play_selection_button (play_selection_controllable),
 	  rec_button (rec_controllable),
-
+	  
 	  shuttle_units_button (_("% ")),
 
 	  punch_in_button (_("Punch In")),
@@ -348,6 +350,63 @@ ARDOUR_UI::configure_handler (GdkEventConfigure* conf)
 }
 
 void
+ARDOUR_UI::set_transport_controllable_state (const XMLNode& node)
+{
+	const XMLProperty* prop;
+
+	if ((prop = node.property ("roll")) != 0) {
+		roll_controllable.set_id (prop->value());
+	}
+	if ((prop = node.property ("stop")) != 0) {
+		stop_controllable.set_id (prop->value());
+	}
+	if ((prop = node.property ("goto start")) != 0) {
+		goto_start_controllable.set_id (prop->value());
+	}
+	if ((prop = node.property ("goto end")) != 0) {
+		goto_end_controllable.set_id (prop->value());
+	}
+	if ((prop = node.property ("auto loop")) != 0) {
+		auto_loop_controllable.set_id (prop->value());
+	}
+	if ((prop = node.property ("play selection")) != 0) {
+		play_selection_controllable.set_id (prop->value());
+	}
+	if ((prop = node.property ("rec")) != 0) {
+		rec_controllable.set_id (prop->value());
+	}
+	if ((prop = node.property ("shuttle")) != 0) {
+		shuttle_controllable.set_id (prop->value());
+	}
+}
+
+XMLNode&
+ARDOUR_UI::get_transport_controllable_state ()
+{
+	XMLNode* node = new XMLNode(X_("TransportControllables"));
+	char buf[64];
+
+	roll_controllable.id().print (buf, sizeof (buf));
+	node->add_property (X_("roll"), buf);
+	stop_controllable.id().print (buf, sizeof (buf));
+	node->add_property (X_("stop"), buf);
+	goto_start_controllable.id().print (buf, sizeof (buf));
+	node->add_property (X_("goto start"), buf);
+	goto_end_controllable.id().print (buf, sizeof (buf));
+	node->add_property (X_("goto end"), buf);
+	auto_loop_controllable.id().print (buf, sizeof (buf));
+	node->add_property (X_("auto loop"), buf);
+	play_selection_controllable.id().print (buf, sizeof (buf));
+	node->add_property (X_("play selection"), buf);
+	rec_controllable.id().print (buf, sizeof (buf));
+	node->add_property (X_("rec"), buf);
+	shuttle_controllable.id().print (buf, sizeof (buf));
+	node->add_property (X_("shuttle"), buf);
+
+	return *node;
+}
+
+void
 ARDOUR_UI::save_ardour_state ()
 {
 	if (!keyboard || !mixer || !editor) {
@@ -360,6 +419,7 @@ ARDOUR_UI::save_ardour_state ()
 
 	XMLNode* node = new XMLNode (keyboard->get_state());
 	Config->add_extra_xml (*node);
+	Config->add_extra_xml (get_transport_controllable_state());
 	Config->save_state();
 
 	XMLNode enode(static_cast<Stateful*>(editor)->get_state());
@@ -2461,6 +2521,11 @@ ARDOUR_UI::use_config ()
 		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
 		ract->set_active ();
 	}	
+
+	XMLNode* node = Config->extra_xml (X_("TransportControllables"));
+	if (node) {
+		set_transport_controllable_state (*node);
+	}
 }
 
 void
@@ -2539,6 +2604,24 @@ ARDOUR_UI::TransportControllable::TransportControllable (std::string name, ARDOU
 void
 ARDOUR_UI::TransportControllable::set_value (float val)
 {
+	if (type == ShuttleControl) {
+
+		double fract;
+
+		if (val == 63.0f) {
+			fract = 0.0;
+		} else {
+			if (val < 63.0f) {
+				fract = -((63.0f - val)/63.0f);
+			} else {
+				fract = ((val - 63.0f)/63.0f);
+			}
+		}
+		
+		ui.set_shuttle_fract (fract);
+		return;
+	}
+		
 	if (val < 0.5f) {
 		/* do nothing: these are radio-style actions */
 		return;
@@ -2603,9 +2686,17 @@ ARDOUR_UI::TransportControllable::get_value (void) const
 		break;
 	case RecordEnable:
 		break;
+	case ShuttleControl:
+		break;
 	default:
 		break;
 	}
 
 	return val;
+}
+
+void
+ARDOUR_UI::TransportControllable::set_id (const string& str)
+{
+	_id = str;
 }

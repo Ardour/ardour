@@ -569,7 +569,7 @@ ExportDialog::save_state()
 
 		row = *ri;
 		track->add_property(X_("channel1"), row[exp_cols.left] ? X_("on") : X_("off"));
-		track->add_property(X_("channel1"), row[exp_cols.right] ? X_("on") : X_("off"));
+		track->add_property(X_("channel2"), row[exp_cols.right] ? X_("on") : X_("off"));
 
 		tracks->add_child_nocopy(*track);
 	}
