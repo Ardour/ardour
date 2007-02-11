@@ -36,13 +36,15 @@ class StateButton
 	void set_colors (const std::vector<Gdk::Color>& colors);
 	void set_visual_state (int);
 	int  get_visual_state () { return visual_state; }
+	void set_self_managed (bool yn) { _self_managed = yn; }
 
   protected:
 	std::vector<Gdk::Color> colors;
 	int  visual_state;
 	Gdk::Color saved_bg;
 	bool have_saved_bg;
-	
+	bool _self_managed;
+
 	virtual void bg_modify (Gtk::StateType, Gdk::Color) = 0;
 };
 

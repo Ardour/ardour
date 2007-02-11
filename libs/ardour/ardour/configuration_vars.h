@@ -62,6 +62,7 @@ CONFIG_VARIABLE (SoloModel, solo_model, "solo-model", InverseMute)
 CONFIG_VARIABLE (bool, solo_latched, "solo-latched", true)
 CONFIG_VARIABLE (bool, latched_record_enable, "latched-record-enable", false)
 CONFIG_VARIABLE (bool, all_safe, "all-safe", false)
+CONFIG_VARIABLE (bool, show_solo_mutes, "show-solo-mutes", false)
 
 /* click */
 

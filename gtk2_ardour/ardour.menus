@@ -318,6 +318,7 @@
                    <menuitem action='LatchedSolo'/>
                    <menuitem action='SoloInPlace'/>
                    <menuitem action='SoloViaBus'/>
+                   <menuitem action='ShowSoloMutes'/>
                </menu>
 	       <menu action='Crossfades'>
 		   <menuitem action='toggle-xfades-active'/>

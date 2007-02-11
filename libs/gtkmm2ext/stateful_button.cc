@@ -95,10 +95,11 @@ StatefulButton::on_realize ()
 void
 StatefulToggleButton::on_toggled ()
 {
-	if (get_active()) {
-		set_visual_state (1);
-	} else {
-		set_visual_state (0);
+	if (!_self_managed) {
+		if (get_active()) {
+			set_visual_state (1);
+		} else {
+			set_visual_state (0);
+		}
 	}
-	
 }

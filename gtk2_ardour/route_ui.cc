@@ -74,6 +74,8 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 	_route->active_changed.connect (mem_fun (*this, &RouteUI::route_active_changed));
 
         mute_button = manage (new BindableToggleButton (_route->mute_control(), m_name ));
+	mute_button->set_self_managed (true);
+
         solo_button = manage (new BindableToggleButton (_route->solo_control(), s_name ));
 
 	mute_button->set_name ("MuteButton");
@@ -82,7 +84,8 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 	vector<Gdk::Color> colors;
 	Gdk::Color c;
 
-	/* mute+solo buttons get 2 color states, so add one here to supplement the existing one */
+	::set_color(c, rgba_from_style (X_("MuteButton"), 0x7f, 0xff, 0x7f, 0, "bg", Gtk::STATE_SELECTED, false ));
+	colors.push_back (c);
 	::set_color(c, rgba_from_style (X_("MuteButton"), 0x7f, 0xff, 0x7f, 0, "bg", Gtk::STATE_ACTIVE, false ));
 	colors.push_back (c);
 	mute_button->set_colors (colors);
@@ -97,6 +100,10 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 	_route->mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed));
 	_route->solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
 	_route->solo_safe_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
+
+	/* when solo changes, update mute state too, in case the user wants us to display it */
+
+	_session.SoloChanged.connect (mem_fun(*this, &RouteUI::solo_changed_so_update_mute));
 	
 	update_solo_display ();
 	update_mute_display ();
@@ -110,13 +117,19 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 
 		rec_enable_button = manage (new BindableToggleButton (t->rec_enable_control(), r_name ));
 
+		/* we manage colors for the rec button, since it has 3 (disabled,enabled,recording), 
+		   not just 2 (active&inactive)
+		*/
+
+		rec_enable_button->set_self_managed (true);
+
 		colors.clear ();
 
 		/* record button has 3 color states, so we set 2 extra here */
-		::set_color(c, rgba_from_style (X_("TrackRecordEnableButton"), 0xff, 0, 0, 0, "bg", Gtk::STATE_SELECTED, false ));
+		::set_color(c, rgba_from_style (X_("RecordEnableButton"), 0xff, 0, 0, 0, "bg", Gtk::STATE_SELECTED, false ));
 		colors.push_back (c);
 		
-		::set_color(c, rgba_from_style (X_("TrackRecordEnableButton"), 0xff, 0, 0, 0, "bg", Gtk::STATE_ACTIVE, false ));
+		::set_color(c, rgba_from_style (X_("RecordEnableButton"), 0xff, 0, 0, 0, "bg", Gtk::STATE_ACTIVE, false ));
 		colors.push_back (c);
 		
 		rec_enable_button->set_colors (colors);
@@ -322,9 +335,10 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 	if (!ignore_toggle && is_track() && rec_enable_button) {
 
 		if (ev->button == 2 && Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+
 			// do nothing on midi bind event
-		}
-		else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::Control|Keyboard::Shift))) {
+
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::Control|Keyboard::Shift))) {
 
 			_session.begin_reversible_command (_("rec-enable change"));
                         Session::GlobalRecordEnableStateCommand *cmd = new Session::GlobalRecordEnableStateCommand(_session, this);
@@ -346,16 +360,16 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 		} else {
 
 			reversibly_apply_audio_track_boolean ("rec-enable change", &AudioTrack::set_record_enable, !audio_track()->record_enabled(), this);
-
-			ignore_toggle = true;
-			rec_enable_button->set_active(audio_track()->record_enabled());
-			ignore_toggle = false;
 		}
-		
-		stop_signal (*rec_enable_button, "button-press-event");
 	}
 
-	return TRUE;
+	return true;
+}
+
+bool
+RouteUI::rec_enable_release (GdkEventButton* ev)
+{
+	return true;
 }
 
 void
@@ -397,6 +411,12 @@ RouteUI::update_solo_display ()
 }
 
 void
+RouteUI::solo_changed_so_update_mute ()
+{
+	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &RouteUI::update_mute_display));
+}
+
+void
 RouteUI::mute_changed(void* src)
 {
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &RouteUI::update_mute_display));
@@ -405,13 +425,38 @@ RouteUI::mute_changed(void* src)
 void
 RouteUI::update_mute_display ()
 {
-	bool x;
+	bool model = _route->record_enabled();
+	bool view = mute_button->get_active();
 
-	if (mute_button->get_active() != (x = _route->muted())){
+	/* first make sure the button's "depressed" visual
+	   is correct.
+	*/
+
+	if (model != view) {
 		ignore_toggle = true;
-		mute_button->set_active(x);
+		mute_button->set_active (model);
 		ignore_toggle = false;
 	}
+
+	/* now attend to visual state */
+	
+	if (Config->get_show_solo_mutes()) {
+		if (_route->muted()) {
+			mute_button->set_visual_state (2);
+		} else if (!_route->soloed() && _route->solo_muted()) {
+			
+			mute_button->set_visual_state (1);
+		} else {
+			mute_button->set_visual_state (0);
+		}
+	} else {
+		if (_route->muted()) {
+			mute_button->set_visual_state (2);
+		} else {
+			mute_button->set_visual_state (0);
+		}
+	}
+
 }
 
 void
@@ -435,7 +480,7 @@ RouteUI::update_rec_display ()
 	/* first make sure the button's "depressed" visual
 	   is correct.
 	*/
-	
+
 	if (model != view) {
 		ignore_toggle = true;
 		rec_enable_button->set_active (model);
@@ -449,22 +494,16 @@ RouteUI::update_rec_display ()
 		switch (_session.record_status ()) {
 		case Session::Disabled:
 		case Session::Enabled:
-		        if (rec_enable_button->get_state() != Gtk::STATE_ACTIVE) {
-		    		rec_enable_button->set_state (Gtk::STATE_ACTIVE);
-			}
+			rec_enable_button->set_visual_state (1);
 			break;
 
 		case Session::Recording:
-		        if (rec_enable_button->get_state() != Gtk::STATE_SELECTED) {
-		    		rec_enable_button->set_state (Gtk::STATE_SELECTED);
-			}
+			rec_enable_button->set_visual_state (2);
 			break;
 		}
 
 	} else {
-		if (rec_enable_button->get_state() != Gtk::STATE_NORMAL) {
-			rec_enable_button->set_state (Gtk::STATE_NORMAL);
-		}
+		rec_enable_button->set_visual_state (0);
 	}
 }
 

@@ -121,6 +121,7 @@ class Route : public IO
 
 	void set_mute (bool yn, void *src);
 	bool muted() const { return _muted; }
+	bool solo_muted() const { return desired_solo_gain == 0.0; }
 
 	void set_mute_config (mute_type, bool, void *src);
 	bool get_mute_config (mute_type);
@@ -256,7 +257,6 @@ class Route : public IO
 
 	bool                     _muted : 1;
 	bool                     _soloed : 1;
-	bool                     _solo_muted : 1;
 	bool                     _solo_safe : 1;
 	bool                     _phase_invert : 1;
 	bool                     _recordable : 1;

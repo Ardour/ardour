@@ -148,7 +148,7 @@ AddRouteDialog::track_type_chosen ()
 	if (track_button.get_active()) {
 		track_mode_combo.set_sensitive (true);
 	} else {
-		track_mode_combo.set_sensitive (true);
+		track_mode_combo.set_sensitive (false);
 	}
 }
 

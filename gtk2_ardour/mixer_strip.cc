@@ -181,9 +181,8 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 
 	if (is_audio_track()) {
 		
-		rec_enable_button->set_name ("MixerRecordEnableButton");
-		rec_enable_button->unset_flags (Gtk::CAN_FOCUS);
 		rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press));
+		rec_enable_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::rec_enable_release));
 
 		AudioTrack* at = audio_track();
 

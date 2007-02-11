@@ -2125,8 +2125,10 @@ Session::route_solo_changed (void* src, boost::weak_ptr<Route> wpr)
 	modify_solo_mute (is_track, same_thing_soloed);
 
 	if (signal) {
-		SoloActive (currently_soloing);
+		SoloActive (currently_soloing); /* EMIT SIGNAL */
 	}
+
+	SoloChanged (); /* EMIT SIGNAL */
 
 	set_dirty();
 }

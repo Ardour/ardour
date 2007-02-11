@@ -390,6 +390,12 @@ ARDOUR_UI::toggle_LatchedSolo()
 }
 
 void
+ARDOUR_UI::toggle_ShowSoloMutes()
+{
+	ActionManager::toggle_config_state ("options", "ShowSoloMutes", &Configuration::set_show_solo_mutes, &Configuration::get_show_solo_mutes);
+}
+
+void
 ARDOUR_UI::mtc_port_changed ()
 {
 	bool have_mtc;
@@ -778,6 +784,8 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		ActionManager::map_some_state ("options", "LatchedRecordEnable", &Configuration::get_latched_record_enable);
 	} else if (PARAM_IS ("solo-latched")) {
 		ActionManager::map_some_state ("options", "LatchedSolo", &Configuration::get_solo_latched);
+	} else if (PARAM_IS ("show-solo-mutes")) {
+		ActionManager::map_some_state ("options", "ShowSoloMutes", &Configuration::get_show_solo_mutes);
 	} else if (PARAM_IS ("solo-model")) {
 		map_solo_model ();
 	} else if (PARAM_IS ("auto-play")) {

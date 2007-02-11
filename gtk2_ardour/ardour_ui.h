@@ -690,6 +690,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_StopTransportAtEndOfSession();
 	void toggle_GainReduceFastTransport();
 	void toggle_LatchedSolo();
+	void toggle_ShowSoloMutes();
 	void toggle_LatchedRecordEnable ();
 	void toggle_RegionEquivalentsOverlap ();
 

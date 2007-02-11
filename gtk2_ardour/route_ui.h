@@ -92,8 +92,10 @@ class RouteUI : public virtual AxisView
 	bool solo_press(GdkEventButton*);
 	bool solo_release(GdkEventButton*);
 	bool rec_enable_press(GdkEventButton*);
+	bool rec_enable_release(GdkEventButton*);
 
 	void solo_changed(void*);
+	void solo_changed_so_update_mute ();
 	void mute_changed(void*);
 	virtual void redirects_changed (void *) {}
 	void route_rec_enable_changed();

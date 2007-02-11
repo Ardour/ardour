@@ -190,9 +190,8 @@ style "track_rec_enable_button" = "small_button"
 	fg[ACTIVE] =   { 0.0, 0.0, 0.0 }
 	fg[PRELIGHT] = { 0.0, 0.0, 0.0 }
 
-	bg[SELECTED] =   { 1.0, 0.0, 0.0 }
-	bg[ACTIVE] =   { 0.91, 0.68, 0.68}
-	bg[PRELIGHT] =   { 1.0, 0.0, 0.0 }
+	bg[ACTIVE] =   { 1.0, 0.0, 0.0 } # actively recording
+	bg[SELECTED] =   { 0.91, 0.68, 0.68} # enabled, not active
 }
 
 style "gain_fader"
@@ -247,8 +246,10 @@ style "mute_button" = "small_button"
 {
 	bg[PRELIGHT] = { 1.0, 0.65, 0.13 }
 	bg[ACTIVE] = { 1.0, 0.98, 0.53 }
-	
+	bg[SELECTED] = { 0.90, 0.89, 0.73 }
+
 	fg[PRELIGHT] = { 0, 0, 0 }
+	fg[SELECTED] = { 0, 0, 0 }
 	fg[ACTIVE] = { 0, 0, 0 }
 }
 
@@ -1075,10 +1076,8 @@ widget "*NewSessionDialogButton*" style "options_window"
 widget "*MixerSendSwitch*" style "very_small_red_active_and_selected_button"
 widget "*OptionEditorToggleButton" style "small_red_active_and_selected_button"
 widget "*NewSessionDialogButton" style "small_red_active_and_selected_button"
-widget "*MixerRecordEnableButton" style "mixer_rec_enable_button"
-widget "*MixerRecordEnableButton*" style "mixer_rec_enable_button"
-widget "*TrackRecordEnableButton" style "track_rec_enable_button"
-widget "*TrackRecordEnableButton*" style "track_rec_enable_button"
+widget "*RecordEnableButton" style "track_rec_enable_button"
+widget "*RecordEnableButton*" style "track_rec_enable_button"
 widget "*MuteButton*" style "mute_button"
 widget "*TrackLoopButton*" style "track_loop_button"
 widget "*PanAutomationLineSelector*" style "multiline_combo"

@@ -663,6 +663,7 @@ class Session : public PBD::StatefulDestructible
 	void set_all_mute (bool);
 
 	sigc::signal<void,bool> SoloActive;
+	sigc::signal<void> SoloChanged;
 	
 	void record_disenable_all ();
 	void record_enable_all ();
