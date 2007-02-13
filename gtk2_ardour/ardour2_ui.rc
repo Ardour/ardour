@@ -190,9 +190,9 @@ style "gain_fader"
 	bg[ACTIVE] =   { 0.152, 0.152, 0.168 }
 }
 
+
 style "track_rec_enable_button" = "small_button"
 {
-	bg[ACTIVE] = { 0.30, 0.30, 0.35 }
 }
 
 style "track_rec_enable_button_active" = "small_button"
@@ -399,8 +399,22 @@ style "transport_button_active"
 
 style "transport_rec_button"
 {
+}
+
+style "transport_rec_button_active"
+{
 	bg[ACTIVE] = { 1.0, 0, 0 }
-	bg[PRELIGHT] = { 0.91, 0.68, 0.68 }		#blinking rec button color
+	bg[NORMAL] = { 1.0, 0, 0 }
+	bg[SELECTED] = { 1.0, 0, 0 }
+	bg[PRELIGHT] = { 1.0, 0, 0 }
+}
+
+style "transport_rec_button_alternate"
+{
+	bg[PRELIGHT] = { 0.91, 0.68, 0.68 }
+	bg[NORMAL] = { 0.91, 0.68, 0.68 }
+	bg[SELECTED] = { 0.91, 0.68, 0.68 }
+	bg[ACTIVE] = { 0.91, 0.68, 0.68 }
 }
 
 style "shuttle_control" = "very_small_text"
@@ -1214,7 +1228,7 @@ widget "*MixerCommentButton" style "very_small_button"
 widget "*MixerCommentButton*" style "very_small_button"
 widget "*EditGroupButton" style "very_small_button"
 widget "*EditGroupButtonLabel" style "very_small_button"
-widget "*TransportButton" style "transport_button"
+widget "*TransportButton" style "transport_rec_button"
 widget "*TransportButton-active" style "transport_button_active"
 widget "*ShuttleButton" style "transport_button"
 widget "*ShuttleButton*" style "transport_button"
@@ -1222,6 +1236,11 @@ widget "*ShuttleDisplay" style "transport_button"
 widget "*ShuttleDisplay*" style "transport_button"
 widget "*ShuttleControl" style "shuttle_control"
 widget "*TransportRecButton" style "transport_rec_button"
+widget "*TransportRecButton*" style "transport_rec_button"
+widget "*TransportRecButton-active" style "transport_rec_button_active"
+widget "*TransportRecButton-active*" style "transport_rec_button_active"
+widget "*TransportRecButton-alternate" style "transport_rec_button_alternate"
+widget "*TransportRecButton-alternate*" style "transport_rec_button_alternate"
 widget "*TransportRecButton*" style "transport_rec_button"
 widget "*RecordingXrunWarningWindow" style "xrun_warn"
 widget "*RecordingXrunWarningWindow*" style "xrun_warn"

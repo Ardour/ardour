@@ -1682,14 +1682,14 @@ ARDOUR_UI::transport_rec_enable_blink (bool onoff)
 	switch (session->record_status()) {
 	case Session::Enabled:
 		if (onoff) {
-			rec_button.set_visual_state (1);
+			rec_button.set_visual_state (2);
 		} else {
 			rec_button.set_visual_state (0);
 		}
 		break;
 
 	case Session::Recording:
-		rec_button.set_visual_state (2);
+		rec_button.set_visual_state (1);
 		break;
 
 	default:
