@@ -192,6 +192,7 @@ style "gain_fader"
 
 style "track_rec_enable_button" = "small_button"
 {
+	bg[ACTIVE] = { 0.30, 0.30, 0.35 }
 }
 
 style "track_rec_enable_button_active" = "small_button"

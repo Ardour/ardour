@@ -1,4 +1,4 @@
-; ardour-2.0beta11.1 GtkAccelMap rc-file         -*- scheme -*-
+; ardour_vst.exe.so GtkAccelMap rc-file         -*- scheme -*-
 ; this file is an automated accelerator map dump
 ;
 ; (gtk_accel_path "<Actions>/RegionList/RegionListSort" "")
@@ -151,6 +151,7 @@
 (gtk_accel_path "<Actions>/Common/goto-editor" "<Alt>e")
 (gtk_accel_path "<Actions>/Editor/select-all" "<Control>a")
 (gtk_accel_path "<Actions>/Editor/nudge-next-forward" "<Control>KP_Add")
+; (gtk_accel_path "<Actions>/options/ShowSoloMutes" "")
 ; (gtk_accel_path "<Actions>/Snap/snap-to-eighths" "")
 (gtk_accel_path "<Actions>/Editor/select-all-after-playhead" "<Shift><Control>p")
 (gtk_accel_path "<Actions>/Common/ToggleMaximalEditor" "F11")
