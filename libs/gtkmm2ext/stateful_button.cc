@@ -34,7 +34,7 @@ StateButton::set_visual_state (int n)
 	
 	switch (n) {
 	case 0:
-		name += "-normal";
+		/* relax */
 		break;
 	case 1:
 		name += "-active";
@@ -43,7 +43,7 @@ StateButton::set_visual_state (int n)
 		name += "-alternate";
 		break;
 	}
-	
+
 	set_widget_name (name);
 	visual_state = n;
 }
