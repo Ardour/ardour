@@ -33,19 +33,17 @@ class StateButton
 	StateButton();
 	virtual ~StateButton() {}
 
-	void set_colors (const std::vector<Gdk::Color>& colors);
 	void set_visual_state (int);
 	int  get_visual_state () { return visual_state; }
 	void set_self_managed (bool yn) { _self_managed = yn; }
 
   protected:
-	std::vector<Gdk::Color> colors;
 	int  visual_state;
-	Gdk::Color saved_bg;
-	bool have_saved_bg;
 	bool _self_managed;
+	bool _is_realized;
 
-	virtual void bg_modify (Gtk::StateType, Gdk::Color) = 0;
+	virtual std::string get_widget_name() const = 0;
+	virtual void set_widget_name (std::string) = 0;
 };
 
 
@@ -60,9 +58,8 @@ class StatefulToggleButton : public StateButton, public Gtk::ToggleButton
 	void on_realize ();
 	void on_toggled ();
 
-	void bg_modify (Gtk::StateType state, Gdk::Color col) { 
-		modify_bg (state, col);
-	}
+	std::string get_widget_name() const { return get_name(); }
+	void set_widget_name (std::string name) { set_name (name); get_child()->set_name (name); }
 };
 
 class StatefulButton : public StateButton, public Gtk::Button
@@ -75,9 +72,8 @@ class StatefulButton : public StateButton, public Gtk::Button
   protected:
 	void on_realize ();
 
-	void bg_modify (Gtk::StateType state, Gdk::Color col) { 
-		modify_bg (state, col);
-	}
+	std::string get_widget_name() const { return get_name(); }
+	void set_widget_name (std::string name) { set_name (name); get_child()->set_name (name); }
 };
 
 };

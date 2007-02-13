@@ -12,22 +12,14 @@ using namespace std;
 
 StateButton::StateButton ()
 {
+	_is_realized = false;
 	visual_state = 0;
-	have_saved_bg = false;
-}
-
-void
-StateButton::set_colors (const vector<Gdk::Color>& c)
-{
-	colors = c;
-	visual_state++; // to force transition
-	set_visual_state (visual_state - 1);
 }
 
 void
 StateButton::set_visual_state (int n)
 {
-	if (!have_saved_bg) {
+	if (!_is_realized) {
 		/* not yet realized */
 		visual_state = n;
 		return;
@@ -36,29 +28,23 @@ StateButton::set_visual_state (int n)
 	if (n == visual_state) {
 		return;
 	}
-	
-	if (n == 0) {
-		
-		/* back to the default color */
-		
-		if (have_saved_bg) {
-			bg_modify (STATE_NORMAL, saved_bg);
-			bg_modify (STATE_ACTIVE, saved_bg);
-			bg_modify (STATE_SELECTED, saved_bg);
-			bg_modify (STATE_PRELIGHT, saved_bg);
-		}
-		
-		
-	} else {
-		
-		int index = (n-1) % colors.size ();
-		
-		bg_modify (STATE_NORMAL, colors[index]);
-		bg_modify (STATE_ACTIVE, colors[index]);
-		bg_modify (STATE_SELECTED, colors[index]);
-		bg_modify (STATE_PRELIGHT, colors[index]);
-	}
 
+	string name = get_widget_name ();
+	name = name.substr (0, name.find_last_of ('-'));
+	
+	switch (n) {
+	case 0:
+		name += "-normal";
+		break;
+	case 1:
+		name += "-active";
+		break;
+	case 2:
+		name += "-alternate";
+		break;
+	}
+	
+	set_widget_name (name);
 	visual_state = n;
 }
 
@@ -69,11 +55,7 @@ StatefulToggleButton::on_realize ()
 {
 	ToggleButton::on_realize ();
 
-	if (!have_saved_bg) {
-		saved_bg = get_style()->get_bg (STATE_NORMAL);
-		have_saved_bg = true;
-	}
-
+	_is_realized = true;
 	visual_state++; // to force transition
 	set_visual_state (visual_state - 1);
 }
@@ -83,11 +65,7 @@ StatefulButton::on_realize ()
 {
 	Button::on_realize ();
 
-	if (!have_saved_bg) {
-		saved_bg = get_style()->get_bg (STATE_NORMAL);
-		have_saved_bg = true;
-	}
-
+	_is_realized = true;
 	visual_state++; // to force transition
 	set_visual_state (visual_state - 1);
 }

@@ -263,6 +263,7 @@ rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a, s
 			r = waverc->fg[state].red / 257;
 			g = waverc->fg[state].green / 257;
 			b = waverc->fg[state].blue / 257;
+ 
 			/* what a hack ... "a" is for "active" */
 			if (state == Gtk::STATE_NORMAL && rgba) {
 				a = waverc->fg[GTK_STATE_ACTIVE].red / 257;

@@ -1489,7 +1489,7 @@ ARDOUR_UI::_blink (void *arg)
 void
 ARDOUR_UI::blink ()
 {
-	Blink (blink_on = !blink_on); /* EMIT_SIGNAL */
+	// Blink (blink_on = !blink_on); /* EMIT_SIGNAL */
 }
 
 void

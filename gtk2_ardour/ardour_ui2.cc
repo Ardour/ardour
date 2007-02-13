@@ -223,50 +223,14 @@ ARDOUR_UI::setup_transport ()
 	rec_button.set_name ("TransportRecButton");
 	auto_loop_button.set_name ("TransportButton");
 
-	vector<Gdk::Color> colors;
-	Gdk::Color c;
-
-	set_color(c, rgba_from_style ("TransportButton", 0xff, 0, 0, 0, "bg", Gtk::STATE_ACTIVE, false ));
-	colors.push_back (c);
-
 	auto_return_button.set_name ("TransportButton");
-	auto_return_button.set_colors (colors);	
 	auto_play_button.set_name ("TransportButton");
-	auto_play_button.set_colors (colors);	
 	auto_input_button.set_name ("TransportButton");
-	auto_input_button.set_colors (colors);	
 	punch_in_button.set_name ("TransportButton");
-	punch_in_button.set_colors (colors);	
 	punch_out_button.set_name ("TransportButton");
-	punch_out_button.set_colors (colors);	
 	click_button.set_name ("TransportButton");
-	click_button.set_colors (colors);	
 	time_master_button.set_name ("TransportButton");
-	time_master_button.set_colors (colors);	
 
-	colors.clear ();
-
-	/* record button has 3 color states, so we set 2 extra here */
-	set_color(c, rgba_from_style ("TransportRecButton", 0xff, 0, 0, 0, "bg", Gtk::STATE_PRELIGHT, false ));
-	colors.push_back (c);
-	
-	set_color(c, rgba_from_style ("TransportRecButton", 0xff, 0, 0, 0, "bg", Gtk::STATE_ACTIVE, false ));
-	colors.push_back (c);
-	
-	rec_button.set_colors (colors);
-	colors.clear ();
-	
-	/* other buttons get 2 color states, so add one here */
-	set_color(c, rgba_from_style ("TransportButton", 0x7f, 0xff, 0x7f, 0, "bg", Gtk::STATE_ACTIVE, false ));
-	colors.push_back (c);
-
-	stop_button.set_colors (colors);
-	roll_button.set_colors (colors);
-	auto_loop_button.set_colors (colors);
-	play_selection_button.set_colors (colors);
-	goto_start_button.set_colors (colors);
-	goto_end_button.set_colors (colors);
-	
 	stop_button.set_size_request(29, -1);
 	roll_button.set_size_request(29, -1);
 	auto_loop_button.set_size_request(29, -1);

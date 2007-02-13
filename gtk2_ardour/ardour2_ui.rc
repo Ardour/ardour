@@ -186,12 +186,32 @@ style "small_red_active_and_selected_button" = "small_button"
 
 style "track_rec_enable_button" = "small_button"
 {
+}
+
+style "track_rec_enable_button_active" = "small_button"
+{
 	fg[SELECTED] = { 0.0, 0.0, 0.0 }
 	fg[ACTIVE] =   { 0.0, 0.0, 0.0 }
 	fg[PRELIGHT] = { 0.0, 0.0, 0.0 }
+	fg[NORMAL] = { 0.0, 0.0, 0.0 }
 
+	bg[NORMAL] =   { 1.0, 0.0, 0.0 } # actively recording
 	bg[ACTIVE] =   { 1.0, 0.0, 0.0 } # actively recording
+	bg[SELECTED] =   { 1.0, 0.0, 0.0 } # actively recording
+	bg[PRELIGHT] =   { 1.0, 0.0, 0.0 } # actively recording
+}
+
+style "track_rec_enable_button_alternate" = "small_button"
+{
+	fg[SELECTED] = { 0.0, 0.0, 0.0 }
+	fg[ACTIVE] =   { 0.0, 0.0, 0.0 }
+	fg[PRELIGHT] = { 0.0, 0.0, 0.0 }
+	fg[NORMAL] = { 0.0, 0.0, 0.0 }
+
+	bg[NORMAL] =   { 0.91, 0.68, 0.68} # enabled, not active
+	bg[ACTIVE] =   { 0.91, 0.68, 0.68} # enabled, not active
 	bg[SELECTED] =   { 0.91, 0.68, 0.68} # enabled, not active
+	bg[PRELIGHT] =   { 0.91, 0.68, 0.68} # enabled, not active
 }
 
 style "gain_fader"
@@ -209,50 +229,75 @@ style "mixer_rec_enable_button" = "track_rec_enable_button"
 
 style "solo_button" = "small_button"
 {
-	bg[PRELIGHT] = { 0, 1.0, 0 }
-	bg[ACTIVE] = { 0.66, 0.97, 0.19 }
+	#	font_name = "sans 7"
+	#	xthickness = 0
+	#	ythickness = 0
+}
 
-	fg[PRELIGHT] = { 0, 0, 0 }
+style "solo_button_alternate" = "small_button"
+{
+	#	font_name = "sans 7"
+	#	xthickness = 0
+	#	ythickness = 0
+
+	bg[NORMAL] = { 0.19, 0.97, 0.69 } # solo-safe
+	bg[ACTIVE] = { 0.19, 0.97, 0.69 } # solo-safe
+	bg[SELECTED] = { 0.19, 0.97, 0.69 } # solo-safe
+	bg[PRELIGHT] = { 0.19, 0.97, 0.69 } # solo-safe
+
 	fg[ACTIVE] = { 0, 0, 0 }
-}
-
-style "safe_solo_button" = "small_button"
-{
-	bg[PRELIGHT] = { 0, 1.0, 0 }
-	bg[ACTIVE] = { 0.19, 0.97, 0.69 }
-
+	fg[SELECTED] = { 0, 0, 0 }
+	fg[NORMAL] = { 0, 0, 0 }
 	fg[PRELIGHT] = { 0, 0, 0 }
+}
+
+
+style "solo_button_active" = "small_button"
+{
+	#	font_name = "sans 7"
+	#	xthickness = 0
+	#	ythickness = 0
+
+	bg[NORMAL] = { 0.66, 0.97, 0.19 }   # solo
+	bg[ACTIVE] = { 0.66, 0.97, 0.19 }   # solo
+	bg[SELECTED] = { 0.66, 0.97, 0.19 }   # solo
+	bg[PRELIGHT] = { 0.66, 0.97, 0.19 }   # solo
+
 	fg[ACTIVE] = { 0, 0, 0 }
+	fg[SELECTED] = { 0, 0, 0 }
+	fg[NORMAL] = { 0, 0, 0 }
+	fg[PRELIGHT] = { 0, 0, 0 }
 }
-
-style "mixer_solo_button" = "solo_button"
-{
-	font_name = "sans 7"
-	xthickness = 0
-	ythickness = 0
-
-}
-
-style "mixer_safe_solo_button" = "safe_solo_button"
-{
-	font_name = "sans 7"
-	xthickness = 0
-	ythickness = 0
-
-}
-
 
 style "mute_button" = "small_button"
 {
-	bg[PRELIGHT] = { 1.0, 0.65, 0.13 }
-	bg[ACTIVE] = { 1.0, 0.98, 0.53 }
-	bg[SELECTED] = { 0.90, 0.89, 0.73 }
-
-	fg[PRELIGHT] = { 0, 0, 0 }
-	fg[SELECTED] = { 0, 0, 0 }
-	fg[ACTIVE] = { 0, 0, 0 }
 }
 
+style "mute_button_alternate" = "small_button"
+{
+	bg[ACTIVE] = { 1.0, 0.98, 0.53 }
+	bg[NORMAL] = { 1.0, 0.98, 0.53 }
+	bg[SELECTED] = { 1.0, 0.98, 0.53 }
+	bg[PRELIGHT] = { 1.0, 0.98, 0.53 }
+
+	fg[SELECTED] = { 0, 0, 0 }
+	fg[ACTIVE] = { 0, 0, 0 }
+	fg[NORMAL] = { 0, 0, 0 }
+	fg[PRELIGHT] = { 0, 0, 0 }
+}
+
+style "mute_button_active" = "small_button"
+{
+	bg[NORMAL] = { 0.90, 0.89, 0.73 }
+	bg[ACTIVE] = { 0.90, 0.89, 0.73 }
+	bg[PRELIGHT] = { 0.90, 0.89, 0.73 }
+	bg[SELECTED] = { 0.90, 0.89, 0.73 }
+
+	fg[SELECTED] = { 0, 0, 0 }
+	fg[ACTIVE] = { 0, 0, 0 }
+	fg[NORMAL] = { 0, 0, 0 }
+	fg[PRELIGHT] = { 0, 0, 0 }
+}
 
 style "multiline_combo" = "small_button"
 {
@@ -291,9 +336,19 @@ style "time_button" = "default_buttons_menus"
 
 style "transport_button"
 {
+}
+
+style "transport_button_active"
+{
+	bg[NORMAL] = { 0.50, 1.0, 0.50 }
 	bg[ACTIVE] = { 0.50, 1.0, 0.50 }
-	fg[ACTIVE] = { 1, 1, 1 }
-	fg[PRELIGHT] = { 1, 1, 1 }
+	bg[SELECTED] = { 0.50, 1.0, 0.50 }
+	bg[PRELIGHT] = { 0.50, 1.0, 0.50 }
+
+	fg[NORMAL] = { 0, 0, 0 }
+	fg[PRELIGHT] = { 0, 0, 0 }
+	fg[SELECTED] = { 0, 0, 0 }
+	fg[ACTIVE] = { 0, 0, 0 }
 }
 
 style "transport_rec_button"
@@ -1077,16 +1132,18 @@ widget "*MixerSendSwitch*" style "very_small_red_active_and_selected_button"
 widget "*OptionEditorToggleButton" style "small_red_active_and_selected_button"
 widget "*NewSessionDialogButton" style "small_red_active_and_selected_button"
 widget "*RecordEnableButton" style "track_rec_enable_button"
-widget "*RecordEnableButton*" style "track_rec_enable_button"
+widget "*RecordEnableButton-active" style "track_rec_enable_button_active"
+widget "*RecordEnableButton-alternate" style "track_rec_enable_button_alternate"
 widget "*MuteButton*" style "mute_button"
+widget "*MuteButton-alternate*" style "mute_button_alternate"
+widget "*MuteButton-active*" style "mute_button_active"
 widget "*TrackLoopButton*" style "track_loop_button"
 widget "*PanAutomationLineSelector*" style "multiline_combo"
 widget "*EditorTimeButton*" style "time_button"
 widget "*EditorMixerButton*" style "default_buttons_menus"
 widget "*SoloButton*" style "solo_button"
-widget "*SoloButton.*" style "solo_button"
-widget "*SafeSoloButton*" style "safe_solo_button"
-widget "*SafeSoloButton.*" style "safe_solo_button"
+widget "*SoloButton-alternate*" style "solo_button_alternate"
+widget "*SoloButton-active*" style "solo_button_active"
 widget "*MixerPhaseInvertButton*" style "very_small_button"
 widget "*MixerPhaseInvertButton.*" style "very_small_button"
 widget "*MixerAutomationRecordingButton*" style "very_small_button"
@@ -1104,7 +1161,7 @@ widget "*MixerCommentButton*" style "very_small_button"
 widget "*EditGroupButton" style "very_small_button"
 widget "*EditGroupButtonLabel" style "very_small_button"
 widget "*TransportButton" style "transport_button"
-widget "*TransportButton*" style "transport_button"
+widget "*TransportButton-active" style "transport_button_active"
 widget "*ShuttleButton" style "transport_button"
 widget "*ShuttleButton*" style "transport_button"
 widget "*ShuttleDisplay" style "transport_button"
