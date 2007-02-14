@@ -15,6 +15,35 @@
 <xsl:param name="html.ext" select="'.html'"/>
 <xsl:output method="html" indent="yes"/>
 
+<!-- Admonition Graphics -->
+<xsl:param name="admon.graphics" select="1"/>
+<xsl:param name="admon.graphics.path">./images/tango-icons/</xsl:param>
+<xsl:param name="callout.graphics.path">./images/tango-icons/</xsl:param>
+
+<!-- Remove table and inline style from admonitions -->
+
+<xsl:template name="graphical.admonition">
+	<xsl:variable name="admon.type">
+		<xsl:choose>
+			<xsl:when test="local-name(.)='note'">Note</xsl:when>
+			<xsl:when test="local-name(.)='warning'">Warning</xsl:when>
+			<xsl:when test="local-name(.)='caution'">Caution</xsl:when>
+			<xsl:when test="local-name(.)='tip'">Tip</xsl:when>
+			<xsl:when test="local-name(.)='important'">Important</xsl:when>
+			<xsl:otherwise>Note</xsl:otherwise>
+		</xsl:choose>
+	</xsl:variable>
+	<div xmlns="http://www.w3.org/1999/xhtml" class="{name(.)}">
+		<xsl:call-template name="anchor"/>
+			<xsl:if test="$admon.textlabel != 0 or title">
+				<h2 class="title">
+					<xsl:apply-templates select="." mode="object.title.markup"/>
+				</h2>
+			</xsl:if>
+		<xsl:apply-templates/>
+	</div>
+</xsl:template>
+
 <!-- 
 	I'm not using draft mode because with at least the version
 	of the stylesheets I have it inserts inline css. I'm not aware
@@ -113,6 +142,7 @@ part toc
 <!-- Limit TOC depth to 1 level -->
 <xsl:param name="toc.section.depth">1</xsl:param>
 
+<!-- 
 <xsl:template name="nongraphical.admonition">
 	<div class="{name(.)}">
 		<h2 class="title">
@@ -124,5 +154,5 @@ part toc
 		<xsl:apply-templates/>
 	</div>
 </xsl:template>
-
+-->
 </xsl:stylesheet>

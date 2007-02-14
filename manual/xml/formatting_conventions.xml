@@ -60,23 +60,19 @@
 			<title>Important</title>
 
 			<para>
-				Some appropriate definition
+				The important admonition is used to draw attention to parts of 
+				the interface that may be overlooked or certain settings that 
+				are vital in determining the behaviour of the Ardour.
 			</para>
 		</important>
-
-		<caution>
-			<title>Caution</title>
-
-			<para>
-				Some appropriate definition
-			</para>
-		</caution>
 
 		<warning>
 			<title>Warning</title>
 
 			<para>
-				Some appropriate definition
+				The warning admonition is used where an action may result in 
+				consequences that are unintended or permanent such as changes to 
+				the session that can not be undone or the removal of files.
 			</para>
 		</warning>
 	</section>

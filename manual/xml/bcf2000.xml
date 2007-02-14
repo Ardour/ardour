@@ -88,11 +88,12 @@ xtc:~% cat /proc/asound/cards
 <screen>
 cat bcf2000_1-07.syx > /dev/snd/midiC2D0	
 </screen>
-		<caution>
+		
+		<important>
 			<para>
 				Make sure you use the actual device you determined in the previous step
 			</para>
-		</caution>
+		</important>
 
 		<para>
 			The BCF display will show a whirling figure-8 animation and count up to 18.

@@ -48,9 +48,9 @@
 		<guimenuitem>Rename</guimenuitem> to confirm the name change.
 	</para>
 
-	<caution>
+	<warning>
 		<para>
 			Changes to track names cannot be undone.
 		</para>
-	</caution>
+	</warning>
 </section>

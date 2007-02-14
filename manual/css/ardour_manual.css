@@ -85,8 +85,18 @@ div.caution,
 div.warning {
 	background: #27272b url(images/admon-bg.png) top left repeat;
 	color:white;
-	padding:0.8em;
+	padding:1.0em;
 	margin-bottom:1.5em;
+}
+
+div.note h2, div.note p,
+div.tip h2,div.tip p,
+div.caution h2,div.caution p,
+div.warning h2,div.warning p,
+div.important h2,div.important p {
+	padding:0em;
+	margin:0em;
+	padding-left:46px;
 }
 
 div.note .title,
@@ -94,16 +104,32 @@ div.tip .title,
 div.important .title,
 div.caution .title,
 div.warning .title {
+	background-color:transparent;
+	background-position:top left;
+	background-repeat:no-repeat;
+	height:42px;
 	font-size:1.3em;
 	color: white;
 }
 
-div.note p,
-div.tip p,
-div.caution p,
-div.warning p,
-div.important p {
-	padding-left:0.5em;
+div.note h2 {
+	background-image:url(images/tango-icons/note.png)
+}
+
+div.tip h2 {
+	background-image:url(images/tango-icons/tip.png)
+}
+
+div.caution h2 {
+	background-image:url(images/tango-icons/caution.png)
+}
+
+div.warning h2 {
+	background-image:url(images/tango-icons/warning.png)
+}
+
+div.important h2 {
+	background-image:url(images/tango-icons/important.png)
 }
 
 /* Tables */
@@ -169,3 +195,14 @@ h5.formalpara {
 	background: white url(./images/watermark-draft.png) top left repeat;
 }
 
+/* remove table border from navigation...ugh */
+
+.navheader table, .navheader table td {
+	border:0px none;
+	border-collapse:collapse;
+}
+
+.navfooter table, .navfooter table td {
+	border:0px none;
+	border-collapse:collapse;
+}
