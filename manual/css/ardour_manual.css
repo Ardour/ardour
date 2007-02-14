@@ -28,6 +28,18 @@ div.longdesc-link {
 	float:right;
 }
 
+/* Lists */
+
+dt {
+	font-weight:bold;
+}
+
+dd {
+	margin:0em;
+	margin-left:2em;
+	padding-top:0em;
+}
+
 /* Images */
 
 img {
@@ -150,3 +162,10 @@ h5.formalpara {
 	font-size:1em;
 	margin-top:2em;
 }
+
+/* Status */
+
+.ardour-draft {
+	background: white url(./images/watermark-draft.png) top left repeat;
+}
+

@@ -73,11 +73,10 @@ imap<leader>sn <section id=""><CR><title></title><CR><para><CR></para><CR></sect
 "imap<leader>s3 <sect3 id=""><CR><title></title><CR><para><CR></para><CR></sect3><esc>kkkk$bla
 imap<leader>ch <chapter id=""><CR><title></title><CR><para><CR></para><CR></chapter><esc>kkkk$bla
 
-" images
-" My mediaobject has two imagedata entries - 1 for EPS and 1 for JPG
+" media related
+imap<leader>fig <figure><CR><title></title><CR></figure><esc>k$bba
 imap<leader>img <mediaobject><CR><imageobject><CR><imagedata fileref=""/><CR></imageobject><CR></mediaobject><esc>kk$bla
-"imap<leader>img <imageobject><CR><imagedata fileref="" format=""><CR></imageobject>
-imap<leader>mo <mediaobject><CR><leader>img<esc>k$hiEPS<esc>j$a<CR>,img<esc>k$hiJPG<esc>j$a<CR></mediaobject>
+imap<leader>oi <objectinfo><CR></objectinfo><esc>k$a
 
 " other objects
 imap<leader>ti <title></title><esc>bba
@@ -85,8 +84,9 @@ imap<leader>fo <footnote><CR><para><CR></para><CR></footnote><esc>kk$a
 imap<leader>sb <sidebar><CR><title></title><CR><para></para><CR></sidebar>
 imap<leader>co <!--  --><esc>bhi
 imap<leader>qt <blockquote><CR><attribution></attribution><CR><literallayout><CR></literallayout><CR></blockquote>
-imap<leader>ge <glossentry id=""><CR><glossterm></glossterm><CR><glossdef><CR><para><CR></para><CR></glossdef><CR></glossentry><esc>kkkkkk$bba
+imap<leader>ge <glossentry id=""><CR><glossterm></glossterm><CR><glossdef><CR><para><CR></para><CR></glossdef><CR></glossentry><esc>6k$bla
 imap<leader>gt <glossterm linkend=""></glossterm><esc>bb3la
+imap<leader>gs <glossseealso></glossseealso><esc>bba
 imap<leader>l <literal></literal><esc>bba
 
 " admonitions

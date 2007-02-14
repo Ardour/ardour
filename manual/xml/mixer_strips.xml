@@ -6,8 +6,8 @@
 
 <!-- XXX lots to do on this page -->
 
-<section id="mixer-window-mixer-strips">
-	<title> Mixer Strips </title>
+<section id="mixer-strips">
+	<title>Mixer Strips</title>
 	<para>
 		Each track and bus is represented in the mixer window by a <emphasis>mixer
 		strip</emphasis> that contains various controls related to signal flow.

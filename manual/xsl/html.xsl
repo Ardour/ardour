@@ -15,6 +15,28 @@
 <xsl:param name="html.ext" select="'.html'"/>
 <xsl:output method="html" indent="yes"/>
 
+<!-- 
+	I'm not using draft mode because with at least the version
+	of the stylesheets I have it inserts inline css. I'm not aware
+	of a non-hacky way around that so until I find a better 
+	solution I'm using custom status fields:
+
+	ardour-draft
+
+	ardour-beta?
+	ardour-rc (release candidate)?
+
+-->
+
+<!-- Add css class for status --> 
+<xsl:template name="body.attributes"> 
+	<xsl:if test="(ancestor-or-self::*[@status][1]/@status != '')"> 
+		<xsl:attribute name="class">
+			<xsl:value-of select="ancestor-or-self::*[@status][1]/@status"/>
+		</xsl:attribute>
+	</xsl:if>
+</xsl:template>
+
 <!-- titles after all elements -->
 <xsl:param name="formal.title.placement">
 figure after
