@@ -333,7 +333,7 @@ class Session : public PBD::StatefulDestructible
 	
 	/* Record status signals */
 
-        sigc::signal<void> RecordStateChanged;
+	sigc::signal<void> RecordStateChanged;
 
 	/* Transport mechanism signals */
 

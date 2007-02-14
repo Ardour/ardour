@@ -311,7 +311,7 @@ env.Append (BUILDERS = {'VersionBuild' : version_bld})
 #
 
 def versioned_builder(target,source,env):
-    w, r = os.popen2( "svn info | awk '/^Revision:/ { print $2}'")
+    w, r = os.popen2( "LANG= svn info | awk '/^Revision:/ { print $2}'")
     
     last_revision = r.readline().strip()
     w.close()
@@ -660,7 +660,8 @@ opt_flags[:0] = [
     "-fomit-frame-pointer",
     "-ffast-math",
     "-fstrength-reduce",
-    "-fno-strict-aliasing"
+    "-fno-strict-aliasing",
+    "-pipe"
     ]
 
 if env['DEBUG'] == 1:
@@ -950,7 +951,7 @@ else:
 #   its included in the tarball
 #
 
-surface_subdirs = [ 'libs/surfaces/control_protocol', 'libs/surfaces/generic_midi', 'libs/surfaces/tranzport' ]
+surface_subdirs = [ 'libs/surfaces/control_protocol', 'libs/surfaces/generic_midi', 'libs/surfaces/tranzport', 'libs/surfaces/mackie' ]
 
 if env['SURFACES']:
     if have_libusb:
@@ -1061,6 +1062,13 @@ if not conf.CheckFunc('posix_memalign'):
 env = conf.Finish()
 
 rcbuild = env.SubstInFile ('ardour.rc','ardour.rc.in', SUBST_DICT = subst_dict)
+subst_dict['%VERSION%'] = ardour_version[0:3]
+subst_dict['%EXTRA_VERSION%'] = ardour_version[3:]
+subst_dict['%REVISION_STRING%'] = ''
+if os.path.exists('.svn'):
+    subst_dict['%REVISION_STRING%'] = '.' + fetch_svn_revision ('.') + 'svn'
+
+specbuild = env.SubstInFile ('ardour.spec','ardour.spec.in', SUBST_DICT = subst_dict)
 
 the_revision = env.Command ('frobnicatory_decoy', [], create_stored_revision)
 
@@ -1078,6 +1086,7 @@ env.Distribute (env['DISTTREE'],
                [ 'SConstruct', 'svn_revision.h',
                   'COPYING', 'PACKAGER_README', 'README',
                   'ardour.rc.in',
+                  'ardour.spec',
                   'ardour_system.rc',
                   'tools/config.guess',
                   'icons/icon/ardour_icon_mac_mask.png',

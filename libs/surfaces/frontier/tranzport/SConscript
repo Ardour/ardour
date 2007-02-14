@@ -1,0 +1,56 @@
+# -*- python -*-
+
+import os
+import os.path
+import glob
+
+Import('env final_prefix install_prefix final_config_prefix libraries i18n')
+
+tranzport = env.Copy()
+
+#
+# this defines the version number of libardour_tranzport
+# 
+
+domain = 'ardour_tranzport'
+
+tranzport.Append(DOMAIN = domain, MAJOR = 1, MINOR = 0, MICRO = 0)
+tranzport.Append(CXXFLAGS = "-DPACKAGE=\\\"" + domain + "\\\"")
+tranzport.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
+tranzport.Append(PACKAGE = domain)
+tranzport.Append(POTFILE = domain + '.pot')
+
+tranzport_files=Split("""
+interface.cc
+tranzport_control_protocol.cc
+""")
+
+tranzport.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
+tranzport.Append(CXXFLAGS="-DDATA_DIR=\\\""+final_prefix+"/share\\\"")
+tranzport.Append(CXXFLAGS="-DCONFIG_DIR=\\\""+final_config_prefix+"\\\"")
+tranzport.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
+
+tranzport.Merge ([
+    libraries['ardour'],
+    libraries['ardour_cp'],
+    libraries['sigc2'],
+    libraries['pbd'],
+    libraries['midi++2'],
+    libraries['xml'],
+    libraries['usb'],
+    libraries['glib2'],
+    libraries['glibmm2']
+    ])
+
+libardour_tranzport = tranzport.SharedLibrary('ardour_tranzport', tranzport_files)
+
+if tranzport['TRANZPORT']:
+	Default(libardour_tranzport)
+	if env['NLS']:
+		i18n (tranzport, tranzport_files, env)
+	env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2', 'surfaces'), libardour_tranzport))
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+				     [ 'SConscript' ] +
+				     tranzport_files + 
+				     glob.glob('po/*.po') + glob.glob('*.h')))

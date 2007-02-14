@@ -1,0 +1,90 @@
+
+I'm putting this here because I don't really have a place to put it, unless I create a web page and have a place to keep the code.
+
+While doing some exaustive testing of my latest code (read - playing a ton of music) I have done some thinking about the ui, and decided that under apparent simplicity should lie complexity.
+
+The "flash" screen idea I am going to drop, and replace it with the idea of a notify area being declared on each screen.
+
+When the unit is idle, these messages will appear in that area statically. When the transport is running, these messages will still appear in that space, which is usually where the meter is. It's actually possible to rapidly flash the area between the competing writers and get a nifty faded effect. (I came across this idea accidentally when I had a pointer overrun)
+
+Also certain things will update on top of each other, whatever was updated 
+last will stay on the screen. This is Pan/Gain primarily.
+
+I need a way to get messages back into the tranzport. Example - I hit Undo, what was undone? Redo, same problem.
+
+I've already found many uses for being able to control more than 1 track at a time, so I think that although I'm *usually* controlling one track at a time, being able to quickly access all tracks would be good.
+
+Example - want to have meters for all tracks running and be able to control the
+db/pan settings of the track I'm on....
+
+What I am going to go with is multifold - but first my design goal: I want to do everything required for a solo musician wielding an instrument to NOT have to touch a keyboard or look at a big screen. When you are wrapped behind a bass, it's difficult to cope with that - but the tranzport is a great alternative.
+
+Most screens will have *4* items on them.
+
+There will be "display views" - which are more informational and bling oriented.
+
+There will be "Track based views"- which basically do track specific things
+
+There will be "interactive views",which basically allow for more input than output. They will do something to highlight the current selection.
+Scroll wheel will select between values for a field. Track Next/Prev will move between fields. I would like to have a "No/Yes" option (hit record for yes? Stop for no?) but I'm still a little vague on that.
+
+Things to do:
+
+A) Hitting "Shift->Spacebar" will switch "views". There are ultimately going to be dozens of views. At present, there are only the "Normal" and "Big Meter" views.
+
+Each view will change somewhat based on the state of the transport. Holding down shift for a second will switch to the "underlying display"....
+
+Here's how the "normal" view looks today in my tree:
+
+VIEW: NORMAL
+
+Play Mode: Stopped
+[Trackname[16]] [gain/pan[4]]
+[Modes[9]] long smpte/bar counter]
+
+Play Mode: Playing > 1.0 speed
+[Trackname[16]] [gain/pan[4]]
+[meter[16]] short smpte/bar counter]
+
+Play Mode: Playing < 1.0
+[Trackname[16]] [gain/pan[4]]
+[meter[9]] long smpte/bar counter]
+
+Play Mode: Recording
+[Trackname[16]] [gain/pan[4]]
+[meter[16]] short smpte/bar counter]
+
+Other views (in order of development priority)
+
+Marker Mode: Edit markers, setup loops and punch in points.
+Config Mode: Load/Save settings, Load/Save project. Set wheel SnapTo
+Loop Mode: Show track, raise layers to top for playback, editing, deletion, loop on and off, etc
+
+It's possible that config mode will have a "MORE" field, or ways to move around the configuration (ffw/Play?)
+
+(the first two are the two modes I most need personally. If you have a suggestion...)
+
+Mastering Mode - display master and current track with meters and panner/db
+Automation Mode - I really don't think I have the pixels for this
+
+(I've already abstracted out the code to do most of these, but it's bling, I'm not going to bother much with it soon)
+
+Quad Meter Mode
+Inverted Meter mode (draws meters backwards)
+Quad Inverted Meter mode (bling, but my car stereo has it, and it's cool)
+10 8 bar meter mode
+5 8 bar meter mode
+
+I haven't written the panner yet, doing the stereo meter killed me.
+
+From a development perspective I'm going to keep revising the code to make it more stable and merely tie the new mode modes to the "bling mode"s until they are ready for prime time. I should be able to put out releases once a week for a while.
+
+A big help would be moving these items into a higher level of abstraction (revising the baseUI class).
+
+In particular, I'd really like "slave" mode. Snapto increment is really important....
+
+Here's an example of something that should be fairly easy to export to the Base::UI subclasses - the current state of the main keyboard's shift key.
+
+That way, when shift is held down for a few seconds on the regular keyboard, I can see what's underneath the current tranzport display mode (I do like big meters) (Also, it's somewhat easier to hit shift on the main keyboard and play on the tranzport or the shuttle wheel, if that's what you are doing).
+
+Should be fairly easy to tap into the gdk event for this but the "right way" to propagate this event into the class is beyond me.

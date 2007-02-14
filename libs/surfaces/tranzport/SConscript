@@ -22,13 +22,36 @@ tranzport.Append(POTFILE = domain + '.pot')
 
 tranzport_files=Split("""
 interface.cc
-tranzport_control_protocol.cc
+buttons.cc
+io.cc
+io_usb.cc
+panner.cc
+lights.cc
+screen.cc
+state.cc
+wheel_modes.cc
+button_events.cc
+general.cc
+lcd.cc
+mode.cc
+show.cc
+init.cc
+wheel.cc
 """)
+
+#figure out when to do
+#io_usb.cc
+#io_midi.cc
+#io_kernel.cc
 
 tranzport.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
 tranzport.Append(CXXFLAGS="-DDATA_DIR=\\\""+final_prefix+"/share\\\"")
 tranzport.Append(CXXFLAGS="-DCONFIG_DIR=\\\""+final_config_prefix+"\\\"")
 tranzport.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
+#if env['HAVE_TRANZPORT_KERNEL_DRIVER']:
+#	tranzport.Append(CXXFLAGS="-DHAVE_TRANZPORT_KERNEL_DRIVER=1")
+
+#merge more into tranzport files for the right io lib
 
 tranzport.Merge ([
     libraries['ardour'],
@@ -37,9 +60,9 @@ tranzport.Merge ([
     libraries['pbd'],
     libraries['midi++2'],
     libraries['xml'],
-    libraries['usb'],
     libraries['glib2'],
-    libraries['glibmm2']
+    libraries['glibmm2'],
+    libraries['usb']
     ])
 
 libardour_tranzport = tranzport.SharedLibrary('ardour_tranzport', tranzport_files)
@@ -48,6 +71,11 @@ if tranzport['TRANZPORT']:
 	Default(libardour_tranzport)
 	if env['NLS']:
 		i18n (tranzport, tranzport_files, env)
+#	if env['HAVE_TRANZPORT_KERNEL_DRIVER']:
+#		tranzport.Merge([
+#			libraries['usb']
+#			])
+
 	env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2', 'surfaces'), libardour_tranzport))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],

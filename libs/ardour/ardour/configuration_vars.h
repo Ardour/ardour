@@ -23,6 +23,7 @@ CONFIG_VARIABLE (bool, midi_control, "midi-control", false)
 
 CONFIG_VARIABLE (uint32_t, feedback_interval_ms,  "feedback-interval-ms", 100)
 CONFIG_VARIABLE (bool, use_tranzport,  "use-tranzport", false)
+CONFIG_VARIABLE (std::string, mackie_emulation, "mackie-emulation", "mcu")
 
 /* disk operations */
 

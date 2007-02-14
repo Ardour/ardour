@@ -404,6 +404,7 @@ Session::GlobalMeteringStateCommand::get_state()
 			case MeterPostFader:
 				meterstr = X_("post");
 				break;
+			default: meterstr = "";
 			}
 
 			child->add_property (X_("meter"), meterstr);
@@ -430,6 +431,7 @@ Session::GlobalMeteringStateCommand::get_state()
 			case MeterPostFader:
 				meterstr = X_("post");
 				break;
+			default: meterstr = "";
 			}
 
 			child->add_property (X_("meter"), meterstr);

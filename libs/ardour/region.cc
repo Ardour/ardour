@@ -738,7 +738,7 @@ Region::state (bool full_state)
 {
 	XMLNode *node = new XMLNode ("Region");
 	char buf[64];
-	char* fe;
+	char* fe = NULL;
 
 	_id.print (buf, sizeof (buf));
 	node->add_property ("id", buf);
@@ -759,6 +759,10 @@ Region::state (bool full_state)
 		break;
 	case EditChangesID:
 		fe = X_("id");
+		break;
+	default: /* should be unreachable but makes g++ happy */
+		cerr << "Odd region property found\n";
+		fe = X_("nothing");
 		break;
 	}
 

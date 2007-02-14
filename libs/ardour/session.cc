@@ -3407,11 +3407,11 @@ Session::available_capture_duration ()
 
 	switch (Config->get_native_file_data_format()) {
 	case FormatFloat:
-		sample_bytes_on_disk = 4;
+		sample_bytes_on_disk = 4.0;
 		break;
 
 	case FormatInt24:
-		sample_bytes_on_disk = 3;
+		sample_bytes_on_disk = 3.0;
 		break;
 
 	default: 
