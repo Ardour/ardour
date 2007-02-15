@@ -237,6 +237,7 @@ class Session : public PBD::StatefulDestructible
 	string name() const { return _name; }
 	string snap_name() const { return _current_snapshot_name; }
 	string raid_path () const;
+	string export_dir () const;
 
 	void set_snap_name ();
 
@@ -1562,6 +1563,7 @@ class Session : public PBD::StatefulDestructible
 	static const char* dead_sound_dir_name;
 	static const char* interchange_dir_name;
 	static const char* peak_dir_name;
+	static const char* export_dir_name;
 
 	string discover_best_sound_dir (bool destructive = false);
 	int ensure_sound_dir (string, string&);

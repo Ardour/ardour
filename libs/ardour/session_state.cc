@@ -487,6 +487,13 @@ Session::create (bool& new_session, string* mix_template, nframes_t initial_leng
 		return -1;
 	}
 
+	dir = export_dir ();
+
+	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+		error << string_compose(_("Session: cannot create session export dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+		return -1;
+	}
+
 
 	/* check new_session so we don't overwrite an existing one */
 
@@ -1905,6 +1912,15 @@ Session::template_dir ()
 	path += "templates/";
 
 	return path;
+}
+
+string
+Session::export_dir () const
+{
+	string res = _path;
+	res += export_dir_name;
+	res += '/';
+	return res;
 }
 
 string

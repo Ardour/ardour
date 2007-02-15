@@ -88,6 +88,7 @@ const char* Session::sound_dir_name = X_("audiofiles");
 const char* Session::peak_dir_name = X_("peaks");
 const char* Session::dead_sound_dir_name = X_("dead_sounds");
 const char* Session::interchange_dir_name = X_("interchange");
+const char* Session::export_dir_name = X_("export");
 
 Session::compute_peak_t				Session::compute_peak 			= 0;
 Session::apply_gain_to_buffer_t		Session::apply_gain_to_buffer 	= 0;

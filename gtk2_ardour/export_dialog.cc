@@ -947,12 +947,12 @@ ExportDialog::start_export ()
 	}
 
 	/* If the filename hasn't been set before, use the
-	   directory above the current session as a default
+	   current session's export directory as a default
 	   location for the export.  
 	*/
 	
 	if (file_entry.get_text().length() == 0) {
-		string dir = session->path();
+		string dir = session->export_dir();
 		string::size_type last_slash;
 		
 		if ((last_slash = dir.find_last_of ('/')) != string::npos && last_slash != 0) {
