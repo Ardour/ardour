@@ -176,20 +176,6 @@ ARDOUR_UI::transport_forwarding ()
 	auto_loop_button.set_visual_state (0);
 }
 
-bool
-messagefoo (GdkEventButton* ev)
-{
-	cerr << " roll  button pressed\n";
-	return false;
-}
-
-bool
-messagefoo2 (GdkEventButton* ev)
-{
-	cerr << " roll  button release\n";
-	return false;
-}
- 
 void
 ARDOUR_UI::setup_transport ()
 {
@@ -266,9 +252,6 @@ ARDOUR_UI::setup_transport ()
 	auto_loop_button.add (*w);
 
 	RefPtr<Action> act;
-
-	roll_button.signal_button_press_event().connect (sigc::ptr_fun (messagefoo));
-	roll_button.signal_button_release_event().connect (sigc::ptr_fun (messagefoo2));
 
 	act = ActionManager::get_action (X_("Transport"), X_("Stop"));
 	act->connect_proxy (stop_button);

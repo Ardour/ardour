@@ -388,6 +388,8 @@ SndFileSource::nondestructive_write_unlocked (Sample *data, nframes_t cnt)
 	
 	nframes_t oldlen;
 	int32_t frame_pos = _length;
+
+	cerr << _name << " write " << cnt << " floats to " << frame_pos << endl;
 	
 	if (write_float (data, frame_pos, cnt) != cnt) {
 		return 0;
@@ -395,6 +397,8 @@ SndFileSource::nondestructive_write_unlocked (Sample *data, nframes_t cnt)
 
 	oldlen = _length;
 	update_length (oldlen, cnt);
+
+	cerr << "\t length is now " << _length << endl;
 
 	if (_build_peakfiles) {
 		PeakBuildRecord *pbr = 0;

@@ -982,7 +982,10 @@ AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, 
 	nframes_t offset = 0;
 	Location *loc = 0;
 
+	/* XXX we don't currently play loops in reverse. not sure why */
+
 	if (!reversed) {
+
 		/* Make the use of a Location atomic for this read operation.
 		   
 		   Note: Locations don't get deleted, so all we care about
@@ -1006,11 +1009,16 @@ AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, 
 			start = loop_start + ((start - loop_start) % loop_length);
 			//cerr << "to " << start << endl;
 		}
+
 		//cerr << "start is " << start << "  loopstart: " << loop_start << "  loopend: " << loop_end << endl;
 	}
 
 	while (cnt) {
 
+		if (reversed) {
+			start -= cnt;
+		}
+			
 		/* take any loop into account. we can't read past the end of the loop. */
 
 		if (loc && (loop_end - start < cnt)) {
@@ -1037,9 +1045,6 @@ AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, 
 		_read_data_count = _playlist->read_data_count();
 		
 		if (reversed) {
-
-			/* don't adjust start, since caller has already done that
-			 */
 
 			swap_by_ptr (buf, buf + this_read - 1);
 			
@@ -1096,7 +1101,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 	if ((total_space = vector.len[0] + vector.len[1]) == 0) {
 		return 0;
 	}
-	
+
 	/* if there are 2+ chunks of disk i/o possible for
 	   this track, let the caller know so that it can arrange
 	   for us to be called again, ASAP.
@@ -1125,6 +1130,8 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 	if (_slaved && total_space < (channels.front().playback_buf->bufsize() / 2)) {
 		return 0;
 	}
+
+	/* never do more than disk_io_chunk_frames worth of disk input per call (limit doesn't apply for memset) */
 
 	total_space = min (disk_io_chunk_frames, total_space);
 
@@ -1159,11 +1166,6 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 
 		} else {
 			
-			/* move read position backwards because we are going
-			   to reverse the data.
-			*/
-			
-			file_frame -= total_space;
 			zero_fill = 0;
 		}
 
@@ -1209,21 +1211,36 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 
 		chan.playback_buf->get_write_vector (&vector);
 
+		if (vector.len[0] > disk_io_chunk_frames) {
+			
+			/* we're not going to fill the first chunk, so certainly do not bother with the
+			   other part. it won't be connected with the part we do fill, as in:
+			   
+			   .... => writable space
+			   ++++ => readable space
+			   ^^^^ => 1 x disk_io_chunk_frames that would be filled
+			   
+			   |......|+++++++++++++|...............................|
+			   buf1                buf0
+			                        ^^^^^^^^^^^^^^^
+			   
+			   
+			   So, just pretend that the buf1 part isn't there.					
+			   
+			*/
+		
+			vector.buf[1] = 0;
+			vector.len[1] = 0;
+		
+		} 
+
 		ts = total_space;
 		file_frame_tmp = file_frame;
 
-		if (reversed) {
-			buf1 = vector.buf[1];
-			len1 = vector.len[1];
-			buf2 = vector.buf[0];
-			len2 = vector.len[0];
-		} else {
-			buf1 = vector.buf[0];
-			len1 = vector.len[0];
-			buf2 = vector.buf[1];
-			len2 = vector.len[1];
-		}
-
+		buf1 = vector.buf[0];
+		len1 = vector.len[0];
+		buf2 = vector.buf[1];
+		len2 = vector.len[1];
 
 		to_read = min (ts, len1);
 		to_read = min (to_read, disk_io_chunk_frames);
@@ -1234,7 +1251,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 				ret = -1;
 				goto out;
 			}
-			
+
 			chan.playback_buf->increment_write_ptr (to_read);
 			ts -= to_read;
 		}
@@ -1243,7 +1260,6 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 
 		if (to_read) {
 
-			
 			/* we read all of vector.len[0], but it wasn't an entire disk_io_chunk_frames of data,
 			   so read some or all of vector.len[1] as well.
 			*/
