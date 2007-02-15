@@ -5,10 +5,10 @@
 ]>
 
 <section id="sn-generic-midi-control-surface">
-	<title>Using a Generic MIDI control surface</title>
-	<para>
-		To be completed. Applies only to Ardour 2.
-	</para>
+  <title>Using a Generic MIDI control surface</title>
+  <para>
+    To be completed. Applies only to Ardour 2.
+  </para>
 <!--
 	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="Some_Subsection.xml" />

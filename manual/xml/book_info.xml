@@ -1,4 +1,5 @@
 <?xml version='1.0'?>
+
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
 
 <!ENTITY BOOKNAME "Ardour Reference Guide">
@@ -8,45 +9,38 @@
 <!ENTITY BUG-NUM "000001"> <!-- use this only while in draft stage -->
 
 ]>
-<bookinfo>
-	<title>Ardour Manual</title>
 
-	<issuenum>1.0</issuenum>
-	<productnumber>2.0</productnumber>
-	<abstract>
-		<para>
-			This is the manual for Ardour, a digital audio workstation for Linux
-			and MacOSX. This manual is jointly created and edited by the Ardour
-			community. It may be published in paper format at some time in the
-			future.
-		</para>
-	</abstract>
-	
-	<isbn>
+<bookinfo>
+  <title>Ardour Manual</title>
+  <issuenum>1.0</issuenum>
+  <productnumber>2.0</productnumber>
+  <abstract>
+    <para>
+      This is the manual for Ardour, a digital audio workstation for Linux
+      and MacOSX. This manual is jointly created and edited by the Ardour
+      community. It may be published in paper format at some time in the
+      future.
+    </para>
+  </abstract>
+  <isbn>
 		N/A
 	</isbn>
-
-	<mediaobject>
-		<imageobject>
-			<imagedata fileref="images/ardourlogo.png"/>
-		</imageobject>
-	</mediaobject>
-	
-	<publisher>
-		<publishername>
-			<inlinemediaobject>
-				<imageobject>
-					<imagedata fileref="images/ardour-title.png" />
-				</imageobject>
-			</inlinemediaobject>
-		</publishername>
-	</publisher>
-	
-	<copyright>
-		<year>2007</year>
-		<holder>Ardour Foundation</holder>
-	</copyright>
-
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref="images/ardourlogo.png"/>
+    </imageobject>
+  </mediaobject>
+  <publisher>
+    <publishername>
+      <inlinemediaobject>
+        <imageobject>
+          <imagedata fileref="images/ardour-title.png" />
+        </imageobject>
+      </inlinemediaobject>
+    </publishername>
+  </publisher>
+  <copyright>
+    <year>2007</year>
+    <holder>Ardour Foundation</holder>
+  </copyright>
 </bookinfo>
-
-

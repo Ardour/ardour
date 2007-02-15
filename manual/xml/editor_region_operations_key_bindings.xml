@@ -1,88 +1,92 @@
 <?xml version="1.0" standalone="no"?>
+
 <!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
 
 ]>
 
 <section id="sn-editor-region-operation-key-bindings">
+  <title>Region Operations Key Bindings</title>
+  <table id="tbl-editor-region-operation-key-bindings">
+    <title>Region Operation Key Bindings</title>
+    <tgroup cols = "2">
+      <colspec colnum="1" colname="Key Binding" colwidth="1"/>
+      <colspec colnum="2" colname="Action" colwidth= "2"/>
+      <thead>
+        <row>
+          <entry>
+            Key Binding
+          </entry>
 
-	<title>Region Operations Key Bindings</title>
+          <entry>
+            Action
+          </entry>
+        </row>
+      </thead>
+      <tbody>
+        <row>
+          <entry>
+            <keycombo><keycap>s</keycap> </keycombo>
+          </entry>
 
-	<table id="tbl-editor-region-operation-key-bindings">
-		<title>Region Operation Key Bindings</title>
-		<tgroup cols = "2">
-			<colspec colnum="1" colname="Key Binding" colwidth="1"/>
-			<colspec colnum="2" colname="Action" colwidth= "2"/>
-			<thead>
-				<row>
-					<entry>
-						Key Binding
-					</entry>
-					<entry>
-						Action
-					</entry>
-				</row>
-			</thead>
-			<tbody>
-				<row>
-					<entry>
-						<keycombo><keycap>s</keycap>
-						</keycombo>
-					</entry>
-					<entry>
-						split region(s) at mouse
-					</entry>
-				</row>
-				<row>
-					<entry>
-						<keycombo><keycap>Alt</keycap><keycap>s</keycap>
-						</keycombo>
-					</entry>
-					<entry>
-						split region(s) at edit cursor
-					</entry>
-				</row>
-				<row>
-					<entry>
-						<keycombo><keycap>Insert</keycap>
-						</keycombo>
-					</entry>
-					<entry>
-						insert selected region (from region list)
-					</entry>
-				</row>
-				<row>
-					<entry>
-						<keycombo><keycap>Meta</keycap><keycap>d</keycap>
-						</keycombo>
-					</entry>
-					<entry>
-						duplicate region
-					</entry>
-				</row>
-				<row>
-					<entry>
-						<keycombo><keycap>Alt</keycap><keycap>r</keycap>
-						</keycombo>
-					</entry>
-					<entry>
-						reverse region
-					</entry>
-				</row>
-				<row>
-					<entry>
-						<keycombo><keycap>Alt</keycap><keycap>n</keycap>
-						</keycombo>
-					</entry>
-					<entry>
-						normalize region
-					</entry>
-				</row>
-			</tbody>
-		</tgroup>
-	</table>
-	<!--
+          <entry>
+            split region(s) at mouse
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Alt</keycap><keycap>s</keycap> </keycombo>
+          </entry>
+
+          <entry>
+            split region(s) at edit cursor
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Insert</keycap> </keycombo>
+          </entry>
+
+          <entry>
+            insert selected region (from region list)
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Meta</keycap><keycap>d</keycap> </keycombo>
+          </entry>
+
+          <entry>
+            duplicate region
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Alt</keycap><keycap>r</keycap> </keycombo>
+          </entry>
+
+          <entry>
+            reverse region
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Alt</keycap><keycap>n</keycap> </keycombo>
+          </entry>
+
+          <entry>
+            normalize region
+          </entry>
+        </row>
+      </tbody>
+    </tgroup>
+  </table>
+<!--
 	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="Some_Subsection.xml" />
 	-->
-
 </section>

@@ -9,6 +9,22 @@ CSSFILE	 ?= $(DOCNAME).css
 XSLTPROC ?= xsltproc
 #PWD		  = $(shell pwd)
 
+help::
+	@echo " The Following is a list of supported build targets:"
+	@echo
+	@echo " html:"
+	@echo "     Build HTML version of ardour manual."
+	@echo
+	@echo " test:"
+	@echo "     Validate DocBook XML source."
+	@echo
+	@echo " format:"
+	@echo "     Format DocBook XML source using xmlformat."
+	@echo
+	@echo " clean:"
+	@echo "     Remove temporary files."
+	@echo
+
 # xsltproc -output option gives I/O errors because??, so 
 # just move the html to the output directory
 html:: clean
@@ -26,9 +42,18 @@ html:: clean
 .PHONY : html
 
 test::
+	# validating book
 	xmllint --noout --postvalid --xinclude $(XMLFILE)
 
 .PHONY : test
+
+format:: test
+	@for file in `find xml/*.xml`; \
+		do xmlformat/xmlformat.pl --in-place --backup .bak \
+		--config-file xmlformat/xmlformat-ardour.conf $$file; \
+		done
+
+.PHONY : format
 
 clean::
 	@rm -rf $(OUTDIR)
