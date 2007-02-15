@@ -2,7 +2,6 @@
   where ENSURE_CORRECT_THREAD is a macro that is modelled on ENSURE_GUI_THREAD
   if the handler is not called in the "correct thread", it will use a pseudo-RT-safe-enough technique to get the correct thread to recall "handler" later on, and return.
   
-* occasional hang on startup. deadlock?
 * finish button mapping
 * discuss button mapping for Ardour
 * concurrency for bank switching? And make sure "old" events aren't sent to "new" faders
@@ -19,6 +18,7 @@
 * power-cycling of surface. fd_midiport doesn't close.
 * remove couts
 * jog with transport rolling doesn't work properly
+* docs in manual
 
 Later
 -----
@@ -28,7 +28,7 @@ Later
 Actual Mackie
 -------------
 * docs claim that unit will send a host query on init.
-* test Mackie surface object. Apparently led rings don't work
+* test Mackie surface object. Apparently led rings don't work. Stereo busses?
 * timecode & 55 char displays
 * midi bandwidth
 
@@ -36,8 +36,6 @@ Bugs
 ----
 
 * get_state isn't called on deactivate
-* close existing and load other session doesn't start control surface
-* set_state is called twice from the control_manager
 * routes "forget" their remote_id between session save and the next session load
 * definitely something wrong with remote_id assignment on session create
   (master strip assigned 0).
