@@ -398,16 +398,16 @@ RedirectBox::insert_plugin_chosen (boost::shared_ptr<Plugin> plugin)
 		uint32_t err_streams;
 
 		if (_route->add_redirect (redirect, this, &err_streams)) {
-			wierd_plugin_dialog (*plugin, err_streams, _route);
+			weird_plugin_dialog (*plugin, err_streams, _route);
 			// XXX SHAREDPTR delete plugin here .. do we even need to care? 
 		}
 	}
 }
 
 void
-RedirectBox::wierd_plugin_dialog (Plugin& p, uint32_t streams, boost::shared_ptr<IO> io)
+RedirectBox::weird_plugin_dialog (Plugin& p, uint32_t streams, boost::shared_ptr<IO> io)
 {
-	ArdourDialog dialog ("wierd plugin dialog");
+	ArdourDialog dialog (_("ardour: weird plugin dialog"));
 	Label label;
 
 	/* i hate this kind of code */
@@ -702,7 +702,7 @@ RedirectBox::compute_redirect_sort_keys ()
 
 		/* now tell them about the problem */
 
-		ArdourDialog dialog ("wierd plugin dialog");
+		ArdourDialog dialog (_("ardour: weird plugin dialog"));
 		Label label;
 
 		label.set_text (_("\
