@@ -25,7 +25,6 @@
 
 #include <midi++/types.h>
 #include <midi++/port.h>
-#include <midi++/alsa_sequencer.h>
 #include <sigc++/sigc++.h>
 #include <boost/shared_array.hpp>
 #include <ardour/configuration.h>
