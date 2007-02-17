@@ -61,7 +61,7 @@ void RouteSignal::connect()
 	// TODO
 	// active_changed
 	// SelectedChanged
-	// RemoteControlIDChanged
+	// RemoteControlIDChanged. Better handled at Session level.
 }
 
 void RouteSignal::disconnect()

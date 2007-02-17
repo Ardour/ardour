@@ -202,14 +202,27 @@ MackieControlProtocol::Sorted MackieControlProtocol::get_sorted_routes()
 	
 	// fetch all routes
 	boost::shared_ptr<Session::RouteList> routes = session->get_routes();
+	set<uint32_t> remote_ids;
+	
+	// routes with remote_id 0 should never be added
+	// TODO verify this with ardour devs
+	// remote_ids.insert( 0 );
 	
 	// sort in remote_id order, and exclude master, control and hidden routes
+	// and any routes that are already set.
 	for ( Session::RouteList::iterator it = routes->begin(); it != routes->end(); ++it )
 	{
 		Route & route = **it;
-		if ( route.active() && !route.master() && !route.hidden() && !route.control() )
+		if (
+				route.active()
+				&& !route.master()
+				&& !route.hidden()
+				&& !route.control()
+				&& remote_ids.find( route.remote_control_id() ) == remote_ids.end()
+		)
 		{
 			sorted.push_back( *it );
+			remote_ids.insert( route.remote_control_id() );
 		}
 	}
 	sort( sorted.begin(), sorted.end(), RouteByRemoteId() );
@@ -846,7 +859,11 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 						next = session->current_end_frame();
 					}
 					
+					// moves jerkily and doesn't really work. eventually core-dumps
 					session->request_locate( next, session->transport_rolling() );
+					// ditto
+					// ScrollTimeline( state.ticks );
+					// mtaht says maybe snap-to code has some ideas
 					
 					// turn off the led ring, for bcf emulation mode
 					port.write( builder.build_led_ring( dynamic_cast<Pot &>( control ), off ) );

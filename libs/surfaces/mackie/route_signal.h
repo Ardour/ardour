@@ -37,8 +37,6 @@ class MackiePort;
   connections from a route to a control surface strip. Instantiating
   it will connect the signals, and destructing it will disconnect
   the signals.
-
-  TODO deal with routes with >1 panner.
 */
 class RouteSignal
 {

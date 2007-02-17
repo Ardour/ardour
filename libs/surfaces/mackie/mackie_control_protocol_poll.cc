@@ -104,7 +104,9 @@ void MackieControlProtocol::update_ports()
 			}
 			_ports_changed = false;
 		}
+		cout << "MackieControlProtocol::update_ports signalling" << endl;
 		update_cond.signal();
+		cout << "MackieControlProtocol::update_ports finished" << endl;
 	}
 }
 

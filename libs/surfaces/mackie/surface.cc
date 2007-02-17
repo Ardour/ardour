@@ -7,16 +7,15 @@
 using namespace std;
 using namespace Mackie;
 
-Surface::Surface( uint32_t max_strips )
-: _max_strips( max_strips )
+Surface::Surface( uint32_t max_strips, uint32_t unit_strips )
+: _max_strips( max_strips ), _unit_strips( unit_strips )
 {
 }
 
 void Surface::init()
 {
 	init_controls();
-	// TODO fix this hard coding
-	init_strips( _max_strips, 8 );
+	init_strips( _max_strips, _unit_strips );
 }
 
 Surface::~Surface()
@@ -34,11 +33,9 @@ Surface::~Surface()
 	}
 }
 
-// Possibly Mackie-specific, because of multiple devices on separate ports
+// Mackie-specific, because of multiple devices on separate ports
 // add the strips from 9..max_strips
 // unit_strips is the number of strips for additional units.
-// TODO would be better to pass the MackiePorts in here, cos
-// each might have a different number of strips
 void Surface::init_strips( uint32_t max_strips, uint32_t unit_strips )
 {
 	if ( strips.size() < max_strips )

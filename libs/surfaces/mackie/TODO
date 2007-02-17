@@ -6,24 +6,29 @@
 * discuss button mapping for Ardour
 * concurrency for bank switching? And make sure "old" events aren't sent to "new" faders
 * concurrency in write( bytes ). Queueing?
-* Are remote_ids supposed to be 1-based or 0-based?
 * TODOs in code
 * handle remote_control_id changed signal from Route.
 * handle removal of route. Need another session signal?
-* Some indication on the UI of remote_ids?
-  Useful for surfaces that don't have a scribble strip.
 * use i18n. see string_compose
 * MackieControlProtocol in namespace Mackie?
 * Generic surface code to common location
 * power-cycling of surface. fd_midiport doesn't close.
 * remove couts
-* jog with transport rolling doesn't work properly
+* jog with transport rolling doesn't work properly. My use of ScrollTimeline also doesn't work.
 * docs in manual
 
 Later
 -----
 * which bank switching - overlap or dead faders? Option?
 * signals for buttons?
+* mix busses and/or a "bus-only" bank/mode
+* what about surfaces like Mackie C4 and BCR2000?
+
+Need UI integration
+-------------------
+* Some indication on the UI of currently bank-switched-in routes?
+  Useful for surfaces that don't have a scribble strip.
+* use current zoom setting and snap state for shuttle wheel
 
 Actual Mackie
 -------------
@@ -35,8 +40,8 @@ Actual Mackie
 Bugs
 ----
 
-* get_state isn't called on deactivate
+* get_state isn't called on deactivate. Huh? What did I mean here?
 * routes "forget" their remote_id between session save and the next session load
 * definitely something wrong with remote_id assignment on session create
   (master strip assigned 0).
-* gui enables record for tracks with no inputs
+* editor window doesn't update route remote_control_id when it's updated in mixer window.

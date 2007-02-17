@@ -28,7 +28,14 @@ class MackieButtonHandler;
 class Surface
 {
 public:
-	Surface( uint32_t max_strips );
+	/**
+		A Surface can be made up of multiple units. eg one Mackie MCU plus
+		one or more Mackie MCU extenders.
+		
+		\param max_strips is the number of strips for the entire surface.
+		\param unit_strips is the number of strips per unit.
+	*/
+	Surface( uint32_t max_strips, uint32_t unit_strips = 8 );
 	virtual ~Surface();
 
 	/// Calls the virtual initialisation methods. This *must* be called after
@@ -56,7 +63,7 @@ public:
 	std::map<std::string,Control*> controls_by_name;
 
 	/// The collection of all numbered strips. No master
-	/// strip in here. 
+	/// strip in here.
 	typedef std::vector<Strip*> Strips;
 	Strips strips;
 
@@ -78,6 +85,7 @@ protected:
 
 private:
 	uint32_t _max_strips;
+	uint32_t _unit_strips;
 };
 
 }
