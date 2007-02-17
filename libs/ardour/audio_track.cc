@@ -276,14 +276,7 @@ AudioTrack::_set_state (const XMLNode& node, bool call_base)
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
 		child = *niter;
 
-		if (child->name() == X_("remote_control")) {
-			if ((prop = child->property (X_("id"))) != 0) {
-				int32_t x;
-				sscanf (prop->value().c_str(), "%d", &x);
-				set_remote_control_id (x);
-			}
-
-		} else if (child->name() == X_("recenable")) {
+		if (child->name() == X_("recenable")) {
 			_rec_enable_control.set_state (*child);
 			_session.add_controllable (&_rec_enable_control);
 		}
@@ -328,11 +321,6 @@ AudioTrack::state(bool full_state)
 	AlignStyle as = _diskstream->alignment_style ();
 	align_node->add_property (X_("style"), enum_2_string (as));
 	root.add_child_nocopy (*align_node);
-
-	XMLNode* remote_control_node = new XMLNode (X_("remote_control"));
-	snprintf (buf, sizeof (buf), "%d", _remote_control_id);
-	remote_control_node->add_property (X_("id"), buf);
-	root.add_child_nocopy (*remote_control_node);
 
 	root.add_property (X_("mode"), enum_2_string (_mode));
 
