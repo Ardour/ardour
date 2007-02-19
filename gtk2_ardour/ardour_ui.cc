@@ -2610,23 +2610,22 @@ void
 ARDOUR_UI::TransportControllable::set_value (float val)
 {
 	if (type == ShuttleControl) {
-
 		double fract;
 
-		if (val == 63.0f) {
+		if (val == 0.5f) {
 			fract = 0.0;
 		} else {
-			if (val < 63.0f) {
-				fract = -((63.0f - val)/63.0f);
+			if (val < 0.5f) {
+				fract = -((0.5f - val)/0.5f);
 			} else {
-				fract = ((val - 63.0f)/63.0f);
+				fract = ((val - 0.5f)/0.5f);
 			}
 		}
 		
 		ui.set_shuttle_fract (fract);
 		return;
 	}
-		
+
 	if (val < 0.5f) {
 		/* do nothing: these are radio-style actions */
 		return;
@@ -2664,7 +2663,7 @@ ARDOUR_UI::TransportControllable::set_value (float val)
 		return;
 	}
 
-	Glib::RefPtr<Action> act = ActionManager::get_action ("transport", action);
+	Glib::RefPtr<Action> act = ActionManager::get_action ("Transport", action);
 
 	if (act) {
 		act->activate ();

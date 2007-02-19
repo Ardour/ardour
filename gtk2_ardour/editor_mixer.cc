@@ -158,6 +158,9 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 	}
 }
 
+double current = 0.0;
+bool currentInitialized = 0;
+
 void
 Editor::update_current_screen ()
 {
@@ -194,7 +197,7 @@ Editor::update_current_screen ()
 
 				playhead_cursor->set_position (frame);
 
-#undef CONTINUOUS_SCROLL
+#define CONTINUOUS_SCROLL
 #ifdef  CONTINUOUS_SCROLL
 
 				/* don't do continuous scroll till the new position is in the rightmost quarter of the 
@@ -213,7 +216,15 @@ Editor::update_current_screen ()
 					}
 				}
 #else
-				horizontal_adjustment.set_value (frame / frames_per_unit);
+				if (!currentInitialized) {
+					current = (frame - current_page_frames()/2) / frames_per_unit;
+					currentInitialized = 1;
+				}
+
+				double target = (frame - current_page_frames()/2) / frames_per_unit;
+				target = (target * 0.1) + (current * 0.9);
+				horizontal_adjustment.set_value ( target );
+				current = target;
 #endif
 
 #endif // CONTINUOUS_SCROLL

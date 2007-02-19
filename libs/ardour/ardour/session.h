@@ -582,7 +582,7 @@ class Session : public PBD::StatefulDestructible
 
 	struct cleanup_report {
 	    vector<string> paths;
-	    int32_t space;
+	    int64_t space;
 	};
 
 	int  cleanup_sources (cleanup_report&);
