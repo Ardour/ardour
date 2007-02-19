@@ -197,7 +197,7 @@ Editor::update_current_screen ()
 
 				playhead_cursor->set_position (frame);
 
-#define CONTINUOUS_SCROLL
+#undef CONTINUOUS_SCROLL
 #ifdef  CONTINUOUS_SCROLL
 
 				/* don't do continuous scroll till the new position is in the rightmost quarter of the 
