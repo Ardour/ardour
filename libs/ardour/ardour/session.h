@@ -476,6 +476,8 @@ class Session : public PBD::StatefulDestructible
 	void   resort_routes ();
 	void   resort_routes_using (boost::shared_ptr<RouteList>);
 
+	void	set_remote_control_ids();
+
 	AudioEngine &engine() { return _engine; };
 
 	int32_t  max_level;

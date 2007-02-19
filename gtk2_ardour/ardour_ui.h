@@ -645,11 +645,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	struct timeval last_peak_grab;
 	struct timeval last_shuttle_request;
 
-	bool have_disk_overrun_displayed;
-	bool have_disk_underrun_displayed;
-
-	void disk_overrun_message_gone ();
-	void disk_underrun_message_gone ();
+	bool have_disk_speed_dialog_displayed;
+	void disk_speed_dialog_gone (int ignored_response, Gtk::MessageDialog*);
 	void disk_overrun_handler ();
 	void disk_underrun_handler ();
 
@@ -682,6 +679,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void set_output_auto_connect (ARDOUR::AutoConnectOption);
 	void set_solo_model (ARDOUR::SoloModel);
 	void set_monitor_model (ARDOUR::MonitorModel);
+	void set_remote_model (ARDOUR::RemoteModel);
 
 	void toggle_StopPluginsWithTransport();
 	void toggle_DoNotRunPluginsWhileRecording();
@@ -697,6 +695,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void mtc_port_changed ();
 	void map_solo_model ();
 	void map_monitor_model ();
+	void map_remote_model ();
 	void map_file_header_format ();
 	void map_file_data_format ();
 	void map_input_auto_connect ();

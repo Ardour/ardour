@@ -107,6 +107,8 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 		update_rec_display ();
 	} 
 	
+	_route->RemoteControlIDChanged.connect (mem_fun(*this, &RouteUI::refresh_remote_control_menu));
+
 	/* map the current state */
 
 	map_frozen ();
@@ -478,6 +480,14 @@ RouteUI::build_remote_control_menu ()
 void
 RouteUI::refresh_remote_control_menu ()
 {
+	ENSURE_GUI_THREAD (mem_fun (*this, &RouteUI::refresh_remote_control_menu));
+
+	// only refresh the menu if it has been instantiated
+
+	if (remote_control_menu == 0) {
+		return;
+	}
+
 	using namespace Menu_Helpers;
 
 	RadioMenuItem::Group rc_group;

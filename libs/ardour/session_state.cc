@@ -3167,6 +3167,8 @@ Session::config_changed (const char* parameter_name)
 
 	} else if (PARAM_IS ("slave-source")) {
 		set_slave_source (Config->get_slave_source());
+	} else if (PARAM_IS ("remote-model")) {
+		set_remote_control_ids ();
 	}
 
 	set_dirty ();

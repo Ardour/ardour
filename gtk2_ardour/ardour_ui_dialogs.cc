@@ -62,6 +62,13 @@ ARDOUR_UI::connect_to_session (Session *s)
 		ActionManager::set_sensitive (ActionManager::range_sensitive_actions, false);
 	}
 
+	if (!session->control_out()) {
+		Glib::RefPtr<Action> act = ActionManager::get_action (X_("options"), X_("SoloViaBus"));
+		if (act) {
+			act->set_sensitive (false);
+		}
+	}
+
 	/* allow wastebasket flush again */
 
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Main"), X_("FlushWastebasket"));

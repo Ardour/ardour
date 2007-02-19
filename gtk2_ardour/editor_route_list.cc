@@ -512,11 +512,13 @@ Editor::initial_route_list_display ()
 void
 Editor::route_list_change (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter)
 {
+	session->set_remote_control_ids();
 	redisplay_route_list ();
 }
 
 void
 Editor::route_list_delete (const Gtk::TreeModel::Path& path)
 {
+	session->set_remote_control_ids();
 	redisplay_route_list ();
 }

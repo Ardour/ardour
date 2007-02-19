@@ -555,12 +555,14 @@ Mixer_UI::hide_all_audiotracks ()
 void
 Mixer_UI::track_list_change (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter)
 {
+	session->set_remote_control_ids();
 	redisplay_track_list ();
 }
 
 void
 Mixer_UI::track_list_delete (const Gtk::TreeModel::Path& path)
 {
+	session->set_remote_control_ids();
 	redisplay_track_list ();
 }
 

@@ -267,6 +267,12 @@ namespace ARDOUR {
 		ExternalMonitoring,
 	};
 
+	enum RemoteModel {
+		UserOrdered,
+		MixerOrdered,
+		EditorOrdered,
+	};
+
 	enum CrossfadeModel {
 		FullCrossfade,
 		ShortCrossfade
@@ -349,6 +355,7 @@ std::istream& operator>>(std::istream& o, ARDOUR::HeaderFormat& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::AutoConnectOption& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::EditMode& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::MonitorModel& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::RemoteModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::SoloModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::LayerModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::CrossfadeModel& sf);

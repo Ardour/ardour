@@ -226,6 +226,39 @@ ARDOUR_UI::set_solo_model (SoloModel model)
 }
 
 void
+ARDOUR_UI::set_remote_model (RemoteModel model)
+{
+	const char* action = 0;
+
+	switch (model) {
+	case UserOrdered:
+		action = X_("RemoteUserDefined");
+		break;
+	case MixerOrdered:
+		action = X_("RemoteMixerDefined");
+		break;
+	case EditorOrdered:
+		action = X_("RemoteEditorDefined");
+		break;
+
+	default:
+		fatal << string_compose (_("programming error: unknown remote model in ARDOUR_UI::set_remote_model: %1"), model) << endmsg;
+		/*NOTREACHED*/
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action ("options", action);
+
+	if (act) {
+		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
+
+		if (ract && ract->get_active() && Config->get_remote_model() != model) {
+			Config->set_remote_model (model);
+		}
+	}
+
+}
+
+void
 ARDOUR_UI::set_monitor_model (MonitorModel model)
 {
 	const char* action = 0;
@@ -464,6 +497,33 @@ ARDOUR_UI::map_monitor_model ()
 		break;
 	case ExternalMonitoring:
 		on = X_("UseExternalMonitoring");
+		break;
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action ("options", on);
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+
+		if (tact && !tact->get_active()) {
+			tact->set_active (true);
+		}
+	}
+}
+
+void
+ARDOUR_UI::map_remote_model ()
+{
+	const char* on = 0;
+
+	switch (Config->get_remote_model()) {
+	case UserOrdered:
+		on = X_("RemoteUserDefined");
+		break;
+	case MixerOrdered:
+		on = X_("RemoteMixerDefined");
+		break;
+	case EditorOrdered:
+		on = X_("RemoteEditorDefined");
 		break;
 	}
 
@@ -814,6 +874,8 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		ActionManager::map_some_state ("options",  "StopTransportAtEndOfSession", &Configuration::get_stop_at_session_end);
 	} else if (PARAM_IS ("monitoring-model")) {
 		map_monitor_model ();
+	} else if (PARAM_IS ("remote-model")) {
+		map_remote_model ();
 	} else if (PARAM_IS ("use-video-sync")) {
 		ActionManager::map_some_state ("Transport",  "ToggleVideoSync", &Configuration::get_use_video_sync);
 	} else if (PARAM_IS ("quieten-at-speed")) {

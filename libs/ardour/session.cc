@@ -1770,6 +1770,27 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 	return ret;
 }
 
+void
+Session::set_remote_control_ids ()
+{
+	RemoteModel m = Config->get_remote_model();
+
+	shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		if ( MixerOrdered == m) {			
+			long order = (*i)->order_key(N_("signal"));
+			(*i)->set_remote_control_id( order+1 );
+		} else if ( EditorOrdered == m) {
+			long order = (*i)->order_key(N_("editor"));
+			(*i)->set_remote_control_id( order+1 );
+		} else if ( UserOrdered == m) {
+			//do nothing ... only changes to remote id's are initiated by user 
+		}
+	}
+}
+
+
 Session::RouteList
 Session::new_audio_route (int input_channels, int output_channels, uint32_t how_many)
 {

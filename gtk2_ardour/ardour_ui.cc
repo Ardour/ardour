@@ -180,8 +180,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	location_ui = 0;
 	open_session_selector = 0;
 	have_configure_timeout = false;
-	have_disk_overrun_displayed = false;
-	have_disk_underrun_displayed = false;
+	have_disk_speed_dialog_displayed = false;
 	_will_create_new_session_automatically = false;
 	session_loaded = false;
 	last_speed_displayed = -1.0f;
@@ -2366,18 +2365,18 @@ ARDOUR_UI::halt_on_xrun_message ()
 void
 ARDOUR_UI::disk_overrun_handler ()
 {
-	ENSURE_GUI_THREAD (mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
+	ENSURE_GUI_THREAD (mem_fun(*this, &ARDOUR_UI::disk_overrun_handler));
 
-	if (!have_disk_overrun_displayed) {
-		have_disk_overrun_displayed = true;
-		MessageDialog msg (*editor, X_("diskrate dialog"), _("\
+	if (!have_disk_speed_dialog_displayed) {
+		have_disk_speed_dialog_displayed = true;
+		MessageDialog* msg = new MessageDialog (*editor, X_("diskrate dialog"), _("\
 The disk system on your computer\n\
 was not able to keep up with Ardour.\n\
 \n\
 Specifically, it failed to write data to disk\n\
 quickly enough to keep up with recording.\n"));
-		msg.run ();
-		have_disk_overrun_displayed = false;
+		msg->signal_response().connect (bind (mem_fun (*this, &ARDOUR_UI::disk_speed_dialog_gone), msg));
+		msg->show_all ();
 	}
 }
 
@@ -2386,29 +2385,24 @@ ARDOUR_UI::disk_underrun_handler ()
 {
 	ENSURE_GUI_THREAD (mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
 
-	if (!have_disk_underrun_displayed) {
-		have_disk_underrun_displayed = true;
-		MessageDialog msg (*editor,
-			(_("The disk system on your computer\n\
+	if (!have_disk_speed_dialog_displayed) {
+		have_disk_speed_dialog_displayed = true;
+		MessageDialog* msg = new MessageDialog (*editor,
+				   _("The disk system on your computer\n\
 was not able to keep up with Ardour.\n\
 \n\
 Specifically, it failed to read data from disk\n\
-quickly enough to keep up with playback.\n")));
-		msg.run ();
-		have_disk_underrun_displayed = false;
+quickly enough to keep up with playback.\n"));
+		msg->signal_response().connect (bind (mem_fun (*this, &ARDOUR_UI::disk_speed_dialog_gone), msg));
+		msg->show_all ();
 	} 
 }
 
 void
-ARDOUR_UI::disk_underrun_message_gone ()
+ARDOUR_UI::disk_speed_dialog_gone (int ignored_response, MessageDialog* msg)
 {
-	have_disk_underrun_displayed = false;
-}
-
-void
-ARDOUR_UI::disk_overrun_message_gone ()
-{
-	have_disk_underrun_displayed = false;
+	have_disk_speed_dialog_displayed = false;
+	delete msg;
 }
 
 int

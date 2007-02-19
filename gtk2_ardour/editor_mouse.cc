@@ -1176,23 +1176,25 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case GainAutomationControlPointItem:
 	case PanAutomationControlPointItem:
 	case RedirectAutomationControlPointItem:
-		cp = static_cast<ControlPoint*>(item->get_data ("control_point"));
-		cp->set_visible (true);
-		
-		double at_x, at_y;
-		at_x = cp->get_x();
-		at_y = cp->get_y ();
-		cp->item->i2w (at_x, at_y);
-		at_x += 20.0;
-		at_y += 20.0;
+		if (mouse_mode == MouseGain || mouse_mode == MouseObject) {
+			cp = static_cast<ControlPoint*>(item->get_data ("control_point"));
+			cp->set_visible (true);
 
-		fraction = 1.0 - (cp->get_y() / cp->line.height());
-	
-		set_verbose_canvas_cursor (cp->line.get_verbose_cursor_string (fraction), at_x, at_y);
-		show_verbose_canvas_cursor ();
-		
-		if (is_drawable()) {
-		        track_canvas.get_window()->set_cursor (*fader_cursor);
+			double at_x, at_y;
+			at_x = cp->get_x();
+			at_y = cp->get_y ();
+			cp->item->i2w (at_x, at_y);
+			at_x += 20.0;
+			at_y += 20.0;
+
+			fraction = 1.0 - (cp->get_y() / cp->line.height());
+
+			set_verbose_canvas_cursor (cp->line.get_verbose_cursor_string (fraction), at_x, at_y);
+			show_verbose_canvas_cursor ();
+
+			if (is_drawable()) {
+				track_canvas.get_window()->set_cursor (*fader_cursor);
+			}
 		}
 		break;
 		
@@ -1210,13 +1212,15 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case GainAutomationLineItem:
 	case RedirectAutomationLineItem:
 	case PanAutomationLineItem:
-		{
-			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
-			if (line)
-				line->property_fill_color_rgba() = color_map[cEnteredAutomationLine];
-		}
-		if (is_drawable()) {
-			track_canvas.get_window()->set_cursor (*fader_cursor);
+		if (mouse_mode == MouseGain || mouse_mode == MouseObject) {
+			{
+				ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
+				if (line)
+					line->property_fill_color_rgba() = color_map[cEnteredAutomationLine];
+			}
+			if (is_drawable()) {
+				track_canvas.get_window()->set_cursor (*fader_cursor);
+			}
 		}
 		break;
 		

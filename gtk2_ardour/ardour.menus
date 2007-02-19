@@ -291,8 +291,12 @@
                    <menuitem action='OutputAutoConnectMaster'/>
                    <menuitem action='OutputAutoConnectManual'/>
                </menu>
-	       <menu action='ControlSurfaces'/>
-               <menu action='Monitoring'>
+	       <menu action='ControlSurfaces'>
+                   <menuitem action='RemoteUserDefined'/>
+                   <menuitem action='RemoteMixerDefined'/>
+                   <menuitem action='RemoteEditorDefined'/>
+               </menu>
+                   <menu action='Monitoring'>
                    <menuitem action='UseHardwareMonitoring'/>
                    <menuitem action='UseSoftwareMonitoring'/>
                    <menuitem action='UseExternalMonitoring'/>

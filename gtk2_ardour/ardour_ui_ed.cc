@@ -470,6 +470,15 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_radio_action (option_actions, output_auto_connect_group, X_("OutputAutoConnectManual"), _("Manually connect outputs"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_output_auto_connect), (AutoConnectOption) 0)));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	RadioAction::Group remote_group;
+
+	act = ActionManager::register_radio_action (option_actions, remote_group, X_("RemoteUserDefined"), _("Remote ID assigned by User"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_remote_model), UserOrdered)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_radio_action (option_actions, remote_group, X_("RemoteMixerDefined"), _("Remote ID follows order of Mixer"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_remote_model), MixerOrdered)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_radio_action (option_actions, remote_group, X_("RemoteEditorDefined"), _("Remote ID follows order of Editor"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_remote_model), EditorOrdered)));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	ActionManager::add_action_group (shuttle_actions);
 	ActionManager::add_action_group (option_actions);
 	ActionManager::add_action_group (jack_actions);
