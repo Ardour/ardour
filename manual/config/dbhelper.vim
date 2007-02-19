@@ -93,8 +93,8 @@ imap<leader>l <literal></literal><esc>bba
 imap<leader>no <note><CR><para></para><CR></note><esc>k$bba
 imap<leader>tp <tip><CR><para></para><CR></tip><esc>k$bba
 imap<leader>imp <important><CR><para></para><CR></important><esc>k$bba
-imap<leader>ca <caution><CR><para></para><CR></caution><esc>k$bba
-"imap<leader>w <warning><CR><para></para><CR></warning><esc>k$bba
+"imap<leader>ca <caution><CR><para></para><CR></caution><esc>k$bba
+imap<leader>w <warning><CR><para></para><CR></warning><esc>k$bba
 
 " computer stuff
 imap<leader>app <application></application><esc>bba
