@@ -3,6 +3,7 @@
 
 #include "controls.h"
 #include "types.h"
+#include <stdint.h>
 
 namespace Mackie
 {
