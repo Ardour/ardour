@@ -182,6 +182,9 @@ Editor::update_current_screen ()
 
 			if (frame != last_update_frame) {
 
+
+#ifdef CONTINUOUS_SCROLL
+#ifndef  CONTINUOUS_SCROLL
 				if (frame < leftmost_frame || frame > leftmost_frame + current_page_frames()) {
 					
 					if (session->transport_speed() < 0) {
@@ -197,35 +200,26 @@ Editor::update_current_screen ()
 
 				playhead_cursor->set_position (frame);
 
-#undef CONTINUOUS_SCROLL
-#ifdef  CONTINUOUS_SCROLL
-
+#else  // CONTINUOUS_SCROLL
+				
 				/* don't do continuous scroll till the new position is in the rightmost quarter of the 
 				   editor canvas
 				*/
 				
-#if 0
-				if (frame > leftmost_frame + (3 * current_page_frames() / 4)) {
-				
-					if (frame > playhead_cursor->current_frame) {
-						nframes_t delta = frame - playhead_cursor->current_frame;
-						horizontal_adjustment.set_value (horizontal_adjustment.get_value() + (delta/frames_per_unit));
+				if (session->transport_speed()) {
+					double target = ((double)frame - (double)current_page_frames()/2.0) / frames_per_unit;
+					if (target <= 0.0) target = 0.0;
+					if ( fabs(target - current) < current_page_frames()/frames_per_unit ) {
+						target = (target * 0.15) + (current * 0.85);
 					} else {
-						nframes_t delta = playhead_cursor->current_frame - frame;
-						horizontal_adjustment.set_value (horizontal_adjustment.get_value() - (delta/frames_per_unit));
+						/* relax */
 					}
+					//printf("frame: %d,  cpf: %d,  fpu: %6.6f, current: %6.6f, target : %6.6f\n", frame, current_page_frames(), frames_per_unit, current, target );
+					current = target;
+					horizontal_adjustment.set_value ( current );
 				}
-#else
-				if (!currentInitialized) {
-					current = (frame - current_page_frames()/2) / frames_per_unit;
-					currentInitialized = 1;
-				}
-
-				double target = (frame - current_page_frames()/2) / frames_per_unit;
-				target = (target * 0.1) + (current * 0.9);
-				horizontal_adjustment.set_value ( target );
-				current = target;
-#endif
+				
+				playhead_cursor->set_position (frame);
 
 #endif // CONTINUOUS_SCROLL
 
