@@ -65,6 +65,8 @@ void * MackieControlProtocol::monitor_work()
 			try { read_ports(); }
 			catch ( exception & e ) {
 				cout << "MackieControlProtocol::poll_ports caught exception: " << e.what() << endl;
+				_ports_changed = true;
+				update_ports();
 			}
 		}
 		// provide a cancellation point
@@ -129,7 +131,7 @@ void MackieControlProtocol::read_ports()
 bool MackieControlProtocol::poll_ports()
 {
 	int timeout = 10; // milliseconds
-	int no_ports_sleep = 10; // milliseconds
+	int no_ports_sleep = 1000; // milliseconds
 
 	Glib::Mutex::Lock lock( update_mutex );
 	// if there are no ports

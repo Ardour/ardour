@@ -260,7 +260,7 @@ void MackieControlProtocol::switch_banks( int initial )
 		uint32_t end_pos = min( route_table.size(), sorted.size() );
 		Sorted::iterator it = sorted.begin() + _current_initial_bank;
 		Sorted::iterator end = sorted.begin() + _current_initial_bank + end_pos;
-		cout << "switch to " << _current_initial_bank << ", " << end_pos << endl;
+		//cout << "switch to " << _current_initial_bank << ", " << end_pos << endl;
 		
 		// link routes to strips
 		uint32_t i = 0;
@@ -268,7 +268,7 @@ void MackieControlProtocol::switch_banks( int initial )
 		{
 			boost::shared_ptr<Route> route = *it;
 			Strip & strip = *surface().strips[i];
-			cout << "remote id " << route->remote_control_id() << " connecting " << route->name() << " to " << strip.name() << " with port " << port_for_id(i) << endl;
+			//cout << "remote id " << route->remote_control_id() << " connecting " << route->name() << " to " << strip.name() << " with port " << port_for_id(i) << endl;
 			route_table[i] = route;
 			RouteSignal * rs = new RouteSignal( *route, *this, strip, port_for_id(i) );
 			route_signals.push_back( rs );
@@ -521,6 +521,14 @@ void MackieControlProtocol::connect_session_signals()
 	connections_back = Config->ParameterChanged.connect( ( mem_fun (*this, &MackieControlProtocol::notify_parameter_changed) ) );
 	// receive rude solo changed
 	connections_back = session->SoloActive.connect( ( mem_fun (*this, &MackieControlProtocol::notify_solo_active_changed) ) );
+	
+	// make sure remote id changed signals reach here
+	// see also notify_route_added
+	Sorted sorted = get_sorted_routes();
+	for ( Sorted::iterator it = sorted.begin(); it != sorted.end(); ++it )
+	{
+		(*it)->RemoteControlIDChanged.connect( ( mem_fun (*this, &MackieControlProtocol::notify_remote_id_changed) ) );
+	}
 }
 
 void MackieControlProtocol::add_port( MIDI::Port & midi_port, int number )
@@ -1128,12 +1136,37 @@ void MackieControlProtocol::notify_route_added( ARDOUR::Session::RouteList & rl 
 		refresh_current_bank();
 	}
 	// otherwise route added, but current bank needs no updating
+	
+	// make sure remote id changes in the new route are handled
+	typedef ARDOUR::Session::RouteList ARS;
+	for ( ARS::iterator it = rl.begin(); it != rl.end(); ++it )
+	{
+		(*it)->RemoteControlIDChanged.connect( ( mem_fun (*this, &MackieControlProtocol::notify_remote_id_changed) ) );
+	}
 }
 
 void MackieControlProtocol::notify_solo_active_changed( bool active )
 {
 	Button * rude_solo = reinterpret_cast<Button*>( surface().controls_by_name["solo"] );
 	mcu_port().write( builder.build_led( *rude_solo, active ? flashing : off ) );
+}
+
+void MackieControlProtocol::notify_remote_id_changed()
+{
+	Sorted sorted = get_sorted_routes();
+	
+	// if a remote id has been moved off the end, we need to shift
+	// the current bank backwards.
+	if ( sorted.size() - _current_initial_bank < route_signals.size() )
+	{
+		// but don't shift backwards past the zeroth channel
+		switch_banks( max( (unsigned int)0, sorted.size() - route_signals.size() ) );
+	}
+	// Otherwise just refresh the current bank
+	else
+	{
+		refresh_current_bank();
+	}
 }
 
 ///////////////////////////////////////////

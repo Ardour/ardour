@@ -1,21 +1,22 @@
 * how long can UI signal callbacks take to execute? What happens if they block?
   where ENSURE_CORRECT_THREAD is a macro that is modelled on ENSURE_GUI_THREAD
   if the handler is not called in the "correct thread", it will use a pseudo-RT-safe-enough technique to get the correct thread to recall "handler" later on, and return.
-  
+
+* automation feedback not working
 * finish button mapping
 * discuss button mapping for Ardour
 * concurrency for bank switching? And make sure "old" events aren't sent to "new" faders
 * concurrency in write( bytes ). Queueing?
 * TODOs in code
-* handle remote_control_id changed signal from Route.
-* handle removal of route. Need another session signal?
+* removal of a route results in a strip that isn't dead, but doesn't have any effect on the session
+* bulk remote id changes cause too many surface updates
 * use i18n. see string_compose
 * MackieControlProtocol in namespace Mackie?
 * Generic surface code to common location
 * power-cycling of surface. fd_midiport doesn't close.
 * remove couts
 * jog with transport rolling doesn't work properly. My use of ScrollTimeline also doesn't work.
-* docs in manual
+* docs in manual, including button assignment diagram
 
 Later
 -----

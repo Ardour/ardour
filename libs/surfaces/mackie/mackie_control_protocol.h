@@ -101,7 +101,9 @@ class MackieControlProtocol
 	/// Signal handler for new routes added
 	void notify_route_added( ARDOUR::Session::RouteList & );
 
-   /// rebuild the current bank. Called on route added/removed and
+	void notify_remote_id_changed();
+
+	/// rebuild the current bank. Called on route added/removed and
    /// remote id changed.
 	void refresh_current_bank();
 
