@@ -76,12 +76,6 @@ Keyboard::Keyboard ()
 	}
 	Meta = possible_meta[i];
 
-	if (Meta) {
-		cerr << "Using " << possible_meta[i] << " for Meta\n";
-	} else {
-		cerr << "NO Meta\n";
-	}
-
 	snooper_id = gtk_key_snooper_install (_snooper, (gpointer) this);
 
 	XMLNode* node = ARDOUR_UI::instance()->keyboard_settings();

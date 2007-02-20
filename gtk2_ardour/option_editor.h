@@ -111,6 +111,9 @@ class OptionEditor : public Gtk::Dialog
 	Gtk::RadioButton::Group mmc_button_group;
 	Gtk::RadioButton::Group midi_button_group;
 
+	Gtk::Adjustment mmc_device_id_adjustment;
+	Gtk::SpinButton mmc_device_id_spinner;
+
 	void port_online_toggled (MIDI::Port*,Gtk::ToggleButton*);
 	void port_trace_in_toggled (MIDI::Port*,Gtk::ToggleButton*);
 	void port_trace_out_toggled (MIDI::Port*,Gtk::ToggleButton*);
@@ -118,6 +121,8 @@ class OptionEditor : public Gtk::Dialog
 	void mmc_port_chosen (MIDI::Port*,Gtk::RadioButton*);
 	void mtc_port_chosen (MIDI::Port*,Gtk::RadioButton*);
 	void midi_port_chosen (MIDI::Port*,Gtk::RadioButton*);
+
+	void mmc_device_id_adjusted ();
 
 	void map_port_online (MIDI::Port*, Gtk::ToggleButton*);
 

@@ -724,6 +724,8 @@ class Session : public PBD::StatefulDestructible
 
 	void deliver_midi (MIDI::Port*, MIDI::byte*, int32_t size);
 
+	void set_mmc_device_id (uint32_t id);
+	
 	/* Scrubbing */
 
 	void start_scrub (nframes_t where);
@@ -1267,8 +1269,7 @@ class Session : public PBD::StatefulDestructible
 	void mmc_record_pause (MIDI::MachineControl &);
 	void mmc_record_strobe (MIDI::MachineControl &);
 	void mmc_record_exit (MIDI::MachineControl &);
-	void mmc_track_record_status (MIDI::MachineControl &, 
-				      uint32_t track, bool enabled);
+	void mmc_track_record_status (MIDI::MachineControl &, uint32_t track, bool enabled);
 	void mmc_fast_forward (MIDI::MachineControl &);
 	void mmc_rewind (MIDI::MachineControl &);
 	void mmc_locate (MIDI::MachineControl &, const MIDI::byte *);

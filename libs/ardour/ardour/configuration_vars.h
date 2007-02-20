@@ -18,6 +18,7 @@ CONFIG_VARIABLE (bool, send_mmc, "send-mmc", false)
 CONFIG_VARIABLE (bool, mmc_control, "mmc-control", false)
 CONFIG_VARIABLE (bool, midi_feedback, "midi-feedback", false)
 CONFIG_VARIABLE (bool, midi_control, "midi-control", false)
+CONFIG_VARIABLE (uint8_t, mmc_device_id, "mmc-device-id", 0)
 
 /* control surfaces */
 

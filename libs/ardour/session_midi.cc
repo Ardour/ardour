@@ -126,9 +126,20 @@ Session::set_mtc_port (string port_tag)
 	return 0;
 }
 
+void
+Session::set_mmc_device_id (uint32_t device_id)
+{
+	if (mmc) {
+		mmc->set_device_id (device_id);
+	}
+}
+
 int
 Session::set_mmc_port (string port_tag)
 {
+	MIDI::byte old_device_id;
+	bool reset_id = false;
+
 	if (port_tag.length() == 0) {
 		if (_mmc_port == 0) {
 			return 0;
@@ -146,6 +157,8 @@ Session::set_mmc_port (string port_tag)
 	_mmc_port = port;
 
 	if (mmc) {
+		old_device_id = mmc->device_id();
+		reset_id = true;
 		delete mmc;
 	}
 
@@ -153,6 +166,9 @@ Session::set_mmc_port (string port_tag)
 					MMC_CommandSignature,
 					MMC_ResponseSignature);
 
+	if (reset_id) {
+		mmc->set_device_id (old_device_id);
+	}
 
 	mmc->Play.connect 
 		(mem_fun (*this, &Session::mmc_deferred_play));
@@ -180,6 +196,7 @@ Session::set_mmc_port (string port_tag)
 		(mem_fun (*this, &Session::mmc_shuttle));
 	mmc->TrackRecordStatusChange.connect
 		(mem_fun (*this, &Session::mmc_record_enable));
+
 
 	/* also handle MIDI SPP because its so common */
 
@@ -543,7 +560,6 @@ Session::mmc_pause (MIDI::MachineControl &mmc)
 static bool step_queued = false;
 
 void
-
 Session::mmc_step (MIDI::MachineControl &mmc, int steps)
 {
 	if (!Config->get_mmc_control()) {

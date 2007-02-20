@@ -171,6 +171,8 @@ void
 GenericMidiControlProtocol::stop_learning (Controllable* c)
 {
 	Glib::Mutex::Lock lm (pending_lock);
+	Glib::Mutex::Lock lm2 (controllables_lock);
+	MIDIControllable* dptr = 0;
 
 	/* learning timed out, and we've been told to consider this attempt to learn to be cancelled. find the
 	   relevant MIDIControllable and remove it from the pending list.
@@ -179,10 +181,21 @@ GenericMidiControlProtocol::stop_learning (Controllable* c)
 	for (MIDIControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ++i) {
 		if (&(*i)->get_controllable() == c) {
 			(*i)->stop_learning ();
-			delete (*i);
+			dptr = *i;
 			pending_controllables.erase (i);
 			break;
 		}
+	}
+
+	for (MIDIControllables::iterator i = controllables.begin(); i != controllables.end(); ++i) {
+		if (&(*i)->get_controllable() == c) {
+			controllables.erase (i);
+			break;
+		}
+	}
+	
+	if (dptr) {
+		delete dptr;
 	}
 }
 
@@ -255,7 +268,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node)
 			
 			ID id = prop->value ();
 			
-			c = session->controllable_by_id (id);
+			c = Controllable::by_id (id);
 			
 			if (c) {
 				MIDIControllable* mc = new MIDIControllable (*_port, *c);
@@ -264,8 +277,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node)
 				}
 				
 			} else {
-				warning << string_compose (_("Generic MIDI control: controllable %1 not found in session (ignored)"),
-							   id)
+				warning << string_compose (_("Generic MIDI control: controllable %1 not found (ignored)"), id)
 					<< endmsg;
 			}
 		}

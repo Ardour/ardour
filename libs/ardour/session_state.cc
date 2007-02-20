@@ -2832,6 +2832,12 @@ Session::set_deletion_in_progress ()
 void
 Session::add_controllable (Controllable* c)
 {
+	/* this adds a controllable to the list managed by the Session.
+	   this is a subset of those managed by the Controllable class
+	   itself, and represents the only ones whose state will be saved
+	   as part of the session.
+	*/
+
 	Glib::Mutex::Lock lm (controllables_lock);
 	controllables.insert (c);
 }
@@ -3064,6 +3070,12 @@ Session::config_changed (const char* parameter_name)
 	} else if (PARAM_IS ("mmc-control")) {
 
 		poke_midi_thread ();
+
+	} else if (PARAM_IS ("mmc-device-id")) {
+
+		if (mmc) {
+			mmc->set_device_id (Config->get_mmc_device_id());
+		}
 
 	} else if (PARAM_IS ("midi-control")) {
 		

@@ -73,7 +73,6 @@ ARDOUR_UI::setup_windows ()
 
 	setup_clock ();
 	setup_transport();
-	setup_adjustables ();
 	build_menu_bar ();
 
 	top_packer.pack_start (menu_bar_base, false, false);
@@ -82,38 +81,6 @@ ARDOUR_UI::setup_windows ()
 	editor->add_toplevel_controls (top_packer);
 
 	return 0;
-}
-
-void
-ARDOUR_UI::setup_adjustables ()
-{
-	adjuster_table.set_homogeneous (true);
-
-	online_control_strings.push_back (_("MMC + Local"));
-	online_control_strings.push_back (_("MMC"));
-	online_control_strings.push_back (_("Local"));
-
-	online_control_button = new GlobalClickBox ("CONTROL",
-						    online_control_strings);
-
-	online_control_button->adjustment.signal_value_changed().connect(mem_fun(*this,&ARDOUR_UI::control_methods_adjusted));
-
-	mmc_id_strings.push_back ("1");
-	mmc_id_strings.push_back ("2");
-	mmc_id_strings.push_back ("3");
-	mmc_id_strings.push_back ("4");
-	mmc_id_strings.push_back ("5");
-	mmc_id_strings.push_back ("6");
-	mmc_id_strings.push_back ("7");
-	mmc_id_strings.push_back ("8");
-	mmc_id_strings.push_back ("9");
-
-	mmc_id_button = new GlobalClickBox (_("MMC ID"), mmc_id_strings);
-
-	mmc_id_button->adjustment.signal_value_changed().connect (mem_fun(*this,&ARDOUR_UI::mmc_device_id_adjusted));
-
-	adjuster_table.attach (*online_control_button, 0, 2, 1, 2, FILL|EXPAND, FILL, 5, 5);
-	adjuster_table.attach (*mmc_id_button, 2, 3, 1, 2, FILL, FILL, 5, 5);
 }
 
 void

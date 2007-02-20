@@ -273,9 +273,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	GlobalClickBox    *crossfade_time_button;
 	vector<string>     crossfade_time_strings;
 
-	GlobalClickBox    *mmc_id_button;
-	vector<string>     mmc_id_strings;
-
 	Gtk::ToggleButton   preroll_button;
 	Gtk::ToggleButton   postroll_button;
 
@@ -285,7 +282,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	int  setup_windows ();
 	void setup_transport ();
 	void setup_clock ();
-	void setup_adjustables ();
 
 	static ARDOUR_UI *theArdourUI;
 
@@ -312,9 +308,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	bool blink_on;
 	void start_blinking ();
 	void stop_blinking ();
-
-	void control_methods_adjusted ();
-	void mmc_device_id_adjusted ();
 
 	void about_signal_response(int response);
 
@@ -466,14 +459,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	/* called by Blink signal */
 
 	void transport_rec_enable_blink (bool onoff);
-
-	/* These change where we accept control from:
-	   MMC, X (local) or both.
-	*/
-
-	void allow_mmc_only ();
-	void allow_mmc_and_local ();
-	void allow_local_only ();
 
 	Gtk::Menu*        session_popup_menu;
 

@@ -1160,7 +1160,7 @@ void MackieControlProtocol::notify_remote_id_changed()
 	if ( sorted.size() - _current_initial_bank < route_signals.size() )
 	{
 		// but don't shift backwards past the zeroth channel
-		switch_banks( max( (unsigned int)0, sorted.size() - route_signals.size() ) );
+		switch_banks( max(0UL, sorted.size() - route_signals.size() ) );
 	}
 	// Otherwise just refresh the current bank
 	else

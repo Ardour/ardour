@@ -707,40 +707,6 @@ ARDOUR_UI::update_wall_clock ()
 
 	return TRUE;
 }
-void
-ARDOUR_UI::control_methods_adjusted ()
-
-{
-	int which_method;
-
-	which_method = (int) online_control_button->adjustment.get_value();
-	switch (which_method) {
-	case 0:
-		allow_mmc_and_local ();
-		break;
-	case 1:
-		allow_mmc_only ();
-		break;
-	case 2:
-		allow_local_only ();
-		break;
-	default:
-		fatal << _("programming error: impossible control method") << endmsg;
-	}
-}
-	
-
-void
-ARDOUR_UI::mmc_device_id_adjusted ()
-
-{
-#if 0
-	if (mmc) {
-		int dev_id = (int) mmc_id_button->adjustment.get_value();
-		mmc->set_device_id (dev_id);
-	}
-#endif
-}
 
 gint
 ARDOUR_UI::session_menu (GdkEventButton *ev)
@@ -1307,24 +1273,6 @@ ARDOUR_UI::map_transport_state ()
 	} else {
 		transport_stopped ();
 	}
-}
-
-void
-ARDOUR_UI::allow_local_only ()
-{
-
-}
-
-void
-ARDOUR_UI::allow_mmc_only ()
-{
-
-}
-
-void
-ARDOUR_UI::allow_mmc_and_local ()
-{
-
 }
 
 void
