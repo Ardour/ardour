@@ -183,7 +183,7 @@ Editor::update_current_screen ()
 			if (frame != last_update_frame) {
 
 
-#ifdef CONTINUOUS_SCROLL
+#undef CONTINUOUS_SCROLL
 #ifndef  CONTINUOUS_SCROLL
 				if (frame < leftmost_frame || frame > leftmost_frame + current_page_frames()) {
 					
