@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id: editor.cc 1353 2007-01-18 03:06:15Z paul $
 */
 
 #include <pbd/stacktrace.h>

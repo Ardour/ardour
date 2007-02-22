@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id: regionview.cc 691 2006-07-23 12:03:19Z drobilla $
 */
 
 #include <cmath>

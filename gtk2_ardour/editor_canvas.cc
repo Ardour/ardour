@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <libgnomecanvasmm/init.h>
@@ -713,7 +712,6 @@ Editor::canvas_horizontally_scrolled ()
 	nframes_t rightmost_frame = leftmost_frame + current_page_frames ();
 	
 	if (rightmost_frame > last_canvas_frame) {
-		cerr << "right most = " << rightmost_frame << " last = " << last_canvas_frame << endl;
 		last_canvas_frame = rightmost_frame;
 		reset_scrolling_region ();
 	}

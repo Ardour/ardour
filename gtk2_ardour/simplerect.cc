@@ -4,7 +4,6 @@
 #include "simplerect_p.h"
 #include <libgnomecanvasmm/private/shape_p.h>
 
-/* $Id$ */
 
 /* rect.c
  *
