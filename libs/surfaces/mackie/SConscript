@@ -50,7 +50,8 @@ mackie.Merge ([
     libraries['midi++2'],
     libraries['xml'],
     libraries['glib2'],
-    libraries['glibmm2']
+    libraries['glibmm2'],
+    libraries['sndfile-ardour']
     ])
 
 libardour_mackie = mackie.SharedLibrary('ardour_mackie', mackie_files)

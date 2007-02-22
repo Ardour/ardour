@@ -41,6 +41,7 @@ opts.AddOptions(
     PathOption('PREFIX', 'Set the install "prefix"', '/usr/local'),
     BoolOption('SURFACES', 'Build support for control surfaces', 1),
     BoolOption('SYSLIBS', 'USE AT YOUR OWN RISK: CANCELS ALL SUPPORT FROM ARDOUR AUTHORS: Use existing system versions of various libraries instead of internal ones', 0),
+    BoolOption('UNIVERSAL', 'Compile as universal binary.  Requires that external libraries are already universal.', 0),
     BoolOption('VERSIONED', 'Add revision information to ardour/gtk executable name inside the build directory', 0),
     BoolOption('VST', 'Compile with support for VST', 0),
     BoolOption('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 0)
@@ -669,6 +670,10 @@ if env['DEBUG'] == 1:
 else:
     env.Append(CCFLAGS=" ".join (opt_flags))
 
+if env['UNIVERSAL'] == 1:
+    env.Append(CCFLAGS="-arch i386 -arch ppc")
+    env.Append(LINKFLAGS="-arch i386 -arch ppc")
+
 #
 # warnings flags
 #
@@ -677,8 +682,9 @@ env.Append(CCFLAGS="-Wall")
 env.Append(CXXFLAGS="-Woverloaded-virtual")
 
 if env['EXTRA_WARN']:
-    env.Append(CCFLAGS="-Wextra -pedantic")
+    env.Append(CCFLAGS="-Wextra -pedantic -ansi")
     env.Append(CXXFLAGS="-ansi")
+#    env.Append(CFLAGS="-iso")
 
 if env['LIBLO']:
     env.Append(CCFLAGS="-DHAVE_LIBLO")
@@ -831,7 +837,7 @@ if env['SYSLIBS']:
     
     libraries['sndfile-ardour'] = LibraryInfo(LIBS='libsndfile-ardour',
                                     LIBPATH='#libs/libsndfile',
-                                    CPPPATH=['#libs/libsndfile', '#libs/libsndfile/src'])
+                                    CPPPATH=['#libs/libsndfile/src'])
 
 #    libraries['libglademm'] = LibraryInfo()
 #    libraries['libglademm'].ParseConfig ('pkg-config --cflags --libs libglademm-2.4')
