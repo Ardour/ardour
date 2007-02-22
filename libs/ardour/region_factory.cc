@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id: playlist_factory.cc 629 2006-06-21 23:01:03Z paul $
 */
 
 #include <pbd/error.h>

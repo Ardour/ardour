@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id: globals.cc 935 2006-09-29 21:39:39Z paul $
 */
 
 #include <cstdio> // Needed so that libraptor (included in lrdf) won't complain
