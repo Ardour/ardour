@@ -23,7 +23,7 @@
 #include <ardour/audioengine.h>
 #include <ardour/configuration.h>
 #include <ardour/auditioner.h>
-#include <ardour/destructive_filesource.h>
+#include <ardour/sndfilesource.h>
 #include <ardour/crossfade.h>
 #include <midi++/manager.h>
 #include <gtkmm2ext/stop_signal.h>
