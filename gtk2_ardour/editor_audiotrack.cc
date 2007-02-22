@@ -45,7 +45,6 @@ Editor::set_show_waveforms (bool yn)
 				atv->set_show_waveforms (yn);
 			}
 		}
-		DisplayControlChanged (Editing::ShowWaveforms);
 	}
 }
 
@@ -61,6 +60,5 @@ Editor::set_show_waveforms_recording (bool yn)
 				atv->set_show_waveforms_recording (yn);
 			}
 		}
-		DisplayControlChanged (Editing::ShowWaveformsRecording);
 	}
 }

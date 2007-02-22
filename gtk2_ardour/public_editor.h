@@ -135,7 +135,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void maximise_editing_space() = 0;
 	virtual void restore_editing_space() = 0;
 
-	sigc::signal<void,Editing::DisplayControl> DisplayControlChanged;
 	sigc::signal<void> ZoomFocusChanged;
 	sigc::signal<void> ZoomChanged;
 	sigc::signal<void> Resized;

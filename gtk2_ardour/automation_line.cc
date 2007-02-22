@@ -25,6 +25,7 @@
 
 #include <pbd/stl_delete.h>
 #include <pbd/memento_command.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/automation_event.h>
 #include <ardour/curve.h>

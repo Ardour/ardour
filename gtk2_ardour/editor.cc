@@ -3181,7 +3181,6 @@ Editor::set_show_measures (bool yn)
 		if ((_show_measures = yn) == true) {
 			draw_measures ();
 		}
-		DisplayControlChanged (ShowMeasures);
 		instant_save ();
 	}
 }
@@ -3204,7 +3203,6 @@ Editor::set_follow_playhead (bool yn)
 			/* catch up */
 			update_current_screen ();
 		}
-		DisplayControlChanged (FollowPlayhead);
 		instant_save ();
 	}
 }

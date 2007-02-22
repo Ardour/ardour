@@ -369,7 +369,8 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 	end_sample = end_sample + waveview->region_start;
 #if DEBUG_CACHE
 	// printf("waveview->region_start == %lu\n",waveview->region_start);
-	printf ("=> 0x%x cache @ 0x%x range: %lu - %lu request: %lu - %lu (%lu frames)\n", 
+	// c_stacktrace ();
+	printf ("\n\n=> 0x%x cache @ 0x%x range: %lu - %lu request: %lu - %lu (%lu frames)\n", 
 		waveview, cache,
 		cache->start, cache->end,
 		start_sample, end_sample, end_sample - start_sample);
@@ -413,7 +414,7 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 	}
 
 #if DEBUG_CACHE
-	fprintf (stderr, "\n\nAVAILABLE FRAMES = %lu of %lu, start = %lu, sstart = %lu, cstart = %lu\n", 
+	fprintf (stderr, "AVAILABLE FRAMES = %lu of %lu, start = %lu, sstart = %lu, cstart = %lu\n", 
 		 rf3, waveview->sourcefile_length_function (waveview->data_src, waveview->samples_per_unit),
 		 waveview->region_start, start_sample, new_cache_start);
 #endif

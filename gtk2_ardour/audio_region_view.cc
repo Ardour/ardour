@@ -607,13 +607,16 @@ AudioRegionView::set_samples_per_unit (gdouble spu)
 {
 	RegionView::set_samples_per_unit (spu);
 
-	for (uint32_t n=0; n < waves.size(); ++n) {
-		waves[n]->property_samples_per_unit() = spu;
+	if (_flags & WaveformVisible) {
+		for (uint32_t n=0; n < waves.size(); ++n) {
+			waves[n]->property_samples_per_unit() = spu;
+		}
 	}
 
 	if (gain_line) {
 		gain_line->reset ();
 	}
+
 	reset_fade_shapes ();
 }
 
@@ -676,6 +679,10 @@ AudioRegionView::set_waveform_visible (bool yn)
 	if (((_flags & WaveformVisible) != yn)) {
 		if (yn) {
 			for (uint32_t n=0; n < waves.size(); ++n) {
+				/* make sure the zoom level is correct, since we don't update
+				   this when waveforms are hidden.
+				*/
+				waves[n]->property_samples_per_unit() = samples_per_unit;
 				waves[n]->show();
 			}
 			_flags |= WaveformVisible;
