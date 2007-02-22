@@ -65,7 +65,7 @@
 #include <ardour/audioplaylist.h>
 #include <ardour/audiofilesource.h>
 #include <ardour/silentfilesource.h>
-#include <ardour/destructive_filesource.h>
+#include <ardour/sndfilesource.h>
 #include <ardour/sndfile_helpers.h>
 #include <ardour/auditioner.h>
 #include <ardour/export.h>

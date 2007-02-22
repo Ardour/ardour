@@ -27,7 +27,6 @@
 #include <ardour/ardour.h>
 #include <ardour/configuration.h>
 #include <ardour/audio_diskstream.h>
-#include <ardour/destructive_filesource.h>
 #include <ardour/control_protocol_manager.h>
 
 #include "i18n.h"

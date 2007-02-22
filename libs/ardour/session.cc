@@ -50,7 +50,6 @@
 #include <ardour/audioplaylist.h>
 #include <ardour/audioregion.h>
 #include <ardour/audiofilesource.h>
-#include <ardour/destructive_filesource.h>
 #include <ardour/auditioner.h>
 #include <ardour/recent_sessions.h>
 #include <ardour/redirect.h>

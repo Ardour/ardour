@@ -43,7 +43,6 @@
 #include <ardour/utils.h>
 #include <ardour/configuration.h>
 #include <ardour/audiofilesource.h>
-#include <ardour/destructive_filesource.h>
 #include <ardour/send.h>
 #include <ardour/region_factory.h>
 #include <ardour/audioplaylist.h>

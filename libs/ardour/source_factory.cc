@@ -23,7 +23,6 @@
 #include <ardour/source_factory.h>
 #include <ardour/sndfilesource.h>
 #include <ardour/silentfilesource.h>
-#include <ardour/destructive_filesource.h>
 #include <ardour/configuration.h>
 
 #ifdef HAVE_COREAUDIO

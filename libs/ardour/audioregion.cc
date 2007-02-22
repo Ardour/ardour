@@ -41,7 +41,6 @@
 #include <ardour/playlist.h>
 #include <ardour/audiofilter.h>
 #include <ardour/audiofilesource.h>
-#include <ardour/destructive_filesource.h>
 #include <ardour/region_factory.h>
 
 #include "i18n.h"
