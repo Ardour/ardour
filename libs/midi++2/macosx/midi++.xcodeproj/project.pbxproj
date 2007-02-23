@@ -31,7 +31,6 @@
 		69A0E0930B8A3B1200A24967 /* mmc.cc in Sources */ = {isa = PBXBuildFile; fileRef = 69A0E0760B8A3B1200A24967 /* mmc.cc */; };
 		69A0E0950B8A3B1200A24967 /* mtc.cc in Sources */ = {isa = PBXBuildFile; fileRef = 69A0E0780B8A3B1200A24967 /* mtc.cc */; };
 		69A0E0960B8A3B1200A24967 /* port_request.cc in Sources */ = {isa = PBXBuildFile; fileRef = 69A0E0790B8A3B1200A24967 /* port_request.cc */; };
-		69A0E09D0B8A3B6300A24967 /* pbd.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 69A0E09B0B8A3B6300A24967 /* pbd.framework */; };
 		69A0E09E0B8A3B6300A24967 /* sigc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 69A0E09C0B8A3B6300A24967 /* sigc.framework */; };
 		69A0E0A80B8A3BA400A24967 /* libglib-2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 69A0E0A40B8A3BA400A24967 /* libglib-2.0.dylib */; };
 		69A0E0A90B8A3BA400A24967 /* libgmodule-2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 69A0E0A50B8A3BA400A24967 /* libgmodule-2.0.dylib */; };
@@ -40,9 +39,27 @@
 		69A0E0B00B8A3BEF00A24967 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 69A0E0AF0B8A3BEF00A24967 /* CoreMIDI.framework */; };
 		69A0E0B50B8A3C0B00A24967 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 69A0E0B40B8A3C0B00A24967 /* CoreFoundation.framework */; };
 		69A0E0BA0B8A3C2000A24967 /* glibmm.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 69A0E0B90B8A3C2000A24967 /* glibmm.framework */; };
+		69D5F6010B8D55B100301E71 /* pbd.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 69D5F6000B8D55A000301E71 /* pbd.framework */; };
 		8D07F2BE0486CC7A007CD1D0 /* midi++_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 32BAE0B70371A74B00C91783 /* midi++_Prefix.pch */; settings = {ATTRIBUTES = (Public, ); }; };
 		8D07F2C00486CC7A007CD1D0 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C1666FE841158C02AAC07 /* InfoPlist.strings */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		69D5F5FF0B8D55A000301E71 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 69D5F5FB0B8D55A000301E71 /* pbd.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 8D07F2C80486CC7A007CD1D0;
+			remoteInfo = pbd;
+		};
+		69D5F6060B8D570800301E71 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 69D5F5FB0B8D55A000301E71 /* pbd.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D07F2BC0486CC7A007CD1D0;
+			remoteInfo = pbd;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		089C1667FE841158C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -71,7 +88,6 @@
 		69A0E0760B8A3B1200A24967 /* mmc.cc */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = mmc.cc; path = ../mmc.cc; sourceTree = SOURCE_ROOT; };
 		69A0E0780B8A3B1200A24967 /* mtc.cc */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = mtc.cc; path = ../mtc.cc; sourceTree = SOURCE_ROOT; };
 		69A0E0790B8A3B1200A24967 /* port_request.cc */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = port_request.cc; path = ../port_request.cc; sourceTree = SOURCE_ROOT; };
-		69A0E09B0B8A3B6300A24967 /* pbd.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = pbd.framework; path = /Library/Frameworks/pbd.framework; sourceTree = "<absolute>"; };
 		69A0E09C0B8A3B6300A24967 /* sigc.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = sigc.framework; path = /Library/Frameworks/sigc.framework; sourceTree = "<absolute>"; };
 		69A0E0A40B8A3BA400A24967 /* libglib-2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libglib-2.0.dylib"; path = "/Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/libglib-2.0.dylib"; sourceTree = "<absolute>"; };
 		69A0E0A50B8A3BA400A24967 /* libgmodule-2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libgmodule-2.0.dylib"; path = "/Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/libgmodule-2.0.dylib"; sourceTree = "<absolute>"; };
@@ -80,6 +96,7 @@
 		69A0E0AF0B8A3BEF00A24967 /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = /System/Library/Frameworks/CoreMIDI.framework; sourceTree = "<absolute>"; };
 		69A0E0B40B8A3C0B00A24967 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
 		69A0E0B90B8A3C2000A24967 /* glibmm.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = glibmm.framework; path = /Library/Frameworks/glibmm.framework; sourceTree = "<absolute>"; };
+		69D5F5FB0B8D55A000301E71 /* pbd.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = pbd.xcodeproj; path = ../../pbd/macosx/pbd.xcodeproj; sourceTree = SOURCE_ROOT; };
 		8D07F2C70486CC7A007CD1D0 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D07F2C80486CC7A007CD1D0 /* midi++.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = "midi++.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -89,7 +106,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				69A0E09D0B8A3B6300A24967 /* pbd.framework in Frameworks */,
+				69D5F6010B8D55B100301E71 /* pbd.framework in Frameworks */,
 				69A0E09E0B8A3B6300A24967 /* sigc.framework in Frameworks */,
 				69A0E0A80B8A3BA400A24967 /* libglib-2.0.dylib in Frameworks */,
 				69A0E0A90B8A3BA400A24967 /* libgmodule-2.0.dylib in Frameworks */,
@@ -126,6 +143,7 @@
 		0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				69D5F5FB0B8D55A000301E71 /* pbd.xcodeproj */,
 				69A0E0B90B8A3C2000A24967 /* glibmm.framework */,
 				69A0E0B40B8A3C0B00A24967 /* CoreFoundation.framework */,
 				69A0E0AF0B8A3BEF00A24967 /* CoreMIDI.framework */,
@@ -133,7 +151,6 @@
 				69A0E0A50B8A3BA400A24967 /* libgmodule-2.0.dylib */,
 				69A0E0A60B8A3BA400A24967 /* libgobject-2.0.dylib */,
 				69A0E0A70B8A3BA400A24967 /* libgthread-2.0.dylib */,
-				69A0E09B0B8A3B6300A24967 /* pbd.framework */,
 				69A0E09C0B8A3B6300A24967 /* sigc.framework */,
 			);
 			name = "External Frameworks and Libraries";
@@ -189,6 +206,14 @@
 			path = "../midi++";
 			sourceTree = SOURCE_ROOT;
 		};
+		69D5F5FC0B8D55A000301E71 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				69D5F6000B8D55A000301E71 /* pbd.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -228,6 +253,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				69D5F6070B8D570800301E71 /* PBXTargetDependency */,
 			);
 			name = "midi++";
 			productInstallPath = "$(HOME)/Library/Frameworks";
@@ -246,6 +272,12 @@
 			mainGroup = 0867D691FE84028FC02AAC07 /* midi++ */;
 			productRefGroup = 034768DDFF38A45A11DB9C8B /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 69D5F5FC0B8D55A000301E71 /* Products */;
+					ProjectRef = 69D5F5FB0B8D55A000301E71 /* pbd.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			shouldCheckCompatibility = 1;
 			targets = (
@@ -253,6 +285,16 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		69D5F6000B8D55A000301E71 /* pbd.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = pbd.framework;
+			remoteRef = 69D5F5FF0B8D55A000301E71 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		8D07F2BF0486CC7A007CD1D0 /* Resources */ = {
@@ -296,6 +338,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		69D5F6070B8D570800301E71 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = pbd;
+			targetProxy = 69D5F6060B8D570800301E71 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		089C1666FE841158C02AAC07 /* InfoPlist.strings */ = {
@@ -379,6 +429,7 @@
 		4FADC24808B4156D00ABE55E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = "/opt/ardour/Frameworks/**";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
