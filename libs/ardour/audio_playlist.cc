@@ -382,7 +382,7 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 
 
 		OverlapType c = top->coverage (bottom->position(), bottom->last_frame());
-		
+
 		try {
 			switch (c) {
 			case OverlapNone:

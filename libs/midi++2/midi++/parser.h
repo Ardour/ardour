@@ -162,8 +162,8 @@ class Parser : public sigc::trackable {
 	bool _mmc_forward;
 	bool _mtc_forward;
 	int   expected_mtc_quarter_frame_code;
-	byte _mtc_time[4];
-	byte _qtr_mtc_time[4];
+	byte _mtc_time[5];
+	byte _qtr_mtc_time[5];
 	unsigned long consecutive_qtr_frame_cnt;
 	MTC_FPS _mtc_fps;
 	MTC_Status _mtc_running;

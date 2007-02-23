@@ -264,6 +264,7 @@ Parser::process_mtc_quarter_frame (byte *msg)
 		
 		_qtr_mtc_time[3] |= ((msg[1] & 0x1) << 4);
 		_mtc_fps = MTC_FPS ((msg[1] & 0x6) >> 1);
+		_qtr_mtc_time[4] = _mtc_fps;
 		break;
 
 	default:
