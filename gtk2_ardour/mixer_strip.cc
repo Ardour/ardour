@@ -389,8 +389,7 @@ MixerStrip::set_stuff_from_route ()
 		} else {
 			_marked_for_display = true;
 		}
-	}
-	else {
+	} else {
 		/* backwards compatibility */
 		_marked_for_display = true;
 	}

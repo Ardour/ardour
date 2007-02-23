@@ -279,7 +279,7 @@ Mixer_UI::add_strip (Session::RouteList& routes)
 		TreeModel::Row row = *(track_model->append());
 		row[track_columns.text] = route->name();
 		
-		row[track_columns.visible] = true;
+		row[track_columns.visible] = strip->marked_for_display();
 		row[track_columns.route] = route;
 		row[track_columns.strip] = strip;
 		
@@ -614,8 +614,10 @@ Mixer_UI::redisplay_track_list ()
 			if (strip->route()->master() || strip->route()->control()) {
 				/* do nothing, these cannot be hidden */
 			} else {
-				strip_packer.remove (*strip);
-				strip->set_packed (false);
+				if (strip->packed()) {
+					strip_packer.remove (*strip);
+					strip->set_packed (false);
+				}
 			}
 		}
 	}
