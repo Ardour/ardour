@@ -144,6 +144,8 @@ static const char* authors[] = {
 	N_("Stefan Kersten"),
 	N_("Christopher George"),
 	N_("Robert Jordens"),
+	N_("Dave Robillard"),
+	N_("Hans Fugal"),
 	N_("Brian Ahr"),
 	N_("Nimal Ratnayake"),
 	N_("Mike Taht"),
