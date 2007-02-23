@@ -1684,6 +1684,12 @@ ARDOUR_UI::new_session (std::string predetermined_path)
 	string session_name;
 	string session_path;
 
+	if (!engine->connected()) {
+		MessageDialog msg (_("Ardour is not connected to JACK at this time. Creating new sessions is not possible."));
+		msg.run ();
+		return;
+	}
+
 	int response = Gtk::RESPONSE_NONE;
 
 	new_session_dialog->set_modal(true);
@@ -1693,6 +1699,13 @@ ARDOUR_UI::new_session (std::string predetermined_path)
 
 	do {
 	        response = new_session_dialog->run ();
+
+		if (!engine->connected()) {
+			new_session_dialog->hide ();
+			MessageDialog msg (_("Ardour is no longer connected to JACK. Creating a new session is not possible."));
+			msg.run ();
+			return;
+		}
 		
 		_session_is_new = false;
 

@@ -269,6 +269,10 @@ Session::Session (AudioEngine &eng,
 {
 	bool new_session;
 
+	if (!eng.connected()) {
+		throw failed_constructor();
+	}
+
 	cerr << "Loading session " << fullpath << " using snapshot " << snapshot_name << " (1)" << endl;
 
 	n_physical_outputs = _engine.n_physical_outputs();
@@ -326,6 +330,10 @@ Session::Session (AudioEngine &eng,
 
 {
 	bool new_session;
+
+	if (!eng.connected()) {
+		throw failed_constructor();
+	}
 
 	cerr << "Loading session " << fullpath << " using snapshot " << snapshot_name << " (2)" << endl;
 

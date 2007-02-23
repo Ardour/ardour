@@ -171,13 +171,11 @@ ExportRangeMarkersDialog::init_progress_computing(Locations::LocationList& locat
 		Location *currentLocation = (*locationIter);
 		
 		if(currentLocation->is_range_marker()){
-			range_markers_durations_aggregated.push_back(
-				duration_before_current_location);
+			range_markers_durations_aggregated.push_back (duration_before_current_location);
 			
-			nframes_t duration = 
-				currentLocation->end() - currentLocation->start();
+			nframes_t duration = currentLocation->end() - currentLocation->start();
 			
-			range_markers_durations.push_back(duration);
+			range_markers_durations.push_back (duration);
 			duration_before_current_location += duration;	
 		}
 	}
@@ -190,14 +188,18 @@ gint
 ExportRangeMarkersDialog::progress_timeout ()
 {
 	double progress = 0.0;
+
+	cerr << "Progress timeout, total = " << total_duration << " index = " << current_range_marker_index
+	     << " current = " << range_markers_durations[current_range_marker_index]
+	     << " agg = " << range_markers_durations_aggregated[current_range_marker_index]
+	     << " prog = " << spec.progress
+	     << endl;
 	
-	if(current_range_marker_index >= range_markers_durations.size()){
+	if (current_range_marker_index >= range_markers_durations.size()){
 		progress = 1.0;
-	}
-	else{
-		progress = 
-			((double) range_markers_durations_aggregated[current_range_marker_index] +
-			(spec.progress * (double) range_markers_durations[current_range_marker_index])) /
+	} else{
+		progress = ((double) range_markers_durations_aggregated[current_range_marker_index] +
+			    (spec.progress * (double) range_markers_durations[current_range_marker_index])) /
 			(double) total_duration;
 	}
 	
