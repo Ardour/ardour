@@ -49,7 +49,7 @@ tranzport.Append(CXXFLAGS="-DDATA_DIR=\\\""+final_prefix+"/share\\\"")
 tranzport.Append(CXXFLAGS="-DCONFIG_DIR=\\\""+final_config_prefix+"\\\"")
 tranzport.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
 #if env['HAVE_TRANZPORT_KERNEL_DRIVER']:
-#	tranzport.Append(CXXFLAGS="-DHAVE_TRANZPORT_KERNEL_DRIVER=1")
+#    tranzport.Append(CXXFLAGS="-DHAVE_TRANZPORT_KERNEL_DRIVER=1")
 
 #merge more into tranzport files for the right io lib
 
@@ -69,17 +69,14 @@ tranzport.Merge ([
 libardour_tranzport = tranzport.SharedLibrary('ardour_tranzport', tranzport_files)
 
 if tranzport['TRANZPORT']:
-	Default(libardour_tranzport)
-	if env['NLS']:
-		i18n (tranzport, tranzport_files, env)
-#	if env['HAVE_TRANZPORT_KERNEL_DRIVER']:
-#		tranzport.Merge([
-#			libraries['usb']
-#			])
-
-	env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2', 'surfaces'), libardour_tranzport))
+    Default(libardour_tranzport)
+    if env['NLS']:
+        i18n (tranzport, tranzport_files, env)
+#    if env['HAVE_TRANZPORT_KERNEL_DRIVER']:
+#        tranzport.Merge([ libraries['usb'] ])
+    env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2', 'surfaces'), libardour_tranzport))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
-				     [ 'SConscript' ] +
-				     tranzport_files + 
-				     glob.glob('po/*.po') + glob.glob('*.h')))
+                     [ 'SConscript' ] +
+                     tranzport_files + 
+                     glob.glob('po/*.po') + glob.glob('*.h')))
