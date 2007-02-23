@@ -62,7 +62,8 @@ tranzport.Merge ([
     libraries['xml'],
     libraries['glib2'],
     libraries['glibmm2'],
-    libraries['usb']
+    libraries['usb'],
+    libraries['sndfile-ardour']
     ])
 
 libardour_tranzport = tranzport.SharedLibrary('ardour_tranzport', tranzport_files)
