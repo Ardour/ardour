@@ -1450,10 +1450,15 @@ Session::path_from_region_name (string name, string identifier)
 		} else {
 			snprintf (buf, sizeof(buf), "%s/%s-%" PRIu32 ".wav", dir.c_str(), name.c_str(), n);
 		}
-		if (access (buf, F_OK) != 0) {
+
+		if (!g_file_test (buf, G_FILE_TEST_EXISTS)) {
 			return buf;
 		}
 	}
+
+	error << string_compose (_("cannot create new file from region name \"%1\" with ident = \"%2\": too many existing files with similar names"),
+				 name, identifier)
+	      << endmsg;
 
 	return "";
 }

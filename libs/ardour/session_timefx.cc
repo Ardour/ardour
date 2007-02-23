@@ -49,6 +49,9 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 	float percentage;
 	nframes_t total_frames;
 	nframes_t done;
+	int c;
+	char buf[64];
+	string::size_type len;
 
 	/* the soundtouch code wants a *tempo* change percentage, which is 
 	   of opposite sign to the length change.  
@@ -72,8 +75,18 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 	done = 0;
 
 	for (uint32_t i = 0; i < tsr.region->n_channels(); ++i) {
-		string path = path_from_region_name (PBD::basename_nosuffix (names[i]), ident);
 
+		string rstr;
+		string::size_type existing_ident;
+		
+		if ((existing_ident = names[i].find (ident)) != string::npos) {
+			rstr = names[i].substr (0, existing_ident);
+		} else {
+			rstr = names[i];
+		}
+
+		string path = path_from_region_name (PBD::basename_nosuffix (rstr), ident);
+		
 		if (path.length() == 0) {
 			error << string_compose (_("tempoize: error creating name for new audio file based on %1"), tsr.region->name()) 
 			      << endmsg;
@@ -87,6 +100,7 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 			error << string_compose (_("tempoize: error creating new audio file %1 (%2)"), path, strerror (errno)) << endmsg;
 			goto out;
 		}
+
 	}
 	
 	try {
@@ -157,7 +171,34 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 		}
 	}
 
-	region_name = tsr.region->name() + X_(".t");
+	len = tsr.region->name().length();
+
+	while (--len) {
+		if (!isdigit (tsr.region->name()[len])) {
+			break;
+		}
+	}
+
+	if (len == 0) {
+		
+		region_name = tsr.region->name() + ".t000";
+
+	} else {
+
+		if (tsr.region->name()[len] == 't') {
+			c = atoi (tsr.region->name().substr(len+1));
+
+			snprintf (buf, sizeof (buf), "t%03d", ++c);
+			region_name = tsr.region->name().substr (0, len) + buf;
+
+		} else {
+			
+			/* not sure what this is, just tack the suffix on to it */
+
+			region_name = tsr.region->name() + ".t000";
+		}
+			
+	}
 
 	r = (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (sources, 0, sources.front()->length(), region_name,
 									      0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile))));
