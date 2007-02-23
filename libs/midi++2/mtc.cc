@@ -36,7 +36,7 @@ using namespace MIDI;
 bool
 Parser::possible_mtc (byte *sysex_buf, size_t msglen)
 {
-	byte fake_mtc_time[4];
+	byte fake_mtc_time[5];
 
 	if (msglen != 10 || sysex_buf[0] != 0xf0 || sysex_buf[1] != 0x7f || sysex_buf[3] != 0x01 || sysex_buf[4] != 0x01) {
 		return false;
@@ -50,7 +50,9 @@ Parser::possible_mtc (byte *sysex_buf, size_t msglen)
 	fake_mtc_time[3] = (sysex_buf[5] & 0x1f); // hours
 	
 	_mtc_fps = MTC_FPS ((sysex_buf[5] & 0x60) >> 5); // fps
-	
+
+	fake_mtc_time[4] = (byte) _mtc_fps;
+
 	/* wait for first quarter frame, which could indicate forwards
 	   or backwards ...
 	*/

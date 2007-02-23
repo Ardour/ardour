@@ -41,6 +41,8 @@ using namespace PBD;
 MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p) 
 	: session (s)
 {
+	can_notify_on_unknown_rate = true;
+
 	rebind (p);
 	reset ();
 }
@@ -93,8 +95,39 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 	smpte.minutes = msg[2];
 	smpte.seconds = msg[1];
 	smpte.frames = msg[0];
-	
-	session.smpte_to_sample( smpte, mtc_frame, true, false );
+
+	switch (msg[4]) {
+	case MTC_24_FPS:
+		smpte.rate = 24;
+		smpte.drop = false;
+		can_notify_on_unknown_rate = true;
+		break;
+	case MTC_25_FPS:
+		smpte.rate = 25;
+		smpte.drop = false;
+		can_notify_on_unknown_rate = true;
+		break;
+	case MTC_30_FPS_DROP:
+		smpte.rate = 30;
+		smpte.drop = true;
+		can_notify_on_unknown_rate = true;
+		break;
+	case MTC_30_FPS:
+		smpte.rate = 30;
+		smpte.drop = false;
+		can_notify_on_unknown_rate = true;
+		break;
+	default:
+		/* throttle error messages about unknown MTC rates */
+		if (can_notify_on_unknown_rate) {
+			error << _("Unknown rate/drop value in incoming MTC stream, session values used instead") << endmsg;
+			can_notify_on_unknown_rate = false;
+		}
+		smpte.rate = session.smpte_frames_per_second();
+		smpte.drop = session.smpte_drop_frames();
+	}
+
+	session.smpte_to_sample (smpte, mtc_frame, true, false);
 	
 	if (was_full) {
 		

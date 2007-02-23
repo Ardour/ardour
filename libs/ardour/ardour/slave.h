@@ -70,6 +70,7 @@ class MTC_Slave : public Slave, public sigc::trackable {
 	Session&    session;
 	MIDI::Port* port;
 	std::vector<sigc::connection> connections;
+	bool        can_notify_on_unknown_rate;
 
 	struct SafeTime {
 
