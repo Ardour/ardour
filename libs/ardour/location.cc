@@ -661,7 +661,7 @@ struct LocationStartLaterComparison
 };
 
 Location *
-Locations::first_location_before (nframes_t frame)
+Locations::first_location_before (nframes_t frame, bool include_special_ranges)
 {
 	LocationList locs;
 
@@ -676,6 +676,9 @@ Locations::first_location_before (nframes_t frame)
 	/* locs is now sorted latest..earliest */
 	
 	for (LocationList::iterator i = locs.begin(); i != locs.end(); ++i) {
+		if (!include_special_ranges && ((*i)->is_auto_loop() || (*i)->is_auto_punch())) {
+			continue;
+		}
 		if (!(*i)->is_hidden() && (*i)->start() < frame) {
 			return (*i);
 		}
@@ -685,7 +688,7 @@ Locations::first_location_before (nframes_t frame)
 }
 
 Location *
-Locations::first_location_after (nframes_t frame)
+Locations::first_location_after (nframes_t frame, bool include_special_ranges)
 {
 	LocationList locs;
 
@@ -700,6 +703,9 @@ Locations::first_location_after (nframes_t frame)
 	/* locs is now sorted earliest..latest */
 	
 	for (LocationList::iterator i = locs.begin(); i != locs.end(); ++i) {
+		if (!include_special_ranges && ((*i)->is_auto_loop() || (*i)->is_auto_punch())) {
+			continue;
+		}
 		if (!(*i)->is_hidden() && (*i)->start() > frame) {
 			return (*i);
 		}
@@ -709,7 +715,7 @@ Locations::first_location_after (nframes_t frame)
 }
 
 nframes_t
-Locations::first_mark_before (nframes_t frame)
+Locations::first_mark_before (nframes_t frame, bool include_special_ranges)
 {
 	LocationList locs;
 
@@ -724,6 +730,9 @@ Locations::first_mark_before (nframes_t frame)
 	/* locs is now sorted latest..earliest */
 	
 	for (LocationList::iterator i = locs.begin(); i != locs.end(); ++i) {
+		if (!include_special_ranges && ((*i)->is_auto_loop() || (*i)->is_auto_punch())) {
+			continue;
+		}
 		if (!(*i)->is_hidden()) {
 			if ((*i)->is_mark()) {
 				/* MARK: start == end */
@@ -746,7 +755,7 @@ Locations::first_mark_before (nframes_t frame)
 }
 
 nframes_t
-Locations::first_mark_after (nframes_t frame)
+Locations::first_mark_after (nframes_t frame, bool include_special_ranges)
 {
 	LocationList locs;
 
@@ -761,6 +770,9 @@ Locations::first_mark_after (nframes_t frame)
 	/* locs is now sorted earliest..latest */
 	
 	for (LocationList::iterator i = locs.begin(); i != locs.end(); ++i) {
+		if (!include_special_ranges && ((*i)->is_auto_loop() || (*i)->is_auto_punch())) {
+			continue;
+		}
 		if (!(*i)->is_hidden()) {
 			if ((*i)->is_mark()) {
 				/* MARK, start == end so just compare start */
