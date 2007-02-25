@@ -1567,7 +1567,8 @@ class Session : public PBD::StatefulDestructible
 	static const char* interchange_dir_name;
 	static const char* peak_dir_name;
 	static const char* export_dir_name;
-
+	
+	string old_sound_dir (bool with_path = true) const;
 	string discover_best_sound_dir (bool destructive = false);
 	int ensure_sound_dir (string, string&);
 	void refresh_disk_space ();

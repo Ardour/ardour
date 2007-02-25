@@ -465,11 +465,16 @@ Session::create (bool& new_session, string* mix_template, nframes_t initial_leng
 		return -1;
 	}
 
-	dir = sound_dir ();
+	/* if this is is an existing session with an old "sounds" directory, just use it. see Session::sound_dir() for more details */
 
-	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
-		error << string_compose(_("Session: cannot create session sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-		return -1;
+	if (!Glib::file_test (old_sound_dir(), Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_DIR)) {
+
+		dir = sound_dir ();
+		
+		if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+			error << string_compose(_("Session: cannot create session sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+			return -1;
+		}
 	}
 
 	dir = dead_sound_dir ();
@@ -1851,16 +1856,56 @@ Session::dead_sound_dir () const
 {
 	string res = _path;
 	res += dead_sound_dir_name;
-	res += '/';
+
+	return res;
+}
+
+string
+Session::old_sound_dir (bool with_path) const
+{
+	string res;
+
+	if (with_path) {
+		res = _path;
+	}
+
+	res += old_sound_dir_name;
+
 	return res;
 }
 
 string
 Session::sound_dir (bool with_path) const
 {
-	/* support old session structure */
+	string res;
+	string full;
 
-	struct stat statbuf;
+	if (with_path) {
+		res = _path;
+	} else {
+		full = _path;
+	}
+
+	res += interchange_dir_name;
+	res += '/';
+	res += legalize_for_path (_name);
+	res += '/';
+	res += sound_dir_name;
+
+	if (with_path) {
+		full = res;
+	} else {
+		full += res;
+	}
+	
+	/* if this already exists, don't check for the old session sound directory */
+
+	if (Glib::file_test (full, Glib::FILE_TEST_IS_DIR|Glib::FILE_TEST_EXISTS)) {
+		return res;
+	}
+		
+	/* possibly support old session structure */
+
 	string old_nopath;
 	string old_withpath;
 
@@ -1869,25 +1914,15 @@ Session::sound_dir (bool with_path) const
 	
 	old_withpath = _path;
 	old_withpath += old_sound_dir_name;
-
-	if (stat (old_withpath.c_str(), &statbuf) == 0) {
+	
+	if (Glib::file_test (old_withpath.c_str(), Glib::FILE_TEST_IS_DIR|Glib::FILE_TEST_EXISTS)) {
 		if (with_path)
 			return old_withpath;
 		
 		return old_nopath;
 	}
-
-	string res;
-
-	if (with_path) {
-		res = _path;
-	}
-
-	res += interchange_dir_name;
-	res += '/';
-	res += legalize_for_path (_name);
-	res += '/';
-	res += sound_dir_name;
+	
+	/* ok, old "sounds" directory isn't there, return the new path */
 
 	return res;
 }
