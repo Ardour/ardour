@@ -44,7 +44,7 @@ opts.AddOptions(
     BoolOption('UNIVERSAL', 'Compile as universal binary.  Requires that external libraries are already universal.', 0),
     BoolOption('VERSIONED', 'Add revision information to ardour/gtk executable name inside the build directory', 0),
     BoolOption('VST', 'Compile with support for VST', 0),
-    BoolOption('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 0)
+    BoolOption('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 1)
 )
 
 #----------------------------------------------------------------------
@@ -961,7 +961,10 @@ surface_subdirs = [ 'libs/surfaces/control_protocol', 'libs/surfaces/generic_mid
 
 if env['SURFACES']:
     if have_libusb:
-        env['TRANZPORT'] = 'yes'
+        env['TRANZPORT'] = 1
+    else:
+        env['TRANZPORT'] = 0
+        print 'Disabled building Tranzport code because libusb could not be found'
     if os.access ('libs/surfaces/sony9pin', os.F_OK):
         surface_subdirs += [ 'libs/surfaces/sony9pin' ]
 
