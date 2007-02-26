@@ -47,7 +47,7 @@ Reverse::run (boost::shared_ptr<AudioRegion> region)
 	SourceList nsrcs;
 	SourceList::iterator si;
 	nframes_t blocksize = 256 * 1024;
-	Sample* buf;
+	Sample* buf = 0;
 	nframes_t fpos;
 	nframes_t fstart;
 	nframes_t to_read;
@@ -69,8 +69,6 @@ Reverse::run (boost::shared_ptr<AudioRegion> region)
 	buf = new Sample[blocksize];
 	to_read = blocksize;
 
-	cerr << "Reverse " << region->name() << " len = " << region->length() << " blocksize = " << blocksize << " start at " << fstart << endl;
-
 	/* now read it backwards */
 
 	while (to_read) {
@@ -80,8 +78,6 @@ Reverse::run (boost::shared_ptr<AudioRegion> region)
 		for (n = 0, si = nsrcs.begin(); n < region->n_channels(); ++n, ++si) {
 
 			/* read it in */
-
-			cerr << "read at " << fpos << " for " << to_read << endl;
 			
 			if (region->source (n)->read (buf, fpos, to_read) != to_read) {
 				goto out;
@@ -105,7 +101,6 @@ Reverse::run (boost::shared_ptr<AudioRegion> region)
 			to_read = blocksize;
 		} else {
 			to_read = fpos - fstart;
-			cerr << "Last read detected, only " << fpos - fstart << " left; move to start and read " << to_read << endl;
 			fpos = fstart;
 		}
 	};
@@ -114,7 +109,9 @@ Reverse::run (boost::shared_ptr<AudioRegion> region)
 
   out:
 
-	delete [] buf;
+	if (buf) {
+		delete [] buf;
+	}
 
 	if (ret) {
 		for (si = nsrcs.begin(); si != nsrcs.end(); ++si) {

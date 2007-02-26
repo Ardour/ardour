@@ -1305,6 +1305,11 @@ AudioDiskstream::do_flush (Session::RunContext context, bool force_flush)
 
 	_write_data_count = 0;
 
+	transvec.buf[0] = 0;
+	transvec.buf[1] = 0;
+	vector.buf[0] = 0;
+	vector.buf[1] = 0;
+
 	for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
 	
 		(*chan).capture_buf->get_read_vector (&vector);
