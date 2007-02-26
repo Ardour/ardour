@@ -84,7 +84,11 @@
 		694120DB0B8A36CD00AF661E /* libgmodule-2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 694120D70B8A36CD00AF661E /* libgmodule-2.0.dylib */; };
 		694120DC0B8A36CD00AF661E /* libgobject-2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 694120D80B8A36CD00AF661E /* libgobject-2.0.dylib */; };
 		694120DD0B8A36CD00AF661E /* libgthread-2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 694120D90B8A36CD00AF661E /* libgthread-2.0.dylib */; };
-		8D07F2BE0486CC7A007CD1D0 /* pbd_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 32BAE0B70371A74B00C91783 /* pbd_Prefix.pch */; settings = {ATTRIBUTES = (Public, ); }; };
+		69C63C150B9369CB00BC0BCA /* strreplace.cc in Sources */ = {isa = PBXBuildFile; fileRef = 69C63C140B9369CB00BC0BCA /* strreplace.cc */; };
+		69C63C190B9369DE00BC0BCA /* replace_all.h in Headers */ = {isa = PBXBuildFile; fileRef = 69C63C180B9369DE00BC0BCA /* replace_all.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		69C63C2B0B936A6E00BC0BCA /* version.cc in Sources */ = {isa = PBXBuildFile; fileRef = 69C63C290B936A6E00BC0BCA /* version.cc */; };
+		69C63C2C0B936A6E00BC0BCA /* version.h in Headers */ = {isa = PBXBuildFile; fileRef = 69C63C2A0B936A6E00BC0BCA /* version.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		8D07F2BE0486CC7A007CD1D0 /* pbd_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 32BAE0B70371A74B00C91783 /* pbd_Prefix.pch */; settings = {ATTRIBUTES = (); }; };
 		8D07F2C00486CC7A007CD1D0 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C1666FE841158C02AAC07 /* InfoPlist.strings */; };
 /* End PBXBuildFile section */
 
@@ -168,6 +172,10 @@
 		694120D70B8A36CD00AF661E /* libgmodule-2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libgmodule-2.0.dylib"; path = "/Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/libgmodule-2.0.dylib"; sourceTree = "<absolute>"; };
 		694120D80B8A36CD00AF661E /* libgobject-2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libgobject-2.0.dylib"; path = "/Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/libgobject-2.0.dylib"; sourceTree = "<absolute>"; };
 		694120D90B8A36CD00AF661E /* libgthread-2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libgthread-2.0.dylib"; path = "/Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/libgthread-2.0.dylib"; sourceTree = "<absolute>"; };
+		69C63C140B9369CB00BC0BCA /* strreplace.cc */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = strreplace.cc; path = ../strreplace.cc; sourceTree = SOURCE_ROOT; };
+		69C63C180B9369DE00BC0BCA /* replace_all.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = replace_all.h; sourceTree = "<group>"; };
+		69C63C290B936A6E00BC0BCA /* version.cc */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = version.cc; sourceTree = "<group>"; };
+		69C63C2A0B936A6E00BC0BCA /* version.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = version.h; sourceTree = "<group>"; };
 		8D07F2C70486CC7A007CD1D0 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D07F2C80486CC7A007CD1D0 /* pbd.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = pbd.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -201,6 +209,8 @@
 		0867D691FE84028FC02AAC07 /* pbd */ = {
 			isa = PBXGroup;
 			children = (
+				69C63C290B936A6E00BC0BCA /* version.cc */,
+				69C63C2A0B936A6E00BC0BCA /* version.h */,
 				08FB77ACFE841707C02AAC07 /* Source */,
 				089C1665FE841158C02AAC07 /* Resources */,
 				0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */,
@@ -235,6 +245,7 @@
 		08FB77ACFE841707C02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				69C63C140B9369CB00BC0BCA /* strreplace.cc */,
 				694120270B8A34AB00AF661E /* base_ui.cc */,
 				694120280B8A34AB00AF661E /* basename.cc */,
 				694120290B8A34AB00AF661E /* command.cc */,
@@ -270,6 +281,7 @@
 		694120360B8A34AB00AF661E /* pbd */ = {
 			isa = PBXGroup;
 			children = (
+				69C63C180B9369DE00BC0BCA /* replace_all.h */,
 				694120380B8A34AB00AF661E /* abstract_ui.cc */,
 				694120390B8A34AB00AF661E /* abstract_ui.h */,
 				6941203A0B8A34AB00AF661E /* base_ui.h */,
@@ -326,6 +338,8 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				69C63C2C0B936A6E00BC0BCA /* version.h in Headers */,
+				69C63C190B9369DE00BC0BCA /* replace_all.h in Headers */,
 				8D07F2BE0486CC7A007CD1D0 /* pbd_Prefix.pch in Headers */,
 				6941207F0B8A34AB00AF661E /* abstract_ui.cc in Headers */,
 				694120780B8A34AB00AF661E /* gettext.h in Headers */,
@@ -405,13 +419,11 @@
 		0867D690FE84028FC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 4FADC24608B4156D00ABE55E /* Build configuration list for PBXProject "pbd" */;
-			compatibilityVersion = "Xcode 3.0";
 			hasScannedForEncodings = 1;
 			mainGroup = 0867D691FE84028FC02AAC07 /* pbd */;
 			productRefGroup = 034768DDFF38A45A11DB9C8B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
-			shouldCheckCompatibility = 1;
 			targets = (
 				8D07F2BC0486CC7A007CD1D0 /* pbd */,
 			);
@@ -444,7 +456,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				69C63C2B0B936A6E00BC0BCA /* version.cc in Sources */,
 				6941206F0B8A34AB00AF661E /* base_ui.cc in Sources */,
+				69C63C150B9369CB00BC0BCA /* strreplace.cc in Sources */,
 				694120700B8A34AB00AF661E /* basename.cc in Sources */,
 				694120710B8A34AB00AF661E /* command.cc in Sources */,
 				694120720B8A34AB00AF661E /* controllable.cc in Sources */,

@@ -159,7 +159,7 @@ Editor::add_audio_region_to_region_display (boost::shared_ptr<AudioRegion> regio
 		}
 
 		if (missing_source) {
-			str += " (MISSING)";
+			str += _(" (MISSING)");
 		}
 
 		row[region_list_columns.name] = str;

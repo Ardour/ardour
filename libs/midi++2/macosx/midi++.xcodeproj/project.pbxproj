@@ -39,6 +39,8 @@
 		69A0E0B00B8A3BEF00A24967 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 69A0E0AF0B8A3BEF00A24967 /* CoreMIDI.framework */; };
 		69A0E0B50B8A3C0B00A24967 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 69A0E0B40B8A3C0B00A24967 /* CoreFoundation.framework */; };
 		69A0E0BA0B8A3C2000A24967 /* glibmm.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 69A0E0B90B8A3C2000A24967 /* glibmm.framework */; };
+		69C63C4C0B936ACF00BC0BCA /* version.cc in Sources */ = {isa = PBXBuildFile; fileRef = 69C63C4A0B936ACF00BC0BCA /* version.cc */; };
+		69C63C4D0B936ACF00BC0BCA /* version.h in Headers */ = {isa = PBXBuildFile; fileRef = 69C63C4B0B936ACF00BC0BCA /* version.h */; };
 		69D5F6010B8D55B100301E71 /* pbd.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 69D5F6000B8D55A000301E71 /* pbd.framework */; };
 		8D07F2BE0486CC7A007CD1D0 /* midi++_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 32BAE0B70371A74B00C91783 /* midi++_Prefix.pch */; settings = {ATTRIBUTES = (Public, ); }; };
 		8D07F2C00486CC7A007CD1D0 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C1666FE841158C02AAC07 /* InfoPlist.strings */; };
@@ -96,6 +98,8 @@
 		69A0E0AF0B8A3BEF00A24967 /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = /System/Library/Frameworks/CoreMIDI.framework; sourceTree = "<absolute>"; };
 		69A0E0B40B8A3C0B00A24967 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
 		69A0E0B90B8A3C2000A24967 /* glibmm.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = glibmm.framework; path = /Library/Frameworks/glibmm.framework; sourceTree = "<absolute>"; };
+		69C63C4A0B936ACF00BC0BCA /* version.cc */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = version.cc; sourceTree = "<group>"; };
+		69C63C4B0B936ACF00BC0BCA /* version.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = version.h; sourceTree = "<group>"; };
 		69D5F5FB0B8D55A000301E71 /* pbd.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = pbd.xcodeproj; path = ../../pbd/macosx/pbd.xcodeproj; sourceTree = SOURCE_ROOT; };
 		8D07F2C70486CC7A007CD1D0 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D07F2C80486CC7A007CD1D0 /* midi++.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = "midi++.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -132,6 +136,8 @@
 		0867D691FE84028FC02AAC07 /* midi++ */ = {
 			isa = PBXGroup;
 			children = (
+				69C63C4A0B936ACF00BC0BCA /* version.cc */,
+				69C63C4B0B936ACF00BC0BCA /* version.h */,
 				08FB77ACFE841707C02AAC07 /* Source */,
 				089C1665FE841158C02AAC07 /* Resources */,
 				0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */,
@@ -221,6 +227,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				69C63C4D0B936ACF00BC0BCA /* version.h in Headers */,
 				8D07F2BE0486CC7A007CD1D0 /* midi++_Prefix.pch in Headers */,
 				69A0E0800B8A3B1200A24967 /* channel.h in Headers */,
 				69A0E0810B8A3B1200A24967 /* coremidi_midiport.h in Headers */,
@@ -267,7 +274,6 @@
 		0867D690FE84028FC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 4FADC24608B4156D00ABE55E /* Build configuration list for PBXProject "midi++" */;
-			compatibilityVersion = "Xcode 3.0";
 			hasScannedForEncodings = 1;
 			mainGroup = 0867D691FE84028FC02AAC07 /* midi++ */;
 			productRefGroup = 034768DDFF38A45A11DB9C8B /* Products */;
@@ -279,7 +285,6 @@
 				},
 			);
 			projectRoot = "";
-			shouldCheckCompatibility = 1;
 			targets = (
 				8D07F2BC0486CC7A007CD1D0 /* midi++ */,
 			);
@@ -322,6 +327,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				69C63C4C0B936ACF00BC0BCA /* version.cc in Sources */,
 				69A0E07A0B8A3B1200A24967 /* coremidi_midiport.cc in Sources */,
 				69A0E07B0B8A3B1200A24967 /* fd_midiport.cc in Sources */,
 				69A0E07C0B8A3B1200A24967 /* fifomidi.cc in Sources */,

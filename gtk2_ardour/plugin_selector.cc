@@ -471,11 +471,11 @@ PluginSelector::ladspa_display_selection_changed()
 void
 PluginSelector::added_list_selection_changed()
 {
-  if (added_list.get_selection()->count_selected_rows() != 0) {
-    btn_remove->set_sensitive (true);
-  } else {
-    btn_remove->set_sensitive (false);
-  }
+	if (added_list.get_selection()->count_selected_rows() != 0) {
+		btn_remove->set_sensitive (true);
+	} else {
+		btn_remove->set_sensitive (false);
+	}
 }
 
 int
