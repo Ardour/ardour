@@ -103,10 +103,12 @@ Session::start_butler_thread ()
 void
 Session::terminate_butler_thread ()
 {
-	void* status;
-	char c = ButlerRequest::Quit;
-	::write (butler_request_pipe[1], &c, 1);
-	pthread_join (butler_thread, &status);
+	if (butler_thread) {
+		void* status;
+		char c = ButlerRequest::Quit;
+		::write (butler_request_pipe[1], &c, 1);
+		pthread_join (butler_thread, &status);
+	}
 }
 
 void

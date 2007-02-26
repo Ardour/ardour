@@ -183,6 +183,8 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	current_trans = 0;
 	first_file_data_format_reset = true;
 	first_file_header_format_reset = true;
+	butler_thread = (pthread_t) 0;
+	midi_thread = (pthread_t) 0;
 
 	AudioDiskstream::allocate_working_buffers();
 	

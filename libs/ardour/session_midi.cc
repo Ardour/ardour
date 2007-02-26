@@ -1114,15 +1114,17 @@ Session::start_midi_thread ()
 void
 Session::terminate_midi_thread ()
 {
-	MIDIRequest* request = new MIDIRequest;
-	void* status;
-
-	request->type = MIDIRequest::Quit;
-
-	midi_requests.write (&request, 1);
-	poke_midi_thread ();
-
-	pthread_join (midi_thread, &status);
+	if (midi_thread) {
+		MIDIRequest* request = new MIDIRequest;
+		void* status;
+		
+		request->type = MIDIRequest::Quit;
+		
+		midi_requests.write (&request, 1);
+		poke_midi_thread ();
+		
+		pthread_join (midi_thread, &status);
+	}
 }
 
 void

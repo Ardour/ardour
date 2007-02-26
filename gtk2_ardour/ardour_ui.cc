@@ -1866,15 +1866,20 @@ ARDOUR_UI::new_session (std::string predetermined_path)
 					uint32_t nphysin = (uint32_t) new_session_dialog->input_limit_count();
 					uint32_t nphysout = (uint32_t) new_session_dialog->output_limit_count();
 							
-					build_session (session_path,
-						       session_name,
-						       cchns,
-						       mchns,
-						       iconnect,
-						       oconnect,
-						       nphysin,
-						       nphysout, 
-						       engine->frame_rate() * 60 * 5);
+					if (build_session (session_path,
+							   session_name,
+							   cchns,
+							   mchns,
+							   iconnect,
+							   oconnect,
+							   nphysin,
+							   nphysout, 
+							   engine->frame_rate() * 60 * 5)) {
+
+						response = Gtk::RESPONSE_NONE;
+						new_session_dialog->reset ();
+						continue;
+					}
 				}
 			}
 		}
@@ -1973,7 +1978,8 @@ ARDOUR_UI::build_session (const string & path, const string & snap_name,
 
 	catch (...) {
 
-		error << string_compose(_("Session \"%1 (snapshot %2)\" did not load successfully"), path, snap_name) << endmsg;
+		MessageDialog msg (string_compose(_("Could not create session in \"%1\""), path));
+		msg.run ();
 		return -1;
 	}
 
