@@ -77,7 +77,7 @@ ARDOUR_UI::toggle_send_midi_feedback ()
 void
 ARDOUR_UI::set_native_file_header_format (HeaderFormat hf)
 {
-	const char *action;
+	const char *action = 0;
 
 	switch (hf) {
 	case BWF:
@@ -119,7 +119,7 @@ ARDOUR_UI::set_native_file_header_format (HeaderFormat hf)
 void
 ARDOUR_UI::set_native_file_data_format (SampleFormat sf)
 {
-	const char* action;
+	const char* action = 0;
 
 	switch (sf) {
 	case FormatFloat:

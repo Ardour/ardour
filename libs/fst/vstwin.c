@@ -514,7 +514,7 @@ fst_load (const char *path)
 		return NULL;
 	}
 
-	if ((fhandle->main_entry = GetProcAddress (fhandle->dll, "main")) == NULL) {
+	if ((fhandle->main_entry = ((AEffect*)()(audioMasterCallback)) GetProcAddress (fhandle->dll, "main")) == NULL) {
 		fst_unload (fhandle);
 		return NULL;
 	}
