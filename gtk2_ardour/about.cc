@@ -150,6 +150,7 @@ static const char* authors[] = {
 	N_("Nimal Ratnayake"),
 	N_("Mike Taht"),
 	N_("John Anderson"),
+	N_("Nedko Arnaudov"),
 	0
 };
 
