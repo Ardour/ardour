@@ -392,7 +392,7 @@ Session::GlobalMeteringStateCommand::get_state()
 		if (r) {
 			child->add_property (X_("id"), r->id().to_s());
 
-			const char* meterstr;
+			const char* meterstr = 0;
 			
 			switch (x->second) {
 			case MeterInput:

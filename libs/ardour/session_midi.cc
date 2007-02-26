@@ -136,7 +136,7 @@ Session::set_mmc_device_id (uint32_t device_id)
 int
 Session::set_mmc_port (string port_tag)
 {
-	MIDI::byte old_device_id;
+	MIDI::byte old_device_id = 0;
 	bool reset_id = false;
 
 	if (port_tag.length() == 0) {

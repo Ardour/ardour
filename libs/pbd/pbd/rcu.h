@@ -10,23 +10,21 @@ template<class T>
 class RCUManager
 {
   public:
- 
 	RCUManager (T* new_rcu_value) {
-		x.m_rcu_value = new boost::shared_ptr<T> (new_rcu_value);
+		m_rcu_value = new boost::shared_ptr<T> (new_rcu_value);
 	}
+	
+	virtual ~RCUManager() { delete m_rcu_value; }
  
-	virtual ~RCUManager() { delete x.m_rcu_value; }
- 
-        boost::shared_ptr<T> reader () const { return *((boost::shared_ptr<T> *) g_atomic_pointer_get (&x.gptr)); }
+        boost::shared_ptr<T> reader () const { return *((boost::shared_ptr<T> *) g_atomic_pointer_get ((volatile gpointer*) &m_rcu_value)); }
  
 	virtual boost::shared_ptr<T> write_copy () = 0;
 	virtual bool update (boost::shared_ptr<T> new_value) = 0;
 
+	volatile gpointer* pointer() const { return (volatile gpointer*) &m_rcu_value; }
+
   protected:
-	union {
-	    boost::shared_ptr<T>* m_rcu_value;
-	    volatile gpointer gptr;
-	} x;
+	volatile boost::shared_ptr<T>* m_rcu_value;
 };
  
  
@@ -59,7 +57,7 @@ public:
 
 		// store the current 
 
-		current_write_old = RCUManager<T>::x.m_rcu_value;
+		current_write_old = (boost::shared_ptr<T>*) RCUManager<T>::m_rcu_value;
 		
 		boost::shared_ptr<T> new_copy (new T(**current_write_old));
 
@@ -75,7 +73,7 @@ public:
 
 		// update, checking that nobody beat us to it
 
-		bool ret = g_atomic_pointer_compare_and_exchange (&RCUManager<T>::x.gptr,
+		bool ret = g_atomic_pointer_compare_and_exchange (RCUManager<T>::pointer(),
 								  (gpointer) current_write_old,
 								  (gpointer) new_spp);
 		

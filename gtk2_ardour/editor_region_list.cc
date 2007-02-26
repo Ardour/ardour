@@ -26,6 +26,7 @@
 
 #include <ardour/audioregion.h>
 #include <ardour/audiofilesource.h>
+#include <ardour/silentfilesource.h>
 #include <ardour/session_region.h>
 
 #include <gtkmm2ext/stop_signal.h>
@@ -85,6 +86,9 @@ Editor::add_audio_region_to_region_display (boost::shared_ptr<AudioRegion> regio
 	string str;
 	TreeModel::Row row;
 	Gdk::Color c;
+	bool missing_source;
+
+	missing_source = boost::dynamic_pointer_cast<SilentFileSource>(region->source());
 
 	if (!show_automatic_regions_in_region_list && region->automatic()) {
 		return;
@@ -124,7 +128,11 @@ Editor::add_audio_region_to_region_display (boost::shared_ptr<AudioRegion> regio
 	} else if (region->whole_file()) {
 
 		row = *(region_list_model->append());
-		set_color(c, rgba_from_style ("RegionListWholeFile", 0xff, 0, 0, 0, "fg", Gtk::STATE_NORMAL, false ));
+		if (missing_source) {
+			c.set_rgb(65535,0,0);     // FIXME: error color from style
+		} else {
+			set_color(c, rgba_from_style ("RegionListWholeFile", 0xff, 0, 0, 0, "fg", Gtk::STATE_NORMAL, false ));
+		}
 		row[region_list_columns.color_] = c;
 
 		if (region->source()->name()[0] == '/') { // external file
@@ -148,6 +156,10 @@ Editor::add_audio_region_to_region_display (boost::shared_ptr<AudioRegion> regio
 
 			str = region->name();
 
+		}
+
+		if (missing_source) {
+			str += " (MISSING)";
 		}
 
 		row[region_list_columns.name] = str;
