@@ -88,7 +88,7 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 		layout->set_font_description (NAME_FONT);
 		Gtkmm2ext::get_ink_pixel_size (layout, width, height);
 
-		NAME_Y_OFFSET = height + 4;
+		NAME_Y_OFFSET = height + 6;
 		NAME_HIGHLIGHT_SIZE = height + 6;
 		NAME_HIGHLIGHT_THRESH = NAME_HIGHLIGHT_SIZE * 2;
 

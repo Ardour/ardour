@@ -42,6 +42,7 @@
 #include "audio_clock.h"
 #include "actions.h"
 #include "utils.h"
+#include "color_manager.h"
 
 #include "i18n.h"
 
@@ -73,6 +74,8 @@ ARDOUR_UI::setup_windows ()
 	setup_clock ();
 	setup_transport();
 	build_menu_bar ();
+
+	color_manager->signal_unmap().connect (bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleColorManager")));
 
 	top_packer.pack_start (menu_bar_base, false, false);
 	top_packer.pack_start (transport_frame, false, false);
