@@ -132,6 +132,8 @@ Session::import_audiofile (import_status& status)
 
 	if ((in = sf_open (status.paths.front().c_str(), SFM_READ, &info)) == 0) {
 		error << string_compose(_("Import: cannot open input sound file \"%1\""), status.paths.front()) << endmsg;
+		status.done = 1;
+		status.cancel = 1;
 		return -1;
 	}
 

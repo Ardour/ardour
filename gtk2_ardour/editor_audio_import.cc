@@ -244,6 +244,8 @@ Editor::import_sndfile (vector<ustring> paths, ImportMode mode, AudioTrack* trac
 	while (!(import_status.done || import_status.cancel)) {
 		gtk_main_iteration ();
 	}
+
+	interthread_progress_window->hide ();
 	
 	import_status.done = true;
 	interthread_progress_connection.disconnect ();
