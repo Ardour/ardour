@@ -57,8 +57,8 @@ Panner2d::Target::~Target ()
 	}
 }
 
-Panner2d::Panner2d (Panner& p, int32_t w, int32_t h)
-	: panner (p), width (w), height (h)
+Panner2d::Panner2d (Panner& p, int32_t h)
+	: panner (p), width (0), height (h)
 {
 	context_menu = 0;
 	bypass_menu_item = 0;

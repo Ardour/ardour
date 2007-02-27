@@ -70,13 +70,13 @@ class FastMeter : public Gtk::DrawingArea {
 	bool vertical_expose (GdkEventExpose*);
 	bool horizontal_expose (GdkEventExpose*);
 	
-	static Glib::RefPtr<Gdk::Pixbuf> request_vertical_meter(int);
+	static Glib::RefPtr<Gdk::Pixbuf> request_vertical_meter(int w, int h);
 
 	static Glib::RefPtr<Gdk::Pixbuf> *v_pixbuf_cache;
 	static int min_v_pixbuf_size;
 	static int max_v_pixbuf_size;
 
-	static Glib::RefPtr<Gdk::Pixbuf> request_horizontal_meter(int);
+	static Glib::RefPtr<Gdk::Pixbuf> request_horizontal_meter(int w, int h);
 
 	static Glib::RefPtr<Gdk::Pixbuf> *h_pixbuf_cache;
 	static int min_h_pixbuf_size;

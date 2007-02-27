@@ -367,6 +367,18 @@ RegionView::set_frame_color ()
 }
 
 void
+RegionView::fake_set_opaque (bool yn)
+{
+       if (yn) {
+               fill_opacity = 130;
+       } else {
+               fill_opacity = 60;
+       }
+
+       TimeAxisViewItem::set_frame_color ();
+}
+
+void
 RegionView::hide_region_editor()
 {
 	if (editor) {

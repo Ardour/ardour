@@ -18,6 +18,7 @@
 */
 
 #include <cmath>
+#include <algorithm>
 
 #include <sigc++/bind.h>
 
@@ -62,6 +63,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
+using namespace std;
 
 int MixerStrip::scrollbar_height = 0;
 
@@ -439,7 +441,6 @@ MixerStrip::set_width (Width w)
 		break;
 
 	case Narrow:
-		set_size_request (50, -1);
 		xml_node->add_property ("strip_width", "narrow");
 
 		if (rec_enable_button) {
@@ -461,6 +462,7 @@ MixerStrip::set_width (Width w)
 		((Gtk::Label*)panners.pan_automation_style_button.get_child())->set_text (panners.short_astyle_string(_route->panner().automation_style()));
 		((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (panners.short_astate_string(_route->panner().automation_state()));
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "longest label", 2, 2);
+		set_size_request (max (50, gpm.get_gm_width()), -1);
 		break;
 	}
 

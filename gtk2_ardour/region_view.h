@@ -68,6 +68,7 @@ class RegionView : public TimeAxisViewItem
     void lower_to_bottom ();
 
     bool set_position(nframes_t pos, void* src, double* delta = 0);
+    void fake_set_opaque (bool yn);
 
     virtual void show_region_editor () = 0;
     virtual void hide_region_editor();
@@ -82,7 +83,7 @@ class RegionView : public TimeAxisViewItem
     virtual void entered () {}
     virtual void exited () {}
     
-	static sigc::signal<void,RegionView*> RegionViewGoingAway;
+    static sigc::signal<void,RegionView*> RegionViewGoingAway;
     sigc::signal<void>                    GoingAway;
 
   protected:

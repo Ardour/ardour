@@ -447,6 +447,14 @@ GainMeter::setup_meters ()
 	}
 }	
 
+int
+GainMeter::get_gm_width ()
+{
+	Gtk::Requisition sz;
+	hbox.size_request (sz);
+	return sz.width;
+}
+
 bool
 GainMeter::gain_key_press (GdkEventKey* ev)
 {

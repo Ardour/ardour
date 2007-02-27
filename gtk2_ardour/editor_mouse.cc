@@ -3321,7 +3321,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 					}
 				}
 			
-				rv->region()->set_opaque(false);
+				rv->fake_set_opaque (false);
 			}
 			
 			if (drag_info.brushing) {
@@ -3431,7 +3431,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			TimeAxisView* tvp2 = trackview_by_y_position (iy1);
 			AudioTimeAxisView* atv2 = dynamic_cast<AudioTimeAxisView*>(tvp2);
 
-			(*i)->region()->set_opaque (true);
+			(*i)->fake_set_opaque (true);
 	    
 			from_playlist = (*i)->region()->playlist();
 			to_playlist = atv2->playlist();
@@ -3525,7 +3525,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			/* no need to add an undo here, we did that when we added this playlist to motion_frozen playlists */
 			
 			rv->region()->set_position (where, (void *) this);
-			rv->region()->set_opaque (true);
+			rv->fake_set_opaque (true);
 		}
 	}
 
@@ -4101,7 +4101,7 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		begin_reversible_command (trim_type);
 
 		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
-			(*i)->region()->set_opaque(false);
+			(*i)->fake_set_opaque(false);
 			(*i)->region()->freeze ();
 		
 			AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
@@ -4296,7 +4296,7 @@ Editor::trim_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			     i != selection->regions.by_layer().end(); ++i)
 			{
 				thaw_region_after_trim (**i);
-				(*i)->region()->set_opaque(true);
+				(*i)->fake_set_opaque (true);
 			}
 		}
 		

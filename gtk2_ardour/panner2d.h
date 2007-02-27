@@ -47,7 +47,7 @@ namespace Pango {
 class Panner2d : public Gtk::DrawingArea
 {
   public:
-	Panner2d (ARDOUR::Panner&, int32_t width, int32_t height);
+	Panner2d (ARDOUR::Panner&, int32_t height);
 	~Panner2d ();
 	
 	int puck_position (int which_puck, float& x, float& y);
