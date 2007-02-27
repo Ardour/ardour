@@ -1526,7 +1526,7 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 			** as passing the move threshold, otherwise e.g. copying regions to
 			** the same temporal position on a different track doesn't work.
 			*/
-			if (drag_info.item_type == RegionItem) {
+			if (drag_info.item_type == RegionItem && drag_info.data) {
 				RegionView* rv = reinterpret_cast<RegionView *> (drag_info.data);
 				if (drag_info.last_trackview != &rv->get_time_axis_view()) {
 					drag_info.move_threshold_passed = true;
