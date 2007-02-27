@@ -964,10 +964,6 @@ AudioEngine::freewheel (bool onoff)
 			_freewheel_thread_registered = false;
 		}
 
-		if (!onoff) {
-			stacktrace (cout);
-		}
-
 		return jack_set_freewheel (_jack, onoff);
 
 	} else {

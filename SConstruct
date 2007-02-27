@@ -667,8 +667,10 @@ opt_flags[:0] = [
 
 if env['DEBUG'] == 1:
     env.Append(CCFLAGS=" ".join (debug_flags))
+    env.Append(LINKFLAGS=" ".join (debug_flags))
 else:
     env.Append(CCFLAGS=" ".join (opt_flags))
+    env.Append(LINKFLAGS=" ".join (opt_flags))
 
 if env['UNIVERSAL'] == 1:
     env.Append(CCFLAGS="-arch i386 -arch ppc")

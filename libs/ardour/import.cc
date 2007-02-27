@@ -71,6 +71,7 @@ protected:
 class ResampledImportableSource : public ImportableSource {
    public:
     ResampledImportableSource (SNDFILE* sf, SF_INFO* info, nframes_t rate) : ImportableSource (sf, info) {
+	    int err;
 
 	    sf_seek (in, 0, SEEK_SET) ;
 	    
@@ -104,7 +105,6 @@ class ResampledImportableSource : public ImportableSource {
 	float input[BLOCKSIZE];
 	SRC_STATE*	src_state;
 	SRC_DATA	src_data;
-        int		err; 
 };
 
 int
@@ -334,6 +334,8 @@ Session::import_audiofile (import_status& status)
 nframes_t 
 ResampledImportableSource::read (Sample* output, nframes_t nframes)
 {
+	int err;
+
 	/* If the input buffer is empty, refill it. */
 	
 	if (src_data.input_frames == 0) {	
