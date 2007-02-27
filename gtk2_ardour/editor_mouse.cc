@@ -2851,7 +2851,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		
 		set<boost::shared_ptr<Playlist> > affected_playlists;
 		pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
-		
+
 		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
 			RegionView* rv;
 			
@@ -2867,7 +2867,6 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			
 			latest_regionview = 0;
 			
-			sigc::connection c = atv->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
 			
 			/* create a new region with the same name. */
 			
@@ -2885,8 +2884,9 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			
 			newregion->set_locked (false);
 			
+			sigc::connection c = atv->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
 			to_playlist->add_region (newregion, (nframes_t) (rv->region()->position() * atv->get_diskstream()->speed()));
-			
+
 			c.disconnect ();
 			
 			if (latest_regionview) {
@@ -2894,12 +2894,10 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			}
 		}
 
-		
-		
 		if (new_regionviews.empty()) {
 			return;
 		}
-		
+
 		/* reset selection to new regionviews */
 		
 		selection->set (new_regionviews);
@@ -3185,149 +3183,165 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
                         MOTION								      
 	************************************************************/
 
-	pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
-	const list<RegionView*>& layered_regions = selection->regions.by_layer();
+	bool do_move;
 
-	for (list<RegionView*>::const_iterator i = layered_regions.begin(); i != layered_regions.end(); ++i) {
-	    
-		RegionView* rv = (*i);
-		double ix1, ix2, iy1, iy2;
-		int32_t temp_pointer_y_span = pointer_y_span;
-
-		/* get item BBox, which will be relative to parent. so we have
-		   to query on a child, then convert to world coordinates using
-		   the parent.
-		*/
-
-		rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
-		rv->get_canvas_group()->i2w (ix1, iy1);
-		TimeAxisView* tvp2 = trackview_by_y_position (iy1);
-		AudioTimeAxisView* canvas_atv = dynamic_cast<AudioTimeAxisView*>(tvp2);
-		AudioTimeAxisView* temp_atv;
-
-		if ((pointer_y_span != 0) && !clamp_y_axis) {
-			y_delta = 0;
-			int32_t x = 0;
-			for (j = height_list.begin(); j!= height_list.end(); j++) {	
-				if (x == canvas_atv->order) {
-					/* we found the track the region is on */
-					if (x != original_pointer_order) {
-						/*this isn't from the same track we're dragging from */
-						temp_pointer_y_span = canvas_pointer_y_span;
-					}		  
-					while (temp_pointer_y_span > 0) {
-						/* we're moving up canvas-wise,
-						   so  we need to find the next track height
-						*/
-						if (j != height_list.begin()) {		  
-							j--;
-						}
-						if (x != original_pointer_order) { 
-							/* we're not from the dragged track, so ignore hidden tracks. */	      
-							if ((*j) == 0) {
-								temp_pointer_y_span++;
-							}
-						}	   
-						y_delta -= (*j);	
-						temp_pointer_y_span--;	
-					}
-					while (temp_pointer_y_span < 0) {		  
-						y_delta += (*j);
-						if (x != original_pointer_order) { 
-							if ((*j) == 0) {
-								temp_pointer_y_span--;
-							}
-						}	   
-		    
-						if (j != height_list.end()) {		      
-							j++;
-						}
-						temp_pointer_y_span++;
-					}
-					/* find out where we'll be when we move and set height accordingly */
-		  
-					tvp2 = trackview_by_y_position (iy1 + y_delta);
-					temp_atv = dynamic_cast<AudioTimeAxisView*>(tvp2);
-					rv->set_height (temp_atv->height);
-	
-					/*   if you un-comment the following, the region colours will follow the track colours whilst dragging,
-					     personally, i think this can confuse things, but never mind.
-					*/
-		  		  
-					//const GdkColor& col (temp_atv->view->get_region_color());
-					//rv->set_color (const_cast<GdkColor&>(col));
-					break;		
-				}
-				x++;
-			}
-		}
-	  
-		/* prevent the regionview from being moved to before 
-		   the zero position on the canvas.
-		*/
-		/* clamp */
-		
-		if (x_delta < 0) {
-			if (-x_delta > ix1) {
-				x_delta = -ix1;
-			}
-		} else if ((x_delta > 0) &&(rv->region()->last_frame() > max_frames - x_delta)) {
-			x_delta = max_frames - rv->region()->last_frame();
-		}
-			
-		if (drag_info.first_move) {
-
-			/* hide any dependent views */
-
-			rv->get_time_axis_view().hide_dependent_views (*rv);
-				
-			/* this is subtle. raising the regionview itself won't help,
-			   because raise_to_top() just puts the item on the top of
-			   its parent's stack. so, we need to put the trackview canvas_display group
-			   on the top, since its parent is the whole canvas.
-			*/
-
-			rv->get_canvas_group()->raise_to_top();
-			rv->get_time_axis_view().canvas_display->raise_to_top();
-			cursor_group->raise_to_top();
-
-			/* freeze the playlists from notifying till
-			   the motion is done.
-			*/
-
-			AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (&rv->get_time_axis_view());
-			if (atv && atv->is_audio_track()) {
-				boost::shared_ptr<AudioPlaylist> pl = boost::dynamic_pointer_cast<AudioPlaylist>(atv->get_diskstream()->playlist());
-				if (pl) {
-					/* only freeze and capture state once */
-
-					insert_result = motion_frozen_playlists.insert (pl);
-					if (insert_result.second) {
-						pl->freeze();
-						session->add_command(new MementoCommand<Playlist>(*pl, &pl->get_state(), 0));
-					}
-				}
-			}
-			rv->region()->set_opaque(false);
-		}
-
-		if (drag_info.brushing) {
-			mouse_brush_insert_region (rv, pending_region_position);
-		} else {
-			rv->move (x_delta, y_delta);			
-		}
-	}
-		
 	if (drag_info.first_move) {
-		cursor_group->raise_to_top();
+		if (drag_info.move_threshold_passed) {
+			do_move = true;
+		} else {
+			do_move = false;
+		}
+	} else {
+		do_move = true;
 	}
+
+	if (do_move) {
+
+		pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
+		const list<RegionView*>& layered_regions = selection->regions.by_layer();
+
+		for (list<RegionView*>::const_iterator i = layered_regions.begin(); i != layered_regions.end(); ++i) {
+	    
+			RegionView* rv = (*i);
+			double ix1, ix2, iy1, iy2;
+			int32_t temp_pointer_y_span = pointer_y_span;
+
+			/* get item BBox, which will be relative to parent. so we have
+			   to query on a child, then convert to world coordinates using
+			   the parent.
+			*/
+
+			rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
+			rv->get_canvas_group()->i2w (ix1, iy1);
+			TimeAxisView* tvp2 = trackview_by_y_position (iy1);
+			AudioTimeAxisView* canvas_atv = dynamic_cast<AudioTimeAxisView*>(tvp2);
+			AudioTimeAxisView* temp_atv;
+
+			if ((pointer_y_span != 0) && !clamp_y_axis) {
+				y_delta = 0;
+				int32_t x = 0;
+				for (j = height_list.begin(); j!= height_list.end(); j++) {	
+					if (x == canvas_atv->order) {
+						/* we found the track the region is on */
+						if (x != original_pointer_order) {
+							/*this isn't from the same track we're dragging from */
+							temp_pointer_y_span = canvas_pointer_y_span;
+						}		  
+						while (temp_pointer_y_span > 0) {
+							/* we're moving up canvas-wise,
+							   so  we need to find the next track height
+							*/
+							if (j != height_list.begin()) {		  
+								j--;
+							}
+							if (x != original_pointer_order) { 
+								/* we're not from the dragged track, so ignore hidden tracks. */	      
+								if ((*j) == 0) {
+									temp_pointer_y_span++;
+								}
+							}	   
+							y_delta -= (*j);	
+							temp_pointer_y_span--;	
+						}
+						while (temp_pointer_y_span < 0) {		  
+							y_delta += (*j);
+							if (x != original_pointer_order) { 
+								if ((*j) == 0) {
+									temp_pointer_y_span--;
+								}
+							}	   
+		    
+							if (j != height_list.end()) {		      
+								j++;
+							}
+							temp_pointer_y_span++;
+						}
+						/* find out where we'll be when we move and set height accordingly */
+		  
+						tvp2 = trackview_by_y_position (iy1 + y_delta);
+						temp_atv = dynamic_cast<AudioTimeAxisView*>(tvp2);
+						rv->set_height (temp_atv->height);
+	
+						/*   if you un-comment the following, the region colours will follow the track colours whilst dragging,
+						     personally, i think this can confuse things, but never mind.
+						*/
+		  		  
+						//const GdkColor& col (temp_atv->view->get_region_color());
+						//rv->set_color (const_cast<GdkColor&>(col));
+						break;		
+					}
+					x++;
+				}
+			}
+	  
+			/* prevent the regionview from being moved to before 
+			   the zero position on the canvas.
+			*/
+			/* clamp */
 		
-	drag_info.first_move = false;
-		
+			if (x_delta < 0) {
+				if (-x_delta > ix1) {
+					x_delta = -ix1;
+				}
+			} else if ((x_delta > 0) &&(rv->region()->last_frame() > max_frames - x_delta)) {
+				x_delta = max_frames - rv->region()->last_frame();
+			}
+
+			if (drag_info.first_move) {
+
+				/* hide any dependent views */
+			
+				rv->get_time_axis_view().hide_dependent_views (*rv);
+			
+				/* this is subtle. raising the regionview itself won't help,
+				   because raise_to_top() just puts the item on the top of
+				   its parent's stack. so, we need to put the trackview canvas_display group
+				   on the top, since its parent is the whole canvas.
+				*/
+			
+				rv->get_canvas_group()->raise_to_top();
+				rv->get_time_axis_view().canvas_display->raise_to_top();
+				cursor_group->raise_to_top();
+			
+				/* freeze the playlists from notifying till
+				   the motion is done.
+				*/
+			
+				AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (&rv->get_time_axis_view());
+				if (atv && atv->is_audio_track()) {
+					boost::shared_ptr<AudioPlaylist> pl = boost::dynamic_pointer_cast<AudioPlaylist>(atv->get_diskstream()->playlist());
+					if (pl) {
+						/* only freeze and capture state once */
+					
+						insert_result = motion_frozen_playlists.insert (pl);
+						if (insert_result.second) {
+							pl->freeze();
+							session->add_command(new MementoCommand<Playlist>(*pl, &pl->get_state(), 0));
+						}
+					}
+				}
+			
+				rv->region()->set_opaque(false);
+			}
+			
+			if (drag_info.brushing) {
+				mouse_brush_insert_region (rv, pending_region_position);
+			} else {
+				rv->move (x_delta, y_delta);			
+			}
+
+		} /* foreach region */
+
+	} /* if do_move */
+
+	if (drag_info.first_move && drag_info.move_threshold_passed) {
+		cursor_group->raise_to_top();
+		drag_info.first_move = false;
+	}
+
 	if (x_delta != 0 && !drag_info.brushing) {
 		show_verbose_time_cursor (drag_info.last_frame_position, 10);
 	}
-		
 } 
 
 void
