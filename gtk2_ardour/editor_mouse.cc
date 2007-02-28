@@ -2834,8 +2834,10 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	   if we haven't passed the move threshold yet
 	*/
 
-	if ((drag_info.x_constrained && (drag_info.last_trackview != &rv->get_time_axis_view())) &&
+	if ((!drag_info.x_constrained || (drag_info.last_trackview != &rv->get_time_axis_view())) &&
 	     drag_info.copy && drag_info.move_threshold_passed && drag_info.want_move_threshold) {
+
+		cerr << "COPY, xcons = " << drag_info.x_constrained << " last = " << drag_info.last_trackview->name() << " rv = " << rv->get_time_axis_view().name() << endl;
 
 		drag_info.want_move_threshold = false; // don't copy again
 
