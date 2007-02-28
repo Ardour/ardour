@@ -167,7 +167,7 @@ Session::import_audiofile (import_status& status)
 				snprintf (buf, sizeof(buf), "%s/%s.wav", sounds_dir.c_str(), basepath.c_str());
 			}
 
-			if (::access (buf, F_OK) == 0) {
+			if (Glib::file_test (buf, Glib::FILE_TEST_EXISTS)) {
 
 				/* if the file already exists, we must come up with
 				 *  a new name for it.  for now we just keep appending

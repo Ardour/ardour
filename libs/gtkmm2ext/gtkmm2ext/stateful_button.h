@@ -44,6 +44,7 @@ class StateButton
 
 	virtual std::string get_widget_name() const = 0;
 	virtual void set_widget_name (std::string) = 0;
+	virtual int get_widget_state() = 0;
 };
 
 
@@ -60,6 +61,7 @@ class StatefulToggleButton : public StateButton, public Gtk::ToggleButton
 
 	std::string get_widget_name() const { return get_name(); }
 	void set_widget_name (std::string name) { set_name (name); get_child()->set_name (name); }
+	int get_widget_state() { return get_state(); }
 };
 
 class StatefulButton : public StateButton, public Gtk::Button
@@ -74,6 +76,7 @@ class StatefulButton : public StateButton, public Gtk::Button
 
 	std::string get_widget_name() const { return get_name(); }
 	void set_widget_name (std::string name) { set_name (name); get_child()->set_name (name); }
+	int get_widget_state() { return get_state(); }
 };
 
 };

@@ -31,7 +31,7 @@ StateButton::set_visual_state (int n)
 
 	string name = get_widget_name ();
 	name = name.substr (0, name.find_last_of ('-'));
-	
+
 	switch (n) {
 	case 0:
 		/* relax */

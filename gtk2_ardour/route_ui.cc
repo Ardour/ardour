@@ -386,7 +386,7 @@ RouteUI::mute_changed(void* src)
 void
 RouteUI::update_mute_display ()
 {
-	bool model = _route->record_enabled();
+	bool model = _route->muted();
 	bool view = mute_button->get_active();
 
 	/* first make sure the button's "depressed" visual
