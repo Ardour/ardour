@@ -826,11 +826,13 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		switch (Config->get_slave_source()) {
 		case None:
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (true);
+			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (true);
 			break;
 
 		default:
 			/* XXX need to make auto-play is off as well as insensitive */
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (false);
+			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (false);
 			break;
 		}
 

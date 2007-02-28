@@ -175,7 +175,7 @@ Session::realtime_stop (bool abort)
 		waiting_for_sync_offset = true;
 	}
 
-	transport_sub_state = (Config->get_auto_return() ? AutoReturning : 0);
+	transport_sub_state = ((Config->get_slave_source() == None && Config->get_auto_return()) ? AutoReturning : 0);
 }
 
 void
@@ -371,13 +371,13 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		update_latency_compensation (true, abort);
 	}
 
-	if (Config->get_auto_return() || (post_transport_work & PostTransportLocate) || synced_to_jack()) {
+	if ((Config->get_slave_source() == None && Config->get_auto_return()) || (post_transport_work & PostTransportLocate) || synced_to_jack()) {
 		
 		if (pending_locate_flush) {
 			flush_all_redirects ();
 		}
-
-		if ((Config->get_auto_return() || synced_to_jack()) && !(post_transport_work & PostTransportLocate)) {
+		
+		if (((Config->get_slave_source() == None && Config->get_auto_return()) || synced_to_jack()) && !(post_transport_work & PostTransportLocate)) {
 
 			_transport_frame = last_stop_frame;
 
