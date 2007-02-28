@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id: audio_source.h 486 2006-04-27 09:04:24Z pauld $
 */
 
 #ifndef __ardour_audio_source_h__

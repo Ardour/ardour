@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id: stateful.h 17 2005-09-24 19:13:41Z taybin $
 */
 
 #ifndef __pbd_stateful_h__

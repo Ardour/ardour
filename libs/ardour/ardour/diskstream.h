@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id: diskstream.h 579 2006-06-12 19:56:37Z essej $
 */
 
 #ifndef __ardour_diskstream_h__

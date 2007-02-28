@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id: tranzport_control_protocol.cc 1252 2006-12-29 19:13:18Z sampo $
 */
 
 /* Design notes: The tranzport is a unique device, basically a 
