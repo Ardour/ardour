@@ -148,7 +148,7 @@ static const char* authors[] = {
 	N_("Hans Fugal"),
 	N_("Brian Ahr"),
 	N_("Nimal Ratnayake"),
-	N_("Mike Taht"),
+	N_("Mike Täht"),
 	N_("John Anderson"),
 	N_("Nedko Arnaudov"),
 	0
