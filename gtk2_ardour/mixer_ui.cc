@@ -896,6 +896,16 @@ Mixer_UI::group_flags_changed (void* src, RouteGroup* group)
 	}
 
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::group_flags_changed), src, group));
+
+	/* force an update of any mixer strips that are using this group,
+	   otherwise mix group names don't change in mixer strips 
+	*/
+
+	for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
+		if ((*i)->mix_group() == group) {
+			(*i)->mix_group_changed(0);
+		}
+	}
 	
 	TreeModel::iterator i;
 	TreeModel::Children rows = group_model->children();

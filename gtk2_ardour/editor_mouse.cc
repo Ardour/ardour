@@ -1521,18 +1521,11 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 		if (!drag_info.move_threshold_passed) {
 
 			drag_info.move_threshold_passed = (abs ((int) (drag_info.current_pointer_x - drag_info.grab_x)) > 4);
-			
-			/* if we are dragging Regions we must also consider a change in track
-			** as passing the move threshold, otherwise e.g. copying regions to
-			** the same temporal position on a different track doesn't work.
-			*/
-			if (drag_info.item_type == RegionItem && drag_info.data) {
-				RegionView* rv = reinterpret_cast<RegionView *> (drag_info.data);
-				if (drag_info.last_trackview != &rv->get_time_axis_view()) {
-					drag_info.move_threshold_passed = true;
-				}
+
+			if (drag_info.copy && !drag_info.move_threshold_passed) {
+				drag_info.move_threshold_passed = (abs ((int) (drag_info.current_pointer_y - drag_info.grab_y)) > 4);
 			}
-			      
+
 			// and change the initial grab loc/frame if this drag info wants us to
 
 			if (drag_info.want_move_threshold && drag_info.move_threshold_passed) {
@@ -2837,7 +2830,12 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	vector<int32_t>  height_list(512) ;
 	vector<int32_t>::iterator j;
 
-	if (drag_info.copy && drag_info.move_threshold_passed && drag_info.want_move_threshold) {
+	/* don't copy regions if we're doing x-constrained and we're in the same track, or
+	   if we haven't passed the move threshold yet
+	*/
+
+	if ((drag_info.x_constrained && (drag_info.last_trackview != &rv->get_time_axis_view())) &&
+	     drag_info.copy && drag_info.move_threshold_passed && drag_info.want_move_threshold) {
 
 		drag_info.want_move_threshold = false; // don't copy again
 
@@ -2866,7 +2864,6 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			}
 			
 			latest_regionview = 0;
-			
 			
 			/* create a new region with the same name. */
 			
