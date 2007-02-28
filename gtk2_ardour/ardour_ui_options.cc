@@ -822,6 +822,17 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 	if (PARAM_IS ("slave-source")) {
 
 		sync_option_combo.set_active_text (slave_source_to_string (Config->get_slave_source()));
+		
+		switch (Config->get_slave_source()) {
+		case None:
+			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (true);
+			break;
+
+		default:
+			/* XXX need to make auto-play is off as well as insensitive */
+			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (false);
+			break;
+		}
 
 	} else if (PARAM_IS ("send-mtc")) {
 

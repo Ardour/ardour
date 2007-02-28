@@ -924,7 +924,7 @@ Session::post_transport ()
 
 	if (post_transport_work & PostTransportLocate) {
 
-		if ((Config->get_auto_play() && !_exporting) || (post_transport_work & PostTransportRoll)) {
+		if (((Config->get_slave_source() == None && Config->get_auto_play()) && !_exporting) || (post_transport_work & PostTransportRoll)) {
 			start_transport ();
 			
 		} else {
