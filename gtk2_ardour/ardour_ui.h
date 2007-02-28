@@ -697,6 +697,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	bool can_save_keybindings;
 	bool first_idle ();
+
+	void no_memory_warning ();
+	void check_memory_locking ();
 };
 
 #endif /* __ardour_gui_h__ */

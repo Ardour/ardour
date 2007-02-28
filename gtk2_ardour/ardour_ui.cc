@@ -437,26 +437,70 @@ ARDOUR_UI::save_ardour_state ()
 void
 ARDOUR_UI::startup ()
 {
-	if (engine->is_realtime()) {
+	check_memory_locking();
+}
+
+void
+ARDOUR_UI::no_memory_warning ()
+{
+	XMLNode node (X_("no-memory-warning"));
+	Config->add_instant_xml (node, get_user_ardour_path());
+}
+
+void
+ARDOUR_UI::check_memory_locking ()
+{
+#ifdef __APPLE__
+	/* OS X doesn't support mlockall(2), and so testing for memory locking capability there is pointless */
+	return;
+#endif
+
+	XMLNode* memory_warning_node = Config->instant_xml (X_("no-memory-warning"), get_user_ardour_path());
+
+	if (engine->is_realtime() && memory_warning_node == 0) {
 
 		struct rlimit limits;
-		
+		int64_t ram;
+		long pages, page_size;
+
+		if ((page_size = sysconf (_SC_PAGESIZE)) < 0 ||(pages = sysconf (_SC_PHYS_PAGES)) < 0) {
+			ram = 0;
+		} else {
+			ram = (int64_t) pages * (int64_t) page_size;
+		}
+
 		if (getrlimit (RLIMIT_MEMLOCK, &limits)) {
 			return;
 		}
 		
 		if (limits.rlim_cur != RLIM_INFINITY) {
-			MessageDialog msg (_("WARNING: Your system has a limit for maximum amount of locked memory. "
-					     "This might cause Ardour to run out of memory before your system "
-					     "runs out of memory. \n\n"
-					     "You can view the memory limit with 'ulimit -l', "
-					     "and it is normally controlled by /etc/security/limits.conf"));
+
+			if (ram == 0 || ((double) limits.rlim_cur / ram) < 0.75) {
 			
-			editor->ensure_float (msg);
-			msg.run ();
+
+				MessageDialog msg (_("WARNING: Your system has a limit for maximum amount of locked memory. "
+						     "This might cause Ardour to run out of memory before your system "
+						     "runs out of memory. \n\n"
+						     "You can view the memory limit with 'ulimit -l', "
+						     "and it is normally controlled by /etc/security/limits.conf"));
+				
+				VBox* vbox = msg.get_vbox();
+				HBox hbox;
+				CheckButton cb (_("Do not show this window again"));
+				
+				cb.signal_toggled().connect (mem_fun (*this, &ARDOUR_UI::no_memory_warning));
+				
+				hbox.pack_start (cb, true, false);
+				vbox->pack_start (hbox);
+				hbox.show_all ();
+				
+				editor->ensure_float (msg);
+				msg.run ();
+			}
 		}
 	}
 }
+
 
 void
 ARDOUR_UI::finish()
