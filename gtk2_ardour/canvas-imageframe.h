@@ -16,7 +16,11 @@
 
 #include <libgnomecanvas/libgnomecanvas.h>
 #include <gtk/gtkenums.h> 
+
+extern "C" {
+/* some versions of libart contain functions not inside an extern C block */
 #include <libart_lgpl/art_misc.h>
+}
 #include <libart_lgpl/art_pixbuf.h>
 
 

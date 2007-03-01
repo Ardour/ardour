@@ -119,7 +119,7 @@ xpm2rgb (const char** xpm, uint32_t& w, uint32_t& h)
 		return 0;
 	}
 
-	savergb = rgb = (unsigned char*)art_alloc (h * w * 3);
+	savergb = rgb = (unsigned char*) malloc (h * w * 3);
 	
 	// LOAD XPM COLORMAP LONG ENOUGH TO DO CONVERSION
 	for (t = 0; t < colors; ++t) {
@@ -162,7 +162,7 @@ xpm2rgba (const char** xpm, uint32_t& w, uint32_t& h)
 		return 0;
 	}
 
-	savergb = rgb = (unsigned char*)art_alloc (h * w * 4);
+	savergb = rgb = (unsigned char*) malloc (h * w * 4);
 	
 	// LOAD XPM COLORMAP LONG ENOUGH TO DO CONVERSION
 
