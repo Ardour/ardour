@@ -105,11 +105,10 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 				   unlike Ringbuffer::read()
 				*/
 
-				RequestObject req (*vec.buf[0]);
-				i->second->increment_read_ptr (1);
 				request_buffer_map_lock.unlock ();
-				do_request (&req);
+				do_request (vec.buf[0]);
 				request_buffer_map_lock.lock ();
+				i->second->increment_read_ptr (1);
 			} 
 		}
 	}
