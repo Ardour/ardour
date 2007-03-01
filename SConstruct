@@ -661,7 +661,6 @@ opt_flags[:0] = [
     "-fomit-frame-pointer",
     "-ffast-math",
     "-fstrength-reduce",
-    "-fno-strict-aliasing",
     "-pipe"
     ]
 
