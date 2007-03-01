@@ -1095,7 +1095,13 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 	assert(mixdown_buffer);
 	assert(gain_buffer);
 
+	vector.buf[0] = 0;
+	vector.len[0] = 0;
+	vector.buf[1] = 0;
+	vector.len[1] = 0;
+
 	channels.front().playback_buf->get_write_vector (&vector);
+
 	
 	if ((total_space = vector.len[0] + vector.len[1]) == 0) {
 		return 0;
