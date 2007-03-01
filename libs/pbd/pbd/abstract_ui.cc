@@ -100,11 +100,6 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 			if (vec.len[0] == 0) {
 				break;
 			} else {
-				/* request_factory/copy constructor does a deep
-				   copy of the Request object,
-				   unlike Ringbuffer::read()
-				*/
-
 				request_buffer_map_lock.unlock ();
 				do_request (vec.buf[0]);
 				request_buffer_map_lock.lock ();
