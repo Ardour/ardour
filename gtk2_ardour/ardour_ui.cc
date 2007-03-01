@@ -453,7 +453,7 @@ ARDOUR_UI::check_memory_locking ()
 #ifdef __APPLE__
 	/* OS X doesn't support mlockall(2), and so testing for memory locking capability there is pointless */
 	return;
-#endif
+#else // !__APPLE__
 
 	XMLNode* memory_warning_node = Config->instant_xml (X_("no-memory-warning"), get_user_ardour_path());
 
@@ -499,6 +499,7 @@ ARDOUR_UI::check_memory_locking ()
 			}
 		}
 	}
+#endif // !__APPLE__
 }
 
 
