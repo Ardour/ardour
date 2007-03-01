@@ -17,10 +17,14 @@
 #include <libgnomecanvas/libgnomecanvas.h>
 #include <gtk/gtkenums.h> 
 
+#ifdef __cplusplus
 extern "C" {
-/* some versions of libart contain functions not inside an extern C block */
+#endif
 #include <libart_lgpl/art_misc.h>
+#ifdef __cplusplus
 }
+#endif
+
 #include <libart_lgpl/art_pixbuf.h>
 
 
