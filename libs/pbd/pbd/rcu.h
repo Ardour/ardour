@@ -25,7 +25,7 @@ class RCUManager
   protected:
 	union {
 	    boost::shared_ptr<T>* m_rcu_value;
-	    volatile gpointer gptr;
+	    mutable volatile gpointer gptr;
 	} x;
 };
  

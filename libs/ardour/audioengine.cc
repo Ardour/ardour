@@ -225,9 +225,9 @@ AudioEngine::jack_sync_callback (jack_transport_state_t state, jack_position_t* 
 {
 	if (_jack && session) {
 		return session->jack_sync_callback (state, pos);
-	} else {
-		return true;
 	}
+
+	return true;
 }
 
 int
