@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		696149E90B97CEF500ECBDF0 /* glib in Frameworks */ = {isa = PBXBuildFile; fileRef = 696149E50B97CEF500ECBDF0 /* glib */; };
+		696149EA0B97CEF500ECBDF0 /* gmodule in Frameworks */ = {isa = PBXBuildFile; fileRef = 696149E60B97CEF500ECBDF0 /* gmodule */; };
+		696149EB0B97CEF500ECBDF0 /* gobject in Frameworks */ = {isa = PBXBuildFile; fileRef = 696149E70B97CEF500ECBDF0 /* gobject */; };
+		696149EC0B97CEF500ECBDF0 /* gthread in Frameworks */ = {isa = PBXBuildFile; fileRef = 696149E80B97CEF500ECBDF0 /* gthread */; };
 		6964FECA0B8E7A7900799BAE /* version.h in Headers */ = {isa = PBXBuildFile; fileRef = 6964FEC80B8E7A7900799BAE /* version.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		6964FECB0B8E7A7900799BAE /* version.cc in Sources */ = {isa = PBXBuildFile; fileRef = 6964FEC90B8E7A7900799BAE /* version.cc */; };
 		696C90530B8D526000D66CAF /* ardour.h in Headers */ = {isa = PBXBuildFile; fileRef = 696C8FAF0B8D526000D66CAF /* ardour.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -170,12 +174,8 @@
 		696C91070B8D52F300D66CAF /* Sndfile-ardour.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 696C90FE0B8D52F300D66CAF /* Sndfile-ardour.framework */; };
 		696C91080B8D52F300D66CAF /* soundtouch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 696C90FF0B8D52F300D66CAF /* soundtouch.framework */; };
 		697D98090B8DCD8C0006A892 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 697D98080B8DCD8C0006A892 /* libxml2.dylib */; };
-		69B1B5160B8E7D72007E41C1 /* libglib-2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 69B1B5120B8E7D72007E41C1 /* libglib-2.0.dylib */; };
-		69B1B5170B8E7D72007E41C1 /* libgmodule-2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 69B1B5130B8E7D72007E41C1 /* libgmodule-2.0.dylib */; };
-		69B1B5180B8E7D72007E41C1 /* libgobject-2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 69B1B5140B8E7D72007E41C1 /* libgobject-2.0.dylib */; };
-		69B1B5190B8E7D72007E41C1 /* libgthread-2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 69B1B5150B8E7D72007E41C1 /* libgthread-2.0.dylib */; };
-		69B1B51B0B8E7D84007E41C1 /* libFLAC.7.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 69B1B51A0B8E7D84007E41C1 /* libFLAC.7.dylib */; };
-		69B1B51D0B8E7DF7007E41C1 /* midi++.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 691B3B960B8D552F009155B5 /* midi++.framework */; };
+		698D9AB60B969A6F00C53B63 /* midi++.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 698D9AB50B969A5B00C53B63 /* midi++.framework */; };
+		69AD45850B97D10600806E7E /* FLAC in Frameworks */ = {isa = PBXBuildFile; fileRef = 69AD45840B97D10600806E7E /* FLAC */; };
 		69B1B5210B8E7DFD007E41C1 /* pbd.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 691B3B7C0B8D5508009155B5 /* pbd.framework */; };
 		69B1B5500B8E80AD007E41C1 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 69B1B54F0B8E80AD007E41C1 /* CoreAudio.framework */; };
 		69F7CE5A0B8DCB3300D76871 /* basic_ui.cc in Sources */ = {isa = PBXBuildFile; fileRef = 69F7CE520B8DCB3300D76871 /* basic_ui.cc */; };
@@ -184,7 +184,7 @@
 		69F7CE5D0B8DCB3300D76871 /* smpte.h in Headers */ = {isa = PBXBuildFile; fileRef = 69F7CE560B8DCB3300D76871 /* smpte.h */; };
 		69F7CE5E0B8DCB3300D76871 /* control_protocol.cc in Sources */ = {isa = PBXBuildFile; fileRef = 69F7CE570B8DCB3300D76871 /* control_protocol.cc */; };
 		69F7CE600B8DCB3300D76871 /* smpte.cc in Sources */ = {isa = PBXBuildFile; fileRef = 69F7CE590B8DCB3300D76871 /* smpte.cc */; };
-		8D07F2BE0486CC7A007CD1D0 /* ardour_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 32BAE0B70371A74B00C91783 /* ardour_Prefix.pch */; settings = {ATTRIBUTES = (Private, ); }; };
+		8D07F2BE0486CC7A007CD1D0 /* ardour_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 32BAE0B70371A74B00C91783 /* ardour_Prefix.pch */; settings = {ATTRIBUTES = (); }; };
 		8D07F2C00486CC7A007CD1D0 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C1666FE841158C02AAC07 /* InfoPlist.strings */; };
 /* End PBXBuildFile section */
 
@@ -196,11 +196,18 @@
 			remoteGlobalIDString = 8D07F2C80486CC7A007CD1D0;
 			remoteInfo = pbd;
 		};
-		691B3B950B8D552F009155B5 /* PBXContainerItemProxy */ = {
+		698D9AB40B969A5B00C53B63 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 691B3B910B8D552F009155B5 /* midi++.xcodeproj */;
+			containerPortal = 698D9AB00B969A5B00C53B63 /* midi++.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 8D07F2C80486CC7A007CD1D0;
+			remoteInfo = "midi++";
+		};
+		698D9AB90B969ADC00C53B63 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 698D9AB00B969A5B00C53B63 /* midi++.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D07F2BC0486CC7A007CD1D0;
 			remoteInfo = "midi++";
 		};
 		69D5F6250B8D58A500301E71 /* PBXContainerItemProxy */ = {
@@ -210,20 +217,16 @@
 			remoteGlobalIDString = 8D07F2BC0486CC7A007CD1D0;
 			remoteInfo = pbd;
 		};
-		69D5F6270B8D58AC00301E71 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 691B3B910B8D552F009155B5 /* midi++.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 8D07F2BC0486CC7A007CD1D0;
-			remoteInfo = "midi++";
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		089C1667FE841158C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		32BAE0B70371A74B00C91783 /* ardour_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ardour_Prefix.pch; sourceTree = "<group>"; };
 		691B3B770B8D5508009155B5 /* pbd.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = pbd.xcodeproj; path = ../../pbd/macosx/pbd.xcodeproj; sourceTree = SOURCE_ROOT; };
-		691B3B910B8D552F009155B5 /* midi++.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "midi++.xcodeproj"; path = "../../midi++2/macosx/midi++.xcodeproj"; sourceTree = SOURCE_ROOT; };
+		696149E50B97CEF500ECBDF0 /* glib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = glib; path = /Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/glib; sourceTree = "<absolute>"; };
+		696149E60B97CEF500ECBDF0 /* gmodule */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = gmodule; path = /Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/gmodule; sourceTree = "<absolute>"; };
+		696149E70B97CEF500ECBDF0 /* gobject */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = gobject; path = /Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/gobject; sourceTree = "<absolute>"; };
+		696149E80B97CEF500ECBDF0 /* gthread */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = gthread; path = /Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/gthread; sourceTree = "<absolute>"; };
 		6964FEC80B8E7A7900799BAE /* version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = version.h; sourceTree = "<group>"; };
 		6964FEC90B8E7A7900799BAE /* version.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = version.cc; sourceTree = "<group>"; };
 		696C8FAF0B8D526000D66CAF /* ardour.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ardour.h; sourceTree = "<group>"; };
@@ -387,11 +390,8 @@
 		696C90FE0B8D52F300D66CAF /* Sndfile-ardour.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "Sndfile-ardour.framework"; path = "/Library/Frameworks/Sndfile-ardour.framework"; sourceTree = "<absolute>"; };
 		696C90FF0B8D52F300D66CAF /* soundtouch.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = soundtouch.framework; path = /Library/Frameworks/soundtouch.framework; sourceTree = "<absolute>"; };
 		697D98080B8DCD8C0006A892 /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = /usr/lib/libxml2.dylib; sourceTree = "<absolute>"; };
-		69B1B5120B8E7D72007E41C1 /* libglib-2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libglib-2.0.dylib"; path = "/Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/libglib-2.0.dylib"; sourceTree = "<absolute>"; };
-		69B1B5130B8E7D72007E41C1 /* libgmodule-2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libgmodule-2.0.dylib"; path = "/Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/libgmodule-2.0.dylib"; sourceTree = "<absolute>"; };
-		69B1B5140B8E7D72007E41C1 /* libgobject-2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libgobject-2.0.dylib"; path = "/Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/libgobject-2.0.dylib"; sourceTree = "<absolute>"; };
-		69B1B5150B8E7D72007E41C1 /* libgthread-2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libgthread-2.0.dylib"; path = "/Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/libgthread-2.0.dylib"; sourceTree = "<absolute>"; };
-		69B1B51A0B8E7D84007E41C1 /* libFLAC.7.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libFLAC.7.dylib; path = "/Library/Frameworks/Sndfile-ardour.framework/Versions/A/Libraries/libFLAC.7.dylib"; sourceTree = "<absolute>"; };
+		698D9AB00B969A5B00C53B63 /* midi++.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "midi++.xcodeproj"; path = "../../midi++2/macosx/midi++.xcodeproj"; sourceTree = SOURCE_ROOT; };
+		69AD45840B97D10600806E7E /* FLAC */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = FLAC; path = "/Library/Frameworks/Sndfile-ardour.framework/Versions/A/Libraries/FLAC"; sourceTree = "<absolute>"; };
 		69B1B54F0B8E80AD007E41C1 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = /System/Library/Frameworks/CoreAudio.framework; sourceTree = "<absolute>"; };
 		69F7CE520B8DCB3300D76871 /* basic_ui.cc */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = basic_ui.cc; sourceTree = "<group>"; };
 		69F7CE540B8DCB3300D76871 /* basic_ui.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = basic_ui.h; sourceTree = "<group>"; };
@@ -408,6 +408,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				698D9AB60B969A6F00C53B63 /* midi++.framework in Frameworks */,
 				69B1B5500B8E80AD007E41C1 /* CoreAudio.framework in Frameworks */,
 				696C91000B8D52F300D66CAF /* glibmm.framework in Frameworks */,
 				696C91010B8D52F300D66CAF /* Jack.framework in Frameworks */,
@@ -419,13 +420,12 @@
 				696C91070B8D52F300D66CAF /* Sndfile-ardour.framework in Frameworks */,
 				696C91080B8D52F300D66CAF /* soundtouch.framework in Frameworks */,
 				697D98090B8DCD8C0006A892 /* libxml2.dylib in Frameworks */,
-				69B1B5160B8E7D72007E41C1 /* libglib-2.0.dylib in Frameworks */,
 				69B1B5210B8E7DFD007E41C1 /* pbd.framework in Frameworks */,
-				69B1B51D0B8E7DF7007E41C1 /* midi++.framework in Frameworks */,
-				69B1B5170B8E7D72007E41C1 /* libgmodule-2.0.dylib in Frameworks */,
-				69B1B5180B8E7D72007E41C1 /* libgobject-2.0.dylib in Frameworks */,
-				69B1B5190B8E7D72007E41C1 /* libgthread-2.0.dylib in Frameworks */,
-				69B1B51B0B8E7D84007E41C1 /* libFLAC.7.dylib in Frameworks */,
+				696149E90B97CEF500ECBDF0 /* glib in Frameworks */,
+				696149EA0B97CEF500ECBDF0 /* gmodule in Frameworks */,
+				696149EB0B97CEF500ECBDF0 /* gobject in Frameworks */,
+				696149EC0B97CEF500ECBDF0 /* gthread in Frameworks */,
+				69AD45850B97D10600806E7E /* FLAC in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -456,14 +456,14 @@
 		0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				69AD45840B97D10600806E7E /* FLAC */,
+				696149E50B97CEF500ECBDF0 /* glib */,
+				696149E60B97CEF500ECBDF0 /* gmodule */,
+				696149E70B97CEF500ECBDF0 /* gobject */,
+				696149E80B97CEF500ECBDF0 /* gthread */,
+				698D9AB00B969A5B00C53B63 /* midi++.xcodeproj */,
 				69B1B54F0B8E80AD007E41C1 /* CoreAudio.framework */,
-				69B1B51A0B8E7D84007E41C1 /* libFLAC.7.dylib */,
-				69B1B5120B8E7D72007E41C1 /* libglib-2.0.dylib */,
-				69B1B5130B8E7D72007E41C1 /* libgmodule-2.0.dylib */,
-				69B1B5140B8E7D72007E41C1 /* libgobject-2.0.dylib */,
-				69B1B5150B8E7D72007E41C1 /* libgthread-2.0.dylib */,
 				697D98080B8DCD8C0006A892 /* libxml2.dylib */,
-				691B3B910B8D552F009155B5 /* midi++.xcodeproj */,
 				691B3B770B8D5508009155B5 /* pbd.xcodeproj */,
 				696C90F70B8D52F300D66CAF /* glibmm.framework */,
 				696C90F80B8D52F300D66CAF /* Jack.framework */,
@@ -577,14 +577,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		691B3B920B8D552F009155B5 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				691B3B960B8D552F009155B5 /* midi++.framework */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		696C8FAD0B8D526000D66CAF /* ardour */ = {
 			isa = PBXGroup;
 			children = (
@@ -671,6 +663,14 @@
 			name = ardour;
 			path = ../ardour;
 			sourceTree = SOURCE_ROOT;
+		};
+		698D9AB10B969A5B00C53B63 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				698D9AB50B969A5B00C53B63 /* midi++.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
 		};
 		69F7CE510B8DCB3300D76871 /* control_protocol */ = {
 			isa = PBXGroup;
@@ -807,7 +807,7 @@
 			);
 			dependencies = (
 				69D5F6260B8D58A500301E71 /* PBXTargetDependency */,
-				69D5F6280B8D58AC00301E71 /* PBXTargetDependency */,
+				698D9ABA0B969ADC00C53B63 /* PBXTargetDependency */,
 			);
 			name = ardour;
 			productInstallPath = "$(HOME)/Library/Frameworks";
@@ -828,8 +828,8 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 691B3B920B8D552F009155B5 /* Products */;
-					ProjectRef = 691B3B910B8D552F009155B5 /* midi++.xcodeproj */;
+					ProductGroup = 698D9AB10B969A5B00C53B63 /* Products */;
+					ProjectRef = 698D9AB00B969A5B00C53B63 /* midi++.xcodeproj */;
 				},
 				{
 					ProductGroup = 691B3B780B8D5508009155B5 /* Products */;
@@ -852,11 +852,11 @@
 			remoteRef = 691B3B7B0B8D5508009155B5 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		691B3B960B8D552F009155B5 /* midi++.framework */ = {
+		698D9AB50B969A5B00C53B63 /* midi++.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = "midi++.framework";
-			remoteRef = 691B3B950B8D552F009155B5 /* PBXContainerItemProxy */;
+			remoteRef = 698D9AB40B969A5B00C53B63 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -967,15 +967,15 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		698D9ABA0B969ADC00C53B63 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "midi++";
+			targetProxy = 698D9AB90B969ADC00C53B63 /* PBXContainerItemProxy */;
+		};
 		69D5F6260B8D58A500301E71 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = pbd;
 			targetProxy = 69D5F6250B8D58A500301E71 /* PBXContainerItemProxy */;
-		};
-		69D5F6280B8D58AC00301E71 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "midi++";
-			targetProxy = 69D5F6270B8D58AC00301E71 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -991,43 +991,6 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		4FADC24308B4156D00ABE55E /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
-				);
-				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.5.sdk/System/Library/Frameworks\"";
-				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
-				FRAMEWORK_VERSION = A;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = ardour_Prefix.pch;
-				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Library/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
-				);
-				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/GLib.framework/Versions/2.12.3/Libraries\"";
-				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/Sndfile-ardour.framework/Versions/A/Libraries\"";
-				LIBRARY_STYLE = DYNAMIC;
-				MACH_O_TYPE = mh_dylib;
-				PRODUCT_NAME = ardour;
-				WRAPPER_EXTENSION = framework;
-				ZERO_LINK = YES;
-			};
-			name = Debug;
-		};
 		4FADC24408B4156D00ABE55E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1035,7 +998,7 @@
 					ppc,
 					i386,
 				);
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = stabs;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -1043,20 +1006,22 @@
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
 				);
-				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.5.sdk/System/Library/Frameworks\"";
-				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
 				FRAMEWORK_VERSION = A;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ardour_Prefix.pch;
 				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Library/Frameworks";
+				INSTALL_PATH = "@executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
 				);
+				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/GLib.framework/Versions/2.12.3/Libraries\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/Sndfile-ardour.framework/Versions/A/Libraries\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/GLib.framework/Versions/2.12.3/Libraries\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/Sndfile-ardour.framework/Versions/A/Libraries\"";
 				LIBRARY_STYLE = DYNAMIC;
@@ -1066,22 +1031,20 @@
 			};
 			name = Release;
 		};
-		4FADC24708B4156D00ABE55E /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				PREBINDING = NO;
-				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
-			};
-			name = Debug;
-		};
 		4FADC24808B4156D00ABE55E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH)";
-				FRAMEWORK_SEARCH_PATHS = "/opt/ardour/Frameworks/**";
+				ARCHS = (
+					"$(NATIVE_ARCH)",
+					ppc,
+				);
+				FRAMEWORK_SEARCH_PATHS = (
+					/opt/ardour/src/ardour2/libs/pbd/macosx/build/Release,
+					"/opt/ardour/src/ardour2/libs/midi++2/macosx/build/Release",
+				);
 				GCC_FAST_OBJC_DISPATCH = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G4;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					HAVE_WEAK_COREAUDIO,
 					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_FOR_PROJECT_1)",
@@ -1096,6 +1059,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS_QUOTED_FOR_PROJECT_3 = "MODULE_DIR=\"\\\"/Library/Application\\ Support/Ardour/modules\\\"\"";
 				GCC_PREPROCESSOR_DEFINITIONS_QUOTED_FOR_PROJECT_4 = "DATA_DIR=\"\\\"/Library/Application\\ Support/Ardour/data\\\"\"";
 				GCC_PREPROCESSOR_DEFINITIONS_QUOTED_FOR_PROJECT_5 = "LOCALEDIR=\"\\\"/Library/Application\\ Support/Ardour/locales\\\"\"";
+				GCC_STRICT_ALIASING = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
@@ -1109,11 +1073,108 @@
 					/Library/Frameworks/LRdf.framework/Headers,
 					/opt/ardour/src/ardour2/libs/surfaces/control_protocol,
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.5;
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = "";
 				PREBINDING = NO;
-				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
 			name = Release;
+		};
+		694E7C8A0B97B0FE0018D03D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH)";
+				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					/opt/ardour/src/ardour2/libs/pbd/macosx/build/Release,
+					"/opt/ardour/src/ardour2/libs/midi++2/macosx/build/Release",
+				);
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_ENABLE_OBJC_EXCEPTIONS = NO;
+				GCC_FAST_OBJC_DISPATCH = NO;
+				GCC_MODEL_TUNING = G4;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					HAVE_WEAK_COREAUDIO,
+					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_FOR_PROJECT_1)",
+					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_FOR_PROJECT_2)",
+					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_FOR_PROJECT_3)",
+					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_FOR_PROJECT_4)",
+					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_FOR_PROJECT_5)",
+					NO_POSIX_MEMALIGN,
+				);
+				GCC_PREPROCESSOR_DEFINITIONS_QUOTED_FOR_PROJECT_1 = "PACKAGE=\"\\\"libardour\\\"\"";
+				GCC_PREPROCESSOR_DEFINITIONS_QUOTED_FOR_PROJECT_2 = "CONFIG_DIR=\"\\\"/Library/Application\\ Support/Ardour/config\\\"\"";
+				GCC_PREPROCESSOR_DEFINITIONS_QUOTED_FOR_PROJECT_3 = "MODULE_DIR=\"\\\"/Library/Application\\ Support/Ardour/modules\\\"\"";
+				GCC_PREPROCESSOR_DEFINITIONS_QUOTED_FOR_PROJECT_4 = "DATA_DIR=\"\\\"/Library/Application\\ Support/Ardour/data\\\"\"";
+				GCC_PREPROCESSOR_DEFINITIONS_QUOTED_FOR_PROJECT_5 = "LOCALEDIR=\"\\\"/Library/Application\\ Support/Ardour/locales\\\"\"";
+				GCC_STRICT_ALIASING = YES;
+				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_POINTER_SIGNEDNESS = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_ALLOW_INCOMPLETE_PROTOCOL = NO;
+				GCC_WARN_CHECK_SWITCH_STATEMENTS = YES;
+				GCC_WARN_EFFECTIVE_CPLUSPLUS_VIOLATIONS = NO;
+				GCC_WARN_MISSING_PARENTHESES = YES;
+				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = NO;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					/usr/include/libxml2,
+					/Library/Frameworks/sigc.framework/Headers,
+					/Library/Frameworks/GLib.framework/Headers,
+					/Library/Frameworks/glibmm.framework/Headers,
+					"/Library/Frameworks/Sndfile-ardour.framework/Headers",
+					/Library/Frameworks/SampleRate.framework/Headers,
+					/Library/Frameworks/Raptor.framework/Headers,
+					/Library/Frameworks/LRdf.framework/Headers,
+					/opt/ardour/src/ardour2/libs/surfaces/control_protocol,
+				);
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = "";
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				STRIP_INSTALLED_PRODUCT = NO;
+			};
+			name = Debug;
+		};
+		694E7C8B0B97B0FE0018D03D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = i386;
+				DEBUG_INFORMATION_FORMAT = stabs;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
+				);
+				FRAMEWORK_VERSION = A;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = ardour_Prefix.pch;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_3)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_4)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/GLib.framework/Versions/2.12.3/Libraries\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/Sndfile-ardour.framework/Versions/A/Libraries\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_3 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/GLib.framework/Versions/2.12.3/Libraries\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_4 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/Sndfile-ardour.framework/Versions/A/Libraries\"";
+				LIBRARY_STYLE = DYNAMIC;
+				MACH_O_TYPE = mh_dylib;
+				PRODUCT_NAME = ardour;
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Debug;
 		};
 /* End XCBuildConfiguration section */
 
@@ -1121,8 +1182,8 @@
 		4FADC24208B4156D00ABE55E /* Build configuration list for PBXNativeTarget "ardour" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				4FADC24308B4156D00ABE55E /* Debug */,
 				4FADC24408B4156D00ABE55E /* Release */,
+				694E7C8B0B97B0FE0018D03D /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -1130,8 +1191,8 @@
 		4FADC24608B4156D00ABE55E /* Build configuration list for PBXProject "ardour" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				4FADC24708B4156D00ABE55E /* Debug */,
 				4FADC24808B4156D00ABE55E /* Release */,
+				694E7C8A0B97B0FE0018D03D /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

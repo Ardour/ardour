@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		696149880B97CED200ECBDF0 /* glib in Frameworks */ = {isa = PBXBuildFile; fileRef = 696149840B97CED200ECBDF0 /* glib */; };
+		696149890B97CED200ECBDF0 /* gmodule in Frameworks */ = {isa = PBXBuildFile; fileRef = 696149850B97CED200ECBDF0 /* gmodule */; };
+		6961498A0B97CED200ECBDF0 /* gobject in Frameworks */ = {isa = PBXBuildFile; fileRef = 696149860B97CED200ECBDF0 /* gobject */; };
+		6961498B0B97CED200ECBDF0 /* gthread in Frameworks */ = {isa = PBXBuildFile; fileRef = 696149870B97CED200ECBDF0 /* gthread */; };
 		69A0E07A0B8A3B1200A24967 /* coremidi_midiport.cc in Sources */ = {isa = PBXBuildFile; fileRef = 69A0E05C0B8A3B1200A24967 /* coremidi_midiport.cc */; };
 		69A0E07B0B8A3B1200A24967 /* fd_midiport.cc in Sources */ = {isa = PBXBuildFile; fileRef = 69A0E05D0B8A3B1200A24967 /* fd_midiport.cc */; };
 		69A0E07C0B8A3B1200A24967 /* fifomidi.cc in Sources */ = {isa = PBXBuildFile; fileRef = 69A0E05E0B8A3B1200A24967 /* fifomidi.cc */; };
@@ -32,10 +36,6 @@
 		69A0E0950B8A3B1200A24967 /* mtc.cc in Sources */ = {isa = PBXBuildFile; fileRef = 69A0E0780B8A3B1200A24967 /* mtc.cc */; };
 		69A0E0960B8A3B1200A24967 /* port_request.cc in Sources */ = {isa = PBXBuildFile; fileRef = 69A0E0790B8A3B1200A24967 /* port_request.cc */; };
 		69A0E09E0B8A3B6300A24967 /* sigc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 69A0E09C0B8A3B6300A24967 /* sigc.framework */; };
-		69A0E0A80B8A3BA400A24967 /* libglib-2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 69A0E0A40B8A3BA400A24967 /* libglib-2.0.dylib */; };
-		69A0E0A90B8A3BA400A24967 /* libgmodule-2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 69A0E0A50B8A3BA400A24967 /* libgmodule-2.0.dylib */; };
-		69A0E0AA0B8A3BA400A24967 /* libgobject-2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 69A0E0A60B8A3BA400A24967 /* libgobject-2.0.dylib */; };
-		69A0E0AB0B8A3BA400A24967 /* libgthread-2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 69A0E0A70B8A3BA400A24967 /* libgthread-2.0.dylib */; };
 		69A0E0B00B8A3BEF00A24967 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 69A0E0AF0B8A3BEF00A24967 /* CoreMIDI.framework */; };
 		69A0E0B50B8A3C0B00A24967 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 69A0E0B40B8A3C0B00A24967 /* CoreFoundation.framework */; };
 		69A0E0BA0B8A3C2000A24967 /* glibmm.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 69A0E0B90B8A3C2000A24967 /* glibmm.framework */; };
@@ -66,6 +66,10 @@
 /* Begin PBXFileReference section */
 		089C1667FE841158C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		32BAE0B70371A74B00C91783 /* midi++_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "midi++_Prefix.pch"; sourceTree = "<group>"; };
+		696149840B97CED200ECBDF0 /* glib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = glib; path = /Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/glib; sourceTree = "<absolute>"; };
+		696149850B97CED200ECBDF0 /* gmodule */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = gmodule; path = /Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/gmodule; sourceTree = "<absolute>"; };
+		696149860B97CED200ECBDF0 /* gobject */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = gobject; path = /Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/gobject; sourceTree = "<absolute>"; };
+		696149870B97CED200ECBDF0 /* gthread */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = gthread; path = /Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/gthread; sourceTree = "<absolute>"; };
 		69A0E05C0B8A3B1200A24967 /* coremidi_midiport.cc */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = coremidi_midiport.cc; path = ../coremidi_midiport.cc; sourceTree = SOURCE_ROOT; };
 		69A0E05D0B8A3B1200A24967 /* fd_midiport.cc */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = fd_midiport.cc; path = ../fd_midiport.cc; sourceTree = SOURCE_ROOT; };
 		69A0E05E0B8A3B1200A24967 /* fifomidi.cc */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = fifomidi.cc; path = ../fifomidi.cc; sourceTree = SOURCE_ROOT; };
@@ -91,10 +95,6 @@
 		69A0E0780B8A3B1200A24967 /* mtc.cc */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = mtc.cc; path = ../mtc.cc; sourceTree = SOURCE_ROOT; };
 		69A0E0790B8A3B1200A24967 /* port_request.cc */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = port_request.cc; path = ../port_request.cc; sourceTree = SOURCE_ROOT; };
 		69A0E09C0B8A3B6300A24967 /* sigc.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = sigc.framework; path = /Library/Frameworks/sigc.framework; sourceTree = "<absolute>"; };
-		69A0E0A40B8A3BA400A24967 /* libglib-2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libglib-2.0.dylib"; path = "/Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/libglib-2.0.dylib"; sourceTree = "<absolute>"; };
-		69A0E0A50B8A3BA400A24967 /* libgmodule-2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libgmodule-2.0.dylib"; path = "/Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/libgmodule-2.0.dylib"; sourceTree = "<absolute>"; };
-		69A0E0A60B8A3BA400A24967 /* libgobject-2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libgobject-2.0.dylib"; path = "/Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/libgobject-2.0.dylib"; sourceTree = "<absolute>"; };
-		69A0E0A70B8A3BA400A24967 /* libgthread-2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libgthread-2.0.dylib"; path = "/Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/libgthread-2.0.dylib"; sourceTree = "<absolute>"; };
 		69A0E0AF0B8A3BEF00A24967 /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = /System/Library/Frameworks/CoreMIDI.framework; sourceTree = "<absolute>"; };
 		69A0E0B40B8A3C0B00A24967 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
 		69A0E0B90B8A3C2000A24967 /* glibmm.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = glibmm.framework; path = /Library/Frameworks/glibmm.framework; sourceTree = "<absolute>"; };
@@ -112,13 +112,13 @@
 			files = (
 				69D5F6010B8D55B100301E71 /* pbd.framework in Frameworks */,
 				69A0E09E0B8A3B6300A24967 /* sigc.framework in Frameworks */,
-				69A0E0A80B8A3BA400A24967 /* libglib-2.0.dylib in Frameworks */,
-				69A0E0A90B8A3BA400A24967 /* libgmodule-2.0.dylib in Frameworks */,
-				69A0E0AA0B8A3BA400A24967 /* libgobject-2.0.dylib in Frameworks */,
-				69A0E0AB0B8A3BA400A24967 /* libgthread-2.0.dylib in Frameworks */,
 				69A0E0B00B8A3BEF00A24967 /* CoreMIDI.framework in Frameworks */,
 				69A0E0B50B8A3C0B00A24967 /* CoreFoundation.framework in Frameworks */,
 				69A0E0BA0B8A3C2000A24967 /* glibmm.framework in Frameworks */,
+				696149880B97CED200ECBDF0 /* glib in Frameworks */,
+				696149890B97CED200ECBDF0 /* gmodule in Frameworks */,
+				6961498A0B97CED200ECBDF0 /* gobject in Frameworks */,
+				6961498B0B97CED200ECBDF0 /* gthread in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -149,14 +149,14 @@
 		0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				696149840B97CED200ECBDF0 /* glib */,
+				696149850B97CED200ECBDF0 /* gmodule */,
+				696149860B97CED200ECBDF0 /* gobject */,
+				696149870B97CED200ECBDF0 /* gthread */,
 				69D5F5FB0B8D55A000301E71 /* pbd.xcodeproj */,
 				69A0E0B90B8A3C2000A24967 /* glibmm.framework */,
 				69A0E0B40B8A3C0B00A24967 /* CoreFoundation.framework */,
 				69A0E0AF0B8A3BEF00A24967 /* CoreMIDI.framework */,
-				69A0E0A40B8A3BA400A24967 /* libglib-2.0.dylib */,
-				69A0E0A50B8A3BA400A24967 /* libgmodule-2.0.dylib */,
-				69A0E0A60B8A3BA400A24967 /* libgobject-2.0.dylib */,
-				69A0E0A70B8A3BA400A24967 /* libgthread-2.0.dylib */,
 				69A0E09C0B8A3B6300A24967 /* sigc.framework */,
 			);
 			name = "External Frameworks and Libraries";
@@ -274,6 +274,7 @@
 		0867D690FE84028FC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 4FADC24608B4156D00ABE55E /* Build configuration list for PBXProject "midi++" */;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 0867D691FE84028FC02AAC07 /* midi++ */;
 			productRefGroup = 034768DDFF38A45A11DB9C8B /* Products */;
@@ -285,6 +286,7 @@
 				},
 			);
 			projectRoot = "";
+			shouldCheckCompatibility = 1;
 			targets = (
 				8D07F2BC0486CC7A007CD1D0 /* midi++ */,
 			);
@@ -365,34 +367,6 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		4FADC24308B4156D00ABE55E /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_VERSION = A;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "midi++_Prefix.pch";
-				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Library/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
-				);
-				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/GLib.framework/Versions/2.12.3/Libraries\"";
-				LIBRARY_STYLE = DYNAMIC;
-				MACH_O_TYPE = mh_dylib;
-				PRODUCT_NAME = "midi++";
-				WRAPPER_EXTENSION = framework;
-				ZERO_LINK = YES;
-			};
-			name = Debug;
-		};
 		4FADC24408B4156D00ABE55E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -409,11 +383,13 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "midi++_Prefix.pch";
 				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Library/Frameworks";
+				INSTALL_PATH = "@executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
 				);
+				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/GLib.framework/Versions/2.12.3/Libraries\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/GLib.framework/Versions/2.12.3/Libraries\"";
 				LIBRARY_STYLE = DYNAMIC;
 				MACH_O_TYPE = mh_dylib;
@@ -422,30 +398,78 @@
 			};
 			name = Release;
 		};
-		4FADC24708B4156D00ABE55E /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				PREBINDING = NO;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-			};
-			name = Debug;
-		};
 		4FADC24808B4156D00ABE55E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = "/opt/ardour/Frameworks/**";
+				ARCHS = (
+					"$(NATIVE_ARCH)",
+					ppc,
+				);
+				DEAD_CODE_STRIPPING = YES;
+				FRAMEWORK_SEARCH_PATHS = /opt/ardour/src/ardour2/libs/pbd/macosx/build/Release;
+				GCC_FAST_OBJC_DISPATCH = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G4;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					/Library/Frameworks/GLib.framework/Headers,
 					/Library/Frameworks/sigc.framework/Headers,
 				);
+				INSTALL_PATH = "@executable_path/../Frameworks";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
 			name = Release;
+		};
+		694E7C660B97AD230018D03D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = /opt/ardour/src/ardour2/libs/pbd/macosx/build/Release;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_FAST_OBJC_DISPATCH = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					/Library/Frameworks/GLib.framework/Headers,
+					/Library/Frameworks/sigc.framework/Headers,
+				);
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				STRIP_INSTALLED_PRODUCT = NO;
+			};
+			name = Debug;
+		};
+		694E7C670B97AD230018D03D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = i386;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "midi++_Prefix.pch";
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/GLib.framework/Versions/2.12.3/Libraries\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/GLib.framework/Versions/2.12.3/Libraries\"";
+				LIBRARY_STYLE = DYNAMIC;
+				MACH_O_TYPE = mh_dylib;
+				PRODUCT_NAME = "midi++";
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Debug;
 		};
 /* End XCBuildConfiguration section */
 
@@ -453,8 +477,8 @@
 		4FADC24208B4156D00ABE55E /* Build configuration list for PBXNativeTarget "midi++" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				4FADC24308B4156D00ABE55E /* Debug */,
 				4FADC24408B4156D00ABE55E /* Release */,
+				694E7C670B97AD230018D03D /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -462,8 +486,8 @@
 		4FADC24608B4156D00ABE55E /* Build configuration list for PBXProject "midi++" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				4FADC24708B4156D00ABE55E /* Debug */,
 				4FADC24808B4156D00ABE55E /* Release */,
+				694E7C660B97AD230018D03D /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

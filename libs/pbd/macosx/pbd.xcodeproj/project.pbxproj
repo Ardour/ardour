@@ -77,17 +77,17 @@
 		694120B30B8A34AB00AF661E /* undo.cc in Sources */ = {isa = PBXBuildFile; fileRef = 6941206C0B8A34AB00AF661E /* undo.cc */; };
 		694120B40B8A34AB00AF661E /* whitespace.cc in Sources */ = {isa = PBXBuildFile; fileRef = 6941206D0B8A34AB00AF661E /* whitespace.cc */; };
 		694120B50B8A34AB00AF661E /* xml++.cc in Sources */ = {isa = PBXBuildFile; fileRef = 6941206E0B8A34AB00AF661E /* xml++.cc */; };
-		694120B80B8A350100AF661E /* sigc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 694120B70B8A350100AF661E /* sigc.framework */; };
-		694120BD0B8A356600AF661E /* glibmm.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 694120BC0B8A356600AF661E /* glibmm.framework */; };
 		694120D40B8A36A200AF661E /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 694120D30B8A36A200AF661E /* libxml2.dylib */; };
-		694120DA0B8A36CD00AF661E /* libglib-2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 694120D60B8A36CD00AF661E /* libglib-2.0.dylib */; };
-		694120DB0B8A36CD00AF661E /* libgmodule-2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 694120D70B8A36CD00AF661E /* libgmodule-2.0.dylib */; };
-		694120DC0B8A36CD00AF661E /* libgobject-2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 694120D80B8A36CD00AF661E /* libgobject-2.0.dylib */; };
-		694120DD0B8A36CD00AF661E /* libgthread-2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 694120D90B8A36CD00AF661E /* libgthread-2.0.dylib */; };
+		694191980B97CD950083505E /* glibmm.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 694191950B97CD950083505E /* glibmm.framework */; };
+		694191990B97CD950083505E /* sigc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 694191960B97CD950083505E /* sigc.framework */; };
 		69C63C150B9369CB00BC0BCA /* strreplace.cc in Sources */ = {isa = PBXBuildFile; fileRef = 69C63C140B9369CB00BC0BCA /* strreplace.cc */; };
 		69C63C190B9369DE00BC0BCA /* replace_all.h in Headers */ = {isa = PBXBuildFile; fileRef = 69C63C180B9369DE00BC0BCA /* replace_all.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		69C63C2B0B936A6E00BC0BCA /* version.cc in Sources */ = {isa = PBXBuildFile; fileRef = 69C63C290B936A6E00BC0BCA /* version.cc */; };
 		69C63C2C0B936A6E00BC0BCA /* version.h in Headers */ = {isa = PBXBuildFile; fileRef = 69C63C2A0B936A6E00BC0BCA /* version.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		69CD7FED0B97CDD50049ED98 /* glib in Frameworks */ = {isa = PBXBuildFile; fileRef = 69CD7FE90B97CDD50049ED98 /* glib */; };
+		69CD7FEE0B97CDD50049ED98 /* gmodule in Frameworks */ = {isa = PBXBuildFile; fileRef = 69CD7FEA0B97CDD50049ED98 /* gmodule */; };
+		69CD7FEF0B97CDD50049ED98 /* gobject in Frameworks */ = {isa = PBXBuildFile; fileRef = 69CD7FEB0B97CDD50049ED98 /* gobject */; };
+		69CD7FF00B97CDD50049ED98 /* gthread in Frameworks */ = {isa = PBXBuildFile; fileRef = 69CD7FEC0B97CDD50049ED98 /* gthread */; };
 		8D07F2BE0486CC7A007CD1D0 /* pbd_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 32BAE0B70371A74B00C91783 /* pbd_Prefix.pch */; settings = {ATTRIBUTES = (); }; };
 		8D07F2C00486CC7A007CD1D0 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C1666FE841158C02AAC07 /* InfoPlist.strings */; };
 /* End PBXBuildFile section */
@@ -165,17 +165,17 @@
 		6941206C0B8A34AB00AF661E /* undo.cc */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = undo.cc; path = ../undo.cc; sourceTree = SOURCE_ROOT; };
 		6941206D0B8A34AB00AF661E /* whitespace.cc */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = whitespace.cc; path = ../whitespace.cc; sourceTree = SOURCE_ROOT; };
 		6941206E0B8A34AB00AF661E /* xml++.cc */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = "xml++.cc"; path = "../xml++.cc"; sourceTree = SOURCE_ROOT; };
-		694120B70B8A350100AF661E /* sigc.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = sigc.framework; path = /Library/Frameworks/sigc.framework; sourceTree = "<absolute>"; };
-		694120BC0B8A356600AF661E /* glibmm.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = glibmm.framework; path = /Library/Frameworks/glibmm.framework; sourceTree = "<absolute>"; };
 		694120D30B8A36A200AF661E /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = /usr/lib/libxml2.dylib; sourceTree = "<absolute>"; };
-		694120D60B8A36CD00AF661E /* libglib-2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libglib-2.0.dylib"; path = "/Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/libglib-2.0.dylib"; sourceTree = "<absolute>"; };
-		694120D70B8A36CD00AF661E /* libgmodule-2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libgmodule-2.0.dylib"; path = "/Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/libgmodule-2.0.dylib"; sourceTree = "<absolute>"; };
-		694120D80B8A36CD00AF661E /* libgobject-2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libgobject-2.0.dylib"; path = "/Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/libgobject-2.0.dylib"; sourceTree = "<absolute>"; };
-		694120D90B8A36CD00AF661E /* libgthread-2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libgthread-2.0.dylib"; path = "/Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/libgthread-2.0.dylib"; sourceTree = "<absolute>"; };
+		694191950B97CD950083505E /* glibmm.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = glibmm.framework; path = /Library/Frameworks/glibmm.framework; sourceTree = "<absolute>"; };
+		694191960B97CD950083505E /* sigc.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = sigc.framework; path = /Library/Frameworks/sigc.framework; sourceTree = "<absolute>"; };
 		69C63C140B9369CB00BC0BCA /* strreplace.cc */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = strreplace.cc; path = ../strreplace.cc; sourceTree = SOURCE_ROOT; };
 		69C63C180B9369DE00BC0BCA /* replace_all.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = replace_all.h; sourceTree = "<group>"; };
 		69C63C290B936A6E00BC0BCA /* version.cc */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = version.cc; sourceTree = "<group>"; };
 		69C63C2A0B936A6E00BC0BCA /* version.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = version.h; sourceTree = "<group>"; };
+		69CD7FE90B97CDD50049ED98 /* glib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = glib; path = /Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/glib; sourceTree = "<absolute>"; };
+		69CD7FEA0B97CDD50049ED98 /* gmodule */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = gmodule; path = /Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/gmodule; sourceTree = "<absolute>"; };
+		69CD7FEB0B97CDD50049ED98 /* gobject */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = gobject; path = /Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/gobject; sourceTree = "<absolute>"; };
+		69CD7FEC0B97CDD50049ED98 /* gthread */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = gthread; path = /Library/Frameworks/GLib.framework/Versions/2.12.3/Libraries/gthread; sourceTree = "<absolute>"; };
 		8D07F2C70486CC7A007CD1D0 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D07F2C80486CC7A007CD1D0 /* pbd.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = pbd.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -185,13 +185,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				694120B80B8A350100AF661E /* sigc.framework in Frameworks */,
-				694120BD0B8A356600AF661E /* glibmm.framework in Frameworks */,
 				694120D40B8A36A200AF661E /* libxml2.dylib in Frameworks */,
-				694120DA0B8A36CD00AF661E /* libglib-2.0.dylib in Frameworks */,
-				694120DB0B8A36CD00AF661E /* libgmodule-2.0.dylib in Frameworks */,
-				694120DC0B8A36CD00AF661E /* libgobject-2.0.dylib in Frameworks */,
-				694120DD0B8A36CD00AF661E /* libgthread-2.0.dylib in Frameworks */,
+				694191980B97CD950083505E /* glibmm.framework in Frameworks */,
+				694191990B97CD950083505E /* sigc.framework in Frameworks */,
+				69CD7FED0B97CDD50049ED98 /* glib in Frameworks */,
+				69CD7FEE0B97CDD50049ED98 /* gmodule in Frameworks */,
+				69CD7FEF0B97CDD50049ED98 /* gobject in Frameworks */,
+				69CD7FF00B97CDD50049ED98 /* gthread in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -222,13 +222,13 @@
 		0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				694120D60B8A36CD00AF661E /* libglib-2.0.dylib */,
-				694120D70B8A36CD00AF661E /* libgmodule-2.0.dylib */,
-				694120D80B8A36CD00AF661E /* libgobject-2.0.dylib */,
-				694120D90B8A36CD00AF661E /* libgthread-2.0.dylib */,
+				69CD7FE90B97CDD50049ED98 /* glib */,
+				69CD7FEA0B97CDD50049ED98 /* gmodule */,
+				69CD7FEB0B97CDD50049ED98 /* gobject */,
+				69CD7FEC0B97CDD50049ED98 /* gthread */,
+				694191950B97CD950083505E /* glibmm.framework */,
+				694191960B97CD950083505E /* sigc.framework */,
 				694120D30B8A36A200AF661E /* libxml2.dylib */,
-				694120BC0B8A356600AF661E /* glibmm.framework */,
-				694120B70B8A350100AF661E /* sigc.framework */,
 			);
 			name = "External Frameworks and Libraries";
 			sourceTree = "<group>";
@@ -419,11 +419,13 @@
 		0867D690FE84028FC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 4FADC24608B4156D00ABE55E /* Build configuration list for PBXProject "pbd" */;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 0867D691FE84028FC02AAC07 /* pbd */;
 			productRefGroup = 034768DDFF38A45A11DB9C8B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
+			shouldCheckCompatibility = 1;
 			targets = (
 				8D07F2BC0486CC7A007CD1D0 /* pbd */,
 			);
@@ -499,34 +501,6 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		4FADC24308B4156D00ABE55E /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_VERSION = A;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = pbd_Prefix.pch;
-				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Library/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
-				);
-				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/GLib.framework/Versions/2.12.3/Libraries\"";
-				LIBRARY_STYLE = DYNAMIC;
-				MACH_O_TYPE = mh_dylib;
-				PRODUCT_NAME = pbd;
-				WRAPPER_EXTENSION = framework;
-				ZERO_LINK = YES;
-			};
-			name = Debug;
-		};
 		4FADC24408B4156D00ABE55E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -543,11 +517,13 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = pbd_Prefix.pch;
 				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Library/Frameworks";
+				INSTALL_PATH = "@executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
 				);
+				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/GLib.framework/Versions/2.12.3/Libraries\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/GLib.framework/Versions/2.12.3/Libraries\"";
 				LIBRARY_STYLE = DYNAMIC;
 				MACH_O_TYPE = mh_dylib;
@@ -556,20 +532,16 @@
 			};
 			name = Release;
 		};
-		4FADC24708B4156D00ABE55E /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				PREBINDING = NO;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-			};
-			name = Debug;
-		};
 		4FADC24808B4156D00ABE55E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH)";
+				ARCHS = (
+					"$(NATIVE_ARCH)",
+					ppc,
+				);
+				GCC_FAST_OBJC_DISPATCH = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_STRICT_ALIASING = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
@@ -578,10 +550,62 @@
 					/Library/Frameworks/glibmm.framework/Headers,
 					/Library/Frameworks/sigc.framework/Headers,
 				);
+				INSTALL_PATH = "@executable_path/../Frameworks";
 				PREBINDING = NO;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
 			name = Release;
+		};
+		69C9AF150B97A83A0097DE90 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH)";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = stabs;
+				GCC_FAST_OBJC_DISPATCH = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					/usr/include/libxml2,
+					/Library/Frameworks/GLib.framework/Headers,
+					/Library/Frameworks/glibmm.framework/Headers,
+					/Library/Frameworks/sigc.framework/Headers,
+				);
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				STRIP_INSTALLED_PRODUCT = NO;
+			};
+			name = Debug;
+		};
+		69C9AF160B97A83A0097DE90 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = i386;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = pbd_Prefix.pch;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/GLib.framework/Versions/2.12.3/Libraries\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/GLib.framework/Versions/2.12.3/Libraries\"";
+				LIBRARY_STYLE = DYNAMIC;
+				MACH_O_TYPE = mh_dylib;
+				PRODUCT_NAME = pbd;
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Debug;
 		};
 /* End XCBuildConfiguration section */
 
@@ -589,8 +613,8 @@
 		4FADC24208B4156D00ABE55E /* Build configuration list for PBXNativeTarget "pbd" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				4FADC24308B4156D00ABE55E /* Debug */,
 				4FADC24408B4156D00ABE55E /* Release */,
+				69C9AF160B97A83A0097DE90 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -598,8 +622,8 @@
 		4FADC24608B4156D00ABE55E /* Build configuration list for PBXProject "pbd" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				4FADC24708B4156D00ABE55E /* Debug */,
 				4FADC24808B4156D00ABE55E /* Release */,
+				69C9AF150B97A83A0097DE90 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
