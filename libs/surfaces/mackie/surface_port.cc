@@ -43,6 +43,11 @@ MidiByteArray SurfacePort::read()
 	MIDI::byte buf[max_buf_size];
 	MidiByteArray retval;
 
+	// return nothing read if the lock isn't acquired
+	Glib::RecMutex::Lock lock( _rwlock, Glib::TRY_LOCK );
+	if ( !lock.locked() ) return retval;
+	
+	// read port and copy to return value
 	int nread = port().read( buf, sizeof (buf) );
 
 	if (nread >= 0) {
@@ -65,8 +70,9 @@ MidiByteArray SurfacePort::read()
 
 void SurfacePort::write( const MidiByteArray & mba )
 {
-	if ( mba[0] == 0xf0 ) cout << "SurfacePort::write: " << mba << endl;
+	//if ( mba[0] == 0xf0 ) cout << "SurfacePort::write: " << mba << endl;
 	//cout << "SurfacePort::write: " << mba << endl;
+	Glib::RecMutex::Lock lock( _rwlock );
 	int count = port().write( mba.bytes().get(), mba.size() );
 	if ( count != (int)mba.size() )
 	{

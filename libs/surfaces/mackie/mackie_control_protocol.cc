@@ -866,11 +866,8 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 						next = session->current_end_frame();
 					}
 					
-					// moves jerkily and doesn't really work. eventually core-dumps
+					// doesn't work very well
 					session->request_locate( next, session->transport_rolling() );
-					// ditto
-					// ScrollTimeline( state.ticks );
-					// mtaht says maybe snap-to code has some ideas
 					
 					// turn off the led ring, for bcf emulation mode
 					port.write( builder.build_led_ring( dynamic_cast<Pot &>( control ), off ) );

@@ -19,6 +19,7 @@
 #define surface_port_h
 
 #include <sigc++/signal.h>
+#include <glibmm/thread.h>
 
 #include "midi_byte_array.h"
 #include "types.h"
@@ -86,6 +87,8 @@ private:
 	MIDI::Port & _port;
 	int _number;
 	bool _active;
+
+	Glib::RecMutex _rwlock;
 };	
 
 std::ostream & operator << ( std::ostream & , const SurfacePort & port );
