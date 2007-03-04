@@ -1503,17 +1503,33 @@ Playlist::bump_name_once (string name)
 	string newname;
 
 	if ((period = name.find_last_of ('.')) == string::npos) {
-		newname = name;
+		newname  = name;
 		newname += ".1";
 	} else {
-		char buf[32];
-		int version;
+		int isnumber = 1;
+		const char *last_element = name.c_str() + period + 1;
+		for (int i = 0; i < strlen(last_element); i++) {
+			if (!isdigit(last_element[i])) {
+				isnumber = 0;
+				break;
+			}
+		}
+
+		errno = 0;
+		long int version = strtol (name.c_str()+period+1, (char **)NULL, 10);
+
+		if (isnumber == 0 || errno != 0) {
+			// last_element is not a number, or is too large
+			newname  = name;
+			newname += ".1";
+		} else {
+			char buf[32];
+
+			snprintf (buf, sizeof(buf), "%d", version+1);
 		
-		sscanf (name.substr (period+1).c_str(), "%d", &version);
-		snprintf (buf, sizeof(buf), "%d", version+1);
-		
-		newname = name.substr (0, period+1);
-		newname += buf;
+			newname  = name.substr (0, period+1);
+			newname += buf;
+		}
 	}
 
 	return newname;
