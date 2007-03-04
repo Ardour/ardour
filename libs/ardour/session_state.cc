@@ -2678,7 +2678,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		   on whichever filesystem it was already on.
 		*/
 
-		if (_path.find ("/sounds/")) {
+		if ((*x).find ("/sounds/") != string::npos) {
 
 			/* old school, go up 1 level */
 
