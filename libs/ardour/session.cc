@@ -1691,16 +1691,19 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 		} else {
 			nphysical_out = 0;
 		}
+
+		shared_ptr<AudioTrack> track;
 		
 		try {
-			shared_ptr<AudioTrack> track (new AudioTrack (*this, track_name, Route::Flag (0), mode));
+			track = boost::shared_ptr<AudioTrack>((new AudioTrack (*this, track_name, Route::Flag (0), mode)));
 			
 			if (track->ensure_io (input_channels, output_channels, false, this)) {
 				error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
 							 input_channels, output_channels)
 				      << endmsg;
+				goto failed;
 			}
-			
+
 			if (nphysical_in) {
 				for (uint32_t x = 0; x < track->n_inputs() && x < nphysical_in; ++x) {
 					
@@ -1760,14 +1763,43 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 		catch (failed_constructor &err) {
 			error << _("Session: could not create new audio track.") << endmsg;
-			// XXX should we delete the tracks already created? 
-			ret.clear ();
-			return ret;
+
+			if (track) {
+				/* we need to get rid of this, since the track failed to be created */
+				/* XXX arguably, AudioTrack::AudioTrack should not do the Session::add_diskstream() */
+
+				{ 
+					RCUWriter<DiskstreamList> writer (diskstreams);
+					boost::shared_ptr<DiskstreamList> ds = writer.get_copy();
+					ds->remove (track->audio_diskstream());
+				}
+			}
+
+			goto failed;
 		}
-		
+
+		catch (AudioEngine::PortRegistrationFailure& pfe) {
+
+			error << _("No more JACK ports are available. You will need to stop Ardour and restart JACK with ports if you need this many tracks.") << endmsg;
+
+			if (track) {
+				/* we need to get rid of this, since the track failed to be created */
+				/* XXX arguably, AudioTrack::AudioTrack should not do the Session::add_diskstream() */
+
+				{ 
+					RCUWriter<DiskstreamList> writer (diskstreams);
+					boost::shared_ptr<DiskstreamList> ds = writer.get_copy();
+					ds->remove (track->audio_diskstream());
+				}
+			}
+
+			goto failed;
+		}
+
 		--how_many;
 	}
 
+  failed:
 	if (!new_routes.empty()) {
 		add_routes (new_routes, false);
 		save_state (_current_snapshot_name);
@@ -1848,6 +1880,7 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 				error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
 							 input_channels, output_channels)
 				      << endmsg;
+				goto failure;
 			}
 			
 			for (uint32_t x = 0; n_physical_inputs && x < bus->n_inputs(); ++x) {
@@ -1899,13 +1932,19 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 
 		catch (failed_constructor &err) {
 			error << _("Session: could not create new audio route.") << endmsg;
-			ret.clear ();
-			return ret;
+			goto failure;
 		}
+
+		catch (AudioEngine::PortRegistrationFailure& pfe) {
+			error << _("No more JACK ports are available. You will need to stop Ardour and restart JACK with ports if you need this many tracks.") << endmsg;
+			goto failure;
+		}
+
 
 		--how_many;
 	}
 
+  failure:
 	if (!ret.empty()) {
 		add_routes (ret, false);
 		save_state (_current_snapshot_name);
@@ -3308,7 +3347,7 @@ void
 Session::graph_reordered ()
 {
 	/* don't do this stuff if we are setting up connections
-	   from a set_state() call.
+	   from a set_state() call or creating new tracks.
 	*/
 
 	if (_state_of_the_state & InitialConnecting) {
