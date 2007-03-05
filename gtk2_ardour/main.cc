@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001-2006 Paul Davis
+    Copyright (C) 2001-2007 Paul Davis
     
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,13 +17,7 @@
 
 */
 
-#include <sys/types.h>
-#include <sys/mman.h>
-#include <sys/wait.h>
-#include <cerrno>
 #include <cstdlib>
-#include <signal.h>
-#include <unistd.h>
 
 #include <sigc++/bind.h>
 #include <gtkmm/settings.h>
@@ -62,172 +56,6 @@ TextReceiver text_receiver ("ardour");
 extern int curvetest (string);
 
 static ARDOUR_UI  *ui = 0;
-
-static void
-shutdown (int status)
-{
-	char* msg;
-
-	if (status) {
-
-		msg = _("ardour is killing itself for a clean exit\n");
-		write (1, msg, strlen (msg));
-		/* drastic, but perhaps necessary */
-		kill (-getpgrp(), SIGKILL);	
-		/*NOTREACHED*/
-
-	} else {
-
-		if (ui) {
-			ui->kill();
-		}
-		
-		pthread_cancel_all ();
-	}
-
-	exit (status);
-}
-
-
-static void 
-handler (int sig)
-{
-	char buf[64];
-	int n;
-
-	/* XXX its doubtful that snprintf() is async-safe */
-	n = snprintf (buf, sizeof(buf), _("%d(%d): received signal %d\n"), getpid(), (int) pthread_self(), sig);
-	write (1, buf, n);
-
-	shutdown (1);
-}
-
-static void *
-signal_thread (void *arg)
-{
-	int sig;
-	sigset_t blocked;
-
-	PBD::ThreadCreated (pthread_self(), X_("Signal"));
-
-	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);
-	
-	/* find out what's blocked right now */
-
-	//sigprocmask (SIG_SETMASK, 0, &blocked);
-	if (pthread_sigmask (SIG_SETMASK, 0, &blocked)) {
-		cerr << "getting blocked signals failed\n";
-	}
-	
-	/* wait for any of the currently blocked signals.
-	   
-	   According to the man page found in linux 2.6 and 2.4, sigwait() 
-	   never returns an error. This is incorrect. Checking the man
-	   pages for some other *nix systems makes it clear that
-	   sigwait() can return several error codes, one of which 
-	   is EINTR. This happens if the thread receives a signal
-	   which is not in the blocked set. 
-
-	   We do not expect that to happen, and if it did we should generally
-	   exit as planned. However, under 2.6, the ptrace facility used 
-	   by gdb seems to also cause sigwait() to return with EINTR
-	   but with a signal that sigwait cannot understand. As a result, 
-	   "sig" is set to zero, an impossible signal number.
-
-	   Handling the EINTR code makes it possible to debug 
-	   ardour on a 2.6 kernel.
-
-	*/
-
-	int swerr;
-
-  again:
-	if ((swerr = sigwait (&blocked, &sig))) {
-		if (swerr == EINTR) {
-			goto again;
-		} else {
-			cerr << "sigwait failed with " << swerr << endl;
-		}
-	}
-
-	cerr << "Signal " << sig << " received\n";
-
-	if (sig != SIGSEGV) {
-
-		/* unblock signals so we can see them during shutdown.
-		   this will help prod developers not to lose sight
-		   of bugs that cause segfaults etc. during shutdown.
-		*/
-
-		sigprocmask (SIG_UNBLOCK, &blocked, 0);
-	}
-
-	shutdown (1);
-	/*NOTREACHED*/
-	return 0;
-}
-
-int
-catch_signals (void)
-{
-	struct sigaction action;
-	pthread_t signal_thread_id;
-	sigset_t signals;
-
-//	if (setpgid (0,0)) {
-	if (setsid ()) {
-		warning << string_compose (_("cannot become new process group leader (%1)"), 
-				    strerror (errno))
-			<< endmsg;
-	}
-
-	sigemptyset (&signals);
-	sigaddset(&signals, SIGHUP);
-	sigaddset(&signals, SIGINT);
-	sigaddset(&signals, SIGQUIT);
-	sigaddset(&signals, SIGPIPE);
-	sigaddset(&signals, SIGTERM);
-	sigaddset(&signals, SIGUSR1);
-	sigaddset(&signals, SIGUSR2);
-
-
-	/* install a handler because otherwise
-	   pthreads behaviour is undefined when we enter
-	   sigwait.
-	*/
-	
-	action.sa_handler = handler;
-	action.sa_mask = signals;
-	action.sa_flags = SA_RESTART|SA_RESETHAND;
-
-	for (int i = 1; i < 32; i++) {
-		if (sigismember (&signals, i)) {
-			if (sigaction (i, &action, 0)) {
-				cerr << string_compose (_("cannot setup signal handling for %1"), i) << endl;
-				return -1;
-			}
-		}
-	} 
-
-	/* this sets the signal mask for this and all 
-	   subsequent threads that do not reset it.
-	*/
-	
-	if (pthread_sigmask (SIG_SETMASK, &signals, 0)) {
-		cerr << string_compose (_("cannot set default signal mask (%1)"), strerror (errno)) << endl;
-		return -1;
-	}
-
-	/* start a thread to wait for signals */
-
-	if (pthread_create_and_store ("signal", &signal_thread_id, 0, signal_thread, 0)) {
-		cerr << "cannot create signal catching thread" << endl;
-		return -1;
-	}
-
-	pthread_detach (signal_thread_id);
-	return 0;
-}
 
 string
 which_ui_rcfile ()
@@ -405,7 +233,7 @@ int main (int argc, char *argv[])
 	}
 
 	if (no_splash) {
-		cerr << _("Copyright (C) 1999-2006 Paul Davis") << endl
+		cerr << _("Copyright (C) 1999-2007 Paul Davis") << endl
 		     << _("Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel Baker") << endl
 		     << endl
 		     << _("Ardour comes with ABSOLUTELY NO WARRANTY") << endl
@@ -466,7 +294,14 @@ int main (int argc, char *argv[])
 
 	delete engine;
 	ARDOUR::cleanup ();
-	shutdown (0);
+
+	if (ui) {
+		ui->kill();
+	}
+		
+	pthread_cancel_all ();
+
+	exit (0);
 
 	return 0;
 }
