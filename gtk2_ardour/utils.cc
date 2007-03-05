@@ -232,7 +232,21 @@ get_font_for_style (string widgetname)
 	foobar.ensure_style();
 
 	style = foobar.get_style ();
-	return style->get_font();
+
+	Glib::RefPtr<const Pango::Layout> layout = foobar.get_layout();
+	
+	PangoFontDescription *pfd = (PangoFontDescription *)pango_layout_get_font_description((PangoLayout *)layout->gobj());
+	
+	if (!pfd) {
+		
+		/* layout inherited its font description from a PangoContext */
+
+		PangoContext* ctxt = (PangoContext*) pango_layout_get_context ((PangoLayout*) layout->gobj());
+		pfd =  pango_context_get_font_description (ctxt);
+		return Pango::FontDescription (pfd, true); /* make a copy */
+	} 
+
+	return Pango::FontDescription (pfd, true); /* make a copy */
 }
 
 uint32_t
