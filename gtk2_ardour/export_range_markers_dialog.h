@@ -30,6 +30,8 @@ class ExportRangeMarkersDialog : public ExportDialog
   public:
 	ExportRangeMarkersDialog (PublicEditor&);
   
+	Gtk::FileChooserAction browse_action() const;
+
   protected:
 	virtual bool is_filepath_valid(string &filepath);
 

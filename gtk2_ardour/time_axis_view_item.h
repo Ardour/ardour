@@ -339,6 +339,10 @@ class TimeAxisViewItem : public Selectable
      */
     TimeAxisViewItem(const std::string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color& base_color, 
 		     nframes_t start, nframes_t duration, Visibility v = Visibility (0));
+
+    TimeAxisViewItem (const TimeAxisViewItem& other);
+
+    void init (const std::string& it_name, double spu, Gdk::Color& base_color, nframes_t start, nframes_t duration, Visibility vis);
     
     /**
      * Calculates some contrasting color for displaying various parts of this item, based upon the base color

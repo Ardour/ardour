@@ -1017,7 +1017,7 @@ Mixer_UI::strip_scroller_button_release (GdkEventButton* ev)
 	using namespace Menu_Helpers;
 
 	if (Keyboard::is_context_menu_event (ev)) {
-		ARDOUR_UI::instance()->add_route();
+		ARDOUR_UI::instance()->add_route (this);
 		return true;
 	}
 

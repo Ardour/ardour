@@ -29,6 +29,7 @@
 #include <gtkmm/progressbar.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/fileselection.h>
+#include <gtkmm/filechooser.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/treeview.h>
 #include <gtkmm/liststore.h>
@@ -56,8 +57,11 @@ class ExportDialog : public ArdourDialog
 	virtual void set_range (nframes_t start, nframes_t end);
 	void start_export ();
 
+	virtual Gtk::FileChooserAction browse_action() const { return Gtk::FILE_CHOOSER_ACTION_SAVE; }
+
   protected:
 	ARDOUR::AudioExportSpecification spec;
+	Gtk::Frame  file_frame;
 
     struct ExportModelColumns : public Gtk::TreeModel::ColumnRecord
 	{
@@ -140,7 +144,6 @@ class ExportDialog : public ArdourDialog
 
 	Gtk::CheckButton cuefile_only_checkbox;
 
-	Gtk::Frame  file_frame;
 	Gtk::Entry  file_entry;
 	Gtk::HBox   file_hbox;
 	Gtk::Button file_browse_button;

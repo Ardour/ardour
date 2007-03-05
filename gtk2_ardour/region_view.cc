@@ -67,7 +67,6 @@ RegionView::RegionView (ArdourCanvas::Group* parent,
 							  TimeAxisViewItem::ShowFrame))
 	  , _region (r)
 	  , sync_mark(0)
-	  , no_wave_msg(0)
 	  , editor(0)
 	  , current_visible_sync_position(0.0)
 	  , valid(false)
@@ -76,6 +75,19 @@ RegionView::RegionView (ArdourCanvas::Group* parent,
 	  , in_destructor(false)
 	  , wait_for_data(false)
 {
+}
+
+RegionView::RegionView (const RegionView& other)
+	: TimeAxisViewItem (other)
+{
+	/* derived concrete type will call init () */
+
+	_region = other._region;
+	editor = other.editor;
+	current_visible_sync_position = other.current_visible_sync_position;
+	valid = false;
+	_pixel_width = other._pixel_width;
+	_height = other._height;
 }
 
 RegionView::RegionView (ArdourCanvas::Group*         parent, 
@@ -87,7 +99,6 @@ RegionView::RegionView (ArdourCanvas::Group*         parent,
 	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), visibility)
 	, _region (r)
 	, sync_mark(0)
-	, no_wave_msg(0)
 	, editor(0)
 	, current_visible_sync_position(0.0)
 	, valid(false)
@@ -101,7 +112,6 @@ RegionView::RegionView (ArdourCanvas::Group*         parent,
 void
 RegionView::init (Gdk::Color& basic_color, bool wfd)
 {
-	editor        = 0;
 	valid         = true;
 	in_destructor = false;
 	_height       = 0;

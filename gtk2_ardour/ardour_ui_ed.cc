@@ -99,7 +99,8 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (main_actions, X_("Close"), _("Close"),  mem_fun(*this, &ARDOUR_UI::close_session));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("AddTrackBus"), _("Add Track/Bus"),  mem_fun(*this, &ARDOUR_UI::add_route));
+	act = ActionManager::register_action (main_actions, X_("AddTrackBus"), _("Add Track/Bus"),  
+					      bind (mem_fun(*this, &ARDOUR_UI::add_route), (Gtk::Window*) 0));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	

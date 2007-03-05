@@ -69,7 +69,7 @@ Editor::keyboard_duplicate_region ()
 		return;
 	}
 
-	float prefix;
+	float prefix = 0;
 	bool was_floating;
 
 	if (get_prefix (prefix, was_floating) == 0) {
@@ -82,7 +82,7 @@ Editor::keyboard_duplicate_region ()
 void
 Editor::keyboard_duplicate_selection ()
 {
-	float prefix;
+	float prefix = 0;
 	bool was_floating;
 
 	if (get_prefix (prefix, was_floating) == 0) {
@@ -95,7 +95,7 @@ Editor::keyboard_duplicate_selection ()
 void
 Editor::keyboard_paste ()
 {
-	float prefix;
+	float prefix = 0;
 	bool was_floating;
 
 	if (get_prefix (prefix, was_floating) == 0) {
@@ -108,7 +108,7 @@ Editor::keyboard_paste ()
 void
 Editor::keyboard_insert_region_list_selection ()
 {
-	float prefix;
+	float prefix = 0;
 	bool was_floating;
 
 	if (get_prefix (prefix, was_floating) == 0) {

@@ -89,14 +89,37 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 {
 }
 
+
+AudioRegionView::AudioRegionView (const AudioRegionView& other)
+	: RegionView (other)
+	, zero_line(0)
+	, fade_in_shape(0)
+	, fade_out_shape(0)
+	, fade_in_handle(0)
+	, fade_out_handle(0)
+	, gain_line(0)
+	, _amplitude_above_axis(1.0)
+	, _flags(0)
+	, fade_color(0)
+
+{
+	Gdk::Color c;
+	int r,g,b,a;
+
+	UINT_TO_RGBA (other.fill_color, &r, &g, &b, &a);
+	c.set_rgb_p (r/255.0, g/255.0, b/255.0);
+	
+	init (c, false);
+}
+
 void
 AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 {
 	// FIXME: Some redundancy here with RegionView::init.  Need to figure out
 	// where order is important and where it isn't...
 	
-	RegionView::init(basic_color, wfd);
-
+	RegionView::init(basic_color, false);
+	
 	XMLNode *node;
 
 	_amplitude_above_axis = 1.0;

@@ -95,6 +95,35 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 		have_name_font = true;
 	}
 
+	group = new ArdourCanvas::Group (parent);
+	
+	init (it_name, spu, base_color, start, duration, vis);
+
+}
+
+TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
+	: trackview (other.trackview)
+{
+
+	Gdk::Color c;
+	int r,g,b,a;
+
+	UINT_TO_RGBA (other.fill_color, &r, &g, &b, &a);
+	c.set_rgb_p (r/255.0, g/255.0, b/255.0);
+
+	/* share the other's parent, but still create a new group */
+
+	Gnome::Canvas::Group* parent = other.group->property_parent();
+	
+	group = new ArdourCanvas::Group (*parent);
+
+	init (other.item_name, other.samples_per_unit, c, other.frame_position, other.item_duration, other.visibility);
+}
+
+
+void
+TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_color, nframes_t start, nframes_t duration, Visibility vis)
+{
 	item_name = it_name ;
 	samples_per_unit = spu ;
 	should_show_selection = true;
@@ -111,8 +140,6 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 	if (duration == 0) {
 		warning << "Time Axis Item Duration == 0" << endl ;
 	}
-
-	group = new ArdourCanvas::Group (parent);
 
 	vestigial_frame = new ArdourCanvas::SimpleRect (*group);
 	vestigial_frame->property_x1() = (double) 0.0;
@@ -219,7 +246,6 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 	set_duration (item_duration, this) ;
 	set_position (start, this) ;
 }
-
 
 /**
  * Destructor

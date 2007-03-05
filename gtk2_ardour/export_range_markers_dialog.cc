@@ -38,12 +38,20 @@ using namespace std;
 ExportRangeMarkersDialog::ExportRangeMarkersDialog (PublicEditor& editor) 
 	: ExportDialog(editor)
 { 
+	set_title (_("ardour: export ranges"));
+	file_frame.set_label (_("Export to Directory"));
+
 	do_not_allow_export_cd_markers();
 	
 	total_duration = 0;
 	current_range_marker_index = 0;
 }
-	
+
+Gtk::FileChooserAction
+ExportRangeMarkersDialog::browse_action () const
+{
+	return Gtk::FILE_CHOOSER_ACTION_CREATE_FOLDER;
+}
 	
 void 
 ExportRangeMarkersDialog::export_audio_data ()

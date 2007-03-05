@@ -3031,7 +3031,7 @@ gint
 Editor::edit_controls_button_release (GdkEventButton* ev)
 {
 	if (Keyboard::is_context_menu_event (ev)) {
-		ARDOUR_UI::instance()->add_route ();
+		ARDOUR_UI::instance()->add_route (this);
 	}
 	return TRUE;
 }

@@ -106,7 +106,6 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	  src_quality_label (_("Conversion Quality"), 1.0, 0.5),
 	  dither_type_label (_("Dither Type"), 1.0, 0.5),
 	  cuefile_only_checkbox (_("Export CD Marker File Only")),
-	  file_frame (_("Export to File")),
 	  file_browse_button (_("Browse")),
 	  track_selector_button (_("Specific tracks ..."))
 {
@@ -1305,7 +1304,7 @@ ExportDialog::window_closed (GdkEventAny *ignored)
 void
 ExportDialog::browse ()
 {
-	FileChooserDialog dialog("Export to file", FILE_CHOOSER_ACTION_SAVE);
+	FileChooserDialog dialog("Export to file", browse_action());
 	dialog.set_transient_for(*this);
 	dialog.set_filename (file_entry.get_text());
 

@@ -997,7 +997,8 @@ ARDOUR_UI::session_add_audio_route (bool track, int32_t input_channels, int32_t 
 				if (how_many == 1) {
 					error << _("could not create a new audio track") << endmsg;
 				} else {
-					error << string_compose (_("could not create %1 new audio tracks"), how_many) << endmsg;
+					error << string_compose (_("could only create %1 of %2 new audio %3"), 
+								 tracks.size(), how_many, (track ? _("tracks") : _("busses"))) << endmsg;
 				}
 			}
 
@@ -1028,6 +1029,7 @@ ARDOUR_UI::session_add_audio_route (bool track, int32_t input_channels, int32_t 
 	}
 
 	catch (...) {
+		cerr << "About to complain about JACK\n";
 		MessageDialog msg (*editor, 
 				   _("There are insufficient JACK ports available\n\
 to create a new track or bus.\n\
@@ -2259,7 +2261,7 @@ releasing %4 %5bytes of disk space"));
 }
 
 void
-ARDOUR_UI::add_route ()
+ARDOUR_UI::add_route (Gtk::Window* float_window)
 {
 	int count;
 
@@ -2269,7 +2271,9 @@ ARDOUR_UI::add_route ()
 
 	if (add_route_dialog == 0) {
 		add_route_dialog = new AddRouteDialog;
-		editor->ensure_float (*add_route_dialog);
+		if (float_window) {
+			add_route_dialog->set_transient_for (*float_window);
+		}
 	}
 
 	if (add_route_dialog->is_visible()) {

@@ -55,6 +55,8 @@ class AudioRegionView : public RegionView
 			 double initial_samples_per_unit,
 			 Gdk::Color& basic_color);
 
+        AudioRegionView (const AudioRegionView& other);
+
 	~AudioRegionView ();
 	
 	virtual void init (Gdk::Color& base_color, bool wait_for_data = false);
@@ -143,7 +145,7 @@ class AudioRegionView : public RegionView
     void reset_width_dependent_items (double pixel_width);
     void set_waveview_data_src();
     
-	void color_handler (ColorID, uint32_t);
+    void color_handler (ColorID, uint32_t);
 
     vector<GnomeCanvasWaveViewCache*> wave_caches;
     vector<ArdourCanvas::WaveView *>  waves;
