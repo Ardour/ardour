@@ -3684,3 +3684,12 @@ Editor::sort_track_selection ()
 	selection->tracks.sort (cmp);
 }
 
+nframes_t
+Editor::edit_cursor_position(bool sync)
+{
+	if (sync && edit_cursor->current_frame != edit_cursor_clock.current_time()) {
+		edit_cursor_clock.set(edit_cursor->current_frame, true);
+	}
+
+	return edit_cursor->current_frame;
+}

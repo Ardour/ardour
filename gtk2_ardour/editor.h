@@ -339,6 +339,8 @@ class Editor : public PublicEditor
 	void reset_zoom (double);
 	void reposition_and_zoom (nframes_t, double);
 
+	nframes_t edit_cursor_position(bool);
+
   protected:
 	void map_transport_state ();
 	void map_position_change (nframes_t);

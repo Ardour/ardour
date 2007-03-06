@@ -1992,6 +1992,7 @@ ARDOUR_UI::load_session (const string & path, const string & snap_name, string* 
 		session->set_clean ();
 	}
 
+	editor->edit_cursor_position (true);
 	return 0;
 }
 
