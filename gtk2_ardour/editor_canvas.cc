@@ -263,8 +263,10 @@ Editor::initialize_canvas ()
 	double time_width = FLT_MAX/frames_per_unit;
 	time_canvas.set_scroll_region(0.0, 0.0, time_width, time_height);
 	
-	edit_cursor = new Cursor (*this, "blue", &Editor::canvas_edit_cursor_event);
-	playhead_cursor = new Cursor (*this, "red", &Editor::canvas_playhead_cursor_event);
+	edit_cursor = new Cursor (*this, &Editor::canvas_edit_cursor_event);
+	edit_cursor->canvas_item.property_fill_color_rgba() = color_map[cEditCursor];
+	playhead_cursor = new Cursor (*this, &Editor::canvas_playhead_cursor_event);
+	playhead_cursor->canvas_item.property_fill_color_rgba() = color_map[cPlayHead];
 
 	initial_ruler_update_required = true;
 	track_canvas.signal_size_allocate().connect (mem_fun(*this, &Editor::track_canvas_allocate));

@@ -101,3 +101,6 @@ COLORID(cTrimHandleLockedStart)
 COLORID(cTrimHandleLockedEnd)
 COLORID(cTrimHandleStart)
 COLORID(cTrimHandleEnd)
+COLORID(cEditCursor)
+COLORID(cPlayHead)
+

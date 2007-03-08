@@ -610,7 +610,7 @@ class Editor : public PublicEditor
 	    nframes_t        current_frame;
 	    double		  length;
 
-	    Cursor (Editor&, const string& color, bool (Editor::*)(GdkEvent*,ArdourCanvas::Item*));
+	    Cursor (Editor&, bool (Editor::*)(GdkEvent*,ArdourCanvas::Item*));
 	    ~Cursor ();
 
 	    void set_position (nframes_t);
