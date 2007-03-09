@@ -20,7 +20,6 @@ LedState MackieButtonHandler::default_button_release( Button & button )
 	return off;
 }
 
-
 LedState MackieButtonHandler::io_press( Button & button )
 {
 	return default_button_press( button );
@@ -671,3 +670,22 @@ LedState MackieButtonHandler::fader_touch_release( Button & button )
 	return default_button_release( button );
 }
 
+LedState MackieButtonHandler::clicking_press( Button & button )
+{
+	return default_button_press( button );
+}
+
+LedState MackieButtonHandler::clicking_release( Button & button )
+{
+	return default_button_press( button );
+}
+
+LedState MackieButtonHandler::global_solo_press( Button & button )
+{
+	return default_button_press( button );
+}
+
+LedState MackieButtonHandler::global_solo_release( Button & button )
+{
+	return default_button_press( button );
+}

@@ -233,26 +233,7 @@ void MackiePort::probe_emulation( const MidiByteArray & bytes )
 		return;
 	}
 
-	// probing doesn't work very well, so just use a config variable
-	// to set the emulation mode
-	bool emulation_ok = false;
-	if ( ARDOUR::Config->get_mackie_emulation() == "bcf" )
-	{
-		_emulation = bcf2000;
-		emulation_ok = true;
-	}
-	else if ( ARDOUR::Config->get_mackie_emulation() == "mcu" )
-	{
-		_emulation = mackie;
-		emulation_ok = true;
-	}
-	else
-	{
-		cout << "unknown mackie emulation: " << ARDOUR::Config->get_mackie_emulation() << endl;
-		emulation_ok = false;
-	}
-	
-	finalise_init( emulation_ok );
+	finalise_init( true );
 }
 
 void MackiePort::init()
@@ -266,12 +247,42 @@ void MackiePort::init()
 	init_event();
 	
 	// kick off initialisation. See docs in header file for init()
-	write_sysex ( MidiByteArray (2, 0x13, 0x00 ));
+	
+	// bypass the init sequence because sometimes the first
+	// message doesn't get to the unit, and there's no way
+	// to do a timed lock in Glib.
+	//write_sysex ( MidiByteArray ( 2, 0x13, 0x00 ) );
+	
+	finalise_init( true );
 }
 
 void MackiePort::finalise_init( bool yn )
 {
 	cout << "MackiePort::finalise_init" << endl;
+	bool emulation_ok = false;
+	
+	// probing doesn't work very well, so just use a config variable
+	// to set the emulation mode
+	if ( _emulation == none )
+	{
+		if ( ARDOUR::Config->get_mackie_emulation() == "bcf" )
+		{
+			_emulation = bcf2000;
+			emulation_ok = true;
+		}
+		else if ( ARDOUR::Config->get_mackie_emulation() == "mcu" )
+		{
+			_emulation = mackie;
+			emulation_ok = true;
+		}
+		else
+		{
+			cout << "unknown mackie emulation: " << ARDOUR::Config->get_mackie_emulation() << endl;
+			emulation_ok = false;
+		}
+	}
+	
+	yn = yn && emulation_ok;
 	
 	SurfacePort::active( yn );
 

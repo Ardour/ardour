@@ -167,6 +167,9 @@ class MackieControlProtocol
 	virtual Mackie::LedState channel_right_press( Mackie::Button & );
 	virtual Mackie::LedState channel_right_release( Mackie::Button & );
 	
+	virtual Mackie::LedState clicking_press( Mackie::Button & );
+	virtual Mackie::LedState clicking_release( Mackie::Button & );
+	
   protected:
 	// create instances of MackiePort, depending on what's found in ardour.rc
 	void create_ports();
@@ -222,13 +225,18 @@ class MackieControlProtocol
 	*/
 	bool handle_strip_button( Mackie::Control &, Mackie::ButtonState, boost::shared_ptr<ARDOUR::Route> );
 
-	// Polling midi port(s) for incoming messages
+	/// thread started. Calls monitor_work.
 	static void* _monitor_work (void* arg);
+	
+	/// Polling midi port(s) for incoming messages
 	void* monitor_work ();
+	
 	/// rebuild the set of ports for this surface
 	void update_ports();
+	
 	/// Returns true if there is pending data, false otherwise
 	bool poll_ports();
+	
 	/// Trigger the MIDI::Parser
 	void read_ports();
 
@@ -240,15 +248,18 @@ class MackieControlProtocol
 	// called from poll_automation to figure out which automations need to be sent
 	void update_automation( Mackie::RouteSignal & );
 
-	/// notification from the MackiePorts that their status has changed
-	void handle_port_changed( Mackie::SurfacePort *, bool active );
-	
 	/**
 		notification that the port is about to start it's init sequence.
 		We must make sure that before this exits, the port is being polled
 		for new data.
 	*/
 	void handle_port_init( Mackie::SurfacePort * );
+
+	/// notification from a MackiePort that it's now active
+	void handle_port_active( Mackie::SurfacePort * );
+	
+	/// notification from a MackiePort that it's now inactive
+	void handle_port_inactive( Mackie::SurfacePort * );
 	
 	boost::shared_ptr<ARDOUR::Route> master_route();
 	Mackie::Strip & master_strip();

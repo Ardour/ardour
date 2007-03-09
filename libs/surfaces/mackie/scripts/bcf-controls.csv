@@ -17,17 +17,17 @@ button,7,strip,vselect,1,0,0x08
 
 # overlay buttons
 button,1,assignment,io,1,1,0x28
-button,1,assignment,sends,1,1,0x29
-button,1,assignment,pan,1,1,0x2a
-button,1,assignment,plugin,1,1,0x2b
-button,1,assignment,eq,1,1,0x2c
+button,1,assignment,sends,1,1,0x5a
+button,1,assignment,pan,1,1,0x59
+button,1,assignment,plugin,1,1,0x57
+button,1,assignment,eq,1,1,0x58
 button,1,assignment,dyn,1,1,0x2d
 button,1,bank,left,1,0,0x2e
 button,1,bank,right,1,0,0x2f
 button,1,bank,channel_left,1,0,0x30
 button,1,bank,channel_right,1,0,0x31
 button,1,,flip,1,1,0x32
-button,1,,edit,1,1,0x33
+button,1,,edit,1,1,0x56
 
 button,1,display,name_value,1,0,0x34
 button,1,display,smpte_beats,1,0,0x35
@@ -47,7 +47,8 @@ button,1,,F13,1,0,0x42
 button,1,,F14,1,0,0x43
 button,1,,F15,1,0,0x44
 button,1,,F16,1,0,0x45
-button,1,modifiers,shift,1,0,0x46
+# turn on/off all solos
+button,1,,global_solo,1,0,0x27
 button,1,modifiers,option,1,0,0x47
 button,1,modifiers,control,1,0,0x48
 button,1,modifiers,cmd_alt,1,0,0x49
@@ -63,11 +64,11 @@ button,1,functions,cancel,1,0,0x52
 button,1,functions,mixer,1,0,0x53
 button,1,transport,frm_left,1,1,0x54
 button,1,transport,frm_right,1,1,0x55
-button,1,transport,loop,1,1,0x56
-button,1,transport,punch_in,1,1,0x57
-button,1,transport,punch_out,1,1,0x58
-button,1,transport,home,1,1,0x59
-button,1,transport,end,1,1,0x5a
+button,1,transport,loop,1,1,0x46
+button,1,transport,punch_in,1,1,0x2c
+button,1,transport,punch_out,1,1,0x2b
+button,1,transport,home,1,1,0x2a
+button,1,transport,end,1,1,0x29
 
 # transport buttons
 button,1,transport,"rewind",1,1,0x5b
@@ -87,6 +88,7 @@ button,1,user,"user_b",1,0,0x67
 button,7,strip,"fader_touch",1,0,0x68
 button,1,master,"fader_touch",1,0,0x6f
 button,1,master,mute,1,0,0x17
+button,1,,clicking,1,1,0x33
 
 button,1,,"smpte",0,1,0x71
 button,1,,"beats",0,1,0x72

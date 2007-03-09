@@ -215,6 +215,11 @@ public:
 	virtual LedState fader_touch_press( Button & );
 	virtual LedState fader_touch_release( Button & );
 
+	virtual LedState clicking_press( Button & );
+	virtual LedState clicking_release( Button & );
+
+	virtual LedState global_solo_press( Button & );
+	virtual LedState global_solo_release( Button & );
 };
 
 }

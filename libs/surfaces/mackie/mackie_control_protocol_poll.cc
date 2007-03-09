@@ -34,49 +34,39 @@ bool MackieControlProtocol::probe()
 
 void * MackieControlProtocol::monitor_work()
 {
-	cout << "MackieControlProtocol::monitor_work" << endl;
 	// What does ThreadCreatedWithRequestSize do?
 	PBD::ThreadCreated (pthread_self(), X_("Mackie"));
 
-#if 0
-	// it seems to do the "block" on poll less often
-	// with this code disabled
-	struct sched_param rtparam;
-	memset (&rtparam, 0, sizeof (rtparam));
-	rtparam.sched_priority = 9; /* XXX should be relative to audio (JACK) thread */
-	
-	int err;
-	if ((err = pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam)) != 0) {
-		// do we care? not particularly.
-		PBD::info << string_compose (_("%1: thread not running with realtime scheduling (%2)"), name(), strerror( errno )) << endmsg;
-	} 
-#endif
-	
 	pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, 0);
 	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);
 
 	// read from midi ports
-	cout << "start poll cycle" << endl;
 	while ( true )
 	{
-		update_ports();
-		if ( poll_ports() )
+		try
 		{
-			try { read_ports(); }
-			catch ( exception & e ) {
-				cout << "MackieControlProtocol::poll_ports caught exception: " << e.what() << endl;
-				_ports_changed = true;
-				update_ports();
+			if ( poll_ports() )
+			{
+				try { read_ports(); }
+				catch ( exception & e ) {
+					cout << "MackieControlProtocol::poll_ports caught exception: " << e.what() << endl;
+					_ports_changed = true;
+					update_ports();
+				}
 			}
+			// poll for automation data from the routes
+			poll_automation();
 		}
+		catch ( exception & e )
+		{
+			cout << "caught exception in MackieControlProtocol::monitor_work " << e.what() << endl;
+		}
+		
 		// provide a cancellation point
 		pthread_testcancel();
-		
-		// poll for automation data from the routes
-		poll_automation();
 	}
 
-	// these never get called
+	// these never get called because of cancellation point above
 	cout << "MackieControlProtocol::poll_ports exiting" << endl;
 	
 	delete[] pfd;
@@ -86,16 +76,14 @@ void * MackieControlProtocol::monitor_work()
 
 void MackieControlProtocol::update_ports()
 {
-	// create pollfd structures if necessary
 	if ( _ports_changed )
 	{
-		cout << "MackieControlProtocol::update_ports changed 1" << endl;
 		Glib::Mutex::Lock ul( update_mutex );
 		// yes, this is a double-test locking paradigm, or whatever it's called
 		// because we don't *always* need to acquire the lock for the first test
 		if ( _ports_changed )
 		{
-			cout << "MackieControlProtocol::update_ports updating" << endl;
+			// create new pollfd structures
 			if ( pfd != 0 ) delete[] pfd;
 			// TODO This might be a memory leak. How does thread cancellation cleanup work?
 			pfd = new pollfd[_ports.size()];
@@ -110,9 +98,7 @@ void MackieControlProtocol::update_ports()
 			}
 			_ports_changed = false;
 		}
-		cout << "MackieControlProtocol::update_ports signalling" << endl;
 		update_cond.signal();
-		cout << "MackieControlProtocol::update_ports finished" << endl;
 	}
 }
 
@@ -125,9 +111,11 @@ void MackieControlProtocol::read_ports()
 		// this will cause handle_midi_any in the MackiePort to be triggered
 		if ( pfd[p].revents & POLLIN > 0 )
 		{
-			lock.release();
+			// avoid deadlocking?
+			// doesn't seem to make a difference
+			//lock.release();
 			_ports[p]->read();
-			lock.acquire();
+			//lock.acquire();
 		}
 	}
 }
@@ -161,36 +149,42 @@ bool MackieControlProtocol::poll_ports()
 	return retval > 0;
 }
 
-void MackieControlProtocol::handle_port_changed( SurfacePort * port, bool active )
+void MackieControlProtocol::handle_port_inactive( SurfacePort * port )
 {
-	cout << "MackieControlProtocol::handle_port_changed port: " << *port << " active: " << active << endl;
-	if ( active == false )
+	// port gone away. So stop polling it ASAP
 	{
-		// port gone away. So stop polling it ASAP
+		// delete the port instance
+		Glib::Mutex::Lock lock( update_mutex );
+		MackiePorts::iterator it = find( _ports.begin(), _ports.end(), port );
+		if ( it != _ports.end() )
 		{
-			// delete the port instance
-			Glib::Mutex::Lock lock( update_mutex );
-			MackiePorts::iterator it = find( _ports.begin(), _ports.end(), port );
-			if ( it != _ports.end() )
-			{
-				delete *it;
-				_ports.erase( it );
-			}
+			delete *it;
+			_ports.erase( it );
 		}
-		_ports_changed = true;
-		update_ports();
 	}
-	else
-	{
-		_ports_changed = true;
-		// port added
-		update_ports();
-		update_surface();
-		
-		// TODO update bank size
-		
-		// rebuild surface
-	}
+	_ports_changed = true;
+	update_ports();
+	
+	// TODO all the rebuilding of surfaces and so on
+}
+
+void MackieControlProtocol::handle_port_active( SurfacePort * port )
+{
+	// no need to re-add port because it was already added
+	// during the init phase. So just update the local surface
+	// representation and send the representation to 
+	// all existing ports
+	
+	// TODO update bank size
+	
+	// TODO rebuild surface, to have new units
+	
+	// finally update session state to the surface
+	// TODO but this is also done in set_active, and
+	// in fact update_surface won't execute unless
+	// _active == true
+	cout << "update_surface in handle_port_active" << endl;
+	update_surface();
 }
 
 void MackieControlProtocol::handle_port_init( Mackie::SurfacePort * sport )
@@ -198,5 +192,4 @@ void MackieControlProtocol::handle_port_init( Mackie::SurfacePort * sport )
 	cout << "MackieControlProtocol::handle_port_init" << endl;
 	_ports_changed = true;
 	update_ports();
-	cout << "MackieControlProtocol::handle_port_init finished" << endl;
 }

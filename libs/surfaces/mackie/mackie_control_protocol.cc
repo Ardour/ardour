@@ -117,6 +117,7 @@ MackieControlProtocol::~MackieControlProtocol()
 	{
 		cout << "~MackieControlProtocol caught unknown" << endl;
 	}
+	cout << "finished ~MackieControlProtocol::MackieControlProtocol" << endl;
 }
 
 Mackie::Surface & MackieControlProtocol::surface()
@@ -370,6 +371,9 @@ int MackieControlProtocol::set_active (bool yn)
 					create_ports();
 				}
 				
+				// make sure the ports are being listened to
+				update_ports();
+				
 				// wait until poll thread is running, with ports to poll
 				// the mutex is only there because conditions require a mutex
 				{
@@ -402,6 +406,7 @@ int MackieControlProtocol::set_active (bool yn)
 				
 				// send current control positions to surface
 				// must come after _active = true otherwise it won't run
+				cout << "update_surface in set_active" << endl;
 				update_surface();
 			}
 			else
@@ -555,17 +560,15 @@ void MackieControlProtocol::add_port( MIDI::Port & midi_port, int number )
 
 	connections_back = sport->active_event.connect(
 		sigc::bind (
-			mem_fun (*this, &MackieControlProtocol::handle_port_changed)
+			mem_fun (*this, &MackieControlProtocol::handle_port_active)
 			, sport
-			, true
 		)
 	);
 
 	connections_back = sport->inactive_event.connect(
 		sigc::bind (
-			mem_fun (*this, &MackieControlProtocol::handle_port_changed)
+			mem_fun (*this, &MackieControlProtocol::handle_port_inactive)
 			, sport
-			, false
 		)
 	);
 	
@@ -895,29 +898,11 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 	}
 }
 
-/////////////////////////////////////////////////////////
-// Notifications from UI
-/////////////////////////////////////////////////////////
-struct RouteSignalByRoute
-{
-	RouteSignalByRoute( Route & route ): _route( route ) {}
-		
-	bool operator () ( const RouteSignal & rs ) const
-	{
-		return rs.route().id() == _route.id();
-	}
-	
-	bool operator () ( const RouteSignal * rs ) const
-	{
-		return rs->route().id() == _route.id();
-	}
-
-	Route & _route;
-};
-
 /////////////////////////////////////////////////
 // handlers for Route signals
 // TODO should these be part of RouteSignal?
+// They started off as sigc handlers for signals
+// from Route, but they're also used in polling for automation
 /////////////////////////////////////////////////
 
 void MackieControlProtocol::notify_solo_changed( RouteSignal * route_signal )
@@ -1038,7 +1023,7 @@ void MackieControlProtocol::poll_automation()
 		}
 		
 		// and the master strip
-		update_automation( *master_route_signal );
+		if ( master_route_signal != 0 ) update_automation( *master_route_signal );
 	}
 }
 
@@ -1134,6 +1119,14 @@ void MackieControlProtocol::notify_parameter_changed( const char * name_str )
 	else if ( name == "punch-out" )
 	{
 		update_global_button( "punch_out", Config->get_punch_out() );
+	}
+	else if ( name == "clicking" )
+	{
+		update_global_button( "clicking", Config->get_clicking() );
+	}
+	else
+	{
+		cout << "parameter changed: " << name << endl;
 	}
 }
 
@@ -1258,6 +1251,18 @@ LedState MackieControlProtocol::end_press( Button & button )
 LedState MackieControlProtocol::end_release( Button & button )
 {
 	return off;
+}
+
+LedState MackieControlProtocol::clicking_press( Button & button )
+{
+	bool state = !Config->get_clicking();
+	Config->set_clicking( state );
+	return state;
+}
+
+LedState MackieControlProtocol::clicking_release( Button & button )
+{
+	return Config->get_clicking();
 }
 
 /////////////////////////////////////

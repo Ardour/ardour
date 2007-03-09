@@ -22,6 +22,11 @@ while !File.exist? ARGV[0]
   sleep 0.010
 end
 
+#mapping_csv = ARGV[1] || "mackie-controls.csv"
+mapping_csv = ARGV[1]
+puts "mapping_csv: #{mapping_csv}"
+puts ""
+
 file = File.open ARGV[0], 'r+'
 mck = Mackie.new( file )
 
@@ -94,7 +99,7 @@ puts "version: #{version.map{|x| x.chr}}"
 
 sf = Surface.new
 control_data = ""
-File.open( "mackie-controls.csv" ) { |f| control_data = f.read }
+File.open( mapping_csv ) { |f| control_data = f.read }
 sf.parse( control_data )
 
 # send all faders to 0, but bounce them first
@@ -122,7 +127,7 @@ while bytes = mck.file.read( 3 )
   
   print " Control Type: %-7s, " % sf.types[midi_type]
   print "id: %4i" % control_id
-  print ", control: %15s" % control.name
-  print ", %15s" % control.group.name
+  print ", control: %15s" % ( control ? control.name : "nil control" )
+  print ", %15s" % ( control ? control.group.name : "nil group" )
   print "\n"
 end

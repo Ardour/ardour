@@ -28,6 +28,8 @@
 #include "i18n.h"
 
 #include <sstream>
+#include <cstring>
+#include <cerrno>
 
 using namespace std;
 using namespace Mackie;
@@ -45,7 +47,11 @@ MidiByteArray SurfacePort::read()
 
 	// return nothing read if the lock isn't acquired
 	Glib::RecMutex::Lock lock( _rwlock, Glib::TRY_LOCK );
-	if ( !lock.locked() ) return retval;
+	if ( !lock.locked() )
+	{
+		cout << "SurfacePort::read not locked" << endl;
+		return retval;
+	}
 	
 	// read port and copy to return value
 	int nread = port().read( buf, sizeof (buf) );
@@ -59,11 +65,17 @@ MidiByteArray SurfacePort::read()
 	}
 	else
 	{
-		ostringstream os;
-		os << "error reading from port: " << port().name() << " nread: " << nread;
-		cout << os.str() << endl;
-		//inactive_event();
-		//throw MackieControlException( os.str() );
+		if ( errno != EAGAIN )
+		{
+			char buf[512];
+			char * msg = strerror_r( errno, buf, 512 );
+			
+			ostringstream os;
+			os << "Surface: error reading from port: " << port().name() << ": " << errno << " " << msg;
+			cout << os.str() << endl;
+			inactive_event();
+			throw MackieControlException( os.str() );
+		}
 	}
 	return retval;
 }
@@ -76,10 +88,17 @@ void SurfacePort::write( const MidiByteArray & mba )
 	int count = port().write( mba.bytes().get(), mba.size() );
 	if ( count != (int)mba.size() )
 	{
-		inactive_event();
-		ostringstream os;
-		os << _("Surface: couldn't write to port ") << port().name();
-		throw MackieControlException( os.str() );
+		if ( errno != EAGAIN )
+		{
+			char buf[512];
+			char * msg = strerror_r( errno, buf, 512 );
+			
+			ostringstream os;
+			os << "Surface: couldn't write to port " << port().name() << ": " << errno << " " << msg;
+			cout << os.str();
+			inactive_event();
+			throw MackieControlException( os.str() );
+		}
 	}
 	//if ( mba[0] == 0xf0 ) cout << "SurfacePort::write " << count << endl;
 }

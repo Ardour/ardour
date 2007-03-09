@@ -1,17 +1,18 @@
 #! /usr/bin/ruby
 
 require 'erb'
-require 'controls.rb'
+
+require File.dirname(__FILE__) + '/controls.rb'
 
 cc_template = ''
-File.open("surface-cc-template.erb", "r") { |f| cc_template = f.read }
+File.open( File.dirname(__FILE__) + "/surface-cc-template.erb", "r" ) { |f| cc_template = f.read }
 
 h_template = ''
-File.open("surface-h-template.erb", "r") { |f| h_template = f.read }
+File.open( File.dirname(__FILE__) + "/surface-h-template.erb", "r" ) { |f| h_template = f.read }
 
 sf = Surface.new( ARGV[0] )
 control_data = ''
-File.open("#{sf.name.downcase}-controls.csv", "r") { |f| control_data = f.read }
+File.open( File.dirname(__FILE__) + "/#{sf.name.downcase}-controls.csv", "r") { |f| control_data = f.read }
 sf.parse control_data
 
 @result = ""
