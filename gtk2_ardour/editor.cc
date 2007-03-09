@@ -1093,8 +1093,7 @@ Editor::connect_to_session (Session *t)
 		}
 		session->locations()->add (loc, false);
 		session->set_auto_loop_location (loc);
-	}
-	else {
+	} else {
 		// force name
 		loc->set_name (_("Loop"));
 	}
@@ -1107,8 +1106,7 @@ Editor::connect_to_session (Session *t)
 		}
 		session->locations()->add (loc, false);
 		session->set_auto_punch_location (loc);
-	}
-	else {
+	} else {
 		// force name
 		loc->set_name (_("Punch"));
 	}

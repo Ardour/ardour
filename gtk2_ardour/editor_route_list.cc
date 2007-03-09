@@ -52,7 +52,7 @@ Editor::handle_new_route (Session::RouteList& routes)
 		boost::shared_ptr<Route> route = (*x);
 
 		if (route->hidden()) {
-			return;
+			continue;
 		}
 		
 		tv = new AudioTimeAxisView (*this, *session, route, track_canvas);
