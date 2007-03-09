@@ -62,8 +62,8 @@ MidiByteArray SurfacePort::read()
 		ostringstream os;
 		os << "error reading from port: " << port().name() << " nread: " << nread;
 		cout << os.str() << endl;
-		inactive_event();
-		throw MackieControlException( os.str() );
+		//inactive_event();
+		//throw MackieControlException( os.str() );
 	}
 	return retval;
 }
