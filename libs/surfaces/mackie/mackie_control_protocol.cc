@@ -105,7 +105,18 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 MackieControlProtocol::~MackieControlProtocol()
 {
 	cout << "~MackieControlProtocol::MackieControlProtocol" << endl;
-	close();
+	try
+	{
+		close();
+	}
+	catch ( exception & e )
+	{
+		cout << "~MackieControlProtocol caught " << e.what() << endl;
+	}
+	catch ( ... )
+	{
+		cout << "~MackieControlProtocol caught unknown" << endl;
+	}
 }
 
 Mackie::Surface & MackieControlProtocol::surface()
@@ -983,7 +994,7 @@ void MackieControlProtocol::notify_gain_changed(  ARDOUR::Route * route, MackieP
 		Fader & fader = strip_from_route( route ).gain();
 		if ( !fader.touch() )
 		{
-			port->write( builder.build_fader( fader, gain_to_slider_position( route->gain() ) ) );
+			port->write( builder.build_fader( fader, gain_to_slider_position( route->effective_gain() ) ) );
 		}
 	}
 	catch( exception & e )
@@ -1024,6 +1035,19 @@ void MackieControlProtocol::notify_panner_changed( ARDOUR::Route * route, Mackie
 	catch( exception & e )
 	{
 		cout << e.what() << endl;
+	}
+}
+
+void MackieControlProtocol::poll_automation()
+{
+	for( RouteSignals::iterator it = route_signals.begin(); it != route_signals.end(); ++it )
+	{
+		// update strip from route
+		ARDOUR::AutoState state = (*it)->route().gain_automation_state();
+		if ( state == Touch || state == Play )
+		{
+			(*it)->notify_all();
+		}
 	}
 }
 

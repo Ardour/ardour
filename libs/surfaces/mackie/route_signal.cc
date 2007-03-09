@@ -76,8 +76,6 @@ void RouteSignal::disconnect()
 
 void RouteSignal::notify_all()
 {
-	void * src = &_route;
-	
 	if ( _strip.has_solo() )
 		_mcp.notify_solo_changed( &_route, &_port );
 	
@@ -87,7 +85,7 @@ void RouteSignal::notify_all()
 	if ( _strip.has_gain() )
 		_mcp.notify_gain_changed( &_route, &_port );
 	
-	_mcp.notify_name_changed( src, &_route, &_port );
+	_mcp.notify_name_changed( &_route, &_route, &_port );
 	
 	if ( _strip.has_vpot() )
 		_mcp.notify_panner_changed( &_route, &_port );

@@ -233,6 +233,9 @@ class MackieControlProtocol
 	void read_ports();
 
 	void add_port( MIDI::Port &, int number );
+
+	/// read automation data from the currently active routes and send to surface
+	void poll_automation();
 	
 	/**
 		used by the notify_XXX methods to find

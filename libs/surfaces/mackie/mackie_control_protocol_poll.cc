@@ -71,6 +71,9 @@ void * MackieControlProtocol::monitor_work()
 		}
 		// provide a cancellation point
 		pthread_testcancel();
+		
+		// poll for automation data from the routes
+		poll_automation();
 	}
 
 	// these never get called
@@ -86,6 +89,7 @@ void MackieControlProtocol::update_ports()
 	// create pollfd structures if necessary
 	if ( _ports_changed )
 	{
+		cout << "MackieControlProtocol::update_ports changed 1" << endl;
 		Glib::Mutex::Lock ul( update_mutex );
 		// yes, this is a double-test locking paradigm, or whatever it's called
 		// because we don't *always* need to acquire the lock for the first test
@@ -178,10 +182,14 @@ void MackieControlProtocol::handle_port_changed( SurfacePort * port, bool active
 	}
 	else
 	{
+cout << __FILE__ << ':' << __LINE__ << endl;
 		_ports_changed = true;
+cout << __FILE__ << ':' << __LINE__ << endl;
 		// port added
 		update_ports();
+cout << __FILE__ << ':' << __LINE__ << endl;
 		update_surface();
+cout << __FILE__ << ':' << __LINE__ << endl;
 		
 		// TODO update bank size
 		
