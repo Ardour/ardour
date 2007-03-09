@@ -1749,7 +1749,7 @@ ARDOUR_UI::new_session (std::string predetermined_path)
 
 		if (!engine->connected()) {
 			new_session_dialog->hide ();
-			MessageDialog msg (_("Ardour is no longer connected to JACK. Creating a new session is not possible."));
+			MessageDialog msg (_("Ardour is not connected to JACK at this time. Creating new sessions is not possible."));
 			msg.run ();
 			return;
 		}
