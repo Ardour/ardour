@@ -182,14 +182,10 @@ void MackieControlProtocol::handle_port_changed( SurfacePort * port, bool active
 	}
 	else
 	{
-cout << __FILE__ << ':' << __LINE__ << endl;
 		_ports_changed = true;
-cout << __FILE__ << ':' << __LINE__ << endl;
 		// port added
 		update_ports();
-cout << __FILE__ << ':' << __LINE__ << endl;
 		update_surface();
-cout << __FILE__ << ':' << __LINE__ << endl;
 		
 		// TODO update bank size
 		

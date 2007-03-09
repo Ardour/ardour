@@ -87,17 +87,17 @@ class MackieControlProtocol
   // strip/route related stuff
   public:	
 	/// Signal handler for Route::solo
-	void notify_solo_changed( ARDOUR::Route *, Mackie::MackiePort * );
+	void notify_solo_changed( Mackie::RouteSignal * );
 	/// Signal handler for Route::mute
-	void notify_mute_changed( ARDOUR::Route *, Mackie::MackiePort * );
+	void notify_mute_changed( Mackie::RouteSignal * );
 	/// Signal handler for Route::record_enable_changed
-	void notify_record_enable_changed( ARDOUR::Route *, Mackie::MackiePort * );
+	void notify_record_enable_changed( Mackie::RouteSignal * );
 	/// Signal handler for Route::gain_changed ( from IO )
-	void notify_gain_changed( ARDOUR::Route *, Mackie::MackiePort * );
+	void notify_gain_changed( Mackie::RouteSignal * );
 	/// Signal handler for Route::name_change
-	void notify_name_changed( void *, ARDOUR::Route *, Mackie::MackiePort * );
+	void notify_name_changed( void *, Mackie::RouteSignal * );
 	/// Signal handler from Panner::Change
-	void notify_panner_changed( ARDOUR::Route *, Mackie::MackiePort * );
+	void notify_panner_changed( Mackie::RouteSignal * );
 	/// Signal handler for new routes added
 	void notify_route_added( ARDOUR::Session::RouteList & );
 
@@ -237,12 +237,9 @@ class MackieControlProtocol
 	/// read automation data from the currently active routes and send to surface
 	void poll_automation();
 	
-	/**
-		used by the notify_XXX methods to find
-		a strip corresponding to the Route passed in.
-	*/
-	Mackie::Strip & strip_from_route( ARDOUR::Route * route );
-	
+	// called from poll_automation to figure out which automations need to be sent
+	void update_automation( Mackie::RouteSignal & );
+
 	/// notification from the MackiePorts that their status has changed
 	void handle_port_changed( Mackie::SurfacePort *, bool active );
 	

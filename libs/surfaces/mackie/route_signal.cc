@@ -30,26 +30,26 @@ using namespace Mackie;
 void RouteSignal::connect()
 {
 	if ( _strip.has_solo() )
-		_solo_changed_connection = _route.solo_control().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_solo_changed ), &_route, &_port ) );
+		_solo_changed_connection = _route.solo_control().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_solo_changed ), this ) );
 	
 	if ( _strip.has_mute() )
-		_mute_changed_connection = _route.mute_control().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_mute_changed ), &_route, &_port ) );
+		_mute_changed_connection = _route.mute_control().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_mute_changed ), this ) );
 	
 	if ( _strip.has_gain() )
-		_gain_changed_connection = _route.gain_control().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_gain_changed ), &_route, &_port ) );
+		_gain_changed_connection = _route.gain_control().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_gain_changed ), this ) );
 		
-	_name_changed_connection = _route.name_changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_name_changed ), &_route, &_port ) );
+	_name_changed_connection = _route.name_changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_name_changed ), this ) );
 	
 	if ( _route.panner().size() == 1 )
 	{
-		_panner_changed_connection = _route.panner()[0]->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_panner_changed ), &_route, &_port ) );
+		_panner_changed_connection = _route.panner()[0]->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_panner_changed ), this ) );
 	}
 	
 	try
 	{
 		_record_enable_changed_connection =
 			dynamic_cast<ARDOUR::Track&>( _route ).rec_enable_control().Changed
-				.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_record_enable_changed ), &_route, &_port ) )
+				.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_record_enable_changed ), this ) )
 		;
 	}
 	catch ( std::bad_cast & )
@@ -77,19 +77,19 @@ void RouteSignal::disconnect()
 void RouteSignal::notify_all()
 {
 	if ( _strip.has_solo() )
-		_mcp.notify_solo_changed( &_route, &_port );
+		_mcp.notify_solo_changed( this );
 	
 	if ( _strip.has_mute() )
-		_mcp.notify_mute_changed( &_route, &_port );
+		_mcp.notify_mute_changed( this );
 	
 	if ( _strip.has_gain() )
-		_mcp.notify_gain_changed( &_route, &_port );
+		_mcp.notify_gain_changed( this );
 	
-	_mcp.notify_name_changed( &_route, &_route, &_port );
+	_mcp.notify_name_changed( &_route, this );
 	
 	if ( _strip.has_vpot() )
-		_mcp.notify_panner_changed( &_route, &_port );
+		_mcp.notify_panner_changed( this );
 	
 	if ( _strip.has_recenable() )
-		_mcp.notify_record_enable_changed( &_route, &_port );
+		_mcp.notify_record_enable_changed( this );
 }

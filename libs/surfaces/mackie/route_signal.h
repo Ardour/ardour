@@ -60,7 +60,7 @@ public:
 	
 	const ARDOUR::Route & route() const { return _route; }
 	Strip & strip() { return _strip; }
-	Port & port() { return _port; }
+	MackiePort & port() { return _port; }
 	
 private:
 	ARDOUR::Route & _route;

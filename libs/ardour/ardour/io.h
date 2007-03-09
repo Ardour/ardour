@@ -108,7 +108,8 @@ class IO : public PBD::StatefulDestructible
 	virtual gain_t effective_gain () const;
 
 	Panner& panner() { return *_panner; }
-
+	const Panner& panner() const { return *_panner; }
+	
 	int ensure_io (uint32_t, uint32_t, bool clear, void *src);
 
 	int use_input_connection (Connection&, void *src);

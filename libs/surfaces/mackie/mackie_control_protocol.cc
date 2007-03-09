@@ -915,45 +915,17 @@ struct RouteSignalByRoute
 	Route & _route;
 };
 
-Strip & MackieControlProtocol::strip_from_route( Route * route )
-{
-	if ( route == 0 )
-	{
-		throw MackieControlException( "route is null in MackieControlProtocol::strip_from_route" );
-	}
-	
-	if ( route->master() )
-	{
-		return master_strip();
-	}
-	
-	RouteSignals::iterator it = find_if(
-		route_signals.begin()
-		, route_signals.end()
-		, RouteSignalByRoute( *route )
-	);
-	
-	if ( it == route_signals.end() )
-	{
-		ostringstream os;
-		os << "No strip for route " << route->name();
-		throw MackieControlException( os.str() );
-	}
-	
-	return (*it)->strip();
-}
-
 /////////////////////////////////////////////////
 // handlers for Route signals
 // TODO should these be part of RouteSignal?
 /////////////////////////////////////////////////
 
-void MackieControlProtocol::notify_solo_changed( ARDOUR::Route * route, MackiePort * port )
+void MackieControlProtocol::notify_solo_changed( RouteSignal * route_signal )
 {
 	try
 	{
-		Button & button = strip_from_route( route ).solo();
-		port->write( builder.build_led( button, route->soloed() ) );
+		Button & button = route_signal->strip().solo();
+		route_signal->port().write( builder.build_led( button, route_signal->route().soloed() ) );
 	}
 	catch( exception & e )
 	{
@@ -961,12 +933,12 @@ void MackieControlProtocol::notify_solo_changed( ARDOUR::Route * route, MackiePo
 	}
 }
 
-void MackieControlProtocol::notify_mute_changed( ARDOUR::Route * route, MackiePort * port )
+void MackieControlProtocol::notify_mute_changed( RouteSignal * route_signal )
 {
 	try
 	{
-		Button & button = strip_from_route( route ).mute();
-		port->write( builder.build_led( button, route->muted() ) );
+		Button & button = route_signal->strip().mute();
+		route_signal->port().write( builder.build_led( button, route_signal->route().muted() ) );
 	}
 	catch( exception & e )
 	{
@@ -974,12 +946,12 @@ void MackieControlProtocol::notify_mute_changed( ARDOUR::Route * route, MackiePo
 	}
 }
 
-void MackieControlProtocol::notify_record_enable_changed( ARDOUR::Route * route, MackiePort * port )
+void MackieControlProtocol::notify_record_enable_changed( RouteSignal * route_signal )
 {
 	try
 	{
-		Button & button = strip_from_route( route ).recenable();
-		port->write( builder.build_led( button, route->record_enabled() ) );
+		Button & button = route_signal->strip().recenable();
+		route_signal->port().write( builder.build_led( button, route_signal->route().record_enabled() ) );
 	}
 	catch( exception & e )
 	{
@@ -987,14 +959,14 @@ void MackieControlProtocol::notify_record_enable_changed( ARDOUR::Route * route,
 	}
 }
 
-void MackieControlProtocol::notify_gain_changed(  ARDOUR::Route * route, MackiePort * port )
+void MackieControlProtocol::notify_gain_changed( RouteSignal * route_signal )
 {
 	try
 	{
-		Fader & fader = strip_from_route( route ).gain();
+		Fader & fader = route_signal->strip().gain();
 		if ( !fader.touch() )
 		{
-			port->write( builder.build_fader( fader, gain_to_slider_position( route->effective_gain() ) ) );
+			route_signal->port().write( builder.build_fader( fader, gain_to_slider_position( route_signal->route().effective_gain() ) ) );
 		}
 	}
 	catch( exception & e )
@@ -1003,7 +975,7 @@ void MackieControlProtocol::notify_gain_changed(  ARDOUR::Route * route, MackieP
 	}
 }
 
-void MackieControlProtocol::notify_name_changed( void *, ARDOUR::Route * route, MackiePort * port )
+void MackieControlProtocol::notify_name_changed( void *, RouteSignal * route_signal )
 {
 	try
 	{
@@ -1016,20 +988,21 @@ void MackieControlProtocol::notify_name_changed( void *, ARDOUR::Route * route, 
 }
 
 // TODO deal with > 1 channel being panned
-void MackieControlProtocol::notify_panner_changed( ARDOUR::Route * route, MackiePort * port )
+void MackieControlProtocol::notify_panner_changed( RouteSignal * route_signal )
 {
 	try
 	{
-		Pot & pot = strip_from_route( route ).vpot();
-		if ( route->panner().size() == 1 )
+		Pot & pot = route_signal->strip().vpot();
+		
+		if ( route_signal->route().panner().size() == 1 )
 		{
 			float pos;
-			route->panner()[0]->get_effective_position( pos);
-			port->write( builder.build_led_ring( pot, ControlState( on, pos ) ) );
+			route_signal->route().panner()[0]->get_effective_position( pos);
+			route_signal->port().write( builder.build_led_ring( pot, ControlState( on, pos ) ) );
 		}
 		else
 		{
-			port->write( builder.zero_control( pot ) );
+			route_signal->port().write( builder.zero_control( pot ) );
 		}
 	}
 	catch( exception & e )
@@ -1038,16 +1011,34 @@ void MackieControlProtocol::notify_panner_changed( ARDOUR::Route * route, Mackie
 	}
 }
 
+// TODO handle plugin automation polling
+void MackieControlProtocol::update_automation( RouteSignal & rs )
+{
+	ARDOUR::AutoState gain_state = rs.route().gain_automation_state();
+	if ( gain_state == Touch || gain_state == Play )
+	{
+		notify_gain_changed( &rs );
+	}
+	
+	ARDOUR::AutoState panner_state = rs.route().panner().automation_state();
+	if ( panner_state == Touch || panner_state == Play )
+	{
+		notify_panner_changed( &rs );
+	}
+}
+
 void MackieControlProtocol::poll_automation()
 {
-	for( RouteSignals::iterator it = route_signals.begin(); it != route_signals.end(); ++it )
+	if ( _active )
 	{
-		// update strip from route
-		ARDOUR::AutoState state = (*it)->route().gain_automation_state();
-		if ( state == Touch || state == Play )
+		// do all currently mapped routes
+		for( RouteSignals::iterator it = route_signals.begin(); it != route_signals.end(); ++it )
 		{
-			(*it)->notify_all();
+			update_automation( **it );
 		}
+		
+		// and the master strip
+		update_automation( *master_route_signal );
 	}
 }
 
