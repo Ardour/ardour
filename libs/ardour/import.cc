@@ -210,19 +210,20 @@ Session::import_audiofile (import_status& status)
 
 	while (!status.cancel) {
 
-		nframes_t nread;
+		nframes_t nread, nfread;
 		long x;
 		long chn;
 		
 		if ((nread = importable->read (data, nframes)) == 0) {
 			break;
 		}
+		nfread = nread / info.channels;
 
 		/* de-interleave */
 				
 		for (chn = 0; chn < info.channels; ++chn) {
 			
-			for (x = chn, n = 0; n < nframes; x += info.channels, ++n) {
+			for (x = chn, n = 0; n < nfread; x += info.channels, ++n) {
 				channel_data[chn][n] = (Sample) data[x];
 			}
 		}
@@ -230,7 +231,7 @@ Session::import_audiofile (import_status& status)
 		/* flush to disk */
 
 		for (chn = 0; chn < info.channels; ++chn) {
-			newfiles[chn]->write (channel_data[chn], nread / info.channels);
+			newfiles[chn]->write (channel_data[chn], nfread);
 		}
 
 		so_far += nread;
@@ -364,7 +365,7 @@ ResampledImportableSource::read (Sample* output, nframes_t nframes)
 
 	if ((err = src_process (src_state, &src_data))) {
 		error << string_compose(_("Import: %1"), src_strerror (err)) << endmsg ;
-		return false ;
+		return 0 ;
 	} 
 	
 	/* Terminate if at end */
@@ -376,6 +377,6 @@ ResampledImportableSource::read (Sample* output, nframes_t nframes)
 	src_data.data_in += src_data.input_frames_used * sf_info->channels ;
 	src_data.input_frames -= src_data.input_frames_used ;
 
-	return nframes;
+	return src_data.output_frames_gen * sf_info->channels;
 }
 
