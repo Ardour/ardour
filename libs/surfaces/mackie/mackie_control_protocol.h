@@ -296,6 +296,7 @@ class MackieControlProtocol
 	/// true until the port configuration is updated;
 	bool _ports_changed;
 
+	bool _polling;
 	struct pollfd * pfd;
 	int nfds;
 };

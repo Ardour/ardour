@@ -41,7 +41,7 @@ void * MackieControlProtocol::monitor_work()
 	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);
 
 	// read from midi ports
-	while ( true )
+	while ( _polling )
 	{
 		try
 		{
@@ -61,15 +61,12 @@ void * MackieControlProtocol::monitor_work()
 		{
 			cout << "caught exception in MackieControlProtocol::monitor_work " << e.what() << endl;
 		}
-		
-		// provide a cancellation point
-		pthread_testcancel();
 	}
 
-	// these never get called because of cancellation point above
-	cout << "MackieControlProtocol::poll_ports exiting" << endl;
-	
+	// TODO ports and pfd and nfds should be in a separate class
 	delete[] pfd;
+	pfd = 0;
+	nfds = 0;
 
 	return (void*) 0;
 }

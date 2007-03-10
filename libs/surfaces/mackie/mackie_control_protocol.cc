@@ -94,6 +94,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, connections_back( _connections )
 	, _surface( 0 )
 	, _ports_changed( false )
+	, _polling( true )
 	, pfd( 0 )
 	, nfds( 0 )
 {
@@ -542,7 +543,7 @@ void MackieControlProtocol::connect_session_signals()
 	Sorted sorted = get_sorted_routes();
 	for ( Sorted::iterator it = sorted.begin(); it != sorted.end(); ++it )
 	{
-		(*it)->RemoteControlIDChanged.connect( ( mem_fun (*this, &MackieControlProtocol::notify_remote_id_changed) ) );
+		connections_back = (*it)->RemoteControlIDChanged.connect( ( mem_fun (*this, &MackieControlProtocol::notify_remote_id_changed) ) );
 	}
 }
 
@@ -645,7 +646,7 @@ void MackieControlProtocol::initialize_surface()
 	// Connect events. Must be after route table otherwise there will be trouble
 	for( MackiePorts::iterator it = _ports.begin(); it != _ports.end(); ++it )
 	{
-		(*it)->control_event.connect( ( mem_fun (*this, &MackieControlProtocol::handle_control_event) ) );
+		connections_back = (*it)->control_event.connect( ( mem_fun (*this, &MackieControlProtocol::handle_control_event) ) );
 	}
 }
 
@@ -653,6 +654,16 @@ void MackieControlProtocol::close()
 {
 	// TODO disconnect port active/inactive signals
 	// Or at least put a lock here
+	
+	// disconnect global signals from Session
+	// TODO Since *this is a sigc::trackable, this shouldn't be necessary
+	// but it is for some reason
+#if 0
+	for( vector<sigc::connection>::iterator it = _connections.begin(); it != _connections.end(); ++it )
+	{
+		it->disconnect();
+	}
+#endif
 	
 	if ( _surface != 0 )
 	{
@@ -687,19 +698,15 @@ void MackieControlProtocol::close()
 			}
 		}
 		
-		// disconnect global signals from Session
-		// TODO Since *this is a sigc::trackable, this shouldn't be necessary
-		for( vector<sigc::connection>::iterator it = _connections.begin(); it != _connections.end(); ++it )
-		{
-			it->disconnect();
-		}
-		
 		// disconnect routes from strips
 		clear_route_signals();
+		
+		delete _surface;
+		_surface = 0;
 	}
 	
 	// stop polling, and wait for it...
-	pthread_cancel_one( thread );
+	_polling = false;
 	pthread_join( thread, 0 );
 	
 	// shut down MackiePorts
@@ -709,7 +716,10 @@ void MackieControlProtocol::close()
 	}
 	_ports.clear();
 	
+	// this is done already in monitor_work. But it's here so we know.
 	delete[] pfd;
+	pfd = 0;
+	nfds = 0;
 }
 
 void* MackieControlProtocol::_monitor_work (void* arg)
@@ -1145,7 +1155,7 @@ void MackieControlProtocol::notify_route_added( ARDOUR::Session::RouteList & rl 
 	typedef ARDOUR::Session::RouteList ARS;
 	for ( ARS::iterator it = rl.begin(); it != rl.end(); ++it )
 	{
-		(*it)->RemoteControlIDChanged.connect( ( mem_fun (*this, &MackieControlProtocol::notify_remote_id_changed) ) );
+		connections_back = (*it)->RemoteControlIDChanged.connect( ( mem_fun (*this, &MackieControlProtocol::notify_remote_id_changed) ) );
 	}
 }
 
