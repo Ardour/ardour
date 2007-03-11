@@ -39,19 +39,36 @@ SurfacePort::SurfacePort( MIDI::Port & port, int number )
 {
 }
 
+SurfacePort::~SurfacePort()
+{
+	//cout << "~SurfacePort::SurfacePort()" << endl;
+	// make sure another thread isn't reading or writing as we close the port
+	Glib::RecMutex::Lock lock( _rwlock );
+	_active = false;
+	//cout << "~SurfacePort::SurfacePort() finished" << endl;
+}
+
 MidiByteArray SurfacePort::read()
 {
 	const int max_buf_size = 512;
 	MIDI::byte buf[max_buf_size];
 	MidiByteArray retval;
 
+	// check active. Mainly so that the destructor
+	// doesn't destroy the mutex while it's still locked
+	if ( !active() ) return retval;
+	
 	// return nothing read if the lock isn't acquired
 	Glib::RecMutex::Lock lock( _rwlock, Glib::TRY_LOCK );
+		
 	if ( !lock.locked() )
 	{
-		cout << "SurfacePort::read not locked" << endl;
+		//cout << "SurfacePort::read not locked" << endl;
 		return retval;
 	}
+	
+	// check active again - destructor sequence
+	if ( !active() ) return retval;
 	
 	// read port and copy to return value
 	int nread = port().read( buf, sizeof (buf) );
@@ -84,7 +101,14 @@ void SurfacePort::write( const MidiByteArray & mba )
 {
 	//if ( mba[0] == 0xf0 ) cout << "SurfacePort::write: " << mba << endl;
 	//cout << "SurfacePort::write: " << mba << endl;
+	
+	// check active before and after lock - to make sure
+	// that the destructor doesn't destroy the mutex while
+	// it's still in use
+	if ( !active() ) return;
 	Glib::RecMutex::Lock lock( _rwlock );
+	if ( !active() ) return;
+
 	int count = port().write( mba.bytes().get(), mba.size() );
 	if ( count != (int)mba.size() )
 	{

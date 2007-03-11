@@ -98,14 +98,14 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, pfd( 0 )
 	, nfds( 0 )
 {
-	cout << "MackieControlProtocol::MackieControlProtocol" << endl;
+	//cout << "MackieControlProtocol::MackieControlProtocol" << endl;
 	// will start reading from ports, as soon as there are some
 	pthread_create_and_store (X_("mackie monitor"), &thread, 0, _monitor_work, this);
 }
 
 MackieControlProtocol::~MackieControlProtocol()
 {
-	cout << "~MackieControlProtocol::MackieControlProtocol" << endl;
+	//cout << "~MackieControlProtocol::MackieControlProtocol" << endl;
 	try
 	{
 		close();
@@ -118,7 +118,7 @@ MackieControlProtocol::~MackieControlProtocol()
 	{
 		cout << "~MackieControlProtocol caught unknown" << endl;
 	}
-	cout << "finished ~MackieControlProtocol::MackieControlProtocol" << endl;
+	//cout << "finished ~MackieControlProtocol::MackieControlProtocol" << endl;
 }
 
 Mackie::Surface & MackieControlProtocol::surface()
@@ -364,7 +364,6 @@ int MackieControlProtocol::set_active (bool yn)
 			if ( yn )
 			{
 				// TODO what happens if this fails half way?
-				cout << "set_active true" << endl;
 				
 				// create MackiePorts
 				{
@@ -389,7 +388,7 @@ int MackieControlProtocol::set_active (bool yn)
 				}
 				
 				// wait until all ports are active
-				// TODO a more sophisticate approach would
+				// TODO a more sophisticated approach would
 				// allow things to start up with only an MCU, even if
 				// extenders were specified but not responding.
 				for( MackiePorts::iterator it = _ports.begin(); it != _ports.end(); ++it )
@@ -407,19 +406,17 @@ int MackieControlProtocol::set_active (bool yn)
 				
 				// send current control positions to surface
 				// must come after _active = true otherwise it won't run
-				cout << "update_surface in set_active" << endl;
 				update_surface();
 			}
 			else
 			{
-				cout << "set_active false" << endl;
 				close();
 				_active = false;
 			}
 		}
 		catch( exception & e )
 		{
-			cout << "set_active to false because " << e.what() << endl;
+			cout << "set_active to false because exception caught: " << e.what() << endl;
 			_active = false;
 			throw;
 		}
@@ -729,7 +726,7 @@ void* MackieControlProtocol::_monitor_work (void* arg)
 
 XMLNode & MackieControlProtocol::get_state()
 {
-	cout << "MackieControlProtocol::get_state" << endl;
+	//cout << "MackieControlProtocol::get_state" << endl;
 	
 	// add name of protocol
 	XMLNode* node = new XMLNode( X_("Protocol") );
@@ -745,7 +742,7 @@ XMLNode & MackieControlProtocol::get_state()
 
 int MackieControlProtocol::set_state( const XMLNode & node )
 {
-	cout << "MackieControlProtocol::set_state: active " << _active << endl;
+	//cout << "MackieControlProtocol::set_state: active " << _active << endl;
 	int retval = 0;
 	
 	// fetch current bank

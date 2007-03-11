@@ -49,12 +49,14 @@ MackiePort::MackiePort( MackieControlProtocol & mcp, MIDI::Port & port, int numb
 , _emulation( none )
 , _initialising( true )
 {
-	cout << "MackiePort::MackiePort" <<endl;
+	//cout << "MackiePort::MackiePort" <<endl;
 }
 
 MackiePort::~MackiePort()
 {
+	//cout << "~MackiePort" << endl;
 	close();
+	//cout << "~MackiePort finished" << endl;
 }
 
 int MackiePort::strips() const
@@ -81,7 +83,7 @@ int MackiePort::strips() const
 // should really be in MackiePort
 void MackiePort::open()
 {
-	cout << "MackiePort::open " << *this << endl;
+	//cout << "MackiePort::open " << *this << endl;
 	_sysex = port().input()->sysex.connect( ( mem_fun (*this, &MackiePort::handle_midi_sysex) ) );
 	
 	// make sure the device is connected
@@ -90,11 +92,14 @@ void MackiePort::open()
 
 void MackiePort::close()
 {
+	//cout << "MackiePort::close" << endl;
+	
 	// disconnect signals
 	_any.disconnect();
 	_sysex.disconnect();
 	
-	// or emit a "closing" signal
+	// TODO emit a "closing" signal?
+	//cout << "MackiePort::close finished" << endl;
 }
 
 const MidiByteArray & MackiePort::sysex_hdr() const
@@ -181,7 +186,7 @@ MidiByteArray calculate_challenge_response( MidiByteArray::iterator begin, MidiB
 MidiByteArray MackiePort::host_connection_query( MidiByteArray & bytes )
 {
 	// handle host connection query
-	cout << "host connection query: " << bytes << endl;
+	//cout << "host connection query: " << bytes << endl;
 	
 	if ( bytes.size() != 18 )
 	{
@@ -202,7 +207,7 @@ MidiByteArray MackiePort::host_connection_query( MidiByteArray & bytes )
 // not used right now
 MidiByteArray MackiePort::host_connection_confirmation( const MidiByteArray & bytes )
 {
-	cout << "host_connection_confirmation: " << bytes << endl;
+	//cout << "host_connection_confirmation: " << bytes << endl;
 	
 	// decode host connection confirmation
 	if ( bytes.size() != 14 )
@@ -219,10 +224,10 @@ MidiByteArray MackiePort::host_connection_confirmation( const MidiByteArray & by
 
 void MackiePort::probe_emulation( const MidiByteArray & bytes )
 {
-	cout << "MackiePort::probe_emulation: " << bytes.size() << ", " << bytes << endl;
+	//cout << "MackiePort::probe_emulation: " << bytes.size() << ", " << bytes << endl;
 	string version_string;
 	for ( int i = 6; i < 11; ++i ) version_string.append( 1, (char)bytes[i] );
-	cout << "version_string: " << version_string << endl;
+	//cout << "version_string: " << version_string << endl;
 	
 	// TODO investigate using serial number. Also, possibly size of bytes might
 	// give an indication. Also, apparently MCU sends non-documented messages
@@ -238,11 +243,11 @@ void MackiePort::probe_emulation( const MidiByteArray & bytes )
 
 void MackiePort::init()
 {
-	cout << "MackiePort::init" << endl;
+	//cout << "MackiePort::init" << endl;
 	init_mutex.lock();
 	_initialising = true;
 	
-	cout << "MackiePort::lock acquired" << endl;
+	//cout << "MackiePort::lock acquired" << endl;
 	// emit pre-init signal
 	init_event();
 	
@@ -258,7 +263,7 @@ void MackiePort::init()
 
 void MackiePort::finalise_init( bool yn )
 {
-	cout << "MackiePort::finalise_init" << endl;
+	//cout << "MackiePort::finalise_init" << endl;
 	bool emulation_ok = false;
 	
 	// probing doesn't work very well, so just use a config variable
@@ -303,18 +308,18 @@ bool MackiePort::wait_for_init()
 	Glib::Mutex::Lock lock( init_mutex );
 	while ( _initialising )
 	{
-		cout << "MackiePort::wait_for_active waiting" << endl;
+		//cout << "MackiePort::wait_for_active waiting" << endl;
 		init_cond.wait( init_mutex );
-		cout << "MackiePort::wait_for_active released" << endl;
+		//cout << "MackiePort::wait_for_active released" << endl;
 	}
-	cout << "MackiePort::wait_for_active returning" << endl;
+	//cout << "MackiePort::wait_for_active returning" << endl;
 	return SurfacePort::active();
 }
 
 void MackiePort::handle_midi_sysex (MIDI::Parser & parser, MIDI::byte * raw_bytes, size_t count )
 {
 	MidiByteArray bytes( count, raw_bytes );
-	cout << "handle_midi_sysex: " << bytes << endl;
+	//cout << "handle_midi_sysex: " << bytes << endl;
 	switch( bytes[5] )
 	{
 		case 0x01:
@@ -389,6 +394,6 @@ void MackiePort::handle_midi_any (MIDI::Parser & parser, MIDI::byte * raw_bytes,
 	}
 	catch( MackieControlException & e )
 	{
-		cout << bytes << ' ' << e.what() << endl;
+		//cout << bytes << ' ' << e.what() << endl;
 	}
 }

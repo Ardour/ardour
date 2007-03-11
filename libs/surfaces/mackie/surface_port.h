@@ -38,10 +38,12 @@ class SurfacePort : public sigc::trackable
 {
 public:
 	SurfacePort( MIDI::Port & port, int number );
-	virtual ~SurfacePort() {}
+	virtual ~SurfacePort();
 	
 	// when this is successful, active() should return true
 	virtual void open() = 0;
+	
+	// subclasses should call this before doing their own close
 	virtual void close() = 0;
 
 	/// read bytes from the port. They'll either end up in the
