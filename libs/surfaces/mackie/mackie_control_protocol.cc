@@ -1272,6 +1272,18 @@ LedState MackieControlProtocol::clicking_release( Button & button )
 	return Config->get_clicking();
 }
 
+LedState MackieControlProtocol::global_solo_press( Button & button )
+{
+	bool state = !session->soloing();
+	session->set_all_solo ( state );
+	return state;
+}
+
+LedState MackieControlProtocol::global_solo_release( Button & button )
+{
+	return session->soloing();
+}
+
 /////////////////////////////////////
 // Bank Switching
 /////////////////////////////////////

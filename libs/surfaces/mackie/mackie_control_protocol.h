@@ -170,6 +170,9 @@ class MackieControlProtocol
 	virtual Mackie::LedState clicking_press( Mackie::Button & );
 	virtual Mackie::LedState clicking_release( Mackie::Button & );
 	
+	virtual Mackie::LedState global_solo_press( Mackie::Button & );
+	virtual Mackie::LedState global_solo_release( Mackie::Button & );
+
   protected:
 	// create instances of MackiePort, depending on what's found in ardour.rc
 	void create_ports();
