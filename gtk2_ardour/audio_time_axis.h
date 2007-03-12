@@ -114,6 +114,7 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	void pan_hidden ();
 
 	void update_pans ();
+	void update_control_names ();
 
 	AutomationTimeAxisView* gain_track;
 	AutomationTimeAxisView* pan_track;

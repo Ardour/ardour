@@ -105,11 +105,11 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	gain_display_box.pack_start (gain_display, true, true);
 
 	peak_display.set_name ("MixerStripPeakDisplay");
-	peak_display.set_has_frame (false);
-	peak_display.set_editable (false);
+//	peak_display.set_has_frame (false);
+//	peak_display.set_editable (false);
 	set_size_request_to_display_given_text  (peak_display, "-80.g", 2, 6); /* note the descender */
 	max_peak = minus_infinity();
-	peak_display.set_text (_("-inf"));
+	peak_display.set_label (_("-inf"));
 	peak_display.unset_flags (Gtk::CAN_FOCUS);
 
 	meter_metric_area.set_name ("MeterMetricsStrip");
@@ -327,10 +327,10 @@ GainMeter::update_meters ()
 				max_peak = mpeak;
 				/* set peak display */
 				if (max_peak <= -200.0f) {
-					peak_display.set_text (_("-inf"));
+					peak_display.set_label (_("-inf"));
 				} else {
 					snprintf (buf, sizeof(buf), "%.1f", max_peak);
-					peak_display.set_text (buf);
+					peak_display.set_label (buf);
 				}
 
 				if (max_peak >= 0.0f) {
@@ -494,7 +494,7 @@ GainMeter::reset_peak_display ()
 	}
 
 	max_peak = -INFINITY;
-	peak_display.set_text (_("-Inf"));
+	peak_display.set_label (_("-Inf"));
 	peak_display.set_name ("MixerStripPeakDisplay");
 }
 
@@ -516,7 +516,7 @@ GainMeter::meter_button_release (GdkEventButton* ev, uint32_t which)
 	case 1:
 		meters[which].meter->clear();
 		max_peak = minus_infinity();
-		peak_display.set_text (_("-inf"));
+		peak_display.set_label (_("-inf"));
 		peak_display.set_name ("MixerStripPeakDisplay");
 		break;
 
