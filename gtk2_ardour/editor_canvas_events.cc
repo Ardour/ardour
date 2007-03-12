@@ -52,7 +52,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 	double wx, wy;
 
 	switch (ev->direction) {
-	case GDK_SCROLL_UP:
+	case GDK_SCROLL_DOWN:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
 			//if (ev->state == GDK_CONTROL_MASK) {
 			/* XXX 
@@ -88,7 +88,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			return true;
 		}
 		break;
-	case GDK_SCROLL_DOWN:
+	case GDK_SCROLL_UP:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
 			//if (ev->state == GDK_CONTROL_MASK) {
 			track_canvas.get_pointer (x, y);
