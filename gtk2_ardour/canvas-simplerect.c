@@ -296,20 +296,20 @@ gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 		if (item->y1 == old_y1) {
 			/* top didn't change, so just draw bottom */
 
-			int start_y = MIN (item->y2, old_y2);
-			int end_y = MAX (item->y2, old_y2);
+			double start_y = MIN (item->y2, old_y2);
+			double end_y = MAX (item->y2, old_y2);
 
-			gnome_canvas_request_redraw (item->canvas, item->x1, start_y, item->x2 + 0.5, end_y + 0.5);
+			gnome_canvas_request_redraw (item->canvas, item->x1, start_y - 0.5, item->x2 + 0.5, end_y + 0.5);
 			return;
 
 		} else if (item->y2 == old_y2) {
 
 			/* bottom didn't change, just draw top */
 
-			int start_y = MIN (item->y1, old_y1);
-			int end_y = MAX (item->y1, old_y1);
+			double start_y = MIN (item->y1, old_y1);
+			double end_y = MAX (item->y1, old_y1);
 
-			gnome_canvas_request_redraw (item->canvas, item->x1, start_y, item->x2 + 0.5, end_y + 0.5);
+			gnome_canvas_request_redraw (item->canvas, item->x1, start_y - 0.5, item->x2 + 0.5, end_y + 0.5);
 			return;
 
 		}
@@ -321,20 +321,20 @@ gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 		if (item->x1 == old_x1) {
 			/* start didn't change, so just draw at the end */
 
-			int start_x = MIN (item->x2, old_x2);
-			int end_x = MAX (item->x2, old_x2);
+			double start_x = MIN (item->x2, old_x2);
+			double end_x = MAX (item->x2, old_x2);
 
-			gnome_canvas_request_redraw (item->canvas, start_x, item->y1, end_x + 0.5, item->y2 + 0.5);
+			gnome_canvas_request_redraw (item->canvas, start_x - 0.5, item->y1, end_x + 0.5, item->y2 + 0.5);
 			return;
 
 		} else if (item->x2 == old_x2) {
 
 			/* end didn't change, so just draw at the start */
+			
+			double start_x = MIN (item->x1, old_x1);
+			double end_x = MAX (item->x1, old_x1);
 
-			int start_x = MIN (item->x1, old_x1);
-			int end_x = MAX (item->x1, old_x1);
-
-			gnome_canvas_request_redraw (item->canvas, start_x, item->y1, end_x + 0.5, item->y2 + 0.5);
+			gnome_canvas_request_redraw (item->canvas, start_x - 0.5, item->y1, end_x + 0.5, item->y2 + 0.5);
 			return;
 
 		}
