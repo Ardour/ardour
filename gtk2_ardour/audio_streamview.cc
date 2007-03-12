@@ -526,7 +526,7 @@ AudioStreamView::setup_rec_box ()
 			rec_rects.push_back (recbox);
 			
 			screen_update_connection.disconnect();
-			screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (mem_fun (*this, &AudioStreamView::update_rec_box));	
+			screen_update_connection = ARDOUR_UI::instance()->MidRapidScreenUpdate.connect (mem_fun (*this, &AudioStreamView::update_rec_box));	
 			rec_updating = true;
 			rec_active = true;
 

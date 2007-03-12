@@ -44,6 +44,7 @@ opts.AddOptions(
     BoolOption('UNIVERSAL', 'Compile as universal binary.  Requires that external libraries are already universal.', 0),
     BoolOption('VERSIONED', 'Add revision information to ardour/gtk executable name inside the build directory', 0),
     BoolOption('VST', 'Compile with support for VST', 0),
+    BoolOption('GPROFILE', 'Compile with support for gprofile (Developers only)', 0),
     BoolOption('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 1)
 )
 
@@ -531,7 +532,10 @@ env = conf.Finish()
 #
 
 opt_flags = []
-debug_flags = [ '-g' ]
+if env['GPROFILE'] == 1:
+    debug_flags = [ '-g', '-pg' ]
+else:
+    debug_flags = [ '-g' ]
 
 # guess at the platform, used to define compiler flags
 

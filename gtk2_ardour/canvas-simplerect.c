@@ -264,11 +264,17 @@ gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 	double x1, x2, y1, y2;
 	double old_x1, old_x2, old_y1, old_y2;
 	double a, b, c, d;
-	
-	old_x1 = item->x1;
-	old_y1 = item->y1;
-	old_x2 = item->x2;
-	old_y2 = item->y2;
+	ArtIRect intersection, old, new;
+
+	old.x0 = old_x1 = item->x1;
+	old.y0 = old_y1 = item->y1;
+	old.x1 = old_x2 = item->x2;
+	old.y1 = old_y2 = item->y2;
+
+	new.x0 = x1;
+	new.y0 = y1;
+	new.x1 = x2;
+	new.y1 = y2;
 
 	gnome_canvas_simplerect_bounds (item, &x1, &y1, &x2, &y2);
 	gnome_canvas_item_i2w (item, &x1, &y1);
@@ -288,6 +294,8 @@ gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 
 	/* now queue redraws for changed areas */
 		
+	art_irect_intersect (&intersection, &old, &new);
+#if 0
 		a = MIN(item->x1, old_x1); 
 		b = MAX(item->x1, old_x1);
 
@@ -304,7 +312,15 @@ gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 		d = MAX(d,item->y2);
 		d = MAX(d, old_y2);
 
+		fprintf (stderr, "%p REDRAW %g,%g %g,%g\n", simplerect, a, c, b + 0.5, d + 0.5);
 		gnome_canvas_request_redraw (item->canvas, a, c, b + 0.5, d + 0.5);
+#else 
+		gnome_canvas_request_redraw (item->canvas, 
+					     intersection.x0,
+					     intersection.y0,
+					     intersection.x1,
+					     intersection.y1);
+#endif
 }
 
 /* 
@@ -509,7 +525,7 @@ gnome_canvas_simplerect_render (GnomeCanvasItem *item,
 	if (parent_class->render) {
 		(*parent_class->render) (item, buf);
 	}
-
+	
 	if (buf->is_bg) {
 
 #ifdef HARLEQUIN_DEBUGGING
