@@ -263,6 +263,16 @@ Editor::initialize_canvas ()
 	double time_width = FLT_MAX/frames_per_unit;
 	time_canvas.set_scroll_region(0.0, 0.0, time_width, time_height);
 	
+	if (!color_map[cEditCursor]) {
+		 warning << _("edit cursor color not defined, check your ardour.colors file!") << endmsg;
+		color_map[cEditCursor] = RGBA_TO_UINT (30,30,30,255);
+	}
+
+	if (!color_map[cPlayHead]) {
+		warning << _("playhead color not defined, check your ardour.colors file!") << endmsg;
+		color_map[cPlayHead] = RGBA_TO_UINT (0,0,0,255);
+	}
+
 	edit_cursor = new Cursor (*this, &Editor::canvas_edit_cursor_event);
 	edit_cursor->canvas_item.property_fill_color_rgba() = color_map[cEditCursor];
 	playhead_cursor = new Cursor (*this, &Editor::canvas_playhead_cursor_event);
