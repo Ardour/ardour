@@ -156,7 +156,7 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 
 		using namespace Menu_Helpers;
 	
-		gain_astate_menu.items().push_back (MenuElem (_("Off"), 
+		gain_astate_menu.items().push_back (MenuElem (_("Manual"), 
 						      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Off)));
 		gain_astate_menu.items().push_back (MenuElem (_("Play"),
 						      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Play)));

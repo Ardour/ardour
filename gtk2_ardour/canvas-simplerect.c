@@ -257,25 +257,20 @@ gnome_canvas_simplerect_bounds (GnomeCanvasItem *item, double *x1, double *y1, d
 
 }
 
+
 static void 
 gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 {
 	GnomeCanvasSimpleRect* simplerect;
 	double x1, x2, y1, y2;
 	double old_x1, old_x2, old_y1, old_y2;
-	double a, b, c, d;
-	ArtIRect intersection, old, new;
+	ArtDRect unionrect, old, new;
 
-	old.x0 = old_x1 = item->x1;
-	old.y0 = old_y1 = item->y1;
-	old.x1 = old_x2 = item->x2;
-	old.y1 = old_y2 = item->y2;
-
-	new.x0 = x1;
-	new.y0 = y1;
-	new.x1 = x2;
-	new.y1 = y2;
-
+	old_x1 = item->x1;
+	old_y1 = item->y1;
+	old_x2 = item->x2;
+	old_y2 = item->y2;
+	
 	gnome_canvas_simplerect_bounds (item, &x1, &y1, &x2, &y2);
 	gnome_canvas_item_i2w (item, &x1, &y1);
 	gnome_canvas_item_i2w (item, &x2, &y2);
@@ -293,34 +288,74 @@ gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 	gnome_canvas_w2c (GNOME_CANVAS(item->canvas), x2, y2, &simplerect->bbox_lrx, &simplerect->bbox_lry);
 
 	/* now queue redraws for changed areas */
-		
-	art_irect_intersect (&intersection, &old, &new);
-#if 0
-		a = MIN(item->x1, old_x1); 
-		b = MAX(item->x1, old_x1);
 
-	        a = MIN(a, item->x2);
-		a = MIN(a, old_x2);
-		b = MAX(b, item->x2);
-		b = MAX(b, old_x2);
+	if (item->x1 == old_x1 && item->x2 == old_x2) {
 
-		c = MIN(item->y1, old_y1);
-		d = MAX(item->y1, old_y1);
+		/* no change in x-axis position */
 
-	        c = MIN(c,item->y2);
-		c = MIN(c, old_y2);
-		d = MAX(d,item->y2);
-		d = MAX(d, old_y2);
+		if (item->y1 == old_y1) {
+			/* top didn't change, so just draw bottom */
 
-		fprintf (stderr, "%p REDRAW %g,%g %g,%g\n", simplerect, a, c, b + 0.5, d + 0.5);
-		gnome_canvas_request_redraw (item->canvas, a, c, b + 0.5, d + 0.5);
-#else 
-		gnome_canvas_request_redraw (item->canvas, 
-					     intersection.x0,
-					     intersection.y0,
-					     intersection.x1,
-					     intersection.y1);
-#endif
+			int start_y = MIN (item->y2, old_y2);
+			int end_y = MAX (item->y2, old_y2);
+
+			gnome_canvas_request_redraw (item->canvas, item->x1, start_y, item->x2 + 0.5, end_y + 0.5);
+			return;
+
+		} else if (item->y2 == old_y2) {
+
+			/* bottom didn't change, just draw top */
+
+			int start_y = MIN (item->y1, old_y1);
+			int end_y = MAX (item->y1, old_y1);
+
+			gnome_canvas_request_redraw (item->canvas, item->x1, start_y, item->x2 + 0.5, end_y + 0.5);
+			return;
+
+		}
+
+	} else if (item->y1 == old_y1 && item->y2 == old_y2) {
+
+		/* no change in y-axis position */
+
+		if (item->x1 == old_x1) {
+			/* start didn't change, so just draw at the end */
+
+			int start_x = MIN (item->x2, old_x2);
+			int end_x = MAX (item->x2, old_x2);
+
+			gnome_canvas_request_redraw (item->canvas, start_x, item->y1, end_x + 0.5, item->y2 + 0.5);
+			return;
+
+		} else if (item->x2 == old_x2) {
+
+			/* end didn't change, so just draw at the start */
+
+			int start_x = MIN (item->x1, old_x1);
+			int end_x = MAX (item->x1, old_x1);
+
+			gnome_canvas_request_redraw (item->canvas, start_x, item->y1, end_x + 0.5, item->y2 + 0.5);
+			return;
+
+		}
+	} 
+
+	new.x0 = x1;
+	new.y0 = y1;
+	new.x1 = x2;
+	new.y1 = y2;
+
+	old.x0 = old_x1;
+	old.y0 = old_y1;
+	old.x1 = old_x2;
+	old.y1 = old_y2;
+
+	art_drect_union (&unionrect, &old, &new);
+	gnome_canvas_request_redraw (item->canvas, 
+				     unionrect.x0,
+				     unionrect.y0,
+				     unionrect.x1 + 0.5,
+				     unionrect.y1 + 0.5);
 }
 
 /* 
