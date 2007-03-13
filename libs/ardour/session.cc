@@ -3904,6 +3904,7 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t le
 
 			if (afs) {
 				afs->update_header (position, *xnow, now);
+				afs->flush_header ();
 			}
 		}
 		
