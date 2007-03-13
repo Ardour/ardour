@@ -905,12 +905,14 @@ class Session : public PBD::StatefulDestructible
 				  void* ptr,
 				  float opt);
 
-	typedef float (*compute_peak_t)				(Sample *, nframes_t, float);
+	typedef float (*compute_peak_t)			(Sample *, nframes_t, float);
+	typedef float (*find_peaks_t)                   (Sample *, nframes_t, float *, float*);
 	typedef void  (*apply_gain_to_buffer_t)		(Sample *, nframes_t, float);
 	typedef void  (*mix_buffers_with_gain_t)	(Sample *, Sample *, nframes_t, float);
 	typedef void  (*mix_buffers_no_gain_t)		(Sample *, Sample *, nframes_t);
 
-	static compute_peak_t			compute_peak;
+	static compute_peak_t		compute_peak;
+	static find_peaks_t             find_peaks;
 	static apply_gain_to_buffer_t	apply_gain_to_buffer;
 	static mix_buffers_with_gain_t	mix_buffers_with_gain;
 	static mix_buffers_no_gain_t	mix_buffers_no_gain;

@@ -24,7 +24,6 @@
 #include <stdint.h>
 
 #if defined (ARCH_X86) && defined (BUILD_SSE_OPTIMIZATIONS)
-
 // Debug wrappers
 
 float
@@ -90,6 +89,25 @@ compute_peak (ARDOUR::Sample *buf, nframes_t nsamples, float current)
 	return current;
 }	
 
+float
+find_peaks (ARDOUR::Sample *buf, nframes_t nframes, float *min, float *max)
+{
+	long i;
+	float a, b;
+
+	a = *max;
+	b = *min;
+
+	for (i = 0; i < nframes; i++) 
+	{
+		a = fmax (buf[i], a);
+		b = fmin (buf[i], b);
+	}
+
+	*max = a;
+	*min = b;
+}
+
 void
 apply_gain_to_buffer (ARDOUR::Sample *buf, nframes_t nframes, float gain)
 {		
@@ -124,6 +142,25 @@ veclib_compute_peak (ARDOUR::Sample *buf, nframes_t nsamples, float current)
         return f_max(current, tmpmax);
 }
 
+float
+veclib_find_peaks (ARDOUR::Sample *buf, nframes_t nframes, float *min, float *max)
+{
+	// TODO: someone with veclib skills needs to write this one
+	long i;
+	float a, b;
+
+	a = *max;
+	b = *min;
+
+	for (i = 0; i < nframes; i++) 
+	{
+		a = fmax (buf[i], a);
+		b = fmin (buf[i], b);
+	}
+
+	*max = a;
+	*min = b;
+}
 void
 veclib_apply_gain_to_buffer (ARDOUR::Sample *buf, nframes_t nframes, float gain)
 {

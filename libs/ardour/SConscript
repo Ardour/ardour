@@ -287,10 +287,13 @@ env['BUILDERS']['SharedAsmObject'] = Builder (action = '$CXX -c -fPIC $SOURCE -o
 if env['FPU_OPTIMIZATION']:
 	if env['DIST_TARGET'] == "i386":
 		arch_specific_objects = env.SharedAsmObject('sse_functions.os', 'sse_functions.s')
+		ardour_files += ['sse_functions_xmm.cc']
 	if env['DIST_TARGET'] == "i686":
 		arch_specific_objects = env.SharedAsmObject('sse_functions.os', 'sse_functions.s')
+		ardour_files += ['sse_functions_xmm.cc']
 	if env['DIST_TARGET'] == "x86_64":
 		arch_specific_objects = env.SharedAsmObject('sse_functions_64bit.os', 'sse_functions_64bit.s')
+		ardour_files += ['sse_functions_xmm.cc']
 			
 libardour = ardour.SharedLibrary('ardour', ardour_files + extra_sources + arch_specific_objects)
 
