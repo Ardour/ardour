@@ -55,9 +55,8 @@ using namespace PBD;
 using namespace Gtk;
 using namespace sigc;
 
-RouteParams_UI::RouteParams_UI (AudioEngine& eng)
+RouteParams_UI::RouteParams_UI ()
 	: ArdourDialog ("track/bus inspector"),
-	  engine (eng),
 	  track_menu(0)
 {
 	pre_redirect_box = 0;

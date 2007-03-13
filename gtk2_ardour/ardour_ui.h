@@ -65,7 +65,6 @@
 class AudioClock;
 class PublicEditor;
 class Keyboard;
-class MeterBridge;
 class OptionEditor;
 class Mixer_UI;
 class ConnectionEditor;

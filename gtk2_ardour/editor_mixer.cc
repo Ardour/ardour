@@ -163,7 +163,7 @@ bool currentInitialized = 0;
 void
 Editor::update_current_screen ()
 {
-	if (session && engine.running()) {
+	if (session && session->engine().running()) {
 
 		nframes_t frame;
 

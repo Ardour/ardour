@@ -54,7 +54,7 @@ ARDOUR_UI::create_editor ()
 
 {
 	try {
-		editor = new Editor (*engine);
+		editor = new Editor ();
 	}
 
 	catch (failed_constructor& err) {

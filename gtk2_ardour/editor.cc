@@ -169,9 +169,8 @@ check_adjustment (Gtk::Adjustment* adj)
 
 }
 
-Editor::Editor (AudioEngine& eng) 
-	: engine (eng),
-
+Editor::Editor ()
+	: 
 	  /* time display buttons */
 
 	  minsec_label (_("Mins:Secs")),

@@ -34,7 +34,7 @@ ARDOUR_UI::create_mixer ()
 
 {
 	try {
-		mixer = new Mixer_UI (*engine);
+		mixer = new Mixer_UI ();
 	} 
 
 	catch (failed_constructor& err) {
@@ -43,3 +43,4 @@ ARDOUR_UI::create_mixer ()
 
 	return 0;
 }
+

@@ -58,7 +58,7 @@ class PluginSelector;
 class RouteParams_UI : public ArdourDialog
 {
   public:
-	RouteParams_UI (ARDOUR::AudioEngine&);
+	RouteParams_UI ();
 	~RouteParams_UI();
 
 	void set_session (ARDOUR::Session *);
@@ -66,8 +66,6 @@ class RouteParams_UI : public ArdourDialog
 	PluginSelector&  plugin_selector() { return *_plugin_selector; }
 
   private:
-	ARDOUR::AudioEngine&     engine;
-
 	Gtk::HBox                global_hpacker;
 	Gtk::VBox                global_vpacker;
 	Gtk::ScrolledWindow      scroller;

@@ -45,7 +45,6 @@ namespace ARDOUR {
 	class RouteGroup;
 	class Session;
 	class AudioDiskstream;
-	class AudioEngine;
 };
 
 class MixerStrip;
@@ -54,7 +53,7 @@ class PluginSelector;
 class Mixer_UI : public Gtk::Window
 {
   public:
-	Mixer_UI (ARDOUR::AudioEngine&);
+	Mixer_UI ();
 	~Mixer_UI();
 
 	void connect_to_session (ARDOUR::Session *);
@@ -80,7 +79,6 @@ class Mixer_UI : public Gtk::Window
 	RouteRedirectSelection& selection() { return _selection; }
 	
   private:
-	ARDOUR::AudioEngine&     engine;
 	ARDOUR::Session         *session;
 
 	bool _visible;

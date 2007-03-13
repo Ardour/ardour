@@ -60,10 +60,6 @@ namespace Gtkmm2ext {
 	class TearOff;
 }
 
-namespace LinuxAudioSystems {
-	class AudioEngine;
-}
-
 namespace ARDOUR {
 	class AudioDiskstream;
 	class RouteGroup;
@@ -121,7 +117,7 @@ class TimeAxisViewItem ;
 class Editor : public PublicEditor
 {
   public:
-	Editor (ARDOUR::AudioEngine&);
+	Editor ();
 	~Editor ();
 
 	void             connect_to_session (ARDOUR::Session *);
@@ -350,7 +346,6 @@ class Editor : public PublicEditor
   private:
 	
 	ARDOUR::Session     *session;
-	ARDOUR::AudioEngine& engine;
 	bool                 constructed;
 
 	PlaylistSelector* _playlist_selector;

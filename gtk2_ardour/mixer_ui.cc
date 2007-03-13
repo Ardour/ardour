@@ -29,7 +29,6 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/stop_signal.h>
 
-#include <ardour/audioengine.h>
 #include <ardour/session.h>
 #include <ardour/audio_track.h>
 #include <ardour/session_route.h>
@@ -58,9 +57,8 @@ using namespace std;
 
 using PBD::atoi;
 
-Mixer_UI::Mixer_UI (AudioEngine& eng)
-	: Window (Gtk::WINDOW_TOPLEVEL),
-	  engine (eng)
+Mixer_UI::Mixer_UI ()
+	: Window (Gtk::WINDOW_TOPLEVEL)
 {
 	_strip_width = Wide;
 	track_menu = 0;

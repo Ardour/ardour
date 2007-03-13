@@ -338,7 +338,7 @@ int
 ARDOUR_UI::create_route_params ()
 {
 	if (route_params == 0) {
-		route_params = new RouteParams_UI (*engine);
+		route_params = new RouteParams_UI ();
 		route_params->set_session (session);
 		route_params->signal_unmap().connect (sigc::bind(sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleInspector")));
 	}
