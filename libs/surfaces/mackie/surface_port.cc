@@ -27,9 +27,12 @@
 
 #include "i18n.h"
 
+#define _XOPEN_SOURCE 600  // force XSI for non-GNU strerror_r()
+
 #include <sstream>
 #include <cstring>
 #include <cerrno>
+
 
 using namespace std;
 using namespace Mackie;
@@ -84,11 +87,15 @@ MidiByteArray SurfacePort::read()
 	{
 		if ( errno != EAGAIN )
 		{
-			char buf[512];
-			char * msg = strerror_r( errno, buf, 512 );
-			
 			ostringstream os;
-			os << "Surface: error reading from port: " << port().name() << ": " << errno << " " << msg;
+			os << "Surface: error reading from port: " << port().name() << ": " << errno;
+
+			char buf[512];
+			int result = strerror_r( errno, buf, 512 );
+			if (!result) {
+				os << " " << buf;
+			} 
+			
 			cout << os.str() << endl;
 			inactive_event();
 			throw MackieControlException( os.str() );
@@ -114,11 +121,15 @@ void SurfacePort::write( const MidiByteArray & mba )
 	{
 		if ( errno != EAGAIN )
 		{
-			char buf[512];
-			char * msg = strerror_r( errno, buf, 512 );
-			
 			ostringstream os;
-			os << "Surface: couldn't write to port " << port().name() << ": " << errno << " " << msg;
+			os << "Surface: couldn't write to port " << port().name() << ": " << errno;
+			char buf[512];
+			int result = strerror_r( errno, buf, 512 );
+
+			if (!result) {
+				os << " " << buf;
+			}
+
 			cout << os.str();
 			inactive_event();
 			throw MackieControlException( os.str() );
