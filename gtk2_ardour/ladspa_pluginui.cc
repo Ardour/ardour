@@ -327,7 +327,7 @@ LadspaPluginUI::automation_state_changed (ControlUI* cui)
 
 	switch (insert->get_port_automation_state (cui->port_index) & (Off|Play|Touch|Write)) {
 	case Off:
-		cui->automate_button.set_label (_("Off"));
+		cui->automate_button.set_label (_("Manual"));
 		break;
 	case Play:
 		cui->automate_button.set_label (_("Play"));
@@ -570,7 +570,7 @@ LadspaPluginUI::astate_clicked (ControlUI* cui, uint32_t port)
 	MenuList& items (automation_menu->items());
 
 	items.clear ();
-	items.push_back (MenuElem (_("Off"), 
+	items.push_back (MenuElem (_("Manual"), 
 				   bind (mem_fun(*this, &LadspaPluginUI::set_automation_state), (AutoState) Off, cui)));
 	items.push_back (MenuElem (_("Play"),
 				   bind (mem_fun(*this, &LadspaPluginUI::set_automation_state), (AutoState) Play, cui)));

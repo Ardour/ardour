@@ -52,7 +52,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 	double wx, wy;
 
 	switch (ev->direction) {
-	case GDK_SCROLL_DOWN:
+	case GDK_SCROLL_UP:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
 			//if (ev->state == GDK_CONTROL_MASK) {
 			/* XXX 
@@ -71,7 +71,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			event.button.y = wy;
 			
 			nframes_t where = event_frame (&event, 0, 0);
-			temporal_zoom_to_frame (true, where);
+			temporal_zoom_to_frame (false, where);
 			return true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
 			if (!current_stepping_trackview) {
@@ -88,7 +88,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			return true;
 		}
 		break;
-	case GDK_SCROLL_UP:
+	case GDK_SCROLL_DOWN:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
 			//if (ev->state == GDK_CONTROL_MASK) {
 			track_canvas.get_pointer (x, y);
@@ -102,7 +102,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			event.button.y = wy;
 			
 			nframes_t where = event_frame (&event, 0, 0);
-			temporal_zoom_to_frame (false, where);
+			temporal_zoom_to_frame (true, where);
 			return true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
 			if (!current_stepping_trackview) {

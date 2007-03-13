@@ -845,7 +845,7 @@ GainMeter::_astate_string (AutoState state, bool shrt)
 
 	switch (state) {
 	case Off:
-		sstr = (shrt ? "O" : _("O"));
+		sstr = (shrt ? "M" : _("M"));
 		break;
 	case Play:
 		sstr = (shrt ? "P" : _("P"));

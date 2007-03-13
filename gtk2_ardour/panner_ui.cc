@@ -85,7 +85,7 @@ PannerUI::PannerUI (boost::shared_ptr<IO> io, Session& s)
 	pan_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
 
 	using namespace Menu_Helpers;
-	pan_astate_menu.items().push_back (MenuElem (_("Off"), 
+	pan_astate_menu.items().push_back (MenuElem (_("Manual"), 
 						     bind (mem_fun (_io->panner(), &Panner::set_automation_state), (AutoState) Off)));
 	pan_astate_menu.items().push_back (MenuElem (_("Play"),
 						     bind (mem_fun (_io->panner(), &Panner::set_automation_state), (AutoState) Play)));
@@ -273,6 +273,13 @@ PannerUI::setup_pan ()
 			delete pan_adjustments.back();
 			pan_adjustments.pop_back ();
 		}
+
+		/* stick something into the panning viewport so that it redraws */
+
+		EventBox* eb = manage (new EventBox());
+		panning_viewport.remove ();
+		panning_viewport.add (*eb);
+		panning_viewport.show_all ();
 
 	} else if (nouts == 2) {
 
@@ -738,7 +745,7 @@ PannerUI::_astate_string (AutoState state, bool shrt)
 
 	switch (state) {
 	case Off:
-		sstr = (shrt ? "O" : _("O"));
+		sstr = (shrt ? "M" : _("M"));
 		break;
 	case Play:
 		sstr = (shrt ? "P" : _("P"));
