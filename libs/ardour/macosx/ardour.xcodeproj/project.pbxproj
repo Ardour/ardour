@@ -178,6 +178,8 @@
 		69AD45850B97D10600806E7E /* FLAC in Frameworks */ = {isa = PBXBuildFile; fileRef = 69AD45840B97D10600806E7E /* FLAC */; };
 		69B1B5210B8E7DFD007E41C1 /* pbd.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 691B3B7C0B8D5508009155B5 /* pbd.framework */; };
 		69B1B5500B8E80AD007E41C1 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 69B1B54F0B8E80AD007E41C1 /* CoreAudio.framework */; };
+		69DBC41B0BA794A500C19E65 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 69DBC41A0BA794A500C19E65 /* Accelerate.framework */; };
+		69DBC42B0BA7992800C19E65 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 69DBC42A0BA7992800C19E65 /* Carbon.framework */; };
 		69F7CE5A0B8DCB3300D76871 /* basic_ui.cc in Sources */ = {isa = PBXBuildFile; fileRef = 69F7CE520B8DCB3300D76871 /* basic_ui.cc */; };
 		69F7CE5B0B8DCB3300D76871 /* basic_ui.h in Headers */ = {isa = PBXBuildFile; fileRef = 69F7CE540B8DCB3300D76871 /* basic_ui.h */; };
 		69F7CE5C0B8DCB3300D76871 /* control_protocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 69F7CE550B8DCB3300D76871 /* control_protocol.h */; };
@@ -393,6 +395,8 @@
 		698D9AB00B969A5B00C53B63 /* midi++.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "midi++.xcodeproj"; path = "../../midi++2/macosx/midi++.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		69AD45840B97D10600806E7E /* FLAC */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = FLAC; path = "/Library/Frameworks/Sndfile-ardour.framework/Versions/A/Libraries/FLAC"; sourceTree = "<absolute>"; };
 		69B1B54F0B8E80AD007E41C1 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = /System/Library/Frameworks/CoreAudio.framework; sourceTree = "<absolute>"; };
+		69DBC41A0BA794A500C19E65 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = /Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/Accelerate.framework; sourceTree = "<absolute>"; };
+		69DBC42A0BA7992800C19E65 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		69F7CE520B8DCB3300D76871 /* basic_ui.cc */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = basic_ui.cc; sourceTree = "<group>"; };
 		69F7CE540B8DCB3300D76871 /* basic_ui.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = basic_ui.h; sourceTree = "<group>"; };
 		69F7CE550B8DCB3300D76871 /* control_protocol.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = control_protocol.h; sourceTree = "<group>"; };
@@ -426,6 +430,8 @@
 				696149EB0B97CEF500ECBDF0 /* gobject in Frameworks */,
 				696149EC0B97CEF500ECBDF0 /* gthread in Frameworks */,
 				69AD45850B97D10600806E7E /* FLAC in Frameworks */,
+				69DBC41B0BA794A500C19E65 /* Accelerate.framework in Frameworks */,
+				69DBC42B0BA7992800C19E65 /* Carbon.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -456,6 +462,8 @@
 		0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				69DBC42A0BA7992800C19E65 /* Carbon.framework */,
+				69DBC41A0BA794A500C19E65 /* Accelerate.framework */,
 				69AD45840B97D10600806E7E /* FLAC */,
 				696149E50B97CEF500ECBDF0 /* glib */,
 				696149E60B97CEF500ECBDF0 /* gmodule */,
@@ -821,7 +829,6 @@
 		0867D690FE84028FC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 4FADC24608B4156D00ABE55E /* Build configuration list for PBXProject "ardour" */;
-			compatibilityVersion = "Xcode 3.0";
 			hasScannedForEncodings = 1;
 			mainGroup = 0867D691FE84028FC02AAC07 /* ardour */;
 			productRefGroup = 034768DDFF38A45A11DB9C8B /* Products */;
@@ -837,7 +844,6 @@
 				},
 			);
 			projectRoot = "";
-			shouldCheckCompatibility = 1;
 			targets = (
 				8D07F2BC0486CC7A007CD1D0 /* ardour */,
 			);
@@ -1005,7 +1011,9 @@
 					"$(inherited)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
 				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
 				FRAMEWORK_VERSION = A;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
@@ -1034,18 +1042,19 @@
 		4FADC24808B4156D00ABE55E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = (
 					"$(NATIVE_ARCH)",
 					ppc,
 				);
-				FRAMEWORK_SEARCH_PATHS = (
-					/opt/ardour/src/ardour2/libs/pbd/macosx/build/Release,
-					"/opt/ardour/src/ardour2/libs/midi++2/macosx/build/Release",
-				);
+				FRAMEWORK_SEARCH_PATHS = /opt/ardour/build;
 				GCC_FAST_OBJC_DISPATCH = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G4;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
+					BUILD_VECLIB_OPTIMIZATIONS,
+					HAVE_WORDEXP,
 					HAVE_WEAK_COREAUDIO,
 					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_FOR_PROJECT_1)",
 					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_FOR_PROJECT_2)",
@@ -1083,18 +1092,18 @@
 		694E7C8A0B97B0FE0018D03D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(NATIVE_ARCH)";
 				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					/opt/ardour/src/ardour2/libs/pbd/macosx/build/Release,
-					"/opt/ardour/src/ardour2/libs/midi++2/macosx/build/Release",
-				);
+				FRAMEWORK_SEARCH_PATHS = /opt/ardour/build;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_ENABLE_OBJC_EXCEPTIONS = NO;
 				GCC_FAST_OBJC_DISPATCH = NO;
 				GCC_MODEL_TUNING = G4;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
+					BUILD_VECLIB_OPTIMIZATIONS,
+					HAVE_WORDEXP,
 					HAVE_WEAK_COREAUDIO,
 					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_FOR_PROJECT_1)",
 					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_FOR_PROJECT_2)",
@@ -1150,7 +1159,9 @@
 					"$(inherited)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
 				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
 				FRAMEWORK_VERSION = A;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = G5;
