@@ -906,7 +906,7 @@ class Session : public PBD::StatefulDestructible
 				  float opt);
 
 	typedef float (*compute_peak_t)			(Sample *, nframes_t, float);
-	typedef float (*find_peaks_t)                   (Sample *, nframes_t, float *, float*);
+	typedef void  (*find_peaks_t)                   (Sample *, nframes_t, float *, float*);
 	typedef void  (*apply_gain_to_buffer_t)		(Sample *, nframes_t, float);
 	typedef void  (*mix_buffers_with_gain_t)	(Sample *, Sample *, nframes_t, float);
 	typedef void  (*mix_buffers_no_gain_t)		(Sample *, Sample *, nframes_t);

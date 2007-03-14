@@ -36,7 +36,7 @@ extern "C" {
 	void  x86_sse_mix_buffers_no_gain	(ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes);
 }
 
-float x86_sse_find_peaks                        (ARDOUR::Sample *buf, nframes_t nsamples, float *min, float *max);
+void x86_sse_find_peaks                        (ARDOUR::Sample *buf, nframes_t nsamples, float *min, float *max);
 
 /* debug wrappers for SSE functions */
 
@@ -54,7 +54,7 @@ void  debug_mix_buffers_no_gain		(ARDOUR::Sample *dst, ARDOUR::Sample *src, nfra
 
 float veclib_compute_peak              (ARDOUR::Sample *buf, nframes_t nsamples, float current);
 
-float veclib_find_peaks                (ARDOUR::Sample *buf, nframes_t nsamples, float *min, float *max);
+void veclib_find_peaks                (ARDOUR::Sample *buf, nframes_t nsamples, float *min, float *max);
 
 void  veclib_apply_gain_to_buffer      (ARDOUR::Sample *buf, nframes_t nframes, float gain);
 
@@ -68,7 +68,7 @@ void  veclib_mix_buffers_no_gain       (ARDOUR::Sample *dst, ARDOUR::Sample *src
 
 float compute_peak              (ARDOUR::Sample *buf, nframes_t nsamples, float current);
 
-float find_peaks                (ARDOUR::Sample *buf, nframes_t nsamples, float *min, float *max);
+void find_peaks                (ARDOUR::Sample *buf, nframes_t nsamples, float *min, float *max);
 
 void  apply_gain_to_buffer      (ARDOUR::Sample *buf, nframes_t nframes, float gain);
 
