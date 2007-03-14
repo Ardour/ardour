@@ -1239,6 +1239,7 @@ class Editor : public PublicEditor
 	void marker_menu_hide ();
 	void marker_menu_loop_range ();
 	void marker_menu_select_all_selectables_using_range ();
+	void marker_menu_select_using_range ();
 	void marker_menu_separate_regions_using_location ();
 	void marker_menu_play_from ();
 	void marker_menu_play_range ();
