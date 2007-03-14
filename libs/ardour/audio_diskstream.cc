@@ -1322,7 +1322,6 @@ AudioDiskstream::do_flush (Session::RunContext context, bool force_flush)
 
 		total = vector.len[0] + vector.len[1];
 
-		
 		if (total == 0 || (total < disk_io_chunk_frames && !force_flush && was_recording)) {
 			goto out;
 		}
@@ -1411,9 +1410,9 @@ AudioDiskstream::do_flush (Session::RunContext context, bool force_flush)
 			   disk_io_chunk_frames of data, so arrange for some part 
 			   of vector.len[1] to be flushed to disk as well.
 			*/
-		
+			
 			to_write = min ((nframes_t)(disk_io_chunk_frames - to_write), (nframes_t) vector.len[1]);
-		
+
 			if ((*chan).write_source->write (vector.buf[1], to_write) != to_write) {
 				error << string_compose(_("AudioDiskstream %1: cannot write to disk"), _id) << endmsg;
 				return -1;
@@ -1695,13 +1694,16 @@ AudioDiskstream::engage_record_enable ()
 
 	g_atomic_int_set (&_record_enabled, 1);
 	capturing_sources.clear ();
+
 	if (Config->get_monitoring_model() == HardwareMonitoring) {
+
 		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
 			if ((*chan).source) {
 				(*chan).source->ensure_monitor_input (!(Config->get_auto_input() && rolling));
 			}
 			capturing_sources.push_back ((*chan).write_source);
 		}
+		
 	} else {
 		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
 			capturing_sources.push_back ((*chan).write_source);
@@ -1715,8 +1717,8 @@ void
 AudioDiskstream::disengage_record_enable ()
 {
 	g_atomic_int_set (&_record_enabled, 0);
-	if (Config->get_monitoring_model() == HardwareMonitoring) {
-		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
+	for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
+		if (Config->get_monitoring_model() == HardwareMonitoring) {
 			if ((*chan).source) {
 				(*chan).source->ensure_monitor_input (false);
 			}
@@ -1725,7 +1727,6 @@ AudioDiskstream::disengage_record_enable ()
 	capturing_sources.clear ();
 	RecordEnableChanged (); /* EMIT SIGNAL */
 }
-		
 
 XMLNode&
 AudioDiskstream::get_state ()
@@ -1919,6 +1920,7 @@ AudioDiskstream::use_new_write_source (uint32_t n)
 	ChannelInfo &chan = channels[n];
 	
 	if (chan.write_source) {
+		chan.write_source->done_with_peakfile_writes ();
 		chan.write_source->set_allow_remove_if_empty (true);
 		chan.write_source.reset ();
 	}

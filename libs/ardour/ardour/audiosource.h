@@ -76,6 +76,8 @@ const nframes_t frames_per_peak = 256;
 	virtual void mark_for_remove() = 0;
 	virtual void mark_streaming_write_completed () {}
 
+	virtual bool can_truncate_peaks() const { return true; }
+
 	void set_captured_for (string str) { _captured_for = str; }
 	string captured_for() const { return _captured_for; }
 
@@ -92,9 +94,6 @@ const nframes_t frames_per_peak = 256;
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
 
-	static int  start_peak_thread ();
-	static void stop_peak_thread ();
-
 	int rename_peakfile (std::string newpath);
 	void touch_peakfile ();
 
@@ -108,6 +107,9 @@ const nframes_t frames_per_peak = 256;
 
 	virtual int setup_peakfile () { return 0; }
 
+	int prepare_for_peakfile_writes ();
+	void done_with_peakfile_writes ();
+
   protected:
 	static bool _build_missing_peakfiles;
 	static bool _build_peakfiles;
@@ -115,7 +117,6 @@ const nframes_t frames_per_peak = 256;
 	bool                _peaks_built;
 	mutable Glib::Mutex _lock;
 	nframes_t           _length;
-	bool                 next_peak_clear_should_notify;
 	string               peakpath;
 	string              _captured_for;
 
@@ -123,12 +124,11 @@ const nframes_t frames_per_peak = 256;
 	mutable uint32_t _write_data_count; // modified in write()
 
 	int initialize_peakfile (bool newfile, string path);
-	void build_peaks_from_scratch ();
-
-	int  do_build_peak (nframes_t, nframes_t);
+	int build_peaks_from_scratch ();
+	int compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframes_t cnt, bool force);
 	void truncate_peakfile();
 
-	mutable off_t _peak_byte_max; // modified in do_build_peaks()
+	mutable off_t _peak_byte_max; // modified in compute_and_write_peak()
 
 	virtual nframes_t read_unlocked (Sample *dst, nframes_t start, nframes_t cnt) const = 0;
 	virtual nframes_t write_unlocked (Sample *dst, nframes_t cnt) = 0;
@@ -137,40 +137,13 @@ const nframes_t frames_per_peak = 256;
 	
 	void update_length (nframes_t pos, nframes_t cnt);
 
-	static pthread_t peak_thread;
-	static bool      have_peak_thread;
-	static void*     peak_thread_work(void*);
-
-	static int peak_request_pipe[2];
-
-	struct PeakRequest {
-	    enum Type {
-		    Build,
-		    Quit
-	    };
-	};
-
-	static vector<boost::shared_ptr<AudioSource> > pending_peak_sources;
-	static Glib::Mutex* pending_peak_sources_lock;
-
-	static void queue_for_peaks (boost::shared_ptr<AudioSource>, bool notify=true);
-	static void clear_queue_for_peaks ();
-	
-	struct PeakBuildRecord {
-	    nframes_t frame;
-	    nframes_t cnt;
-
-	    PeakBuildRecord (nframes_t f, nframes_t c) 
-		    : frame (f), cnt (c) {}
-	    PeakBuildRecord (const PeakBuildRecord& other) {
-		    frame = other.frame;
-		    cnt = other.cnt;
-	    }
-	};
-
-	list<AudioSource::PeakBuildRecord *> pending_peak_builds;
-
   private:
+	int peakfile;
+	nframes_t peak_leftover_cnt;
+	nframes_t peak_leftover_size;
+	Sample* peak_leftovers;
+	nframes_t peak_leftover_frame;
+
 	bool file_changed (string path);
 };
 

@@ -396,28 +396,7 @@ SndFileSource::nondestructive_write_unlocked (Sample *data, nframes_t cnt)
 	update_length (oldlen, cnt);
 
 	if (_build_peakfiles) {
-		PeakBuildRecord *pbr = 0;
-		
-		if (pending_peak_builds.size()) {
-			pbr = pending_peak_builds.back();
-		}
-			
-		if (pbr && pbr->frame + pbr->cnt == oldlen) {
-			
-			/* the last PBR extended to the start of the current write,
-			   so just extend it again.
-			*/
-			pbr->cnt += cnt;
-		} else {
-			pending_peak_builds.push_back (new PeakBuildRecord (oldlen, cnt));
-		}
-
-		_peaks_built = false;
-	}
-	
-	
-	if (_build_peakfiles) {
-		queue_for_peaks (shared_from_this (), false);
+		compute_and_write_peaks (data, frame_pos, cnt, false);
 	}
 
 	_write_data_count = cnt;
@@ -507,32 +486,12 @@ SndFileSource::destructive_write_unlocked (Sample* data, nframes_t cnt)
 
 	old_file_pos = file_pos;
 	update_length (file_pos, cnt);
+
+	if (_build_peakfiles) {
+		compute_and_write_peaks (data, file_pos, cnt, false);
+	}
+
 	file_pos += cnt;
-
-	if (_build_peakfiles) {
-		PeakBuildRecord *pbr = 0;
-		
-		if (pending_peak_builds.size()) {
-			pbr = pending_peak_builds.back();
-		}
-		
-		if (pbr && pbr->frame + pbr->cnt == old_file_pos) {
-			
-			/* the last PBR extended to the start of the current write,
-			   so just extend it again.
-			*/
-			
-			pbr->cnt += cnt;
-		} else {
-			pending_peak_builds.push_back (new PeakBuildRecord (old_file_pos, cnt));
-		}
-		
-		_peaks_built = false;
-	}
-
-	if (_build_peakfiles) {
-		queue_for_peaks (shared_from_this (), true);
-	}
 	
 	return cnt;
 }
@@ -627,9 +586,6 @@ SndFileSource::set_header_timeline_position ()
 		delete _broadcast_info;
 		_broadcast_info = 0;
 	}
-
-	
-
 }
 
 nframes_t

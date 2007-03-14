@@ -1281,6 +1281,7 @@ AudioRegion::normalize_to (float target_dB)
 	boost::shared_ptr<Playlist> pl (playlist());
 
 	if (pl) {
+		cerr << "Send modified\n";
 		pl->Modified();
 	}
 

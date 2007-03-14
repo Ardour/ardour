@@ -107,6 +107,7 @@ class AudioFileSource : public AudioSource {
 
 	bool destructive() const { return (_flags & Destructive); }
 	virtual bool set_destructive (bool yn) { return false; }
+	bool can_truncate_peaks() const { return !destructive(); }
 
 	Flag flags() const { return _flags; }
 

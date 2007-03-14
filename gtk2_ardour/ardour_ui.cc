@@ -263,10 +263,6 @@ ARDOUR_UI::set_engine (AudioEngine& e)
 	AudioFileSource::set_build_peakfiles (true);
 	AudioFileSource::set_build_missing_peakfiles (true);
 
-	if (AudioSource::start_peak_thread ()) {
-		throw failed_constructor();
-	}
-
 	/* set default clock modes */
 
 	primary_clock.set_mode (AudioClock::SMPTE);
@@ -304,8 +300,6 @@ ARDOUR_UI::~ARDOUR_UI ()
 	if (add_route_dialog) {
 		delete add_route_dialog;
 	}
-
-	AudioSource::stop_peak_thread ();
 }
 
 gint
@@ -1147,8 +1141,6 @@ ARDOUR_UI::remove_last_capture()
 void
 ARDOUR_UI::transport_record ()
 {
-	cerr << "transport record\n";
-
 	if (session) {
 		switch (session->record_status()) {
 		case Session::Disabled:

@@ -316,6 +316,22 @@ Configuration::map_parameters (sigc::slot<void,const char*> theSlot)
 #undef  CONFIG_VARIABLE_SPECIAL	
 }
 
+bool ConfigVariableBase::show_stores = false;
+
+void
+ConfigVariableBase::set_show_stored_values (bool yn)
+{
+	show_stores = yn;
+}
+
+void
+ConfigVariableBase::show_stored_value (const string& str)
+{
+	if (show_stores) {
+		cerr << "Config variable " << _name << " stored as " << str << endl;
+	}
+}
+
 void
 ConfigVariableBase::notify ()
 {
@@ -328,3 +344,4 @@ ConfigVariableBase::miss ()
 	// placeholder for any debugging desired when a config variable 
 	// is set but to the same value as it already has
 }
+

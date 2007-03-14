@@ -3867,6 +3867,10 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t le
 		buffers.push_back (b);
 	}
 
+	for (vector<boost::shared_ptr<AudioSource> >::iterator src=srcs.begin(); src != srcs.end(); ++src) {
+		(*src)->prepare_for_peakfile_writes ();
+	}
+			
 	while (to_do && !itt.cancel) {
 		
 		this_chunk = min (to_do, chunk_size);
@@ -3909,15 +3913,6 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t le
 			}
 		}
 		
-		/* build peakfile for new source */
-		
-		for (vector<boost::shared_ptr<AudioSource> >::iterator src=srcs.begin(); src != srcs.end(); ++src) {
-			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*src);
-			if (afs) {
-				afs->build_peaks ();
-			}
-		}
-
 		/* construct a region to represent the bounced material */
 
 		boost::shared_ptr<Region> aregion = RegionFactory::create (srcs, 0, srcs.front()->length(), 
@@ -3936,6 +3931,11 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t le
 			}
 
 			(*src)->drop_references ();
+		}
+
+	} else {
+		for (vector<boost::shared_ptr<AudioSource> >::iterator src = srcs.begin(); src != srcs.end(); ++src) {
+			(*src)->done_with_peakfile_writes ();
 		}
 	}
 

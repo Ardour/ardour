@@ -130,7 +130,6 @@ AudioFileSource::init (string pathstr, bool must_exist)
 
 	_length = 0;
 	timeline_position = 0;
-	next_peak_clear_should_notify = false;
 	_peaks_built = false;
 	file_is_new = false;
 
@@ -260,10 +259,7 @@ AudioFileSource::mark_streaming_write_completed ()
 
 	Glib::Mutex::Lock lm (_lock);
 
-	next_peak_clear_should_notify = true;
-
-	if (_peaks_built || pending_peak_builds.empty()) {
-		_peaks_built = true;
+	if (_peaks_built) {
 		PeaksReady (); /* EMIT SIGNAL */
 	}
 }

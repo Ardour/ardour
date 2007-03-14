@@ -27,10 +27,13 @@ class ConfigVariableBase {
 	virtual void add_to_node (XMLNode& node) = 0;
 	virtual bool set_from_node (const XMLNode& node, Owner owner) = 0;
 
+	void show_stored_value (const std::string&);
+	static void set_show_stored_values (bool yn);
 
   protected:
 	std::string _name;
 	Owner _owner;
+	static bool show_stores;
 
 	void notify ();
 	void miss ();
@@ -61,7 +64,7 @@ class ConfigVariable : public ConfigVariableBase
 	void add_to_node (XMLNode& node) {
 		std::stringstream ss;
 		ss << value;
-		cerr << "Config variable " << _name << " stored as " << ss.str() << endl;
+		show_stored_value (ss.str());
 		XMLNode* child = new XMLNode ("Option");
 		child->add_property ("name", _name);
 		child->add_property ("value", ss.str());
