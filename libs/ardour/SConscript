@@ -297,10 +297,10 @@ sse_env.Append (CXXFLAGS="-msse")
 if env['FPU_OPTIMIZATION']:
 	if env['DIST_TARGET'] == "i386":
 		arch_specific_objects = env.SharedAsmObject('sse_functions.os', 'sse_functions.s')
-		always_sse_objects += ['sse_functions_xmm.os']
+		always_sse_objects += [ sse_env.SharedObject (source = 'sse_functions_xmm.cc') ]
 	if env['DIST_TARGET'] == "i686":
 		arch_specific_objects = env.SharedAsmObject('sse_functions.os', 'sse_functions.s')
-		always_sse_objects += ['sse_functions_xmm.os']
+		always_sse_objects += [ sse_env.SharedObject (source = 'sse_functions_xmm.cc') ]
 	if env['DIST_TARGET'] == "x86_64":
 		arch_specific_objects = env.SharedAsmObject('sse_functions_64bit.os', 'sse_functions_64bit.s')
 		always_sse_objects += [ sse_env.SharedObject (source = 'sse_functions_xmm.cc') ]
