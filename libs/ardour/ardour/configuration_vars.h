@@ -38,7 +38,7 @@ CONFIG_VARIABLE (HeaderFormat, native_file_header_format,  "native-file-header-f
 /* OSC */
 
 CONFIG_VARIABLE (uint32_t, osc_port, "osc-port", 3819)
-CONFIG_VARIABLE (bool, use_osc, "use-osc", true)
+CONFIG_VARIABLE (bool, use_osc, "use-osc", false)
 
 /* crossfades */
 

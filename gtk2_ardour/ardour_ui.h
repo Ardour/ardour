@@ -658,6 +658,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_use_midi_control();
 	void toggle_send_mtc ();
 
+	void toggle_use_osc ();
+
 	void set_input_auto_connect (ARDOUR::AutoConnectOption);
 	void set_output_auto_connect (ARDOUR::AutoConnectOption);
 	void set_solo_model (ARDOUR::SoloModel);

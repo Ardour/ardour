@@ -342,6 +342,7 @@
                <menuitem action='SendMMC'/>
                <menuitem action='UseMMC'/>
                <separator/>
+               <menuitem action='UseOSC'/>
                <menuitem action='StopPluginsWithTransport'/>
                <menuitem action='DoNotRunPluginsWhileRecording'/>
                <menuitem action='LatchedRecordEnable'/>

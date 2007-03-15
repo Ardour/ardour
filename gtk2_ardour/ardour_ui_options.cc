@@ -24,6 +24,7 @@
 
 #include <ardour/configuration.h>
 #include <ardour/session.h>
+#include <ardour/osc.h>
 #include <ardour/audioengine.h>
 
 #include "ardour_ui.h"
@@ -60,6 +61,12 @@ void
 ARDOUR_UI::toggle_use_mmc ()
 {
 	ActionManager::toggle_config_state ("options", "UseMMC", &Configuration::set_mmc_control, &Configuration::get_mmc_control);
+}
+
+void
+ARDOUR_UI::toggle_use_osc ()
+{
+	ActionManager::toggle_config_state ("options", "UseOSC", &Configuration::set_use_osc, &Configuration::get_use_osc);
 }
 
 void
@@ -844,6 +851,16 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 
 		ActionManager::map_some_state ("options", "SendMMC", &Configuration::get_send_mmc);
 
+	} else if (PARAM_IS ("use-osc")) {
+
+		if (Config->get_use_osc()) {
+			osc->start ();
+		} else {
+			osc->stop ();
+		}
+
+		ActionManager::map_some_state ("options", "UseOSC", &Configuration::get_use_osc);
+		
 	} else if (PARAM_IS ("mmc-control")) {
 		ActionManager::map_some_state ("options", "UseMMC", &Configuration::get_mmc_control);
 	} else if (PARAM_IS ("midi-feedback")) {
