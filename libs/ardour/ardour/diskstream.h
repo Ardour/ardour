@@ -33,6 +33,7 @@
 #include <pbd/fastlog.h>
 #include <pbd/ringbufferNPT.h>
 #include <pbd/stateful.h>
+#include <pbd/mutex.h>
 #include <pbd/statefuldestructible.h> 
 
 #include <ardour/ardour.h>
@@ -237,7 +238,7 @@ class IO;
 
 	static nframes_t disk_io_chunk_frames;
 	vector<CaptureInfo*>  capture_info;
-	Glib::Mutex           capture_info_lock;
+	PBDMutex           capture_info_lock;
 
 	uint32_t i_am_the_modifier;
 
@@ -292,7 +293,7 @@ class IO;
 	AlignStyle               _persistent_alignment_style;
 	bool                      first_input_change;
 
-	Glib::Mutex  state_lock;
+	PBDMutex  state_lock;
 
 	nframes_t scrub_start;
 	nframes_t scrub_buffer_size;

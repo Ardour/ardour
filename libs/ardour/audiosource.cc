@@ -592,7 +592,7 @@ AudioSource::build_peaks_from_scratch ()
 		Glib::Mutex::Lock lp (_lock);
 		
 		if (prepare_for_peakfile_writes ()) {
-			return -1;
+			goto out;
 		}
 		
 		current_frame = 0;

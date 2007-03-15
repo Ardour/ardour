@@ -127,6 +127,8 @@ AudioDiskstream::~AudioDiskstream ()
 		}
 		channels.clear();
 	}
+
+	state_lock.lock ();
 }
 
 void
@@ -539,7 +541,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 	// If we can't take the state lock return.
 	if (!state_lock.trylock()) {
 		return 1;
-	}
+	} 
 
 	adjust_capture_position = 0;
 
@@ -825,7 +827,6 @@ AudioDiskstream::commit (nframes_t nframes)
 	}
 
 	state_lock.unlock();
-
 	_processed = false;
 
 	return need_butler;
