@@ -3284,7 +3284,7 @@ Editor::playlist_deletion_dialog (boost::shared_ptr<Playlist> pl)
 	label.show ();
 
 	dialog.add_button (_("Delete playlist"), RESPONSE_ACCEPT);
-	dialog.add_button (_("Keep playlist"), RESPONSE_CANCEL);
+	dialog.add_button (_("Keep playlist"), RESPONSE_REJECT);
 	dialog.add_button (_("Cancel"), RESPONSE_CANCEL);
 
 	switch (dialog.run ()) {
