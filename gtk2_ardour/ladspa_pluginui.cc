@@ -292,12 +292,14 @@ LadspaPluginUI::ControlUI::ControlUI ()
 	: automate_button (X_("")) // force creation of a label 
 {
 	automate_button.set_name ("PluginAutomateButton");
-	ARDOUR_UI::instance()->tooltips().set_tip (automate_button,
-						   _("Automation control"));
+	ARDOUR_UI::instance()->tooltips().set_tip (automate_button, _("Automation control"));
 
-	/* don't fix the height, it messes up the bar controllers */
+	/* XXX translators: use a string here that will be at least as long
+	   as the longest automation label (see ::automation_state_changed()
+	   below). be sure to include a descender.
+	*/
 
-	set_size_request_to_display_given_text (automate_button, X_("lngnuf"), 2, 2);
+	set_size_request_to_display_given_text (*automate_button.get_child(), _("Mgnual"), 5, 5);
 
 	ignore_change = 0;
 	display = 0;
@@ -377,6 +379,8 @@ LadspaPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontro
 
 	control_ui->set_spacing (5);
 
+	Gtk::Requisition req (control_ui->automate_button.size_request());
+
 	if (plugin->parameter_is_input (port_index)) {
 
 		boost::shared_ptr<LadspaPlugin> lp;
@@ -455,8 +459,7 @@ LadspaPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontro
 			sigc::slot<void,char*,uint32_t> pslot = sigc::bind (mem_fun(*this, &LadspaPluginUI::print_parameter), (uint32_t) port_index);
 
 			control_ui->control = new BarController (*control_ui->adjustment, *mcontrol, pslot);
-			// should really match the height of the text in the automation button+label
-			control_ui->control->set_size_request (200, 22);
+			control_ui->control->set_size_request (200, req.height);
 			control_ui->control->set_name (X_("PluginSlider"));
 			control_ui->control->set_style (BarController::LeftToRight);
 			control_ui->control->set_use_parent (true);

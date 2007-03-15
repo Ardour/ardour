@@ -608,6 +608,7 @@ class Session : public PBD::StatefulDestructible
 	boost::shared_ptr<AudioFileSource> create_audio_source_for_session (ARDOUR::AudioDiskstream&, uint32_t which_channel, bool destructive);
 
 	boost::shared_ptr<Source> source_by_id (const PBD::ID&);
+	boost::shared_ptr<Source> source_by_path_and_channel (const Glib::ustring&, uint16_t);
 
 	/* playlist management */
 

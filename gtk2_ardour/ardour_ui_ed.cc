@@ -394,6 +394,9 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_toggle_action (option_actions, X_("UseOSC"), _("Use OSC"), mem_fun (*this, &ARDOUR_UI::toggle_use_osc));
+#ifndef HAVE_LIBLO
+	act->set_sensitive (false);
+#endif
 
 	ActionManager::register_toggle_action (option_actions, X_("StopPluginsWithTransport"), _("Stop plugins with transport"), mem_fun (*this, &ARDOUR_UI::toggle_StopPluginsWithTransport));
 	ActionManager::register_toggle_action (option_actions, X_("VerifyRemoveLastCapture"), _("Verify remove last capture"), mem_fun (*this, &ARDOUR_UI::toggle_VerifyRemoveLastCapture));

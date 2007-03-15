@@ -283,19 +283,29 @@ env['BUILDERS']['SharedAsmObject'] = Builder (action = '$CXX -c -fPIC $SOURCE -o
 					      suffix = '$SHOBJSUFFIX',
 					      src_suffix = '.s',
 					      single_source = 1)
+#
+# handle objects that should always be compiled with -msse in their own
+# special environment, which is exactly like "ardour" but unconditionally
+# includes -msse
+# 
+
+
+always_sse_objects = []
+sse_env = ardour.Copy()
+sse_env.Append (CXXFLAGS="-msse")
 
 if env['FPU_OPTIMIZATION']:
 	if env['DIST_TARGET'] == "i386":
 		arch_specific_objects = env.SharedAsmObject('sse_functions.os', 'sse_functions.s')
-		ardour_files += ['sse_functions_xmm.cc']
+		always_sse_objects += ['sse_functions_xmm.os']
 	if env['DIST_TARGET'] == "i686":
 		arch_specific_objects = env.SharedAsmObject('sse_functions.os', 'sse_functions.s')
-		ardour_files += ['sse_functions_xmm.cc']
+		always_sse_objects += ['sse_functions_xmm.os']
 	if env['DIST_TARGET'] == "x86_64":
 		arch_specific_objects = env.SharedAsmObject('sse_functions_64bit.os', 'sse_functions_64bit.s')
-		ardour_files += ['sse_functions_xmm.cc']
+		always_sse_objects += [ sse_env.SharedObject (source = 'sse_functions_xmm.cc') ]
 			
-libardour = ardour.SharedLibrary('ardour', ardour_files + extra_sources + arch_specific_objects)
+libardour = ardour.SharedLibrary('ardour', ardour_files + always_sse_objects + extra_sources + arch_specific_objects)
 
 Default(libardour)
 

@@ -508,7 +508,7 @@ Editor::Editor ()
 
 	edit_group_display.set_name ("EditGroupList");
 	edit_group_display.get_selection()->set_mode (SELECTION_SINGLE);
-	edit_group_display.set_headers_visible (false);
+	edit_group_display.set_headers_visible (true);
 	edit_group_display.set_reorderable (false);
 	edit_group_display.set_rules_hint (true);
 	edit_group_display.set_size_request (75, -1);

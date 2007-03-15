@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Paul Davis
+    Copyright (C) 2007 Paul sDavis
     	Written by Sampo Savolainen
 
     This program is free software; you can redistribute it and/or modify

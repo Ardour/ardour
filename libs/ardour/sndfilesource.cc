@@ -35,6 +35,7 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
+using Glib::ustring;
 
 gain_t* SndFileSource::out_coefficient = 0;
 gain_t* SndFileSource::in_coefficient = 0;
@@ -54,11 +55,11 @@ SndFileSource::SndFileSource (Session& s, const XMLNode& node)
 	}
 }
 
-SndFileSource::SndFileSource (Session& s, string path, int chn, Flag flags)
+SndFileSource::SndFileSource (Session& s, ustring path, int chn, Flag flags)
           /* files created this way are never writable or removable */
 	: AudioFileSource (s, path, Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
 {
-	channel = chn;
+	_channel = chn;
 
 	init ();
 
@@ -67,7 +68,7 @@ SndFileSource::SndFileSource (Session& s, string path, int chn, Flag flags)
 	}
 }
 
-SndFileSource::SndFileSource (Session& s, string path, SampleFormat sfmt, HeaderFormat hf, nframes_t rate, Flag flags)
+SndFileSource::SndFileSource (Session& s, ustring path, SampleFormat sfmt, HeaderFormat hf, nframes_t rate, Flag flags)
 	: AudioFileSource (s, path, flags, sfmt, hf)
 {
 	int fmt = 0;
@@ -177,7 +178,7 @@ SndFileSource::SndFileSource (Session& s, string path, SampleFormat sfmt, Header
 void 
 SndFileSource::init ()
 {
-	string file;
+	ustring file;
 
 	// lets try to keep the object initalizations here at the top
 	xfade_buf = 0;
@@ -221,8 +222,8 @@ SndFileSource::open ()
 		return -1;
 	}
 
-	if (channel >= _info.channels) {
-		error << string_compose(_("SndFileSource: file only contains %1 channels; %2 is invalid as a channel number"), _info.channels, channel) << endmsg;
+	if (_channel >= _info.channels) {
+		error << string_compose(_("SndFileSource: file only contains %1 channels; %2 is invalid as a channel number"), _info.channels, _channel) << endmsg;
 		sf_close (sf);
 		sf = 0;
 		return -1;
@@ -346,7 +347,7 @@ SndFileSource::read_unlocked (Sample *dst, nframes_t start, nframes_t cnt) const
 	}
 	
 	nread = sf_read_float (sf, interleave_buf, real_cnt);
-	ptr = interleave_buf + channel;
+	ptr = interleave_buf + _channel;
 	nread /= _info.channels;
 	
 	/* stride through the interleaved data */
@@ -841,7 +842,7 @@ SndFileSource::set_timeline_position (int64_t pos)
 }
 
 int
-SndFileSource::get_soundfile_info (string path, SoundFileInfo& info, string& error_msg)
+SndFileSource::get_soundfile_info (const ustring& path, SoundFileInfo& info, string& error_msg)
 {
 	SNDFILE *sf;
 	SF_INFO sf_info;

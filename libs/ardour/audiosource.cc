@@ -35,6 +35,7 @@
 
 #include <ardour/audiosource.h>
 #include <ardour/cycle_timer.h>
+#include <ardour/session.h>
 
 #include "i18n.h"
 
@@ -45,7 +46,7 @@ using namespace PBD;
 bool AudioSource::_build_missing_peakfiles = false;
 bool AudioSource::_build_peakfiles = false;
 
-AudioSource::AudioSource (Session& s, string name)
+AudioSource::AudioSource (Session& s, ustring name)
 	: Source (s, name)
 {
 	_peaks_built = false;
@@ -157,11 +158,11 @@ AudioSource::touch_peakfile ()
 }
 
 int
-AudioSource::rename_peakfile (string newpath)
+AudioSource::rename_peakfile (ustring newpath)
 {
 	/* caller must hold _lock */
 
-	string oldpath = peakpath;
+	ustring oldpath = peakpath;
 
 	if (access (oldpath.c_str(), F_OK) == 0) {
 		if (rename (oldpath.c_str(), newpath.c_str()) != 0) {
@@ -176,7 +177,7 @@ AudioSource::rename_peakfile (string newpath)
 }
 
 int
-AudioSource::initialize_peakfile (bool newfile, string audio_path)
+AudioSource::initialize_peakfile (bool newfile, ustring audio_path)
 {
 	struct stat statbuf;
 
@@ -187,7 +188,7 @@ AudioSource::initialize_peakfile (bool newfile, string audio_path)
 	*/
 	
 	if (!newfile && access (peakpath.c_str(), R_OK) != 0) {
-		string str = old_peak_path (audio_path);
+		ustring str = old_peak_path (audio_path);
 		if (access (str.c_str(), R_OK) == 0) {
 			peakpath = str;
 		}
@@ -664,13 +665,10 @@ AudioSource::done_with_peakfile_writes ()
 	}
 }
 
-static bool wrote_xmax = false;
-
 int
 AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframes_t cnt, bool force)
 {
 	Sample* buf2 = 0;
-	Sample xmin, xmax;
 	nframes_t to_do;
 	uint32_t  peaks_computed;
 	PeakData* peakbuf;
@@ -689,8 +687,6 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 
 		if (first_frame != peak_leftover_frame + peak_leftover_cnt) {
 
-			cerr << "seek, flush out " << peak_leftover_cnt << endl;
-
 			/* uh-oh, ::seek() since the last ::compute_and_write_peaks(), 
 			   and we have leftovers. flush a single peak (since the leftovers
 			   never represent more than that, and restart.
@@ -700,11 +696,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 			
 			x.min = peak_leftovers[0];
 			x.max = peak_leftovers[0];
-			
-			for (nframes_t n = 1; n < peak_leftover_cnt; ++n) {
-				x.max = max (x.max, peak_leftovers[n]);
-				x.min = min (x.min, peak_leftovers[n]);
-			}
+			Session::find_peaks (peak_leftovers + 1, peak_leftover_cnt - 1, &x.min, &x.max);
 
 			off_t byte = (peak_leftover_frame / frames_per_peak) * sizeof (PeakData);
 
@@ -768,8 +760,6 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 		if (force && (to_do < frames_per_peak)) {
 			/* keep the left overs around for next time */
 
-			cerr << "save " << to_do << " leftovers\n";
-
 			if (peak_leftover_size < to_do) {
 				delete [] peak_leftovers;
 				peak_leftovers = new Sample[to_do];
@@ -786,17 +776,10 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 			
 		nframes_t this_time = min (frames_per_peak, to_do);
 
-		xmin = buf[0];
-		xmax = buf[0];
+		peakbuf[peaks_computed].max = buf[0];
+		peakbuf[peaks_computed].min = buf[0];
 
-		for (nframes_t n = 1; n < this_time; ++n) {
-			xmax = max (xmax, buf[n]);
-			xmin = min (xmin, buf[n]);
-		}
-		
-
-		peakbuf[peaks_computed].max = xmax;
-		peakbuf[peaks_computed].min = xmin;
+		Session::find_peaks (buf+1, this_time-1, &peakbuf[peaks_computed].min, &peakbuf[peaks_computed].max);
 
 		peaks_computed++;
 		buf += this_time;
@@ -865,7 +848,7 @@ AudioSource::truncate_peakfile ()
 }
 
 bool
-AudioSource::file_changed (string path)
+AudioSource::file_changed (ustring path)
 {
 	struct stat stat_file;
 	struct stat stat_peak;

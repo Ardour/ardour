@@ -68,7 +68,7 @@ void  veclib_mix_buffers_no_gain       (ARDOUR::Sample *dst, ARDOUR::Sample *src
 
 float compute_peak              (ARDOUR::Sample *buf, nframes_t nsamples, float current);
 
-void find_peaks                (ARDOUR::Sample *buf, nframes_t nsamples, float *min, float *max);
+void  find_peaks                (ARDOUR::Sample *buf, nframes_t nsamples, float *min, float *max);
 
 void  apply_gain_to_buffer      (ARDOUR::Sample *buf, nframes_t nframes, float gain);
 

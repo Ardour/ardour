@@ -853,11 +853,13 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 
 	} else if (PARAM_IS ("use-osc")) {
 
+#ifdef HAVE_LIBLO
 		if (Config->get_use_osc()) {
 			osc->start ();
 		} else {
 			osc->stop ();
 		}
+#endif
 
 		ActionManager::map_some_state ("options", "UseOSC", &Configuration::get_use_osc);
 		

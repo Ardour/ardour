@@ -1508,7 +1508,7 @@ Playlist::bump_name_once (string name)
 	} else {
 		int isnumber = 1;
 		const char *last_element = name.c_str() + period + 1;
-		for (int i = 0; i < strlen(last_element); i++) {
+		for (size_t i = 0; i < strlen(last_element); i++) {
 			if (!isdigit(last_element[i])) {
 				isnumber = 0;
 				break;
@@ -1525,7 +1525,7 @@ Playlist::bump_name_once (string name)
 		} else {
 			char buf[32];
 
-			snprintf (buf, sizeof(buf), "%d", version+1);
+			snprintf (buf, sizeof(buf), "%ld", version+1);
 		
 			newname  = name.substr (0, period+1);
 			newname += buf;

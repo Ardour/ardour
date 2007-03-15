@@ -370,11 +370,21 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_fi
 		for (int n = 0; n < finfo.channels; ++n)
 		{
 			try {
-				source = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable 
-										       (*session, path,  n,
-											(mode == ImportAsTapeTrack ? 
-											 AudioFileSource::Destructive : 
-											 AudioFileSource::Flag (0))));
+
+				/* check if we have this thing embedded already */
+
+				boost::shared_ptr<Source> s;
+
+				if ((s = session->source_by_path_and_channel (path, n)) == 0) {
+					cerr << "source doesn't exist yet\n";
+					source = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable 
+											       (*session, path,  n,
+												(mode == ImportAsTapeTrack ? 
+												 AudioFileSource::Destructive : 
+												 AudioFileSource::Flag (0))));
+				} else {
+					source = boost::dynamic_pointer_cast<AudioFileSource> (s);
+				}
 
 				sources.push_back(source);
 			} 
