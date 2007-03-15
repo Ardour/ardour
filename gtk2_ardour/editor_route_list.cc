@@ -27,6 +27,7 @@
 #include "audio_time_axis.h"
 #include "mixer_strip.h"
 #include "gui_thread.h"
+#include "actions.h"
 
 #include <ardour/route.h>
 #include <ardour/audio_track.h>
@@ -148,9 +149,10 @@ Editor::remove_route (TimeAxisView *tv)
 		}
 	}
 	/* since the editor mixer goes away when you remove a route, set the
-	 * button to inacttive 
+	 * button to inactive and untick the menu option
 	 */
 	editor_mixer_button.set_active(false);
+	ActionManager::uncheck_toggleaction ("<Actions>/Editor/show-editor-mixer");
 
 	/* and disable if all tracks and/or routes are gone */
 
