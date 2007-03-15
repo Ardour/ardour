@@ -127,8 +127,6 @@ AudioDiskstream::~AudioDiskstream ()
 		}
 		channels.clear();
 	}
-
-	state_lock.lock ();
 }
 
 void

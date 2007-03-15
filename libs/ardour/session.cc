@@ -78,6 +78,12 @@ using namespace ARDOUR;
 using namespace PBD;
 using boost::shared_ptr;
 
+#ifdef __x86_64__
+static const int CPU_CACHE_ALIGN = 64;
+#else
+static const int CPU_CACHE_ALIGN = 16; /* arguably 32 on most arches, but it matters less */
+#endif
+
 const char* Session::_template_suffix = X_(".template");
 const char* Session::_statefile_suffix = X_(".ardour");
 const char* Session::_pending_suffix = X_(".pending");
@@ -1396,7 +1402,7 @@ Session::set_block_size (nframes_t nframes)
 		uint32_t np;
 			
 		current_block_size = nframes;
-		
+
 		for (np = 0, i = _passthru_buffers.begin(); i != _passthru_buffers.end(); ++i, ++np) {
 			free (*i);
 		}
@@ -1417,7 +1423,7 @@ Session::set_block_size (nframes_t nframes)
 #ifdef NO_POSIX_MEMALIGN
 			buf = (Sample *) malloc(current_block_size * sizeof(Sample));
 #else
-			posix_memalign((void **)&buf,16,current_block_size * 4);
+			posix_memalign((void **)&buf,CPU_CACHE_ALIGN,current_block_size * sizeof(Sample));
 #endif			
 			*i = buf;
 
@@ -3563,7 +3569,7 @@ Session::ensure_passthru_buffers (uint32_t howmany)
 #ifdef NO_POSIX_MEMALIGN
 		p =  (Sample *) malloc(current_block_size * sizeof(Sample));
 #else
-		posix_memalign((void **)&p,16,current_block_size * 4);
+		posix_memalign((void **)&p,CPU_CACHE_ALIGN,current_block_size * sizeof(Sample));
 #endif			
 		_passthru_buffers.push_back (p);
 
@@ -3572,7 +3578,7 @@ Session::ensure_passthru_buffers (uint32_t howmany)
 #ifdef NO_POSIX_MEMALIGN
 		p =  (Sample *) malloc(current_block_size * sizeof(Sample));
 #else
-		posix_memalign((void **)&p,16,current_block_size * 4);
+		posix_memalign((void **)&p,CPU_CACHE_ALIGN,current_block_size * 4);
 #endif			
 		memset (p, 0, sizeof (Sample) * current_block_size);
 		_silent_buffers.push_back (p);
@@ -3582,7 +3588,7 @@ Session::ensure_passthru_buffers (uint32_t howmany)
 #ifdef NO_POSIX_MEMALIGN
 		p =  (Sample *) malloc(current_block_size * sizeof(Sample));
 #else
-		posix_memalign((void **)&p,16,current_block_size * 4);
+		posix_memalign((void **)&p,CPU_CACHE_ALIGN,current_block_size * sizeof(Sample));
 #endif			
 		memset (p, 0, sizeof (Sample) * current_block_size);
 		_send_buffers.push_back (p);
@@ -3862,7 +3868,7 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t le
 #ifdef NO_POSIX_MEMALIGN
 		b =  (Sample *) malloc(chunk_size * sizeof(Sample));
 #else
-		posix_memalign((void **)&b,16,chunk_size * 4);
+		posix_memalign((void **)&b,4096,chunk_size * sizeof(Sample));
 #endif			
 		buffers.push_back (b);
 	}

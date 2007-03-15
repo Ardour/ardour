@@ -33,7 +33,6 @@
 #include <pbd/fastlog.h>
 #include <pbd/ringbufferNPT.h>
 #include <pbd/stateful.h>
-#include <pbd/mutex.h>
 #include <pbd/statefuldestructible.h> 
 
 #include <ardour/ardour.h>
@@ -237,8 +236,9 @@ class IO;
 	virtual void use_destructive_playlist () = 0;
 
 	static nframes_t disk_io_chunk_frames;
-	vector<CaptureInfo*>  capture_info;
-	PBDMutex           capture_info_lock;
+	std::vector<CaptureInfo*>  capture_info;
+	char pad1[1024];
+	Glib::Mutex           capture_info_lock;
 
 	uint32_t i_am_the_modifier;
 
@@ -293,7 +293,8 @@ class IO;
 	AlignStyle               _persistent_alignment_style;
 	bool                      first_input_change;
 
-	PBDMutex  state_lock;
+	char pad2[1024];
+	Glib::Mutex  state_lock;
 
 	nframes_t scrub_start;
 	nframes_t scrub_buffer_size;

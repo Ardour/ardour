@@ -356,7 +356,6 @@ void
 Diskstream::playlist_modified ()
 {
 	if (!i_am_the_modifier && !overwrite_queued) {
-		cerr << _name << " request overwrite\n";
 		_session.request_overwrite_buffer (this);
 		overwrite_queued = true;
 	} 
