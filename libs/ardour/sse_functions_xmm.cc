@@ -43,6 +43,29 @@ x86_sse_find_peaks(float *buf, nframes_t nframes, float *min, float *max)
 		nframes--;
 	}
 
+        // use 64 byte prefetch for quadruple quads
+        while (nframes >= 16) {
+                __builtin_prefetch(buf+64,0,0);
+
+                work = _mm_load_ps(buf);
+                current_min = _mm_min_ps(current_min, work);
+                current_max = _mm_max_ps(current_max, work);
+                buf+=4;
+                work = _mm_load_ps(buf);
+                current_min = _mm_min_ps(current_min, work);
+                current_max = _mm_max_ps(current_max, work);
+                buf+=4;
+                work = _mm_load_ps(buf);
+                current_min = _mm_min_ps(current_min, work);
+                current_max = _mm_max_ps(current_max, work);
+                buf+=4;
+                work = _mm_load_ps(buf);
+                current_min = _mm_min_ps(current_min, work);
+                current_max = _mm_max_ps(current_max, work);
+                buf+=4;
+                nframes-=16;
+        }
+
 	// work through aligned buffers
 	while (nframes >= 4) {
 
