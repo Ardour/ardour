@@ -237,7 +237,6 @@ class IO;
 
 	static nframes_t disk_io_chunk_frames;
 	std::vector<CaptureInfo*>  capture_info;
-	char pad1[1024];
 	Glib::Mutex           capture_info_lock;
 
 	uint32_t i_am_the_modifier;
@@ -293,7 +292,6 @@ class IO;
 	AlignStyle               _persistent_alignment_style;
 	bool                      first_input_change;
 
-	char pad2[1024];
 	Glib::Mutex  state_lock;
 
 	nframes_t scrub_start;
