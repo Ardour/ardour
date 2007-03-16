@@ -601,7 +601,7 @@ elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_6
         if env['DIST_TARGET'] != 'i386':
             
             flag_line = os.popen ("cat /proc/cpuinfo | grep '^flags'").read()[:-1]
-            x86_flags = flag_line.split (": ")[1:][0].split (' ')
+            x86_flags = flag_line.split (": ")[1:][0].split ()
             
             if "mmx" in x86_flags:
                 opt_flags.append ("-mmmx")
