@@ -212,7 +212,7 @@ class AudioDiskstream : public Diskstream
 	int do_flush (Session::RunContext context, bool force = false);
 	int do_refill () { return _do_refill(_mixdown_buffer, _gain_buffer); }
 	
-	int do_refill_with_alloc();
+	int do_refill_with_alloc ();
 
 	int read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
 		nframes_t& start, nframes_t cnt, 
@@ -251,14 +251,14 @@ class AudioDiskstream : public Diskstream
 	static Sample* _mixdown_buffer;
 	static gain_t* _gain_buffer;
 
-	// Uh, /really/ private? (there should probably be less friends of Diskstream)
-	int _do_refill (Sample *mixdown_buffer, float *gain_buffer);
-	
-	
 	std::vector<boost::shared_ptr<AudioFileSource> > capturing_sources;
 	
 	typedef vector<ChannelInfo> ChannelList;
 	ChannelList channels;
+	
+ /* really */
+  private:
+	int _do_refill (Sample *mixdown_buffer, float *gain_buffer);
 };
 
 } // namespace ARDOUR

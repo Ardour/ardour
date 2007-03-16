@@ -410,6 +410,18 @@ Session::process_event (Event* ev)
 
 	case Event::InputConfigurationChange:
 		post_transport_work = PostTransportWork (post_transport_work | PostTransportInputChange);
+		{
+			RCUWriter<DiskstreamList> writer (diskstreams);
+			boost::shared_ptr<DiskstreamList> ds = writer.get_copy();
+			ds->remove (ev->diskstream);
+			/* writer goes out of scope, copies ds back to main */
+		}
+		{
+			RCUWriter<DiskstreamList> writer (diskstreams_input_pending);
+			boost::shared_ptr<DiskstreamList> ds = writer.get_copy();
+			ds->push_back (ev->diskstream);
+			/* writer goes out of scope, copies ds back to main */
+		}
 		schedule_butler_transport_work ();
 		break;
 

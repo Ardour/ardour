@@ -21,6 +21,7 @@
 #define __ardour_diskstream_h__
 
 #include <sigc++/signal.h>
+#include <boost/enable_shared_from_this.hpp>
 
 #include <cmath>
 #include <string>
@@ -53,7 +54,7 @@ class Session;
 class Playlist;
 class IO;
 
- class Diskstream : public PBD::StatefulDestructible
+class Diskstream : public PBD::StatefulDestructible, public boost::enable_shared_from_this<ARDOUR::Diskstream>
 {	
   public:
 	enum Flag {
@@ -199,7 +200,6 @@ class IO;
 	
 	/** For non-butler contexts (allocates temporary working buffers) */
 	virtual int do_refill_with_alloc() = 0;
-
 	
 	/* XXX fix this redundancy ... */
 

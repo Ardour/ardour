@@ -125,9 +125,6 @@ Diskstream::init (Flag f)
 
 Diskstream::~Diskstream ()
 {
-	// Taken by derived class destrctors.. should assure locked here somehow?
-	//Glib::Mutex::Lock lm (state_lock);
-
 	if (_playlist)
 		_playlist->release ();
 }
@@ -146,7 +143,7 @@ Diskstream::handle_input_change (IOChange change, void *src)
 
 	if (!(input_change_pending & change)) {
 		input_change_pending = IOChange (input_change_pending|change);
-		_session.request_input_change_handling ();
+		_session.request_input_change_handling (shared_from_this());
 	}
 }
 

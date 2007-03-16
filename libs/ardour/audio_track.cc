@@ -60,6 +60,7 @@ AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode 
 	}
 
 	boost::shared_ptr<AudioDiskstream> ds (new AudioDiskstream (_session, name, dflags));
+	
 	_session.add_diskstream (ds);
 
 	set_diskstream (boost::dynamic_pointer_cast<AudioDiskstream> (ds), this);

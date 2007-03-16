@@ -36,6 +36,7 @@
 #include <pbd/xml++.h>
 #include <pbd/memento_command.h>
 #include <pbd/enumwriter.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/ardour.h>
 #include <ardour/audioengine.h>
@@ -912,25 +913,25 @@ AudioDiskstream::overwrite_existing_buffers ()
 int
 AudioDiskstream::seek (nframes_t frame, bool complete_refill)
 {
-	Glib::Mutex::Lock lm (state_lock);
 	uint32_t n;
 	int ret;
 	ChannelList::iterator chan;
-
+	Glib::Mutex::Lock lm (state_lock);
+	
 	for (n = 0, chan = channels.begin(); chan != channels.end(); ++chan, ++n) {
 		(*chan).playback_buf->reset ();
 		(*chan).capture_buf->reset ();
 	}
 	
 	/* can't rec-enable in destructive mode if transport is before start */
-
+	
 	if (destructive() && record_enabled() && frame < _session.current_start_frame()) {
 		disengage_record_enable ();
 	}
-
+	
 	playback_sample = frame;
 	file_frame = frame;
-
+	
 	if (complete_refill) {
 		while ((ret = do_refill_with_alloc ()) > 0) ;
 	} else {
@@ -1065,7 +1066,7 @@ AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, 
 }
 
 int
-AudioDiskstream::do_refill_with_alloc()
+AudioDiskstream::do_refill_with_alloc ()
 {
 	Sample* mix_buf  = new Sample[disk_io_chunk_frames];
 	float*  gain_buf = new float[disk_io_chunk_frames];
@@ -1100,7 +1101,6 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 	vector.len[1] = 0;
 
 	channels.front().playback_buf->get_write_vector (&vector);
-
 	
 	if ((total_space = vector.len[0] + vector.len[1]) == 0) {
 		return 0;
@@ -1833,9 +1833,6 @@ AudioDiskstream::set_state (const XMLNode& node)
 
 	if (nchans > _n_channels) {
 
-		// we need to add new channel infos
-		//LockMonitor lm (state_lock, __LINE__, __FILE__);
-
 		int diff = nchans - channels.size();
 
 		for (int i=0; i < diff; ++i) {
@@ -1843,9 +1840,6 @@ AudioDiskstream::set_state (const XMLNode& node)
 		}
 
 	} else if (nchans < _n_channels) {
-
-		// we need to get rid of channels
-		//LockMonitor lm (state_lock, __LINE__, __FILE__);
 
 		int diff = channels.size() - nchans;
 		

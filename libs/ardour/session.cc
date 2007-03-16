@@ -269,6 +269,7 @@ Session::Session (AudioEngine &eng,
 	  pending_events (2048),
 	  midi_requests (128), // the size of this should match the midi request pool size
 	  diskstreams (new DiskstreamList),
+	  diskstreams_input_pending (new DiskstreamList),
 	  routes (new RouteList),
 	  auditioner ((Auditioner*) 0),
 	  _click_io ((IO*) 0),
@@ -332,6 +333,7 @@ Session::Session (AudioEngine &eng,
 	  pending_events (2048),
 	  midi_requests (16),
 	  diskstreams (new DiskstreamList),
+	  diskstreams_input_pending (new DiskstreamList),
 	  routes (new RouteList),
 	  main_outs (0)
 
@@ -2002,21 +2004,23 @@ void
 Session::add_diskstream (boost::shared_ptr<Diskstream> dstream)
 {
 	/* need to do this in case we're rolling at the time, to prevent false underruns */
-	dstream->do_refill_with_alloc();
+	dstream->do_refill_with_alloc ();
 	
-	{ 
+	dstream->set_block_size (current_block_size);
+
+	if (_state_of_the_state & InitialConnecting) {
 		RCUWriter<DiskstreamList> writer (diskstreams);
 		boost::shared_ptr<DiskstreamList> ds = writer.get_copy();
 		ds->push_back (dstream);
-	}
-
-	dstream->set_block_size (current_block_size);
+		/* writer goes out of scope, copies ds back to main */
+	} 
 
 	dstream->PlaylistChanged.connect (sigc::bind (mem_fun (*this, &Session::diskstream_playlist_changed), dstream));
 	/* this will connect to future changes, and check the current length */
 	diskstream_playlist_changed (dstream);
 
 	dstream->prepare ();
+
 }
 
 void
@@ -3383,7 +3387,11 @@ Session::graph_reordered ()
 	   we were connecting. do it now.
 	*/
 
-	request_input_change_handling ();
+	boost::shared_ptr<DiskstreamList> ds = diskstreams.reader();
+	
+	for (DiskstreamList::iterator i = ds->begin(); i != ds->end(); ++i) {
+		request_input_change_handling (*i);
+	}
 
 	resort_routes ();
 
