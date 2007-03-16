@@ -381,6 +381,7 @@ Mixer_UI::disconnect_from_session ()
 	ENSURE_GUI_THREAD(mem_fun(*this, &Mixer_UI::disconnect_from_session));
 	
 	group_model->clear ();
+	_selection.clear ();
 	set_title (_("ardour: mixer"));
 	stop_updating ();
 }
