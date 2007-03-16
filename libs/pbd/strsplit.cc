@@ -56,7 +56,7 @@ split (ustring str, vector<ustring>& result, char splitchar)
 	}
 
 	for (ustring::size_type n = 0; n < len; ++n) {
-		if (str[n] == splitchar) {
+		if (str[n] == gunichar(splitchar)) {
 			cnt++;
 		}
 	}

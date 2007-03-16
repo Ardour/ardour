@@ -916,7 +916,6 @@ ExportDialog::do_export ()
 void
 ExportDialog::end_dialog ()
 {
-
 	if (spec.running) {
 		spec.stop = true;
 
@@ -929,7 +928,7 @@ ExportDialog::end_dialog ()
 		}
 	}
 
-	session->engine().freewheel (false);
+	session->finalize_audio_export ();
 
 	hide_all ();
 

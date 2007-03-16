@@ -117,7 +117,6 @@ Session::import_audiofile (import_status& status)
 	float *data = 0;
 	Sample **channel_data = 0;
 	long nfiles = 0;
-	long n;
 	string basepath;
 	string sounds_dir;
 	nframes_t so_far;
@@ -143,14 +142,14 @@ Session::import_audiofile (import_status& status)
 		importable = new ImportableSource (in, &info);
 	}
 
-	for (n = 0; n < info.channels; ++n) {
+	for (int n = 0; n < info.channels; ++n) {
 		newfiles.push_back (boost::shared_ptr<AudioFileSource>());
 	}
 
 	sounds_dir = discover_best_sound_dir ();
 	basepath = PBD::basename_nosuffix (status.paths.front());
 
-	for (n = 0; n < info.channels; ++n) {
+	for (int n = 0; n < info.channels; ++n) {
 
 		bool goodfile = false;
 
@@ -162,7 +161,7 @@ Session::import_audiofile (import_status& status)
 					snprintf (buf, sizeof(buf), "%s/%s-R.wav", sounds_dir.c_str(), basepath.c_str());
 				}
 			} else if (info.channels > 1) {
-				snprintf (buf, sizeof(buf), "%s/%s-c%lu.wav", sounds_dir.c_str(), basepath.c_str(), n+1);
+				snprintf (buf, sizeof(buf), "%s/%s-c%d.wav", sounds_dir.c_str(), basepath.c_str(), n+1);
 			} else {
 				snprintf (buf, sizeof(buf), "%s/%s.wav", sounds_dir.c_str(), basepath.c_str());
 			}
@@ -199,7 +198,7 @@ Session::import_audiofile (import_status& status)
 	data = new float[nframes * info.channels];
 	channel_data = new Sample * [ info.channels ];
 	
-	for (n = 0; n < info.channels; ++n) {
+	for (int n = 0; n < info.channels; ++n) {
 		channel_data[n] = new Sample[nframes];
 	}
 
@@ -222,7 +221,8 @@ Session::import_audiofile (import_status& status)
 		/* de-interleave */
 				
 		for (chn = 0; chn < info.channels; ++chn) {
-			
+
+			nframes_t n;
 			for (x = chn, n = 0; n < nfread; x += info.channels, ++n) {
 				channel_data[chn][n] = (Sample) data[x];
 			}
@@ -257,7 +257,7 @@ Session::import_audiofile (import_status& status)
 	if (status.multichan) {
 		/* all sources are used in a single multichannel region */
 
-		for (n = 0; n < nfiles && !status.cancel; ++n) {
+		for (int n = 0; n < nfiles && !status.cancel; ++n) {
 			/* flush the final length to the header */
 			newfiles[n]->update_header(0, *now, xnow);
 			sources.push_back(newfiles[n]);
@@ -274,7 +274,7 @@ Session::import_audiofile (import_status& status)
 		status.new_regions.push_back (r);
 
 	} else {
-		for (n = 0; n < nfiles && !status.cancel; ++n) {
+		for (int n = 0; n < nfiles && !status.cancel; ++n) {
 
 			/* flush the final length to the header */
 
@@ -309,7 +309,7 @@ Session::import_audiofile (import_status& status)
 	}
 	
 	if (channel_data) {
-		for (n = 0; n < info.channels; ++n) {
+		for (int n = 0; n < info.channels; ++n) {
 			delete [] channel_data[n];
 		}
 		delete [] channel_data;

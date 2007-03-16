@@ -65,7 +65,7 @@ ExportRangeMarkersDialog::process_range_markers_export(Locations::LocationList& 
 	Locations::LocationList::iterator locationIter;
 	current_range_marker_index = 0;
 	init_progress_computing(locations);
-	
+
 	for (locationIter = locations.begin(); locationIter != locations.end(); ++locationIter) {
 		Location *currentLocation = (*locationIter);
 
@@ -90,7 +90,8 @@ ExportRangeMarkersDialog::process_range_markers_export(Locations::LocationList& 
 
 			// wait until export of this range finished
 			gtk_main_iteration();
-			while(spec.running){
+
+			while (spec.running){
 				if(gtk_events_pending()){
 					gtk_main_iteration();
 				}else {
@@ -197,12 +198,6 @@ ExportRangeMarkersDialog::progress_timeout ()
 {
 	double progress = 0.0;
 
-	cerr << "Progress timeout, total = " << total_duration << " index = " << current_range_marker_index
-	     << " current = " << range_markers_durations[current_range_marker_index]
-	     << " agg = " << range_markers_durations_aggregated[current_range_marker_index]
-	     << " prog = " << spec.progress
-	     << endl;
-	
 	if (current_range_marker_index >= range_markers_durations.size()){
 		progress = 1.0;
 	} else{

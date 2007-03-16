@@ -92,7 +92,7 @@ compute_peak (ARDOUR::Sample *buf, nframes_t nsamples, float current)
 void
 find_peaks (ARDOUR::Sample *buf, nframes_t nframes, float *min, float *max)
 {
-	long i;
+	nframes_t i;
 	float a, b;
 
 	a = *max;

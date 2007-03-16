@@ -671,7 +671,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 	Sample* buf2 = 0;
 	nframes_t to_do;
 	uint32_t  peaks_computed;
-	PeakData* peakbuf;
+	PeakData* peakbuf = 0;
 	int ret = -1;
 	nframes_t current_frame;
 	nframes_t frames_done;

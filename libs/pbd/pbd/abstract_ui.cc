@@ -54,6 +54,8 @@ AbstractUI<RequestObject>::get_request (RequestType rt)
 	}
 	
 	RequestBufferVector vec;
+	vec.buf[0] = 0;
+	vec.buf[1] = 0;
 	
 	rbuf->get_write_vector (&vec);
 

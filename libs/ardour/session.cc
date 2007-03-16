@@ -3626,7 +3626,6 @@ Session::next_insert_id ()
 		for (boost::dynamic_bitset<uint32_t>::size_type n = 0; n < insert_bitset.size(); ++n) {
 			if (!insert_bitset[n]) {
 				insert_bitset[n] = true;
-				cerr << "Returning " << n << " as insert ID\n";
 				return n;
 				
 			}
@@ -3647,7 +3646,6 @@ Session::next_send_id ()
 		for (boost::dynamic_bitset<uint32_t>::size_type n = 0; n < send_bitset.size(); ++n) {
 			if (!send_bitset[n]) {
 				send_bitset[n] = true;
-				cerr << "Returning " << n << " as send ID\n";
 				return n;
 				
 			}

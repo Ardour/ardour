@@ -267,7 +267,7 @@ AudioExportSpecification::process (nframes_t nframes)
 	char errbuf[256];
 	nframes_t to_write = 0;
 	int cnt = 0;
-
+	
 	do {
 
 		/* now do sample rate conversion */
@@ -427,8 +427,6 @@ AudioExportSpecification::process (nframes_t nframes)
 int
 Session::start_audio_export (AudioExportSpecification& spec)
 {
-	int ret;
-
 	if (spec.prepare (current_block_size, frame_rate())) {
 		return -1;
 	}
@@ -436,40 +434,21 @@ Session::start_audio_export (AudioExportSpecification& spec)
 	spec.pos = spec.start_frame;
 	spec.end_frame = spec.end_frame;
 	spec.total_frames = spec.end_frame - spec.start_frame;
+	spec.running = true; 
+	spec.do_freewheel = false; /* force a call to ::prepare_to_export() before proceeding to normal operation */
 
 	spec.freewheel_connection = _engine.Freewheel.connect (sigc::bind (mem_fun (*this, &Session::process_export), &spec));
 
-	if ((ret = _engine.freewheel (true)) == 0) {
-		spec.running = true; 
-		spec.do_freewheel = false;
-	}
-
-	return ret;
+	return _engine.freewheel (true);
 }
 
 int
 Session::stop_audio_export (AudioExportSpecification& spec)
 {
-	/* can't use stop_transport() here because we need
-	   an immediate halt and don't require all the declick
-	   stuff that stop_transport() implements.
-	*/
+	/* don't stop freewheeling but do stop paying attention to it for now */
 
-	realtime_stop (true);
-	schedule_butler_transport_work ();
-
-	/* restart slaving */
-
-	if (post_export_slave != None) {
-		Config->set_slave_source (post_export_slave);
-	} else {
-		locate (post_export_position, false, false, false);
-	}
-
-	spec.clear ();
-	_exporting = false;
-
-	spec.running = false;
+	spec.freewheel_connection.disconnect ();
+	spec.clear (); /* resets running/stop etc */
 
 	return 0;
 }
@@ -639,3 +618,25 @@ Session::process_export (nframes_t nframes, AudioExportSpecification* spec)
 	return ret;
 }
 
+void
+Session::finalize_audio_export ()
+{
+	_engine.freewheel (false);
+	_exporting = false;
+
+	/* can't use stop_transport() here because we need
+	   an immediate halt and don't require all the declick
+	   stuff that stop_transport() implements.
+	*/
+
+	realtime_stop (true);
+	schedule_butler_transport_work ();
+
+	/* restart slaving */
+
+	if (post_export_slave != None) {
+		Config->set_slave_source (post_export_slave);
+	} else {
+		locate (post_export_position, false, false, false);
+	}
+}
