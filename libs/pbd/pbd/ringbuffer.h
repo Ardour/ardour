@@ -113,8 +113,8 @@ class RingBuffer
   protected:
 	T *buf;
 	guint size;
-	mutable guint write_idx;
-	mutable guint read_idx;
+	mutable gint write_idx;
+	mutable gint read_idx;
 	guint size_mask;
 };
 

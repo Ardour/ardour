@@ -80,7 +80,6 @@
 		694120D40B8A36A200AF661E /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 694120D30B8A36A200AF661E /* libxml2.dylib */; };
 		694191980B97CD950083505E /* glibmm.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 694191950B97CD950083505E /* glibmm.framework */; };
 		694191990B97CD950083505E /* sigc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 694191960B97CD950083505E /* sigc.framework */; };
-		69741D9A0BA8EF1400FC5029 /* mutex.h in Headers */ = {isa = PBXBuildFile; fileRef = 69741D990BA8EF1400FC5029 /* mutex.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		69C63C150B9369CB00BC0BCA /* strreplace.cc in Sources */ = {isa = PBXBuildFile; fileRef = 69C63C140B9369CB00BC0BCA /* strreplace.cc */; };
 		69C63C190B9369DE00BC0BCA /* replace_all.h in Headers */ = {isa = PBXBuildFile; fileRef = 69C63C180B9369DE00BC0BCA /* replace_all.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		69C63C2B0B936A6E00BC0BCA /* version.cc in Sources */ = {isa = PBXBuildFile; fileRef = 69C63C290B936A6E00BC0BCA /* version.cc */; };
@@ -169,7 +168,6 @@
 		694120D30B8A36A200AF661E /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = /usr/lib/libxml2.dylib; sourceTree = "<absolute>"; };
 		694191950B97CD950083505E /* glibmm.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = glibmm.framework; path = /Library/Frameworks/glibmm.framework; sourceTree = "<absolute>"; };
 		694191960B97CD950083505E /* sigc.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = sigc.framework; path = /Library/Frameworks/sigc.framework; sourceTree = "<absolute>"; };
-		69741D990BA8EF1400FC5029 /* mutex.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = mutex.h; path = ../pbd/mutex.h; sourceTree = SOURCE_ROOT; };
 		69C63C140B9369CB00BC0BCA /* strreplace.cc */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = strreplace.cc; path = ../strreplace.cc; sourceTree = SOURCE_ROOT; };
 		69C63C180B9369DE00BC0BCA /* replace_all.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = replace_all.h; sourceTree = "<group>"; };
 		69C63C290B936A6E00BC0BCA /* version.cc */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = version.cc; sourceTree = "<group>"; };
@@ -247,7 +245,6 @@
 		08FB77ACFE841707C02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				69741D990BA8EF1400FC5029 /* mutex.h */,
 				69C63C140B9369CB00BC0BCA /* strreplace.cc */,
 				694120270B8A34AB00AF661E /* base_ui.cc */,
 				694120280B8A34AB00AF661E /* basename.cc */,
@@ -390,7 +387,6 @@
 				694120A80B8A34AB00AF661E /* undo.h in Headers */,
 				694120A90B8A34AB00AF661E /* whitespace.h in Headers */,
 				694120AA0B8A34AB00AF661E /* xml++.h in Headers */,
-				69741D9A0BA8EF1400FC5029 /* mutex.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
