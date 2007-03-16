@@ -66,6 +66,7 @@ gain_t* AudioDiskstream::_gain_buffer          = 0;
 AudioDiskstream::AudioDiskstream (Session &sess, const string &name, Diskstream::Flag flag)
 	: Diskstream(sess, name, flag)
 	, deprecated_io_node(NULL)
+	, channels (new ChannelList)
 {
 	/* prevent any write sources from being created */
 
@@ -80,6 +81,7 @@ AudioDiskstream::AudioDiskstream (Session &sess, const string &name, Diskstream:
 AudioDiskstream::AudioDiskstream (Session& sess, const XMLNode& node)
 	: Diskstream(sess, node)
 	, deprecated_io_node(NULL)
+	, channels (new ChannelList)
 {
 	in_set_state = true;
 	init (Recordable);
@@ -109,7 +111,7 @@ AudioDiskstream::init (Diskstream::Flag f)
 	set_block_size (_session.get_block_size());
 	allocate_temporary_buffers ();
 
-	add_channel ();
+	add_channel (1);
 	assert(_n_channels == 1);
 }
 
@@ -118,16 +120,17 @@ AudioDiskstream::~AudioDiskstream ()
 	notify_callbacks ();
 
 	{
-		/* don't be holding this lock as we exit the destructor, glib will wince
-		   visibly since the mutex gets destroyed before we release it.
-		*/
-
-		Glib::Mutex::Lock lm (state_lock);
-		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
-			(*chan).release ();
+		RCUWriter<ChannelList> writer (channels);
+		boost::shared_ptr<ChannelList> c = writer.get_copy();
+		
+		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+			delete *chan;
 		}
-		channels.clear();
+
+		c->clear();
 	}
+
+	channels.flush ();
 }
 
 void
@@ -153,37 +156,26 @@ AudioDiskstream::free_working_buffers()
 void
 AudioDiskstream::non_realtime_input_change ()
 {
-	{ 
+	{
 		Glib::Mutex::Lock lm (state_lock);
 
 		if (input_change_pending == NoChange) {
 			return;
 		}
 
-		if (input_change_pending & ConfigurationChanged) {
-
+		{
+			RCUWriter<ChannelList> writer (channels);
+			boost::shared_ptr<ChannelList> c = writer.get_copy();
+			
+			_n_channels = c->size();
+			
 			if (_io->n_inputs() > _n_channels) {
-				
-				// we need to add new channel infos
-				
-				int diff = _io->n_inputs() - channels.size();
-				
-				for (int i = 0; i < diff; ++i) {
-					add_channel ();
-				}
-				
-		} else if (_io->n_inputs() < _n_channels) {
-				
-				// we need to get rid of channels
-				
-				int diff = channels.size() - _io->n_inputs();
-				
-				for (int i = 0; i < diff; ++i) {
-					remove_channel ();
-				}
+				add_channel_to (c, _io->n_inputs() - _n_channels);
+			} else if (_io->n_inputs() < _n_channels) {
+				remove_channel_from (c, _n_channels - _io->n_inputs());
 			}
-		} 
-
+		}
+		
 		get_input_sources ();
 		set_capture_offset ();
 		
@@ -193,10 +185,12 @@ AudioDiskstream::non_realtime_input_change ()
 		} else {
 			set_align_style_from_io ();
 		}
-
+		
 		input_change_pending = NoChange;
-	}
 
+		/* implicit unlock */
+	}
+	
 	/* reset capture files */
 
 	reset_write_sources (false);
@@ -213,23 +207,26 @@ AudioDiskstream::non_realtime_input_change ()
 void
 AudioDiskstream::get_input_sources ()
 {
+	boost::shared_ptr<ChannelList> c = channels.reader();
+
+	uint32_t n;
+	ChannelList::iterator chan;
 	uint32_t ni = _io->n_inputs();
-	
-	for (uint32_t n = 0; n < ni; ++n) {
+
+	for (n = 0, chan = c->begin(); chan != c->end() && n < ni; ++chan, ++n) {
 		
 		const char **connections = _io->input(n)->get_connections ();
-		ChannelInfo& chan = channels[n];
 		
 		if (connections == 0 || connections[0] == 0) {
 			
-			if (chan.source) {
+			if ((*chan)->source) {
 				// _source->disable_metering ();
 			}
 			
-			chan.source = 0;
+			(*chan)->source = 0;
 			
 		} else {
-			chan.source = _session.engine().get_port_by_name (connections[0]);
+			(*chan)->source = _session.engine().get_port_by_name (connections[0]);
 		}
 		
 		if (connections) {
@@ -322,9 +319,10 @@ void
 AudioDiskstream::setup_destructive_playlist ()
 {
 	SourceList srcs;
-
-	for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
-		srcs.push_back ((*chan).write_source);
+	boost::shared_ptr<ChannelList> c = channels.reader();
+	
+	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+		srcs.push_back ((*chan)->write_source);
 	}
 
 	/* a single full-sized region */
@@ -361,15 +359,16 @@ AudioDiskstream::use_destructive_playlist ()
 
 	uint32_t n;
 	ChannelList::iterator chan;
+	boost::shared_ptr<ChannelList> c = channels.reader();
 
-	for (n = 0, chan = channels.begin(); chan != channels.end(); ++chan, ++n) {
-		(*chan).write_source = boost::dynamic_pointer_cast<AudioFileSource>(region->source (n));
-		assert((*chan).write_source);
-		(*chan).write_source->set_allow_remove_if_empty (false);
+	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
+		(*chan)->write_source = boost::dynamic_pointer_cast<AudioFileSource>(region->source (n));
+		assert((*chan)->write_source);
+		(*chan)->write_source->set_allow_remove_if_empty (false);
 
 		/* this might be false if we switched modes, so force it */
 
-		(*chan).write_source->set_destructive (true);
+		(*chan)->write_source->set_destructive (true);
 	}
 
 	/* the source list will never be reset for a destructive track */
@@ -465,15 +464,16 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
 		}
 
 		if (_flags & Recordable) {
-			for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
+			boost::shared_ptr<ChannelList> c = channels.reader();
+			for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 				
 				RingBufferNPT<CaptureTransition>::rw_vector transvec;
-				(*chan).capture_transition_buf->get_write_vector(&transvec);
+				(*chan)->capture_transition_buf->get_write_vector(&transvec);
 				
 				if (transvec.len[0] > 0) {
 					transvec.buf[0]->type = CaptureStart;
 					transvec.buf[0]->capture_val = capture_start_frame;
-					(*chan).capture_transition_buf->increment_write_ptr(1);
+					(*chan)->capture_transition_buf->increment_write_ptr(1);
 				}
 				else {
 					// bad!
@@ -503,7 +503,8 @@ int
 AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_t offset, bool can_record, bool rec_monitors_input)
 {
 	uint32_t n;
-	ChannelList::iterator c;
+	boost::shared_ptr<ChannelList> c = channels.reader();
+	ChannelList::iterator chan;
 	int ret = -1;
 	nframes_t rec_offset = 0;
 	nframes_t rec_nframes = 0;
@@ -544,9 +545,9 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 
 	adjust_capture_position = 0;
 
-	for (c = channels.begin(); c != channels.end(); ++c) {
-		(*c).current_capture_buffer = 0;
-		(*c).current_playback_buffer  = 0;
+	for (chan = c->begin(); chan != c->end(); ++chan) {
+		(*chan)->current_capture_buffer = 0;
+		(*chan)->current_playback_buffer  = 0;
 	}
 
 	if (nominally_recording || (_session.get_record_enabled() && Config->get_punch_in())) {
@@ -607,25 +608,25 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 
 	if (nominally_recording || rec_nframes) {
 
-		for (n = 0, c = channels.begin(); c != channels.end(); ++c, ++n) {
+		for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
 			
-			ChannelInfo& chan (*c);
-		
-			chan.capture_buf->get_write_vector (&chan.capture_vector);
+			ChannelInfo* chaninfo (*chan);
 
-			if (rec_nframes <= chan.capture_vector.len[0]) {
+			chaninfo->capture_buf->get_write_vector (&chaninfo->capture_vector);
+
+			if (rec_nframes <= chaninfo->capture_vector.len[0]) {
 				
-				chan.current_capture_buffer = chan.capture_vector.buf[0];
+				chaninfo->current_capture_buffer = chaninfo->capture_vector.buf[0];
 
 				/* note: grab the entire port buffer, but only copy what we were supposed to for recording, and use
 				   rec_offset
 				*/
 
-				memcpy (chan.current_capture_buffer, _io->input(n)->get_buffer (rec_nframes) + offset + rec_offset, sizeof (Sample) * rec_nframes);
+				memcpy (chaninfo->current_capture_buffer, _io->input(n)->get_buffer (rec_nframes) + offset + rec_offset, sizeof (Sample) * rec_nframes);
 
 			} else {
 
-				nframes_t total = chan.capture_vector.len[0] + chan.capture_vector.len[1];
+				nframes_t total = chaninfo->capture_vector.len[0] + chaninfo->capture_vector.len[1];
 
 				if (rec_nframes > total) {
 					DiskOverrun ();
@@ -633,21 +634,21 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 				}
 
 				Sample* buf = _io->input (n)->get_buffer (nframes) + offset;
-				nframes_t first = chan.capture_vector.len[0];
+				nframes_t first = chaninfo->capture_vector.len[0];
 
-				memcpy (chan.capture_wrap_buffer, buf, sizeof (Sample) * first);
-				memcpy (chan.capture_vector.buf[0], buf, sizeof (Sample) * first);
-				memcpy (chan.capture_wrap_buffer+first, buf + first, sizeof (Sample) * (rec_nframes - first));
-				memcpy (chan.capture_vector.buf[1], buf + first, sizeof (Sample) * (rec_nframes - first));
+				memcpy (chaninfo->capture_wrap_buffer, buf, sizeof (Sample) * first);
+				memcpy (chaninfo->capture_vector.buf[0], buf, sizeof (Sample) * first);
+				memcpy (chaninfo->capture_wrap_buffer+first, buf + first, sizeof (Sample) * (rec_nframes - first));
+				memcpy (chaninfo->capture_vector.buf[1], buf + first, sizeof (Sample) * (rec_nframes - first));
 				
-				chan.current_capture_buffer = chan.capture_wrap_buffer;
+				chaninfo->current_capture_buffer = chaninfo->capture_wrap_buffer;
 			}
 		}
 
 	} else {
 
 		if (was_recording) {
-			finish_capture (rec_monitors_input);
+			finish_capture (rec_monitors_input, c);
 		}
 
 	}
@@ -658,8 +659,8 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 
 		if (rec_nframes == nframes && rec_offset == 0) {
 
-			for (c = channels.begin(); c != channels.end(); ++c) {
-				(*c).current_playback_buffer = (*c).current_capture_buffer;
+			for (chan = c->begin(); chan != c->end(); ++chan) {
+				(*chan)->current_playback_buffer = (*chan)->current_capture_buffer;
 			}
 
 			playback_distance = nframes;
@@ -681,8 +682,8 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 
 		/* can't do actual capture yet - waiting for latency effects to finish before we start*/
 
-		for (c = channels.begin(); c != channels.end(); ++c) {
-			(*c).current_playback_buffer = (*c).current_capture_buffer;
+		for (chan = c->begin(); chan != c->end(); ++chan) {
+			(*chan)->current_playback_buffer = (*chan)->current_capture_buffer;
 		}
 
 		playback_distance = nframes;
@@ -706,22 +707,22 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 			necessary_samples = nframes;
 		}
 		
-		for (c = channels.begin(); c != channels.end(); ++c) {
-			(*c).playback_buf->get_read_vector (&(*c).playback_vector);
+		for (chan = c->begin(); chan != c->end(); ++chan) {
+			(*chan)->playback_buf->get_read_vector (&(*chan)->playback_vector);
 		}
 
 		n = 0;			
 
-		for (c = channels.begin(); c != channels.end(); ++c, ++n) {
-		
-			ChannelInfo& chan (*c);
+		for (chan = c->begin(); chan != c->end(); ++chan, ++n) {
+			
+			ChannelInfo* chaninfo (*chan);
 
-			if (necessary_samples <= chan.playback_vector.len[0]) {
+			if (necessary_samples <= chaninfo->playback_vector.len[0]) {
 
-				chan.current_playback_buffer = chan.playback_vector.buf[0];
+				chaninfo->current_playback_buffer = chaninfo->playback_vector.buf[0];
 
 			} else {
-				nframes_t total = chan.playback_vector.len[0] + chan.playback_vector.len[1];
+				nframes_t total = chaninfo->playback_vector.len[0] + chaninfo->playback_vector.len[1];
 				
 				if (necessary_samples > total) {
 					DiskUnderrun ();
@@ -729,12 +730,12 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 					
 				} else {
 					
-					memcpy ((char *) chan.playback_wrap_buffer, chan.playback_vector.buf[0],
-						chan.playback_vector.len[0] * sizeof (Sample));
-					memcpy (chan.playback_wrap_buffer + chan.playback_vector.len[0], chan.playback_vector.buf[1], 
-						(necessary_samples - chan.playback_vector.len[0]) * sizeof (Sample));
+					memcpy ((char *) chaninfo->playback_wrap_buffer, chaninfo->playback_vector.buf[0],
+						chaninfo->playback_vector.len[0] * sizeof (Sample));
+					memcpy (chaninfo->playback_wrap_buffer + chaninfo->playback_vector.len[0], chaninfo->playback_vector.buf[1], 
+						(necessary_samples - chaninfo->playback_vector.len[0]) * sizeof (Sample));
 					
-					chan.current_playback_buffer = chan.playback_wrap_buffer;
+					chaninfo->current_playback_buffer = chaninfo->playback_wrap_buffer;
 				}
 			}
 		} 
@@ -747,10 +748,10 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 			// Linearly interpolate into the alt buffer
 			// using 40.24 fixp maths (swh)
 
-			for (c = channels.begin(); c != channels.end(); ++c) {
+			for (chan = c->begin(); chan != c->end(); ++chan) {
 
 				float fr;
-				ChannelInfo& chan (*c);
+				ChannelInfo* chaninfo (*chan);
 
 				i = 0;
 				phase = last_phase;
@@ -758,13 +759,13 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 				for (nframes_t outsample = 0; outsample < nframes; ++outsample) {
 					i = phase >> 24;
 					fr = (phase & 0xFFFFFF) / 16777216.0f;
-					chan.speed_buffer[outsample] = 
-						chan.current_playback_buffer[i] * (1.0f - fr) +
-						chan.current_playback_buffer[i+1] * fr;
+					chaninfo->speed_buffer[outsample] = 
+						chaninfo->current_playback_buffer[i] * (1.0f - fr) +
+						chaninfo->current_playback_buffer[i+1] * fr;
 					phase += phi;
 				}
 				
-				chan.current_playback_buffer = chan.speed_buffer;
+				chaninfo->current_playback_buffer = chaninfo->speed_buffer;
 			}
 
 			playback_distance = i + 1;
@@ -804,12 +805,13 @@ AudioDiskstream::commit (nframes_t nframes)
 		playback_sample += playback_distance;
 	}
 
-	for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
+	boost::shared_ptr<ChannelList> c = channels.reader();
+	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 
-		(*chan).playback_buf->increment_read_ptr (playback_distance);
+		(*chan)->playback_buf->increment_read_ptr (playback_distance);
 		
 		if (adjust_capture_position) {
-			(*chan).capture_buf->increment_write_ptr (adjust_capture_position);
+			(*chan)->capture_buf->increment_write_ptr (adjust_capture_position);
 		}
 	}
 	
@@ -819,10 +821,10 @@ AudioDiskstream::commit (nframes_t nframes)
 	}
 	
 	if (_slaved) {
-		need_butler = channels[0].playback_buf->write_space() >= channels[0].playback_buf->bufsize() / 2;
+		need_butler = c->front()->playback_buf->write_space() >= c->front()->playback_buf->bufsize() / 2;
 	} else {
-		need_butler = channels[0].playback_buf->write_space() >= disk_io_chunk_frames
-			|| channels[0].capture_buf->read_space() >= disk_io_chunk_frames;
+		need_butler = c->front()->playback_buf->write_space() >= disk_io_chunk_frames
+			|| c->front()->capture_buf->read_space() >= disk_io_chunk_frames;
 	}
 
 	state_lock.unlock();
@@ -839,12 +841,13 @@ AudioDiskstream::set_pending_overwrite (bool yn)
 	pending_overwrite = yn;
 
 	overwrite_frame = playback_sample;
-	overwrite_offset = channels.front().playback_buf->get_read_ptr();
+	overwrite_offset = channels.reader()->front()->playback_buf->get_read_ptr();
 }
 
 int
 AudioDiskstream::overwrite_existing_buffers ()
 {
+	boost::shared_ptr<ChannelList> c = channels.reader();
  	Sample* mixdown_buffer;
  	float* gain_buffer;
  	int ret = -1;
@@ -853,7 +856,7 @@ AudioDiskstream::overwrite_existing_buffers ()
 	overwrite_queued = false;
 
 	/* assume all are the same size */
-	nframes_t size = channels[0].playback_buf->bufsize();
+	nframes_t size = c->front()->playback_buf->bufsize();
 	
  	mixdown_buffer = new Sample[size];
  	gain_buffer = new float[size];
@@ -864,7 +867,7 @@ AudioDiskstream::overwrite_existing_buffers ()
 	uint32_t n=0;
 	nframes_t start;
 
-	for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan, ++n) {
+	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan, ++n) {
 
 		start = overwrite_frame;
 		nframes_t cnt = size;
@@ -882,7 +885,7 @@ AudioDiskstream::overwrite_existing_buffers ()
 		
 		nframes_t to_read = size - overwrite_offset;
 
-		if (read ((*chan).playback_buf->buffer() + overwrite_offset, mixdown_buffer, gain_buffer, start, to_read, *chan, n, reversed)) {
+		if (read ((*chan)->playback_buf->buffer() + overwrite_offset, mixdown_buffer, gain_buffer, start, to_read, *chan, n, reversed)) {
 			error << string_compose(_("AudioDiskstream %1: when refilling, cannot read %2 from playlist at frame %3"),
 					 _id, size, playback_sample) << endmsg;
 			goto out;
@@ -892,7 +895,7 @@ AudioDiskstream::overwrite_existing_buffers ()
 
 			cnt -= to_read;
 		
-			if (read ((*chan).playback_buf->buffer(), mixdown_buffer, gain_buffer,
+			if (read ((*chan)->playback_buf->buffer(), mixdown_buffer, gain_buffer,
 				  start, cnt, *chan, n, reversed)) {
 				error << string_compose(_("AudioDiskstream %1: when refilling, cannot read %2 from playlist at frame %3"),
 						 _id, size, playback_sample) << endmsg;
@@ -916,11 +919,13 @@ AudioDiskstream::seek (nframes_t frame, bool complete_refill)
 	uint32_t n;
 	int ret;
 	ChannelList::iterator chan;
+	boost::shared_ptr<ChannelList> c = channels.reader();
+
 	Glib::Mutex::Lock lm (state_lock);
 	
-	for (n = 0, chan = channels.begin(); chan != channels.end(); ++chan, ++n) {
-		(*chan).playback_buf->reset ();
-		(*chan).capture_buf->reset ();
+	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
+		(*chan)->playback_buf->reset ();
+		(*chan)->capture_buf->reset ();
 	}
 	
 	/* can't rec-enable in destructive mode if transport is before start */
@@ -945,9 +950,10 @@ int
 AudioDiskstream::can_internal_playback_seek (nframes_t distance)
 {
 	ChannelList::iterator chan;
+	boost::shared_ptr<ChannelList> c = channels.reader();
 
-	for (chan = channels.begin(); chan != channels.end(); ++chan) {
-		if ((*chan).playback_buf->read_space() < distance) {
+	for (chan = c->begin(); chan != c->end(); ++chan) {
+		if ((*chan)->playback_buf->read_space() < distance) {
 			return false;
 		} 
 	}
@@ -958,9 +964,10 @@ int
 AudioDiskstream::internal_playback_seek (nframes_t distance)
 {
 	ChannelList::iterator chan;
+	boost::shared_ptr<ChannelList> c = channels.reader();
 
-	for (chan = channels.begin(); chan != channels.end(); ++chan) {
-		(*chan).playback_buf->increment_read_ptr (distance);
+	for (chan = c->begin(); chan != c->end(); ++chan) {
+		(*chan)->playback_buf->increment_read_ptr (distance);
 	}
 
 	first_recordable_frame += distance;
@@ -971,7 +978,7 @@ AudioDiskstream::internal_playback_seek (nframes_t distance)
 
 int
 AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, nframes_t& start, nframes_t cnt, 
-		  ChannelInfo& channel_info, int channel, bool reversed)
+		       ChannelInfo* channel_info, int channel, bool reversed)
 {
 	nframes_t this_read = 0;
 	bool reloop = false;
@@ -1090,7 +1097,12 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 	nframes_t zero_fill;
 	uint32_t chan_n;
 	ChannelList::iterator i;
+	boost::shared_ptr<ChannelList> c = channels.reader();
 	nframes_t ts;
+
+	if (c->empty()) {
+		return 0;
+	}
 
 	assert(mixdown_buffer);
 	assert(gain_buffer);
@@ -1100,7 +1112,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 	vector.buf[1] = 0;
 	vector.len[1] = 0;
 
-	channels.front().playback_buf->get_write_vector (&vector);
+	c->front()->playback_buf->get_write_vector (&vector);
 	
 	if ((total_space = vector.len[0] + vector.len[1]) == 0) {
 		return 0;
@@ -1131,7 +1143,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 	   work with.
 	*/
 	
-	if (_slaved && total_space < (channels.front().playback_buf->bufsize() / 2)) {
+	if (_slaved && total_space < (c->front()->playback_buf->bufsize() / 2)) {
 		return 0;
 	}
 
@@ -1145,15 +1157,15 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 
 			/* at start: nothing to do but fill with silence */
 
-			for (chan_n = 0, i = channels.begin(); i != channels.end(); ++i, ++chan_n) {
+			for (chan_n = 0, i = c->begin(); i != c->end(); ++i, ++chan_n) {
 					
-				ChannelInfo& chan (*i);
-				chan.playback_buf->get_write_vector (&vector);
+				ChannelInfo* chan (*i);
+				chan->playback_buf->get_write_vector (&vector);
 				memset (vector.buf[0], 0, sizeof(Sample) * vector.len[0]);
 				if (vector.len[1]) {
 					memset (vector.buf[1], 0, sizeof(Sample) * vector.len[1]);
 				}
-				chan.playback_buf->increment_write_ptr (vector.len[0] + vector.len[1]);
+				chan->playback_buf->increment_write_ptr (vector.len[0] + vector.len[1]);
 			}
 			return 0;
 		}
@@ -1179,15 +1191,15 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 
 			/* at end: nothing to do but fill with silence */
 			
-			for (chan_n = 0, i = channels.begin(); i != channels.end(); ++i, ++chan_n) {
+			for (chan_n = 0, i = c->begin(); i != c->end(); ++i, ++chan_n) {
 					
-				ChannelInfo& chan (*i);
-				chan.playback_buf->get_write_vector (&vector);
+				ChannelInfo* chan (*i);
+				chan->playback_buf->get_write_vector (&vector);
 				memset (vector.buf[0], 0, sizeof(Sample) * vector.len[0]);
 				if (vector.len[1]) {
 					memset (vector.buf[1], 0, sizeof(Sample) * vector.len[1]);
 				}
-				chan.playback_buf->increment_write_ptr (vector.len[0] + vector.len[1]);
+				chan->playback_buf->increment_write_ptr (vector.len[0] + vector.len[1]);
 			}
 			return 0;
 		}
@@ -1206,14 +1218,14 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 	
 	nframes_t file_frame_tmp = 0;
 
-	for (chan_n = 0, i = channels.begin(); i != channels.end(); ++i, ++chan_n) {
+	for (chan_n = 0, i = c->begin(); i != c->end(); ++i, ++chan_n) {
 
-		ChannelInfo& chan (*i);
+		ChannelInfo* chan (*i);
 		Sample* buf1;
 		Sample* buf2;
 		nframes_t len1, len2;
 
-		chan.playback_buf->get_write_vector (&vector);
+		chan->playback_buf->get_write_vector (&vector);
 
 		if (vector.len[0] > disk_io_chunk_frames) {
 			
@@ -1256,7 +1268,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 				goto out;
 			}
 
-			chan.playback_buf->increment_write_ptr (to_read);
+			chan->playback_buf->increment_write_ptr (to_read);
 			ts -= to_read;
 		}
 
@@ -1273,7 +1285,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 				goto out;
 			}
 		
-			chan.playback_buf->increment_write_ptr (to_read);
+			chan->playback_buf->increment_write_ptr (to_read);
 		}
 
 		if (zero_fill) {
@@ -1315,9 +1327,10 @@ AudioDiskstream::do_flush (Session::RunContext context, bool force_flush)
 	vector.buf[0] = 0;
 	vector.buf[1] = 0;
 
-	for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
+	boost::shared_ptr<ChannelList> c = channels.reader();
+	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 	
-		(*chan).capture_buf->get_read_vector (&vector);
+		(*chan)->capture_buf->get_read_vector (&vector);
 
 		total = vector.len[0] + vector.len[1];
 
@@ -1346,7 +1359,7 @@ AudioDiskstream::do_flush (Session::RunContext context, bool force_flush)
 		// important that we get this after the capture buf
 
 		if (destructive()) {
-			(*chan).capture_transition_buf->get_read_vector(&transvec);
+			(*chan)->capture_transition_buf->get_read_vector(&transvec);
 			size_t transcount = transvec.len[0] + transvec.len[1];
 			bool have_start = false;
 			size_t ti;
@@ -1357,8 +1370,8 @@ AudioDiskstream::do_flush (Session::RunContext context, bool force_flush)
 				if (captrans.type == CaptureStart) {
 					// by definition, the first data we got above represents the given capture pos
 
-					(*chan).write_source->mark_capture_start (captrans.capture_val);
-					(*chan).curr_capture_cnt = 0;
+					(*chan)->write_source->mark_capture_start (captrans.capture_val);
+					(*chan)->curr_capture_cnt = 0;
 
 					have_start = true;
 				}
@@ -1366,17 +1379,17 @@ AudioDiskstream::do_flush (Session::RunContext context, bool force_flush)
 
 					// capture end, the capture_val represents total frames in capture
 
-					if (captrans.capture_val <= (*chan).curr_capture_cnt + to_write) {
+					if (captrans.capture_val <= (*chan)->curr_capture_cnt + to_write) {
 
 						// shorten to make the write a perfect fit
-						uint32_t nto_write = (captrans.capture_val - (*chan).curr_capture_cnt); 
+						uint32_t nto_write = (captrans.capture_val - (*chan)->curr_capture_cnt); 
 
 						if (nto_write < to_write) {
 							ret = 1; // should we?
 						}
 						to_write = nto_write;
 
-						(*chan).write_source->mark_capture_end ();
+						(*chan)->write_source->mark_capture_end ();
 						
 						// increment past this transition, but go no further
 						++ti;
@@ -1391,17 +1404,17 @@ AudioDiskstream::do_flush (Session::RunContext context, bool force_flush)
 			}
 
 			if (ti > 0) {
-				(*chan).capture_transition_buf->increment_read_ptr(ti);
+				(*chan)->capture_transition_buf->increment_read_ptr(ti);
 			}
 		}
 
-		if ((!(*chan).write_source) || (*chan).write_source->write (vector.buf[0], to_write) != to_write) {
+		if ((!(*chan)->write_source) || (*chan)->write_source->write (vector.buf[0], to_write) != to_write) {
 			error << string_compose(_("AudioDiskstream %1: cannot write to disk"), _id) << endmsg;
 			return -1;
 		}
 
-		(*chan).capture_buf->increment_read_ptr (to_write);
-		(*chan).curr_capture_cnt += to_write;
+		(*chan)->capture_buf->increment_read_ptr (to_write);
+		(*chan)->curr_capture_cnt += to_write;
 		
 		if ((to_write == vector.len[0]) && (total > to_write) && (to_write < disk_io_chunk_frames) && !destructive()) {
 		
@@ -1412,15 +1425,15 @@ AudioDiskstream::do_flush (Session::RunContext context, bool force_flush)
 			
 			to_write = min ((nframes_t)(disk_io_chunk_frames - to_write), (nframes_t) vector.len[1]);
 
-			if ((*chan).write_source->write (vector.buf[1], to_write) != to_write) {
+			if ((*chan)->write_source->write (vector.buf[1], to_write) != to_write) {
 				error << string_compose(_("AudioDiskstream %1: cannot write to disk"), _id) << endmsg;
 				return -1;
 			}
 
-			_write_data_count += (*chan).write_source->write_data_count();
+			_write_data_count += (*chan)->write_source->write_data_count();
 	
-			(*chan).capture_buf->increment_read_ptr (to_write);
-			(*chan).curr_capture_cnt += to_write;
+			(*chan)->capture_buf->increment_read_ptr (to_write);
+			(*chan)->curr_capture_cnt += to_write;
 		}
 	}
 
@@ -1440,10 +1453,11 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 	SourceList::iterator src;
 	ChannelList::iterator chan;
 	vector<CaptureInfo*>::iterator ci;
+	boost::shared_ptr<ChannelList> c = channels.reader();
 	uint32_t n = 0; 
 	bool mark_write_completed = false;
 
-	finish_capture (true);
+	finish_capture (true, c);
 
 	/* butler is already stopped, but there may be work to do 
 	   to flush remaining data to disk.
@@ -1475,13 +1489,13 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 			goto outout;
 		}
 
-		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
+		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 
-			if ((*chan).write_source) {
+			if ((*chan)->write_source) {
 				
-				(*chan).write_source->mark_for_remove ();
-				(*chan).write_source->drop_references ();
-				(*chan).write_source.reset ();
+				(*chan)->write_source->mark_for_remove ();
+				(*chan)->write_source->drop_references ();
+				(*chan)->write_source.reset ();
 			}
 			
 			/* new source set up in "out" below */
@@ -1496,9 +1510,9 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 
 	/* figure out the name for this take */
 
-	for (n = 0, chan = channels.begin(); chan != channels.end(); ++chan, ++n) {
+	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
 
-		boost::shared_ptr<AudioFileSource> s = (*chan).write_source;
+		boost::shared_ptr<AudioFileSource> s = (*chan)->write_source;
 		
 		if (s) {
 			srcs.push_back (s);
@@ -1523,7 +1537,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 	} else {
 
 		string whole_file_region_name;
-		whole_file_region_name = region_name_from_path (channels[0].write_source->name(), true);
+		whole_file_region_name = region_name_from_path (c->front()->write_source->name(), true);
 
 		/* Register a new region with the Session that
 		   describes the entire source. Do this first
@@ -1532,7 +1546,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 		*/
 		
 		try {
-			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, channels[0].write_source->last_capture_start_frame(), total_capture, 
+			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, c->front()->write_source->last_capture_start_frame(), total_capture, 
 									     whole_file_region_name,
 									     0, AudioRegion::Flag (AudioRegion::DefaultFlags|AudioRegion::Automatic|AudioRegion::WholeFile)));
 
@@ -1553,7 +1567,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
                 XMLNode &before = _playlist->get_state();
 		_playlist->freeze ();
 		
-		for (buffer_position = channels[0].write_source->last_capture_start_frame(), ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
+		for (buffer_position = c->front()->write_source->last_capture_start_frame(), ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 			
 			string region_name;
 
@@ -1603,7 +1617,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 }
 
 void
-AudioDiskstream::finish_capture (bool rec_monitors_input)
+AudioDiskstream::finish_capture (bool rec_monitors_input, boost::shared_ptr<ChannelList> c)
 {
 	was_recording = false;
 	
@@ -1612,16 +1626,16 @@ AudioDiskstream::finish_capture (bool rec_monitors_input)
 	}
 
 	if (recordable() && destructive()) {
-		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
+		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 			
 			RingBufferNPT<CaptureTransition>::rw_vector transvec;
-			(*chan).capture_transition_buf->get_write_vector(&transvec);
+			(*chan)->capture_transition_buf->get_write_vector(&transvec);
 			
 			
 			if (transvec.len[0] > 0) {
 				transvec.buf[0]->type = CaptureEnd;
 				transvec.buf[0]->capture_val = capture_captured;
-				(*chan).capture_transition_buf->increment_write_ptr(1);
+				(*chan)->capture_transition_buf->increment_write_ptr(1);
 			}
 			else {
 				// bad!
@@ -1664,7 +1678,7 @@ AudioDiskstream::set_record_enabled (bool yn)
 		return;
 	}
 
-	if (yn && channels[0].source == 0) {
+	if (yn && channels.reader()->front()->source == 0) {
 
 		/* pick up connections not initiated *from* the IO object
 		   we're associated with.
@@ -1689,23 +1703,24 @@ AudioDiskstream::set_record_enabled (bool yn)
 void
 AudioDiskstream::engage_record_enable ()
 {
-    bool rolling = _session.transport_speed() != 0.0f;
+	bool rolling = _session.transport_speed() != 0.0f;
+	boost::shared_ptr<ChannelList> c = channels.reader();
 
 	g_atomic_int_set (&_record_enabled, 1);
 	capturing_sources.clear ();
 
 	if (Config->get_monitoring_model() == HardwareMonitoring) {
 
-		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
-			if ((*chan).source) {
-				(*chan).source->ensure_monitor_input (!(Config->get_auto_input() && rolling));
+		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+			if ((*chan)->source) {
+				(*chan)->source->ensure_monitor_input (!(Config->get_auto_input() && rolling));
 			}
-			capturing_sources.push_back ((*chan).write_source);
+			capturing_sources.push_back ((*chan)->write_source);
 		}
 		
 	} else {
-		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
-			capturing_sources.push_back ((*chan).write_source);
+		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+			capturing_sources.push_back ((*chan)->write_source);
 		}
 	}
 
@@ -1716,10 +1731,11 @@ void
 AudioDiskstream::disengage_record_enable ()
 {
 	g_atomic_int_set (&_record_enabled, 0);
-	for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
+	boost::shared_ptr<ChannelList> c = channels.reader();
+	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 		if (Config->get_monitoring_model() == HardwareMonitoring) {
-			if ((*chan).source) {
-				(*chan).source->ensure_monitor_input (false);
+			if ((*chan)->source) {
+				(*chan)->source->ensure_monitor_input (false);
 			}
 		}
 	}
@@ -1733,10 +1749,11 @@ AudioDiskstream::get_state ()
 	XMLNode* node = new XMLNode ("AudioDiskstream");
 	char buf[64] = "";
 	LocaleGuard lg (X_("POSIX"));
+	boost::shared_ptr<ChannelList> c = channels.reader();
 
 	node->add_property ("flags", enum_2_string (_flags));
 
-	snprintf (buf, sizeof(buf), "%zd", channels.size());
+	snprintf (buf, sizeof(buf), "%zd", c->size());
 	node->add_property ("channels", buf);
 
 	node->add_property ("playlist", _playlist->name());
@@ -1831,21 +1848,15 @@ AudioDiskstream::set_state (const XMLNode& node)
 	// create necessary extra channels
 	// we are always constructed with one and we always need one
 
+	_n_channels = channels.reader()->size();
+	
 	if (nchans > _n_channels) {
 
-		int diff = nchans - channels.size();
-
-		for (int i=0; i < diff; ++i) {
-			add_channel ();
-		}
+		add_channel (nchans - _n_channels);
 
 	} else if (nchans < _n_channels) {
 
-		int diff = channels.size() - nchans;
-		
-		for (int i = 0; i < diff; ++i) {
-			remove_channel ();
-		}
+		remove_channel (_n_channels - nchans);
 	}
 
 	if ((prop = node.property ("playlist")) == 0) {
@@ -1881,8 +1892,6 @@ AudioDiskstream::set_state (const XMLNode& node)
 		}
 	}
 
-	_n_channels = channels.size();
-
 	in_set_state = false;
 
 	/* make sure this is clear before we do anything else */
@@ -1901,38 +1910,40 @@ AudioDiskstream::set_state (const XMLNode& node)
 int
 AudioDiskstream::use_new_write_source (uint32_t n)
 {
+	boost::shared_ptr<ChannelList> c = channels.reader();
+
 	if (!recordable()) {
 		return 1;
 	}
 
-	if (n >= channels.size()) {
+	if (n >= c->size()) {
 		error << string_compose (_("AudioDiskstream: channel %1 out of range"), n) << endmsg;
 		return -1;
 	}
 
-	ChannelInfo &chan = channels[n];
+	ChannelInfo* chan = (*c)[n];
 	
-	if (chan.write_source) {
-		chan.write_source->done_with_peakfile_writes ();
-		chan.write_source->set_allow_remove_if_empty (true);
-		chan.write_source.reset ();
+	if (chan->write_source) {
+		chan->write_source->done_with_peakfile_writes ();
+		chan->write_source->set_allow_remove_if_empty (true);
+		chan->write_source.reset ();
 	}
 
 	try {
-		if ((chan.write_source = _session.create_audio_source_for_session (*this, n, destructive())) == 0) {
+		if ((chan->write_source = _session.create_audio_source_for_session (*this, n, destructive())) == 0) {
 			throw failed_constructor();
 		}
 	} 
 
 	catch (failed_constructor &err) {
 		error << string_compose (_("%1:%2 new capture file not initialized correctly"), _name, n) << endmsg;
-		chan.write_source.reset ();
+		chan->write_source.reset ();
 		return -1;
 	}
 
 	/* do not remove destructive files even if they are empty */
 
-	chan.write_source->set_allow_remove_if_empty (!destructive());
+	chan->write_source->set_allow_remove_if_empty (!destructive());
 
 	return 0;
 }
@@ -1941,6 +1952,7 @@ void
 AudioDiskstream::reset_write_sources (bool mark_write_complete, bool force)
 {
 	ChannelList::iterator chan;
+	boost::shared_ptr<ChannelList> c = channels.reader();
 	uint32_t n;
 
 	if (!recordable()) {
@@ -1949,20 +1961,20 @@ AudioDiskstream::reset_write_sources (bool mark_write_complete, bool force)
 	
 	capturing_sources.clear ();
 
-	for (chan = channels.begin(), n = 0; chan != channels.end(); ++chan, ++n) {
+	for (chan = c->begin(), n = 0; chan != c->end(); ++chan, ++n) {
 		if (!destructive()) {
 
-			if ((*chan).write_source && mark_write_complete) {
-				(*chan).write_source->mark_streaming_write_completed ();
+			if ((*chan)->write_source && mark_write_complete) {
+				(*chan)->write_source->mark_streaming_write_completed ();
 			}
 			use_new_write_source (n);
 
 			if (record_enabled()) {
-				capturing_sources.push_back ((*chan).write_source);
+				capturing_sources.push_back ((*chan)->write_source);
 			}
 
 		} else {
-			if ((*chan).write_source == 0) {
+			if ((*chan)->write_source == 0) {
 				use_new_write_source (n);
 			}
 		}
@@ -1984,11 +1996,12 @@ int
 AudioDiskstream::rename_write_sources ()
 {
 	ChannelList::iterator chan;
+	boost::shared_ptr<ChannelList> c = channels.reader();
 	uint32_t n;
 
-	for (chan = channels.begin(), n = 0; chan != channels.end(); ++chan, ++n) {
-		if ((*chan).write_source != 0) {
-			(*chan).write_source->set_name (_name, destructive());
+	for (chan = c->begin(), n = 0; chan != c->end(); ++chan, ++n) {
+		if ((*chan)->write_source != 0) {
+			(*chan)->write_source->set_name (_name, destructive());
 			/* XXX what to do if one of them fails ? */
 		}
 	}
@@ -2001,10 +2014,11 @@ AudioDiskstream::set_block_size (nframes_t nframes)
 {
 	if (_session.get_block_size() > speed_buffer_size) {
 		speed_buffer_size = _session.get_block_size();
+		boost::shared_ptr<ChannelList> c = channels.reader();
 
-		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
-			if ((*chan).speed_buffer) delete [] (*chan).speed_buffer;
-			(*chan).speed_buffer = new Sample[speed_buffer_size];
+		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+			if ((*chan)->speed_buffer) delete [] (*chan)->speed_buffer;
+			(*chan)->speed_buffer = new Sample[speed_buffer_size];
 		}
 	}
 	allocate_temporary_buffers ();
@@ -2023,11 +2037,13 @@ AudioDiskstream::allocate_temporary_buffers ()
 
 	if (required_wrap_size > wrap_buffer_size) {
 
-		for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
-			if ((*chan).playback_wrap_buffer) delete [] (*chan).playback_wrap_buffer;
-			(*chan).playback_wrap_buffer = new Sample[required_wrap_size];	
-			if ((*chan).capture_wrap_buffer) delete [] (*chan).capture_wrap_buffer;
-			(*chan).capture_wrap_buffer = new Sample[required_wrap_size];	
+		boost::shared_ptr<ChannelList> c = channels.reader();
+
+		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+			if ((*chan)->playback_wrap_buffer) delete [] (*chan)->playback_wrap_buffer;
+			(*chan)->playback_wrap_buffer = new Sample[required_wrap_size];	
+			if ((*chan)->capture_wrap_buffer) delete [] (*chan)->capture_wrap_buffer;
+			(*chan)->capture_wrap_buffer = new Sample[required_wrap_size];	
 		}
 
 		wrap_buffer_size = required_wrap_size;
@@ -2037,10 +2053,12 @@ AudioDiskstream::allocate_temporary_buffers ()
 void
 AudioDiskstream::monitor_input (bool yn)
 {
-	for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
+	boost::shared_ptr<ChannelList> c = channels.reader();
+
+	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 		
-		if ((*chan).source) {
-			(*chan).source->ensure_monitor_input (yn);
+		if ((*chan)->source) {
+			(*chan)->source->ensure_monitor_input (yn);
 		}
 	}
 }
@@ -2056,8 +2074,10 @@ AudioDiskstream::set_align_style_from_io ()
 
 	get_input_sources ();
 	
-	for (ChannelList::iterator chan = channels.begin(); chan != channels.end(); ++chan) {
-		if ((*chan).source && (*chan).source->flags() & JackPortIsPhysical) {
+	boost::shared_ptr<ChannelList> c = channels.reader();
+
+	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+		if ((*chan)->source && (*chan)->source->flags() & JackPortIsPhysical) {
 			have_physical = true;
 			break;
 		}
@@ -2071,55 +2091,64 @@ AudioDiskstream::set_align_style_from_io ()
 }
 
 int
-AudioDiskstream::add_channel ()
+AudioDiskstream::add_channel_to (boost::shared_ptr<ChannelList> c, uint32_t how_many)
 {
-	/* XXX need to take lock??? */
+	while (how_many--) {
+		c->push_back (new ChannelInfo(_session.diskstream_buffer_size(), speed_buffer_size, wrap_buffer_size));
+	}
 
-	/* this copies the ChannelInfo, which currently has no buffers. kind
-	   of pointless really, but we want the channels list to contain
-	   actual objects, not pointers to objects. mostly for convenience,
-	   which isn't much in evidence.
-	*/
-
-	channels.push_back (ChannelInfo());
-
-	/* now allocate the buffers */
-
-	channels.back().init (_session.diskstream_buffer_size(), 
-			      speed_buffer_size,
-			      wrap_buffer_size);
-
-	_n_channels = channels.size();
+	_n_channels = c->size();
 
 	return 0;
 }
 
 int
-AudioDiskstream::remove_channel ()
+AudioDiskstream::add_channel (uint32_t how_many)
 {
-	if (channels.size() > 1) {
-		/* XXX need to take lock??? */
-		channels.back().release ();
-		channels.pop_back();
-		_n_channels = channels.size();
-		return 0;
+	RCUWriter<ChannelList> writer (channels);
+	boost::shared_ptr<ChannelList> c = writer.get_copy();
+
+	return add_channel_to (c, how_many);
+}
+
+int
+AudioDiskstream::remove_channel_from (boost::shared_ptr<ChannelList> c, uint32_t how_many)
+{
+	while (--how_many && !c->empty()) {
+		delete c->back();
+		c->pop_back();
 	}
 
-	return -1;
+	_n_channels = c->size();
+
+	return 0;
+}
+
+int
+AudioDiskstream::remove_channel (uint32_t how_many)
+{
+	RCUWriter<ChannelList> writer (channels);
+	boost::shared_ptr<ChannelList> c = writer.get_copy();
+	
+	return remove_channel_from (c, how_many);
 }
 
 float
 AudioDiskstream::playback_buffer_load () const
 {
-	return (float) ((double) channels.front().playback_buf->read_space()/
-			(double) channels.front().playback_buf->bufsize());
+	boost::shared_ptr<ChannelList> c = channels.reader();
+
+	return (float) ((double) c->front()->playback_buf->read_space()/
+			(double) c->front()->playback_buf->bufsize());
 }
 
 float
 AudioDiskstream::capture_buffer_load () const
 {
-	return (float) ((double) channels.front().capture_buf->write_space()/
-			(double) channels.front().capture_buf->bufsize());
+	boost::shared_ptr<ChannelList> c = channels.reader();
+
+	return (float) ((double) c->front()->capture_buf->write_space()/
+			(double) c->front()->capture_buf->bufsize());
 }
 
 int
@@ -2281,24 +2310,14 @@ AudioDiskstream::can_become_destructive (bool& requires_bounce) const
 	return true;
 }
 
-AudioDiskstream::ChannelInfo::ChannelInfo ()
+AudioDiskstream::ChannelInfo::ChannelInfo (nframes_t bufsize, nframes_t speed_size, nframes_t wrap_size)
 {
-	playback_wrap_buffer = 0;
-	capture_wrap_buffer = 0;
-	speed_buffer = 0;
 	peak_power = 0.0f;
 	source = 0;
 	current_capture_buffer = 0;
 	current_playback_buffer = 0;
 	curr_capture_cnt = 0;
-	playback_buf = 0;
-	capture_buf = 0;
-	capture_transition_buf = 0;
-}
 
-void
-AudioDiskstream::ChannelInfo::init (nframes_t bufsize, nframes_t speed_size, nframes_t wrap_size)
-{
 	speed_buffer = new Sample[speed_size];
 	playback_wrap_buffer = new Sample[wrap_size];
 	capture_wrap_buffer = new Sample[wrap_size];
@@ -2319,11 +2338,6 @@ AudioDiskstream::ChannelInfo::init (nframes_t bufsize, nframes_t speed_size, nfr
 }
 
 AudioDiskstream::ChannelInfo::~ChannelInfo ()
-{
-}
-
-void
-AudioDiskstream::ChannelInfo::release ()
 {
 	if (write_source) {
 		write_source.reset ();

@@ -165,7 +165,6 @@ class Session : public PBD::StatefulDestructible
 	    };
 
 	    boost::shared_ptr<Region>     region;
-	    boost::shared_ptr<Diskstream> diskstream;
 
 	    list<AudioRange>     audio_range;
 	    list<MusicRange>     music_range;
@@ -362,7 +361,7 @@ class Session : public PBD::StatefulDestructible
 	void request_transport_speed (float speed);
 	void request_overwrite_buffer (Diskstream*);
 	void request_diskstream_speed (Diskstream&, float speed);
-	void request_input_change_handling (boost::shared_ptr<ARDOUR::Diskstream>);
+	void request_input_change_handling ();
 
 	bool locate_pending() const { return static_cast<bool>(post_transport_work&PostTransportLocate); }
 	bool transport_locked () const;
@@ -1425,7 +1424,6 @@ class Session : public PBD::StatefulDestructible
 	/* disk-streams */
 
 	SerializedRCUManager<DiskstreamList>  diskstreams; 
-	SerializedRCUManager<DiskstreamList>  diskstreams_input_pending; 
 
 	uint32_t dstream_buffer_size;
 	int  load_diskstreams (const XMLNode&);

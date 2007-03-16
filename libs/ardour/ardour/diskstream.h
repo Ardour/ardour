@@ -21,7 +21,6 @@
 #define __ardour_diskstream_h__
 
 #include <sigc++/signal.h>
-#include <boost/enable_shared_from_this.hpp>
 
 #include <cmath>
 #include <string>
@@ -54,7 +53,7 @@ class Session;
 class Playlist;
 class IO;
 
-class Diskstream : public PBD::StatefulDestructible, public boost::enable_shared_from_this<ARDOUR::Diskstream>
+class Diskstream : public PBD::StatefulDestructible
 {	
   public:
 	enum Flag {
@@ -207,7 +206,6 @@ class Diskstream : public PBD::StatefulDestructible, public boost::enable_shared
 	virtual void playlist_modified ();
 	virtual void playlist_deleted (boost::weak_ptr<Playlist>);
 
-	virtual void finish_capture (bool rec_monitors_input) = 0;
 	virtual void transport_stopped (struct tm&, time_t, bool abort) = 0;
 
 	struct CaptureInfo {

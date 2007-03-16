@@ -269,7 +269,6 @@ Session::Session (AudioEngine &eng,
 	  pending_events (2048),
 	  midi_requests (128), // the size of this should match the midi request pool size
 	  diskstreams (new DiskstreamList),
-	  diskstreams_input_pending (new DiskstreamList),
 	  routes (new RouteList),
 	  auditioner ((Auditioner*) 0),
 	  _click_io ((IO*) 0),
@@ -333,7 +332,6 @@ Session::Session (AudioEngine &eng,
 	  pending_events (2048),
 	  midi_requests (16),
 	  diskstreams (new DiskstreamList),
-	  diskstreams_input_pending (new DiskstreamList),
 	  routes (new RouteList),
 	  main_outs (0)
 
@@ -2008,7 +2006,7 @@ Session::add_diskstream (boost::shared_ptr<Diskstream> dstream)
 	
 	dstream->set_block_size (current_block_size);
 
-	if (_state_of_the_state & InitialConnecting) {
+	{
 		RCUWriter<DiskstreamList> writer (diskstreams);
 		boost::shared_ptr<DiskstreamList> ds = writer.get_copy();
 		ds->push_back (dstream);
@@ -3387,11 +3385,7 @@ Session::graph_reordered ()
 	   we were connecting. do it now.
 	*/
 
-	boost::shared_ptr<DiskstreamList> ds = diskstreams.reader();
-	
-	for (DiskstreamList::iterator i = ds->begin(); i != ds->end(); ++i) {
-		request_input_change_handling (*i);
-	}
+	request_input_change_handling ();
 
 	resort_routes ();
 

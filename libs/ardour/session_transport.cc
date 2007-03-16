@@ -49,11 +49,10 @@ using namespace sigc;
 using namespace PBD;
 
 void
-Session::request_input_change_handling (boost::shared_ptr<Diskstream> ds)
+Session::request_input_change_handling ()
 {
 	if (!(_state_of_the_state & (InitialConnecting|Deletion))) {
 		Event* ev = new Event (Event::InputConfigurationChange, Event::Add, Event::Immediate, 0, 0.0);
-		ev->diskstream = ds;
 		queue_event (ev);
 	}
 }
@@ -197,27 +196,9 @@ Session::butler_transport_work ()
 	}
 
 	if (post_transport_work & PostTransportInputChange) {
-		{
-			RCUWriter<DiskstreamList> input_writer (diskstreams_input_pending);
-			boost::shared_ptr<DiskstreamList> input_list = input_writer.get_copy ();
-			RCUWriter<DiskstreamList> dswriter (diskstreams);
-			boost::shared_ptr<DiskstreamList> ds = dswriter.get_copy();
-
-			for (DiskstreamList::iterator i = input_list->begin(); i != input_list->end(); ++i) {
-
-				/* make the change */
-				
-				(*i)->non_realtime_input_change ();
-
-				/* now transfer it back onto the regular diskstreams list */
-
-				ds->push_back (*i);
-			}
-			
-			input_list->clear();
+		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
+			(*i)->non_realtime_input_change ();
 		}
-
-		diskstreams_input_pending.flush ();
 	}
 
 	if (post_transport_work & PostTransportSpeed) {

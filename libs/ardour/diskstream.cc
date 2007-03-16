@@ -143,7 +143,7 @@ Diskstream::handle_input_change (IOChange change, void *src)
 
 	if (!(input_change_pending & change)) {
 		input_change_pending = IOChange (input_change_pending|change);
-		_session.request_input_change_handling (shared_from_this());
+		_session.request_input_change_handling ();
 	}
 }
 
