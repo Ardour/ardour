@@ -318,6 +318,6 @@ env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ar
 env.Alias('version', ardour.VersionBuild(['version.cc', 'ardour/version.h'], []))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
-				     [ 'SConscript', 'i18n.h', 'gettext.h', 'sse_functions.s', 'sse_functions_64bit.s' ] +
+				     [ 'SConscript', 'i18n.h', 'gettext.h', 'sse_functions_xmm.cc', 'sse_functions.s', 'sse_functions_64bit.s' ] +
 				     ardour_files + osc_files + vst_files + coreaudio_files + audiounit_files +
 				     glob.glob('po/*.po') + glob.glob('ardour/*.h')))

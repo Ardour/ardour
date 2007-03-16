@@ -333,7 +333,7 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
 					'ardour.sh.in',
 					'ardev_common.sh.in',
                                         'ardour2_ui.rc', 'splash.png',
-                                        'ardour.menus', 'ardour.bindings', 'ardour.colors',
+                                        'ardour.menus', 'ardour.bindings.in', 'ardour.colors',
 					'editor_xpms'
                                         ] +
                                       gtkardour_files +
