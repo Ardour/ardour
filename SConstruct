@@ -1082,7 +1082,7 @@ subst_dict['%REVISION_STRING%'] = ''
 if os.path.exists('.svn'):
     subst_dict['%REVISION_STRING%'] = '.' + fetch_svn_revision ('.') + 'svn'
 
-specbuild = env.SubstInFile ('ardour.spec','ardour.spec.in', SUBST_DICT = subst_dict)
+# specbuild = env.SubstInFile ('ardour.spec','ardour.spec.in', SUBST_DICT = subst_dict)
 
 the_revision = env.Command ('frobnicatory_decoy', [], create_stored_revision)
 
@@ -1100,7 +1100,6 @@ env.Distribute (env['DISTTREE'],
                [ 'SConstruct', 'svn_revision.h',
                   'COPYING', 'PACKAGER_README', 'README',
                   'ardour.rc.in',
-                  'ardour.spec',
                   'ardour_system.rc',
                   'tools/config.guess',
                   'icons/icon/ardour_icon_mac_mask.png',
