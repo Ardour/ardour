@@ -178,7 +178,7 @@ TranzportControlProtocol::monitor_work ()
 	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);
 	rtpriority_set();
 	inflight=0;
-	int intro = 20;
+	//int intro = 20;
 
 	// wait for the device to come online
 	invalidate();
