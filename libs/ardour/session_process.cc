@@ -284,7 +284,7 @@ Session::process_with_events (nframes_t nframes)
 		return;
 	}
 
-	end_frame = _transport_frame + nframes;
+	end_frame = _transport_frame + (nframes_t)abs(floor(nframes * _transport_speed));
 
 	{
 		Event* this_event;
@@ -330,20 +330,15 @@ Session::process_with_events (nframes_t nframes)
 
 		while (nframes) {
 
-			if (this_event == 0 || this_event->action_frame > end_frame || this_event->action_frame < _transport_frame) {
+			this_nframes = nframes; /* real (jack) time relative */
+			frames_moved = (long) floor (_transport_speed * nframes); /* transport relative */
 
-				this_nframes = nframes;
-				
-			} else {
-				
-				/* compute nframes to next event */
-
-				if (this_event->action_frame < end_frame) {
-					this_nframes = nframes - (end_frame - this_event->action_frame);
-				} else {
-					this_nframes = nframes;
-				}
-			}
+			/* running an event, position transport precisely to its time */
+			if (this_event && this_event->action_frame <= end_frame && this_event->action_frame >= _transport_frame) {
+				/* this isn't quite right for reverse play */
+				frames_moved = (long) (this_event->action_frame - _transport_frame);
+				this_nframes = (nframes_t) abs( floor(frames_moved / _transport_speed) );
+			} 
 
 			if (this_nframes) {
 				
@@ -362,8 +357,6 @@ Session::process_with_events (nframes_t nframes)
 				nframes -= this_nframes;
 				offset += this_nframes;
 				
-				frames_moved = (nframes_t) floor (_transport_speed * this_nframes);
-			
 				if (frames_moved < 0) {
 					decrement_transport_position (-frames_moved);
 				} else {
@@ -395,8 +388,7 @@ Session::process_with_events (nframes_t nframes)
 			}
 
 			/* this is necessary to handle the case of seamless looping */
-			/* not sure if it will work in conjuction with varispeed */
-			end_frame = _transport_frame + nframes;
+			end_frame = _transport_frame + (nframes_t) floor (nframes * _transport_speed);
 			
 		}
 
