@@ -1717,7 +1717,7 @@ ARDOUR_UI::save_template ()
 	}
 }
 
-void
+bool
 ARDOUR_UI::new_session (std::string predetermined_path)
 {
 	string session_name;
@@ -1726,7 +1726,7 @@ ARDOUR_UI::new_session (std::string predetermined_path)
 	if (!engine->connected()) {
 		MessageDialog msg (_("Ardour is not connected to JACK at this time. Creating new sessions is not possible."));
 		msg.run ();
-		return;
+		return false;
 	}
 
 	int response = Gtk::RESPONSE_NONE;
@@ -1743,7 +1743,7 @@ ARDOUR_UI::new_session (std::string predetermined_path)
 			new_session_dialog->hide ();
 			MessageDialog msg (_("Ardour is not connected to JACK at this time. Creating new sessions is not possible."));
 			msg.run ();
-			return;
+			return false;
 		}
 		
 		_session_is_new = false;
@@ -1754,7 +1754,7 @@ ARDOUR_UI::new_session (std::string predetermined_path)
 				quit();
 			}
 			new_session_dialog->hide ();
-			return;
+			return false;
 
 		} else if (response == Gtk::RESPONSE_NONE) {
 
@@ -1929,6 +1929,7 @@ ARDOUR_UI::new_session (std::string predetermined_path)
 	show();
 	new_session_dialog->get_window()->set_cursor();
 	new_session_dialog->hide();
+	return true;
 }
 
 void

@@ -127,7 +127,9 @@ maybe_load_session ()
 	if (!session_name.length()) {
 		ui->hide_splash ();
 		if (!Config->get_no_new_session_dialog()) {
-		       ui->new_session ();
+			if (!ui->new_session ()) {
+				return false;
+			}
 		}
 
 		return true;
@@ -168,7 +170,9 @@ maybe_load_session ()
 		/* Show the NSD */
 		ui->hide_splash ();
 		if (!Config->get_no_new_session_dialog()) {
-		       ui->new_session ();
+			if (!ui->new_session ()) {
+				return false;
+			}
 		}
 	}
 
