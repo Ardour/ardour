@@ -17,7 +17,9 @@
 
 */
 
+#include <glibmm/miscutils.h>
 #include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/window_title.h>
 #include <ardour/audioengine.h>
 
 #include "editor.h"
@@ -28,6 +30,8 @@
 #include "actions.h"
 
 #include "i18n.h"
+
+using namespace Gtkmm2ext;
 
 void
 Editor::editor_mixer_button_toggled ()
@@ -344,7 +348,10 @@ Editor::session_going_away ()
 
 	current_mixer_strip = 0;
 
-	set_title (_("ardour: editor"));
+	WindowTitle title(Glib::get_application_name());
+	title += _("Editor");
+
+	set_title (title.get_string());
 
 	session = 0;
 }

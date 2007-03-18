@@ -30,6 +30,7 @@
 #include <pbd/stacktrace.h>
 #include <pbd/memento_command.h>
 
+#include <glibmm/miscutils.h>
 #include <gtkmm/image.h>
 #include <gdkmm/color.h>
 #include <gdkmm/bitmap.h>
@@ -38,6 +39,7 @@
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/tearoff.h>
 #include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/window_title.h>
 
 #include <ardour/audio_track.h>
 #include <ardour/audio_diskstream.h>
@@ -708,7 +710,10 @@ Editor::Editor ()
 		set_icon_list (window_icons);
 		set_default_icon_list (window_icons);
 	}
-	set_title (_("ardour: editor"));
+
+	WindowTitle title(Glib::get_application_name());
+	title += _("Editor");
+	set_title (title.get_string());
 	set_wmclass (X_("ardour_editor"), "Ardour");
 
 	add (vpacker);
@@ -1006,24 +1011,21 @@ Editor::update_title ()
 	if (session) {
 		bool dirty = session->dirty();
 
-		string wintitle = _("ardour: editor: ");
-
-		if (dirty) {
-			wintitle += '[';
-		}
-
-		wintitle += session->name();
+		string session_name;
 
 		if (session->snap_name() != session->name()) {
-			wintitle += ':';
-			wintitle += session->snap_name();
+			session_name = session->snap_name();
+		} else {
+			session_name = session->name();
 		}
 
 		if (dirty) {
-			wintitle += ']';
+			session_name = "*" + session_name;
 		}
 
-		set_title (wintitle);
+		WindowTitle title(session_name);
+		title += Glib::get_application_name();
+		set_title (title.get_string());
 	}
 }
 
@@ -2716,6 +2718,8 @@ Editor::map_transport_state ()
 	if (session->transport_stopped()) {
 		have_pending_keyboard_selection = false;
 	}
+
+	update_loop_range_view (true);
 }
 
 /* UNDO/REDO */

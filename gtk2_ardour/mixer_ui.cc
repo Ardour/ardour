@@ -28,6 +28,7 @@
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/stop_signal.h>
+#include <gtkmm2ext/window_title.h>
 
 #include <ardour/session.h>
 #include <ardour/audio_track.h>
@@ -201,7 +202,11 @@ Mixer_UI::Mixer_UI ()
 
 	add (global_vpacker);
 	set_name ("MixerWindow");
-	set_title (_("ardour: mixer"));
+	
+	WindowTitle title(Glib::get_application_name());
+	title += _("Mixer");
+	set_title (title.get_string());
+
 	set_wmclass (X_("ardour_mixer"), "Ardour");
 
 	add_accel_group (ActionManager::ui_manager->get_accel_group());
@@ -353,9 +358,11 @@ Mixer_UI::connect_to_session (Session* sess)
 	XMLNode* node = ARDOUR_UI::instance()->mixer_settings();
 	set_state (*node);
 
-	string wintitle = _("ardour: mixer: ");
-	wintitle += session->name();
-	set_title (wintitle);
+	WindowTitle title(session->name());
+	title += _("Mixer");
+	title += Glib::get_application_name();
+
+	set_title (title.get_string());
 
 	initial_track_display ();
 
@@ -382,7 +389,11 @@ Mixer_UI::disconnect_from_session ()
 	
 	group_model->clear ();
 	_selection.clear ();
-	set_title (_("ardour: mixer"));
+
+	WindowTitle title(Glib::get_application_name());
+	title += _("Mixer");
+	set_title (title.get_string());
+	
 	stop_updating ();
 }
 

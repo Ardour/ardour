@@ -299,7 +299,7 @@ gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 			double start_y = MIN (item->y2, old_y2);
 			double end_y = MAX (item->y2, old_y2);
 
-			gnome_canvas_request_redraw (item->canvas, item->x1, start_y - 0.5, item->x2 + 0.5, end_y + 0.5);
+			gnome_canvas_request_redraw (item->canvas, item->x1, start_y - 0.5, item->x2, end_y + 1.5);
 			return;
 
 		} else if (item->y2 == old_y2) {
@@ -309,7 +309,7 @@ gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 			double start_y = MIN (item->y1, old_y1);
 			double end_y = MAX (item->y1, old_y1);
 
-			gnome_canvas_request_redraw (item->canvas, item->x1, start_y - 0.5, item->x2 + 0.5, end_y + 0.5);
+			gnome_canvas_request_redraw (item->canvas, item->x1, start_y - 0.5, item->x2, end_y + 1.5);
 			return;
 
 		}
@@ -324,7 +324,7 @@ gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 			double start_x = MIN (item->x2, old_x2);
 			double end_x = MAX (item->x2, old_x2);
 
-			gnome_canvas_request_redraw (item->canvas, start_x - 0.5, item->y1, end_x + 0.5, item->y2 + 0.5);
+			gnome_canvas_request_redraw (item->canvas, start_x - 0.5, item->y1, end_x + 1.5, item->y2);
 			return;
 
 		} else if (item->x2 == old_x2) {
@@ -334,7 +334,7 @@ gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 			double start_x = MIN (item->x1, old_x1);
 			double end_x = MAX (item->x1, old_x1);
 
-			gnome_canvas_request_redraw (item->canvas, start_x - 0.5, item->y1, end_x + 0.5, item->y2 + 0.5);
+			gnome_canvas_request_redraw (item->canvas, start_x - 0.5, item->y1, end_x + 1.5, item->y2 + 0.5);
 			return;
 
 		}
@@ -352,8 +352,8 @@ gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 
 	art_drect_union (&unionrect, &old, &new);
 	gnome_canvas_request_redraw (item->canvas, 
-				     unionrect.x0,
-				     unionrect.y0,
+				     unionrect.x0 - 0.5,
+				     unionrect.y0 - 0.5,
 				     unionrect.x1 + 0.5,
 				     unionrect.y1 + 0.5);
 }

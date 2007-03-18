@@ -32,12 +32,16 @@
 #include <gtkmm/stock.h>
 #include <gdkmm/cursor.h>
 
+#include <gtkmm2ext/window_title.h>
+
+using namespace Gtkmm2ext;
+
 #include "opts.h"
 
 NewSessionDialog::NewSessionDialog()
 	: ArdourDialog ("session control")
 {
-        session_name_label = Gtk::manage(new class Gtk::Label(_("Name :")));
+	session_name_label = Gtk::manage(new class Gtk::Label(_("Name :")));
 	m_name = Gtk::manage(new class Gtk::Entry());
 	m_name->set_text(GTK_ARDOUR::session_name);
 
@@ -338,7 +342,11 @@ NewSessionDialog::NewSessionDialog()
 	get_vbox()->set_homogeneous(false);
 	get_vbox()->set_spacing(0);
 	get_vbox()->pack_start(*m_notebook, Gtk::PACK_SHRINK, 0);
-	set_title(_("ardour: session control"));
+
+	WindowTitle title(Glib::get_application_name());
+	title += _("Session Control");
+	set_title(title.get_string());
+
 	//set_modal(false);
 	//property_window_position().set_value(Gtk::WIN_POS_NONE);
 	set_resizable(false);

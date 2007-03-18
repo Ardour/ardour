@@ -29,6 +29,8 @@
 #include <pbd/xml++.h>
 
 #include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/window_title.h>
+
 #include <ardour/export.h>
 #include <ardour/sndfile_helpers.h>
 #include <ardour/audio_track.h>
@@ -51,6 +53,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace sigc;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 
 static const gchar *sample_rates[] = {
 	N_("22.05kHz"),
@@ -117,8 +120,11 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	track_and_master_selection_allowed = true;
 	channel_count_selection_allowed = true;
 	export_cd_markers_allowed = true;
+
+	WindowTitle title(Glib::get_application_name());
+	title += _("Export");
 	
-	set_title (_("ardour: export"));
+	set_title (title.get_string());
 	set_wmclass (X_("ardour_export"), "Ardour");
 	set_name ("ExportWindow");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);

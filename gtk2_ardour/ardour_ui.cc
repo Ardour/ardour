@@ -44,6 +44,7 @@
 #include <gtkmm2ext/fastmeter.h>
 #include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/popup.h>
+#include <gtkmm2ext/window_title.h>
 
 #include <midi++/port.h>
 #include <midi++/mmc.h>
@@ -93,7 +94,7 @@ sigc::signal<void,nframes_t> ARDOUR_UI::Clock;
 
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
-	: Gtkmm2ext::UI ("ardour", argcp, argvp, rcfile),
+	: Gtkmm2ext::UI (X_("Ardour"), argcp, argvp, rcfile),
 	  
 	  primary_clock (X_("primary"), false, X_("TransportClockDisplay"), true, false, true),
 	  secondary_clock (X_("secondary"), false, X_("SecondaryClockDisplay"), true, false, true),
