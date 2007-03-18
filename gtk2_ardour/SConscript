@@ -147,7 +147,6 @@ export_range_markers_dialog.cc
 gain_automation_time_axis.cc
 gain_meter.cc
 ghostregion.cc
-grouped_buttons.cc
 gtk-custom-hruler.c
 gtk-custom-ruler.c
 imageframe.cc
@@ -276,6 +275,13 @@ rcu = gtkardour.Program(target = 'rcu', source = rcu_files)
 tt = gtkmmtests.Program(target = 'tt', source = tt_files)
 
 my_subst_dict = { }
+
+#
+# null substitution just to avoid ardour.bindings being in svn
+#
+
+ardourbindings = env.SubstInFile ('ardour.bindings', 'ardour.bindings.in', SUBST_DICT = my_subst_dict);
+
 my_subst_dict['%INSTALL_PREFIX%'] = final_prefix
 my_subst_dict['%LIBDIR%'] = env['LIBDIR']
 my_subst_dict['%VERSION%'] = ardour_version
@@ -286,6 +292,7 @@ env.AddPostAction (ardoursh, Chmod ('$TARGET', 0755))
 ardourdev = env.SubstInFile ('ardev_common.sh','ardev_common.sh.in', SUBST_DICT = my_subst_dict);
 env.AddPostAction (ardourdev, Chmod ('$TARGET', 0755))
 
+Default(ardourbindings)
 Default(ardourdev)
 Default(ardoursh)
 
@@ -329,7 +336,7 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
 					'ardour.sh.in',
 					'ardev_common.sh.in',
                                         'ardour2_ui.rc', 'splash.png',
-                                        'ardour.menus', 'ardour.bindings', 'ardour.colors',
+                                        'ardour.menus', 'ardour.bindings.in', 'ardour.colors',
 					'editor_xpms'
                                         ] +
                                       gtkardour_files +

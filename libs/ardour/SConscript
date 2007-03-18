@@ -101,6 +101,7 @@ session_state.cc
 session_time.cc
 session_timefx.cc
 session_transport.cc
+silentfilesource.cc
 sndfile_helpers.cc
 sndfilesource.cc
 source.cc
@@ -296,16 +297,29 @@ env['BUILDERS']['SharedAsmObject'] = Builder (action = '$CXX -c -fPIC $SOURCE -o
 					      suffix = '$SHOBJSUFFIX',
 					      src_suffix = '.s',
 					      single_source = 1)
+#
+# handle objects that should always be compiled with -msse in their own
+# special environment, which is exactly like "ardour" but unconditionally
+# includes -msse
+# 
+
+
+always_sse_objects = []
+sse_env = ardour.Copy()
+sse_env.Append (CXXFLAGS="-msse")
 
 if env['FPU_OPTIMIZATION']:
 	if env['DIST_TARGET'] == "i386":
 		arch_specific_objects = env.SharedAsmObject('sse_functions.os', 'sse_functions.s')
+		always_sse_objects += [ sse_env.SharedObject (source = 'sse_functions_xmm.cc') ]
 	if env['DIST_TARGET'] == "i686":
 		arch_specific_objects = env.SharedAsmObject('sse_functions.os', 'sse_functions.s')
+		always_sse_objects += [ sse_env.SharedObject (source = 'sse_functions_xmm.cc') ]
 	if env['DIST_TARGET'] == "x86_64":
 		arch_specific_objects = env.SharedAsmObject('sse_functions_64bit.os', 'sse_functions_64bit.s')
+		always_sse_objects += [ sse_env.SharedObject (source = 'sse_functions_xmm.cc') ]
 			
-libardour = ardour.SharedLibrary('ardour', ardour_files + extra_sources + arch_specific_objects)
+libardour = ardour.SharedLibrary('ardour', ardour_files + always_sse_objects + extra_sources + arch_specific_objects)
 
 Default(libardour)
 
@@ -318,6 +332,6 @@ env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ar
 env.Alias('version', ardour.VersionBuild(['version.cc', 'ardour/version.h'], []))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
-				     [ 'SConscript', 'i18n.h', 'gettext.h', 'sse_functions.s', 'sse_functions_64bit.s' ] +
+				     [ 'SConscript', 'i18n.h', 'gettext.h', 'sse_functions_xmm.cc', 'sse_functions.s', 'sse_functions_64bit.s' ] +
 				     ardour_files + osc_files + vst_files + coreaudio_files + audiounit_files +
 				     glob.glob('po/*.po') + glob.glob('ardour/*.h')))

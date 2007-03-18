@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <algorithm>
@@ -145,8 +144,13 @@ static const char* authors[] = {
 	N_("Stefan Kersten"),
 	N_("Christopher George"),
 	N_("Robert Jordens"),
+	N_("Dave Robillard"),
+	N_("Hans Fugal"),
 	N_("Brian Ahr"),
 	N_("Nimal Ratnayake"),
+	N_("Mike Täht"),
+	N_("John Anderson"),
+	N_("Nedko Arnaudov"),
 	0
 };
 

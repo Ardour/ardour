@@ -15,7 +15,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *  
- * $Id$
  */
 
 #include <iostream>
@@ -59,6 +58,11 @@ int
 OSC::start ()
 {
 	char tmpstr[255];
+
+	if (_osc_server) {
+		/* already started */
+		return 0;
+	}
 	
 	for (int j=0; j < 20; ++j) {
 		snprintf(tmpstr, sizeof(tmpstr), "%d", _port);
@@ -109,16 +113,22 @@ OSC::start ()
 int
 OSC::stop ()
 {	
+	if (_osc_server == 0) {
+		/* already stopped */
+		return 0;
+	}
+
+	// stop server thread
+	terminate_osc_thread();
+
 	lo_server_free (_osc_server);
+	_osc_server = 0;
 	
 	if (!_osc_unix_socket_path.empty()) {
 		// unlink it
 		unlink(_osc_unix_socket_path.c_str());
 	}
 	
-	// stop server thread
-	terminate_osc_thread();
-
 	return 0;
 }
 

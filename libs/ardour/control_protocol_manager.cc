@@ -43,7 +43,6 @@ ControlProtocolManager::~ControlProtocolManager()
 	}
 
 	control_protocol_info.clear();
-		
 }
 
 void
@@ -75,12 +74,11 @@ ControlProtocolManager::drop_session ()
 			delete *p;
 		}
 		control_protocols.clear ();
-
+		
 		for (list<ControlProtocolInfo*>::iterator p = control_protocol_info.begin(); p != control_protocol_info.end(); ++p) {
-			delete *p;
+			// otherwise the ControlProtocol instances are not recreated in set_session
+			(*p)->requested = true;
 		}
-
-		control_protocol_info.clear();
 	}
 }
 
@@ -105,10 +103,6 @@ ControlProtocolManager::instantiate (ControlProtocolInfo& cpi)
 
 	Glib::Mutex::Lock lm (protocols_lock);
 	control_protocols.push_back (cpi.protocol);
-
-	if (cpi.state) {
-		cpi.protocol->set_state (*cpi.state);
-	}
 
 	return cpi.protocol;
 }
@@ -297,7 +291,6 @@ ControlProtocolManager::set_state (const XMLNode& node)
 				if ((prop = (*citer)->property (X_("name"))) != 0) {
 					ControlProtocolInfo* cpi = cpi_by_name (prop->value());
 					if (cpi) {
-
 						if (!(*citer)->children().empty()) {
 							cpi->state = (*citer)->children().front ();
 						} else {

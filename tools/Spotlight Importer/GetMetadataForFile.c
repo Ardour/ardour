@@ -9,6 +9,7 @@
    an array of Uniform Type Identifiers (UTI) for the LSItemContentTypes 
    that your importer can handle
   
+   (DONE)
    ----------------------------------------------------------------------------- */
 
 /* -----------------------------------------------------------------------------

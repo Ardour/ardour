@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <algorithm>
@@ -56,9 +55,8 @@ using namespace PBD;
 using namespace Gtk;
 using namespace sigc;
 
-RouteParams_UI::RouteParams_UI (AudioEngine& eng)
+RouteParams_UI::RouteParams_UI ()
 	: ArdourDialog ("track/bus inspector"),
-	  engine (eng),
 	  track_menu(0)
 {
 	pre_redirect_box = 0;
@@ -508,7 +506,7 @@ RouteParams_UI::show_track_menu()
 		track_menu->set_name ("ArdourContextMenu");
 		track_menu->items().push_back 
 				(MenuElem (_("Add Track/Bus"), 
-					   mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::add_route)));
+					   bind (mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::add_route), (Gtk::Window*) 0)));
 	}
 	track_menu->popup (1, gtk_get_current_event_time());
 }

@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <algorithm>
@@ -24,11 +23,13 @@
 #include <cassert>
 
 #include "editor.h"
+#include "keyboard.h"
 #include "ardour_ui.h"
 #include "audio_time_axis.h"
 #include "midi_time_axis.h"
 #include "mixer_strip.h"
 #include "gui_thread.h"
+#include "actions.h"
 
 #include <pbd/unknown_type.h>
 
@@ -56,7 +57,7 @@ Editor::handle_new_route (Session::RouteList& routes)
 		boost::shared_ptr<Route> route = (*x);
 
 		if (route->hidden()) {
-			return;
+			continue;
 		}
 		
 		if (route->default_type() == ARDOUR::DataType::AUDIO)
@@ -157,9 +158,10 @@ Editor::remove_route (TimeAxisView *tv)
 		}
 	}
 	/* since the editor mixer goes away when you remove a route, set the
-	 * button to inacttive 
+	 * button to inactive and untick the menu option
 	 */
 	editor_mixer_button.set_active(false);
+	ActionManager::uncheck_toggleaction ("<Actions>/Editor/show-editor-mixer");
 
 	/* and disable if all tracks and/or routes are gone */
 
@@ -274,6 +276,8 @@ Editor::redisplay_route_list ()
 		n++;
 		
 	}
+
+	full_canvas_height = position;
 
 	/* make sure the cursors stay on top of every newly added track */
 
@@ -518,11 +522,13 @@ Editor::initial_route_list_display ()
 void
 Editor::route_list_change (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter)
 {
+	session->set_remote_control_ids();
 	redisplay_route_list ();
 }
 
 void
 Editor::route_list_delete (const Gtk::TreeModel::Path& path)
 {
+	session->set_remote_control_ids();
 	redisplay_route_list ();
 }

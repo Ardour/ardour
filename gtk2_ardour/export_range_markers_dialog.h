@@ -30,10 +30,14 @@ class ExportRangeMarkersDialog : public ExportDialog
   public:
 	ExportRangeMarkersDialog (PublicEditor&);
   
+	Gtk::FileChooserAction browse_action() const;
+
   protected:
 	virtual bool is_filepath_valid(string &filepath);
 
   	void export_audio_data();
+
+	bool wants_dir() { return true; }
   
   private:
 	// keeps the duration of all range_markers before the current

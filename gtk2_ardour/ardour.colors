@@ -101,3 +101,6 @@ cTrimHandleLockedStart 0.92 0.06 0.06 0.16
 cTrimHandleLockedEnd 0.92 0.06 0.06 0.16
 cTrimHandleStart 0.10 0.00 1.00 0.27
 cTrimHandleEnd 0.10 0.00 1.00 0.27
+cEditCursor	0.00 0.00 1.00 1.00
+cPlayHead	1.00 0.00 0.00 1.00
+

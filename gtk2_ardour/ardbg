@@ -1,4 +1,5 @@
 #!/bin/sh
 dir=`dirname "$0"`
 . $dir/ardev_common.sh
+LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 exec gdb $EXECUTABLE $*

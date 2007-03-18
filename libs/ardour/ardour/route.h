@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __ardour_route_h__
@@ -78,8 +77,8 @@ class Route : public IO
 	std::string comment() { return _comment; }
 	void set_comment (std::string str, void *src);
 
-	long order_key(std::string name) const;
-	void set_order_key (std::string name, long n);
+	long order_key (const char* name) const;
+	void set_order_key (const char* name, long n);
 
 	bool hidden() const { return _flags & Hidden; }
 	bool master() const { return _flags & MasterOut; }
@@ -121,6 +120,7 @@ class Route : public IO
 
 	void set_mute (bool yn, void *src);
 	bool muted() const { return _muted; }
+	bool solo_muted() const { return desired_solo_gain == 0.0; }
 
 	void set_mute_config (mute_type, bool, void *src);
 	bool get_mute_config (mute_type);
@@ -256,7 +256,6 @@ class Route : public IO
 
 	bool                     _muted : 1;
 	bool                     _soloed : 1;
-	bool                     _solo_muted : 1;
 	bool                     _solo_safe : 1;
 	bool                     _recordable : 1;
 	bool                     _active : 1;
@@ -324,7 +323,16 @@ class Route : public IO
 	void init ();
 
 	static uint32_t order_key_cnt;
-	typedef std::map<std::string,long> OrderKeys;
+
+	struct ltstr
+	{
+	    bool operator()(const char* s1, const char* s2) const
+	    {
+		    return strcmp(s1, s2) < 0;
+	    }
+	};
+
+	typedef std::map<const char*,long,ltstr> OrderKeys;
 	OrderKeys order_keys;
 
 	void input_change_handler (IOChange, void *src);

@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <pbd/pthread_utils.h>
@@ -40,6 +39,7 @@
 #include "sfdb_ui.h"
 #include "editing.h"
 #include "audio_time_axis.h"
+#include "utils.h"
 
 #include "i18n.h"
 
@@ -244,6 +244,8 @@ Editor::import_sndfile (vector<ustring> paths, ImportMode mode, AudioTrack* trac
 	while (!(import_status.done || import_status.cancel)) {
 		gtk_main_iteration ();
 	}
+
+	interthread_progress_window->hide ();
 	
 	import_status.done = true;
 	interthread_progress_connection.disconnect ();
@@ -315,7 +317,8 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_fi
 				choices.push_back (_("Embed all without questions"));
 			
 				Gtkmm2ext::Choice rate_choice (
-					string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"), path),
+					string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"), 
+							short_path (path, 40)),
 					choices, false);
 				
 				int resx = rate_choice.run ();
@@ -367,11 +370,21 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_fi
 		for (int n = 0; n < finfo.channels; ++n)
 		{
 			try {
-				source = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable 
-										       (DataType::AUDIO, *session, path,  n,
-											(mode == ImportAsTapeTrack ? 
-											 AudioFileSource::Destructive : 
-											 AudioFileSource::Flag (0))));
+
+				/* check if we have this thing embedded already */
+
+				boost::shared_ptr<Source> s;
+
+				if ((s = session->source_by_path_and_channel (path, n)) == 0) {
+					cerr << "source doesn't exist yet\n";
+					source = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable 
+											       (DataType::AUDIO, *session, path,  n,
+												(mode == ImportAsTapeTrack ? 
+												 AudioFileSource::Destructive : 
+												 AudioFileSource::Flag (0))));
+				} else {
+					source = boost::dynamic_pointer_cast<AudioFileSource> (s);
+				}
 
 				sources.push_back(source);
 			} 

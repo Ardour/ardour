@@ -14,7 +14,9 @@ using namespace ARDOUR;
 using namespace PBD;
 
 TempoDialog::TempoDialog (TempoMap& map, nframes_t frame, const string & action)
-	: ArdourDialog ("tempo dialog"),
+	: ArdourDialog (_("edit tempo")),
+	  bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0, 1.0),
+	  bpm_spinner (bpm_adjustment),
 	  bpm_frame (_("Beats per minute")),
 	  ok_button (action),
 	  cancel_button (_("Cancel")),
@@ -32,6 +34,8 @@ TempoDialog::TempoDialog (TempoMap& map, nframes_t frame, const string & action)
 
 TempoDialog::TempoDialog (TempoSection& section, const string & action)
 	: ArdourDialog ("tempo dialog"),
+	  bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0, 1.0),
+	  bpm_spinner (bpm_adjustment),
 	  bpm_frame (_("Beats per minute")),
 	  ok_button (action),
 	  cancel_button (_("Cancel")),
@@ -46,12 +50,13 @@ TempoDialog::TempoDialog (TempoSection& section, const string & action)
 void
 TempoDialog::init (const BBT_Time& when, double bpm, bool movable)
 {
-	snprintf (buf, sizeof (buf), "%.2f", bpm);
-	bpm_entry.set_text (buf);
-	bpm_entry.select_region (0, -1);
-	
+	bpm_spinner.set_numeric (true);
+	bpm_spinner.set_digits (1);
+	bpm_spinner.set_wrap (true);
+	bpm_spinner.set_value (bpm);
+
 	hspacer1.set_border_width (5);
-	hspacer1.pack_start (bpm_entry, false, false);
+	hspacer1.pack_start (bpm_spinner, false, false);
 	vspacer1.set_border_width (5);
 	vspacer1.pack_start (hspacer1, false, false);
 
@@ -90,7 +95,7 @@ TempoDialog::init (const BBT_Time& when, double bpm, bool movable)
 	}
 
 	bpm_frame.set_name ("MetricDialogFrame");
-	bpm_entry.set_name ("MetricEntry");
+	bpm_spinner.set_name ("MetricEntry");
 
 	get_vbox()->pack_start (bpm_frame, false, false);
 	
@@ -100,83 +105,34 @@ TempoDialog::init (const BBT_Time& when, double bpm, bool movable)
 	set_default_response (RESPONSE_ACCEPT);
 
 	get_vbox()->show_all();
-	bpm_entry.show();
+	bpm_spinner.show();
 
 	set_name ("MetricDialog");
-	bpm_entry.signal_activate().connect (bind (mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
-	bpm_entry.signal_key_release_event().connect (mem_fun (*this, &TempoDialog::bpm_key_release));
-	bpm_entry.signal_key_press_event().connect (mem_fun (*this, &TempoDialog::bpm_key_press), false);
+
+	bpm_spinner.signal_activate().connect (bind (mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
+	bpm_spinner.signal_button_press_event().connect (mem_fun (*this, &TempoDialog::bpm_button_press), false);
+	bpm_spinner.signal_button_release_event().connect (mem_fun (*this, &TempoDialog::bpm_button_release), false);
 }
 
 bool
-TempoDialog::bpm_key_press (GdkEventKey* ev)
+TempoDialog::bpm_button_press (GdkEventButton* ev)
 {
-
-switch (ev->keyval) { 
-
- case GDK_0:
- case GDK_1:
- case GDK_2:
- case GDK_3:
- case GDK_4:
- case GDK_5:
- case GDK_6:
- case GDK_7:
- case GDK_8:
- case GDK_9:
- case GDK_KP_0:
- case GDK_KP_1:
- case GDK_KP_2:
- case GDK_KP_3:
- case GDK_KP_4:
- case GDK_KP_5:
- case GDK_KP_6:
- case GDK_KP_7:
- case GDK_KP_8:
- case GDK_KP_9:
- case GDK_period:
- case GDK_comma:
- case  GDK_KP_Delete:
- case  GDK_KP_Enter:
- case  GDK_Delete:
- case  GDK_BackSpace:
- case  GDK_Escape:
- case  GDK_Return:
- case  GDK_Home:
- case  GDK_End:
- case  GDK_Left:
- case  GDK_Right:
- case  GDK_Num_Lock:
- case  GDK_Tab:
-    return FALSE;
- default:
-      break;
- }
-
-   return TRUE;
+	return false;
 }
 
 bool
-TempoDialog::bpm_key_release (GdkEventKey* ev)
-{
-        if (bpm_entry.get_text() != "") {
-	        set_response_sensitive (Gtk::RESPONSE_ACCEPT, true);
-	} else {
-	        set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
-	}
+TempoDialog::bpm_button_release (GdkEventButton* ev)
+{	
+	/* the value has been modified, accept should work now */
+
+	set_response_sensitive (Gtk::RESPONSE_ACCEPT, true);
 	return false;
 }
 
 double 
 TempoDialog::get_bpm ()
 {
-	double bpm;
-	
-	if (sscanf (bpm_entry.get_text().c_str(), "%lf", &bpm) != 1) {
-		return 0;
-	}
-
-	return bpm;
+	return bpm_spinner.get_value ();
 }	
 
 bool

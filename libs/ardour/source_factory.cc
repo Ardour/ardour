@@ -22,9 +22,9 @@
 
 #include <ardour/source_factory.h>
 #include <ardour/sndfilesource.h>
-#include <ardour/smf_source.h>
-#include <ardour/destructive_filesource.h>
+#include <ardour/silentfilesource.h>
 #include <ardour/configuration.h>
+#include <ardour/smf_source.h>
 
 #ifdef HAVE_COREAUDIO
 #include <ardour/coreaudiosource.h>
@@ -52,6 +52,14 @@ SourceFactory::setup_peakfile (boost::shared_ptr<Source> s)
 	return 0;
 }
 
+boost::shared_ptr<Source>
+SourceFactory::createSilent (Session& s, const XMLNode& node, nframes_t nframes, float sr)
+{
+	boost::shared_ptr<Source> ret (new SilentFileSource (s, node, nframes, sr));
+	SourceCreated (ret);
+	return ret;
+}
+
 #ifdef HAVE_COREAUDIO
 boost::shared_ptr<Source>
 SourceFactory::create (Session& s, const XMLNode& node)
@@ -74,6 +82,9 @@ SourceFactory::create (Session& s, const XMLNode& node)
 		} 
 
 		catch (failed_constructor& err) {
+		
+			/* this is allowed to throw */
+			
 			boost::shared_ptr<Source> ret (new SndFileSource (s, node));
 			if (setup_peakfile (ret)) {
 				return boost::shared_ptr<Source>();
@@ -87,7 +98,6 @@ SourceFactory::create (Session& s, const XMLNode& node)
 		boost::shared_ptr<Source> ret (new SMFSource (node));
 		SourceCreated (ret);
 		return ret;
-
 	}
 
 	return boost::shared_ptr<Source>();
@@ -98,12 +108,14 @@ SourceFactory::create (Session& s, const XMLNode& node)
 boost::shared_ptr<Source>
 SourceFactory::create (Session& s, const XMLNode& node)
 {
+	/* this is allowed to throw */
+
 	DataType type = DataType::AUDIO;
 	const XMLProperty* prop = node.property("type");
 	if (prop) {
 		type = DataType(prop->value());
 	}
-
+	
 	if (type == DataType::AUDIO) {
 		
 		boost::shared_ptr<Source> ret (new SndFileSource (s, node));
@@ -123,7 +135,7 @@ SourceFactory::create (Session& s, const XMLNode& node)
 		return ret;
 
 	}
-
+	
 	return boost::shared_ptr<Source> ();
 }
 
@@ -159,6 +171,9 @@ SourceFactory::createReadable (DataType type, Session& s, string path, int chn, 
 			}
 
 		} else {
+
+
+			/* this is allowed to throw */
 
 			boost::shared_ptr<Source> ret (new SndFileSource (s, path, chn, flags));
 			if (setup_peakfile (ret)) {

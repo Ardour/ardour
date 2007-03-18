@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <algorithm>
@@ -54,7 +53,6 @@
 #include <ardour/midi_playlist.h>
 #include <ardour/midi_region.h>
 #include <ardour/smf_source.h>
-#include <ardour/destructive_filesource.h>
 #include <ardour/auditioner.h>
 #include <ardour/recent_sessions.h>
 #include <ardour/redirect.h>
@@ -86,6 +84,12 @@ using namespace ARDOUR;
 using namespace PBD;
 using boost::shared_ptr;
 
+#ifdef __x86_64__
+static const int CPU_CACHE_ALIGN = 64;
+#else
+static const int CPU_CACHE_ALIGN = 16; /* arguably 32 on most arches, but it matters less */
+#endif
+
 const char* Session::_template_suffix = X_(".template");
 const char* Session::_statefile_suffix = X_(".ardour");
 const char* Session::_pending_suffix = X_(".pending");
@@ -94,8 +98,10 @@ const char* Session::sound_dir_name = X_("audiofiles");
 const char* Session::peak_dir_name = X_("peaks");
 const char* Session::dead_sound_dir_name = X_("dead_sounds");
 const char* Session::interchange_dir_name = X_("interchange");
+const char* Session::export_dir_name = X_("export");
 
-Session::compute_peak_t				Session::compute_peak 			= 0;
+Session::compute_peak_t			Session::compute_peak 		= 0;
+Session::find_peaks_t			Session::find_peaks 		= 0;
 Session::apply_gain_to_buffer_t		Session::apply_gain_to_buffer 	= 0;
 Session::mix_buffers_with_gain_t	Session::mix_buffers_with_gain 	= 0;
 Session::mix_buffers_no_gain_t		Session::mix_buffers_no_gain 	= 0;
@@ -280,6 +286,10 @@ Session::Session (AudioEngine &eng,
 {
 	bool new_session;
 
+	if (!eng.connected()) {
+		throw failed_constructor();
+	}
+
 	cerr << "Loading session " << fullpath << " using snapshot " << snapshot_name << " (1)" << endl;
 
 	n_physical_outputs = _engine.n_physical_outputs();
@@ -341,6 +351,10 @@ Session::Session (AudioEngine &eng,
 
 {
 	bool new_session;
+
+	if (!eng.connected()) {
+		throw failed_constructor();
+	}
 
 	cerr << "Loading session " << fullpath << " using snapshot " << snapshot_name << " (2)" << endl;
 
@@ -1396,7 +1410,7 @@ Session::set_block_size (nframes_t nframes)
 	{ 
 			
 		current_block_size = nframes;
-		
+
 		ensure_buffers(_scratch_buffers->available());
 
 		if (_gain_automation_buffer) {
@@ -1740,16 +1754,19 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 		} else {
 			nphysical_out = 0;
 		}
+
+		shared_ptr<AudioTrack> track;
 		
 		try {
-			shared_ptr<AudioTrack> track (new AudioTrack (*this, track_name, Route::Flag (0), mode));
+			track = boost::shared_ptr<AudioTrack>((new AudioTrack (*this, track_name, Route::Flag (0), mode)));
 			
 			if (track->ensure_io (ChanCount(DataType::AUDIO, input_channels), ChanCount(DataType::AUDIO, output_channels), false, this)) {
 				error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
 							 input_channels, output_channels)
 				      << endmsg;
+				goto failed;
 			}
-			
+
 			if (nphysical_in) {
 				for (uint32_t x = 0; x < track->n_inputs().get(DataType::AUDIO) && x < nphysical_in; ++x) {
 					
@@ -1809,14 +1826,43 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 		catch (failed_constructor &err) {
 			error << _("Session: could not create new audio track.") << endmsg;
-			// XXX should we delete the tracks already created? 
-			ret.clear ();
-			return ret;
+
+			if (track) {
+				/* we need to get rid of this, since the track failed to be created */
+				/* XXX arguably, AudioTrack::AudioTrack should not do the Session::add_diskstream() */
+
+				{ 
+					RCUWriter<DiskstreamList> writer (diskstreams);
+					boost::shared_ptr<DiskstreamList> ds = writer.get_copy();
+					ds->remove (track->audio_diskstream());
+				}
+			}
+
+			goto failed;
 		}
-		
+
+		catch (AudioEngine::PortRegistrationFailure& pfe) {
+
+			error << _("No more JACK ports are available. You will need to stop Ardour and restart JACK with ports if you need this many tracks.") << endmsg;
+
+			if (track) {
+				/* we need to get rid of this, since the track failed to be created */
+				/* XXX arguably, AudioTrack::AudioTrack should not do the Session::add_diskstream() */
+
+				{ 
+					RCUWriter<DiskstreamList> writer (diskstreams);
+					boost::shared_ptr<DiskstreamList> ds = writer.get_copy();
+					ds->remove (track->audio_diskstream());
+				}
+			}
+
+			goto failed;
+		}
+
 		--how_many;
 	}
 
+  failed:
 	if (!new_routes.empty()) {
 		add_routes (new_routes, false);
 		save_state (_current_snapshot_name);
@@ -1824,6 +1870,27 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 	return ret;
 }
+
+void
+Session::set_remote_control_ids ()
+{
+	RemoteModel m = Config->get_remote_model();
+
+	shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		if ( MixerOrdered == m) {			
+			long order = (*i)->order_key(N_("signal"));
+			(*i)->set_remote_control_id( order+1 );
+		} else if ( EditorOrdered == m) {
+			long order = (*i)->order_key(N_("editor"));
+			(*i)->set_remote_control_id( order+1 );
+		} else if ( UserOrdered == m) {
+			//do nothing ... only changes to remote id's are initiated by user 
+		}
+	}
+}
+
 
 Session::RouteList
 Session::new_audio_route (int input_channels, int output_channels, uint32_t how_many)
@@ -1876,6 +1943,7 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 				error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
 							 input_channels, output_channels)
 				      << endmsg;
+				goto failure;
 			}
 			
 			for (uint32_t x = 0; n_physical_inputs && x < bus->n_inputs().get(DataType::AUDIO); ++x) {
@@ -1927,13 +1995,19 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 
 		catch (failed_constructor &err) {
 			error << _("Session: could not create new audio route.") << endmsg;
-			ret.clear ();
-			return ret;
+			goto failure;
 		}
+
+		catch (AudioEngine::PortRegistrationFailure& pfe) {
+			error << _("No more JACK ports are available. You will need to stop Ardour and restart JACK with ports if you need this many tracks.") << endmsg;
+			goto failure;
+		}
+
 
 		--how_many;
 	}
 
+  failure:
 	if (!ret.empty()) {
 		add_routes (ret, false);
 		save_state (_current_snapshot_name);
@@ -1984,21 +2058,23 @@ void
 Session::add_diskstream (boost::shared_ptr<Diskstream> dstream)
 {
 	/* need to do this in case we're rolling at the time, to prevent false underruns */
-	dstream->do_refill_with_alloc();
+	dstream->do_refill_with_alloc ();
 	
-	{ 
+	dstream->set_block_size (current_block_size);
+
+	{
 		RCUWriter<DiskstreamList> writer (diskstreams);
 		boost::shared_ptr<DiskstreamList> ds = writer.get_copy();
 		ds->push_back (dstream);
-	}
-
-	dstream->set_block_size (current_block_size);
+		/* writer goes out of scope, copies ds back to main */
+	} 
 
 	dstream->PlaylistChanged.connect (sigc::bind (mem_fun (*this, &Session::diskstream_playlist_changed), dstream));
 	/* this will connect to future changes, and check the current length */
 	diskstream_playlist_changed (dstream);
 
 	dstream->prepare ();
+
 }
 
 void
@@ -2180,8 +2256,10 @@ Session::route_solo_changed (void* src, boost::weak_ptr<Route> wpr)
 	modify_solo_mute (is_track, same_thing_soloed);
 
 	if (signal) {
-		SoloActive (currently_soloing);
+		SoloActive (currently_soloing); /* EMIT SIGNAL */
 	}
+
+	SoloChanged (); /* EMIT SIGNAL */
 
 	set_dirty();
 }
@@ -2795,6 +2873,24 @@ Session::source_by_id (const PBD::ID& id)
 	/* XXX search MIDI or other searches here */
 	
 	return source;
+}
+
+
+boost::shared_ptr<Source>
+Session::source_by_path_and_channel (const Glib::ustring& path, uint16_t chn)
+{
+	Glib::Mutex::Lock lm (source_lock);
+
+	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
+		cerr << "comparing " << path << " with " << i->second->name() << endl;
+		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(i->second);
+
+		if (afs && afs->path() == path && chn == afs->channel()) {
+			return afs;
+		} 
+		       
+	}
+	return boost::shared_ptr<Source>();
 }
 
 string
@@ -3503,7 +3599,7 @@ void
 Session::graph_reordered ()
 {
 	/* don't do this stuff if we are setting up connections
-	   from a set_state() call.
+	   from a set_state() call or creating new tracks.
 	*/
 
 	if (_state_of_the_state & InitialConnecting) {
@@ -3630,11 +3726,11 @@ Session::available_capture_duration ()
 
 	switch (Config->get_native_file_data_format()) {
 	case FormatFloat:
-		sample_bytes_on_disk = 4;
+		sample_bytes_on_disk = 4.0;
 		break;
 
 	case FormatInt24:
-		sample_bytes_on_disk = 3;
+		sample_bytes_on_disk = 3.0;
 		break;
 
 	default: 
@@ -3733,7 +3829,6 @@ Session::next_insert_id ()
 		for (boost::dynamic_bitset<uint32_t>::size_type n = 0; n < insert_bitset.size(); ++n) {
 			if (!insert_bitset[n]) {
 				insert_bitset[n] = true;
-				cerr << "Returning " << n << " as insert ID\n";
 				return n;
 				
 			}
@@ -3754,7 +3849,6 @@ Session::next_send_id ()
 		for (boost::dynamic_bitset<uint32_t>::size_type n = 0; n < send_bitset.size(); ++n) {
 			if (!send_bitset[n]) {
 				send_bitset[n] = true;
-				cerr << "Returning " << n << " as send ID\n";
 				return n;
 				
 			}
@@ -3991,6 +4085,12 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t le
 	buffers.ensure_buffers(nchans, chunk_size);
 	buffers.set_count(nchans);
 
+	for (vector<boost::shared_ptr<Source> >::iterator src=srcs.begin(); src != srcs.end(); ++src) {
+		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*src);
+		if (afs)
+			afs->prepare_for_peakfile_writes ();
+	}
+			
 	while (to_do && !itt.cancel) {
 		
 		this_chunk = min (to_do, chunk_size);
@@ -4029,18 +4129,10 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t le
 			
 			if (afs) {
 				afs->update_header (position, *xnow, now);
+				afs->flush_header ();
 			}
 		}
 		
-		/* build peakfile for new source */
-		
-		for (vector<boost::shared_ptr<Source> >::iterator src=srcs.begin(); src != srcs.end(); ++src) {
-			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*src);
-			if (afs) {
-				afs->build_peaks ();
-			}
-		}
-
 		/* construct a region to represent the bounced material */
 
 		boost::shared_ptr<Region> aregion = RegionFactory::create (srcs, 0, srcs.front()->length(), 
@@ -4059,6 +4151,14 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t le
 			}
 
 			(*src)->drop_references ();
+		}
+
+	} else {
+		for (vector<boost::shared_ptr<Source> >::iterator src = srcs.begin(); src != srcs.end(); ++src) {
+			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*src);
+			
+			if (afs)
+				afs->done_with_peakfile_writes ();
 		}
 	}
 

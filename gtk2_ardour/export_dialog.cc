@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 
 */
 
@@ -109,7 +108,6 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	  src_quality_label (_("Conversion Quality"), 1.0, 0.5),
 	  dither_type_label (_("Dither Type"), 1.0, 0.5),
 	  cuefile_only_checkbox (_("Export CD Marker File Only")),
-	  file_frame (_("Export to File")),
 	  file_browse_button (_("Browse")),
 	  track_selector_button (_("Specific tracks ..."))
 {
@@ -571,7 +569,7 @@ ExportDialog::save_state()
 
 		row = *ri;
 		track->add_property(X_("channel1"), row[exp_cols.left] ? X_("on") : X_("off"));
-		track->add_property(X_("channel1"), row[exp_cols.right] ? X_("on") : X_("off"));
+		track->add_property(X_("channel2"), row[exp_cols.right] ? X_("on") : X_("off"));
 
 		tracks->add_child_nocopy(*track);
 	}
@@ -917,11 +915,9 @@ ExportDialog::do_export ()
 	end_dialog ();
 }
 	
-
 void
 ExportDialog::end_dialog ()
 {
-
 	if (spec.running) {
 		spec.stop = true;
 
@@ -934,7 +930,7 @@ ExportDialog::end_dialog ()
 		}
 	}
 
-	session->engine().freewheel (false);
+	session->finalize_audio_export ();
 
 	hide_all ();
 
@@ -950,19 +946,21 @@ ExportDialog::start_export ()
 	}
 
 	/* If the filename hasn't been set before, use the
-	   directory above the current session as a default
+	   current session's export directory as a default
 	   location for the export.  
 	*/
 	
 	if (file_entry.get_text().length() == 0) {
-		string dir = session->path();
+		string dir = session->export_dir();
 		string::size_type last_slash;
 		
-		if ((last_slash = dir.find_last_of ('/')) != string::npos) {
+		if ((last_slash = dir.find_last_of ('/')) != string::npos && last_slash != 0) {
 			dir = dir.substr (0, last_slash+1);
 		}
 
-		dir = dir + "export.wav";
+		if (!wants_dir()) {
+			dir = dir + "export.wav";
+		}
 		
 		file_entry.set_text (dir);
 	}
@@ -1307,7 +1305,7 @@ ExportDialog::window_closed (GdkEventAny *ignored)
 void
 ExportDialog::browse ()
 {
-	FileChooserDialog dialog("Export to file", FILE_CHOOSER_ACTION_SAVE);
+	FileChooserDialog dialog("Export to file", browse_action());
 	dialog.set_transient_for(*this);
 	dialog.set_filename (file_entry.get_text());
 

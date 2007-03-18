@@ -4,7 +4,6 @@
 
 #include <glibmm.h>
 
-/* $Id$ */
 
 /* line.h
  * 

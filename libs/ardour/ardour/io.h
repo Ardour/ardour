@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __ardour_io_h__
@@ -113,7 +112,8 @@ class IO : public PBD::StatefulDestructible
 
 	Panner& panner()        { return *_panner; }
 	PeakMeter& peak_meter() { return *_meter; }
-
+	const Panner& panner() const { return *_panner; }
+	
 	int ensure_io (ChanCount in, ChanCount out, bool clear, void *src);
 
 	int use_input_connection (Connection&, void *src);

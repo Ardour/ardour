@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __ardour_location_h__
@@ -159,11 +158,11 @@ class Locations : public PBD::StatefulDestructible
 	int set_current (Location *, bool want_lock = true);
 	Location *current () const { return current_location; }
 
-	Location *first_location_before (nframes_t);
-	Location *first_location_after (nframes_t);
+	Location *first_location_before (nframes_t, bool include_special_ranges = false);
+	Location *first_location_after (nframes_t, bool include_special_ranges = false);
 
-	nframes_t first_mark_before (nframes_t);
-	nframes_t first_mark_after (nframes_t);
+	nframes_t first_mark_before (nframes_t, bool include_special_ranges = false);
+	nframes_t first_mark_after (nframes_t, bool include_special_ranges = false);
 
 	sigc::signal<void,Location*> current_changed;
 	sigc::signal<void>           changed;

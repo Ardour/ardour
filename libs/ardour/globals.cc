@@ -235,6 +235,7 @@ setup_hardware_optimization (bool try_optimization)
 	
 			// SSE SET
 			Session::compute_peak 		= x86_sse_compute_peak;
+			Session::find_peaks 		= x86_sse_find_peaks;
 			Session::apply_gain_to_buffer 	= x86_sse_apply_gain_to_buffer;
 			Session::mix_buffers_with_gain 	= x86_sse_mix_buffers_with_gain;
 			Session::mix_buffers_no_gain 	= x86_sse_mix_buffers_no_gain;
@@ -251,6 +252,7 @@ setup_hardware_optimization (bool try_optimization)
 
                 if (sysVersion >= 0x00001040) { // Tiger at least
                         Session::compute_peak           = veclib_compute_peak;
+			Session::find_peaks 		= veclib_find_peaks;
                         Session::apply_gain_to_buffer   = veclib_apply_gain_to_buffer;
                         Session::mix_buffers_with_gain  = veclib_mix_buffers_with_gain;
                         Session::mix_buffers_no_gain    = veclib_mix_buffers_no_gain;
@@ -264,7 +266,8 @@ setup_hardware_optimization (bool try_optimization)
 
         if (generic_mix_functions) {
 
-		Session::compute_peak 			= compute_peak;
+		Session::compute_peak 		= compute_peak;
+		Session::find_peaks 		= find_peaks;
 		Session::apply_gain_to_buffer 	= apply_gain_to_buffer;
 		Session::mix_buffers_with_gain 	= mix_buffers_with_gain;
 		Session::mix_buffers_no_gain 	= mix_buffers_no_gain;
@@ -280,8 +283,6 @@ ARDOUR::init (ARDOUR::AudioEngine& engine, bool use_vst, bool try_optimization)
 
 	(void) bindtextdomain(PACKAGE, LOCALEDIR);
 
-	PBD::ID::init ();
-	
 	setup_enum_writer ();
 
 	lrdf_init();
@@ -617,6 +618,7 @@ std::istream& operator>>(std::istream& o, HeaderFormat& var) { return int_to_typ
 std::istream& operator>>(std::istream& o, SampleFormat& var) { return int_to_type<SampleFormat> (o, var); }
 std::istream& operator>>(std::istream& o, AutoConnectOption& var) { return int_to_type<AutoConnectOption> (o, var); }
 std::istream& operator>>(std::istream& o, MonitorModel& var) { return int_to_type<MonitorModel> (o, var); }
+std::istream& operator>>(std::istream& o, RemoteModel& var) { return int_to_type<RemoteModel> (o, var); }
 std::istream& operator>>(std::istream& o, EditMode& var) { return int_to_type<EditMode> (o, var); }
 std::istream& operator>>(std::istream& o, SoloModel& var) { return int_to_type<SoloModel> (o, var); }
 std::istream& operator>>(std::istream& o, LayerModel& var) { return int_to_type<LayerModel> (o, var); }

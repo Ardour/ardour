@@ -203,6 +203,11 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = /Library/Spotlight;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/usr/lib\"";
 				LIBRARY_STYLE = Bundle;
 				PRODUCT_NAME = "Spotlight Importer";
 				WRAPPER_EXTENSION = mdimporter;
@@ -222,6 +227,11 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = /Library/Spotlight;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/usr/lib\"";
 				LIBRARY_STYLE = Bundle;
 				PRODUCT_NAME = "Spotlight Importer";
 				WRAPPER_EXTENSION = mdimporter;

@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <unistd.h>
@@ -35,6 +34,7 @@
 #include <gdkmm/color.h>
 #include <gdkmm/bitmap.h>
 
+#include <gtkmm2ext/grouped_buttons.h>
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/tearoff.h>
 #include <gtkmm2ext/utils.h>
@@ -54,7 +54,6 @@
 
 #include "ardour_ui.h"
 #include "editor.h"
-#include "grouped_buttons.h"
 #include "keyboard.h"
 #include "marker.h"
 #include "playlist_selector.h"
@@ -69,7 +68,6 @@
 #include "editing.h"
 #include "public_editor.h"
 #include "crossfade_edit.h"
-#include "audio_time_axis.h"
 #include "canvas_impl.h"
 #include "actions.h"
 #include "gui_thread.h"
@@ -172,9 +170,8 @@ check_adjustment (Gtk::Adjustment* adj)
 
 }
 
-Editor::Editor (AudioEngine& eng) 
-	: engine (eng),
-
+Editor::Editor ()
+	: 
 	  /* time display buttons */
 
 	  minsec_label (_("Mins:Secs")),
@@ -311,6 +308,7 @@ Editor::Editor (AudioEngine& eng)
 	button_release_can_deselect = true;
 	canvas_idle_queued = false;
 	_dragging_playhead = false;
+	_dragging_hscrollbar = false;
 
 	location_marker_color = color_map[cLocationMarker];
 	location_range_color = color_map[cLocationRange];
@@ -356,8 +354,8 @@ Editor::Editor (AudioEngine& eng)
 	edit_vscrollbar.set_adjustment (vertical_adjustment);
 	edit_hscrollbar.set_adjustment (horizontal_adjustment);
 
- 	edit_hscrollbar.signal_button_press_event().connect (mem_fun(*this, &Editor::hscrollbar_button_press));
- 	edit_hscrollbar.signal_button_release_event().connect (mem_fun(*this, &Editor::hscrollbar_button_release));
+ 	edit_hscrollbar.signal_button_press_event().connect (mem_fun(*this, &Editor::hscrollbar_button_press), false);
+ 	edit_hscrollbar.signal_button_release_event().connect (mem_fun(*this, &Editor::hscrollbar_button_release), false);
  	edit_hscrollbar.signal_size_allocate().connect (mem_fun(*this, &Editor::hscrollbar_allocate));
 
 	edit_hscrollbar.set_name ("EditorHScrollbar");
@@ -511,7 +509,7 @@ Editor::Editor (AudioEngine& eng)
 
 	edit_group_display.set_name ("EditGroupList");
 	edit_group_display.get_selection()->set_mode (SELECTION_SINGLE);
-	edit_group_display.set_headers_visible (false);
+	edit_group_display.set_headers_visible (true);
 	edit_group_display.set_reorderable (false);
 	edit_group_display.set_rules_hint (true);
 	edit_group_display.set_size_request (75, -1);
@@ -986,6 +984,7 @@ Editor::handle_new_duration ()
 				  
 	if (new_end > last_canvas_frame) {
 		last_canvas_frame = new_end;
+		horizontal_adjustment.set_upper (last_canvas_frame / frames_per_unit);
 		reset_scrolling_region ();
 	}
 
@@ -1072,7 +1071,7 @@ Editor::connect_to_session (Session *t)
 
 	session_connections.push_back (session->SMPTEOffsetChanged.connect (mem_fun(*this, &Editor::update_just_smpte)));
 
-	session_connections.push_back (session->tempo_map().StateChanged.connect (mem_fun(*this, &Editor::tempo_map_changed)));
+	session_connections.push_back (session->tempo_map().StateChanged.connect (bind (mem_fun(*this, &Editor::tempo_map_changed), false)));
 
 	edit_groups_changed ();
 
@@ -1094,8 +1093,7 @@ Editor::connect_to_session (Session *t)
 		}
 		session->locations()->add (loc, false);
 		session->set_auto_loop_location (loc);
-	}
-	else {
+	} else {
 		// force name
 		loc->set_name (_("Loop"));
 	}
@@ -1108,8 +1106,7 @@ Editor::connect_to_session (Session *t)
 		}
 		session->locations()->add (loc, false);
 		session->set_auto_punch_location (loc);
-	}
-	else {
+	} else {
 		// force name
 		loc->set_name (_("Punch"));
 	}
@@ -1241,8 +1238,8 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 		items.push_back (SeparatorElem());
 		
 		items.push_back (MenuElem (_("Linear"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Linear)));
-		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::LogB)));
-		items.push_back (MenuElem (_("Slow"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Fast)));
+		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Fast)));
+		items.push_back (MenuElem (_("Slow"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::LogB)));
 		items.push_back (MenuElem (_("Fast"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::LogA)));
 		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Slow)));
 		break;
@@ -1258,10 +1255,10 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 		items.push_back (SeparatorElem());
 		
 		items.push_back (MenuElem (_("Linear"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Linear)));
-		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Fast)));
-		items.push_back (MenuElem (_("Slow"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::LogB)));
-		items.push_back (MenuElem (_("Fast"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::LogA)));
-		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Slow)));
+		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Slow)));
+		items.push_back (MenuElem (_("Slow"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::LogA)));
+		items.push_back (MenuElem (_("Fast"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::LogB)));
+		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Fast)));
 
 		break;
 
@@ -3032,7 +3029,7 @@ gint
 Editor::edit_controls_button_release (GdkEventButton* ev)
 {
 	if (Keyboard::is_context_menu_event (ev)) {
-		ARDOUR_UI::instance()->add_route ();
+		ARDOUR_UI::instance()->add_route (this);
 	}
 	return TRUE;
 }
@@ -3181,7 +3178,6 @@ Editor::set_show_measures (bool yn)
 		if ((_show_measures = yn) == true) {
 			draw_measures ();
 		}
-		DisplayControlChanged (ShowMeasures);
 		instant_save ();
 	}
 }
@@ -3204,7 +3200,6 @@ Editor::set_follow_playhead (bool yn)
 			/* catch up */
 			update_current_screen ();
 		}
-		DisplayControlChanged (FollowPlayhead);
 		instant_save ();
 	}
 }
@@ -3290,7 +3285,7 @@ Editor::playlist_deletion_dialog (boost::shared_ptr<Playlist> pl)
 	label.show ();
 
 	dialog.add_button (_("Delete playlist"), RESPONSE_ACCEPT);
-	dialog.add_button (_("Keep playlist"), RESPONSE_CANCEL);
+	dialog.add_button (_("Keep playlist"), RESPONSE_REJECT);
 	dialog.add_button (_("Cancel"), RESPONSE_CANCEL);
 
 	switch (dialog.run ()) {
@@ -3621,26 +3616,6 @@ Editor::set_frames_per_unit (double fpu)
 	instant_save ();
 }
 
-void 
-Editor::canvas_horizontally_scrolled ()
-{
-	/* this is the core function that controls horizontal scrolling of the canvas. it is called
-	   whenever the horizontal_adjustment emits its "value_changed" signal. it executes in an
-	   idle handler.
-	*/
-
-  	leftmost_frame = (nframes_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
-	nframes_t rightmost_frame = leftmost_frame + current_page_frames ();
-	
-	if (rightmost_frame > last_canvas_frame) {
-		last_canvas_frame = rightmost_frame;
-		reset_scrolling_region ();
-	}
-	
-	update_fixed_rulers ();
-	tempo_map_changed (Change (0));
-}
-
 void
 Editor::queue_visual_change (nframes_t where)
 {
@@ -3687,7 +3662,7 @@ Editor::idle_visual_changer ()
 			/* the signal handler will do the rest */
 		} else {
 			update_fixed_rulers();
-			tempo_map_changed (Change (0));
+			tempo_map_changed (Change (0), true);
 		}
 	}
 
@@ -3707,3 +3682,12 @@ Editor::sort_track_selection ()
 	selection->tracks.sort (cmp);
 }
 
+nframes_t
+Editor::edit_cursor_position(bool sync)
+{
+	if (sync && edit_cursor->current_frame != edit_cursor_clock.current_time()) {
+		edit_cursor_clock.set(edit_cursor->current_frame, true);
+	}
+
+	return edit_cursor->current_frame;
+}

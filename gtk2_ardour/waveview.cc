@@ -1,7 +1,6 @@
 #include "waveview.h"
 #include "waveview_p.h"
 
-/* $Id$ */
 
 /* waveview.cc
  *

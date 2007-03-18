@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cstdio> // for sprintf, grrr 
@@ -706,7 +705,7 @@ Editor::update_ruler_visibility ()
 	
 	update_fixed_rulers();
 	//update_tempo_based_rulers();
-	tempo_map_changed(Change (0));
+	tempo_map_changed(Change (0), false);
 
 	time_canvas_event_box.show_all();
 	time_button_event_box.show_all();

@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __ardour_route_ui__
@@ -95,8 +94,10 @@ class RouteUI : public virtual AxisView
 	bool solo_press(GdkEventButton*);
 	bool solo_release(GdkEventButton*);
 	bool rec_enable_press(GdkEventButton*);
+	bool rec_enable_release(GdkEventButton*);
 
 	void solo_changed(void*);
+	void solo_changed_so_update_mute ();
 	void mute_changed(void*);
 	virtual void redirects_changed (void *) {}
 	void route_rec_enable_changed();
@@ -149,7 +150,10 @@ class RouteUI : public virtual AxisView
 
 	void update_rec_display ();
 	void update_mute_display ();
+
+	bool was_solo_safe;
 	void update_solo_display ();
+
 	virtual void map_frozen ();
 
 	void set_remote_control_id (uint32_t id, Gtk::CheckMenuItem* item);

@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include <string>
 #include <iostream>
+#include <iterator>
 
 #include <midi++/types.h>
 #include <midi++/parser.h>
@@ -138,7 +139,6 @@ Parser::~Parser ()
 
 void
 Parser::trace_event (Parser &p, byte *msg, size_t len)
-
 {
 	eventType type;
 	ostream *o;
@@ -309,15 +309,13 @@ Parser::trace_event (Parser &p, byte *msg, size_t len)
 
 void
 Parser::trace (bool onoff, ostream *o, const string &prefix)
-
 {
 	trace_connection.disconnect ();
 
 	if (onoff) {
 		trace_stream = o;
 		trace_prefix = prefix;
-		trace_connection = any.connect 
-			(mem_fun (*this, &Parser::trace_event));
+		trace_connection = any.connect (mem_fun (*this, &Parser::trace_event));
 	} else {
 		trace_prefix = "";
 		trace_stream = 0;

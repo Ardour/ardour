@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include "editor.h"
@@ -34,17 +33,20 @@ Editor::hscrollbar_allocate (Gtk::Allocation &alloc)
 bool
 Editor::hscrollbar_button_press (GdkEventButton *ev)
 {
-	return true;
+	_dragging_hscrollbar = true;
+	return false;
 }
 
 bool
 Editor::hscrollbar_button_release (GdkEventButton *ev)
 {
+	_dragging_hscrollbar = false;
+
 	if (session) {
 
 	}
 
-	return true;
+	return false;
 }
 
 void

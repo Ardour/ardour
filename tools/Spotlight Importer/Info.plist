@@ -11,13 +11,12 @@
 	To export this declaration, fill in the fields with your application's 
 	information, and uncomment the block of XML.
 	-->
-	
-	<!--
+
 	<key>UTExportedTypeDeclarations</key>
 	<array>
 		<dict>
 			<key>UTTypeIdentifier</key>
-			<string>org.ardour.yourUTI</string>
+			<string>org.ardour.Ardour.session</string>
 			<key>UTTypeReferenceURL</key>
 			<string>http://www.ardour.org</string>
 			<key>UTTypeDescription</key>
@@ -30,15 +29,14 @@
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>com.apple.ostype</key>
-				<string>XXXX</string>
+				<string>ArAs</string>
 				<key>public.filename-extension</key>
 				<array>
-					<string>xxxx</string>
+					<string>ardour</string>
 				</array>
 			</dict>
 		</dict>
 	</array>
-	-->
 
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>

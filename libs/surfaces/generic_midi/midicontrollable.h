@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id: controllable.h 4 2005-05-13 20:47:18Z taybin $
 */
 
 #ifndef __gm_midicontrollable_h__

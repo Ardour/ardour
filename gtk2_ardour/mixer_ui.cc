@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <algorithm>
@@ -30,13 +29,13 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/stop_signal.h>
 
-#include <ardour/audioengine.h>
 #include <ardour/session.h>
 #include <ardour/audio_track.h>
 #include <ardour/session_route.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/plugin_manager.h>
 
+#include "keyboard.h"
 #include "mixer_ui.h"
 #include "mixer_strip.h"
 #include "plugin_selector.h"
@@ -58,9 +57,8 @@ using namespace std;
 
 using PBD::atoi;
 
-Mixer_UI::Mixer_UI (AudioEngine& eng)
-	: Window (Gtk::WINDOW_TOPLEVEL),
-	  engine (eng)
+Mixer_UI::Mixer_UI ()
+	: Window (Gtk::WINDOW_TOPLEVEL)
 {
 	_strip_width = Wide;
 	track_menu = 0;
@@ -279,7 +277,7 @@ Mixer_UI::add_strip (Session::RouteList& routes)
 		TreeModel::Row row = *(track_model->append());
 		row[track_columns.text] = route->name();
 		
-		row[track_columns.visible] = true;
+		row[track_columns.visible] = strip->marked_for_display();
 		row[track_columns.route] = route;
 		row[track_columns.strip] = strip;
 		
@@ -383,6 +381,7 @@ Mixer_UI::disconnect_from_session ()
 	ENSURE_GUI_THREAD(mem_fun(*this, &Mixer_UI::disconnect_from_session));
 	
 	group_model->clear ();
+	_selection.clear ();
 	set_title (_("ardour: mixer"));
 	stop_updating ();
 }
@@ -554,12 +553,14 @@ Mixer_UI::hide_all_audiotracks ()
 void
 Mixer_UI::track_list_change (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter)
 {
+	session->set_remote_control_ids();
 	redisplay_track_list ();
 }
 
 void
 Mixer_UI::track_list_delete (const Gtk::TreeModel::Path& path)
 {
+	session->set_remote_control_ids();
 	redisplay_track_list ();
 }
 
@@ -612,8 +613,10 @@ Mixer_UI::redisplay_track_list ()
 			if (strip->route()->master() || strip->route()->control()) {
 				/* do nothing, these cannot be hidden */
 			} else {
-				strip_packer.remove (*strip);
-				strip->set_packed (false);
+				if (strip->packed()) {
+					strip_packer.remove (*strip);
+					strip->set_packed (false);
+				}
 			}
 		}
 	}
@@ -892,6 +895,16 @@ Mixer_UI::group_flags_changed (void* src, RouteGroup* group)
 	}
 
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::group_flags_changed), src, group));
+
+	/* force an update of any mixer strips that are using this group,
+	   otherwise mix group names don't change in mixer strips 
+	*/
+
+	for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
+		if ((*i)->mix_group() == group) {
+			(*i)->mix_group_changed(0);
+		}
+	}
 	
 	TreeModel::iterator i;
 	TreeModel::Children rows = group_model->children();
@@ -1003,7 +1016,7 @@ Mixer_UI::strip_scroller_button_release (GdkEventButton* ev)
 	using namespace Menu_Helpers;
 
 	if (Keyboard::is_context_menu_event (ev)) {
-		ARDOUR_UI::instance()->add_route();
+		ARDOUR_UI::instance()->add_route (this);
 		return true;
 	}
 

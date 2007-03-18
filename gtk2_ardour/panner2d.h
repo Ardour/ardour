@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __ardour_panner_2d_h__
@@ -47,7 +46,7 @@ namespace Pango {
 class Panner2d : public Gtk::DrawingArea
 {
   public:
-	Panner2d (ARDOUR::Panner&, int32_t width, int32_t height);
+	Panner2d (ARDOUR::Panner&, int32_t height);
 	~Panner2d ();
 	
 	int puck_position (int which_puck, float& x, float& y);

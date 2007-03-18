@@ -16,7 +16,6 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-  $Id$
 */
 
 #include <string>
@@ -90,50 +89,9 @@ int
 Session::set_mtc_port (string port_tag)
 {
 #if 0
-	MTC_Slave *ms;
+	MIDI::byte old_device_id = 0;
+	bool reset_id = false;
 
-	if (port_tag.length() == 0) {
-
-		if (_slave && ((ms = dynamic_cast<MTC_Slave*> (_slave)) != 0)) {
-			error << _("Ardour is slaved to MTC - port cannot be reset") << endmsg;
-			return -1;
-		}
-
-		if (_mtc_port == 0) {
-			return 0;
-		}
-
-		_mtc_port = 0;
-		goto out;
-	}
-
-	MIDI::Port* port;
-
-	if ((port = MIDI::Manager::instance()->port (port_tag)) == 0) {
-		error << string_compose (_("unknown port %1 requested for MTC"), port_tag) << endl;
-		return -1;
-	}
-
-	_mtc_port = port;
-
-	if (_slave && ((ms = dynamic_cast<MTC_Slave*> (_slave)) != 0)) {
-		ms->rebind (*port);
-	}
-
-	Config->set_mtc_port_name (port_tag);
-
-  out:
-	#endif
-	MTC_PortChanged(); /* EMIT SIGNAL */
-	change_midi_ports ();
-	set_dirty();
-	return 0;
-}
-
-int
-Session::set_mmc_port (string port_tag)
-{
-#if 0
 	if (port_tag.length() == 0) {
 		if (_mmc_port == 0) {
 			return 0;
@@ -151,6 +109,8 @@ Session::set_mmc_port (string port_tag)
 	_mmc_port = port;
 
 	if (mmc) {
+		old_device_id = mmc->device_id();
+		reset_id = true;
 		delete mmc;
 	}
 
@@ -158,6 +118,9 @@ Session::set_mmc_port (string port_tag)
 					MMC_CommandSignature,
 					MMC_ResponseSignature);
 
+	if (reset_id) {
+		mmc->set_device_id (old_device_id);
+	}
 
 	mmc->Play.connect 
 		(mem_fun (*this, &Session::mmc_deferred_play));
@@ -186,6 +149,7 @@ Session::set_mmc_port (string port_tag)
 	mmc->TrackRecordStatusChange.connect
 		(mem_fun (*this, &Session::mmc_record_enable));
 
+
 	/* also handle MIDI SPP because its so common */
 
 	_mmc_port->input()->start.connect (mem_fun (*this, &Session::spp_start));
@@ -193,6 +157,96 @@ Session::set_mmc_port (string port_tag)
 	_mmc_port->input()->stop.connect (mem_fun (*this, &Session::spp_stop));
 	
 	Config->set_mmc_port_name (port_tag);
+
+  out:
+	MMC_PortChanged(); /* EMIT SIGNAL */
+	change_midi_ports ();
+	set_dirty();
+#endif
+	return 0;
+}
+
+void
+Session::set_mmc_device_id (uint32_t device_id)
+{
+	if (mmc) {
+		mmc->set_device_id (device_id);
+	}
+}
+
+int
+Session::set_mmc_port (string port_tag)
+{
+#if 0
+	MIDI::byte old_device_id = 0;
+	bool reset_id = false;
+
+	if (port_tag.length() == 0) {
+		if (_mmc_port == 0) {
+			return 0;
+		}
+		_mmc_port = 0;
+		goto out;
+	}
+
+	MIDI::Port* port;
+
+	if ((port = MIDI::Manager::instance()->port (port_tag)) == 0) {
+		return -1;
+	}
+
+	_mmc_port = port;
+
+	if (mmc) {
+		old_device_id = mmc->device_id();
+		reset_id = true;
+		delete mmc;
+	}
+
+	mmc = new MIDI::MachineControl (*_mmc_port, 1.0, 
+					MMC_CommandSignature,
+					MMC_ResponseSignature);
+
+	if (reset_id) {
+		mmc->set_device_id (old_device_id);
+	}
+
+	mmc->Play.connect 
+		(mem_fun (*this, &Session::mmc_deferred_play));
+	mmc->DeferredPlay.connect 
+		(mem_fun (*this, &Session::mmc_deferred_play));
+	mmc->Stop.connect 
+		(mem_fun (*this, &Session::mmc_stop));
+	mmc->FastForward.connect 
+		(mem_fun (*this, &Session::mmc_fast_forward));
+	mmc->Rewind.connect 
+		(mem_fun (*this, &Session::mmc_rewind));
+	mmc->Pause.connect 
+		(mem_fun (*this, &Session::mmc_pause));
+	mmc->RecordPause.connect 
+		(mem_fun (*this, &Session::mmc_record_pause));
+	mmc->RecordStrobe.connect 
+		(mem_fun (*this, &Session::mmc_record_strobe));
+	mmc->RecordExit.connect 
+		(mem_fun (*this, &Session::mmc_record_exit));
+	mmc->Locate.connect 
+		(mem_fun (*this, &Session::mmc_locate));
+	mmc->Step.connect 
+		(mem_fun (*this, &Session::mmc_step));
+	mmc->Shuttle.connect 
+		(mem_fun (*this, &Session::mmc_shuttle));
+	mmc->TrackRecordStatusChange.connect
+		(mem_fun (*this, &Session::mmc_record_enable));
+
+
+	/* also handle MIDI SPP because its so common */
+
+	_mmc_port->input()->start.connect (mem_fun (*this, &Session::spp_start));
+	_mmc_port->input()->contineu.connect (mem_fun (*this, &Session::spp_continue));
+	_mmc_port->input()->stop.connect (mem_fun (*this, &Session::spp_stop));
+	
+	Config->set_mmc_port_name (port_tag);
+
   out:
 #endif
 	MMC_PortChanged(); /* EMIT SIGNAL */
@@ -1127,15 +1181,17 @@ Session::start_midi_thread ()
 void
 Session::terminate_midi_thread ()
 {
-	MIDIRequest* request = new MIDIRequest;
-	void* status;
-
-	request->type = MIDIRequest::Quit;
-
-	midi_requests.write (&request, 1);
-	poke_midi_thread ();
-
-	pthread_join (midi_thread, &status);
+	if (midi_thread) {
+		MIDIRequest* request = new MIDIRequest;
+		void* status;
+		
+		request->type = MIDIRequest::Quit;
+		
+		midi_requests.write (&request, 1);
+		poke_midi_thread ();
+		
+		pthread_join (midi_thread, &status);
+	}
 }
 
 void

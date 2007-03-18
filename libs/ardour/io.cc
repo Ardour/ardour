@@ -27,6 +27,7 @@
 #include <glibmm/thread.h>
 
 #include <pbd/xml++.h>
+#include <pbd/replace_all.h>
 
 #include <ardour/audioengine.h>
 #include <ardour/io.h>
@@ -1815,6 +1816,12 @@ IO::set_name (string name, void* src)
 {
 	if (name == _name) {
 		return 0;
+	}
+
+	/* replace all colons in the name. i wish we didn't have to do this */
+
+	if (replace_all (name, ":", "-")) {
+		warning << _("you cannot use colons to name objects with I/O connections") << endmsg;
 	}
 
 	for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {

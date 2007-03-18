@@ -31,6 +31,7 @@ setup_enum_writer ()
 	RegionPoint _RegionPoint;
 	Placement _Placement;
 	MonitorModel _MonitorModel;
+	RemoteModel _RemoteModel;
 	CrossfadeModel _CrossfadeModel;
 	LayerModel _LayerModel;
 	SoloModel _SoloModel;
@@ -141,6 +142,11 @@ setup_enum_writer ()
 	REGISTER_ENUM (SoftwareMonitoring);
 	REGISTER_ENUM (ExternalMonitoring);
 	REGISTER (_MonitorModel);
+
+	REGISTER_ENUM (UserOrdered);
+	REGISTER_ENUM (MixerOrdered);
+	REGISTER_ENUM (EditorOrdered);
+	REGISTER (_RemoteModel);
 
 	REGISTER_ENUM (FullCrossfade);
 	REGISTER_ENUM (ShortCrossfade);

@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __sndfile_source_h__ 
@@ -31,11 +30,11 @@ class SndFileSource : public AudioFileSource {
   public:
 	/* constructor to be called for existing external-to-session files */
 
-	SndFileSource (Session&, std::string path, int chn, Flag flags);
+        SndFileSource (Session&, Glib::ustring path, int chn, Flag flags);
 
 	/* constructor to be called for new in-session files */
 
-	SndFileSource (Session&, std::string path, SampleFormat samp_format, HeaderFormat hdr_format, nframes_t rate, 
+	SndFileSource (Session&, Glib::ustring path, SampleFormat samp_format, HeaderFormat hdr_format, nframes_t rate, 
 		       Flag flags = SndFileSource::default_writable_flags);
 		       
 	/* constructor to be called for existing in-session files */
@@ -60,7 +59,7 @@ class SndFileSource : public AudioFileSource {
 	static void setup_standard_crossfades (nframes_t sample_rate);
 	static const AudioFileSource::Flag default_writable_flags;
 
-	static int get_soundfile_info (string path, SoundFileInfo& _info, string& error_msg);
+	static int get_soundfile_info (const Glib::ustring& path, SoundFileInfo& _info, string& error_msg);
 
   protected:
 	void set_header_timeline_position ();

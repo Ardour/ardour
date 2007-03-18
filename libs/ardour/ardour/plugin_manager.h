@@ -7,7 +7,6 @@
 
 #include <ardour/types.h>
 #include <ardour/plugin.h>
-#include <ardour/audio_unit.h>
 
 namespace ARDOUR {
 

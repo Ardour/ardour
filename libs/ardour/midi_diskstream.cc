@@ -42,7 +42,6 @@
 #include <ardour/utils.h>
 #include <ardour/configuration.h>
 #include <ardour/smf_source.h>
-#include <ardour/destructive_filesource.h>
 #include <ardour/send.h>
 #include <ardour/region_factory.h>
 #include <ardour/midi_playlist.h>

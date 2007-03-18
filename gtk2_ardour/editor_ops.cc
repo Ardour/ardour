@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <unistd.h>
@@ -2570,7 +2569,7 @@ Editor::bounce_range_selection ()
 		return;
 	}
 
-	TrackViewList *views = get_valid_views (selection->time.track, selection->time.group);
+	TrackSelection views = selection->tracks;
 
 	nframes_t start = selection->time[clicked_selection].start;
 	nframes_t end = selection->time[clicked_selection].end;
@@ -2578,7 +2577,7 @@ Editor::bounce_range_selection ()
 	
 	begin_reversible_command (_("bounce range"));
 
-	for (TrackViewList::iterator i = views->begin(); i != views->end(); ++i) {
+	for (TrackViewList::iterator i = views.begin(); i != views.end(); ++i) {
 
 		AudioTimeAxisView* atv;
 
@@ -2605,8 +2604,6 @@ Editor::bounce_range_selection ()
 	}
 	
 	commit_reversible_command ();
-	
-	delete views;
 }
 
 void

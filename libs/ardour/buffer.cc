@@ -22,6 +22,12 @@ using std::cerr; using std::endl;
 
 #include <ardour/buffer.h>
 
+#ifdef __x86_64__
+static const int CPU_CACHE_ALIGN = 64;
+#else
+static const int CPU_CACHE_ALIGN = 16; /* arguably 32 on most arches, but it matters less */
+#endif
+
 namespace ARDOUR {
 
 
@@ -47,7 +53,7 @@ AudioBuffer::AudioBuffer(size_t capacity)
 #ifdef NO_POSIX_MEMALIGN
 		_data =  (Sample *) malloc(sizeof(Sample) * capacity);
 #else
-		posix_memalign((void**)&_data, 16, sizeof(Sample) * capacity);
+		posix_memalign((void**)&_data, CPU_CACHE_ALIGN, sizeof(Sample) * capacity);
 #endif	
 		assert(_data);
 		_owns_data = true;
@@ -76,8 +82,8 @@ MidiBuffer::MidiBuffer(size_t capacity)
 	_events =  (MidiEvent *) malloc(sizeof(MidiEvent) * capacity);
 	_data =  (RawMidi *) malloc(sizeof(RawMidi) * capacity * MAX_EVENT_SIZE);
 #else
-	posix_memalign((void**)&_events, 16, sizeof(MidiEvent) * capacity);
-	posix_memalign((void**)&_data, 16, sizeof(RawMidi) * capacity * MAX_EVENT_SIZE);
+	posix_memalign((void**)&_events, CPU_CACHE_ALIGN, sizeof(MidiEvent) * capacity);
+	posix_memalign((void**)&_data, CPU_CACHE_ALIGN, sizeof(RawMidi) * capacity * MAX_EVENT_SIZE);
 #endif	
 	assert(_data);
 	assert(_events);

@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id: midicontrollable.cc 629 2006-06-21 23:01:03Z paul $
 */
 
 #include <cstdio> /* for sprintf, sigh */
@@ -99,6 +98,8 @@ MIDIControllable::stop_learning ()
 void
 MIDIControllable::drop_external_control ()
 {
+	cerr << "Dropping existing control using " << connections << " connections\n";
+
 	if (connections > 0) {
 		midi_sense_connection[0].disconnect ();
 	} 
@@ -279,6 +280,8 @@ MIDIControllable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 	default:
 		break;
 	}
+
+	cerr << "MIDI bound with " << connections << endl;
 }
 
 void

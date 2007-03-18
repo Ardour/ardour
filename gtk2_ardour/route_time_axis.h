@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id: audio_time_axis.h 664 2006-07-05 19:47:25Z drobilla $
 */
 
 #ifndef __ardour_route_time_axis_h__

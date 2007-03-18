@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <gtkmm2ext/utils.h>
@@ -158,10 +157,13 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 	}
 }
 
+double current = 0.0;
+bool currentInitialized = 0;
+
 void
 Editor::update_current_screen ()
 {
-	if (session && engine.running()) {
+	if (session && session->engine().running()) {
 
 		nframes_t frame;
 
@@ -178,35 +180,52 @@ Editor::update_current_screen ()
 			playhead_cursor->canvas_item.show();
 
 			if (frame != last_update_frame) {
-				const jack_nframes_t page_width = current_page_frames();
 
-				// Percentage width of the visible range to use as a scroll interval
-				// Idea: snap this to the nearest bar/beat/tick/etc, would make scrolling much
-				// less jarring when zoomed in.. and it would be fun to watch :)
-				static const double scroll_pct = 3.0/4.0;
 
-				const jack_nframes_t rightmost_frame = leftmost_frame + page_width;
-				const jack_nframes_t scroll_interval = (jack_nframes_t)(page_width * scroll_pct);
-				const jack_nframes_t padding = (jack_nframes_t)floor((page_width-scroll_interval) / 2.0);
-
-				if (frame < leftmost_frame + padding || frame > rightmost_frame - padding) {
-
+#undef CONTINUOUS_SCROLL
+#ifndef  CONTINUOUS_SCROLL
+				if (frame < leftmost_frame || frame > leftmost_frame + current_page_frames()) {
+					
 					if (session->transport_speed() < 0) {
-						if (frame > scroll_interval) {
-							center_screen (frame - scroll_interval/2);
+						if (frame > (current_page_frames()/2)) {
+							center_screen (frame-(current_page_frames()/2));
 						} else {
-							center_screen (scroll_interval);
+							center_screen (current_page_frames()/2);
 						}
 					} else {
-						center_screen(frame + scroll_interval/2);
+						center_screen (frame+(current_page_frames()/2));
 					}
 				}
 
 				playhead_cursor->set_position (frame);
+
+#else  // CONTINUOUS_SCROLL
+				
+				/* don't do continuous scroll till the new position is in the rightmost quarter of the 
+				   editor canvas
+				*/
+				
+				if (session->transport_speed()) {
+					double target = ((double)frame - (double)current_page_frames()/2.0) / frames_per_unit;
+					if (target <= 0.0) target = 0.0;
+					if ( fabs(target - current) < current_page_frames()/frames_per_unit ) {
+						target = (target * 0.15) + (current * 0.85);
+					} else {
+						/* relax */
+					}
+					//printf("frame: %d,  cpf: %d,  fpu: %6.6f, current: %6.6f, target : %6.6f\n", frame, current_page_frames(), frames_per_unit, current, target );
+					current = target;
+					horizontal_adjustment.set_value ( current );
+				}
+				
+				playhead_cursor->set_position (frame);
+
+#endif // CONTINUOUS_SCROLL
+
 			}
 
 		} else {
-
+			
 			if (frame != last_update_frame) {
 				if (frame < leftmost_frame || frame > leftmost_frame + current_page_frames()) {
 					playhead_cursor->canvas_item.hide();
@@ -222,7 +241,7 @@ Editor::update_current_screen ()
 		if (current_mixer_strip) {
 			current_mixer_strip->fast_update ();
 		}
-
+		
 	}
 }
 

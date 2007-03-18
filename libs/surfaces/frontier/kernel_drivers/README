@@ -1,0 +1,16 @@
+This directory contains the USB Tranzport Kernel driver for Linux.
+
+At present it accepts reads/writes of 8 byte cmds to /dev/tranzport0 to control
+the lights and screen.
+
+Reads are possible. Wheel Compression does not currently account for button changes
+
+It also has some sysfs hooks that are non-functional at the moment.
+
+The API is closely tied to the ardour revision and WILL change. 
+
+A sysfs interface is PERFECT for simple userspace apps to do fun things with the
+lights and screen. It's fairly lousy for handling input events and very lousy
+for watching the state of the shuttle wheel.
+
+In the end this is going to be driven by a midi layer

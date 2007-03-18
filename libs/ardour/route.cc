@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cmath>
@@ -81,7 +80,7 @@ Route::init ()
 	_soloed = false;
 	_solo_safe = false;
 	_phase_invert = false;
-	order_keys[N_("signal")] = order_key_cnt++;
+	order_keys[strdup (N_("signal"))] = order_key_cnt++;
 	_active = true;
 	_silent = false;
 	_meter_point = MeterPostFader;
@@ -116,6 +115,10 @@ Route::~Route ()
 {
 	clear_redirects (this);
 
+	for (OrderKeys::iterator i = order_keys.begin(); i != order_keys.end(); ++i) {
+		free ((void*)(i->first));
+	}
+
 	if (_control_outs) {
 		delete _control_outs;
 	}
@@ -137,21 +140,23 @@ Route::remote_control_id() const
 }
 
 long
-Route::order_key (string name) const
+Route::order_key (const char* name) const
 {
 	OrderKeys::const_iterator i;
 	
-	if ((i = order_keys.find (name)) == order_keys.end()) {
-		return -1;
+	for (i = order_keys.begin(); i != order_keys.end(); ++i) {
+		if (!strcmp (name, i->first)) {
+			return i->second;
+		}
 	}
 
-	return (*i).second;
+	return -1;
 }
 
 void
-Route::set_order_key (string name, long n)
+Route::set_order_key (const char* name, long n)
 {
-	order_keys[name] = n;
+	order_keys[strdup(name)] = n;
 	_session.set_dirty ();
 }
 
@@ -1107,9 +1112,16 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 			} else {
 				s->expect_inputs ((*prev)->output_streams());
 			}
-		}
 
-		redirect_max_outs = max ((*r)->output_streams(), redirect_max_outs);
+		} else {
+			
+			/* don't pay any attention to send output configuration, since it doesn't
+			   affect the route.
+			 */
+
+			redirect_max_outs = max ((*r)->output_streams (), redirect_max_outs);
+			
+		}
 	}
 
 	/* we're done */
@@ -1349,7 +1361,7 @@ Route::state(bool full_state)
 	OrderKeys::iterator x = order_keys.begin(); 
 
 	while (x != order_keys.end()) {
-		order_string += (*x).first;
+		order_string += string ((*x).first);
 		order_string += '=';
 		snprintf (buf, sizeof(buf), "%ld", (*x).second);
 		order_string += buf;
@@ -1367,6 +1379,11 @@ Route::state(bool full_state)
 	node->add_child_nocopy (IO::state (full_state));
 	node->add_child_nocopy (_solo_control.get_state ());
 	node->add_child_nocopy (_mute_control.get_state ());
+
+	XMLNode* remote_control_node = new XMLNode (X_("remote_control"));
+	snprintf (buf, sizeof (buf), "%d", _remote_control_id);
+	remote_control_node->add_property (X_("id"), buf);
+	node->add_child_nocopy (*remote_control_node);
 
 	if (_control_outs) {
 		XMLNode* cnode = new XMLNode (X_("ControlOuts"));
@@ -1564,7 +1581,7 @@ Route::_set_state (const XMLNode& node, bool call_base)
 					error << string_compose (_("badly formed order key string in state file! [%1] ... ignored."), remaining)
 					      << endmsg;
 				} else {
-					set_order_key (remaining.substr (0, equal), n);
+					set_order_key (remaining.substr (0, equal).c_str(), n);
 				}
 			}
 
@@ -1659,6 +1676,13 @@ Route::_set_state (const XMLNode& node, bool call_base)
 			else if (prop->value() == "mute") {
 				_mute_control.set_state (*child);
 				_session.add_controllable (&_mute_control);
+			}
+		}
+		else if (child->name() == X_("remote_control")) {
+			if ((prop = child->property (X_("id"))) != 0) {
+				int32_t x;
+				sscanf (prop->value().c_str(), "%d", &x);
+				set_remote_control_id (x);
 			}
 		}
 	}

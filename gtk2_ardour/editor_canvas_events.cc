@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cstdlib>
@@ -25,6 +24,7 @@
 #include <ardour/audioplaylist.h>
 
 #include "editor.h"
+#include "keyboard.h"
 #include "public_editor.h"
 #include "audio_region_view.h"
 #include "audio_streamview.h"
@@ -71,7 +71,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			event.button.y = wy;
 			
 			nframes_t where = event_frame (&event, 0, 0);
-			temporal_zoom_to_frame (true, where);
+			temporal_zoom_to_frame (false, where);
 			return true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
 			if (!current_stepping_trackview) {
@@ -102,7 +102,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			event.button.y = wy;
 			
 			nframes_t where = event_frame (&event, 0, 0);
-			temporal_zoom_to_frame (false, where);
+			temporal_zoom_to_frame (true, where);
 			return true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
 			if (!current_stepping_trackview) {

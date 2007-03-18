@@ -53,9 +53,10 @@
 
 using namespace ARDOUR;
 using namespace PBD;
+using namespace Glib;
 
-string AudioFileSource::peak_dir = "";
-string AudioFileSource::search_path;
+ustring AudioFileSource::peak_dir = "";
+ustring AudioFileSource::search_path;
 
 sigc::signal<void> AudioFileSource::HeaderPositionOffsetChanged;
 uint64_t           AudioFileSource::header_position_offset = 0;
@@ -63,9 +64,9 @@ uint64_t           AudioFileSource::header_position_offset = 0;
 /* XXX maybe this too */
 char   AudioFileSource::bwf_serial_number[13] = "000000000000";
 
-AudioFileSource::AudioFileSource (Session& s, string path, Flag flags)
+AudioFileSource::AudioFileSource (Session& s, ustring path, Flag flags)
 	: AudioSource (s, path), _flags (flags),
-	  channel (0)
+	  _channel (0)
 {
 	/* constructor used for existing external to session files. file must exist already */
 	_is_embedded = AudioFileSource::determine_embeddedness (path);
@@ -76,9 +77,9 @@ AudioFileSource::AudioFileSource (Session& s, string path, Flag flags)
 
 }
 
-AudioFileSource::AudioFileSource (Session& s, std::string path, Flag flags, SampleFormat samp_format, HeaderFormat hdr_format)
+AudioFileSource::AudioFileSource (Session& s, ustring path, Flag flags, SampleFormat samp_format, HeaderFormat hdr_format)
 	: AudioSource (s, path), _flags (flags),
-	  channel (0)
+	  _channel (0)
 {
 	/* constructor used for new internal-to-session files. file cannot exist */
 	_is_embedded = false;
@@ -88,9 +89,9 @@ AudioFileSource::AudioFileSource (Session& s, std::string path, Flag flags, Samp
 	}
 }
 
-AudioFileSource::AudioFileSource (Session& s, const XMLNode& node)
+AudioFileSource::AudioFileSource (Session& s, const XMLNode& node, bool must_exist)
 	: AudioSource (s, node), _flags (Flag (Writable|CanRename))
-          /* channel is set in set_state() */
+          /* _channel is set in set_state() */
 {
 	/* constructor used for existing internal-to-session files. file must exist */
 
@@ -98,7 +99,7 @@ AudioFileSource::AudioFileSource (Session& s, const XMLNode& node)
 		throw failed_constructor ();
 	}
 	
-	if (init (_name, true)) {
+	if (init (_name, must_exist)) {
 		throw failed_constructor ();
 	}
 }
@@ -112,7 +113,7 @@ AudioFileSource::~AudioFileSource ()
 }
 
 bool
-AudioFileSource::determine_embeddedness (std::string path)
+AudioFileSource::determine_embeddedness (ustring path)
 {
 	return (path.find("/") == 0);
 }
@@ -124,18 +125,17 @@ AudioFileSource::removable () const
 }
 
 int
-AudioFileSource::init (string pathstr, bool must_exist)
+AudioFileSource::init (ustring pathstr, bool must_exist)
 {
 	bool is_new = false;
 
 	_length = 0;
 	timeline_position = 0;
-	next_peak_clear_should_notify = false;
 	_peaks_built = false;
 	file_is_new = false;
 
 	if (!find (pathstr, must_exist, is_new)) {
-		return -1;
+		throw non_existent_source ();
 	}
 
 	if (is_new && must_exist) {
@@ -146,40 +146,40 @@ AudioFileSource::init (string pathstr, bool must_exist)
 }
 
 
-string
-AudioFileSource::peak_path (string audio_path)
+ustring
+AudioFileSource::peak_path (ustring audio_path)
 {
 	return _session.peak_path_from_audio_path (audio_path);
 }
 
-string
-AudioFileSource::old_peak_path (string audio_path)
+ustring
+AudioFileSource::old_peak_path (ustring audio_path)
 {
 	/* XXX hardly bombproof! fix me */
 
 	struct stat stat_file;
 	struct stat stat_mount;
 
-	string mp = mountpoint (audio_path);
+	ustring mp = mountpoint (audio_path);
 
 	stat (audio_path.c_str(), &stat_file);
 	stat (mp.c_str(), &stat_mount);
 
 	char buf[32];
 #ifdef __APPLE__
-	snprintf (buf, sizeof (buf), "%u-%u-%d.peak", stat_mount.st_ino, stat_file.st_ino, channel);
+	snprintf (buf, sizeof (buf), "%u-%u-%d.peak", stat_mount.st_ino, stat_file.st_ino, _channel);
 #else
-	snprintf (buf, sizeof (buf), "%ld-%ld-%d.peak", stat_mount.st_ino, stat_file.st_ino, channel);
+	snprintf (buf, sizeof (buf), "%ld-%ld-%d.peak", stat_mount.st_ino, stat_file.st_ino, _channel);
 #endif
 
-	string res = peak_dir;
+	ustring res = peak_dir;
 	res += buf;
 
 	return res;
 }
 
 bool
-AudioFileSource::get_soundfile_info (string path, SoundFileInfo& _info, string& error_msg)
+AudioFileSource::get_soundfile_info (ustring path, SoundFileInfo& _info, string& error_msg)
 {
 #ifdef HAVE_COREAUDIO
 	if (CoreAudioSource::get_soundfile_info (path, _info, error_msg) == 0) {
@@ -200,7 +200,7 @@ AudioFileSource::get_state ()
 	XMLNode& root (AudioSource::get_state());
 	char buf[32];
 	root.add_property (X_("flags"), enum_2_string (_flags));
-	snprintf (buf, sizeof (buf), "%d", channel);
+	snprintf (buf, sizeof (buf), "%u", _channel);
 	root.add_property (X_("channel"), buf);
 	return root;
 }
@@ -222,9 +222,9 @@ AudioFileSource::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property (X_("channel"))) != 0) {
-		channel = atoi (prop->value());
+		_channel = atoi (prop->value());
 	} else {
-		channel = 0;
+		_channel = 0;
 	}
 
 	if ((prop = node.property (X_("name"))) != 0) {
@@ -260,16 +260,13 @@ AudioFileSource::mark_streaming_write_completed ()
 
 	Glib::Mutex::Lock lm (_lock);
 
-	next_peak_clear_should_notify = true;
-
-	if (_peaks_built || pending_peak_builds.empty()) {
-		_peaks_built = true;
+	if (_peaks_built) {
 		PeaksReady (); /* EMIT SIGNAL */
 	}
 }
 
 void
-AudioFileSource::mark_take (string id)
+AudioFileSource::mark_take (ustring id)
 {
 	if (writable()) {
 		_take_id = id;
@@ -277,14 +274,14 @@ AudioFileSource::mark_take (string id)
 }
 
 int
-AudioFileSource::move_to_trash (const string trash_dir_name)
+AudioFileSource::move_to_trash (const ustring& trash_dir_name)
 {
 	if (is_embedded()) {
 		cerr << "tried to move an embedded region to trash" << endl;
 		return -1;
 	}
 
-	string newpath;
+	ustring newpath;
 
 	if (!writable()) {
 		return -1;
@@ -311,7 +308,7 @@ AudioFileSource::move_to_trash (const string trash_dir_name)
 		
 		char buf[PATH_MAX+1];
 		int version = 1;
-		string newpath_v;
+		ustring newpath_v;
 
 		snprintf (buf, sizeof (buf), "%s.%d", newpath.c_str(), version);
 		newpath_v = buf;
@@ -362,18 +359,16 @@ AudioFileSource::move_to_trash (const string trash_dir_name)
 }
 
 bool
-AudioFileSource::find (string pathstr, bool must_exist, bool& isnew)
+AudioFileSource::find (ustring& pathstr, bool must_exist, bool& isnew)
 {
-	string::size_type pos;
+	ustring::size_type pos;
 	bool ret = false;
 
 	isnew = false;
 
 	/* clean up PATH:CHANNEL notation so that we are looking for the correct path */
 
-	if ((pos = pathstr.find_last_of (':')) == string::npos) {
-		pathstr = pathstr;
-	} else {
+	if ((pos = pathstr.find_last_of (':')) != ustring::npos) {
 		pathstr = pathstr.substr (0, pos);
 	}
 
@@ -381,10 +376,10 @@ AudioFileSource::find (string pathstr, bool must_exist, bool& isnew)
 
 		/* non-absolute pathname: find pathstr in search path */
 
-		vector<string> dirs;
+		vector<ustring> dirs;
 		int cnt;
-		string fullpath;
-		string keeppath;
+		ustring fullpath;
+		ustring keeppath;
 
 		if (search_path.length() == 0) {
 			error << _("FileSource: search path not set") << endmsg;
@@ -395,7 +390,7 @@ AudioFileSource::find (string pathstr, bool must_exist, bool& isnew)
 
 		cnt = 0;
 		
-		for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
+		for (vector<ustring>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
 
 			fullpath = *i;
 			if (fullpath[fullpath.length()-1] != '/') {
@@ -471,7 +466,7 @@ AudioFileSource::find (string pathstr, bool must_exist, bool& isnew)
 }
 
 void
-AudioFileSource::set_search_path (string p)
+AudioFileSource::set_search_path (ustring p)
 {
 	search_path = p;
 }
@@ -513,11 +508,11 @@ AudioFileSource::set_allow_remove_if_empty (bool yn)
 }
 
 int
-AudioFileSource::set_name (string newname, bool destructive)
+AudioFileSource::set_name (ustring newname, bool destructive)
 {
 	Glib::Mutex::Lock lm (_lock);
-	string oldpath = _path;
-	string newpath = Session::change_audio_path_by_name (oldpath, _name, newname, destructive);
+	ustring oldpath = _path;
+	ustring newpath = Session::change_audio_path_by_name (oldpath, _name, newname, destructive);
 
 	if (newpath.empty()) {
 		error << string_compose (_("programming error: %1"), "cannot generate a changed audio path") << endmsg;
@@ -542,7 +537,7 @@ AudioFileSource::set_name (string newname, bool destructive)
 }
 
 bool
-AudioFileSource::is_empty (Session& s, string path)
+AudioFileSource::is_empty (Session& s, ustring path)
 {
 	bool ret = false;
 	
@@ -566,30 +561,36 @@ AudioFileSource::setup_peakfile ()
 }
 
 bool
-AudioFileSource::safe_file_extension(string file)
+AudioFileSource::safe_file_extension(ustring file)
 {
-	return !(file.rfind(".wav") == string::npos &&
-		file.rfind(".aiff")== string::npos &&
-		file.rfind(".aif") == string::npos &&
-		file.rfind(".snd") == string::npos &&
-		file.rfind(".au")  == string::npos &&
-		file.rfind(".raw") == string::npos &&
-		file.rfind(".sf")  == string::npos &&
-		file.rfind(".cdr") == string::npos &&
-		file.rfind(".smp") == string::npos &&
-		file.rfind(".maud")== string::npos &&
-		file.rfind(".vwe") == string::npos &&
-		file.rfind(".paf") == string::npos &&
+	return !(file.rfind(".wav") == ustring::npos &&
+		file.rfind(".aiff")== ustring::npos &&
+		file.rfind(".aif") == ustring::npos &&
+		file.rfind(".snd") == ustring::npos &&
+		file.rfind(".au")  == ustring::npos &&
+		file.rfind(".raw") == ustring::npos &&
+		file.rfind(".sf")  == ustring::npos &&
+		file.rfind(".cdr") == ustring::npos &&
+		file.rfind(".smp") == ustring::npos &&
+		file.rfind(".maud")== ustring::npos &&
+		file.rfind(".vwe") == ustring::npos &&
+		file.rfind(".paf") == ustring::npos &&
 #ifdef HAVE_COREAUDIO
-		file.rfind(".mp3") == string::npos &&
-		file.rfind(".aac") == string::npos &&
-		file.rfind(".mp4") == string::npos &&
+		file.rfind(".mp3") == ustring::npos &&
+		file.rfind(".aac") == ustring::npos &&
+		file.rfind(".mp4") == ustring::npos &&
 #endif // HAVE_COREAUDIO
-		file.rfind(".voc") == string::npos);
+		file.rfind(".voc") == ustring::npos);
 }
 
 void
 AudioFileSource::mark_immutable ()
 {
-	_flags = Flag (_flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
+	/* destructive sources stay writable, and their other flags don't
+	   change.
+	*/
+
+	if (!(_flags & Destructive)) {
+		_flags = Flag (_flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
+	}
 }

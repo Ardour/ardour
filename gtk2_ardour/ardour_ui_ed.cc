@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 /* This file contains any ARDOUR_UI methods that require knowledge of
@@ -35,6 +34,7 @@
 #include "actions.h"
 
 #include <ardour/session.h>
+#include <ardour/audioengine.h>
 #include <ardour/control_protocol_manager.h>
 
 #include <control_protocol/control_protocol.h>
@@ -54,7 +54,7 @@ ARDOUR_UI::create_editor ()
 
 {
 	try {
-		editor = new Editor (*engine);
+		editor = new Editor ();
 	}
 
 	catch (failed_constructor& err) {
@@ -92,14 +92,15 @@ ARDOUR_UI::install_actions ()
 
 	/* the real actions */
 
-	act = ActionManager::register_action (main_actions, X_("New"), _("New"),  bind (mem_fun(*this, &ARDOUR_UI::new_session), string ()));
+	act = ActionManager::register_action (main_actions, X_("New"), _("New"),  hide_return (bind (mem_fun(*this, &ARDOUR_UI::new_session), string ())));
 
 	ActionManager::register_action (main_actions, X_("Open"), _("Open"),  mem_fun(*this, &ARDOUR_UI::open_session));
 	ActionManager::register_action (main_actions, X_("Recent"), _("Recent"),  mem_fun(*this, &ARDOUR_UI::open_recent_session));
 	act = ActionManager::register_action (main_actions, X_("Close"), _("Close"),  mem_fun(*this, &ARDOUR_UI::close_session));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("AddTrackBus"), _("Add Track/Bus"),  mem_fun(*this, &ARDOUR_UI::add_route));
+	act = ActionManager::register_action (main_actions, X_("AddTrackBus"), _("Add Track/Bus"),  
+					      bind (mem_fun(*this, &ARDOUR_UI::add_route), (Gtk::Window*) 0));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	
@@ -180,7 +181,6 @@ ARDOUR_UI::install_actions ()
 	
 	common_actions = ActionGroup::create (X_("Common"));
 	ActionManager::register_action (main_actions, X_("Windows"), _("Windows"));
-	ActionManager::register_action (common_actions, X_("Start-Prefix"), _("start prefix"), mem_fun(*this, &ARDOUR_UI::start_keyboard_prefix));
 	ActionManager::register_action (common_actions, X_("Quit"), _("Quit"), (mem_fun(*this, &ARDOUR_UI::finish)));
 
         /* windows visibility actions */
@@ -397,6 +397,11 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_toggle_action (option_actions, X_("UseMIDIcontrol"), _("Use MIDI control"), mem_fun (*this, &ARDOUR_UI::toggle_use_midi_control));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_toggle_action (option_actions, X_("UseOSC"), _("Use OSC"), mem_fun (*this, &ARDOUR_UI::toggle_use_osc));
+#ifndef HAVE_LIBLO
+	act->set_sensitive (false);
+#endif
+
 	ActionManager::register_toggle_action (option_actions, X_("StopPluginsWithTransport"), _("Stop plugins with transport"), mem_fun (*this, &ARDOUR_UI::toggle_StopPluginsWithTransport));
 	ActionManager::register_toggle_action (option_actions, X_("VerifyRemoveLastCapture"), _("Verify remove last capture"), mem_fun (*this, &ARDOUR_UI::toggle_VerifyRemoveLastCapture));
 	ActionManager::register_toggle_action (option_actions, X_("StopRecordingOnXrun"), _("Stop recording on xrun"), mem_fun (*this, &ARDOUR_UI::toggle_StopRecordingOnXrun));
@@ -409,6 +414,8 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_toggle_action (option_actions, X_("LatchedSolo"), _("Latched solo"), mem_fun (*this, &ARDOUR_UI::toggle_LatchedSolo));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (option_actions, X_("ShowSoloMutes"), _("Show solo muting"), mem_fun (*this, &ARDOUR_UI::toggle_ShowSoloMutes));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	/* !!! REMEMBER THAT RADIO ACTIONS HAVE TO BE HANDLED WITH MORE FINESSE THAN SIMPLE TOGGLES !!! */
@@ -472,6 +479,15 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_radio_action (option_actions, output_auto_connect_group, X_("OutputAutoConnectManual"), _("Manually connect outputs"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_output_auto_connect), (AutoConnectOption) 0)));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	RadioAction::Group remote_group;
+
+	act = ActionManager::register_radio_action (option_actions, remote_group, X_("RemoteUserDefined"), _("Remote ID assigned by User"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_remote_model), UserOrdered)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_radio_action (option_actions, remote_group, X_("RemoteMixerDefined"), _("Remote ID follows order of Mixer"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_remote_model), MixerOrdered)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_radio_action (option_actions, remote_group, X_("RemoteEditorDefined"), _("Remote ID follows order of Editor"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_remote_model), EditorOrdered)));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	ActionManager::add_action_group (shuttle_actions);
 	ActionManager::add_action_group (option_actions);
 	ActionManager::add_action_group (jack_actions);
@@ -521,6 +537,57 @@ ARDOUR_UI::toggle_control_protocol_feedback (ControlProtocolInfo* cpi, const cha
 				if (x != cpi->protocol->get_feedback()) {
 					cpi->protocol->set_feedback (x);
 				}
+			}
+		}
+	}
+}
+
+void
+ARDOUR_UI::set_jack_buffer_size (nframes_t nframes)
+{
+	Glib::RefPtr<Action> action;
+	char* action_name = 0;
+
+	switch (nframes) {
+	case 32:
+		action_name = X_("JACKLatency32");
+		break;
+	case 64:
+		action_name = X_("JACKLatency64");
+		break;
+	case 128:
+		action_name = X_("JACKLatency128");
+		break;
+	case 512:
+		action_name = X_("JACKLatency512");
+		break;
+	case 1024:
+		action_name = X_("JACKLatency1024");
+		break;
+	case 2048:
+		action_name = X_("JACKLatency2048");
+		break;
+	case 4096:
+		action_name = X_("JACKLatency4096");
+		break;
+	case 8192:
+		action_name = X_("JACKLatency8192");
+		break;
+	default:
+		/* XXX can we do anything useful ? */
+		break;
+	}
+
+	if (action_name) {
+
+		action = ActionManager::get_action (X_("JACK"), action_name);
+
+		if (action) {
+			Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (action);
+
+			if (ract && ract->get_active()) {
+				engine->request_buffer_size (nframes);
+				update_sample_rate (0);
 			}
 		}
 	}

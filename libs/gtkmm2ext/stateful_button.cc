@@ -1,31 +1,63 @@
 #include <string>
 #include <iostream>
-#include "gtkmm2ext/stateful_button.h"
+
+#include <gtkmm/main.h>
+
+#include <gtkmm2ext/stateful_button.h>
 
 using namespace Gtk;
 using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace std;
 
-StatefulButton::StatefulButton ()
+StateButton::StateButton ()
 {
-	current_state = 0;
-	have_saved_bg = false;
-}
-
-StatefulButton::StatefulButton (const string& label)
-	: Button (label)
-{
-	current_state = 0;
-	have_saved_bg = false;
+	_is_realized = false;
+	visual_state = 0;
 }
 
 void
-StatefulButton::set_colors (const vector<Gdk::Color>& c)
+StateButton::set_visual_state (int n)
 {
-	colors = c;
-	current_state++; // to force transition
-	set_state (current_state - 1);
+	if (!_is_realized) {
+		/* not yet realized */
+		visual_state = n;
+		return;
+	}
+
+	if (n == visual_state) {
+		return;
+	}
+
+	string name = get_widget_name ();
+	name = name.substr (0, name.find_last_of ('-'));
+
+	switch (n) {
+	case 0:
+		/* relax */
+		break;
+	case 1:
+		name += "-active";
+		break;
+	case 2:
+		name += "-alternate";
+		break;
+	}
+
+	set_widget_name (name);
+	visual_state = n;
+}
+
+/* ----------------------------------------------------------------- */
+
+void
+StatefulToggleButton::on_realize ()
+{
+	ToggleButton::on_realize ();
+
+	_is_realized = true;
+	visual_state++; // to force transition
+	set_visual_state (visual_state - 1);
 }
 
 void
@@ -33,48 +65,19 @@ StatefulButton::on_realize ()
 {
 	Button::on_realize ();
 
-	if (!have_saved_bg) {
-		saved_bg = get_style()->get_bg (STATE_NORMAL);
-		have_saved_bg = true;
-	}
-
-	current_state++; // to force transition
-	set_state (current_state - 1);
+	_is_realized = true;
+	visual_state++; // to force transition
+	set_visual_state (visual_state - 1);
 }
 
 void
-StatefulButton::set_state (int n)
+StatefulToggleButton::on_toggled ()
 {
-	if (is_realized()) {
-
-		if (n == current_state) {
-			return;
-		}
-		
-		if (n == 0) {
-			
-			/* back to the default color */
-			
-			if (have_saved_bg) {
-				modify_bg (STATE_NORMAL, saved_bg);
-				modify_bg (STATE_ACTIVE, saved_bg);
-				modify_bg (STATE_SELECTED, saved_bg);
-				modify_bg (STATE_PRELIGHT, saved_bg);
-			}
-			
-
+	if (!_self_managed) {
+		if (get_active()) {
+			set_visual_state (1);
 		} else {
-			
-			int index = (n-1) % colors.size ();
-			
-			modify_bg (STATE_NORMAL, colors[index]);
-			modify_bg (STATE_ACTIVE, colors[index]);
-			modify_bg (STATE_SELECTED, colors[index]);
-			modify_bg (STATE_PRELIGHT, colors[index]);
+			set_visual_state (0);
 		}
-		
-		/* leave insensitive alone */
 	}
-
-	current_state = n;
 }

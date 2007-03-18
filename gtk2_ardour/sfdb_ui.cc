@@ -50,6 +50,8 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
+Glib::ustring SoundFileBrowser::persistent_folder;
+
 SoundFileBox::SoundFileBox ()
 	:
 	_session(0),
@@ -308,6 +310,11 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s)
 	chooser.set_filter (filter);
 	chooser.set_select_multiple (true);
 	chooser.signal_update_preview().connect(mem_fun(*this, &SoundFileBrowser::update_preview));
+
+	if (!persistent_folder.empty()) {
+		chooser.set_current_folder (persistent_folder);
+	}
+
 	found_list_view.get_selection()->signal_changed().connect(mem_fun(*this, &SoundFileBrowser::found_list_view_selected));
 	
 	found_search_btn.signal_clicked().connect(mem_fun(*this, &SoundFileBrowser::found_search_clicked));
@@ -316,6 +323,11 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s)
 	show_all ();
 	
 	set_session (s);
+}
+
+SoundFileBrowser::~SoundFileBrowser ()
+{
+	persistent_folder = chooser.get_current_folder();
 }
 
 void
@@ -548,3 +560,4 @@ SoundFileOmega::mode_changed ()
 		break;
 	}
 }
+

@@ -8,6 +8,7 @@
 #include <gtkmm/label.h>
 #include <gtkmm/table.h>
 #include <gtkmm/entry.h>
+#include <gtkmm/spinbutton.h>
 #include <gtkmm/comboboxtext.h>
 
 #include <ardour/types.h>
@@ -17,8 +18,9 @@
 
 struct TempoDialog : public ArdourDialog 
 {
-    Gtk::Entry   bpm_entry;
-    Gtk::Frame   bpm_frame;
+    Gtk::Adjustment   bpm_adjustment;
+    Gtk::SpinButton   bpm_spinner;
+    Gtk::Frame        bpm_frame;
     Gtk::VBox    vpacker;
     Gtk::Button  ok_button;
     Gtk::Button  cancel_button;
@@ -41,8 +43,9 @@ struct TempoDialog : public ArdourDialog
     
   private:
     void init (const ARDOUR::BBT_Time& start, double, bool);
-    bool bpm_key_press (GdkEventKey* );
-    bool bpm_key_release (GdkEventKey* );
+    void bpm_changed ();
+    bool bpm_button_press (GdkEventButton* );
+    bool bpm_button_release (GdkEventButton* );
 };
 
 struct MeterDialog : public ArdourDialog 

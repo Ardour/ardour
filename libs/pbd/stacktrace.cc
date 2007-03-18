@@ -23,7 +23,7 @@ PBD::stacktrace (std::ostream& out, int levels)
 
 		printf ("Obtained %zd stack frames.\n", size);
 		
-		for (i = 0; i < size && (levels == 0 || i < levels); i++) {
+		for (i = 0; i < size && (levels == 0 || i < size_t(levels)); i++) {
 			out << strings[i] << std::endl;
 		}
 		
@@ -37,6 +37,12 @@ void
 PBD::stacktrace (std::ostream& out, int levels)
 {
 	out << "stack tracing is not enabled on this platform" << std::endl;
+}
+
+void
+c_stacktrace ()
+{
+	PBD::stacktrace (std::cout);
 }
 
 #endif /* HAVE_EXECINFO */

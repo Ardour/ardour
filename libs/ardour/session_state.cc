@@ -15,7 +15,6 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
     
-  $Id$
 */
 
 #define __STDC_FORMAT_MACROS 1
@@ -71,7 +70,8 @@
 #include <ardour/midi_playlist.h>
 #include <ardour/smf_source.h>
 #include <ardour/audiofilesource.h>
-#include <ardour/destructive_filesource.h>
+#include <ardour/silentfilesource.h>
+#include <ardour/sndfilesource.h>
 #include <ardour/midi_source.h>
 #include <ardour/sndfile_helpers.h>
 #include <ardour/auditioner.h>
@@ -193,6 +193,8 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	current_trans = 0;
 	first_file_data_format_reset = true;
 	first_file_header_format_reset = true;
+	butler_thread = (pthread_t) 0;
+	//midi_thread = (pthread_t) 0;
 
 	AudioDiskstream::allocate_working_buffers();
 
@@ -477,11 +479,16 @@ Session::create (bool& new_session, string* mix_template, nframes_t initial_leng
 		return -1;
 	}
 
-	dir = sound_dir ();
+	/* if this is is an existing session with an old "sounds" directory, just use it. see Session::sound_dir() for more details */
 
-	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
-		error << string_compose(_("Session: cannot create session sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-		return -1;
+	if (!Glib::file_test (old_sound_dir(), Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_DIR)) {
+
+		dir = sound_dir ();
+		
+		if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+			error << string_compose(_("Session: cannot create session sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+			return -1;
+		}
 	}
 
 	dir = dead_sound_dir ();
@@ -495,6 +502,13 @@ Session::create (bool& new_session, string* mix_template, nframes_t initial_leng
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
 		error << string_compose(_("Session: cannot create session automation dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+		return -1;
+	}
+
+	dir = export_dir ();
+
+	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+		error << string_compose(_("Session: cannot create session export dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
 		return -1;
 	}
 
@@ -605,6 +619,12 @@ Session::save_state (string snapshot_name, bool pending)
 	string bak_path;
 
 	if (_state_of_the_state & CannotSave) {
+		return 1;
+	}
+
+	if (!_engine.connected ()) {
+		error << _("Ardour's audio engine is not connected and state saving would lose all I/O connections. Session not saved")
+		      << endmsg;
 		return 1;
 	}
 
@@ -1442,6 +1462,19 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool full)
 	
 	try {
 		boost::shared_ptr<AudioRegion> region (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (sources, node)));
+
+		/* a final detail: this is the one and only place that we know how long missing files are */
+
+		if (region->whole_file()) {
+			for (SourceList::iterator sx = sources.begin(); sx != sources.end(); ++sx) {
+				boost::shared_ptr<SilentFileSource> sfp = boost::dynamic_pointer_cast<SilentFileSource> (*sx);
+				if (sfp) {
+					sfp->set_length (region->length());
+				}
+			}
+		}
+
+
 		return region;
 						       
 	}
@@ -1533,10 +1566,15 @@ Session::path_from_region_name (string name, string identifier)
 		} else {
 			snprintf (buf, sizeof(buf), "%s/%s-%" PRIu32 ".wav", dir.c_str(), name.c_str(), n);
 		}
-		if (access (buf, F_OK) != 0) {
+
+		if (!g_file_test (buf, G_FILE_TEST_EXISTS)) {
 			return buf;
 		}
 	}
+
+	error << string_compose (_("cannot create new file from region name \"%1\" with ident = \"%2\": too many existing files with similar names"),
+				 name, identifier)
+	      << endmsg;
 
 	return "";
 }
@@ -1555,10 +1593,16 @@ Session::load_sources (const XMLNode& node)
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
-		if ((source = XMLSourceFactory (**niter)) == 0) {
-			error << _("Session: cannot create Source from XML description.") << endmsg;
+		try {
+			if ((source = XMLSourceFactory (**niter)) == 0) {
+				error << _("Session: cannot create Source from XML description.") << endmsg;
+			}
 		}
 
+		catch (non_existent_source& err) {
+			warning << _("A sound file is missing. It will be replaced by silence.") << endmsg;
+			source = SourceFactory::createSilent (*this, **niter, max_frames, _current_frame_rate);
+		}
 	}
 
 	return 0;
@@ -1574,7 +1618,7 @@ Session::XMLSourceFactory (const XMLNode& node)
 	try {
 		return SourceFactory::create (*this, node);
 	}
-	
+
 	catch (failed_constructor& err) {
 		error << _("Found a sound file that cannot be used by Ardour. Talk to the progammers.") << endmsg;
 		return boost::shared_ptr<Source>();
@@ -1922,16 +1966,56 @@ Session::dead_sound_dir () const
 {
 	string res = _path;
 	res += dead_sound_dir_name;
-	res += '/';
+
+	return res;
+}
+
+string
+Session::old_sound_dir (bool with_path) const
+{
+	string res;
+
+	if (with_path) {
+		res = _path;
+	}
+
+	res += old_sound_dir_name;
+
 	return res;
 }
 
 string
 Session::sound_dir (bool with_path) const
 {
-	/* support old session structure */
+	string res;
+	string full;
 
-	struct stat statbuf;
+	if (with_path) {
+		res = _path;
+	} else {
+		full = _path;
+	}
+
+	res += interchange_dir_name;
+	res += '/';
+	res += legalize_for_path (_name);
+	res += '/';
+	res += sound_dir_name;
+
+	if (with_path) {
+		full = res;
+	} else {
+		full += res;
+	}
+	
+	/* if this already exists, don't check for the old session sound directory */
+
+	if (Glib::file_test (full, Glib::FILE_TEST_IS_DIR|Glib::FILE_TEST_EXISTS)) {
+		return res;
+	}
+		
+	/* possibly support old session structure */
+
 	string old_nopath;
 	string old_withpath;
 
@@ -1940,25 +2024,15 @@ Session::sound_dir (bool with_path) const
 	
 	old_withpath = _path;
 	old_withpath += old_sound_dir_name;
-
-	if (stat (old_withpath.c_str(), &statbuf) == 0) {
+	
+	if (Glib::file_test (old_withpath.c_str(), Glib::FILE_TEST_IS_DIR|Glib::FILE_TEST_EXISTS)) {
 		if (with_path)
 			return old_withpath;
 		
 		return old_nopath;
 	}
-
-	string res;
-
-	if (with_path) {
-		res = _path;
-	}
-
-	res += interchange_dir_name;
-	res += '/';
-	res += legalize_for_path (_name);
-	res += '/';
-	res += sound_dir_name;
+	
+	/* ok, old "sounds" directory isn't there, return the new path */
 
 	return res;
 }
@@ -1987,6 +2061,15 @@ Session::template_dir ()
 	path += "templates/";
 
 	return path;
+}
+
+string
+Session::export_dir () const
+{
+	string res = _path;
+	res += export_dir_name;
+	res += '/';
+	return res;
 }
 
 string
@@ -2703,7 +2786,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		   on whichever filesystem it was already on.
 		*/
 
-		if (_path.find ("/sounds/")) {
+		if ((*x).find ("/sounds/") != string::npos) {
 
 			/* old school, go up 1 level */
 
@@ -2898,6 +2981,12 @@ Session::set_deletion_in_progress ()
 void
 Session::add_controllable (Controllable* c)
 {
+	/* this adds a controllable to the list managed by the Session.
+	   this is a subset of those managed by the Controllable class
+	   itself, and represents the only ones whose state will be saved
+	   as part of the session.
+	*/
+
 	Glib::Mutex::Lock lm (controllables_lock);
 	controllables.insert (c);
 }
@@ -3131,6 +3220,12 @@ Session::config_changed (const char* parameter_name)
 
 		//poke_midi_thread ();
 
+	} else if (PARAM_IS ("mmc-device-id")) {
+
+		if (mmc) {
+			mmc->set_device_id (Config->get_mmc_device_id());
+		}
+
 	} else if (PARAM_IS ("midi-control")) {
 		
 		//poke_midi_thread ();
@@ -3233,6 +3328,8 @@ Session::config_changed (const char* parameter_name)
 
 	} else if (PARAM_IS ("slave-source")) {
 		set_slave_source (Config->get_slave_source());
+	} else if (PARAM_IS ("remote-model")) {
+		set_remote_control_ids ();
 	}
 
 	set_dirty ();

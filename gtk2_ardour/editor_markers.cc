@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <sigc++/retype.h>
@@ -511,6 +510,7 @@ Editor::build_range_marker_menu (bool loop_or_punch)
 
 	items.push_back (MenuElem (_("Separate Regions in Range"), mem_fun(*this, &Editor::marker_menu_separate_regions_using_location)));
 	items.push_back (MenuElem (_("Select All in Range"), mem_fun(*this, &Editor::marker_menu_select_all_selectables_using_range)));
+	items.push_back (MenuElem (_("Select Range"), mem_fun(*this, &Editor::marker_menu_select_using_range)));
 
 }
 
@@ -557,6 +557,24 @@ Editor::marker_menu_hide ()
 	
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 		l->set_hidden (true, this);
+	}
+}
+
+void
+Editor::marker_menu_select_using_range ()
+{
+	Marker* marker;
+
+	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
+		/*NOTREACHED*/
+	}
+
+	Location* l;
+	bool is_start;
+
+	if (((l = find_location_from_marker (marker, is_start)) != 0) && (l->end() > l->start())) {
+	        set_selection_from_range (*l);
 	}
 }
 

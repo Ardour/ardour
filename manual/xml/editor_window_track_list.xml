@@ -1,0 +1,67 @@
+<?xml version="1.0" standalone="no"?>
+
+<!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
+
+]>
+
+<section id="editor-window-track-list">
+  <title>Track List</title>
+  <para>
+    To the left of the track area is the track list, which lists all tracks
+    and busses in the session. Tracks/Busses that are visible have their
+    names displayed in cyan, while hidden ones have their names displayed in
+    orange.
+  </para>
+
+  <para>
+    Click on the name of a track/bus to toggle its visibility in the editor.
+    Click and drag the name to reorder the track display area.
+  </para>
+
+  <para>
+    You can click on the title bar of the track list to display a menu that
+    allows you to:
+  </para>
+
+  <itemizedlist>
+    <listitem>
+      <para>
+        Hide all
+      </para>
+    </listitem>
+
+    <listitem>
+      <para>
+        Show all
+      </para>
+    </listitem>
+
+    <listitem>
+      <para>
+        Hide all tracks
+      </para>
+    </listitem>
+
+    <listitem>
+      <para>
+        Show all tracks
+      </para>
+    </listitem>
+
+    <listitem>
+      <para>
+        Hide all busses
+      </para>
+    </listitem>
+
+    <listitem>
+      <para>
+        Show all busses
+      </para>
+    </listitem>
+  </itemizedlist>
+<!--
+	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
+		href="Some_Subsection.xml" />
+	-->
+</section>

@@ -47,6 +47,8 @@ class RegionView : public TimeAxisViewItem
 	            double               samples_per_unit,
 	            Gdk::Color&          basic_color);
 
+	RegionView (const RegionView& other);
+
 	~RegionView ();
 	
 	virtual void init (Gdk::Color& base_color, bool wait_for_data);
@@ -68,6 +70,7 @@ class RegionView : public TimeAxisViewItem
     void lower_to_bottom ();
 
     bool set_position(nframes_t pos, void* src, double* delta = 0);
+    void fake_set_opaque (bool yn);
 
     virtual void show_region_editor () = 0;
     virtual void hide_region_editor();
@@ -82,14 +85,14 @@ class RegionView : public TimeAxisViewItem
     virtual void entered () {}
     virtual void exited () {}
     
-	static sigc::signal<void,RegionView*> RegionViewGoingAway;
+    static sigc::signal<void,RegionView*> RegionViewGoingAway;
     sigc::signal<void>                    GoingAway;
 
   protected:
 
     /** Allows derived types to specify their visibility requirements
      * to the TimeAxisViewItem parent class
-	 */
+     */
     RegionView (ArdourCanvas::Group *, 
 		TimeAxisView&,
 		boost::shared_ptr<ARDOUR::Region>,
@@ -119,7 +122,6 @@ class RegionView : public TimeAxisViewItem
     boost::shared_ptr<ARDOUR::Region> _region;
     
     ArdourCanvas::Polygon* sync_mark; ///< polgyon for sync position 
-    ArdourCanvas::Text*    no_wave_msg;
 
     RegionEditor* editor;
 

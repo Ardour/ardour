@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id: editor.cc 1353 2007-01-18 03:06:15Z paul $
 */
 
 #include <pbd/stacktrace.h>
@@ -154,6 +153,11 @@ Editor::extend_selection_to_track (TimeAxisView& view)
 	return false;
 }
 
+void
+Editor::select_all_tracks ()
+{
+	selection->set (track_views);
+}
 
 bool
 Editor::set_selected_track (TimeAxisView& view, Selection::Operation op, bool no_remove)

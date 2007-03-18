@@ -18,11 +18,14 @@ CONFIG_VARIABLE (bool, send_mmc, "send-mmc", false)
 CONFIG_VARIABLE (bool, mmc_control, "mmc-control", false)
 CONFIG_VARIABLE (bool, midi_feedback, "midi-feedback", false)
 CONFIG_VARIABLE (bool, midi_control, "midi-control", false)
+CONFIG_VARIABLE (uint8_t, mmc_device_id, "mmc-device-id", 0)
 
 /* control surfaces */
 
 CONFIG_VARIABLE (uint32_t, feedback_interval_ms,  "feedback-interval-ms", 100)
 CONFIG_VARIABLE (bool, use_tranzport,  "use-tranzport", false)
+CONFIG_VARIABLE (std::string, mackie_emulation, "mackie-emulation", "mcu")
+CONFIG_VARIABLE (RemoteModel, remote_model, "remote-model", MixerOrdered)
 
 /* disk operations */
 
@@ -35,7 +38,7 @@ CONFIG_VARIABLE (HeaderFormat, native_file_header_format,  "native-file-header-f
 /* OSC */
 
 CONFIG_VARIABLE (uint32_t, osc_port, "osc-port", 3819)
-CONFIG_VARIABLE (bool, use_osc, "use-osc", true)
+CONFIG_VARIABLE (bool, use_osc, "use-osc", false)
 
 /* crossfades */
 
@@ -62,6 +65,7 @@ CONFIG_VARIABLE (SoloModel, solo_model, "solo-model", InverseMute)
 CONFIG_VARIABLE (bool, solo_latched, "solo-latched", true)
 CONFIG_VARIABLE (bool, latched_record_enable, "latched-record-enable", false)
 CONFIG_VARIABLE (bool, all_safe, "all-safe", false)
+CONFIG_VARIABLE (bool, show_solo_mutes, "show-solo-mutes", false)
 
 /* click */
 

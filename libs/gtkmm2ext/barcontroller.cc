@@ -267,14 +267,12 @@ BarController::expose (GdkEventExpose* event)
 	gint w, h;
 	double fract;
 
-	w = darea.get_width() - 2;
-	h = darea.get_height() - 2;
-
 	fract = ((adjustment.get_value() - adjustment.get_lower()) /
 		 (adjustment.get_upper() - adjustment.get_lower()));
 	
 	switch (_style) {
 	case Line:
+		w = darea.get_width() - 1;
 		h = darea.get_height();
 		x1 = (gint) floor (w * fract);
 		x2 = x1;
@@ -304,6 +302,10 @@ BarController::expose (GdkEventExpose* event)
 		break;
 
 	case LeftToRight:
+
+		w = darea.get_width() - 2;
+		h = darea.get_height() - 2;
+
 		x1 = 0;
 		x2 = (gint) floor (w * fract);
 		y1 = 0;

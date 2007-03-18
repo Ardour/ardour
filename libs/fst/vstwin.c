@@ -326,9 +326,17 @@ DWORD WINAPI gui_event_loop (LPVOID param)
 		fst_error ("cannot set timer on dummy window");
 	}
 
-	while (GetMessageA (&msg, NULL, 0,0)) {
+	while (1) {
+
+		GetMessageA (&msg, NULL, 0,0);
+
+		if (msg.message == WM_SYSTEMERROR) {
+			/* sent when this thread is supposed to exist */
+			break;
+		}
 		
-	    if( msg.message == WM_KEYDOWN ) debreak();
+		if (msg.message == WM_KEYDOWN) debreak();
+
 		TranslateMessage( &msg );
 		DispatchMessageA (&msg);
 
@@ -336,7 +344,6 @@ DWORD WINAPI gui_event_loop (LPVOID param)
 		   and run idle callbacks 
 		*/
 		
-
 		if( msg.message == WM_TIMER ) {
 		    pthread_mutex_lock (&plugin_mutex);
 again:
@@ -409,6 +416,12 @@ fst_init ()
 	}
 
 	return 0;
+}
+
+void
+fst_finish ()
+{
+	PostThreadMessageA (gui_thread_id, WM_SYSTEMERROR, 0, 0);
 }
 
 int
@@ -501,7 +514,9 @@ fst_load (const char *path)
 		return NULL;
 	}
 
-	if ((fhandle->main_entry = GetProcAddress (fhandle->dll, "main")) == NULL) {
+	typedef AEffect* (*entryFunctionType)(audioMasterCallback);
+
+	if ((fhandle->main_entry = (entryFunctionType) GetProcAddress (fhandle->dll, "main")) == NULL) {
 		fst_unload (fhandle);
 		return NULL;
 	}

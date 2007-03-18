@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id: /local/undo/gtk2_ardour/region_editor.h 5 2006-05-31T02:48:48.738745Z paul  $
 */
 
 #ifndef __gtk_ardour_region_edit_h__

@@ -394,7 +394,7 @@ Session::GlobalMeteringStateCommand::get_state()
 		if (r) {
 			child->add_property (X_("id"), r->id().to_s());
 
-			const char* meterstr;
+			const char* meterstr = 0;
 			
 			switch (x->second) {
 			case MeterInput:
@@ -406,6 +406,8 @@ Session::GlobalMeteringStateCommand::get_state()
 			case MeterPostFader:
 				meterstr = X_("post");
 				break;
+			default:
+				fatal << string_compose (_("programming error: %1") , "no meter state in Session::GlobalMeteringStateCommand::get_state") << endmsg;
 			}
 
 			child->add_property (X_("meter"), meterstr);
@@ -432,6 +434,7 @@ Session::GlobalMeteringStateCommand::get_state()
 			case MeterPostFader:
 				meterstr = X_("post");
 				break;
+			default: meterstr = "";
 			}
 
 			child->add_property (X_("meter"), meterstr);

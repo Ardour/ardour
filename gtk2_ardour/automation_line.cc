@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cmath>
@@ -25,6 +24,7 @@
 
 #include <pbd/stl_delete.h>
 #include <pbd/memento_command.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/automation_event.h>
 #include <ardour/curve.h>

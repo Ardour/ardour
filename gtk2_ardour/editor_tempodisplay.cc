@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cstdio> // for sprintf, grrr 
@@ -94,13 +93,13 @@ Editor::draw_metric_marks (const Metrics& metrics)
 }
 
 void
-Editor::tempo_map_changed (Change ignored)
+Editor::tempo_map_changed (Change ignored, bool immediate_redraw)
 {
 	if (!session) {
 		return;
 	}
 
-        ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::tempo_map_changed), ignored));
+        ENSURE_GUI_THREAD(bind (mem_fun (*this, &Editor::tempo_map_changed), ignored, immediate_redraw));
 
 	BBT_Time previous_beat, next_beat; // the beats previous to the leftmost frame and after the rightmost frame
 
@@ -135,18 +134,27 @@ Editor::tempo_map_changed (Change ignored)
 		current_bbt_points = 0;
 	}
 
-	redisplay_tempo ();
+	if (immediate_redraw) {
+
+		hide_measures ();
+
+		if (session && current_bbt_points) {
+			draw_measures ();
+		}
+
+	} else {
+
+		if (session && current_bbt_points) {
+			Glib::signal_idle().connect (mem_fun (*this, &Editor::lazy_hide_and_draw_measures));
+		} else {
+			hide_measures ();
+		}
+	}
 }
 
 void
 Editor::redisplay_tempo ()
 {	
-
-	if (session && current_bbt_points) {
-		Glib::signal_idle().connect (mem_fun (*this, &Editor::lazy_hide_and_draw_measures));
-	} else {
-		hide_measures ();
-	}
 }
 
 void

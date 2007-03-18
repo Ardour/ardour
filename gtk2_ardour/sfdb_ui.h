@@ -88,7 +88,7 @@ class SoundFileBrowser : public ArdourDialog
 {
   public:
 	SoundFileBrowser (std::string title, ARDOUR::Session* _s = 0);
-	virtual ~SoundFileBrowser () {}; 
+	virtual ~SoundFileBrowser ();
 	
 	virtual void set_session (ARDOUR::Session*);
 
@@ -96,7 +96,9 @@ class SoundFileBrowser : public ArdourDialog
 	Gtk::FileChooserWidget chooser;
 	Gtk::FileFilter filter;
 	SoundFileBox preview;
-	
+
+	static Glib::ustring persistent_folder;
+
 	class FoundTagColumns : public Gtk::TreeModel::ColumnRecord
 	{
 	  public:
@@ -110,7 +112,7 @@ class SoundFileBrowser : public ArdourDialog
 	Gtk::TreeView found_list_view;
 	Gtk::Entry found_entry;
 	Gtk::Button found_search_btn;
-	
+
 	Gtk::Notebook notebook;
 	
 	void update_preview ();

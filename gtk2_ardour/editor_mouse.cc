@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cassert>
@@ -35,6 +34,7 @@
 #include "time_axis_view.h"
 #include "audio_time_axis.h"
 #include "audio_region_view.h"
+#include "midi_region_view.h"
 #include "marker.h"
 #include "streamview.h"
 #include "region_gain_line.h"
@@ -302,7 +302,9 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 
 	if (((mouse_mode != MouseObject) &&
 	     (mouse_mode != MouseAudition || item_type != RegionItem) &&
-	     (mouse_mode != MouseTimeFX || item_type != RegionItem)) ||
+	     (mouse_mode != MouseTimeFX || item_type != RegionItem) &&
+	     (mouse_mode != MouseRange)) ||
+
 	    (event->type != GDK_BUTTON_PRESS && event->type != GDK_BUTTON_RELEASE || event->button.button > 3)) {
 		
 		return;
@@ -312,9 +314,11 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 
 		if ((event->button.state & Keyboard::RelevantModifierKeyMask) && event->button.button != 1) {
 			
-			/* no selection action on modified button-2 or button-3 events */
-			
-			return;
+			/* almost no selection action on modified button-2 or button-3 events */
+		
+			if (item_type != RegionItem && event->button.button != 2) {
+				return;
+			}
 		}
 	}
 	    
@@ -325,29 +329,48 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 
 	switch (item_type) {
 	case RegionItem:
-		commit = set_selected_regionview_from_click (press, op, true);
+		if (mouse_mode != MouseRange) {
+			commit = set_selected_regionview_from_click (press, op, true);
+		} else if (event->type == GDK_BUTTON_PRESS) {
+			commit = set_selected_track_from_click (press, op, false);
+		}
 		break;
 		
 	case RegionViewNameHighlight:
 	case RegionViewName:
-		commit = set_selected_regionview_from_click (press, op, true);
+		if (mouse_mode != MouseRange) {
+			commit = set_selected_regionview_from_click (press, op, true);
+		} else if (event->type == GDK_BUTTON_PRESS) {
+			commit = set_selected_track_from_click (press, op, false);
+		}
 		break;
 
 	case FadeInHandleItem:
 	case FadeInItem:
 	case FadeOutHandleItem:
 	case FadeOutItem:
-		commit = set_selected_regionview_from_click (press, op, true);
+		if (mouse_mode != MouseRange) {
+			commit = set_selected_regionview_from_click (press, op, true);
+		} else if (event->type == GDK_BUTTON_PRESS) {
+			commit = set_selected_track_from_click (press, op, false);
+		}
 		break;
 		
 	case GainAutomationControlPointItem:
 	case PanAutomationControlPointItem:
 	case RedirectAutomationControlPointItem:
-		commit = set_selected_control_point_from_click (op, false);
+		if (mouse_mode != MouseRange) {
+			commit = set_selected_control_point_from_click (op, false);
+		}
 		break;
 		
 	case StreamItem:
-		// commit = set_selected_track_from_click (press, op, true);
+		/* for context click or range selection, select track */
+		if (event->button.button == 3) {
+			commit = set_selected_track_from_click (press, op, true);
+		} else if (event->type == GDK_BUTTON_PRESS && mouse_mode == MouseRange) {
+			commit = set_selected_track_from_click (press, op, false);
+		}
 		break;
 		    
 	case AutomationTrackItem:
@@ -358,26 +381,6 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		break;
 	}
 	
-#define SELECT_TRACK_FROM_CANVAS_IN_RANGE_MODE
-#ifdef  SELECT_TRACK_FROM_CANVAS_IN_RANGE_MODE
-	/* in range mode, button 1/2/3 press potentially selects a track */
-
-	if (mouse_mode == MouseRange && 
-	    event->type == GDK_BUTTON_PRESS && 
-	    event->button.button <= 3) {
-		
-		switch (item_type) {
-		case StreamItem:
-		case RegionItem:
-		case AutomationTrackItem:
-			commit = set_selected_track_from_click (true, op, true);
-			break;
-
-		default:
-			break;
-		}
-	}
-#endif
 	if (commit) {
 		commit_reversible_command ();
 	}
@@ -1174,23 +1177,25 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case GainAutomationControlPointItem:
 	case PanAutomationControlPointItem:
 	case RedirectAutomationControlPointItem:
-		cp = static_cast<ControlPoint*>(item->get_data ("control_point"));
-		cp->set_visible (true);
-		
-		double at_x, at_y;
-		at_x = cp->get_x();
-		at_y = cp->get_y ();
-		cp->item->i2w (at_x, at_y);
-		at_x += 20.0;
-		at_y += 20.0;
+		if (mouse_mode == MouseGain || mouse_mode == MouseObject) {
+			cp = static_cast<ControlPoint*>(item->get_data ("control_point"));
+			cp->set_visible (true);
 
-		fraction = 1.0 - (cp->get_y() / cp->line.height());
-	
-		set_verbose_canvas_cursor (cp->line.get_verbose_cursor_string (fraction), at_x, at_y);
-		show_verbose_canvas_cursor ();
-		
-		if (is_drawable()) {
-		        track_canvas.get_window()->set_cursor (*fader_cursor);
+			double at_x, at_y;
+			at_x = cp->get_x();
+			at_y = cp->get_y ();
+			cp->item->i2w (at_x, at_y);
+			at_x += 20.0;
+			at_y += 20.0;
+
+			fraction = 1.0 - (cp->get_y() / cp->line.height());
+
+			set_verbose_canvas_cursor (cp->line.get_verbose_cursor_string (fraction), at_x, at_y);
+			show_verbose_canvas_cursor ();
+
+			if (is_drawable()) {
+				track_canvas.get_window()->set_cursor (*fader_cursor);
+			}
 		}
 		break;
 		
@@ -1208,13 +1213,15 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case GainAutomationLineItem:
 	case RedirectAutomationLineItem:
 	case PanAutomationLineItem:
-		{
-			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
-			if (line)
-				line->property_fill_color_rgba() = color_map[cEnteredAutomationLine];
-		}
-		if (is_drawable()) {
-			track_canvas.get_window()->set_cursor (*fader_cursor);
+		if (mouse_mode == MouseGain || mouse_mode == MouseObject) {
+			{
+				ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
+				if (line)
+					line->property_fill_color_rgba() = color_map[cEnteredAutomationLine];
+			}
+			if (is_drawable()) {
+				track_canvas.get_window()->set_cursor (*fader_cursor);
+			}
 		}
 		break;
 		
@@ -1515,7 +1522,10 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 		*/
 		if (!drag_info.move_threshold_passed) {
 
-			drag_info.move_threshold_passed = (abs ((int) (drag_info.current_pointer_x - drag_info.grab_x)) > 4);
+			bool x_threshold_passed =  (abs ((int) (drag_info.current_pointer_x - drag_info.grab_x)) > 4);
+			bool y_threshold_passed =  (abs ((int) (drag_info.current_pointer_y - drag_info.grab_y)) > 4);
+
+			drag_info.move_threshold_passed = (x_threshold_passed || y_threshold_passed);
 			
 			// and change the initial grab loc/frame if this drag info wants us to
 
@@ -2825,60 +2835,34 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 		drag_info.want_move_threshold = false; // don't copy again
 
-		/* this is committed in the grab finished callback. */
-		
-		begin_reversible_command (_("Drag region copy"));
-		
 		/* duplicate the region(s) */
 		
 		vector<RegionView*> new_regionviews;
 		
-		set<boost::shared_ptr<Playlist> > affected_playlists;
-		pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
-		
 		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
 			RegionView* rv;
-			
+			RegionView* nrv;
+			AudioRegionView* arv = dynamic_cast<AudioRegionView*>(rv);
+			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(rv);
+
 			rv = (*i);
-			
-			boost::shared_ptr<Playlist> to_playlist = rv->region()->playlist();
-			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&rv->get_time_axis_view());
 
-			insert_result = affected_playlists.insert (to_playlist);
-			if (insert_result.second) {
-				session->add_command (new MementoCommand<Playlist>(*to_playlist, &to_playlist->get_state(), 0));
-			}
-			
-			latest_regionview = 0;
-			
-			sigc::connection c = rtv->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
-			
-			/* create a new region with the same name. */
-			
-			boost::shared_ptr<Region> newregion;
+			if (arv)	
+				nrv = new AudioRegionView (*arv);
+			else if (mrv)
+				nrv = new MidiRegionView (*mrv);
+			else
+				continue;
 
-			newregion = RegionFactory::create (rv->region());
-			assert(newregion != 0);
+			nrv->get_canvas_group()->show ();
 
-			/* if the original region was locked, we don't care */
-			
-			newregion->set_locked (false);
-			
-			to_playlist->add_region (newregion, (nframes_t) (rv->region()->position() * rtv->get_diskstream()->speed()));
-			
-			c.disconnect ();
-			
-			if (latest_regionview) {
-				new_regionviews.push_back (latest_regionview);
-			}
+			new_regionviews.push_back (nrv);
 		}
 
-		
-		
 		if (new_regionviews.empty()) {
 			return;
 		}
-		
+
 		/* reset selection to new regionviews */
 		
 		selection->set (new_regionviews);
@@ -2886,6 +2870,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		/* reset drag_info data to reflect the fact that we are dragging the copies */
 		
 		drag_info.data = new_regionviews.front();
+		
 		swap_grab (new_regionviews.front()->get_canvas_group (), 0, event->motion.time);
 	}
 
@@ -3164,149 +3149,147 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
                         MOTION								      
 	************************************************************/
 
-	pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
-	const list<RegionView*>& layered_regions = selection->regions.by_layer();
+	bool do_move;
 
-	for (list<RegionView*>::const_iterator i = layered_regions.begin(); i != layered_regions.end(); ++i) {
-	    
-		RegionView* rv = (*i);
-		double ix1, ix2, iy1, iy2;
-		int32_t temp_pointer_y_span = pointer_y_span;
-
-		/* get item BBox, which will be relative to parent. so we have
-		   to query on a child, then convert to world coordinates using
-		   the parent.
-		*/
-
-		rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
-		rv->get_canvas_group()->i2w (ix1, iy1);
-		TimeAxisView* tvp2 = trackview_by_y_position (iy1);
-		RouteTimeAxisView* canvas_rtv = dynamic_cast<RouteTimeAxisView*>(tvp2);
-		RouteTimeAxisView* temp_rtv;
-
-		if ((pointer_y_span != 0) && !clamp_y_axis) {
-			y_delta = 0;
-			int32_t x = 0;
-			for (j = height_list.begin(); j!= height_list.end(); j++) {	
-				if (x == canvas_rtv->order) {
-					/* we found the track the region is on */
-					if (x != original_pointer_order) {
-						/*this isn't from the same track we're dragging from */
-						temp_pointer_y_span = canvas_pointer_y_span;
-					}		  
-					while (temp_pointer_y_span > 0) {
-						/* we're moving up canvas-wise,
-						   so  we need to find the next track height
-						*/
-						if (j != height_list.begin()) {		  
-							j--;
-						}
-						if (x != original_pointer_order) { 
-							/* we're not from the dragged track, so ignore hidden tracks. */	      
-							if ((*j) == 0) {
-								temp_pointer_y_span++;
-							}
-						}	   
-						y_delta -= (*j);	
-						temp_pointer_y_span--;	
-					}
-					while (temp_pointer_y_span < 0) {		  
-						y_delta += (*j);
-						if (x != original_pointer_order) { 
-							if ((*j) == 0) {
-								temp_pointer_y_span--;
-							}
-						}	   
-		    
-						if (j != height_list.end()) {		      
-							j++;
-						}
-						temp_pointer_y_span++;
-					}
-					/* find out where we'll be when we move and set height accordingly */
-		  
-					tvp2 = trackview_by_y_position (iy1 + y_delta);
-					temp_rtv = dynamic_cast<RouteTimeAxisView*>(tvp2);
-					rv->set_height (temp_rtv->height);
-	
-					/*   if you un-comment the following, the region colours will follow the track colours whilst dragging,
-					     personally, i think this can confuse things, but never mind.
-					*/
-		  		  
-					//const GdkColor& col (temp_rtv->view->get_region_color());
-					//rv->set_color (const_cast<GdkColor&>(col));
-					break;		
-				}
-				x++;
-			}
-		}
-	  
-		/* prevent the regionview from being moved to before 
-		   the zero position on the canvas.
-		*/
-		/* clamp */
-		
-		if (x_delta < 0) {
-			if (-x_delta > ix1) {
-				x_delta = -ix1;
-			}
-		} else if ((x_delta > 0) &&(rv->region()->last_frame() > max_frames - x_delta)) {
-			x_delta = max_frames - rv->region()->last_frame();
-		}
-			
-		if (drag_info.first_move) {
-
-			/* hide any dependent views */
-
-			rv->get_time_axis_view().hide_dependent_views (*rv);
-				
-			/* this is subtle. raising the regionview itself won't help,
-			   because raise_to_top() just puts the item on the top of
-			   its parent's stack. so, we need to put the trackview canvas_display group
-			   on the top, since its parent is the whole canvas.
-			*/
-
-			rv->get_canvas_group()->raise_to_top();
-			rv->get_time_axis_view().canvas_display->raise_to_top();
-			cursor_group->raise_to_top();
-
-			/* freeze the playlists from notifying till
-			   the motion is done.
-			*/
-
-			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&rv->get_time_axis_view());
-			if (rtv && rtv->is_audio_track()) {
-				boost::shared_ptr<AudioPlaylist> pl = boost::dynamic_pointer_cast<AudioPlaylist>(rtv->get_diskstream()->playlist());
-				if (pl) {
-					/* only freeze and capture state once */
-
-					insert_result = motion_frozen_playlists.insert (pl);
-					if (insert_result.second) {
-						pl->freeze();
-						session->add_command(new MementoCommand<Playlist>(*pl, &pl->get_state(), 0));
-					}
-				}
-			}
-			rv->region()->set_opaque(false);
-		}
-
-		if (drag_info.brushing) {
-			mouse_brush_insert_region (rv, pending_region_position);
-		} else {
-			rv->move (x_delta, y_delta);			
-		}
-	}
-		
 	if (drag_info.first_move) {
-		cursor_group->raise_to_top();
+		if (drag_info.move_threshold_passed) {
+			do_move = true;
+		} else {
+			do_move = false;
+		}
+	} else {
+		do_move = true;
 	}
+
+	if (do_move) {
+
+		pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
+		const list<RegionView*>& layered_regions = selection->regions.by_layer();
+
+		for (list<RegionView*>::const_iterator i = layered_regions.begin(); i != layered_regions.end(); ++i) {
+	    
+			RegionView* rv = (*i);
+			double ix1, ix2, iy1, iy2;
+			int32_t temp_pointer_y_span = pointer_y_span;
+
+			/* get item BBox, which will be relative to parent. so we have
+			   to query on a child, then convert to world coordinates using
+			   the parent.
+			*/
+
+			rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
+			rv->get_canvas_group()->i2w (ix1, iy1);
+			TimeAxisView* tvp2 = trackview_by_y_position (iy1);
+			RouteTimeAxisView* canvas_rtv = dynamic_cast<RouteTimeAxisView*>(tvp2);
+			RouteTimeAxisView* temp_rtv;
+
+			if ((pointer_y_span != 0) && !clamp_y_axis) {
+				y_delta = 0;
+				int32_t x = 0;
+				for (j = height_list.begin(); j!= height_list.end(); j++) {	
+					if (x == canvas_rtv->order) {
+						/* we found the track the region is on */
+						if (x != original_pointer_order) {
+							/*this isn't from the same track we're dragging from */
+							temp_pointer_y_span = canvas_pointer_y_span;
+						}		  
+						while (temp_pointer_y_span > 0) {
+							/* we're moving up canvas-wise,
+							   so  we need to find the next track height
+							*/
+							if (j != height_list.begin()) {		  
+								j--;
+							}
+							if (x != original_pointer_order) { 
+								/* we're not from the dragged track, so ignore hidden tracks. */	      
+								if ((*j) == 0) {
+									temp_pointer_y_span++;
+								}
+							}	   
+							y_delta -= (*j);	
+							temp_pointer_y_span--;	
+						}
+						while (temp_pointer_y_span < 0) {		  
+							y_delta += (*j);
+							if (x != original_pointer_order) { 
+								if ((*j) == 0) {
+									temp_pointer_y_span--;
+								}
+							}	   
+		    
+							if (j != height_list.end()) {		      
+								j++;
+							}
+							temp_pointer_y_span++;
+						}
+						/* find out where we'll be when we move and set height accordingly */
+		  
+						tvp2 = trackview_by_y_position (iy1 + y_delta);
+						temp_rtv = dynamic_cast<RouteTimeAxisView*>(tvp2);
+						rv->set_height (temp_rtv->height);
+	
+						/*   if you un-comment the following, the region colours will follow the track colours whilst dragging,
+						     personally, i think this can confuse things, but never mind.
+						*/
+		  		  
+						//const GdkColor& col (temp_rtv->view->get_region_color());
+						//rv->set_color (const_cast<GdkColor&>(col));
+						break;		
+					}
+					x++;
+				}
+			}
+	  
+			/* prevent the regionview from being moved to before 
+			   the zero position on the canvas.
+			*/
+			/* clamp */
 		
-	drag_info.first_move = false;
-		
+			if (x_delta < 0) {
+				if (-x_delta > ix1) {
+					x_delta = -ix1;
+				}
+			} else if ((x_delta > 0) &&(rv->region()->last_frame() > max_frames - x_delta)) {
+				x_delta = max_frames - rv->region()->last_frame();
+			}
+
+			if (drag_info.first_move) {
+
+				/* hide any dependent views */
+			
+				rv->get_time_axis_view().hide_dependent_views (*rv);
+			
+				/* this is subtle. raising the regionview itself won't help,
+				   because raise_to_top() just puts the item on the top of
+				   its parent's stack. so, we need to put the trackview canvas_display group
+				   on the top, since its parent is the whole canvas.
+				*/
+			
+				rv->get_canvas_group()->raise_to_top();
+				rv->get_time_axis_view().canvas_display->raise_to_top();
+				cursor_group->raise_to_top();
+
+				rv->fake_set_opaque (true);
+			}
+			
+			if (drag_info.brushing) {
+				mouse_brush_insert_region (rv, pending_region_position);
+			} else {
+				rv->move (x_delta, y_delta);			
+			}
+
+		} /* foreach region */
+
+	} /* if do_move */
+
+	if (drag_info.first_move && drag_info.move_threshold_passed) {
+		cursor_group->raise_to_top();
+		drag_info.first_move = false;
+	}
+
 	if (x_delta != 0 && !drag_info.brushing) {
 		show_verbose_time_cursor (drag_info.last_frame_position, 10);
 	}
-		
 } 
 
 void
@@ -3317,7 +3300,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
 	bool nocommit = true;
 	double speed;
-	RouteTimeAxisView* atv;
+	RouteTimeAxisView* rtv;
 	bool regionview_y_movement;
 	bool regionview_x_movement;
 
@@ -3346,9 +3329,9 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	/* adjust for track speed */
 	speed = 1.0;
 
-	atv = dynamic_cast<RouteTimeAxisView*> (drag_info.last_trackview);
-	if (atv && atv->get_diskstream()) {
-		speed = atv->get_diskstream()->speed();
+	rtv = dynamic_cast<RouteTimeAxisView*> (drag_info.last_trackview);
+	if (rtv && rtv->get_diskstream()) {
+		speed = rtv->get_diskstream()->speed();
 	}
 	
 	regionview_x_movement = (drag_info.last_frame_position != (nframes_t) (rv->region()->position()/speed));
@@ -3357,106 +3340,94 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	//printf ("last_frame: %s position is %lu  %g\n", rv->get_time_axis_view().name().c_str(), drag_info.last_frame_position, speed); 
 	//printf ("last_rackview: %s \n", drag_info.last_trackview->name().c_str()); 
 	
+	char* op_string;
+
+	if (drag_info.copy) {
+		if (drag_info.x_constrained) {
+			op_string = _("fixed time region copy");
+		} else {
+			op_string = _("region copy");
+		} 
+	} else {
+		if (drag_info.x_constrained) {
+			op_string = _("fixed time region drag");
+		} else {
+			op_string = _("region drag");
+		}
+	}
+
+	begin_reversible_command (op_string);
+
 	if (regionview_y_movement) {
 
-		/* motion between tracks */
-
-		list<RegionView*> new_selection;
-	
 		/* moved to a different audio track. */
 
-		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ) {
-	    
-			RegionView* rv2 = (*i);	    	    
-	    
-			/* the region that used to be in the old playlist is not
-			   moved to the new one - we make a copy of it. as a result,
-			   any existing editor for the region should no longer be
-			   visible.
-			*/ 
-	    
-			if (!drag_info.copy) {
-				rv2->hide_region_editor();
-			}	    
-			new_selection.push_back (rv2);	    
-			i++;
-		}
+		list<RegionView*> new_selection;
+		new_selection = selection->regions.by_layer();
+		selection->clear_regions ();
 
-		/* first, freeze the target tracks */
+		for (list<RegionView*>::const_iterator i = new_selection.begin(); i != new_selection.end(); ++i) {
+	    
+			RegionView* rv = (*i);	    	    
 
-		for (list<RegionView*>::const_iterator i = new_selection.begin(); i != new_selection.end();i++ ) {
-
-			boost::shared_ptr<Playlist> from_playlist;
-			boost::shared_ptr<Playlist> to_playlist;
-				
 			double ix1, ix2, iy1, iy2;
-	    
-			(*i)->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
-			(*i)->get_canvas_group()->i2w (ix1, iy1);
-			TimeAxisView* tvp2 = trackview_by_y_position (iy1);
-			RouteTimeAxisView* atv2 = dynamic_cast<RouteTimeAxisView*>(tvp2);
-
-			(*i)->region()->set_opaque (true);
-	    
-			from_playlist = (*i)->region()->playlist();
-			to_playlist = atv2->playlist();
-
-			/* the from_playlist was frozen in the "first_move" case 
-			   of the motion handler. the insert can fail, 
-			   but that doesn't matter. it just means
-			   we already have the playlist in the list.
-			*/
 			
-			motion_frozen_playlists.insert (from_playlist);
-
-			/* only freeze the to_playlist once */
-
-			insert_result = motion_frozen_playlists.insert(to_playlist);
-			if (insert_result.second) {
-				to_playlist->freeze();
-                                session->add_command(new MementoCommand<Playlist>(*to_playlist, &to_playlist->get_state(), 0));
-			}
-
-		}
-
-		/* now do it again with the actual operations */
-
-		for (list<RegionView*>::const_iterator i = new_selection.begin(); i != new_selection.end();i++ ) {
-
-			boost::shared_ptr<Playlist> from_playlist;
-			boost::shared_ptr<Playlist> to_playlist;
-				
-			double ix1, ix2, iy1, iy2;
-	    
-			(*i)->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
-			(*i)->get_canvas_group()->i2w (ix1, iy1);
+			rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
+			rv->get_canvas_group()->i2w (ix1, iy1);
 			TimeAxisView* tvp2 = trackview_by_y_position (iy1);
-			RouteTimeAxisView* atv2 = dynamic_cast<RouteTimeAxisView*>(tvp2);
-	    
-			from_playlist = (*i)->region()->playlist();
-			to_playlist = atv2->playlist();
+			RouteTimeAxisView* rtv2 = dynamic_cast<RouteTimeAxisView*>(tvp2);
 
-			latest_regionview = 0;
+			boost::shared_ptr<Playlist> from_playlist = rv->region()->playlist();
+			boost::shared_ptr<Playlist> to_playlist = rtv2->playlist();
 	    
 			where = (nframes_t) (unit_to_frame (ix1) * speed);
-			boost::shared_ptr<Region> new_region (RegionFactory::create ((*i)->region()));
+			boost::shared_ptr<Region> new_region (RegionFactory::create (rv->region()));
 
-			from_playlist->remove_region (((*i)->region()));
+			if (!drag_info.copy) {
+				
+				/* the region that used to be in the old playlist is not
+				   moved to the new one - we make a copy of it. as a result,
+				   any existing editor for the region should no longer be
+				   visible.
+				*/ 
+	    
+				rv->hide_region_editor();
+				rv->fake_set_opaque (false);
+
+				session->add_command (new MementoCommand<Playlist>(*from_playlist, &from_playlist->get_state(), 0));	
+				from_playlist->remove_region ((rv->region()));
+				session->add_command (new MementoCommand<Playlist>(*from_playlist, 0, &from_playlist->get_state()));	
+			}
+
+			latest_regionview = 0;
 			
-			sigc::connection c = atv2->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
+			sigc::connection c = rtv2->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
+			session->add_command (new MementoCommand<Playlist>(*to_playlist, &to_playlist->get_state(), 0));	
 			to_playlist->add_region (new_region, where);
+			session->add_command (new MementoCommand<Playlist>(*to_playlist, 0, &to_playlist->get_state()));	
 			c.disconnect ();
 							      
 			if (latest_regionview) {
 				selection->add (latest_regionview);
 			}
+
+			if (drag_info.copy) {
+				// get rid of the copy
+				delete rv;
+			} 
 		} 
 
 	} else {
 
 		/* motion within a single track */
+
+		list<RegionView*> regions = selection->regions.by_layer();
+
+		if (drag_info.copy) {
+			selection->clear_regions();
+		}
 		
-		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
+		for (list<RegionView*>::iterator i = regions.begin(); i != regions.end(); ++i) {
 
 			rv = (*i);
 
@@ -3464,12 +3435,13 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 				continue;
 			}
 			
+
 			if (regionview_x_movement) {
 				double ownspeed = 1.0;
-				RouteTimeAxisView* atv = dynamic_cast<RouteTimeAxisView*> (&(rv->get_time_axis_view()));
+				rtv = dynamic_cast<RouteTimeAxisView*> (&(rv->get_time_axis_view()));
 
-				if (atv && atv->get_diskstream()) {
-					ownspeed = atv->get_diskstream()->speed();
+				if (rtv && rtv->get_diskstream()) {
+					ownspeed = rtv->get_diskstream()->speed();
 				}
 				
 				/* base the new region position on the current position of the regionview.*/
@@ -3485,23 +3457,62 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 				where = rv->region()->position();
 			}
 
-			rv->get_time_axis_view().reveal_dependent_views (*rv);
+			boost::shared_ptr<Playlist> to_playlist = rv->region()->playlist();
 
-			/* no need to add an undo here, we did that when we added this playlist to motion_frozen playlists */
-			
-			rv->region()->set_position (where, (void *) this);
-			rv->region()->set_opaque (true);
+			/* add the undo */
+
+			session->add_command (new MementoCommand<Playlist>(*to_playlist, &to_playlist->get_state(), 0));	
+
+			if (drag_info.copy) {
+
+				boost::shared_ptr<Region> newregion;
+				boost::shared_ptr<Region> ar;
+
+				if ((ar = boost::dynamic_pointer_cast<AudioRegion>(rv->region())) != 0) {
+					newregion = RegionFactory::create (ar);
+				} else {
+					/* XXX MIDI HERE drobilla */
+					continue;
+				}
+
+				/* add it */
+				
+				latest_regionview = 0;
+				sigc::connection c = rtv->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
+				to_playlist->add_region (newregion, (nframes_t) (where * rtv->get_diskstream()->speed()));
+				c.disconnect ();
+				
+				if (latest_regionview) {
+					rtv->reveal_dependent_views (*latest_regionview);
+					selection->add (latest_regionview);
+				}
+				
+				/* if the original region was locked, we don't care for the new one */
+				
+				newregion->set_locked (false);			
+
+			} else {
+
+				/* just change the model */
+
+				rv->region()->set_position (where, (void*) this);
+
+			}
+
+			/* add the redo */
+
+			session->add_command (new MementoCommand<Playlist>(*to_playlist, 0, &to_playlist->get_state()));
+
+			/* get rid of the copy */
+
+			if (drag_info.copy) {
+				delete rv;
+			}
 		}
 	}
 
   out:
-	for (set<boost::shared_ptr<Playlist> >::iterator p = motion_frozen_playlists.begin(); p != motion_frozen_playlists.end(); ++p) {
-		(*p)->thaw ();
-		session->add_command (new MementoCommand<Playlist>(*((*p).get()), 0, & (*p)->get_state()));
-	}
-
-	motion_frozen_playlists.clear ();
-
+	
 	if (!nocommit) {
 		commit_reversible_command ();
 	}
@@ -3516,10 +3527,10 @@ Editor::region_view_item_click (AudioRegionView& rv, GdkEventButton* event)
 	
 	if (Keyboard::modifier_state_contains (event->state, Keyboard::Control)) {
 		TimeAxisView* tv = &rv.get_time_axis_view();
-		RouteTimeAxisView* atv = dynamic_cast<RouteTimeAxisView*>(tv);
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(tv);
 		double speed = 1.0;
-		if (atv && atv->is_track()) {
-			speed = atv->get_diskstream()->speed();
+		if (rtv && rtv->is_track()) {
+			speed = rtv->get_diskstream()->speed();
 		}
 
 		if (Keyboard::modifier_state_equals (event->state, Keyboard::ModifierMask (Keyboard::Control|Keyboard::Alt))) {
@@ -3976,8 +3987,6 @@ Editor::start_trim (ArdourCanvas::Item* item, GdkEvent* event)
 	nframes_t region_end = (nframes_t) (clicked_regionview->region()->last_frame() / speed);
 	nframes_t region_length = (nframes_t) (clicked_regionview->region()->length() / speed);
 
-	motion_frozen_playlists.clear();
-	
 	//drag_info.item = clicked_regionview->get_name_highlight();
 	drag_info.item = item;
 	drag_info.motion_callback = &Editor::trim_motion_callback;
@@ -4066,7 +4075,7 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		begin_reversible_command (trim_type);
 
 		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
-			(*i)->region()->set_opaque(false);
+			(*i)->fake_set_opaque(false);
 			(*i)->region()->freeze ();
 		
 			AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
@@ -4261,7 +4270,7 @@ Editor::trim_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			     i != selection->regions.by_layer().end(); ++i)
 			{
 				thaw_region_after_trim (**i);
-				(*i)->region()->set_opaque(true);
+				(*i)->fake_set_opaque (true);
 			}
 		}
 		
@@ -4887,14 +4896,14 @@ Editor::mouse_brush_insert_region (RegionView* rv, nframes_t pos)
 		return;
 	}
 
-	RouteTimeAxisView* atv = dynamic_cast<RouteTimeAxisView*>(&arv->get_time_axis_view());
+	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&arv->get_time_axis_view());
 
-	if (atv == 0 || !atv->is_track()) {
+	if (rtv == 0 || !rtv->is_track()) {
 		return;
 	}
 
-	boost::shared_ptr<Playlist> playlist = atv->playlist();
-	double speed = atv->get_diskstream()->speed();
+	boost::shared_ptr<Playlist> playlist = rtv->playlist();
+	double speed = rtv->get_diskstream()->speed();
 	
         XMLNode &before = playlist->get_state();
 	playlist->add_region (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (arv->audio_region())), (nframes_t) (pos * speed));

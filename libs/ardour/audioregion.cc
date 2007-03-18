@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cmath>
@@ -41,7 +40,6 @@
 #include <ardour/playlist.h>
 #include <ardour/audiofilter.h>
 #include <ardour/audiofilesource.h>
-#include <ardour/destructive_filesource.h>
 #include <ardour/region_factory.h>
 
 #include "i18n.h"
@@ -932,10 +930,15 @@ AudioRegion::separate_by_channel (Session& session, vector<boost::shared_ptr<Aud
 			new_name += ('0' + n + 1);
 		}
 
-		/* create a copy with just one source */
+		/* create a copy with just one source. prevent if from being thought of as "whole file" even if 
+		   it covers the entire source file(s).
+		 */
 
-		boost::shared_ptr<Region> r = RegionFactory::create (srcs, _start, _length, new_name, _layer, _flags);
+		Flag f = Flag (_flags & ~WholeFile);
+
+		boost::shared_ptr<Region> r = RegionFactory::create (srcs, _start, _length, new_name, _layer, f);
 		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
+		cerr << "new region name is " << ar->name() << endl;
 
 		v.push_back (ar);
 		
@@ -1096,6 +1099,7 @@ AudioRegion::normalize_to (float target_dB)
 	boost::shared_ptr<Playlist> pl (playlist());
 
 	if (pl) {
+		cerr << "Send modified\n";
 		pl->Modified();
 	}
 

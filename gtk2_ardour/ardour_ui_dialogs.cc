@@ -62,6 +62,20 @@ ARDOUR_UI::connect_to_session (Session *s)
 		ActionManager::set_sensitive (ActionManager::range_sensitive_actions, false);
 	}
 
+	if (!session->control_out()) {
+		Glib::RefPtr<Action> act = ActionManager::get_action (X_("options"), X_("SoloViaBus"));
+		if (act) {
+			act->set_sensitive (false);
+		}
+	}
+
+	/* allow wastebasket flush again */
+
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Main"), X_("FlushWastebasket"));
+	if (act) {
+		act->set_sensitive (true);
+	}
+
 	/* there are never any selections on startup */
 
 	ActionManager::set_sensitive (ActionManager::region_selection_sensitive_actions, false);
@@ -139,6 +153,7 @@ ARDOUR_UI::connect_to_session (Session *s)
 
 	second_connection = Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::every_second), 1000);
 	point_one_second_connection = Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::every_point_one_seconds), 100);
+	// point_oh_five_second_connection = Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::every_point_oh_five_seconds), 50);
 	point_zero_one_second_connection = Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::every_point_zero_one_seconds), 40);
 }
 
@@ -158,6 +173,7 @@ ARDOUR_UI::unload_session ()
 	editor->hide ();
 	second_connection.disconnect ();
 	point_one_second_connection.disconnect ();
+	point_oh_five_second_connection.disconnect ();
 	point_zero_one_second_connection.disconnect();
 
 	ActionManager::set_sensitive (ActionManager::session_sensitive_actions, false);
@@ -322,7 +338,7 @@ int
 ARDOUR_UI::create_route_params ()
 {
 	if (route_params == 0) {
-		route_params = new RouteParams_UI (*engine);
+		route_params = new RouteParams_UI ();
 		route_params->set_session (session);
 		route_params->signal_unmap().connect (sigc::bind(sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleInspector")));
 	}

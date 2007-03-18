@@ -1,0 +1,104 @@
+tranzport 0.1 <tranzport.sf.net>
+oct 18, 2005
+arthur@artcmusic.com
+---
+
+The Frontier Design Tranzport(tm) (www.frontierdesign.com) is a simple
+wireless USB device. It is not a MIDI device. The document on their web
+site "Tranzport(tm) Native Mode Interface Description" describes the
+Tranzport(tm) as if it were a MIDI device, but this is implemented by their
+Windows and Macintosh software drivers.
+
+This code will allow you to use your Tranzport(tm) at a lower level of
+abstraction. This code relies on libusb, which can be obtained from
+libusb.sourceforge.net.
+
+To compile the program, type "make". You should end up with a executable
+called "tranzport". You'll probably have to run this program as root.
+
+Using the program is straightforward. It will simply tell you which
+buttons are being pressed and what not. If you press one of the buttons
+with a light, the light will turn on. If you hold shift and press one of
+the buttons with a light, the light will turn off. If you take out the
+batteries to the device (or go out of range), it will tell you that the
+device is offline. When you replace the batteries (or come back in
+range), it should tell you it is back online.
+
+Once you understand how everything works, you should be able to
+incorporate it into your own setup however you wish.
+
+This code was developed on a Linux machine, but (theoretically) it
+should work on any system that is supported by libusb, since that is how
+it communicates with the device.
+
+Here are a few more details about the device:
+
+There are two endpoints for communication with the device. All data
+reads and writes are done in 8-byte segments.
+
+One endpoint is for interrupt reads. This is used to read button data 
+from the device. It also supplies status information for when the device 
+goes out of range and comes back in range, loses power and regains 
+power, etc. The format of the data is:
+
+    00 ss bb bb bb bb dd 00  (hexadecimal)
+
+where:
+
+    ss - status code, 01=online ff=offline
+    bb - button bits
+    dd - data wheel, 01-3f=forward 41-7f=backward
+
+Please refer to the source code for a list of the button bits.
+
+The other endpoint is for interrupt writes. This is used to toggle the
+lights on the device, and to write data to the LCD.
+
+There are 7 lights on the device. To turn a light on, send the following 
+sequence of bytes:
+
+    00 00 nn 01 00 00 00 00  (hexadecimal)
+
+where nn is the light number.
+
+To turn a light off:
+
+    00 00 nn 00 00 00 00 00  (hexadecimal)
+
+Here is the list of lights:
+
+    00  Record
+    01  Track Rec
+    02  Track Mute
+    03  Track Solo
+    04  Any Solo
+    05  Loop
+    06  Punch
+
+The size of the LCD is 20x2, and it is split into 10 cells, each cell
+being 4 characters wide. The cells progress across, then down. To write
+to the LCD, send the following sequence of bytes:
+
+    00 01 cc aa aa aa aa 00  (hexadecimal)
+
+where:
+
+    cc - cell number
+    aa - ASCII code
+
+Here is a list of the cells to clarify:
+
+    00  row 0, column 0-3
+    01  row 0, column 4-7
+    02  row 0, column 8-11
+    03  row 0, column 12-15
+    04  row 0, column 16-19
+    05  row 1, column 0-3
+    06  row 1, column 4-7
+    07  row 1, column 8-11
+    08  row 1, column 12-15
+    09  row 1, column 16-19
+
+You should refer to the "Tranzport(tm) Native Mode Interface
+Description" document for a listing of the ASCII codes the LCD uses.
+

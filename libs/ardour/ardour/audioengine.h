@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __ardour_audioengine_h__
@@ -52,6 +51,8 @@ class AudioEngine : public sigc::trackable
 	
 	jack_client_t* jack() const { return _jack; }
 	bool connected() const { return _jack != 0; }
+
+	bool is_realtime () const;
 
 	std::string client_name() const { return jack_client_name; }
 

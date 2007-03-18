@@ -126,7 +126,7 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "jump-backward-to-mark", _("Jump Backward to Mark"), mem_fun(*this, &Editor::jump_backward_to_mark));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "add-location-from-playhead", _("Add Location from Playhead"), mem_fun(*this, &Editor::add_location_from_playhead_cursor));
+	act = ActionManager::register_action (editor_actions, "add-location-from-playhead", _("Add Mark from Playhead"), mem_fun(*this, &Editor::add_location_from_playhead_cursor));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "nudge-forward", _("Nudge Forward"), bind (mem_fun(*this, &Editor::nudge_forward), false));
@@ -430,7 +430,7 @@ Editor::toggle_waveform_visibility ()
 void
 Editor::toggle_waveforms_while_recording ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleWaveformVisibility"));
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleWaveformsWhileRecording"));
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 		set_show_waveforms_recording (tact->get_active());

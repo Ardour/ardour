@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __ardour_keyboard_h__
@@ -45,13 +44,6 @@ class Keyboard : public sigc::trackable, Stateful
 	int set_state (const XMLNode&);
 
 	typedef vector<uint32_t> State;
-	
-	int  get_prefix(float&, bool& was_floating);
-	void start_prefix ();
-
-	static State  translate_key_name (const string&);
-	static string get_real_keyname (const string& name);
-
 	typedef uint32_t ModifierMask;
 
 	static uint32_t Control;
@@ -101,17 +93,8 @@ class Keyboard : public sigc::trackable, Stateful
   private:
 	static Keyboard* _the_keyboard;
 
-	bool   _queue_events;
-	bool   _flush_queue;
-
 	guint           snooper_id;
 	State           state;
-	bool            collecting_prefix;
-	string          current_prefix;
-	int*            modifier_masks;
-	int             modifier_mask;
-	int             min_keycode;
-	int             max_keycode;
 
 	static guint     edit_but;
 	static guint     edit_mod;
@@ -121,13 +104,6 @@ class Keyboard : public sigc::trackable, Stateful
 
 	static gint _snooper (GtkWidget*, GdkEventKey*, gpointer);
 	gint snooper (GtkWidget*, GdkEventKey*);
-	
-	void queue_event (GdkEventKey*);
-	void get_modifier_masks ();
-	void check_modifier_state ();
-	void clear_modifier_state ();
-
-	void check_meta_numlock (char keycode, guint mod, string modname);
 };
 
 #endif /* __ardour_keyboard_h__ */

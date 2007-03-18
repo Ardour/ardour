@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <algorithm>
@@ -47,10 +46,9 @@ Reverse::run (boost::shared_ptr<AudioRegion> region)
 {
 	SourceList nsrcs;
 	SourceList::iterator si;
-	const nframes_t blocksize = 256 * 1048;
-	Sample buf[blocksize];
+	nframes_t blocksize = 256 * 1024;
+	Sample* buf = 0;
 	nframes_t fpos;
-	nframes_t fend;
 	nframes_t fstart;
 	nframes_t to_read;
 	int ret = -1;
@@ -61,20 +59,19 @@ Reverse::run (boost::shared_ptr<AudioRegion> region)
 		goto out;
 	}
 
-	fend = region->start() + region->length();
 	fstart = region->start();
 
-	if (blocksize < fend) {
-		fpos =max(fstart, fend - blocksize);
-	} else {
-		fpos = fstart;
+	if (blocksize > region->length()) {
+		blocksize = region->length();
 	}
 
-	to_read = min (region->length(), blocksize);
+	fpos = max (fstart, (fstart + region->length() - blocksize));
+	buf = new Sample[blocksize];
+	to_read = blocksize;
 
 	/* now read it backwards */
 
-	while (1) {
+	while (to_read) {
 
 		uint32_t n;
 
@@ -85,7 +82,7 @@ Reverse::run (boost::shared_ptr<AudioRegion> region)
 			if (region->audio_source (n)->read (buf, fpos, to_read) != to_read) {
 				goto out;
 			}
-			
+
 			/* swap memory order */
 			
 			for (nframes_t i = 0; i < to_read/2; ++i) {
@@ -101,13 +98,11 @@ Reverse::run (boost::shared_ptr<AudioRegion> region)
 			}
 		}
 
-		if (fpos == fstart) {
-			break;
-		} else if (fpos > fstart + to_read) {
+		if (fpos > fstart + blocksize) {
 			fpos -= to_read;
-			to_read = min (fstart - fpos, blocksize);
+			to_read = blocksize;
 		} else {
-			to_read = fpos-fstart;
+			to_read = fpos - fstart;
 			fpos = fstart;
 		}
 	};
@@ -115,6 +110,10 @@ Reverse::run (boost::shared_ptr<AudioRegion> region)
 	ret = finish (region, nsrcs);
 
   out:
+
+	if (buf) {
+		delete [] buf;
+	}
 
 	if (ret) {
 		for (si = nsrcs.begin(); si != nsrcs.end(); ++si) {

@@ -1,0 +1,74 @@
+# -*- python -*-
+
+import os
+import os.path
+import glob
+
+Import('env final_prefix install_prefix final_config_prefix libraries i18n')
+
+mackie = env.Copy()
+
+#
+# this defines the version number of libardour_mackie
+# 
+
+domain = 'ardour_mackie'
+
+mackie.Append(DOMAIN = domain, MAJOR = 1, MINOR = 0, MICRO = 0)
+mackie.Append(CXXFLAGS = "-DPACKAGE=\\\"" + domain + "\\\"")
+mackie.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
+mackie.Append(PACKAGE = domain)
+mackie.Append(POTFILE = domain + '.pot')
+
+mackie_files=Split("""
+interface.cc
+midi_byte_array.cc
+controls.cc
+route_signal.cc
+mackie_midi_builder.cc
+mackie_button_handler.cc
+mackie_control_protocol_poll.cc
+surface_port.cc
+mackie_port.cc
+types.cc
+surface.cc
+mackie_control_protocol.cc
+bcf_surface.cc
+mackie_surface.cc
+""")
+
+mackie.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
+mackie.Append(CXXFLAGS="-DDATA_DIR=\\\""+final_prefix+"/share\\\"")
+mackie.Append(CXXFLAGS="-DCONFIG_DIR=\\\""+final_config_prefix+"\\\"")
+mackie.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
+
+mackie.Merge ([
+    libraries['ardour'],
+    libraries['ardour_cp'],
+    libraries['sigc2'],
+    libraries['pbd'],
+    libraries['midi++2'],
+    libraries['xml'],
+    libraries['glib2'],
+    libraries['glibmm2'],
+    libraries['sndfile-ardour']
+    ])
+
+libardour_mackie = mackie.SharedLibrary('ardour_mackie', mackie_files)
+
+test_files = Split("""
+midi_byte_array.cc
+test.cc
+""")
+mackie_test = Program('mackie_test', test_files )
+
+if mackie['SURFACES']:
+	Default(libardour_mackie)
+	if env['NLS']:
+		i18n (mackie, mackie_files, env)
+	env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2','surfaces'), libardour_mackie))
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+				     [ 'SConscript' ] +
+				     mackie_files + 
+				     glob.glob('po/*.po') + glob.glob('*.h')))

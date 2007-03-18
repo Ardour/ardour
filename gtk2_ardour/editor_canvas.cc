@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <libgnomecanvasmm/init.h>
@@ -264,8 +263,20 @@ Editor::initialize_canvas ()
 	double time_width = FLT_MAX/frames_per_unit;
 	time_canvas.set_scroll_region(0.0, 0.0, time_width, time_height);
 	
-	edit_cursor = new Cursor (*this, "blue", &Editor::canvas_edit_cursor_event);
-	playhead_cursor = new Cursor (*this, "red", &Editor::canvas_playhead_cursor_event);
+	if (!color_map[cEditCursor]) {
+		 warning << _("edit cursor color not defined, check your ardour.colors file!") << endmsg;
+		color_map[cEditCursor] = RGBA_TO_UINT (30,30,30,255);
+	}
+
+	if (!color_map[cPlayHead]) {
+		warning << _("playhead color not defined, check your ardour.colors file!") << endmsg;
+		color_map[cPlayHead] = RGBA_TO_UINT (0,0,0,255);
+	}
+
+	edit_cursor = new Cursor (*this, &Editor::canvas_edit_cursor_event);
+	edit_cursor->canvas_item.property_fill_color_rgba() = color_map[cEditCursor];
+	playhead_cursor = new Cursor (*this, &Editor::canvas_playhead_cursor_event);
+	playhead_cursor->canvas_item.property_fill_color_rgba() = color_map[cPlayHead];
 
 	initial_ruler_update_required = true;
 	track_canvas.signal_size_allocate().connect (mem_fun(*this, &Editor::track_canvas_allocate));
@@ -280,7 +291,7 @@ Editor::track_canvas_allocate (Gtk::Allocation alloc)
 	if (!initial_ruler_update_required) {
 		if (!canvas_idle_queued) {
 			/* call this first so that we do stuff before any pending redraw */
-			Glib::signal_idle().connect (mem_fun (*this, &Editor::track_canvas_idle), false);
+			Glib::signal_idle().connect (mem_fun (*this, &Editor::track_canvas_size_allocated), false);
 			canvas_idle_queued = true;
 		}
 		return;
@@ -288,11 +299,11 @@ Editor::track_canvas_allocate (Gtk::Allocation alloc)
 
 	initial_ruler_update_required = false;
 	
-	track_canvas_idle ();
+	track_canvas_size_allocated ();
 }
 
 bool
-Editor::track_canvas_idle ()
+Editor::track_canvas_size_allocated ()
 {
 	if (canvas_idle_queued) {
 		canvas_idle_queued = false;
@@ -320,7 +331,6 @@ Editor::track_canvas_idle ()
 
 		full_canvas_height = height;
 	}
-
 
 	zoom_range_clock.set ((nframes_t) floor ((canvas_width * frames_per_unit)));
 	edit_cursor->set_position (edit_cursor->current_frame);
@@ -363,7 +373,7 @@ Editor::track_canvas_idle ()
 	}
 		
 	update_fixed_rulers();
-	tempo_map_changed (Change (0));
+	tempo_map_changed (Change (0), true);
 	
 	Resized (); /* EMIT_SIGNAL */
 
@@ -697,4 +707,26 @@ Editor::left_track_canvas (GdkEventCrossing *ev)
 	return FALSE;
 }
 
+
+void 
+Editor::canvas_horizontally_scrolled ()
+{
+	/* this is the core function that controls horizontal scrolling of the canvas. it is called
+	   whenever the horizontal_adjustment emits its "value_changed" signal. it typically executes in an
+	   idle handler, which is important because tempo_map_changed() should issue redraws immediately
+	   and not defer them to an idle handler.
+	*/
+
+  	leftmost_frame = (nframes_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
+	nframes_t rightmost_frame = leftmost_frame + current_page_frames ();
+	
+	if (rightmost_frame > last_canvas_frame) {
+		last_canvas_frame = rightmost_frame;
+		reset_scrolling_region ();
+	}
+	
+	update_fixed_rulers ();
+
+	tempo_map_changed (Change (0), !_dragging_hscrollbar);
+}
 

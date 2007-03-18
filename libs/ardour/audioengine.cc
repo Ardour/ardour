@@ -15,16 +15,17 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <unistd.h>
 #include <cerrno>
 #include <vector>
 #include <exception>
+#include <stdexcept>
 
 #include <glibmm/timer.h>
 #include <pbd/pthread_utils.h>
+#include <pbd/stacktrace.h>
 #include <pbd/unknown_type.h>
 
 #include <ardour/audioengine.h>
@@ -229,9 +230,9 @@ AudioEngine::jack_sync_callback (jack_transport_state_t state, jack_position_t* 
 {
 	if (_jack && session) {
 		return session->jack_sync_callback (state, pos);
-	} else {
-		return true;
 	}
+
+	return true;
 }
 
 int
@@ -296,6 +297,7 @@ AudioEngine::process_callback (nframes_t nframes)
 
 	if (_freewheeling) {
 		if (Freewheel (nframes)) {
+			cerr << "Freewheeling returned non-zero!\n";
 			_freewheeling = false;
 			jack_set_freewheel (_jack, false);
 		}
@@ -1187,8 +1189,13 @@ int
 AudioEngine::request_buffer_size (nframes_t nframes)
 {
 	if (_jack) {
-		int ret = jack_set_buffer_size (_jack, nframes);
-		return ret;
+
+		if (nframes == jack_get_buffer_size (_jack)) {
+			return 0;
+		}
+
+		return jack_set_buffer_size (_jack, nframes);
+
 	} else {
 		return -1;
 	}
@@ -1239,3 +1246,12 @@ AudioEngine::make_port_name_non_relative (string portname)
 	return str;
 }
 
+bool
+AudioEngine::is_realtime () const
+{
+	if (_jack) {
+		return jack_is_realtime (_jack);
+	} else {
+		return false;
+	}
+}

@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cstdlib>
@@ -70,7 +69,7 @@ Editor::keyboard_duplicate_region ()
 		return;
 	}
 
-	float prefix;
+	float prefix = 0;
 	bool was_floating;
 
 	if (get_prefix (prefix, was_floating) == 0) {
@@ -83,7 +82,7 @@ Editor::keyboard_duplicate_region ()
 void
 Editor::keyboard_duplicate_selection ()
 {
-	float prefix;
+	float prefix = 0;
 	bool was_floating;
 
 	if (get_prefix (prefix, was_floating) == 0) {
@@ -96,7 +95,7 @@ Editor::keyboard_duplicate_selection ()
 void
 Editor::keyboard_paste ()
 {
-	float prefix;
+	float prefix = 0;
 	bool was_floating;
 
 	if (get_prefix (prefix, was_floating) == 0) {
@@ -109,7 +108,7 @@ Editor::keyboard_paste ()
 void
 Editor::keyboard_insert_region_list_selection ()
 {
-	float prefix;
+	float prefix = 0;
 	bool was_floating;
 
 	if (get_prefix (prefix, was_floating) == 0) {
@@ -122,6 +121,7 @@ Editor::keyboard_insert_region_list_selection ()
 int
 Editor::get_prefix (float& val, bool& was_floating)
 {
-	return Keyboard::the_keyboard().get_prefix (val, was_floating);
+	was_floating = false;
+	return 1;
 }
 

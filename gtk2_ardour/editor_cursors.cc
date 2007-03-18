@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cstdlib>
@@ -31,7 +30,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
 
-Editor::Cursor::Cursor (Editor& ed, const string& color, bool (Editor::*callbck)(GdkEvent*,ArdourCanvas::Item*))
+Editor::Cursor::Cursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,ArdourCanvas::Item*))
 	: editor (ed),
 	  canvas_item (*editor.cursor_group),
 	  length(1.0)
@@ -43,7 +42,6 @@ Editor::Cursor::Cursor (Editor& ed, const string& color, bool (Editor::*callbck)
 	points.push_back(Gnome::Art::Point(1.0, 0.0));
 
 	canvas_item.property_points() = points;
-	canvas_item.property_fill_color() = color; //.c_str());
 	canvas_item.property_width_pixels() = 1;
 	canvas_item.property_first_arrowhead() = TRUE;
 	canvas_item.property_last_arrowhead() = TRUE;

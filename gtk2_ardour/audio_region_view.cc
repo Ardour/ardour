@@ -88,14 +88,37 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 {
 }
 
+
+AudioRegionView::AudioRegionView (const AudioRegionView& other)
+	: RegionView (other)
+	, zero_line(0)
+	, fade_in_shape(0)
+	, fade_out_shape(0)
+	, fade_in_handle(0)
+	, fade_out_handle(0)
+	, gain_line(0)
+	, _amplitude_above_axis(1.0)
+	, _flags(0)
+	, fade_color(0)
+
+{
+	Gdk::Color c;
+	int r,g,b,a;
+
+	UINT_TO_RGBA (other.fill_color, &r, &g, &b, &a);
+	c.set_rgb_p (r/255.0, g/255.0, b/255.0);
+	
+	init (c, false);
+}
+
 void
 AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 {
 	// FIXME: Some redundancy here with RegionView::init.  Need to figure out
 	// where order is important and where it isn't...
 	
-	RegionView::init(basic_color, wfd);
-
+	RegionView::init(basic_color, false);
+	
 	XMLNode *node;
 
 	_amplitude_above_axis = 1.0;
@@ -629,13 +652,16 @@ AudioRegionView::set_samples_per_unit (gdouble spu)
 {
 	RegionView::set_samples_per_unit (spu);
 
-	for (uint32_t n=0; n < waves.size(); ++n) {
-		waves[n]->property_samples_per_unit() = spu;
+	if (_flags & WaveformVisible) {
+		for (uint32_t n=0; n < waves.size(); ++n) {
+			waves[n]->property_samples_per_unit() = spu;
+		}
 	}
 
 	if (gain_line) {
 		gain_line->reset ();
 	}
+
 	reset_fade_shapes ();
 }
 
@@ -698,6 +724,10 @@ AudioRegionView::set_waveform_visible (bool yn)
 	if (((_flags & WaveformVisible) != yn)) {
 		if (yn) {
 			for (uint32_t n=0; n < waves.size(); ++n) {
+				/* make sure the zoom level is correct, since we don't update
+				   this when waveforms are hidden.
+				*/
+				waves[n]->property_samples_per_unit() = samples_per_unit;
 				waves[n]->show();
 			}
 			_flags |= WaveformVisible;

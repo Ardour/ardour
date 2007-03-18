@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __ardour_location_ui_h__
@@ -32,7 +31,6 @@
 #include <ardour/session.h>
 
 #include "ardour_dialog.h"
-#include "keyboard_target.h"
 
 namespace ARDOUR {
 	class LocationStack;

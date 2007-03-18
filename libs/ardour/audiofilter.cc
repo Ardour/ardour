@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <time.h>
@@ -80,6 +79,7 @@ AudioFilter::finish (boost::shared_ptr<AudioRegion> region, SourceList& nsrcs)
 		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*si);
 		if (afs) {
 			afs->update_header (region->position(), *now, xnow);
+			afs->mark_immutable ();
 		}
 	}
 

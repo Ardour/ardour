@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __ardour_editor_h__
@@ -59,10 +58,6 @@
 
 namespace Gtkmm2ext {
 	class TearOff;
-}
-
-namespace LinuxAudioSystems {
-	class AudioEngine;
 }
 
 namespace ARDOUR {
@@ -122,7 +117,7 @@ class TimeAxisViewItem ;
 class Editor : public PublicEditor
 {
   public:
-	Editor (ARDOUR::AudioEngine&);
+	Editor ();
 	~Editor ();
 
 	void             connect_to_session (ARDOUR::Session *);
@@ -147,11 +142,11 @@ class Editor : public PublicEditor
 	void step_mouse_mode (bool next);
 	Editing::MouseMode current_mouse_mode () { return mouse_mode; }
 
-	void add_imageframe_time_axis(const string & track_name, void*) ;
-	void add_imageframe_marker_time_axis(const string & track_name, TimeAxisView* marked_track, void*) ;
+	void add_imageframe_time_axis(const std::string & track_name, void*) ;
+	void add_imageframe_marker_time_axis(const std::string & track_name, TimeAxisView* marked_track, void*) ;
 	void connect_to_image_compositor() ;
 	void scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item) ;
-	TimeAxisView* get_named_time_axis(const string & name) ;
+	TimeAxisView* get_named_time_axis(const std::string & name) ;
 
 	void consider_auditioning (boost::shared_ptr<ARDOUR::Region>);
 	void hide_a_region (boost::shared_ptr<ARDOUR::Region>);
@@ -340,6 +335,8 @@ class Editor : public PublicEditor
 	void reset_zoom (double);
 	void reposition_and_zoom (nframes_t, double);
 
+	nframes_t edit_cursor_position(bool);
+
   protected:
 	void map_transport_state ();
 	void map_position_change (nframes_t);
@@ -349,7 +346,6 @@ class Editor : public PublicEditor
   private:
 	
 	ARDOUR::Session     *session;
-	ARDOUR::AudioEngine& engine;
 	bool                 constructed;
 
 	PlaylistSelector* _playlist_selector;
@@ -441,6 +437,7 @@ class Editor : public PublicEditor
 	void catch_vanishing_regionview (RegionView *);
 
 	bool set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove=false);
+	void select_all_tracks ();
 
 	bool set_selected_control_point_from_click (Selection::Operation op = Selection::Set, bool no_remove=false);
 	bool set_selected_track_from_click (bool press, Selection::Operation op = Selection::Set, bool no_remove=false);
@@ -608,7 +605,7 @@ class Editor : public PublicEditor
 	    nframes_t        current_frame;
 	    double		  length;
 
-	    Cursor (Editor&, const string& color, bool (Editor::*)(GdkEvent*,ArdourCanvas::Item*));
+	    Cursor (Editor&, bool (Editor::*)(GdkEvent*,ArdourCanvas::Item*));
 	    ~Cursor ();
 
 	    void set_position (nframes_t);
@@ -653,6 +650,7 @@ class Editor : public PublicEditor
 	void controls_layout_size_request (Gtk::Requisition*);
 
 	Gtk::HScrollbar     edit_hscrollbar;
+	bool                _dragging_hscrollbar;
 
 	void reset_hscrollbar_stepping ();
 	
@@ -1174,7 +1172,7 @@ class Editor : public PublicEditor
 	Gtk::Allocation canvas_allocation;
 	bool canvas_idle_queued;
 	void track_canvas_allocate (Gtk::Allocation alloc);
-	bool track_canvas_idle ();
+	bool track_canvas_size_allocated ();
 
 	void set_edit_cursor (GdkEvent* event);
 	void set_playhead_cursor (GdkEvent* event);
@@ -1241,6 +1239,7 @@ class Editor : public PublicEditor
 	void marker_menu_hide ();
 	void marker_menu_loop_range ();
 	void marker_menu_select_all_selectables_using_range ();
+	void marker_menu_select_using_range ();
 	void marker_menu_separate_regions_using_location ();
 	void marker_menu_play_from ();
 	void marker_menu_play_range ();
@@ -1275,7 +1274,7 @@ class Editor : public PublicEditor
 	void remove_metric_marks ();
 	void draw_metric_marks (const ARDOUR::Metrics& metrics);
 
-	void tempo_map_changed (ARDOUR::Change);
+	void tempo_map_changed (ARDOUR::Change, bool immediate_redraw);
 	void redisplay_tempo ();
 	
 	void snap_to (nframes_t& first, int32_t direction = 0, bool for_mark = false);

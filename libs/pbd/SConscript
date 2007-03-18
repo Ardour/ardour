@@ -36,6 +36,7 @@ pthread_utils.cc
 receiver.cc
 stacktrace.cc
 stateful.cc
+strreplace.cc
 strsplit.cc
 textreceiver.cc
 transmitter.cc

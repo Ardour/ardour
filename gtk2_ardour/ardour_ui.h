@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __ardour_gui_h__
@@ -55,6 +54,7 @@
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/click_box.h>
 #include <gtkmm2ext/stateful_button.h>
+#include <gtkmm2ext/bindable_button.h>
 #include <ardour/ardour.h>
 #include <ardour/session.h>
 
@@ -65,7 +65,6 @@
 class AudioClock;
 class PublicEditor;
 class Keyboard;
-class MeterBridge;
 class OptionEditor;
 class Mixer_UI;
 class ConnectionEditor;
@@ -128,7 +127,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 		_will_create_new_session_automatically = yn;
 	}
 
-        void new_session(std::string path = string());
+        bool new_session(std::string path = string());
 	gint cmdline_new_session (string path);
 	int  unload_session ();
 	void close_session(); 
@@ -156,6 +155,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	static sigc::signal<void,bool> Blink;
 	static sigc::signal<void>      RapidScreenUpdate;
+	static sigc::signal<void>      MidRapidScreenUpdate;
 	static sigc::signal<void>      SuperRapidScreenUpdate;
 	static sigc::signal<void,nframes_t> Clock;
 
@@ -187,7 +187,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void store_clock_modes ();
 	void restore_clock_modes ();
 
-	void add_route ();
+	void add_route (Gtk::Window* float_window);
 	
 	void session_add_audio_track (int input_channels, int32_t output_channels, ARDOUR::TrackMode mode, uint32_t how_many) {
 		session_add_audio_route (true, input_channels, output_channels, mode, how_many);
@@ -277,9 +277,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	GlobalClickBox    *crossfade_time_button;
 	vector<string>     crossfade_time_strings;
 
-	GlobalClickBox    *mmc_id_button;
-	vector<string>     mmc_id_strings;
-
 	Gtk::ToggleButton   preroll_button;
 	Gtk::ToggleButton   postroll_button;
 
@@ -289,7 +286,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	int  setup_windows ();
 	void setup_transport ();
 	void setup_clock ();
-	void setup_adjustables ();
 
 	static ARDOUR_UI *theArdourUI;
 
@@ -316,9 +312,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	bool blink_on;
 	void start_blinking ();
 	void stop_blinking ();
-
-	void control_methods_adjusted ();
-	void mmc_device_id_adjusted ();
 
 	void about_signal_response(int response);
 
@@ -360,18 +353,51 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::HBox                primary_clock_hbox;
 	Gtk::HBox                secondary_clock_hbox;
 
-	Gtkmm2ext::StatefulButton roll_button;
-	Gtkmm2ext::StatefulButton stop_button;
-	Gtkmm2ext::StatefulButton rewind_button;
-	Gtkmm2ext::StatefulButton forward_button;
-	Gtkmm2ext::StatefulButton goto_start_button;
-	Gtkmm2ext::StatefulButton goto_end_button;
-	Gtkmm2ext::StatefulButton auto_loop_button;
-	Gtkmm2ext::StatefulButton play_selection_button;
 
-	Gtkmm2ext::StatefulButton rec_button;
+	struct TransportControllable : public PBD::Controllable {
+	    enum ToggleType {
+		    Roll = 0,
+		    Stop,
+		    RecordEnable,
+		    GotoStart,
+		    GotoEnd,
+		    AutoLoop,
+		    PlaySelection,
+		    ShuttleControl
+		    
+	    };
+	    
+	    TransportControllable (std::string name, ARDOUR_UI&, ToggleType);
+	    void set_value (float);
+	    float get_value (void) const;
+	    
+	    void set_id (const std::string&);
+	    
+	    ARDOUR_UI& ui;
+	    ToggleType type;
+	};
 
-	Gtk::ToggleButton time_master_button;
+	TransportControllable roll_controllable;
+	TransportControllable stop_controllable;
+	TransportControllable goto_start_controllable;
+	TransportControllable goto_end_controllable;
+	TransportControllable auto_loop_controllable;
+	TransportControllable play_selection_controllable;
+	TransportControllable rec_controllable;
+	TransportControllable shuttle_controllable;
+	BindingProxy shuttle_controller_binding_proxy;
+
+	void set_transport_controllable_state (const XMLNode&);
+	XMLNode& get_transport_controllable_state ();
+
+	BindableButton roll_button;
+	BindableButton stop_button;
+	BindableButton goto_start_button;
+	BindableButton goto_end_button;
+	BindableButton auto_loop_button;
+	BindableButton play_selection_button;
+	BindableButton rec_button;
+
 	Gtk::ComboBoxText sync_option_combo;
 
 	void sync_option_changed ();
@@ -403,16 +429,19 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	gint shuttle_box_expose (GdkEventExpose*);
 	gint mouse_shuttle (double x, bool force);
 	void use_shuttle_fract (bool force);
+	void set_shuttle_fract (double);
 
 	bool   shuttle_grabbed;
 	double shuttle_fract;
 
-	Gtk::ToggleButton punch_in_button;
-	Gtk::ToggleButton punch_out_button;
-	Gtk::ToggleButton auto_return_button;
-	Gtk::ToggleButton auto_play_button;
-	Gtk::ToggleButton auto_input_button;
-	Gtk::ToggleButton click_button;
+	Gtkmm2ext::StatefulToggleButton punch_in_button;
+	Gtkmm2ext::StatefulToggleButton punch_out_button;
+	Gtkmm2ext::StatefulToggleButton auto_return_button;
+	Gtkmm2ext::StatefulToggleButton auto_play_button;
+	Gtkmm2ext::StatefulToggleButton auto_input_button;
+	Gtkmm2ext::StatefulToggleButton click_button;
+	Gtkmm2ext::StatefulToggleButton time_master_button;
+
 	Gtk::ToggleButton auditioning_alert_button;
 	Gtk::ToggleButton solo_alert_button;
 
@@ -434,14 +463,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	/* called by Blink signal */
 
 	void transport_rec_enable_blink (bool onoff);
-
-	/* These change where we accept control from:
-	   MMC, X (local) or both.
-	*/
-
-	void allow_mmc_only ();
-	void allow_mmc_and_local ();
-	void allow_local_only ();
 
 	Gtk::Menu*        session_popup_menu;
 
@@ -502,10 +523,12 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	gint every_second ();
 	gint every_point_one_seconds ();
+	gint every_point_oh_five_seconds ();
 	gint every_point_zero_one_seconds ();
 
 	sigc::connection second_connection;
 	sigc::connection point_one_second_connection;
+	sigc::connection point_oh_five_second_connection;
 	sigc::connection point_zero_one_second_connection;
 
 	gint session_menu (GdkEventButton *);
@@ -589,7 +612,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	/* Keymap handling */
 
 	void install_actions ();
-	void start_keyboard_prefix();
 
 	void toggle_record_enable (uint32_t);
 
@@ -613,11 +635,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	struct timeval last_peak_grab;
 	struct timeval last_shuttle_request;
 
-	bool have_disk_overrun_displayed;
-	bool have_disk_underrun_displayed;
-
-	void disk_overrun_message_gone ();
-	void disk_underrun_message_gone ();
+	bool have_disk_speed_dialog_displayed;
+	void disk_speed_dialog_gone (int ignored_response, Gtk::MessageDialog*);
 	void disk_overrun_handler ();
 	void disk_underrun_handler ();
 
@@ -646,10 +665,13 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_use_midi_control();
 	void toggle_send_mtc ();
 
+	void toggle_use_osc ();
+
 	void set_input_auto_connect (ARDOUR::AutoConnectOption);
 	void set_output_auto_connect (ARDOUR::AutoConnectOption);
 	void set_solo_model (ARDOUR::SoloModel);
 	void set_monitor_model (ARDOUR::MonitorModel);
+	void set_remote_model (ARDOUR::RemoteModel);
 
 	void toggle_StopPluginsWithTransport();
 	void toggle_DoNotRunPluginsWhileRecording();
@@ -658,12 +680,14 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_StopTransportAtEndOfSession();
 	void toggle_GainReduceFastTransport();
 	void toggle_LatchedSolo();
+	void toggle_ShowSoloMutes();
 	void toggle_LatchedRecordEnable ();
 	void toggle_RegionEquivalentsOverlap ();
 
 	void mtc_port_changed ();
 	void map_solo_model ();
 	void map_monitor_model ();
+	void map_remote_model ();
 	void map_file_header_format ();
 	void map_file_data_format ();
 	void map_input_auto_connect ();
@@ -680,6 +704,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	bool can_save_keybindings;
 	bool first_idle ();
+
+	void no_memory_warning ();
+	void check_memory_locking ();
 };
 
 #endif /* __ardour_gui_h__ */

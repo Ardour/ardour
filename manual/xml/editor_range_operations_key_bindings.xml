@@ -1,0 +1,83 @@
+<?xml version="1.0" standalone="no"?>
+
+<!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
+
+]>
+
+<section id="sn-editor-range-operations-key-bindings">
+  <title>Range Operations</title>
+  <table id="tbl-editor-range-operations-key-bindings">
+    <title>Range Operations Key Bindings</title>
+    <tgroup cols = "2">
+      <colspec colnum="1" colname="Key Binding" colwidth="1"/>
+      <colspec colnum="2" colname="Action" colwidth= "2"/>
+      <thead>
+        <row>
+          <entry>
+            Key Binding
+          </entry>
+
+          <entry>
+            Action
+          </entry>
+        </row>
+      </thead>
+      <tbody>
+        <row>
+          <entry>
+            <keycombo><keycap>Keypad Down arrow</keycap> </keycombo>
+          </entry>
+
+          <entry>
+            begin range definition while transport rolls
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Keypad Up arrow</keycap> </keycombo>
+          </entry>
+
+          <entry>
+            end range definition while transport rolls
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Shift</keycap><keycap>Tab</keycap> </keycombo>
+          </entry>
+
+          <entry>
+            extend range to end of region
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>Tab</keycap>
+            </keycombo>
+          </entry>
+
+          <entry>
+            extend range to start of region
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Meta</keycap><keycap>s</keycap> </keycombo>
+          </entry>
+
+          <entry>
+            duplicate range
+          </entry>
+        </row>
+      </tbody>
+    </tgroup>
+  </table>
+<!--
+	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
+		href="Some_Subsection.xml" />
+	-->
+</section>
