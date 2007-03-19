@@ -88,7 +88,6 @@ ARDOUR_UI *ARDOUR_UI::theArdourUI = 0;
 
 sigc::signal<void,bool> ARDOUR_UI::Blink;
 sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
-sigc::signal<void>      ARDOUR_UI::MidRapidScreenUpdate;
 sigc::signal<void>      ARDOUR_UI::SuperRapidScreenUpdate;
 sigc::signal<void,nframes_t> ARDOUR_UI::Clock;
 
@@ -618,13 +617,6 @@ ARDOUR_UI::every_point_one_seconds ()
 	update_speed_display ();
 	RapidScreenUpdate(); /* EMIT_SIGNAL */
 	return TRUE;
-}
-
-gint
-ARDOUR_UI::every_point_oh_five_seconds ()
-{
-	MidRapidScreenUpdate(); /* EMIT_SIGNAL */
-	return true;
 }
 
 gint
