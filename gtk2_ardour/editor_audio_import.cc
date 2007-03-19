@@ -21,6 +21,7 @@
 #include <pbd/basename.h>
 
 #include <gtkmm2ext/choice.h>
+#include <gtkmm2ext/window_title.h>
 
 #include <ardour/session.h>
 #include <ardour/audioplaylist.h>
@@ -48,6 +49,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace sigc;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 using namespace Editing;
 using Glib::ustring;
 
@@ -169,7 +171,7 @@ Editor::do_embed (vector<ustring> paths, bool split, ImportMode mode, AudioTrack
 							   to_embed.size() > 2 ? _("multichannel") : _("stereo")));
 			choices.push_back (_("Import as multiple regions"));
 			
-			Gtkmm2ext::Choice chooser (string_compose (_("Paired files detected (%1, %2 ...).\nDo you want to:"),
+			Choice chooser (string_compose (_("Paired files detected (%1, %2 ...).\nDo you want to:"),
 								   to_embed[0],
 								   to_embed[1]),
 						   choices);
@@ -215,7 +217,9 @@ Editor::do_embed (vector<ustring> paths, bool split, ImportMode mode, AudioTrack
 int
 Editor::import_sndfile (vector<ustring> paths, ImportMode mode, AudioTrack* track, nframes_t& pos)
 {
-	interthread_progress_window->set_title (string_compose (_("ardour: importing %1"), paths.front()));
+	WindowTitle title = string_compose (_("importing %1"), paths.front());
+
+	interthread_progress_window->set_title (title.get_string());
 	interthread_progress_window->set_position (Gtk::WIN_POS_MOUSE);
 	interthread_progress_window->show_all ();
 	interthread_progress_bar.set_fraction (0.0f);

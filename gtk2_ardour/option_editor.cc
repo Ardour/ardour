@@ -28,6 +28,7 @@
 #include <midi++/manager.h>
 #include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/window_title.h>
 
 #include "public_editor.h"
 #include "keyboard.h"
@@ -52,7 +53,7 @@ using namespace std;
 static vector<string> positional_sync_strings;
 
 OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
-	: Dialog ("option editor"),
+	: Dialog ("options editor"),
 	  ui (uip),
 	  editor (ed),
 	  mixer (mixui),
@@ -97,9 +98,12 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	click_io_selector = 0;
 	auditioner_io_selector = 0;
 	session = 0;
+	
+	WindowTitle title(Glib::get_application_name());
+	title += _("Options Editor");
+	set_title(title.get_string());
 
 	set_default_size (300, 300);
-	set_title (_("ardour: options editor"));
 	set_wmclass (X_("ardour_option_editor"), "Ardour");
 
 	set_name ("OptionsWindow");

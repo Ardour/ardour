@@ -24,6 +24,8 @@
 
 #include <pbd/convert.h>
 
+#include <glibmm/miscutils.h>
+
 #include <gtkmm/messagedialog.h>
 
 #include <gtkmm2ext/gtk_ui.h>
@@ -32,6 +34,7 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/doi.h>
+#include <gtkmm2ext/window_title.h>
 
 #include <ardour/ardour.h>
 #include <ardour/session.h>
@@ -1008,11 +1011,12 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 		
 		if (send->get_gui() == 0) {
 			
-			string title;
-			title = string_compose(_("ardour: %1"), send->name());	
-			
 			send_ui = new SendUIWindow (send, _session);
-			send_ui->set_title (title);
+
+			WindowTitle title(Glib::get_application_name());
+			title += send->name();
+			send_ui->set_title (title.get_string());
+
 			send->set_gui (send_ui);
 			
 		} else {
@@ -1049,7 +1053,10 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 						ARDOUR_UI::instance()->the_editor().ensure_float (*plugin_ui);
 					}
 
-					plugin_ui->set_title (generate_redirect_title (plugin_insert));
+					WindowTitle title(Glib::get_application_name());
+					title += generate_redirect_title (plugin_insert);
+					plugin_ui->set_title (title.get_string());
+
 					plugin_insert->set_gui (plugin_ui);
 					
 					// change window title when route name is changed
@@ -1317,8 +1324,12 @@ RedirectBox::route_name_changed (void* src, PluginUIWindow* plugin_ui, boost::we
 {
 	ENSURE_GUI_THREAD(bind (mem_fun (*this, &RedirectBox::route_name_changed), src, plugin_ui, wpi));
 	boost::shared_ptr<PluginInsert> pi (wpi.lock());
+	
+
 	if (pi) {
-		plugin_ui->set_title (generate_redirect_title (pi));
+		WindowTitle title(Glib::get_application_name());
+		title += generate_redirect_title (pi);
+		plugin_ui->set_title (title.get_string());
 	}
 }
 
@@ -1337,6 +1348,6 @@ RedirectBox::generate_redirect_title (boost::shared_ptr<PluginInsert> pi)
 		maker += " ...";
 	}
 
-	return string_compose(_("ardour: %1: %2 (by %3)"), _route->name(), pi->name(), maker);	
+	return string_compose(_("%1: %2 (by %3)"), _route->name(), pi->name(), maker);	
 }
 

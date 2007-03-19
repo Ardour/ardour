@@ -24,6 +24,7 @@
 #include <ardour/utils.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/stop_signal.h>
+#include <gtkmm2ext/window_title.h>
 #include <cmath>
 
 #include "audio_region_editor.h"
@@ -38,6 +39,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace sigc;
 using namespace std;
+using namespace Gtkmm2ext;
 
 AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion> r, AudioRegionView& rv)
 	: RegionEditor (s),
@@ -118,9 +120,10 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), static_cast<Window *> (this)));
 
-	string title = _("ardour: region ");
-	title += _region->name();
-	set_title (title);
+	WindowTitle title(string_compose (_("Region %1"), _region->name()));
+	title += Glib::get_application_name();
+
+	set_title (title.get_string());
 
 	show_all();
 

@@ -31,6 +31,7 @@
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/choice.h>
+#include <gtkmm2ext/window_title.h>
 
 #include <ardour/audioengine.h>
 #include <ardour/session.h>
@@ -67,6 +68,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace sigc;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 using namespace Editing;
 
 /***********************************************************************
@@ -1763,7 +1765,10 @@ Editor::rename_region ()
 		return;
 	}
 
-	dialog.set_title (_("ardour: rename region"));
+	WindowTitle title(Glib::get_application_name());
+	title += _("Rename Region");
+
+	dialog.set_title (title.get_string());
 	dialog.set_name ("RegionRenameWindow");
 	dialog.set_size_request (300, -1);
 	dialog.set_position (Gtk::WIN_POS_MOUSE);
@@ -2526,8 +2531,10 @@ Editor::freeze_route ()
 	if (interthread_progress_window == 0) {
 		build_interthread_progress_window ();
 	}
-	
-	interthread_progress_window->set_title (_("ardour: freeze"));
+
+	WindowTitle title(Glib::get_application_name());
+	title += _("Freeze");
+	interthread_progress_window->set_title (title.get_string());
 	interthread_progress_window->set_position (Gtk::WIN_POS_MOUSE);
 	interthread_progress_window->show_all ();
 	interthread_progress_bar.set_fraction (0.0f);

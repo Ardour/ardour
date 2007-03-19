@@ -501,6 +501,7 @@ class Editor : public PublicEditor
 	Gtk::EventBox      time_canvas_event_box;
 	Gtk::EventBox      track_canvas_event_box;
 	Gtk::EventBox      time_button_event_box;
+	Gtk::Frame         time_button_frame;
 
 	ArdourCanvas::Group      *minsec_group;
 	ArdourCanvas::Group      *bbt_group;
@@ -557,6 +558,7 @@ class Editor : public PublicEditor
 	gint metric_get_frames (GtkCustomRulerMark **, gdouble, gdouble, gint);
 	gint metric_get_minsec (GtkCustomRulerMark **, gdouble, gdouble, gint);
 
+	Gtk::Widget        *_ruler_separator;
 	GtkWidget          *_smpte_ruler;
 	GtkWidget          *_bbt_ruler;
 	GtkWidget          *_frames_ruler;
@@ -803,7 +805,6 @@ class Editor : public PublicEditor
 	void named_selection_display_selection_changed ();
 
 	/* track views */
-	int track_spacing;
 	TrackViewList  track_views;
 	TimeAxisView     *trackview_by_y_position (double ypos);
 

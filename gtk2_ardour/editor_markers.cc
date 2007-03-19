@@ -23,6 +23,7 @@
 
 #include <libgnomecanvas/libgnomecanvas.h>
 #include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/window_title.h>
 
 #include <ardour/location.h>
 #include <pbd/memento_command.h>
@@ -43,6 +44,7 @@ using namespace sigc;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 
 void
 Editor::clear_marker_display ()
@@ -856,12 +858,15 @@ Editor::marker_menu_rename ()
 	string txt;
 
 	dialog.set_prompt (_("New Name:"));
-	
+
+	WindowTitle title(Glib::get_application_name());
 	if (loc->is_mark()) {
-		dialog.set_title (_("ardour: rename mark"));
+		title += _("Rename Mark");
 	} else {
-		dialog.set_title (_("ardour: rename range"));
+		title += _("Rename Range");
 	}
+
+	dialog.set_title(title.get_string());
 
 	dialog.set_name ("MarkRenameWindow");
 	dialog.set_size_request (250, -1);
@@ -976,8 +981,8 @@ Editor::update_loop_range_view (bool visibility)
 		if (visibility) {
 			transport_loop_range_rect->show();
 		}
-	}
-	else if (visibility) {
+
+	} else if (visibility) {
 		transport_loop_range_rect->hide();
 	}
 }

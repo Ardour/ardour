@@ -141,33 +141,33 @@ Editor::initialize_canvas ()
 	range_marker_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height * 3.0);
 	transport_marker_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height * 4.0);
 	
-	tempo_bar = new ArdourCanvas::SimpleRect (*tempo_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
+	tempo_bar = new ArdourCanvas::SimpleRect (*tempo_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
 	tempo_bar->property_fill_color_rgba() = color_map[cTempoBar];
 	tempo_bar->property_outline_pixels() = 0;
 	
-	meter_bar = new ArdourCanvas::SimpleRect (*meter_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
+	meter_bar = new ArdourCanvas::SimpleRect (*meter_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
 	meter_bar->property_fill_color_rgba() = color_map[cMeterBar];
 	meter_bar->property_outline_pixels() = 0;
 	
-	marker_bar = new ArdourCanvas::SimpleRect (*marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
+	marker_bar = new ArdourCanvas::SimpleRect (*marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
 	marker_bar->property_fill_color_rgba() = color_map[cMarkerBar];
 	marker_bar->property_outline_pixels() = 0;
 	
-	range_marker_bar = new ArdourCanvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
+	range_marker_bar = new ArdourCanvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
 	range_marker_bar->property_fill_color_rgba() = color_map[cRangeMarkerBar];
 	range_marker_bar->property_outline_pixels() = 0;
 	
-	transport_marker_bar = new ArdourCanvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
+	transport_marker_bar = new ArdourCanvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
 	transport_marker_bar->property_fill_color_rgba() = color_map[cTransportMarkerBar];
 	transport_marker_bar->property_outline_pixels() = 0;
 	
-	range_bar_drag_rect = new ArdourCanvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
+	range_bar_drag_rect = new ArdourCanvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
 	range_bar_drag_rect->property_fill_color_rgba() = color_map[cRangeDragBarRectFill];
 	range_bar_drag_rect->property_outline_color_rgba() = color_map[cRangeDragBarRect];
 	range_bar_drag_rect->property_outline_pixels() = 0;
 	range_bar_drag_rect->hide ();
 	
-	transport_bar_drag_rect = new ArdourCanvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
+	transport_bar_drag_rect = new ArdourCanvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
 	transport_bar_drag_rect ->property_fill_color_rgba() = color_map[cTransportDragRectFill];
 	transport_bar_drag_rect->property_outline_color_rgba() = color_map[cTransportDragRect];
 	transport_bar_drag_rect->property_outline_pixels() = 0;
@@ -321,14 +321,9 @@ Editor::track_canvas_size_allocated ()
 		for (i = track_views.begin(); i != track_views.end(); ++i) {
 			if ((*i)->control_parent) {
 				height += (*i)->effective_height;
-				height += track_spacing;
 			}
 		}
 		
-		if (height) {
-			height -= track_spacing;
-		}
-
 		full_canvas_height = height;
 	}
 
@@ -391,7 +386,6 @@ Editor::reset_scrolling_region (Gtk::Allocation* alloc)
 	        TimeAxisView *tv = (*i)[route_display_columns.tv];
 		if (tv != 0 && !tv->hidden()) {
 			pos += tv->effective_height;
-			pos += track_spacing;
 		}
 	}
 
@@ -416,7 +410,6 @@ Editor::controls_layout_size_request (Requisition* req)
 	        TimeAxisView *tv = (*i)[route_display_columns.tv];
 		if (tv != 0) {
 			pos += tv->effective_height;
-			pos += track_spacing;
 		}
 	}
 
