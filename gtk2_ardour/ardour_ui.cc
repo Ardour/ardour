@@ -527,6 +527,7 @@ If you still wish to quit, please use the\n\n\
 	if (session) {
 		session->set_deletion_in_progress ();
 	}
+	cerr << "Stopping engine\n";
 	engine->stop (true);
 	Config->save_state();
 	quit ();

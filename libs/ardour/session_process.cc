@@ -210,6 +210,9 @@ Session::commit_diskstreams (nframes_t nframes, bool &needs_butler)
 		}
 		
 		/* force all diskstreams not handled by a Route to call do their stuff.
+		   Note: the diskstreams that were handled by a route will just return zero
+		   from this call, because they know they were processed. So in fact, this
+		   also runs commit() for every diskstream.
 		 */
 
 		if ((dret = (*i)->process (_transport_frame, nframes, 0, actively_recording(), get_rec_monitors_input())) == 0) {

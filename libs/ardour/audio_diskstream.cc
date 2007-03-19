@@ -524,6 +524,8 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 		return 0;
 	}
 
+	commit_should_unlock = false;
+
 	check_record_status (transport_frame, nframes, can_record);
 
 	nominally_recording = (can_record && re);
@@ -542,7 +544,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 	if (!state_lock.trylock()) {
 		return 1;
 	} 
-
+	commit_should_unlock = true;
 	adjust_capture_position = 0;
 
 	for (chan = c->begin(); chan != c->end(); ++chan) {
@@ -788,6 +790,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 		   be called. unlock the state lock.
 		*/
 		
+		commit_should_unlock = false;
 		state_lock.unlock();
 	} 
 
@@ -827,7 +830,10 @@ AudioDiskstream::commit (nframes_t nframes)
 			|| c->front()->capture_buf->read_space() >= disk_io_chunk_frames;
 	}
 
-	state_lock.unlock();
+	if (commit_should_unlock) {
+		state_lock.unlock();
+	}
+
 	_processed = false;
 
 	return need_butler;

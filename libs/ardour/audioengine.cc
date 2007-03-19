@@ -283,9 +283,11 @@ AudioEngine::process_callback (nframes_t nframes)
 	}
 
 	if (session_remove_pending) {
+		cerr << "engine notes session remove pending\n";
 		session = 0;
 		session_remove_pending = false;
 		session_removed.signal();
+		cerr << "done, woken waiter\n";
 		_processed_frames = next_processed_frames;
 		return 0;
 	}
@@ -451,8 +453,10 @@ AudioEngine::remove_session ()
 	if (_running) {
 
 		if (session) {
+			cerr << "mark session for removal\n";
 			session_remove_pending = true;
 			session_removed.wait(_process_lock);
+			cerr << "done\n";
 		}
 
 	} else {
