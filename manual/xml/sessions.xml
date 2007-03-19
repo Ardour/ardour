@@ -15,8 +15,6 @@
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="creating_a_new_session.xml" />
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
-		href="adding_tracks.xml" />
-  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="opening_a_session.xml" />
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="saving_a_session.xml" />

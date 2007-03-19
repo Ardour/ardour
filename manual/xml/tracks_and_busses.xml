@@ -16,42 +16,8 @@
       <imagedata fileref="images/signal_flow.png"/>
     </imageobject>
   </mediaobject>
-  <section id="creating-tracks">
-    <title>Creating Tracks</title>
-    <para>
-      Tracks may be added to the session at any time.
-    </para>
-    <orderedlist><title>Creating a new Track</title>
-      <listitem>
-        <para>
-          Choose <menuchoice> <guimenu>Session</guimenu> <guisubmenu>Add
-          Track/Bus</guisubmenu> </menuchoice>
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          add_track.ps Add Track Dialog
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          In the Add Tracks dialog, choose whether you wish to add a new
-          Track or a new Bus.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          Enter the number of new tracks/busses you want to add.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          Choose the I/O configuration of the tracks/busses you are adding
-          using the clickbox.
-        </para>
-      </listitem>
-    </orderedlist>
-  </section>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
+		href="adding_tracks.xml" />
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="renaming_tracks.xml" />
   <section id="deleting-tracks">

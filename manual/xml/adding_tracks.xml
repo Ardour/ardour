@@ -13,33 +13,52 @@
   <itemizedlist>
     <listitem>
       <para>
-        <menuchoice> <guimenu>Session</guimenu> <guisubmenu>Add
+        Choose <menuchoice> <guimenu>Session</guimenu> <guisubmenu>Add
         Track/Bus</guisubmenu> </menuchoice>
       </para>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/add_track_bus.png"/>
+        </imageobject>
+      </mediaobject>
     </listitem>
-  </itemizedlist>
-  <mediaobject>
-    <imageobject>
-      <imagedata fileref="images/add_track_bus.png"/>
-    </imageobject>
-  </mediaobject>
-  <para>
-    In the Add Tracks dialog, choose whether you wish to add a new Track or
-    a new Bus.
-  </para>
 
-  <itemizedlist>
+    <listitem>
+      <para>
+        Choose whether you wish to add a new Track or a new Bus.
+      </para>
+    </listitem>
+
     <listitem>
       <para>
         Enter the number of new tracks/busses you want to add.
       </para>
     </listitem>
+
+    <listitem>
+      <para>
+        Choose the channel configuration for the Tracks or Busses you are
+        adding.
+      </para>
+    </listitem>
+
+    <listitem>
+      <para>
+        If you are creating a Track choose whether to create a normal track
+        or a Tape Track.
+      </para>
+    </listitem>
   </itemizedlist>
 
-  <para>
-    Choose the I/O configuration of the tracks/busses you are adding using
-    the clickbox.
-  </para>
+  <note>
+    <para>
+      If you choose <literal>Manual Setup</literal> for the channel
+      configuration then the tracks will be created with no inputs and you
+      will have to configure the I/O configuration of the track using the
+      <link linkend="input-output-connections-editor">I/O Connections
+      Editor</link>
+    </para>
+  </note>
 <!--
 	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="Some_Subsection.xml" />
