@@ -271,7 +271,6 @@ Editor::Editor ()
 	no_route_list_redisplay = false;
 	verbose_cursor_on = true;
 	route_removal = false;
-	track_spacing = 0;
 	show_automatic_regions_in_region_list = true;
 	region_list_sort_type = (Editing::RegionListSortType) 0; 
 	have_pending_keyboard_selection = false;
@@ -366,12 +365,13 @@ Editor::Editor ()
 
  	edit_cursor_clock.ValueChanged.connect (mem_fun(*this, &Editor::edit_cursor_clock_changed));
 	
+	time_canvas_vbox.pack_start (*_ruler_separator, false, false);
 	time_canvas_vbox.pack_start (*minsec_ruler, false, false);
 	time_canvas_vbox.pack_start (*smpte_ruler, false, false);
 	time_canvas_vbox.pack_start (*frames_ruler, false, false);
 	time_canvas_vbox.pack_start (*bbt_ruler, false, false);
 	time_canvas_vbox.pack_start (time_canvas, true, true);
-	time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars));
+	time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars) + 2);
 
 	bbt_label.set_name ("EditorTimeButton");
 	bbt_label.set_size_request (-1, (int)timebar_height);
@@ -424,6 +424,9 @@ Editor::Editor ()
 	time_button_event_box.set_name ("TimebarLabelBase");
 	time_button_event_box.signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_label_button_release));
 
+	time_button_frame.add(time_button_event_box);
+	time_button_frame.property_shadow_type() = Gtk::SHADOW_OUT;
+
 	/* these enable us to have a dedicated window (for cursor setting, etc.) 
 	   for the canvas areas.
 	*/
@@ -441,7 +444,7 @@ Editor::Editor ()
 	
 	edit_packer.attach (edit_vscrollbar,         0, 1, 1, 3,    FILL,        FILL|EXPAND, 0, 0);
 
-	edit_packer.attach (time_button_event_box,   1, 2, 0, 1,    FILL,        FILL, 0, 0);
+	edit_packer.attach (time_button_frame,       0, 2, 0, 1,    FILL,        FILL, 0, 0);
 	edit_packer.attach (time_canvas_event_box,   2, 3, 0, 1,    FILL|EXPAND, FILL, 0, 0);
 
 	edit_packer.attach (controls_layout,         1, 2, 1, 2,    FILL,        FILL|EXPAND, 0, 0);

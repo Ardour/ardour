@@ -686,7 +686,7 @@ AutomationTimeAxisView::get_selectables (nframes_t start, nframes_t end, double 
 		   y_position is the "origin" or "top" of the track.
 		*/
 
-		double mybot = y_position + height; // XXX need to include Editor::track_spacing; 
+		double mybot = y_position + height;
 
 		if (y_position >= top && mybot <= bot) {
 

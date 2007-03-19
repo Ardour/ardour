@@ -55,6 +55,10 @@ Editor::initialize_rulers ()
 	ruler_editor = this;
 	ruler_grabbed_widget = 0;
 	
+	_ruler_separator = new Gtk::HSeparator();
+	_ruler_separator->set_size_request(-1, 2);
+	_ruler_separator->show();
+
 	_smpte_ruler = gtk_custom_hruler_new ();
 	smpte_ruler = Glib::wrap (_smpte_ruler);
 	smpte_ruler->set_name ("SMPTERuler");
@@ -600,6 +604,7 @@ Editor::update_ruler_visibility ()
 	frames_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
 	minsec_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
 
+	ruler_children.insert (canvaspos, Element(*_ruler_separator, PACK_SHRINK, PACK_START));
 	
 	if (ruler_shown[ruler_metric_minsec]) {
 		lab_children.push_back (Element(minsec_label, PACK_SHRINK, PACK_START));
@@ -625,7 +630,7 @@ Editor::update_ruler_visibility ()
 		visible_timebars++;
 	}
 
-	double tbpos = 0.0;
+	double tbpos = 1.0;
 	double old_unit_pos ;
 	
 	if (ruler_shown[ruler_time_meter]) {
@@ -707,7 +712,7 @@ Editor::update_ruler_visibility ()
 	tempo_map_changed(Change (0), false);
 
 	time_canvas_event_box.show_all();
-	time_button_event_box.show_all();
+	time_button_frame.show_all();
 }
 
 void

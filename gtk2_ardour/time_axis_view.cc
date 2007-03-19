@@ -147,7 +147,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 
 	controls_frame.add (controls_hbox);
 	controls_frame.set_name ("TimeAxisViewControlsBaseUnselected");
-	controls_frame.set_shadow_type (Gtk::SHADOW_OUT);
+	controls_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
 
 	ColorChanged.connect (mem_fun (*this, &TimeAxisView::color_handler));
 }
@@ -233,7 +233,7 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 		
 		if (canvas_item_visible ((*i)->canvas_display)) {
 			++nth;
-			effective_height += (*i)->show_at (y + 1 + effective_height, nth, parent);
+			effective_height += (*i)->show_at (y + effective_height, nth, parent);
 		}
 	}
 
@@ -361,7 +361,7 @@ void
 TimeAxisView::set_height_pixels (uint32_t h)
 {
 	height = h;
-	controls_frame.set_size_request (-1, height);
+	controls_frame.set_size_request (-1, height + ((order == 0) ? 1 : 0));
 
  	if (canvas_item_visible (selection_group)) {
 		/* resize the selection rect */
@@ -846,7 +846,7 @@ TimeAxisView::touched (double top, double bot)
 	   y_position is the "origin" or "top" of the track.
 	 */
 
-	double mybot = y_position + height; // XXX need to include Editor::track_spacing; 
+	double mybot = y_position + height;
 	
 	return ((y_position <= bot && y_position >= top) || 
 		((mybot <= bot) && (top < mybot)) || 
