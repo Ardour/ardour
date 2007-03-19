@@ -7,6 +7,9 @@
 <section id="sn-mackie">
   <title>Using the Mackie driver for MCU and BCF2000</title>
   <para>
+		Note: Mackie support is available only for ardour 2.0 beta12 or newer.
+	</para>
+  <para>
     This will walk you through the process of configuring and using Mackie
     MCU, or a BCF2000 in
     <ulink url="http://www.behringerdownload.de/BCF2000/BCF2000_Emulation_modes.pdf">Logic
