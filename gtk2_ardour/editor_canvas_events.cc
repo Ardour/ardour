@@ -214,7 +214,11 @@ Editor::typed_event (ArdourCanvas::Item* item, GdkEvent *event, ItemType type)
 bool
 Editor::canvas_region_view_event (GdkEvent *event, ArdourCanvas::Item* item, RegionView *rv)
 {
-	gint ret = FALSE;
+	bool ret = false;
+
+	if (!rv->sensitive ()) {
+		return false;
+	}
 
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
@@ -330,6 +334,10 @@ Editor::canvas_fade_in_event (GdkEvent *event, ArdourCanvas::Item* item, AudioRe
 {
 	/* we handle only button 3 press/release events */
 
+	if (!rv->sensitive()) {
+		return false;
+	}
+
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
 		clicked_regionview = rv;
@@ -362,6 +370,10 @@ Editor::canvas_fade_in_handle_event (GdkEvent *event, ArdourCanvas::Item* item, 
 {
 	bool ret = false;
 	
+	if (!rv->sensitive()) {
+		return false;
+	}
+
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
 	case GDK_2BUTTON_PRESS:
@@ -401,6 +413,10 @@ Editor::canvas_fade_out_event (GdkEvent *event, ArdourCanvas::Item* item, AudioR
 {
 	/* we handle only button 3 press/release events */
 
+	if (!rv->sensitive()) {
+		return false;
+	}
+
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
 		clicked_regionview = rv;
@@ -433,6 +449,10 @@ Editor::canvas_fade_out_handle_event (GdkEvent *event, ArdourCanvas::Item* item,
 {
 	bool ret = false;
 	
+	if (!rv->sensitive()) {
+		return false;
+	}
+
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
 	case GDK_2BUTTON_PRESS:
@@ -703,6 +723,10 @@ Editor::canvas_region_view_name_highlight_event (GdkEvent* event, ArdourCanvas::
 {
 	bool ret = false;
 	
+	if (!rv->sensitive()) {
+		return false;
+	}
+
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
 	case GDK_2BUTTON_PRESS:
@@ -738,6 +762,10 @@ bool
 Editor::canvas_region_view_name_event (GdkEvent *event, ArdourCanvas::Item* item, RegionView* rv)
 {
 	bool ret = false;
+
+	if (!rv->sensitive()) {
+		return false;
+	}
 
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:

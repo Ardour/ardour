@@ -136,6 +136,7 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 	min_item_duration = 0 ;
 	show_vestigial = true;
 	visibility = vis;
+	_sensitive = true;
 
 	if (duration == 0) {
 		warning << "Time Axis Item Duration == 0" << endl ;

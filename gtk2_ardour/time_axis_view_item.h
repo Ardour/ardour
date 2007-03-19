@@ -176,6 +176,9 @@ class TimeAxisViewItem : public Selectable
      * @param yn true if this item should show its selected status
      */
     virtual void set_should_show_selection (bool yn) ;
+
+    void set_sensitive (bool yn) { _sensitive = yn; }
+    bool sensitive () const { return _sensitive; }
     
     //---------------------------------------------------------------------------------------//
     // Parent Component Methods
@@ -412,6 +415,9 @@ class TimeAxisViewItem : public Selectable
 
     /** should the item show its selected status */
     bool should_show_selection;
+
+    /** should the item respond to events */
+    bool _sensitive;
     
     /**
      * The unique item name of this Item

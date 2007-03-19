@@ -2379,7 +2379,7 @@ ARDOUR_UI::disk_overrun_handler ()
 
 	if (!have_disk_speed_dialog_displayed) {
 		have_disk_speed_dialog_displayed = true;
-		MessageDialog* msg = new MessageDialog (*editor, X_("diskrate dialog"), _("\
+		MessageDialog* msg = new MessageDialog (*editor, _("\
 The disk system on your computer\n\
 was not able to keep up with Ardour.\n\
 \n\
