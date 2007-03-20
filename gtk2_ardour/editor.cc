@@ -2834,32 +2834,34 @@ Editor::history_changed ()
 void
 Editor::duplicate_dialog (bool dup_region)
 {
-	if (dup_region) {
-		if (clicked_regionview == 0) {
-			return;
-		}
-	} else {
-		if (selection->time.length() == 0) {
-			return;
-		}
+	if (selection->regions.empty() && (selection->time.length() == 0)) {
+		return;
 	}
 
 	ArdourDialog win ("duplicate dialog");
-	Entry  entry;
 	Label  label (_("Duplicate how many times?"));
+	Adjustment adjustment (1.0, 1.0, 1000000.0, 1.0, 5.0);
+	SpinButton spinner (adjustment);
 
+	win.get_vbox()->set_spacing (12);
 	win.get_vbox()->pack_start (label);
-	win.add_action_widget (entry, RESPONSE_ACCEPT);
+
+	/* dialogs have ::add_action_widget() but that puts the spinner in the wrong
+	   place, visually. so do this by hand.
+	*/
+
+	win.get_vbox()->pack_start (spinner);
+	spinner.signal_activate().connect (sigc::bind (mem_fun (win, &ArdourDialog::response), RESPONSE_ACCEPT));
+
+	label.show ();
+	spinner.show ();
+
 	win.add_button (Stock::OK, RESPONSE_ACCEPT);
 	win.add_button (Stock::CANCEL, RESPONSE_CANCEL);
 
 	win.set_position (WIN_POS_MOUSE);
 
-	entry.set_text ("1");
-	set_size_request_to_display_given_text (entry, X_("12345678"), 20, 15);
-	entry.select_region (0, -1);
-	entry.grab_focus ();
-
+	spinner.grab_focus ();
 
 	switch (win.run ()) {
 	case RESPONSE_ACCEPT:
@@ -2868,17 +2870,12 @@ Editor::duplicate_dialog (bool dup_region)
 		return;
 	}
 
-	string text = entry.get_text();
-	float times;
+	float times = adjustment.get_value();
 
-	if (sscanf (text.c_str(), "%f", &times) == 1) {
-		if (dup_region) {
-			RegionSelection regions;
-			regions.add (clicked_regionview);
-			duplicate_some_regions (regions, times);
-		} else {
-			duplicate_selection (times);
-		}
+	if (!selection->regions.empty()) {
+		duplicate_some_regions (selection->regions, times);
+	} else {
+		duplicate_selection (times);
 	}
 }
 

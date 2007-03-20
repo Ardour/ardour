@@ -659,7 +659,7 @@ void
 ARDOUR_UI::update_cpu_load ()
 {
 	char buf[32];
-	snprintf (buf, sizeof (buf), _("DSP: %.1f%%"), engine->get_cpu_load());
+	snprintf (buf, sizeof (buf), _("DSP: %5.1f%%"), engine->get_cpu_load());
 	cpu_load_label.set_text (buf);
 }
 
