@@ -2583,6 +2583,9 @@ ARDOUR_UI::save_keybindings ()
 bool
 ARDOUR_UI::first_idle ()
 {
+	if (session) {
+		session->allow_auto_play (true);
+	}
 	can_save_keybindings = true;
 	return false;
 }

@@ -131,6 +131,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	insert_cnt = 0;
 	_transport_speed = 0;
 	_last_transport_speed = 0;
+	auto_play_legal = false;
 	transport_sub_state = 0;
 	_transport_frame = 0;
 	last_stop_frame = 0;

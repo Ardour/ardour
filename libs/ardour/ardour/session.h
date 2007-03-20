@@ -358,6 +358,7 @@ class Session : public PBD::StatefulDestructible
 	void set_session_start (nframes_t start) { start_location->set_start(start); }
 	void set_session_end (nframes_t end) { end_location->set_start(end); _end_location_is_free = false; }
 	void use_rf_shuttle_speed ();
+	void allow_auto_play (bool yn);
 	void request_transport_speed (float speed);
 	void request_overwrite_buffer (Diskstream*);
 	void request_diskstream_speed (Diskstream&, float speed);
@@ -984,6 +985,7 @@ class Session : public PBD::StatefulDestructible
 	volatile float          _transport_speed;
 	volatile float          _desired_transport_speed;
 	float                   _last_transport_speed;
+	bool                     auto_play_legal;
 	nframes_t          _last_slave_transport_frame;
 	nframes_t           maximum_output_latency;
 	nframes_t           last_stop_frame;
