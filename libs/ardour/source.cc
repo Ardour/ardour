@@ -111,7 +111,17 @@ Source::set_state (const XMLNode& node)
 void
 Source::add_playlist (boost::shared_ptr<Playlist> pl)
 {
-	_playlists.insert (pl);
+	std::pair<PlaylistMap::iterator,bool> res;
+	std::pair<boost::shared_ptr<Playlist>, uint32_t> newpair (pl, 1);
+	Glib::Mutex::Lock lm (playlist_lock);
+
+	res = _playlists.insert (newpair);
+
+	if (!res.second) {
+		/* it already existed, bump count */
+		res.first->second++;
+	}
+		
 	pl->GoingAway.connect (bind (mem_fun (*this, &Source::remove_playlist), boost::weak_ptr<Playlist> (pl)));
 }
 
@@ -124,10 +134,15 @@ Source::remove_playlist (boost::weak_ptr<Playlist> wpl)
 		return;
 	}
 
-	std::set<boost::shared_ptr<Playlist> >::iterator x;
+	PlaylistMap::iterator x;
+	Glib::Mutex::Lock lm (playlist_lock);
 
 	if ((x = _playlists.find (pl)) != _playlists.end()) {
-		_playlists.erase (x);
+		if (x->second > 1) {
+			x->second--;
+		} else {
+			_playlists.erase (x);
+		}
 	}
 }
 

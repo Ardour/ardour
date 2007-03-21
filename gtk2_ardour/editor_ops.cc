@@ -2811,19 +2811,21 @@ Editor::cut_copy_regions (CutCopyOp op)
 		}
 		
 		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>((*x)->region());
+		boost::shared_ptr<Region> _xx;
 		
 		switch (op) {
 		case Cut:
 			if (!ar) break;
 			
-			npl->add_region (RegionFactory::create (ar), (*x)->region()->position() - first_position);
+			_xx = RegionFactory::create ((*x)->region());
+			npl->add_region (_xx, (*x)->region()->position() - first_position);
 			pl->remove_region (((*x)->region()));
 			break;
 			
 		case Copy:
 			if (!ar) break;
 			
-			npl->add_region (RegionFactory::create (ar), (*x)->region()->position() - first_position);
+			npl->add_region ((*x)->region(), (*x)->region()->position() - first_position);
 			break;
 			
 		case Clear:
@@ -2843,10 +2845,11 @@ Editor::cut_copy_regions (CutCopyOp op)
 		foo.push_back ((*i).pl);
 	}
 	
+
 	if (!foo.empty()) {
 		cut_buffer->set (foo);
 	}
-	
+
 	for (set<PlaylistState, lt_playlist>::iterator pl = freezelist.begin(); pl != freezelist.end(); ++pl) {
 		(*pl).playlist->thaw ();
 		session->add_command (new MementoCommand<Playlist>(*(*pl).playlist, (*pl).before, &(*pl).playlist->get_state()));

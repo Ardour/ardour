@@ -574,6 +574,11 @@ Playlist::remove_region_internal (boost::shared_ptr<Region>region)
 		old_length = _get_maximum_extent();
 	}
 
+	if (!in_set_state) {
+		/* unset playlist */
+		region->set_playlist (boost::weak_ptr<Playlist>());
+	}
+
 	for (i = regions.begin(); i != regions.end(); ++i) {
 		if (*i == region) {
 
@@ -1172,6 +1177,14 @@ Playlist::region_changed (Change what_changed, boost::shared_ptr<Region> region)
 	}
 
 	return save;
+}
+
+void
+Playlist::drop_regions ()
+{
+	RegionLock rl (this);
+	regions.clear ();
+	all_regions.clear ();
 }
 
 void

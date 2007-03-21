@@ -63,7 +63,9 @@ class Source : public PBD::StatefulDestructible
 	string            _name;
 	time_t            _timestamp;
 
-	std::set<boost::shared_ptr<ARDOUR::Playlist> > _playlists;
+	Glib::Mutex playlist_lock;
+	typedef std::map<boost::shared_ptr<ARDOUR::Playlist>, uint32_t > PlaylistMap;
+	PlaylistMap _playlists;
 
   private:
 	uint32_t          _in_use;

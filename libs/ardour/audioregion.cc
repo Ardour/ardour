@@ -1057,7 +1057,6 @@ AudioRegion::separate_by_channel (Session& session, vector<boost::shared_ptr<Aud
 
 		boost::shared_ptr<Region> r = RegionFactory::create (srcs, _start, _length, new_name, _layer, f);
 		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
-		cerr << "new region name is " << ar->name() << endl;
 
 		v.push_back (ar);
 		
@@ -1281,7 +1280,6 @@ AudioRegion::normalize_to (float target_dB)
 	boost::shared_ptr<Playlist> pl (playlist());
 
 	if (pl) {
-		cerr << "Send modified\n";
 		pl->Modified();
 	}
 
@@ -1368,6 +1366,7 @@ void
 AudioRegion::set_playlist (boost::weak_ptr<Playlist> wpl)
 {
 	boost::shared_ptr<Playlist> old_playlist = (_playlist.lock());
+
 	boost::shared_ptr<Playlist> pl (wpl.lock());
 
 	if (old_playlist == pl) {
@@ -1390,7 +1389,7 @@ AudioRegion::set_playlist (boost::weak_ptr<Playlist> wpl)
 	} else {
 		if (old_playlist) {
 			for (SourceList::const_iterator i = sources.begin(); i != sources.end(); ++i) {
-				(*i)->remove_playlist (_playlist);
+				(*i)->remove_playlist (old_playlist);
 			}
 		}
 	}

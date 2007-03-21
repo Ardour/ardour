@@ -354,8 +354,8 @@ gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 	gnome_canvas_request_redraw (item->canvas, 
 				     unionrect.x0 - 0.5,
 				     unionrect.y0 - 0.5,
-				     unionrect.x1 + 0.5,
-				     unionrect.y1 + 0.5);
+				     unionrect.x1 + 1.5,
+				     unionrect.y1 + 1.5);
 }
 
 /* 
