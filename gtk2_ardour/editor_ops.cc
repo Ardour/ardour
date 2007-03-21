@@ -1508,19 +1508,13 @@ Editor::insert_region_list_drag (boost::shared_ptr<AudioRegion> region, int x, i
 		return;
 	}
 	
-	cerr << "drop target playlist, UC  = " << playlist.use_count() << endl;
-
 	snap_to (where);
 	
 	begin_reversible_command (_("insert dragged region"));
         XMLNode &before = playlist->get_state();
-	cerr << "pre add target playlist, UC  = " << playlist.use_count() << endl;
 	playlist->add_region (RegionFactory::create (region), where, 1.0);
-	cerr << "post add target playlist, UC  = " << playlist.use_count() << endl;
 	session->add_command(new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
 	commit_reversible_command ();
-
-	cerr << "post drop target playlist, UC  = " << playlist.use_count() << endl;
 }
 
 void
@@ -1999,6 +1993,12 @@ Editor::separate_region_from_selection ()
 		if ((atv = dynamic_cast<AudioTimeAxisView*> ((*i))) != 0) {
 
 			if (atv->is_audio_track()) {
+
+				/* no edits to destructive tracks */
+
+				if (atv->audio_track()->audio_diskstream()->destructive()) {
+					continue;
+				}
 					
 				if ((playlist = atv->playlist()) != 0) {
 					if (!doing_undo) {
@@ -2052,6 +2052,12 @@ Editor::separate_regions_using_location (Location& loc)
 
 			if (atv->is_audio_track()) {
 					
+				/* no edits to destructive tracks */
+
+				if (atv->audio_track()->audio_diskstream()->destructive()) {
+					continue;
+				}
+
 				if ((playlist = atv->playlist()) != 0) {
                                         XMLNode *before;
 					if (!doing_undo) {
@@ -2081,75 +2087,76 @@ Editor::separate_regions_using_location (Location& loc)
 void
 Editor::crop_region_to_selection ()
 {
-	if (selection->time.empty()) {
+	if (selection->time.empty() || selection->tracks.empty()) {
 		return;
 	}
 
 	vector<boost::shared_ptr<Playlist> > playlists;
 	boost::shared_ptr<Playlist> playlist;
 
-	if (clicked_trackview != 0) {
-
-		if ((playlist = clicked_trackview->playlist()) == 0) {
-			return;
-		}
-
-		playlists.push_back (playlist);
-
-	} else {
+	sort_track_selection ();
+	
+	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 		
-		sort_track_selection ();
+		AudioTimeAxisView* atv;
+		
+		if ((atv = dynamic_cast<AudioTimeAxisView*> ((*i))) != 0) {
+			
+			if (atv->is_audio_track()) {
+				
+				/* no edits to destructive tracks */
 
-		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+				if (atv->audio_track()->audio_diskstream()->destructive()) {
+					continue;
+				}
 
-			AudioTimeAxisView* atv;
-
-			if ((atv = dynamic_cast<AudioTimeAxisView*> ((*i))) != 0) {
-
-				if (atv->is_audio_track()) {
-					
-					if ((playlist = atv->playlist()) != 0) {
-						playlists.push_back (playlist);
-					}
+				if ((playlist = atv->playlist()) != 0) {
+					playlists.push_back (playlist);
 				}
 			}
 		}
 	}
 
-	if (!playlists.empty()) {
-
-		nframes_t start;
-		nframes_t end;
-		nframes_t cnt;
-
-		begin_reversible_command (_("trim to selection"));
-
-		for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists.begin(); i != playlists.end(); ++i) {
-			
-			boost::shared_ptr<Region> region;
-			
-			start = selection->time.start();
-
-			if ((region = (*i)->top_region_at(start)) == 0) {
-				continue;
-			}
-			
-			/* now adjust lengths to that we do the right thing
-			   if the selection extends beyond the region
-			*/
-			
-			start = max (start, region->position());
-			end = min (selection->time.end_frame(), start + region->length() - 1);
-			cnt = end - start + 1;
-
-                        XMLNode &before = (*i)->get_state();
-			region->trim_to (start, cnt, this);
-                        XMLNode &after = (*i)->get_state();
-			session->add_command (new MementoCommand<Playlist>(*(*i), &before, &after));
-		}
-
-		commit_reversible_command ();
+	if (playlists.empty()) {
+		return;
 	}
+		
+	nframes_t start;
+	nframes_t end;
+	nframes_t cnt;
+	
+	begin_reversible_command (_("trim to selection"));
+	
+	for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		
+		boost::shared_ptr<Region> region;
+		
+		start = selection->time.start();
+		
+		if ((region = (*i)->top_region_at(start)) == 0) {
+			continue;
+		}
+		
+		/* now adjust lengths to that we do the right thing
+		   if the selection extends beyond the region
+		*/
+		
+		start = max (start, region->position());
+		if (max_frames - start < region->length()) {
+			end = start + region->length() - 1;
+		} else {
+			end = max_frames;
+		}
+		end = min (selection->time.end_frame(), end);
+		cnt = end - start + 1;
+		
+		XMLNode &before = (*i)->get_state();
+		region->trim_to (start, cnt, this);
+		XMLNode &after = (*i)->get_state();
+		session->add_command (new MementoCommand<Playlist>(*(*i), &before, &after));
+	}
+	
+	commit_reversible_command ();
 }		
 
 void
@@ -2581,7 +2588,7 @@ Editor::bounce_range_selection ()
 	nframes_t start = selection->time[clicked_selection].start;
 	nframes_t end = selection->time[clicked_selection].end;
 	nframes_t cnt = end - start + 1;
-	
+
 	begin_reversible_command (_("bounce range"));
 
 	for (TrackViewList::iterator i = views.begin(); i != views.end(); ++i) {
@@ -2603,7 +2610,7 @@ Editor::bounce_range_selection ()
 		itt.done = false;
 		itt.cancel = false;
 		itt.progress = false;
-		
+
                 XMLNode &before = playlist->get_state();
 		atv->audio_track()->bounce_range (start, cnt, itt);
                 XMLNode &after = playlist->get_state();
