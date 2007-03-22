@@ -387,8 +387,6 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 bool
 Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
-	nframes_t where = event_frame (event, 0, 0);
-
 	track_canvas.grab_focus();
 
 	if (session && session->actively_recording()) {
@@ -744,79 +742,6 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 		break;
 
 	case 3:
-		break;
-
-	case 4:
-		switch (mouse_mode) {
-		case MouseZoom:
-			//temporal_zoom_to_frame (true, where);
-			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Control)) {
-				temporal_zoom_to_frame (true, where);
-			}
-			else {
-				temporal_zoom_step (true);
-			}
-			break;
-		default:
-			
-			if (Keyboard::modifier_state_contains (event->button.state, Keyboard::ModifierMask(Keyboard::Alt))) {
-				scroll_backward (0.6f);
-				return true;
-			}
-			else if (Keyboard::no_modifier_keys_pressed (&event->button)) {
-				scroll_tracks_up_line ();
-			} else {
-				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Shift)) {
-					if (clicked_trackview) {
-						if (!current_stepping_trackview) {
-						  step_timeout = Glib::signal_timeout().connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
-							current_stepping_trackview = clicked_trackview;
-						}
-						gettimeofday (&last_track_height_step_timestamp, 0);
-						current_stepping_trackview->step_height (true);
-					}
-				}
-				else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Control)) {
-					temporal_zoom_to_frame (true, where);
-				}
-			}
-		}
-		break;
-
-	case 5:
-		switch (mouse_mode) {
-		case MouseZoom:
-			// temporal_zoom_to_frame (false, where);
-			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Control)) {
-				temporal_zoom_to_frame (false, where);
-			}
-			else {
-				temporal_zoom_step (false);
-			}
-			break;
-		default:
-
-			if (Keyboard::modifier_state_contains (event->button.state, Keyboard::ModifierMask(Keyboard::Alt))) {
-				scroll_forward (0.6f);
-				return true;
-			}
-			else if (Keyboard::no_modifier_keys_pressed (&event->button)) {
-				scroll_tracks_down_line ();
-			} else {
-				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Shift)) {
-					if (clicked_trackview) {
-						if (!current_stepping_trackview) {
-						  step_timeout = Glib::signal_timeout().connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
-							current_stepping_trackview = clicked_trackview;
-						}
-						gettimeofday (&last_track_height_step_timestamp, 0);
-						current_stepping_trackview->step_height (false);
-					}
-				} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Control)) {
-					temporal_zoom_to_frame (false, where);
-				}
-			}
-		}
 		break;
 
 	default:
@@ -4559,7 +4484,6 @@ Editor::end_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 			switch (mouse_mode) {
 			case MouseObject:
 				/* find the two markers on either side and then make the selection from it */
-				cerr << "select between " << start << " .. " << end << endl;
 				select_all_within (start, end, 0.0f, FLT_MAX, Selection::Set);
 				break;
 

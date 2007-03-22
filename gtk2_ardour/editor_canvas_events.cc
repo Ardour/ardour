@@ -148,11 +148,8 @@ Editor::track_canvas_event (GdkEvent *event, ArdourCanvas::Item* item)
 		break;
 
 	case GDK_BUTTON_RELEASE:
-		switch (event->button.button) {
-		case 4:
-		case 5:
-			button_release_handler (item, event, NoItem);
-			break;
+		if (drag_info.item) {
+			end_grab (drag_info.item, event);
 		}
 		break;
 
@@ -165,7 +162,7 @@ Editor::track_canvas_event (GdkEvent *event, ArdourCanvas::Item* item)
 		break;
 	}
 
-	return FALSE;
+	return false;
 }
 
 bool
@@ -219,6 +216,7 @@ Editor::canvas_region_view_event (GdkEvent *event, ArdourCanvas::Item* item, Reg
 	if (!rv->sensitive ()) {
 		return false;
 	}
+
 
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
@@ -519,6 +517,11 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 		
 	}
 
+	/* XXX do not forward double clicks */
+
+	if (event->type == GDK_2BUTTON_PRESS) {
+		return false;
+	}
 	
 	/* proxy for the upper most regionview */
 
@@ -544,10 +547,10 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 
 					RegionView* rv = atv->view()->find_view (rl->front());
 
-					/* proxy */
-
 					delete rl;
 
+					/* proxy */
+					
 					return canvas_region_view_event (event, rv->get_canvas_group(), rv);
 				} 
 			}

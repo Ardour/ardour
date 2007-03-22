@@ -629,14 +629,9 @@ ARDOUR_UI::shuttle_box_button_release (GdkEventButton* ev)
 		return true;
 
 	case 3:
+	default:
 		return true;
-		
-	case 4:
-		shuttle_fract += 0.005;
-		break;
-	case 5:
-		shuttle_fract -= 0.005;
-		break;
+
 	}
 
 	use_shuttle_fract (true);
