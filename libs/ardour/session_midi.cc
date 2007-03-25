@@ -398,24 +398,6 @@ Session::setup_midi_control ()
 	mtc_msg[10] = 0xf1;
 	mtc_msg[12] = 0xf1;
 	mtc_msg[14] = 0xf1;
-
-	if (_mmc_port != 0) {
-
-		Config->set_send_mmc (session_send_mmc);
-
-	} else {
-
-		mmc = 0;
-		session_send_mmc = false;
-	}
-
-	if (_mtc_port != 0) {
-
-		Config->set_send_mtc (session_send_mtc);
-
-	} else {
-		session_send_mtc = false;
-	}
 }
 
 int

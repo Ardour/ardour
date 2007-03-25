@@ -3177,6 +3177,8 @@ Session::config_changed (const char* parameter_name)
 				/* mark us ready to send */
 				next_quarter_frame_to_send = 0;
 			}
+		} else {
+			session_send_mtc = false;
 		}
 
 	} else if (PARAM_IS ("send-mmc")) {
@@ -3187,6 +3189,9 @@ Session::config_changed (const char* parameter_name)
 		
 		if (_mmc_port != 0) {
 			session_send_mmc = Config->get_send_mmc();
+		} else {
+			mmc = 0;
+			session_send_mmc = false; 
 		}
 
 	} else if (PARAM_IS ("midi-feedback")) {
