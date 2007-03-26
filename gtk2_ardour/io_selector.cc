@@ -778,14 +778,15 @@ PortInsertWindow::PortInsertWindow (Session& sess, boost::shared_ptr<PortInsert>
 	rescan_button.signal_clicked().connect (mem_fun(*this, &PortInsertWindow::rescan));
 
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));	
-	pi->GoingAway.connect (mem_fun(*this, &PortInsertWindow::plugin_going_away));
+
+	going_away_connection = pi->GoingAway.connect (mem_fun(*this, &PortInsertWindow::plugin_going_away));
 }
 
 void
 PortInsertWindow::plugin_going_away ()
 {
 	ENSURE_GUI_THREAD(mem_fun(*this, &PortInsertWindow::plugin_going_away));
-	
+	going_away_connection.disconnect ();
 	delete_when_idle (this);
 }
 
