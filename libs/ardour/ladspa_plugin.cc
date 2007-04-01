@@ -116,6 +116,7 @@ LadspaPlugin::init (void *mod, uint32_t index, nframes_t rate)
 
 	for (i = 0; i < port_cnt; ++i) {
 		if (LADSPA_IS_PORT_CONTROL(port_descriptor (i))) {
+			cerr << "plugin, port nr " << i << ", data = " << control_data[i] << endl;
 			connect_port (i, &control_data[i]);
 			
 			if (LADSPA_IS_PORT_OUTPUT(port_descriptor (i)) &&
@@ -164,6 +165,7 @@ LadspaPlugin::default_value (uint32_t port)
 	float ret = 0.0f;
 	bool bounds_given = false;
 	bool sr_scaling = false;
+	bool earlier_hint = false;
 
 	/* defaults - case 1 */
 	
@@ -172,6 +174,7 @@ LadspaPlugin::default_value (uint32_t port)
 			ret = prh[port].LowerBound;
 			bounds_given = true;
 			sr_scaling = true;
+			earlier_hint = true;
 		}
 		
 		/* FIXME: add support for logarithmic defaults */
@@ -180,33 +183,41 @@ LadspaPlugin::default_value (uint32_t port)
 			ret = prh[port].LowerBound * 0.75f + prh[port].UpperBound * 0.25f;
 			bounds_given = true;
 			sr_scaling = true;
+			earlier_hint = true;
 		}
 		else if (LADSPA_IS_HINT_DEFAULT_MIDDLE(prh[port].HintDescriptor)) {
 			ret = prh[port].LowerBound * 0.50f + prh[port].UpperBound * 0.50f;
 			bounds_given = true;
 			sr_scaling = true;
+			earlier_hint = true;
 		}
 		else if (LADSPA_IS_HINT_DEFAULT_HIGH(prh[port].HintDescriptor)) {
 			ret = prh[port].LowerBound * 0.25f + prh[port].UpperBound * 0.75f;
 			bounds_given = true;
 			sr_scaling = true;
+			earlier_hint = true;
 		}
 		else if (LADSPA_IS_HINT_DEFAULT_MAXIMUM(prh[port].HintDescriptor)) {
 			ret = prh[port].UpperBound;
 			bounds_given = true;
 			sr_scaling = true;
+			earlier_hint = true;
 		}
 		else if (LADSPA_IS_HINT_DEFAULT_0(prh[port].HintDescriptor)) {
 			ret = 0.0f;
+			earlier_hint = true;
 		}
 		else if (LADSPA_IS_HINT_DEFAULT_1(prh[port].HintDescriptor)) {
 			ret = 1.0f;
+			earlier_hint = true;
 		}
 		else if (LADSPA_IS_HINT_DEFAULT_100(prh[port].HintDescriptor)) {
 			ret = 100.0f;
+			earlier_hint = true;
 		}
 		else if (LADSPA_IS_HINT_DEFAULT_440(prh[port].HintDescriptor)) {
 			ret = 440.0f;
+			earlier_hint = true;
 		}
 		else {
 			/* no hint found */
@@ -259,7 +270,7 @@ LadspaPlugin::default_value (uint32_t port)
 	
 	/* defaults - case 5 */
 		
-	if (LADSPA_IS_HINT_SAMPLE_RATE(prh[port].HintDescriptor)) {
+	if (LADSPA_IS_HINT_SAMPLE_RATE(prh[port].HintDescriptor) && !earlier_hint) {
 		if (bounds_given) {
 			if (sr_scaling) {
 				ret *= sample_rate;
