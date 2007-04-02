@@ -30,6 +30,7 @@
 #include "canvas-waveview.h"
 #include "rgb_macros.h"
 
+
 extern void c_stacktrace();
 
 enum {
@@ -49,6 +50,8 @@ enum {
 	 PROP_Y,
 	 PROP_HEIGHT,
 	 PROP_WAVE_COLOR,
+	 PROP_CLIP_COLOR,
+	 PROP_ZERO_COLOR,
 	 PROP_RECTIFIED,
 	 PROP_REGION_START,
 	 PROP_LOGSCALED,
@@ -251,6 +254,20 @@ gnome_canvas_waveview_class_init (GnomeCanvasWaveViewClass *class)
 	 
 	 g_object_class_install_property
 		 (gobject_class,
+		  PROP_CLIP_COLOR,
+		  g_param_spec_uint ("clip_color", NULL, NULL,
+				     0, G_MAXUINT, 0,
+				     (G_PARAM_READABLE | G_PARAM_WRITABLE)));
+	 
+	 g_object_class_install_property
+		 (gobject_class,
+		  PROP_ZERO_COLOR,
+		  g_param_spec_uint ("zero_color", NULL, NULL,
+				     0, G_MAXUINT, 0,
+				     (G_PARAM_READABLE | G_PARAM_WRITABLE)));
+	 
+	 g_object_class_install_property
+		 (gobject_class,
 		  PROP_RECTIFIED,
 		  g_param_spec_boolean ("rectified", NULL, NULL,
 					FALSE,
@@ -326,6 +343,8 @@ gnome_canvas_waveview_init (GnomeCanvasWaveView *waveview)
 	waveview->reload_cache_in_render = FALSE;
 
  	waveview->wave_color = RGBA_TO_UINT(44,35,126,255);
+ 	waveview->clip_color = RGBA_TO_UINT(44,0,0,100);
+ 	waveview->zero_color = RGBA_TO_UINT(44,0,128,100);
 }
 
 static void
@@ -797,6 +816,20 @@ gnome_canvas_waveview_set_property (GObject      *object,
 		}
 		break;
 
+	case PROP_CLIP_COLOR:
+		if (waveview->clip_color != g_value_get_uint(value)) {
+		        waveview->clip_color = g_value_get_uint(value);
+			redraw = TRUE;
+		}
+		break;
+
+	case PROP_ZERO_COLOR:
+		if (waveview->zero_color != g_value_get_uint(value)) {
+		        waveview->zero_color = g_value_get_uint(value);
+			redraw = TRUE;
+		}
+		break;
+
 	case PROP_RECTIFIED:
 		if (waveview->rectified != g_value_get_boolean(value)) {
 			waveview->rectified = g_value_get_boolean(value);
@@ -909,6 +942,14 @@ gnome_canvas_waveview_get_property (GObject      *object,
 		g_value_set_uint (value, waveview->wave_color);
 		break;
 
+	case PROP_CLIP_COLOR:
+		g_value_set_uint (value, waveview->clip_color);
+		break;
+
+	case PROP_ZERO_COLOR:
+		g_value_set_uint (value, waveview->zero_color);
+		break;
+
 	case PROP_RECTIFIED:
 		g_value_set_boolean (value, waveview->rectified);
 		break;
@@ -969,6 +1010,8 @@ gnome_canvas_waveview_update (GnomeCanvasItem *item, double *affine, ArtSVP *cli
 
 	UINT_TO_RGBA (waveview->wave_color, &waveview->wave_r, &waveview->wave_g, &waveview->wave_b,
 		      &waveview->wave_a);
+	UINT_TO_RGBA (waveview->clip_color, &waveview->clip_r, &waveview->clip_g, &waveview->clip_b,
+		      &waveview->clip_a);
 
 //	check_cache (waveview, "end of update");
 }
@@ -1066,6 +1109,7 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 
 #define origin half_height
 
+
 	for (x = begin; x < end; x++) {
 
 		double max, min;
@@ -1126,11 +1170,11 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 		}
 
 		if (clip_max) {
-			PAINT_VERT(buf, 255, 0, 0, x, pymax, pymax+clip_length);
+			PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a, x, pymax, pymax+clip_length);
 		}
 
 		if (clip_min) {
-			PAINT_VERT(buf, 255, 0, 0, x, pymin-clip_length, pymin);
+			PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a, x, pymin-clip_length, pymin);
 		}
 
 		/* presto, we're done */
@@ -1138,6 +1182,13 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 		cache_index++;
 	}
 
+	// Paint zeroline.
+	//PAINT_HORIZA(buf, waveview->zero_r, waveview->zero_g, waveview->zero_b, waveview->zero_a, begin, endi-1, origin );
+	
+	unsigned char zero_r, zero_g, zero_b, zero_a;
+	UINT_TO_RGBA( waveview->zero_color, &zero_r, &zero_g, &zero_b, &zero_a );
+	int zeroline_y = (int) rint ((item->y1 + origin) * item->canvas->pixels_per_unit);
+	PAINT_HORIZA(buf, zero_r, zero_g, zero_b, zero_a, begin, end, zeroline_y);
 #undef origin
 
 }

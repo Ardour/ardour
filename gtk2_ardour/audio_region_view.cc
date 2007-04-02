@@ -678,6 +678,9 @@ AudioRegionView::set_colors ()
 		} else {
 			waves[n]->property_wave_color() = color_map[cWaveForm];
 		}
+
+		waves[n]->property_clip_color() = color_map[cWaveFormClip];
+		waves[n]->property_zero_color() = color_map[cZeroLine];
 	}
 }
 
@@ -752,7 +755,7 @@ AudioRegionView::set_envelope_visible (bool yn)
 void
 AudioRegionView::create_waves ()
 {
-	bool create_zero_line = true;
+	bool create_zero_line = false;
 
 	RouteTimeAxisView& atv (*(dynamic_cast<RouteTimeAxisView*>(&trackview))); // ick
 
@@ -786,7 +789,9 @@ AudioRegionView::create_waves ()
 		}
 	}
 
-	if (create_zero_line) {
+	// Blame torben
+	//if (create_zero_line) {
+	if (0) {
 		if (zero_line) {
 			delete zero_line;
 		}
@@ -830,6 +835,8 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 	wave->property_samples_per_unit() =  samples_per_unit;
 	wave->property_amplitude_above_axis() =  _amplitude_above_axis;
 	wave->property_wave_color() = _region->muted() ? color_map[cMutedWaveForm] : color_map[cWaveForm];
+	wave->property_clip_color() = color_map[cWaveFormClip];
+	wave->property_zero_color() = color_map[cZeroLine];
 	wave->property_region_start() = _region->start();
 	wave->property_rectified() = (bool) (_flags & WaveformRectified);
 	wave->property_logscaled() = (bool) (_flags & WaveformLogScaled);
@@ -868,6 +875,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 		/* all waves created, don't hook into peaks ready anymore */
 		data_ready_connection.disconnect ();		
 
+		if(0)
 		if (!zero_line) {
 			zero_line = new ArdourCanvas::SimpleLine (*group);
 			zero_line->property_x1() = (gdouble) 1.0;
@@ -1075,6 +1083,8 @@ AudioRegionView::add_ghost (AutomationTimeAxisView& atv)
 		wave->property_samples_per_unit() =  samples_per_unit;
 		wave->property_amplitude_above_axis() =  _amplitude_above_axis;
 		wave->property_wave_color() = color_map[cGhostTrackWave];
+		wave->property_clip_color() = color_map[cGhostTrackWaveClip];
+		wave->property_zero_color() = color_map[cGhostTrackZeroLine];
 		wave->property_region_start() = _region->start();
 
 		ghost->waves.push_back(wave);
@@ -1159,21 +1169,16 @@ AudioRegionView::color_handler (ColorID id, uint32_t val)
 	switch (id) {
 	case cMutedWaveForm:
 	case cWaveForm:
+	case cWaveFormClip:
+	case cGhostTrackWave:
+	case cGhostTrackWaveClip:
+	case cZeroLine:
 		set_colors ();
 		break;
 
 	case cGainLineInactive:
 	case cGainLine:
 		envelope_active_changed();
-		break;
-		
-	case cZeroLine:
-		if (zero_line) {
-			zero_line->property_color_rgba() = (guint) color_map[cZeroLine];
-		}
-		break;
-
-	case cGhostTrackWave:
 		break;
 
 	default:

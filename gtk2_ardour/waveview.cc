@@ -251,6 +251,22 @@ Glib::PropertyProxy_ReadOnly<guint> WaveView::property_wave_color() const
 {
 	return Glib::PropertyProxy_ReadOnly<guint> (this, "wave_color");
 }
+Glib::PropertyProxy<guint> WaveView::property_clip_color()
+{
+	return Glib::PropertyProxy<guint> (this, "clip_color");
+}
+Glib::PropertyProxy_ReadOnly<guint> WaveView::property_clip_color() const
+{
+	return Glib::PropertyProxy_ReadOnly<guint> (this, "clip_color");
+}
+Glib::PropertyProxy<guint> WaveView::property_zero_color()
+{
+	return Glib::PropertyProxy<guint> (this, "zero_color");
+}
+Glib::PropertyProxy_ReadOnly<guint> WaveView::property_zero_color() const
+{
+	return Glib::PropertyProxy_ReadOnly<guint> (this, "zero_color");
+}
 Glib::PropertyProxy<gint> WaveView::property_rectified()
 {
 	return Glib::PropertyProxy<gint> (this, "rectified");

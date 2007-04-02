@@ -1,4 +1,5 @@
 cWaveForm 0.0 0.0 0.0 0.80
+cWaveFormClip 1.0 0.0 0.0 0.90
 cMutedWaveForm 0.35 0.35 0.35 1.0
 cSelectedFrameBase 0.71 0.57 0.66 1.0
 cFrameBase 0.75 0.75 0.76 1.0
@@ -70,6 +71,8 @@ cMeasureLineBar 0.55 0.55 0.60 0.55
 cGhostTrackBaseOutline 0.00 0.00 0.00 1.00
 cGhostTrackBaseFill 0.27 0.00 0.49 0.50
 cGhostTrackWave 0.0 3.00 0.0 0.30
+cGhostTrackWaveClip 1.0 0.0 0.0 0.0
+cGhostTrackZeroLine 0.9 0.0 0.9 0.40
 cImageTrackBase 0.87 0.87 0.85 1.00
 cImageTrackOutline 0.00 0.00 0.00 1.00
 cMarkerTrackBase 0.87 0.87 0.85 1.00
