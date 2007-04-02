@@ -565,6 +565,9 @@ AudioFileSource::safe_file_extension(ustring file)
 		file.rfind(".maud")== ustring::npos &&
 		file.rfind(".vwe") == ustring::npos &&
 		file.rfind(".paf") == ustring::npos &&
+#ifdef HAVE_FLAC
+		file.rfind(".flac")== ustring::npos &&
+#endif // HAVE_FLAC
 #ifdef HAVE_COREAUDIO
 		file.rfind(".mp3") == ustring::npos &&
 		file.rfind(".aac") == ustring::npos &&

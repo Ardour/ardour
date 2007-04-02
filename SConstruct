@@ -728,7 +728,8 @@ prep_libcheck(env, libraries['flac'])
 libraries['flac'].Append(CCFLAGS="-I/usr/local/include", LINKFLAGS="-L/usr/local/lib")
 
 conf = Configure (libraries['flac'])
-conf.CheckLib ('FLAC', 'FLAC__stream_decoder_new', language='CXX')
+if conf.CheckLib ('FLAC', 'FLAC__stream_decoder_new', language='CXX'):
+    conf.env.Append('-DHAVE_FLAC')
 libraries['flac'] = conf.Finish ()
 
 # or if that fails...
