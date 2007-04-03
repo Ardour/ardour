@@ -1027,6 +1027,7 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 	int cache_index;
 	double half_height;
 	int x, end, begin;
+	int zbegin, zend;
 
 	waveview = GNOME_CANVAS_WAVEVIEW (item);
 
@@ -1041,12 +1042,24 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 		buf->is_bg = FALSE;
 	}
 
-	begin = MAX(waveview->bbox_ulx,buf->rect.x0);
+	begin = MAX(waveview->bbox_ulx, buf->rect.x0);
+
+	if (begin == waveview->bbox_ulx) {
+		zbegin = begin + 1;
+	} else {
+		zbegin = begin;
+	}
 
 	if (waveview->bbox_lrx >= 0) {
 		end = MIN(waveview->bbox_lrx,buf->rect.x1);
 	} else {
 		end = buf->rect.x1;
+	}
+
+	if (end == waveview->bbox_lrx) {
+		zend = end - 1;
+	} else {
+		zend = end;
 	}
 
 	if (begin == end) {
@@ -1182,13 +1195,15 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 		cache_index++;
 	}
 
-	// Paint zeroline.
-	//PAINT_HORIZA(buf, waveview->zero_r, waveview->zero_g, waveview->zero_b, waveview->zero_a, begin, endi-1, origin );
-	
-	unsigned char zero_r, zero_g, zero_b, zero_a;
-	UINT_TO_RGBA( waveview->zero_color, &zero_r, &zero_g, &zero_b, &zero_a );
-	int zeroline_y = (int) rint ((item->y1 + origin) * item->canvas->pixels_per_unit);
-	PAINT_HORIZA(buf, zero_r, zero_g, zero_b, zero_a, begin, end, zeroline_y);
+	if (!waveview->rectified) {
+		// Paint zeroline.
+		//PAINT_HORIZA(buf, waveview->zero_r, waveview->zero_g, waveview->zero_b, waveview->zero_a, begin, endi-1, origin );
+		
+		unsigned char zero_r, zero_g, zero_b, zero_a;
+		UINT_TO_RGBA( waveview->zero_color, &zero_r, &zero_g, &zero_b, &zero_a );
+		int zeroline_y = (int) rint ((item->y1 + origin) * item->canvas->pixels_per_unit);
+		PAINT_HORIZA(buf, zero_r, zero_g, zero_b, zero_a, zbegin, zend, zeroline_y);
+	}
 #undef origin
 
 }

@@ -116,7 +116,6 @@ LadspaPlugin::init (void *mod, uint32_t index, nframes_t rate)
 
 	for (i = 0; i < port_cnt; ++i) {
 		if (LADSPA_IS_PORT_CONTROL(port_descriptor (i))) {
-			cerr << "plugin, port nr " << i << ", data = " << control_data[i] << endl;
 			connect_port (i, &control_data[i]);
 			
 			if (LADSPA_IS_PORT_OUTPUT(port_descriptor (i)) &&

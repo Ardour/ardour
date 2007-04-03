@@ -755,8 +755,6 @@ AudioRegionView::set_envelope_visible (bool yn)
 void
 AudioRegionView::create_waves ()
 {
-	bool create_zero_line = false;
-
 	RouteTimeAxisView& atv (*(dynamic_cast<RouteTimeAxisView*>(&trackview))); // ick
 
 	if (!atv.get_diskstream()) {
@@ -782,24 +780,10 @@ AudioRegionView::create_waves ()
 			if (audio_region()->source(n)->peaks_ready (bind (mem_fun(*this, &AudioRegionView::peaks_ready_handler), n), data_ready_connection)) {
 				create_one_wave (n, true);
 			} else {
-				create_zero_line = false;
 			}
 		} else {
 			create_one_wave (n, true);
 		}
-	}
-
-	// Blame torben
-	//if (create_zero_line) {
-	if (0) {
-		if (zero_line) {
-			delete zero_line;
-		}
-		zero_line = new ArdourCanvas::SimpleLine (*group);
-		zero_line->property_x1() = (gdouble) 1.0;
-		zero_line->property_x2() = (gdouble) (_region->length() / samples_per_unit) - 1.0;
-		zero_line->property_color_rgba() = (guint) color_map[cZeroLine];
-		manage_zero_line ();
 	}
 }
 
@@ -1170,8 +1154,6 @@ AudioRegionView::color_handler (ColorID id, uint32_t val)
 	case cMutedWaveForm:
 	case cWaveForm:
 	case cWaveFormClip:
-	case cGhostTrackWave:
-	case cGhostTrackWaveClip:
 	case cZeroLine:
 		set_colors ();
 		break;

@@ -2308,8 +2308,9 @@ Route::protect_automation ()
 {
 	switch (gain_automation_state()) {
 	case Write:
-	case Touch:
 		set_gain_automation_state (Off);
+	case Touch:
+		set_gain_automation_state (Play);
 		break;
 	default:
 		break;
@@ -2317,8 +2318,10 @@ Route::protect_automation ()
 
 	switch (panner().automation_state ()) {
 	case Write:
-	case Touch:
 		panner().set_automation_state (Off);
+		break;
+	case Touch:
+		panner().set_automation_state (Play);
 		break;
 	default:
 		break;

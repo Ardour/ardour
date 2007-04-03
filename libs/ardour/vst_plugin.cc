@@ -172,9 +172,8 @@ VSTPlugin::get_state()
 
 			} else {
 
-				error << string_compose (_("cannot check VST chunk directory: %1"),
-						  strerror (errno))
-				      << endmsg;
+				warning << string_compose (_("cannot check VST chunk directory: %1"), strerror (errno))
+					<< endmsg;
 				return *root;
 			}
 

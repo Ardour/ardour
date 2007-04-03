@@ -484,8 +484,10 @@ PluginInsert::protect_automation ()
 
 		switch (al.automation_state()) {
 		case Write:
-		case Touch:
 			al.set_automation_state (Off);
+			break;
+		case Touch:
+			al.set_automation_state (Play);
 			break;
 		default:
 			break;
