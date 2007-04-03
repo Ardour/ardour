@@ -163,6 +163,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	/* make sure labels etc. are correct */
 
 	automation_state_changed ();
+	ColorChanged.connect (mem_fun (*this, &AutomationTimeAxisView::color_handler));
 }
 
 AutomationTimeAxisView::~AutomationTimeAxisView ()
@@ -786,6 +787,42 @@ AutomationTimeAxisView::exited ()
 {
 	hide_all_but_selected_control_points ();
 }
+
+void
+AutomationTimeAxisView::set_colors () {
+
+    for( list<GhostRegion *>::iterator i=ghosts.begin(); i != ghosts.end(); i++ ) {
+	(*i)->set_colors();
+    }
+    
+    for( vector<AutomationLine *>::iterator i=lines.begin(); i != lines.end(); i++ ) {
+	(*i)->set_colors();
+    }
+
+}
+
+void
+AutomationTimeAxisView::color_handler (ColorID id, uint32_t val) {
+    
+	switch (id) {
+	case cGhostTrackWave:
+	case cGhostTrackWaveClip:
+	case cGhostTrackZeroLine:
+
+	case cControlPoint:
+	case cControlPointFill:
+	case cControlPointOutline:
+	case cAutomationLine:
+		set_colors ();
+
+		break;
+
+	default: 
+		break;
+	}
+}
+
+
 
 void
 AutomationTimeAxisView::set_state (const XMLNode& node)

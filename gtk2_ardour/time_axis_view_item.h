@@ -199,7 +199,7 @@ class TimeAxisViewItem : public Selectable
      *
      * @param new_name the new name text to display
      */
-    void set_name_text(std::string new_name) ;
+    void set_name_text(const Glib::ustring& new_name) ;
     
     /**
      * Set the height of this item
@@ -460,6 +460,9 @@ class TimeAxisViewItem : public Selectable
     ArdourCanvas::SimpleRect* name_highlight;
     ArdourCanvas::SimpleRect* frame_handle_start;
     ArdourCanvas::SimpleRect* frame_handle_end;
+
+    int name_text_width;
+    double last_name_text_width;
 
     Visibility visibility;
 

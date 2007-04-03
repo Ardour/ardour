@@ -1075,7 +1075,7 @@ Editor::connect_to_session (Session *t)
 
 	session_connections.push_back (session->SMPTEOffsetChanged.connect (mem_fun(*this, &Editor::update_just_smpte)));
 
-	session_connections.push_back (session->tempo_map().StateChanged.connect (bind (mem_fun(*this, &Editor::tempo_map_changed), false)));
+	session_connections.push_back (session->tempo_map().StateChanged.connect (mem_fun(*this, &Editor::tempo_map_changed)));
 
 	edit_groups_changed ();
 
@@ -3665,7 +3665,7 @@ Editor::idle_visual_changer ()
 			/* the signal handler will do the rest */
 		} else {
 			update_fixed_rulers();
-			tempo_map_changed (Change (0), true);
+			redisplay_tempo (true);
 		}
 	}
 

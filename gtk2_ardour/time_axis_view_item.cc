@@ -125,6 +125,8 @@ void
 TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_color, nframes_t start, nframes_t duration, Visibility vis)
 {
 	item_name = it_name ;
+	name_text_width = ::pixel_width (it_name, NAME_FONT);
+	last_name_text_width = 0;
 	samples_per_unit = spu ;
 	should_show_selection = true;
 	frame_position = start ;
@@ -488,6 +490,7 @@ TimeAxisViewItem::set_item_name(std::string new_name, void* src)
 	if (new_name != item_name) {
 		std::string temp_name = item_name ;
 		item_name = new_name ;
+		name_text_width = ::pixel_width (new_name, NAME_FONT);
 		NameChanged (item_name, temp_name, src) ; /* EMIT_SIGNAL */
 	}
 }
@@ -553,10 +556,11 @@ TimeAxisViewItem::get_time_axis_view()
  * @param new_name the new name text to display
  */
 void
-TimeAxisViewItem::set_name_text(std::string new_name)
+TimeAxisViewItem::set_name_text(const ustring& new_name)
 {
 	if (name_text) {
 		name_text->property_text() = new_name.c_str();
+		name_text_width = pixel_width (new_name, NAME_FONT);
 	}
 }
 
@@ -913,6 +917,13 @@ TimeAxisViewItem::reset_name_width (double pixel_width)
 	if (name_text == 0) {
 		return;
 	}
+
+	if ((last_name_text_width &&                                      // we did this once
+	     (name_text_width <= pixel_width - NAME_X_OFFSET) &&          // fits the new size
+	     (name_text_width <= last_name_text_width - NAME_X_OFFSET))) { // fit into the old size too
+		last_name_text_width = pixel_width;
+		return;
+	}
                        
 	int width;
 	
@@ -941,6 +952,8 @@ TimeAxisViewItem::reset_name_width (double pixel_width)
 		name_text->property_text() = ustr;
 		name_text->show();
 	}
+
+	last_name_text_width = pixel_width;
 }
 
 

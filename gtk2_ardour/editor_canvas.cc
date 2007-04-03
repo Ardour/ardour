@@ -368,7 +368,7 @@ Editor::track_canvas_size_allocated ()
 	}
 		
 	update_fixed_rulers();
-	tempo_map_changed (Change (0), true);
+	redisplay_tempo (true);
 	
 	Resized (); /* EMIT_SIGNAL */
 
@@ -723,6 +723,6 @@ Editor::canvas_horizontally_scrolled ()
 	
 	update_fixed_rulers ();
 
-	tempo_map_changed (Change (0), !_dragging_hscrollbar);
+	redisplay_tempo (!_dragging_hscrollbar);
 }
 

@@ -44,6 +44,20 @@ using namespace sigc;
 using namespace Glib;
 using namespace PBD;
 
+int
+pixel_width (const ustring& str, Pango::FontDescription& font)
+{
+	Label foo;
+	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout ("");
+
+	layout->set_font_description (font);
+	layout->set_text (str);
+
+	int width, height;
+	Gtkmm2ext::get_ink_pixel_size (layout, width, height);
+	return width;
+}
+
 ustring
 fit_to_pixels (const ustring& str, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses)
 {

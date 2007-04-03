@@ -1275,8 +1275,8 @@ class Editor : public PublicEditor
 	void remove_metric_marks ();
 	void draw_metric_marks (const ARDOUR::Metrics& metrics);
 
-	void tempo_map_changed (ARDOUR::Change, bool immediate_redraw);
-	void redisplay_tempo ();
+	void tempo_map_changed (ARDOUR::Change);
+	void redisplay_tempo (bool immediate_redraw);
 	
 	void snap_to (nframes_t& first, int32_t direction = 0, bool for_mark = false);
 	uint32_t bbt_beat_subdivision;

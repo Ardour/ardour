@@ -122,6 +122,9 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void entered ();
 	void exited ();
 
+	void set_colors ();
+	void color_handler (ColorID, uint32_t);
+
 	static Pango::FontDescription name_font;
 	static bool have_name_font;
 };

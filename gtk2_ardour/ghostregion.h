@@ -41,6 +41,7 @@ struct GhostRegion : public sigc::trackable
     void set_samples_per_unit (double spu);
     void set_duration (double units);
     void set_height ();
+    void set_colors ();
 
     sigc::signal<void,GhostRegion*> GoingAway;
 };
