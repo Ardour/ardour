@@ -50,7 +50,6 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o)
 	hold_state = 0;
 	current_peak = 0;
 	current_level = 0;
-	current_user_level = -100.0f;
 	
 	set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
 
@@ -413,10 +412,9 @@ FastMeter::horizontal_expose (GdkEventExpose* ev)
 }
 
 void
-FastMeter::set (float lvl, float usrlvl)
+FastMeter::set (float lvl)
 {
 	current_level = lvl;
-	current_user_level = usrlvl;
 	
 	if (lvl > current_peak) {
 		current_peak = lvl;
