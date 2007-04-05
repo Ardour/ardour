@@ -464,6 +464,8 @@ class TimeAxisViewItem : public Selectable
     int name_text_width;
     double last_name_text_width;
 
+    std::map<Glib::ustring::size_type,int> name_text_size_cache;
+    
     Visibility visibility;
 
 }; /* class TimeAxisViewItem */

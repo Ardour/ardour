@@ -1202,7 +1202,7 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 		unsigned char zero_r, zero_g, zero_b, zero_a;
 		UINT_TO_RGBA( waveview->zero_color, &zero_r, &zero_g, &zero_b, &zero_a );
 		int zeroline_y = (int) rint ((item->y1 + origin) * item->canvas->pixels_per_unit);
-		PAINT_HORIZA(buf, zero_r, zero_g, zero_b, zero_a, zbegin, zend, zeroline_y);
+		PAINT_HORIZA(buf, zero_r, zero_g, zero_b, zero_a, zbegin, end, zeroline_y);
 	}
 #undef origin
 

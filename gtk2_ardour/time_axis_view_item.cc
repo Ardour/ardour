@@ -559,8 +559,9 @@ void
 TimeAxisViewItem::set_name_text(const ustring& new_name)
 {
 	if (name_text) {
-		name_text->property_text() = new_name.c_str();
+		name_text->property_text() = new_name;
 		name_text_width = pixel_width (new_name, NAME_FONT);
+		name_text_size_cache.clear ();
 	}
 }
 
@@ -918,42 +919,87 @@ TimeAxisViewItem::reset_name_width (double pixel_width)
 		return;
 	}
 
-	if ((last_name_text_width &&                                      // we did this once
-	     (name_text_width <= pixel_width - NAME_X_OFFSET) &&          // fits the new size
+	int limit = (int) floor (pixel_width - NAME_X_OFFSET);
+	bool shrinking = (last_name_text_width > pixel_width);
+	int actual_width;
+	ustring ustr;
+	ustring::size_type n;
+
+	if ((last_name_text_width &&                                       // we did this once
+	     shrinking &&                                                  // we're getting smaller
+	     (name_text_width <= limit) &&                                 // fits the new size
 	     (name_text_width <= last_name_text_width - NAME_X_OFFSET))) { // fit into the old size too
 		last_name_text_width = pixel_width;
 		return;
 	}
-                       
-	int width;
-	
-	ustring ustr = fit_to_pixels (item_name, (int) floor (pixel_width - NAME_X_OFFSET), NAME_FONT, width);
 
-	if (ustr.empty()) {
+	/* now check the cache of existing truncations */
+
+	Gtk::Label foo;
+	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout ("");
+
+	for (n = item_name.length(); n > 0; --n) {
 		
-		name_text->hide ();
-		
-	} else {
-		
-		/* don't use name for event handling if it leaves no room
-		   for trimming to work.
-		*/
-		
-		if (pixel_width - width < (NAME_X_OFFSET * 2.0)) {
-			if (name_connected) {
-				name_connected = false;
+		map<ustring::size_type,int>::iterator i;
+
+		if ((i = name_text_size_cache.find (n)) != name_text_size_cache.end()) {
+
+			/* we know the length of this substring already */
+			
+			if ((actual_width = (*i).second) < limit) {
+
+				/* it fits, use it */
+				
+				ustr = item_name.substr (0, n);
+				break;
 			}
+						
 		} else {
-			if (!name_connected) {
-				name_connected = true;
+			
+			/* we don't know the length of this substring already, so compute
+			   it and put it into the cache.
+			 */
+
+			layout->set_text (item_name.substr (0, n));
+			
+			int width, height;
+			Gtkmm2ext::get_ink_pixel_size (layout, width, height);
+			
+			name_text_size_cache[n] = width;
+
+			if ((actual_width = width) < limit) {
+				ustr = item_name.substr (0, n);
+				break;
 			}
 		}
-		
-		name_text->property_text() = ustr;
-		name_text->show();
 	}
 
+	if (n == 0) {
+		/* nothing will fit */
+		name_text->hide ();
+		last_name_text_width = pixel_width;
+		return;
+	} 
+
+	/* don't use name for event handling if it leaves no room
+	   for trimming to work.
+	*/
+	
+	if (pixel_width - actual_width < (NAME_X_OFFSET * 2.0)) {
+		if (name_connected) {
+			name_connected = false;
+		}
+	} else {
+		if (!name_connected) {
+			name_connected = true;
+		}
+	}
+	
+	name_text->property_text() = ustr;
+	name_text_width = actual_width;
+	name_text->show();
 	last_name_text_width = pixel_width;
+
 }
 
 
