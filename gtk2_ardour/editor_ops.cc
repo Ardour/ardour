@@ -2831,8 +2831,9 @@ Editor::cut_copy_regions (CutCopyOp op)
 			
 		case Copy:
 			if (!ar) break;
-			
-			npl->add_region ((*x)->region(), (*x)->region()->position() - first_position);
+
+			/* copy region before adding, so we're not putting same object into two different playlists */
+			npl->add_region (RegionFactory::create ((*x)->region()), (*x)->region()->position() - first_position);
 			break;
 			
 		case Clear:

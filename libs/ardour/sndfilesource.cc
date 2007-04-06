@@ -894,3 +894,9 @@ SndFileSource::get_timecode_info (SNDFILE* sf, SF_BROADCAST_INFO* binfo, bool& e
 	ret |= (uint32_t) binfo->time_reference_low;
 	return ret;
 }
+
+bool
+SndFileSource::one_of_several_channels () const
+{
+	return _info.channels > 1;
+}

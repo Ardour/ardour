@@ -323,8 +323,8 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	Selection::Operation op = Keyboard::selection_type (event->button.state);
 	bool press = (event->type == GDK_BUTTON_PRESS);
 
-	begin_reversible_command (_("select on click"));
-
+	// begin_reversible_command (_("select on click"));
+	
 	switch (item_type) {
 	case RegionItem:
 		if (mouse_mode != MouseRange) {
@@ -379,9 +379,9 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		break;
 	}
 	
-	if (commit) {
-		commit_reversible_command ();
-	}
+//	if (commit) {
+//		commit_reversible_command ();
+//	}
 }
 
 bool
@@ -3287,12 +3287,10 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	if (regionview_y_movement) {
 
 		/* moved to a different audio track. */
+		
+		vector<RegionView*> new_selection;
 
-		list<RegionView*> new_selection;
-		new_selection = selection->regions.by_layer();
-		selection->clear_regions ();
-
-		for (list<RegionView*>::const_iterator i = new_selection.begin(); i != new_selection.end(); ++i) {
+		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ) {
 	    
 			RegionView* rv = (*i);	    	    
 
@@ -3334,14 +3332,36 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			c.disconnect ();
 							      
 			if (latest_regionview) {
-				selection->add (latest_regionview);
+				new_selection.push_back (latest_regionview);
 			}
 
 			if (drag_info.copy) {
 				// get rid of the copy
 				delete rv;
 			} 
+
+			/* OK, this is where it gets tricky. If the playlist was being used by >1 tracks, and the region
+			   was selected in all of them, then removing it from the playlist will have removed all
+			   trace of it from the selection (i.e. there were N regions selected, we removed 1,
+			   but since its the same playlist for N tracks, all N tracks updated themselves, removed the
+			   corresponding regionview, and the selection is now empty).
+
+			   this could have invalidated any and all iterators into the region selection.
+
+			   the heuristic we use here is: if the region selection is empty, break out of the loop
+			   here. if the region selection is not empty, then restart the loop because we know that
+			   we must have removed at least the region(view) we've just been working on as well as any
+			   that we processed on previous iterations.
+			*/
+
+			if (selection->regions.empty()) {
+				break;
+			} else { 
+				i = selection->regions.by_layer().begin();
+			}
 		} 
+
+		selection->set (new_selection);
 
 	} else {
 

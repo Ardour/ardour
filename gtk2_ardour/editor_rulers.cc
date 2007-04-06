@@ -260,12 +260,12 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 	/* need to use the correct x,y, the event lies */
 	time_canvas_event_box.get_window()->get_pointer (x, y, state);
 
-	
-	track_canvas.c2w (x, y, wcx, wcy);
-	track_canvas.w2c (wcx, wcy, cx, cy);
-	
-	nframes_t where = leftmost_frame + pixel_to_frame (x);
+	time_canvas.c2w (x, y, wcx, wcy);
+	time_canvas.w2c (wcx, wcy, cx, cy);
 
+	wcx = x;
+	nframes_t where = event_frame ((GdkEvent*) ev, &wcx, (double *) 0);
+	cx = wcx;
 
 	/// ripped from maybe_autoscroll, and adapted to work here
 	nframes_t one_page = (nframes_t) rint (canvas_width * frames_per_unit);
@@ -307,8 +307,7 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 		break;
 	}
 
-	if (cursor)
-	{
+	if (cursor) {
 		cursor->set_position (where);
 		
 		if (cursor == edit_cursor) {

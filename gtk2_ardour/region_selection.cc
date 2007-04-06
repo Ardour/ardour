@@ -31,20 +31,22 @@ using namespace sigc;
 
 RegionSelection::RegionSelection ()
 {
+	RegionView::RegionViewGoingAway.connect (mem_fun(*this, &RegionSelection::remove_it));
+
 	_current_start = 0;
 	_current_end = 0;
 }
 
 RegionSelection::RegionSelection (const RegionSelection& other)
 {
+	RegionView::RegionViewGoingAway.connect (mem_fun(*this, &RegionSelection::remove_it));
+
 	for (RegionSelection::const_iterator i = other.begin(); i != other.end(); ++i) {
 		add (*i);
 	}
 	_current_start = other._current_start;
 	_current_end = other._current_end;
 }
-
-
 
 RegionSelection&
 RegionSelection::operator= (const RegionSelection& other)
@@ -85,8 +87,6 @@ RegionSelection::add (RegionView* rv)
 		/* we already have it */
 		return false;
 	}
-
-	rv->RegionViewGoingAway.connect (mem_fun(*this, &RegionSelection::remove_it));
 
 	if (rv->region()->first_frame() < _current_start || empty()) {
 		_current_start = rv->region()->first_frame();

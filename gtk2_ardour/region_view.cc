@@ -24,6 +24,7 @@
 #include <gtkmm.h>
 
 #include <gtkmm2ext/gtk_ui.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/playlist.h>
 #include <ardour/audioregion.h>
