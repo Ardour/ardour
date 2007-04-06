@@ -151,6 +151,11 @@ Editor::ruler_button_press (GdkEventButton* ev)
 
 	switch (ev->button) {
 	case 1:
+		// Since we are about to move the playhead, cancel any running
+		// auditions.
+		if (session->is_auditioning()) {
+			session->cancel_audition ();
+		}
 		/* transport playhead */
 		snap_to (where);
 		session->request_locate (where);

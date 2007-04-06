@@ -1537,6 +1537,8 @@ ARDOUR_UI::name_io_setup (AudioEngine& engine,
 	}
 }
 
+/** Ask the user for the name of a new shapshot and then take it.
+ */
 void
 ARDOUR_UI::snapshot_session ()
 {

@@ -770,10 +770,12 @@ class Editor : public PublicEditor
 	SnapshotDisplayModelColumns snapshot_display_columns;
 	Glib::RefPtr<Gtk::ListStore> snapshot_display_model;
 	Gtk::TreeView snapshot_display;
+	Gtk::Menu snapshot_context_menu;
 
 	bool snapshot_display_button_press (GdkEventButton*);
 	void snapshot_display_selection_changed ();
 	void redisplay_snapshots();
+	void popup_snapshot_context_menu (int, int32_t, Glib::ustring);
 
 	/* named selections */
 
@@ -795,6 +797,8 @@ class Editor : public PublicEditor
 	void create_named_selection ();
 	void paste_named_selection (float times);
 	void remove_selected_named_selections ();
+	void remove_snapshot (Glib::ustring);
+	void rename_snapshot (Glib::ustring);
 
 	void handle_new_named_selection ();
 	void add_named_selection_to_named_selection_display (ARDOUR::NamedSelection&);

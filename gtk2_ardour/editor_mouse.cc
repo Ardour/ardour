@@ -1922,7 +1922,11 @@ Editor::start_cursor_grab (ArdourCanvas::Item* item, GdkEvent* event)
 		
 		if (session && drag_info.was_rolling) {
 			session->request_stop ();
-		} 
+		}
+
+		if (session && session->is_auditioning()) {
+			session->cancel_audition ();
+		}
 	}
 
 	drag_info.pointer_frame_offset = drag_info.grab_frame - cursor->current_frame;	

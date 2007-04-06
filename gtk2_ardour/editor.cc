@@ -40,6 +40,7 @@
 #include <gtkmm2ext/tearoff.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/window_title.h>
+#include <gtkmm2ext/choice.h>
 
 #include <ardour/audio_track.h>
 #include <ardour/audio_diskstream.h>
@@ -3372,6 +3373,9 @@ Editor::control_layout_scroll (GdkEventScroll* ev)
 	return false;
 }
 
+
+/** A new snapshot has been selected.
+ */
 void
 Editor::snapshot_display_selection_changed ()
 {
@@ -3396,7 +3400,93 @@ Editor::snapshot_display_selection_changed ()
 bool
 Editor::snapshot_display_button_press (GdkEventButton* ev)
 {
-	 return false;
+	if (ev->button == 3) {
+		/* Right-click on the snapshot list. Work out which snapshot it
+		   was over. */
+		Gtk::TreeModel::Path path;
+		Gtk::TreeViewColumn* col;
+		int cx;
+		int cy;
+		snapshot_display.get_path_at_pos ((int) ev->x, (int) ev->y, path, col, cx, cy);
+		Gtk::TreeModel::iterator iter = snapshot_display_model->get_iter (path);
+		if (iter) {
+			Gtk::TreeModel::Row row = *iter;
+			popup_snapshot_context_menu (ev->button, ev->time, row[snapshot_display_columns.real_name]);
+		}
+		return true;
+	}
+
+	return false;
+}
+
+
+/** Pop up the snapshot display context menu.
+ * @param button Button used to open the menu.
+ * @param time Menu open time.
+ * @snapshot_name Name of the snapshot that the menu click was over.
+ */
+
+void
+Editor::popup_snapshot_context_menu (int button, int32_t time, Glib::ustring snapshot_name)
+{
+	using namespace Menu_Helpers;
+
+	MenuList& items (snapshot_context_menu.items());
+	items.clear ();
+
+	const bool modification_allowed = (session->snap_name() != snapshot_name && session->name() != snapshot_name);
+
+	items.push_back (MenuElem (_("Remove"), bind (mem_fun (*this, &Editor::remove_snapshot), snapshot_name)));
+	if (!modification_allowed) {
+		items.back().set_sensitive (false);
+	}
+
+	items.push_back (MenuElem (_("Rename"), bind (mem_fun (*this, &Editor::rename_snapshot), snapshot_name)));
+	if (!modification_allowed) {
+		items.back().set_sensitive (false);
+	}
+
+	snapshot_context_menu.popup (button, time);
+}
+
+void
+Editor::rename_snapshot (Glib::ustring old_name)
+{
+	ArdourPrompter prompter(true);
+
+	string new_name;
+
+	prompter.set_name ("Prompter");
+	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
+	prompter.set_prompt (_("New name of snapshot"));
+	prompter.set_initial_text (old_name);
+	
+	if (prompter.run() == RESPONSE_ACCEPT) {
+		prompter.get_result (new_name);
+		if (new_name.length()) {
+			session->rename_state (old_name, new_name);
+		        redisplay_snapshots ();
+		}
+	}
+}
+
+
+void
+Editor::remove_snapshot (Glib::ustring name)
+{
+	vector<string> choices;
+
+	std::string prompt  = string_compose (_("Do you really want to remove snapshot \"%1\" ?\n(cannot be undone)"), name);
+
+	choices.push_back (_("No, do nothing."));
+	choices.push_back (_("Yes, remove it."));
+
+	Gtkmm2ext::Choice prompter (prompt, choices);
+
+	if (prompter.run () == 1) {
+		session->remove_state (name);
+		redisplay_snapshots ();
+	}
 }
 
 void
