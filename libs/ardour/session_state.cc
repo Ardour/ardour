@@ -2696,7 +2696,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 
 		for (set<string>::iterator i = all_sources.begin(); i != all_sources.end(); ++i) {
 
-			if (spath == *i) {
+			if (strcmp(canonicalize_file_name(spath.c_str()), canonicalize_file_name( (*i).c_str())) == 0) {
 				used = true;
 				break;
 			}
