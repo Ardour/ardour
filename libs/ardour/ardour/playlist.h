@@ -182,6 +182,7 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
 	bool             save_on_thaw;
 	string           last_save_reason;
 	uint32_t         in_set_state;
+	bool             first_set_state;
 	bool            _hidden;
 	bool            _splicing;
 	bool            _nudging;

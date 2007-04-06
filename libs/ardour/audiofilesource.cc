@@ -29,11 +29,13 @@
 #include <pbd/pathscanner.h>
 #include <pbd/stl_delete.h>
 #include <pbd/strsplit.h>
+#include <pbd/shortpath.h>
 #include <pbd/enumwriter.h>
 
 #include <sndfile.h>
 
 #include <glibmm/miscutils.h>
+#include <glibmm/fileutils.h>
 
 #include <ardour/audiofilesource.h>
 #include <ardour/sndfile_helpers.h>
@@ -366,10 +368,33 @@ AudioFileSource::find (ustring& pathstr, bool must_exist, bool& isnew)
 
 	isnew = false;
 
-	/* clean up PATH:CHANNEL notation so that we are looking for the correct path */
+	/* i (paul) made a nasty design error by using ':' as a special character in
+	   Ardour 0.99 .. this hack tries to make things sort of work.
+	*/
 
 	if ((pos = pathstr.find_last_of (':')) != ustring::npos) {
-		pathstr = pathstr.substr (0, pos);
+		if (Glib::file_test (pathstr, Glib::FILE_TEST_EXISTS)) {
+			/* its a real file, no problem */
+			
+		} else {
+
+			if (must_exist) {
+
+				/* older session using file:channel syntax */
+				
+				warning << string_compose (_("This older session references an embedded\n\
+non-mono audio file:\n\n%1\n\n						\
+The session file may be edited or the file must be removed before it can be used."), 
+							   short_path (pathstr, 48))
+					<< endmsg;
+				return false;
+
+			} else {
+				
+				/* new derived file (e.g. for timefx) being created in a newer session */
+
+			}
+		}
 	}
 
 	if (pathstr[0] != '/') {

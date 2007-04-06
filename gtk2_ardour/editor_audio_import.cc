@@ -19,6 +19,7 @@
 
 #include <pbd/pthread_utils.h>
 #include <pbd/basename.h>
+#include <pbd/shortpath.h>
 
 #include <gtkmm2ext/choice.h>
 #include <gtkmm2ext/window_title.h>
@@ -380,7 +381,6 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_fi
 				boost::shared_ptr<Source> s;
 
 				if ((s = session->source_by_path_and_channel (path, n)) == 0) {
-					cerr << "source doesn't exist yet\n";
 					source = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable 
 											       (*session, path,  n,
 												(mode == ImportAsTapeTrack ? 

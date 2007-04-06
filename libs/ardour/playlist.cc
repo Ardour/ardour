@@ -74,6 +74,7 @@ Playlist::Playlist (Session& sess, string nom, bool hide)
 	: _session (sess)
 {
 	init (hide);
+	first_set_state = false;
 	_name = nom;
 	
 }
@@ -108,6 +109,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, string namestr, boo
 	_edit_mode = other->_edit_mode;
 
 	in_set_state = 0;
+	first_set_state = false;
 	in_flush = false;
 	in_partition = false;
 	subcnt = 0;
@@ -180,6 +182,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, nframes_t start, nf
 	}
 	
 	in_set_state--;
+	first_set_state = false;
 
 	/* this constructor does NOT notify others (session) */
 }
@@ -220,6 +223,7 @@ Playlist::init (bool hide)
 	g_atomic_int_set (&ignore_state_changes, 0);
 	pending_modified = false;
 	pending_length = false;
+	first_set_state = true;
 	_refcnt = 0;
 	_hidden = hide;
 	_splicing = false;
@@ -508,10 +512,10 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, nframes_t posit
 		 old_length = _get_maximum_extent();
 	}
 
-	if (!in_set_state) {
+	if (!first_set_state) {
 		boost::shared_ptr<Playlist> foo (shared_from_this());
 		region->set_playlist (boost::weak_ptr<Playlist>(foo));
-	}
+	} 
 
 	region->set_position (position, this);
 
@@ -1418,7 +1422,7 @@ Playlist::set_state (const XMLNode& node)
 	}
 
 	in_set_state--;
-
+	first_set_state = false;
 	return 0;
 }
 

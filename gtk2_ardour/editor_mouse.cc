@@ -3381,6 +3381,8 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 			boost::shared_ptr<Playlist> to_playlist = rv->region()->playlist();
 
+			assert (to_playlist);
+
 			/* add the undo */
 
 			session->add_command (new MementoCommand<Playlist>(*to_playlist, &to_playlist->get_state(), 0));	

@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <sigc++/bind.h>
 #include <pbd/error.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/playlist.h>
 
