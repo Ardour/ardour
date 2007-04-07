@@ -273,6 +273,7 @@ int main (int argc, char *argv[])
 		ARDOUR::init (use_vst, try_hw_optimization);
 		setup_gtk_ardour_enums ();
 		Config->set_current_owner (ConfigVariableBase::Interface);
+		ui->setup_profile ();
 
 		try { 
 			engine = new ARDOUR::AudioEngine (jack_client_name);

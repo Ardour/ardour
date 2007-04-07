@@ -50,6 +50,7 @@
 #include <midi++/mmc.h>
 
 #include <ardour/ardour.h>
+#include <ardour/profile.h>
 #include <ardour/session_route.h>
 #include <ardour/port.h>
 #include <ardour/audioengine.h>
@@ -642,11 +643,11 @@ ARDOUR_UI::update_sample_rate (nframes_t ignored)
 		nframes_t rate = engine->frame_rate();
 		
 		if (fmod (rate, 1000.0) != 0.0) {
-			snprintf (buf, sizeof (buf), _("%.1f kHz / %4.1f msecs"), 
+			snprintf (buf, sizeof (buf), _("%.1f kHz / %4.1f ms"), 
 				  (float) rate/1000.0f,
 				  (engine->frames_per_cycle() / (float) rate) * 1000.0f);
 		} else {
-			snprintf (buf, sizeof (buf), _("%u kHz / %4.1f msecs"), 
+			snprintf (buf, sizeof (buf), _("%u kHz / %4.1f ms"), 
 				  rate/1000,
 				  (engine->frames_per_cycle() / (float) rate) * 1000.0f);
 		}
@@ -2710,4 +2711,12 @@ void
 ARDOUR_UI::TransportControllable::set_id (const string& str)
 {
 	_id = str;
+}
+
+void
+ARDOUR_UI::setup_profile ()
+{
+	if (gdk_screen_width() < 1200) {
+		Profile->set_small_screen ();
+	}
 }

@@ -46,6 +46,7 @@
 #include "rgb_macros.h"
 
 #include <ardour/types.h>
+#include <ardour/profile.h>
 #include <ardour/route.h>
 #include <ardour/audio_track.h>
 #include <ardour/audio_diskstream.h>
@@ -3307,6 +3308,12 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			where = (nframes_t) (unit_to_frame (ix1) * speed);
 			boost::shared_ptr<Region> new_region (RegionFactory::create (rv->region()));
 
+			/* undo the previous hide_dependent_views so that xfades don't
+			   disappear on copying regions 
+			*/
+
+			rv->get_time_axis_view().reveal_dependent_views (*rv);
+
 			if (!drag_info.copy) {
 				
 				/* the region that used to be in the old playlist is not
@@ -3510,7 +3517,7 @@ Editor::show_verbose_time_cursor (nframes_t frame, double offset, double xpos, d
 		return;
 	}
 
-	switch (ARDOUR_UI::instance()->secondary_clock.mode ()) {
+	switch (Profile->get_small_screen() ? ARDOUR_UI::instance()->primary_clock.mode () : ARDOUR_UI::instance()->secondary_clock.mode ()) {
 	case AudioClock::BBT:
 		session->bbt_time (frame, bbt);
 		snprintf (buf, sizeof (buf), "%02" PRIu32 "|%02" PRIu32 "|%02" PRIu32, bbt.bars, bbt.beats, bbt.ticks);

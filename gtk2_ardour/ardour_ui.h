@@ -212,6 +212,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void set_keybindings_path (std::string path);
 	void save_keybindings ();
 
+	void setup_profile ();
+
   protected:
 	friend class PublicEditor;
 

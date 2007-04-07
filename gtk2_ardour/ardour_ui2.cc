@@ -34,6 +34,7 @@
 
 #include <ardour/audioengine.h>
 #include <ardour/ardour.h>
+#include <ardour/profile.h>
 #include <ardour/route.h>
 
 #include "ardour_ui.h"
@@ -364,7 +365,9 @@ ARDOUR_UI::setup_transport ()
 
 	HBox* clock_box = manage (new HBox);
 	clock_box->pack_start (primary_clock, false, false);
-	clock_box->pack_start (secondary_clock, false, false);
+	if (!ARDOUR::Profile->get_small_screen()) {
+		clock_box->pack_start (secondary_clock, false, false);
+	}
 	VBox* time_controls_box = manage (new VBox);
 	time_controls_box->pack_start (sync_option_combo, false, false);
 	time_controls_box->pack_start (time_master_button, false, false);
