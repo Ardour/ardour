@@ -2689,6 +2689,8 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		} 
 	}
 
+	char tmppath[PATH_MAX+1];
+	
 	for (vector<string*>::iterator x = soundfiles->begin(); x != soundfiles->end(); ++x) {
 
 		used = false;
@@ -2696,7 +2698,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 
 		for (set<string>::iterator i = all_sources.begin(); i != all_sources.end(); ++i) {
 
-			if (strcmp(canonicalize_file_name(spath.c_str()), canonicalize_file_name( (*i).c_str())) == 0) {
+			if (strcmp(realpath(spath.c_str(), tmppath), realpath( (*i).c_str(), tmppath)) == 0) {
 				used = true;
 				break;
 			}
