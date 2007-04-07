@@ -142,6 +142,8 @@ MIDIControllable::midi_sense_note (Parser &p, EventTwoBytes *msg, bool is_on)
 			controllable.set_value (is_on ? 1 : 0);
 		}
 	}
+
+	last_written = (MIDI::byte) (controllable.get_value() * 127.0); // to prevent feedback fights
 }
 
 void
@@ -157,6 +159,8 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 				controllable.set_value (0);
 			}
 		}
+
+		last_written = (MIDI::byte) (controllable.get_value() * 127.0); // to prevent feedback fights
 	}
 }
 
@@ -167,6 +171,7 @@ MIDIControllable::midi_sense_program_change (Parser &p, byte msg)
 
 	if (!bistate) {
 		controllable.set_value (msg/127.0);
+		last_written = (MIDI::byte) (controllable.get_value() * 127.0); // to prevent feedback fights
 	} 
 }
 
@@ -178,6 +183,7 @@ MIDIControllable::midi_sense_pitchbend (Parser &p, pitchbend_t pb)
 	/* XXX gack - get rid of assumption about typeof pitchbend_t */
 
 	controllable.set_value ((pb/(float) SHRT_MAX));
+	last_written = (MIDI::byte) (controllable.get_value() * 127.0); // to prevent feedback fights
 }			
 
 void
@@ -292,7 +298,7 @@ MIDIControllable::send_feedback ()
 	if (setting || !feedback || control_type == none) {
 		return;
 	}
-	
+
 	msg[0] = (control_type & 0xF0) | (control_channel & 0xF); 
 	msg[1] = control_additional;
 	msg[2] = (byte) (controllable.get_value() * 127.0f);
