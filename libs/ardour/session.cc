@@ -1853,7 +1853,7 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			if (dynamic_cast<AudioTrack*>((*i).get()) == 0) {
-				if (!(*i)->hidden()) {
+				if (!(*i)->hidden() && (*i)->name() != "master") {
 					bus_id++;
 				}
 			}
@@ -1870,15 +1870,13 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 	while (how_many) {
 
 		do {
-			++bus_id;
-
 			snprintf (bus_name, sizeof(bus_name), "Bus %" PRIu32, bus_id);
 
 			if (route_by_name (bus_name) == 0) {
 				break;
 			}
 
-		} while (bus_id < (UINT_MAX-1));
+		} while (++bus_id < (UINT_MAX-1));
 
 		try {
 			shared_ptr<Route> bus (new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), DataType::AUDIO));
