@@ -1853,7 +1853,7 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			if (dynamic_cast<AudioTrack*>((*i).get()) == 0) {
-				if (!(*i)->hidden() && (*i)->name() != "master") {
+				if (!(*i)->hidden() && (*i)->name() != _("master")) {
 					bus_id++;
 				}
 			}
