@@ -35,7 +35,7 @@ MIDIControllable::MIDIControllable (Port& p, Controllable& c, bool is_bistate)
 	: controllable (c), _port (p), bistate (is_bistate)
 {
 	setting = false;
-	last_written = 0; // got a better idea ?
+	last_value = 0; // got a better idea ?
 	control_type = none;
 	_control_description = "MIDI Control: none";
 	control_additional = (byte) -1;
@@ -143,7 +143,7 @@ MIDIControllable::midi_sense_note (Parser &p, EventTwoBytes *msg, bool is_on)
 		}
 	}
 
-	last_written = (MIDI::byte) (controllable.get_value() * 127.0); // to prevent feedback fights
+	last_value = (MIDI::byte) (controllable.get_value() * 127.0); // to prevent feedback fights
 }
 
 void
@@ -160,7 +160,7 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 			}
 		}
 
-		last_written = (MIDI::byte) (controllable.get_value() * 127.0); // to prevent feedback fights
+		last_value = (MIDI::byte) (controllable.get_value() * 127.0); // to prevent feedback fights
 	}
 }
 
@@ -171,7 +171,7 @@ MIDIControllable::midi_sense_program_change (Parser &p, byte msg)
 
 	if (!bistate) {
 		controllable.set_value (msg/127.0);
-		last_written = (MIDI::byte) (controllable.get_value() * 127.0); // to prevent feedback fights
+		last_value = (MIDI::byte) (controllable.get_value() * 127.0); // to prevent feedback fights
 	} 
 }
 
@@ -183,7 +183,7 @@ MIDIControllable::midi_sense_pitchbend (Parser &p, pitchbend_t pb)
 	/* XXX gack - get rid of assumption about typeof pitchbend_t */
 
 	controllable.set_value ((pb/(float) SHRT_MAX));
-	last_written = (MIDI::byte) (controllable.get_value() * 127.0); // to prevent feedback fights
+	last_value = (MIDI::byte) (controllable.get_value() * 127.0); // to prevent feedback fights
 }			
 
 void
@@ -313,11 +313,11 @@ MIDIControllable::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool force)
 
 		MIDI::byte gm = (MIDI::byte) (controllable.get_value() * 127.0);
 		
-		if (gm != last_written) {
+		if (gm != last_value) {
 			*buf++ = (0xF0 & control_type) | (0xF & control_channel);
 			*buf++ = control_additional; /* controller number */
 			*buf++ = gm;
-			last_written = gm;
+			last_value = gm;
 			bufsize -= 3;
 		}
 	}

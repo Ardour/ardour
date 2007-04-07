@@ -67,7 +67,7 @@ class MIDIControllable : public Stateful
 	PBD::Controllable& controllable;
 	MIDI::Port&     _port;
 	bool             setting;
-	MIDI::byte       last_written;
+	MIDI::byte       last_value;
 	bool             bistate;
 	int              midi_msg_id;      /* controller ID or note number */
 	sigc::connection midi_sense_connection[2];
