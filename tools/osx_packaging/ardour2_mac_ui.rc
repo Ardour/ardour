@@ -838,11 +838,11 @@ style "track_controls_inactive"
 
 style "edit_controls_base_selected"
 {
-	bg[NORMAL] = { 0.56, 0.56, 0.56 }
-	bg[ACTIVE] = { 0.56, 0.56, 0.56 }
-	bg[INSENSITIVE] = { 0.56, 0.56, 0.56 }
-	bg[SELECTED] = { 0.56, 0.56, 0.56 }
-	bg[PRELIGHT] = { 0.56, 0.56, 0.56 }
+	bg[NORMAL] = { 0.60, 0.54, 0.60 }
+	bg[ACTIVE] = { 0.60, 0.54, 0.60 }
+	bg[INSENSITIVE] = { 0.60, 0.54, 0.60 }
+	bg[SELECTED] = { 0.60, 0.54, 0.60 }
+	bg[PRELIGHT] = { 0.60, 0.54, 0.60 }
 }
 
 style "automation_track_controls_base"
