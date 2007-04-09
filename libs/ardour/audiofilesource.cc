@@ -248,7 +248,10 @@ AudioFileSource::set_state (const XMLNode& node)
 void
 AudioFileSource::mark_for_remove ()
 {
-	if (!writable()) {
+	// This operation is not allowed for sources for destructive tracks or embedded files.
+	// Fortunately mark_for_remove() is never called for embedded files. This function
+	// must be fixed if that ever happens.
+	if (_flags & Destructive) {
 		return;
 	}
 
