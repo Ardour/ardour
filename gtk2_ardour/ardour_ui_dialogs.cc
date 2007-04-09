@@ -146,6 +146,8 @@ ARDOUR_UI::connect_to_session (Session *s)
 
 	AudioClock::ModeChanged.connect (mem_fun (*this, &ARDOUR_UI::store_clock_modes));
 
+	Glib::signal_idle().connect (mem_fun (*this, &ARDOUR_UI::first_idle));
+
 	start_clocking ();
 	start_blinking ();
 
