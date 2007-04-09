@@ -2689,7 +2689,8 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		} 
 	}
 
-	char tmppath[PATH_MAX+1];
+	char tmppath1[PATH_MAX+1];
+	char tmppath2[PATH_MAX+1];
 	
 	for (vector<string*>::iterator x = soundfiles->begin(); x != soundfiles->end(); ++x) {
 
@@ -2698,7 +2699,10 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 
 		for (set<string>::iterator i = all_sources.begin(); i != all_sources.end(); ++i) {
 
-			if (strcmp(realpath(spath.c_str(), tmppath), realpath( (*i).c_str(), tmppath)) == 0) {
+			realpath(spath.c_str(), tmppath1);
+			realpath((*i).c_str(),  tmppath2);
+
+			if (strcmp(tmppath1, tmppath2) == 0) {
 				used = true;
 				break;
 			}
