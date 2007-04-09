@@ -65,7 +65,7 @@ class AudioRegion : public Region
 	
 	void normalize_to (float target_in_dB = 0.0f);
 
-	uint32_t n_channels() { return sources.size(); }
+	uint32_t n_channels() const { return sources.size(); }
 	vector<string> master_source_names();
 	
 	bool envelope_active () const { return _flags & Region::EnvelopeActive; }
@@ -95,6 +95,8 @@ class AudioRegion : public Region
 	int      set_state (const XMLNode&);
 
 	static void set_default_fade (float steepness, nframes_t len);
+	bool fade_in_is_default () const;
+	bool fade_out_is_default () const;
 
 	enum FadeShape {
 		Linear,

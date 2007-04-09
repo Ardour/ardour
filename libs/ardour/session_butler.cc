@@ -248,7 +248,7 @@ Session::butler_thread_work ()
 		gettimeofday (&begin, 0);
 
 		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader ();
-		
+
 		for (i = dsl->begin(); !transport_work_requested() && butler_should_run && i != dsl->end(); ++i) {
 
 			boost::shared_ptr<Diskstream> ds = *i;
