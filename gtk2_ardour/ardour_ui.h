@@ -655,7 +655,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_send_midi_feedback ();
 	void toggle_use_mmc ();
 	void toggle_send_mmc ();
-	void toggle_use_midi_control();
 	void toggle_send_mtc ();
 
 	void toggle_use_osc ();

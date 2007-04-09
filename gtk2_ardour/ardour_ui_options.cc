@@ -70,12 +70,6 @@ ARDOUR_UI::toggle_use_osc ()
 }
 
 void
-ARDOUR_UI::toggle_use_midi_control ()
-{
-	ActionManager::toggle_config_state ("options", "UseMIDIcontrol", &Configuration::set_midi_control, &Configuration::get_midi_control);
-}
-
-void
 ARDOUR_UI::toggle_send_midi_feedback ()
 {
 	ActionManager::toggle_config_state ("options", "SendMIDIfeedback", &Configuration::set_midi_feedback, &Configuration::get_midi_feedback);
@@ -867,8 +861,6 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		ActionManager::map_some_state ("options", "UseMMC", &Configuration::get_mmc_control);
 	} else if (PARAM_IS ("midi-feedback")) {
 		ActionManager::map_some_state ("options", "SendMIDIfeedback", &Configuration::get_midi_feedback);
-	} else if (PARAM_IS ("midi-control")) {
-		ActionManager::map_some_state ("options", "UseMIDIcontrol", &Configuration::get_midi_control);
 	} else if (PARAM_IS ("do-not-record-plugins")) {
 		ActionManager::map_some_state ("options", "DoNotRunPluginsWhileRecording", &Configuration::get_do_not_record_plugins);
 	} else if (PARAM_IS ("latched-record-enable")) {
