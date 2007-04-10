@@ -358,8 +358,9 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	case GainAutomationControlPointItem:
 	case PanAutomationControlPointItem:
 	case RedirectAutomationControlPointItem:
+		commit = set_selected_track_from_click (press, op, true);
 		if (mouse_mode != MouseRange) {
-			commit = set_selected_control_point_from_click (op, false);
+			commit |= set_selected_control_point_from_click (op, false);
 		}
 		break;
 		
@@ -986,8 +987,10 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		case MouseGain:
 			// Gain only makes sense for audio regions
-			if ( ! dynamic_cast<AudioRegionView*>(clicked_regionview))
+
+			if (!dynamic_cast<AudioRegionView*>(clicked_regionview)) {
 				break;
+			}
 
 			switch (item_type) {
 			case RegionItem:
@@ -1617,6 +1620,7 @@ Editor::end_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	stop_canvas_autoscroll ();
 
 	if (drag_info.item == 0) {
+		cerr << "end grab with no item\n";
 		return false;
 	}
 	

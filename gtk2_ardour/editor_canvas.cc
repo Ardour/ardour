@@ -93,7 +93,13 @@ Editor::initialize_canvas ()
 	track_canvas.set_center_scroll_region (false);
 	track_canvas.set_dither  	(Gdk::RGB_DITHER_NONE);
 
-	track_canvas.signal_event().connect (bind (mem_fun (*this, &Editor::track_canvas_event), (ArdourCanvas::Item*) 0));
+	/* need to handle 4 specific types of events as catch-alls */
+
+	track_canvas.signal_scroll_event().connect (mem_fun (*this, &Editor::track_canvas_scroll_event));
+	track_canvas.signal_motion_notify_event().connect (mem_fun (*this, &Editor::track_canvas_motion_notify_event));
+	track_canvas.signal_button_press_event().connect (mem_fun (*this, &Editor::track_canvas_button_press_event));
+	track_canvas.signal_button_release_event().connect (mem_fun (*this, &Editor::track_canvas_button_release_event));
+
 	track_canvas.set_name ("EditorMainCanvas");
 	track_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK|Gdk::SCROLL_MASK);
 	track_canvas.signal_leave_notify_event().connect (mem_fun(*this, &Editor::left_track_canvas));

@@ -728,6 +728,14 @@ msgstr "Gå till slutet av sessionen"
 msgid "Play loop range"
 msgstr "Spela loop-omfång"
 
+#: gtk2_ardour/ardour_ui_ed.cc:243
+msgid "Transition To Roll"
+msgstr "Övergång till Rullning"
+
+#: gtk2_ardour/ardour_ui_ed.cc:247
+msgid "Transition To Reverse"
+msgstr "Övergång till Motsatt riktning"
+
 #: ../ardour_ui2.cc:296
 msgid "Return to last playback start when stopped"
 msgstr "Återvänd till senaste startmarkörpunkten vid stopp"
@@ -742,11 +750,11 @@ msgstr "Rimlig inljudsmedhörning"
 
 #: ../ardour_ui2.cc:299
 msgid "Start recording at auto-punch start"
-msgstr "Starta inspelning vid auto-punch-start"
+msgstr "Starta inspelning vid autoinslagsstart"
 
 #: ../ardour_ui2.cc:300
 msgid "Stop recording at auto-punch end"
-msgstr "Stanna inspelning vid auto-punch-slut"
+msgstr "Stanna inspelning vid autoinslagsslut"
 
 #: ../ardour_ui2.cc:301
 msgid "Enable/Disable audio click"
@@ -1025,7 +1033,7 @@ msgstr "Start/Stopp"
 
 #: ../ardour_ui_ed.cc:225
 msgid "Stop + Forget Capture"
-msgstr "Stanna + Glöm inspelning"
+msgstr "Stanna + ångra inspelning"
 
 #: ../ardour_ui_ed.cc:228
 msgid "Play Loop Range"
@@ -1053,15 +1061,15 @@ msgstr "Bakåtspolning (snabb)"
 
 #: ../ardour_ui_ed.cc:247
 msgid "Forward"
-msgstr "Framspolning"
+msgstr "Framåtspolning"
 
 #: ../ardour_ui_ed.cc:250
 msgid "Forward (Slow)"
-msgstr "Framspolning (långsam)"
+msgstr "Framåtspolning (långsam)"
 
 #: ../ardour_ui_ed.cc:253
 msgid "Forward (Fast)"
-msgstr "Framspolning (snabb)"
+msgstr "Framåtspolning (snabb)"
 
 #: ../ardour_ui_ed.cc:256
 msgid "Goto Zero"
@@ -1269,6 +1277,10 @@ msgstr "Skicka MIDI-gensvar"
 msgid "Use MIDI control"
 msgstr "Använd MIDI-kontroll"
 
+#: gtk2_ardour/ardour_ui_ed.cc:399
+msgid "Use OSC"
+msgstr "Använd OSC"
+
 #: gtk2_ardour/ardour_ui_ed.cc:437
 msgid "Auto-connect inputs to physical inputs"
 msgstr "Anslut automatiskt ingångar till fysiska ingångar"
@@ -1288,6 +1300,18 @@ msgstr "Ansluta automatiskt utgångar till master-bussen"
 #: gtk2_ardour/ardour_ui_ed.cc:448
 msgid "Manually connect outputs"
 msgstr "Anslut utgångar manuellt"
+
+#: gtk2_ardour/ardour_ui_ed.cc:475
+msgid "Remote ID assigned by User"
+msgstr "Fjärr-ID bestäms av användaren"
+
+#: gtk2_ardour/ardour_ui_ed.cc:477
+msgid "Remote ID follows order of Mixer"
+msgstr "Fjärr-ID följer mixerordning"
+
+#: gtk2_ardour/ardour_ui_ed.cc:479
+msgid "Remote ID follows order of Editor"
+msgstr "Fjärr-ID flöjer redigerareordning"
 
 #: ../ardour_ui_ed.cc:376
 msgid "Connect new track inputs to hardware"
@@ -1342,6 +1366,10 @@ msgstr "-12dB volymreduktion för snabbspolning"
 msgid "Rec-enable stays engaged at stop"
 msgstr "Inspelningsläge ändras ej vid stopp"
 
+#: gtk2_ardour/ardour_ui_ed.cc:410
+msgid "Region equivalents overlap"
+msgstr "Likvärda regioner överlappar"
+
 #. session options
 #: ../ardour_ui_ed.cc:418
 msgid "Do not run plugins while recording"
@@ -1350,6 +1378,11 @@ msgstr "Kör ej insticksprogram vid inspelning"
 #: ../ardour_ui_ed.cc:421
 msgid "Latched solo"
 msgstr "Låst solo"
+
+#: gtk2_ardour/ardour_ui_ed.cc:409
+msgid "Show solo muting"
+msgstr "Visa solotystning"
+
 
 #: ../ardour_ui_ed.cc:426
 msgid "Solo in-place"
@@ -1371,10 +1404,9 @@ msgstr "Nya fulla övertoningar är påslagna"
 msgid "ST"
 msgstr "HT"
 
-#: gtk2_ardour/audio_clock.cc:1796 gtk2_ardour/editor.cc:180
+#: gtk2_ardour/audio_clock.cc:1801 gtk2_ardour/editor.cc:180
 msgid "Timecode"
 msgstr "Tidskod"
-
 
 #: ../ardour_ui_options.cc:407 ../ardour_ui_options.cc:417
 #: ../ardour_ui_options.cc:484
@@ -2052,7 +2084,7 @@ msgstr "Omfångsmarkörer"
 
 #: ../editor.cc:193 ../editor_rulers.cc:391
 msgid "Loop/Punch Ranges"
-msgstr "Loop-/punch-markörer"
+msgstr "Loop-/inslagsmarkörer"
 
 #: ../editor.cc:215
 msgid "range"
@@ -2177,7 +2209,7 @@ msgstr ""
 #. force name
 #: ../editor.cc:1281 ../editor.cc:1290 ../editor_markers.cc:895
 msgid "Punch"
-msgstr ""
+msgstr "Inslag"
 
 #: ../editor.cc:1438 ../editor_mouse.cc:1741
 msgid "programming error: fade in canvas item has no regionview data pointer!"
@@ -2360,7 +2392,7 @@ msgstr "Redigeringsmarkör till slutet"
 #: ../editor.cc:1909 ../gain_meter.cc:180 ../gain_meter.cc:808
 #: ../panner_ui.cc:97 ../panner_ui.cc:802
 msgid "Trim"
-msgstr "Beskära"
+msgstr "Beskär"
 
 #: ../editor.cc:1912
 msgid "Split"
@@ -2378,13 +2410,13 @@ msgstr "Duplicera"
 msgid "Fill Track"
 msgstr "Fyll spåret"
 
+#: gtk2_ardour/editor.cc:1776
+msgid "Play range"
+msgstr "Spela omfång"
+
 #: ../editor.cc:1923
 msgid "Destroy"
 msgstr "Förstör"
-
-#: ../editor.cc:1953
-msgid "Play range"
-msgstr "Spela omfång"
 
 #: ../editor.cc:1954
 msgid "Loop range"
@@ -2406,13 +2438,17 @@ msgstr "Separera omfång till regionlista"
 msgid "Select all in range"
 msgstr "Välj allt i omfång"
 
+#: gtk2_ardour/editor_markers.cc:515
+msgid "Select Range"
+msgstr "Välj omfång"
+
 #: ../editor.cc:1968 ../editor.cc:2013
 msgid "Set range to loop range"
 msgstr "Ställ in omfång till loop-omfånget"
 
 #: ../editor.cc:1969 ../editor.cc:2014
 msgid "Set range to punch range"
-msgstr "Ställ in omfång till punch-omfånget"
+msgstr "Ställ in omfång till inslagsomfånget"
 
 #: ../editor.cc:1971
 msgid "Crop region to range"
@@ -2609,7 +2645,7 @@ msgstr "Gör om (%1)"
 
 #: ../editor.cc:3505
 msgid "... as new track"
-msgstr "... som ny region"
+msgstr "... som nytt spår"
 
 #: ../editor.cc:3506
 msgid "... as new region"
@@ -2759,7 +2795,7 @@ msgstr "Visa redigeringsmixer"
 
 #: ../editor_actions.cc:54
 msgid "Span Entire Overlap"
-msgstr "Sträck över hela överlappnngen"
+msgstr "Sträck över hela överlappningen"
 
 #: ../editor_actions.cc:56 ../editor_actions.cc:383
 msgid "Short"
@@ -2779,7 +2815,7 @@ msgstr "Startmarkören till nästa regionslut"
 
 #: ../editor_actions.cc:70
 msgid "Playhead to Next Region Sync"
-msgstr "Startmarkören till nästa"
+msgstr "Startmarkören till nästa regionsynk.-punkt"
 
 #: ../editor_actions.cc:73
 msgid "Playhead to Previous Region Start"
@@ -2819,19 +2855,19 @@ msgstr "Redigeringsmarkören till förra regionssynk.-punkten"
 
 #: ../editor_actions.cc:94
 msgid "Playhead to Range Start"
-msgstr "Startmarkören till regionstarten"
+msgstr "Startmarkören till omfångstarten"
 
 #: ../editor_actions.cc:96
 msgid "Playhead to Range End"
-msgstr "Startmarkören till regionslutet"
+msgstr "Startmarkören till omfångslutet"
 
 #: ../editor_actions.cc:99
 msgid "Edit Cursor to Range Start"
-msgstr "Redigeringsmarkören till regionstarten"
+msgstr "Redigeringsmarkören till omfångstarten"
 
 #: ../editor_actions.cc:101
 msgid "Edit Cursor to Range End"
-msgstr "Redigeringsmarkören till regionslutet"
+msgstr "Redigeringsmarkören till omfångslutet"
 
 #: ../editor_actions.cc:104 ../editor_ops.cc:1364
 msgid "select all"
@@ -2859,7 +2895,7 @@ msgstr "Välj allt mellan markörerna"
 
 #: ../editor_actions.cc:118
 msgid "Select All in Punch Range"
-msgstr "Välj allt i punch-omfånget"
+msgstr "Välj allt i inslagsomfånget"
 
 #: ../editor_actions.cc:120
 msgid "Select All in Loop Range"
@@ -2880,6 +2916,10 @@ msgstr "Lägg till Plats från startmarkören"
 #: ../editor_actions.cc:130
 msgid "Nudge Forward"
 msgstr "Knuffa framåt"
+
+#: gtk2_ardour/editor_actions.cc:129
+msgid "Add Mark from Playhead"
+msgstr "Lägg till markör utifrån startmarkören"
 
 #: ../editor_actions.cc:132
 msgid "Nudge Next Forward"
@@ -2943,6 +2983,10 @@ msgstr "Centrera redigeringsmarkören"
 
 #: ../editor_actions.cc:165
 msgid "Playhead Forward"
+msgstr "Startmarkören framåt"
+
+#: gtk2_ardour/editor_actions.cc:168
+msgid "Playhead forward"
 msgstr "Startmarkören framåt"
 
 #: ../editor_actions.cc:167
@@ -3221,19 +3265,19 @@ msgstr "Fallande"
 
 #: ../editor_actions.cc:329
 msgid "By Region Name"
-msgstr "utifrån Regionsnamn"
+msgstr "utifrån Regionens namn"
 
 #: ../editor_actions.cc:331
 msgid "By Region Length"
-msgstr "utifrån Regionslängd"
+msgstr "utifrån Regionens längd"
 
 #: ../editor_actions.cc:333
 msgid "By Region Position"
-msgstr "utifrån Regionsposition"
+msgstr "utifrån Regionens position"
 
 #: ../editor_actions.cc:335
 msgid "By Region Timestamp"
-msgstr "utifrån Regionstiddstämpel"
+msgstr "utifrån Regionens tidstämpel"
 
 #: ../editor_actions.cc:337
 msgid "By Region Start in File"
@@ -3245,19 +3289,19 @@ msgstr "utifrån Regionens slut i filen"
 
 #: ../editor_actions.cc:341
 msgid "By Source File Name"
-msgstr "utifrån Källfilnamn"
+msgstr "utifrån Källfilens namn"
 
 #: ../editor_actions.cc:343
 msgid "By Source File Length"
-msgstr "utifrån Källfillängd"
+msgstr "utifrån Källfilens längd"
 
 #: ../editor_actions.cc:345
 msgid "By Source File Creation Date"
-msgstr ""
+msgstr "utifrån Källfilens skapelsedatum"
 
 #: ../editor_actions.cc:347
 msgid "By Source Filesystem"
-msgstr "utifrån Källfilsskapelsedatum"
+msgstr "utifrån Källfilsystemet"
 
 #. the next two are duplicate items with different names for use in two different contexts
 #: ../editor_actions.cc:353
@@ -3480,7 +3524,7 @@ msgstr "Ta bort markör"
 
 #: ../editor_markers.cc:478 ../editor_markers.cc:534
 msgid "Locate to Range Mark"
-msgstr "Flytta starmarköer till omfångsmarkör"
+msgstr "Flytta startmarköer till omfångsmarkör"
 
 #: ../editor_markers.cc:479 ../editor_markers.cc:535
 msgid "Play from Range Mark"
@@ -3524,7 +3568,7 @@ msgstr "Sätt loop-omfång här"
 
 #: ../editor_markers.cc:520
 msgid "Set Punch Range"
-msgstr "Sätt punch-omfång här"
+msgstr "Sätt inslagsomfång här"
 
 #: ../editor_markers.cc:814
 msgid "New Name:"
@@ -3548,7 +3592,7 @@ msgstr "ställ in loop-omfång"
 
 #: ../editor_markers.cc:890
 msgid "set punch range"
-msgstr "ställ in punch-omfång"
+msgstr "ställ in inslagsomfång"
 
 #: ../editor_mouse.cc:102
 msgid "Editor::event_frame() used on unhandled event type %1"
@@ -3765,7 +3809,7 @@ msgstr "välj allt inom omfång"
 
 #: ../editor_ops.cc:1538
 msgid "select all from punch"
-msgstr "välj allt från punch"
+msgstr "välj allt från inslag"
 
 #: ../editor_ops.cc:1560
 msgid "select all from loop"
@@ -3979,10 +4023,18 @@ msgstr "Ny platsmarkör"
 msgid "Clear all locations"
 msgstr "Rensa alla platsmarkörer"
 
+#: gtk2_ardour/editor_rulers.cc:347
+msgid "Unhide locations"
+msgstr "Visa platsmarkörer"
+
 #. ruler_items.push_back (MenuElem (_("New Range")));
 #: ../editor_rulers.cc:317
 msgid "Clear all ranges"
 msgstr "Rensa alla omfång"
+
+#: gtk2_ardour/editor_rulers.cc:353
+msgid "Unhide ranges"
+msgstr "Visa omfång"
 
 #: ../editor_rulers.cc:326
 msgid "New Tempo"
@@ -4908,11 +4960,11 @@ msgstr "Använd endast"
 
 #: gtk2_ardour/new_session_dialog.cc:105
 msgid "... to Master Bus"
-msgstr "...till Master-bussen"
+msgstr "... till Master-bussen"
 
 #: gtk2_ardour/new_session_dialog.cc:106
 msgid "... to Physical Outputs"
-msgstr "...till fysiska utgångar"
+msgstr "... till fysiska utgångar"
 
 
 #: ../new_session_dialog.cc:56 ../new_session_dialog.cc:67
@@ -4925,7 +4977,7 @@ msgstr "<b>Spår/bussingångar</b>"
 
 #: ../new_session_dialog.cc:66
 msgid "Automatically Connect Outputs"
-msgstr "Anslut automatiskt utgångar"
+msgstr "Anslut automatiskt utgångar..."
 
 #: ../new_session_dialog.cc:75
 msgid "Connect to Master Bus"
@@ -4975,6 +5027,10 @@ msgstr "Öppna session"
 #: ../new_session_dialog.cc:281
 msgid "ardour: session control"
 msgstr "ardour: session"
+
+#: gtk2_ardour/new_session_dialog.cc:347
+msgid "Session Control"
+msgstr "Session"
 
 #: ../new_session_dialog.cc:305
 msgid "select template"
@@ -5924,3 +5980,105 @@ msgstr "nytt namn: "
 #: ../visual_time_axis.cc:335
 msgid "A track already exists with that name"
 msgstr "Ett spår med det namnet existerar redan"
+
+#: gtk2_ardour/sfdb_ui.cc:273
+msgid "Add to Region list"
+msgstr "Lägg till i regionlistan"
+
+#: gtk2_ardour/sfdb_ui.cc:274
+msgid "Add to selected Track(s)"
+msgstr "Lägg till i valt spår"
+
+#: gtk2_ardour/sfdb_ui.cc:275
+msgid "Add as new Track(s)"
+msgstr "Lägg till som nytt/nya spår"
+
+#: gtk2_ardour/sfdb_ui.cc:276
+msgid "Add as new Tape Track(s)"
+msgstr "Lägg till som Band-spår"
+
+#: gtk2_ardour/sfdb_ui.cc:285
+msgid "Search"
+msgstr "Sök"
+
+#: gtk2_ardour/sfdb_ui.cc:302
+msgid "Files"
+msgstr "Filer"
+
+#: gtk2_ardour/sfdb_ui.cc:303
+msgid "Tags"
+msgstr "Taggar"
+
+#: gtk2_ardour/sfdb_ui.cc:129
+msgid "Format: n/a"
+msgstr ""
+
+#: gtk2_ardour/sfdb_ui.cc:130
+msgid "Channels: n/a"
+msgstr "Kanaler: n/a"
+
+#: gtk2_ardour/sfdb_ui.cc:131
+msgid "Samplerate: n/a"
+msgstr "Samplefrekvens: n/a"
+
+#: gtk2_ardour/sfdb_ui.cc:132
+msgid "Timecode: n/a"
+msgstr "Tidskod: n/a"
+
+#: gtk2_ardour/sfdb_ui.cc:142
+msgid "Length: %1"
+msgstr "Längd: %1"
+
+#: gtk2_ardour/sfdb_ui.cc:144
+msgid "Channels: %1"
+msgstr "Kanaler: %1"
+
+#: gtk2_ardour/sfdb_ui.cc:145
+msgid "Samplerate: %1"
+msgstr "Samplingsfrekvens: %1"
+
+#: gtk2_ardour/sfdb_ui.cc:146
+msgid "Timecode: %1"
+msgstr "Tidskod: %1"
+
+#: gtk2_ardour/sfdb_ui.cc:61
+msgid "Apply"
+msgstr "Verkställ"
+
+#: gtk2_ardour/sfdb_ui.cc:70
+msgid "comma seperated tags"
+msgstr "komma-separerade taggar"
+
+
+#: gtk2_ardour/editor.cc:127 gtk2_ardour/editor.cc:3529
+#: gtk2_ardour/editor_actions.cc:287
+msgid "Magnetic"
+msgstr "Magnetisk"
+
+#: gtk2_ardour/editor.cc:132 gtk2_ardour/editor.cc:3546
+#: gtk2_ardour/export_dialog.cc:138 gtk2_ardour/export_dialog.cc:154
+#: gtk2_ardour/export_dialog.cc:1066 gtk2_ardour/export_dialog.cc:1070
+msgid "Left"
+msgstr "Vänster"
+
+#: gtk2_ardour/editor.cc:133 gtk2_ardour/editor.cc:3548
+#: gtk2_ardour/export_dialog.cc:139 gtk2_ardour/export_dialog.cc:155
+msgid "Right"
+msgstr "Höger"
+
+#: gtk2_ardour/editor.cc:134 gtk2_ardour/editor.cc:3550
+msgid "Center"
+msgstr "Mitten"
+
+#: gtk2_ardour/editor.cc:135 gtk2_ardour/editor.cc:3552
+msgid "Playhead"
+msgstr "Startmarkören"
+
+#: gtk2_ardour/ardour_ui2.cc:835 gtk2_ardour/ardour_ui2.cc:858
+msgid "stop"
+msgstr "stopp"
+
+#: gtk2_ardour/audio_time_axis.cc:273
+msgid "Logarithmic"
+msgstr "Logaritmisk"
+

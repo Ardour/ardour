@@ -20,6 +20,8 @@
 #include <cstdlib>
 #include <cmath>
 
+#include <pbd/stacktrace.h>
+
 #include <ardour/audio_diskstream.h>
 #include <ardour/audioplaylist.h>
 
@@ -129,39 +131,35 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 }
 
 bool
-Editor::track_canvas_event (GdkEvent *event, ArdourCanvas::Item* item)
+Editor::track_canvas_scroll_event (GdkEventScroll *event)
 {
-	gint x, y;
+	track_canvas.grab_focus();
+	track_canvas_scroll (event);
+	return false;
+}
 
-	/* this is the handler for events that are not handled by
-	   items.
-	*/
+bool
+Editor::track_canvas_button_press_event (GdkEventButton *event)
+{
+	track_canvas.grab_focus();
+	return false;
+}
 
-	switch (event->type) {
-	case GDK_MOTION_NOTIFY:
-		/* keep those motion events coming */
-		track_canvas.get_pointer (x, y);
-		return track_canvas_motion (event);
-
-	case GDK_BUTTON_PRESS:
-		track_canvas.grab_focus();
-		break;
-
-	case GDK_BUTTON_RELEASE:
-		if (drag_info.item) {
-			end_grab (drag_info.item, event);
-		}
-		break;
-
-	case GDK_SCROLL:
-		track_canvas.grab_focus();
-		track_canvas_scroll (&event->scroll);
-		break;
-
-	default:
-		break;
+bool
+Editor::track_canvas_button_release_event (GdkEventButton *event)
+{
+	if (drag_info.item) {
+		end_grab (drag_info.item, (GdkEvent*) event);
 	}
+	return false;
+}
 
+bool
+Editor::track_canvas_motion_notify_event (GdkEventMotion *event)
+{
+	int x, y;
+	/* keep those motion events coming */
+	track_canvas.get_pointer (x, y);
 	return false;
 }
 
@@ -292,6 +290,7 @@ bool
 Editor::canvas_automation_track_event (GdkEvent *event, ArdourCanvas::Item* item, AutomationTimeAxisView *atv)
 {
 	bool ret = false;
+
 	
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:

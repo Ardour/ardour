@@ -1171,8 +1171,12 @@ class Editor : public PublicEditor
 
 	bool canvas_playhead_cursor_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_edit_cursor_event (GdkEvent* event, ArdourCanvas::Item*);
-	bool track_canvas_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool track_canvas_scroll (GdkEventScroll* event);
+
+	bool track_canvas_scroll_event (GdkEventScroll* event);
+	bool track_canvas_button_press_event (GdkEventButton* event);
+	bool track_canvas_button_release_event (GdkEventButton* event);
+	bool track_canvas_motion_notify_event (GdkEventMotion* event);
 
 	Gtk::Allocation canvas_allocation;
 	bool canvas_idle_queued;
