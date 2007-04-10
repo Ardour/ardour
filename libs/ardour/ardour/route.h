@@ -169,9 +169,9 @@ class Route : public IO
 	int copy_redirects (const Route&, Placement, uint32_t* err_streams = 0);
 	int sort_redirects (uint32_t* err_streams = 0);
 
-	void clear_redirects (void *src);
+	void clear_redirects (Placement, void *src);
 	void all_redirects_flip();
-	void all_redirects_active (bool state);
+	void all_redirects_active (Placement, bool state);
 
 	virtual nframes_t update_total_latency();
 	nframes_t signal_latency() const { return _own_latency; }

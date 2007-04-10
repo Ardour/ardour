@@ -606,7 +606,7 @@ ARDOUR_UI::shuttle_box_button_release (GdkEventButton* ev)
 		shuttle_grabbed = false;
 		shuttle_box.remove_modal_grab ();
 		if (Config->get_shuttle_behaviour() == Sprung) {
-			if (Config->get_auto_play() || roll_button.get_state()) {
+			if (Config->get_auto_play() || session->transport_rolling()) {
 				shuttle_fract = SHUTTLE_FRACT_SPEED1;				
 				session->request_transport_speed (1.0);
 				stop_button.set_visual_state (0);

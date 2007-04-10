@@ -957,21 +957,31 @@ could not match the configuration of this track.");
 void
 RedirectBox::all_redirects_active (bool state)
 {
-	_route->all_redirects_active (state);
+	_route->all_redirects_active (_placement, state);
 }
 
 void
-RedirectBox::clear_redirects()
+RedirectBox::clear_redirects ()
 {
 	string prompt;
 	vector<string> choices;
 
 	if (boost::dynamic_pointer_cast<AudioTrack>(_route) != 0) {
-		prompt = _("Do you really want to remove all redirects from this track?\n"
-			   "(this cannot be undone)");
+		if (_placement == PreFader) {
+			prompt = _("Do you really want to remove all pre-fader redirects from this track?\n"
+				   "(this cannot be undone)");
+		} else {
+			prompt = _("Do you really want to remove all post-fader redirects from this track?\n"
+				   "(this cannot be undone)");
+		}
 	} else {
-		prompt = _("Do you really want to remove all redirects from this bus?\n"
-			   "(this cannot be undone)");
+		if (_placement == PreFader) {
+			prompt = _("Do you really want to remove all pre-fader redirects from this bus?\n"
+				   "(this cannot be undone)");
+		} else {
+			prompt = _("Do you really want to remove all post-fader redirects from this bus?\n"
+				   "(this cannot be undone)");
+		}
 	}
 
 	choices.push_back (_("Cancel"));
@@ -980,7 +990,7 @@ RedirectBox::clear_redirects()
 	Gtkmm2ext::Choice prompter (prompt, choices);
 
 	if (prompter.run () == 1) {
-		_route->clear_redirects (this);
+		_route->clear_redirects (_placement, this);
 	}
 }
 

@@ -500,15 +500,6 @@ Editor::build_region_boundary_cache ()
 				break;
 			}
 
-		} else if (clicked_trackview) {
-
-			TrackViewList t;
-			t.push_back (clicked_trackview);
-
-			if ((r = find_next_region (pos, point, 1, t, &ontrack)) == 0) {
-				break;
-			}
-
 		} else {
 
 			if ((r = find_next_region (pos, point, 1, track_views, &ontrack)) == 0) {
