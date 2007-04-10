@@ -380,7 +380,7 @@ Editor::popup_ruler_menu (nframes_t where, ItemType t)
 		mitem->set_active(true);
 	}
 
-	ruler_items.push_back (CheckMenuElem (X_("Timecode"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_smpte)));
+	ruler_items.push_back (CheckMenuElem (_("Timecode"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_smpte)));
 	mitem = (CheckMenuItem *) &ruler_items.back(); 
 	if (ruler_shown[ruler_metric_smpte]) {
 		mitem->set_active(true);
