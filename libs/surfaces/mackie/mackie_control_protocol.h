@@ -124,11 +124,11 @@ class MackieControlProtocol
 	void update_global_button( const std::string & name, Mackie::LedState );
   
    // transport button handler methods from MackieButtonHandler
-	virtual Mackie::LedState rewind_press( Mackie::Button & );
-	virtual Mackie::LedState rewind_release( Mackie::Button & );
+	virtual Mackie::LedState frm_left_press( Mackie::Button & );
+	virtual Mackie::LedState frm_left_release( Mackie::Button & );
 
-	virtual Mackie::LedState ffwd_press( Mackie::Button & );
-	virtual Mackie::LedState ffwd_release( Mackie::Button & );
+	virtual Mackie::LedState frm_right_press( Mackie::Button & );
+	virtual Mackie::LedState frm_right_release( Mackie::Button & );
 
 	virtual Mackie::LedState stop_press( Mackie::Button & );
 	virtual Mackie::LedState stop_release( Mackie::Button & );
@@ -154,7 +154,13 @@ class MackieControlProtocol
 	virtual Mackie::LedState end_press( Mackie::Button & );
 	virtual Mackie::LedState end_release( Mackie::Button & );
 	
-   // bank switching button handler methods from MackieButtonHandler
+	virtual Mackie::LedState rewind_press( Mackie::Button & button );
+	virtual Mackie::LedState rewind_release( Mackie::Button & button );
+
+	virtual Mackie::LedState ffwd_press( Mackie::Button & button );
+	virtual Mackie::LedState ffwd_release( Mackie::Button & button );
+
+	// bank switching button handler methods from MackieButtonHandler
 	virtual Mackie::LedState left_press( Mackie::Button & );
 	virtual Mackie::LedState left_release( Mackie::Button & );
 
@@ -302,6 +308,8 @@ class MackieControlProtocol
 	bool _polling;
 	struct pollfd * pfd;
 	int nfds;
+	
+	bool _transport_previously_rolling;
 };
 
 #endif // ardour_mackie_control_protocol_h

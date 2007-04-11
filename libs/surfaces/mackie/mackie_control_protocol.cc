@@ -1038,7 +1038,7 @@ void MackieControlProtocol::poll_automation()
 // Transport Buttons
 /////////////////////////////////////
 
-LedState MackieControlProtocol::rewind_press( Button & button )
+LedState MackieControlProtocol::frm_left_press( Button & button )
 {
 	// can use first_mark_before/after as well
 	Location * loc = session->locations()->first_location_before (
@@ -1048,12 +1048,12 @@ LedState MackieControlProtocol::rewind_press( Button & button )
 	return on;
 }
 
-LedState MackieControlProtocol::rewind_release( Button & button )
+LedState MackieControlProtocol::frm_left_release( Button & button )
 {
 	return off;
 }
 
-LedState MackieControlProtocol::ffwd_press( Button & button )
+LedState MackieControlProtocol::frm_right_press( Button & button )
 {
 	// can use first_mark_before/after as well
 	Location * loc = session->locations()->first_location_after (
@@ -1063,7 +1063,7 @@ LedState MackieControlProtocol::ffwd_press( Button & button )
 	return on;
 }
 
-LedState MackieControlProtocol::ffwd_release( Button & button )
+LedState MackieControlProtocol::frm_right_release( Button & button )
 {
 	return off;
 }
@@ -1110,6 +1110,36 @@ LedState MackieControlProtocol::record_release( Button & button )
 	}
 	else
 		return off;
+}
+
+LedState MackieControlProtocol::rewind_press( Button & button )
+{
+	session->request_transport_speed( -2.0 );
+	return on;
+}
+
+LedState MackieControlProtocol::rewind_release( Button & button )
+{
+	if ( _transport_previously_rolling )
+		session->request_transport_speed( 1.0 );
+	else
+		session->request_stop();
+	return off;
+}
+
+LedState MackieControlProtocol::ffwd_press( Button & button )
+{
+	session->request_transport_speed( 2.0 );
+	return on;
+}
+
+LedState MackieControlProtocol::ffwd_release( Button & button )
+{
+	if ( _transport_previously_rolling )
+		session->request_transport_speed( 1.0 );
+	else
+		session->request_stop();
+	return off;
 }
 
 ///////////////////////////////////////////
@@ -1197,6 +1227,8 @@ void MackieControlProtocol::notify_transport_state_changed()
 	update_global_button( "play", session->transport_rolling() );
 	update_global_button( "stop", !session->transport_rolling() );
 	update_global_button( "loop", session->get_play_loop() );
+	
+	_transport_previously_rolling = session->transport_rolling();
 	
 	// rec is special because it's tristate
 	Button * rec = reinterpret_cast<Button*>( surface().controls_by_name["record"] );
