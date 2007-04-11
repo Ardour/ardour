@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __ardour_io_h__
@@ -109,7 +108,8 @@ class IO : public PBD::StatefulDestructible
 	virtual gain_t effective_gain () const;
 
 	Panner& panner() { return *_panner; }
-
+	const Panner& panner() const { return *_panner; }
+	
 	int ensure_io (uint32_t, uint32_t, bool clear, void *src);
 
 	int use_input_connection (Connection&, void *src);

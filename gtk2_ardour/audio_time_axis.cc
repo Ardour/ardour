@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cstdlib>
@@ -108,21 +107,13 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	
 	_route->panner().Changed.connect (mem_fun(*this, &AudioTimeAxisView::update_pans));
 
-	if (is_audio_track()) {
+	update_control_names ();
 
-		controls_ebox.set_name ("AudioTrackControlsBaseUnselected");
-		controls_base_selected_name = "AudioTrackControlsBaseSelected";
-		controls_base_unselected_name = "AudioTrackControlsBaseUnselected";
+	if (is_audio_track()) {
 
 		/* ask for notifications of any new RegionViews */
 		_view->RegionViewAdded.connect (mem_fun(*this, &AudioTimeAxisView::region_view_added));
 		_view->attach ();
-
-	} else { /* bus */
-
-		controls_ebox.set_name ("AudioBusControlsBaseUnselected");
-		controls_base_selected_name = "AudioBusControlsBaseSelected";
-		controls_base_unselected_name = "AudioBusControlsBaseUnselected";
 	}
 
 	post_construct ();
@@ -622,7 +613,19 @@ void
 AudioTimeAxisView::route_active_changed ()
 {
 	RouteTimeAxisView::route_active_changed ();
+	update_control_names ();
+}
 
+
+/**
+ *    Set up the names of the controls so that they are coloured
+ *    correctly depending on whether this route is inactive or
+ *    selected.
+ */
+
+void
+AudioTimeAxisView::update_control_names ()
+{
 	if (is_audio_track()) {
 		if (_route->active()) {
 			controls_ebox.set_name ("AudioTrackControlsBaseUnselected");

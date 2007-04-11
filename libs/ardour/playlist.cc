@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <set>
@@ -75,6 +74,7 @@ Playlist::Playlist (Session& sess, string nom, bool hide)
 	: _session (sess)
 {
 	init (hide);
+	first_set_state = false;
 	_name = nom;
 	
 }
@@ -109,6 +109,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, string namestr, boo
 	_edit_mode = other->_edit_mode;
 
 	in_set_state = 0;
+	first_set_state = false;
 	in_flush = false;
 	in_partition = false;
 	subcnt = 0;
@@ -181,6 +182,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, nframes_t start, nf
 	}
 	
 	in_set_state--;
+	first_set_state = false;
 
 	/* this constructor does NOT notify others (session) */
 }
@@ -221,6 +223,7 @@ Playlist::init (bool hide)
 	g_atomic_int_set (&ignore_state_changes, 0);
 	pending_modified = false;
 	pending_length = false;
+	first_set_state = true;
 	_refcnt = 0;
 	_hidden = hide;
 	_splicing = false;
@@ -509,10 +512,10 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, nframes_t posit
 		 old_length = _get_maximum_extent();
 	}
 
-	if (!in_set_state) {
+	if (!first_set_state) {
 		boost::shared_ptr<Playlist> foo (shared_from_this());
 		region->set_playlist (boost::weak_ptr<Playlist>(foo));
-	}
+	} 
 
 	region->set_position (position, this);
 
@@ -573,6 +576,11 @@ Playlist::remove_region_internal (boost::shared_ptr<Region>region)
 
 	if (!holding_state()) {
 		old_length = _get_maximum_extent();
+	}
+
+	if (!in_set_state) {
+		/* unset playlist */
+		region->set_playlist (boost::weak_ptr<Playlist>());
 	}
 
 	for (i = regions.begin(); i != regions.end(); ++i) {
@@ -1176,6 +1184,14 @@ Playlist::region_changed (Change what_changed, boost::shared_ptr<Region> region)
 }
 
 void
+Playlist::drop_regions ()
+{
+	RegionLock rl (this);
+	regions.clear ();
+	all_regions.clear ();
+}
+
+void
 Playlist::clear (bool with_signals)
 {
 	{ 
@@ -1406,7 +1422,7 @@ Playlist::set_state (const XMLNode& node)
 	}
 
 	in_set_state--;
-
+	first_set_state = false;
 	return 0;
 }
 
@@ -1504,17 +1520,33 @@ Playlist::bump_name_once (string name)
 	string newname;
 
 	if ((period = name.find_last_of ('.')) == string::npos) {
-		newname = name;
+		newname  = name;
 		newname += ".1";
 	} else {
-		char buf[32];
-		int version;
+		int isnumber = 1;
+		const char *last_element = name.c_str() + period + 1;
+		for (size_t i = 0; i < strlen(last_element); i++) {
+			if (!isdigit(last_element[i])) {
+				isnumber = 0;
+				break;
+			}
+		}
+
+		errno = 0;
+		long int version = strtol (name.c_str()+period+1, (char **)NULL, 10);
+
+		if (isnumber == 0 || errno != 0) {
+			// last_element is not a number, or is too large
+			newname  = name;
+			newname += ".1";
+		} else {
+			char buf[32];
+
+			snprintf (buf, sizeof(buf), "%ld", version+1);
 		
-		sscanf (name.substr (period+1).c_str(), "%d", &version);
-		snprintf (buf, sizeof(buf), "%d", version+1);
-		
-		newname = name.substr (0, period+1);
-		newname += buf;
+			newname  = name.substr (0, period+1);
+			newname += buf;
+		}
 	}
 
 	return newname;

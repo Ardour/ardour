@@ -291,8 +291,12 @@
                    <menuitem action='OutputAutoConnectMaster'/>
                    <menuitem action='OutputAutoConnectManual'/>
                </menu>
-	       <menu action='ControlSurfaces'/>
-               <menu action='Monitoring'>
+	       <menu action='ControlSurfaces'>
+                   <menuitem action='RemoteUserDefined'/>
+                   <menuitem action='RemoteMixerDefined'/>
+                   <menuitem action='RemoteEditorDefined'/>
+               </menu>
+                   <menu action='Monitoring'>
                    <menuitem action='UseHardwareMonitoring'/>
                    <menuitem action='UseSoftwareMonitoring'/>
                    <menuitem action='UseExternalMonitoring'/>
@@ -318,6 +322,7 @@
                    <menuitem action='LatchedSolo'/>
                    <menuitem action='SoloInPlace'/>
                    <menuitem action='SoloViaBus'/>
+                   <menuitem action='ShowSoloMutes'/>
                </menu>
 	       <menu action='Crossfades'>
 		   <menuitem action='toggle-xfades-active'/>
@@ -337,6 +342,7 @@
                <menuitem action='SendMMC'/>
                <menuitem action='UseMMC'/>
                <separator/>
+               <menuitem action='UseOSC'/>
                <menuitem action='StopPluginsWithTransport'/>
                <menuitem action='DoNotRunPluginsWhileRecording'/>
                <menuitem action='LatchedRecordEnable'/>

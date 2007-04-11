@@ -55,23 +55,23 @@ PannerBar::expose (GdkEventExpose* ev)
 	points[0].x = (darea.get_width()/2 - triangle_size);
 	points[0].y = 0;
 
-	points[1].x = (darea.get_width()/2 + triangle_size) - 1;
+	points[1].x = (darea.get_width()/2 + triangle_size);
 	points[1].y = 0;
 	
-	points[2].x = darea.get_width()/2 - 1;
+	points[2].x = darea.get_width()/2;
 	points[2].y = triangle_size - 1;
 
 	gdk_draw_polygon (win->gobj(), gc->gobj(), true, points, 3); 
 
 	// right
 
-	points[0].x = (darea.get_width() - triangle_size) - 1;
+	points[0].x = (darea.get_width() - triangle_size);
 	points[0].y = 0;
 
-	points[1].x = darea.get_width() - 1;
+	points[1].x = darea.get_width();
 	points[1].y = 0;
 	
-	points[2].x = darea.get_width() - 1;
+	points[2].x = darea.get_width();
 	points[2].y = triangle_size;
 
 	gdk_draw_polygon (win->gobj(), gc->gobj(), true, points, 3);

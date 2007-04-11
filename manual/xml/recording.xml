@@ -5,15 +5,15 @@
 ]>
 
 <chapter id="ch-recording">
-	<title>Recording</title>
-	<para>
-		This section covers the main points of recording audio into an Ardour
-		session.
-	</para>
-	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
+  <title>Recording</title>
+  <para>
+    This section covers the main points of recording audio into an Ardour
+    session.
+  </para>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="basic_recording.xml" />
-	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="monitoring.xml" />
-	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="setting_up_to_record.xml" />
 </chapter>

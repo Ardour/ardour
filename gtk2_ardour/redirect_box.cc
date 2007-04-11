@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cmath>
@@ -25,6 +24,8 @@
 
 #include <pbd/convert.h>
 
+#include <glibmm/miscutils.h>
+
 #include <gtkmm/messagedialog.h>
 
 #include <gtkmm2ext/gtk_ui.h>
@@ -33,6 +34,7 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/doi.h>
+#include <gtkmm2ext/window_title.h>
 
 #include <ardour/ardour.h>
 #include <ardour/session.h>
@@ -398,16 +400,16 @@ RedirectBox::insert_plugin_chosen (boost::shared_ptr<Plugin> plugin)
 		uint32_t err_streams;
 
 		if (_route->add_redirect (redirect, this, &err_streams)) {
-			wierd_plugin_dialog (*plugin, err_streams, _route);
+			weird_plugin_dialog (*plugin, err_streams, _route);
 			// XXX SHAREDPTR delete plugin here .. do we even need to care? 
 		}
 	}
 }
 
 void
-RedirectBox::wierd_plugin_dialog (Plugin& p, uint32_t streams, boost::shared_ptr<IO> io)
+RedirectBox::weird_plugin_dialog (Plugin& p, uint32_t streams, boost::shared_ptr<IO> io)
 {
-	ArdourDialog dialog ("wierd plugin dialog");
+	ArdourDialog dialog (_("ardour: weird plugin dialog"));
 	Label label;
 
 	/* i hate this kind of code */
@@ -702,7 +704,7 @@ RedirectBox::compute_redirect_sort_keys ()
 
 		/* now tell them about the problem */
 
-		ArdourDialog dialog ("wierd plugin dialog");
+		ArdourDialog dialog (_("ardour: weird plugin dialog"));
 		Label label;
 
 		label.set_text (_("\
@@ -955,21 +957,31 @@ could not match the configuration of this track.");
 void
 RedirectBox::all_redirects_active (bool state)
 {
-	_route->all_redirects_active (state);
+	_route->all_redirects_active (_placement, state);
 }
 
 void
-RedirectBox::clear_redirects()
+RedirectBox::clear_redirects ()
 {
 	string prompt;
 	vector<string> choices;
 
 	if (boost::dynamic_pointer_cast<AudioTrack>(_route) != 0) {
-		prompt = _("Do you really want to remove all redirects from this track?\n"
-			   "(this cannot be undone)");
+		if (_placement == PreFader) {
+			prompt = _("Do you really want to remove all pre-fader redirects from this track?\n"
+				   "(this cannot be undone)");
+		} else {
+			prompt = _("Do you really want to remove all post-fader redirects from this track?\n"
+				   "(this cannot be undone)");
+		}
 	} else {
-		prompt = _("Do you really want to remove all redirects from this bus?\n"
-			   "(this cannot be undone)");
+		if (_placement == PreFader) {
+			prompt = _("Do you really want to remove all pre-fader redirects from this bus?\n"
+				   "(this cannot be undone)");
+		} else {
+			prompt = _("Do you really want to remove all post-fader redirects from this bus?\n"
+				   "(this cannot be undone)");
+		}
 	}
 
 	choices.push_back (_("Cancel"));
@@ -978,7 +990,7 @@ RedirectBox::clear_redirects()
 	Gtkmm2ext::Choice prompter (prompt, choices);
 
 	if (prompter.run () == 1) {
-		_route->clear_redirects (this);
+		_route->clear_redirects (_placement, this);
 	}
 }
 
@@ -1008,11 +1020,12 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 		
 		if (send->get_gui() == 0) {
 			
-			string title;
-			title = string_compose(_("ardour: %1"), send->name());	
-			
 			send_ui = new SendUIWindow (send, _session);
-			send_ui->set_title (title);
+
+			WindowTitle title(Glib::get_application_name());
+			title += send->name();
+			send_ui->set_title (title.get_string());
+
 			send->set_gui (send_ui);
 			
 		} else {
@@ -1049,7 +1062,10 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 						ARDOUR_UI::instance()->the_editor().ensure_float (*plugin_ui);
 					}
 
-					plugin_ui->set_title (generate_redirect_title (plugin_insert));
+					WindowTitle title(Glib::get_application_name());
+					title += generate_redirect_title (plugin_insert);
+					plugin_ui->set_title (title.get_string());
+
 					plugin_insert->set_gui (plugin_ui);
 					
 					// change window title when route name is changed
@@ -1316,8 +1332,12 @@ RedirectBox::route_name_changed (void* src, PluginUIWindow* plugin_ui, boost::we
 {
 	ENSURE_GUI_THREAD(bind (mem_fun (*this, &RedirectBox::route_name_changed), src, plugin_ui, wpi));
 	boost::shared_ptr<PluginInsert> pi (wpi.lock());
+	
+
 	if (pi) {
-		plugin_ui->set_title (generate_redirect_title (pi));
+		WindowTitle title(Glib::get_application_name());
+		title += generate_redirect_title (pi);
+		plugin_ui->set_title (title.get_string());
 	}
 }
 
@@ -1336,6 +1356,6 @@ RedirectBox::generate_redirect_title (boost::shared_ptr<PluginInsert> pi)
 		maker += " ...";
 	}
 
-	return string_compose(_("ardour: %1: %2 (by %3)"), _route->name(), pi->name(), maker);	
+	return string_compose(_("%1: %2 (by %3)"), _route->name(), pi->name(), maker);	
 }
 

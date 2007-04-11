@@ -430,7 +430,7 @@ Editor::toggle_waveform_visibility ()
 void
 Editor::toggle_waveforms_while_recording ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleWaveformVisibility"));
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleWaveformsWhileRecording"));
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 		set_show_waveforms_recording (tact->get_active());

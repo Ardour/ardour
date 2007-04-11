@@ -38,12 +38,20 @@ using namespace std;
 ExportRangeMarkersDialog::ExportRangeMarkersDialog (PublicEditor& editor) 
 	: ExportDialog(editor)
 { 
+	set_title (_("ardour: export ranges"));
+	file_frame.set_label (_("Export to Directory"));
+
 	do_not_allow_export_cd_markers();
 	
 	total_duration = 0;
 	current_range_marker_index = 0;
 }
-	
+
+Gtk::FileChooserAction
+ExportRangeMarkersDialog::browse_action () const
+{
+	return Gtk::FILE_CHOOSER_ACTION_CREATE_FOLDER;
+}
 	
 void 
 ExportRangeMarkersDialog::export_audio_data ()
@@ -57,7 +65,7 @@ ExportRangeMarkersDialog::process_range_markers_export(Locations::LocationList& 
 	Locations::LocationList::iterator locationIter;
 	current_range_marker_index = 0;
 	init_progress_computing(locations);
-	
+
 	for (locationIter = locations.begin(); locationIter != locations.end(); ++locationIter) {
 		Location *currentLocation = (*locationIter);
 
@@ -82,7 +90,8 @@ ExportRangeMarkersDialog::process_range_markers_export(Locations::LocationList& 
 
 			// wait until export of this range finished
 			gtk_main_iteration();
-			while(spec.running){
+
+			while (spec.running){
 				if(gtk_events_pending()){
 					gtk_main_iteration();
 				}else {
@@ -171,13 +180,11 @@ ExportRangeMarkersDialog::init_progress_computing(Locations::LocationList& locat
 		Location *currentLocation = (*locationIter);
 		
 		if(currentLocation->is_range_marker()){
-			range_markers_durations_aggregated.push_back(
-				duration_before_current_location);
+			range_markers_durations_aggregated.push_back (duration_before_current_location);
 			
-			nframes_t duration = 
-				currentLocation->end() - currentLocation->start();
+			nframes_t duration = currentLocation->end() - currentLocation->start();
 			
-			range_markers_durations.push_back(duration);
+			range_markers_durations.push_back (duration);
 			duration_before_current_location += duration;	
 		}
 	}
@@ -190,14 +197,12 @@ gint
 ExportRangeMarkersDialog::progress_timeout ()
 {
 	double progress = 0.0;
-	
-	if(current_range_marker_index >= range_markers_durations.size()){
+
+	if (current_range_marker_index >= range_markers_durations.size()){
 		progress = 1.0;
-	}
-	else{
-		progress = 
-			((double) range_markers_durations_aggregated[current_range_marker_index] +
-			(spec.progress * (double) range_markers_durations[current_range_marker_index])) /
+	} else{
+		progress = ((double) range_markers_durations_aggregated[current_range_marker_index] +
+			    (spec.progress * (double) range_markers_durations[current_range_marker_index])) /
 			(double) total_duration;
 	}
 	

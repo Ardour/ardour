@@ -339,7 +339,7 @@ void RateTransposer::clear()
 
 
 // Returns nonzero if there aren't any samples available for outputting.
-uint RateTransposer::isEmpty()
+int RateTransposer::isEmpty() const
 {
     int res;
 

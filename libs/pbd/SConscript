@@ -34,8 +34,10 @@ pathscanner.cc
 pool.cc
 pthread_utils.cc
 receiver.cc
+shortpath.cc
 stacktrace.cc
 stateful.cc
+strreplace.cc
 strsplit.cc
 textreceiver.cc
 transmitter.cc

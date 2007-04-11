@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __ardour_source_h__
@@ -64,7 +63,9 @@ class Source : public PBD::StatefulDestructible
 	string            _name;
 	time_t            _timestamp;
 
-	std::set<boost::shared_ptr<ARDOUR::Playlist> > _playlists;
+	Glib::Mutex playlist_lock;
+	typedef std::map<boost::shared_ptr<ARDOUR::Playlist>, uint32_t > PlaylistMap;
+	PlaylistMap _playlists;
 
   private:
 	uint32_t          _in_use;

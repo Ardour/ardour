@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id: controllable.h 4 2005-05-13 20:47:18Z taybin $
 */
 
 #ifndef __gm_midicontrollable_h__
@@ -68,7 +67,7 @@ class MIDIControllable : public Stateful
 	PBD::Controllable& controllable;
 	MIDI::Port&     _port;
 	bool             setting;
-	MIDI::byte       last_written;
+	MIDI::byte       last_value;
 	bool             bistate;
 	int              midi_msg_id;      /* controller ID or note number */
 	sigc::connection midi_sense_connection[2];

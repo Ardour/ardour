@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __ardour_gtk_gain_meter_h__
@@ -70,6 +69,8 @@ class GainMeter : public Gtk::VBox
 	void set_width (Width);
 	void setup_meters ();
 
+	int get_gm_width ();
+
 	void set_meter_strip_name (const char * name);
 	void set_fader_name (const char * name);
 
@@ -85,7 +86,7 @@ class GainMeter : public Gtk::VBox
 	Gtkmm2ext::VSliderController *gain_slider;
 	Gtk::Adjustment              gain_adjustment;
 	Gtkmm2ext::FocusEntry        gain_display;
-	Gtk::Entry                   peak_display;
+	Gtk::Button                  peak_display;
 	Gtk::HBox                    gain_display_box;
 	Gtk::HBox                    fader_box;
 	Gtk::DrawingArea             meter_metric_area;

@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cstdio> // for sprintf
@@ -1072,39 +1071,6 @@ AudioClock::field_button_press_event (GdkEventButton *ev, Field field)
 	case 3:
 		/* used for context sensitive menu */
 		return FALSE;
-		break;
-
-	case 4:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
-			frames = get_frames (field);
-			if (frames != 0) {
-				if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
-					frames *= 10;
-				}
-				set (current_time() + frames, true);
-				 ValueChanged (); /* EMIT_SIGNAL */
-			}
-		}
-		break;
-
-	case 5:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
-			frames = get_frames (field);
-			if (frames != 0) {
-				if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
-					frames *= 10;
-				}
-
-				if ((double)current_time() - (double)frames < 0.0) {
-					set (0, true);
-				}
-				else {
-					set (current_time() - frames, true);
-				}
-				
-				 ValueChanged (); /* EMIT_SIGNAL */
-			}
-		}
 		break;
 
 	default:

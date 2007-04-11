@@ -76,9 +76,9 @@ namespace ARDOUR
 
 	    /* shared between UI thread and audio thread */
 
-	    float progress;  /* audio thread sets this */
-	    bool  stop;      /* UI sets this */
-	    bool  running;   /* audio thread sets to false when export is done */
+	    volatile float progress;  /* audio thread sets this */
+	    volatile bool  stop;      /* UI sets this */
+	    volatile bool  running;   /* audio thread sets to false when export is done */
 
 	    int   status;
 

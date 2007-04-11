@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cmath>
@@ -25,7 +24,6 @@
 #include <stdint.h>
 
 #if defined (ARCH_X86) && defined (BUILD_SSE_OPTIMIZATIONS)
-
 // Debug wrappers
 
 float
@@ -92,6 +90,25 @@ compute_peak (ARDOUR::Sample *buf, nframes_t nsamples, float current)
 }	
 
 void
+find_peaks (ARDOUR::Sample *buf, nframes_t nframes, float *min, float *max)
+{
+	nframes_t i;
+	float a, b;
+
+	a = *max;
+	b = *min;
+
+	for (i = 0; i < nframes; i++) 
+	{
+		a = fmax (buf[i], a);
+		b = fmin (buf[i], b);
+	}
+
+	*max = a;
+	*min = b;
+}
+
+void
 apply_gain_to_buffer (ARDOUR::Sample *buf, nframes_t nframes, float gain)
 {		
 	for (nframes_t i=0; i<nframes; i++)
@@ -123,6 +140,13 @@ veclib_compute_peak (ARDOUR::Sample *buf, nframes_t nsamples, float current)
 	float tmpmax = 0.0f;
         vDSP_maxmgv(buf, 1, &tmpmax, nsamples);
         return f_max(current, tmpmax);
+}
+
+void
+veclib_find_peaks (ARDOUR::Sample *buf, nframes_t nframes, float *min, float *max)
+{
+	vDSP_maxv (buf, 1, max, nframes);
+	vDSP_minv (buf, 1, min, nframes);
 }
 
 void

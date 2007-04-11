@@ -5,62 +5,68 @@
 ]>
 
 <section id="sn-editor-aligning-key-bindings">
-	<title>Aligning</title>
-	<table id="tbl-editor-aligning-key-bindings">
-		<title>Editor Aligning Key Bindings</title>
-		<tgroup cols = "2">
-			<colspec colnum="1" colname="Key Binding" colwidth="1"/>
-			<colspec colnum="2" colname="Action" colwidth= "2"/>
-			<thead>
-				<row>
-					<entry>
-						Key Binding
-					</entry>
-					<entry>
-						Action
-					</entry>
-				</row>
-			</thead>
-			<tbody>
-				<row>
-					<entry>
-						<keycombo><keycap>a</keycap>
-						</keycombo>
-					</entry>
-					<entry>
-						relative alignment of region sync points or starts
-					</entry>
-				</row>
-				<row>
-					<entry>
-						<keycombo><keycap>Meta</keycap><keycap>a</keycap>
-						</keycombo>
-					</entry>
-					<entry>
-						absolute alignment of region sync points or starts
-					</entry>
-				</row>
-				<row>
-					<entry>
-						<keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>a</keycap>
-						</keycombo>
-					</entry>
-					<entry>
-						relative alignment of region ends
-					</entry>
-				</row>
-				<row>
-					<entry>
-						<keycombo><keycap>Ctrl</keycap><keycap>Meta</keycap><keycap>a</keycap>
-						</keycombo>
-					</entry>
-					<entry>
-						align region ends
-					</entry>
-				</row>
-			</tbody>
-		</tgroup>
-	</table>
+  <title>Aligning</title>
+  <table id="tbl-editor-aligning-key-bindings">
+    <title>Editor Aligning Key Bindings</title>
+    <tgroup cols = "2">
+      <colspec colnum="1" colname="Key Binding" colwidth="1"/>
+      <colspec colnum="2" colname="Action" colwidth= "2"/>
+      <thead>
+        <row>
+          <entry>
+            Key Binding
+          </entry>
+
+          <entry>
+            Action
+          </entry>
+        </row>
+      </thead>
+      <tbody>
+        <row>
+          <entry>
+            <keycombo><keycap>a</keycap> </keycombo>
+          </entry>
+
+          <entry>
+            relative alignment of region sync points or starts
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Meta</keycap><keycap>a</keycap> </keycombo>
+          </entry>
+
+          <entry>
+            absolute alignment of region sync points or starts
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>a</keycap>
+            </keycombo>
+          </entry>
+
+          <entry>
+            relative alignment of region ends
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Ctrl</keycap><keycap>Meta</keycap><keycap>a</keycap>
+            </keycombo>
+          </entry>
+
+          <entry>
+            align region ends
+          </entry>
+        </row>
+      </tbody>
+    </tgroup>
+  </table>
 <!--
 	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="Some_Subsection.xml" />

@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id: diskstream.cc 567 2006-06-07 14:54:12Z trutkin $
 */
 
 #include <fstream>
@@ -45,7 +44,6 @@
 #include <ardour/utils.h>
 #include <ardour/configuration.h>
 #include <ardour/audiofilesource.h>
-#include <ardour/destructive_filesource.h>
 #include <ardour/send.h>
 #include <ardour/playlist.h>
 #include <ardour/cycle_timer.h>
@@ -116,6 +114,7 @@ Diskstream::init (Flag f)
 	playback_distance = 0;
 	_read_data_count = 0;
 	_write_data_count = 0;
+	commit_should_unlock = false;
 
 	pending_overwrite = false;
 	overwrite_frame = 0;
@@ -127,9 +126,6 @@ Diskstream::init (Flag f)
 
 Diskstream::~Diskstream ()
 {
-	// Taken by derived class destrctors.. should assure locked here somehow?
-	//Glib::Mutex::Lock lm (state_lock);
-
 	if (_playlist)
 		_playlist->release ();
 }
@@ -219,7 +215,9 @@ Diskstream::prepare ()
 void
 Diskstream::recover ()
 {
-	state_lock.unlock();
+	if (commit_should_unlock) {
+		state_lock.unlock();
+	}
 	_processed = false;
 }
 

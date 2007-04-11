@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __ardour_audio_time_axis_h__
@@ -115,6 +114,7 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	void pan_hidden ();
 
 	void update_pans ();
+	void update_control_names ();
 
 	AutomationTimeAxisView* gain_track;
 	AutomationTimeAxisView* pan_track;

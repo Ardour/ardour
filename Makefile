@@ -1,4 +1,4 @@
-all: scons cscope
+all: scons
 
 scons:
 	scons

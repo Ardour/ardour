@@ -15,24 +15,26 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cstdlib>
 #include <cmath>
 #include <algorithm>
 #include <string>
+#include <sstream>
 
 #include <pbd/basename.h>
 
 #include <ardour/audioregion.h>
 #include <ardour/audiofilesource.h>
+#include <ardour/silentfilesource.h>
 #include <ardour/session_region.h>
 
 #include <gtkmm2ext/stop_signal.h>
 
 #include "editor.h"
 #include "editing.h"
+#include "keyboard.h"
 #include "ardour_ui.h"
 #include "gui_thread.h"
 #include "actions.h"
@@ -85,6 +87,9 @@ Editor::add_audio_region_to_region_display (boost::shared_ptr<AudioRegion> regio
 	string str;
 	TreeModel::Row row;
 	Gdk::Color c;
+	bool missing_source;
+
+	missing_source = boost::dynamic_pointer_cast<SilentFileSource>(region->source());
 
 	if (!show_automatic_regions_in_region_list && region->automatic()) {
 		return;
@@ -124,18 +129,23 @@ Editor::add_audio_region_to_region_display (boost::shared_ptr<AudioRegion> regio
 	} else if (region->whole_file()) {
 
 		row = *(region_list_model->append());
-		set_color(c, rgba_from_style ("RegionListWholeFile", 0xff, 0, 0, 0, "fg", Gtk::STATE_NORMAL, false ));
+		if (missing_source) {
+			c.set_rgb(65535,0,0);     // FIXME: error color from style
+		} else {
+			set_color(c, rgba_from_style ("RegionListWholeFile", 0xff, 0, 0, 0, "fg", Gtk::STATE_NORMAL, false ));
+		}
 		row[region_list_columns.color_] = c;
 
 		if (region->source()->name()[0] == '/') { // external file
 
 			if (region->whole_file()) {
-				str = ".../";
 
 				boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(region->source());
 
+				str = ".../";
+
 				if (afs) {
-					str += region_name_from_path (afs->path(), region->n_channels() > 1);
+					str = region_name_from_path (afs->path(), region->n_channels() > 1);
 				} else {
 					str += region->source()->name();
 				}
@@ -148,6 +158,18 @@ Editor::add_audio_region_to_region_display (boost::shared_ptr<AudioRegion> regio
 
 			str = region->name();
 
+		}
+
+		if (region->n_channels() > 1) {
+			std::stringstream foo;
+			foo << region->n_channels ();
+			str += " [";
+			str += foo.str();
+			str += ']';
+		}
+
+		if (missing_source) {
+			str += _(" (MISSING)");
 		}
 
 		row[region_list_columns.name] = str;

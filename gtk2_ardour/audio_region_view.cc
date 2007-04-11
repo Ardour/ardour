@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cmath>
@@ -90,14 +89,37 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 {
 }
 
+
+AudioRegionView::AudioRegionView (const AudioRegionView& other)
+	: RegionView (other)
+	, zero_line(0)
+	, fade_in_shape(0)
+	, fade_out_shape(0)
+	, fade_in_handle(0)
+	, fade_out_handle(0)
+	, gain_line(0)
+	, _amplitude_above_axis(1.0)
+	, _flags(0)
+	, fade_color(0)
+
+{
+	Gdk::Color c;
+	int r,g,b,a;
+
+	UINT_TO_RGBA (other.fill_color, &r, &g, &b, &a);
+	c.set_rgb_p (r/255.0, g/255.0, b/255.0);
+	
+	init (c, false);
+}
+
 void
 AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 {
 	// FIXME: Some redundancy here with RegionView::init.  Need to figure out
 	// where order is important and where it isn't...
 	
-	RegionView::init(basic_color, wfd);
-
+	RegionView::init(basic_color, false);
+	
 	XMLNode *node;
 
 	_amplitude_above_axis = 1.0;
@@ -607,13 +629,16 @@ AudioRegionView::set_samples_per_unit (gdouble spu)
 {
 	RegionView::set_samples_per_unit (spu);
 
-	for (uint32_t n=0; n < waves.size(); ++n) {
-		waves[n]->property_samples_per_unit() = spu;
+	if (_flags & WaveformVisible) {
+		for (uint32_t n=0; n < waves.size(); ++n) {
+			waves[n]->property_samples_per_unit() = spu;
+		}
 	}
 
 	if (gain_line) {
 		gain_line->reset ();
 	}
+
 	reset_fade_shapes ();
 }
 
@@ -653,6 +678,9 @@ AudioRegionView::set_colors ()
 		} else {
 			waves[n]->property_wave_color() = color_map[cWaveForm];
 		}
+
+		waves[n]->property_clip_color() = color_map[cWaveFormClip];
+		waves[n]->property_zero_color() = color_map[cZeroLine];
 	}
 }
 
@@ -676,6 +704,10 @@ AudioRegionView::set_waveform_visible (bool yn)
 	if (((_flags & WaveformVisible) != yn)) {
 		if (yn) {
 			for (uint32_t n=0; n < waves.size(); ++n) {
+				/* make sure the zoom level is correct, since we don't update
+				   this when waveforms are hidden.
+				*/
+				waves[n]->property_samples_per_unit() = samples_per_unit;
 				waves[n]->show();
 			}
 			_flags |= WaveformVisible;
@@ -723,8 +755,6 @@ AudioRegionView::set_envelope_visible (bool yn)
 void
 AudioRegionView::create_waves ()
 {
-	bool create_zero_line = true;
-
 	RouteTimeAxisView& atv (*(dynamic_cast<RouteTimeAxisView*>(&trackview))); // ick
 
 	if (!atv.get_diskstream()) {
@@ -750,22 +780,10 @@ AudioRegionView::create_waves ()
 			if (audio_region()->source(n)->peaks_ready (bind (mem_fun(*this, &AudioRegionView::peaks_ready_handler), n), data_ready_connection)) {
 				create_one_wave (n, true);
 			} else {
-				create_zero_line = false;
 			}
 		} else {
 			create_one_wave (n, true);
 		}
-	}
-
-	if (create_zero_line) {
-		if (zero_line) {
-			delete zero_line;
-		}
-		zero_line = new ArdourCanvas::SimpleLine (*group);
-		zero_line->property_x1() = (gdouble) 1.0;
-		zero_line->property_x2() = (gdouble) (_region->length() / samples_per_unit) - 1.0;
-		zero_line->property_color_rgba() = (guint) color_map[cZeroLine];
-		manage_zero_line ();
 	}
 }
 
@@ -801,6 +819,8 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 	wave->property_samples_per_unit() =  samples_per_unit;
 	wave->property_amplitude_above_axis() =  _amplitude_above_axis;
 	wave->property_wave_color() = _region->muted() ? color_map[cMutedWaveForm] : color_map[cWaveForm];
+	wave->property_clip_color() = color_map[cWaveFormClip];
+	wave->property_zero_color() = color_map[cZeroLine];
 	wave->property_region_start() = _region->start();
 	wave->property_rectified() = (bool) (_flags & WaveformRectified);
 	wave->property_logscaled() = (bool) (_flags & WaveformLogScaled);
@@ -839,6 +859,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 		/* all waves created, don't hook into peaks ready anymore */
 		data_ready_connection.disconnect ();		
 
+		if(0)
 		if (!zero_line) {
 			zero_line = new ArdourCanvas::SimpleLine (*group);
 			zero_line->property_x1() = (gdouble) 1.0;
@@ -1046,6 +1067,8 @@ AudioRegionView::add_ghost (AutomationTimeAxisView& atv)
 		wave->property_samples_per_unit() =  samples_per_unit;
 		wave->property_amplitude_above_axis() =  _amplitude_above_axis;
 		wave->property_wave_color() = color_map[cGhostTrackWave];
+		wave->property_clip_color() = color_map[cGhostTrackWaveClip];
+		wave->property_zero_color() = color_map[cGhostTrackZeroLine];
 		wave->property_region_start() = _region->start();
 
 		ghost->waves.push_back(wave);
@@ -1130,21 +1153,14 @@ AudioRegionView::color_handler (ColorID id, uint32_t val)
 	switch (id) {
 	case cMutedWaveForm:
 	case cWaveForm:
+	case cWaveFormClip:
+	case cZeroLine:
 		set_colors ();
 		break;
 
 	case cGainLineInactive:
 	case cGainLine:
 		envelope_active_changed();
-		break;
-		
-	case cZeroLine:
-		if (zero_line) {
-			zero_line->property_color_rgba() = (guint) color_map[cZeroLine];
-		}
-		break;
-
-	case cGhostTrackWave:
 		break;
 
 	default:

@@ -99,6 +99,8 @@ struct _GnomeCanvasWaveView
     double height;
     double half_height;
     uint32_t wave_color;
+    uint32_t clip_color;
+    uint32_t zero_color;
 
     char rectified;
     char logscaled; 
@@ -113,6 +115,7 @@ struct _GnomeCanvasWaveView
     int32_t bbox_lrx;
     int32_t bbox_lry;
     unsigned char wave_r, wave_g, wave_b, wave_a;
+    unsigned char clip_r, clip_g, clip_b, clip_a;
     uint32_t samples;
     uint32_t region_start;
     int32_t reload_cache_in_render;

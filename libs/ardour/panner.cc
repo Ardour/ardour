@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cmath>
@@ -654,10 +653,7 @@ Multi2dPanner::distribute (Sample* src, Sample** obufs, gain_t gain_coeff, nfram
 			}
 			
 			pan = left * gain_coeff;
-			
-			for (; n < nframes; ++n) {
-				dst[n] += src[n] * pan;
-			}
+			Session::mix_buffers_with_gain(dst+n,src+n,nframes-n,pan);
 			
 		} else {
 
@@ -667,20 +663,10 @@ Multi2dPanner::distribute (Sample* src, Sample** obufs, gain_t gain_coeff, nfram
 			if ((pan *= gain_coeff) != 1.0f) {
 				
 				if (pan != 0.0f) {
-					
-					for (nframes_t n = 0; n < nframes; ++n) {
-						dst[n] += src[n] * pan;
-					}      
-					
+					Session::mix_buffers_with_gain(dst,src,nframes,pan);
 				} 
-
-				
 			} else {
-				
-				for (nframes_t n = 0; n < nframes; ++n) {
-					dst[n] += src[n];
-				}      
-
+					Session::mix_buffers_no_gain(dst,src,nframes);
 			}
 #endif
 #ifdef CAN_INTERP

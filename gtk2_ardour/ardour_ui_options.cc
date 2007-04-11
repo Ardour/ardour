@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <pbd/convert.h>
@@ -25,6 +24,7 @@
 
 #include <ardour/configuration.h>
 #include <ardour/session.h>
+#include <ardour/osc.h>
 #include <ardour/audioengine.h>
 
 #include "ardour_ui.h"
@@ -64,9 +64,9 @@ ARDOUR_UI::toggle_use_mmc ()
 }
 
 void
-ARDOUR_UI::toggle_use_midi_control ()
+ARDOUR_UI::toggle_use_osc ()
 {
-	ActionManager::toggle_config_state ("options", "UseMIDIcontrol", &Configuration::set_midi_control, &Configuration::get_midi_control);
+	ActionManager::toggle_config_state ("options", "UseOSC", &Configuration::set_use_osc, &Configuration::get_use_osc);
 }
 
 void
@@ -78,7 +78,7 @@ ARDOUR_UI::toggle_send_midi_feedback ()
 void
 ARDOUR_UI::set_native_file_header_format (HeaderFormat hf)
 {
-	const char *action;
+	const char *action = 0;
 
 	switch (hf) {
 	case BWF:
@@ -120,7 +120,7 @@ ARDOUR_UI::set_native_file_header_format (HeaderFormat hf)
 void
 ARDOUR_UI::set_native_file_data_format (SampleFormat sf)
 {
-	const char* action;
+	const char* action = 0;
 
 	switch (sf) {
 	case FormatFloat:
@@ -220,6 +220,39 @@ ARDOUR_UI::set_solo_model (SoloModel model)
 
 		if (ract && ract->get_active() && Config->get_solo_model() != model) {
 			Config->set_solo_model (model);
+		}
+	}
+
+}
+
+void
+ARDOUR_UI::set_remote_model (RemoteModel model)
+{
+	const char* action = 0;
+
+	switch (model) {
+	case UserOrdered:
+		action = X_("RemoteUserDefined");
+		break;
+	case MixerOrdered:
+		action = X_("RemoteMixerDefined");
+		break;
+	case EditorOrdered:
+		action = X_("RemoteEditorDefined");
+		break;
+
+	default:
+		fatal << string_compose (_("programming error: unknown remote model in ARDOUR_UI::set_remote_model: %1"), model) << endmsg;
+		/*NOTREACHED*/
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action ("options", action);
+
+	if (act) {
+		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
+
+		if (ract && ract->get_active() && Config->get_remote_model() != model) {
+			Config->set_remote_model (model);
 		}
 	}
 
@@ -390,6 +423,12 @@ ARDOUR_UI::toggle_LatchedSolo()
 }
 
 void
+ARDOUR_UI::toggle_ShowSoloMutes()
+{
+	ActionManager::toggle_config_state ("options", "ShowSoloMutes", &Configuration::set_show_solo_mutes, &Configuration::get_show_solo_mutes);
+}
+
+void
 ARDOUR_UI::mtc_port_changed ()
 {
 	bool have_mtc;
@@ -458,6 +497,33 @@ ARDOUR_UI::map_monitor_model ()
 		break;
 	case ExternalMonitoring:
 		on = X_("UseExternalMonitoring");
+		break;
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action ("options", on);
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+
+		if (tact && !tact->get_active()) {
+			tact->set_active (true);
+		}
+	}
+}
+
+void
+ARDOUR_UI::map_remote_model ()
+{
+	const char* on = 0;
+
+	switch (Config->get_remote_model()) {
+	case UserOrdered:
+		on = X_("RemoteUserDefined");
+		break;
+	case MixerOrdered:
+		on = X_("RemoteMixerDefined");
+		break;
+	case EditorOrdered:
+		on = X_("RemoteEditorDefined");
 		break;
 	}
 
@@ -757,6 +823,19 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 	if (PARAM_IS ("slave-source")) {
 
 		sync_option_combo.set_active_text (slave_source_to_string (Config->get_slave_source()));
+		
+		switch (Config->get_slave_source()) {
+		case None:
+			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (true);
+			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (true);
+			break;
+
+		default:
+			/* XXX need to make auto-play is off as well as insensitive */
+			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (false);
+			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (false);
+			break;
+		}
 
 	} else if (PARAM_IS ("send-mtc")) {
 
@@ -766,18 +845,30 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 
 		ActionManager::map_some_state ("options", "SendMMC", &Configuration::get_send_mmc);
 
+	} else if (PARAM_IS ("use-osc")) {
+
+#ifdef HAVE_LIBLO
+		if (Config->get_use_osc()) {
+			osc->start ();
+		} else {
+			osc->stop ();
+		}
+#endif
+
+		ActionManager::map_some_state ("options", "UseOSC", &Configuration::get_use_osc);
+		
 	} else if (PARAM_IS ("mmc-control")) {
 		ActionManager::map_some_state ("options", "UseMMC", &Configuration::get_mmc_control);
 	} else if (PARAM_IS ("midi-feedback")) {
 		ActionManager::map_some_state ("options", "SendMIDIfeedback", &Configuration::get_midi_feedback);
-	} else if (PARAM_IS ("midi-control")) {
-		ActionManager::map_some_state ("options", "UseMIDIcontrol", &Configuration::get_midi_control);
 	} else if (PARAM_IS ("do-not-record-plugins")) {
 		ActionManager::map_some_state ("options", "DoNotRunPluginsWhileRecording", &Configuration::get_do_not_record_plugins);
 	} else if (PARAM_IS ("latched-record-enable")) {
 		ActionManager::map_some_state ("options", "LatchedRecordEnable", &Configuration::get_latched_record_enable);
 	} else if (PARAM_IS ("solo-latched")) {
 		ActionManager::map_some_state ("options", "LatchedSolo", &Configuration::get_solo_latched);
+	} else if (PARAM_IS ("show-solo-mutes")) {
+		ActionManager::map_some_state ("options", "ShowSoloMutes", &Configuration::get_show_solo_mutes);
 	} else if (PARAM_IS ("solo-model")) {
 		map_solo_model ();
 	} else if (PARAM_IS ("auto-play")) {
@@ -806,6 +897,8 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		ActionManager::map_some_state ("options",  "StopTransportAtEndOfSession", &Configuration::get_stop_at_session_end);
 	} else if (PARAM_IS ("monitoring-model")) {
 		map_monitor_model ();
+	} else if (PARAM_IS ("remote-model")) {
+		map_remote_model ();
 	} else if (PARAM_IS ("use-video-sync")) {
 		ActionManager::map_some_state ("Transport",  "ToggleVideoSync", &Configuration::get_use_video_sync);
 	} else if (PARAM_IS ("quieten-at-speed")) {

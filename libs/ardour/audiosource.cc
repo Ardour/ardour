@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id: source.cc 404 2006-03-17 17:39:21Z pauld $
 */
 
 #include <sys/stat.h>
@@ -36,6 +35,7 @@
 
 #include <ardour/audiosource.h>
 #include <ardour/cycle_timer.h>
+#include <ardour/session.h>
 
 #include "i18n.h"
 
@@ -43,41 +43,33 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-pthread_t                    AudioSource::peak_thread;
-bool                         AudioSource::have_peak_thread = false;
-vector<boost::shared_ptr<AudioSource> > AudioSource::pending_peak_sources;
-Glib::Mutex*                 AudioSource::pending_peak_sources_lock = 0;
-int                          AudioSource::peak_request_pipe[2];
-
 bool AudioSource::_build_missing_peakfiles = false;
 bool AudioSource::_build_peakfiles = false;
 
-AudioSource::AudioSource (Session& s, string name)
+AudioSource::AudioSource (Session& s, ustring name)
 	: Source (s, name)
 {
-	if (pending_peak_sources_lock == 0) {
-		pending_peak_sources_lock = new Glib::Mutex;
-	}
-
 	_peaks_built = false;
 	_peak_byte_max = 0;
-	next_peak_clear_should_notify = true;
+	peakfile = -1;
 	_read_data_count = 0;
 	_write_data_count = 0;
+	peak_leftover_cnt = 0;
+	peak_leftover_size = 0;
+	peak_leftovers = 0;
 }
 
 AudioSource::AudioSource (Session& s, const XMLNode& node) 
 	: Source (s, node)
 {
-	if (pending_peak_sources_lock == 0) {
-		pending_peak_sources_lock = new Glib::Mutex;
-	}
-
 	_peaks_built = false;
 	_peak_byte_max = 0;
-	next_peak_clear_should_notify = true;
+	peakfile = -1;
 	_read_data_count = 0;
 	_write_data_count = 0;
+	peak_leftover_cnt = 0;
+	peak_leftover_size = 0;
+	peak_leftovers = 0;
 
 	if (set_state (node)) {
 		throw failed_constructor();
@@ -86,6 +78,19 @@ AudioSource::AudioSource (Session& s, const XMLNode& node)
 
 AudioSource::~AudioSource ()
 {
+	/* shouldn't happen but make sure we don't leak file descriptors anyway */
+	
+	if (peak_leftover_cnt) {
+		cerr << "AudioSource destroyed with leftover peak data pending" << endl;
+	}
+
+	if (peakfile >= 0) {
+		::close (peakfile);
+	}
+
+	if (peak_leftovers) {
+		delete [] peak_leftovers;
+	}
 }
 
 XMLNode&
@@ -117,171 +122,6 @@ AudioSource::set_state (const XMLNode& node)
 /***********************************************************************
   PEAK FILE STUFF
  ***********************************************************************/
-
-void*
-AudioSource::peak_thread_work (void* arg)
-{
-	PBD::ThreadCreated (pthread_self(), X_("Peak"));
-	struct pollfd pfd[1];
-
-	if (pending_peak_sources_lock == 0) {
-		pending_peak_sources_lock = new Glib::Mutex;
-	}
-
-	Glib::Mutex::Lock lm (*pending_peak_sources_lock);
-
-	while (true) {
-
-		pfd[0].fd = peak_request_pipe[0];
-		pfd[0].events = POLLIN|POLLERR|POLLHUP;
-
-		pending_peak_sources_lock->unlock ();
-
-		if (poll (pfd, 1, -1) < 0) {
-
-			if (errno == EINTR) {
-				pending_peak_sources_lock->lock ();
-				continue;
-			}
-			
-			error << string_compose (_("poll on peak request pipe failed (%1)"),
-					  strerror (errno))
-			      << endmsg;
-			break;
-		}
-
-		if (pfd[0].revents & ~POLLIN) {
-			error << _("Error on peak thread request pipe") << endmsg;
-			break;
-		}
-
-		if (pfd[0].revents & POLLIN) {
-
-			char req;
-			
-			/* empty the pipe of all current requests */
-
-			while (1) {
-				size_t nread = ::read (peak_request_pipe[0], &req, sizeof (req));
-
-				if (nread == 1) {
-					switch ((PeakRequest::Type) req) {
-					
-					case PeakRequest::Build:
-						break;
-						
-					case PeakRequest::Quit:
-						pthread_exit_pbd (0);
-						/*NOTREACHED*/
-						break;
-						
-					default:
-						break;
-					}
-
-				} else if (nread == 0) {
-					break;
-				} else if (errno == EAGAIN) {
-					break;
-				} else {
-					fatal << _("Error reading from peak request pipe") << endmsg;
-					/*NOTREACHED*/
-				}
-			}
-		}
-
-		pending_peak_sources_lock->lock ();
-
-		while (!pending_peak_sources.empty()) {
-
-			boost::shared_ptr<AudioSource> s = pending_peak_sources.front();
-			pending_peak_sources.erase (pending_peak_sources.begin());
-			
-			pending_peak_sources_lock->unlock ();
-			s->build_peaks();
-			pending_peak_sources_lock->lock ();
-		}
-	}
-
-	pthread_exit_pbd (0);
-	/*NOTREACHED*/
-	return 0;
-}
-
-int
-AudioSource::start_peak_thread ()
-{
-	if (!_build_peakfiles) {
-		return 0;
-	}
-
-	if (pipe (peak_request_pipe)) {
-		error << string_compose(_("Cannot create transport request signal pipe (%1)"), strerror (errno)) << endmsg;
-		return -1;
-	}
-
-	if (fcntl (peak_request_pipe[0], F_SETFL, O_NONBLOCK)) {
-		error << string_compose(_("UI: cannot set O_NONBLOCK on peak request pipe (%1)"), strerror (errno)) << endmsg;
-		return -1;
-	}
-
-	if (fcntl (peak_request_pipe[1], F_SETFL, O_NONBLOCK)) {
-		error << string_compose(_("UI: cannot set O_NONBLOCK on peak request pipe (%1)"), strerror (errno)) << endmsg;
-		return -1;
-	}
-
-	if (pthread_create_and_store ("peak file builder", &peak_thread, 0, peak_thread_work, 0)) {
-		error << _("AudioSource: could not create peak thread") << endmsg;
-		return -1;
-	}
-
-	have_peak_thread = true;
-	return 0;
-}
-
-void
-AudioSource::stop_peak_thread ()
-{
-	if (!have_peak_thread) {
-		return;
-	}
-
-	void* status;
-
-	char c = (char) PeakRequest::Quit;
-	::write (peak_request_pipe[1], &c, 1);
-	pthread_join (peak_thread, &status);
-}
-
-void 
-AudioSource::queue_for_peaks (boost::shared_ptr<AudioSource> source, bool notify)
-{
-	if (have_peak_thread) {
-		
-		Glib::Mutex::Lock lm (*pending_peak_sources_lock);
-		
-		source->next_peak_clear_should_notify = notify;
-		
-		if (find (pending_peak_sources.begin(),
-			  pending_peak_sources.end(),
-			  source) == pending_peak_sources.end()) {
-			pending_peak_sources.push_back (source);
-		}
-
-		char c = (char) PeakRequest::Build;
-		::write (peak_request_pipe[1], &c, 1);
-	}
-}
-
-void AudioSource::clear_queue_for_peaks ()
-{
-	/* this is done to cancel a group of running peak builds */
-	if (have_peak_thread) {
-		Glib::Mutex::Lock lm (*pending_peak_sources_lock);
-		pending_peak_sources.clear ();
-	}
-}
-
 
 bool
 AudioSource::peaks_ready (sigc::slot<void> the_slot, sigc::connection& conn) const
@@ -318,11 +158,11 @@ AudioSource::touch_peakfile ()
 }
 
 int
-AudioSource::rename_peakfile (string newpath)
+AudioSource::rename_peakfile (ustring newpath)
 {
 	/* caller must hold _lock */
 
-	string oldpath = peakpath;
+	ustring oldpath = peakpath;
 
 	if (access (oldpath.c_str(), F_OK) == 0) {
 		if (rename (oldpath.c_str(), newpath.c_str()) != 0) {
@@ -337,7 +177,7 @@ AudioSource::rename_peakfile (string newpath)
 }
 
 int
-AudioSource::initialize_peakfile (bool newfile, string audio_path)
+AudioSource::initialize_peakfile (bool newfile, ustring audio_path)
 {
 	struct stat statbuf;
 
@@ -348,7 +188,7 @@ AudioSource::initialize_peakfile (bool newfile, string audio_path)
 	*/
 	
 	if (!newfile && access (peakpath.c_str(), R_OK) != 0) {
-		string str = old_peak_path (audio_path);
+		ustring str = old_peak_path (audio_path);
 		if (access (str.c_str(), R_OK) == 0) {
 			peakpath = str;
 		}
@@ -431,7 +271,7 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 	int ret = -1;
 	PeakData* staging = 0;
 	Sample* raw_staging = 0;
-	int peakfile = -1;
+	int _peakfile = -1;
 
 	expected_peaks = (cnt / (double) frames_per_peak);
 	scale = npeaks/expected_peaks;
@@ -492,7 +332,7 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 
 		/* open, read, close */
 
-		if ((peakfile = ::open (peakpath.c_str(), O_RDONLY, 0664)) < 0) {
+		if ((_peakfile = ::open (peakpath.c_str(), O_RDONLY, 0664)) < 0) {
 			error << string_compose(_("AudioSource: cannot open peakpath \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
 			return -1;
 		}
@@ -501,8 +341,8 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 		cerr << "DIRECT PEAKS\n";
 #endif
 		
-		nread = ::pread (peakfile, peaks, sizeof (PeakData)* npeaks, first_peak_byte);
-		close (peakfile);
+		nread = ::pread (_peakfile, peaks, sizeof (PeakData)* npeaks, first_peak_byte);
+		close (_peakfile);
 
 		if (nread != sizeof (PeakData) * npeaks) {
 			cerr << "AudioSource["
@@ -566,7 +406,7 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 
 		/* open ... close during out: handling */
 
-		if ((peakfile = ::open (peakpath.c_str(), O_RDONLY, 0664)) < 0) {
+		if ((_peakfile = ::open (peakpath.c_str(), O_RDONLY, 0664)) < 0) {
 			error << string_compose(_("AudioSource: cannot open peakpath \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
 			return 0;
 		}
@@ -583,10 +423,10 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 				cerr << "read " << sizeof (PeakData) * to_read << " from peakfile @ " << start_byte << endl;
 #endif
 				
-				if ((nread = ::pread (peakfile, staging, sizeof (PeakData) * to_read, start_byte))
+				if ((nread = ::pread (_peakfile, staging, sizeof (PeakData) * to_read, start_byte))
 				    != sizeof (PeakData) * to_read) {
 
-					off_t fend = lseek (peakfile, 0, SEEK_END);
+					off_t fend = lseek (_peakfile, 0, SEEK_END);
 					
 					cerr << "AudioSource["
 					     << _name
@@ -672,13 +512,21 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 				
 				to_read = min (chunksize, (_length - current_frame));
 
+				if (to_read == 0) {
+					/* XXX ARGH .. out by one error ... need to figure out why this happens
+					   and fix it rather than do this band-aid move.
+					*/
+					zero_fill = npeaks - nvisual_peaks;
+					break;
+				}
+
 				if ((frames_read = read_unlocked (raw_staging, current_frame, to_read)) == 0) {
-					error << string_compose(_("AudioSource[%1]: peak read - cannot read %2 samples at offset %3")
-							 , _name, to_read, current_frame) 
+					error << string_compose(_("AudioSource[%1]: peak read - cannot read %2 samples at offset %3 of %4 (%5)"),
+								_name, to_read, current_frame, _length, strerror (errno)) 
 					      << endmsg;
 					goto out;
 				}
-
+					
 				i = 0;
 			}
 			
@@ -708,8 +556,8 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 	}
 
   out:
-	if (peakfile >= 0) {
-		close (peakfile);
+	if (_peakfile >= 0) {
+		close (_peakfile);
 	}
 
 	if (staging) {
@@ -730,196 +578,277 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 #undef DEBUG_PEAK_BUILD
 
 int
-AudioSource::build_peaks ()
+AudioSource::build_peaks_from_scratch ()
 {
-	vector<PeakBuildRecord*> built;
-	int status = -1;
-	bool pr_signal = false;
-	list<PeakBuildRecord*> copy;
+	nframes_t current_frame;
+	nframes_t cnt;
+	Sample buf[frames_per_peak];
+	nframes_t frames_read;
+	nframes_t frames_to_read;
+	int ret = -1;
 
 	{
-		Glib::Mutex::Lock lm (_lock);
-		copy = pending_peak_builds;
-		pending_peak_builds.clear ();
-	}
-		
-#ifdef DEBUG_PEAK_BUILD
-	cerr << "build peaks with " << copy.size() << " requests pending\n";
-#endif		
+		/* hold lock while building peaks */
 
-	for (list<PeakBuildRecord *>::iterator i = copy.begin(); i != copy.end(); ++i) {
+		Glib::Mutex::Lock lp (_lock);
 		
-		if ((status = do_build_peak ((*i)->frame, (*i)->cnt)) != 0) { 
-			unlink (peakpath.c_str());
-			break;
+		if (prepare_for_peakfile_writes ()) {
+			goto out;
 		}
-		built.push_back (new PeakBuildRecord (*(*i)));
-		delete *i;
-	}
-
-	{ 
-		Glib::Mutex::Lock lm (_lock);
-
-		if (status == 0) {
-			_peaks_built = true;
+		
+		current_frame = 0;
+		cnt = _length;
+		_peaks_built = false;
+		
+		while (cnt) {
 			
-			if (next_peak_clear_should_notify) {
-				next_peak_clear_should_notify = false;
-				pr_signal = true;
+			frames_to_read = min (frames_per_peak, cnt);
+
+			if ((frames_read = read_unlocked (buf, current_frame, frames_to_read)) != frames_to_read) {
+				error << string_compose(_("%1: could not write read raw data for peak computation (%2)"), _name, strerror (errno)) << endmsg;
+				done_with_peakfile_writes ();
+				goto out;
 			}
-		}
-	}
 
-	if (status == 0) {
-		for (vector<PeakBuildRecord *>::iterator i = built.begin(); i != built.end(); ++i) {
-			PeakRangeReady ((*i)->frame, (*i)->cnt); /* EMIT SIGNAL */
-			delete *i;
+			if (compute_and_write_peaks (buf, current_frame, frames_read, true)) {
+				break;
+			}
+			
+			current_frame += frames_read;
+			cnt -= frames_read;
 		}
-
-		if (pr_signal) {
+		
+		if (cnt == 0) {
+			/* success */
 			truncate_peakfile();
-			PeaksReady (); /* EMIT SIGNAL */
-		}
+			_peaks_built = true;
+		} 
+
+		done_with_peakfile_writes ();
 	}
 
-	return status;
+	/* lock no longer held, safe to signal */
+
+	if (_peaks_built) {
+		PeaksReady (); /* EMIT SIGNAL */
+		ret = 0;
+	}
+
+  out:
+	if (ret) {
+		unlink (peakpath.c_str());
+	}
+
+	return ret;
 }
 
 int
-AudioSource::do_build_peak (nframes_t first_frame, nframes_t cnt)
+AudioSource::prepare_for_peakfile_writes ()
 {
-	nframes_t current_frame;
-	Sample buf[frames_per_peak];
-	Sample xmin, xmax;
-	uint32_t  peaki;
-	PeakData* peakbuf;
-	nframes_t frames_read;
-	nframes_t frames_to_read;
-	off_t first_peak_byte;
-	int peakfile = -1;
-	int ret = -1;
-	off_t target_length;
-	off_t endpos;
-
-#ifdef DEBUG_PEAK_BUILD
-	cerr << pthread_self() << ": " << _name << ": building peaks for " << first_frame << " to " << first_frame + cnt - 1 << endl;
-#endif
-
-	first_peak_byte = (first_frame / frames_per_peak) * sizeof (PeakData);
-
-#ifdef DEBUG_PEAK_BUILD
-	cerr << "seeking to " << first_peak_byte << " before writing new peak data\n";
-#endif
-
-	current_frame = first_frame;
-	peakbuf = new PeakData[(cnt/frames_per_peak)+1];
-	peaki = 0;
-
 	if ((peakfile = ::open (peakpath.c_str(), O_RDWR|O_CREAT, 0664)) < 0) {
 		error << string_compose(_("AudioSource: cannot open peakpath \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
 		return -1;
 	}
-	
-	while (cnt) {
+	return 0;
+}
 
-		frames_to_read = min (frames_per_peak, cnt);
-
-		/* lock for every read */
-
-		if ((frames_read = read (buf, current_frame, frames_to_read)) != frames_to_read) {
-			error << string_compose(_("%1: could not write read raw data for peak computation (%2)"), _name, strerror (errno)) << endmsg;
-			goto out;
-		}
-
-		xmin = buf[0];
-		xmax = buf[0];
-
-		for (nframes_t n = 1; n < frames_read; ++n) {
-			xmax = max (xmax, buf[n]);
-			xmin = min (xmin, buf[n]);
-
-//			if (current_frame < frames_read) {
-//				cerr << "sample = " << buf[n] << " max = " << xmax << " min = " << xmin << " max of 2 = " << max (xmax, buf[n]) << endl;
-//			}
-		}
-
-		peakbuf[peaki].max = xmax;
-		peakbuf[peaki].min = xmin;
-		peaki++;
-
-		current_frame += frames_read;
-		cnt -= frames_read;
+void
+AudioSource::done_with_peakfile_writes ()
+{
+	if (peak_leftover_cnt) {
+		compute_and_write_peaks (0, 0, 0, true);
 	}
 
-#define BLOCKSIZE (128 * 1024)
+	if (peakfile >= 0) {
+		close (peakfile);
+		peakfile = -1;
+	}
+}
 
-	/* on some filesystems (ext3, at least) this helps to reduce fragmentation of
-	   the peakfiles. its not guaranteed to do so, and even on ext3 (as of december 2006)
-	   it does not cause single-extent allocation even for peakfiles of 
-	   less than BLOCKSIZE bytes.  only call ftruncate if we'll make the file larger.
-	*/
-	endpos = lseek (peakfile, 0, SEEK_END);
+int
+AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframes_t cnt, bool force)
+{
+	Sample* buf2 = 0;
+	nframes_t to_do;
+	uint32_t  peaks_computed;
+	PeakData* peakbuf = 0;
+	int ret = -1;
+	nframes_t current_frame;
+	nframes_t frames_done;
+	const size_t blocksize = (128 * 1024);
+	off_t first_peak_byte;
+
+	if (peakfile < 0) {
+		prepare_for_peakfile_writes ();
+	}
+
+  restart:
+	if (peak_leftover_cnt) {
+
+		if (first_frame != peak_leftover_frame + peak_leftover_cnt) {
+
+			/* uh-oh, ::seek() since the last ::compute_and_write_peaks(), 
+			   and we have leftovers. flush a single peak (since the leftovers
+			   never represent more than that, and restart.
+			*/
+			
+			PeakData x;
+			
+			x.min = peak_leftovers[0];
+			x.max = peak_leftovers[0];
+			Session::find_peaks (peak_leftovers + 1, peak_leftover_cnt - 1, &x.min, &x.max);
+
+			off_t byte = (peak_leftover_frame / frames_per_peak) * sizeof (PeakData);
+
+			if (::pwrite (peakfile, &x, sizeof (PeakData), byte) != sizeof (PeakData)) {
+				error << string_compose(_("%1: could not write peak file data (%2)"), _name, strerror (errno)) << endmsg;
+				goto out;
+			}
+
+			_peak_byte_max = max (_peak_byte_max, (off_t) (byte + sizeof(PeakData)));
+
+			PeakRangeReady (peak_leftover_frame, peak_leftover_cnt); /* EMIT SIGNAL */
+			PeaksReady (); /* EMIT SIGNAL */
+
+			/* left overs are done */
+
+			peak_leftover_cnt = 0;
+			goto restart;
+		}
+
+		/* else ... had leftovers, but they immediately preceed the new data, so just
+		   merge them and compute.
+		*/
+
+		/* make a new contiguous buffer containing leftovers and the new stuff */
+
+		to_do = cnt + peak_leftover_cnt;
+		buf2 = new Sample[to_do];
+
+		/* the remnants */
+		memcpy (buf2, peak_leftovers, peak_leftover_cnt * sizeof (Sample));
+
+		/* the new stuff */
+		memcpy (buf2+peak_leftover_cnt, buf, cnt * sizeof (Sample));
+
+		/* no more leftovers */
+		peak_leftover_cnt = 0;
+
+		/* use the temporary buffer */
+		buf = buf2;
+
+		/* make sure that when we write into the peakfile, we startup where we left off */
+
+		first_frame = peak_leftover_frame;
 		
-	target_length = BLOCKSIZE * ((first_peak_byte + BLOCKSIZE + 1) / BLOCKSIZE);
-
-	if (endpos < target_length) {
-		// XXX - we really shouldn't be doing this for destructive source peaks
-		ftruncate (peakfile, target_length);
-		//cerr << "do build TRUNC: " << peakpath << "  " << target_length << endl;
-
-		/* error doesn't actually matter though, so continue on without testing */
+	} else {
+		to_do = cnt;
 	}
 
-	if (::pwrite (peakfile, peakbuf, sizeof (PeakData) * peaki, first_peak_byte) != (ssize_t) (sizeof (PeakData) * peaki)) {
+	peakbuf = new PeakData[(to_do/frames_per_peak)+1];
+	peaks_computed = 0;
+	current_frame = first_frame;
+	frames_done = 0;
+
+	while (to_do) {
+
+		/* if some frames were passed in (i.e. we're not flushing leftovers)
+		   and there are less than frames_per_peak to do, save them till
+		   next time
+		*/
+
+		if (force && (to_do < frames_per_peak)) {
+			/* keep the left overs around for next time */
+
+			if (peak_leftover_size < to_do) {
+				delete [] peak_leftovers;
+				peak_leftovers = new Sample[to_do];
+				peak_leftover_size = to_do;
+			}
+			memcpy (peak_leftovers, buf, to_do * sizeof (Sample));
+			peak_leftover_cnt = to_do;
+			peak_leftover_frame = current_frame;
+
+			/* done for now */
+
+			break;
+		}
+			
+		nframes_t this_time = min (frames_per_peak, to_do);
+
+		peakbuf[peaks_computed].max = buf[0];
+		peakbuf[peaks_computed].min = buf[0];
+
+		Session::find_peaks (buf+1, this_time-1, &peakbuf[peaks_computed].min, &peakbuf[peaks_computed].max);
+
+		peaks_computed++;
+		buf += this_time;
+		to_do -= this_time;
+		frames_done += this_time;
+		current_frame += this_time;
+	}
+		
+	first_peak_byte = (first_frame / frames_per_peak) * sizeof (PeakData);
+
+	if (can_truncate_peaks()) {
+
+		/* on some filesystems (ext3, at least) this helps to reduce fragmentation of
+		   the peakfiles. its not guaranteed to do so, and even on ext3 (as of december 2006)
+		   it does not cause single-extent allocation even for peakfiles of 
+		   less than BLOCKSIZE bytes.  only call ftruncate if we'll make the file larger.
+		*/
+		
+		off_t endpos = lseek (peakfile, 0, SEEK_END);
+		off_t target_length = blocksize * ((first_peak_byte + blocksize + 1) / blocksize);
+		
+		if (endpos < target_length) {
+			ftruncate (peakfile, target_length);
+			/* error doesn't actually matter though, so continue on without testing */
+		}
+	}
+
+	if (::pwrite (peakfile, peakbuf, sizeof (PeakData) * peaks_computed, first_peak_byte) != (ssize_t) (sizeof (PeakData) * peaks_computed)) {
 		error << string_compose(_("%1: could not write peak file data (%2)"), _name, strerror (errno)) << endmsg;
 		goto out;
 	}
 
-	_peak_byte_max = max(_peak_byte_max, (off_t) (first_peak_byte + sizeof(PeakData)*peaki));
+	_peak_byte_max = max (_peak_byte_max, (off_t) (first_peak_byte + sizeof(PeakData)*peaks_computed));	
+
+	if (frames_done) {
+		PeakRangeReady (first_frame, frames_done); /* EMIT SIGNAL */
+		PeaksReady (); /* EMIT SIGNAL */
+	}
 
 	ret = 0;
 
   out:
 	delete [] peakbuf;
-	if (peakfile >= 0) {
-		close (peakfile);
+	if (buf2) {
+		delete [] buf2;
 	}
 	return ret;
 }
 
 void
-AudioSource::build_peaks_from_scratch ()
-{
-	Glib::Mutex::Lock lp (_lock);
-
-	next_peak_clear_should_notify = true;
-	pending_peak_builds.push_back (new PeakBuildRecord (0, _length));
-	queue_for_peaks (shared_from_this(), true);
-}
-
-void
 AudioSource::truncate_peakfile ()
 {
-	int peakfile = -1;
+	if (peakfile < 0) {
+		error << string_compose (_("programming error: %1"), "AudioSource::truncate_peakfile() called without open peakfile descriptor")
+		      << endmsg;
+		return;
+	}
 
 	/* truncate the peakfile down to its natural length if necessary */
 
-	if ((peakfile = ::open (peakpath.c_str(), O_RDWR)) >= 0) {
-		off_t end = lseek (peakfile, 0, SEEK_END);
-		
-		if (end > _peak_byte_max) {
-			ftruncate(peakfile, _peak_byte_max);
-			//cerr << "truncated " << peakpath << " to " << _peak_byte_max << " bytes" << endl;
-		}
-		else {
-			//cerr << "NOT truncated " << peakpath << " to " << _peak_byte_max << " end " << end << endl;
-		}
-		close (peakfile);
+	off_t end = lseek (peakfile, 0, SEEK_END);
+	
+	if (end > _peak_byte_max) {
+		ftruncate (peakfile, _peak_byte_max);
 	}
 }
 
 bool
-AudioSource::file_changed (string path)
+AudioSource::file_changed (ustring path)
 {
 	struct stat stat_file;
 	struct stat stat_peak;

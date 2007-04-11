@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <sigc++/retype.h>
@@ -24,6 +23,7 @@
 
 #include <libgnomecanvas/libgnomecanvas.h>
 #include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/window_title.h>
 
 #include <ardour/location.h>
 #include <pbd/memento_command.h>
@@ -44,6 +44,7 @@ using namespace sigc;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 
 void
 Editor::clear_marker_display ()
@@ -511,6 +512,7 @@ Editor::build_range_marker_menu (bool loop_or_punch)
 
 	items.push_back (MenuElem (_("Separate Regions in Range"), mem_fun(*this, &Editor::marker_menu_separate_regions_using_location)));
 	items.push_back (MenuElem (_("Select All in Range"), mem_fun(*this, &Editor::marker_menu_select_all_selectables_using_range)));
+	items.push_back (MenuElem (_("Select Range"), mem_fun(*this, &Editor::marker_menu_select_using_range)));
 
 }
 
@@ -557,6 +559,24 @@ Editor::marker_menu_hide ()
 	
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 		l->set_hidden (true, this);
+	}
+}
+
+void
+Editor::marker_menu_select_using_range ()
+{
+	Marker* marker;
+
+	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
+		/*NOTREACHED*/
+	}
+
+	Location* l;
+	bool is_start;
+
+	if (((l = find_location_from_marker (marker, is_start)) != 0) && (l->end() > l->start())) {
+	        set_selection_from_range (*l);
 	}
 }
 
@@ -838,12 +858,15 @@ Editor::marker_menu_rename ()
 	string txt;
 
 	dialog.set_prompt (_("New Name:"));
-	
+
+	WindowTitle title(Glib::get_application_name());
 	if (loc->is_mark()) {
-		dialog.set_title (_("ardour: rename mark"));
+		title += _("Rename Mark");
 	} else {
-		dialog.set_title (_("ardour: rename range"));
+		title += _("Rename Range");
 	}
+
+	dialog.set_title(title.get_string());
 
 	dialog.set_name ("MarkRenameWindow");
 	dialog.set_size_request (250, -1);
@@ -958,8 +981,8 @@ Editor::update_loop_range_view (bool visibility)
 		if (visibility) {
 			transport_loop_range_rect->show();
 		}
-	}
-	else if (visibility) {
+
+	} else if (visibility) {
 		transport_loop_range_rect->hide();
 	}
 }

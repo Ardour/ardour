@@ -3,7 +3,6 @@
 #include "simpleline.h"
 #include "simpleline_p.h"
 
-/* $Id$ */
 
 /* line.ccg
  *

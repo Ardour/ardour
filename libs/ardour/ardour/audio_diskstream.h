@@ -32,6 +32,7 @@
 #include <pbd/fastlog.h>
 #include <pbd/ringbufferNPT.h>
 #include <pbd/stateful.h> 
+#include <pbd/rcu.h> 
 
 #include <ardour/ardour.h>
 #include <ardour/configuration.h>
@@ -65,24 +66,28 @@ class AudioDiskstream : public Diskstream
 	float capture_buffer_load() const;
 
 	string input_source (uint32_t n=0) const {
-		if (n < channels.size()) {
-			return channels[n].source ? channels[n].source->name() : "";
+		boost::shared_ptr<ChannelList> c = channels.reader();
+		if (n < c->size()) {
+			return (*c)[n]->source ? (*c)[n]->source->name() : "";
 		} else {
 			return ""; 
 		}
 	}
 
 	Port *input_source_port (uint32_t n=0) const { 
-		if (n < channels.size()) return channels[n].source; return 0; 
+		boost::shared_ptr<ChannelList> c = channels.reader();
+		if (n < c->size()) return (*c)[n]->source; return 0; 
 	}
 
 	void set_record_enabled (bool yn);
 	int set_destructive (bool yn);
 	bool can_become_destructive (bool& requires_bounce) const;
 
-	float peak_power(uint32_t n=0) { 
-		float x = channels[n].peak_power;
-		channels[n].peak_power = 0.0f;
+	float peak_power(uint32_t n = 0) { 
+		boost::shared_ptr<ChannelList> c = channels.reader();
+		ChannelInfo* chaninfo = (*c)[n];
+		float x = chaninfo->peak_power;
+		chaninfo->peak_power = 0.0f;
 		if (x > 0.0f) {
 			return 20.0f * fast_log10(x);
 		} else {
@@ -96,27 +101,29 @@ class AudioDiskstream : public Diskstream
 	int use_new_playlist ();
 	int use_copy_playlist ();
 
-	Sample *playback_buffer (uint32_t n=0) {
-		if (n < channels.size())
-			return channels[n].current_playback_buffer;
+	Sample *playback_buffer (uint32_t n = 0) {
+		boost::shared_ptr<ChannelList> c = channels.reader();
+		if (n < c->size())
+			return (*c)[n]->current_playback_buffer;
 		return 0;
 	}
 	
-	Sample *capture_buffer (uint32_t n=0) {
-		if (n < channels.size())
-			return channels[n].current_capture_buffer;
+	Sample *capture_buffer (uint32_t n = 0) {
+		boost::shared_ptr<ChannelList> c = channels.reader();
+		if (n < c->size())
+			return (*c)[n]->current_capture_buffer;
 		return 0;
 	}
 
 	boost::shared_ptr<AudioFileSource> write_source (uint32_t n=0) {
-		if (n < channels.size())
-			return channels[n].write_source;
+		boost::shared_ptr<ChannelList> c = channels.reader();
+		if (n < c->size())
+			return (*c)[n]->write_source;
 		return boost::shared_ptr<AudioFileSource>();
 	}
 
-	int add_channel ();
-	int remove_channel ();
-	
+	int add_channel (uint32_t how_many);
+	int remove_channel (uint32_t how_many);
 	
 	/* stateful */
 
@@ -174,11 +181,8 @@ class AudioDiskstream : public Diskstream
 
 	struct ChannelInfo {
 	    
-	    ChannelInfo ();
+	    ChannelInfo (nframes_t buffer_size, nframes_t speed_buffer_size, nframes_t wrap_buffer_size);
 	    ~ChannelInfo ();
-
-	    void init (nframes_t buffer_size, nframes_t speed_buffer_size, nframes_t wrap_buffer_size);
-	    void release ();
 
 	    Sample     *playback_wrap_buffer;
 	    Sample     *capture_wrap_buffer;
@@ -208,17 +212,19 @@ class AudioDiskstream : public Diskstream
 	    nframes_t                     curr_capture_cnt;
 	};
 
+	typedef std::vector<ChannelInfo*> ChannelList;
+
 	/* The two central butler operations */
 	int do_flush (Session::RunContext context, bool force = false);
 	int do_refill () { return _do_refill(_mixdown_buffer, _gain_buffer); }
 	
-	int do_refill_with_alloc();
+	int do_refill_with_alloc ();
 
 	int read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
-		nframes_t& start, nframes_t cnt, 
-		ChannelInfo& channel_info, int channel, bool reversed);
+		  nframes_t& start, nframes_t cnt, 
+		  ChannelInfo* channel_info, int channel, bool reversed);
 
-	void finish_capture (bool rec_monitors_input);
+	void finish_capture (bool rec_monitors_input, boost::shared_ptr<ChannelList>);
 	void transport_stopped (struct tm&, time_t, bool abort);
 
 	void init (Diskstream::Flag);
@@ -251,14 +257,17 @@ class AudioDiskstream : public Diskstream
 	static Sample* _mixdown_buffer;
 	static gain_t* _gain_buffer;
 
-	// Uh, /really/ private? (there should probably be less friends of Diskstream)
-	int _do_refill (Sample *mixdown_buffer, float *gain_buffer);
-	
-	
 	std::vector<boost::shared_ptr<AudioFileSource> > capturing_sources;
 	
-	typedef vector<ChannelInfo> ChannelList;
-	ChannelList channels;
+	SerializedRCUManager<ChannelList> channels;
+	
+ /* really */
+  private:
+	int _do_refill (Sample *mixdown_buffer, float *gain_buffer);
+
+	int add_channel_to (boost::shared_ptr<ChannelList>, uint32_t how_many);
+	int remove_channel_from (boost::shared_ptr<ChannelList>, uint32_t how_many);
+
 };
 
 } // namespace ARDOUR

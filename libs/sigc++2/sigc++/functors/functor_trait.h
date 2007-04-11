@@ -27,14 +27,14 @@
 
 namespace sigc {
 
-/** nil struct type.
- * The nil struct type is used as default template argument in the
+/** nil_ struct type.
+ * The nil_ struct type is used as default template argument in the
  * unnumbered sigc::signal and sigc::slot templates.
  *
  * @ingroup signal
  * @ingroup slot
  */
-struct nil;
+struct nil_;
 
 
 /** @defgroup functors Functors

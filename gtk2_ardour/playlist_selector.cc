@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 
 */
 
@@ -29,6 +28,7 @@
 #include <ardour/configuration.h>
 
 #include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/window_title.h>
 
 #include "playlist_selector.h"
 #include "route_ui.h"
@@ -39,6 +39,7 @@
 using namespace std;
 using namespace sigc;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 using namespace ARDOUR;
 using namespace PBD;
 
@@ -49,10 +50,13 @@ PlaylistSelector::PlaylistSelector ()
 	
 	set_position (WIN_POS_MOUSE);
 	set_name ("PlaylistSelectorWindow");
-	set_title (_("ardour: playlists"));
 	set_modal(true);
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 	set_size_request (300, 200);
+
+	WindowTitle title(Glib::get_application_name());
+	title += _("Playlists");
+	set_title(title.get_string());
 
 	model = TreeStore::create (columns);
 	tree.set_model (model);
@@ -104,10 +108,9 @@ PlaylistSelector::show_for (RouteUI* ruix)
 
 	rui = ruix;
 
-	str = _("ardour: playlist for ");
-	str += rui->route()->name();
-
-	set_title (str);
+	WindowTitle title(Glib::get_application_name());
+	title += string_compose (_("Playlist for %1"), rui->route()->name());
+	set_title (title.get_string());
 
 	clear_map ();
 	select_connection.disconnect ();

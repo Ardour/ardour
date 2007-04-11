@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cerrno>
@@ -36,6 +35,7 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
+using Glib::ustring;
 
 gain_t* SndFileSource::out_coefficient = 0;
 gain_t* SndFileSource::in_coefficient = 0;
@@ -55,11 +55,11 @@ SndFileSource::SndFileSource (Session& s, const XMLNode& node)
 	}
 }
 
-SndFileSource::SndFileSource (Session& s, string path, int chn, Flag flags)
+SndFileSource::SndFileSource (Session& s, ustring path, int chn, Flag flags)
           /* files created this way are never writable or removable */
 	: AudioFileSource (s, path, Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
 {
-	channel = chn;
+	_channel = chn;
 
 	init ();
 
@@ -68,7 +68,7 @@ SndFileSource::SndFileSource (Session& s, string path, int chn, Flag flags)
 	}
 }
 
-SndFileSource::SndFileSource (Session& s, string path, SampleFormat sfmt, HeaderFormat hf, nframes_t rate, Flag flags)
+SndFileSource::SndFileSource (Session& s, ustring path, SampleFormat sfmt, HeaderFormat hf, nframes_t rate, Flag flags)
 	: AudioFileSource (s, path, flags, sfmt, hf)
 {
 	int fmt = 0;
@@ -178,7 +178,7 @@ SndFileSource::SndFileSource (Session& s, string path, SampleFormat sfmt, Header
 void 
 SndFileSource::init ()
 {
-	string file;
+	ustring file;
 
 	// lets try to keep the object initalizations here at the top
 	xfade_buf = 0;
@@ -222,8 +222,8 @@ SndFileSource::open ()
 		return -1;
 	}
 
-	if (channel >= _info.channels) {
-		error << string_compose(_("SndFileSource: file only contains %1 channels; %2 is invalid as a channel number"), _info.channels, channel) << endmsg;
+	if (_channel >= _info.channels) {
+		error << string_compose(_("SndFileSource: file only contains %1 channels; %2 is invalid as a channel number"), _info.channels, _channel) << endmsg;
 		sf_close (sf);
 		sf = 0;
 		return -1;
@@ -347,7 +347,7 @@ SndFileSource::read_unlocked (Sample *dst, nframes_t start, nframes_t cnt) const
 	}
 	
 	nread = sf_read_float (sf, interleave_buf, real_cnt);
-	ptr = interleave_buf + channel;
+	ptr = interleave_buf + _channel;
 	nread /= _info.channels;
 	
 	/* stride through the interleaved data */
@@ -388,7 +388,7 @@ SndFileSource::nondestructive_write_unlocked (Sample *data, nframes_t cnt)
 	
 	nframes_t oldlen;
 	int32_t frame_pos = _length;
-	
+
 	if (write_float (data, frame_pos, cnt) != cnt) {
 		return 0;
 	}
@@ -397,28 +397,7 @@ SndFileSource::nondestructive_write_unlocked (Sample *data, nframes_t cnt)
 	update_length (oldlen, cnt);
 
 	if (_build_peakfiles) {
-		PeakBuildRecord *pbr = 0;
-		
-		if (pending_peak_builds.size()) {
-			pbr = pending_peak_builds.back();
-		}
-			
-		if (pbr && pbr->frame + pbr->cnt == oldlen) {
-			
-			/* the last PBR extended to the start of the current write,
-			   so just extend it again.
-			*/
-			pbr->cnt += cnt;
-		} else {
-			pending_peak_builds.push_back (new PeakBuildRecord (oldlen, cnt));
-		}
-
-		_peaks_built = false;
-	}
-	
-	
-	if (_build_peakfiles) {
-		queue_for_peaks (shared_from_this (), false);
+		compute_and_write_peaks (data, frame_pos, cnt, false);
 	}
 
 	_write_data_count = cnt;
@@ -508,32 +487,12 @@ SndFileSource::destructive_write_unlocked (Sample* data, nframes_t cnt)
 
 	old_file_pos = file_pos;
 	update_length (file_pos, cnt);
+
+	if (_build_peakfiles) {
+		compute_and_write_peaks (data, file_pos, cnt, false);
+	}
+
 	file_pos += cnt;
-
-	if (_build_peakfiles) {
-		PeakBuildRecord *pbr = 0;
-		
-		if (pending_peak_builds.size()) {
-			pbr = pending_peak_builds.back();
-		}
-		
-		if (pbr && pbr->frame + pbr->cnt == old_file_pos) {
-			
-			/* the last PBR extended to the start of the current write,
-			   so just extend it again.
-			*/
-			
-			pbr->cnt += cnt;
-		} else {
-			pending_peak_builds.push_back (new PeakBuildRecord (old_file_pos, cnt));
-		}
-		
-		_peaks_built = false;
-	}
-
-	if (_build_peakfiles) {
-		queue_for_peaks (shared_from_this (), true);
-	}
 	
 	return cnt;
 }
@@ -628,9 +587,6 @@ SndFileSource::set_header_timeline_position ()
 		delete _broadcast_info;
 		_broadcast_info = 0;
 	}
-
-	
-
 }
 
 nframes_t
@@ -886,7 +842,7 @@ SndFileSource::set_timeline_position (int64_t pos)
 }
 
 int
-SndFileSource::get_soundfile_info (string path, SoundFileInfo& info, string& error_msg)
+SndFileSource::get_soundfile_info (const ustring& path, SoundFileInfo& info, string& error_msg)
 {
 	SNDFILE *sf;
 	SF_INFO sf_info;
@@ -937,4 +893,10 @@ SndFileSource::get_timecode_info (SNDFILE* sf, SF_BROADCAST_INFO* binfo, bool& e
 	ret <<= 32;
 	ret |= (uint32_t) binfo->time_reference_low;
 	return ret;
+}
+
+bool
+SndFileSource::one_of_several_channels () const
+{
+	return _info.channels > 1;
 }

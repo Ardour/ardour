@@ -15,13 +15,19 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <unistd.h>
 
 #include <pbd/pthread_utils.h>
 #include <pbd/basename.h>
+#include <pbd/shortpath.h>
 
 #include <gtkmm2ext/choice.h>
+#include <gtkmm2ext/window_title.h>
 
 #include <ardour/session.h>
 #include <ardour/audioplaylist.h>
@@ -49,6 +55,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace sigc;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 using namespace Editing;
 using Glib::ustring;
 
@@ -170,7 +177,7 @@ Editor::do_embed (vector<ustring> paths, bool split, ImportMode mode, AudioTrack
 							   to_embed.size() > 2 ? _("multichannel") : _("stereo")));
 			choices.push_back (_("Import as multiple regions"));
 			
-			Gtkmm2ext::Choice chooser (string_compose (_("Paired files detected (%1, %2 ...).\nDo you want to:"),
+			Choice chooser (string_compose (_("Paired files detected (%1, %2 ...).\nDo you want to:"),
 								   to_embed[0],
 								   to_embed[1]),
 						   choices);
@@ -216,7 +223,9 @@ Editor::do_embed (vector<ustring> paths, bool split, ImportMode mode, AudioTrack
 int
 Editor::import_sndfile (vector<ustring> paths, ImportMode mode, AudioTrack* track, nframes_t& pos)
 {
-	interthread_progress_window->set_title (string_compose (_("ardour: importing %1"), paths.front()));
+	WindowTitle title = string_compose (_("importing %1"), paths.front());
+
+	interthread_progress_window->set_title (title.get_string());
 	interthread_progress_window->set_position (Gtk::WIN_POS_MOUSE);
 	interthread_progress_window->show_all ();
 	interthread_progress_bar.set_fraction (0.0f);
@@ -245,6 +254,8 @@ Editor::import_sndfile (vector<ustring> paths, ImportMode mode, AudioTrack* trac
 	while (!(import_status.done || import_status.cancel)) {
 		gtk_main_iteration ();
 	}
+
+	interthread_progress_window->hide ();
 	
 	import_status.done = true;
 	interthread_progress_connection.disconnect ();
@@ -288,7 +299,7 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_fi
 		linked_path += Glib::path_get_basename (path);
 		
 		if (link (path.c_str(), linked_path.c_str()) == 0) {
-			
+
 			/* there are many reasons why link(2) might have failed.
 			   but if it succeeds, we now have a link in the
 			   session sound dir that will protect against
@@ -296,6 +307,21 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_fi
 			*/
 			
 			path = linked_path;
+
+		} else {
+
+			/* one possible reason is that its already linked */
+
+			if (errno == EEXIST) {
+				struct stat sb;
+
+				if (stat (linked_path.c_str(), &sb) == 0) {
+					if (sb.st_nlink > 1) { // its a hard link, assume its the one we want
+						path = linked_path;
+					}
+				}
+			}
+
 		}
 		
 		/* note that we temporarily truncated _id at the colon */
@@ -369,11 +395,20 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_fi
 		for (int n = 0; n < finfo.channels; ++n)
 		{
 			try {
-				source = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable 
-										       (*session, path,  n,
-											(mode == ImportAsTapeTrack ? 
-											 AudioFileSource::Destructive : 
-											 AudioFileSource::Flag (0))));
+
+				/* check if we have this thing embedded already */
+
+				boost::shared_ptr<Source> s;
+
+				if ((s = session->source_by_path_and_channel (path, n)) == 0) {
+					source = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable 
+											       (*session, path,  n,
+												(mode == ImportAsTapeTrack ? 
+												 AudioFileSource::Destructive : 
+												 AudioFileSource::Flag (0))));
+				} else {
+					source = boost::dynamic_pointer_cast<AudioFileSource> (s);
+				}
 
 				sources.push_back(source);
 			} 

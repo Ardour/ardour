@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cstdio> // for sprintf, grrr 
@@ -56,6 +55,10 @@ Editor::initialize_rulers ()
 	ruler_editor = this;
 	ruler_grabbed_widget = 0;
 	
+	_ruler_separator = new Gtk::HSeparator();
+	_ruler_separator->set_size_request(-1, 2);
+	_ruler_separator->show();
+
 	_smpte_ruler = gtk_custom_hruler_new ();
 	smpte_ruler = Glib::wrap (_smpte_ruler);
 	smpte_ruler->set_name ("SMPTERuler");
@@ -148,6 +151,11 @@ Editor::ruler_button_press (GdkEventButton* ev)
 
 	switch (ev->button) {
 	case 1:
+		// Since we are about to move the playhead, cancel any running
+		// auditions.
+		if (session->is_auditioning()) {
+			session->cancel_audition ();
+		}
 		/* transport playhead */
 		snap_to (where);
 		session->request_locate (where);
@@ -252,12 +260,12 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 	/* need to use the correct x,y, the event lies */
 	time_canvas_event_box.get_window()->get_pointer (x, y, state);
 
-	
-	track_canvas.c2w (x, y, wcx, wcy);
-	track_canvas.w2c (wcx, wcy, cx, cy);
-	
-	nframes_t where = leftmost_frame + pixel_to_frame (x);
+	time_canvas.c2w (x, y, wcx, wcy);
+	time_canvas.w2c (wcx, wcy, cx, cy);
 
+	wcx = x;
+	nframes_t where = event_frame ((GdkEvent*) ev, &wcx, (double *) 0);
+	cx = wcx;
 
 	/// ripped from maybe_autoscroll, and adapted to work here
 	nframes_t one_page = (nframes_t) rint (canvas_width * frames_per_unit);
@@ -299,8 +307,7 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 		break;
 	}
 
-	if (cursor)
-	{
+	if (cursor) {
 		cursor->set_position (where);
 		
 		if (cursor == edit_cursor) {
@@ -373,7 +380,7 @@ Editor::popup_ruler_menu (nframes_t where, ItemType t)
 		mitem->set_active(true);
 	}
 
-	ruler_items.push_back (CheckMenuElem (X_("Timecode"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_smpte)));
+	ruler_items.push_back (CheckMenuElem (_("Timecode"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_smpte)));
 	mitem = (CheckMenuItem *) &ruler_items.back(); 
 	if (ruler_shown[ruler_metric_smpte]) {
 		mitem->set_active(true);
@@ -601,6 +608,7 @@ Editor::update_ruler_visibility ()
 	frames_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
 	minsec_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
 
+	ruler_children.insert (canvaspos, Element(*_ruler_separator, PACK_SHRINK, PACK_START));
 	
 	if (ruler_shown[ruler_metric_minsec]) {
 		lab_children.push_back (Element(minsec_label, PACK_SHRINK, PACK_START));
@@ -626,7 +634,7 @@ Editor::update_ruler_visibility ()
 		visible_timebars++;
 	}
 
-	double tbpos = 0.0;
+	double tbpos = 1.0;
 	double old_unit_pos ;
 	
 	if (ruler_shown[ruler_time_meter]) {
@@ -705,10 +713,10 @@ Editor::update_ruler_visibility ()
 	
 	update_fixed_rulers();
 	//update_tempo_based_rulers();
-	tempo_map_changed(Change (0), false);
+	redisplay_tempo (false);
 
 	time_canvas_event_box.show_all();
-	time_button_event_box.show_all();
+	time_button_frame.show_all();
 }
 
 void

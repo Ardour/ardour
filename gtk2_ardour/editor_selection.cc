@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id: editor.cc 1353 2007-01-18 03:06:15Z paul $
 */
 
 #include <pbd/stacktrace.h>
@@ -154,6 +153,11 @@ Editor::extend_selection_to_track (TimeAxisView& view)
 	return false;
 }
 
+void
+Editor::select_all_tracks ()
+{
+	selection->set (track_views);
+}
 
 bool
 Editor::set_selected_track (TimeAxisView& view, Selection::Operation op, bool no_remove)
@@ -772,7 +776,7 @@ Editor::select_all_within (nframes_t start, nframes_t end, double top, double bo
 	list<Selectable*>::size_type n = 0;
 	TrackViewList touched_tracks;
 
-	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
+	for (TrackViewList::iterator iter = selection->tracks.begin(); iter != selection->tracks.end(); ++iter) {
 		if ((*iter)->hidden()) {
 			continue;
 		}
@@ -780,13 +784,18 @@ Editor::select_all_within (nframes_t start, nframes_t end, double top, double bo
 		n = touched.size();
 
 		(*iter)->get_selectables (start, end, top, bot, touched);
-
+		
 		if (n != touched.size()) {
 			touched_tracks.push_back (*iter);
 		}
 	}
 
+	if (touched.empty()) {
+		return false;
+	}
+
 	if (!touched_tracks.empty()) {
+
 		switch (op) {
 		case Selection::Add:
 			selection->add (touched_tracks);
@@ -802,7 +811,7 @@ Editor::select_all_within (nframes_t start, nframes_t end, double top, double bo
 			break;
 		}
 	}
-		
+
 	begin_reversible_command (_("select all within"));
 	switch (op) {
 	case Selection::Add:
@@ -818,8 +827,9 @@ Editor::select_all_within (nframes_t start, nframes_t end, double top, double bo
 		/* not defined yet */
 		break;
 	}
-
+	
 	commit_reversible_command ();
+
 	return !touched.empty();
 }
 

@@ -1,5 +1,5 @@
 #!/bin/sh      
 export ARDOUR_PATH=../gtk2_ardour/icons:../gtk2_ardour/pixmaps:../gtk2_ardour
-export LD_LIBRARY_PATH=../gtk2_ardour:../libs/surfaces/control_protocol:../libs/ardour:../libs/midi++2:../libs/pbd:../libs/soundtouch:../libs/gtkmm2ext:../libs/sigc++2:../libs/glibmm2:../libs/gtkmm2/atk:../libs/gtkmm2/pango:../libs/gtkmm2/gdk:../libs/gtkmm2/gtk:../libs/libgnomecanvasmm:../libs/libsndfile:../libs/appleutility:$$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=../gtk2_ardour:../libs/surfaces/control_protocol:../libs/ardour:../libs/midi++2:../libs/pbd:../libs/soundtouch:../libs/gtkmm2ext:../libs/sigc++2:../libs/glibmm2:../libs/gtkmm2/atk:../libs/gtkmm2/pango:../libs/gtkmm2/gdk:../libs/gtkmm2/gtk:../libs/libgnomecanvasmm:../libs/libsndfile:../libs/appleutility:$LD_LIBRARY_PATH
 export GTK_PATH=$PWD/../libs/clearlooks:~/.ardour2
 exec wine ./ardour_vst.exe.so "$@"

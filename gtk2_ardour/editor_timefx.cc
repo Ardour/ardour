@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cstdlib>
@@ -26,6 +25,8 @@
 #include <pbd/error.h>
 #include <pbd/pthread_utils.h>
 #include <pbd/memento_command.h>
+
+#include <gtkmm2ext/window_title.h>
 
 #include "editor.h"
 #include "audio_time_axis.h"
@@ -45,6 +46,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace sigc;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 
 Editor::TimeStretchDialog::TimeStretchDialog (Editor& e)
 	: ArdourDialog ("time stretch dialog"),
@@ -54,8 +56,11 @@ Editor::TimeStretchDialog::TimeStretchDialog (Editor& e)
 {
 	set_modal (true);
 	set_position (Gtk::WIN_POS_MOUSE);
-	set_title (_("ardour: timestretch"));
 	set_name (N_("TimeStretchDialog"));
+
+	WindowTitle title(Glib::get_application_name());
+	title += _("Timestretch");
+	set_title(title.get_string());
 
 	get_vbox()->set_spacing (5);
 	get_vbox()->set_border_width (5);

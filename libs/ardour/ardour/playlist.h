@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __ardour_playlist_h__
@@ -139,6 +138,12 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
 	
 	virtual bool destroy_region (boost::shared_ptr<Region>) = 0;
 
+	/* special case function used by UI selection objects, which have playlists that actually own the regions
+	   within them.
+	*/
+
+	void drop_regions ();
+
   protected:
 	friend class Session;
 
@@ -177,6 +182,7 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
 	bool             save_on_thaw;
 	string           last_save_reason;
 	uint32_t         in_set_state;
+	bool             first_set_state;
 	bool            _hidden;
 	bool            _splicing;
 	bool            _nudging;

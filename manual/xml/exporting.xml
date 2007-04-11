@@ -4,11 +4,12 @@
 
 ]>
 
-<chapter id="ch-exporting"><title>Exporting</title>
-	<para>
-		This section covers ways to get your session converted into various formats
-		for use by other software or systems.
-	</para>
-	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
+<chapter id="ch-exporting">
+  <title>Exporting</title>
+  <para>
+    This section covers ways to get your session converted into various
+    formats for use by other software or systems.
+  </para>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="exporting_to_cd.xml" />
 </chapter>

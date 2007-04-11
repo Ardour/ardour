@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __ardour_mixer_ui_h__
@@ -38,7 +37,6 @@
 #include <ardour/ardour.h>
 #include <ardour/io.h>
 
-#include "keyboard_target.h"
 #include "route_redirect_selection.h"
 #include "enums.h"
 
@@ -47,7 +45,6 @@ namespace ARDOUR {
 	class RouteGroup;
 	class Session;
 	class AudioDiskstream;
-	class AudioEngine;
 };
 
 class MixerStrip;
@@ -56,7 +53,7 @@ class PluginSelector;
 class Mixer_UI : public Gtk::Window
 {
   public:
-	Mixer_UI (ARDOUR::AudioEngine&);
+	Mixer_UI ();
 	~Mixer_UI();
 
 	void connect_to_session (ARDOUR::Session *);
@@ -82,7 +79,6 @@ class Mixer_UI : public Gtk::Window
 	RouteRedirectSelection& selection() { return _selection; }
 	
   private:
-	ARDOUR::AudioEngine&     engine;
 	ARDOUR::Session         *session;
 
 	bool _visible;

@@ -31,20 +31,22 @@ using namespace sigc;
 
 RegionSelection::RegionSelection ()
 {
+	RegionView::RegionViewGoingAway.connect (mem_fun(*this, &RegionSelection::remove_it));
+
 	_current_start = 0;
 	_current_end = 0;
 }
 
 RegionSelection::RegionSelection (const RegionSelection& other)
 {
+	RegionView::RegionViewGoingAway.connect (mem_fun(*this, &RegionSelection::remove_it));
+
 	for (RegionSelection::const_iterator i = other.begin(); i != other.end(); ++i) {
 		add (*i);
 	}
 	_current_start = other._current_start;
 	_current_end = other._current_end;
 }
-
-
 
 RegionSelection&
 RegionSelection::operator= (const RegionSelection& other)
@@ -86,8 +88,6 @@ RegionSelection::add (RegionView* rv)
 		return false;
 	}
 
-	rv->RegionViewGoingAway.connect (mem_fun(*this, &RegionSelection::remove_it));
-
 	if (rv->region()->first_frame() < _current_start || empty()) {
 		_current_start = rv->region()->first_frame();
 	}
@@ -114,31 +114,33 @@ RegionSelection::remove_it (RegionView *rv)
 bool
 RegionSelection::remove (RegionView* rv)
 {
-	RegionSelection::iterator i;
+	RegionSelection::iterator r;
 
-	if ((i = find (begin(), end(), rv)) != end()) {
-
-		erase (i);
+	if ((r = find (begin(), end(), rv)) != end()) {
 
 		// remove from layer sorted list
 		_bylayer.remove (rv);
 		
-		if (empty()) {
+		if (size() == 1) {
+
+			/* this is the last one, so when we delete it
+			   we will be empty.
+			*/
 
 			_current_start = 0;
 			_current_end = 0;
 
 		} else {
 			
-			boost::shared_ptr<Region> region ((*i)->region());
-
+			boost::shared_ptr<Region> region ((*r)->region());
+			
 			if (region->first_frame() == _current_start) {
 				
 				/* reset current start */
 				
 				nframes_t ref = max_frames;
 				
-				for (i = begin (); i != end(); ++i) {
+				for (RegionSelection::iterator i = begin (); i != end(); ++i) {
 					if (region->first_frame() < ref) {
 						ref = region->first_frame();
 					}
@@ -154,7 +156,7 @@ RegionSelection::remove (RegionView* rv)
 				
 				nframes_t ref = 0;
 				
-				for (i = begin (); i != end(); ++i) {
+				for (RegionSelection::iterator i = begin (); i != end(); ++i) {
 					if (region->first_frame() > ref) {
 						ref = region->first_frame();
 					}
@@ -163,6 +165,8 @@ RegionSelection::remove (RegionView* rv)
 				_current_end = ref;
 			}
 		}
+
+		erase (r);
 
 		return true;
 	}

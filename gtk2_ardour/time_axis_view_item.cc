@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <pbd/error.h>
@@ -89,31 +88,61 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 		layout->set_font_description (NAME_FONT);
 		Gtkmm2ext::get_ink_pixel_size (layout, width, height);
 
-		NAME_Y_OFFSET = height + 4;
+		NAME_Y_OFFSET = height + 6;
 		NAME_HIGHLIGHT_SIZE = height + 6;
 		NAME_HIGHLIGHT_THRESH = NAME_HIGHLIGHT_SIZE * 2;
 
 		have_name_font = true;
 	}
 
+	group = new ArdourCanvas::Group (parent);
+	
+	init (it_name, spu, base_color, start, duration, vis);
+
+}
+
+TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
+	: trackview (other.trackview)
+{
+
+	Gdk::Color c;
+	int r,g,b,a;
+
+	UINT_TO_RGBA (other.fill_color, &r, &g, &b, &a);
+	c.set_rgb_p (r/255.0, g/255.0, b/255.0);
+
+	/* share the other's parent, but still create a new group */
+
+	Gnome::Canvas::Group* parent = other.group->property_parent();
+	
+	group = new ArdourCanvas::Group (*parent);
+
+	init (other.item_name, other.samples_per_unit, c, other.frame_position, other.item_duration, other.visibility);
+}
+
+
+void
+TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_color, nframes_t start, nframes_t duration, Visibility vis)
+{
 	item_name = it_name ;
+	name_text_width = ::pixel_width (it_name, NAME_FONT);
+	last_name_text_width = 0;
 	samples_per_unit = spu ;
 	should_show_selection = true;
 	frame_position = start ;
 	item_duration = duration ;
 	name_connected = false;
-	fill_opacity = 130;
+	fill_opacity = 60;
 	position_locked = false ;
 	max_item_duration = ARDOUR::max_frames;
 	min_item_duration = 0 ;
 	show_vestigial = true;
 	visibility = vis;
+	_sensitive = true;
 
 	if (duration == 0) {
 		warning << "Time Axis Item Duration == 0" << endl ;
 	}
-
-	group = new ArdourCanvas::Group (parent);
 
 	vestigial_frame = new ArdourCanvas::SimpleRect (*group);
 	vestigial_frame->property_x1() = (double) 0.0;
@@ -220,7 +249,6 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 	set_duration (item_duration, this) ;
 	set_position (start, this) ;
 }
-
 
 /**
  * Destructor
@@ -462,6 +490,7 @@ TimeAxisViewItem::set_item_name(std::string new_name, void* src)
 	if (new_name != item_name) {
 		std::string temp_name = item_name ;
 		item_name = new_name ;
+		name_text_width = ::pixel_width (new_name, NAME_FONT);
 		NameChanged (item_name, temp_name, src) ; /* EMIT_SIGNAL */
 	}
 }
@@ -527,10 +556,12 @@ TimeAxisViewItem::get_time_axis_view()
  * @param new_name the new name text to display
  */
 void
-TimeAxisViewItem::set_name_text(std::string new_name)
+TimeAxisViewItem::set_name_text(const ustring& new_name)
 {
 	if (name_text) {
-		name_text->property_text() = new_name.c_str();
+		name_text->property_text() = new_name;
+		name_text_width = pixel_width (new_name, NAME_FONT);
+		name_text_size_cache.clear ();
 	}
 }
 
@@ -887,34 +918,88 @@ TimeAxisViewItem::reset_name_width (double pixel_width)
 	if (name_text == 0) {
 		return;
 	}
-                       
-	int width;
-	
-	ustring ustr = fit_to_pixels (item_name, (int) floor (pixel_width - NAME_X_OFFSET), NAME_FONT, width);
 
-	if (ustr.empty()) {
+	int limit = (int) floor (pixel_width - NAME_X_OFFSET);
+	bool shrinking = (last_name_text_width > pixel_width);
+	int actual_width;
+	ustring ustr;
+	ustring::size_type n;
+
+	if ((last_name_text_width &&                                       // we did this once
+	     shrinking &&                                                  // we're getting smaller
+	     (name_text_width <= limit) &&                                 // fits the new size
+	     (name_text_width <= last_name_text_width - NAME_X_OFFSET))) { // fit into the old size too
+		last_name_text_width = pixel_width;
+		return;
+	}
+
+	/* now check the cache of existing truncations */
+
+	Gtk::Label foo;
+	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout ("");
+
+	for (n = item_name.length(); n > 0; --n) {
 		
-		name_text->hide ();
-		
-	} else {
-		
-		/* don't use name for event handling if it leaves no room
-		   for trimming to work.
-		*/
-		
-		if (pixel_width - width < (NAME_X_OFFSET * 2.0)) {
-			if (name_connected) {
-				name_connected = false;
+		map<ustring::size_type,int>::iterator i;
+
+		if ((i = name_text_size_cache.find (n)) != name_text_size_cache.end()) {
+
+			/* we know the length of this substring already */
+			
+			if ((actual_width = (*i).second) < limit) {
+
+				/* it fits, use it */
+				
+				ustr = item_name.substr (0, n);
+				break;
 			}
+						
 		} else {
-			if (!name_connected) {
-				name_connected = true;
+			
+			/* we don't know the length of this substring already, so compute
+			   it and put it into the cache.
+			 */
+
+			layout->set_text (item_name.substr (0, n));
+			
+			int width, height;
+			Gtkmm2ext::get_ink_pixel_size (layout, width, height);
+			
+			name_text_size_cache[n] = width;
+
+			if ((actual_width = width) < limit) {
+				ustr = item_name.substr (0, n);
+				break;
 			}
 		}
-		
-		name_text->property_text() = ustr;
-		name_text->show();
 	}
+
+	if (n == 0) {
+		/* nothing will fit */
+		name_text->hide ();
+		last_name_text_width = pixel_width;
+		return;
+	} 
+
+	/* don't use name for event handling if it leaves no room
+	   for trimming to work.
+	*/
+	
+	if (pixel_width - actual_width < (NAME_X_OFFSET * 2.0)) {
+		if (name_connected) {
+			name_connected = false;
+		}
+	} else {
+		if (!name_connected) {
+			name_connected = true;
+		}
+	}
+	
+	name_text->property_text() = ustr;
+	name_text_width = actual_width;
+	name_text->show();
+	last_name_text_width = pixel_width;
+
 }
 
 

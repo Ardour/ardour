@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __ardour_session_h__
@@ -165,7 +164,7 @@ class Session : public PBD::StatefulDestructible
 			SlaveSource slave;
 	    };
 
-	    boost::shared_ptr<Region>   region;
+	    boost::shared_ptr<Region>     region;
 
 	    list<AudioRange>     audio_range;
 	    list<MusicRange>     music_range;
@@ -237,6 +236,7 @@ class Session : public PBD::StatefulDestructible
 	string name() const { return _name; }
 	string snap_name() const { return _current_snapshot_name; }
 	string raid_path () const;
+	string export_dir () const;
 
 	void set_snap_name ();
 
@@ -333,7 +333,7 @@ class Session : public PBD::StatefulDestructible
 	
 	/* Record status signals */
 
-        sigc::signal<void> RecordStateChanged;
+	sigc::signal<void> RecordStateChanged;
 
 	/* Transport mechanism signals */
 
@@ -358,6 +358,7 @@ class Session : public PBD::StatefulDestructible
 	void set_session_start (nframes_t start) { start_location->set_start(start); }
 	void set_session_end (nframes_t end) { end_location->set_start(end); _end_location_is_free = false; }
 	void use_rf_shuttle_speed ();
+	void allow_auto_play (bool yn);
 	void request_transport_speed (float speed);
 	void request_overwrite_buffer (Diskstream*);
 	void request_diskstream_speed (Diskstream&, float speed);
@@ -410,6 +411,8 @@ class Session : public PBD::StatefulDestructible
 	int save_template (string template_name);
         int save_history (string snapshot_name = "");
         int restore_history (string snapshot_name);
+	void remove_state (string snapshot_name);
+	void rename_state (string old_name, string new_name);
 
 	static int rename_template (string old_name, string new_name);
 
@@ -474,6 +477,8 @@ class Session : public PBD::StatefulDestructible
 
 	void   resort_routes ();
 	void   resort_routes_using (boost::shared_ptr<RouteList>);
+
+	void	set_remote_control_ids();
 
 	AudioEngine &engine() { return _engine; };
 
@@ -573,13 +578,14 @@ class Session : public PBD::StatefulDestructible
 
 	int start_audio_export (ARDOUR::AudioExportSpecification&);
 	int stop_audio_export (ARDOUR::AudioExportSpecification&);
-	
+	void finalize_audio_export ();
+
 	void add_source (boost::shared_ptr<Source>);
 	void remove_source (boost::weak_ptr<Source>);
 
 	struct cleanup_report {
 	    vector<string> paths;
-	    int32_t space;
+	    int64_t space;
 	};
 
 	int  cleanup_sources (cleanup_report&);
@@ -606,6 +612,7 @@ class Session : public PBD::StatefulDestructible
 	boost::shared_ptr<AudioFileSource> create_audio_source_for_session (ARDOUR::AudioDiskstream&, uint32_t which_channel, bool destructive);
 
 	boost::shared_ptr<Source> source_by_id (const PBD::ID&);
+	boost::shared_ptr<Source> source_by_path_and_channel (const Glib::ustring&, uint16_t);
 
 	/* playlist management */
 
@@ -663,6 +670,7 @@ class Session : public PBD::StatefulDestructible
 	void set_all_mute (bool);
 
 	sigc::signal<void,bool> SoloActive;
+	sigc::signal<void> SoloChanged;
 	
 	void record_disenable_all ();
 	void record_enable_all ();
@@ -720,6 +728,8 @@ class Session : public PBD::StatefulDestructible
 
 	void deliver_midi (MIDI::Port*, MIDI::byte*, int32_t size);
 
+	void set_mmc_device_id (uint32_t id);
+	
 	/* Scrubbing */
 
 	void start_scrub (nframes_t where);
@@ -900,12 +910,14 @@ class Session : public PBD::StatefulDestructible
 				  void* ptr,
 				  float opt);
 
-	typedef float (*compute_peak_t)				(Sample *, nframes_t, float);
+	typedef float (*compute_peak_t)			(Sample *, nframes_t, float);
+	typedef void  (*find_peaks_t)                   (Sample *, nframes_t, float *, float*);
 	typedef void  (*apply_gain_to_buffer_t)		(Sample *, nframes_t, float);
 	typedef void  (*mix_buffers_with_gain_t)	(Sample *, Sample *, nframes_t, float);
 	typedef void  (*mix_buffers_no_gain_t)		(Sample *, Sample *, nframes_t);
 
-	static compute_peak_t			compute_peak;
+	static compute_peak_t		compute_peak;
+	static find_peaks_t             find_peaks;
 	static apply_gain_to_buffer_t	apply_gain_to_buffer;
 	static mix_buffers_with_gain_t	mix_buffers_with_gain;
 	static mix_buffers_no_gain_t	mix_buffers_no_gain;
@@ -975,6 +987,7 @@ class Session : public PBD::StatefulDestructible
 	volatile float          _transport_speed;
 	volatile float          _desired_transport_speed;
 	float                   _last_transport_speed;
+	bool                     auto_play_legal;
 	nframes_t          _last_slave_transport_frame;
 	nframes_t           maximum_output_latency;
 	nframes_t           last_stop_frame;
@@ -1263,8 +1276,7 @@ class Session : public PBD::StatefulDestructible
 	void mmc_record_pause (MIDI::MachineControl &);
 	void mmc_record_strobe (MIDI::MachineControl &);
 	void mmc_record_exit (MIDI::MachineControl &);
-	void mmc_track_record_status (MIDI::MachineControl &, 
-				      uint32_t track, bool enabled);
+	void mmc_track_record_status (MIDI::MachineControl &, uint32_t track, bool enabled);
 	void mmc_fast_forward (MIDI::MachineControl &);
 	void mmc_rewind (MIDI::MachineControl &);
 	void mmc_locate (MIDI::MachineControl &, const MIDI::byte *);
@@ -1561,7 +1573,9 @@ class Session : public PBD::StatefulDestructible
 	static const char* dead_sound_dir_name;
 	static const char* interchange_dir_name;
 	static const char* peak_dir_name;
-
+	static const char* export_dir_name;
+	
+	string old_sound_dir (bool with_path = true) const;
 	string discover_best_sound_dir (bool destructive = false);
 	int ensure_sound_dir (string, string&);
 	void refresh_disk_space ();

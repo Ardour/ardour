@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <algorithm>
@@ -145,14 +144,19 @@ static const char* authors[] = {
 	N_("Stefan Kersten"),
 	N_("Christopher George"),
 	N_("Robert Jordens"),
+	N_("Dave Robillard"),
+	N_("Hans Fugal"),
 	N_("Brian Ahr"),
 	N_("Nimal Ratnayake"),
+	N_("Mike Täht"),
+	N_("John Anderson"),
+	N_("Nedko Arnaudov"),
 	0
 };
 
 static const char* translators[] = {
 	N_("French:\n\tAlain Fréhel <alain.frehel@free.fr>\n\tChristophe Combelles <ccomb@free.fr>\n"),
-	N_("German:\n\tKarsten Petersen <kapet@kapet.de>\n"),
+	N_("German:\n\tKarsten Petersen <kapet@kapet.de>\n\tSebastian Arnold <mail@sebastian-arnold.net>\n"),
 	N_("Italian:\n\tFilippo Pappalardo <filippo@email.it>\n"),
 	N_("Portuguese:\n\tRui Nuno Capela <rncbc@rncbc.org>\n"),
 	N_("Brazilian Portuguese:\n\tAlexander da Franca Fernandes <alexander@nautae.eti.br>\
@@ -186,7 +190,7 @@ About::About ()
 	}
 
 	set_translator_credits (t);
-	set_copyright (_("Copyright (C) 1999-2006 Paul Davis\n"));
+	set_copyright (_("Copyright (C) 1999-2007 Paul Davis\n"));
 	set_license (_("Ardour comes with ABSOLUTELY NO WARRANTY\n"
 		       "This is free software, and you are welcome to redistribute it\n"
 		       "under certain conditions; see the file COPYING for details.\n"));

@@ -15,7 +15,6 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-  $Id$
 */
 
 #include <limits.h>
@@ -106,11 +105,11 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	gain_display_box.pack_start (gain_display, true, true);
 
 	peak_display.set_name ("MixerStripPeakDisplay");
-	peak_display.set_has_frame (false);
-	peak_display.set_editable (false);
+//	peak_display.set_has_frame (false);
+//	peak_display.set_editable (false);
 	set_size_request_to_display_given_text  (peak_display, "-80.g", 2, 6); /* note the descender */
 	max_peak = minus_infinity();
-	peak_display.set_text (_("-inf"));
+	peak_display.set_label (_("-inf"));
 	peak_display.unset_flags (Gtk::CAN_FOCUS);
 
 	meter_metric_area.set_name ("MeterMetricsStrip");
@@ -157,7 +156,7 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 
 		using namespace Menu_Helpers;
 	
-		gain_astate_menu.items().push_back (MenuElem (_("Off"), 
+		gain_astate_menu.items().push_back (MenuElem (_("Manual"), 
 						      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Off)));
 		gain_astate_menu.items().push_back (MenuElem (_("Play"),
 						      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Play)));
@@ -227,11 +226,11 @@ GainMeter::render_metrics (Gtk::Widget& w)
 	Glib::RefPtr<Gdk::Window> win (w.get_window());
 	Glib::RefPtr<Gdk::GC> fg_gc (w.get_style()->get_fg_gc (Gtk::STATE_NORMAL));
 	Glib::RefPtr<Gdk::GC> bg_gc (w.get_style()->get_bg_gc (Gtk::STATE_NORMAL));
-	gint x, y, width, height, depth;
+	gint width, height;
 	int  db_points[] = { -50, -40, -20, -30, -10, -3, 0, 4 };
 	char buf[32];
 
-	win->get_geometry (x, y, width, height, depth);
+	win->get_size (width, height);
 	
 	Glib::RefPtr<Gdk::Pixmap> pixmap = Gdk::Pixmap::create (win, width, height);
 
@@ -270,9 +269,9 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 	Glib::RefPtr<Gdk::GC> bg_gc (meter_metric_area.get_style()->get_bg_gc (Gtk::STATE_NORMAL));
 	GdkRectangle base_rect;
 	GdkRectangle draw_rect;
-	gint x, y, width, height, depth;
+	gint width, height;
 
-	win->get_geometry (x, y, width, height, depth);
+	win->get_size (width, height);
 	
 	base_rect.width = width;
 	base_rect.height = height;
@@ -320,7 +319,7 @@ GainMeter::update_meters ()
 		if ((*i).packed) {
 			peak = _io->peak_input_power (n);
 
-			(*i).meter->set (log_meter (peak), peak);
+			(*i).meter->set (log_meter (peak));
 
 			mpeak = _io->max_peak_power(n);
 			
@@ -328,10 +327,10 @@ GainMeter::update_meters ()
 				max_peak = mpeak;
 				/* set peak display */
 				if (max_peak <= -200.0f) {
-					peak_display.set_text (_("-inf"));
+					peak_display.set_label (_("-inf"));
 				} else {
 					snprintf (buf, sizeof(buf), "%.1f", max_peak);
-					peak_display.set_text (buf);
+					peak_display.set_label (buf);
 				}
 
 				if (max_peak >= 0.0f) {
@@ -448,6 +447,13 @@ GainMeter::setup_meters ()
 	}
 }	
 
+int
+GainMeter::get_gm_width ()
+{
+	Gtk::Requisition sz = hbox.size_request ();
+	return sz.width;
+}
+
 bool
 GainMeter::gain_key_press (GdkEventKey* ev)
 {
@@ -487,7 +493,7 @@ GainMeter::reset_peak_display ()
 	}
 
 	max_peak = -INFINITY;
-	peak_display.set_text (_("-Inf"));
+	peak_display.set_label (_("-Inf"));
 	peak_display.set_name ("MixerStripPeakDisplay");
 }
 
@@ -509,7 +515,7 @@ GainMeter::meter_button_release (GdkEventButton* ev, uint32_t which)
 	case 1:
 		meters[which].meter->clear();
 		max_peak = minus_infinity();
-		peak_display.set_text (_("-inf"));
+		peak_display.set_label (_("-inf"));
 		peak_display.set_name ("MixerStripPeakDisplay");
 		break;
 
@@ -838,7 +844,7 @@ GainMeter::_astate_string (AutoState state, bool shrt)
 
 	switch (state) {
 	case Off:
-		sstr = (shrt ? "O" : _("O"));
+		sstr = (shrt ? "M" : _("M"));
 		break;
 	case Play:
 		sstr = (shrt ? "P" : _("P"));

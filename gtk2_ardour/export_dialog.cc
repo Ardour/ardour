@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 
 */
 
@@ -30,6 +29,8 @@
 #include <pbd/xml++.h>
 
 #include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/window_title.h>
+
 #include <ardour/export.h>
 #include <ardour/sndfile_helpers.h>
 #include <ardour/audio_track.h>
@@ -52,6 +53,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace sigc;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 
 static const gchar *sample_rates[] = {
 	N_("22.05kHz"),
@@ -107,7 +109,6 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	  src_quality_label (_("Conversion Quality"), 1.0, 0.5),
 	  dither_type_label (_("Dither Type"), 1.0, 0.5),
 	  cuefile_only_checkbox (_("Export CD Marker File Only")),
-	  file_frame (_("Export to File")),
 	  file_browse_button (_("Browse")),
 	  track_selector_button (_("Specific tracks ..."))
 {
@@ -119,8 +120,11 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	track_and_master_selection_allowed = true;
 	channel_count_selection_allowed = true;
 	export_cd_markers_allowed = true;
+
+	WindowTitle title(Glib::get_application_name());
+	title += _("Export");
 	
-	set_title (_("ardour: export"));
+	set_title (title.get_string());
 	set_wmclass (X_("ardour_export"), "Ardour");
 	set_name ("ExportWindow");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
@@ -569,7 +573,7 @@ ExportDialog::save_state()
 
 		row = *ri;
 		track->add_property(X_("channel1"), row[exp_cols.left] ? X_("on") : X_("off"));
-		track->add_property(X_("channel1"), row[exp_cols.right] ? X_("on") : X_("off"));
+		track->add_property(X_("channel2"), row[exp_cols.right] ? X_("on") : X_("off"));
 
 		tracks->add_child_nocopy(*track);
 	}
@@ -918,7 +922,6 @@ ExportDialog::do_export ()
 void
 ExportDialog::end_dialog ()
 {
-
 	if (spec.running) {
 		spec.stop = true;
 
@@ -931,7 +934,7 @@ ExportDialog::end_dialog ()
 		}
 	}
 
-	session->engine().freewheel (false);
+	session->finalize_audio_export ();
 
 	hide_all ();
 
@@ -947,12 +950,12 @@ ExportDialog::start_export ()
 	}
 
 	/* If the filename hasn't been set before, use the
-	   directory above the current session as a default
+	   current session's export directory as a default
 	   location for the export.  
 	*/
 	
 	if (file_entry.get_text().length() == 0) {
-		string dir = session->path();
+		string dir = session->export_dir();
 		string::size_type last_slash;
 		
 		if ((last_slash = dir.find_last_of ('/')) != string::npos && last_slash != 0) {
@@ -1306,7 +1309,7 @@ ExportDialog::window_closed (GdkEventAny *ignored)
 void
 ExportDialog::browse ()
 {
-	FileChooserDialog dialog("Export to file", FILE_CHOOSER_ACTION_SAVE);
+	FileChooserDialog dialog("Export to file", browse_action());
 	dialog.set_transient_for(*this);
 	dialog.set_filename (file_entry.get_text());
 

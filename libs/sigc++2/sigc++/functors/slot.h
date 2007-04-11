@@ -471,7 +471,7 @@ public:
  *
  * The template arguments determine the function signature of operator()():
  * - @e T_return The return type of operator()().
- * - @e T_arg1 Argument type used in the definition of operator()(). The default @p nil means no argument.
+ * - @e T_arg1 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
  *
  * To use simply assign the slot to the desired functor. If the functor
  * is not compatible with the parameter list defined with the template
@@ -546,8 +546,8 @@ public:
  *
  * The template arguments determine the function signature of operator()():
  * - @e T_return The return type of operator()().
- * - @e T_arg1 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg2 Argument type used in the definition of operator()(). The default @p nil means no argument.
+ * - @e T_arg1 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg2 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
  *
  * To use simply assign the slot to the desired functor. If the functor
  * is not compatible with the parameter list defined with the template
@@ -624,9 +624,9 @@ public:
  *
  * The template arguments determine the function signature of operator()():
  * - @e T_return The return type of operator()().
- * - @e T_arg1 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg2 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg3 Argument type used in the definition of operator()(). The default @p nil means no argument.
+ * - @e T_arg1 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg2 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg3 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
  *
  * To use simply assign the slot to the desired functor. If the functor
  * is not compatible with the parameter list defined with the template
@@ -705,10 +705,10 @@ public:
  *
  * The template arguments determine the function signature of operator()():
  * - @e T_return The return type of operator()().
- * - @e T_arg1 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg2 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg3 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg4 Argument type used in the definition of operator()(). The default @p nil means no argument.
+ * - @e T_arg1 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg2 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg3 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg4 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
  *
  * To use simply assign the slot to the desired functor. If the functor
  * is not compatible with the parameter list defined with the template
@@ -789,11 +789,11 @@ public:
  *
  * The template arguments determine the function signature of operator()():
  * - @e T_return The return type of operator()().
- * - @e T_arg1 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg2 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg3 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg4 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg5 Argument type used in the definition of operator()(). The default @p nil means no argument.
+ * - @e T_arg1 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg2 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg3 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg4 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg5 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
  *
  * To use simply assign the slot to the desired functor. If the functor
  * is not compatible with the parameter list defined with the template
@@ -876,12 +876,12 @@ public:
  *
  * The template arguments determine the function signature of operator()():
  * - @e T_return The return type of operator()().
- * - @e T_arg1 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg2 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg3 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg4 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg5 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg6 Argument type used in the definition of operator()(). The default @p nil means no argument.
+ * - @e T_arg1 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg2 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg3 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg4 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg5 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg6 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
  *
  * To use simply assign the slot to the desired functor. If the functor
  * is not compatible with the parameter list defined with the template
@@ -966,13 +966,13 @@ public:
  *
  * The template arguments determine the function signature of operator()():
  * - @e T_return The return type of operator()().
- * - @e T_arg1 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg2 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg3 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg4 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg5 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg6 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg7 Argument type used in the definition of operator()(). The default @p nil means no argument.
+ * - @e T_arg1 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg2 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg3 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg4 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg5 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg6 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg7 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
  *
  * To use simply assign the slot to the desired functor. If the functor
  * is not compatible with the parameter list defined with the template
@@ -1061,13 +1061,13 @@ public:
  *
  * The template arguments determine the function signature of operator()():
  * - @e T_return The return type of operator()().
- * - @e T_arg1 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg2 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg3 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg4 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg5 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg6 Argument type used in the definition of operator()(). The default @p nil means no argument.
- * - @e T_arg7 Argument type used in the definition of operator()(). The default @p nil means no argument.
+ * - @e T_arg1 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg2 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg3 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg4 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg5 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg6 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
+ * - @e T_arg7 Argument type used in the definition of operator()(). The default @p nil_ means no argument.
  *
  * To use simply assign the slot to the desired functor. If the functor
  * is not compatible with the parameter list defined with the template
@@ -1085,7 +1085,7 @@ public:
  *
  * @ingroup slot
  */
-template <class T_return, class T_arg1 = nil,class T_arg2 = nil,class T_arg3 = nil,class T_arg4 = nil,class T_arg5 = nil,class T_arg6 = nil,class T_arg7 = nil>
+template <class T_return, class T_arg1 = nil_,class T_arg2 = nil_,class T_arg3 = nil_,class T_arg4 = nil_,class T_arg5 = nil_,class T_arg6 = nil_,class T_arg7 = nil_>
 class slot 
   : public slot7<T_return, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>
 {
@@ -1111,10 +1111,10 @@ public:
  * See the base class for useful methods.
  * This is the template specialization of the unnumbered sigc::slot
  * template for 0 argument(s), specialized for different numbers of arguments
- * This is possible because the template has default (nil) template types.
+ * This is possible because the template has default (nil_) template types.
  */
 template <class T_return>
-class slot <T_return, nil, nil, nil, nil, nil, nil, nil>
+class slot <T_return, nil_, nil_, nil_, nil_, nil_, nil_, nil_>
   : public slot0<T_return>
 {
 public:
@@ -1138,10 +1138,10 @@ public:
  * See the base class for useful methods.
  * This is the template specialization of the unnumbered sigc::slot
  * template for 1 argument(s), specialized for different numbers of arguments
- * This is possible because the template has default (nil) template types.
+ * This is possible because the template has default (nil_) template types.
  */
 template <class T_return, class T_arg1>
-class slot <T_return, T_arg1, nil, nil, nil, nil, nil, nil>
+class slot <T_return, T_arg1, nil_, nil_, nil_, nil_, nil_, nil_>
   : public slot1<T_return, T_arg1>
 {
 public:
@@ -1165,10 +1165,10 @@ public:
  * See the base class for useful methods.
  * This is the template specialization of the unnumbered sigc::slot
  * template for 2 argument(s), specialized for different numbers of arguments
- * This is possible because the template has default (nil) template types.
+ * This is possible because the template has default (nil_) template types.
  */
 template <class T_return, class T_arg1,class T_arg2>
-class slot <T_return, T_arg1, T_arg2, nil, nil, nil, nil, nil>
+class slot <T_return, T_arg1, T_arg2, nil_, nil_, nil_, nil_, nil_>
   : public slot2<T_return, T_arg1,T_arg2>
 {
 public:
@@ -1192,10 +1192,10 @@ public:
  * See the base class for useful methods.
  * This is the template specialization of the unnumbered sigc::slot
  * template for 3 argument(s), specialized for different numbers of arguments
- * This is possible because the template has default (nil) template types.
+ * This is possible because the template has default (nil_) template types.
  */
 template <class T_return, class T_arg1,class T_arg2,class T_arg3>
-class slot <T_return, T_arg1, T_arg2, T_arg3, nil, nil, nil, nil>
+class slot <T_return, T_arg1, T_arg2, T_arg3, nil_, nil_, nil_, nil_>
   : public slot3<T_return, T_arg1,T_arg2,T_arg3>
 {
 public:
@@ -1219,10 +1219,10 @@ public:
  * See the base class for useful methods.
  * This is the template specialization of the unnumbered sigc::slot
  * template for 4 argument(s), specialized for different numbers of arguments
- * This is possible because the template has default (nil) template types.
+ * This is possible because the template has default (nil_) template types.
  */
 template <class T_return, class T_arg1,class T_arg2,class T_arg3,class T_arg4>
-class slot <T_return, T_arg1, T_arg2, T_arg3, T_arg4, nil, nil, nil>
+class slot <T_return, T_arg1, T_arg2, T_arg3, T_arg4, nil_, nil_, nil_>
   : public slot4<T_return, T_arg1,T_arg2,T_arg3,T_arg4>
 {
 public:
@@ -1246,10 +1246,10 @@ public:
  * See the base class for useful methods.
  * This is the template specialization of the unnumbered sigc::slot
  * template for 5 argument(s), specialized for different numbers of arguments
- * This is possible because the template has default (nil) template types.
+ * This is possible because the template has default (nil_) template types.
  */
 template <class T_return, class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
-class slot <T_return, T_arg1, T_arg2, T_arg3, T_arg4, T_arg5, nil, nil>
+class slot <T_return, T_arg1, T_arg2, T_arg3, T_arg4, T_arg5, nil_, nil_>
   : public slot5<T_return, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>
 {
 public:
@@ -1273,10 +1273,10 @@ public:
  * See the base class for useful methods.
  * This is the template specialization of the unnumbered sigc::slot
  * template for 6 argument(s), specialized for different numbers of arguments
- * This is possible because the template has default (nil) template types.
+ * This is possible because the template has default (nil_) template types.
  */
 template <class T_return, class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
-class slot <T_return, T_arg1, T_arg2, T_arg3, T_arg4, T_arg5, T_arg6, nil>
+class slot <T_return, T_arg1, T_arg2, T_arg3, T_arg4, T_arg5, T_arg6, nil_>
   : public slot6<T_return, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>
 {
 public:

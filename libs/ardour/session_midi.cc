@@ -16,7 +16,6 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-  $Id$
 */
 
 #include <string>
@@ -126,9 +125,20 @@ Session::set_mtc_port (string port_tag)
 	return 0;
 }
 
+void
+Session::set_mmc_device_id (uint32_t device_id)
+{
+	if (mmc) {
+		mmc->set_device_id (device_id);
+	}
+}
+
 int
 Session::set_mmc_port (string port_tag)
 {
+	MIDI::byte old_device_id = 0;
+	bool reset_id = false;
+
 	if (port_tag.length() == 0) {
 		if (_mmc_port == 0) {
 			return 0;
@@ -146,6 +156,8 @@ Session::set_mmc_port (string port_tag)
 	_mmc_port = port;
 
 	if (mmc) {
+		old_device_id = mmc->device_id();
+		reset_id = true;
 		delete mmc;
 	}
 
@@ -153,6 +165,9 @@ Session::set_mmc_port (string port_tag)
 					MMC_CommandSignature,
 					MMC_ResponseSignature);
 
+	if (reset_id) {
+		mmc->set_device_id (old_device_id);
+	}
 
 	mmc->Play.connect 
 		(mem_fun (*this, &Session::mmc_deferred_play));
@@ -180,6 +195,7 @@ Session::set_mmc_port (string port_tag)
 		(mem_fun (*this, &Session::mmc_shuttle));
 	mmc->TrackRecordStatusChange.connect
 		(mem_fun (*this, &Session::mmc_record_enable));
+
 
 	/* also handle MIDI SPP because its so common */
 
@@ -382,24 +398,6 @@ Session::setup_midi_control ()
 	mtc_msg[10] = 0xf1;
 	mtc_msg[12] = 0xf1;
 	mtc_msg[14] = 0xf1;
-
-	if (_mmc_port != 0) {
-
-		Config->set_send_mmc (session_send_mmc);
-
-	} else {
-
-		mmc = 0;
-		session_send_mmc = false;
-	}
-
-	if (_mtc_port != 0) {
-
-		Config->set_send_mtc (session_send_mtc);
-
-	} else {
-		session_send_mtc = false;
-	}
 }
 
 int
@@ -543,7 +541,6 @@ Session::mmc_pause (MIDI::MachineControl &mmc)
 static bool step_queued = false;
 
 void
-
 Session::mmc_step (MIDI::MachineControl &mmc, int steps)
 {
 	if (!Config->get_mmc_control()) {
@@ -1099,15 +1096,17 @@ Session::start_midi_thread ()
 void
 Session::terminate_midi_thread ()
 {
-	MIDIRequest* request = new MIDIRequest;
-	void* status;
-
-	request->type = MIDIRequest::Quit;
-
-	midi_requests.write (&request, 1);
-	poke_midi_thread ();
-
-	pthread_join (midi_thread, &status);
+	if (midi_thread) {
+		MIDIRequest* request = new MIDIRequest;
+		void* status;
+		
+		request->type = MIDIRequest::Quit;
+		
+		midi_requests.write (&request, 1);
+		poke_midi_thread ();
+		
+		pthread_join (midi_thread, &status);
+	}
 }
 
 void

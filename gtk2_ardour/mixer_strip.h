@@ -241,9 +241,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	bool ignore_speed_adjustment;
 
-	string solo_button_name () const { return "MixerSoloButton"; }
-	string safe_solo_button_name () const { return "MixerSafeSoloButton"; }
-
 	void engine_running();
 	void engine_stopped();
 

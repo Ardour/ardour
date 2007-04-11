@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __ardour_route_params_ui_h__
@@ -41,7 +40,6 @@
 
 #include "io_selector.h"
 #include "ardour_dialog.h"
-#include "keyboard_target.h"
 #include "redirect_box.h"
 #include "route_redirect_selection.h"
 
@@ -60,7 +58,7 @@ class PluginSelector;
 class RouteParams_UI : public ArdourDialog
 {
   public:
-	RouteParams_UI (ARDOUR::AudioEngine&);
+	RouteParams_UI ();
 	~RouteParams_UI();
 
 	void set_session (ARDOUR::Session *);
@@ -68,8 +66,6 @@ class RouteParams_UI : public ArdourDialog
 	PluginSelector&  plugin_selector() { return *_plugin_selector; }
 
   private:
-	ARDOUR::AudioEngine&     engine;
-
 	Gtk::HBox                global_hpacker;
 	Gtk::VBox                global_vpacker;
 	Gtk::ScrolledWindow      scroller;

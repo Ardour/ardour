@@ -16,7 +16,15 @@
 
 #include <libgnomecanvas/libgnomecanvas.h>
 #include <gtk/gtkenums.h> 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <libart_lgpl/art_misc.h>
+#ifdef __cplusplus
+}
+#endif
+
 #include <libart_lgpl/art_pixbuf.h>
 
 

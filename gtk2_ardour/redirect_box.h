@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __ardour_gtk_redirect_box__
@@ -195,7 +194,7 @@ class RedirectBox : public Gtk::HBox
 
 	gint idle_delete_redirect (boost::weak_ptr<ARDOUR::Redirect>);
 
-	void wierd_plugin_dialog (ARDOUR::Plugin& p, uint32_t streams, boost::shared_ptr<ARDOUR::IO> io);
+	void weird_plugin_dialog (ARDOUR::Plugin& p, uint32_t streams, boost::shared_ptr<ARDOUR::IO> io);
 
 	static RedirectBox* _current_redirect_box;
 	static bool enter_box (GdkEventCrossing*, RedirectBox*);

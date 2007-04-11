@@ -80,7 +80,7 @@ style "marker_text"
 
 style "time_axis_view_item_name"
 {
-	font_name = "sans medium 10"
+	font_name = "sans 10"
 }
 
 style "default_base" = "medium_text"
@@ -141,11 +141,11 @@ style "transport_base" = "medium_bold_text"
   bg[SELECTED] = { 0, 0, 0 }
 }
 
-style "black_mackie_menu_bar" = "medium_bold_text"
+style "black_mackie_menu_bar"
 {
-      font_name = "sans bold 11"
-      fg[NORMAL] = { 1.0, 1.0, 1.0 }
-      bg[NORMAL] = { 0, 0, 0 }
+  font_name = "sans bold 11"
+  fg[NORMAL] = { 1.0, 1.0, 1.0 }
+  bg[NORMAL] = { 0, 0, 0 }
 }
 
 style "default_buttons_menus" 
@@ -184,24 +184,58 @@ style "small_red_active_and_selected_button" = "small_button"
 	bg[SELECTED] = { 1.0, 0, 0}
 }
 
-style "track_rec_enable_button" = "small_button"
-{
-	fg[SELECTED] = { 0.0, 0.0, 0.0 }
-	fg[ACTIVE] =   { 0.0, 0.0, 0.0 }
-	fg[PRELIGHT] = { 0.0, 0.0, 0.0 }
-
-	bg[SELECTED] =   { 1.0, 0.0, 0.0 }
-	bg[ACTIVE] =   { 0.91, 0.68, 0.68}
-	bg[PRELIGHT] =   { 1.0, 0.0, 0.0 }
-}
-
 style "gain_fader"
 {
 	bg[NORMAL] =   { 0.269, 0.269, 0.300}
 	bg[ACTIVE] =   { 0.152, 0.152, 0.168 }
 }
 
-style "mixer_rec_enable_button" = "track_rec_enable_button"
+
+style "track_rec_enable_button" = "small_button"
+{
+}
+
+style "track_rec_enable_button_active" = "small_button"
+{
+	fg[SELECTED] = { 0.0, 0.0, 0.0 }
+	fg[ACTIVE] =   { 0.0, 0.0, 0.0 }
+	fg[PRELIGHT] = { 0.0, 0.0, 0.0 }
+	fg[NORMAL] = { 0.0, 0.0, 0.0 }
+
+	bg[NORMAL] =   { 1.0, 0.0, 0.0 }
+	bg[ACTIVE] =   { 1.0, 0.0, 0.0 }
+	bg[SELECTED] =   { 1.0, 0.0, 0.0 }
+	bg[PRELIGHT] =   { 1.0, 0.0, 0.0 }
+}
+
+style "track_rec_enable_button_alternate" = "small_button"
+{
+	fg[SELECTED] = { 0.0, 0.0, 0.0 }
+	fg[ACTIVE] =   { 0.0, 0.0, 0.0 }
+	fg[PRELIGHT] = { 0.0, 0.0, 0.0 }
+	fg[NORMAL] = { 0.0, 0.0, 0.0 }
+
+	bg[NORMAL] =   { 0.91, 0.68, 0.68}
+	bg[ACTIVE] =   { 0.91, 0.68, 0.68}
+	bg[SELECTED] =   { 0.91, 0.68, 0.68}
+	bg[PRELIGHT] =   { 0.91, 0.68, 0.68}
+}
+
+style "mixer_track_rec_enable_button" = "track_rec_enable_button"
+{
+	font_name = "sans 8"
+	xthickness = 0
+	ythickness = 0
+}
+
+style "mixer_track_rec_enable_button_alternate" = "track_rec_enable_button_alternate"
+{
+	font_name = "sans 8"
+	xthickness = 0
+	ythickness = 0
+}
+
+style "mixer_track_rec_enable_button_active" = "track_rec_enable_button_active"
 {
 	font_name = "sans 8"
 	xthickness = 0
@@ -210,20 +244,33 @@ style "mixer_rec_enable_button" = "track_rec_enable_button"
 
 style "solo_button" = "small_button"
 {
-	bg[PRELIGHT] = { 0, 1.0, 0 }
-	bg[ACTIVE] = { 0.66, 0.97, 0.19 }
-
-	fg[PRELIGHT] = { 0, 0, 0 }
-	fg[ACTIVE] = { 0, 0, 0 }
 }
 
-style "safe_solo_button" = "small_button"
+style "solo_button_alternate" = "small_button"
 {
-	bg[PRELIGHT] = { 0, 1.0, 0 }
-	bg[ACTIVE] = { 0.19, 0.97, 0.69 }
+	bg[NORMAL] = { 0.19, 0.97, 0.69 } # solo-safe
+	bg[ACTIVE] = { 0.19, 0.97, 0.69 } # solo-safe
+	bg[SELECTED] = { 0.19, 0.97, 0.69 } # solo-safe
+	bg[PRELIGHT] = { 0.19, 0.97, 0.69 } # solo-safe
 
-	fg[PRELIGHT] = { 0, 0, 0 }
 	fg[ACTIVE] = { 0, 0, 0 }
+	fg[SELECTED] = { 0, 0, 0 }
+	fg[NORMAL] = { 0, 0, 0 }
+	fg[PRELIGHT] = { 0, 0, 0 }
+}
+
+
+style "solo_button_active" = "small_button"
+{
+	bg[NORMAL] = { 0.66, 0.97, 0.19 }   # solo
+	bg[ACTIVE] = { 0.66, 0.97, 0.19 }   # solo
+	bg[SELECTED] = { 0.66, 0.97, 0.19 }   # solo
+	bg[PRELIGHT] = { 0.66, 0.97, 0.19 }   # solo
+
+	fg[ACTIVE] = { 0, 0, 0 }
+	fg[SELECTED] = { 0, 0, 0 }
+	fg[NORMAL] = { 0, 0, 0 }
+	fg[PRELIGHT] = { 0, 0, 0 }
 }
 
 style "mixer_solo_button" = "solo_button"
@@ -231,27 +278,72 @@ style "mixer_solo_button" = "solo_button"
 	font_name = "sans 8"
 	xthickness = 0
 	ythickness = 0
-
 }
 
-style "mixer_safe_solo_button" = "safe_solo_button"
+style "mixer_solo_button_alternate" = "solo_button_alternate"
 {
-	font_name = "sans 7"
+	font_name = "sans 8"
 	xthickness = 0
 	ythickness = 0
-
+}
+style "mixer_solo_button_active" = "solo_button_active"
+{
+	font_name = "sans 8"
+	xthickness = 0
+	ythickness = 0
 }
 
 
 style "mute_button" = "small_button"
 {
-	bg[PRELIGHT] = { 1.0, 0.65, 0.13 }
-	bg[ACTIVE] = { 1.0, 0.98, 0.53 }
-	
-	fg[PRELIGHT] = { 0, 0, 0 }
-	fg[ACTIVE] = { 0, 0, 0 }
 }
 
+style "mute_button_alternate" = "small_button"
+{
+	bg[ACTIVE] = { 1.0, 0.98, 0.53 }
+	bg[NORMAL] = { 1.0, 0.98, 0.53 }
+	bg[SELECTED] = { 1.0, 0.98, 0.53 }
+	bg[PRELIGHT] = { 1.0, 0.98, 0.53 }
+
+	fg[SELECTED] = { 0, 0, 0 }
+	fg[ACTIVE] = { 0, 0, 0 }
+	fg[NORMAL] = { 0, 0, 0 }
+	fg[PRELIGHT] = { 0, 0, 0 }
+}
+
+style "mute_button_active" = "small_button"
+{
+	bg[NORMAL] = { 0.90, 0.89, 0.73 }
+	bg[ACTIVE] = { 0.90, 0.89, 0.73 }
+	bg[PRELIGHT] = { 0.90, 0.89, 0.73 }
+	bg[SELECTED] = { 0.90, 0.89, 0.73 }
+
+	fg[SELECTED] = { 0, 0, 0 }
+	fg[ACTIVE] = { 0, 0, 0 }
+	fg[NORMAL] = { 0, 0, 0 }
+	fg[PRELIGHT] = { 0, 0, 0 }
+}
+
+style "mixer_mute_button" = "mute_button"
+{
+	font_name = "sans 8"
+	xthickness = 0
+	ythickness = 0
+}
+
+style "mixer_mute_button_alternate" = "mute_button_alternate"
+{
+	font_name = "sans 8"
+	xthickness = 0
+	ythickness = 0
+}
+
+style "mixer_mute_button_active" = "mute_button_active"
+{
+	font_name = "sans 8"
+	xthickness = 0
+	ythickness = 0
+}
 
 style "multiline_combo" = "small_button"
 {
@@ -290,15 +382,39 @@ style "time_button" = "default_buttons_menus"
 
 style "transport_button"
 {
-	font_name = "sans 9"
+}
+
+style "transport_button_active"
+{
+	bg[NORMAL] = { 0.50, 1.0, 0.50 }
 	bg[ACTIVE] = { 0.50, 1.0, 0.50 }
+	bg[SELECTED] = { 0.50, 1.0, 0.50 }
+	bg[PRELIGHT] = { 0.50, 1.0, 0.50 }
+
+	fg[NORMAL] = { 0, 0, 0 }
+	fg[PRELIGHT] = { 0, 0, 0 }
+	fg[SELECTED] = { 0, 0, 0 }
 	fg[ACTIVE] = { 0, 0, 0 }
 }
 
 style "transport_rec_button"
 {
+}
+
+style "transport_rec_button_active"
+{
 	bg[ACTIVE] = { 1.0, 0, 0 }
-	bg[PRELIGHT] = { 0.91, 0.68, 0.68 }		#blinking rec button color
+	bg[NORMAL] = { 1.0, 0, 0 }
+	bg[SELECTED] = { 1.0, 0, 0 }
+	bg[PRELIGHT] = { 1.0, 0, 0 }
+}
+
+style "transport_rec_button_alternate"
+{
+	bg[PRELIGHT] = { 0.91, 0.68, 0.68 }
+	bg[NORMAL] = { 0.91, 0.68, 0.68 }
+	bg[SELECTED] = { 0.91, 0.68, 0.68 }
+	bg[ACTIVE] = { 0.91, 0.68, 0.68 }
 }
 
 style "shuttle_control" = "very_small_text"
@@ -548,7 +664,7 @@ style "transport_clock_display"
 
 style "tempo_meter_clock_display"
 {
-	font_name = "sans 9"
+	font_name = "sans 8"
 	fg[NORMAL] = { 1.0, 1.0, 1.0 }
 	fg[ACTIVE] = { 1.0, 1.0, 0.0 }
 	fg[SELECTED] = { 1.0, 0, 0 }
@@ -560,7 +676,6 @@ style "tempo_meter_clock_display"
 
 style "default_clock_display" = "medium text"
 {
- 	font_name = "sans 10"
 	fg[NORMAL] = { 0.50, 1.0, 0.50 }
 	fg[ACTIVE] = { 1.0, 0.0, 0.0 }
 	fg[SELECTED] = { 1.0, 0, 0 }
@@ -723,11 +838,11 @@ style "track_controls_inactive"
 
 style "edit_controls_base_selected"
 {
-	bg[NORMAL] = { 0.56, 0.56, 0.56 }
-	bg[ACTIVE] = { 0.56, 0.56, 0.56 }
-	bg[INSENSITIVE] = { 0.56, 0.56, 0.56 }
-	bg[SELECTED] = { 0.56, 0.56, 0.56 }
-	bg[PRELIGHT] = { 0.56, 0.56, 0.56 }
+	bg[NORMAL] = { 0.60, 0.54, 0.60 }
+	bg[ACTIVE] = { 0.60, 0.54, 0.60 }
+	bg[INSENSITIVE] = { 0.60, 0.54, 0.60 }
+	bg[SELECTED] = { 0.60, 0.54, 0.60 }
+	bg[PRELIGHT] = { 0.60, 0.54, 0.60 }
 }
 
 style "automation_track_controls_base"
@@ -1016,355 +1131,365 @@ style "ardour_button" ="default_buttons_menus"
 }
 
 #---------------------------------------------------------------
-widget "*FirstActionMessage" style "first_action_message"
-widget "*VerboseCanvasCursor" style "verbose_canvas_cursor"
-widget "*MarkerText" style "marker_text"
-widget "*TimeAxisViewItemName*" style "time_axis_view_item_name"
-#widget "*ExportProgress" style "default_buttons_menus"
-widget "*ExportFileLabel" style "small_bold_text"
-widget "*ExportFormatLabel" style "medium_bold_text"
-widget "*ExportHeader" style "small_bold_text"
-widget "*ExportFileDisplay" style "medium_entry"
-widget "*ExportFormatDisplay" style "medium_entry"
-widget "*ExportCheckbox" style "small_entry"
-widget "*ExportTrackSelector*" style "medium_entry_noselection_bg"
-widget "*EditModeSelector" style "medium_bold_entry"
-widget "*SnapTypeSelector" style "medium_bold_entry"
-widget "*SnapModeSelector" style "medium_bold_entry"
-widget "*ZoomFocusSelector" style "medium_bold_entry"
-widget "*ArdourContextMenu*" style "default_buttons_menus"
-widget "*EditGroupTitleButton*" style "default_buttons_menus"
-widget "*MixerGroupTitleButton*" style "default_buttons_menus"
-widget "*ErrorLogCloseButton" style "default_buttons_menus"
-widget "*EditorGTKButton*" style "default_buttons_menus" 
-widget "*ToolbarButton" style "default_buttons_menus"
-widget "*ToolbarButton*" style "default_buttons_menus"
-widget "*CrossfadeEditButton" style "default_buttons_menus"
-widget "*CrossfadeEditButton*" style "default_buttons_menus"
-widget "*TrackHistoryButton*" style "default_buttons_menus"
-widget "*TrackSizeButton*" style "default_buttons_menus"
-widget "*TrackPlaylistButton*" style "default_buttons_menus"
-widget "*TrackAutomationButton*" style "default_buttons_menus"
-widget "*TrackGroupButton*" style "default_buttons_menus"
-widget "*TrackMixButton*" style "default_buttons_menus"
-widget "*TrackVisualButton*" style "default_buttons_menus"
-widget "*TrackRemoveButton*" style "default_buttons_menus"
-widget "*BaseButton" style "default_buttons_menus"
-widget "*TakeButtonLabel" style "default_buttons_menus"
-widget "*MixerWidthButton" style "default_buttons_menus"
-widget "*MixerHideButton" style "default_buttons_menus"
-widget "*MixerSendButton" style "default_buttons_menus"
-widget "*MixerSendButtonLabel" style "default_buttons_menus"
-widget "*MixerSendSwitch" style "default_buttons_menus"
-widget "*MixerInsertButton" style "default_buttons_menus"
-widget "*MixerInsertButtonLabel" style "default_buttons_menus"
-widget "*MixerInsertSwitch" style "default_buttons_menus"
-widget "*MixerMonitorInputButton*" style "very_small_button"
-widget "*MixerMonitorInputButton.*" style "very_small_button"
-widget "*MixerIOButton" style "very_small_button"
-widget "*MixerIOButtonLabel" style "very_small_button"
-widget "*AddRouteDialogSpinner" style "ardour_adjusters"
-widget "*AddRouteDialogRadioButton*" style "options_window"
-widget "*OptionsNotebook" style "options_window"
-widget "*OptionEditorToggleButton*" style "options_window"
-widget "*OptionsLabel" style "options_window"
-widget "*OptionEditorAuditionerLabel" style "options_window"
-widget "*OptionsEntry" style "option_entry"
-widget "*InspectorNotebook" style "options_window"
-widget "*NewSessionDialog" style "options_window"
-widget "*NewSessionDialogButton*" style "options_window"
-widget "*MixerSendSwitch*" style "very_small_red_active_and_selected_button"
-widget "*OptionEditorToggleButton" style "small_red_active_and_selected_button"
-widget "*NewSessionDialogButton" style "small_red_active_and_selected_button"
-widget "*MixerRecordEnableButton" style "mixer_rec_enable_button"
-widget "*MixerRecordEnableButton*" style "mixer_rec_enable_button"
-widget "*TrackRecordEnableButton" style "track_rec_enable_button"
-widget "*TrackRecordEnableButton*" style "track_rec_enable_button"
-widget "*TrackMuteButton*" style "mute_button"
-widget "*TrackLoopButton*" style "track_loop_button"
-widget "*PanAutomationLineSelector*" style "multiline_combo"
-widget "*EditorTimeButton*" style "time_button"
-widget "*EditorMixerButton*" style "default_buttons_menus"
-widget "*SoloButton*" style "solo_button"
-widget "*SoloButton.*" style "solo_button"
-widget "*SafeSoloButton*" style "safe_solo_button"
-widget "*SafeSoloButton.*" style "safe_solo_button"
-widget "*MixerPhaseInvertButton*" style "very_small_button"
-widget "*MixerPhaseInvertButton.*" style "very_small_button"
-widget "*MixerAutomationRecordingButton*" style "very_small_button"
-widget "*MixerAutomationRecordingButton.*" style "very_small_button"
-widget "*MixerAutomationModeButton*" style "very_small_button"
-widget "*MixerAutomationModeButton.*" style "very_small_button"
-widget "*MixerAutomationPlaybackButton*" style "very_small_button"
-widget "*MixerAutomationPlaybackButton.*" style "very_small_button"
-widget "*MixerMuteButton*" style "mixer_mute_button"
-widget "*MixerMuteButton.*" style "mixer_mute_button"
-widget "*MixerSoloButton*" style "mixer_solo_button"
-widget "*MixerSoloButton.*" style "mixer_solo_button"
-widget "*MixerNameButton" style "very_small_button"
-widget "*MixerNameButtonLabel" style "very_small_button"
-widget "*MixerGroupButton" style "very_small_button"
-widget "*MixerGroupButtonLabel" style "very_small_button"
-widget "*MixerCommentButton" style "very_small_button"
-widget "*MixerCommentButton*" style "very_small_button"
-widget "*EditGroupButton" style "very_small_button"
-widget "*EditGroupButtonLabel" style "very_small_button"
-widget "*TransportButton" style "transport_button"
-widget "*TransportButton*" style "transport_button"
-widget "*ShuttleButton" style "transport_button"
-widget "*ShuttleButton*" style "transport_button"
-widget "*ShuttleDisplay" style "transport_button"
-widget "*ShuttleDisplay*" style "transport_button"
-widget "*ShuttleControl" style "shuttle_control"
-widget "*TransportRecButton" style "transport_rec_button"
-widget "*TransportRecButton*" style "transport_rec_button"
-widget "*RecordingXrunWarningWindow" style "xrun_warn"
-widget "*RecordingXrunWarningWindow*" style "xrun_warn"
-widget "*MainMenuBar" style "menu_bar_base"
-widget "*ErrorMessage" style "error_message"
-widget "*FatalMessage" style "fatal_message"
-widget "*InfoMessage" style "info_message"
-widget "*WarningMessage" style "warning_message"
-widget "*BigClockNonRecording" style "non_recording_big_clock_display"
-widget "*BigClockRecording" style "recording_big_clock_display"
-widget "*TransportClockDisplay" style "transport_clock_display"
-widget "*SecondaryClockDisplay" style "transport_clock_display"
-widget "*AudioClockFramesUpperInfo" style "tempo_meter_clock_display"
-widget "*AudioClockFramesLowerInfo" style "tempo_meter_clock_display"
-widget "*AudioClockSMPTEUpperInfo" style "tempo_meter_clock_display"
-widget "*AudioClockSMPTELowerInfo" style "tempo_meter_clock_display"
-widget "*AudioClockBBTUpperInfo" style "tempo_meter_clock_display"
-widget "*AudioClockBBTLowerInfo" style "tempo_meter_clock_display"
-widget "*SelectionStartClock" style "default_clock_display"
-widget "*SelectionEndClock" style "default_clock_display"
-widget "*EditCursorClock" style "default_clock_display"
-widget "*PreRollClock" style "default_clock_display"
-widget "*PostRollClock" style "default_clock_display"
-widget "*NudgeClock" style "default_clock_display"
-widget "*ZoomRangeClock" style "default_clock_display"
-widget "*SMPTEOffsetClock" style "default_clock_display"
-widget "*TransportLabel" style "small_bold_text"
-widget "*TakeLabel" style "small_bold_text"
-widget "*LocationLabel" style "small_bold_text"
-widget "*WipeLabel" style "small_bold_text"
-widget "*TakeTagLabel" style "small_bold_text"
-widget "*ToolBarLabel" style "small_bold_text"
-widget "*EditorDisplayLabel" style "small_bold_text"
-widget "*NewSessionLabel" style "large_text"
-widget "*GlobalButtonLabel" style "default_buttons_menus"
-widget "*ClickButton" style "medium_entry"
-widget "*RegionNameDisplay" style "medium_entry"
-widget "*PluginDisplay" style "medium_entry"
-widget "*SelectionDisplay" style "medium_entry"
-widget "*HistorySelector" style "medium_entry"
-widget "*LocationSelector" style "medium_entry"
-widget "*TakeSelector" style "medium_entry"
-widget "*RegionSelector" style "medium_entry"
-widget "*SMPTERuler" style "editor_time_ruler"
-widget "*BBTRuler" style "editor_time_ruler"
-widget "*FramesRuler" style "editor_time_ruler"
-widget "*MinSecRuler" style "editor_time_ruler"
-widget "*BaseFrame" style "base_frame"
-widget "*AudioTrackStripBase" style "audio_track_base"
-widget "*TimeAxisViewControlsBaseUnselected" style "audio_track_base"
-widget "*AudioTrackControlsBaseUnselected" style "audio_track_base"
-widget "*AudioTrackFader" style "gain_fader"
-widget "*AudioBusStripBase" style "audio_bus_base"
-widget "*BusControlsBaseUnselected" style "audio_bus_base"
-widget "*AudioBusFader" style "gain_fader"
-widget "*TrackSeparator" style "track_separator"
-widget "*TrackEditIndicator0*" style "edit_group_0"
-widget "*TrackEditIndicator1*" style "edit_group_1"
-widget "*TrackEditIndicator2*" style "edit_group_2"
-widget "*TrackEditIndicator3*" style "edit_group_3"
-widget "*TrackEditIndicator4*" style "edit_group_3"
-widget "*TrackEditIndicator5*" style "edit_group_3"
-widget "*TrackEditIndicator6*" style "edit_group_3"
-widget "*TrackEditIndicator7*" style "edit_group_3"
-widget "*EditorTrackNameDisplay" style "track_name_display"
-widget "*EditorTrackNameDisplay*" style "track_name_display"
-widget "*EditorActiveTrackNameDisplay" style "active_track_name_display"
-widget "*EditorActiveTrackNameDisplay*" style "active_track_name_display"
-widget "*CrossfadeEditAuditionButton" style "red_when_active"
-widget "*CrossfadeEditAuditionButton*" style "red_when_active"
-widget "*CrossfadeEditCurveButton" style "red_when_active"
-widget "*CrossfadeEditCurveButton*" style "red_when_active"
-widget "*CrossfadeEditLabel" style "medium_text"
-widget "*CrossfadeEditFrame" style "base_frame"
-widget "*MouseModeButton" style "default_buttons_menus"
-widget "*MouseModeButton*" style "default_buttons_menus"
-widget "*EditorMainCanvas" style "main_canvas_area"
-widget "*AudioTrackControlsBaseInactiveUnselected" style "track_controls_inactive"
-widget "*BusControlsBaseInactiveUnselected" style "track_controls_inactive"
-widget "*AutomationTrackControlsBaseInactiveUnselected" style "track_controls_inactive"
-widget "*AutomationTrackName" style "automation_track_name"
-widget "*AudioTrackControlsBaseInactiveSelected" style "track_controls_inactive"
-widget "*BusControlsBaseInactiveSelected" style "track_controls_inactive"
-widget "*AutomationTrackControlsBaseInactiveSelected" style "track_controls_inactive"
-widget "*AudioTrackStripBaseInactive" style "track_controls_inactive"
-widget "*AudioBusStripBaseInactive" style "track_controls_inactive"
-widget "*AudioTrackControlsBaseSelected" style "edit_controls_base_selected"
-widget "*BusControlsBaseSelected" style "edit_controls_base_selected"
-widget "*AutomationTrackControlsBase" style "automation_track_controls_base"
-widget "*AutomationTrackControlsBaseSelected" style "edit_controls_base_selected"
-widget "*EditorMenuBar*" style "black_mackie_menu_bar"
-widget "*MainMenuBar*" style "black_mackie_menu_bar"
-widget "*ZoomClickBox" style "medium_bold_entry"
-widget "*PluginParameterLabel" style "medium_text"
-widget "*PluginNameInfo" style "plugin_name_text"
-widget "*PluginMakerInfo" style "plugin_maker_text"
-widget "*PluginParameterInfo" style "medium_text"
-widget "*MotionControllerValue" style "medium_entry"
-widget "*ParameterValueDisplay" style "medium_bold_entry"
-widget "*PluginUIClickBox" style "medium_bold_entry"
-widget "*PluginUIClickBox*" style "medium_bold_entry"
-widget "*PluginSlider" style "plugin_slider"
-widget "*RedirectSelector" style "redirect_list_display"
-widget "*RedirectSelector.*" style "redirect_list_display"
-widget "*EditGroupDisplay" style "treeview_display"
-widget "*TrackListDisplay" style "treeview_display"
-widget "*RegionListDisplay" style "treeview_display"
-widget "*NamedSelectionDisplay" style "treeview_display"
-widget "*SnapshotDisplay" style "treeview_display"
-widget "*MixerTrackCommentArea" style "option_entry"
-widget "*MixerPanZone" style "pan_zone"
-widget "*MixerTrackDisplayList" style "treeview_display"
-widget "*MixerSnapshotDisplayList" style "treeview_display"
-widget "*MixerAuxDisplayList" style "treeview_display"
-widget "*MixerGroupList" style "treeview_display"
-widget "*RegionEditorLabel" style "medium_text"
-widget "*RegionEditorSmallLabel" style "small_text"
-widget "*RegionEditorEntry" style "medium_entry"
-widget "*RegionEditorClock" style "default_clock_display"
-widget "*RegionEditorToggleButton" style "paler_red_when_active"
-widget "*RegionEditorToggleButton*" style "paler_red_when_active"
-widget "*MixerStripSpeedBase" style "small_entry"
-widget "*MixerStripSpeedBase*" style "small_entry"
-widget "*MixerStripSpeedBaseNotOne" style "small_red_on_black_entry"
-widget "*MixerStripSpeedBaseNotOne*" style "small_red_on_black_entry"
-widget "*MixerStripGainDisplay" style "small_entry"
-widget "*MixerStripGainDisplay*" style "small_entry"
-widget "*MixerStripGainUnitButton" style "very_small_button"
-widget "*MixerStripGainUnitButton*" style "very_small_button"
-widget "*MixerStripMeterPreButton" style "very_small_button"
-widget "*MixerStripMeterPreButton*" style "very_small_button"
-widget "*MixerStripPeakDisplay*" style "red_active_small_entry"
-widget "*MixerStripPeakDisplayPeak*" style "peak_display_peaked_entry"
-widget "*MixerStripSelectedFrame" style "selected_strip_frame"
-widget "*MixerStripFrame" style "base_frame"
-widget "*HWMonitorButton" style "red_when_active"
-widget "*HWMonitorButton*" style "red_when_active"
-widget "*BypassButton" style "red_when_active"
-widget "*BypassButton*" style "red_when_active"
-widget "*TransportSoloAlert" style "flashing_alert"
-widget "*TransportSoloAlert.*" style "flashing_alert"
-widget "*TransportAuditioningAlert" style "flashing_alert"
-widget "*TransportAuditioningAlert.*" style "flashing_alert"
-widget "*FadeCurve" style "medium_bold_entry"
-widget "*FadeCurve*" style "medium_bold_entry"
-widget "*IOSelectorButton" style "default_buttons_menus"
-widget "*IOSelectorButton*" style "default_buttons_menus"
-widget "*IOSelectorList" style "medium_entry_noselection_fg"
-widget "*IOSelectorPortList" style "io_selector_port_list"
-widget "*IOSelectorPortList.*" style "io_selector_port_list"
-widget "*IOSelectorPortListSelected" style "selected_io_selector_port_list"
-widget "*IOSelectorPortListSelected.*" style "selected_io_selector_port_list"
-widget "*IOSelectorNotebook" style "io_selector_notebook"
-widget "*IOSelectorNotebookTab" style "io_selector_notebook"
-widget "*IOSelectorFrame" style "base_frame"
-widget "*ConnectionEditorButton" style "default_buttons_menus"
-widget "*ConnectionEditorButton*" style "default_buttons_menus"
-widget "*ConnectionEditorList" style "medium_entry_noselection_fg"
-widget "*ConnectionEditorConnectionList" style "medium_entry"
-widget "*ConnectionEditorPortList" style "io_selector_port_list"
-widget "*ConnectionEditorPortListSelected" style "selected_io_selector_port_list"
-widget "*ConnectionEditorNotebook" style "io_selector_notebook"
-widget "*ConnectionEditorNotebookTab" style "io_selector_notebook"
-widget "*ConnectionEditorFrame" style "base_frame"
-widget "*RouteParamsListDisplay" style "inspector_track_list_display"
-widget "*RouteParamsPreListDisplay" style "inspector_redirect_list_display"
-widget "*RouteParamsPostListDisplay" style "inspector_redirect_list_display"
-widget "*TearOffArrow" style "tearoff_arrow"
-widget "*RouteParamsTitleButton" style "medium_text"
-widget "*RouteParamsTitleLabel" style "medium_text"
-widget "*PluginAutomateRecordButton" style "small_red_active_and_selected_button"
-widget "*PluginAutomateRecordButton*" style "small_red_active_and_selected_button"
-widget "*PluginAutomatePlayButton" style "small_red_active_and_selected_button"
-widget "*PluginAutomatePlayButton*" style "small_red_active_and_selected_button"
-widget "*PluginAutomateButton" style "small_button"
-widget "*PluginAutomateButton*" style "small_button"
-widget "*PluginSaveButton" style "small_button"
-widget "*PluginSaveButton*" style "small_button"
-widget "*PluginLoadButton" style "small_button"
-widget "*PluginLoadButton*" style "small_button"
-widget "*FaderMetricsStrip" style "meter_metrics_strip"
-widget "*MeterMetricsStrip" style "meter_metrics_strip"
-widget "*MetricDialogFrame" style "base_frame"
-widget "*MetricEntry" style "medium_bold_entry"
-widget "*MetricButton" style "default_buttons_menus"
-widget "*MetricButton.*" style "default_buttons_menus"
-widget "*MetricLabel" style "medium_text"
-widget "*TimeStretchButton" style "default_buttons_menus"
-widget "*TimeStretchButton.*" style "default_buttons_menus"
-widget "*TimeStretchProgress" style "default_buttons_menus"
-widget "*ChoiceWindow" style "default_buttons_menus"
-widget "*ChoicePrompt" style "default_buttons_menus"
-widget "*ChoiceButton" style "default_buttons_menus"
-widget "*ChoiceButton*" style "default_buttons_menus"
-widget "*SelectionModeButton" style "default_buttons_menus"
-widget "*SelectionModeButton*" style "default_buttons_menus"
-widget "*TrackLabel" style "medium_text"
-widget "*TrackPlugName" style "medium_text"
-widget "*TrackParameterName" style "small_text"
-widget "*AddRouteDialog*" style "medium_text"
-widget "*AddRouteDialog.GtkLabel" style "medium_text"
-widget "*AddRouteDialogChannelChoice" style "medium_bold_entry"
-widget "*AddRouteDialogSpinner" style "medium_bold_entry"
-widget "*AddRouteDialogSpinner*" style "medium_bold_entry"
-widget "*AddRouteDialogRadioButton" style "red_when_active"
-widget "*AddRouteDialogButton" style "default_buttons_menus"
-widget "*AddRouteDialogNameTemplateEntry" style "medium_bold_entry"
-widget "*NewSessionIOLabel" style "larger_bold_text"
-widget "*NewSessionSR1Label" style "red_medium_text"
-widget "*NewSessionSR2Label" style "medium_text"
-widget "*NewSessionChannelChoice" style "medium_bold_entry"
-widget "*NewSessionMainButton" style "larger_bold_text"
-widget "*NewSessionMainButton*" style "larger_bold_text"
-widget "*NewSessionMainLabel" style "larger_bold_text"
-widget "*LocationEditRowClock" style "location_rows_clock"
-widget "*LocationEditNameLabel" style "medium_text"
-widget "*LocationEditSetButton" style "location_row_button"
-widget "*LocationEditSetButton*" style "location_row_button"
-widget "*LocationEditGoButton" style "location_row_button"
-widget "*LocationEditGoButton*" style "location_row_button"
-widget "*LocationEditCdButton" style "small_red_active_and_selected_button"
-widget "*LocationEditCdButton*" style "small_red_active_and_selected_button"
-widget "*LocationEditHideButton" style "small_red_active_and_selected_button"
-widget "*LocationEditHideButton*" style "small_red_active_and_selected_button"
-widget "*LocationEditNumberLabel" style "small_text"
-widget "*LocationLocEditorFrame" style "base_frame"
-widget "*LocationRangeEditorFrame" style "base_frame"
-widget "*LocationEditNameEntry" style "option_entry"
-widget "*LocationAddLocationButton" style "default_buttons_menus"
-widget "*LocationAddLocationButton*" style "default_buttons_menus"
-widget "*LocationAddRangeButton" style "default_buttons_menus"
-widget "*LocationAddRangeButton*" style "default_buttons_menus"
-widget "*LocationEditRemoveButton" style "location_row_button"
-widget "*LocationEditRemoveButton*" style "location_row_button"
-widget "*PanSlider" style "pan_slider"
-widget "*PanningLinkButton" style "mixer_red_active_button"
-widget "*PanningLinkButton.*" style "mixer_red_active_button"
-widget "*PanningLinkDirectionButton" style "very_small_button"
-widget "*PanningLinkDirectionButton.*" style "very_small_button"
-widget "*ChannelCountSelector" style "medium_bold_entry"
-widget "*ChannelCountSelector.GtkArrow" style "default_buttons_menus"
-widget "*RegionListWholeFile" style "treeview_parent_node"
-widget "*EditorHScrollbar" style "editor_hscrollbar"
 
-class "GtkWidget" style "default_base"
-class "GtkScrollbar" style "ardour_adjusters"
-class "GtkLabel" style "default_buttons_menus"
-class "GtkButton" style "ardour_button"
-class "GtkArrow" style "tearoff_arrow"
-class "GtkProgressBar" style "ardour_progressbars"
+class "GtkWidget" style:highest "default_base"
+class "GtkScrollbar" style:highest "ardour_adjusters"
+class "GtkLabel" style:highest "default_buttons_menus"
+class "GtkButton" style:highest "ardour_button"
+class "GtkArrow" style:highest "tearoff_arrow"
+class "GtkProgressBar" style:highest "ardour_progressbars"
+
+widget "*FirstActionMessage" style:highest "first_action_message"
+widget "*VerboseCanvasCursor" style:highest "verbose_canvas_cursor"
+widget "*MarkerText" style:highest "marker_text"
+widget "*TimeAxisViewItemName*" style:highest "time_axis_view_item_name"
+#widget "*ExportProgress" style:highest "default_buttons_menus"
+widget "*ExportFileLabel" style:highest "small_bold_text"
+widget "*ExportFormatLabel" style:highest "medium_bold_text"
+widget "*ExportHeader" style:highest "small_bold_text"
+widget "*ExportFileDisplay" style:highest "medium_entry"
+widget "*ExportFormatDisplay" style:highest "medium_entry"
+widget "*ExportCheckbox" style:highest "small_entry"
+widget "*ExportTrackSelector*" style:highest "medium_entry_noselection_bg"
+widget "*EditModeSelector" style:highest "medium_bold_entry"
+widget "*SnapTypeSelector" style:highest "medium_bold_entry"
+widget "*SnapModeSelector" style:highest "medium_bold_entry"
+widget "*ZoomFocusSelector" style:highest "medium_bold_entry"
+widget "*ArdourContextMenu*" style:highest "default_buttons_menus"
+widget "*EditGroupTitleButton*" style:highest "default_buttons_menus"
+widget "*MixerGroupTitleButton*" style:highest "default_buttons_menus"
+widget "*ErrorLogCloseButton" style:highest "default_buttons_menus"
+widget "*EditorGTKButton*" style:highest "default_buttons_menus" 
+widget "*ToolbarButton" style:highest "default_buttons_menus"
+widget "*ToolbarButton*" style:highest "default_buttons_menus"
+widget "*CrossfadeEditButton" style:highest "default_buttons_menus"
+widget "*CrossfadeEditButton*" style:highest "default_buttons_menus"
+widget "*TrackHistoryButton*" style:highest "default_buttons_menus"
+widget "*TrackSizeButton*" style:highest "default_buttons_menus"
+widget "*TrackPlaylistButton*" style:highest "default_buttons_menus"
+widget "*TrackAutomationButton*" style:highest "default_buttons_menus"
+widget "*TrackGroupButton*" style:highest "default_buttons_menus"
+widget "*TrackMixButton*" style:highest "default_buttons_menus"
+widget "*TrackVisualButton*" style:highest "default_buttons_menus"
+widget "*TrackRemoveButton*" style:highest "default_buttons_menus"
+widget "*BaseButton" style:highest "default_buttons_menus"
+widget "*TakeButtonLabel" style:highest "default_buttons_menus"
+widget "*MixerWidthButton" style:highest "default_buttons_menus"
+widget "*MixerHideButton" style:highest "default_buttons_menus"
+widget "*MixerSendButton" style:highest "default_buttons_menus"
+widget "*MixerSendButtonLabel" style:highest "default_buttons_menus"
+widget "*MixerSendSwitch" style:highest "default_buttons_menus"
+widget "*MixerInsertButton" style:highest "default_buttons_menus"
+widget "*MixerInsertButtonLabel" style:highest "default_buttons_menus"
+widget "*MixerInsertSwitch" style:highest "default_buttons_menus"
+widget "*MixerMonitorInputButton*" style:highest "very_small_button"
+widget "*MixerMonitorInputButton.*" style:highest "very_small_button"
+widget "*MixerIOButton" style:highest "very_small_button"
+widget "*MixerIOButtonLabel" style:highest "very_small_button"
+widget "*AddRouteDialogSpinner" style:highest "ardour_adjusters"
+widget "*AddRouteDialogRadioButton*" style:highest "options_window"
+widget "*OptionsNotebook" style:highest "options_window"
+widget "*OptionEditorToggleButton*" style:highest "options_window"
+widget "*OptionsLabel" style:highest "options_window"
+widget "*OptionEditorAuditionerLabel" style:highest "options_window"
+widget "*OptionsEntry" style:highest "option_entry"
+widget "*InspectorNotebook" style:highest "options_window"
+widget "*NewSessionDialog" style:highest "options_window"
+widget "*NewSessionDialogButton*" style:highest "options_window"
+widget "*MixerSendSwitch*" style:highest "very_small_red_active_and_selected_button"
+widget "*OptionEditorToggleButton" style:highest "small_red_active_and_selected_button"
+widget "*NewSessionDialogButton" style:highest "small_red_active_and_selected_button"
+widget "*RecordEnableButton" style:highest "track_rec_enable_button"
+widget "*RecordEnableButton-active" style:highest "track_rec_enable_button_active"
+widget "*RecordEnableButton-alternate" style:highest "track_rec_enable_button_alternate"
+widget "*MixerRecordEnableButton" style:highest "mixer_track_rec_enable_button"
+widget "*MixerRecordEnableButton-active" style:highest "mixer_track_rec_enable_button_active"
+widget "*MixerRecordEnableButton-alternate" style:highest "mixer_track_rec_enable_button_alternate"
+widget "*MuteButton" style:highest "mute_button"
+widget "*MuteButton-alternate" style:highest "mute_button_alternate"
+widget "*MuteButton-active" style:highest "mute_button_active"
+widget "*MixerMuteButton" style:highest "mixer_mute_button"
+widget "*MixerMuteButton-alternate" style:highest "mixer_mute_button_alternate"
+widget "*MixerMuteButton-active" style:highest "mixer_mute_button_active"
+widget "*SoloButton" style:highest "solo_button"
+widget "*SoloButton-alternate" style:highest "solo_button_alternate"
+widget "*SoloButton-active" style:highest "solo_button_active"
+widget "*MixerSoloButton" style:highest "mixer_solo_button"
+widget "*MixerSoloButton-alternate" style:highest "mixer_solo_button_alternate"
+widget "*MixerSoloButton-active" style:highest "mixer_solo_button_active"
+widget "*TrackLoopButton*" style:highest "track_loop_button"
+widget "*PanAutomationLineSelector*" style:highest "multiline_combo"
+widget "*EditorTimeButton*" style:highest "time_button"
+widget "*MixerPhaseInvertButton*" style:highest "very_small_button"
+widget "*MixerPhaseInvertButton.*" style:highest "very_small_button"
+widget "*MixerAutomationRecordingButton*" style:highest "very_small_button"
+widget "*MixerAutomationRecordingButton.*" style:highest "very_small_button"
+widget "*MixerAutomationModeButton*" style:highest "very_small_button"
+widget "*MixerAutomationModeButton.*" style:highest "very_small_button"
+widget "*MixerAutomationPlaybackButton*" style:highest "very_small_button"
+widget "*MixerAutomationPlaybackButton.*" style:highest "very_small_button"
+widget "*MixerNameButton" style:highest "very_small_button"
+widget "*MixerNameButtonLabel" style:highest "very_small_button"
+widget "*MixerGroupButton" style:highest "very_small_button"
+widget "*MixerGroupButtonLabel" style:highest "very_small_button"
+widget "*MixerCommentButton" style:highest "very_small_button"
+widget "*MixerCommentButton*" style:highest "very_small_button"
+widget "*EditGroupButton" style:highest "very_small_button"
+widget "*EditGroupButtonLabel" style:highest "very_small_button"
+widget "*TransportButton" style:highest "transport_rec_button"
+widget "*TransportButton-active" style:highest "transport_button_active"
+widget "*ShuttleButton" style:highest "transport_button"
+widget "*ShuttleButton*" style:highest "transport_button"
+widget "*ShuttleDisplay" style:highest "transport_button"
+widget "*ShuttleDisplay*" style:highest "transport_button"
+widget "*ShuttleControl" style:highest "shuttle_control"
+widget "*TransportRecButton" style:highest "transport_rec_button"
+widget "*TransportRecButton*" style:highest "transport_rec_button"
+widget "*TransportRecButton-active" style:highest "transport_rec_button_active"
+widget "*TransportRecButton-active*" style:highest "transport_rec_button_active"
+widget "*TransportRecButton-alternate" style:highest "transport_rec_button_alternate"
+widget "*TransportRecButton-alternate*" style:highest "transport_rec_button_alternate"
+widget "*TransportRecButton*" style:highest "transport_rec_button"
+widget "*RecordingXrunWarningWindow" style:highest "xrun_warn"
+widget "*RecordingXrunWarningWindow*" style:highest "xrun_warn"
+widget "*MainMenuBar" style:highest "menu_bar_base"
+widget "*ErrorMessage" style:highest "error_message"
+widget "*FatalMessage" style:highest "fatal_message"
+widget "*InfoMessage" style:highest "info_message"
+widget "*WarningMessage" style:highest "warning_message"
+widget "*BigClockNonRecording" style:highest "non_recording_big_clock_display"
+widget "*BigClockRecording" style:highest "recording_big_clock_display"
+widget "*TransportClockDisplay" style:highest "transport_clock_display"
+widget "*SecondaryClockDisplay" style:highest "transport_clock_display"
+widget "*AudioClockFramesUpperInfo" style:highest "tempo_meter_clock_display"
+widget "*AudioClockFramesLowerInfo" style:highest "tempo_meter_clock_display"
+widget "*AudioClockSMPTEUpperInfo" style:highest "tempo_meter_clock_display"
+widget "*AudioClockSMPTELowerInfo" style:highest "tempo_meter_clock_display"
+widget "*AudioClockBBTUpperInfo" style:highest "tempo_meter_clock_display"
+widget "*AudioClockBBTLowerInfo" style:highest "tempo_meter_clock_display"
+widget "*SelectionStartClock" style:highest "default_clock_display"
+widget "*SelectionEndClock" style:highest "default_clock_display"
+widget "*EditCursorClock" style:highest "default_clock_display"
+widget "*PreRollClock" style:highest "default_clock_display"
+widget "*PostRollClock" style:highest "default_clock_display"
+widget "*NudgeClock" style:highest "default_clock_display"
+widget "*ZoomRangeClock" style:highest "default_clock_display"
+widget "*SMPTEOffsetClock" style:highest "default_clock_display"
+widget "*TransportLabel" style:highest "small_bold_text"
+widget "*TakeLabel" style:highest "small_bold_text"
+widget "*LocationLabel" style:highest "small_bold_text"
+widget "*WipeLabel" style:highest "small_bold_text"
+widget "*TakeTagLabel" style:highest "small_bold_text"
+widget "*ToolBarLabel" style:highest "small_bold_text"
+widget "*EditorDisplayLabel" style:highest "small_bold_text"
+widget "*NewSessionLabel" style:highest "large_text"
+widget "*GlobalButtonLabel" style:highest "default_buttons_menus"
+widget "*ClickButton" style:highest "medium_entry"
+widget "*RegionNameDisplay" style:highest "medium_entry"
+widget "*PluginDisplay" style:highest "medium_entry"
+widget "*SelectionDisplay" style:highest "medium_entry"
+widget "*HistorySelector" style:highest "medium_entry"
+widget "*LocationSelector" style:highest "medium_entry"
+widget "*TakeSelector" style:highest "medium_entry"
+widget "*RegionSelector" style:highest "medium_entry"
+widget "*SMPTERuler" style:highest "editor_time_ruler"
+widget "*BBTRuler" style:highest "editor_time_ruler"
+widget "*FramesRuler" style:highest "editor_time_ruler"
+widget "*MinSecRuler" style:highest "editor_time_ruler"
+widget "*BaseFrame" style:highest "base_frame"
+widget "*AudioTrackStripBase" style:highest "audio_track_base"
+widget "*TimeAxisViewControlsBaseUnselected" style:highest "audio_track_base"
+widget "*AudioTrackControlsBaseUnselected" style:highest "audio_track_base"
+widget "*AudioTrackFader" style:highest "gain_fader"
+widget "*AudioBusStripBase" style:highest "audio_bus_base"
+widget "*BusControlsBaseUnselected" style:highest "audio_bus_base"
+widget "*AudioBusFader" style:highest "gain_fader"
+widget "*TrackSeparator" style:highest "track_separator"
+widget "*TrackEditIndicator0*" style:highest "edit_group_0"
+widget "*TrackEditIndicator1*" style:highest "edit_group_1"
+widget "*TrackEditIndicator2*" style:highest "edit_group_2"
+widget "*TrackEditIndicator3*" style:highest "edit_group_3"
+widget "*TrackEditIndicator4*" style:highest "edit_group_3"
+widget "*TrackEditIndicator5*" style:highest "edit_group_3"
+widget "*TrackEditIndicator6*" style:highest "edit_group_3"
+widget "*TrackEditIndicator7*" style:highest "edit_group_3"
+widget "*EditorTrackNameDisplay" style:highest "track_name_display"
+widget "*EditorTrackNameDisplay*" style:highest "track_name_display"
+widget "*EditorActiveTrackNameDisplay" style:highest "active_track_name_display"
+widget "*EditorActiveTrackNameDisplay*" style:highest "active_track_name_display"
+widget "*CrossfadeEditAuditionButton" style:highest "red_when_active"
+widget "*CrossfadeEditAuditionButton*" style:highest "red_when_active"
+widget "*CrossfadeEditCurveButton" style:highest "red_when_active"
+widget "*CrossfadeEditCurveButton*" style:highest "red_when_active"
+widget "*CrossfadeEditLabel" style:highest "medium_text"
+widget "*CrossfadeEditFrame" style:highest "base_frame"
+widget "*MouseModeButton" style:highest "default_buttons_menus"
+widget "*MouseModeButton*" style:highest "default_buttons_menus"
+widget "*EditorMainCanvas" style:highest "main_canvas_area"
+widget "*AudioTrackControlsBaseInactiveUnselected" style:highest "track_controls_inactive"
+widget "*BusControlsBaseInactiveUnselected" style:highest "track_controls_inactive"
+widget "*AutomationTrackControlsBaseInactiveUnselected" style:highest "track_controls_inactive"
+widget "*AutomationTrackName" style:highest "automation_track_name"
+widget "*AudioTrackControlsBaseInactiveSelected" style:highest "track_controls_inactive"
+widget "*BusControlsBaseInactiveSelected" style:highest "track_controls_inactive"
+widget "*AutomationTrackControlsBaseInactiveSelected" style:highest "track_controls_inactive"
+widget "*AudioTrackStripBaseInactive" style:highest "track_controls_inactive"
+widget "*AudioBusStripBaseInactive" style:highest "track_controls_inactive"
+widget "*AudioTrackControlsBaseSelected" style:highest "edit_controls_base_selected"
+widget "*BusControlsBaseSelected" style:highest "edit_controls_base_selected"
+widget "*AutomationTrackControlsBase" style:highest "automation_track_controls_base"
+widget "*AutomationTrackControlsBaseSelected" style:highest "edit_controls_base_selected"
+widget "*EditorMenuBar*" style:highest "black_mackie_menu_bar"
+widget "*MainMenuBar*" style:highest "black_mackie_menu_bar"
+widget "*ZoomClickBox" style:highest "medium_bold_entry"
+widget "*PluginParameterLabel" style:highest "medium_text"
+widget "*PluginNameInfo" style:highest "plugin_name_text"
+widget "*PluginMakerInfo" style:highest "plugin_maker_text"
+widget "*PluginParameterInfo" style:highest "medium_text"
+widget "*MotionControllerValue" style:highest "medium_entry"
+widget "*ParameterValueDisplay" style:highest "medium_bold_entry"
+widget "*PluginUIClickBox" style:highest "medium_bold_entry"
+widget "*PluginUIClickBox*" style:highest "medium_bold_entry"
+widget "*PluginSlider" style:highest "plugin_slider"
+widget "*RedirectSelector" style:highest "redirect_list_display"
+widget "*RedirectSelector.*" style:highest "redirect_list_display"
+widget "*EditGroupDisplay" style:highest "treeview_display"
+widget "*TrackListDisplay" style:highest "treeview_display"
+widget "*RegionListDisplay" style:highest "treeview_display"
+widget "*NamedSelectionDisplay" style:highest "treeview_display"
+widget "*SnapshotDisplay" style:highest "treeview_display"
+widget "*MixerTrackCommentArea" style:highest "option_entry"
+widget "*MixerPanZone" style:highest "pan_zone"
+widget "*MixerTrackDisplayList" style:highest "treeview_display"
+widget "*MixerSnapshotDisplayList" style:highest "treeview_display"
+widget "*MixerAuxDisplayList" style:highest "treeview_display"
+widget "*MixerGroupList" style:highest "treeview_display"
+widget "*RegionEditorLabel" style:highest "medium_text"
+widget "*RegionEditorSmallLabel" style:highest "small_text"
+widget "*RegionEditorEntry" style:highest "medium_entry"
+widget "*RegionEditorClock" style:highest "default_clock_display"
+widget "*RegionEditorToggleButton" style:highest "paler_red_when_active"
+widget "*RegionEditorToggleButton*" style:highest "paler_red_when_active"
+widget "*MixerStripSpeedBase" style:highest "small_entry"
+widget "*MixerStripSpeedBase*" style:highest "small_entry"
+widget "*MixerStripSpeedBaseNotOne" style:highest "small_red_on_black_entry"
+widget "*MixerStripSpeedBaseNotOne*" style:highest "small_red_on_black_entry"
+widget "*MixerStripGainDisplay" style:highest "small_entry"
+widget "*MixerStripGainDisplay*" style:highest "small_entry"
+widget "*MixerStripGainUnitButton" style:highest "very_small_button"
+widget "*MixerStripGainUnitButton*" style:highest "very_small_button"
+widget "*MixerStripMeterPreButton" style:highest "very_small_button"
+widget "*MixerStripMeterPreButton*" style:highest "very_small_button"
+widget "*MixerStripPeakDisplay*" style:highest "red_active_small_entry"
+widget "*MixerStripPeakDisplayPeak*" style:highest "peak_display_peaked_entry"
+widget "*MixerStripSelectedFrame" style:highest "selected_strip_frame"
+widget "*MixerStripFrame" style:highest "base_frame"
+widget "*HWMonitorButton" style:highest "red_when_active"
+widget "*HWMonitorButton*" style:highest "red_when_active"
+widget "*BypassButton" style:highest "red_when_active"
+widget "*BypassButton*" style:highest "red_when_active"
+widget "*TransportSoloAlert" style:highest "flashing_alert"
+widget "*TransportSoloAlert.*" style:highest "flashing_alert"
+widget "*TransportAuditioningAlert" style:highest "flashing_alert"
+widget "*TransportAuditioningAlert.*" style:highest "flashing_alert"
+widget "*FadeCurve" style:highest "medium_bold_entry"
+widget "*FadeCurve*" style:highest "medium_bold_entry"
+widget "*IOSelectorButton" style:highest "default_buttons_menus"
+widget "*IOSelectorButton*" style:highest "default_buttons_menus"
+widget "*IOSelectorList" style:highest "medium_entry_noselection_fg"
+widget "*IOSelectorPortList" style:highest "io_selector_port_list"
+widget "*IOSelectorPortList.*" style:highest "io_selector_port_list"
+widget "*IOSelectorPortListSelected" style:highest "selected_io_selector_port_list"
+widget "*IOSelectorPortListSelected.*" style:highest "selected_io_selector_port_list"
+widget "*IOSelectorNotebook" style:highest "io_selector_notebook"
+widget "*IOSelectorNotebookTab" style:highest "io_selector_notebook"
+widget "*IOSelectorFrame" style:highest "base_frame"
+widget "*ConnectionEditorButton" style:highest "default_buttons_menus"
+widget "*ConnectionEditorButton*" style:highest "default_buttons_menus"
+widget "*ConnectionEditorList" style:highest "medium_entry_noselection_fg"
+widget "*ConnectionEditorConnectionList" style:highest "medium_entry"
+widget "*ConnectionEditorPortList" style:highest "io_selector_port_list"
+widget "*ConnectionEditorPortListSelected" style:highest "selected_io_selector_port_list"
+widget "*ConnectionEditorNotebook" style:highest "io_selector_notebook"
+widget "*ConnectionEditorNotebookTab" style:highest "io_selector_notebook"
+widget "*ConnectionEditorFrame" style:highest "base_frame"
+widget "*RouteParamsListDisplay" style:highest "inspector_track_list_display"
+widget "*RouteParamsPreListDisplay" style:highest "inspector_redirect_list_display"
+widget "*RouteParamsPostListDisplay" style:highest "inspector_redirect_list_display"
+widget "*TearOffArrow" style:highest "tearoff_arrow"
+widget "*RouteParamsTitleButton" style:highest "medium_text"
+widget "*RouteParamsTitleLabel" style:highest "medium_text"
+widget "*PluginAutomateRecordButton" style:highest "small_red_active_and_selected_button"
+widget "*PluginAutomateRecordButton*" style:highest "small_red_active_and_selected_button"
+widget "*PluginAutomatePlayButton" style:highest "small_red_active_and_selected_button"
+widget "*PluginAutomatePlayButton*" style:highest "small_red_active_and_selected_button"
+widget "*PluginAutomateButton" style:highest "small_button"
+widget "*PluginAutomateButton*" style:highest "small_button"
+widget "*PluginSaveButton" style:highest "small_button"
+widget "*PluginSaveButton*" style:highest "small_button"
+widget "*PluginLoadButton" style:highest "small_button"
+widget "*PluginLoadButton*" style:highest "small_button"
+widget "*FaderMetricsStrip" style:highest "meter_metrics_strip"
+widget "*MeterMetricsStrip" style:highest "meter_metrics_strip"
+widget "*MetricDialogFrame" style:highest "base_frame"
+widget "*MetricEntry" style:highest "medium_bold_entry"
+widget "*MetricButton" style:highest "default_buttons_menus"
+widget "*MetricButton.*" style:highest "default_buttons_menus"
+widget "*MetricLabel" style:highest "medium_text"
+widget "*TimeStretchButton" style:highest "default_buttons_menus"
+widget "*TimeStretchButton.*" style:highest "default_buttons_menus"
+widget "*TimeStretchProgress" style:highest "default_buttons_menus"
+widget "*ChoiceWindow" style:highest "default_buttons_menus"
+widget "*ChoicePrompt" style:highest "default_buttons_menus"
+widget "*ChoiceButton" style:highest "default_buttons_menus"
+widget "*ChoiceButton*" style:highest "default_buttons_menus"
+widget "*SelectionModeButton" style:highest "default_buttons_menus"
+widget "*SelectionModeButton*" style:highest "default_buttons_menus"
+widget "*TrackLabel" style:highest "medium_text"
+widget "*TrackPlugName" style:highest "medium_text"
+widget "*TrackParameterName" style:highest "small_text"
+widget "*AddRouteDialog*" style:highest "medium_text"
+widget "*AddRouteDialog.GtkLabel" style:highest "medium_text"
+widget "*AddRouteDialogChannelChoice" style:highest "medium_bold_entry"
+widget "*AddRouteDialogSpinner" style:highest "medium_bold_entry"
+widget "*AddRouteDialogSpinner*" style:highest "medium_bold_entry"
+widget "*AddRouteDialogRadioButton" style:highest "red_when_active"
+widget "*AddRouteDialogButton" style:highest "default_buttons_menus"
+widget "*AddRouteDialogNameTemplateEntry" style:highest "medium_bold_entry"
+widget "*NewSessionIOLabel" style:highest "larger_bold_text"
+widget "*NewSessionSR1Label" style:highest "red_medium_text"
+widget "*NewSessionSR2Label" style:highest "medium_text"
+widget "*NewSessionChannelChoice" style:highest "medium_bold_entry"
+widget "*NewSessionMainButton" style:highest "larger_bold_text"
+widget "*NewSessionMainButton*" style:highest "larger_bold_text"
+widget "*NewSessionMainLabel" style:highest "larger_bold_text"
+widget "*LocationEditRowClock" style:highest "location_rows_clock"
+widget "*LocationEditNameLabel" style:highest "medium_text"
+widget "*LocationEditSetButton" style:highest "location_row_button"
+widget "*LocationEditSetButton*" style:highest "location_row_button"
+widget "*LocationEditGoButton" style:highest "location_row_button"
+widget "*LocationEditGoButton*" style:highest "location_row_button"
+widget "*LocationEditCdButton" style:highest "small_red_active_and_selected_button"
+widget "*LocationEditCdButton*" style:highest "small_red_active_and_selected_button"
+widget "*LocationEditHideButton" style:highest "small_red_active_and_selected_button"
+widget "*LocationEditHideButton*" style:highest "small_red_active_and_selected_button"
+widget "*LocationEditNumberLabel" style:highest "small_text"
+widget "*LocationLocEditorFrame" style:highest "base_frame"
+widget "*LocationRangeEditorFrame" style:highest "base_frame"
+widget "*LocationEditNameEntry" style:highest "option_entry"
+widget "*LocationAddLocationButton" style:highest "default_buttons_menus"
+widget "*LocationAddLocationButton*" style:highest "default_buttons_menus"
+widget "*LocationAddRangeButton" style:highest "default_buttons_menus"
+widget "*LocationAddRangeButton*" style:highest "default_buttons_menus"
+widget "*LocationEditRemoveButton" style:highest "location_row_button"
+widget "*LocationEditRemoveButton*" style:highest "location_row_button"
+widget "*PanSlider" style:highest "pan_slider"
+widget "*PanningLinkButton" style:highest "mixer_red_active_button"
+widget "*PanningLinkButton.*" style:highest "mixer_red_active_button"
+widget "*PanningLinkDirectionButton" style:highest "very_small_button"
+widget "*PanningLinkDirectionButton.*" style:highest "very_small_button"
+widget "*ChannelCountSelector" style:highest "medium_bold_entry"
+widget "*ChannelCountSelector.GtkArrow" style:highest "default_buttons_menus"
+widget "*RegionListWholeFile" style:highest "treeview_parent_node"
+widget "*EditorHScrollbar" style:highest "editor_hscrollbar"
 

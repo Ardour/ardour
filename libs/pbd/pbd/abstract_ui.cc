@@ -54,6 +54,8 @@ AbstractUI<RequestObject>::get_request (RequestType rt)
 	}
 	
 	RequestBufferVector vec;
+	vec.buf[0] = 0;
+	vec.buf[1] = 0;
 	
 	rbuf->get_write_vector (&vec);
 
@@ -100,16 +102,10 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 			if (vec.len[0] == 0) {
 				break;
 			} else {
-				/* request_factory/copy constructor does a deep
-				   copy of the Request object,
-				   unlike Ringbuffer::read()
-				*/
-
-				RequestObject req (*vec.buf[0]);
-				i->second->increment_read_ptr (1);
 				request_buffer_map_lock.unlock ();
-				do_request (&req);
+				do_request (vec.buf[0]);
 				request_buffer_map_lock.lock ();
+				i->second->increment_read_ptr (1);
 			} 
 		}
 	}

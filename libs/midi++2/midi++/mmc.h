@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __midipp_mmc_h_h__
@@ -93,6 +92,8 @@ class MachineControl : public sigc::trackable
 	Port &port() { return _port; }
 	
 	void set_device_id (byte id);
+	byte device_id () const { return _device_id; }
+
 	static bool is_mmc (byte *sysex_buf, size_t len);
 
 	/* Signals to connect to if you want to run "callbacks"

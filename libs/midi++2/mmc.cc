@@ -202,7 +202,7 @@ MachineControl::MachineControl (Port &p, float version,
 	
 	build_mmc_cmd_map ();
 
-	_device_id = 1;
+	_device_id = 0;
 	
 	if ((parser = _port.input()) != 0) {
 		parser->mmc.connect 
@@ -258,7 +258,7 @@ MachineControl::process_mmc_message (Parser &p, byte *msg, size_t len)
 	*/
 
 #if 0
-	cerr << "*** MMC message: len = " << len << "\n\t";
+	cerr << "*** me = " << (int) _device_id << " MMC message: len = " << len << "\n\t";
 	for (size_t i = 0; i < len; i++) {
 		cerr << hex << (int) msg[i] << dec << ' ';
 	}

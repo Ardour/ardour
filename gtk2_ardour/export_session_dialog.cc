@@ -21,12 +21,13 @@
 #include "ardour_ui.h"
 #include "export_session_dialog.h"
 
+#include "i18n.h"
 
 ExportSessionDialog::ExportSessionDialog (PublicEditor& editor) 
 	: ExportDialog(editor)
 {
+	file_frame.set_label (_("Export to File"));
 }
-	
 	
 void 
 ExportSessionDialog::export_audio_data ()

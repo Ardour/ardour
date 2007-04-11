@@ -73,8 +73,7 @@ PannerUI::PannerUI (boost::shared_ptr<IO> io, Session& s)
 	//set_size_request_to_display_given_text (pan_automation_style_button, X_("0"), 2, 2);
 
 	pan_bar_packer.set_size_request (-1, 61);
-	panning_viewport.set_size_request (64, 61);
-
+	panning_viewport.set_size_request (-1, 61);
 	panning_viewport.set_name (X_("BaseFrame"));
 
 	ARDOUR_UI::instance()->tooltips().set_tip (panning_link_button,
@@ -86,7 +85,7 @@ PannerUI::PannerUI (boost::shared_ptr<IO> io, Session& s)
 	pan_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
 
 	using namespace Menu_Helpers;
-	pan_astate_menu.items().push_back (MenuElem (_("Off"), 
+	pan_astate_menu.items().push_back (MenuElem (_("Manual"), 
 						     bind (mem_fun (_io->panner(), &Panner::set_automation_state), (AutoState) Off)));
 	pan_astate_menu.items().push_back (MenuElem (_("Play"),
 						     bind (mem_fun (_io->panner(), &Panner::set_automation_state), (AutoState) Play)));
@@ -137,7 +136,7 @@ PannerUI::PannerUI (boost::shared_ptr<IO> io, Session& s)
 	pan_vbox.pack_start (panning_viewport, Gtk::PACK_SHRINK);
 	pan_vbox.pack_start (panning_link_box, Gtk::PACK_SHRINK);
 
-	pack_start (pan_vbox, true, false);
+	pack_start (pan_vbox, true, true);
 
 	panner = 0;
 
@@ -215,23 +214,9 @@ PannerUI::set_width (Width w)
 {
 	switch (w) {
 	case Wide:
-		panning_viewport.set_size_request (64, 61);
-		if (panner) {
-			panner->set_size_request (63, 61);
-		}
-		for (vector<PannerBar*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
-			(*i)->set_size_request (63, pan_bar_height);
-		}
 		panning_link_button.set_label (_("link"));
 		break;
 	case Narrow:
-		panning_viewport.set_size_request (34, 61);
-		if (panner) {
-			panner->set_size_request (33, 61);
-		}
-		for (vector<PannerBar*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
-			(*i)->set_size_request (33, pan_bar_height);
-		}
 		panning_link_button.set_label (_("L"));
 		break;
 	}
@@ -289,6 +274,13 @@ PannerUI::setup_pan ()
 			pan_adjustments.pop_back ();
 		}
 
+		/* stick something into the panning viewport so that it redraws */
+
+		EventBox* eb = manage (new EventBox());
+		panning_viewport.remove ();
+		panning_viewport.add (*eb);
+		panning_viewport.show_all ();
+
 	} else if (nouts == 2) {
 
 		vector<Adjustment*>::size_type asz;
@@ -344,16 +336,9 @@ PannerUI::setup_pan ()
 			bc->event_widget().signal_button_release_event().connect
 				(bind (mem_fun(*this, &PannerUI::pan_button_event), (uint32_t) asz));
 
-			pan_bars.push_back (bc);
-			switch (_width) {
-			case Wide:
-				bc->set_size_request (63, pan_bar_height);
-				break;
-			case Narrow:
-				bc->set_size_request (33, pan_bar_height);
-				break;
-			}
+			bc->set_size_request (-1, pan_bar_height);
 
+			pan_bars.push_back (bc);
 			pan_bar_packer.pack_start (*bc, false, false);
 		}
 
@@ -370,26 +355,15 @@ PannerUI::setup_pan ()
 
 	} else {
 
-		int w = 0;
-
-		switch (_width) {
-		case Wide:
-			w = 63;
-			break;
-		case Narrow:
-			w = 33;
-			break;
-		}
-
 		if (panner == 0) {
-			panner = new Panner2d (_io->panner(), w, 61);
+			panner = new Panner2d (_io->panner(), 61);
 			panner->set_name ("MixerPanZone");
 			panner->show ();
 		}
 		
 		update_pan_sensitive ();
 		panner->reset (_io->n_inputs());
-		panner->set_size_request (w, 61);
+		panner->set_size_request (-1, 61);
 
 		/* and finally, add it to the panner frame */
 
@@ -771,7 +745,7 @@ PannerUI::_astate_string (AutoState state, bool shrt)
 
 	switch (state) {
 	case Off:
-		sstr = (shrt ? "O" : _("O"));
+		sstr = (shrt ? "M" : _("M"));
 		break;
 	case Play:
 		sstr = (shrt ? "P" : _("P"));

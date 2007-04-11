@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __ardour_gtk_ghost_region_h__
@@ -42,6 +41,7 @@ struct GhostRegion : public sigc::trackable
     void set_samples_per_unit (double spu);
     void set_duration (double units);
     void set_height ();
+    void set_colors ();
 
     sigc::signal<void,GhostRegion*> GoingAway;
 };

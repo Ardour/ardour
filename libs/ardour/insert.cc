@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <string>
@@ -485,8 +484,10 @@ PluginInsert::protect_automation ()
 
 		switch (al.automation_state()) {
 		case Write:
-		case Touch:
 			al.set_automation_state (Off);
+			break;
+		case Touch:
+			al.set_automation_state (Play);
 			break;
 		default:
 			break;

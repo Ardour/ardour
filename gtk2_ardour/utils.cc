@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cstdlib>
@@ -44,6 +43,20 @@ using namespace Gtk;
 using namespace sigc;
 using namespace Glib;
 using namespace PBD;
+
+int
+pixel_width (const ustring& str, Pango::FontDescription& font)
+{
+	Label foo;
+	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout ("");
+
+	layout->set_font_description (font);
+	layout->set_text (str);
+
+	int width, height;
+	Gtkmm2ext::get_ink_pixel_size (layout, width, height);
+	return width;
+}
 
 ustring
 fit_to_pixels (const ustring& str, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses)
@@ -120,7 +133,7 @@ xpm2rgb (const char** xpm, uint32_t& w, uint32_t& h)
 		return 0;
 	}
 
-	savergb = rgb = (unsigned char*)art_alloc (h * w * 3);
+	savergb = rgb = (unsigned char*) malloc (h * w * 3);
 	
 	// LOAD XPM COLORMAP LONG ENOUGH TO DO CONVERSION
 	for (t = 0; t < colors; ++t) {
@@ -163,7 +176,7 @@ xpm2rgba (const char** xpm, uint32_t& w, uint32_t& h)
 		return 0;
 	}
 
-	savergb = rgb = (unsigned char*)art_alloc (h * w * 4);
+	savergb = rgb = (unsigned char*) malloc (h * w * 4);
 	
 	// LOAD XPM COLORMAP LONG ENOUGH TO DO CONVERSION
 
@@ -233,7 +246,21 @@ get_font_for_style (string widgetname)
 	foobar.ensure_style();
 
 	style = foobar.get_style ();
-	return style->get_font();
+
+	Glib::RefPtr<const Pango::Layout> layout = foobar.get_layout();
+	
+	PangoFontDescription *pfd = (PangoFontDescription *)pango_layout_get_font_description((PangoLayout *)layout->gobj());
+	
+	if (!pfd) {
+		
+		/* layout inherited its font description from a PangoContext */
+
+		PangoContext* ctxt = (PangoContext*) pango_layout_get_context ((PangoLayout*) layout->gobj());
+		pfd =  pango_context_get_font_description (ctxt);
+		return Pango::FontDescription (pfd, true); /* make a copy */
+	} 
+
+	return Pango::FontDescription (pfd, true); /* make a copy */
 }
 
 uint32_t
@@ -263,6 +290,7 @@ rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a, s
 			r = waverc->fg[state].red / 257;
 			g = waverc->fg[state].green / 257;
 			b = waverc->fg[state].blue / 257;
+ 
 			/* what a hack ... "a" is for "active" */
 			if (state == Gtk::STATE_NORMAL && rgba) {
 				a = waverc->fg[GTK_STATE_ACTIVE].red / 257;
@@ -548,54 +576,4 @@ key_is_legal_for_numeric_entry (guint keyval)
 }
 
 
-ustring
-short_path (ustring path, uint32_t target_characters)
-{
-	ustring::size_type last_sep;
-	ustring::size_type len = path.length();
-	const char separator = '/';
 
-	if (len <= target_characters) {
-		return path;
-	}
-
-	if ((last_sep = path.find_last_of (separator)) == ustring::npos) {
-
-		/* just a filename, but its too long anyway */
-
-		if (target_characters > 3) {
-			return path.substr (0, target_characters - 3) + ustring ("...");
-		} else {
-			/* stupid caller, just hand back the whole thing */
-			return path;
-		}
-	}
-
-	if (len - last_sep >= target_characters) {
-
-		/* even the filename itself is too long */
-
-		if (target_characters > 3) {
-			return path.substr (last_sep+1, target_characters - 3) + ustring ("...");
-		} else {
-			/* stupid caller, just hand back the whole thing */
-			return path;
-		}
-	}
-	
-	uint32_t so_far = (len - last_sep);
-	uint32_t space_for = target_characters - so_far;
-
-	if (space_for >= 3) {
-		ustring res = "...";
-		res += path.substr (last_sep - space_for);
-		return res;
-	} else {
-		/* remove part of the end */
-		ustring res = "...";
-		res += path.substr (last_sep - space_for, len - last_sep + space_for - 3);
-		res += "...";
-		return res;
-		
-	}
-}

@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cstdio>
@@ -148,7 +147,7 @@ AddRouteDialog::track_type_chosen ()
 	if (track_button.get_active()) {
 		track_mode_combo.set_sensitive (true);
 	} else {
-		track_mode_combo.set_sensitive (true);
+		track_mode_combo.set_sensitive (false);
 	}
 }
 

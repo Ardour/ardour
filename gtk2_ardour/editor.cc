@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <unistd.h>
@@ -31,6 +30,7 @@
 #include <pbd/stacktrace.h>
 #include <pbd/memento_command.h>
 
+#include <glibmm/miscutils.h>
 #include <gtkmm/image.h>
 #include <gdkmm/color.h>
 #include <gdkmm/bitmap.h>
@@ -39,6 +39,8 @@
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/tearoff.h>
 #include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/window_title.h>
+#include <gtkmm2ext/choice.h>
 
 #include <ardour/audio_track.h>
 #include <ardour/audio_diskstream.h>
@@ -170,9 +172,8 @@ check_adjustment (Gtk::Adjustment* adj)
 
 }
 
-Editor::Editor (AudioEngine& eng) 
-	: engine (eng),
-
+Editor::Editor ()
+	: 
 	  /* time display buttons */
 
 	  minsec_label (_("Mins:Secs")),
@@ -271,7 +272,6 @@ Editor::Editor (AudioEngine& eng)
 	no_route_list_redisplay = false;
 	verbose_cursor_on = true;
 	route_removal = false;
-	track_spacing = 0;
 	show_automatic_regions_in_region_list = true;
 	region_list_sort_type = (Editing::RegionListSortType) 0; 
 	have_pending_keyboard_selection = false;
@@ -366,12 +366,13 @@ Editor::Editor (AudioEngine& eng)
 
  	edit_cursor_clock.ValueChanged.connect (mem_fun(*this, &Editor::edit_cursor_clock_changed));
 	
+	time_canvas_vbox.pack_start (*_ruler_separator, false, false);
 	time_canvas_vbox.pack_start (*minsec_ruler, false, false);
 	time_canvas_vbox.pack_start (*smpte_ruler, false, false);
 	time_canvas_vbox.pack_start (*frames_ruler, false, false);
 	time_canvas_vbox.pack_start (*bbt_ruler, false, false);
 	time_canvas_vbox.pack_start (time_canvas, true, true);
-	time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars));
+	time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars) + 2);
 
 	bbt_label.set_name ("EditorTimeButton");
 	bbt_label.set_size_request (-1, (int)timebar_height);
@@ -424,6 +425,9 @@ Editor::Editor (AudioEngine& eng)
 	time_button_event_box.set_name ("TimebarLabelBase");
 	time_button_event_box.signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_label_button_release));
 
+	time_button_frame.add(time_button_event_box);
+	time_button_frame.property_shadow_type() = Gtk::SHADOW_OUT;
+
 	/* these enable us to have a dedicated window (for cursor setting, etc.) 
 	   for the canvas areas.
 	*/
@@ -441,7 +445,7 @@ Editor::Editor (AudioEngine& eng)
 	
 	edit_packer.attach (edit_vscrollbar,         0, 1, 1, 3,    FILL,        FILL|EXPAND, 0, 0);
 
-	edit_packer.attach (time_button_event_box,   1, 2, 0, 1,    FILL,        FILL, 0, 0);
+	edit_packer.attach (time_button_frame,       0, 2, 0, 1,    FILL,        FILL, 0, 0);
 	edit_packer.attach (time_canvas_event_box,   2, 3, 0, 1,    FILL|EXPAND, FILL, 0, 0);
 
 	edit_packer.attach (controls_layout,         1, 2, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
@@ -510,7 +514,7 @@ Editor::Editor (AudioEngine& eng)
 
 	edit_group_display.set_name ("EditGroupList");
 	edit_group_display.get_selection()->set_mode (SELECTION_SINGLE);
-	edit_group_display.set_headers_visible (false);
+	edit_group_display.set_headers_visible (true);
 	edit_group_display.set_reorderable (false);
 	edit_group_display.set_rules_hint (true);
 	edit_group_display.set_size_request (75, -1);
@@ -710,7 +714,10 @@ Editor::Editor (AudioEngine& eng)
 		set_icon_list (window_icons);
 		set_default_icon_list (window_icons);
 	}
-	set_title (_("ardour: editor"));
+
+	WindowTitle title(Glib::get_application_name());
+	title += _("Editor");
+	set_title (title.get_string());
 	set_wmclass (X_("ardour_editor"), "Ardour");
 
 	add (vpacker);
@@ -1008,24 +1015,21 @@ Editor::update_title ()
 	if (session) {
 		bool dirty = session->dirty();
 
-		string wintitle = _("ardour: editor: ");
-
-		if (dirty) {
-			wintitle += '[';
-		}
-
-		wintitle += session->name();
+		string session_name;
 
 		if (session->snap_name() != session->name()) {
-			wintitle += ':';
-			wintitle += session->snap_name();
+			session_name = session->snap_name();
+		} else {
+			session_name = session->name();
 		}
 
 		if (dirty) {
-			wintitle += ']';
+			session_name = "*" + session_name;
 		}
 
-		set_title (wintitle);
+		WindowTitle title(session_name);
+		title += Glib::get_application_name();
+		set_title (title.get_string());
 	}
 }
 
@@ -1072,7 +1076,7 @@ Editor::connect_to_session (Session *t)
 
 	session_connections.push_back (session->SMPTEOffsetChanged.connect (mem_fun(*this, &Editor::update_just_smpte)));
 
-	session_connections.push_back (session->tempo_map().StateChanged.connect (bind (mem_fun(*this, &Editor::tempo_map_changed), false)));
+	session_connections.push_back (session->tempo_map().StateChanged.connect (mem_fun(*this, &Editor::tempo_map_changed)));
 
 	edit_groups_changed ();
 
@@ -1094,8 +1098,7 @@ Editor::connect_to_session (Session *t)
 		}
 		session->locations()->add (loc, false);
 		session->set_auto_loop_location (loc);
-	}
-	else {
+	} else {
 		// force name
 		loc->set_name (_("Loop"));
 	}
@@ -1108,8 +1111,7 @@ Editor::connect_to_session (Session *t)
 		}
 		session->locations()->add (loc, false);
 		session->set_auto_punch_location (loc);
-	}
-	else {
+	} else {
 		// force name
 		loc->set_name (_("Punch"));
 	}
@@ -1241,8 +1243,8 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 		items.push_back (SeparatorElem());
 		
 		items.push_back (MenuElem (_("Linear"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Linear)));
-		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::LogB)));
-		items.push_back (MenuElem (_("Slow"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Fast)));
+		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Fast)));
+		items.push_back (MenuElem (_("Slow"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::LogB)));
 		items.push_back (MenuElem (_("Fast"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::LogA)));
 		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Slow)));
 		break;
@@ -1258,10 +1260,10 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 		items.push_back (SeparatorElem());
 		
 		items.push_back (MenuElem (_("Linear"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Linear)));
-		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Fast)));
-		items.push_back (MenuElem (_("Slow"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::LogB)));
-		items.push_back (MenuElem (_("Fast"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::LogA)));
-		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Slow)));
+		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Slow)));
+		items.push_back (MenuElem (_("Slow"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::LogA)));
+		items.push_back (MenuElem (_("Fast"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::LogB)));
+		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Fast)));
 
 		break;
 
@@ -1629,48 +1631,65 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 
 	items.push_back (SeparatorElem());
 
-	items.push_back (CheckMenuElem (_("Lock"), mem_fun(*this, &Editor::toggle_region_lock)));
+	sigc::connection fooc;
+
+	items.push_back (CheckMenuElem (_("Lock")));
 	region_lock_item = static_cast<CheckMenuItem*>(&items.back());
+	fooc = region_lock_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_lock));
 	if (region->locked()) {
+		fooc.block (true);
 		region_lock_item->set_active();
+		fooc.block (false);
 	}
-	items.push_back (CheckMenuElem (_("Mute"), mem_fun(*this, &Editor::toggle_region_mute)));
+	items.push_back (CheckMenuElem (_("Mute")));
 	region_mute_item = static_cast<CheckMenuItem*>(&items.back());
+	fooc = region_mute_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_mute));
 	if (region->muted()) {
+		fooc.block (true);
 		region_mute_item->set_active();
-	}
-	items.push_back (CheckMenuElem (_("Opaque"), mem_fun(*this, &Editor::toggle_region_opaque)));
-	region_opaque_item = static_cast<CheckMenuItem*>(&items.back());
-	if (region->opaque()) {
-		region_opaque_item->set_active();
+		fooc.block (false);
 	}
 
+	items.push_back (CheckMenuElem (_("Opaque")));
+	region_opaque_item = static_cast<CheckMenuItem*>(&items.back());
+	fooc = region_opaque_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_opaque));
+	if (region->opaque()) {
+		fooc.block (true);
+		region_opaque_item->set_active();
+		fooc.block (false);
+	}
+	
 	items.push_back (CheckMenuElem (_("Original position"), mem_fun(*this, &Editor::naturalize)));
 	if (region->at_natural_position()) {
 		items.back().set_sensitive (false);
 	}
-
+	
 	items.push_back (SeparatorElem());
-
+	
 	if (ar) {
 		
 		RegionView* rv = sv->find_view (ar);
 		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(rv);
-
+		
 		items.push_back (MenuElem (_("Reset Envelope"), mem_fun(*this, &Editor::reset_region_gain_envelopes)));
 		
-		items.push_back (CheckMenuElem (_("Envelope Visible"), mem_fun(*this, &Editor::toggle_gain_envelope_visibility)));
+		items.push_back (CheckMenuElem (_("Envelope Visible")));
 		region_envelope_visible_item = static_cast<CheckMenuItem*> (&items.back());
-
+		fooc = region_envelope_visible_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_gain_envelope_visibility));
 		if (arv->envelope_visible()) {
+			fooc.block (true);
 			region_envelope_visible_item->set_active (true);
+			fooc.block (false);
 		}
-
-		items.push_back (CheckMenuElem (_("Envelope Active"), mem_fun(*this, &Editor::toggle_gain_envelope_active)));
+		
+		items.push_back (CheckMenuElem (_("Envelope Active")));
 		region_envelope_active_item = static_cast<CheckMenuItem*> (&items.back());
-
+		fooc = region_envelope_active_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_gain_envelope_active));
+		
 		if (ar->envelope_active()) {
+			fooc.block (true);
 			region_envelope_active_item->set_active (true);
+			fooc.block (false);
 		}
 
 		items.push_back (SeparatorElem());
@@ -2720,6 +2739,8 @@ Editor::map_transport_state ()
 	if (session->transport_stopped()) {
 		have_pending_keyboard_selection = false;
 	}
+
+	update_loop_range_view (true);
 }
 
 /* UNDO/REDO */
@@ -2831,32 +2852,34 @@ Editor::history_changed ()
 void
 Editor::duplicate_dialog (bool dup_region)
 {
-	if (dup_region) {
-		if (clicked_regionview == 0) {
-			return;
-		}
-	} else {
-		if (selection->time.length() == 0) {
-			return;
-		}
+	if (selection->regions.empty() && (selection->time.length() == 0)) {
+		return;
 	}
 
 	ArdourDialog win ("duplicate dialog");
-	Entry  entry;
 	Label  label (_("Duplicate how many times?"));
+	Adjustment adjustment (1.0, 1.0, 1000000.0, 1.0, 5.0);
+	SpinButton spinner (adjustment);
 
+	win.get_vbox()->set_spacing (12);
 	win.get_vbox()->pack_start (label);
-	win.add_action_widget (entry, RESPONSE_ACCEPT);
+
+	/* dialogs have ::add_action_widget() but that puts the spinner in the wrong
+	   place, visually. so do this by hand.
+	*/
+
+	win.get_vbox()->pack_start (spinner);
+	spinner.signal_activate().connect (sigc::bind (mem_fun (win, &ArdourDialog::response), RESPONSE_ACCEPT));
+
+	label.show ();
+	spinner.show ();
+
 	win.add_button (Stock::OK, RESPONSE_ACCEPT);
 	win.add_button (Stock::CANCEL, RESPONSE_CANCEL);
 
 	win.set_position (WIN_POS_MOUSE);
 
-	entry.set_text ("1");
-	set_size_request_to_display_given_text (entry, X_("12345678"), 20, 15);
-	entry.select_region (0, -1);
-	entry.grab_focus ();
-
+	spinner.grab_focus ();
 
 	switch (win.run ()) {
 	case RESPONSE_ACCEPT:
@@ -2865,17 +2888,12 @@ Editor::duplicate_dialog (bool dup_region)
 		return;
 	}
 
-	string text = entry.get_text();
-	float times;
+	float times = adjustment.get_value();
 
-	if (sscanf (text.c_str(), "%f", &times) == 1) {
-		if (dup_region) {
-			RegionSelection regions;
-			regions.add (clicked_regionview);
-			duplicate_some_regions (regions, times);
-		} else {
-			duplicate_selection (times);
-		}
+	if (!selection->regions.empty()) {
+		duplicate_some_regions (selection->regions, times);
+	} else {
+		duplicate_selection (times);
 	}
 }
 
@@ -3032,7 +3050,7 @@ gint
 Editor::edit_controls_button_release (GdkEventButton* ev)
 {
 	if (Keyboard::is_context_menu_event (ev)) {
-		ARDOUR_UI::instance()->add_route ();
+		ARDOUR_UI::instance()->add_route (this);
 	}
 	return TRUE;
 }
@@ -3181,7 +3199,6 @@ Editor::set_show_measures (bool yn)
 		if ((_show_measures = yn) == true) {
 			draw_measures ();
 		}
-		DisplayControlChanged (ShowMeasures);
 		instant_save ();
 	}
 }
@@ -3204,7 +3221,6 @@ Editor::set_follow_playhead (bool yn)
 			/* catch up */
 			update_current_screen ();
 		}
-		DisplayControlChanged (FollowPlayhead);
 		instant_save ();
 	}
 }
@@ -3290,7 +3306,7 @@ Editor::playlist_deletion_dialog (boost::shared_ptr<Playlist> pl)
 	label.show ();
 
 	dialog.add_button (_("Delete playlist"), RESPONSE_ACCEPT);
-	dialog.add_button (_("Keep playlist"), RESPONSE_CANCEL);
+	dialog.add_button (_("Keep playlist"), RESPONSE_REJECT);
 	dialog.add_button (_("Cancel"), RESPONSE_CANCEL);
 
 	switch (dialog.run ()) {
@@ -3374,6 +3390,9 @@ Editor::control_layout_scroll (GdkEventScroll* ev)
 	return false;
 }
 
+
+/** A new snapshot has been selected.
+ */
 void
 Editor::snapshot_display_selection_changed ()
 {
@@ -3398,7 +3417,93 @@ Editor::snapshot_display_selection_changed ()
 bool
 Editor::snapshot_display_button_press (GdkEventButton* ev)
 {
-	 return false;
+	if (ev->button == 3) {
+		/* Right-click on the snapshot list. Work out which snapshot it
+		   was over. */
+		Gtk::TreeModel::Path path;
+		Gtk::TreeViewColumn* col;
+		int cx;
+		int cy;
+		snapshot_display.get_path_at_pos ((int) ev->x, (int) ev->y, path, col, cx, cy);
+		Gtk::TreeModel::iterator iter = snapshot_display_model->get_iter (path);
+		if (iter) {
+			Gtk::TreeModel::Row row = *iter;
+			popup_snapshot_context_menu (ev->button, ev->time, row[snapshot_display_columns.real_name]);
+		}
+		return true;
+	}
+
+	return false;
+}
+
+
+/** Pop up the snapshot display context menu.
+ * @param button Button used to open the menu.
+ * @param time Menu open time.
+ * @snapshot_name Name of the snapshot that the menu click was over.
+ */
+
+void
+Editor::popup_snapshot_context_menu (int button, int32_t time, Glib::ustring snapshot_name)
+{
+	using namespace Menu_Helpers;
+
+	MenuList& items (snapshot_context_menu.items());
+	items.clear ();
+
+	const bool modification_allowed = (session->snap_name() != snapshot_name && session->name() != snapshot_name);
+
+	items.push_back (MenuElem (_("Remove"), bind (mem_fun (*this, &Editor::remove_snapshot), snapshot_name)));
+	if (!modification_allowed) {
+		items.back().set_sensitive (false);
+	}
+
+	items.push_back (MenuElem (_("Rename"), bind (mem_fun (*this, &Editor::rename_snapshot), snapshot_name)));
+	if (!modification_allowed) {
+		items.back().set_sensitive (false);
+	}
+
+	snapshot_context_menu.popup (button, time);
+}
+
+void
+Editor::rename_snapshot (Glib::ustring old_name)
+{
+	ArdourPrompter prompter(true);
+
+	string new_name;
+
+	prompter.set_name ("Prompter");
+	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
+	prompter.set_prompt (_("New name of snapshot"));
+	prompter.set_initial_text (old_name);
+	
+	if (prompter.run() == RESPONSE_ACCEPT) {
+		prompter.get_result (new_name);
+		if (new_name.length()) {
+			session->rename_state (old_name, new_name);
+		        redisplay_snapshots ();
+		}
+	}
+}
+
+
+void
+Editor::remove_snapshot (Glib::ustring name)
+{
+	vector<string> choices;
+
+	std::string prompt  = string_compose (_("Do you really want to remove snapshot \"%1\" ?\n(cannot be undone)"), name);
+
+	choices.push_back (_("No, do nothing."));
+	choices.push_back (_("Yes, remove it."));
+
+	Gtkmm2ext::Choice prompter (prompt, choices);
+
+	if (prompter.run () == 1) {
+		session->remove_state (name);
+		redisplay_snapshots ();
+	}
 }
 
 void
@@ -3667,7 +3772,7 @@ Editor::idle_visual_changer ()
 			/* the signal handler will do the rest */
 		} else {
 			update_fixed_rulers();
-			tempo_map_changed (Change (0), true);
+			redisplay_tempo (true);
 		}
 	}
 
@@ -3687,3 +3792,12 @@ Editor::sort_track_selection ()
 	selection->tracks.sort (cmp);
 }
 
+nframes_t
+Editor::edit_cursor_position(bool sync)
+{
+	if (sync && edit_cursor->current_frame != edit_cursor_clock.current_time()) {
+		edit_cursor_clock.set(edit_cursor->current_frame, true);
+	}
+
+	return edit_cursor->current_frame;
+}

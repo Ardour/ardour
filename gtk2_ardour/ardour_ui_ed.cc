@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 /* This file contains any ARDOUR_UI methods that require knowledge of
@@ -26,7 +25,10 @@
 
 #include <pbd/pathscanner.h>
 
+#include <glibmm/miscutils.h>
+
 #include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/window_title.h>
 
 #include "ardour_ui.h"
 #include "public_editor.h"
@@ -35,6 +37,7 @@
 #include "actions.h"
 
 #include <ardour/session.h>
+#include <ardour/profile.h>
 #include <ardour/audioengine.h>
 #include <ardour/control_protocol_manager.h>
 
@@ -55,7 +58,7 @@ ARDOUR_UI::create_editor ()
 
 {
 	try {
-		editor = new Editor (*engine);
+		editor = new Editor ();
 	}
 
 	catch (failed_constructor& err) {
@@ -93,14 +96,15 @@ ARDOUR_UI::install_actions ()
 
 	/* the real actions */
 
-	act = ActionManager::register_action (main_actions, X_("New"), _("New"),  bind (mem_fun(*this, &ARDOUR_UI::new_session), string ()));
+	act = ActionManager::register_action (main_actions, X_("New"), _("New"),  hide_return (bind (mem_fun(*this, &ARDOUR_UI::new_session), string ())));
 
 	ActionManager::register_action (main_actions, X_("Open"), _("Open"),  mem_fun(*this, &ARDOUR_UI::open_session));
 	ActionManager::register_action (main_actions, X_("Recent"), _("Recent"),  mem_fun(*this, &ARDOUR_UI::open_recent_session));
 	act = ActionManager::register_action (main_actions, X_("Close"), _("Close"),  mem_fun(*this, &ARDOUR_UI::close_session));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("AddTrackBus"), _("Add Track/Bus"),  mem_fun(*this, &ARDOUR_UI::add_route));
+	act = ActionManager::register_action (main_actions, X_("AddTrackBus"), _("Add Track/Bus"),  
+					      bind (mem_fun(*this, &ARDOUR_UI::add_route), (Gtk::Window*) 0));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	
@@ -181,7 +185,6 @@ ARDOUR_UI::install_actions ()
 	
 	common_actions = ActionGroup::create (X_("Common"));
 	ActionManager::register_action (main_actions, X_("Windows"), _("Windows"));
-	ActionManager::register_action (common_actions, X_("Start-Prefix"), _("start prefix"), mem_fun(*this, &ARDOUR_UI::start_keyboard_prefix));
 	ActionManager::register_action (common_actions, X_("Quit"), _("Quit"), (mem_fun(*this, &ARDOUR_UI::finish)));
 
         /* windows visibility actions */
@@ -391,8 +394,11 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (option_actions, X_("SendMIDIfeedback"), _("Send MIDI feedback"), mem_fun (*this, &ARDOUR_UI::toggle_send_midi_feedback));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (option_actions, X_("UseMIDIcontrol"), _("Use MIDI control"), mem_fun (*this, &ARDOUR_UI::toggle_use_midi_control));
-	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_toggle_action (option_actions, X_("UseOSC"), _("Use OSC"), mem_fun (*this, &ARDOUR_UI::toggle_use_osc));
+#ifndef HAVE_LIBLO
+	act->set_sensitive (false);
+#endif
 
 	ActionManager::register_toggle_action (option_actions, X_("StopPluginsWithTransport"), _("Stop plugins with transport"), mem_fun (*this, &ARDOUR_UI::toggle_StopPluginsWithTransport));
 	ActionManager::register_toggle_action (option_actions, X_("VerifyRemoveLastCapture"), _("Verify remove last capture"), mem_fun (*this, &ARDOUR_UI::toggle_VerifyRemoveLastCapture));
@@ -406,6 +412,8 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_toggle_action (option_actions, X_("LatchedSolo"), _("Latched solo"), mem_fun (*this, &ARDOUR_UI::toggle_LatchedSolo));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (option_actions, X_("ShowSoloMutes"), _("Show solo muting"), mem_fun (*this, &ARDOUR_UI::toggle_ShowSoloMutes));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	/* !!! REMEMBER THAT RADIO ACTIONS HAVE TO BE HANDLED WITH MORE FINESSE THAN SIMPLE TOGGLES !!! */
@@ -467,6 +475,15 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_radio_action (option_actions, output_auto_connect_group, X_("OutputAutoConnectMaster"), _("Auto-connect outputs to master bus"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_output_auto_connect), AutoConnectMaster)));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_radio_action (option_actions, output_auto_connect_group, X_("OutputAutoConnectManual"), _("Manually connect outputs"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_output_auto_connect), (AutoConnectOption) 0)));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	RadioAction::Group remote_group;
+
+	act = ActionManager::register_radio_action (option_actions, remote_group, X_("RemoteUserDefined"), _("Remote ID assigned by User"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_remote_model), UserOrdered)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_radio_action (option_actions, remote_group, X_("RemoteMixerDefined"), _("Remote ID follows order of Mixer"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_remote_model), MixerOrdered)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_radio_action (option_actions, remote_group, X_("RemoteEditorDefined"), _("Remote ID follows order of Editor"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_remote_model), EditorOrdered)));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	ActionManager::add_action_group (shuttle_actions);
@@ -680,11 +697,13 @@ ARDOUR_UI::build_menu_bar ()
 	sample_rate_label.set_name ("SampleRate");
 
 	menu_hbox.pack_start (*menu_bar, true, true);
-	menu_hbox.pack_end (wall_clock_box, false, false, 10);
-	menu_hbox.pack_end (disk_space_box, false, false, 10);
-	menu_hbox.pack_end (cpu_load_box, false, false, 10);
-	menu_hbox.pack_end (buffer_load_box, false, false, 10);
-	menu_hbox.pack_end (sample_rate_box, false, false, 10);
+	if (!Profile->get_small_screen()) {
+		menu_hbox.pack_end (wall_clock_box, false, false, 2);
+		menu_hbox.pack_end (disk_space_box, false, false, 4);
+	}
+	menu_hbox.pack_end (cpu_load_box, false, false, 4);
+	menu_hbox.pack_end (buffer_load_box, false, false, 4);
+	menu_hbox.pack_end (sample_rate_box, false, false, 4);
 
 	menu_bar_base.set_name ("MainMenuBar");
 	menu_bar_base.add (menu_hbox);
@@ -699,7 +718,10 @@ ARDOUR_UI::setup_clock ()
 	
 	big_clock_window->set_border_width (0);
 	big_clock_window->add  (big_clock);
-	big_clock_window->set_title (_("ardour: clock"));
+
+	WindowTitle title(Glib::get_application_name());
+	title += _("Clock");
+	big_clock_window->set_title (title.get_string());
 	big_clock_window->set_type_hint (Gdk::WINDOW_TYPE_HINT_MENU);
 	big_clock_window->signal_realize().connect (bind (sigc::ptr_fun (set_decoration), big_clock_window,  (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
 	big_clock_window->signal_unmap().connect (bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleBigClock")));

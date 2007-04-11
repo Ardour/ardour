@@ -16,7 +16,6 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-  $Id$
 */
 
 #include <iostream>
@@ -26,6 +25,7 @@
 #include <ardour/timestamps.h>
 
 #include <pbd/error.h>
+#include <pbd/enumwriter.h>
 #include <pbd/stacktrace.h>
 
 #include <ardour/ardour.h>

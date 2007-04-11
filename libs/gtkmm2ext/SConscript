@@ -60,6 +60,7 @@ tearoff.cc
 textviewer.cc
 utils.cc
 version.cc
+window_title.cc
 """)
 
 gtkmm2ext.VersionBuild(['version.cc','gtkmm2ext/version.h'], [])

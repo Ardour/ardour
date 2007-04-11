@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <algorithm>
@@ -173,9 +172,8 @@ VSTPlugin::get_state()
 
 			} else {
 
-				error << string_compose (_("cannot check VST chunk directory: %1"),
-						  strerror (errno))
-				      << endmsg;
+				warning << string_compose (_("cannot check VST chunk directory: %1"), strerror (errno))
+					<< endmsg;
 				return *root;
 			}
 

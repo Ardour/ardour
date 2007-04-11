@@ -47,6 +47,8 @@ class RegionView : public TimeAxisViewItem
 	            double               samples_per_unit,
 	            Gdk::Color&          basic_color);
 
+	RegionView (const RegionView& other);
+
 	~RegionView ();
 	
 	virtual void init (Gdk::Color& base_color, bool wait_for_data);
@@ -54,42 +56,45 @@ class RegionView : public TimeAxisViewItem
 	boost::shared_ptr<ARDOUR::Region> region() const { return _region; }
 	
 	bool is_valid() const    { return valid; }
-    void set_valid (bool yn) { valid = yn; }
 
-    virtual void set_height (double) = 0;
-    virtual void set_samples_per_unit (double);
-    virtual bool set_duration (nframes_t, void*);
 
-    void move (double xdelta, double ydelta);
+	void set_valid (bool yn) { valid = yn; }
+	
+	virtual void set_height (double) = 0;
+	virtual void set_samples_per_unit (double);
+	virtual bool set_duration (nframes_t, void*);
+	
+	void move (double xdelta, double ydelta);
+	
+	void raise ();
+	void raise_to_top ();
+	void lower ();
+	void lower_to_bottom ();
 
-    void raise ();
-    void raise_to_top ();
-    void lower ();
-    void lower_to_bottom ();
+	bool set_position(nframes_t pos, void* src, double* delta = 0);
+	void fake_set_opaque (bool yn);
+	
+	virtual void show_region_editor () = 0;
+	virtual void hide_region_editor();
+	
+	virtual void region_changed (ARDOUR::Change);
+	
+	virtual GhostRegion* add_ghost (AutomationTimeAxisView&) = 0;
+	void                 remove_ghost (GhostRegion*);
+	
+	uint32_t get_fill_color ();
 
-    bool set_position(nframes_t pos, void* src, double* delta = 0);
-
-    virtual void show_region_editor () = 0;
-    virtual void hide_region_editor();
-
-    virtual void region_changed (ARDOUR::Change);
-
-    virtual GhostRegion* add_ghost (AutomationTimeAxisView&) = 0;
-    void                 remove_ghost (GhostRegion*);
-
-    uint32_t get_fill_color ();
-
-    virtual void entered () {}
-    virtual void exited () {}
-    
+	virtual void entered () {}
+	virtual void exited () {}
+	
 	static sigc::signal<void,RegionView*> RegionViewGoingAway;
-    sigc::signal<void>                    GoingAway;
-
+	sigc::signal<void>                    GoingAway;
+	
   protected:
-
-    /** Allows derived types to specify their visibility requirements
+	
+	/** Allows derived types to specify their visibility requirements
      * to the TimeAxisViewItem parent class
-	 */
+     */
     RegionView (ArdourCanvas::Group *, 
 		TimeAxisView&,
 		boost::shared_ptr<ARDOUR::Region>,
@@ -119,7 +124,6 @@ class RegionView : public TimeAxisViewItem
     boost::shared_ptr<ARDOUR::Region> _region;
     
     ArdourCanvas::Polygon* sync_mark; ///< polgyon for sync position 
-    ArdourCanvas::Text*    no_wave_msg;
 
     RegionEditor* editor;
 

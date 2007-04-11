@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <glibmm/thread.h>
@@ -65,7 +64,7 @@ Auditioner::Auditioner (Session& s)
 	}
 
 	if (right.length()) {
-		audio_diskstream()->add_channel();
+		audio_diskstream()->add_channel (1);
 		add_output_port (right, this, DataType::AUDIO);
 	}
 
@@ -139,12 +138,10 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 	_diskstream->playlist()->clear ();
 	_diskstream->playlist()->add_region (the_region, 0, 1);
 
-	while (_diskstream->n_channels() < the_region->n_channels()) {
-		audio_diskstream()->add_channel ();
-	}
-
-	while (_diskstream->n_channels() > the_region->n_channels()) {
-		audio_diskstream()->remove_channel ();
+	if (_diskstream->n_channels() < the_region->n_channels()) {
+		audio_diskstream()->add_channel (the_region->n_channels() - _diskstream->n_channels());
+	} else if (_diskstream->n_channels() > the_region->n_channels()) {
+		audio_diskstream()->remove_channel (_diskstream->n_channels() - the_region->n_channels());
 	}
 
 	/* force a panner reset now that we have all channels */

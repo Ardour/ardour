@@ -15,10 +15,10 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cmath>
+#include <algorithm>
 
 #include <sigc++/bind.h>
 
@@ -63,6 +63,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
+using namespace std;
 
 int MixerStrip::scrollbar_height = 0;
 
@@ -155,17 +156,10 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	/* XXX what is this meant to do? */
 	//meter_point_button.signal_button_release_event().connect (mem_fun (gpm, &GainMeter::meter_release), false);
 
-	solo_button->set_name ("MixerSoloButton");
-	mute_button->set_name ("MixerMuteButton");
-
 	hide_button.set_events (hide_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 
-	width_button.unset_flags (Gtk::CAN_FOCUS);
-	hide_button.unset_flags (Gtk::CAN_FOCUS);
-	input_button.unset_flags (Gtk::CAN_FOCUS);
-	output_button.unset_flags (Gtk::CAN_FOCUS);
-	solo_button->unset_flags (Gtk::CAN_FOCUS);
-	mute_button->unset_flags (Gtk::CAN_FOCUS);
+	mute_button->set_name ("MixerMuteButton");
+	solo_button->set_name ("MixerSoloButton");
 
 	button_table.set_homogeneous (true);
 	button_table.set_spacings (0);
@@ -184,9 +178,10 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 
 	if (is_audio_track()) {
 		
+		rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press), false);
+		rec_enable_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::rec_enable_release));
+
 		rec_enable_button->set_name ("MixerRecordEnableButton");
-		rec_enable_button->unset_flags (Gtk::CAN_FOCUS);
-		rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press));
 
 		AudioTrack* at = audio_track();
 
@@ -396,8 +391,7 @@ MixerStrip::set_stuff_from_route ()
 		} else {
 			_marked_for_display = true;
 		}
-	}
-	else {
+	} else {
 		/* backwards compatibility */
 		_marked_for_display = true;
 	}
@@ -419,56 +413,56 @@ MixerStrip::set_width (Width w)
 	ensure_xml_node ();
 	
 	_width = w;
-
+	
 	switch (w) {
 	case Wide:
 		set_size_request (-1, -1);
 		xml_node->add_property ("strip_width", "wide");
-
-		if (rec_enable_button) {
-			rec_enable_button->set_label (_("record"));
+		
+		if (rec_enable_button)  {
+			((Gtk::Label*)rec_enable_button->get_child())->set_text (_("record"));
 		}
-		mute_button->set_label  (_("Mute"));
-		solo_button->set_label (_("Solo"));
+		((Gtk::Label*)mute_button->get_child())->set_text  (_("Mute"));
+		((Gtk::Label*)solo_button->get_child())->set_text (_("Solo"));
 
 		if (_route->comment() == "") {
 		       comment_button.unset_bg (STATE_NORMAL);
-		       comment_button.set_label (_("comments"));
+		       ((Gtk::Label*)comment_button.get_child())->set_text (_("comments"));
 		} else {
 		       comment_button.modify_bg (STATE_NORMAL, color());
-		       comment_button.set_label (_("*comments*"));
+		       ((Gtk::Label*)comment_button.get_child())->set_text (_("*comments*"));
 		}
 
-		gpm.gain_automation_style_button.set_label (gpm.astyle_string(_route->gain_automation_curve().automation_style()));
-		gpm.gain_automation_state_button.set_label (gpm.astate_string(_route->gain_automation_curve().automation_state()));
-		panners.pan_automation_style_button.set_label (panners.astyle_string(_route->panner().automation_style()));
-		panners.pan_automation_state_button.set_label (panners.astate_string(_route->panner().automation_state()));
+		((Gtk::Label*)gpm.gain_automation_style_button.get_child())->set_text (gpm.astyle_string(_route->gain_automation_curve().automation_style()));
+		((Gtk::Label*)gpm.gain_automation_state_button.get_child())->set_text (gpm.astate_string(_route->gain_automation_curve().automation_state()));
+		((Gtk::Label*)panners.pan_automation_style_button.get_child())->set_text (panners.astyle_string(_route->panner().automation_style()));
+		((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (panners.astate_string(_route->panner().automation_state()));
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "long", 2, 2);
 		break;
 
 	case Narrow:
-		set_size_request (50, -1);
 		xml_node->add_property ("strip_width", "narrow");
 
 		if (rec_enable_button) {
-			rec_enable_button->set_label (_("Rec"));
+			((Gtk::Label*)rec_enable_button->get_child())->set_text (_("Rec"));
 		}
-		mute_button->set_label (_("M"));
-		solo_button->set_label (_("S"));
+		((Gtk::Label*)mute_button->get_child())->set_text (_("M"));
+		((Gtk::Label*)solo_button->get_child())->set_text (_("S"));
 
 		if (_route->comment() == "") {
 		       comment_button.unset_bg (STATE_NORMAL);
-		       comment_button.set_label (_("Cmt"));
+		       ((Gtk::Label*)comment_button.get_child())->set_text (_("Cmt"));
 		} else {
 		       comment_button.modify_bg (STATE_NORMAL, color());
-		       comment_button.set_label (_("*Cmt*"));
+		       ((Gtk::Label*)comment_button.get_child())->set_text (_("*Cmt*"));
 		}
 
-		gpm.gain_automation_style_button.set_label (gpm.short_astyle_string(_route->gain_automation_curve().automation_style()));
-		gpm.gain_automation_state_button.set_label (gpm.short_astate_string(_route->gain_automation_curve().automation_state()));
-		panners.pan_automation_style_button.set_label (panners.short_astyle_string(_route->panner().automation_style()));
-		panners.pan_automation_state_button.set_label (panners.short_astate_string(_route->panner().automation_state()));
+		((Gtk::Label*)gpm.gain_automation_style_button.get_child())->set_text (gpm.short_astyle_string(_route->gain_automation_curve().automation_style()));
+		((Gtk::Label*)gpm.gain_automation_state_button.get_child())->set_text (gpm.short_astate_string(_route->gain_automation_curve().automation_state()));
+		((Gtk::Label*)panners.pan_automation_style_button.get_child())->set_text (panners.short_astyle_string(_route->panner().automation_style()));
+		((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (panners.short_astate_string(_route->panner().automation_state()));
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "longest label", 2, 2);
+		set_size_request (max (50, gpm.get_gm_width()), -1);
 		break;
 	}
 
@@ -789,20 +783,20 @@ MixerStrip::comment_editor_done_editing() {
 		case Wide:
 			if (! str.empty()) {
 			        comment_button.modify_bg (STATE_NORMAL, color());
-				comment_button.set_label (_("*Comments*"));
+				((Gtk::Label*)comment_button.get_child())->set_text (_("*Comments*"));
 			} else {
 			        comment_button.unset_bg (STATE_NORMAL);
-				comment_button.set_label (_("Comments"));
+				((Gtk::Label*)comment_button.get_child())->set_text (_("Comments"));
 			}
 			break;
 		   
 		case Narrow:
 			if (! str.empty()) {
 			        comment_button.modify_bg (STATE_NORMAL, color());
-				comment_button.set_label (_("*Cmt*"));
+				((Gtk::Label*)comment_button.get_child())->set_text (_("*Cmt*"));
 			} else {
 			        comment_button.unset_bg (STATE_NORMAL);
-				comment_button.set_label (_("Cmt"));
+				((Gtk::Label*)comment_button.get_child())->set_text (_("Cmt"));
 			} 
 			break;
 		}

@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <algorithm>
@@ -104,10 +103,12 @@ Session::start_butler_thread ()
 void
 Session::terminate_butler_thread ()
 {
-	void* status;
-	char c = ButlerRequest::Quit;
-	::write (butler_request_pipe[1], &c, 1);
-	pthread_join (butler_thread, &status);
+	if (butler_thread) {
+		void* status;
+		char c = ButlerRequest::Quit;
+		::write (butler_request_pipe[1], &c, 1);
+		pthread_join (butler_thread, &status);
+	}
 }
 
 void
@@ -247,7 +248,7 @@ Session::butler_thread_work ()
 		gettimeofday (&begin, 0);
 
 		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader ();
-		
+
 		for (i = dsl->begin(); !transport_work_requested() && butler_should_run && i != dsl->end(); ++i) {
 
 			boost::shared_ptr<Diskstream> ds = *i;

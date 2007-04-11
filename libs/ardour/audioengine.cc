@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <unistd.h>
@@ -226,9 +225,9 @@ AudioEngine::jack_sync_callback (jack_transport_state_t state, jack_position_t* 
 {
 	if (_jack && session) {
 		return session->jack_sync_callback (state, pos);
-	} else {
-		return true;
 	}
+
+	return true;
 }
 
 int
@@ -963,10 +962,6 @@ AudioEngine::freewheel (bool onoff)
 
 		if (onoff) {
 			_freewheel_thread_registered = false;
-		}
-
-		if (!onoff) {
-			stacktrace (cout);
 		}
 
 		return jack_set_freewheel (_jack, onoff);

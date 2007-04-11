@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id: midicontrollable.cc 629 2006-06-21 23:01:03Z paul $
 */
 
 #include <cstdio> /* for sprintf, sigh */
@@ -36,7 +35,7 @@ MIDIControllable::MIDIControllable (Port& p, Controllable& c, bool is_bistate)
 	: controllable (c), _port (p), bistate (is_bistate)
 {
 	setting = false;
-	last_written = 0; // got a better idea ?
+	last_value = 0; // got a better idea ?
 	control_type = none;
 	_control_description = "MIDI Control: none";
 	control_additional = (byte) -1;
@@ -99,6 +98,8 @@ MIDIControllable::stop_learning ()
 void
 MIDIControllable::drop_external_control ()
 {
+	cerr << "Dropping existing control using " << connections << " connections\n";
+
 	if (connections > 0) {
 		midi_sense_connection[0].disconnect ();
 	} 
@@ -141,6 +142,8 @@ MIDIControllable::midi_sense_note (Parser &p, EventTwoBytes *msg, bool is_on)
 			controllable.set_value (is_on ? 1 : 0);
 		}
 	}
+
+	last_value = (MIDI::byte) (controllable.get_value() * 127.0); // to prevent feedback fights
 }
 
 void
@@ -156,6 +159,8 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 				controllable.set_value (0);
 			}
 		}
+
+		last_value = (MIDI::byte) (controllable.get_value() * 127.0); // to prevent feedback fights
 	}
 }
 
@@ -166,6 +171,7 @@ MIDIControllable::midi_sense_program_change (Parser &p, byte msg)
 
 	if (!bistate) {
 		controllable.set_value (msg/127.0);
+		last_value = (MIDI::byte) (controllable.get_value() * 127.0); // to prevent feedback fights
 	} 
 }
 
@@ -177,6 +183,7 @@ MIDIControllable::midi_sense_pitchbend (Parser &p, pitchbend_t pb)
 	/* XXX gack - get rid of assumption about typeof pitchbend_t */
 
 	controllable.set_value ((pb/(float) SHRT_MAX));
+	last_value = (MIDI::byte) (controllable.get_value() * 127.0); // to prevent feedback fights
 }			
 
 void
@@ -279,6 +286,8 @@ MIDIControllable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 	default:
 		break;
 	}
+
+	cerr << "MIDI bound with " << connections << endl;
 }
 
 void
@@ -289,7 +298,7 @@ MIDIControllable::send_feedback ()
 	if (setting || !feedback || control_type == none) {
 		return;
 	}
-	
+
 	msg[0] = (control_type & 0xF0) | (control_channel & 0xF); 
 	msg[1] = control_additional;
 	msg[2] = (byte) (controllable.get_value() * 127.0f);
@@ -304,11 +313,11 @@ MIDIControllable::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool force)
 
 		MIDI::byte gm = (MIDI::byte) (controllable.get_value() * 127.0);
 		
-		if (gm != last_written) {
+		if (gm != last_value) {
 			*buf++ = (0xF0 & control_type) | (0xF & control_channel);
 			*buf++ = control_additional; /* controller number */
 			*buf++ = gm;
-			last_written = gm;
+			last_value = gm;
 			bufsize -= 3;
 		}
 	}

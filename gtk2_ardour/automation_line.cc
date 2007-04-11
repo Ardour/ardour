@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cmath>
@@ -25,6 +24,7 @@
 
 #include <pbd/stl_delete.h>
 #include <pbd/memento_command.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/automation_event.h>
 #include <ardour/curve.h>
@@ -1134,6 +1134,13 @@ AutomationLine::set_selected_points (PointSelection& points)
 		(*i)->show_color (false, !points_visible);
 	}
 
+}
+
+void AutomationLine::set_colors() {
+	set_line_color( color_map[cAutomationLine] );
+	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
+		(*i)->show_color (false, !points_visible);
+	}
 }
 
 void

@@ -69,3 +69,13 @@ GhostRegion::set_height ()
 	}
 }
 
+void
+GhostRegion::set_colors ()
+{
+    for (uint32_t n=0; n < waves.size(); ++n) {
+	waves[n]->property_wave_color() = color_map[cGhostTrackWave];
+
+	waves[n]->property_clip_color() = color_map[cGhostTrackWaveClip];
+	waves[n]->property_zero_color() = color_map[cGhostTrackZeroLine];
+    }
+}

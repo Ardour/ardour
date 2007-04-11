@@ -5,326 +5,283 @@
 ]>
 
 <section id="sn-tracks-and-busses">
-	<title>Tracks and Busses</title>
-	<para>
-		This chapter covers basic management of tracks. Tracks are probably the most
-		important objects in Ardour. They represent the fundamental way to playback
-		and record audio, MIDI, and image data.
-	</para>
-	<mediaobject>
-		<imageobject>
-			<imagedata fileref="images/signal_flow.png"/>
-		</imageobject>
-	</mediaobject>
-	<section id="creating-tracks">
-		<title>Creating Tracks</title>
-		<para>
-			Tracks may be added to the session at any time.
-		</para>
-		
-		<orderedlist>
-			<title>Creating a new Track</title>
-			<listitem>
-				<para>
-					Choose <menuchoice> <guimenu>Session</guimenu> <guisubmenu>Add
-					Track/Bus</guisubmenu> </menuchoice>
-				</para>
-			</listitem>
-			<listitem>
-				<para>
-					add_track.ps Add Track Dialog
-				</para>
-			</listitem>
-			<listitem>
-				<para>
-					In the Add Tracks dialog, choose whether you wish to add a new Track or a
-					new Bus.
-				</para>
-			</listitem>
-			<listitem>
-				<para>
-					Enter the number of new tracks/busses you want to add.
-				</para>
-			</listitem>
-			<listitem>
-				<para>
-					Choose the I/O configuration of the tracks/busses you are adding using
-					the clickbox.
-				</para>
-			</listitem>
-		</orderedlist>
-		<para>
-			After the track is created, it is recommended that you change its name from
-			the generic name it will have been provided with. To rename a track:
-		</para>
-		<orderedlist>
-			<title>Renaming a Track</title>
-			<listitem>
-				<para>
-					In the editor or mixer, the track name, and select <guimenuitem>Rename</guimenuitem> from the
-					dialog that appears. This will cause the "New Track Name" dialog to appear.
-				</para>
-			</listitem>
-			<listitem>
-				<para>
-					In the New Track Name dialog, type a new track name, and then click the
-					<guibutton>OK</guibutton> button in that dialog.
-				</para>
-			</listitem>
-		</orderedlist>
-	</section>
+  <title>Tracks and Busses</title>
+  <para>
+    This chapter covers basic management of tracks. Tracks are probably the
+    most important objects in Ardour. They represent the fundamental way to
+    playback and record audio, MIDI, and image data.
+  </para>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref="images/signal_flow.png"/>
+    </imageobject>
+  </mediaobject>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
+		href="adding_tracks.xml" />
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
+		href="renaming_tracks.xml" />
+  <section id="deleting-tracks">
+    <title>Deleting Tracks</title>
+    <para>
+      Deleting a track is permanent operation that cannot be undone.
+      However, since the audio, MIDI, automation and other data associated
+      with the track will remain as part of the session, and the actual
+      playlist(s) that were in use by the track are still available. for use
+      by other tracks. As a result, although inadvertently deleting a track
+      is inconvenient, it doesn't result in any significant loss of
+      information.
+    </para>
 
-	<section id="deleting-tracks">
-		<title>Deleting Tracks</title>
-		<para>
-			Deleting a track is permanent operation that cannot be undone. However,
-			since the audio, MIDI, automation and other data associated with the track
-			will remain as part of the session, and the actual playlist(s) that were in
-			use by the track are still available. for use by other tracks. As a result,
-			although inadvertently deleting a track is inconvenient, it doesn't result
-			in any significant loss of information.
-		</para>
+    <section id="deleting-a-track">
+      <title>deleting a track</title>
+      <para>
+        Click on the name of the track you want to delete. From the menu
+        that appears, select <guimenuitem>Remove</guimenuitem>. A
+        confirmation dialog will appear to ensure that you really meant to
+        remove the track.
+      </para>
+    </section>
+  </section>
 
-		<section id="deleting-a-track">
-			<title>deleting a track</title>
-			<para>
-				Click on the name of the track you want to delete. From the menu that
-				appears, select <guimenuitem>Remove</guimenuitem>. A confirmation dialog will appear to ensure that
-				you really meant to remove the track.
-			</para>
-		</section>
-	</section>
+  <section id="hiding-tracks">
+    <title>Hiding Tracks</title>
+    <para>
+      The track list on the left edge of the Editor and Mixer can be used to
+      hide or show specific tracks in either or both of those two windows.
+      To hide a track, click to on the tracks name in the relevant track
+      list. To show a track, click on its name in the track list. Visible
+      tracks have their names shown in cyan, hidden ones in orange.
+    </para>
 
-	<section id="hiding-tracks">
-		<title>Hiding Tracks</title>
-		<para>
-			The track list on the left edge of the Editor and Mixer can be used to hide
-			or show specific tracks in either or both of those two windows. To hide a
-			track, click to on the tracks name in the relevant track list. To show a
-			track, click on its name in the track list. Visible tracks have their names
-			shown in cyan, hidden ones in orange.
-		</para>
+    <para>
+      You can also hide any track by clicking its hide button
+      (images/hidebutton.ps).
+    </para>
 
-		<para>
-			You can also hide any track by clicking its hide button
-			(images/hidebutton.ps).
-		</para>
+    <para>
+      Hiding a track in the Editor has no effect on its visibility in the
+      Mixer, and vice versa. Hiding a track in one or both windows does not
+      affect the playback of that track's material.
+    </para>
+  </section>
 
-		<para>
-			Hiding a track in the Editor has no effect on its visibility in the Mixer,
-			and vice versa. Hiding a track in one or both windows does not affect the
-			playback of that track's material.
-		</para>
-	</section>
+  <section id="track-visibility">
+    <title>Track Visibility</title>
+    <section id="showing-all-tracks">
+      <title>Showing all Tracks</title>
+      <para>
+        Click on the titlebar of the track list of the Editor or Mixer. From
+        the menu that appears, select "Show All"
+      </para>
+    </section>
 
-	<section id="track-visibility">
-		<title>Track Visibility</title>
-		<section id="showing-all-tracks">
-			<title>Showing all Tracks</title>
-			<para>
-				Click on the titlebar of the track list of the Editor or Mixer. From the
-				menu that appears, select "Show All"
-			</para>
-		</section>
+    <section id="hiding-all-tracks">
+      <title>Hiding all Tracks</title>
+      <para>
+        Click on the titlebar of the track list of the Editor or Mixer. From
+        the menu that appears, select "Hiding All".
+      </para>
+    </section>
 
-		<section id="hiding-all-tracks">
-			<title>Hiding all Tracks</title>
-			<para>
-				Click on the titlebar of the track list of the Editor or Mixer. From the
-				menu that appears, select "Hiding All".
-			</para>
-		</section>
+    <section id="showing-classes-of-tracks">
+      <title>Showing certain classes of tracks</title>
+      <para>
+        Click on the titlebar of the track list of the Editor or Mixer. From
+        the menu that appears, select "Show All Audio Tracks", or "Show all
+        Busses" as appropriate.
+      </para>
+    </section>
 
-		<section id="showing-classes-of-tracks">
-			<title>Showing certain classes of tracks</title>
-			<para>
-				Click on the titlebar of the track list of the Editor or Mixer. From the
-				menu that appears, select "Show All Audio Tracks", or "Show all Busses" as
-				appropriate.
-			</para>
-		</section>
+    <section id="hiding-classes-of-tracks">
+      <title>Hiding certain classes of tracks</title>
+      <para>
+        Click on the titlebar of the track list of the Editor or Mixer. From
+        the menu that appears, select "Hide All Audio Tracks", or "Hide all
+        Busses" as appropriate.
+      </para>
+    </section>
 
-		<section id="hiding-classes-of-tracks">
-			<title>Hiding certain classes of tracks</title>
-			<para>
-				Click on the titlebar of the track list of the Editor or Mixer. From the
-				menu that appears, select "Hide All Audio Tracks", or "Hide all Busses" as
-				appropriate.
-			</para>
-		</section>
+    <section id="reordering-tracks">
+      <title>Reordering Tracks</title>
+      <para>
+        Tracks may be reordered by clicking on their name in one of the
+        track lists and dragging it to a new position in the list. Note that
+        the order of tracks in the editor is totally independent of their
+        order in the mixer.
+      </para>
+    </section>
+  </section>
 
-		<section id="reordering-tracks">
-			<title>Reordering Tracks</title>
-			<para>
-				Tracks may be reordered by clicking on their name in one of the track
-				lists and dragging it to a new position in the list. Note that the order
-				of tracks in the editor is totally independent of their order in the
-				mixer.
-			</para>
-		</section>
-	</section>
+  <section id="io-configuration">
+    <title>I/O Configuration</title>
+    <para></para>
+  </section>
 
-	<section id="io-configuration">
-		<title>I/O Configuration</title>
-		<para></para>
-	</section>
+  <section id="soloing-tracks">
+    <title>Soloing Tracks</title>
+    <para>
+      "Soloing" a track refers to changing some aspect of the signal flow
+      through Ardour that makes it possible to listen to one (or just a few)
+      tracks at a time. It is often done during mixing and mastering to help
+      an audio engineer listen carefully to parts of the mix.
+    </para>
 
-	<section id="soloing-tracks">
-		<title>Soloing Tracks</title>
-		<para>
-			"Soloing" a track refers to changing some aspect of the signal flow through
-			Ardour that makes it possible to listen to one (or just a few) tracks at a
-			time. It is often done during mixing and mastering to help an audio
-			engineer listen carefully to parts of the mix.
-		</para>
+    <para>
+      Tracks may be soloed at any time. When one or more tracks are soloed,
+      all non-soloedntracks will no longer be audible.
+    </para>
 
-		<para>
-			Tracks may be soloed at any time. When one or more tracks are soloed, all
-			non-soloedntracks will no longer be audible.
-		</para>
+    <para>
+      Soloing tracks does not affect the solo status of busses, nor vice
+      versa. That is, soloing a track leaves all busses audible and soloing
+      a track leaves all tracks "audible". You may not actually be able to
+      hear the "audible" material if it is routed through a non-soloed bus.
+    </para>
 
-		<para>
-			Soloing tracks does not affect the solo status of busses, nor vice versa.
-			That is, soloing a track leaves all busses audible and soloing a track
-			leaves all tracks "audible". You may not actually be able to hear the
-			"audible" material if it is routed through a non-soloed bus.
-		</para>
+    <para>
+      This design is intended to allow FX busses and master outs to be
+      useful even when soloing. Soloing is made significantly more complex
+      by the presence of control outs (see control_outs_soloing for more
+      details on soloing with control outs).
+    </para>
 
-		<para>
-			This design is intended to allow FX busses and master outs to be useful
-			even when soloing. Soloing is made significantly more complex by the
-			presence of control outs (see control_outs_soloing for more details on
-			soloing with control outs).
-		</para>
+    <section id="rude-solo-light">
+      <title>Rude Solo Light</title>
+      <para>
+        Whenever one or more tracks are soloed, the "rude solo light" in the
+        transport window will flash. You can cancel any current solos by
+        clicking on the "rude solo light".
+      </para>
+    </section>
 
-		<section id="rude-solo-light">
-			<title>Rude Solo Light</title>
-			<para>
-				Whenever one or more tracks are soloed, the "rude solo light" in the
-				transport window will flash. You can cancel any current solos by clicking
-				on the "rude solo light".
-			</para>
-		</section>
+    <section id="solo-modes">
+      <title>Solo modes</title>
+      <para>
+        Ardour has two solo modes.
+      </para>
 
-		<section id="solo-modes">
-			<title>Solo modes</title>
-			<para>
-				Ardour has two solo modes.
-			</para>
+      <variablelist>
+        <title></title>
+        <varlistentry>
+          <term>solo latch</term>
+          <listitem>
+            <para>
+              soloing a track adds it to the set of soloed tracks, so you
+              may have any number of soloed tracks.
+            </para>
+          </listitem>
+        </varlistentry>
 
-			<variablelist>
-				<title></title>
-				<varlistentry>
-					<term>solo latch</term>
-					<listitem>
-						<para>
-							soloing a track adds it to the set of soloed tracks, so you may have
-							any number of soloed tracks.
-						</para>
-					</listitem>
-				</varlistentry>
+        <varlistentry>
+          <term>solo unlatch</term>
+          <listitem>
+            <para>
+              soloing a track unsolos any other soloed track, so you can
+              have only one soloed track at a time.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
 
-				<varlistentry>
-					<term>solo unlatch</term>
-					<listitem>
-						<para>
-							soloing a track unsolos any other soloed track, so you can have only
-							one soloed track at a time.
-						</para>
-					</listitem>
-				</varlistentry>
-			</variablelist>
-		</section>
+    <section id="changing-solo-mode">
+      <title>Changing Solo Mode</title>
+      <para>
+        To change the solo mode, goto the Options editor (options_editor)
+        and view the <guilabel>Misc</guilabel> tab.
+      </para>
+    </section>
 
-		<section id="changing-solo-mode">
-			<title>Changing Solo Mode</title>
-			<para>
-				To change the solo mode, goto the Options editor (options_editor) and view
-				the <guilabel>Misc</guilabel> tab.
-			</para>
-		</section>
+    <section id="soloing-a-track">
+      <title>Soloing a Track</title>
+      <para>
+        To toggle the solo state of a track, click on the solo button in
+        either the mixer strip for the track or the track controls section
+        in the editor.
+      </para>
 
-		<section id="soloing-a-track">
-			<title>Soloing a Track</title>
-			<para>
-				To toggle the solo state of a track, click on the solo button in either
-				the mixer strip for the track or the track controls section in the editor.
-			</para>
+      <para>
+        To toggle the solo state of all tracks in an edit or mix group, use
+        Ctrl1 on the solo button of a track in the group. If you do this in
+        the Editor, the edit group will be used; in the Mixer, the mix group
+        will be used.
+      </para>
 
-			<para>
-				To toggle the solo state of all tracks in an edit or mix group, use Ctrl1
-				on the solo button of a track in the group. If you do this in the Editor,
-				the edit group will be used; in the Mixer, the mix group will be used.
-			</para>
+      <para>
+        To toggle the solo state of all tracks, use
+        <keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><mousebutton>Button1</mousebutton></keycombo>
+        on a track solo button.
+      </para>
+    </section>
 
-			<para>
-				To toggle the solo state of all tracks, use
-				<keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><mousebutton>Button1</mousebutton></keycombo>
-				on a track solo button.
-			</para>
-		</section>
+    <section id="solo-safe">
+      <title>Solo safe</title>
+      <para>
+        To protect a track's current solo status, use Shift1 on that track's
+        solo button. The color of the button will change to a pale blue to
+        indicate "solo safe" status. No changes to the solo state for that
+        track are possible until "solo safe" has been unset for the track.
+      </para>
+    </section>
 
-		<section id="solo-safe">
-			<title>Solo safe</title>
-			<para>
-				To protect a track's current solo status, use Shift1 on that track's solo
-				button. The color of the button will change to a pale blue to indicate
-				"solo safe" status. No changes to the solo state for that
-				track are possible until "solo safe" has been unset for the track.
-			</para>
-		</section>
+    <section id="momentary-solo">
+      <title>Momentary solo</title>
+      <para>
+        Use 2 on a track's solo button to solo the track for as long as the
+        mouse button is pressed.
+      </para>
+    </section>
+  </section>
 
-		<section id="momentary-solo">
-			<title>Momentary solo</title>
-			<para>
-				Use 2 on a track's solo button to solo the track for as long as the mouse
-				button is pressed.
-			</para>
-		</section>
-	</section>
+  <section id="track-display-size">
+    <title>Track Display Size</title>
+    <para>
+      In the editor window, tracks always extend across the full extent of
+      the track display area, but they can have varying heights. In the
+      mixer window, tracks always from the top to the bottom of the mixer
+      (as strips), but they can have varying widths.
+    </para>
 
-	<section id="track-display-size">
-		<title>Track Display Size</title>
-		<para>
-			In the editor window, tracks always extend across the full extent of the
-			track display area, but they can have varying heights. In the mixer window,
-			tracks always from the top to the bottom of the mixer (as strips), but they
-			can have varying widths.
-		</para>
+    <section id="changing-editor-track-height">
+      <title>Changing editor track height</title>
+      <para></para>
+    </section>
 
-		<section id="changing-editor-track-height">
-			<title>Changing editor track height</title>
-			<para></para>
-		</section>
+    <section id="changing-mixer-track-width">
+      <title>Changing mixer track width</title>
+      <para></para>
+    </section>
+  </section>
 
-		<section id="changing-mixer-track-width">
-			<title>Changing mixer track width</title>
-			<para></para>
-		</section>
-	</section>
+  <section id="track-groups">
+    <title>Grouping Tracks</title>
+    <section id="creating-a-track-group">
+      <title>Creating a Group</title>
+      <para></para>
+    </section>
 
-	<section id="track-groups">
-		<title>Grouping Tracks</title>
-		<section id="creating-a-track-group">
-			<title>Creating a Group</title>
-			<para></para>
-		</section>
+    <section id="renaming-track-group">
+      <title>Renaming a Group</title>
+      <para></para>
+    </section>
 
-		<section id="renaming-track-group">
-			<title>Renaming a Group</title>
-			<para></para>
-		</section>
+    <section id="changing-members-of-a-track-group">
+      <title>Changing members of a group</title>
+      <para></para>
+    </section>
 
-		<section id="changing-members-of-a-track-group">
-			<title>Changing members of a group</title>
-			<para></para>
-		</section>
+    <section id="deleting-a-track-group">
+      <title>Deleting a Group</title>
+      <para></para>
+    </section>
+  </section>
 
-		<section id="deleting-a-track-group">
-			<title>Deleting a Group</title>
-			<para></para>
-		</section>
-	</section>
+  <section id="track-controls">
+    <title>Track Controls</title>
+    <para></para>
+  </section>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
+		href="default_track_names.xml" />
 <!--
 			<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 				href="Some_Subsection.xml" />

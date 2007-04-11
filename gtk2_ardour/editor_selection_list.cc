@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cstdlib>
@@ -31,6 +30,7 @@
 #include <gtkmm2ext/stop_signal.h>
 
 #include "editor.h"
+#include "keyboard.h"
 #include "selection.h"
 #include "time_axis_view.h"
 #include "ardour_ui.h"

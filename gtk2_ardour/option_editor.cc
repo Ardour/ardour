@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <pbd/whitespace.h>
@@ -24,13 +23,15 @@
 #include <ardour/audioengine.h>
 #include <ardour/configuration.h>
 #include <ardour/auditioner.h>
-#include <ardour/destructive_filesource.h>
+#include <ardour/sndfilesource.h>
 #include <ardour/crossfade.h>
 #include <midi++/manager.h>
 #include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/window_title.h>
 
 #include "public_editor.h"
+#include "keyboard.h"
 #include "mixer_ui.h"
 #include "ardour_ui.h"
 #include "io_selector.h"
@@ -52,7 +53,7 @@ using namespace std;
 static vector<string> positional_sync_strings;
 
 OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
-	: Dialog ("option editor"),
+	: Dialog ("options editor"),
 	  ui (uip),
 	  editor (ed),
 	  mixer (mixui),
@@ -74,6 +75,9 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 
 	  /* MIDI */
 
+	  mmc_device_id_adjustment (0.0, 0.0, (double) 0x7f, 1.0, 16.0),
+	  mmc_device_id_spinner (mmc_device_id_adjustment),
+
 	  /* Click */
 
 	  click_table (2, 3),
@@ -94,9 +98,12 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	click_io_selector = 0;
 	auditioner_io_selector = 0;
 	session = 0;
+	
+	WindowTitle title(Glib::get_application_name());
+	title += _("Options Editor");
+	set_title(title.get_string());
 
 	set_default_size (300, 300);
-	set_title (_("ardour: options editor"));
 	set_wmclass (X_("ardour_option_editor"), "Ardour");
 
 	set_name ("OptionsWindow");
@@ -367,23 +374,28 @@ OptionEditor::setup_midi_options ()
 	ToggleButton* tb;
 	RadioButton* rb;
 
-	Gtk::Table* table = manage (new Table (ports.size() + 4, 9));
+	Gtk::Table* table = manage (new Table (ports.size() + 4, 10));
 
 	table->set_row_spacings (6);
 	table->set_col_spacings (10);
 
-	table->attach (*(manage (new Label (X_("Port")))), 0, 1, 0, 1);
-	table->attach (*(manage (new Label (X_("Offline")))), 1, 2, 0, 1);
-	table->attach (*(manage (new Label (X_("Trace\nInput")))), 2, 3, 0, 1);
-	table->attach (*(manage (new Label (X_("Trace\nOutput")))), 3, 4, 0, 1);
-	table->attach (*(manage (new Label (X_("MTC")))), 4, 5, 0, 1);
-	table->attach (*(manage (new Label (X_("MMC")))), 6, 7, 0, 1);
-	table->attach (*(manage (new Label (X_("MIDI Parameter\nControl")))), 8, 9, 0, 1);
+	table->attach (*(manage (new Label (_("Port")))), 0, 1, 0, 1);
+	table->attach (*(manage (new Label (_("Offline")))), 1, 2, 0, 1);
+	table->attach (*(manage (new Label (_("Trace\nInput")))), 2, 3, 0, 1);
+	table->attach (*(manage (new Label (_("Trace\nOutput")))), 3, 4, 0, 1);
+	table->attach (*(manage (new Label (_("MTC")))), 4, 5, 0, 1);
+	table->attach (*(manage (new Label (_("MMC")))), 6, 7, 0, 1);
+	table->attach (*(manage (new Label (_("MIDI Parameter\nControl")))), 8, 9, 0, 1);
 
 	table->attach (*(manage (new HSeparator())), 0, 9, 1, 2);
 	table->attach (*(manage (new VSeparator())), 5, 6, 0, 8);
 	table->attach (*(manage (new VSeparator())), 7, 8, 0, 8);
 	
+	table->attach (*(manage (new Label (_("MMC Device ID")))), 9, 10, 0, 1);
+	table->attach (mmc_device_id_spinner, 9, 10, 1, 2);
+	
+	mmc_device_id_adjustment.signal_value_changed().connect (mem_fun (*this, &OptionEditor::mmc_device_id_adjusted));
+
 	for (n = 0, i = ports.begin(); i != ports.end(); ++n, ++i) {
 
 		pair<MIDI::Port*,vector<RadioButton*> > newpair;
@@ -553,12 +565,22 @@ OptionEditor::map_port_online (MIDI::Port* port, ToggleButton* tb)
 }
 
 void
+OptionEditor::mmc_device_id_adjusted ()
+{
+	uint8_t id = (uint8_t) mmc_device_id_spinner.get_value();
+
+	if (id != Config->get_mmc_device_id()) {
+		Config->set_mmc_device_id (id);
+	}
+}
+
+void
 OptionEditor::port_trace_in_toggled (MIDI::Port* port, ToggleButton* tb)
 {
 	bool trace = tb->get_active();
 
 	if (port->input()->tracing() != trace) {
-		port->output()->trace (trace, &cerr, string (port->name()) + string (" input: "));
+		port->input()->trace (trace, &cerr, string (port->name()) + string (" input: "));
 	}
 }
 

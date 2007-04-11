@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __pbd_gtkmm_abutton_h__
@@ -27,28 +26,56 @@
 
 namespace Gtkmm2ext {
 
-class StatefulButton : public Gtk::Button
+class StateButton 
 {
    public:
-	StatefulButton();
-	explicit StatefulButton(const std::string &label);
-	virtual ~StatefulButton() {}
+	StateButton();
+	virtual ~StateButton() {}
 
-	void set_colors (const std::vector<Gdk::Color>& colors);
-	void set_state (int);
-	int  get_state () { return current_state; }
-	void set_active (bool yn) {
-		set_state (yn ? 1 : 0);
-	}
-	
+	void set_visual_state (int);
+	int  get_visual_state () { return visual_state; }
+	void set_self_managed (bool yn) { _self_managed = yn; }
 
   protected:
-	std::vector<Gdk::Color> colors;
-	int current_state;
-	Gdk::Color saved_bg;
-	bool have_saved_bg;
+	int  visual_state;
+	bool _self_managed;
+	bool _is_realized;
 
+	virtual std::string get_widget_name() const = 0;
+	virtual void set_widget_name (std::string) = 0;
+	virtual int get_widget_state() = 0;
+};
+
+
+class StatefulToggleButton : public StateButton, public Gtk::ToggleButton
+{
+   public:
+	StatefulToggleButton() {}
+	explicit StatefulToggleButton(const std::string &label) : Gtk::ToggleButton (label) {}
+	~StatefulToggleButton() {}
+
+  protected:
 	void on_realize ();
+	void on_toggled ();
+
+	std::string get_widget_name() const { return get_name(); }
+	void set_widget_name (std::string name) { set_name (name); get_child()->set_name (name); }
+	int get_widget_state() { return get_state(); }
+};
+
+class StatefulButton : public StateButton, public Gtk::Button
+{
+   public:
+	StatefulButton() {}
+	explicit StatefulButton(const std::string &label) : Gtk::Button (label) {}
+	virtual ~StatefulButton() {}
+
+  protected:
+	void on_realize ();
+
+	std::string get_widget_name() const { return get_name(); }
+	void set_widget_name (std::string name) { set_name (name); get_child()->set_name (name); }
+	int get_widget_state() { return get_state(); }
 };
 
 };

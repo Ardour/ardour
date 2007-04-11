@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __ardour_ui_io_selector_h__
@@ -199,6 +198,7 @@ class PortInsertWindow : public ArdourDialog
 	void accept ();
 
 	void plugin_going_away ();
+	sigc::connection going_away_connection;
 };
 
 

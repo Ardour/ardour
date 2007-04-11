@@ -2,6 +2,7 @@
 #define __pbd_controllable_h__
 
 #include <string>
+#include <set>
 
 #include <sigc++/trackable.h>
 #include <sigc++/signal.h>
@@ -36,8 +37,18 @@ class Controllable : public PBD::StatefulDestructible {
 
 	std::string name() const { return _name; }
 
+	static Controllable* by_id (const PBD::ID&);
+	static Controllable* by_name (const std::string&);
+
   private:
 	std::string _name;
+
+	void add ();
+	void remove ();
+
+	typedef std::set<PBD::Controllable*> Controllables;
+	static Glib::Mutex* registry_lock;
+	static Controllables registry;
 };
 
 }

@@ -38,9 +38,10 @@ CoreAudioSource::CoreAudioSource (Session& s, const XMLNode& node)
 }
 
 CoreAudioSource::CoreAudioSource (Session& s, const string& path, int chn, Flag flags)
-	: AudioFileSource(s, path, flags),
+	/* files created this way are never writable or removable */
+	: AudioFileSource (s, path, Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
 {
-	channel = chn;
+	_channel = chn;
 	init ();
 }
 
@@ -60,8 +61,8 @@ CoreAudioSource::init ()
 		n_channels = file_asbd.NumberChannels();
 		cerr << "number of channels: " << n_channels << endl;
 		
-		if (channel >= n_channels) {
-			error << string_compose("CoreAudioSource: file only contains %1 channels; %2 is invalid as a channel number (%3)", n_channels, channel, name()) << endmsg;
+		if (_channel >= n_channels) {
+			error << string_compose("CoreAudioSource: file only contains %1 channels; %2 is invalid as a channel number (%3)", n_channels, _channel, name()) << endmsg;
 			throw failed_constructor();
 		}
 
@@ -132,14 +133,14 @@ CoreAudioSource::read_unlocked (Sample *dst, nframes_t start, nframes_t cnt) con
 		abl.mBuffers[0].mDataByteSize = tmpbufsize * sizeof(Sample);
 		abl.mBuffers[0].mData = tmpbuf;
 
-		cerr << "channel: " << channel << endl;
+		cerr << "channel: " << _channel << endl;
 		
 		try {
 			af.Read (real_cnt, &abl);
 		} catch (CAXException& cax) {
 			error << string_compose("CoreAudioSource: %1 (%2)", cax.mOperation, _name);
 		}
-		float *ptr = tmpbuf + channel;
+		float *ptr = tmpbuf + _channel;
 		real_cnt /= n_channels;
 		
 		/* stride through the interleaved data */

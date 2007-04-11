@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __ardour_automation_line_h__
@@ -160,6 +159,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&);
+	void set_colors();
 
   protected:
 

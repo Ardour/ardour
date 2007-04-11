@@ -105,8 +105,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	ignore_toggle = false;
 
-	mute_button->set_name ("TrackMuteButton");
-	solo_button->set_name ("SoloButton");
 	edit_group_button.set_name ("TrackGroupButton");
 	playlist_button.set_name ("TrackPlaylistButton");
 	automation_button.set_name ("TrackAutomationButton");
@@ -124,9 +122,9 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	visual_button.signal_clicked().connect (mem_fun(*this, &RouteTimeAxisView::visual_click));
 	hide_button.signal_clicked().connect (mem_fun(*this, &RouteTimeAxisView::hide_click));
 
-	solo_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::solo_press));
+	solo_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::solo_press), false);
 	solo_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::solo_release));
-	mute_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::mute_press));
+	mute_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::mute_press), false);
 	mute_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::mute_release));
 
 	if (is_track()) {
@@ -144,8 +142,8 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 		}
 		rec_enable_button->show_all ();
 
-		rec_enable_button->set_name ("TrackRecordEnableButton");
-		rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press));
+		rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press), false);
+		rec_enable_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::rec_enable_release));
 		controls_table.attach (*rec_enable_button, 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 		ARDOUR_UI::instance()->tooltips().set_tip(*rec_enable_button, _("Record"));
 	}
@@ -177,15 +175,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	/* remove focus from the buttons */
 	
-	automation_button.unset_flags (Gtk::CAN_FOCUS);
-	solo_button->unset_flags (Gtk::CAN_FOCUS);
-	mute_button->unset_flags (Gtk::CAN_FOCUS);
-	edit_group_button.unset_flags (Gtk::CAN_FOCUS);
-	size_button.unset_flags (Gtk::CAN_FOCUS);
-	playlist_button.unset_flags (Gtk::CAN_FOCUS);
-	hide_button.unset_flags (Gtk::CAN_FOCUS);
-	visual_button.unset_flags (Gtk::CAN_FOCUS);
-
 	y_position = -1;
 
 	_route->redirects_changed.connect (mem_fun(*this, &RouteTimeAxisView::redirects_changed));
@@ -484,7 +473,6 @@ RouteTimeAxisView::build_display_menu ()
 
 static bool __reset_item (RadioMenuItem* item)
 {
-	cerr << "reset item to true\n";
 	item->set_active ();
 	return false;
 }
@@ -999,6 +987,18 @@ RouteTimeAxisView::update_diskstream_display ()
 void
 RouteTimeAxisView::selection_click (GdkEventButton* ev)
 {
+	if (Keyboard::modifier_state_equals (ev->state, (Keyboard::Shift|Keyboard::Control))) {
+
+		/* special case: select/deselect all tracks */
+		if (editor.get_selection().selected (this)) {
+			editor.get_selection().clear_tracks ();
+		} else {
+			editor.select_all_tracks ();
+		}
+
+		return;
+	} 
+
 	PublicEditor::TrackViewList* tracks = editor.get_valid_views (this, _route->edit_group());
 
 	switch (Keyboard::selection_type (ev->state)) {

@@ -50,18 +50,16 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o)
 	hold_state = 0;
 	current_peak = 0;
 	current_level = 0;
-	current_user_level = -100.0f;
 	
 	set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
 
 	pixrect.x = 0;
 	pixrect.y = 0;
 
-
 	if (orientation == Vertical) {
-		pixbuf = request_vertical_meter(250);
+		pixbuf = request_vertical_meter(dimen, 250);
 	} else {
-		pixbuf = request_horizontal_meter(186);
+		pixbuf = request_horizontal_meter(186, dimen);
 	}
 
 	pixheight = pixbuf->get_height();
@@ -79,14 +77,14 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o)
 	request_height= pixrect.height;
 }
 
-Glib::RefPtr<Gdk::Pixbuf> FastMeter::request_vertical_meter(int length)
+Glib::RefPtr<Gdk::Pixbuf> FastMeter::request_vertical_meter(int width, int height)
 {
-	if (length < min_v_pixbuf_size)
-		length = min_v_pixbuf_size;
-	if (length > max_v_pixbuf_size)
-		length = max_v_pixbuf_size;
+	if (height < min_v_pixbuf_size)
+		height = min_v_pixbuf_size;
+	if (height > max_v_pixbuf_size)
+		height = max_v_pixbuf_size;
 	
-	int index = length - 1;
+	int index = height - 1;
 
 	if (v_pixbuf_cache == 0) {
 		v_pixbuf_cache = (Glib::RefPtr<Gdk::Pixbuf>*) malloc(sizeof(Glib::RefPtr<Gdk::Pixbuf>) * max_v_pixbuf_size);
@@ -97,8 +95,6 @@ Glib::RefPtr<Gdk::Pixbuf> FastMeter::request_vertical_meter(int length)
 		return ret;
 
 	guint8* data;
-	int width = 5;
-	int height = length;
 
 	data = (guint8*) malloc(width*height * 3);
 	
@@ -155,15 +151,15 @@ Glib::RefPtr<Gdk::Pixbuf> FastMeter::request_vertical_meter(int length)
 	return ret;
 }
 
-Glib::RefPtr<Gdk::Pixbuf> FastMeter::request_horizontal_meter(int length)
+Glib::RefPtr<Gdk::Pixbuf> FastMeter::request_horizontal_meter(int width, int height)
 {
-	if (length < min_h_pixbuf_size)
-		length = min_h_pixbuf_size;
-	if (length > max_h_pixbuf_size)
-		length = max_h_pixbuf_size;
+	if (width < min_h_pixbuf_size)
+		width = min_h_pixbuf_size;
+	if (width > max_h_pixbuf_size)
+		width = max_h_pixbuf_size;
 	
-	int index = length - 1;
-
+	int index = width - 1;
+	
 	if (h_pixbuf_cache == 0) {
 		h_pixbuf_cache = (Glib::RefPtr<Gdk::Pixbuf>*) malloc(sizeof(Glib::RefPtr<Gdk::Pixbuf>) * max_h_pixbuf_size);
 		memset(h_pixbuf_cache,0,sizeof(Glib::RefPtr<Gdk::Pixbuf>) * max_h_pixbuf_size);
@@ -173,8 +169,6 @@ Glib::RefPtr<Gdk::Pixbuf> FastMeter::request_horizontal_meter(int length)
 		return ret;
 
 	guint8* data;
-	int width = length;
-	int height = 5;
 
 	data = (guint8*) malloc(width*height * 3);
 	
@@ -253,19 +247,20 @@ void
 FastMeter::on_size_request (GtkRequisition* req)
 {
 	if (orientation == Vertical) {
+
 		req->height = request_height;
-		
 		req->height = max(req->height, min_v_pixbuf_size);
 		req->height = min(req->height, max_v_pixbuf_size);
 
-		req->width  = 5;
-	} else {
 		req->width  = request_width;
 
+	} else {
+
+		req->width  = request_width;
 		req->width  = max(req->width,  min_h_pixbuf_size);
 		req->width  = min(req->width,  max_h_pixbuf_size);
 
-		req->height = 5;
+		req->height = request_height;
 	}
 
 }
@@ -274,8 +269,9 @@ void
 FastMeter::on_size_allocate (Gtk::Allocation &alloc)
 {
 	if (orientation == Vertical) {
-		if (alloc.get_width() != 5) {
-			alloc.set_width(5);
+
+		if (alloc.get_width() != request_width) {
+			alloc.set_width (request_width);
 		}
 
 		int h = alloc.get_height();
@@ -286,11 +282,13 @@ FastMeter::on_size_allocate (Gtk::Allocation &alloc)
 			alloc.set_height(h);
 
 		if (pixheight != h) {
-			pixbuf = request_vertical_meter(h);
+			pixbuf = request_vertical_meter(request_width, h);
 		}
+
 	} else {
-		if (alloc.get_height() != 5) {
-			alloc.set_height(5);
+
+		if (alloc.get_height() != request_height) {
+			alloc.set_height(request_height);
 		}
 
 		int w = alloc.get_width();
@@ -301,7 +299,7 @@ FastMeter::on_size_allocate (Gtk::Allocation &alloc)
 			alloc.set_width(w);
 
 		if (pixwidth != w) {
-			pixbuf = request_horizontal_meter(w);
+			pixbuf = request_horizontal_meter(w, request_height);
 		}
 	}
 
@@ -414,10 +412,9 @@ FastMeter::horizontal_expose (GdkEventExpose* ev)
 }
 
 void
-FastMeter::set (float lvl, float usrlvl)
+FastMeter::set (float lvl)
 {
 	current_level = lvl;
-	current_user_level = usrlvl;
 	
 	if (lvl > current_peak) {
 		current_peak = lvl;

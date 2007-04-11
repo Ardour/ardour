@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <algorithm>
@@ -383,7 +382,7 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 
 
 		OverlapType c = top->coverage (bottom->position(), bottom->last_frame());
-		
+
 		try {
 			switch (c) {
 			case OverlapNone:

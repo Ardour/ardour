@@ -132,7 +132,7 @@ struct count_void<void,void,void,void,void,void,void>
  *
  * @ingroup bind
  */
-template <int I_location, class T_functor, class T_type1=nil,class T_type2=nil,class T_type3=nil,class T_type4=nil,class T_type5=nil,class T_type6=nil,class T_type7=nil>
+template <int I_location, class T_functor, class T_type1=nil_,class T_type2=nil_,class T_type3=nil_,class T_type4=nil_,class T_type5=nil_,class T_type6=nil_,class T_type7=nil_>
 struct bind_functor;
 
 /** Adaptor that binds an argument to the wrapped functor.
@@ -141,7 +141,7 @@ struct bind_functor;
  * @ingroup bind
  */
 template <class T_functor, class T_bound>
-struct bind_functor<0, T_functor, T_bound, nil,nil,nil,nil,nil,nil> : public adapts<T_functor>
+struct bind_functor<0, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
@@ -319,7 +319,7 @@ struct bind_functor<0, T_functor, T_bound, nil,nil,nil,nil,nil,nil> : public ada
  * @ingroup bind
  */
 template <class T_functor, class T_bound>
-struct bind_functor<1, T_functor, T_bound, nil,nil,nil,nil,nil,nil> : public adapts<T_functor>
+struct bind_functor<1, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
@@ -497,7 +497,7 @@ struct bind_functor<1, T_functor, T_bound, nil,nil,nil,nil,nil,nil> : public ada
  * @ingroup bind
  */
 template <class T_functor, class T_bound>
-struct bind_functor<2, T_functor, T_bound, nil,nil,nil,nil,nil,nil> : public adapts<T_functor>
+struct bind_functor<2, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
@@ -654,7 +654,7 @@ struct bind_functor<2, T_functor, T_bound, nil,nil,nil,nil,nil,nil> : public ada
  * @ingroup bind
  */
 template <class T_functor, class T_bound>
-struct bind_functor<3, T_functor, T_bound, nil,nil,nil,nil,nil,nil> : public adapts<T_functor>
+struct bind_functor<3, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
@@ -789,7 +789,7 @@ struct bind_functor<3, T_functor, T_bound, nil,nil,nil,nil,nil,nil> : public ada
  * @ingroup bind
  */
 template <class T_functor, class T_bound>
-struct bind_functor<4, T_functor, T_bound, nil,nil,nil,nil,nil,nil> : public adapts<T_functor>
+struct bind_functor<4, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
@@ -901,7 +901,7 @@ struct bind_functor<4, T_functor, T_bound, nil,nil,nil,nil,nil,nil> : public ada
  * @ingroup bind
  */
 template <class T_functor, class T_bound>
-struct bind_functor<5, T_functor, T_bound, nil,nil,nil,nil,nil,nil> : public adapts<T_functor>
+struct bind_functor<5, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
@@ -989,7 +989,7 @@ struct bind_functor<5, T_functor, T_bound, nil,nil,nil,nil,nil,nil> : public ada
  * @ingroup bind
  */
 template <class T_functor, class T_bound>
-struct bind_functor<6, T_functor, T_bound, nil,nil,nil,nil,nil,nil> : public adapts<T_functor>
+struct bind_functor<6, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
@@ -1068,7 +1068,7 @@ void visit_each(const T_action& _A_action,
  * @ingroup bind
  */
 template <class T_functor, class T_type1>
-struct bind_functor<-1, T_functor, T_type1, nil, nil, nil, nil, nil, nil> : public adapts<T_functor>
+struct bind_functor<-1, T_functor, T_type1, nil_, nil_, nil_, nil_, nil_, nil_> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
@@ -1285,7 +1285,7 @@ void visit_each(const T_action& _A_action,
  * @ingroup bind
  */
 template <class T_functor, class T_type1,class T_type2>
-struct bind_functor<-1, T_functor, T_type1, T_type2, nil, nil, nil, nil, nil> : public adapts<T_functor>
+struct bind_functor<-1, T_functor, T_type1, T_type2, nil_, nil_, nil_, nil_, nil_> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
@@ -1475,7 +1475,7 @@ void visit_each(const T_action& _A_action,
  * @ingroup bind
  */
 template <class T_functor, class T_type1,class T_type2,class T_type3>
-struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, nil, nil, nil, nil> : public adapts<T_functor>
+struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, nil_, nil_, nil_, nil_> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
@@ -1639,7 +1639,7 @@ void visit_each(const T_action& _A_action,
  * @ingroup bind
  */
 template <class T_functor, class T_type1,class T_type2,class T_type3,class T_type4>
-struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, T_type4, nil, nil, nil> : public adapts<T_functor>
+struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, T_type4, nil_, nil_, nil_> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
@@ -1778,7 +1778,7 @@ void visit_each(const T_action& _A_action,
  * @ingroup bind
  */
 template <class T_functor, class T_type1,class T_type2,class T_type3,class T_type4,class T_type5>
-struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, T_type4, T_type5, nil, nil> : public adapts<T_functor>
+struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, T_type4, T_type5, nil_, nil_> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
@@ -1893,7 +1893,7 @@ void visit_each(const T_action& _A_action,
  * @ingroup bind
  */
 template <class T_functor, class T_type1,class T_type2,class T_type3,class T_type4,class T_type5,class T_type6>
-struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, T_type4, T_type5, T_type6, nil> : public adapts<T_functor>
+struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, T_type4, T_type5, T_type6, nil_> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 

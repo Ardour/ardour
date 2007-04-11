@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id: regionview.cc 691 2006-07-23 12:03:19Z drobilla $
 */
 
 #include <cmath>
@@ -25,6 +24,7 @@
 #include <gtkmm.h>
 
 #include <gtkmm2ext/gtk_ui.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/playlist.h>
 #include <ardour/audioregion.h>
@@ -68,7 +68,6 @@ RegionView::RegionView (ArdourCanvas::Group* parent,
 							  TimeAxisViewItem::ShowFrame))
 	  , _region (r)
 	  , sync_mark(0)
-	  , no_wave_msg(0)
 	  , editor(0)
 	  , current_visible_sync_position(0.0)
 	  , valid(false)
@@ -77,6 +76,19 @@ RegionView::RegionView (ArdourCanvas::Group* parent,
 	  , in_destructor(false)
 	  , wait_for_data(false)
 {
+}
+
+RegionView::RegionView (const RegionView& other)
+	: TimeAxisViewItem (other)
+{
+	/* derived concrete type will call init () */
+
+	_region = other._region;
+	editor = other.editor;
+	current_visible_sync_position = other.current_visible_sync_position;
+	valid = false;
+	_pixel_width = other._pixel_width;
+	_height = other._height;
 }
 
 RegionView::RegionView (ArdourCanvas::Group*         parent, 
@@ -88,7 +100,6 @@ RegionView::RegionView (ArdourCanvas::Group*         parent,
 	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), visibility)
 	, _region (r)
 	, sync_mark(0)
-	, no_wave_msg(0)
 	, editor(0)
 	, current_visible_sync_position(0.0)
 	, valid(false)
@@ -102,7 +113,6 @@ RegionView::RegionView (ArdourCanvas::Group*         parent,
 void
 RegionView::init (Gdk::Color& basic_color, bool wfd)
 {
-	editor        = 0;
 	valid         = true;
 	in_destructor = false;
 	_height       = 0;
@@ -365,6 +375,18 @@ RegionView::set_frame_color ()
 	}
 
 	TimeAxisViewItem::set_frame_color ();
+}
+
+void
+RegionView::fake_set_opaque (bool yn)
+{
+       if (yn) {
+               fill_opacity = 130;
+       } else {
+               fill_opacity = 60;
+       }
+
+       TimeAxisViewItem::set_frame_color ();
 }
 
 void

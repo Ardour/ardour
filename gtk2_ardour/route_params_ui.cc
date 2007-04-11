@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <algorithm>
@@ -23,6 +22,7 @@
 #include <glibmm/thread.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/stop_signal.h>
+#include <gtkmm2ext/window_title.h>
 
 #include <ardour/session.h>
 #include <ardour/session_route.h>
@@ -54,11 +54,11 @@
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 using namespace sigc;
 
-RouteParams_UI::RouteParams_UI (AudioEngine& eng)
+RouteParams_UI::RouteParams_UI ()
 	: ArdourDialog ("track/bus inspector"),
-	  engine (eng),
 	  track_menu(0)
 {
 	pre_redirect_box = 0;
@@ -137,8 +137,11 @@ RouteParams_UI::RouteParams_UI (AudioEngine& eng)
 	
 	set_name ("RouteParamsWindow");
 	set_default_size (620,370);
-	set_title (_("ardour: track/bus inspector"));
 	set_wmclass (X_("ardour_route_parameters"), "Ardour");
+
+	WindowTitle title(Glib::get_application_name());
+	title += _("Track/Bus Inspector"); 
+	set_title (title.get_string());
 
 	// events
 	route_display.get_selection()->signal_changed().connect(mem_fun(*this, &RouteParams_UI::route_selected));
@@ -508,7 +511,7 @@ RouteParams_UI::show_track_menu()
 		track_menu->set_name ("ArdourContextMenu");
 		track_menu->items().push_back 
 				(MenuElem (_("Add Track/Bus"), 
-					   mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::add_route)));
+					   bind (mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::add_route), (Gtk::Window*) 0)));
 	}
 	track_menu->popup (1, gtk_get_current_event_time());
 }
@@ -652,29 +655,33 @@ RouteParams_UI::redirect_going_away (boost::shared_ptr<ARDOUR::Redirect> redirec
 void
 RouteParams_UI::update_title ()
 {
-     	if (_route) {
-		string title;
-		title += _route->name();
-// 		title += ": ";
+	WindowTitle title(Glib::get_application_name());
+	title += _("Track/Bus Inspector");
 
-// 		if (_redirect && (_current_view == PLUGIN_CONFIG_VIEW || _current_view == SEND_CONFIG_VIEW)) {
-// 			title += _redirect->name();
-// 		}
-// 		else if (_current_view == INPUT_CONFIG_VIEW) {
-// 			title += _("INPUT");
-// 		}
-// 		else if (_current_view == OUTPUT_CONFIG_VIEW) {
-// 			title += _("OUTPUT");
-// 		}
+	if (_route) {
+
+		// 		title += ": ";
+
+		// 		if (_redirect && (_current_view == PLUGIN_CONFIG_VIEW || _current_view == SEND_CONFIG_VIEW)) {
+		// 			title += _redirect->name();
+		// 		}
+		// 		else if (_current_view == INPUT_CONFIG_VIEW) {
+		// 			title += _("INPUT");
+		// 		}
+		// 		else if (_current_view == OUTPUT_CONFIG_VIEW) {
+		// 			title += _("OUTPUT");
+		// 		}
+
+		title_label.set_text(_route->name());
 		
-		title_label.set_text(title);
+		title += _route->name();
 
-		title = _("ardour: track/bus inspector: ") + title;
-		set_title(title);
+		set_title(title.get_string());
 	}
 	else {
 		title_label.set_text(_("No Route Selected"));
-		set_title(_("ardour: track/bus/inspector: no route selected"));
+		title += _("No Route Selected");
+		set_title(title.get_string());
 	}	
 }
 

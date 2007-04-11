@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cmath>
@@ -23,6 +22,7 @@
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/stop_signal.h>
+#include <gtkmm2ext/window_title.h>
 
 #include <ardour/utils.h>
 #include <ardour/configuration.h>
@@ -567,13 +567,16 @@ LocationEditRow::flags_changed (ARDOUR::Location *loc, void *src)
 }
 
 LocationUI::LocationUI ()
-	: ArdourDialog ("location dialog"),
+	: ArdourDialog ("locations dialog"),
 	  add_location_button (_("Add New Location")),
 	  add_range_button (_("Add New Range"))
 {
 	i_am_the_modifier = 0;
+	
+	WindowTitle title(Glib::get_application_name());
+	title += _("Locations");
 
-	set_title(_("ardour: locations"));
+	set_title(title.get_string());
 	set_wmclass(X_("ardour_locations"), "Ardour");
 
 	set_name ("LocationWindow");

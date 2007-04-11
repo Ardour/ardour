@@ -257,19 +257,20 @@ gnome_canvas_simplerect_bounds (GnomeCanvasItem *item, double *x1, double *y1, d
 
 }
 
+
 static void 
 gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 {
 	GnomeCanvasSimpleRect* simplerect;
 	double x1, x2, y1, y2;
 	double old_x1, old_x2, old_y1, old_y2;
-	double a, b, c, d;
-	
+	ArtDRect unionrect, old, new;
+
 	old_x1 = item->x1;
 	old_y1 = item->y1;
 	old_x2 = item->x2;
 	old_y2 = item->y2;
-
+	
 	gnome_canvas_simplerect_bounds (item, &x1, &y1, &x2, &y2);
 	gnome_canvas_item_i2w (item, &x1, &y1);
 	gnome_canvas_item_i2w (item, &x2, &y2);
@@ -287,24 +288,74 @@ gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 	gnome_canvas_w2c (GNOME_CANVAS(item->canvas), x2, y2, &simplerect->bbox_lrx, &simplerect->bbox_lry);
 
 	/* now queue redraws for changed areas */
-		
-		a = MIN(item->x1, old_x1); 
-		b = MAX(item->x1, old_x1);
 
-	        a = MIN(a, item->x2);
-		a = MIN(a, old_x2);
-		b = MAX(b, item->x2);
-		b = MAX(b, old_x2);
+	if (item->x1 == old_x1 && item->x2 == old_x2) {
 
-		c = MIN(item->y1, old_y1);
-		d = MAX(item->y1, old_y1);
+		/* no change in x-axis position */
 
-	        c = MIN(c,item->y2);
-		c = MIN(c, old_y2);
-		d = MAX(d,item->y2);
-		d = MAX(d, old_y2);
+		if (item->y1 == old_y1) {
+			/* top didn't change, so just draw bottom */
 
-		gnome_canvas_request_redraw (item->canvas, a, c, b + 0.5, d + 0.5);
+			double start_y = MIN (item->y2, old_y2);
+			double end_y = MAX (item->y2, old_y2);
+
+			gnome_canvas_request_redraw (item->canvas, item->x1, start_y - 0.5, item->x2, end_y + 1.5);
+			return;
+
+		} else if (item->y2 == old_y2) {
+
+			/* bottom didn't change, just draw top */
+
+			double start_y = MIN (item->y1, old_y1);
+			double end_y = MAX (item->y1, old_y1);
+
+			gnome_canvas_request_redraw (item->canvas, item->x1, start_y - 0.5, item->x2, end_y + 1.5);
+			return;
+
+		}
+
+	} else if (item->y1 == old_y1 && item->y2 == old_y2) {
+
+		/* no change in y-axis position */
+
+		if (item->x1 == old_x1) {
+			/* start didn't change, so just draw at the end */
+
+			double start_x = MIN (item->x2, old_x2);
+			double end_x = MAX (item->x2, old_x2);
+
+			gnome_canvas_request_redraw (item->canvas, start_x - 0.5, item->y1, end_x + 1.5, item->y2);
+			return;
+
+		} else if (item->x2 == old_x2) {
+
+			/* end didn't change, so just draw at the start */
+			
+			double start_x = MIN (item->x1, old_x1);
+			double end_x = MAX (item->x1, old_x1);
+
+			gnome_canvas_request_redraw (item->canvas, start_x - 0.5, item->y1, end_x + 1.5, item->y2 + 0.5);
+			return;
+
+		}
+	} 
+
+	new.x0 = x1;
+	new.y0 = y1;
+	new.x1 = x2;
+	new.y1 = y2;
+
+	old.x0 = old_x1;
+	old.y0 = old_y1;
+	old.x1 = old_x2;
+	old.y1 = old_y2;
+
+	art_drect_union (&unionrect, &old, &new);
+	gnome_canvas_request_redraw (item->canvas, 
+				     unionrect.x0 - 0.5,
+				     unionrect.y0 - 0.5,
+				     unionrect.x1 + 1.5,
+				     unionrect.y1 + 1.5);
 }
 
 /* 
@@ -509,7 +560,7 @@ gnome_canvas_simplerect_render (GnomeCanvasItem *item,
 	if (parent_class->render) {
 		(*parent_class->render) (item, buf);
 	}
-
+	
 	if (buf->is_bg) {
 
 #ifdef HARLEQUIN_DEBUGGING

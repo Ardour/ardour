@@ -3,118 +3,148 @@
 # This file is distributed under the same license as the gtk-ardour package.
 #
 # Igor Blinov pitstop@nm.ru, 2004.
-# Alexandre Prokoudine <alexandre.prokoudine@gmail.com>, 2006.
+# Alexandre Prokoudine <alexandre.prokoudine@gmail.com>, 2006, 2007.
 msgid ""
 msgstr ""
 "Project-Id-Version: ru_RU\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-09-21 04:11+0400\n"
-"PO-Revision-Date: 2006-09-21 07:53+0400\n"
+"POT-Creation-Date: 2007-01-05 08:01+0300\n"
+"PO-Revision-Date: 2007-01-11 06:31+0300\n"
 "Last-Translator: Alexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
-"Language-Team: Russian <ru@li.org>\n"
+"Language-Team: Russian <gnome-cyr@lists.gnome.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: KBabel 1.11.4\n"
 "Plural-Forms:  nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: gtk2_ardour/about.cc:120
+#: gtk2_ardour/about.cc:121
 msgid "Paul Davis"
 msgstr "Paul Davis"
 
-#: gtk2_ardour/about.cc:121
+#: gtk2_ardour/about.cc:122
 msgid "Jesse Chappell"
 msgstr "Jesse Chappell"
 
-#: gtk2_ardour/about.cc:122
+#: gtk2_ardour/about.cc:123
 msgid "Taybin Rutkin"
 msgstr "Taybin Rutkin"
 
-#: gtk2_ardour/about.cc:123
+#: gtk2_ardour/about.cc:124
 msgid "Marcus Andersson"
 msgstr "Marcus Andersson"
 
-#: gtk2_ardour/about.cc:124
+#: gtk2_ardour/about.cc:125
 msgid "Jeremy Hall"
 msgstr "Jeremy Hall"
 
-#: gtk2_ardour/about.cc:125
+#: gtk2_ardour/about.cc:126
 msgid "Steve Harris"
 msgstr "Steve Harris"
 
-#: gtk2_ardour/about.cc:126
+#: gtk2_ardour/about.cc:127
 msgid "Tim Mayberry"
 msgstr "Tim Mayberry"
 
-#: gtk2_ardour/about.cc:127
+#: gtk2_ardour/about.cc:128
 msgid "Mark Stewart"
 msgstr "Mark Stewart"
 
-#: gtk2_ardour/about.cc:128
+#: gtk2_ardour/about.cc:129
 msgid "Sam Chessman"
 msgstr "Sam Chessman"
 
-#: gtk2_ardour/about.cc:129
+#: gtk2_ardour/about.cc:130
 msgid "Jack O'Quin"
 msgstr "Jack O'Quin"
 
-#: gtk2_ardour/about.cc:130
+#: gtk2_ardour/about.cc:131
 msgid "Matt Krai"
 msgstr "Matt Krai"
 
-#: gtk2_ardour/about.cc:131
+#: gtk2_ardour/about.cc:132
 msgid "Ben Bell"
 msgstr "Ben Bell"
 
-#: gtk2_ardour/about.cc:132
+#: gtk2_ardour/about.cc:133
 msgid "Gerard van Dongen"
 msgstr "Gerard van Dongen"
 
-#: gtk2_ardour/about.cc:133
+#: gtk2_ardour/about.cc:134
 msgid "Thomas Charbonnel"
 msgstr "Thomas Charbonnel"
 
-#: gtk2_ardour/about.cc:134
+#: gtk2_ardour/about.cc:135
 msgid "Nick Mainsbridge"
 msgstr "Nick Mainsbridge"
 
-#: gtk2_ardour/about.cc:135
+#: gtk2_ardour/about.cc:136
 msgid "Colin Law"
 msgstr "Colin Law"
 
-#: gtk2_ardour/about.cc:136
+#: gtk2_ardour/about.cc:137
 msgid "Sampo Savolainen"
 msgstr "Sampo Savolainen"
 
-#: gtk2_ardour/about.cc:137
+#: gtk2_ardour/about.cc:138
 msgid "Joshua Leach"
 msgstr "Joshua Leach"
 
-#: gtk2_ardour/about.cc:138
+#: gtk2_ardour/about.cc:139
 msgid "Rob Holland"
 msgstr "Rob Holland"
 
-#: gtk2_ardour/about.cc:139
+#: gtk2_ardour/about.cc:140
 msgid "Per Sigmond"
 msgstr "Per Sigmond"
 
-#: gtk2_ardour/about.cc:140
+#: gtk2_ardour/about.cc:141
 msgid "Doug Mclain"
 msgstr "Doug Mclain"
 
-#: gtk2_ardour/about.cc:141
+#: gtk2_ardour/about.cc:142
 msgid "Petter Sundlöf"
 msgstr "Petter Sundlöf"
 
+#: gtk2_ardour/about.cc:143
+msgid "Thorsten Wilms"
+msgstr "Thorsten Wilms"
+
+#: gtk2_ardour/about.cc:144
+msgid "Ben Loftis"
+msgstr "Ben Loftis"
+
+#: gtk2_ardour/about.cc:145
+msgid "Stefan Kersten"
+msgstr "Stefan Kersten"
+
 #: gtk2_ardour/about.cc:146
+msgid "Christopher George"
+msgstr "Christopher George"
+
+#: gtk2_ardour/about.cc:147
+msgid "Robert Jordens"
+msgstr "Robert Jordens"
+
+#: gtk2_ardour/about.cc:148
+msgid "Brian Ahr"
+msgstr "Brian Ahr"
+
+#: gtk2_ardour/about.cc:149
+msgid "Nimal Ratnayake"
+msgstr "Nimal Ratnayake"
+
+#: gtk2_ardour/about.cc:154
 msgid ""
 "French:\n"
 "\tAlain Fréhel <alain.frehel@free.fr>\n"
+"\tChristophe Combelles <ccomb@free.fr>\n"
 msgstr ""
 "Французский:\n"
 "\tAlain Fréhel <alain.frehel@free.fr>\n"
+"\tChristophe Combelles <ccomb@free.fr>\n"
 
-#: gtk2_ardour/about.cc:147
+#: gtk2_ardour/about.cc:155
 msgid ""
 "German:\n"
 "\tKarsten Petersen <kapet@kapet.de>\n"
@@ -122,7 +152,7 @@ msgstr ""
 "Немецкий:\n"
 "\tKarsten Petersen <kapet@kapet.de>\n"
 
-#: gtk2_ardour/about.cc:148
+#: gtk2_ardour/about.cc:156
 msgid ""
 "Italian:\n"
 "\tFilippo Pappalardo <filippo@email.it>\n"
@@ -130,7 +160,7 @@ msgstr ""
 "Итальянский:\n"
 "\tFilippo Pappalardo <filippo@email.it>\n"
 
-#: gtk2_ardour/about.cc:149
+#: gtk2_ardour/about.cc:157
 msgid ""
 "Portuguese:\n"
 "\tRui Nuno Capela <rncbc@rncbc.org>\n"
@@ -138,7 +168,7 @@ msgstr ""
 "Португальский:\n"
 "\tRui Nuno Capela <rncbc@rncbc.org>\n"
 
-#: gtk2_ardour/about.cc:150
+#: gtk2_ardour/about.cc:158
 msgid ""
 "Brazilian Portuguese:\n"
 "\tAlexander da Franca Fernandes <alexander@nautae.eti.br>\n"
@@ -148,7 +178,7 @@ msgstr ""
 "\tAlexander da Franca Fernandes <alexander@nautae.eti.br>\n"
 "\tChris Ross <chris@tebibyte.org>\n"
 
-#: gtk2_ardour/about.cc:152
+#: gtk2_ardour/about.cc:160
 msgid ""
 "Spanish:\n"
 "\t Alex Krohn <alexkrohn@fastmail.fm>\n"
@@ -156,7 +186,7 @@ msgstr ""
 "Испанский:\n"
 "\t Alex Krohn <alexkrohn@fastmail.fm>\n"
 
-#: gtk2_ardour/about.cc:153
+#: gtk2_ardour/about.cc:161
 msgid ""
 "Russian:\n"
 "\t Igor Blinov <pitstop@nm.ru>\n"
@@ -165,47 +195,93 @@ msgstr ""
 "\t Igor Blinov <pitstop@nm.ru>\n"
 "\t Alexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
 
-#: gtk2_ardour/about.cc:181
-msgid "Copyright (C) 1999-2005 Paul Davis\n"
-msgstr "Авторские права 1999-2005 Paul Davis\n"
+#: gtk2_ardour/about.cc:189
+#, fuzzy
+msgid "Copyright (C) 1999-2006 Paul Davis\n"
+msgstr "Авторские права © 1999-2006 Paul Davis"
 
-#: gtk2_ardour/about.cc:182
+#: gtk2_ardour/about.cc:190
 msgid ""
 "Ardour comes with ABSOLUTELY NO WARRANTY\n"
 "This is free software, and you are welcome to redistribute it\n"
 "under certain conditions; see the file COPYING for details.\n"
 msgstr ""
 
-#: gtk2_ardour/about.cc:188
+#: gtk2_ardour/about.cc:195
+msgid "visit http://www.ardour.org/"
+msgstr "Зайдите на http://www.ardour.org/"
+
+#: gtk2_ardour/about.cc:196
+#, fuzzy
 msgid ""
 "%1\n"
-"(built with ardour/gtk %2.%3.%4 libardour: %5.%6.%7)"
+"(built from revision %2)"
 msgstr ""
+"%1\n"
+"(собрано из ревизии %2)"
 
-#: gtk2_ardour/actions.cc:76
+#: gtk2_ardour/actions.cc:77
 msgid "badly formatted UI definition file"
-msgstr ""
+msgstr "некорректно отформатированный файл определения интерфейса"
 
-#: gtk2_ardour/actions.cc:78
+#: gtk2_ardour/actions.cc:79
 msgid "Ardour menu definition file not found"
-msgstr ""
+msgstr "Файл определения меню Ardour не найден"
 
-#: gtk2_ardour/actions.cc:82
+#: gtk2_ardour/actions.cc:83
 msgid "ardour will not work without a valid ardour.menus file"
-msgstr ""
+msgstr "Ardour не будет работать без корректного файла ardour.menus"
 
-#: gtk2_ardour/actions.cc:261
+#: gtk2_ardour/actions.cc:235
 #, fuzzy
 msgid "programmer error: %1 %2"
 msgstr "ошибка в программе: "
 
-#: gtk2_ardour/actions.cc:280
+#: gtk2_ardour/actions.cc:254
 msgid "Unknown action name: %1"
+msgstr "Неизвестное имя действия: %1"
+
+#: gtk2_ardour/add_route_dialog.cc:41 gtk2_ardour/add_route_dialog.cc:196
+msgid "Mono"
+msgstr "Моно"
+
+#: gtk2_ardour/add_route_dialog.cc:42 gtk2_ardour/add_route_dialog.cc:198
+msgid "Stereo"
+msgstr "Стерео"
+
+#: gtk2_ardour/add_route_dialog.cc:43
+msgid "3 Channels"
+msgstr "3 канала"
+
+#: gtk2_ardour/add_route_dialog.cc:44
+msgid "4 Channels"
+msgstr "4 канала"
+
+#: gtk2_ardour/add_route_dialog.cc:45
+msgid "6 Channels"
+msgstr "6 каналов"
+
+#: gtk2_ardour/add_route_dialog.cc:46
+msgid "8 Channels"
+msgstr "8 каналов"
+
+#: gtk2_ardour/add_route_dialog.cc:47
+msgid "Manual Setup"
+msgstr "Ручная настройка"
+
+#: gtk2_ardour/add_route_dialog.cc:52 gtk2_ardour/add_route_dialog.cc:177
+#: gtk2_ardour/editor.cc:126 gtk2_ardour/editor.cc:3616
+#: gtk2_ardour/editor_actions.cc:286 gtk2_ardour/time_axis_view.cc:586
+msgid "Normal"
+msgstr "Норм."
+
+#: gtk2_ardour/add_route_dialog.cc:53 gtk2_ardour/add_route_dialog.cc:179
+msgid "Tape"
 msgstr ""
 
 #: gtk2_ardour/add_route_dialog.cc:62
 msgid "ardour: add track/bus"
-msgstr "ardour: добавить трек/шину"
+msgstr "ardour: добавить дорожку/шину"
 
 #: gtk2_ardour/add_route_dialog.cc:63 gtk2_ardour/editor_route_list.cc:71
 msgid "Tracks"
@@ -215,7 +291,7 @@ msgstr "Дорожки"
 msgid "Busses"
 msgstr "Шины"
 
-#: gtk2_ardour/add_route_dialog.cc:96 gtk2_ardour/plugin_ui.cc:145
+#: gtk2_ardour/add_route_dialog.cc:96 gtk2_ardour/plugin_ui.cc:151
 msgid "Add"
 msgstr "Добавить"
 
@@ -224,25 +300,8 @@ msgid "Name (template)"
 msgstr "Имя (шаблона)"
 
 #: gtk2_ardour/add_route_dialog.cc:120
-#, fuzzy
 msgid "Channel Configuration"
-msgstr "Отменить импорт"
-
-#: gtk2_ardour/add_route_dialog.cc:177 gtk2_ardour/time_axis_view.cc:553
-msgid "Normal"
-msgstr "Норм."
-
-#: gtk2_ardour/add_route_dialog.cc:179
-msgid "Tape"
-msgstr ""
-
-#: gtk2_ardour/add_route_dialog.cc:196
-msgid "Mono"
-msgstr "Моно"
-
-#: gtk2_ardour/add_route_dialog.cc:198
-msgid "Stereo"
-msgstr "Стерео"
+msgstr "Парометры каналов"
 
 #: gtk2_ardour/ardour_ui.cc:106
 msgid ""
@@ -266,15 +325,15 @@ msgstr ""
 msgid "% "
 msgstr "% "
 
-#: gtk2_ardour/ardour_ui.cc:119 gtk2_ardour/ardour_ui_ed.cc:267
+#: gtk2_ardour/ardour_ui.cc:119 gtk2_ardour/ardour_ui_ed.cc:274
 msgid "Punch In"
 msgstr "Начало врезки"
 
-#: gtk2_ardour/ardour_ui.cc:120 gtk2_ardour/ardour_ui_ed.cc:270
+#: gtk2_ardour/ardour_ui.cc:120 gtk2_ardour/ardour_ui_ed.cc:277
 msgid "Punch Out"
 msgstr "Конец врезки"
 
-#: gtk2_ardour/ardour_ui.cc:121 gtk2_ardour/ardour_ui_ed.cc:282
+#: gtk2_ardour/ardour_ui.cc:121 gtk2_ardour/ardour_ui_ed.cc:289
 msgid "Auto Return"
 msgstr "Автовозврат"
 
@@ -282,12 +341,12 @@ msgstr "Автовозврат"
 msgid "Autuo Play"
 msgstr "Автовоспр."
 
-#: gtk2_ardour/ardour_ui.cc:123 gtk2_ardour/ardour_ui_ed.cc:276
+#: gtk2_ardour/ardour_ui.cc:123 gtk2_ardour/ardour_ui_ed.cc:283
 msgid "Auto Input"
 msgstr "Автовход"
 
-#: gtk2_ardour/ardour_ui.cc:124 gtk2_ardour/ardour_ui_ed.cc:273
-#: gtk2_ardour/option_editor.cc:128
+#: gtk2_ardour/ardour_ui.cc:124 gtk2_ardour/ardour_ui_ed.cc:280
+#: gtk2_ardour/option_editor.cc:126
 msgid "Click"
 msgstr "Метроном"
 
@@ -299,11 +358,11 @@ msgstr "КОНТРОЛЬ"
 msgid "SOLO"
 msgstr "СОЛО"
 
-#: gtk2_ardour/ardour_ui.cc:374
+#: gtk2_ardour/ardour_ui.cc:364
 msgid "quit"
 msgstr "выйти"
 
-#: gtk2_ardour/ardour_ui.cc:383
+#: gtk2_ardour/ardour_ui.cc:373
 msgid ""
 "Ardour was unable to save your session.\n"
 "\n"
@@ -312,34 +371,33 @@ msgid ""
 "\"Just quit\" option."
 msgstr ""
 
-#: gtk2_ardour/ardour_ui.cc:402
+#: gtk2_ardour/ardour_ui.cc:397
 msgid "ardour: save session?"
 msgstr "ardour: сохранить сессию?"
 
-#: gtk2_ardour/ardour_ui.cc:409
+#: gtk2_ardour/ardour_ui.cc:404
 msgid "Don't %1"
 msgstr "Отмена"
 
-#: gtk2_ardour/ardour_ui.cc:411
+#: gtk2_ardour/ardour_ui.cc:406
 msgid "Just %1"
 msgstr "Да, %1"
 
-#: gtk2_ardour/ardour_ui.cc:413
+#: gtk2_ardour/ardour_ui.cc:408
 msgid "Save and %1"
 msgstr "Сохранить и %1"
 
-#: gtk2_ardour/ardour_ui.cc:425
+#: gtk2_ardour/ardour_ui.cc:420
 #, fuzzy
 msgid "session"
 msgstr "Сессия"
 
-#: gtk2_ardour/ardour_ui.cc:427
+#: gtk2_ardour/ardour_ui.cc:422
 #, fuzzy
 msgid "snapshot"
 msgstr "Снимок"
 
-#: gtk2_ardour/ardour_ui.cc:429
-#, fuzzy
+#: gtk2_ardour/ardour_ui.cc:424
 msgid ""
 "The %1\"%2\"\n"
 "has not been saved.\n"
@@ -355,84 +413,84 @@ msgstr ""
 "Все сделанные изменения\n"
 "будут потеряны, если не сохранить их.\n"
 "\n"
-"Что Вы хотите сделать?"
+"Что вы хотите сделать?"
 
-#: gtk2_ardour/ardour_ui.cc:443
+#: gtk2_ardour/ardour_ui.cc:438
 msgid "Prompter"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui.cc:502
-#, fuzzy, c-format
+#: gtk2_ardour/ardour_ui.cc:498
+#, c-format
 msgid "disconnected"
-msgstr "Отсоединить"
+msgstr "отсоединено"
 
-#: gtk2_ardour/ardour_ui.cc:509
+#: gtk2_ardour/ardour_ui.cc:505
 #, fuzzy, c-format
 msgid "%.1f kHz / %4.1f msecs"
 msgstr "SR: %.1f кГц"
 
-#: gtk2_ardour/ardour_ui.cc:513
+#: gtk2_ardour/ardour_ui.cc:509
 #, fuzzy, c-format
 msgid "%u kHz / %4.1f msecs"
 msgstr "SR: %.1f кГц"
 
-#: gtk2_ardour/ardour_ui.cc:526
+#: gtk2_ardour/ardour_ui.cc:522
 #, fuzzy, c-format
 msgid "DSP: %.1f%%"
 msgstr "Загрузка DSP: %.1f%%"
 
-#: gtk2_ardour/ardour_ui.cc:536
+#: gtk2_ardour/ardour_ui.cc:532
 #, fuzzy, c-format
 msgid "Buffers p:%<PRIu32>%% c:%<PRIu32>%%"
 msgstr "Буферы p:%5.0f%% c:%5.0f%%"
 
-#: gtk2_ardour/ardour_ui.cc:564
+#: gtk2_ardour/ardour_ui.cc:560
 #, fuzzy
 msgid "Disk: 24hrs+"
 msgstr "место на диске: 24 часа +"
 
-#: gtk2_ardour/ardour_ui.cc:594
+#: gtk2_ardour/ardour_ui.cc:580
 #, fuzzy, c-format
 msgid "Disk: %02dh:%02dm:%02ds"
 msgstr "свободное место: %02dч:%02dмин:%02dсек"
 
-#: gtk2_ardour/ardour_ui.cc:633
+#: gtk2_ardour/ardour_ui.cc:619
 msgid "programming error: impossible control method"
 msgstr "ошибка в программе: impossible control method"
 
-#: gtk2_ardour/ardour_ui.cc:741 gtk2_ardour/new_session_dialog.cc:301
+#: gtk2_ardour/ardour_ui.cc:727 gtk2_ardour/new_session_dialog.cc:355
 #, fuzzy
 msgid "Recent Sessions"
 msgstr "открыть сессию"
 
-#: gtk2_ardour/ardour_ui.cc:834
+#: gtk2_ardour/ardour_ui.cc:820
 msgid "open session"
 msgstr "открыть сессию"
 
-#: gtk2_ardour/ardour_ui.cc:840
+#: gtk2_ardour/ardour_ui.cc:826
 msgid "Ardour sessions"
 msgstr "Сессии Ardour"
 
-#: gtk2_ardour/ardour_ui.cc:873
+#: gtk2_ardour/ardour_ui.cc:859
 msgid "Patience is a virtue.\n"
 msgstr "По нитке дойдёшь и до клубка.\n"
 
-#: gtk2_ardour/ardour_ui.cc:883
+#: gtk2_ardour/ardour_ui.cc:869
 #, fuzzy
 msgid "You cannot add a track or bus without a session already loaded."
 msgstr "Вы не можете добавить трек пока сессия не загружена."
 
-#: gtk2_ardour/ardour_ui.cc:893 gtk2_ardour/ardour_ui.cc:905
+#: gtk2_ardour/ardour_ui.cc:879 gtk2_ardour/ardour_ui.cc:891
 #, fuzzy
 msgid "could not create a new audio track"
 msgstr "не удалось создать новый аудиотрек"
 
-#: gtk2_ardour/ardour_ui.cc:895 gtk2_ardour/ardour_ui.cc:907
+#: gtk2_ardour/ardour_ui.cc:881 gtk2_ardour/ardour_ui.cc:893
 #, fuzzy
 msgid "could not create %1 new audio tracks"
 msgstr "не удалось создать новый аудиотрек"
 
-#: gtk2_ardour/ardour_ui.cc:927
+#: gtk2_ardour/ardour_ui.cc:913
 msgid ""
 "There are insufficient JACK ports available\n"
 "to create a new track or bus.\n"
@@ -440,14 +498,14 @@ msgid ""
 "restart JACK with more ports."
 msgstr ""
 
-#: gtk2_ardour/ardour_ui.cc:1046
+#: gtk2_ardour/ardour_ui.cc:1033
 msgid ""
 "Please create 1 or more track\n"
 "before trying to record.\n"
 "Check the Session menu."
 msgstr ""
 
-#: gtk2_ardour/ardour_ui.cc:1268
+#: gtk2_ardour/ardour_ui.cc:1253
 #, fuzzy
 msgid ""
 "JACK has either been shutdown or it\n"
@@ -460,42 +518,47 @@ msgstr ""
 "Необходимо сохранить сессию и\n"
 "перезапустить JACK и Ardour."
 
-#: gtk2_ardour/ardour_ui.cc:1285
-msgid "Unable to create all required ports"
-msgstr ""
-
-#: gtk2_ardour/ardour_ui.cc:1293
+#: gtk2_ardour/ardour_ui.cc:1270
 #, fuzzy
 msgid "Unable to start the session running"
 msgstr "В начало сессии"
 
-#: gtk2_ardour/ardour_ui.cc:1399 gtk2_ardour/ardour_ui.cc:1418
+#: gtk2_ardour/ardour_ui.cc:1370 gtk2_ardour/ardour_ui.cc:1389
+#: gtk2_ardour/audio_clock.cc:451
 msgid "none"
 msgstr "нет"
 
-#: gtk2_ardour/ardour_ui.cc:1408 gtk2_ardour/ardour_ui.cc:1427
+#: gtk2_ardour/ardour_ui.cc:1379 gtk2_ardour/ardour_ui.cc:1398
 msgid "off"
-msgstr "выкл"
+msgstr "выкл."
 
-#: gtk2_ardour/ardour_ui.cc:1451
+#: gtk2_ardour/ardour_ui.cc:1421
 msgid "Name of New Snapshot"
 msgstr "Имя нового снимка:"
 
-#: gtk2_ardour/ardour_ui.cc:1597
+#: gtk2_ardour/ardour_ui.cc:1567
 msgid "Name for mix template:"
 msgstr "Имя mix-шаблона:"
 
-#: gtk2_ardour/ardour_ui.cc:1598
+#: gtk2_ardour/ardour_ui.cc:1568
 msgid "-template"
 msgstr "-шаблон"
 
-#: gtk2_ardour/ardour_ui.cc:1806
+#: gtk2_ardour/ardour_ui.cc:1689
+#, fuzzy
+msgid ""
+"This session\n"
+"%1\n"
+"already exists. Do you want to open it?"
+msgstr "Файл с таким именем уже есть. Перезаписать его?"
+
+#: gtk2_ardour/ardour_ui.cc:1805
 msgid ""
 "You do not have write access to this session.\n"
 "This prevents the session from being loaded."
 msgstr ""
 
-#: gtk2_ardour/ardour_ui.cc:1819 gtk2_ardour/ardour_ui.cc:1871
+#: gtk2_ardour/ardour_ui.cc:1818 gtk2_ardour/ardour_ui.cc:1867
 msgid "Session \"%1 (snapshot %2)\" did not load successfully"
 msgstr "Не удалось загрузить сессию \"%1 (снимок %2)\""
 
@@ -545,14 +608,9 @@ msgstr "Очистка"
 msgid "CleanupDialog"
 msgstr "Очистка"
 
-#: gtk2_ardour/ardour_ui.cc:2039
-#, fuzzy
-msgid "ardour_cleanup"
-msgstr "ardour: очистка"
-
 #: gtk2_ardour/ardour_ui.cc:2058
 msgid "cleaned files"
-msgstr ""
+msgstr "очищенные файлы"
 
 #: gtk2_ardour/ardour_ui.cc:2059
 #, fuzzy
@@ -586,7 +644,7 @@ msgstr "Следующие %1 файлов были удалены, освобо
 msgid "Recording was stopped because your system could not keep up."
 msgstr "Запись остановлена из-за недостаточного быстродействия системы"
 
-#: gtk2_ardour/ardour_ui.cc:2224
+#: gtk2_ardour/ardour_ui.cc:2212
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with Ardour.\n"
@@ -595,7 +653,7 @@ msgid ""
 "quickly enough to keep up with recording.\n"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui.cc:2243
+#: gtk2_ardour/ardour_ui.cc:2231
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with Ardour.\n"
@@ -604,7 +662,7 @@ msgid ""
 "quickly enough to keep up with playback.\n"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui.cc:2269
+#: gtk2_ardour/ardour_ui.cc:2257
 msgid ""
 "This session appears to have been in\n"
 "middle of recording when ardour or\n"
@@ -615,20 +673,20 @@ msgid ""
 "what you would like to do.\n"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui.cc:2279
+#: gtk2_ardour/ardour_ui.cc:2267
 msgid "Recover from crash"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui.cc:2280
+#: gtk2_ardour/ardour_ui.cc:2268
 msgid "Ignore crash data"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui.cc:2298
+#: gtk2_ardour/ardour_ui.cc:2286
 #, fuzzy
 msgid "Could not disconnect from JACK"
 msgstr "Не удалось соединиться с сервером JACK как \"%1\""
 
-#: gtk2_ardour/ardour_ui.cc:2311
+#: gtk2_ardour/ardour_ui.cc:2299
 #, fuzzy
 msgid "Could not reconnect to JACK"
 msgstr "Не удалось соединиться с сервером JACK как \"%1\""
@@ -657,977 +715,1056 @@ msgstr ""
 msgid "MMC ID"
 msgstr "MMC идентификатор"
 
-#: gtk2_ardour/ardour_ui2.cc:291
+#: gtk2_ardour/ardour_ui2.cc:295
 msgid "Play from playhead"
 msgstr "Воспроизвести от указателя"
 
-#: gtk2_ardour/ardour_ui2.cc:292
+#: gtk2_ardour/ardour_ui2.cc:296
 msgid "Stop playback"
 msgstr "Стоп"
 
-#: gtk2_ardour/ardour_ui2.cc:293
-#, fuzzy
+#: gtk2_ardour/ardour_ui2.cc:297
 msgid "Play range/selection"
-msgstr "Воспроизвести выделенное"
+msgstr "Воспроизвести выделение"
 
-#: gtk2_ardour/ardour_ui2.cc:294
+#: gtk2_ardour/ardour_ui2.cc:298
 msgid "Go to start of session"
 msgstr "В начало сессии"
 
-#: gtk2_ardour/ardour_ui2.cc:295
+#: gtk2_ardour/ardour_ui2.cc:299
 msgid "Go to end of session"
 msgstr "В конец сессии"
 
-#: gtk2_ardour/ardour_ui2.cc:296
+#: gtk2_ardour/ardour_ui2.cc:300
 msgid "Play loop range"
-msgstr "Воспроизвести \"кольцо\""
+msgstr "Закольцевать выделение"
 
-#: gtk2_ardour/ardour_ui2.cc:297
+#: gtk2_ardour/ardour_ui2.cc:301
 msgid "Return to last playback start when stopped"
 msgstr "Вернуться к точке начала воспроизведения"
 
-#: gtk2_ardour/ardour_ui2.cc:298
+#: gtk2_ardour/ardour_ui2.cc:302
 msgid "Start playback after any locate"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui2.cc:299
+#: gtk2_ardour/ardour_ui2.cc:303
 msgid "Be sensible about input monitoring"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui2.cc:300
+#: gtk2_ardour/ardour_ui2.cc:304
 msgid "Start recording at auto-punch start"
 msgstr "Начать запись с начала \"авто-врезки\""
 
-#: gtk2_ardour/ardour_ui2.cc:301
+#: gtk2_ardour/ardour_ui2.cc:305
 msgid "Stop recording at auto-punch end"
 msgstr "Остановить запись в конце \"авто-врезки\""
 
-#: gtk2_ardour/ardour_ui2.cc:302
+#: gtk2_ardour/ardour_ui2.cc:306
 msgid "Enable/Disable audio click"
 msgstr "Вкл./Выкл. метроном"
 
-#: gtk2_ardour/ardour_ui2.cc:303
+#: gtk2_ardour/ardour_ui2.cc:307
 msgid "Positional sync source"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui2.cc:304
+#: gtk2_ardour/ardour_ui2.cc:308
 msgid "Does Ardour control the time?"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui2.cc:305
+#: gtk2_ardour/ardour_ui2.cc:309
 msgid "Shuttle speed control"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui2.cc:306
+#: gtk2_ardour/ardour_ui2.cc:310
 #, c-format
 msgid "Select semitones or %%-age for speed display"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui2.cc:307
+#: gtk2_ardour/ardour_ui2.cc:311
 msgid "Current transport speed"
 msgstr "Текщаяя скорсть транспорта"
 
-#: gtk2_ardour/ardour_ui2.cc:330
+#: gtk2_ardour/ardour_ui2.cc:334
 msgid "Primary clock"
 msgstr "Основной счётчик"
 
-#: gtk2_ardour/ardour_ui2.cc:331
+#: gtk2_ardour/ardour_ui2.cc:335
 msgid "secondary clock"
 msgstr "дополнительный счётчик"
 
-#: gtk2_ardour/ardour_ui2.cc:388 gtk2_ardour/ardour_ui2.cc:849
-#: gtk2_ardour/ardour_ui2.cc:862 gtk2_ardour/ardour_ui2.cc:925
-#: gtk2_ardour/ardour_ui2.cc:927
+#: gtk2_ardour/ardour_ui2.cc:366
+msgid ""
+"When active, something is soloed.\n"
+"Click to de-solo everything"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui2.cc:367
+msgid ""
+"When active, auditioning is taking place\n"
+"Click to stop the audition"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui2.cc:395 gtk2_ardour/ardour_ui2.cc:826
+#: gtk2_ardour/ardour_ui2.cc:882 gtk2_ardour/ardour_ui_options.cc:802
 msgid "sprung"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui2.cc:389 gtk2_ardour/ardour_ui2.cc:851
-#: gtk2_ardour/ardour_ui2.cc:873
+#: gtk2_ardour/ardour_ui2.cc:396 gtk2_ardour/ardour_ui2.cc:828
+#: gtk2_ardour/ardour_ui_options.cc:813
 msgid "wheel"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui2.cc:467
-msgid "ardour: clock"
-msgstr "ardour: счётчик"
-
-#: gtk2_ardour/ardour_ui2.cc:612
+#: gtk2_ardour/ardour_ui2.cc:602
 msgid "Maximum speed"
 msgstr "Макс. скорость"
 
-#: gtk2_ardour/ardour_ui2.cc:839
-#, fuzzy
-msgid "ST"
-msgstr "УСТАНОВИТЬ"
-
-#: gtk2_ardour/ardour_ui2.cc:883 gtk2_ardour/ardour_ui2.cc:906
+#: gtk2_ardour/ardour_ui2.cc:838 gtk2_ardour/ardour_ui2.cc:861
 #, fuzzy
 msgid "stop"
 msgstr "Стоп"
 
-#: gtk2_ardour/ardour_ui2.cc:923
+#: gtk2_ardour/ardour_ui2.cc:880
 msgid "-0.55"
 msgstr "-0.55"
 
-#: gtk2_ardour/ardour_ui_dialogs.cc:145 gtk2_ardour/playlist_selector.cc:70
-#, fuzzy
+#: gtk2_ardour/ardour_ui_dependents.cc:85
+msgid "Ardour key bindings file not found at \"%1\" or contains errors."
+msgstr "Файл комбинаций клавиш для Ardour не найден в каталоге \"%1\" или содержит ошибки."
+
+#: gtk2_ardour/ardour_ui_dialogs.cc:142 gtk2_ardour/playlist_selector.cc:69
 msgid "close"
 msgstr "Закрыть"
 
-#: gtk2_ardour/ardour_ui_dialogs.cc:352 gtk2_ardour/ardour_ui_ed.cc:184
-msgid "Sound File Browser"
-msgstr "Аудиобиблиотека"
-
-#: gtk2_ardour/ardour_ui_ed.cc:72
+#: gtk2_ardour/ardour_ui_ed.cc:77
 msgid "Session"
 msgstr "Сессия"
 
-#: gtk2_ardour/ardour_ui_ed.cc:73 gtk2_ardour/ardour_ui_ed.cc:130
-#: gtk2_ardour/editor.cc:1786 gtk2_ardour/export_dialog.cc:350
-#: gtk2_ardour/export_dialog.cc:1059 gtk2_ardour/export_dialog.cc:1063
+#: gtk2_ardour/ardour_ui_ed.cc:78 gtk2_ardour/ardour_ui_ed.cc:138
+#: gtk2_ardour/editor.cc:1736 gtk2_ardour/export_dialog.cc:348
+#: gtk2_ardour/export_dialog.cc:1057 gtk2_ardour/export_dialog.cc:1061
 msgid "Export"
 msgstr "Экспортировать"
 
-#: gtk2_ardour/ardour_ui_ed.cc:74
+#: gtk2_ardour/ardour_ui_ed.cc:79
 msgid "Cleanup"
 msgstr "Очистить"
 
-#: gtk2_ardour/ardour_ui_ed.cc:75 gtk2_ardour/option_editor.cc:125
+#: gtk2_ardour/ardour_ui_ed.cc:80 gtk2_ardour/option_editor.cc:123
 msgid "Sync"
-msgstr "Синхр."
+msgstr "Синхронизация"
 
-#: gtk2_ardour/ardour_ui_ed.cc:76 gtk2_ardour/ardour_ui_ed.cc:77
+#: gtk2_ardour/ardour_ui_ed.cc:81 gtk2_ardour/ardour_ui_ed.cc:82
 msgid "Options"
 msgstr "Параметры"
 
-#: gtk2_ardour/ardour_ui_ed.cc:78
+#: gtk2_ardour/ardour_ui_ed.cc:83
 msgid "Help"
 msgstr "Справка"
 
-#: gtk2_ardour/ardour_ui_ed.cc:79
+#: gtk2_ardour/ardour_ui_ed.cc:84
 msgid "KeyMouse Actions"
-msgstr "Горячие клавиши"
+msgstr "Клавиатурные комбинации"
 
-#: gtk2_ardour/ardour_ui_ed.cc:80
+#: gtk2_ardour/ardour_ui_ed.cc:85
 msgid "Audio File Format"
 msgstr "Формат звуковых файлов"
 
-#: gtk2_ardour/ardour_ui_ed.cc:81
+#: gtk2_ardour/ardour_ui_ed.cc:86
 msgid "Header"
 msgstr "Заголовок"
 
-#: gtk2_ardour/ardour_ui_ed.cc:82
+#: gtk2_ardour/ardour_ui_ed.cc:87
 msgid "Data"
 msgstr "Данные"
 
-#: gtk2_ardour/ardour_ui_ed.cc:83
+#: gtk2_ardour/ardour_ui_ed.cc:88
 msgid "Control Surfaces"
-msgstr ""
+msgstr "Устройства управления"
 
-#: gtk2_ardour/ardour_ui_ed.cc:87 gtk2_ardour/route_time_axis.cc:1139
-#: gtk2_ardour/new_session_dialog.cc:546
+#: gtk2_ardour/ardour_ui_ed.cc:89
+msgid "Metering"
+msgstr "Индикаторы"
+
+#: gtk2_ardour/ardour_ui_ed.cc:90
+msgid "Fall off rate"
+msgstr "Частота спада"
+
+#: gtk2_ardour/ardour_ui_ed.cc:91
+msgid "Hold Time"
+msgstr "Время задержки"
+
+#: gtk2_ardour/ardour_ui_ed.cc:95 gtk2_ardour/route_time_axis.cc:1309
+#: gtk2_ardour/new_session_dialog.cc:612
 msgid "New"
 msgstr "Новая"
 
-#: gtk2_ardour/ardour_ui_ed.cc:89 gtk2_ardour/new_session_dialog.cc:533
+#: gtk2_ardour/ardour_ui_ed.cc:97 gtk2_ardour/new_session_dialog.cc:599
 msgid "Open"
 msgstr "Открыть"
 
-#: gtk2_ardour/ardour_ui_ed.cc:90
+#: gtk2_ardour/ardour_ui_ed.cc:98
 msgid "Recent"
 msgstr "Последние"
 
-#: gtk2_ardour/ardour_ui_ed.cc:91 gtk2_ardour/io_selector.cc:60
-#: gtk2_ardour/io_selector.cc:794 gtk2_ardour/connection_editor.cc:59
+#: gtk2_ardour/ardour_ui_ed.cc:99 gtk2_ardour/io_selector.cc:60
+#: gtk2_ardour/io_selector.cc:748 gtk2_ardour/connection_editor.cc:59
 msgid "Close"
 msgstr "Закрыть"
 
-#: gtk2_ardour/ardour_ui_ed.cc:94 gtk2_ardour/route_params_ui.cc:510
+#: gtk2_ardour/ardour_ui_ed.cc:102 gtk2_ardour/route_params_ui.cc:510
 msgid "Add Track/Bus"
-msgstr "Добавить Дорожку/Шину"
+msgstr "Добавить дорожку/шину"
 
-#: gtk2_ardour/ardour_ui_ed.cc:105
+#: gtk2_ardour/ardour_ui_ed.cc:113
 msgid "Connect"
 msgstr "Соединить"
 
-#: gtk2_ardour/ardour_ui_ed.cc:113
+#: gtk2_ardour/ardour_ui_ed.cc:121
 msgid "Snapshot"
 msgstr "Снимок"
 
-#: gtk2_ardour/ardour_ui_ed.cc:116
+#: gtk2_ardour/ardour_ui_ed.cc:124
 msgid "Save Template..."
 msgstr "Сохранить шаблон..."
 
-#: gtk2_ardour/ardour_ui_ed.cc:119
+#: gtk2_ardour/ardour_ui_ed.cc:127
 msgid "Export session to audiofile..."
-msgstr "Экспорт сессии в аудиофайл..."
+msgstr "Сессию в аудиофайл..."
 
-#: gtk2_ardour/ardour_ui_ed.cc:122
+#: gtk2_ardour/ardour_ui_ed.cc:130
 msgid "Export selection to audiofile..."
-msgstr "Экспорт выделение в аудиофайл..."
+msgstr "Выделение в аудиофайл..."
 
-#: gtk2_ardour/ardour_ui_ed.cc:126
+#: gtk2_ardour/ardour_ui_ed.cc:134
 msgid "Export range markers to audiofile..."
-msgstr "Экспортировать маркеры области в аудиофайл..."
+msgstr "Маркеры области в аудиофайл..."
 
-#: gtk2_ardour/ardour_ui_ed.cc:133
+#: gtk2_ardour/ardour_ui_ed.cc:141
 msgid "Cleanup unused sources"
 msgstr "Очистить неиспользуемые источники"
 
-#: gtk2_ardour/ardour_ui_ed.cc:135
+#: gtk2_ardour/ardour_ui_ed.cc:143
 msgid "Flush wastebasket"
 msgstr "Очистить корзину"
 
-#: gtk2_ardour/ardour_ui_ed.cc:141 gtk2_ardour/ardour_ui_options.cc:425
-#: gtk2_ardour/ardour_ui_options.cc:434 gtk2_ardour/ardour_ui_options.cc:507
+#: gtk2_ardour/ardour_ui_ed.cc:149
 msgid "JACK"
 msgstr "JACK"
 
-#: gtk2_ardour/ardour_ui_ed.cc:142
+#: gtk2_ardour/ardour_ui_ed.cc:150
 msgid "Latency"
 msgstr "Задержка отклика"
 
-#: gtk2_ardour/ardour_ui_ed.cc:144
+#: gtk2_ardour/ardour_ui_ed.cc:152
 msgid "Reconnect"
 msgstr "Пересоединиться"
 
-#: gtk2_ardour/ardour_ui_ed.cc:147 gtk2_ardour/mixer_strip.cc:498
-#: gtk2_ardour/mixer_strip.cc:561
+#: gtk2_ardour/ardour_ui_ed.cc:155 gtk2_ardour/mixer_strip.cc:517
+#: gtk2_ardour/mixer_strip.cc:579
 msgid "Disconnect"
 msgstr "Отсоединиться"
 
-#: gtk2_ardour/ardour_ui_ed.cc:174
+#: gtk2_ardour/ardour_ui_ed.cc:182
 msgid "Windows"
 msgstr "Окна"
 
-#: gtk2_ardour/ardour_ui_ed.cc:175
+#: gtk2_ardour/ardour_ui_ed.cc:183
 msgid "start prefix"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:176
+#: gtk2_ardour/ardour_ui_ed.cc:184
 msgid "Quit"
 msgstr "Выйти"
 
-#: gtk2_ardour/ardour_ui_ed.cc:180
+#: gtk2_ardour/ardour_ui_ed.cc:188
 msgid "Maximise Editor Space"
 msgstr "Редактор на полный экран"
 
-#: gtk2_ardour/ardour_ui_ed.cc:182
+#: gtk2_ardour/ardour_ui_ed.cc:190
 msgid "Show Editor"
 msgstr "Показать редактор"
 
-#: gtk2_ardour/ardour_ui_ed.cc:183
+#: gtk2_ardour/ardour_ui_ed.cc:191
 msgid "Show Mixer"
 msgstr "Показать микшер"
 
-#: gtk2_ardour/ardour_ui_ed.cc:185
+#: gtk2_ardour/ardour_ui_ed.cc:192
 msgid "Options Editor"
-msgstr "Редактор параметров"
+msgstr "Параметры программы"
 
-#: gtk2_ardour/ardour_ui_ed.cc:186
+#: gtk2_ardour/ardour_ui_ed.cc:193
 msgid "Track/Bus Inspector"
 msgstr "Инспектор дорожек/шин"
 
-#: gtk2_ardour/ardour_ui_ed.cc:188 gtk2_ardour/connection_editor.cc:147
+#: gtk2_ardour/ardour_ui_ed.cc:195 gtk2_ardour/connection_editor.cc:147
 #: gtk2_ardour/connection_editor.cc:148
 msgid "Connections"
 msgstr "Соединения"
 
-#: gtk2_ardour/ardour_ui_ed.cc:190
+#: gtk2_ardour/ardour_ui_ed.cc:197
 msgid "Locations"
 msgstr "Интервалы"
 
-#: gtk2_ardour/ardour_ui_ed.cc:192
+#: gtk2_ardour/ardour_ui_ed.cc:199
 msgid "Big Clock"
 msgstr "Большой счётчик"
 
-#: gtk2_ardour/ardour_ui_ed.cc:194
+#: gtk2_ardour/ardour_ui_ed.cc:201
 msgid "About"
 msgstr "О программе"
 
-#: gtk2_ardour/ardour_ui_ed.cc:195
+#: gtk2_ardour/ardour_ui_ed.cc:202
 msgid "Colors"
 msgstr "Цвета"
 
-#: gtk2_ardour/ardour_ui_ed.cc:197
+#: gtk2_ardour/ardour_ui_ed.cc:204
 msgid "Add Audio Track"
 msgstr "Добавить звуковую дорожку"
 
-#: gtk2_ardour/ardour_ui_ed.cc:199
+#: gtk2_ardour/ardour_ui_ed.cc:206
 msgid "Add Audio Bus"
 msgstr "Добавить звуковую шину"
 
-#: gtk2_ardour/ardour_ui_ed.cc:201
+#: gtk2_ardour/ardour_ui_ed.cc:208
 msgid "Save"
 msgstr "Сохранить"
 
-#: gtk2_ardour/ardour_ui_ed.cc:203 gtk2_ardour/editor_actions.cc:257
-#, fuzzy
+#: gtk2_ardour/ardour_ui_ed.cc:210 gtk2_ardour/editor_actions.cc:256
 msgid "Remove Last Capture"
 msgstr "Удалить последнюю запись"
 
-#: gtk2_ardour/ardour_ui_ed.cc:210
+#: gtk2_ardour/ardour_ui_ed.cc:217
 msgid "Transport"
 msgstr "Транспорт"
 
-#: gtk2_ardour/ardour_ui_ed.cc:216 gtk2_ardour/sfdb_ui.cc:60
+#: gtk2_ardour/ardour_ui_ed.cc:223 gtk2_ardour/sfdb_ui.cc:59
 msgid "Stop"
 msgstr "Стоп"
 
-#: gtk2_ardour/ardour_ui_ed.cc:219
+#: gtk2_ardour/ardour_ui_ed.cc:226
 msgid "Roll"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:223
+#: gtk2_ardour/ardour_ui_ed.cc:230
 msgid "Start/Stop"
 msgstr "Старт/Стоп"
 
-#: gtk2_ardour/ardour_ui_ed.cc:226
+#: gtk2_ardour/ardour_ui_ed.cc:233
 msgid "Stop + Forget Capture"
 msgstr "Стоп+ Забыть захват"
 
-#: gtk2_ardour/ardour_ui_ed.cc:229
+#: gtk2_ardour/ardour_ui_ed.cc:236
 msgid "Play Loop Range"
 msgstr "Воспроизвести петлю"
 
-#: gtk2_ardour/ardour_ui_ed.cc:232
+#: gtk2_ardour/ardour_ui_ed.cc:239
 msgid "Play Selection"
 msgstr "Воспроизвести выделение"
 
-#: gtk2_ardour/ardour_ui_ed.cc:236
+#: gtk2_ardour/ardour_ui_ed.cc:243
 msgid "Enable Record"
 msgstr "Разрешить запись"
 
-#: gtk2_ardour/ardour_ui_ed.cc:239
+#: gtk2_ardour/ardour_ui_ed.cc:246
 msgid "Rewind"
 msgstr "Перемотать назад"
 
-#: gtk2_ardour/ardour_ui_ed.cc:242
+#: gtk2_ardour/ardour_ui_ed.cc:249
 msgid "Rewind (Slow)"
 msgstr "Перемотать назад (медленно)"
 
-#: gtk2_ardour/ardour_ui_ed.cc:245
+#: gtk2_ardour/ardour_ui_ed.cc:252
 msgid "Rewind (Fast)"
 msgstr "Перемотать назад (быстро)"
 
-#: gtk2_ardour/ardour_ui_ed.cc:248
+#: gtk2_ardour/ardour_ui_ed.cc:255
 msgid "Forward"
 msgstr "Перемотать вперёд"
 
-#: gtk2_ardour/ardour_ui_ed.cc:251
+#: gtk2_ardour/ardour_ui_ed.cc:258
 msgid "Forward (Slow)"
 msgstr "Перемотать вперёд (медленно)"
 
-#: gtk2_ardour/ardour_ui_ed.cc:254
+#: gtk2_ardour/ardour_ui_ed.cc:261
 msgid "Forward (Fast)"
 msgstr "Перемотать вперёд (быстро)"
 
-#: gtk2_ardour/ardour_ui_ed.cc:257
+#: gtk2_ardour/ardour_ui_ed.cc:264
 msgid "Goto Zero"
 msgstr "К нулевой отметке"
 
-#: gtk2_ardour/ardour_ui_ed.cc:260
+#: gtk2_ardour/ardour_ui_ed.cc:267
 msgid "Goto Start"
 msgstr "К началу"
 
-#: gtk2_ardour/ardour_ui_ed.cc:263
+#: gtk2_ardour/ardour_ui_ed.cc:270
 msgid "Goto End"
 msgstr "В конец"
 
-#: gtk2_ardour/ardour_ui_ed.cc:279
+#: gtk2_ardour/ardour_ui_ed.cc:286
 msgid "Auto Play"
 msgstr "Автовоспроизведение"
 
-#: gtk2_ardour/ardour_ui_ed.cc:286
+#: gtk2_ardour/ardour_ui_ed.cc:293
 msgid "Sync startup to video"
 msgstr "Синхронизировать начало с видео"
 
-#: gtk2_ardour/ardour_ui_ed.cc:287
+#: gtk2_ardour/ardour_ui_ed.cc:294
 #, fuzzy
 msgid "Time master"
 msgstr "JACK-счётчик - мастер"
 
-#: gtk2_ardour/ardour_ui_ed.cc:290
+#: gtk2_ardour/ardour_ui_ed.cc:297
 msgid "Toggle Record Enable Track1"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:292
+#: gtk2_ardour/ardour_ui_ed.cc:299
 msgid "Toggle Record Enable Track2"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:294
+#: gtk2_ardour/ardour_ui_ed.cc:301
 msgid "Toggle Record Enable Track3"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:296
+#: gtk2_ardour/ardour_ui_ed.cc:303
 msgid "Toggle Record Enable Track4"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:298
+#: gtk2_ardour/ardour_ui_ed.cc:305
 msgid "Toggle Record Enable Track5"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:300
+#: gtk2_ardour/ardour_ui_ed.cc:307
 msgid "Toggle Record Enable Track6"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:302
+#: gtk2_ardour/ardour_ui_ed.cc:309
 msgid "Toggle Record Enable Track7"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:304
+#: gtk2_ardour/ardour_ui_ed.cc:311
 msgid "Toggle Record Enable Track8"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:306
+#: gtk2_ardour/ardour_ui_ed.cc:313
 msgid "Toggle Record Enable Track9"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:308
+#: gtk2_ardour/ardour_ui_ed.cc:315
 msgid "Toggle Record Enable Track10"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:310
+#: gtk2_ardour/ardour_ui_ed.cc:317
 msgid "Toggle Record Enable Track11"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:312
+#: gtk2_ardour/ardour_ui_ed.cc:319
 msgid "Toggle Record Enable Track12"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:314
+#: gtk2_ardour/ardour_ui_ed.cc:321
 msgid "Toggle Record Enable Track13"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:316
+#: gtk2_ardour/ardour_ui_ed.cc:323
 msgid "Toggle Record Enable Track14"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:318
+#: gtk2_ardour/ardour_ui_ed.cc:325
 msgid "Toggle Record Enable Track15"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:320
+#: gtk2_ardour/ardour_ui_ed.cc:327
 msgid "Toggle Record Enable Track16"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:322
+#: gtk2_ardour/ardour_ui_ed.cc:329
 msgid "Toggle Record Enable Track17"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:324
+#: gtk2_ardour/ardour_ui_ed.cc:331
 msgid "Toggle Record Enable Track18"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:326
+#: gtk2_ardour/ardour_ui_ed.cc:333
 msgid "Toggle Record Enable Track19"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:328
+#: gtk2_ardour/ardour_ui_ed.cc:335
 msgid "Toggle Record Enable Track20"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:330
+#: gtk2_ardour/ardour_ui_ed.cc:337
 msgid "Toggle Record Enable Track21"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:332
+#: gtk2_ardour/ardour_ui_ed.cc:339
 msgid "Toggle Record Enable Track22"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:334
+#: gtk2_ardour/ardour_ui_ed.cc:341
 msgid "Toggle Record Enable Track23"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:336
+#: gtk2_ardour/ardour_ui_ed.cc:343
 msgid "Toggle Record Enable Track24"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:338
+#: gtk2_ardour/ardour_ui_ed.cc:345
 msgid "Toggle Record Enable Track25"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:340
+#: gtk2_ardour/ardour_ui_ed.cc:347
 msgid "Toggle Record Enable Track26"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:342
+#: gtk2_ardour/ardour_ui_ed.cc:349
 msgid "Toggle Record Enable Track27"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:344
+#: gtk2_ardour/ardour_ui_ed.cc:351
 msgid "Toggle Record Enable Track28"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:346
+#: gtk2_ardour/ardour_ui_ed.cc:353
 msgid "Toggle Record Enable Track29"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:348
+#: gtk2_ardour/ardour_ui_ed.cc:355
 msgid "Toggle Record Enable Track30"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:350
+#: gtk2_ardour/ardour_ui_ed.cc:357
 msgid "Toggle Record Enable Track31"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:352
+#: gtk2_ardour/ardour_ui_ed.cc:359
 msgid "Toggle Record Enable Track32"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:357
+#: gtk2_ardour/ardour_ui_ed.cc:364
 msgid "Percentage"
 msgstr "Процентов"
 
-#: gtk2_ardour/ardour_ui_ed.cc:358
+#: gtk2_ardour/ardour_ui_ed.cc:365
 msgid "Semitones"
 msgstr "Полутонов"
 
-#: gtk2_ardour/ardour_ui_ed.cc:362
+#: gtk2_ardour/ardour_ui_ed.cc:369
 msgid "Send MTC"
 msgstr "Передавать MTC"
 
-#: gtk2_ardour/ardour_ui_ed.cc:364
+#: gtk2_ardour/ardour_ui_ed.cc:371
 msgid "Send MMC"
 msgstr "Передавать MMC"
 
-#: gtk2_ardour/ardour_ui_ed.cc:366
+#: gtk2_ardour/ardour_ui_ed.cc:373
 msgid "Use MMC"
 msgstr "Использовать MMC"
 
-#: gtk2_ardour/ardour_ui_ed.cc:368
+#: gtk2_ardour/ardour_ui_ed.cc:375
 msgid "Send MIDI feedback"
 msgstr "Передавать отклик MIDI"
 
-#: gtk2_ardour/ardour_ui_ed.cc:370
+#: gtk2_ardour/ardour_ui_ed.cc:377
 msgid "Use MIDI control"
 msgstr "Использовать управление по MIDI"
 
-#: gtk2_ardour/ardour_ui_ed.cc:373
-msgid "Connect new track inputs to hardware"
-msgstr "Подключать входы новых дорожек к устройству"
-
-#: gtk2_ardour/ardour_ui_ed.cc:392
-msgid "Connect new track outputs to hardware"
-msgstr "Подключать выходы новых дорожек к устройству"
-
-#: gtk2_ardour/ardour_ui_ed.cc:394
-msgid "Connect new track outputs to master"
-msgstr "Подключать выходы новых дорожек к мастеру"
-
-#: gtk2_ardour/ardour_ui_ed.cc:396
-msgid "Manually connect new track outputs"
-msgstr "Ручное подключение дорожек к выходам"
-
-#: gtk2_ardour/ardour_ui_ed.cc:401
-msgid "Hardware monitoring"
-msgstr "Аппаратный контроль"
-
-#: gtk2_ardour/ardour_ui_ed.cc:402
-msgid "Software monitoring"
-msgstr "Программный контроль"
-
-#: gtk2_ardour/ardour_ui_ed.cc:403
-msgid "External monitoring"
-msgstr "Внешний контроль"
-
-#: gtk2_ardour/ardour_ui_ed.cc:407
+#: gtk2_ardour/ardour_ui_ed.cc:380
 msgid "Stop plugins with transport"
 msgstr "Останавливать расширения с транспортом"
 
-#: gtk2_ardour/ardour_ui_ed.cc:408
+#: gtk2_ardour/ardour_ui_ed.cc:381
 msgid "Verify remove last capture"
 msgstr "Проверить удаление последней записи"
 
-#: gtk2_ardour/ardour_ui_ed.cc:409
+#: gtk2_ardour/ardour_ui_ed.cc:382
 msgid "Stop recording on xrun"
 msgstr "Остановить запись при потере отсчётов"
 
-#: gtk2_ardour/ardour_ui_ed.cc:410
+#: gtk2_ardour/ardour_ui_ed.cc:383
 msgid "Stop transport at session end"
 msgstr "Останавливать транспорт в конце сессии"
 
-#: gtk2_ardour/ardour_ui_ed.cc:411
+#: gtk2_ardour/ardour_ui_ed.cc:384
 msgid "-12dB gain reduce ffwd/rewind"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:412
+#: gtk2_ardour/ardour_ui_ed.cc:385
 msgid "Rec-enable stays engaged at stop"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:416
-#, fuzzy
+#: gtk2_ardour/ardour_ui_ed.cc:387
 msgid "Do not run plugins while recording"
-msgstr "Использовать модули (plugins) во время записи"
+msgstr "Не запускать расширения во время записи"
 
-#: gtk2_ardour/ardour_ui_ed.cc:419
+#: gtk2_ardour/ardour_ui_ed.cc:390
 msgid "Latched solo"
-msgstr ""
+msgstr "Запертое соло"
 
-#: gtk2_ardour/ardour_ui_ed.cc:424
+#: gtk2_ardour/ardour_ui_ed.cc:398 gtk2_ardour/ardour_ui_ed.cc:406
+#: gtk2_ardour/audio_clock.cc:1805 gtk2_ardour/gain_meter.cc:159
+#: gtk2_ardour/ladspa_pluginui.cc:330 gtk2_ardour/ladspa_pluginui.cc:573
+#: gtk2_ardour/panner_ui.cc:89
+msgid "Off"
+msgstr "Выкл"
+
+#: gtk2_ardour/ardour_ui_ed.cc:399 gtk2_ardour/editor.cc:1357
+#: gtk2_ardour/editor.cc:1374
+msgid "Slowest"
+msgstr "Медленнее всего"
+
+#: gtk2_ardour/ardour_ui_ed.cc:400 gtk2_ardour/editor.cc:1358
+#: gtk2_ardour/editor.cc:1375
+msgid "Slow"
+msgstr "Медленно"
+
+#: gtk2_ardour/ardour_ui_ed.cc:401 gtk2_ardour/ardour_ui_ed.cc:408
+msgid "Medium"
+msgstr "Средне"
+
+#: gtk2_ardour/ardour_ui_ed.cc:402 gtk2_ardour/editor.cc:1359
+#: gtk2_ardour/editor.cc:1376
+msgid "Fast"
+msgstr "Быстро"
+
+#: gtk2_ardour/ardour_ui_ed.cc:403
+msgid "Faster"
+msgstr "Быстрее"
+
+#: gtk2_ardour/ardour_ui_ed.cc:404 gtk2_ardour/editor.cc:1360
+#: gtk2_ardour/editor.cc:1377
+msgid "Fastest"
+msgstr "Быстрее всего"
+
+#: gtk2_ardour/ardour_ui_ed.cc:407 gtk2_ardour/editor_actions.cc:58
+msgid "Short"
+msgstr "Короткая"
+
+#: gtk2_ardour/ardour_ui_ed.cc:409
+msgid "Long"
+msgstr "Долгая"
+
+#: gtk2_ardour/ardour_ui_ed.cc:427
+msgid "Hardware monitoring"
+msgstr "Аппаратный контроль"
+
+#: gtk2_ardour/ardour_ui_ed.cc:428
+msgid "Software monitoring"
+msgstr "Программный контроль"
+
+#: gtk2_ardour/ardour_ui_ed.cc:429
+msgid "External monitoring"
+msgstr "Внешний контроль"
+
+#: gtk2_ardour/ardour_ui_ed.cc:433
 #, fuzzy
 msgid "Solo in-place"
 msgstr "Соло"
 
-#: gtk2_ardour/ardour_ui_ed.cc:426
+#: gtk2_ardour/ardour_ui_ed.cc:435
 msgid "Solo via bus"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_ed.cc:429
-#, fuzzy
-msgid "Automatically create crossfades"
-msgstr "Автоматический кроссфейд на перекрытии"
+#: gtk2_ardour/ardour_ui_ed.cc:440
+msgid "Auto-connect inputs to physical inputs"
+msgstr "Автосоединить входы с физическими входами"
 
-#: gtk2_ardour/ardour_ui_ed.cc:431
-msgid "Unmute new full crossfades"
+#: gtk2_ardour/ardour_ui_ed.cc:442
+msgid "Manually connect inputs"
+msgstr "Вручную подключиться к входам"
+
+#: gtk2_ardour/ardour_ui_ed.cc:447
+msgid "Auto-connect outputs to physical outs"
+msgstr "Автомат. соединить выходы с физическими выходами"
+
+#: gtk2_ardour/ardour_ui_ed.cc:449
+msgid "Auto-connect outputs to master bus"
+msgstr "Автомат. соединить выходы с мастером"
+
+#: gtk2_ardour/ardour_ui_ed.cc:451
+msgid "Manually connect outputs"
+msgstr "Вручную подключить выходы"
+
+#: gtk2_ardour/ardour_ui_ed.cc:549 gtk2_ardour/ladspa_pluginui.cc:168
+msgid "Controls"
+msgstr "Управление"
+
+#: gtk2_ardour/ardour_ui_ed.cc:553
+msgid "Feedback"
+msgstr "Отклик"
+
+#: gtk2_ardour/ardour_ui_ed.cc:633
+msgid "ardour: clock"
+msgstr "ardour: счётчик"
+
+#: gtk2_ardour/ardour_ui_options.cc:205
+msgid "programming error: unknown solo model in ARDOUR_UI::set_solo_model: %1"
 msgstr ""
 
-#: gtk2_ardour/ardour_ui_options.cc:423 gtk2_ardour/ardour_ui_options.cc:433
-#: gtk2_ardour/ardour_ui_options.cc:501
+#: gtk2_ardour/ardour_ui_options.cc:239
+msgid "programming error: unknown monitor model in ARDOUR_UI::set_monitor_model: %1"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui_options.cc:492
+msgid ""
+"programming error: unknown file header format passed to ARDOUR_UI::"
+"map_file_data_format: %1"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui_options.cc:524
+msgid ""
+"programming error: unknown file data format passed to ARDOUR_UI::"
+"map_file_data_format: %1"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui_options.cc:824
 #, fuzzy
-msgid "Internal"
-msgstr "внутренний"
+msgid "ST"
+msgstr "УСТАНОВИТЬ"
 
-#: gtk2_ardour/ardour_ui_options.cc:424 gtk2_ardour/ardour_ui_options.cc:504
-#, fuzzy
-msgid "MTC"
-msgstr "MMC"
+#: gtk2_ardour/audio_clock.cc:1801 gtk2_ardour/editor.cc:180
+msgid "Timecode"
+msgstr "Тайм-код"
 
-#: gtk2_ardour/audio_clock.cc:1742 gtk2_ardour/editor.cc:189
-msgid "SMPTE"
-msgstr "SMPTE"
-
-#: gtk2_ardour/audio_clock.cc:1743 gtk2_ardour/editor.cc:188
-#: gtk2_ardour/editor_rulers.cc:359
+#: gtk2_ardour/audio_clock.cc:1802 gtk2_ardour/editor.cc:179
+#: gtk2_ardour/editor_rulers.cc:386
 msgid "Bars:Beats"
 msgstr "Такт:Доля"
 
-#: gtk2_ardour/audio_clock.cc:1744
+#: gtk2_ardour/audio_clock.cc:1803
 msgid "Minutes:Seconds"
 msgstr "Минуты:Секунды"
 
-#: gtk2_ardour/audio_clock.cc:1745
+#: gtk2_ardour/audio_clock.cc:1804
 msgid "Audio Frames"
 msgstr "Аудио кадры"
 
-#: gtk2_ardour/audio_clock.cc:1746 gtk2_ardour/editor_actions.cc:379
-#: gtk2_ardour/editor_actions.cc:387 gtk2_ardour/gain_meter.cc:167
-#: gtk2_ardour/ladspa_pluginui.cc:330 gtk2_ardour/ladspa_pluginui.cc:573
-#: gtk2_ardour/panner_ui.cc:87
-msgid "Off"
-msgstr "Выкл"
-
-#: gtk2_ardour/audio_clock.cc:1748
+#: gtk2_ardour/audio_clock.cc:1807
 msgid "Mode"
 msgstr "Режим"
 
-#: gtk2_ardour/route_time_axis.cc:86
+#: gtk2_ardour/route_time_axis.cc:87
 msgid "m"
 msgstr "т"
 
-#: gtk2_ardour/route_time_axis.cc:86
+#: gtk2_ardour/route_time_axis.cc:87
 msgid "s"
 msgstr "с"
 
-#: gtk2_ardour/route_time_axis.cc:86
+#: gtk2_ardour/route_time_axis.cc:87
 msgid "r"
 msgstr "з"
 
-#: gtk2_ardour/route_time_axis.cc:90
+#: gtk2_ardour/route_time_axis.cc:91
 msgid "g"
 msgstr "г"
 
-#: gtk2_ardour/route_time_axis.cc:91
+#: gtk2_ardour/route_time_axis.cc:92
 msgid "p"
 msgstr "сп"
 
-#: gtk2_ardour/route_time_axis.cc:92 gtk2_ardour/automation_time_axis.cc:33
+#: gtk2_ardour/route_time_axis.cc:93 gtk2_ardour/automation_time_axis.cc:36
 #: gtk2_ardour/visual_time_axis.cc:74
 msgid "h"
 msgstr "в"
 
-#: gtk2_ardour/route_time_axis.cc:93
+#: gtk2_ardour/route_time_axis.cc:94
 msgid "a"
 msgstr "а"
 
-#: gtk2_ardour/route_time_axis.cc:94 gtk2_ardour/visual_time_axis.cc:73
+#: gtk2_ardour/route_time_axis.cc:95 gtk2_ardour/visual_time_axis.cc:73
 msgid "v"
 msgstr "п"
 
-#: gtk2_ardour/route_time_axis.cc:138 gtk2_ardour/mixer_strip.cc:83
+#: gtk2_ardour/route_time_axis.cc:150 gtk2_ardour/mixer_strip.cc:85
 msgid "Record"
 msgstr "Запись"
 
-#: gtk2_ardour/route_time_axis.cc:146 gtk2_ardour/editor_actions.cc:37
-#: gtk2_ardour/mixer_strip.cc:83
+#: gtk2_ardour/route_time_axis.cc:158 gtk2_ardour/editor_actions.cc:38
+#: gtk2_ardour/mixer_strip.cc:85 gtk2_ardour/mixer_strip.cc:433
 msgid "Solo"
 msgstr "Соло"
 
-#: gtk2_ardour/route_time_axis.cc:147 gtk2_ardour/editor.cc:1710
-#: gtk2_ardour/editor.cc:1809 gtk2_ardour/mixer_strip.cc:83
-#: gtk2_ardour/panner_ui.cc:417
+#: gtk2_ardour/route_time_axis.cc:159 gtk2_ardour/editor.cc:1660
+#: gtk2_ardour/editor.cc:1750 gtk2_ardour/mixer_strip.cc:85
+#: gtk2_ardour/mixer_strip.cc:432 gtk2_ardour/panner_ui.cc:430
 msgid "Mute"
 msgstr "Тихо"
 
-#: gtk2_ardour/route_time_axis.cc:148
+#: gtk2_ardour/route_time_axis.cc:160
 msgid "Edit Group"
 msgstr "Группы"
 
-#: gtk2_ardour/route_time_axis.cc:149 gtk2_ardour/visual_time_axis.cc:92
+#: gtk2_ardour/route_time_axis.cc:161 gtk2_ardour/visual_time_axis.cc:92
 msgid "Display Height"
 msgstr "Высота дорожки"
 
-#: gtk2_ardour/route_time_axis.cc:150
+#: gtk2_ardour/route_time_axis.cc:162
 msgid "Playlist"
 msgstr "Список"
 
-#: gtk2_ardour/route_time_axis.cc:151 gtk2_ardour/route_time_axis.cc:428
+#: gtk2_ardour/route_time_axis.cc:163 gtk2_ardour/route_time_axis.cc:425
 msgid "Automation"
 msgstr "Автомат"
 
-#: gtk2_ardour/route_time_axis.cc:152 gtk2_ardour/visual_time_axis.cc:93
+#: gtk2_ardour/route_time_axis.cc:164 gtk2_ardour/visual_time_axis.cc:93
 msgid "Visual options"
 msgstr "Параметры отображения"
 
-#: gtk2_ardour/route_time_axis.cc:153 gtk2_ardour/visual_time_axis.cc:94
+#: gtk2_ardour/route_time_axis.cc:165 gtk2_ardour/visual_time_axis.cc:94
 msgid "Hide this track"
-msgstr "Скрыть трек"
+msgstr "Скрыть дорожку"
 
-#: gtk2_ardour/route_time_axis.cc:272 gtk2_ardour/mixer_strip.cc:887
+#: gtk2_ardour/route_time_axis.cc:276 gtk2_ardour/mixer_strip.cc:917
 msgid "No group"
 msgstr "Нет группы"
 
-#: gtk2_ardour/route_time_axis.cc:389
-#, fuzzy
+#: gtk2_ardour/route_time_axis.cc:386
 msgid "Show all automation"
-msgstr "автомат"
+msgstr "Показать всю автоматизацию"
+
+#: gtk2_ardour/route_time_axis.cc:389
+msgid "Show existing automation"
+msgstr "Показать существующую автоматизацию"
 
 #: gtk2_ardour/route_time_axis.cc:392
-#, fuzzy
-msgid "Show existing automation"
-msgstr "использовать имеющийся шаблон"
+msgid "Hide all automation"
+msgstr "Спрятать всю автоматизацию"
 
 #: gtk2_ardour/route_time_axis.cc:395
-#, fuzzy
-msgid "Hide all automation"
-msgstr "очистить интервалы"
-
-#: gtk2_ardour/route_time_axis.cc:398
 msgid "Plugins"
-msgstr "Модули (плагины)"
+msgstr "Расширения"
 
-#: gtk2_ardour/route_time_axis.cc:419 gtk2_ardour/automation_time_axis.cc:426
+#: gtk2_ardour/route_time_axis.cc:416 gtk2_ardour/automation_time_axis.cc:430
 #: gtk2_ardour/imageframe_time_axis.cc:255 gtk2_ardour/marker_time_axis.cc:211
 msgid "Height"
 msgstr "Высота"
 
-#: gtk2_ardour/route_time_axis.cc:420 gtk2_ardour/color_manager.cc:41
+#: gtk2_ardour/route_time_axis.cc:417 gtk2_ardour/color_manager.cc:41
 #: gtk2_ardour/imageframe_time_axis.cc:256 gtk2_ardour/marker_time_axis.cc:212
 msgid "Color"
 msgstr "Цвет"
 
-#: gtk2_ardour/route_time_axis.cc:425 gtk2_ardour/mixer_strip.cc:971
-#, fuzzy
+#: gtk2_ardour/route_time_axis.cc:422 gtk2_ardour/mixer_strip.cc:1002
 msgid "Remote Control ID"
-msgstr "использовать контрольные выходы"
+msgstr ""
 
-#: gtk2_ardour/route_time_axis.cc:443
+#: gtk2_ardour/route_time_axis.cc:440
 #, fuzzy
 msgid "Align with existing material"
 msgstr "Существующий материал"
 
-#: gtk2_ardour/route_time_axis.cc:449
+#: gtk2_ardour/route_time_axis.cc:446
 #, fuzzy
 msgid "Align with capture time"
 msgstr "Время записи"
 
-#: gtk2_ardour/route_time_axis.cc:455
+#: gtk2_ardour/route_time_axis.cc:452
 #, fuzzy
 msgid "Alignment"
 msgstr "Выровнять"
 
-#: gtk2_ardour/route_time_axis.cc:462 gtk2_ardour/editor.cc:480
-#: gtk2_ardour/editor_actions.cc:62 gtk2_ardour/mixer_strip.cc:960
+#: gtk2_ardour/route_time_axis.cc:458
+#, fuzzy
+msgid "Normal mode"
+msgstr "Норм."
+
+#: gtk2_ardour/route_time_axis.cc:461
+msgid "Tape mode"
+msgstr ""
+
+#: gtk2_ardour/route_time_axis.cc:477 gtk2_ardour/editor.cc:480
+#: gtk2_ardour/editor_actions.cc:61 gtk2_ardour/mixer_strip.cc:991
 #: gtk2_ardour/mixer_ui.cc:109
 msgid "Active"
 msgstr "Активны"
 
-#: gtk2_ardour/route_time_axis.cc:467 gtk2_ardour/editor.cc:1872
-#: gtk2_ardour/editor_actions.cc:322 gtk2_ardour/editor_markers.cc:511
+#: gtk2_ardour/route_time_axis.cc:482 gtk2_ardour/editor.cc:1840
+#: gtk2_ardour/editor_actions.cc:326 gtk2_ardour/editor_markers.cc:512
 #: gtk2_ardour/imageframe_time_axis.cc:259 gtk2_ardour/location_ui.cc:58
-#: gtk2_ardour/marker_time_axis.cc:215 gtk2_ardour/mixer_strip.cc:974
+#: gtk2_ardour/marker_time_axis.cc:215 gtk2_ardour/mixer_strip.cc:1005
 msgid "Remove"
 msgstr "Удалить"
 
-#: gtk2_ardour/route_time_axis.cc:733
-#, fuzzy
-msgid "Name for playlist"
-msgstr "Имя снимка"
+#: gtk2_ardour/route_time_axis.cc:508 gtk2_ardour/route_time_axis.cc:563
+#: gtk2_ardour/route_time_axis.cc:828 gtk2_ardour/editor_actions.cc:1015
+msgid "programming error: %1 %2"
+msgstr "ошибка в программе: %1 %2"
 
-#: gtk2_ardour/route_time_axis.cc:735 gtk2_ardour/route_time_axis.cc:1136
-#: gtk2_ardour/editor_markers.cc:830 gtk2_ardour/editor_mouse.cc:4723
+#: gtk2_ardour/route_time_axis.cc:852
+msgid "Name for playlist"
+msgstr "Имя списка воспроизведения"
+
+#: gtk2_ardour/route_time_axis.cc:854 gtk2_ardour/route_time_axis.cc:1306
+#: gtk2_ardour/editor_markers.cc:857 gtk2_ardour/editor_mouse.cc:4757
 #: gtk2_ardour/imageframe_time_axis.cc:248 gtk2_ardour/marker_time_axis.cc:208
-#: gtk2_ardour/mixer_strip.cc:958 gtk2_ardour/redirect_box.cc:752
-#: gtk2_ardour/redirect_box.cc:1080 gtk2_ardour/route_ui.cc:746
-#: gtk2_ardour/visual_time_axis.cc:326
+#: gtk2_ardour/mixer_strip.cc:989 gtk2_ardour/redirect_box.cc:823
+#: gtk2_ardour/redirect_box.cc:1149 gtk2_ardour/route_ui.cc:760
+#: gtk2_ardour/visual_time_axis.cc:331
 msgid "Rename"
 msgstr "Переименовать"
 
-#: gtk2_ardour/route_time_axis.cc:770 gtk2_ardour/route_time_axis.cc:811
-#, fuzzy
+#: gtk2_ardour/route_time_axis.cc:896 gtk2_ardour/route_time_axis.cc:942
 msgid "Name for Playlist"
-msgstr "Имя снимка"
+msgstr "Имя списка воспроизведения"
 
-#: gtk2_ardour/route_time_axis.cc:990 gtk2_ardour/visual_time_axis.cc:383
-msgid "a track already exists with that name"
+#: gtk2_ardour/route_time_axis.cc:1134 gtk2_ardour/visual_time_axis.cc:341
+#: gtk2_ardour/visual_time_axis.cc:388
+msgid "A track already exists with that name"
 msgstr "Дорожка с таким именем уже существует"
 
-#: gtk2_ardour/route_time_axis.cc:1133
-msgid "Current: %1"
-msgstr ""
-
-#: gtk2_ardour/route_time_axis.cc:1140
+#: gtk2_ardour/route_time_axis.cc:1310
 msgid "New Copy"
 msgstr "Новая копия"
 
-#: gtk2_ardour/route_time_axis.cc:1142
+#: gtk2_ardour/route_time_axis.cc:1312
 msgid "Clear Current"
 msgstr "Очистить текущий"
 
-#: gtk2_ardour/route_time_axis.cc:1144 gtk2_ardour/editor.cc:1974
-#: gtk2_ardour/editor.cc:2050
-msgid "Select"
-msgstr "Выделить"
+#: gtk2_ardour/route_time_axis.cc:1315
+msgid "Select from all ..."
+msgstr "Выбрать из всех..."
 
-#: gtk2_ardour/route_time_axis.cc:1333 gtk2_ardour/editor.cc:1432
+#: gtk2_ardour/route_time_axis.cc:1521 gtk2_ardour/editor.cc:1382
 #: gtk2_ardour/selection.cc:642
 msgid "programming error: "
 msgstr "Ошибка в программе: "
 
-#: gtk2_ardour/audio_time_axis.cc:229
+#: gtk2_ardour/audio_time_axis.cc:222
 msgid "Fader"
 msgstr "Фейдер"
 
-#: gtk2_ardour/audio_time_axis.cc:234
+#: gtk2_ardour/audio_time_axis.cc:227
 msgid "Pan"
 msgstr "Пан."
 
-#: gtk2_ardour/audio_time_axis.cc:249
+#: gtk2_ardour/audio_time_axis.cc:242
 msgid "Hide all crossfades"
 msgstr "Скрыть все кроссфейды"
 
-#: gtk2_ardour/audio_time_axis.cc:250
+#: gtk2_ardour/audio_time_axis.cc:243
 msgid "Show all crossfades"
 msgstr "Показать все кроссфейды"
 
-#: gtk2_ardour/audio_time_axis.cc:257
+#: gtk2_ardour/audio_time_axis.cc:250
 msgid "Show waveforms"
-msgstr "Показывать форму сигнала"
+msgstr "Показать форму сигнала"
 
-#: gtk2_ardour/audio_time_axis.cc:265
+#: gtk2_ardour/audio_time_axis.cc:260
 msgid "Traditional"
 msgstr "Обычная"
 
-#: gtk2_ardour/audio_time_axis.cc:268
+#: gtk2_ardour/audio_time_axis.cc:263
 msgid "Rectified"
 msgstr "Увеличенная"
 
-#: gtk2_ardour/audio_time_axis.cc:271
+#: gtk2_ardour/audio_time_axis.cc:270 gtk2_ardour/editor.cc:1356
+#: gtk2_ardour/editor.cc:1373
+msgid "Linear"
+msgstr "Линейная"
+
+#: gtk2_ardour/audio_time_axis.cc:273
+msgid "Logarithmic"
+msgstr "Логарифмическая"
+
+#: gtk2_ardour/audio_time_axis.cc:290
 msgid "Waveform"
 msgstr "Форма сигнала"
 
-#: gtk2_ardour/audio_time_axis.cc:331
+#: gtk2_ardour/audio_time_axis.cc:362
 msgid "gain"
 msgstr "усил."
 
-#: gtk2_ardour/audio_time_axis.cc:371
+#: gtk2_ardour/audio_time_axis.cc:402
 msgid "pan"
 msgstr "пан."
 
-#: gtk2_ardour/automation_line.cc:888
+#: gtk2_ardour/automation_line.cc:795
 #, fuzzy
 msgid "automation event move"
 msgstr "автомат"
 
-#: gtk2_ardour/automation_line.cc:890
+#: gtk2_ardour/automation_line.cc:797
 #, fuzzy
 msgid "automation range drag"
 msgstr "автомат"
 
-#: gtk2_ardour/automation_line.cc:1019 gtk2_ardour/region_gain_line.cc:64
+#: gtk2_ardour/automation_line.cc:1022 gtk2_ardour/region_gain_line.cc:64
 #, fuzzy
 msgid "remove control point"
 msgstr "использовать контрольные выходы"
 
-#: gtk2_ardour/automation_time_axis.cc:34 gtk2_ardour/editor_ops.cc:2922
+#: gtk2_ardour/automation_time_axis.cc:37 gtk2_ardour/editor_ops.cc:2840
 msgid "clear"
 msgstr "очистить"
 
-#: gtk2_ardour/automation_time_axis.cc:79
+#: gtk2_ardour/automation_time_axis.cc:78
 msgid "track height"
 msgstr "Высота дорожки"
 
-#: gtk2_ardour/automation_time_axis.cc:80
+#: gtk2_ardour/automation_time_axis.cc:79
 msgid "automation state"
 msgstr "Состояние автоматизации"
 
-#: gtk2_ardour/automation_time_axis.cc:81
+#: gtk2_ardour/automation_time_axis.cc:80
 msgid "clear track"
 msgstr "Очистить дорожку"
 
-#: gtk2_ardour/automation_time_axis.cc:82
+#: gtk2_ardour/automation_time_axis.cc:81
 msgid "hide track"
 msgstr "Скрыть дорожку"
 
-#: gtk2_ardour/automation_time_axis.cc:188
-#: gtk2_ardour/automation_time_axis.cc:217
-#: gtk2_ardour/automation_time_axis.cc:437
+#: gtk2_ardour/automation_time_axis.cc:187
+#: gtk2_ardour/automation_time_axis.cc:216
+#: gtk2_ardour/automation_time_axis.cc:441
 msgid "Manual"
 msgstr ""
 
-#: gtk2_ardour/automation_time_axis.cc:190
-#: gtk2_ardour/automation_time_axis.cc:228
-#: gtk2_ardour/automation_time_axis.cc:441 gtk2_ardour/editor.cc:1951
-#: gtk2_ardour/editor.cc:2032 gtk2_ardour/gain_meter.cc:169
+#: gtk2_ardour/automation_time_axis.cc:189
+#: gtk2_ardour/automation_time_axis.cc:227
+#: gtk2_ardour/automation_time_axis.cc:445 gtk2_ardour/editor.cc:1918
+#: gtk2_ardour/editor.cc:1999 gtk2_ardour/gain_meter.cc:161
 #: gtk2_ardour/ladspa_pluginui.cc:333 gtk2_ardour/ladspa_pluginui.cc:575
-#: gtk2_ardour/panner_ui.cc:89 gtk2_ardour/sfdb_ui.cc:59
+#: gtk2_ardour/panner_ui.cc:91 gtk2_ardour/sfdb_ui.cc:58
 msgid "Play"
 msgstr "Воспроизвести"
 
-#: gtk2_ardour/automation_time_axis.cc:192
-#: gtk2_ardour/automation_time_axis.cc:239
-#: gtk2_ardour/automation_time_axis.cc:445 gtk2_ardour/gain_meter.cc:171
+#: gtk2_ardour/automation_time_axis.cc:191
+#: gtk2_ardour/automation_time_axis.cc:238
+#: gtk2_ardour/automation_time_axis.cc:449 gtk2_ardour/gain_meter.cc:163
 #: gtk2_ardour/ladspa_pluginui.cc:336 gtk2_ardour/ladspa_pluginui.cc:577
-#: gtk2_ardour/panner_ui.cc:91
+#: gtk2_ardour/panner_ui.cc:93
 msgid "Write"
 msgstr "Записать"
 
-#: gtk2_ardour/automation_time_axis.cc:194
-#: gtk2_ardour/automation_time_axis.cc:250
-#: gtk2_ardour/automation_time_axis.cc:449 gtk2_ardour/gain_meter.cc:173
+#: gtk2_ardour/automation_time_axis.cc:193
+#: gtk2_ardour/automation_time_axis.cc:249
+#: gtk2_ardour/automation_time_axis.cc:453 gtk2_ardour/gain_meter.cc:165
 #: gtk2_ardour/ladspa_pluginui.cc:339 gtk2_ardour/ladspa_pluginui.cc:579
-#: gtk2_ardour/panner_ui.cc:93
+#: gtk2_ardour/panner_ui.cc:95
 #, fuzzy
 msgid "Touch"
 msgstr "Врезка"
 
-#: gtk2_ardour/automation_time_axis.cc:261 gtk2_ardour/ladspa_pluginui.cc:342
+#: gtk2_ardour/automation_time_axis.cc:260 gtk2_ardour/ladspa_pluginui.cc:342
 msgid "???"
 msgstr "???"
 
-#: gtk2_ardour/automation_time_axis.cc:275
+#: gtk2_ardour/automation_time_axis.cc:274
 msgid "clear automation"
 msgstr "Очистить автоматизацию"
 
-#: gtk2_ardour/automation_time_axis.cc:428 gtk2_ardour/editor_actions.cc:320
+#: gtk2_ardour/automation_time_axis.cc:432 gtk2_ardour/editor_actions.cc:324
 msgid "Hide"
 msgstr "Скрыть"
 
-#: gtk2_ardour/automation_time_axis.cc:430 gtk2_ardour/crossfade_edit.cc:79
-#: gtk2_ardour/redirect_box.cc:1072 gtk2_ardour/connection_editor.cc:57
+#: gtk2_ardour/automation_time_axis.cc:434 gtk2_ardour/crossfade_edit.cc:79
+#: gtk2_ardour/redirect_box.cc:1141 gtk2_ardour/connection_editor.cc:57
 msgid "Clear"
 msgstr "Очистить"
 
-#: gtk2_ardour/automation_time_axis.cc:453
+#: gtk2_ardour/automation_time_axis.cc:457
 msgid "State"
 msgstr "Состояние"
 
@@ -1650,7 +1787,7 @@ msgstr ""
 
 #: gtk2_ardour/canvas-imageframe.c:120
 msgid "y"
-msgstr ""
+msgstr "y"
 
 #: gtk2_ardour/canvas-imageframe.c:121 gtk2_ardour/canvas-simpleline.c:121
 #: gtk2_ardour/canvas-simplerect.c:117
@@ -1658,9 +1795,8 @@ msgid "y coordinate of upper left corner of rect "
 msgstr ""
 
 #: gtk2_ardour/canvas-imageframe.c:129
-#, fuzzy
 msgid "width"
-msgstr "запись"
+msgstr "Ширина"
 
 #: gtk2_ardour/canvas-imageframe.c:130
 msgid "the width"
@@ -1768,7 +1904,7 @@ msgstr ""
 
 #: gtk2_ardour/canvas-simplerect.c:199
 msgid "fill color rgba"
-msgstr ""
+msgstr "Цвет заливки в RGBA"
 
 #: gtk2_ardour/canvas-simplerect.c:200
 msgid "color of fill"
@@ -1787,7 +1923,7 @@ msgstr "не удалось отобразить заставку (файл \"%1
 msgid "ardour: x-fade edit"
 msgstr "ardour: редактор кроссфейдов"
 
-#: gtk2_ardour/crossfade_edit.cc:80 gtk2_ardour/panner_ui.cc:433
+#: gtk2_ardour/crossfade_edit.cc:80 gtk2_ardour/panner_ui.cc:446
 msgid "Reset"
 msgstr "Сбросить"
 
@@ -1829,1528 +1965,1463 @@ msgstr "Нарастание"
 msgid "Fade Out"
 msgstr "Затухание"
 
-#: gtk2_ardour/crossfade_edit.cc:173 gtk2_ardour/editor.cc:1785
-#: gtk2_ardour/editor_actions.cc:318 gtk2_ardour/option_editor.cc:129
+#: gtk2_ardour/crossfade_edit.cc:173 gtk2_ardour/editor.cc:1735
+#: gtk2_ardour/editor_actions.cc:322 gtk2_ardour/option_editor.cc:127
 msgid "Audition"
 msgstr "Контроль"
 
-#: gtk2_ardour/editor.cc:105 gtk2_ardour/editor.cc:3521
-#, fuzzy
-msgid "Slide Edit"
-msgstr "Скольжение"
-
-#: gtk2_ardour/editor.cc:106 gtk2_ardour/editor.cc:3519
-#, fuzzy
-msgid "Splice Edit"
-msgstr "Стыковка"
-
-#: gtk2_ardour/editor.cc:111 gtk2_ardour/editor.cc:3576
-#: gtk2_ardour/editor_actions.cc:417 gtk2_ardour/export_dialog.cc:78
-#: gtk2_ardour/export_dialog.cc:92 gtk2_ardour/export_dialog.cc:893
-#: gtk2_ardour/export_dialog.cc:1225 gtk2_ardour/route_ui.cc:438
+#: gtk2_ardour/editor.cc:102 gtk2_ardour/editor.cc:3600
+#: gtk2_ardour/editor_actions.cc:400 gtk2_ardour/export_dialog.cc:76
+#: gtk2_ardour/export_dialog.cc:90 gtk2_ardour/export_dialog.cc:891
+#: gtk2_ardour/export_dialog.cc:1223 gtk2_ardour/route_ui.cc:459
 msgid "None"
 msgstr "Нет"
 
-#: gtk2_ardour/editor.cc:112 gtk2_ardour/editor.cc:3564
+#: gtk2_ardour/editor.cc:103 gtk2_ardour/editor.cc:3588
 msgid "CD Frames"
 msgstr "Выборка CD"
 
-#: gtk2_ardour/editor.cc:113 gtk2_ardour/editor.cc:3566
+#: gtk2_ardour/editor.cc:104 gtk2_ardour/editor.cc:3590
 msgid "SMPTE Frames"
 msgstr "SMPTE кадры"
 
-#: gtk2_ardour/editor.cc:114 gtk2_ardour/editor.cc:3568
+#: gtk2_ardour/editor.cc:105 gtk2_ardour/editor.cc:3592
 msgid "SMPTE Seconds"
 msgstr "SMPTE секунды"
 
-#: gtk2_ardour/editor.cc:115 gtk2_ardour/editor.cc:3570
+#: gtk2_ardour/editor.cc:106 gtk2_ardour/editor.cc:3594
 msgid "SMPTE Minutes"
 msgstr "SMPTE минуты"
 
-#: gtk2_ardour/editor.cc:116 gtk2_ardour/editor.cc:3572
+#: gtk2_ardour/editor.cc:107 gtk2_ardour/editor.cc:3596
 msgid "Seconds"
 msgstr "Секунд"
 
-#: gtk2_ardour/editor.cc:117 gtk2_ardour/editor.cc:3574
+#: gtk2_ardour/editor.cc:108 gtk2_ardour/editor.cc:3598
 msgid "Minutes"
 msgstr "Минут"
 
-#: gtk2_ardour/editor.cc:118 gtk2_ardour/editor.cc:3546
+#: gtk2_ardour/editor.cc:109 gtk2_ardour/editor.cc:3570
 msgid "Beats/32"
 msgstr "долям/32"
 
-#: gtk2_ardour/editor.cc:119 gtk2_ardour/editor.cc:3544
+#: gtk2_ardour/editor.cc:110 gtk2_ardour/editor.cc:3568
 msgid "Beats/16"
 msgstr "долям/16"
 
-#: gtk2_ardour/editor.cc:120 gtk2_ardour/editor.cc:3542
+#: gtk2_ardour/editor.cc:111 gtk2_ardour/editor.cc:3566
 msgid "Beats/8"
 msgstr "долям/8"
 
-#: gtk2_ardour/editor.cc:121 gtk2_ardour/editor.cc:3540
+#: gtk2_ardour/editor.cc:112 gtk2_ardour/editor.cc:3564
 msgid "Beats/4"
 msgstr "долям/4"
 
-#: gtk2_ardour/editor.cc:122 gtk2_ardour/editor.cc:3538
+#: gtk2_ardour/editor.cc:113 gtk2_ardour/editor.cc:3562
 msgid "Beats/3"
 msgstr "долям/3"
 
-#: gtk2_ardour/editor.cc:123 gtk2_ardour/editor.cc:3548
+#: gtk2_ardour/editor.cc:114 gtk2_ardour/editor.cc:3572
 msgid "Beats"
 msgstr "долям"
 
-#: gtk2_ardour/editor.cc:124 gtk2_ardour/editor.cc:3550
+#: gtk2_ardour/editor.cc:115 gtk2_ardour/editor.cc:3574
 msgid "Bars"
 msgstr "тактам"
 
-#: gtk2_ardour/editor.cc:125 gtk2_ardour/editor.cc:3552
+#: gtk2_ardour/editor.cc:116 gtk2_ardour/editor.cc:3576
 msgid "Marks"
 msgstr "маркерам"
 
-#: gtk2_ardour/editor.cc:126 gtk2_ardour/editor.cc:3554
+#: gtk2_ardour/editor.cc:117 gtk2_ardour/editor.cc:136
+#: gtk2_ardour/editor.cc:3578 gtk2_ardour/editor.cc:3643
 msgid "Edit Cursor"
 msgstr "курсору"
 
-#: gtk2_ardour/editor.cc:127 gtk2_ardour/editor.cc:3556
+#: gtk2_ardour/editor.cc:118 gtk2_ardour/editor.cc:3580
 msgid "Region starts"
 msgstr "нач. областей"
 
-#: gtk2_ardour/editor.cc:128 gtk2_ardour/editor.cc:3558
+#: gtk2_ardour/editor.cc:119 gtk2_ardour/editor.cc:3582
 msgid "Region ends"
 msgstr "оконч. областей"
 
-#: gtk2_ardour/editor.cc:129 gtk2_ardour/editor.cc:3562
+#: gtk2_ardour/editor.cc:120 gtk2_ardour/editor.cc:3586
 msgid "Region syncs"
 msgstr ""
 
-#: gtk2_ardour/editor.cc:130 gtk2_ardour/editor.cc:3560
+#: gtk2_ardour/editor.cc:121 gtk2_ardour/editor.cc:3584
 msgid "Region bounds"
 msgstr ""
 
-#: gtk2_ardour/editor.cc:135 gtk2_ardour/editor.cc:3593
-#, fuzzy
-msgid "Normal Snap"
-msgstr "Норм."
+#: gtk2_ardour/editor.cc:127 gtk2_ardour/editor.cc:3618
+#: gtk2_ardour/editor_actions.cc:287
+msgid "Magnetic"
+msgstr "Магнитное"
 
-#: gtk2_ardour/editor.cc:136 gtk2_ardour/editor.cc:3595
-#, fuzzy
-msgid "Magnetic Snap"
-msgstr "Магн."
+#: gtk2_ardour/editor.cc:132 gtk2_ardour/editor.cc:3635
+#: gtk2_ardour/export_dialog.cc:138 gtk2_ardour/export_dialog.cc:154
+#: gtk2_ardour/export_dialog.cc:1066 gtk2_ardour/export_dialog.cc:1070
+msgid "Left"
+msgstr "Левый"
 
-#: gtk2_ardour/editor.cc:141 gtk2_ardour/editor.cc:3612
-#, fuzzy
-msgid "Focus Left"
-msgstr "Масштабировать к"
+#: gtk2_ardour/editor.cc:133 gtk2_ardour/editor.cc:3637
+#: gtk2_ardour/export_dialog.cc:139 gtk2_ardour/export_dialog.cc:155
+msgid "Right"
+msgstr "Правый"
 
-#: gtk2_ardour/editor.cc:142 gtk2_ardour/editor.cc:3614
+#: gtk2_ardour/editor.cc:134 gtk2_ardour/editor.cc:3639
 #, fuzzy
-msgid "Focus Right"
-msgstr "Масштабировать к"
+msgid "Center"
+msgstr "Размер"
 
-#: gtk2_ardour/editor.cc:143 gtk2_ardour/editor.cc:3616
+#: gtk2_ardour/editor.cc:135 gtk2_ardour/editor.cc:3641
 #, fuzzy
-msgid "Focus Center"
-msgstr "Масштабировать к"
+msgid "Playhead"
+msgstr "Установить указатель"
 
-#: gtk2_ardour/editor.cc:144
-#, fuzzy
-msgid "Focus Play"
-msgstr "Масштабировать к"
-
-#: gtk2_ardour/editor.cc:145
-#, fuzzy
-msgid "Focus Edit"
-msgstr "Масштабировать к"
-
-#: gtk2_ardour/editor.cc:187
+#: gtk2_ardour/editor.cc:178
 msgid "Mins:Secs"
 msgstr "Мин:Сек"
 
-#: gtk2_ardour/editor.cc:190 gtk2_ardour/editor_rulers.cc:353
+#: gtk2_ardour/editor.cc:181 gtk2_ardour/editor_rulers.cc:380
 msgid "Frames"
 msgstr "Кадры"
 
-#: gtk2_ardour/editor.cc:191 gtk2_ardour/editor_rulers.cc:373
+#: gtk2_ardour/editor.cc:182 gtk2_ardour/editor_rulers.cc:400
 msgid "Tempo"
 msgstr "Темп"
 
-#: gtk2_ardour/editor.cc:192 gtk2_ardour/editor_rulers.cc:367
+#: gtk2_ardour/editor.cc:183 gtk2_ardour/editor_rulers.cc:394
 msgid "Meter"
 msgstr "Размер"
 
-#: gtk2_ardour/editor.cc:193 gtk2_ardour/editor_rulers.cc:379
+#: gtk2_ardour/editor.cc:184 gtk2_ardour/editor_rulers.cc:406
 msgid "Location Markers"
 msgstr "Маркеры интервалов"
 
-#: gtk2_ardour/editor.cc:194 gtk2_ardour/editor_rulers.cc:385
+#: gtk2_ardour/editor.cc:185 gtk2_ardour/editor_rulers.cc:412
 msgid "Range Markers"
 msgstr "Маркеры областей"
 
-#: gtk2_ardour/editor.cc:195 gtk2_ardour/editor_rulers.cc:391
+#: gtk2_ardour/editor.cc:186 gtk2_ardour/editor_rulers.cc:418
 msgid "Loop/Punch Ranges"
 msgstr "Области колец/врезок"
 
-#: gtk2_ardour/editor.cc:213
+#: gtk2_ardour/editor.cc:204
 msgid "mode"
 msgstr "режим"
 
-#: gtk2_ardour/editor.cc:214
+#: gtk2_ardour/editor.cc:205
 msgid "automation"
 msgstr "автомат"
 
 #: gtk2_ardour/editor.cc:455 gtk2_ardour/editor.cc:481
-#: gtk2_ardour/editor_actions.cc:64 gtk2_ardour/mixer_ui.cc:84
+#: gtk2_ardour/editor_actions.cc:63 gtk2_ardour/mixer_ui.cc:84
 #: gtk2_ardour/mixer_ui.cc:110 gtk2_ardour/analysis_window.cc:64
-msgid "Visible"
-msgstr "Видимы"
+msgid "Show"
+msgstr "Показать"
 
 #: gtk2_ardour/editor.cc:456 gtk2_ardour/editor.cc:479
 msgid "Name"
 msgstr "Имя"
 
-#: gtk2_ardour/editor.cc:555 gtk2_ardour/editor.cc:622
+#: gtk2_ardour/editor.cc:555 gtk2_ardour/editor.cc:621
 msgid "Regions"
 msgstr "Области"
 
-#: gtk2_ardour/editor.cc:595 gtk2_ardour/editor.cc:634
+#: gtk2_ardour/editor.cc:594 gtk2_ardour/editor.cc:633
 msgid "Chunks"
 msgstr "Фрагменты"
 
-#: gtk2_ardour/editor.cc:625
+#: gtk2_ardour/editor.cc:624
 msgid "Tracks/Busses"
 msgstr "Дорожки/Шины"
 
-#: gtk2_ardour/editor.cc:628
+#: gtk2_ardour/editor.cc:627
 msgid "Snapshots"
 msgstr "Снимки"
 
-#: gtk2_ardour/editor.cc:631
+#: gtk2_ardour/editor.cc:630
+#, fuzzy
 msgid "Edit Groups"
-msgstr ""
-"Ред.\n"
-"группы"
-
-#: gtk2_ardour/editor.cc:680
-msgid "Nudge Region/Selection Forwards"
-msgstr ""
+msgstr "Ред. группы"
 
 #: gtk2_ardour/editor.cc:681
-#, fuzzy
-msgid "Nudge Region/Selection Backwards"
-msgstr "Скрыть трек"
+msgid "Nudge Region/Selection Forwards"
+msgstr "Подвинуть область выделение вперёд"
 
-#: gtk2_ardour/editor.cc:688 gtk2_ardour/editor_mixer.cc:296
+#: gtk2_ardour/editor.cc:682
+msgid "Nudge Region/Selection Backwards"
+msgstr "Подвинуть область выделение назад"
+
+#: gtk2_ardour/editor.cc:710 gtk2_ardour/editor_mixer.cc:305
 msgid "ardour: editor"
 msgstr "ardour: редактор"
 
-#: gtk2_ardour/editor.cc:689
-msgid "ardour_editor"
-msgstr "ardour_редактор"
-
-#: gtk2_ardour/editor.cc:1122
+#: gtk2_ardour/editor.cc:1116
 msgid "ardour: editor: "
 msgstr "ardour: редактор: "
 
-#: gtk2_ardour/editor.cc:1208 gtk2_ardour/editor.cc:1217
-#: gtk2_ardour/editor_markers.cc:874
+#: gtk2_ardour/editor.cc:1189 gtk2_ardour/editor.cc:1198
+#: gtk2_ardour/editor_markers.cc:901
 msgid "Loop"
 msgstr "Кольцо"
 
-#: gtk2_ardour/editor.cc:1222 gtk2_ardour/editor.cc:1231
-#: gtk2_ardour/editor_markers.cc:902
+#: gtk2_ardour/editor.cc:1203 gtk2_ardour/editor.cc:1212
+#: gtk2_ardour/editor_markers.cc:929
 msgid "Punch"
 msgstr "Врезка"
 
-#: gtk2_ardour/editor.cc:1387 gtk2_ardour/editor_mouse.cc:1748
+#: gtk2_ardour/editor.cc:1337 gtk2_ardour/editor_mouse.cc:1751
 #, fuzzy
 msgid "programming error: fade in canvas item has no regionview data pointer!"
 msgstr "ошибка в программе: line canvas item has no line pointer!"
 
-#: gtk2_ardour/editor.cc:1400 gtk2_ardour/editor.cc:1417
-#: gtk2_ardour/redirect_box.cc:1088
+#: gtk2_ardour/editor.cc:1349 gtk2_ardour/editor.cc:1366
+#: gtk2_ardour/redirect_box.cc:1157
 msgid "Deactivate"
 msgstr "Деактивировать"
 
-#: gtk2_ardour/editor.cc:1402 gtk2_ardour/editor.cc:1419
-#: gtk2_ardour/redirect_box.cc:1086
+#: gtk2_ardour/editor.cc:1351 gtk2_ardour/editor.cc:1368
+#: gtk2_ardour/redirect_box.cc:1155
 msgid "Activate"
 msgstr "Активировать"
 
-#: gtk2_ardour/editor.cc:1407 gtk2_ardour/editor.cc:1424
-#, fuzzy
-msgid "Linear"
-msgstr "линейное"
-
-#: gtk2_ardour/editor.cc:1408 gtk2_ardour/editor.cc:1425
-#: gtk2_ardour/editor_actions.cc:380
-msgid "Slowest"
-msgstr "Медленнее всего"
-
-#: gtk2_ardour/editor.cc:1409 gtk2_ardour/editor.cc:1426
-#: gtk2_ardour/editor_actions.cc:381
-msgid "Slow"
-msgstr "Медленно"
-
-#: gtk2_ardour/editor.cc:1410 gtk2_ardour/editor.cc:1427
-#: gtk2_ardour/editor_actions.cc:383
-msgid "Fast"
-msgstr "Быстро"
-
-#: gtk2_ardour/editor.cc:1411 gtk2_ardour/editor.cc:1428
-#: gtk2_ardour/editor_actions.cc:385
-msgid "Fastest"
-msgstr "Быстрее всего"
-
-#: gtk2_ardour/editor.cc:1539 gtk2_ardour/editor.cc:1547
+#: gtk2_ardour/editor.cc:1489 gtk2_ardour/editor.cc:1497
 msgid "Freeze"
 msgstr "Заморозить"
 
-#: gtk2_ardour/editor.cc:1543
+#: gtk2_ardour/editor.cc:1493
 msgid "Unfreeze"
 msgstr "Разморозить"
 
-#: gtk2_ardour/editor.cc:1712 gtk2_ardour/editor.cc:1807
+#: gtk2_ardour/editor.cc:1662
 msgid "Unmute"
 msgstr "Снять глушение"
 
-#: gtk2_ardour/editor.cc:1716 gtk2_ardour/editor.cc:1996
-#: gtk2_ardour/editor_actions.cc:27 gtk2_ardour/editor_markers.cc:510
-#: gtk2_ardour/mixer_strip.cc:496 gtk2_ardour/mixer_strip.cc:559
-#: gtk2_ardour/redirect_box.cc:1094
+#: gtk2_ardour/editor.cc:1666 gtk2_ardour/editor.cc:1963
+#: gtk2_ardour/editor_actions.cc:28 gtk2_ardour/editor_markers.cc:511
+#: gtk2_ardour/mixer_strip.cc:515 gtk2_ardour/mixer_strip.cc:577
+#: gtk2_ardour/redirect_box.cc:1163
 msgid "Edit"
 msgstr "Правка"
 
-#: gtk2_ardour/editor.cc:1721
+#: gtk2_ardour/editor.cc:1671
 msgid "Convert to short"
 msgstr ""
 
-#: gtk2_ardour/editor.cc:1723
+#: gtk2_ardour/editor.cc:1673
 msgid "Convert to full"
 msgstr ""
 
-#: gtk2_ardour/editor.cc:1734
+#: gtk2_ardour/editor.cc:1684
 msgid "Crossfade"
 msgstr "Кроссфейд"
 
-#: gtk2_ardour/editor.cc:1777
+#: gtk2_ardour/editor.cc:1727
 msgid "Popup region editor"
 msgstr "Открыть редактор области"
 
-#: gtk2_ardour/editor.cc:1778
-#, fuzzy
+#: gtk2_ardour/editor.cc:1728
 msgid "Raise to top layer"
-msgstr "Поднять область в верхний слой"
+msgstr "Поднять в верхний слой"
 
-#: gtk2_ardour/editor.cc:1779
-#, fuzzy
+#: gtk2_ardour/editor.cc:1729
 msgid "Lower to bottom layer"
-msgstr "Опустить область в нижний слой"
+msgstr "Опустить в нижний слой"
 
-#: gtk2_ardour/editor.cc:1781
+#: gtk2_ardour/editor.cc:1731
 msgid "Define sync point"
-msgstr ""
+msgstr "Определить точку синхронизации"
 
-#: gtk2_ardour/editor.cc:1782
+#: gtk2_ardour/editor.cc:1732
 msgid "Remove sync point"
-msgstr ""
+msgstr "Удалить точку синхронизации"
 
-#: gtk2_ardour/editor.cc:1787
+#: gtk2_ardour/editor.cc:1737
 #, fuzzy
 msgid "Bounce"
 msgstr "Свести выделенное"
 
-#: gtk2_ardour/editor.cc:1790
+#: gtk2_ardour/editor.cc:1740
 #, fuzzy
 msgid "Analyze region"
 msgstr "Воспроизвести область"
 
-#: gtk2_ardour/editor.cc:1802
+#: gtk2_ardour/editor.cc:1745
 msgid "Lock"
 msgstr "Запереть"
 
-#: gtk2_ardour/editor.cc:1803
-msgid "Unlock"
-msgstr "Отпереть"
+#: gtk2_ardour/editor.cc:1755
+#, fuzzy
+msgid "Opaque"
+msgstr "затенить"
 
-#: gtk2_ardour/editor.cc:1813
+#: gtk2_ardour/editor.cc:1761
 msgid "Original position"
 msgstr "Исходное положение"
 
-#: gtk2_ardour/editor.cc:1819
-msgid "Toggle envelope visibility"
-msgstr ""
+#: gtk2_ardour/editor.cc:1773
+msgid "Reset Envelope"
+msgstr "Сбросить огибающую"
 
-#: gtk2_ardour/editor.cc:1820
-msgid "Toggle envelope active"
-msgstr ""
+#: gtk2_ardour/editor.cc:1775
+msgid "Envelope Visible"
+msgstr "Огибающая видима"
 
-#: gtk2_ardour/editor.cc:1824
+#: gtk2_ardour/editor.cc:1782
+msgid "Envelope Active"
+msgstr "Огибающая активна"
+
+#: gtk2_ardour/editor.cc:1792
 msgid "DeNormalize"
 msgstr "Денормализовать"
 
-#: gtk2_ardour/editor.cc:1826
+#: gtk2_ardour/editor.cc:1794
 msgid "Normalize"
 msgstr "Нормализовать"
 
-#: gtk2_ardour/editor.cc:1829
+#: gtk2_ardour/editor.cc:1797
 msgid "Reverse"
-msgstr ""
+msgstr "Развернуть"
 
-#: gtk2_ardour/editor.cc:1835
+#: gtk2_ardour/editor.cc:1803 gtk2_ardour/editor.cc:1885
 msgid "Add Range Markers"
 msgstr "Добавить маркеры областей"
 
-#: gtk2_ardour/editor.cc:1836
+#: gtk2_ardour/editor.cc:1804
 #, fuzzy
-msgid "Set Range"
-msgstr "Разделить область"
+msgid "Set Range Selection"
+msgstr "Воспроизвести выделенное"
 
-#: gtk2_ardour/editor.cc:1845
+#: gtk2_ardour/editor.cc:1813
 msgid "Nudge fwd"
 msgstr "Подвинуть вперёд"
 
-#: gtk2_ardour/editor.cc:1846
+#: gtk2_ardour/editor.cc:1814
 msgid "Nudge bwd"
 msgstr "Подвинуть назад"
 
-#: gtk2_ardour/editor.cc:1847
+#: gtk2_ardour/editor.cc:1815
 msgid "Nudge fwd by capture offset"
 msgstr ""
 
-#: gtk2_ardour/editor.cc:1848
+#: gtk2_ardour/editor.cc:1816
 msgid "Nudge bwd by capture offset"
 msgstr ""
 
-#: gtk2_ardour/editor.cc:1850 gtk2_ardour/editor.cc:2016
-#: gtk2_ardour/editor.cc:2072
+#: gtk2_ardour/editor.cc:1818 gtk2_ardour/editor.cc:1983
+#: gtk2_ardour/editor.cc:2039
 msgid "Nudge"
 msgstr "Подвинуть"
 
-#: gtk2_ardour/editor.cc:1857
+#: gtk2_ardour/editor.cc:1825
 msgid "Start to edit cursor"
 msgstr "От начала до курсора"
 
-#: gtk2_ardour/editor.cc:1858
+#: gtk2_ardour/editor.cc:1826
 msgid "Edit cursor to end"
 msgstr "От курсора до конца"
 
-#: gtk2_ardour/editor.cc:1860 gtk2_ardour/gain_meter.cc:176
-#: gtk2_ardour/gain_meter.cc:808 gtk2_ardour/panner_ui.cc:96
-#: gtk2_ardour/panner_ui.cc:793
+#: gtk2_ardour/editor.cc:1828 gtk2_ardour/gain_meter.cc:168
+#: gtk2_ardour/gain_meter.cc:868 gtk2_ardour/panner_ui.cc:98
+#: gtk2_ardour/panner_ui.cc:806
 msgid "Trim"
-msgstr ""
+msgstr "Обрезать"
 
-#: gtk2_ardour/editor.cc:1863
+#: gtk2_ardour/editor.cc:1831
 msgid "Split"
-msgstr "Склеить"
+msgstr "Разделить"
 
-#: gtk2_ardour/editor.cc:1866
+#: gtk2_ardour/editor.cc:1834
 msgid "Make mono regions"
 msgstr "Создать моно-области"
 
-#: gtk2_ardour/editor.cc:1869
+#: gtk2_ardour/editor.cc:1837
 msgid "Duplicate"
 msgstr "Размножить"
 
-#: gtk2_ardour/editor.cc:1870
+#: gtk2_ardour/editor.cc:1838
 msgid "Fill Track"
 msgstr "Заполнить трек"
 
-#: gtk2_ardour/editor.cc:1874
-msgid "Destroy"
-msgstr ""
-
-#: gtk2_ardour/editor.cc:1904
-#, fuzzy
+#: gtk2_ardour/editor.cc:1870
 msgid "Play range"
-msgstr "Воспроизвести \"кольцо\""
+msgstr "Воспроизвести «кольцо»"
 
-#: gtk2_ardour/editor.cc:1905
+#: gtk2_ardour/editor.cc:1871
 msgid "Loop range"
 msgstr ""
 
-#: gtk2_ardour/editor.cc:1909
-#, fuzzy
+#: gtk2_ardour/editor.cc:1875
 msgid "Analyze range"
-msgstr "Воспроизвести \"кольцо\""
+msgstr "Проанализировать «кольцо»"
 
-#: gtk2_ardour/editor.cc:1913
+#: gtk2_ardour/editor.cc:1879
 #, fuzzy
 msgid "Separate range to track"
 msgstr "Разделить область"
 
-#: gtk2_ardour/editor.cc:1914
+#: gtk2_ardour/editor.cc:1880
 #, fuzzy
 msgid "Separate range to region list"
 msgstr "Воспроизвести выделенную область"
 
-#: gtk2_ardour/editor.cc:1917
-#, fuzzy
+#: gtk2_ardour/editor.cc:1883
 msgid "Select all in range"
-msgstr "Выделить всё"
+msgstr "Выделить всё выделении"
 
-#: gtk2_ardour/editor.cc:1919 gtk2_ardour/editor.cc:1964
+#: gtk2_ardour/editor.cc:1886 gtk2_ardour/editor.cc:1931
 #, fuzzy
 msgid "Set range to loop range"
 msgstr "выбрать окно просмотра"
 
-#: gtk2_ardour/editor.cc:1920 gtk2_ardour/editor.cc:1965
+#: gtk2_ardour/editor.cc:1887 gtk2_ardour/editor.cc:1932
 #, fuzzy
 msgid "Set range to punch range"
 msgstr "Выбрать текущий интервал"
 
-#: gtk2_ardour/editor.cc:1922
-#, fuzzy
+#: gtk2_ardour/editor.cc:1889
 msgid "Crop region to range"
-msgstr "Обрезать область по выделенному"
+msgstr "Обрезать область по выделению"
 
-#: gtk2_ardour/editor.cc:1923
-#, fuzzy
+#: gtk2_ardour/editor.cc:1890
 msgid "Fill range with region"
-msgstr "Создать область"
+msgstr "Заполнить выделение областью"
 
-#: gtk2_ardour/editor.cc:1924
-#, fuzzy
+#: gtk2_ardour/editor.cc:1891
 msgid "Duplicate range"
-msgstr "Размножить"
+msgstr "Продублировать выделение"
 
-#: gtk2_ardour/editor.cc:1925
-#, fuzzy
+#: gtk2_ardour/editor.cc:1892
 msgid "Create chunk from range"
-msgstr "Создать фрагмент из выделенного"
+msgstr "Создать фрагмент из выделения"
 
-#: gtk2_ardour/editor.cc:1927
+#: gtk2_ardour/editor.cc:1894
 msgid "Bounce range"
-msgstr ""
+msgstr "Свести выделение"
 
-#: gtk2_ardour/editor.cc:1928
-#, fuzzy
+#: gtk2_ardour/editor.cc:1895
 msgid "Export range"
-msgstr "Экспорт области"
+msgstr "Экспортировать выделение"
 
-#: gtk2_ardour/editor.cc:1930
-#, fuzzy
+#: gtk2_ardour/editor.cc:1897
 msgid "Range"
-msgstr "выделять"
+msgstr "Выделение"
 
-#: gtk2_ardour/editor.cc:1945 gtk2_ardour/editor.cc:2030
+#: gtk2_ardour/editor.cc:1912 gtk2_ardour/editor.cc:1997
 msgid "Play from edit cursor"
 msgstr "Воспроизвести от курсора"
 
-#: gtk2_ardour/editor.cc:1946 gtk2_ardour/editor.cc:2031
+#: gtk2_ardour/editor.cc:1913 gtk2_ardour/editor.cc:1998
 msgid "Play from start"
 msgstr "Воспроизвести сначала"
 
-#: gtk2_ardour/editor.cc:1947
+#: gtk2_ardour/editor.cc:1914
 msgid "Play region"
 msgstr "Воспроизвести область"
 
-#: gtk2_ardour/editor.cc:1949
+#: gtk2_ardour/editor.cc:1916
 msgid "Loop Region"
 msgstr "«Закольцевать» область"
 
-#: gtk2_ardour/editor.cc:1959 gtk2_ardour/editor.cc:2040
+#: gtk2_ardour/editor.cc:1926 gtk2_ardour/editor.cc:2007
 msgid "Select All in track"
 msgstr "Выделить всё в дорожке"
 
-#: gtk2_ardour/editor.cc:1960 gtk2_ardour/editor.cc:2041
-#: gtk2_ardour/redirect_box.cc:1082
+#: gtk2_ardour/editor.cc:1927 gtk2_ardour/editor.cc:2008
+#: gtk2_ardour/redirect_box.cc:1151
 msgid "Select All"
 msgstr "Выделить всё"
 
-#: gtk2_ardour/editor.cc:1961 gtk2_ardour/editor.cc:2042
+#: gtk2_ardour/editor.cc:1928 gtk2_ardour/editor.cc:2009
 msgid "Invert selection in track"
 msgstr "Обратить выделение в дорожке"
 
-#: gtk2_ardour/editor.cc:1962 gtk2_ardour/editor.cc:2043
+#: gtk2_ardour/editor.cc:1929 gtk2_ardour/editor.cc:2010
 msgid "Invert selection"
 msgstr "Обратить выделение"
 
-#: gtk2_ardour/editor.cc:1967 gtk2_ardour/editor.cc:2045
+#: gtk2_ardour/editor.cc:1934 gtk2_ardour/editor.cc:2012
 msgid "Select all after edit cursor"
 msgstr "Выделить всё после курсора"
 
-#: gtk2_ardour/editor.cc:1968 gtk2_ardour/editor.cc:2046
+#: gtk2_ardour/editor.cc:1935 gtk2_ardour/editor.cc:2013
 msgid "Select all before edit cursor"
 msgstr "Выделить всё до курсора"
 
-#: gtk2_ardour/editor.cc:1969 gtk2_ardour/editor.cc:2047
+#: gtk2_ardour/editor.cc:1936 gtk2_ardour/editor.cc:2014
 msgid "Select all after playhead"
 msgstr "Выделить всё после указателя"
 
-#: gtk2_ardour/editor.cc:1970 gtk2_ardour/editor.cc:2048
+#: gtk2_ardour/editor.cc:1937 gtk2_ardour/editor.cc:2015
 msgid "Select all before playhead"
 msgstr "Выделить всё до указателя"
 
-#: gtk2_ardour/editor.cc:1971
+#: gtk2_ardour/editor.cc:1938
 msgid "Select all between cursors"
 msgstr "Выделить всё между курсорами"
 
-#: gtk2_ardour/editor.cc:1982 gtk2_ardour/editor.cc:2058
-#: gtk2_ardour/editor.cc:3388 gtk2_ardour/editor_actions.cc:216
-#: gtk2_ardour/redirect_box.cc:1075
+#: gtk2_ardour/editor.cc:1941 gtk2_ardour/editor.cc:2017
+msgid "Select"
+msgstr "Выделить"
+
+#: gtk2_ardour/editor.cc:1949 gtk2_ardour/editor.cc:2025
+#: gtk2_ardour/editor_actions.cc:215 gtk2_ardour/redirect_box.cc:1144
 msgid "Cut"
 msgstr "Вырезать"
 
-#: gtk2_ardour/editor.cc:1983 gtk2_ardour/editor.cc:2059
-#: gtk2_ardour/editor.cc:3390 gtk2_ardour/editor_actions.cc:221
-#: gtk2_ardour/redirect_box.cc:1077
+#: gtk2_ardour/editor.cc:1950 gtk2_ardour/editor.cc:2026
+#: gtk2_ardour/editor_actions.cc:220 gtk2_ardour/redirect_box.cc:1146
 msgid "Copy"
 msgstr "Копировать"
 
-#: gtk2_ardour/editor.cc:1984
+#: gtk2_ardour/editor.cc:1951
 msgid "Paste at edit cursor"
 msgstr "Вставить под курсор редактора"
 
-#: gtk2_ardour/editor.cc:1985
+#: gtk2_ardour/editor.cc:1952
 msgid "Paste at mouse"
 msgstr "Вставить под курсор мыши"
 
-#: gtk2_ardour/editor.cc:1989 gtk2_ardour/editor.cc:3395
+#: gtk2_ardour/editor.cc:1956
 msgid "Align"
 msgstr "Выровнять"
 
-#: gtk2_ardour/editor.cc:1990 gtk2_ardour/editor.cc:3397
+#: gtk2_ardour/editor.cc:1957
 msgid "Align Relative"
 msgstr "Выровнять относительно"
 
-#: gtk2_ardour/editor.cc:1994
+#: gtk2_ardour/editor.cc:1961
 msgid "Insert chunk"
 msgstr "Вставить фрагмент"
 
-#: gtk2_ardour/editor.cc:2001
-#, fuzzy
+#: gtk2_ardour/editor.cc:1968
 msgid "Insert Selected Region"
-msgstr "Воспроизвести выделенную область"
+msgstr "Вставить выделенную область"
 
-#: gtk2_ardour/editor.cc:2002
+#: gtk2_ardour/editor.cc:1969
 msgid "Insert Existing Audio"
-msgstr ""
+msgstr "Вставить звуковой файл"
 
-#: gtk2_ardour/editor.cc:2011 gtk2_ardour/editor.cc:2067
+#: gtk2_ardour/editor.cc:1978 gtk2_ardour/editor.cc:2034
 msgid "Nudge entire track fwd"
-msgstr ""
+msgstr "Подвинуть всю дорожку вперёд"
 
-#: gtk2_ardour/editor.cc:2012 gtk2_ardour/editor.cc:2068
+#: gtk2_ardour/editor.cc:1979 gtk2_ardour/editor.cc:2035
 msgid "Nudge track after edit cursor fwd"
-msgstr ""
+msgstr "Подвинуть всю дорожку после курсора правки вперёд"
 
-#: gtk2_ardour/editor.cc:2013 gtk2_ardour/editor.cc:2069
+#: gtk2_ardour/editor.cc:1980 gtk2_ardour/editor.cc:2036
 msgid "Nudge entire track bwd"
-msgstr ""
+msgstr "Подвинуть всю дорожку назад"
 
-#: gtk2_ardour/editor.cc:2014 gtk2_ardour/editor.cc:2070
+#: gtk2_ardour/editor.cc:1981 gtk2_ardour/editor.cc:2037
 msgid "Nudge track after edit cursor bwd"
-msgstr ""
+msgstr "Подвинуть всю дорожку после курсора правки назад"
 
-#: gtk2_ardour/editor.cc:2060 gtk2_ardour/editor.cc:3392
-#: gtk2_ardour/editor_actions.cc:223 gtk2_ardour/redirect_box.cc:1079
+#: gtk2_ardour/editor.cc:2027 gtk2_ardour/editor_actions.cc:222
+#: gtk2_ardour/redirect_box.cc:1148
 msgid "Paste"
 msgstr "Вставить"
 
-#: gtk2_ardour/editor.cc:2612
-#, fuzzy
+#: gtk2_ardour/editor.cc:2585
 msgid "Select/Move Objects"
-msgstr "выбирать/двигать объекты"
+msgstr "Выбирать/двигать объекты"
 
-#: gtk2_ardour/editor.cc:2613
-#, fuzzy
+#: gtk2_ardour/editor.cc:2586
 msgid "Select/Move Ranges"
-msgstr "выбирать/двигать диапазоны"
+msgstr "Выбирать/двигать области"
 
-#: gtk2_ardour/editor.cc:2614
-#, fuzzy
+#: gtk2_ardour/editor.cc:2587
 msgid "Draw Gain Automation"
-msgstr "автомат"
+msgstr "Рисовать автоматизацию усиления"
 
-#: gtk2_ardour/editor.cc:2615
-#, fuzzy
+#: gtk2_ardour/editor.cc:2588
 msgid "Select Zoom Range"
-msgstr "выбрать окно просмотра"
+msgstr "Отмасштабировать вид в выделенную область"
 
-#: gtk2_ardour/editor.cc:2616
-#, fuzzy
+#: gtk2_ardour/editor.cc:2589
 msgid "Stretch/Shrink Regions"
-msgstr "растянуть/сжать области"
+msgstr "Растянуть/сжать области"
 
-#: gtk2_ardour/editor.cc:2617
-#, fuzzy
+#: gtk2_ardour/editor.cc:2590
 msgid "Listen to Specific Regions"
 msgstr "Воспроизвести выделенную область"
 
-#: gtk2_ardour/editor.cc:2646 gtk2_ardour/editor_actions.cc:144
+#: gtk2_ardour/editor.cc:2620 gtk2_ardour/editor_actions.cc:143
 msgid "Zoom In"
 msgstr "Увеличить"
 
-#: gtk2_ardour/editor.cc:2651 gtk2_ardour/editor_actions.cc:142
+#: gtk2_ardour/editor.cc:2626 gtk2_ardour/editor_actions.cc:141
 msgid "Zoom Out"
 msgstr "Уменьшить"
 
-#: gtk2_ardour/editor.cc:2656 gtk2_ardour/editor_actions.cc:146
+#: gtk2_ardour/editor.cc:2632 gtk2_ardour/editor_actions.cc:145
 msgid "Zoom to Session"
 msgstr "Показать всё"
 
-#: gtk2_ardour/editor.cc:2663
-msgid ""
-"Current Zoom Range\n"
-"(Width of visible area)"
-msgstr ""
+#: gtk2_ardour/editor.cc:2638
+#, fuzzy
+msgid "Zoom focus"
+msgstr "Фокус при масштабировании"
 
-#: gtk2_ardour/editor.cc:2682
+#: gtk2_ardour/editor.cc:2654
 msgid "Unit to snap cursors and ranges to"
 msgstr ""
 
-#: gtk2_ardour/editor.cc:3267 gtk2_ardour/editor.cc:3307
+#: gtk2_ardour/editor.cc:3348 gtk2_ardour/editor.cc:3397
 #, fuzzy
 msgid "set selected regions"
 msgstr "Воспроизвести выделенную область"
 
-#: gtk2_ardour/editor.cc:3363 gtk2_ardour/editor_actions.cc:206
+#: gtk2_ardour/editor.cc:3437 gtk2_ardour/editor_actions.cc:205
 msgid "Undo"
 msgstr "Отменить"
 
-#: gtk2_ardour/editor.cc:3365
+#: gtk2_ardour/editor.cc:3439
 msgid "Undo (%1)"
 msgstr "Отменить (%1)"
 
-#: gtk2_ardour/editor.cc:3375 gtk2_ardour/editor_actions.cc:208
+#: gtk2_ardour/editor.cc:3446 gtk2_ardour/editor_actions.cc:207
 msgid "Redo"
 msgstr "Повторить"
 
-#: gtk2_ardour/editor.cc:3377
+#: gtk2_ardour/editor.cc:3448
 msgid "Redo (%1)"
 msgstr "Повторить (%1)"
 
-#: gtk2_ardour/editor.cc:3411
-msgid "... as new track"
-msgstr "... как новую дорожку"
-
-#: gtk2_ardour/editor.cc:3412
-msgid "... as new region"
-msgstr "... как новую область"
-
-#: gtk2_ardour/editor.cc:3414
-msgid "Import audio (copy)"
-msgstr "Импортировать аудио (копией)"
-
-#: gtk2_ardour/editor.cc:3417
-msgid "Remove last capture"
-msgstr "Удалить последнюю запись"
-
-#: gtk2_ardour/editor.cc:3441
+#: gtk2_ardour/editor.cc:3469
 msgid "Duplicate how many times?"
 msgstr "Количество повторов?"
 
-#: gtk2_ardour/editor.cc:3618
+#: gtk2_ardour/editor.cc:3547
 #, fuzzy
-msgid "Focus Playhead"
-msgstr "Масштабировать к"
+msgid "Splice Edit"
+msgstr "Стыковка"
 
-#: gtk2_ardour/editor.cc:3620
+#: gtk2_ardour/editor.cc:3549
 #, fuzzy
-msgid "Focus Edit Cursor"
-msgstr "курсору"
+msgid "Slide Edit"
+msgstr "Скольжение"
 
-#: gtk2_ardour/editor.cc:3929
+#: gtk2_ardour/editor.cc:3959
 msgid ""
 "Playlist %1 is currently unused.\n"
 "If left alone, no audio files used by it will be cleaned.\n"
 "If deleted, audio files used by it alone by will cleaned."
 msgstr ""
 
-#: gtk2_ardour/editor.cc:3937
+#: gtk2_ardour/editor.cc:3969
 msgid "Delete playlist"
 msgstr "Удалить список воспроизведения"
 
-#: gtk2_ardour/editor.cc:3938
+#: gtk2_ardour/editor.cc:3970
 msgid "Keep playlist"
 msgstr "Сохранить список воспроизведения"
 
-#: gtk2_ardour/editor.cc:3939 gtk2_ardour/editor_audio_import.cc:239
-#: gtk2_ardour/editor_ops.cc:2061 gtk2_ardour/editor_timefx.cc:72
-#: gtk2_ardour/export_dialog.cc:971 gtk2_ardour/io_selector.cc:61
-#: gtk2_ardour/io_selector.cc:795 gtk2_ardour/redirect_box.cc:901
+#: gtk2_ardour/editor.cc:3971 gtk2_ardour/editor_audio_import.cc:315
+#: gtk2_ardour/editor_ops.cc:1979 gtk2_ardour/editor_timefx.cc:72
+#: gtk2_ardour/export_dialog.cc:969 gtk2_ardour/io_selector.cc:61
+#: gtk2_ardour/io_selector.cc:749 gtk2_ardour/redirect_box.cc:975
 #: gtk2_ardour/tempo_dialog.cc:20 gtk2_ardour/tempo_dialog.cc:37
 #: gtk2_ardour/tempo_dialog.cc:202 gtk2_ardour/tempo_dialog.cc:220
 #: gtk2_ardour/connection_editor.cc:60
 msgid "Cancel"
 msgstr "Отмена"
 
-#: gtk2_ardour/editor.cc:4107
+#: gtk2_ardour/editor.cc:4174
 msgid "new playlists"
 msgstr "Создать списки воспроизведения"
 
-#: gtk2_ardour/editor.cc:4115
+#: gtk2_ardour/editor.cc:4182
 msgid "copy playlists"
 msgstr "Скопировать списки воспроизведения"
 
-#: gtk2_ardour/editor.cc:4123
+#: gtk2_ardour/editor.cc:4190
 msgid "clear playlists"
 msgstr "Очистить списки воспроизведения"
 
-#: gtk2_ardour/editor_actions.cc:28
+#: gtk2_ardour/editor_actions.cc:29
 msgid "Select regions"
 msgstr "Выделение областей"
 
-#: gtk2_ardour/editor_actions.cc:29
+#: gtk2_ardour/editor_actions.cc:30
 msgid "Select range operations"
 msgstr "Действия с выделенной областью"
 
-#: gtk2_ardour/editor_actions.cc:30
+#: gtk2_ardour/editor_actions.cc:31
 msgid "Move edit cursor"
 msgstr "Переместить курсор редактора"
 
-#: gtk2_ardour/editor_actions.cc:31
+#: gtk2_ardour/editor_actions.cc:32
 msgid "Region operations"
 msgstr "Действия с областями"
 
-#: gtk2_ardour/editor_actions.cc:32
+#: gtk2_ardour/editor_actions.cc:33
 msgid "Tools"
 msgstr "Инструменты"
 
-#: gtk2_ardour/editor_actions.cc:33
+#: gtk2_ardour/editor_actions.cc:34
 msgid "View"
 msgstr "Вид"
 
-#: gtk2_ardour/editor_actions.cc:34
+#: gtk2_ardour/editor_actions.cc:35
 msgid "ZoomFocus"
 msgstr "Фокус при масштабировании"
 
-#: gtk2_ardour/editor_actions.cc:35
+#: gtk2_ardour/editor_actions.cc:36
 msgid "Meter hold"
 msgstr "Задержка индикатора"
 
-#: gtk2_ardour/editor_actions.cc:36
+#: gtk2_ardour/editor_actions.cc:37
 msgid "Meter falloff"
-msgstr "Спадание индикатора"
+msgstr "Спад индикатора"
 
-#: gtk2_ardour/editor_actions.cc:38
+#: gtk2_ardour/editor_actions.cc:39
 msgid "Crossfades"
 msgstr "Кроссфейды"
 
-#: gtk2_ardour/editor_actions.cc:39
+#: gtk2_ardour/editor_actions.cc:40
 msgid "Monitoring"
 msgstr "Контроль"
 
-#: gtk2_ardour/editor_actions.cc:40
+#: gtk2_ardour/editor_actions.cc:41
 msgid "Autoconnect"
 msgstr "Автосоединение"
 
-#: gtk2_ardour/editor_actions.cc:41
+#: gtk2_ardour/editor_actions.cc:42
 msgid "Layering"
 msgstr "Слои"
 
-#: gtk2_ardour/editor_actions.cc:42
-msgid "SMPTE fps"
-msgstr "Кадров в секунду SMPTE"
-
 #: gtk2_ardour/editor_actions.cc:43
+msgid "Timecode fps"
+msgstr "Скорость (FPS) тайм-кода"
+
+#: gtk2_ardour/editor_actions.cc:44
 msgid "Pullup / Pulldown"
 msgstr ""
 
-#: gtk2_ardour/editor_actions.cc:44
-msgid "Metering"
-msgstr "Индикаторы"
-
 #: gtk2_ardour/editor_actions.cc:45
-msgid "Fall off rate"
-msgstr "Частота спада"
+msgid "Subframes"
+msgstr "Подвыборки"
 
 #: gtk2_ardour/editor_actions.cc:46
-msgid "Hold Time"
-msgstr "Время задержки"
-
-#: gtk2_ardour/editor_actions.cc:47
 msgid "Add Existing Audio"
 msgstr "Добавить существующий файл"
 
-#: gtk2_ardour/editor_actions.cc:52
+#: gtk2_ardour/editor_actions.cc:51
 msgid "Show Editor Mixer"
 msgstr "Показать микшер редактора"
 
-#: gtk2_ardour/editor_actions.cc:57
+#: gtk2_ardour/editor_actions.cc:56
 #, fuzzy
 msgid "Span Entire Overlap"
 msgstr "Поднять область на один слой"
 
-#: gtk2_ardour/editor_actions.cc:59 gtk2_ardour/editor_actions.cc:388
-msgid "Short"
-msgstr "Короткая"
-
-#: gtk2_ardour/editor_actions.cc:66
+#: gtk2_ardour/editor_actions.cc:65
 msgid "Created Automatically"
 msgstr "Создано автоматически"
 
-#: gtk2_ardour/editor_actions.cc:69
+#: gtk2_ardour/editor_actions.cc:68
 msgid "Playhead to Next Region Start"
 msgstr "Указатель к началу следующей области"
 
-#: gtk2_ardour/editor_actions.cc:71
+#: gtk2_ardour/editor_actions.cc:70
 msgid "Playhead to Next Region End"
 msgstr "Указатель к концу следующей области"
 
-#: gtk2_ardour/editor_actions.cc:73
+#: gtk2_ardour/editor_actions.cc:72
 msgid "Playhead to Next Region Sync"
 msgstr ""
 
-#: gtk2_ardour/editor_actions.cc:76
+#: gtk2_ardour/editor_actions.cc:75
 msgid "Playhead to Previous Region Start"
 msgstr "Указатель к началу предыдущей области"
 
-#: gtk2_ardour/editor_actions.cc:78
+#: gtk2_ardour/editor_actions.cc:77
 msgid "Playhead to Previous Region End"
 msgstr "Указатель к концу предыдущей области"
 
-#: gtk2_ardour/editor_actions.cc:80
+#: gtk2_ardour/editor_actions.cc:79
 msgid "Playhead to Previous Region Sync"
 msgstr ""
 
-#: gtk2_ardour/editor_actions.cc:83
+#: gtk2_ardour/editor_actions.cc:82
 msgid "Edit Cursor to Next Region Start"
 msgstr "Курсор редактора к началу следующей области"
 
-#: gtk2_ardour/editor_actions.cc:85
+#: gtk2_ardour/editor_actions.cc:84
 msgid "Edit Cursor to Next Region End"
 msgstr "Курсор редактора к концу следующей области"
 
-#: gtk2_ardour/editor_actions.cc:87
+#: gtk2_ardour/editor_actions.cc:86
 #, fuzzy
 msgid "Edit Cursor to Next Region Sync"
 msgstr "От курсора до конца"
 
-#: gtk2_ardour/editor_actions.cc:90
+#: gtk2_ardour/editor_actions.cc:89
 msgid "Edit Cursor to Previous Region Start"
 msgstr "Курсор редактора к началу предыдущей области"
 
-#: gtk2_ardour/editor_actions.cc:92
+#: gtk2_ardour/editor_actions.cc:91
 msgid "Edit Cursor to Previous Region End"
 msgstr "Курсор редактора к концу предыдущей области"
 
-#: gtk2_ardour/editor_actions.cc:94
+#: gtk2_ardour/editor_actions.cc:93
 msgid "Edit Cursor to Previous Region Sync"
 msgstr ""
 
-#: gtk2_ardour/editor_actions.cc:97
+#: gtk2_ardour/editor_actions.cc:96
 msgid "Playhead to Range Start"
 msgstr "Указатель к началу области"
 
-#: gtk2_ardour/editor_actions.cc:99
+#: gtk2_ardour/editor_actions.cc:98
 msgid "Playhead to Range End"
 msgstr "Указатель к концу области"
 
-#: gtk2_ardour/editor_actions.cc:102
+#: gtk2_ardour/editor_actions.cc:101
 msgid "Edit Cursor to Range Start"
 msgstr "Курсор редактора к началу области"
 
-#: gtk2_ardour/editor_actions.cc:104
+#: gtk2_ardour/editor_actions.cc:103
 msgid "Edit Cursor to Range End"
 msgstr "Курсор редактора к концу области"
 
-#: gtk2_ardour/editor_actions.cc:107 gtk2_ardour/editor_ops.cc:1373
+#: gtk2_ardour/editor_actions.cc:106 gtk2_ardour/editor_ops.cc:1292
 msgid "select all"
 msgstr "Выделить всё"
 
-#: gtk2_ardour/editor_actions.cc:109
+#: gtk2_ardour/editor_actions.cc:108
 msgid "Select All After Edit Cursor"
 msgstr "Выделить всё после курсора редактора"
 
-#: gtk2_ardour/editor_actions.cc:111
+#: gtk2_ardour/editor_actions.cc:110
 msgid "Select All Before Edit Cursor"
 msgstr "Выделить всё перед курсором редактора"
 
-#: gtk2_ardour/editor_actions.cc:114
+#: gtk2_ardour/editor_actions.cc:113
 msgid "Select All After Playhead"
 msgstr "Выделить всё после указателя"
 
-#: gtk2_ardour/editor_actions.cc:116
+#: gtk2_ardour/editor_actions.cc:115
 msgid "Select All Before Playhead"
 msgstr "Выделить всё до указателя"
 
-#: gtk2_ardour/editor_actions.cc:118
+#: gtk2_ardour/editor_actions.cc:117
 #, fuzzy
 msgid "Select All Between Cursors"
 msgstr "Воспроизвести от курсора"
 
-#: gtk2_ardour/editor_actions.cc:121
+#: gtk2_ardour/editor_actions.cc:120
 #, fuzzy
 msgid "Select All in Punch Range"
 msgstr "Выбрать текущий интервал"
 
-#: gtk2_ardour/editor_actions.cc:123
+#: gtk2_ardour/editor_actions.cc:122
 msgid "Select All in Loop Range"
 msgstr "Выделить всё в закольцованной области"
 
-#: gtk2_ardour/editor_actions.cc:126
+#: gtk2_ardour/editor_actions.cc:125
 msgid "Jump Forward to Mark"
 msgstr "К следующей метке"
 
-#: gtk2_ardour/editor_actions.cc:128
+#: gtk2_ardour/editor_actions.cc:127
 msgid "Jump Backward to Mark"
 msgstr "К предыдущей метке"
 
-#: gtk2_ardour/editor_actions.cc:130
+#: gtk2_ardour/editor_actions.cc:129
 #, fuzzy
 msgid "Add Location from Playhead"
 msgstr "Воспроизвести от указателя"
 
-#: gtk2_ardour/editor_actions.cc:133
+#: gtk2_ardour/editor_actions.cc:132
 msgid "Nudge Forward"
 msgstr "Подвинуть вперёд"
 
-#: gtk2_ardour/editor_actions.cc:135
+#: gtk2_ardour/editor_actions.cc:134
 msgid "Nudge Next Forward"
-msgstr ""
+msgstr "Подвинуть следующую вперёд"
 
-#: gtk2_ardour/editor_actions.cc:137
+#: gtk2_ardour/editor_actions.cc:136
 msgid "Nudge Backward"
 msgstr "Подвинуть назад"
 
-#: gtk2_ardour/editor_actions.cc:139
-#, fuzzy
+#: gtk2_ardour/editor_actions.cc:138
 msgid "Nudge Next Backward"
-msgstr "Скрыть трек"
+msgstr "Подвинуть следующую назад"
 
-#: gtk2_ardour/editor_actions.cc:149
+#: gtk2_ardour/editor_actions.cc:148
 msgid "Scroll Tracks Up"
 msgstr "Прокрутить дорожки вверх"
 
-#: gtk2_ardour/editor_actions.cc:151
+#: gtk2_ardour/editor_actions.cc:150
 msgid "Scroll Tracks Down"
 msgstr "Прокрутить дорожки вниз"
 
-#: gtk2_ardour/editor_actions.cc:153
+#: gtk2_ardour/editor_actions.cc:152
 #, fuzzy
 msgid "Step Tracks Up"
 msgstr "Скрыть трек"
 
-#: gtk2_ardour/editor_actions.cc:155
+#: gtk2_ardour/editor_actions.cc:154
 msgid "Step Tracks Down"
 msgstr ""
 
-#: gtk2_ardour/editor_actions.cc:158
+#: gtk2_ardour/editor_actions.cc:157
 msgid "Scroll Backward"
 msgstr "Прокрутить назад"
 
-#: gtk2_ardour/editor_actions.cc:160
+#: gtk2_ardour/editor_actions.cc:159
 msgid "Scroll Forward"
 msgstr "Прокрутить вперёд"
 
-#: gtk2_ardour/editor_actions.cc:162
+#: gtk2_ardour/editor_actions.cc:161
 msgid "goto"
 msgstr "Перейти"
 
-#: gtk2_ardour/editor_actions.cc:164
+#: gtk2_ardour/editor_actions.cc:163
 msgid "Center Playhead"
 msgstr "Указатель по центру"
 
-#: gtk2_ardour/editor_actions.cc:166
+#: gtk2_ardour/editor_actions.cc:165
 msgid "Center Edit Cursor"
 msgstr "Курсор редактора по центру"
 
-#: gtk2_ardour/editor_actions.cc:168
+#: gtk2_ardour/editor_actions.cc:167
 msgid "Playhead Forward"
 msgstr "Указатель вперёд"
 
-#: gtk2_ardour/editor_actions.cc:170
+#: gtk2_ardour/editor_actions.cc:169
 msgid "Playhead Backward"
 msgstr "Указатель назад"
 
-#: gtk2_ardour/editor_actions.cc:172
+#: gtk2_ardour/editor_actions.cc:171
 msgid "Playhead to Edit"
 msgstr "Указатель к курсору редактора"
 
-#: gtk2_ardour/editor_actions.cc:174
+#: gtk2_ardour/editor_actions.cc:173
 msgid "Edit to Playhead"
 msgstr "Курсор редактора к указателю"
 
-#: gtk2_ardour/editor_actions.cc:177
+#: gtk2_ardour/editor_actions.cc:176
 msgid "Align Regions Start"
 msgstr "Выровнять начало областей"
 
-#: gtk2_ardour/editor_actions.cc:179
+#: gtk2_ardour/editor_actions.cc:178
 #, fuzzy
 msgid "Align Regions Start Relative"
 msgstr "Выровнять относительно"
 
-#: gtk2_ardour/editor_actions.cc:181
+#: gtk2_ardour/editor_actions.cc:180
 msgid "Align Regions End"
 msgstr "Выровнять конец областей"
 
-#: gtk2_ardour/editor_actions.cc:183
+#: gtk2_ardour/editor_actions.cc:182
 #, fuzzy
 msgid "Align Regions End Relative"
 msgstr "Выровнять относительно"
 
-#: gtk2_ardour/editor_actions.cc:186
+#: gtk2_ardour/editor_actions.cc:185
 #, fuzzy
 msgid "Align Regions Sync"
 msgstr "прослушать область"
 
-#: gtk2_ardour/editor_actions.cc:188
+#: gtk2_ardour/editor_actions.cc:187
 #, fuzzy
 msgid "Align Regions Sync Relative"
 msgstr "Выровнять относительно"
 
-#: gtk2_ardour/editor_actions.cc:191
+#: gtk2_ardour/editor_actions.cc:190
 msgid "Audition at Mouse"
 msgstr "Контроль по курсору мыши"
 
-#: gtk2_ardour/editor_actions.cc:193
+#: gtk2_ardour/editor_actions.cc:192
 msgid "Brush at Mouse"
 msgstr "Кисточка по курсору"
 
-#: gtk2_ardour/editor_actions.cc:195
+#: gtk2_ardour/editor_actions.cc:194
 msgid "Set Edit Cursor"
 msgstr "Установить курсор редактора"
 
-#: gtk2_ardour/editor_actions.cc:197
+#: gtk2_ardour/editor_actions.cc:196
 msgid "Mute/Unmute Region"
 msgstr "Приглушить /вернуть звук области"
 
-#: gtk2_ardour/editor_actions.cc:199
+#: gtk2_ardour/editor_actions.cc:198
 msgid "Set Playhead"
 msgstr "Установить указатель"
 
-#: gtk2_ardour/editor_actions.cc:201
+#: gtk2_ardour/editor_actions.cc:200
 msgid "Split Region"
 msgstr "Разделить область"
 
-#: gtk2_ardour/editor_actions.cc:203
+#: gtk2_ardour/editor_actions.cc:202
 #, fuzzy
 msgid "Set Region Sync Position"
 msgstr "по расположению области"
 
-#: gtk2_ardour/editor_actions.cc:211
+#: gtk2_ardour/editor_actions.cc:210
 msgid "Export Session"
 msgstr "Экспортировать сессию"
 
-#: gtk2_ardour/editor_actions.cc:213
+#: gtk2_ardour/editor_actions.cc:212
 msgid "Export Range"
 msgstr "Экспортировать область"
 
-#: gtk2_ardour/editor_actions.cc:219 gtk2_ardour/connection_editor.cc:56
+#: gtk2_ardour/editor_actions.cc:218 gtk2_ardour/connection_editor.cc:56
 msgid "Delete"
 msgstr "Удалить"
 
-#: gtk2_ardour/editor_actions.cc:225
+#: gtk2_ardour/editor_actions.cc:224
 msgid "Duplicate Region"
 msgstr "Продублировать область"
 
-#: gtk2_ardour/editor_actions.cc:227
+#: gtk2_ardour/editor_actions.cc:226
 msgid "Duplicate Range"
 msgstr "Продублировать область"
 
-#: gtk2_ardour/editor_actions.cc:229
+#: gtk2_ardour/editor_actions.cc:228
 msgid "Insert Region"
 msgstr "Вставить область"
 
-#: gtk2_ardour/editor_actions.cc:231
+#: gtk2_ardour/editor_actions.cc:230
 msgid "Reverse Region"
 msgstr "Развернуть область"
 
-#: gtk2_ardour/editor_actions.cc:233
+#: gtk2_ardour/editor_actions.cc:232
 msgid "Normalize Region"
 msgstr "Нормализовать область"
 
-#: gtk2_ardour/editor_actions.cc:235
+#: gtk2_ardour/editor_actions.cc:234
 msgid "crop"
 msgstr "Обрезать"
 
-#: gtk2_ardour/editor_actions.cc:237
+#: gtk2_ardour/editor_actions.cc:236
 msgid "Insert Chunk"
 msgstr "Вставить фрагмент"
 
-#: gtk2_ardour/editor_actions.cc:240
+#: gtk2_ardour/editor_actions.cc:239
 msgid "Split at edit cursor"
 msgstr "Разделить по курсору редактора"
 
-#: gtk2_ardour/editor_actions.cc:243
+#: gtk2_ardour/editor_actions.cc:242
 msgid "Start Range"
-msgstr ""
+msgstr "Начать выделение"
 
-#: gtk2_ardour/editor_actions.cc:245
+#: gtk2_ardour/editor_actions.cc:244
 msgid "Finish Range"
-msgstr ""
+msgstr "Закончить выделение"
 
-#: gtk2_ardour/editor_actions.cc:247
+#: gtk2_ardour/editor_actions.cc:246
 msgid "Finish add Range"
-msgstr ""
+msgstr "Закончить добавку выделения"
 
-#: gtk2_ardour/editor_actions.cc:250
+#: gtk2_ardour/editor_actions.cc:249
 msgid "Extend Range to End of Region"
-msgstr ""
+msgstr "Расширить выделение до конца области"
 
-#: gtk2_ardour/editor_actions.cc:252
-#, fuzzy
+#: gtk2_ardour/editor_actions.cc:251
 msgid "Extend Range to Start of Region"
-msgstr "В начало сессии"
+msgstr "Расширить выделение до начала области"
 
-#: gtk2_ardour/editor_actions.cc:255
+#: gtk2_ardour/editor_actions.cc:254
 msgid "Follow Playhead"
 msgstr "Следовать за указателем"
 
-#: gtk2_ardour/editor_actions.cc:263
+#: gtk2_ardour/editor_actions.cc:262
 msgid "Zoom Focus Left"
 msgstr "Фокус влево"
 
-#: gtk2_ardour/editor_actions.cc:265
+#: gtk2_ardour/editor_actions.cc:264
 msgid "Zoom Focus Right"
 msgstr "Фокус вправо"
 
-#: gtk2_ardour/editor_actions.cc:267
+#: gtk2_ardour/editor_actions.cc:266
 msgid "Zoom Focus Center"
 msgstr "Фокус по центру"
 
-#: gtk2_ardour/editor_actions.cc:269
+#: gtk2_ardour/editor_actions.cc:268
 msgid "Zoom Focus Playhead"
 msgstr "Фокус по указателю"
 
-#: gtk2_ardour/editor_actions.cc:271
+#: gtk2_ardour/editor_actions.cc:270
 msgid "Zoom Focus Edit"
 msgstr "Фокус по курсору"
 
-#: gtk2_ardour/editor_actions.cc:277
+#: gtk2_ardour/editor_actions.cc:276
 msgid "Object Tool"
 msgstr "Объект"
 
-#: gtk2_ardour/editor_actions.cc:278
+#: gtk2_ardour/editor_actions.cc:277
 msgid "Range Tool"
-msgstr "Область"
+msgstr "Выделение"
 
-#: gtk2_ardour/editor_actions.cc:279
+#: gtk2_ardour/editor_actions.cc:278
 msgid "Gain Tool"
 msgstr "Усиление"
 
-#: gtk2_ardour/editor_actions.cc:280
+#: gtk2_ardour/editor_actions.cc:279
 msgid "Zoom Tool"
 msgstr "Лупа"
 
-#: gtk2_ardour/editor_actions.cc:281
+#: gtk2_ardour/editor_actions.cc:280
 msgid "Timefx Tool"
 msgstr "Время"
 
-#: gtk2_ardour/editor_actions.cc:286
+#: gtk2_ardour/editor_actions.cc:282
 msgid "Snap To"
-msgstr "Привязка"
+msgstr "Прилипание"
 
-#: gtk2_ardour/editor_actions.cc:288
-msgid "Snap to frame"
-msgstr "Привязка к выборке"
-
-#: gtk2_ardour/editor_actions.cc:289
-msgid "Snap to cd frame"
-msgstr "Привязка к выборке CD"
-
-#: gtk2_ardour/editor_actions.cc:290
-msgid "Snap to SMPTE frame"
-msgstr "Привязка к кадру SMPTE"
-
-#: gtk2_ardour/editor_actions.cc:291
-msgid "Snap to SMPTE seconds"
-msgstr "Привязка к секундам SMPTE"
+#: gtk2_ardour/editor_actions.cc:283
+msgid "Snap Mode"
+msgstr "Режим привязки"
 
 #: gtk2_ardour/editor_actions.cc:292
-msgid "Snap to SMPTE minutes"
-msgstr "Привязка к минутам SMPTE"
+msgid "Snap to frame"
+msgstr "Прилипание к выборке"
 
 #: gtk2_ardour/editor_actions.cc:293
-msgid "Snap to seconds"
-msgstr "Привязка к секундам"
+msgid "Snap to cd frame"
+msgstr "Прилипание к выборке CD"
 
 #: gtk2_ardour/editor_actions.cc:294
-msgid "Snap to minutes"
-msgstr "Привязка к минутам"
+msgid "Snap to SMPTE frame"
+msgstr "Прилипание к кадру SMPTE"
 
 #: gtk2_ardour/editor_actions.cc:295
-msgid "Snap to thirtyseconds"
-msgstr "Привязка по 30 секундам"
+msgid "Snap to SMPTE seconds"
+msgstr "Прилипание к секундам SMPTE"
 
 #: gtk2_ardour/editor_actions.cc:296
-msgid "Snap to asixteenthbeat"
-msgstr "Привязка к 1/16"
+msgid "Snap to SMPTE minutes"
+msgstr "Прилипание к минутам SMPTE"
 
 #: gtk2_ardour/editor_actions.cc:297
-msgid "Snap to eighths"
-msgstr "Привязка к 1/8"
+msgid "Snap to seconds"
+msgstr "Прилипание к секундам"
 
 #: gtk2_ardour/editor_actions.cc:298
-msgid "Snap to quarters"
-msgstr "Привязка к 1/4"
+msgid "Snap to minutes"
+msgstr "Прилипание к минутам"
 
 #: gtk2_ardour/editor_actions.cc:299
-msgid "Snap to thirds"
-msgstr "Привязка к 1/3"
+msgid "Snap to thirtyseconds"
+msgstr "Прилипание по 30 секундам"
 
 #: gtk2_ardour/editor_actions.cc:300
-msgid "Snap to beat"
-msgstr "Привязка к доле"
+msgid "Snap to asixteenthbeat"
+msgstr "Прилипание к 1/16"
 
 #: gtk2_ardour/editor_actions.cc:301
-msgid "Snap to bar"
-msgstr "Привязка к такту"
+msgid "Snap to eighths"
+msgstr "Прилипание к 1/8"
 
 #: gtk2_ardour/editor_actions.cc:302
-msgid "Snap to mark"
-msgstr "Привязка к маркеру"
+msgid "Snap to quarters"
+msgstr "Прилипание к 1/4"
 
 #: gtk2_ardour/editor_actions.cc:303
-msgid "Snap to edit cursor"
-msgstr "Привязка к курсору редактора"
+msgid "Snap to thirds"
+msgstr "Прилипание к 1/3"
 
 #: gtk2_ardour/editor_actions.cc:304
-msgid "Snap to region start"
-msgstr "Привязка к началу области"
+msgid "Snap to beat"
+msgstr "Прилипание к доле"
 
 #: gtk2_ardour/editor_actions.cc:305
-msgid "Snap to region end"
-msgstr "Привязка к концу области"
+msgid "Snap to bar"
+msgstr "Прилипание к такту"
 
 #: gtk2_ardour/editor_actions.cc:306
+msgid "Snap to mark"
+msgstr "Прилипание к маркеру"
+
+#: gtk2_ardour/editor_actions.cc:307
+msgid "Snap to edit cursor"
+msgstr "Прилипание к курсору редактора"
+
+#: gtk2_ardour/editor_actions.cc:308
+msgid "Snap to region start"
+msgstr "Прилипание к началу области"
+
+#: gtk2_ardour/editor_actions.cc:309
+msgid "Snap to region end"
+msgstr "Прилипание к концу области"
+
+#: gtk2_ardour/editor_actions.cc:310
 msgid "Snap to region sync"
 msgstr ""
 
-#: gtk2_ardour/editor_actions.cc:307
+#: gtk2_ardour/editor_actions.cc:311
 msgid "Snap to region boundary"
-msgstr "Привязка к границам области"
+msgstr "Прилипание к границам области"
 
-#: gtk2_ardour/editor_actions.cc:316
+#: gtk2_ardour/editor_actions.cc:320
 msgid "Sort"
 msgstr ""
 
-#: gtk2_ardour/editor_actions.cc:324
+#: gtk2_ardour/editor_actions.cc:328
 msgid "Show all"
 msgstr "Показать всё"
 
-#: gtk2_ardour/editor_actions.cc:325
+#: gtk2_ardour/editor_actions.cc:329
 msgid "Show automatic regions"
 msgstr "Показать автомат. области"
 
-#: gtk2_ardour/editor_actions.cc:327
+#: gtk2_ardour/editor_actions.cc:331
 msgid "Ascending"
 msgstr "По возрастанию"
 
-#: gtk2_ardour/editor_actions.cc:329
+#: gtk2_ardour/editor_actions.cc:333
 msgid "Descending"
 msgstr "По убыванию"
 
-#: gtk2_ardour/editor_actions.cc:332
+#: gtk2_ardour/editor_actions.cc:336
 msgid "By Region Name"
 msgstr "По имени области"
 
-#: gtk2_ardour/editor_actions.cc:334
+#: gtk2_ardour/editor_actions.cc:338
 msgid "By Region Length"
 msgstr "По длительности области"
 
-#: gtk2_ardour/editor_actions.cc:336
+#: gtk2_ardour/editor_actions.cc:340
 msgid "By Region Position"
 msgstr "По расположению области"
 
-#: gtk2_ardour/editor_actions.cc:338
+#: gtk2_ardour/editor_actions.cc:342
 msgid "By Region Timestamp"
 msgstr "По времени создания области"
 
-#: gtk2_ardour/editor_actions.cc:340
+#: gtk2_ardour/editor_actions.cc:344
 msgid "By Region Start in File"
 msgstr "По началу области в файле"
 
-#: gtk2_ardour/editor_actions.cc:342
+#: gtk2_ardour/editor_actions.cc:346
 msgid "By Region End in File"
 msgstr "По концу области в файле"
 
-#: gtk2_ardour/editor_actions.cc:344
+#: gtk2_ardour/editor_actions.cc:348
 msgid "By Source File Name"
 msgstr "По имени исходного файла"
 
-#: gtk2_ardour/editor_actions.cc:346
+#: gtk2_ardour/editor_actions.cc:350
 msgid "By Source File Length"
 msgstr "По длительности исходного файла"
 
-#: gtk2_ardour/editor_actions.cc:348
+#: gtk2_ardour/editor_actions.cc:352
 msgid "By Source File Creation Date"
 msgstr "По дате создания исходного файла"
 
-#: gtk2_ardour/editor_actions.cc:350
+#: gtk2_ardour/editor_actions.cc:354
 msgid "By Source Filesystem"
 msgstr "По исходной файловой системе"
 
-#: gtk2_ardour/editor_actions.cc:356
+#: gtk2_ardour/editor_actions.cc:360
 msgid "Add External Audio"
 msgstr "Добавить внешний звуковой файл"
 
-#: gtk2_ardour/editor_actions.cc:358
+#: gtk2_ardour/editor_actions.cc:362
 msgid "as Region(s)"
 msgstr "как область(-и)"
 
-#: gtk2_ardour/editor_actions.cc:360
+#: gtk2_ardour/editor_actions.cc:364
 msgid "as Tracks"
 msgstr "как дорожки"
 
-#: gtk2_ardour/editor_actions.cc:362
+#: gtk2_ardour/editor_actions.cc:366
 msgid "as Tape Tracks"
 msgstr ""
 
-#: gtk2_ardour/editor_actions.cc:364
+#: gtk2_ardour/editor_actions.cc:368
 msgid "to Tracks"
 msgstr "в дорожки"
 
-#: gtk2_ardour/editor_actions.cc:367
+#: gtk2_ardour/editor_actions.cc:371
 msgid "Show Waveforms"
 msgstr "Показывать форму сигнала"
 
-#: gtk2_ardour/editor_actions.cc:368
+#: gtk2_ardour/editor_actions.cc:372
 msgid "Show Waveforms While Recording"
 msgstr "Показывать форму сигнала при записи"
 
-#: gtk2_ardour/editor_actions.cc:369
+#: gtk2_ardour/editor_actions.cc:373
 msgid "Show Measures"
 msgstr "Показывать линии тактов"
 
-#: gtk2_ardour/editor_actions.cc:382 gtk2_ardour/editor_actions.cc:389
-msgid "Medium"
-msgstr "Средне"
+#: gtk2_ardour/editor_actions.cc:377
+msgid "Later is Higher"
+msgstr "Более поздние выше"
+
+#: gtk2_ardour/editor_actions.cc:378
+msgid "Most Recently Moved/Added is Higher"
+msgstr "Недавно смещённые/добавленные выше"
+
+#: gtk2_ardour/editor_actions.cc:379
+msgid "Most Recently Added is Higher"
+msgstr "Недавно добавленные выше"
+
+#: gtk2_ardour/editor_actions.cc:383
+msgid "23.976"
+msgstr "23.976"
 
 #: gtk2_ardour/editor_actions.cc:384
-msgid "Faster"
-msgstr "Быстрее"
-
-#: gtk2_ardour/editor_actions.cc:390
-msgid "Long"
-msgstr "Долгая"
-
-#: gtk2_ardour/editor_actions.cc:394
-#, fuzzy
-msgid "Later is Higher"
-msgstr "Опустить область на один слой"
-
-#: gtk2_ardour/editor_actions.cc:395
-#, fuzzy
-msgid "Most Recently Moved/Added is Higher"
-msgstr "Опустить область на один слой"
-
-#: gtk2_ardour/editor_actions.cc:396
-#, fuzzy
-msgid "Most Recently Added is Higher"
-msgstr "Опустить область на один слой"
-
-#: gtk2_ardour/editor_actions.cc:400
-msgid "23.976"
-msgstr ""
-
-#: gtk2_ardour/editor_actions.cc:401
 msgid "24"
-msgstr ""
+msgstr "24"
 
-#: gtk2_ardour/editor_actions.cc:402
+#: gtk2_ardour/editor_actions.cc:385
 msgid "24.976"
-msgstr ""
+msgstr "24.976"
 
-#: gtk2_ardour/editor_actions.cc:403
+#: gtk2_ardour/editor_actions.cc:386
 msgid "25"
-msgstr ""
+msgstr "25"
 
-#: gtk2_ardour/editor_actions.cc:404
+#: gtk2_ardour/editor_actions.cc:387
 msgid "29.97"
-msgstr ""
+msgstr "29.97"
 
-#: gtk2_ardour/editor_actions.cc:405
+#: gtk2_ardour/editor_actions.cc:388
 msgid "29.97 drop"
 msgstr ""
 
-#: gtk2_ardour/editor_actions.cc:406
+#: gtk2_ardour/editor_actions.cc:389
 msgid "30"
-msgstr ""
+msgstr "30"
 
-#: gtk2_ardour/editor_actions.cc:407
+#: gtk2_ardour/editor_actions.cc:390
 msgid "30 drop"
 msgstr ""
 
-#: gtk2_ardour/editor_actions.cc:408
+#: gtk2_ardour/editor_actions.cc:391
 msgid "59.94"
-msgstr ""
+msgstr "59.94"
+
+#: gtk2_ardour/editor_actions.cc:392
+msgid "60"
+msgstr "60"
+
+#: gtk2_ardour/editor_actions.cc:396
+msgid "+4.1667% + 0.1%"
+msgstr "+4.1667% + 0.1%"
+
+#: gtk2_ardour/editor_actions.cc:397
+msgid "+4.1667%"
+msgstr "+4.1667%"
+
+#: gtk2_ardour/editor_actions.cc:398
+msgid "+4.1667% - 0.1%"
+msgstr "+4.1667% - 0.1%"
+
+#: gtk2_ardour/editor_actions.cc:399
+msgid "+ 0.1%"
+msgstr "+ 0.1%"
+
+#: gtk2_ardour/editor_actions.cc:401
+msgid "- 0.1%"
+msgstr "- 0.1%"
+
+#: gtk2_ardour/editor_actions.cc:402
+msgid "-4.1667% + 0.1%"
+msgstr "-4.1667% + 0.1%"
+
+#: gtk2_ardour/editor_actions.cc:403
+msgid "-4.1667%"
+msgstr "-4.1667%"
+
+#: gtk2_ardour/editor_actions.cc:404
+msgid "-4.1667% - 0.1%"
+msgstr "-4.1667% - 0.1%"
+
+#: gtk2_ardour/editor_actions.cc:408
+msgid "80 per frame"
+msgstr "800 на выборку"
 
 #: gtk2_ardour/editor_actions.cc:409
-msgid "60"
+msgid "100 per frame"
+msgstr "100 на выборку"
+
+#: gtk2_ardour/editor_actions.cc:712 gtk2_ardour/editor_actions.cc:757
+#: gtk2_ardour/editor_actions.cc:768 gtk2_ardour/editor_actions.cc:812
+#: gtk2_ardour/editor_actions.cc:822
+#, fuzzy
+msgid "programming error: %1: %2"
+msgstr "ошибка в программе: "
+
+#: gtk2_ardour/editor_actions.cc:723 gtk2_ardour/editor_actions.cc:951
+#: gtk2_ardour/editor_actions.cc:964 gtk2_ardour/editor_actions.cc:1028
+#: gtk2_ardour/sfdb_ui.cc:395
+#, fuzzy
+msgid "programming error: %1"
+msgstr "ошибка в программе: "
+
+#: gtk2_ardour/editor_actions.cc:983
+msgid "Configuraton is using unhandled subframes per frame value: %1"
 msgstr ""
 
-#: gtk2_ardour/editor_actions.cc:413
-#, c-format
-msgid "+4.1667% + 0.1%"
-msgstr ""
-
-#: gtk2_ardour/editor_actions.cc:414
-msgid "+4.1667%"
-msgstr ""
-
-#: gtk2_ardour/editor_actions.cc:415
-#, c-format
-msgid "+4.1667% - 0.1%"
-msgstr ""
-
-#: gtk2_ardour/editor_actions.cc:416
-msgid "+ 0.1%"
-msgstr ""
-
-#: gtk2_ardour/editor_actions.cc:418
-msgid "- 0.1%"
-msgstr ""
-
-#: gtk2_ardour/editor_actions.cc:419
-#, c-format
-msgid "-4.1667% + 0.1%"
-msgstr ""
-
-#: gtk2_ardour/editor_actions.cc:420
-msgid "-4.1667%"
-msgstr ""
-
-#: gtk2_ardour/editor_actions.cc:421
-#, c-format
-msgid "-4.1667% - 0.1%"
-msgstr ""
-
-#: gtk2_ardour/editor_audio_import.cc:75
+#: gtk2_ardour/editor_audio_import.cc:76
 #, fuzzy
 msgid "You can't import or embed an audiofile until you have a session loaded."
 msgstr "Вы не можете импортировать аудиофайл пока сессия не загружена."
 
-#: gtk2_ardour/editor_audio_import.cc:80
-#, fuzzy
+#: gtk2_ardour/editor_audio_import.cc:81
 msgid "Add existing audio to session"
-msgstr "использовать имеющийся шаблон"
+msgstr "Добавить существующий файл в сессию"
 
-#: gtk2_ardour/editor_audio_import.cc:145
+#: gtk2_ardour/editor_audio_import.cc:166
+msgid "Import as a %1 region"
+msgstr "Импортировать как %1 область"
+
+#: gtk2_ardour/editor_audio_import.cc:167
 #, fuzzy
-msgid "ardour: importing %1"
-msgstr "ardour: экспорт"
+msgid "multichannel"
+msgstr "отмена"
 
-#: gtk2_ardour/editor_audio_import.cc:149
+#: gtk2_ardour/editor_audio_import.cc:167 gtk2_ardour/export_dialog.cc:84
+msgid "stereo"
+msgstr "стерео"
+
+#: gtk2_ardour/editor_audio_import.cc:168
+msgid "Import as multiple regions"
+msgstr "Импортировать как несколько областей"
+
+#: gtk2_ardour/editor_audio_import.cc:170
+msgid ""
+"Paired files detected (%1, %2 ...).\n"
+"Do you want to:"
+msgstr ""
+
+#: gtk2_ardour/editor_audio_import.cc:216
+msgid "ardour: importing %1"
+msgstr "ardour: экспортируется %1"
+
+#: gtk2_ardour/editor_audio_import.cc:220
 msgid "Cancel Import"
 msgstr "Отменить импорт"
 
-#: gtk2_ardour/editor_audio_import.cc:227
+#: gtk2_ardour/editor_audio_import.cc:303
 #, fuzzy
 msgid "Editor: cannot open file \"%1\", (%2)"
 msgstr "Редактор: не удалось открыть файл \"%1\" (%2)"
 
-#: gtk2_ardour/editor_audio_import.cc:235
-#, fuzzy
+#: gtk2_ardour/editor_audio_import.cc:311
 msgid "Cancel entire import"
-msgstr "Отменить импорт"
+msgstr "Отменить весь импорт"
 
-#: gtk2_ardour/editor_audio_import.cc:236
-#, fuzzy
+#: gtk2_ardour/editor_audio_import.cc:312
 msgid "Don't embed it"
-msgstr "Отмена"
+msgstr "Не встраивать"
 
-#: gtk2_ardour/editor_audio_import.cc:237
+#: gtk2_ardour/editor_audio_import.cc:313
 msgid "Embed all without questions"
-msgstr ""
+msgstr "Встроить без лишних вопросов"
 
-#: gtk2_ardour/editor_audio_import.cc:242
+#: gtk2_ardour/editor_audio_import.cc:318
 msgid "Embed it anyway"
-msgstr ""
+msgstr "Всё равно встроить"
 
-#: gtk2_ardour/editor_audio_import.cc:245
+#: gtk2_ardour/editor_audio_import.cc:321
 #, fuzzy
 msgid ""
 "%1\n"
@@ -3359,11 +3430,11 @@ msgstr ""
 "Выбранный аудиофайл имеет частоту дискретизации данных\n"
 "отличную от текущей сессии!"
 
-#: gtk2_ardour/editor_audio_import.cc:278
+#: gtk2_ardour/editor_audio_import.cc:360
 msgid "could not open %1"
 msgstr "не удалось открыть %1"
 
-#: gtk2_ardour/editor_audio_import.cc:323
+#: gtk2_ardour/editor_audio_import.cc:407
 #, fuzzy
 msgid "insert sndfile"
 msgstr "Вставить внешний аудиофайл"
@@ -3372,27 +3443,26 @@ msgstr "Вставить внешний аудиофайл"
 msgid "VerboseCanvasCursor"
 msgstr ""
 
-#: gtk2_ardour/editor_edit_groups.cc:53 gtk2_ardour/mixer_ui.cc:754
+#: gtk2_ardour/editor_edit_groups.cc:53 gtk2_ardour/mixer_ui.cc:751
 #, fuzzy
 msgid "Activate All"
 msgstr "Активировать"
 
-#: gtk2_ardour/editor_edit_groups.cc:54 gtk2_ardour/mixer_ui.cc:755
+#: gtk2_ardour/editor_edit_groups.cc:54 gtk2_ardour/mixer_ui.cc:752
 #, fuzzy
 msgid "Disable All"
 msgstr "Отсоединить"
 
-#: gtk2_ardour/editor_edit_groups.cc:56 gtk2_ardour/mixer_ui.cc:757
+#: gtk2_ardour/editor_edit_groups.cc:56 gtk2_ardour/mixer_ui.cc:754
 #, fuzzy
 msgid "Add group"
 msgstr "Нет группы"
 
-#: gtk2_ardour/editor_edit_groups.cc:229 gtk2_ardour/mixer_ui.cc:988
-#, fuzzy
+#: gtk2_ardour/editor_edit_groups.cc:229 gtk2_ardour/mixer_ui.cc:985
 msgid "unnamed"
-msgstr "Переименовать"
+msgstr "безымянный"
 
-#: gtk2_ardour/editor_edit_groups.cc:258 gtk2_ardour/mixer_ui.cc:852
+#: gtk2_ardour/editor_edit_groups.cc:258 gtk2_ardour/mixer_ui.cc:849
 msgid "-all-"
 msgstr "-все-"
 
@@ -3410,11 +3480,11 @@ msgid ""
 "Create 1 or more ranges by dragging the mouse in the range bar"
 msgstr ""
 
-#: gtk2_ardour/editor_imageframe.cc:625 gtk2_ardour/editor_imageframe.cc:655
+#: gtk2_ardour/editor_imageframe.cc:623 gtk2_ardour/editor_imageframe.cc:653
 msgid "programming error: no ImageFrameView selected"
 msgstr "ошибка в программе: no ImageFrameView selected"
 
-#: gtk2_ardour/editor_imageframe.cc:848 gtk2_ardour/editor_imageframe.cc:870
+#: gtk2_ardour/editor_imageframe.cc:846 gtk2_ardour/editor_imageframe.cc:868
 msgid "programming error: no MarkerView selected"
 msgstr "ошибка в программе: no MarkerView selected"
 
@@ -3428,20 +3498,20 @@ msgstr "отключить воспроизведение этой област�
 msgid "keyboard selection"
 msgstr "Выделить по интервалу"
 
-#: gtk2_ardour/editor_markers.cc:293 gtk2_ardour/editor_ops.cc:1297
-#: gtk2_ardour/editor_ops.cc:1311 gtk2_ardour/editor_ops.cc:1330
+#: gtk2_ardour/editor_markers.cc:293 gtk2_ardour/editor_ops.cc:1213
+#: gtk2_ardour/editor_ops.cc:1227 gtk2_ardour/editor_ops.cc:1246
 #: gtk2_ardour/location_ui.cc:776
 msgid "add marker"
 msgstr "добавить маркер"
 
 #: gtk2_ardour/editor_markers.cc:309 gtk2_ardour/editor_markers.cc:383
-#: gtk2_ardour/editor_markers.cc:555 gtk2_ardour/editor_markers.cc:573
-#: gtk2_ardour/editor_markers.cc:592 gtk2_ardour/editor_markers.cc:611
-#: gtk2_ardour/editor_markers.cc:641 gtk2_ardour/editor_markers.cc:669
-#: gtk2_ardour/editor_markers.cc:697 gtk2_ardour/editor_markers.cc:735
-#: gtk2_ardour/editor_markers.cc:762 gtk2_ardour/editor_markers.cc:785
-#: gtk2_ardour/editor_markers.cc:804 gtk2_ardour/editor_mouse.cc:2027
-#: gtk2_ardour/editor_mouse.cc:4322
+#: gtk2_ardour/editor_markers.cc:556 gtk2_ardour/editor_markers.cc:574
+#: gtk2_ardour/editor_markers.cc:593 gtk2_ardour/editor_markers.cc:612
+#: gtk2_ardour/editor_markers.cc:642 gtk2_ardour/editor_markers.cc:670
+#: gtk2_ardour/editor_markers.cc:698 gtk2_ardour/editor_markers.cc:737
+#: gtk2_ardour/editor_markers.cc:762 gtk2_ardour/editor_markers.cc:789
+#: gtk2_ardour/editor_markers.cc:812 gtk2_ardour/editor_markers.cc:831
+#: gtk2_ardour/editor_mouse.cc:2038 gtk2_ardour/editor_mouse.cc:4356
 msgid "programming error: marker canvas item has no marker object pointer!"
 msgstr "ошибка в программе: marker canvas item has no marker object pointer!"
 
@@ -3474,89 +3544,90 @@ msgstr "Скрыть маркер"
 msgid "Remove Mark"
 msgstr "Удалить маркер"
 
-#: gtk2_ardour/editor_markers.cc:482 gtk2_ardour/editor_markers.cc:538
+#: gtk2_ardour/editor_markers.cc:482 gtk2_ardour/editor_markers.cc:539
 #, fuzzy
 msgid "Locate to Range Mark"
 msgstr "Маркеры интервалов"
 
-#: gtk2_ardour/editor_markers.cc:483 gtk2_ardour/editor_markers.cc:539
+#: gtk2_ardour/editor_markers.cc:483 gtk2_ardour/editor_markers.cc:540
 #, fuzzy
 msgid "Play from Range Mark"
 msgstr "Воспроизвести \"кольцо\""
 
 #: gtk2_ardour/editor_markers.cc:484
 #, fuzzy
+msgid "Play Range"
+msgstr "Воспроизвести \"кольцо\""
+
+#: gtk2_ardour/editor_markers.cc:485
+#, fuzzy
 msgid "Loop Range"
 msgstr "Воспроизвести \"кольцо\""
 
-#: gtk2_ardour/editor_markers.cc:485 gtk2_ardour/editor_markers.cc:540
+#: gtk2_ardour/editor_markers.cc:486 gtk2_ardour/editor_markers.cc:541
 #, fuzzy
 msgid "Set Range Mark from Playhead"
 msgstr "Воспроизвести от указателя"
 
-#: gtk2_ardour/editor_markers.cc:486 gtk2_ardour/editor_markers.cc:541
+#: gtk2_ardour/editor_markers.cc:487 gtk2_ardour/editor_markers.cc:542
 #, fuzzy
 msgid "Set Range from Range Selection"
 msgstr "Воспроизвести выделенное"
 
-#: gtk2_ardour/editor_markers.cc:490
-#, fuzzy
+#: gtk2_ardour/editor_markers.cc:491
 msgid "Rename Range"
-msgstr "Переименовать"
+msgstr "Переименовать область"
 
-#: gtk2_ardour/editor_markers.cc:491 gtk2_ardour/editor_markers.cc:543
+#: gtk2_ardour/editor_markers.cc:492 gtk2_ardour/editor_markers.cc:544
 #, fuzzy
 msgid "Hide Range"
 msgstr "выделять"
 
-#: gtk2_ardour/editor_markers.cc:492
+#: gtk2_ardour/editor_markers.cc:493
 #, fuzzy
 msgid "Remove Range"
 msgstr "Удалить поле"
 
-#: gtk2_ardour/editor_markers.cc:496 gtk2_ardour/editor_markers.cc:545
+#: gtk2_ardour/editor_markers.cc:497 gtk2_ardour/editor_markers.cc:546
 #, fuzzy
 msgid "Separate Regions in Range"
 msgstr "Создать область из выделенного"
 
-#: gtk2_ardour/editor_markers.cc:497 gtk2_ardour/editor_markers.cc:546
+#: gtk2_ardour/editor_markers.cc:498 gtk2_ardour/editor_markers.cc:547
 #, fuzzy
 msgid "Select All in Range"
 msgstr "Выделить всё"
 
-#: gtk2_ardour/editor_markers.cc:523
+#: gtk2_ardour/editor_markers.cc:524
 msgid "Set Loop Range"
 msgstr ""
 
-#: gtk2_ardour/editor_markers.cc:524
+#: gtk2_ardour/editor_markers.cc:525
 msgid "Set Punch Range"
 msgstr ""
 
-#: gtk2_ardour/editor_markers.cc:818
-#, fuzzy
+#: gtk2_ardour/editor_markers.cc:845
 msgid "New Name:"
-msgstr "новое имя: "
+msgstr "Новое имя: "
 
-#: gtk2_ardour/editor_markers.cc:821
+#: gtk2_ardour/editor_markers.cc:848
 msgid "ardour: rename mark"
 msgstr "ardour: переименовать маркер"
 
-#: gtk2_ardour/editor_markers.cc:823
-#, fuzzy
+#: gtk2_ardour/editor_markers.cc:850
 msgid "ardour: rename range"
 msgstr "ardour: переименовать область"
 
-#: gtk2_ardour/editor_markers.cc:843
-#, fuzzy
+#: gtk2_ardour/editor_markers.cc:870
 msgid "rename marker"
-msgstr "добавить маркер"
+msgstr "переименовать маркер"
 
-#: gtk2_ardour/editor_markers.cc:869
+#: gtk2_ardour/editor_markers.cc:896
 #, fuzzy
 msgid "set loop range"
 msgstr "выбрать окно просмотра"
 
-#: gtk2_ardour/editor_markers.cc:897
+#: gtk2_ardour/editor_markers.cc:924
 #, fuzzy
 msgid "set punch range"
 msgstr "Выбрать текущий интервал"
@@ -3570,72 +3641,72 @@ msgstr "Editor::event_frame() used on unhandled event type %1"
 msgid "select on click"
 msgstr "Использовать как щелчок метронома"
 
-#: gtk2_ardour/editor_mouse.cc:1596
+#: gtk2_ardour/editor_mouse.cc:1599
 msgid "programming error: start_grab called without drag item"
 msgstr "ошибка в программе: start_grab called without drag item"
 
-#: gtk2_ardour/editor_mouse.cc:1820
+#: gtk2_ardour/editor_mouse.cc:1823
 #, fuzzy
 msgid "change fade in length"
 msgstr "редактировать введение в уровень"
 
-#: gtk2_ardour/editor_mouse.cc:1841
+#: gtk2_ardour/editor_mouse.cc:1845
 #, fuzzy
 msgid "programming error: fade out canvas item has no regionview data pointer!"
 msgstr "ошибка в программе: cursor canvas item has no cursor data pointer!"
 
-#: gtk2_ardour/editor_mouse.cc:1915
+#: gtk2_ardour/editor_mouse.cc:1919
 #, fuzzy
 msgid "change fade out length"
 msgstr "редактировать сведение в ноль"
 
-#: gtk2_ardour/editor_mouse.cc:1937
+#: gtk2_ardour/editor_mouse.cc:1942
 msgid "programming error: cursor canvas item has no cursor data pointer!"
 msgstr "ошибка в программе: cursor canvas item has no cursor data pointer!"
 
-#: gtk2_ardour/editor_mouse.cc:2162
+#: gtk2_ardour/editor_mouse.cc:2173
 #, fuzzy
 msgid "move marker"
 msgstr "Удалить поле"
 
-#: gtk2_ardour/editor_mouse.cc:2190 gtk2_ardour/editor_mouse.cc:2221
-#: gtk2_ardour/editor_tempodisplay.cc:490
+#: gtk2_ardour/editor_mouse.cc:2201 gtk2_ardour/editor_mouse.cc:2232
+#: gtk2_ardour/editor_tempodisplay.cc:492
 msgid "programming error: meter marker canvas item has no marker object pointer!"
 msgstr "ошибка в программе: meter marker canvas item has no marker object pointer!"
 
-#: gtk2_ardour/editor_mouse.cc:2289
+#: gtk2_ardour/editor_mouse.cc:2300
 #, fuzzy
 msgid "copy meter mark"
 msgstr "добавить маркер"
 
-#: gtk2_ardour/editor_mouse.cc:2300
+#: gtk2_ardour/editor_mouse.cc:2311
 msgid "move meter mark"
 msgstr ""
 
-#: gtk2_ardour/editor_mouse.cc:2316 gtk2_ardour/editor_mouse.cc:2349
-#: gtk2_ardour/editor_tempodisplay.cc:353
-#: gtk2_ardour/editor_tempodisplay.cc:437
-#: gtk2_ardour/editor_tempodisplay.cc:456
+#: gtk2_ardour/editor_mouse.cc:2327 gtk2_ardour/editor_mouse.cc:2360
+#: gtk2_ardour/editor_tempodisplay.cc:355
+#: gtk2_ardour/editor_tempodisplay.cc:439
+#: gtk2_ardour/editor_tempodisplay.cc:458
 msgid "programming error: tempo marker canvas item has no marker object pointer!"
 msgstr "ошибка в программе: tempo marker canvas item has no marker object pointer!"
 
-#: gtk2_ardour/editor_mouse.cc:2321 gtk2_ardour/editor_mouse.cc:2354
-#: gtk2_ardour/editor_tempodisplay.cc:358
-#: gtk2_ardour/editor_tempodisplay.cc:442
+#: gtk2_ardour/editor_mouse.cc:2332 gtk2_ardour/editor_mouse.cc:2365
+#: gtk2_ardour/editor_tempodisplay.cc:360
+#: gtk2_ardour/editor_tempodisplay.cc:444
 msgid "programming error: marker for tempo is not a tempo marker!"
 msgstr "ошибка в программе: marker for tempo is not a tempo marker!"
 
-#: gtk2_ardour/editor_mouse.cc:2421
+#: gtk2_ardour/editor_mouse.cc:2432
 #, fuzzy
 msgid "copy tempo mark"
 msgstr "добавить маркер"
 
-#: gtk2_ardour/editor_mouse.cc:2432
+#: gtk2_ardour/editor_mouse.cc:2443
 msgid "move tempo mark"
 msgstr ""
 
-#: gtk2_ardour/editor_mouse.cc:2447 gtk2_ardour/editor_mouse.cc:2466
-#: gtk2_ardour/editor_mouse.cc:2479
+#: gtk2_ardour/editor_mouse.cc:2458 gtk2_ardour/editor_mouse.cc:2477
+#: gtk2_ardour/editor_mouse.cc:2490
 msgid ""
 "programming error: control point canvas item has no control point object "
 "pointer!"
@@ -3643,344 +3714,344 @@ msgstr ""
 "ошибка в программе: control point canvas item has no control point object "
 "pointer!"
 
-#: gtk2_ardour/editor_mouse.cc:2585
+#: gtk2_ardour/editor_mouse.cc:2596
 msgid "programming error: line canvas item has no line pointer!"
 msgstr "ошибка в программе: line canvas item has no line pointer!"
 
-#: gtk2_ardour/editor_mouse.cc:2694
+#: gtk2_ardour/editor_mouse.cc:2705
 #, fuzzy
 msgid "move region(s)"
 msgstr "Создать область"
 
-#: gtk2_ardour/editor_mouse.cc:2757
+#: gtk2_ardour/editor_mouse.cc:2771
 #, fuzzy
 msgid "Drag region brush"
 msgstr "прослушать область"
 
-#: gtk2_ardour/editor_mouse.cc:2781
+#: gtk2_ardour/editor_mouse.cc:2793
 msgid "Drag region copy"
 msgstr ""
 
-#: gtk2_ardour/editor_mouse.cc:3641
+#: gtk2_ardour/editor_mouse.cc:3673
 #, fuzzy
 msgid "selection grab"
 msgstr "Выделенное"
 
-#: gtk2_ardour/editor_mouse.cc:3683
+#: gtk2_ardour/editor_mouse.cc:3715
 #, fuzzy
 msgid "cancel selection"
 msgstr "Воспроизвести выделенное"
 
-#: gtk2_ardour/editor_mouse.cc:3793
+#: gtk2_ardour/editor_mouse.cc:3825
 #, fuzzy
 msgid "range selection"
 msgstr "Воспроизвести выделенное"
 
-#: gtk2_ardour/editor_mouse.cc:3809
+#: gtk2_ardour/editor_mouse.cc:3841
 #, fuzzy
 msgid "trim selection start"
 msgstr "Выделить по интервалу"
 
-#: gtk2_ardour/editor_mouse.cc:3825
+#: gtk2_ardour/editor_mouse.cc:3857
 #, fuzzy
 msgid "trim selection end"
 msgstr "Выделить по интервалу"
 
-#: gtk2_ardour/editor_mouse.cc:3842
+#: gtk2_ardour/editor_mouse.cc:3874
 #, fuzzy
 msgid "move selection"
 msgstr "Свести выделенное"
 
-#: gtk2_ardour/editor_mouse.cc:4231
+#: gtk2_ardour/editor_mouse.cc:4265
 #, fuzzy
 msgid "Start point trim"
 msgstr "От начала до курсора"
 
-#: gtk2_ardour/editor_mouse.cc:4263
+#: gtk2_ardour/editor_mouse.cc:4297
 msgid "End point trim"
 msgstr ""
 
-#: gtk2_ardour/editor_mouse.cc:4306
+#: gtk2_ardour/editor_mouse.cc:4340
 msgid "trimmed region"
 msgstr ""
 
-#: gtk2_ardour/editor_mouse.cc:4448
+#: gtk2_ardour/editor_mouse.cc:4482
 msgid "new range marker"
 msgstr "Новый маркер области"
 
-#: gtk2_ardour/editor_mouse.cc:4692
+#: gtk2_ardour/editor_mouse.cc:4726
 #, fuzzy
 msgid "select regions"
 msgstr "Воспроизвести выделенную область"
 
-#: gtk2_ardour/editor_mouse.cc:4721
+#: gtk2_ardour/editor_mouse.cc:4755
 msgid "Name for region:"
 msgstr "Имя области: "
 
-#: gtk2_ardour/editor_mouse.cc:4785
+#: gtk2_ardour/editor_mouse.cc:4819
 #, fuzzy
 msgid "timestretch"
 msgstr "ardour: эффект timestretch"
 
-#: gtk2_ardour/editor_ops.cc:196
+#: gtk2_ardour/editor_ops.cc:115
 #, fuzzy
 msgid "split"
 msgstr "Склеить"
 
-#: gtk2_ardour/editor_ops.cc:235
+#: gtk2_ardour/editor_ops.cc:154
 #, fuzzy
 msgid "remove region"
 msgstr "Создать область"
 
-#: gtk2_ardour/editor_ops.cc:255
+#: gtk2_ardour/editor_ops.cc:174
 msgid ""
 " This is destructive, will possibly delete audio files\n"
 "It cannot be undone\n"
 "Do you really want to destroy %1 ?"
 msgstr ""
 
-#: gtk2_ardour/editor_ops.cc:259
+#: gtk2_ardour/editor_ops.cc:178
 #, fuzzy
 msgid "these regions"
 msgstr "Воспроизвести выделенную область"
 
-#: gtk2_ardour/editor_ops.cc:259
+#: gtk2_ardour/editor_ops.cc:178
 #, fuzzy
 msgid "this region"
 msgstr "отключить воспроизведение этой области"
 
-#: gtk2_ardour/editor_ops.cc:261 gtk2_ardour/editor_ops.cc:3364
-#: gtk2_ardour/route_ui.cc:715 gtk2_ardour/visual_time_axis.cc:278
+#: gtk2_ardour/editor_ops.cc:180 gtk2_ardour/editor_ops.cc:3300
+#: gtk2_ardour/route_ui.cc:736 gtk2_ardour/visual_time_axis.cc:283
 msgid "No, do nothing."
 msgstr "Нет"
 
-#: gtk2_ardour/editor_ops.cc:264
+#: gtk2_ardour/editor_ops.cc:183
 #, fuzzy
 msgid "Yes, destroy them."
 msgstr "Да"
 
-#: gtk2_ardour/editor_ops.cc:266 gtk2_ardour/editor_ops.cc:3365
+#: gtk2_ardour/editor_ops.cc:185 gtk2_ardour/editor_ops.cc:3301
 msgid "Yes, destroy it."
 msgstr "Да"
 
-#: gtk2_ardour/editor_ops.cc:355 gtk2_ardour/editor_ops.cc:383
+#: gtk2_ardour/editor_ops.cc:271 gtk2_ardour/editor_ops.cc:299
 #, fuzzy
 msgid "extend selection"
 msgstr "Выделить по интервалу"
 
-#: gtk2_ardour/editor_ops.cc:399 gtk2_ardour/editor_ops.cc:434
-#: gtk2_ardour/editor_ops.cc:479 gtk2_ardour/editor_ops.cc:506
+#: gtk2_ardour/editor_ops.cc:315 gtk2_ardour/editor_ops.cc:350
+#: gtk2_ardour/editor_ops.cc:395 gtk2_ardour/editor_ops.cc:422
 msgid "nudge forward"
 msgstr ""
 
-#: gtk2_ardour/editor_ops.cc:571
+#: gtk2_ardour/editor_ops.cc:487
 msgid "build_region_boundary_cache called with snap_type = %1"
 msgstr "build_region_boundary_cache called with snap_type = %1"
 
-#: gtk2_ardour/editor_ops.cc:1430
+#: gtk2_ardour/editor_ops.cc:1350
 #, fuzzy
 msgid "select all within"
 msgstr "Выделить всё"
 
-#: gtk2_ardour/editor_ops.cc:1462
+#: gtk2_ardour/editor_ops.cc:1383
 #, fuzzy
 msgid "set selection from region"
 msgstr "Создать область из выделенного"
 
-#: gtk2_ardour/editor_ops.cc:1495
+#: gtk2_ardour/editor_ops.cc:1416
 #, fuzzy
 msgid "set selection from range"
 msgstr "Создать область из выделенного"
 
-#: gtk2_ardour/editor_ops.cc:1525
+#: gtk2_ardour/editor_ops.cc:1446
 #, fuzzy
 msgid "select all from range"
 msgstr "выбрать окно просмотра"
 
-#: gtk2_ardour/editor_ops.cc:1547
+#: gtk2_ardour/editor_ops.cc:1468
 #, fuzzy
 msgid "select all from punch"
 msgstr "Выделить всё"
 
-#: gtk2_ardour/editor_ops.cc:1569
+#: gtk2_ardour/editor_ops.cc:1490
 #, fuzzy
 msgid "select all from loop"
 msgstr "Выделить всё"
 
-#: gtk2_ardour/editor_ops.cc:1583
+#: gtk2_ardour/editor_ops.cc:1504
 #, fuzzy
 msgid "select all after cursor"
 msgstr "От начала до курсора"
 
-#: gtk2_ardour/editor_ops.cc:1588
+#: gtk2_ardour/editor_ops.cc:1509
 #, fuzzy
 msgid "select all before cursor"
 msgstr "Воспроизвести от курсора"
 
-#: gtk2_ardour/editor_ops.cc:1618
+#: gtk2_ardour/editor_ops.cc:1539
 #, fuzzy
 msgid "select all between cursors"
 msgstr "Воспроизвести от курсора"
 
-#: gtk2_ardour/editor_ops.cc:1749
+#: gtk2_ardour/editor_ops.cc:1670
 msgid "clear markers"
 msgstr "очистить маркеры"
 
-#: gtk2_ardour/editor_ops.cc:1762
+#: gtk2_ardour/editor_ops.cc:1683
 msgid "clear ranges"
 msgstr ""
 
-#: gtk2_ardour/editor_ops.cc:1782
+#: gtk2_ardour/editor_ops.cc:1703
 msgid "clear locations"
 msgstr "очистить интервалы"
 
-#: gtk2_ardour/editor_ops.cc:1833
+#: gtk2_ardour/editor_ops.cc:1756
 #, fuzzy
 msgid "insert dragged region"
 msgstr "Вставить область"
 
-#: gtk2_ardour/editor_ops.cc:1869
+#: gtk2_ardour/editor_ops.cc:1803
 #, fuzzy
 msgid "insert region"
 msgstr "Вставить область"
 
-#: gtk2_ardour/editor_ops.cc:2060 gtk2_ardour/io_selector.cc:60
-#: gtk2_ardour/io_selector.cc:794 gtk2_ardour/connection_editor.cc:86
+#: gtk2_ardour/editor_ops.cc:1978 gtk2_ardour/io_selector.cc:60
+#: gtk2_ardour/io_selector.cc:748 gtk2_ardour/connection_editor.cc:86
 msgid "OK"
 msgstr "ОК"
 
-#: gtk2_ardour/editor_ops.cc:2067
+#: gtk2_ardour/editor_ops.cc:1985
 msgid "ardour: rename region"
 msgstr "ardour: переименовать область"
 
-#: gtk2_ardour/editor_ops.cc:2292 gtk2_ardour/editor_ops.cc:2345
+#: gtk2_ardour/editor_ops.cc:2210 gtk2_ardour/editor_ops.cc:2263
 #, fuzzy
 msgid "separate"
 msgstr "Разделить область"
 
-#: gtk2_ardour/editor_ops.cc:2410
+#: gtk2_ardour/editor_ops.cc:2328
 #, fuzzy
 msgid "trim to selection"
 msgstr "Выделить по интервалу"
 
-#: gtk2_ardour/editor_ops.cc:2451
+#: gtk2_ardour/editor_ops.cc:2369
 msgid "region fill"
 msgstr ""
 
-#: gtk2_ardour/editor_ops.cc:2515
+#: gtk2_ardour/editor_ops.cc:2433
 #, fuzzy
 msgid "fill selection"
 msgstr "Закольцевать выделенное"
 
-#: gtk2_ardour/editor_ops.cc:2536
+#: gtk2_ardour/editor_ops.cc:2454
 #, fuzzy
 msgid "Programming error. that region doesn't cover that position"
 msgstr "ошибка в программе: location/marker map does not contain location!"
 
-#: gtk2_ardour/editor_ops.cc:2539
+#: gtk2_ardour/editor_ops.cc:2457
 #, fuzzy
 msgid "set region sync position"
 msgstr "Области/положение"
 
-#: gtk2_ardour/editor_ops.cc:2555
+#: gtk2_ardour/editor_ops.cc:2473
 msgid "Place the edit cursor at the desired sync point"
 msgstr "Поместите курсор на точку синхронизации"
 
-#: gtk2_ardour/editor_ops.cc:2560
+#: gtk2_ardour/editor_ops.cc:2478
 #, fuzzy
 msgid "set sync from edit cursor"
 msgstr "Воспроизвести от курсора"
 
-#: gtk2_ardour/editor_ops.cc:2573
+#: gtk2_ardour/editor_ops.cc:2491
 msgid "remove sync"
 msgstr ""
 
-#: gtk2_ardour/editor_ops.cc:2588
+#: gtk2_ardour/editor_ops.cc:2506
 msgid "naturalize"
 msgstr ""
 
-#: gtk2_ardour/editor_ops.cc:2653
+#: gtk2_ardour/editor_ops.cc:2571
 #, fuzzy
 msgid "align selection (relative)"
 msgstr "Выровнять относительно"
 
-#: gtk2_ardour/editor_ops.cc:2682
+#: gtk2_ardour/editor_ops.cc:2600
 #, fuzzy
 msgid "align selection"
 msgstr "Свести выделенное"
 
-#: gtk2_ardour/editor_ops.cc:2694
+#: gtk2_ardour/editor_ops.cc:2612
 #, fuzzy
 msgid "align region"
 msgstr "прослушать область"
 
-#: gtk2_ardour/editor_ops.cc:2742 gtk2_ardour/editor_ops.cc:2768
+#: gtk2_ardour/editor_ops.cc:2660 gtk2_ardour/editor_ops.cc:2686
 #, fuzzy
 msgid "trim to edit"
 msgstr "От начала до курсора"
 
-#: gtk2_ardour/editor_ops.cc:2820
+#: gtk2_ardour/editor_ops.cc:2738
 #, fuzzy
 msgid "ardour: freeze"
 msgstr "ardour: "
 
-#: gtk2_ardour/editor_ops.cc:2825
+#: gtk2_ardour/editor_ops.cc:2743
 #, fuzzy
 msgid "Cancel Freeze"
 msgstr "Отмена"
 
-#: gtk2_ardour/editor_ops.cc:2862
+#: gtk2_ardour/editor_ops.cc:2780
 #, fuzzy
 msgid "bounce range"
 msgstr "Выбрать текущий интервал"
 
-#: gtk2_ardour/editor_ops.cc:2916
+#: gtk2_ardour/editor_ops.cc:2834
 msgid "cut"
 msgstr "вырезать"
 
-#: gtk2_ardour/editor_ops.cc:2919
+#: gtk2_ardour/editor_ops.cc:2837
 msgid "copy"
 msgstr "копировать"
 
-#: gtk2_ardour/editor_ops.cc:2932
+#: gtk2_ardour/editor_ops.cc:2850
 msgid " objects"
 msgstr "объекты"
 
-#: gtk2_ardour/editor_ops.cc:2958
+#: gtk2_ardour/editor_ops.cc:2876
 msgid " range"
 msgstr ""
 
-#: gtk2_ardour/editor_ops.cc:3121
+#: gtk2_ardour/editor_ops.cc:3057
 #, fuzzy
 msgid "paste"
 msgstr "Вставить"
 
-#: gtk2_ardour/editor_ops.cc:3159
+#: gtk2_ardour/editor_ops.cc:3095
 #, fuzzy
 msgid "paste chunk"
 msgstr "Создать фрагмент"
 
-#: gtk2_ardour/editor_ops.cc:3200
+#: gtk2_ardour/editor_ops.cc:3136
 #, fuzzy
 msgid "duplicate region"
 msgstr "Разделить область"
 
-#: gtk2_ardour/editor_ops.cc:3245
+#: gtk2_ardour/editor_ops.cc:3181
 #, fuzzy
 msgid "duplicate selection"
 msgstr "Свести выделенное"
 
-#: gtk2_ardour/editor_ops.cc:3303
+#: gtk2_ardour/editor_ops.cc:3239
 #, fuzzy
 msgid "clear playlist"
 msgstr "Имя снимка"
 
-#: gtk2_ardour/editor_ops.cc:3333
+#: gtk2_ardour/editor_ops.cc:3269
 #, fuzzy
 msgid "nudge track"
 msgstr "Скрыть трек"
 
-#: gtk2_ardour/editor_ops.cc:3361
+#: gtk2_ardour/editor_ops.cc:3297
 msgid ""
 "Do you really want to destroy the last capture?\n"
 "(This is destructive and cannot be undone)"
@@ -3988,85 +4059,87 @@ msgstr ""
 "Последнюю запись будет удалена. Вы уверены?\n"
 "(отмена операции невозможна)"
 
-#: gtk2_ardour/editor_ops.cc:3389
-#, fuzzy
+#: gtk2_ardour/editor_ops.cc:3325
 msgid "normalize"
-msgstr "Норм."
+msgstr "нормализовать"
 
-#: gtk2_ardour/editor_ops.cc:3442
+#: gtk2_ardour/editor_ops.cc:3378
 msgid "reverse regions"
 msgstr ""
 
-#: gtk2_ardour/editor_region_list.cc:98 gtk2_ardour/editor_region_list.cc:103
-#: gtk2_ardour/editor_region_list.cc:106 gtk2_ardour/location_ui.cc:57
+#: gtk2_ardour/editor_ops.cc:3491
+#, fuzzy
+msgid "reset region gain"
+msgstr "Создать область"
+
+#: gtk2_ardour/editor_region_list.cc:103 gtk2_ardour/editor_region_list.cc:109
+#: gtk2_ardour/editor_region_list.cc:112 gtk2_ardour/location_ui.cc:57
 msgid "Hidden"
 msgstr "Скрытый"
 
 #: gtk2_ardour/editor_route_list.cc:100 gtk2_ardour/editor_route_list.cc:101
-#: gtk2_ardour/editor_route_list.cc:246
+#: gtk2_ardour/editor_route_list.cc:250
 msgid "editor"
 msgstr "редактор"
 
-#: gtk2_ardour/editor_route_list.cc:313 gtk2_ardour/mixer_ui.cc:717
+#: gtk2_ardour/editor_route_list.cc:317 gtk2_ardour/mixer_ui.cc:714
 msgid "Show All"
 msgstr "Показать всё"
 
-#: gtk2_ardour/editor_route_list.cc:314 gtk2_ardour/mixer_ui.cc:718
+#: gtk2_ardour/editor_route_list.cc:318 gtk2_ardour/mixer_ui.cc:715
 msgid "Hide All"
 msgstr "Скрыть всё"
 
-#: gtk2_ardour/editor_route_list.cc:315 gtk2_ardour/mixer_ui.cc:719
+#: gtk2_ardour/editor_route_list.cc:319 gtk2_ardour/mixer_ui.cc:716
 #, fuzzy
 msgid "Show All Audio Tracks"
 msgstr "Показать все аудиошины"
 
-#: gtk2_ardour/editor_route_list.cc:316 gtk2_ardour/mixer_ui.cc:720
+#: gtk2_ardour/editor_route_list.cc:320 gtk2_ardour/mixer_ui.cc:717
 #, fuzzy
 msgid "Hide All Audio Tracks"
 msgstr "Скрыть все аудиошины"
 
-#: gtk2_ardour/editor_route_list.cc:317 gtk2_ardour/mixer_ui.cc:721
-#, fuzzy
+#: gtk2_ardour/editor_route_list.cc:321 gtk2_ardour/mixer_ui.cc:718
 msgid "Show All Audio Busses"
 msgstr "Показать все аудиошины"
 
-#: gtk2_ardour/editor_route_list.cc:318 gtk2_ardour/mixer_ui.cc:722
-#, fuzzy
+#: gtk2_ardour/editor_route_list.cc:322 gtk2_ardour/mixer_ui.cc:719
 msgid "Hide All Audio Busses"
 msgstr "Скрыть все аудиошины"
 
-#: gtk2_ardour/editor_rulers.cc:311
+#: gtk2_ardour/editor_rulers.cc:338
 #, fuzzy
 msgid "New location marker"
 msgstr "Маркеры интервалов"
 
-#: gtk2_ardour/editor_rulers.cc:312
+#: gtk2_ardour/editor_rulers.cc:339
 #, fuzzy
 msgid "Clear all locations"
 msgstr "очистить интервалы"
 
-#: gtk2_ardour/editor_rulers.cc:317
+#: gtk2_ardour/editor_rulers.cc:344
 msgid "Clear all ranges"
 msgstr "Очистить все области"
 
-#: gtk2_ardour/editor_rulers.cc:326
+#: gtk2_ardour/editor_rulers.cc:353
 #, fuzzy
 msgid "New Tempo"
 msgstr "Новый темп"
 
-#: gtk2_ardour/editor_rulers.cc:327
+#: gtk2_ardour/editor_rulers.cc:354
 msgid "Clear tempo"
 msgstr "Очистить темп"
 
-#: gtk2_ardour/editor_rulers.cc:332
+#: gtk2_ardour/editor_rulers.cc:359
 msgid "New Meter"
-msgstr ""
+msgstr "Новый счётчик"
 
-#: gtk2_ardour/editor_rulers.cc:333
+#: gtk2_ardour/editor_rulers.cc:360
 msgid "Clear meter"
-msgstr ""
+msgstr "Сбросить счётчик"
 
-#: gtk2_ardour/editor_rulers.cc:341
+#: gtk2_ardour/editor_rulers.cc:368
 msgid "Min:Secs"
 msgstr "Мин:С"
 
@@ -4082,38 +4155,38 @@ msgstr "Создать фрагмент"
 msgid "Forget it"
 msgstr "Забыть"
 
-#: gtk2_ardour/editor_tempodisplay.cc:270
-#: gtk2_ardour/editor_tempodisplay.cc:313
+#: gtk2_ardour/editor_tempodisplay.cc:272
+#: gtk2_ardour/editor_tempodisplay.cc:315
 msgid "add"
 msgstr "добавить"
 
-#: gtk2_ardour/editor_tempodisplay.cc:292
+#: gtk2_ardour/editor_tempodisplay.cc:294
 #, fuzzy
 msgid "add tempo mark"
 msgstr "добавить маркер"
 
-#: gtk2_ardour/editor_tempodisplay.cc:335
+#: gtk2_ardour/editor_tempodisplay.cc:337
 #, fuzzy
 msgid "add meter mark"
 msgstr "добавить маркер"
 
-#: gtk2_ardour/editor_tempodisplay.cc:370
-#: gtk2_ardour/editor_tempodisplay.cc:401
+#: gtk2_ardour/editor_tempodisplay.cc:372
+#: gtk2_ardour/editor_tempodisplay.cc:403
 msgid "done"
 msgstr "готово"
 
-#: gtk2_ardour/editor_tempodisplay.cc:388
-#: gtk2_ardour/editor_tempodisplay.cc:419
+#: gtk2_ardour/editor_tempodisplay.cc:390
+#: gtk2_ardour/editor_tempodisplay.cc:421
 msgid "replace tempo mark"
-msgstr ""
+msgstr "сменить метку темпа"
 
-#: gtk2_ardour/editor_tempodisplay.cc:461
-#: gtk2_ardour/editor_tempodisplay.cc:495
+#: gtk2_ardour/editor_tempodisplay.cc:463
+#: gtk2_ardour/editor_tempodisplay.cc:497
 msgid "programming error: marker for meter is not a meter marker!"
 msgstr "ошибка в программе: marker for meter is not a meter marker!"
 
-#: gtk2_ardour/editor_tempodisplay.cc:471
-#: gtk2_ardour/editor_tempodisplay.cc:507
+#: gtk2_ardour/editor_tempodisplay.cc:473
+#: gtk2_ardour/editor_tempodisplay.cc:509
 #, fuzzy
 msgid "remove tempo mark"
 msgstr "Да, удалить всё"
@@ -4150,198 +4223,175 @@ msgstr "TimeStretchProgress"
 msgid "timestretch cannot be started - thread creation error"
 msgstr ""
 
-#: gtk2_ardour/export_dialog.cc:59 gtk2_ardour/export_dialog.cc:399
-#: gtk2_ardour/export_dialog.cc:1027 gtk2_ardour/export_dialog.cc:1195
+#: gtk2_ardour/export_dialog.cc:57 gtk2_ardour/export_dialog.cc:397
+#: gtk2_ardour/export_dialog.cc:1025 gtk2_ardour/export_dialog.cc:1193
 msgid "22.05kHz"
 msgstr "22.05кГц"
 
-#: gtk2_ardour/export_dialog.cc:60 gtk2_ardour/export_dialog.cc:402
-#: gtk2_ardour/export_dialog.cc:417 gtk2_ardour/export_dialog.cc:1029
-#: gtk2_ardour/export_dialog.cc:1197
+#: gtk2_ardour/export_dialog.cc:58 gtk2_ardour/export_dialog.cc:400
+#: gtk2_ardour/export_dialog.cc:415 gtk2_ardour/export_dialog.cc:1027
+#: gtk2_ardour/export_dialog.cc:1195
 msgid "44.1kHz"
 msgstr "44.1кГц"
 
-#: gtk2_ardour/export_dialog.cc:61 gtk2_ardour/export_dialog.cc:405
-#: gtk2_ardour/export_dialog.cc:1031 gtk2_ardour/export_dialog.cc:1199
+#: gtk2_ardour/export_dialog.cc:59 gtk2_ardour/export_dialog.cc:403
+#: gtk2_ardour/export_dialog.cc:1029 gtk2_ardour/export_dialog.cc:1197
 msgid "48kHz"
 msgstr "48кГц"
 
-#: gtk2_ardour/export_dialog.cc:62 gtk2_ardour/export_dialog.cc:408
-#: gtk2_ardour/export_dialog.cc:1033 gtk2_ardour/export_dialog.cc:1201
+#: gtk2_ardour/export_dialog.cc:60 gtk2_ardour/export_dialog.cc:406
+#: gtk2_ardour/export_dialog.cc:1031 gtk2_ardour/export_dialog.cc:1199
 msgid "88.2kHz"
 msgstr "88.2кГц"
 
-#: gtk2_ardour/export_dialog.cc:63 gtk2_ardour/export_dialog.cc:411
-#: gtk2_ardour/export_dialog.cc:1035 gtk2_ardour/export_dialog.cc:1203
+#: gtk2_ardour/export_dialog.cc:61 gtk2_ardour/export_dialog.cc:409
+#: gtk2_ardour/export_dialog.cc:1033 gtk2_ardour/export_dialog.cc:1201
 msgid "96kHz"
 msgstr "96кГц"
 
-#: gtk2_ardour/export_dialog.cc:64 gtk2_ardour/export_dialog.cc:414
-#: gtk2_ardour/export_dialog.cc:1037 gtk2_ardour/export_dialog.cc:1205
+#: gtk2_ardour/export_dialog.cc:62 gtk2_ardour/export_dialog.cc:412
+#: gtk2_ardour/export_dialog.cc:1035 gtk2_ardour/export_dialog.cc:1203
 msgid "192kHz"
 msgstr "192кГц"
 
-#: gtk2_ardour/export_dialog.cc:69
+#: gtk2_ardour/export_dialog.cc:67
 msgid "best"
 msgstr "высокое"
 
-#: gtk2_ardour/export_dialog.cc:70 gtk2_ardour/export_dialog.cc:1212
+#: gtk2_ardour/export_dialog.cc:68 gtk2_ardour/export_dialog.cc:1210
 msgid "fastest"
 msgstr "быстрое"
 
-#: gtk2_ardour/export_dialog.cc:71 gtk2_ardour/export_dialog.cc:1214
+#: gtk2_ardour/export_dialog.cc:69 gtk2_ardour/export_dialog.cc:1212
 msgid "linear"
 msgstr "линейное"
 
-#: gtk2_ardour/export_dialog.cc:72 gtk2_ardour/export_dialog.cc:1216
+#: gtk2_ardour/export_dialog.cc:70 gtk2_ardour/export_dialog.cc:1214
 msgid "better"
 msgstr "нормальное"
 
-#: gtk2_ardour/export_dialog.cc:73 gtk2_ardour/export_dialog.cc:1218
+#: gtk2_ardour/export_dialog.cc:71 gtk2_ardour/export_dialog.cc:1216
 msgid "intermediate"
 msgstr "среднее"
 
-#: gtk2_ardour/export_dialog.cc:79 gtk2_ardour/export_dialog.cc:1227
+#: gtk2_ardour/export_dialog.cc:77 gtk2_ardour/export_dialog.cc:1225
 msgid "Rectangular"
-msgstr "Rectangular"
+msgstr "Прямоугольный"
 
-#: gtk2_ardour/export_dialog.cc:80
+#: gtk2_ardour/export_dialog.cc:78
 msgid "Shaped Noise"
-msgstr "Shaped Noise"
+msgstr "По очертаниям"
 
-#: gtk2_ardour/export_dialog.cc:81 gtk2_ardour/export_dialog.cc:1229
+#: gtk2_ardour/export_dialog.cc:79 gtk2_ardour/export_dialog.cc:1227
 msgid "Triangular"
-msgstr "Triangular"
+msgstr "Треугольный"
 
-#: gtk2_ardour/export_dialog.cc:86
-msgid "stereo"
-msgstr "стерео"
-
-#: gtk2_ardour/export_dialog.cc:87 gtk2_ardour/export_dialog.cc:486
-#: gtk2_ardour/export_dialog.cc:1055 gtk2_ardour/export_dialog.cc:1177
+#: gtk2_ardour/export_dialog.cc:85 gtk2_ardour/export_dialog.cc:484
+#: gtk2_ardour/export_dialog.cc:1053 gtk2_ardour/export_dialog.cc:1175
 msgid "mono"
 msgstr "моно"
 
-#: gtk2_ardour/export_dialog.cc:93
+#: gtk2_ardour/export_dialog.cc:91
 msgid "CUE"
-msgstr ""
+msgstr "CUE"
 
-#: gtk2_ardour/export_dialog.cc:94
+#: gtk2_ardour/export_dialog.cc:92
 msgid "TOC"
-msgstr ""
+msgstr "TOC"
+
+#: gtk2_ardour/export_dialog.cc:100
+msgid "Format"
+msgstr "Формат"
+
+#: gtk2_ardour/export_dialog.cc:101
+msgid "CD Marker File Type"
+msgstr "Тип файла маркеров CD"
 
 #: gtk2_ardour/export_dialog.cc:102
-#, fuzzy
-msgid "Format"
-msgstr "Норм."
+msgid "Channels"
+msgstr "Каналов"
 
 #: gtk2_ardour/export_dialog.cc:103
-msgid "CD Marker File Type"
-msgstr ""
+msgid "File Type"
+msgstr "Тип файла"
 
 #: gtk2_ardour/export_dialog.cc:104
-#, fuzzy
-msgid "Channels"
-msgstr "отмена"
+msgid "Sample Format"
+msgstr "Формат сэмпла"
 
 #: gtk2_ardour/export_dialog.cc:105
-#, fuzzy
-msgid "File Type"
-msgstr "Тип"
+msgid "Sample Endianness"
+msgstr "Байтовый порядок сэмпла"
 
 #: gtk2_ardour/export_dialog.cc:106
-#, fuzzy
-msgid "Sample Format"
-msgstr "Разделить область"
+msgid "Sample Rate"
+msgstr "Частота сэмплирования"
 
 #: gtk2_ardour/export_dialog.cc:107
-msgid "Sample Endianness"
-msgstr ""
+msgid "Conversion Quality"
+msgstr "Качество преобразования"
 
 #: gtk2_ardour/export_dialog.cc:108
-#, fuzzy
-msgid "Sample Rate"
-msgstr "Разделить область"
+msgid "Dither Type"
+msgstr "Тип дитеринга"
 
 #: gtk2_ardour/export_dialog.cc:109
-msgid "Conversion Quality"
-msgstr ""
+msgid "Export CD Marker File Only"
+msgstr "Экспортировать только файл маркеров CD"
 
 #: gtk2_ardour/export_dialog.cc:110
-msgid "Dither Type"
-msgstr ""
-
-#: gtk2_ardour/export_dialog.cc:111
-msgid "Export CD Marker File Only"
-msgstr ""
-
-#: gtk2_ardour/export_dialog.cc:112
-#, fuzzy
 msgid "Export to File"
-msgstr "Экспорт на CD"
+msgstr "Экспорт в файл"
 
-#: gtk2_ardour/export_dialog.cc:113 gtk2_ardour/option_editor.cc:82
-#: gtk2_ardour/option_editor.cc:83
+#: gtk2_ardour/export_dialog.cc:111 gtk2_ardour/option_editor.cc:80
+#: gtk2_ardour/option_editor.cc:81
 msgid "Browse"
 msgstr "Обзор"
 
-#: gtk2_ardour/export_dialog.cc:114
+#: gtk2_ardour/export_dialog.cc:112
 msgid "Specific tracks ..."
-msgstr ""
+msgstr "Специфические задачи"
 
-#: gtk2_ardour/export_dialog.cc:125
+#: gtk2_ardour/export_dialog.cc:123
 msgid "ardour: export"
 msgstr "ardour: экспорт"
 
-#: gtk2_ardour/export_dialog.cc:126
-msgid "ardour_export"
-msgstr "ardour_экспорт"
-
-#: gtk2_ardour/export_dialog.cc:139 gtk2_ardour/export_dialog.cc:155
-#: gtk2_ardour/mixer_strip.cc:121 gtk2_ardour/mixer_strip.cc:727
+#: gtk2_ardour/export_dialog.cc:137 gtk2_ardour/export_dialog.cc:153
+#: gtk2_ardour/mixer_strip.cc:123 gtk2_ardour/mixer_strip.cc:746
 msgid "Output"
 msgstr "Выход"
 
-#: gtk2_ardour/export_dialog.cc:140 gtk2_ardour/export_dialog.cc:156
-#: gtk2_ardour/export_dialog.cc:1068 gtk2_ardour/export_dialog.cc:1072
-msgid "Left"
-msgstr "Левый"
-
-#: gtk2_ardour/export_dialog.cc:141 gtk2_ardour/export_dialog.cc:157
-msgid "Right"
-msgstr "Правый"
-
-#: gtk2_ardour/export_dialog.cc:633
+#: gtk2_ardour/export_dialog.cc:631
 #, fuzzy
 msgid "Editor: cannot open \"%1\" as export file for CD toc file"
 msgstr "Редакор: не могу открыть \"%1\" как файл экспорта маркеров для CD-треков"
 
-#: gtk2_ardour/export_dialog.cc:759
+#: gtk2_ardour/export_dialog.cc:757
 #, fuzzy
 msgid "Editor: cannot open \"%1\" as export file for CD cue file"
 msgstr "Редакор: не могу открыть \"%1\" как файл экспорта маркеров для CD-треков"
 
-#: gtk2_ardour/export_dialog.cc:778
+#: gtk2_ardour/export_dialog.cc:776
 msgid "WAV"
 msgstr "WAV"
 
-#: gtk2_ardour/export_dialog.cc:912
+#: gtk2_ardour/export_dialog.cc:910
 msgid "Stop Export"
 msgstr "Остановить экспорт"
 
-#: gtk2_ardour/export_dialog.cc:1131
+#: gtk2_ardour/export_dialog.cc:1129
 msgid "Please enter a valid filename."
 msgstr "Введите корректное имя файла"
 
-#: gtk2_ardour/export_dialog.cc:1141
+#: gtk2_ardour/export_dialog.cc:1139
 msgid "Please specify a complete filename for the audio file."
 msgstr "Укажите полное имя звукового файла"
 
-#: gtk2_ardour/export_dialog.cc:1147
+#: gtk2_ardour/export_dialog.cc:1145
 msgid "File already exists, do you want to overwrite it?"
 msgstr "Файл с таким именем уже есть. Перезаписать его?"
 
-#: gtk2_ardour/export_dialog.cc:1159
+#: gtk2_ardour/export_dialog.cc:1157
 #: gtk2_ardour/export_range_markers_dialog.cc:153
 msgid "Cannot write file in: "
 msgstr "Невозможно записать файлв в:"
@@ -4361,51 +4411,48 @@ msgstr ""
 msgid "add gain automation event"
 msgstr "автомат"
 
-#: gtk2_ardour/gain_meter.cc:67
-msgid "cannot find images for fader slider"
-msgstr ""
-
-#: gtk2_ardour/gain_meter.cc:74
-msgid "cannot find images for fader rail"
-msgstr ""
-
-#: gtk2_ardour/gain_meter.cc:125 gtk2_ardour/gain_meter.cc:334
-#: gtk2_ardour/gain_meter.cc:489 gtk2_ardour/gain_meter.cc:534
+#: gtk2_ardour/gain_meter.cc:112 gtk2_ardour/gain_meter.cc:330
+#: gtk2_ardour/gain_meter.cc:511 gtk2_ardour/gain_meter.cc:578
 #, fuzzy
 msgid "-inf"
 msgstr "в"
 
-#: gtk2_ardour/gain_meter.cc:135
+#: gtk2_ardour/gain_meter.cc:123
 msgid "Fader automation mode"
 msgstr "Режим автоматизации фейдера"
 
-#: gtk2_ardour/gain_meter.cc:136
+#: gtk2_ardour/gain_meter.cc:124
 msgid "Fader automation type"
 msgstr "Тип автоматизации фейдера"
 
-#: gtk2_ardour/gain_meter.cc:177 gtk2_ardour/gain_meter.cc:812
-#: gtk2_ardour/panner_ui.cc:97 gtk2_ardour/panner_ui.cc:797
+#: gtk2_ardour/gain_meter.cc:169 gtk2_ardour/gain_meter.cc:872
+#: gtk2_ardour/panner_ui.cc:99 gtk2_ardour/panner_ui.cc:810
 msgid "Abs"
 msgstr "Абс"
 
-#: gtk2_ardour/gain_meter.cc:467
+#: gtk2_ardour/gain_meter.cc:489
 msgid "-Inf"
 msgstr "-Inf"
 
-#: gtk2_ardour/gain_meter.cc:776 gtk2_ardour/mixer_strip.cc:730
-#: gtk2_ardour/panner_ui.cc:761
+#: gtk2_ardour/gain_meter.cc:688 gtk2_ardour/gain_meter.cc:703
+#, fuzzy
+msgid "meter point change"
+msgstr "Выбрать текущий интервал"
+
+#: gtk2_ardour/gain_meter.cc:836 gtk2_ardour/mixer_strip.cc:749
+#: gtk2_ardour/panner_ui.cc:774
 msgid "O"
 msgstr "O"
 
-#: gtk2_ardour/gain_meter.cc:779 gtk2_ardour/panner_ui.cc:764
+#: gtk2_ardour/gain_meter.cc:839 gtk2_ardour/panner_ui.cc:777
 msgid "P"
 msgstr "P"
 
-#: gtk2_ardour/gain_meter.cc:782 gtk2_ardour/panner_ui.cc:767
+#: gtk2_ardour/gain_meter.cc:842 gtk2_ardour/panner_ui.cc:780
 msgid "T"
 msgstr "T"
 
-#: gtk2_ardour/gain_meter.cc:785 gtk2_ardour/panner_ui.cc:770
+#: gtk2_ardour/gain_meter.cc:845 gtk2_ardour/panner_ui.cc:783
 msgid "W"
 msgstr "W"
 
@@ -4496,10 +4543,10 @@ msgstr "Кадр"
 msgid "Rename Track"
 msgstr "Переименовать дорожку"
 
-#: gtk2_ardour/io_selector.cc:62 gtk2_ardour/io_selector.cc:796
+#: gtk2_ardour/io_selector.cc:62 gtk2_ardour/io_selector.cc:750
 #: gtk2_ardour/connection_editor.cc:61 gtk2_ardour/connection_editor.cc:110
 msgid "Rescan"
-msgstr ""
+msgstr "Просканировать заново"
 
 #: gtk2_ardour/io_selector.cc:70
 msgid "%1 input"
@@ -4511,11 +4558,11 @@ msgstr "%1 выход"
 
 #: gtk2_ardour/io_selector.cc:144 gtk2_ardour/route_params_ui.cc:103
 msgid "Inputs"
-msgstr "Входов"
+msgstr "Входы"
 
 #: gtk2_ardour/io_selector.cc:144 gtk2_ardour/route_params_ui.cc:104
 msgid "Outputs"
-msgstr "Выходов"
+msgstr "Выходы"
 
 #: gtk2_ardour/io_selector.cc:145
 msgid "Add Input"
@@ -4541,16 +4588,11 @@ msgstr "Отсоединить все"
 msgid "Available connections"
 msgstr "Доступные соединения"
 
-#: gtk2_ardour/io_selector.cc:557 gtk2_ardour/io_selector.cc:576
+#: gtk2_ardour/io_selector.cc:549 gtk2_ardour/io_selector.cc:560
 msgid "There are no more JACK ports available."
-msgstr ""
+msgstr "Доступных портов JACK не осталось."
 
-#: gtk2_ardour/io_selector.cc:651 gtk2_ardour/io_selector.cc:678
-#: gtk2_ardour/io_selector.cc:731
-msgid "port"
-msgstr "порт"
-
-#: gtk2_ardour/io_selector.cc:800
+#: gtk2_ardour/io_selector.cc:754
 msgid "ardour: "
 msgstr "ardour: "
 
@@ -4592,11 +4634,7 @@ msgstr "Для \"mod5\" назначено кнопок: %1"
 
 #: gtk2_ardour/ladspa_pluginui.cc:77
 msgid "<span size=\"large\">Presets</span>"
-msgstr ""
-
-#: gtk2_ardour/ladspa_pluginui.cc:168
-msgid "Controls"
-msgstr "Управление"
+msgstr "<span size=\"large\">Предустановки</span>"
 
 #: gtk2_ardour/ladspa_pluginui.cc:205
 msgid "Plugin Editor: could not build control element for port %1"
@@ -4604,7 +4642,7 @@ msgstr "Редактор модулей: невозможно создать э�
 
 #: gtk2_ardour/ladspa_pluginui.cc:296
 msgid "Automation control"
-msgstr "Контроль атовматизации"
+msgstr "Контроль автоматизации"
 
 #: gtk2_ardour/location_ui.cc:49 gtk2_ardour/location_ui.cc:52
 msgid "Set"
@@ -4620,7 +4658,7 @@ msgstr "CD"
 
 #: gtk2_ardour/location_ui.cc:59
 msgid "SCMS"
-msgstr ""
+msgstr "SCMS"
 
 #: gtk2_ardour/location_ui.cc:60
 msgid "Pre-Emphasis"
@@ -4632,15 +4670,11 @@ msgstr "Добавить новый интервал"
 
 #: gtk2_ardour/location_ui.cc:572
 msgid "Add New Range"
-msgstr ""
+msgstr "Добавить новую область"
 
 #: gtk2_ardour/location_ui.cc:576
 msgid "ardour: locations"
 msgstr "ardour: интервалы"
-
-#: gtk2_ardour/location_ui.cc:577
-msgid "ardour_locations"
-msgstr "ardour_интервалы"
 
 #: gtk2_ardour/location_ui.cc:605
 #, fuzzy
@@ -4655,32 +4689,28 @@ msgstr ""
 msgid "add range marker"
 msgstr "Добавить маркер области"
 
-#: gtk2_ardour/main.cc:72
+#: gtk2_ardour/main.cc:73
 msgid "ardour is killing itself for a clean exit\n"
 msgstr "ardour: принудительное завершение работы\n"
 
-#: gtk2_ardour/main.cc:81
-msgid "stopping user interface\n"
-msgstr "завершение работы...\n"
-
-#: gtk2_ardour/main.cc:100
+#: gtk2_ardour/main.cc:99
 #, c-format
 msgid "%d(%d): received signal %d\n"
 msgstr "%d(%d): принят сигнал %d\n"
 
-#: gtk2_ardour/main.cc:180
+#: gtk2_ardour/main.cc:179
 msgid "cannot become new process group leader (%1)"
 msgstr ""
 
-#: gtk2_ardour/main.cc:207
+#: gtk2_ardour/main.cc:206
 msgid "cannot setup signal handling for %1"
 msgstr "cannot setup signal handling for %1"
 
-#: gtk2_ardour/main.cc:218
+#: gtk2_ardour/main.cc:217
 msgid "cannot set default signal mask (%1)"
 msgstr "cannot set default signal mask (%1)"
 
-#: gtk2_ardour/main.cc:248
+#: gtk2_ardour/main.cc:247
 msgid ""
 "Without a UI style file, ardour will look strange.\n"
 " Please set ARDOUR2_UI_RC to point to a valid UI style file"
@@ -4689,11 +4719,11 @@ msgstr ""
 "без файла, определяющего стиль оформления.\n"
 "Пожалуйста, укажите его [файл] в переменной окружения ARDOUR_UI_RC"
 
-#: gtk2_ardour/main.cc:270
+#: gtk2_ardour/main.cc:268
 msgid "Ardour could not connect to JACK."
 msgstr "Не удалось соединиться с сервером JACK."
 
-#: gtk2_ardour/main.cc:274
+#: gtk2_ardour/main.cc:272
 #, fuzzy
 msgid ""
 "There are several possible reasons:\n"
@@ -4713,11 +4743,11 @@ msgstr ""
 "\n"
 "Пожалуйста, проверьте все варианты, возможно потребуется (пере)запуск JACK."
 
-#: gtk2_ardour/main.cc:316
+#: gtk2_ardour/main.cc:314
 msgid "could not load command line session \"%1\""
 msgstr "не удалось загрузить сессию \"%1\", указанную в командной строке"
 
-#: gtk2_ardour/main.cc:324
+#: gtk2_ardour/main.cc:322
 msgid ""
 "\n"
 "\n"
@@ -4725,52 +4755,52 @@ msgid ""
 "To create it from the command line, start ardour as \"ardour --new %1"
 msgstr ""
 
-#: gtk2_ardour/main.cc:383
+#: gtk2_ardour/main.cc:386
 msgid "Ardour/GTK "
 msgstr "Ardour/GTK "
 
-#: gtk2_ardour/main.cc:385
+#: gtk2_ardour/main.cc:388
 msgid ""
 "\n"
 "   (built using "
 msgstr ""
+"\n"
+"   (собран с использованием "
 
-#: gtk2_ardour/main.cc:389
-msgid " with libardour "
-msgstr " с libardour "
-
-#: gtk2_ardour/main.cc:394
+#: gtk2_ardour/main.cc:391
 msgid " and GCC version "
 msgstr " и версией GCC "
 
-#: gtk2_ardour/main.cc:404
+#: gtk2_ardour/main.cc:401
 msgid "Copyright (C) 1999-2006 Paul Davis"
 msgstr "Авторские права © 1999-2006 Paul Davis"
 
-#: gtk2_ardour/main.cc:405
+#: gtk2_ardour/main.cc:402
 msgid ""
 "Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel "
 "Baker"
-msgstr "Частичные авторские права © Steve Harris, Ari Johnson, Brett Viren, Joel Baker"
+msgstr ""
+"Частичные авторские права © Steve Harris, Ari Johnson, Brett Viren, Joel "
+"Baker"
 
-#: gtk2_ardour/main.cc:407
+#: gtk2_ardour/main.cc:404
 msgid "Ardour comes with ABSOLUTELY NO WARRANTY"
 msgstr "Ardour распространяется БЕЗО ВСЯКИХ ГАРАНТИЙ"
 
-#: gtk2_ardour/main.cc:408
+#: gtk2_ardour/main.cc:405
 msgid "not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 msgstr ""
 
-#: gtk2_ardour/main.cc:409
+#: gtk2_ardour/main.cc:406
 msgid "This is free software, and you are welcome to redistribute it "
 msgstr "Это свободное программное обеспечение, Вы можете распространять его"
 
-#: gtk2_ardour/main.cc:410
+#: gtk2_ardour/main.cc:407
 #, fuzzy
 msgid "under certain conditions; see the source for copying conditions."
 msgstr "на определённых условиях; подробнее об этом читайте в файле COPYING."
 
-#: gtk2_ardour/main.cc:420
+#: gtk2_ardour/main.cc:417
 msgid "could not create ARDOUR GUI"
 msgstr "не удалось создать графический интерфейс для ARDOUR"
 
@@ -4778,7 +4808,7 @@ msgstr "не удалось создать графический интерфе
 msgid "Could not connect to JACK server as  \"%1\""
 msgstr "Не удалось соединиться с сервером JACK как \"%1\""
 
-#: gtk2_ardour/main.cc:446
+#: gtk2_ardour/main.cc:447
 msgid "could not initialize Ardour."
 msgstr "не удалось запустить Ardour."
 
@@ -4795,118 +4825,110 @@ msgstr "Удалить поле"
 msgid "Marker"
 msgstr "Маркер"
 
-#: gtk2_ardour/mixer_strip.cc:92 gtk2_ardour/mixer_strip.cc:137
-#: gtk2_ardour/mixer_strip.cc:1191
+#: gtk2_ardour/mixer_strip.cc:94 gtk2_ardour/mixer_strip.cc:139
+#: gtk2_ardour/mixer_strip.cc:1218
 msgid "pre"
 msgstr ""
 
-#: gtk2_ardour/mixer_strip.cc:93 gtk2_ardour/mixer_strip.cc:782
+#: gtk2_ardour/mixer_strip.cc:95 gtk2_ardour/mixer_strip.cc:796
 msgid "Comments"
 msgstr "Комментарии"
 
-#: gtk2_ardour/mixer_strip.cc:116
+#: gtk2_ardour/mixer_strip.cc:118
 msgid "Input"
 msgstr "Вход"
 
-#: gtk2_ardour/mixer_strip.cc:133 gtk2_ardour/mixer_strip.cc:1187
+#: gtk2_ardour/mixer_strip.cc:135 gtk2_ardour/mixer_strip.cc:1214
 msgid "input"
 msgstr "вход"
 
-#: gtk2_ardour/mixer_strip.cc:141 gtk2_ardour/mixer_strip.cc:1195
+#: gtk2_ardour/mixer_strip.cc:143 gtk2_ardour/mixer_strip.cc:1222
 msgid "post"
 msgstr ""
 
-#: gtk2_ardour/mixer_strip.cc:149
+#: gtk2_ardour/mixer_strip.cc:150
 msgid "tupni"
 msgstr ""
 
-#: gtk2_ardour/mixer_strip.cc:205
+#: gtk2_ardour/mixer_strip.cc:204
 msgid "Varispeed"
 msgstr ""
 
-#: gtk2_ardour/mixer_strip.cc:231 gtk2_ardour/mixer_strip.cc:796
+#: gtk2_ardour/mixer_strip.cc:230 gtk2_ardour/mixer_strip.cc:812
 msgid "Click to Add/Edit Comments"
 msgstr "Нажмите для добавления/правки комментариев"
 
-#: gtk2_ardour/mixer_strip.cc:371
+#: gtk2_ardour/mixer_strip.cc:386
 msgid "unknown strip width \"%1\" in XML GUI information"
 msgstr "неизвестная ширина трека \"%1\" в XML описании"
 
-#: gtk2_ardour/mixer_strip.cc:415
+#: gtk2_ardour/mixer_strip.cc:430
 #, fuzzy
 msgid "record"
 msgstr "Запись"
 
-#: gtk2_ardour/mixer_strip.cc:417 gtk2_ardour/audio_region_editor.cc:46
-msgid "mute"
-msgstr "тихо"
-
-#: gtk2_ardour/mixer_strip.cc:418
-msgid "solo"
-msgstr "соло"
-
-#: gtk2_ardour/mixer_strip.cc:421
+#: gtk2_ardour/mixer_strip.cc:437
 msgid "comments"
 msgstr "комментарии"
 
-#: gtk2_ardour/mixer_strip.cc:423
+#: gtk2_ardour/mixer_strip.cc:440
 msgid "*comments*"
 msgstr "*комментарии*"
 
-#: gtk2_ardour/mixer_strip.cc:438
+#: gtk2_ardour/mixer_strip.cc:455
 msgid "Rec"
 msgstr "Зап"
 
-#: gtk2_ardour/mixer_strip.cc:440
+#: gtk2_ardour/mixer_strip.cc:457
 msgid "M"
 msgstr "M"
 
-#: gtk2_ardour/mixer_strip.cc:441
+#: gtk2_ardour/mixer_strip.cc:458
 msgid "S"
 msgstr "S"
 
-#: gtk2_ardour/mixer_strip.cc:444 gtk2_ardour/mixer_strip.cc:790
+#: gtk2_ardour/mixer_strip.cc:462 gtk2_ardour/mixer_strip.cc:806
 msgid "Cmt"
 msgstr ""
 
-#: gtk2_ardour/mixer_strip.cc:446 gtk2_ardour/mixer_strip.cc:788
+#: gtk2_ardour/mixer_strip.cc:465 gtk2_ardour/mixer_strip.cc:803
 msgid "*Cmt*"
 msgstr ""
 
-#: gtk2_ardour/mixer_strip.cc:484 gtk2_ardour/mixer_strip.cc:550
-#: gtk2_ardour/redirect_box.cc:1021
+#: gtk2_ardour/mixer_strip.cc:503 gtk2_ardour/mixer_strip.cc:569
+#: gtk2_ardour/redirect_box.cc:1086
 msgid "Not connected to JACK - no I/O changes are possible"
 msgstr ""
 
-#: gtk2_ardour/mixer_strip.cc:584 gtk2_ardour/mixer_strip.cc:600
+#: gtk2_ardour/mixer_strip.cc:603 gtk2_ardour/mixer_strip.cc:619
 msgid "could not register new ports required for that connection"
 msgstr "Не удалось зарегистрировать новые порты для этого соединения"
 
-#: gtk2_ardour/mixer_strip.cc:707
+#: gtk2_ardour/mixer_strip.cc:726
 msgid " Input"
 msgstr " Вход"
 
-#: gtk2_ardour/mixer_strip.cc:710
+#: gtk2_ardour/mixer_strip.cc:729
 msgid "I"
 msgstr "ВХ"
 
-#: gtk2_ardour/mixer_strip.cc:780
+#: gtk2_ardour/mixer_strip.cc:793
 msgid "*Comments*"
 msgstr "*Комментарии*"
 
-#: gtk2_ardour/mixer_strip.cc:819
+#: gtk2_ardour/mixer_strip.cc:848
 msgid ": comment editor"
 msgstr ": редактор комментариев"
 
-#: gtk2_ardour/mixer_strip.cc:913
+#: gtk2_ardour/mixer_strip.cc:943
 msgid "Grp"
-msgstr ""
+msgstr "Грп"
 
-#: gtk2_ardour/mixer_strip.cc:916
+#: gtk2_ardour/mixer_strip.cc:946
 msgid "~G"
 msgstr "нГр"
 
-#: gtk2_ardour/mixer_strip.cc:964
+#: gtk2_ardour/mixer_strip.cc:995
 msgid "Invert Polarity"
 msgstr "Развернуть полярность"
 
@@ -4918,194 +4940,187 @@ msgstr "Каналы"
 msgid "Group"
 msgstr "Группа"
 
-#: gtk2_ardour/mixer_ui.cc:209 gtk2_ardour/mixer_ui.cc:389
+#: gtk2_ardour/mixer_ui.cc:206 gtk2_ardour/mixer_ui.cc:386
 msgid "ardour: mixer"
 msgstr "ardour: микшер"
 
-#: gtk2_ardour/mixer_ui.cc:210
-msgid "ardour_mixer"
-msgstr "ardour_микшер"
-
-#: gtk2_ardour/mixer_ui.cc:361
+#: gtk2_ardour/mixer_ui.cc:358
 msgid "ardour: mixer: "
 msgstr "ardour: микшер: "
 
-#: gtk2_ardour/mixer_ui.cc:592
+#: gtk2_ardour/mixer_ui.cc:589
 msgid "signal"
 msgstr "сигнал"
 
-#: gtk2_ardour/mixer_ui.cc:741
+#: gtk2_ardour/mixer_ui.cc:738
 msgid "track display list item for renamed strip not found!"
 msgstr ""
 
 #: gtk2_ardour/new_session_dialog.cc:41
-msgid "New Session Name :"
-msgstr "Имя новой сессии:"
+msgid "Name :"
+msgstr "Имя:"
 
-#: gtk2_ardour/new_session_dialog.cc:45
-msgid "Create Session Directory In :"
-msgstr "Создать каталог сессии в:"
+#: gtk2_ardour/new_session_dialog.cc:45 gtk2_ardour/new_session_dialog.cc:46
+#: gtk2_ardour/new_session_dialog.cc:47 gtk2_ardour/new_session_dialog.cc:48
+msgid "channels"
+msgstr "канал(-ов)"
 
-#: gtk2_ardour/new_session_dialog.cc:47
-msgid "Use Session Template :"
-msgstr "Использовать шаблон:"
+#: gtk2_ardour/new_session_dialog.cc:66
+msgid "<b>Busses</b>"
+msgstr "<b>Шины</b>"
 
-#: gtk2_ardour/new_session_dialog.cc:49
-msgid "Channel Count"
-msgstr "Число каналов"
+#: gtk2_ardour/new_session_dialog.cc:67
+msgid "<b>Inputs</b>"
+msgstr "<b>Входы</b>"
 
-#: gtk2_ardour/new_session_dialog.cc:50
+#: gtk2_ardour/new_session_dialog.cc:68
+msgid "<b>Outputs</b>"
+msgstr "<b>Выходы</b>"
+
+#: gtk2_ardour/new_session_dialog.cc:70
+msgid "Create Folder In :"
+msgstr "Создать папку сессии в:"
+
+#: gtk2_ardour/new_session_dialog.cc:72
+msgid "Template :"
+msgstr "Шаблон:"
+
+#: gtk2_ardour/new_session_dialog.cc:74
 msgid "Create Monitor Bus"
 msgstr "Создать контрольную шину"
 
-#: gtk2_ardour/new_session_dialog.cc:57
+#: gtk2_ardour/new_session_dialog.cc:81
 msgid "Create Master Bus"
 msgstr "Создать мастер-шину"
 
-#: gtk2_ardour/new_session_dialog.cc:59
-msgid "Automatically Connect Inputs"
-msgstr "Автоматическое подключение ко входам"
+#: gtk2_ardour/new_session_dialog.cc:83
+msgid "Automatically Connect to Physical Inputs"
+msgstr "Автоматически подключиться к физическим входам"
 
-#: gtk2_ardour/new_session_dialog.cc:60 gtk2_ardour/new_session_dialog.cc:71
-msgid "Port Limit"
-msgstr "Портов не более чем"
+#: gtk2_ardour/new_session_dialog.cc:84 gtk2_ardour/new_session_dialog.cc:97
+msgid "Use only"
+msgstr "Использовать только"
 
-#: gtk2_ardour/new_session_dialog.cc:68
-msgid "<b>Track/Bus Inputs</b>"
-msgstr "<b>Входы дорожек/шин</b>"
-
-#: gtk2_ardour/new_session_dialog.cc:70
+#: gtk2_ardour/new_session_dialog.cc:96
 msgid "Automatically Connect Outputs"
-msgstr "Автоматическое подключение к выходам"
+msgstr "Автоматически подключиться к выходам"
 
-#: gtk2_ardour/new_session_dialog.cc:79
-msgid "Connect to Master Bus"
-msgstr "Соединиться с мастер-шиной"
+#: gtk2_ardour/new_session_dialog.cc:105
+msgid "... to Master Bus"
+msgstr "... к мастер-шине"
 
-#: gtk2_ardour/new_session_dialog.cc:80
-msgid "Connect to Physical Outputs"
-msgstr "Соединиться с физическими выходами"
+#: gtk2_ardour/new_session_dialog.cc:106
+msgid "... to Physical Outputs"
+msgstr "... к физическим выходам"
 
-#: gtk2_ardour/new_session_dialog.cc:84
-msgid "<b>Track/Bus Outputs</b>"
-msgstr "<b>Выходы дорожек/шин</b>"
-
-#: gtk2_ardour/new_session_dialog.cc:87
+#: gtk2_ardour/new_session_dialog.cc:112
 msgid "Advanced Options"
 msgstr "Расширенные параметры"
 
-#: gtk2_ardour/new_session_dialog.cc:95
-msgid "Open Recent Session"
-msgstr "Открыть недавнюю сессию"
+#: gtk2_ardour/new_session_dialog.cc:120
+msgid "Recent:"
+msgstr "Недавние:"
 
-#: gtk2_ardour/new_session_dialog.cc:131
-msgid "Open Session File :"
-msgstr "Открыть файл сессии:"
+#: gtk2_ardour/new_session_dialog.cc:157
+msgid "Browse:"
+msgstr "Обзор:"
 
-#: gtk2_ardour/new_session_dialog.cc:281
+#: gtk2_ardour/new_session_dialog.cc:335
 msgid "New Session"
 msgstr "Создать сессию"
 
-#: gtk2_ardour/new_session_dialog.cc:283
+#: gtk2_ardour/new_session_dialog.cc:337
 msgid "Open Session"
 msgstr "Открыть сессию"
 
-#: gtk2_ardour/new_session_dialog.cc:288
+#: gtk2_ardour/new_session_dialog.cc:342
 msgid "ardour: session control"
 msgstr "Сессии Ardour"
 
-#: gtk2_ardour/new_session_dialog.cc:317
+#: gtk2_ardour/new_session_dialog.cc:383
 msgid "select template"
 msgstr "Выберите шаблон"
 
-#: gtk2_ardour/new_session_dialog.cc:323
+#: gtk2_ardour/new_session_dialog.cc:389
 msgid "select session file"
 msgstr "Выберите файл сессии"
 
-#: gtk2_ardour/new_session_dialog.cc:332
+#: gtk2_ardour/new_session_dialog.cc:398
 msgid "select directory"
 msgstr "Выберите каталог"
 
-#: gtk2_ardour/option_editor.cc:75
+#: gtk2_ardour/option_editor.cc:73
 msgid "SMPTE offset is negative"
 msgstr "Смещение SMPTE отрицательно"
 
-#: gtk2_ardour/option_editor.cc:101
+#: gtk2_ardour/option_editor.cc:99
 msgid "ardour: options editor"
-msgstr "Редактор параметров"
+msgstr "ardour: параметры программы"
 
-#: gtk2_ardour/option_editor.cc:102
-msgid "ardour_option_editor"
-msgstr "ardour_редактор_параметров"
-
-#: gtk2_ardour/option_editor.cc:126
+#: gtk2_ardour/option_editor.cc:124
 msgid "Paths/Files"
-msgstr "Пути/Файлы"
+msgstr "Пути/файлы"
 
-#: gtk2_ardour/option_editor.cc:127
+#: gtk2_ardour/option_editor.cc:125
 msgid "Kbd/Mouse"
-msgstr "Клавиатура/Мышь"
+msgstr "Клавиатура/мышь"
 
-#: gtk2_ardour/option_editor.cc:130
+#: gtk2_ardour/option_editor.cc:128
 msgid "Layers & Fades"
 msgstr "Слои и фейды"
 
-#: gtk2_ardour/option_editor.cc:134
+#: gtk2_ardour/option_editor.cc:132
 msgid "MIDI"
 msgstr "MIDI"
 
-#: gtk2_ardour/option_editor.cc:222
+#: gtk2_ardour/option_editor.cc:220
 msgid "session RAID path"
 msgstr "Путь к файлам RAID-сессий"
 
-#: gtk2_ardour/option_editor.cc:227
-msgid "Soundfile Search Paths"
-msgstr "Путь к звуковым файлам"
-
-#: gtk2_ardour/option_editor.cc:252 gtk2_ardour/option_editor.cc:258
-#: gtk2_ardour/option_editor.cc:670 gtk2_ardour/option_editor.cc:697
+#: gtk2_ardour/option_editor.cc:236 gtk2_ardour/option_editor.cc:242
+#: gtk2_ardour/option_editor.cc:652 gtk2_ardour/option_editor.cc:672
 msgid "internal"
 msgstr "внутренний"
 
-#: gtk2_ardour/option_editor.cc:271
+#: gtk2_ardour/option_editor.cc:255
 msgid "Short crossfade length (msecs)"
-msgstr ""
+msgstr "Длительность короткого кроссфейда (мс)"
 
-#: gtk2_ardour/option_editor.cc:283
+#: gtk2_ardour/option_editor.cc:267
 msgid "Destructive crossfade length (msecs)"
-msgstr ""
+msgstr "Длительность деструктивного кроссфейда (мс)"
 
-#: gtk2_ardour/option_editor.cc:342
+#: gtk2_ardour/option_editor.cc:327
 msgid "SMPTE Offset"
 msgstr "Смещение SMPTE"
 
-#: gtk2_ardour/option_editor.cc:409 gtk2_ardour/option_editor.cc:416
-#: gtk2_ardour/option_editor.cc:419 gtk2_ardour/option_editor.cc:565
+#: gtk2_ardour/option_editor.cc:394 gtk2_ardour/option_editor.cc:401
+#: gtk2_ardour/option_editor.cc:404 gtk2_ardour/option_editor.cc:552
 msgid "online"
 msgstr ""
 
-#: gtk2_ardour/option_editor.cc:416 gtk2_ardour/option_editor.cc:417
-#: gtk2_ardour/option_editor.cc:562
+#: gtk2_ardour/option_editor.cc:401 gtk2_ardour/option_editor.cc:402
+#: gtk2_ardour/option_editor.cc:549
 msgid "offline"
 msgstr ""
 
-#: gtk2_ardour/option_editor.cc:617
+#: gtk2_ardour/option_editor.cc:605
 msgid "Choose Click"
 msgstr "Выберите щелчок метронома"
 
-#: gtk2_ardour/option_editor.cc:636
+#: gtk2_ardour/option_editor.cc:624
 msgid "Choose Click Emphasis"
 msgstr "Выберите акцентирующий щелчок метронома"
 
-#: gtk2_ardour/option_editor.cc:750
+#: gtk2_ardour/option_editor.cc:724
 msgid "Click audio file"
 msgstr "Файл щелчков метронома"
 
-#: gtk2_ardour/option_editor.cc:756
+#: gtk2_ardour/option_editor.cc:730
 msgid "Click emphasis audiofile"
 msgstr "Файл акцентирующих щелчков метронома"
 
-#: gtk2_ardour/option_editor.cc:793
+#: gtk2_ardour/option_editor.cc:767
 msgid ""
 "The auditioner is a dedicated mixer strip used\n"
 "for listening to specific regions outside the context\n"
@@ -5116,35 +5131,35 @@ msgstr ""
 "для прослушивания определённых областей вне общего контекста микса. \n"
 "Его можно соединить как любой другой канал микшера."
 
-#: gtk2_ardour/option_editor.cc:866
+#: gtk2_ardour/option_editor.cc:840
 msgid "Edit using"
 msgstr "Редактировать с"
 
-#: gtk2_ardour/option_editor.cc:873 gtk2_ardour/option_editor.cc:900
+#: gtk2_ardour/option_editor.cc:847 gtk2_ardour/option_editor.cc:874
 msgid "+ button"
 msgstr "+ клавиша"
 
-#: gtk2_ardour/option_editor.cc:893
+#: gtk2_ardour/option_editor.cc:867
 msgid "Delete using"
 msgstr "Удалять с"
 
-#: gtk2_ardour/option_editor.cc:920
+#: gtk2_ardour/option_editor.cc:894
 msgid "Ignore snap using"
 msgstr "Игнорировать привязку с"
 
-#: gtk2_ardour/opts.cc:46
+#: gtk2_ardour/opts.cc:47
 msgid "Usage: "
 msgstr "Использование: "
 
-#: gtk2_ardour/opts.cc:47
+#: gtk2_ardour/opts.cc:48
 msgid "  -v, --version                    Show version information\n"
 msgstr "  -v, --version                    Информация о версии программы\n"
 
-#: gtk2_ardour/opts.cc:48
+#: gtk2_ardour/opts.cc:49
 msgid "  -h, --help                       Print this message\n"
 msgstr "  -h, --help                       Показать это сообщение\n"
 
-#: gtk2_ardour/opts.cc:49
+#: gtk2_ardour/opts.cc:50
 msgid ""
 "  -b, --bindings                   Print all possible keyboard binding "
 "names\n"
@@ -5152,45 +5167,46 @@ msgstr ""
 "  -b, --bindings                   Показать все доступные \"горячие\" "
 "клавиши\n"
 
-#: gtk2_ardour/opts.cc:50
+#: gtk2_ardour/opts.cc:51
 msgid "  -n, --show-splash                Show splash screen\n"
 msgstr "  -n, --no-splash                  Не показывать заставку\n"
 
-#: gtk2_ardour/opts.cc:51
+#: gtk2_ardour/opts.cc:52
 msgid ""
 "  -c, --name  name                 Use a specific jack client name, default "
 "is ardour\n"
 msgstr ""
-"  -c, --jack-client-name  имя     Использовать другое имя клиента к JACK, "
-"по умолчанию — Ardour\n"
+"  -c, --jack-client-name  имя     Использовать другое имя клиента к JACK, по "
+"умолчанию — Ardour\n"
 
-#: gtk2_ardour/opts.cc:52
+#: gtk2_ardour/opts.cc:53
 msgid ""
 "  -N, --new session-name           Create a new session from the command "
 "line\n"
 msgstr "  -N, --new имя-сессии           Создать новую сессию из командной строки\n"
 
-#: gtk2_ardour/opts.cc:53
-msgid "  -o, --use-hw-optimizations        Try to use h/w specific optimizations\n"
+#: gtk2_ardour/opts.cc:54
+msgid "  -O, --no-hw-optimizations        Disable h/w specific optimizations\n"
 msgstr ""
 
-#: gtk2_ardour/opts.cc:55
+#: gtk2_ardour/opts.cc:56
 #, fuzzy
 msgid "  -V, --novst                      Do not use VST support\n"
 msgstr "  -n, --no-splash                  Не показывать заставку\n"
 
-#: gtk2_ardour/opts.cc:57
+#: gtk2_ardour/opts.cc:58
 msgid "  [session-name]                   Name of session to load\n"
 msgstr "  [имя-сессии]                     Загрузить сессию с указанным именем\n"
 
-#: gtk2_ardour/opts.cc:58
+#: gtk2_ardour/opts.cc:59
 msgid "  -C, --curvetest filename         Curve algorithm debugger\n"
 msgstr ""
 
-#: gtk2_ardour/opts.cc:59
-#, fuzzy
-msgid "  -g, --gtktheme                   Allow GTK to load a theme\n"
-msgstr "  -h, --help                       Показать это сообщение\n"
+#: gtk2_ardour/opts.cc:60
+msgid ""
+"  -k, --keybindings filename       Name of key bindings to load (default is "
+"~/.ardour2/ardour.bindings)\n"
+msgstr ""
 
 #: gtk2_ardour/pan_automation_time_axis.cc:70
 msgid "You need to select which line to edit"
@@ -5200,42 +5216,42 @@ msgstr ""
 msgid "add pan automation event"
 msgstr "добавить автомат. событие панорамы"
 
-#: gtk2_ardour/panner2d.cc:589 gtk2_ardour/panner_ui.cc:425
-#: gtk2_ardour/plugin_ui.cc:146
+#: gtk2_ardour/panner2d.cc:589 gtk2_ardour/panner_ui.cc:438
+#: gtk2_ardour/plugin_ui.cc:152
 msgid "Bypass"
 msgstr "Обход"
 
-#: gtk2_ardour/panner_ui.cc:56 gtk2_ardour/panner_ui.cc:223
+#: gtk2_ardour/panner_ui.cc:58 gtk2_ardour/panner_ui.cc:225
 #, fuzzy
 msgid "link"
 msgstr "в"
 
-#: gtk2_ardour/panner_ui.cc:67
+#: gtk2_ardour/panner_ui.cc:69
 msgid "Pan automation mode"
 msgstr "Режим автоматизации панорамы"
 
-#: gtk2_ardour/panner_ui.cc:68
+#: gtk2_ardour/panner_ui.cc:70
 msgid "Pan automation type"
 msgstr "Тип автоматизации панорамы"
 
-#: gtk2_ardour/panner_ui.cc:79
+#: gtk2_ardour/panner_ui.cc:81
 msgid "panning link control"
 msgstr ""
 
-#: gtk2_ardour/panner_ui.cc:81
+#: gtk2_ardour/panner_ui.cc:83
 msgid "panning link direction"
 msgstr ""
 
-#: gtk2_ardour/panner_ui.cc:233
+#: gtk2_ardour/panner_ui.cc:235
 msgid "L"
 msgstr "L"
 
-#: gtk2_ardour/panner_ui.cc:328
+#: gtk2_ardour/panner_ui.cc:341
 #, c-format
 msgid "panner for channel %zu"
 msgstr ""
 
-#: gtk2_ardour/panner_ui.cc:435
+#: gtk2_ardour/panner_ui.cc:448
 msgid "Reset all"
 msgstr "Сбросить все"
 
@@ -5247,15 +5263,15 @@ msgstr "Списки воспроизведения"
 msgid "Playlists grouped by track"
 msgstr "Списки, сгруппированные по дорожке"
 
-#: gtk2_ardour/playlist_selector.cc:98
+#: gtk2_ardour/playlist_selector.cc:108
 msgid "ardour: playlist for "
 msgstr "ardour: список воспроизведения для "
 
-#: gtk2_ardour/playlist_selector.cc:114
+#: gtk2_ardour/playlist_selector.cc:124
 msgid "Other tracks"
 msgstr "Другие дорожки"
 
-#: gtk2_ardour/playlist_selector.cc:130
+#: gtk2_ardour/playlist_selector.cc:141
 msgid "unassigned"
 msgstr ""
 
@@ -5283,7 +5299,7 @@ msgstr "# выходов"
 
 #: gtk2_ardour/plugin_selector.cc:68
 msgid "Plugins to be Connected to Insert"
-msgstr ""
+msgstr "Расширения, подключаемые к возврату"
 
 #: gtk2_ardour/plugin_selector.cc:80 gtk2_ardour/plugin_selector.cc:98
 msgid "Available plugins"
@@ -5319,11 +5335,11 @@ msgid ""
 "version of ardour)"
 msgstr ""
 
-#: gtk2_ardour/plugin_ui.cc:166
+#: gtk2_ardour/plugin_ui.cc:172
 msgid "Plugin preset %1 not found"
 msgstr ""
 
-#: gtk2_ardour/plugin_ui.cc:176
+#: gtk2_ardour/plugin_ui.cc:182
 msgid "Name of New Preset:"
 msgstr "Имя новой предустановки:"
 
@@ -5335,15 +5351,15 @@ msgstr ""
 msgid "add automation event to "
 msgstr ""
 
-#: gtk2_ardour/redirect_box.cc:226
+#: gtk2_ardour/redirect_box.cc:235
 msgid "New send"
 msgstr "Новый посыл"
 
-#: gtk2_ardour/redirect_box.cc:227
+#: gtk2_ardour/redirect_box.cc:236
 msgid "Show send controls"
 msgstr ""
 
-#: gtk2_ardour/redirect_box.cc:386
+#: gtk2_ardour/redirect_box.cc:417
 msgid ""
 "You attempted to add a plugin (%1).\n"
 "The plugin has %2 inputs\n"
@@ -5354,7 +5370,7 @@ msgid ""
 "part of the signal."
 msgstr ""
 
-#: gtk2_ardour/redirect_box.cc:398
+#: gtk2_ardour/redirect_box.cc:429
 msgid ""
 "You attempted to add a plugin (%1).\n"
 "The plugin has %2 inputs\n"
@@ -5366,7 +5382,7 @@ msgid ""
 "support this type of configuration."
 msgstr ""
 
-#: gtk2_ardour/redirect_box.cc:411
+#: gtk2_ardour/redirect_box.cc:442
 msgid ""
 "You attempted to add a plugin (%1).\n"
 "\n"
@@ -5379,34 +5395,34 @@ msgid ""
 "Ardour does not understand what to do in such situations.\n"
 msgstr ""
 
-#: gtk2_ardour/redirect_box.cc:499
+#: gtk2_ardour/redirect_box.cc:539
 msgid "Pre-fader inserts, sends & plugins:"
 msgstr ""
 
-#: gtk2_ardour/redirect_box.cc:502
+#: gtk2_ardour/redirect_box.cc:542
 msgid "Post-fader inserts, sends & plugins:"
 msgstr ""
 
-#: gtk2_ardour/redirect_box.cc:650
+#: gtk2_ardour/redirect_box.cc:708
 msgid ""
 "You cannot reorder this set of redirects\n"
 "in that way because the inputs and\n"
 "outputs do not work correctly."
 msgstr ""
 
-#: gtk2_ardour/redirect_box.cc:750
+#: gtk2_ardour/redirect_box.cc:821
 #, fuzzy
 msgid "rename redirect"
 msgstr "ardour: переименовать область"
 
-#: gtk2_ardour/redirect_box.cc:824 gtk2_ardour/redirect_box.cc:872
+#: gtk2_ardour/redirect_box.cc:898 gtk2_ardour/redirect_box.cc:946
 msgid ""
 "Copying the set of redirects on the clipboard failed,\n"
 "probably because the I/O configuration of the plugins\n"
 "could not match the configuration of this track."
 msgstr ""
 
-#: gtk2_ardour/redirect_box.cc:894
+#: gtk2_ardour/redirect_box.cc:968
 #, fuzzy
 msgid ""
 "Do you really want to remove all redirects from this track?\n"
@@ -5415,7 +5431,7 @@ msgstr ""
 "Вы действительно хотите удалить трек \"%1\" ?\n"
 "(отмена невозможна)"
 
-#: gtk2_ardour/redirect_box.cc:897
+#: gtk2_ardour/redirect_box.cc:971
 #, fuzzy
 msgid ""
 "Do you really want to remove all redirects from this bus?\n"
@@ -5424,174 +5440,107 @@ msgstr ""
 "Вы действительно хотите удалить трек \"%1\" ?\n"
 "(отмена невозможна)"
 
-#: gtk2_ardour/redirect_box.cc:902
+#: gtk2_ardour/redirect_box.cc:976
 msgid "Yes, remove them all"
 msgstr "Да, удалить их все"
 
-#: gtk2_ardour/redirect_box.cc:938
+#: gtk2_ardour/redirect_box.cc:1012
 #, fuzzy
 msgid "ardour: %1"
 msgstr "ardour: "
 
-#: gtk2_ardour/redirect_box.cc:983
+#: gtk2_ardour/redirect_box.cc:1134
+msgid "New Plugin ..."
+msgstr "Добавить расширение..."
+
+#: gtk2_ardour/redirect_box.cc:1136
+msgid "New Insert"
+msgstr "Добавить возврат"
+
+#: gtk2_ardour/redirect_box.cc:1138
+msgid "New Send ..."
+msgstr "Добавить посыл..."
+
+#: gtk2_ardour/redirect_box.cc:1152
+msgid "Deselect All"
+msgstr "Снять все выделения"
+
+#: gtk2_ardour/redirect_box.cc:1159
+msgid "Activate all"
+msgstr "Активировать все"
+
+#: gtk2_ardour/redirect_box.cc:1160
+msgid "Deactivate all"
+msgstr "Деактивировать все"
+
+#: gtk2_ardour/redirect_box.cc:1339
 #, fuzzy
 msgid "ardour: %1: %2 (by %3)"
 msgstr "ardour: "
 
-#: gtk2_ardour/redirect_box.cc:1069
-msgid "New Plugin ..."
-msgstr "Новое расширение..."
-
-#: gtk2_ardour/redirect_box.cc:1070
-msgid "New Insert"
-msgstr "Новый возврат"
-
-#: gtk2_ardour/redirect_box.cc:1071
-msgid "New Send ..."
-msgstr "Новый посыл..."
-
-#: gtk2_ardour/redirect_box.cc:1083
-msgid "Deselect All"
-msgstr "Снять все выделения"
-
-#: gtk2_ardour/redirect_box.cc:1090
-msgid "Activate all"
-msgstr "Активировать все"
-
-#: gtk2_ardour/redirect_box.cc:1091
-msgid "Deactivate all"
-msgstr "Деактивировать все"
-
-#: gtk2_ardour/audio_region_editor.cc:44
+#: gtk2_ardour/audio_region_editor.cc:47
 msgid "NAME:"
 msgstr "ИМЯ:"
 
-#: gtk2_ardour/audio_region_editor.cc:45
-msgid "lock"
-msgstr "запереть"
-
-#: gtk2_ardour/audio_region_editor.cc:47
-msgid "opaque"
-msgstr "затенить"
-
 #: gtk2_ardour/audio_region_editor.cc:48
-#: gtk2_ardour/audio_region_editor.cc:191
-#: gtk2_ardour/audio_region_editor.cc:225
-msgid "active"
-msgstr "активно"
-
-#: gtk2_ardour/audio_region_editor.cc:49
-msgid "visible"
-msgstr "Видимы"
-
-#: gtk2_ardour/audio_region_editor.cc:52
-msgid "Layer"
-msgstr "Слой"
-
-#: gtk2_ardour/audio_region_editor.cc:53
 msgid "play"
 msgstr "воспроизвести"
 
-#: gtk2_ardour/audio_region_editor.cc:60
-msgid "ENVELOPE"
-msgstr "ОГИБАЮЩАЯ"
-
-#: gtk2_ardour/audio_region_editor.cc:106
-msgid "mute this region"
-msgstr "отключить воспроизведение этой области"
-
-#: gtk2_ardour/audio_region_editor.cc:107
-msgid "regions underneath this one cannot be heard"
-msgstr "области ниже этой не могут быть прослушаны"
-
-#: gtk2_ardour/audio_region_editor.cc:108
-msgid "prevent any changes to this region"
-msgstr "запретить любые изменения этой области"
-
-#: gtk2_ardour/audio_region_editor.cc:109
-msgid "use the gain envelope during playback"
-msgstr "использовать огибающую при воспроизведении"
-
-#: gtk2_ardour/audio_region_editor.cc:110
-msgid "show the gain envelope"
-msgstr "отображать огибающую"
-
-#: gtk2_ardour/audio_region_editor.cc:111
-msgid "use fade in curve during playback"
-msgstr "использовать вводную кривую при воспроизведении"
-
-#: gtk2_ardour/audio_region_editor.cc:112
-msgid "use fade out curve during playback"
-msgstr "использовать выводную кривую при воспроизведении"
-
-#: gtk2_ardour/audio_region_editor.cc:113
+#: gtk2_ardour/audio_region_editor.cc:67
 msgid "audition this region"
 msgstr "прослушать область"
 
-#: gtk2_ardour/audio_region_editor.cc:146
+#: gtk2_ardour/audio_region_editor.cc:82
 msgid "START:"
 msgstr "НАЧАЛО:"
 
-#: gtk2_ardour/audio_region_editor.cc:148
+#: gtk2_ardour/audio_region_editor.cc:84
 msgid "END:"
 msgstr "КОНЕЦ:"
 
-#: gtk2_ardour/audio_region_editor.cc:150
+#: gtk2_ardour/audio_region_editor.cc:86
 msgid "LENGTH:"
 msgstr "ДЛИНА:"
 
-#: gtk2_ardour/audio_region_editor.cc:190
-msgid "FADE IN"
-msgstr "ВВЕДЕНИЕ В УРОВЕНЬ"
-
-#: gtk2_ardour/audio_region_editor.cc:192
-#: gtk2_ardour/audio_region_editor.cc:226
-msgid "msecs"
-msgstr "мс"
-
-#: gtk2_ardour/audio_region_editor.cc:224
-msgid "FADE OUT"
-msgstr "СВЕДЕНИЕ В НОЛЬ"
-
-#: gtk2_ardour/audio_region_editor.cc:264
+#: gtk2_ardour/audio_region_editor.cc:122
 msgid "ardour: region "
 msgstr "ardour: область "
 
-#: gtk2_ardour/audio_region_editor.cc:401
-msgid "fade in edit"
+#: gtk2_ardour/audio_region_editor.cc:202
+#, fuzzy
+msgid "change region start position"
+msgstr "Области/положение"
+
+#: gtk2_ardour/audio_region_editor.cc:219
+#, fuzzy
+msgid "change region end position"
+msgstr "Области/положение"
+
+#: gtk2_ardour/audio_region_editor.cc:240
+#, fuzzy
+msgid "change region length"
 msgstr "редактировать введение в уровень"
 
-#: gtk2_ardour/audio_region_editor.cc:413
-msgid "fade out edit"
-msgstr "редактировать сведение в ноль"
-
-#: gtk2_ardour/audio_region_view.cc:901
+#: gtk2_ardour/audio_region_view.cc:939
 #, fuzzy
 msgid "add gain control point"
 msgstr "использовать контрольные выходы"
 
 #: gtk2_ardour/route_params_ui.cc:85
 msgid "Tracks/Buses"
-msgstr "Дорожи/Шины"
+msgstr "Дорожи/шины"
 
 #: gtk2_ardour/route_params_ui.cc:105
-#, fuzzy
 msgid "Pre-fader Redirects"
-msgstr "Предобработка"
+msgstr "Предфейдерные перенаправления"
 
 #: gtk2_ardour/route_params_ui.cc:106
-#, fuzzy
 msgid "Post-fader Redirects"
-msgstr "Постобработка"
+msgstr "Послефейдерные перенаправления"
 
 #: gtk2_ardour/route_params_ui.cc:140
-#, fuzzy
 msgid "ardour: track/bus inspector"
-msgstr "ardour: добавить трек/шину"
-
-#: gtk2_ardour/route_params_ui.cc:141
-msgid "ardour_route_parameters"
-msgstr "ardour_параметры_маршрутов"
+msgstr "ardour: добавить дорожку/шину"
 
 #: gtk2_ardour/route_params_ui.cc:202
 msgid "route display list item for renamed route not found!"
@@ -5599,12 +5548,11 @@ msgstr ""
 
 #: gtk2_ardour/route_params_ui.cc:449
 msgid "NO TRACK"
-msgstr "НЕТ ТРЕКОВ"
+msgstr "НЕТ ДОРОЖЕК"
 
 #: gtk2_ardour/route_params_ui.cc:672
-#, fuzzy
 msgid "ardour: track/bus inspector: "
-msgstr "ardour: добавить трек/шину"
+msgstr "ardour: инспектор дорожек/шин"
 
 #: gtk2_ardour/route_params_ui.cc:676
 msgid "No Route Selected"
@@ -5615,56 +5563,60 @@ msgstr "Нет выбранных маршрутов"
 msgid "ardour: track/bus/inspector: no route selected"
 msgstr "ardour: параметры маршрутов: нет выбранных маршрутов"
 
-#: gtk2_ardour/route_ui.cc:131
+#: gtk2_ardour/route_ui.cc:144
 msgid "mute change"
 msgstr ""
 
-#: gtk2_ardour/route_ui.cc:207 gtk2_ardour/route_ui.cc:218
+#: gtk2_ardour/route_ui.cc:222 gtk2_ardour/route_ui.cc:233
 msgid "solo change"
 msgstr ""
 
-#: gtk2_ardour/route_ui.cc:282
+#: gtk2_ardour/route_ui.cc:291
+msgid "Not connected to JACK - cannot engage record"
+msgstr ""
+
+#: gtk2_ardour/route_ui.cc:303
 msgid "rec-enable change"
 msgstr ""
 
-#: gtk2_ardour/route_ui.cc:480
+#: gtk2_ardour/route_ui.cc:501
 #, fuzzy
 msgid "Solo-safe"
 msgstr "Соло"
 
-#: gtk2_ardour/route_ui.cc:502
+#: gtk2_ardour/route_ui.cc:523
 msgid "Pre Fader"
-msgstr "Пред фейдер"
+msgstr "Предфейдер"
 
-#: gtk2_ardour/route_ui.cc:509
+#: gtk2_ardour/route_ui.cc:530
 msgid "Post Fader"
-msgstr "Пост фейдер"
+msgstr "Послефейдер"
 
-#: gtk2_ardour/route_ui.cc:516
+#: gtk2_ardour/route_ui.cc:537
 msgid "Control Outs"
 msgstr "Контрольные выходы"
 
-#: gtk2_ardour/route_ui.cc:523
+#: gtk2_ardour/route_ui.cc:544
 msgid "Main Outs"
 msgstr "Главные выходы"
 
-#: gtk2_ardour/route_ui.cc:560
+#: gtk2_ardour/route_ui.cc:581
 msgid "mix group solo  change"
 msgstr ""
 
-#: gtk2_ardour/route_ui.cc:599
+#: gtk2_ardour/route_ui.cc:620
 msgid "mix group mute change"
 msgstr ""
 
-#: gtk2_ardour/route_ui.cc:616
+#: gtk2_ardour/route_ui.cc:637
 msgid "mix group rec-enable change"
 msgstr ""
 
-#: gtk2_ardour/route_ui.cc:634 gtk2_ardour/visual_time_axis.cc:237
+#: gtk2_ardour/route_ui.cc:655 gtk2_ardour/visual_time_axis.cc:242
 msgid "ardour: color selection"
 msgstr "ardour: выбор цвета"
 
-#: gtk2_ardour/route_ui.cc:710
+#: gtk2_ardour/route_ui.cc:731
 #, fuzzy
 msgid ""
 "Do you really want to remove track \"%1\" ?\n"
@@ -5675,7 +5627,7 @@ msgstr ""
 "Вы действительно хотите удалить трек \"%1\" ?\n"
 "(отмена невозможна)"
 
-#: gtk2_ardour/route_ui.cc:712
+#: gtk2_ardour/route_ui.cc:733
 msgid ""
 "Do you really want to remove bus \"%1\" ?\n"
 "(cannot be undone)"
@@ -5683,98 +5635,91 @@ msgstr ""
 "Вы действительно хотите удалить шину \"%1\" ?\n"
 "(отмена невозможна)"
 
-#: gtk2_ardour/route_ui.cc:716 gtk2_ardour/visual_time_axis.cc:279
+#: gtk2_ardour/route_ui.cc:737 gtk2_ardour/visual_time_axis.cc:284
 msgid "Yes, remove it."
 msgstr "Да, удалить."
 
-#: gtk2_ardour/route_ui.cc:744
+#: gtk2_ardour/route_ui.cc:758
 #, fuzzy
 msgid "New Name: "
 msgstr "новое имя: "
 
-#: gtk2_ardour/sfdb_ui.cc:61
-msgid "Add Field..."
-msgstr "Добавить поле..."
+#: gtk2_ardour/sfdb_ui.cc:60
+#, fuzzy
+msgid "Apply"
+msgstr "воспроизвести"
 
-#: gtk2_ardour/sfdb_ui.cc:62
-msgid "Remove Field"
-msgstr "Удалить поле"
-
-#: gtk2_ardour/sfdb_ui.cc:65
+#: gtk2_ardour/sfdb_ui.cc:63
 msgid "Soundfile Info"
 msgstr "Информация о файле"
 
-#: gtk2_ardour/sfdb_ui.cc:83
-msgid "Field"
-msgstr "Критерий"
+#: gtk2_ardour/sfdb_ui.cc:120
+msgid "Length: %1"
+msgstr ""
 
-#: gtk2_ardour/sfdb_ui.cc:84
-msgid "Value"
-msgstr "Значение"
-
-#: gtk2_ardour/sfdb_ui.cc:167
+#: gtk2_ardour/sfdb_ui.cc:126
 #, fuzzy
-msgid "channels"
+msgid "Channels: %1"
 msgstr "отмена"
 
-#: gtk2_ardour/sfdb_ui.cc:167
+#: gtk2_ardour/sfdb_ui.cc:129
 #, fuzzy
-msgid "samplerate"
+msgid "Samplerate: %1"
 msgstr "Разделить область"
 
-#: gtk2_ardour/sfdb_ui.cc:168
-#, fuzzy
-msgid "resolution"
-msgstr "Воспроизвести выделенное"
+#: gtk2_ardour/sfdb_ui.cc:132
+msgid "Timecode: %1"
+msgstr ""
 
-#: gtk2_ardour/sfdb_ui.cc:168
-#, fuzzy
-msgid "format"
-msgstr "Норм."
-
-#: gtk2_ardour/sfdb_ui.cc:189
+#: gtk2_ardour/sfdb_ui.cc:166
 #, fuzzy
 msgid "Could not read file: %1 (%2)."
 msgstr "Редактор: не удалось открыть файл \"%1\" (%2)"
 
-#: gtk2_ardour/sfdb_ui.cc:205
+#: gtk2_ardour/sfdb_ui.cc:184
 msgid "Could not access soundfile: "
 msgstr "Файл недоступен: "
 
-#: gtk2_ardour/sfdb_ui.cc:244
-#, fuzzy
-msgid "Name for Field"
-msgstr "Имя области: "
+#: gtk2_ardour/sfdb_ui.cc:267
+msgid "Add to Region list"
+msgstr "Добавить в список областей"
 
-#: gtk2_ardour/sfdb_ui.cc:356
+#: gtk2_ardour/sfdb_ui.cc:268
+msgid "Add to selected Track(s)"
+msgstr "Добавить в выделенные дорожки"
+
+#: gtk2_ardour/sfdb_ui.cc:269
+msgid "Add as new Track(s)"
+msgstr "Добавить как новую дорожку(-и)"
+
+#: gtk2_ardour/sfdb_ui.cc:270
+#, fuzzy
+msgid "Add as new Tape Track(s)"
+msgstr "Добавить как новую tape дорожку(-и)"
+
+#: gtk2_ardour/sfdb_ui.cc:313
 msgid "Split Channels"
-msgstr ""
+msgstr "Разделить каналы"
 
-#: gtk2_ardour/sfdb_ui.cc:363
+#: gtk2_ardour/sfdb_ui.cc:320
 msgid "Create a region for each channel"
-msgstr ""
+msgstr "Создать область для каждого канала"
 
-#: gtk2_ardour/sfdb_ui.cc:365
+#: gtk2_ardour/sfdb_ui.cc:322
 msgid "Embed"
-msgstr ""
+msgstr "Встроить"
 
-#: gtk2_ardour/sfdb_ui.cc:367
-#, fuzzy
+#: gtk2_ardour/sfdb_ui.cc:324
 msgid "Link to an external file"
-msgstr "Вставить внешний аудиофайл"
+msgstr "Сослаться на внешний файл"
 
-#: gtk2_ardour/sfdb_ui.cc:369
+#: gtk2_ardour/sfdb_ui.cc:328
 msgid "Import"
-msgstr "Импорт"
+msgstr "Импортировать"
 
-#: gtk2_ardour/sfdb_ui.cc:371
+#: gtk2_ardour/sfdb_ui.cc:330
 msgid "Copy a file to the session folder"
-msgstr ""
-
-#: gtk2_ardour/sfdb_ui.cc:438
-#, fuzzy
-msgid "programming error: %1"
-msgstr "ошибка в программе: "
+msgstr "Скопировать файл в папку проекта"
 
 #: gtk2_ardour/tempo_dialog.cc:18 gtk2_ardour/tempo_dialog.cc:35
 msgid "Beats per minute"
@@ -5844,27 +5789,27 @@ msgstr "некорректное определение ноты (%1)"
 msgid "gTortnam"
 msgstr ""
 
-#: gtk2_ardour/time_axis_view.cc:550
+#: gtk2_ardour/time_axis_view.cc:583
 msgid "Largest"
 msgstr "Огромная"
 
-#: gtk2_ardour/time_axis_view.cc:551
+#: gtk2_ardour/time_axis_view.cc:584
 msgid "Large"
 msgstr "Большая"
 
-#: gtk2_ardour/time_axis_view.cc:552
+#: gtk2_ardour/time_axis_view.cc:585
 msgid "Larger"
 msgstr "Больше"
 
-#: gtk2_ardour/time_axis_view.cc:554
+#: gtk2_ardour/time_axis_view.cc:587
 msgid "Smaller"
 msgstr "Меньше"
 
-#: gtk2_ardour/time_axis_view.cc:555
+#: gtk2_ardour/time_axis_view.cc:588
 msgid "Small"
 msgstr "Маленькая"
 
-#: gtk2_ardour/time_axis_view.cc:869
+#: gtk2_ardour/time_axis_view.cc:903
 msgid "unknown track height name \"%1\" in XML GUI information"
 msgstr "неизвестное имя ширины трека \"%1\" в XML описании"
 
@@ -5880,15 +5825,20 @@ msgstr ""
 msgid "programming error: request for non-existent audio range (%1)!"
 msgstr "ошибка в программе: request for non-existent audio range (%1)!"
 
-#: gtk2_ardour/utils.cc:107 gtk2_ardour/utils.cc:150
+#: gtk2_ardour/utils.cc:118 gtk2_ardour/utils.cc:161
 msgid "bad XPM header %1"
 msgstr "ошибка в XPM заголовке %1"
 
-#: gtk2_ardour/utils.cc:332
+#: gtk2_ardour/utils.cc:285
 msgid "missing RGBA style for \"%1\""
 msgstr ""
 
-#: gtk2_ardour/visual_time_axis.cc:276
+#: gtk2_ardour/utils.cc:467
+#, fuzzy
+msgid "cannot find icon image for %1"
+msgstr "cannot setup signal handling for %1"
+
+#: gtk2_ardour/visual_time_axis.cc:281
 msgid ""
 "Do you really want to remove track \"%1\" ?\n"
 "(cannot be undone)"
@@ -5896,13 +5846,9 @@ msgstr ""
 "Вы действительно хотите удалить трек \"%1\" ?\n"
 "(отмена невозможна)"
 
-#: gtk2_ardour/visual_time_axis.cc:325
+#: gtk2_ardour/visual_time_axis.cc:330
 msgid "new name: "
 msgstr "новое имя: "
-
-#: gtk2_ardour/visual_time_axis.cc:336
-msgid "A track already exists with that name"
-msgstr "Трек с таким именем уже существует"
 
 #: gtk2_ardour/connection_editor.cc:51
 msgid "ardour: connections"

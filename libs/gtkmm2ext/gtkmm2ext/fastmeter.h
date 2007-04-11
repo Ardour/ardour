@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef __gtkmm2ext_fastmeter_h__
@@ -36,7 +35,7 @@ class FastMeter : public Gtk::DrawingArea {
 	FastMeter (long hold_cnt, unsigned long width, Orientation);
 	virtual ~FastMeter ();
 	
-	void set (float level, float user_level=0.0f);
+	void set (float level);
 	void clear ();
 
 	float get_level() { return current_level; }
@@ -70,13 +69,13 @@ class FastMeter : public Gtk::DrawingArea {
 	bool vertical_expose (GdkEventExpose*);
 	bool horizontal_expose (GdkEventExpose*);
 	
-	static Glib::RefPtr<Gdk::Pixbuf> request_vertical_meter(int);
+	static Glib::RefPtr<Gdk::Pixbuf> request_vertical_meter(int w, int h);
 
 	static Glib::RefPtr<Gdk::Pixbuf> *v_pixbuf_cache;
 	static int min_v_pixbuf_size;
 	static int max_v_pixbuf_size;
 
-	static Glib::RefPtr<Gdk::Pixbuf> request_horizontal_meter(int);
+	static Glib::RefPtr<Gdk::Pixbuf> request_horizontal_meter(int w, int h);
 
 	static Glib::RefPtr<Gdk::Pixbuf> *h_pixbuf_cache;
 	static int min_h_pixbuf_size;

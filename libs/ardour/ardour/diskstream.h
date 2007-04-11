@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id: diskstream.h 579 2006-06-12 19:56:37Z essej $
 */
 
 #ifndef __ardour_diskstream_h__
@@ -54,7 +53,7 @@ class Session;
 class Playlist;
 class IO;
 
- class Diskstream : public PBD::StatefulDestructible
+class Diskstream : public PBD::StatefulDestructible
 {	
   public:
 	enum Flag {
@@ -200,7 +199,6 @@ class IO;
 	
 	/** For non-butler contexts (allocates temporary working buffers) */
 	virtual int do_refill_with_alloc() = 0;
-
 	
 	/* XXX fix this redundancy ... */
 
@@ -208,7 +206,6 @@ class IO;
 	virtual void playlist_modified ();
 	virtual void playlist_deleted (boost::weak_ptr<Playlist>);
 
-	virtual void finish_capture (bool rec_monitors_input) = 0;
 	virtual void transport_stopped (struct tm&, time_t, bool abort) = 0;
 
 	struct CaptureInfo {
@@ -237,7 +234,7 @@ class IO;
 	virtual void use_destructive_playlist () = 0;
 
 	static nframes_t disk_io_chunk_frames;
-	vector<CaptureInfo*>  capture_info;
+	std::vector<CaptureInfo*>  capture_info;
 	Glib::Mutex           capture_info_lock;
 
 	uint32_t i_am_the_modifier;
@@ -285,6 +282,7 @@ class IO;
 	nframes_t            file_frame;		
 	nframes_t            playback_sample;
 	nframes_t            playback_distance;
+	bool                 commit_should_unlock;
 
 	uint32_t                 _read_data_count;
 	uint32_t                 _write_data_count;

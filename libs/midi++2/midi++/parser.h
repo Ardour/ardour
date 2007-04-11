@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #ifndef  __midi_parse_h__
@@ -162,8 +161,8 @@ class Parser : public sigc::trackable {
 	bool _mmc_forward;
 	bool _mtc_forward;
 	int   expected_mtc_quarter_frame_code;
-	byte _mtc_time[4];
-	byte _qtr_mtc_time[4];
+	byte _mtc_time[5];
+	byte _qtr_mtc_time[5];
 	unsigned long consecutive_qtr_frame_cnt;
 	MTC_FPS _mtc_fps;
 	MTC_Status _mtc_running;
