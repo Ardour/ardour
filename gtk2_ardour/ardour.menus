@@ -369,6 +369,7 @@
 	 <menuitem action='cut'/>
 	 <menuitem action='copy'/>
 	 <menuitem action='paste'/>
+	 <menuitem action='delete'/>
 	  <separator/>
 	 <menuitem action='rename'/>
 	  <separator/>

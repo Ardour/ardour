@@ -174,6 +174,7 @@ class RedirectBox : public Gtk::HBox
 	void cut_redirects ();
 	void copy_redirects ();
 	void paste_redirects ();
+	void delete_redirects ();
 	void clear_redirects ();
 	void clone_redirects ();
 	void rename_redirects ();
@@ -207,6 +208,7 @@ class RedirectBox : public Gtk::HBox
 	static void rb_cut ();
 	static void rb_copy ();
 	static void rb_paste ();
+	static void rb_delete ();
 	static void rb_rename ();
 	static void rb_select_all ();
 	static void rb_deselect_all ();
