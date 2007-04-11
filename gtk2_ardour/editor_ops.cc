@@ -461,9 +461,10 @@ void
 Editor::build_region_boundary_cache ()
 {
 	nframes_t pos = 0;
-	RegionPoint point;
+	vector<RegionPoint> interesting_points;
 	boost::shared_ptr<Region> r;
 	TrackViewList tracks;
+	bool at_end = false;
 
 	region_boundary_cache.clear ();
 
@@ -473,16 +474,17 @@ Editor::build_region_boundary_cache ()
 	
 	switch (snap_type) {
 	case SnapToRegionStart:
-		point = Start;
+		interesting_points.push_back (Start);
 		break;
 	case SnapToRegionEnd:
-		point = End;
+		interesting_points.push_back (End);
 		break;	
 	case SnapToRegionSync:
-		point = SyncPoint;
+		interesting_points.push_back (SyncPoint);
 		break;	
 	case SnapToRegionBoundary:
-		point = Start;
+		interesting_points.push_back (Start);
+		interesting_points.push_back (End);
 		break;	
 	default:
 		fatal << string_compose (_("build_region_boundary_cache called with snap_type = %1"), snap_type) << endmsg;
@@ -491,62 +493,80 @@ Editor::build_region_boundary_cache ()
 	}
 	
 	TimeAxisView *ontrack = 0;
+	TrackViewList tlist;
 
-	while (pos < session->current_end_frame()) {
+	if (!selection->tracks.empty()) {
+		tlist = selection->tracks;
+	} else {
+		tlist = track_views;
+	}
 
-		if (!selection->tracks.empty()) {
-
-			if ((r = find_next_region (pos, point, 1, selection->tracks, &ontrack)) == 0) {
-				break;
-			}
-
-		} else {
-
-			if ((r = find_next_region (pos, point, 1, track_views, &ontrack)) == 0) {
-				break;
-			}
-		}
+	while (pos < session->current_end_frame() && !at_end) {
 
 		nframes_t rpos;
-		
-		switch (snap_type) {
-		case SnapToRegionStart:
-			rpos = r->first_frame();
-			break;
-		case SnapToRegionEnd:
-			rpos = r->last_frame();
-			break;	
-		case SnapToRegionSync:
-			rpos = r->adjust_to_sync (r->first_frame());
-			break;
+		nframes_t lpos = max_frames;
 
-		case SnapToRegionBoundary:
-			rpos = r->last_frame();
-			break;	
-		default:
-			break;
-		}
-		
-		float speed = 1.0f;
-		AudioTimeAxisView *atav;
+		for (vector<RegionPoint>::iterator p = interesting_points.begin(); p != interesting_points.end(); ++p) {
 
-		if ( ontrack != 0 && (atav = dynamic_cast<AudioTimeAxisView*>(ontrack)) != 0 ) {
-			if (atav->get_diskstream() != 0) {
-				speed = atav->get_diskstream()->speed();
+			if ((r = find_next_region (pos, *p, 1, tlist, &ontrack)) == 0) {
+				at_end = true;
+				/* move to next point type */
+				continue;
+			}
+
+			
+			switch (*p) {
+			case Start:
+				rpos = r->first_frame();
+				break;
+			case End:
+				rpos = r->last_frame();
+				break;	
+			case SyncPoint:
+				rpos = r->adjust_to_sync (r->first_frame());
+				break;
+			default:
+				break;
+			}
+			
+			float speed = 1.0f;
+			AudioTimeAxisView *atav;
+			
+			if (ontrack != 0 && (atav = dynamic_cast<AudioTimeAxisView*>(ontrack)) != 0 ) {
+				if (atav->get_diskstream() != 0) {
+					speed = atav->get_diskstream()->speed();
+				}
+			}
+			
+			rpos = track_frame_to_session_frame (rpos, speed);
+
+			if (rpos < lpos) {
+				lpos = rpos;
+			}
+
+			/* prevent duplicates, but we don't use set<> because we want to be able
+			   to sort later.
+			*/
+
+			vector<nframes_t>::iterator ri; 
+			
+			for (ri = region_boundary_cache.begin(); ri != region_boundary_cache.end(); ++ri) {
+				if (*ri == rpos) {
+					break;
+				}
+			}
+
+			if (ri == region_boundary_cache.end()) {
+				region_boundary_cache.push_back (rpos);
 			}
 		}
 
-		rpos = track_frame_to_session_frame(rpos, speed);
-
-		if (region_boundary_cache.empty() || rpos != region_boundary_cache.back()) {
-			if (snap_type == SnapToRegionBoundary) {
-				region_boundary_cache.push_back (r->first_frame());
-			}
-			region_boundary_cache.push_back (rpos);
-		}
-
-		pos = rpos + 1;
+		pos = lpos + 1;
 	}
+
+	/* finally sort to be sure that the order is correct */
+
+	sort (region_boundary_cache.begin(), region_boundary_cache.end());
 }
 
 boost::shared_ptr<Region>
