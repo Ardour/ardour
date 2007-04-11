@@ -37,6 +37,7 @@
 #include <midi++/manager.h>
 #include <pbd/pthread_utils.h>
 #include <pbd/error.h>
+#include <pbd/memento_command.h>
 
 #include <ardour/route.h>
 #include <ardour/session.h>
@@ -1405,6 +1406,30 @@ LedState MackieControlProtocol::channel_right_press( Button & button )
 }
 
 LedState MackieControlProtocol::channel_right_release( Button & button )
+{
+	return off;
+}
+
+/////////////////////////////////////
+// Functions
+/////////////////////////////////////
+LedState MackieControlProtocol::marker_press( Button & button )
+{
+	// cut'n'paste from LocationUI::add_new_location()
+	string markername;
+	nframes_t where = session->audible_frame();
+	session->locations()->next_available_name(markername,"mcu");
+	Location *location = new Location (where, where, markername, Location::IsMark);
+	session->begin_reversible_command (_("add marker"));
+	XMLNode &before = session->locations()->get_state();
+	session->locations()->add (location, true);
+	XMLNode &after = session->locations()->get_state();
+	session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
+	session->commit_reversible_command ();
+	return on;
+}
+
+LedState MackieControlProtocol::marker_release( Button & button )
 {
 	return off;
 }
