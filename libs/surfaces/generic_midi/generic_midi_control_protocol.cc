@@ -129,6 +129,30 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 		return false;
 	}
 
+	MIDIControllables::iterator tmp;
+	for (MIDIControllables::iterator i = controllables.begin(); i != controllables.end(); ) {
+		tmp = i;
+		++tmp;
+		if (&(*i)->get_controllable() == c) {
+			delete (*i);
+			controllables.erase (i);
+		}
+		i = tmp;
+	}
+
+	MIDIPendingControllables::iterator ptmp;
+	for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ) {
+		ptmp = i;
+		++ptmp;
+		if (&((*i).first)->get_controllable() == c) {
+			(*i).second.disconnect();
+			delete (*i).first;
+			pending_controllables.erase (i);
+		}
+		i = ptmp;
+	}
+
+
 	MIDIControllable* mc = 0;
 
 	for (MIDIControllables::iterator i = controllables.begin(); i != controllables.end(); ++i) {
@@ -144,11 +168,12 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 	
 	{
 		Glib::Mutex::Lock lm (pending_lock);
-		std::pair<MIDIControllables::iterator,bool> result;
-		result = pending_controllables.insert (mc);
-		if (result.second) {
-			c->LearningFinished.connect (bind (mem_fun (*this, &GenericMidiControlProtocol::learning_stopped), mc));
-		}
+
+		std::pair<MIDIControllable *, sigc::connection> element;
+		element.first = mc;
+		element.second = c->LearningFinished.connect (bind (mem_fun (*this, &GenericMidiControlProtocol::learning_stopped), mc));
+
+		pending_controllables.push_back (element);
 	}
 
 	mc->learn_about_external_control ();
@@ -161,10 +186,18 @@ GenericMidiControlProtocol::learning_stopped (MIDIControllable* mc)
 	Glib::Mutex::Lock lm (pending_lock);
 	Glib::Mutex::Lock lm2 (controllables_lock);
 	
-	MIDIControllables::iterator i = find (pending_controllables.begin(), pending_controllables.end(), mc);
+	MIDIPendingControllables::iterator tmp;
 
-	if (i != pending_controllables.end()) {
-		pending_controllables.erase (i);
+	for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ) {
+		tmp = i;
+		++tmp;
+
+		if ( (*i).first == mc) {
+			(*i).second.disconnect();
+			pending_controllables.erase(i);
+		}
+
+		i = tmp;
 	}
 
 	controllables.insert (mc);
@@ -181,18 +214,13 @@ GenericMidiControlProtocol::stop_learning (Controllable* c)
 	   relevant MIDIControllable and remove it from the pending list.
 	*/
 
-	for (MIDIControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ++i) {
-		if (&(*i)->get_controllable() == c) {
-			(*i)->stop_learning ();
-			dptr = *i;
-			pending_controllables.erase (i);
-			break;
-		}
-	}
+	for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ++i) {
+		if (&((*i).first)->get_controllable() == c) {
+			(*i).first->stop_learning ();
+			dptr = (*i).first;
+			(*i).second.disconnect();
 
-	for (MIDIControllables::iterator i = controllables.begin(); i != controllables.end(); ++i) {
-		if (&(*i)->get_controllable() == c) {
-			controllables.erase (i);
+			pending_controllables.erase (i);
 			break;
 		}
 	}

@@ -151,6 +151,11 @@ Editor::ruler_button_press (GdkEventButton* ev)
 
 	switch (ev->button) {
 	case 1:
+		// Since we are about to move the playhead, cancel any running
+		// auditions.
+		if (session->is_auditioning()) {
+			session->cancel_audition ();
+		}
 		/* transport playhead */
 		snap_to (where);
 		session->request_locate (where);
@@ -255,13 +260,14 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 	/* need to use the correct x,y, the event lies */
 	time_canvas_event_box.get_window()->get_pointer (x, y, state);
 
-	
-	track_canvas.c2w (x, y, wcx, wcy);
-	track_canvas.w2c (wcx, wcy, cx, cy);
-	
-	nframes_t where = leftmost_frame + pixel_to_frame (x);
+	time_canvas.c2w (x, y, wcx, wcy);
+	time_canvas.w2c (wcx, wcy, cx, cy);
 
-	/// ripped from maybe_autoscroll
+	wcx = x;
+	nframes_t where = event_frame ((GdkEvent*) ev, &wcx, (double *) 0);
+	cx = wcx;
+
+	/// ripped from maybe_autoscroll, and adapted to work here
 	nframes_t one_page = (nframes_t) rint (canvas_width * frames_per_unit);
 	nframes_t rightmost_frame = leftmost_frame + one_page;
 
@@ -303,8 +309,7 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 		break;
 	}
 
-	if (cursor)
-	{
+	if (cursor) {
 		cursor->set_position (where);
 		
 		if (cursor == edit_cursor) {
@@ -377,7 +382,7 @@ Editor::popup_ruler_menu (nframes_t where, ItemType t)
 		mitem->set_active(true);
 	}
 
-	ruler_items.push_back (CheckMenuElem (X_("Timecode"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_smpte)));
+	ruler_items.push_back (CheckMenuElem (_("Timecode"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_smpte)));
 	mitem = (CheckMenuItem *) &ruler_items.back(); 
 	if (ruler_shown[ruler_metric_smpte]) {
 		mitem->set_active(true);
@@ -710,7 +715,7 @@ Editor::update_ruler_visibility ()
 	
 	update_fixed_rulers();
 	//update_tempo_based_rulers();
-	tempo_map_changed(Change (0), false);
+	redisplay_tempo (false);
 
 	time_canvas_event_box.show_all();
 	time_button_frame.show_all();

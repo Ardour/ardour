@@ -178,6 +178,15 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 	region_view->set_amplitude_above_axis(_amplitude_above_axis);
 	region_views.push_front (region_view);
 
+	
+	/* if its the special single-sample length that we use for rec-regions, make it 
+	   insensitive to events 
+	*/
+
+	if (region->length() == 1) {
+		region_view->set_sensitive (false);
+	}
+
 	/* if this was the first one, then lets query the waveform scale and shape.
 	   otherwise, we set it to the current value */
 	   

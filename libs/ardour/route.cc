@@ -113,7 +113,8 @@ Route::init ()
 
 Route::~Route ()
 {
-	clear_redirects (this);
+	clear_redirects (PreFader, this);
+	clear_redirects (PostFader, this);
 
 	for (OrderKeys::iterator i = order_keys.begin(); i != order_keys.end(); ++i) {
 		free ((void*)(i->first));
@@ -884,10 +885,13 @@ Route::add_redirects (const RedirectList& others, void *src, uint32_t* err_strea
 	return 0;
 }
 
+/** Remove redirects with a given placement.
+ * @param p Placement of redirects to remove.
+ */
 void
-Route::clear_redirects (void *src)
+Route::clear_redirects (Placement p, void *src)
 {
-	ChanCount old_rmo = redirect_max_outs;
+	const ChanCount old_rmo = redirect_max_outs;
 
 	if (!_session.engine().connected()) {
 		return;
@@ -895,13 +899,22 @@ Route::clear_redirects (void *src)
 
 	{
 		Glib::RWLock::WriterLock lm (redirect_lock);
-		RedirectList::iterator i;
-		for (i = _redirects.begin(); i != _redirects.end(); ++i) {
-			(*i)->drop_references ();
+		RedirectList new_list;
+		
+		for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+			if ((*i)->placement() == p) {
+				/* it's the placement we want to get rid of */
+				(*i)->drop_references ();
+			} else {
+				/* it's a different placement, so keep it */
+				new_list.push_back (*i);
+			}
 		}
-		_redirects.clear ();
+		
+		_redirects = new_list;
 	}
 
+	/* FIXME: can't see how this test can ever fire */
 	if (redirect_max_outs != old_rmo) {
 		reset_panner ();
 	}
@@ -1269,8 +1282,12 @@ Route::all_redirects_flip ()
 	}
 }
 
+/** Set all redirects with a given placement to a given active state.
+ * @param p Placement of redirects to change.
+ * @param state New active state for those redirects.
+ */
 void
-Route::all_redirects_active (bool state)
+Route::all_redirects_active (Placement p, bool state)
 {
 	Glib::RWLock::ReaderLock lm (redirect_lock);
 
@@ -1279,7 +1296,9 @@ Route::all_redirects_active (bool state)
 	}
 
 	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
-		(*i)->set_active (state, this);
+		if ((*i)->placement() == p) {
+			(*i)->set_active (state, this);
+		}
 	}
 }
 
@@ -2263,8 +2282,9 @@ Route::protect_automation ()
 {
 	switch (gain_automation_state()) {
 	case Write:
-	case Touch:
 		set_gain_automation_state (Off);
+	case Touch:
+		set_gain_automation_state (Play);
 		break;
 	default:
 		break;
@@ -2272,8 +2292,10 @@ Route::protect_automation ()
 
 	switch (panner().automation_state ()) {
 	case Write:
-	case Touch:
 		panner().set_automation_state (Off);
+		break;
+	case Touch:
+		panner().set_automation_state (Play);
 		break;
 	default:
 		break;

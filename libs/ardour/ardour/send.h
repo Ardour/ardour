@@ -38,7 +38,7 @@ class Send : public Redirect
 	Send (Session&, Placement);
 	Send (Session&, const XMLNode&);
 	Send (const Send&);
-	~Send ();
+	virtual ~Send ();
 
 	uint32_t bit_slot() const { return bitslot; }
 	

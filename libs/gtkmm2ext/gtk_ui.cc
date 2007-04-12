@@ -37,6 +37,7 @@
 #include <gtkmm2ext/textviewer.h>
 #include <gtkmm2ext/popup.h>
 #include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/window_title.h>
 
 #include "i18n.h"
 
@@ -87,10 +88,11 @@ UI::UI (string namestr, int *argc, char ***argv, string rcfile)
 	errors->text().set_editable (false); 
 	errors->text().set_name ("ErrorText");
 
-	string title;
-	title = namestr;
-	title += ": Log";
-	errors->set_title (title);
+	Glib::set_application_name(namestr);
+
+	WindowTitle title(Glib::get_application_name());
+	title += _("Log");
+	errors->set_title (title.get_string());
 
 	errors->dismiss_button().set_name ("ErrorLogCloseButton");
 	errors->signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), (Window *) errors));

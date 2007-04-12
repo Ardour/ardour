@@ -64,7 +64,7 @@ namespace sigc {
  *
  * @ingroup retype
  */
-template <class T_functor, class T_type1=nil,class T_type2=nil,class T_type3=nil,class T_type4=nil,class T_type5=nil,class T_type6=nil,class T_type7=nil>
+template <class T_functor, class T_type1=nil_,class T_type2=nil_,class T_type3=nil_,class T_type4=nil_,class T_type5=nil_,class T_type6=nil_,class T_type7=nil_>
 struct retype_functor
   : public adapts<T_functor>
 {

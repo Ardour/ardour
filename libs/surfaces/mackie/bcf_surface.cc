@@ -615,17 +615,10 @@ void Mackie::BcfSurface::init_controls()
 	group->add( *control );
 
 	group = groups["modifiers"];
-	control = new Button ( 71, 1, "option", *group );
-	buttons[0x47] = control;
+	control = new Button ( 80, 1, "option", *group );
+	buttons[0x50] = control;
 	controls.push_back( control );
 	controls_by_name["option"] = control;
-	group->add( *control );
-
-	group = groups["modifiers"];
-	control = new Button ( 72, 1, "control", *group );
-	buttons[0x48] = control;
-	controls.push_back( control );
-	controls_by_name["control"] = control;
 	group->add( *control );
 
 	group = groups["modifiers"];
@@ -663,13 +656,6 @@ void Mackie::BcfSurface::init_controls()
 	controls_by_name["snapshot"] = control;
 	group->add( *control );
 
-	group = groups["automation"];
-	control = new Button ( 78, 1, "touch", *group );
-	buttons[0x4e] = control;
-	controls.push_back( control );
-	controls_by_name["touch"] = control;
-	group->add( *control );
-
 	group = groups["functions"];
 	control = new Button ( 79, 1, "redo", *group );
 	buttons[0x4f] = control;
@@ -678,8 +664,8 @@ void Mackie::BcfSurface::init_controls()
 	group->add( *control );
 
 	group = groups["functions"];
-	control = new Button ( 80, 1, "marker", *group );
-	buttons[0x50] = control;
+	control = new Button ( 71, 1, "marker", *group );
+	buttons[0x47] = control;
 	controls.push_back( control );
 	controls_by_name["marker"] = control;
 	group->add( *control );
@@ -706,15 +692,15 @@ void Mackie::BcfSurface::init_controls()
 	group->add( *control );
 
 	group = groups["transport"];
-	control = new Button ( 84, 1, "frm_left", *group );
-	buttons[0x54] = control;
+	control = new Button ( 91, 1, "frm_left", *group );
+	buttons[0x5b] = control;
 	controls.push_back( control );
 	controls_by_name["frm_left"] = control;
 	group->add( *control );
 
 	group = groups["transport"];
-	control = new Button ( 85, 1, "frm_right", *group );
-	buttons[0x55] = control;
+	control = new Button ( 92, 1, "frm_right", *group );
+	buttons[0x5c] = control;
 	controls.push_back( control );
 	controls_by_name["frm_right"] = control;
 	group->add( *control );
@@ -727,15 +713,15 @@ void Mackie::BcfSurface::init_controls()
 	group->add( *control );
 
 	group = groups["transport"];
-	control = new Button ( 44, 1, "punch_in", *group );
-	buttons[0x2c] = control;
+	control = new Button ( 72, 1, "punch_in", *group );
+	buttons[0x48] = control;
 	controls.push_back( control );
 	controls_by_name["punch_in"] = control;
 	group->add( *control );
 
 	group = groups["transport"];
-	control = new Button ( 43, 1, "punch_out", *group );
-	buttons[0x2b] = control;
+	control = new Button ( 78, 1, "punch_out", *group );
+	buttons[0x4e] = control;
 	controls.push_back( control );
 	controls_by_name["punch_out"] = control;
 	group->add( *control );
@@ -755,15 +741,15 @@ void Mackie::BcfSurface::init_controls()
 	group->add( *control );
 
 	group = groups["transport"];
-	control = new Button ( 91, 1, "rewind", *group );
-	buttons[0x5b] = control;
+	control = new Button ( 44, 1, "rewind", *group );
+	buttons[0x2c] = control;
 	controls.push_back( control );
 	controls_by_name["rewind"] = control;
 	group->add( *control );
 
 	group = groups["transport"];
-	control = new Button ( 92, 1, "ffwd", *group );
-	buttons[0x5c] = control;
+	control = new Button ( 43, 1, "ffwd", *group );
+	buttons[0x2b] = control;
 	controls.push_back( control );
 	controls_by_name["ffwd"] = control;
 	group->add( *control );
@@ -1196,18 +1182,10 @@ void Mackie::BcfSurface::handle_button( MackieButtonHandler & mbh, ButtonState b
 			}
 			break;
 
-		case 0x47: // option
+		case 0x50: // option
 			switch ( bs ) {
 				case press: ls = mbh.option_press( button ); break;
 				case release: ls = mbh.option_release( button ); break;
-				case neither: break;
-			}
-			break;
-
-		case 0x48: // control
-			switch ( bs ) {
-				case press: ls = mbh.control_press( button ); break;
-				case release: ls = mbh.control_release( button ); break;
 				case neither: break;
 			}
 			break;
@@ -1252,14 +1230,6 @@ void Mackie::BcfSurface::handle_button( MackieButtonHandler & mbh, ButtonState b
 			}
 			break;
 
-		case 0x4e: // touch
-			switch ( bs ) {
-				case press: ls = mbh.touch_press( button ); break;
-				case release: ls = mbh.touch_release( button ); break;
-				case neither: break;
-			}
-			break;
-
 		case 0x4f: // redo
 			switch ( bs ) {
 				case press: ls = mbh.redo_press( button ); break;
@@ -1268,7 +1238,7 @@ void Mackie::BcfSurface::handle_button( MackieButtonHandler & mbh, ButtonState b
 			}
 			break;
 
-		case 0x50: // marker
+		case 0x47: // marker
 			switch ( bs ) {
 				case press: ls = mbh.marker_press( button ); break;
 				case release: ls = mbh.marker_release( button ); break;
@@ -1300,7 +1270,7 @@ void Mackie::BcfSurface::handle_button( MackieButtonHandler & mbh, ButtonState b
 			}
 			break;
 
-		case 0x54: // frm_left
+		case 0x5b: // frm_left
 			switch ( bs ) {
 				case press: ls = mbh.frm_left_press( button ); break;
 				case release: ls = mbh.frm_left_release( button ); break;
@@ -1308,7 +1278,7 @@ void Mackie::BcfSurface::handle_button( MackieButtonHandler & mbh, ButtonState b
 			}
 			break;
 
-		case 0x55: // frm_right
+		case 0x5c: // frm_right
 			switch ( bs ) {
 				case press: ls = mbh.frm_right_press( button ); break;
 				case release: ls = mbh.frm_right_release( button ); break;
@@ -1324,7 +1294,7 @@ void Mackie::BcfSurface::handle_button( MackieButtonHandler & mbh, ButtonState b
 			}
 			break;
 
-		case 0x2c: // punch_in
+		case 0x48: // punch_in
 			switch ( bs ) {
 				case press: ls = mbh.punch_in_press( button ); break;
 				case release: ls = mbh.punch_in_release( button ); break;
@@ -1332,7 +1302,7 @@ void Mackie::BcfSurface::handle_button( MackieButtonHandler & mbh, ButtonState b
 			}
 			break;
 
-		case 0x2b: // punch_out
+		case 0x4e: // punch_out
 			switch ( bs ) {
 				case press: ls = mbh.punch_out_press( button ); break;
 				case release: ls = mbh.punch_out_release( button ); break;
@@ -1356,7 +1326,7 @@ void Mackie::BcfSurface::handle_button( MackieButtonHandler & mbh, ButtonState b
 			}
 			break;
 
-		case 0x5b: // rewind
+		case 0x2c: // rewind
 			switch ( bs ) {
 				case press: ls = mbh.rewind_press( button ); break;
 				case release: ls = mbh.rewind_release( button ); break;
@@ -1364,7 +1334,7 @@ void Mackie::BcfSurface::handle_button( MackieButtonHandler & mbh, ButtonState b
 			}
 			break;
 
-		case 0x5c: // ffwd
+		case 0x2b: // ffwd
 			switch ( bs ) {
 				case press: ls = mbh.ffwd_press( button ); break;
 				case release: ls = mbh.ffwd_release( button ); break;

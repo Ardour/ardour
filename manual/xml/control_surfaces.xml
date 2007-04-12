@@ -22,4 +22,6 @@
 		href="generic_midi_control_surface.xml" />
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="configuring_usb_device_access.xml" />
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
+		href="mackie.xml" />
 </chapter>

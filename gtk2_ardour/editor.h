@@ -770,10 +770,12 @@ class Editor : public PublicEditor
 	SnapshotDisplayModelColumns snapshot_display_columns;
 	Glib::RefPtr<Gtk::ListStore> snapshot_display_model;
 	Gtk::TreeView snapshot_display;
+	Gtk::Menu snapshot_context_menu;
 
 	bool snapshot_display_button_press (GdkEventButton*);
 	void snapshot_display_selection_changed ();
 	void redisplay_snapshots();
+	void popup_snapshot_context_menu (int, int32_t, Glib::ustring);
 
 	/* named selections */
 
@@ -795,6 +797,8 @@ class Editor : public PublicEditor
 	void create_named_selection ();
 	void paste_named_selection (float times);
 	void remove_selected_named_selections ();
+	void remove_snapshot (Glib::ustring);
+	void rename_snapshot (Glib::ustring);
 
 	void handle_new_named_selection ();
 	void add_named_selection_to_named_selection_display (ARDOUR::NamedSelection&);
@@ -1167,8 +1171,12 @@ class Editor : public PublicEditor
 
 	bool canvas_playhead_cursor_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_edit_cursor_event (GdkEvent* event, ArdourCanvas::Item*);
-	bool track_canvas_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool track_canvas_scroll (GdkEventScroll* event);
+
+	bool track_canvas_scroll_event (GdkEventScroll* event);
+	bool track_canvas_button_press_event (GdkEventButton* event);
+	bool track_canvas_button_release_event (GdkEventButton* event);
+	bool track_canvas_motion_notify_event (GdkEventMotion* event);
 
 	Gtk::Allocation canvas_allocation;
 	bool canvas_idle_queued;
@@ -1275,8 +1283,8 @@ class Editor : public PublicEditor
 	void remove_metric_marks ();
 	void draw_metric_marks (const ARDOUR::Metrics& metrics);
 
-	void tempo_map_changed (ARDOUR::Change, bool immediate_redraw);
-	void redisplay_tempo ();
+	void tempo_map_changed (ARDOUR::Change);
+	void redisplay_tempo (bool immediate_redraw);
 	
 	void snap_to (nframes_t& first, int32_t direction = 0, bool for_mark = false);
 	uint32_t bbt_beat_subdivision;

@@ -332,12 +332,12 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 	nframes_t buf_offset;
 	nframes_t to_read;
 
-	/* precondition: caller has verified that we cover the desired section */
-
-	if (chan_n >= _sources.size()) {
+	if (muted()) {
 		return 0; /* read nothing */
 	}
-	
+
+	/* precondition: caller has verified that we cover the desired section */
+
 	if (position < _position) {
 		internal_offset = 0;
 		buf_offset = _position - position;
@@ -362,18 +362,30 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 		mixdown_buffer += buf_offset;
 	}
 
-	if (muted()) {
-		return 0; /* read nothing */
-	}
-
 	_read_data_count = 0;
 
-	boost::shared_ptr<AudioSource> src = audio_source(chan_n);
-	if (src->read (mixdown_buffer, _start + internal_offset, to_read) != to_read) {
-		return 0; /* "read nothing" */
-	}
+	if (chan_n < n_channels()) {
+		
+		boost::shared_ptr<AudioSource> src = audio_source(chan_n);
+		if (src->read (mixdown_buffer, _start + internal_offset, to_read) != to_read) {
 
-	_read_data_count += src->read_data_count();
+			return 0; /* "read nothing" */
+		}
+
+		_read_data_count += src->read_data_count();
+
+	} else {
+		
+		/* track is N-channel, this region has less channels; silence the ones
+		   we don't have.
+		*/
+
+		memset (mixdown_buffer, 0, sizeof (Sample) * cnt);
+
+		/* no fades required */
+
+		goto merge;
+	}
 
 	/* fade in */
 
@@ -384,7 +396,7 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 		/* see if this read is within the fade in */
 
 		if (internal_offset < fade_in_length) {
-			
+		
 			nframes_t limit;
 
 			limit = min (to_read, fade_in_length - internal_offset);
@@ -458,13 +470,15 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 		Session::apply_gain_to_buffer (mixdown_buffer, to_read, _scale_amplitude);
 	}
 
+  merge:
+
 	if (!opaque()) {
 
 		/* gack. the things we do for users.
 		 */
 
 		buf += buf_offset;
-
+		
 		for (nframes_t n = 0; n < to_read; ++n) {
 			buf[n] += mixdown_buffer[n];
 		}
@@ -827,6 +841,18 @@ AudioRegion::set_fade_out_active (bool yn)
 	send_change (FadeOutActiveChanged);
 }
 
+bool
+AudioRegion::fade_in_is_default () const
+{
+	return _fade_in_shape == Linear && _fade_in.back()->when == 64;
+}
+
+bool
+AudioRegion::fade_out_is_default () const
+{
+	return _fade_out_shape == Linear && _fade_out.back()->when == 64;
+}
+
 void
 AudioRegion::set_default_fade_in ()
 {
@@ -938,7 +964,6 @@ AudioRegion::separate_by_channel (Session& session, vector<boost::shared_ptr<Aud
 
 		boost::shared_ptr<Region> r = RegionFactory::create (srcs, _start, _length, new_name, _layer, f);
 		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
-		cerr << "new region name is " << ar->name() << endl;
 
 		v.push_back (ar);
 		
@@ -1099,7 +1124,6 @@ AudioRegion::normalize_to (float target_dB)
 	boost::shared_ptr<Playlist> pl (playlist());
 
 	if (pl) {
-		cerr << "Send modified\n";
 		pl->Modified();
 	}
 
@@ -1130,14 +1154,16 @@ void
 AudioRegion::suspend_fade_in ()
 {
 	if (++_fade_in_disabled == 1) {
-		set_fade_in_active (false);
+		if (fade_in_is_default()) {
+			set_fade_in_active (false);
+		}
 	}
 }
 
 void
 AudioRegion::resume_fade_in ()
 {
-	if (_fade_in_disabled && --_fade_in_disabled == 0) {
+	if (--_fade_in_disabled == 0 && _fade_in_disabled) {
 		set_fade_in_active (true);
 	}
 }
@@ -1146,14 +1172,16 @@ void
 AudioRegion::suspend_fade_out ()
 {
 	if (++_fade_out_disabled == 1) {
-		set_fade_out_active (false);
+		if (fade_out_is_default()) {
+			set_fade_out_active (false);
+		}
 	}
 }
 
 void
 AudioRegion::resume_fade_out ()
 {
-	if (_fade_out_disabled && --_fade_out_disabled == 0) {
+	if (--_fade_out_disabled == 0 &&_fade_out_disabled) {
 		set_fade_out_active (true);
 	}
 }
@@ -1185,7 +1213,7 @@ AudioRegion::source_offset_changed ()
 boost::shared_ptr<AudioSource>
 AudioRegion::audio_source (uint32_t n) const
 {
-	// Guaranteed to succeed (use a static cast?)
+	// Guaranteed to succeed (use a static cast for speed?)
 	return boost::dynamic_pointer_cast<AudioSource>(source(n));
 }
 

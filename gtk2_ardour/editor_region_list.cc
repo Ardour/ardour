@@ -21,6 +21,7 @@
 #include <cmath>
 #include <algorithm>
 #include <string>
+#include <sstream>
 
 #include <pbd/basename.h>
 
@@ -138,12 +139,13 @@ Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 		if (region->source()->name()[0] == '/') { // external file
 
 			if (region->whole_file()) {
-				str = ".../";
 
 				boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(region->source());
 
+				str = ".../";
+
 				if (afs) {
-					str += region_name_from_path (afs->path(), region->n_channels() > 1);
+					str = region_name_from_path (afs->path(), region->n_channels() > 1);
 				} else {
 					str += region->source()->name();
 				}
@@ -156,6 +158,14 @@ Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 
 			str = region->name();
 
+		}
+
+		if (region->n_channels() > 1) {
+			std::stringstream foo;
+			foo << region->n_channels ();
+			str += " [";
+			str += foo.str();
+			str += ']';
 		}
 
 		if (missing_source) {

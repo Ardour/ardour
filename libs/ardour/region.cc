@@ -272,11 +272,14 @@ void
 Region::set_playlist (boost::weak_ptr<Playlist> wpl)
 {
 	boost::shared_ptr<Playlist> old_playlist = (_playlist.lock());
+
 	boost::shared_ptr<Playlist> pl (wpl.lock());
 
 	if (old_playlist == pl) {
 		return;
 	}
+
+	_playlist = pl;
 
 	if (pl) {
 		if (old_playlist) {
@@ -292,7 +295,7 @@ Region::set_playlist (boost::weak_ptr<Playlist> wpl)
 	} else {
 		if (old_playlist) {
 			for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
-				(*i)->remove_playlist (_playlist);
+				(*i)->remove_playlist (old_playlist);
 			}
 		}
 	}

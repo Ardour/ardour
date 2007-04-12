@@ -1136,6 +1136,13 @@ AutomationLine::set_selected_points (PointSelection& points)
 
 }
 
+void AutomationLine::set_colors() {
+	set_line_color( color_map[cAutomationLine] );
+	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
+		(*i)->show_color (false, !points_visible);
+	}
+}
+
 void
 AutomationLine::show_selection ()
 {

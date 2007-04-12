@@ -114,6 +114,7 @@ Diskstream::init (Flag f)
 	playback_distance = 0;
 	_read_data_count = 0;
 	_write_data_count = 0;
+	commit_should_unlock = false;
 
 	pending_overwrite = false;
 	overwrite_frame = 0;
@@ -212,7 +213,9 @@ Diskstream::prepare ()
 void
 Diskstream::recover ()
 {
-	state_lock.unlock();
+	if (commit_should_unlock) {
+		state_lock.unlock();
+	}
 	_processed = false;
 }
 

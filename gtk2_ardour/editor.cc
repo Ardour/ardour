@@ -40,6 +40,7 @@
 #include <gtkmm2ext/tearoff.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/window_title.h>
+#include <gtkmm2ext/choice.h>
 
 #include <ardour/audio_track.h>
 #include <ardour/audio_diskstream.h>
@@ -1076,7 +1077,7 @@ Editor::connect_to_session (Session *t)
 
 	session_connections.push_back (session->SMPTEOffsetChanged.connect (mem_fun(*this, &Editor::update_just_smpte)));
 
-	session_connections.push_back (session->tempo_map().StateChanged.connect (bind (mem_fun(*this, &Editor::tempo_map_changed), false)));
+	session_connections.push_back (session->tempo_map().StateChanged.connect (mem_fun(*this, &Editor::tempo_map_changed)));
 
 	edit_groups_changed ();
 
@@ -1631,48 +1632,65 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 
 	items.push_back (SeparatorElem());
 
-	items.push_back (CheckMenuElem (_("Lock"), mem_fun(*this, &Editor::toggle_region_lock)));
+	sigc::connection fooc;
+
+	items.push_back (CheckMenuElem (_("Lock")));
 	region_lock_item = static_cast<CheckMenuItem*>(&items.back());
+	fooc = region_lock_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_lock));
 	if (region->locked()) {
+		fooc.block (true);
 		region_lock_item->set_active();
+		fooc.block (false);
 	}
-	items.push_back (CheckMenuElem (_("Mute"), mem_fun(*this, &Editor::toggle_region_mute)));
+	items.push_back (CheckMenuElem (_("Mute")));
 	region_mute_item = static_cast<CheckMenuItem*>(&items.back());
+	fooc = region_mute_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_mute));
 	if (region->muted()) {
+		fooc.block (true);
 		region_mute_item->set_active();
-	}
-	items.push_back (CheckMenuElem (_("Opaque"), mem_fun(*this, &Editor::toggle_region_opaque)));
-	region_opaque_item = static_cast<CheckMenuItem*>(&items.back());
-	if (region->opaque()) {
-		region_opaque_item->set_active();
+		fooc.block (false);
 	}
 
+	items.push_back (CheckMenuElem (_("Opaque")));
+	region_opaque_item = static_cast<CheckMenuItem*>(&items.back());
+	fooc = region_opaque_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_opaque));
+	if (region->opaque()) {
+		fooc.block (true);
+		region_opaque_item->set_active();
+		fooc.block (false);
+	}
+	
 	items.push_back (CheckMenuElem (_("Original position"), mem_fun(*this, &Editor::naturalize)));
 	if (region->at_natural_position()) {
 		items.back().set_sensitive (false);
 	}
-
+	
 	items.push_back (SeparatorElem());
-
+	
 	if (ar) {
 		
 		RegionView* rv = sv->find_view (ar);
 		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(rv);
-
+		
 		items.push_back (MenuElem (_("Reset Envelope"), mem_fun(*this, &Editor::reset_region_gain_envelopes)));
 		
-		items.push_back (CheckMenuElem (_("Envelope Visible"), mem_fun(*this, &Editor::toggle_gain_envelope_visibility)));
+		items.push_back (CheckMenuElem (_("Envelope Visible")));
 		region_envelope_visible_item = static_cast<CheckMenuItem*> (&items.back());
-
+		fooc = region_envelope_visible_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_gain_envelope_visibility));
 		if (arv->envelope_visible()) {
+			fooc.block (true);
 			region_envelope_visible_item->set_active (true);
+			fooc.block (false);
 		}
-
-		items.push_back (CheckMenuElem (_("Envelope Active"), mem_fun(*this, &Editor::toggle_gain_envelope_active)));
+		
+		items.push_back (CheckMenuElem (_("Envelope Active")));
 		region_envelope_active_item = static_cast<CheckMenuItem*> (&items.back());
-
+		fooc = region_envelope_active_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_gain_envelope_active));
+		
 		if (ar->envelope_active()) {
+			fooc.block (true);
 			region_envelope_active_item->set_active (true);
+			fooc.block (false);
 		}
 
 		items.push_back (SeparatorElem());
@@ -2835,32 +2853,34 @@ Editor::history_changed ()
 void
 Editor::duplicate_dialog (bool dup_region)
 {
-	if (dup_region) {
-		if (clicked_regionview == 0) {
-			return;
-		}
-	} else {
-		if (selection->time.length() == 0) {
-			return;
-		}
+	if (selection->regions.empty() && (selection->time.length() == 0)) {
+		return;
 	}
 
 	ArdourDialog win ("duplicate dialog");
-	Entry  entry;
 	Label  label (_("Duplicate how many times?"));
+	Adjustment adjustment (1.0, 1.0, 1000000.0, 1.0, 5.0);
+	SpinButton spinner (adjustment);
 
+	win.get_vbox()->set_spacing (12);
 	win.get_vbox()->pack_start (label);
-	win.add_action_widget (entry, RESPONSE_ACCEPT);
+
+	/* dialogs have ::add_action_widget() but that puts the spinner in the wrong
+	   place, visually. so do this by hand.
+	*/
+
+	win.get_vbox()->pack_start (spinner);
+	spinner.signal_activate().connect (sigc::bind (mem_fun (win, &ArdourDialog::response), RESPONSE_ACCEPT));
+
+	label.show ();
+	spinner.show ();
+
 	win.add_button (Stock::OK, RESPONSE_ACCEPT);
 	win.add_button (Stock::CANCEL, RESPONSE_CANCEL);
 
 	win.set_position (WIN_POS_MOUSE);
 
-	entry.set_text ("1");
-	set_size_request_to_display_given_text (entry, X_("12345678"), 20, 15);
-	entry.select_region (0, -1);
-	entry.grab_focus ();
-
+	spinner.grab_focus ();
 
 	switch (win.run ()) {
 	case RESPONSE_ACCEPT:
@@ -2869,17 +2889,12 @@ Editor::duplicate_dialog (bool dup_region)
 		return;
 	}
 
-	string text = entry.get_text();
-	float times;
+	float times = adjustment.get_value();
 
-	if (sscanf (text.c_str(), "%f", &times) == 1) {
-		if (dup_region) {
-			RegionSelection regions;
-			regions.add (clicked_regionview);
-			duplicate_some_regions (regions, times);
-		} else {
-			duplicate_selection (times);
-		}
+	if (!selection->regions.empty()) {
+		duplicate_some_regions (selection->regions, times);
+	} else {
+		duplicate_selection (times);
 	}
 }
 
@@ -3376,6 +3391,9 @@ Editor::control_layout_scroll (GdkEventScroll* ev)
 	return false;
 }
 
+
+/** A new snapshot has been selected.
+ */
 void
 Editor::snapshot_display_selection_changed ()
 {
@@ -3400,7 +3418,93 @@ Editor::snapshot_display_selection_changed ()
 bool
 Editor::snapshot_display_button_press (GdkEventButton* ev)
 {
-	 return false;
+	if (ev->button == 3) {
+		/* Right-click on the snapshot list. Work out which snapshot it
+		   was over. */
+		Gtk::TreeModel::Path path;
+		Gtk::TreeViewColumn* col;
+		int cx;
+		int cy;
+		snapshot_display.get_path_at_pos ((int) ev->x, (int) ev->y, path, col, cx, cy);
+		Gtk::TreeModel::iterator iter = snapshot_display_model->get_iter (path);
+		if (iter) {
+			Gtk::TreeModel::Row row = *iter;
+			popup_snapshot_context_menu (ev->button, ev->time, row[snapshot_display_columns.real_name]);
+		}
+		return true;
+	}
+
+	return false;
+}
+
+
+/** Pop up the snapshot display context menu.
+ * @param button Button used to open the menu.
+ * @param time Menu open time.
+ * @snapshot_name Name of the snapshot that the menu click was over.
+ */
+
+void
+Editor::popup_snapshot_context_menu (int button, int32_t time, Glib::ustring snapshot_name)
+{
+	using namespace Menu_Helpers;
+
+	MenuList& items (snapshot_context_menu.items());
+	items.clear ();
+
+	const bool modification_allowed = (session->snap_name() != snapshot_name && session->name() != snapshot_name);
+
+	items.push_back (MenuElem (_("Remove"), bind (mem_fun (*this, &Editor::remove_snapshot), snapshot_name)));
+	if (!modification_allowed) {
+		items.back().set_sensitive (false);
+	}
+
+	items.push_back (MenuElem (_("Rename"), bind (mem_fun (*this, &Editor::rename_snapshot), snapshot_name)));
+	if (!modification_allowed) {
+		items.back().set_sensitive (false);
+	}
+
+	snapshot_context_menu.popup (button, time);
+}
+
+void
+Editor::rename_snapshot (Glib::ustring old_name)
+{
+	ArdourPrompter prompter(true);
+
+	string new_name;
+
+	prompter.set_name ("Prompter");
+	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
+	prompter.set_prompt (_("New name of snapshot"));
+	prompter.set_initial_text (old_name);
+	
+	if (prompter.run() == RESPONSE_ACCEPT) {
+		prompter.get_result (new_name);
+		if (new_name.length()) {
+			session->rename_state (old_name, new_name);
+		        redisplay_snapshots ();
+		}
+	}
+}
+
+
+void
+Editor::remove_snapshot (Glib::ustring name)
+{
+	vector<string> choices;
+
+	std::string prompt  = string_compose (_("Do you really want to remove snapshot \"%1\" ?\n(cannot be undone)"), name);
+
+	choices.push_back (_("No, do nothing."));
+	choices.push_back (_("Yes, remove it."));
+
+	Gtkmm2ext::Choice prompter (prompt, choices);
+
+	if (prompter.run () == 1) {
+		session->remove_state (name);
+		redisplay_snapshots ();
+	}
 }
 
 void
@@ -3669,7 +3773,7 @@ Editor::idle_visual_changer ()
 			/* the signal handler will do the rest */
 		} else {
 			update_fixed_rulers();
-			tempo_map_changed (Change (0), true);
+			redisplay_tempo (true);
 		}
 	}
 

@@ -37,6 +37,7 @@
 #include "actions.h"
 
 #include <ardour/session.h>
+#include <ardour/profile.h>
 #include <ardour/audioengine.h>
 #include <ardour/control_protocol_manager.h>
 
@@ -397,8 +398,6 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (option_actions, X_("SendMIDIfeedback"), _("Send MIDI feedback"), mem_fun (*this, &ARDOUR_UI::toggle_send_midi_feedback));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (option_actions, X_("UseMIDIcontrol"), _("Use MIDI control"), mem_fun (*this, &ARDOUR_UI::toggle_use_midi_control));
-	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_toggle_action (option_actions, X_("UseOSC"), _("Use OSC"), mem_fun (*this, &ARDOUR_UI::toggle_use_osc));
 #ifndef HAVE_LIBLO
@@ -702,11 +701,13 @@ ARDOUR_UI::build_menu_bar ()
 	sample_rate_label.set_name ("SampleRate");
 
 	menu_hbox.pack_start (*menu_bar, true, true);
-	menu_hbox.pack_end (wall_clock_box, false, false, 10);
-	menu_hbox.pack_end (disk_space_box, false, false, 10);
-	menu_hbox.pack_end (cpu_load_box, false, false, 10);
-	menu_hbox.pack_end (buffer_load_box, false, false, 10);
-	menu_hbox.pack_end (sample_rate_box, false, false, 10);
+	if (!Profile->get_small_screen()) {
+		menu_hbox.pack_end (wall_clock_box, false, false, 2);
+		menu_hbox.pack_end (disk_space_box, false, false, 4);
+	}
+	menu_hbox.pack_end (cpu_load_box, false, false, 4);
+	menu_hbox.pack_end (buffer_load_box, false, false, 4);
+	menu_hbox.pack_end (sample_rate_box, false, false, 4);
 
 	menu_bar_base.set_name ("MainMenuBar");
 	menu_bar_base.add (menu_hbox);

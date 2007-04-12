@@ -515,7 +515,11 @@ TimeAxisView::popup_display_menu (guint32 when)
 	if (display_menu == 0) {
 		build_display_menu ();
 	}
-	editor.set_selected_track (*this, Selection::Add);
+
+	if (!get_selected()) {
+		editor.set_selected_track (*this, Selection::Set);
+	}
+
 	display_menu->popup (1, when);	
 }
 

@@ -47,6 +47,7 @@
 #include "rgb_macros.h"
 
 #include <ardour/types.h>
+#include <ardour/profile.h>
 #include <ardour/route.h>
 #include <ardour/audio_track.h>
 #include <ardour/audio_diskstream.h>
@@ -325,8 +326,8 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	Selection::Operation op = Keyboard::selection_type (event->button.state);
 	bool press = (event->type == GDK_BUTTON_PRESS);
 
-	begin_reversible_command (_("select on click"));
-
+	// begin_reversible_command (_("select on click"));
+	
 	switch (item_type) {
 	case RegionItem:
 		if (mouse_mode != MouseRange) {
@@ -359,8 +360,9 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	case GainAutomationControlPointItem:
 	case PanAutomationControlPointItem:
 	case RedirectAutomationControlPointItem:
+		commit = set_selected_track_from_click (press, op, true);
 		if (mouse_mode != MouseRange) {
-			commit = set_selected_control_point_from_click (op, false);
+			commit |= set_selected_control_point_from_click (op, false);
 		}
 		break;
 		
@@ -381,16 +383,14 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		break;
 	}
 	
-	if (commit) {
-		commit_reversible_command ();
-	}
+//	if (commit) {
+//		commit_reversible_command ();
+//	}
 }
 
 bool
 Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
-	nframes_t where = event_frame (event, 0, 0);
-
 	track_canvas.grab_focus();
 
 	if (session && session->actively_recording()) {
@@ -748,79 +748,6 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 	case 3:
 		break;
 
-	case 4:
-		switch (mouse_mode) {
-		case MouseZoom:
-			//temporal_zoom_to_frame (true, where);
-			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Control)) {
-				temporal_zoom_to_frame (true, where);
-			}
-			else {
-				temporal_zoom_step (true);
-			}
-			break;
-		default:
-			
-			if (Keyboard::modifier_state_contains (event->button.state, Keyboard::ModifierMask(Keyboard::Alt))) {
-				scroll_backward (0.6f);
-				return true;
-			}
-			else if (Keyboard::no_modifier_keys_pressed (&event->button)) {
-				scroll_tracks_up_line ();
-			} else {
-				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Shift)) {
-					if (clicked_axisview) {
-						if (!current_stepping_trackview) {
-						  step_timeout = Glib::signal_timeout().connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
-							current_stepping_trackview = clicked_axisview;
-						}
-						gettimeofday (&last_track_height_step_timestamp, 0);
-						current_stepping_trackview->step_height (true);
-					}
-				}
-				else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Control)) {
-					temporal_zoom_to_frame (true, where);
-				}
-			}
-		}
-		break;
-
-	case 5:
-		switch (mouse_mode) {
-		case MouseZoom:
-			// temporal_zoom_to_frame (false, where);
-			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Control)) {
-				temporal_zoom_to_frame (false, where);
-			}
-			else {
-				temporal_zoom_step (false);
-			}
-			break;
-		default:
-
-			if (Keyboard::modifier_state_contains (event->button.state, Keyboard::ModifierMask(Keyboard::Alt))) {
-				scroll_forward (0.6f);
-				return true;
-			}
-			else if (Keyboard::no_modifier_keys_pressed (&event->button)) {
-				scroll_tracks_down_line ();
-			} else {
-				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Shift)) {
-					if (clicked_axisview) {
-						if (!current_stepping_trackview) {
-						  step_timeout = Glib::signal_timeout().connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
-							current_stepping_trackview = clicked_axisview;
-						}
-						gettimeofday (&last_track_height_step_timestamp, 0);
-						current_stepping_trackview->step_height (false);
-					}
-				} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Control)) {
-					temporal_zoom_to_frame (false, where);
-				}
-			}
-		}
-		break;
-
 	default:
 		break;
 
@@ -1062,8 +989,10 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		case MouseGain:
 			// Gain only makes sense for audio regions
-			if ( ! dynamic_cast<AudioRegionView*>(clicked_regionview))
+
+			if (!dynamic_cast<AudioRegionView*>(clicked_regionview)) {
 				break;
+			}
 
 			switch (item_type) {
 			case RegionItem:
@@ -1693,6 +1622,7 @@ Editor::end_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	stop_canvas_autoscroll ();
 
 	if (drag_info.item == 0) {
+		cerr << "end grab with no item\n";
 		return false;
 	}
 	
@@ -1999,7 +1929,11 @@ Editor::start_cursor_grab (ArdourCanvas::Item* item, GdkEvent* event)
 		
 		if (session && drag_info.was_rolling) {
 			session->request_stop ();
-		} 
+		}
+
+		if (session && session->is_auditioning()) {
+			session->cancel_audition ();
+		}
 	}
 
 	drag_info.pointer_frame_offset = drag_info.grab_frame - cursor->current_frame;	
@@ -3361,12 +3295,10 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	if (regionview_y_movement) {
 
 		/* moved to a different audio track. */
+		
+		vector<RegionView*> new_selection;
 
-		list<RegionView*> new_selection;
-		new_selection = selection->regions.by_layer();
-		selection->clear_regions ();
-
-		for (list<RegionView*>::const_iterator i = new_selection.begin(); i != new_selection.end(); ++i) {
+		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ) {
 	    
 			RegionView* rv = (*i);	    	    
 
@@ -3382,6 +3314,12 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	    
 			where = (nframes_t) (unit_to_frame (ix1) * speed);
 			boost::shared_ptr<Region> new_region (RegionFactory::create (rv->region()));
+
+			/* undo the previous hide_dependent_views so that xfades don't
+			   disappear on copying regions 
+			*/
+
+			rv->get_time_axis_view().reveal_dependent_views (*rv);
 
 			if (!drag_info.copy) {
 				
@@ -3408,14 +3346,36 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			c.disconnect ();
 							      
 			if (latest_regionview) {
-				selection->add (latest_regionview);
+				new_selection.push_back (latest_regionview);
 			}
 
 			if (drag_info.copy) {
 				// get rid of the copy
 				delete rv;
 			} 
+
+			/* OK, this is where it gets tricky. If the playlist was being used by >1 tracks, and the region
+			   was selected in all of them, then removing it from the playlist will have removed all
+			   trace of it from the selection (i.e. there were N regions selected, we removed 1,
+			   but since its the same playlist for N tracks, all N tracks updated themselves, removed the
+			   corresponding regionview, and the selection is now empty).
+
+			   this could have invalidated any and all iterators into the region selection.
+
+			   the heuristic we use here is: if the region selection is empty, break out of the loop
+			   here. if the region selection is not empty, then restart the loop because we know that
+			   we must have removed at least the region(view) we've just been working on as well as any
+			   that we processed on previous iterations.
+			*/
+
+			if (selection->regions.empty()) {
+				break;
+			} else { 
+				i = selection->regions.by_layer().begin();
+			}
 		} 
+
+		selection->set (new_selection);
 
 	} else {
 
@@ -3458,6 +3418,8 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			}
 
 			boost::shared_ptr<Playlist> to_playlist = rv->region()->playlist();
+
+			assert (to_playlist);
 
 			/* add the undo */
 
@@ -3562,7 +3524,7 @@ Editor::show_verbose_time_cursor (nframes_t frame, double offset, double xpos, d
 		return;
 	}
 
-	switch (ARDOUR_UI::instance()->secondary_clock.mode ()) {
+	switch (Profile->get_small_screen() ? ARDOUR_UI::instance()->primary_clock.mode () : ARDOUR_UI::instance()->secondary_clock.mode ()) {
 	case AudioClock::BBT:
 		session->bbt_time (frame, bbt);
 		snprintf (buf, sizeof (buf), "%02" PRIu32 "|%02" PRIu32 "|%02" PRIu32, bbt.bars, bbt.beats, bbt.ticks);
@@ -4562,7 +4524,6 @@ Editor::end_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 			switch (mouse_mode) {
 			case MouseObject:
 				/* find the two markers on either side and then make the selection from it */
-				cerr << "select between " << start << " .. " << end << endl;
 				select_all_within (start, end, 0.0f, FLT_MAX, Selection::Set);
 				break;
 

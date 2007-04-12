@@ -81,6 +81,7 @@ class AudioFileSource : public AudioSource {
 	virtual void           mark_capture_start (nframes_t) {}
 	virtual void           mark_capture_end () {}
 	virtual void           clear_capture_marks() {}
+	virtual bool           one_of_several_channels () const { return false; }
 
 	virtual int update_header (nframes_t when, struct tm&, time_t) = 0;
 	virtual int flush_header () = 0;
@@ -161,7 +162,7 @@ class AudioFileSource : public AudioSource {
 	virtual void set_timeline_position (int64_t pos);
 	virtual void set_header_timeline_position () = 0;
 
-	bool find (Glib::ustring& path, bool must_exist, bool& is_new);
+	bool find (Glib::ustring& path, bool must_exist, bool& is_new, uint16_t& chan);
 	bool removable() const;
 	bool writable() const { return _flags & Writable; }
 };

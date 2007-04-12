@@ -646,7 +646,7 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 		} 
 	}
 
-	if (transport_rolling() && !Config->get_auto_play() && !with_roll && !(synced_to_jack() && play_loop)) {
+	if (transport_rolling() && (!auto_play_legal || !Config->get_auto_play()) && !with_roll && !(synced_to_jack() && play_loop)) {
 		realtime_stop (false);
 	} 
 
@@ -936,7 +936,7 @@ Session::post_transport ()
 
 	if (post_transport_work & PostTransportLocate) {
 
-		if (((Config->get_slave_source() == None && Config->get_auto_play()) && !_exporting) || (post_transport_work & PostTransportRoll)) {
+		if (((Config->get_slave_source() == None && (auto_play_legal && Config->get_auto_play())) && !_exporting) || (post_transport_work & PostTransportRoll)) {
 			start_transport ();
 			
 		} else {
@@ -1260,4 +1260,10 @@ void
 Session::update_latency_compensation_proxy (void* ignored)
 {
 	update_latency_compensation (false, false);
+}
+
+void
+Session::allow_auto_play (bool yn)
+{
+	auto_play_legal = yn;
 }

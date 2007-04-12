@@ -56,6 +56,8 @@ class SndFileSource : public AudioFileSource {
 
 	bool set_destructive (bool yn);
 
+	bool one_of_several_channels () const;
+
 	static void setup_standard_crossfades (nframes_t sample_rate);
 	static const AudioFileSource::Flag default_writable_flags;
 

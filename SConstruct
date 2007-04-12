@@ -16,7 +16,7 @@ import SCons.Node.FS
 SConsignFile()
 EnsureSConsVersion(0, 96)
 
-ardour_version = '2.0beta12'
+ardour_version = '2.0rc1'
 
 subst_dict = { }
 
@@ -728,7 +728,8 @@ prep_libcheck(env, libraries['flac'])
 libraries['flac'].Append(CCFLAGS="-I/usr/local/include", LINKFLAGS="-L/usr/local/lib")
 
 conf = Configure (libraries['flac'])
-conf.CheckLib ('FLAC', 'FLAC__stream_decoder_new', language='CXX')
+if conf.CheckLib ('FLAC', 'FLAC__stream_decoder_new', language='CXX'):
+    conf.env.Append(CCFLAGS='-DHAVE_FLAC')
 libraries['flac'] = conf.Finish ()
 
 # or if that fails...

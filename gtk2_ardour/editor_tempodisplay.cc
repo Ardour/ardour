@@ -93,13 +93,28 @@ Editor::draw_metric_marks (const Metrics& metrics)
 }
 
 void
-Editor::tempo_map_changed (Change ignored, bool immediate_redraw)
+Editor::tempo_map_changed (Change ignored)
 {
 	if (!session) {
 		return;
 	}
 
-        ENSURE_GUI_THREAD(bind (mem_fun (*this, &Editor::tempo_map_changed), ignored, immediate_redraw));
+	ENSURE_GUI_THREAD(bind (mem_fun (*this, &Editor::tempo_map_changed), ignored));
+	
+	redisplay_tempo (false); // redraw rulers and measures
+	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
+}
+
+/**
+ * This code was originally in tempo_map_changed, but this is called every time the canvas scrolls horizontally. 
+ * That's why this is moved in here. The new tempo_map_changed is called when the ARDOUR::TempoMap actually changed.
+ */
+void
+Editor::redisplay_tempo (bool immediate_redraw)
+{
+	if (!session) {
+		return;
+	}
 
 	BBT_Time previous_beat, next_beat; // the beats previous to the leftmost frame and after the rightmost frame
 
@@ -150,11 +165,6 @@ Editor::tempo_map_changed (Change ignored, bool immediate_redraw)
 			hide_measures ();
 		}
 	}
-}
-
-void
-Editor::redisplay_tempo ()
-{	
 }
 
 void
@@ -307,8 +317,6 @@ Editor::mouse_add_new_tempo_event (nframes_t frame)
 	commit_reversible_command ();
 	
 	map.dump (cerr);
-
-	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
 }
 
 void
@@ -349,8 +357,6 @@ Editor::mouse_add_new_meter_event (nframes_t frame)
 	commit_reversible_command ();
 	
 	map.dump (cerr);
-
-	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
 }
 
 void
@@ -401,8 +407,6 @@ Editor::edit_meter_section (MeterSection* section)
         XMLNode &after = session->tempo_map().get_state();
 	session->add_command(new MementoCommand<TempoMap>(session->tempo_map(), &before, &after));
 	commit_reversible_command ();
-
-	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
 }
 
 void
@@ -433,8 +437,6 @@ Editor::edit_tempo_section (TempoSection* section)
         XMLNode &after = session->tempo_map().get_state();
 	session->add_command (new MementoCommand<TempoMap>(session->tempo_map(), &before, &after));
 	commit_reversible_command ();
-
-	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
 }
 
 void
@@ -485,8 +487,6 @@ Editor::real_remove_tempo_marker (TempoSection *section)
 	session->add_command(new MementoCommand<TempoMap>(session->tempo_map(), &before, &after));
 	commit_reversible_command ();
 
-	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
-
 	return FALSE;
 }
 
@@ -520,8 +520,6 @@ Editor::real_remove_meter_marker (MeterSection *section)
 	XMLNode &after = session->tempo_map().get_state();
 	session->add_command(new MementoCommand<TempoMap>(session->tempo_map(), &before, &after));
 	commit_reversible_command ();
-
-	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
 
 	return FALSE;
 }

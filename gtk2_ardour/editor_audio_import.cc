@@ -17,8 +17,14 @@
 
 */
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <unistd.h>
+
 #include <pbd/pthread_utils.h>
 #include <pbd/basename.h>
+#include <pbd/shortpath.h>
 
 #include <gtkmm2ext/choice.h>
 #include <gtkmm2ext/window_title.h>
@@ -293,7 +299,7 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_fi
 		linked_path += Glib::path_get_basename (path);
 		
 		if (link (path.c_str(), linked_path.c_str()) == 0) {
-			
+
 			/* there are many reasons why link(2) might have failed.
 			   but if it succeeds, we now have a link in the
 			   session sound dir that will protect against
@@ -301,6 +307,21 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_fi
 			*/
 			
 			path = linked_path;
+
+		} else {
+
+			/* one possible reason is that its already linked */
+
+			if (errno == EEXIST) {
+				struct stat sb;
+
+				if (stat (linked_path.c_str(), &sb) == 0) {
+					if (sb.st_nlink > 1) { // its a hard link, assume its the one we want
+						path = linked_path;
+					}
+				}
+			}
+
 		}
 		
 		/* note that we temporarily truncated _id at the colon */
@@ -380,7 +401,6 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_fi
 				boost::shared_ptr<Source> s;
 
 				if ((s = session->source_by_path_and_channel (path, n)) == 0) {
-					cerr << "source doesn't exist yet\n";
 					source = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable 
 											       (DataType::AUDIO, *session, path,  n,
 												(mode == ImportAsTapeTrack ? 

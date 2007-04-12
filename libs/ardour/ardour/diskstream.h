@@ -281,6 +281,7 @@ class Diskstream : public PBD::StatefulDestructible
 	nframes_t            file_frame;		
 	nframes_t            playback_sample;
 	nframes_t            playback_distance;
+	bool                 commit_should_unlock;
 
 	uint32_t                 _read_data_count;
 	uint32_t                 _write_data_count;

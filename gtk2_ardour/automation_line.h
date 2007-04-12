@@ -159,6 +159,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&);
+	void set_colors();
 
   protected:
 

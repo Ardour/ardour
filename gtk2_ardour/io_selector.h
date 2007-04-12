@@ -198,6 +198,7 @@ class PortInsertWindow : public ArdourDialog
 	void accept ();
 
 	void plugin_going_away ();
+	sigc::connection going_away_connection;
 };
 
 

@@ -41,6 +41,7 @@
 #include <ardour/ardour.h>
 #include <ardour/audio_library.h>
 #include <ardour/configuration.h>
+#include <ardour/profile.h>
 #include <ardour/plugin_manager.h>
 #include <ardour/audiosource.h>
 #include <ardour/utils.h>
@@ -61,6 +62,7 @@
 #include "i18n.h"
 
 ARDOUR::Configuration* ARDOUR::Config = 0;
+ARDOUR::RuntimeProfile* ARDOUR::Profile = 0;
 ARDOUR::AudioLibrary* ARDOUR::Library = 0;
 
 #ifdef HAVE_LIBLO
@@ -296,10 +298,12 @@ ARDOUR::init (ARDOUR::AudioEngine& engine, bool use_vst, bool try_optimization)
 
 	Config->set_use_vst (use_vst);
 
+	Profile = new RuntimeProfile;
+
 	if (setup_midi (engine)) {
 		return -1;
 	}
-    
+
 #ifdef HAVE_LIBLO
 	if (setup_osc ()) {
 		return -1;

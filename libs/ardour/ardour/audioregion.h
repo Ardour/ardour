@@ -89,6 +89,8 @@ class AudioRegion : public Region
 	int      set_state (const XMLNode&);
 
 	static void set_default_fade (float steepness, nframes_t len);
+	bool fade_in_is_default () const;
+	bool fade_out_is_default () const;
 
 	enum FadeShape {
 		Linear,

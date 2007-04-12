@@ -1,6 +1,7 @@
 /* no guard clauses here */
 
 COLORID(cWaveForm)
+COLORID(cWaveFormClip)
 COLORID(cMutedWaveForm)
 COLORID(cSelectedFrameBase)
 COLORID(cFrameBase)
@@ -75,6 +76,8 @@ COLORID(cMeasureLineBar)
 COLORID(cGhostTrackBaseOutline)
 COLORID(cGhostTrackBaseFill)
 COLORID(cGhostTrackWave)
+COLORID(cGhostTrackWaveClip)
+COLORID(cGhostTrackZeroLine)
 COLORID(cImageTrackBase)
 COLORID(cImageTrackOutline)
 COLORID(cMarkerTrackBase)

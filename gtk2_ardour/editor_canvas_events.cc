@@ -20,6 +20,8 @@
 #include <cstdlib>
 #include <cmath>
 
+#include <pbd/stacktrace.h>
+
 #include <ardour/audio_diskstream.h>
 #include <ardour/audioplaylist.h>
 
@@ -129,43 +131,36 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 }
 
 bool
-Editor::track_canvas_event (GdkEvent *event, ArdourCanvas::Item* item)
+Editor::track_canvas_scroll_event (GdkEventScroll *event)
 {
-	gint x, y;
+	track_canvas.grab_focus();
+	track_canvas_scroll (event);
+	return false;
+}
 
-	/* this is the handler for events that are not handled by
-	   items.
-	*/
+bool
+Editor::track_canvas_button_press_event (GdkEventButton *event)
+{
+	track_canvas.grab_focus();
+	return false;
+}
 
-	switch (event->type) {
-	case GDK_MOTION_NOTIFY:
-		/* keep those motion events coming */
-		track_canvas.get_pointer (x, y);
-		return track_canvas_motion (event);
-
-	case GDK_BUTTON_PRESS:
-		track_canvas.grab_focus();
-		break;
-
-	case GDK_BUTTON_RELEASE:
-		switch (event->button.button) {
-		case 4:
-		case 5:
-			button_release_handler (item, event, NoItem);
-			break;
-		}
-		break;
-
-	case GDK_SCROLL:
-		track_canvas.grab_focus();
-		track_canvas_scroll (&event->scroll);
-		break;
-
-	default:
-		break;
+bool
+Editor::track_canvas_button_release_event (GdkEventButton *event)
+{
+	if (drag_info.item) {
+		end_grab (drag_info.item, (GdkEvent*) event);
 	}
+	return false;
+}
 
-	return FALSE;
+bool
+Editor::track_canvas_motion_notify_event (GdkEventMotion *event)
+{
+	int x, y;
+	/* keep those motion events coming */
+	track_canvas.get_pointer (x, y);
+	return false;
 }
 
 bool
@@ -214,7 +209,12 @@ Editor::typed_event (ArdourCanvas::Item* item, GdkEvent *event, ItemType type)
 bool
 Editor::canvas_region_view_event (GdkEvent *event, ArdourCanvas::Item* item, RegionView *rv)
 {
-	gint ret = FALSE;
+	bool ret = false;
+
+	if (!rv->sensitive ()) {
+		return false;
+	}
+
 
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
@@ -290,6 +290,7 @@ bool
 Editor::canvas_automation_track_event (GdkEvent *event, ArdourCanvas::Item* item, AutomationTimeAxisView *atv)
 {
 	bool ret = false;
+
 	
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
@@ -330,6 +331,10 @@ Editor::canvas_fade_in_event (GdkEvent *event, ArdourCanvas::Item* item, AudioRe
 {
 	/* we handle only button 3 press/release events */
 
+	if (!rv->sensitive()) {
+		return false;
+	}
+
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
 		clicked_regionview = rv;
@@ -362,6 +367,10 @@ Editor::canvas_fade_in_handle_event (GdkEvent *event, ArdourCanvas::Item* item, 
 {
 	bool ret = false;
 	
+	if (!rv->sensitive()) {
+		return false;
+	}
+
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
 	case GDK_2BUTTON_PRESS:
@@ -401,6 +410,10 @@ Editor::canvas_fade_out_event (GdkEvent *event, ArdourCanvas::Item* item, AudioR
 {
 	/* we handle only button 3 press/release events */
 
+	if (!rv->sensitive()) {
+		return false;
+	}
+
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
 		clicked_regionview = rv;
@@ -433,6 +446,10 @@ Editor::canvas_fade_out_handle_event (GdkEvent *event, ArdourCanvas::Item* item,
 {
 	bool ret = false;
 	
+	if (!rv->sensitive()) {
+		return false;
+	}
+
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
 	case GDK_2BUTTON_PRESS:
@@ -499,6 +516,11 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 		
 	}
 
+	/* XXX do not forward double clicks */
+
+	if (event->type == GDK_2BUTTON_PRESS) {
+		return false;
+	}
 	
 	/* proxy for the upper most regionview */
 
@@ -524,10 +546,10 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 
 					RegionView* rv = atv->view()->find_view (rl->front());
 
-					/* proxy */
-
 					delete rl;
 
+					/* proxy */
+					
 					return canvas_region_view_event (event, rv->get_canvas_group(), rv);
 				} 
 			}
@@ -703,6 +725,10 @@ Editor::canvas_region_view_name_highlight_event (GdkEvent* event, ArdourCanvas::
 {
 	bool ret = false;
 	
+	if (!rv->sensitive()) {
+		return false;
+	}
+
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
 	case GDK_2BUTTON_PRESS:
@@ -738,6 +764,10 @@ bool
 Editor::canvas_region_view_name_event (GdkEvent *event, ArdourCanvas::Item* item, RegionView* rv)
 {
 	bool ret = false;
+
+	if (!rv->sensitive()) {
+		return false;
+	}
 
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:

@@ -323,7 +323,7 @@ GainMeter::update_meters ()
 		if ((*i).packed) {
 			peak = _io->peak_meter().peak_power (n);
 
-			(*i).meter->set (log_meter (peak), peak);
+			(*i).meter->set (log_meter (peak));
 
 			mpeak = _io->peak_meter().max_peak_power(n);
 			

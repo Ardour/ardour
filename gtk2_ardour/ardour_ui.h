@@ -155,7 +155,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	static sigc::signal<void,bool> Blink;
 	static sigc::signal<void>      RapidScreenUpdate;
-	static sigc::signal<void>      MidRapidScreenUpdate;
 	static sigc::signal<void>      SuperRapidScreenUpdate;
 	static sigc::signal<void,nframes_t> Clock;
 
@@ -218,6 +217,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void set_keybindings_path (std::string path);
 	void save_keybindings ();
+
+	void setup_profile ();
 
   protected:
 	friend class PublicEditor;
@@ -523,7 +524,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	gint every_second ();
 	gint every_point_one_seconds ();
-	gint every_point_oh_five_seconds ();
 	gint every_point_zero_one_seconds ();
 
 	sigc::connection second_connection;
@@ -662,7 +662,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_send_midi_feedback ();
 	void toggle_use_mmc ();
 	void toggle_send_mmc ();
-	void toggle_use_midi_control();
 	void toggle_send_mtc ();
 
 	void toggle_use_osc ();

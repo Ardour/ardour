@@ -53,6 +53,7 @@ slider_position_to_gain (double pos)
 }
 
 Glib::ustring fit_to_pixels (const Glib::ustring&, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses = false);
+int pixel_width (const Glib::ustring& str, Pango::FontDescription& font);
 
 gint   just_hide_it (GdkEventAny*, Gtk::Window*);
 void   allow_keyboard_focus (bool);
@@ -80,6 +81,5 @@ static std::map<std::string, Glib::RefPtr<Gdk::Pixbuf> > xpm_map;
 const char* const *get_xpm_data (std::string path);
 std::string longest (std::vector<std::string>&);
 bool key_is_legal_for_numeric_entry (guint keyval);
-Glib::ustring short_path (Glib::ustring, uint32_t target_characters);
 
 #endif /* __ardour_gtk_utils_h__ */

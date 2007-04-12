@@ -666,10 +666,7 @@ Multi2dPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
 			}
 			
 			pan = left * gain_coeff;
-			
-			for (; n < nframes; ++n) {
-				dst[n] += src[n] * pan;
-			}
+			Session::mix_buffers_with_gain(dst+n,src+n,nframes-n,pan);
 			
 		} else {
 
@@ -679,20 +676,10 @@ Multi2dPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
 			if ((pan *= gain_coeff) != 1.0f) {
 				
 				if (pan != 0.0f) {
-					
-					for (nframes_t n = 0; n < nframes; ++n) {
-						dst[n] += src[n] * pan;
-					}      
-					
+					Session::mix_buffers_with_gain(dst,src,nframes,pan);
 				} 
-
-				
 			} else {
-				
-				for (nframes_t n = 0; n < nframes; ++n) {
-					dst[n] += src[n];
-				}      
-
+					Session::mix_buffers_no_gain(dst,src,nframes);
 			}
 #endif
 #ifdef CAN_INTERP

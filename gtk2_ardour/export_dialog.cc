@@ -876,7 +876,7 @@ ExportDialog::export_cue_file (Locations::LocationList& locations, const string&
 void
 ExportDialog::do_export_cd_markers (const string& path,const string& cuefile_type)
 {
-	if (cuefile_type == "TOC") {
+	if (cuefile_type == _("TOC")) {
 		session->locations()->apply (*this, &ExportDialog::export_toc_file, path);	
 	} else {
 		session->locations()->apply (*this, &ExportDialog::export_cue_file, path);

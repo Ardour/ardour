@@ -141,6 +141,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	insert_cnt = 0;
 	_transport_speed = 0;
 	_last_transport_speed = 0;
+	auto_play_legal = false;
 	transport_sub_state = 0;
 	_transport_frame = 0;
 	last_stop_frame = 0;
@@ -611,6 +612,48 @@ Session::remove_pending_capture_state ()
 	unlink (xml_path.c_str());
 }
 
+/** Rename a state file.
+ * @param snapshot_name Snapshot name.
+ */
+void
+Session::rename_state (string old_name, string new_name)
+{
+	if (old_name == _current_snapshot_name || old_name == _name) {
+		/* refuse to rename the current snapshot or the "main" one */
+		return;
+	}
+	
+	const string old_xml_path = _path + old_name + _statefile_suffix;
+	const string new_xml_path = _path + new_name + _statefile_suffix;
+
+	if (rename (old_xml_path.c_str(), new_xml_path.c_str()) != 0) {
+		error << string_compose(_("could not rename snapshot %1 to %2"), old_name, new_name) << endmsg;
+	}
+}
+
+/** Remove a state file.
+ * @param snapshot_name Snapshot name.
+ */
+void
+Session::remove_state (string snapshot_name)
+{
+	if (snapshot_name == _current_snapshot_name || snapshot_name == _name) {
+		/* refuse to remove the current snapshot or the "main" one */
+		return;
+	}
+	
+	const string xml_path = _path + snapshot_name + _statefile_suffix;
+
+	/* make a backup copy of the state file */
+	const string bak_path = xml_path + ".bak";
+	if (g_file_test (xml_path.c_str(), G_FILE_TEST_EXISTS)) {
+		copy_file (xml_path, bak_path);
+	}
+
+	/* and delete it */
+	unlink (xml_path.c_str());
+}
+
 int
 Session::save_state (string snapshot_name, bool pending)
 {
@@ -636,10 +679,12 @@ Session::save_state (string snapshot_name, bool pending)
 
 	if (!pending) {
 
+		/* proper save: use _statefile_suffix (.ardour in English) */
 		xml_path = _path;
 		xml_path += snapshot_name;
 		xml_path += _statefile_suffix;
 
+		/* make a backup copy of the old file */
 		bak_path = xml_path;
 		bak_path += ".bak";
 		
@@ -649,6 +694,7 @@ Session::save_state (string snapshot_name, bool pending)
 
 	} else {
 
+		/* pending save: use _pending_suffix (.pending in English) */
 		xml_path = _path;
 		xml_path += snapshot_name;
 		xml_path += _pending_suffix;
@@ -2751,6 +2797,9 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		} 
 	}
 
+	char tmppath1[PATH_MAX+1];
+	char tmppath2[PATH_MAX+1];
+	
 	for (vector<string*>::iterator x = soundfiles->begin(); x != soundfiles->end(); ++x) {
 
 		used = false;
@@ -2758,7 +2807,10 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 
 		for (set<string>::iterator i = all_sources.begin(); i != all_sources.end(); ++i) {
 
-			if (spath == *i) {
+			realpath(spath.c_str(), tmppath1);
+			realpath((*i).c_str(),  tmppath2);
+
+			if (strcmp(tmppath1, tmppath2) == 0) {
 				used = true;
 				break;
 			}
@@ -3284,6 +3336,8 @@ Session::config_changed (const char* parameter_name)
 				/* mark us ready to send */
 				next_quarter_frame_to_send = 0;
 			}
+		} else {
+			session_send_mtc = false;
 		}
 
 	} else if (PARAM_IS ("send-mmc")) {
@@ -3294,6 +3348,9 @@ Session::config_changed (const char* parameter_name)
 		
 		if (_mmc_port != 0) {
 			session_send_mmc = Config->get_send_mmc();
+		} else {
+			mmc = 0;
+			session_send_mmc = false; 
 		}
 
 	} else if (PARAM_IS ("midi-feedback")) {

@@ -176,6 +176,9 @@ class TimeAxisViewItem : public Selectable
      * @param yn true if this item should show its selected status
      */
     virtual void set_should_show_selection (bool yn) ;
+
+    void set_sensitive (bool yn) { _sensitive = yn; }
+    bool sensitive () const { return _sensitive; }
     
     //---------------------------------------------------------------------------------------//
     // Parent Component Methods
@@ -196,7 +199,7 @@ class TimeAxisViewItem : public Selectable
      *
      * @param new_name the new name text to display
      */
-    void set_name_text(std::string new_name) ;
+    void set_name_text(const Glib::ustring& new_name) ;
     
     /**
      * Set the height of this item
@@ -412,6 +415,9 @@ class TimeAxisViewItem : public Selectable
 
     /** should the item show its selected status */
     bool should_show_selection;
+
+    /** should the item respond to events */
+    bool _sensitive;
     
     /**
      * The unique item name of this Item
@@ -455,6 +461,11 @@ class TimeAxisViewItem : public Selectable
     ArdourCanvas::SimpleRect* frame_handle_start;
     ArdourCanvas::SimpleRect* frame_handle_end;
 
+    int name_text_width;
+    double last_name_text_width;
+
+    std::map<Glib::ustring::size_type,int> name_text_size_cache;
+    
     Visibility visibility;
 
 }; /* class TimeAxisViewItem */

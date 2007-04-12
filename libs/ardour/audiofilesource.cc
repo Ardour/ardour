@@ -29,11 +29,13 @@
 #include <pbd/pathscanner.h>
 #include <pbd/stl_delete.h>
 #include <pbd/strsplit.h>
+#include <pbd/shortpath.h>
 #include <pbd/enumwriter.h>
 
 #include <sndfile.h>
 
 #include <glibmm/miscutils.h>
+#include <glibmm/fileutils.h>
 
 #include <ardour/audiofilesource.h>
 #include <ardour/sndfile_helpers.h>
@@ -91,15 +93,17 @@ AudioFileSource::AudioFileSource (Session& s, ustring path, Flag flags, SampleFo
 
 AudioFileSource::AudioFileSource (Session& s, const XMLNode& node, bool must_exist)
 	: AudioSource (s, node), _flags (Flag (Writable|CanRename))
-          /* _channel is set in set_state() */
+          /* _channel is set in set_state() or init() */
 {
 	/* constructor used for existing internal-to-session files. file must exist */
 
 	if (set_state (node)) {
 		throw failed_constructor ();
 	}
+
+	string foo = _name;
 	
-	if (init (_name, must_exist)) {
+	if (init (foo, must_exist)) {
 		throw failed_constructor ();
 	}
 }
@@ -134,7 +138,7 @@ AudioFileSource::init (ustring pathstr, bool must_exist)
 	_peaks_built = false;
 	file_is_new = false;
 
-	if (!find (pathstr, must_exist, is_new)) {
+	if (!find (pathstr, must_exist, is_new, _channel)) {
 		throw non_existent_source ();
 	}
 
@@ -244,7 +248,10 @@ AudioFileSource::set_state (const XMLNode& node)
 void
 AudioFileSource::mark_for_remove ()
 {
-	if (!writable()) {
+	// This operation is not allowed for sources for destructive tracks or embedded files.
+	// Fortunately mark_for_remove() is never called for embedded files. This function
+	// must be fixed if that ever happens.
+	if (_flags & Destructive) {
 		return;
 	}
 
@@ -359,18 +366,12 @@ AudioFileSource::move_to_trash (const ustring& trash_dir_name)
 }
 
 bool
-AudioFileSource::find (ustring& pathstr, bool must_exist, bool& isnew)
+AudioFileSource::find (ustring& pathstr, bool must_exist, bool& isnew, uint16_t& chan)
 {
 	ustring::size_type pos;
 	bool ret = false;
 
 	isnew = false;
-
-	/* clean up PATH:CHANNEL notation so that we are looking for the correct path */
-
-	if ((pos = pathstr.find_last_of (':')) != ustring::npos) {
-		pathstr = pathstr.substr (0, pos);
-	}
 
 	if (pathstr[0] != '/') {
 
@@ -396,12 +397,60 @@ AudioFileSource::find (ustring& pathstr, bool must_exist, bool& isnew)
 			if (fullpath[fullpath.length()-1] != '/') {
 				fullpath += '/';
 			}
+
 			fullpath += pathstr;
+
+			/* i (paul) made a nasty design error by using ':' as a special character in
+			   Ardour 0.99 .. this hack tries to make things sort of work.
+			*/
 			
-			if (access (fullpath.c_str(), R_OK) == 0) {
-				keeppath = fullpath;
-				++cnt;
-			} 
+			if ((pos = pathstr.find_last_of (':')) != ustring::npos) {
+				
+				if (Glib::file_test (fullpath, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
+
+					/* its a real file, no problem */
+					
+					keeppath = fullpath;
+					++cnt;
+
+				} else {
+					
+					if (must_exist) {
+						
+						/* might be an older session using file:channel syntax. see if the version
+						   without the :suffix exists
+						 */
+						
+						ustring shorter = pathstr.substr (0, pos);
+						fullpath = *i;
+
+						if (fullpath[fullpath.length()-1] != '/') {
+							fullpath += '/';
+						}
+
+						fullpath += shorter;
+
+						if (Glib::file_test (pathstr, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
+							chan = atoi (pathstr.substr (pos+1));
+							pathstr = shorter;
+							keeppath = fullpath;
+							++cnt;
+						} 
+						
+					} else {
+						
+						/* new derived file (e.g. for timefx) being created in a newer session */
+						
+					}
+				}
+
+			} else {
+
+				if (Glib::file_test (fullpath, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
+					keeppath = fullpath;
+					++cnt;
+				} 
+			}
 		}
 
 		if (cnt > 1) {
@@ -418,7 +467,7 @@ AudioFileSource::find (ustring& pathstr, bool must_exist, bool& isnew)
 				isnew = true;
 			}
 		}
-		
+
 		_name = pathstr;
 		_path = keeppath;
 		ret = true;
@@ -426,18 +475,31 @@ AudioFileSource::find (ustring& pathstr, bool must_exist, bool& isnew)
 	} else {
 		
 		/* external files and/or very very old style sessions include full paths */
+
+		/* ugh, handle ':' situation */
+
+		if ((pos = pathstr.find_last_of (':')) != ustring::npos) {
+			
+			ustring shorter = pathstr.substr (0, pos);
+
+			if (Glib::file_test (shorter, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
+				chan = atoi (pathstr.substr (pos+1));
+				pathstr = shorter;
+			}
+		}
 		
 		_path = pathstr;
+
 		if (is_embedded()) {
 			_name = pathstr;
 		} else {
 			_name = pathstr.substr (pathstr.find_last_of ('/') + 1);
 		}
-		
-		if (access (_path.c_str(), R_OK) != 0) {
+
+		if (!Glib::file_test (pathstr, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
 
 			/* file does not exist or we cannot read it */
-
+			
 			if (must_exist) {
 				error << string_compose(_("Filesource: cannot find required file (%1): %2"), _path, strerror (errno)) << endmsg;
 				goto out;
@@ -458,6 +520,7 @@ AudioFileSource::find (ustring& pathstr, bool must_exist, bool& isnew)
 			/* already exists */
 
 			ret = true;
+
 		}
 	}
 	
@@ -575,6 +638,9 @@ AudioFileSource::safe_file_extension(ustring file)
 		file.rfind(".maud")== ustring::npos &&
 		file.rfind(".vwe") == ustring::npos &&
 		file.rfind(".paf") == ustring::npos &&
+#ifdef HAVE_FLAC
+		file.rfind(".flac")== ustring::npos &&
+#endif // HAVE_FLAC
 #ifdef HAVE_COREAUDIO
 		file.rfind(".mp3") == ustring::npos &&
 		file.rfind(".aac") == ustring::npos &&

@@ -53,6 +53,8 @@
 #include <midi++/mmc.h>
 
 #include <ardour/ardour.h>
+#include <ardour/profile.h>
+#include <ardour/session_route.h>
 #include <ardour/port.h>
 #include <ardour/audioengine.h>
 #include <ardour/playlist.h>
@@ -60,7 +62,6 @@
 #include <ardour/audio_diskstream.h>
 #include <ardour/audiofilesource.h>
 #include <ardour/recent_sessions.h>
-#include <ardour/session_route.h>
 #include <ardour/port.h>
 #include <ardour/audio_track.h>
 #include <ardour/midi_track.h>
@@ -92,7 +93,6 @@ ARDOUR_UI *ARDOUR_UI::theArdourUI = 0;
 
 sigc::signal<void,bool> ARDOUR_UI::Blink;
 sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
-sigc::signal<void>      ARDOUR_UI::MidRapidScreenUpdate;
 sigc::signal<void>      ARDOUR_UI::SuperRapidScreenUpdate;
 sigc::signal<void,nframes_t> ARDOUR_UI::Clock;
 
@@ -191,7 +191,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	keybindings_path = ARDOUR::find_config_file ("ardour.bindings");
 
 	can_save_keybindings = false;
-	Glib::signal_idle().connect (mem_fun (*this, &ARDOUR_UI::first_idle));
 
 	last_configure_time.tv_sec = 0;
 	last_configure_time.tv_usec = 0;
@@ -625,13 +624,6 @@ ARDOUR_UI::every_point_one_seconds ()
 }
 
 gint
-ARDOUR_UI::every_point_oh_five_seconds ()
-{
-	MidRapidScreenUpdate(); /* EMIT_SIGNAL */
-	return true;
-}
-
-gint
 ARDOUR_UI::every_point_zero_one_seconds ()
 {
 	SuperRapidScreenUpdate(); /* EMIT_SIGNAL */
@@ -654,11 +646,11 @@ ARDOUR_UI::update_sample_rate (nframes_t ignored)
 		nframes_t rate = engine->frame_rate();
 		
 		if (fmod (rate, 1000.0) != 0.0) {
-			snprintf (buf, sizeof (buf), _("%.1f kHz / %4.1f msecs"), 
+			snprintf (buf, sizeof (buf), _("%.1f kHz / %4.1f ms"), 
 				  (float) rate/1000.0f,
 				  (engine->frames_per_cycle() / (float) rate) * 1000.0f);
 		} else {
-			snprintf (buf, sizeof (buf), _("%u kHz / %4.1f msecs"), 
+			snprintf (buf, sizeof (buf), _("%u kHz / %4.1f ms"), 
 				  rate/1000,
 				  (engine->frames_per_cycle() / (float) rate) * 1000.0f);
 		}
@@ -671,7 +663,7 @@ void
 ARDOUR_UI::update_cpu_load ()
 {
 	char buf[32];
-	snprintf (buf, sizeof (buf), _("DSP: %.1f%%"), engine->get_cpu_load());
+	snprintf (buf, sizeof (buf), _("DSP: %5.1f%%"), engine->get_cpu_load());
 	cpu_load_label.set_text (buf);
 }
 
@@ -1583,6 +1575,8 @@ ARDOUR_UI::name_io_setup (AudioEngine& engine,
 	}
 }
 
+/** Ask the user for the name of a new shapshot and then take it.
+ */
 void
 ARDOUR_UI::snapshot_session ()
 {
@@ -2428,7 +2422,7 @@ ARDOUR_UI::disk_overrun_handler ()
 
 	if (!have_disk_speed_dialog_displayed) {
 		have_disk_speed_dialog_displayed = true;
-		MessageDialog* msg = new MessageDialog (*editor, X_("diskrate dialog"), _("\
+		MessageDialog* msg = new MessageDialog (*editor, _("\
 The disk system on your computer\n\
 was not able to keep up with Ardour.\n\
 \n\
@@ -2640,6 +2634,9 @@ ARDOUR_UI::save_keybindings ()
 bool
 ARDOUR_UI::first_idle ()
 {
+	if (session) {
+		session->allow_auto_play (true);
+	}
 	can_save_keybindings = true;
 	return false;
 }
@@ -2762,4 +2759,12 @@ void
 ARDOUR_UI::TransportControllable::set_id (const string& str)
 {
 	_id = str;
+}
+
+void
+ARDOUR_UI::setup_profile ()
+{
+	if (gdk_screen_width() < 1200) {
+		Profile->set_small_screen ();
+	}
 }

@@ -131,7 +131,7 @@ struct count_void<void,void,void,void,void,void,void>
  *
  * @ingroup bind
  */
-template <int I_location, class T_functor, class T_type1=nil,class T_type2=nil,class T_type3=nil,class T_type4=nil,class T_type5=nil,class T_type6=nil,class T_type7=nil>
+template <int I_location, class T_functor, class T_type1=nil_,class T_type2=nil_,class T_type3=nil_,class T_type4=nil_,class T_type5=nil_,class T_type6=nil_,class T_type7=nil_>
 struct bind_functor;
 
 /** Adaptor that binds an argument to the wrapped functor.

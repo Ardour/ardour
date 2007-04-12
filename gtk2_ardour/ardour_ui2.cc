@@ -34,6 +34,7 @@
 
 #include <ardour/audioengine.h>
 #include <ardour/ardour.h>
+#include <ardour/profile.h>
 #include <ardour/route.h>
 
 #include "ardour_ui.h"
@@ -364,7 +365,9 @@ ARDOUR_UI::setup_transport ()
 
 	HBox* clock_box = manage (new HBox);
 	clock_box->pack_start (primary_clock, false, false);
-	clock_box->pack_start (secondary_clock, false, false);
+	if (!ARDOUR::Profile->get_small_screen()) {
+		clock_box->pack_start (secondary_clock, false, false);
+	}
 	VBox* time_controls_box = manage (new VBox);
 	time_controls_box->pack_start (sync_option_combo, false, false);
 	time_controls_box->pack_start (time_master_button, false, false);
@@ -603,7 +606,7 @@ ARDOUR_UI::shuttle_box_button_release (GdkEventButton* ev)
 		shuttle_grabbed = false;
 		shuttle_box.remove_modal_grab ();
 		if (Config->get_shuttle_behaviour() == Sprung) {
-			if (Config->get_auto_play() || roll_button.get_state()) {
+			if (Config->get_auto_play() || roll_button.get_visual_state()) {
 				shuttle_fract = SHUTTLE_FRACT_SPEED1;				
 				session->request_transport_speed (1.0);
 				stop_button.set_visual_state (0);
@@ -629,14 +632,9 @@ ARDOUR_UI::shuttle_box_button_release (GdkEventButton* ev)
 		return true;
 
 	case 3:
+	default:
 		return true;
-		
-	case 4:
-		shuttle_fract += 0.005;
-		break;
-	case 5:
-		shuttle_fract -= 0.005;
-		break;
+
 	}
 
 	use_shuttle_fract (true);

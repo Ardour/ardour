@@ -9,7 +9,7 @@
 
 namespace SigC {
 
-template <class T_functor, class T_return, class T_type1=::sigc::nil,class T_type2=::sigc::nil,class T_type3=::sigc::nil,class T_type4=::sigc::nil,class T_type5=::sigc::nil,class T_type6=::sigc::nil,class T_type7=::sigc::nil>
+template <class T_functor, class T_return, class T_type1=::sigc::nil_,class T_type2=::sigc::nil_,class T_type3=::sigc::nil_,class T_type4=::sigc::nil_,class T_type5=::sigc::nil_,class T_type6=::sigc::nil_,class T_type7=::sigc::nil_>
 struct retype_slot_functor
   : public ::sigc::adapts<T_functor>
 {

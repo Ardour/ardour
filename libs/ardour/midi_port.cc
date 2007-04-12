@@ -61,7 +61,7 @@ MidiPort::cycle_start (jack_nframes_t nframes)
 	void* jack_buffer = jack_port_get_buffer(_port, nframes);
 
 	const jack_nframes_t event_count
-		= jack_midi_get_event_count(jack_buffer, nframes);
+		= jack_midi_get_event_count(jack_buffer);
 
 	assert(event_count < _buffer.capacity());
 
@@ -71,7 +71,7 @@ MidiPort::cycle_start (jack_nframes_t nframes)
 	for (jack_nframes_t i=0; i < event_count; ++i) {
 
 		// This will fail to compile if we change MidiEvent to our own class
-		jack_midi_event_get(static_cast<jack_midi_event_t*>(&ev), jack_buffer, i, nframes);
+		jack_midi_event_get(static_cast<jack_midi_event_t*>(&ev), jack_buffer, i);
 
 		_buffer.push_back(ev);
 		// Convert note ons with velocity 0 to proper note offs
@@ -103,11 +103,11 @@ MidiPort::cycle_end()
 	//if (event_count > 0)
 	//	cerr << "MIDIPort writing " << event_count << " events." << endl;
 
-	jack_midi_clear_buffer(jack_buffer, _nframes_this_cycle);
+	jack_midi_clear_buffer(jack_buffer);
 	for (jack_nframes_t i=0; i < event_count; ++i) {
 		const jack_midi_event_t& ev = _buffer[i];
 		assert(ev.time < _nframes_this_cycle);
-		jack_midi_event_write(jack_buffer, ev.time, ev.buffer, ev.size, _nframes_this_cycle);
+		jack_midi_event_write(jack_buffer, ev.time, ev.buffer, ev.size);
 	}
 	
 	_nframes_this_cycle = 0;

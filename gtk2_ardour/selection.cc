@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <sigc++/bind.h>
 #include <pbd/error.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/playlist.h>
 
@@ -131,6 +132,8 @@ Selection::clear_playlists ()
 	/* Selections own their playlists */
 
 	for (PlaylistSelection::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		/* selections own their own regions, which are copies of the "originals". make them go away */
+		(*i)->drop_regions ();
 		(*i)->release ();
 	}
 
