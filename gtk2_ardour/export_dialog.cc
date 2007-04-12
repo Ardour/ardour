@@ -398,25 +398,25 @@ ExportDialog::connect_to_session (Session *s)
 
 	switch (session->frame_rate()) {
 	case 22050:
-		sample_rate_combo.set_active_text (N_("22.05kHz"));
+		sample_rate_combo.set_active_text (_("22.05kHz"));
 		break;
 	case 44100:
-		sample_rate_combo.set_active_text (N_("44.1kHz"));
+		sample_rate_combo.set_active_text (_("44.1kHz"));
 		break;
 	case 48000:
-		sample_rate_combo.set_active_text (N_("48kHz"));
+		sample_rate_combo.set_active_text (_("48kHz"));
 		break;
 	case 88200:
-		sample_rate_combo.set_active_text (N_("88.2kHz"));
+		sample_rate_combo.set_active_text (_("88.2kHz"));
 		break;
 	case 96000:
-		sample_rate_combo.set_active_text (N_("96kHz"));
+		sample_rate_combo.set_active_text (_("96kHz"));
 		break;
 	case 192000:
-		sample_rate_combo.set_active_text (N_("192kHz"));
+		sample_rate_combo.set_active_text (_("192kHz"));
 		break;
 	default:
-		sample_rate_combo.set_active_text (N_("44.1kHz"));
+		sample_rate_combo.set_active_text (_("44.1kHz"));
 		break;
 	}
 
@@ -1028,15 +1028,15 @@ ExportDialog::sample_rate_chosen ()
 
 	if (sr_str == N_("22.05kHz")) {
 		rate = 22050;
-	} else if (sr_str == N_("44.1kHz")) {
+	} else if (sr_str == _("44.1kHz")) {
 		rate = 44100;
-	} else if (sr_str == N_("48kHz")) {
+	} else if (sr_str == _("48kHz")) {
 		rate = 48000;
-	} else if (sr_str == N_("88.2kHz")) {
+	} else if (sr_str == _("88.2kHz")) {
 		rate = 88200;
-	} else if (sr_str == N_("96kHz")) {
+	} else if (sr_str == _("96kHz")) {
 		rate = 96000;
-	} else if (sr_str == N_("192kHz")) {
+	} else if (sr_str == _("192kHz")) {
 		rate = 192000;
 	} else {
 		rate = session->frame_rate();
@@ -1196,15 +1196,15 @@ ExportDialog::initSpec(string &filepath)
 	string sr_str = sample_rate_combo.get_active_text();
 	if (sr_str == N_("22.05kHz")) {
 		spec.sample_rate = 22050;
-	} else if (sr_str == N_("44.1kHz")) {
+	} else if (sr_str == _("44.1kHz")) {
 		spec.sample_rate = 44100;
-	} else if (sr_str == N_("48kHz")) {
+	} else if (sr_str == _("48kHz")) {
 		spec.sample_rate = 48000;
-	} else if (sr_str == N_("88.2kHz")) {
+	} else if (sr_str == _("88.2kHz")) {
 		spec.sample_rate = 88200;
-	} else if (sr_str == N_("96kHz")) {
+	} else if (sr_str == _("96kHz")) {
 		spec.sample_rate = 96000;
-	} else if (sr_str == N_("192kHz")) {
+	} else if (sr_str == _("192kHz")) {
 		spec.sample_rate = 192000;
 	} else {
 		spec.sample_rate = session->frame_rate();
