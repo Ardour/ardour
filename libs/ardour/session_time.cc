@@ -158,13 +158,7 @@ Session::sync_time_vars ()
 	}
 	_smpte_frames_per_hour = (nframes_t)rint(smpte_frames_per_second() * 3600.0);
 
-}
-
-int
-Session::set_smpte_format (SmpteFormat format)
-{
-
-	Config->set_smpte_format (format);
+	cerr << "resetting mtc_smpte_bits\n";
 
 	last_smpte_valid = false;
 	// smpte type bits are the middle two in the upper nibble
@@ -186,7 +180,13 @@ Session::set_smpte_format (SmpteFormat format)
 		}
 		break;
 	};
+}
 
+int
+Session::set_smpte_format (SmpteFormat format)
+{
+	/* this will trigger any other changes needed */
+	Config->set_smpte_format (format);
 	return 0;
 }
 
