@@ -159,6 +159,7 @@ Editor::ruler_button_press (GdkEventButton* ev)
 		/* transport playhead */
 		snap_to (where);
 		session->request_locate (where);
+		_dragging_playhead = true;
 		break;
 
 	case 2:
@@ -199,6 +200,7 @@ Editor::ruler_button_release (GdkEventButton* ev)
 	switch (ev->button) {
 	case 1:
 		/* transport playhead */
+		_dragging_playhead = false;
 		snap_to (where);
 		session->request_locate (where);
 		break;
