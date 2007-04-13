@@ -158,8 +158,6 @@ Session::sync_time_vars ()
 	}
 	_smpte_frames_per_hour = (nframes_t)rint(smpte_frames_per_second() * 3600.0);
 
-	cerr << "resetting mtc_smpte_bits\n";
-
 	last_smpte_valid = false;
 	// smpte type bits are the middle two in the upper nibble
 	switch ((int) ceil (smpte_frames_per_second())) {

@@ -720,9 +720,6 @@ Session::send_time_code_in_another_thread (bool full)
 		return;
 	}
 
-	cerr << "send " << (full ? "full" : "qtr") << " MTC message, _frames_per_smpte_frame = " 
-	     << _frames_per_smpte_frame << endl;
-
 	MIDIRequest* request = new MIDIRequest;
 
 	if (full) {
