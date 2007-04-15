@@ -1,6 +1,6 @@
 # Portuguese (European) translation to gtk2_ardour
 # Copyright (C) 2003-2007 Paul Davis
-# This file is distributed under the same license as the PACKAGE package.
+# This file is distributed under the same license as the ardour2 package.
 # Rui Nuno Capela <rncbc@rncbc.org>, 2004-2007.
 #
 msgid ""
@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: gtk2_ardour rev.1702\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-04-08 13:00+0100\n"
-"PO-Revision-Date: 2007-04-13 13:00+0000\n"
+"PO-Revision-Date: 2007-04-14 13:00+0000\n"
 "Last-Translator: Rui Nuno Capela <rncbc@rncbc.org>\n"
 "Language-Team: Portuguese\n"
 "MIME-Version: 1.0\n"
@@ -2923,7 +2923,7 @@ msgid "Export Range"
 msgstr "Exportar intervalo"
 
 #. Note: for now, editor-delete does the exact same thing as editor-cut
-#: editor_actions.cc:217
+#: editor_actions.cc:217 redirect_box.cc:1199
 msgid "Delete"
 msgstr "Eliminar"
 
@@ -5354,10 +5354,6 @@ msgstr "Activar todos"
 #: redirect_box.cc:1076
 msgid "Deactivate all"
 msgstr "Desactivar todos"
-
-#: redirect_box.cc:1199
-msgid "Delete"
-msgstr "Eliminar"
 
 #: region_editor.cc:45
 msgid "NAME:"
