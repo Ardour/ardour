@@ -1609,6 +1609,7 @@ class Session : public PBD::StatefulDestructible
 
 	void jack_timebase_callback (jack_transport_state_t, nframes_t, jack_position_t*, int);
 	int  jack_sync_callback (jack_transport_state_t, jack_position_t*);
+	void reset_jack_connection (jack_client_t* jack);
 	void record_enable_change_all (bool yn);
 
 	XMLNode& state(bool);

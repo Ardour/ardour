@@ -1133,6 +1133,7 @@ AudioEngine::reconnect_to_jack ()
 
 
 	if (session) {
+		session->reset_jack_connection (_jack);
 		nframes_t blocksize = jack_get_buffer_size (_jack);
 		session->set_block_size (blocksize);
 		session->set_frame_rate (jack_get_sample_rate (_jack));

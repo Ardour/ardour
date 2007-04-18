@@ -138,6 +138,7 @@ class JACK_Slave : public Slave
 	bool ok() const;
 	nframes_t resolution() const { return 1; }
 	bool requires_seekahead () const { return false; }
+	void reset_client (jack_client_t* jack);
 
   private:
 	jack_client_t* jack;
