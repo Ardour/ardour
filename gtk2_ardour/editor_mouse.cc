@@ -4521,7 +4521,7 @@ Editor::end_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 			switch (mouse_mode) {
 			case MouseObject:
 				/* find the two markers on either side and then make the selection from it */
-				select_all_within (start, end, 0.0f, FLT_MAX, Selection::Set);
+				select_all_within (start, end, 0.0f, FLT_MAX, track_views, Selection::Set);
 				break;
 
 			case MouseRange:
@@ -4724,9 +4724,9 @@ Editor::end_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event)
 		begin_reversible_command (_("rubberband selection"));
 
 		if (drag_info.grab_frame < drag_info.last_pointer_frame) {
-			commit = select_all_within (drag_info.grab_frame, drag_info.last_pointer_frame, y1, y2, op);
+			commit = select_all_within (drag_info.grab_frame, drag_info.last_pointer_frame, y1, y2, track_views, op);
 		} else {
-			commit = select_all_within (drag_info.last_pointer_frame, drag_info.grab_frame, y1, y2, op);
+			commit = select_all_within (drag_info.last_pointer_frame, drag_info.grab_frame, y1, y2, track_views, op);
 		}		
 
 		if (commit) {
