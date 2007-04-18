@@ -257,7 +257,9 @@ void MackieControlProtocol::switch_banks( int initial )
 	int delta = sorted.size() - route_table.size();
 	if ( initial < 0 || ( delta > 0 && initial > delta ) )
 	{
+#ifdef DEBUG
 		cout << "not switching to " << initial << endl;
+#endif
 		return;
 	}
 	_current_initial_bank = initial;
@@ -417,7 +419,9 @@ int MackieControlProtocol::set_active (bool yn)
 		}
 		catch( exception & e )
 		{
+#ifdef DEBUG
 			cout << "set_active to false because exception caught: " << e.what() << endl;
+#endif
 			_active = false;
 			throw;
 		}
@@ -498,8 +502,10 @@ void MackieControlProtocol::update_global_button( const string & name, LedState 
 	}
 	else
 	{
+#ifdef DEBUG
 		cout << "Button " << name << " not found" << endl;
-	}
+#endif
+		}
 }
 
 // send messages to surface to set controls to correct values
@@ -675,7 +681,9 @@ void MackieControlProtocol::close()
 		}
 		catch ( exception & e )
 		{
+#ifdef DEBUG
 			cout << "MackieControlProtocol::close caught exception: " << e.what() << endl;
+#endif
 		}
 		
 		for( MackiePorts::iterator it = _ports.begin(); it != _ports.end(); ++it )
@@ -692,7 +700,9 @@ void MackieControlProtocol::close()
 			}
 			catch ( exception & e )
 			{
+#ifdef DEBUG
 				cout << "MackieControlProtocol::close caught exception: " << e.what() << endl;
+#endif
 			}
 		}
 		
@@ -758,7 +768,9 @@ int MackieControlProtocol::set_state( const XMLNode & node )
 		}
 		catch ( exception & e )
 		{
+#ifdef DEBUG
 			cout << "exception in MackieControlProtocol::set_state: " << e.what() << endl;
+#endif
 			return -1;
 		}
 	}
@@ -1115,7 +1127,7 @@ LedState MackieControlProtocol::record_release( Button & button )
 
 LedState MackieControlProtocol::rewind_press( Button & button )
 {
-	session->request_transport_speed( -2.0 );
+	session->request_transport_speed( -4.0 );
 	return on;
 }
 
@@ -1130,7 +1142,7 @@ LedState MackieControlProtocol::rewind_release( Button & button )
 
 LedState MackieControlProtocol::ffwd_press( Button & button )
 {
-	session->request_transport_speed( 2.0 );
+	session->request_transport_speed( 4.0 );
 	return on;
 }
 
@@ -1164,7 +1176,9 @@ void MackieControlProtocol::notify_parameter_changed( const char * name_str )
 	}
 	else
 	{
+#ifdef DEBUG
 		cout << "parameter changed: " << name << endl;
+#endif
 	}
 }
 

@@ -499,13 +499,6 @@ Session::create (bool& new_session, string* mix_template, nframes_t initial_leng
 		return -1;
 	}
 
-	dir = automation_dir ();
-
-	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
-		error << string_compose(_("Session: cannot create session automation dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-		return -1;
-	}
-
 	dir = export_dir ();
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
