@@ -1267,3 +1267,13 @@ Session::allow_auto_play (bool yn)
 {
 	auto_play_legal = yn;
 }
+
+void
+Session::reset_jack_connection (jack_client_t* jack)
+{
+	JACK_Slave* js;
+
+	if (_slave && ((js = dynamic_cast<JACK_Slave*> (_slave)) != 0)) {
+		js->reset_client (jack);
+	}
+}

@@ -594,7 +594,7 @@ Editor::marker_menu_select_all_selectables_using_range ()
 	bool is_start;
 
 	if (((l = find_location_from_marker (marker, is_start)) != 0) && (l->end() > l->start())) {
-	        select_all_within (l->start(), l->end() - 1, 0,  DBL_MAX, Selection::Set);
+	        select_all_within (l->start(), l->end() - 1, 0,  DBL_MAX, track_views, Selection::Set);
 	}
 	  
 }

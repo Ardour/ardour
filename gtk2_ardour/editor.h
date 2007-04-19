@@ -1435,7 +1435,7 @@ class Editor : public PublicEditor
 	void drag_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event);
 	void end_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event);
 
-	bool select_all_within (nframes_t start, nframes_t end, gdouble topy, gdouble boty, Selection::Operation op);
+	bool select_all_within (nframes_t start, nframes_t end, gdouble topy, gdouble boty, const TrackViewList&, Selection::Operation op);
 	
 	ArdourCanvas::SimpleRect   *rubberband_rect;
 	

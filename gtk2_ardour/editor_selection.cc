@@ -245,7 +245,7 @@ Editor::set_selected_control_point_from_click (Selection::Operation op, bool no_
  	y1 = clicked_control_point->get_x() - 10;
 	y2 = clicked_control_point->get_y() + 10;
 
-	return select_all_within (x1, x2, y1, y2, op);
+	return select_all_within (x1, x2, y1, y2, selection->tracks, op);
 }
 
 void
@@ -770,13 +770,13 @@ Editor::invert_selection ()
 }
 
 bool
-Editor::select_all_within (nframes_t start, nframes_t end, double top, double bot, Selection::Operation op)
+Editor::select_all_within (nframes_t start, nframes_t end, double top, double bot, const TrackViewList& tracklist, Selection::Operation op)
 {
 	list<Selectable*> touched;
 	list<Selectable*>::size_type n = 0;
 	TrackViewList touched_tracks;
 
-	for (TrackViewList::iterator iter = selection->tracks.begin(); iter != selection->tracks.end(); ++iter) {
+	for (TrackViewList::const_iterator iter = tracklist.begin(); iter != tracklist.end(); ++iter) {
 		if ((*iter)->hidden()) {
 			continue;
 		}

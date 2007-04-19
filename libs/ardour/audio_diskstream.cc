@@ -612,7 +612,16 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 
 	if (nominally_recording || rec_nframes) {
 
-		for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
+		uint32_t limit = _io->n_inputs ().get(DataType::AUDIO);
+
+		/* one or more ports could already have been removed from _io, but our
+		   channel setup hasn't yet been updated. prevent us from trying to
+		   use channels that correspond to missing ports. note that the
+		   process callback (from which this is called) is always atomic
+		   with respect to port removal/addition.
+		*/
+
+		for (n = 0, chan = c->begin(); chan != c->end() && n < limit; ++chan, ++n) {
 			
 			ChannelInfo* chaninfo (*chan);
 
