@@ -305,6 +305,7 @@ class Editor : public PublicEditor
 	void toggle_xfades_active ();
 	void toggle_xfade_visibility ();
 	bool xfade_visibility() const { return _xfade_visibility; }
+	void update_xfade_visibility ();
 	void update_crossfade_model ();
 	void set_crossfade_model (ARDOUR::CrossfadeModel);
 
