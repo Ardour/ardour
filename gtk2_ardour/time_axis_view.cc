@@ -221,6 +221,9 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	order = nth;
 	_hidden = false;
 	
+	/* height in pixels depends on _order, so update it now we've changed _order */
+	set_height (height_style);
+	
 	effective_height = height;
 
 	/* now show children */
