@@ -348,6 +348,7 @@
                <menuitem action='LatchedRecordEnable'/>
                <menuitem action='RegionEquivalentsOverlap'/>
                <separator/>
+               <menuitem action='PeriodicSafetyBackups'/>
                <menuitem action='VerifyRemoveLastCapture'/>
                <menuitem action='StopRecordingOnXrun'/>
                <menuitem action='StopTransportAtEndOfSession'/>
