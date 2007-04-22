@@ -548,7 +548,7 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 
 			_in = bottom;
 			_out = top;
-			_anchor_point = StartOfIn;
+			_anchor_point = EndOfOut;
 
 			if (model == FullCrossfade) {
 				_position = bottom->first_frame(); // "{"

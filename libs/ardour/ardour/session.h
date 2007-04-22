@@ -336,6 +336,8 @@ class Session : public PBD::StatefulDestructible
 	void disable_record (bool rt_context, bool force = false);
 	void step_back_from_record ();
 	
+	void maybe_write_autosave ();
+
 	/* Proxy signal for region hidden changes */
 
 	sigc::signal<void,boost::shared_ptr<Region> > RegionHiddenChange;

@@ -594,6 +594,14 @@ Session::load_diskstreams (const XMLNode& node)
 }
 
 void
+Session::maybe_write_autosave()
+{
+        if (dirty() && record_status() != Recording) {
+                save_state("", true);
+        }
+}
+
+void
 Session::remove_pending_capture_state ()
 {
 	string xml_path;
@@ -700,7 +708,7 @@ Session::save_state (string snapshot_name, bool pending)
 	tmp_path += snapshot_name;
 	tmp_path += ".tmp";
 
-	cerr << "actually writing state\n";
+	cerr << "actually writing state to " << xml_path << endl;
 
 	if (!tree.write (tmp_path)) {
 		error << string_compose (_("state could not be saved to %1"), tmp_path) << endmsg;

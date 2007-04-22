@@ -399,6 +399,12 @@ ARDOUR_UI::toggle_VerifyRemoveLastCapture()
 }
 
 void
+ARDOUR_UI::toggle_PeriodicSafetyBackups()
+{
+	ActionManager::toggle_config_state ("options", "PeriodicSafetyBackups", &Configuration::set_periodic_safety_backups, &Configuration::get_periodic_safety_backups);
+}
+
+void
 ARDOUR_UI::toggle_StopRecordingOnXrun()
 {
 	ActionManager::toggle_config_state ("options", "StopRecordingOnXrun", &Configuration::set_stop_recording_on_xrun, &Configuration::get_stop_recording_on_xrun);
@@ -891,6 +897,8 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		ActionManager::map_some_state ("options", "LatchedRecordEnable", &Configuration::get_latched_record_enable);
 	} else if (PARAM_IS ("verify-remove-last-capture")) {
 		ActionManager::map_some_state ("options",  "VerifyRemoveLastCapture", &Configuration::get_verify_remove_last_capture);
+	} else if (PARAM_IS ("periodic-safety-backups")) {
+		ActionManager::map_some_state ("options",  "PeriodicSafetyBackups", &Configuration::get_periodic_safety_backups);
 	} else if (PARAM_IS ("stop-recording-on-xrun")) {
 		ActionManager::map_some_state ("options",  "StopRecordingOnXrun", &Configuration::get_stop_recording_on_xrun);
 	} else if (PARAM_IS ("stop-at-session-end")) {
@@ -944,8 +952,6 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		map_meter_hold ();
 	} else if (PARAM_IS ("meter-falloff")) {
 		map_meter_falloff ();
-	} else if (PARAM_IS ("verify-remove-last-capture")) {
-		ActionManager::map_some_state ("options", "VerifyRemoveLastCapture", &Configuration::get_verify_remove_last_capture);
 	} else if (PARAM_IS ("video-pullup") || PARAM_IS ("smpte-format")) {
 		if (session) {
 			primary_clock.set (session->audible_frame(), true);

@@ -1350,6 +1350,10 @@ msgstr "Stoppa insticksprogram vid stopp"
 msgid "Verify remove last capture"
 msgstr "Bekräfta borttagning av senaste inspelade ljudet"
 
+#: gtk2_ardour/ardour_ui_ed.cc:405
+msgid "Make periodic safety backups"
+msgstr "Gör periodiska säkerhetskopior"
+
 #: ../ardour_ui_ed.cc:411
 msgid "Stop recording on xrun"
 msgstr "Stanna inspelning vid xrun-förekomst"

@@ -3535,3 +3535,21 @@ Editor::set_fade_out_active (bool yn)
 	}
 }
 
+
+/** Update crossfade visibility after its configuration has been changed */
+void
+Editor::update_xfade_visibility ()
+{
+	_xfade_visibility = Config->get_xfades_visible ();
+	
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		AudioTimeAxisView* v = dynamic_cast<AudioTimeAxisView*>(*i);
+		if (v) {
+			if (_xfade_visibility) {
+				v->show_all_xfades ();
+			} else {
+				v->hide_all_xfades ();
+			}
+		}
+	}
+}

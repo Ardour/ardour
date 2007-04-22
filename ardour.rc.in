@@ -33,6 +33,8 @@
     <Option name="use-vst" value="yes"/>
     <Option name="use-tranzport" value="yes"/>
     <Option name="destructive-xfade-msecs" value="20"/>
+    <Option name="periodic-safety-backups" value="1"/>
+    <Option name="periodic-safety-backup-interval" value="120"/>
   </Config>
   <extra>
     <Keyboard edit-button="3" edit-modifier="4" delete-button="3" delete-modifier="1" snap-modifier="32"/>

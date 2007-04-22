@@ -297,6 +297,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	int  ask_about_saving_session (const string & why);
 	int  save_the_session;
 
+	/* periodic safety backup, to be precise */
+	gint autosave_session();
+	void update_autosave();
+	sigc::connection _autosave_connection;
+
 	void queue_transport_change ();
 	void map_transport_state ();
 	int32_t do_engine_start ();
@@ -675,6 +680,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_StopPluginsWithTransport();
 	void toggle_DoNotRunPluginsWhileRecording();
 	void toggle_VerifyRemoveLastCapture();
+	void toggle_PeriodicSafetyBackups();
 	void toggle_StopRecordingOnXrun();
 	void toggle_StopTransportAtEndOfSession();
 	void toggle_GainReduceFastTransport();
