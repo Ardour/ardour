@@ -1076,7 +1076,13 @@ if not conf.CheckFunc('posix_memalign'):
 
 env = conf.Finish()
 
+# generate the per-user and system rc files from the same source
+
 rcbuild = env.SubstInFile ('ardour.rc','ardour.rc.in', SUBST_DICT = subst_dict)
+sysrcbuild = env.SubstInFile ('ardour_system.rc','ardour.rc.in', SUBST_DICT = subst_dict)
+
+# add to the substitution dictionary
+
 subst_dict['%VERSION%'] = ardour_version[0:3]
 subst_dict['%EXTRA_VERSION%'] = ardour_version[3:]
 subst_dict['%REVISION_STRING%'] = ''
@@ -1092,6 +1098,7 @@ env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.rc'))
 
 Default (rcbuild)
+Default (sysrcbuild)
 
 # source tarball
 

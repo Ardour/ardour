@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Ardour>
+  <MIDI-port tag="seq" device="ardour" type="alsa/sequencer" mode="duplex"/>
+  <MIDI-port tag="control" device="ardour" type="alsa/sequencer" mode="duplex"/>
+  <MIDI-port tag="mcu" device="ardour" type="alsa/sequencer" mode="duplex"/>
   <Config>
     <Option name="minimum-disk-io-bytes" value="262144"/>
     <Option name="track-buffer-seconds" value="5.000000"/>
@@ -8,10 +11,34 @@
     <Option name="mute-affects-control-outs" value="yes"/>
     <Option name="mute-affects-main-outs" value="yes"/>
     <Option name="solo-latch" value="yes"/>
-    <Option name="pixmap-path" value="/usr/share/ardour/pixmaps:/usr/local/share/ardour/pixmaps"/>
+    <Option name="mtc-port" value="seq"/>
+    <Option name="mmc-port" value="seq"/>
+    <Option name="midi-port" value="seq"/>
+    <Option name="jack-time-master" value="yes"/>
+    <Option name="trace-midi-input" value="no"/>
+    <Option name="trace-midi-output" value="no"/>
+    <Option name="plugins-stop-with-transport" value="no"/>
+    <Option name="no-sw-monitoring" value="no"/>
+    <Option name="stop-recording-on-xrun" value="no"/>
+    <Option name="stop-at-session-end" value="no"/>
+    <Option name="auto-xfade" value="yes"/>
+    <Option name="crossfades-active" value="1"/>
+    <Option name="crossfades-visible" value="1"/>
+    <Option name="xfade-model" value="0"/>
+    <Option name="no-new-session-dialog" value="yes"/>
+    <Option name="timecode-source-is-synced" value="yes"/>
+    <Option name="auditioner-left-out" value="alsa_pcm:playback_1"/>
+    <Option name="auditioner-right-out" value="alsa_pcm:playback_2"/>
+    <Option name="quieten-at-speed" value="1.000000"/>
+    <Option name="use-vst" value="yes"/>
+    <Option name="use-tranzport" value="yes"/>
     <Option name="disk-choice-space-threshold" value="57600000"/>
-    <Option name="mtc-port" value="trident"/>
-    <Option name="mmc-port" value="trident"/>
-    <Option name="monitor-inputs" value="no"/>
+    <Option name="destructive-xfade-msecs" value="20"/>
+    <Option name="periodic-safety-backups" value="1"/>
+    <Option name="periodic-safety-backup-interval" value="120"/>
   </Config>
+  <extra>
+    <Keyboard edit-button="3" edit-modifier="4" delete-button="3" delete-modifier="1" snap-modifier="32"/>
+  </extra>
 </Ardour>
+
