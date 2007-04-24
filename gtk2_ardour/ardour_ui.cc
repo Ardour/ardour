@@ -1763,6 +1763,7 @@ ARDOUR_UI::new_session (std::string predetermined_path)
 	new_session_dialog->set_name (predetermined_path);
 	new_session_dialog->reset_recent();
 	new_session_dialog->show();
+	new_session_dialog->set_current_page (0);
 
 	do {
 	        response = new_session_dialog->run ();
