@@ -130,7 +130,10 @@ class Data(object):
 		sessions[session_name]['collabs'][self._data['user']] = {}
 		sessions[session_name]['collabs'][self._data['user']]['snaps'] = []
 		sessions[session_name]['collabs'][self._data['user']]['sounds'] = []
-		sessions[session_name]['collabs'][collab_name]['v2paths'] = !os.path.test (os.path.join (session_path,'sounds'))
+		if os.path.test (os.path.join (session_path,'sounds')):
+			sessions[session_name]['collabs'][collab_name]['v2paths'] = False
+		else:
+			sessions[session_name]['collabs'][collab_name]['v2paths'] = True
 		
 		self._data['sessions'] = sessions
 		
@@ -152,10 +155,8 @@ class Data(object):
 	def create_session(self, session_path):
 		try:
 			os.mkdir(session_path)
-			if v2paths:
-				os.mkdir(os.path.join (session_path,'interchange',session_name,'audiofiles')
-			else:
-				os.mkdir(os.path.join (session_path,'sounds')
+			os.mkdir(os.path.join (session_path,'interchange',session_name,'audiofiles'))
+
 		except OSError:
 			raise_error("Could not create session directory", g_display.window)
 			return
@@ -763,21 +764,21 @@ class ArdourShareWindow(object):
 		#need to hold a reference to the item_factory or the menubar will disappear.
 		self.item_factory = gtk.ItemFactory(gtk.MenuBar, '<main>', accel_group)
 		self.item_factory.create_items(menu_items, self.window)
-		main_box.pack_start(self.item_factory.get_widget('<main>'), gtk.FALSE)
+		main_box.pack_start(self.item_factory.get_widget('<main>'), False)
 		
 		pane1 = gtk.HPaned()
 		pane2 = gtk.HPaned()
-		pane1.pack2(pane2, gtk.TRUE, gtk.FALSE)
+		pane1.pack2(pane2, True, False)
 		
 		scroll1 = gtk.ScrolledWindow()
 		scroll1.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-		pane1.pack1(scroll1, gtk.TRUE, gtk.FALSE)
+		pane1.pack1(scroll1, True, False)
 		scroll2 = gtk.ScrolledWindow()
 		scroll2.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-		pane2.pack1(scroll2, gtk.TRUE, gtk.FALSE)
+		pane2.pack1(scroll2, True, False)
 		scroll3 = gtk.ScrolledWindow()
 		scroll3.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-		pane2.pack2(scroll3, gtk.TRUE, gtk.FALSE)
+		pane2.pack2(scroll3, True, False)
 		
 		self.session_model = gtk.ListStore(gobject.TYPE_STRING)
 		view1 = gtk.TreeView(self.session_model)
@@ -805,10 +806,10 @@ class ArdourShareWindow(object):
 		self.snap_selection.connect("changed", self.cb_snap_selection_changed)
 		scroll3.add(view3)
 		
-		main_box.pack_start(pane1, gtk.TRUE, gtk.TRUE)
+		main_box.pack_start(pane1, True, True)
 		
 		self.status_bar = gtk.Statusbar()
-		main_box.pack_start(self.status_bar, gtk.FALSE)
+		main_box.pack_start(self.status_bar, False)
 		self._status_cid = self.status_bar.get_context_id('display')
 		self._status_mid = ''
 		
