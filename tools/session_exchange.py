@@ -111,6 +111,7 @@ class Data(object):
 		sessions[session_name]['collabs'][collab_name]['sounds'] = []
 		sessions[session_name]['collabs'][collab_name]['ip'] = ip_address
 		sessions[session_name]['collabs'][collab_name]['port'] = port
+		sessions[session_name]['collabs'][collab_name]['v2paths'] = true
 		self._data['sessions'] = sessions
 		
 		client = ExchangeClientFactory(session_name, collab_name, None, self.debug_mode)
@@ -129,6 +130,7 @@ class Data(object):
 		sessions[session_name]['collabs'][self._data['user']] = {}
 		sessions[session_name]['collabs'][self._data['user']]['snaps'] = []
 		sessions[session_name]['collabs'][self._data['user']]['sounds'] = []
+		sessions[session_name]['collabs'][collab_name]['v2paths'] = !os.path.test (os.path.join (session_path,'sounds'))
 		
 		self._data['sessions'] = sessions
 		
@@ -150,7 +152,10 @@ class Data(object):
 	def create_session(self, session_path):
 		try:
 			os.mkdir(session_path)
-			os.mkdir(session_path+"/sounds")
+			if v2paths:
+				os.mkdir(os.path.join (session_path,'interchange',session_name,'audiofiles')
+			else:
+				os.mkdir(os.path.join (session_path,'sounds')
 		except OSError:
 			raise_error("Could not create session directory", g_display.window)
 			return
@@ -230,7 +235,10 @@ class Data(object):
 	
 	def _scan_sounds(self, session):
 		sounds = []
-		files = os.listdir(session+'/sounds')
+		if v2paths:
+			files = os.listdir(os.path.join (session,'interchange', session, 'audiofiles'))
+		else:
+			files = os.listdir(os.path.join (session,'sounds'))
 		pattern = re.compile(r'\.peak$')
 		for file in files:
 			if not pattern.search(file):

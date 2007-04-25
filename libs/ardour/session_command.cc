@@ -81,8 +81,6 @@ Session::memento_command_factory(XMLNode *n)
     if (obj_T == typeid (AudioRegion).name() || obj_T == typeid (Region).name()) {
 	    if (audio_regions.count(id)) {
 		    return new MementoCommand<AudioRegion>(*audio_regions[id], before, after);
-	    } else {
-		    cerr << "count failed for " << id << " though we have " << audio_regions.size() << endl;
 	    }
     } else if (obj_T == typeid (AudioSource).name()) {
 	    if (audio_sources.count(id))
