@@ -343,11 +343,7 @@ IO::pan (vector<Sample*>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t off
 			memcpy (dst, bufs[0], sizeof (Sample) * nframes);
 			
 			for (n = 1; n < nbufs; ++n) {
-				src = bufs[n];
-				
-				for (nframes_t n = 0; n < nframes; ++n) {
-					dst[n] += src[n];
-				}
+				Session::mix_buffers_no_gain(dst,bufs[n],nframes);
 			}
 
 			output(0)->mark_silence (false);
@@ -365,11 +361,7 @@ IO::pan (vector<Sample*>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t off
 			}	
 
 			for (n = 1; n < nbufs; ++n) {
-				src = bufs[n];
-				
-				for (nframes_t n = 0; n < nframes; ++n) {
-					dst[n] += src[n] * gain_coeff;
-				}	
+				Session::mix_buffers_with_gain(dst,bufs[n],nframes,gain_coeff);
 			}
 			
 			output(0)->mark_silence (false);
