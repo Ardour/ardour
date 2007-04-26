@@ -23,6 +23,7 @@
 #include <sigc++/bind.h>
 
 #include <pbd/convert.h>
+#include <pbd/enumwriter.h>
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
@@ -112,6 +113,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	ignore_speed_adjustment = false;
 	comment_window = 0;
 	comment_area = 0;
+	_width_owner = 0;
 
 	width_button.add (*(manage (new Gtk::Image (::get_icon("strip_width")))));
 	hide_button.add (*(manage (new Gtk::Image (::get_icon("hide")))));
@@ -370,19 +372,10 @@ MixerStrip::set_stuff_from_route ()
 
 	ensure_xml_node ();
 
+	/* if width is not set, it will be set by the MixerUI or editor */
+
 	if ((prop = xml_node->property ("strip_width")) != 0) {
-		if (prop->value() == "wide") {
-			set_width (Wide);
-		} else if (prop->value() == "narrow") {
-			set_width (Narrow);
-		}
-		else {
-			error << string_compose(_("unknown strip width \"%1\" in XML GUI information"), prop->value()) << endmsg;
-			set_width (Wide);
-		}
-	}
-	else {
-		set_width (Wide);
+		set_width (Width (string_2_enum (prop->value(), _width)), this);
 	}
 
 	if ((prop = xml_node->property ("shown_mixer")) != 0) {
@@ -398,14 +391,17 @@ MixerStrip::set_stuff_from_route ()
 }
 
 void
-MixerStrip::set_width (Width w)
+MixerStrip::set_width (Width w, void* owner)
 {
 	/* always set the gpm width again, things may be hidden */
+
 	gpm.set_width (w);
 	panners.set_width (w);
 	pre_redirect_box.set_width (w);
 	post_redirect_box.set_width (w);
-	
+
+	_width_owner = owner;
+
 	if (_width == w) {
 		return;
 	}
@@ -413,11 +409,14 @@ MixerStrip::set_width (Width w)
 	ensure_xml_node ();
 	
 	_width = w;
-	
+
+	if (_width_owner == this) {
+		xml_node->add_property ("strip_width", enum_2_string (_width));
+	}
+
 	switch (w) {
 	case Wide:
 		set_size_request (-1, -1);
-		xml_node->add_property ("strip_width", "wide");
 		
 		if (rec_enable_button)  {
 			((Gtk::Label*)rec_enable_button->get_child())->set_text (_("record"));
@@ -441,8 +440,6 @@ MixerStrip::set_width (Width w)
 		break;
 
 	case Narrow:
-		xml_node->add_property ("strip_width", "narrow");
-
 		if (rec_enable_button) {
 			((Gtk::Label*)rec_enable_button->get_child())->set_text (_("Rec"));
 		}
@@ -1095,10 +1092,10 @@ MixerStrip::width_clicked ()
 {
 	switch (_width) {
 	case Wide:
-		set_width (Narrow);
+		set_width (Narrow, this);
 		break;
 	case Narrow:
-		set_width (Wide);
+		set_width (Wide, this);
 		break;
 	}
 }

@@ -20,6 +20,7 @@
 #include <pbd/enumwriter.h>
 
 #include "audio_clock.h"
+#include "enums.h"
 
 using namespace std;
 using namespace PBD;
@@ -33,6 +34,7 @@ setup_gtk_ardour_enums ()
 	vector<string> s;
 
 	AudioClock::Mode clock_mode;
+	Width width;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -45,4 +47,8 @@ setup_gtk_ardour_enums ()
 	REGISTER_CLASS_ENUM (AudioClock, Frames);
 	REGISTER_CLASS_ENUM (AudioClock, Off);
 	REGISTER (clock_mode);
+
+	REGISTER_ENUM (Wide);
+	REGISTER_ENUM (Narrow);
+	REGISTER (width);
 }
