@@ -3776,7 +3776,7 @@ Editor::idle_visual_changer ()
 		}
 	}
 
-	return 0;
+	return 0; /* this is always a one-shot call */
 }
 
 struct EditorOrderTimeAxisSorter {

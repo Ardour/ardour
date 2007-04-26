@@ -18,6 +18,7 @@
 */
 
 #include <pbd/error.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/types.h>
 #include <ardour/ardour.h>
@@ -571,7 +572,7 @@ TimeAxisViewItem::set_name_text(const ustring& new_name)
  * @param h the new height
  */		
 void
-TimeAxisViewItem::set_height(double height)
+TimeAxisViewItem::set_height (double height)
 {
 	if (name_highlight) {
 		if (height < NAME_HIGHLIGHT_THRESH) {
@@ -975,8 +976,7 @@ TimeAxisViewItem::reset_name_width (double pixel_width)
 	}
 
 	if (n == 0) {
-		/* nothing will fit */
-		name_text->hide ();
+		name_text->property_text() = "";
 		last_name_text_width = pixel_width;
 		return;
 	} 

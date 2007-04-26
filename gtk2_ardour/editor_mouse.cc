@@ -4761,7 +4761,7 @@ Editor::mouse_rename_region (ArdourCanvas::Item* item, GdkEvent* event)
         string str;
 		prompter.get_result(str);
 		if (str.length()) {
-	        clicked_regionview->region()->set_name (str);
+			clicked_regionview->region()->set_name (str);
 		}
 		break;
 	}
