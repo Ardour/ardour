@@ -145,7 +145,7 @@ class RouteUI : public virtual AxisView
 	void disconnect_input ();
 	void disconnect_output ();
 
-	void update_rec_display ();
+	virtual void update_rec_display ();
 	void update_mute_display ();
 
 	bool was_solo_safe;
