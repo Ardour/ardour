@@ -126,6 +126,10 @@ ARDOUR_UI::connect_to_session (Session *s)
 
 	solo_alert_button.set_active (session->soloing());
 
+	/* update autochange callback on dirty state changing */
+
+	session->DirtyChanged.connect (mem_fun(*this, &ARDOUR_UI::update_autosave));
+
 	/* can't be auditioning here */
 
 	primary_clock.set_session (s);

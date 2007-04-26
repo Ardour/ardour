@@ -2757,6 +2757,9 @@ Session::remove_last_capture ()
 	}
 
 	destroy_regions (r);
+
+	save_state (_current_snapshot_name);
+
 	return 0;
 }
 

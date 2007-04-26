@@ -159,6 +159,7 @@ Editor::ruler_button_press (GdkEventButton* ev)
 		/* transport playhead */
 		snap_to (where);
 		session->request_locate (where);
+		_dragging_playhead = true;
 		break;
 
 	case 2:
@@ -192,7 +193,6 @@ Editor::ruler_button_release (GdkEventButton* ev)
 		return FALSE;
 	}
 
-	hide_verbose_canvas_cursor();
 	stop_canvas_autoscroll();
 	
 	nframes_t where = leftmost_frame + pixel_to_frame (x);
@@ -200,6 +200,7 @@ Editor::ruler_button_release (GdkEventButton* ev)
 	switch (ev->button) {
 	case 1:
 		/* transport playhead */
+		_dragging_playhead = false;
 		snap_to (where);
 		session->request_locate (where);
 		break;
@@ -251,7 +252,7 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 		return FALSE;
 	}
 	
-	double wcx=0,wcy=0;
+       	double wcx=0,wcy=0;
 	double cx=0,cy=0;
 
 	gint x,y;
@@ -260,12 +261,11 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 	/* need to use the correct x,y, the event lies */
 	time_canvas_event_box.get_window()->get_pointer (x, y, state);
 
-	time_canvas.c2w (x, y, wcx, wcy);
-	time_canvas.w2c (wcx, wcy, cx, cy);
 
-	wcx = x;
-	nframes_t where = event_frame ((GdkEvent*) ev, &wcx, (double *) 0);
-	cx = wcx;
+	track_canvas.c2w (x, y, wcx, wcy);
+	track_canvas.w2c (wcx, wcy, cx, cy);
+	
+	nframes_t where = leftmost_frame + pixel_to_frame (x);
 
 	/// ripped from maybe_autoscroll, and adapted to work here
 	nframes_t one_page = (nframes_t) rint (canvas_width * frames_per_unit);
@@ -312,9 +312,9 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 		
 		if (cursor == edit_cursor) {
 			edit_cursor_clock.set (where);
+		} else if (cursor == playhead_cursor) {
+			UpdateAllTransportClocks (cursor->current_frame);
 		}
-		
-		show_verbose_time_cursor (where, 10, cx, 0);
 	}
 	
 	return TRUE;

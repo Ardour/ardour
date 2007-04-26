@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -2104,15 +2104,15 @@ Editor::set_state (const XMLNode& node)
 
 	if ((prop = node.property ("follow-playhead"))) {
 		bool yn = (prop->value() == "yes");
+		set_follow_playhead (yn);
 		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-follow-playhead"));
 		if (act) {
 			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-			/* do it twice to force the change */
-			tact->set_active (!yn);
-			tact->set_active (yn);
+			if (tact->get_active() != yn) {
+				tact->set_active (yn);
+			}
 		}
 	}
-
 
 	if ((prop = node.property ("region-list-sort-type"))) {
 		region_list_sort_type = (Editing::RegionListSortType) -1; // force change 
@@ -3776,7 +3776,7 @@ Editor::idle_visual_changer ()
 		}
 	}
 
-	return 0;
+	return 0; /* this is always a one-shot call */
 }
 
 struct EditorOrderTimeAxisSorter {

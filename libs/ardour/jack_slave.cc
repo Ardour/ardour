@@ -44,6 +44,12 @@ JACK_Slave::~JACK_Slave ()
 {
 }
 
+void
+JACK_Slave::reset_client (jack_client_t* j)
+{
+	jack = j;
+}
+
 bool
 JACK_Slave::locked() const
 {

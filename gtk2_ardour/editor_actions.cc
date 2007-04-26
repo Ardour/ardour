@@ -1,3 +1,22 @@
+/*
+    Copyright (C) 2000-2007 Paul Davis 
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
 #include <ardour/ardour.h>
 
 #include "utils.h"
@@ -1046,9 +1065,12 @@ Editor::toggle_xfades_active ()
 void
 Editor::toggle_xfade_visibility ()
 {
-	ActionManager::toggle_config_state ("Editor", "toggle-xfades-visibility", &Configuration::set_xfades_visible, &Configuration::get_xfades_visible);
+	ActionManager::toggle_config_state ("Editor", "toggle-xfades-visible", &Configuration::set_xfades_visible, &Configuration::get_xfades_visible);
 }
 
+/** A Configuration parameter has changed.
+ * @param parameter_name Name of the changed parameter.
+ */
 void
 Editor::parameter_changed (const char* parameter_name)
 {
@@ -1073,6 +1095,7 @@ Editor::parameter_changed (const char* parameter_name)
 		ActionManager::map_some_state ("Editor", "toggle-xfades-active", &Configuration::get_xfades_active);
 	} else if (PARAM_IS ("xfades-visible")) {
 		ActionManager::map_some_state ("Editor", "toggle-xfades-visible", &Configuration::get_xfades_visible);
+		update_xfade_visibility ();
 	} else if (PARAM_IS ("auto-xfade")) {
 		ActionManager::map_some_state ("Editor", "toggle-auto-xfades", &Configuration::get_auto_xfade);
 	} else if (PARAM_IS ("xfade-model")) {

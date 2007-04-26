@@ -16,7 +16,7 @@ import SCons.Node.FS
 SConsignFile()
 EnsureSConsVersion(0, 96)
 
-ardour_version = '2.0rc1'
+ardour_version = '2.0rc2'
 
 subst_dict = { }
 
@@ -382,14 +382,22 @@ env.Append (BUILDERS = {'Tarball' : tarball_bld})
 #
 
 if env['VST']:
-    sys.stdout.write ("Are you building Ardour for personal use (rather than distribution to others)? [no]: ")
-    answer = sys.stdin.readline ()
-    answer = answer.rstrip().strip()
-    if answer != "yes" and answer != "y":
-        print 'You cannot build Ardour with VST support for distribution to others.\nIt is a violation of several different licenses. Build with VST=false.'
-        sys.exit (-1);
+    if os.path.isfile('.personal_use_only'):
+        print "Enabling VST support. Note that distributing a VST-enabled ardour\nis a violation of several different licences.\nBuild with VST=false if you intend to distribute ardour to others."
     else:
-        print "OK, VST support will be enabled"
+        sys.stdout.write ("Are you building Ardour for personal use (rather than distribution to others)? [no]: ")
+        answer = sys.stdin.readline ()
+        answer = answer.rstrip().strip()
+        if answer == "yes" or answer == "y":
+            fh = open('.personal_use_only', 'w')
+            fh.close()
+            print "OK, VST support will be enabled"
+        else:
+            print 'You cannot build Ardour with VST support for distribution to others.\nIt is a violation of several different licenses. Build with VST=false.'
+            sys.exit (-1);
+else:
+    if os.path.isfile('.personal_use_only'):
+        os.remove('.personal_use_only')
 
 
 #######################
@@ -1084,7 +1092,13 @@ if not conf.CheckFunc('posix_memalign'):
 
 env = conf.Finish()
 
+# generate the per-user and system rc files from the same source
+
 rcbuild = env.SubstInFile ('ardour.rc','ardour.rc.in', SUBST_DICT = subst_dict)
+sysrcbuild = env.SubstInFile ('ardour_system.rc','ardour.rc.in', SUBST_DICT = subst_dict)
+
+# add to the substitution dictionary
+
 subst_dict['%VERSION%'] = ardour_version[0:3]
 subst_dict['%EXTRA_VERSION%'] = ardour_version[3:]
 subst_dict['%REVISION_STRING%'] = ''
@@ -1100,6 +1114,7 @@ env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.rc'))
 
 Default (rcbuild)
+Default (sysrcbuild)
 
 # source tarball
 
@@ -1109,7 +1124,6 @@ env.Distribute (env['DISTTREE'],
                [ 'SConstruct', 'svn_revision.h',
                   'COPYING', 'PACKAGER_README', 'README',
                   'ardour.rc.in',
-                  'ardour_system.rc',
                   'tools/config.guess',
                   'icons/icon/ardour_icon_mac_mask.png',
                   'icons/icon/ardour_icon_mac.png',

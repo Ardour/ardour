@@ -428,6 +428,39 @@ ARDOUR_UI::save_ardour_state ()
 	save_keybindings ();
 }
 
+gint
+ARDOUR_UI::autosave_session ()
+{
+        if (!Config->get_periodic_safety_backups())
+                return 1;
+        
+        if (session) {
+                session->maybe_write_autosave();
+        }
+
+        return 1;
+}
+
+void
+ARDOUR_UI::update_autosave ()
+{
+        ENSURE_GUI_THREAD (mem_fun (*this, &ARDOUR_UI::update_autosave));
+        
+        if (session->dirty()) {
+                if (_autosave_connection.connected()) {
+                        _autosave_connection.disconnect();
+                }
+
+                _autosave_connection = Glib::signal_timeout().connect (mem_fun (*this, &ARDOUR_UI::autosave_session),
+								    Config->get_periodic_safety_backup_interval() * 1000);
+
+        } else {
+                if (_autosave_connection.connected()) {
+                        _autosave_connection.disconnect();
+                }               
+        }
+}
+
 void
 ARDOUR_UI::startup ()
 {
@@ -1730,6 +1763,7 @@ ARDOUR_UI::new_session (std::string predetermined_path)
 	new_session_dialog->set_name (predetermined_path);
 	new_session_dialog->reset_recent();
 	new_session_dialog->show();
+	new_session_dialog->set_current_page (0);
 
 	do {
 	        response = new_session_dialog->run ();

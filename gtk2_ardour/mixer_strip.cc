@@ -175,7 +175,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	bottom_button_table.set_col_spacings (0);
 	bottom_button_table.set_homogeneous (true);
 	bottom_button_table.attach (group_button, 0, 1, 0, 1);
-
+	
 	if (is_audio_track()) {
 		
 		rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press), false);
@@ -367,7 +367,7 @@ void
 MixerStrip::set_stuff_from_route ()
 {
 	XMLProperty *prop;
-	
+
 	ensure_xml_node ();
 
 	if ((prop = xml_node->property ("strip_width")) != 0) {
@@ -563,7 +563,7 @@ MixerStrip::input_press (GdkEventButton *ev)
 		msg.run ();
 		return true;
 	}
-	
+
 	switch (ev->button) {
 
 	case 1:
@@ -692,7 +692,7 @@ void
 MixerStrip::connect_to_pan ()
 {
 	ENSURE_GUI_THREAD(mem_fun(*this, &MixerStrip::connect_to_pan));
-	
+
 	panstate_connection.disconnect ();
 	panstyle_connection.disconnect ();
 
@@ -773,7 +773,8 @@ MixerStrip::output_changed (IOChange change, void *src)
 
 
 void 
-MixerStrip::comment_editor_done_editing() {
+MixerStrip::comment_editor_done_editing() 
+{
 	string str =  comment_area->get_buffer()->get_text();
 	if (_route->comment() != str) {
 		_route->set_comment (str, this);
@@ -973,12 +974,11 @@ void
 MixerStrip::build_route_ops_menu ()
 {
 	using namespace Menu_Helpers;
-
 	route_ops_menu = manage (new Menu);
 	route_ops_menu->set_name ("ArdourContextMenu");
 
 	MenuList& items = route_ops_menu->items();
-	
+
 	items.push_back (MenuElem (_("Rename"), mem_fun(*this, &RouteUI::route_rename)));
 	items.push_back (SeparatorElem());
 	items.push_back (CheckMenuElem (_("Active"), mem_fun (*this, &RouteUI::toggle_route_active)));
@@ -1003,6 +1003,11 @@ MixerStrip::name_button_button_press (GdkEventButton* ev)
 {
 	if (ev->button == 1) {
 		list_route_operations ();
+
+		Menu_Helpers::MenuList& items = route_ops_menu->items();
+		/* do not allow rename if the track is record-enabled */
+		static_cast<MenuItem*> (&items.front())->set_sensitive (!_route->record_enabled());
+
 		route_ops_menu->popup (1, ev->time);
 	}
 	return FALSE;

@@ -136,7 +136,7 @@
                   Making a pot pretend to be a shuttle wheel doesn't work
                   very well.
                 </para>
-                </footnote> / nothing
+                </footnote> / global solo
               </entry>
 
               <entry namest="Buttons 1" nameend="Buttons 2">
@@ -158,7 +158,9 @@
               </entry>
 
               <entry>
-                loop
+                <para>loop</para>
+								<para>shift 1: marker</para>
+								<para>shift 2: punch in</para>
               </entry>
             </row>
 
@@ -176,7 +178,8 @@
               </entry>
 
               <entry>
-                click
+                <para>click</para>
+								<para>shift 2: punch out</para>
               </entry>
             </row>
 
@@ -190,11 +193,11 @@
               </entry>
 
               <entry>
-                punch in
+                rewind
               </entry>
 
               <entry>
-                punch out
+                ffwd
               </entry>
             </row>
 
@@ -210,11 +213,13 @@
 
             <row>
               <entry>
-                previous bank (shift 1 is previous route)
+                <para>previous bank</para>
+								<para>shift 1: previous route</para>
               </entry>
 
               <entry>
-                next bank (shift 1 is next route)
+                <para>next bank</para>
+								<para>shift 1: next route</para>
               </entry>
             </row>
 

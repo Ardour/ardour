@@ -151,6 +151,7 @@ static const char* authors[] = {
 	N_("Mike Täht"),
 	N_("John Anderson"),
 	N_("Nedko Arnaudov"),
+	N_("Carl Hetherington"),
 	0
 };
 
@@ -163,6 +164,7 @@ static const char* translators[] = {
 \n\tChris Ross <chris@tebibyte.org>\n"),
 	N_("Spanish:\n\t Alex Krohn <alexkrohn@fastmail.fm>\n"),
 	N_("Russian:\n\t Igor Blinov <pitstop@nm.ru>\n"),
+	N_("Greek:\n\t Klearchos Gourgourinis <muadib@in.gr>\n"),
 	0
 };
 

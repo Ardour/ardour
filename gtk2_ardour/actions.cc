@@ -256,6 +256,13 @@ ActionManager::uncheck_toggleaction (const char * name)
 	delete [] group_name;
 }
 
+/** Examine the state of a Configuration setting and a toggle action, and toggle the Configuration
+ * setting if its state doesn't match the toggle action.
+ * @param group Action group.
+ * @param action Action name.
+ * @param Method to set the state of the Configuration setting.
+ * @param Method to get the state of the Configuration setting.
+ */
 void
 ActionManager::toggle_config_state (const char* group, const char* action, bool (Configuration::*set)(bool), bool (Configuration::*get)(void) const)
 {
@@ -285,6 +292,12 @@ ActionManager::toggle_config_state (const char* group, const char* action, sigc:
 	}
 }
 
+
+/** Set the state of a ToggleAction using a particular Configuration get() method
+ * @param group Action group.
+ * @param action Action name.
+ * @param get Method to obtain the state that the ToggleAction should have.
+ */
 void
 ActionManager::map_some_state (const char* group, const char* action, bool (Configuration::*get)() const)
 {

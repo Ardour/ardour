@@ -1,3 +1,22 @@
+/*
+    Copyright (C) 2000-2007 Paul Davis 
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
 #include <ardour/session.h>
 #include <ardour/route.h>
 #include <pbd/memento_command.h>
@@ -60,8 +79,9 @@ Session::memento_command_factory(XMLNode *n)
     /* create command */
     string obj_T = n->property ("type_name")->value();
     if (obj_T == typeid (AudioRegion).name() || obj_T == typeid (Region).name()) {
-	    if (audio_regions.count(id))
+	    if (audio_regions.count(id)) {
 		    return new MementoCommand<AudioRegion>(*audio_regions[id], before, after);
+	    }
     } else if (obj_T == typeid (AudioSource).name()) {
 	    if (audio_sources.count(id))
 		    return new MementoCommand<AudioSource>(*audio_sources[id], before, after);
@@ -86,6 +106,7 @@ Session::memento_command_factory(XMLNode *n)
 
     /* we failed */
     error << string_compose (_("could not reconstitute MementoCommand from XMLNode. object type = %1 id = %2"), obj_T, id.to_s()) << endmsg;
+
     return 0 ;
 }
 
