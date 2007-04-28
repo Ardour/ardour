@@ -689,7 +689,7 @@ Session::save_state (string snapshot_name, bool pending)
 	tmp_path += snapshot_name;
 	tmp_path += ".tmp";
 
-	cerr << "actually writing state to " << xml_path << endl;
+	// cerr << "actually writing state to " << xml_path << endl;
 
 	if (!tree.write (tmp_path)) {
 		error << string_compose (_("state could not be saved to %1"), tmp_path) << endmsg;
