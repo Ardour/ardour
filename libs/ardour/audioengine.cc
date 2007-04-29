@@ -762,6 +762,7 @@ AudioEngine::halted (void *arg)
 	ae->_running = false;
 	ae->_buffer_size = 0;
 	ae->_frame_rate = 0;
+	ae->_jack = 0;
 
 	ae->Halted(); /* EMIT SIGNAL */
 }

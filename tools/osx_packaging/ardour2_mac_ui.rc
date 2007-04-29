@@ -448,6 +448,7 @@ style "editor_hscrollbar" = "ardour_adjusters"
 	# make it bigger.
 	# 
 	GtkRange::slider_width = 27
+        GtkScrollbar::slider_width = 27
 }
 
 style "ardour_progressbars" = "default_buttons_menus"

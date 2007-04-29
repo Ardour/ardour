@@ -244,7 +244,7 @@ Mixer_UI::show_window ()
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		ms = (*ri)[track_columns.strip];
-		ms->set_width (ms->get_width());
+		ms->set_width (ms->get_width(), ms->width_owner());
 	}
 	_visible = true;
 }
@@ -274,7 +274,10 @@ Mixer_UI::add_strip (Session::RouteList& routes)
 		strip = new MixerStrip (*this, *session, route);
 		strips.push_back (strip);
 		
-		strip->set_width (_strip_width);
+		if (strip->width_owner() != strip) {
+			strip->set_width (_strip_width, this);
+		}
+
 		show_strip (strip);
 		
 		no_track_list_redisplay = true;
@@ -1040,7 +1043,7 @@ Mixer_UI::set_strip_width (Width w)
 	_strip_width = w;
 
 	for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
-		(*i)->set_width (w);
+		(*i)->set_width (w, this);
 	}
 }
 
