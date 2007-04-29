@@ -708,7 +708,7 @@ Session::save_state (string snapshot_name, bool pending)
 	tmp_path += snapshot_name;
 	tmp_path += ".tmp";
 
-	cerr << "actually writing state to " << xml_path << endl;
+	// cerr << "actually writing state to " << xml_path << endl;
 
 	if (!tree.write (tmp_path)) {
 		error << string_compose (_("state could not be saved to %1"), tmp_path) << endmsg;
@@ -770,7 +770,7 @@ Session::load_state (string snapshot_name)
 	xmlpath += snapshot_name;
 	xmlpath += _pending_suffix;
 
-	if (!access (xmlpath.c_str(), F_OK)) {
+	if (Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
 
 		/* there is pending state from a crashed capture attempt */
 
@@ -785,8 +785,8 @@ Session::load_state (string snapshot_name)
 		xmlpath += snapshot_name;
 		xmlpath += _statefile_suffix;
 	}
-
-	if (access (xmlpath.c_str(), F_OK)) {
+	
+	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
 		error << string_compose(_("%1: session state information file \"%2\" doesn't exist!"), _name, xmlpath) << endmsg;
 		return 1;
 	}
@@ -828,8 +828,10 @@ Session::load_state (string snapshot_name)
 	if (is_old) {
 		string backup_path;
 
-		backup_path = xmlpath;
-		backup_path += ".1";
+		backup_path = _path;
+		backup_path += snapshot_name;
+		backup_path += "-1";
+		backup_path += _statefile_suffix;
 
 		info << string_compose (_("Copying old session file %1 to %2\nUse %2 with Ardour versions before 2.0 from now on"),
 					xmlpath, backup_path) 
@@ -1614,7 +1616,7 @@ Session::path_from_region_name (string name, string identifier)
 			snprintf (buf, sizeof(buf), "%s/%s-%" PRIu32 ".wav", dir.c_str(), name.c_str(), n);
 		}
 
-		if (!g_file_test (buf, G_FILE_TEST_EXISTS)) {
+		if (!Glib::file_test (buf, Glib::FILE_TEST_EXISTS)) {
 			return buf;
 		}
 	}

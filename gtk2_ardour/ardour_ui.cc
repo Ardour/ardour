@@ -951,9 +951,30 @@ ARDOUR_UI::filter_ardour_session_dirs (const FileFilter::Info& info)
 	return S_ISREG (statbuf.st_mode);
 }
 
+bool
+ARDOUR_UI::check_audioengine ()
+{
+	if (engine) {
+		if (!engine->connected()) {
+			MessageDialog msg (_("Ardour is not connected to JACK\n"
+					     "You cannot open or close sessions in this condition"));
+			msg.run ();
+			return false;
+		}
+		return true;
+	} else {
+		return false;
+	}
+}
+
 void
 ARDOUR_UI::open_session ()
 {
+	if (!check_audioengine()) {
+		return;
+		
+	}
+
 	/* popup selector window */
 
 	if (open_session_selector == 0) {
@@ -1789,9 +1810,7 @@ ARDOUR_UI::new_session (std::string predetermined_path)
 	string session_name;
 	string session_path;
 
-	if (!engine->connected()) {
-		MessageDialog msg (_("Ardour is not connected to JACK at this time. Creating new sessions is not possible."));
-		msg.run ();
+	if (!check_audioengine()) {
 		return false;
 	}
 
@@ -1801,14 +1820,13 @@ ARDOUR_UI::new_session (std::string predetermined_path)
 	new_session_dialog->set_name (predetermined_path);
 	new_session_dialog->reset_recent();
 	new_session_dialog->show();
+	new_session_dialog->set_current_page (0);
 
 	do {
 	        response = new_session_dialog->run ();
 
-		if (!engine->connected()) {
+		if (!check_audioengine()) {
 			new_session_dialog->hide ();
-			MessageDialog msg (_("Ardour is not connected to JACK at this time. Creating new sessions is not possible."));
-			msg.run ();
 			return false;
 		}
 		
@@ -2001,6 +2019,10 @@ ARDOUR_UI::new_session (std::string predetermined_path)
 void
 ARDOUR_UI::close_session()
 {
+	if (!check_audioengine()) {
+		return;
+	}
+
 	unload_session();
 	new_session ();
 }
@@ -2012,6 +2034,10 @@ ARDOUR_UI::load_session (const string & path, const string & snap_name, string* 
 	int x;
 	session_loaded = false;
 	
+	if (!check_audioengine()) {
+		return -1;
+	}
+
 	x = unload_session ();
 
 	if (x < 0) {
@@ -2068,8 +2094,14 @@ ARDOUR_UI::build_session (const string & path, const string & snap_name,
 	Session *new_session;
 	int x;
 
+	if (!check_audioengine()) {
+		return -1;
+	}
+
 	session_loaded = false;
+
 	x = unload_session ();
+
 	if (x < 0) {
 		return -1;
 	} else if (x > 0) {

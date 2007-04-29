@@ -1622,7 +1622,6 @@ Editor::end_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	stop_canvas_autoscroll ();
 
 	if (drag_info.item == 0) {
-		cerr << "end grab with no item\n";
 		return false;
 	}
 	
@@ -2770,7 +2769,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		drag_info.want_move_threshold = false; // don't copy again
 
 		/* duplicate the region(s) */
-		
+
 		vector<RegionView*> new_regionviews;
 		
 		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
@@ -2804,7 +2803,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		/* reset drag_info data to reflect the fact that we are dragging the copies */
 		
 		drag_info.data = new_regionviews.front();
-		
+
 		swap_grab (new_regionviews.front()->get_canvas_group (), 0, event->motion.time);
 	}
 
@@ -3237,6 +3236,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	RouteTimeAxisView* rtv;
 	bool regionview_y_movement;
 	bool regionview_x_movement;
+	vector<RegionView*> copies;
 
 	/* first_move is set to false if the regionview has been moved in the 
 	   motion handler. 
@@ -3244,6 +3244,12 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 	if (drag_info.first_move) {
 		/* just a click */
+
+		if (drag_info.copy) {
+			for (list<RegionView*>::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+				copies.push_back (*i);
+			}
+		}
 		goto out;
 	}
 
@@ -3257,6 +3263,13 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 	if (drag_info.brushing) {
 		/* all changes were made during motion event handlers */
+		
+		if (drag_info.copy) {
+			for (list<RegionView*>::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+				copies.push_back (*i);
+			}
+		}
+
 		goto out;
 	}
 
@@ -3299,7 +3312,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 		vector<RegionView*> new_selection;
 
 		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ) {
-	    
+			
 			RegionView* rv = (*i);	    	    
 
 			double ix1, ix2, iy1, iy2;
@@ -3335,6 +3348,12 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 				session->add_command (new MementoCommand<Playlist>(*from_playlist, &from_playlist->get_state(), 0));	
 				from_playlist->remove_region ((rv->region()));
 				session->add_command (new MementoCommand<Playlist>(*from_playlist, 0, &from_playlist->get_state()));	
+
+			} else {
+
+				/* the regionview we dragged around is a temporary copy, queue it for deletion */
+				
+				copies.push_back (rv);
 			}
 
 			latest_regionview = 0;
@@ -3349,11 +3368,6 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 				new_selection.push_back (latest_regionview);
 			}
 
-			if (drag_info.copy) {
-				// get rid of the copy
-				delete rv;
-			} 
-
 			/* OK, this is where it gets tricky. If the playlist was being used by >1 tracks, and the region
 			   was selected in all of them, then removing it from the playlist will have removed all
 			   trace of it from the selection (i.e. there were N regions selected, we removed 1,
@@ -3366,12 +3380,19 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			   here. if the region selection is not empty, then restart the loop because we know that
 			   we must have removed at least the region(view) we've just been working on as well as any
 			   that we processed on previous iterations.
+
+			   EXCEPT .... if we are doing a copy drag, then the selection hasn't been modified and
+			   we can just iterate.
 			*/
 
-			if (selection->regions.empty()) {
-				break;
-			} else { 
-				i = selection->regions.by_layer().begin();
+			if (drag_info.copy) {
+				++i;
+			} else {
+				if (selection->regions.empty()) {
+					break;
+				} else { 
+					i = selection->regions.by_layer().begin();
+				}
 			}
 		} 
 
@@ -3465,10 +3486,8 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 			session->add_command (new MementoCommand<Playlist>(*to_playlist, 0, &to_playlist->get_state()));
 
-			/* get rid of the copy */
-
 			if (drag_info.copy) {
-				delete rv;
+				copies.push_back (rv);
 			}
 		}
 	}
@@ -3477,6 +3496,10 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	
 	if (!nocommit) {
 		commit_reversible_command ();
+	}
+
+	for (vector<RegionView*>::iterator x = copies.begin(); x != copies.end(); ++x) {
+		delete *x;
 	}
 }
 
@@ -4764,7 +4787,7 @@ Editor::mouse_rename_region (ArdourCanvas::Item* item, GdkEvent* event)
         string str;
 		prompter.get_result(str);
 		if (str.length()) {
-	        clicked_regionview->region()->set_name (str);
+			clicked_regionview->region()->set_name (str);
 		}
 		break;
 	}

@@ -159,6 +159,8 @@ protected:
 	void route_name_changed (void *);
 	void name_entry_changed ();
 
+	void update_rec_display ();
+
 	virtual void label_view ();
 	
 	void add_edit_group_menu_item (ARDOUR::RouteGroup *, Gtk::RadioMenuItem::Group*);

@@ -575,7 +575,12 @@ int
 NewSessionDialog::get_current_page()
 {
 	return m_notebook->get_current_page();
-	
+}
+
+void
+NewSessionDialog::set_current_page(int page)
+{
+	return m_notebook->set_current_page (page);
 }
 
 void

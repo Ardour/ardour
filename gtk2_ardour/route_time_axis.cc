@@ -1776,3 +1776,10 @@ RouteTimeAxisView::reset_redirect_automation_curves ()
 	}
 }
 
+void
+RouteTimeAxisView::update_rec_display ()
+{
+	RouteUI::update_rec_display ();
+	name_entry.set_sensitive (!_route->record_enabled());
+}
+		

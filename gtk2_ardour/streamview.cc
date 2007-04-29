@@ -112,15 +112,15 @@ StreamView::set_height (gdouble h)
 		return -1;
 	}
 
+	if (canvas_rect->property_y2() == h) {
+		return 0;
+	}
+
 	canvas_rect->property_y2() = h;
 
 	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		(*i)->set_height (h);
 	}
-
-	/*for (CrossfadeViewList::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
-		(*i)->set_height (h);
-	}*/
 
 	for (vector<RecBoxInfo>::iterator i = rec_rects.begin(); i != rec_rects.end(); ++i) {
 		RecBoxInfo &recbox = (*i);

@@ -263,6 +263,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	ARDOUR::AudioEngine                 *engine;
 	ARDOUR::Session                     *session;
 
+	bool check_audioengine();
+
 	Gtk::Tooltips          _tooltips;
 
 	void                     goto_editor_window ();

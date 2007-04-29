@@ -27,7 +27,7 @@
 
 #include <pbd/convert.h>
 #include <pbd/error.h>
-#include <pbd/stacktrace.h>
+#include <pbd/enumwriter.h>
 #include <pbd/memento_command.h>
 
 #include <glibmm/miscutils.h>
@@ -2042,6 +2042,10 @@ Editor::set_state (const XMLNode& node)
 		edit_cursor->set_position (0);
 	}
 
+	if ((prop = node.property ("mixer-width"))) {
+		editor_mixer_strip_width = Width (string_2_enum (prop->value(), editor_mixer_strip_width));
+	}
+
 	if ((prop = node.property ("zoom-focus"))) {
 		set_zoom_focus ((ZoomFocus) atoi (prop->value()));
 	}
@@ -2182,6 +2186,8 @@ Editor::get_state ()
 		node->add_child_nocopy (*geometry);
 	}
 
+	maybe_add_mixer_strip_width (*node);
+	
 	snprintf (buf, sizeof(buf), "%d", (int) zoom_focus);
 	node->add_property ("zoom-focus", buf);
 	snprintf (buf, sizeof(buf), "%f", frames_per_unit);
@@ -3777,7 +3783,7 @@ Editor::idle_visual_changer ()
 		}
 	}
 
-	return 0;
+	return 0; /* this is always a one-shot call */
 }
 
 struct EditorOrderTimeAxisSorter {

@@ -424,7 +424,7 @@ PluginInsert::automation_run (BufferSet& bufs, nframes_t nframes, nframes_t offs
 	
  	while (nframes) {
 
- 		nframes_t cnt = min (((nframes_t) floor (next_event.when) - now), nframes);
+		nframes_t cnt = min (((nframes_t) ceil (next_event.when) - now), nframes);
   
  		connect_and_run (bufs, cnt, offset, true, now);
  		

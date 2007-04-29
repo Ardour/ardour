@@ -289,12 +289,26 @@ AudioStreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 }
 
 void
+AudioStreamView::add_crossfade_weak (boost::weak_ptr<Crossfade> crossfade)
+{
+	boost::shared_ptr<Crossfade> sp (crossfade.lock());
+
+	if (!sp) {
+		return;
+	}
+
+	add_crossfade (sp);
+}
+
+void
 AudioStreamView::add_crossfade (boost::shared_ptr<Crossfade> crossfade)
 {
 	AudioRegionView* lview = 0;
 	AudioRegionView* rview = 0;
+
+	/* we do not allow shared_ptr<T> to be bound to slots */
 	
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::add_crossfade), crossfade));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::add_crossfade_weak), boost::weak_ptr<Crossfade> (crossfade)));
 
 	/* first see if we already have a CrossfadeView for this Crossfade */
 

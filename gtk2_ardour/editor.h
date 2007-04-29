@@ -264,6 +264,7 @@ class Editor : public PublicEditor
 	TrackViewList* get_valid_views (TimeAxisView*, ARDOUR::RouteGroup* grp = 0);
 
 	Width editor_mixer_strip_width;
+	void maybe_add_mixer_strip_width (XMLNode&);
 	void show_editor_mixer (bool yn);
 	void set_selected_mixer_strip (TimeAxisView&);
 	void hide_track_in_display (TimeAxisView& tv);

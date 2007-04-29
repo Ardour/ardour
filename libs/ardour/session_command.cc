@@ -81,8 +81,9 @@ Session::memento_command_factory(XMLNode *n)
     /* create command */
     string obj_T = n->property ("type_name")->value();
     if (obj_T == typeid (AudioRegion).name() || obj_T == typeid (MidiRegion).name() || obj_T == typeid (Region).name()) {
-	    if (regions.count(id))
+	    if (regions.count(id)) {
 		    return new MementoCommand<Region>(*regions[id], before, after);
+	    }
     } else if (obj_T == typeid (AudioSource).name() || obj_T == typeid (MidiSource).name()) {
 	    if (sources.count(id))
 		    return new MementoCommand<Source>(*sources[id], before, after);
@@ -107,6 +108,7 @@ Session::memento_command_factory(XMLNode *n)
 
     /* we failed */
     error << string_compose (_("could not reconstitute MementoCommand from XMLNode. object type = %1 id = %2"), obj_T, id.to_s()) << endmsg;
+
     return 0 ;
 }
 

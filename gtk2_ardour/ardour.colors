@@ -17,9 +17,9 @@ cTransportMarkerBar 0.60 0.60 0.64 1.0
 cTimeStretchFill 0.89 0.71 0.71 0.59
 cTimeStretchOutline 0.39 0.39 0.39 0.59
 cAutomationLine 0.27 0.74 0.35 1.0
-cLeftPanAutomationLine 0.77 0.24 0.01 1.0
+cLeftPanAutomationLine 0.87 0.44 0.11 1.0
 cRightPanAutomationLine 0.03 0.26 0.73 1.0
-cRedirectAutomationLine 0.28 0.34 0.74 1.0
+cRedirectAutomationLine 0.48 0.64 0.98 1.0
 cControlPointFill 0 0 0 1.0
 cControlPointOutline 0 0 0 1.0
 cEnteredControlPointOutline 1.0 0.21 0.21 1.0

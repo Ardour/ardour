@@ -73,7 +73,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	base_rect = new SimpleRect(*canvas_display);
 	base_rect->property_x1() = 0.0;
 	base_rect->property_y1() = 0.0;
-	base_rect->property_x2() = max_frames;
+	base_rect->property_x2() = editor.frame_to_pixel (max_frames);
 	base_rect->property_outline_color_rgba() = color_map[cAutomationTrackOutline];
 	/* outline ends and bottom */
 	base_rect->property_outline_what() = (guint32) (0x1|0x2|0x8);
