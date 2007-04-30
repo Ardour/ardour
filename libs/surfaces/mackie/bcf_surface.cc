@@ -615,8 +615,8 @@ void Mackie::BcfSurface::init_controls()
 	group->add( *control );
 
 	group = groups["modifiers"];
-	control = new Button ( 71, 1, "option", *group );
-	buttons[0x47] = control;
+	control = new Button ( 80, 1, "option", *group );
+	buttons[0x50] = control;
 	controls.push_back( control );
 	controls_by_name["option"] = control;
 	group->add( *control );
@@ -664,8 +664,8 @@ void Mackie::BcfSurface::init_controls()
 	group->add( *control );
 
 	group = groups["functions"];
-	control = new Button ( 80, 1, "marker", *group );
-	buttons[0x50] = control;
+	control = new Button ( 71, 1, "marker", *group );
+	buttons[0x47] = control;
 	controls.push_back( control );
 	controls_by_name["marker"] = control;
 	group->add( *control );
@@ -1182,7 +1182,7 @@ void Mackie::BcfSurface::handle_button( MackieButtonHandler & mbh, ButtonState b
 			}
 			break;
 
-		case 0x47: // option
+		case 0x50: // option
 			switch ( bs ) {
 				case press: ls = mbh.option_press( button ); break;
 				case release: ls = mbh.option_release( button ); break;
@@ -1238,7 +1238,7 @@ void Mackie::BcfSurface::handle_button( MackieButtonHandler & mbh, ButtonState b
 			}
 			break;
 
-		case 0x50: // marker
+		case 0x47: // marker
 			switch ( bs ) {
 				case press: ls = mbh.marker_press( button ); break;
 				case release: ls = mbh.marker_release( button ); break;

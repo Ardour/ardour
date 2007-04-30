@@ -257,6 +257,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	ARDOUR::AudioEngine                 *engine;
 	ARDOUR::Session                     *session;
 
+	bool check_audioengine();
+
 	Gtk::Tooltips          _tooltips;
 
 	void                     goto_editor_window ();
@@ -290,6 +292,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void finish();
 	int  ask_about_saving_session (const string & why);
 	int  save_the_session;
+
+	/* periodic safety backup, to be precise */
+	gint autosave_session();
+	void update_autosave();
+	sigc::connection _autosave_connection;
 
 	void queue_transport_change ();
 	void map_transport_state ();
@@ -668,6 +675,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_StopPluginsWithTransport();
 	void toggle_DoNotRunPluginsWhileRecording();
 	void toggle_VerifyRemoveLastCapture();
+	void toggle_PeriodicSafetyBackups();
 	void toggle_StopRecordingOnXrun();
 	void toggle_StopTransportAtEndOfSession();
 	void toggle_GainReduceFastTransport();

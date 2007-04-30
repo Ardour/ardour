@@ -9,6 +9,8 @@ sigc2_files = glob.glob('sigc++/*.cc') + glob.glob('sigc++/functors/*.cc') + glo
 Import('env install_prefix')
 sigc2 = env.Copy()
 
+sigc2.Append(CXXFLAGS='-DLIBSIGC_DISABLE_DEPRECATED')
+
 libsigc2 = sigc2.SharedLibrary('sigc++2', sigc2_files)
 
 if os.access ('autogen.sh', os.F_OK) :

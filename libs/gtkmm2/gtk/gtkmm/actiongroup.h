@@ -3,6 +3,7 @@
 #ifndef _GTKMM_ACTIONGROUP_H
 #define _GTKMM_ACTIONGROUP_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -97,7 +98,7 @@ public:
   /** Gets the name of the action group.
    * @return The name of the action group.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   Glib::ustring get_name() const;
 
@@ -108,13 +109,13 @@ public:
    * is sensitive.
    * @return <tt>true</tt> if the group is sensitive.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   bool get_sensitive() const;
   
   /** Changes the sensitivity of @a action_group 
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param sensitive New sensitivity.
    */
   void set_sensitive(bool sensitive = true);
@@ -125,13 +126,13 @@ public:
    * is visible.
    * @return <tt>true</tt> if the group is visible.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   bool get_visible() const;
   
   /** Changes the visible of @a action_group .
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param visible New visiblity.
    */
   void set_visible(bool visible = true);
@@ -141,7 +142,7 @@ public:
    * @param action_name The name of the action.
    * @return The action, or <tt>0</tt> if no action by that name exists
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   Glib::RefPtr<Action> get_action(const Glib::ustring& action_name);
   
@@ -149,7 +150,7 @@ public:
    * @param action_name The name of the action.
    * @return The action, or <tt>0</tt> if no action by that name exists
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   Glib::RefPtr<const Action> get_action(const Glib::ustring& action_name) const;
 
@@ -157,14 +158,14 @@ public:
   /** Lists the actions in the action group.
    * @return An allocated list of the action objects in the action group
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   Glib::ListHandle< Glib::RefPtr<Action> > get_actions();
   
   /** Lists the actions in the action group.
    * @return An allocated list of the action objects in the action group
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   Glib::ListHandle< Glib::RefPtr<const Action> > get_actions() const;
     
@@ -185,7 +186,7 @@ public:
   
   /** Removes an action object from the action group.
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param action An action.
    */
   void remove(const Glib::RefPtr<Action>& action);
@@ -197,7 +198,7 @@ public:
    * @param string A string.
    * @return The translation of @a string 
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   Glib::ustring translate_string(const Glib::ustring& str) const;
   
@@ -207,15 +208,80 @@ public:
   //These are also just C convenience methods that are useless unless you are using the other convenience methods:
   
 
+  /** The connect_proxy signal is emitted after connecting a proxy to 
+   * an action in the group. Note that the proxy may have been connected 
+   * to a different action before.
+   *
+   * This is intended for simple customizations for which a custom action
+   * class would be too clumsy, e.g. showing tooltips for menuitems in the
+   * statusbar.
+   *
+   * UIManager proxies the signal and provides global notification 
+   * just before any action is connected to a proxy, which is probably more
+   * convenient to use.
+   *
+   * @param action the action
+   * @param proxy the proxy
+   */
+  
+/**
+   * @par Prototype:
+   * <tt>void %connect_proxy(const Glib::RefPtr<Action>& action, Widget* proxy)</tt>
+   */
+
   Glib::SignalProxy2< void,const Glib::RefPtr<Action>&,Widget* > signal_connect_proxy();
 
   
+  /** The disconnect_proxy signal is emitted after disconnecting a proxy 
+   * from an action in the group. 
+   *
+   * UIManager proxies the signal and provides global notification 
+   * just before any action is connected to a proxy, which is probably more
+   * convenient to use.
+   *
+   * @param action the action
+   * @param proxy the proxy
+   */
+  
+/**
+   * @par Prototype:
+   * <tt>void %disconnect_proxy(const Glib::RefPtr<Action>& action, Widget* proxy)</tt>
+   */
+
   Glib::SignalProxy2< void,const Glib::RefPtr<Action>&,Widget* > signal_disconnect_proxy();
-             
+
   
+  /** The pre_activate signal is emitted just before the @action in the
+   * action_group is activated
+   *
+   * This is intended for UIManager to proxy the signal and provide global
+   * notification just before any action is activated.
+   *
+   * @action the action
+   */          
+  
+/**
+   * @par Prototype:
+   * <tt>void %pre_activate(const Glib::RefPtr<Action>& action)</tt>
+   */
+
   Glib::SignalProxy1< void,const Glib::RefPtr<Action>& > signal_pre_activate();
- 
+
   
+  /** The post_activate signal is emitted just after the @action in the
+   * @action_group is activated
+   *
+   * This is intended for UIManager to proxy the signal and provide global
+   * notification just after any action is activated.
+   *
+   * @param action the action
+   */ 
+  
+/**
+   * @par Prototype:
+   * <tt>void %post_activate(const Glib::RefPtr<Action>& action)</tt>
+   */
+
   Glib::SignalProxy1< void,const Glib::RefPtr<Action>& > signal_post_activate();
  
 
@@ -223,11 +289,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

@@ -3,6 +3,7 @@
 #ifndef _GDKMM_TYPES_H
 #define _GDKMM_TYPES_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -328,7 +329,7 @@ inline bool operator==(const Point& lhs, const Point& rhs)
 inline bool operator!=(const Point& lhs, const Point& rhs)
   { return !lhs.equal(rhs); }
 
-
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 struct AtomStringTraits
 {
   typedef std::string CppType;
@@ -348,6 +349,7 @@ struct AtomStringTraits
 // we don't want it to look like we're calling a template trait, but
 // a utility function. -Bryan
 typedef AtomStringTraits AtomString;
+#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 typedef Glib::ArrayHandle<std::string,AtomStringTraits> ArrayHandle_AtomString;
 

@@ -3,6 +3,7 @@
 #ifndef _GTKMM_ALIGNMENT_H
 #define _GTKMM_ALIGNMENT_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -99,11 +100,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -150,7 +157,7 @@ public:
    * this can be used to indent the child widget towards the right by adding
    * padding on the left.
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param padding_top The padding at the top of the widget.
    * @param padding_bottom The padding at the bottom of the widget.
    * @param padding_left The padding at the left of the widget.
@@ -161,7 +168,7 @@ public:
   /** Gets the padding on the different sides of the widget.
    * See set_padding().
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param padding_top Location to store the padding for the top of the widget, or <tt>0</tt>.
    * @param padding_bottom Location to store the padding for the bottom of the widget, or <tt>0</tt>.
    * @param padding_left Location to store the padding for the left of the widget, or <tt>0</tt>.
@@ -169,14 +176,17 @@ public:
    */
   void get_padding(guint& padding_top, guint& padding_bottom, guint& padding_left, guint& padding_right);
               
-  /** Horizontal position of child in available space. 0.0 is left aligned
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Horizontal position of child in available space. 0.0 is left aligned
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<float> property_xalign() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Horizontal position of child in available space. 0.0 is left aligned
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -184,15 +194,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<float> property_xalign() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Vertical position of child in available space. 0.0 is top aligned
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Vertical position of child in available space. 0.0 is top aligned
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<float> property_yalign() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Vertical position of child in available space. 0.0 is top aligned
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -200,15 +214,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<float> property_yalign() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** If available horizontal space is bigger than needed for the child
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** If available horizontal space is bigger than needed for the child
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<float> property_xscale() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** If available horizontal space is bigger than needed for the child
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -216,15 +234,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<float> property_xscale() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** If available vertical space is bigger than needed for the child
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** If available vertical space is bigger than needed for the child
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<float> property_yscale() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** If available vertical space is bigger than needed for the child
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -232,17 +254,21 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<float> property_yscale() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
   //New in GTK+ 2.4
-  /** The padding to insert at the top of the widget.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The padding to insert at the top of the widget.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<guint> property_top_padding() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The padding to insert at the top of the widget.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -250,15 +276,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<guint> property_top_padding() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The padding to insert at the bottom of the widget.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The padding to insert at the bottom of the widget.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<guint> property_bottom_padding() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The padding to insert at the bottom of the widget.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -266,15 +296,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<guint> property_bottom_padding() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The padding to insert at the left of the widget.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The padding to insert at the left of the widget.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<guint> property_left_padding() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The padding to insert at the left of the widget.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -282,15 +316,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<guint> property_left_padding() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The padding to insert at the right of the widget.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The padding to insert at the right of the widget.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<guint> property_right_padding() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The padding to insert at the right of the widget.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -298,6 +336,7 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<guint> property_right_padding() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -313,6 +352,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Alignment* wrap(GtkAlignment* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_ALIGNMENT_H */
 

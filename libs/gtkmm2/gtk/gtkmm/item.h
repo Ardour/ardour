@@ -3,6 +3,7 @@
 #ifndef _GTKMM_ITEM_H
 #define _GTKMM_ITEM_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -90,14 +91,20 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_select();
   virtual void on_deselect();
   virtual void on_toggle();
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -107,18 +114,30 @@ public:
   
   void select();
   
+/**
+   * @par Prototype:
+   * <tt>void %select()</tt>
+   */
 
   Glib::SignalProxy0< void > signal_select();
 
 
   void deselect();
   
+/**
+   * @par Prototype:
+   * <tt>void %deselect()</tt>
+   */
 
   Glib::SignalProxy0< void > signal_deselect();
 
 
   void toggle();
   
+/**
+   * @par Prototype:
+   * <tt>void %toggle()</tt>
+   */
 
   Glib::SignalProxy0< void > signal_toggle();
 
@@ -140,6 +159,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Item* wrap(GtkItem* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_ITEM_H */
 

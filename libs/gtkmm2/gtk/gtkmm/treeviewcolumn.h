@@ -3,6 +3,7 @@
 #ifndef _GTKMM_TREEVIEWCOLUMN_H
 #define _GTKMM_TREEVIEWCOLUMN_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -79,13 +80,19 @@ namespace Gtk
 {
 
 
+// We use GTKMM_API here because gcc needs the extra help on win32 , even 
+// when using --export-all and auto-import. 
+// See http://bugzilla.gnome.org/show_bug.cgi?id=309030.
+
+//TODO: This should derive+implement from CellLayout when we can break ABI.
+
 /** Typedefed as Gtk::TreeView::Column.
  * This is a visible column in a Gtk::TreeView widget. It determines the geometry, type.
  *
  * @ingroup TreeView
 */
 
-class TreeViewColumn : public Gtk::Object
+class GTKMM_API TreeViewColumn : public Gtk::Object
 {
   public:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -128,12 +135,18 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_clicked();
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -238,7 +251,11 @@ public:
    */
   void add_attribute(CellRenderer& cell_renderer, const Glib::ustring& attribute, int column);
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
   void add_attribute(const Glib::PropertyProxy_Base& property, const TreeModelColumnBase& column);
+#endif
+
+  void add_attribute(Gtk::CellRenderer& cell, const Glib::ustring& property_name, const TreeModelColumnBase& column);
   
 
   /** Associate a view CellRenderer with a model column, so that the CellRenderer renders the data in the model column.
@@ -395,14 +412,15 @@ public:
    * option set, then the last column gets all extra space.  By default, every
    * column is created with this <tt>false</tt>.
    * 
-   * Since: 2.4
+   * @newin2p4
+   * @param expand <tt>true</tt> if the column should take available extra space, <tt>false</tt> if not.
    */
   void set_expand(bool expand = true);
   
   /** Return <tt>true</tt> if the column expands to take any available space.
    * @return <tt>true</tt>, if the column expands
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   bool get_expand() const;
 
@@ -483,6 +501,7 @@ public:
   void set_sort_column(int sort_column_id);
 
   #ifndef GTKMM_DISABLE_DEPRECATED
+
   /** @deprecated Use set_sort_column() instead.
    */
   void set_sort_column_id(const TreeModelColumnBase& sort_column_id);
@@ -490,9 +509,9 @@ public:
   /** @deprecated Use set_sort_column() instead.
    */
   void set_sort_column_id(int sort_column_id);
-  #endif //GTKMM_DISABLE_DEPRECATED
-  
-  
+  #endif // GTKMM_DISABLE_DEPRECATED
+
+
   /** Gets the logical @a sort_column_id  that the model sorts on when this
    * column is selected for sorting.
    * See set_sort_column_id().
@@ -566,7 +585,7 @@ public:
   /** Sets the current keyboard focus to be at @a cell , if the column contains
    * 2 or more editable and activatable cells.
    * 
-   * Since: 2.2
+   * @newin2p2
    * @param cell A Gtk::CellRenderer.
    */
   void focus_cell(CellRenderer& cell);
@@ -582,19 +601,34 @@ public:
    * @return <tt>true</tt> if @a cell  belongs to @a tree_column .
    */
   bool get_cell_position(const CellRenderer& cell_renderer, int& start_pos, int& width) const;
+  
+  /** Flags the column, and the cell renderers added to this column, to have
+   * their sizes renegotiated.
+   * 
+   * @newin2p8
+   */
+  void queue_resize();
 
   
+/**
+   * @par Prototype:
+   * <tt>void %clicked()</tt>
+   */
+
   Glib::SignalProxy0< void > signal_clicked();
 
 
-  /** Whether to display the column.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether to display the column.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_visible() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether to display the column.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -602,24 +636,30 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_visible() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Current width of the column.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Current width of the column.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_width() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
-  /** Resize mode of the column.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Resize mode of the column.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<TreeViewColumnSizing> property_sizing() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Resize mode of the column.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -627,15 +667,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<TreeViewColumnSizing> property_sizing() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Current fixed width of the column.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Current fixed width of the column.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_fixed_width() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Current fixed width of the column.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -643,15 +687,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_fixed_width() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Minimum allowed width of the column.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Minimum allowed width of the column.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_min_width() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Minimum allowed width of the column.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -659,15 +707,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_min_width() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Maximum allowed width of the column.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Maximum allowed width of the column.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_max_width() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Maximum allowed width of the column.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -675,15 +727,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_max_width() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Title to appear in column header.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Title to appear in column header.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_title() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Title to appear in column header.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -691,15 +747,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_title() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Column gets share of extra width allocated to the widget.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Column gets share of extra width allocated to the widget.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_expand() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Column gets share of extra width allocated to the widget.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -707,15 +767,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_expand() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Whether the header can be clicked.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether the header can be clicked.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_clickable() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the header can be clicked.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -723,15 +787,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_clickable() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Widget to put in column header button instead of column title.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Widget to put in column header button instead of column title.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Widget*> property_widget() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Widget to put in column header button instead of column title.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -739,15 +807,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Widget*> property_widget() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** X Alignment of the column header text or widget.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** X Alignment of the column header text or widget.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<float> property_alignment() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** X Alignment of the column header text or widget.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -755,15 +827,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<float> property_alignment() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Whether the column can be reordered around the headers.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether the column can be reordered around the headers.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_reorderable() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the column can be reordered around the headers.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -771,15 +847,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_reorderable() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Whether to show a sort indicator.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether to show a sort indicator.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_sort_indicator() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether to show a sort indicator.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -787,15 +867,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_sort_indicator() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Sort direction the sort indicator should indicate.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Sort direction the sort indicator should indicate.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<SortType> property_sort_order() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Sort direction the sort indicator should indicate.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -803,6 +887,7 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<SortType> property_sort_order() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -816,7 +901,7 @@ private:
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-template<class T_ModelColumnType>
+template<class T_ModelColumnType> inline
 void TreeViewColumn::pack_start(const TreeModelColumn<T_ModelColumnType>& column, bool expand)
 {
   //Generate appropriate Renderer for the column:
@@ -827,7 +912,7 @@ void TreeViewColumn::pack_start(const TreeModelColumn<T_ModelColumnType>& column
   set_renderer(*pCellRenderer, column);
 }
 
-template<class T_ModelColumnType>
+template<class T_ModelColumnType> inline
 void TreeViewColumn::pack_end(const TreeModelColumn<T_ModelColumnType>& column, bool expand)
 {
   //Generate appropriate Renderer for the column:
@@ -839,7 +924,7 @@ void TreeViewColumn::pack_end(const TreeModelColumn<T_ModelColumnType>& column, 
 }
 
 
-template <class T_ModelColumnType>
+template <class T_ModelColumnType> inline
 TreeViewColumn::TreeViewColumn(const Glib::ustring& title,
                                const TreeModelColumn<T_ModelColumnType>& column)
 :
@@ -863,6 +948,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::TreeViewColumn* wrap(GtkTreeViewColumn* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_TREEVIEWCOLUMN_H */
 

@@ -30,6 +30,7 @@
 #include <ardour/crossfade.h>
 #include <ardour/crossfade_compare.h>
 #include <ardour/session.h>
+#include <pbd/enumwriter.h>
 
 #include "i18n.h"
 
@@ -381,6 +382,7 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 		}
 
 
+
 		OverlapType c = top->coverage (bottom->position(), bottom->last_frame());
 
 		try {
@@ -411,7 +413,7 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 				
 				xfade = boost::shared_ptr<Crossfade> (new Crossfade (top, bottom, xfade_length, top->first_frame(), StartOfIn));
 				add_crossfade (xfade);
-				
+
 				if (top_region_at (top->last_frame() - 1) == top) {
 					/* 
 					   only add a fade out if there is no region on top of the end of 'top' (which 

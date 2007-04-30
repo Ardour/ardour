@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: Ardour 2.0rc1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-04-08 11:00+0200\n"
-"PO-Revision-Date: 2007-04-09 13:24+0200\n"
+"PO-Revision-Date: 2007-04-09 16:14+0200\n"
 "Last-Translator: Christophe Combelles <ccomb@free.fr>\n"
 "Language-Team: French\n"
 "MIME-Version: 1.0\n"
@@ -1333,6 +1333,10 @@ msgstr "Réception MMC (Midi Machine Control)"
 #: gtk2_ardour/ardour_ui_ed.cc:395
 msgid "Send MIDI feedback"
 msgstr "Envoi des réponses MIDI"
+
+#: gtk2_ardour/ardour_ui_ed.cc:397
+msgid "Use MIDI control"
+msgstr "Réception des contrôles MIDI"
 
 #: gtk2_ardour/ardour_ui_ed.cc:400
 msgid "Use OSC"
@@ -4275,41 +4279,41 @@ msgstr ""
 #: gtk2_ardour/export_dialog.cc:59 gtk2_ardour/export_dialog.cc:401
 #: gtk2_ardour/export_dialog.cc:1029 gtk2_ardour/export_dialog.cc:1197
 msgid "22.05kHz"
-msgstr "22,05 kHz"
+msgstr "22.05kHz"
 
 #: gtk2_ardour/export_dialog.cc:60 gtk2_ardour/export_dialog.cc:404
 #: gtk2_ardour/export_dialog.cc:419 gtk2_ardour/export_dialog.cc:1031
 #: gtk2_ardour/export_dialog.cc:1199
 msgid "44.1kHz"
-msgstr "44,1 kHz"
+msgstr "44.1kHz"
 
 #: gtk2_ardour/export_dialog.cc:61 gtk2_ardour/export_dialog.cc:407
 #: gtk2_ardour/export_dialog.cc:1033 gtk2_ardour/export_dialog.cc:1201
 msgid "48kHz"
-msgstr "48 kHz"
+msgstr "48kHz"
 
 #: gtk2_ardour/export_dialog.cc:62 gtk2_ardour/export_dialog.cc:410
 #: gtk2_ardour/export_dialog.cc:1035 gtk2_ardour/export_dialog.cc:1203
 msgid "88.2kHz"
-msgstr "88,2 kHz"
+msgstr "88.2kHz"
 
 #: gtk2_ardour/export_dialog.cc:63 gtk2_ardour/export_dialog.cc:413
 #: gtk2_ardour/export_dialog.cc:1037 gtk2_ardour/export_dialog.cc:1205
 msgid "96kHz"
-msgstr "96 kHz"
+msgstr "96kHz"
 
 #: gtk2_ardour/export_dialog.cc:64 gtk2_ardour/export_dialog.cc:416
 #: gtk2_ardour/export_dialog.cc:1039 gtk2_ardour/export_dialog.cc:1207
 msgid "192kHz"
-msgstr "192 kHz"
+msgstr "192kHz"
 
 #: gtk2_ardour/export_dialog.cc:69
 msgid "best"
-msgstr "meilleur"
+msgstr "la meilleure"
 
 #: gtk2_ardour/export_dialog.cc:70 gtk2_ardour/export_dialog.cc:1214
 msgid "fastest"
-msgstr "rapide"
+msgstr "la plus rapide"
 
 #: gtk2_ardour/export_dialog.cc:71 gtk2_ardour/export_dialog.cc:1216
 msgid "linear"
@@ -4317,11 +4321,11 @@ msgstr "linéaire"
 
 #: gtk2_ardour/export_dialog.cc:72 gtk2_ardour/export_dialog.cc:1218
 msgid "better"
-msgstr "mieux"
+msgstr "bonne"
 
 #: gtk2_ardour/export_dialog.cc:73 gtk2_ardour/export_dialog.cc:1220
 msgid "intermediate"
-msgstr "intermédiaire"
+msgstr "moyenne"
 
 #: gtk2_ardour/export_dialog.cc:79 gtk2_ardour/export_dialog.cc:1229
 msgid "Rectangular"
@@ -4342,11 +4346,11 @@ msgstr "mono"
 
 #: gtk2_ardour/export_dialog.cc:93
 msgid "CUE"
-msgstr "fichier CUE"
+msgstr "CUE"
 
 #: gtk2_ardour/export_dialog.cc:94
 msgid "TOC"
-msgstr "fichier TOC"
+msgstr "TOC"
 
 #: gtk2_ardour/export_dialog.cc:102
 msgid "Format"
@@ -4354,39 +4358,39 @@ msgstr "format"
 
 #: gtk2_ardour/export_dialog.cc:103
 msgid "CD Marker File Type"
-msgstr "type de fichier de marqueur de CD"
+msgstr "descripteur de CD"
 
 #: gtk2_ardour/export_dialog.cc:104
 msgid "Channels"
-msgstr "voies"
+msgstr "nb de voies"
 
 #: gtk2_ardour/export_dialog.cc:105
 msgid "File Type"
-msgstr "type de fichier"
+msgstr "fichier"
 
 #: gtk2_ardour/export_dialog.cc:106
 msgid "Sample Format"
-msgstr "format d'échantillon"
+msgstr "échantillon"
 
 #: gtk2_ardour/export_dialog.cc:107
 msgid "Sample Endianness"
-msgstr "ordre des bits des échantillons"
+msgstr "ordre des bits"
 
 #: gtk2_ardour/export_dialog.cc:108
 msgid "Sample Rate"
-msgstr "taux d'échantillonnage"
+msgstr "échantillonnage"
 
 #: gtk2_ardour/export_dialog.cc:109
 msgid "Conversion Quality"
-msgstr "qualité de conversion"
+msgstr "conversion"
 
 #: gtk2_ardour/export_dialog.cc:110
 msgid "Dither Type"
-msgstr "type d'interpolation"
+msgstr "interpolation"
 
 #: gtk2_ardour/export_dialog.cc:111
 msgid "Export CD Marker File Only"
-msgstr "exporter simplement un fichier de marqueurs de CD"
+msgstr "n'exporter qu'un fichier descripteur de CD"
 
 #: gtk2_ardour/export_dialog.cc:112 gtk2_ardour/option_editor.cc:84
 #: gtk2_ardour/option_editor.cc:85

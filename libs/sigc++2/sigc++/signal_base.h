@@ -44,8 +44,9 @@ namespace internal
 struct SIGC_API signal_impl
 {
   typedef size_t size_type;
-  typedef std::list<slot_base>::iterator       iterator_type;
-  typedef std::list<slot_base>::const_iterator const_iterator_type;
+  typedef std::list<slot_base> slot_list;
+  typedef slot_list::iterator       iterator_type;
+  typedef slot_list::const_iterator const_iterator_type;
 
   signal_impl();
 
@@ -160,6 +161,40 @@ struct SIGC_API signal_exec
     { sig_->unreference_exec(); }
 };
 
+/** Temporary slot list used during signal emission.
+ *  Through evolution this class is slightly misnamed.  It is now
+ *  an index into the slot_list passed into it.  It simply keeps track
+ *  of where the end of this list was at construction, and pretends that's
+ *  the end of your list.  This way you may connect during emittion without
+ *  inadvertently entering an infinite loop, as well as make other
+ *  modifications to the slot_list at your own risk.
+ */
+struct temp_slot_list
+{
+  typedef signal_impl::slot_list slot_list;
+  typedef signal_impl::iterator_type iterator;
+  typedef signal_impl::const_iterator_type const_iterator;
+
+  temp_slot_list(slot_list &slots) : slots_(slots)
+  {
+    placeholder = slots_.insert(slots_.end(), slot_base());
+  }
+
+  ~temp_slot_list()
+  {
+    slots_.erase(placeholder);
+  }
+
+  iterator begin() { return slots_.begin(); }
+  iterator end() { return placeholder; }
+  const_iterator begin() const { return slots_.begin(); }
+  const_iterator end() const { return placeholder; }
+
+private:
+  slot_list &slots_;
+  slot_list::iterator placeholder;
+};
+  
 } /* namespace internal */
 
 
@@ -228,13 +263,16 @@ struct SIGC_API signal_base : public trackable
 protected:
   typedef internal::signal_impl::iterator_type iterator_type;
 
-  /** Adds a slot at the bottom of the list of slots.
+  /** Adds a slot at the end of the list of slots.
+   * With connect(), slots can also be added during signal emission.
+   * In this case, they won't be executed until the next emission occurs.
    * @param slot_ The slot to add to the list of slots.
    * @return An iterator pointing to the new slot in the list.
    */
   iterator_type connect(const slot_base& slot_);
 
   /** Adds a slot at the given position into the list of slots.
+   * Note that this function does not work during signal emission!
    * @param i An iterator indicating the position where @e slot_ should be inserted.
    * @param slot_ The slot to add to the list of slots.
    * @return An iterator pointing to the new slot in the list.
@@ -242,6 +280,7 @@ protected:
   iterator_type insert(iterator_type i, const slot_base& slot_);
 
   /** Removes the slot at the given position from the list of slots.
+   * Note that this function does not work during signal emission!
    * @param i An iterator pointing to the slot to be removed.
    * @return An iterator pointing to the slot in the list after the one removed.
    */

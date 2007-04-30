@@ -26,7 +26,7 @@
 namespace
 {
 
-void warn_already_registered(const char* location, const std::string& full_name)
+static void warn_already_registered(const char* location, const std::string& full_name)
 {
   g_warning("file %s: (%s): The type name `%s' has been registered already.\n"
             "This is not supposed to happen -- please send a mail with detailed "

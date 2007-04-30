@@ -98,14 +98,6 @@ struct unwrap_reference<const_reference_wrapper<T_type> >
 };
 
 template <class T_type>
-T_type& unwrap(T_type& v)
-{ return v; }
-
-template <class T_type>
-const T_type& unwrap(const T_type& v)
-{ return v; }
-
-template <class T_type>
 T_type& unwrap(const reference_wrapper<T_type>& v)
 { return v; }
 

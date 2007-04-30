@@ -3,6 +3,7 @@
 #ifndef _GTKMM_FIXED_H
 #define _GTKMM_FIXED_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -98,11 +99,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -116,10 +123,13 @@ public:
   void move(Widget& widget, int x, int y);
   
   /** Sets whether a Gtk::Fixed widget is created with a separate
-   * Gdk::Window for widget->window or not. (By default, it will be
+   * Gdk::Window for @a widget -&gt;window or not. (By default, it will be
    * created with no separate Gdk::Window). This function must be called
    * while the Gtk::Fixed is not realized, for instance, immediately after the
    * window is created.
+   * 
+   * This function was added to provide an easy migration path for
+   * older applications which may expect Gtk::Fixed to have a separate window.
    * @param has_window <tt>true</tt> if a separate window should be created.
    */
   void set_has_window(bool has_window = true);
@@ -144,6 +154,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Fixed* wrap(GtkFixed* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_FIXED_H */
 

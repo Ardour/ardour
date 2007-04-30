@@ -3,6 +3,7 @@
 #ifndef _GTKMM_BUTTONBOX_H
 #define _GTKMM_BUTTONBOX_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -111,11 +112,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -133,7 +140,7 @@ public:
    * 
    * This group appears after the other children if the style
    * is Gtk::BUTTONBOX_START, Gtk::BUTTONBOX_SPREAD or
-   * Gtk::BUTTONBOX_EDGE, and before the the other children if the style
+   * Gtk::BUTTONBOX_EDGE, and before the other children if the style
    * is Gtk::BUTTONBOX_END. For horizontal button boxes, the definition
    * of before/after depends on direction of the widget (see
    * Gtk::Widget::set_direction()). If the style is Gtk::BUTTONBOX_START
@@ -150,30 +157,33 @@ public:
    * @param child A child of @a widget .
    * @return Whether @a child  should appear in a secondary group of children.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   bool get_child_secondary(const Gtk::Widget& child) const;
 
-  int get_child_min_width() const;
-  void set_child_min_width(const int& value);
-
-  int get_child_min_height() const;
-  void set_child_min_height(const int& value);
-
-  int get_child_ipadding_x() const;
-  void set_child_ipadding_x(const int& value);
-
-  int get_child_ipadding_y() const;
-  void set_child_ipadding_y(const int& value);
-
-  /** How to layout the buttons in the box. Possible values are default
+   int get_child_min_width() const;
+    void set_child_min_width(const int& value);
+ 
+   int get_child_min_height() const;
+    void set_child_min_height(const int& value);
+ 
+   int get_child_ipadding_x() const;
+    void set_child_ipadding_x(const int& value);
+ 
+   int get_child_ipadding_y() const;
+    void set_child_ipadding_y(const int& value);
+ 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** How to layout the buttons in the box. Possible values are default
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<ButtonBoxStyle> property_layout_style() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** How to layout the buttons in the box. Possible values are default
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -181,6 +191,7 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<ButtonBoxStyle> property_layout_style() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -241,11 +252,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -312,11 +329,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -338,7 +361,9 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::ButtonBox* wrap(GtkButtonBox* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 namespace Glib
 {
   /** @relates Gtk::VButtonBox
@@ -347,7 +372,9 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::VButtonBox* wrap(GtkVButtonBox* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 namespace Glib
 {
   /** @relates Gtk::HButtonBox
@@ -356,6 +383,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::HButtonBox* wrap(GtkHButtonBox* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_BUTTONBOX_H */
 

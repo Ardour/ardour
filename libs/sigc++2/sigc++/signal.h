@@ -11,11 +11,13 @@
 #include <sigc++/functors/slot.h>
 #include <sigc++/functors/mem_fun.h>
 
-// TODO: This should have its own test.
+//SIGC_TYPEDEF_REDEFINE_ALLOWED:
+// TODO: This should have its own test, but I can not create one that gives the error instead of just a warning. murrayc.
 // I have just used this because there is a correlation between these two problems.
 #ifdef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
-  //Compilers, such as SUN Forte C++, that do not allow this also often
+  //Compilers, such as older versions of SUN Forte C++, that do not allow this also often
   //do not allow a typedef to have the same name as a class in the typedef's definition.
+  //For Sun Forte CC 5.7 (SUN Workshop 10), comment this out to fix the build.
   #define SIGC_TYPEDEF_REDEFINE_ALLOWED 1
 #endif
 
@@ -71,7 +73,7 @@ struct slot_iterator
       return *this;
     }
 
-  slot_iterator& operator--(int)
+  slot_iterator operator--(int)
     {
       slot_iterator __tmp(*this);
       --i_;
@@ -137,7 +139,7 @@ struct slot_const_iterator
       return *this;
     }
 
-  slot_const_iterator& operator--(int)
+  slot_const_iterator operator--(int)
     {
       slot_const_iterator __tmp(*this);
       --i_;
@@ -171,8 +173,20 @@ struct slot_list
 
   typedef slot_iterator<slot_type>              iterator;
   typedef slot_const_iterator<slot_type>        const_iterator;
+  
+  #ifndef SIGC_HAVE_SUN_REVERSE_ITERATOR
   typedef std::reverse_iterator<iterator>       reverse_iterator;
   typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+  #else
+  typedef std::reverse_iterator<iterator, std::random_access_iterator_tag,
+                                int, int&, int*, ptrdiff_t> reverse_iterator;
+
+  typedef std::reverse_iterator<const_iterator, std::random_access_iterator_tag,
+                                int, const int&, const int*, ptrdiff_t> const_reverse_iterator;
+  #endif /* SIGC_HAVE_SUN_REVERSE_ITERATOR */
+
+
+
 
   slot_list()
     : list_(0) {}
@@ -307,7 +321,7 @@ struct slot_iterator_buf
       return *this;
     }
 
-  slot_iterator_buf& operator--(int)
+  slot_iterator_buf operator--(int)
     {
       slot_iterator_buf __tmp(*this);
       --i_;
@@ -383,7 +397,7 @@ struct slot_iterator_buf<T_emitter, void>
       return *this;
     }
 
-  slot_iterator_buf& operator--(int)
+  slot_iterator_buf operator--(int)
     {
       slot_iterator_buf __tmp(*this);
       --i_;
@@ -439,10 +453,11 @@ struct signal_emit0
         return accumulator(slot_iterator_buf_type(), slot_iterator_buf_type());
 
       signal_exec exec(impl);
+      temp_slot_list slots(impl->slots_);
 
       self_type self ;
-      return accumulator(slot_iterator_buf_type(impl->slots_.begin(), &self),
-                         slot_iterator_buf_type(impl->slots_.end(), &self));
+      return accumulator(slot_iterator_buf_type(slots.begin(), &self),
+                         slot_iterator_buf_type(slots.end(), &self));
     }
   
 };
@@ -468,21 +483,32 @@ struct signal_emit0<T_return, nil_>
    */
   static result_type emit(signal_impl* impl)
     {
-      if (!impl || impl->slots_.empty()) return T_return();
-      iterator_type it = impl->slots_.begin();
-      for (; it != impl->slots_.end(); ++it)
-        if (!it->empty() && !it->blocked()) break;
-      if (it == impl->slots_.end()) return T_return(); // note that 'T_return r_();' doesn't work => define 'r_' after this line and initialize as follows:
-
+      if (!impl || impl->slots_.empty())
+        return T_return();
+        
       signal_exec exec(impl);
-
-      T_return r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_);
-      for (++it; it != impl->slots_.end(); ++it)
-        {
-          if (it->empty() || it->blocked())
-            continue;
-          r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_);
-        }
+      T_return r_ = T_return(); 
+      
+      //Use this scope to make sure that "slots" is destroyed before "exec" is destroyed.
+      //This avoids a leak on MSVC++ - see http://bugzilla.gnome.org/show_bug.cgi?id=306249
+      { 
+        temp_slot_list slots(impl->slots_);
+        iterator_type it = slots.begin();
+        for (; it != slots.end(); ++it)
+          if (!it->empty() && !it->blocked()) break;
+          
+        if (it == slots.end())
+          return T_return(); // note that 'T_return r_();' doesn't work => define 'r_' after this line and initialize as follows:
+  
+        r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_);
+        for (++it; it != slots.end(); ++it)
+          {
+            if (it->empty() || it->blocked())
+              continue;
+            r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_);
+          }
+      }
+      
       return r_;
     }
 };
@@ -509,8 +535,9 @@ struct signal_emit0<void, nil_>
     {
       if (!impl || impl->slots_.empty()) return;
       signal_exec exec(impl);
+      temp_slot_list slots(impl->slots_);
 
-      for (iterator_type it = impl->slots_.begin(); it != impl->slots_.end(); ++it)
+      for (iterator_type it = slots.begin(); it != slots.end(); ++it)
         {
           if (it->empty() || it->blocked())
             continue;
@@ -563,10 +590,11 @@ struct signal_emit1
         return accumulator(slot_iterator_buf_type(), slot_iterator_buf_type());
 
       signal_exec exec(impl);
+      temp_slot_list slots(impl->slots_);
 
       self_type self (_A_a1);
-      return accumulator(slot_iterator_buf_type(impl->slots_.begin(), &self),
-                         slot_iterator_buf_type(impl->slots_.end(), &self));
+      return accumulator(slot_iterator_buf_type(slots.begin(), &self),
+                         slot_iterator_buf_type(slots.end(), &self));
     }
   
   typename type_trait<T_arg1>::take _A_a1_;
@@ -595,21 +623,32 @@ struct signal_emit1<T_return, T_arg1, nil_>
    */
   static result_type emit(signal_impl* impl, typename type_trait<T_arg1>::take _A_a1)
     {
-      if (!impl || impl->slots_.empty()) return T_return();
-      iterator_type it = impl->slots_.begin();
-      for (; it != impl->slots_.end(); ++it)
-        if (!it->empty() && !it->blocked()) break;
-      if (it == impl->slots_.end()) return T_return(); // note that 'T_return r_();' doesn't work => define 'r_' after this line and initialize as follows:
-
+      if (!impl || impl->slots_.empty())
+        return T_return();
+        
       signal_exec exec(impl);
-
-      T_return r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1);
-      for (++it; it != impl->slots_.end(); ++it)
-        {
-          if (it->empty() || it->blocked())
-            continue;
-          r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1);
-        }
+      T_return r_ = T_return(); 
+      
+      //Use this scope to make sure that "slots" is destroyed before "exec" is destroyed.
+      //This avoids a leak on MSVC++ - see http://bugzilla.gnome.org/show_bug.cgi?id=306249
+      { 
+        temp_slot_list slots(impl->slots_);
+        iterator_type it = slots.begin();
+        for (; it != slots.end(); ++it)
+          if (!it->empty() && !it->blocked()) break;
+          
+        if (it == slots.end())
+          return T_return(); // note that 'T_return r_();' doesn't work => define 'r_' after this line and initialize as follows:
+  
+        r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1);
+        for (++it; it != slots.end(); ++it)
+          {
+            if (it->empty() || it->blocked())
+              continue;
+            r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1);
+          }
+      }
+      
       return r_;
     }
 };
@@ -638,8 +677,9 @@ struct signal_emit1<void, T_arg1, nil_>
     {
       if (!impl || impl->slots_.empty()) return;
       signal_exec exec(impl);
+      temp_slot_list slots(impl->slots_);
 
-      for (iterator_type it = impl->slots_.begin(); it != impl->slots_.end(); ++it)
+      for (iterator_type it = slots.begin(); it != slots.end(); ++it)
         {
           if (it->empty() || it->blocked())
             continue;
@@ -693,10 +733,11 @@ struct signal_emit2
         return accumulator(slot_iterator_buf_type(), slot_iterator_buf_type());
 
       signal_exec exec(impl);
+      temp_slot_list slots(impl->slots_);
 
       self_type self (_A_a1,_A_a2);
-      return accumulator(slot_iterator_buf_type(impl->slots_.begin(), &self),
-                         slot_iterator_buf_type(impl->slots_.end(), &self));
+      return accumulator(slot_iterator_buf_type(slots.begin(), &self),
+                         slot_iterator_buf_type(slots.end(), &self));
     }
   
   typename type_trait<T_arg1>::take _A_a1_;
@@ -727,21 +768,32 @@ struct signal_emit2<T_return, T_arg1,T_arg2, nil_>
    */
   static result_type emit(signal_impl* impl, typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2)
     {
-      if (!impl || impl->slots_.empty()) return T_return();
-      iterator_type it = impl->slots_.begin();
-      for (; it != impl->slots_.end(); ++it)
-        if (!it->empty() && !it->blocked()) break;
-      if (it == impl->slots_.end()) return T_return(); // note that 'T_return r_();' doesn't work => define 'r_' after this line and initialize as follows:
-
+      if (!impl || impl->slots_.empty())
+        return T_return();
+        
       signal_exec exec(impl);
-
-      T_return r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1,_A_a2);
-      for (++it; it != impl->slots_.end(); ++it)
-        {
-          if (it->empty() || it->blocked())
-            continue;
-          r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1,_A_a2);
-        }
+      T_return r_ = T_return(); 
+      
+      //Use this scope to make sure that "slots" is destroyed before "exec" is destroyed.
+      //This avoids a leak on MSVC++ - see http://bugzilla.gnome.org/show_bug.cgi?id=306249
+      { 
+        temp_slot_list slots(impl->slots_);
+        iterator_type it = slots.begin();
+        for (; it != slots.end(); ++it)
+          if (!it->empty() && !it->blocked()) break;
+          
+        if (it == slots.end())
+          return T_return(); // note that 'T_return r_();' doesn't work => define 'r_' after this line and initialize as follows:
+  
+        r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1,_A_a2);
+        for (++it; it != slots.end(); ++it)
+          {
+            if (it->empty() || it->blocked())
+              continue;
+            r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1,_A_a2);
+          }
+      }
+      
       return r_;
     }
 };
@@ -771,8 +823,9 @@ struct signal_emit2<void, T_arg1,T_arg2, nil_>
     {
       if (!impl || impl->slots_.empty()) return;
       signal_exec exec(impl);
+      temp_slot_list slots(impl->slots_);
 
-      for (iterator_type it = impl->slots_.begin(); it != impl->slots_.end(); ++it)
+      for (iterator_type it = slots.begin(); it != slots.end(); ++it)
         {
           if (it->empty() || it->blocked())
             continue;
@@ -827,10 +880,11 @@ struct signal_emit3
         return accumulator(slot_iterator_buf_type(), slot_iterator_buf_type());
 
       signal_exec exec(impl);
+      temp_slot_list slots(impl->slots_);
 
       self_type self (_A_a1,_A_a2,_A_a3);
-      return accumulator(slot_iterator_buf_type(impl->slots_.begin(), &self),
-                         slot_iterator_buf_type(impl->slots_.end(), &self));
+      return accumulator(slot_iterator_buf_type(slots.begin(), &self),
+                         slot_iterator_buf_type(slots.end(), &self));
     }
   
   typename type_trait<T_arg1>::take _A_a1_;
@@ -863,21 +917,32 @@ struct signal_emit3<T_return, T_arg1,T_arg2,T_arg3, nil_>
    */
   static result_type emit(signal_impl* impl, typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3)
     {
-      if (!impl || impl->slots_.empty()) return T_return();
-      iterator_type it = impl->slots_.begin();
-      for (; it != impl->slots_.end(); ++it)
-        if (!it->empty() && !it->blocked()) break;
-      if (it == impl->slots_.end()) return T_return(); // note that 'T_return r_();' doesn't work => define 'r_' after this line and initialize as follows:
-
+      if (!impl || impl->slots_.empty())
+        return T_return();
+        
       signal_exec exec(impl);
-
-      T_return r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1,_A_a2,_A_a3);
-      for (++it; it != impl->slots_.end(); ++it)
-        {
-          if (it->empty() || it->blocked())
-            continue;
-          r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1,_A_a2,_A_a3);
-        }
+      T_return r_ = T_return(); 
+      
+      //Use this scope to make sure that "slots" is destroyed before "exec" is destroyed.
+      //This avoids a leak on MSVC++ - see http://bugzilla.gnome.org/show_bug.cgi?id=306249
+      { 
+        temp_slot_list slots(impl->slots_);
+        iterator_type it = slots.begin();
+        for (; it != slots.end(); ++it)
+          if (!it->empty() && !it->blocked()) break;
+          
+        if (it == slots.end())
+          return T_return(); // note that 'T_return r_();' doesn't work => define 'r_' after this line and initialize as follows:
+  
+        r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1,_A_a2,_A_a3);
+        for (++it; it != slots.end(); ++it)
+          {
+            if (it->empty() || it->blocked())
+              continue;
+            r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1,_A_a2,_A_a3);
+          }
+      }
+      
       return r_;
     }
 };
@@ -908,8 +973,9 @@ struct signal_emit3<void, T_arg1,T_arg2,T_arg3, nil_>
     {
       if (!impl || impl->slots_.empty()) return;
       signal_exec exec(impl);
+      temp_slot_list slots(impl->slots_);
 
-      for (iterator_type it = impl->slots_.begin(); it != impl->slots_.end(); ++it)
+      for (iterator_type it = slots.begin(); it != slots.end(); ++it)
         {
           if (it->empty() || it->blocked())
             continue;
@@ -965,10 +1031,11 @@ struct signal_emit4
         return accumulator(slot_iterator_buf_type(), slot_iterator_buf_type());
 
       signal_exec exec(impl);
+      temp_slot_list slots(impl->slots_);
 
       self_type self (_A_a1,_A_a2,_A_a3,_A_a4);
-      return accumulator(slot_iterator_buf_type(impl->slots_.begin(), &self),
-                         slot_iterator_buf_type(impl->slots_.end(), &self));
+      return accumulator(slot_iterator_buf_type(slots.begin(), &self),
+                         slot_iterator_buf_type(slots.end(), &self));
     }
   
   typename type_trait<T_arg1>::take _A_a1_;
@@ -1003,21 +1070,32 @@ struct signal_emit4<T_return, T_arg1,T_arg2,T_arg3,T_arg4, nil_>
    */
   static result_type emit(signal_impl* impl, typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3,typename type_trait<T_arg4>::take _A_a4)
     {
-      if (!impl || impl->slots_.empty()) return T_return();
-      iterator_type it = impl->slots_.begin();
-      for (; it != impl->slots_.end(); ++it)
-        if (!it->empty() && !it->blocked()) break;
-      if (it == impl->slots_.end()) return T_return(); // note that 'T_return r_();' doesn't work => define 'r_' after this line and initialize as follows:
-
+      if (!impl || impl->slots_.empty())
+        return T_return();
+        
       signal_exec exec(impl);
-
-      T_return r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1,_A_a2,_A_a3,_A_a4);
-      for (++it; it != impl->slots_.end(); ++it)
-        {
-          if (it->empty() || it->blocked())
-            continue;
-          r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1,_A_a2,_A_a3,_A_a4);
-        }
+      T_return r_ = T_return(); 
+      
+      //Use this scope to make sure that "slots" is destroyed before "exec" is destroyed.
+      //This avoids a leak on MSVC++ - see http://bugzilla.gnome.org/show_bug.cgi?id=306249
+      { 
+        temp_slot_list slots(impl->slots_);
+        iterator_type it = slots.begin();
+        for (; it != slots.end(); ++it)
+          if (!it->empty() && !it->blocked()) break;
+          
+        if (it == slots.end())
+          return T_return(); // note that 'T_return r_();' doesn't work => define 'r_' after this line and initialize as follows:
+  
+        r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1,_A_a2,_A_a3,_A_a4);
+        for (++it; it != slots.end(); ++it)
+          {
+            if (it->empty() || it->blocked())
+              continue;
+            r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1,_A_a2,_A_a3,_A_a4);
+          }
+      }
+      
       return r_;
     }
 };
@@ -1049,8 +1127,9 @@ struct signal_emit4<void, T_arg1,T_arg2,T_arg3,T_arg4, nil_>
     {
       if (!impl || impl->slots_.empty()) return;
       signal_exec exec(impl);
+      temp_slot_list slots(impl->slots_);
 
-      for (iterator_type it = impl->slots_.begin(); it != impl->slots_.end(); ++it)
+      for (iterator_type it = slots.begin(); it != slots.end(); ++it)
         {
           if (it->empty() || it->blocked())
             continue;
@@ -1107,10 +1186,11 @@ struct signal_emit5
         return accumulator(slot_iterator_buf_type(), slot_iterator_buf_type());
 
       signal_exec exec(impl);
+      temp_slot_list slots(impl->slots_);
 
       self_type self (_A_a1,_A_a2,_A_a3,_A_a4,_A_a5);
-      return accumulator(slot_iterator_buf_type(impl->slots_.begin(), &self),
-                         slot_iterator_buf_type(impl->slots_.end(), &self));
+      return accumulator(slot_iterator_buf_type(slots.begin(), &self),
+                         slot_iterator_buf_type(slots.end(), &self));
     }
   
   typename type_trait<T_arg1>::take _A_a1_;
@@ -1147,21 +1227,32 @@ struct signal_emit5<T_return, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5, nil_>
    */
   static result_type emit(signal_impl* impl, typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3,typename type_trait<T_arg4>::take _A_a4,typename type_trait<T_arg5>::take _A_a5)
     {
-      if (!impl || impl->slots_.empty()) return T_return();
-      iterator_type it = impl->slots_.begin();
-      for (; it != impl->slots_.end(); ++it)
-        if (!it->empty() && !it->blocked()) break;
-      if (it == impl->slots_.end()) return T_return(); // note that 'T_return r_();' doesn't work => define 'r_' after this line and initialize as follows:
-
+      if (!impl || impl->slots_.empty())
+        return T_return();
+        
       signal_exec exec(impl);
-
-      T_return r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1,_A_a2,_A_a3,_A_a4,_A_a5);
-      for (++it; it != impl->slots_.end(); ++it)
-        {
-          if (it->empty() || it->blocked())
-            continue;
-          r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1,_A_a2,_A_a3,_A_a4,_A_a5);
-        }
+      T_return r_ = T_return(); 
+      
+      //Use this scope to make sure that "slots" is destroyed before "exec" is destroyed.
+      //This avoids a leak on MSVC++ - see http://bugzilla.gnome.org/show_bug.cgi?id=306249
+      { 
+        temp_slot_list slots(impl->slots_);
+        iterator_type it = slots.begin();
+        for (; it != slots.end(); ++it)
+          if (!it->empty() && !it->blocked()) break;
+          
+        if (it == slots.end())
+          return T_return(); // note that 'T_return r_();' doesn't work => define 'r_' after this line and initialize as follows:
+  
+        r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1,_A_a2,_A_a3,_A_a4,_A_a5);
+        for (++it; it != slots.end(); ++it)
+          {
+            if (it->empty() || it->blocked())
+              continue;
+            r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1,_A_a2,_A_a3,_A_a4,_A_a5);
+          }
+      }
+      
       return r_;
     }
 };
@@ -1194,8 +1285,9 @@ struct signal_emit5<void, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5, nil_>
     {
       if (!impl || impl->slots_.empty()) return;
       signal_exec exec(impl);
+      temp_slot_list slots(impl->slots_);
 
-      for (iterator_type it = impl->slots_.begin(); it != impl->slots_.end(); ++it)
+      for (iterator_type it = slots.begin(); it != slots.end(); ++it)
         {
           if (it->empty() || it->blocked())
             continue;
@@ -1253,10 +1345,11 @@ struct signal_emit6
         return accumulator(slot_iterator_buf_type(), slot_iterator_buf_type());
 
       signal_exec exec(impl);
+      temp_slot_list slots(impl->slots_);
 
       self_type self (_A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6);
-      return accumulator(slot_iterator_buf_type(impl->slots_.begin(), &self),
-                         slot_iterator_buf_type(impl->slots_.end(), &self));
+      return accumulator(slot_iterator_buf_type(slots.begin(), &self),
+                         slot_iterator_buf_type(slots.end(), &self));
     }
   
   typename type_trait<T_arg1>::take _A_a1_;
@@ -1295,21 +1388,32 @@ struct signal_emit6<T_return, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6, nil_>
    */
   static result_type emit(signal_impl* impl, typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3,typename type_trait<T_arg4>::take _A_a4,typename type_trait<T_arg5>::take _A_a5,typename type_trait<T_arg6>::take _A_a6)
     {
-      if (!impl || impl->slots_.empty()) return T_return();
-      iterator_type it = impl->slots_.begin();
-      for (; it != impl->slots_.end(); ++it)
-        if (!it->empty() && !it->blocked()) break;
-      if (it == impl->slots_.end()) return T_return(); // note that 'T_return r_();' doesn't work => define 'r_' after this line and initialize as follows:
-
+      if (!impl || impl->slots_.empty())
+        return T_return();
+        
       signal_exec exec(impl);
-
-      T_return r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6);
-      for (++it; it != impl->slots_.end(); ++it)
-        {
-          if (it->empty() || it->blocked())
-            continue;
-          r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6);
-        }
+      T_return r_ = T_return(); 
+      
+      //Use this scope to make sure that "slots" is destroyed before "exec" is destroyed.
+      //This avoids a leak on MSVC++ - see http://bugzilla.gnome.org/show_bug.cgi?id=306249
+      { 
+        temp_slot_list slots(impl->slots_);
+        iterator_type it = slots.begin();
+        for (; it != slots.end(); ++it)
+          if (!it->empty() && !it->blocked()) break;
+          
+        if (it == slots.end())
+          return T_return(); // note that 'T_return r_();' doesn't work => define 'r_' after this line and initialize as follows:
+  
+        r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6);
+        for (++it; it != slots.end(); ++it)
+          {
+            if (it->empty() || it->blocked())
+              continue;
+            r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6);
+          }
+      }
+      
       return r_;
     }
 };
@@ -1343,8 +1447,9 @@ struct signal_emit6<void, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6, nil_>
     {
       if (!impl || impl->slots_.empty()) return;
       signal_exec exec(impl);
+      temp_slot_list slots(impl->slots_);
 
-      for (iterator_type it = impl->slots_.begin(); it != impl->slots_.end(); ++it)
+      for (iterator_type it = slots.begin(); it != slots.end(); ++it)
         {
           if (it->empty() || it->blocked())
             continue;
@@ -1403,10 +1508,11 @@ struct signal_emit7
         return accumulator(slot_iterator_buf_type(), slot_iterator_buf_type());
 
       signal_exec exec(impl);
+      temp_slot_list slots(impl->slots_);
 
       self_type self (_A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6,_A_a7);
-      return accumulator(slot_iterator_buf_type(impl->slots_.begin(), &self),
-                         slot_iterator_buf_type(impl->slots_.end(), &self));
+      return accumulator(slot_iterator_buf_type(slots.begin(), &self),
+                         slot_iterator_buf_type(slots.end(), &self));
     }
   
   typename type_trait<T_arg1>::take _A_a1_;
@@ -1447,21 +1553,32 @@ struct signal_emit7<T_return, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7, 
    */
   static result_type emit(signal_impl* impl, typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3,typename type_trait<T_arg4>::take _A_a4,typename type_trait<T_arg5>::take _A_a5,typename type_trait<T_arg6>::take _A_a6,typename type_trait<T_arg7>::take _A_a7)
     {
-      if (!impl || impl->slots_.empty()) return T_return();
-      iterator_type it = impl->slots_.begin();
-      for (; it != impl->slots_.end(); ++it)
-        if (!it->empty() && !it->blocked()) break;
-      if (it == impl->slots_.end()) return T_return(); // note that 'T_return r_();' doesn't work => define 'r_' after this line and initialize as follows:
-
+      if (!impl || impl->slots_.empty())
+        return T_return();
+        
       signal_exec exec(impl);
-
-      T_return r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6,_A_a7);
-      for (++it; it != impl->slots_.end(); ++it)
-        {
-          if (it->empty() || it->blocked())
-            continue;
-          r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6,_A_a7);
-        }
+      T_return r_ = T_return(); 
+      
+      //Use this scope to make sure that "slots" is destroyed before "exec" is destroyed.
+      //This avoids a leak on MSVC++ - see http://bugzilla.gnome.org/show_bug.cgi?id=306249
+      { 
+        temp_slot_list slots(impl->slots_);
+        iterator_type it = slots.begin();
+        for (; it != slots.end(); ++it)
+          if (!it->empty() && !it->blocked()) break;
+          
+        if (it == slots.end())
+          return T_return(); // note that 'T_return r_();' doesn't work => define 'r_' after this line and initialize as follows:
+  
+        r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6,_A_a7);
+        for (++it; it != slots.end(); ++it)
+          {
+            if (it->empty() || it->blocked())
+              continue;
+            r_ = (reinterpret_cast<call_type>(it->rep_->call_))(it->rep_, _A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6,_A_a7);
+          }
+      }
+      
       return r_;
     }
 };
@@ -1496,8 +1613,9 @@ struct signal_emit7<void, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7, nil_
     {
       if (!impl || impl->slots_.empty()) return;
       signal_exec exec(impl);
+      temp_slot_list slots(impl->slots_);
 
-      for (iterator_type it = impl->slots_.begin(); it != impl->slots_.end(); ++it)
+      for (iterator_type it = slots.begin(); it != slots.end(); ++it)
         {
           if (it->empty() || it->blocked())
             continue;
@@ -2540,13 +2658,14 @@ public:
 };
 
 
+
 /** Convenience wrapper for the numbered sigc::signal0 template.
  * See the base class for useful methods.
  * This is the template specialization of the unnumbered sigc::signal
  * template for 0 argument(s).
  */
 template <class T_return>
-class signal <T_return>
+class signal <T_return, nil_,nil_,nil_,nil_,nil_,nil_,nil_>
   : public signal0<T_return, nil_>
 {
 public:
@@ -2570,13 +2689,14 @@ public:
     : signal0<T_return, nil_>(src) {}
 };
 
+
 /** Convenience wrapper for the numbered sigc::signal1 template.
  * See the base class for useful methods.
  * This is the template specialization of the unnumbered sigc::signal
  * template for 1 argument(s).
  */
 template <class T_return, class T_arg1>
-class signal <T_return, T_arg1>
+class signal <T_return, T_arg1, nil_,nil_,nil_,nil_,nil_,nil_>
   : public signal1<T_return, T_arg1, nil_>
 {
 public:
@@ -2600,13 +2720,14 @@ public:
     : signal1<T_return, T_arg1, nil_>(src) {}
 };
 
+
 /** Convenience wrapper for the numbered sigc::signal2 template.
  * See the base class for useful methods.
  * This is the template specialization of the unnumbered sigc::signal
  * template for 2 argument(s).
  */
 template <class T_return, class T_arg1,class T_arg2>
-class signal <T_return, T_arg1,T_arg2>
+class signal <T_return, T_arg1,T_arg2, nil_,nil_,nil_,nil_,nil_>
   : public signal2<T_return, T_arg1,T_arg2, nil_>
 {
 public:
@@ -2630,13 +2751,14 @@ public:
     : signal2<T_return, T_arg1,T_arg2, nil_>(src) {}
 };
 
+
 /** Convenience wrapper for the numbered sigc::signal3 template.
  * See the base class for useful methods.
  * This is the template specialization of the unnumbered sigc::signal
  * template for 3 argument(s).
  */
 template <class T_return, class T_arg1,class T_arg2,class T_arg3>
-class signal <T_return, T_arg1,T_arg2,T_arg3>
+class signal <T_return, T_arg1,T_arg2,T_arg3, nil_,nil_,nil_,nil_>
   : public signal3<T_return, T_arg1,T_arg2,T_arg3, nil_>
 {
 public:
@@ -2660,13 +2782,14 @@ public:
     : signal3<T_return, T_arg1,T_arg2,T_arg3, nil_>(src) {}
 };
 
+
 /** Convenience wrapper for the numbered sigc::signal4 template.
  * See the base class for useful methods.
  * This is the template specialization of the unnumbered sigc::signal
  * template for 4 argument(s).
  */
 template <class T_return, class T_arg1,class T_arg2,class T_arg3,class T_arg4>
-class signal <T_return, T_arg1,T_arg2,T_arg3,T_arg4>
+class signal <T_return, T_arg1,T_arg2,T_arg3,T_arg4, nil_,nil_,nil_>
   : public signal4<T_return, T_arg1,T_arg2,T_arg3,T_arg4, nil_>
 {
 public:
@@ -2690,13 +2813,14 @@ public:
     : signal4<T_return, T_arg1,T_arg2,T_arg3,T_arg4, nil_>(src) {}
 };
 
+
 /** Convenience wrapper for the numbered sigc::signal5 template.
  * See the base class for useful methods.
  * This is the template specialization of the unnumbered sigc::signal
  * template for 5 argument(s).
  */
 template <class T_return, class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
-class signal <T_return, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>
+class signal <T_return, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5, nil_,nil_>
   : public signal5<T_return, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5, nil_>
 {
 public:
@@ -2720,13 +2844,14 @@ public:
     : signal5<T_return, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5, nil_>(src) {}
 };
 
+
 /** Convenience wrapper for the numbered sigc::signal6 template.
  * See the base class for useful methods.
  * This is the template specialization of the unnumbered sigc::signal
  * template for 6 argument(s).
  */
 template <class T_return, class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
-class signal <T_return, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>
+class signal <T_return, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6, nil_>
   : public signal6<T_return, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6, nil_>
 {
 public:

@@ -223,6 +223,7 @@ lambda_group1<T_functor, T_type1>::operator ()() const
   { return func_(value1_()); }
 
 
+//template specialization of visit_each<>(action, functor):
 template <class T_action, class T_functor, class T_type1>
 void visit_each(const T_action& _A_action,
                 const lambda_group1<T_functor, T_type1>& _A_target)
@@ -434,6 +435,7 @@ lambda_group2<T_functor, T_type1,T_type2>::operator ()() const
   { return func_(value1_(),value2_()); }
 
 
+//template specialization of visit_each<>(action, functor):
 template <class T_action, class T_functor, class T_type1,class T_type2>
 void visit_each(const T_action& _A_action,
                 const lambda_group2<T_functor, T_type1,T_type2>& _A_target)
@@ -692,6 +694,7 @@ lambda_group3<T_functor, T_type1,T_type2,T_type3>::operator ()() const
   { return func_(value1_(),value2_(),value3_()); }
 
 
+//template specialization of visit_each<>(action, functor):
 template <class T_action, class T_functor, class T_type1,class T_type2,class T_type3>
 void visit_each(const T_action& _A_action,
                 const lambda_group3<T_functor, T_type1,T_type2,T_type3>& _A_target)

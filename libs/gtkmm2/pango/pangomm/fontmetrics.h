@@ -3,6 +3,7 @@
 #ifndef _PANGOMM_FONTMETRICS_H
 #define _PANGOMM_FONTMETRICS_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -182,6 +183,7 @@ class Value<Pango::FontMetrics> : public Glib::Value_Boxed<Pango::FontMetrics>
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 } // namespace Glib
+
 
 #endif /* _PANGOMM_FONTMETRICS_H */
 

@@ -89,15 +89,19 @@ void SignalProxyNormal::slot0_void_callback(GObject* self, void* data)
   // Do not try to call a signal on a disassociated wrapper.
   if(Glib::ObjectBase::_get_current_wrapper(self))
   {
+    #ifdef GLIBMM_EXCEPTIONS_ENABLED
     try
     {
+    #endif //GLIBMM_EXCEPTIONS_ENABLED
       if(sigc::slot_base *const slot = data_to_slot(data))
         (*static_cast<sigc::slot<void>*>(slot))();
+    #ifdef GLIBMM_EXCEPTIONS_ENABLED
     }
     catch(...)
     {
       Glib::exception_handlers_invoke();
     }
+    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
 }
 

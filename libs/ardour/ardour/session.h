@@ -323,6 +323,8 @@ class Session : public PBD::StatefulDestructible
 	void disable_record (bool rt_context, bool force = false);
 	void step_back_from_record ();
 	
+	void maybe_write_autosave ();
+
 	/* Proxy signal for region hidden changes */
 
 	sigc::signal<void,boost::shared_ptr<Region> > RegionHiddenChange;
@@ -1609,6 +1611,7 @@ class Session : public PBD::StatefulDestructible
 
 	void jack_timebase_callback (jack_transport_state_t, nframes_t, jack_position_t*, int);
 	int  jack_sync_callback (jack_transport_state_t, jack_position_t*);
+	void reset_jack_connection (jack_client_t* jack);
 	void record_enable_change_all (bool yn);
 
 	XMLNode& state(bool);

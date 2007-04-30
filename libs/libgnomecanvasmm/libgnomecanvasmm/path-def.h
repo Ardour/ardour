@@ -3,6 +3,7 @@
 #ifndef _LIBGNOMECANVASMM_PATH_DEF_H
 #define _LIBGNOMECANVASMM_PATH_DEF_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -279,6 +280,7 @@ namespace Glib
   Glib::RefPtr<Gnome::Canvas::PathDef> wrap(GnomeCanvasPathDef* object, bool take_copy = false);
 
 } // namespace Glib
+
 
 #endif /* _LIBGNOMECANVASMM_PATH_DEF_H */
 

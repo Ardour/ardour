@@ -19,6 +19,9 @@ gtkardour.Append(DOMAIN=domain, MAJOR=1,MINOR=0,MICRO=2)
 gtkardour.Append(CCFLAGS="-DPACKAGE=\\\"" + domain + "\\\"")
 gtkardour.Append(CXXFLAGS="-DPACKAGE=\\\"" + domain + "\\\"")
 gtkardour.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
+gtkardour.Append(CXXFLAGS="-DGLIBMM_DISABLE_DEPRECATED")
+gtkardour.Append(CXXFLAGS="-DGDKMM_DISABLE_DEPRECATED")
+gtkardour.Append(CXXFLAGS="-DGTKMM_DISABLE_DEPRECATED")
 gtkardour.Append(CPPPATH="#/")  # for top level svn_revision.h
 #gtkardour.Append(CXXFLAGS="-DFLOWCANVAS_AA")
 gtkardour.Append(PACKAGE=domain)
@@ -39,6 +42,7 @@ gtkardour.Merge ([
     libraries['flac'],
     libraries['lrdf'],
     libraries['glibmm2'],
+    libraries['cairomm'],
     libraries['pangomm'],
     libraries['atkmm'],
     libraries['gdkmm2'],
@@ -332,6 +336,7 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
                                         'i18n.h', 'gettext.h',
 					'ardour.sh.in',
 					'ardev_common.sh.in',
+					'ardev', 'ardbg',
                                         'ardour2_ui.rc', 'splash.png',
                                         'ardour.menus', 'ardour.bindings.in', 'ardour.colors',
 					'editor_xpms'

@@ -49,14 +49,14 @@ button,1,,F15,1,0,0x44
 button,1,,F16,1,0,0x45
 # turn on/off all solos
 button,1,,global_solo,1,0,0x27
-button,1,modifiers,option,1,0,0x47
+button,1,modifiers,option,1,0,0x50
 button,1,modifiers,cmd_alt,1,0,0x49
 button,1,automation,on,1,1,0x4a
 button,1,automation,rec_ready,1,1,0x4b
 button,1,functions,undo,1,1,0x4c
 button,1,automation,snapshot,1,1,0x4d
 button,1,functions,redo,1,1,0x4f
-button,1,functions,marker,1,1,0x50
+button,1,functions,marker,1,1,0x47
 button,1,functions,enter,1,1,0x51
 button,1,functions,cancel,1,0,0x52
 button,1,functions,mixer,1,0,0x53

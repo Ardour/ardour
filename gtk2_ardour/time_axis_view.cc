@@ -221,6 +221,9 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	order = nth;
 	_hidden = false;
 	
+	/* height in pixels depends on _order, so update it now we've changed _order */
+	set_height (height_style);
+	
 	effective_height = height;
 
 	/* now show children */
@@ -975,8 +978,7 @@ TimeAxisView::compute_controls_size_info ()
 	one_row_table.attach (*buttons[0], 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 	
 	one_row_table.show_all ();
-	Gtk::Requisition req(one_row_table.size_request ());
-
+	Gtk::Requisition req (one_row_table.size_request ());
 
 	// height required to show 1 row of buttons
 

@@ -8,7 +8,7 @@ pangomm_files = glob.glob('pangomm/*.cc')
 
 Import('env libraries install_prefix')
 pangomm = env.Copy()
-pangomm.Merge([libraries['glibmm2'], libraries['pango'], libraries['sigc2']])
+pangomm.Merge([libraries['glibmm2'], libraries['cairo'], libraries['cairomm'], libraries['pango'], libraries['pangocairo'], libraries['sigc2']])
 
 libpangomm = pangomm.SharedLibrary('pangomm', pangomm_files)
 Default(libpangomm)

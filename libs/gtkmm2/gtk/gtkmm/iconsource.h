@@ -3,6 +3,7 @@
 #ifndef _GTKMM_ICONSOURCE_H
 #define _GTKMM_ICONSOURCE_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -283,6 +284,7 @@ class Value<Gtk::IconSource> : public Glib::Value_Boxed<Gtk::IconSource>
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 } // namespace Glib
+
 
 #endif /* _GTKMM_ICONSOURCE_H */
 

@@ -3,6 +3,7 @@
 #ifndef _LIBGNOMECANVASMM_ELLIPSE_H
 #define _LIBGNOMECANVASMM_ELLIPSE_H
 
+
 #include <glibmm.h>
 
 // -*- C++ -*-
@@ -98,15 +99,19 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
 
 
 private:
-;
+
 
 public:
   explicit Ellipse(Group& parent);
@@ -117,6 +122,8 @@ public:
 
 } /* namespace Canvas */
 } /* namespace Gnome */
+
+
 namespace Glib
 {
   /** @relates Gnome::Canvas::Ellipse
@@ -125,6 +132,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gnome::Canvas::Ellipse* wrap(GnomeCanvasEllipse* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _LIBGNOMECANVASMM_ELLIPSE_H */
 

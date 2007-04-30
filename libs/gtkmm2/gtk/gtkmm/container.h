@@ -3,6 +3,7 @@
 #ifndef _GTKMM_CONTAINER_H
 #define _GTKMM_CONTAINER_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -109,15 +110,21 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_add(Widget* widget);
   virtual void on_remove(Widget* widget);
   virtual void on_check_resize();
   virtual void on_set_focus_child(Widget* widget);
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -154,14 +161,9 @@ public:
   
 
   /** Removes @a widget  from @a container . @a widget  must be inside @a container .
-   * Note that @a container  will own a reference to @a widget , and that this
-   * may be the last reference held; so removing a widget from its
-   * container can destroy that widget. If you want to use @a widget 
-   * again, you need to add a reference to it while it's not inside
-   * a container, using Glib::object_ref(). If you don't want to use @a widget 
-   * again it's usually more efficient to simply destroy it directly
-   * using Gtk::Widget::destroy() since this will remove it from the
-   * container and help break any circular reference count cycles.
+   * If @a widget  is managed with Gtk::manage(), and you don't want to use @a widget 
+   * again then you should delete @a widget , because there will no longer be any parent 
+   * container to delete it automatically.
    * @param widget A current child of @a container .
    */
 
@@ -211,13 +213,13 @@ public:
   //_WRAP_METHOD(void foreach_full_(GtkCallback callback,GtkCallbackMarshal marshal, gpointer data,GtkDestroyNotify notify),gtk_container_foreach_full)
 
   
-  /** Returns the the container's non-internal children. See
+  /** Returns the container's non-internal children. See
    * forall() for details on what constitutes an "internal" child.
    * @return A newly-allocated list of the container's non-internal children.
    */
   Glib::ListHandle<Widget*> get_children();
   
-  /** Returns the the container's non-internal children. See
+  /** Returns the container's non-internal children. See
    * forall() for details on what constitutes an "internal" child.
    * @return A newly-allocated list of the container's non-internal children.
    */
@@ -355,15 +357,38 @@ public:
   // Ignore functions such as gtk_container_class_install_child_property(),  which I think are for themes, like the GtkWidget style properties.
   
 
+/**
+   * @par Prototype:
+   * <tt>void %add(Widget* widget)</tt>
+   */
+
   Glib::SignalProxy1< void,Widget* > signal_add();
 
+
+  //We use the optional custom_c_callback parameter with _WRAP_SIGNAL() here,
+  //so that we can write special code to check for deleted child widget parameters:
   
+/**
+   * @par Prototype:
+   * <tt>void %remove(Widget* widget)</tt>
+   */
+
   Glib::SignalProxy1< void,Widget* > signal_remove();
 
-  
+
+/**
+   * @par Prototype:
+   * <tt>void %check_resize()</tt>
+   */
+
   Glib::SignalProxy0< void > signal_check_resize();
 
   
+/**
+   * @par Prototype:
+   * <tt>void %set_focus_child(Widget* widget)</tt>
+   */
+
   Glib::SignalProxy1< void,Widget* > signal_set_focus_child();
 
 
@@ -372,21 +397,39 @@ public:
 protected:
   Container();
 
-    virtual GtkType child_type_vfunc() const;
-    virtual void forall_vfunc(gboolean include_internals, GtkCallback callback, gpointer callback_data);
-  //TODO: What is this?
-    virtual char* composite_name_vfunc(GtkWidget* child);
-    virtual void set_child_property_vfunc(GtkWidget* child, guint property_id, const GValue* value, GParamSpec* pspec);
-    virtual void get_child_property_vfunc(GtkWidget* child, guint property_id, GValue* value, GParamSpec* pspec) const;
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual GtkType child_type_vfunc() const;
+#endif //GLIBMM_VFUNCS_ENABLED
 
-  /** The width of the empty border outside the containers children.
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual void forall_vfunc(gboolean include_internals, GtkCallback callback, gpointer callback_data);
+#endif //GLIBMM_VFUNCS_ENABLED
+
+  //TODO: What is this?
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual char* composite_name_vfunc(GtkWidget* child);
+#endif //GLIBMM_VFUNCS_ENABLED
+
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual void set_child_property_vfunc(GtkWidget* child, guint property_id, const GValue* value, GParamSpec* pspec);
+#endif //GLIBMM_VFUNCS_ENABLED
+
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual void get_child_property_vfunc(GtkWidget* child, guint property_id, GValue* value, GParamSpec* pspec) const;
+#endif //GLIBMM_VFUNCS_ENABLED
+
+
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The width of the empty border outside the containers children.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<guint> property_border_width() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The width of the empty border outside the containers children.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -394,15 +437,19 @@ protected:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<guint> property_border_width() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Specify how resize events are handled.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Specify how resize events are handled.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<ResizeMode> property_resize_mode() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Specify how resize events are handled.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -410,22 +457,17 @@ protected:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<ResizeMode> property_resize_mode() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Can be used to add a new child to the container.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy_WriteOnly<Widget*> property_child() ;
-
+  #ifdef GLIBMM_PROPERTIES_ENABLED
 /** Can be used to add a new child to the container.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
-  Glib::PropertyProxy_ReadOnly<Widget*> property_child() const;
+  Glib::PropertyProxy_WriteOnly<Widget*> property_child() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -441,6 +483,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Container* wrap(GtkContainer* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_CONTAINER_H */
 

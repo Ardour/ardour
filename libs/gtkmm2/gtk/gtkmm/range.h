@@ -3,6 +3,7 @@
 #ifndef _GTKMM_RANGE_H
 #define _GTKMM_RANGE_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -37,6 +38,40 @@ namespace Gtk
 { class Range_Class; } // namespace Gtk
 namespace Gtk
 {
+
+/** @addtogroup gtkmmEnums Enums and Flags */
+
+/**
+ * @ingroup gtkmmEnums
+ */
+enum SensitivityType
+{
+  SENSITIVITY_AUTO,
+  SENSITIVITY_ON,
+  SENSITIVITY_OFF
+};
+
+} // namespace Gtk
+
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+namespace Glib
+{
+
+template <>
+class Value<Gtk::SensitivityType> : public Glib::Value_Enum<Gtk::SensitivityType>
+{
+public:
+  static GType value_type() G_GNUC_CONST;
+};
+
+} // namespace Glib
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+
+namespace Gtk
+{
+
 
 class Adjustment;
 
@@ -88,14 +123,20 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_value_changed();
   virtual void on_adjust_bounds(double new_value);
   virtual void on_move_slider(ScrollType scroll);
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -163,6 +204,16 @@ public:
    * @return <tt>true</tt> if the range is inverted.
    */
   bool get_inverted() const;
+
+  
+  void set_lower_stepper_sensitivity(SensitivityType sensitivity);
+  
+  SensitivityType get_lower_stepper_sensitivity() const;
+  
+  void set_upper_stepper_sensitivity(SensitivityType sensitivity);
+  
+  SensitivityType get_upper_stepper_sensitivity() const;
+
   
   /** Sets the step and page sizes for the range.
    * The step size is used when the user clicks the Gtk::Scrollbar
@@ -195,30 +246,73 @@ public:
   double get_value() const;
 
   
+/**
+   * @par Prototype:
+   * <tt>void %value_changed()</tt>
+   */
+
   Glib::SignalProxy0< void > signal_value_changed();
 
   
+/**
+   * @par Prototype:
+   * <tt>void %adjust_bounds(double new_value)</tt>
+   */
+
   Glib::SignalProxy1< void,double > signal_adjust_bounds();
 
   
+/**
+   * @par Prototype:
+   * <tt>void %move_slider(ScrollType scroll)</tt>
+   */
+
   Glib::SignalProxy1< void,ScrollType > signal_move_slider();
 
   
   //We use no_default_handler for this, because we can not add a new vfunc to 2.5 without breaking ABI.
   //TODO: Remove no_default_handler when we do an ABI-break-with-parallel-install.
+  /** The change_value signal is emitted when a scroll action is
+   * performed on a range.  It allows an application to determine the
+   * type of scroll event that occurred and the resultant new value.
+   * The application can handle the event itself and return true to
+   * prevent further processing.  Or, by returning false, it can pass
+   * the event to other handlers until the default GTK+ handler is
+   * reached.
+   *
+   * The value parameter is unrounded.  An application that overrides
+   * the change_value signal is responsible for clamping the value to
+   * the desired number of decimal digits; the default handler 
+   * clamps the value based on range->round_digits.
+   *
+   * It is not possible to use delayed update policies in an overridden
+   * change_value handler.
+   *
+   * @param scroll the type of scroll action that was performed.
+   * @param new_value the new value resulting from the scroll action.
+   * @result true to prevent other handlers from being invoked for the
+   * signal, or false to propagate the signal further.
+   */
   
+/**
+   * @par Prototype:
+   * <tt>bool %change_value(ScrollType scroll, double new_value)</tt>
+   */
 
   Glib::SignalProxy2< bool,ScrollType,double > signal_change_value();
 
 
-  /** How the range should be updated on the screen.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** How the range should be updated on the screen.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<UpdateType> property_update_policy() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** How the range should be updated on the screen.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -226,15 +320,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<UpdateType> property_update_policy() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The GtkAdjustment that contains the current value of this range object.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The GtkAdjustment that contains the current value of this range object.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Adjustment*> property_adjustment() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The GtkAdjustment that contains the current value of this range object.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -242,15 +340,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Adjustment*> property_adjustment() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Invert direction slider moves to increase range value.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Invert direction slider moves to increase range value.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_inverted() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Invert direction slider moves to increase range value.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -258,10 +360,53 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_inverted() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The sensitivity policy for the stepper that points to the adjustment's lower side.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy<SensitivityType> property_lower_stepper_sensitivity() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+/** The sensitivity policy for the stepper that points to the adjustment's lower side.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy_ReadOnly<SensitivityType> property_lower_stepper_sensitivity() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The sensitivity policy for the stepper that points to the adjustment's upper side.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy<SensitivityType> property_upper_stepper_sensitivity() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+/** The sensitivity policy for the stepper that points to the adjustment's upper side.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy_ReadOnly<SensitivityType> property_upper_stepper_sensitivity() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
   
 protected:
-    virtual void get_range_border_vfunc(GtkBorder* border) const;
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual void get_range_border_vfunc(GtkBorder* border) const;
+#endif //GLIBMM_VFUNCS_ENABLED
 
 
 };
@@ -277,6 +422,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Range* wrap(GtkRange* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_RANGE_H */
 

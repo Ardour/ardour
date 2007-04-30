@@ -1,14 +1,14 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR Paul Davis
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Portuguese (European) translation to gtk2_ardour
+# Copyright (C) 2003-2007 Paul Davis
+# This file is distributed under the same license as the ardour2 package.
+# Rui Nuno Capela <rncbc@rncbc.org>, 2004-2007.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: 0.814.2\n"
+"Project-Id-Version: gtk2_ardour rev.1702\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-06-27 13:00-0400\n"
-"PO-Revision-Date: 2004-12-07 13:00+0000\n"
+"POT-Creation-Date: 2007-04-08 13:00+0100\n"
+"PO-Revision-Date: 2007-04-15 19:00+0100\n"
 "Last-Translator: Rui Nuno Capela <rncbc@rncbc.org>\n"
 "Language-Team: Portuguese\n"
 "MIME-Version: 1.0\n"
@@ -20,9 +20,8 @@ msgid "Paul Davis"
 msgstr ""
 
 #: about.cc:121
-#, fuzzy
 msgid "Jesse Chappell"
-msgstr "reiniciar"
+msgstr ""
 
 #: about.cc:122
 msgid "Taybin Rutkin"
@@ -152,26 +151,23 @@ msgid "Copyright (C) 1999-2005 Paul Davis\n"
 msgstr ""
 
 #: about.cc:182
-#, fuzzy
 msgid ""
 "Ardour comes with ABSOLUTELY NO WARRANTY\n"
 "This is free software, and you are welcome to redistribute it\n"
 "under certain conditions; see the file COPYING for details.\n"
 msgstr ""
-"Copyright (C) 1999-2004 Paul Davis\n"
 "Ardour é fornecido ABSOLUTAMENTE SEM QUALQUER GARANTIA\n"
 "Sendo software livre, é permitida e até encorajada a sua distribuição\n"
 "desde que sejam respeitadas algumas condições;\n"
-"para mais informações, leia por favor o ficheiro COPYING.\n"
+"para mais informações, por favor leia o ficheiro COPYING.\n"
 
 #: about.cc:188
-#, fuzzy
 msgid ""
 "%1\n"
 "(built with ardour/gtk %2.%3.%4 libardour: %5.%6.%7)"
 msgstr ""
-"Ardour: %1\n"
-"(compilado com ardour/gtk %2 libardour: %3.%4.%5)"
+"%1\n"
+"(compilado com ardour/gtk %2.%3.%4 libardour: %5.%6.%7)"
 
 #: actions.cc:261
 msgid "programmer error: %1 %2"
@@ -200,27 +196,24 @@ msgid "Name (template)"
 msgstr "Nome (modelo)"
 
 #: add_route_dialog.cc:120
-#, fuzzy
 msgid "Channel Configuration"
-msgstr "Configuração"
+msgstr "Configuração de canal"
 
 #: add_route_dialog.cc:177 editor.cc:134 editor.cc:3688 time_axis_view.cc:552
 msgid "Normal"
 msgstr "Normal"
 
 #: add_route_dialog.cc:179
-#, fuzzy
 msgid "Tape"
-msgstr "Início"
+msgstr "Fita"
 
 #: add_route_dialog.cc:196
 msgid "Mono"
 msgstr ""
 
 #: add_route_dialog.cc:198
-#, fuzzy
 msgid "Stereo"
-msgstr "Parar"
+msgstr ""
 
 #. preroll stuff
 #: ardour_ui.cc:106
@@ -241,11 +234,12 @@ msgstr ""
 
 #. transport
 #: ardour_ui.cc:115
-#, fuzzy
 msgid ""
 "time\n"
 "master"
-msgstr "Supervisor de tempo JACK"
+msgstr ""
+"tempo\n"
+"principal"
 
 #: ardour_ui.cc:117
 msgid "% "
@@ -293,7 +287,7 @@ msgstr ""
 
 #: ardour_ui.cc:124
 msgid "click"
-msgstr "Batimento"
+msgstr "metrónomo"
 
 #: ardour_ui.cc:125
 msgid "AUDITIONING"
@@ -314,7 +308,11 @@ msgid ""
 "If you still wish to quit, please use the\n"
 "\n"
 "\"Just quit\" option."
-msgstr ""
+msgstr "Não foi possível guardar a sua sessão.\n"
+"\n"
+"Se ainda pretende sair, por favor use\n"
+"\n"
+" a opção \"Apenas sair\""
 
 #: ardour_ui.cc:403
 msgid "ardour: save session?"
@@ -333,17 +331,14 @@ msgid "Save and %1"
 msgstr "Guardar e %1"
 
 #: ardour_ui.cc:426
-#, fuzzy
 msgid "session"
-msgstr "Sessão"
+msgstr "sessão"
 
 #: ardour_ui.cc:428
-#, fuzzy
 msgid "snapshot"
-msgstr "Capturar"
+msgstr "captura"
 
 #: ardour_ui.cc:430
-#, fuzzy
 msgid ""
 "The %1\"%2\"\n"
 "has not been saved.\n"
@@ -353,11 +348,11 @@ msgid ""
 "\n"
 "What do you want to do?"
 msgstr ""
-"A sessão \"%1\"\n"
+"A sessão %1\"%2\"\n"
 "ainda não se encontra salvaguardada.\n"
 "\n"
 "Qualquer alteração feita até ao momento\n"
-"ficará perdida se não a salvaguardar agora.\n"
+"ficará perdida se não salvaguardar agora.\n"
 "\n"
 "O que pretende fazer?"
 
@@ -366,19 +361,18 @@ msgid "Prompter"
 msgstr "Alerta"
 
 #: ardour_ui.cc:503
-#, fuzzy, c-format
 msgid "disconnected"
-msgstr "Desligar"
+msgstr "desligado"
 
 #: ardour_ui.cc:510
-#, fuzzy, c-format
+#, c-format
 msgid "SR: %.1f kHz / %4.1f msecs"
-msgstr "FA: %.1f kHz"
+msgstr "FA: %.1f kHz / %4.1f msegs"
 
 #: ardour_ui.cc:514
 #, c-format
 msgid "SR: %u kHz / %4.1f msecs"
-msgstr ""
+msgstr "FA: %u kHz / %4.1f msegs"
 
 #: ardour_ui.cc:527
 #, c-format
@@ -404,9 +398,8 @@ msgid "programming error: impossible control method"
 msgstr ""
 
 #: ardour_ui.cc:741 new_session_dialog.cc:294
-#, fuzzy
 msgid "Recent Sessions"
-msgstr "abrir sessão"
+msgstr "Sessões recentes"
 
 #. ardour sessions are folders
 #: ardour_ui.cc:834
@@ -414,9 +407,8 @@ msgid "open session"
 msgstr "abrir sessão"
 
 #: ardour_ui.cc:840
-#, fuzzy
 msgid "Ardour sessions"
-msgstr "ardour: guardar sessão?"
+msgstr "Sessões"
 
 #: ardour_ui.cc:873
 msgid "Patience is a virtue.\n"
@@ -424,9 +416,7 @@ msgstr "A paciência é uma virtude.\n"
 
 #: ardour_ui.cc:882
 msgid "You cannot add a track without a session already loaded."
-msgstr ""
-"Não é possível acrescentar uma faixa sem que haja uma sessão esteja "
-"carregada."
+msgstr "Não é possível acrescentar uma faixa sem que haja uma sessão esteja carregada."
 
 #: ardour_ui.cc:889
 msgid "could not create new audio track"
@@ -443,6 +433,10 @@ msgid ""
 "You should save Ardour, exit and\n"
 "restart JACK with more ports."
 msgstr ""
+"Não existem portos JACK disponíveis suficientes\n"
+"para criar uma nova faixa ou barramento.\n"
+"Deverá salvaguardar a sessão, sair e\n"
+"reiniciar JACK com um maior número de portos."
 
 #: ardour_ui.cc:1036
 msgid ""
@@ -450,33 +444,34 @@ msgid ""
 "before trying to record.\n"
 "Check the Session menu."
 msgstr ""
+"Por favor, cria 1 ou mais faixas\n"
+"antes de tentar gravar.\n"
+"Verifique o menu de Sessão."
 
 #: ardour_ui.cc:1265
-#, fuzzy
 msgid ""
 "JACK has either been shutdown or it\n"
 "disconnected Ardour because Ardour\n"
 "was not fast enough. You can save the\n"
 "session and/or try to reconnect to JACK ."
 msgstr ""
-"O serviço de audio (JACK) foi desactivado ou\n"
-"o mesmo desligou a sua ligação com o Ardour,\n"
-"talvez porque este não o acompanhava suficientemente.\n"
+"O serviço de audio (JACK) foi desligado ou\n"
+"o mesmo desactivou a sua ligação com o Ardour,\n"
+"talvez porque o desempenho não era o mais adequado.\n"
 "A sessão corrente deverá ser salvaguardada\n"
-"e o serviço JACK reiniciado, tal como o Ardour."
+"e o serviço JACK devidamente reiniciado."
 
 #: ardour_ui.cc:1282
 msgid "Unable to create all required ports"
-msgstr ""
+msgstr "Não foi possível criar todos os portos necessários"
 
 #: ardour_ui.cc:1290
-#, fuzzy
 msgid "Unable to start the session running"
-msgstr "Ir para o início da sessão"
+msgstr "Não foi possível iniciar a sessão corrente"
 
 #: ardour_ui.cc:1426
 msgid "No Stream"
-msgstr "Sem Fluxo"
+msgstr "Sem fluxo"
 
 #: ardour_ui.cc:1453 ardour_ui.cc:1472
 msgid "none"
@@ -487,9 +482,8 @@ msgid "off"
 msgstr "desligado"
 
 #: ardour_ui.cc:1505
-#, fuzzy
 msgid "Name of New Snapshot"
-msgstr "Nome para a imagem capturada"
+msgstr "Nome para a nova captura"
 
 #: ardour_ui.cc:1651
 msgid "Name for mix template:"
@@ -504,6 +498,9 @@ msgid ""
 "You do not have write access to this session.\n"
 "This prevents the session from being loaded."
 msgstr ""
+"A sessão não pode ser carregada devidamente\n"
+"por deficiência de acesso privilegiado de escrita."
+
 
 #: ardour_ui.cc:1822 ardour_ui.cc:1877
 msgid "Session \"%1 (snapshot %2)\" did not load successfully"
@@ -511,7 +508,7 @@ msgstr "Não foi possível carregar a sessão \"%1 (captura %2)\" com sucesso"
 
 #: ardour_ui.cc:1933
 msgid "No audio files were ready for cleanup"
-msgstr ""
+msgstr "Não foram encontrados ficheiros audio para limpeza"
 
 #: ardour_ui.cc:1937
 msgid ""
@@ -520,24 +517,26 @@ msgid ""
 "These may still include regions that\n"
 "require some unused files to continue to exist."
 msgstr ""
+"Se isto parecer surpreendente, \n"
+"verifique a existência de capturas.\n"
+"Estas podem ainda incluir regiões que necessitem\n"
+"da existência de alguns ficheiros já em desuso."
 
 #: ardour_ui.cc:1946
 msgid "ardour: cleanup"
 msgstr "ardour: limpeza"
 
 #: ardour_ui.cc:1982 ardour_ui.cc:1988
-#, fuzzy
 msgid "files were"
-msgstr "ficheiros"
+msgstr "ficheiros foram"
 
 #: ardour_ui.cc:1984 ardour_ui.cc:1990
-#, fuzzy
 msgid "file was"
-msgstr "ficheiros"
+msgstr "ficheiro foi"
 
 #: ardour_ui.cc:2031
 msgid "Are you sure you want to cleanup?"
-msgstr ""
+msgstr "Tem a certeza que pretende realizar a limpeza?"
 
 #: ardour_ui.cc:2036
 msgid ""
@@ -546,19 +545,20 @@ msgid ""
 "After cleanup, unused audio files will be moved to a \"dead sounds\" "
 "location."
 msgstr ""
+"A limpeza é uma operação destrutiva.\n"
+"TODA a informação de desfazer/refazer será perdida coma limpeza."
+"Após a limpeza, todos os ficheiros audio em desuso serão\n"
+"removidos para um \"arquivo morto\""
 
 #: ardour_ui.cc:2042
-#, fuzzy
 msgid "Clean Up"
-msgstr "Apagar"
+msgstr "Limpeza"
 
 #: ardour_ui.cc:2045
-#, fuzzy
 msgid "CleanupDialog"
-msgstr "Apagar"
+msgstr ""
 
 #: ardour_ui.cc:2046
-#, fuzzy
 msgid "ardour_cleanup"
 msgstr "ardour: limpeza"
 
@@ -567,7 +567,6 @@ msgid "cleaned files"
 msgstr "ficheiros limpos"
 
 #: ardour_ui.cc:2066
-#, fuzzy
 msgid ""
 "The following %1 %2 not in use and \n"
 "have been moved to:\n"
@@ -577,29 +576,29 @@ msgid ""
 "release an additional\n"
 "%4 %5bytes of disk space.\n"
 msgstr ""
-"Os seguintes %1 %2 não se encontram em uso.\n"
-"Da próxima vez que efectuar uma limpeza\n"
-"irão ser libertados %3 %4 de espaço em disco"
+"O(s) seguinte(s) %1 %2 encontrado(s) em desuso\n"
+"e automaticamente removido(s) para:\n"
+"%3. \n"
+"\n"
+"Serão libertados %3 %4bytes de espaço em disco.\n"
 
 #: ardour_ui.cc:2091
 msgid "deleted file"
 msgstr "ficheiro eliminado"
 
 #: ardour_ui.cc:2092
-#, fuzzy
 msgid ""
 "The following %1 %2 deleted from\n"
 "%3,\n"
 "releasing %4 %5bytes of disk space"
 msgstr ""
-"Os seguintes %1 ficheiro%2 foram eliminados, libertando %3 %4B de espaço em "
-"disco"
+"O(s) seguinte(s) %1 %2 eliminado(s) de\n"
+"%3,\n"
+"libertando %3 %4bytes de espaço em disco."
 
 #: ardour_ui.cc:2215
 msgid "Recording was stopped because your system could not keep up."
-msgstr ""
-"A gravação foi interrompida porque o seu sistema não foi capaz de a "
-"acompanhar."
+msgstr "A gravação foi interrompida porque o seu sistema não foi capaz de a acompanhar adequadamente."
 
 #: ardour_ui.cc:2238
 msgid ""
@@ -610,7 +609,7 @@ msgid ""
 "quickly enough to keep up with recording.\n"
 msgstr ""
 "O sistema de ficheiros em disco do seu computador\n"
-"não foi capaz de manter o serviço audio do Ardour.\n"
+"não foi capaz de manter o serviço audio adequadamente.\n"
 "\n"
 "Especificamente, a velocidade de escrita de dados em disco\n"
 "foi insuficiente para acompanhar o ritmo de gravação.\n"
@@ -624,7 +623,7 @@ msgid ""
 "quickly enough to keep up with playback.\n"
 msgstr ""
 "O sistema de ficheiros em disco do seu computador\n"
-"não foi capaz de manter o serviço audio do Ardour.\n"
+"não foi capaz de manter o serviço audio adequadamente.\n"
 "\n"
 "Especificamente, a velocidade de leitura de dados em disco\n"
 "foi insuficiente para acompanhar o ritmo de reprodução.\n"
@@ -640,34 +639,32 @@ msgid ""
 "what you would like to do.\n"
 msgstr ""
 "Esta sessão parece ter estado a meio\n"
-"de uma gravação quando o Ardour ou\n"
+"de uma gravação quando o sistema ou\n"
 "o computador foi desligado.\n"
 "\n"
-"Pode ser tentada a recuperação do audio\n"
-"capturado até então ou simplesmente ignorá-lo.\n"
+"Pode ser tentada a recuperação da material\n"
+"gravado até então ou simplesmente ignorá-lo.\n"
 "Por favor decida o que pretende fazer.\n"
 
 #: ardour_ui.cc:2293
 msgid "Recover from crash"
-msgstr "Recuperação"
+msgstr "Recuperar"
 
 #: ardour_ui.cc:2294
 msgid "Ignore crash data"
-msgstr "Ignorar informação de recuperação"
+msgstr "Ignorar"
 
 #: ardour_ui.cc:2312
-#, fuzzy
 msgid "Could not disconnect from JACK"
-msgstr "Não foi possível conectar ao serviço JACK como \"%1\""
+msgstr "Não foi possível desligar do serviço JACK"
 
 #: ardour_ui.cc:2325
-#, fuzzy
 msgid "Could not reconnect to JACK"
-msgstr "Não foi possível conectar ao serviço JACK como \"%1\""
+msgstr "Não foi possível ligar ao serviço JACK"
 
 #: ardour_ui2.cc:60
 msgid "UI: cannot setup editor"
-msgstr "Não foi possível iniciar o painel principal de edição (editor)"
+msgstr "Não foi possível iniciar o painel de edição"
 
 #: ardour_ui2.cc:65
 msgid "UI: cannot setup mixer"
@@ -723,7 +720,7 @@ msgstr "Iniciar a reprodução após qualquer localização"
 
 #: ardour_ui2.cc:299
 msgid "Be sensible about input monitoring"
-msgstr "Seja sensível acerca de monitorização de entradas"
+msgstr "Seja sensível acerca da monitorização de entradas"
 
 #: ardour_ui2.cc:300
 msgid "Start recording at auto-punch start"
@@ -738,22 +735,21 @@ msgid "Enable/Disable audio click"
 msgstr "Ligar/Desligar o metrónomo"
 
 #: ardour_ui2.cc:303
-#, fuzzy
 msgid "Positional sync source"
-msgstr "Sicronia de Posição"
+msgstr "Sicronia de posição"
 
 #: ardour_ui2.cc:304
 msgid "Does Ardour control the time?"
-msgstr ""
+msgstr "Controlo de tempo?"
 
 #: ardour_ui2.cc:305
 msgid "Shuttle speed control"
 msgstr "Controlo de velocidade"
 
 #: ardour_ui2.cc:306
-#, fuzzy, c-format
+#, c-format
 msgid "Select semitones or %%-age for speed display"
-msgstr "Seleccionar semitons ou %-agem para visualização de velocidade"
+msgstr "Seleccionar semi-tons ou %%agem para visualização de velocidade"
 
 #: ardour_ui2.cc:307
 msgid "Current transport speed"
@@ -783,9 +779,8 @@ msgid "ardour: clock"
 msgstr "ardour: cronómetro"
 
 #: ardour_ui2.cc:596
-#, fuzzy
 msgid "Maximum speed"
-msgstr "velocidade variável"
+msgstr "Velocidade máxima"
 
 #: ardour_ui2.cc:823
 msgid "st"
@@ -796,12 +791,10 @@ msgid "stopped"
 msgstr "parado"
 
 #: ardour_ui_dialogs.cc:153 playlist_selector.cc:70
-#, fuzzy
 msgid "close"
-msgstr "Fechar"
+msgstr "fechar"
 
 #: ardour_ui_dialogs.cc:360 ardour_ui_ed.cc:184
-#, fuzzy
 msgid "Sound File Browser"
 msgstr "Audioteca"
 
@@ -817,43 +810,39 @@ msgstr "Exportar"
 
 #: ardour_ui_ed.cc:74
 msgid "Cleanup"
-msgstr "Apagar"
+msgstr "Limpar"
 
 #: ardour_ui_ed.cc:75 option_editor.cc:126
 msgid "Sync"
 msgstr "Sincronia"
 
 #: ardour_ui_ed.cc:76 ardour_ui_ed.cc:77
-#, fuzzy
 msgid "Options"
 msgstr "Opções"
 
 #: ardour_ui_ed.cc:78
 msgid "Help"
-msgstr ""
+msgstr "Ajuda"
 
 #: ardour_ui_ed.cc:79
 msgid "KeyMouse Actions"
-msgstr ""
+msgstr "Acções teclado/rato"
 
 #: ardour_ui_ed.cc:80
-#, fuzzy
 msgid "Audio File Format"
-msgstr "Quadros Audio"
+msgstr "Formato de ficheiro audio"
 
 #: ardour_ui_ed.cc:81
-#, fuzzy
 msgid "Header"
-msgstr "Pré-Atenuador"
+msgstr "Cabeçalho"
 
 #: ardour_ui_ed.cc:82
 msgid "Data"
-msgstr ""
+msgstr "Dados"
 
 #: ardour_ui_ed.cc:83
-#, fuzzy
 msgid "Control Surfaces"
-msgstr "Saídas de Controlo"
+msgstr "Mesas de controlo"
 
 #. the real actions
 #: ardour_ui_ed.cc:87 audio_time_axis.cc:1854 new_session_dialog.cc:529
@@ -874,7 +863,7 @@ msgstr "Fechar"
 
 #: ardour_ui_ed.cc:94 route_params_ui.cc:514
 msgid "Add Track/Bus"
-msgstr "Acrescentar Faixa/Barramento"
+msgstr "Acrescentar faixa/barramento"
 
 #: ardour_ui_ed.cc:105
 msgid "Connect"
@@ -887,25 +876,23 @@ msgstr "Capturar"
 
 #: ardour_ui_ed.cc:116
 msgid "Save Template..."
-msgstr "Guardar Modelo..."
+msgstr "Guardar modelo..."
 
 #: ardour_ui_ed.cc:119
 msgid "Export session to audiofile..."
 msgstr "Exportar sessão para ficheiro audio..."
 
 #: ardour_ui_ed.cc:122
-#, fuzzy
 msgid "Export selection to audiofile..."
-msgstr "Exportar sessão para ficheiro audio..."
+msgstr "Exportar selecção para ficheiro audio..."
 
 #: ardour_ui_ed.cc:126
-#, fuzzy
 msgid "Export range markers to audiofile..."
 msgstr "Exportar intervalo para ficheiro audio..."
 
 #: ardour_ui_ed.cc:133
 msgid "Cleanup unused sources"
-msgstr "Apagar originais em desuso"
+msgstr "Limpar originais em desuso"
 
 #: ardour_ui_ed.cc:135
 msgid "Flush wastebasket"
@@ -913,18 +900,16 @@ msgstr "Limpeza"
 
 #: ardour_ui_ed.cc:141 ardour_ui_options.cc:408 ardour_ui_options.cc:417
 #: ardour_ui_options.cc:489
-#, fuzzy
 msgid "JACK"
-msgstr "RECUAR"
+msgstr ""
 
 #: ardour_ui_ed.cc:142
 msgid "Latency"
-msgstr ""
+msgstr "Latência"
 
 #: ardour_ui_ed.cc:144
-#, fuzzy
 msgid "Reconnect"
-msgstr "Ligar"
+msgstr "Religar"
 
 #: ardour_ui_ed.cc:147 mixer_strip.cc:497 mixer_strip.cc:565
 msgid "Disconnect"
@@ -936,7 +921,7 @@ msgstr "Janelas"
 
 #: ardour_ui_ed.cc:175
 msgid "start prefix"
-msgstr ""
+msgstr "prefixo"
 
 #: ardour_ui_ed.cc:176
 msgid "Quit"
@@ -945,26 +930,23 @@ msgstr "Sair"
 #. windows visibility actions
 #: ardour_ui_ed.cc:180
 msgid "Maximise Editor Space"
-msgstr ""
+msgstr "Maximizar o painel de edição"
 
 #: ardour_ui_ed.cc:182
-#, fuzzy
 msgid "Show Editor"
-msgstr "Opções"
+msgstr "Mostrar painel de edição"
 
 #: ardour_ui_ed.cc:183
-#, fuzzy
 msgid "Show Mixer"
-msgstr "Mistura"
+msgstr "Mostrar painel de mistura"
 
 #: ardour_ui_ed.cc:185
 msgid "Options Editor"
 msgstr "Opções"
 
 #: ardour_ui_ed.cc:186
-#, fuzzy
 msgid "Track/Bus Inspector"
-msgstr "Faixas/Barramentos"
+msgstr "Faixas/barramentos"
 
 #: ardour_ui_ed.cc:188
 msgid "Connections"
@@ -976,41 +958,36 @@ msgstr "Localizações"
 
 #: ardour_ui_ed.cc:192
 msgid "Big Clock"
-msgstr "Cronómetro Principal"
+msgstr "Cronómetro principal"
 
 #: ardour_ui_ed.cc:194
 msgid "About"
 msgstr "Acerca de"
 
 #: ardour_ui_ed.cc:195
-#, fuzzy
 msgid "Colors"
-msgstr "Cor"
+msgstr "Cores"
 
 #: ardour_ui_ed.cc:197
-#, fuzzy
 msgid "Add Audio Track"
-msgstr "Acrescentar Faixa/Barramento"
+msgstr "Acrescentar faixa/barramento audio"
 
 #: ardour_ui_ed.cc:199
-#, fuzzy
 msgid "Add Audio Bus"
-msgstr "Esconder todos os barramentos audio"
+msgstr "Acrescentar barramento audio"
 
 #: ardour_ui_ed.cc:201
 msgid "Save"
 msgstr "Guardar"
 
 #: ardour_ui_ed.cc:203 editor_actions.cc:255
-#, fuzzy
 msgid "Remove Last Capture"
 msgstr "Remover a última captura"
 
 #. do-nothing action for the "transport" menu bar item
 #: ardour_ui_ed.cc:210
-#, fuzzy
 msgid "Transport"
-msgstr "Tradutores"
+msgstr "Transporte"
 
 #. these two are not used by key bindings, instead use ToggleRoll for that. these two do show up in
 #. menus and via button proxies.
@@ -1021,77 +998,69 @@ msgstr "Parar"
 
 #: ardour_ui_ed.cc:219
 msgid "Roll"
-msgstr ""
+msgstr "Rolar"
 
 #: ardour_ui_ed.cc:223
-#, fuzzy
 msgid "Start/Stop"
-msgstr "Início:"
+msgstr "Iniciar/Parar"
 
 #: ardour_ui_ed.cc:226
 msgid "Stop + Forget Capture"
-msgstr ""
+msgstr "Parar + esquecer gravação"
 
 #: ardour_ui_ed.cc:229
-#, fuzzy
 msgid "Play Loop Range"
 msgstr "Reproduzir intervalo cíclico"
 
 #: ardour_ui_ed.cc:232
-#, fuzzy
 msgid "Play Selection"
 msgstr "Reproduzir região seleccionada"
 
 #: ardour_ui_ed.cc:236
-#, fuzzy
 msgid "Enable Record"
 msgstr "Gravar"
 
 #: ardour_ui_ed.cc:239
-#, fuzzy
 msgid "Rewind"
-msgstr "Região"
+msgstr "Rebobinar"
 
 #: ardour_ui_ed.cc:242
 msgid "Rewind (Slow)"
-msgstr ""
+msgstr "Rebobinar (devagar)"
 
 #: ardour_ui_ed.cc:245
 msgid "Rewind (Fast)"
-msgstr ""
+msgstr "Rebobinar (rápido)"
 
 #: ardour_ui_ed.cc:248
-#, fuzzy
 msgid "Forward"
-msgstr "retocar p/frente"
+msgstr "Avançar"
 
 #: ardour_ui_ed.cc:251
 msgid "Forward (Slow)"
-msgstr ""
+msgstr "Avançar (devagar)"
 
 #: ardour_ui_ed.cc:254
 msgid "Forward (Fast)"
-msgstr ""
+msgstr "Avançar (rápido)"
 
 #: ardour_ui_ed.cc:257
 msgid "Goto Zero"
-msgstr ""
+msgstr "Ir para o zero"
 
 #: ardour_ui_ed.cc:260
-#, fuzzy
 msgid "Goto Start"
-msgstr "Início:"
+msgstr "Ir para o início"
 
 #: ardour_ui_ed.cc:263
 msgid "Goto End"
-msgstr ""
+msgstr "Ir para o final"
 
 #. XXX the newline in the displayed names of these action is really wrong, but its because we want the button
 #. that proxies for these action to be more compact. It would be nice to find a way to override the action
 #. name appearance on the buttons.
 #.
 #: ardour_ui_ed.cc:272
-#, fuzzy
 msgid ""
 "Punch\n"
 "in"
@@ -1100,7 +1069,6 @@ msgstr ""
 "inserção"
 
 #: ardour_ui_ed.cc:275
-#, fuzzy
 msgid ""
 "Punch\n"
 "out"
@@ -1113,7 +1081,6 @@ msgid "Click"
 msgstr "Metrónomo"
 
 #: ardour_ui_ed.cc:281
-#, fuzzy
 msgid ""
 "Auto\n"
 "input"
@@ -1122,157 +1089,156 @@ msgstr ""
 "automática"
 
 #: ardour_ui_ed.cc:284
-#, fuzzy
 msgid ""
 "Auto\n"
 "play"
 msgstr ""
-"reprodução\n"
+"Reprodução\n"
 "automática"
 
 #: ardour_ui_ed.cc:287
-#, fuzzy
 msgid ""
 "Auto\n"
 "return"
 msgstr ""
-"retorno\n"
+"Retorno\n"
 "automático"
 
 #: ardour_ui_ed.cc:291
-#, fuzzy
 msgid ""
 "Time\n"
 "master"
-msgstr "Supervisor de tempo JACK"
+msgstr ""
+"Supervisão\n"
+"de tempo"
 
 #: ardour_ui_ed.cc:294
 msgid "Toggle Record Enable Track1"
-msgstr ""
+msgstr "Comutador de gravação Faixa 1"
 
 #: ardour_ui_ed.cc:296
 msgid "Toggle Record Enable Track2"
-msgstr ""
+msgstr "Comutador de gravação Faixa 2"
 
 #: ardour_ui_ed.cc:298
 msgid "Toggle Record Enable Track3"
-msgstr ""
+msgstr "Comutador de gravação Faixa 3"
 
 #: ardour_ui_ed.cc:300
 msgid "Toggle Record Enable Track4"
-msgstr ""
+msgstr "Comutador de gravação Faixa 4"
 
 #: ardour_ui_ed.cc:302
 msgid "Toggle Record Enable Track5"
-msgstr ""
+msgstr "Comutador de gravação Faixa 5"
 
 #: ardour_ui_ed.cc:304
 msgid "Toggle Record Enable Track6"
-msgstr ""
+msgstr "Comutador de gravação Faixa 6"
 
 #: ardour_ui_ed.cc:306
 msgid "Toggle Record Enable Track7"
-msgstr ""
+msgstr "Comutador de gravação Faixa 7"
 
 #: ardour_ui_ed.cc:308
 msgid "Toggle Record Enable Track8"
-msgstr ""
+msgstr "Comutador de gravação Faixa 8"
 
 #: ardour_ui_ed.cc:310
 msgid "Toggle Record Enable Track9"
-msgstr ""
+msgstr "Comutador de gravação Faixa 9"
 
 #: ardour_ui_ed.cc:312
 msgid "Toggle Record Enable Track10"
-msgstr ""
+msgstr "Comutador de gravação Faixa 10"
 
 #: ardour_ui_ed.cc:314
 msgid "Toggle Record Enable Track11"
-msgstr ""
+msgstr "Comutador de gravação Faixa 11"
 
 #: ardour_ui_ed.cc:316
 msgid "Toggle Record Enable Track12"
-msgstr ""
+msgstr "Comutador de gravação Faixa 12"
 
 #: ardour_ui_ed.cc:318
 msgid "Toggle Record Enable Track13"
-msgstr ""
+msgstr "Comutador de gravação Faixa 13"
 
 #: ardour_ui_ed.cc:320
 msgid "Toggle Record Enable Track14"
-msgstr ""
+msgstr "Comutador de gravação Faixa 14"
 
 #: ardour_ui_ed.cc:322
 msgid "Toggle Record Enable Track15"
-msgstr ""
+msgstr "Comutador de gravação Faixa 15"
 
 #: ardour_ui_ed.cc:324
 msgid "Toggle Record Enable Track16"
-msgstr ""
+msgstr "Comutador de gravação Faixa 16"
 
 #: ardour_ui_ed.cc:326
 msgid "Toggle Record Enable Track17"
-msgstr ""
+msgstr "Comutador de gravação Faixa 17"
 
 #: ardour_ui_ed.cc:328
 msgid "Toggle Record Enable Track18"
-msgstr ""
+msgstr "Comutador de gravação Faixa 18"
 
 #: ardour_ui_ed.cc:330
 msgid "Toggle Record Enable Track19"
-msgstr ""
+msgstr "Comutador de gravação Faixa 19"
 
 #: ardour_ui_ed.cc:332
 msgid "Toggle Record Enable Track20"
-msgstr ""
+msgstr "Comutador de gravação Faixa 20"
 
 #: ardour_ui_ed.cc:334
 msgid "Toggle Record Enable Track21"
-msgstr ""
+msgstr "Comutador de gravação Faixa 21"
 
 #: ardour_ui_ed.cc:336
 msgid "Toggle Record Enable Track22"
-msgstr ""
+msgstr "Comutador de gravação Faixa 22"
 
 #: ardour_ui_ed.cc:338
 msgid "Toggle Record Enable Track23"
-msgstr ""
+msgstr "Comutador de gravação Faixa 23"
 
 #: ardour_ui_ed.cc:340
 msgid "Toggle Record Enable Track24"
-msgstr ""
+msgstr "Comutador de gravação Faixa 24"
 
 #: ardour_ui_ed.cc:342
 msgid "Toggle Record Enable Track25"
-msgstr ""
+msgstr "Comutador de gravação Faixa 25"
 
 #: ardour_ui_ed.cc:344
 msgid "Toggle Record Enable Track26"
-msgstr ""
+msgstr "Comutador de gravação Faixa 26"
 
 #: ardour_ui_ed.cc:346
 msgid "Toggle Record Enable Track27"
-msgstr ""
+msgstr "Comutador de gravação Faixa 27"
 
 #: ardour_ui_ed.cc:348
 msgid "Toggle Record Enable Track28"
-msgstr ""
+msgstr "Comutador de gravação Faixa 28"
 
 #: ardour_ui_ed.cc:350
 msgid "Toggle Record Enable Track29"
-msgstr ""
+msgstr "Comutador de gravação Faixa 29"
 
 #: ardour_ui_ed.cc:352
 msgid "Toggle Record Enable Track30"
-msgstr ""
+msgstr "Comutador de gravação Faixa 30"
 
 #: ardour_ui_ed.cc:354
 msgid "Toggle Record Enable Track31"
-msgstr ""
+msgstr "Comutador de gravação Faixa 31"
 
 #: ardour_ui_ed.cc:356
 msgid "Toggle Record Enable Track32"
-msgstr ""
+msgstr "Comutador de gravação Faixa 32"
 
 #: ardour_ui_ed.cc:361
 msgid "Percentage"
@@ -1280,7 +1246,7 @@ msgstr "Percentagem"
 
 #: ardour_ui_ed.cc:362
 msgid "Semitones"
-msgstr "Semitons"
+msgstr "Semi-tons"
 
 #: ardour_ui_ed.cc:366
 msgid "Send MTC"
@@ -1291,109 +1257,93 @@ msgid "Send MMC"
 msgstr "Enviar MMC"
 
 #: ardour_ui_ed.cc:370
-#, fuzzy
 msgid "Use MMC"
-msgstr "Enviar MMC"
+msgstr "Usar MMC"
 
 #: ardour_ui_ed.cc:372
-#, fuzzy
 msgid "Send MIDI feedback"
-msgstr "Enviar resposta a parametros MIDI"
+msgstr "Enviar controlo MIDI"
 
 #: ardour_ui_ed.cc:374
-#, fuzzy
 msgid "Use MIDI control"
-msgstr "Porta MMC"
+msgstr "Usar controlo MIDI"
 
 #: ardour_ui_ed.cc:377
-#, fuzzy
 msgid "Connect new track inputs to hardware"
-msgstr "Ligar novas faixas automaticamente"
+msgstr "Ligar entradas de faixas novas automaticamente"
 
 #: ardour_ui_ed.cc:396
-#, fuzzy
 msgid "Connect new track outputs to hardware"
-msgstr "Ligar novas faixas automaticamente"
+msgstr "Ligar saídas de faixas novas automaticamente"
 
 #: ardour_ui_ed.cc:398
-#, fuzzy
 msgid "Connect new track outputs to master"
-msgstr "ligar saídas principais automaticamente"
+msgstr "Ligar saídas principais de faixas novas a  automaticamente"
 
 #: ardour_ui_ed.cc:400
-#, fuzzy
 msgid "Manually connect new track outputs"
-msgstr "ligar saídas manualmente"
+msgstr "Ligar saídas de faixas novas manualmente"
 
 #: ardour_ui_ed.cc:405
-#, fuzzy
 msgid "Hardware monitoring"
-msgstr "Usar monitorização física"
+msgstr "Monitorização física"
 
 #: ardour_ui_ed.cc:406
-#, fuzzy
 msgid "Software monitoring"
-msgstr "Usar monitorização lógica"
+msgstr "Monitorização lógica"
 
 #: ardour_ui_ed.cc:407
-#, fuzzy
 msgid "External monitoring"
-msgstr "Usar monitorização física"
+msgstr "Monitorização externa"
 
 #. Configuration object options (i.e. not session specific)
-#: ardour_ui_ed.cc:411
 msgid "Stop plugins with transport"
 msgstr "Suspender efeitos/plug-ins com transporte"
 
 #: ardour_ui_ed.cc:412
-#, fuzzy
 msgid "Verify remove last capture"
-msgstr "Remover a última captura"
+msgstr "Verificar remoção da última captura"
 
 #: ardour_ui_ed.cc:413
 msgid "Stop recording on xrun"
-msgstr "Suspender a gravação em caso de falha sincrónica (XRUN)"
+msgstr "Suspender gravação em caso de falha sincrónica (XRUN)"
 
 #: ardour_ui_ed.cc:414
-#, fuzzy
 msgid "Stop transport at session end"
-msgstr "Suspender o transporte no final da sessão"
+msgstr "Suspender transporte no final da sessão"
 
 #: ardour_ui_ed.cc:415
 msgid "-12dB gain reduce ffwd/rewind"
-msgstr ""
+msgstr "Atenuar 12dB durante o rebobinar/avançar"
 
 #: ardour_ui_ed.cc:416
 msgid "Rec-enable stays engaged at stop"
-msgstr ""
+msgstr "Gravação permanece activa quando parar"
 
 #. session options
 #: ardour_ui_ed.cc:420
-#, fuzzy
 msgid "Do not run plugins while recording"
-msgstr "Executar efeitos/plug-ins durante a gravação"
+msgstr "Não executar efeitos/plug-ins durante a gravação"
 
 #: ardour_ui_ed.cc:423
 msgid "Latched solo"
 msgstr "Solo retido"
 
 #: ardour_ui_ed.cc:428
-#, fuzzy
 msgid "Solo in-place"
-msgstr "solo livre"
+msgstr "Solo livre"
 
 #: ardour_ui_ed.cc:430
 msgid "Solo via bus"
-msgstr "Solo por barramento"
+msgstr "Solo via barramento"
 
 #: ardour_ui_ed.cc:433
-#, fuzzy
 msgid "Automatically create crossfades"
-msgstr "Desvanecimento cruzado automático em sobreposição"
+msgstr "Criar desvanecimentos cruzados automaticamente"
 
 #: ardour_ui_ed.cc:435
 msgid "Unmute new full crossfades"
-msgstr ""
+msgstr "Desmutar desvanecimentos cruzados novos"
 
 #: ardour_ui_options.cc:406 ardour_ui_options.cc:416 ardour_ui_options.cc:483
 msgid "Internal"
@@ -1417,7 +1367,7 @@ msgstr "Mins:Segs"
 
 #: audio_clock.cc:1745
 msgid "Audio Frames"
-msgstr "Quadros Audio"
+msgstr "Quadros audio"
 
 #.
 #. Slowest = 6.6dB/sec falloff at update rate of 40ms
@@ -1489,7 +1439,7 @@ msgstr "Altura"
 
 #: audio_time_axis.cc:173
 msgid "Playlist"
-msgstr "Lista de Reprodução"
+msgstr "Lista de reprodução"
 
 #: audio_time_axis.cc:174 audio_time_axis.cc:741
 msgid "Automation"
@@ -1519,45 +1469,39 @@ msgstr "Cor"
 
 #: audio_time_axis.cc:707
 msgid "Hide all crossfades"
-msgstr ""
+msgstr "Esconder todos os desvanecimentos cruzados"
 
 #: audio_time_axis.cc:708
 msgid "Show all crossfades"
-msgstr ""
+msgstr "Mostrar todos os desvanecimentos cruzados"
 
 #: audio_time_axis.cc:712 mixer_strip.cc:1011
-#, fuzzy
 msgid "Remote Control ID"
-msgstr "remover ponto de controlo"
+msgstr "ID controlo remoto"
 
 #: audio_time_axis.cc:718
-#, fuzzy
 msgid "Show all automation"
-msgstr "Mostrar todos as automatizações"
+msgstr "Mostrar todas as automatizações"
 
 #: audio_time_axis.cc:721
-#, fuzzy
 msgid "Show existing automation"
 msgstr "Mostrar automatizações existentes"
 
 #: audio_time_axis.cc:724
-#, fuzzy
 msgid "Hide all automation"
-msgstr "Esconder todos as automatizações"
+msgstr "Esconder todas as automatizações"
 
 #: audio_time_axis.cc:729
-#, fuzzy
 msgid "Fader"
-msgstr "Desvanecimentos"
+msgstr "Desvanecimento"
 
 #: audio_time_axis.cc:734
-#, fuzzy
 msgid "Pan"
-msgstr "pan"
+msgstr "Panorama"
 
 #: audio_time_axis.cc:739
 msgid "Plugins"
-msgstr ""
+msgstr "Efeitos/plug-ins"
 
 #: audio_time_axis.cc:747
 msgid "Show waveforms"
@@ -1576,24 +1520,21 @@ msgid "Waveform"
 msgstr "Forma de onda"
 
 #: audio_time_axis.cc:771
-#, fuzzy
 msgid "Align with existing material"
-msgstr "Material existente"
+msgstr "Alinhar com material existente"
 
 #: audio_time_axis.cc:776
-#, fuzzy
 msgid "Align with capture time"
-msgstr "Tempo de captura"
+msgstr "Alinhar com tempo de gravação"
 
 #: audio_time_axis.cc:782
-#, fuzzy
 msgid "Alignment"
-msgstr "Alinhar"
+msgstr "Alinhamento"
 
 #: audio_time_axis.cc:788 editor.cc:527 editor_actions.cc:60
 #: mixer_strip.cc:1000 mixer_ui.cc:111
 msgid "Active"
-msgstr "Activar"
+msgstr "Activo"
 
 #: audio_time_axis.cc:793 editor.cc:1922 editor_actions.cc:320
 #: editor_markers.cc:508 imageframe_time_axis.cc:259 location_ui.cc:57
@@ -1613,7 +1554,6 @@ msgid "Rename"
 msgstr "Renomear"
 
 #: audio_time_axis.cc:868 audio_time_axis.cc:908
-#, fuzzy
 msgid "Name for Playlist"
 msgstr "Nome para lista de reprodução"
 
@@ -1627,7 +1567,7 @@ msgstr "ganho"
 
 #: audio_time_axis.cc:1207
 msgid "pan"
-msgstr "pan"
+msgstr "panorama"
 
 #: audio_time_axis.cc:1410 editor.cc:1483 selection.cc:634
 msgid "programming error: "
@@ -1639,11 +1579,11 @@ msgstr "Actual: %1"
 
 #: audio_time_axis.cc:1855
 msgid "New Copy"
-msgstr "Nova Cópia"
+msgstr "Nova cópia"
 
 #: audio_time_axis.cc:1857
 msgid "Clear Current"
-msgstr "Limpar Actual"
+msgstr "Apagar actual"
 
 #: audio_time_axis.cc:1859 editor.cc:2024 editor.cc:2100
 msgid "Select"
@@ -1667,22 +1607,19 @@ msgstr "apagar"
 
 #: automation_time_axis.cc:75
 msgid "track height"
-msgstr ""
+msgstr "altura da faixa"
 
 #: automation_time_axis.cc:76
-#, fuzzy
 msgid "automation state"
-msgstr "ponto de automatização de panorâmica"
+msgstr "estado de automatização"
 
 #: automation_time_axis.cc:77
-#, fuzzy
 msgid "clear track"
-msgstr "apagar intervalos"
+msgstr "apagar faixa"
 
 #: automation_time_axis.cc:78
-#, fuzzy
 msgid "hide track"
-msgstr "retocar faixa"
+msgstr "esconder faixa"
 
 #: automation_time_axis.cc:184 automation_time_axis.cc:213
 #: automation_time_axis.cc:461
@@ -1693,21 +1630,19 @@ msgstr ""
 #: automation_time_axis.cc:465 editor.cc:2001 editor.cc:2082 gain_meter.cc:174
 #: panner_ui.cc:91 plugin_ui.cc:395 plugin_ui.cc:637 sfdb_ui.cc:56
 msgid "Play"
-msgstr "Reproduzir"
+msgstr "Reprodução"
 
 #: automation_time_axis.cc:188 automation_time_axis.cc:235
 #: automation_time_axis.cc:469 gain_meter.cc:176 panner_ui.cc:93
 #: plugin_ui.cc:398 plugin_ui.cc:639
-#, fuzzy
 msgid "Write"
-msgstr "escrita"
+msgstr "Escrita"
 
 #: automation_time_axis.cc:190 automation_time_axis.cc:246
 #: automation_time_axis.cc:473 gain_meter.cc:178 panner_ui.cc:95
 #: plugin_ui.cc:401 plugin_ui.cc:641
-#, fuzzy
 msgid "Touch"
-msgstr "tocar"
+msgstr "Tocar"
 
 #: automation_time_axis.cc:257 option_editor.cc:183 option_editor.cc:189
 #: plugin_ui.cc:404
@@ -1727,17 +1662,16 @@ msgid "Clear"
 msgstr "Apagar"
 
 #: automation_time_axis.cc:477
-#, fuzzy
 msgid "State"
-msgstr "Início"
+msgstr "Estado"
 
 #: canvas-imageframe.c:104
 msgid "pixbuf"
-msgstr ""
+msgstr "imagem"
 
 #: canvas-imageframe.c:105
 msgid "the pixbuf"
-msgstr ""
+msgstr "a imagem"
 
 #: canvas-imageframe.c:110
 msgid "x"
@@ -1745,7 +1679,7 @@ msgstr ""
 
 #: canvas-imageframe.c:111 canvas-simpleline.c:111 canvas-simplerect.c:107
 msgid "x coordinate of upper left corner of rect"
-msgstr ""
+msgstr "coordenada x do canto superior esquerdo do rectângulo"
 
 #: canvas-imageframe.c:120
 msgid "y"
@@ -1753,42 +1687,39 @@ msgstr ""
 
 #: canvas-imageframe.c:121 canvas-simpleline.c:121 canvas-simplerect.c:117
 msgid "y coordinate of upper left corner of rect "
-msgstr ""
+msgstr "coordenada y do canto superior esquerdo do rectângulo"
 
 #: canvas-imageframe.c:129
-#, fuzzy
 msgid "width"
-msgstr "escrita"
+msgstr "largura"
 
 #: canvas-imageframe.c:130
 msgid "the width"
-msgstr ""
+msgstr "a largura"
 
 #: canvas-imageframe.c:139
 msgid "drawwidth"
-msgstr ""
+msgstr "largura visível"
 
 #: canvas-imageframe.c:140
 msgid "drawn width"
-msgstr ""
+msgstr "largura visível"
 
 #: canvas-imageframe.c:148
-#, fuzzy
 msgid "height"
-msgstr "Altura"
+msgstr "altura"
 
 #: canvas-imageframe.c:149
-#, fuzzy
 msgid "the height"
-msgstr "Altura"
+msgstr "a altura"
 
 #: canvas-imageframe.c:157
 msgid "anchor"
-msgstr ""
+msgstr "referência"
 
 #: canvas-imageframe.c:158
 msgid "the anchor"
-msgstr ""
+msgstr "a referência"
 
 #: canvas-simpleline.c:110 canvas-simplerect.c:106
 msgid "x1"
@@ -1804,7 +1735,7 @@ msgstr ""
 
 #: canvas-simpleline.c:132 canvas-simplerect.c:128
 msgid "x coordinate of lower right corner of rect"
-msgstr ""
+msgstr "coordenada x do canto inferior direito do rectângulo"
 
 #: canvas-simpleline.c:141 canvas-simplerect.c:137
 msgid "y2"
@@ -1812,121 +1743,107 @@ msgstr ""
 
 #: canvas-simpleline.c:142 canvas-simplerect.c:138
 msgid "y coordinate of lower right corner of rect "
-msgstr ""
+msgstr "coordenada x do canto inferior direito do rectângulo"
 
 #: canvas-simpleline.c:150
 msgid "color rgba"
-msgstr ""
+msgstr "cor (rgba)"
 
 #: canvas-simpleline.c:151
-#, fuzzy
 msgid "color of line"
-msgstr "linear"
+msgstr "cor da linha"
 
 #: canvas-simplerect.c:148
 msgid "outline pixels"
-msgstr ""
+msgstr "contorno"
 
 #: canvas-simplerect.c:149
 msgid "width in pixels of outline"
-msgstr ""
+msgstr "largura do contorno"
 
 #: canvas-simplerect.c:159
 msgid "outline what"
-msgstr ""
+msgstr "contornar"
 
 #: canvas-simplerect.c:160
 msgid "which boundaries to outline (mask)"
-msgstr ""
+msgstr "contornos"
 
 #: canvas-simplerect.c:171
-#, fuzzy
 msgid "fill"
-msgstr "ficheiro"
+msgstr "preencher"
 
 #: canvas-simplerect.c:172
-#, fuzzy
 msgid "fill rectangle"
-msgstr "preencher selecção"
+msgstr "preencher rectângulo"
 
 #: canvas-simplerect.c:179
 msgid "draw"
-msgstr ""
+msgstr "desenhar"
 
 #: canvas-simplerect.c:180
-#, fuzzy
 msgid "draw rectangle"
-msgstr " intervalo"
+msgstr "desenhar rectângulo"
 
 #: canvas-simplerect.c:188
 msgid "outline color rgba"
-msgstr ""
+msgstr "cor de contorno (rgba)"
 
 #: canvas-simplerect.c:189
 msgid "color of outline"
-msgstr ""
+msgstr "cor de contorno"
 
 #: canvas-simplerect.c:199
 msgid "fill color rgba"
-msgstr ""
+msgstr "cor de preenchimento (rgba)"
 
 #: canvas-simplerect.c:200
 msgid "color of fill"
-msgstr ""
+msgstr "cor de preenchimento"
 
 #: color_manager.cc:40
-#, fuzzy
 msgid "Object"
-msgstr "objecto"
+msgstr "Objecto"
 
 #: color_manager.cc:78
-#, fuzzy
 msgid "cannot open color definition file %1: %2"
-msgstr ""
-"Editor: não foi possível abrir o ficheiro de imagem inicial \"%1\" (%2)"
+msgstr "não foi possível abrir o ficheiro de definição de cores %1: %2"
 
 #: crossfade_edit.cc:75
 msgid "ardour: x-fade edit"
 msgstr "ardour: desvanecimento cruzado"
 
 #: crossfade_edit.cc:79 panner_ui.cc:443
-#, fuzzy
 msgid "Reset"
-msgstr "reiniciar"
+msgstr "Reiniciar"
 
 #: crossfade_edit.cc:80
-#, fuzzy
 msgid "Fade"
-msgstr "Desvanecimentos"
+msgstr "Desvanecimento"
 
 #: crossfade_edit.cc:81
-#, fuzzy
 msgid "Out (dry)"
-msgstr "saída (limpa)"
+msgstr "Saída (limpa)"
 
 #: crossfade_edit.cc:82
-#, fuzzy
 msgid "Out"
 msgstr "Saída"
 
 #: crossfade_edit.cc:83
-#, fuzzy
 msgid "In (dry)"
-msgstr "entrada (limpa)"
+msgstr "Entrada (limpa)"
 
 #: crossfade_edit.cc:84
 msgid "In"
-msgstr ""
+msgstr "Entrada"
 
 #: crossfade_edit.cc:86
-#, fuzzy
 msgid "With Pre-roll"
-msgstr "com pré-batimento"
+msgstr "Com pré-batimento"
 
 #: crossfade_edit.cc:87
-#, fuzzy
 msgid "With Post-roll"
-msgstr "com pós-batimento"
+msgstr "Com pós-batimento"
 
 #: crossfade_edit.cc:95
 msgid "Fade In"
@@ -2012,11 +1929,11 @@ msgstr "Compassos"
 
 #: editor.cc:124 editor.cc:3647
 msgid "Marks"
-msgstr "Marcas"
+msgstr "Marcadores"
 
 #: editor.cc:125 editor.cc:144 editor.cc:3649 editor.cc:3715
 msgid "Edit Cursor"
-msgstr "Cursor de Edição"
+msgstr "Cursor de edição"
 
 #: editor.cc:126 editor.cc:3651
 msgid "Region starts"
@@ -2053,7 +1970,7 @@ msgstr "Centro"
 
 #: editor.cc:143 editor.cc:3713
 msgid "Playhead"
-msgstr "Cursor de Reprodução"
+msgstr "Cursor de reprodução"
 
 #. time display buttons
 #: editor.cc:186
@@ -2074,15 +1991,15 @@ msgstr "VUímetro"
 
 #: editor.cc:192 editor_rulers.cc:380
 msgid "Location Markers"
-msgstr "Localizações"
+msgstr "Marcadores de localização"
 
 #: editor.cc:193 editor_rulers.cc:386
 msgid "Range Markers"
-msgstr "Intervalos"
+msgstr "Marcadores de intervalo"
 
 #: editor.cc:194 editor_rulers.cc:392
 msgid "Loop/Punch Ranges"
-msgstr "Ciclos/Inserção"
+msgstr "Ciclos/inserção"
 
 #: editor.cc:216
 msgid "range"
@@ -2102,7 +2019,7 @@ msgstr ""
 
 #: editor.cc:221
 msgid "listen"
-msgstr ""
+msgstr "ouvir"
 
 #: editor.cc:223
 msgid "mode"
@@ -2114,7 +2031,7 @@ msgstr "automatização"
 
 #: editor.cc:226
 msgid "Edit Mode"
-msgstr "Modo de Edição"
+msgstr "Modo de edição"
 
 #: editor.cc:227 editor_actions.cc:284
 msgid "Snap To"
@@ -2122,11 +2039,11 @@ msgstr "Ajustar a"
 
 #: editor.cc:228
 msgid "Snap Mode"
-msgstr "Modo de Ajuste"
+msgstr "Modo de ajuste"
 
 #: editor.cc:229
 msgid "Zoom Focus"
-msgstr "Zoom(focagem)"
+msgstr "Zoom (focagem)"
 
 #. </CMT Additions>
 #. nudge
@@ -2136,44 +2053,40 @@ msgstr "Retocar"
 
 #: editor.cc:470
 msgid "Zoom in"
-msgstr "Zoom(+)"
+msgstr "Zoom (+)"
 
 #: editor.cc:471
 msgid "Zoom out"
-msgstr "Zoom(-)"
+msgstr "Zoom (-)"
 
 #: editor.cc:474
 msgid "Zoom to session"
-msgstr "Zoom(sessão)"
+msgstr "Zoom (sessão)"
 
 #: editor.cc:489
 msgid "Zoom Span"
-msgstr "Zoom(alcance)"
+msgstr "Zoom (alcance)"
 
 #: editor.cc:502 editor.cc:528 editor_actions.cc:62 mixer_ui.cc:86
 #: mixer_ui.cc:112
-#, fuzzy
 msgid "Visible"
-msgstr "visível"
+msgstr "Visível"
 
 #: editor.cc:503 editor.cc:526
-#, fuzzy
 msgid "Name"
-msgstr "Quadros"
+msgstr "Nome"
 
 #: editor.cc:602 editor.cc:669
-#, fuzzy
 msgid "Regions"
-msgstr "Região"
+msgstr "Regiões"
 
 #: editor.cc:642 editor.cc:681
 msgid "Chunks"
 msgstr "Trechos"
 
 #: editor.cc:672
-#, fuzzy
 msgid "Tracks/Busses"
-msgstr "Faixas/Barramentos"
+msgstr "Faixas/barramentos"
 
 #: editor.cc:675
 msgid "Snapshots"
@@ -2244,7 +2157,7 @@ msgstr "Rápido"
 
 #: editor.cc:1462 editor.cc:1479 editor_actions.cc:381
 msgid "Fastest"
-msgstr "Mais Rápido"
+msgstr "Mais rápido"
 
 #: editor.cc:1589 editor.cc:1597
 msgid "Freeze"
@@ -2255,9 +2168,8 @@ msgid "Unfreeze"
 msgstr "Descongelar"
 
 #: editor.cc:1762 editor.cc:1857
-#, fuzzy
 msgid "Unmute"
-msgstr "mudo"
+msgstr "Desmudo"
 
 #. non-operative menu items for menu bar
 #. show editors
@@ -2269,14 +2181,13 @@ msgstr "Editar"
 
 #: editor.cc:1771
 msgid "Convert to short"
-msgstr ""
+msgstr "Converter para curto"
 
 #: editor.cc:1773
 msgid "Convert to full"
-msgstr ""
+msgstr "Converter para todo"
 
 #: editor.cc:1784
-#, fuzzy
 msgid "Crossfade"
 msgstr "Desvanecimento cruzado"
 
@@ -2285,14 +2196,12 @@ msgid "Popup region editor"
 msgstr "Editor de região"
 
 #: editor.cc:1828
-#, fuzzy
 msgid "Raise to top layer"
-msgstr "Elevar a região para o nível de topo"
+msgstr "Elevar região para o nível de topo"
 
 #: editor.cc:1829
-#, fuzzy
 msgid "Lower to bottom layer"
-msgstr "Descer a região para o nível de fundo"
+msgstr "Descer região para o nível de fundo"
 
 #: editor.cc:1831
 msgid "Define sync point"
@@ -2303,14 +2212,12 @@ msgid "Remove sync point"
 msgstr "Remover ponto de sincronia"
 
 #: editor.cc:1837
-#, fuzzy
 msgid "Bounce"
-msgstr "Rebater intervalo"
+msgstr "Regravar"
 
 #: editor.cc:1840
-#, fuzzy
 msgid "Analyze region"
-msgstr "Reproduzir Região"
+msgstr "Analizar região"
 
 #: editor.cc:1852
 msgid "Lock"
@@ -2326,12 +2233,11 @@ msgstr "Posição original"
 
 #: editor.cc:1869
 msgid "Toggle envelope visibility"
-msgstr ""
+msgstr "Comutar visibilidade de envolvente"
 
 #: editor.cc:1870
-#, fuzzy
 msgid "Toggle envelope active"
-msgstr "Activação"
+msgstr "Comutar activação de envolvente"
 
 #: editor.cc:1874
 msgid "DeNormalize"
@@ -2347,14 +2253,12 @@ msgstr "Inverter"
 
 #. range related stuff
 #: editor.cc:1885
-#, fuzzy
 msgid "Add Range Markers"
-msgstr "Intervalos"
+msgstr "Acrescentar marcadores de intervalo"
 
 #: editor.cc:1886
-#, fuzzy
 msgid "Set Range"
-msgstr "Separar Intervalo"
+msgstr "Estabelecer intervalo"
 
 #: editor.cc:1895
 msgid "Nudge fwd"
@@ -2366,11 +2270,11 @@ msgstr "Retocar p/trás"
 
 #: editor.cc:1897
 msgid "Nudge fwd by capture offset"
-msgstr "Retocar p/frente captura"
+msgstr "Retocar p/frente (gravação)"
 
 #: editor.cc:1898
 msgid "Nudge bwd by capture offset"
-msgstr "Retocar p/trás captura"
+msgstr "Retocar p/trás (gravação)"
 
 #: editor.cc:1907
 msgid "Start to edit cursor"
@@ -2399,7 +2303,7 @@ msgstr "Duplicar"
 
 #: editor.cc:1920
 msgid "Fill Track"
-msgstr "Preencher Faixa"
+msgstr "Preencher faixa"
 
 #: editor.cc:1924
 msgid "Destroy"
@@ -2414,49 +2318,40 @@ msgid "Loop range"
 msgstr "Intervalo cíclico"
 
 #: editor.cc:1959
-#, fuzzy
 msgid "Analyze range"
-msgstr "Reproduzir intervalo"
+msgstr "Analizar intervalo"
 
 #: editor.cc:1963
-#, fuzzy
 msgid "Separate range to track"
-msgstr "Separar Intervalo"
+msgstr "Separar intervalo em faixa"
 
 #: editor.cc:1964
-#, fuzzy
 msgid "Separate range to region list"
-msgstr "seleccionar regiões"
+msgstr "Separar intervalo em regiões"
 
 #: editor.cc:1967
-#, fuzzy
 msgid "Select all in range"
-msgstr "Seleccionar tudo na faixa"
+msgstr "Seleccionar todo intervalo"
 
 #: editor.cc:1969 editor.cc:2014
-#, fuzzy
 msgid "Set range to loop range"
-msgstr "Seleccionar intervalo de ciclo"
+msgstr "Estabelecer intervalo cíclico"
 
 #: editor.cc:1970 editor.cc:2015
-#, fuzzy
 msgid "Set range to punch range"
-msgstr "Seleccionar intervalo de inserção"
+msgstr "Estabelecer intervalo de inserção"
 
 #: editor.cc:1972
-#, fuzzy
 msgid "Crop region to range"
-msgstr "Cortar Regão para intervalo"
+msgstr "Cortar região no intervalo"
 
 #: editor.cc:1973
-#, fuzzy
 msgid "Fill range with region"
-msgstr "Preencher intervalo c/Região"
+msgstr "Preencher intervalo com região"
 
 #: editor.cc:1974
-#, fuzzy
 msgid "Duplicate range"
-msgstr "Duplicar"
+msgstr "Duplicar intervalo"
 
 #: editor.cc:1975
 msgid "Create chunk from range"
@@ -2464,12 +2359,11 @@ msgstr "Criar trecho desde intervalo"
 
 #: editor.cc:1977
 msgid "Bounce range"
-msgstr "Rebater intervalo"
+msgstr "Regravar intervalo"
 
 #: editor.cc:1978
-#, fuzzy
 msgid "Export range"
-msgstr "Exportar região"
+msgstr "Exportar intervalo"
 
 #: editor.cc:1980
 msgid "Range"
@@ -2484,13 +2378,12 @@ msgid "Play from start"
 msgstr "Reproduzir desde o início"
 
 #: editor.cc:1997
-#, fuzzy
 msgid "Play region"
-msgstr "Reproduzir Região"
+msgstr "Reproduzir região"
 
 #: editor.cc:1999
 msgid "Loop Region"
-msgstr "Região Cíclica"
+msgstr "Reproduzir região em ciclo"
 
 #: editor.cc:2009 editor.cc:2090
 msgid "Select All in track"
@@ -2501,39 +2394,32 @@ msgid "Select All"
 msgstr "Seleccionar tudo"
 
 #: editor.cc:2011 editor.cc:2092
-#, fuzzy
 msgid "Invert selection in track"
-msgstr "Inverter na faixa"
+msgstr "Inverter selecção na faixa"
 
 #: editor.cc:2012 editor.cc:2093
-#, fuzzy
 msgid "Invert selection"
-msgstr "mover selecção"
+msgstr "Inverter selecção"
 
 #: editor.cc:2017 editor.cc:2095
-#, fuzzy
 msgid "Select all after edit cursor"
-msgstr "Do início ao cursor de edição"
+msgstr "Seleccionar tudo após o cursor de edição"
 
 #: editor.cc:2018 editor.cc:2096
-#, fuzzy
 msgid "Select all before edit cursor"
-msgstr "Do início ao cursor de edição"
+msgstr "Seleccionar tudo antes do cursor de edição"
 
 #: editor.cc:2019 editor.cc:2097
-#, fuzzy
 msgid "Select all after playhead"
-msgstr "Desde cursor de reprodução"
+msgstr "Seleccionar tudo após o cursor de reprodução"
 
 #: editor.cc:2020 editor.cc:2098
-#, fuzzy
 msgid "Select all before playhead"
-msgstr "Desde cursor de reprodução"
+msgstr "Seleccionar tudo antes do cursor de reprodução"
 
 #: editor.cc:2021
-#, fuzzy
 msgid "Select all between cursors"
-msgstr "Do início ao cursor de edição"
+msgstr "Seleccionar tudo entre cursores"
 
 #. standard editing stuff
 #: editor.cc:2032 editor.cc:2108 editor.cc:3483 editor_actions.cc:214
@@ -2547,14 +2433,12 @@ msgid "Copy"
 msgstr "Copiar"
 
 #: editor.cc:2034
-#, fuzzy
 msgid "Paste at edit cursor"
-msgstr "Do início ao cursor de edição"
+msgstr "Colar no cursor de edição"
 
 #: editor.cc:2035
-#, fuzzy
 msgid "Paste at mouse"
-msgstr "usar saídas principais"
+msgstr "Colar no cursor do rato"
 
 #: editor.cc:2039 editor.cc:3490
 msgid "Align"
@@ -2562,20 +2446,19 @@ msgstr "Alinhar"
 
 #: editor.cc:2040 editor.cc:3492
 msgid "Align Relative"
-msgstr "Alinhar Relativamente"
+msgstr "Alinhar relativamente"
 
 #: editor.cc:2044
 msgid "Insert chunk"
 msgstr "Inserir trecho"
 
 #: editor.cc:2051
-#, fuzzy
 msgid "Insert Selected Region"
-msgstr "seleccionar regiões"
+msgstr "Inserir regiões seleccionadas"
 
 #: editor.cc:2052
 msgid "Insert Existing Audio"
-msgstr ""
+msgstr "Inserir audio existente"
 
 #: editor.cc:2061 editor.cc:2117
 msgid "Nudge entire track fwd"
@@ -2618,9 +2501,8 @@ msgid "stretch/shrink regions"
 msgstr "alongar/estreitar regiões"
 
 #: editor.cc:2635
-#, fuzzy
 msgid "listen to specific regions"
-msgstr "seleccionar regiões"
+msgstr "ouvir regiões específicas"
 
 #: editor.cc:2746
 msgid "Start:"
@@ -2652,12 +2534,11 @@ msgstr "Refazer (%1)"
 
 #: editor.cc:3506
 msgid "... as new track"
-msgstr ""
+msgstr "... como faixa nova"
 
 #: editor.cc:3507
-#, fuzzy
 msgid "... as new region"
-msgstr "alinhar região"
+msgstr "... como região nova"
 
 #: editor.cc:3509
 msgid "Import audio (copy)"
@@ -2678,17 +2559,14 @@ msgid ""
 "If deleted, audio files used by it alone by will cleaned."
 msgstr ""
 "A lista de reprodução %1 não se encontra actualmente em uso.\n"
-"Se for mantida assim, não serão elimnados os ficheiros de audio por ela "
-"empregues.\n"
-"Se for eliminada, todos os ficheiros de audio serão respectivamente "
-"eliminados."
+"Se for mantida assim, não serão eliminados os ficheiros de audio por ela empregues.\n"
+"Se for eliminada, todos os ficheiros de audio serão respectivamente eliminados."
 
 #: editor.cc:4030
 msgid "Delete playlist"
 msgstr "Eliminar lista de reprodução"
 
 #: editor.cc:4031
-#, fuzzy
 msgid "Keep playlist"
 msgstr "Manter lista de reprodução"
 
@@ -2700,642 +2578,543 @@ msgid "Cancel"
 msgstr "Cancelar"
 
 #: editor.cc:4199
-#, fuzzy
 msgid "new playlists"
-msgstr "Manter lista de reprodução"
+msgstr "nova lista de reprodução"
 
 #: editor.cc:4207
-#, fuzzy
 msgid "copy playlists"
-msgstr "Manter lista de reprodução"
+msgstr "copiar lista de reprodução"
 
 #: editor.cc:4215
-#, fuzzy
 msgid "clear playlists"
-msgstr "limpar lista de reprodução"
+msgstr "apagar lista de reprodução"
 
 #: editor_actions.cc:28
-#, fuzzy
 msgid "Select regions"
-msgstr "seleccionar regiões"
+msgstr "Seleccionar regiões"
 
 #: editor_actions.cc:29
-#, fuzzy
 msgid "Select range operations"
-msgstr "seleccionar regiões"
+msgstr "Seleccionar regiões"
 
 #: editor_actions.cc:30
-#, fuzzy
 msgid "Move edit cursor"
-msgstr "Do início ao cursor de edição"
+msgstr "Mover cursor de edição"
 
 #: editor_actions.cc:31
-#, fuzzy
 msgid "Region operations"
-msgstr "Regiões/criação"
+msgstr "Operações em regiões"
 
 #: editor_actions.cc:32
 msgid "Tools"
-msgstr ""
+msgstr "Ferramentas"
 
 #: editor_actions.cc:33
 msgid "View"
-msgstr ""
+msgstr "Ver"
 
 #: editor_actions.cc:34
-#, fuzzy
 msgid "ZoomFocus"
-msgstr "Zoom(focagem)"
+msgstr "Zoom (focagem)"
 
 #: editor_actions.cc:35
-#, fuzzy
 msgid "Meter hold"
-msgstr "VUímetro"
+msgstr "VUímetro (persistência)"
 
 #: editor_actions.cc:36
 msgid "Meter falloff"
-msgstr ""
+msgstr "VUímetro (decaimento)"
 
 #: editor_actions.cc:38
-#, fuzzy
 msgid "Crossfades"
-msgstr "Desvanecimento cruzado"
+msgstr "Desvanecimentos cruzados"
 
 #: editor_actions.cc:39
-#, fuzzy
 msgid "Monitoring"
-msgstr "Usar monitorização física"
+msgstr "Monitorização"
 
 #: editor_actions.cc:40
-#, fuzzy
 msgid "Autoconnect"
-msgstr "Ligar"
+msgstr "Auto-ligar"
 
 #: editor_actions.cc:41
-#, fuzzy
 msgid "Layering"
-msgstr "Nível"
+msgstr "Nivelar"
 
 #: editor_actions.cc:42
-#, fuzzy
 msgid "Metering"
 msgstr "VUímetro"
 
 #: editor_actions.cc:43
 msgid "Fall off rate"
-msgstr ""
+msgstr "Taxa de decaimento"
 
 #: editor_actions.cc:44
 msgid "Hold Time"
-msgstr ""
+msgstr "Tempo de persistência"
 
 #: editor_actions.cc:45
 msgid "Add Existing Audio"
-msgstr ""
+msgstr "Acrescenter audio existente"
 
 #. add named actions for the editor
 #: editor_actions.cc:50
-#, fuzzy
 msgid "Show Editor Mixer"
-msgstr "Mostrar painéis de mistura de todas as faixas audio"
+msgstr "Mostrar painel de mistura"
 
 #: editor_actions.cc:55
-#, fuzzy
 msgid "Span Entire Overlap"
-msgstr "Elevar a região em um nível"
+msgstr "Abranger toda a sobreposição"
 
 #: editor_actions.cc:57 editor_actions.cc:384
-#, fuzzy
 msgid "Short"
-msgstr "porta"
+msgstr "Curto"
 
 #: editor_actions.cc:64
 msgid "Created Automatically"
-msgstr ""
+msgstr "Criado automaticamente"
 
 #: editor_actions.cc:67
 msgid "Playhead to Next Region Start"
-msgstr ""
+msgstr "Reprodução ao início da próxima região"
 
 #: editor_actions.cc:69
 msgid "Playhead to Next Region End"
-msgstr ""
+msgstr "Reprodução ao final da próxima região"
 
 #: editor_actions.cc:71
 msgid "Playhead to Next Region Sync"
-msgstr ""
+msgstr "Reprodução síncrona com a próxima região"
 
 #: editor_actions.cc:74
 msgid "Playhead to Previous Region Start"
-msgstr ""
+msgstr "Reprodução ao início da região anterior"
 
 #: editor_actions.cc:76
 msgid "Playhead to Previous Region End"
-msgstr ""
+msgstr "Reprodução ao final da região anterior"
 
 #: editor_actions.cc:78
 msgid "Playhead to Previous Region Sync"
-msgstr ""
+msgstr "Reprodução sincronizada com a região anterior"
 
 #: editor_actions.cc:81
-#, fuzzy
 msgid "Edit Cursor to Next Region Start"
-msgstr "Do cursor de edição ao final"
+msgstr "Edição ao início da próxima região"
 
 #: editor_actions.cc:83
-#, fuzzy
 msgid "Edit Cursor to Next Region End"
-msgstr "Do cursor de edição ao final"
+msgstr "Edição ao final da próxima região"
 
 #: editor_actions.cc:85
-#, fuzzy
 msgid "Edit Cursor to Next Region Sync"
-msgstr "Do cursor de edição ao final"
+msgstr "Edição sincronizada com a próxima região"
 
 #: editor_actions.cc:88
 msgid "Edit Cursor to Previous Region Start"
-msgstr ""
+msgstr "Edição ao início da região anterior"
 
 #: editor_actions.cc:90
-#, fuzzy
 msgid "Edit Cursor to Previous Region End"
-msgstr "Do cursor de edição ao final"
+msgstr "Edição ao final da região anterior"
 
 #: editor_actions.cc:92
-#, fuzzy
 msgid "Edit Cursor to Previous Region Sync"
-msgstr "Do cursor de edição ao final"
+msgstr "Edição sincronizada com região anterior"
 
 #: editor_actions.cc:95
 msgid "Playhead to Range Start"
-msgstr ""
+msgstr "Reprodução no início do intervalo"
 
 #: editor_actions.cc:97
-#, fuzzy
 msgid "Playhead to Range End"
-msgstr "Reproduzir intervalo cíclico"
+msgstr "Reprodução no final do intervalo"
 
 #: editor_actions.cc:100
-#, fuzzy
 msgid "Edit Cursor to Range Start"
-msgstr "Do cursor de edição ao final"
+msgstr "Edição no início do intervalo"
 
 #: editor_actions.cc:102
-#, fuzzy
 msgid "Edit Cursor to Range End"
-msgstr "Do cursor de edição ao final"
+msgstr "Edição no final do intervalo"
 
 #: editor_actions.cc:105 editor_ops.cc:1363
-#, fuzzy
 msgid "select all"
-msgstr "Seleccionar tudo"
+msgstr "seleccionar tudo"
 
 #: editor_actions.cc:107
-#, fuzzy
 msgid "Select All After Edit Cursor"
-msgstr "sincronizar pelo cursor de edição"
+msgstr "Seleccionar tudo após o cursor de edição"
 
 #: editor_actions.cc:109
 msgid "Select All Before Edit Cursor"
-msgstr ""
+msgstr "Seleccionar tudo antes do cursor de edição"
 
 #: editor_actions.cc:112
-#, fuzzy
 msgid "Select All After Playhead"
-msgstr "Desde cursor de reprodução"
+msgstr "Seleccionar tudo após o cursor de reprodução"
 
 #: editor_actions.cc:114
-#, fuzzy
 msgid "Select All Before Playhead"
-msgstr "Desde cursor de reprodução"
+msgstr "Seleccionar tudo antes do cursor de reprodução"
 
 #: editor_actions.cc:116
-#, fuzzy
 msgid "Select All Between Cursors"
-msgstr "sincronizar pelo cursor de edição"
+msgstr "Seleccionar tudo entre cursores"
 
 #: editor_actions.cc:119
-#, fuzzy
 msgid "Select All in Punch Range"
-msgstr "Seleccionar Intervalo de Inserção"
+msgstr "Seleccionar tudo no intervalo de inserção"
 
 #: editor_actions.cc:121
-#, fuzzy
 msgid "Select All in Loop Range"
-msgstr "Seleccionar intervalo de ciclo"
+msgstr "Seleccionar tudo no intervalo de ciclo"
 
 #: editor_actions.cc:124
 msgid "Jump Forward to Mark"
-msgstr ""
+msgstr "Saltar marcador p/frente"
 
 #: editor_actions.cc:126
 msgid "Jump Backward to Mark"
-msgstr ""
+msgstr "Saltar marcador p/trás"
 
 #: editor_actions.cc:128
-#, fuzzy
 msgid "Add Location from Playhead"
-msgstr "Desde cursor de reprodução"
+msgstr "Acrescentar localização no cursor de reprodução"
 
 #: editor_actions.cc:131
-#, fuzzy
 msgid "Nudge Forward"
-msgstr "retocar p/frente"
+msgstr "Retocar p/frente"
 
 #: editor_actions.cc:133
-#, fuzzy
 msgid "Nudge Next Forward"
-msgstr "retocar p/frente"
+msgstr "Retocar seguinte p/frente"
 
 #: editor_actions.cc:135
-#, fuzzy
 msgid "Nudge Backward"
 msgstr "Retocar p/trás"
 
 #: editor_actions.cc:137
-#, fuzzy
 msgid "Nudge Next Backward"
-msgstr "Retocar toda a faixa p/frente"
+msgstr "Retocar seguinte p/trás"
 
 #: editor_actions.cc:140
-#, fuzzy
 msgid "Zoom Out"
-msgstr "Zoom(-)"
+msgstr "Zoom (-)"
 
 #: editor_actions.cc:142
-#, fuzzy
 msgid "Zoom In"
-msgstr "Zoom(+)"
+msgstr "Zoom (+)"
 
 #: editor_actions.cc:144
-#, fuzzy
 msgid "Zoom to Session"
-msgstr "Zoom(sessão)"
+msgstr "Zoom (sessão)"
 
 #: editor_actions.cc:147
-#, fuzzy
 msgid "Scroll Tracks Up"
-msgstr "Preencher Faixa"
+msgstr "Rolar faixas p/cima"
 
 #: editor_actions.cc:149
 msgid "Scroll Tracks Down"
-msgstr ""
+msgstr "Rolar faixas p/baixo"
 
 #: editor_actions.cc:151
-#, fuzzy
 msgid "Step Tracks Up"
-msgstr "retocar faixa"
+msgstr "Passar faixas p/cima"
 
 #: editor_actions.cc:153
 msgid "Step Tracks Down"
-msgstr ""
+msgstr "Passar faixas p/baixo"
 
 #: editor_actions.cc:156
 msgid "Scroll Backward"
-msgstr ""
+msgstr "Rolar p/trás"
 
 #: editor_actions.cc:158
 msgid "Scroll Forward"
-msgstr ""
+msgstr "Rolar p/frente"
 
 #: editor_actions.cc:160
 msgid "goto"
-msgstr ""
+msgstr "ir para"
 
 #: editor_actions.cc:162
-#, fuzzy
 msgid "Center Playhead"
-msgstr "Cursor de Reprodução"
+msgstr "Centrar cursor de reprodução"
 
 #: editor_actions.cc:164
-#, fuzzy
 msgid "Center Edit Cursor"
-msgstr "Cursor de Edição"
+msgstr "Centrar cursor de edição"
 
 #: editor_actions.cc:166
-#, fuzzy
 msgid "Playhead Forward"
-msgstr "Cursor de Reprodução"
+msgstr "Cursor de reprodução p/frente"
 
 #: editor_actions.cc:168
-#, fuzzy
 msgid "Playhead Backward"
-msgstr "Cursor de Reprodução"
+msgstr "Cursor de reprodução p/trás"
 
 #: editor_actions.cc:170
-#, fuzzy
 msgid "Playhead to Edit"
-msgstr "Cursor de Reprodução"
+msgstr "Cursor de reprodução p/edição"
 
 #: editor_actions.cc:172
-#, fuzzy
 msgid "Edit to Playhead"
-msgstr "Desde cursor de reprodução"
+msgstr "Cursor de edição p/reprodução"
 
 #: editor_actions.cc:175
-#, fuzzy
 msgid "Align Regions Start"
-msgstr "Inícios de região"
+msgstr "Alinhar regiões pelo início"
 
 #: editor_actions.cc:177
-#, fuzzy
 msgid "Align Regions Start Relative"
-msgstr "alinhar selecção (relativamente)"
+msgstr "Alinhar regiões pelo início (relativamente)"
 
 #: editor_actions.cc:179
-#, fuzzy
 msgid "Align Regions End"
-msgstr "alinhar região"
+msgstr "Alinhar regiões pelo final"
 
 #: editor_actions.cc:181
-#, fuzzy
 msgid "Align Regions End Relative"
-msgstr "Alinhar Relativamente"
+msgstr "Alinhar regiões pelo início (relativamente)"
 
 #: editor_actions.cc:184
-#, fuzzy
 msgid "Align Regions Sync"
-msgstr "alinhar região"
+msgstr "Alinhar regiões sincronizadas"
 
 #: editor_actions.cc:186
-#, fuzzy
 msgid "Align Regions Sync Relative"
-msgstr "Alinhar Relativamente"
+msgstr "Alinhar regiões sincronizadas (relativamente)"
 
 #: editor_actions.cc:189
-#, fuzzy
 msgid "Audition at Mouse"
-msgstr "Audição"
+msgstr "Ouvir ao cursor do rato"
 
 #: editor_actions.cc:191
-#, fuzzy
 msgid "Brush at Mouse"
-msgstr "usar saídas principais"
+msgstr "Varrer ao cursor do rato"
 
 #: editor_actions.cc:193
-#, fuzzy
 msgid "Set Edit Cursor"
-msgstr "Cursor de Edição"
+msgstr "Estabelecer cursor de edição"
 
 #: editor_actions.cc:195
-#, fuzzy
 msgid "Mute/Unmute Region"
-msgstr "Criar Região"
+msgstr "Comutar região"
 
 #: editor_actions.cc:197
-#, fuzzy
 msgid "Set Playhead"
-msgstr "Cursor de Reprodução"
+msgstr "Estabelecer cursor de reprodução"
 
 #: editor_actions.cc:199
-#, fuzzy
 msgid "Split Region"
-msgstr "Separar Região"
+msgstr "Separar região"
 
 #: editor_actions.cc:201
-#, fuzzy
 msgid "Set Region Sync Position"
-msgstr "Por Posição de Região"
+msgstr "Estabelecer posição de sincronia de região"
 
 #: editor_actions.cc:209
-#, fuzzy
 msgid "Export Session"
 msgstr "Exportar região"
 
 #: editor_actions.cc:211
-#, fuzzy
 msgid "Export Range"
-msgstr "Separar Intervalo"
+msgstr "Exportar intervalo"
 
 #. Note: for now, editor-delete does the exact same thing as editor-cut
-#: editor_actions.cc:217
-#, fuzzy
+#: editor_actions.cc:217 redirect_box.cc:1199
 msgid "Delete"
-msgstr "eliminar"
+msgstr "Eliminar"
 
 #: editor_actions.cc:223
-#, fuzzy
 msgid "Duplicate Region"
-msgstr "duplicar região"
+msgstr "Duplicar região"
 
 #: editor_actions.cc:225
-#, fuzzy
 msgid "Duplicate Range"
-msgstr "Duplicar"
+msgstr "Duplicar intervalo"
 
 #: editor_actions.cc:227
 msgid "Insert Region"
-msgstr "Inserir Região"
+msgstr "Inserir região"
 
 #: editor_actions.cc:229
-#, fuzzy
 msgid "Reverse Region"
-msgstr "inverter regiões"
+msgstr "Inverter região"
 
 #: editor_actions.cc:231
-#, fuzzy
 msgid "Normalize Region"
-msgstr "Normalizar"
+msgstr "Normalizar região"
 
 #: editor_actions.cc:233
-#, fuzzy
 msgid "crop"
-msgstr "cópia"
+msgstr "cortar"
 
 #: editor_actions.cc:235
-#, fuzzy
 msgid "Insert Chunk"
 msgstr "Inserir trecho"
 
 #: editor_actions.cc:238
-#, fuzzy
 msgid "Split at edit cursor"
 msgstr "Do início ao cursor de edição"
 
 #: editor_actions.cc:241
-#, fuzzy
 msgid "Start Range"
-msgstr "Separar Intervalo"
+msgstr "Iniciar intervalo"
 
 #: editor_actions.cc:243
 msgid "Finish Range"
-msgstr ""
+msgstr "Finalizar intervalo"
 
 #: editor_actions.cc:245
 msgid "Finish add Range"
-msgstr ""
+msgstr "Acabar intervalo"
 
 #: editor_actions.cc:248
 msgid "Extend Range to End of Region"
-msgstr ""
+msgstr "Extender intervalo ao final da região"
 
 #: editor_actions.cc:250
-#, fuzzy
 msgid "Extend Range to Start of Region"
-msgstr "Ir para o início da sessão"
+msgstr "Extender intervalo ao início da região"
 
 #: editor_actions.cc:253
-#, fuzzy
 msgid "Follow Playhead"
 msgstr "Seguir o cursor de reprodução"
 
 #: editor_actions.cc:261
-#, fuzzy
 msgid "Zoom Focus Left"
-msgstr "Zoom(focagem)"
+msgstr "Zoom (focagem/esquerda)"
 
 #: editor_actions.cc:263
-#, fuzzy
 msgid "Zoom Focus Right"
-msgstr "Zoom(focagem)"
+msgstr "Zoom (focagem/direita)"
 
 #: editor_actions.cc:265
-#, fuzzy
 msgid "Zoom Focus Center"
-msgstr "Zoom(focagem)"
+msgstr "Zoom (focagem/centro)"
 
 #: editor_actions.cc:267
-#, fuzzy
 msgid "Zoom Focus Playhead"
-msgstr "Zoom(focagem)"
+msgstr "Zoom (focagem/reprodução)"
 
 #: editor_actions.cc:269
-#, fuzzy
 msgid "Zoom Focus Edit"
-msgstr "Zoom(focagem)"
+msgstr "Zoom (focagem/edição)"
 
 #: editor_actions.cc:275
 msgid "Object Tool"
-msgstr ""
+msgstr "Ferramenta/objecto"
 
 #: editor_actions.cc:276
-#, fuzzy
 msgid "Range Tool"
-msgstr "Intervalo"
+msgstr "Ferramenta/intervalo"
 
 #: editor_actions.cc:277
 msgid "Gain Tool"
-msgstr ""
+msgstr "Ferramenta/ganho"
 
 #: editor_actions.cc:278
-#, fuzzy
 msgid "Zoom Tool"
-msgstr "Zoom(-)"
+msgstr "Ferramenta/zoom"
 
 #: editor_actions.cc:279
 msgid "Timefx Tool"
-msgstr ""
+msgstr "Ferramenta/timefx"
 
 #: editor_actions.cc:286
-#, fuzzy
 msgid "Snap to frame"
-msgstr "Modo de Ajuste"
+msgstr "Ajustar ao quadro"
 
 #: editor_actions.cc:287
-#, fuzzy
 msgid "Snap to cd frame"
-msgstr "Modo de Ajuste"
+msgstr "Ajustar ao quadro (CD)"
 
 #: editor_actions.cc:288
-#, fuzzy
 msgid "Snap to SMPTE frame"
-msgstr "Quadros SMPTE"
+msgstr "Ajustar ao quadro (SMPTE)"
 
 #: editor_actions.cc:289
-#, fuzzy
 msgid "Snap to SMPTE seconds"
-msgstr "Segundos SMPTE"
+msgstr "Ajustar ao segundo (SMPTE)"
 
 #: editor_actions.cc:290
-#, fuzzy
 msgid "Snap to SMPTE minutes"
-msgstr "Minutos SMPTE"
+msgstr "Ajustar ao minuto (SMPTE)"
 
 #: editor_actions.cc:291
-#, fuzzy
 msgid "Snap to seconds"
-msgstr "Segundos"
+msgstr "Ajustar ao segundo"
 
 #: editor_actions.cc:292
 msgid "Snap to minutes"
-msgstr ""
+msgstr "Ajustar ao minuto"
 
 #: editor_actions.cc:293
-#, fuzzy
 msgid "Snap to thirtyseconds"
-msgstr "trigésima-segunda (32)"
+msgstr "Ajustar aos 30 segundos"
 
 #: editor_actions.cc:294
 msgid "Snap to asixteenthbeat"
-msgstr ""
+msgstr "Ajustar ao batimento/16"
 
 #: editor_actions.cc:295
 msgid "Snap to eighths"
-msgstr ""
+msgstr "Ajustar ao batimento/8"
 
 #: editor_actions.cc:296
 msgid "Snap to quarters"
-msgstr ""
+msgstr "Ajustar ao batimento/4"
 
 #: editor_actions.cc:297
-#, fuzzy
 msgid "Snap to thirds"
-msgstr "Modo de Ajuste"
+msgstr "Ajustar ao batimento/3"
 
 #: editor_actions.cc:298
-#, fuzzy
 msgid "Snap to beat"
-msgstr "Modo de Ajuste"
+msgstr "Ajustar ao batimento"
 
 #: editor_actions.cc:299
-#, fuzzy
 msgid "Snap to bar"
-msgstr "Ajustar a"
+msgstr "Ajustar ao compasso"
 
 #: editor_actions.cc:300
-#, fuzzy
 msgid "Snap to mark"
-msgstr "acrescentar marcador de região"
+msgstr "Ajustar ao marcador"
 
 #: editor_actions.cc:301
-#, fuzzy
 msgid "Snap to edit cursor"
-msgstr "Do início ao cursor de edição"
+msgstr "Ajustar ao cursor de edição"
 
 #: editor_actions.cc:302
-#, fuzzy
 msgid "Snap to region start"
-msgstr "Inícios de região"
+msgstr "Ajustar ao início de região"
 
 #: editor_actions.cc:303
-#, fuzzy
 msgid "Snap to region end"
-msgstr "Finais de região"
+msgstr "Ajustar ao final de região"
 
 #: editor_actions.cc:304
-#, fuzzy
 msgid "Snap to region sync"
-msgstr "Sincronismos de região"
+msgstr "Ajustar ao sincronismo de região"
 
 #: editor_actions.cc:305
-#, fuzzy
 msgid "Snap to region boundary"
-msgstr "Extremos de região"
+msgstr "Ajustar ao extremo de região"
 
 #. the region list popup menu
 #: editor_actions.cc:314
-#, fuzzy
 msgid "Sort"
-msgstr "porta"
+msgstr "Ordenar"
 
 #: editor_actions.cc:322
 msgid "Show all"
 msgstr "Mostrar tudo"
 
 #: editor_actions.cc:323
-#, fuzzy
 msgid "Show automatic regions"
-msgstr "Mostrar todos as automatizações"
+msgstr "Mostrar regiões de automatização"
 
 #: editor_actions.cc:325
 msgid "Ascending"
@@ -3347,118 +3126,104 @@ msgstr "Decrescente"
 
 #: editor_actions.cc:330
 msgid "By Region Name"
-msgstr "Por Nome de Região"
+msgstr "Por nome de região"
 
 #: editor_actions.cc:332
 msgid "By Region Length"
-msgstr "Por Tamanho de Região"
+msgstr "Por comprimento de região"
 
 #: editor_actions.cc:334
 msgid "By Region Position"
-msgstr "Por Posição de Região"
+msgstr "Por posição de região"
 
 #: editor_actions.cc:336
 msgid "By Region Timestamp"
-msgstr "Por Instante de Região"
+msgstr "Por instante de região"
 
 #: editor_actions.cc:338
 msgid "By Region Start in File"
-msgstr "Por Posição Inicial da Região no Ficheiro"
+msgstr "Por posição inicial da região no ficheiro"
 
 #: editor_actions.cc:340
 msgid "By Region End in File"
-msgstr "Por Posição Final da Região no Ficheiro"
+msgstr "Por posição final da região no ficheiro"
 
 #: editor_actions.cc:342
 msgid "By Source File Name"
-msgstr "Por Nome do Ficheiro Original"
+msgstr "Por nome do ficheiro original"
 
 #: editor_actions.cc:344
 msgid "By Source File Length"
-msgstr "Por Tamanho do Ficheiro Original"
+msgstr "Por comprimento do ficheiro original"
 
 #: editor_actions.cc:346
 msgid "By Source File Creation Date"
-msgstr "Por Data de Criação do Ficheiro Original"
+msgstr "Por data de criação do ficheiro original"
 
 #: editor_actions.cc:348
 msgid "By Source Filesystem"
-msgstr "Por Sistema de Ficheiros Original"
+msgstr "Por sistema de ficheiros original"
 
 #. the next two are duplicate items with different names for use in two different contexts
 #: editor_actions.cc:354
-#, fuzzy
 msgid "Add External Audio"
-msgstr "Acrescentar à lista de Regiões Externas"
+msgstr "Acrescentar audio externo"
 
 #: editor_actions.cc:356
-#, fuzzy
 msgid "as Region(s)"
-msgstr "Arrastar regiões"
+msgstr "como regiões"
 
 #: editor_actions.cc:358
-#, fuzzy
 msgid "as Tracks"
-msgstr "Faixas"
+msgstr "como faixas"
 
 #: editor_actions.cc:360
-#, fuzzy
 msgid "to Tracks"
-msgstr "Faixas"
+msgstr "para faixas"
 
 #: editor_actions.cc:363
-#, fuzzy
 msgid "Show Waveforms"
 msgstr "Mostrar formas de onda"
 
 #: editor_actions.cc:364
-#, fuzzy
 msgid "Show Waveforms While Recording"
 msgstr "Mostrar formas de onda enquanto grava"
 
 #: editor_actions.cc:365
-#, fuzzy
 msgid "Show Measures"
 msgstr "Mostrar linhas de tempo"
 
 #: editor_actions.cc:378 editor_actions.cc:385
 msgid "Medium"
-msgstr ""
+msgstr "Médio"
 
 #: editor_actions.cc:380
-#, fuzzy
 msgid "Faster"
 msgstr "Rápido"
 
 #: editor_actions.cc:386
 msgid "Long"
-msgstr ""
+msgstr "Longo"
 
 #: editor_actions.cc:390
-#, fuzzy
 msgid "Later is Higher"
-msgstr "Descer a região em um nível"
+msgstr "Última em cima"
 
 #: editor_actions.cc:391
-#, fuzzy
 msgid "Most Recently Moved/Added is Higher"
-msgstr "Descer a região em um nível"
+msgstr "Movida/acrescentada recentemente em cima"
 
 #: editor_actions.cc:392
-#, fuzzy
 msgid "Most Recently Added is Higher"
-msgstr "Descer a região em um nível"
+msgstr "Acrescentada recentemente em cima"
 
 #: editor_audio_import.cc:72
-#, fuzzy
 msgid "You can't import or embed an audiofile until you have a session loaded."
-msgstr ""
-"Não é possível importar um ficheiro audio sem que haja uma sessão carregada"
+msgstr "Não é possível importar um ficheiro audio sem que haja uma sessão carregada"
 
 #: editor_audio_import.cc:77
-#, fuzzy
 msgid "Add existing audio to session"
-msgstr "Mostrar automatizações existentes"
+msgstr "Acrescenter audio existente à sessão"
 
 #: editor_audio_import.cc:142
 msgid "ardour: importing %1"
@@ -3466,39 +3231,35 @@ msgstr "ardour: em importação %1"
 
 #: editor_audio_import.cc:146
 msgid "Cancel Import"
-msgstr "Cancelar Importação"
+msgstr "Cancelar importação"
 
 #: editor_audio_import.cc:224
-#, fuzzy
 msgid "Editor: cannot open file \"%1\", (%2)"
-msgstr "Editor: não foi possível abrir o ficheiro \"%1\" (%2)"
+msgstr "Editor: não foi possível abrir o ficheiro \"%1\", (%2)"
 
 #: editor_audio_import.cc:232
-#, fuzzy
 msgid "Cancel entire import"
-msgstr "Cancelar Importação"
+msgstr "Cancelar importação inteira"
 
 #: editor_audio_import.cc:233
-#, fuzzy
 msgid "Don't embed it"
-msgstr "Não %1"
+msgstr "Não acrescentar"
 
 #: editor_audio_import.cc:234
 msgid "Embed all without questions"
-msgstr ""
+msgstr "Acrescentar sem qualquer questão"
 
 #: editor_audio_import.cc:239
-#, fuzzy
 msgid "Embed it anyway"
-msgstr "%s de qualquer forma"
+msgstr "Acrescentar de qualquer forma"
 
 #: editor_audio_import.cc:242
-#, fuzzy
 msgid ""
 "%1\n"
 "This audiofile's sample rate doesn't match the session sample rate!"
 msgstr ""
-"A frequência de amostragem deste ficheiro audio não é igual à de sessão"
+"%1\n"
+"A frequência de amostragem deste ficheiro audio não é igual à de sessão!"
 
 #: editor_audio_import.cc:275
 msgid "could not open %1"
@@ -3514,24 +3275,20 @@ msgid "VerboseCanvasCursor"
 msgstr ""
 
 #: editor_edit_groups.cc:53 mixer_ui.cc:736
-#, fuzzy
 msgid "Activate All"
-msgstr "Activar"
+msgstr "Activar tudo"
 
 #: editor_edit_groups.cc:54 mixer_ui.cc:737
-#, fuzzy
 msgid "Disable All"
-msgstr "Desligar"
+msgstr "Desabilitar tudo"
 
 #: editor_edit_groups.cc:56 mixer_ui.cc:739
-#, fuzzy
 msgid "Add group"
-msgstr "Sem grupo"
+msgstr "Acrescentar grupo"
 
 #: editor_edit_groups.cc:229 mixer_ui.cc:970
-#, fuzzy
 msgid "unnamed"
-msgstr "Renomear"
+msgstr "sem nome"
 
 #: editor_edit_groups.cc:258 mixer_ui.cc:834
 msgid "-all-"
@@ -3543,6 +3300,9 @@ msgid ""
 "\n"
 "Select a selection using the range mouse mode"
 msgstr ""
+"Não existe qualquer selecção para exportar.\n"
+"\n"
+"Seleccione algo com o modo de intervalo"
 
 #: editor_export_audio.cc:110
 msgid ""
@@ -3550,6 +3310,9 @@ msgid ""
 "\n"
 "Create 1 or more ranges by dragging the mouse in the range bar"
 msgstr ""
+"Não existe qualquer intervalo para exportar.\n"
+"\n"
+"Seleccione um ou mais por arraste na barra de intervalos"
 
 #: editor_imageframe.cc:625 editor_imageframe.cc:655
 msgid "programming error: no ImageFrameView selected"
@@ -3560,19 +3323,17 @@ msgid "programming error: no MarkerView selected"
 msgstr ""
 
 #: editor_keyboard.cc:104
-#, fuzzy
 msgid "mute region"
-msgstr "emudecer esta região"
+msgstr "emudecer região"
 
 #: editor_keys.cc:46
-#, fuzzy
 msgid "keyboard selection"
-msgstr "extender selecção"
+msgstr "selecção de teclado"
 
 #: editor_markers.cc:292 editor_ops.cc:1290 editor_ops.cc:1303
 #: editor_ops.cc:1321 location_ui.cc:774
 msgid "add marker"
-msgstr "adicionar marcador"
+msgstr "acrescentar marcador"
 
 #: editor_markers.cc:307 editor_markers.cc:380 editor_markers.cc:552
 #: editor_markers.cc:570 editor_markers.cc:589 editor_markers.cc:608
@@ -3587,128 +3348,108 @@ msgid "remove marker"
 msgstr "remover marcador"
 
 #: editor_markers.cc:458
-#, fuzzy
 msgid "Locate to Mark"
-msgstr "Localizar"
+msgstr "Localizar ao marcador"
 
 #: editor_markers.cc:459
-#, fuzzy
 msgid "Play from Mark"
-msgstr "Reproduzir desde o início"
+msgstr "Reproduzir desde o marcador"
 
 #: editor_markers.cc:460
-#, fuzzy
 msgid "Set Mark from Playhead"
-msgstr "Desde cursor de reprodução"
+msgstr "Estabelecer marcador no cursor de reprodução"
 
 #: editor_markers.cc:464
-#, fuzzy
 msgid "Rename Mark"
-msgstr "Renomear"
+msgstr "Renomear marcador"
 
 #: editor_markers.cc:465
-#, fuzzy
 msgid "Hide Mark"
-msgstr "retocar faixa"
+msgstr "Esconder marcador"
 
 #: editor_markers.cc:466
-#, fuzzy
 msgid "Remove Mark"
-msgstr "remover marcador"
+msgstr "Remover marcador"
 
 #: editor_markers.cc:479 editor_markers.cc:535
-#, fuzzy
 msgid "Locate to Range Mark"
-msgstr "Localizações"
+msgstr "Localizar no marcador de intervalo"
 
 #: editor_markers.cc:480 editor_markers.cc:536
-#, fuzzy
 msgid "Play from Range Mark"
-msgstr "Reproduzir intervalo cíclico"
+msgstr "Reproduzir desde marcador de intervalo"
 
 #: editor_markers.cc:481
-#, fuzzy
 msgid "Loop Range"
 msgstr "Intervalo cíclico"
 
 #: editor_markers.cc:482 editor_markers.cc:537
-#, fuzzy
 msgid "Set Range Mark from Playhead"
-msgstr "Desde cursor de reprodução"
+msgstr "Estabelecer marcador de intervalo desde cursor de reprodução"
 
 #: editor_markers.cc:483 editor_markers.cc:538
-#, fuzzy
 msgid "Set Range from Range Selection"
-msgstr "selecção de intervalo"
+msgstr "Estabelecer intervalo desde selecção de intervalo"
 
 #: editor_markers.cc:487
-#, fuzzy
 msgid "Rename Range"
-msgstr "Renomear"
+msgstr "Renomear intervalo"
 
 #: editor_markers.cc:488 editor_markers.cc:540
-#, fuzzy
 msgid "Hide Range"
-msgstr "Adicionar Novo Intervalo"
+msgstr "Esconder intervalo"
 
 #: editor_markers.cc:489
-#, fuzzy
 msgid "Remove Range"
-msgstr "Remover Campo"
+msgstr "Remover intervalo"
 
 #: editor_markers.cc:493 editor_markers.cc:542
-#, fuzzy
 msgid "Separate Regions in Range"
-msgstr "Nova região desde a selecção"
+msgstr "Separar regiões no intervalo"
 
 #: editor_markers.cc:494 editor_markers.cc:543
-#, fuzzy
 msgid "Select All in Range"
-msgstr "Seleccionar tudo na faixa"
+msgstr "Seleccionar tudo no intervalo"
 
 #: editor_markers.cc:520
 msgid "Set Loop Range"
-msgstr "Seleccionar Intervalo Cíclico"
+msgstr "Estabelecer intervalo cíclico"
 
 #: editor_markers.cc:521
 msgid "Set Punch Range"
-msgstr "Seleccionar Intervalo de Inserção"
+msgstr "Estabelecer intervalo de inserção"
 
 #: editor_markers.cc:815
-#, fuzzy
 msgid "New Name:"
-msgstr "novo nome: "
+msgstr "Novo nome: "
 
 #: editor_markers.cc:818
 msgid "ardour: rename mark"
-msgstr "ardour: renomear marca"
+msgstr "ardour: renomear marcador"
 
 #: editor_markers.cc:820
-#, fuzzy
 msgid "ardour: rename range"
-msgstr "ardour: renomear região"
+msgstr "ardour: renomear intervalo"
 
 #: editor_markers.cc:840
-#, fuzzy
 msgid "rename marker"
 msgstr "remover marcador"
 
 #: editor_markers.cc:865
 msgid "set loop range"
-msgstr "seleccionar intervalo cíclico"
+msgstr "estabelcer intervalo cíclico"
 
 #: editor_markers.cc:891
 msgid "set punch range"
-msgstr "seleccionar intervalo de inserção"
+msgstr "estabelecer intervalo de inserção"
 
 #: editor_mouse.cc:103
 msgid "Editor::event_frame() used on unhandled event type %1"
 msgstr ""
 
 #: editor_mouse.cc:313
-#, fuzzy
 msgid "select on click"
-msgstr "Usar como metrónomo"
+msgstr "seleccionar com metrónomo"
 
 #: editor_mouse.cc:1590
 msgid "programming error: start_grab called without drag item"
@@ -3724,16 +3465,15 @@ msgstr ""
 
 #: editor_mouse.cc:1906
 msgid "change fade out length"
-msgstr "alterar duração desvanecimento"
+msgstr "alterar duração de desvanecimento"
 
 #: editor_mouse.cc:1925
 msgid "programming error: cursor canvas item has no cursor data pointer!"
 msgstr ""
 
 #: editor_mouse.cc:2142
-#, fuzzy
 msgid "move marker"
-msgstr "remover marcador"
+msgstr "mover marcador"
 
 #: editor_mouse.cc:2165 editor_mouse.cc:2196 editor_tempodisplay.cc:459
 msgid ""
@@ -3741,13 +3481,12 @@ msgid ""
 msgstr ""
 
 #: editor_mouse.cc:2264
-#, fuzzy
 msgid "copy meter mark"
-msgstr "remover marcador métrico"
+msgstr "copiar marcador métrico"
 
 #: editor_mouse.cc:2274
 msgid "move meter mark"
-msgstr "remover marcador métrico"
+msgstr "mover marccador métrico"
 
 #: editor_mouse.cc:2289 editor_mouse.cc:2322 editor_tempodisplay.cc:331
 #: editor_tempodisplay.cc:409 editor_tempodisplay.cc:428
@@ -3761,13 +3500,12 @@ msgid "programming error: marker for tempo is not a tempo marker!"
 msgstr ""
 
 #: editor_mouse.cc:2394
-#, fuzzy
 msgid "copy tempo mark"
-msgstr "remover marcador de tempo"
+msgstr "copiar marcador de tempo"
 
 #: editor_mouse.cc:2404
 msgid "move tempo mark"
-msgstr "remover marcador de tempo"
+msgstr "mover marcador de tempo"
 
 #: editor_mouse.cc:2418 editor_mouse.cc:2437 editor_mouse.cc:2450
 msgid ""
@@ -3780,32 +3518,29 @@ msgid "programming error: line canvas item has no line pointer!"
 msgstr ""
 
 #: editor_mouse.cc:2664
-#, fuzzy
 msgid "move region(s)"
-msgstr "remover região"
+msgstr "mover região"
 
 #: editor_mouse.cc:2727
-#, fuzzy
 msgid "Drag region brush"
-msgstr "Arrastar regiões"
+msgstr "Arrastar região"
 
 #. don't copy again
 #. this is committed in the grab finished callback.
 #: editor_mouse.cc:2751
 msgid "Drag region copy"
-msgstr "Arraster cópia de região"
+msgstr "Arrastar cópia de região"
 
 #. A selection grab currently creates two undo/redo operations, one for
 #. creating the new region and another for moving it.
 #.
 #: editor_mouse.cc:3609
 msgid "selection grab"
-msgstr "selecção"
+msgstr "arrastar selecção"
 
 #: editor_mouse.cc:3650
-#, fuzzy
 msgid "cancel selection"
-msgstr "selecção de intervalo"
+msgstr "cancelar selecção"
 
 #: editor_mouse.cc:3760
 msgid "range selection"
@@ -3813,11 +3548,11 @@ msgstr "selecção de intervalo"
 
 #: editor_mouse.cc:3776
 msgid "trim selection start"
-msgstr "recortar início da selecção"
+msgstr "cortar início da selecção"
 
 #: editor_mouse.cc:3792
 msgid "trim selection end"
-msgstr "recortar final da selecção"
+msgstr "cortar final da selecção"
 
 #: editor_mouse.cc:3809
 msgid "move selection"
@@ -3825,15 +3560,15 @@ msgstr "mover selecção"
 
 #: editor_mouse.cc:4195
 msgid "Start point trim"
-msgstr "Ponto inicial de recorte"
+msgstr "Ponto inicial de corte"
 
 #: editor_mouse.cc:4223
 msgid "End point trim"
-msgstr "Ponto final de recorte"
+msgstr "Ponto final de corte"
 
 #: editor_mouse.cc:4262
 msgid "trimmed region"
-msgstr "região recortada"
+msgstr "região cortada"
 
 #: editor_mouse.cc:4400
 msgid "new range marker"
@@ -3865,16 +3600,18 @@ msgid ""
 "It cannot be undone\n"
 "Do you really want to destroy %1 ?"
 msgstr ""
+" Esta operação é destrutiva,\n"
+"irá possivelmente eliminar ficheiros audio,\n"
+"não podendo ser desfeita\n"
+"Tem a certeza que pretende destruir %1 ?"
 
 #: editor_ops.cc:254
-#, fuzzy
 msgid "these regions"
-msgstr "inverter regiões"
+msgstr "estas regiões"
 
 #: editor_ops.cc:254
-#, fuzzy
 msgid "this region"
-msgstr "emudecer esta região"
+msgstr "esta região"
 
 #: editor_ops.cc:256 editor_ops.cc:3318 route_ui.cc:707
 #: visual_time_axis.cc:278
@@ -3882,13 +3619,12 @@ msgid "No, do nothing."
 msgstr "Não, não fazer nada."
 
 #: editor_ops.cc:259
-#, fuzzy
 msgid "Yes, destroy them."
-msgstr "Sim, elimine-se."
+msgstr "Sim, elimine-as."
 
 #: editor_ops.cc:261 editor_ops.cc:3319
 msgid "Yes, destroy it."
-msgstr "Sim, elimine-se."
+msgstr "Sim, elimine-a."
 
 #: editor_ops.cc:352 editor_ops.cc:380
 msgid "extend selection"
@@ -3903,49 +3639,40 @@ msgid "build_region_boundary_cache called with snap_type = %1"
 msgstr ""
 
 #: editor_ops.cc:1420
-#, fuzzy
 msgid "select all within"
-msgstr "Seleccionar tudo"
+msgstr "seleccionar tudo entre"
 
 #: editor_ops.cc:1452
-#, fuzzy
 msgid "set selection from region"
-msgstr "selecção de intervalo"
+msgstr "estabelecer selecção desde a região"
 
 #: editor_ops.cc:1485
-#, fuzzy
 msgid "set selection from range"
-msgstr "selecção de intervalo"
+msgstr "estabelecer selecção desde o intervalo"
 
 #: editor_ops.cc:1515
-#, fuzzy
 msgid "select all from range"
-msgstr "seleccionar zoom"
+msgstr "seleccionar tudo desde o intervalo"
 
 #: editor_ops.cc:1537
-#, fuzzy
 msgid "select all from punch"
-msgstr "Seleccionar tudo"
+msgstr "seleccionar tudo desde a inserção"
 
 #: editor_ops.cc:1559
-#, fuzzy
 msgid "select all from loop"
-msgstr "Seleccionar tudo"
+msgstr "seleccionar tudo desde o ciclo"
 
 #: editor_ops.cc:1573
-#, fuzzy
 msgid "select all after cursor"
-msgstr "Do início ao cursor de edição"
+msgstr "seleccionar tudo após o cursor"
 
 #: editor_ops.cc:1578
-#, fuzzy
 msgid "select all before cursor"
-msgstr "sincronizar pelo cursor de edição"
+msgstr "seleccionar tudo anterior ao cursor"
 
 #: editor_ops.cc:1608
-#, fuzzy
 msgid "select all between cursors"
-msgstr "sincronizar pelo cursor de edição"
+msgstr "seleccionar tudo entre cursores"
 
 #: editor_ops.cc:1739
 msgid "clear markers"
@@ -3976,13 +3703,12 @@ msgid "ardour: rename region"
 msgstr "ardour: renomear região"
 
 #: editor_ops.cc:2277 editor_ops.cc:2326
-#, fuzzy
 msgid "separate"
 msgstr "separar"
 
 #: editor_ops.cc:2388
 msgid "trim to selection"
-msgstr "recortar pela selecção"
+msgstr "cortar pela selecção"
 
 #: editor_ops.cc:2428
 msgid "region fill"
@@ -3997,16 +3723,14 @@ msgid "Programming error. that region doesn't cover that position"
 msgstr ""
 
 #: editor_ops.cc:2511
-#, fuzzy
 msgid "set region sync position"
-msgstr "Regiões/posição"
+msgstr "estabelecer posição de sincronismo na região"
 
 #: editor_ops.cc:2526
 msgid "Place the edit cursor at the desired sync point"
 msgstr "Coloque o cursor de edição sobre o ponto de sincronia desejado"
 
 #: editor_ops.cc:2531
-#, fuzzy
 msgid "set sync from edit cursor"
 msgstr "sincronizar pelo cursor de edição"
 
@@ -4032,21 +3756,19 @@ msgstr "alinhar região"
 
 #: editor_ops.cc:2708 editor_ops.cc:2733
 msgid "trim to edit"
-msgstr "recortar para edição"
+msgstr "cortar para edição"
 
 #: editor_ops.cc:2784
-#, fuzzy
 msgid "ardour: freeze"
-msgstr "ardour: renomear região"
+msgstr "ardour: congelamento"
 
 #: editor_ops.cc:2789
-#, fuzzy
 msgid "Cancel Freeze"
-msgstr "Cancelar"
+msgstr "Cancelar congelamento"
 
 #: editor_ops.cc:2826
 msgid "bounce range"
-msgstr "intervalo de rebatimento"
+msgstr "regravar região"
 
 #: editor_ops.cc:2879
 msgid "cut"
@@ -4108,7 +3830,7 @@ msgstr "inverter regiões"
 #: editor_region_list.cc:98 editor_region_list.cc:103
 #: editor_region_list.cc:106 location_ui.cc:56
 msgid "Hidden"
-msgstr "Esconder"
+msgstr "Escondida"
 
 #. added a new fresh one at the end
 #: editor_route_list.cc:102 editor_route_list.cc:103 editor_route_list.cc:247
@@ -4121,25 +3843,21 @@ msgstr "Mostrar tudo"
 
 #: editor_route_list.cc:311 mixer_ui.cc:700
 msgid "Hide All"
-msgstr "Ocultar tudo"
+msgstr "Esconder tudo"
 
 #: editor_route_list.cc:312 mixer_ui.cc:701
-#, fuzzy
 msgid "Show All Audio Tracks"
-msgstr "Mostrar todos os barramentos audio"
+msgstr "Mostrar todos as faixas audio"
 
 #: editor_route_list.cc:313 mixer_ui.cc:702
-#, fuzzy
 msgid "Hide All Audio Tracks"
-msgstr "Esconder todos os barramentos audio"
+msgstr "Esconder todos as faixas audio"
 
 #: editor_route_list.cc:314 mixer_ui.cc:703
-#, fuzzy
 msgid "Show All Audio Busses"
 msgstr "Mostrar todos os barramentos audio"
 
 #: editor_route_list.cc:315 mixer_ui.cc:704
-#, fuzzy
 msgid "Hide All Audio Busses"
 msgstr "Esconder todos os barramentos audio"
 
@@ -4158,7 +3876,7 @@ msgstr "Apagar todos os intervalos"
 
 #: editor_rulers.cc:327
 msgid "New Tempo"
-msgstr "Novo Tempo"
+msgstr "Novo tempo"
 
 #: editor_rulers.cc:328
 msgid "Clear tempo"
@@ -4177,12 +3895,10 @@ msgid "Min:Secs"
 msgstr "Min:Segs"
 
 #: editor_selection_list.cc:108
-#, fuzzy
 msgid "Name for Chunk:"
 msgstr "Nome para o trecho:"
 
 #: editor_selection_list.cc:111
-#, fuzzy
 msgid "Create Chunk"
 msgstr "Criar trecho"
 
@@ -4195,12 +3911,10 @@ msgid "add"
 msgstr "acrescentar"
 
 #: editor_tempodisplay.cc:275
-#, fuzzy
 msgid "add tempo mark"
-msgstr "acrescentar marcador de região"
+msgstr "acrescentar marcador de tempo"
 
 #: editor_tempodisplay.cc:315
-#, fuzzy
 msgid "add meter mark"
 msgstr "acrescentar marcador métrico"
 
@@ -4222,11 +3936,11 @@ msgstr "remover marcador de tempo"
 
 #: editor_timefx.cc:51
 msgid "Quick but Ugly"
-msgstr "Rápido mas Feio"
+msgstr "Rápido e feio"
 
 #: editor_timefx.cc:52
 msgid "Skip Anti-aliasing"
-msgstr "Ignorar Anti-aliasing"
+msgstr "Ignorar anti-aliasing"
 
 #: editor_timefx.cc:56
 msgid "ardour: timestretch"
@@ -4238,7 +3952,7 @@ msgstr ""
 
 #: editor_timefx.cc:70
 msgid "Stretch/Shrink it"
-msgstr "Alongar/Estreitar"
+msgstr "Alongar/estreitar"
 
 #: editor_timefx.cc:73 editor_timefx.cc:74
 msgid "TimeStretchButton"
@@ -4308,7 +4022,7 @@ msgstr ""
 
 #: export_dialog.cc:80
 msgid "Shaped Noise"
-msgstr "Forma de Ruído"
+msgstr "Forma de ruído"
 
 #: export_dialog.cc:81 export_dialog.cc:1229
 msgid "Triangular"
@@ -4333,54 +4047,48 @@ msgid "TOC"
 msgstr ""
 
 #: export_dialog.cc:102
-#, fuzzy
 msgid "Format"
-msgstr "Normal"
+msgstr "Formato"
 
 #: export_dialog.cc:103
 msgid "CD Marker File Type"
-msgstr ""
+msgstr "Tipo de marcadores CD"
 
 #: export_dialog.cc:104
-#, fuzzy
 msgid "Channels"
-msgstr "cancelar"
+msgstr "Canais"
 
 #: export_dialog.cc:105
-#, fuzzy
 msgid "File Type"
-msgstr "Ficheiros"
+msgstr "Tipo de ficheiro"
 
 #: export_dialog.cc:106
-#, fuzzy
 msgid "Sample Format"
-msgstr "separar"
+msgstr "Formato de amostra"
 
 #: export_dialog.cc:107
 msgid "Sample Endianness"
-msgstr ""
+msgstr "Representação binária"
 
 #: export_dialog.cc:108
-#, fuzzy
 msgid "Sample Rate"
-msgstr "separar"
+msgstr "Frequência de amostragem"
 
 #: export_dialog.cc:109
 msgid "Conversion Quality"
-msgstr ""
+msgstr "Qualidade de conversão"
 
 #: export_dialog.cc:110
 msgid "Dither Type"
-msgstr ""
+msgstr "Tipo de extrapolação"
 
 #: export_dialog.cc:111
 msgid "Export CD Marker File Only"
-msgstr ""
+msgstr "Exportar marcadores CD apenas"
 
 #: export_dialog.cc:112
-#, fuzzy
 msgid "Export to File"
-msgstr "Exportar para CD"
+msgstr "Exportar para ficheiro"
 
 #: export_dialog.cc:113 option_editor.cc:83 option_editor.cc:84
 msgid "Browse"
@@ -4421,39 +4129,40 @@ msgstr ""
 
 #: export_dialog.cc:912
 msgid "Stop Export"
-msgstr "Cancelar Exportação"
+msgstr "Cancelar exportação"
 
 #: export_dialog.cc:1131
 msgid "Please enter a valid filename."
-msgstr ""
+msgstr "Por favor, entre um nome de ficheiro válido"
 
 #: export_dialog.cc:1141
 msgid "Please specify a complete filename for the audio file."
-msgstr ""
+msgstr "Por favor, especifique um nome completo para o ficheiro audio"
 
 #: export_dialog.cc:1147
 msgid "File already exists, do you want to overwrite it?"
-msgstr ""
+msgstr "O ficheiro já existe, deseja reescrevê-lo ?"
 
 #: export_dialog.cc:1159 export_range_markers_dialog.cc:153
 msgid "Cannot write file in: "
-msgstr ""
+msgstr "Não foi possível escrever o ficheiro em: "
 
 #. warning dialog
 #: export_range_markers_dialog.cc:135
 msgid "Please enter a valid target directory."
-msgstr ""
+msgstr "Por favor, entre um directório de destino válido."
 
 #: export_range_markers_dialog.cc:143
 msgid ""
 "Please select an existing target directory. Files\n"
 "are not allowed!"
 msgstr ""
+"Por favor, seleccione um directório de destino existente.\n"
+"Não são permitidos ficheiros!"
 
 #: gain_automation_time_axis.cc:62
-#, fuzzy
 msgid "add gain automation event"
-msgstr "acrescentar evento de automatização a "
+msgstr "acrescentar evento de automatização de ganho"
 
 #: gain_meter.cc:67
 msgid "cannot find images for fader slider"
@@ -4464,19 +4173,16 @@ msgid "cannot find images for fader rail"
 msgstr ""
 
 #: gain_meter.cc:130 gain_meter.cc:339 gain_meter.cc:494 gain_meter.cc:539
-#, fuzzy
 msgid "-inf"
-msgstr "entrada"
+msgstr ""
 
 #: gain_meter.cc:140
-#, fuzzy
 msgid "Fader automation mode"
-msgstr "modo de automatização de panorâmica"
+msgstr "Modo de automatizaçã"
 
 #: gain_meter.cc:141
-#, fuzzy
 msgid "Fader automation type"
-msgstr "Tipo de automatização de panorâmica"
+msgstr "Tipo de automatização"
 
 #. XXX it might different in different languages
 #: gain_meter.cc:182 gain_meter.cc:817 panner_ui.cc:99 panner_ui.cc:807
@@ -4484,14 +4190,12 @@ msgid "Abs"
 msgstr ""
 
 #: gain_meter.cc:472
-#, fuzzy
 msgid "-Inf"
-msgstr "entrada"
+msgstr ""
 
 #: gain_meter.cc:781 mixer_strip.cc:770 panner_ui.cc:771
-#, fuzzy
 msgid "O"
-msgstr "OU"
+msgstr ""
 
 #: gain_meter.cc:784 panner_ui.cc:774
 msgid "P"
@@ -4506,110 +4210,95 @@ msgid "W"
 msgstr ""
 
 #: gtk-custom-ruler.c:126
-#, fuzzy
 msgid "Lower"
-msgstr "Nível"
+msgstr "Inferior"
 
 #: gtk-custom-ruler.c:127
-#, fuzzy
 msgid "Lower limit of ruler"
-msgstr "Descer a região para o nível de fundo"
+msgstr "Limite inferior da régua"
 
 #: gtk-custom-ruler.c:136
 msgid "Upper"
-msgstr ""
+msgstr "Superior"
 
 #: gtk-custom-ruler.c:137
 msgid "Upper limit of ruler"
-msgstr ""
+msgstr "Limite superior da régua"
 
 #: gtk-custom-ruler.c:146
-#, fuzzy
 msgid "Position"
-msgstr "Sicronia de Posição"
+msgstr "Posição"
 
 #: gtk-custom-ruler.c:147
 msgid "Position of mark on the ruler"
-msgstr ""
+msgstr "Posição do marcador na régua"
 
 #: gtk-custom-ruler.c:156
 msgid "Max Size"
-msgstr ""
+msgstr "Tamanho máximo"
 
 #: gtk-custom-ruler.c:157
 msgid "Maximum size of the ruler"
-msgstr ""
+msgstr "Tamanho máximo da régua"
 
 #: gtk-custom-ruler.c:166
-#, fuzzy
 msgid "Show Position"
-msgstr "Por Posição de Região"
+msgstr "Mostrar posição"
 
 #: gtk-custom-ruler.c:167
 msgid "Draw current ruler position"
-msgstr ""
+msgstr "Visualizar posição corrente da régua"
 
 #. end-of-file, other end closed or shutdown?
 #: imageframe_socket_handler.cc:127
 msgid "Image Compositor Socket has been shutdown/closed"
-msgstr "O ligação ao Compositor de Imagem foi desligada/fechada"
+msgstr "A ligação ao compositor de imagem foi desligada/fechada"
 
 #: imageframe_time_axis.cc:286
-#, fuzzy
 msgid "0.5 seconds"
-msgstr "Segundos"
+msgstr "0.5 segundos"
 
 #: imageframe_time_axis.cc:287 marker_time_axis.cc:242
-#, fuzzy
 msgid "1 seconds"
-msgstr "Segundos"
+msgstr "1 segundo"
 
 #: imageframe_time_axis.cc:288 marker_time_axis.cc:243
-#, fuzzy
 msgid "1.5 seconds"
-msgstr "Segundos"
+msgstr "1.5 segundos"
 
 #: imageframe_time_axis.cc:289 marker_time_axis.cc:244
-#, fuzzy
 msgid "2 seconds"
-msgstr "Segundos"
+msgstr "2 segundos"
 
 #: imageframe_time_axis.cc:290 marker_time_axis.cc:245
-#, fuzzy
 msgid "2.5 seconds"
-msgstr "Segundos"
+msgstr "2.5 segundos"
 
 #: imageframe_time_axis.cc:291 marker_time_axis.cc:246
-#, fuzzy
 msgid "3 seconds"
-msgstr "Segundos"
+msgstr "3 segundos"
 
 #. duration_items.push_back(SeparatorElem()) ;
 #. duration_items.push_back(MenuElem (_("custom"), mem_fun(*this, &ImageFrameTimeAxis::set_marker_duration_custom))) ;
 #: imageframe_time_axis.cc:296 marker_time_axis.cc:251
-#, fuzzy
 msgid "Duration (sec)"
-msgstr "Arrastar regiões"
+msgstr "Duração (seg)"
 
 #: imageframe_time_axis.cc:301
-#, fuzzy
 msgid "Remove Frame"
-msgstr "Remover Campo"
+msgstr "Remover quadro"
 
 #: imageframe_time_axis.cc:304
-#, fuzzy
 msgid "Image Frame"
-msgstr "Quadros CD"
+msgstr "Quadro de imagem"
 
 #: imageframe_time_axis.cc:305 marker_time_axis.cc:257
-#, fuzzy
 msgid "Rename Track"
-msgstr "Renomear"
+msgstr "Renomear faixa"
 
 #: io_selector.cc:60 io_selector.cc:794
-#, fuzzy
 msgid "Rescan"
-msgstr "refrescar"
+msgstr "Refrescar"
 
 #: io_selector.cc:68
 msgid "%1 input"
@@ -4628,29 +4317,24 @@ msgid "Outputs"
 msgstr "Saídas"
 
 #: io_selector.cc:143
-#, fuzzy
 msgid "Add Input"
-msgstr "acrescentar entrada"
+msgstr "Acrescentar entrada"
 
 #: io_selector.cc:143
-#, fuzzy
 msgid "Add Output"
-msgstr "acrescentar saída"
+msgstr "Acrescentar saída"
 
 #: io_selector.cc:144
-#, fuzzy
 msgid "Remove Input"
-msgstr "Remover ponto de sincronia"
+msgstr "Remover entrada"
 
 #: io_selector.cc:144
-#, fuzzy
 msgid "Remove Output"
-msgstr "No.Saídas"
+msgstr "Remover saída"
 
 #: io_selector.cc:145
-#, fuzzy
 msgid "Disconnect All"
-msgstr "Desligar"
+msgstr "Desligar tudo"
 
 #: io_selector.cc:159
 msgid "Available connections"
@@ -4658,11 +4342,11 @@ msgstr "Ligações disponíveis"
 
 #: io_selector.cc:555 io_selector.cc:574
 msgid "There are no more JACK ports available."
-msgstr ""
+msgstr "Não existem portos JACK disponíveis"
 
 #: io_selector.cc:649 io_selector.cc:676 io_selector.cc:729
 msgid "port"
-msgstr "porta"
+msgstr "porto"
 
 #: io_selector.cc:798
 msgid "ardour: "
@@ -4677,6 +4361,7 @@ msgid ""
 "Your system is completely broken - NumLock uses \"%1\"as its modifier. This "
 "is madness - see the man page for xmodmap to find out how to fix this."
 msgstr ""
+
 
 #: keyboard.cc:533
 msgid ""
@@ -4706,7 +4391,7 @@ msgstr "Existem %1 teclas associadas a \"mod5\""
 
 #: location_ui.cc:48 location_ui.cc:51
 msgid "Set"
-msgstr "Seleccionar"
+msgstr "Estabelecer"
 
 #: location_ui.cc:49 location_ui.cc:52
 msgid "Go"
@@ -4722,15 +4407,15 @@ msgstr ""
 
 #: location_ui.cc:59
 msgid "Pre-Emphasis"
-msgstr ""
+msgstr "Pré-êmfase"
 
 #: location_ui.cc:570
 msgid "Add New Location"
-msgstr "Adicionar Nova Localização"
+msgstr "Adicionar nova localização"
 
 #: location_ui.cc:571
 msgid "Add New Range"
-msgstr "Adicionar Novo Intervalo"
+msgstr "Adicionar novo intervalo"
 
 #: location_ui.cc:575
 msgid "ardour: locations"
@@ -4741,14 +4426,12 @@ msgid "ardour_locations"
 msgstr ""
 
 #: location_ui.cc:604
-#, fuzzy
 msgid "Location (CD Index) Markers"
-msgstr "Localizações"
+msgstr "Marcadores de localização (índice CD)"
 
 #: location_ui.cc:624
-#, fuzzy
 msgid "Range (CD Track) Markers"
-msgstr "Intervalos"
+msgstr "Marcadores de intervalos (faixas CD)"
 
 #: location_ui.cc:790
 msgid "add range marker"
@@ -4756,21 +4439,21 @@ msgstr "acrescentar marcador de região"
 
 #: main.cc:72
 msgid "ardour is killing itself for a clean exit\n"
-msgstr "ardour em modo de auto-destruição para uma saída em beleza\n"
+msgstr "ardour entrou em auto-destruição para sair em beleza\n"
 
 #: main.cc:81
 msgid "stopping user interface\n"
-msgstr "interface homem-máquina em fase terminal\n"
+msgstr "interface de utilizador em fase terminal\n"
 
 #. XXX its doubtful that snprintf() is async-safe
 #: main.cc:100
-#, fuzzy, c-format
+#, c-format
 msgid "%d(%d): received signal %d\n"
-msgstr "%d: sinal %d recebido\n"
+msgstr "%d(%d): sinal %d recebido\n"
 
 #: main.cc:180
 msgid "cannot become new process group leader (%1)"
-msgstr ""
+msgstr "não foi possível estabelecer-se como processo principal de grupo (%1)"
 
 #: main.cc:207
 msgid "cannot setup signal handling for %1"
@@ -4781,23 +4464,19 @@ msgid "cannot set default signal mask (%1)"
 msgstr "não foi possível estabelecer máscara de sinal %1"
 
 #: main.cc:248
-#, fuzzy
 msgid ""
 "Without a UI style file, ardour will look strange.\n"
 " Please set ARDOUR2_UI_RC to point to a valid UI style file"
 msgstr ""
-"O Ardour vai aparecer algo esquisito sem um ficheiro\n"
-"de estilo visual para o interface de utilizador (UI).\n"
-"Por favor, indique um ficheiro de estilo visual válido em ARDOUR_UI_RC "
-"(variável de ambiente)"
+"O Ardour vai parecer estranho sem um ficheiro\n"
+"de estilo visual para o interface de utilizador.\n"
+"Por favor, indique um ficheiro válido em ARDOUR_UI_RC"
 
 #: main.cc:270
-#, fuzzy
 msgid "Ardour could not connect to JACK."
-msgstr "Não foi possível conectar ao serviço JACK como \"%1\""
+msgstr "Não foi possível ligar ao serviço JACK."
 
 #: main.cc:274
-#, fuzzy
 msgid ""
 "There are several possible reasons:\n"
 "\n"
@@ -4807,12 +4486,11 @@ msgid ""
 "\n"
 "Please consider the possibilities, and perhaps (re)start JACK."
 msgstr ""
-"Não foi possível estabelecer ligação com o serviço JACK.\n"
-"Podem existir várias razões para tal:\n"
+"Podem existir várias razões:\n"
 "\n"
 "1) O serviço JACK não se encontra activo.\n"
 "2) O serviço JACK encontra-se activo por outro utilizador, talvez root.\n"
-"3) Já se encontra activo outro client chamado \"ardour\".\n"
+"3) Já se encontra activo outro client com o nome \"ardour\".\n"
 "\n"
 "Por favor, considere estas possibilidades e (re)inicie o serviço JACK."
 
@@ -4828,6 +4506,10 @@ msgid ""
 "A session named \"%1\" already exists.\n"
 "To avoid this message, start ardour as \"ardour %1"
 msgstr ""
+"\n"
+"\n"
+"Já existe uma sessão denominada \"%1\".\n"
+"Para evitar esta mensagem, inicie ardour como \"ardour %1\""
 
 #: main.cc:335
 msgid ""
@@ -4836,6 +4518,10 @@ msgid ""
 "No session named \"%1\" exists.\n"
 "To create it from the command line, start ardour as \"ardour --new %1"
 msgstr ""
+"\n"
+"\n"
+"Não existe nenhuma sessão denominada \"%1\".\n"
+"Para a criar desde a linha de comando, inicie ardour como \"ardour --new %1\""
 
 #: main.cc:399
 msgid "Ardour/GTK "
@@ -4846,15 +4532,16 @@ msgid ""
 "\n"
 "   (built using "
 msgstr ""
+"\n"
+"   (compilado "
 
 #: main.cc:405
-#, fuzzy
 msgid " with libardour "
-msgstr " em execução com libardour "
+msgstr " com libardour "
 
 #: main.cc:410
 msgid " and GCC version "
-msgstr ""
+msgstr " e versão GCC "
 
 #: main.cc:420
 msgid "Copyright (C) 1999-2006 Paul Davis"
@@ -4865,6 +4552,8 @@ msgid ""
 "Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel "
 "Baker"
 msgstr ""
+"Algumas partes Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel "
+"Baker"
 
 #: main.cc:423
 msgid "Ardour comes with ABSOLUTELY NO WARRANTY"
@@ -4872,18 +4561,16 @@ msgstr "Ardour é fornecido ABSOLUTAMENTE SEM QUALQUER GARANTIA"
 
 #: main.cc:424
 msgid "not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
-msgstr ""
+msgstr "nem mesmo para COMERCIALIZAÇÃO ou INDICADO PARA UM FIM PARTICULAR."
 
 #: main.cc:425
 msgid "This is free software, and you are welcome to redistribute it "
-msgstr "Sendo software livre, é permitida e até encorajada a sua distribuição"
+msgstr "Sendo software livre, é permitida e até encorajada a sua distribuição "
 
 #: main.cc:426
-#, fuzzy
 msgid "under certain conditions; see the source for copying conditions."
-msgstr ""
-"desde que sejam respeitadas algumas condições; para mais informações, leia "
-"por favor o ficheiro COPYING."
+msgstr "desde que sejam respeitadas algumas condições; para mais informações, "
+"por favor leia o ficheiro COPYING."
 
 #: main.cc:435
 msgid "could not create ARDOUR GUI"
@@ -4891,26 +4578,23 @@ msgstr "não foi possível criar o interface gráfico (GUI)"
 
 #: main.cc:453
 msgid "Could not connect to JACK server as  \"%1\""
-msgstr "Não foi possível conectar ao serviço JACK como \"%1\""
+msgstr "Não foi possível ligar ao serviço JACK como \"%1\""
 
 #: main.cc:456
 msgid "could not initialize Ardour."
 msgstr "não foi possível inicializar o Ardour"
 
 #: marker.cc:244
-#, fuzzy
 msgid "MarkerText"
-msgstr "Marcas"
+msgstr "Marcadores"
 
 #: marker_time_axis.cc:254
-#, fuzzy
 msgid "Remove Marker"
-msgstr "remover marcador"
+msgstr "Remover marcador"
 
 #: marker_time_axis.cc:256
-#, fuzzy
 msgid "Marker"
-msgstr "Marcas"
+msgstr "Marcador"
 
 #: meter_bridge.cc:78
 msgid "ardour: meter bridge"
@@ -4926,7 +4610,6 @@ msgid "# of %u-sample overs"
 msgstr "# de %u-quadros"
 
 #: meter_bridge_strip.cc:222
-#, fuzzy
 msgid "New Name for Meter:"
 msgstr "Novo nome para o VUímetro:"
 
@@ -4936,48 +4619,42 @@ msgstr ""
 
 #: mixer_strip.cc:96 mixer_strip.cc:822
 msgid "Comments"
-msgstr ""
+msgstr "Comentários"
 
 #: mixer_strip.cc:119
-#, fuzzy
 msgid "Input"
 msgstr "Entradas"
 
 #: mixer_strip.cc:136 mixer_strip.cc:1223
-#, fuzzy
 msgid "input"
-msgstr "%1 entrada"
+msgstr "entrada"
 
 #: mixer_strip.cc:144 mixer_strip.cc:1231
-#, fuzzy
 msgid "post"
-msgstr "porta"
+msgstr "pós"
 
 #. TRANSLATORS: this string should be longest of the strings
 #. used to describe meter points. In english, its "input".
 #.
 #: mixer_strip.cc:152
 msgid "tupni"
-msgstr ""
+msgstr "adartne"
 
 #: mixer_strip.cc:207
-#, fuzzy
 msgid "Varispeed"
-msgstr "velocidade variável"
+msgstr "Velocidade variável"
 
 #: mixer_strip.cc:233 mixer_strip.cc:836
 msgid "Click to Add/Edit Comments"
-msgstr ""
+msgstr "Clicar para acrescentar/editar comentários"
 
 #: mixer_strip.cc:374
 msgid "unknown strip width \"%1\" in XML GUI information"
-msgstr ""
-"largura desconhecida \"%1\" na informação XML para o interface gráfico (GUI)"
+msgstr "largura de painel desconhecida \"%1\" na informação XML para o interface gráfico (GUI)"
 
 #: mixer_strip.cc:417
-#, fuzzy
 msgid "record"
-msgstr "Gravar"
+msgstr "gravar"
 
 #: mixer_strip.cc:418 region_editor.cc:47
 msgid "mute"
@@ -4989,16 +4666,15 @@ msgstr ""
 
 #: mixer_strip.cc:422
 msgid "comments"
-msgstr ""
+msgstr "comentários"
 
 #: mixer_strip.cc:424
 msgid "*comments*"
-msgstr ""
+msgstr "*comentários*"
 
 #: mixer_strip.cc:438
-#, fuzzy
 msgid "Rec"
-msgstr "refrescar"
+msgstr ""
 
 #: mixer_strip.cc:439
 msgid "M"
@@ -5009,9 +4685,8 @@ msgid "S"
 msgstr ""
 
 #: mixer_strip.cc:443 mixer_strip.cc:830
-#, fuzzy
 msgid "Cmt"
-msgstr "corte"
+msgstr ""
 
 #: mixer_strip.cc:445 mixer_strip.cc:828
 msgid "*Cmt*"
@@ -5019,7 +4694,7 @@ msgstr ""
 
 #: mixer_strip.cc:483 mixer_strip.cc:549 redirect_box.cc:1006
 msgid "Not connected to JACK - no I/O changes are possible"
-msgstr ""
+msgstr "Desligado do JACK - não são possíveis alterações nas entradas/saídas"
 
 #: mixer_strip.cc:560
 msgid "Track"
@@ -5027,26 +4702,23 @@ msgstr "Faixa"
 
 #: mixer_strip.cc:588 mixer_strip.cc:604
 msgid "could not register new ports required for that connection"
-msgstr ""
+msgstr "não foi possível criar os portos necessários para efectuar a ligação"
 
 #: mixer_strip.cc:747
-#, fuzzy
 msgid " Input"
-msgstr "No.Entradas"
+msgstr " Entrada"
 
 #: mixer_strip.cc:750
-#, fuzzy
 msgid "I"
-msgstr "ENTRADA"
+msgstr "E"
 
 #: mixer_strip.cc:820
 msgid "*Comments*"
-msgstr ""
+msgstr "*Comentários*"
 
 #: mixer_strip.cc:859
-#, fuzzy
 msgid ": comment editor"
-msgstr "Não foi possível iniciar o painel principal de edição (editor)"
+msgstr ": editor de comentários"
 
 #: mixer_strip.cc:953
 msgid "Grp"
@@ -5057,22 +4729,20 @@ msgid "~G"
 msgstr ""
 
 #: mixer_strip.cc:1004
-#, fuzzy
 msgid "Invert Polarity"
-msgstr "polaridade"
+msgstr "Inverter polaridade"
 
 #: mixer_ui.cc:85
 msgid "Strips"
 msgstr "Painéis"
 
 #: mixer_ui.cc:110
-#, fuzzy
 msgid "Group"
-msgstr "Grupos"
+msgstr "Grupo"
 
 #: mixer_ui.cc:211 mixer_ui.cc:370
 msgid "ardour: mixer"
-msgstr "ardour: misturador"
+msgstr "ardour: mistura"
 
 #: mixer_ui.cc:212
 msgid "ardour_mixer"
@@ -5080,7 +4750,7 @@ msgstr ""
 
 #: mixer_ui.cc:346
 msgid "ardour: mixer: "
-msgstr "ardour: misturador: "
+msgstr "ardour: mistura: "
 
 #: mixer_ui.cc:573
 msgid "signal"
@@ -5091,116 +4761,96 @@ msgid "track display list item for renamed strip not found!"
 msgstr "não foi encontrada qualquer faixa para o painel de mistura"
 
 #: new_session_dialog.cc:39
-#, fuzzy
 msgid "New Session Name :"
-msgstr "Nome de sessão:"
+msgstr "Novo nome de sessão:"
 
 #: new_session_dialog.cc:41
 msgid "Create Session Directory In :"
-msgstr ""
+msgstr "Criar directório de sessão em :"
 
 #: new_session_dialog.cc:43
-#, fuzzy
 msgid "Use Session Template :"
-msgstr "Modelo de sessão"
+msgstr "Usar modelo de sessão"
 
 #: new_session_dialog.cc:45
-#, fuzzy
 msgid "Channel Count"
-msgstr "Cancelar Importação"
+msgstr "Número de canais"
 
 #: new_session_dialog.cc:46
-#, fuzzy
 msgid "Create Monitor Bus"
-msgstr "Saídas de Controlo"
+msgstr "Criar barramento de controlo"
 
 #: new_session_dialog.cc:53
-#, fuzzy
 msgid "Create Master Bus"
-msgstr "usar saídas principais"
+msgstr "Criar barramento para VUímetro"
 
 #: new_session_dialog.cc:55
-#, fuzzy
 msgid "Automatically Connect Inputs"
-msgstr "ligar entradas físicas automaticamente"
+msgstr "Ligar entradas automaticamente"
 
 #: new_session_dialog.cc:56 new_session_dialog.cc:67
-#, fuzzy
 msgid "Port Limit"
-msgstr "Esquecer"
+msgstr "Limite de portos"
 
 #: new_session_dialog.cc:64
-#, fuzzy
 msgid "<b>Track/Bus Inputs</b>"
-msgstr "Faixas/Barramentos"
+msgstr "<b>Faixas/Barramentos de entrada</b>"
 
 #: new_session_dialog.cc:66
-#, fuzzy
 msgid "Automatically Connect Outputs"
-msgstr "ligar saídas manualmente"
+msgstr "Ligar saídas automaticamente"
 
 #: new_session_dialog.cc:75
 msgid "Connect to Master Bus"
-msgstr ""
+msgstr "Ligar ao barramento principal"
 
 #: new_session_dialog.cc:76
 msgid "Connect to Physical Outputs"
-msgstr ""
+msgstr "Ligar às saídas físicas"
 
 #: new_session_dialog.cc:80
-#, fuzzy
 msgid "<b>Track/Bus Outputs</b>"
-msgstr "Saída"
+msgstr "<b>Faixas/Barramentos de saída</b>"
 
 #: new_session_dialog.cc:83
-#, fuzzy
 msgid "Advanced Options"
-msgstr "Opções"
+msgstr "Opções avançadas"
 
 #: new_session_dialog.cc:91
-#, fuzzy
 msgid "Open Recent Session"
-msgstr "abrir sessão"
+msgstr "Abrir sessão recente"
 
 #: new_session_dialog.cc:127
-#, fuzzy
 msgid "Open Session File :"
-msgstr "abrir sessão"
+msgstr "Abrir sessão :"
 
 #: new_session_dialog.cc:274
-#, fuzzy
 msgid "New Session"
-msgstr "Sessão"
+msgstr "Nova sessão"
 
 #: new_session_dialog.cc:276
-#, fuzzy
 msgid "Open Session"
-msgstr "abrir sessão"
+msgstr "Abrir sessão"
 
 #: new_session_dialog.cc:281
-#, fuzzy
 msgid "ardour: session control"
-msgstr "ardour: guardar sessão?"
+msgstr "ardour: controlo de sessão"
 
 #: new_session_dialog.cc:310
-#, fuzzy
 msgid "select template"
-msgstr "Sem modelo"
+msgstr "seleccionar modelo"
 
 #: new_session_dialog.cc:316
-#, fuzzy
 msgid "select session file"
-msgstr "seleccionar regiões"
+msgstr "seleccionar sessão"
 
 #: new_session_dialog.cc:325
-#, fuzzy
 msgid "select directory"
-msgstr "seleccionar regiões"
+msgstr "seleccionar directório"
 
 #: option_editor.cc:76
-#, fuzzy
 msgid "SMPTE offset is negative"
-msgstr "Deslocamento SMPTE"
+msgstr "Deslocamento SMPTE negativo"
 
 #: option_editor.cc:102
 msgid "ardour: options editor"
@@ -5220,7 +4870,7 @@ msgstr "Teclado/Rato"
 
 #: option_editor.cc:131
 msgid "Layers & Fades"
-msgstr ""
+msgstr "Níveis & Desvanecimentos"
 
 #: option_editor.cc:135
 msgid "MIDI"
@@ -5247,14 +4897,12 @@ msgid "session RAID path"
 msgstr "directório RAID de sessão"
 
 #: option_editor.cc:249
-#, fuzzy
 msgid "Soundfile Search Paths"
-msgstr "Audioteca"
+msgstr "Directórios da audioteca"
 
 #: option_editor.cc:254
-#, fuzzy
 msgid "Paths"
-msgstr "Directórios/Ficheiros"
+msgstr "Directórios"
 
 #: option_editor.cc:268 option_editor.cc:274 option_editor.cc:723
 #: option_editor.cc:750
@@ -5263,11 +4911,11 @@ msgstr "interno"
 
 #: option_editor.cc:287
 msgid "Short crossfade length (msecs)"
-msgstr ""
+msgstr "Desvanecimento cruzado de curta duração (msegs)"
 
 #: option_editor.cc:299
 msgid "Destructive crossfade length (msecs)"
-msgstr ""
+msgstr "Desvanecimento cruzado destrutivo (msegs)"
 
 #: option_editor.cc:367
 msgid "SMPTE Frames/second"
@@ -5279,26 +4927,23 @@ msgstr "Deslocamento SMPTE"
 
 #: option_editor.cc:462 option_editor.cc:469 option_editor.cc:472
 #: option_editor.cc:618
-#, fuzzy
 msgid "online"
-msgstr "linear"
+msgstr "ligado"
 
 #. remember, we have to handle the i18n case where the relative
 #. lengths of the strings in language N is different than in english.
 #.
 #: option_editor.cc:469 option_editor.cc:470 option_editor.cc:615
-#, fuzzy
 msgid "offline"
-msgstr "linear"
+msgstr "desligado"
 
 #: option_editor.cc:670
 msgid "Choose Click"
-msgstr ""
+msgstr "Metrónomo"
 
 #: option_editor.cc:689
-#, fuzzy
 msgid "Choose Click Emphasis"
-msgstr "Usar como metrónomo acentuado"
+msgstr "Usar metrónomo acentuado"
 
 #: option_editor.cc:803
 msgid "Click audio file"
@@ -5315,9 +4960,9 @@ msgid ""
 "of the overall mix. It can be connected just like any\n"
 "other mixer strip."
 msgstr ""
-"O auditor é um painel de mistura dedicado\n"
+"O auditor é um painel de mistura dedicado usado\n"
 "para a escuta de determinadas regiões fora do contexto\n"
-"da mistura geral. Pode ser inter-conectado tal como\n"
+"da mistura geral. Pode ser interligado tal como\n"
 "qualquer outro painel de mistura."
 
 #: option_editor.cc:919
@@ -5357,37 +5002,34 @@ msgstr ""
 "possíveis\n"
 
 #: opts.cc:50
-#, fuzzy
 msgid "  -n, --show-splash                Show splash screen\n"
-msgstr ""
-"  -n, --no-splash                  Não mostrar ecran de apresentação "
-"inicial\n"
+msgstr "  -n, --show-splash                Mostrar ecran de apresentação inicial\n"
 
 #: opts.cc:51
-#, fuzzy
 msgid ""
 "  -c, --name  name                 Use a specific jack client name, default "
 "is ardour\n"
 msgstr ""
-"  -c, --jack-client-name  name     Empregar um nome de cliente JACK "
-"específico (ardour)\n"
+"  -c, --name  name                 Empregar um nome de cliente JACK específico "
+"(ardour)\n"
 
 #: opts.cc:52
-#, fuzzy
 msgid ""
 "  -N, --new session-name           Create a new session from the command "
 "line\n"
-msgstr "  [session-name]                   Nome de sessão a carregar\n"
+msgstr ""
+"  -N, --new session-name           Criar uma nova sessão denominada pela "
+"linha de comando\n"
 
 #: opts.cc:53
 msgid ""
 "  -o, --use-hw-optimizations        Try to use h/w specific optimizations\n"
 msgstr ""
+"  -o, --use-hw-optimizations        Tentar usar optimizações específicas do hardware\n"
 
 #: opts.cc:55
-#, fuzzy
 msgid "  -V, --novst                      Do not use VST support\n"
-msgstr "  -V, --novst                      Não usar suporte VST inicial\n"
+msgstr "  -V, --novst                      Não usar suporte VST\n"
 
 #: opts.cc:57
 msgid "  [session-name]                   Name of session to load\n"
@@ -5395,30 +5037,27 @@ msgstr "  [session-name]                   Nome de sessão a carregar\n"
 
 #: opts.cc:58
 msgid "  -C, --curvetest filename         Curve algorithm debugger\n"
-msgstr ""
+msgstr "  -C, --curvetest filename         Depurador do algoritmo de curvaturas\n"
 
 #: opts.cc:59
-#, fuzzy
 msgid "  -g, --gtktheme                   Allow GTK to load a theme\n"
-msgstr "  -h, --help                       Mostrar esta mesma mensagem\n"
+msgstr "  -g, --gtktheme                   Permitir que o GTK carregue um aspecto visual\n"
 
 #: pan_automation_time_axis.cc:60
 msgid "You can't graphically edit panning of more than stream"
-msgstr ""
+msgstr "Não é possível alterar gráficamente a panorâmica deste conjunto de canais"
 
 #: pan_automation_time_axis.cc:80
-#, fuzzy
 msgid "add pan automation event"
-msgstr "acrescentar evento de automatização a "
+msgstr "acrescentar evento de automatização de panorâmica"
 
 #: panner2d.cc:589 panner_ui.cc:435 plugin_ui.cc:834
 msgid "Bypass"
 msgstr "Ignorar"
 
 #: panner_ui.cc:58 panner_ui.cc:225
-#, fuzzy
 msgid "link"
-msgstr "entrada"
+msgstr "ligar"
 
 #: panner_ui.cc:69
 msgid "Pan automation mode"
@@ -5430,11 +5069,11 @@ msgstr "Tipo de automatização de panorâmica"
 
 #: panner_ui.cc:81
 msgid "panning link control"
-msgstr ""
+msgstr "controlo de ligação panorâmica"
 
 #: panner_ui.cc:83
 msgid "panning link direction"
-msgstr ""
+msgstr "direcção de ligação panorâmica"
 
 #: panner_ui.cc:235
 msgid "L"
@@ -5443,47 +5082,42 @@ msgstr ""
 #: panner_ui.cc:335
 #, c-format
 msgid "panner for channel %lu"
-msgstr ""
+msgstr "panorama para o canal %lu"
 
 #: panner_ui.cc:337
 #, c-format
 msgid "panner for channel %u"
-msgstr ""
+msgstr "panorama para o canal %u"
 
 #: panner_ui.cc:445
-#, fuzzy
 msgid "Reset all"
-msgstr "reiniciar"
+msgstr "Reiniciar tudo"
 
 #: playlist_selector.cc:52
-#, fuzzy
 msgid "ardour: playlists"
-msgstr "ardour: efeitos/plug-ins"
+msgstr "ardour: listas de reprodução"
 
 #: playlist_selector.cc:59
 msgid "Playlists grouped by track"
-msgstr ""
+msgstr "Listas de reprodução agrupadas por faixa"
 
 #: playlist_selector.cc:98
-#, fuzzy
 msgid "ardour: playlist for "
-msgstr "ardour: efeitos/plug-ins"
+msgstr "ardour: listas de reprodução para "
 
 #: playlist_selector.cc:114
-#, fuzzy
 msgid "Other tracks"
-msgstr "retocar faixa"
+msgstr "Outras faixas"
 
 #: playlist_selector.cc:130
 msgid "unassigned"
-msgstr ""
+msgstr "não atribuidas"
 
 #: plugin_selector.cc:43
 msgid "ardour: plugins"
 msgstr "ardour: efeitos/plug-ins"
 
 #: plugin_selector.cc:56
-#, fuzzy
 msgid "Available LADSPA Plugins"
 msgstr "Efeitos/plug-ins LADSPA disponíveis"
 
@@ -5501,12 +5135,11 @@ msgstr "No.Saídas"
 
 #: plugin_selector.cc:68
 msgid "Plugins to be Connected to Insert"
-msgstr ""
+msgstr "Efeitos/plug-ins para ligar e inserir"
 
 #: plugin_selector.cc:80
-#, fuzzy
 msgid "Available plugins"
-msgstr "Efeitos/plug-ins VST disponíveis"
+msgstr "Efeitos/plug-ins disponíveis"
 
 #: plugin_selector.cc:98
 msgid "Add a plugin to the effect list"
@@ -5514,7 +5147,7 @@ msgstr "Acrescentar à lista de efeitos/plug-ins"
 
 #: plugin_selector.cc:102
 msgid "Remove a plugin from the effect list"
-msgstr "Remover à lista de efeitos/plug-ins"
+msgstr "Remover da lista de efeitos/plug-ins"
 
 #: plugin_selector.cc:104
 msgid "Update available plugins"
@@ -5538,32 +5171,28 @@ msgstr ""
 
 #: plugin_ui.cc:139
 msgid "<span size=\"large\">Presets</span>"
-msgstr ""
+msgstr "<span size=\"large\">Parametrizações</span>"
 
 #: plugin_ui.cc:230
-#, fuzzy
 msgid "Controls"
-msgstr "Saídas de Controlo"
+msgstr "Controlos"
 
 #: plugin_ui.cc:267
 msgid "Plugin Editor: could not build control element for port %1"
-msgstr ""
-"Editor de efeitos/plug-ins: não foi possível criar elemento de controlo para "
-"%1"
+msgstr "Editor de efeitos/plug-ins: não foi possível criar elemento"
+" de controlo para %1"
 
 #: plugin_ui.cc:358
-#, fuzzy
 msgid "Automation control"
-msgstr "controlo de automatização"
+msgstr "Controlo de automatização"
 
 #: plugin_ui.cc:854
 msgid "Plugin preset %1 not found"
 msgstr "Parametrização de efeito/plug-in %1 inexistente"
 
 #: plugin_ui.cc:864
-#, fuzzy
 msgid "Name of New Preset:"
-msgstr "Nome para a nova ligação:"
+msgstr "Nome para a nova parametrização:"
 
 #: redirect_automation_line.cc:54
 msgid "redirect automation created for non-plugin"
@@ -5575,12 +5204,11 @@ msgstr "acrescentar evento de automatização a "
 
 #: redirect_box.cc:223
 msgid "New send"
-msgstr ""
+msgstr "Novo envio"
 
 #: redirect_box.cc:224
-#, fuzzy
 msgid "Show send controls"
-msgstr "Controlo de velocidade"
+msgstr "Mostrar controlos de envio"
 
 #: redirect_box.cc:383
 msgid ""
@@ -5592,6 +5220,11 @@ msgid ""
 "This makes no sense - you are throwing away\n"
 "part of the signal."
 msgstr ""
+"Foi tentado acrescentar um efeito/plug-in (%1).\n"
+"O efeito/plug-in tem %2 entradas, mas\n"
+"o ponto de inserção tem %3 canais activos.\n"
+"\n"
+"Não faz sentido deitar fora parte do sinal."
 
 #: redirect_box.cc:395
 msgid ""
@@ -5604,6 +5237,14 @@ msgid ""
 "side-chain inputs. A future version of Ardour will\n"
 "support this type of configuration."
 msgstr ""
+"Foi tentado acrescentar um efeito/plug-in (%1).\n"
+"O efeito/plug-in tem %2 entradas, mas no ponto\n"
+"de inserção somente existem %3 canais activos.\n"
+"\n"
+"Não faz sentido deitar fora parte do sinal,\n"
+"a menos que o efeito/plug-in suporte entradas\n"
+"à parte. Uma futura versão do Ardour poderá viar\n"
+"a suportar este tipo de configuração."
 
 #: redirect_box.cc:408
 msgid ""
@@ -5617,14 +5258,24 @@ msgid ""
 "\n"
 "Ardour does not understand what to do in such situations.\n"
 msgstr ""
+"Foi tentado acrescentar um efeito/plug-in (%1).\n"
+"\n"
+"No entanto, a configuração de entradas/saídas\n"
+"não faz qualquer sentido.\n"
+"\n"
+"O efeito/plug-in tem %2 entradas e %3 saídas,\n"
+"a faixa/barramento tem %4 entradas e %5 saídas,\n"
+"e no ponto de inserção existem %3 canais activos.\n"
+"\n"
+"Não é possível determinar o que fazer nestas situações.\n"
 
 #: redirect_box.cc:495
 msgid "Pre-fader inserts, sends & plugins:"
-msgstr ""
+msgstr "Inserções, envios e efeitos/plug-ins pré-atenuador"
 
 #: redirect_box.cc:498
 msgid "Post-fader inserts, sends & plugins:"
-msgstr ""
+msgstr "Inserções, envios e efeitos/plug-ins pós-atenuador"
 
 #: redirect_box.cc:644
 msgid ""
@@ -5632,11 +5283,13 @@ msgid ""
 "in that way because the inputs and\n"
 "outputs do not work correctly."
 msgstr ""
+"Não é possível reordenar os redireccionamentos\n"
+"na forma pretendida porque as entradas e saídas\n"
+"não podem ser combinadas correctamente."
 
 #: redirect_box.cc:749
-#, fuzzy
 msgid "rename redirect"
-msgstr "ardour: renomear região"
+msgstr "renomear redireccionamento"
 
 #: redirect_box.cc:826 redirect_box.cc:874
 msgid ""
@@ -5644,72 +5297,67 @@ msgid ""
 "probably because the I/O configuration of the plugins\n"
 "could not match the configuration of this track."
 msgstr ""
+"Não foi possível copiar o conjunto de redireccionamentos,\n"
+"provavelmente porque a configuração de entradas e saídas\n"
+"para os efeitos/plug-ins não combinam correctamente\n"
+"com a configuração desta faixa."
 
 #: redirect_box.cc:896
-#, fuzzy
 msgid ""
 "Do you really want to remove all redirects from this track?\n"
 "(this cannot be undone)"
 msgstr ""
-"Deseja realmente remover o faixa \"%1\" ?\n"
+"Deseja realmente remover todos os redireccionamentos para esta faixa?\n"
 "(esta operação não pode ser desfeita)"
 
 #: redirect_box.cc:899
-#, fuzzy
 msgid ""
 "Do you really want to remove all redirects from this bus?\n"
 "(this cannot be undone)"
 msgstr ""
-"Deseja realmente remover o faixa \"%1\" ?\n"
+"Deseja realmente remover todos os redireccionamentos para este barramento?\n"
 "(esta operação não pode ser desfeita)"
 
 #: redirect_box.cc:904
-#, fuzzy
 msgid "Yes, remove them all"
-msgstr "Sim, remover."
+msgstr "Sim, remover todos"
 
 #: redirect_box.cc:940
-#, fuzzy
 msgid "ardour: %1"
-msgstr "ardour: misturador"
+msgstr ""
 
 #: redirect_box.cc:982
-#, fuzzy
 msgid "ardour: %1: %2 (by %3)"
-msgstr "ardour: misturador: "
+msgstr "ardour: %1: %2 (por %3)"
 
 #. new stuff
 #: redirect_box.cc:1054
 msgid "New Plugin ..."
-msgstr ""
+msgstr "Novo efeito/plug-in..."
 
 #: redirect_box.cc:1055
-#, fuzzy
 msgid "New Insert"
-msgstr "nova entrada"
+msgstr "Nova inserção"
 
 #: redirect_box.cc:1056
 msgid "New Send ..."
-msgstr ""
+msgstr "Novo envio..."
 
 #: redirect_box.cc:1068
-#, fuzzy
 msgid "Deselect All"
-msgstr "Seleccionar tudo"
+msgstr "Seleccionar nenhum"
 
 #: redirect_box.cc:1075
-#, fuzzy
 msgid "Activate all"
-msgstr "Activar"
+msgstr "Activar todos"
 
 #: redirect_box.cc:1076
-#, fuzzy
 msgid "Deactivate all"
-msgstr "Desactivar"
+msgstr "Desactivar todos"
 
 #: region_editor.cc:45
 msgid "NAME:"
-msgstr "NOME:"
+msgstr "Nome:"
 
 #: region_editor.cc:46
 msgid "lock"
@@ -5737,7 +5385,7 @@ msgstr "reproduzir"
 
 #: region_editor.cc:61
 msgid "ENVELOPE"
-msgstr "ENVOLVENTE"
+msgstr "Envolvente"
 
 #: region_editor.cc:107
 msgid "mute this region"
@@ -5745,7 +5393,7 @@ msgstr "emudecer esta região"
 
 #: region_editor.cc:108
 msgid "regions underneath this one cannot be heard"
-msgstr "regiões abaixo desta não serão ouvidas"
+msgstr "regiões abaixo desta não poderão ser ouvidas"
 
 #: region_editor.cc:109
 msgid "prevent any changes to this region"
@@ -5773,19 +5421,19 @@ msgstr "ouvir esta região"
 
 #: region_editor.cc:147
 msgid "START:"
-msgstr "INÍCIO:"
+msgstr "Início:"
 
 #: region_editor.cc:149
 msgid "END:"
-msgstr "FINAL:"
+msgstr "Final:"
 
 #: region_editor.cc:151
 msgid "LENGTH:"
-msgstr "TAMANHO:"
+msgstr "Tamanho:"
 
 #: region_editor.cc:191
 msgid "FADE IN"
-msgstr "EVANESCER"
+msgstr "Evanescer"
 
 #: region_editor.cc:193 region_editor.cc:227
 msgid "msecs"
@@ -5793,7 +5441,7 @@ msgstr "msegs"
 
 #: region_editor.cc:225
 msgid "FADE OUT"
-msgstr "DESVANECER"
+msgstr "Desvanecer"
 
 #: region_editor.cc:265
 msgid "ardour: region "
@@ -5808,28 +5456,24 @@ msgid "fade out edit"
 msgstr "alterar desvanecimento"
 
 #: regionview.cc:1146
-#, fuzzy
 msgid "add gain control point"
-msgstr "remover ponto de controlo"
+msgstr "acrescentar ponto de controlo"
 
 #: route_params_ui.cc:89
 msgid "Tracks/Buses"
-msgstr "Faixas/Barramentos"
+msgstr "Faixas/barramentos"
 
 #: route_params_ui.cc:109
-#, fuzzy
 msgid "Pre-fader Redirects"
-msgstr "Pré-encaminhamentos"
+msgstr "Encaminhamentos pré-atenuador"
 
 #: route_params_ui.cc:110
-#, fuzzy
 msgid "Post-fader Redirects"
-msgstr "Pós-encaminhamentos"
+msgstr "Encaminhamentos pós-atenuador"
 
 #: route_params_ui.cc:144
-#, fuzzy
 msgid "ardour: track/bus inspector"
-msgstr "ardour: acrescentar faixa/barramento"
+msgstr "ardour: faixa/barramento"
 
 #: route_params_ui.cc:145
 msgid "ardour_route_parameters"
@@ -5837,25 +5481,23 @@ msgstr ""
 
 #: route_params_ui.cc:202
 msgid "route display list item for renamed route not found!"
-msgstr "não foi encontrado qualquer elemento de encaminhamento"
+msgstr "não foi encontrado qualquer encaminhamento"
 
 #: route_params_ui.cc:453
 msgid "NO TRACK"
-msgstr "SEM FAIXA"
+msgstr "Nenhuma faixa"
 
 #: route_params_ui.cc:695
-#, fuzzy
 msgid "ardour: track/bus inspector: "
-msgstr "ardour: acrescentar faixa/barramento"
+msgstr "ardour: faixa/barramento: "
 
 #: route_params_ui.cc:699
 msgid "No Route Selected"
-msgstr "Caminho Não Seleccionado"
+msgstr "Nenhum saminho seleccionado"
 
 #: route_params_ui.cc:700
-#, fuzzy
 msgid "ardour: track/bus/inspector: no route selected"
-msgstr "ardour: parâmetros de encaminhamento: caminho não seleccionado"
+msgstr "ardour: faixa/baramento: nenhum caminho seleccionado"
 
 #. ctrl-shift-click applies change to all routes
 #: route_ui.cc:134
@@ -5874,7 +5516,7 @@ msgstr "gravar alterado"
 
 #: route_ui.cc:479
 msgid "Solo-safe"
-msgstr "solo livre"
+msgstr "Solo livre"
 
 #: route_ui.cc:487 route_ui.cc:530
 msgid "MIDI Bind"
@@ -5882,19 +5524,19 @@ msgstr "Associação MIDI"
 
 #: route_ui.cc:501
 msgid "Pre Fader"
-msgstr "Pré-Atenuador"
+msgstr "Pré-atenuador"
 
 #: route_ui.cc:508
 msgid "Post Fader"
-msgstr "Pós-Atenuador"
+msgstr "Pós-atenuador"
 
 #: route_ui.cc:515
 msgid "Control Outs"
-msgstr "Saídas de Controlo"
+msgstr "Saídas de controlo"
 
 #: route_ui.cc:522
 msgid "Main Outs"
-msgstr "Saídas Principais"
+msgstr "Saídas principais"
 
 #: route_ui.cc:559
 msgid "mix group solo  change"
@@ -5913,15 +5555,15 @@ msgid "ardour: color selection"
 msgstr "ardor: selecção de cor"
 
 #: route_ui.cc:702
-#, fuzzy
 msgid ""
 "Do you really want to remove track \"%1\" ?\n"
 "\n"
 "You may also lose the playlist used by this track.\n"
 "(cannot be undone)"
 msgstr ""
-"Deseja realmente remover o faixa \"%1\" ?\n"
-"A lista de reprodução em uso por esta faixa pode ficar perdida.\n"
+"Deseja realmente remover a faixa \"%1\" ?\n"
+"\n"
+"A lista de reprodução em uso para esta faixa pode ficar perdida.\n"
 "(esta operação não pode ser desfeita)"
 
 #: route_ui.cc:704
@@ -5937,17 +5579,16 @@ msgid "Yes, remove it."
 msgstr "Sim, remover."
 
 #: route_ui.cc:737
-#, fuzzy
 msgid "New Name: "
-msgstr "novo nome: "
+msgstr "Novo nome: "
 
 #: sfdb_ui.cc:58
 msgid "Add Field..."
-msgstr "Acrescentar Campo..."
+msgstr "Acrescentar campo..."
 
 #: sfdb_ui.cc:59
 msgid "Remove Field"
-msgstr "Remover Campo"
+msgstr "Remover campo"
 
 #: sfdb_ui.cc:62
 msgid "Soundfile Info"
@@ -5962,54 +5603,48 @@ msgid "Value"
 msgstr "Valor"
 
 #: sfdb_ui.cc:161
-#, fuzzy
 msgid "channels"
-msgstr "cancelar"
+msgstr "canais"
 
 #: sfdb_ui.cc:161
-#, fuzzy
 msgid "samplerate"
-msgstr "separar"
+msgstr "freq.amostragem"
 
 #: sfdb_ui.cc:162
-#, fuzzy
 msgid "resolution"
-msgstr "selecção de intervalo"
+msgstr "resolução"
 
 #: sfdb_ui.cc:162
-#, fuzzy
 msgid "format"
-msgstr "Normal"
+msgstr "formato"
 
 #: sfdb_ui.cc:183
 msgid "Could not read file: %1 (%2)."
-msgstr "Não foi possível ler o ficheiro \"%1\" (%2)"
+msgstr "Não foi possível ler o ficheiro: %1 (%2)."
 
 #: sfdb_ui.cc:199
 msgid "Could not access soundfile: "
 msgstr "Não foi possível aceder ao ficheiros audio: "
 
 #: sfdb_ui.cc:236
-#, fuzzy
 msgid "Name for Field"
-msgstr "Nome para a região:"
+msgstr "Nome para a campo"
 
 #: sfdb_ui.cc:335
 msgid "Split Channels"
-msgstr "Separar Canais"
+msgstr "Separar canais"
 
 #: sfdb_ui.cc:342
 msgid "Create a region for each channel"
-msgstr ""
+msgstr "Criar uma região para cada canal"
 
 #: sfdb_ui.cc:344
 msgid "Embed"
-msgstr ""
+msgstr "Integrar"
 
 #: sfdb_ui.cc:346
-#, fuzzy
 msgid "Link to an external file"
-msgstr "Inserir ficheiro audio externo"
+msgstr "Ligar a ficheiro audio externo"
 
 #: sfdb_ui.cc:348
 msgid "Import"
@@ -6017,7 +5652,7 @@ msgstr "Importar"
 
 #: sfdb_ui.cc:350
 msgid "Copy a file to the session folder"
-msgstr ""
+msgstr "Copiar ficheiro para o directório de sessão"
 
 #: sfdb_ui.cc:414
 msgid "programming error: %1"
@@ -6052,7 +5687,7 @@ msgstr "Batimentos por compasso"
 
 #: tempo_dialog.cc:236 tempo_dialog.cc:247
 msgid "whole (1)"
-msgstr "toda (1)"
+msgstr "inteira (1)"
 
 #: tempo_dialog.cc:237 tempo_dialog.cc:249
 msgid "second (2)"
@@ -6080,7 +5715,7 @@ msgstr "trigésima-segunda (32)"
 
 #: tempo_dialog.cc:420
 msgid "garbaged note type entry (%1)"
-msgstr "tipo de nota desconhecido (%1)"
+msgstr "tipo de nota desconhecida (%1)"
 
 #: tempo_dialog.cc:430
 msgid "incomprehensible note type entry (%1)"
@@ -6112,7 +5747,7 @@ msgstr "Pequeno"
 
 #: time_axis_view.cc:870
 msgid "unknown track height name \"%1\" in XML GUI information"
-msgstr ""
+msgstr "altura de faixa desconhecida \"%1\" na informação XML para o interface gráfico (GUI)"
 
 #. first constructed item sets up font info
 #: time_axis_view_item.cc:79
@@ -6121,7 +5756,7 @@ msgstr ""
 
 #: time_axis_view_item.cc:298
 msgid "new duration %1 frames is out of bounds for %2"
-msgstr ""
+msgstr "nova duração de %1 quadros fora dos limites para %2"
 
 #: time_selection.cc:41
 msgid "programming error: request for non-existent audio range (%1)!"
@@ -6151,11 +5786,9 @@ msgstr "novo nome: "
 msgid "A track already exists with that name"
 msgstr "Já existe uma faixa com este nome"
 
-#, fuzzy
 #~ msgid "set selected trackview"
 #~ msgstr "seleccionar visualização de faixa"
 
-#, fuzzy
 #~ msgid "set selected control point"
 #~ msgstr "remover ponto de controlo"
 
@@ -6168,26 +5801,23 @@ msgstr "Já existe uma faixa com este nome"
 #~ msgid "via Session menu"
 #~ msgstr "via menu de Sessão"
 
-#, fuzzy
 #~ msgid "<b>Advanced</b>"
 #~ msgstr "Avançado..."
 
-#, fuzzy
 #~ msgid "Select a File"
 #~ msgstr "Seleccionar tudo"
 
-#, fuzzy
 #~ msgid "Track/Bus connection options"
-#~ msgstr "Faixas/Barramentos"
+#~ msgstr "Faixas/barramentos"
 
 #~ msgid "RECORD"
-#~ msgstr "GRAVAR"
+#~ msgstr "Gravar"
 
 #~ msgid "INPUT"
-#~ msgstr "ENTRADA"
+#~ msgstr "Entrada"
 
 #~ msgid "OUTPUT"
-#~ msgstr "SAÍDA"
+#~ msgstr "Saída"
 
 #~ msgid "Gain automation mode"
 #~ msgstr "Modo de automatização de ganho"
@@ -6196,7 +5826,7 @@ msgstr "Já existe uma faixa com este nome"
 #~ msgstr "Tipo de automatização de ganho"
 
 #~ msgid "trim"
-#~ msgstr "recorte"
+#~ msgstr "cortar"
 
 #~ msgid "gain automation mode"
 #~ msgstr "modo de automatização de ganho"
@@ -6208,10 +5838,10 @@ msgstr "Já existe uma faixa com este nome"
 #~ msgstr "ponto de automatização de panorâmica"
 
 #~ msgid "REC"
-#~ msgstr "GRAV"
+#~ msgstr "Grav"
 
 #~ msgid "OUT"
-#~ msgstr "SAÍDA"
+#~ msgstr "Saída"
 
 #~ msgid "aplay"
 #~ msgstr "aRepr"
@@ -6222,9 +5852,8 @@ msgstr "Já existe uma faixa com este nome"
 #~ msgid "no group"
 #~ msgstr "sem grupo"
 
-#, fuzzy
 #~ msgid "normal"
-#~ msgstr "Normal"
+#~ msgstr "normal"
 
 #~ msgid "Disk r:%5.1f w:%5.1f MB/s"
 #~ msgstr "Disco r:%5.1f w:%5.1f MB/s"
@@ -6232,18 +5861,15 @@ msgstr "Já existe uma faixa com este nome"
 #~ msgid "file"
 #~ msgstr "ficheiro"
 
-#, fuzzy
 #~ msgid "ardour cleanup"
 #~ msgstr "ardour: limpeza"
 
 #~ msgid "close session"
 #~ msgstr "fechar sessão"
 
-#, fuzzy
 #~ msgid "SetRegionLayerMode"
-#~ msgstr "Finais de região"
+#~ msgstr "Níveis de região"
 
-#, fuzzy
 #~ msgid "SetCrossfadeModel"
 #~ msgstr "Desvanecimento cruzado"
 
@@ -6254,38 +5880,37 @@ msgstr "Já existe uma faixa com este nome"
 #~ msgstr "Seleccionar intervalo"
 
 #~ msgid "FORMAT"
-#~ msgstr "FORMATO"
+#~ msgstr "Formato"
 
 #~ msgid "CD MARKER FILE TYPE"
-#~ msgstr "TIPO DE FICHEIRO MARCADORES CD"
+#~ msgstr "Tipo de ficheiro marcadores CD"
 
 #~ msgid "CHANNELS"
-#~ msgstr "CANAIS"
+#~ msgstr "Canais"
 
 #~ msgid "FILE TYPE"
-#~ msgstr "TIPO DE FICHEIRO"
+#~ msgstr "Tipo de ficheiro"
 
 #~ msgid "SAMPLE FORMAT"
-#~ msgstr "FORMATO DE AMOSTRA"
+#~ msgstr "Formato de amostra"
 
 #~ msgid "SAMPLE ENDIANNESS"
-#~ msgstr "REPRESENTAÇÃO BINÁRIA"
+#~ msgstr "Representação binária"
 
 #~ msgid "SAMPLE RATE"
-#~ msgstr "FREQUÊNCIA DE AMOSTRAGEM"
+#~ msgstr "Frequência de amostragem"
 
 #~ msgid "CONVERSION QUALITY"
-#~ msgstr "QUALIDADE DE CONVERSÃO"
+#~ msgstr "Qualidade de conversão"
 
 #~ msgid "DITHER TYPE"
-#~ msgstr "TIPO DE EXTRAPOLAÇÃO"
+#~ msgstr "Tipo de extrapolação"
 
-#, fuzzy
 #~ msgid "EXPORT CD MARKER FILE ONLY"
-#~ msgstr "TIPO DE FICHEIRO MARCADORES CD"
+#~ msgstr "Tipo de ficheiro marcadores CD"
 
 #~ msgid "EXPORT TO FILE"
-#~ msgstr "EXPORTAR PARA FICHEIRO"
+#~ msgstr "Exportar para ficheiro"
 
 #~ msgid "ardour: unplugged"
 #~ msgstr "ardour: desligado"
@@ -6303,7 +5928,7 @@ msgstr "Já existe uma faixa com este nome"
 #~ msgstr "ignorar"
 
 #~ msgid "Name for plugin settings:"
-#~ msgstr "Nome para efeito/plug-in:"
+#~ msgstr "Nome para configuração de efeito/plug-in:"
 
 #~ msgid "Authors"
 #~ msgstr "Autores"
@@ -6340,7 +5965,7 @@ msgstr "Já existe uma faixa com este nome"
 #~ msgstr "Seleccionar modo de salto ou de rolamento"
 
 #~ msgid "Image Compositor"
-#~ msgstr "Compositor de Imagem"
+#~ msgstr "Compositor de imagem"
 
 #~ msgid "Audio Library"
 #~ msgstr "Audioteca"
@@ -6349,25 +5974,22 @@ msgstr "Já existe uma faixa com este nome"
 #~ msgstr "VUímetro"
 
 #~ msgid "Input Connections"
-#~ msgstr "Ligações de Entrada"
+#~ msgstr "Ligações de entrada"
 
 #~ msgid "Output Connections"
-#~ msgstr "Ligações de Saída"
+#~ msgstr "Ligações de saída"
 
-#, fuzzy
 #~ msgid "New Input"
-#~ msgstr "nova entrada"
+#~ msgstr "Nova entrada"
 
-#, fuzzy
 #~ msgid "New Output"
-#~ msgstr "nova saída"
+#~ msgstr "Nova saída"
 
-#, fuzzy
 #~ msgid "Add Port"
-#~ msgstr "acrescentar porta"
+#~ msgstr "Acrescentar porto"
 
 #~ msgid "Available Ports"
-#~ msgstr "Portas Disponíveis"
+#~ msgstr "Portos disponíveis"
 
 #~ msgid "ardour: connections"
 #~ msgstr "ardour: ligações"
@@ -6375,12 +5997,11 @@ msgstr "Já existe uma faixa com este nome"
 #~ msgid "in %d"
 #~ msgstr "em %d"
 
-#, fuzzy
 #~ msgid "crossfade editor"
-#~ msgstr "alterar evanescimento"
+#~ msgstr "alterar desvanescimento cruzado"
 
 #~ msgid "Regions/name"
-#~ msgstr "Regiões"
+#~ msgstr "Nome/regiões"
 
 #~ msgid ""
 #~ "editor\n"
@@ -6402,12 +6023,11 @@ msgstr "Já existe uma faixa com este nome"
 #~ msgstr "Intercalar audio (ligar)"
 
 #~ msgid "Cancel cleanup"
-#~ msgstr "Cancelar eliminação"
+#~ msgstr "Cancelar limpeza"
 
 #~ msgid "Name for new edit group"
 #~ msgstr "Nome para o novo grupo de edição"
 
-#, fuzzy
 #~ msgid "Import selected as tracks"
 #~ msgstr "Importar selecção"
 
@@ -6419,9 +6039,8 @@ msgstr "Já existe uma faixa com este nome"
 #~ "Não é possível intercalar um ficheiro audio sem que haja uma sessão "
 #~ "carregada"
 
-#, fuzzy
 #~ msgid "Insert selected as new tracks"
-#~ msgstr "seleccionar visualização de faixa"
+#~ msgstr "Inserir faxas seleccionadas como novas"
 
 #~ msgid "Insert selected"
 #~ msgstr "Inserir selecção"
@@ -6454,7 +6073,7 @@ msgstr "Já existe uma faixa com este nome"
 #~ msgstr "Regiões/sistema de ficheiros"
 
 #~ msgid "Show All AbstractTracks"
-#~ msgstr "Mostar todas as faixas abstractas"
+#~ msgstr "Mostrar todas as faixas abstractas"
 
 #~ msgid "Hide All AbstractTracks"
 #~ msgstr "Esconder todas as faixas abstractas"
@@ -6472,10 +6091,10 @@ msgstr "Já existe uma faixa com este nome"
 #~ msgstr "combinação mal formada - ignorada"
 
 #~ msgid "ardour: soundfile selector"
-#~ msgstr "ardor: selecção de ficheiro audio"
+#~ msgstr "ardour: selecção de ficheiro audio"
 
 #~ msgid "Add to Library..."
-#~ msgstr "Acrescentar à Audioteca..."
+#~ msgstr "Acrescentar à audioteca..."
 
 #~ msgid "Remove..."
 #~ msgstr "Remover..."
@@ -6484,10 +6103,10 @@ msgstr "Já existe uma faixa com este nome"
 #~ msgstr "Procurar..."
 
 #~ msgid "Add Folder"
-#~ msgstr "Acrescentar Directório/Pasta"
+#~ msgstr "Acrescentar directório"
 
 #~ msgid "Add audio file or directory"
-#~ msgstr "Acrescentar ficheiro ou directório/pasta"
+#~ msgstr "Acrescentar ficheiro ou directório"
 
 #~ msgid "Importing"
 #~ msgstr "Em importação"
@@ -6496,7 +6115,7 @@ msgstr "Já existe uma faixa com este nome"
 #~ msgstr "%1 não foram acrescentados"
 
 #~ msgid "Folder name:"
-#~ msgstr "Nome do directório/pasta:"
+#~ msgstr "Nome do directório:"
 
 #~ msgid "Should not be reached"
 #~ msgstr "Não deve ser alcançada"
@@ -6598,9 +6217,8 @@ msgstr "Já existe uma faixa com este nome"
 #~ msgid "Narrow mixer strips"
 #~ msgstr "Estreitar painéis de mistura"
 
-#, fuzzy
 #~ msgid "MIDI parameter control"
-#~ msgstr "Receber controlo de parametros MIDI"
+#~ msgstr "Controlo de parametros MIDI"
 
 #~ msgid "Debug keyboard events"
 #~ msgstr "Depurar eventos programáticos de teclado"
@@ -6612,13 +6230,13 @@ msgstr "Já existe uma faixa com este nome"
 #~ msgstr "Visualização"
 
 #~ msgid "Broadcast WAVE/floating point"
-#~ msgstr "WAVE/vírgula flutuante (Broadcast)"
+#~ msgstr "WAVE/vírgula flutuante (difusão)"
 
 #~ msgid "WAVE/floating point"
 #~ msgstr "WAVE/vírgula flutuante"
 
 #~ msgid "Native Format"
-#~ msgstr "Formato Nativo"
+#~ msgstr "Formato nativo"
 
 #~ msgid "--unknown--"
 #~ msgstr "--desconhecido--"
@@ -6635,21 +6253,17 @@ msgstr "Já existe uma faixa com este nome"
 #~ msgid "outs"
 #~ msgstr "saídas"
 
-#, fuzzy
 #~ msgid "Select all"
 #~ msgstr "Seleccionar tudo"
 
-#, fuzzy
 #~ msgid "Inserts"
-#~ msgstr "Inverter"
+#~ msgstr "Inverte"
 
-#, fuzzy
 #~ msgid "Sends"
-#~ msgstr "Segundos"
+#~ msgstr "Envios"
 
-#, fuzzy
 #~ msgid "Select all ..."
-#~ msgstr "Seleccionar tudo"
+#~ msgstr "Seleccionar tudo..."
 
 #~ msgid "Pre Redirects"
 #~ msgstr "Pré-encaminhamentos"
@@ -6658,7 +6272,7 @@ msgstr "Já existe uma faixa com este nome"
 #~ msgstr "Pós-encaminhamentos"
 
 #~ msgid "Seamless Looping"
-#~ msgstr "Ciclos Imperceptíveis"
+#~ msgstr "Ciclos imperceptíveis"
 
 #~ msgid "Recieve MMC"
 #~ msgstr "Receber MMC"
@@ -6670,10 +6284,10 @@ msgstr "Já existe uma faixa com este nome"
 #~ msgstr "Rastrear saídas MIDI"
 
 #~ msgid "MTC Port"
-#~ msgstr "Porta MTC"
+#~ msgstr "Porto MTC"
 
 #~ msgid "MIDI Param Port"
-#~ msgstr "Porta Parameterização MIDI"
+#~ msgstr "Porto parameterização MIDI"
 
 #~ msgid "attempt to timestretch a non-audio track!"
 #~ msgstr "tentativa de alongamento temporal duma faixa não-audio"
@@ -6702,9 +6316,8 @@ msgstr "Já existe uma faixa com este nome"
 #~ msgid "Edit fade"
 #~ msgstr "Editar desvanecimento"
 
-#, fuzzy
 #~ msgid "Bounce region"
-#~ msgstr "Rebater selecção"
+#~ msgstr "Regravar região"
 
 #~ msgid "clear connections"
 #~ msgstr "apagar ligações"
@@ -6713,7 +6326,7 @@ msgstr "Já existe uma faixa com este nome"
 #~ msgstr "acrescentar comentários/notas aqui"
 
 #~ msgid "Crossfades in use"
-#~ msgstr "Desvanecimentos cruzados automáticos em utilização"
+#~ msgstr "Desvanecimentos cruzados em uso"
 
 #~ msgid "outside this computer"
 #~ msgstr "fora deste computador"
@@ -6722,4 +6335,4 @@ msgstr "Já existe uma faixa com este nome"
 #~ msgstr "dentro deste computador"
 
 #~ msgid "Recorded audio is generated"
-#~ msgstr "Gravação audio é gerada"
+#~ msgstr "Gravação audio gerada"

@@ -26,6 +26,12 @@ extern "C" { typedef struct _GError GError; }
 
 #include <glib/gquark.h>
 #include <glibmm/exception.h>
+#include <glibmmconfig.h> //For GLIBMM_EXCEPTIONS_ENABLED
+
+#ifndef GLIBMM_EXCEPTIONS_ENABLED
+//When not usinge exceptions, we pass auto_ptrs of the exceptions objects around instead. 
+#include <memory> //For std::auto_ptr
+#endif
 
 
 namespace Glib
@@ -56,13 +62,22 @@ public:
 
   void propagate(GError** dest);
 
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
   typedef void (* ThrowFunc) (GError*);
+#else
+  //When not using exceptions, we just pass the Exception object around without throwing it:
+  typedef std::auto_ptr<Glib::Error> (* ThrowFunc) (GError*);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
 
   static void register_init();
   static void register_cleanup();
   static void register_domain(GQuark domain, ThrowFunc throw_func);
 
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
   static void throw_exception(GError* gobject) G_GNUC_NORETURN;
+#else
+  static std::auto_ptr<Glib::Error> throw_exception(GError* gobject);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
 
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 

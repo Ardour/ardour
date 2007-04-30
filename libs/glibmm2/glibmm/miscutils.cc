@@ -100,7 +100,8 @@ std::string get_real_name()
 
 std::string get_home_dir()
 {
-  return std::string(g_get_home_dir());
+  const char *const value = g_get_home_dir();
+  return (value) ? std::string(value) : std::string();
 }
 
 std::string get_tmp_dir()
@@ -144,21 +145,25 @@ std::string path_get_dirname(const std::string& filename)
 
 std::string build_filename(const Glib::ArrayHandle<std::string>& elements)
 {
-  return build_path(G_DIR_SEPARATOR_S, elements);
+  return Glib::convert_return_gchar_ptr_to_stdstring( g_build_filenamev(const_cast<char**>(elements.data())) );
+
 }
 
 std::string build_filename(const std::string& elem1, const std::string& elem2)
 {
   const char *const elements[] = { elem1.c_str(), elem2.c_str(), 0 };
-  return build_path(G_DIR_SEPARATOR_S, elements);                                          
+  return build_filename(elements);                                          
 }
+
+std::string build_path(const std::string& separator, const Glib::ArrayHandle<std::string>& elements)
+{
+  return Glib::convert_return_gchar_ptr_to_stdstring( g_build_pathv(separator.c_str(), const_cast<char**>(elements.data())) );
 
 /* Yes, this reimplements the functionality of g_build_path() -- because
  * it takes a varargs list, and calling it several times would result
  * in different behaviour.
  */
-std::string build_path(const std::string& separator, const Glib::ArrayHandle<std::string>& elements)
-{
+  /*
   std::string result;
   result.reserve(256); //TODO: Explain why this magic number is useful. murrayc
 
@@ -229,6 +234,7 @@ std::string build_path(const std::string& separator, const Glib::ArrayHandle<std
     result += last_trailing;
 
   return result;
+  */
 }
 
 std::string find_program_in_path(const std::string& program)

@@ -3,6 +3,7 @@
 #ifndef _GTKMM_BOX_H
 #define _GTKMM_BOX_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -211,7 +212,8 @@ virtual void remove(Widget& w); //Implented as custom or by LIST_CONTAINER_REMOV
  * right side.  Use repeated calls to pack_start() to pack widgets into a
  * Gtk::Box from start to end. Use pack_end() to add widgets from end to start.
  * You may intersperse these calls and add widgets from both ends of the same
- * Gtk::Box.
+ * Gtk::Box. The last widget added with pack_start() will be placed just before
+ * the last widget added with pack_end()
  *
  * Because Gtk::Box is a Gtk::Container, you may also use Gtk::Container::add()
  * to insert widgets, and they will be packed as if with pack_start(). Use
@@ -268,11 +270,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -354,14 +362,17 @@ public:
    */
   const BoxList& children() const;
 
-  /** The amount of space between children.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The amount of space between children.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_spacing() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The amount of space between children.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -369,15 +380,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_spacing() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Whether the children should all be the same size.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether the children should all be the same size.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_homogeneous() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the children should all be the same size.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -385,6 +400,7 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_homogeneous() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 protected:
@@ -450,11 +466,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -531,11 +553,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -564,7 +592,9 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Box* wrap(GtkBox* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 namespace Glib
 {
   /** @relates Gtk::VBox
@@ -573,7 +603,9 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::VBox* wrap(GtkVBox* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 namespace Glib
 {
   /** @relates Gtk::HBox
@@ -582,6 +614,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::HBox* wrap(GtkHBox* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_BOX_H */
 

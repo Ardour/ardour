@@ -3,6 +3,7 @@
 #ifndef _GTKMM_RULER_H
 #define _GTKMM_RULER_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -110,11 +111,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -141,9 +148,9 @@ public:
    */
   MetricType get_metric();
 
-  double get_range_lower() const;
-  double get_range_upper() const;
-
+   double get_range_lower() const;
+    double get_range_upper() const;
+ 
   /** sets the range of the ruler.
    * <i>upper</i> and <i>lower</i> arguments denote the extents of the Ruler.
    * <i>max_size</i> is the largest number displayed by the ruler.
@@ -171,17 +178,26 @@ public:
   
   void draw_pos();
 
-    virtual void draw_ticks_vfunc();
-    virtual void draw_pos_vfunc();
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual void draw_ticks_vfunc();
+#endif //GLIBMM_VFUNCS_ENABLED
 
-  /** Lower limit of ruler.
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual void draw_pos_vfunc();
+#endif //GLIBMM_VFUNCS_ENABLED
+
+
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Lower limit of ruler.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<double> property_lower() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Lower limit of ruler.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -189,15 +205,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<double> property_lower() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Upper limit of ruler.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Upper limit of ruler.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<double> property_upper() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Upper limit of ruler.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -205,15 +225,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<double> property_upper() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Position of mark on the ruler.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Position of mark on the ruler.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<double> property_position() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Position of mark on the ruler.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -221,15 +245,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<double> property_position() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Maximum size of the ruler.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Maximum size of the ruler.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<double> property_max_size() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Maximum size of the ruler.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -237,6 +265,7 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<double> property_max_size() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -290,11 +319,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -354,11 +389,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -380,7 +421,9 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Ruler* wrap(GtkRuler* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 namespace Glib
 {
   /** @relates Gtk::VRuler
@@ -389,7 +432,9 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::VRuler* wrap(GtkVRuler* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 namespace Glib
 {
   /** @relates Gtk::HRuler
@@ -398,6 +443,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::HRuler* wrap(GtkHRuler* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_RULER_H */
 

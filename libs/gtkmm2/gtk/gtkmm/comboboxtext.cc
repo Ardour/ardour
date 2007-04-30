@@ -99,7 +99,13 @@ Glib::ustring ComboBoxText::get_active_text() const
   return result;
 }
 
+//deprecated.
 void ComboBoxText::clear()
+{
+  clear_items();
+}
+
+void ComboBoxText::clear_items()
 {
   //Ideally, we would just store the ListStore as a member variable, but we forgot to do that and not it would break the ABI.
   Glib::RefPtr<Gtk::TreeModel> model = get_model();
@@ -107,6 +113,28 @@ void ComboBoxText::clear()
   
   if(list_model)  
     list_model->clear();
+}
+
+void ComboBoxText::remove_text(const Glib::ustring& text)
+{
+  //Ideally, we would just store the ListStore as a member variable, but we forgot to do that and not it would break the ABI.
+  Glib::RefPtr<Gtk::TreeModel> model = get_model();
+  Glib::RefPtr<Gtk::ListStore> list_model = Glib::RefPtr<ListStore>::cast_dynamic(model);
+
+  //Look for the row with this text, and remove it:
+  if(list_model)
+  {
+    for(Gtk::TreeModel::iterator iter = list_model->children().begin(); iter != list_model->children().end(); ++iter)
+    {
+      const Glib::ustring& this_text = (*iter)[m_text_columns.m_column];
+
+      if(this_text == text)
+      {
+        list_model->erase(iter);
+        return; //success
+      }
+    }
+  }
 }
 
 void ComboBoxText::set_active_text(const Glib::ustring& text)

@@ -26,52 +26,83 @@ namespace sigc {
 
 namespace internal {
 
+//This should really be an inner class of limit_derived_target, without the T_limit template type,
+//But the SUN CC 5.7 (not earlier versions) compiler finds it ambiguous when we specify a particular specialization of it.
+//and does not seem to allow us to tell it explicitly that it's an inner class.
+template <bool I_derived, class T_type, class T_limit>
+struct with_type;
+
+//Specialization for I_derived = false
+template <class T_type, class T_limit> struct
+with_type<false, T_type, T_limit>
+{
+  static void execute_(const T_type&, const T_limit&) {}
+};
+
+//Specialization for I_derived = true
+template <class T_type, class T_limit>
+struct with_type<true, T_type, T_limit>
+{
+  static void execute_(const T_type& _A_type, const T_limit& _A_action)
+  { _A_action.action_(_A_type); }
+};
+
+
 /// Helper struct for visit_each_type().
 template <class T_target, class T_action>
 struct limit_derived_target
 {
   typedef limit_derived_target<T_target, T_action> T_self;
 
-  template <bool I_derived, class T_type> struct with_type;
-
-  template <class T_type> struct with_type<false,T_type>
-  { static void execute_(const T_type&, const T_self&) {} };
-
-  template <class T_type> struct with_type<true,T_type>
-  { static void execute_(const T_type& _A_type, const T_self& _A_action)
-      { _A_action.action_(_A_type); }
-  };
-
+ 
   template <class T_type>
   void operator()(const T_type& _A_type) const
-  { with_type<is_base_and_derived<T_target,T_type>::value,T_type>::execute_(_A_type,*this); }
+  {
+    with_type<is_base_and_derived<T_target, T_type>::value, T_type, T_self>::execute_(_A_type, *this);
+  }
 
-  limit_derived_target(const T_action& _A_action): action_(_A_action) {}
+  limit_derived_target(const T_action& _A_action)
+  : action_(_A_action)
+  {}
 
   T_action action_;
 };
 
-/// Helper struct for visit_each_type().
+// Specialization for T_target pointer types, to provide a slightly different execute_() implementation.
+
+template <bool I_derived, class T_type, class T_limit>
+struct with_type_pointer;
+
+//Specialization for I_derived = false
+template <class T_type, class T_limit>
+struct with_type_pointer<false, T_type, T_limit>
+{
+ static void execute_(const T_type&, const T_limit&) {}
+};
+
+//Specialization for I_derived = true
+template <class T_type, class T_limit>
+struct with_type_pointer<true, T_type, T_limit>
+{
+  static void execute_(const T_type& _A_type, const T_limit& _A_action) 
+  { _A_action.action_(&_A_type); }
+};
+
 template <class T_target, class T_action>
 struct limit_derived_target<T_target*, T_action>
 {
   typedef limit_derived_target<T_target*, T_action> T_self;
 
-  template <bool I_derived, class T_type> struct with_type;
-
-  template <class T_type> struct with_type<false,T_type>
-  { static void execute_(const T_type&, const T_self&) {} };
-
-  template <class T_type> struct with_type<true,T_type>
-  { static void execute_(const T_type& _A_type, const T_self& _A_action) 
-     { _A_action.action_(&_A_type); }
-  };
 
   template <class T_type>
   void operator()(const T_type& _A_type) const
-  { with_type<is_base_and_derived<T_target,T_type>::value,T_type>::execute_(_A_type,*this); }
+  {
+    with_type_pointer<is_base_and_derived<T_target, T_type>::value, T_type, T_self>::execute_(_A_type, *this);
+  }
 
-  limit_derived_target(const T_action& _A_action): action_(_A_action) {}
+  limit_derived_target(const T_action& _A_action)
+  : action_(_A_action)
+  {}
 
   T_action action_;
 };
@@ -120,8 +151,23 @@ void visit_each(const T_action& _A_action, const T_functor& _A_functor)
 template <class T_type, class T_action, class T_functor>
 void visit_each_type(const T_action& _A_action, const T_functor& _A_functor)
 { 
-  internal::limit_derived_target<T_type,T_action> limited_action(_A_action);
-  visit_each(limited_action,_A_functor);
+  typedef internal::limit_derived_target<T_type, T_action> type_limited_action;
+
+  type_limited_action limited_action(_A_action);
+
+  //specifying the types of the template specialization prevents disconnection of bound trackable references (such as with sigc::ref()),
+  //probably because the visit_each<> specializations take various different template types,
+  //in various sequences, and we are probably specifying only a subset of them with this.
+  //
+  //But this is required by the AIX (and maybe IRIX MipsPro  and Tru64) compilers.
+  //I guess that sigc::ref() therefore does not work on those platforms. murrayc
+  //visit_each<type_limited_action, T_functor>(limited_action, _A_functor);
+
+  //g++ (even slightly old ones) is our primary platform, so we could use the non-crashing version. 
+  //However, the expliict version also fixes a crash in a slightl more common case: http://bugzilla.gnome.org/show_bug.cgi?id=169225
+  //Users (and distributors) of libsigc++ on AIX (and maybe IRIX MipsPro  and Tru64) do 
+  //need to use the version above instead, to allow compilation.
+  visit_each(limited_action, _A_functor);
 }
 
 } /* namespace sigc */

@@ -21,6 +21,9 @@
  */
 
 #include <glibmm/propertyproxy_base.h>
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+
 #include <glibmm/signalproxy_connectionnode.h>
 #include <glibmm/object.h>
 #include <glibmm/private/object_p.h>
@@ -28,26 +31,18 @@
 namespace Glib
 {
 
-/** PropertyProxyConnectionNode is a connection node for use with SignalProxyProperty.
-  * It's like ProxyConnectionNode, but it contains the property name too.
-  */
-class PropertyProxyConnectionNode : public SignalProxyConnectionNode
+PropertyProxyConnectionNode::PropertyProxyConnectionNode(const sigc::slot_base& slot, GObject* gobject)
+: SignalProxyConnectionNode(slot, gobject)
 {
-public:
-  friend class SignalProxyProperty;
+}
 
-  PropertyProxyConnectionNode(const sigc::slot_base& slot, GObject* gobject, const gchar* property_name);
-
-protected:
-  //This will be examined in the callback.
-  //Should be a static string literal.
-  const gchar* property_name_;
-};
-
-PropertyProxyConnectionNode::PropertyProxyConnectionNode(const sigc::slot_base& slot, GObject* gobject, const gchar* property_name)
-: SignalProxyConnectionNode(slot, gobject),
-  property_name_(property_name)
+void PropertyProxyConnectionNode::callback(GObject*, GParamSpec* pspec, gpointer data) //static
 {
+  if(pspec && data)
+  {
+    if(sigc::slot_base *const slot = SignalProxyBase::data_to_slot(data))
+      (*static_cast<sigc::slot<void>*>(slot))();
+  }
 }
 
 //SignalProxyProperty implementation:
@@ -64,39 +59,21 @@ SignalProxyProperty::~SignalProxyProperty()
 
 sigc::connection SignalProxyProperty::connect(const SlotType& sl)
 {
-  // create a proxy to hold our connection info
-  PropertyProxyConnectionNode* pConnectionNode = new PropertyProxyConnectionNode(sl, obj_->gobj(), property_name_ );
+  // Create a proxy to hold our connection info
+  // This will be deleted by destroy_notify_handler.
+  PropertyProxyConnectionNode* pConnectionNode = new PropertyProxyConnectionNode(sl, obj_->gobj());
 
   // connect it to gtk+
   // pConnectionNode will be passed as the data argument to the callback.
   // The callback will then call the virtual Object::property_change_notify() method,
   // which will contain a switch/case statement which will examine the property name.
+  const Glib::ustring notify_signal_name = "notify::" + Glib::ustring(property_name_);
   pConnectionNode->connection_id_ = g_signal_connect_data(obj_->gobj(),
-         "notify", (GCallback)(&callback), pConnectionNode,
+         notify_signal_name.c_str(), (GCallback)(&PropertyProxyConnectionNode::callback), pConnectionNode,
          &PropertyProxyConnectionNode::destroy_notify_handler,
          G_CONNECT_AFTER);
 
   return sigc::connection(pConnectionNode->slot_);
-}
-
-void SignalProxyProperty::callback(GObject*, GParamSpec* pspec, gpointer data) //static
-{
-  if(pspec && data)
-  {
-    //Get the name of the property that has changed:
-    const char* property_name_changed = pspec->name;
-
-    //Get the name of the property that we are waiting for:
-    PropertyProxyConnectionNode* conn = static_cast<PropertyProxyConnectionNode*>(data);
-    const char* property_name_monitored = conn->property_name_;
-
-    //If it's the correct property, then call the signal handler:
-    if(strcmp(property_name_changed, property_name_monitored) == 0)
-    {
-      if(sigc::slot_base *const slot = data_to_slot(data))
-        (*static_cast<sigc::slot<void>*>(slot))();
-    }
-  }
 }
 
 
@@ -149,3 +126,4 @@ void PropertyProxy_Base::reset_property_()
 
 } // namespace Glib
 
+#endif //GLIBMM_PROPERTIES_ENABLED

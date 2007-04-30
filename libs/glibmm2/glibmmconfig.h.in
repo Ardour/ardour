@@ -17,6 +17,7 @@
 #define GLIBMM_CONFIGURE
 #elif defined(__MINGW32__)
 #define GLIBMM_WIN32
+#define GLIBMM_DLL
 #define GLIBMM_CONFIGURE
 #else
 //AIX clR compiler complains about this even though it doesn't get this far:
@@ -27,9 +28,6 @@
 #endif /* _WIN32 */
 
 #ifdef GLIBMM_CONFIGURE
-/* compiler feature tests that are used during compile time and run-time
-   by gtk-- only. tests used by gdk-- and gtk-- should go into
-   gdk--config.h.in */
 #undef GLIBMM_CXX_HAVE_MUTABLE
 #undef GLIBMM_CXX_HAVE_NAMESPACES
 //#undef GLIBMM_CXX_GAUB
@@ -45,6 +43,10 @@
 #undef GLIBMM_CAN_ASSIGN_NON_EXTERN_C_FUNCTIONS_TO_EXTERN_C_CALLBACKS
 #undef GLIBMM_CAN_USE_NAMESPACES_INSIDE_EXTERNC
 #undef GLIBMM_HAVE_ALLOWS_STATIC_INLINE_NPOS
+#undef GLIBMM_PROPERTIES_ENABLED
+#undef GLIBMM_VFUNCS_ENABLED
+#undef GLIBMM_EXCEPTIONS_ENABLED
+#undef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 #endif
 
 #ifdef GLIBMM_MSC
@@ -57,7 +59,10 @@
   #define GLIBMM_CAN_USE_DYNAMIC_CAST_IN_UNUSED_TEMPLATE_WITHOUT_DEFINITION 1
   #define GLIBMM_CAN_ASSIGN_NON_EXTERN_C_FUNCTIONS_TO_EXTERN_C_CALLBACKS 1
   #define GLIBMM_CAN_USE_NAMESPACES_INSIDE_EXTERNC 1
-  #define GLIBMM_HAVE_ALLOWS_STATIC_INLINE_NPOS 1
+  #define GLIBMM_PROPERTIES_ENABLED 1
+  #define GLIBMM_VFUNCS_ENABLED 1
+  #define GLIBMM_EXCEPTIONS_ENABLED 1
+  #define GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED 1
   #pragma warning (disable: 4786 4355 4800 4181)
 #endif
 

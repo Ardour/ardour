@@ -450,8 +450,7 @@ GainMeter::setup_meters ()
 int
 GainMeter::get_gm_width ()
 {
-	Gtk::Requisition sz;
-	hbox.size_request (sz);
+	Gtk::Requisition sz = hbox.size_request ();
 	return sz.width;
 }
 

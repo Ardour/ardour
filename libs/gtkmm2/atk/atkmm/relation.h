@@ -3,6 +3,7 @@
 #ifndef _ATKMM_RELATION_H
 #define _ATKMM_RELATION_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -153,6 +154,12 @@ public:
   Glib::ArrayHandle< Glib::RefPtr<const Atk::Object> > get_target() const;
   
   
+  /** Adds the specified AtkObject to the target for the relation, if it is
+   * not already present.
+   * 
+   * Since: 1.9
+   * @param target An Atk::Object.
+   */
   void add_target(const Glib::RefPtr<Atk::Object>& target);
 
 
@@ -160,11 +167,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

@@ -3,6 +3,7 @@
 #ifndef _LIBGNOMECANVASMM_LINE_H
 #define _LIBGNOMECANVASMM_LINE_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -142,9 +143,13 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
 
@@ -155,14 +160,17 @@ public:
   explicit Line(Group& parent);
   Line(Group& parent, const Points& points);
 
-  /** 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Points> property_points() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -170,15 +178,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Points> property_points() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_fill_color() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -186,15 +198,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_fill_color() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Gdk::Color> property_fill_color_gdk() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -202,15 +218,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Gdk::Color> property_fill_color_gdk() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<guint> property_fill_color_rgba() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -218,15 +238,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<guint> property_fill_color_rgba() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy< Glib::RefPtr<Gdk::Bitmap> > property_fill_stipple() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -234,15 +258,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly< Glib::RefPtr<Gdk::Bitmap> > property_fill_stipple() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<guint> property_width_pixels() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -250,15 +278,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<guint> property_width_pixels() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<double> property_width_units() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -266,15 +298,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<double> property_width_units() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Gdk::CapStyle> property_cap_style() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -282,15 +318,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Gdk::CapStyle> property_cap_style() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Gdk::JoinStyle> property_join_style() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -298,15 +338,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Gdk::JoinStyle> property_join_style() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Gdk::LineStyle> property_line_style() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -314,15 +358,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Gdk::LineStyle> property_line_style() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_first_arrowhead() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -330,15 +378,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_first_arrowhead() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_last_arrowhead() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -346,15 +398,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_last_arrowhead() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_smooth() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -362,15 +418,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_smooth() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<guint> property_spline_steps() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -378,15 +438,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<guint> property_spline_steps() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<double> property_arrow_shape_a() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -394,15 +458,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<double> property_arrow_shape_a() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<double> property_arrow_shape_b() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -410,15 +478,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<double> property_arrow_shape_b() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<double> property_arrow_shape_c() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -426,6 +498,7 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<double> property_arrow_shape_c() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -448,6 +521,7 @@ public:
 } // namespace Glib
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
+
 namespace Glib
 {
   /** @relates Gnome::Canvas::Line
@@ -456,6 +530,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gnome::Canvas::Line* wrap(GnomeCanvasLine* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _LIBGNOMECANVASMM_LINE_H */
 

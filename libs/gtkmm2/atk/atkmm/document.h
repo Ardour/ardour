@@ -3,6 +3,7 @@
 #ifndef _ATKMM_DOCUMENT_H
 #define _ATKMM_DOCUMENT_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -110,19 +111,30 @@ public:
   gpointer get_document();
 
 protected:
-    virtual const gchar* get_document_type_vfunc();
-    virtual gpointer get_document_vfunc() const;
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual const gchar* get_document_type_vfunc();
+#endif //GLIBMM_VFUNCS_ENABLED
+
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual gpointer get_document_vfunc() const;
+#endif //GLIBMM_VFUNCS_ENABLED
 
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };
@@ -140,6 +152,7 @@ namespace Glib
   Glib::RefPtr<Atk::Document> wrap(AtkDocument* object, bool take_copy = false);
 
 } // namespace Glib
+
 
 #endif /* _ATKMM_DOCUMENT_H */
 

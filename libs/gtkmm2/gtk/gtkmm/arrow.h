@@ -3,6 +3,7 @@
 #ifndef _GTKMM_ARROW_H
 #define _GTKMM_ARROW_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -96,11 +97,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -125,14 +132,17 @@ public:
    */
   void set(ArrowType arrow_type, ShadowType shadow_type);
 
-  /** The direction the arrow should point.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The direction the arrow should point.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<ArrowType> property_arrow_type() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The direction the arrow should point.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -140,15 +150,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<ArrowType> property_arrow_type() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Appearance of the shadow surrounding the arrow.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Appearance of the shadow surrounding the arrow.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<ShadowType> property_shadow_type() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Appearance of the shadow surrounding the arrow.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -156,6 +170,7 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<ShadowType> property_shadow_type() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -172,6 +187,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Arrow* wrap(GtkArrow* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_ARROW_H */
 

@@ -26,6 +26,7 @@
 #include <string>
 
 #include <gdkmm/types.h>
+#include <gtkmm/accelkey.h>
 
 namespace Gtk
 {
@@ -107,8 +108,8 @@ void save(const std::string& filename);
  *
  * @param accel_path a valid accelerator path
  *
- * Since: 2.4
- **/
+ * @newin2p4
+ */
 void lock_path(const std::string& accel_path);
 
 /** Unlocks the given accelerator path. Refer to gtk_accel_map_lock_path()
@@ -116,9 +117,26 @@ void lock_path(const std::string& accel_path);
  *
  * @param accel_path a valid accelerator path
  *
- * Since: 2.4
- **/
+ * @newin2p4
+ */
 void unlock_path(const std::string& accel_path);
+
+/** Looks up the accelerator entry for accel_path.
+ * @param accel_path A valid accelerator path.
+ * @result true if accel_path is known, false otherwise
+ *
+ * @newin2p10
+ */
+bool lookup_entry (const Glib::ustring& accel_path);
+
+/** Looks up the accelerator entry for accel_path and fills in key.
+ * @param accel_path A valid accelerator path.
+ * @param key The accelerator key to be filled in.
+ * @result true if accel_path is known, false otherwise
+ *
+ * @newin2p10
+ */
+bool lookup_entry (const Glib::ustring& accel_path, Gtk::AccelKey& key);
 
 } // namespace AccelMap
 

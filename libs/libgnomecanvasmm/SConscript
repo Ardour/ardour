@@ -15,7 +15,8 @@ gnomecanvasmm.Merge([libraries['glibmm2'],
                      libraries['atkmm'],
                      libraries['gdkmm2'],
                      libraries['gtkmm2'],
-                     libraries['libgnomecanvas2'] ])
+                     libraries['libgnomecanvas2'],
+                     libraries['cairomm'] ])
 
 libgnomecanvasmm = gnomecanvasmm.SharedLibrary('libgnomecanvasmm', gnomecanvasmm_files)
 Default(libgnomecanvasmm)

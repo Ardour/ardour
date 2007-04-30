@@ -29,7 +29,7 @@ AC_DEFUN([AL_PROG_GNU_MAKE],[
 dnl 
 dnl Check for GNU make (stolen from gtk+/configure.in)
 AC_MSG_CHECKING(whether make is GNU Make)
-if $ac_make --version 2>/dev/null | grep '^GNU Make ' >/dev/null ; then
+if ${MAKE-make} --version 2>/dev/null | grep '^GNU Make ' >/dev/null ; then
         AC_MSG_RESULT(yes)
 else
         AC_MSG_RESULT(no)

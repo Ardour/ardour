@@ -3,6 +3,7 @@
 #ifndef _GDKMM_PIXBUF_H
 #define _GDKMM_PIXBUF_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -191,7 +192,14 @@ public:
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 private:
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
   static void throw_func(GError* gobject);
+#else
+  //When not using exceptions, we just pass the Exception object around without throwing it:
+  static std::auto_ptr<Glib::Error> throw_func(GError* gobject);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
   friend void wrap_init(); // uses throw_func()
 #endif
 };
@@ -279,7 +287,7 @@ private:
   
 protected:
 
-  //TODO: Documente these, based on the docs for the C functions.
+  //TODO: Document these, based on the docs for the C functions.
   Pixbuf(const Glib::RefPtr<Drawable>& src, const Glib::RefPtr<Colormap>& cmap,
          int src_x, int src_y, int dest_x, int dest_y, int width, int height);
   Pixbuf(const Glib::RefPtr<Image>& src, const Glib::RefPtr<Colormap>& cmap,
@@ -342,7 +350,23 @@ public:
    * @throw Glib::FileError
    * @throw Gdk::PixbufError
    */
+  
+  /** Creates a new pixbuf by loading an image from a file.  The file format is
+   * detected automatically. If <tt>0</tt> is returned, then @a error  will be set.
+   * Possible errors are in the Gdk::PIXBUF_ERROR and G::FILE_ERROR domains.
+   * @param filename Name of file to load, in the GLib file name encoding.
+   * @param error Return location for an error.
+   * @return A newly-created pixbuf with a reference count of 1, or <tt>0</tt> if
+   * any of several error conditions occurred:  the file could not be opened,
+   * there was no loader for the file's format, there was not enough memory to
+   * allocate the image buffer, or the image file contained invalid data.
+   */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
   static Glib::RefPtr<Pixbuf> create_from_file(const std::string& filename);
+#else
+  static Glib::RefPtr<Pixbuf> create_from_file(const std::string& filename, std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
   
   /** Creates a new pixbuf by loading an image from a file. The file format is detected automatically.
    * The image will be scaled to fit in the requested size.
@@ -354,8 +378,38 @@ public:
    * @throw Glib::FileError
    * @throw Gdk::PixbufError
    */
-  static Glib::RefPtr<Pixbuf> create_from_file(const std::string& filename, int width, int height, bool preserve_aspect_ratio = true);
   
+  /** Creates a new pixbuf by loading an image from a file.  The file format is
+   * detected automatically. If <tt>0</tt> is returned, then @a error  will be set.
+   * Possible errors are in the Gdk::PIXBUF_ERROR and G::FILE_ERROR domains.
+   * The image will be scaled to fit in the requested size, optionally preserving
+   * the image's aspect ratio. 
+   * 
+   * When preserving the aspect ratio, a @a width  of -1 will cause the image
+   * to be scaled to the exact given height, and a @a height  of -1 will cause
+   * the image to be scaled to the exact given width. When not preserving
+   * aspect ratio, a @a width  or @a height  of -1 means to not scale the image 
+   * at all in that dimension. Negative values for @a width  and @a height  are 
+   * allowed since 2.8.
+   * @param filename Name of file to load, in the GLib file name encoding.
+   * @param width The width the image should have or -1 to not constrain the width.
+   * @param height The height the image should have or -1 to not constrain the height.
+   * @param preserve_aspect_ratio <tt>true</tt> to preserve the image's aspect ratio.
+   * @param error Return location for an error.
+   * @return A newly-created pixbuf with a reference count of 1, or <tt>0</tt> 
+   * if any of several error conditions occurred:  the file could not be opened,
+   * there was no loader for the file's format, there was not enough memory to
+   * allocate the image buffer, or the image file contained invalid data.
+   * 
+   * @newin2p6.
+   */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  static Glib::RefPtr<Pixbuf> create_from_file(const std::string& filename, int width, int height, bool preserve_aspect_ratio = true);
+#else
+  static Glib::RefPtr<Pixbuf> create_from_file(const std::string& filename, int width, int height, bool preserve_aspect_ratio, std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+   //gdk_pixbuf_new_from_file_at_size() just calls gdk_pixbuf_new_from_file_at_scale().
 
   /** Creates a new Gdk::Pixbuf out of in-memory image data.
    * Currently only RGB images with 8 bits per sample are supported.
@@ -428,10 +482,55 @@ public:
    * to @a data for the resulting pixbuf.
    * @throw Gdk::PixbufError
    */
+  
+  /** Create a Gdk::Pixbuf from a flat representation that is suitable for
+   * storing as inline data in a program. This is useful if you want to
+   * ship a program with images, but don't want to depend on any
+   * external files.
+   * 
+   * GTK+ ships with a program called &lt;command&gt;gdk-pixbuf-csource&lt;/command&gt; 
+   * which allows for conversion of Gdk::Pixbufs into such a inline representation.
+   * In almost all cases, you should pass the &lt;option&gt;--raw&lt;/option&gt; flag to
+   * &lt;command&gt;gdk-pixbuf-csource&lt;/command&gt;. A sample invocation would be:
+   * 
+   * @code
+   * gdk-pixbuf-csource --raw --name=myimage_inline myimage.png
+   * @endcode
+   * 
+   * For the typical case where the inline pixbuf is read-only static data,
+   * you don't need to copy the pixel data unless you intend to write to
+   * it, so you can pass <tt>false</tt> for @a copy_pixels .  (If you pass 
+   * &lt;option&gt;--rle&lt;/option&gt; to &lt;command&gt;gdk-pixbuf-csource&lt;/command&gt;, a copy 
+   * will be made even if @a copy_pixels  is <tt>false</tt>, so using this option is 
+   * generally a bad idea.)
+   * 
+   * If you create a pixbuf from const inline data compiled into your
+   * program, it's probably safe to ignore errors and disable length checks, 
+   * since things will always succeed:
+   * @code
+   * pixbuf = gdk_pixbuf_new_from_inline (-1, myimage_inline, <tt>false</tt>, <tt>0</tt>);
+   * @endcode
+   * 
+   * For non-const inline data, you could get out of memory. For untrusted 
+   * inline data located at runtime, you could have corrupt inline data in 
+   * addition.
+   * @param data_length Length in bytes of the @a data  argument or -1 to 
+   * disable length checks.
+   * @param data Byte data containing a serialized Gdk::Pixdata structure.
+   * @param copy_pixels Whether to copy the pixel data, or use direct pointers
+   *  @a data  for the resulting pixbuf.
+   * @param error G::Error return location, may be <tt>0</tt> to ignore errors.
+   * @return A newly-created Gdk::Pixbuf structure with a reference,
+   * count of 1, or <tt>0</tt> if an error occurred.
+   */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
   static Glib::RefPtr<Pixbuf> create_from_inline(int data_length, const guint8* data,
                                                  bool copy_pixels = false);
+#else
+  static Glib::RefPtr<Pixbuf> create_from_inline(int data_length, const guint8* data, bool copy_pixels, std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
 
-  
+
   /** Queries the color space of a pixbuf.
    * @return Color space.
    */
@@ -485,21 +584,56 @@ public:
    */
   void fill(guint32 pixel);
 
-  /** Save an image file.
+  /** Saves pixbuf to a file in format @a type. 
+   * By default, "jpeg", "png", "ico" and "bmp" are possible file formats to save in, but more formats may be installed.
+   * TThe list of all writable formats can be determined by using Gdk::Pixbuf::get_formats() with 
+   * Gdk::PixbufFormat::is_writable().
+   *
+   * @param filename The path of the file to be created.
+   * @param type The file type.
+   *
    * @throw Glib::FileError
    * @throw Gdk::PixbufError
    */
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
   void save(const std::string& filename, const Glib::ustring& type);
+  #else
+  void save(const std::string& filename, const Glib::ustring& type, std::auto_ptr<Glib::Error>& error);
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
   
 
-  /** Save an image file.
+  /** Saves pixbuf to a file in format @a type. 
+   * By default, "jpeg", "png", "ico" and "bmp" are possible file formats to save in, but more formats may be installed.
+   * TThe list of all writable formats can be determined by using Gdk::Pixbuf::get_formats() with 
+   * Gdk::PixbufFormat::is_writable().
+   *
+   * The @a option_keys and @option_values, if not empty, should contain pairs of strings that modify the save parameters. 
+   * For example,  "quality", "100".
+   *
+   * Currently only a few parameters exist. JPEG images can be saved with a "quality" parameter; 
+   * its value should be in the range [0,100]. Text chunks can be attached to PNG images by specifying parameters of the 
+   * form "tEXt::key", where key is an ASCII string of length 1-79. The values are UTF-8 encoded strings. ICO images can be 
+   * saved in depth 16, 24, or 32, by using the "depth" parameter. When the ICO saver is given "x_hot" and "y_hot" 
+   * parameters, it produces a CUR instead of an ICO.  
+   *
+   * @param filename The path of the file to be created.
+   * @param type The file type.
+   * @param option_keys
+   * @param option_values
+   *
    * @throw Glib::FileError
    * @throw Gdk::PixbufError
    */
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
   void save(const std::string& filename, const Glib::ustring& type,
             const Glib::StringArrayHandle& option_keys,
             const Glib::StringArrayHandle& option_values);
-  
+  #else
+  void save(const std::string& filename, const Glib::ustring& type,
+            const Glib::StringArrayHandle& option_keys,
+            const Glib::StringArrayHandle& option_values, std::auto_ptr<Glib::Error>& error);
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+
   
 /* TODO:
 typedef gboolean (*GdkPixbufSaveFunc)   (const gchar *buf,
@@ -524,10 +658,47 @@ gboolean gdk_pixbuf_save_to_callbackv   (GdkPixbuf  *pixbuf,
 
 */
 
+  /* Saves the pixbuf to a new buffer in format @a type.
+   * Note that the buffer is not nul-terminated and may contain embedded nulls.
+   * @see save().
+   *
+   * @param buffer This will be set to the address of a new buffer.
+   * @param size This will be set to the size of the @a buffer.
+   * @param type Currently "jpeg", "png", "ico" or "bmp".
+   *
+   * @throw Glib::FileError
+   * @throw Gdk::PixbufError
+   */
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  void save_to_buffer(gchar*& buffer, gsize& buffer_size,
+                      const Glib::ustring& type = "png");
+  #else
+  void save_to_buffer(gchar*& buffer, gsize& buffer_size,
+                      const Glib::ustring& type, std::auto_ptr<Glib::Error>& error);
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+                      
+  /* Saves the pixbuf to a new buffer in format @a type.
+   * Note that the buffer is not nul-terminated and may contain embedded nulls.
+   * @see save().
+   *
+   * @param buffer This will be set to the address of a new buffer.
+   * @param size This will be set to the size of the @a buffer.
+   * @param type Currently "jpeg", "png", "ico" or "bmp".
+   *
+   * @throw Glib::FileError
+   * @throw Gdk::PixbufError
+   */
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
   void save_to_buffer(gchar*& buffer, gsize& buffer_size,
                       const Glib::ustring& type,
                       const Glib::StringArrayHandle& option_keys,
                       const Glib::StringArrayHandle& option_values);
+  #else
+  void save_to_buffer(gchar*& buffer, gsize& buffer_size,
+                      const Glib::ustring& type,
+                      const Glib::StringArrayHandle& option_keys,
+                      const Glib::StringArrayHandle& option_values, std::auto_ptr<Glib::Error>& error);
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
   
                                          
   /** Takes an existing pixbuf and adds an alpha channel to it.
@@ -732,7 +903,7 @@ gboolean gdk_pixbuf_save_to_callbackv   (GdkPixbuf  *pixbuf,
    * @param angle The angle to rotate by.
    * @return A new pixbuf
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   Glib::RefPtr<Gdk::Pixbuf> rotate_simple(PixbufRotation angle) const;
   
@@ -741,7 +912,7 @@ gboolean gdk_pixbuf_save_to_callbackv   (GdkPixbuf  *pixbuf,
    * @param horizontal <tt>true</tt> to flip horizontally, <tt>false</tt> to flip vertically.
    * @return A new pixbuf.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   Glib::RefPtr<Gdk::Pixbuf> flip(bool horizontal = true) const;
 
@@ -857,11 +1028,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

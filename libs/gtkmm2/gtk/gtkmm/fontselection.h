@@ -3,6 +3,7 @@
 #ifndef _GTKMM_FONTSELECTION_H
 #define _GTKMM_FONTSELECTION_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -106,11 +107,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -129,31 +136,34 @@ public:
   void set_preview_text(const Glib::ustring& fontname);
 
   // Font page
-  Entry* get_font_entry();
+   Entry* get_font_entry();
   const Entry* get_font_entry() const;
-  Entry* get_font_style_entry();
+    Entry* get_font_style_entry();
   const Entry* get_font_style_entry() const;
-  Entry* get_size_entry();
+    Entry* get_size_entry();
   const Entry* get_size_entry() const;
-
-  RadioButton* get_pixels_button();
+ 
+   RadioButton* get_pixels_button();
   const RadioButton* get_pixels_button() const;
-  RadioButton* get_points_button();
+    RadioButton* get_points_button();
   const RadioButton* get_points_button() const;
-  Button* get_filter_button();
+    Button* get_filter_button();
   const Button* get_filter_button() const;
-
-  Entry* get_preview_entry();
+ 
+   Entry* get_preview_entry();
   const Entry* get_preview_entry() const;
-
-  /** The X string that represents this font.
+ 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The X string that represents this font.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_font_name() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The X string that represents this font.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -161,15 +171,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_font_name() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The text to display in order to demonstrate the selected font.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The text to display in order to demonstrate the selected font.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_preview_text() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The text to display in order to demonstrate the selected font.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -177,6 +191,7 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_preview_text() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -231,11 +246,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -255,15 +276,15 @@ public:
   
   void set_preview_text(const Glib::ustring& fontname);
 
-  FontSelection* get_font_selection();
+   FontSelection* get_font_selection();
   const FontSelection* get_font_selection() const;
-  Button* get_ok_button();
+    Button* get_ok_button();
   const Button* get_ok_button() const;
-  Button* get_apply_button();
+    Button* get_apply_button();
   const Button* get_apply_button() const;
-  Button* get_cancel_button();
+    Button* get_cancel_button();
   const Button* get_cancel_button() const;
-
+ 
 
 };
 
@@ -278,7 +299,9 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::FontSelection* wrap(GtkFontSelection* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 namespace Glib
 {
   /** @relates Gtk::FontSelectionDialog
@@ -287,6 +310,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::FontSelectionDialog* wrap(GtkFontSelectionDialog* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_FONTSELECTION_H */
 

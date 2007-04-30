@@ -264,7 +264,8 @@ template <class T_functor>
 void retype_return_functor<void, T_functor>::operator()()
   { this->functor_(); }
 
-
+  
+//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::retype_return_functor performs a functor on the
  * functor stored in the sigc::retype_return_functor object.

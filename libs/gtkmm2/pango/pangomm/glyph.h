@@ -3,6 +3,7 @@
 #ifndef _PANGOMM_GLYPH_H
 #define _PANGOMM_GLYPH_H
 
+
 #include <glibmm.h>
 
 /* glyph.h
@@ -68,18 +69,18 @@ public:
   /** Gets the glyph itself.
    * @return The glyph.
    */
-  Glyph get_glyph() const;
-
+   Glyph get_glyph() const;
+ 
   /** Gets the positional information about the glyph.
    * @return A GylphGeometry object.
    */
-  GlyphGeometry get_geometry() const;
-
+   GlyphGeometry get_geometry() const;
+ 
   /** Gets the visual attributes of the glyph.
    * @return A GlyphVisAttr structure.
    */
-  GlyphVisAttr get_attr() const;
-
+   GlyphVisAttr get_attr() const;
+ 
 //I don't think that we need these set_* functions!
 //TODO: Who wrote this? Investigate. murrayc.
   /* Sets the glyph itself.
@@ -129,18 +130,18 @@ public:
   /** Gets the logical width to use for the character.
    * @return The logical width.
    */
-  GlyphUnit get_width() const;
-
+   GlyphUnit get_width() const;
+ 
   /** Gets the horizontal offset from nominal character position.
    * @return The horizontal offset.
    */
-  GlyphUnit get_x_offset() const;
-
+   GlyphUnit get_x_offset() const;
+ 
   /** Gets the vertical offset from nominal character position.
    * @return The vertical offset.
    */
-  GlyphUnit get_y_offset() const;
-
+   GlyphUnit get_y_offset() const;
+ 
 //I don't think that we need these set_* functions!
   /* Sets the logical width to use for the character.
    * @param width The new logical width.
@@ -217,6 +218,7 @@ const Pango::GlyphGeometry& wrap(const PangoGlyphGeometry* object);
 //const Pango::GlyphVisAttr& wrap(const PangoGlyphVisAttr* object);
 
 } //namespace Glib
+
 
 #endif /* _PANGOMM_GLYPH_H */
 

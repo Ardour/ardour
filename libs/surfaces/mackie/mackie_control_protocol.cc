@@ -37,6 +37,7 @@
 #include <midi++/manager.h>
 #include <pbd/pthread_utils.h>
 #include <pbd/error.h>
+#include <pbd/memento_command.h>
 
 #include <ardour/route.h>
 #include <ardour/session.h>
@@ -256,7 +257,9 @@ void MackieControlProtocol::switch_banks( int initial )
 	int delta = sorted.size() - route_table.size();
 	if ( initial < 0 || ( delta > 0 && initial > delta ) )
 	{
+#ifdef DEBUG
 		cout << "not switching to " << initial << endl;
+#endif
 		return;
 	}
 	_current_initial_bank = initial;
@@ -416,7 +419,9 @@ int MackieControlProtocol::set_active (bool yn)
 		}
 		catch( exception & e )
 		{
+#ifdef DEBUG
 			cout << "set_active to false because exception caught: " << e.what() << endl;
+#endif
 			_active = false;
 			throw;
 		}
@@ -497,8 +502,10 @@ void MackieControlProtocol::update_global_button( const string & name, LedState 
 	}
 	else
 	{
+#ifdef DEBUG
 		cout << "Button " << name << " not found" << endl;
-	}
+#endif
+		}
 }
 
 // send messages to surface to set controls to correct values
@@ -674,7 +681,9 @@ void MackieControlProtocol::close()
 		}
 		catch ( exception & e )
 		{
+#ifdef DEBUG
 			cout << "MackieControlProtocol::close caught exception: " << e.what() << endl;
+#endif
 		}
 		
 		for( MackiePorts::iterator it = _ports.begin(); it != _ports.end(); ++it )
@@ -691,7 +700,9 @@ void MackieControlProtocol::close()
 			}
 			catch ( exception & e )
 			{
+#ifdef DEBUG
 				cout << "MackieControlProtocol::close caught exception: " << e.what() << endl;
+#endif
 			}
 		}
 		
@@ -757,7 +768,9 @@ int MackieControlProtocol::set_state( const XMLNode & node )
 		}
 		catch ( exception & e )
 		{
+#ifdef DEBUG
 			cout << "exception in MackieControlProtocol::set_state: " << e.what() << endl;
+#endif
 			return -1;
 		}
 	}
@@ -1114,7 +1127,7 @@ LedState MackieControlProtocol::record_release( Button & button )
 
 LedState MackieControlProtocol::rewind_press( Button & button )
 {
-	session->request_transport_speed( -2.0 );
+	session->request_transport_speed( -4.0 );
 	return on;
 }
 
@@ -1129,7 +1142,7 @@ LedState MackieControlProtocol::rewind_release( Button & button )
 
 LedState MackieControlProtocol::ffwd_press( Button & button )
 {
-	session->request_transport_speed( 2.0 );
+	session->request_transport_speed( 4.0 );
 	return on;
 }
 
@@ -1163,7 +1176,9 @@ void MackieControlProtocol::notify_parameter_changed( const char * name_str )
 	}
 	else
 	{
+#ifdef DEBUG
 		cout << "parameter changed: " << name << endl;
+#endif
 	}
 }
 
@@ -1405,6 +1420,30 @@ LedState MackieControlProtocol::channel_right_press( Button & button )
 }
 
 LedState MackieControlProtocol::channel_right_release( Button & button )
+{
+	return off;
+}
+
+/////////////////////////////////////
+// Functions
+/////////////////////////////////////
+LedState MackieControlProtocol::marker_press( Button & button )
+{
+	// cut'n'paste from LocationUI::add_new_location()
+	string markername;
+	nframes_t where = session->audible_frame();
+	session->locations()->next_available_name(markername,"mcu");
+	Location *location = new Location (where, where, markername, Location::IsMark);
+	session->begin_reversible_command (_("add marker"));
+	XMLNode &before = session->locations()->get_state();
+	session->locations()->add (location, true);
+	XMLNode &after = session->locations()->get_state();
+	session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
+	session->commit_reversible_command ();
+	return on;
+}
+
+LedState MackieControlProtocol::marker_release( Button & button )
 {
 	return off;
 }

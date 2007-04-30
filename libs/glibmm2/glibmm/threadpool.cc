@@ -100,14 +100,17 @@ namespace
 
 static void call_thread_entry_slot(void* data, void* user_data)
 {
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
   try
   {
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
     Glib::ThreadPool::SlotList *const slot_list =
         static_cast<Glib::ThreadPool::SlotList*>(user_data);
 
     sigc::slot<void> slot (slot_list->pop(static_cast<sigc::slot<void>*>(data)));
 
     slot();
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
   }
   catch(Glib::Thread::Exit&)
   {
@@ -118,6 +121,7 @@ static void call_thread_entry_slot(void* data, void* user_data)
   {
     Glib::exception_handlers_invoke();
   }
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
 }
 
 } // anonymous namespace

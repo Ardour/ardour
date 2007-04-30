@@ -3,6 +3,7 @@
 #ifndef _PANGOMM_LAYOUTRUN_H
 #define _PANGOMM_LAYOUTRUN_H
 
+
 #include <glibmm.h>
 
 /* layoutrun.h
@@ -55,13 +56,13 @@ public:
   /** Gets the Pango::Item object that provides information about the segment of text in this run.
    * @return A Pango::Item object.
    */
-  Item get_item() const;
-
+   Item get_item() const;
+ 
   /** Gets the string of glyphs obtained by shaping the text for this item.
    * @return A Pango::GlyphString object.
    */
-  GlyphString get_glyphs() const;
-
+   GlyphString get_glyphs() const;
+ 
   /// Provides access to the underlying C GObject.  
   PangoLayoutRun*       gobj()       { return &gobject_; }
   /// Provides access to the underlying C GObject.

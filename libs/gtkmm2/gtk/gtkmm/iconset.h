@@ -3,6 +3,7 @@
 #ifndef _GTKMM_ICONSET_H
 #define _GTKMM_ICONSET_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -43,6 +44,9 @@ namespace Gtk
 
 class Style;
 class Widget;
+
+//TODO_API: Is _CLASS_BOXEDTYPE the appropriate thing to use here.
+//This seems to be reference-counted, not copied.
 
 class IconSet
 {
@@ -183,6 +187,7 @@ class Value<Gtk::IconSet> : public Glib::Value_Boxed<Gtk::IconSet>
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 } // namespace Glib
+
 
 #endif /* _GTKMM_ICONSET_H */
 

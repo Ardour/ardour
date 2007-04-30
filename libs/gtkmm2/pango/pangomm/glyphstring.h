@@ -3,6 +3,7 @@
 #ifndef _PANGOMM_GLYPHSTRING_H
 #define _PANGOMM_GLYPHSTRING_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -29,6 +30,7 @@
 #include <pangomm/font.h>
 #include <pangomm/glyph.h>
 #include <pangomm/item.h>
+#include <cairomm/context.h>
 #include <pango/pango-glyph.h>
 #include <pango/pango-item.h> //For PangoAnalysis.
 
@@ -183,6 +185,8 @@ public:
    */
   Glib::ArrayHandle<GlyphInfo> get_glyphs() const;
 
+  //TODO: Wrap pango_cairo_glyph_string_path().
+
 
 };
 
@@ -218,6 +222,7 @@ class Value<Pango::GlyphString> : public Glib::Value_Boxed<Pango::GlyphString>
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 } // namespace Glib
+
 
 #endif /* _PANGOMM_GLYPHSTRING_H */
 

@@ -3,6 +3,7 @@
 #ifndef _GTKMM_OBJECT_H
 #define _GTKMM_OBJECT_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -42,6 +43,16 @@ namespace Gtk
 
 class Object;
 
+/** Mark a Gtk::Object as owned by its parent container widget, so you don't need to delete it manually.
+ * For instance,
+ * @code
+ * Gtk::Button* button = Gtk::manage( new Gtk::Button("Hello") );
+ * vbox.pack_start(*button); //vbox will delete button when vbox is deleted.
+ * @endcode
+ *
+ * @param obj A Gtk::Object, such as a gtkmm widget.
+ * @result The Gtk::Object passed as the @a obj parameter.
+ */
 template<class T>
 T* manage(T* obj)
 {
@@ -49,8 +60,16 @@ T* manage(T* obj)
   return obj;
 }
 
+/** Gtk::Object is the base class for all widgets, and for a few non-widget objects such as 
+ * Gtk::Adjustment. Gtk::Object predates Glib::Object; non-widgets that derive from Gtk::Object 
+ * rather than Glib::Object do so for backward compatibility reasons.
+ *
+ * The most interesting difference between Gtk::Object and Glib::Object is the ability to use Gtk::manage() to delegate memory management to the container widget. Gtk::Objects can also be 
+ * explicitly deleted at any time, instead of using only reference-counting, and container widgets 
+ * can respond when their child objects are being deleted (for instance by removing the widget).
+ */
 
-class Object : public Glib::Object
+class GTKMM_API Object : public Glib::Object
 {
   public:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -93,11 +112,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -110,16 +135,23 @@ public:
   //void set_user_data(gpointer data);
   //gpointer get_user_data();
 
+  #ifndef DOXYGEN_SHOULD_SKIP_THIS
+  /** Used by Gtk::manage(). You should not need to use this directly.
+   */
   virtual void set_manage();
+  #endif //DOXYGEN_SHOULD_SKIP_THIS
 
-  /** Anonymous User Data Pointer.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Anonymous User Data Pointer.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<void*> property_user_data() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Anonymous User Data Pointer.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -127,18 +159,28 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<void*> property_user_data() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
+  #ifndef DOXYGEN_SHOULD_SKIP_THIS
+  /** Private API.
+   */
   bool is_managed_() const;
+  #endif //DOXYGEN_SHOULD_SKIP_THIS
 
 protected:
 
+  #ifndef DOXYGEN_SHOULD_SKIP_THIS
+  /** Private API.
+   */
   void destroy_();
+  #endif //DOXYGEN_SHOULD_SKIP_THIS
 
   // If you need it, give me an example. murrayc. -- Me too. daniel.
   //_WRAP_SIGNAL(void destroy(), "destroy")
   
 
+  #ifndef DOXYGEN_SHOULD_SKIP_THIS
   void _init_unmanage(bool is_toplevel = false);
   virtual void destroy_notify_(); //override.
   void disconnect_cpp_wrapper();
@@ -148,6 +190,7 @@ protected:
   // set if flags used by derived classes.
   bool referenced_; // = not managed.
   bool gobject_disposed_;
+  #endif //DOXYGEN_SHOULD_SKIP_THIS
 
 
 };
@@ -163,6 +206,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Object* wrap(GtkObject* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_OBJECT_H */
 

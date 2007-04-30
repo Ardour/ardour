@@ -54,7 +54,7 @@ struct typed_slot_rep : public slot_rep
    */
   static void* destroy(void* data)
     {
-      self* self_ = static_cast<self*>((slot_rep*)data);
+      self* self_ = static_cast<self*>(reinterpret_cast<slot_rep*>(data));
       self_->call_ = 0;
       self_->destroy_ = 0;
       visit_each_type<trackable*>(slot_do_unbind(self_), self_->functor_);
@@ -73,8 +73,8 @@ struct typed_slot_rep : public slot_rep
    */
   static void* dup(void* data)
     {
-      slot_rep* rep_ = (slot_rep*)data;
-      return static_cast<slot_rep*>(new self(*static_cast<self*>(rep_)));
+      slot_rep* a_rep = reinterpret_cast<slot_rep*>(data);
+      return static_cast<slot_rep*>(new self(*static_cast<self*>(a_rep)));
     }
 };
 
@@ -437,7 +437,7 @@ public:
   inline T_return operator()() const
     {
       if (!empty() && !blocked())
-        return (reinterpret_cast<call_type>(rep_->call_))(rep_);
+        return (reinterpret_cast<call_type>(slot_base::rep_->call_))(slot_base::rep_);
       return T_return();
     }
 
@@ -449,7 +449,10 @@ public:
   template <class T_functor>
   slot0(const T_functor& _A_func)
     : slot_base(new internal::typed_slot_rep<T_functor>(_A_func))
-    { rep_->call_ = internal::slot_call0<T_functor, T_return>::address(); }
+    {
+      //The slot_base:: is necessary to stop the HP-UX aCC compiler from being confused. murrayc.
+      slot_base::rep_->call_ = internal::slot_call0<T_functor, T_return>::address();
+    }
 
   slot0(const slot0& src)
     : slot_base(src) {}
@@ -509,7 +512,7 @@ public:
   inline T_return operator()(arg1_type_ _A_a1) const
     {
       if (!empty() && !blocked())
-        return (reinterpret_cast<call_type>(rep_->call_))(rep_, _A_a1);
+        return (reinterpret_cast<call_type>(slot_base::rep_->call_))(slot_base::rep_, _A_a1);
       return T_return();
     }
 
@@ -521,7 +524,10 @@ public:
   template <class T_functor>
   slot1(const T_functor& _A_func)
     : slot_base(new internal::typed_slot_rep<T_functor>(_A_func))
-    { rep_->call_ = internal::slot_call1<T_functor, T_return, T_arg1>::address(); }
+    {
+      //The slot_base:: is necessary to stop the HP-UX aCC compiler from being confused. murrayc.
+      slot_base::rep_->call_ = internal::slot_call1<T_functor, T_return, T_arg1>::address();
+    }
 
   slot1(const slot1& src)
     : slot_base(src) {}
@@ -584,7 +590,7 @@ public:
   inline T_return operator()(arg1_type_ _A_a1,arg2_type_ _A_a2) const
     {
       if (!empty() && !blocked())
-        return (reinterpret_cast<call_type>(rep_->call_))(rep_, _A_a1,_A_a2);
+        return (reinterpret_cast<call_type>(slot_base::rep_->call_))(slot_base::rep_, _A_a1,_A_a2);
       return T_return();
     }
 
@@ -596,7 +602,10 @@ public:
   template <class T_functor>
   slot2(const T_functor& _A_func)
     : slot_base(new internal::typed_slot_rep<T_functor>(_A_func))
-    { rep_->call_ = internal::slot_call2<T_functor, T_return, T_arg1,T_arg2>::address(); }
+    {
+      //The slot_base:: is necessary to stop the HP-UX aCC compiler from being confused. murrayc.
+      slot_base::rep_->call_ = internal::slot_call2<T_functor, T_return, T_arg1,T_arg2>::address();
+    }
 
   slot2(const slot2& src)
     : slot_base(src) {}
@@ -662,7 +671,7 @@ public:
   inline T_return operator()(arg1_type_ _A_a1,arg2_type_ _A_a2,arg3_type_ _A_a3) const
     {
       if (!empty() && !blocked())
-        return (reinterpret_cast<call_type>(rep_->call_))(rep_, _A_a1,_A_a2,_A_a3);
+        return (reinterpret_cast<call_type>(slot_base::rep_->call_))(slot_base::rep_, _A_a1,_A_a2,_A_a3);
       return T_return();
     }
 
@@ -674,7 +683,10 @@ public:
   template <class T_functor>
   slot3(const T_functor& _A_func)
     : slot_base(new internal::typed_slot_rep<T_functor>(_A_func))
-    { rep_->call_ = internal::slot_call3<T_functor, T_return, T_arg1,T_arg2,T_arg3>::address(); }
+    {
+      //The slot_base:: is necessary to stop the HP-UX aCC compiler from being confused. murrayc.
+      slot_base::rep_->call_ = internal::slot_call3<T_functor, T_return, T_arg1,T_arg2,T_arg3>::address();
+    }
 
   slot3(const slot3& src)
     : slot_base(src) {}
@@ -743,7 +755,7 @@ public:
   inline T_return operator()(arg1_type_ _A_a1,arg2_type_ _A_a2,arg3_type_ _A_a3,arg4_type_ _A_a4) const
     {
       if (!empty() && !blocked())
-        return (reinterpret_cast<call_type>(rep_->call_))(rep_, _A_a1,_A_a2,_A_a3,_A_a4);
+        return (reinterpret_cast<call_type>(slot_base::rep_->call_))(slot_base::rep_, _A_a1,_A_a2,_A_a3,_A_a4);
       return T_return();
     }
 
@@ -755,7 +767,10 @@ public:
   template <class T_functor>
   slot4(const T_functor& _A_func)
     : slot_base(new internal::typed_slot_rep<T_functor>(_A_func))
-    { rep_->call_ = internal::slot_call4<T_functor, T_return, T_arg1,T_arg2,T_arg3,T_arg4>::address(); }
+    {
+      //The slot_base:: is necessary to stop the HP-UX aCC compiler from being confused. murrayc.
+      slot_base::rep_->call_ = internal::slot_call4<T_functor, T_return, T_arg1,T_arg2,T_arg3,T_arg4>::address();
+    }
 
   slot4(const slot4& src)
     : slot_base(src) {}
@@ -827,7 +842,7 @@ public:
   inline T_return operator()(arg1_type_ _A_a1,arg2_type_ _A_a2,arg3_type_ _A_a3,arg4_type_ _A_a4,arg5_type_ _A_a5) const
     {
       if (!empty() && !blocked())
-        return (reinterpret_cast<call_type>(rep_->call_))(rep_, _A_a1,_A_a2,_A_a3,_A_a4,_A_a5);
+        return (reinterpret_cast<call_type>(slot_base::rep_->call_))(slot_base::rep_, _A_a1,_A_a2,_A_a3,_A_a4,_A_a5);
       return T_return();
     }
 
@@ -839,7 +854,10 @@ public:
   template <class T_functor>
   slot5(const T_functor& _A_func)
     : slot_base(new internal::typed_slot_rep<T_functor>(_A_func))
-    { rep_->call_ = internal::slot_call5<T_functor, T_return, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::address(); }
+    {
+      //The slot_base:: is necessary to stop the HP-UX aCC compiler from being confused. murrayc.
+      slot_base::rep_->call_ = internal::slot_call5<T_functor, T_return, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::address();
+    }
 
   slot5(const slot5& src)
     : slot_base(src) {}
@@ -914,7 +932,7 @@ public:
   inline T_return operator()(arg1_type_ _A_a1,arg2_type_ _A_a2,arg3_type_ _A_a3,arg4_type_ _A_a4,arg5_type_ _A_a5,arg6_type_ _A_a6) const
     {
       if (!empty() && !blocked())
-        return (reinterpret_cast<call_type>(rep_->call_))(rep_, _A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6);
+        return (reinterpret_cast<call_type>(slot_base::rep_->call_))(slot_base::rep_, _A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6);
       return T_return();
     }
 
@@ -926,7 +944,10 @@ public:
   template <class T_functor>
   slot6(const T_functor& _A_func)
     : slot_base(new internal::typed_slot_rep<T_functor>(_A_func))
-    { rep_->call_ = internal::slot_call6<T_functor, T_return, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::address(); }
+    {
+      //The slot_base:: is necessary to stop the HP-UX aCC compiler from being confused. murrayc.
+      slot_base::rep_->call_ = internal::slot_call6<T_functor, T_return, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::address();
+    }
 
   slot6(const slot6& src)
     : slot_base(src) {}
@@ -1004,7 +1025,7 @@ public:
   inline T_return operator()(arg1_type_ _A_a1,arg2_type_ _A_a2,arg3_type_ _A_a3,arg4_type_ _A_a4,arg5_type_ _A_a5,arg6_type_ _A_a6,arg7_type_ _A_a7) const
     {
       if (!empty() && !blocked())
-        return (reinterpret_cast<call_type>(rep_->call_))(rep_, _A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6,_A_a7);
+        return (reinterpret_cast<call_type>(slot_base::rep_->call_))(slot_base::rep_, _A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6,_A_a7);
       return T_return();
     }
 
@@ -1016,7 +1037,10 @@ public:
   template <class T_functor>
   slot7(const T_functor& _A_func)
     : slot_base(new internal::typed_slot_rep<T_functor>(_A_func))
-    { rep_->call_ = internal::slot_call7<T_functor, T_return, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>::address(); }
+    {
+      //The slot_base:: is necessary to stop the HP-UX aCC compiler from being confused. murrayc.
+      slot_base::rep_->call_ = internal::slot_call7<T_functor, T_return, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>::address();
+    }
 
   slot7(const slot7& src)
     : slot_base(src) {}
@@ -1078,17 +1102,19 @@ public:
     : parent_type(_A_func) {}
 
   slot(const slot& src)
-    : parent_type((const parent_type&)src) {}
+    : parent_type(reinterpret_cast<const parent_type&>(src)) {}
 };
+
 
 
 /** Convenience wrapper for the numbered sigc::slot0 template.
  * See the base class for useful methods.
  * This is the template specialization of the unnumbered sigc::slot
- * template for 0 argument(s).
+ * template for 0 argument(s), specialized for different numbers of arguments
+ * This is possible because the template has default (nil_) template types.
  */
 template <class T_return>
-class slot <T_return>
+class slot <T_return, nil_, nil_, nil_, nil_, nil_, nil_, nil_>
   : public slot0<T_return>
 {
 public:
@@ -1104,16 +1130,18 @@ public:
     : parent_type(_A_func) {}
 
   slot(const slot& src)
-    : parent_type((const parent_type&)src) {}
+    : parent_type(reinterpret_cast<const parent_type&>(src)) {}
 };
+
 
 /** Convenience wrapper for the numbered sigc::slot1 template.
  * See the base class for useful methods.
  * This is the template specialization of the unnumbered sigc::slot
- * template for 1 argument(s).
+ * template for 1 argument(s), specialized for different numbers of arguments
+ * This is possible because the template has default (nil_) template types.
  */
 template <class T_return, class T_arg1>
-class slot <T_return, T_arg1>
+class slot <T_return, T_arg1, nil_, nil_, nil_, nil_, nil_, nil_>
   : public slot1<T_return, T_arg1>
 {
 public:
@@ -1129,16 +1157,18 @@ public:
     : parent_type(_A_func) {}
 
   slot(const slot& src)
-    : parent_type((const parent_type&)src) {}
+    : parent_type(reinterpret_cast<const parent_type&>(src)) {}
 };
+
 
 /** Convenience wrapper for the numbered sigc::slot2 template.
  * See the base class for useful methods.
  * This is the template specialization of the unnumbered sigc::slot
- * template for 2 argument(s).
+ * template for 2 argument(s), specialized for different numbers of arguments
+ * This is possible because the template has default (nil_) template types.
  */
 template <class T_return, class T_arg1,class T_arg2>
-class slot <T_return, T_arg1,T_arg2>
+class slot <T_return, T_arg1, T_arg2, nil_, nil_, nil_, nil_, nil_>
   : public slot2<T_return, T_arg1,T_arg2>
 {
 public:
@@ -1154,16 +1184,18 @@ public:
     : parent_type(_A_func) {}
 
   slot(const slot& src)
-    : parent_type((const parent_type&)src) {}
+    : parent_type(reinterpret_cast<const parent_type&>(src)) {}
 };
+
 
 /** Convenience wrapper for the numbered sigc::slot3 template.
  * See the base class for useful methods.
  * This is the template specialization of the unnumbered sigc::slot
- * template for 3 argument(s).
+ * template for 3 argument(s), specialized for different numbers of arguments
+ * This is possible because the template has default (nil_) template types.
  */
 template <class T_return, class T_arg1,class T_arg2,class T_arg3>
-class slot <T_return, T_arg1,T_arg2,T_arg3>
+class slot <T_return, T_arg1, T_arg2, T_arg3, nil_, nil_, nil_, nil_>
   : public slot3<T_return, T_arg1,T_arg2,T_arg3>
 {
 public:
@@ -1179,16 +1211,18 @@ public:
     : parent_type(_A_func) {}
 
   slot(const slot& src)
-    : parent_type((const parent_type&)src) {}
+    : parent_type(reinterpret_cast<const parent_type&>(src)) {}
 };
+
 
 /** Convenience wrapper for the numbered sigc::slot4 template.
  * See the base class for useful methods.
  * This is the template specialization of the unnumbered sigc::slot
- * template for 4 argument(s).
+ * template for 4 argument(s), specialized for different numbers of arguments
+ * This is possible because the template has default (nil_) template types.
  */
 template <class T_return, class T_arg1,class T_arg2,class T_arg3,class T_arg4>
-class slot <T_return, T_arg1,T_arg2,T_arg3,T_arg4>
+class slot <T_return, T_arg1, T_arg2, T_arg3, T_arg4, nil_, nil_, nil_>
   : public slot4<T_return, T_arg1,T_arg2,T_arg3,T_arg4>
 {
 public:
@@ -1204,16 +1238,18 @@ public:
     : parent_type(_A_func) {}
 
   slot(const slot& src)
-    : parent_type((const parent_type&)src) {}
+    : parent_type(reinterpret_cast<const parent_type&>(src)) {}
 };
+
 
 /** Convenience wrapper for the numbered sigc::slot5 template.
  * See the base class for useful methods.
  * This is the template specialization of the unnumbered sigc::slot
- * template for 5 argument(s).
+ * template for 5 argument(s), specialized for different numbers of arguments
+ * This is possible because the template has default (nil_) template types.
  */
 template <class T_return, class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
-class slot <T_return, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>
+class slot <T_return, T_arg1, T_arg2, T_arg3, T_arg4, T_arg5, nil_, nil_>
   : public slot5<T_return, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>
 {
 public:
@@ -1229,16 +1265,18 @@ public:
     : parent_type(_A_func) {}
 
   slot(const slot& src)
-    : parent_type((const parent_type&)src) {}
+    : parent_type(reinterpret_cast<const parent_type&>(src)) {}
 };
+
 
 /** Convenience wrapper for the numbered sigc::slot6 template.
  * See the base class for useful methods.
  * This is the template specialization of the unnumbered sigc::slot
- * template for 6 argument(s).
+ * template for 6 argument(s), specialized for different numbers of arguments
+ * This is possible because the template has default (nil_) template types.
  */
 template <class T_return, class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
-class slot <T_return, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>
+class slot <T_return, T_arg1, T_arg2, T_arg3, T_arg4, T_arg5, T_arg6, nil_>
   : public slot6<T_return, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>
 {
 public:
@@ -1254,7 +1292,7 @@ public:
     : parent_type(_A_func) {}
 
   slot(const slot& src)
-    : parent_type((const parent_type&)src) {}
+    : parent_type(reinterpret_cast<const parent_type&>(src)) {}
 };
 
 

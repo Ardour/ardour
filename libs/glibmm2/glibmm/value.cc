@@ -39,6 +39,14 @@ void ValueBase::init(GType type)
   g_value_init(&gobject_, type);
 }
 
+void ValueBase::init(const GValue* value)
+{
+  g_value_init(&gobject_, G_VALUE_TYPE(value));
+
+  if(value)
+    g_value_copy(value, &gobject_);
+}
+
 ValueBase::ValueBase(const ValueBase& other)
 {
   GLIBMM_INITIALIZE_STRUCT(gobject_, GValue);

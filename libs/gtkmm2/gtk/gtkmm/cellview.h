@@ -3,6 +3,7 @@
 #ifndef _GTKMM_CELLVIEW_H
 #define _GTKMM_CELLVIEW_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -98,11 +99,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -135,7 +142,7 @@ public:
    * set, it will remove it before setting the new model.  If @a model  is 
    * <tt>0</tt>, then it will unset the old model.
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param model A Gtk::TreeModel.
    */
   void set_model(const Glib::RefPtr<TreeModel>& model);
@@ -147,11 +154,18 @@ public:
    * a needed intermediate state if say, the model for
    * the Gtk::CellView becomes temporarily empty.
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param path A Gtk::TreePath or <tt>0</tt> to unset.
    */
   void set_displayed_row(const TreeModel::Path& path);
   
+  /** Returns a Gtk::TreePath referring to the currently 
+   * displayed row. If no row is currently displayed, 
+   * <tt>0</tt> is returned.
+   * @return The currently displayed row or <tt>0</tt>
+   * 
+   * @newin2p6.
+   */
   TreeModel::Path get_displayed_row() const;
   
   /** Sets @a requisition  to the size needed by @a cell_view  to display 
@@ -160,14 +174,14 @@ public:
    * @param requisition Return location for the size.
    * @return <tt>true</tt>
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   bool get_size_of_row(const TreeModel::Path& path, Requisition& requisition) const;
 
   
   /** Sets the background color of @a view .
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param color The new background color.
    */
   void set_background_color(const Gdk::Color& color);
@@ -178,7 +192,7 @@ public:
    * renderers has been newly allocated and should be freed with
    * Glib::list_free() when no longer needed.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   Glib::ListHandle<CellRenderer*> get_cell_renderers();
   
@@ -187,7 +201,7 @@ public:
    * renderers has been newly allocated and should be freed with
    * Glib::list_free() when no longer needed.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   Glib::ListHandle<const CellRenderer*> get_cell_renderers() const;
 
@@ -205,6 +219,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::CellView* wrap(GtkCellView* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_CELLVIEW_H */
 

@@ -3,6 +3,7 @@
 #ifndef _GDKMM_BITMAP_H
 #define _GDKMM_BITMAP_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */

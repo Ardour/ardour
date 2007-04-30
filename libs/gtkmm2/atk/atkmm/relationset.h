@@ -3,6 +3,7 @@
 #ifndef _ATKMM_RELATIONSET_H
 #define _ATKMM_RELATIONSET_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -137,6 +138,15 @@ public:
   Glib::RefPtr<Relation> get_relation(RelationType relationship);
   
   
+  /** Add a new relation of the specified type with the specified target to 
+   * the current relation set if the relation set does not contain a relation
+   * of that type. If it is does contain a relation of that typea the target
+   * is added to the relation.
+   * 
+   * Since: 1.9
+   * @param relationship An Atk::RelationType.
+   * @param target An Atk::Object.
+   */
   void add_relation_by_type(RelationType relationship, const Glib::RefPtr<Atk::Object>& target);
 
 
@@ -144,11 +154,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

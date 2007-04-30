@@ -3,6 +3,7 @@
 #ifndef _LIBGNOMECANVASMM_CANVAS_H
 #define _LIBGNOMECANVASMM_CANVAS_H
 
+
 #include <glibmm.h>
 
 // -*- C++ -*-
@@ -107,9 +108,13 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
   virtual void on_draw_background(const Glib::RefPtr<Gdk::Drawable>& drawable, int x, int y, int width, int height);
@@ -117,7 +122,7 @@ protected:
 
 
 private:
-;
+
 public:
   Canvas();
 
@@ -378,8 +383,8 @@ public:
   // The following are simply accessed via the struct in C,
   //  but Federico reports that they are meant to be used.
   //: Get the pixels per unit.
-  double get_pixels_per_unit() const;
-
+   double get_pixels_per_unit() const;
+ 
   //: Draw the background for the area given.
   //- This method is only used for non-antialiased canvases.
   
@@ -395,24 +400,21 @@ public:
   Glib::SignalProxy1< void,GnomeCanvasBuf* > signal_render_background();
 
   //: Private Virtual methods for groping the canvas inside bonobo.
-    virtual void request_update_vfunc();
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual void request_update_vfunc();
+#endif //GLIBMM_VFUNCS_ENABLED
+
 
   // Whether the canvas is in antialiased mode or not.
-  /** 
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy<bool> property_aa() ;
-
-/** 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The antialiasing mode of the canvas.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_aa() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -438,6 +440,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gnome::Canvas::Canvas* wrap(GnomeCanvas* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _LIBGNOMECANVASMM_CANVAS_H */
 

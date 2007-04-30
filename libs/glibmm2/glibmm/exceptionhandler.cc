@@ -32,6 +32,7 @@
 GLIBMM_USING_STD(exception)
 GLIBMM_USING_STD(list)
 
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
 
 namespace
 {
@@ -156,4 +157,7 @@ void exception_handlers_invoke() throw()
 }
 
 } // namespace Glib
+
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
 

@@ -3,6 +3,7 @@
 #ifndef _GTKMM_CELLRENDERER_H
 #define _GTKMM_CELLRENDERER_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -195,12 +196,18 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_editing_canceled();
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -314,25 +321,28 @@ public:
    */
   void get_fixed_size(int& width, int& height) const;
 
-  //TODO: Mark as @deprecated: See stop_editing().
   
+#ifndef GTKMM_DISABLE_DEPRECATED
+
   /** Causes the cell renderer to emit the "editing-canceled" signal.  This
    * function is for use only by implementations of cell renderers that need to
    * notify the client program that an editing process was canceled and the
    * changes were not committed.
    * 
-   * Since: 2.4
+   * @newin2p4
    * Deprecated: Use stop_editing() instead
+   * @deprecated Use stop_editing().
    */
   void editing_canceled();
+#endif // GTKMM_DISABLE_DEPRECATED
 
-  
+
   /** Informs the cell renderer that the editing is stopped.
    * If @a canceled  is <tt>true</tt>, the cell renderer will emit the "editing-canceled" 
    * signal. This function should be called by cell renderer implementations 
    * in response to the "editing-done" signal of Gtk::CellEditable.
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param canceled <tt>true</tt> if the editing has been canceled.
    */
   void stop_editing(bool canceled = false);
@@ -341,27 +351,68 @@ public:
    * For instance, property_text for CellRendererText, and property_active for CellRendererToggle
    * Needs to be overridden in derived classes.
    */
+#ifdef GLIBMM_PROPERTIES_ENABLED
   virtual Glib::PropertyProxy_Base _property_renderable();
+#else
+  virtual Glib::ustring _property_renderable();
+#endif
 
+  /** This signal is emitted when the user cancels the process of editing a
+   * cell.  For example, an editable cell renderer could be written to cancel
+   * editing when the user presses Escape. 
+   *
+   * @see editing_canceled() 
+   */
   
+/**
+   * @par Prototype:
+   * <tt>void %editing_canceled()</tt>
+   */
+
   Glib::SignalProxy0< void > signal_editing_canceled();
 
   
   //We use no_default_handler for this, because we can not add a new vfunc to 2.5 without breaking ABI.
   //TODO: Remove no_default_handler when we do an ABI-break-with-parallel-install.
+  //TODO: Remove the warning in the documentation when we have fixed the inheritance of CellRendererCombo.
+  /** This signal gets emitted when a cell starts to be edited.
+   * The indended use of this signal is to do special setup
+   * on @a editable, e.g. adding an EntryCompletion or setting
+   * up additional columns in a ComboBox.
+   *
+   * Note that GTK+ doesn't guarantee that cell renderers will
+   * continue to use the same kind of widget for editing in future
+   * releases, therefore you should check the type of @a editable
+   * before doing any specific setup.
+   *
+   * Note that this signal does not work yet in gtkmm.
+   * See http://bugzilla.gnome.org/show_bug.cgi?id=301597
+   *
+   * @newin2p6
+   *
+   * @param editable the CellEditable.
+   * @param path the path identifying the edited cell.
+   */
   
+/**
+   * @par Prototype:
+   * <tt>void %editing_started(CellEditable* editable, const Glib::ustring& path)</tt>
+   */
 
   Glib::SignalProxy2< void,CellEditable*,const Glib::ustring& > signal_editing_started();
 
 
-  /** Editable mode of the CellRenderer.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Editable mode of the CellRenderer.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<CellRendererMode> property_mode() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Editable mode of the CellRenderer.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -369,15 +420,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<CellRendererMode> property_mode() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Display the cell.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Display the cell.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_visible() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Display the cell.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -385,15 +440,39 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_visible() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The x-align.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Display the cell sensitive.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy<bool> property_sensitive() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+/** Display the cell sensitive.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy_ReadOnly<bool> property_sensitive() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The x-align.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<float> property_xalign() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The x-align.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -401,15 +480,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<float> property_xalign() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The y-align.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The y-align.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<float> property_yalign() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The y-align.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -417,15 +500,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<float> property_yalign() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The xpad.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The xpad.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<unsigned int> property_xpad() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The xpad.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -433,15 +520,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<unsigned int> property_xpad() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The ypad.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The ypad.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<unsigned int> property_ypad() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The ypad.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -449,15 +540,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<unsigned int> property_ypad() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The fixed width.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The fixed width.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_width() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The fixed width.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -465,15 +560,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_width() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The fixed height.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The fixed height.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_height() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The fixed height.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -481,15 +580,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_height() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Row has children.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Row has children.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_is_expander() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Row has children.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -497,15 +600,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_is_expander() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Row is an expander row
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Row is an expander row
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_is_expanded() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Row is an expander row
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -513,31 +620,30 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_is_expanded() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Cell background color as a string.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy_WriteOnly<Glib::ustring> property_cell_background() ;
-
+  #ifdef GLIBMM_PROPERTIES_ENABLED
 /** Cell background color as a string.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
-  Glib::PropertyProxy_ReadOnly<Glib::ustring> property_cell_background() const;
+  Glib::PropertyProxy_WriteOnly<Glib::ustring> property_cell_background() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Cell background color as a GdkColor.
+
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Cell background color as a GdkColor.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Gdk::Color> property_cell_background_gdk() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Cell background color as a GdkColor.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -545,15 +651,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Gdk::Color> property_cell_background_gdk() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
  
-  /** Whether this tag affects the cell background color.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether this tag affects the cell background color.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_cell_background_set() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether this tag affects the cell background color.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -561,6 +671,7 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_cell_background_set() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 protected:
@@ -582,14 +693,24 @@ protected:
    * @param width Width needed to render a cell.
    * @param height Height needed to render a cell.
    **/
-    virtual void get_size_vfunc(Widget& widget, const Gdk::Rectangle* cell_area, int* x_offset, int* y_offset, int* width, int* height) const;
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual void get_size_vfunc(Widget& widget, const Gdk::Rectangle* cell_area, int* x_offset, int* y_offset, int* width, int* height) const;
+#endif //GLIBMM_VFUNCS_ENABLED
+
                   
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual void render_vfunc(const Glib::RefPtr<Gdk::Drawable>& window, Widget& widget, const Gdk::Rectangle& background_area, const Gdk::Rectangle& cell_area, const Gdk::Rectangle& expose_area, CellRendererState flags);
+#endif //GLIBMM_VFUNCS_ENABLED
 
-    virtual void render_vfunc(const Glib::RefPtr<Gdk::Drawable>& window, Widget& widget, const Gdk::Rectangle& background_area, const Gdk::Rectangle& cell_area, const Gdk::Rectangle& expose_area, CellRendererState flags);
 
-    virtual bool activate_vfunc(GdkEvent* event, Widget& widget, const Glib::ustring& path, const Gdk::Rectangle& background_area, const Gdk::Rectangle& cell_area, CellRendererState flags);
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual bool activate_vfunc(GdkEvent* event, Widget& widget, const Glib::ustring& path, const Gdk::Rectangle& background_area, const Gdk::Rectangle& cell_area, CellRendererState flags);
+#endif //GLIBMM_VFUNCS_ENABLED
 
-    virtual CellEditable* start_editing_vfunc(GdkEvent* event, Widget& widget, const Glib::ustring& path, const Gdk::Rectangle& background_area, const Gdk::Rectangle& cell_area, CellRendererState flags);
+
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual CellEditable* start_editing_vfunc(GdkEvent* event, Widget& widget, const Glib::ustring& path, const Gdk::Rectangle& background_area, const Gdk::Rectangle& cell_area, CellRendererState flags);
+#endif //GLIBMM_VFUNCS_ENABLED
 
 
 };
@@ -605,6 +726,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::CellRenderer* wrap(GtkCellRenderer* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_CELLRENDERER_H */
 

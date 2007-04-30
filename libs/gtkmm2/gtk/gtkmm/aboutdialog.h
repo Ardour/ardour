@@ -3,6 +3,7 @@
 #ifndef _GTKMM_ABOUTDIALOG_H
 #define _GTKMM_ABOUTDIALOG_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -41,7 +42,16 @@ namespace Gtk
 namespace Gtk
 {
 
-/** TODO
+/** The AboutDialog offers a simple way to display information about a program like its logo, name, copyright, 
+ * website and license. It is also possible to give credits to the authors, documenters, translators and artists 
+ * who have worked on the program. An about dialog is typically opened when the user selects the About option 
+ * from the Help menu. All parts of the dialog are optional.
+ *
+ * About dialogs often contain links and email addresses. Gtk::AboutDialog supports this by offering global 
+ * hooks, which are called when the user clicks on a link or email address, see set_email_hook() and 
+ * set_url_hook(). Email addresses in the authors, documenters and artists properties are recognized by looking 
+ * for <user@host>, URLs are recognized by looking for http://url, with the URL extending to the next space, 
+ * tab or line break.
  *
  * @ingroup Dialogs
  */
@@ -89,11 +99,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -107,14 +123,14 @@ public:
    * @return The program name. The string is owned by the about
    * dialog and must not be modified.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   Glib::ustring get_name() const;
   
   /** Sets the name to display in the about dialog. 
    * If this is not set, it defaults to Glib::get_application_name().
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param name The program name.
    */
   void set_name(const Glib::ustring& name);
@@ -123,13 +139,13 @@ public:
    * @return The version string. The string is owned by the about
    * dialog and must not be modified.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   Glib::ustring get_version() const;
   
   /** Sets the version string to display in the about dialog.
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param version The version string.
    */
   void set_version(const Glib::ustring& version);
@@ -138,14 +154,14 @@ public:
    * @return The copyright string. The string is owned by the about
    * dialog and must not be modified.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   Glib::ustring get_copyright() const;
   
   /** Sets the copyright string to display in the about dialog.
    * This should be a short string of one or two lines. 
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param copyright The copyright string.
    */
   void set_copyright(const Glib::ustring& copyright);
@@ -154,7 +170,7 @@ public:
    * @return The comments. The string is owned by the about
    * dialog and must not be modified.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   Glib::ustring get_comments() const;
   
@@ -162,7 +178,7 @@ public:
    * dialog. This should be a short string of one or
    * two lines.
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param comments A comments string.
    */
   void set_comments(const Glib::ustring& comments);
@@ -171,7 +187,7 @@ public:
    * @return The license information. The string is owned by the about
    * dialog and must not be modified.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   Glib::ustring get_license() const;
   
@@ -179,7 +195,7 @@ public:
    * license dialog. If @a license  is <tt>0</tt>, the license button is
    * hidden.
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param license The license information or <tt>0</tt>.
    */
   void set_license(const Glib::ustring& license);
@@ -188,13 +204,13 @@ public:
    * @return The website URL. The string is owned by the about
    * dialog and must not be modified.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   Glib::ustring get_website() const;
   
   /** Sets the URL to use for the website link.
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param website A URL string starting with "http://".
    */
   void set_website(const Glib::ustring& website);
@@ -203,18 +219,18 @@ public:
    * @return The label used for the website link. The string is owned by the about
    * dialog and must not be modified.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   Glib::ustring get_website_label() const;
   
   /** Sets the label to be used for the website link.
    * It defaults to the website URL.
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param website_label The label used for the website link.
    */
   void set_website_label(const Glib::ustring& website_label);
-  
+
    
   /** Returns the string which are displayed in the authors tab
    * of the secondary credits dialog.
@@ -222,19 +238,19 @@ public:
    * the authors. The array is owned by the about dialog 
    * and must not be modified.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   Glib::StringArrayHandle get_authors() const;
-  
+
   
   /** Sets the strings which are displayed in the authors tab
    * of the secondary credits dialog. 
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param authors A <tt>0</tt>-terminated array of strings.
    */
   void set_authors(const Glib::StringArrayHandle& authors) const;
-  
+
   
   /** Returns the string which are displayed in the documenters 
    * tab of the secondary credits dialog.
@@ -242,15 +258,15 @@ public:
    * the documenters. The array is owned by the about dialog 
    * and must not be modified.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   Glib::StringArrayHandle get_documenters() const;
-  
+
    
   /** Sets the strings which are displayed in the documenters tab
    * of the secondary credits dialog. 
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param documenters A <tt>0</tt>-terminated array of strings.
    */
   void set_documenters(const Glib::StringArrayHandle& documenters);
@@ -261,14 +277,14 @@ public:
    * the artists. The array is owned by the about dialog 
    * and must not be modified.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   Glib::StringArrayHandle get_artists() const;
   
   /** Sets the strings which are displayed in the artists tab
    * of the secondary credits dialog. 
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param artists A <tt>0</tt>-terminated array of strings.
    */
   void set_artists(const Glib::StringArrayHandle& artists);
@@ -278,7 +294,7 @@ public:
    * @return The translator credits string. The string is
    * owned by the about dialog and must not be modified.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   Glib::ustring get_translator_credits() const;
   
@@ -297,18 +313,18 @@ public:
    * since Gtk::AboutDialog will detect if "translator-credits" is untranslated
    * and hide the tab.
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param translator_credits The translator credits.
    */
   void set_translator_credits(const Glib::ustring& translator_credits);
-  
+
   
   /** Returns the pixbuf displayed as logo in the about dialog.
    * @return The pixbuf displayed as logo. The pixbuf is
    * owned by the about dialog. If you want to keep a reference
    * to it, you have to call Glib::object_ref() on it.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   Glib::RefPtr<Gdk::Pixbuf> get_logo();
   
@@ -317,7 +333,7 @@ public:
    * owned by the about dialog. If you want to keep a reference
    * to it, you have to call Glib::object_ref() on it.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   Glib::RefPtr<const Gdk::Pixbuf> get_logo() const;
 
@@ -327,18 +343,18 @@ public:
    * window icon set with Gtk::Window::set_default_icon()
    * will be used.
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param logo A Gdk::Pixbuf, or <tt>0</tt>.
    */
   void set_logo(const Glib::RefPtr<Gdk::Pixbuf>& logo);
-  
+
   
   /** Returns the icon name displayed as logo in the about dialog.
    * @return The icon name displayed as logo. The string is
-   * owned by the about dialog. If you want to keep a reference
+   * owned by the dialog. If you want to keep a reference
    * to it, you have to call Glib::strdup() on it.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   Glib::ustring get_logo_icon_name() const;
   
@@ -347,31 +363,57 @@ public:
    * window icon set with Gtk::Window::set_default_icon()
    * will be used.
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param icon_name An icon name, or <tt>0</tt>.
    */
   void set_logo_icon_name(const Glib::ustring& icon_name);
+
+  
+  /** Returns whether the license text in @a about  is 
+   * automatically wrapped.
+   * @return <tt>true</tt> if the license text is wrapped 
+   * 
+   * @newin2p8.
+   */
+  bool get_wrap_license() const;
+  
+  /** Sets whether the license text in @a about  is 
+   * automatically wrapped.
+   * 
+   * @newin2p8
+   * @param wrap_license Whether to wrap the license.
+   */
+  void set_wrap_license(bool wrap_license);
 
   /** For instance,
    * void on_activate_link_url(AboutDialog& about_dialog, const Glib::ustring& link);
    */
   typedef sigc::slot<void, AboutDialog& /* about_dialog */, const Glib::ustring& /* link */> SlotActivateLink;
-  
-  //TODO: Document these methods.
+
+  /** Installs a global callback to be called whenever the user activates an email link in an about dialog.
+   * @param slot A function or method to call when an email link is activated.
+   */
   static void set_email_hook(const SlotActivateLink& slot);
   
-  
+
+  /** Installs a global callback to be called whenever the user activates a URL link in an about dialog.
+   * @param slot A function or method to call when a URL link is activated.
+   */
   static void set_url_hook(const SlotActivateLink& slot);
   
-  
-  /** The name of the program. If this is not set
+
+//TODO: Deprecate this, because it conflicts with the property in GtkWidget, which will be deprecated in GTK+ 2.12.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The name of the program. If this is not set
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_name() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The name of the program. If this is not set
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -379,15 +421,20 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_name() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The version of the program.
+
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The version of the program.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_version() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The version of the program.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -395,15 +442,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_version() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Copyright information for the program.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Copyright information for the program.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_copyright() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Copyright information for the program.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -411,15 +462,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_copyright() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Comments about the program.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Comments about the program.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_comments() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Comments about the program.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -427,15 +482,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_comments() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The URL for the link to the website of the program.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The URL for the link to the website of the program.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_website() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The URL for the link to the website of the program.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -443,15 +502,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_website() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The label for the link to the website of the program. If this is not set
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The label for the link to the website of the program. If this is not set
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_website_label() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The label for the link to the website of the program. If this is not set
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -459,15 +522,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_website_label() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The license of the program.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The license of the program.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_license() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The license of the program.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -475,15 +542,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_license() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** List of authors of the program.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** List of authors of the program.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::StringArrayHandle> property_authors() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** List of authors of the program.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -491,15 +562,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::StringArrayHandle> property_authors() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** List of people documenting the program.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** List of people documenting the program.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::StringArrayHandle> property_documenters() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** List of people documenting the program.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -507,15 +582,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::StringArrayHandle> property_documenters() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Credits to the translators. This string should be marked as translatable.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Credits to the translators. This string should be marked as translatable.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::StringArrayHandle> property_translator_credits() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Credits to the translators. This string should be marked as translatable.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -523,15 +602,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::StringArrayHandle> property_translator_credits() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** List of people who have contributed artwork to the program.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** List of people who have contributed artwork to the program.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::StringArrayHandle> property_artists() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** List of people who have contributed artwork to the program.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -539,15 +622,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::StringArrayHandle> property_artists() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** A logo for the about box. If this is not set
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** A logo for the about box. If this is not set
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy< Glib::RefPtr<Gdk::Pixbuf> > property_logo() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** A logo for the about box. If this is not set
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -555,15 +642,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly< Glib::RefPtr<Gdk::Pixbuf> > property_logo() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** A named icon to use as the logo for the about box.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** A named icon to use as the logo for the about box.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_logo_icon_name() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** A named icon to use as the logo for the about box.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -571,6 +662,27 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_logo_icon_name() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+  
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether to wrap the license text.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy<bool> property_wrap_license() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether to wrap the license text.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy_ReadOnly<bool> property_wrap_license() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
   
 
 };
@@ -586,6 +698,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::AboutDialog* wrap(GtkAboutDialog* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_ABOUTDIALOG_H */
 

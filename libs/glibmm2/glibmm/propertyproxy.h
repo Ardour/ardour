@@ -24,6 +24,7 @@
 
 #include <glibmm/propertyproxy_base.h>
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 
 namespace Glib
 {
@@ -86,12 +87,7 @@ public:
   /** Set the value of this property.
    * @param data The new value for the property.
    */
-  void set_value(const PropertyType& data)
-    {
-      PropertyProxy_Base& base = *this;
-      // The downcast to PropertyProxy<T> is safe, and avoids code duplication.
-      static_cast<PropertyProxy<T>&>(base).set_value(data);
-    }
+  void set_value(const PropertyType& data);
 
   /** Set the value of this property back to its default value
    */
@@ -118,12 +114,7 @@ public:
   /** Get the value of this property.
    * @result The current value of the property.
    */
-  PropertyType get_value() const
-    {
-      const PropertyProxy_Base& base = *this;
-      // The downcast to PropertyProxy<T> is safe, and avoids code duplication.
-      return static_cast<const PropertyProxy<T>&>(base).get_value();
-    }
+  PropertyType get_value() const;
 
   operator PropertyType() const
     { return this->get_value(); }
@@ -154,10 +145,37 @@ T PropertyProxy<T>::get_value() const
   return value.get();
 }
 
+//We previously just static_cast<> PropertyProxy_WriteOnly<> to PropertyProxy<> to call its set_value(), 
+//to avoid code duplication.
+//But the AIX compiler does not like that hack.
+template <class T>
+void PropertyProxy_WriteOnly<T>::set_value(const T& data)
+{
+  Glib::Value<T> value;
+  value.init(Glib::Value<T>::value_type());
+
+  value.set(data);
+  set_property_(value);
+}
+
+//We previously just static_cast<> PropertyProxy_WriteOnly<> to PropertyProxy<> to call its set_value(), 
+//to avoid code duplication.
+//But the AIX compiler does not like that hack.
+template <class T>
+T PropertyProxy_ReadOnly<T>::get_value() const
+{
+  Glib::Value<T> value;
+  value.init(Glib::Value<T>::value_type());
+
+  get_property_(value);
+  return value.get();
+}
+
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 } // namespace Glib
 
+#endif //GLIBMM_PROPERTIES_ENABLED
 
 #endif /* _GLIBMM_PROPERTYPROXY_H */
 

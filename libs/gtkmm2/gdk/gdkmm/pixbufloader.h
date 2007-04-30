@@ -3,6 +3,7 @@
 #ifndef _GDKMM_PIXBUFLOADER_H
 #define _GDKMM_PIXBUFLOADER_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -106,12 +107,17 @@ protected:
    * and here:
    * http://www.freedesktop.org/Software/shared-mime-info
    *
+   * The list of non-mime-type image formats depends on what image loaders
+   * are installed, but typically "png", "jpeg", "gif", "tiff" and 
+   * "xpm" are among the supported formats. To obtain the full list of
+   * supported image formats, call PixbufFormat::get_name() on each 
+   * of the PixbufFormats returned by Gdk::Pixbuf::get_formats().
+   *
    * @param image_type Name of the image format to be loaded with the image.
    * @param mime_type If this is true then the image_type is a MIME type.
    * @throw Gdk::PixbufError
    */
   explicit PixbufLoader(const Glib::ustring& image_type, bool mime_type = false);
-  //TODO: What non-mime-types names are possible?
 
 public:
 
@@ -136,6 +142,12 @@ public:
    * and here:
    * http://www.freedesktop.org/Software/shared-mime-info
    *
+   * The list of non-mime-type image formats depends on what image loaders
+   * are installed, but typically "png", "jpeg", "gif", "tiff" and 
+   * "xpm" are among the supported formats. To obtain the full list of
+   * supported image formats, call PixbufFormat::get_name() on each 
+   * of the PixbufFormats returned by Gdk::Pixbuf::get_formats().
+   *
    * @param image_type Name of the image format to be loaded with the image.
    * @param mime_type If this is true then the image_type is a MIME type.
    * @throw Gdk::PixbufError
@@ -152,12 +164,13 @@ public:
    * Attempts to set the desired image size  are ignored after the 
    * emission of the ::size_prepared signal.
    * 
-   * Since: 2.2
+   * @newin2p2
    * @param width The desired width of the image being loaded.
    * @param height The desired height of the image being loaded.
    */
   void set_size(int width, int height);
-          
+
+ 
   /** Causes the pixbuf loader to parse the next @a count bytes of an image.
    * It will return if the data was loaded successfully, and throw an exception
    * if an error occurred. In the latter case, the loader will be closed, and
@@ -167,8 +180,25 @@ public:
    * @throw Gdk::PixbufError
    * @throw Glib::FileError
    */
-  void write(const guint8* buf, gsize count);
   
+  /** This will cause a pixbuf loader to parse the next @a count  bytes of
+   * an image.  It will return <tt>true</tt> if the data was loaded successfully,
+   * and <tt>false</tt> if an error occurred.  In the latter case, the loader
+   * will be closed, and will not accept further writes. If <tt>false</tt> is
+   * returned, @a error  will be set to an error from the Gdk::PIXBUF_ERROR
+   * or G::FILE_ERROR domains.
+   * @param buf Pointer to image data.
+   * @param count Length of the @a buf  buffer in bytes.
+   * @param error Return location for errors.
+   * @return <tt>true</tt> if the write was successful, or <tt>false</tt> if the loader
+   * cannot parse the buffer.
+   */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  void write(const guint8* buf, gsize count);
+#else
+  void write(const guint8* buf, gsize count, std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
 
   /** Informs a pixbuf loader that no further writes with PixbufLoader::write()
    * will occur, so that it can free its internal loading structures.  Also,
@@ -179,8 +209,26 @@ public:
    * @throw Gdk::PixbufError
    * @throw Glib::FileError
    */
-  void close();
   
+  /** Informs a pixbuf loader that no further writes with
+   * write() will occur, so that it can free its
+   * internal loading structures. Also, tries to parse any data that
+   * hasn't yet been parsed; if the remaining data is partial or
+   * corrupt, an error will be returned.  If <tt>false</tt> is returned, @a error 
+   * will be set to an error from the Gdk::PIXBUF_ERROR or G::FILE_ERROR
+   * domains. If you're just cancelling a load rather than expecting it
+   * to be finished, passing <tt>0</tt> for @a error  to ignore it is
+   * reasonable.
+   * @param error Return location for a G::Error, or <tt>0</tt> to ignore errors.
+   * @return <tt>true</tt> if all image data written so far was successfully
+   *             passed out via the update_area signal.
+   */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  void close();
+#else
+  void close(std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
 
   /** Queries the Gdk::Pixbuf that a pixbuf loader is currently creating.
    * In general it only makes sense to call this function after the
@@ -214,23 +262,74 @@ public:
    * @return A Gdk::PixbufFormat or <tt>0</tt>. The return value is owned 
    * by GdkPixbuf and should not be freed.
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   PixbufFormat get_format() const;
 
+  /** This signal is emitted when the pixbuf loader has allocated the 
+   * pixbuf in the desired size.  After this signal is emitted, 
+   * applications can call get_pixbuf() to fetch 
+   * the partially-loaded pixbuf.
+   */ 
   
+/**
+   * @par Prototype:
+   * <tt>void %area_prepared()</tt>
+   */
+
   Glib::SignalProxy0< void > signal_area_prepared();
 
+
+  /** This signal is emitted when a significant area of the image being
+   * loaded has been updated.  Normally it means that a complete
+   * scanline has been read in, but it could be a different area as
+   * well.  Applications can use this signal to know when to repaint
+   * areas of an image that is being loaded.
+   *
+   * @param X offset of upper-left corner of the updated area.
+   * @param y Y offset of upper-left corner of the updated area.
+   * @param width Width of updated area.
+   * @param height Height of updated area.
+   */
   
+/**
+   * @par Prototype:
+   * <tt>void %area_updated(int x, int y, int width, int height)</tt>
+   */
+
   Glib::SignalProxy4< void,int,int,int,int > signal_area_updated();
 
+
+  /** This signal is emitted when close() is called.
+   * It can be used by different parts of an application to receive
+   * notification when an image loader is closed by the code that
+   * drives it.
+   */
   
+/**
+   * @par Prototype:
+   * <tt>void %closed()</tt>
+   */
+
   Glib::SignalProxy0< void > signal_closed();
 
-  
+
   //We use no_default_handler for this, because we can not add a new vfunc to 2.5 without breaking ABI.
   //TODO: Remove no_default_handler when we do an ABI-break-with-parallel-install.
+  /** This signal is emitted when the pixbuf loader has been fed the
+   * initial amount of data that is required to figure out the size
+   * of the image that it will create.  Applications can call  
+   * set_size() in response to this signal to set
+   * the desired size to which the image should be scaled.
+   *
+   * @param width The original width of the image.
+   * @param height The original height of the image
+   */
   
+/**
+   * @par Prototype:
+   * <tt>void %size_prepared(int width, int height)</tt>
+   */
 
   Glib::SignalProxy2< void,int,int > signal_size_prepared();
 
@@ -239,14 +338,20 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_area_prepared();
   virtual void on_area_updated(int x, int y, int width, int height);
   virtual void on_closed();
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

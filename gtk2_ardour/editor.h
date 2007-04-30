@@ -264,6 +264,7 @@ class Editor : public PublicEditor
 	TrackViewList* get_valid_views (TimeAxisView*, ARDOUR::RouteGroup* grp = 0);
 
 	Width editor_mixer_strip_width;
+	void maybe_add_mixer_strip_width (XMLNode&);
 	void show_editor_mixer (bool yn);
 	void set_selected_mixer_strip (TimeAxisView&);
 	void hide_track_in_display (TimeAxisView& tv);
@@ -305,6 +306,7 @@ class Editor : public PublicEditor
 	void toggle_xfades_active ();
 	void toggle_xfade_visibility ();
 	bool xfade_visibility() const { return _xfade_visibility; }
+	void update_xfade_visibility ();
 	void update_crossfade_model ();
 	void set_crossfade_model (ARDOUR::CrossfadeModel);
 
@@ -1435,7 +1437,7 @@ class Editor : public PublicEditor
 	void drag_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event);
 	void end_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event);
 
-	bool select_all_within (nframes_t start, nframes_t end, gdouble topy, gdouble boty, Selection::Operation op);
+	bool select_all_within (nframes_t start, nframes_t end, gdouble topy, gdouble boty, const TrackViewList&, Selection::Operation op);
 	
 	ArdourCanvas::SimpleRect   *rubberband_rect;
 	

@@ -3,6 +3,7 @@
 #ifndef _PANGOMM_TABARRAY_H
 #define _PANGOMM_TABARRAY_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -190,6 +191,7 @@ class Value<Pango::TabArray> : public Glib::Value_Boxed<Pango::TabArray>
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 } // namespace Glib
+
 
 #endif /* _PANGOMM_TABARRAY_H */
 

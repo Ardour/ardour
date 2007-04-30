@@ -3,6 +3,7 @@
 #ifndef _PANGOMM_LAYOUTLINE_H
 #define _PANGOMM_LAYOUTLINE_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -28,6 +29,7 @@
 
 #include <glibmm/slisthandle.h> // For the Glib::SListHandle typedef
 #include <pangomm/rectangle.h>
+#include <cairomm/context.h>
 #include <pango/pango-layout.h>
 
 
@@ -163,12 +165,28 @@ public:
    */
   Rectangle get_pixel_logical_extents() const;
 
-  Glib::RefPtr<Pango::Layout> get_layout();
+  /** Draws this LayoutLine in the specified Cairo context.
+   * The origin of the glyphs (the left edge of the line) will
+   * be drawn at the current point of the cairo context.
+   *
+   * @param context A Cairo context.
+   */
+  void show_in_cairo_context(const Cairo::RefPtr<Cairo::Context>& context);
+
+  /** Adds the text in this LayoutLine to the current path in the
+   * specified Cairo @a context. The origin of the glyphs (the left edge
+   * of the line) will be at the current point of the cairo context.
+   *
+   * @param context A Cairo context.
+   */
+  void add_to_cairo_context(const Cairo::RefPtr<Cairo::Context>& context);
+
+   Glib::RefPtr<Pango::Layout> get_layout();
   Glib::RefPtr<const Pango::Layout> get_layout() const;
-  //_MEMBER_SET_GOBJECT(layout, layout, Pango::Layout, PangoLayout*)
-  int get_length() const;
-  int get_start_index() const;
-    
+   //_MEMBER_SET_GOBJECT(layout, layout, Pango::Layout, PangoLayout*)
+   int get_length() const;
+    int get_start_index() const;
+     
 
 };
 
@@ -217,6 +235,7 @@ namespace Glib
   Glib::RefPtr<Pango::LayoutLine> wrap(PangoLayoutLine* object, bool take_copy = false);
 
 } // namespace Glib
+
 
 #endif /* _PANGOMM_LAYOUTLINE_H */
 

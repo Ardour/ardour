@@ -3,6 +3,7 @@
 #ifndef _GTKMM_ADJUSTMENT_H
 #define _GTKMM_ADJUSTMENT_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -100,13 +101,19 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_changed();
   virtual void on_value_changed();
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -125,12 +132,9 @@ public:
    * @param page_increment The page increment
    * @param page_size The page size
    */
-  Adjustment(double value,
-      	     double lower,  double upper,
-      	     double step_increment = 1, double page_increment = 10,
-      	     double page_size = 0);
+  Adjustment(double value, double lower, double upper, double step_increment = 1, double page_increment = 10, double page_size = 0);
   
-
+  
   /** Emits a "changed" signal from the Adjustment.  This is typically called by the owner of the Adjustment after it has changed any of the Adjustment fields other than the value.
    */
   void changed();
@@ -162,28 +166,28 @@ public:
   /** Retrieve the @a lower member variable.
    * @return The current value of @a lower.
    */
-  double get_lower() const;
-
+   double get_lower() const;
+ 
   /** Retrieve the @a upper member variable.
    * @return The current value of @a upper.
    */
-  double get_upper() const;
-
+   double get_upper() const;
+ 
   /** Retrieve the @a step_increment variable.
    * @return The current value of @a step_increment.
    */
-  double get_step_increment() const;
-
+   double get_step_increment() const;
+ 
   /** Retrieve the @a page_increment variable.
    * @return The current value of @a page_increment.
    */
-  double get_page_increment() const;
-
+   double get_page_increment() const;
+ 
   /** Retrieve the @a page_size variable.
    * @return The current value of @a page_size.
    */
-  double get_page_size() const;
-
+   double get_page_size() const;
+ 
   // TODO: This section needs changing. We must be able to set more at a time,
   // emitting "changed" signal only once.
   /** Sets the @a lower member variable
@@ -212,9 +216,19 @@ public:
   void set_page_size(double size);
 
   
+/**
+   * @par Prototype:
+   * <tt>void %changed()</tt>
+   */
+
   Glib::SignalProxy0< void > signal_changed();
 
   
+/**
+   * @par Prototype:
+   * <tt>void %value_changed()</tt>
+   */
+
   Glib::SignalProxy0< void > signal_value_changed();
 
 
@@ -231,6 +245,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Adjustment* wrap(GtkAdjustment* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_ADJUSTMENT_H */
 

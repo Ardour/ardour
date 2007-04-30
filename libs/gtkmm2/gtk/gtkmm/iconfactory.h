@@ -3,6 +3,7 @@
 #ifndef _GTKMM_ICONFACTORY_H
 #define _GTKMM_ICONFACTORY_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -114,11 +115,11 @@ public:
   void add(const Gtk::StockID& stock_id, const IconSet& icon_set);
   
   /** Adds an icon factory to the list of icon factories searched by
-   * Gtk::Style::lookup_icon_set(). This means that, for example,
-   * Gtk::Image::new_from_stock() will be able to find icons in @a factory .
-   * There will normally be an icon factory added for each library or
-   * application that comes with icons. The default icon factories
-   * can be overridden by themes.
+   *     Gtk::Style::lookup_icon_set(). This means that, for example,
+   *     the Image::Image(const Gtk::StockID& stock_id, IconSize size) constructor will be able to find icons in @a factory .
+   *     There will normally be an icon factory added for each library or
+   *     application that comes with icons. The default icon factories
+   *     can be overridden by themes.
    */
   void add_default();
   
@@ -133,11 +134,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

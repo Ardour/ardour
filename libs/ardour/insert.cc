@@ -415,7 +415,7 @@ PluginInsert::automation_run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t 
 	
  	while (nframes) {
 
- 		nframes_t cnt = min (((nframes_t) floor (next_event.when) - now), nframes);
+		nframes_t cnt = min (((nframes_t) ceil (next_event.when) - now), nframes);
   
  		connect_and_run (bufs, nbufs, cnt, offset, true, now);
  		

@@ -3,6 +3,7 @@
 #ifndef _GDKMM_GC_H
 #define _GDKMM_GC_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -469,6 +470,9 @@ public:
    * @param mask A bitmap.
    */
   void set_clip_mask(const Glib::RefPtr<Bitmap>& mask);
+
+  /** @deprecated Use set_clip_rectangle(const Rectangle& rectangle) instead.
+   */
   
   /** Sets the clip mask for a graphics context from a
    * rectangle. The clip mask is interpreted relative to the clip
@@ -476,6 +480,14 @@ public:
    * @param rectangle The rectangle to clip to.
    */
   void set_clip_rectangle(Rectangle& rectangle);
+  
+  /** Sets the clip mask for a graphics context from a
+   * rectangle. The clip mask is interpreted relative to the clip
+   * origin. (See set_clip_origin()).
+   * @param rectangle The rectangle to clip to.
+   */
+  void set_clip_rectangle(const Rectangle& rectangle);
+
   
   /** Sets the clip mask for a graphics context from a region structure.
    * The clip mask is interpreted relative to the clip origin. (See
@@ -574,14 +586,14 @@ public:
   /** Gets the Gdk::Screen for which @a gc  was created
    * @return The Gdk::Screen for @a gc .
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   Glib::RefPtr<Screen> get_screen();
   
   /** Gets the Gdk::Screen for which @a gc  was created
    * @return The Gdk::Screen for @a gc .
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   Glib::RefPtr<const Screen> get_screen() const;
 
@@ -590,11 +602,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

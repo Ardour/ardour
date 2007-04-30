@@ -51,7 +51,13 @@ double Glib::Ascii::strtod(const std::string&      str,
                            std::string::size_type  start_index)
 {
   if(start_index > str.size())
+  {
+    #ifdef GLIBMM_EXCEPTIONS_ENABLED
     throw std::out_of_range("out of range (strtod): start_index > str.size()");
+    #else
+      return 0;
+    #endif //GLIBMM_EXCEPTIONS_ENABLED
+  }
 
   const char *const bufptr = str.c_str();
   char* endptr = 0;
@@ -63,6 +69,8 @@ double Glib::Ascii::strtod(const std::string&      str,
   {
     g_return_val_if_fail(err_no == ERANGE, result);
 
+    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+    //Interpret the result in the event of an error:
     if(result > 0.0)
       throw std::overflow_error("overflow (strtod): positive number too large");
 
@@ -70,6 +78,9 @@ double Glib::Ascii::strtod(const std::string&      str,
       throw std::overflow_error("overflow (strtod): negative number too large");
 
     throw std::underflow_error("underflow (strtod): number too small");
+    #else
+    return result;
+    #endif // GLIBMM_EXCEPTIONS_ENABLED
   }
 
   if(endptr)

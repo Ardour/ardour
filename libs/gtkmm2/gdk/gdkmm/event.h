@@ -3,6 +3,7 @@
 #ifndef _GDKMM_EVENT_H
 #define _GDKMM_EVENT_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -88,7 +89,8 @@ enum EventType
   SCROLL,
   WINDOW_STATE,
   SETTING,
-  OWNER_CHANGE
+  OWNER_CHANGE,
+  GRAB_BROKEN
 };
 
 } // namespace Gdk
@@ -316,7 +318,7 @@ public:
    * have been allocated by GTK+, for instance, by
    * gdk_event_copy().
    * 
-   * Since: 2.2
+   * @newin2p2
    * @param screen A Gdk::Screen.
    */
   void set_screen(const Glib::RefPtr<Screen>& screen);
@@ -324,26 +326,26 @@ public:
   /** Returns the screen for the event. The screen is
    * typically the screen for <tt>event->any.window</tt>, but
    * for events such as mouse events, it is the screen
-   * where the the pointer was when the event occurs -
+   * where the pointer was when the event occurs -
    * that is, the screen which has the root window 
    * to which <tt>event->motion.x_root</tt> and
    * <tt>event->motion.y_root</tt> are relative.
    * @return The screen for the event
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   Glib::RefPtr<Screen> get_screen();
   
   /** Returns the screen for the event. The screen is
    * typically the screen for <tt>event->any.window</tt>, but
    * for events such as mouse events, it is the screen
-   * where the the pointer was when the event occurs -
+   * where the pointer was when the event occurs -
    * that is, the screen which has the root window 
    * to which <tt>event->motion.x_root</tt> and
    * <tt>event->motion.y_root</tt> are relative.
    * @return The screen for the event
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   Glib::RefPtr<const Screen> get_screen() const;
 
@@ -393,6 +395,7 @@ class Value<Gdk::Event> : public Glib::Value_Boxed<Gdk::Event>
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 } // namespace Glib
+
 
 #endif /* _GDKMM_EVENT_H */
 

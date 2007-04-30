@@ -23,6 +23,7 @@
 #include <sigc++/bind.h>
 
 #include <pbd/convert.h>
+#include <pbd/enumwriter.h>
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
@@ -112,6 +113,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	ignore_speed_adjustment = false;
 	comment_window = 0;
 	comment_area = 0;
+	_width_owner = 0;
 
 	width_button.add (*(manage (new Gtk::Image (::get_icon("strip_width")))));
 	hide_button.add (*(manage (new Gtk::Image (::get_icon("hide")))));
@@ -175,7 +177,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	bottom_button_table.set_col_spacings (0);
 	bottom_button_table.set_homogeneous (true);
 	bottom_button_table.attach (group_button, 0, 1, 0, 1);
-
+	
 	if (is_audio_track()) {
 		
 		rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press), false);
@@ -367,22 +369,13 @@ void
 MixerStrip::set_stuff_from_route ()
 {
 	XMLProperty *prop;
-	
+
 	ensure_xml_node ();
 
+	/* if width is not set, it will be set by the MixerUI or editor */
+
 	if ((prop = xml_node->property ("strip_width")) != 0) {
-		if (prop->value() == "wide") {
-			set_width (Wide);
-		} else if (prop->value() == "narrow") {
-			set_width (Narrow);
-		}
-		else {
-			error << string_compose(_("unknown strip width \"%1\" in XML GUI information"), prop->value()) << endmsg;
-			set_width (Wide);
-		}
-	}
-	else {
-		set_width (Wide);
+		set_width (Width (string_2_enum (prop->value(), _width)), this);
 	}
 
 	if ((prop = xml_node->property ("shown_mixer")) != 0) {
@@ -398,14 +391,17 @@ MixerStrip::set_stuff_from_route ()
 }
 
 void
-MixerStrip::set_width (Width w)
+MixerStrip::set_width (Width w, void* owner)
 {
 	/* always set the gpm width again, things may be hidden */
+
 	gpm.set_width (w);
 	panners.set_width (w);
 	pre_redirect_box.set_width (w);
 	post_redirect_box.set_width (w);
-	
+
+	_width_owner = owner;
+
 	if (_width == w) {
 		return;
 	}
@@ -413,11 +409,14 @@ MixerStrip::set_width (Width w)
 	ensure_xml_node ();
 	
 	_width = w;
-	
+
+	if (_width_owner == this) {
+		xml_node->add_property ("strip_width", enum_2_string (_width));
+	}
+
 	switch (w) {
 	case Wide:
 		set_size_request (-1, -1);
-		xml_node->add_property ("strip_width", "wide");
 		
 		if (rec_enable_button)  {
 			((Gtk::Label*)rec_enable_button->get_child())->set_text (_("record"));
@@ -441,8 +440,6 @@ MixerStrip::set_width (Width w)
 		break;
 
 	case Narrow:
-		xml_node->add_property ("strip_width", "narrow");
-
 		if (rec_enable_button) {
 			((Gtk::Label*)rec_enable_button->get_child())->set_text (_("Rec"));
 		}
@@ -563,7 +560,7 @@ MixerStrip::input_press (GdkEventButton *ev)
 		msg.run ();
 		return true;
 	}
-	
+
 	switch (ev->button) {
 
 	case 1:
@@ -692,7 +689,7 @@ void
 MixerStrip::connect_to_pan ()
 {
 	ENSURE_GUI_THREAD(mem_fun(*this, &MixerStrip::connect_to_pan));
-	
+
 	panstate_connection.disconnect ();
 	panstyle_connection.disconnect ();
 
@@ -773,7 +770,8 @@ MixerStrip::output_changed (IOChange change, void *src)
 
 
 void 
-MixerStrip::comment_editor_done_editing() {
+MixerStrip::comment_editor_done_editing() 
+{
 	string str =  comment_area->get_buffer()->get_text();
 	if (_route->comment() != str) {
 		_route->set_comment (str, this);
@@ -973,12 +971,11 @@ void
 MixerStrip::build_route_ops_menu ()
 {
 	using namespace Menu_Helpers;
-
 	route_ops_menu = manage (new Menu);
 	route_ops_menu->set_name ("ArdourContextMenu");
 
 	MenuList& items = route_ops_menu->items();
-	
+
 	items.push_back (MenuElem (_("Rename"), mem_fun(*this, &RouteUI::route_rename)));
 	items.push_back (SeparatorElem());
 	items.push_back (CheckMenuElem (_("Active"), mem_fun (*this, &RouteUI::toggle_route_active)));
@@ -1003,6 +1000,11 @@ MixerStrip::name_button_button_press (GdkEventButton* ev)
 {
 	if (ev->button == 1) {
 		list_route_operations ();
+
+		Menu_Helpers::MenuList& items = route_ops_menu->items();
+		/* do not allow rename if the track is record-enabled */
+		static_cast<MenuItem*> (&items.front())->set_sensitive (!_route->record_enabled());
+
 		route_ops_menu->popup (1, ev->time);
 	}
 	return FALSE;
@@ -1090,10 +1092,10 @@ MixerStrip::width_clicked ()
 {
 	switch (_width) {
 	case Wide:
-		set_width (Narrow);
+		set_width (Narrow, this);
 		break;
 	case Narrow:
-		set_width (Wide);
+		set_width (Wide, this);
 		break;
 	}
 }

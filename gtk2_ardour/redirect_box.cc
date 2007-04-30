@@ -760,15 +760,19 @@ RedirectBox::cut_redirects ()
 
 	no_redirect_redisplay = true;
 	for (vector<boost::shared_ptr<Redirect> >::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i) {
+		// Do not cut inserts or sends
+		if (boost::dynamic_pointer_cast<PluginInsert>((*i)) != 0) {
+			void* gui = (*i)->get_gui ();
 		
-		void* gui = (*i)->get_gui ();
+			if (gui) {
+				static_cast<Gtk::Widget*>(gui)->hide ();
+			}
 		
-		if (gui) {
-			static_cast<Gtk::Widget*>(gui)->hide ();
-		}
-		
-		if (_route->remove_redirect (*i, this)) {
-			/* removal failed */
+			if (_route->remove_redirect (*i, this)) {
+				/* removal failed */
+				_rr_selection.remove (*i);
+			}
+		} else {
 			_rr_selection.remove (*i);
 		}
 
@@ -790,10 +794,40 @@ RedirectBox::copy_redirects ()
 	}
 
 	for (vector<boost::shared_ptr<Redirect> >::iterator i = to_be_copied.begin(); i != to_be_copied.end(); ++i) {
-		copies.push_back (Redirect::clone (*i));
+		// Do not copy inserts or sends
+		if (boost::dynamic_pointer_cast<PluginInsert>((*i)) != 0) {
+			copies.push_back (Redirect::clone (*i));
+		}
   	}
 
 	_rr_selection.set (copies);
+
+}
+
+void
+RedirectBox::delete_redirects ()
+{
+	vector<boost::shared_ptr<Redirect> > to_be_deleted;
+	
+	get_selected_redirects (to_be_deleted);
+
+	if (to_be_deleted.empty()) {
+		return;
+	}
+
+	for (vector<boost::shared_ptr<Redirect> >::iterator i = to_be_deleted.begin(); i != to_be_deleted.end(); ++i) {
+		
+		void* gui = (*i)->get_gui ();
+		
+		if (gui) {
+			static_cast<Gtk::Widget*>(gui)->hide ();
+		}
+
+		_route->remove_redirect( *i, this);
+	}
+
+	no_redirect_redisplay = false;
+	redisplay_redirects (this);
 }
 
 gint
@@ -1161,6 +1195,10 @@ RedirectBox::register_actions ()
 	ActionManager::plugin_selection_sensitive_actions.push_back(act);
 	act = ActionManager::register_action (popup_act_grp, X_("copy"), _("Copy"),  sigc::ptr_fun (RedirectBox::rb_copy));
 	ActionManager::plugin_selection_sensitive_actions.push_back(act);
+
+	act = ActionManager::register_action (popup_act_grp, X_("delete"), _("Delete"),  sigc::ptr_fun (RedirectBox::rb_delete));
+	ActionManager::plugin_selection_sensitive_actions.push_back(act); // ??
+
 	paste_action = ActionManager::register_action (popup_act_grp, X_("paste"), _("Paste"),  sigc::ptr_fun (RedirectBox::rb_paste));
 	act = ActionManager::register_action (popup_act_grp, X_("rename"), _("Rename"),  sigc::ptr_fun (RedirectBox::rb_rename));
 	ActionManager::plugin_selection_sensitive_actions.push_back(act);
@@ -1229,6 +1267,16 @@ RedirectBox::rb_cut ()
 	}
 
 	_current_redirect_box->cut_redirects ();
+}
+
+void
+RedirectBox::rb_delete ()
+{
+	if (_current_redirect_box == 0) {
+		return;
+	}
+
+	_current_redirect_box->delete_redirects ();
 }
 
 void

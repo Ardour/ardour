@@ -251,6 +251,7 @@ adaptor_functor<T_functor>::operator()() const
   { return functor_(); }
 
 
+//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::adaptor_functor performs a functor
  * on the functor stored in the sigc::adaptor_functor object.
@@ -261,7 +262,9 @@ template <class T_action, class T_functor>
 void visit_each(const T_action& _A_action,
                 const adaptor_functor<T_functor>& _A_target)
 {
-  visit_each(_A_action, _A_target.functor_);
+  //The extra sigc:: prefix avoids ambiguity in some strange
+  //situations.
+  sigc::visit_each(_A_action, _A_target.functor_);
 }
 
 

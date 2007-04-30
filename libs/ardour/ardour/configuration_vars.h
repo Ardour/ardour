@@ -1,3 +1,22 @@
+/*
+    Copyright (C) 2000-2007 Paul Davis 
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
 /* IO connection */
 
 CONFIG_VARIABLE (AutoConnectOption, output_auto_connect, "output-auto-connect", AutoConnectOption (0))
@@ -118,6 +137,8 @@ CONFIG_VARIABLE (bool, use_vst, "use-vst", true)
 CONFIG_VARIABLE (uint32_t, subframes_per_frame, "subframes-per-frame", 100)
 CONFIG_VARIABLE (uint32_t, saved_history_depth, "save-history-depth", 100)
 CONFIG_VARIABLE (bool, use_overlap_equivalency, "use-overlap-equivalency", false)
+CONFIG_VARIABLE (bool, periodic_safety_backups, "periodic-safety-backups", true)
+CONFIG_VARIABLE (uint32_t, periodic_safety_backup_interval, "periodic-safety-backup-interval", 120)
 
 /* BWAV */
 

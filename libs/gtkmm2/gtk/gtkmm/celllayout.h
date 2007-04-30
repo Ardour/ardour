@@ -3,6 +3,7 @@
 #ifndef _GTKMM_CELLLAYOUT_H
 #define _GTKMM_CELLLAYOUT_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -108,7 +109,9 @@ public:
    * then the @a cell  is allocated no more space than it needs. Any unused space
    * is divided evenly between cells for which @a expand  is <tt>true</tt>.
    * 
-   * Since: 2.4
+   * Note that reusing the same cell renderer is not supported. 
+   * 
+   * @newin2p4
    * @param cell A Gtk::CellRenderer.
    * @param expand <tt>true</tt> if @a cell  is to be given extra space allocated to @a cell_layout .
    */
@@ -118,7 +121,9 @@ public:
    *  @a cell  is allocated no more space than it needs. Any unused space is
    * divided evenly between cells for which @a expand  is <tt>true</tt>.
    * 
-   * Since: 2.4
+   * Note that reusing the same cell renderer is not supported. 
+   * 
+   * @newin2p4
    * @param cell A Gtk::CellRenderer.
    * @param expand <tt>true</tt> if @a cell  is to be given extra space allocated to @a cell_layout .
    */
@@ -127,10 +132,10 @@ public:
   /** Unsets all the mappings on all renderers on @a cell_layout  and
    * removes all renderers from @a cell_layout .
    * 
-   * Since: 2.4
+   * @newin2p4
    */
   void clear();
-  
+
    //I think this is just a convenience method, equivalent to clear() and multiple add_attribute()s. murrayc.
 
   
@@ -140,24 +145,29 @@ public:
    * of the model contains strings, you could have the "text" attribute of a
    * Gtk::CellRendererText get its values from column 2.
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param cell A Gtk::CellRenderer.
    * @param attribute An attribute on the renderer.
    * @param column The column position on the model to get the attribute from.
    */
   void add_attribute(CellRenderer& cell, const Glib::ustring& attribute, int column);
-  void add_attribute(const Glib::PropertyProxy_Base& property, const TreeModelColumnBase& column);
 
-  //For instance, void on_cell_data(const TreeModel::const_iterator& iter)                                        
+#ifdef GLIBMM_PROPERTIES_ENABLED
+  void add_attribute(const Glib::PropertyProxy_Base& property, const TreeModelColumnBase& column);
+#endif
+
+  void add_attribute(CellRenderer& cell, const Glib::ustring& attribute, const TreeModelColumnBase& column);
+
+  //For instance, void on_cell_data(const TreeModel::const_iterator& iter)
   typedef sigc::slot<void, const TreeModel::const_iterator&> SlotCellData;
 
   void set_cell_data_func(CellRenderer& cell, const SlotCellData& slot);
   
-                                                                                  
+
   /** Clears all existing attributes previously set with
    * set_attributes().
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param cell A Gtk::CellRenderer to clear the attribute mapping on.
    */
   void clear_attributes(CellRenderer& cell);
@@ -166,31 +176,54 @@ public:
   /** Re-inserts @a cell  at @a position . Note that @a cell  has already to be packed
    * into @a cell_layout  for this to function properly.
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param cell A Gtk::CellRenderer to reorder.
    * @param position New position to insert @a cell  at.
    */
   void reorder(CellRenderer& cell, int position);
 
 protected:
-    virtual void pack_start_vfunc(CellRenderer* cell, bool expand);
-    virtual void pack_end_vfunc(CellRenderer* cell, bool expand);
-    virtual void clear_vfunc();
-    virtual void add_attribute_vfunc(CellRenderer* cell, const Glib::ustring& attribute, int column);
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual void pack_start_vfunc(CellRenderer* cell, bool expand);
+#endif //GLIBMM_VFUNCS_ENABLED
+
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual void pack_end_vfunc(CellRenderer* cell, bool expand);
+#endif //GLIBMM_VFUNCS_ENABLED
+
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual void clear_vfunc();
+#endif //GLIBMM_VFUNCS_ENABLED
+
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual void add_attribute_vfunc(CellRenderer* cell, const Glib::ustring& attribute, int column);
+#endif //GLIBMM_VFUNCS_ENABLED
+
 //TODO:  _WRAP_VFUNC(void set_cell_data_func(CellRenderer* cell, GtkCellLayoutDataFunc func, gpointer func_data, GDestroyNotify destroy), set_cell_data_func)
-    virtual void clear_attributes_vfunc(CellRenderer* cell);
-    virtual void reorder_vfunc(CellRenderer* cell, int position);
-                                 
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual void clear_attributes_vfunc(CellRenderer* cell);
+#endif //GLIBMM_VFUNCS_ENABLED
+
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual void reorder_vfunc(CellRenderer* cell, int position);
+#endif //GLIBMM_VFUNCS_ENABLED
+
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };
@@ -205,7 +238,11 @@ void CellLayout::pack_start(const TreeModelColumn<T_ModelColumnType>& column, bo
   pack_start(*pCellRenderer, expand);
 
   //Make the renderer render the column:
+#ifdef GLIBMM_PROPERTIES_ENABLED
   add_attribute(pCellRenderer->_property_renderable(), column);
+#else
+  add_attribute(*pCellRenderer, pCellRenderer->_property_renderable(), column);
+#endif
 }
 
 } // namespace Gtk
@@ -221,6 +258,7 @@ namespace Glib
   Glib::RefPtr<Gtk::CellLayout> wrap(GtkCellLayout* object, bool take_copy = false);
 
 } // namespace Glib
+
 
 #endif /* _GTKMM_CELLLAYOUT_H */
 

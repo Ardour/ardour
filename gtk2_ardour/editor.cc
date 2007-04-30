@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 
 #include <pbd/convert.h>
 #include <pbd/error.h>
-#include <pbd/stacktrace.h>
+#include <pbd/enumwriter.h>
 #include <pbd/memento_command.h>
 
 #include <glibmm/miscutils.h>
@@ -2041,6 +2041,10 @@ Editor::set_state (const XMLNode& node)
 		edit_cursor->set_position (0);
 	}
 
+	if ((prop = node.property ("mixer-width"))) {
+		editor_mixer_strip_width = Width (string_2_enum (prop->value(), editor_mixer_strip_width));
+	}
+
 	if ((prop = node.property ("zoom-focus"))) {
 		set_zoom_focus ((ZoomFocus) atoi (prop->value()));
 	}
@@ -2104,15 +2108,15 @@ Editor::set_state (const XMLNode& node)
 
 	if ((prop = node.property ("follow-playhead"))) {
 		bool yn = (prop->value() == "yes");
+		set_follow_playhead (yn);
 		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-follow-playhead"));
 		if (act) {
 			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-			/* do it twice to force the change */
-			tact->set_active (!yn);
-			tact->set_active (yn);
+			if (tact->get_active() != yn) {
+				tact->set_active (yn);
+			}
 		}
 	}
-
 
 	if ((prop = node.property ("region-list-sort-type"))) {
 		region_list_sort_type = (Editing::RegionListSortType) -1; // force change 
@@ -2181,6 +2185,8 @@ Editor::get_state ()
 		node->add_child_nocopy (*geometry);
 	}
 
+	maybe_add_mixer_strip_width (*node);
+	
 	snprintf (buf, sizeof(buf), "%d", (int) zoom_focus);
 	node->add_property ("zoom-focus", buf);
 	snprintf (buf, sizeof(buf), "%f", frames_per_unit);
@@ -3776,7 +3782,7 @@ Editor::idle_visual_changer ()
 		}
 	}
 
-	return 0;
+	return 0; /* this is always a one-shot call */
 }
 
 struct EditorOrderTimeAxisSorter {

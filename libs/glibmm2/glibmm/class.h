@@ -23,6 +23,7 @@
  */
 
 #include <glib-object.h>
+#include <glibmmconfig.h> //Include this here so that the /private/*.h classes have access to GLIBMM_VFUNCS_ENABLED
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

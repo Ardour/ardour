@@ -20,6 +20,9 @@
 #include <glibmm/miscutils.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/window_title.h>
+
+#include <pbd/enumwriter.h>
+
 #include <ardour/audioengine.h>
 
 #include "editor.h"
@@ -32,6 +35,7 @@
 #include "i18n.h"
 
 using namespace Gtkmm2ext;
+using namespace PBD;
 
 void
 Editor::editor_mixer_button_toggled ()
@@ -107,8 +111,8 @@ Editor::show_editor_mixer (bool yn)
 			current_mixer_strip->set_embedded (true);
 			current_mixer_strip->Hiding.connect (mem_fun(*this, &Editor::current_mixer_strip_hidden));
 			current_mixer_strip->GoingAway.connect (mem_fun(*this, &Editor::current_mixer_strip_removed));
-			current_mixer_strip->set_width (editor_mixer_strip_width);
-			
+			current_mixer_strip->set_width (editor_mixer_strip_width, (void*) this);
+
 			global_hpacker.pack_start (*current_mixer_strip, Gtk::PACK_SHRINK );
  			global_hpacker.reorder_child (*current_mixer_strip, 0);
 
@@ -354,4 +358,12 @@ Editor::session_going_away ()
 	set_title (title.get_string());
 
 	session = 0;
+}
+
+void
+Editor::maybe_add_mixer_strip_width (XMLNode& node)
+{
+	if (current_mixer_strip) {
+		node.add_property ("mixer-width", enum_2_string (current_mixer_strip->get_width()));
+	}
 }

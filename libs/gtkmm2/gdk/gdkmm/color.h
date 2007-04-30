@@ -3,6 +3,7 @@
 #ifndef _GDKMM_COLOR_H
 #define _GDKMM_COLOR_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -126,12 +127,14 @@ public:
   */
   bool set(const Glib::ustring& value);
 
-  #ifndef GDKMM_DEPRECATED
+  #ifndef GDKMM_DISABLE_DEPRECATED
+
   /** 
    * @deprecated See set().
    */
   bool parse(const Glib::ustring& spec);
-  #endif //GDKMM_DEPRECATED
+  #endif // GDKMM_DISABLE_DEPRECATED
+
 
   /** Get the red component of the color.
    * @result The red component of the color.
@@ -269,6 +272,7 @@ class Value<Gdk::Color> : public Glib::Value_Boxed<Gdk::Color>
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 } // namespace Glib
+
 
 #endif /* _GDKMM_COLOR_H */
 

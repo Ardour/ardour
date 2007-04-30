@@ -3,6 +3,7 @@
 #ifndef _GDKMM_RGBCMAP_H
 #define _GDKMM_RGBCMAP_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */

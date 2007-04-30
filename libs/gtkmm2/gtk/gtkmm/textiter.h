@@ -3,6 +3,7 @@
 #ifndef _GTKMM_TEXTITER_H
 #define _GTKMM_TEXTITER_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -694,9 +695,61 @@ public:
    */
   bool backward_word_starts(int count);
 
+  
+  /** Moves @a iter  to the start of the next visible line. Returns <tt>true</tt> if there
+   * was a next line to move to, and <tt>false</tt> if @a iter  was simply moved to
+   * the end of the buffer and is now not dereferenceable, or if @a iter  was
+   * already at the end of the buffer.
+   * @return Whether @a iter  can be dereferenced
+   * 
+   * @newin2p8.
+   */
+  bool forward_visible_line();
+  
+  /** Moves @a iter  to the start of the previous visible line. Returns <tt>true</tt> if
+   *  @a iter  could be moved; i.e. if @a iter  was at character offset 0, this
+   * function returns <tt>false</tt>. Therefore if @a iter  was already on line 0,
+   * but not at the start of the line, @a iter  is snapped to the start of
+   * the line and the function returns <tt>true</tt>. (Note that this implies that
+   * in a loop calling this function, the line number may not change on
+   * every iteration, if your first iteration is on line 0.)
+   * @return Whether @a iter  moved
+   * 
+   * @newin2p8.
+   */
+  bool backward_visible_line();
+  
+  /** Moves @a count  visible lines forward, if possible (if @a count  would move
+   * past the start or end of the buffer, moves to the start or end of
+   * the buffer).  The return value indicates whether the iterator moved
+   * onto a dereferenceable position; if the iterator didn't move, or
+   * moved onto the end iterator, then <tt>false</tt> is returned. If @a count  is 0,
+   * the function does nothing and returns <tt>false</tt>. If @a count  is negative,
+   * moves backward by 0 - @a count  lines.
+   * @param count Number of lines to move forward.
+   * @return Whether @a iter  moved and is dereferenceable
+   * 
+   * @newin2p8.
+   */
+  bool forward_visible_line(int count);
+  
+  /** Moves @a count  visible lines backward, if possible (if @a count  would move
+   * past the start or end of the buffer, moves to the start or end of
+   * the buffer).  The return value indicates whether the iterator moved
+   * onto a dereferenceable position; if the iterator didn't move, or
+   * moved onto the end iterator, then <tt>false</tt> is returned. If @a count  is 0,
+   * the function does nothing and returns <tt>false</tt>. If @a count  is negative,
+   * moves forward by 0 - @a count  lines.
+   * @param count Number of lines to move backward.
+   * @return Whether @a iter  moved and is dereferenceable
+   * 
+   * @newin2p8.
+   */
+  bool backward_visible_lines(int count);
+
   //TODO: Now that there are so many *_visible_ versions of the methods, maybe we should
   //just add a visible=false parameter and therefore halve the number of methods. murrayc
-  
+ 
   
   /** Moves forward to the next visible word end. (If @a iter  is currently on a
    * word end, moves forward to the next one after that.) Word breaks
@@ -705,7 +758,7 @@ public:
    * algorithms).
    * @return <tt>true</tt> if @a iter  moved and is not the end iterator 
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   bool forward_visible_word_end();
   
@@ -716,7 +769,7 @@ public:
    * algorithms).
    * @return <tt>true</tt> if @a iter  moved and is not the end iterator 
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   bool backward_visible_word_start();
   
@@ -724,7 +777,7 @@ public:
    * @param count Number of times to move.
    * @return <tt>true</tt> if @a iter  moved and is not the end iterator 
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   bool forward_visible_word_ends(int count);
   
@@ -732,7 +785,7 @@ public:
    * @param count Number of times to move.
    * @return <tt>true</tt> if @a iter  moved and is not the end iterator 
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   bool backward_visible_word_starts(int count);
 
@@ -810,7 +863,7 @@ public:
    * gtk_text_iter_forward_cursor_position() for details.
    * @return <tt>true</tt> if we moved and the new position is dereferenceable
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   bool forward_visible_cursor_position();
   
@@ -818,7 +871,7 @@ public:
    * gtk_text_iter_backward_cursor_position() for details.
    * @return <tt>true</tt> if we moved and the new position is dereferenceable
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   bool backward_visible_cursor_position();
   
@@ -827,7 +880,7 @@ public:
    * @param count Number of positions to move.
    * @return <tt>true</tt> if we moved and the new position is dereferenceable
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   bool forward_visible_cursor_positions(int count);
   
@@ -836,7 +889,7 @@ public:
    * @param count Number of positions to move.
    * @return <tt>true</tt> if we moved and the new position is dereferenceable
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   bool backward_visible_cursor_positions(int count);
 
@@ -1041,18 +1094,22 @@ TextIter::PredicateAdapter<Predicate>::PredicateAdapter(const Predicate& predica
 template <class Predicate>
 gboolean TextIter::PredicateAdapter<Predicate>::gtk_callback(gunichar uc, void* user_data)
 {
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
   try
   {
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
     // This will either use Predicate::operator(), or call a function pointer.
     // The explicit conditional expression avoids relying on an implicit
     // conversion of the return type to int, which might be not available.
     return (static_cast<TextIter::PredicateAdapter<Predicate>*>(user_data)->predicate_(uc)) ? 1 : 0;
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
   }
   catch(...)
   {
     Glib::exception_handlers_invoke();
     return 0;
   }
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
 }
 
 inline
@@ -1205,6 +1262,7 @@ class Value<Gtk::TextIter> : public Glib::Value_Boxed<Gtk::TextIter>
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 } // namespace Glib
+
 
 #endif /* _GTKMM_TEXTITER_H */
 

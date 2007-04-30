@@ -3,6 +3,7 @@
 #ifndef _GTKMM_TEXTTAGTABLE_H
 #define _GTKMM_TEXTTAGTABLE_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -143,12 +144,27 @@ public:
   int get_size() const;
 
   
+/**
+   * @par Prototype:
+   * <tt>void %tag_changed(const Glib::RefPtr<TextTag>& tag, bool size_changed)</tt>
+   */
+
   Glib::SignalProxy2< void,const Glib::RefPtr<TextTag>&,bool > signal_tag_changed();
 
   
+/**
+   * @par Prototype:
+   * <tt>void %tag_added(const Glib::RefPtr<TextTag>& tag)</tt>
+   */
+
   Glib::SignalProxy1< void,const Glib::RefPtr<TextTag>& > signal_tag_added();
 
   
+/**
+   * @par Prototype:
+   * <tt>void %tag_removed(const Glib::RefPtr<TextTag>& tag)</tt>
+   */
+
   Glib::SignalProxy1< void,const Glib::RefPtr<TextTag>& > signal_tag_removed();
 
 
@@ -156,14 +172,20 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_tag_changed(const Glib::RefPtr<TextTag>& tag, bool size_changed);
   virtual void on_tag_added(const Glib::RefPtr<TextTag>& tag);
   virtual void on_tag_removed(const Glib::RefPtr<TextTag>& tag);
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

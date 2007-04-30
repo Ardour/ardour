@@ -1,21 +1,107 @@
-*** libsigc++ 2.0:
+2.0.17:
 
-libsigc++ implements a typesafe callback system for standard C++. It
-allows you to define signals and to connect those signals to any
-callback function, either global or a member function, regardless of
-whether it is static or virtual.
+* slot::disconnect(): Make this work.
+  sigc::connection::disconnect() already worked.
+  (James Lin, Murray Cumming)
+* visit_each compilation problem fixed.
+  (Philipp Berndt)
 
-libsigc++ is used by gtkmm to wrap the GTK+ signal system. It does not depend 
-on GTK or gtkmm.
+2.0.16:
 
-libsigc++ 2.0 uses modern C++ mechanisms to achieve a highly flexible,
-yet typesafe callback system. It supports all features of libsigc++ 1.2
-and improves upon it with a simpler and more powerful API.
+* Fixed build for SUN Forte C++ 5.5
+* Fixed build for MSVC++ 7.1
+* Fixed crash when using --no-inline with g++.
 
-This version of libsigc++ needs GNU g++ 3.2 or higher to compile.
+2.0.15:
 
+* g++ 3.2 (and Mac OS X g++ 3.3) build fix.
+  (Paul Pogonyshev)
+* Compose: Fix slot lifetime regression introduced in 
+  2.0.9. (Philip Langdale)
+* tests: Small ISO C++ correctness fix (Marek Rouchal)
+* Don't specify unused function parameter names.
+  (Andris Pavenis)
 
-*** ChangeLog summary:
+2.0.14:
+
+* SUN Forte 5.7 build fix for ambiguity when using 
+  inner template class. However, you still need the 
+  patch in bug #302098 to finish the build.
+
+2.0.13:
+
+* signal_emit::emit(): Ensure the correct order of 
+  destruction of the member variables, to avoid a leak.
+  (Andreas Ames, bug #306249)
+* Allow recursive signal emission again.
+  (Neal E. Coombes, bug #303896)
+* SUN Forte CC 5.5 build fixes:
+  - test_compatibility minor fix.
+  - visit_each() template specializations: 
+  Mention the bool I_derives_trackable template type,
+  (Friedemann Kleint, bug #305647)
+ - Check for the non-standard SUN reverse_iterator,
+  and use alternative code if necessary.
+  (Murray Cumming)
+
+2.0.12:
+
+* Fixes crashes when using virtual inheritance, particularly 
+  with bound by-reference parameters, caused by casting 
+  from derived to base when the derived destructor has run.
+  (Régis Duchesne)
+  This might affect non-g++ compilers, so do tell us about 
+  any problems.
+
+2.0.11:
+
+* Build fixes for SUN Forte, Tru64
+  (Murray Cumming), and MSVC++ (Cedric Gustin).
+
+2.0.10:
+
+* tests: Include <new> to avoid unresolved symbols on Tru64.
+  (Tim Mooney)
+* When signal handlers are connected made during an emit
+  of the same signal, prevent them from being called in the
+  same emit, to prevent infinite loops.
+  (Neal E. Coombes)
+* Performance improvement in a corner case.
+  (Neal E. Coombes).
+
+2.0.9:
+
+* sigc::bind() now works with the AIX and Tru64 compilers.
+  See the comments in sigc++/visit_each.h: visit_each_type() 
+  if you have compilation problems.
+  (Murray Cumming)
+* sigc::var() is now documented. (Roger Ferrer Ibáñez)
+
+2.0.8:
+
+* Maybe avoid (incorrect) warning with g++ 3.3.5.
+  (Murray Cumming)
+* Fix namespace ambiguity when using multiple 
+  major versions of libsigc++. (Liza Klerck)
+
+2.0.7:
+
+* Now builds with the following compilers, in addition to 
+the existing GNU g++, SUN Forte CC 5.5, MSVC++ .Net 2003, 
+and Intel compilers: 
+- IBM AIX xlC v7
+- Tru64 C++ V6.5-042
+- IRIX MIPSpro 7.4.2m
+  (Older versions of all these compilers might also work.)
+  (Murray Cumming, www.thewrittenword.com)
+* MSVC++ .Net 2003 build improvements.
+  (Cedric Gustin, Timothy M. Shead)
+* Replace C-style casts with reinterpret_cast<> and 
+  static_cast<>. (e97_far at e.kth.se).
+* Documentation: Added manual, based on the manual in 
+  libsigc++ 1.2, but updated for the new API.
+  (Murray Cumming)
+
 
 2.0.6:
 

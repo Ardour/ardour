@@ -762,6 +762,7 @@ AudioEngine::halted (void *arg)
 	ae->_running = false;
 	ae->_buffer_size = 0;
 	ae->_frame_rate = 0;
+	ae->_jack = 0;
 
 	ae->Halted(); /* EMIT SIGNAL */
 }
@@ -1133,6 +1134,7 @@ AudioEngine::reconnect_to_jack ()
 
 
 	if (session) {
+		session->reset_jack_connection (_jack);
 		nframes_t blocksize = jack_get_buffer_size (_jack);
 		session->set_block_size (blocksize);
 		session->set_frame_rate (jack_get_sample_rate (_jack));

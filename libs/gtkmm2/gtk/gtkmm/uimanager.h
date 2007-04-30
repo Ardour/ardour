@@ -3,6 +3,7 @@
 #ifndef _GTKMM_UIMANAGER_H
 #define _GTKMM_UIMANAGER_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -176,7 +177,7 @@ public:
    * Note that this only affects regular menus. Generated popup 
    * menus never have tearoff menu items.
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param add_tearoffs Whether tearoff menu items are added.
    */
   void set_add_tearoffs(bool add_tearoffs = true);
@@ -185,7 +186,7 @@ public:
    * will have tearoff menu items.
    * @return Whether tearoff menu items are added
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   bool get_add_tearoffs() const;
   
@@ -193,7 +194,7 @@ public:
    * with @a self . Actions in earlier groups hide actions with the same 
    * name in later groups. 
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param action_group The action group to be inserted.
    * @param pos The position at which the group will be inserted.
    */
@@ -202,7 +203,7 @@ public:
   /** Removes an action group from the list of action groups associated 
    * with @a self .
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param action_group The action group to be removed.
    */
   void remove_action_group(const Glib::RefPtr<ActionGroup>& action_group);
@@ -212,7 +213,7 @@ public:
    * @return A G::List of action groups. The list is owned by GTK+ 
    * and should not be modified.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   Glib::ListHandle< Glib::RefPtr<ActionGroup> > get_action_groups();
   
@@ -220,7 +221,7 @@ public:
    * @return A G::List of action groups. The list is owned by GTK+ 
    * and should not be modified.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   Glib::ListHandle< Glib::RefPtr<const ActionGroup> > get_action_groups() const;
   
@@ -228,14 +229,14 @@ public:
   /** Returns the Gtk::AccelGroup associated with @a self .
    * @return The Gtk::AccelGroup.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   Glib::RefPtr<AccelGroup> get_accel_group();
   
   /** Returns the Gtk::AccelGroup associated with @a self .
    * @return The Gtk::AccelGroup.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   Glib::RefPtr<const AccelGroup> get_accel_group() const;
   
@@ -247,11 +248,16 @@ public:
    * 
    * Note that the widget found by following a path that ends in a &lt;menu&gt;
    * element is the menuitem to which the menu is attached, not the menu itself.
+   * 
+   * Also note that the widgets constructed by a ui manager are not tied to 
+   * the lifecycle of the ui manager. If you add the widgets returned by this 
+   * function to some container or explicitly ref them, they will survive the
+   * destruction of the ui manager.
    * @param path A path.
    * @return The widget found by following the path, or <tt>0</tt> if no widget
    * was found.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   Widget* get_widget(const Glib::ustring& path);
   
@@ -263,11 +269,16 @@ public:
    * 
    * Note that the widget found by following a path that ends in a &lt;menu&gt;
    * element is the menuitem to which the menu is attached, not the menu itself.
+   * 
+   * Also note that the widgets constructed by a ui manager are not tied to 
+   * the lifecycle of the ui manager. If you add the widgets returned by this 
+   * function to some container or explicitly ref them, they will survive the
+   * destruction of the ui manager.
    * @param path A path.
    * @return The widget found by following the path, or <tt>0</tt> if no widget
    * was found.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   const Widget* get_widget(const Glib::ustring& path) const;
 
@@ -279,7 +290,7 @@ public:
    * @return A newly-allocated of all toplevel widgets of the requested 
    * types. 
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   Glib::SListHandle<Widget*> get_toplevels(UIManagerItemType types);
   
@@ -290,7 +301,7 @@ public:
    * @return A newly-allocated of all toplevel widgets of the requested 
    * types. 
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   Glib::SListHandle<const Widget*> get_toplevels(UIManagerItemType types) const;
                  
@@ -301,7 +312,7 @@ public:
    * @return The action whose proxy widget is found by following the path, 
    * or <tt>0</tt> if no widget was found.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   Glib::RefPtr<Action> get_action(const Glib::ustring& path);
   
@@ -311,7 +322,7 @@ public:
    * @return The action whose proxy widget is found by following the path, 
    * or <tt>0</tt> if no widget was found.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   Glib::RefPtr<const Action> get_action(const Glib::ustring& path) const;
 
@@ -324,9 +335,13 @@ public:
    * @param buffer the string to parse
    * @result  The merge id for the merged UI. The merge id can be used to unmerge the UI with remove_ui(). If an error occurred, the return value is 0.
    * @throws exception
-   * Since: 2.4
+   * @newin2p4
    */ 
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
   ui_merge_id add_ui_from_string(const Glib::ustring& buffer);
+  #else
+  ui_merge_id add_ui_from_string(const Glib::ustring& buffer, std::auto_ptr<Glib::Error>& error);
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
   
   
   /** Parses a file containing a UI definition and 
@@ -336,9 +351,14 @@ public:
    * to unmerge the UI with gtk_ui_manager_remove_ui(). If an error occurred,
    * the return value is 0.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
   ui_merge_id add_ui_from_file(const Glib::ustring& filename);
+#else
+  ui_merge_id add_ui_from_file(const Glib::ustring& filename, std::auto_ptr<Glib::Error>& error);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
 
 //TODO: Is top=true a good default?
 
@@ -352,7 +372,7 @@ public:
    * 
    *  @a see  add_ui_separator().
    * 
-   * Since: 2.4
+   *  @a newin2p4 
    * @param merge_id The merge id for the merged UI, see gtk_ui_manager_new_merge_id().
    * @param path A path.
    * @param name The name for the added UI element.
@@ -372,7 +392,7 @@ public:
    *
    * @see add_ui().
    *
-   * Since: 2.4
+   * @newin2p4
    * @param merge_id The merge id for the merged UI, see gtk_ui_manager_new_merge_id().
    * @param path A path.
    * @param name The name for the added UI element.
@@ -385,7 +405,7 @@ public:
   
   /** Unmerges the part of @a self &lt;!-- --&gt;s content identified by @a merge_id .
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param merge_id A merge id as returned by gtk_ui_manager_add_ui_from_string().
    */
   void remove_ui(ui_merge_id merge_id);
@@ -394,7 +414,7 @@ public:
    * @return A newly allocated string containing an XML representation of 
    * the merged UI.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   Glib::ustring get_ui() const;
   
@@ -416,7 +436,7 @@ public:
    * 
    * @endcode
    * 
-   * Since: 2.4
+   * @newin2p4
    */
   void ensure_update();
   
@@ -424,37 +444,116 @@ public:
    * gtk_ui_manager_add_ui().
    * @return An unused merge id.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   ui_merge_id new_merge_id();
 
+  /** The add_widget signal is emitted for each generated menubar and toolbar.
+   * It is not emitted for generated popup menus, which can be obtained by 
+   * get_widget().
+   * 
+   * @param widget the added widget
+   */
+  
+/**
+   * @par Prototype:
+   * <tt>void %add_widget(Widget* widget)</tt>
+   */
 
   Glib::SignalProxy1< void,Widget* > signal_add_widget();
 
   
+  /** The "actions-changed" signal is emitted whenever the set of actions
+   * changes.
+   */
+  
+/**
+   * @par Prototype:
+   * <tt>void %actions_changed()</tt>
+   */
+
   Glib::SignalProxy0< void > signal_actions_changed();
 
   
+  /** The connect_proxy signal is emitted after connecting a proxy to 
+   * an action in the group. 
+   *
+   * This is intended for simple customizations for which a custom action
+   * class would be too clumsy, e.g. showing tooltips for menuitems in the
+   * statusbar.
+   *
+   * @param action the action
+   * @param widget the proxy
+   */
+  
+/**
+   * @par Prototype:
+   * <tt>void %connect_proxy(const Glib::RefPtr<Action>& action, Widget* widget)</tt>
+   */
+
   Glib::SignalProxy2< void,const Glib::RefPtr<Action>&,Widget* > signal_connect_proxy();
 
   
+  /** The disconnect_proxy signal is emitted after disconnecting a proxy 
+   * from an action in the group. 
+   *
+   * @param action the action
+   * @param widget the proxy
+   */
+  
+/**
+   * @par Prototype:
+   * <tt>void %disconnect_proxy(const Glib::RefPtr<Action>& action, Widget* widget)</tt>
+   */
+
   Glib::SignalProxy2< void,const Glib::RefPtr<Action>&,Widget* > signal_disconnect_proxy();
 
   
+  /** The pre_activate signal is emitted just before the @a action
+   * is activated.
+   *
+   * This is intended for applications to get notification
+   * just before any action is activated.
+   *
+   * @param action the action
+   */
+  
+/**
+   * @par Prototype:
+   * <tt>void %pre_activate(const Glib::RefPtr<Action>& action)</tt>
+   */
+
   Glib::SignalProxy1< void,const Glib::RefPtr<Action>& > signal_pre_activate();
 
   
+  /** The post_activate signal is emitted just after the @a action
+   * is activated.
+   *
+   * This is intended for applications to get notification
+   * just after any action is activated.
+   *
+   * @param action the action
+   */
+  
+/**
+   * @par Prototype:
+   * <tt>void %post_activate(const Glib::RefPtr<Action>& action)</tt>
+   */
+
   Glib::SignalProxy1< void,const Glib::RefPtr<Action>& > signal_post_activate();
 
 
-  /** Whether tearoff menu items should be added to menus.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether tearoff menu items should be added to menus.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_add_tearoffs() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether tearoff menu items should be added to menus.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -462,27 +561,36 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_add_tearoffs() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** An XML string describing the merged UI.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** An XML string describing the merged UI.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_ui() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_add_widget(Widget* widget);
   virtual void on_actions_changed();
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };
