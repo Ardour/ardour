@@ -844,6 +844,8 @@ if env['SYSLIBS']:
     libraries['sigc2'].ParseConfig('pkg-config --cflags --libs sigc++-2.0')
     libraries['glibmm2'] = LibraryInfo()
     libraries['glibmm2'].ParseConfig('pkg-config --cflags --libs glibmm-2.4')
+    libraries['cairomm'] = LibraryInfo()
+    libraries['cairomm'].ParseConfig('pkg-config --cflags --libs cairomm-1.0')
     libraries['gdkmm2'] = LibraryInfo()
     libraries['gdkmm2'].ParseConfig ('pkg-config --cflags --libs gdkmm-2.4')
     libraries['gtkmm2'] = LibraryInfo()
@@ -867,7 +869,7 @@ if env['SYSLIBS']:
     libraries['soundtouch'] = LibraryInfo()
     libraries['soundtouch'].ParseConfig ('pkg-config --cflags --libs soundtouch-1.0')
     # Comment the previous line and uncomment this for Debian:
-	#libraries['soundtouch'].ParseConfig ('pkg-config --cflags --libs libSoundTouch')
+    #libraries['soundtouch'].ParseConfig ('pkg-config --cflags --libs libSoundTouch')
 
     libraries['appleutility'] = LibraryInfo(LIBS='libappleutility',
                                             LIBPATH='#libs/appleutility',
