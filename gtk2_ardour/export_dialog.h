@@ -20,19 +20,7 @@
 #ifndef __ardour_export_dialog_h__
 #define __ardour_export_dialog_h__
 
-#include <gtkmm/alignment.h>
-#include <gtkmm/box.h>
-#include <gtkmm/table.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/button.h>
-#include <gtkmm/progressbar.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/fileselection.h>
-#include <gtkmm/filechooser.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/treeview.h>
-#include <gtkmm/liststore.h>
+#include <gtkmm.h>
 
 #include <ardour/export.h>
 #include <ardour/location.h>
