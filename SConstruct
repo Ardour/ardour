@@ -16,7 +16,7 @@ import SCons.Node.FS
 SConsignFile()
 EnsureSConsVersion(0, 96)
 
-ardour_version = '2.0rc2'
+ardour_version = '2.0'
 
 subst_dict = { }
 
