@@ -17,9 +17,11 @@
 */
 
 #include <cassert>
+#include <iostream>
+
 #include <ardour/midi_port.h>
 #include <ardour/data_type.h>
-#include <iostream>
+#include <midi++/jackcompat.h>
 
 using namespace ARDOUR;
 using namespace std;

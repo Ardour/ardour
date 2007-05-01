@@ -46,6 +46,8 @@ class Port;
 class AudioEngine : public sigc::trackable
 {
    public:
+	typedef std::set<Port*> Ports;
+
 	AudioEngine (std::string client_name);
 	virtual ~AudioEngine ();
 	
@@ -65,6 +67,8 @@ class AudioEngine : public sigc::trackable
 	int stop (bool forever = false);
 	int start ();
 	bool running() const { return _running; }
+
+	int run_process_cycle (ARDOUR::Session*, jack_nframes_t nframes);
 
 	Glib::Mutex& process_lock() { return _process_lock; }
 
@@ -211,7 +215,6 @@ class AudioEngine : public sigc::trackable
 	bool                  reconnect_on_halt;
 	int                  _usecs_per_cycle;
 
-	typedef std::set<Port*> Ports;
 	SerializedRCUManager<Ports> ports;
 
 	int    process_callback (nframes_t nframes);

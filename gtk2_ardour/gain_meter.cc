@@ -138,12 +138,12 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	fader_vbox->pack_start (*fader_centering_box, false, false, 0);
 
 	hbox.set_spacing (2);
-	hbox.pack_start (*fader_vbox, true, true);
 
-	if (_io->default_type() == ARDOUR::DataType::AUDIO)
-		hbox.pack_start (*fader_vbox, false, false, 2);
+	if (_io->default_type() == ARDOUR::DataType::AUDIO) {
+		hbox.pack_start (*fader_vbox, true, true);
+	}
 	
-	set_width(Narrow);
+	set_width (Narrow);
 
 	Route* r;
 

@@ -534,9 +534,7 @@ Session::destroy ()
 		tmp = i;
 		++tmp;
 
-		cerr << "dropping refs on a region (" << i->second->name() << " @ " << i->second << ") with UC = " << i->second.use_count() << endl;
 		i->second->drop_references ();
-		cerr << "AFTER: UC = " << i->second.use_count() << endl;
 
 		i = tmp;
 	}

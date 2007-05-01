@@ -72,7 +72,7 @@ PeakMeter::setup (const ChanCount& in)
 	while (_peak_power.size() > limit) {
 		_peak_power.pop_back();
 		_visible_peak_power.pop_back();
-		_max_peak_power.push_back(minus_infinity());
+		_max_peak_power.pop_back();
 	}
 
 	while (_peak_power.size() < limit) {

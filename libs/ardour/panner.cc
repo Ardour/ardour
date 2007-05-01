@@ -1386,9 +1386,6 @@ Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, nframes
 
 		return;
 	}
-
-	// More than 1 output, we should have 1 panner for each input
-	assert(size() == inbufs.count().get(DataType::AUDIO));
 	
 	/* the terrible silence ... */
 	for (BufferSet::audio_iterator i = outbufs.audio_begin(); i != outbufs.audio_end(); ++i) {
@@ -1396,7 +1393,8 @@ Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, nframes
 	}
 
 	BufferSet::audio_iterator i = inbufs.audio_begin();
-	for (iterator pan = begin(); pan != end(); ++pan, ++i) {
+
+	for (iterator pan = begin(); pan != end() && i != inbufs.audio_end(); ++pan, ++i) {
 		(*pan)->distribute (*i, outbufs, gain_coeff, nframes);
 	}
 }
