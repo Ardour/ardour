@@ -48,15 +48,6 @@ public:
 	 */
 	static const size_t num_types = 2;
 
-
-	/** Helper for collections that store typed things by index (BufferSet, PortList).
-	 * Guaranteed to be a valid index from 0 to (the number of available types - 1),
-	 * because NIL is not included.  No, this isn't pretty - purely for speed.
-	 * See DataType::to_index().
-	 */
-	inline static size_t symbol_index(const Symbol symbol)
-		{ return (size_t)symbol - 1; }
-
 	DataType(const Symbol& symbol)
 	: _symbol(symbol)
 	{}
@@ -95,8 +86,8 @@ public:
 		}
 	}
 
-	Symbol        to_symbol() const { return _symbol; }
-	inline size_t to_index() const  { assert(_symbol != NIL); return symbol_index(_symbol); }
+	//Symbol        to_symbol() const { return _symbol; }
+	inline size_t to_index() const { return (size_t)_symbol - 1; }
 
 	/** DataType iterator, for writing generic loops that iterate over all
 	 * available types.
