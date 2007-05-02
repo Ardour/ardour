@@ -818,7 +818,7 @@ AudioTrack::freeze (InterThreadInfo& itt)
 		}
 	}
 
-	new_playlist = PlaylistFactory::create (_session, new_playlist_name, false);
+	new_playlist = PlaylistFactory::create (DataType::AUDIO, _session, new_playlist_name, false);
 	region_name = new_playlist_name;
 
 	/* create a new region from all filesources, keep it private */

@@ -2823,21 +2823,19 @@ Editor::cut_copy_regions (CutCopyOp op)
 		
 		boost::shared_ptr<Region> r = (*x)->region();
 		boost::shared_ptr<Region> _xx;
-		
+
+		assert (r != 0);
+
 		switch (op) {
 		case Cut:
-			if (!r) break;
-			
-			_xx = RegionFactory::create ((*x)->region());
-			npl->add_region (_xx, (*x)->region()->position() - first_position);
-			pl->remove_region (((*x)->region()));
+			_xx = RegionFactory::create (r);
+			npl->add_region (_xx, r->position() - first_position);
+			pl->remove_region (r);
 			break;
 			
 		case Copy:
-			if (!r) break;
-
 			/* copy region before adding, so we're not putting same object into two different playlists */
-			npl->add_region (RegionFactory::create ((*x)->region()), (*x)->region()->position() - first_position);
+			npl->add_region (RegionFactory::create (r, r->position() - first_position);
 			break;
 			
 		case Clear:

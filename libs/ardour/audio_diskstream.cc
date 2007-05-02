@@ -243,7 +243,7 @@ AudioDiskstream::find_and_use_playlist (const string& name)
 	boost::shared_ptr<AudioPlaylist> playlist;
 		
 	if ((playlist = boost::dynamic_pointer_cast<AudioPlaylist> (_session.playlist_by_name (name))) == 0) {
-		playlist = boost::dynamic_pointer_cast<AudioPlaylist> (PlaylistFactory::create (_session, name));
+		playlist = boost::dynamic_pointer_cast<AudioPlaylist> (PlaylistFactory::create (DataType::AUDIO, _session, name));
 	}
 
 	if (!playlist) {
@@ -280,7 +280,7 @@ AudioDiskstream::use_new_playlist ()
 		newname = Playlist::bump_name (_name, _session);
 	}
 
-	if ((playlist = boost::dynamic_pointer_cast<AudioPlaylist> (PlaylistFactory::create (_session, newname, hidden()))) != 0) {
+	if ((playlist = boost::dynamic_pointer_cast<AudioPlaylist> (PlaylistFactory::create (DataType::AUDIO, _session, newname, hidden()))) != 0) {
 		
 		playlist->set_orig_diskstream_id (id());
 		return use_playlist (playlist);
