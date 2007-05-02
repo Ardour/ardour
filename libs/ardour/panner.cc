@@ -41,7 +41,7 @@
 #include <ardour/panner.h>
 #include <ardour/utils.h>
 
-#include <ardour/mix.h>
+#include <ardour/runtime_functions.h>
 #include <ardour/buffer_set.h>
 
 #include "i18n.h"
@@ -304,7 +304,7 @@ BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 		
 		pan = left * gain_coeff;
 
-		Session::mix_buffers_with_gain(dst+n,src+n,nframes-n,pan);
+		mix_buffers_with_gain(dst+n,src+n,nframes-n,pan);
 		
 	} else {
 		
@@ -315,7 +315,7 @@ BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 			
 			if (pan != 0.0f) {
 				
-				Session::mix_buffers_with_gain(dst,src,nframes,pan);
+				mix_buffers_with_gain(dst,src,nframes,pan);
 
 				/* mark that we wrote into the buffer */
 
@@ -325,7 +325,7 @@ BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 			
 		} else {
 			
-			Session::mix_buffers_no_gain(dst,src,nframes);
+			mix_buffers_no_gain(dst,src,nframes);
 			
 			/* mark that we wrote into the buffer */
 			
@@ -354,7 +354,7 @@ BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 		
 		pan = right * gain_coeff;
 		
-		Session::mix_buffers_with_gain(dst+n,src+n,nframes-n,pan);
+		mix_buffers_with_gain(dst+n,src+n,nframes-n,pan);
 		
 		/* XXX it would be nice to mark the buffer as written to */
 
@@ -367,14 +367,14 @@ BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 			
 			if (pan != 0.0f) {
 				
-				Session::mix_buffers_with_gain(dst,src,nframes,pan);
+				mix_buffers_with_gain(dst,src,nframes,pan);
 				
 				/* XXX it would be nice to mark the buffer as written to */
 			}
 			
 		} else {
 			
-			Session::mix_buffers_no_gain(dst,src,nframes);
+			mix_buffers_no_gain(dst,src,nframes);
 			
 			/* XXX it would be nice to mark the buffer as written to */
 		}
@@ -666,7 +666,7 @@ Multi2dPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
 			}
 			
 			pan = left * gain_coeff;
-			Session::mix_buffers_with_gain(dst+n,src+n,nframes-n,pan);
+			mix_buffers_with_gain(dst+n,src+n,nframes-n,pan);
 			
 		} else {
 
@@ -676,10 +676,10 @@ Multi2dPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
 			if ((pan *= gain_coeff) != 1.0f) {
 				
 				if (pan != 0.0f) {
-					Session::mix_buffers_with_gain(dst,src,nframes,pan);
+					mix_buffers_with_gain(dst,src,nframes,pan);
 				} 
 			} else {
-					Session::mix_buffers_no_gain(dst,src,nframes);
+					mix_buffers_no_gain(dst,src,nframes);
 			}
 #endif
 #ifdef CAN_INTERP

@@ -54,6 +54,7 @@
 #endif
 
 #include <ardour/mix.h>
+#include <ardour/runtime_functions.h>
 
 #if defined (__APPLE__)
        #include <Carbon/Carbon.h> // For Gestalt
@@ -82,6 +83,12 @@ Change ARDOUR::LengthChanged = ARDOUR::new_change ();
 Change ARDOUR::PositionChanged = ARDOUR::new_change ();
 Change ARDOUR::NameChanged = ARDOUR::new_change ();
 Change ARDOUR::BoundsChanged = Change (0); // see init(), below
+
+compute_peak_t			ARDOUR::compute_peak 		= 0;
+find_peaks_t			ARDOUR::find_peaks 		= 0;
+apply_gain_to_buffer_t		ARDOUR::apply_gain_to_buffer 	= 0;
+mix_buffers_with_gain_t	        ARDOUR::mix_buffers_with_gain 	= 0;
+mix_buffers_no_gain_t		ARDOUR::mix_buffers_no_gain 	= 0;
 
 #ifdef HAVE_LIBLO
 static int
@@ -236,11 +243,11 @@ setup_hardware_optimization (bool try_optimization)
 			info << "Using SSE optimized routines" << endmsg;
 	
 			// SSE SET
-			Session::compute_peak 		= x86_sse_compute_peak;
-			Session::find_peaks 		= x86_sse_find_peaks;
-			Session::apply_gain_to_buffer 	= x86_sse_apply_gain_to_buffer;
-			Session::mix_buffers_with_gain 	= x86_sse_mix_buffers_with_gain;
-			Session::mix_buffers_no_gain 	= x86_sse_mix_buffers_no_gain;
+			compute_peak 		= x86_sse_compute_peak;
+			find_peaks 		= x86_sse_find_peaks;
+			apply_gain_to_buffer 	= x86_sse_apply_gain_to_buffer;
+			mix_buffers_with_gain 	= x86_sse_mix_buffers_with_gain;
+			mix_buffers_no_gain 	= x86_sse_mix_buffers_no_gain;
 
 			generic_mix_functions = false;
 
@@ -253,11 +260,11 @@ setup_hardware_optimization (bool try_optimization)
                         sysVersion = 0;
 
                 if (sysVersion >= 0x00001040) { // Tiger at least
-                        Session::compute_peak           = veclib_compute_peak;
-			Session::find_peaks 		= veclib_find_peaks;
-                        Session::apply_gain_to_buffer   = veclib_apply_gain_to_buffer;
-                        Session::mix_buffers_with_gain  = veclib_mix_buffers_with_gain;
-                        Session::mix_buffers_no_gain    = veclib_mix_buffers_no_gain;
+                        compute_peak           = veclib_compute_peak;
+			find_peaks 	       = veclib_find_peaks;
+                        apply_gain_to_buffer   = veclib_apply_gain_to_buffer;
+                        mix_buffers_with_gain  = veclib_mix_buffers_with_gain;
+                        mix_buffers_no_gain    = veclib_mix_buffers_no_gain;
 
                         generic_mix_functions = false;
 
@@ -267,12 +274,12 @@ setup_hardware_optimization (bool try_optimization)
         }
 
         if (generic_mix_functions) {
-
-		Session::compute_peak 		= compute_peak;
-		Session::find_peaks 		= find_peaks;
-		Session::apply_gain_to_buffer 	= apply_gain_to_buffer;
-		Session::mix_buffers_with_gain 	= mix_buffers_with_gain;
-		Session::mix_buffers_no_gain 	= mix_buffers_no_gain;
+		
+		compute_peak 		= default_compute_peak;
+		find_peaks 		= default_find_peaks;
+		apply_gain_to_buffer 	= default_apply_gain_to_buffer;
+		mix_buffers_with_gain 	= default_mix_buffers_with_gain;
+		mix_buffers_no_gain 	= default_mix_buffers_no_gain;
 		
 		info << "No H/W specific optimizations in use" << endmsg;
 	}

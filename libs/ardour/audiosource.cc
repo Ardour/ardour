@@ -35,7 +35,7 @@
 
 #include <ardour/audiosource.h>
 #include <ardour/cycle_timer.h>
-#include <ardour/session.h>
+#include <ardour/runtime_functions.h>
 
 #include "i18n.h"
 
@@ -696,7 +696,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 			
 			x.min = peak_leftovers[0];
 			x.max = peak_leftovers[0];
-			Session::find_peaks (peak_leftovers + 1, peak_leftover_cnt - 1, &x.min, &x.max);
+			find_peaks (peak_leftovers + 1, peak_leftover_cnt - 1, &x.min, &x.max);
 
 			off_t byte = (peak_leftover_frame / frames_per_peak) * sizeof (PeakData);
 
@@ -779,7 +779,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 		peakbuf[peaks_computed].max = buf[0];
 		peakbuf[peaks_computed].min = buf[0];
 
-		Session::find_peaks (buf+1, this_time-1, &peakbuf[peaks_computed].min, &peakbuf[peaks_computed].max);
+		find_peaks (buf+1, this_time-1, &peakbuf[peaks_computed].min, &peakbuf[peaks_computed].max);
 
 		peaks_computed++;
 		buf += this_time;

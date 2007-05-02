@@ -27,53 +27,39 @@
 
 extern "C" {
 /* SSE functions */
-	float x86_sse_compute_peak		(ARDOUR::Sample *buf, nframes_t nsamples, float current);
-
-	void  x86_sse_apply_gain_to_buffer	(ARDOUR::Sample *buf, nframes_t nframes, float gain);
-
-	void  x86_sse_mix_buffers_with_gain	(ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes, float gain);
-
-	void  x86_sse_mix_buffers_no_gain	(ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes);
+	float x86_sse_compute_peak		(const ARDOUR::Sample * buf, nframes_t nsamples, float current);
+	void  x86_sse_apply_gain_to_buffer	(ARDOUR::Sample * buf, nframes_t nframes, float gain);
+	void  x86_sse_mix_buffers_with_gain	(ARDOUR::Sample * dst, const ARDOUR::Sample * src, nframes_t nframes, float gain);
+	void  x86_sse_mix_buffers_no_gain	(ARDOUR::Sample * dst, const ARDOUR::Sample * src, nframes_t nframes);
 }
 
-void x86_sse_find_peaks                        (ARDOUR::Sample *buf, nframes_t nsamples, float *min, float *max);
+void  x86_sse_find_peaks                (const ARDOUR::Sample * buf, nframes_t nsamples, float *min, float *max);
 
 /* debug wrappers for SSE functions */
 
-float debug_compute_peak		(ARDOUR::Sample *buf, nframes_t nsamples, float current);
-
-void  debug_apply_gain_to_buffer	(ARDOUR::Sample *buf, nframes_t nframes, float gain);
-
-void  debug_mix_buffers_with_gain	(ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes, float gain);
-
-void  debug_mix_buffers_no_gain		(ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes);
+float debug_compute_peak		(const ARDOUR::Sample * buf, nframes_t nsamples, float current);
+void  debug_apply_gain_to_buffer	(ARDOUR::Sample * buf, nframes_t nframes, float gain);
+void  debug_mix_buffers_with_gain	(ARDOUR::Sample * dst, const ARDOUR::Sample * src, nframes_t nframes, float gain);
+void  debug_mix_buffers_no_gain		(ARDOUR::Sample * dst, const ARDOUR::Sample * src, nframes_t nframes);
 
 #endif
 
 #if defined (__APPLE__)
 
-float veclib_compute_peak              (ARDOUR::Sample *buf, nframes_t nsamples, float current);
-
-void veclib_find_peaks                (ARDOUR::Sample *buf, nframes_t nsamples, float *min, float *max);
-
-void  veclib_apply_gain_to_buffer      (ARDOUR::Sample *buf, nframes_t nframes, float gain);
-
-void  veclib_mix_buffers_with_gain     (ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes, float gain);
-
-void  veclib_mix_buffers_no_gain       (ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes);
+float veclib_compute_peak              (const ARDOUR::Sample * buf, nframes_t nsamples, float current);
+void veclib_find_peaks                 (const ARDOUR::Sample * buf, nframes_t nsamples, float *min, float *max);
+void  veclib_apply_gain_to_buffer      (ARDOUR::Sample * buf, nframes_t nframes, float gain);
+void  veclib_mix_buffers_with_gain     (ARDOUR::Sample * dst, const ARDOUR::Sample * src, nframes_t nframes, float gain);
+void  veclib_mix_buffers_no_gain       (ARDOUR::Sample * dst, const ARDOUR::Sample * src, nframes_t nframes);
 
 #endif
 
 /* non-optimized functions */
 
-float compute_peak              (ARDOUR::Sample *buf, nframes_t nsamples, float current);
-
-void  find_peaks                (ARDOUR::Sample *buf, nframes_t nsamples, float *min, float *max);
-
-void  apply_gain_to_buffer      (ARDOUR::Sample *buf, nframes_t nframes, float gain);
-
-void  mix_buffers_with_gain     (ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes, float gain);
-
-void  mix_buffers_no_gain       (ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes);
+float default_compute_peak              (const ARDOUR::Sample * buf, nframes_t nsamples, float current);
+void  default_find_peaks                (const ARDOUR::Sample * buf, nframes_t nsamples, float *min, float *max);
+void  default_apply_gain_to_buffer      (ARDOUR::Sample * buf, nframes_t nframes, float gain);
+void  default_mix_buffers_with_gain     (ARDOUR::Sample * dst, const ARDOUR::Sample * src, nframes_t nframes, float gain);
+void  default_mix_buffers_no_gain       (ARDOUR::Sample * dst, const ARDOUR::Sample * src, nframes_t nframes);
 
 #endif /* __ardour_mix_h__ */

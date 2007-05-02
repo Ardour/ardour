@@ -41,7 +41,6 @@
 #include <ardour/ladspa_plugin.h>
 #include <ardour/panner.h>
 #include <ardour/dB.h>
-#include <ardour/mix.h>
 #include <ardour/amp.h>
 #include <ardour/meter.h>
 #include <ardour/buffer_set.h>
@@ -507,7 +506,7 @@ Route::process_output_buffers (BufferSet& bufs,
 				
 				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
 					Sample* const sp = i->data(nframes);
-					Session::apply_gain_to_buffer(sp,nframes,this_gain);
+					apply_gain_to_buffer(sp,nframes,this_gain);
 				}
 
 			} else if (_gain == 0) {

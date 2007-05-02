@@ -24,6 +24,7 @@
 #include <iostream>
 #include <ardour/types.h>
 #include <ardour/data_type.h>
+#include <ardour/runtime_functions.h>
 
 namespace ARDOUR {
 
@@ -142,21 +143,13 @@ public:
 		Sample*       const dst_raw = _data + offset;
 		const Sample* const src_raw = src.data(len);
 
-		for (jack_nframes_t n = 0; n < len; ++n) {
-			dst_raw[n] += src_raw[n] * gain_coeff;
-		}
-		
+		mix_buffers_with_gain (dst_raw, src_raw, len, gain_coeff);
+
 		_silent = ( (src.silent() && _silent) || (_silent && gain_coeff == 0) );
 	}
 	
 	void apply_gain(gain_t gain, jack_nframes_t len, jack_nframes_t offset=0) {
-		Sample* const buf = _data + offset;
-
-		for (jack_nframes_t n = 0; n < len; ++n) {
-			buf[n] *= gain;
-		}
-
-		_silent = (_silent || gain == 0);
+		apply_gain_to_buffer (_data + offset, len, gain);
 	}
 
 	/** Set the data contained by this buffer manually (for setting directly to jack buffer).

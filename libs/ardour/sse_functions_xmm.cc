@@ -22,7 +22,7 @@
 #include <ardour/types.h>
 
 void
-x86_sse_find_peaks(float *buf, nframes_t nframes, float *min, float *max)
+x86_sse_find_peaks(const ARDOUR::Sample* buf, nframes_t nframes, float *min, float *max)
 {
 	__m128 current_max, current_min, work;
 

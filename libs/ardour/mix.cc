@@ -23,6 +23,8 @@
 #include <ardour/mix.h>
 #include <stdint.h>
 
+using namespace ARDOUR;
+
 #if defined (ARCH_X86) && defined (BUILD_SSE_OPTIMIZATIONS)
 // Debug wrappers
 
@@ -80,7 +82,7 @@ debug_mix_buffers_no_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t n
 
 
 float
-compute_peak (ARDOUR::Sample *buf, nframes_t nsamples, float current) 
+default_compute_peak (const ARDOUR::Sample * buf, nframes_t nsamples, float current) 
 {
 	for (nframes_t i = 0; i < nsamples; ++i) {
 		current = f_max (current, fabsf (buf[i]));
@@ -90,7 +92,7 @@ compute_peak (ARDOUR::Sample *buf, nframes_t nsamples, float current)
 }	
 
 void
-find_peaks (ARDOUR::Sample *buf, nframes_t nframes, float *min, float *max)
+default_find_peaks (const ARDOUR::Sample * buf, nframes_t nframes, float *min, float *max)
 {
 	nframes_t i;
 	float a, b;
@@ -109,14 +111,14 @@ find_peaks (ARDOUR::Sample *buf, nframes_t nframes, float *min, float *max)
 }
 
 void
-apply_gain_to_buffer (ARDOUR::Sample *buf, nframes_t nframes, float gain)
+default_apply_gain_to_buffer (ARDOUR::Sample * buf, nframes_t nframes, float gain)
 {		
 	for (nframes_t i=0; i<nframes; i++)
 		buf[i] *= gain;
 }
 
 void
-mix_buffers_with_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes, float gain)
+default_mix_buffers_with_gain (ARDOUR::Sample * dst, const ARDOUR::Sample * src, nframes_t nframes, float gain)
 {
 	for (nframes_t i = 0; i < nframes; i++) {
 		dst[i] += src[i] * gain;
@@ -124,7 +126,7 @@ mix_buffers_with_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nfram
 }
 
 void
-mix_buffers_no_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes)
+default_mix_buffers_no_gain (ARDOUR::Sample * dst, const ARDOUR::Sample * src, nframes_t nframes)
 {
 	for (nframes_t i=0; i < nframes; i++) {
 		dst[i] += src[i];
@@ -135,7 +137,7 @@ mix_buffers_no_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes
 #include <Accelerate/Accelerate.h>
 
 float
-veclib_compute_peak (ARDOUR::Sample *buf, nframes_t nsamples, float current)
+veclib_compute_peak (const ARDOUR::Sample * buf, nframes_t nsamples, float current)
 {
 	float tmpmax = 0.0f;
         vDSP_maxmgv(buf, 1, &tmpmax, nsamples);
@@ -143,26 +145,26 @@ veclib_compute_peak (ARDOUR::Sample *buf, nframes_t nsamples, float current)
 }
 
 void
-veclib_find_peaks (ARDOUR::Sample *buf, nframes_t nframes, float *min, float *max)
+veclib_find_peaks (const ARDOUR::Sample * buf, nframes_t nframes, float *min, float *max)
 {
 	vDSP_maxv (buf, 1, max, nframes);
 	vDSP_minv (buf, 1, min, nframes);
 }
 
 void
-veclib_apply_gain_to_buffer (ARDOUR::Sample *buf, nframes_t nframes, float gain)
+veclib_apply_gain_to_buffer (ARDOUR::Sample * buf, nframes_t nframes, float gain)
 {
         vDSP_vsmul(buf, 1, &gain, buf, 1, nframes);
 }
 
 void
-veclib_mix_buffers_with_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes, float gain)
+veclib_mix_buffers_with_gain (ARDOUR::Sample * dst, const ARDOUR::Sample * src, nframes_t nframes, float gain)
 {
         vDSP_vsma(src, 1, &gain, dst, 1, dst, 1, nframes);
 }
 
 void
-veclib_mix_buffers_no_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t nframes)
+veclib_mix_buffers_no_gain (ARDOUR::Sample * dst, const ARDOUR::Sample * src, nframes_t nframes)
 {
         // It seems that a vector mult only operation does not exist...
         float gain = 1.0f;

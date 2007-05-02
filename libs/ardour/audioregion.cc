@@ -41,6 +41,7 @@
 #include <ardour/audiofilter.h>
 #include <ardour/audiofilesource.h>
 #include <ardour/region_factory.h>
+#include <ardour/runtime_functions.h>
 
 #include "i18n.h"
 #include <locale.h>
@@ -467,7 +468,7 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 			}
 		}
 	} else if (_scale_amplitude != 1.0f) {
-		Session::apply_gain_to_buffer (mixdown_buffer, to_read, _scale_amplitude);
+		apply_gain_to_buffer (mixdown_buffer, to_read, _scale_amplitude);
 	}
 
   merge:
@@ -1099,7 +1100,7 @@ AudioRegion::normalize_to (float target_dB)
 				return;
 			}
 			
-			maxamp = Session::compute_peak (buf, to_read, maxamp);
+			maxamp = compute_peak (buf, to_read, maxamp);
 		}
 
 		fpos += to_read;

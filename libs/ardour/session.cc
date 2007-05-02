@@ -100,12 +100,6 @@ const char* Session::dead_sound_dir_name = X_("dead_sounds");
 const char* Session::interchange_dir_name = X_("interchange");
 const char* Session::export_dir_name = X_("export");
 
-Session::compute_peak_t			Session::compute_peak 		= 0;
-Session::find_peaks_t			Session::find_peaks 		= 0;
-Session::apply_gain_to_buffer_t		Session::apply_gain_to_buffer 	= 0;
-Session::mix_buffers_with_gain_t	Session::mix_buffers_with_gain 	= 0;
-Session::mix_buffers_no_gain_t		Session::mix_buffers_no_gain 	= 0;
-
 sigc::signal<int> Session::AskAboutPendingState;
 sigc::signal<void> Session::SendFeedback;
 
