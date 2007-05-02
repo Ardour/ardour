@@ -47,6 +47,8 @@ class ControlProtocol : public sigc::trackable, public Stateful, public BasicUI 
 	virtual int set_feedback (bool yn) { return 0; }
 	virtual bool get_feedback () const { return false; }
 
+	virtual void route_list_changed () {}
+
 	sigc::signal<void> ActiveChanged;
 
 	/* signals that a control protocol can emit and other (presumably graphical)
@@ -100,6 +102,8 @@ class ControlProtocol : public sigc::trackable, public Stateful, public BasicUI 
 	std::vector<boost::shared_ptr<ARDOUR::Route> > route_table;
 	std::string _name;
 	bool _active;
+
+	void add_strip (std::list<boost::shared_ptr<ARDOUR::Route> >);
 
 	void next_track (uint32_t initial_id);
 	void prev_track (uint32_t initial_id);
