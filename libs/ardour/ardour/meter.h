@@ -41,7 +41,7 @@ public:
 	void reset_max ();
 
 	/** Compute peaks */
-	void run (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset=0);
+	void run (BufferSet& bufs, nframes_t nframes, nframes_t offset=0);
 	
 	float peak_power (uint32_t n) { 
 		if (n < _visible_peak_power.size()) {

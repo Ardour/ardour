@@ -352,7 +352,7 @@ MidiTrack::set_state_part_two ()
 }	
 
 int 
-MidiTrack::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, 
+MidiTrack::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
 		     bool session_state_changing, bool can_record, bool rec_monitors_input)
 {
 	if (n_outputs().get(DataType::MIDI) == 0) {
@@ -433,7 +433,7 @@ MidiTrack::no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nfr
 }
 
 int
-MidiTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, int declick,
+MidiTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, int declick,
 		  bool can_record, bool rec_monitors_input)
 {
 	int dret;
@@ -448,7 +448,7 @@ MidiTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframe
 		return 0;
 	}
 
-	jack_nframes_t transport_frame = _session.transport_frame();
+	nframes_t transport_frame = _session.transport_frame();
 
 	if ((nframes = check_initial_delay (nframes, offset, transport_frame)) == 0) {
 		/* need to do this so that the diskstream sets its
@@ -507,7 +507,7 @@ MidiTrack::roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframe
 }
 
 int
-MidiTrack::silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t offset, 
+MidiTrack::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
 			 bool can_record, bool rec_monitors_input)
 {
 	if (n_outputs().get(DataType::MIDI) == 0 && _redirects.empty()) {
@@ -529,8 +529,8 @@ MidiTrack::silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack
 
 void
 MidiTrack::process_output_buffers (BufferSet& bufs,
-			       jack_nframes_t start_frame, jack_nframes_t end_frame, 
-			       jack_nframes_t nframes, jack_nframes_t offset, bool with_redirects, int declick,
+			       nframes_t start_frame, nframes_t end_frame, 
+			       nframes_t nframes, nframes_t offset, bool with_redirects, int declick,
 			       bool meter)
 {
 	/* There's no such thing as a MIDI bus for the time being, to avoid diverging from trunk
@@ -578,13 +578,13 @@ MidiTrack::set_name (string str, void *src)
 }
 
 int
-MidiTrack::export_stuff (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t end_frame)
+MidiTrack::export_stuff (BufferSet& bufs, nframes_t nframes, nframes_t end_frame)
 {
 	return -1;
 }
 
 void
-MidiTrack::set_latency_delay (jack_nframes_t longest_session_latency)
+MidiTrack::set_latency_delay (nframes_t longest_session_latency)
 {
 	Route::set_latency_delay (longest_session_latency);
 	_diskstream->set_roll_delay (_roll_delay);
@@ -600,7 +600,7 @@ MidiTrack::bounce (InterThreadInfo& itt)
 
 
 void
-MidiTrack::bounce_range (jack_nframes_t start, jack_nframes_t end, InterThreadInfo& itt)
+MidiTrack::bounce_range (nframes_t start, nframes_t end, InterThreadInfo& itt)
 {
 	throw;
 	//vector<MidiSource*> srcs;

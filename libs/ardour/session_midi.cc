@@ -763,7 +763,7 @@ Session::change_midi_ports ()
  * have been called with the appropriate nframes parameter this cycle.
  */
 int
-Session::send_full_time_code(jack_nframes_t nframes)
+Session::send_full_time_code(nframes_t nframes)
 {
 	/* This function could easily send at a given frame offset, but would
 	 * that be useful?  Does ardour do sub-block accurate locating? [DR] */
@@ -787,7 +787,7 @@ Session::send_full_time_code(jack_nframes_t nframes)
 	if (((mtc_smpte_bits >> 5) != MIDI::MTC_25_FPS) && (transmitting_smpte_time.frames % 2)) {
 		// start MTC quarter frame transmission on an even frame
 		SMPTE::increment( transmitting_smpte_time );
-		outbound_mtc_smpte_frame += (jack_nframes_t) _frames_per_smpte_frame;
+		outbound_mtc_smpte_frame += (nframes_t) _frames_per_smpte_frame;
 	}
 
 	// Compensate for audio latency
@@ -828,7 +828,7 @@ Session::send_full_time_code(jack_nframes_t nframes)
  * earlier already this cycle by send_full_time_code)
  */
 int
-Session::send_midi_time_code_for_cycle(jack_nframes_t nframes)
+Session::send_midi_time_code_for_cycle(nframes_t nframes)
 {	
 	assert (next_quarter_frame_to_send >= 0);
 	assert (next_quarter_frame_to_send <= 7);
@@ -845,7 +845,7 @@ Session::send_midi_time_code_for_cycle(jack_nframes_t nframes)
 	}
 	
 	/* Duration of one quarter frame */
-	jack_nframes_t quarter_frame_duration = ((long) _frames_per_smpte_frame) >> 2;
+	nframes_t quarter_frame_duration = ((long) _frames_per_smpte_frame) >> 2;
 	
 	//cerr << "(MTC) TR: " << _transport_frame << " - SF: " << outbound_mtc_smpte_frame
 	//<< " - NQ: " << next_quarter_frame_to_send << " - FD" << quarter_frame_duration << endl;
@@ -888,14 +888,14 @@ Session::send_midi_time_code_for_cycle(jack_nframes_t nframes)
 				break;
 		}			
 		
-		const jack_nframes_t msg_time = (outbound_mtc_smpte_frame
+		const nframes_t msg_time = (outbound_mtc_smpte_frame
 			+ (quarter_frame_duration * next_quarter_frame_to_send));
 	
 		// This message must fall within this block or something is broken
 		assert(msg_time >= _transport_frame);
 		assert(msg_time < _transport_frame + nframes);
 
-		jack_nframes_t out_stamp = msg_time - _transport_frame;
+		nframes_t out_stamp = msg_time - _transport_frame;
 		assert(out_stamp < nframes);
 
 		if (!_mtc_port->midimsg (mtc_msg, 2, out_stamp)) {

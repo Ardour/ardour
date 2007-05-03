@@ -103,7 +103,7 @@ MidiBuffer::~MidiBuffer()
  * Note that offset and nframes refer to sample time, NOT buffer offsets or event counts.
  */
 void
-MidiBuffer::read_from(const Buffer& src, jack_nframes_t nframes, jack_nframes_t offset)
+MidiBuffer::read_from(const Buffer& src, nframes_t nframes, nframes_t offset)
 {
 	assert(src.type() == DataType::MIDI);
 	const MidiBuffer& msrc = (MidiBuffer&)src;
@@ -154,7 +154,7 @@ MidiBuffer::push_back(const MidiEvent& ev)
 
 
 void
-MidiBuffer::silence(jack_nframes_t dur, jack_nframes_t offset)
+MidiBuffer::silence(nframes_t dur, nframes_t offset)
 {
 	// FIXME use parameters
 	assert(offset == 0);

@@ -1335,7 +1335,7 @@ AutomationList::set_state (const XMLNode& node)
 		const XMLNodeList& elist = node.children();
 		XMLNodeConstIterator i;
 		XMLProperty* prop;
-		jack_nframes_t x;
+		nframes_t x;
 		double y;
 		
 		freeze ();

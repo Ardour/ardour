@@ -38,8 +38,11 @@ class AudioPort : public Port {
 		free (_port);
 	}
 
-	void cycle_start(jack_nframes_t nframes);
-	void cycle_end();
+	void cycle_start(nframes_t nframes) {
+		_buffer.set_data ((Sample*) jack_port_get_buffer (_port, nframes), nframes);
+	}
+
+	void cycle_end() {}
 
 	DataType type() const { return DataType(DataType::AUDIO); }
 
@@ -72,8 +75,8 @@ class AudioPort : public Port {
 	uint32_t short_overs () const { return _short_overs; }
 	uint32_t long_overs ()  const { return _long_overs; }
 	
-	static void set_short_over_length (jack_nframes_t);
-	static void set_long_over_length (jack_nframes_t);
+	static void set_short_over_length (nframes_t);
+	static void set_long_over_length (nframes_t);
 
   protected:
 	friend class AudioEngine;
@@ -85,14 +88,14 @@ class AudioPort : public Port {
 
 	AudioBuffer _buffer;
 
-	jack_nframes_t               _overlen;
+	nframes_t               _overlen;
 	jack_default_audio_sample_t  _peak;
 	float                        _peak_db;
 	uint32_t                     _short_overs;
 	uint32_t                     _long_overs;
 	
-	static jack_nframes_t        _long_over_length;
-	static jack_nframes_t        _short_over_length;
+	static nframes_t        _long_over_length;
+	static nframes_t        _short_over_length;
 };
  
 } // namespace ARDOUR

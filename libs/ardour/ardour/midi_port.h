@@ -47,7 +47,7 @@ class MidiPort : public Port {
 		return _buffer;
 	}
 	
-	void cycle_start(jack_nframes_t nframes);
+	void cycle_start(nframes_t nframes);
 	void cycle_end();
 
 	size_t capacity() { return _buffer.capacity(); }
@@ -61,7 +61,7 @@ class MidiPort : public Port {
 	/* engine isn't supposed to access below here */
 
 	MidiBuffer     _buffer;
-	jack_nframes_t _nframes_this_cycle;
+	nframes_t _nframes_this_cycle;
 };
  
 } // namespace ARDOUR

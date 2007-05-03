@@ -130,8 +130,8 @@ Session::process_routes (nframes_t nframes, nframes_t offset)
 
 	record_active = actively_recording(); // || (get_record_enabled() && get_punch_in());
 
-	const jack_nframes_t start_frame = _transport_frame;
-	const jack_nframes_t end_frame = _transport_frame + (jack_nframes_t)floor(nframes * _transport_speed);
+	const nframes_t start_frame = _transport_frame;
+	const nframes_t end_frame = _transport_frame + (nframes_t)floor(nframes * _transport_speed);
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
@@ -176,8 +176,8 @@ Session::silent_process_routes (nframes_t nframes, nframes_t offset)
 		declick = -1;
 	}
 	
-	const jack_nframes_t start_frame = _transport_frame;
-	const jack_nframes_t end_frame = _transport_frame + lrintf(nframes * _transport_speed);
+	const nframes_t start_frame = _transport_frame;
+	const nframes_t end_frame = _transport_frame + lrintf(nframes * _transport_speed);
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 

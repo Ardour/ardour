@@ -68,7 +68,7 @@ class MidiDiskstream : public Diskstream
 	float playback_buffer_load() const;
 	float capture_buffer_load() const;
 	
-	void get_playback(MidiBuffer& dst, jack_nframes_t start, jack_nframes_t end);
+	void get_playback(MidiBuffer& dst, nframes_t start, nframes_t end);
 
 	void set_record_enabled (bool yn);
 
@@ -99,21 +99,21 @@ class MidiDiskstream : public Diskstream
 
 	void set_pending_overwrite(bool);
 	int  overwrite_existing_buffers ();
-	void set_block_size (jack_nframes_t);
-	int  internal_playback_seek (jack_nframes_t distance);
-	int  can_internal_playback_seek (jack_nframes_t distance);
+	void set_block_size (nframes_t);
+	int  internal_playback_seek (nframes_t distance);
+	int  can_internal_playback_seek (nframes_t distance);
 	int  rename_write_sources ();
 	void reset_write_sources (bool, bool force = false);
 	void non_realtime_input_change ();
 
   protected:
-	int seek (jack_nframes_t which_sample, bool complete_refill = false);
+	int seek (nframes_t which_sample, bool complete_refill = false);
 
   protected:
 	friend class MidiTrack;
 
-	int  process (jack_nframes_t transport_frame, jack_nframes_t nframes, jack_nframes_t offset, bool can_record, bool rec_monitors_input);
-	bool commit  (jack_nframes_t nframes);
+	int  process (nframes_t transport_frame, nframes_t nframes, nframes_t offset, bool can_record, bool rec_monitors_input);
+	bool commit  (nframes_t nframes);
 
   private:
 
@@ -123,7 +123,7 @@ class MidiDiskstream : public Diskstream
 	
 	int do_refill_with_alloc();
 
-	int read (jack_nframes_t& start, jack_nframes_t cnt, bool reversed);
+	int read (nframes_t& start, nframes_t cnt, bool reversed);
 
 	void finish_capture (bool rec_monitors_input);
 	void transport_stopped (struct tm&, time_t, bool abort);
@@ -139,7 +139,7 @@ class MidiDiskstream : public Diskstream
 	int use_pending_capture_data (XMLNode& node);
 
 	void get_input_sources ();
-	void check_record_status (jack_nframes_t transport_frame, jack_nframes_t nframes, bool can_record);
+	void check_record_status (nframes_t transport_frame, nframes_t nframes, bool can_record);
 	void set_align_style_from_io();
 	
 	void engage_record_enable ();
@@ -157,7 +157,7 @@ class MidiDiskstream : public Diskstream
 	RingBufferNPT<CaptureTransition>* _capture_transition_buf;
 	//RingBufferNPT<RawMidi>::rw_vector _playback_vector;
 	//RingBufferNPT<RawMidi>::rw_vector _capture_vector;
-	jack_nframes_t _last_flush_frame;
+	nframes_t _last_flush_frame;
 };
 
 }; /* namespace ARDOUR */

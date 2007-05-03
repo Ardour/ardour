@@ -50,7 +50,7 @@ Change Region::LayerChanged      = ARDOUR::new_change ();
 Change Region::HiddenChanged     = ARDOUR::new_change ();
 
 /** Basic Region constructor (single source) */
-Region::Region (boost::shared_ptr<Source> src, jack_nframes_t start, jack_nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
+Region::Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
 	: _name(name)
 	, _type(type)
 	, _flags(flags)
@@ -73,7 +73,7 @@ Region::Region (boost::shared_ptr<Source> src, jack_nframes_t start, jack_nframe
 }
 
 /** Basic Region constructor (many sources) */
-Region::Region (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
+Region::Region (SourceList& srcs, nframes_t start, nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
 	: _name(name)
 	, _type(type)
 	, _flags(flags)
@@ -1191,7 +1191,7 @@ Region::source_equivalent (boost::shared_ptr<const Region> other) const
 }
 
 bool
-Region::verify_length (jack_nframes_t len)
+Region::verify_length (nframes_t len)
 {
 	for (uint32_t n=0; n < _sources.size(); ++n) {
 		if (_start > _sources[n]->length() - len) {
@@ -1202,7 +1202,7 @@ Region::verify_length (jack_nframes_t len)
 }
 
 bool
-Region::verify_start_and_length (jack_nframes_t new_start, jack_nframes_t new_length)
+Region::verify_start_and_length (nframes_t new_start, nframes_t new_length)
 {
 	for (uint32_t n=0; n < _sources.size(); ++n) {
 		if (new_length > _sources[n]->length() - new_start) {
@@ -1212,7 +1212,7 @@ Region::verify_start_and_length (jack_nframes_t new_start, jack_nframes_t new_le
 	return true;
 }
 bool
-Region::verify_start (jack_nframes_t pos)
+Region::verify_start (nframes_t pos)
 {
 	for (uint32_t n=0; n < _sources.size(); ++n) {
 		if (pos > _sources[n]->length() - _length) {
@@ -1223,7 +1223,7 @@ Region::verify_start (jack_nframes_t pos)
 }
 
 bool
-Region::verify_start_mutable (jack_nframes_t& new_start)
+Region::verify_start_mutable (nframes_t& new_start)
 {
 	for (uint32_t n=0; n < _sources.size(); ++n) {
 		if (new_start > _sources[n]->length() - _length) {

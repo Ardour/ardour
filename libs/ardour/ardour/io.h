@@ -96,11 +96,11 @@ class IO : public PBD::StatefulDestructible
 	
 	virtual void silence  (nframes_t, nframes_t offset);
 
-	void collect_input  (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset);
-	void deliver_output (BufferSet& bufs, jack_nframes_t start_frame, jack_nframes_t end_frame,
-	                                      jack_nframes_t nframes, jack_nframes_t offset);
-	void just_meter_input (jack_nframes_t start_frame, jack_nframes_t end_frame, 
-			       jack_nframes_t nframes, jack_nframes_t offset);
+	void collect_input  (BufferSet& bufs, nframes_t nframes, nframes_t offset);
+	void deliver_output (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame,
+	                                      nframes_t nframes, nframes_t offset);
+	void just_meter_input (nframes_t start_frame, nframes_t end_frame, 
+			       nframes_t nframes, nframes_t offset);
 
 	virtual void   set_gain (gain_t g, void *src);
 	void           inc_gain (gain_t delta, void *src);
@@ -216,11 +216,11 @@ class IO : public PBD::StatefulDestructible
 
 	/* automation */
 
-	static void set_automation_interval (jack_nframes_t frames) {
+	static void set_automation_interval (nframes_t frames) {
 		_automation_interval = frames;
 	}
 
-	static jack_nframes_t automation_interval() { 
+	static nframes_t automation_interval() { 
 		return _automation_interval;
 	}
 

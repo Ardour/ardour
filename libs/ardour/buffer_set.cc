@@ -151,7 +151,7 @@ BufferSet::buffer_capacity(DataType type) const
 
 // FIXME: make 'in' const
 void
-BufferSet::read_from(BufferSet& in, jack_nframes_t nframes, jack_nframes_t offset)
+BufferSet::read_from(BufferSet& in, nframes_t nframes, nframes_t offset)
 {
 	assert(available() >= in.count());
 

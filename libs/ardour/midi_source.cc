@@ -90,15 +90,15 @@ MidiSource::set_state (const XMLNode& node)
 	return 0;
 }
 
-jack_nframes_t
-MidiSource::read (MidiRingBuffer& dst, jack_nframes_t start, jack_nframes_t cnt, jack_nframes_t stamp_offset) const
+nframes_t
+MidiSource::read (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset) const
 {
 	Glib::Mutex::Lock lm (_lock);
 	return read_unlocked (dst, start, cnt, stamp_offset);
 }
 
-jack_nframes_t
-MidiSource::write (MidiRingBuffer& dst, jack_nframes_t cnt)
+nframes_t
+MidiSource::write (MidiRingBuffer& dst, nframes_t cnt)
 {
 	Glib::Mutex::Lock lm (_lock);
 	return write_unlocked (dst, cnt);

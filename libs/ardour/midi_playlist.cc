@@ -100,7 +100,7 @@ MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, string 
 */
 }
 
-MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, jack_nframes_t start, jack_nframes_t dur, string name, bool hidden)
+MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, nframes_t start, nframes_t dur, string name, bool hidden)
 		: Playlist (other, start, dur, name, hidden)
 {
 	/* this constructor does NOT notify others (session) */
@@ -118,9 +118,9 @@ struct RegionSortByLayer {
 };
 
 /** Returns the number of frames in time duration read (eg could be large when 0 events are read) */
-jack_nframes_t
-MidiPlaylist::read (MidiRingBuffer& dst, jack_nframes_t start,
-                     jack_nframes_t dur, unsigned chan_n)
+nframes_t
+MidiPlaylist::read (MidiRingBuffer& dst, nframes_t start,
+                     nframes_t dur, unsigned chan_n)
 {
 	/* this function is never called from a realtime thread, so
 	   its OK to block (for short intervals).
@@ -128,10 +128,10 @@ MidiPlaylist::read (MidiRingBuffer& dst, jack_nframes_t start,
 
 	Glib::Mutex::Lock rm (region_lock);
 
-	jack_nframes_t ret         = 0;
-	jack_nframes_t end         = start + dur - 1;
-	//jack_nframes_t read_frames = 0;
-	//jack_nframes_t skip_frames = 0;
+	nframes_t ret         = 0;
+	nframes_t end         = start + dur - 1;
+	//nframes_t read_frames = 0;
+	//nframes_t skip_frames = 0;
 
 	//_read_data_count = 0;
 

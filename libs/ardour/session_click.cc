@@ -53,10 +53,10 @@ Session::click (nframes_t start, nframes_t nframes, nframes_t offset)
 		return;
 	} 
 
-	const jack_nframes_t end = start + (jack_nframes_t)floor(nframes * _transport_speed);
+	const nframes_t end = start + (nframes_t)floor(nframes * _transport_speed);
 
 	BufferSet& bufs = get_scratch_buffers(ChanCount(DataType::AUDIO, 1));
-	buf = bufs.get_audio(0).data(nframes);
+	buf = bufs.get_audio(0).data();
 	points = _tempo_map->get_points (start, end);
 
 	if (points == 0) {

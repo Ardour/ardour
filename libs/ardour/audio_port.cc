@@ -23,8 +23,8 @@
 using namespace ARDOUR;
 using namespace std;
 
-jack_nframes_t AudioPort::_short_over_length = 2;
-jack_nframes_t AudioPort::_long_over_length = 10;
+nframes_t AudioPort::_short_over_length = 2;
+nframes_t AudioPort::_long_over_length = 10;
 
 AudioPort::AudioPort(jack_port_t* p)
 	: Port(p)
@@ -51,23 +51,4 @@ AudioPort::reset()
 	reset_meters ();
 }
 
-void
-AudioPort::cycle_start (jack_nframes_t nframes)
-{
-	if (_flags & JackPortIsOutput) {
-		const bool silent = _buffer.silent();
-		// FIXME: do nothing, we can cache the value (but capacity needs to be set for MIDI)
-		_buffer.set_data((Sample*)jack_port_get_buffer (_port, nframes), nframes);
-		if (silent) {
-			_buffer.silence(nframes);
-		}
-	} else {
-		_buffer.set_data((Sample*)jack_port_get_buffer (_port, nframes), nframes);
-	}
-}
 
-void
-AudioPort::cycle_end()
-{
-	// whatever...
-}

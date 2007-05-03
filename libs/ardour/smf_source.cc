@@ -163,7 +163,7 @@ SMFSource::open()
 }
 
 int
-SMFSource::update_header (jack_nframes_t when, struct tm&, time_t)
+SMFSource::update_header (nframes_t when, struct tm&, time_t)
 {
 	_timeline_position = when;
 	return flush_header();
@@ -220,7 +220,7 @@ SMFSource::flush_footer()
  */
 /*
 long
-SMFSource::find_first_event_after(jack_nframes_t start)
+SMFSource::find_first_event_after(nframes_t start)
 {
 	// FIXME: obviously this is slooow
 	
@@ -287,12 +287,12 @@ SMFSource::read_event(MidiEvent& ev) const
 	return ev.size;
 }
 
-jack_nframes_t
-SMFSource::read_unlocked (MidiRingBuffer& dst, jack_nframes_t start, jack_nframes_t cnt, jack_nframes_t stamp_offset) const
+nframes_t
+SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset) const
 {
 	//cerr << "SMF - read " << start << ", count=" << cnt << ", offset=" << stamp_offset << endl;
 
-	jack_nframes_t time = 0;
+	nframes_t time = 0;
 
 	// FIXME: ugh
 	unsigned char ev_buf[MidiBuffer::max_event_size()];
@@ -334,8 +334,8 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, jack_nframes_t start, jack_nframe
 	return cnt;
 }
 
-jack_nframes_t
-SMFSource::write_unlocked (MidiRingBuffer& src, jack_nframes_t cnt)
+nframes_t
+SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 {
 	//cerr << "SMF WRITE -- " << _length << "--" << cnt << endl;
 	

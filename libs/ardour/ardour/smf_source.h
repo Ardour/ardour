@@ -56,8 +56,8 @@ class SMFSource : public MidiSource {
 	*/
 	// FIXME and thus are useless for MIDI.. but make MidiDiskstream compile easier! :)
 
-	virtual jack_nframes_t last_capture_start_frame() const { return 0; }
-	virtual void           mark_capture_start (jack_nframes_t) {}
+	virtual nframes_t last_capture_start_frame() const { return 0; }
+	virtual void           mark_capture_start (nframes_t) {}
 	virtual void           mark_capture_end () {}
 	virtual void           clear_capture_marks() {}
 
@@ -68,7 +68,7 @@ class SMFSource : public MidiSource {
 	void set_allow_remove_if_empty (bool yn);
 	void mark_for_remove();
 
-	int update_header (jack_nframes_t when, struct tm&, time_t);
+	int update_header (nframes_t when, struct tm&, time_t);
 	int flush_header ();
 	int flush_footer ();
 
@@ -81,7 +81,7 @@ class SMFSource : public MidiSource {
 	string take_id() const { return _take_id; }
 
 	static void set_search_path (string);
-	static void set_header_position_offset (jack_nframes_t offset, bool negative);
+	static void set_header_position_offset (nframes_t offset, bool negative);
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
@@ -90,8 +90,8 @@ class SMFSource : public MidiSource {
 
 	int init (string idstr, bool must_exist);
 
-	jack_nframes_t read_unlocked (MidiRingBuffer& dst, jack_nframes_t start, jack_nframes_t cn, jack_nframes_t stamp_offset) const;
-	jack_nframes_t write_unlocked (MidiRingBuffer& dst, jack_nframes_t cnt);
+	nframes_t read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cn, nframes_t stamp_offset) const;
+	nframes_t write_unlocked (MidiRingBuffer& dst, nframes_t cnt);
 
 	bool find (std::string path, bool must_exist, bool& is_new);
 	bool removable() const;
@@ -112,7 +112,7 @@ class SMFSource : public MidiSource {
 	bool           _allow_remove_if_empty;
 	uint64_t       _timeline_position;
 	FILE*          _fd;
-	jack_nframes_t _last_ev_time; // last frame time written, relative to source start
+	nframes_t _last_ev_time; // last frame time written, relative to source start
 	uint32_t       _track_size;
 	uint32_t       _header_size; // size of SMF header, including MTrk chunk header
 

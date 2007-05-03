@@ -41,7 +41,7 @@ class Port : public sigc::trackable {
 
 	virtual DataType type() const = 0;
 
-	virtual void cycle_start(jack_nframes_t nframes) {}
+	virtual void cycle_start(nframes_t nframes) {}
 	virtual void cycle_end() {}
 
 	virtual Buffer& get_buffer() = 0;

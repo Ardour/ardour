@@ -176,10 +176,10 @@ class AudioRegion : public Region
   protected:
 	int set_live_state (const XMLNode&, Change&, bool send);
 	
-	virtual bool verify_start (jack_nframes_t);
-	virtual bool verify_start_and_length (jack_nframes_t, jack_nframes_t);
-	virtual bool verify_start_mutable (jack_nframes_t&_start);
-	virtual bool verify_length (jack_nframes_t);
+	virtual bool verify_start (nframes_t);
+	virtual bool verify_start_and_length (nframes_t, nframes_t);
+	virtual bool verify_start_mutable (nframes_t&_start);
+	virtual bool verify_length (nframes_t);
 	/*virtual void recompute_at_start () = 0;
 	virtual void recompute_at_end () = 0;*/
 };

@@ -48,21 +48,21 @@ using namespace std;
 using namespace ARDOUR;
 
 /** Basic MidiRegion constructor (one channel) */
-MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, jack_nframes_t start, jack_nframes_t length)
+MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, nframes_t start, nframes_t length)
 	: Region (src, start, length, PBD::basename_nosuffix(src->name()), DataType::MIDI, 0,  Region::Flag(Region::DefaultFlags|Region::External))
 {
 	assert(_name.find("/") == string::npos);
 }
 
 /* Basic MidiRegion constructor (one channel) */
-MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
+MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (src, start, length, name, DataType::MIDI, layer, flags)
 {
 	assert(_name.find("/") == string::npos);
 }
 
 /* Basic MidiRegion constructor (many channels) */
-MidiRegion::MidiRegion (SourceList& srcs, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
+MidiRegion::MidiRegion (SourceList& srcs, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (srcs, start, length, name, DataType::MIDI, layer, flags)
 {
 	assert(_name.find("/") == string::npos);
@@ -70,7 +70,7 @@ MidiRegion::MidiRegion (SourceList& srcs, jack_nframes_t start, jack_nframes_t l
 
 
 /** Create a new MidiRegion, that is part of an existing one */
-MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, jack_nframes_t offset, jack_nframes_t length, const string& name, layer_t layer, Flag flags)
+MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, nframes_t offset, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (other, offset, length, name, layer, flags)
 {
 	assert(_name.find("/") == string::npos);
@@ -108,31 +108,31 @@ MidiRegion::~MidiRegion ()
 {
 }
 
-jack_nframes_t
-MidiRegion::read_at (MidiRingBuffer& out, jack_nframes_t position, 
-		      jack_nframes_t dur, 
-		      uint32_t chan_n, jack_nframes_t read_frames, jack_nframes_t skip_frames) const
+nframes_t
+MidiRegion::read_at (MidiRingBuffer& out, nframes_t position, 
+		      nframes_t dur, 
+		      uint32_t chan_n, nframes_t read_frames, nframes_t skip_frames) const
 {
 	return _read_at (_sources, out, position, dur, chan_n, read_frames, skip_frames);
 }
 
-jack_nframes_t
-MidiRegion::master_read_at (MidiRingBuffer& out, jack_nframes_t position, 
-			     jack_nframes_t dur, uint32_t chan_n) const
+nframes_t
+MidiRegion::master_read_at (MidiRingBuffer& out, nframes_t position, 
+			     nframes_t dur, uint32_t chan_n) const
 {
 	return _read_at (_master_sources, out, position, dur, chan_n, 0, 0);
 }
 
-jack_nframes_t
+nframes_t
 MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer& dst, 
-		       jack_nframes_t position, jack_nframes_t dur, 
-		       uint32_t chan_n, jack_nframes_t read_frames, jack_nframes_t skip_frames) const
+		       nframes_t position, nframes_t dur, 
+		       uint32_t chan_n, nframes_t read_frames, nframes_t skip_frames) const
 {
 	// cerr << _name << "._read_at(" << position << ") - " << _position << endl;
 
-	jack_nframes_t internal_offset = 0;
-	jack_nframes_t src_offset      = 0;
-	jack_nframes_t to_read         = 0;
+	nframes_t internal_offset = 0;
+	nframes_t src_offset      = 0;
+	nframes_t to_read         = 0;
 	
 	/* precondition: caller has verified that we cover the desired section */
 

@@ -50,16 +50,16 @@ class MidiRegion : public Region
 
 	boost::shared_ptr<MidiSource> midi_source (uint32_t n=0) const;
 
-	jack_nframes_t read_at (MidiRingBuffer& dst,
-			jack_nframes_t position,
-			jack_nframes_t dur, 
+	nframes_t read_at (MidiRingBuffer& dst,
+			nframes_t position,
+			nframes_t dur, 
 			uint32_t       chan_n      = 0,
-			jack_nframes_t read_frames = 0,
-			jack_nframes_t skip_frames = 0) const;
+			nframes_t read_frames = 0,
+			nframes_t skip_frames = 0) const;
 
-	jack_nframes_t master_read_at (MidiRingBuffer& dst,
-			jack_nframes_t position,
-			jack_nframes_t dur,
+	nframes_t master_read_at (MidiRingBuffer& dst,
+			nframes_t position,
+			nframes_t dur,
 			uint32_t chan_n=0) const;
 
 	XMLNode& state (bool);
@@ -72,10 +72,10 @@ class MidiRegion : public Region
   private:
 	friend class RegionFactory;
 
-	MidiRegion (boost::shared_ptr<MidiSource>, jack_nframes_t start, jack_nframes_t length);
-	MidiRegion (boost::shared_ptr<MidiSource>, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
-	MidiRegion (SourceList &, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
-	MidiRegion (boost::shared_ptr<const MidiRegion>, jack_nframes_t start, jack_nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
+	MidiRegion (boost::shared_ptr<MidiSource>, nframes_t start, nframes_t length);
+	MidiRegion (boost::shared_ptr<MidiSource>, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
+	MidiRegion (SourceList &, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
+	MidiRegion (boost::shared_ptr<const MidiRegion>, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
 	MidiRegion (boost::shared_ptr<const MidiRegion>);
 	MidiRegion (boost::shared_ptr<MidiSource>, const XMLNode&);
 	MidiRegion (SourceList &, const XMLNode&);
@@ -84,12 +84,12 @@ class MidiRegion : public Region
 	friend class Playlist;
 
   private:
-	jack_nframes_t _read_at (const SourceList&, MidiRingBuffer& dst,
-		jack_nframes_t position,
-		jack_nframes_t dur, 
+	nframes_t _read_at (const SourceList&, MidiRingBuffer& dst,
+		nframes_t position,
+		nframes_t dur, 
 		uint32_t chan_n = 0,
-		jack_nframes_t read_frames = 0,
-		jack_nframes_t skip_frames = 0) const;
+		nframes_t read_frames = 0,
+		nframes_t skip_frames = 0) const;
 
 	void recompute_at_start ();
 	void recompute_at_end ();

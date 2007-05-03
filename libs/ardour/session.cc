@@ -1380,7 +1380,7 @@ Session::set_frame_rate (nframes_t frames_per_second)
 
 	sync_time_vars();
 
-	Route::set_automation_interval ((jack_nframes_t) ceil ((double) frames_per_second * 0.25));
+	Route::set_automation_interval ((nframes_t) ceil ((double) frames_per_second * 0.25));
 
 	// XXX we need some equivalent to this, somehow
 	// SndFileSource::setup_standard_crossfades (frames_per_second);
@@ -4097,7 +4097,7 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t le
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*src);
 			
 			if (afs) {
-				if (afs->write (buffers.get_audio(n).data(this_chunk), this_chunk) != this_chunk) {
+				if (afs->write (buffers.get_audio(n).data(), this_chunk) != this_chunk) {
 					goto out;
 				}
 			}

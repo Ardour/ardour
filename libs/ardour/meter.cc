@@ -33,7 +33,7 @@ namespace ARDOUR {
  * be set to 0.
  */
 void
-PeakMeter::run (BufferSet& bufs, jack_nframes_t nframes, jack_nframes_t offset)
+PeakMeter::run (BufferSet& bufs, nframes_t nframes, nframes_t offset)
 {
 	size_t meterable = std::min(bufs.count().get(DataType::AUDIO), _peak_power.size());
 

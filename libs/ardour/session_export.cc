@@ -589,7 +589,7 @@ Session::process_export (nframes_t nframes, AudioExportSpecification* spec)
 				cerr << "FIXME: Non-audio export" << endl;
 				continue;
 			}
-			Sample* port_buffer = port->get_audio_buffer().data(nframes);
+			Sample* port_buffer = port->get_audio_buffer().data();
 
 			/* now interleave the data from the channel into the float buffer */
 				

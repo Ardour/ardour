@@ -1319,13 +1319,13 @@ class Session : public PBD::StatefulDestructible
 	/* cache the most-recently requested time conversions. This helps when we
 	 * have multiple clocks showing the same time (e.g. the transport frame) */
 	bool           last_smpte_valid;
-	jack_nframes_t last_smpte_when;
+	nframes_t last_smpte_when;
 	SMPTE::Time    last_smpte;
 	
 	bool _send_smpte_update; ///< Flag to send a full frame (SMPTE) MTC message this cycle
 
-	int send_full_time_code(jack_nframes_t nframes);
-	int send_midi_time_code_for_cycle(jack_nframes_t nframes);
+	int send_full_time_code(nframes_t nframes);
+	int send_midi_time_code_for_cycle(nframes_t nframes);
 
 	nframes_t adjust_apparent_position (nframes_t frames);
 	

@@ -1444,7 +1444,7 @@ IO::load_automation (string path)
 
 	while (in.getline (line, sizeof(line), '\n')) {
 		char type;
-		jack_nframes_t when;
+		nframes_t when;
 		double value;
 
 		if (++linecnt == 1) {

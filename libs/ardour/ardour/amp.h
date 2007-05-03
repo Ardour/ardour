@@ -31,9 +31,9 @@ class BufferSet;
  */
 class Amp {
 public:
-	static void run (BufferSet& bufs, jack_nframes_t nframes, gain_t initial, gain_t target, bool invert_polarity);
+	static void run (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t target, bool invert_polarity);
 
-	static void apply_simple_gain(BufferSet& bufs, jack_nframes_t nframes, gain_t target);
+	static void apply_simple_gain(BufferSet& bufs, nframes_t nframes, gain_t target);
 };
 
 

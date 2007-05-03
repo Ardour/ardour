@@ -244,7 +244,7 @@ BaseStereoPanner::load (istream& in, string path, uint32_t& linecnt)
 	_automation.clear ();
 
 	while (in.getline (line, sizeof (line), '\n')) {
-		jack_nframes_t when;
+		nframes_t when;
 		double value;
 
 		++linecnt;
@@ -281,11 +281,11 @@ BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 		return;
 	}
 	
-	Sample* const src = srcbuf.data(nframes);
+	Sample* const src = srcbuf.data();
 
 	/* LEFT */
 
-	dst = obufs.get_audio(0).data(nframes);
+	dst = obufs.get_audio(0).data();
 
 	if (fabsf ((delta = (left - desired_left))) > 0.002) { // about 1 degree of arc 
 		
@@ -335,7 +335,7 @@ BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 
 	/* RIGHT */
 
-	dst = obufs.get_audio(1).data(nframes);
+	dst = obufs.get_audio(1).data();
 	
 	if (fabsf ((delta = (right - desired_right))) > 0.002) { // about 1 degree of arc 
 		
@@ -434,7 +434,7 @@ EqualPowerStereoPanner::distribute_automated (AudioBuffer& srcbuf, BufferSet& ob
 
 	Sample* dst;
 	pan_t* pbuf;
-	Sample* const src = srcbuf.data(nframes);
+	Sample* const src = srcbuf.data();
 
 	/* fetch positional data */
 
@@ -473,7 +473,7 @@ EqualPowerStereoPanner::distribute_automated (AudioBuffer& srcbuf, BufferSet& ob
 
 	/* LEFT */
 
-	dst = obufs.get_audio(0).data(nframes);
+	dst = obufs.get_audio(0).data();
 	pbuf = buffers[0];
 	
 	for (nframes_t n = 0; n < nframes; ++n) {
@@ -484,7 +484,7 @@ EqualPowerStereoPanner::distribute_automated (AudioBuffer& srcbuf, BufferSet& ob
 
 	/* RIGHT */
 
-	dst = obufs.get_audio(1).data(nframes);
+	dst = obufs.get_audio(1).data();
 	pbuf = buffers[1];
 
 	for (nframes_t n = 0; n < nframes; ++n) {
@@ -642,12 +642,12 @@ Multi2dPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
 		return;
 	}
 	
-	Sample* const src = srcbuf.data(nframes);
+	Sample* const src = srcbuf.data();
 
 
 	for (n = 0, o = parent.outputs.begin(); o != parent.outputs.end(); ++o, ++n) {
 
-		dst = obufs.get_audio(n).data(nframes);
+		dst = obufs.get_audio(n).data();
 	
 #ifdef CAN_INTERP
 		if (fabsf ((delta = (left_interp - desired_left))) > 0.002) { // about 1 degree of arc 

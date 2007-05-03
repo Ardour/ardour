@@ -459,7 +459,7 @@ Route::process_output_buffers (BufferSet& bufs,
 			
 			if (_phase_invert) {
 				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
-					Sample* const sp = i->data(nframes);
+					Sample* const sp = i->data();
 					
 					for (nframes_t nx = 0; nx < nframes; ++nx) {
 						sp[nx] *= -gab[nx];
@@ -467,7 +467,7 @@ Route::process_output_buffers (BufferSet& bufs,
 				}
 			} else {
 				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
-					Sample* const sp = i->data(nframes);
+					Sample* const sp = i->data();
 					
 					for (nframes_t nx = 0; nx < nframes; ++nx) {
 						sp[nx] *= gab[nx];
@@ -505,7 +505,7 @@ Route::process_output_buffers (BufferSet& bufs,
 				}
 				
 				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
-					Sample* const sp = i->data(nframes);
+					Sample* const sp = i->data();
 					apply_gain_to_buffer(sp,nframes,this_gain);
 				}
 
@@ -699,7 +699,7 @@ Route::passthru (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, 
 }
 
 void
-Route::passthru_silence (jack_nframes_t start_frame, jack_nframes_t end_frame, jack_nframes_t nframes, jack_nframes_t offset, int declick, bool meter)
+Route::passthru_silence (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset, int declick, bool meter)
 {
 	process_output_buffers (_session.get_silent_buffers (n_process_buffers()), start_frame, end_frame, nframes, offset, true, declick, meter);
 }

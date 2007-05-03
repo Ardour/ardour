@@ -47,8 +47,8 @@ class MidiSource : public Source
 	MidiSource (Session& session, const XMLNode&);
 	virtual ~MidiSource ();
 	
-	virtual jack_nframes_t read (MidiRingBuffer& dst, jack_nframes_t start, jack_nframes_t cnt, jack_nframes_t stamp_offset) const;
-	virtual jack_nframes_t write (MidiRingBuffer& src, jack_nframes_t cnt);
+	virtual nframes_t read (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset) const;
+	virtual nframes_t write (MidiRingBuffer& src, nframes_t cnt);
 
 	virtual void mark_for_remove() = 0;
 	virtual void mark_streaming_write_completed () {}
@@ -64,14 +64,14 @@ class MidiSource : public Source
 	// The MIDI equivalent to "peaks"
 	static int  start_view_data_thread ();
 	static void stop_view_data_thread ();
-	mutable sigc::signal<void,jack_nframes_t,jack_nframes_t> ViewDataRangeReady;
+	mutable sigc::signal<void,nframes_t,nframes_t> ViewDataRangeReady;
 	
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
 
   protected:
-	virtual jack_nframes_t read_unlocked (MidiRingBuffer& dst, jack_nframes_t start, jack_nframes_t cnt, jack_nframes_t stamp_offset) const = 0;
-	virtual jack_nframes_t write_unlocked (MidiRingBuffer& dst, jack_nframes_t cnt) = 0;
+	virtual nframes_t read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset) const = 0;
+	virtual nframes_t write_unlocked (MidiRingBuffer& dst, nframes_t cnt) = 0;
 	
 	mutable Glib::Mutex _lock;
 	string              _captured_for;

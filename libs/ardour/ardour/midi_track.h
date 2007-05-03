@@ -39,18 +39,18 @@ public:
 	
 	int set_name (string str, void *src);
 
-	int roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, 
-		jack_nframes_t offset, int declick, bool can_record, bool rec_monitors_input);
+	int roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
+		nframes_t offset, int declick, bool can_record, bool rec_monitors_input);
 	
-	int no_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, 
-		jack_nframes_t offset, bool state_changing, bool can_record, bool rec_monitors_input);
+	int no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
+		nframes_t offset, bool state_changing, bool can_record, bool rec_monitors_input);
 	
-	int silent_roll (jack_nframes_t nframes, jack_nframes_t start_frame, jack_nframes_t end_frame, 
-		jack_nframes_t offset, bool can_record, bool rec_monitors_input);
+	int silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
+		nframes_t offset, bool can_record, bool rec_monitors_input);
 
 	void process_output_buffers (BufferSet& bufs,
-				     jack_nframes_t start_frame, jack_nframes_t end_frame,
-				     jack_nframes_t nframes, jack_nframes_t offset, bool with_redirects, int declick,
+				     nframes_t start_frame, nframes_t end_frame,
+				     nframes_t nframes, nframes_t offset, bool with_redirects, int declick,
 				     bool meter);
 
 	boost::shared_ptr<MidiDiskstream> midi_diskstream() const;
@@ -60,16 +60,16 @@ public:
 
 	int set_mode (TrackMode m);
 
-	void set_latency_delay (jack_nframes_t);
+	void set_latency_delay (nframes_t);
 
 	int export_stuff (BufferSet& bufs,
-		jack_nframes_t nframes, jack_nframes_t end_frame);
+		nframes_t nframes, nframes_t end_frame);
 
 	void freeze (InterThreadInfo&);
 	void unfreeze ();
 
 	void bounce (InterThreadInfo&);
-	void bounce_range (jack_nframes_t start, jack_nframes_t end, InterThreadInfo&);
+	void bounce_range (nframes_t start, nframes_t end, InterThreadInfo&);
 
 	int set_state(const XMLNode& node);
 

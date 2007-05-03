@@ -28,26 +28,30 @@ namespace ARDOUR {
 
 /** Apply a declicked gain to the audio buffers of @a bufs */
 void
-Amp::run (BufferSet& bufs, jack_nframes_t nframes, gain_t initial, gain_t target, bool invert_polarity)
+Amp::run (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t target, bool invert_polarity)
 {
+	if (nframes == 0)
+		return;
+
 	if (bufs.count().get(DataType::AUDIO) == 0)
 		return;
 
-	assert(bufs.buffer_capacity(DataType::AUDIO) >= nframes);
+	// assert(bufs.buffer_capacity(DataType::AUDIO) >= nframes);
 
 	// if we don't need to declick, defer to apply_simple_gain
+
 	if (initial == target) {
-		apply_simple_gain(bufs, nframes, invert_polarity ? -target : target);
+		for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+			apply_gain_to_buffer (i->data (), nframes, target);
+		}
+		return;
 	}
 
-	const jack_nframes_t declick = std::min ((jack_nframes_t)128, nframes);
+	const nframes_t declick = std::min ((nframes_t)128, nframes);
 	gain_t         delta;
 	double         fractional_shift = -1.0/declick;
 	double         fractional_pos;
 	gain_t         polscale = invert_polarity ? -1.0f : 1.0f;
-
-	if (nframes == 0)
-		return;
 
 	if (target < initial) {
 		/* fade out: remove more and more of delta from initial */
@@ -58,11 +62,11 @@ Amp::run (BufferSet& bufs, jack_nframes_t nframes, gain_t initial, gain_t target
 	}
 
 	for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
-		Sample* const buffer = i->data(nframes);
+		Sample* const buffer = i->data();
 
 		fractional_pos = 1.0;
 
-		for (jack_nframes_t nx = 0; nx < declick; ++nx) {
+		for (nframes_t nx = 0; nx < declick; ++nx) {
 			buffer[nx] *= polscale * (initial + (delta * (0.5 + 0.5 * cos (M_PI * fractional_pos))));
 			fractional_pos += fractional_shift;
 		}
@@ -78,20 +82,15 @@ Amp::run (BufferSet& bufs, jack_nframes_t nframes, gain_t initial, gain_t target
 			if (target == 0.0) {
 				memset (&buffer[declick], 0, sizeof (Sample) * (nframes - declick));
 			} else if (target != 1.0) {
-				for (jack_nframes_t nx = declick; nx < nframes; ++nx) {
-					buffer[nx] *= target;
-				}
+				apply_gain_to_buffer (&buffer[declick], nframes - declick, target);
 			}
 		}
 	}
 }
 
 void
-Amp::apply_simple_gain (BufferSet& bufs, jack_nframes_t nframes, gain_t target)
+Amp::apply_simple_gain (BufferSet& bufs, nframes_t nframes, gain_t target)
 {
-	for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
-		i->apply_gain(target, nframes);
-	}
 }
 
 

@@ -52,9 +52,9 @@ class Source : public PBD::StatefulDestructible
 	void stamp (time_t when) { _timestamp = when; }
 	
 	/** @return the number of items in this source */
-	jack_nframes_t length() const { return _length; }
+	nframes_t length() const { return _length; }
 
-	virtual jack_nframes_t natural_position() const { return 0; }
+	virtual nframes_t natural_position() const { return 0; }
 
 	virtual void mark_for_remove() = 0;
 	virtual void mark_streaming_write_completed () = 0;
@@ -74,13 +74,13 @@ class Source : public PBD::StatefulDestructible
 	static sigc::signal<void,Source*> SourceCreated;
 
   protected:
-	void update_length (jack_nframes_t pos, jack_nframes_t cnt);
+	void update_length (nframes_t pos, nframes_t cnt);
 	
 	Session&          _session;
 	string            _name;
 	DataType          _type;
 	time_t            _timestamp;
-	jack_nframes_t    _length;
+	nframes_t    _length;
 
 	Glib::Mutex playlist_lock;
 	typedef std::map<boost::shared_ptr<ARDOUR::Playlist>, uint32_t > PlaylistMap;

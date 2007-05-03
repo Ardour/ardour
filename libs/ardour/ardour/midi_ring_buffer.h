@@ -94,10 +94,10 @@ public:
 
 	/** Read events all events up to time @a end into @a out, leaving stamps intact.
 	 * Any events before @a start will be dropped. */
-	size_t read(MidiBuffer& out, jack_nframes_t start, jack_nframes_t end);
+	size_t read(MidiBuffer& out, nframes_t start, nframes_t end);
 
 	/** Write all events from @a in, applying @a offset to all time stamps */
-	size_t write(const MidiBuffer& in, jack_nframes_t offset = 0);
+	size_t write(const MidiBuffer& in, nframes_t offset = 0);
 
 	inline void clear_event(size_t index);
 
@@ -128,7 +128,7 @@ MidiRingBuffer::clear_event(size_t index)
 inline size_t
 MidiRingBuffer::write (const MidiEvent& ev)
 {
-	//static jack_nframes_t last_write_time = 0;
+	//static nframes_t last_write_time = 0;
 	
 	assert(ev.size > 0);
 
@@ -162,13 +162,13 @@ MidiRingBuffer::write (const MidiEvent& ev)
 }
 
 inline size_t
-MidiRingBuffer::read(MidiBuffer& dst, jack_nframes_t start, jack_nframes_t end)
+MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end)
 {
 	if (read_space() == 0)
 		return 0;
 
 	size_t         priv_read_ptr = g_atomic_int_get(&_read_ptr);
-	jack_nframes_t time          = _ev_buf[priv_read_ptr].time;
+	nframes_t time          = _ev_buf[priv_read_ptr].time;
 	size_t         count         = 0;
 	size_t         limit         = read_space();
 
@@ -205,7 +205,7 @@ MidiRingBuffer::read(MidiBuffer& dst, jack_nframes_t start, jack_nframes_t end)
 }
 
 inline size_t
-MidiRingBuffer::write(const MidiBuffer& in, jack_nframes_t offset)
+MidiRingBuffer::write(const MidiBuffer& in, nframes_t offset)
 {
 	size_t num_events = in.size();
 	size_t to_write = std::min(write_space(), num_events);

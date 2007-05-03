@@ -41,13 +41,13 @@ public:
 	MidiPlaylist (Session&, const XMLNode&, bool hidden = false);
 	MidiPlaylist (Session&, string name, bool hidden = false);
 	MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, string name, bool hidden = false);
-	MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, jack_nframes_t start, jack_nframes_t cnt,
+	MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, nframes_t start, nframes_t cnt,
 	              string name, bool hidden = false);
 
 	~MidiPlaylist ();
 
 	nframes_t read (MidiRingBuffer& buf,
-			jack_nframes_t start, jack_nframes_t cnt, uint32_t chan_n=0);
+			nframes_t start, nframes_t cnt, uint32_t chan_n=0);
 
 	int set_state (const XMLNode&);
 	UndoAction get_memento() const;

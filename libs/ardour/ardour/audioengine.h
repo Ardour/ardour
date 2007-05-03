@@ -68,8 +68,6 @@ class AudioEngine : public sigc::trackable
 	int start ();
 	bool running() const { return _running; }
 
-	int run_process_cycle (ARDOUR::Session*, jack_nframes_t nframes);
-
 	Glib::Mutex& process_lock() { return _process_lock; }
 
 	nframes_t frame_rate();

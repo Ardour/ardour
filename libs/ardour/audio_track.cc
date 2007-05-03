@@ -586,7 +586,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 		uint32_t i;
 
 		for (i = 0, n = 1; i < limit; ++i, ++n) {
-			memcpy (bufs.get_audio(i).data(nframes), b, sizeof (Sample) * nframes); 
+			memcpy (bufs.get_audio(i).data(), b, sizeof (Sample) * nframes); 
 			if (n < diskstream->n_channels().get(DataType::AUDIO)) {
 				tmpb = diskstream->playback_buffer(n);
 				if (tmpb!=0) {
@@ -652,26 +652,26 @@ AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes
 	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(diskstream->playlist());
 	assert(apl);
 
-	if (apl->read (buffers.get_audio(nframes).data(nframes),
+	if (apl->read (buffers.get_audio(nframes).data(),
 			mix_buffer, gain_buffer, start, nframes) != nframes) {
 		return -1;
 	}
 
 	assert(buffers.count().get(DataType::AUDIO) >= 1);
 	uint32_t n=1;
-	Sample* b = buffers.get_audio(0).data(nframes);
+	Sample* b = buffers.get_audio(0).data();
 	BufferSet::audio_iterator bi = buffers.audio_begin();
 	++bi;
 	for ( ; bi != buffers.audio_end(); ++bi, ++n) {
 		if (n < diskstream->n_channels().get(DataType::AUDIO)) {
-			if (apl->read (bi->data(nframes), mix_buffer, gain_buffer, start, nframes, n) != nframes) {
+			if (apl->read (bi->data(), mix_buffer, gain_buffer, start, nframes, n) != nframes) {
 				return -1;
 			}
-			b = bi->data(nframes);
+			b = bi->data();
 		}
 		else {
 			/* duplicate last across remaining buffers */
-			memcpy (bi->data(nframes), b, sizeof (Sample) * nframes); 
+			memcpy (bi->data(), b, sizeof (Sample) * nframes); 
 		}
 	}
 
@@ -700,7 +700,7 @@ AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes
 		_gain_automation_curve.get_vector (start, start + nframes, gain_automation, nframes);
 
 		for (BufferSet::audio_iterator bi = buffers.audio_begin(); bi != buffers.audio_end(); ++bi) {
-			Sample *b = bi->data(nframes);
+			Sample *b = bi->data();
 			for (nframes_t n = 0; n < nframes; ++n) {
 				b[n] *= gain_automation[n];
 			}
@@ -709,7 +709,7 @@ AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes
 	} else {
 
 		for (BufferSet::audio_iterator bi = buffers.audio_begin(); bi != buffers.audio_end(); ++bi) {
-			Sample *b = bi->data(nframes);
+			Sample *b = bi->data();
 			for (nframes_t n = 0; n < nframes; ++n) {
 				b[n] *= this_gain;
 			}

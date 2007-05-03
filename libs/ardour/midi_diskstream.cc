@@ -172,7 +172,7 @@ MidiDiskstream::non_realtime_input_change ()
 	/* now refill channel buffers */
 
 	if (speed() != 1.0f || speed() != -1.0f) {
-		seek ((jack_nframes_t) (_session.transport_frame() * (double) speed()));
+		seek ((nframes_t) (_session.transport_frame() * (double) speed()));
 	}
 	else {
 		seek (_session.transport_frame());
@@ -308,7 +308,7 @@ MidiDiskstream::set_destructive (bool yn)
 }
 
 void
-MidiDiskstream::check_record_status (jack_nframes_t transport_frame, jack_nframes_t nframes, bool can_record)
+MidiDiskstream::check_record_status (nframes_t transport_frame, nframes_t nframes, bool can_record)
 {
 	// FIXME: waaay too much code to duplicate (AudioDiskstream)
 	
@@ -431,12 +431,12 @@ MidiDiskstream::check_record_status (jack_nframes_t transport_frame, jack_nframe
 }
 
 int
-MidiDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes, jack_nframes_t offset, bool can_record, bool rec_monitors_input)
+MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_t offset, bool can_record, bool rec_monitors_input)
 {
 	// FIXME: waay too much code to duplicate (AudioDiskstream::process)
 	int            ret = -1;
-	jack_nframes_t rec_offset = 0;
-	jack_nframes_t rec_nframes = 0;
+	nframes_t rec_offset = 0;
+	nframes_t rec_nframes = 0;
 	bool           nominally_recording;
 	bool           re = record_enabled ();
 	bool           collect_playback = false;
@@ -582,12 +582,12 @@ MidiDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes,
 
 		/* we're doing playback */
 
-		jack_nframes_t necessary_samples;
+		nframes_t necessary_samples;
 
 		/* no varispeed playback if we're recording, because the output .... TBD */
 
 		if (rec_nframes == 0 && _actual_speed != 1.0f) {
-			necessary_samples = (jack_nframes_t) floor ((nframes * fabs (_actual_speed))) + 1;
+			necessary_samples = (nframes_t) floor ((nframes * fabs (_actual_speed))) + 1;
 		} else {
 			necessary_samples = nframes;
 		}
@@ -618,7 +618,7 @@ MidiDiskstream::process (jack_nframes_t transport_frame, jack_nframes_t nframes,
 }
 
 bool
-MidiDiskstream::commit (jack_nframes_t nframes)
+MidiDiskstream::commit (nframes_t nframes)
 {
 	bool need_butler = false;
 
@@ -674,7 +674,7 @@ MidiDiskstream::overwrite_existing_buffers ()
 }
 
 int
-MidiDiskstream::seek (jack_nframes_t frame, bool complete_refill)
+MidiDiskstream::seek (nframes_t frame, bool complete_refill)
 {
 	Glib::Mutex::Lock lm (state_lock);
 	int ret = -1;
@@ -696,7 +696,7 @@ MidiDiskstream::seek (jack_nframes_t frame, bool complete_refill)
 }
 
 int
-MidiDiskstream::can_internal_playback_seek (jack_nframes_t distance)
+MidiDiskstream::can_internal_playback_seek (nframes_t distance)
 {
 	if (_playback_buf->read_space() < distance) {
 		return false;
@@ -706,7 +706,7 @@ MidiDiskstream::can_internal_playback_seek (jack_nframes_t distance)
 }
 
 int
-MidiDiskstream::internal_playback_seek (jack_nframes_t distance)
+MidiDiskstream::internal_playback_seek (nframes_t distance)
 {
 	first_recordable_frame += distance;
 	playback_sample += distance;
@@ -716,13 +716,13 @@ MidiDiskstream::internal_playback_seek (jack_nframes_t distance)
 
 /** @a start is set to the new frame position (TIME) read up to */
 int
-MidiDiskstream::read (jack_nframes_t& start, jack_nframes_t dur, bool reversed)
+MidiDiskstream::read (nframes_t& start, nframes_t dur, bool reversed)
 {	
-	jack_nframes_t this_read = 0;
+	nframes_t this_read = 0;
 	bool reloop = false;
-	jack_nframes_t loop_end = 0;
-	jack_nframes_t loop_start = 0;
-	jack_nframes_t loop_length = 0;
+	nframes_t loop_end = 0;
+	nframes_t loop_start = 0;
+	nframes_t loop_length = 0;
 	Location *loc = 0;
 
 	if (!reversed) {
@@ -884,8 +884,8 @@ MidiDiskstream::do_refill ()
 
 	// So (read it, then) write it:
 	
-	jack_nframes_t file_frame_tmp = file_frame;
-	jack_nframes_t to_read = min(disk_io_chunk_frames, (max_frames - file_frame));
+	nframes_t file_frame_tmp = file_frame;
+	nframes_t to_read = min(disk_io_chunk_frames, (max_frames - file_frame));
 	
 	// FIXME: read count?
 	if (read (file_frame_tmp, to_read, reversed)) {
@@ -917,7 +917,7 @@ MidiDiskstream::do_flush (Session::RunContext context, bool force_flush)
 	int32_t ret = 0;
 	// FIXME: I'd be lying if I said I knew what this thing was
 	//RingBufferNPT<CaptureTransition>::rw_vector transvec;
-	jack_nframes_t total;
+	nframes_t total;
 
 	_write_data_count = 0;
 
@@ -949,7 +949,7 @@ MidiDiskstream::do_flush (Session::RunContext context, bool force_flush)
 		ret = 1;
 	} 
 
-	//to_write = min (disk_io_chunk_frames, (jack_nframes_t) vector.len[0]);
+	//to_write = min (disk_io_chunk_frames, (nframes_t) vector.len[0]);
 	to_write = disk_io_chunk_frames;
 
 	assert(!destructive());
@@ -977,7 +977,7 @@ MidiDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_cap
 	bool more_work = true;
 	int err = 0;
 	boost::shared_ptr<MidiRegion> region;
-	jack_nframes_t total_capture;
+	nframes_t total_capture;
 	MidiRegion::SourceList srcs;
 	MidiRegion::SourceList::iterator src;
 	vector<CaptureInfo*>::iterator ci;
@@ -1411,7 +1411,7 @@ MidiDiskstream::rename_write_sources ()
 }
 
 void
-MidiDiskstream::set_block_size (jack_nframes_t nframes)
+MidiDiskstream::set_block_size (nframes_t nframes)
 {
 }
 
@@ -1477,7 +1477,7 @@ MidiDiskstream::use_pending_capture_data (XMLNode& node)
  * so that an event at start has time = 0
  */
 void
-MidiDiskstream::get_playback(MidiBuffer& dst, jack_nframes_t start, jack_nframes_t end)
+MidiDiskstream::get_playback(MidiBuffer& dst, nframes_t start, nframes_t end)
 {
 	dst.clear();
 	assert(dst.size() == 0);

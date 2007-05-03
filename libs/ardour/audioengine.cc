@@ -304,12 +304,25 @@ AudioEngine::process_callback (nframes_t nframes)
 		return 0;
 	}
 
-	if (run_process_cycle (session, nframes)) {
-		/* we were zombified, maybe because a ladspa plugin took
-		   too long, or jackd exited, or something like that.
-		*/
+	boost::shared_ptr<Ports> p = ports.reader();
+
+	// Prepare ports (ie read data if necessary)
+	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
+		(*i)->cycle_start (nframes);
+	}
+	
+	if (session) {
+		session->process (nframes);
+	}
+
+	if (!_running) {
 		_processed_frames = next_processed_frames;
 		return 0;
+	}
+	
+	// Finalize ports (ie write data if necessary)
+	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
+		(*i)->cycle_end ();
 	}
 
 	if (last_monitor_check + monitor_check_interval < next_processed_frames) {
@@ -333,28 +346,6 @@ AudioEngine::process_callback (nframes_t nframes)
 	}
 
 	_processed_frames = next_processed_frames;
-	return 0;
-}
-
-int
-AudioEngine::run_process_cycle (Session* s, jack_nframes_t nframes)
-{
-	boost::shared_ptr<Ports> p = ports.reader();
-
-	// Prepare ports (ie read data if necessary)
-	for (Ports::iterator i = p->begin(); i != p->end(); ++i)
-		(*i)->cycle_start (nframes);
-	
-	s->process (nframes);
-
-	if (!_running) {
-		return -1;
-	}
-	
-	// Finalize ports (ie write data if necessary)
-	for (Ports::iterator i = p->begin(); i != p->end(); ++i)
-		(*i)->cycle_end ();
-
 	return 0;
 }
 
@@ -456,14 +447,23 @@ AudioEngine::set_session (Session *s)
 		   can before we really start running.
 		*/
 		
-		run_process_cycle (session, blocksize);
-		run_process_cycle (session, blocksize);
-		run_process_cycle (session, blocksize);
-		run_process_cycle (session, blocksize);
-		run_process_cycle (session, blocksize);
-		run_process_cycle (session, blocksize);
-		run_process_cycle (session, blocksize);
-		run_process_cycle (session, blocksize);
+		boost::shared_ptr<Ports> p = ports.reader();
+
+		for (Ports::iterator i = p->begin(); i != p->end(); ++i)
+			(*i)->cycle_start (blocksize);
+
+		s->process (blocksize);
+		s->process (blocksize);
+		s->process (blocksize);
+		s->process (blocksize);
+		s->process (blocksize);
+		s->process (blocksize);
+		s->process (blocksize);
+		s->process (blocksize);
+
+		for (Ports::iterator i = p->begin(); i != p->end(); ++i)
+			(*i)->cycle_end ();
+
 	}
 }
 

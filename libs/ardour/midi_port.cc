@@ -45,7 +45,7 @@ MidiPort::~MidiPort()
 }
 
 void
-MidiPort::cycle_start (jack_nframes_t nframes)
+MidiPort::cycle_start (nframes_t nframes)
 {
 	_buffer.clear();
 	assert(_buffer.size() == 0);
@@ -62,7 +62,7 @@ MidiPort::cycle_start (jack_nframes_t nframes)
 	
 	void* jack_buffer = jack_port_get_buffer(_port, nframes);
 
-	const jack_nframes_t event_count
+	const nframes_t event_count
 		= jack_midi_get_event_count(jack_buffer);
 
 	assert(event_count < _buffer.capacity());
@@ -70,7 +70,7 @@ MidiPort::cycle_start (jack_nframes_t nframes)
 	MidiEvent ev;
 
 	// FIXME: too slow, event struct is copied twice (here and MidiBuffer::push_back)
-	for (jack_nframes_t i=0; i < event_count; ++i) {
+	for (nframes_t i=0; i < event_count; ++i) {
 
 		// This will fail to compile if we change MidiEvent to our own class
 		jack_midi_event_get(static_cast<jack_midi_event_t*>(&ev), jack_buffer, i);
@@ -100,13 +100,13 @@ MidiPort::cycle_end()
 	
 	void* jack_buffer = jack_port_get_buffer(_port, _nframes_this_cycle);
 
-	const jack_nframes_t event_count = _buffer.size();
+	const nframes_t event_count = _buffer.size();
 	
 	//if (event_count > 0)
 	//	cerr << "MIDIPort writing " << event_count << " events." << endl;
 
 	jack_midi_clear_buffer(jack_buffer);
-	for (jack_nframes_t i=0; i < event_count; ++i) {
+	for (nframes_t i=0; i < event_count; ++i) {
 		const jack_midi_event_t& ev = _buffer[i];
 		assert(ev.time < _nframes_this_cycle);
 		jack_midi_event_write(jack_buffer, ev.time, ev.buffer, ev.size);
