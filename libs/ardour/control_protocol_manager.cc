@@ -96,8 +96,10 @@ ControlProtocolManager::drop_session ()
 		
 		for (list<ControlProtocolInfo*>::iterator p = control_protocol_info.begin(); p != control_protocol_info.end(); ++p) {
 			// otherwise the ControlProtocol instances are not recreated in set_session
-			(*p)->requested = true;
-			(*p)->protocol = 0;
+			if ((*p)->protocol) {
+				(*p)->requested = true;
+				(*p)->protocol = 0;
+			}
 		}
 	}
 }
