@@ -108,8 +108,8 @@ setup_osc ()
 }
 #endif
 
-static int 
-setup_midi (AudioEngine& engine	)
+int 
+ARDOUR::setup_midi (AudioEngine& engine)
 {
 	std::map<string,Configuration::MidiPortDescriptor*>::iterator i;
 	int nports;
@@ -286,7 +286,7 @@ setup_hardware_optimization (bool try_optimization)
 }
 
 int
-ARDOUR::init (ARDOUR::AudioEngine& engine, bool use_vst, bool try_optimization)
+ARDOUR::init (bool use_vst, bool try_optimization)
 {
 	extern void setup_enum_writer ();
 
@@ -306,10 +306,6 @@ ARDOUR::init (ARDOUR::AudioEngine& engine, bool use_vst, bool try_optimization)
 	Config->set_use_vst (use_vst);
 
 	Profile = new RuntimeProfile;
-
-	if (setup_midi (engine)) {
-		return -1;
-	}
 
 #ifdef HAVE_LIBLO
 	if (setup_osc ()) {

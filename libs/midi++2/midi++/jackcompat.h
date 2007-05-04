@@ -18,7 +18,7 @@
 #ifndef JACK_COMPAT_H
 #define JACK_COMPAT_H
 
-#define JACK_MIDI_NEEDS_NFRAMES
+//#define JACK_MIDI_NEEDS_NFRAMES
 
 #if defined(JACK_MIDI_NEEDS_NFRAMES)
 

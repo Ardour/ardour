@@ -44,8 +44,10 @@ namespace ARDOUR {
 
 	static const nframes_t max_frames = JACK_MAX_FRAMES;
 
-	int init (AudioEngine& engine, bool with_vst, bool try_optimization);
+	int init (bool with_vst, bool try_optimization);
 	int cleanup ();
+
+	int setup_midi(AudioEngine& engine);
 	
 	std::string get_ardour_revision ();
 	
