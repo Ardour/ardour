@@ -1872,11 +1872,13 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 		do {
 			snprintf (bus_name, sizeof(bus_name), "Bus %" PRIu32, bus_id);
 
+			bus_id++;
+
 			if (route_by_name (bus_name) == 0) {
 				break;
 			}
 
-		} while (++bus_id < (UINT_MAX-1));
+		} while (bus_id < (UINT_MAX-1));
 
 		try {
 			shared_ptr<Route> bus (new Route (*this, bus_name, -1, -1, -1, -1, Route::Flag(0), DataType::AUDIO));
