@@ -3241,12 +3241,6 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 	if (drag_info.first_move) {
 		/* just a click */
-
-		if (drag_info.copy) {
-			for (list<RegionView*>::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-				copies.push_back (*i);
-			}
-		}
 		goto out;
 	}
 
