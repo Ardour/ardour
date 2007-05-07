@@ -1090,8 +1090,8 @@ if conf.CheckCHeader('/System/Library/Frameworks/CoreAudio.framework/Versions/A/
     subst_dict['%JACK_INPUT%'] = "coreaudio:Built-in Audio:in"
     subst_dict['%JACK_OUTPUT%'] = "coreaudio:Built-in Audio:out"
 else:
-    subst_dict['%JACK_INPUT%'] = "alsa_pcm:playback_"
-    subst_dict['%JACK_OUTPUT%'] = "alsa_pcm:capture_"
+    subst_dict['%JACK_INPUT%'] = "system:playback_"
+    subst_dict['%JACK_OUTPUT%'] = "system:capture_"
 
 # posix_memalign available
 if not conf.CheckFunc('posix_memalign'):
