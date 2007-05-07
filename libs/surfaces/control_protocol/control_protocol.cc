@@ -38,12 +38,19 @@ ControlProtocol::ControlProtocol (Session& s, string str)
 	  _name (str)
 {
 	_active = false;
+	session->RouteAdded.connect (mem_fun(*this, &ControlProtocol::add_strip));
 }
 
 ControlProtocol::~ControlProtocol ()
 {
 }
 
+void
+ControlProtocol::add_strip (std::list<boost::shared_ptr<ARDOUR::Route> >)
+{
+	route_list_changed();
+}
+	
 void
 ControlProtocol::next_track (uint32_t initial_id)
 {
