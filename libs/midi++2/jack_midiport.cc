@@ -24,7 +24,6 @@
 #include <midi++/types.h>
 #include <midi++/jack.h>
 #include <midi++/port_request.h>
-#include <midi++/jackcompat.h>
 
 using namespace std;
 using namespace MIDI;

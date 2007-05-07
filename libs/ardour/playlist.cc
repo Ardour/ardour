@@ -1460,12 +1460,7 @@ Playlist::state (bool full_state)
 
 	if (full_state) {
 		RegionLock rlock (this, false);
-
-		cerr << _name << " getting region state for " << regions.size() << endl;
-
 		for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-			cerr << "\t" << " now at " << (*i) << endl;
-			cerr << "\t\t" << (*i)->name() << endl;
 			node->add_child_nocopy ((*i)->get_state());
 		}
 	}

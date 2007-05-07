@@ -243,7 +243,7 @@ AudioRegion::verify_start_and_length (nframes_t new_start, nframes_t new_length)
 	if (afs && afs->destructive()) {
 		return true;
 	} else {
-		return verify_start_and_length(new_start, new_length);
+		return Region::verify_start_and_length(new_start, new_length);
 	}
 }
 
@@ -255,7 +255,7 @@ AudioRegion::verify_start (nframes_t pos)
 	if (afs && afs->destructive()) {
 		return true;
 	} else {
-		return verify_start(pos);
+		return Region::verify_start(pos);
 	}
 }
 
@@ -267,7 +267,7 @@ AudioRegion::verify_start_mutable (nframes_t& new_start)
 	if (afs && afs->destructive()) {
 		return true;
 	} else {
-		return verify_start_mutable(new_start);
+		return Region::verify_start_mutable(new_start);
 	}
 }
 
