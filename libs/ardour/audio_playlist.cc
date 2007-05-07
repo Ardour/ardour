@@ -346,8 +346,6 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 		return;
 	}
 
-	cerr << "Check dependents of " << r->name() << endl;
-
 	if ((region = boost::dynamic_pointer_cast<AudioRegion> (r)) == 0) {
 		fatal << _("programming error: non-audio Region tested for overlap in audio playlist")
 		      << endmsg;

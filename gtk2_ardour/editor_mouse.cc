@@ -2775,17 +2775,19 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
 			RegionView* rv;
 			RegionView* nrv;
-			AudioRegionView* arv = dynamic_cast<AudioRegionView*>(rv);
-			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(rv);
 
 			rv = (*i);
 
-			if (arv)	
+			AudioRegionView* arv = dynamic_cast<AudioRegionView*>(rv);
+			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(rv);
+
+			if (arv) {
 				nrv = new AudioRegionView (*arv);
-			else if (mrv)
+			} else if (mrv) {
 				nrv = new MidiRegionView (*mrv);
-			else
+			} else {
 				continue;
+			}
 
 			nrv->get_canvas_group()->show ();
 
@@ -3244,12 +3246,6 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 	if (drag_info.first_move) {
 		/* just a click */
-
-		if (drag_info.copy) {
-			for (list<RegionView*>::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-				copies.push_back (*i);
-			}
-		}
 		goto out;
 	}
 
