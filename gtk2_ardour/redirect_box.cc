@@ -1066,7 +1066,12 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 			send_ui = reinterpret_cast<SendUIWindow *> (send->get_gui());
 		}
 		
-		send_ui->present ();
+		if (send_ui->is_visible()) {
+			send_ui->get_window()->raise ();
+		} else {
+			send_ui->show_all ();
+			send_ui->present ();
+		}
 		
 	} else {
 		
@@ -1105,9 +1110,13 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 				} else {
 					plugin_ui = reinterpret_cast<PluginUIWindow *> (plugin_insert->get_gui());
 				}
-
-				plugin_ui->present ();
-
+			
+				if (plugin_ui->is_visible()) {
+					plugin_ui->get_window()->raise ();
+				} else {
+					plugin_ui->show_all ();
+					plugin_ui->present ();
+				}
 #ifdef HAVE_AUDIOUNIT
 			} else if (type == ARDOUR::AudioUnit) {
 				AUPluginUI* plugin_ui;
@@ -1117,7 +1126,12 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 					plugin_ui = reinterpret_cast<AUPluginUI*> (plugin_insert->get_gui());
 				}
 				
-				plugin_ui->present ();
+				if (plugin_ui->is_visible()) {
+					plugin_ui->get_window()->raise ();
+				} else {
+					plugin_ui->show_all ();
+					plugin_ui->present ();
+				}
 #endif				
 			} else {
 				warning << "Unsupported plugin sent to RedirectBox::edit_redirect()" << endmsg;
@@ -1140,8 +1154,12 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 			} else {
 				io_selector = reinterpret_cast<PortInsertWindow *> (port_insert->get_gui());
 			}
-
-			io_selector->present ();
+			
+			if (io_selector->is_visible()) {
+				io_selector->get_window()->raise ();
+			} else {
+				io_selector->present ();
+			}
 		}
 	}
 }
