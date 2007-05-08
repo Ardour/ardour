@@ -484,13 +484,6 @@ IO::deliver_output_no_pan (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nfr
 	vector<Sample*> outs;
 	gain_t actual_gain;
 
-	if (dg != _gain) {
-		/* unlikely condition */
-		for (o = _outputs.begin(), i = 0; o != _outputs.end(); ++o, ++i) {
-			outs.push_back ((*o)->get_buffer (nframes) + offset);
-		}
-	}
-
 	/* reduce nbufs to the index of the last input buffer */
 
 	nbufs--;
@@ -506,6 +499,11 @@ IO::deliver_output_no_pan (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nfr
 		dst = (*o)->get_buffer (nframes) + offset;
 		src = bufs[min(nbufs,i)];
 
+		if (dg != _gain) {
+			/* unlikely condition */
+			outs.push_back (dst);
+		}
+
 		if (dg != _gain || actual_gain == 1.0f) {
 			memcpy (dst, src, sizeof (Sample) * nframes);
 		} else if (actual_gain == 0.0f) {
@@ -520,7 +518,7 @@ IO::deliver_output_no_pan (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nfr
 	}
 
 	if (dg != _gain) {
-		apply_declick (outs, outs.size(), nframes, _gain, dg, false);
+		apply_declick (outs, i, nframes, _gain, dg, false);
 		_gain = dg;
 	}
 

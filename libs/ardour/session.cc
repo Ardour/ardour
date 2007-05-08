@@ -915,6 +915,7 @@ Session::hookup_io ()
 
 	if (_control_out) {
 		uint32_t n;
+		vector<string> cports;
 
 		while ((int) _control_out->n_inputs() < _control_out->input_maximum()) {
 			if (_control_out->add_input_port ("", this)) {
@@ -932,7 +933,20 @@ Session::hookup_io ()
 			}
 			n++;
 		}
-	}
+
+
+		uint32_t ni = _control_out->n_inputs();
+
+		for (n = 0; n < ni; ++n) {
+			cports.push_back (_control_out->input(n)->name());
+		}
+
+		boost::shared_ptr<RouteList> r = routes.reader ();		
+
+		for (RouteList::iterator x = r->begin(); x != r->end(); ++x) {
+			(*x)->set_control_outs (cports);
+		}
+	} 
 
 	/* Tell all IO objects to connect themselves together */
 
@@ -1745,19 +1759,6 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			
 			channels_used += track->n_inputs ();
 
-			if (_control_out) {
-				vector<string> cports;
-				uint32_t ni = _control_out->n_inputs();
-				
-				for (n = 0; n < ni; ++n) {
-					cports.push_back (_control_out->input(n)->name());
-				}
-				
-				track->set_control_outs (cports);
-			}
-
-			// assert (current_thread != RT_thread)
-			
 			track->audio_diskstream()->non_realtime_input_change();
 			
 			track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
@@ -1920,16 +1921,6 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 				}
 			}
 			
-			if (_control_out) {
-				vector<string> cports;
-				uint32_t ni = _control_out->n_inputs();
-				
-				for (uint32_t n = 0; n < ni; ++n) {
-					cports.push_back (_control_out->input(n)->name());
-				}
-				bus->set_control_outs (cports);
-			}
-
 			bus->set_remote_control_id (control_id);
 			++control_id;
 
@@ -1986,8 +1977,23 @@ Session::add_routes (RouteList& new_routes, bool save)
 		
 		if ((*x)->control()) {
 			_control_out = (*x);
-		}
+		} 
 	}
+
+	if (_control_out && IO::connecting_legal) {
+
+		vector<string> cports;
+		uint32_t ni = _control_out->n_inputs();
+		uint32_t n;
+
+		for (n = 0; n < ni; ++n) {
+			cports.push_back (_control_out->input(n)->name());
+		}
+
+		for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
+			(*x)->set_control_outs (cports);
+		}
+	} 
 
 	set_dirty();
 

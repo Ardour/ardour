@@ -421,7 +421,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 			
 		} else {
 
-			co->deliver_output (bufs, nbufs, nframes, offset);
+			co->deliver_output_no_pan (bufs, nbufs, nframes, offset);
 			
 		} 
 	} 
@@ -585,7 +585,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 			(no_monitor && record_enabled() && (!Config->get_auto_input() || _session.actively_recording()))
 
 			) {
-
+			
 			co->silence (nframes, offset);
 			
 		} else {
@@ -642,7 +642,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 			if (_meter_point == MeterPostFader) {
 				reset_peak_meters ();
 			}
-			
+
 			IO::silence (nframes, offset);
 			
 		} else {
@@ -1806,11 +1806,17 @@ Route::set_control_outs (const vector<string>& ports)
 {
 	Glib::Mutex::Lock lm (control_outs_lock);
 	vector<string>::const_iterator i;
+	uint32_t limit;
 
  	if (_control_outs) {
  		delete _control_outs;
  		_control_outs = 0;
  	}
+
+	if (control() || master()) {
+		/* no control outs for these two special busses */
+		return 0;
+	}
  	
  	if (ports.empty()) {
  		return 0;
@@ -1825,7 +1831,20 @@ Route::set_control_outs (const vector<string>& ports)
 	   have outputs. we track the changes in ::output_change_handler().
 	*/
 
-	_control_outs->ensure_io (0, n_outputs(), true, this);
+	limit = n_outputs ();
+
+	if (_control_outs->ensure_io (0, limit, true, this)) {
+		return -1;
+	}
+
+	/* now connect to the named ports */
+
+	for (uint32_t n = 0; n < limit; ++n) {
+		if (_control_outs->connect_output (_control_outs->output (n), ports[n], this)) {
+			error << string_compose (_("could not connect %1 to %2"), _control_outs->output(n)->name(), ports[n]) << endmsg;
+			return -1;
+		}
+	}
  
  	return 0;
 }	

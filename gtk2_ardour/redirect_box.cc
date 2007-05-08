@@ -294,7 +294,7 @@ RedirectBox::redirect_button_press_event (GdkEventButton *ev)
 		
 	}
 
-	if (redirect && (Keyboard::is_edit_event (ev) || (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS && ev->state == 0))) {
+	if (redirect && (Keyboard::is_edit_event (ev) || (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS))) {
 		
 		if (_session.engine().connected()) {
 			/* XXX giving an error message here is hard, because we may be in the midst of a button press */
