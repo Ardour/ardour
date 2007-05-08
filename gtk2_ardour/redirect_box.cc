@@ -339,7 +339,7 @@ RedirectBox::redirect_button_release_event (GdkEventButton *ev)
 		show_redirect_menu(ev->time);
 		ret = true;
 
-	} else if (redirect && ev->button == 2 && ev->state == GDK_BUTTON2_MASK) {
+	} else if (redirect && ev->button == 2 && Keyboard::modifier_state_equals (ev->state, Gdk::BUTTON2_MASK)) {
 		
 		redirect->set_active (!redirect->active(), this);
 		ret = true;
