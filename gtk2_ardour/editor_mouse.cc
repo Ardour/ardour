@@ -3239,7 +3239,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	   motion handler. 
 	*/
 
-	if (drag_info.first_move) {
+	if (drag_info.first_move && !(drag_info.copy && drag_info.x_constrained)) {
 		/* just a click */
 		goto out;
 	}
@@ -3315,7 +3315,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 			boost::shared_ptr<Playlist> from_playlist = rv->region()->playlist();
 			boost::shared_ptr<Playlist> to_playlist = atv2->playlist();
-	    
+
 			where = (nframes_t) (unit_to_frame (ix1) * speed);
 			boost::shared_ptr<Region> new_region (RegionFactory::create (rv->region()));
 
@@ -3450,7 +3450,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 				}
 
 				/* add it */
-				
+
 				latest_regionview = 0;
 				sigc::connection c = atv->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
 				to_playlist->add_region (newregion, (nframes_t) (where * atv->get_diskstream()->speed()));
