@@ -3,7 +3,6 @@
 #ifndef _GTKMM_STOCKITEM_H
 #define _GTKMM_STOCKITEM_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -74,12 +73,12 @@ public:
             Gdk::ModifierType modifier = Gdk::ModifierType(0), unsigned int keyval = 0,
             const Glib::ustring& translation_domain = Glib::ustring());
 
-   StockID get_stock_id() const;
-    Glib::ustring get_label() const;
-    Gdk::ModifierType get_modifier() const;
-    guint get_keyval() const;
-    Glib::ustring get_translation_domain() const;
- 
+  StockID get_stock_id() const;
+  Glib::ustring get_label() const;
+  Gdk::ModifierType get_modifier() const;
+  guint get_keyval() const;
+  Glib::ustring get_translation_domain() const;
+
   static bool lookup(const Gtk::StockID& stock_id, Gtk::StockItem& item);
 
 
@@ -99,7 +98,6 @@ namespace Glib
 Gtk::StockItem wrap(GtkStockItem* object, bool take_copy = false);
 
 } // namespace Glib
-
 
 #endif /* _GTKMM_STOCKITEM_H */
 

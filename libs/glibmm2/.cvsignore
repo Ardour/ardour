@@ -1,0 +1,13 @@
+Makefile
+Makefile.in
+aclocal.m4
+autom4te.cache
+config.log
+config.status
+configure
+glibmm-2.4.pc
+glibmmconfig.h
+libtool
+stamp-h1
+*.os
+*.dylib

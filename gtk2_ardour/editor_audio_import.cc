@@ -263,7 +263,7 @@ Editor::import_sndfile (vector<ustring> paths, ImportMode mode, AudioTrack* trac
 	/* import thread finished - see if we should build a new track */
 	
 	if (!import_status.new_regions.empty()) {
-		boost::shared_ptr<AudioRegion> region (import_status.new_regions.front());
+		boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion>(import_status.new_regions.front());
 		finish_bringing_in_audio (region, region->n_channels(), region->n_channels(), track, pos, mode);
 	}
 
@@ -402,7 +402,7 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_fi
 
 				if ((s = session->source_by_path_and_channel (path, n)) == 0) {
 					source = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable 
-											       (*session, path,  n,
+											       (DataType::AUDIO, *session, path,  n,
 												(mode == ImportAsTapeTrack ? 
 												 AudioFileSource::Destructive : 
 												 AudioFileSource::Flag (0))));
@@ -436,7 +436,7 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_fi
 										  Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External)));
 
 	if (Config->get_output_auto_connect() & AutoConnectMaster) {
-		output_chan = (session->master_out() ? session->master_out()->n_inputs() : input_chan);
+		output_chan = (session->master_out() ? session->master_out()->n_inputs().get(DataType::AUDIO) : input_chan);
 	} else {
 		output_chan = input_chan;
 	}

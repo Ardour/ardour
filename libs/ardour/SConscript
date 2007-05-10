@@ -17,7 +17,6 @@ domain = 'libardour'
 ardour.Append(DOMAIN = domain, MAJOR = 2, MINOR = 0, MICRO = 0)
 ardour.Append(CXXFLAGS = "-DPACKAGE=\\\"" + domain + "\\\"")
 ardour.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
-ardour.Append(CXXFLAGS="-DGLIBMM_DISABLE_DEPRECATED")
 ardour.Append(PACKAGE = domain)
 ardour.Append(POTFILE = domain + '.pot')
 
@@ -28,17 +27,33 @@ ardour.Append(POTFILE = domain + '.pot')
 ardour.Append(CPPPATH = '#libs/surfaces/control_protocol')
 
 ardour_files=Split("""
+chan_count.cc
 diskstream.cc
+track.cc
 audio_diskstream.cc
 audio_library.cc
 audio_playlist.cc
-track.cc
 audio_track.cc
 audioengine.cc
+port.cc
+audio_port.cc
+midi_port.cc
+port_set.cc
+buffer.cc
+buffer_set.cc
+meter.cc
+amp.cc
+panner.cc
 audiofilesource.cc
 audiofilter.cc
 audioregion.cc
 audiosource.cc
+midi_source.cc
+midi_diskstream.cc
+midi_playlist.cc
+midi_track.cc
+midi_region.cc
+smf_source.cc
 auditioner.cc
 automation.cc
 automation_event.cc
@@ -61,13 +76,11 @@ ladspa_plugin.cc
 location.cc
 mtc_slave.cc
 named_selection.cc
-panner.cc
 pcm_utils.cc
 playlist.cc
 playlist_factory.cc
 plugin.cc
 plugin_manager.cc
-port.cc
 recent_sessions.cc
 redirect.cc
 region.cc

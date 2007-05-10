@@ -69,20 +69,8 @@ public:
    *
    * init() is not implemented as constructor, to avoid the necessity
    * to implement a forward constructor in each derived class.
-   *
-   * @param type The type that the Value should hold.
    */
   void init(GType type);
-
-  /** Setup the GValue storing the type and value of the specified @a value.
-   * Note that init() should never be called twice.
-   *
-   * init() is not implemented as constructor, to avoid the necessity
-   * to implement a forward constructor in each derived class.
-   *
-   * @param value The existing GValue.
-   */
-  void init(const GValue* value);
 
   /** Reset contents to the default value of its type.
    */

@@ -32,35 +32,35 @@
 
 namespace MIDI {
 
-    class CoreMidi_MidiPort:public Port {
-      public:
-	CoreMidi_MidiPort(PortRequest & req);
-	virtual ~ CoreMidi_MidiPort();
+class CoreMidi_MidiPort:public Port {
+	public:
+		CoreMidi_MidiPort(PortRequest & req);
+		virtual ~ CoreMidi_MidiPort();
 
-	virtual int selectable() const {
-	    return -1;
-	}
-      protected:
-	/* Direct I/O */
-	int write(byte * msg, size_t msglen);
-	int read(byte * buf, size_t max) {
-	    return 0;
-	} /* CoreMidi callback */
-	    static void read_proc(const MIDIPacketList * pktlist,
-				  void *refCon, void *connRefCon);
+		virtual int selectable() const {
+			return -1;
+		}
+	protected:
+		/* Direct I/O */
+		int write (byte *msg, size_t msglen, timestamp_t timestamp);	
+		int read (byte *buf, size_t max, timestamp_t timestamp);
 
-      private:
-	byte midi_buffer[1024];
-	MIDIClientRef midi_client;
-	MIDIEndpointRef midi_destination;
-	MIDIEndpointRef midi_source;
+		/* CoreMidi callback */
+		static void read_proc(const MIDIPacketList * pktlist,
+				void *refCon, void *connRefCon);
 
-	int Open(PortRequest & req);
-	void Close();
-	static MIDITimeStamp MIDIGetCurrentHostTime();
+	private:
+		byte midi_buffer[1024];
+		MIDIClientRef midi_client;
+		MIDIEndpointRef midi_destination;
+		MIDIEndpointRef midi_source;
 
-	bool firstrecv;
-    };
+		int Open(PortRequest & req);
+		void Close();
+		static MIDITimeStamp MIDIGetCurrentHostTime();
+
+		bool firstrecv;
+};
 
 } // namespace MIDI
 

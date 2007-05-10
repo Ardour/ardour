@@ -129,7 +129,6 @@ LadspaPluginUI::build ()
 	int button_row, button_col;
 	int output_rows, output_cols;
 	int button_rows, button_cols;
-	guint32 n_ins=0, n_outs = 0;
 
 	prefheight = 30;
 	hpacker.set_spacing (10);
@@ -263,9 +262,6 @@ LadspaPluginUI::build ()
 
 		} 
 	}
-
-	n_ins = plugin->get_info()->n_inputs;
-	n_outs = plugin->get_info()->n_outputs;
 
 	if (box->children().empty()) {
 		hpacker.remove (*frame);
@@ -758,3 +754,4 @@ LadspaPluginUI::setup_scale_values(guint32 port_index, ControlUI* cui)
 
 	return enums;
 }
+

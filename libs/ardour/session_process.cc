@@ -23,7 +23,7 @@
 #include <unistd.h>
 
 #include <pbd/error.h>
- 
+
 #include <glibmm/thread.h>
 
 #include <ardour/ardour.h>
@@ -36,6 +36,8 @@
 #include <ardour/cycles.h>
 #include <ardour/cycle_timer.h>
 
+#include <midi++/manager.h>
+
 #include "i18n.h"
 
 using namespace ARDOUR;
@@ -45,6 +47,8 @@ using namespace std;
 void
 Session::process (nframes_t nframes)
 {
+	MIDI::Manager::instance()->cycle_start(nframes);
+
 	if (synced_to_jack() && waiting_to_start) {
 		if ( _engine.transport_state() == AudioEngine::TransportRolling) {
 			actually_start_transport ();
@@ -58,6 +62,8 @@ Session::process (nframes_t nframes)
 	} 
 	
 	(this->*process_function) (nframes);
+	
+	MIDI::Manager::instance()->cycle_end();
 
 	SendFeedback (); /* EMIT SIGNAL */
 }
@@ -74,7 +80,7 @@ Session::prepare_diskstreams ()
 int
 Session::no_roll (nframes_t nframes, nframes_t offset)
 {
-	nframes_t end_frame = _transport_frame + nframes;
+	nframes_t end_frame = _transport_frame + nframes; // FIXME: varispeed + no_roll ??
 	int ret = 0;
 	bool declick = get_transport_declick_required();
 	boost::shared_ptr<RouteList> r = routes.reader ();
@@ -124,6 +130,9 @@ Session::process_routes (nframes_t nframes, nframes_t offset)
 
 	record_active = actively_recording(); // || (get_record_enabled() && get_punch_in());
 
+	const nframes_t start_frame = _transport_frame;
+	const nframes_t end_frame = _transport_frame + (nframes_t)floor(nframes * _transport_speed);
+
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
 		int ret;
@@ -134,7 +143,7 @@ Session::process_routes (nframes_t nframes, nframes_t offset)
 
 		(*i)->set_pending_declick (declick);
 
-		if ((ret = (*i)->roll (nframes, _transport_frame, _transport_frame + nframes, offset, declick, record_active, rec_monitors)) < 0) {
+		if ((ret = (*i)->roll (nframes, start_frame, end_frame, offset, declick, record_active, rec_monitors)) < 0) {
 
 			/* we have to do this here. Route::roll() for an AudioTrack will have called AudioDiskstream::process(),
 			   and the DS will expect AudioDiskstream::commit() to be called. but we're aborting from that
@@ -166,6 +175,9 @@ Session::silent_process_routes (nframes_t nframes, nframes_t offset)
 		/* force a declick out */
 		declick = -1;
 	}
+	
+	const nframes_t start_frame = _transport_frame;
+	const nframes_t end_frame = _transport_frame + lrintf(nframes * _transport_speed);
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
@@ -175,7 +187,7 @@ Session::silent_process_routes (nframes_t nframes, nframes_t offset)
 			continue;
 		}
 
-		if ((ret = (*i)->silent_roll (nframes, _transport_frame, _transport_frame + nframes, offset, record_active, rec_monitors)) < 0) {
+		if ((ret = (*i)->silent_roll (nframes, start_frame, end_frame, offset, record_active, rec_monitors)) < 0) {
 			
 			/* we have to do this here. Route::roll() for an AudioTrack will have called AudioDiskstream::process(),
 			   and the DS will expect AudioDiskstream::commit() to be called. but we're aborting from that
@@ -243,16 +255,17 @@ Session::commit_diskstreams (nframes_t nframes, bool &needs_butler)
 	}
 }
 
+
 void
 Session::process_with_events (nframes_t nframes)
 {
-	Event* ev;
+	Event*         ev;
 	nframes_t this_nframes;
 	nframes_t end_frame;
 	nframes_t offset;
-	bool session_needs_butler = false;
 	nframes_t stop_limit;
 	long           frames_moved;
+	bool           session_needs_butler = false;
 
 	/* make sure the auditioner is silent */
 
@@ -277,11 +290,19 @@ Session::process_with_events (nframes_t nframes)
 		process_event (ev);
 	}
 
+	/* Events caused a transport change, send an MTC Full Frame (SMPTE) message.
+	 * This is sent whether rolling or not, to give slaves an idea of ardour time
+	 * on locates (and allow slow slaves to position and prepare for rolling)
+	 */
+	if (_send_smpte_update) {
+		send_full_time_code(nframes);
+	}
+
 	if (!process_can_proceed()) {
 		no_roll (nframes, 0);
 		return;
 	}
-		
+
 	if (events.empty() || next_event == events.end()) {
 		process_without_events (nframes);
 		return;
@@ -308,6 +329,8 @@ Session::process_with_events (nframes_t nframes)
 			no_roll (nframes, 0);
 			return;
 		}
+	
+		send_midi_time_code_for_cycle(nframes);
 
 		if (actively_recording()) {
 			stop_limit = max_frames;
@@ -399,17 +422,9 @@ Session::process_with_events (nframes_t nframes)
 
 	} /* implicit release of route lock */
 
-
-	if (session_needs_butler) {
+	if (session_needs_butler)
 		summon_butler ();
-	} 
-	
-	if (!_engine.freewheeling() && session_send_mtc) {
-		send_midi_time_code_in_another_thread ();
-	}
-
-	return;
-}		
+}
 
 void
 Session::reset_slave_state ()
@@ -556,7 +571,6 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 		if (slave_state == Waiting) {
 
 			// cerr << "waiting at " << slave_transport_frame << endl;
-			
 			if (slave_transport_frame >= slave_wait_end) {
 				// cerr << "\tstart at " << _transport_frame << endl;
 
@@ -740,6 +754,8 @@ Session::process_without_events (nframes_t nframes)
 			no_roll (nframes, 0);
 			return;
 		}
+	
+		send_midi_time_code_for_cycle(nframes);
 		
 		if (actively_recording()) {
 			stop_limit = max_frames;
@@ -784,16 +800,9 @@ Session::process_without_events (nframes_t nframes)
 
 	} /* implicit release of route lock */
 
-	if (session_needs_butler) {
+	if (session_needs_butler)
 		summon_butler ();
-	} 
-	
-	if (!_engine.freewheeling() && session_send_mtc) {
-		send_midi_time_code_in_another_thread ();
-	}
-
-	return;
-}		
+}
 
 void
 Session::process_audition (nframes_t nframes)

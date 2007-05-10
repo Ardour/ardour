@@ -121,7 +121,7 @@ class AudioFileSource : public AudioSource {
 	   to cause issues.
 	*/
 
-	virtual void handle_header_position_change () {}
+	virtual void handle_header_position_change ();
 
   protected:
 	

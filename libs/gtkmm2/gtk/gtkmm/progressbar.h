@@ -3,7 +3,6 @@
 #ifndef _GTKMM_PROGRESSBAR_H
 #define _GTKMM_PROGRESSBAR_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -178,17 +177,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -208,8 +201,11 @@ public:
 
   
   /** Retrieves the text displayed superimposed on the progress bar,
-   * if any.
-   * @return Text.
+   * if any, otherwise <tt>0</tt>. The return value is a reference
+   * to the text, not a copy of it, so will become invalid
+   * if you change the text in the progress bar.
+   * @return Text, or <tt>0</tt>; this string is owned by the widget
+   * and should not be modified or freed.
    */
   Glib::ustring get_text() const;
   
@@ -259,30 +255,21 @@ public:
   /** Sets the mode used to ellipsize (add an ellipsis: "...") the text 
    * if there is not enough space to render the entire string.
    * 
-   * @newin2p6
+   * Since: 2.6
    * @param mode A Pango::EllipsizeMode.
    */
   void set_ellipsize(Pango::EllipsizeMode mode);
   
-  /** Returns the ellipsizing position of the progressbar. 
-   * See set_ellipsize().
-   * @return Pango::EllipsizeMode
-   * 
-   * @newin2p6.
-   */
   Pango::EllipsizeMode get_ellipsize() const;
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The fraction of total work that has been completed.
+  /** The fraction of total work that has been completed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<double> property_fraction() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The fraction of total work that has been completed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -290,19 +277,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<double> property_fraction() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The fraction of total progress to move the bouncing block when pulsed.
+  /** The fraction of total progress to move the bouncing block when pulsed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<double> property_pulse_step() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The fraction of total progress to move the bouncing block when pulsed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -310,19 +293,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<double> property_pulse_step() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Orientation and growth direction of the progress bar.
+  /** Orientation and growth direction of the progress bar.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<ProgressBarOrientation> property_orientation() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Orientation and growth direction of the progress bar.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -330,19 +309,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<ProgressBarOrientation> property_orientation() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Text to be displayed in the progress bar.
+  /** Text to be displayed in the progress bar.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_text() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Text to be displayed in the progress bar.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -350,19 +325,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_text() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The preferred place to ellipsize the string
+  /** The preferred place to ellipsize the string
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_ellipsize() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The preferred place to ellipsize the string
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -370,7 +341,6 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_ellipsize() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -386,8 +356,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::ProgressBar* wrap(GtkProgressBar* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_PROGRESSBAR_H */
 

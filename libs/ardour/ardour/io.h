@@ -38,6 +38,8 @@
 #include <ardour/curve.h>
 #include <ardour/types.h>
 #include <ardour/data_type.h>
+#include <ardour/port_set.h>
+#include <ardour/chan_count.h>
 
 using std::string;
 using std::vector;
@@ -48,9 +50,13 @@ namespace ARDOUR {
 
 class Session;
 class AudioEngine;
-class Port;
 class Connection;
 class Panner;
+class PeakMeter;
+class Port;
+class AudioPort;
+class MidiPort;
+class BufferSet;
 
 /** A collection of input and output ports with connections.
  *
@@ -67,50 +73,48 @@ class IO : public PBD::StatefulDestructible
 	    int input_min = -1, int input_max = -1, 
 	    int output_min = -1, int output_max = -1,
 	    DataType default_type = DataType::AUDIO);
-
+	
 	IO (Session&, const XMLNode&, DataType default_type = DataType::AUDIO);
-
+	
 	virtual ~IO();
 
-	int input_minimum() const { return _input_minimum; }
-	int input_maximum() const { return _input_maximum; }
-	int output_minimum() const { return _output_minimum; }
-	int output_maximum() const { return _output_maximum; }
-
-	void set_input_minimum (int n);
-	void set_input_maximum (int n);
-	void set_output_minimum (int n);
-	void set_output_maximum (int n);
-
-	DataType default_type() const { return _default_type; }
+	ChanCount input_minimum() const { return _input_minimum; }
+	ChanCount input_maximum() const { return _input_maximum; }
+	ChanCount output_minimum() const { return _output_minimum; }
+	ChanCount output_maximum() const { return _output_maximum; }
+	
+	void set_input_minimum (ChanCount n);
+	void set_input_maximum (ChanCount n);
+	void set_output_minimum (ChanCount n);
+	void set_output_maximum (ChanCount n);
+	
+	DataType default_type() const         { return _default_type; }
+	void     set_default_type(DataType t) { _default_type = t; }
 
 	const string& name() const { return _name; }
 	virtual int set_name (string str, void *src);
 	
 	virtual void silence  (nframes_t, nframes_t offset);
 
-	// These should be moved in to a separate object that manipulates an IO
-	
-	void pan (vector<Sample*>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset, gain_t gain_coeff);
-	void pan_automated (vector<Sample*>& bufs, uint32_t nbufs, nframes_t start_frame, nframes_t end_frame, 
-			    nframes_t nframes, nframes_t offset);
-	void collect_input  (vector<Sample*>&, uint32_t nbufs, nframes_t nframes, nframes_t offset);
-	void deliver_output (vector<Sample*>&, uint32_t nbufs, nframes_t nframes, nframes_t offset);
-	void deliver_output_no_pan (vector<Sample*>&, uint32_t nbufs, nframes_t nframes, nframes_t offset);
+	void collect_input  (BufferSet& bufs, nframes_t nframes, nframes_t offset);
+	void deliver_output (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame,
+	                                      nframes_t nframes, nframes_t offset);
 	void just_meter_input (nframes_t start_frame, nframes_t end_frame, 
 			       nframes_t nframes, nframes_t offset);
-
-	virtual uint32_t n_process_buffers () { return 0; }
 
 	virtual void   set_gain (gain_t g, void *src);
 	void           inc_gain (gain_t delta, void *src);
 	gain_t         gain () const { return _desired_gain; }
 	virtual gain_t effective_gain () const;
+	
+	void set_phase_invert (bool yn, void *src);
+	bool phase_invert() const { return _phase_invert; }
 
-	Panner& panner() { return *_panner; }
+	Panner& panner()        { return *_panner; }
+	PeakMeter& peak_meter() { return *_meter; }
 	const Panner& panner() const { return *_panner; }
 	
-	int ensure_io (uint32_t, uint32_t, bool clear, void *src);
+	int ensure_io (ChanCount in, ChanCount out, bool clear, void *src);
 
 	int use_input_connection (Connection&, void *src);
 	int use_output_connection (Connection&, void *src);
@@ -139,24 +143,34 @@ class IO : public PBD::StatefulDestructible
 	nframes_t input_latency() const;
 	void           set_port_latency (nframes_t);
 
+	const PortSet& inputs()  const { return _inputs; }
+	const PortSet& outputs() const { return _outputs; }
+
 	Port *output (uint32_t n) const {
-		if (n < _noutputs) {
-			return _outputs[n];
+		if (n < _outputs.num_ports()) {
+			return _outputs.port(n);
 		} else {
 			return 0;
 		}
 	}
 
 	Port *input (uint32_t n) const {
-		if (n < _ninputs) {
-			return _inputs[n];
+		if (n < _inputs.num_ports()) {
+			return _inputs.port(n);
 		} else {
 			return 0;
 		}
 	}
 
-	uint32_t n_inputs () const { return _ninputs; }
-	uint32_t n_outputs () const { return _noutputs; }
+	AudioPort* audio_input(uint32_t n) const;
+	AudioPort* audio_output(uint32_t n) const;
+	MidiPort*  midi_input(uint32_t n) const;
+	MidiPort*  midi_output(uint32_t n) const;
+
+	const ChanCount& n_inputs ()  const { return _inputs.count(); }
+	const ChanCount& n_outputs () const { return _outputs.count(); }
+
+	void attach_buffers(ChanCount ignored);
 
 	sigc::signal<void,IOChange,void*> input_changed;
 	sigc::signal<void,IOChange,void*> output_changed;
@@ -169,46 +183,26 @@ class IO : public PBD::StatefulDestructible
 	int set_state (const XMLNode&);
 
 	static int  disable_connecting (void);
+
 	static int  enable_connecting (void);
+
 	static int  disable_ports (void);
+
 	static int  enable_ports (void);
+
 	static int  disable_panners (void);
+
 	static int  reset_panners (void);
 	
-	static sigc::signal<int> PortsLegal;
-	static sigc::signal<int> PannersLegal;
-	static sigc::signal<int> ConnectingLegal;
-	static sigc::signal<void,uint32_t> MoreOutputs;
-	static sigc::signal<int> PortsCreated;
+	static sigc::signal<int>            PortsLegal;
+	static sigc::signal<int>            PannersLegal;
+	static sigc::signal<int>            ConnectingLegal;
+	static sigc::signal<void,ChanCount> MoreChannels;
+	static sigc::signal<int>            PortsCreated;
 
 	PBD::Controllable& gain_control() {
 		return _gain_control;
 	}
-
-	/* Peak metering */
-
-	float peak_input_power (uint32_t n) { 
-		if (_ninputs == 0) {
-			return minus_infinity();
-		} else if (n < std::max (_ninputs, _noutputs)) {
-			return _visible_peak_power[n];
-		} else {
-			return minus_infinity();
-		}
-	}
-
-	float max_peak_power (uint32_t n) {
-		if (_ninputs == 0) {
-			return minus_infinity();
-		} else if (n < std::max (_ninputs, _noutputs)) {
-			return _max_peak_power[n];
-		} else {
-			return minus_infinity();
-		}
-	}
-
-	void reset_max_peak_meters ();
-
 	
     static void update_meters();
 
@@ -222,11 +216,11 @@ class IO : public PBD::StatefulDestructible
 
 	/* automation */
 
-	static void set_automation_interval (jack_nframes_t frames) {
+	static void set_automation_interval (nframes_t frames) {
 		_automation_interval = frames;
 	}
 
-	static jack_nframes_t automation_interval() { 
+	static nframes_t automation_interval() { 
 		return _automation_interval;
 	}
 
@@ -277,33 +271,28 @@ class IO : public PBD::StatefulDestructible
   protected:
 	Session&            _session;
 	Panner*             _panner;
+	BufferSet*          _output_buffers; //< Set directly to output port buffers
 	gain_t              _gain;
 	gain_t              _effective_gain;
 	gain_t              _desired_gain;
 	Glib::Mutex         declick_lock;
-	vector<Port*>       _outputs;
-	vector<Port*>       _inputs;
-	vector<float>       _peak_power;
-	vector<float>       _visible_peak_power;
-	vector<float>       _max_peak_power;
+	PortSet             _outputs;
+	PortSet             _inputs;
+	PeakMeter*          _meter;
 	string              _name;
 	Connection*         _input_connection;
 	Connection*         _output_connection;
 	bool                 no_panner_reset;
+	bool                _phase_invert;
 	XMLNode*             deferred_state;
 	DataType            _default_type;
-	bool                _ignore_gain_on_deliver;
 	
-
 	virtual void set_deferred_state() {}
 
-	void reset_peak_meters();
 	void reset_panner ();
 
-	virtual uint32_t pans_required() const { return _ninputs; }
-
-	static void apply_declick (vector<Sample*>&, uint32_t nbufs, nframes_t nframes, 
-				   gain_t initial, gain_t target, bool invert_polarity);
+	virtual uint32_t pans_required() const
+		{ return _inputs.count().get(DataType::AUDIO); }
 
 	struct GainControllable : public PBD::Controllable {
 	    GainControllable (std::string name, IO& i) : Controllable (name), io (i) {}
@@ -339,10 +328,9 @@ class IO : public PBD::StatefulDestructible
 	static bool connecting_legal;
 	static bool ports_legal;
 
-  private:
+	BufferSet& output_buffers() { return *_output_buffers; }
 
-	uint32_t _ninputs;
-	uint32_t _noutputs;
+  private:
 
 	/* are these the best variable names ever, or what? */
 
@@ -359,10 +347,10 @@ class IO : public PBD::StatefulDestructible
 	sigc::connection port_legal_c;
 	sigc::connection panner_legal_c;
 
-	int _input_minimum;
-	int _input_maximum;
-	int _output_minimum;
-	int _output_maximum;
+	ChanCount _input_minimum;
+	ChanCount _input_maximum;
+	ChanCount _output_minimum;
+	ChanCount _output_maximum;
 
 
 	static int parse_io_string (const string&, vector<string>& chns);
@@ -372,8 +360,8 @@ class IO : public PBD::StatefulDestructible
 	int set_sources (vector<string>&, void *src, bool add);
 	int set_destinations (vector<string>&, void *src, bool add);
 
-	int ensure_inputs (uint32_t, bool clear, bool lockit, void *src);
-	int ensure_outputs (uint32_t, bool clear, bool lockit, void *src);
+	int ensure_inputs (ChanCount, bool clear, bool lockit, void *src);
+	int ensure_outputs (ChanCount, bool clear, bool lockit, void *src);
 
 	void drop_input_connection ();
 	void drop_output_connection ();
@@ -389,8 +377,8 @@ class IO : public PBD::StatefulDestructible
 	void setup_peak_meters ();
 	void meter ();
 
-	bool ensure_inputs_locked (uint32_t, bool clear, void *src);
-	bool ensure_outputs_locked (uint32_t, bool clear, void *src);
+	bool ensure_inputs_locked (ChanCount, bool clear, void *src);
+	bool ensure_outputs_locked (ChanCount, bool clear, void *src);
 
 	int32_t find_input_port_hole ();
 	int32_t find_output_port_hole ();

@@ -44,6 +44,7 @@ static const char* channel_setup_names[] = {
 	N_("6 Channels"),
 	N_("8 Channels"),
 	N_("Manual Setup"),
+	"MIDI",
 	0
 };
 
@@ -157,6 +158,18 @@ AddRouteDialog::track ()
 	return track_button.get_active ();
 }
 
+ARDOUR::DataType
+AddRouteDialog::type ()
+{
+	// FIXME: ew
+	
+	const string str = channel_combo.get_active_text();
+	if (str == _("MIDI"))
+		return ARDOUR::DataType::MIDI;
+	else
+		return ARDOUR::DataType::AUDIO;
+}
+
 string
 AddRouteDialog::name_template ()
 {
@@ -192,7 +205,7 @@ AddRouteDialog::channels ()
 	string str = channel_combo.get_active_text();
 	int chns;
 
-	if (str == _("Mono")) {
+	if (str == _("Mono") || str == _("MIDI")) {
 		return 1;
 	} else if (str == _("Stereo")) {
 		return 2;

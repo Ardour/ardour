@@ -3,7 +3,6 @@
 #ifndef _LIBGNOMECANVASMM_ITEM_H
 #define _LIBGNOMECANVASMM_ITEM_H
 
-
 #include <glibmm.h>
 
 // -*- C++ -*-
@@ -106,13 +105,9 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
   virtual bool on_event(GdkEvent* p1);
@@ -263,48 +258,18 @@ public:
   void reparent(Group& new_group);
 
   /// Returns the canvas we're on.
-   Canvas* get_canvas() const;
- 
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void update_vfunc(double* affine, ArtSVP* clip_path, int flags);
-#endif //GLIBMM_VFUNCS_ENABLED
+  Canvas* get_canvas() const;
 
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void realize_vfunc();
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void unrealize_vfunc();
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void map_vfunc();
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void unmap_vfunc();
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual ArtUta* coverage_vfunc();
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void draw_vfunc(const Glib::RefPtr<Gdk::Drawable>& drawable, int x, int y, int width, int height);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void render_vfunc(GnomeCanvasBuf* buf);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual double point_vfunc(double x, double y, int cx, int cy, GnomeCanvasItem** actual_item);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void bounds_vfunc(double* x1, double* y1, double* x2, double* y2);
-#endif //GLIBMM_VFUNCS_ENABLED
-
+    virtual void update_vfunc(double* affine, ArtSVP* clip_path, int flags);
+    virtual void realize_vfunc();
+    virtual void unrealize_vfunc();
+    virtual void map_vfunc();
+    virtual void unmap_vfunc();
+    virtual ArtUta* coverage_vfunc();
+    virtual void draw_vfunc(const Glib::RefPtr<Gdk::Drawable>& drawable, int x, int y, int width, int height);
+    virtual void render_vfunc(GnomeCanvasBuf* buf);
+    virtual double point_vfunc(double x, double y, int cx, int cy, GnomeCanvasItem** actual_item);
+    virtual void bounds_vfunc(double* x1, double* y1, double* x2, double* y2);
 
   //: Signal: an event ocurred for an item of this type.  The(x, y)
   //: coordinates are in the canvas world coordinate system.
@@ -313,20 +278,14 @@ public:
   Glib::SignalProxy1< bool,GdkEvent* > signal_event();
 
 
-  Group* get_parent_group();
-  const Group* get_parent_group() const;
-
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** 
+  /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Group*> property_parent() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -334,7 +293,6 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Group*> property_parent() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 protected:
@@ -399,7 +357,6 @@ protected:
 } /* namespace Canvas */
 } /* namespace Gnome */
 
-
 namespace Glib
 {
   /** @relates Gnome::Canvas::Item
@@ -408,8 +365,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gnome::Canvas::Item* wrap(GnomeCanvasItem* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _LIBGNOMECANVASMM_ITEM_H */
 

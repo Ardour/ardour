@@ -3,7 +3,6 @@
 #ifndef _GTKMM_RADIOBUTTON_H
 #define _GTKMM_RADIOBUTTON_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -93,18 +92,12 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_group_changed();
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -132,30 +125,10 @@ public:
   RadioButton(Group& group, const Glib::ustring& label, bool mnemonic = false);
   
 
-  /** Get the radio button's group.
-   * This group may be passed to the constructors of other radio buttons, or used with set_group().
-   *
-   * @result The group to which the radio button belongs.
-   */
-  
   Group get_group();
-
- /** Set the radio button's group.
-   * You can obtain a suitable group from another radio button by using get_group().
-   *
-   * @result The group to which the radio button should belong.
-   */
   void set_group(Group& group);
-
-  /** Remove the radio button from the group.
-   */
   void reset_group();
   
-
-/**
-   * @par Prototype:
-   * <tt>void %group_changed()</tt>
-   */
 
   Glib::SignalProxy0< void > signal_group_changed();
 
@@ -173,8 +146,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::RadioButton* wrap(GtkRadioButton* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_RADIOBUTTON_H */
 

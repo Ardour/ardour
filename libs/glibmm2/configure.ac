@@ -18,13 +18,13 @@ AC_PREREQ(2.50)
 #  Version and initialization
 #########################################################################
 GLIBMM_MAJOR_VERSION=2
-GLIBMM_MINOR_VERSION=12
-GLIBMM_MICRO_VERSION=5
+GLIBMM_MINOR_VERSION=6
+GLIBMM_MICRO_VERSION=1
 GLIBMM_VERSION=$GLIBMM_MAJOR_VERSION.$GLIBMM_MINOR_VERSION.$GLIBMM_MICRO_VERSION
 GLIBMM_RELEASE=$GLIBMM_MAJOR_VERSION.$GLIBMM_MINOR_VERSION
-AC_DEFINE_UNQUOTED([GLIBMM_MAJOR_VERSION], $GLIBMM_MAJOR_VERSION, [Major Version])
-AC_DEFINE_UNQUOTED([GLIBMM_MINOR_VERSION], $GLIBMM_MINOR_VERSION, [Minor Version])
-AC_DEFINE_UNQUOTED([GLIBMM_MICRO_VERSION], $GLIBMM_MICRO_VERSION, [Micro Version])
+AC_DEFINE_UNQUOTED(GLIBMM_MAJOR_VERSION, $GLIBMM_MAJOR_VERSION)
+AC_DEFINE_UNQUOTED(GLIBMM_MINOR_VERSION, $GLIBMM_MINOR_VERSION)
+AC_DEFINE_UNQUOTED(GLIBMM_MICRO_VERSION, $GLIBMM_MICRO_VERSION)
 AC_SUBST(GLIBMM_MAJOR_VERSION)
 AC_SUBST(GLIBMM_MINOR_VERSION)
 AC_SUBST(GLIBMM_MICRO_VERSION)
@@ -38,7 +38,7 @@ AC_SUBST(GLIBMM_RELEASE)
 #  ? :+1 : ?   == just some internal changes, nothing breaks but might work 
 #                 better
 # CURRENT : REVISION : AGE
-LIBGLIBMM_SO_VERSION=1:24:0
+LIBGLIBMM_SO_VERSION=1:13:0
 AC_SUBST(LIBGLIBMM_SO_VERSION)
 
 AC_CONFIG_AUX_DIR(scripts)
@@ -69,34 +69,7 @@ AC_PROG_MAKE_SET
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 
-dnl Used for enabling the "-no-undefined" flag while generating DLLs
-dnl Copied from the official gtk+-2 configure.in
-AC_MSG_CHECKING([for some Win32 platform])
-case "$host" in
-  *-*-mingw*|*-*-cygwin*)
-    platform_win32=yes
-    ;;
-  *)
-    platform_win32=no
-    ;;
-esac
-AC_MSG_RESULT([$platform_win32])
-AM_CONDITIONAL(PLATFORM_WIN32, test "$platform_win32" = "yes")
-
-AC_MSG_CHECKING([for native Win32])
-case "$host" in
-  *-*-mingw*)
-    os_win32=yes
-    ;;
-  *)
-    os_win32=no
-    ;;
-esac
-AC_MSG_RESULT([$os_win32])
-AM_CONDITIONAL(OS_WIN32, test "$os_win32" = "yes")
-
 AC_DISABLE_STATIC
-AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 
 AL_PROG_GNU_M4(AC_MSG_ERROR([dnl
@@ -108,47 +81,24 @@ SUN make does not work for building gtkmm.
 Please install GNU make.]))
 
 #########################################################################
+#  Dependancy checks
+#########################################################################
+gtkmm_min_glib_version=2.6.0
+
+PKG_CHECK_MODULES(GLIBMM, glib-2.0 >= ${gtkmm_min_glib_version} gobject-2.0 >= ${gtkmm_min_glib_version} gmodule-2.0 >= ${gtkmm_min_glib_version})
+AC_SUBST(GLIBMM_CFLAGS)
+AC_SUBST(GLIBMM_LIBS)
+
+# gthread isn't a requirement, but we should use its CFLAGS if available.
+PKG_CHECK_MODULES(GTHREAD, gthread-2.0 >= ${gtkmm_min_glib_version},[],[GTHREAD_CFLAGS=''; GTHREAD_LIBS=''])
+AC_SUBST(GTHREAD_CFLAGS)
+AC_SUBST(GTHREAD_LIBS)
+
+
+#########################################################################
 #  C++ checks
 #########################################################################
 AC_PROG_CXX
-
-# Check for the SUN Forte compiler, and define GLIBMM_COMPILER_SUN_FORTE in the header.
-GLIBMM_PROG_CXX_SUN
-
-# Ensure MSVC-compatible struct packing convention is used when
-# compiling for Win32 with gcc.
-# What flag to depends on gcc version: gcc3 uses "-mms-bitfields", while
-# gcc2 uses "-fnative-struct".
-if test x"$os_win32" = xyes; then
-  if test x"$GCC" = xyes -a x"$GXX" = xyes; then
-    msnative_struct=''
-    AC_MSG_CHECKING([how to get MSVC-compatible struct packing])
-    if test -z "$ac_cv_prog_CC"; then
-      our_gcc="$CC"
-    else
-      our_gcc="$ac_cv_prog_CC"
-    fi
-    case `$our_gcc --version | sed -e 's,\..*,.,' -e q` in
-      2.)
-	if $our_gcc -v --help 2>/dev/null | grep fnative-struct >/dev/null; then
-	  msnative_struct='-fnative-struct'
-	fi
-	;;
-      *)
-	if $our_gcc -v --help 2>/dev/null | grep ms-bitfields >/dev/null; then
-	  msnative_struct='-mms-bitfields'
-	fi
-	;;
-    esac
-    if test x"$msnative_struct" = x ; then
-      AC_MSG_RESULT([no way])
-      AC_MSG_WARN([produced libraries might be incompatible with MSVC-compiled code])
-    else
-      CXXFLAGS="$CXXFLAGS $msnative_struct"
-      AC_MSG_RESULT([${msnative_struct}])
-    fi
-  fi
-fi
 
 AC_LANG_CPLUSPLUS
 
@@ -174,34 +124,11 @@ GLIBMM_CXX_CAN_ASSIGN_NON_EXTERN_C_FUNCTIONS_TO_EXTERN_C_CALLBACKS()
 GLIBMM_CXX_CAN_USE_NAMESPACES_INSIDE_EXTERNC()
 GLIBMM_CXX_ALLOWS_STATIC_INLINE_NPOS()
 
-
 # Check whether --enable-debug-refcounting was given.
 GLIBMM_ARG_ENABLE_DEBUG_REFCOUNTING()
 
 # Evaluate the --enable-warnings=level option.
 GTKMM_ARG_ENABLE_WARNINGS()
-
-# Add an --enable-use-deprecations configure option:
-AC_ARG_ENABLE(deprecations,
-              [AC_HELP_STRING([--enable-use-deprecations],
-                              [warn about deprecated usages [default=no]])],,
-              [enable_deprecations=no])
-              
-if test "x$enable_use_deprecations" = "xyes"; then
-   DISABLE_DEPRECATED_CFLAGS="-DG_DISABLE_DEPRECATED"
-   AC_SUBST(DISABLE_DEPRECATED_CFLAGS)
-fi
-
-#Offer the ability to omit some API from the library, 
-#to reduce the code size:
-GLIBMM_ARG_ENABLE_API_DEPRECATED()
-GLIBMM_ARG_ENABLE_API_EXCEPTIONS()
-GLIBMM_ARG_ENABLE_API_PROPERTIES()
-GLIBMM_ARG_ENABLE_API_VFUNCS()
-
-# Offer the ability to omit some API from the library, 
-# to reduce the code size:
-GLIBMM_ARG_ENABLE_API_DEFAULT_SIGNAL_HANDLERS()
 
 # Dummy conditional just to make automake-1.4 happy.
 # We need an always-false condition in docs/Makefile.am.
@@ -210,7 +137,6 @@ AM_CONDITIONAL(GTKMM_FALSE,[false])
 # HACK:  Assign a dummy in order to prevent execution of autoheader by the
 # maintainer-mode rules.  That would fail since we aren't using autoheader.
 AUTOHEADER=':'
-
 
 AC_CONFIG_FILES([
   Makefile

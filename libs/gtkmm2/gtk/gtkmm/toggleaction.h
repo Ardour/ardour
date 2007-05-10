@@ -3,7 +3,6 @@
 #ifndef _GTKMM_TOGGLEACTION_H
 #define _GTKMM_TOGGLEACTION_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -99,13 +98,13 @@ public:
   
   /** Emits the "toggled" signal on the toggle action.
    * 
-   * @newin2p4
+   * Since: 2.4
    */
   void toggled();
   
   /** Sets the checked state on the toggle action.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param is_active Whether the action should be checked or not.
    */
   void set_active(bool is_active = true);
@@ -113,13 +112,13 @@ public:
   /** Returns the checked state of the toggle action.
    * @return The checked state of the toggle action
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   bool get_active() const;
   
   /** Sets whether the action should have proxies like a radio action.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param draw_as_radio Whether the action should have proxies like a radio 
    * action.
    */
@@ -128,30 +127,22 @@ public:
   /** Returns whether the action should have proxies like a radio action.
    * @return Whether the action should have proxies like a radio action.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   bool get_draw_as_radio() const;
 
   
-/**
-   * @par Prototype:
-   * <tt>void %toggled()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_toggled();
 
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether the proxies for this action look like radio action proxies.
+  /** Whether the proxies for this action look like radio action proxies.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_draw_as_radio() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the proxies for this action look like radio action proxies.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -159,25 +150,18 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_draw_as_radio() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
           
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_toggled();
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

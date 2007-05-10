@@ -30,6 +30,7 @@
 
 #include <inttypes.h>
 #include <jack/types.h>
+#include <jack/midiport.h>
 #include <control_protocol/smpte.h>
 #include <pbd/id.h>
 
@@ -39,13 +40,6 @@
 
 typedef int intptr_t;
 #endif
-
-/* at some point move this into the ARDOUR namespace,
-   but for now its outside because it replaces the
-   old global "jack_nframes_t"
-*/
-
-typedef uint32_t                    nframes_t;
 
 namespace ARDOUR {
 
@@ -57,6 +51,10 @@ namespace ARDOUR {
 	typedef float                       gain_t;
 	typedef uint32_t                    layer_t;
 	typedef uint64_t                    microseconds_t;
+	typedef uint32_t                    nframes_t;
+
+	typedef jack_midi_event_t MidiEvent;
+	typedef unsigned char     RawMidi;
 
 	enum IOChange {
 		NoChange = 0,
@@ -345,8 +343,7 @@ namespace ARDOUR {
 		Semitones
 	};
 
-	typedef std::vector<boost::shared_ptr<AudioSource> > SourceList;
-
+	typedef std::vector<boost::shared_ptr<Source> > SourceList;
 } // namespace ARDOUR
 
 std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat& sf);
@@ -362,6 +359,8 @@ std::istream& operator>>(std::istream& o, ARDOUR::SlaveSource& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ShuttleBehaviour& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ShuttleUnits& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::SmpteFormat& sf);
+
+using ARDOUR::nframes_t;
 
 static inline nframes_t
 session_frame_to_track_frame (nframes_t session_frame, double speed)

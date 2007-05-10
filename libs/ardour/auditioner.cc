@@ -45,11 +45,11 @@ Auditioner::Auditioner (Session& s)
 	string right = Config->get_auditioner_output_right();
 
 	if (left == "default") {
-		left = _session.engine().get_nth_physical_output (0);	
+		left = _session.engine().get_nth_physical_output (DataType::AUDIO, 0);	
 	}
 
 	if (right == "default") {
-		right = _session.engine().get_nth_physical_output (1);
+		right = _session.engine().get_nth_physical_output (DataType::AUDIO, 1);
 	}
 	
 	if ((left.length() == 0) && (right.length() == 0)) {
@@ -70,6 +70,8 @@ Auditioner::Auditioner (Session& s)
 
 	allow_pan_reset ();
 	
+	reset_panner ();
+
 	IO::output_changed.connect (mem_fun (*this, &Auditioner::output_changed));
 
 	the_region.reset ((AudioRegion*) 0);
@@ -108,7 +110,7 @@ Auditioner::audition_current_playlist ()
 
 	/* force a panner reset now that we have all channels */
 
-	_panner->reset (n_outputs(), _diskstream->n_channels());
+	_panner->reset (n_outputs().get(DataType::AUDIO), _diskstream->n_channels().get(DataType::AUDIO));
 
 	g_atomic_int_set (&_active, 1);
 }
@@ -138,15 +140,15 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 	_diskstream->playlist()->clear ();
 	_diskstream->playlist()->add_region (the_region, 0, 1);
 
-	if (_diskstream->n_channels() < the_region->n_channels()) {
-		audio_diskstream()->add_channel (the_region->n_channels() - _diskstream->n_channels());
-	} else if (_diskstream->n_channels() > the_region->n_channels()) {
-		audio_diskstream()->remove_channel (_diskstream->n_channels() - the_region->n_channels());
+	if (_diskstream->n_channels().get(DataType::AUDIO) < the_region->n_channels()) {
+		audio_diskstream()->add_channel (the_region->n_channels() - _diskstream->n_channels().get(DataType::AUDIO));
+	} else if (_diskstream->n_channels().get(DataType::AUDIO) > the_region->n_channels()) {
+		audio_diskstream()->remove_channel (_diskstream->n_channels().get(DataType::AUDIO) - the_region->n_channels());
 	}
 
 	/* force a panner reset now that we have all channels */
 
-	_panner->reset (n_outputs(), _diskstream->n_channels());
+	reset_panner();
 
 	length = the_region->length();
 	_diskstream->seek (0);
@@ -195,7 +197,7 @@ Auditioner::output_changed (IOChange change, void* src)
 		const char ** connections;
 		connections =  output (0)->get_connections ();
 		if (connections) {
-			phys = _session.engine().get_nth_physical_output (0);
+			phys = _session.engine().get_nth_physical_output (DataType::AUDIO, 0);
 			if (phys != connections[0]) {
 				Config->set_auditioner_output_left (connections[0]);
 			} else {
@@ -208,7 +210,7 @@ Auditioner::output_changed (IOChange change, void* src)
 		
 		connections = output (1)->get_connections ();
 		if (connections) {
-			phys = _session.engine().get_nth_physical_output (1);
+			phys = _session.engine().get_nth_physical_output (DataType::AUDIO, 1);
 			if (phys != connections[0]) {
 				Config->set_auditioner_output_right (connections[0]);
 			} else {

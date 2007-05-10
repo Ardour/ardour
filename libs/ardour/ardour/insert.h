@@ -27,6 +27,7 @@
 #include <sigc++/signal.h>
 #include <ardour/ardour.h>
 #include <ardour/redirect.h>
+#include <ardour/plugin_state.h>
 #include <ardour/types.h>
 
 class XMLNode;
@@ -49,7 +50,8 @@ class Insert : public Redirect
 	
 	virtual ~Insert() { }
 
-	virtual void run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset) = 0;
+	virtual void run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset) = 0;
+	
 	virtual void activate () {}
 	virtual void deactivate () {}
 
@@ -71,12 +73,13 @@ class PortInsert : public Insert
 	int set_state(const XMLNode&);
 
 	void init ();
-	void run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset);
+	
+	void run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset);
 
 	nframes_t latency();
 	
-	uint32_t output_streams() const;
-	uint32_t input_streams() const;
+	ChanCount output_streams() const;
+	ChanCount input_streams() const;
 
 	int32_t can_support_input_configuration (int32_t) const;
 	int32_t configure_io (int32_t magic, int32_t in, int32_t out);
@@ -102,17 +105,18 @@ class PluginInsert : public Insert
 	XMLNode& get_state(void);
 	int set_state(const XMLNode&);
 
-	void run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset);
+	void run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset);
 	void silence (nframes_t nframes, nframes_t offset);
+	
 	void activate ();
 	void deactivate ();
 
 	void set_block_size (nframes_t nframes);
 
-	uint32_t output_streams() const;
-	uint32_t input_streams() const;
-	uint32_t natural_output_streams() const;
-	uint32_t natural_input_streams() const;
+	ChanCount output_streams() const;
+	ChanCount input_streams() const;
+	ChanCount natural_output_streams() const;
+	ChanCount natural_input_streams() const;
 
 	int      set_count (uint32_t num);
 	uint32_t get_count () const { return _plugins.size(); }
@@ -153,8 +157,9 @@ class PluginInsert : public Insert
 	void parameter_changed (uint32_t, float);
 	
 	vector<boost::shared_ptr<Plugin> > _plugins;
-	void automation_run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset);
-	void connect_and_run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset, bool with_auto, nframes_t now = 0);
+	
+	void automation_run (BufferSet& bufs, nframes_t nframes, nframes_t offset);
+	void connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t offset, bool with_auto, nframes_t now = 0);
 
 	void init ();
 	void set_automatable ();

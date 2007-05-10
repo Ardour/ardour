@@ -3,7 +3,6 @@
 #ifndef _GTKMM_ACCELLABEL_H
 #define _GTKMM_ACCELLABEL_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -90,17 +89,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -154,17 +147,14 @@ public:
   bool refetch();
 
   //_WRAP_PROPERTY("accel-closure", Glib::Object) //GClosure
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The widget to be monitored for accelerator changes.
+  /** The widget to be monitored for accelerator changes.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Gtk::Widget*> property_accel_widget() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The widget to be monitored for accelerator changes.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -172,7 +162,6 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Gtk::Widget*> property_accel_widget() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -188,8 +177,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::AccelLabel* wrap(GtkAccelLabel* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_ACCELLABEL_H */
 

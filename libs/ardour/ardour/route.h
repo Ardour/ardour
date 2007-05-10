@@ -124,9 +124,6 @@ class Route : public IO
 
 	void set_mute_config (mute_type, bool, void *src);
 	bool get_mute_config (mute_type);
-
-	void set_phase_invert (bool yn, void *src);
-	bool phase_invert() const { return _phase_invert; }
 	
 	void       set_edit_group (RouteGroup *, void *);
 	void       drop_edit_group (void *);
@@ -161,8 +158,11 @@ class Route : public IO
 		}
 	}
 	
-	uint32_t max_redirect_outs () const { return redirect_max_outs; }
-		
+	ChanCount max_redirect_outs () const { return redirect_max_outs; }
+	
+	// FIXME: remove/replace err_streams parameters with something appropriate
+	// they are used by 'wierd_plugin_dialog'(sic) to display the number of input streams
+	// at the insertion point if the insert fails
 	int add_redirect (boost::shared_ptr<Redirect>, void *src, uint32_t* err_streams = 0);
 	int add_redirects (const RedirectList&, void *src, uint32_t* err_streams = 0);
 	int remove_redirect (boost::shared_ptr<Redirect>, void *src, uint32_t* err_streams = 0);
@@ -257,7 +257,6 @@ class Route : public IO
 	bool                     _muted : 1;
 	bool                     _soloed : 1;
 	bool                     _solo_safe : 1;
-	bool                     _phase_invert : 1;
 	bool                     _recordable : 1;
 	bool                     _active : 1;
 	bool                     _mute_affects_pre_fader : 1;
@@ -295,24 +294,28 @@ class Route : public IO
 	void passthru (nframes_t start_frame, nframes_t end_frame, 
 		       nframes_t nframes, nframes_t offset, int declick, bool meter_inputs);
 
-	void process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
+	virtual void process_output_buffers (BufferSet& bufs,
 				     nframes_t start_frame, nframes_t end_frame,
 				     nframes_t nframes, nframes_t offset, bool with_redirects, int declick,
 				     bool meter);
 
   protected:
-	/* for derived classes */
 
 	virtual XMLNode& state(bool);
 
+	void passthru_silence (nframes_t start_frame, nframes_t end_frame,
+	                       nframes_t nframes, nframes_t offset, int declick,
+	                       bool meter);
+	
 	void silence (nframes_t nframes, nframes_t offset);
+	
 	sigc::connection input_signal_connection;
 
-	uint32_t redirect_max_outs;
+	ChanCount redirect_max_outs;
 	uint32_t _remote_control_id;
 
 	uint32_t pans_required() const;
-	uint32_t n_process_buffers ();
+	ChanCount n_process_buffers ();
 
 	virtual int _set_state (const XMLNode&, bool call_base);
 

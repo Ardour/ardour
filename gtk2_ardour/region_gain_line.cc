@@ -108,4 +108,3 @@ AudioRegionGainLine::end_drag (ControlPoint* cp)
 	AutomationLine::end_drag(cp);
 }
 
-

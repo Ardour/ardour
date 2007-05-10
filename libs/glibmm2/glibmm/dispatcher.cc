@@ -129,7 +129,7 @@ static void fd_close_and_invalidate(int& fd)
 namespace Glib
 {
 
-class DispatchNotifier : public sigc::trackable
+class DispatchNotifier
 {
 public:
   ~DispatchNotifier();
@@ -188,10 +188,8 @@ DispatchNotifier::DispatchNotifier(const Glib::RefPtr<MainContext>& context)
 {
   create_pipe();
 
-  #ifdef GLIBMM_EXCEPTIONS_ENABLED
   try
   {
-  #endif //GLIBMM_EXCEPTIONS_ENABLED
 #ifdef G_OS_WIN32
     conn_io_handler_ = context_->signal_io().connect(
         sigc::mem_fun(*this, &DispatchNotifier::pipe_io_handler),
@@ -201,7 +199,6 @@ DispatchNotifier::DispatchNotifier(const Glib::RefPtr<MainContext>& context)
         sigc::mem_fun(*this, &DispatchNotifier::pipe_io_handler),
         fd_receiver_, Glib::IO_IN);
 #endif /* !G_OS_WIN32 */
-  #ifdef GLIBMM_EXCEPTIONS_ENABLED
   }
   catch(...)
   {
@@ -212,7 +209,6 @@ DispatchNotifier::DispatchNotifier(const Glib::RefPtr<MainContext>& context)
 
     throw;
   }
-  #endif //GLIBMM_EXCEPTIONS_ENABLED
 }
 
 DispatchNotifier::~DispatchNotifier()
@@ -235,29 +231,20 @@ void DispatchNotifier::create_pipe()
 
   if(!fd_receiver_)
   {
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
     GError* const error = g_error_new(G_FILE_ERROR, G_FILE_ERROR_FAILED,
                                       "Failed to create event for inter-thread communication: %s",
                                       g_win32_error_message(GetLastError()));
     throw Glib::FileError(error);
-#else 
-    return; //TODO: Provide an alternative to the exception.
-#endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-
 #else /* !G_OS_WIN32 */
   int filedes[2] = { -1, -1 };
 
   if(pipe(filedes) < 0)
   {
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
     GError* const error = g_error_new(G_FILE_ERROR, g_file_error_from_errno(errno),
                                       "Failed to create pipe for inter-thread communication: %s",
                                       g_strerror(errno));
     throw Glib::FileError(error);
-#else 
-    return; //TODO: Provide an alternative to the exception.
-#endif //GLIBMM_EXCEPTIONS_ENABLED
   }
 
   fd_set_close_on_exec(filedes[0]);
@@ -366,18 +353,14 @@ bool DispatchNotifier::pipe_io_handler(Glib::IOCondition)
     // Actually, we wouldn't need the try/catch block because the Glib::Source
     // C callback already does it for us.  However, we do it anyway because the
     // default return value is 'false', which is not what we want.
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
     try
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
       data.dispatcher->signal_();
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
     }
     catch(...)
     {
       Glib::exception_handlers_invoke();
     }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
 #else /* !G_OS_WIN32 */
   DispatchNotifyData data;
@@ -407,18 +390,14 @@ bool DispatchNotifier::pipe_io_handler(Glib::IOCondition)
   // Actually, we wouldn't need the try/catch block because the Glib::Source
   // C callback already does it for us.  However, we do it anyway because the
   // default return value is 'false', which is not what we want.
-  #ifdef GLIBMM_EXCEPTIONS_ENABLED
   try
   {
-  #endif //GLIBMM_EXCEPTIONS_ENABLED
     data.dispatcher->signal_(); // emit
-  #ifdef GLIBMM_EXCEPTIONS_ENABLED
   }
   catch(...)
   {
     Glib::exception_handlers_invoke();
   }
-  #endif //GLIBMM_EXCEPTIONS_ENABLED
 #endif /* !G_OS_WIN32 */
 
   return true;

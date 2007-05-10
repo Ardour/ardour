@@ -3,7 +3,6 @@
 #ifndef _GTKMM_TREEMODELSORT_H
 #define _GTKMM_TREEMODELSORT_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -45,22 +44,6 @@ namespace Gtk
 {
 
 /** A wrapper which makes an underlying Gtk::TreeModel sortable.
- *
- * The TreeModelSort is a model which implements the TreeSortable interface. 
- * It does not hold any data itself, but rather is created with
- * a child model and proxies its data.  It has identical column types to
- * this child model, and the changes in the child are propagated.  The
- * primary purpose of this model is to provide a way to sort a different
- * model without modifying it. Note that the sort function used by
- * TreeModelSort is not guaranteed to be stable. 
- *
- * For instance, you might create two TreeView widgets each with a
- * view of the same data.  If the model is wrapped by a
- * TreeModelSort then the two TreeViews can each sort their
- * view of the data without affecting the other.  By contrast, if we
- * simply put the same model in each widget, then sorting the first would
- * sort the second.
- *
  * @ingroup TreeView
  */
 
@@ -130,8 +113,8 @@ public:
   
   /** Converts @a child_path  to a path relative to @a tree_model_sort .  That is,
    *  @a child_path  points to a path in the child model.  The returned path will
-   * point to the same row in the sorted model.  If @a child_path  isn't a valid 
-   * path on the child model, then <tt>0</tt> is returned.
+   * point to the same row in the sorted model.  If @a child_path  isn't a valid path
+   * on the child model, then <tt>0</tt> is returned.
    * @param child_path A Gtk::TreePath to convert.
    * @return A newly allocated Gtk::TreePath, or <tt>0</tt>.
    */
@@ -145,11 +128,10 @@ public:
   iterator convert_child_iter_to_iter(const iterator& child_iter) const;
 
   
-  /** Converts @a sorted_path  to a path on the child model of @a tree_model_sort .  
-   * That is, @a sorted_path  points to a location in @a tree_model_sort .  The 
-   * returned path will point to the same location in the model not being 
-   * sorted.  If @a sorted_path  does not point to a location in the child model, 
-   * <tt>0</tt> is returned.
+  /** Converts @a sorted_path  to a path on the child model of @a tree_model_sort .  That
+   * is, @a sorted_path  points to a location in @a tree_model_sort .  The returned path
+   * will point to the same location in the model not being sorted.  If @a sorted_path  
+   * does not point to a location in the child model, <tt>0</tt> is returned.
    * @param sorted_path A Gtk::TreePath to convert.
    * @return A newly allocated Gtk::TreePath, or <tt>0</tt>.
    */
@@ -180,15 +162,14 @@ public:
   void clear_cache();
 
   
-  /** &lt;warning&gt;
-   * This function is slow. Only use it for debugging and/or testing purposes.
-   * &lt;/warning&gt;
+  /** WARNING: This function is slow. Only use it for debugging and/or testing
+   * purposes.
    * 
    * Checks if the given iter is a valid iter for this Gtk::TreeModelSort.
    * @param iter A Gtk::TreeIter.
    * @return <tt>true</tt> if the iter is valid, <tt>false</tt> if the iter is invalid.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   bool iter_is_valid(const iterator& iter) const;
 
@@ -200,17 +181,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

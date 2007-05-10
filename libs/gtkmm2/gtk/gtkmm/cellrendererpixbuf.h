@@ -3,7 +3,6 @@
 #ifndef _GTKMM_CELLRENDERERPIXBUF_H
 #define _GTKMM_CELLRENDERERPIXBUF_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -96,17 +95,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -114,18 +107,15 @@ private:
 public:
 
   CellRendererPixbuf();
-
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The pixbuf to render.
+  
+  /** The pixbuf to render.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy< Glib::RefPtr<Gdk::Pixbuf> > property_pixbuf() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The pixbuf to render.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -133,19 +123,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly< Glib::RefPtr<Gdk::Pixbuf> > property_pixbuf() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Pixbuf for open expander.
+  /** Pixbuf for open expander.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy< Glib::RefPtr<Gdk::Pixbuf> > property_pixbuf_expander_open() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Pixbuf for open expander.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -153,19 +139,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly< Glib::RefPtr<Gdk::Pixbuf> > property_pixbuf_expander_open() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Pixbuf for closed expander.
+  /** Pixbuf for closed expander.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy< Glib::RefPtr<Gdk::Pixbuf> > property_pixbuf_expander_closed() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Pixbuf for closed expander.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -173,19 +155,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly< Glib::RefPtr<Gdk::Pixbuf> > property_pixbuf_expander_closed() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The stock ID of the stock icon to render.
+  /** The stock ID of the stock icon to render.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_stock_id() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The stock ID of the stock icon to render.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -193,19 +171,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_stock_id() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The GtkIconSize value that specifies the size of the rendered icon.
+  /** The GtkIconSize value that specifies the size of the rendered icon.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<guint> property_stock_size() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The GtkIconSize value that specifies the size of the rendered icon.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -213,19 +187,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<guint> property_stock_size() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Render detail to pass to the theme engine.
+  /** Render detail to pass to the theme engine.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_stock_detail() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Render detail to pass to the theme engine.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -233,14 +203,9 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_stock_detail() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
-  virtual Glib::PropertyProxy_Base _property_renderable();
-#else
-  virtual Glib::ustring _property_renderable();
-#endif
+  virtual Glib::PropertyProxy_Base _property_renderable(); //override
 
 
 };
@@ -256,8 +221,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::CellRendererPixbuf* wrap(GtkCellRendererPixbuf* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_CELLRENDERERPIXBUF_H */
 

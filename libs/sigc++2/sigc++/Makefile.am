@@ -1,10 +1,9 @@
 # Base (./)
 base_m4 = template.macros.m4 signal.h.m4 slot.h.m4 method_slot.h.m4 \
-	  object_slot.h.m4 class_slot.h.m4 hide.h.m4 retype.h.m4 \
-	  limit_reference.h.m4
+	  object_slot.h.m4 class_slot.h.m4 hide.h.m4 retype.h.m4
 base_built_cc =
 base_built_h = signal.h slot.h method_slot.h \
-	       object_slot.h class_slot.h hide.h retype.h limit_reference.h
+	       object_slot.h class_slot.h hide.h retype.h
 
 signal.cc : signal.h signal_base.h functors/slot.h functors/slot_base.h functors/mem_fun.h functors/functor_trait.h
 
@@ -58,22 +57,15 @@ nobase_library_include_HEADERS = $(sigc_m4) $(sigc_built_h) \
   functors/functors.h \
   functors/slot_base.h \
   adaptors/adaptors.h \
-  adaptors/bound_argument.h \
   adaptors/lambda/lambda.h
 
-# Support for DLL on cygwin/mingw using libtool > 1.4
-if PLATFORM_WIN32
-win32_dlls_ldflags = -no-undefined -Wl,--export-all-symbols
-else
-win32_dlls_ldflags =
-endif
-
 # build the library
-lib_LTLIBRARIES = libsigc-2.0.la
-libsigc_2_0_la_SOURCES = signal.cc signal_base.cc trackable.cc connection.cc \
+#lib_LTLIBRARIES = libsigc-2.0.la
+#libsigc_2_0_la_SOURCES = signal.cc signal_base.cc trackable.cc connection.cc \
                          functors/slot.cc functors/slot_base.cc \
 			 adaptors/lambda/lambda.cc
-libsigc_2_0_la_LDFLAGS  = $(win32_dlls_ldflags)
+#libsigc_2_0_la_LDFLAGS  = 
+
 BUILT_SOURCES = $(sigc_built_h) $(sigc_built_cc)
 
 CLEANFILES = build-subdirs-stamp

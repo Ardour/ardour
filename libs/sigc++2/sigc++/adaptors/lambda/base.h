@@ -3,7 +3,6 @@
 #ifndef _SIGC_LAMBDA_BASE_HPP_
 #define _SIGC_LAMBDA_BASE_HPP_
 #include <sigc++/adaptors/adaptor_trait.h>
-#include <sigc++/reference_wrapper.h>
 
 namespace sigc {
 
@@ -202,72 +201,72 @@ struct lambda_core<T_type, false> : public lambda_base
   result_type operator()() const;
 
   template <class T_arg1>
-  result_type operator ()(T_arg1) const 
+  result_type operator ()(T_arg1 _A_1) const 
     { return value_; }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1>
-  result_type sun_forte_workaround(T_arg1) const
+  result_type sun_forte_workaround(T_arg1 _A_1) const
     { return value_; }
   #endif //SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
 
   template <class T_arg1,class T_arg2>
-  result_type operator ()(T_arg1,T_arg2) const 
+  result_type operator ()(T_arg1 _A_1,T_arg2 _A_2) const 
     { return value_; }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2>
-  result_type sun_forte_workaround(T_arg1,T_arg2) const
+  result_type sun_forte_workaround(T_arg1 _A_1,T_arg2 _A_2) const
     { return value_; }
   #endif //SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
 
   template <class T_arg1,class T_arg2,class T_arg3>
-  result_type operator ()(T_arg1,T_arg2,T_arg3) const 
+  result_type operator ()(T_arg1 _A_1,T_arg2 _A_2,T_arg3 _A_3) const 
     { return value_; }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3>
-  result_type sun_forte_workaround(T_arg1,T_arg2,T_arg3) const
+  result_type sun_forte_workaround(T_arg1 _A_1,T_arg2 _A_2,T_arg3 _A_3) const
     { return value_; }
   #endif //SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
 
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
-  result_type operator ()(T_arg1,T_arg2,T_arg3,T_arg4) const 
+  result_type operator ()(T_arg1 _A_1,T_arg2 _A_2,T_arg3 _A_3,T_arg4 _A_4) const 
     { return value_; }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
-  result_type sun_forte_workaround(T_arg1,T_arg2,T_arg3,T_arg4) const
+  result_type sun_forte_workaround(T_arg1 _A_1,T_arg2 _A_2,T_arg3 _A_3,T_arg4 _A_4) const
     { return value_; }
   #endif //SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
 
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
-  result_type operator ()(T_arg1,T_arg2,T_arg3,T_arg4,T_arg5) const 
+  result_type operator ()(T_arg1 _A_1,T_arg2 _A_2,T_arg3 _A_3,T_arg4 _A_4,T_arg5 _A_5) const 
     { return value_; }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
-  result_type sun_forte_workaround(T_arg1,T_arg2,T_arg3,T_arg4,T_arg5) const
+  result_type sun_forte_workaround(T_arg1 _A_1,T_arg2 _A_2,T_arg3 _A_3,T_arg4 _A_4,T_arg5 _A_5) const
     { return value_; }
   #endif //SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
 
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
-  result_type operator ()(T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6) const 
+  result_type operator ()(T_arg1 _A_1,T_arg2 _A_2,T_arg3 _A_3,T_arg4 _A_4,T_arg5 _A_5,T_arg6 _A_6) const 
     { return value_; }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
-  result_type sun_forte_workaround(T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6) const
+  result_type sun_forte_workaround(T_arg1 _A_1,T_arg2 _A_2,T_arg3 _A_3,T_arg4 _A_4,T_arg5 _A_5,T_arg6 _A_6) const
     { return value_; }
   #endif //SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
 
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
-  result_type operator ()(T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7) const 
+  result_type operator ()(T_arg1 _A_1,T_arg2 _A_2,T_arg3 _A_3,T_arg4 _A_4,T_arg5 _A_5,T_arg6 _A_6,T_arg7 _A_7) const 
     { return value_; }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
-  result_type sun_forte_workaround(T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7) const
+  result_type sun_forte_workaround(T_arg1 _A_1,T_arg2 _A_2,T_arg3 _A_3,T_arg4 _A_4,T_arg5 _A_5,T_arg6 _A_6,T_arg7 _A_7) const
     { return value_; }
   #endif //SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
 
@@ -284,7 +283,6 @@ typename lambda_core<T_type, false>::result_type lambda_core<T_type, false>::ope
 } /* namespace internal */
 
 
-//template specialization of visit_each<>(action, functor):
 template <class T_action, class T_functor, bool I_islambda>
 void visit_each(const T_action& _A_action,
                 const internal::lambda_core<T_functor, I_islambda>& _A_target)
@@ -342,7 +340,6 @@ struct lambda : public internal::lambda_core<T_type>
 };
 
 
-//template specialization of visit_each<>(action, functor):
 template <class T_action, class T_type>
 void visit_each(const T_action& _A_action,
                 const lambda<T_type>& _A_target)
@@ -351,32 +348,12 @@ void visit_each(const T_action& _A_action,
 }
 
 
-/** Converts a reference into a lambda object.
- * sigc::var creates a 0-ary functor, returning the value of a referenced variable. 
- *
- * @par Example:
- *   @code
- *   int main(int argc, char* argv)
- *   {
- *     int data;
- *     sigc::signal<int> readValue;
- *
- *     readValue.connect(sigc::var(data));
- *
- *     data = 3;
- *     std::cout << readValue() << std::endl; //Prints 3.
- *
- *    data = 5;
- *    std::cout << readValue() << std::endl; //Prints 5.
- *   }
- *   @endcode
- */
+/// Converts a reference into a lambda object.
 template <class T_type>
 lambda<T_type&> var(T_type& v)
 { return lambda<T_type&>(v); }
 
-/** Converts a constant reference into a lambda object.
- */
+/// Converts a constant reference into a lambda object.
 template <class T_type>
 lambda<const T_type&> var(const T_type& v)
 { return lambda<const T_type&>(v); }

@@ -3,7 +3,6 @@
 #ifndef _GTKMM_COLORSELECTION_H
 #define _GTKMM_COLORSELECTION_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -105,18 +104,12 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_color_changed();
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -200,25 +193,17 @@ public:
   static SlotChangePaletteHook set_change_palette_hook(const SlotChangePaletteHook& slot);
 
   
-/**
-   * @par Prototype:
-   * <tt>void %color_changed()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_color_changed();
 
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether a palette should be used.
+  /** Whether a palette should be used.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_has_palette() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether a palette should be used.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -226,19 +211,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_has_palette() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether the color selector should allow setting opacity.
+  /** Whether the color selector should allow setting opacity.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_has_opacity_control() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the color selector should allow setting opacity.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -246,19 +227,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_has_opacity_control() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The current color.
+  /** The current color.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Gdk::Color> property_current_color() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The current color.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -266,19 +243,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Gdk::Color> property_current_color() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The current opacity value (0 fully transparent, 65535 fully opaque).
+  /** The current opacity value (0 fully transparent, 65535 fully opaque).
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<guint> property_current_alpha() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The current opacity value (0 fully transparent, 65535 fully opaque).
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -286,7 +259,6 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<guint> property_current_alpha() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -338,17 +310,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -359,15 +325,15 @@ public:
   ColorSelectionDialog();
   explicit ColorSelectionDialog(const Glib::ustring& title);
 
-   ColorSelection* get_colorsel();
+  ColorSelection* get_colorsel();
   const ColorSelection* get_colorsel() const;
-    Button* get_ok_button();
+  Button* get_ok_button();
   const Button* get_ok_button() const;
-    Button* get_cancel_button();
+  Button* get_cancel_button();
   const Button* get_cancel_button() const;
-    Button* get_help_button();
+  Button* get_help_button();
   const Button* get_help_button() const;
- 
+
 
 };
 
@@ -382,9 +348,7 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::ColorSelection* wrap(GtkColorSelection* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 namespace Glib
 {
   /** @relates Gtk::ColorSelectionDialog
@@ -393,8 +357,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::ColorSelectionDialog* wrap(GtkColorSelectionDialog* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_COLORSELECTION_H */
 

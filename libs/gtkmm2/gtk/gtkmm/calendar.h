@@ -3,7 +3,6 @@
 #ifndef _GTKMM_CALENDAR_H
 #define _GTKMM_CALENDAR_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -176,16 +175,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_month_changed();
   virtual void on_day_selected();
   virtual void on_day_selected_double_click();
@@ -193,7 +187,6 @@ protected:
   virtual void on_next_month();
   virtual void on_prev_year();
   virtual void on_next_year();
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -202,51 +195,26 @@ public:
   Calendar();
   
   
-  /** Shifts the calendar to a different month.
-   * @param month A month number between 0 and 11.
-   * @param year The year the month is in.
-   * @return <tt>true</tt>, always.
-   */
   int select_month(guint month, guint year);
   
-  /** Selects a day from the current month.
-   * @param day The day number between 1 and 31, or 0 to unselect 
-   * the currently selected day.
-   */
   void select_day(guint day);
   
-  /** Places a visual marker on a particular day.
-   * @param day The day number to mark between 1 and 31.
-   * @return <tt>true</tt>, always.
-   */
   int mark_day(guint day);
   
-  /** Removes the visual marker from a particular day.
-   * @param day The day number to unmark between 1 and 31.
-   * @return <tt>true</tt>, always.
-   */
   int unmark_day(guint day);
   
-  /** Remove all visual markers.
-   */
   void clear_marks();
 
+  #ifndef GTKMM_DISABLE_DEPRECATED
   
-#ifndef GTKMM_DISABLE_DEPRECATED
-
-  /** Sets display options (whether to display the heading and the month headings).
-   * 
-   * Deprecated: Use set_display_options() instead
-   * @param flags The display options to set.
-   */
   void display_options(CalendarDisplayOptions flags);
-#endif // GTKMM_DISABLE_DEPRECATED
-
-
+  #endif //GTKMM_DISABLE_DEPRECATED
+  
+  
   /** Sets display options (whether to display the heading and the month  
    * headings).
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param flags The display options to set.
    */
   void set_display_options(CalendarDisplayOptions flags);
@@ -254,82 +222,36 @@ public:
   /** Returns the current display options of @a calendar .
    * @return The display options.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   CalendarDisplayOptions get_display_options() const;
 
   
-  /** Obtains the selected date from a Gtk::Calendar.
-   * @param year Location to store the year number, or <tt>0</tt>.
-   * @param month Location to store the month number (between 0 and 11), or <tt>0</tt>.
-   * @param day Location to store the day number (between 1 and 31), or <tt>0</tt>.
-   */
   void get_date(guint& year, guint& month, guint& day) const;
   
-  /** Does nothing. Previously locked the display of the calendar until
-   * it was thawed with thaw().
-   */
   void freeze();
   
-  /** Does nothing. Previously defrosted a calendar; all the changes made
-   * since the last freeze() were displayed.
-   */
   void thaw();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %month_changed()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_month_changed();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %day_selected()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_day_selected();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %day_selected_double_click()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_day_selected_double_click();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %prev_month()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_prev_month();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %next_month()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_next_month();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %prev_year()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_prev_year();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %next_year()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_next_year();
 
 
@@ -346,8 +268,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Calendar* wrap(GtkCalendar* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_CALENDAR_H */
 

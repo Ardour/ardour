@@ -3,7 +3,6 @@
 #ifndef _GDKMM_DISPLAYMANAGER_H
 #define _GDKMM_DISPLAYMANAGER_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -100,7 +99,7 @@ public:
    * the global Gdk::DisplayManager singleton; gdk_parse_pargs(),
    * gdk_init(), or gdk_init_check() must have been called first.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   static Glib::RefPtr<DisplayManager> get();
   
@@ -108,7 +107,7 @@ public:
    * @return A Gdk::Display, or <tt>0</tt> if there is no default
    * display.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<Display> get_default_display();
   
@@ -116,37 +115,33 @@ public:
    * @return A Gdk::Display, or <tt>0</tt> if there is no default
    * display.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<const Display> get_default_display() const;
 
   
   /** Sets @a display  as the default display.
    * 
-   * @newin2p2
+   * Since: 2.2
    * @param display A Gdk::Display.
    */
   void set_default_display(const Glib::RefPtr<Display>& display);
 
   
   /** List all currently open displays.
-   * 
-   *  @a newin2p2 
    * @return A list of Gdk::Display objects.
+   * Since: 2.2.
    */
   Glib::SListHandle< Glib::RefPtr<Display> > list_displays();
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The default display for GDK.
+  /** The default display for GDK.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy< Glib::RefPtr<Display> > property_default_display() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The default display for GDK.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -154,21 +149,8 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly< Glib::RefPtr<Display> > property_default_display() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
   
-  /** The display_opened signal is emitted when a display is opened.
-   *
-   * @newin2p2
-   *
-   * @param display the opened display
-   */
-  
-/**
-   * @par Prototype:
-   * <tt>void %display_opened(const Glib::RefPtr<Display>& display)</tt>
-   */
-
   Glib::SignalProxy1< void,const Glib::RefPtr<Display>& > signal_display_opened();
 
 
@@ -176,18 +158,12 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_display_opened(const Glib::RefPtr<Display>& display);
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

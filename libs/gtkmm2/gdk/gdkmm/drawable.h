@@ -3,7 +3,6 @@
 #ifndef _GDKMM_DRAWABLE_H
 #define _GDKMM_DRAWABLE_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -37,7 +36,6 @@
 #include <gdkmm/region.h>
 #include <gdkmm/rgbcmap.h>
 #include <gdkmm/types.h>
-#include <cairomm/context.h>
 //#include <gdkmm/pixbuf.h>
 
 
@@ -97,12 +95,7 @@ class Pixbuf;
  *
  * To use a drawable, create a concrete Drawable of the type you wish to use
  * and a Gdk::GC (graphics context) for that Drawable.  With the GC you can
- * draw lines, text, arcs and such. 
- *
- * An alternative is to create a Cairo::Context with get_cairo_context()
- * while you handle the 'exposed' event of the drawable. For more about
- * this, please see "Using cairo with GTK+" in the "Common questions" section
- * of the GTK+ Reference Manual.
+ * draw lines, text, arcs and such.
  */
 
 class Drawable : public Glib::Object
@@ -272,9 +265,9 @@ public:
    * colormap, or errors will result. (On X11, failure to match
    * visual/colormap results in a BadMatch error from the X server.)
    * A common cause of this problem is an attempt to draw a bitmap to
-   * a color drawable. The way to draw a bitmap is to set the bitmap as 
-   * the stipple on the Gdk::GC, set the fill mode to Gdk::STIPPLED, and 
-   * then draw the rectangle.
+   * a color drawable. The way to draw a bitmap is to set the
+   * bitmap as a clip mask on your Gdk::GC, then use gdk_draw_rectangle()
+   * to draw a rectangle clipped to the bitmap.
    * @param gc A Gdk::GC sharing the drawable's visual and colormap.
    * @param src The source Gdk::Drawable, which may be the same as @a drawable .
    * @param xsrc X position in @a src  of rectangle to draw.
@@ -409,7 +402,7 @@ public:
    * The clip mask of @a gc  is ignored, but clip rectangles and clip regions work
    * fine.
    * 
-   * @newin2p2
+   * Since: 2.2
    * @param gc A Gdk::GC, used for clipping, or <tt>0</tt>.
    * @param pixbuf A Gdk::Pixbuf.
    * @param src_x Source X coordinate within pixbuf.
@@ -435,8 +428,8 @@ public:
    * server-side drawable as a client-side Gdk::Image.  The format of a
    * Gdk::Image depends on the Gdk::Visual of the current display, which
    * makes manipulating Gdk::Image extremely difficult; therefore, in
-   * most cases you should use the Gdk::Pixbuf::create() method that takes a Gdk::Drawable, 
-   * instead of this lower-level function. A Gdk::Pixbuf contains image data in a
+   * most cases you should use Gdk::Pixbuf::get_from_drawable() instead of
+   * this lower-level function. A Gdk::Pixbuf contains image data in a
    * canonicalized RGB format, rather than a display-dependent format.
    * Of course, there's a convenience vs. speed tradeoff here, so you'll
    * want to think about what makes sense for your application.
@@ -550,14 +543,14 @@ public:
   /** Gets the Gdk::Screen associated with a Gdk::Drawable.
    * @return The Gdk::Screen associated with @a drawable 
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<Screen> get_screen();
   
   /** Gets the Gdk::Screen associated with a Gdk::Drawable.
    * @return The Gdk::Screen associated with @a drawable 
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<const Screen> get_screen() const;
 
@@ -565,41 +558,27 @@ public:
   /** Gets the Gdk::Display associated with a Gdk::Drawable.
    * @return The Gdk::Display associated with @a drawable 
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<Display> get_display();
   
   /** Gets the Gdk::Display associated with a Gdk::Drawable.
    * @return The Gdk::Display associated with @a drawable 
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<const Display> get_display() const;
-
-   
-  /** Creates a Cairo context for drawing to @a drawable .
-   * @return A newly created Cairo context.
-   * 
-   * @newin2p10.
-   */
-  Cairo::RefPtr<Cairo::Context> create_cairo_context();
 
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

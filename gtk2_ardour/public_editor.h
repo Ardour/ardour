@@ -62,6 +62,7 @@ class ControlPoint;
 class SelectionRect;
 class CrossfadeView;
 class RouteTimeAxisView;
+class RegionView;
 class AudioRegionView;
 class TempoMarker;
 class MeterMarker;
@@ -159,7 +160,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	sigc::signal<void> ZoomChanged;
 	sigc::signal<void> Resized;
 	sigc::signal<void> Realized;
-	sigc::signal<void> GoingAway;
 	sigc::signal<void,nframes_t> UpdateAllTransportClocks;
 
 	Glib::RefPtr<Gtk::ActionGroup> editor_actions;

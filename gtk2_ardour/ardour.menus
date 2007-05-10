@@ -333,10 +333,10 @@
 		   <menuitem action='CrossfadesShort'/>
 	       </menu>
 	       <menu action='Layering'>
-		   <menuitem action='LayerLaterHigher'/>
-		   <menuitem action='LayerMoveAddHigher'/>
-		   <menuitem action='LayerAddHigher'/>
-               </menu>
+		     <menuitem action='LayerLaterHigher'/>
+		     <menuitem action='LayerMoveAddHigher'/>
+		     <menuitem action='LayerAddHigher'/>
+           </menu>
                <separator/>
                <menuitem action='SendMTC'/>
                <menuitem action='SendMMC'/>

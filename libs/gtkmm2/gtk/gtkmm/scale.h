@@ -3,7 +3,6 @@
 #ifndef _GTKMM_SCALE_H
 #define _GTKMM_SCALE_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -115,18 +114,12 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual Glib::ustring on_format_value(double value);
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -176,7 +169,7 @@ public:
    * @return The Pango::Layout for this scale, or <tt>0</tt> if the draw_value property
    * is <tt>false</tt>.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   Glib::RefPtr<Pango::Layout> get_layout();
   
@@ -185,7 +178,7 @@ public:
    * @return The Pango::Layout for this scale, or <tt>0</tt> if the draw_value property
    * is <tt>false</tt>.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   Glib::RefPtr<const Pango::Layout> get_layout() const;
   
@@ -197,7 +190,7 @@ public:
    * If the draw_value property is <tt>false</tt>, the return values are 
    * undefined.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param x Location to store X offset of layout, or <tt>0</tt>.
    * @param y Location to store Y offset of layout, or <tt>0</tt>.
    */
@@ -211,10 +204,6 @@ public:
    * as a double and should return the representation of it as a Glib::ustring.
    */ 
   
-/**
-   * @par Prototype:
-   * <tt>Glib::ustring %format_value(double value)</tt>
-   */
 
   Glib::SignalProxy1< Glib::ustring,double > signal_format_value();
 
@@ -224,17 +213,14 @@ public:
 
   /** Number of displayed decimal digits.
    */
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The number of decimal places that are displayed in the value.
+  /** The number of decimal places that are displayed in the value.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_digits() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The number of decimal places that are displayed in the value.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -242,22 +228,18 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_digits() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
   /** Whether to draw the value as a string next to slider.
    */
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether the current value is displayed as a string next to the slider.
+  /** Whether the current value is displayed as a string next to the slider.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_draw_value() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the current value is displayed as a string next to the slider.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -265,22 +247,18 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_draw_value() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
   /** The position in which the value is displayed.
    */
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The position in which the current value is displayed.
+  /** The position in which the current value is displayed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<PositionType> property_value_pos() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The position in which the current value is displayed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -288,15 +266,11 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<PositionType> property_value_pos() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 protected:
 
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void draw_value_vfunc();
-#endif //GLIBMM_VFUNCS_ENABLED
-
+    virtual void draw_value_vfunc();
   
   virtual int calc_digits_(double step) const;
 
@@ -355,17 +329,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -436,17 +404,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -475,9 +437,7 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Scale* wrap(GtkScale* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 namespace Glib
 {
   /** @relates Gtk::VScale
@@ -486,9 +446,7 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::VScale* wrap(GtkVScale* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 namespace Glib
 {
   /** @relates Gtk::HScale
@@ -497,8 +455,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::HScale* wrap(GtkHScale* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_SCALE_H */
 

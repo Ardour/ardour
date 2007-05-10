@@ -327,7 +327,7 @@ MTC_Slave::speed_and_position (float& speed, nframes_t& pos)
 	return true;
 }
 
-nframes_t
+ARDOUR::nframes_t
 MTC_Slave::resolution() const
 {
 	return (nframes_t) session.frames_per_smpte_frame();

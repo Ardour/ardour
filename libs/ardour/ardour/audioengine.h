@@ -46,6 +46,8 @@ class Port;
 class AudioEngine : public sigc::trackable
 {
    public:
+	typedef std::set<Port*> Ports;
+
 	AudioEngine (std::string client_name);
 	virtual ~AudioEngine ();
 	
@@ -113,11 +115,11 @@ class AudioEngine : public sigc::trackable
 
 	Port *register_input_port (DataType type, const std::string& portname);
 	Port *register_output_port (DataType type, const std::string& portname);
-	int   unregister_port (Port *);
+	int   unregister_port (Port &);
 	
 	int connect (const std::string& source, const std::string& destination);
 	int disconnect (const std::string& source, const std::string& destination);
-	int disconnect (Port *);
+	int disconnect (Port &);
 	
 	const char ** get_ports (const std::string& port_name_pattern, const std::string& type_name_pattern, uint32_t flags);
 
@@ -127,21 +129,19 @@ class AudioEngine : public sigc::trackable
 	void get_physical_outputs (std::vector<std::string>&);
 	void get_physical_inputs (std::vector<std::string>&);
 
-	std::string get_nth_physical_output (uint32_t n) {
-		return get_nth_physical (n, JackPortIsInput);
+	std::string get_nth_physical_output (DataType type, uint32_t n) {
+		return get_nth_physical (type, n, JackPortIsInput);
 	}
 
-	std::string get_nth_physical_input (uint32_t n) {
-		return get_nth_physical (n, JackPortIsOutput);
+	std::string get_nth_physical_input (DataType type, uint32_t n) {
+		return get_nth_physical (type, n, JackPortIsOutput);
 	}
 
 	nframes_t get_port_total_latency (const Port&);
 	void update_total_latencies ();
 
-	/* the caller may not delete the object pointed to by 
-	   the return value
+	/** Caller may not delete the object pointed to by the return value
 	*/
-
 	Port *get_port_by_name (const std::string& name, bool keep = true);
 
 	enum TransportState {
@@ -213,7 +213,6 @@ class AudioEngine : public sigc::trackable
 	bool                  reconnect_on_halt;
 	int                  _usecs_per_cycle;
 
-	typedef std::set<Port*> Ports;
 	SerializedRCUManager<Ports> ports;
 
 	int    process_callback (nframes_t nframes);
@@ -223,9 +222,9 @@ class AudioEngine : public sigc::trackable
 	typedef std::list<PortConnection> PortConnections;
 
 	PortConnections port_connections;
-	void   remove_connections_for (Port*);
+	void   remove_connections_for (Port&);
 
-	std::string get_nth_physical (uint32_t which, int flags);
+	std::string get_nth_physical (DataType type, uint32_t n, int flags);
 
 	static int  _xrun_callback (void *arg);
 	static int  _graph_order_callback (void *arg);

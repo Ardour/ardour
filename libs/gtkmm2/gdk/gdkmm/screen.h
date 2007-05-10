@@ -3,7 +3,6 @@
 #ifndef _GDKMM_SCREEN_H
 #define _GDKMM_SCREEN_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -107,21 +106,21 @@ public:
   /** Gets the default colormap for @a screen .
    * @return The default Gdk::Colormap.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<Colormap> get_default_colormap();
   
   /** Gets the default colormap for @a screen .
    * @return The default Gdk::Colormap.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<const Colormap> get_default_colormap() const;
 
   
   /** Sets the default @a colormap  for @a screen .
    * 
-   * @newin2p2
+   * Since: 2.2
    * @param colormap A Gdk::Colormap.
    */
   void set_default_colormap(const Glib::RefPtr<const Colormap>& colormap);
@@ -129,14 +128,14 @@ public:
   /** Gets the system's default colormap for @a screen 
    * @return The default colormap for @a screen .
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<Colormap> get_system_colormap();
   
   /** Gets the system's default colormap for @a screen 
    * @return The default colormap for @a screen .
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<const Colormap> get_system_colormap() const;
 
@@ -146,7 +145,7 @@ public:
    * The return value should not be freed.
    * @return The system visual
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<Visual> get_system_visual();
   
@@ -155,7 +154,7 @@ public:
    * The return value should not be freed.
    * @return The system visual
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<const Visual> get_system_visual() const;
 
@@ -167,7 +166,7 @@ public:
    * call this function.
    * @return The preferred colormap
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<Colormap> get_rgb_colormap();
   
@@ -178,7 +177,7 @@ public:
    * call this function.
    * @return The preferred colormap
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<const Colormap> get_rgb_colormap() const;
 
@@ -191,7 +190,7 @@ public:
    * drawables with any visual.
    * @return The Gdk::Visual chosen by GdkRGB.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<Visual> get_rgb_visual();
   
@@ -203,74 +202,22 @@ public:
    * drawables with any visual.
    * @return The Gdk::Visual chosen by GdkRGB.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<const Visual> get_rgb_visual() const;
-
-  
-  /** Gets a colormap to use for creating windows or pixmaps with an
-   * alpha channel. The windowing system on which GTK+ is running
-   * may not support this capability, in which case <tt>0</tt> will
-   * be returned. Even if a non-<tt>0</tt> value is returned, its
-   * possible that the window's alpha channel won't be honored
-   * when displaying the window on the screen: in particular, for
-   * X an appropriate windowing manager and compositing manager
-   * must be running to provide appropriate display.
-   * @return A colormap to use for windows with an alpha channel
-   * or <tt>0</tt> if the capability is not available.
-   * 
-   * @newin2p8.
-   */
-  Glib::RefPtr<Colormap> get_rgba_colormap();
-  
-  /** Gets a colormap to use for creating windows or pixmaps with an
-   * alpha channel. The windowing system on which GTK+ is running
-   * may not support this capability, in which case <tt>0</tt> will
-   * be returned. Even if a non-<tt>0</tt> value is returned, its
-   * possible that the window's alpha channel won't be honored
-   * when displaying the window on the screen: in particular, for
-   * X an appropriate windowing manager and compositing manager
-   * must be running to provide appropriate display.
-   * @return A colormap to use for windows with an alpha channel
-   * or <tt>0</tt> if the capability is not available.
-   * 
-   * @newin2p8.
-   */
-  Glib::RefPtr<const Colormap> get_rgba_colormap() const;
-
-  
-  /** Gets a visual to use for creating windows or pixmaps with an
-   * alpha channel. See the docs for get_rgba_colormap()
-   * for caveats.
-   * @return A visual to use for windows with an alpha channel
-   * or <tt>0</tt> if the capability is not available.
-   * 
-   * @newin2p8.
-   */
-  Glib::RefPtr<Visual> get_rgba_visual();
-  
-  /** Gets a visual to use for creating windows or pixmaps with an
-   * alpha channel. See the docs for get_rgba_colormap()
-   * for caveats.
-   * @return A visual to use for windows with an alpha channel
-   * or <tt>0</tt> if the capability is not available.
-   * 
-   * @newin2p8.
-   */
-  Glib::RefPtr<const Visual> get_rgba_visual() const;
 
   
   /** Gets the root window of @a screen .
    * @return The root window
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<Window> get_root_window();
   
   /** Gets the root window of @a screen .
    * @return The root window
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<const Window> get_root_window() const;
 
@@ -278,14 +225,14 @@ public:
   /** Gets the display to which the @a screen  belongs.
    * @return The display to which @a screen  belongs
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<Display> get_display();
   
   /** Gets the display to which the @a screen  belongs.
    * @return The display to which @a screen  belongs
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<const Display> get_display() const;
 
@@ -294,37 +241,37 @@ public:
    * to which it belongs. (See get_display())
    * @return The index
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   int get_number() const;
   
   /** Gets the width of @a screen  in pixels
    * @return The width of @a screen  in pixels.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   int get_width() const;
   
   /** Gets the height of @a screen  in pixels
    * @return The height of @a screen  in pixels.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   int get_height() const;
   
   /** Gets the width of @a screen  in millimeters. 
    * Note that on some X servers this value will not be correct.
-   * @return The width of @a screen  in millimeters.
+   * @return The width of @a screen  in pixels.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   int get_width_mm() const;
   
   /** Returns the height of @a screen  in millimeters. 
    * Note that on some X servers this value will not be correct.
-   * @return The heigth of @a screen  in millimeters.
+   * @return The heigth of @a screen  in pixels.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   int get_height_mm() const;
 
@@ -333,24 +280,26 @@ public:
    * A visual describes a hardware image data format.
    * For example, a visual might support 24-bit color, or 8-bit color,
    * and might expect pixels to be in a certain format.
-   *  @a newin2p2 
    * @return A list of visuals.
+   * 
+   * Since: 2.2.
    */
   Glib::ListHandle< Glib::RefPtr<Visual> > list_visuals();
   
   /** Obtains a list of all toplevel windows known to GDK on the screen @a screen .
    * A toplevel window is a child of the root window (see
    * gdk_get_default_root_window()).
-   *  @a newin2p2 
    * @return List of toplevel windows.
+   * 
+   * Since: 2.2.
    */
   Glib::ListHandle< Glib::RefPtr<Window> > get_toplevel_windows();
   
   /** Determines the name to pass to Gdk::Display::open() to get
    * a Gdk::Display with this screen as the default screen.
-   * 
-   *  @a newin2p2 
    * @return The name.
+   * 
+   * Since: 2.2.
    */
   Glib::ustring make_display_name();
 
@@ -358,17 +307,17 @@ public:
   /** Returns the number of monitors which @a screen  consists of.
    * @return Number of monitors which @a screen  consists of.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   int get_n_monitors() const;
   
   /** Retrieves the Gdk::Rectangle representing the size and position of 
-   * the individual monitor within the entire screen area.
+   * the individual monitor within the the entire screen area.
    * 
    * Note that the size of the entire screen area can be retrieved via 
    * get_width() and get_height().
    * 
-   * @newin2p2
+   * Since: 2.2
    * @param monitor_num The monitor number.
    * @param dest A Gdk::Rectangle to be filled with the monitor geometry.
    */
@@ -380,7 +329,7 @@ public:
    * @return The monitor number in which the point ( @a x , @a y ) lies, or
    * a monitor close to ( @a x , @a y ) if the point is not in any monitor.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   int get_monitor_at_point(int x, int y) const;
   
@@ -392,7 +341,7 @@ public:
    * the number of the monitor in which the largest area of the 
    * bounding rectangle of @a window  resides.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   int get_monitor_at_window(const Glib::RefPtr<Window>& window) const;
 
@@ -409,7 +358,7 @@ public:
    * GDK_WIN32_CLIENT_MESSAGE to all top-level windows. The amount of
    * data is limited to one long, i.e. four bytes.
    * 
-   * @newin2p2
+   * Since: 2.2
    * @param event The Gdk::Event.
    */
   void broadcast_client_message(GdkEvent* event);
@@ -419,22 +368,13 @@ public:
    * Gdk::Display::get_default()).
    * @return A Gdk::Screen, or <tt>0</tt> if there is no default display.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   static Glib::RefPtr<Screen> get_default();
 
   template <class ValueType>
   bool get_setting(const Glib::ustring& name, ValueType& value) const;
   
-
-  /** The size_changed signal is emitted when the pixel width or 
-   * height of a screen changes.
-   */
-  
-/**
-   * @par Prototype:
-   * <tt>void %size_changed()</tt>
-   */
 
   Glib::SignalProxy0< void > signal_size_changed();
 
@@ -443,18 +383,12 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_size_changed();
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

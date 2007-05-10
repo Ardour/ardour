@@ -94,8 +94,7 @@ ALSA_SequencerMidiPort::selectable () const
 	return -1;
 }
 
-int 
-ALSA_SequencerMidiPort::write (byte *msg, size_t msglen)	
+int ALSA_SequencerMidiPort::write (byte *msg, size_t msglen, timestamp_t timestamp)	
 {
 	TR_FN ();
 	int R;
@@ -134,8 +133,7 @@ ALSA_SequencerMidiPort::write (byte *msg, size_t msglen)
 	return totwritten;
 }
 
-int 
-ALSA_SequencerMidiPort::read (byte *buf, size_t max)
+int ALSA_SequencerMidiPort::read (byte *buf, size_t max, timestamp_t timestamp)
 {
 	TR_FN();
 	int err;

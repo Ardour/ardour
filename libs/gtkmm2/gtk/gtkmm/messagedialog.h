@@ -3,7 +3,6 @@
 #ifndef _GTKMM_MESSAGEDIALOG_H
 #define _GTKMM_MESSAGEDIALOG_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -52,8 +51,7 @@ enum MessageType
   MESSAGE_INFO,
   MESSAGE_WARNING,
   MESSAGE_QUESTION,
-  MESSAGE_ERROR,
-  MESSAGE_OTHER
+  MESSAGE_ERROR
 };
 
 } // namespace Gtk
@@ -166,17 +164,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -187,22 +179,17 @@ public:
   MessageDialog(Gtk::Window& parent, const Glib::ustring& message, bool use_markup = false, MessageType type = MESSAGE_INFO, ButtonsType buttons = BUTTONS_OK, bool modal = false);
   
 
-  void set_image(Widget& image);
-
+  /** @deprecated Use set_message(string, true);
+   */
   
-#ifndef GTKMM_DISABLE_DEPRECATED
-
   /** Sets the text of the message dialog to be @a str , which is marked
    * up with the Pango text markup
    * language.
    * 
-   * @newin2p4
-   * @deprecated Use set_message(string, true).
+   * Since: 2.4
    * @param str Markup string (see Pango markup format).
    */
   void set_markup(const Glib::ustring& str);
-#endif // GTKMM_DISABLE_DEPRECATED
-
 
   /** Sets the primary text of the message dialog.
    *
@@ -215,145 +202,13 @@ public:
   /** Sets the secondary text of the message dialog.
    * Note that setting a secondary text makes the primary text become bold, unless you have provided explicit markup.
    *
-   * @newin2p6.
+   * Since 2.6.
    *
    * @param text The message.
    * @param use_markup Whether @a message contains pango markup.
    */
   void set_secondary_text(const Glib::ustring& text, bool use_markup = false);
   
-
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The type of message.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy<MessageType> property_message_type() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-#ifdef GLIBMM_PROPERTIES_ENABLED
-/** The type of message.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy_ReadOnly<MessageType> property_message_type() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The buttons shown in the message dialog.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy_ReadOnly<ButtonsType> property_buttons() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The primary text of the message dialog.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy<Glib::ustring> property_text() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-#ifdef GLIBMM_PROPERTIES_ENABLED
-/** The primary text of the message dialog.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy_ReadOnly<Glib::ustring> property_text() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The primary text of the title includes Pango markup.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy<bool> property_use_markup() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-#ifdef GLIBMM_PROPERTIES_ENABLED
-/** The primary text of the title includes Pango markup.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy_ReadOnly<bool> property_use_markup() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The secondary text of the message dialog.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy<Glib::ustring> property_secondary_text() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-#ifdef GLIBMM_PROPERTIES_ENABLED
-/** The secondary text of the message dialog.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy_ReadOnly<Glib::ustring> property_secondary_text() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The secondary text includes Pango markup.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy<bool> property_secondary_use_markup() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-#ifdef GLIBMM_PROPERTIES_ENABLED
-/** The secondary text includes Pango markup.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy_ReadOnly<bool> property_secondary_use_markup() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The image.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy<Widget*> property_image() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-#ifdef GLIBMM_PROPERTIES_ENABLED
-/** The image.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy_ReadOnly<Widget*> property_image() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
 
 };
 
@@ -368,8 +223,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::MessageDialog* wrap(GtkMessageDialog* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_MESSAGEDIALOG_H */
 

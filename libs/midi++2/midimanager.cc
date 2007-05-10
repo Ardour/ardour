@@ -33,17 +33,11 @@ using namespace std;
 using namespace MIDI;
 using namespace PBD;
 
-/* XXX check for strdup leaks */
-
 Manager *Manager::theManager = 0;
 
 Manager::Manager () 
-      
+	: api_data(NULL)
 {
-	inputPort = 0;
-	outputPort = 0;
-	inputChannelNumber = 0;
-	outputChannelNumber = 0;
 }
 
 Manager::~Manager ()
@@ -109,8 +103,7 @@ Manager::add_port (PortRequest &req)
 			/* modes must be different or complementary */
 		}
 	}
-	
-	port = factory.create_port (req);
+	port = factory.create_port (req, api_data);
 	
 	if (port == 0) {
 		return 0;
@@ -128,18 +121,6 @@ Manager::add_port (PortRequest &req)
 	newpair.first = port->device();
 	newpair.second = port;
 	ports_by_device.insert (newpair);
-
-	/* first port added becomes the default input
-	   port.
-	*/
-
-	if (inputPort == 0) {
-		inputPort = port;
-	} 
-
-	if (outputPort == 0) {
-		outputPort = port;
-	}
 
 	return port;
 }
@@ -159,92 +140,6 @@ Manager::remove_port (string name)
 	delete (*res).second;
 
 	return 0;
-}
-
-int
-Manager::set_input_port (string tag)
-{
-	PortMap::iterator res;
-	bool found = false;
-
-	for (res = ports_by_tag.begin(); res != ports_by_tag.end(); res++) {
-		if (tag == (*res).first) {
-			found = true;
-			break;
-		}
-	}
-	
-	if (!found) {
-		return -1;
-	}
-
-	inputPort = (*res).second;
-
-	return 0;
-}
-
-int
-Manager::set_input_port (size_t portnum)
-
-{
-	PortMap::iterator res;
-
-	for (res = ports_by_tag.begin(); res != ports_by_tag.end(); res++) {
-		if ((*res).second->number() == portnum) {
-			inputPort = (*res).second;
-			return 0;
-		}
-	}
-
-	return -1;
-}
-
-int
-Manager::set_output_port (string tag)
-
-{
-	PortMap::iterator res;
-	bool found = false;
-
-	for (res = ports_by_tag.begin(); res != ports_by_tag.end(); res++) {
-		if (tag == (*res).first) {
-			found = true;
-			break;
-		}
-	}
-	
-	if (!found) {
-		return -1;
-	}
-
-	// XXX send a signal to say we're about to change output ports
-
-	if (outputPort) {
-		for (channel_t chan = 0; chan < 16; chan++) {
-			outputPort->channel (chan)->all_notes_off ();
-		}
-	}
-	outputPort = (*res).second;
-
-	// XXX send a signal to say we've changed output ports
-
-	return 0;
-}
-
-int
-Manager::set_output_port (size_t portnum)
-
-{
-	PortMap::iterator res;
-
-	for (res = ports_by_tag.begin(); res != ports_by_tag.end(); res++) {
-		if ((*res).second->number() == portnum) {
-			outputPort = (*res).second;
-			return 0;
-		}
-	}
-
-	return -1;
 }
 
 Port *
@@ -367,7 +262,6 @@ Manager::parse_port_request (string str, Port::Type type)
 		}
 
 	} else {
-                // check when tagname is freed
 		req->tagname = g_path_get_basename (req->devname);
 		req->mode = O_RDWR;
 	}
@@ -380,3 +274,20 @@ Manager::parse_port_request (string str, Port::Type type)
 
 	return 0;
 }
+
+void
+Manager::cycle_start(nframes_t nframes)
+{
+	for (PortMap::iterator i = ports_by_device.begin(); 
+	            i != ports_by_device.end(); i++)
+		(*i).second->cycle_start(nframes);
+}
+
+void
+Manager::cycle_end()
+{
+	for (PortMap::iterator i = ports_by_device.begin(); 
+	            i != ports_by_device.end(); i++)
+		(*i).second->cycle_end();
+}
+

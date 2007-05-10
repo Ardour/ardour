@@ -196,7 +196,13 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 		session_add_audio_route (false, input_channels, output_channels, ARDOUR::Normal, how_many);
 	}
 
-	void session_add_midi_track ();
+	void session_add_midi_track (uint32_t how_many) {
+		session_add_midi_route (true, how_many);
+	}
+
+	/*void session_add_midi_bus () {
+		session_add_midi_route (false);
+	}*/
 
 	void set_engine (ARDOUR::AudioEngine&);
 	gint start_engine ();
@@ -448,7 +454,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::ToggleButton solo_alert_button;
 
 	Gtk::VBox alert_box;
-	
+
 	void solo_blink (bool);
 	void audition_blink (bool);
 
@@ -543,6 +549,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void save_template ();
 
 	void session_add_audio_route (bool disk, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode, uint32_t how_many);
+	void session_add_midi_route (bool disk, uint32_t how_many);
 
 	void set_transport_sensitivity (bool);
 

@@ -1,0 +1,25 @@
+# -*- python -*-
+
+import os
+import os.path
+import glob
+
+Import('env libraries install_prefix')
+
+libglademm_files = glob.glob('libglademm/*.cc')
+
+libglademm = env.Copy()
+libglademm.Merge([libraries['gtk2'], libraries['glade2'], libraries['sigc2'], libraries['glibmm2'], libraries['pangomm'], libraries['atkmm'], libraries['gdkmm2'], libraries['gtkmm2']])
+
+libglade = libglademm.SharedLibrary('libglademm', libglademm_files)
+
+Default(libglade)
+
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), libglade))
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+                                     [ 'SConscript', 'libglademmconfig.h', 'libglademm.h'] +
+				     libglademm_files + 
+				     glob.glob('libglademm/*.h') +
+				     glob.glob('libglademm/private/*.h')
+				     ))

@@ -3,7 +3,6 @@
 #ifndef _PANGOMM_ATTRLIST_H
 #define _PANGOMM_ATTRLIST_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -44,8 +43,6 @@ namespace Pango
  *
  * Since the Pango::AttrList structure is stored as a linear list, it is not suitable for storing attributes for large amounts of text.
  * In general, you should not use a single Pango::AttrList for more than one paragraph of text.
- *
- * When obtaining an AttrList, you should check that it is valid. For instance, if(attrlist).
  */
 class AttrList
 {
@@ -113,9 +110,6 @@ public:
    */
   AttrList(const Glib::ustring& markup_text, gunichar accel_marker, Glib::ustring& text, gunichar& accel_char);
 
-  ///Tests whether the AttrList is valid.
-  operator bool();
-
   void insert(Attribute& attr);
    // hand code because we need to pass a copy of the attribute
   void insert_before(Attribute& attr);
@@ -125,9 +119,9 @@ public:
   
   /** This function splices attribute list @a other  into @a list .
    * This operation is equivalent to stretching every attribute
-   * that applies at position @a pos  in @a list  by an amount @a len ,
+   * applies at position @a pos  in @a list  by an amount @a len ,
    * and then calling pango_attr_list_change() with a copy
-   * of each attribute in @a other  in sequence (offset in position by @a pos ).
+   * of each attributes in @a other  in sequence (offset in position by @a pos ).
    * 
    * This operation proves useful for, for instance, inserting
    * a preedit string in the middle of an edit buffer.
@@ -183,7 +177,6 @@ class Value<Pango::AttrList> : public Glib::Value_Boxed<Pango::AttrList>
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 } // namespace Glib
-
 
 #endif /* _PANGOMM_ATTRLIST_H */
 

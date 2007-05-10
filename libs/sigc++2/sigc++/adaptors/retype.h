@@ -81,7 +81,7 @@ struct retype_functor
   typename deduce_result_type<T_arg1>::type
   operator()(T_arg1 _A_a1)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_type1>::take>
-        (static_cast<T_type1>(_A_a1));
+        ((T_type1)_A_a1);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
@@ -89,7 +89,7 @@ struct retype_functor
   typename deduce_result_type<T_arg1>::type
   sun_forte_workaround(T_arg1 _A_a1)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_type1>::take>
-        (static_cast<T_type1>(_A_a1));
+        ((T_type1)_A_a1);
     }
   #endif
 
@@ -97,7 +97,7 @@ struct retype_functor
   typename deduce_result_type<T_arg1,T_arg2>::type
   operator()(T_arg1 _A_a1,T_arg2 _A_a2)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_type1>::take,typename type_trait<T_type2>::take>
-        (static_cast<T_type1>(_A_a1),static_cast<T_type2>(_A_a2));
+        ((T_type1)_A_a1,(T_type2)_A_a2);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
@@ -105,7 +105,7 @@ struct retype_functor
   typename deduce_result_type<T_arg1,T_arg2>::type
   sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_type1>::take,typename type_trait<T_type2>::take>
-        (static_cast<T_type1>(_A_a1),static_cast<T_type2>(_A_a2));
+        ((T_type1)_A_a1,(T_type2)_A_a2);
     }
   #endif
 
@@ -113,7 +113,7 @@ struct retype_functor
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
   operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_type1>::take,typename type_trait<T_type2>::take,typename type_trait<T_type3>::take>
-        (static_cast<T_type1>(_A_a1),static_cast<T_type2>(_A_a2),static_cast<T_type3>(_A_a3));
+        ((T_type1)_A_a1,(T_type2)_A_a2,(T_type3)_A_a3);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
@@ -121,7 +121,7 @@ struct retype_functor
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
   sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_type1>::take,typename type_trait<T_type2>::take,typename type_trait<T_type3>::take>
-        (static_cast<T_type1>(_A_a1),static_cast<T_type2>(_A_a2),static_cast<T_type3>(_A_a3));
+        ((T_type1)_A_a1,(T_type2)_A_a2,(T_type3)_A_a3);
     }
   #endif
 
@@ -129,7 +129,7 @@ struct retype_functor
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
   operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_type1>::take,typename type_trait<T_type2>::take,typename type_trait<T_type3>::take,typename type_trait<T_type4>::take>
-        (static_cast<T_type1>(_A_a1),static_cast<T_type2>(_A_a2),static_cast<T_type3>(_A_a3),static_cast<T_type4>(_A_a4));
+        ((T_type1)_A_a1,(T_type2)_A_a2,(T_type3)_A_a3,(T_type4)_A_a4);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
@@ -137,7 +137,7 @@ struct retype_functor
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
   sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_type1>::take,typename type_trait<T_type2>::take,typename type_trait<T_type3>::take,typename type_trait<T_type4>::take>
-        (static_cast<T_type1>(_A_a1),static_cast<T_type2>(_A_a2),static_cast<T_type3>(_A_a3),static_cast<T_type4>(_A_a4));
+        ((T_type1)_A_a1,(T_type2)_A_a2,(T_type3)_A_a3,(T_type4)_A_a4);
     }
   #endif
 
@@ -145,7 +145,7 @@ struct retype_functor
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
   operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_type1>::take,typename type_trait<T_type2>::take,typename type_trait<T_type3>::take,typename type_trait<T_type4>::take,typename type_trait<T_type5>::take>
-        (static_cast<T_type1>(_A_a1),static_cast<T_type2>(_A_a2),static_cast<T_type3>(_A_a3),static_cast<T_type4>(_A_a4),static_cast<T_type5>(_A_a5));
+        ((T_type1)_A_a1,(T_type2)_A_a2,(T_type3)_A_a3,(T_type4)_A_a4,(T_type5)_A_a5);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
@@ -153,7 +153,7 @@ struct retype_functor
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
   sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_type1>::take,typename type_trait<T_type2>::take,typename type_trait<T_type3>::take,typename type_trait<T_type4>::take,typename type_trait<T_type5>::take>
-        (static_cast<T_type1>(_A_a1),static_cast<T_type2>(_A_a2),static_cast<T_type3>(_A_a3),static_cast<T_type4>(_A_a4),static_cast<T_type5>(_A_a5));
+        ((T_type1)_A_a1,(T_type2)_A_a2,(T_type3)_A_a3,(T_type4)_A_a4,(T_type5)_A_a5);
     }
   #endif
 
@@ -161,7 +161,7 @@ struct retype_functor
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
   operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_type1>::take,typename type_trait<T_type2>::take,typename type_trait<T_type3>::take,typename type_trait<T_type4>::take,typename type_trait<T_type5>::take,typename type_trait<T_type6>::take>
-        (static_cast<T_type1>(_A_a1),static_cast<T_type2>(_A_a2),static_cast<T_type3>(_A_a3),static_cast<T_type4>(_A_a4),static_cast<T_type5>(_A_a5),static_cast<T_type6>(_A_a6));
+        ((T_type1)_A_a1,(T_type2)_A_a2,(T_type3)_A_a3,(T_type4)_A_a4,(T_type5)_A_a5,(T_type6)_A_a6);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
@@ -169,7 +169,7 @@ struct retype_functor
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
   sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_type1>::take,typename type_trait<T_type2>::take,typename type_trait<T_type3>::take,typename type_trait<T_type4>::take,typename type_trait<T_type5>::take,typename type_trait<T_type6>::take>
-        (static_cast<T_type1>(_A_a1),static_cast<T_type2>(_A_a2),static_cast<T_type3>(_A_a3),static_cast<T_type4>(_A_a4),static_cast<T_type5>(_A_a5),static_cast<T_type6>(_A_a6));
+        ((T_type1)_A_a1,(T_type2)_A_a2,(T_type3)_A_a3,(T_type4)_A_a4,(T_type5)_A_a5,(T_type6)_A_a6);
     }
   #endif
 
@@ -177,7 +177,7 @@ struct retype_functor
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>::type
   operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6,T_arg7 _A_a7)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_type1>::take,typename type_trait<T_type2>::take,typename type_trait<T_type3>::take,typename type_trait<T_type4>::take,typename type_trait<T_type5>::take,typename type_trait<T_type6>::take,typename type_trait<T_type7>::take>
-        (static_cast<T_type1>(_A_a1),static_cast<T_type2>(_A_a2),static_cast<T_type3>(_A_a3),static_cast<T_type4>(_A_a4),static_cast<T_type5>(_A_a5),static_cast<T_type6>(_A_a6),static_cast<T_type7>(_A_a7));
+        ((T_type1)_A_a1,(T_type2)_A_a2,(T_type3)_A_a3,(T_type4)_A_a4,(T_type5)_A_a5,(T_type6)_A_a6,(T_type7)_A_a7);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
@@ -185,7 +185,7 @@ struct retype_functor
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>::type
   sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6,T_arg7 _A_a7)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_type1>::take,typename type_trait<T_type2>::take,typename type_trait<T_type3>::take,typename type_trait<T_type4>::take,typename type_trait<T_type5>::take,typename type_trait<T_type6>::take,typename type_trait<T_type7>::take>
-        (static_cast<T_type1>(_A_a1),static_cast<T_type2>(_A_a2),static_cast<T_type3>(_A_a3),static_cast<T_type4>(_A_a4),static_cast<T_type5>(_A_a5),static_cast<T_type6>(_A_a6),static_cast<T_type7>(_A_a7));
+        ((T_type1)_A_a1,(T_type2)_A_a2,(T_type3)_A_a3,(T_type4)_A_a4,(T_type5)_A_a5,(T_type6)_A_a6,(T_type7)_A_a7);
     }
   #endif
 
@@ -203,8 +203,7 @@ typename retype_functor<T_functor, T_type1,T_type2,T_type3,T_type4,T_type5,T_typ
 retype_functor<T_functor, T_type1,T_type2,T_type3,T_type4,T_type5,T_type6,T_type7>::operator()()
   { return this->functor_(); }
 
-  
-//template specialization of visit_each<>(action, functor):
+
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::retype_functor performs a functor on the
  * functor stored in the sigc::retype_functor object.

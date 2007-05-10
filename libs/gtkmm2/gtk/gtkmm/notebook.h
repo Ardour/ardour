@@ -3,7 +3,6 @@
 #ifndef _GTKMM_NOTEBOOK_H
 #define _GTKMM_NOTEBOOK_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -369,18 +368,12 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_switch_page(GtkNotebookPage* page, guint page_num);
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -471,18 +464,6 @@ public:
   void remove_page(int page_num = 0);
   void remove_page(Widget& child);
 
-  /** For instance,
-   * Notebook* on_window_creation(Widget* page, int x, int y);
-   */
-  typedef sigc::slot<Notebook*, Widget*, int, int> SlotWindowCreation;
-
-  static void set_window_creation_hook(const SlotWindowCreation& slot);
-  
-
-  void set_group_id(int group_id);
-  
-  int get_group_id() const;
-
   
   /** Returns the page number of the current page.
    * @return The index (starting from 0) of the current
@@ -510,7 +491,7 @@ public:
   /** Gets the number of pages in a notebook.
    * @return The number of pages in the notebook.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   int get_n_pages();
   /*Widget* get_current_page();*/ /*inconsistency with set_current_page*/
@@ -700,15 +681,6 @@ public:
    */
   void reorder_child(Widget& child, int position);
 
-  
-  bool get_tab_reorderable(Widget& child) const;
-  
-  void set_tab_reorderable(Widget& child, bool reorderable = true);
-  
-  bool get_tab_detachable(Widget& child) const;
-  
-  void set_tab_detachable(Widget& child, bool detachable = true);
-
 
   PageList::iterator get_current();
 
@@ -716,52 +688,20 @@ public:
   const PageList& pages() const;
 
   
-/**
-   * @par Prototype:
-   * <tt>void %switch_page(GtkNotebookPage* page, guint page_num)</tt>
-   */
-
   Glib::SignalProxy2< void,GtkNotebookPage*,guint > signal_switch_page();
-
-  
-/**
-   * @par Prototype:
-   * <tt>void %page_reordered(Widget* page, guint page_num)</tt>
-   */
-
-  Glib::SignalProxy2< void,Widget*,guint > signal_page_reordered();
-
-  
-/**
-   * @par Prototype:
-   * <tt>void %page_removed(Widget* page, guint page_num)</tt>
-   */
-
-  Glib::SignalProxy2< void,Widget*,guint > signal_page_removed();
-
-  
-/**
-   * @par Prototype:
-   * <tt>void %page_added(Widget* page, guint page_num)</tt>
-   */
-
-  Glib::SignalProxy2< void,Widget*,guint > signal_page_added();
 
 
   //Key-binding signals:
   
   
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Which side of the notebook holds the tabs.
+  /** Which side of the notebook holds the tabs.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<PositionType> property_tab_pos() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Which side of the notebook holds the tabs.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -769,19 +709,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<PositionType> property_tab_pos() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether tabs should be shown or not.
+  /** Whether tabs should be shown or not.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_show_tabs() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether tabs should be shown or not.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -789,19 +725,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_show_tabs() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether the border should be shown or not.
+  /** Whether the border should be shown or not.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_show_border() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the border should be shown or not.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -809,19 +741,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_show_border() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** If TRUE
+  /** If TRUE
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_scrollable() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** If TRUE
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -829,30 +757,31 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_scrollable() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Width of the border around the tab labels.
+  /** Width of the border around the tab labels.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_WriteOnly<guint> property_tab_border() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
+/** Width of the border around the tab labels.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy_ReadOnly<guint> property_tab_border() const;
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Width of the horizontal border of tab labels.
+  /** Width of the horizontal border of tab labels.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<guint> property_tab_hborder() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Width of the horizontal border of tab labels.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -860,19 +789,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<guint> property_tab_hborder() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Width of the vertical border of tab labels.
+  /** Width of the vertical border of tab labels.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<guint> property_tab_vborder() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Width of the vertical border of tab labels.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -880,19 +805,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<guint> property_tab_vborder() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The index of the current page.
+  /** The index of the current page.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_page() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The index of the current page.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -900,19 +821,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_page() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** If TRUE
+  /** If TRUE
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_enable_popup() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** If TRUE
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -920,19 +837,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_enable_popup() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether tabs should have homogeneous sizes.
+  /** Whether tabs should have homogeneous sizes.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_homogeneous() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether tabs should have homogeneous sizes.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -940,7 +853,6 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_homogeneous() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 protected:
@@ -986,8 +898,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Notebook* wrap(GtkNotebook* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_NOTEBOOK_H */
 

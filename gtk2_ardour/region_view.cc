@@ -255,6 +255,14 @@ RegionView::reset_width_dependent_items (double pixel_width)
 }
 
 void
+RegionView::set_height (gdouble height)
+{
+	TimeAxisViewItem::set_height (height - 2);
+	
+	_height = height;
+}
+
+void
 RegionView::region_layered ()
 {
 	RouteTimeAxisView *rtv = dynamic_cast<RouteTimeAxisView*>(&get_time_axis_view());
@@ -410,10 +418,9 @@ RegionView::region_renamed ()
 		str = _region->name();
 	}
 
-	if (_region->speed_mismatch (trackview.session().frame_rate())) {
-		str = string ("*") + str;
-	}
-
+	// speed mismatch handled in audio_region_view.cc
+	// FIXME: come up with more elegant solution for this
+	
 	if (_region->muted()) {
 		str = string ("!") + str;
 	}

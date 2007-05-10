@@ -3,7 +3,6 @@
 #ifndef _GTKMM_BIN_H
 #define _GTKMM_BIN_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -93,17 +92,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -116,9 +109,9 @@ public:
   // get_child() is a convenience function to get a c++ wrapper of
   // the contained widget. It may return NULL if such an item is not
   // available.
-   Widget* get_child();
+  Widget* get_child();
   const Widget* get_child() const;
- 
+
   /** Remove the contained object
    * Since this can only hold one object it is not necessary to
    * specify which object to remove like other containers.
@@ -213,8 +206,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Bin* wrap(GtkBin* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_BIN_H */
 

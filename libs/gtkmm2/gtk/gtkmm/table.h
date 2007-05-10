@@ -3,7 +3,6 @@
 #ifndef _GTKMM_TABLE_H
 #define _GTKMM_TABLE_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -210,17 +209,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -286,7 +279,7 @@ public:
   void set_homogeneous(bool homogeneous = true);
   
   /** Returns whether the table cells are all constrained to the same
-   * width and height. (See set_homogenous())
+   * width and height. (See gtk_table_set_homogenous())
    * @return <tt>true</tt> if the cells are all constrained to the same size.
    */
   bool get_homogeneous() const;
@@ -297,17 +290,14 @@ public:
   TableList& children();
   const TableList& children() const;
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The number of rows in the table.
+  /** The number of rows in the table.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<guint> property_n_rows() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The number of rows in the table.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -315,19 +305,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<guint> property_n_rows() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The number of columns in the table.
+  /** The number of columns in the table.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<guint> property_n_columns() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The number of columns in the table.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -335,19 +321,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<guint> property_n_columns() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The amount of space between two consecutive columns.
+  /** The amount of space between two consecutive columns.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<guint> property_column_spacing() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The amount of space between two consecutive columns.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -355,19 +337,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<guint> property_column_spacing() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The amount of space between two consecutive rows.
+  /** The amount of space between two consecutive rows.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<guint> property_row_spacing() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The amount of space between two consecutive rows.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -375,7 +353,6 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<guint> property_row_spacing() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 protected:
@@ -397,8 +374,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Table* wrap(GtkTable* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_TABLE_H */
 

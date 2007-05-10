@@ -14,7 +14,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
 #include <cmath>
@@ -324,6 +323,34 @@ AudioRegionView::region_scale_amplitude_changed ()
 }
 
 void
+AudioRegionView::region_renamed ()
+{
+	// FIXME: ugly duplication with RegionView...
+	
+	string str;
+
+	if (_region->locked()) {
+		str += '>';
+		str += _region->name();
+		str += '<';
+	} else {
+		str = _region->name();
+	}
+
+	// ... because of this
+	if (audio_region()->speed_mismatch (trackview.session().frame_rate())) {
+		str = string ("*") + str;
+	}
+
+	if (_region->muted()) {
+		str = string ("!") + str;
+	}
+
+	set_item_name (str, this);
+	set_name_text (str);
+}
+
+void
 AudioRegionView::region_resized (Change what_changed)
 {
 	RegionView::region_resized(what_changed);
@@ -385,16 +412,12 @@ AudioRegionView::region_muted ()
 	}
 }
 
-
 void
 AudioRegionView::set_height (gdouble height)
 {
-	uint32_t wcnt = waves.size();
-
-	// FIXME: ick
-	TimeAxisViewItem::set_height (height - 2);
+	RegionView::set_height(height);
 	
-	_height = height;
+	uint32_t wcnt = waves.size();
 
 	for (uint32_t n=0; n < wcnt; ++n) {
 		gdouble ht;
@@ -761,7 +784,7 @@ AudioRegionView::create_waves ()
 		return;
 	}
 
-	uint32_t nchans = atv.get_diskstream()->n_channels();
+	uint32_t nchans = atv.get_diskstream()->n_channels().get(DataType::AUDIO);
 	
 	/* in tmp_waves, set up null pointers for each channel so the vector is allocated */
 	for (uint32_t n = 0; n < nchans; ++n) {
@@ -777,7 +800,7 @@ AudioRegionView::create_waves ()
 		wave_caches.push_back (WaveView::create_cache ());
 
 		if (wait_for_data) {
-			if (audio_region()->source(n)->peaks_ready (bind (mem_fun(*this, &AudioRegionView::peaks_ready_handler), n), data_ready_connection)) {
+			if (audio_region()->audio_source(n)->peaks_ready (bind (mem_fun(*this, &AudioRegionView::peaks_ready_handler), n), data_ready_connection)) {
 				create_one_wave (n, true);
 			} else {
 			}
@@ -791,7 +814,7 @@ void
 AudioRegionView::create_one_wave (uint32_t which, bool direct)
 {
 	RouteTimeAxisView& atv (*(dynamic_cast<RouteTimeAxisView*>(&trackview))); // ick
-	uint32_t nchans = atv.get_diskstream()->n_channels();
+	uint32_t nchans = atv.get_diskstream()->n_channels().get(DataType::AUDIO);
 	uint32_t n;
 	uint32_t nwaves = std::min (nchans, audio_region()->n_channels());
 	gdouble ht;
@@ -1046,7 +1069,7 @@ AudioRegionView::add_ghost (AutomationTimeAxisView& atv)
 	GhostRegion* ghost = new GhostRegion (atv, unit_position);
 	uint32_t nchans;
 	
-	nchans = rtv->get_diskstream()->n_channels();
+	nchans = rtv->get_diskstream()->n_channels().get(DataType::AUDIO);
 
 	for (uint32_t n = 0; n < nchans; ++n) {
 		

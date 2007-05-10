@@ -45,6 +45,7 @@
 #include <ardour/export.h>
 #include <ardour/sndfile_helpers.h>
 #include <ardour/port.h>
+#include <ardour/audio_port.h>
 #include <ardour/audioengine.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/panner.h>
@@ -583,8 +584,12 @@ Session::process_export (nframes_t nframes, AudioExportSpecification* spec)
 			/* OK, this port's output is supposed to appear on this channel 
 			 */
 
-			Port* port = (*t).first;
-			Sample* port_buffer = port->get_buffer (nframes);
+			AudioPort* const port = dynamic_cast<AudioPort*>((*t).first);
+			if (port == 0) {
+				cerr << "FIXME: Non-audio export" << endl;
+				continue;
+			}
+			Sample* port_buffer = port->get_audio_buffer().data();
 
 			/* now interleave the data from the channel into the float buffer */
 				

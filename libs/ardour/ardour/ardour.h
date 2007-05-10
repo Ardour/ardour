@@ -46,6 +46,8 @@ namespace ARDOUR {
 
 	int init (bool with_vst, bool try_optimization);
 	int cleanup ();
+
+	int setup_midi(AudioEngine& engine);
 	
 	std::string get_ardour_revision ();
 	

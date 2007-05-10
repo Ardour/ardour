@@ -69,13 +69,7 @@ IOStatus StreamIOChannel::read_vfunc(char* buf, gsize count, gsize& bytes_read)
     return IO_STATUS_EOF;
 
   if(stream_in_->fail())
-  {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
     throw Glib::Error(G_IO_CHANNEL_ERROR, G_IO_CHANNEL_ERROR_FAILED, "Reading from stream failed");
-    #else
-    return IO_STATUS_ERROR;
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-  }
 
   return IO_STATUS_NORMAL;
 }
@@ -90,13 +84,7 @@ IOStatus StreamIOChannel::write_vfunc(const char* buf, gsize count, gsize& bytes
   stream_out_->write(buf, count);
 
   if(stream_out_->fail())
-  {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
     throw Glib::Error(G_IO_CHANNEL_ERROR, G_IO_CHANNEL_ERROR_FAILED, "Writing to stream failed");
-    #else
-      return IO_STATUS_ERROR;
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-  }
 
   bytes_written = count; // all or nothing ;)
 
@@ -130,13 +118,7 @@ IOStatus StreamIOChannel::seek_vfunc(gint64 offset, SeekType type)
   }
 
   if(failed)
-  {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
     throw Glib::Error(G_IO_CHANNEL_ERROR, G_IO_CHANNEL_ERROR_FAILED, "Seeking into stream failed");
-    #else
-    return IO_STATUS_ERROR;
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-  }
 
   return Glib::IO_STATUS_NORMAL;
 }
@@ -165,22 +147,12 @@ IOStatus StreamIOChannel::close_vfunc()
   }
   else
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
     throw Glib::Error(G_IO_CHANNEL_ERROR, G_IO_CHANNEL_ERROR_FAILED,
                       "Attempt to close non-file stream");
-    #else
-    return IO_STATUS_ERROR;
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
 
   if(failed)
-  {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
     throw Glib::Error(G_IO_CHANNEL_ERROR, G_IO_CHANNEL_ERROR_FAILED, "Failed to close stream");
-    #else
-    return IO_STATUS_ERROR;
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-  }
 
   return IO_STATUS_NORMAL;
 }

@@ -3,7 +3,6 @@
 #ifndef _GTKMM_STYLE_H
 #define _GTKMM_STYLE_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -134,22 +133,22 @@ public:
   Gdk::Color get_text_aa(Gtk::StateType state) const;
 
 
-   void set_black(const Gdk::Color& value);
-    Gdk::Color get_black() const;
-    void set_white(const Gdk::Color& value);
-    Gdk::Color get_white() const;
- 
+  void set_black(const Gdk::Color& value);
+  Gdk::Color get_black() const;
+  void set_white(const Gdk::Color& value);
+  Gdk::Color get_white() const;
+
   void set_font(const Pango::FontDescription& font_desc);
 
   // These are only available after being attached to a window.
   Pango::FontDescription get_font() const;
 
   void set_xthickness(int xthickness);
-   int get_xthickness() const;
- 
+  int get_xthickness() const;
+
   void set_ythickness(int ythickness);
-   int get_ythickness() const;
- 
+  int get_ythickness() const;
+
   Glib::RefPtr<Gdk::GC> get_fg_gc(Gtk::StateType state_type);
   Glib::RefPtr<const Gdk::GC> get_fg_gc(Gtk::StateType state_type) const;
 
@@ -171,29 +170,23 @@ public:
   Glib::RefPtr<Gdk::GC> get_base_gc(Gtk::StateType state_type);
   Glib::RefPtr<const Gdk::GC> get_base_gc(Gtk::StateType state_type) const;
 
-   Glib::RefPtr<Gdk::GC> get_black_gc();
+  Glib::RefPtr<Gdk::GC> get_black_gc();
   Glib::RefPtr<const Gdk::GC> get_black_gc() const;
-    Glib::RefPtr<Gdk::GC> get_white_gc();
+  Glib::RefPtr<Gdk::GC> get_white_gc();
   Glib::RefPtr<const Gdk::GC> get_white_gc() const;
- 
-  #ifndef GTKMM_DISABLE_DEPRECATED
 
-  /* @deprecated use get_bg() instead.
+  /* Deprecated in gtkmm 2.2 -- use get_bg() instead.
+   * Honestly, I have absolutely no idea why this method was added
+   * in the first place.  It's basically just confusing since it's
+   * absolutely unrelated to set_background().  Sigh.
    */
   Gdk::Color get_background(Gtk::StateType state_type) const;
 
-  /*@deprecated use get_bg() instead.
+  /* Deprecated in gtkmm 2.2 -- use get_bg_pixmap() instead.
    */
   Glib::RefPtr<Gdk::Pixmap> get_background_pixmap(Gtk::StateType state_type);
 
-  /** @deprecated Use set_bg_pixmap(Gtk::StateType state_type, const Glib::RefPtr<const Gdk::Pixmap>& pixmap)
-   */
   void set_bg_pixmap(Gtk::StateType state_type, const Glib::RefPtr<Gdk::Pixmap>& pixmap);
-  #endif // GTKMM_DISABLE_DEPRECATED
-
-
-  void set_bg_pixmap(Gtk::StateType state_type, const Glib::RefPtr<const Gdk::Pixmap>& pixmap);
-
   Glib::RefPtr<Gdk::Pixmap>       get_bg_pixmap(Gtk::StateType state_type);
   Glib::RefPtr<const Gdk::Pixmap> get_bg_pixmap(Gtk::StateType state_type) const;
 
@@ -203,10 +196,9 @@ public:
    * @param window A Gdk::Window.
    * @param state_type A state.
    * @param shadow_type The type of shadow to draw.
-   * @param area Clip rectangle, or <tt>0</tt> if the
-   * output should not be clipped.
-   * @param widget The widget (may be <tt>0</tt>).
-   * @param detail A style detail (may be <tt>0</tt>).
+   * @param area Clip rectangle.
+   * @param widget The widget.
+   * @param detail A style detail.
    * @param arrow_type The type of arrow to draw.
    * @param fill <tt>true</tt> if the arrow tip should be filled.
    * @param x X origin of the rectangle to draw the arrow in.
@@ -233,10 +225,9 @@ public:
    * @param window A Gdk::Window.
    * @param state_type A state.
    * @param shadow_type The type of shadow to draw.
-   * @param area Clip rectangle, or <tt>0</tt> if the
-   * output should not be clipped.
-   * @param widget The widget (may be <tt>0</tt>).
-   * @param detail A style detail (may be <tt>0</tt>).
+   * @param area Clip rectangle.
+   * @param widget The widget.
+   * @param detail A style detail.
    * @param x X origin of the box.
    * @param y Y origin of the box.
    * @param width The width of the box.
@@ -260,10 +251,9 @@ public:
    * @param window A Gdk::Window.
    * @param state_type A state.
    * @param shadow_type Type of shadow to draw.
-   * @param area Clip rectangle, or <tt>0</tt> if the
-   * output should not be clipped.
-   * @param widget The widget (may be <tt>0</tt>).
-   * @param detail A style detail (may be <tt>0</tt>).
+   * @param area Clip rectangle.
+   * @param widget The widget.
+   * @param detail A style detail.
    * @param x X origin of the rectangle.
    * @param y Y origin of the rectangle.
    * @param width Width of the rectangle.
@@ -293,10 +283,9 @@ public:
    * @param window A Gdk::Window.
    * @param state_type A state.
    * @param shadow_type The type of shadow to draw.
-   * @param area Clip rectangle, or <tt>0</tt> if the
-   * output should not be clipped.
-   * @param widget The widget (may be <tt>0</tt>).
-   * @param detail A style detail (may be <tt>0</tt>).
+   * @param area Clip rectangle.
+   * @param widget The widget.
+   * @param detail A style detail.
    * @param x X origin of the rectangle to draw the check in.
    * @param y Y origin of the rectangle to draw the check in.
    * @param width The width of the rectangle to draw the check in.
@@ -320,10 +309,9 @@ public:
    * @param window A Gdk::Window.
    * @param state_type A state.
    * @param shadow_type The type of shadow to draw.
-   * @param area Clip rectangle, or <tt>0</tt> if the
-   * output should not be clipped.
-   * @param widget The widget (may be <tt>0</tt>).
-   * @param detail A style detail (may be <tt>0</tt>).
+   * @param area Clip rectangle.
+   * @param widget The widget.
+   * @param detail A style detail.
    * @param x X origin of the rectangle to draw the diamond in.
    * @param y Y origin of the rectangle to draw the diamond in.
    * @param width Width of the rectangle to draw the diamond in.
@@ -346,10 +334,9 @@ public:
    * @param window A Gdk::Window.
    * @param state_type A state.
    * @param shadow_type Type of shadow to draw.
-   * @param area Clip rectangle, or <tt>0</tt> if the
-   * output should not be clipped.
-   * @param widget The widget (may be <tt>0</tt>).
-   * @param detail A style detail (may be <tt>0</tt>).
+   * @param area Clip rectangle.
+   * @param widget The widget.
+   * @param detail A style detail.
    * @param x X origin of the extension.
    * @param y Y origin of the extension.
    * @param width Width of the extension.
@@ -374,10 +361,9 @@ public:
    * @param window A Gdk::Window.
    * @param state_type A state.
    * @param shadow_type The type of shadow to draw.
-   * @param area Clip rectangle, or <tt>0</tt> if the
-   * output should not be clipped.
-   * @param widget The widget (may be <tt>0</tt>).
-   * @param detail A style detail (may be <tt>0</tt>).
+   * @param area Clip rectangle.
+   * @param widget The widget.
+   * @param detail A style detail.
    * @param x X origin of the box.
    * @param y Y origin of the box.
    * @param width The width of the box.
@@ -400,10 +386,9 @@ public:
    * given style.
    * @param window A Gdk::Window.
    * @param state_type A state.
-   * @param area Clip rectangle, or <tt>0</tt> if the
-   * output should not be clipped.
-   * @param widget The widget (may be <tt>0</tt>).
-   * @param detail A style detail (may be <tt>0</tt>).
+   * @param area Clip rectangle.
+   * @param widget The widget.
+   * @param detail A style detail.
    * @param x The x origin of the rectangle around which to draw a focus indicator.
    * @param y The y origin of the rectangle around which to draw a focus indicator.
    * @param width The width of the rectangle around which to draw a focus indicator.
@@ -425,10 +410,9 @@ public:
    * @param window A Gdk::Window.
    * @param state_type A state.
    * @param shadow_type Type of shadow to draw.
-   * @param area Clip rectangle, or <tt>0</tt> if the
-   * output should not be clipped.
-   * @param widget The widget (may be <tt>0</tt>).
-   * @param detail A style detail (may be <tt>0</tt>).
+   * @param area Clip rectangle.
+   * @param widget The widget.
+   * @param detail A style detail.
    * @param x X origin of the handle.
    * @param y Y origin of the handle.
    * @param width With of the handle.
@@ -453,10 +437,9 @@ public:
    * using the given style and state.
    * @param window A Gdk::Window.
    * @param state_type A state.
-   * @param area Rectangle to which the output is clipped, or <tt>0</tt> if the
-   * output should not be clipped.
-   * @param widget The widget (may be <tt>0</tt>).
-   * @param detail A style detail (may be <tt>0</tt>).
+   * @param area Rectangle to which the output is clipped.
+   * @param widget The widget.
+   * @param detail A style detail.
    * @param x1 The starting x coordinate.
    * @param x2 The ending x coordinate.
    * @param y The y coordinate.
@@ -477,10 +460,9 @@ public:
    * @param window A Gdk::Window.
    * @param state_type A state.
    * @param shadow_type The type of shadow to draw.
-   * @param area Clip rectangle, or <tt>0</tt> if the
-   * output should not be clipped.
-   * @param widget The widget (may be <tt>0</tt>).
-   * @param detail A style detail (may be <tt>0</tt>).
+   * @param area Clip rectangle.
+   * @param widget The widget.
+   * @param detail A style detail.
    * @param x X origin of the rectangle to draw the option in.
    * @param y Y origin of the rectangle to draw the option in.
    * @param width The width of the rectangle to draw the option in.
@@ -514,10 +496,9 @@ public:
    * @param window A Gdk::Window.
    * @param state_type A state.
    * @param shadow_type Type of shadow to draw.
-   * @param area Clip rectangle or <tt>0</tt> if the
-   * output should not be clipped.
-   * @param widget The widget (may be <tt>0</tt>).
-   * @param detail A style detail (may be <tt>0</tt>).
+   * @param area Clip rectangle.
+   * @param widget The widget.
+   * @param detail A style detail.
    * @param x X origin of the rectangle.
    * @param y Y origin of the rectangle.
    * @param width Width of the rectangle.
@@ -542,10 +523,9 @@ public:
    * @param window A Gdk::Window.
    * @param state_type A state.
    * @param shadow_type Type of shadow to draw.
-   * @param area Clip rectangle, or <tt>0</tt> if the
-   * output should not be clipped.
-   * @param widget The widget (may be <tt>0</tt>).
-   * @param detail A style detail (may be <tt>0</tt>).
+   * @param area Clip rectangle.
+   * @param widget The widget.
+   * @param detail A style detail.
    * @param x X origin of the rectangle.
    * @param y Y origin of the rectangle.
    * @param width Width of the rectangle.
@@ -591,10 +571,9 @@ public:
    * @param window A Gdk::Window.
    * @param state_type A state.
    * @param shadow_type The type of shadow to draw.
-   * @param area Clip rectangle, or <tt>0</tt> if the
-   * output should not be clipped.
-   * @param widget The widget (may be <tt>0</tt>).
-   * @param detail A style detail (may be <tt>0</tt>).
+   * @param area Clip rectangle.
+   * @param widget The widget.
+   * @param detail A style detail.
    * @param x X origin of the rectangle to draw the tab in.
    * @param y Y origin of the rectangle to draw the tab in.
    * @param width The width of the rectangle to draw the tab in.
@@ -617,10 +596,9 @@ public:
    * using the given style and state.
    * @param window A Gdk::Window.
    * @param state_type A state.
-   * @param area Rectangle to which the output is clipped, or <tt>0</tt> if the
-   * output should not be clipped.
-   * @param widget The widget (may be <tt>0</tt>).
-   * @param detail A style detail (may be <tt>0</tt>).
+   * @param area Rectangle to which the output is clipped.
+   * @param widget The widget.
+   * @param detail A style detail.
    * @param y1 The starting y coordinate.
    * @param y2 The ending y coordinate.
    * @param x The x coordinate.
@@ -636,26 +614,15 @@ public:
                   int                               x) const;
 
   
-  /** Draws an expander as used in Gtk::TreeView. @a x  and @a y  specify the
-   * center the expander. The size of the expander is determined by the
-   * "expander-size" style property of @a widget .  (If widget is not
-   * specified or doesn't have an "expander-size" property, an
-   * unspecified default size will be used, since the caller doesn't
-   * have sufficient information to position the expander, this is
-   * likely not useful.) The expander is expander_size pixels tall
-   * in the collapsed position and expander_size pixels wide in the
-   * expanded position.
+  /** Draws an expander as used in Gtk::TreeView.
    * @param window A Gdk::Window.
    * @param state_type A state.
-   * @param area Clip rectangle, or <tt>0</tt> if the
-   * output should not be clipped.
-   * @param widget The widget (may be <tt>0</tt>).
-   * @param detail A style detail (may be <tt>0</tt>).
+   * @param area Clip rectangle.
+   * @param widget The widget.
+   * @param detail A style detail.
    * @param x The x position to draw the expander at.
    * @param y The y position to draw the expander at.
-   * @param expander_style The style to draw the expander in; determines
-   * whether the expander is collapsed, expanded, or in an
-   * intermediate state.
+   * @param expander_style The style to draw the expander in.
    */
   void paint_expander(
                   const Glib::RefPtr<Gdk::Window>&  window,
@@ -686,10 +653,9 @@ public:
    * parameters.
    * @param window A Gdk::Window.
    * @param state_type A state.
-   * @param area Clip rectangle, or <tt>0</tt> if the
-   * output should not be clipped.
-   * @param widget The widget (may be <tt>0</tt>).
-   * @param detail A style detail (may be <tt>0</tt>).
+   * @param area Clip rectangle.
+   * @param widget The widget.
+   * @param detail A style detail.
    * @param edge The edge in which to draw the resize grip.
    * @param x The x origin of the rectangle in which to draw the resize grip.
    * @param y The y origin of the rectangle in which to draw the resize grip.
@@ -733,9 +699,6 @@ public:
   IconSet lookup_icon_set(const Gtk::StockID& stock_id);
 
   
-  bool lookup_color(const Glib::ustring& color_name, Gdk::Color& color) const;
-
-
   /** Renders the icon specified by @a source  at the given @a size  
    * according to the given parameters and returns the result in a 
    * pixbuf.
@@ -753,133 +716,40 @@ public:
                                        Gtk::Widget& widget, const Glib::ustring& detail);
 
 protected:
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void realize_vfunc();
-#endif //GLIBMM_VFUNCS_ENABLED
+    virtual void realize_vfunc();
+    virtual void unrealize_vfunc();
+    virtual void copy_vfunc(const Glib::RefPtr<Style>& src);
+    virtual Glib::RefPtr<Style> clone_vfunc();
+    virtual void init_from_rc_vfunc(const Glib::RefPtr<RcStyle>& rc_style);
+    virtual void set_background_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type);
 
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void unrealize_vfunc();
-#endif //GLIBMM_VFUNCS_ENABLED
+    virtual Glib::RefPtr<Gdk::Pixbuf> render_icon_vfunc(const IconSource& source, TextDirection direction, Gtk::StateType state, IconSize size, Widget* widget, const Glib::ustring& detail);
+    virtual void draw_hline_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x1, int x2, int y);
+    virtual void draw_vline_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int y1, int y2, int x);
+    virtual void draw_shadow_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height);
+    virtual void draw_polygon_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, GdkPoint* point, int npoints, bool fill);
+    virtual void draw_arrow_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, Gtk::ArrowType arrow_type, bool fill, int x, int y, int width, int height);
+    virtual void draw_diamond_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height);
+    virtual void draw_string_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, const Glib::ustring& string);
+    virtual void draw_box_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height);
+    virtual void draw_flat_box_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height);
+    virtual void draw_check_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height);
+    virtual void draw_option_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height);
+    virtual void draw_tab_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height);
+    virtual void draw_shadow_gap_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height, Gtk::PositionType gap_side, int gap_x, int gap_width);
+    virtual void draw_box_gap_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height, Gtk::PositionType gap_side, int gap_x, int gap_width);
+    virtual void draw_extension_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height, PositionType gap_side);
+    virtual void draw_focus_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height);
+    virtual void draw_slider_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height, Orientation orientation);
+    virtual void draw_handle_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height, Orientation orientation);
+    virtual void draw_expander_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, ExpanderStyle expander_style);
+    virtual void draw_layout_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, bool use_text, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, const Glib::RefPtr<Pango::Layout>& layout);
+    virtual void draw_resize_grip_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, Gdk::WindowEdge edge, int x, int y, int width, int height);
 
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void copy_vfunc(const Glib::RefPtr<Style>& src);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual Glib::RefPtr<Style> clone_vfunc();
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void init_from_rc_vfunc(const Glib::RefPtr<RcStyle>& rc_style);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void set_background_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual Glib::RefPtr<Gdk::Pixbuf> render_icon_vfunc(const IconSource& source, TextDirection direction, Gtk::StateType state, IconSize size, Widget* widget, const Glib::ustring& detail);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void draw_hline_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x1, int x2, int y);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void draw_vline_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int y1, int y2, int x);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void draw_shadow_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void draw_polygon_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, GdkPoint* point, int npoints, bool fill);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void draw_arrow_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, Gtk::ArrowType arrow_type, bool fill, int x, int y, int width, int height);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void draw_diamond_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void draw_string_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, const Glib::ustring& string);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void draw_box_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void draw_flat_box_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void draw_check_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void draw_option_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void draw_tab_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void draw_shadow_gap_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height, Gtk::PositionType gap_side, int gap_x, int gap_width);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void draw_box_gap_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height, Gtk::PositionType gap_side, int gap_x, int gap_width);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void draw_extension_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height, PositionType gap_side);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void draw_focus_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void draw_slider_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height, Orientation orientation);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void draw_handle_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, ShadowType shadow_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, int width, int height, Orientation orientation);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void draw_expander_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, ExpanderStyle expander_style);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void draw_layout_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, bool use_text, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, int x, int y, const Glib::RefPtr<Pango::Layout>& layout);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void draw_resize_grip_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type, const Gdk::Rectangle& area, Widget* widget, const Glib::ustring& detail, Gdk::WindowEdge edge, int x, int y, int width, int height);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-
-/**
-   * @par Prototype:
-   * <tt>void %realize()</tt>
-   */
-
+  
   Glib::SignalProxy0< void > signal_realize();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %unrealize()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_unrealize();
 
 
@@ -887,19 +757,13 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_realize();
   virtual void on_unrealize();
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

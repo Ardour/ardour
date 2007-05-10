@@ -3,7 +3,6 @@
 #ifndef _GTKMM_TREEPATH_H
 #define _GTKMM_TREEPATH_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -206,43 +205,31 @@ public:
 
 
 #ifndef GTKMM_DISABLE_DEPRECATED
-
+  /// @deprecated replaced by push_back():
+  
   /** Appends a new index to a path.  As a result, the depth of the path is
    * increased.
-   * @deprecated replaced by push_back()
    * @param index The index.
    */
   void append_index(int index);
-#endif // GTKMM_DISABLE_DEPRECATED
-
-
-#ifndef GTKMM_DISABLE_DEPRECATED
-
+  /// @deprecated replaced by push_front():
+  
   /** Prepends a new index to a path.  As a result, the depth of the path is
    * increased.
-   * @deprecated replaced by push_front().
    * @param index The index.
    */
   void prepend_index(int index);
-#endif // GTKMM_DISABLE_DEPRECATED
-
-
-#ifndef GTKMM_DISABLE_DEPRECATED
-
+  /// @deprecated replaced by size():
+  
   /** Returns the current depth of @a path .
-   * @deprecated replaced by size().
    * @return The depth of @a path .
    */
   int get_depth() const;
-#endif // GTKMM_DISABLE_DEPRECATED
-
-
-#ifndef GTKMM_DISABLE_DEPRECATED
-
+  
   /// @deprecated replaced by begin(), end(), and operator[]
   Glib::ArrayHandle<int> get_indices() const;
-#endif // GTKMM_DISABLE_DEPRECATED
-
+#endif
+  
   
   /**
    * Obtains a Gtk::TreeModel and Gtk::TreeModel::Path from selection data of target type
@@ -410,7 +397,6 @@ class Value<Gtk::TreePath> : public Glib::Value_Boxed<Gtk::TreePath>
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 } // namespace Glib
-
 
 #endif /* _GTKMM_TREEPATH_H */
 

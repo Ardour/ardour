@@ -155,8 +155,6 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 	}
 
 	_length = 0;
-	_active = Config->get_xfades_active();
-
 	initialize();
 	
 	if (set_state (node)) {

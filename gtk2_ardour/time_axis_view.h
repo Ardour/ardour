@@ -62,12 +62,10 @@ class TimeAxisViewItem;
 class Selection;
 class Selectable;
 
-/**
- * TimeAxisView defines the abstract base class for time-axis views.
+/** Abstract base class for time-axis views (horizontal editor 'strips')
  *
  * This class provides the basic LHS controls and display methods. This should be
  * extended to create functional time-axis based views.
- *
  */
 class TimeAxisView : public virtual AxisView
 {
@@ -104,13 +102,13 @@ class TimeAxisView : public virtual AxisView
 	PublicEditor& editor;
 	
 	TrackHeight height_style; 
-	uint32_t height;  /* in canvas units */
-	uint32_t effective_height;  /* in canvas units */
-	double  y_position;
-	int     order;
+	uint32_t    height;  /* in canvas units */
+	uint32_t    effective_height;  /* in canvas units */
+	double      y_position;
+	int         order;
 	
-	ArdourCanvas::Group   *canvas_display;
- 	Gtk::VBox       *control_parent;
+	ArdourCanvas::Group *canvas_display;
+ 	Gtk::VBox           *control_parent;
 
 	/* The Standard LHS Controls */
 	Gtk::Frame    controls_frame;
@@ -122,14 +120,13 @@ class TimeAxisView : public virtual AxisView
 	Gtk::HBox     name_hbox;
 	Gtk::Frame    name_frame;
  	Gtkmm2ext::FocusEntry name_entry;
-
+	
 	void hide_name_label ();
 	void hide_name_entry ();
 	void show_name_label ();
 	void show_name_entry ();
 
-	/**
-	 * Display this TrackView as the nth component of the parent box, at y.
+	/** Display this TrackView as the nth component of the parent box, at y.
 	 *
 	 * @param y 
 	 * @param nth
@@ -140,9 +137,7 @@ class TimeAxisView : public virtual AxisView
 
 	bool touched (double top, double bot);
 
-	/**
-	 * Hides this TrackView
-	 */
+	/** Hides this TrackView */
 	virtual void hide ();
 	bool hidden() const { return _hidden; }
 
@@ -235,49 +230,39 @@ class TimeAxisView : public virtual AxisView
 	virtual bool name_entry_focus_in (GdkEventFocus *ev);
 	virtual bool name_entry_focus_out (GdkEventFocus *ev);
 
-	/**
-	 * Handle mouse relaese on our LHS control name ebox.
+	/** Handle mouse relaese on our LHS control name ebox.
 	 * 
 	 *@ param ev the event
 	 */
 	virtual bool controls_ebox_button_release (GdkEventButton *ev);
 	virtual bool controls_ebox_scroll (GdkEventScroll *ev);
 
-	/**
-	 * Displays the standard LHS control menu at when.
+	/** Display the standard LHS control menu at when.
 	 *
 	 * @param when the popup activation time
 	 */
 	virtual void popup_display_menu (guint32 when);
 
-	/**
-	 * Build the standard LHS control menu.
+	/** Build the standard LHS control menu.
 	 * Subclasses should extend this method to add their own menu options.
-	 *
 	 */
 	virtual void build_display_menu ();
 
-	/**
-         * Do anything that needs to be done to dynamically reset
-	 * the LHS control menu.
+	/** Do whatever needs to be done to dynamically reset the LHS control menu.
 	 */
 	virtual bool handle_display_menu_map_event (GdkEventAny *ev) { return false; }
 
-	/**
-	 * Build the standard LHS control size menu for the default heights options.
-	 *
+	/** Build the standard LHS control size menu for the default heights options.
 	 */
 	virtual void build_size_menu();
 
-	/**
-	 * Displays the standard LHS controls size menu for the track heights
+	/** Displays the standard LHS controls size menu for the track heights
 	 *
-	 * @parem when the popup activation time
+	 * @param when the popup activation time
 	 */
  	void popup_size_menu(guint32 when);
 
-	/**
-	 * Handle the size option of out main menu.
+	/** Handle the size option of our main menu.
 	 * 
 	 * @param ev the event
 	 */
@@ -292,8 +277,7 @@ class TimeAxisView : public virtual AxisView
 
 	TimeAxisView* parent;
 
-	/* find the parent with state */
-
+	/** Find the parent with state */
 	TimeAxisView* get_parent_with_state();
 
 	std::vector<TimeAxisView*> children;

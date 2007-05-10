@@ -43,6 +43,7 @@
 
 #include <ardour/session.h>
 #include <ardour/route.h>
+#include <ardour/meter.h>
 
 #include "i18n.h"
 
@@ -137,9 +138,12 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	fader_vbox->pack_start (*fader_centering_box, false, false, 0);
 
 	hbox.set_spacing (2);
-	hbox.pack_start (*fader_vbox, true, true);
 
-	set_width(Narrow);
+	if (_io->default_type() == ARDOUR::DataType::AUDIO) {
+		hbox.pack_start (*fader_vbox, true, true);
+	}
+	
+	set_width (Narrow);
 
 	Route* r;
 
@@ -317,11 +321,11 @@ GainMeter::update_meters ()
 	
 	for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
 		if ((*i).packed) {
-			peak = _io->peak_input_power (n);
+			peak = _io->peak_meter().peak_power (n);
 
 			(*i).meter->set (log_meter (peak));
 
-			mpeak = _io->max_peak_power(n);
+			mpeak = _io->peak_meter().max_peak_power(n);
 			
 			if (mpeak > max_peak) {
 				max_peak = mpeak;
@@ -385,7 +389,7 @@ GainMeter::hide_all_meters ()
 void
 GainMeter::setup_meters ()
 {
-	uint32_t nmeters = _io->n_outputs();
+	uint32_t nmeters = _io->n_outputs().get(DataType::AUDIO);
 	guint16 width;
 
 	hide_all_meters ();
@@ -397,16 +401,16 @@ GainMeter::setup_meters ()
 		switch (r->meter_point()) {
 		case MeterPreFader:
 		case MeterInput:
-			nmeters = r->n_inputs();
+			nmeters = r->n_inputs().get(DataType::AUDIO);
 			break;
 		case MeterPostFader:
-			nmeters = r->n_outputs();
+			nmeters = r->n_outputs().get(DataType::AUDIO);
 			break;
 		}
 
 	} else {
 
-		nmeters = _io->n_outputs();
+		nmeters = _io->n_outputs().get(DataType::AUDIO);
 
 	}
 
@@ -489,7 +493,7 @@ GainMeter::reset_peak_display ()
 {
 	Route * r;
 	if ((r = dynamic_cast<Route*> (_io.get())) != 0) {
-		r->reset_max_peak_meters();
+		r->peak_meter().reset_max();
 	}
 
 	max_peak = -INFINITY;

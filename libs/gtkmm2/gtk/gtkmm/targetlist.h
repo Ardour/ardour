@@ -3,7 +3,6 @@
 #ifndef _GTKMM_TARGETLIST_H
 #define _GTKMM_TARGETLIST_H
 
-
 #include <glibmm.h>
 
 /* Copyright(C) 2002 The gtkmm Development Team
@@ -69,24 +68,11 @@ public:
   static Glib::RefPtr<Gtk::TargetList> create(const ArrayHandle_TargetEntry& targets);
   
  
-  /** Appends another target to a Gtk::TargetList.
-   * @param target The interned atom representing the target.
-   * @param flags The flags for this target.
-   * @param info An ID that will be passed back to the application.
-   */
   void add(const Glib::ustring& target, TargetFlags flags = TargetFlags(0), guint info = 0);
   void add(const ArrayHandle_TargetEntry& targets);
   
-  /** Removes a target from a target list.
-   * @param target The interned atom representing the target.
-   */
   void remove(const Glib::ustring& target);
   
-  /** Looks up a given target in a Gtk::TargetList.
-   * @param target An interned atom representing the target to search for.
-   * @param info A pointer to the location to store application info for target.
-   * @return <tt>true</tt> if the target was found, otherwise <tt>false</tt>.
-   */
   bool find(const Glib::ustring& target, guint* info) const;
 
 
@@ -106,7 +92,6 @@ namespace Glib
   Glib::RefPtr<Gtk::TargetList> wrap(GtkTargetList* object, bool take_copy = false);
 
 } // namespace Glib
-
 
 #endif /* _GTKMM_TARGETLIST_H */
 

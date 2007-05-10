@@ -53,8 +53,7 @@ namespace Glib
 enum ModuleFlags
 {
   MODULE_BIND_LAZY = 1 << 0,
-  MODULE_BIND_LOCAL = 1 << 1,
-  MODULE_BIND_MASK = 0x03
+  MODULE_BIND_MASK = 0x01
 };
 
 /** @ingroup glibmmEnums */

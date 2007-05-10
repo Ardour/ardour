@@ -50,26 +50,26 @@ using namespace Glib;
 using namespace Editing;
 
 void
-Editor::handle_audio_region_removed (boost::weak_ptr<AudioRegion> wregion)
+Editor::handle_region_removed (boost::weak_ptr<Region> wregion)
 {
 	ENSURE_GUI_THREAD (mem_fun (*this, &Editor::redisplay_regions));
 	redisplay_regions ();
 }
 
 void
-Editor::handle_new_audio_region (boost::weak_ptr<AudioRegion> wregion)
+Editor::handle_new_region (boost::weak_ptr<Region> wregion)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::handle_new_audio_region), wregion));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::handle_new_region), wregion));
 
 	/* don't copy region - the one we are being notified
 	   about belongs to the session, and so it will
 	   never be edited.
 	*/
 
-	boost::shared_ptr<AudioRegion> region (wregion.lock());
+	boost::shared_ptr<Region> region (wregion.lock());
 	
 	if (region) {
-		add_audio_region_to_region_display (region);
+		add_region_to_region_display (region);
 	}
 }
 
@@ -82,7 +82,7 @@ Editor::region_hidden (boost::shared_ptr<Region> r)
 }
 
 void
-Editor::add_audio_region_to_region_display (boost::shared_ptr<AudioRegion> region)
+Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 {
 	string str;
 	TreeModel::Row row;
@@ -242,14 +242,14 @@ Editor::region_list_selection_changed()
 }
 
 void
-Editor::insert_into_tmp_audio_regionlist(boost::shared_ptr<AudioRegion> region)
+Editor::insert_into_tmp_regionlist(boost::shared_ptr<Region> region)
 {
 	/* keep all whole files at the beginning */
 	
 	if (region->whole_file()) {
-		tmp_audio_region_list.push_front (region);
+		tmp_region_list.push_front (region);
 	} else {
-		tmp_audio_region_list.push_back (region);
+		tmp_region_list.push_back (region);
 	}
 }
 
@@ -265,13 +265,13 @@ Editor::redisplay_regions ()
 		   sorting.
 		*/
 		
-		tmp_audio_region_list.clear();
-		session->foreach_audio_region (this, &Editor::insert_into_tmp_audio_regionlist);
+		tmp_region_list.clear();
+		session->foreach_region (this, &Editor::insert_into_tmp_regionlist);
 
-		for (list<boost::shared_ptr<AudioRegion> >::iterator r = tmp_audio_region_list.begin(); r != tmp_audio_region_list.end(); ++r) {
-			add_audio_region_to_region_display (*r);
+		for (list<boost::shared_ptr<Region> >::iterator r = tmp_region_list.begin(); r != tmp_region_list.end(); ++r) {
+			add_region_to_region_display (*r);
 		}
-		tmp_audio_region_list.clear();
+		tmp_region_list.clear();
 		
 		region_list_display.set_model (region_list_model);
 	}

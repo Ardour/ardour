@@ -3,7 +3,6 @@
 #ifndef _ATKMM_IMPLEMENTOR_P_H
 #define _ATKMM_IMPLEMENTOR_P_H
 
-
 #include <glibmm/private/interface_p.h>
 
 namespace Atk
@@ -27,21 +26,16 @@ public:
 
 protected:
 
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   //Callbacks (default signal handlers):
   //These will call the *_impl member methods, which will then call the existing default signal callbacks, if any.
   //You could prevent the original default signal handlers being called by overriding the *_impl method.
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
   //Callbacks (virtual functions):
-#ifdef GLIBMM_VFUNCS_ENABLED
   static AtkObject* ref_accessible_vfunc_callback(AtkImplementor* self);
-#endif //GLIBMM_VFUNCS_ENABLED
 };
 
 
 } // namespace Atk
-
 
 #endif /* _ATKMM_IMPLEMENTOR_P_H */
 

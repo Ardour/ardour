@@ -3,7 +3,6 @@
 #ifndef _GTKMM_CLIPBOARD_H
 #define _GTKMM_CLIPBOARD_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -45,10 +44,6 @@ namespace Gtk
 { class Clipboard_Class; } // namespace Gtk
 namespace Gtk
 {
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-class TextBuffer;
-#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 /** The Clipboard object represents a clipboard of data shared between different processes or between 
  * different widgets in the same process. Each clipboard is identified by a name encoded as a GdkAtom. *
@@ -150,7 +145,7 @@ public:
    * 
    * (Passing Gdk::NONE is the same as using <tt>gdk_atom_intern
    * ("CLIPBOARD", <tt>false</tt>)</tt>. See 
-   * http://www.freedesktop.org/Standards/clipboards-spec
+   * http://www.freedesktop.org/standards/clipboards-spec/clipboards.txt
    * for a detailed discussion of the "CLIPBOARD" vs. "PRIMARY"
    * selections under the X window system. On Win32 the
    * Gdk::SELECTION_PRIMARY clipboard is essentially ignored.)
@@ -171,7 +166,7 @@ public:
    * it is owned by GTK+, must not be freed or
    * unrefd.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   static Glib::RefPtr<Clipboard> get_for_display(const Glib::RefPtr<Gdk::Display>& display, GdkAtom selection = GDK_SELECTION_CLIPBOARD);
 
@@ -179,14 +174,14 @@ public:
   /** Gets the Gdk::Display associated with @a clipboard 
    * @return The Gdk::Display associated with @a clipboard 
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<Gdk::Display> get_display();
   
   /** Gets the Gdk::Display associated with @a clipboard 
    * @return The Gdk::Display associated with @a clipboard 
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<const Gdk::Display> get_display() const;
 
@@ -260,7 +255,7 @@ public:
    * for the image, and for converting the image into the 
    * requested format.
    * 
-   * @newin2p6
+   * Since: 2.6
    * @param pixbuf A Gdk::Pixbuf.
    */
   void set_image(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf);
@@ -300,24 +295,6 @@ public:
    */
   void request_text(const SlotTextReceived& slot);
   
-
-  /// For instance: void on_rich_text_received(const Glib::ustring& format, const std::string& text);
-  typedef sigc::slot<void, const Glib::ustring& , const std::string&> SlotRichTextReceived;
-
-  /** Requests the contents of the clipboard as rich text. When the rich text is later received, 
-   * callback will be called.
-   *
-   * The text parameter to the callback will contain the resulting rich text if the request succeeded, or 
-   * an empty string if it failed. This function can fail for various reasons, in particular if the 
-   * clipboard was empty or if the contents of the clipboard could not be converted into rich text form.
-   *
-   *
-   * @param slot:  a function to call when the text is received,
-   *             or the retrieval fails. (It will always be called
-   *             one way or the other.)
-   */
-  void request_rich_text(const Glib::RefPtr<TextBuffer>& buffer, const SlotRichTextReceived& slot);
-  
   
   /// For instance: void on_image_received(const Glib::RefPtr<Gdk::Pixbuf>& text);
   typedef sigc::slot<void, const Glib::RefPtr<Gdk::Pixbuf>&> SlotImageReceived;
@@ -355,7 +332,7 @@ public:
    *             is an intermediate type, so you should convert it to a
    *             standard C++ container.
    *
-   * @newin2p4
+   * Since: 2.4
    */
   void request_targets(const SlotTargetsReceived& slot);
   
@@ -383,9 +360,6 @@ public:
    * clipboard could not be converted into text form.).
    */
   Glib::ustring wait_for_text() const;
-
-  std::string wait_for_rich_text(const Glib::RefPtr<TextBuffer>& buffer, std::string& format);
-  
   
   //Maybe the result should be const, but constness is not so clear-cut here. murrayc
   
@@ -400,7 +374,7 @@ public:
    * if the clipboard was empty or if the contents of 
    * the clipboard could not be converted into an image.)
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
   Glib::RefPtr<Gdk::Pixbuf> wait_for_image() const;
   
@@ -418,8 +392,6 @@ public:
    */
   bool wait_is_text_available() const;
   
-  bool wait_is_rich_text_available(const Glib::RefPtr<TextBuffer>& buffer) const;
-  
   /** Test to see if there is an image available to be pasted
    * This is done by requesting the TARGETS atom and checking
    * if it contains any of the supported image targets. This function 
@@ -431,7 +403,7 @@ public:
    * the actual image data.
    * @return <tt>true</tt> is there is an image available, <tt>false</tt> otherwise.
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
   bool wait_is_image_available() const;  
   
@@ -444,7 +416,7 @@ public:
    * @param target A Gdk::Atom indicating which target to look for.
    * @return <tt>true</tt> if the target is available, <tt>false</tt> otherwise.
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
   bool wait_is_target_available(const Glib::ustring& target);
 
@@ -454,7 +426,7 @@ public:
    *
    * @result targets: The targets.
    *
-   * @newin2p4
+   * Since: 2.4
    */
   Glib::StringArrayHandle wait_for_targets() const;
   
@@ -481,35 +453,20 @@ public:
   /** Stores the current clipboard data somewhere so that it will stay
    * around after the application has quit.
    * 
-   * @newin2p6
+   * Since: 2.6
    */
   void store();
-
-  //We use no_default_handler because this signal was added and we don't want to break the ABI by adding a virtual function.
-  
-/**
-   * @par Prototype:
-   * <tt>void %owner_change(GdkEventOwnerChange* event)</tt>
-   */
-
-  Glib::SignalProxy1< void,GdkEventOwnerChange* > signal_owner_change();
-
            
+
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

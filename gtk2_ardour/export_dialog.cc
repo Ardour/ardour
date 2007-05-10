@@ -55,6 +55,8 @@ using namespace sigc;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
+using PBD::internationalize;
+
 static const gchar *sample_rates[] = {
 	N_("22.05kHz"),
 	N_("44.1kHz"),
@@ -214,28 +216,28 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	   takes a reference. 
 	*/
 
-	vector<string> pop_strings = I18N (sample_rates);
+	vector<string> pop_strings = I18N(sample_rates);
 	Gtkmm2ext::set_popdown_strings (sample_rate_combo, pop_strings);
 	sample_rate_combo.set_active_text (pop_strings.front());
-	pop_strings = I18N (src_quality);
+	pop_strings = I18N(src_quality);
 	Gtkmm2ext::set_popdown_strings (src_quality_combo, pop_strings);
 	src_quality_combo.set_active_text (pop_strings.front());
-	pop_strings = I18N (dither_types);
+	pop_strings = I18N(dither_types);
 	Gtkmm2ext::set_popdown_strings (dither_type_combo, pop_strings);
 	dither_type_combo.set_active_text (pop_strings.front());
-	pop_strings = I18N (channel_strings);
+	pop_strings = I18N(channel_strings);
 	Gtkmm2ext::set_popdown_strings (channel_count_combo, pop_strings);
 	channel_count_combo.set_active_text (pop_strings.front());
-	pop_strings = I18N ((const char **) sndfile_header_formats_strings);
+	pop_strings = I18N((const char **) sndfile_header_formats_strings);
 	Gtkmm2ext::set_popdown_strings (header_format_combo, pop_strings);
 	header_format_combo.set_active_text (pop_strings.front());
-	pop_strings = I18N ((const char **) sndfile_bitdepth_formats_strings);
+	pop_strings = I18N((const char **) sndfile_bitdepth_formats_strings);
 	Gtkmm2ext::set_popdown_strings (bitdepth_format_combo, pop_strings);
 	bitdepth_format_combo.set_active_text (pop_strings.front());
-	pop_strings = I18N ((const char **) sndfile_endian_formats_strings);
+	pop_strings = I18N((const char **) sndfile_endian_formats_strings);
 	Gtkmm2ext::set_popdown_strings (endian_format_combo, pop_strings);
 	endian_format_combo.set_active_text (pop_strings.front());
-	pop_strings = I18N (cue_file_types);
+	pop_strings = I18N(cue_file_types);
 	Gtkmm2ext::set_popdown_strings (cue_file_combo, pop_strings);
 	cue_file_combo.set_active_text (pop_strings.front());
 
@@ -492,7 +494,7 @@ ExportDialog::set_state()
 			}
 
 			TreeModel::Children rows = master_selector.get_model()->children();
-			for (uint32_t r = 0; r < session->master_out()->n_outputs(); ++r) {
+			for (uint32_t r = 0; r < session->master_out()->n_outputs().get(DataType::AUDIO); ++r) {
 				if (nchns == 2) {
 					if (r % 2) {
 						rows[r][exp_cols.right] = true;
@@ -1094,9 +1096,9 @@ ExportDialog::fill_lists ()
 			continue;
 		}
 
-		for (uint32_t i=0; i < route->n_outputs(); ++i) {
+		for (uint32_t i=0; i < route->n_outputs().get(DataType::AUDIO); ++i) {
 			string name;
-			if (route->n_outputs() == 1) {
+			if (route->n_outputs().get(DataType::AUDIO) == 1) {
 				name = route->name();
 			} else {
 				name = string_compose("%1: out-%2", route->name(), i+1);

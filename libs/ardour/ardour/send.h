@@ -42,7 +42,8 @@ class Send : public Redirect
 
 	uint32_t bit_slot() const { return bitslot; }
 	
-	void run (vector<Sample *> &bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset);
+	void run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset);
+	
 	void activate() {}
 	void deactivate () {}
 
@@ -52,14 +53,14 @@ class Send : public Redirect
 	XMLNode& get_state(void);
 	int set_state(const XMLNode& node);
 
-	uint32_t pans_required() const { return expected_inputs; }
-	void expect_inputs (uint32_t);
+	uint32_t pans_required() const { return _expected_inputs.get(DataType::AUDIO); }
+	void expect_inputs (const ChanCount&);
 
 	static uint32_t how_many_sends();
 
   private:
-	bool _metering;
-	uint32_t expected_inputs;
+	bool      _metering;
+	ChanCount _expected_inputs;
 	uint32_t bitslot;
 };
 

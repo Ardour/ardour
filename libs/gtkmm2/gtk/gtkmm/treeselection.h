@@ -3,7 +3,6 @@
 #ifndef _GTKMM_TREESELECTION_H
 #define _GTKMM_TREESELECTION_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -212,7 +211,7 @@ public:
   /** Returns the number of rows that have been selected in @a tree .
    * @return The number of rows selected.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   int count_selected_rows() const;
 
@@ -300,7 +299,7 @@ public:
   /** Unselects a range of nodes, determined by @a start_path  and @a end_path 
    * inclusive.
    * 
-   * @newin2p2
+   * Since: 2.2
    * @param start_path The initial node of the range.
    * @param end_path The initial node of the range.
    */
@@ -336,11 +335,6 @@ public:
   void unselect_all();
   
   
-/**
-   * @par Prototype:
-   * <tt>void %changed()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_changed();
 
 
@@ -348,18 +342,12 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_changed();
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

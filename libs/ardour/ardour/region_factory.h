@@ -32,14 +32,13 @@ class Session;
 class RegionFactory {
 
   public:
-	/* This is emitted only when a new id is assigned. Therefore,
+	/** This is emitted only when a new id is assigned. Therefore,
 	   in a pure Region copy, it will not be emitted.
 
 	   It must be emitted by derived classes, not Region
 	   itself, to permit dynamic_cast<> to be used to 
 	   infer the type of Region.
 	*/
-
 	static sigc::signal<void,boost::shared_ptr<Region> > CheckNewRegion;
 
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region>, nframes_t start, 

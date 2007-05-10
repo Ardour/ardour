@@ -3,7 +3,6 @@
 #ifndef _GDKMM_REGION_H
 #define _GDKMM_REGION_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -230,7 +229,6 @@ namespace Glib
 Gdk::Region wrap(GdkRegion* object, bool take_copy = false);
 
 } // namespace Glib
-
 
 #endif /* _GDKMM_REGION_H */
 

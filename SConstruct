@@ -408,14 +408,13 @@ deps = \
 {
 	'glib-2.0'             : '2.10.1',
 	'gthread-2.0'          : '2.10.1',
-	'gtk+-2.0'             : '2.10.0',
+	'gtk+-2.0'             : '2.8.1',
 	'libxml-2.0'           : '2.6.0',
 	'samplerate'           : '0.1.0',
 	'raptor'               : '1.4.2',
 	'lrdf'                 : '0.4.0',
-	'jack'                 : '0.101.1',
-	'libgnomecanvas-2.0'   : '2.0',
-        'cairo'                : '1.2.4'
+	'jack'                 : '0.105.0',
+	'libgnomecanvas-2.0'   : '2.0'
 }
 
 def DependenciesRequiredMessage():
@@ -492,12 +491,6 @@ libraries['xml'].ParseConfig('pkg-config --cflags --libs libxml-2.0')
 libraries['xslt'] = LibraryInfo()
 libraries['xslt'].ParseConfig('pkg-config --cflags --libs libxslt')
 
-libraries['cairo'] = LibraryInfo()
-libraries['cairo'].ParseConfig ('pkg-config --cflags --libs cairo')
-
-libraries['pangocairo'] = LibraryInfo()
-libraries['pangocairo'].ParseConfig ('pkg-config --cflags --libs pangocairo')
-
 libraries['glib2'] = LibraryInfo()
 libraries['glib2'].ParseConfig ('pkg-config --cflags --libs glib-2.0')
 libraries['glib2'].ParseConfig ('pkg-config --cflags --libs gobject-2.0')
@@ -506,9 +499,6 @@ libraries['glib2'].ParseConfig ('pkg-config --cflags --libs gthread-2.0')
 
 libraries['gtk2'] = LibraryInfo()
 libraries['gtk2'].ParseConfig ('pkg-config --cflags --libs gtk+-2.0')
-
-libraries['gtk2-unix-print'] = LibraryInfo()
-libraries['gtk2-unix-print'].ParseConfig ('pkg-config --cflags --libs gtk+-unix-print-2.0')
 
 libraries['pango'] = LibraryInfo()
 libraries['pango'].ParseConfig ('pkg-config --cflags --libs pango')
@@ -802,18 +792,25 @@ libraries['dmalloc'] = conf.Finish ()
 #
 
 conf = Configure(env)
-
-if conf.CheckCHeader('alsa/asoundlib.h'):
+if conf.CheckCHeader('jack/midiport.h'):
+    libraries['sysmidi'] = LibraryInfo (LIBS='jack')
+    env['SYSMIDI'] = 'JACK MIDI'
+    subst_dict['%MIDITAG%'] = "control"
+    subst_dict['%MIDITYPE%'] = "jack"
+    print "Using JACK MIDI"
+elif conf.CheckCHeader('alsa/asoundlib.h'):
     libraries['sysmidi'] = LibraryInfo (LIBS='asound')
     env['SYSMIDI'] = 'ALSA Sequencer'
     subst_dict['%MIDITAG%'] = "seq"
     subst_dict['%MIDITYPE%'] = "alsa/sequencer"
+    print "Using ALSA MIDI"
 elif conf.CheckCHeader('/System/Library/Frameworks/CoreMIDI.framework/Headers/CoreMIDI.h'):
     # this line is needed because scons can't handle -framework in ParseConfig() yet.
     libraries['sysmidi'] = LibraryInfo (LINKFLAGS= '-framework CoreMIDI -framework CoreFoundation -framework CoreAudio -framework CoreServices -framework AudioUnit -framework AudioToolbox -bind_at_load')
     env['SYSMIDI'] = 'CoreMIDI'
     subst_dict['%MIDITAG%'] = "ardour"
     subst_dict['%MIDITYPE%'] = "coremidi"
+    print "Using CoreMIDI"
 else:
     print "It appears you don't have the required MIDI libraries installed. For Linux this means you are missing the development package for ALSA libraries."
     sys.exit (1)
@@ -865,9 +862,12 @@ if env['SYSLIBS']:
                                     LIBPATH='#libs/libsndfile',
                                     CPPPATH=['#libs/libsndfile/src'])
 
+#    libraries['libglademm'] = LibraryInfo()
+#    libraries['libglademm'].ParseConfig ('pkg-config --cflags --libs libglademm-2.4')
+
 #    libraries['flowcanvas'] = LibraryInfo(LIBS='flowcanvas', LIBPATH='#/libs/flowcanvas', CPPPATH='#libs/flowcanvas')
     libraries['soundtouch'] = LibraryInfo()
-    libraries['soundtouch'].ParseConfig ('pkg-config --cflags --libs soundtouch-1.0')
+    libraries['soundtouch'].ParseConfig ('pkg-config --cflags --libs libSoundTouch')
     # Comment the previous line and uncomment this for Debian:
     #libraries['soundtouch'].ParseConfig ('pkg-config --cflags --libs libSoundTouch')
 
@@ -909,9 +909,6 @@ else:
     libraries['glibmm2'] = LibraryInfo(LIBS='glibmm2',
                                     LIBPATH='#libs/glibmm2',
                                     CPPPATH='#libs/glibmm2')
-    libraries['cairomm'] = LibraryInfo(LIBS='cairomm',
-                                    LIBPATH='#libs/cairomm',
-                                    CPPPATH='#libs/cairomm')
     libraries['pangomm'] = LibraryInfo(LIBS='pangomm',
                                     LIBPATH='#libs/gtkmm2/pango',
                                     CPPPATH='#libs/gtkmm2/pango')
@@ -934,6 +931,9 @@ else:
     libraries['sndfile-ardour'] = LibraryInfo(LIBS='libsndfile-ardour',
                                     LIBPATH='#libs/libsndfile',
                                     CPPPATH=['#libs/libsndfile', '#libs/libsndfile/src'])
+#    libraries['libglademm'] = LibraryInfo(LIBS='libglademm',
+#                                          LIBPATH='#libs/libglademm',
+#                                          CPPPATH='#libs/libglademm')
     libraries['appleutility'] = LibraryInfo(LIBS='libappleutility',
                                             LIBPATH='#libs/appleutility',
                                             CPPPATH='#libs/appleutility')
@@ -962,7 +962,6 @@ else:
     
     gtk_subdirs = [
 	'libs/glibmm2',
-        'libs/cairomm',
 	'libs/gtkmm2/pango',
 	'libs/gtkmm2/atk',
 	'libs/gtkmm2/gdk',
@@ -1029,6 +1028,14 @@ else:
 
 config_prefix = '$DESTDIR' + final_config_prefix
 
+# For colorgcc
+if os.environ.has_key('PATH'):
+	env['PATH'] = os.environ['PATH']
+if os.environ.has_key('TERM'):
+	env['TERM'] = os.environ['TERM']
+if os.environ.has_key('HOME'):
+	env['HOME'] = os.environ['HOME']
+
 #
 # everybody needs this
 #
@@ -1083,8 +1090,8 @@ if conf.CheckCHeader('/System/Library/Frameworks/CoreAudio.framework/Versions/A/
     subst_dict['%JACK_INPUT%'] = "coreaudio:Built-in Audio:in"
     subst_dict['%JACK_OUTPUT%'] = "coreaudio:Built-in Audio:out"
 else:
-    subst_dict['%JACK_INPUT%'] = "alsa_pcm:playback_"
-    subst_dict['%JACK_OUTPUT%'] = "alsa_pcm:capture_"
+    subst_dict['%JACK_INPUT%'] = "system:playback_"
+    subst_dict['%JACK_OUTPUT%'] = "system:capture_"
 
 # posix_memalign available
 if not conf.CheckFunc('posix_memalign'):

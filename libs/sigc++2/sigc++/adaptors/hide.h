@@ -87,7 +87,7 @@ struct hide_functor <-1, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1>
   typename deduce_result_type<T_arg1>::type
-  operator()(T_arg1)
+  operator()(T_arg1 _A_a1)
     { return this->functor_(); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
@@ -104,14 +104,14 @@ struct hide_functor <-1, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2>
   typename deduce_result_type<T_arg1,T_arg2>::type
-  operator()(T_arg1 _A_a1, T_arg2)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass>
         (_A_a1); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2>
   typename deduce_result_type<T_arg1,T_arg2>::type
-  sun_forte_workaround(T_arg1 _A_a1, T_arg2)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass>
         (_A_a1); }
   #endif
@@ -124,14 +124,14 @@ struct hide_functor <-1, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
-  operator()(T_arg1 _A_a1,T_arg2 _A_a2, T_arg3)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass>
         (_A_a1, _A_a2); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
-  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2, T_arg3)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass>
         (_A_a1, _A_a2); }
   #endif
@@ -145,14 +145,14 @@ struct hide_functor <-1, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
-  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3, T_arg4)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass>
         (_A_a1, _A_a2, _A_a3); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
-  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3, T_arg4)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass>
         (_A_a1, _A_a2, _A_a3); }
   #endif
@@ -167,14 +167,14 @@ struct hide_functor <-1, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
-  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4, T_arg5)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass>
         (_A_a1, _A_a2, _A_a3, _A_a4); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
-  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4, T_arg5)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass>
         (_A_a1, _A_a2, _A_a3, _A_a4); }
   #endif
@@ -190,14 +190,14 @@ struct hide_functor <-1, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
-  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5, T_arg6)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
         (_A_a1, _A_a2, _A_a3, _A_a4, _A_a5); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
-  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5, T_arg6)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
         (_A_a1, _A_a2, _A_a3, _A_a4, _A_a5); }
   #endif
@@ -214,14 +214,14 @@ struct hide_functor <-1, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>::type
-  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6, T_arg7)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6,T_arg7 _A_a7)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
         (_A_a1, _A_a2, _A_a3, _A_a4, _A_a5, _A_a6); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>::type
-  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6, T_arg7)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6,T_arg7 _A_a7)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
         (_A_a1, _A_a2, _A_a3, _A_a4, _A_a5, _A_a6); }
   #endif
@@ -256,7 +256,7 @@ struct hide_functor <0, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1>
   typename deduce_result_type<T_arg1>::type
-  operator()(T_arg1)
+  operator()(T_arg1 _A_a1)
     { return this->functor_(); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
@@ -273,14 +273,14 @@ struct hide_functor <0, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2>
   typename deduce_result_type<T_arg1,T_arg2>::type
-  operator()(T_arg1, T_arg2 _A_a2)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg2>::pass>
         (_A_a2); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2>
   typename deduce_result_type<T_arg1,T_arg2>::type
-  sun_forte_workaround(T_arg1, T_arg2 _A_a2)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg2>::pass>
         (_A_a2); }
   #endif
@@ -293,14 +293,14 @@ struct hide_functor <0, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
-  operator()(T_arg1, T_arg2 _A_a2, T_arg3 _A_a3)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass>
         (_A_a2, _A_a3); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
-  sun_forte_workaround(T_arg1, T_arg2 _A_a2, T_arg3 _A_a3)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass>
         (_A_a2, _A_a3); }
   #endif
@@ -314,14 +314,14 @@ struct hide_functor <0, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
-  operator()(T_arg1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4 _A_a4)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass>
         (_A_a2, _A_a3, _A_a4); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
-  sun_forte_workaround(T_arg1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4 _A_a4)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass>
         (_A_a2, _A_a3, _A_a4); }
   #endif
@@ -336,14 +336,14 @@ struct hide_functor <0, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
-  operator()(T_arg1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4 _A_a4, T_arg5 _A_a5)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
         (_A_a2, _A_a3, _A_a4, _A_a5); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
-  sun_forte_workaround(T_arg1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4 _A_a4, T_arg5 _A_a5)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
         (_A_a2, _A_a3, _A_a4, _A_a5); }
   #endif
@@ -359,14 +359,14 @@ struct hide_functor <0, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
-  operator()(T_arg1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4 _A_a4, T_arg5 _A_a5, T_arg6 _A_a6)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
         (_A_a2, _A_a3, _A_a4, _A_a5, _A_a6); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
-  sun_forte_workaround(T_arg1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4 _A_a4, T_arg5 _A_a5, T_arg6 _A_a6)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
         (_A_a2, _A_a3, _A_a4, _A_a5, _A_a6); }
   #endif
@@ -383,14 +383,14 @@ struct hide_functor <0, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>::type
-  operator()(T_arg1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4 _A_a4, T_arg5 _A_a5, T_arg6 _A_a6, T_arg7 _A_a7)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6,T_arg7 _A_a7)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass, typename type_trait<T_arg7>::pass>
         (_A_a2, _A_a3, _A_a4, _A_a5, _A_a6, _A_a7); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>::type
-  sun_forte_workaround(T_arg1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4 _A_a4, T_arg5 _A_a5, T_arg6 _A_a6, T_arg7 _A_a7)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6,T_arg7 _A_a7)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass, typename type_trait<T_arg7>::pass>
         (_A_a2, _A_a3, _A_a4, _A_a5, _A_a6, _A_a7); }
   #endif
@@ -426,14 +426,14 @@ struct hide_functor <1, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2>
   typename deduce_result_type<T_arg1,T_arg2>::type
-  operator()(T_arg1 _A_a1, T_arg2)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass>
         (_A_a1); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2>
   typename deduce_result_type<T_arg1,T_arg2>::type
-  sun_forte_workaround(T_arg1 _A_a1, T_arg2)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass>
         (_A_a1); }
   #endif
@@ -446,14 +446,14 @@ struct hide_functor <1, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
-  operator()(T_arg1 _A_a1, T_arg2, T_arg3 _A_a3)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg3>::pass>
         (_A_a1, _A_a3); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
-  sun_forte_workaround(T_arg1 _A_a1, T_arg2, T_arg3 _A_a3)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg3>::pass>
         (_A_a1, _A_a3); }
   #endif
@@ -467,14 +467,14 @@ struct hide_functor <1, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
-  operator()(T_arg1 _A_a1, T_arg2, T_arg3 _A_a3, T_arg4 _A_a4)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass>
         (_A_a1, _A_a3, _A_a4); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
-  sun_forte_workaround(T_arg1 _A_a1, T_arg2, T_arg3 _A_a3, T_arg4 _A_a4)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass>
         (_A_a1, _A_a3, _A_a4); }
   #endif
@@ -489,14 +489,14 @@ struct hide_functor <1, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
-  operator()(T_arg1 _A_a1, T_arg2, T_arg3 _A_a3, T_arg4 _A_a4, T_arg5 _A_a5)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
         (_A_a1, _A_a3, _A_a4, _A_a5); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
-  sun_forte_workaround(T_arg1 _A_a1, T_arg2, T_arg3 _A_a3, T_arg4 _A_a4, T_arg5 _A_a5)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
         (_A_a1, _A_a3, _A_a4, _A_a5); }
   #endif
@@ -512,14 +512,14 @@ struct hide_functor <1, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
-  operator()(T_arg1 _A_a1, T_arg2, T_arg3 _A_a3, T_arg4 _A_a4, T_arg5 _A_a5, T_arg6 _A_a6)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
         (_A_a1, _A_a3, _A_a4, _A_a5, _A_a6); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
-  sun_forte_workaround(T_arg1 _A_a1, T_arg2, T_arg3 _A_a3, T_arg4 _A_a4, T_arg5 _A_a5, T_arg6 _A_a6)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
         (_A_a1, _A_a3, _A_a4, _A_a5, _A_a6); }
   #endif
@@ -536,14 +536,14 @@ struct hide_functor <1, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>::type
-  operator()(T_arg1 _A_a1, T_arg2, T_arg3 _A_a3, T_arg4 _A_a4, T_arg5 _A_a5, T_arg6 _A_a6, T_arg7 _A_a7)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6,T_arg7 _A_a7)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass, typename type_trait<T_arg7>::pass>
         (_A_a1, _A_a3, _A_a4, _A_a5, _A_a6, _A_a7); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>::type
-  sun_forte_workaround(T_arg1 _A_a1, T_arg2, T_arg3 _A_a3, T_arg4 _A_a4, T_arg5 _A_a5, T_arg6 _A_a6, T_arg7 _A_a7)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6,T_arg7 _A_a7)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass, typename type_trait<T_arg7>::pass>
         (_A_a1, _A_a3, _A_a4, _A_a5, _A_a6, _A_a7); }
   #endif
@@ -580,14 +580,14 @@ struct hide_functor <2, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
-  operator()(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass>
         (_A_a1, _A_a2); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
-  sun_forte_workaround(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass>
         (_A_a1, _A_a2); }
   #endif
@@ -601,14 +601,14 @@ struct hide_functor <2, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
-  operator()(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3, T_arg4 _A_a4)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg4>::pass>
         (_A_a1, _A_a2, _A_a4); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
-  sun_forte_workaround(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3, T_arg4 _A_a4)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg4>::pass>
         (_A_a1, _A_a2, _A_a4); }
   #endif
@@ -623,14 +623,14 @@ struct hide_functor <2, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
-  operator()(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3, T_arg4 _A_a4, T_arg5 _A_a5)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
         (_A_a1, _A_a2, _A_a4, _A_a5); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
-  sun_forte_workaround(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3, T_arg4 _A_a4, T_arg5 _A_a5)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
         (_A_a1, _A_a2, _A_a4, _A_a5); }
   #endif
@@ -646,14 +646,14 @@ struct hide_functor <2, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
-  operator()(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3, T_arg4 _A_a4, T_arg5 _A_a5, T_arg6 _A_a6)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
         (_A_a1, _A_a2, _A_a4, _A_a5, _A_a6); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
-  sun_forte_workaround(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3, T_arg4 _A_a4, T_arg5 _A_a5, T_arg6 _A_a6)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
         (_A_a1, _A_a2, _A_a4, _A_a5, _A_a6); }
   #endif
@@ -670,14 +670,14 @@ struct hide_functor <2, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>::type
-  operator()(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3, T_arg4 _A_a4, T_arg5 _A_a5, T_arg6 _A_a6, T_arg7 _A_a7)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6,T_arg7 _A_a7)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass, typename type_trait<T_arg7>::pass>
         (_A_a1, _A_a2, _A_a4, _A_a5, _A_a6, _A_a7); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>::type
-  sun_forte_workaround(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3, T_arg4 _A_a4, T_arg5 _A_a5, T_arg6 _A_a6, T_arg7 _A_a7)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6,T_arg7 _A_a7)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass, typename type_trait<T_arg7>::pass>
         (_A_a1, _A_a2, _A_a4, _A_a5, _A_a6, _A_a7); }
   #endif
@@ -715,14 +715,14 @@ struct hide_functor <3, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
-  operator()(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass>
         (_A_a1, _A_a2, _A_a3); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
-  sun_forte_workaround(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass>
         (_A_a1, _A_a2, _A_a3); }
   #endif
@@ -737,14 +737,14 @@ struct hide_functor <3, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
-  operator()(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4, T_arg5 _A_a5)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg5>::pass>
         (_A_a1, _A_a2, _A_a3, _A_a5); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
-  sun_forte_workaround(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4, T_arg5 _A_a5)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg5>::pass>
         (_A_a1, _A_a2, _A_a3, _A_a5); }
   #endif
@@ -760,14 +760,14 @@ struct hide_functor <3, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
-  operator()(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4, T_arg5 _A_a5, T_arg6 _A_a6)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
         (_A_a1, _A_a2, _A_a3, _A_a5, _A_a6); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
-  sun_forte_workaround(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4, T_arg5 _A_a5, T_arg6 _A_a6)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
         (_A_a1, _A_a2, _A_a3, _A_a5, _A_a6); }
   #endif
@@ -784,14 +784,14 @@ struct hide_functor <3, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>::type
-  operator()(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4, T_arg5 _A_a5, T_arg6 _A_a6, T_arg7 _A_a7)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6,T_arg7 _A_a7)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass, typename type_trait<T_arg7>::pass>
         (_A_a1, _A_a2, _A_a3, _A_a5, _A_a6, _A_a7); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>::type
-  sun_forte_workaround(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4, T_arg5 _A_a5, T_arg6 _A_a6, T_arg7 _A_a7)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6,T_arg7 _A_a7)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass, typename type_trait<T_arg7>::pass>
         (_A_a1, _A_a2, _A_a3, _A_a5, _A_a6, _A_a7); }
   #endif
@@ -830,14 +830,14 @@ struct hide_functor <4, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
-  operator()(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4 _A_a4, T_arg5)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass>
         (_A_a1, _A_a2, _A_a3, _A_a4); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
-  sun_forte_workaround(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4 _A_a4, T_arg5)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass>
         (_A_a1, _A_a2, _A_a3, _A_a4); }
   #endif
@@ -853,14 +853,14 @@ struct hide_functor <4, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
-  operator()(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4 _A_a4, T_arg5, T_arg6 _A_a6)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg6>::pass>
         (_A_a1, _A_a2, _A_a3, _A_a4, _A_a6); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
-  sun_forte_workaround(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4 _A_a4, T_arg5, T_arg6 _A_a6)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg6>::pass>
         (_A_a1, _A_a2, _A_a3, _A_a4, _A_a6); }
   #endif
@@ -877,14 +877,14 @@ struct hide_functor <4, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>::type
-  operator()(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4 _A_a4, T_arg5, T_arg6 _A_a6, T_arg7 _A_a7)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6,T_arg7 _A_a7)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg6>::pass, typename type_trait<T_arg7>::pass>
         (_A_a1, _A_a2, _A_a3, _A_a4, _A_a6, _A_a7); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>::type
-  sun_forte_workaround(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4 _A_a4, T_arg5, T_arg6 _A_a6, T_arg7 _A_a7)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6,T_arg7 _A_a7)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg6>::pass, typename type_trait<T_arg7>::pass>
         (_A_a1, _A_a2, _A_a3, _A_a4, _A_a6, _A_a7); }
   #endif
@@ -924,14 +924,14 @@ struct hide_functor <5, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
-  operator()(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4 _A_a4, T_arg5 _A_a5, T_arg6)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
         (_A_a1, _A_a2, _A_a3, _A_a4, _A_a5); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
-  sun_forte_workaround(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4 _A_a4, T_arg5 _A_a5, T_arg6)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
         (_A_a1, _A_a2, _A_a3, _A_a4, _A_a5); }
   #endif
@@ -948,14 +948,14 @@ struct hide_functor <5, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>::type
-  operator()(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4 _A_a4, T_arg5 _A_a5, T_arg6, T_arg7 _A_a7)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6,T_arg7 _A_a7)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg7>::pass>
         (_A_a1, _A_a2, _A_a3, _A_a4, _A_a5, _A_a7); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>::type
-  sun_forte_workaround(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4 _A_a4, T_arg5 _A_a5, T_arg6, T_arg7 _A_a7)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6,T_arg7 _A_a7)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg7>::pass>
         (_A_a1, _A_a2, _A_a3, _A_a4, _A_a5, _A_a7); }
   #endif
@@ -996,14 +996,14 @@ struct hide_functor <6, T_functor> : public adapts<T_functor>
    */
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>::type
-  operator()(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4 _A_a4, T_arg5 _A_a5, T_arg6 _A_a6, T_arg7)
+  operator()(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6,T_arg7 _A_a7)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
         (_A_a1, _A_a2, _A_a3, _A_a4, _A_a5, _A_a6); }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>::type
-  sun_forte_workaround(T_arg1 _A_a1, T_arg2 _A_a2, T_arg3 _A_a3, T_arg4 _A_a4, T_arg5 _A_a5, T_arg6 _A_a6, T_arg7)
+  sun_forte_workaround(T_arg1 _A_a1,T_arg2 _A_a2,T_arg3 _A_a3,T_arg4 _A_a4,T_arg5 _A_a5,T_arg6 _A_a6,T_arg7 _A_a7)
     { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
         (_A_a1, _A_a2, _A_a3, _A_a4, _A_a5, _A_a6); }
   #endif
@@ -1018,7 +1018,6 @@ struct hide_functor <6, T_functor> : public adapts<T_functor>
 };
 
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::hide_functor performs a functor on the
  * functor stored in the sigc::hide_functor object.

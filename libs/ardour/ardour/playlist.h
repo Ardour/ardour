@@ -40,6 +40,7 @@
 #include <ardour/ardour.h>
 #include <ardour/crossfade_compare.h>
 #include <ardour/location.h>
+#include <ardour/data_type.h>
 
 namespace ARDOUR  {
 
@@ -50,8 +51,8 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
   public:
 	typedef list<boost::shared_ptr<Region> >    RegionList;
 
-	Playlist (Session&, const XMLNode&, bool hidden = false);
-	Playlist (Session&, string name, bool hidden = false);
+	Playlist (Session&, const XMLNode&, DataType type, bool hidden = false);
+	Playlist (Session&, string name, DataType type, bool hidden = false);
 	Playlist (boost::shared_ptr<const Playlist>, string name, bool hidden = false);
 	Playlist (boost::shared_ptr<const Playlist>, nframes_t start, nframes_t cnt, string name, bool hidden = false);
 
@@ -68,6 +69,8 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
 
 	std::string name() const { return _name; }
 	void set_name (std::string str);
+
+	const DataType& data_type() const { return _type; }
 
 	bool frozen() const { return _frozen; }
 	void set_frozen (bool yn);
@@ -171,6 +174,7 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
 	std::set<boost::shared_ptr<Region> > all_regions; /* all regions ever added to this playlist */
 	string          _name;
 	Session&        _session;
+	DataType        _type;
 	mutable gint    block_notifications;
 	mutable gint    ignore_state_changes;
 	mutable Glib::Mutex region_lock;

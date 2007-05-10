@@ -26,13 +26,14 @@
 #include <midi++/channel.h>
 #include <midi++/port_request.h>
 
-//using namespace Select;
+using namespace Select;
 using namespace MIDI;
 
 size_t Port::nports = 0;
 
 Port::Port (PortRequest &req)
-
+	: _currently_in_cycle(false)
+	, _nframes_this_cycle(0)
 {
 	_ok = false;  /* derived class must set to true if constructor
 			 succeeds.
@@ -83,51 +84,32 @@ Port::~Port ()
 	}
 }
 
-int
-Port::clock ()
-	
+/** Send a clock tick message.
+ * \return true on success.
+ */
+bool
+Port::clock (timestamp_t timestamp)
 {
 	static byte clockmsg = 0xf8;
 	
 	if (_mode != O_RDONLY) {
-		return midimsg (&clockmsg, 1);
+		return midimsg (&clockmsg, 1, timestamp);
 	}
 	
-	return 0;
-}
-
-/*
-void
-Port::selector_read_callback (Selectable *s, Select::Condition cond) 
-
-{
-	byte buf[64];
-	read (buf, sizeof (buf));
-}
-*/
-
-void
-Port::xforms_read_callback (int cond, int fd, void *ptr) 
-
-{
-	byte buf[64];
-	
-	((Port *)ptr)->read (buf, sizeof (buf));
+	return false;
 }
 
 void
-Port::gtk_read_callback (void *ptr, int fd, int cond)
-
+Port::cycle_start (nframes_t nframes)
 {
-	byte buf[64];
-	
-	((Port *)ptr)->read (buf, sizeof (buf));
+	_currently_in_cycle = true;
+	_nframes_this_cycle = nframes;
 }
 
 void
-Port::write_callback (byte *msg, unsigned int len, void *ptr)
-	
+Port::cycle_end ()
 {
-	((Port *)ptr)->write (msg, len);
+	_currently_in_cycle = false;
+	_nframes_this_cycle = 0;
 }
 

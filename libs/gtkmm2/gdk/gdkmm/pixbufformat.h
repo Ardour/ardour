@@ -3,7 +3,6 @@
 #ifndef _GDKMM_PIXBUFFORMAT_H
 #define _GDKMM_PIXBUFFORMAT_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -59,14 +58,14 @@ public:
   /** Returns the name of the format.
    * @return The name of the format. 
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::ustring get_name() const;
   
   /** Returns a description of the format.
    * @return A description of the format.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::ustring get_description() const;
   
@@ -74,7 +73,7 @@ public:
    * @return A <tt>0</tt>-terminated array of mime types which must be freed with 
    * Glib::strfreev() when it is no longer needed.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::StringArrayHandle get_mime_types() const;
   
@@ -83,14 +82,14 @@ public:
    * @return A <tt>0</tt>-terminated array of filename extensions which must be
    * freed with Glib::strfreev() when it is no longer needed.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::StringArrayHandle get_extensions() const;
   
   /** Returns whether pixbufs can be saved in the given format.
    * @return Whether pixbufs can be saved in the given format.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   bool is_writable() const;
   
@@ -101,7 +100,7 @@ public:
    * resulting pixbuf to the desired size.
    * @return Whether this image format is scalable.
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
   bool is_scalable() const;
   
@@ -109,7 +108,7 @@ public:
    * gdk_pixbuf_format_set_disabled().
    * @return Whether this image format is disabled.
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
   bool is_disabled() const;
   
@@ -118,7 +117,7 @@ public:
    * images. Applications can use this to avoid using image loaders 
    * with an inappropriate license, see gdk_pixbuf_format_get_license().
    * 
-   * @newin2p6
+   * Since: 2.6
    * @param disabled <tt>true</tt> to disable the format @a format .
    */
   void set_disabled(bool disabled = true);
@@ -129,7 +128,7 @@ public:
    * or "other" to indicate some other license.
    * @return A string describing the license of @a format . 
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
   Glib::ustring get_license() const;
 

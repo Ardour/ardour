@@ -5,7 +5,7 @@ EXTRA_DIST = autogen.sh sigc++config.h.in libsigc++-2.0.spec.in
 # ACLOCAL_FLAGS = -I scripts
 
 SUBDIRS      = sigc++ 
-DIST_SUBDIRS = $(SUBDIRS)
+DIST_SUBDIRS = $(SUBDIRS) 
 
 sigc_configdir = $(libdir)/sigc++-2.0/include
 sigc_config_DATA = sigc++config.h
@@ -28,4 +28,3 @@ dist-hook:
 	echo "**********************************************************"; \
 	echo; echo \
 	cp libsigc++-2.0.spec $(distdir)
-

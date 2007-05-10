@@ -60,7 +60,7 @@ class RegionView : public TimeAxisViewItem
 
 	void set_valid (bool yn) { valid = yn; }
 	
-	virtual void set_height (double) = 0;
+	virtual void set_height (double);
 	virtual void set_samples_per_unit (double);
 	virtual bool set_duration (nframes_t, void*);
 	
@@ -101,14 +101,14 @@ class RegionView : public TimeAxisViewItem
 		double      samples_per_unit,
 		Gdk::Color& basic_color,
 		TimeAxisViewItem::Visibility);
-
+    
     virtual void region_resized (ARDOUR::Change);
     void         region_moved (void *);
     virtual void region_muted ();
     void         region_locked ();
     void         region_opacity ();
     void         region_layered ();
-    void         region_renamed ();
+    virtual void region_renamed ();
     void         region_sync_changed ();
 
     static gint _lock_toggle (ArdourCanvas::Item*, GdkEvent*, void*);
@@ -118,7 +118,7 @@ class RegionView : public TimeAxisViewItem
     virtual void compute_colors (Gdk::Color&);
     virtual void set_frame_color ();
     virtual void reset_width_dependent_items (double pixel_width);
-    
+
     virtual void color_handler (ColorID, uint32_t) {}
 	
     boost::shared_ptr<ARDOUR::Region> _region;

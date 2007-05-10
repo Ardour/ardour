@@ -3,7 +3,6 @@
 #ifndef _GTKMM_TREEITER_H
 #define _GTKMM_TREEITER_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -305,7 +304,7 @@ public:
    * you do not know the column type at compile-time.
    * If the @a data output argument is of an inappropriate C++ type then this might fail at runtime.
    * @param column The number of the column whose value you want to change.
-   * @result data An output argument which will contain the value of this column of this row.
+   * @retval data An output argument which will contain the value of this column of this row.
    */
   template <class ColumnType>
   void get_value(int column, ColumnType& data) const;
@@ -513,7 +512,6 @@ class Value<Gtk::TreeIterBase> : public Glib::Value_Boxed<Gtk::TreeIterBase>
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 } // namespace Glib
-
 
 #endif /* _GTKMM_TREEITER_H */
 

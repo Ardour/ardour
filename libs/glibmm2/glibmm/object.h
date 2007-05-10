@@ -20,12 +20,6 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//X11 defines DestroyNotify and some other non-prefixed stuff, and it's too late to change that now,
-//so let's give people a clue about the compilation errors that they will see:
-#ifdef DestroyNotify
-  #error "X11/Xlib.h seems to have been included before this header. Due to some commonly-named macros in X11/Xlib.h, it may only be included after any glibmm, gdkmm, or gtkmm headers."
-#endif //DestroyNotify
-
 #include <glibmm/objectbase.h>
 #include <glibmm/wrap.h>
 #include <glibmm/quark.h>
@@ -33,8 +27,6 @@
 #include <glibmm/utility.h> /* Could be private, but that would be tedious. */
 #include <glibmm/containerhandle_shared.h> //Because its specializations may be here.
 #include <glibmm/value.h>
-
-#include <glibmmconfig.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 extern "C"
@@ -92,7 +84,7 @@ private:
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 
-class GLIBMM_API Object : virtual public ObjectBase
+class Object : virtual public ObjectBase
 {
 public:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -196,7 +188,7 @@ struct TypeTraits< Glib::RefPtr<T> >
   }
 };
 
-//This confuses the SUN Forte compiler, so we ifdef it out:
+//This confuse the SUN Forte compiler, so we ifdef it out:
 #ifdef GLIBMM_HAVE_DISAMBIGUOUS_CONST_TEMPLATE_SPECIALIZATIONS
 
 /** Partial specialization for pointers to const GObject instances.

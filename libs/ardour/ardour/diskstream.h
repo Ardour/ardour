@@ -114,7 +114,7 @@ class Diskstream : public PBD::StatefulDestructible
 	nframes_t get_capture_start_frame (uint32_t n=0);
 	nframes_t get_captured_frames (uint32_t n=0);
 	
-	uint32_t n_channels() { return _n_channels; }
+	ChanCount n_channels() { return _n_channels; }
 
 	static nframes_t disk_io_frames() { return disk_io_chunk_frames; }
 	static void set_disk_io_chunk_frames (uint32_t n) { disk_io_chunk_frames = n; }
@@ -123,7 +123,6 @@ class Diskstream : public PBD::StatefulDestructible
 	virtual XMLNode& get_state(void) = 0;
 	virtual int      set_state(const XMLNode& node) = 0;
 	
-	// FIXME: makes sense for all diskstream types?
 	virtual void monitor_input (bool) {}
 
 	nframes_t capture_offset() const { return _capture_offset; }
@@ -230,8 +229,8 @@ class Diskstream : public PBD::StatefulDestructible
 	virtual void get_input_sources () = 0;
 	virtual void check_record_status (nframes_t transport_frame, nframes_t nframes, bool can_record) = 0;
 	virtual void set_align_style_from_io() {}
-	virtual void setup_destructive_playlist () = 0;
-	virtual void use_destructive_playlist () = 0;
+	virtual void setup_destructive_playlist () {}
+	virtual void use_destructive_playlist () {}
 
 	static nframes_t disk_io_chunk_frames;
 	std::vector<CaptureInfo*>  capture_info;
@@ -242,7 +241,7 @@ class Diskstream : public PBD::StatefulDestructible
 	string            _name;
 	ARDOUR::Session&  _session;
 	ARDOUR::IO*       _io;
-	uint32_t          _n_channels;
+	ChanCount         _n_channels;
 
 	boost::shared_ptr<Playlist> _playlist;
 

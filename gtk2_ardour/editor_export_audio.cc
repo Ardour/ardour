@@ -40,6 +40,7 @@
 #include <ardour/audio_diskstream.h>
 #include <ardour/audioregion.h>
 #include <ardour/audioplaylist.h>
+#include <ardour/chan_count.h>
 #include <ardour/source_factory.h>
 #include <ardour/audiofilesource.h>
 
@@ -127,6 +128,7 @@ int
 Editor::write_region_selection (RegionSelection& regions)
 {
 	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
+		// FIXME
 		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(*i);
 		if (arv)
 			if (write_region ("", arv->audio_region()) == false)
@@ -207,7 +209,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 		
 			
 			try {
-				fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (*session, path, false, session->frame_rate()));
+				fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (DataType::AUDIO, *session, path, false, session->frame_rate()));
 			}
 			
 			catch (failed_constructor& err) {
@@ -301,7 +303,7 @@ Editor::write_audio_selection (TimeSelection& ts)
 }
 
 bool
-Editor::write_audio_range (AudioPlaylist& playlist, uint32_t channels, list<AudioRange>& range)
+Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list<AudioRange>& range)
 {
 	boost::shared_ptr<AudioFileSource> fs;
 	const nframes_t chunk_size = 4096;
@@ -313,6 +315,8 @@ Editor::write_audio_range (AudioPlaylist& playlist, uint32_t channels, list<Audi
 	uint32_t cnt;
 	string path;
 	vector<boost::shared_ptr<AudioFileSource> > sources;
+
+	uint32_t channels = count.get(DataType::AUDIO);
 
 	for (uint32_t n=0; n < channels; ++n) {
 		
@@ -339,7 +343,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, uint32_t channels, list<Audi
 		path = s;
 		
 		try {
-			fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (*session, path, false, session->frame_rate()));
+			fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (DataType::AUDIO, *session, path, false, session->frame_rate()));
 		}
 		
 		catch (failed_constructor& err) {

@@ -3,7 +3,6 @@
 #ifndef _GTKMM_TOGGLETOOLBUTTON_H
 #define _GTKMM_TOGGLETOOLBUTTON_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -90,18 +89,12 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_toggled();
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -142,7 +135,7 @@ public:
    * want the GtkToggleButton to be 'pressed in', and <tt>false</tt> to raise it.
    * This action causes the toggled signal to be emitted.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param is_active Whether @a button  should be active.
    */
   void set_active(bool is_active = true);
@@ -151,16 +144,11 @@ public:
    * Returns <tt>true</tt> if the toggle button is pressed in and <tt>false</tt> if it is raised.
    * @return <tt>true</tt> if the toggle tool button is pressed in, <tt>false</tt> if not
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   bool get_active() const;
 
   
-/**
-   * @par Prototype:
-   * <tt>void %toggled()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_toggled();
 
 
@@ -177,8 +165,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::ToggleToolButton* wrap(GtkToggleToolButton* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_TOGGLETOOLBUTTON_H */
 

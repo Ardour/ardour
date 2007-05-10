@@ -3,7 +3,6 @@
 #ifndef _GTKMM_ICONINFO_H
 #define _GTKMM_ICONINFO_H
 
-
 #include <glibmm.h>
 
 /* Copyright (C) 2003 The gtkmm Development Team
@@ -90,7 +89,7 @@ public:
    * @return The base size, or 0, if no base
    * size is known for the icon.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   int get_base_size() const;
   
@@ -131,20 +130,14 @@ public:
    * will avoid scaling icons that it considers sufficiently close to the
    * requested size or for which the source image would have to be scaled
    * up too far. (This maintains sharpness.)
-   * @param error Location to store error information on failure, or <tt>0</tt>.
    * @return The rendered icon; this may be a newly created icon
    * or a new reference to an internal icon, so you must not modify
    * the icon. Use Glib::object_unref() to release your reference to the
    * icon.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
   Glib::RefPtr<Gdk::Pixbuf> load_icon() const;
-#else
-  Glib::RefPtr<Gdk::Pixbuf> load_icon(std::auto_ptr<Glib::Error>& error) const;
-#endif //GLIBMM_EXCEPTIONS_ENABLED
-
   
   /** Sets whether the coordinates returned by gtk_icon_info_get_embedded_rect()
    * and gtk_icon_info_get_attach_points() should be returned in their
@@ -161,7 +154,7 @@ public:
    * This function is provided primarily to allow compatibility wrappers
    * for older API's, and is not expected to be useful for applications.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param raw_coordinates Whether the coordinates of embedded rectangles
    * and attached points should be returned in their original
    * (unscaled) form.
@@ -178,7 +171,7 @@ public:
    * when this function returns <tt>true</tt>.
    * @return <tt>true</tt> if the icon has an embedded rectangle
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   bool get_embedded_rect(Gdk::Rectangle& rectangle) const;
   bool get_attach_points(Glib::ArrayHandle<Gdk::Point>& points) const;
@@ -190,7 +183,7 @@ public:
    * the icon doesn't have a specified display name. This value
    * is owned @a icon_info  and must not be modified or free.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   Glib::ustring get_display_name() const;
 
@@ -229,7 +222,6 @@ class Value<Gtk::IconInfo> : public Glib::Value_Boxed<Gtk::IconInfo>
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 } // namespace Glib
-
 
 #endif /* _GTKMM_ICONINFO_H */
 

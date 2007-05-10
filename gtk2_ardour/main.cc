@@ -191,7 +191,7 @@ int main (int argc, char *argv[])
 #endif
 
 {
-	ARDOUR::AudioEngine *engine;
+	ARDOUR::AudioEngine *engine = NULL;
 	vector<Glib::ustring> null_file_list;
 
         Glib::thread_init();
@@ -251,7 +251,7 @@ int main (int argc, char *argv[])
 
 	PBD::ID::init ();
 
-        try { 
+	try { 
 		ui = new ARDOUR_UI (&argc, &argv, which_ui_rcfile());
 	} catch (failed_constructor& err) {
 		error << _("could not create ARDOUR GUI") << endmsg;
@@ -269,7 +269,7 @@ int main (int argc, char *argv[])
 		}
 	}
 
-    	try {
+    try {
 		ARDOUR::init (use_vst, try_hw_optimization);
 		setup_gtk_ardour_enums ();
 		Config->set_current_owner (ConfigVariableBase::Interface);
@@ -282,6 +282,8 @@ int main (int argc, char *argv[])
 			error << string_compose (_("Could not connect to JACK server as  \"%1\""), jack_client_name) <<  endmsg;
 			return -1;
 		}
+
+		ARDOUR::setup_midi(*engine);
 		
 		ui->set_engine (*engine);
 

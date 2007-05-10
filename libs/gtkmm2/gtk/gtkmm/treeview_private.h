@@ -32,12 +32,40 @@ namespace Gtk
 namespace TreeView_Private
 {
 
-void SignalProxy_CellData_gtk_callback(GtkTreeViewColumn*, GtkCellRenderer* cell,
-                           GtkTreeModel* model, GtkTreeIter* iter, void* data);
-void SignalProxy_CellData_gtk_callback_destroy(void* data);
+//This Signal Proxy allows the C++ coder to specify a sigc::slot instead of a static function.
+class SignalProxy_CellData
+{
+public:
+  typedef TreeViewColumn::SlotCellData SlotType;
 
-gboolean SignalProxy_RowSeparator_gtk_callback(GtkTreeModel* model, GtkTreeIter* iter, void* data);
-void SignalProxy_RowSeparator_gtk_callback_destroy(void* data);
+  SignalProxy_CellData(const SlotType& slot);
+  ~SignalProxy_CellData();
+
+  static void gtk_callback(GtkTreeViewColumn*, GtkCellRenderer* cell,
+                           GtkTreeModel* model, GtkTreeIter* iter, void* data);
+  static void gtk_callback_destroy(void* data);
+
+protected:
+  SlotType slot_;
+};
+
+//SignalProxy_RowSeparator:
+
+//This Signal Proxy allows the C++ coder to specify a sigc::slot instead of a static function.
+class SignalProxy_RowSeparator
+{
+public:
+  typedef TreeView::SlotRowSeparator SlotType;
+
+  SignalProxy_RowSeparator(const SlotType& slot);
+  ~SignalProxy_RowSeparator();
+
+  static gboolean gtk_callback(GtkTreeModel* model, GtkTreeIter* iter, void* data);
+  static void gtk_callback_destroy(void* data);
+
+protected:
+  SlotType slot_;
+};
 
 
 } /* namespace TreeView_Private */

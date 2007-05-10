@@ -3,7 +3,6 @@
 #ifndef _ATKMM_IMAGE_H
 #define _ATKMM_IMAGE_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -136,39 +135,22 @@ public:
   void get_image_position(int& x, int& y, CoordType coord_type) const;
 
 protected:
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual bool set_image_description_vfunc(const Glib::ustring& description);
-#endif //GLIBMM_VFUNCS_ENABLED
+    virtual bool set_image_description_vfunc(const Glib::ustring& description);
+    virtual const char* get_image_description_vfunc() const;
 
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual const char* get_image_description_vfunc() const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void get_image_position_vfunc(int& x, int& y, CoordType coord_type) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void get_image_size_vfunc(int& width, int& height) const;
-#endif //GLIBMM_VFUNCS_ENABLED
+    virtual void get_image_position_vfunc(int& x, int& y, CoordType coord_type) const;
+    virtual void get_image_size_vfunc(int& width, int& height) const;
 
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };
@@ -186,7 +168,6 @@ namespace Glib
   Glib::RefPtr<Atk::Image> wrap(AtkImage* object, bool take_copy = false);
 
 } // namespace Glib
-
 
 #endif /* _ATKMM_IMAGE_H */
 

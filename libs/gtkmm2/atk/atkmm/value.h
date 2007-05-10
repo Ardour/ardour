@@ -3,7 +3,6 @@
 #ifndef _ATKMM_VALUE_H
 #define _ATKMM_VALUE_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -121,38 +120,21 @@ public:
   bool set_current_value(const Glib::ValueBase& value);
 
 protected:
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void get_current_value_vfunc(Glib::ValueBase& value) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void get_maximum_value_vfunc(Glib::ValueBase& value) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void get_minimum_value_vfunc(Glib::ValueBase& value) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual bool set_current_value_vfunc(const Glib::ValueBase& value);
-#endif //GLIBMM_VFUNCS_ENABLED
+    virtual void get_current_value_vfunc(Glib::ValueBase& value) const;
+    virtual void get_maximum_value_vfunc(Glib::ValueBase& value) const;
+    virtual void get_minimum_value_vfunc(Glib::ValueBase& value) const;
+    virtual bool set_current_value_vfunc(const Glib::ValueBase& value);
 
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };
@@ -170,7 +152,6 @@ namespace Glib
   Glib::RefPtr<Atk::Value> wrap(AtkValue* object, bool take_copy = false);
 
 } // namespace Glib
-
 
 #endif /* _ATKMM_VALUE_H */
 

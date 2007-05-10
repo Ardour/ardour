@@ -3,7 +3,6 @@
 #ifndef _GTKMM_ENUMS_H
 #define _GTKMM_ENUMS_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -155,8 +154,7 @@ enum ArrowType
   ARROW_UP,
   ARROW_DOWN,
   ARROW_LEFT,
-  ARROW_RIGHT,
-  ARROW_NONE
+  ARROW_RIGHT
 };
 
 } // namespace Gtk
@@ -1337,38 +1335,6 @@ namespace Glib
 
 template <>
 class Value<Gtk::SortType> : public Glib::Value_Enum<Gtk::SortType>
-{
-public:
-  static GType value_type() G_GNUC_CONST;
-};
-
-} // namespace Glib
-#endif /* DOXYGEN_SHOULD_SKIP_THIS */
-
-
-namespace Gtk
-{
-
-/**
- * @ingroup gtkmmEnums
- */
-enum PageOrientation
-{
-  PAGE_ORIENTATION_PORTRAIT,
-  PAGE_ORIENTATION_LANDSCAPE,
-  PAGE_ORIENTATION_REVERSE_PORTRAIT,
-  PAGE_ORIENTATION_REVERSE_LANDSCAPE
-};
-
-} // namespace Gtk
-
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-namespace Glib
-{
-
-template <>
-class Value<Gtk::PageOrientation> : public Glib::Value_Enum<Gtk::PageOrientation>
 {
 public:
   static GType value_type() G_GNUC_CONST;

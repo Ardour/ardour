@@ -32,6 +32,7 @@
 #include <gtkmm/comboboxtext.h>
 
 #include <ardour/types.h>
+#include <ardour/data_type.h>
 
 class AddRouteDialog : public Gtk::Dialog
 {
@@ -40,6 +41,7 @@ class AddRouteDialog : public Gtk::Dialog
 	~AddRouteDialog ();
 
 	bool track ();
+	ARDOUR::DataType type();
 	std::string name_template ();
 	int channels ();
 	int count ();

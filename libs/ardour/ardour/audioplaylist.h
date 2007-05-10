@@ -44,7 +44,7 @@ class AudioPlaylist : public ARDOUR::Playlist
 	AudioPlaylist (boost::shared_ptr<const AudioPlaylist>, string name, bool hidden = false);
 	AudioPlaylist (boost::shared_ptr<const AudioPlaylist>, nframes_t start, nframes_t cnt, string name, bool hidden = false);
 
-       ~AudioPlaylist (); /* public should use unref() */
+	~AudioPlaylist ();
 
 	void clear (bool with_signals=true);
 

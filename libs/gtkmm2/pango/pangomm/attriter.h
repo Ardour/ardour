@@ -3,7 +3,6 @@
 #ifndef _PANGOMM_ATTRITER_H
 #define _PANGOMM_ATTRITER_H
 
-
 #include <glibmm.h>
 
 /* attriter.h

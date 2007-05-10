@@ -101,7 +101,7 @@ struct SIGC_API slot_rep : public trackable
    * @return A deep copy of the slot_rep object.
    */
   inline slot_rep* dup() const
-    { return reinterpret_cast<slot_rep*>((*dup_)(const_cast<slot_rep*>(this))); }
+    { return (slot_rep*)(*dup_)(const_cast<slot_rep*>(this)); }
 
   /** Set the parent with a callback.
    * slots have one parent exclusively.
@@ -298,9 +298,7 @@ public:
    */
   void disconnect();
 
-//The Tru64 and Solaris Forte 5.5 compilers needs this operator=() to be public. I'm not sure why, or why it needs to be protected usually. murrayc.
-//See bug #168265. 
-//protected:
+protected:
   /** Overrides this slot making a copy from another slot.
    * @param src The slot from which to make a copy.
    * @return @p this.

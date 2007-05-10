@@ -3,7 +3,6 @@
 #ifndef _GDKMM_CURSOR_H
 #define _GDKMM_CURSOR_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -196,45 +195,21 @@ public:
          int x, int y);
   explicit Cursor(const Glib::RefPtr<Display>& display, CursorType cursor_type);
   Cursor(const Glib::RefPtr<Display>& display, const Glib::RefPtr<Pixbuf>& pixbuf, int x, int y);
-  explicit Cursor(const Glib::RefPtr<Display>& display, const Glib::ustring& name);
 
   
   /** Returns the display on which the Gdk::Cursor is defined.
    * @return The Gdk::Display associated to @a cursor 
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<Display> get_display();
   
   /** Returns the display on which the Gdk::Cursor is defined.
    * @return The Gdk::Display associated to @a cursor 
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<const Display> get_display() const;
-
-  
-  /** Returns a Gdk::Pixbuf with the image used to display the cursor.
-   * 
-   * Note that depending on the capabilities of the windowing system and 
-   * on the cursor, GDK may not be able to obtain the image data. In this 
-   * case, <tt>0</tt> is returned.
-   * @return A Gdk::Pixbuf representing @a cursor , or <tt>0</tt>
-   * 
-   * @newin2p8.
-   */
-  Glib::RefPtr<Gdk::Pixbuf> get_image();
-  
-  /** Returns a Gdk::Pixbuf with the image used to display the cursor.
-   * 
-   * Note that depending on the capabilities of the windowing system and 
-   * on the cursor, GDK may not be able to obtain the image data. In this 
-   * case, <tt>0</tt> is returned.
-   * @return A Gdk::Pixbuf representing @a cursor , or <tt>0</tt>
-   * 
-   * @newin2p8.
-   */
-  Glib::RefPtr<const Gdk::Pixbuf> get_image() const;
 
 
 };
@@ -271,7 +246,6 @@ class Value<Gdk::Cursor> : public Glib::Value_Boxed<Gdk::Cursor>
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 } // namespace Glib
-
 
 #endif /* _GDKMM_CURSOR_H */
 

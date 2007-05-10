@@ -30,6 +30,7 @@
 
 GLIBMM_USING_STD(map)
 
+
 namespace
 {
 
@@ -130,6 +131,7 @@ void Error::propagate(GError** dest)
   gobject_ = 0;
 }
 
+
 // static
 void Error::register_init()
 {
@@ -158,12 +160,8 @@ void Error::register_domain(GQuark domain, Error::ThrowFunc throw_func)
   (*throw_func_table)[domain] = throw_func;
 }
 
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
 // static, noreturn
 void Error::throw_exception(GError* gobject)
-#else
-std::auto_ptr<Glib::Error> Error::throw_exception(GError* gobject)
-#endif //GLIBMM_EXCEPTIONS_ENABLED
 {
   g_assert(gobject != 0);
 
@@ -173,11 +171,7 @@ std::auto_ptr<Glib::Error> Error::throw_exception(GError* gobject)
 
   if(const ThrowFunc throw_func = (*throw_func_table)[gobject->domain])
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
     (*throw_func)(gobject);
-    #else
-    return (*throw_func)(gobject);
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
     g_assert_not_reached();
   }
 
@@ -185,14 +179,9 @@ std::auto_ptr<Glib::Error> Error::throw_exception(GError* gobject)
             "unknown error domain '%s': throwing generic Glib::Error exception\n",
             (gobject->domain) ? g_quark_to_string(gobject->domain) : "(null)");
 
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
   // Doesn't copy, because error-returning functions return a newly allocated GError for us.
   throw Glib::Error(gobject);
-#else
-  return std::auto_ptr<Glib::Error>(new Glib::Error(gobject));
-#endif //GLIBMM_EXCEPTIONS_ENABLED
 }
-
 
 } // namespace Glib
 

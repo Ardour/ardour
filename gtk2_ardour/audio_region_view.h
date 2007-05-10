@@ -119,6 +119,22 @@ class AudioRegionView : public RegionView
 	    WaveformRectified = 0x8,
 	    WaveformLogScaled = 0x10,
     };
+
+    vector<ArdourCanvas::WaveView *> waves;
+    vector<ArdourCanvas::WaveView *> tmp_waves; ///< see ::create_waves()
+    ArdourCanvas::Polygon*           sync_mark; ///< polgyon for sync position 
+    ArdourCanvas::SimpleLine*        zero_line;
+    ArdourCanvas::Polygon*           fade_in_shape;
+    ArdourCanvas::Polygon*           fade_out_shape;
+    ArdourCanvas::SimpleRect*        fade_in_handle;
+    ArdourCanvas::SimpleRect*        fade_out_handle;
+    
+    AudioRegionGainLine * gain_line;
+
+    double _amplitude_above_axis;
+
+    uint32_t _flags;
+    uint32_t fade_color;
     
     void reset_fade_shapes ();
     void reset_fade_in_shape ();
@@ -132,6 +148,7 @@ class AudioRegionView : public RegionView
     void region_moved (void *);
     void region_muted ();
     void region_scale_amplitude_changed ();
+	void region_renamed ();
 
     void create_waves ();
     void create_one_wave (uint32_t, bool);
@@ -148,20 +165,6 @@ class AudioRegionView : public RegionView
     void color_handler (ColorID, uint32_t);
 
     vector<GnomeCanvasWaveViewCache*> wave_caches;
-    vector<ArdourCanvas::WaveView *>  waves;
-    vector<ArdourCanvas::WaveView *>  tmp_waves; ///< see ::create_waves()
-    ArdourCanvas::Polygon*            sync_mark; ///< polgyon for sync position 
-    ArdourCanvas::SimpleLine*         zero_line;
-    ArdourCanvas::Polygon*            fade_in_shape;
-    ArdourCanvas::Polygon*            fade_out_shape;
-    ArdourCanvas::SimpleRect*         fade_in_handle;
-    ArdourCanvas::SimpleRect*         fade_out_handle;
-    AudioRegionGainLine*              gain_line;
-
-    double _amplitude_above_axis;
-
-    uint32_t _flags;
-    uint32_t fade_color;
 };
 
 #endif /* __gtk_ardour_audio_region_view_h__ */

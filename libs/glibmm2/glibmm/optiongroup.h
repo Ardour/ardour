@@ -96,7 +96,7 @@ void          g_option_group_set_translate_func     (GOptionGroup       *group,
   /** A convenience function to use gettext() for translating
    * user-visible strings. 
    * 
-   * @newin2p6
+   * Since: 2.6
    * @param domain The domain to use.
    */
   void set_translation_domain(const Glib::ustring& domain);

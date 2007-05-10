@@ -23,36 +23,30 @@
 #include <sigc++/signal.h>
 #include <pbd/failed_constructor.h>
 #include <ardour/ardour.h>
+#include <ardour/data_type.h>
 #include <jack/jack.h>
 
 namespace ARDOUR {
 
 class AudioEngine;
+class Buffer;
 
+/** Abstract base for all outside ports (eg Jack ports)
+ */
 class Port : public sigc::trackable {
    public:
 	virtual ~Port() { 
 		free (_port);
 	}
 
-	Sample *get_buffer (nframes_t nframes) {
-		if (_flags & JackPortIsOutput) {
-			return _buffer;
-		} else {
-			return (Sample *) jack_port_get_buffer (_port, nframes);
-		}
-	}
+	virtual DataType type() const = 0;
 
-	void reset_buffer () {
-		if (_flags & JackPortIsOutput) {
-			_buffer = (Sample *) jack_port_get_buffer (_port, 0);
-		} else {
-			_buffer = 0; /* catch illegal attempts to use it */
-		}
-		_silent = false;
-	}
+	virtual void cycle_start(nframes_t nframes) {}
+	virtual void cycle_end() {}
 
-	std::string name() { 
+	virtual Buffer& get_buffer() = 0;
+	
+	std::string name() const { 
 		return _name;
 	}
 
@@ -70,10 +64,6 @@ class Port : public sigc::trackable {
 		return jack_port_is_mine (client, _port);
 	}
 
-	const char* type() const {
-		return _type.c_str();
-	}
-
 	int connected () const {
 		return jack_port_connected (_port);
 	}
@@ -85,38 +75,6 @@ class Port : public sigc::trackable {
 	const char ** get_connections () const {
 		return jack_port_get_connections (_port);
 	}
-
-	void reset_overs () {
-		_short_overs = 0;
-		_long_overs = 0;
-		_overlen = 0;
-	}
-
-	void reset_peak_meter () {
-		_peak = 0;
-	}
-	
-	void reset_meters () {
-		reset_peak_meter ();
-		reset_overs ();
-	}
-
-	void enable_metering() {
-		_metering++;
-	}
-	
-	void disable_metering () {
-		if (_metering) { _metering--; }
-	}
-
-	float                       peak_db() const { return _peak_db; }
-	jack_default_audio_sample_t peak()    const { return _peak; }
-
-	uint32_t short_overs () const { return _short_overs; }
-	uint32_t long_overs ()  const { return _long_overs; }
-	
-	static void set_short_over_length (nframes_t);
-	static void set_long_over_length (nframes_t);
 
 	bool receives_input() const {
 		return _flags & JackPortIsInput;
@@ -132,6 +90,14 @@ class Port : public sigc::trackable {
 
 	bool can_monitor () const {
 		return _flags & JackPortCanMonitor;
+	}
+
+	void enable_metering() {
+		_metering++;
+	}
+	
+	void disable_metering () {
+		if (_metering) { _metering--; }
 	}
 	
 	void ensure_monitor_input (bool yn) {
@@ -160,57 +126,25 @@ class Port : public sigc::trackable {
 	sigc::signal<void,bool> MonitorInputChanged;
 	sigc::signal<void,bool> ClockSyncChanged;
 
-	bool is_silent() const { return _silent; }
-
-	/** Assumes that the port is an audio output port */
-	void silence (nframes_t nframes, nframes_t offset) {
-		if (!_silent) {
-			memset (_buffer + offset, 0, sizeof (Sample) * nframes);
-			if (offset == 0) {
-				/* XXX this isn't really true, but i am not sure
-				   how to set this correctly. we really just
-				   want to set it true when the entire port
-				   buffer has been overrwritten.
-				*/
-				_silent = true;
-			}
-		}
-	}
-	
-	void mark_silence (bool yn) {
-		_silent = yn;
-	}
-
-  private:
+  protected:
 	friend class AudioEngine;
 
 	Port (jack_port_t *port);
-	void reset ();
 	
-	/* engine isn't supposed to below here */
+	virtual void reset ();
+	
+	/* engine isn't supposed to access below here */
 
-	Sample *_buffer;
-
-	/* cache these 3 from JACK so that we can
-	   access them for reconnecting.
-	*/
-
+	/* cache these 3 from JACK so we can access them for reconnecting */
 	JackPortFlags _flags;
 	std::string   _type;
 	std::string   _name;
 
-	bool                         _last_monitor : 1;
-	bool                         _silent : 1;
-	jack_port_t                 *_port;
-	nframes_t               _overlen;
-	jack_default_audio_sample_t  _peak;
-	float                        _peak_db;
-	uint32_t                     _short_overs;
-	uint32_t                     _long_overs;
-	unsigned short               _metering;
-	
-	static nframes_t        _long_over_length;
-	static nframes_t        _short_over_length;
+	jack_port_t*  _port;
+
+	unsigned short _metering;
+
+	bool          _last_monitor : 1;
 };
  
 } // namespace ARDOUR

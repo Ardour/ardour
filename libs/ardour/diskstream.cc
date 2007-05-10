@@ -61,7 +61,7 @@ using namespace PBD;
  * default from configuration_vars.h).  0 is not a good value for
  * allocating buffer sizes..
  */
-nframes_t Diskstream::disk_io_chunk_frames = 1024 * 256;
+ARDOUR::nframes_t Diskstream::disk_io_chunk_frames = 1024 * 256;
 
 sigc::signal<void>                Diskstream::DiskOverrun;
 sigc::signal<void>                Diskstream::DiskUnderrun;
@@ -120,8 +120,6 @@ Diskstream::init (Flag f)
 	overwrite_frame = 0;
 	overwrite_queued = false;
 	input_change_pending = NoChange;
-
-	_n_channels = 0;
 }
 
 Diskstream::~Diskstream ()
@@ -261,7 +259,7 @@ Diskstream::set_loop (Location *location)
 	return 0;
 }
 
-nframes_t
+ARDOUR::nframes_t
 Diskstream::get_capture_start_frame (uint32_t n)
 {
 	Glib::Mutex::Lock lm (capture_info_lock);
@@ -274,7 +272,7 @@ Diskstream::get_capture_start_frame (uint32_t n)
 	}
 }
 
-nframes_t
+ARDOUR::nframes_t
 Diskstream::get_captured_frames (uint32_t n)
 {
 	Glib::Mutex::Lock lm (capture_info_lock);
@@ -288,7 +286,7 @@ Diskstream::get_captured_frames (uint32_t n)
 }
 
 void
-Diskstream::set_roll_delay (nframes_t nframes)
+Diskstream::set_roll_delay (ARDOUR::nframes_t nframes)
 {
 	_roll_delay = nframes;
 }

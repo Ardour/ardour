@@ -79,7 +79,7 @@ MidiByteArray SurfacePort::read()
 	if ( !active() ) return retval;
 	
 	// read port and copy to return value
-	int nread = port().read( buf, sizeof (buf) );
+	int nread = port().read( buf, sizeof (buf), 0 );
 
 	if (nread >= 0) {
 		retval.copy( nread, buf );
@@ -116,7 +116,7 @@ void SurfacePort::write( const MidiByteArray & mba )
 	Glib::RecMutex::Lock lock( _rwlock );
 	if ( !active() ) return;
 
-	int count = port().write( mba.bytes().get(), mba.size() );
+	int count = port().write( mba.bytes().get(), mba.size(), 0 );
 	if ( count != (int)mba.size() )
 	{
 		if ( errno != EAGAIN )

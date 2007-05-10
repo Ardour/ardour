@@ -3,7 +3,6 @@
 #ifndef _LIBGNOMECANVASMM_RECT_H
 #define _LIBGNOMECANVASMM_RECT_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -100,13 +99,9 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
 
@@ -124,7 +119,6 @@ public:
 } /* namespace Canvas */
 } /* namespace Gnome */
 
-
 namespace Glib
 {
   /** @relates Gnome::Canvas::Rect
@@ -133,8 +127,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gnome::Canvas::Rect* wrap(GnomeCanvasRect* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _LIBGNOMECANVASMM_RECT_H */
 

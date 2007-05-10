@@ -3,7 +3,6 @@
 #ifndef _GTKMM_TREESORTABLE_H
 #define _GTKMM_TREESORTABLE_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -136,7 +135,6 @@ public:
   void set_sort_column(int sort_column_id, SortType order);
 
   #ifndef GTKMM_DISABLE_DEPRECATED
-
   /** @deprecated Use set_sort_column() instead.
    */
   void set_sort_column_id(const TreeModelColumnBase& sort_column_id, SortType order);
@@ -144,10 +142,9 @@ public:
   /** @deprecated Use set_sort_column() instead.
    */
   void set_sort_column_id(int sort_column_id, SortType order);
-  #endif // GTKMM_DISABLE_DEPRECATED
+  #endif //GTKMM_DISABLE_DEPRECATED
 
-
-  /** This callback should return -1 if a compares before b, 0 if they compare equal, 1 if a compares after b. 
+  /** This callback should return -1 if b compares before a, 0 if they compare equal, 1 if a compares after b. 
    * For instance, int on_sort_compare(const Gtk::TreeModel::iterator& a, const Gtk::TreeModel::iterator& b);
    */
   typedef sigc::slot<int, const Gtk::TreeModel::iterator&, const Gtk::TreeModel::iterator&> SlotCompare;
@@ -196,56 +193,29 @@ public:
    */
   void sort_column_changed();
   
-/**
-   * @par Prototype:
-   * <tt>void %sort_column_changed()</tt>
-   */
 
   Glib::SignalProxy0< void > signal_sort_column_changed();
 
 
 protected:
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual bool get_sort_column_id_vfunc(int* sort_column_id, SortType* order) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void set_sort_column_id_vfunc(int sort_column_id, SortType order);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void set_sort_func_vfunc(int sort_column_id, GtkTreeIterCompareFunc func, void* data, GtkDestroyNotify destroy);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void set_default_sort_func_vfunc(GtkTreeIterCompareFunc func, void* data, GtkDestroyNotify destroy);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual bool has_default_sort_func_vfunc() const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void sort_column_changed_vfunc() const;
-#endif //GLIBMM_VFUNCS_ENABLED
+    virtual bool get_sort_column_id_vfunc(int* sort_column_id, SortType* order) const;
+    virtual void set_sort_column_id_vfunc(int sort_column_id, SortType order);
+    virtual void set_sort_func_vfunc(int sort_column_id, GtkTreeIterCompareFunc func, void* data, GtkDestroyNotify destroy);
+    virtual void set_default_sort_func_vfunc(GtkTreeIterCompareFunc func, void* data, GtkDestroyNotify destroy);
+    virtual bool has_default_sort_func_vfunc() const;
+    virtual void sort_column_changed_vfunc() const;
 
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_sort_column_changed();
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };
@@ -263,7 +233,6 @@ namespace Glib
   Glib::RefPtr<Gtk::TreeSortable> wrap(GtkTreeSortable* object, bool take_copy = false);
 
 } // namespace Glib
-
 
 #endif /* _GTKMM_TREESORTABLE_H */
 

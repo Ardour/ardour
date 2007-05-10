@@ -39,6 +39,8 @@ namespace ARDOUR {
 
 class Session;
 class Panner;
+class BufferSet;
+class AudioBuffer;
 
 class StreamPanner : public sigc::trackable, public Stateful
 {
@@ -61,10 +63,10 @@ class StreamPanner : public sigc::trackable, public Stateful
 	void get_effective_position (float& xpos, float& ypos) const { xpos = effective_x; ypos = effective_y; }
 	void get_effective_position (float& xpos, float& ypos, float& zpos) const { xpos = effective_x; ypos = effective_y; zpos = effective_z; }
 
-	/* the basic panner API */
+	/* the basic StreamPanner API */
 
-	virtual void distribute (Sample* src, Sample** obufs, gain_t gain_coeff, nframes_t nframes) = 0;
-	virtual void distribute_automated (Sample* src, Sample** obufs, 
+	virtual void distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes) = 0;
+	virtual void distribute_automated (AudioBuffer& src, BufferSet& obufs,
 				     nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers) = 0;
 
 	/* automation */
@@ -140,7 +142,7 @@ class BaseStereoPanner : public StreamPanner
 	   and a type name. See EqualPowerStereoPanner as an example.
 	*/
 
-	void distribute (Sample* src, Sample** obufs, gain_t gain_coeff, nframes_t nframes);
+	void distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
 
 	void snapshot (nframes_t now);
 	void transport_stopped (nframes_t frame);
@@ -170,7 +172,7 @@ class EqualPowerStereoPanner : public BaseStereoPanner
 	EqualPowerStereoPanner (Panner&);
 	~EqualPowerStereoPanner ();
 
-	void distribute_automated (Sample* src, Sample** obufs, 
+	void distribute_automated (AudioBuffer& src, BufferSet& obufs, 
 			     nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
 
 	void get_current_coefficients (pan_t*) const;
@@ -204,8 +206,8 @@ class Multi2dPanner : public StreamPanner
 
 	Curve& automation() { return _automation; }
 
-	void distribute (Sample* src, Sample** obufs, gain_t gain_coeff, nframes_t nframes);
-	void distribute_automated (Sample* src, Sample** obufs, 
+	void distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
+	void distribute_automated (AudioBuffer& src, BufferSet& obufs,
 				   nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
 
 	static StreamPanner* factory (Panner&);
@@ -240,6 +242,9 @@ class Panner : public std::vector<StreamPanner*>, public Stateful, public sigc::
 
 	Panner (string name, Session&);
 	virtual ~Panner ();
+
+	/// The fundamental Panner function
+	void distribute(BufferSet& src, BufferSet& dest, nframes_t start_frame, nframes_t end_frames, nframes_t nframes, nframes_t offset);
 
 	bool bypassed() const { return _bypassed; }
 	void set_bypassed (bool yn);
@@ -302,6 +307,7 @@ class Panner : public std::vector<StreamPanner*>, public Stateful, public sigc::
 	int load ();
 
   private:
+	void distribute_no_automation(BufferSet& src, BufferSet& dest, nframes_t nframes, nframes_t offset, gain_t gain_coeff);
 
 	Session&         _session;
 	uint32_t     current_outs;

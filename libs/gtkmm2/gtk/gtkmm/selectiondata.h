@@ -3,7 +3,6 @@
 #ifndef _GTKMM_SELECTIONDATA_H
 #define _GTKMM_SELECTIONDATA_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -35,10 +34,6 @@ extern "C" { typedef struct _GtkSelectionData GtkSelectionData; }
 
 namespace Gtk
 {
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-class TextBuffer;
-#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 class SelectionData
 {
@@ -126,7 +121,7 @@ public:
    * @return <tt>true</tt> if the selection was successfully set,
    * otherwise <tt>false</tt>.
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
   bool set_pixbuf(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf);
   
@@ -136,7 +131,7 @@ public:
    * newly allocated pixbuf is returned, otherwise <tt>0</tt>.
    * If the result is non-<tt>0</tt> it must be freed with Glib::object_unref().
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
   Glib::RefPtr<Gdk::Pixbuf> get_pixbuf();
   
@@ -146,7 +141,7 @@ public:
    * newly allocated pixbuf is returned, otherwise <tt>0</tt>.
    * If the result is non-<tt>0</tt> it must be freed with Glib::object_unref().
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
   Glib::RefPtr<const Gdk::Pixbuf> get_pixbuf() const;
   
@@ -160,7 +155,7 @@ public:
    * @return <tt>true</tt> if the selection was successfully set,
    * otherwise <tt>false</tt>.
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
   bool set_uris(const Glib::StringArrayHandle& uris);
   
@@ -170,13 +165,13 @@ public:
    * containing the URIs, otherwise <tt>0</tt>. If the result is 
    * non-<tt>0</tt> it must be freed with Glib::strfreev().
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
   Glib::StringArrayHandle get_uris() const;
 
-   const guint8* get_data() const;
-    int get_length() const;
- 
+  const guint8* get_data() const;
+  int get_length() const;
+
   std::string get_data_as_string() const;
 
   std::string get_target() const;
@@ -187,18 +182,16 @@ public:
 
   /** Returns the ID of the selection.
    */
-   GdkAtom get_selection() const;
- 
+  GdkAtom get_selection() const;
+
   /** Returns the type of the data as set by SelectionData::set().
    */
   std::string get_data_type() const; // get_type() already exists
 
-   int get_format() const;
-    Glib::RefPtr<Gdk::Display> get_display();
+  int get_format() const;
+  Glib::RefPtr<Gdk::Display> get_display();
   Glib::RefPtr<const Gdk::Display> get_display() const;
- 
-  
-  bool targets_include_uri() const;
+
   
   /** Given a Gtk::SelectionData object holding a list of targets,
    * determines if any of the targets in @a targets  can be used to
@@ -208,8 +201,6 @@ public:
    */
   bool targets_include_text() const;
   
-  bool targets_include_rich_text(const Glib::RefPtr<TextBuffer>& buffer) const;
-  
   /** Given a Gtk::SelectionData object holding a list of targets,
    * determines if any of the targets in @a targets  can be used to
    * provide a Gdk::Pixbuf.
@@ -218,7 +209,7 @@ public:
    * @return <tt>true</tt> if @a selection_data  holds a list of targets,
    * and a suitable target for images is included, otherwise <tt>false</tt>.
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
   bool targets_include_image(bool writable = true) const;
 
@@ -257,7 +248,6 @@ class Value<Gtk::SelectionData> : public Glib::Value_Boxed<Gtk::SelectionData>
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 } // namespace Glib
-
 
 #endif /* _GTKMM_SELECTIONDATA_H */
 

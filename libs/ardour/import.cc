@@ -34,6 +34,7 @@
 #include <pbd/basename.h>
 
 #include <ardour/ardour.h>
+#include <ardour/types.h>
 #include <ardour/session.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/sndfilesource.h>
@@ -183,7 +184,8 @@ Session::import_audiofile (import_status& status)
 		} while ( !goodfile);
 
 		try { 
-			newfiles[n] = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (*this, buf, false, frame_rate()));
+			newfiles[n] = boost::dynamic_pointer_cast<AudioFileSource> (
+				SourceFactory::createWritable (DataType::AUDIO, *this, buf, false, frame_rate()));
 		}
 
 		catch (failed_constructor& err) {
@@ -316,7 +318,6 @@ Session::import_audiofile (import_status& status)
 	}
 
 	if (status.cancel) {
-
 		status.new_regions.clear ();
 
 		for (vector<string>::iterator i = new_paths.begin(); i != new_paths.end(); ++i) {

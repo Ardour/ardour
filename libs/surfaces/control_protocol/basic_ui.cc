@@ -28,6 +28,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using ARDOUR::nframes_t;
 
 BasicUI::BasicUI (Session& s)
 	: session (&s)

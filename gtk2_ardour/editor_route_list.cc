@@ -20,17 +20,20 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cmath>
+#include <cassert>
 
 #include "editor.h"
 #include "keyboard.h"
 #include "ardour_ui.h"
 #include "audio_time_axis.h"
+#include "midi_time_axis.h"
 #include "mixer_strip.h"
 #include "gui_thread.h"
 #include "actions.h"
 
+#include <pbd/unknown_type.h>
+
 #include <ardour/route.h>
-#include <ardour/audio_track.h>
 
 #include "i18n.h"
 
@@ -39,13 +42,14 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
 
+
 void
 Editor::handle_new_route (Session::RouteList& routes)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::handle_new_route), routes));
 	
 	TimeAxisView *tv;
-	AudioTimeAxisView *atv;
+	RouteTimeAxisView *rtv;
 	TreeModel::Row parent;
 	TreeModel::Row row;
 
@@ -56,7 +60,12 @@ Editor::handle_new_route (Session::RouteList& routes)
 			continue;
 		}
 		
-		tv = new AudioTimeAxisView (*this, *session, route, track_canvas);
+		if (route->default_type() == ARDOUR::DataType::AUDIO)
+			tv = new AudioTimeAxisView (*this, *session, route, track_canvas);
+		else if (route->default_type() == ARDOUR::DataType::MIDI)
+			tv = new MidiTimeAxisView (*this, *session, route, track_canvas);
+		else
+			throw unknown_type();
 		
 #if 0
 		if (route_display_model->children().size() == 0) {
@@ -96,10 +105,10 @@ Editor::handle_new_route (Session::RouteList& routes)
 		
 		ignore_route_list_reorder = true;
 		
-		if ((atv = dynamic_cast<AudioTimeAxisView*> (tv)) != 0) {
+		if ((rtv = dynamic_cast<RouteTimeAxisView*> (tv)) != 0) {
 			/* added a new fresh one at the end */
-			if (atv->route()->order_key(N_("editor")) == -1) {
-				atv->route()->set_order_key (N_("editor"), route_display_model->children().size()-1);
+			if (rtv->route()->order_key(N_("editor")) == -1) {
+				rtv->route()->set_order_key (N_("editor"), route_display_model->children().size()-1);
 			}
 		}
 		
@@ -191,9 +200,9 @@ Editor::hide_track_in_display (TimeAxisView& tv)
 		}
 	}
 
-	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (&tv);
+	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&tv);
 
-	if (atv && current_mixer_strip && (atv->route() == current_mixer_strip->route())) {
+	if (rtv && current_mixer_strip && (rtv->route() == current_mixer_strip->route())) {
 		// this will hide the mixer strip
 		set_selected_mixer_strip (tv);
 	}
@@ -235,7 +244,7 @@ Editor::redisplay_route_list ()
 
 	for (n = 0, order = 0, position = 0, i = rows.begin(); i != rows.end(); ++i) {
 		TimeAxisView *tv = (*i)[route_display_columns.tv];
-		AudioTimeAxisView* at; 
+		RouteTimeAxisView* rt; 
 
 		if (tv == 0) {
 			// just a "title" row
@@ -248,8 +257,8 @@ Editor::redisplay_route_list ()
 			   to tracks.
 			*/
 			
-			if ((at = dynamic_cast<AudioTimeAxisView*> (tv)) != 0) {
-				at->route()->set_order_key (N_("editor"), order);
+			if ((rt = dynamic_cast<RouteTimeAxisView*> (tv)) != 0) {
+				rt->route()->set_order_key (N_("editor"), order);
 				++order;
 			}
 		}

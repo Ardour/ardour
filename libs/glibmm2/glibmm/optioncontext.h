@@ -54,14 +54,7 @@ public:
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 private:
-
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
   static void throw_func(GError* gobject);
-#else
-  //When not using exceptions, we just pass the Exception object around without throwing it:
-  static std::auto_ptr<Glib::Error> throw_func(GError* gobject);
-#endif //GLIBMM_EXCEPTIONS_ENABLED
-
   friend void wrap_init(); // uses throw_func()
 #endif
 };
@@ -98,7 +91,7 @@ public:
    * and &lt;option&gt;--help-&lt;/option&gt;&lt;replaceable&gt;groupname&lt;/replaceable&gt; and creates
    * suitable output to stdout. 
    * 
-   * @newin2p6
+   * Since: 2.6
    * @param help_enabled <tt>true</tt> to enable &lt;option&gt;--help&lt;/option&gt;, <tt>false</tt> to disable it.
    */
   void set_help_enabled(bool help_enabled = true);
@@ -107,7 +100,7 @@ public:
    * is turned on for @a context . See g_option_context_set_help_enabled().
    * @return <tt>true</tt> if automatic help generation is turned on.
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
   bool get_help_enabled() const;
   
@@ -119,7 +112,7 @@ public:
    * which don't start with a dash). But note that GOption cannot reliably
    * determine whether a non-option belongs to a preceding unknown option.
    * 
-   * @newin2p6
+   * Since: 2.6
    * @param ignore_unknown <tt>true</tt> to ignore unknown options, <tt>false</tt> to produce
    * an error when unknown options are met.
    */
@@ -129,7 +122,7 @@ public:
    * g_option_context_set_ignore_unknown_options().
    * @return <tt>true</tt> if unknown options are ignored.
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
   bool get_ignore_unknown_options() const;
 
@@ -141,10 +134,8 @@ public:
    * 
    * If the parsing is successful, any parsed arguments are
    * removed from the array and @a argc  and @a argv  are updated 
-   * accordingly. A '--' option is stripped from @a argv 
-   * unless there are unparsed options before and after it, 
-   * or some of the options after it start with '-'. In case 
-   * of an error, @a argc  and @a argv  are left unmodified. 
+   * accordingly. In case of an error, @a argc  and @a argv  are
+   * left unmodified.
    * 
    * If automatic &lt;option&gt;--help&lt;/option&gt; support is enabled
    * (see g_option_context_set_help_enabled()), and the 
@@ -157,14 +148,9 @@ public:
    * @return <tt>true</tt> if the parsing was successful, 
    * <tt>false</tt> if an error occurred
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
   bool parse(int& argc, char**& argv);
-#else
-  bool parse(int& argc, char**& argv, std::auto_ptr<Glib::Error>& error);
-#endif //GLIBMM_EXCEPTIONS_ENABLED
-
 
   //g_option_context_add_main_entries(), just creates a group internally, adds them to it, and does a set_main_group()
   //- a group without callbacks seems to do some simple default parsing.

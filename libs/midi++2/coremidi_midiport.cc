@@ -56,7 +56,7 @@ void CoreMidi_MidiPort::Close ()
 	if (midi_client) MIDIClientDispose(midi_client);
 }
 
-int CoreMidi_MidiPort::write (byte *msg, size_t msglen)	
+int CoreMidi_MidiPort::write (byte *msg, size_t msglen, timestamp_t timestamp)	
 {
 	OSStatus err;
     MIDIPacketList* pktlist = (MIDIPacketList*)midi_buffer;

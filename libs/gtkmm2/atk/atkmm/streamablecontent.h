@@ -3,7 +3,6 @@
 #ifndef _ATKMM_STREAMABLECONTENT_H
 #define _ATKMM_STREAMABLECONTENT_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -118,34 +117,20 @@ public:
   Glib::RefPtr<Glib::IOChannel> get_stream(const Glib::ustring& mime_type);
 
 protected:
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual int get_n_mime_types_vfunc() const;
-#endif //GLIBMM_VFUNCS_ENABLED
+    virtual int get_n_mime_types_vfunc() const;
+    virtual const gchar* get_mime_type_vfunc(int i) const;
+    virtual GIOChannel* get_stream_vfunc(const Glib::ustring& mime_type);                                                   
 
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual const gchar* get_mime_type_vfunc(int i) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual GIOChannel* get_stream_vfunc(const Glib::ustring& mime_type);
-#endif //GLIBMM_VFUNCS_ENABLED
-                                                   
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };
@@ -163,7 +148,6 @@ namespace Glib
   Glib::RefPtr<Atk::StreamableContent> wrap(AtkStreamableContent* object, bool take_copy = false);
 
 } // namespace Glib
-
 
 #endif /* _ATKMM_STREAMABLECONTENT_H */
 

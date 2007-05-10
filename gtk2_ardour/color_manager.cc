@@ -98,6 +98,8 @@ ColorManager::load (string path)
 		return -1;
 	}
 
+	cerr << "Loading color definition file " << path << endl;
+
 	while (in) {
 		string name;
 		double r, g, b, a;

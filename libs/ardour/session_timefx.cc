@@ -94,7 +94,7 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 		}
 
 		try {
-			sources.push_back (boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (*this, path, false, frame_rate())));
+			sources.push_back (boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (DataType::AUDIO, *this, path, false, frame_rate())));
 
 		} catch (failed_constructor& err) {
 			error << string_compose (_("tempoize: error creating new audio file %1 (%2)"), path, strerror (errno)) << endmsg;
@@ -111,6 +111,12 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 			Sample buffer[bufsize];
 			nframes_t pos = 0;
 			nframes_t this_read = 0;
+
+			boost::shared_ptr<AudioSource> asrc = boost::dynamic_pointer_cast<AudioSource>(sources[i]);
+			if (!asrc) {
+				cerr << "FIXME: TimeFX for non-audio" << endl;
+				continue;
+			}
 
 			st.clear();
 			while (tsr.running && pos < tsr.region->length()) {
@@ -135,7 +141,7 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 				st.putSamples (buffer, this_read);
 			
 				while ((this_read = st.receiveSamples (buffer, bufsize)) > 0 && tsr.running) {
-					if (sources[i]->write (buffer, this_read) != this_read) {
+					if (asrc->write (buffer, this_read) != this_read) {
 						error << string_compose (_("error writing tempo-adjusted data to %1"), sources[i]->name()) << endmsg;
 						goto out;
 					}
@@ -147,7 +153,7 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 			}
 		
 			while (tsr.running && (this_read = st.receiveSamples (buffer, bufsize)) > 0) {
-				if (sources[i]->write (buffer, this_read) != this_read) {
+				if (asrc->write (buffer, this_read) != this_read) {
 					error << string_compose (_("error writing tempo-adjusted data to %1"), sources[i]->name()) << endmsg;
 					goto out;
 				}

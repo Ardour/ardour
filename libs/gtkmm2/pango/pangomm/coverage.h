@@ -3,7 +3,6 @@
 #ifndef _PANGOMM_COVERAGE_H
 #define _PANGOMM_COVERAGE_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -165,7 +164,6 @@ namespace Glib
   Glib::RefPtr<Pango::Coverage> wrap(PangoCoverage* object, bool take_copy = false);
 
 } // namespace Glib
-
 
 #endif /* _PANGOMM_COVERAGE_H */
 

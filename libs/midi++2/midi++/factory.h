@@ -28,7 +28,7 @@ namespace MIDI {
 
 class PortFactory {
   public:
-	Port *create_port (PortRequest &req);
+	Port *create_port (PortRequest &req, void* data);
 
 	static bool ignore_duplicate_devices (Port::Type);
 };

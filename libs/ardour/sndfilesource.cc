@@ -578,8 +578,8 @@ SndFileSource::set_header_timeline_position ()
 		return;
 	}
 
-       _broadcast_info->time_reference_high = (timeline_position >> 32);
-       _broadcast_info->time_reference_low = (timeline_position & 0xffffffff);
+	_broadcast_info->time_reference_high = (timeline_position >> 32);
+	_broadcast_info->time_reference_low = (timeline_position & 0xffffffff);
 
 	if (sf_command (sf, SFC_SET_BROADCAST_INFO, _broadcast_info, sizeof (*_broadcast_info)) != SF_TRUE) {
 		error << string_compose (_("cannot set broadcast info for audio file %1; Dropping broadcast info for this file"), _path) << endmsg;

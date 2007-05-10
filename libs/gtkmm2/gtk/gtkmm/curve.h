@@ -3,7 +3,6 @@
 #ifndef _GTKMM_CURVE_H
 #define _GTKMM_CURVE_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -99,18 +98,12 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_curve_type_changed();
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -136,25 +129,17 @@ public:
   void set_curve_type(CurveType type);
 
   
-/**
-   * @par Prototype:
-   * <tt>void %curve_type_changed()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_curve_type_changed();
 
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Is this curve linear
+  /** Is this curve linear
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<CurveType> property_curve_type() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Is this curve linear
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -162,19 +147,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<CurveType> property_curve_type() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Minimum possible value for X.
+  /** Minimum possible value for X.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<float> property_min_x() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Minimum possible value for X.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -182,19 +163,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<float> property_min_x() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Maximum possible X value.
+  /** Maximum possible X value.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<float> property_max_x() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Maximum possible X value.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -202,19 +179,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<float> property_max_x() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Minimum possible value for Y.
+  /** Minimum possible value for Y.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<float> property_min_y() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Minimum possible value for Y.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -222,19 +195,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<float> property_min_y() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Maximum possible value for Y.
+  /** Maximum possible value for Y.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<float> property_max_y() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Maximum possible value for Y.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -242,7 +211,6 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<float> property_max_y() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -295,17 +263,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -327,9 +289,7 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Curve* wrap(GtkCurve* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 namespace Glib
 {
   /** @relates Gtk::GammaCurve
@@ -338,8 +298,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::GammaCurve* wrap(GtkGammaCurve* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_CURVE_H */
 

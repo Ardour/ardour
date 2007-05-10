@@ -183,7 +183,43 @@ IOSelector::IOSelector (Session& sess, boost::shared_ptr<IO> ior, bool input)
 	port_button_box.set_border_width (5);
 
 	port_button_box.pack_start (add_port_button, false, false);
+
+	// The IO selector only works for single typed IOs
+	const ARDOUR::DataType t = io->default_type();
+
+	if (for_input) {
+		if (io->input_maximum().get(t) < 0 || io->input_maximum().get(t) > (size_t) io->n_inputs().get(t)) {
+			add_port_button.set_sensitive (true);
+		} else {
+			add_port_button.set_sensitive (false);
+		}
+
+	} else {
+		if (io->output_maximum().get(t) < 0 || io->output_maximum().get(t) > (size_t) io->n_outputs().get(t)) {
+			add_port_button.set_sensitive (true);
+		} else {
+			add_port_button.set_sensitive (false);
+		}
+			
+	}
+
 	port_button_box.pack_start (remove_port_button, false, false);
+
+	if (for_input) {
+		if (io->input_minimum().get(t) < 0 || io->input_minimum().get(t) < (size_t) io->n_inputs().get(t)) {
+			remove_port_button.set_sensitive (true);
+		} else {
+			remove_port_button.set_sensitive (false);
+		}
+			
+	} else {
+		if (io->output_minimum().get(t) < 0 || io->output_minimum().get(t) < (size_t) io->n_outputs().get(t)) {
+			remove_port_button.set_sensitive (true);
+		} else {
+			remove_port_button.set_sensitive (false);
+		}
+	}
+
 	port_button_box.pack_start (clear_connections_button, false, false);
 
 	port_and_button_box.set_border_width (5);
@@ -224,9 +260,11 @@ IOSelector::~IOSelector ()
 void 
 IOSelector::set_button_sensitivity ()
 {
+	DataType t = io->default_type();
+
 	if (for_input) {
 
-		if (io->input_maximum() < 0 || io->input_maximum() > (int) io->n_inputs()) {
+		if (io->input_maximum().get(t) < 0 || io->input_maximum().get(t) > io->n_inputs().get(t)) {
 			add_port_button.set_sensitive (true);
 		} else {
 			add_port_button.set_sensitive (false);
@@ -234,7 +272,7 @@ IOSelector::set_button_sensitivity ()
 
 	} else {
 
-		if (io->output_maximum() < 0 || io->output_maximum() > (int) io->n_outputs()) {
+		if (io->output_maximum().get(t) < 0 || io->output_maximum().get(t) > io->n_outputs().get(t)) {
 			add_port_button.set_sensitive (true);
 		} else {
 			add_port_button.set_sensitive (false);
@@ -243,14 +281,14 @@ IOSelector::set_button_sensitivity ()
 	}
 
 	if (for_input) {
-		if (io->n_inputs() && (io->input_minimum() < 0 || io->input_minimum() < (int) io->n_inputs())) {
+		if (io->n_inputs().get(t) && (io->input_minimum().get(t) < 0 || io->input_minimum().get(t) < io->n_inputs().get(t))) {
 			remove_port_button.set_sensitive (true);
 		} else {
 			remove_port_button.set_sensitive (false);
 		}
 			
 	} else {
-		if (io->n_outputs() && (io->output_minimum() < 0 || io->output_minimum() < (int) io->n_outputs())) {
+		if (io->n_outputs().get(t) && (io->output_minimum().get(t) < 0 || io->output_minimum().get(t) < io->n_outputs().get(t))) {
 			remove_port_button.set_sensitive (true);
 		} else {
 			remove_port_button.set_sensitive (false);
@@ -380,10 +418,13 @@ IOSelector::display_ports ()
 		Port *port;
 		uint32_t limit;
 		
+		// The IO selector only works for single typed IOs
+		const ARDOUR::DataType t = io->default_type();
+
 		if (for_input) {
-			limit = io->n_inputs();
+			limit = io->n_inputs().get(t);
 		} else {
-			limit = io->n_outputs();
+			limit = io->n_outputs().get(t);
 		}
 		
 		for (slist<TreeView *>::iterator i = port_displays.begin(); i != port_displays.end(); ) {
@@ -448,7 +489,7 @@ IOSelector::display_ports ()
 			
 			if (for_input) {
 				
-				if (io->input_maximum() == 1) {
+				if (io->input_maximum().get(io->default_type()) == 1) {
 					selected_port = port;
 					selected_port_tview = tview;
 				} else {
@@ -459,7 +500,7 @@ IOSelector::display_ports ()
 				
 			} else {
 				
-				if (io->output_maximum() == 1) {
+				if (io->output_maximum().get(t) == 1) {
 					selected_port = port;
 					selected_port_tview = tview;
 				} else {
@@ -511,7 +552,9 @@ IOSelector::port_selection_changed (GdkEventButton *ev, TreeView* treeview)
 	if (for_input) {
 		if ((status = io->connect_input (selected_port, other_port_name, this)) == 0) {
 			Port *p = session.engine().get_port_by_name (other_port_name);
-			p->enable_metering();
+			if (p) {
+				p->enable_metering();
+			}
 		}
 	} else {
 		status = io->connect_output (selected_port, other_port_name, this);
@@ -537,6 +580,9 @@ void
 IOSelector::add_port ()
 {
 	/* add a new port, then hide the button if we're up to the maximum allowed */
+
+	// The IO selector only works for single typed IOs
+	const ARDOUR::DataType t = io->default_type();
 
 	if (for_input) {
 
@@ -569,15 +615,17 @@ IOSelector::remove_port ()
 {
 	uint32_t nports;
 
+	// The IO selector only works for single typed IOs
+	const ARDOUR::DataType t = io->default_type();
+	
 	// always remove last port
 	
 	if (for_input) {
-		if ((nports = io->n_inputs()) > 0) {
+		if ((nports = io->n_inputs().get(t)) > 0) {
 			io->remove_input_port (io->input(nports-1), this);
 		}
-
 	} else {
-		if ((nports = io->n_outputs()) > 0) {
+		if ((nports = io->n_outputs().get(t)) > 0) {
 			io->remove_output_port (io->output(nports-1), this);
 		}
 	}
@@ -616,7 +664,9 @@ IOSelector::connection_button_release (GdkEventButton *ev, TreeView *treeview)
 		
 		if (for_input) {
 			Port *p = session.engine().get_port_by_name (connected_port_name);
-			p->disable_metering();
+			if (p) {
+				p->disable_metering();
+			}
 			io->disconnect_input (port, connected_port_name, this);
 		} else {
 			io->disconnect_output (port, connected_port_name, this);
@@ -704,11 +754,11 @@ IOSelector::redisplay ()
 	display_ports ();
 
 	if (for_input) {
-		if (io->input_maximum() != 0) {
+		if (io->input_maximum().get(io->default_type()) != 0) {
 			rescan ();
 		}
 	} else {
-		if (io->output_maximum() != 0) {
+		if (io->output_maximum().get(io->default_type()) != 0) {
 			rescan();
 		}
 	}

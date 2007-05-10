@@ -3,7 +3,6 @@
 #ifndef _GTKMM_SIZEGROUP_H
 #define _GTKMM_SIZEGROUP_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -78,24 +77,6 @@ namespace Gtk
 {
 
 
-/** Gtk::SizeGroup provides a mechanism for grouping a number of widgets together so they all request the same amount of space. 
- * This is typically useful when you want a column of widgets to have the same size, but you can't use a Gtk::Table widget.
- * 
- * In detail, the size requested for each widget in a Gtk::SizeGroup is the maximum of the sizes that would have been 
- * requested for each widget in the size group if they were not in the size group. The mode of the size group (see 
- * set_mode()) determines whether this applies to the horizontal size, the vertical size, or both sizes.
- *
- * Note that size groups only affect the amount of space requested, not the size that the widgets finally receive. If 
- * you want the widgets in a GtkSizeGroup to actually be the same size, you need to pack them in such a way that they 
- * get the size they request and not more. For example, if you are packing your widgets into a table, you would not 
- * include the Gtk::FILL flag.
- * 
- * Widgets can be part of multiple size groups; GTK+ will compute the horizontal size of a widget from the horizontal 
- * requisition of all widgets that can be reached from the widget by a chain of size groups of type 
- * Gtk::SIZE_GROUP_HORIZONTAL or Gtk::SIZE_GROUP_BOTH, and the vertical size from the vertical requisition of all widgets  
- * that can be reached from the widget by a chain of size groups of type Gtk::SIZE_GROUP_VERTICAL or Gtk::SIZE_GROUP_BOTH.
- */
-
 class SizeGroup : public Glib::Object
 {
   
@@ -163,24 +144,6 @@ public:
    * @return The current mode of the size group.
    */
   SizeGroupMode get_mode() const;
-
-  
-  /** Sets whether invisible widgets should be ignored when
-   * calculating the size.
-   * 
-   * @newin2p8
-   * @param ignore_hidden Whether hidden widgets should be ignored
-   * when calculating the size.
-   */
-  void set_ignore_hidden(bool ignore_hidden = true);
-  
-  /** Returns if invisible widgets are ignored when calculating the size.
-   * @return <tt>true</tt> if invisible widgets are ignored.
-   * 
-   * @newin2p8.
-   */
-  bool get_ignore_hidden() const;
-
   
   /** Adds a widget to a Gtk::SizeGroup. In the future, the requisition
    * of the widget will be determined as the maximum of its requisition
@@ -196,67 +159,32 @@ public:
    */
   void remove_widget(Widget& widget);
 
-  
-  Glib::SListHandle<Widget*> get_widgets();
-  
-  Glib::SListHandle<const Widget*> get_widgets() const;
-
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The directions in which the size group affects the requested sizes of its component widgets.
+  /** The directions in which the size group effects the requested sizes of its component widgets.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<SizeGroupMode> property_mode() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
-/** The directions in which the size group affects the requested sizes of its component widgets.
+/** The directions in which the size group effects the requested sizes of its component widgets.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<SizeGroupMode> property_mode() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** If TRUE
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy<bool> property_ignore_hidden() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-#ifdef GLIBMM_PROPERTIES_ENABLED
-/** If TRUE
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy_ReadOnly<bool> property_ignore_hidden() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

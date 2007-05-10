@@ -3,7 +3,6 @@
 #ifndef _GTKMM_LAYOUT_H
 #define _GTKMM_LAYOUT_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -103,18 +102,12 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_set_scroll_adjustments(Adjustment* hadj, Adjustment* vadj);
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -215,30 +208,23 @@ public:
    */
   const Adjustment* get_vadjustment() const;
 
-   Glib::RefPtr<Gdk::Window> get_bin_window();
+  Glib::RefPtr<Gdk::Window> get_bin_window();
   Glib::RefPtr<const Gdk::Window> get_bin_window() const;
- 
+
   // See Gtk::Widget::set_scroll_adjustments()
   
-/**
-   * @par Prototype:
-   * <tt>void %set_scroll_adjustments(Adjustment* hadj, Adjustment* vadj)</tt>
-   */
 
   Glib::SignalProxy2< void,Adjustment*,Adjustment* > signal_set_scroll_adjustments();
 
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The GtkAdjustment for the horizontal position.
+  /** The GtkAdjustment for the horizontal position.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Adjustment*> property_hadjustment() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The GtkAdjustment for the horizontal position.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -246,19 +232,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Adjustment*> property_hadjustment() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The GtkAdjustment for the vertical position.
+  /** The GtkAdjustment for the vertical position.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Adjustment*> property_vadjustment() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The GtkAdjustment for the vertical position.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -266,19 +248,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Adjustment*> property_vadjustment() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The width of the layout.
+  /** The width of the layout.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<guint> property_width() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The width of the layout.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -286,19 +264,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<guint> property_width() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The height of the layout.
+  /** The height of the layout.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<guint> property_height() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The height of the layout.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -306,7 +280,6 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<guint> property_height() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -322,8 +295,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Layout* wrap(GtkLayout* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_LAYOUT_H */
 

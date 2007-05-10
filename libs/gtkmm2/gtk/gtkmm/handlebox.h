@@ -3,7 +3,6 @@
 #ifndef _GTKMM_HANDLEBOX_H
 #define _GTKMM_HANDLEBOX_H
 
-
 #include <glibmm.h>
 
  /* $Id$ */
@@ -96,19 +95,13 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_child_attached(Widget* child);
   virtual void on_child_detached(Widget* child);
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -143,44 +136,31 @@ public:
   PositionType get_snap_edge() const;
 
   
-/**
-   * @par Prototype:
-   * <tt>void %child_attached(Widget* child)</tt>
-   */
-
   Glib::SignalProxy1< void,Widget* > signal_child_attached();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %child_detached(Widget* child)</tt>
-   */
-
   Glib::SignalProxy1< void,Widget* > signal_child_detached();
 
 
-   Glib::RefPtr<Gdk::Window> get_bin_window();
+  Glib::RefPtr<Gdk::Window> get_bin_window();
   Glib::RefPtr<const Gdk::Window> get_bin_window() const;
-    Glib::RefPtr<Gdk::Window> get_float_window();
+  Glib::RefPtr<Gdk::Window> get_float_window();
   Glib::RefPtr<const Gdk::Window> get_float_window() const;
- 
+
   bool is_child_detached() const;
   bool is_float_window_mapped() const;
   bool is_in_drag() const;
   bool shrinks_on_detach() const;
 
   //_WRAP_PROPERTY("shadow", ShadowType); //deprecated.
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Appearance of the shadow that surrounds the container.
+  /** Appearance of the shadow that surrounds the container.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<ShadowType> property_shadow_type() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Appearance of the shadow that surrounds the container.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -188,19 +168,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<ShadowType> property_shadow_type() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Position of the handle relative to the child widget.
+  /** Position of the handle relative to the child widget.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<PositionType> property_handle_position() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Position of the handle relative to the child widget.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -208,19 +184,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<PositionType> property_handle_position() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Side of the handlebox that's lined up with the docking point to dock the handlebox.
+  /** Side of the handlebox that's lined up with the docking point to dock the handlebox.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<PositionType> property_snap_edge() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Side of the handlebox that's lined up with the docking point to dock the handlebox.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -228,7 +200,6 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<PositionType> property_snap_edge() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -244,8 +215,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::HandleBox* wrap(GtkHandleBox* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_HANDLEBOX_H */
 

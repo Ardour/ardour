@@ -3,7 +3,6 @@
 #ifndef _GTKMM_MENUITEM_H
 #define _GTKMM_MENUITEM_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -97,21 +96,15 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_activate();
   virtual void on_activate_item();
   virtual void on_toggle_size_request(int* requisition);
   virtual void on_toggle_size_allocate(int allocation);
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -194,35 +187,15 @@ public:
   void unset_accel_path();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %activate()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_activate();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %activate_item()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_activate_item();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %toggle_size_request(int* requisition)</tt>
-   */
-
   Glib::SignalProxy1< void,int* > signal_toggle_size_request();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %toggle_size_allocate(int allocation)</tt>
-   */
-
   Glib::SignalProxy1< void,int > signal_toggle_size_allocate();
 
 
@@ -255,8 +228,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::MenuItem* wrap(GtkMenuItem* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_MENUITEM_H */
 

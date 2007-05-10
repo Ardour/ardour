@@ -170,10 +170,10 @@ Session::merge_event (Event* ev)
 	set_next_event ();
 }
 
+/** @return true when @a ev is deleted. */
 bool
 Session::_replace_event (Event* ev)
 {
-	// returns true when we deleted the passed in event
 	bool ret = false;
 	Events::iterator i;
 
@@ -202,10 +202,10 @@ Session::_replace_event (Event* ev)
 	return ret;
 }
 
+/** @return true when @a ev is deleted. */
 bool
 Session::_remove_event (Session::Event* ev)
 {
-	// returns true when we deleted the passed in event
 	bool ret = false;
 	Events::iterator i;
 	
@@ -314,6 +314,8 @@ Session::process_event (Event* ev)
 		}
 	}
 
+	//printf("Processing event: %s\n", event_names[ev->type]);
+
 	switch (ev->type) {
 	case Event::SetLoop:
 		set_play_loop (ev->yes_or_no);
@@ -335,6 +337,7 @@ Session::process_event (Event* ev)
 			// cerr << "soft locate to " << ev->target_frame << endl;
 			start_locate (ev->target_frame, false, true, false);
 		}
+		_send_smpte_update = true;
 		break;
 
 	case Event::LocateRoll:
@@ -345,6 +348,7 @@ Session::process_event (Event* ev)
 			// cerr << "soft locate to+roll " << ev->target_frame << endl;
 			start_locate (ev->target_frame, true, true, false);
 		}
+		_send_smpte_update = true;
 		break;
 
 	case Event::SetTransportSpeed:
@@ -397,7 +401,7 @@ Session::process_event (Event* ev)
 		break;
 
 	case Event::SetDiskstreamSpeed:
-		set_diskstream_speed (static_cast<AudioDiskstream*> (ev->ptr), ev->speed);
+		set_diskstream_speed (static_cast<Diskstream*> (ev->ptr), ev->speed);
 		break;
 
 	case Event::SetSlaveSource:

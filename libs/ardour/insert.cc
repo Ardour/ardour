@@ -29,6 +29,7 @@
 #include <ardour/port.h>
 #include <ardour/route.h>
 #include <ardour/ladspa_plugin.h>
+#include <ardour/buffer_set.h>
 
 #ifdef VST_SUPPORT
 #include <ardour/vst_plugin.h>
@@ -48,6 +49,8 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+/* ********** FIXME: TYPE **************
+ * Inserts are still definitely audio only */
 Insert::Insert(Session& s, string name, Placement p)
 	: Redirect (s, name, p)
 {
@@ -77,7 +80,7 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug, Placemen
 
 	{
 		Glib::Mutex::Lock em (_session.engine().process_lock());
-		IO::MoreOutputs (output_streams ());
+		IO::MoreChannels (max(input_streams(), output_streams()));
 	}
 
 	RedirectCreated (this); /* EMIT SIGNAL */
@@ -96,7 +99,7 @@ PluginInsert::PluginInsert (Session& s, const XMLNode& node)
 
 	{
 		Glib::Mutex::Lock em (_session.engine().process_lock());
-		IO::MoreOutputs (output_streams());
+		IO::MoreChannels (max(input_streams(), output_streams()));
 	}
 }
 
@@ -179,28 +182,32 @@ PluginInsert::auto_state_changed (uint32_t which)
 	}
 }
 
-uint32_t
+ChanCount
 PluginInsert::output_streams() const
 {
-	return _plugins[0]->get_info()->n_outputs * _plugins.size();
+	// FIXME: TYPE
+	return ChanCount(DataType::AUDIO, _plugins[0]->get_info()->n_outputs * _plugins.size());
 }
 
-uint32_t
+ChanCount
 PluginInsert::input_streams() const
 {
-	return _plugins[0]->get_info()->n_inputs * _plugins.size();
+	// FIXME: TYPE
+	return ChanCount(DataType::AUDIO, _plugins[0]->get_info()->n_inputs * _plugins.size());
 }
 
-uint32_t
+ChanCount
 PluginInsert::natural_output_streams() const
 {
-	return _plugins[0]->get_info()->n_outputs;
+	// FIXME: TYPE
+	return ChanCount(DataType::AUDIO, _plugins[0]->get_info()->n_outputs);
 }
 
-uint32_t
+ChanCount
 PluginInsert::natural_input_streams() const
 {
-	return _plugins[0]->get_info()->n_inputs;
+	// FIXME: TYPE
+	return ChanCount(DataType::AUDIO, _plugins[0]->get_info()->n_inputs);
 }
 
 bool
@@ -265,10 +272,10 @@ PluginInsert::deactivate ()
 }
 
 void
-PluginInsert::connect_and_run (vector<Sample*>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset, bool with_auto, nframes_t now)
+PluginInsert::connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t offset, bool with_auto, nframes_t now)
 {
-	int32_t in_index = 0;
-	int32_t out_index = 0;
+	uint32_t in_index = 0;
+	uint32_t out_index = 0;
 
 	/* Note that we've already required that plugins
 	   be able to handle in-place processing.
@@ -298,7 +305,7 @@ PluginInsert::connect_and_run (vector<Sample*>& bufs, uint32_t nbufs, nframes_t 
 	}
 
 	for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-		(*i)->connect_and_run (bufs, nbufs, in_index, out_index, nframes, offset);
+		(*i)->connect_and_run (bufs, in_index, out_index, nframes, offset);
 	}
 
 	/* leave remaining channel buffers alone */
@@ -339,28 +346,28 @@ PluginInsert::transport_stopped (nframes_t now)
 void
 PluginInsert::silence (nframes_t nframes, nframes_t offset)
 {
-	int32_t in_index = 0;
-	int32_t out_index = 0;
+	uint32_t in_index = 0;
+	uint32_t out_index = 0;
 
 	uint32_t n;
 
 	if (active()) {
 		for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 			n = (*i) -> get_info()->n_inputs;
-			(*i)->connect_and_run (_session.get_silent_buffers (n), n, in_index, out_index, nframes, offset);
+			(*i)->connect_and_run (_session.get_silent_buffers (ChanCount(DataType::AUDIO, n)), in_index, out_index, nframes, offset);
 		}
 	}
 }
 	
 void
-PluginInsert::run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset)
+PluginInsert::run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset)
 {
 	if (active()) {
 
 		if (_session.transport_rolling()) {
-			automation_run (bufs, nbufs, nframes, offset);
+			automation_run (bufs, nframes, offset);
 		} else {
-			connect_and_run (bufs, nbufs, nframes, offset, false);
+			connect_and_run (bufs, nframes, offset, false);
 		}
 	} else {
 		uint32_t in = _plugins[0]->get_info()->n_inputs;
@@ -371,9 +378,11 @@ PluginInsert::run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nf
 			/* not active, but something has make up for any channel count increase */
 			
 			for (uint32_t n = out - in; n < out; ++n) {
-				memcpy (bufs[n], bufs[in - 1], sizeof (Sample) * nframes);
+				memcpy (bufs.get_audio(n).data(nframes, offset), bufs.get_audio(in - 1).data(nframes, offset), sizeof (Sample) * nframes);
 			}
 		}
+
+		bufs.count().set(DataType::AUDIO, out);
 	}
 }
 
@@ -392,7 +401,7 @@ PluginInsert::set_parameter (uint32_t port, float val)
 }
 
 void
-PluginInsert::automation_run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset)
+PluginInsert::automation_run (BufferSet& bufs, nframes_t nframes, nframes_t offset)
 {
 	ControlEvent next_event (0, 0.0f);
 	nframes_t now = _session.transport_frame ();
@@ -401,7 +410,7 @@ PluginInsert::automation_run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t 
 	Glib::Mutex::Lock lm (_automation_lock, Glib::TRY_LOCK);
 
 	if (!lm.locked()) {
-		connect_and_run (bufs, nbufs, nframes, offset, false);
+		connect_and_run (bufs, nframes, offset, false);
 		return;
 	}
 	
@@ -409,7 +418,7 @@ PluginInsert::automation_run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t 
 		
  		/* no events have a time within the relevant range */
 		
- 		connect_and_run (bufs, nbufs, nframes, offset, true, now);
+ 		connect_and_run (bufs, nframes, offset, true, now);
  		return;
  	}
 	
@@ -417,7 +426,7 @@ PluginInsert::automation_run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t 
 
 		nframes_t cnt = min (((nframes_t) ceil (next_event.when) - now), nframes);
   
- 		connect_and_run (bufs, nbufs, cnt, offset, true, now);
+ 		connect_and_run (bufs, cnt, offset, true, now);
  		
  		nframes -= cnt;
  		offset += cnt;
@@ -431,7 +440,7 @@ PluginInsert::automation_run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t 
  	/* cleanup anything that is left to do */
   
  	if (nframes) {
- 		connect_and_run (bufs, nbufs, nframes, offset, true, now);
+ 		connect_and_run (bufs, nframes, offset, true, now);
   	}
 }	
 
@@ -789,7 +798,7 @@ PluginInsert::describe_parameter (uint32_t what)
 	return _plugins[0]->describe_parameter (what);
 }
 
-nframes_t 
+ARDOUR::nframes_t 
 PluginInsert::latency() 
 {
 	return _plugins[0]->latency ();
@@ -833,7 +842,6 @@ PortInsert::PortInsert (Session& s, Placement p)
 {
 	init ();
 	RedirectCreated (this); /* EMIT SIGNAL */
-
 }
 
 PortInsert::PortInsert (const PortInsert& other)
@@ -873,9 +881,9 @@ PortInsert::~PortInsert ()
 }
 
 void
-PortInsert::run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset)
+PortInsert::run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset)
 {
-	if (n_outputs() == 0) {
+	if (n_outputs().get(_default_type) == 0) {
 		return;
 	}
 
@@ -885,22 +893,9 @@ PortInsert::run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nfra
 		return;
 	}
 
-	uint32_t n;
-	vector<Port*>::iterator o;
-	vector<Port*>::iterator i;
+	deliver_output(bufs, start_frame, end_frame, nframes, offset);
 
-	/* deliver output */
-
-	for (o = _outputs.begin(), n = 0; o != _outputs.end(); ++o, ++n) {
-		memcpy ((*o)->get_buffer (nframes) + offset, bufs[min(nbufs,n)], sizeof (Sample) * nframes);
-		(*o)->mark_silence (false);
-	}
-	
-	/* collect input */
-	
-	for (i = _inputs.begin(), n = 0; i != _inputs.end(); ++i, ++n) {
-		memcpy (bufs[min(nbufs,n)], (*i)->get_buffer (nframes) + offset, sizeof (Sample) * nframes);
-	}
+	collect_input(bufs, nframes, offset);
 }
 
 XMLNode&
@@ -962,7 +957,7 @@ PortInsert::set_state(const XMLNode& node)
 	return 0;
 }
 
-nframes_t 
+ARDOUR::nframes_t 
 PortInsert::latency() 
 {
 	/* because we deliver and collect within the same cycle,
@@ -978,7 +973,7 @@ PortInsert::latency()
 int32_t
 PortInsert::can_support_input_configuration (int32_t in) const
 {
-	if (input_maximum() == -1 && output_maximum() == -1) {
+	if (input_maximum() == ChanCount::INFINITE && output_maximum() == ChanCount::INFINITE) {
 
 		/* not configured yet */
 
@@ -990,7 +985,7 @@ PortInsert::can_support_input_configuration (int32_t in) const
 		   many output ports it will have.
 		*/
 
-		if (output_maximum() == in) {
+		if (output_maximum().get(_default_type) == static_cast<uint32_t>(in)) {
 			return 1;
 		} 
 	}
@@ -1015,36 +1010,36 @@ PortInsert::configure_io (int32_t ignored_magic, int32_t in, int32_t out)
 	   to the number of input ports we need.
 	*/
 
-	set_output_maximum (in);
-	set_output_minimum (in);
-	set_input_maximum (out);
-	set_input_minimum (out);
+	set_output_maximum (ChanCount(_default_type, in));
+	set_output_minimum (ChanCount(_default_type, in));
+	set_input_maximum (ChanCount(_default_type, out));
+	set_input_minimum (ChanCount(_default_type, out));
 
 	if (in < 0) {
-		in = n_outputs ();
+		in = n_outputs ().get(_default_type);
 	} 
 
 	if (out < 0) {
-		out = n_inputs ();
+		out = n_inputs ().get(_default_type);
 	}
 
-	return ensure_io (out, in, false, this);
+	return ensure_io (ChanCount(_default_type, out), ChanCount(_default_type, in), false, this);
 }
 
 int32_t
 PortInsert::compute_output_streams (int32_t cnt) const
 {
 	/* puzzling, eh? think about it ... */
-	return n_inputs ();
+	return n_inputs ().get(_default_type);
 }
 
-uint32_t
+ChanCount
 PortInsert::output_streams() const
 {
 	return n_inputs ();
 }
 
-uint32_t
+ChanCount
 PortInsert::input_streams() const
 {
 	return n_outputs ();

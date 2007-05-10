@@ -3,7 +3,6 @@
 #ifndef _GDKMM_COLORMAP_H
 #define _GDKMM_COLORMAP_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -115,18 +114,27 @@ public:
 
   //_WRAP_METHOD(void change(int ncolors), gdk_colormap_change)
 
-  #ifndef GDKMM_DISABLE_DEPRECATED
+  // Both 'GdkColor* colors' and 'gboolean* success' are _array_ output arguments.
+ 
 
-  ///@deprecated Use alloc_color().
+  /** Allocates colors from a colormap.
+   * @param colors The color values to allocate. On return, the pixel
+   * values for allocated colors will be filled in.
+   * @param ncolors The number of colors in @a colors .
+   * @param writeable If <tt>true</tt>, the colors are allocated writeable
+   * (their values can later be changed using gdk_color_change()).
+   * Writeable colors cannot be shared between applications.
+   * @param best_match If <tt>true</tt>, GDK will attempt to do matching against
+   * existing colors if the colors cannot be allocated as requested.
+   * @param success An array of length @a ncolors . On return, this
+   * indicates whether the corresponding color in @a colors  was
+   * successfully allocated or not.
+   * @return The number of colors that were not successfully 
+   * allocated.
+   */
   int alloc_colors(ArrayHandle_Color& colors, int ncolors, bool writeable, bool best_match, Glib::ArrayHandle<bool>& success);
+
   
-
-  ///@deprecated Use free_color()
-  void free_colors(Color& colors, int ncolors);
-  
-  #endif // GDKMM_DISABLE_DEPRECATED
-
-
   /** Allocates a single color from a colormap.
    * @param color The color to allocate. On return the
    * &lt;structfield&gt;pixel&lt;/structfield&gt; field will be
@@ -139,8 +147,12 @@ public:
    * @return <tt>true</tt> if the allocation succeeded.
    */
   bool alloc_color(Color& color, bool writeable = false, bool best_match = true);
-  void free_color(Color& color);
-
+  
+  /** Frees previously allocated colors.
+   * @param colors The colors to free.
+   * @param ncolors The number of colors in @a colors .
+   */
+  void free_colors(Color& colors, int ncolors);
   
   /** Locates the RGB color in @a colormap  corresponding to the given
    * hardware pixel @a pixel . @a pixel  must be a valid pixel in the
@@ -172,14 +184,14 @@ public:
   /** Gets the screen for which this colormap was created.
    * @return The screen for which this colormap was created.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<Screen> get_screen();
   
   /** Gets the screen for which this colormap was created.
    * @return The screen for which this colormap was created.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<const Screen> get_screen() const;
   
@@ -188,17 +200,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

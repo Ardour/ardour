@@ -3,7 +3,6 @@
 #ifndef _SIGC_ADAPTORS_MACROS_BINDHM4_
 #define _SIGC_ADAPTORS_MACROS_BINDHM4_
 #include <sigc++/adaptors/adaptor_trait.h>
-#include <sigc++/adaptors/bound_argument.h>
 
 namespace sigc { 
 
@@ -141,24 +140,20 @@ struct bind_functor;
  * @ingroup bind
  */
 template <class T_functor, class T_bound>
-struct bind_functor<0, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : public adapts<T_functor>
+struct bind_functor<0, T_functor, T_bound> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
   template <class T_arg1=void,class T_arg2=void,class T_arg3=void,class T_arg4=void,class T_arg5=void,class T_arg6=void,class T_arg7=void>
   struct deduce_result_type
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_bound>::pass, typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>::type type; };
   typedef typename adaptor_type::result_type  result_type;
 
   /** Invokes the wrapped functor passing on the bound argument only.
    * @return The return value of the functor invocation.
    */
   result_type
-  operator()()
-  {
-    //Note: The AIX compiler sometimes gives linker errors if we do not define this in the class.
-    return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_bound>::type>::pass> (bound_.invoke());
-  }
+  operator()();
 
   /** Invokes the wrapped functor passing on the arguments.
    * bound_ is passed as the 1th argument.
@@ -168,16 +163,16 @@ struct bind_functor<0, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1>
   typename deduce_result_type<T_arg1>::type
   operator()(T_arg1 _A_arg1)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg1>::pass>
-        (bound_.invoke(), _A_arg1);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_bound>::pass, typename type_trait<T_arg1>::pass>
+        (bound_, _A_arg1);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1>
   typename deduce_result_type<T_arg1>::type
   sun_forte_workaround(T_arg1 _A_arg1)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg1>::pass>
-        (bound_.invoke(), _A_arg1);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_bound>::pass, typename type_trait<T_arg1>::pass>
+        (bound_, _A_arg1);
     }
   #endif
     
@@ -190,16 +185,16 @@ struct bind_functor<0, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2>
   typename deduce_result_type<T_arg1,T_arg2>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass>
-        (bound_.invoke(), _A_arg1, _A_arg2);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_bound>::pass, typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass>
+        (bound_, _A_arg1, _A_arg2);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2>
   typename deduce_result_type<T_arg1,T_arg2>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass>
-        (bound_.invoke(), _A_arg1, _A_arg2);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_bound>::pass, typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass>
+        (bound_, _A_arg1, _A_arg2);
     }
   #endif
     
@@ -213,16 +208,16 @@ struct bind_functor<0, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2,class T_arg3>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass>
-        (bound_.invoke(), _A_arg1, _A_arg2, _A_arg3);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_bound>::pass, typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass>
+        (bound_, _A_arg1, _A_arg2, _A_arg3);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass>
-        (bound_.invoke(), _A_arg1, _A_arg2, _A_arg3);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_bound>::pass, typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass>
+        (bound_, _A_arg1, _A_arg2, _A_arg3);
     }
   #endif
     
@@ -237,16 +232,16 @@ struct bind_functor<0, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass>
-        (bound_.invoke(), _A_arg1, _A_arg2, _A_arg3, _A_arg4);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_bound>::pass, typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass>
+        (bound_, _A_arg1, _A_arg2, _A_arg3, _A_arg4);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass>
-        (bound_.invoke(), _A_arg1, _A_arg2, _A_arg3, _A_arg4);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_bound>::pass, typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass>
+        (bound_, _A_arg1, _A_arg2, _A_arg3, _A_arg4);
     }
   #endif
     
@@ -262,16 +257,16 @@ struct bind_functor<0, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
-        (bound_.invoke(), _A_arg1, _A_arg2, _A_arg3, _A_arg4, _A_arg5);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_bound>::pass, typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
+        (bound_, _A_arg1, _A_arg2, _A_arg3, _A_arg4, _A_arg5);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
-        (bound_.invoke(), _A_arg1, _A_arg2, _A_arg3, _A_arg4, _A_arg5);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_bound>::pass, typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
+        (bound_, _A_arg1, _A_arg2, _A_arg3, _A_arg4, _A_arg5);
     }
   #endif
     
@@ -288,16 +283,16 @@ struct bind_functor<0, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5,T_arg6 _A_arg6)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
-        (bound_.invoke(), _A_arg1, _A_arg2, _A_arg3, _A_arg4, _A_arg5, _A_arg6);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_bound>::pass, typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
+        (bound_, _A_arg1, _A_arg2, _A_arg3, _A_arg4, _A_arg5, _A_arg6);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5,T_arg6 _A_arg6)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
-        (bound_.invoke(), _A_arg1, _A_arg2, _A_arg3, _A_arg4, _A_arg5, _A_arg6);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_bound>::pass, typename type_trait<T_arg1>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
+        (bound_, _A_arg1, _A_arg2, _A_arg3, _A_arg4, _A_arg5, _A_arg6);
     }
   #endif
     
@@ -310,8 +305,13 @@ struct bind_functor<0, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
     {}
 
   /// The argument bound to the functor.
-  bound_argument<T_bound> bound_;
+  T_bound bound_;
 };
+
+template <class T_functor, class T_bound>
+typename bind_functor<0, T_functor, T_bound>::result_type
+bind_functor<0, T_functor, T_bound>::operator()()
+  { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_bound>::pass> (bound_); }
 
 /** Adaptor that binds an argument to the wrapped functor.
  * This template specialization fixes the 2th argument of the wrapped functor.
@@ -319,24 +319,20 @@ struct bind_functor<0, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
  * @ingroup bind
  */
 template <class T_functor, class T_bound>
-struct bind_functor<1, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : public adapts<T_functor>
+struct bind_functor<1, T_functor, T_bound> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
   template <class T_arg1=void,class T_arg2=void,class T_arg3=void,class T_arg4=void,class T_arg5=void,class T_arg6=void,class T_arg7=void>
   struct deduce_result_type
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>::type type; };
   typedef typename adaptor_type::result_type  result_type;
 
   /** Invokes the wrapped functor passing on the bound argument only.
    * @return The return value of the functor invocation.
    */
   result_type
-  operator()()
-  {
-    //Note: The AIX compiler sometimes gives linker errors if we do not define this in the class.
-    return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_bound>::type>::pass> (bound_.invoke());
-  }
+  operator()();
 
   /** Invokes the wrapped functor passing on the arguments.
    * bound_ is passed as the 2th argument.
@@ -346,16 +342,16 @@ struct bind_functor<1, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1>
   typename deduce_result_type<T_arg1>::type
   operator()(T_arg1 _A_arg1)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass>
-        (_A_arg1, bound_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_bound>::pass>
+        (_A_arg1, bound_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1>
   typename deduce_result_type<T_arg1>::type
   sun_forte_workaround(T_arg1 _A_arg1)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass>
-        (_A_arg1, bound_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_bound>::pass>
+        (_A_arg1, bound_);
     }
   #endif
     
@@ -368,16 +364,16 @@ struct bind_functor<1, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2>
   typename deduce_result_type<T_arg1,T_arg2>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg2>::pass>
-        (_A_arg1, bound_.invoke(), _A_arg2);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg2>::pass>
+        (_A_arg1, bound_, _A_arg2);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2>
   typename deduce_result_type<T_arg1,T_arg2>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg2>::pass>
-        (_A_arg1, bound_.invoke(), _A_arg2);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg2>::pass>
+        (_A_arg1, bound_, _A_arg2);
     }
   #endif
     
@@ -391,16 +387,16 @@ struct bind_functor<1, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2,class T_arg3>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass>
-        (_A_arg1, bound_.invoke(), _A_arg2, _A_arg3);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass>
+        (_A_arg1, bound_, _A_arg2, _A_arg3);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass>
-        (_A_arg1, bound_.invoke(), _A_arg2, _A_arg3);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass>
+        (_A_arg1, bound_, _A_arg2, _A_arg3);
     }
   #endif
     
@@ -415,16 +411,16 @@ struct bind_functor<1, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass>
-        (_A_arg1, bound_.invoke(), _A_arg2, _A_arg3, _A_arg4);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass>
+        (_A_arg1, bound_, _A_arg2, _A_arg3, _A_arg4);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass>
-        (_A_arg1, bound_.invoke(), _A_arg2, _A_arg3, _A_arg4);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass>
+        (_A_arg1, bound_, _A_arg2, _A_arg3, _A_arg4);
     }
   #endif
     
@@ -440,16 +436,16 @@ struct bind_functor<1, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
-        (_A_arg1, bound_.invoke(), _A_arg2, _A_arg3, _A_arg4, _A_arg5);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
+        (_A_arg1, bound_, _A_arg2, _A_arg3, _A_arg4, _A_arg5);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
-        (_A_arg1, bound_.invoke(), _A_arg2, _A_arg3, _A_arg4, _A_arg5);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
+        (_A_arg1, bound_, _A_arg2, _A_arg3, _A_arg4, _A_arg5);
     }
   #endif
     
@@ -466,16 +462,16 @@ struct bind_functor<1, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5,T_arg6 _A_arg6)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
-        (_A_arg1, bound_.invoke(), _A_arg2, _A_arg3, _A_arg4, _A_arg5, _A_arg6);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
+        (_A_arg1, bound_, _A_arg2, _A_arg3, _A_arg4, _A_arg5, _A_arg6);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5,T_arg6 _A_arg6)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
-        (_A_arg1, bound_.invoke(), _A_arg2, _A_arg3, _A_arg4, _A_arg5, _A_arg6);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg2>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
+        (_A_arg1, bound_, _A_arg2, _A_arg3, _A_arg4, _A_arg5, _A_arg6);
     }
   #endif
     
@@ -488,8 +484,13 @@ struct bind_functor<1, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
     {}
 
   /// The argument bound to the functor.
-  bound_argument<T_bound> bound_;
+  T_bound bound_;
 };
+
+template <class T_functor, class T_bound>
+typename bind_functor<1, T_functor, T_bound>::result_type
+bind_functor<1, T_functor, T_bound>::operator()()
+  { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_bound>::pass> (bound_); }
 
 /** Adaptor that binds an argument to the wrapped functor.
  * This template specialization fixes the 3th argument of the wrapped functor.
@@ -497,24 +498,20 @@ struct bind_functor<1, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
  * @ingroup bind
  */
 template <class T_functor, class T_bound>
-struct bind_functor<2, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : public adapts<T_functor>
+struct bind_functor<2, T_functor, T_bound> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
   template <class T_arg1=void,class T_arg2=void,class T_arg3=void,class T_arg4=void,class T_arg5=void,class T_arg6=void,class T_arg7=void>
   struct deduce_result_type
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>::type type; };
   typedef typename adaptor_type::result_type  result_type;
 
   /** Invokes the wrapped functor passing on the bound argument only.
    * @return The return value of the functor invocation.
    */
   result_type
-  operator()()
-  {
-    //Note: The AIX compiler sometimes gives linker errors if we do not define this in the class.
-    return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_bound>::type>::pass> (bound_.invoke());
-  }
+  operator()();
 
   /** Invokes the wrapped functor passing on the arguments.
    * bound_ is passed as the 3th argument.
@@ -525,16 +522,16 @@ struct bind_functor<2, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2>
   typename deduce_result_type<T_arg1,T_arg2>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass>
-        (_A_arg1,_A_arg2, bound_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_bound>::pass>
+        (_A_arg1,_A_arg2, bound_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2>
   typename deduce_result_type<T_arg1,T_arg2>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass>
-        (_A_arg1,_A_arg2, bound_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_bound>::pass>
+        (_A_arg1,_A_arg2, bound_);
     }
   #endif
     
@@ -548,16 +545,16 @@ struct bind_functor<2, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2,class T_arg3>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg3>::pass>
-        (_A_arg1,_A_arg2, bound_.invoke(), _A_arg3);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg3>::pass>
+        (_A_arg1,_A_arg2, bound_, _A_arg3);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg3>::pass>
-        (_A_arg1,_A_arg2, bound_.invoke(), _A_arg3);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg3>::pass>
+        (_A_arg1,_A_arg2, bound_, _A_arg3);
     }
   #endif
     
@@ -572,16 +569,16 @@ struct bind_functor<2, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass>
-        (_A_arg1,_A_arg2, bound_.invoke(), _A_arg3, _A_arg4);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass>
+        (_A_arg1,_A_arg2, bound_, _A_arg3, _A_arg4);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass>
-        (_A_arg1,_A_arg2, bound_.invoke(), _A_arg3, _A_arg4);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass>
+        (_A_arg1,_A_arg2, bound_, _A_arg3, _A_arg4);
     }
   #endif
     
@@ -597,16 +594,16 @@ struct bind_functor<2, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
-        (_A_arg1,_A_arg2, bound_.invoke(), _A_arg3, _A_arg4, _A_arg5);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
+        (_A_arg1,_A_arg2, bound_, _A_arg3, _A_arg4, _A_arg5);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
-        (_A_arg1,_A_arg2, bound_.invoke(), _A_arg3, _A_arg4, _A_arg5);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
+        (_A_arg1,_A_arg2, bound_, _A_arg3, _A_arg4, _A_arg5);
     }
   #endif
     
@@ -623,16 +620,16 @@ struct bind_functor<2, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5,T_arg6 _A_arg6)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
-        (_A_arg1,_A_arg2, bound_.invoke(), _A_arg3, _A_arg4, _A_arg5, _A_arg6);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
+        (_A_arg1,_A_arg2, bound_, _A_arg3, _A_arg4, _A_arg5, _A_arg6);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5,T_arg6 _A_arg6)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
-        (_A_arg1,_A_arg2, bound_.invoke(), _A_arg3, _A_arg4, _A_arg5, _A_arg6);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg3>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
+        (_A_arg1,_A_arg2, bound_, _A_arg3, _A_arg4, _A_arg5, _A_arg6);
     }
   #endif
     
@@ -645,8 +642,13 @@ struct bind_functor<2, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
     {}
 
   /// The argument bound to the functor.
-  bound_argument<T_bound> bound_;
+  T_bound bound_;
 };
+
+template <class T_functor, class T_bound>
+typename bind_functor<2, T_functor, T_bound>::result_type
+bind_functor<2, T_functor, T_bound>::operator()()
+  { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_bound>::pass> (bound_); }
 
 /** Adaptor that binds an argument to the wrapped functor.
  * This template specialization fixes the 4th argument of the wrapped functor.
@@ -654,24 +656,20 @@ struct bind_functor<2, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
  * @ingroup bind
  */
 template <class T_functor, class T_bound>
-struct bind_functor<3, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : public adapts<T_functor>
+struct bind_functor<3, T_functor, T_bound> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
   template <class T_arg1=void,class T_arg2=void,class T_arg3=void,class T_arg4=void,class T_arg5=void,class T_arg6=void,class T_arg7=void>
   struct deduce_result_type
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>::type type; };
   typedef typename adaptor_type::result_type  result_type;
 
   /** Invokes the wrapped functor passing on the bound argument only.
    * @return The return value of the functor invocation.
    */
   result_type
-  operator()()
-  {
-    //Note: The AIX compiler sometimes gives linker errors if we do not define this in the class.
-    return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_bound>::type>::pass> (bound_.invoke());
-  }
+  operator()();
 
   /** Invokes the wrapped functor passing on the arguments.
    * bound_ is passed as the 4th argument.
@@ -683,16 +681,16 @@ struct bind_functor<3, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2,class T_arg3>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3, bound_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<T_bound>::pass>
+        (_A_arg1,_A_arg2,_A_arg3, bound_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3, bound_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<T_bound>::pass>
+        (_A_arg1,_A_arg2,_A_arg3, bound_);
     }
   #endif
     
@@ -707,16 +705,16 @@ struct bind_functor<3, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg4>::pass>
-        (_A_arg1,_A_arg2,_A_arg3, bound_.invoke(), _A_arg4);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg4>::pass>
+        (_A_arg1,_A_arg2,_A_arg3, bound_, _A_arg4);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg4>::pass>
-        (_A_arg1,_A_arg2,_A_arg3, bound_.invoke(), _A_arg4);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg4>::pass>
+        (_A_arg1,_A_arg2,_A_arg3, bound_, _A_arg4);
     }
   #endif
     
@@ -732,16 +730,16 @@ struct bind_functor<3, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
-        (_A_arg1,_A_arg2,_A_arg3, bound_.invoke(), _A_arg4, _A_arg5);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
+        (_A_arg1,_A_arg2,_A_arg3, bound_, _A_arg4, _A_arg5);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
-        (_A_arg1,_A_arg2,_A_arg3, bound_.invoke(), _A_arg4, _A_arg5);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass>
+        (_A_arg1,_A_arg2,_A_arg3, bound_, _A_arg4, _A_arg5);
     }
   #endif
     
@@ -758,16 +756,16 @@ struct bind_functor<3, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5,T_arg6 _A_arg6)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
-        (_A_arg1,_A_arg2,_A_arg3, bound_.invoke(), _A_arg4, _A_arg5, _A_arg6);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
+        (_A_arg1,_A_arg2,_A_arg3, bound_, _A_arg4, _A_arg5, _A_arg6);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5,T_arg6 _A_arg6)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
-        (_A_arg1,_A_arg2,_A_arg3, bound_.invoke(), _A_arg4, _A_arg5, _A_arg6);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg4>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
+        (_A_arg1,_A_arg2,_A_arg3, bound_, _A_arg4, _A_arg5, _A_arg6);
     }
   #endif
     
@@ -780,8 +778,13 @@ struct bind_functor<3, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
     {}
 
   /// The argument bound to the functor.
-  bound_argument<T_bound> bound_;
+  T_bound bound_;
 };
+
+template <class T_functor, class T_bound>
+typename bind_functor<3, T_functor, T_bound>::result_type
+bind_functor<3, T_functor, T_bound>::operator()()
+  { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_bound>::pass> (bound_); }
 
 /** Adaptor that binds an argument to the wrapped functor.
  * This template specialization fixes the 5th argument of the wrapped functor.
@@ -789,24 +792,20 @@ struct bind_functor<3, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
  * @ingroup bind
  */
 template <class T_functor, class T_bound>
-struct bind_functor<4, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : public adapts<T_functor>
+struct bind_functor<4, T_functor, T_bound> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
   template <class T_arg1=void,class T_arg2=void,class T_arg3=void,class T_arg4=void,class T_arg5=void,class T_arg6=void,class T_arg7=void>
   struct deduce_result_type
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>::type type; };
   typedef typename adaptor_type::result_type  result_type;
 
   /** Invokes the wrapped functor passing on the bound argument only.
    * @return The return value of the functor invocation.
    */
   result_type
-  operator()()
-  {
-    //Note: The AIX compiler sometimes gives linker errors if we do not define this in the class.
-    return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_bound>::type>::pass> (bound_.invoke());
-  }
+  operator()();
 
   /** Invokes the wrapped functor passing on the arguments.
    * bound_ is passed as the 5th argument.
@@ -819,16 +818,16 @@ struct bind_functor<4, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3,_A_arg4, bound_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<T_bound>::pass>
+        (_A_arg1,_A_arg2,_A_arg3,_A_arg4, bound_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3,_A_arg4, bound_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<T_bound>::pass>
+        (_A_arg1,_A_arg2,_A_arg3,_A_arg4, bound_);
     }
   #endif
     
@@ -844,16 +843,16 @@ struct bind_functor<4, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg5>::pass>
-        (_A_arg1,_A_arg2,_A_arg3,_A_arg4, bound_.invoke(), _A_arg5);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg5>::pass>
+        (_A_arg1,_A_arg2,_A_arg3,_A_arg4, bound_, _A_arg5);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg5>::pass>
-        (_A_arg1,_A_arg2,_A_arg3,_A_arg4, bound_.invoke(), _A_arg5);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg5>::pass>
+        (_A_arg1,_A_arg2,_A_arg3,_A_arg4, bound_, _A_arg5);
     }
   #endif
     
@@ -870,16 +869,16 @@ struct bind_functor<4, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5,T_arg6 _A_arg6)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
-        (_A_arg1,_A_arg2,_A_arg3,_A_arg4, bound_.invoke(), _A_arg5, _A_arg6);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
+        (_A_arg1,_A_arg2,_A_arg3,_A_arg4, bound_, _A_arg5, _A_arg6);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5,T_arg6 _A_arg6)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
-        (_A_arg1,_A_arg2,_A_arg3,_A_arg4, bound_.invoke(), _A_arg5, _A_arg6);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg5>::pass, typename type_trait<T_arg6>::pass>
+        (_A_arg1,_A_arg2,_A_arg3,_A_arg4, bound_, _A_arg5, _A_arg6);
     }
   #endif
     
@@ -892,8 +891,13 @@ struct bind_functor<4, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
     {}
 
   /// The argument bound to the functor.
-  bound_argument<T_bound> bound_;
+  T_bound bound_;
 };
+
+template <class T_functor, class T_bound>
+typename bind_functor<4, T_functor, T_bound>::result_type
+bind_functor<4, T_functor, T_bound>::operator()()
+  { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_bound>::pass> (bound_); }
 
 /** Adaptor that binds an argument to the wrapped functor.
  * This template specialization fixes the 6th argument of the wrapped functor.
@@ -901,24 +905,20 @@ struct bind_functor<4, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
  * @ingroup bind
  */
 template <class T_functor, class T_bound>
-struct bind_functor<5, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : public adapts<T_functor>
+struct bind_functor<5, T_functor, T_bound> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
   template <class T_arg1=void,class T_arg2=void,class T_arg3=void,class T_arg4=void,class T_arg5=void,class T_arg6=void,class T_arg7=void>
   struct deduce_result_type
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg6>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg6>::pass>::type type; };
   typedef typename adaptor_type::result_type  result_type;
 
   /** Invokes the wrapped functor passing on the bound argument only.
    * @return The return value of the functor invocation.
    */
   result_type
-  operator()()
-  {
-    //Note: The AIX compiler sometimes gives linker errors if we do not define this in the class.
-    return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_bound>::type>::pass> (bound_.invoke());
-  }
+  operator()();
 
   /** Invokes the wrapped functor passing on the arguments.
    * bound_ is passed as the 6th argument.
@@ -932,16 +932,16 @@ struct bind_functor<5, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3,_A_arg4,_A_arg5, bound_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass, typename type_trait<T_bound>::pass>
+        (_A_arg1,_A_arg2,_A_arg3,_A_arg4,_A_arg5, bound_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3,_A_arg4,_A_arg5, bound_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass, typename type_trait<T_bound>::pass>
+        (_A_arg1,_A_arg2,_A_arg3,_A_arg4,_A_arg5, bound_);
     }
   #endif
     
@@ -958,16 +958,16 @@ struct bind_functor<5, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5,T_arg6 _A_arg6)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg6>::pass>
-        (_A_arg1,_A_arg2,_A_arg3,_A_arg4,_A_arg5, bound_.invoke(), _A_arg6);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg6>::pass>
+        (_A_arg1,_A_arg2,_A_arg3,_A_arg4,_A_arg5, bound_, _A_arg6);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5,T_arg6 _A_arg6)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass, typename type_trait<T_arg6>::pass>
-        (_A_arg1,_A_arg2,_A_arg3,_A_arg4,_A_arg5, bound_.invoke(), _A_arg6);
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass, typename type_trait<T_bound>::pass, typename type_trait<T_arg6>::pass>
+        (_A_arg1,_A_arg2,_A_arg3,_A_arg4,_A_arg5, bound_, _A_arg6);
     }
   #endif
     
@@ -980,8 +980,13 @@ struct bind_functor<5, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
     {}
 
   /// The argument bound to the functor.
-  bound_argument<T_bound> bound_;
+  T_bound bound_;
 };
+
+template <class T_functor, class T_bound>
+typename bind_functor<5, T_functor, T_bound>::result_type
+bind_functor<5, T_functor, T_bound>::operator()()
+  { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_bound>::pass> (bound_); }
 
 /** Adaptor that binds an argument to the wrapped functor.
  * This template specialization fixes the 7th argument of the wrapped functor.
@@ -989,24 +994,20 @@ struct bind_functor<5, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
  * @ingroup bind
  */
 template <class T_functor, class T_bound>
-struct bind_functor<6, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : public adapts<T_functor>
+struct bind_functor<6, T_functor, T_bound> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
   template <class T_arg1=void,class T_arg2=void,class T_arg3=void,class T_arg4=void,class T_arg5=void,class T_arg6=void,class T_arg7=void>
   struct deduce_result_type
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass,typename type_trait<T_arg6>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass,typename type_trait<T_arg6>::pass, typename type_trait<T_bound>::pass>::type type; };
   typedef typename adaptor_type::result_type  result_type;
 
   /** Invokes the wrapped functor passing on the bound argument only.
    * @return The return value of the functor invocation.
    */
   result_type
-  operator()()
-  {
-    //Note: The AIX compiler sometimes gives linker errors if we do not define this in the class.
-    return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_bound>::type>::pass> (bound_.invoke());
-  }
+  operator()();
 
   /** Invokes the wrapped functor passing on the arguments.
    * bound_ is passed as the 7th argument.
@@ -1021,16 +1022,16 @@ struct bind_functor<6, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5,T_arg6 _A_arg6)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass,typename type_trait<T_arg6>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3,_A_arg4,_A_arg5,_A_arg6, bound_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass,typename type_trait<T_arg6>::pass, typename type_trait<T_bound>::pass>
+        (_A_arg1,_A_arg2,_A_arg3,_A_arg4,_A_arg5,_A_arg6, bound_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5,T_arg6 _A_arg6)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass,typename type_trait<T_arg6>::pass, typename type_trait<typename unwrap_reference<T_bound>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3,_A_arg4,_A_arg5,_A_arg6, bound_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass,typename type_trait<T_arg6>::pass, typename type_trait<T_bound>::pass>
+        (_A_arg1,_A_arg2,_A_arg3,_A_arg4,_A_arg5,_A_arg6, bound_);
     }
   #endif
     
@@ -1043,11 +1044,14 @@ struct bind_functor<6, T_functor, T_bound, nil_,nil_,nil_,nil_,nil_,nil_> : publ
     {}
 
   /// The argument bound to the functor.
-  bound_argument<T_bound> bound_;
+  T_bound bound_;
 };
 
+template <class T_functor, class T_bound>
+typename bind_functor<6, T_functor, T_bound>::result_type
+bind_functor<6, T_functor, T_bound>::operator()()
+  { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_bound>::pass> (bound_); }
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bind_functor performs a functor on the
  * functor and on the object instances stored in the sigc::bind_functor object.
@@ -1068,29 +1072,29 @@ void visit_each(const T_action& _A_action,
  * @ingroup bind
  */
 template <class T_functor, class T_type1>
-struct bind_functor<-1, T_functor, T_type1, nil_, nil_, nil_, nil_, nil_, nil_> : public adapts<T_functor>
+struct bind_functor<-1, T_functor, T_type1> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   template <int count, class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   struct deduce_result_type_internal
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass,typename type_trait<T_arg6>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass,typename type_trait<T_arg6>::pass, typename type_trait<T_type1>::pass>::type type; };
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   struct deduce_result_type_internal<2, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass, typename type_trait<T_type1>::pass>::type type; };
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   struct deduce_result_type_internal<3, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<T_type1>::pass>::type type; };
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   struct deduce_result_type_internal<4, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<T_type1>::pass>::type type; };
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   struct deduce_result_type_internal<5, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_type1>::pass>::type type; };
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   struct deduce_result_type_internal<6, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass, typename type_trait<T_type1>::pass>::type type; };
 #endif /*DOXYGEN_SHOULD_SKIP_THIS*/
 
   template <class T_arg1=void,class T_arg2=void,class T_arg3=void,class T_arg4=void,class T_arg5=void,class T_arg6=void,class T_arg7=void>
@@ -1104,11 +1108,7 @@ struct bind_functor<-1, T_functor, T_type1, nil_, nil_, nil_, nil_, nil_, nil_> 
    * @return The return value of the functor invocation.
    */
   result_type
-  operator()()
-  {
-    //Note: The AIX compiler sometimes gives linker errors if we do not define this in the class.
-    return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_type1>::type>::pass> (bound1_.invoke());
-  }
+  operator()();
 
   /** Invokes the wrapped functor passing on the arguments.
    * The last 1 argument(s) are fixed.
@@ -1118,16 +1118,16 @@ struct bind_functor<-1, T_functor, T_type1, nil_, nil_, nil_, nil_, nil_, nil_> 
   template <class T_arg1>
   typename deduce_result_type<T_arg1>::type
   operator()(T_arg1 _A_arg1)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass>
-        (_A_arg1, bound1_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_type1>::pass>
+        (_A_arg1, bound1_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1>
   typename deduce_result_type<T_arg1>::type
   sun_forte_workaround(T_arg1 _A_arg1)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass>
-        (_A_arg1, bound1_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_type1>::pass>
+        (_A_arg1, bound1_);
     }
   #endif
     
@@ -1140,16 +1140,16 @@ struct bind_functor<-1, T_functor, T_type1, nil_, nil_, nil_, nil_, nil_, nil_> 
   template <class T_arg1,class T_arg2>
   typename deduce_result_type<T_arg1,T_arg2>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass>
-        (_A_arg1,_A_arg2, bound1_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_type1>::pass>
+        (_A_arg1,_A_arg2, bound1_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2>
   typename deduce_result_type<T_arg1,T_arg2>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass>
-        (_A_arg1,_A_arg2, bound1_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_type1>::pass>
+        (_A_arg1,_A_arg2, bound1_);
     }
   #endif
     
@@ -1163,16 +1163,16 @@ struct bind_functor<-1, T_functor, T_type1, nil_, nil_, nil_, nil_, nil_, nil_> 
   template <class T_arg1,class T_arg2,class T_arg3>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3, bound1_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<T_type1>::pass>
+        (_A_arg1,_A_arg2,_A_arg3, bound1_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3, bound1_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<T_type1>::pass>
+        (_A_arg1,_A_arg2,_A_arg3, bound1_);
     }
   #endif
     
@@ -1187,16 +1187,16 @@ struct bind_functor<-1, T_functor, T_type1, nil_, nil_, nil_, nil_, nil_, nil_> 
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3,_A_arg4, bound1_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<T_type1>::pass>
+        (_A_arg1,_A_arg2,_A_arg3,_A_arg4, bound1_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3,_A_arg4, bound1_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<T_type1>::pass>
+        (_A_arg1,_A_arg2,_A_arg3,_A_arg4, bound1_);
     }
   #endif
     
@@ -1212,16 +1212,16 @@ struct bind_functor<-1, T_functor, T_type1, nil_, nil_, nil_, nil_, nil_, nil_> 
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3,_A_arg4,_A_arg5, bound1_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass, typename type_trait<T_type1>::pass>
+        (_A_arg1,_A_arg2,_A_arg3,_A_arg4,_A_arg5, bound1_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3,_A_arg4,_A_arg5, bound1_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass, typename type_trait<T_type1>::pass>
+        (_A_arg1,_A_arg2,_A_arg3,_A_arg4,_A_arg5, bound1_);
     }
   #endif
     
@@ -1238,16 +1238,16 @@ struct bind_functor<-1, T_functor, T_type1, nil_, nil_, nil_, nil_, nil_, nil_> 
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5,T_arg6 _A_arg6)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass,typename type_trait<T_arg6>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3,_A_arg4,_A_arg5,_A_arg6, bound1_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass,typename type_trait<T_arg6>::pass, typename type_trait<T_type1>::pass>
+        (_A_arg1,_A_arg2,_A_arg3,_A_arg4,_A_arg5,_A_arg6, bound1_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5,T_arg6 _A_arg6)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass,typename type_trait<T_arg6>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3,_A_arg4,_A_arg5,_A_arg6, bound1_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass,typename type_trait<T_arg6>::pass, typename type_trait<T_type1>::pass>
+        (_A_arg1,_A_arg2,_A_arg3,_A_arg4,_A_arg5,_A_arg6, bound1_);
     }
   #endif
     
@@ -1260,11 +1260,14 @@ struct bind_functor<-1, T_functor, T_type1, nil_, nil_, nil_, nil_, nil_, nil_> 
     {}
 
   /// The argument bound to the functor.
-  bound_argument<T_type1> bound1_;
+  T_type1 bound1_;
 };
 
+template <class T_functor, class T_type1>
+typename bind_functor<-1, T_functor, T_type1>::result_type
+bind_functor<-1, T_functor, T_type1>::operator()()
+  { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_type1>::pass> (bound1_); }
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bind_functor performs a functor on the
  * functor and on the object instances stored in the sigc::bind_functor object.
@@ -1285,26 +1288,26 @@ void visit_each(const T_action& _A_action,
  * @ingroup bind
  */
 template <class T_functor, class T_type1,class T_type2>
-struct bind_functor<-1, T_functor, T_type1, T_type2, nil_, nil_, nil_, nil_, nil_> : public adapts<T_functor>
+struct bind_functor<-1, T_functor, T_type1,T_type2> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   template <int count, class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   struct deduce_result_type_internal
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass>::type type; };
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   struct deduce_result_type_internal<3, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass>::type type; };
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   struct deduce_result_type_internal<4, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass>::type type; };
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   struct deduce_result_type_internal<5, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass>::type type; };
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   struct deduce_result_type_internal<6, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass>::type type; };
 #endif /*DOXYGEN_SHOULD_SKIP_THIS*/
 
   template <class T_arg1=void,class T_arg2=void,class T_arg3=void,class T_arg4=void,class T_arg5=void,class T_arg6=void,class T_arg7=void>
@@ -1318,11 +1321,7 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, nil_, nil_, nil_, nil_, nil
    * @return The return value of the functor invocation.
    */
   result_type
-  operator()()
-  {
-    //Note: The AIX compiler sometimes gives linker errors if we do not define this in the class.
-    return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass> (bound1_.invoke(),bound2_.invoke());
-  }
+  operator()();
 
   /** Invokes the wrapped functor passing on the arguments.
    * The last 2 argument(s) are fixed.
@@ -1332,16 +1331,16 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, nil_, nil_, nil_, nil_, nil
   template <class T_arg1>
   typename deduce_result_type<T_arg1>::type
   operator()(T_arg1 _A_arg1)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass>
-        (_A_arg1, bound1_.invoke(),bound2_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass>
+        (_A_arg1, bound1_,bound2_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1>
   typename deduce_result_type<T_arg1>::type
   sun_forte_workaround(T_arg1 _A_arg1)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass>
-        (_A_arg1, bound1_.invoke(),bound2_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass>
+        (_A_arg1, bound1_,bound2_);
     }
   #endif
     
@@ -1354,16 +1353,16 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, nil_, nil_, nil_, nil_, nil
   template <class T_arg1,class T_arg2>
   typename deduce_result_type<T_arg1,T_arg2>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass>
-        (_A_arg1,_A_arg2, bound1_.invoke(),bound2_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass>
+        (_A_arg1,_A_arg2, bound1_,bound2_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2>
   typename deduce_result_type<T_arg1,T_arg2>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass>
-        (_A_arg1,_A_arg2, bound1_.invoke(),bound2_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass>
+        (_A_arg1,_A_arg2, bound1_,bound2_);
     }
   #endif
     
@@ -1377,16 +1376,16 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, nil_, nil_, nil_, nil_, nil
   template <class T_arg1,class T_arg2,class T_arg3>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3, bound1_.invoke(),bound2_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass>
+        (_A_arg1,_A_arg2,_A_arg3, bound1_,bound2_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3, bound1_.invoke(),bound2_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass>
+        (_A_arg1,_A_arg2,_A_arg3, bound1_,bound2_);
     }
   #endif
     
@@ -1401,16 +1400,16 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, nil_, nil_, nil_, nil_, nil
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3,_A_arg4, bound1_.invoke(),bound2_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass>
+        (_A_arg1,_A_arg2,_A_arg3,_A_arg4, bound1_,bound2_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3,_A_arg4, bound1_.invoke(),bound2_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass>
+        (_A_arg1,_A_arg2,_A_arg3,_A_arg4, bound1_,bound2_);
     }
   #endif
     
@@ -1426,16 +1425,16 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, nil_, nil_, nil_, nil_, nil
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3,_A_arg4,_A_arg5, bound1_.invoke(),bound2_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass>
+        (_A_arg1,_A_arg2,_A_arg3,_A_arg4,_A_arg5, bound1_,bound2_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4,T_arg5 _A_arg5)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3,_A_arg4,_A_arg5, bound1_.invoke(),bound2_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass,typename type_trait<T_arg5>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass>
+        (_A_arg1,_A_arg2,_A_arg3,_A_arg4,_A_arg5, bound1_,bound2_);
     }
   #endif
     
@@ -1448,12 +1447,15 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, nil_, nil_, nil_, nil_, nil
     {}
 
   /// The argument bound to the functor.
-  bound_argument<T_type1> bound1_;
-  bound_argument<T_type2> bound2_;
+  T_type1 bound1_;
+  T_type2 bound2_;
 };
 
+template <class T_functor, class T_type1,class T_type2>
+typename bind_functor<-1, T_functor, T_type1,T_type2>::result_type
+bind_functor<-1, T_functor, T_type1,T_type2>::operator()()
+  { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass> (bound1_,bound2_); }
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bind_functor performs a functor on the
  * functor and on the object instances stored in the sigc::bind_functor object.
@@ -1475,23 +1477,23 @@ void visit_each(const T_action& _A_action,
  * @ingroup bind
  */
 template <class T_functor, class T_type1,class T_type2,class T_type3>
-struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, nil_, nil_, nil_, nil_> : public adapts<T_functor>
+struct bind_functor<-1, T_functor, T_type1,T_type2,T_type3> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   template <int count, class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   struct deduce_result_type_internal
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass>::type type; };
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   struct deduce_result_type_internal<4, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass>::type type; };
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   struct deduce_result_type_internal<5, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass>::type type; };
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   struct deduce_result_type_internal<6, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass>::type type; };
 #endif /*DOXYGEN_SHOULD_SKIP_THIS*/
 
   template <class T_arg1=void,class T_arg2=void,class T_arg3=void,class T_arg4=void,class T_arg5=void,class T_arg6=void,class T_arg7=void>
@@ -1505,11 +1507,7 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, nil_, nil_, nil_, 
    * @return The return value of the functor invocation.
    */
   result_type
-  operator()()
-  {
-    //Note: The AIX compiler sometimes gives linker errors if we do not define this in the class.
-    return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass> (bound1_.invoke(),bound2_.invoke(),bound3_.invoke());
-  }
+  operator()();
 
   /** Invokes the wrapped functor passing on the arguments.
    * The last 3 argument(s) are fixed.
@@ -1519,16 +1517,16 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, nil_, nil_, nil_, 
   template <class T_arg1>
   typename deduce_result_type<T_arg1>::type
   operator()(T_arg1 _A_arg1)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass>
-        (_A_arg1, bound1_.invoke(),bound2_.invoke(),bound3_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass>
+        (_A_arg1, bound1_,bound2_,bound3_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1>
   typename deduce_result_type<T_arg1>::type
   sun_forte_workaround(T_arg1 _A_arg1)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass>
-        (_A_arg1, bound1_.invoke(),bound2_.invoke(),bound3_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass>
+        (_A_arg1, bound1_,bound2_,bound3_);
     }
   #endif
     
@@ -1541,16 +1539,16 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, nil_, nil_, nil_, 
   template <class T_arg1,class T_arg2>
   typename deduce_result_type<T_arg1,T_arg2>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass>
-        (_A_arg1,_A_arg2, bound1_.invoke(),bound2_.invoke(),bound3_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass>
+        (_A_arg1,_A_arg2, bound1_,bound2_,bound3_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2>
   typename deduce_result_type<T_arg1,T_arg2>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass>
-        (_A_arg1,_A_arg2, bound1_.invoke(),bound2_.invoke(),bound3_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass>
+        (_A_arg1,_A_arg2, bound1_,bound2_,bound3_);
     }
   #endif
     
@@ -1564,16 +1562,16 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, nil_, nil_, nil_, 
   template <class T_arg1,class T_arg2,class T_arg3>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3, bound1_.invoke(),bound2_.invoke(),bound3_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass>
+        (_A_arg1,_A_arg2,_A_arg3, bound1_,bound2_,bound3_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3, bound1_.invoke(),bound2_.invoke(),bound3_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass>
+        (_A_arg1,_A_arg2,_A_arg3, bound1_,bound2_,bound3_);
     }
   #endif
     
@@ -1588,16 +1586,16 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, nil_, nil_, nil_, 
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3,_A_arg4, bound1_.invoke(),bound2_.invoke(),bound3_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass>
+        (_A_arg1,_A_arg2,_A_arg3,_A_arg4, bound1_,bound2_,bound3_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3,T_arg4>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3,T_arg4 _A_arg4)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3,_A_arg4, bound1_.invoke(),bound2_.invoke(),bound3_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass,typename type_trait<T_arg4>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass>
+        (_A_arg1,_A_arg2,_A_arg3,_A_arg4, bound1_,bound2_,bound3_);
     }
   #endif
     
@@ -1610,13 +1608,16 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, nil_, nil_, nil_, 
     {}
 
   /// The argument bound to the functor.
-  bound_argument<T_type1> bound1_;
-  bound_argument<T_type2> bound2_;
-  bound_argument<T_type3> bound3_;
+  T_type1 bound1_;
+  T_type2 bound2_;
+  T_type3 bound3_;
 };
 
+template <class T_functor, class T_type1,class T_type2,class T_type3>
+typename bind_functor<-1, T_functor, T_type1,T_type2,T_type3>::result_type
+bind_functor<-1, T_functor, T_type1,T_type2,T_type3>::operator()()
+  { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass> (bound1_,bound2_,bound3_); }
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bind_functor performs a functor on the
  * functor and on the object instances stored in the sigc::bind_functor object.
@@ -1639,20 +1640,20 @@ void visit_each(const T_action& _A_action,
  * @ingroup bind
  */
 template <class T_functor, class T_type1,class T_type2,class T_type3,class T_type4>
-struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, T_type4, nil_, nil_, nil_> : public adapts<T_functor>
+struct bind_functor<-1, T_functor, T_type1,T_type2,T_type3,T_type4> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   template <int count, class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   struct deduce_result_type_internal
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass,typename type_trait<typename unwrap_reference<T_type4>::type>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass,typename type_trait<T_type4>::pass>::type type; };
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   struct deduce_result_type_internal<5, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass,typename type_trait<typename unwrap_reference<T_type4>::type>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass,typename type_trait<T_type4>::pass>::type type; };
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   struct deduce_result_type_internal<6, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass,typename type_trait<typename unwrap_reference<T_type4>::type>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass,typename type_trait<T_type4>::pass>::type type; };
 #endif /*DOXYGEN_SHOULD_SKIP_THIS*/
 
   template <class T_arg1=void,class T_arg2=void,class T_arg3=void,class T_arg4=void,class T_arg5=void,class T_arg6=void,class T_arg7=void>
@@ -1666,11 +1667,7 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, T_type4, nil_, nil
    * @return The return value of the functor invocation.
    */
   result_type
-  operator()()
-  {
-    //Note: The AIX compiler sometimes gives linker errors if we do not define this in the class.
-    return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass,typename type_trait<typename unwrap_reference<T_type4>::type>::pass> (bound1_.invoke(),bound2_.invoke(),bound3_.invoke(),bound4_.invoke());
-  }
+  operator()();
 
   /** Invokes the wrapped functor passing on the arguments.
    * The last 4 argument(s) are fixed.
@@ -1680,16 +1677,16 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, T_type4, nil_, nil
   template <class T_arg1>
   typename deduce_result_type<T_arg1>::type
   operator()(T_arg1 _A_arg1)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass,typename type_trait<typename unwrap_reference<T_type4>::type>::pass>
-        (_A_arg1, bound1_.invoke(),bound2_.invoke(),bound3_.invoke(),bound4_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass,typename type_trait<T_type4>::pass>
+        (_A_arg1, bound1_,bound2_,bound3_,bound4_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1>
   typename deduce_result_type<T_arg1>::type
   sun_forte_workaround(T_arg1 _A_arg1)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass,typename type_trait<typename unwrap_reference<T_type4>::type>::pass>
-        (_A_arg1, bound1_.invoke(),bound2_.invoke(),bound3_.invoke(),bound4_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass,typename type_trait<T_type4>::pass>
+        (_A_arg1, bound1_,bound2_,bound3_,bound4_);
     }
   #endif
     
@@ -1702,16 +1699,16 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, T_type4, nil_, nil
   template <class T_arg1,class T_arg2>
   typename deduce_result_type<T_arg1,T_arg2>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass,typename type_trait<typename unwrap_reference<T_type4>::type>::pass>
-        (_A_arg1,_A_arg2, bound1_.invoke(),bound2_.invoke(),bound3_.invoke(),bound4_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass,typename type_trait<T_type4>::pass>
+        (_A_arg1,_A_arg2, bound1_,bound2_,bound3_,bound4_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2>
   typename deduce_result_type<T_arg1,T_arg2>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass,typename type_trait<typename unwrap_reference<T_type4>::type>::pass>
-        (_A_arg1,_A_arg2, bound1_.invoke(),bound2_.invoke(),bound3_.invoke(),bound4_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass,typename type_trait<T_type4>::pass>
+        (_A_arg1,_A_arg2, bound1_,bound2_,bound3_,bound4_);
     }
   #endif
     
@@ -1725,16 +1722,16 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, T_type4, nil_, nil
   template <class T_arg1,class T_arg2,class T_arg3>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass,typename type_trait<typename unwrap_reference<T_type4>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3, bound1_.invoke(),bound2_.invoke(),bound3_.invoke(),bound4_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass,typename type_trait<T_type4>::pass>
+        (_A_arg1,_A_arg2,_A_arg3, bound1_,bound2_,bound3_,bound4_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2,class T_arg3>
   typename deduce_result_type<T_arg1,T_arg2,T_arg3>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2,T_arg3 _A_arg3)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass,typename type_trait<typename unwrap_reference<T_type4>::type>::pass>
-        (_A_arg1,_A_arg2,_A_arg3, bound1_.invoke(),bound2_.invoke(),bound3_.invoke(),bound4_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass,typename type_trait<T_arg3>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass,typename type_trait<T_type4>::pass>
+        (_A_arg1,_A_arg2,_A_arg3, bound1_,bound2_,bound3_,bound4_);
     }
   #endif
     
@@ -1747,14 +1744,17 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, T_type4, nil_, nil
     {}
 
   /// The argument bound to the functor.
-  bound_argument<T_type1> bound1_;
-  bound_argument<T_type2> bound2_;
-  bound_argument<T_type3> bound3_;
-  bound_argument<T_type4> bound4_;
+  T_type1 bound1_;
+  T_type2 bound2_;
+  T_type3 bound3_;
+  T_type4 bound4_;
 };
 
+template <class T_functor, class T_type1,class T_type2,class T_type3,class T_type4>
+typename bind_functor<-1, T_functor, T_type1,T_type2,T_type3,T_type4>::result_type
+bind_functor<-1, T_functor, T_type1,T_type2,T_type3,T_type4>::operator()()
+  { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass,typename type_trait<T_type4>::pass> (bound1_,bound2_,bound3_,bound4_); }
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bind_functor performs a functor on the
  * functor and on the object instances stored in the sigc::bind_functor object.
@@ -1778,17 +1778,17 @@ void visit_each(const T_action& _A_action,
  * @ingroup bind
  */
 template <class T_functor, class T_type1,class T_type2,class T_type3,class T_type4,class T_type5>
-struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, T_type4, T_type5, nil_, nil_> : public adapts<T_functor>
+struct bind_functor<-1, T_functor, T_type1,T_type2,T_type3,T_type4,T_type5> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   template <int count, class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   struct deduce_result_type_internal
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass,typename type_trait<typename unwrap_reference<T_type4>::type>::pass,typename type_trait<typename unwrap_reference<T_type5>::type>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass,typename type_trait<T_type4>::pass,typename type_trait<T_type5>::pass>::type type; };
   template <class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   struct deduce_result_type_internal<6, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass,typename type_trait<typename unwrap_reference<T_type4>::type>::pass,typename type_trait<typename unwrap_reference<T_type5>::type>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass,typename type_trait<T_type4>::pass,typename type_trait<T_type5>::pass>::type type; };
 #endif /*DOXYGEN_SHOULD_SKIP_THIS*/
 
   template <class T_arg1=void,class T_arg2=void,class T_arg3=void,class T_arg4=void,class T_arg5=void,class T_arg6=void,class T_arg7=void>
@@ -1802,11 +1802,7 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, T_type4, T_type5, 
    * @return The return value of the functor invocation.
    */
   result_type
-  operator()()
-  {
-    //Note: The AIX compiler sometimes gives linker errors if we do not define this in the class.
-    return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass,typename type_trait<typename unwrap_reference<T_type4>::type>::pass,typename type_trait<typename unwrap_reference<T_type5>::type>::pass> (bound1_.invoke(),bound2_.invoke(),bound3_.invoke(),bound4_.invoke(),bound5_.invoke());
-  }
+  operator()();
 
   /** Invokes the wrapped functor passing on the arguments.
    * The last 5 argument(s) are fixed.
@@ -1816,16 +1812,16 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, T_type4, T_type5, 
   template <class T_arg1>
   typename deduce_result_type<T_arg1>::type
   operator()(T_arg1 _A_arg1)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass,typename type_trait<typename unwrap_reference<T_type4>::type>::pass,typename type_trait<typename unwrap_reference<T_type5>::type>::pass>
-        (_A_arg1, bound1_.invoke(),bound2_.invoke(),bound3_.invoke(),bound4_.invoke(),bound5_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass,typename type_trait<T_type4>::pass,typename type_trait<T_type5>::pass>
+        (_A_arg1, bound1_,bound2_,bound3_,bound4_,bound5_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1>
   typename deduce_result_type<T_arg1>::type
   sun_forte_workaround(T_arg1 _A_arg1)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass,typename type_trait<typename unwrap_reference<T_type4>::type>::pass,typename type_trait<typename unwrap_reference<T_type5>::type>::pass>
-        (_A_arg1, bound1_.invoke(),bound2_.invoke(),bound3_.invoke(),bound4_.invoke(),bound5_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass,typename type_trait<T_type4>::pass,typename type_trait<T_type5>::pass>
+        (_A_arg1, bound1_,bound2_,bound3_,bound4_,bound5_);
     }
   #endif
     
@@ -1838,16 +1834,16 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, T_type4, T_type5, 
   template <class T_arg1,class T_arg2>
   typename deduce_result_type<T_arg1,T_arg2>::type
   operator()(T_arg1 _A_arg1,T_arg2 _A_arg2)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass,typename type_trait<typename unwrap_reference<T_type4>::type>::pass,typename type_trait<typename unwrap_reference<T_type5>::type>::pass>
-        (_A_arg1,_A_arg2, bound1_.invoke(),bound2_.invoke(),bound3_.invoke(),bound4_.invoke(),bound5_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass,typename type_trait<T_type4>::pass,typename type_trait<T_type5>::pass>
+        (_A_arg1,_A_arg2, bound1_,bound2_,bound3_,bound4_,bound5_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1,class T_arg2>
   typename deduce_result_type<T_arg1,T_arg2>::type
   sun_forte_workaround(T_arg1 _A_arg1,T_arg2 _A_arg2)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass,typename type_trait<typename unwrap_reference<T_type4>::type>::pass,typename type_trait<typename unwrap_reference<T_type5>::type>::pass>
-        (_A_arg1,_A_arg2, bound1_.invoke(),bound2_.invoke(),bound3_.invoke(),bound4_.invoke(),bound5_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass,typename type_trait<T_arg2>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass,typename type_trait<T_type4>::pass,typename type_trait<T_type5>::pass>
+        (_A_arg1,_A_arg2, bound1_,bound2_,bound3_,bound4_,bound5_);
     }
   #endif
     
@@ -1860,15 +1856,18 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, T_type4, T_type5, 
     {}
 
   /// The argument bound to the functor.
-  bound_argument<T_type1> bound1_;
-  bound_argument<T_type2> bound2_;
-  bound_argument<T_type3> bound3_;
-  bound_argument<T_type4> bound4_;
-  bound_argument<T_type5> bound5_;
+  T_type1 bound1_;
+  T_type2 bound2_;
+  T_type3 bound3_;
+  T_type4 bound4_;
+  T_type5 bound5_;
 };
 
+template <class T_functor, class T_type1,class T_type2,class T_type3,class T_type4,class T_type5>
+typename bind_functor<-1, T_functor, T_type1,T_type2,T_type3,T_type4,T_type5>::result_type
+bind_functor<-1, T_functor, T_type1,T_type2,T_type3,T_type4,T_type5>::operator()()
+  { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass,typename type_trait<T_type4>::pass,typename type_trait<T_type5>::pass> (bound1_,bound2_,bound3_,bound4_,bound5_); }
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bind_functor performs a functor on the
  * functor and on the object instances stored in the sigc::bind_functor object.
@@ -1893,14 +1892,14 @@ void visit_each(const T_action& _A_action,
  * @ingroup bind
  */
 template <class T_functor, class T_type1,class T_type2,class T_type3,class T_type4,class T_type5,class T_type6>
-struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, T_type4, T_type5, T_type6, nil_> : public adapts<T_functor>
+struct bind_functor<-1, T_functor, T_type1,T_type2,T_type3,T_type4,T_type5,T_type6> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   template <int count, class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   struct deduce_result_type_internal
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass,typename type_trait<typename unwrap_reference<T_type4>::type>::pass,typename type_trait<typename unwrap_reference<T_type5>::type>::pass,typename type_trait<typename unwrap_reference<T_type6>::type>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_arg1>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass,typename type_trait<T_type4>::pass,typename type_trait<T_type5>::pass,typename type_trait<T_type6>::pass>::type type; };
 #endif /*DOXYGEN_SHOULD_SKIP_THIS*/
 
   template <class T_arg1=void,class T_arg2=void,class T_arg3=void,class T_arg4=void,class T_arg5=void,class T_arg6=void,class T_arg7=void>
@@ -1914,11 +1913,7 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, T_type4, T_type5, 
    * @return The return value of the functor invocation.
    */
   result_type
-  operator()()
-  {
-    //Note: The AIX compiler sometimes gives linker errors if we do not define this in the class.
-    return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass,typename type_trait<typename unwrap_reference<T_type4>::type>::pass,typename type_trait<typename unwrap_reference<T_type5>::type>::pass,typename type_trait<typename unwrap_reference<T_type6>::type>::pass> (bound1_.invoke(),bound2_.invoke(),bound3_.invoke(),bound4_.invoke(),bound5_.invoke(),bound6_.invoke());
-  }
+  operator()();
 
   /** Invokes the wrapped functor passing on the arguments.
    * The last 6 argument(s) are fixed.
@@ -1928,16 +1923,16 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, T_type4, T_type5, 
   template <class T_arg1>
   typename deduce_result_type<T_arg1>::type
   operator()(T_arg1 _A_arg1)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass,typename type_trait<typename unwrap_reference<T_type4>::type>::pass,typename type_trait<typename unwrap_reference<T_type5>::type>::pass,typename type_trait<typename unwrap_reference<T_type6>::type>::pass>
-        (_A_arg1, bound1_.invoke(),bound2_.invoke(),bound3_.invoke(),bound4_.invoke(),bound5_.invoke(),bound6_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass,typename type_trait<T_type4>::pass,typename type_trait<T_type5>::pass,typename type_trait<T_type6>::pass>
+        (_A_arg1, bound1_,bound2_,bound3_,bound4_,bound5_,bound6_);
     }
 
   #ifndef SIGC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD
   template <class T_arg1>
   typename deduce_result_type<T_arg1>::type
   sun_forte_workaround(T_arg1 _A_arg1)
-    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass,typename type_trait<typename unwrap_reference<T_type4>::type>::pass,typename type_trait<typename unwrap_reference<T_type5>::type>::pass,typename type_trait<typename unwrap_reference<T_type6>::type>::pass>
-        (_A_arg1, bound1_.invoke(),bound2_.invoke(),bound3_.invoke(),bound4_.invoke(),bound5_.invoke(),bound6_.invoke());
+    { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_arg1>::pass, typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass,typename type_trait<T_type4>::pass,typename type_trait<T_type5>::pass,typename type_trait<T_type6>::pass>
+        (_A_arg1, bound1_,bound2_,bound3_,bound4_,bound5_,bound6_);
     }
   #endif
     
@@ -1950,16 +1945,19 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, T_type4, T_type5, 
     {}
 
   /// The argument bound to the functor.
-  bound_argument<T_type1> bound1_;
-  bound_argument<T_type2> bound2_;
-  bound_argument<T_type3> bound3_;
-  bound_argument<T_type4> bound4_;
-  bound_argument<T_type5> bound5_;
-  bound_argument<T_type6> bound6_;
+  T_type1 bound1_;
+  T_type2 bound2_;
+  T_type3 bound3_;
+  T_type4 bound4_;
+  T_type5 bound5_;
+  T_type6 bound6_;
 };
 
+template <class T_functor, class T_type1,class T_type2,class T_type3,class T_type4,class T_type5,class T_type6>
+typename bind_functor<-1, T_functor, T_type1,T_type2,T_type3,T_type4,T_type5,T_type6>::result_type
+bind_functor<-1, T_functor, T_type1,T_type2,T_type3,T_type4,T_type5,T_type6>::operator()()
+  { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass,typename type_trait<T_type4>::pass,typename type_trait<T_type5>::pass,typename type_trait<T_type6>::pass> (bound1_,bound2_,bound3_,bound4_,bound5_,bound6_); }
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bind_functor performs a functor on the
  * functor and on the object instances stored in the sigc::bind_functor object.
@@ -1985,14 +1983,14 @@ void visit_each(const T_action& _A_action,
  * @ingroup bind
  */
 template <class T_functor, class T_type1,class T_type2,class T_type3,class T_type4,class T_type5,class T_type6,class T_type7>
-struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, T_type4, T_type5, T_type6, T_type7> : public adapts<T_functor>
+struct bind_functor<-1, T_functor, T_type1,T_type2,T_type3,T_type4,T_type5,T_type6,T_type7> : public adapts<T_functor>
 {
   typedef typename adapts<T_functor>::adaptor_type adaptor_type;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   template <int count, class T_arg1,class T_arg2,class T_arg3,class T_arg4,class T_arg5,class T_arg6,class T_arg7>
   struct deduce_result_type_internal
-    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass,typename type_trait<typename unwrap_reference<T_type4>::type>::pass,typename type_trait<typename unwrap_reference<T_type5>::type>::pass,typename type_trait<typename unwrap_reference<T_type6>::type>::pass,typename type_trait<typename unwrap_reference<T_type7>::type>::pass>::type type; };
+    { typedef typename adaptor_type::template deduce_result_type<typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass,typename type_trait<T_type4>::pass,typename type_trait<T_type5>::pass,typename type_trait<T_type6>::pass,typename type_trait<T_type7>::pass>::type type; };
 #endif /*DOXYGEN_SHOULD_SKIP_THIS*/
 
   template <class T_arg1=void,class T_arg2=void,class T_arg3=void,class T_arg4=void,class T_arg5=void,class T_arg6=void,class T_arg7=void>
@@ -2006,11 +2004,7 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, T_type4, T_type5, 
    * @return The return value of the functor invocation.
    */
   result_type
-  operator()()
-  {
-    //Note: The AIX compiler sometimes gives linker errors if we do not define this in the class.
-    return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<typename unwrap_reference<T_type1>::type>::pass,typename type_trait<typename unwrap_reference<T_type2>::type>::pass,typename type_trait<typename unwrap_reference<T_type3>::type>::pass,typename type_trait<typename unwrap_reference<T_type4>::type>::pass,typename type_trait<typename unwrap_reference<T_type5>::type>::pass,typename type_trait<typename unwrap_reference<T_type6>::type>::pass,typename type_trait<typename unwrap_reference<T_type7>::type>::pass> (bound1_.invoke(),bound2_.invoke(),bound3_.invoke(),bound4_.invoke(),bound5_.invoke(),bound6_.invoke(),bound7_.invoke());
-  }
+  operator()();
 
   /** Constructs a bind_functor object that binds an argument to the passed functor.
    * @param _A_functor Functor to invoke from operator()().
@@ -2021,17 +2015,20 @@ struct bind_functor<-1, T_functor, T_type1, T_type2, T_type3, T_type4, T_type5, 
     {}
 
   /// The argument bound to the functor.
-  bound_argument<T_type1> bound1_;
-  bound_argument<T_type2> bound2_;
-  bound_argument<T_type3> bound3_;
-  bound_argument<T_type4> bound4_;
-  bound_argument<T_type5> bound5_;
-  bound_argument<T_type6> bound6_;
-  bound_argument<T_type7> bound7_;
+  T_type1 bound1_;
+  T_type2 bound2_;
+  T_type3 bound3_;
+  T_type4 bound4_;
+  T_type5 bound5_;
+  T_type6 bound6_;
+  T_type7 bound7_;
 };
 
+template <class T_functor, class T_type1,class T_type2,class T_type3,class T_type4,class T_type5,class T_type6,class T_type7>
+typename bind_functor<-1, T_functor, T_type1,T_type2,T_type3,T_type4,T_type5,T_type6,T_type7>::result_type
+bind_functor<-1, T_functor, T_type1,T_type2,T_type3,T_type4,T_type5,T_type6,T_type7>::operator()()
+  { return this->functor_.SIGC_WORKAROUND_OPERATOR_PARENTHESES<typename type_trait<T_type1>::pass,typename type_trait<T_type2>::pass,typename type_trait<T_type3>::pass,typename type_trait<T_type4>::pass,typename type_trait<T_type5>::pass,typename type_trait<T_type6>::pass,typename type_trait<T_type7>::pass> (bound1_,bound2_,bound3_,bound4_,bound5_,bound6_,bound7_); }
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bind_functor performs a functor on the
  * functor and on the object instances stored in the sigc::bind_functor object.
@@ -2064,10 +2061,10 @@ void visit_each(const T_action& _A_action,
  * @ingroup bind
  */
 template <int I_location, class T_bound1, class T_functor>
-inline bind_functor<I_location, T_functor, T_bound1>
+inline bind_functor<I_location, T_functor, typename unwrap_reference<T_bound1>::type>
 bind(const T_functor& _A_func, T_bound1 _A_b1)
 { 
-  return bind_functor<I_location, T_functor, T_bound1>
+  return bind_functor<I_location, T_functor, typename unwrap_reference<T_bound1>::type>
            (_A_func, _A_b1);
 }
 
@@ -2082,10 +2079,10 @@ bind(const T_functor& _A_func, T_bound1 _A_b1)
  */
 template <class T_type1, class T_functor>
 inline bind_functor<-1, T_functor,
-                    T_type1>
+                    typename unwrap_reference<T_type1>::type>
 bind(const T_functor& _A_func, T_type1 _A_b1)
 { return bind_functor<-1, T_functor,
-                    T_type1>
+                    typename unwrap_reference<T_type1>::type>
                     (_A_func, _A_b1);
 }
 
@@ -2101,12 +2098,12 @@ bind(const T_functor& _A_func, T_type1 _A_b1)
  */
 template <class T_type1,class T_type2, class T_functor>
 inline bind_functor<-1, T_functor,
-                    T_type1,
-                    T_type2>
+                    typename unwrap_reference<T_type1>::type,
+                    typename unwrap_reference<T_type2>::type>
 bind(const T_functor& _A_func, T_type1 _A_b1,T_type2 _A_b2)
 { return bind_functor<-1, T_functor,
-                    T_type1,
-                    T_type2>
+                    typename unwrap_reference<T_type1>::type,
+                    typename unwrap_reference<T_type2>::type>
                     (_A_func, _A_b1,_A_b2);
 }
 
@@ -2123,14 +2120,14 @@ bind(const T_functor& _A_func, T_type1 _A_b1,T_type2 _A_b2)
  */
 template <class T_type1,class T_type2,class T_type3, class T_functor>
 inline bind_functor<-1, T_functor,
-                    T_type1,
-                    T_type2,
-                    T_type3>
+                    typename unwrap_reference<T_type1>::type,
+                    typename unwrap_reference<T_type2>::type,
+                    typename unwrap_reference<T_type3>::type>
 bind(const T_functor& _A_func, T_type1 _A_b1,T_type2 _A_b2,T_type3 _A_b3)
 { return bind_functor<-1, T_functor,
-                    T_type1,
-                    T_type2,
-                    T_type3>
+                    typename unwrap_reference<T_type1>::type,
+                    typename unwrap_reference<T_type2>::type,
+                    typename unwrap_reference<T_type3>::type>
                     (_A_func, _A_b1,_A_b2,_A_b3);
 }
 
@@ -2148,16 +2145,16 @@ bind(const T_functor& _A_func, T_type1 _A_b1,T_type2 _A_b2,T_type3 _A_b3)
  */
 template <class T_type1,class T_type2,class T_type3,class T_type4, class T_functor>
 inline bind_functor<-1, T_functor,
-                    T_type1,
-                    T_type2,
-                    T_type3,
-                    T_type4>
+                    typename unwrap_reference<T_type1>::type,
+                    typename unwrap_reference<T_type2>::type,
+                    typename unwrap_reference<T_type3>::type,
+                    typename unwrap_reference<T_type4>::type>
 bind(const T_functor& _A_func, T_type1 _A_b1,T_type2 _A_b2,T_type3 _A_b3,T_type4 _A_b4)
 { return bind_functor<-1, T_functor,
-                    T_type1,
-                    T_type2,
-                    T_type3,
-                    T_type4>
+                    typename unwrap_reference<T_type1>::type,
+                    typename unwrap_reference<T_type2>::type,
+                    typename unwrap_reference<T_type3>::type,
+                    typename unwrap_reference<T_type4>::type>
                     (_A_func, _A_b1,_A_b2,_A_b3,_A_b4);
 }
 
@@ -2176,18 +2173,18 @@ bind(const T_functor& _A_func, T_type1 _A_b1,T_type2 _A_b2,T_type3 _A_b3,T_type4
  */
 template <class T_type1,class T_type2,class T_type3,class T_type4,class T_type5, class T_functor>
 inline bind_functor<-1, T_functor,
-                    T_type1,
-                    T_type2,
-                    T_type3,
-                    T_type4,
-                    T_type5>
+                    typename unwrap_reference<T_type1>::type,
+                    typename unwrap_reference<T_type2>::type,
+                    typename unwrap_reference<T_type3>::type,
+                    typename unwrap_reference<T_type4>::type,
+                    typename unwrap_reference<T_type5>::type>
 bind(const T_functor& _A_func, T_type1 _A_b1,T_type2 _A_b2,T_type3 _A_b3,T_type4 _A_b4,T_type5 _A_b5)
 { return bind_functor<-1, T_functor,
-                    T_type1,
-                    T_type2,
-                    T_type3,
-                    T_type4,
-                    T_type5>
+                    typename unwrap_reference<T_type1>::type,
+                    typename unwrap_reference<T_type2>::type,
+                    typename unwrap_reference<T_type3>::type,
+                    typename unwrap_reference<T_type4>::type,
+                    typename unwrap_reference<T_type5>::type>
                     (_A_func, _A_b1,_A_b2,_A_b3,_A_b4,_A_b5);
 }
 
@@ -2207,20 +2204,20 @@ bind(const T_functor& _A_func, T_type1 _A_b1,T_type2 _A_b2,T_type3 _A_b3,T_type4
  */
 template <class T_type1,class T_type2,class T_type3,class T_type4,class T_type5,class T_type6, class T_functor>
 inline bind_functor<-1, T_functor,
-                    T_type1,
-                    T_type2,
-                    T_type3,
-                    T_type4,
-                    T_type5,
-                    T_type6>
+                    typename unwrap_reference<T_type1>::type,
+                    typename unwrap_reference<T_type2>::type,
+                    typename unwrap_reference<T_type3>::type,
+                    typename unwrap_reference<T_type4>::type,
+                    typename unwrap_reference<T_type5>::type,
+                    typename unwrap_reference<T_type6>::type>
 bind(const T_functor& _A_func, T_type1 _A_b1,T_type2 _A_b2,T_type3 _A_b3,T_type4 _A_b4,T_type5 _A_b5,T_type6 _A_b6)
 { return bind_functor<-1, T_functor,
-                    T_type1,
-                    T_type2,
-                    T_type3,
-                    T_type4,
-                    T_type5,
-                    T_type6>
+                    typename unwrap_reference<T_type1>::type,
+                    typename unwrap_reference<T_type2>::type,
+                    typename unwrap_reference<T_type3>::type,
+                    typename unwrap_reference<T_type4>::type,
+                    typename unwrap_reference<T_type5>::type,
+                    typename unwrap_reference<T_type6>::type>
                     (_A_func, _A_b1,_A_b2,_A_b3,_A_b4,_A_b5,_A_b6);
 }
 
@@ -2241,22 +2238,22 @@ bind(const T_functor& _A_func, T_type1 _A_b1,T_type2 _A_b2,T_type3 _A_b3,T_type4
  */
 template <class T_type1,class T_type2,class T_type3,class T_type4,class T_type5,class T_type6,class T_type7, class T_functor>
 inline bind_functor<-1, T_functor,
-                    T_type1,
-                    T_type2,
-                    T_type3,
-                    T_type4,
-                    T_type5,
-                    T_type6,
-                    T_type7>
+                    typename unwrap_reference<T_type1>::type,
+                    typename unwrap_reference<T_type2>::type,
+                    typename unwrap_reference<T_type3>::type,
+                    typename unwrap_reference<T_type4>::type,
+                    typename unwrap_reference<T_type5>::type,
+                    typename unwrap_reference<T_type6>::type,
+                    typename unwrap_reference<T_type7>::type>
 bind(const T_functor& _A_func, T_type1 _A_b1,T_type2 _A_b2,T_type3 _A_b3,T_type4 _A_b4,T_type5 _A_b5,T_type6 _A_b6,T_type7 _A_b7)
 { return bind_functor<-1, T_functor,
-                    T_type1,
-                    T_type2,
-                    T_type3,
-                    T_type4,
-                    T_type5,
-                    T_type6,
-                    T_type7>
+                    typename unwrap_reference<T_type1>::type,
+                    typename unwrap_reference<T_type2>::type,
+                    typename unwrap_reference<T_type3>::type,
+                    typename unwrap_reference<T_type4>::type,
+                    typename unwrap_reference<T_type5>::type,
+                    typename unwrap_reference<T_type6>::type,
+                    typename unwrap_reference<T_type7>::type>
                     (_A_func, _A_b1,_A_b2,_A_b3,_A_b4,_A_b5,_A_b6,_A_b7);
 }
 

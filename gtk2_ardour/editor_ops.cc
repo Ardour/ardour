@@ -146,11 +146,11 @@ Editor::split_regions_at (nframes_t where, RegionSelection& regions)
 void
 Editor::remove_clicked_region ()
 {
-	if (clicked_audio_trackview == 0 || clicked_regionview == 0) {
+	if (clicked_routeview == 0 || clicked_regionview == 0) {
 		return;
 	}
 
-	boost::shared_ptr<Playlist> playlist = clicked_audio_trackview->playlist();
+	boost::shared_ptr<Playlist> playlist = clicked_routeview->playlist();
 	
 	begin_reversible_command (_("remove region"));
         XMLNode &before = playlist->get_state();
@@ -530,11 +530,11 @@ Editor::build_region_boundary_cache ()
 			}
 			
 			float speed = 1.0f;
-			AudioTimeAxisView *atav;
+			RouteTimeAxisView *rtav;
 			
-			if (ontrack != 0 && (atav = dynamic_cast<AudioTimeAxisView*>(ontrack)) != 0 ) {
-				if (atav->get_diskstream() != 0) {
-					speed = atav->get_diskstream()->speed();
+			if (ontrack != 0 && (rtav = dynamic_cast<RouteTimeAxisView*>(ontrack)) != 0 ) {
+				if (rtav->get_diskstream() != 0) {
+					speed = rtav->get_diskstream()->speed();
 				}
 			}
 			
@@ -579,7 +579,7 @@ Editor::find_next_region (nframes_t frame, RegionPoint point, int32_t dir, Track
 
 	float track_speed;
 	nframes_t track_frame;
-	AudioTimeAxisView *atav;
+	RouteTimeAxisView *rtav;
 
 	for (i = tracks.begin(); i != tracks.end(); ++i) {
 
@@ -587,9 +587,9 @@ Editor::find_next_region (nframes_t frame, RegionPoint point, int32_t dir, Track
 		boost::shared_ptr<Region> r;
 		
 		track_speed = 1.0f;
-		if ( (atav = dynamic_cast<AudioTimeAxisView*>(*i)) != 0 ) {
-			if (atav->get_diskstream()!=0)
-				track_speed = atav->get_diskstream()->speed();
+		if ( (rtav = dynamic_cast<RouteTimeAxisView*>(*i)) != 0 ) {
+			if (rtav->get_diskstream()!=0)
+				track_speed = rtav->get_diskstream()->speed();
 		}
 
 		track_frame = session_frame_to_track_frame(frame, track_speed);
@@ -651,10 +651,10 @@ Editor::cursor_to_region_point (Cursor* cursor, RegionPoint point, int32_t dir)
 		
 		r = find_next_region (pos, point, dir, selection->tracks, &ontrack);
 		
-	} else if (clicked_trackview) {
+	} else if (clicked_axisview) {
 		
 		TrackViewList t;
-		t.push_back (clicked_trackview);
+		t.push_back (clicked_axisview);
 		
 		r = find_next_region (pos, point, dir, t, &ontrack);
 		
@@ -682,11 +682,11 @@ Editor::cursor_to_region_point (Cursor* cursor, RegionPoint point, int32_t dir)
 	}
 	
 	float speed = 1.0f;
-	AudioTimeAxisView *atav;
+	RouteTimeAxisView *rtav;
 
-	if ( ontrack != 0 && (atav = dynamic_cast<AudioTimeAxisView*>(ontrack)) != 0 ) {
-		if (atav->get_diskstream() != 0) {
-			speed = atav->get_diskstream()->speed();
+	if ( ontrack != 0 && (rtav = dynamic_cast<RouteTimeAxisView*>(ontrack)) != 0 ) {
+		if (rtav->get_diskstream() != 0) {
+			speed = rtav->get_diskstream()->speed();
 		}
 	}
 
@@ -1248,7 +1248,7 @@ Editor::add_location_from_selection ()
 		return;
 	}
 
-	if (session == 0 || clicked_trackview == 0) {
+	if (session == 0 || clicked_axisview == 0) {
 		return;
 	}
 
@@ -1482,13 +1482,13 @@ Editor::unhide_ranges ()
 /* INSERT/REPLACE */
 
 void
-Editor::insert_region_list_drag (boost::shared_ptr<AudioRegion> region, int x, int y)
+Editor::insert_region_list_drag (boost::shared_ptr<Region> region, int x, int y)
 {
 	double wx, wy;
 	double cx, cy;
 	TimeAxisView *tv;
 	nframes_t where;
-	AudioTimeAxisView *atv = 0;
+	RouteTimeAxisView *rtv = 0;
 	boost::shared_ptr<Playlist> playlist;
 	
 	track_canvas.window_to_world (x, y, wx, wy);
@@ -1511,11 +1511,11 @@ Editor::insert_region_list_drag (boost::shared_ptr<AudioRegion> region, int x, i
 		return;
 	}
 	
-	if ((atv = dynamic_cast<AudioTimeAxisView*>(tv)) == 0) {
+	if ((rtv = dynamic_cast<RouteTimeAxisView*>(tv)) == 0) {
 		return;
 	}
 
-	if ((playlist = atv->playlist()) == 0) {
+	if ((playlist = rtv->playlist()) == 0) {
 		return;
 	}
 	
@@ -1534,8 +1534,8 @@ Editor::insert_region_list_selection (float times)
 	RouteTimeAxisView *tv = 0;
 	boost::shared_ptr<Playlist> playlist;
 
-	if (clicked_audio_trackview != 0) {
-		tv = clicked_audio_trackview;
+	if (clicked_routeview != 0) {
+		tv = clicked_routeview;
 	} else if (!selection->tracks.empty()) {
 		if ((tv = dynamic_cast<RouteTimeAxisView*>(selection->tracks.front())) == 0) {
 			return;
@@ -1878,7 +1878,7 @@ Editor::interthread_cancel_clicked ()
 void
 Editor::region_from_selection ()
 {
-	if (clicked_trackview == 0) {
+	if (clicked_axisview == 0) {
 		return;
 	}
 
@@ -1908,7 +1908,7 @@ Editor::region_from_selection ()
 		}
 
 		current = boost::dynamic_pointer_cast<AudioRegion> (current_r);
-		// FIXME: audio only
+		assert(current); // FIXME
 		if (current != 0) {
 			internal_start = start - current->position();
 			session->region_name (new_name, current->name(), true);
@@ -1987,6 +1987,8 @@ Editor::new_region_from_selection ()
 void
 Editor::separate_region_from_selection ()
 {
+	// FIXME: TYPE
+	
 	bool doing_undo = false;
 
 	if (selection->time.empty()) {
@@ -1999,37 +2001,34 @@ Editor::separate_region_from_selection ()
 
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 
-		AudioTimeAxisView* atv;
+		RouteTimeAxisView* rtv;
+		
+		if ((rtv = dynamic_cast<RouteTimeAxisView*> ((*i))) != 0) {
 
-		if ((atv = dynamic_cast<AudioTimeAxisView*> ((*i))) != 0) {
+			Track* t = dynamic_cast<Track*>(rtv->track());
 
-			if (atv->is_audio_track()) {
-
-				/* no edits to destructive tracks */
-
-				if (atv->audio_track()->audio_diskstream()->destructive()) {
-					continue;
-				}
-					
-				if ((playlist = atv->playlist()) != 0) {
+			if (t != 0 && ! t->diskstream()->destructive()) {
+				
+				if ((playlist = rtv->playlist()) != 0) {
 					if (!doing_undo) {
 						begin_reversible_command (_("separate"));
 						doing_undo = true;
 					}
-                                        XMLNode *before;
-					if (doing_undo) 
-                                            before = &(playlist->get_state());
+					
+					XMLNode *before;
+					if (doing_undo)
+						before = &(playlist->get_state());
 			
 					/* XXX need to consider musical time selections here at some point */
 
-					double speed = atv->get_diskstream()->speed();
+					double speed = t->diskstream()->speed();
 
 					for (list<AudioRange>::iterator t = selection->time.begin(); t != selection->time.end(); ++t) {
 						playlist->partition ((nframes_t)((*t).start * speed), (nframes_t)((*t).end * speed), true);
 					}
 
-					if (doing_undo) 
-                                            session->add_command(new MementoCommand<Playlist>(*playlist, before, &playlist->get_state()));
+					if (doing_undo)
+						session->add_command(new MementoCommand<Playlist>(*playlist, before, &playlist->get_state()));
 				}
 			}
 		}
@@ -2041,6 +2040,8 @@ Editor::separate_region_from_selection ()
 void
 Editor::separate_regions_using_location (Location& loc)
 {
+	// FIXME: TYPE
+	
 	bool doing_undo = false;
 
 	if (loc.is_mark()) {
@@ -2057,31 +2058,28 @@ Editor::separate_regions_using_location (Location& loc)
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {	
 	//for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 
-		AudioTimeAxisView* atv;
+		RouteTimeAxisView* rtv;
+		
+		if ((rtv = dynamic_cast<RouteTimeAxisView*> ((*i))) != 0) {
 
-		if ((atv = dynamic_cast<AudioTimeAxisView*> ((*i))) != 0) {
+			Track* t = dynamic_cast<Track*>(rtv->track());
 
-			if (atv->is_audio_track()) {
+			if (t != 0 && ! t->diskstream()->destructive()) {
+				
+				if ((playlist = rtv->playlist()) != 0) {
 					
-				/* no edits to destructive tracks */
-
-				if (atv->audio_track()->audio_diskstream()->destructive()) {
-					continue;
-				}
-
-				if ((playlist = atv->playlist()) != 0) {
-                                        XMLNode *before;
+					XMLNode *before;
 					if (!doing_undo) {
 						begin_reversible_command (_("separate"));
 						doing_undo = true;
 					}
-					if (doing_undo) 
-                                            before = &(playlist->get_state());
+					if (doing_undo)
+						before = &(playlist->get_state());
                                             
 			
 					/* XXX need to consider musical time selections here at some point */
 
-					double speed = atv->get_diskstream()->speed();
+					double speed = rtv->get_diskstream()->speed();
 
 
 					playlist->partition ((nframes_t)(loc.start() * speed), (nframes_t)(loc.end() * speed), true);
@@ -2109,19 +2107,15 @@ Editor::crop_region_to_selection ()
 	
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 		
-		AudioTimeAxisView* atv;
+		RouteTimeAxisView* rtv;
 		
-		if ((atv = dynamic_cast<AudioTimeAxisView*> ((*i))) != 0) {
-			
-			if (atv->is_audio_track()) {
+		if ((rtv = dynamic_cast<RouteTimeAxisView*> ((*i))) != 0) {
+
+			Track* t = dynamic_cast<Track*>(rtv->track());
+
+			if (t != 0 && ! t->diskstream()->destructive()) {
 				
-				/* no edits to destructive tracks */
-
-				if (atv->audio_track()->audio_diskstream()->destructive()) {
-					continue;
-				}
-
-				if ((playlist = atv->playlist()) != 0) {
+				if ((playlist = rtv->playlist()) != 0) {
 					playlists.push_back (playlist);
 				}
 			}
@@ -2189,8 +2183,7 @@ Editor::region_fill_track ()
 		
 		// FIXME
 		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(region);
-		if (!ar)
-			continue;
+		assert(ar);
 
 		boost::shared_ptr<Playlist> pl = region->playlist();
 
@@ -2204,7 +2197,7 @@ Editor::region_fill_track ()
 			return;
 		}
 
-                XMLNode &before = pl->get_state();
+		XMLNode &before = pl->get_state();
 		pl->add_region (RegionFactory::create (ar), ar->last_frame(), times);
 		session->add_command (new MementoCommand<Playlist>(*pl, &before, &pl->get_state()));
 	}
@@ -2215,7 +2208,7 @@ Editor::region_fill_track ()
 void
 Editor::region_fill_selection ()
 {
-       	if (clicked_audio_trackview == 0 || !clicked_audio_trackview->is_audio_track()) {
+ 	if (clicked_routeview == 0 || !clicked_routeview->is_audio_track()) {
 		return;
 	}
 
@@ -2341,7 +2334,7 @@ Editor::align_relative (RegionPoint what)
 }
 
 struct RegionSortByTime {
-    bool operator() (const AudioRegionView* a, const AudioRegionView* b) {
+    bool operator() (const RegionView* a, const RegionView* b) {
 	    return a->region()->position() < b->region()->position();
     }
 };
@@ -2464,11 +2457,11 @@ Editor::trim_region_to_edit_cursor ()
 	boost::shared_ptr<Region> region (clicked_regionview->region());
 
 	float speed = 1.0f;
-	AudioTimeAxisView *atav;
+	RouteTimeAxisView *rtav;
 
-	if ( clicked_trackview != 0 && (atav = dynamic_cast<AudioTimeAxisView*>(clicked_trackview)) != 0 ) {
-		if (atav->get_diskstream() != 0) {
-			speed = atav->get_diskstream()->speed();
+	if ( clicked_axisview != 0 && (rtav = dynamic_cast<RouteTimeAxisView*>(clicked_axisview)) != 0 ) {
+		if (rtav->get_diskstream() != 0) {
+			speed = rtav->get_diskstream()->speed();
 		}
 	}
 
@@ -2490,11 +2483,11 @@ Editor::trim_region_from_edit_cursor ()
 	boost::shared_ptr<Region> region (clicked_regionview->region());
 
 	float speed = 1.0f;
-	AudioTimeAxisView *atav;
+	RouteTimeAxisView *rtav;
 
-	if ( clicked_trackview != 0 && (atav = dynamic_cast<AudioTimeAxisView*>(clicked_trackview)) != 0 ) {
-		if (atav->get_diskstream() != 0) {
-			speed = atav->get_diskstream()->speed();
+	if ( clicked_axisview != 0 && (rtav = dynamic_cast<RouteTimeAxisView*>(clicked_axisview)) != 0 ) {
+		if (rtav->get_diskstream() != 0) {
+			speed = rtav->get_diskstream()->speed();
 		}
 	}
 
@@ -2509,11 +2502,11 @@ Editor::trim_region_from_edit_cursor ()
 void
 Editor::unfreeze_route ()
 {
-	if (clicked_audio_trackview == 0 || !clicked_audio_trackview->is_audio_track()) {
+	if (clicked_routeview == 0 || !clicked_routeview->is_track()) {
 		return;
 	}
 	
-	clicked_audio_trackview->audio_track()->unfreeze ();
+	clicked_routeview->track()->unfreeze ();
 }
 
 void*
@@ -2526,7 +2519,7 @@ Editor::_freeze_thread (void* arg)
 void*
 Editor::freeze_thread ()
 {
-	clicked_audio_trackview->audio_track()->freeze (*current_interthread_info);
+	clicked_routeview->audio_track()->freeze (*current_interthread_info);
 	return 0;
 }
 
@@ -2540,7 +2533,7 @@ Editor::freeze_progress_timeout (void *arg)
 void
 Editor::freeze_route ()
 {
-	if (clicked_audio_trackview == 0 || !clicked_audio_trackview->is_audio_track()) {
+	if (clicked_routeview == 0 || !clicked_routeview->is_track()) {
 		return;
 	}
 	
@@ -2604,15 +2597,15 @@ Editor::bounce_range_selection ()
 
 	for (TrackViewList::iterator i = views.begin(); i != views.end(); ++i) {
 
-		AudioTimeAxisView* atv;
+		RouteTimeAxisView* rtv;
 
-		if ((atv = dynamic_cast<AudioTimeAxisView*> (*i)) == 0) {
+		if ((rtv = dynamic_cast<RouteTimeAxisView*> (*i)) == 0) {
 			continue;
 		}
 		
 		boost::shared_ptr<Playlist> playlist;
 		
-		if ((playlist = atv->playlist()) == 0) {
+		if ((playlist = rtv->playlist()) == 0) {
 			return;
 		}
 
@@ -2622,9 +2615,9 @@ Editor::bounce_range_selection ()
 		itt.cancel = false;
 		itt.progress = false;
 
-                XMLNode &before = playlist->get_state();
-		atv->audio_track()->bounce_range (start, cnt, itt);
-                XMLNode &after = playlist->get_state();
+		XMLNode &before = playlist->get_state();
+		rtv->track()->bounce_range (start, cnt, itt);
+		XMLNode &after = playlist->get_state();
 		session->add_command (new MementoCommand<Playlist> (*playlist, &before, &after));
 	}
 	
@@ -2736,14 +2729,14 @@ struct lt_playlist {
 	
 struct PlaylistMapping { 
     TimeAxisView* tv;
-    boost::shared_ptr<AudioPlaylist> pl;
+    boost::shared_ptr<Playlist> pl;
 
     PlaylistMapping (TimeAxisView* tvp) : tv (tvp) {}
 };
 
 void
 Editor::cut_copy_regions (CutCopyOp op)
-{
+{	
 	/* we can't use a std::map here because the ordering is important, and we can't trivially sort
 	   a map when we want ordered access to both elements. i think.
 	*/
@@ -2764,7 +2757,7 @@ Editor::cut_copy_regions (CutCopyOp op)
 		first_position = min ((*x)->region()->position(), first_position);
 
 		if (op == Cut || op == Clear) {
-			boost::shared_ptr<AudioPlaylist> pl = boost::dynamic_pointer_cast<AudioPlaylist>((*x)->region()->playlist());
+			boost::shared_ptr<Playlist> pl = (*x)->region()->playlist();
 
 			if (pl) {
 
@@ -2796,7 +2789,7 @@ Editor::cut_copy_regions (CutCopyOp op)
 
 	for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ) {
 
-		boost::shared_ptr<AudioPlaylist> pl = boost::dynamic_pointer_cast<AudioPlaylist>((*x)->region()->playlist());
+		boost::shared_ptr<Playlist> pl = (*x)->region()->playlist();
 		
 		if (!pl) {
 			/* impossible, but this handles it for the future */
@@ -2804,7 +2797,7 @@ Editor::cut_copy_regions (CutCopyOp op)
 		}
 
 		TimeAxisView& tv = (*x)->get_trackview();
-		boost::shared_ptr<AudioPlaylist> npl;
+		boost::shared_ptr<Playlist> npl;
 		RegionSelection::iterator tmp;
 		
 		tmp = x;
@@ -2821,34 +2814,32 @@ Editor::cut_copy_regions (CutCopyOp op)
 		assert (z != pmap.end());
 		
 		if (!(*z).pl) {
-			npl = boost::dynamic_pointer_cast<AudioPlaylist> (PlaylistFactory::create (*session, "cutlist", true));
+			npl = PlaylistFactory::create (pl->data_type(), *session, "cutlist", true);
 			npl->freeze();
 			(*z).pl = npl;
 		} else {
 			npl = (*z).pl;
 		}
 		
-		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>((*x)->region());
+		boost::shared_ptr<Region> r = (*x)->region();
 		boost::shared_ptr<Region> _xx;
-		
+
+		assert (r != 0);
+
 		switch (op) {
 		case Cut:
-			if (!ar) break;
-			
-			_xx = RegionFactory::create ((*x)->region());
-			npl->add_region (_xx, (*x)->region()->position() - first_position);
-			pl->remove_region (((*x)->region()));
+			_xx = RegionFactory::create (r);
+			npl->add_region (_xx, r->position() - first_position);
+			pl->remove_region (r);
 			break;
 			
 		case Copy:
-			if (!ar) break;
-
 			/* copy region before adding, so we're not putting same object into two different playlists */
-			npl->add_region (RegionFactory::create ((*x)->region()), (*x)->region()->position() - first_position);
+			npl->add_region (RegionFactory::create (r), r->position() - first_position);
 			break;
 			
 		case Clear:
-			pl->remove_region (((*x)->region()));
+			pl->remove_region (r);
 			break;
 		}
 
@@ -2971,15 +2962,15 @@ Editor::paste_named_selection (float times)
 
 	for (t = selection->tracks.begin(); t != selection->tracks.end(); ++t) {
 		
-		AudioTimeAxisView* atv;
+		RouteTimeAxisView* rtv;
 		boost::shared_ptr<Playlist> pl;
 		boost::shared_ptr<AudioPlaylist> apl;
 
-		if ((atv = dynamic_cast<AudioTimeAxisView*> (*t)) == 0) {
+		if ((rtv = dynamic_cast<RouteTimeAxisView*> (*t)) == 0) {
 			continue;
 		}
 
-		if ((pl = atv->playlist()) == 0) {
+		if ((pl = rtv->playlist()) == 0) {
 			continue;
 		}
 		
@@ -2990,7 +2981,7 @@ Editor::paste_named_selection (float times)
 		tmp = chunk;
 		++tmp;
 
-                XMLNode &before = apl->get_state();
+		XMLNode &before = apl->get_state();
 		apl->paste (*chunk, edit_cursor->current_frame, times);
 		session->add_command(new MementoCommand<AudioPlaylist>(*apl, &before, &apl->get_state()));
 
@@ -3017,8 +3008,8 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		boost::shared_ptr<Region> r ((*i)->region());
 
 		TimeAxisView& tv = (*i)->get_time_axis_view();
-		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (&tv);
-		sigc::connection c = atv->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&tv);
+		sigc::connection c = rtv->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
 		
  		playlist = (*i)->region()->playlist();
                 XMLNode &before = playlist->get_state();

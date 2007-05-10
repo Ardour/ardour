@@ -3,7 +3,6 @@
 #ifndef _GTKMM_TEXTCHILDANCHOR_H
 #define _GTKMM_TEXTCHILDANCHOR_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -44,11 +43,9 @@ namespace Gtk
 namespace Gtk
 {
 
-/** A TextChildAnchor is a spot in the buffer where child widgets can be "anchored" 
- * (inserted inline, as if they were characters). The anchor can have multiple widgets anchored, 
- * to allow for multiple views.
- *
- * Typedefed as Gtk::TextBuffer::ChildAnchor.
+//TODO: Add a real class description.
+
+/** Typedefed as Gtk::TextBuffer::ChildAnchor.
  * @ingroup TextView
  */
 
@@ -135,17 +132,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

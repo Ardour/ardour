@@ -3,7 +3,6 @@
 #ifndef _GTKMM_BUTTON_H
 #define _GTKMM_BUTTON_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -96,23 +95,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_pressed();
   virtual void on_released();
   virtual void on_clicked();
   virtual void on_enter();
   virtual void on_leave();
   virtual void on_activate();
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -129,7 +122,7 @@ public:
    * directly instead.
    */
   Button();
-
+  
 
   /** Simple Push Button with label.
    * Create a button with the given label inside. You won't be able
@@ -137,11 +130,6 @@ public:
    * in it
    */
   explicit Button(const Glib::ustring& label, bool mnemonic = false);
-
-  /** Creates a new Button containing the image and text from a stock item.
-   * Stock ids have identifiers like Gtk::Stock::OK and Gtk::Stock::APPLY.
-   * @param stock_id The stock item.
-   */
   explicit Button(const StockID& stock_id);
 
 
@@ -212,7 +200,7 @@ public:
    * you don't want the keyboard focus removed from the main area of the
    * application.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param focus_on_click Whether the button grabs focus when clicked with the mouse.
    */
   void set_focus_on_click(bool focus_on_click = true);
@@ -222,7 +210,7 @@ public:
    * @return <tt>true</tt> if the button grabs focus when it is clicked with
    * the mouse.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   bool get_focus_on_click() const;
 
@@ -230,7 +218,7 @@ public:
   /** Sets the alignment of the child. This property has no effect unless 
    * the child is a Gtk::Misc or a Gtk::Aligment.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param xalign The horizontal position of the child, 0.0 is left aligned, 
    * 1.0 is right aligned.
    * @param yalign The vertical position of the child, 0.0 is top aligned, 
@@ -240,7 +228,7 @@ public:
   
   /** Gets the alignment of the child in the button.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param xalign Return location for horizontal alignment.
    * @param yalign Return location for vertical alignment.
    */
@@ -248,96 +236,57 @@ public:
 
   
   /** Set the image of @a button  to the given widget. Note that
-   * it depends on the gtk-button-images setting whether the
-   * image will be displayed or not, you don't have to call
-   * Gtk::Widget::show() on @a image  yourself.
+   * it depends on the show-button-images setting whether the
+   * image will be displayed or not.
    * 
-   * @newin2p6
+   * Since: 2.6
    * @param image A widget to set as the image for the button.
    */
   void set_image(Widget& image);
   
   /** Gets the widget that is currenty set as the image of @a button .
-   *     This may have been explicitly set by set_image()
-   *     or specified as a stock item to the constructor.
+   * This may have been explicitly set by set_image()
+   * or constructed by new_from_stock().
    * 
-   *     @a newin2p6 
+   * Since: 2.6
    */
   Widget* get_image();
   
   /** Gets the widget that is currenty set as the image of @a button .
-   *     This may have been explicitly set by set_image()
-   *     or specified as a stock item to the constructor.
+   * This may have been explicitly set by set_image()
+   * or constructed by new_from_stock().
    * 
-   *     @a newin2p6 
+   * Since: 2.6
    */
   const Widget* get_image() const;
-
+   
   
-  void set_image_position(PositionType position);
-  
-  PositionType get_image_position() const;
-
-  
-/**
-   * @par Prototype:
-   * <tt>void %pressed()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_pressed();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %released()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_released();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %clicked()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_clicked();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %enter()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_enter();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %leave()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_leave();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %activate()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_activate();
 
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Text of the label widget inside the button
+  /** Text of the label widget inside the button
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_label() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Text of the label widget inside the button
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -345,19 +294,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_label() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The border relief style.
+  /** The border relief style.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<ReliefStyle> property_relief() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The border relief style.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -365,19 +310,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<ReliefStyle> property_relief() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** If set
+  /** If set
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_use_underline() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** If set
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -385,19 +326,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_use_underline() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** If set
+  /** If set
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_use_stock() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** If set
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -405,19 +342,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_use_stock() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether the button grabs focus when it is clicked with the mouse.
+  /** Whether the button grabs focus when it is clicked with the mouse.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_focus_on_click() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the button grabs focus when it is clicked with the mouse.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -425,19 +358,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_focus_on_click() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Horizontal position of child in available space. 0.0 is left aligned
+  /** Horizontal position of child in available space. 0.0 is left aligned
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<float> property_xalign() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Horizontal position of child in available space. 0.0 is left aligned
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -445,19 +374,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<float> property_xalign() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Vertical position of child in available space. 0.0 is top aligned
+  /** Vertical position of child in available space. 0.0 is top aligned
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<float> property_yalign() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Vertical position of child in available space. 0.0 is top aligned
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -465,19 +390,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<float> property_yalign() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Child widget to appear next to the button text.
+  /** Child widget to appear next to the button text.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Gtk::Widget*> property_image() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Child widget to appear next to the button text.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -485,27 +406,6 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Gtk::Widget*> property_image() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The position of the image relative to the text.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy<PositionType> property_image_position() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-#ifdef GLIBMM_PROPERTIES_ENABLED
-/** The position of the image relative to the text.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy_ReadOnly<PositionType> property_image_position() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -527,8 +427,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Button* wrap(GtkButton* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_BUTTON_H */
 

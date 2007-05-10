@@ -3,7 +3,6 @@
 #ifndef _GTKMM_PANED_H
 #define _GTKMM_PANED_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -129,17 +128,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -177,14 +170,14 @@ public:
   /** Obtains the first child of the paned widget.
    * @return First child, or <tt>0</tt> if it is not set.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   Widget* get_child1();
   
   /** Obtains the first child of the paned widget.
    * @return First child, or <tt>0</tt> if it is not set.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   const Widget* get_child1() const;
 
@@ -192,31 +185,28 @@ public:
   /** Obtains the second child of the paned widget.
    * @return Second child, or <tt>0</tt> if it is not set.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   Widget* get_child2();
   
   /** Obtains the second child of the paned widget.
    * @return Second child, or <tt>0</tt> if it is not set.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   const Widget* get_child2() const;
  
   //Keybinding signals:
   
   
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Position of paned separator in pixels (0 means all the way to the left/top).
+  /** Position of paned separator in pixels (0 means all the way to the left/top).
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_position() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Position of paned separator in pixels (0 means all the way to the left/top).
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -224,19 +214,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_position() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** TRUE if the Position property should be used.
+  /** TRUE if the Position property should be used.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_position_set() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** TRUE if the Position property should be used.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -244,28 +230,23 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_position_set() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Smallest possible value for the position property.
+  /** Smallest possible value for the position property.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_min_position() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Largest possible value for the position property.
+  /** Largest possible value for the position property.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_max_position() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -321,17 +302,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -393,17 +368,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -425,9 +394,7 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Paned* wrap(GtkPaned* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 namespace Glib
 {
   /** @relates Gtk::HPaned
@@ -436,9 +403,7 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::HPaned* wrap(GtkHPaned* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 namespace Glib
 {
   /** @relates Gtk::VPaned
@@ -447,8 +412,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::VPaned* wrap(GtkVPaned* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_PANED_H */
 

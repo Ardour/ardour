@@ -27,42 +27,52 @@ namespace Gtk
 namespace TreeView_Private
 {
 
-void SignalProxy_CellData_gtk_callback(GtkTreeViewColumn*, GtkCellRenderer* cell,
+SignalProxy_CellData::SignalProxy_CellData(const SlotType& slot)
+:
+  slot_ (slot)
+{}
+
+SignalProxy_CellData::~SignalProxy_CellData()
+{}
+
+void SignalProxy_CellData::gtk_callback(GtkTreeViewColumn*, GtkCellRenderer* cell,
                                         GtkTreeModel* model, GtkTreeIter* iter, void* data)
 {
-  TreeViewColumn::SlotCellData* the_slot = static_cast<TreeViewColumn::SlotCellData*>(data);
+  SignalProxy_CellData *const self = static_cast<SignalProxy_CellData*>(data);
 
-  #ifdef GLIBMM_EXCEPTIONS_ENABLED
   try
   {
-  #endif //GLIBMM_EXCEPTIONS_ENABLE
     // use Slot::operator()
-    (*the_slot)(Glib::wrap(cell, false), TreeIter(model, iter));
-  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+    (self->slot_)(Glib::wrap(cell, false), TreeIter(model, iter));
   }
   catch(...)
   {
     Glib::exception_handlers_invoke();
   }
-  #endif //GLIBMM_EXCEPTIONS_ENABLE
 }
 
-void SignalProxy_CellData_gtk_callback_destroy(void* data)
+void SignalProxy_CellData::gtk_callback_destroy(void* data)
 {
-  delete static_cast<TreeViewColumn::SlotCellData*>(data);
+  delete static_cast<SignalProxy_CellData*>(data);
 }
 
 
-gboolean SignalProxy_RowSeparator_gtk_callback(GtkTreeModel* model, GtkTreeIter* iter, void* data)
-{
-  TreeView::SlotRowSeparator* the_slot = static_cast<TreeView::SlotRowSeparator*>(data);
 
-  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+SignalProxy_RowSeparator::SignalProxy_RowSeparator(const SlotType& slot)
+:
+  slot_ (slot)
+{}
+
+SignalProxy_RowSeparator::~SignalProxy_RowSeparator()
+{}
+
+gboolean SignalProxy_RowSeparator::gtk_callback(GtkTreeModel* model, GtkTreeIter* iter, void* data)
+{
+  SignalProxy_RowSeparator *const self = static_cast<SignalProxy_RowSeparator*>(data);
+
   try
   {
-  #endif //GLIBMM_EXCEPTIONS_ENABLE
-    return (*the_slot)(Glib::wrap(model, true), Gtk::TreeIter(model, iter));
-  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+    return (self->slot_)(Glib::wrap(model, true), Gtk::TreeIter(model, iter));
   }
   catch(...)
   {
@@ -70,12 +80,11 @@ gboolean SignalProxy_RowSeparator_gtk_callback(GtkTreeModel* model, GtkTreeIter*
   }
 
   return 0; // arbitrary value
-  #endif //GLIBMM_EXCEPTIONS_ENABLE
 }
 
-void SignalProxy_RowSeparator_gtk_callback_destroy(void* data)
+void SignalProxy_RowSeparator::gtk_callback_destroy(void* data)
 {
-  delete static_cast<TreeView::SlotRowSeparator*>(data);
+  delete static_cast<SignalProxy_RowSeparator*>(data);
 }
 
 

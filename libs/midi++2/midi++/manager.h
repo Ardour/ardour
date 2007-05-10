@@ -28,10 +28,27 @@
 
 namespace MIDI {
 
+/** Creates, stores, and manages system MIDI ports.
+ */
 class Manager {
   public:
 	~Manager ();
 	
+	void set_api_data(void* data) { api_data = data; }
+
+	/** Signal the start of an audio cycle.
+	 * This MUST be called before any reading/writing for this cycle.
+	 * Realtime safe.
+	 */
+	void cycle_start(nframes_t nframes);
+
+	/** Signal the end of an audio cycle.
+	 * This signifies that the cycle began with @ref cycle_start has ended.
+	 * This MUST be called at the end of each cycle.
+	 * Realtime safe.
+	 */
+	void cycle_end();
+
 	Port *add_port (PortRequest &);
 	int   remove_port (std::string port);
 
@@ -39,20 +56,6 @@ class Manager {
 	Port *port (size_t number);
 
 	size_t    nports () { return ports_by_device.size(); }
-
-	/* defaults for clients who are not picky */
-	
-	Port *inputPort;
-	Port *outputPort;
-	channel_t inputChannelNumber;
-	channel_t outputChannelNumber;
-
-	int set_input_port (size_t port);
-	int set_input_port (std::string);
-	int set_output_port (size_t port);
-	int set_output_port (std::string);
-	int set_input_channel (channel_t);
-	int set_output_channel (channel_t);
 
 	int foreach_port (int (*func)(const Port &, size_t n, void *), 
 			  void *arg);
@@ -78,6 +81,8 @@ class Manager {
 	static Manager *theManager;
 	PortMap         ports_by_device; /* canonical */
 	PortMap         ports_by_tag;    /* may contain duplicate Ports */
+
+	void *api_data;
 
 	void close_ports ();
 };

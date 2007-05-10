@@ -3,9 +3,6 @@
 #ifndef _GTKMM_COMBO_H
 #define _GTKMM_COMBO_H
 
-#ifndef GTKMM_DISABLE_DEPRECATED
-
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -115,19 +112,13 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_scroll_horizontal(ScrollType scroll_type, float position);
   virtual void on_scroll_vertical(ScrollType scroll_type, float position);
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -137,19 +128,9 @@ public:
   ComboDropDownItem();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %scroll_horizontal(ScrollType scroll_type, float position)</tt>
-   */
-
   Glib::SignalProxy2< void,ScrollType,float > signal_scroll_horizontal();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %scroll_vertical(ScrollType scroll_type, float position)</tt>
-   */
-
   Glib::SignalProxy2< void,ScrollType,float > signal_scroll_vertical();
 
 
@@ -268,20 +249,14 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_select_child(Widget& item);
   virtual void on_selection_changed();
   virtual void on_unselect_child(Widget& item);
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -304,27 +279,12 @@ public:
   const ComboDropDownList& children() const;
 
   
-/**
-   * @par Prototype:
-   * <tt>void %select_child(Widget& item)</tt>
-   */
-
   Glib::SignalProxy1< void,Widget& > signal_select_child();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %selection_changed()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_selection_changed();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %unselect_child(Widget& item)</tt>
-   */
-
   Glib::SignalProxy1< void,Widget& > signal_unselect_child();
 
 
@@ -394,26 +354,20 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
 
-  
 public:
 
   Combo();
   
+
   /** Allow direct text entry
    * Whether the text in the entry must be or not be in the list.
    *
@@ -468,22 +422,19 @@ public:
   
   void disable_activate();
 
-   Entry* get_entry();
+  Entry* get_entry();
   const Entry* get_entry() const;
-    ComboDropDown* get_list();
+  ComboDropDown* get_list();
   const ComboDropDown* get_list() const;
- 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether the arrow keys move through the list of items.
+
+  /** Whether the arrow keys move through the list of items.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_enable_arrow_keys() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the arrow keys move through the list of items.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -491,19 +442,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_enable_arrow_keys() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Obsolete property
+  /** Obsolete property
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_enable_arrows_always() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Obsolete property
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -511,19 +458,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_enable_arrows_always() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether list item matching is case sensitive.
+  /** Whether list item matching is case sensitive.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_case_sensitive() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether list item matching is case sensitive.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -531,19 +474,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_case_sensitive() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether an empty value may be entered in this field.
+  /** Whether an empty value may be entered in this field.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_allow_empty() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether an empty value may be entered in this field.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -551,19 +490,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_allow_empty() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether entered values must already be present in the list.
+  /** Whether entered values must already be present in the list.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_value_in_list() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether entered values must already be present in the list.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -571,7 +506,6 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_value_in_list() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -588,9 +522,7 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::ComboDropDownItem* wrap(GtkListItem* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 namespace Glib
 {
   /** @relates Gtk::ComboDropDown
@@ -599,9 +531,7 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::ComboDropDown* wrap(GtkList* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 namespace Glib
 {
   /** @relates Gtk::Combo
@@ -610,11 +540,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Combo* wrap(GtkCombo* object, bool take_copy = false);
-} //namespace Glib
-
-
-#endif // GTKMM_DISABLE_DEPRECATED
-
-
+}
 #endif /* _GTKMM_COMBO_H */
 

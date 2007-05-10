@@ -37,7 +37,7 @@
 #include <ardour/playlist_factory.h>
 #include <ardour/panner.h>
 #include <ardour/utils.h>
-
+#include <ardour/buffer_set.h>
 #include "i18n.h"
 
 using namespace std;
@@ -123,10 +123,10 @@ AudioTrack::deprecated_use_diskstream_connections ()
 
 	diskstream->deprecated_io_node = 0;
 
-	set_input_minimum (-1);
-	set_input_maximum (-1);
-	set_output_minimum (-1);
-	set_output_maximum (-1);
+	set_input_minimum (ChanCount::ZERO);
+	set_input_maximum (ChanCount::INFINITE);
+	set_output_minimum (ChanCount::ZERO);
+	set_output_maximum (ChanCount::INFINITE);
 	
 	if ((prop = node.property ("gain")) != 0) {
 		set_gain (atof (prop->value().c_str()), this);
@@ -423,24 +423,11 @@ AudioTrack::set_state_part_two ()
 	return;
 }	
 
-uint32_t
-AudioTrack::n_process_buffers ()
-{
-	return max ((uint32_t) _diskstream->n_channels(), redirect_max_outs);
-}
-
-void
-AudioTrack::passthru_silence (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset, int declick, bool meter)
-{
-	uint32_t nbufs = n_process_buffers ();
-	process_output_buffers (_session.get_silent_buffers (nbufs), nbufs, start_frame, end_frame, nframes, offset, true, declick, meter);
-}
-
 int 
 AudioTrack::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
 		     bool session_state_changing, bool can_record, bool rec_monitors_input)
 {
-	if (n_outputs() == 0) {
+	if (n_outputs().get_total() == 0) {
 		return 0;
 	}
 
@@ -536,7 +523,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 	}
 
 	
-	if (n_outputs() == 0 && _redirects.empty()) {
+	if (n_outputs().get_total() == 0 && _redirects.empty()) {
 		return 0;
 	}
 
@@ -592,16 +579,15 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 		
 		/* copy the diskstream data to all output buffers */
 		
-		vector<Sample*>& bufs = _session.get_passthru_buffers ();
-		uint32_t limit = n_process_buffers ();
+		const size_t limit = n_process_buffers().get(DataType::AUDIO);
+		BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
 		
 		uint32_t n;
 		uint32_t i;
 
-
 		for (i = 0, n = 1; i < limit; ++i, ++n) {
-			memcpy (bufs[i], b, sizeof (Sample) * nframes); 
-			if (n < diskstream->n_channels()) {
+			memcpy (bufs.get_audio(i).data(), b, sizeof (Sample) * nframes); 
+			if (n < diskstream->n_channels().get(DataType::AUDIO)) {
 				tmpb = diskstream->playback_buffer(n);
 				if (tmpb!=0) {
 					b = tmpb;
@@ -619,7 +605,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 			}
 		}
 
-		process_output_buffers (bufs, limit, start_frame, end_frame, nframes, offset, (!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
+		process_output_buffers (bufs, start_frame, end_frame, nframes, offset, (!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
 		
 	} else {
 		/* problem with the diskstream; just be quiet for a bit */
@@ -633,7 +619,7 @@ int
 AudioTrack::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
 			 bool can_record, bool rec_monitors_input)
 {
-	if (n_outputs() == 0 && _redirects.empty()) {
+	if (n_outputs().get_total() == 0 && _redirects.empty()) {
 		return 0;
 	}
 
@@ -651,7 +637,7 @@ AudioTrack::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end
 }
 
 int
-AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, nframes_t start, nframes_t nframes)
+AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes)
 {
 	gain_t  gain_automation[nframes];
 	gain_t  gain_buffer[nframes];
@@ -659,8 +645,6 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, nframes_t st
 	RedirectList::iterator i;
 	bool post_fader_work = false;
 	gain_t this_gain = _gain;
-	vector<Sample*>::iterator bi;
-	Sample * b;
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
 	
 	Glib::RWLock::ReaderLock rlock (redirect_lock);
@@ -668,24 +652,26 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, nframes_t st
 	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(diskstream->playlist());
 	assert(apl);
 
-	if (apl->read (buffers[0], mix_buffer, gain_buffer, start, nframes) != nframes) {
+	if (apl->read (buffers.get_audio(nframes).data(),
+			mix_buffer, gain_buffer, start, nframes) != nframes) {
 		return -1;
 	}
 
+	assert(buffers.count().get(DataType::AUDIO) >= 1);
 	uint32_t n=1;
-	bi = buffers.begin();
-	b = buffers[0];
+	Sample* b = buffers.get_audio(0).data();
+	BufferSet::audio_iterator bi = buffers.audio_begin();
 	++bi;
-	for (; bi != buffers.end(); ++bi, ++n) {
-		if (n < diskstream->n_channels()) {
-			if (apl->read ((*bi), mix_buffer, gain_buffer, start, nframes, n) != nframes) {
+	for ( ; bi != buffers.audio_end(); ++bi, ++n) {
+		if (n < diskstream->n_channels().get(DataType::AUDIO)) {
+			if (apl->read (bi->data(), mix_buffer, gain_buffer, start, nframes, n) != nframes) {
 				return -1;
 			}
-			b = (*bi);
+			b = bi->data();
 		}
 		else {
 			/* duplicate last across remaining buffers */
-			memcpy ((*bi), b, sizeof (Sample) * nframes); 
+			memcpy (bi->data(), b, sizeof (Sample) * nframes); 
 		}
 	}
 
@@ -700,7 +686,7 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, nframes_t st
 		if ((insert = boost::dynamic_pointer_cast<Insert>(*i)) != 0) {
 			switch (insert->placement()) {
 			case PreFader:
-				insert->run (buffers, nbufs, nframes, 0);
+				insert->run (buffers, start, start+nframes, nframes, 0);
 				break;
 			case PostFader:
 				post_fader_work = true;
@@ -713,8 +699,8 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, nframes_t st
 		
 		_gain_automation_curve.get_vector (start, start + nframes, gain_automation, nframes);
 
-		for (bi = buffers.begin(); bi != buffers.end(); ++bi) {
-			Sample *b = *bi;
+		for (BufferSet::audio_iterator bi = buffers.audio_begin(); bi != buffers.audio_end(); ++bi) {
+			Sample *b = bi->data();
 			for (nframes_t n = 0; n < nframes; ++n) {
 				b[n] *= gain_automation[n];
 			}
@@ -722,8 +708,8 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, nframes_t st
 
 	} else {
 
-		for (bi = buffers.begin(); bi != buffers.end(); ++bi) {
-			Sample *b = *bi;
+		for (BufferSet::audio_iterator bi = buffers.audio_begin(); bi != buffers.audio_end(); ++bi) {
+			Sample *b = bi->data();
 			for (nframes_t n = 0; n < nframes; ++n) {
 				b[n] *= this_gain;
 			}
@@ -740,7 +726,7 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, nframes_t st
 				case PreFader:
 					break;
 				case PostFader:
-					insert->run (buffers, nbufs, nframes, 0);
+					insert->run (buffers, start, start+nframes, nframes, 0);
 					break;
 				}
 			}
@@ -753,7 +739,7 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, nframes_t st
 void
 AudioTrack::bounce (InterThreadInfo& itt)
 {
-	vector<boost::shared_ptr<AudioSource> > srcs;
+	vector<boost::shared_ptr<Source> > srcs;
 	_session.write_one_audio_track (*this, 0, _session.current_end_frame(), false, srcs, itt);
 }
 
@@ -761,14 +747,14 @@ AudioTrack::bounce (InterThreadInfo& itt)
 void
 AudioTrack::bounce_range (nframes_t start, nframes_t end, InterThreadInfo& itt)
 {
-	vector<boost::shared_ptr<AudioSource> > srcs;
+	vector<boost::shared_ptr<Source> > srcs;
 	_session.write_one_audio_track (*this, start, end, false, srcs, itt);
 }
 
 void
 AudioTrack::freeze (InterThreadInfo& itt)
 {
-	vector<boost::shared_ptr<AudioSource> > srcs;
+	vector<boost::shared_ptr<Source> > srcs;
 	string new_playlist_name;
 	boost::shared_ptr<Playlist> new_playlist;
 	string dir;
@@ -832,14 +818,14 @@ AudioTrack::freeze (InterThreadInfo& itt)
 		}
 	}
 
-	new_playlist = PlaylistFactory::create (_session, new_playlist_name, false);
+	new_playlist = PlaylistFactory::create (DataType::AUDIO, _session, new_playlist_name, false);
 	region_name = new_playlist_name;
 
 	/* create a new region from all filesources, keep it private */
 
 	boost::shared_ptr<Region> region (RegionFactory::create (srcs, 0, srcs[0]->length(), 
 								 region_name, 0, 
-								 (AudioRegion::Flag) (AudioRegion::WholeFile|AudioRegion::DefaultFlags),
+								 (Region::Flag) (Region::WholeFile|Region::DefaultFlags),
 								 false));
 
 	new_playlist->set_orig_diskstream_id (diskstream->id());

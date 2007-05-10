@@ -39,6 +39,8 @@
 #include <ardour/audioengine.h>
 #include <ardour/audio_track.h>
 #include <ardour/audio_diskstream.h>
+#include <ardour/midi_track.h>
+#include <ardour/midi_diskstream.h>
 
 #include "i18n.h"
 using namespace sigc;
@@ -89,9 +91,6 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 
 	_session.SoloChanged.connect (mem_fun(*this, &RouteUI::solo_changed_so_update_mute));
 	
-	update_solo_display ();
-	update_mute_display ();
-
 	if (is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 
@@ -105,6 +104,9 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 
 		update_rec_display ();
 	} 
+
+	mute_button->unset_flags (Gtk::CAN_FOCUS);
+	solo_button->unset_flags (Gtk::CAN_FOCUS);
 	
 	_route->RemoteControlIDChanged.connect (mem_fun(*this, &RouteUI::refresh_remote_control_menu));
 
@@ -330,7 +332,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 		} else {
 
-			reversibly_apply_audio_track_boolean ("rec-enable change", &AudioTrack::set_record_enable, !audio_track()->record_enabled(), this);
+			reversibly_apply_track_boolean ("rec-enable change", &Track::set_record_enable, !track()->record_enabled(), this);
 		}
 	}
 
@@ -648,13 +650,13 @@ RouteUI::reversibly_apply_route_boolean (string name, void (Route::*func)(bool, 
 }
 
 void
-RouteUI::reversibly_apply_audio_track_boolean (string name, void (AudioTrack::*func)(bool, void *), bool yn, void *arg)
+RouteUI::reversibly_apply_track_boolean (string name, void (Track::*func)(bool, void *), bool yn, void *arg)
 {
 	_session.begin_reversible_command (name);
-        XMLNode &before = audio_track()->get_state();
-	bind (mem_fun (*audio_track(), func), yn, arg)();
-        XMLNode &after = audio_track()->get_state();
-	_session.add_command (new MementoCommand<AudioTrack>(*audio_track(), &before, &after));
+        XMLNode &before = track()->get_state();
+	bind (mem_fun (*track(), func), yn, arg)();
+        XMLNode &after = track()->get_state();
+	_session.add_command (new MementoCommand<Track>(*track(), &before, &after));
 	_session.commit_reversible_command ();
 }
 
@@ -963,6 +965,18 @@ AudioTrack*
 RouteUI::audio_track() const
 {
 	return dynamic_cast<AudioTrack*>(_route.get());
+}
+
+bool
+RouteUI::is_midi_track () const
+{
+	return dynamic_cast<MidiTrack*>(_route.get()) != 0;
+}
+
+MidiTrack*
+RouteUI::midi_track() const
+{
+	return dynamic_cast<MidiTrack*>(_route.get());
 }
 
 boost::shared_ptr<Diskstream>

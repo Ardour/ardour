@@ -15,7 +15,6 @@
 #include "attributes.h"
 #include "attriter.h"
 #include "attrlist.h"
-#include "cairofontmap.h"
 #include "color.h"
 #include "context.h"
 #include "coverage.h"

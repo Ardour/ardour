@@ -3,7 +3,6 @@
 #ifndef _GTKMM_INVISIBLE_H
 #define _GTKMM_INVISIBLE_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -89,17 +88,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -112,20 +105,20 @@ public:
   /** Returns the Gdk::Screen object associated with @a invisible 
    * @return The associated Gdk::Screen.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<Gdk::Screen> get_screen();
   
   /** Returns the Gdk::Screen object associated with @a invisible 
    * @return The associated Gdk::Screen.
    * 
-   * @newin2p2.
+   * Since: 2.2.
    */
   Glib::RefPtr<const Gdk::Screen> get_screen() const;
   
   /** Sets the Gdk::Screen where the Gtk::Invisible object will be displayed.
    * 
-   * @newin2p2
+   * Since: 2.2
    * @param screen A Gdk::Screen.
    */
   void set_screen(const Glib::RefPtr<Gdk::Screen>& screen);
@@ -144,8 +137,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Invisible* wrap(GtkInvisible* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_INVISIBLE_H */
 

@@ -31,6 +31,7 @@
 
 namespace ARDOUR {
 	class AudioTrack;
+	class MidiTrack;
 }
 
 namespace Gtk {
@@ -49,12 +50,14 @@ class RouteUI : public virtual AxisView
 
 	bool is_track() const;
 	bool is_audio_track() const;
+	bool is_midi_track() const;
 
 	boost::shared_ptr<ARDOUR::Route> route() const { return _route; }
 	
 	// FIXME: make these return shared_ptr
 	ARDOUR::Track*      track() const;
 	ARDOUR::AudioTrack* audio_track() const;
+	ARDOUR::MidiTrack*  midi_track() const;
 	
 	boost::shared_ptr<ARDOUR::Diskstream> get_diskstream() const;
 
@@ -156,7 +159,7 @@ class RouteUI : public virtual AxisView
 	void set_remote_control_id (uint32_t id, Gtk::CheckMenuItem* item);
 
 	void reversibly_apply_route_boolean (string name, void (ARDOUR::Route::*func)(bool, void*), bool, void *);
-	void reversibly_apply_audio_track_boolean (string name, void (ARDOUR::AudioTrack::*func)(bool, void*), bool, void *);
+	void reversibly_apply_track_boolean (string name, void (ARDOUR::Track::*func)(bool, void*), bool, void *);
 };
 
 #endif /* __ardour_route_ui__ */

@@ -567,7 +567,7 @@ Session::jack_timebase_callback (jack_transport_state_t state,
 #endif		
 }
 
-nframes_t
+ARDOUR::nframes_t
 Session::convert_to_frames_at (nframes_t position, AnyTime& any)
 {
 	double secs;

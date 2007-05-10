@@ -3,7 +3,6 @@
 #ifndef _ATKMM_TABLE_H
 #define _ATKMM_TABLE_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -337,194 +336,68 @@ public:
   bool remove_column_selection(int column);
 
   
-/**
-   * @par Prototype:
-   * <tt>void %row_inserted(int row, int num_inserted)</tt>
-   */
-
   Glib::SignalProxy2< void,int,int > signal_row_inserted();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %column_inserted(int column, int num_inserted)</tt>
-   */
-
   Glib::SignalProxy2< void,int,int > signal_column_inserted();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %row_deleted(int row, int num_deleted)</tt>
-   */
-
   Glib::SignalProxy2< void,int,int > signal_row_deleted();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %column_deleted(int column, int num_deleted)</tt>
-   */
-
   Glib::SignalProxy2< void,int,int > signal_column_deleted();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %row_reordered()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_row_reordered();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %column_reordered()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_column_reordered();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %model_changed()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_model_changed();
 
 
 protected:
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual Glib::RefPtr<Atk::Object> get_at_vfunc(int row, int column);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual int get_index_at_vfunc(int row, int column) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual int get_column_at_index_vfunc(int index) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual int get_row_at_index_vfunc(int index) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual int get_n_columns_vfunc() const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual int get_n_rows_vfunc() const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual int get_column_extent_at_vfunc(int row, int column) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual int get_row_extent_at_vfunc(int row, int column) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual Glib::RefPtr<Atk::Object> get_caption_vfunc();
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual const char* get_column_description_vfunc(int column) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual Glib::RefPtr<Atk::Object> get_column_header_vfunc(int column);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual const char* get_row_description_vfunc(int row) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual Glib::RefPtr<Atk::Object> get_row_header_vfunc(int row);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual Glib::RefPtr<Atk::Object> get_summary_vfunc();
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void set_caption_vfunc(const Glib::RefPtr<Atk::Object>& caption);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void set_column_description_vfunc(int column, const char* description);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void set_column_header_vfunc(int column, const Glib::RefPtr<Atk::Object>& header);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void set_row_description_vfunc(int row, const char* description);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void set_row_header_vfunc(int row, const Glib::RefPtr<Atk::Object>& header);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void set_summary_vfunc(const Glib::RefPtr<Atk::Object>& accessible);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual bool is_column_selected_vfunc(int column) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual bool is_row_selected_vfunc(int row) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual bool is_selected_vfunc(int row, int column) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual bool add_row_selection_vfunc(int row);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual bool remove_row_selection_vfunc(int row);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual bool add_column_selection_vfunc(int column);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual bool remove_column_selection_vfunc(int column);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual int get_selected_columns_vfunc(int** selected) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual int get_selected_rows_vfunc(int** selected) const;
-#endif //GLIBMM_VFUNCS_ENABLED
+    virtual Glib::RefPtr<Atk::Object> get_at_vfunc(int row, int column);
+    virtual int get_index_at_vfunc(int row, int column) const;
+    virtual int get_column_at_index_vfunc(int index) const;
+    virtual int get_row_at_index_vfunc(int index) const;
+    virtual int get_n_columns_vfunc() const;
+    virtual int get_n_rows_vfunc() const;
+    virtual int get_column_extent_at_vfunc(int row, int column) const;
+    virtual int get_row_extent_at_vfunc(int row, int column) const;
+    virtual Glib::RefPtr<Atk::Object> get_caption_vfunc();
+    virtual const char* get_column_description_vfunc(int column) const;
+    virtual Glib::RefPtr<Atk::Object> get_column_header_vfunc(int column);
+    virtual const char* get_row_description_vfunc(int row) const;
+    virtual Glib::RefPtr<Atk::Object> get_row_header_vfunc(int row);
+    virtual Glib::RefPtr<Atk::Object> get_summary_vfunc();
+    virtual void set_caption_vfunc(const Glib::RefPtr<Atk::Object>& caption);
+    virtual void set_column_description_vfunc(int column, const char* description);
+    virtual void set_column_header_vfunc(int column, const Glib::RefPtr<Atk::Object>& header);
+    virtual void set_row_description_vfunc(int row, const char* description);
+    virtual void set_row_header_vfunc(int row, const Glib::RefPtr<Atk::Object>& header);
+    virtual void set_summary_vfunc(const Glib::RefPtr<Atk::Object>& accessible);
+    virtual bool is_column_selected_vfunc(int column) const;
+    virtual bool is_row_selected_vfunc(int row) const;
+    virtual bool is_selected_vfunc(int row, int column) const;
+    virtual bool add_row_selection_vfunc(int row);
+    virtual bool remove_row_selection_vfunc(int row);
+    virtual bool add_column_selection_vfunc(int column);
+    virtual bool remove_column_selection_vfunc(int column);
+    virtual int get_selected_columns_vfunc(int** selected) const;
+    virtual int get_selected_rows_vfunc(int** selected) const;
 
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_row_inserted(int row, int num_inserted);
   virtual void on_column_inserted(int column, int num_inserted);
   virtual void on_row_deleted(int row, int num_deleted);
@@ -532,7 +405,6 @@ protected:
   virtual void on_row_reordered();
   virtual void on_column_reordered();
   virtual void on_model_changed();
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };
@@ -550,7 +422,6 @@ namespace Glib
   Glib::RefPtr<Atk::Table> wrap(AtkTable* object, bool take_copy = false);
 
 } // namespace Glib
-
 
 #endif /* _ATKMM_TABLE_H */
 

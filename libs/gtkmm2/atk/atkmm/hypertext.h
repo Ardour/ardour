@@ -3,7 +3,6 @@
 #ifndef _ATKMM_HYPERTEXT_H
 #define _ATKMM_HYPERTEXT_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -128,43 +127,24 @@ public:
   int get_link_index(int char_index) const;
 
   
-/**
-   * @par Prototype:
-   * <tt>void %link_selected(int link_index)</tt>
-   */
-
   Glib::SignalProxy1< void,int > signal_link_selected();
 
 
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual Glib::RefPtr<Hyperlink> get_link_vfunc(int link_index);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual int get_n_links_vfunc() const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual int get_link_index_vfunc(int char_index) const;
-#endif //GLIBMM_VFUNCS_ENABLED
+    virtual Glib::RefPtr<Hyperlink> get_link_vfunc(int link_index);
+    virtual int get_n_links_vfunc() const;
+    virtual int get_link_index_vfunc(int char_index) const;
 
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_link_selected(int link_index);
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };
@@ -182,7 +162,6 @@ namespace Glib
   Glib::RefPtr<Atk::Hypertext> wrap(AtkHypertext* object, bool take_copy = false);
 
 } // namespace Glib
-
 
 #endif /* _ATKMM_HYPERTEXT_H */
 

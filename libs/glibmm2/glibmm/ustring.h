@@ -233,11 +233,11 @@ public:
 #endif /* GLIBMM_HAVE_SUN_REVERSE_ITERATOR */
 
 #ifdef GLIBMM_HAVE_ALLOWS_STATIC_INLINE_NPOS
-  static GLIBMM_API const size_type npos = std::string::npos;
+  static const size_type npos = std::string::npos;
 #else
   //The IRIX MipsPro compiler says "The indicated constant value is not known",
   //so we need to initalize the static member data elsewhere.
-  static GLIBMM_API const size_type npos;
+  static const size_type npos;
 #endif
 
   /*! Default constructor, which creates an empty string.
@@ -269,13 +269,13 @@ public:
   /*! Construct a ustring as a copy of a substring.
    * @param src %Source ustring.
    * @param i Index of first character to copy from.
-   * @param n Number of UTF-8 characters to copy (defaults to copying the remainder).
+   * @param n Number of characters to copy (defaults to copying the remainder).
    */
   ustring(const ustring& src, size_type i, size_type n=npos);
 
   /*! Construct a ustring as a partial copy of a C string.
    * @param src %Source C string encoded as UTF-8.
-   * @param n Number of UTF-8 characters to copy.
+   * @param n Number of characters to copy.
    */
   ustring(const char* src, size_type n);
 
@@ -570,7 +570,7 @@ public:
 //! @{
 
   /*! Returns a new UTF-8 string with all characters characters converted to
-   * their uppercase equivalent, while honoring the current locale.  The
+   * their lowercase equivalent, while honoring the current locale.  The
    * resulting string may change in the number of bytes as well as in the
    * number of characters.  For instance, the German sharp&nbsp;s
    * <tt>&quot;&szlig;&quot;</tt> will be replaced by two characters

@@ -42,23 +42,30 @@ using std::max;
 
 using namespace ARDOUR;
 
-Source::Source (Session& s, string name)
+Source::Source (Session& s, string name, DataType type)
 	: _session (s)
+	, _type(type)
 {
+	assert(_name.find("/") == string::npos);
+
 	_name = name;
 	_timestamp = 0;
+	_length = 0;
 	_in_use = 0;
 }
 
 Source::Source (Session& s, const XMLNode& node) 
 	: _session (s)
+	, _type(DataType::AUDIO)
 {
 	_timestamp = 0;
+	_length = 0;
 	_in_use = 0;
 
-	if (set_state (node)) {
+	if (set_state (node) || _type == DataType::NIL) {
 		throw failed_constructor();
 	}
+	assert(_name.find("/") == string::npos);
 }
 
 Source::~Source ()
@@ -73,6 +80,7 @@ Source::get_state ()
 	char buf[64];
 
 	node->add_property ("name", _name);
+	node->add_property ("type", _type.to_string());
 	_id.print (buf, sizeof (buf));
 	node->add_property ("id", buf);
 
@@ -101,11 +109,24 @@ Source::set_state (const XMLNode& node)
 		return -1;
 	}
 
+	if ((prop = node.property ("type")) != 0) {
+		_type = DataType(prop->value());
+	}
+
 	if ((prop = node.property ("timestamp")) != 0) {
 		sscanf (prop->value().c_str(), "%ld", &_timestamp);
 	}
+	assert(_name.find("/") == string::npos);
 
 	return 0;
+}
+
+void
+Source::update_length (nframes_t pos, nframes_t cnt)
+{
+	if (pos + cnt > _length) {
+		_length = pos+cnt;
+	}
 }
 
 void

@@ -3,7 +3,6 @@
 #ifndef _GTKMM_ASPECTFRAME_H
 #define _GTKMM_ASPECTFRAME_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -96,17 +95,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -166,17 +159,14 @@ public:
   
   void set(AlignmentEnum xalign, AlignmentEnum yalign, float ratio, bool obey_child = true);
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** X alignment of the child.
+  /** X alignment of the child.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<float> property_xalign() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** X alignment of the child.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -184,19 +174,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<float> property_xalign() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Y alignment of the child.
+  /** Y alignment of the child.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<float> property_yalign() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Y alignment of the child.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -204,19 +190,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<float> property_yalign() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Aspect ratio if obey_child is FALSE.
+  /** Aspect ratio if obey_child is FALSE.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<float> property_ratio() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Aspect ratio if obey_child is FALSE.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -224,19 +206,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<float> property_ratio() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Force aspect ratio to match that of the frame's child.
+  /** Force aspect ratio to match that of the frame's child.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_obey_child() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Force aspect ratio to match that of the frame's child.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -244,7 +222,6 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_obey_child() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -260,8 +237,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::AspectFrame* wrap(GtkAspectFrame* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_ASPECTFRAME_H */
 

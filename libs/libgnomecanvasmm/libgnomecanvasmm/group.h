@@ -3,7 +3,6 @@
 #ifndef _LIBGNOMECANVASMM_GROUP_H
 #define _LIBGNOMECANVASMM_GROUP_H
 
-
 #include <glibmm.h>
 
 // -*- C++ -*-
@@ -99,71 +98,58 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
 
 
 private:
-
+;
 public:
   friend class Canvas;
   explicit Group(Group& parent, double x = 0, double y = 0);
   Group();
 
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** X.
+  /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<double> property_x() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
-/** X.
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<double> property_x() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Y.
+  /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<double> property_y() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
-/** Y.
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<double> property_y() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
 
 } /* namespace Canvas */
 } /* namespace Gnome */
-
 
 namespace Glib
 {
@@ -173,8 +159,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gnome::Canvas::Group* wrap(GnomeCanvasGroup* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _LIBGNOMECANVASMM_GROUP_H */
 

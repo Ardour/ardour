@@ -3,7 +3,6 @@
 #ifndef _PANGOMM_CONTEXT_H
 #define _PANGOMM_CONTEXT_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -39,8 +38,6 @@
 #include <pangomm/attrlist.h>
 #include <pangomm/types.h> //For Matrix
 #include <pango/pango-context.h>
-#include <cairomm/context.h>
-#include <cairomm/fontoptions.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -288,9 +285,7 @@ public:
    * (No matrix set is the same as setting the identity matrix.).
    */
   void set_matrix(const Matrix& matrix);
-
-  Matrix get_matrix() const;
-  
+  //TODO: _WRAP_METHOD(Matrix get_matrix() const, pango_context_get_matrix)
 
   /** Breaks a piece of text into segments with consistent directional level and shaping engine.
    * Each byte of @a text will be contained in exactly one of the items in the returned list.
@@ -322,43 +317,16 @@ public:
   ListHandle_Item itemize(const Glib::ustring& text, int start_index, int length,
                           const AttrList& attrs, AttrIter& cached_iter) const;
 
-  /** Updates a Pango Context previously created for use with Cairo to
-   * match the current transformation and target surface of a Cairo
-   * Context. If any layouts have been created for the context,
-   * it's necessary to call Pango::Layout::context_changed() on those
-   * layouts.
-   *
-   * @param context A Cairo context, from CairoFontMap::create_context().
-   */
-  void update_from_cairo_context(const Cairo::RefPtr<Cairo::Context>& context);
-
-
-  void set_cairo_font_options(const Cairo::FontOptions& options);
-
- 
-  Cairo::FontOptions get_font_options() const;
-
-  
-  void set_resolution(double dpi);
-  
-  double get_resolution() const;
-
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

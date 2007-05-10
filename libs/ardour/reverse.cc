@@ -79,7 +79,7 @@ Reverse::run (boost::shared_ptr<AudioRegion> region)
 
 			/* read it in */
 			
-			if (region->source (n)->read (buf, fpos, to_read) != to_read) {
+			if (region->audio_source (n)->read (buf, fpos, to_read) != to_read) {
 				goto out;
 			}
 
@@ -91,7 +91,9 @@ Reverse::run (boost::shared_ptr<AudioRegion> region)
 			
 			/* write it out */
 
-			if ((*si)->write (buf, to_read) != to_read) {
+			boost::shared_ptr<AudioSource> asrc(boost::dynamic_pointer_cast<AudioSource>(*si));
+
+			if (asrc && asrc->write (buf, to_read) != to_read) {
 				goto out;
 			}
 		}
@@ -115,7 +117,8 @@ Reverse::run (boost::shared_ptr<AudioRegion> region)
 
 	if (ret) {
 		for (si = nsrcs.begin(); si != nsrcs.end(); ++si) {
-			(*si)->mark_for_remove ();
+			boost::shared_ptr<AudioSource> asrc(boost::dynamic_pointer_cast<AudioSource>(*si));
+			asrc->mark_for_remove ();
 		}
 	}
 	

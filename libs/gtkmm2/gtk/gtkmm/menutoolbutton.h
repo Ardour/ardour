@@ -3,7 +3,6 @@
 #ifndef _GTKMM_MENUTOOLBUTTON_H
 #define _GTKMM_MENUTOOLBUTTON_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -92,18 +91,12 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_show_menu();
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -143,7 +136,7 @@ public:
   /** Sets the Gtk::Menu that is popped up when the user clicks on the arrow.
    * If @a menu  is <tt>0</tt>, the arrow button becomes insensitive.
    * 
-   * @newin2p6
+   * Since: 2.6
    * @param menu The Gtk::Menu associated with Gtk::MenuToolButton.
    */
   void set_menu(Menu& menu);
@@ -151,48 +144,31 @@ public:
   /** Gets the Gtk::Menu associated with Gtk::MenuToolButton.
    * @return The Gtk::Menu associated with Gtk::MenuToolButton
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
   Menu* get_menu();
   
   /** Gets the Gtk::Menu associated with Gtk::MenuToolButton.
    * @return The Gtk::Menu associated with Gtk::MenuToolButton
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
   const Menu* get_menu() const;
 
   
-  /** Sets the Gtk::Tooltips object to be used for arrow button which
-   * pops up the menu. See Gtk::ToolItem::set_tooltip() for setting
-   * a tooltip on the whole Gtk::MenuToolButton.
-   * 
-   * @newin2p6
-   * @param tooltips The Gtk::Tooltips object to be used.
-   * @param tip_text Text to be used as tooltip text for tool_item.
-   * @param tip_private Text to be used as private tooltip text.
-   */
   void set_arrow_tooltip(Tooltips& tooltips, const Glib::ustring& tip_text, const Glib::ustring& tip_private);
 
   
-/**
-   * @par Prototype:
-   * <tt>void %show_menu()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_show_menu();
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The dropdown menu.
+  /** The dropdown menu.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Menu*> property_menu() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The dropdown menu.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -200,7 +176,6 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Menu*> property_menu() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -216,8 +191,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::MenuToolButton* wrap(GtkMenuToolButton* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_MENUTOOLBUTTON_H */
 

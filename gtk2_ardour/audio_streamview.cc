@@ -61,7 +61,7 @@ AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 	_waveform_scale = LinearWaveform;
 	_waveform_shape = Traditional;
 	
-	if (tv.is_audio_track())
+	if (tv.is_track())
 		stream_base_color = color_map[cAudioTrackBase];
 	else
 		stream_base_color = color_map[cAudioBusBase];
@@ -72,7 +72,6 @@ AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 	_amplitude_above_axis = 1.0;
 
 	use_rec_regions = tv.editor.show_waveforms_recording ();
-	last_rec_peak_frame = 0;
 
 }
 
@@ -247,7 +246,6 @@ AudioStreamView::remove_region_view (boost::weak_ptr<Region> weak_r)
 			i = tmp;
 		}
 	}
-
 
 	StreamView::remove_region_view(r);
 }
@@ -475,20 +473,22 @@ AudioStreamView::setup_rec_box ()
 
 				SourceList sources;
 
-				for (list<sigc::connection>::iterator prc = peak_ready_connections.begin(); prc != peak_ready_connections.end(); ++prc) {
+				for (list<sigc::connection>::iterator prc = rec_data_ready_connections.begin(); prc != rec_data_ready_connections.end(); ++prc) {
 					(*prc).disconnect();
 				}
-				peak_ready_connections.clear();
+				rec_data_ready_connections.clear();
 					
 				// FIXME
 				boost::shared_ptr<AudioDiskstream> ads = boost::dynamic_pointer_cast<AudioDiskstream>(_trackview.get_diskstream());
 				assert(ads);
 
-				for (uint32_t n=0; n < ads->n_channels(); ++n) {
+				for (uint32_t n=0; n < ads->n_channels().get(DataType::AUDIO); ++n) {
 					boost::shared_ptr<AudioFileSource> src = boost::static_pointer_cast<AudioFileSource> (ads->write_source (n));
 					if (src) {
 						sources.push_back (src);
-						peak_ready_connections.push_back (src->PeakRangeReady.connect (bind (mem_fun (*this, &AudioStreamView::rec_peak_range_ready), boost::weak_ptr<Source>(src))));
+						
+						rec_data_ready_connections.push_back (src->PeakRangeReady.connect (bind
+							(mem_fun (*this, &AudioStreamView::rec_peak_range_ready), boost::weak_ptr<Source>(src)))); 
 					}
 				}
 
@@ -501,6 +501,7 @@ AudioStreamView::setup_rec_box ()
 				
 				boost::shared_ptr<AudioRegion> region (boost::dynamic_pointer_cast<AudioRegion>
 								       (RegionFactory::create (sources, start, 1 , "", 0, (Region::Flag)(Region::DefaultFlags | Region::DoNotSaveState), false)));
+				assert(region);
 				region->set_position (_trackview.session().transport_frame(), this);
 
 				rec_regions.push_back (region);
@@ -572,14 +573,14 @@ AudioStreamView::setup_rec_box ()
 			/* disconnect rapid update */
 			screen_update_connection.disconnect();
 
-			for (list<sigc::connection>::iterator prc = peak_ready_connections.begin(); prc != peak_ready_connections.end(); ++prc) {
+			for (list<sigc::connection>::iterator prc = rec_data_ready_connections.begin(); prc != rec_data_ready_connections.end(); ++prc) {
 				(*prc).disconnect();
 			}
-			peak_ready_connections.clear();
+			rec_data_ready_connections.clear();
 
 			rec_updating = false;
 			rec_active = false;
-			last_rec_peak_frame = 0;
+			last_rec_data_frame = 0;
 			
 			/* remove temp regions */
 
@@ -631,15 +632,15 @@ AudioStreamView::rec_peak_range_ready (nframes_t start, nframes_t cnt, boost::we
 
 	// this is called from the peak building thread
 	
-	if (rec_peak_ready_map.size() == 0 || start+cnt > last_rec_peak_frame) {
-		last_rec_peak_frame = start + cnt;
+	if (rec_data_ready_map.size() == 0 || start+cnt > last_rec_data_frame) {
+		last_rec_data_frame = start + cnt;
 	}
 	
-	rec_peak_ready_map[src] = true;
+	rec_data_ready_map[src] = true;
 	
-	if (rec_peak_ready_map.size() == _trackview.get_diskstream()->n_channels()) {
+	if (rec_data_ready_map.size() == _trackview.get_diskstream()->n_channels().get(DataType::AUDIO)) {
 		this->update_rec_regions ();
-		rec_peak_ready_map.clear();
+		rec_data_ready_map.clear();
 	}
 }
 
@@ -672,9 +673,9 @@ AudioStreamView::update_rec_regions ()
 
 			if (region == rec_regions.back() && rec_active) {
 
-				if (last_rec_peak_frame > region->start()) {
+				if (last_rec_data_frame > region->start()) {
 
-					nframes_t nlen = last_rec_peak_frame - region->start();
+					nframes_t nlen = last_rec_data_frame - region->start();
 
 					if (nlen != region->length()) {
 

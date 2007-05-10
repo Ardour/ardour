@@ -3,7 +3,6 @@
 #ifndef _GDKMM_WINDOW_H
 #define _GDKMM_WINDOW_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -868,8 +867,9 @@ public:
    */
   void lower();
   
-  /** Sets keyboard focus to @a window . In most cases, gtk_window_present() 
-   * should be used on a Gtk::Window, rather than calling this function.
+  /** Sets keyboard focus to @a window . If @a window  is not onscreen this
+   * will not work. In most cases, gtk_window_present() should be used on
+   * a Gtk::Window, rather than calling this function.
    * @param timestamp Timestamp of the event triggering the window focus.
    */
   void focus(guint32 timestamp);
@@ -928,20 +928,6 @@ public:
    * @param dy Amount to scroll in the Y direction.
    */
   void scroll(int dx, int dy);
-  
-  /** Move the part of @a window  indicated by @a region  by @a dy  pixels in the Y 
-   * direction and @a dx  pixels in the X direction. The portions of @a region  
-   * that not covered by the new position of @a region  are invalidated.
-   * 
-   * Child windows are not moved.
-   * 
-   * @newin2p8
-   * @param region The Gdk::Region to move.
-   * @param dx Amount to move in the X direction.
-   * @param dy Amount to move in the Y direction.
-   */
-  void move_region(const Region& region, int dx, int dy);
-
   
   /** Applies a shape mask to @a window . Pixels in @a window  corresponding to
    * set bits in the @a mask  will be visible; pixels in @a window 
@@ -1050,7 +1036,7 @@ public:
    * way.
    * 
    * You should only use this on windows for which you have
-   * previously called gdk_window_set_transient_for()
+   * previously called #gdk_window_set_transient_for()
    * @param modal <tt>true</tt> if the window is modal, <tt>false</tt> otherwise.
    */
   void set_modal_hint(bool modal = true);
@@ -1068,7 +1054,7 @@ public:
    * gdk_window_move_resize().
    * 
    * Note that on X11, this effect has no effect on windows
-   * of type Gdk::WINDOW_TEMP or windows where override redirect
+   * of type GDK_WINDOW_TEMP or windows where override_redirect
    * has been turned on via gdk_window_set_override_redirect()
    * since these windows are not resizable by the user.
    * 
@@ -1224,8 +1210,7 @@ public:
    * @param parent_relative Whether the tiling origin is at the origin of @a window 's parent.
    */
   void set_back_pixmap(const Glib::RefPtr<Pixmap>&pixmap, bool parent_relative);
-
- 
+  
   /** Sets the mouse pointer for a Gdk::Window. 
    * To make the cursor invisible, use gdk_cursor_new_from_pixmap() to create
    * a cursor with no pixels in it.
@@ -1296,7 +1281,7 @@ public:
    * @return Not meaningful, ignore.
    */
   int get_origin(int& x, int& y) const;
-  
+  //_WRAP_METHOD(bool get_deskrelative_origin(int& x, int& y), gdk_window_get_deskrelative_origin)
   
   /** Obtains the top-left corner of the window manager frame in root
    * window coordinates.
@@ -1443,14 +1428,14 @@ public:
   /** Returns the group leader window for @a window . See gdk_window_set_group().
    * @return The group leader window for @a window 
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   Glib::RefPtr<Window> get_group();
   
   /** Returns the group leader window for @a window . See gdk_window_set_group().
    * @return The group leader window for @a window 
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   Glib::RefPtr<const Window> get_group() const;
 
@@ -1570,8 +1555,9 @@ public:
   /** Begins a window resize operation (for a toplevel window).
    * You might use this function to implement a "window resize grip," for
    * example; in fact Gtk::Statusbar uses it. The function works best
-   * with window managers that support the Extended Window Manager Hints, but has a 
-   * fallback implementation for other window managers.
+   * with window managers that support the Extended Window Manager Hints spec
+   * (see http://www.freedesktop.org), but has a fallback implementation
+   * for other window managers.
    * @param edge The edge or corner from which the drag is started.
    * @param button The button being used to drag.
    * @param root_x Root window X coordinate of mouse click that began the drag.
@@ -1583,8 +1569,8 @@ public:
   /** Begins a window move operation (for a toplevel window).  You might
    * use this function to implement a "window move grip," for
    * example. The function works best with window managers that support
-   * the Extended 
-   * Window Manager Hints, but has a fallback implementation for
+   * the Extended Window Manager Hints spec (see
+   * http://www.freedesktop.org), but has a fallback implementation for
    * other window managers.
    * @param button The button being used to drag.
    * @param root_x Root window X coordinate of mouse click that began the drag.
@@ -1714,7 +1700,7 @@ public:
    * On X, calling this function makes @a window  participate in the
    * _NET_WM_SYNC_REQUEST window manager protocol.
    * 
-   * @newin2p6
+   * Since: 2.6
    */
   void enable_synchronized_configure();
   
@@ -1724,10 +1710,10 @@ public:
    * application. GTK+ applications will automatically call this
    * function when appropriate.
    * 
-   * This function can only be called if gdk_window_enable_synchronized_configure()
+   * This function can only be called if gdk_window_use_configure()
    * was called previously.
    * 
-   * @newin2p6
+   * Since: 2.6
    */
   void configure_finished();
 
@@ -1735,11 +1721,11 @@ public:
   /** Toggles whether a window should appear in a task list or window
    * list. If a window's semantic type as specified with
    * gdk_window_set_type_hint() already fully describes the window, this
-   * function should <em>not</em> be called in addition, 
-   * instead you should allow the window to be treated according to 
-   * standard policy for its semantic type.
+   * function should NOT be called in addition, instead you should allow
+   * the window to be treated according to standard policy for its
+   * semantic type.
    * 
-   * @newin2p2
+   * Since: 2.2
    * @param skips_taskbar <tt>true</tt> to skip the taskbar.
    */
   void set_skip_taskbar_hint(bool skips_taskbar = true);
@@ -1748,24 +1734,14 @@ public:
    * switcher, or other desktop utility program that displays a small
    * thumbnail representation of the windows on the desktop). If a
    * window's semantic type as specified with gdk_window_set_type_hint()
-   * already fully describes the window, this function should 
-   * <em>not</em> be called in addition, instead you should 
-   * allow the window to be treated according to standard policy for 
-   * its semantic type.
+   * already fully describes the window, this function should NOT be
+   * called in addition, instead you should allow the window to be
+   * treated according to standard policy for its semantic type.
    * 
-   * @newin2p2
+   * Since: 2.2
    * @param skips_pager <tt>true</tt> to skip the pager.
    */
   void set_skip_pager_hint(bool skips_pager = true);
-
-  
-  /** Toggles whether a window needs the user's
-   * urgent attention.
-   * 
-   * @newin2p8
-   * @param urgent <tt>true</tt> if the window is urgent.
-   */
-  void set_urgency_hint(bool urgent = true);
 
   
   /** Moves the window into fullscreen mode. This means the
@@ -1782,7 +1758,7 @@ public:
    * most standard window managers, and GDK makes a best effort to get
    * it to happen.
    * 
-   * @newin2p2
+   * Since: 2.2
    */
   void fullscreen();
   
@@ -1797,7 +1773,7 @@ public:
    * most standard window managers, and GDK makes a best effort to get
    * it to happen. 
    * 
-   * @newin2p2
+   * Since: 2.2
    */
   void unfullscreen();
 
@@ -1851,7 +1827,7 @@ public:
    * But it will happen with most standard window managers,
    * and GDK makes a best effort to get it to happen.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param setting Whether to keep @a window  above other windows.
    */
   void set_keep_above(bool setting = true);
@@ -1866,7 +1842,7 @@ public:
    * But it will happen with most standard window managers,
    * and GDK makes a best effort to get it to happen.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param setting Whether to keep @a window  below other windows.
    */
   void set_keep_below(bool setting = true);
@@ -1878,7 +1854,7 @@ public:
    * On X, it is the responsibility of the window manager to interpret this 
    * hint. ICCCM-compliant window manager usually respect it.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param accept_focus <tt>true</tt> if the window should receive input focus.
    */
   void set_accept_focus(bool accept_focus = true);
@@ -1893,7 +1869,7 @@ public:
    * this hint. %Window managers following the freedesktop.org window
    * manager extension specification should respect it.
    * 
-   * @newin2p6
+   * Since: 2.6
    * @param focus_on_map <tt>true</tt> if the window should receive input focus when mapped.
    */
   void set_focus_on_map(bool focus_on_map);
@@ -1903,17 +1879,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

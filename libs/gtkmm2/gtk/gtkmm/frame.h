@@ -3,7 +3,6 @@
 #ifndef _GTKMM_FRAME_H
 #define _GTKMM_FRAME_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -96,17 +95,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -209,17 +202,14 @@ public:
    */
   ShadowType get_shadow_type() const;
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Text of the frame's label.
+  /** Text of the frame's label.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_label() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Text of the frame's label.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -227,19 +217,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_label() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The horizontal alignment of the label.
+  /** The horizontal alignment of the label.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<double> property_label_xalign() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The horizontal alignment of the label.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -247,19 +233,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<double> property_label_xalign() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The vertical alignment of the label.
+  /** The vertical alignment of the label.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<double> property_label_yalign() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The vertical alignment of the label.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -267,19 +249,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<double> property_label_yalign() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Appearance of the frame border.
+  /** Appearance of the frame border.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<ShadowType> property_shadow_type() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Appearance of the frame border.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -287,19 +265,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<ShadowType> property_shadow_type() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** A widget to display in place of the usual frame label.
+  /** A widget to display in place of the usual frame label.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Widget*> property_label_widget() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** A widget to display in place of the usual frame label.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -307,13 +281,10 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Widget*> property_label_widget() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 protected:
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void compute_child_allocation_vfunc(Allocation& allocation);
-#endif //GLIBMM_VFUNCS_ENABLED
+    virtual void compute_child_allocation_vfunc(Allocation& allocation);
 
 
 };
@@ -329,8 +300,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Frame* wrap(GtkFrame* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_FRAME_H */
 

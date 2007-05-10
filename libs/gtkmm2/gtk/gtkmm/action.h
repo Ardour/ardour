@@ -3,7 +3,6 @@
 #ifndef _GTKMM_ACTION_H
 #define _GTKMM_ACTION_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -28,7 +27,7 @@
 #include <gtkmm/widget.h>
 #include <gtkmm/accelgroup.h>
 #include <gtkmm/stockid.h>
-
+ 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 typedef struct _GtkAction GtkAction;
@@ -107,7 +106,7 @@ public:
    * @return The name of the action. The string belongs to GTK+ and should not
    * be freed.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   Glib::ustring get_name() const;
 
@@ -116,7 +115,7 @@ public:
    * @return <tt>true</tt> if the action and its associated action group 
    * are both sensitive.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   bool is_sensitive() const;
   
@@ -125,10 +124,11 @@ public:
    * for that.
    * @return <tt>true</tt> if the action itself is sensitive.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   bool get_sensitive() const;
 
+   //TODO: Just wrap gtk_action_set_sensitive() when they put it in GTK+.
    void set_tooltip(const Glib::ustring& tooltip);
 
   
@@ -137,17 +137,17 @@ public:
    * is_sensitive() 
    * for that.
    * 
-   * @newin2p6
+   * Since: 2.6
    * @param sensitive <tt>true</tt> to make the action sensitive.
    */
   void set_sensitive(bool sensitive = true);
-
+  
   
   /** Returns whether the action is effectively visible.
    * @return <tt>true</tt> if the action and its associated action group 
    * are both visible.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   bool is_visible() const;
   
@@ -156,7 +156,7 @@ public:
    * for that.
    * @return <tt>true</tt> if the action itself is visible.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   bool get_visible() const;
   
@@ -165,7 +165,7 @@ public:
    * is_visible() 
    * for that.
    * 
-   * @newin2p6
+   * Since: 2.6
    * @param visible <tt>true</tt> to make the action visible.
    */
   void set_visible(bool visible = true);
@@ -177,7 +177,7 @@ public:
    * 
    * It can also be used to manually activate an action.
    * 
-   * @newin2p4
+   * Since: 2.4
    */
   void activate();
   
@@ -186,21 +186,21 @@ public:
    * @param icon_size The size of the icon that should be created.
    * @return A widget that displays the icon for this action.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   Image* create_icon(IconSize icon_size);
   
   /** Creates a menu item widget that proxies for the given action.
    * @return A menu item connected to the action.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   MenuItem* create_menu_item();
   
   /** Creates a toolbar item widget that proxies for the given action.
    * @return A toolbar item connected to the action.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   ToolItem* create_tool_item();
   
@@ -212,7 +212,7 @@ public:
    * If the widget is already connected to an action, it is disconnected
    * first.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param proxy The proxy widget.
    */
   void connect_proxy(Widget& proxy);
@@ -220,17 +220,16 @@ public:
   /** Disconnects a proxy widget from an action.  
    * Does <em>not</em> destroy the widget, however.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param proxy The proxy widget.
    */
   void disconnect_proxy(Widget& proxy);
-
   
   /** Returns the proxy widgets for an action.
    * @return A G::SList of proxy widgets. The list is owned by the action and
    * must not be modified.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   Glib::SListHandle<Widget*> get_proxies();
   
@@ -238,10 +237,9 @@ public:
    * @return A G::SList of proxy widgets. The list is owned by the action and
    * must not be modified.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   Glib::SListHandle<const Widget*> get_proxies() const;
-
   
   /** Installs the accelerator for @a action  if @a action  has an
    * accel path and group. See set_accel_path() and 
@@ -252,20 +250,20 @@ public:
    * function has been called and doesn't remove the accelerator until
    * disconnect_accelerator() has been called as many times.
    * 
-   * @newin2p4
+   * Since: 2.4
    */
   void connect_accelerator();
   
   /** Undoes the effect of one call to connect_accelerator().
    * 
-   * @newin2p4
+   * Since: 2.4
    */
   void disconnect_accelerator();
   
   
   /** Returns the accel path for this action.  
    * 
-   * @newin2p6
+   * Since: 2.6
    * @return The accel path for this action, or <tt>0</tt>
    * if none is set. The returned string is owned by GTK+
    * and must not be freed or modified.
@@ -275,13 +273,6 @@ public:
   /// For instance, void on_activate();
   typedef sigc::slot<void> SlotActivate;
   
-  /** The "activate" signal is emitted when the action is activated.
-   */
-  
-/**
-   * @par Prototype:
-   * <tt>void %activate()</tt>
-   */
 
   Glib::SignalProxy0< void > signal_activate();
 
@@ -292,7 +283,7 @@ public:
    * with the action will have this accel path, so that their
    * accelerators are consistent.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param accel_path The accelerator path.
    */
   void set_accel_path(const Glib::ustring& accel_path);
@@ -300,33 +291,28 @@ public:
   /** Sets the Gtk::AccelGroup in which the accelerator for this action
    * will be installed.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param accel_group A Gtk::AccelGroup or <tt>0</tt>.
    */
   void set_accel_group(const Glib::RefPtr<AccelGroup>& accel_group);
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** A unique name for the action.
+  /** A unique name for the action.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_name() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The label used for menu items and buttons that activate this action.
+  /** The label used for menu items and buttons that activate this action.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_label() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The label used for menu items and buttons that activate this action.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -334,19 +320,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_label() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** A shorter label that may be used on toolbar buttons.
+  /** A shorter label that may be used on toolbar buttons.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_short_label() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** A shorter label that may be used on toolbar buttons.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -354,19 +336,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_short_label() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** A tooltip for this action.
+  /** A tooltip for this action.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_tooltip() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** A tooltip for this action.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -374,19 +352,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_tooltip() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The stock icon displayed in widgets representing this action.
+  /** The stock icon displayed in widgets representing this action.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<StockID> property_stock_id() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The stock icon displayed in widgets representing this action.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -394,19 +368,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<StockID> property_stock_id() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether the toolbar item is visible when the toolbar is in a horizontal orientation.
+  /** Whether the toolbar item is visible when the toolbar is in a horizontal orientation.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_visible_horizontal() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the toolbar item is visible when the toolbar is in a horizontal orientation.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -414,19 +384,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_visible_horizontal() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether the toolbar item is visible when the toolbar is in a vertical orientation.
+  /** Whether the toolbar item is visible when the toolbar is in a vertical orientation.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_visible_vertical() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the toolbar item is visible when the toolbar is in a vertical orientation.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -434,19 +400,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_visible_vertical() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether the action is considered important. When TRUE
+  /** Whether the action is considered important. When TRUE
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_is_important() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the action is considered important. When TRUE
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -454,19 +416,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_is_important() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** When TRUE
+  /** When TRUE
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_hide_if_empty() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** When TRUE
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -474,19 +432,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_hide_if_empty() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether the action is enabled.
+  /** Whether the action is enabled.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_sensitive() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the action is enabled.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -494,19 +448,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_sensitive() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether the action is visible.
+  /** Whether the action is visible.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_visible() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the action is visible.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -514,7 +464,6 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_visible() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 protected:
@@ -526,7 +475,7 @@ protected:
    * 
    * This function is intended for use by action implementations.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param proxy A proxy widget.
    */
   void block_activate_from(Widget& proxy);
@@ -537,7 +486,7 @@ protected:
    * 
    * This function is intended for use by action implementations.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param proxy A proxy widget.
    */
   void unblock_activate_from(Widget& proxy);
@@ -545,39 +494,22 @@ protected:
 
 protected: 
   //Widget-creation routines:
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual Widget* create_menu_item_vfunc();
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual Widget* create_tool_item_vfunc();
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void connect_proxy_vfunc(Widget* proxy);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void disconnect_proxy_vfunc(Widget* proxy);
-#endif //GLIBMM_VFUNCS_ENABLED
+    virtual Widget* create_menu_item_vfunc();
+    virtual Widget* create_tool_item_vfunc();
+    virtual void connect_proxy_vfunc(Widget* proxy);
+    virtual void disconnect_proxy_vfunc(Widget* proxy);
 
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_activate();
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

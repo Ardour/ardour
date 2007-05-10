@@ -3,7 +3,6 @@
 #ifndef _GTKMM_RC_H
 #define _GTKMM_RC_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -178,8 +177,8 @@ public:
   Glib::RefPtr<RcStyle> copy() const;
 
   void set_name(const Glib::ustring& name);
-   Glib::ustring get_name() const;
- 
+  Glib::ustring get_name() const;
+
   void set_bg_pixmap_name(Gtk::StateType state, const Glib::ustring& name);
   Glib::ustring get_bg_pixmap_name(Gtk::StateType state) const;
 
@@ -204,27 +203,21 @@ public:
 
 
   void set_xthickness(int xthickness);
-   int get_xthickness() const;
- 
+  int get_xthickness() const;
+
   void set_ythickness(int ythickness);
-   int get_ythickness() const;
- 
+  int get_ythickness() const;
+
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };
@@ -296,7 +289,7 @@ public:
    *
    * @param settings a Gtk::Settings
    *
-   * @newin2p4
+   * Since: 2.4
    */
   static void reset_styles(const Glib::RefPtr<Settings>& settings);
 

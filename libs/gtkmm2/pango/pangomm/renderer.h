@@ -3,7 +3,6 @@
 #ifndef _PANGOMM_RENDERER_H
 #define _PANGOMM_RENDERER_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -33,6 +32,7 @@
 #include <pangomm/glyphstring.h>
 #include <pangomm/layout.h>
 #include <pangomm/layoutline.h>
+#include <pangomm/types.h> //For Matrix.
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -287,24 +287,19 @@ public:
    * (No matrix set is the same as setting the identity matrix.).
    */
   void set_matrix(const Matrix& matrix);
-  Matrix get_matrix() const;
-  
+  //TOOD: _WRAP_METHOD(Matrix get_matrix(), pango_renderer_get_matrix)
+  //Note: The returned matrix is owned by Pango and must not be modified or freed.
+
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

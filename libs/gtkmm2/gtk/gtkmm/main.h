@@ -3,7 +3,6 @@
 #ifndef _GTKMM_MAIN_H
 #define _GTKMM_MAIN_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -119,7 +118,7 @@ public:
   /** Scans the argument vector, and strips off all parameters parsed by GTK+ or your @a option_context.
    * Add a Glib::OptionGroup to the Glib::OptionContext to parse your own command-line arguments.  
    *
-   * Note:  The argument strings themself won't be modified, although the
+   * Note:  The argument strings themselves won't be modified, although the
    * pointers to them might change.  This makes it possible to create your
    * own argv of string literals, which have the type 'const char[]' in
    * standard C++.  (You might need to use const_cast<>, though.)

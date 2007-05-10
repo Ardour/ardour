@@ -21,6 +21,7 @@
 
 #include <ardour/playlist.h>
 #include <ardour/audioplaylist.h>
+#include <ardour/midi_playlist.h>
 #include <ardour/playlist_factory.h>
 
 #include "i18n.h"
@@ -33,26 +34,34 @@ sigc::signal<void,boost::shared_ptr<Playlist> > PlaylistFactory::PlaylistCreated
 boost::shared_ptr<Playlist> 
 PlaylistFactory::create (Session& s, const XMLNode& node, bool hidden) 
 {
+	const XMLProperty* type = node.property("type");
+
 	boost::shared_ptr<Playlist> pl;
 
-	pl = boost::shared_ptr<Playlist> (new AudioPlaylist (s, node, hidden));
+	if ( !type || type->value() == "audio" )
+		pl = boost::shared_ptr<Playlist> (new AudioPlaylist (s, node, hidden));
+	else if ( type->value() == "midi" )
+		pl = boost::shared_ptr<Playlist> (new MidiPlaylist (s, node, hidden));
 
 	pl->set_region_ownership ();
 
-	if (!hidden) {
+	if (pl && !hidden) {
 		PlaylistCreated (pl);
 	}
 	return pl;
 }
 
 boost::shared_ptr<Playlist> 
-PlaylistFactory::create (Session& s, string name, bool hidden) 
+PlaylistFactory::create (DataType type, Session& s, string name, bool hidden) 
 {
 	boost::shared_ptr<Playlist> pl;
 
-	pl = boost::shared_ptr<Playlist> (new AudioPlaylist (s, name, hidden));
+	if (type == DataType::AUDIO)
+		pl = boost::shared_ptr<Playlist> (new AudioPlaylist (s, name, hidden));
+	else if (type == DataType::MIDI)
+		pl = boost::shared_ptr<Playlist> (new MidiPlaylist (s, name, hidden));
 
-	if (!hidden) {
+	if (pl && !hidden) {
 		PlaylistCreated (pl);
 	}
 
@@ -64,13 +73,17 @@ PlaylistFactory::create (boost::shared_ptr<const Playlist> old, string name, boo
 {
 	boost::shared_ptr<Playlist> pl;
 	boost::shared_ptr<const AudioPlaylist> apl;
+	boost::shared_ptr<const MidiPlaylist> mpl;
 
 	if ((apl = boost::dynamic_pointer_cast<const AudioPlaylist> (old)) != 0) {
 		pl = boost::shared_ptr<Playlist> (new AudioPlaylist (apl, name, hidden));
 		pl->set_region_ownership ();
+	} else if ((mpl = boost::dynamic_pointer_cast<const MidiPlaylist> (old)) != 0) {
+		pl = boost::shared_ptr<Playlist> (new MidiPlaylist (mpl, name, hidden));
+		pl->set_region_ownership ();
 	}
 
-	if (!hidden) {
+	if (pl && !hidden) {
 		PlaylistCreated (pl);
 	}
 
@@ -82,9 +95,13 @@ PlaylistFactory::create (boost::shared_ptr<const Playlist> old, nframes_t start,
 {
 	boost::shared_ptr<Playlist> pl;
 	boost::shared_ptr<const AudioPlaylist> apl;
+	boost::shared_ptr<const MidiPlaylist> mpl;
 	
 	if ((apl = boost::dynamic_pointer_cast<const AudioPlaylist> (old)) != 0) {
 		pl = boost::shared_ptr<Playlist> (new AudioPlaylist (apl, start, cnt, name, hidden));
+		pl->set_region_ownership ();
+	} else if ((mpl = boost::dynamic_pointer_cast<const MidiPlaylist> (old)) != 0) {
+		pl = boost::shared_ptr<Playlist> (new MidiPlaylist (mpl, start, cnt, name, hidden));
 		pl->set_region_ownership ();
 	}
 

@@ -10,7 +10,6 @@
 #define _SIGC_FUNCTORS_MACROS_MEM_FUNHM4_
 #include <sigc++/type_traits.h>
 #include <sigc++/functors/functor_trait.h>
-#include <sigc++/limit_reference.h>
 
 namespace sigc {
 
@@ -1744,7 +1743,6 @@ protected:
   function_type func_ptr_;
 };
 
-
 /** bound_mem_functor0 encapsulates a  method with 0 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_mem_functor0.
  *
@@ -1767,32 +1765,26 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_mem_functor0( T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_mem_functor0 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_mem_functor0( T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @return The return value of the method invocation.
    */
   T_return operator()() const
-    { return (obj_.invoke().*(this->func_ptr_))(); }
+    { return (obj_ptr_->*(this->func_ptr_))(); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+   T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_mem_functor object.
@@ -1803,9 +1795,8 @@ template <class T_action, class T_return, class T_obj>
 void visit_each(const T_action& _A_action,
                 const bound_mem_functor0<T_return, T_obj>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_mem_functor1 encapsulates a  method with 1 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_mem_functor1.
@@ -1830,33 +1821,27 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_mem_functor1( T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_mem_functor1 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_mem_functor1( T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+   T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_mem_functor object.
@@ -1867,9 +1852,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1>
 void visit_each(const T_action& _A_action,
                 const bound_mem_functor1<T_return, T_obj, T_arg1>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_mem_functor2 encapsulates a  method with 2 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_mem_functor2.
@@ -1895,18 +1879,14 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_mem_functor2( T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_mem_functor2 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_mem_functor2( T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
@@ -1914,15 +1894,13 @@ public:
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1,_A_a2); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1,_A_a2); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+   T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_mem_functor object.
@@ -1933,9 +1911,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1,class T_arg2
 void visit_each(const T_action& _A_action,
                 const bound_mem_functor2<T_return, T_obj, T_arg1,T_arg2>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_mem_functor3 encapsulates a  method with 3 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_mem_functor3.
@@ -1962,18 +1939,14 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_mem_functor3( T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_mem_functor3 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_mem_functor3( T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
@@ -1982,15 +1955,13 @@ public:
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1,_A_a2,_A_a3); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1,_A_a2,_A_a3); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+   T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_mem_functor object.
@@ -2001,9 +1972,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1,class T_arg2
 void visit_each(const T_action& _A_action,
                 const bound_mem_functor3<T_return, T_obj, T_arg1,T_arg2,T_arg3>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_mem_functor4 encapsulates a  method with 4 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_mem_functor4.
@@ -2031,18 +2001,14 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_mem_functor4( T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_mem_functor4 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_mem_functor4( T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
@@ -2052,15 +2018,13 @@ public:
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3,typename type_trait<T_arg4>::take _A_a4) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+   T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_mem_functor object.
@@ -2071,9 +2035,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1,class T_arg2
 void visit_each(const T_action& _A_action,
                 const bound_mem_functor4<T_return, T_obj, T_arg1,T_arg2,T_arg3,T_arg4>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_mem_functor5 encapsulates a  method with 5 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_mem_functor5.
@@ -2102,18 +2065,14 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_mem_functor5( T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_mem_functor5 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_mem_functor5( T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
@@ -2124,15 +2083,13 @@ public:
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3,typename type_trait<T_arg4>::take _A_a4,typename type_trait<T_arg5>::take _A_a5) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4,_A_a5); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4,_A_a5); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+   T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_mem_functor object.
@@ -2143,9 +2100,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1,class T_arg2
 void visit_each(const T_action& _A_action,
                 const bound_mem_functor5<T_return, T_obj, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_mem_functor6 encapsulates a  method with 6 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_mem_functor6.
@@ -2175,18 +2131,14 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_mem_functor6( T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_mem_functor6 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_mem_functor6( T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
@@ -2198,15 +2150,13 @@ public:
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3,typename type_trait<T_arg4>::take _A_a4,typename type_trait<T_arg5>::take _A_a5,typename type_trait<T_arg6>::take _A_a6) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+   T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_mem_functor object.
@@ -2217,9 +2167,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1,class T_arg2
 void visit_each(const T_action& _A_action,
                 const bound_mem_functor6<T_return, T_obj, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_mem_functor7 encapsulates a  method with 7 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_mem_functor7.
@@ -2250,18 +2199,14 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_mem_functor7( T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_mem_functor7 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_mem_functor7( T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
@@ -2274,15 +2219,13 @@ public:
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3,typename type_trait<T_arg4>::take _A_a4,typename type_trait<T_arg5>::take _A_a5,typename type_trait<T_arg6>::take _A_a6,typename type_trait<T_arg7>::take _A_a7) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6,_A_a7); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6,_A_a7); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+   T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_mem_functor object.
@@ -2293,9 +2236,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1,class T_arg2
 void visit_each(const T_action& _A_action,
                 const bound_mem_functor7<T_return, T_obj, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_const_mem_functor0 encapsulates a const method with 0 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_const_mem_functor0.
@@ -2319,32 +2261,26 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_mem_functor0(const T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_const_mem_functor0 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_mem_functor0(const T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @return The return value of the method invocation.
    */
   T_return operator()() const
-    { return (obj_.invoke().*(this->func_ptr_))(); }
+    { return (obj_ptr_->*(this->func_ptr_))(); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  const_limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+  const T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_const_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_const_mem_functor object.
@@ -2355,9 +2291,8 @@ template <class T_action, class T_return, class T_obj>
 void visit_each(const T_action& _A_action,
                 const bound_const_mem_functor0<T_return, T_obj>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_const_mem_functor1 encapsulates a const method with 1 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_const_mem_functor1.
@@ -2382,33 +2317,27 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_mem_functor1(const T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_const_mem_functor1 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_mem_functor1(const T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  const_limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+  const T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_const_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_const_mem_functor object.
@@ -2419,9 +2348,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1>
 void visit_each(const T_action& _A_action,
                 const bound_const_mem_functor1<T_return, T_obj, T_arg1>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_const_mem_functor2 encapsulates a const method with 2 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_const_mem_functor2.
@@ -2447,18 +2375,14 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_mem_functor2(const T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_const_mem_functor2 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_mem_functor2(const T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
@@ -2466,15 +2390,13 @@ public:
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1,_A_a2); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1,_A_a2); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  const_limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+  const T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_const_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_const_mem_functor object.
@@ -2485,9 +2407,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1,class T_arg2
 void visit_each(const T_action& _A_action,
                 const bound_const_mem_functor2<T_return, T_obj, T_arg1,T_arg2>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_const_mem_functor3 encapsulates a const method with 3 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_const_mem_functor3.
@@ -2514,18 +2435,14 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_mem_functor3(const T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_const_mem_functor3 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_mem_functor3(const T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
@@ -2534,15 +2451,13 @@ public:
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1,_A_a2,_A_a3); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1,_A_a2,_A_a3); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  const_limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+  const T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_const_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_const_mem_functor object.
@@ -2553,9 +2468,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1,class T_arg2
 void visit_each(const T_action& _A_action,
                 const bound_const_mem_functor3<T_return, T_obj, T_arg1,T_arg2,T_arg3>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_const_mem_functor4 encapsulates a const method with 4 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_const_mem_functor4.
@@ -2583,18 +2497,14 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_mem_functor4(const T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_const_mem_functor4 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_mem_functor4(const T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
@@ -2604,15 +2514,13 @@ public:
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3,typename type_trait<T_arg4>::take _A_a4) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  const_limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+  const T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_const_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_const_mem_functor object.
@@ -2623,9 +2531,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1,class T_arg2
 void visit_each(const T_action& _A_action,
                 const bound_const_mem_functor4<T_return, T_obj, T_arg1,T_arg2,T_arg3,T_arg4>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_const_mem_functor5 encapsulates a const method with 5 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_const_mem_functor5.
@@ -2654,18 +2561,14 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_mem_functor5(const T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_const_mem_functor5 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_mem_functor5(const T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
@@ -2676,15 +2579,13 @@ public:
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3,typename type_trait<T_arg4>::take _A_a4,typename type_trait<T_arg5>::take _A_a5) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4,_A_a5); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4,_A_a5); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  const_limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+  const T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_const_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_const_mem_functor object.
@@ -2695,9 +2596,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1,class T_arg2
 void visit_each(const T_action& _A_action,
                 const bound_const_mem_functor5<T_return, T_obj, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_const_mem_functor6 encapsulates a const method with 6 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_const_mem_functor6.
@@ -2727,18 +2627,14 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_mem_functor6(const T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_const_mem_functor6 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_mem_functor6(const T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
@@ -2750,15 +2646,13 @@ public:
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3,typename type_trait<T_arg4>::take _A_a4,typename type_trait<T_arg5>::take _A_a5,typename type_trait<T_arg6>::take _A_a6) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  const_limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+  const T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_const_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_const_mem_functor object.
@@ -2769,9 +2663,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1,class T_arg2
 void visit_each(const T_action& _A_action,
                 const bound_const_mem_functor6<T_return, T_obj, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_const_mem_functor7 encapsulates a const method with 7 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_const_mem_functor7.
@@ -2802,18 +2695,14 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_mem_functor7(const T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_const_mem_functor7 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_mem_functor7(const T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
@@ -2826,15 +2715,13 @@ public:
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3,typename type_trait<T_arg4>::take _A_a4,typename type_trait<T_arg5>::take _A_a5,typename type_trait<T_arg6>::take _A_a6,typename type_trait<T_arg7>::take _A_a7) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6,_A_a7); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6,_A_a7); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  const_limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+  const T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_const_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_const_mem_functor object.
@@ -2845,9 +2732,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1,class T_arg2
 void visit_each(const T_action& _A_action,
                 const bound_const_mem_functor7<T_return, T_obj, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_volatile_mem_functor0 encapsulates a volatile method with 0 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_volatile_mem_functor0.
@@ -2871,32 +2757,26 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_volatile_mem_functor0( T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_volatile_mem_functor0 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_volatile_mem_functor0( T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @return The return value of the method invocation.
    */
   T_return operator()() const
-    { return (obj_.invoke().*(this->func_ptr_))(); }
+    { return (obj_ptr_->*(this->func_ptr_))(); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  volatile_limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+   T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_volatile_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_volatile_mem_functor object.
@@ -2907,9 +2787,8 @@ template <class T_action, class T_return, class T_obj>
 void visit_each(const T_action& _A_action,
                 const bound_volatile_mem_functor0<T_return, T_obj>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_volatile_mem_functor1 encapsulates a volatile method with 1 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_volatile_mem_functor1.
@@ -2934,33 +2813,27 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_volatile_mem_functor1( T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_volatile_mem_functor1 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_volatile_mem_functor1( T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  volatile_limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+   T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_volatile_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_volatile_mem_functor object.
@@ -2971,9 +2844,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1>
 void visit_each(const T_action& _A_action,
                 const bound_volatile_mem_functor1<T_return, T_obj, T_arg1>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_volatile_mem_functor2 encapsulates a volatile method with 2 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_volatile_mem_functor2.
@@ -2999,18 +2871,14 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_volatile_mem_functor2( T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_volatile_mem_functor2 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_volatile_mem_functor2( T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
@@ -3018,15 +2886,13 @@ public:
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1,_A_a2); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1,_A_a2); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  volatile_limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+   T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_volatile_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_volatile_mem_functor object.
@@ -3037,9 +2903,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1,class T_arg2
 void visit_each(const T_action& _A_action,
                 const bound_volatile_mem_functor2<T_return, T_obj, T_arg1,T_arg2>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_volatile_mem_functor3 encapsulates a volatile method with 3 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_volatile_mem_functor3.
@@ -3066,18 +2931,14 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_volatile_mem_functor3( T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_volatile_mem_functor3 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_volatile_mem_functor3( T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
@@ -3086,15 +2947,13 @@ public:
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1,_A_a2,_A_a3); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1,_A_a2,_A_a3); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  volatile_limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+   T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_volatile_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_volatile_mem_functor object.
@@ -3105,9 +2964,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1,class T_arg2
 void visit_each(const T_action& _A_action,
                 const bound_volatile_mem_functor3<T_return, T_obj, T_arg1,T_arg2,T_arg3>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_volatile_mem_functor4 encapsulates a volatile method with 4 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_volatile_mem_functor4.
@@ -3135,18 +2993,14 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_volatile_mem_functor4( T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_volatile_mem_functor4 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_volatile_mem_functor4( T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
@@ -3156,15 +3010,13 @@ public:
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3,typename type_trait<T_arg4>::take _A_a4) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  volatile_limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+   T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_volatile_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_volatile_mem_functor object.
@@ -3175,9 +3027,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1,class T_arg2
 void visit_each(const T_action& _A_action,
                 const bound_volatile_mem_functor4<T_return, T_obj, T_arg1,T_arg2,T_arg3,T_arg4>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_volatile_mem_functor5 encapsulates a volatile method with 5 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_volatile_mem_functor5.
@@ -3206,18 +3057,14 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_volatile_mem_functor5( T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_volatile_mem_functor5 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_volatile_mem_functor5( T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
@@ -3228,15 +3075,13 @@ public:
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3,typename type_trait<T_arg4>::take _A_a4,typename type_trait<T_arg5>::take _A_a5) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4,_A_a5); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4,_A_a5); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  volatile_limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+   T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_volatile_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_volatile_mem_functor object.
@@ -3247,9 +3092,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1,class T_arg2
 void visit_each(const T_action& _A_action,
                 const bound_volatile_mem_functor5<T_return, T_obj, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_volatile_mem_functor6 encapsulates a volatile method with 6 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_volatile_mem_functor6.
@@ -3279,18 +3123,14 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_volatile_mem_functor6( T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_volatile_mem_functor6 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_volatile_mem_functor6( T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
@@ -3302,15 +3142,13 @@ public:
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3,typename type_trait<T_arg4>::take _A_a4,typename type_trait<T_arg5>::take _A_a5,typename type_trait<T_arg6>::take _A_a6) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  volatile_limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+   T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_volatile_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_volatile_mem_functor object.
@@ -3321,9 +3159,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1,class T_arg2
 void visit_each(const T_action& _A_action,
                 const bound_volatile_mem_functor6<T_return, T_obj, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_volatile_mem_functor7 encapsulates a volatile method with 7 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_volatile_mem_functor7.
@@ -3354,18 +3191,14 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_volatile_mem_functor7( T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_volatile_mem_functor7 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_volatile_mem_functor7( T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
@@ -3378,15 +3211,13 @@ public:
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3,typename type_trait<T_arg4>::take _A_a4,typename type_trait<T_arg5>::take _A_a5,typename type_trait<T_arg6>::take _A_a6,typename type_trait<T_arg7>::take _A_a7) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6,_A_a7); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6,_A_a7); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  volatile_limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+   T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_volatile_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_volatile_mem_functor object.
@@ -3397,9 +3228,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1,class T_arg2
 void visit_each(const T_action& _A_action,
                 const bound_volatile_mem_functor7<T_return, T_obj, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_const_volatile_mem_functor0 encapsulates a const volatile method with 0 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_const_volatile_mem_functor0.
@@ -3423,32 +3253,26 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_volatile_mem_functor0(const T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_const_volatile_mem_functor0 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_volatile_mem_functor0(const T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @return The return value of the method invocation.
    */
   T_return operator()() const
-    { return (obj_.invoke().*(this->func_ptr_))(); }
+    { return (obj_ptr_->*(this->func_ptr_))(); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  const_volatile_limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+  const T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_const_volatile_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_const_volatile_mem_functor object.
@@ -3459,9 +3283,8 @@ template <class T_action, class T_return, class T_obj>
 void visit_each(const T_action& _A_action,
                 const bound_const_volatile_mem_functor0<T_return, T_obj>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_const_volatile_mem_functor1 encapsulates a const volatile method with 1 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_const_volatile_mem_functor1.
@@ -3486,33 +3309,27 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_volatile_mem_functor1(const T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_const_volatile_mem_functor1 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_volatile_mem_functor1(const T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  const_volatile_limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+  const T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_const_volatile_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_const_volatile_mem_functor object.
@@ -3523,9 +3340,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1>
 void visit_each(const T_action& _A_action,
                 const bound_const_volatile_mem_functor1<T_return, T_obj, T_arg1>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_const_volatile_mem_functor2 encapsulates a const volatile method with 2 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_const_volatile_mem_functor2.
@@ -3551,18 +3367,14 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_volatile_mem_functor2(const T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_const_volatile_mem_functor2 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_volatile_mem_functor2(const T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
@@ -3570,15 +3382,13 @@ public:
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1,_A_a2); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1,_A_a2); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  const_volatile_limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+  const T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_const_volatile_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_const_volatile_mem_functor object.
@@ -3589,9 +3399,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1,class T_arg2
 void visit_each(const T_action& _A_action,
                 const bound_const_volatile_mem_functor2<T_return, T_obj, T_arg1,T_arg2>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_const_volatile_mem_functor3 encapsulates a const volatile method with 3 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_const_volatile_mem_functor3.
@@ -3618,18 +3427,14 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_volatile_mem_functor3(const T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_const_volatile_mem_functor3 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_volatile_mem_functor3(const T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
@@ -3638,15 +3443,13 @@ public:
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1,_A_a2,_A_a3); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1,_A_a2,_A_a3); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  const_volatile_limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+  const T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_const_volatile_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_const_volatile_mem_functor object.
@@ -3657,9 +3460,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1,class T_arg2
 void visit_each(const T_action& _A_action,
                 const bound_const_volatile_mem_functor3<T_return, T_obj, T_arg1,T_arg2,T_arg3>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_const_volatile_mem_functor4 encapsulates a const volatile method with 4 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_const_volatile_mem_functor4.
@@ -3687,18 +3489,14 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_volatile_mem_functor4(const T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_const_volatile_mem_functor4 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_volatile_mem_functor4(const T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
@@ -3708,15 +3506,13 @@ public:
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3,typename type_trait<T_arg4>::take _A_a4) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  const_volatile_limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+  const T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_const_volatile_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_const_volatile_mem_functor object.
@@ -3727,9 +3523,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1,class T_arg2
 void visit_each(const T_action& _A_action,
                 const bound_const_volatile_mem_functor4<T_return, T_obj, T_arg1,T_arg2,T_arg3,T_arg4>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_const_volatile_mem_functor5 encapsulates a const volatile method with 5 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_const_volatile_mem_functor5.
@@ -3758,18 +3553,14 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_volatile_mem_functor5(const T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_const_volatile_mem_functor5 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_volatile_mem_functor5(const T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
@@ -3780,15 +3571,13 @@ public:
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3,typename type_trait<T_arg4>::take _A_a4,typename type_trait<T_arg5>::take _A_a5) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4,_A_a5); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4,_A_a5); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  const_volatile_limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+  const T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_const_volatile_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_const_volatile_mem_functor object.
@@ -3799,9 +3588,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1,class T_arg2
 void visit_each(const T_action& _A_action,
                 const bound_const_volatile_mem_functor5<T_return, T_obj, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_const_volatile_mem_functor6 encapsulates a const volatile method with 6 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_const_volatile_mem_functor6.
@@ -3831,18 +3619,14 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_volatile_mem_functor6(const T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_const_volatile_mem_functor6 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_volatile_mem_functor6(const T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
@@ -3854,15 +3638,13 @@ public:
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3,typename type_trait<T_arg4>::take _A_a4,typename type_trait<T_arg5>::take _A_a5,typename type_trait<T_arg6>::take _A_a6) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  const_volatile_limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+  const T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_const_volatile_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_const_volatile_mem_functor object.
@@ -3873,9 +3655,8 @@ template <class T_action, class T_return, class T_obj, class T_arg1,class T_arg2
 void visit_each(const T_action& _A_action,
                 const bound_const_volatile_mem_functor6<T_return, T_obj, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
-
 
 /** bound_const_volatile_mem_functor7 encapsulates a const volatile method with 7 arguments and an object instance.
  * Use the convenience function mem_fun() to create an instance of bound_const_volatile_mem_functor7.
@@ -3906,18 +3687,14 @@ public:
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_volatile_mem_functor7(const T_obj* _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(*_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(_A_obj) {}
 
   /** Constructs a bound_const_volatile_mem_functor7 object that wraps the passed method.
    * @param _A_obj Reference to instance the method will operate on.
    * @param _A_func Pointer to method will be invoked from operator()().
    */
   bound_const_volatile_mem_functor7(const T_obj& _A_obj, function_type _A_func)
-    : base_type_(_A_func),
-      obj_(_A_obj)
-    {}
+    : base_type_(_A_func), obj_ptr_(&_A_obj) {}
 
   /** Execute the wrapped method operating on the stored instance.
    * @param _A_a1 Argument to be passed on to the method.
@@ -3930,15 +3707,13 @@ public:
    * @return The return value of the method invocation.
    */
   T_return operator()(typename type_trait<T_arg1>::take _A_a1,typename type_trait<T_arg2>::take _A_a2,typename type_trait<T_arg3>::take _A_a3,typename type_trait<T_arg4>::take _A_a4,typename type_trait<T_arg5>::take _A_a5,typename type_trait<T_arg6>::take _A_a6,typename type_trait<T_arg7>::take _A_a7) const
-    { return (obj_.invoke().*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6,_A_a7); }
+    { return (obj_ptr_->*(this->func_ptr_))(_A_a1,_A_a2,_A_a3,_A_a4,_A_a5,_A_a6,_A_a7); }
 
 //protected:
-  // Reference to stored object instance.
-  // This is the handler object, such as TheObject in void TheObject::signal_handler().
-  const_volatile_limit_reference<T_obj> obj_;
+  /// Pointer to stored object instance.
+  const T_obj *obj_ptr_;
 };
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::bound_const_volatile_mem_functor performs a functor
  * on the object instance stored in the sigc::bound_const_volatile_mem_functor object.
@@ -3949,7 +3724,7 @@ template <class T_action, class T_return, class T_obj, class T_arg1,class T_arg2
 void visit_each(const T_action& _A_action,
                 const bound_const_volatile_mem_functor7<T_return, T_obj, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>& _A_target)
 {
-  sigc::visit_each(_A_action, _A_target.obj_);
+  visit_each(_A_action, *_A_target.obj_ptr_);
 }
 
 

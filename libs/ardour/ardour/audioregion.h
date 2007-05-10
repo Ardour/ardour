@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2001 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -54,24 +54,18 @@ class AudioRegion : public Region
 
 	~AudioRegion();
 
-	bool source_equivalent (boost::shared_ptr<const Region>) const;
-
 	bool speed_mismatch (float) const;
 
-	boost::shared_ptr<AudioSource> source (uint32_t n=0) const { if (n < sources.size()) return sources[n]; else return sources[0]; } 
+	boost::shared_ptr<AudioSource> audio_source (uint32_t n=0) const;
 
-	void set_scale_amplitude (gain_t);
+	void   set_scale_amplitude (gain_t);
 	gain_t scale_amplitude() const { return _scale_amplitude; }
 	
 	void normalize_to (float target_in_dB = 0.0f);
 
-	uint32_t n_channels() const { return sources.size(); }
-	vector<string> master_source_names();
-	
 	bool envelope_active () const { return _flags & Region::EnvelopeActive; }
 	bool fade_in_active ()  const { return _flags & Region::FadeIn; }
 	bool fade_out_active () const { return _flags & Region::FadeOut; }
-	bool captured() const { return !(_flags & (Region::Flag (Region::Import|Region::External))); }
 
 	Curve& fade_in()  { return _fade_in; }
 	Curve& fade_out() { return _fade_out; }
@@ -129,16 +123,12 @@ class AudioRegion : public Region
 
 	int exportme (ARDOUR::Session&, ARDOUR::AudioExportSpecification&);
 
-	boost::shared_ptr<Region> get_parent() const;
-
 	/* xfade/fade interactions */
 
 	void suspend_fade_in ();
 	void suspend_fade_out ();
 	void resume_fade_in ();
 	void resume_fade_out ();
-
-	void set_playlist (boost::weak_ptr<Playlist>);
 
   private:
 	friend class RegionFactory;
@@ -165,10 +155,6 @@ class AudioRegion : public Region
 				 nframes_t read_frames = 0,
 				 nframes_t skip_frames = 0) const;
 
-	bool verify_start (nframes_t position);
-	bool verify_length (nframes_t position);
-	bool verify_start_mutable (nframes_t& start);
-	bool verify_start_and_length (nframes_t start, nframes_t length);
 	void recompute_at_start ();
 	void recompute_at_end ();
 
@@ -177,13 +163,6 @@ class AudioRegion : public Region
 	void fade_out_changed ();
 	void source_offset_changed ();
 	void listen_to_my_curves ();
-
-	void source_deleted ();
-	
-	SourceList        sources;
-	
-	/** Used when timefx are applied, so we can always use the original source. */
-	SourceList        master_sources; 
 
 	mutable Curve     _fade_in;
 	FadeShape         _fade_in_shape;
@@ -196,6 +175,13 @@ class AudioRegion : public Region
 
   protected:
 	int set_live_state (const XMLNode&, Change&, bool send);
+	
+	virtual bool verify_start (nframes_t);
+	virtual bool verify_start_and_length (nframes_t, nframes_t);
+	virtual bool verify_start_mutable (nframes_t&_start);
+	virtual bool verify_length (nframes_t);
+	/*virtual void recompute_at_start () = 0;
+	virtual void recompute_at_end () = 0;*/
 };
 
 } /* namespace ARDOUR */

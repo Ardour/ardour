@@ -3,7 +3,6 @@
 #ifndef _PANGOMM_LANGUAGE_H
 #define _PANGOMM_LANGUAGE_H
 
-
 #include <glibmm.h>
 
 /* Copyright (C) 2002 The gtkmm Development Team
@@ -241,7 +240,6 @@ class Value<Pango::Language> : public Glib::Value_Boxed<Pango::Language>
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 } // namespace Glib
-
 
 #endif /* _PANGOMM_LANGUAGE_H */
 

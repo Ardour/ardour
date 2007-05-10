@@ -17,6 +17,9 @@
 
 */
 
+#define __STDC_FORMAT_MACROS 1
+#include <stdint.h>
+
 #include <algorithm>
 
 #include <pbd/error.h>
@@ -114,8 +117,9 @@ GenericMidiControlProtocol::_send_feedback ()
 	if (end == buf) {
 		return;
 	} 
-	
-	_port->write (buf, (int32_t) (end - buf));
+
+	// FIXME
+	//_port->write (buf, (int32_t) (end - buf));
 }
 
 bool

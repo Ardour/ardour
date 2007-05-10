@@ -296,8 +296,8 @@ Editor::session_going_away ()
 	cut_buffer->clear ();
 
 	clicked_regionview = 0;
-	clicked_trackview = 0;
-	clicked_audio_trackview = 0;
+	clicked_axisview = 0;
+	clicked_routeview = 0;
 	clicked_crossfadeview = 0;
 	entered_regionview = 0;
 	entered_track = 0;

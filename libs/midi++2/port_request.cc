@@ -36,7 +36,7 @@ PortRequest::PortRequest (const string &xdev,
 	
 	devname = strdup (xdev.c_str());
 	tagname = strdup (xtag.c_str());
-
+	
 	if (xmode == "output" ||
 	    xmode == "out" || 
 	    xmode == "OUTPUT" ||
@@ -58,7 +58,10 @@ PortRequest::PortRequest (const string &xdev,
 		status = Unknown;
 	}
 
-	if (xtype == "ALSA/RAW" ||
+	if (xtype == "JACK" ||
+		   xtype == "jack") {
+		type = Port::JACK_Midi;
+	} else if (xtype == "ALSA/RAW" ||
 		   xtype == "alsa/raw") {
 		type = Port::ALSA_RawMidi;
 	} else if (xtype == "ALSA/SEQUENCER" ||

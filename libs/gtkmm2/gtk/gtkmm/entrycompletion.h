@@ -3,7 +3,6 @@
 #ifndef _GTKMM_ENTRYCOMPLETION_H
 #define _GTKMM_ENTRYCOMPLETION_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -42,7 +41,6 @@ namespace Gtk
 
 class Entry;
 
-//TODO: This should derive+implement from CellLayout, when we can break ABI.
 
 class EntryCompletion : public Glib::Object
 {
@@ -102,14 +100,14 @@ public:
   /** Gets the entry @a completion  has been attached to.
    * @return The entry @a completion  has been attached to.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   Entry* get_entry();
   
   /** Gets the entry @a completion  has been attached to.
    * @return The entry @a completion  has been attached to.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   const Entry* get_entry() const;
 
@@ -118,7 +116,7 @@ public:
    * a model set, it will remove it before setting the new model.
    * If model is <tt>0</tt>, then it will unset the model.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param model The Gtk::TreeModel.
    */
   void set_model(const Glib::RefPtr<TreeModel>& model);
@@ -127,7 +125,7 @@ public:
    * Returns <tt>0</tt> if the model is unset.
    * @return A Gtk::TreeModel, or <tt>0</tt> if none is currently being used.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   Glib::RefPtr<TreeModel> get_model();
   
@@ -135,7 +133,7 @@ public:
    * Returns <tt>0</tt> if the model is unset.
    * @return A Gtk::TreeModel, or <tt>0</tt> if none is currently being used.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   Glib::RefPtr<const TreeModel> get_model() const;
 
@@ -150,7 +148,7 @@ public:
    * key takes a lot of time and will come up with meaningless results anyway
    * (ie, a too large dataset).
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param length The minimum length of the key in order to start completing.
    */
   void set_minimum_key_length(int length);
@@ -158,7 +156,7 @@ public:
   /** Returns the minimum key length as set for @a completion .
    * @return The currently used minimum key length.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   int get_minimum_key_length() const;
   
@@ -166,14 +164,14 @@ public:
    * current list with completions, using the current key. The completion list
    * view will be updated accordingly.
    * 
-   * @newin2p4
+   * Since: 2.4
    */
   void complete();
 
   
   /** Requests a prefix insertion. 
    * 
-   * @newin2p6
+   * Since: 2.6
    */
   void insert_prefix();
 
@@ -193,7 +191,7 @@ public:
   
   /** Deletes the action at @a index  from @a completion 's action list.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param index The index of the item to Delete.
    */
   void delete_action(int index = 0);
@@ -202,7 +200,7 @@ public:
   /** Sets whether the common prefix of the possible completions should
    * be automatically inserted in the entry.
    * 
-   * @newin2p6
+   * Since: 2.6
    * @param inline_completion <tt>true</tt> to do inline completion.
    */
   void set_inline_completion(bool inline_completion = true);
@@ -211,13 +209,13 @@ public:
    * be automatically inserted in the entry.
    * @return <tt>true</tt> if inline completion is turned on
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
   bool get_inline_completion() const;
   
   /** Sets whether the completions should be presented in a popup window.
    * 
-   * @newin2p6
+   * Since: 2.6
    * @param popup_completion <tt>true</tt> to do popup completion.
    */
   void set_popup_completion(bool popup_completion = true);
@@ -225,47 +223,9 @@ public:
   /** Returns whether the completions should be presented in a popup window.
    * @return <tt>true</tt> if popup completion is turned on
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
   bool get_popup_completion() const;
-
-  
-  /** Sets whether the completion popup window will be resized to be the same
-   * width as the entry.
-   * 
-   * @newin2p8
-   * @param popup_set_width <tt>true</tt> to make the width of the popup the same as the entry.
-   */
-  void set_popup_set_width(bool popup_set_width = true);
-  
-  /** Returns whether the  completion popup window will be resized to the 
-   * width of the entry.
-   * @return <tt>true</tt> if the popup window will be resized to the width of 
-   * the entry
-   * 
-   * @newin2p8.
-   */
-  bool get_popup_set_width() const;
-  
-  /** Sets whether the completion popup window will appear even if there is
-   * only a single match. You may want to set this to <tt>false</tt> if you
-   * are using inline
-   * completion.
-   * 
-   * @newin2p8
-   * @param popup_single_match <tt>true</tt> if the popup should appear even for a single
-   * match.
-   */
-  void set_popup_single_width(bool popup_single_match = true);
-  
-  /** Returns whether the completion popup window will appear even if there is
-   * only a single match.
-   * @return <tt>true</tt> if the popup window will appear regardless of the
-   * number of matches.
-   * 
-   * @newin2p8.
-   */
-  bool get_popup_single_match() const;
 
   
   /** Convenience function for setting up the most used case of this code: a
@@ -277,7 +237,7 @@ public:
    * column. If you need to set the text column, but don't want the cell 
    * renderer, use Glib::object_set() to set the ::text_column property directly.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param column The column in the model of @a completion  to get strings from.
    */
   void set_text_column(const TreeModelColumnBase& column);
@@ -291,7 +251,7 @@ public:
    * column. If you need to set the text column, but don't want the cell 
    * renderer, use Glib::object_set() to set the ::text_column property directly.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param column The column in the model of @a completion  to get strings from.
    */
   void set_text_column(int column);
@@ -299,20 +259,11 @@ public:
   /** Returns the column in the model of @a completion  to get strings from.
    * @return The column containing the strings
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
   int get_text_column();
 
-  /** Emitted when an action is activated.
-   *
-   * @param index The index of the activated action.
-   */
   
-/**
-   * @par Prototype:
-   * <tt>void %action_activated(int index)</tt>
-   */
-
   Glib::SignalProxy1< void,int > signal_action_activated();
 
 
@@ -320,15 +271,7 @@ public:
   //because we need both the iter and the model to make the C++ iter.
   
 
-  /** Emitted when a match from the list is selected. 
-   * The default behaviour is to replace the contents of the 
-   * entry with the contents of the text column in the row 
-   * pointed to by @a iter.
-   *
-   * @param model The TreeModel containing the matches
-   * @param iter A TreeModel::iterator positioned at the selected match
-   * @result true if the signal has been handled
-   * 
+  /**
    * @par Prototype:
    * <tt>bool %match_selected(const TreeModel::iterator& iter)</tt>
    */
@@ -337,194 +280,27 @@ public:
   
   //We use no_default_handler for this, because we can not add a new vfunc to 2.5 without breaking ABI.
   //TODO: Remove no_default_handler when we do an ABI-break-with-parallel-install.
-  /** Emitted when the inline autocompletion is triggered. 
-   * The default behaviour is to make the entry display the 
-   * whole prefix and select the newly inserted part.
-   *
-   * Applications may connect to this signal in order to insert only a
-   * smaller part of the @a prefix into the entry - e.g. the entry used in
-   * the FileChooser inserts only the part of the prefix up to the 
-   * next '/'.
-   * 
-   * @newin2p6
-   *
-   * @param prefix The common prefix of all possible completions.
-   * @result true if the signal has been handled
-   */ 
   
-/**
-   * @par Prototype:
-   * <tt>bool %insert_prefix(const Glib::ustring& prefix)</tt>
-   */
 
   Glib::SignalProxy1< bool,const Glib::ustring& > signal_insert_prefix();
  
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The model to find matches in.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy< Glib::RefPtr<Gtk::TreeModel> > property_model() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-#ifdef GLIBMM_PROPERTIES_ENABLED
-/** The model to find matches in.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy_ReadOnly< Glib::RefPtr<Gtk::TreeModel> > property_model() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Minimum length of the search key in order to look up matches.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy<int> property_minimum_key_length() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-#ifdef GLIBMM_PROPERTIES_ENABLED
-/** Minimum length of the search key in order to look up matches.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy_ReadOnly<int> property_minimum_key_length() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The column of the model containing the strings.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy<int> property_text_column() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-#ifdef GLIBMM_PROPERTIES_ENABLED
-/** The column of the model containing the strings.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy_ReadOnly<int> property_text_column() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether the common prefix should be inserted automatically.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy<bool> property_inline_completion() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-#ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether the common prefix should be inserted automatically.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy_ReadOnly<bool> property_inline_completion() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether the completions should be shown in a popup window.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy<bool> property_popup_completion() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-#ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether the completions should be shown in a popup window.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy_ReadOnly<bool> property_popup_completion() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** If TRUE
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy<bool> property_popup_set_width() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-#ifdef GLIBMM_PROPERTIES_ENABLED
-/** If TRUE
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy_ReadOnly<bool> property_popup_set_width() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** If TRUE
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy<bool> property_popup_single_match() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-#ifdef GLIBMM_PROPERTIES_ENABLED
-/** If TRUE
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy_ReadOnly<bool> property_popup_single_match() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-
 protected:
 
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   //Default Signal Handler:
   virtual bool on_match_selected(const TreeModel::iterator& iter);        
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_action_activated(int index);
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

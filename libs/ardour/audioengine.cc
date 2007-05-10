@@ -20,14 +20,19 @@
 #include <unistd.h>
 #include <cerrno>
 #include <vector>
+#include <exception>
+#include <stdexcept>
 
 #include <glibmm/timer.h>
 #include <pbd/pthread_utils.h>
 #include <pbd/stacktrace.h>
+#include <pbd/unknown_type.h>
 
 #include <ardour/audioengine.h>
 #include <ardour/buffer.h>
 #include <ardour/port.h>
+#include <ardour/audio_port.h>
+#include <ardour/midi_port.h>
 #include <ardour/session.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/utils.h>
@@ -299,15 +304,25 @@ AudioEngine::process_callback (nframes_t nframes)
 		return 0;
 	}
 
-	session->process (nframes);
+	boost::shared_ptr<Ports> p = ports.reader();
+
+	// Prepare ports (ie read data if necessary)
+	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
+		(*i)->cycle_start (nframes);
+	}
+	
+	if (session) {
+		session->process (nframes);
+	}
 
 	if (!_running) {
-		/* we were zombified, maybe because a ladspa plugin took
-		   too long, or jackd exited, or something like that.
-		*/
-		
 		_processed_frames = next_processed_frames;
 		return 0;
+	}
+	
+	// Finalize ports (ie write data if necessary)
+	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
+		(*i)->cycle_end ();
 	}
 
 	if (last_monitor_check + monitor_check_interval < next_processed_frames) {
@@ -432,14 +447,23 @@ AudioEngine::set_session (Session *s)
 		   can before we really start running.
 		*/
 		
-		session->process (blocksize);
-		session->process (blocksize);
-		session->process (blocksize);
-		session->process (blocksize);
-		session->process (blocksize);
-		session->process (blocksize);
-		session->process (blocksize);
-		session->process (blocksize);
+		boost::shared_ptr<Ports> p = ports.reader();
+
+		for (Ports::iterator i = p->begin(); i != p->end(); ++i)
+			(*i)->cycle_start (blocksize);
+
+		s->process (blocksize);
+		s->process (blocksize);
+		s->process (blocksize);
+		s->process (blocksize);
+		s->process (blocksize);
+		s->process (blocksize);
+		s->process (blocksize);
+		s->process (blocksize);
+
+		for (Ports::iterator i = p->begin(); i != p->end(); ++i)
+			(*i)->cycle_end ();
+
 	}
 }
 
@@ -478,9 +502,16 @@ AudioEngine::register_input_port (DataType type, const string& portname)
 
 	if (p) {
 
-		Port *newport;
+		Port* newport = 0;
+		
+		if (type == DataType::AUDIO)
+			newport = new AudioPort (p);
+		else if (type == DataType::MIDI)
+			newport = new MidiPort (p);
+		else
+			throw unknown_type();
 
-		if ((newport = new Port (p)) != 0) {
+		if (newport != 0) {
 			RCUWriter<Ports> writer (ports);
 			boost::shared_ptr<Ports> ps = writer.get_copy ();
 			ps->insert (ps->begin(), newport);
@@ -508,25 +539,29 @@ AudioEngine::register_output_port (DataType type, const string& portname)
 		}
 	}
 
-	jack_port_t *p;
-
+	jack_port_t* p = 0;
+	
 	if ((p = jack_port_register (_jack, portname.c_str(),
-		type.to_jack_type(), JackPortIsOutput, 0)) != 0) {
+			type.to_jack_type(), JackPortIsOutput, 0)) != 0) {
+		
+		Port* newport = 0;
+		
+		if (type == DataType::AUDIO)
+			newport = new AudioPort (p);
+		else if (type == DataType::MIDI)
+			newport = new MidiPort (p);
+		else
+			throw unknown_type ();
 
-		Port *newport = 0;
-
-		{
+		if (newport != 0) {
 			RCUWriter<Ports> writer (ports);
 			boost::shared_ptr<Ports> ps = writer.get_copy ();
-			
-			newport = new Port (p);
 			ps->insert (ps->begin(), newport);
-
 			/* writer goes out of scope, forces update */
 		}
-
+		
 		return newport;
-
+		
 	} else {
 		throw PortRegistrationFailure ();
 	}
@@ -536,44 +571,38 @@ AudioEngine::register_output_port (DataType type, const string& portname)
 
 
 int          
-AudioEngine::unregister_port (Port *port)
+AudioEngine::unregister_port (Port& port)
 {
 	if (!_running) { 
 		/* probably happening when the engine has been halted by JACK,
 		   in which case, there is nothing we can do here.
-		*/
+		   */
 		return 0;
 	}
 
-	if (port) {
+	int ret = jack_port_unregister (_jack, port._port);
 
-		int ret = jack_port_unregister (_jack, port->_port);
-		
-		if (ret == 0) {
-			
-			{
+	if (ret == 0) {
 
-				RCUWriter<Ports> writer (ports);
-				boost::shared_ptr<Ports> ps = writer.get_copy ();
-				
-				for (Ports::iterator i = ps->begin(); i != ps->end(); ++i) {
-					if ((*i) == port) {
-						ps->erase (i);
-						break;
-					}
+		{
+
+			RCUWriter<Ports> writer (ports);
+			boost::shared_ptr<Ports> ps = writer.get_copy ();
+
+			for (Ports::iterator i = ps->begin(); i != ps->end(); ++i) {
+				if ((*i) == &port) {
+					ps->erase (i);
+					break;
 				}
-
-				/* writer goes out of scope, forces update */
 			}
 
-			remove_connections_for (port);
+			/* writer goes out of scope, forces update */
 		}
 
-		return ret;
-
-	} else {
-		return -1;
+		remove_connections_for (port);
 	}
+
+	return ret;
 }
 
 int 
@@ -639,7 +668,7 @@ AudioEngine::disconnect (const string& source, const string& destination)
 }
 
 int
-AudioEngine::disconnect (Port *port)
+AudioEngine::disconnect (Port& port)
 {
 	if (!_running) {
 		if (!_has_run) {
@@ -650,7 +679,7 @@ AudioEngine::disconnect (Port *port)
 		}
 	}
 
-	int ret = jack_port_disconnect (_jack, port->_port);
+	int ret = jack_port_disconnect (_jack, port._port);
 
 	if (ret == 0) {
 		remove_connections_for (port);
@@ -660,7 +689,7 @@ AudioEngine::disconnect (Port *port)
 
 }
 
-nframes_t
+ARDOUR::nframes_t
 AudioEngine::frame_rate ()
 {
 	if (_jack) {
@@ -677,7 +706,7 @@ AudioEngine::frame_rate ()
 	}
 }
 
-nframes_t
+ARDOUR::nframes_t
 AudioEngine::frames_per_cycle ()
 {
 	if (_jack) {
@@ -694,6 +723,9 @@ AudioEngine::frames_per_cycle ()
 	}
 }
 
+/** Get a port by name.
+ * Note this can return NULL, it will NOT create a port if it is not found (any more).
+ */
 Port *
 AudioEngine::get_port_by_name (const string& portname, bool keep)
 {
@@ -708,8 +740,6 @@ AudioEngine::get_port_by_name (const string& portname, bool keep)
 		}
 	}
 	
-	/* check to see if we have a Port for this name already */
-
 	boost::shared_ptr<Ports> pr = ports.reader();
 	
 	for (Ports::iterator i = pr->begin(); i != pr->end(); ++i) {
@@ -718,26 +748,7 @@ AudioEngine::get_port_by_name (const string& portname, bool keep)
 		}
 	}
 
-	jack_port_t *p;
-
-	if ((p = jack_port_by_name (_jack, portname.c_str())) != 0) {
-		Port *newport = new Port (p);
-
-		{
-			if (keep && newport->is_mine (_jack)) {
-				RCUWriter<Ports> writer (ports);
-				boost::shared_ptr<Ports> ps = writer.get_copy ();
-				ps->insert (newport);
-				/* writer goes out of scope, forces update */
-			}
-		}
-
-		return newport;
-
-	} else {
-
-		return 0;
-	}
+	return 0;
 }
 
 const char **
@@ -854,11 +865,13 @@ AudioEngine::get_physical_outputs (vector<string>& outs)
 }
 
 string
-AudioEngine::get_nth_physical (uint32_t n, int flag)
+AudioEngine::get_nth_physical (DataType type, uint32_t n, int flag)
 {
 	const char ** ports;
 	uint32_t i;
 	string ret;
+
+	assert(type != DataType::NIL);
 
 	if (!_running || !_jack) {
 		if (!_has_run) {
@@ -869,7 +882,7 @@ AudioEngine::get_nth_physical (uint32_t n, int flag)
 		}
 	}
 
-	ports = jack_get_ports (_jack, NULL, NULL, JackPortIsPhysical|flag);
+	ports = jack_get_ports (_jack, NULL, type.to_jack_type(), JackPortIsPhysical|flag);
 	
 	if (ports == 0) {
 		return "";
@@ -886,7 +899,7 @@ AudioEngine::get_nth_physical (uint32_t n, int flag)
 	return ret;
 }
 
-nframes_t
+ARDOUR::nframes_t
 AudioEngine::get_port_total_latency (const Port& port)
 {
 	if (!_jack) {
@@ -995,7 +1008,7 @@ AudioEngine::remove_all_ports ()
 }
 
 void
-AudioEngine::remove_connections_for (Port* port)
+AudioEngine::remove_connections_for (Port& port)
 {
 	for (PortConnections::iterator i = port_connections.begin(); i != port_connections.end(); ) {
 		PortConnections::iterator tmp;
@@ -1003,7 +1016,7 @@ AudioEngine::remove_connections_for (Port* port)
 		tmp = i;
 		++tmp;
 		
-		if ((*i).first == port->name()) {
+		if ((*i).first == port.name()) {
 			port_connections.erase (i);
 		}
 
@@ -1111,7 +1124,7 @@ AudioEngine::reconnect_to_jack ()
 		
 		short_name = long_name.substr (long_name.find_last_of (':') + 1);
 
-		if (((*i)->_port = jack_port_register (_jack, short_name.c_str(), (*i)->type(), (*i)->flags(), 0)) == 0) {
+		if (((*i)->_port = jack_port_register (_jack, short_name.c_str(), (*i)->type().to_jack_type(), (*i)->flags(), 0)) == 0) {
 			error << string_compose (_("could not reregister %1"), (*i)->name()) << endmsg;
 			break;
 		} else {
@@ -1120,7 +1133,7 @@ AudioEngine::reconnect_to_jack ()
 		(*i)->reset ();
 
 		if ((*i)->flags() & JackPortIsOutput) {
-			(*i)->silence (jack_get_buffer_size (_jack), 0);
+			(*i)->get_buffer().silence (jack_get_buffer_size (_jack), 0);
 		}
 	}
 

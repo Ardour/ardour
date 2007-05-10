@@ -21,7 +21,7 @@
 #include <ardour/session.h>
 #include <ardour/route.h>
 #include <ardour/audio_track.h>
-
+#include <ardour/meter.h>
 #include <control_protocol/control_protocol.h>
 
 using namespace ARDOUR;
@@ -259,7 +259,7 @@ ControlProtocol::route_get_peak_input_power (uint32_t table_index, uint32_t whic
 		return 0.0f;
 	}
 
-	return r->peak_input_power (which_input);
+	return r->peak_meter().peak_power (which_input);
 }
 
 

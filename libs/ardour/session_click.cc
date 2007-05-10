@@ -24,6 +24,7 @@
 #include <ardour/session.h>
 #include <ardour/tempo.h>
 #include <ardour/io.h>
+#include <ardour/buffer_set.h>
 
 #include <sndfile.h>
 
@@ -39,9 +40,7 @@ void
 Session::click (nframes_t start, nframes_t nframes, nframes_t offset)
 {
 	TempoMap::BBTPointList *points;
-	nframes_t end;
 	Sample *buf;
-	vector<Sample*> bufs;
 
 	if (_click_io == 0) {
 		return;
@@ -54,38 +53,38 @@ Session::click (nframes_t start, nframes_t nframes, nframes_t offset)
 		return;
 	} 
 
-	end = start + nframes;
+	const nframes_t end = start + (nframes_t)floor(nframes * _transport_speed);
 
-	buf = _passthru_buffers[0];
+	BufferSet& bufs = get_scratch_buffers(ChanCount(DataType::AUDIO, 1));
+	buf = bufs.get_audio(0).data();
 	points = _tempo_map->get_points (start, end);
 
 	if (points == 0) {
 		goto run_clicks;
 	}
 
-	if (!points->empty()) {
+	if (points->empty()) {
+		delete points;
+		goto run_clicks;
+	}
 
-		for (TempoMap::BBTPointList::iterator i = points->begin(); i != points->end(); ++i) {
-			switch ((*i).type) {
-			case TempoMap::Beat:
-				if (click_emphasis_data == 0 || (click_emphasis_data && (*i).beat != 1)) {
-					clicks.push_back (new Click ((*i).frame, click_length, click_data));
-				}
-				break;
-				
-			case TempoMap::Bar:
-				if (click_emphasis_data) {
-					clicks.push_back (new Click ((*i).frame, click_emphasis_length, click_emphasis_data));
-				} 
-				break;
+	for (TempoMap::BBTPointList::iterator i = points->begin(); i != points->end(); ++i) {
+		switch ((*i).type) {
+		case TempoMap::Beat:
+			if (click_emphasis_data == 0 || (click_emphasis_data && (*i).beat != 1)) {
+				clicks.push_back (new Click ((*i).frame, click_length, click_data));
 			}
+			break;
+
+		case TempoMap::Bar:
+			if (click_emphasis_data) {
+				clicks.push_back (new Click ((*i).frame, click_emphasis_length, click_emphasis_data));
+			} 
+			break;
 		}
 	}
 	
-	delete points;
-	
   run_clicks:
-	
 	memset (buf, 0, sizeof (Sample) * nframes);
 
 	for (list<Click*>::iterator i = clicks.begin(); i != clicks.end(); ) {
@@ -126,8 +125,8 @@ Session::click (nframes_t start, nframes_t nframes, nframes_t offset)
 
 		i = next;
 	}
-
-	_click_io->deliver_output (_passthru_buffers, 1, nframes, offset);
+	
+	_click_io->deliver_output (bufs, start, end, nframes, offset);
 }
 
 void

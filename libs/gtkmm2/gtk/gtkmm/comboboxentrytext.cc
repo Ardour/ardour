@@ -81,42 +81,14 @@ void ComboBoxEntryText::prepend_text(const Glib::ustring& text)
   }
 }
 
-//deprecated.
 void ComboBoxEntryText::clear()
 {
-  clear_items();
-}
-
-void ComboBoxEntryText::clear_items()
-{
   //Ideally, we would just store the ListStore as a member variable, but we forgot to do that and not it would break the ABI.
   Glib::RefPtr<Gtk::TreeModel> model = get_model();
   Glib::RefPtr<Gtk::ListStore> list_model = Glib::RefPtr<ListStore>::cast_dynamic(model);
-
+  
   if(list_model)  
     list_model->clear();
-}
-
-void ComboBoxEntryText::remove_text(const Glib::ustring& text)
-{
-  //Ideally, we would just store the ListStore as a member variable, but we forgot to do that and not it would break the ABI.
-  Glib::RefPtr<Gtk::TreeModel> model = get_model();
-  Glib::RefPtr<Gtk::ListStore> list_model = Glib::RefPtr<ListStore>::cast_dynamic(model);
-
-  //Look for the row with this text, and remove it:
-  if(list_model)
-  {
-    for(Gtk::TreeModel::iterator iter = list_model->children().begin(); iter != list_model->children().end(); ++iter)
-    {
-      const Glib::ustring& this_text = (*iter)[m_text_columns.m_column];
-
-      if(this_text == text)
-      {
-        list_model->erase(iter);
-        return; //success
-      }
-    }
-  }
 }
 
 Glib::ustring ComboBoxEntryText::get_active_text() const

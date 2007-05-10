@@ -3,7 +3,6 @@
 #ifndef _GTKMM_CELLEDITABLE_H
 #define _GTKMM_CELLEDITABLE_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -116,45 +115,27 @@ public:
   void remove_widget();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %editing_done()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_editing_done();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %remove_widget()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_remove_widget();
 
 
 protected:
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void start_editing_vfunc(GdkEvent* event);
-#endif //GLIBMM_VFUNCS_ENABLED
+    virtual void start_editing_vfunc(GdkEvent* event);
 
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_editing_done();
   virtual void on_remove_widget();
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };
@@ -172,7 +153,6 @@ namespace Glib
   Glib::RefPtr<Gtk::CellEditable> wrap(GtkCellEditable* object, bool take_copy = false);
 
 } // namespace Glib
-
 
 #endif /* _GTKMM_CELLEDITABLE_H */
 

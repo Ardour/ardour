@@ -51,7 +51,7 @@ TearOff::TearOff (Widget& c, bool allow_resize)
 	
 	VBox* box1;
 	box1 = manage (new VBox);
-	box1->pack_start (close_event_box, false, false, 5);
+	box1->pack_start (close_event_box, false, false, 2);
 	
 	window_box.pack_end (*box1, false, false, 2);
 	own_window.add (window_box);
@@ -67,7 +67,7 @@ TearOff::TearOff (Widget& c, bool allow_resize)
 
 	VBox* box2;
 	box2 = manage (new VBox);
-	box2->pack_start (tearoff_event_box, false, false, 5);
+	box2->pack_start (tearoff_event_box, false, false, 2);
 
 	pack_start (contents);
 	pack_start (*box2, false, false, 2);

@@ -20,7 +20,6 @@
 #ifndef __ardour_session_h__
 #define __ardour_session_h__
 
-
 #include <string>
 #include <list>
 #include <map>
@@ -55,6 +54,8 @@
 #include <ardour/gain.h>
 #include <ardour/io.h>
 
+#include <ardour/smpte.h>
+
 class XMLTree;
 class XMLNode;
 class AEffect;
@@ -72,13 +73,18 @@ namespace ARDOUR {
 class Port;
 class AudioEngine;
 class Slave;
-class Diskstream;	
-class AudioDiskstream;	
+class Diskstream;
 class Route;
 class AuxInput;
 class Source;
 class AudioSource;
+class BufferSet;
+
+class Diskstream;
+class AudioDiskstream;
+class MidiDiskstream;
 class AudioFileSource;
+class MidiSource;
 class Auditioner;
 class Insert;
 class Send;
@@ -90,10 +96,15 @@ class TempoMap;
 class AudioTrack;
 class NamedSelection;
 class AudioRegion;
+
 class Region;
 class Playlist;
 class VSTPlugin;
 class ControlProtocolInfo;
+
+class MidiTrack;
+class MidiRegion;
+class SMFSource;
 
 struct AudioExportSpecification;
 struct RouteGroup;
@@ -104,7 +115,6 @@ using std::map;
 using std::set;
 
 class Session : public PBD::StatefulDestructible
-
 {
   private:
 	typedef std::pair<boost::weak_ptr<Route>,bool> RouteBooleanState;
@@ -151,8 +161,8 @@ class Session : public PBD::StatefulDestructible
 		    Replace,
 		    Clear
 	    };
-
-	    Type           type;
+		
+		Type           type;
 	    Action         action;
 	    nframes_t action_frame;
 	    nframes_t target_frame;
@@ -162,6 +172,7 @@ class Session : public PBD::StatefulDestructible
 			void*                ptr;
 			bool                 yes_or_no;
 			SlaveSource slave;
+			Route*               route;
 	    };
 
 	    boost::shared_ptr<Region>     region;
@@ -252,8 +263,6 @@ class Session : public PBD::StatefulDestructible
 	std::string dead_sound_dir () const;
 	std::string automation_dir () const;
 
-	string peak_path_from_audio_path (string) const;
-
 	static string suffixed_search_path (std::string suffix, bool data);
 	static string control_protocol_path ();
 	static string template_path ();
@@ -261,14 +270,18 @@ class Session : public PBD::StatefulDestructible
 	static void get_template_list (list<string>&);
 	
 	static string change_audio_path_by_name (string oldpath, string oldname, string newname, bool destructive);
+	static string change_midi_path_by_name (string oldpath, string oldname, string newname, bool destructive);
+	
+	string peak_path_from_audio_path (string) const;
 	string audio_path_from_name (string, uint32_t nchans, uint32_t chan, bool destructive);
+	string midi_path_from_name (string);
 
 	void process (nframes_t nframes);
 
-	vector<Sample*>& get_passthru_buffers() { return _passthru_buffers; }
-	vector<Sample*>& get_silent_buffers (uint32_t howmany);
-	vector<Sample*>& get_send_buffers () { return _send_buffers; }
-
+	BufferSet& get_silent_buffers (ChanCount count = ChanCount::ZERO);
+	BufferSet& get_scratch_buffers (ChanCount count = ChanCount::ZERO);
+	BufferSet& get_send_buffers (ChanCount count = ChanCount::ZERO);
+	
 	void add_diskstream (boost::shared_ptr<Diskstream>);
 	boost::shared_ptr<Diskstream> diskstream_by_id (const PBD::ID& id);
 	boost::shared_ptr<Diskstream> diskstream_by_name (string name);
@@ -283,11 +296,11 @@ class Session : public PBD::StatefulDestructible
 	
 	typedef std::list<boost::shared_ptr<Diskstream> > DiskstreamList;
 	typedef std::list<boost::shared_ptr<Route> >      RouteList; 
-
+	
 	boost::shared_ptr<RouteList> get_routes() const {
 		return routes.reader ();
 	}
-
+	
 	uint32_t nroutes() const { return routes.reader()->size(); }
 	uint32_t ntracks () const;
 	uint32_t nbusses () const;
@@ -370,6 +383,7 @@ class Session : public PBD::StatefulDestructible
 	bool transport_locked () const;
 
 	int wipe ();
+	//int wipe_diskstream (AudioDiskstream *);
 
 	int remove_region_from_region_list (boost::shared_ptr<Region>);
 
@@ -474,12 +488,14 @@ class Session : public PBD::StatefulDestructible
 
 	std::list<boost::shared_ptr<AudioTrack> > new_audio_track (int input_channels, int output_channels, TrackMode mode = Normal, uint32_t how_many = 1);
 	RouteList new_audio_route (int input_channels, int output_channels, uint32_t how_many);
+	
+	std::list<boost::shared_ptr<MidiTrack> > new_midi_track (TrackMode mode = Normal, uint32_t how_many = 1);
+	//boost::shared_ptr<Route>     new_midi_route (uint32_t how_many = 1);
 
 	void   remove_route (boost::shared_ptr<Route>);
-
 	void   resort_routes ();
 	void   resort_routes_using (boost::shared_ptr<RouteList>);
-
+	
 	void	set_remote_control_ids();
 
 	AudioEngine &engine() { return _engine; };
@@ -541,19 +557,22 @@ class Session : public PBD::StatefulDestructible
 	
 	/* region info  */
 
-	sigc::signal<void,boost::weak_ptr<AudioRegion> > AudioRegionAdded;
-	sigc::signal<void,boost::weak_ptr<AudioRegion> > AudioRegionRemoved;
+	sigc::signal<void,boost::shared_ptr<Region> > RegionAdded;
+	sigc::signal<void,boost::shared_ptr<Region> > RegionRemoved;
 
 	int region_name (string& result, string base = string(""), bool newlevel = false) const;
 	string new_region_name (string);
 	string path_from_region_name (string name, string identifier);
 
-	boost::shared_ptr<AudioRegion> find_whole_file_parent (boost::shared_ptr<AudioRegion const>);
+	boost::shared_ptr<Region> find_whole_file_parent (boost::shared_ptr<Region const>);
+	
 	void find_equivalent_playlist_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >& result);
 
-	boost::shared_ptr<AudioRegion> XMLRegionFactory (const XMLNode&, bool full);
+	boost::shared_ptr<Region>      XMLRegionFactory (const XMLNode&, bool full);
+	boost::shared_ptr<AudioRegion> XMLAudioRegionFactory (const XMLNode&, bool full);
+	boost::shared_ptr<MidiRegion>  XMLMidiRegionFactory (const XMLNode&, bool full);
 
-	template<class T> void foreach_audio_region (T *obj, void (T::*func)(boost::shared_ptr<AudioRegion>));
+	template<class T> void foreach_region (T *obj, void (T::*func)(boost::shared_ptr<Region>));
 
 	/* source management */
 
@@ -567,8 +586,7 @@ class Session : public PBD::StatefulDestructible
 	    std::vector<Glib::ustring> paths;
 	    
 	    /* result */
-	    std::vector<boost::shared_ptr<AudioRegion> > new_regions;
-	    
+	    std::vector<boost::shared_ptr<Region> > new_regions;
 	};
 
 	int import_audiofile (import_status&);
@@ -612,6 +630,8 @@ class Session : public PBD::StatefulDestructible
 	static sigc::signal<int> AskAboutPendingState;
 	
 	boost::shared_ptr<AudioFileSource> create_audio_source_for_session (ARDOUR::AudioDiskstream&, uint32_t which_channel, bool destructive);
+
+	boost::shared_ptr<MidiSource> create_midi_source_for_session (ARDOUR::MidiDiskstream&);
 
 	boost::shared_ptr<Source> source_by_id (const PBD::ID&);
 	boost::shared_ptr<Source> source_by_path_and_channel (const Glib::ustring&, uint16_t);
@@ -660,7 +680,7 @@ class Session : public PBD::StatefulDestructible
 
 	/* flattening stuff */
 
-	int write_one_audio_track (AudioTrack&, nframes_t start, nframes_t cnt, bool overwrite, vector<boost::shared_ptr<AudioSource> >&,
+	int write_one_audio_track (AudioTrack&, nframes_t start, nframes_t cnt, bool overwrite, vector<boost::shared_ptr<Source> >&,
 				   InterThreadInfo& wot);
 	int freeze (InterThreadInfo&);
 
@@ -894,7 +914,7 @@ class Session : public PBD::StatefulDestructible
 	/* buffers for gain and pan */
 
 	gain_t* gain_automation_buffer () const { return _gain_automation_buffer; }
-	pan_t** pan_automation_buffer() const { return _pan_automation_buffer; }
+	pan_t** pan_automation_buffer () const  { return _pan_automation_buffer; }
 
 	/* buffers for conversion */
 	enum RunContext {
@@ -911,18 +931,6 @@ class Session : public PBD::StatefulDestructible
 				  long value,
 				  void* ptr,
 				  float opt);
-
-	typedef float (*compute_peak_t)			(Sample *, nframes_t, float);
-	typedef void  (*find_peaks_t)                   (Sample *, nframes_t, float *, float*);
-	typedef void  (*apply_gain_to_buffer_t)		(Sample *, nframes_t, float);
-	typedef void  (*mix_buffers_with_gain_t)	(Sample *, Sample *, nframes_t, float);
-	typedef void  (*mix_buffers_no_gain_t)		(Sample *, Sample *, nframes_t);
-
-	static compute_peak_t		compute_peak;
-	static find_peaks_t             find_peaks;
-	static apply_gain_to_buffer_t	apply_gain_to_buffer;
-	static mix_buffers_with_gain_t	mix_buffers_with_gain;
-	static mix_buffers_no_gain_t	mix_buffers_no_gain;
 
 	static sigc::signal<void> SendFeedback;
 
@@ -993,9 +1001,9 @@ class Session : public PBD::StatefulDestructible
 	nframes_t          _last_slave_transport_frame;
 	nframes_t           maximum_output_latency;
 	nframes_t           last_stop_frame;
-	vector<Sample *>        _passthru_buffers;
-	vector<Sample *>        _silent_buffers;
-	vector<Sample *>        _send_buffers;
+	BufferSet*              _scratch_buffers;
+	BufferSet*              _silent_buffers;
+	BufferSet*              _send_buffers;
 	nframes_t           current_block_size;
 	nframes_t          _worst_output_latency;
 	nframes_t          _worst_input_latency;
@@ -1012,7 +1020,7 @@ class Session : public PBD::StatefulDestructible
 
 	void update_latency_compensation_proxy (void* ignored);
 
-	void ensure_passthru_buffers (uint32_t howmany);
+	void ensure_buffers (ChanCount howmany);
 	
 	void process_scrub          (nframes_t);
 	void process_without_events (nframes_t);
@@ -1233,7 +1241,7 @@ class Session : public PBD::StatefulDestructible
 	void remove_empty_sounds ();
 
 	void setup_midi_control ();
-	int  midi_read (MIDI::Port *);
+	//int  midi_read (MIDI::Port *);
 
 	void enable_record ();
 	
@@ -1259,13 +1267,13 @@ class Session : public PBD::StatefulDestructible
 	void *do_work();
 
 	void set_next_event ();
-	void process_event (Event *);
+	void process_event (Event *ev);
 
 	/* MIDI Machine Control */
 
 	void deliver_mmc (MIDI::MachineControl::Command, nframes_t);
-	void deliver_midi_message (MIDI::Port * port, MIDI::eventType ev, MIDI::channel_t, MIDI::EventTwoBytes);
-	void deliver_data (MIDI::Port* port, MIDI::byte*, int32_t size);
+	//void deliver_midi_message (MIDI::Port * port, MIDI::eventType ev, MIDI::channel_t, MIDI::EventTwoBytes);
+	//void deliver_data (MIDI::Port* port, MIDI::byte*, int32_t size);
 
 	void spp_start (MIDI::Parser&);
 	void spp_continue (MIDI::Parser&);
@@ -1308,22 +1316,16 @@ class Session : public PBD::StatefulDestructible
 	nframes_t _smpte_offset;
 	bool _smpte_offset_negative;
 
-	/* cache the most-recently requested time conversions.
-	   this helps when we have multiple clocks showing the
-	   same time (e.g. the transport frame)
-	*/
+	/* cache the most-recently requested time conversions. This helps when we
+	 * have multiple clocks showing the same time (e.g. the transport frame) */
+	bool           last_smpte_valid;
+	nframes_t last_smpte_when;
+	SMPTE::Time    last_smpte;
+	
+	bool _send_smpte_update; ///< Flag to send a full frame (SMPTE) MTC message this cycle
 
-	bool       last_smpte_valid;
-	nframes_t  last_smpte_when;
-	SMPTE::Time last_smpte;
-
-	int send_full_time_code ();
-	int send_midi_time_code ();
-
-	void send_full_time_code_in_another_thread ();
-	void send_midi_time_code_in_another_thread ();
-	void send_time_code_in_another_thread (bool full);
-	void send_mmc_in_another_thread (MIDI::MachineControl::Command, nframes_t frame = 0);
+	int send_full_time_code(nframes_t nframes);
+	int send_midi_time_code_for_cycle(nframes_t nframes);
 
 	nframes_t adjust_apparent_position (nframes_t frames);
 	
@@ -1378,17 +1380,8 @@ class Session : public PBD::StatefulDestructible
 	    static MultiAllocSingleReleasePool pool;
 	};
 
-	Glib::Mutex       midi_lock;
-	pthread_t       midi_thread;
-	int             midi_request_pipe[2];
 	mutable  gint   butler_active;
-	RingBuffer<MIDIRequest*> midi_requests;
-
-	int           start_midi_thread ();
-	void          terminate_midi_thread ();
-	void          poke_midi_thread ();
-	static void *_midi_thread_work (void *arg);
-	void          midi_thread_work ();
+	
 	void          change_midi_ports ();
 	int           use_config_midi_ports ();
 
@@ -1460,8 +1453,8 @@ class Session : public PBD::StatefulDestructible
 	/* REGION MANAGEMENT */
 
 	mutable Glib::Mutex region_lock;
-	typedef map<PBD::ID,boost::shared_ptr<AudioRegion> > AudioRegionList;
-	AudioRegionList audio_regions;
+	typedef map<PBD::ID,boost::shared_ptr<Region> > RegionList;
+	RegionList regions;
 	
 	void add_region (boost::shared_ptr<Region>);
 	void region_changed (Change, boost::weak_ptr<Region>);
@@ -1471,10 +1464,10 @@ class Session : public PBD::StatefulDestructible
 
 	/* SOURCES */
 	
-	mutable Glib::Mutex audio_source_lock;
-	typedef std::map<PBD::ID,boost::shared_ptr<AudioSource> > AudioSourceList;
+	mutable Glib::Mutex source_lock;
+	typedef std::map<PBD::ID,boost::shared_ptr<Source> > SourceMap;
 
-	AudioSourceList audio_sources;
+	SourceMap sources;
 
 	int load_sources (const XMLNode& node);
 	XMLNode& get_sources_as_xml ();
@@ -1510,9 +1503,9 @@ class Session : public PBD::StatefulDestructible
 	NamedSelection *named_selection_factory (string name);
 	NamedSelection *XMLNamedSelectionFactory (const XMLNode&);
 
-        /* CURVES and AUTOMATION LISTS */
-        std::map<PBD::ID, Curve*> curves;
-        std::map<PBD::ID, AutomationList*> automation_lists;
+	/* CURVES and AUTOMATION LISTS */
+	std::map<PBD::ID, Curve*> curves;
+	std::map<PBD::ID, AutomationList*> automation_lists;
 
 	/* DEFAULT FADE CURVES */
 
@@ -1689,7 +1682,7 @@ class Session : public PBD::StatefulDestructible
 			    void* ptr,
 			    float opt);
 
-	/* number of hardware audio ports we're using,
+	/* number of hardware ports we're using,
 	   based on max (requested,available)
 	*/
 

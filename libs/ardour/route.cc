@@ -26,9 +26,9 @@
 #include <pbd/enumwriter.h>
 
 #include <ardour/timestamps.h>
-#include <ardour/buffer.h>
 #include <ardour/audioengine.h>
 #include <ardour/route.h>
+#include <ardour/buffer.h>
 #include <ardour/insert.h>
 #include <ardour/send.h>
 #include <ardour/session.h>
@@ -37,17 +37,18 @@
 #include <ardour/cycle_timer.h>
 #include <ardour/route_group.h>
 #include <ardour/port.h>
+#include <ardour/audio_port.h>
 #include <ardour/ladspa_plugin.h>
 #include <ardour/panner.h>
 #include <ardour/dB.h>
-#include <ardour/mix.h>
-
+#include <ardour/amp.h>
+#include <ardour/meter.h>
+#include <ardour/buffer_set.h>
 #include "i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
-
 
 uint32_t Route::order_key_cnt = 0;
 
@@ -73,7 +74,7 @@ Route::Route (Session& sess, const XMLNode& node, DataType default_type)
 void
 Route::init ()
 {
-	redirect_max_outs = 0;
+	redirect_max_outs.reset();
 	_muted = false;
 	_soloed = false;
 	_solo_safe = false;
@@ -89,7 +90,6 @@ Route::init ()
 	_declickable = false;
 	_pending_declick = true;
 	_remote_control_id = 0;
-	_ignore_gain_on_deliver = true;
 	
 	_edit_group = 0;
 	_mix_group = 0;
@@ -221,18 +221,30 @@ Route::set_gain (gain_t val, void *src)
 	IO::set_gain (val, src);
 }
 
+/** Process this route for one (sub) cycle (process thread)
+ *
+ * @param bufs Scratch buffers to use for the signal path
+ * @param start_frame Initial transport frame 
+ * @param end_frame Final transport frame
+ * @param nframes Number of frames to output (to ports)
+ * @param offset Output offset (of port buffers, for split cycles)
+ *
+ * Note that (end_frame - start_frame) may not be equal to nframes when the
+ * transport speed isn't 1.0 (eg varispeed).
+ */
 void
-Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
-			       nframes_t start_frame, nframes_t end_frame, 
-			       nframes_t nframes, nframes_t offset, bool with_redirects, int declick,
-			       bool meter)
+Route::process_output_buffers (BufferSet& bufs,
+		nframes_t start_frame, nframes_t end_frame, 
+        nframes_t nframes, nframes_t offset, bool with_redirects, int declick,
+		bool meter)
 {
-	uint32_t n;
+	// This is definitely very audio-only for now
+	assert(_default_type == DataType::AUDIO);
+	
 	RedirectList::iterator i;
 	bool post_fader_work = false;
 	bool mute_declick_applied = false;
 	gain_t dmg, dsg, dg;
-	vector<Sample*>::iterator bufiter;
 	IO *co;
 	bool mute_audible;
 	bool solo_audible;
@@ -279,17 +291,17 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	   -------------------------------------------------------------------------------------------------- */
 
 	if (declick > 0) {
-		apply_declick (bufs, nbufs, nframes, 0.0, 1.0, false);
+		Amp::run (bufs, nframes, 0.0, 1.0, false);
 		_pending_declick = 0;
 	} else if (declick < 0) {
-		apply_declick (bufs, nbufs, nframes, 1.0, 0.0, false);
+		Amp::run (bufs, nframes, 1.0, 0.0, false);
 		_pending_declick = 0;
 	} else {
 
 		/* no global declick */
 
 		if (solo_gain != dsg) {
-			apply_declick (bufs, nbufs, nframes, solo_gain, dsg, false);
+			Amp::run (bufs, nframes, solo_gain, dsg, false);
 			solo_gain = dsg;
 		}
 	}
@@ -300,13 +312,11 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	   -------------------------------------------------------------------------------------------------- */
 
 	if (meter && (_meter_point == MeterInput)) {
-		for (n = 0; n < nbufs; ++n) {
-			_peak_power[n] = Session::compute_peak (bufs[n], nframes, _peak_power[n]); 
-		}
+		_meter->run(bufs, nframes);
 	}
 
 	if (!_soloed && _mute_affects_pre_fader && (mute_gain != dmg)) {
-		apply_declick (bufs, nbufs, nframes, mute_gain, dmg, false);
+		Amp::run (bufs, nframes, mute_gain, dmg, false);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}
@@ -336,14 +346,18 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 			
 		} else {
 
-			co->deliver_output (bufs, nbufs, nframes, offset);
+			co->deliver_output (bufs, start_frame, end_frame, nframes, offset);
 			
 		} 
 	} 
 
-	/* ----------------------------------------------------------------------------------------------------
+	/* ---------------------------------------------------------------------------------------------------
 	   PRE-FADER REDIRECTS
 	   -------------------------------------------------------------------------------------------------- */
+
+	/* FIXME: Somewhere in these loops is where bufs.count() should go from n_inputs() to redirect_max_outs()
+	 * (if they differ).  Something explicit needs to be done here to make sure the list of redirects will
+	 * give us what we need (possibly by inserting transparent 'translators' into the list to make it work) */
 
 	if (with_redirects) {
 		Glib::RWLock::ReaderLock rm (redirect_lock, Glib::TRY_LOCK);
@@ -352,13 +366,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 				for (i = _redirects.begin(); i != _redirects.end(); ++i) {
 					switch ((*i)->placement()) {
 					case PreFader:
-						if (dsg == 0) {
-							if (boost::dynamic_pointer_cast<Send>(*i) || boost::dynamic_pointer_cast<PortInsert>(*i)) {
-								(*i)->silence (nframes, offset);
-							}
-						} else {
-							(*i)->run (bufs, nbufs, nframes, offset);
-						}
+						(*i)->run (bufs, start_frame, end_frame, nframes, offset);
 						break;
 					case PostFader:
 						post_fader_work = true;
@@ -380,9 +388,12 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 		} 
 	}
 
+	// FIXME: for now, just hope the redirects list did what it was supposed to
+	bufs.set_count(n_process_buffers());
 
+	
 	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_post_fader) {
-		apply_declick (bufs, nbufs, nframes, mute_gain, dmg, false);
+		Amp::run (bufs, nframes, mute_gain, dmg, false);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}
@@ -392,9 +403,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	   -------------------------------------------------------------------------------------------------- */
 
 	if (meter && (_meter_point == MeterPreFader)) {
-		for (n = 0; n < nbufs; ++n) {
-			_peak_power[n] = Session::compute_peak (bufs[n], nframes, _peak_power[n]);
-		}
+		_meter->run(bufs, nframes);
 	}
 
 	
@@ -421,8 +430,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 			
 		} else {
 
-			co->deliver_output (bufs, nbufs, nframes, offset);
-			
+			co->deliver_output (bufs, start_frame, end_frame, nframes, offset);
 		} 
 	} 
 	
@@ -449,16 +457,16 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 		if (apply_gain_automation) {
 			
 			if (_phase_invert) {
-				for (n = 0; n < nbufs; ++n)  {
-					Sample *sp = bufs[n];
+				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+					Sample* const sp = i->data();
 					
 					for (nframes_t nx = 0; nx < nframes; ++nx) {
 						sp[nx] *= -gab[nx];
 					}
 				}
 			} else {
-				for (n = 0; n < nbufs; ++n) {
-					Sample *sp = bufs[n];
+				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+					Sample* const sp = i->data();
 					
 					for (nframes_t nx = 0; nx < nframes; ++nx) {
 						sp[nx] *= gab[nx];
@@ -476,7 +484,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 			
 			if (_gain != dg) {
 				
-				apply_declick (bufs, nbufs, nframes, _gain, dg, _phase_invert);
+				Amp::run (bufs, nframes, _gain, dg, _phase_invert);
 				_gain = dg;
 				
 			} else if (_gain != 0 && (_phase_invert || _gain != 1.0)) {
@@ -495,14 +503,14 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 					this_gain = _gain;
 				}
 				
-				for (n = 0; n < nbufs; ++n) {
-					Sample *sp = bufs[n];
-					Session::apply_gain_to_buffer(sp,nframes,this_gain);
+				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+					Sample* const sp = i->data();
+					apply_gain_to_buffer(sp,nframes,this_gain);
 				}
 
 			} else if (_gain == 0) {
-				for (n = 0; n < nbufs; ++n) {
-					memset (bufs[n], 0, sizeof (Sample) * nframes);
+				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+					i->clear();
 				}
 			}
 		}
@@ -529,13 +537,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 					case PreFader:
 						break;
 					case PostFader:
-						if (dsg == 0) {
-							if (boost::dynamic_pointer_cast<Send>(*i) || boost::dynamic_pointer_cast<PortInsert>(*i)) {
-								(*i)->silence (nframes, offset);
-							}
-						} else {
-							(*i)->run (bufs, nbufs, nframes, offset);
-						}
+						(*i)->run (bufs, start_frame, end_frame, nframes, offset);
 						break;
 					}
 				}
@@ -554,7 +556,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	}
 
 	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_control_outs) {
-		apply_declick (bufs, nbufs, nframes, mute_gain, dmg, false);
+		Amp::run (bufs, nframes, mute_gain, dmg, false);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}
@@ -585,12 +587,12 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 			(no_monitor && record_enabled() && (!Config->get_auto_input() || _session.actively_recording()))
 
 			) {
-
+			
 			co->silence (nframes, offset);
 			
 		} else {
 
-			co->deliver_output_no_pan (bufs, nbufs, nframes, offset);
+			co->deliver_output (bufs, start_frame, end_frame, nframes, offset);
 		} 
 	} 
 
@@ -599,7 +601,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	   ----------------------------------------------------------------------*/
 
 	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_main_outs) {
-		apply_declick (bufs, nbufs, nframes, mute_gain, dmg, false);
+		Amp::run (bufs, nframes, mute_gain, dmg, false);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}
@@ -611,7 +613,7 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	solo_audible = dsg > 0;
 	mute_audible = dmg > 0 || !_mute_affects_main_outs;
 	
-	if (n_outputs() == 0) {
+	if (n_outputs().get(_default_type) == 0) {
 	    
 	    /* relax */
 
@@ -640,27 +642,15 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 			*/
 			
 			if (_meter_point == MeterPostFader) {
-				reset_peak_meters ();
+				peak_meter().reset();
 			}
-			
+
 			IO::silence (nframes, offset);
 			
 		} else {
 			
-			if ((_session.transport_speed() > 1.5f || 
-			     _session.transport_speed() < -1.5f) &&
-			    Config->get_quieten_at_speed()) {
-				pan (bufs, nbufs, nframes, offset, speed_quietning); 
-			} else {
-				// cerr << _name << " panner state = " << _panner->automation_state() << endl;
-				if (!_panner->empty() &&
-				    (_panner->automation_state() & Play ||
-				     ((_panner->automation_state() & Touch) && !_panner->touching()))) {
-					pan_automated (bufs, nbufs, start_frame, end_frame, nframes, offset);
-				} else {
-					pan (bufs, nbufs, nframes, offset, 1.0); 
-				}
-			}
+			deliver_output(bufs, start_frame, end_frame, nframes, offset);
+
 		}
 
 	}
@@ -670,62 +660,47 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	   -------------------------------------------------------------------------------------------------- */
 
 	if (meter && (_meter_point == MeterPostFader)) {
-//		cerr << "meter post" << endl;
-
 		if ((_gain == 0 && !apply_gain_automation) || dmg == 0) {
-			uint32_t no = n_outputs();
-			for (n = 0; n < no; ++n) {
-				_peak_power[n] = 0;
-			} 
+			_meter->reset();
 		} else {
-			uint32_t no = n_outputs();
-			for (n = 0; n < no; ++n) {
-				_peak_power[n] = Session::compute_peak (output(n)->get_buffer (nframes) + offset, nframes, _peak_power[n]);
-			}
+			_meter->run(output_buffers(), nframes, offset);
 		}
 	}
 }
 
-uint32_t
+ChanCount
 Route::n_process_buffers ()
 {
 	return max (n_inputs(), redirect_max_outs);
 }
 
 void
-
 Route::passthru (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset, int declick, bool meter_first)
 {
-	vector<Sample*>& bufs = _session.get_passthru_buffers();
-	uint32_t limit = n_process_buffers ();
+	BufferSet& bufs = _session.get_scratch_buffers(n_process_buffers());
 
 	_silent = false;
 
-	collect_input (bufs, limit, nframes, offset);
+	collect_input (bufs, nframes, offset);
 
 #define meter_stream meter_first
 
 	if (meter_first) {
-		for (uint32_t n = 0; n < limit; ++n) {
-			_peak_power[n] = Session::compute_peak (bufs[n], nframes, _peak_power[n]);
-		}
+		_meter->run(bufs, nframes);
 		meter_stream = false;
 	} else {
 		meter_stream = true;
 	}
 		
-	process_output_buffers (bufs, limit, start_frame, end_frame, nframes, offset, true, declick, meter_stream);
+	process_output_buffers (bufs, start_frame, end_frame, nframes, offset, true, declick, meter_stream);
 
 #undef meter_stream
 }
 
 void
-Route::set_phase_invert (bool yn, void *src)
+Route::passthru_silence (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset, int declick, bool meter)
 {
-	if (_phase_invert != yn) {
-		_phase_invert = yn;
-	}
-	//  phase_invert_changed (src); /* EMIT SIGNAL */
+	process_output_buffers (_session.get_silent_buffers (n_process_buffers()), start_frame, end_frame, nframes, offset, true, declick, meter);
 }
 
 void
@@ -790,7 +765,7 @@ Route::set_mute (bool yn, void *src)
 int
 Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* err_streams)
 {
-	uint32_t old_rmo = redirect_max_outs;
+	ChanCount old_rmo = redirect_max_outs;
 
 	if (!_session.engine().connected()) {
 		return 1;
@@ -802,17 +777,15 @@ Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* 
 		boost::shared_ptr<PluginInsert> pi;
 		boost::shared_ptr<PortInsert> porti;
 
-		uint32_t potential_max_streams = 0;
+		redirect->set_default_type(_default_type);
 
 		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(redirect)) != 0) {
 			pi->set_count (1);
 
-			if (pi->input_streams() == 0) {
-				/* instrument plugin */
+			if (pi->input_streams() == ChanCount::ZERO) {
+				/* generator plugin */
 				_have_internal_generator = true;
 			}
-
-			potential_max_streams = max(pi->input_streams(), pi->output_streams());
 			
 		} else if ((porti = boost::dynamic_pointer_cast<PortInsert>(redirect)) != 0) {
 
@@ -825,22 +798,15 @@ Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* 
 			   the "outputs" of the route should match the inputs of this
 			   route. XXX shouldn't they match the number of active signal
 			   streams at the point of insertion?
-			   
 			*/
+			// FIXME: (yes, they should)
 
 			porti->ensure_io (n_outputs (), n_inputs(), false, this);
 		}
-
+		
 		// Ensure peak vector sizes before the plugin is activated
-		while (_peak_power.size() < potential_max_streams) {
-			_peak_power.push_back(0);
-		}
-		while (_visible_peak_power.size() < potential_max_streams) {
-			_visible_peak_power.push_back(-INFINITY);
-		}
-		while (_max_peak_power.size() < potential_max_streams) {
-			_max_peak_power.push_back(-INFINITY);
-		}
+		ChanCount potential_max_streams = max(redirect->input_streams(), redirect->output_streams());
+		_meter->setup(potential_max_streams);
 
 		_redirects.push_back (redirect);
 
@@ -854,7 +820,7 @@ Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* 
 		redirect->active_changed.connect (mem_fun (*this, &Route::redirect_active_proxy));
 	}
 	
-	if (redirect_max_outs != old_rmo || old_rmo == 0) {
+	if (redirect_max_outs != old_rmo || old_rmo == ChanCount::ZERO) {
 		reset_panner ();
 	}
 
@@ -866,7 +832,7 @@ Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* 
 int
 Route::add_redirects (const RedirectList& others, void *src, uint32_t* err_streams)
 {
-	uint32_t old_rmo = redirect_max_outs;
+	ChanCount old_rmo = redirect_max_outs;
 
 	if (!_session.engine().connected()) {
 		return 1;
@@ -878,7 +844,7 @@ Route::add_redirects (const RedirectList& others, void *src, uint32_t* err_strea
 		RedirectList::iterator existing_end = _redirects.end();
 		--existing_end;
 
-		uint32_t potential_max_streams = 0;
+		ChanCount potential_max_streams;
 
 		for (RedirectList::const_iterator i = others.begin(); i != others.end(); ++i) {
 			
@@ -887,21 +853,13 @@ Route::add_redirects (const RedirectList& others, void *src, uint32_t* err_strea
 			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
 				pi->set_count (1);
 				
-				uint32_t m = max(pi->input_streams(), pi->output_streams());
+				ChanCount m = max(pi->input_streams(), pi->output_streams());
 				if (m > potential_max_streams)
 					potential_max_streams = m;
 			}
 
 			// Ensure peak vector sizes before the plugin is activated
-			while (_peak_power.size() < potential_max_streams) {
-				_peak_power.push_back(0);
-			}
-			while (_visible_peak_power.size() < potential_max_streams) {
-				_visible_peak_power.push_back(-INFINITY);
-			}
-			while (_max_peak_power.size() < potential_max_streams) {
-				_max_peak_power.push_back(-INFINITY);
-			}
+			_meter->setup(potential_max_streams);
 
 			_redirects.push_back (*i);
 			
@@ -917,7 +875,7 @@ Route::add_redirects (const RedirectList& others, void *src, uint32_t* err_strea
 		}
 	}
 	
-	if (redirect_max_outs != old_rmo || old_rmo == 0) {
+	if (redirect_max_outs != old_rmo || old_rmo == ChanCount::ZERO) {
 		reset_panner ();
 	}
 
@@ -931,7 +889,7 @@ Route::add_redirects (const RedirectList& others, void *src, uint32_t* err_strea
 void
 Route::clear_redirects (Placement p, void *src)
 {
-	const uint32_t old_rmo = redirect_max_outs;
+	const ChanCount old_rmo = redirect_max_outs;
 
 	if (!_session.engine().connected()) {
 		return;
@@ -959,7 +917,7 @@ Route::clear_redirects (Placement p, void *src)
 		reset_panner ();
 	}
 	
-	redirect_max_outs = 0;
+	redirect_max_outs.reset();
 	_have_internal_generator = false;
 	redirects_changed (src); /* EMIT SIGNAL */
 }
@@ -967,13 +925,13 @@ Route::clear_redirects (Placement p, void *src)
 int
 Route::remove_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* err_streams)
 {
-	uint32_t old_rmo = redirect_max_outs;
+	ChanCount old_rmo = redirect_max_outs;
 
 	if (!_session.engine().connected()) {
 		return 1;
 	}
 
-	redirect_max_outs = 0;
+	redirect_max_outs.reset();
 
 	{
 		Glib::RWLock::WriterLock lm (redirect_lock);
@@ -1071,7 +1029,7 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 	map<Placement,list<InsertCount> > insert_map;
 	nframes_t initial_streams;
 
-	redirect_max_outs = 0;
+	redirect_max_outs.reset();
 	i_cnt = 0;
 	s_cnt = 0;
 
@@ -1125,7 +1083,7 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 
 	/* A: PreFader */
 	
-	if (check_some_plugin_counts (insert_map[PreFader], n_inputs (), err_streams)) {
+	if (check_some_plugin_counts (insert_map[PreFader], n_inputs ().get(_default_type), err_streams)) {
 		return -1;
 	}
 
@@ -1135,7 +1093,7 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 		InsertCount& ic (insert_map[PreFader].back());
 		initial_streams = ic.insert->compute_output_streams (ic.cnt);
 	} else {
-		initial_streams = n_inputs ();
+		initial_streams = n_inputs ().get(_default_type);
 	}
 
 	/* B: PostFader */
@@ -1153,7 +1111,7 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 
   recompute:
 
-	redirect_max_outs = 0;
+	redirect_max_outs.reset();
 	RedirectList::iterator prev = _redirects.end();
 
 	for (r = _redirects.begin(); r != _redirects.end(); prev = r, ++r) {
@@ -1225,7 +1183,7 @@ Route::check_some_plugin_counts (list<InsertCount>& iclist, int32_t required_inp
 int
 Route::copy_redirects (const Route& other, Placement placement, uint32_t* err_streams)
 {
-	uint32_t old_rmo = redirect_max_outs;
+	ChanCount old_rmo = redirect_max_outs;
 
 	if (err_streams) {
 		*err_streams = 0;
@@ -1298,7 +1256,7 @@ Route::copy_redirects (const Route& other, Placement placement, uint32_t* err_st
 		}
 	}
 
-	if (redirect_max_outs != old_rmo || old_rmo == 0) {
+	if (redirect_max_outs != old_rmo || old_rmo == ChanCount::ZERO) {
 		reset_panner ();
 	}
 
@@ -1354,7 +1312,7 @@ Route::sort_redirects (uint32_t* err_streams)
 	{
 		RedirectSorter comparator;
 		Glib::RWLock::WriterLock lm (redirect_lock);
-		uint32_t old_rmo = redirect_max_outs;
+		ChanCount old_rmo = redirect_max_outs;
 
 		/* the sweet power of C++ ... */
 
@@ -1770,8 +1728,6 @@ Route::silence (nframes_t nframes, nframes_t offset)
 {
 	if (!_silent) {
 
-		// reset_peak_meters ();
-		
 		IO::silence (nframes, offset);
 
 		if (_control_outs) {
@@ -1806,11 +1762,17 @@ Route::set_control_outs (const vector<string>& ports)
 {
 	Glib::Mutex::Lock lm (control_outs_lock);
 	vector<string>::const_iterator i;
-
+	size_t limit;
+	
  	if (_control_outs) {
  		delete _control_outs;
  		_control_outs = 0;
  	}
+
+	if (control() || master()) {
+		/* no control outs for these two special busses */
+		return 0;
+	}
  	
  	if (ports.empty()) {
  		return 0;
@@ -1822,10 +1784,25 @@ Route::set_control_outs (const vector<string>& ports)
  	_control_outs = new IO (_session, coutname);
 
 	/* our control outs need as many outputs as we
-	   have outputs. we track the changes in ::output_change_handler().
+	   have audio outputs. we track the changes in ::output_change_handler().
 	*/
+	
+	// XXX its stupid that we have to get this value twice
 
-	_control_outs->ensure_io (0, n_outputs(), true, this);
+	limit = n_outputs().get(DataType::AUDIO);
+	
+	if (_control_outs->ensure_io (ChanCount::ZERO, ChanCount (DataType::AUDIO, n_outputs().get (DataType::AUDIO)), true, this)) {
+		return -1;
+	}
+	
+	/* now connect to the named ports */
+	
+	for (size_t n = 0; n < limit; ++n) {
+		if (_control_outs->connect_output (_control_outs->output (n), ports[n], this)) {
+			error << string_compose (_("could not connect %1 to %2"), _control_outs->output(n)->name(), ports[n]) << endmsg;
+			return -1;
+		}
+	}
  
  	return 0;
 }	
@@ -1900,8 +1877,8 @@ Route::feeds (boost::shared_ptr<Route> other)
 	uint32_t i, j;
 
 	IO& self = *this;
-	uint32_t no = self.n_outputs();
-	uint32_t ni = other->n_inputs ();
+	uint32_t no = self.n_outputs().get_total();
+	uint32_t ni = other->n_inputs ().get_total();
 
 	for (i = 0; i < no; ++i) {
 		for (j = 0; j < ni; ++j) {
@@ -1915,7 +1892,7 @@ Route::feeds (boost::shared_ptr<Route> other)
 
 	for (RedirectList::iterator r = _redirects.begin(); r != _redirects.end(); r++) {
 
-		no = (*r)->n_outputs();
+		no = (*r)->n_outputs().get_total();
 
 		for (i = 0; i < no; ++i) {
 			for (j = 0; j < ni; ++j) {
@@ -1930,7 +1907,7 @@ Route::feeds (boost::shared_ptr<Route> other)
 
 	if (_control_outs) {
 
-		no = _control_outs->n_outputs();
+		no = _control_outs->n_outputs().get_total();
 		
 		for (i = 0; i < no; ++i) {
 			for (j = 0; j < ni; ++j) {
@@ -2041,7 +2018,7 @@ Route::output_change_handler (IOChange change, void *ignored)
 {
 	if (change & ConfigurationChanged) {
 		if (_control_outs) {
-			_control_outs->ensure_io (0, n_outputs(), true, this);
+			_control_outs->ensure_io (ChanCount::ZERO, ChanCount(DataType::AUDIO, n_outputs().get(DataType::AUDIO)), true, this);
 		}
 		
 		reset_plugin_counts (0);
@@ -2051,18 +2028,18 @@ Route::output_change_handler (IOChange change, void *ignored)
 uint32_t
 Route::pans_required () const
 {
-	if (n_outputs() < 2) {
+	if (n_outputs().get(DataType::AUDIO) < 2) {
 		return 0;
 	}
 	
-	return max (n_inputs (), redirect_max_outs);
+	return max (n_inputs ().get(DataType::AUDIO), static_cast<size_t>(redirect_max_outs.get(DataType::AUDIO)));
 }
 
 int 
 Route::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
 		   bool session_state_changing, bool can_record, bool rec_monitors_input)
 {
-	if (n_outputs() == 0) {
+	if (n_outputs().get_total() == 0) {
 		return 0;
 	}
 
@@ -2073,7 +2050,7 @@ Route::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, n
 
 	apply_gain_automation = false;
 	
-	if (n_inputs()) {
+	if (n_inputs().get_total()) {
 		passthru (start_frame, end_frame, nframes, offset, 0, false);
 	} else {
 		silence (nframes, offset);
@@ -2120,7 +2097,7 @@ Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nfra
 		}
 	}
 
-	if ((n_outputs() == 0 && _redirects.empty()) || n_inputs() == 0 || !_active) {
+	if ((n_outputs().get_total() == 0 && _redirects.empty()) || n_inputs().get_total() == 0 || !_active) {
 		silence (nframes, offset);
 		return 0;
 	}
@@ -2139,8 +2116,6 @@ Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nfra
 		Glib::Mutex::Lock am (automation_lock, Glib::TRY_LOCK);
 		
 		if (am.locked() && _session.transport_rolling()) {
-			
-			nframes_t start_frame = end_frame - nframes;
 			
 			if (gain_automation_playback()) {
 				apply_gain_automation = _gain_automation_curve.rt_safe_get_vector (start_frame, end_frame, _session.gain_automation_buffer(), nframes);
@@ -2164,8 +2139,8 @@ Route::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_fram
 void
 Route::toggle_monitor_input ()
 {
-	for (vector<Port*>::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
-		(*i)->ensure_monitor_input(!(*i)->monitoring_input());
+	for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
+		i->ensure_monitor_input( ! i->monitoring_input());
 	}
 }
 
@@ -2177,11 +2152,10 @@ Route::has_external_redirects () const
 	for (RedirectList::const_iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
 		if ((pi = boost::dynamic_pointer_cast<const PortInsert>(*i)) != 0) {
 
-			uint32_t no = pi->n_outputs();
-
-			for (uint32_t n = 0; n < no; ++n) {
+			for (PortSet::const_iterator port = pi->outputs().begin();
+					port != pi->outputs().end(); ++port) {
 				
-				string port_name = pi->output(n)->name();
+				string port_name = port->name();
 				string client_name = port_name.substr (0, port_name.find(':'));
 
 				/* only say "yes" if the redirect is actually in use */

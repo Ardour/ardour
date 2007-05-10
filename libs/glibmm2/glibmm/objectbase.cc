@@ -22,7 +22,6 @@
 
 #include <glibmm/quark.h>
 #include <glibmm/objectbase.h>
-#include <glibmm/propertyproxy_base.h> //For PropertyProxyConnectionNode
 
 
 namespace
@@ -32,7 +31,7 @@ namespace
 // char array rather than a string literal allows for fast pointer comparison,
 // which is otherwise not guaranteed to work.
 
-static const char anonymous_custom_type_name[] = "gtkmm__anonymous_custom_type";
+const char anonymous_custom_type_name[] = "gtkmm__anonymous_custom_type";
 
 } // anonymous namespace
 
@@ -254,23 +253,6 @@ void ObjectBase::set_property_value(const Glib::ustring& property_name, const Gl
 void ObjectBase::get_property_value(const Glib::ustring& property_name, Glib::ValueBase& value) const
 {
   g_object_get_property(const_cast<GObject*>(gobj()), property_name.c_str(), value.gobj());
-}
-
-void ObjectBase::connect_property_changed(const Glib::ustring& property_name, const sigc::slot<void>& slot)
-{
-  // Create a proxy to hold our connection info
-  // This will be deleted by destroy_notify_handler.
-  PropertyProxyConnectionNode* pConnectionNode = new PropertyProxyConnectionNode(slot, gobj());
-
-  // connect it to gtk+
-  // pConnectionNode will be passed as the data argument to the callback.
-  // The callback will then call the virtual Object::property_change_notify() method,
-  // which will contain a switch/case statement which will examine the property name.
-  const Glib::ustring notify_signal_name = "notify::" + property_name;
-  pConnectionNode->connection_id_ = g_signal_connect_data(gobj(),
-         notify_signal_name.c_str(), (GCallback)(&PropertyProxyConnectionNode::callback), pConnectionNode, 
-         &PropertyProxyConnectionNode::destroy_notify_handler,
-         G_CONNECT_AFTER);
 }
 
 

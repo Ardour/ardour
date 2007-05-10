@@ -28,6 +28,8 @@
 #include <midi++/port.h>
 #include <midi++/fd_midiport.h>
 
+namespace MIDI {
+
 class ALSA_RawMidiPort : public MIDI::FD_MidiPort
 
 {
@@ -37,6 +39,7 @@ class ALSA_RawMidiPort : public MIDI::FD_MidiPort
 	virtual ~ALSA_RawMidiPort () {}
 };
 
+} // namespace MIDI
 
 #endif // __alsa_rawmidi_h__
 

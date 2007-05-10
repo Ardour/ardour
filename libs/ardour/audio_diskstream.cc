@@ -50,6 +50,7 @@
 #include <ardour/playlist_factory.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/audioregion.h>
+#include <ardour/audio_port.h>
 #include <ardour/source_factory.h>
 
 #include "i18n.h"
@@ -112,7 +113,7 @@ AudioDiskstream::init (Diskstream::Flag f)
 	allocate_temporary_buffers ();
 
 	add_channel (1);
-	assert(_n_channels == 1);
+	assert(_n_channels == ChanCount(DataType::AUDIO, 1));
 }
 
 AudioDiskstream::~AudioDiskstream ()
@@ -167,12 +168,12 @@ AudioDiskstream::non_realtime_input_change ()
 			RCUWriter<ChannelList> writer (channels);
 			boost::shared_ptr<ChannelList> c = writer.get_copy();
 			
-			_n_channels = c->size();
+			_n_channels.set(DataType::AUDIO, c->size());
 			
-			if (_io->n_inputs() > _n_channels) {
-				add_channel_to (c, _io->n_inputs() - _n_channels);
-			} else if (_io->n_inputs() < _n_channels) {
-				remove_channel_from (c, _n_channels - _io->n_inputs());
+			if (_io->n_inputs().get(DataType::AUDIO) > _n_channels.get(DataType::AUDIO)) {
+				add_channel_to (c, _io->n_inputs().get(DataType::AUDIO) - _n_channels.get(DataType::AUDIO));
+			} else if (_io->n_inputs().get(DataType::AUDIO) < _n_channels.get(DataType::AUDIO)) {
+				remove_channel_from (c, _n_channels.get(DataType::AUDIO) - _io->n_inputs().get(DataType::AUDIO));
 			}
 		}
 		
@@ -211,7 +212,7 @@ AudioDiskstream::get_input_sources ()
 
 	uint32_t n;
 	ChannelList::iterator chan;
-	uint32_t ni = _io->n_inputs();
+	uint32_t ni = _io->n_inputs().get(DataType::AUDIO);
 
 	for (n = 0, chan = c->begin(); chan != c->end() && n < ni; ++chan, ++n) {
 		
@@ -226,7 +227,8 @@ AudioDiskstream::get_input_sources ()
 			(*chan)->source = 0;
 			
 		} else {
-			(*chan)->source = _session.engine().get_port_by_name (connections[0]);
+			(*chan)->source = dynamic_cast<AudioPort*>(
+				_session.engine().get_port_by_name (connections[0]) );
 		}
 		
 		if (connections) {
@@ -241,7 +243,7 @@ AudioDiskstream::find_and_use_playlist (const string& name)
 	boost::shared_ptr<AudioPlaylist> playlist;
 		
 	if ((playlist = boost::dynamic_pointer_cast<AudioPlaylist> (_session.playlist_by_name (name))) == 0) {
-		playlist = boost::dynamic_pointer_cast<AudioPlaylist> (PlaylistFactory::create (_session, name));
+		playlist = boost::dynamic_pointer_cast<AudioPlaylist> (PlaylistFactory::create (DataType::AUDIO, _session, name));
 	}
 
 	if (!playlist) {
@@ -278,7 +280,7 @@ AudioDiskstream::use_new_playlist ()
 		newname = Playlist::bump_name (_name, _session);
 	}
 
-	if ((playlist = boost::dynamic_pointer_cast<AudioPlaylist> (PlaylistFactory::create (_session, newname, hidden()))) != 0) {
+	if ((playlist = boost::dynamic_pointer_cast<AudioPlaylist> (PlaylistFactory::create (DataType::AUDIO, _session, newname, hidden()))) != 0) {
 		
 		playlist->set_orig_diskstream_id (id());
 		return use_playlist (playlist);
@@ -610,7 +612,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 
 	if (nominally_recording || rec_nframes) {
 
-		uint32_t limit = _io->n_inputs ();
+		uint32_t limit = _io->n_inputs ().get(DataType::AUDIO);
 
 		/* one or more ports could already have been removed from _io, but our
 		   channel setup hasn't yet been updated. prevent us from trying to
@@ -633,7 +635,10 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 				   rec_offset
 				*/
 
-				memcpy (chaninfo->current_capture_buffer, _io->input(n)->get_buffer (rec_nframes) + offset + rec_offset, sizeof (Sample) * rec_nframes);
+				AudioPort* const ap = _io->audio_input(n);
+				assert(ap);
+				assert(rec_nframes <= ap->get_audio_buffer().capacity());
+				memcpy (chaninfo->current_capture_buffer, ap->get_audio_buffer().data(rec_nframes, offset + rec_offset), sizeof (Sample) * rec_nframes);
 
 			} else {
 
@@ -644,7 +649,10 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 					goto out;
 				}
 
-				Sample* buf = _io->input (n)->get_buffer (nframes) + offset;
+				AudioPort* const ap = _io->audio_input(n);
+				assert(ap);
+
+				Sample* buf = ap->get_audio_buffer().data(nframes, offset);
 				nframes_t first = chaninfo->capture_vector.len[0];
 
 				memcpy (chaninfo->capture_wrap_buffer, buf, sizeof (Sample) * first);
@@ -932,7 +940,7 @@ int
 AudioDiskstream::seek (nframes_t frame, bool complete_refill)
 {
 	uint32_t n;
-	int ret;
+	int ret = -1;
 	ChannelList::iterator chan;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
@@ -1612,7 +1620,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 		}
 
 		_playlist->thaw ();
-                XMLNode &after = _playlist->get_state();
+		XMLNode &after = _playlist->get_state();
 		_session.add_command (new MementoCommand<Playlist>(*_playlist, &before, &after));
 	}
 
@@ -1683,7 +1691,7 @@ AudioDiskstream::finish_capture (bool rec_monitors_input, boost::shared_ptr<Chan
 void
 AudioDiskstream::set_record_enabled (bool yn)
 {
-	if (!recordable() || !_session.record_enabling_legal() || _io->n_inputs() == 0) {
+	if (!recordable() || !_session.record_enabling_legal() || _io->n_inputs().get(DataType::AUDIO) == 0) {
 		return;
 	}
 
@@ -1863,15 +1871,15 @@ AudioDiskstream::set_state (const XMLNode& node)
 	// create necessary extra channels
 	// we are always constructed with one and we always need one
 
-	_n_channels = channels.reader()->size();
+	_n_channels.set(DataType::AUDIO, channels.reader()->size());
 	
-	if (nchans > _n_channels) {
+	if (nchans > _n_channels.get(DataType::AUDIO)) {
 
-		add_channel (nchans - _n_channels);
+		add_channel (nchans - _n_channels.get(DataType::AUDIO));
 
-	} else if (nchans < _n_channels) {
+	} else if (nchans < _n_channels.get(DataType::AUDIO)) {
 
-		remove_channel (_n_channels - nchans);
+		remove_channel (_n_channels.get(DataType::AUDIO) - nchans);
 	}
 
 	if ((prop = node.property ("playlist")) == 0) {
@@ -2112,7 +2120,7 @@ AudioDiskstream::add_channel_to (boost::shared_ptr<ChannelList> c, uint32_t how_
 		c->push_back (new ChannelInfo(_session.diskstream_buffer_size(), speed_buffer_size, wrap_buffer_size));
 	}
 
-	_n_channels = c->size();
+	_n_channels.set(DataType::AUDIO, c->size());
 
 	return 0;
 }
@@ -2134,7 +2142,7 @@ AudioDiskstream::remove_channel_from (boost::shared_ptr<ChannelList> c, uint32_t
 		c->pop_back();
 	}
 
-	_n_channels = c->size();
+	_n_channels.set(DataType::AUDIO, c->size());
 
 	return 0;
 }
@@ -2193,7 +2201,8 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 			}
 
 			try {
-				fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (_session, prop->value(), false, _session.frame_rate()));
+				fs = boost::dynamic_pointer_cast<AudioFileSource> (
+					SourceFactory::createWritable (DataType::AUDIO, _session, prop->value(), false, _session.frame_rate()));
 			}
 
 			catch (failed_constructor& err) {
@@ -2218,7 +2227,7 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 		return 1;
 	}
 
-	if (pending_sources.size() != _n_channels) {
+	if (pending_sources.size() != _n_channels.get(DataType::AUDIO)) {
 		error << string_compose (_("%1: incorrect number of pending sources listed - ignoring them all"), _name)
 		      << endmsg;
 		return -1;

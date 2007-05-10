@@ -125,7 +125,7 @@ sndfile_endian_format_from_string (string str)
 
 string
 sndfile_file_ending_from_string (string str)
-{
+{	
 	static vector<string> file_endings;
 
 	if (file_endings.empty()) {

@@ -88,6 +88,7 @@ style "default_base" = "medium_text"
   GtkWidget::cursor_color =  {1.0, 1.0, 1.0 }
   GtkButton::default_border = { 0, 0, 0, 0 }
   GtkButton::default_outside_border = { 0, 0, 0, 0 }
+  GtkButton::button_relief = GTK_RELIEF_NONE
   GtkTreeView::vertical-padding = 0
   GtkTreeView::horizontal-padding = 0
   GtkTreeView::even-row-color = { 0, 0, 0 }
@@ -119,9 +120,9 @@ style "default_base" = "medium_text"
 
   engine "clearlooks" 
   {
-    menubarstyle      = 2       # 0 = flat, 1 = sunken, 2 = flat gradient
-    menuitemstyle     = 1       # 0 = flat, 1 = 3d-ish (gradient), 2 = 3d-ish (button)
-    listviewitemstyle = 1       # 0 = flat, 1 = 3d-ish (gradient)
+    menubarstyle      = 0       # 0 = flat, 1 = sunken, 2 = flat gradient
+    menuitemstyle     = 0       # 0 = flat, 1 = 3d-ish (gradient), 2 = 3d-ish (button)
+    listviewitemstyle = 0       # 0 = flat, 1 = 3d-ish (gradient)
     progressbarstyle  = 1       # 0 = candy bar, 1 = fancy candy bar, 2 = flat
   }
 }
@@ -140,14 +141,14 @@ style "transport_base" = "medium_bold_text"
   bg[INSENSITIVE] = { 0, 0, 0 }
   bg[SELECTED] = { 0, 0, 0 }
 }
-
+/*
 style "black_mackie_menu_bar"
 {
   font_name = "sans bold 9"
   fg[NORMAL] = { 1.0, 1.0, 1.0 }
   bg[NORMAL] = { 0, 0, 0 }
 }
-
+*/
 style "default_buttons_menus" 
 {
   font_name = "sans 8"
@@ -497,7 +498,7 @@ style "xrun_warn"
 	bg[NORMAL] = { 1.0, 0.48, 0.46 }
 	bg[ACTIVE] = { 0.09, 1.0, 0.46 }
 }
-
+/*
 style "menu_bar_base" = "default_base"
 {
 	bg[NORMAL] = { 0.2, 0.2, 0.3 }
@@ -506,7 +507,7 @@ style "menu_bar_base" = "default_base"
 	bg[INSENSITIVE] = { 0, 0, 0 }
 	bg[SELECTED] = { 0, 0, 0 }
 }
-
+*/
 style "fatal_message" = "medium_text"
 {
    fg[ACTIVE] = { 1.0, 0, 1.0 }
@@ -692,6 +693,14 @@ style "editor_time_ruler" = "small_text"
 	bg[NORMAL] = { 0.09, 0.09, 0.09 }
 }
 
+style "audio_bus_base"
+{
+  font_name = "sans 6"
+  fg[NORMAL] = { 0.77, 0.77, 0.72 }	
+  fg[NORMAL] = { 0.7, 0.8, 0.2 }	
+  bg[NORMAL] = { 0.20, 0.20, 0.26 }	
+}
+
 style "audio_track_base" = "default_base"
 {
   font_name = "sans 6"
@@ -703,13 +712,24 @@ style "audio_track_base" = "default_base"
   bg[SELECTED] = { 0.20, 0.20, 0.20 }
 }
 
-style "audio_bus_base"
+style "midi_bus_base"
 {
   font_name = "sans 6"
   fg[NORMAL] = { 0.77, 0.77, 0.72 }	
   fg[NORMAL] = { 0.7, 0.8, 0.2 }	
   #bg[NORMAL] = {0, 0.36, 0.40 }
   bg[NORMAL] = "#444466"	
+}
+
+style "midi_track_base" = "default_base"
+{
+  font_name = "sans 6"
+  fg[NORMAL] = { 0.77, 0.77, 0.72 }	
+  bg[NORMAL] = { 0.48, 0.30, 0.32 }
+  bg[ACTIVE] = { 0.20, 0.20, 0.20 }	
+  bg[PRELIGHT] = { 0.20, 0.20, 0.20 }
+  bg[INSENSITIVE] = { 0.20, 0.20, 0.20 }
+  bg[SELECTED] = { 0.20, 0.20, 0.20 }
 }
 
 style "track_name_display"
@@ -1253,7 +1273,7 @@ widget "*TransportRecButton-alternate*" style:highest "transport_rec_button_alte
 widget "*TransportRecButton*" style:highest "transport_rec_button"
 widget "*RecordingXrunWarningWindow" style:highest "xrun_warn"
 widget "*RecordingXrunWarningWindow*" style:highest "xrun_warn"
-widget "*MainMenuBar" style:highest "menu_bar_base"
+/*widget "*MainMenuBar" style:highest "menu_bar_base"*/
 widget "*ErrorMessage" style:highest "error_message"
 widget "*FatalMessage" style:highest "fatal_message"
 widget "*InfoMessage" style:highest "info_message"
@@ -1340,8 +1360,9 @@ widget "*AudioTrackControlsBaseSelected" style:highest "edit_controls_base_selec
 widget "*BusControlsBaseSelected" style:highest "edit_controls_base_selected"
 widget "*AutomationTrackControlsBase" style:highest "automation_track_controls_base"
 widget "*AutomationTrackControlsBaseSelected" style:highest "edit_controls_base_selected"
-widget "*EditorMenuBar*" style:highest "black_mackie_menu_bar"
+/*widget "*EditorMenuBar*" style:highest "black_mackie_menu_bar"
 widget "*MainMenuBar*" style:highest "black_mackie_menu_bar"
+*/
 widget "*ZoomClickBox" style:highest "medium_bold_entry"
 widget "*PluginParameterLabel" style:highest "medium_text"
 widget "*PluginNameInfo" style:highest "plugin_name_text"

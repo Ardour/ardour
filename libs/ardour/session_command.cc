@@ -27,6 +27,8 @@
 #include <ardour/tempo.h>
 #include <ardour/audiosource.h>
 #include <ardour/audioregion.h>
+#include <ardour/midi_source.h>
+#include <ardour/midi_region.h>
 #include <pbd/error.h>
 #include <pbd/id.h>
 #include <pbd/statefuldestructible.h>
@@ -78,13 +80,13 @@ Session::memento_command_factory(XMLNode *n)
 
     /* create command */
     string obj_T = n->property ("type_name")->value();
-    if (obj_T == typeid (AudioRegion).name() || obj_T == typeid (Region).name()) {
-	    if (audio_regions.count(id)) {
-		    return new MementoCommand<AudioRegion>(*audio_regions[id], before, after);
+    if (obj_T == typeid (AudioRegion).name() || obj_T == typeid (MidiRegion).name() || obj_T == typeid (Region).name()) {
+	    if (regions.count(id)) {
+		    return new MementoCommand<Region>(*regions[id], before, after);
 	    }
-    } else if (obj_T == typeid (AudioSource).name()) {
-	    if (audio_sources.count(id))
-		    return new MementoCommand<AudioSource>(*audio_sources[id], before, after);
+    } else if (obj_T == typeid (AudioSource).name() || obj_T == typeid (MidiSource).name()) {
+	    if (sources.count(id))
+		    return new MementoCommand<Source>(*sources[id], before, after);
     } else if (obj_T == typeid (Location).name()) {
 	    return new MementoCommand<Location>(*_locations.get_location_by_id(id), before, after);
     } else if (obj_T == typeid (Locations).name()) {

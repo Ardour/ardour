@@ -541,6 +541,15 @@ AudioFileSource::set_header_position_offset (nframes_t offset)
 	HeaderPositionOffsetChanged ();
 }
 
+void 
+AudioFileSource::handle_header_position_change ()
+{
+	if (writable()) {
+		set_header_timeline_position ();
+		flush_header ();
+	}
+}
+
 void
 AudioFileSource::set_timeline_position (int64_t pos)
 {
@@ -594,7 +603,8 @@ bool
 AudioFileSource::is_empty (Session& s, ustring path)
 {
 	bool ret = false;
-	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (s, path, 0, NoPeakFile, false));
+	
+	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (DataType::AUDIO, s, path, 0, NoPeakFile, false));
 
 	if (afs) {
 		ret = (afs->length() == 0);

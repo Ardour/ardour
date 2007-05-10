@@ -49,19 +49,15 @@ void slot_rep::disconnect()
     parent_ = 0;        // Just a precaution.
     (cleanup_)(data_);  // Notify the parent (might lead to destruction of this!).
   }
-  else
-    call_ = 0;
 }
 
 //static
 void* slot_rep::notify(void* data)
 {
-  slot_rep* self_ = reinterpret_cast<slot_rep*>(data);
-
+  slot_rep* self_ = (slot_rep*)data;
   self_->call_ = 0; // Invalidate the slot.
   self_->destroy(); // Detach the stored functor from the other referred trackables and destroy it.
   self_->disconnect(); // Disconnect the slot (might lead to deletion of self_!).
-
   return 0;
 }
 
@@ -82,17 +78,7 @@ slot_base::slot_base(const slot_base& src)
   blocked_(src.blocked_)
 {
   if (src.rep_)
-  {
-    //Check call_ so we can ignore invalidated slots.
-    //Otherwise, destroyed bound reference parameters (whose destruction caused the slot's invalidation) may be used during dup().
-    //Note: I'd prefer to check somewhere during dup(). murrayc.
-    if (src.rep_->call_)
-      rep_ = src.rep_->dup();
-    else
-    {
-      *this = slot_base(); //Return the default invalid slot.
-    }
-  }
+    rep_ = src.rep_->dup();
 }
 
 slot_base::~slot_base()

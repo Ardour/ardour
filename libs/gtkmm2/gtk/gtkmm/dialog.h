@@ -3,7 +3,6 @@
 #ifndef _GTKMM_DIALOG_H
 #define _GTKMM_DIALOG_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -163,18 +162,12 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_response(int response_id);
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -234,16 +227,6 @@ public:
    */
   void set_default_response(int response_id);
   
-  /** Gets the response id of a widget in the action area
-   * of a dialog.
-   * @param widget A widget in the action area of @a dialog .
-   * @return The response id of @a widget , or Gtk::RESPONSE_NONE
-   * if @a widget  doesn't have a response id set.
-   * 
-   * @newin2p8.
-   */
-  int get_response_for_widget(const Gtk::Widget& widget) const;
-  
   /** Sets whether the dialog has a separator above the buttons.
    * <tt>true</tt> by default.
    * @param setting <tt>true</tt> to have a separator.
@@ -254,7 +237,7 @@ public:
    * @return <tt>true</tt> if the dialog has a separator.
    */
   bool get_has_separator() const;
-
+  
   
   /** Returns <tt>true</tt> if dialogs are expected to use an alternative
    * button order on the screen @a screen . See 
@@ -268,27 +251,11 @@ public:
    * @param screen A Gdk::Screen, or <tt>0</tt> to use the default screen.
    * @return Whether the alternative button order should be used
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
   static bool alternative_button_order(const Glib::RefPtr<const Gdk::Screen>& screen);
-
-  /** Sets an alternative button order. If the gtk-alternative-button-order 
-   * setting is set to true, the dialog buttons are reordered according to 
-   * the order of the response ids in @a new_order.
-   *
-   * By default, GTK+ dialogs use the button order advocated by the Gnome 
-   * <ulink url="http://developer.gnome.org/projects/gup/hig/2.0/">Human 
-   * Interface Guidelines</ulink> with the affirmative button at the far 
-   * right, and the cancel button left of it. But the builtin GTK+ dialogs
-   * and #GtkMessageDialog<!-- -->s do provide an alternative button order,
-   * which is more suitable on some platforms, e.g. Windows.
-   *
-   * Use this function after adding all the buttons to your dialog
-   *
-   * @param new_order an array of response ids of the dialog's buttons.
-   * 
-   * @newinp26
-   */
+  	
+  //TODO: Document this:   
   void set_alternative_button_order_from_array(const Glib::ArrayHandle<int>& new_order);
   
 
@@ -332,22 +299,19 @@ public:
    */
   int run();
 
-   VBox* get_vbox();
+  VBox* get_vbox();
   const VBox* get_vbox() const;
-    HButtonBox* get_action_area();
+  HButtonBox* get_action_area();
   const HButtonBox* get_action_area() const;
- 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The dialog has a separator bar above its buttons.
+
+  /** The dialog has a separator bar above its buttons.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_has_separator() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The dialog has a separator bar above its buttons.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -355,13 +319,7 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_has_separator() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-
-/**
-   * @par Prototype:
-   * <tt>void %response(int response_id)</tt>
-   */
 
   Glib::SignalProxy1< void,int > signal_response();
 
@@ -383,8 +341,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Dialog* wrap(GtkDialog* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_DIALOG_H */
 

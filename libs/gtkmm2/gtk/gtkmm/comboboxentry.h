@@ -3,7 +3,6 @@
 #ifndef _GTKMM_COMBOBOXENTRY_H
 #define _GTKMM_COMBOBOXENTRY_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -99,17 +98,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -140,7 +133,7 @@ public:
   /** Sets the model column which @a entry_box  should use to get strings from
    * to be @a text_column .
    * 
-   * @newin2p4.
+   * Since: 2.4.
    * @param text_column A column in @a model  to get the strings from.
    */
   void set_text_column(const TreeModelColumnBase& text_column) const;   
@@ -148,7 +141,7 @@ public:
   /** Sets the model column which @a entry_box  should use to get strings from
    * to be @a text_column .
    * 
-   * @newin2p4.
+   * Since: 2.4.
    * @param text_column A column in @a model  to get the strings from.
    */
   void set_text_column(int text_column) const; 
@@ -156,17 +149,17 @@ public:
   /** Returns the column which @a entry_box  is using to get the strings from.
    * @return A column in the data source model of @a entry_box .
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   int get_text_column() const; 
 
   //The child is always an entry:
 
-  /** @see Bin::get_child().
+  /** See Bin::get_entry().
    */
   Entry* get_entry();
 
-  /** @see Bin::get_child().
+  /** See Bin::get_entry().
    */
   const Entry* get_entry() const;                                      
 
@@ -185,8 +178,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::ComboBoxEntry* wrap(GtkComboBoxEntry* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_COMBOBOXENTRY_H */
 

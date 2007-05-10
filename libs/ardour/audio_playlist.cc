@@ -40,15 +40,18 @@ using namespace std;
 using namespace PBD;
 
 AudioPlaylist::AudioPlaylist (Session& session, const XMLNode& node, bool hidden)
-	: Playlist (session, node, hidden)
+	: Playlist (session, node, DataType::AUDIO, hidden)
 {
+	const XMLProperty* prop = node.property("type");
+	assert(!prop || DataType(prop->value()) == DataType::AUDIO);
+
 	in_set_state++;
 	set_state (node);
 	in_set_state--;
 }
 
 AudioPlaylist::AudioPlaylist (Session& session, string name, bool hidden)
-	: Playlist (session, name, hidden)
+	: Playlist (session, name, DataType::AUDIO, hidden)
 {
 }
 
@@ -106,17 +109,17 @@ AudioPlaylist::~AudioPlaylist ()
 	/* drop connections to signals */
 
 	notify_callbacks ();
-
+	
 	_crossfades.clear ();
 }
 
 struct RegionSortByLayer {
-    bool operator() (boost::shared_ptr<Region>a, boost::shared_ptr<Region>b) {
+    bool operator() (boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
 	    return a->layer() < b->layer();
     }
 };
 
-nframes_t
+ARDOUR::nframes_t
 AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nframes_t start,
 		     nframes_t cnt, unsigned chan_n)
 {

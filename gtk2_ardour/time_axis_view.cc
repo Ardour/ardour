@@ -131,8 +131,8 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 
 	controls_vbox.pack_start (controls_table, false, false);
 	controls_vbox.show ();
-
-	controls_ebox.set_name ("TimeAxisViewControlsBaseUnselected");
+	
+	//controls_ebox.set_name ("TimeAxisViewControlsBaseUnselected");
 	controls_ebox.add (controls_vbox);
 	controls_ebox.add_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK|SCROLL_MASK);
 	controls_ebox.set_flags (CAN_FOCUS);
@@ -978,7 +978,8 @@ TimeAxisView::compute_controls_size_info ()
 	one_row_table.attach (*buttons[0], 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 	
 	one_row_table.show_all ();
-	Gtk::Requisition req (one_row_table.size_request ());
+	Gtk::Requisition req(one_row_table.size_request ());
+
 
 	// height required to show 1 row of buttons
 

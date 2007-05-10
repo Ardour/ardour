@@ -3,7 +3,6 @@
 #ifndef _GTKMM_EXPANDER_H
 #define _GTKMM_EXPANDER_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -43,29 +42,10 @@ namespace Gtk
 
 /** A container which can hide its child.
  *
- * An Expander allows the user to hide or show its child by clicking on an
+ * A Expander allows the user to hide or show its child by clicking on an
  * expander triangle similar to the triangles used in a Gtk::TreeView.
  *
- * Normally you use an expander as you would use any other descendant
- * of Gtk::Bin; you create the child widget and use add() to add it to 
- * the expander.  When the expander is toggled, it will take care of 
- * showing and hiding the child automatically.
- *
- * Special Usage: There are situations in which you may prefer to show and
- * hide the expanded widget yourself, such as when you want to
- * actually create the widget at expansion time.  In this case,
- * create an Expander but do not add a child to it.  The
- * expander widget has an <tt>expanded</tt> property
- * which can be used to monitor its expansion state.  You should
- * watch this property with a signal connection as follows:
- * @code
- * expander.property_expanded().signal_changed().connect(
- *   sigc::mem_fun(*this, &SomeClass::on_expander_changed)
- * );
- * @endcode
- *
  * @ingroup Widgets
- * @ingroup Containers
  */
 
 class Expander : public Bin
@@ -111,17 +91,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -132,7 +106,7 @@ public:
    *
    * The Expander has an empty label.
    * 
-   * @newin2p4
+   * Since: 2.4
    */
   Expander();
 
@@ -147,7 +121,7 @@ public:
    * @param label The string for the label describing the Expander.
    * @param mnemonic Wether the label may contain underscores to set up accelerators.
    
-   * @newin2p4
+   * Since: 2.4
    */
   explicit Expander(const Glib::ustring& label, bool mnemonic = false);
   
@@ -156,7 +130,7 @@ public:
    * the child widget to be revealed, and <tt>false</tt> if you want the
    * child widget to be hidden.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param expanded Whether the child widget is revealed.
    */
   void set_expanded(bool expanded = true);
@@ -167,7 +141,7 @@ public:
    * See set_expanded().
    * @return The current state of the expander.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   bool get_expanded() const;
 
@@ -175,7 +149,7 @@ public:
   /** Sets the spacing field of @a expander , which is the number of pixels to
    * place between expander and the child.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param spacing Distance between the expander and child in pixels.
    */
   void set_spacing(int spacing);
@@ -183,7 +157,7 @@ public:
   /** Gets the value set by set_spacing().
    * @return Spacing between the expander and child.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   int get_spacing() const;
 
@@ -192,7 +166,7 @@ public:
    * 
    * This will also clear any previously set labels.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param label A string.
    */
   void set_label(const Glib::ustring& label);
@@ -205,7 +179,7 @@ public:
    * @return The text of the label widget. This string is owned
    * by the widget and must not be modified or freed.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   Glib::ustring get_label() const;
 
@@ -213,7 +187,7 @@ public:
   /** If true, an underline in the text of the expander label indicates
    * the next character should be used for the mnemonic accelerator key.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param use_underline <tt>true</tt> if underlines in the text indicate mnemonics.
    */
   void set_use_underline(bool use_underline = true);
@@ -223,7 +197,7 @@ public:
    * @return <tt>true</tt> if an embedded underline in the expander label
    * indicates the mnemonic accelerator keys.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   bool get_use_underline() const;
 
@@ -231,7 +205,7 @@ public:
   /** Sets whether the text of the label contains markup in Pango's text markup
    * language. See Gtk::Label::set_markup().
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param use_markup <tt>true</tt> if the label's text should be parsed for markup.
    */
   void set_use_markup(bool use_markup = true);
@@ -241,7 +215,7 @@ public:
    * language. See set_use_markup().
    * @return <tt>true</tt> if the label's text will be parsed for markup
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   bool get_use_markup() const;
 
@@ -249,7 +223,7 @@ public:
   /** Set the label widget for the expander. This is the widget
    * that will appear embedded alongside the expander arrow.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param label_widget The new label widget.
    */
   void set_label_widget(Widget& label_widget);
@@ -258,7 +232,7 @@ public:
    * set_label_widget().
    * @return The label widget, or <tt>0</tt> if there is none.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   Widget* get_label_widget();
   
@@ -266,23 +240,20 @@ public:
    * set_label_widget().
    * @return The label widget, or <tt>0</tt> if there is none.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   const Widget* get_label_widget() const;
 
    //keybinding
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether the expander has been opened to reveal the child widget.
+  /** Whether the expander has been opened to reveal the child widget.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_expanded() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the expander has been opened to reveal the child widget.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -290,19 +261,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_expanded() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Text of the expander's label.
+  /** Text of the expander's label.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_label() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Text of the expander's label.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -310,19 +277,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_label() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** If set
+  /** If set
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_use_underline() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** If set
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -330,19 +293,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_use_underline() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The text of the label includes XML markup. See pango_parse_markup.
+  /** The text of the label includes XML markup. See pango_parse_markup.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_use_markup() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The text of the label includes XML markup. See pango_parse_markup.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -350,19 +309,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_use_markup() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Space to put between the label and the child.
+  /** Space to put between the label and the child.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_spacing() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Space to put between the label and the child.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -370,19 +325,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_spacing() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** A widget to display in place of the usual expander label.
+  /** A widget to display in place of the usual expander label.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Widget*> property_label_widget() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** A widget to display in place of the usual expander label.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -390,7 +341,6 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Widget*> property_label_widget() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
             
 
 };
@@ -407,8 +357,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Expander* wrap(GtkExpander* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_EXPANDER_H */
 

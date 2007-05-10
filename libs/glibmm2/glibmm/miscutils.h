@@ -137,7 +137,7 @@ std::string get_user_name();
 std::string get_real_name();
 
 /** Gets the current user's home directory.
- * @return The current user's home directory or an empty string if not defined.
+ * @return The current user's home directory.
  */
 std::string get_home_dir();
 

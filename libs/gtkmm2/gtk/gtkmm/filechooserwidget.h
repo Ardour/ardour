@@ -3,7 +3,6 @@
 #ifndef _GTKMM_FILECHOOSERWIDGET_H
 #define _GTKMM_FILECHOOSERWIDGET_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -97,17 +96,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -123,7 +116,7 @@ public:
    *
    * @param action Open or save mode for the widget
    * 
-   * @newin2p4
+   * Since: 2.4
    */
   explicit FileChooserWidget(FileChooserAction action);
   explicit FileChooserWidget(FileChooserAction action, const Glib::ustring& backend);
@@ -142,8 +135,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::FileChooserWidget* wrap(GtkFileChooserWidget* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_FILECHOOSERWIDGET_H */
 

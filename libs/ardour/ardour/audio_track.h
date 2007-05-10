@@ -53,7 +53,7 @@ class AudioTrack : public Track
 	int use_diskstream (string name);
 	int use_diskstream (const PBD::ID& id);
 	
-	int export_stuff (vector<Sample*>& buffers, uint32_t nbufs, nframes_t nframes, nframes_t end_frame);
+	int export_stuff (BufferSet& bufs, nframes_t nframes, nframes_t end_frame);
 
 	void freeze (InterThreadInfo&);
 	void unfreeze ();
@@ -65,15 +65,9 @@ class AudioTrack : public Track
 
   protected:
 	XMLNode& state (bool full);
-
-	void passthru_silence (nframes_t start_frame, nframes_t end_frame, 
-			       nframes_t nframes, nframes_t offset, int declick,
-			       bool meter);
-
-	uint32_t n_process_buffers ();
-
-	int _set_state (const XMLNode&, bool call_base);
 	
+	int _set_state (const XMLNode&, bool call_base);
+
   private:
 	int  set_diskstream (boost::shared_ptr<AudioDiskstream>, void *);
 	int  deprecated_use_diskstream_connections ();

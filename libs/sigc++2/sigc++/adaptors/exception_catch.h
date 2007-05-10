@@ -165,7 +165,8 @@ struct exception_catch_functor : public adapts<T_functor>
     : adapts<T_functor>(_A_func), catcher_(_A_catcher)
     {}
 
-  T_catcher catcher_; 
+  protected: 
+    T_catcher catcher_; 
 };
 
 template <class T_functor, class T_catcher, class T_return>
@@ -286,6 +287,7 @@ struct exception_catch_functor<T_functor, T_catcher, void> : public adapts<T_fun
     {}
   ~exception_catch_functor() {}
 
+  protected: 
     T_catcher catcher_; 
 };
 
@@ -298,8 +300,7 @@ void exception_catch_functor<T_functor, T_catcher, void>::operator()()
       { this->catcher_(); }
   }
 
-  
-//template specialization of visit_each<>(action, functor):
+
 template <class T_action, class T_functor, class T_catcher, class T_return>
 void visit_each(const T_action& _A_action,
                 const exception_catch_functor<T_functor, T_catcher, T_return>& _A_target)

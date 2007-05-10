@@ -3,7 +3,6 @@
 #ifndef _PANGOMM_COLOR_H
 #define _PANGOMM_COLOR_H
 
-
 #include <glibmm.h>
 
 /* Copyright (C) 2002 The gtkmm Development Team
@@ -65,33 +64,33 @@ public:
   /** Gets the red component of the color.
    * @return The red component of the color. This is a value between 0 and 65535, with 65535 indicating full intensity.
    */
-   guint16 get_red() const;
- 
+  guint16 get_red() const;
+
   /** Gets the green component of the color.
    * @return The green component of the color. This is a value between 0 and 65535, with 65535 indicating full intensity.
    */
-   guint16 get_green() const;
- 
+  guint16 get_green() const;
+
   /** Gets the blue component of the color.
    * @return The blue component of the color. This is a value between 0 and 65535, with 65535 indicating full intensity.
    */
-   guint16 get_blue() const;
- 
+  guint16 get_blue() const;
+
   /** Sets the red component of the color.
    * @param value The red component of the color. This is a value between 0 and 65535, with 65535 indicating full intensity.
    */
-   void set_red(const guint16& value);
- 
+  void set_red(const guint16& value);
+
   /** Sets the green component of the color.
    * @param value The green component of the color. This is a value between 0 and 65535, with 65535 indicating full intensity.
    */
-   void set_green(const guint16& value);
- 
+  void set_green(const guint16& value);
+
   /** Sets the blue component of the color.
    * @param value The blue component of the color. This is a value between 0 and 65535, with 65535 indicating full intensity.
    */
-   void set_blue(const guint16& value);
- 
+  void set_blue(const guint16& value);
+
   
   /** Fill in the fields of a color from a string specification. The
    * string can either one of a large set of standard names. (Taken
@@ -134,7 +133,6 @@ class Value<Pango::Color> : public Glib::Value_Boxed<Pango::Color>
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 } // namespace Glib
-
 
 #endif /* _PANGOMM_COLOR_H */
 

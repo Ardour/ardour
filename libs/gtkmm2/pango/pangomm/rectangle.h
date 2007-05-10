@@ -3,7 +3,6 @@
 #ifndef _PANGOMM_RECTANGLE_H
 #define _PANGOMM_RECTANGLE_H
 
-
 #include <glibmm.h>
 
 /* Copyright (C) 2002 The gtkmm Development Team
@@ -159,7 +158,6 @@ Pango::Rectangle& wrap(PangoRectangle* object);
 const Pango::Rectangle& wrap(const PangoRectangle* object);
 
 } /* namespace Glib */
-
 
 #endif /* _PANGOMM_RECTANGLE_H */
 

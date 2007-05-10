@@ -3,7 +3,6 @@
 #ifndef _GTKMM_COLORBUTTON_H
 #define _GTKMM_COLORBUTTON_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -94,18 +93,12 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_color_set();
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -119,7 +112,7 @@ public:
    * open, allowing the user to select a color. The swatch will be updated to reflect the
    * new color when the user finishes.
    *
-   * @newin2p4
+   * Since: 2.4
    */
   ColorButton();
   
@@ -132,21 +125,21 @@ public:
    *
    * @param color A Gdk::Color to set the current color with.
    *
-   * @newin2p4
+   * Since: 2.4
    */
   explicit ColorButton(const Gdk::Color& color);
 
   
   /** Sets the current color to be @a color .
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param color A Gdk::Color to set the current color with.
    */
   void set_color(const Gdk::Color& color);
   
   /** Sets the current opacity to be @a alpha . 
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param alpha An integer between 0 and 65535.
    */
   void set_alpha(guint16 alpha);
@@ -157,7 +150,7 @@ public:
    *
    * @return A Gdk::Color representing the current internal color of the Gtk::ColorButton.
    *
-   * @newin2p4
+   * Since: 2.4
    */
   Gdk::Color get_color() const;
   
@@ -165,13 +158,13 @@ public:
   /** Returns the current alpha value.
    * @return An integer between 0 and 65535.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   guint16 get_alpha() const;
   
   /** Sets whether or not the color button should use the alpha channel.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param use_alpha <tt>true</tt> if color button should use alpha channel, <tt>false</tt> if not.
    */
   void set_use_alpha(bool use_alpha = true);
@@ -179,35 +172,32 @@ public:
   /** Does the color selection dialog use the alpha channel?
    * @return <tt>true</tt> if the color sample uses alpha channel, <tt>false</tt> if not.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   bool get_use_alpha() const;
   
   /** Sets the title for the color selection dialog.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param title String containing new window title.
    */
   void set_title(const Glib::ustring& title);
   
   /** Gets the title of the color selection dialog.
+   * @return An internal string, do not free the return value
    * 
-   * @newin2p4
-   * @return The title.
+   * Since: 2.4.
    */
   Glib::ustring get_title() const;
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether or not to give the color an alpha value.
+  /** Whether or not to give the color an alpha value.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_use_alpha() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether or not to give the color an alpha value.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -215,19 +205,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_use_alpha() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The title of the color selection dialog.
+  /** The title of the color selection dialog.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_title() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The title of the color selection dialog.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -235,19 +221,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_title() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The selected color.
+  /** The selected color.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Gdk::Color> property_color() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The selected color.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -255,19 +237,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Gdk::Color> property_color() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The selected opacity value (0 fully transparent, 65535 fully opaque).
+  /** The selected opacity value (0 fully transparent, 65535 fully opaque).
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<guint16> property_alpha() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The selected opacity value (0 fully transparent, 65535 fully opaque).
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -275,18 +253,7 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<guint16> property_alpha() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-
-  /** The color_set signal is emitted when the user selects a color. When handling this signal,
-   * use get_color() and get_alpha() to find out which color 
-   * was just selected.
-   */
-  
-/**
-   * @par Prototype:
-   * <tt>void %color_set()</tt>
-   */
 
   Glib::SignalProxy0< void > signal_color_set();
                     
@@ -305,8 +272,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::ColorButton* wrap(GtkColorButton* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_COLORBUTTON_H */
 

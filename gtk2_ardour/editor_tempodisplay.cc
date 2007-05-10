@@ -180,10 +180,10 @@ Editor::hide_measures ()
 ArdourCanvas::SimpleLine *
 Editor::get_time_line ()
 {
-         ArdourCanvas::SimpleLine *line;
+	ArdourCanvas::SimpleLine *line;
 
 	if (free_measure_lines.empty()) {
-	        line = new ArdourCanvas::SimpleLine (*time_line_group);
+		line = new ArdourCanvas::SimpleLine (*time_line_group);
 		used_measure_lines.push_back (line);
 	} else {
 		line = free_measure_lines.front();
@@ -214,8 +214,8 @@ Editor::draw_measures ()
 	gdouble xpos;
 	double x1, x2, y1, y2, beat_density;
 
-        uint32_t beats = 0;
-        uint32_t bars = 0;
+	uint32_t beats = 0;
+	uint32_t bars = 0;
 	uint32_t color;
 
 	if (current_bbt_points == 0 || current_bbt_points->empty()) {
@@ -239,7 +239,7 @@ Editor::draw_measures ()
 		 */
 		return;
 	}
-
+	
 	for (i = current_bbt_points->begin(); i != current_bbt_points->end(); ++i) {
 
 		switch ((*i).type) {

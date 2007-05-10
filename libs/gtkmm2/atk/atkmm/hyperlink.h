@@ -3,7 +3,6 @@
 #ifndef _ATKMM_HYPERLINK_H
 #define _ATKMM_HYPERLINK_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -171,108 +170,66 @@ public:
   bool is_selected_link() const;
 
   
-/**
-   * @par Prototype:
-   * <tt>void %link_activated()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_link_activated();
 
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Specifies whether the AtkHyperlink object is selected.
+  /** Specifies whether the AtkHyperlink object is selected.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_selected_link() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The number of anchors associated with the AtkHyperlink object.
+  /** The number of anchors associated with the AtkHyperlink object.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_number_of_anchors() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The end index of the AtkHyperlink object.
+  /** The end index of the AtkHyperlink object.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_end_index() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The start index of the AtkHyperlink object.
+  /** The start index of the AtkHyperlink object.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_start_index() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 protected:
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual gchar* get_uri_vfunc(int i) const;
-#endif //GLIBMM_VFUNCS_ENABLED
+    virtual gchar* get_uri_vfunc(int i) const;
+    virtual Glib::RefPtr<Atk::Object> get_object_vfunc(int i);
+    virtual int get_end_index_vfunc() const;
+    virtual int get_start_index_vfunc() const;
+    virtual bool is_valid_vfunc() const;
+    virtual int get_n_anchors_vfunc() const;
+    virtual guint link_state_vfunc() const;
+    virtual bool is_selected_link_vfunc() const; 
 
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual Glib::RefPtr<Atk::Object> get_object_vfunc(int i);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual int get_end_index_vfunc() const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual int get_start_index_vfunc() const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual bool is_valid_vfunc() const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual int get_n_anchors_vfunc() const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual guint link_state_vfunc() const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual bool is_selected_link_vfunc() const;
-#endif //GLIBMM_VFUNCS_ENABLED
- 
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_link_activated();
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

@@ -3,7 +3,6 @@
 #ifndef _ATKMM_ACTION_H
 #define _ATKMM_ACTION_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -155,46 +154,23 @@ public:
   Glib::ustring get_localized_name(int i);
 
 protected:
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual bool do_action_vfunc(int i);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual int get_n_actions_vfunc() const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual const char* get_description_vfunc(int i) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual const char* get_name_vfunc(int i) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual const char* get_keybinding_vfunc(int i) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual bool set_description_vfunc(int i, const Glib::ustring& desc);
-#endif //GLIBMM_VFUNCS_ENABLED
+    virtual bool do_action_vfunc(int i);
+    virtual int get_n_actions_vfunc() const;
+    virtual const char* get_description_vfunc(int i) const;
+    virtual const char* get_name_vfunc(int i) const;
+    virtual const char* get_keybinding_vfunc(int i) const;
+    virtual bool set_description_vfunc(int i, const Glib::ustring& desc);
 
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };
@@ -212,7 +188,6 @@ namespace Glib
   Glib::RefPtr<Atk::Action> wrap(AtkAction* object, bool take_copy = false);
 
 } // namespace Glib
-
 
 #endif /* _ATKMM_ACTION_H */
 

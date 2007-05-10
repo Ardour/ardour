@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002-2006 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,16 +17,15 @@
 
 */
 
-#include "ardour/port.h"
+#include <ardour/port.h>
 
 using namespace ARDOUR;
 using namespace std;
 
-nframes_t Port::_short_over_length = 2;
-nframes_t Port::_long_over_length = 10;
-
 Port::Port (jack_port_t *p) 
 	: _port (p)
+	, _metering(0)
+	, _last_monitor(false)
 {
 	if (_port == 0) {
 		throw failed_constructor();
@@ -42,13 +41,7 @@ Port::Port (jack_port_t *p)
 void
 Port::reset ()
 {
-	reset_buffer ();
-	
 	_last_monitor = false;
-	_silent = false;
-	_metering = 0;
-	
-	reset_meters ();
 }
 
 int 

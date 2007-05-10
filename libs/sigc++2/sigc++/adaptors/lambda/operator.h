@@ -750,7 +750,6 @@ lambda_operator<T_action, T_type1, T_type2>::operator ()() const
       typename arg2_type::result_type>
       (arg1_(), arg2_()); }
 
-//template specialization of visit_each<>(action, functor):      
 template <class T_action, class T_lambda_action, class T_arg1, class T_arg2>
 void visit_each(const T_action& _A_action,
                 const lambda_operator<T_lambda_action, T_arg1, T_arg2>& _A_target)
@@ -945,7 +944,6 @@ lambda_operator_unary<T_action, T_type>::operator ()() const
       typename arg_type::result_type>
       (arg_()); }
 
-//template specialization of visit_each<>(action, functor):
 template <class T_action, class T_lambda_action, class T_arg>
 void visit_each(const T_action& _A_action,
                 const lambda_operator_unary<T_lambda_action, T_arg>& _A_target)
@@ -1139,7 +1137,6 @@ lambda_operator_convert<T_action, T_type, T_arg>::operator ()() const
       typename arg_type::result_type>
       (arg_()); }
 
-//template specialization of visit_each<>(action, functor):
 template <class T_action, class T_lambda_action, class T_type, class T_arg>
 void visit_each(const T_action& _A_action,
                 const lambda_operator_convert<T_lambda_action, T_type, T_arg>& _A_target)

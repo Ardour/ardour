@@ -94,6 +94,7 @@ using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace Editing;
 
+using PBD::internationalize;
 using PBD::atoi;
 
 const double Editor::timebar_height = 15.0;
@@ -231,8 +232,8 @@ Editor::Editor ()
 	selection->PointsChanged.connect (mem_fun(*this, &Editor::point_selection_changed));
 
 	clicked_regionview = 0;
-	clicked_trackview = 0;
-	clicked_audio_trackview = 0;
+	clicked_axisview = 0;
+	clicked_routeview = 0;
 	clicked_crossfadeview = 0;
 	clicked_control_point = 0;
 	latest_regionview = 0;
@@ -443,7 +444,7 @@ Editor::Editor ()
 	edit_packer.set_border_width (0);
 	edit_packer.set_name ("EditorWindow");
 	
-	edit_packer.attach (edit_vscrollbar,         0, 1, 1, 3,    FILL,        FILL|EXPAND, 0, 0);
+	edit_packer.attach (edit_vscrollbar,         3, 4, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
 
 	edit_packer.attach (time_button_frame,       0, 2, 0, 1,    FILL,        FILL, 0, 0);
 	edit_packer.attach (time_canvas_event_box,   2, 3, 0, 1,    FILL|EXPAND, FILL, 0, 0);
@@ -1062,8 +1063,8 @@ Editor::connect_to_session (Session *t)
 	session_connections.push_back (session->TransportStateChange.connect (mem_fun(*this, &Editor::map_transport_state)));
 	session_connections.push_back (session->PositionChanged.connect (mem_fun(*this, &Editor::map_position_change)));
 	session_connections.push_back (session->RouteAdded.connect (mem_fun(*this, &Editor::handle_new_route)));
-	session_connections.push_back (session->AudioRegionAdded.connect (mem_fun(*this, &Editor::handle_new_audio_region)));
-	session_connections.push_back (session->AudioRegionRemoved.connect (mem_fun(*this, &Editor::handle_audio_region_removed)));
+	session_connections.push_back (session->RegionAdded.connect (mem_fun(*this, &Editor::handle_new_region)));
+	session_connections.push_back (session->RegionRemoved.connect (mem_fun(*this, &Editor::handle_region_removed)));
 	session_connections.push_back (session->DurationChanged.connect (mem_fun(*this, &Editor::handle_new_duration)));
 	session_connections.push_back (session->edit_group_added.connect (mem_fun(*this, &Editor::add_edit_group)));
 	session_connections.push_back (session->edit_group_removed.connect (mem_fun(*this, &Editor::edit_groups_changed)));
@@ -1156,10 +1157,10 @@ Editor::connect_to_session (Session *t)
 		
 		for (i = rows.begin(); i != rows.end(); ++i) {
 			TimeAxisView *tv =  (*i)[route_display_columns.tv];
-			AudioTimeAxisView *atv;
+			RouteTimeAxisView *rtv;
 			
-			if ((atv = dynamic_cast<AudioTimeAxisView*>(tv)) != 0) {
-				if (atv->route()->master()) {
+			if ((rtv = dynamic_cast<RouteTimeAxisView*>(tv)) != 0) {
+				if (rtv->route()->master()) {
 					route_list_display.get_selection()->unselect (i);
 				}
 			}
@@ -1308,7 +1309,7 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 		break;
 
 	case StreamItem:
-		if (clicked_audio_trackview->get_diskstream()) {
+		if (clicked_routeview->is_track()) {
 			build_menu_function = &Editor::build_track_context_menu;
 		} else {
 			build_menu_function = &Editor::build_track_bus_context_menu;
@@ -1364,7 +1365,7 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 		return;
 	}
 
-	if (clicked_audio_trackview && clicked_audio_trackview->audio_track()) {
+	if (clicked_routeview && clicked_routeview->audio_track()) {
 
 		/* Bounce to disk */
 		
@@ -1373,7 +1374,7 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 		
 		edit_items.push_back (SeparatorElem());
 
-		switch (clicked_audio_trackview->audio_track()->freeze_state()) {
+		switch (clicked_routeview->audio_track()->freeze_state()) {
 		case AudioTrack::NoFreeze:
 			edit_items.push_back (MenuElem (_("Freeze"), mem_fun(*this, &Editor::freeze_route)));
 			break;
@@ -1423,7 +1424,7 @@ Editor::build_track_region_context_menu (nframes_t frame)
 	MenuList& edit_items  = track_region_context_menu.items();
 	edit_items.clear();
 
-	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (clicked_trackview);
+	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (clicked_axisview);
 
 	if (atv) {
 		boost::shared_ptr<Diskstream> ds;
@@ -1450,7 +1451,7 @@ Editor::build_track_crossfade_context_menu (nframes_t frame)
 	MenuList& edit_items  = track_crossfade_context_menu.items();
 	edit_items.clear ();
 
-	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (clicked_trackview);
+	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (clicked_axisview);
 
 	if (atv) {
 		boost::shared_ptr<Diskstream> ds;
@@ -1949,7 +1950,7 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 
 void
 Editor::set_snap_to (SnapType st)
-{
+{	
 	snap_type = st;
 	string str = snap_type_strings[(int) st];
 
@@ -3607,7 +3608,7 @@ void
 Editor::new_playlists ()
 {
 	begin_reversible_command (_("new playlists"));
-	mapover_audio_tracks (mem_fun (*this, &Editor::mapped_use_new_playlist));
+	mapover_tracks (mem_fun (*this, &Editor::mapped_use_new_playlist));
 	commit_reversible_command ();
 }
 
@@ -3615,7 +3616,7 @@ void
 Editor::copy_playlists ()
 {
 	begin_reversible_command (_("copy playlists"));
-	mapover_audio_tracks (mem_fun (*this, &Editor::mapped_use_copy_playlist));
+	mapover_tracks (mem_fun (*this, &Editor::mapped_use_copy_playlist));
 	commit_reversible_command ();
 }
 
@@ -3623,24 +3624,24 @@ void
 Editor::clear_playlists ()
 {
 	begin_reversible_command (_("clear playlists"));
-	mapover_audio_tracks (mem_fun (*this, &Editor::mapped_clear_playlist));
+	mapover_tracks (mem_fun (*this, &Editor::mapped_clear_playlist));
 	commit_reversible_command ();
 }
 
 void 
-Editor::mapped_use_new_playlist (AudioTimeAxisView& atv, uint32_t sz)
+Editor::mapped_use_new_playlist (RouteTimeAxisView& atv, uint32_t sz)
 {
 	atv.use_new_playlist (sz > 1 ? false : true);
 }
 
 void
-Editor::mapped_use_copy_playlist (AudioTimeAxisView& atv, uint32_t sz)
+Editor::mapped_use_copy_playlist (RouteTimeAxisView& atv, uint32_t sz)
 {
 	atv.use_copy_playlist (sz > 1 ? false : true);
 }
 
 void 
-Editor::mapped_clear_playlist (AudioTimeAxisView& atv, uint32_t sz)
+Editor::mapped_clear_playlist (RouteTimeAxisView& atv, uint32_t sz)
 {
 	atv.clear_playlist ();
 }

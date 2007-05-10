@@ -1,4 +1,31 @@
-This is glibmm, a C++ API for parts of glib that are useful for C++.
-See http://www.gtkmm.org
+This is the unstable version of gtkmm, aimed at Gtk+ 2.0.x.
+See CHANGES for a comparison with gtkmm 1.2.
+
+Contents:
+* Your unstable development environment
+* Required libraries:
+
+Your unstable development environment
+-------------------------------------
+
+Until the GTK+ 2.0 / GNOME 2.0 platform is stable, you should try to separate these unstable libraries from your stable GTK+ 1.2 / GNOME 1.2/1.4 libraries. You can do this by installing the unstable libraries into a different prefix.
+e.g. ./configure --prefix=/usr/devgnome2
+
+When using the development libraries, you will need to modify some environment variables. This will be easier if you create a file (e.g. devgnome2) in your home directory that contains these commands:
+
+export PATH="/usr/devgnome2/bin:$PATH"; export LD_LIBRARY_PATH="/usr/devgnome2/lib" ; export PKG_CONFIG_PATH="/usr/devgnome2/lib/pkgconfig:$PKG_CONFIG_PATH" ;
+
+You can then type
+# source devgnome2
+to prepare your environment before building or working with the development libraries.
+
+You may also need to edit /etc/ld.so.conf to add /usr/devgnome2/lib, and then type /sbin/ldconfig to re-process the ld.so.conf.
 
 
+The vicious-build-scripts module in cvs.gnome.org might help you with this, if you can get it to work.
+
+Required Libraries
+------------------
+
+* Of course, you will need gtk+ 2 and its dependencies.
+* libsigc++ 1.2 (A release, or libsigc++-1.2 from cvs)

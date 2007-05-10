@@ -31,17 +31,22 @@ namespace MIDI {
 
 class Port;
 
+/** Stateful MIDI channel class.
+ *
+ * This remembers various useful information about the current 'state' of a
+ * MIDI channel (eg current pitch bend value).
+ */
 class Channel : public sigc::trackable {
 
   public:
 	Channel (byte channel_number, Port &);
 
-	Port &midi_port()               { return port; }
-	byte channel()                  { return channel_number; }
-	byte program()                  { return program_number; }
-	byte bank()                     { return bank_number; }
-	byte pressure ()                { return chanpress; }
-	byte poly_pressure (byte n)     { return polypress[n]; }
+	Port &midi_port()               { return _port; }
+	byte channel()                  { return _channel_number; }
+	byte program()                  { return _program_number; }
+	byte bank()                     { return _bank_number; }
+	byte pressure ()                { return _chanpress; }
+	byte poly_pressure (byte n)     { return _polypress[n]; }
 
 	byte last_note_on () { 
 		return _last_note_on;
@@ -57,53 +62,52 @@ class Channel : public sigc::trackable {
 	}
 
 	pitchbend_t pitchbend () { 
-		return pitch_bend;
+		return _pitch_bend;
 	}
 
 	controller_value_t controller_value (byte n) { 
-		return controller_val[n%128];
+		return _controller_val[n%128];
 	}
 
 	controller_value_t *controller_addr (byte n) {
-		return &controller_val[n%128];
+		return &_controller_val[n%128];
 	}
 
 	void set_controller (byte n, byte val) {
-		controller_val[n%128] = val;
+		_controller_val[n%128] = val;
 	}
 
-	int channel_msg (byte id, byte val1, byte val2);
-
-	int all_notes_off () {
-		return channel_msg (MIDI::controller, 123, 0);
+	bool channel_msg (byte id, byte val1, byte val2, timestamp_t timestamp);
+	bool all_notes_off (timestamp_t timestamp) {
+		return channel_msg (MIDI::controller, 123, 0, timestamp);
 	}
 	
-	int control (byte id, byte value) {
-		return channel_msg (MIDI::controller, id, value);
+	bool control (byte id, byte value, timestamp_t timestamp) {
+		return channel_msg (MIDI::controller, id, value, timestamp);
 	}
 	
-	int note_on (byte note, byte velocity) {
-		return channel_msg (MIDI::on, note, velocity);
+	bool note_on (byte note, byte velocity, timestamp_t timestamp) {
+		return channel_msg (MIDI::on, note, velocity, timestamp);
 	}
 	
-	int note_off (byte note, byte velocity) {
-		return channel_msg (MIDI::off, note, velocity);
+	bool note_off (byte note, byte velocity, timestamp_t timestamp) {
+		return channel_msg (MIDI::off, note, velocity, timestamp);
 	}
 	
-	int aftertouch (byte value) {
-		return channel_msg (MIDI::chanpress, value, 0);
+	bool aftertouch (byte value, timestamp_t timestamp) {
+		return channel_msg (MIDI::chanpress, value, 0, timestamp);
 	}
 
-	int poly_aftertouch (byte note, byte value) {
-		return channel_msg (MIDI::polypress, note, value);
+	bool poly_aftertouch (byte note, byte value, timestamp_t timestamp) {
+		return channel_msg (MIDI::polypress, note, value, timestamp);
 	}
 
-	int program_change (byte value) {
-		return channel_msg (MIDI::program, value, 0);
+	bool program_change (byte value, timestamp_t timestamp) {
+		return channel_msg (MIDI::program, value, 0, timestamp);
 	}
 
-	int pitchbend (byte msb, byte lsb) {
-		return channel_msg (MIDI::pitchbend, lsb, msb);
+	bool pitchbend (byte msb, byte lsb, timestamp_t timestamp) {
+		return channel_msg (MIDI::pitchbend, lsb, msb, timestamp);
 	}
 
   protected:
@@ -112,34 +116,33 @@ class Channel : public sigc::trackable {
 	void connect_output_signals ();
 
   private:
-	Port &port;
+	Port & _port;
 
 	/* Current channel values */
+	byte               _channel_number;
+	byte               _bank_number;
+	byte               _program_number;
+	byte               _rpn_msb;
+	byte               _rpn_lsb;
+	byte               _nrpn_msb;
+	byte               _nrpn_lsb;
+	byte               _chanpress;
+	byte               _polypress[128];
+	bool               _controller_14bit[128];
+	controller_value_t _controller_val[128];
+	byte               _controller_msb[128];
+	byte               _controller_lsb[128];
+	byte               _last_note_on;
+	byte               _last_on_velocity;
+	byte               _last_note_off;
+	byte               _last_off_velocity;
+	pitchbend_t        _pitch_bend;
+	bool               _omni;
+	bool               _poly;
+	bool               _mono;
+	size_t             _notes_on;
 
-	byte     channel_number;
-        byte     bank_number;
-	byte     program_number;
-	byte     rpn_msb;
-	byte     rpn_lsb;
-	byte     nrpn_msb;
-	byte     nrpn_lsb;
-	byte     chanpress;
-	byte     polypress[128];
-	bool         controller_14bit[128];
-	controller_value_t  controller_val[128];
-	byte     controller_msb[128];
-	byte     controller_lsb[128];
-	byte     _last_note_on;
-	byte     _last_on_velocity;
-	byte     _last_note_off;
-	byte     _last_off_velocity;
-	pitchbend_t  pitch_bend;
-	bool         _omni;
-	bool         _poly;
-	bool         _mono;
-	size_t       _notes_on;
-
-	void reset (bool notes_off = true);
+	void reset (timestamp_t timestamp, nframes_t nframes, bool notes_off = true);
 	
 	void process_note_off (Parser &, EventTwoBytes *);
 	void process_note_on (Parser &, EventTwoBytes *);

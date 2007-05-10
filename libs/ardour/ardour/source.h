@@ -28,6 +28,7 @@
 #include <pbd/statefuldestructible.h> 
 
 #include <ardour/ardour.h>
+#include <ardour/data_type.h>
 
 namespace ARDOUR {
 
@@ -37,31 +38,49 @@ class Playlist;
 class Source : public PBD::StatefulDestructible
 {
   public:
-	Source (Session&, std::string name);
+	Source (Session&, std::string name, DataType type);
 	Source (Session&, const XMLNode&);
+	
 	virtual ~Source ();
 
 	std::string name() const { return _name; }
 	int set_name (std::string str, bool destructive);
 
+	DataType type() { return _type; }
+
 	time_t timestamp() const { return _timestamp; }
 	void stamp (time_t when) { _timestamp = when; }
+	
+	/** @return the number of items in this source */
+	nframes_t length() const { return _length; }
 
+	virtual nframes_t natural_position() const { return 0; }
+
+	virtual void mark_for_remove() = 0;
+	virtual void mark_streaming_write_completed () = 0;
+	
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
-
+	
 	void use () { _in_use++; }
 	void disuse () { if (_in_use) { _in_use--; } }
-
+	
 	void add_playlist (boost::shared_ptr<ARDOUR::Playlist>);
 	void remove_playlist (boost::weak_ptr<ARDOUR::Playlist>);
 
 	uint32_t used() const;
 
+	
+	static sigc::signal<void,Source*> SourceCreated;
+
   protected:
+	void update_length (nframes_t pos, nframes_t cnt);
+	
 	Session&          _session;
 	string            _name;
+	DataType          _type;
 	time_t            _timestamp;
+	nframes_t    _length;
 
 	Glib::Mutex playlist_lock;
 	typedef std::map<boost::shared_ptr<ARDOUR::Playlist>, uint32_t > PlaylistMap;

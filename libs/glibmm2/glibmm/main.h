@@ -277,29 +277,6 @@ private:
   SignalIO& operator=(const SignalIO&);
 };
 
-class SignalChildWatch
-{
-public:
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-  explicit inline SignalChildWatch(GMainContext* context);
-#endif
-  /** Connects a child watch handler.
-   * @code
-   * Glib::signal_child_watch().connect(sigc::ptr_fun(&child_watch_handler), pid);
-   * @endcode
-   * @param slot A slot to call when child @a pid exited.
-   * @param pid The child to watch for.
-   * @param priority The priority of the new event source.
-   * @return A connection handle, which can be used to disconnect the handler.
-   */
-  sigc::connection connect(const sigc::slot<void,GPid, int>& slot, GPid pid, 
-int priority = PRIORITY_DEFAULT);
-private:
-  GMainContext* context_;
-
-  // no copy assignment
-  SignalChildWatch& operator=(const SignalChildWatch&);
-};
 
 /** Convenience timeout signal.
  * @return A signal proxy; you want to use SignalTimeout::connect().
@@ -315,11 +292,6 @@ SignalIdle signal_idle();
  * @return A signal proxy; you want to use SignalIO::connect().
  */
 SignalIO signal_io();
-
-/** Convenience child watch signal.
- * @return A signal proxy; you want to use SignalChildWatch::connect().
- */
-SignalChildWatch signal_child_watch();
 
 
 /** Main context.
@@ -341,10 +313,7 @@ public:
   static Glib::RefPtr<MainContext> get_default();
 
   /** Runs a single iteration for the given main loop. 
-   * This involves checking to see if any event sources are ready to be processed, then if no events sources are 
-   * ready and may_block is true, waiting for a source to become ready, then dispatching the highest priority events 
-   * sources that are ready. Note that even when may_block is true, it is still possible for iteration() to return 
-   * false, since the the wait may be interrupted for other reasons than an event source becoming ready.
+   * This involves checking to see if any event sources are ready to be processed, then if no events sources are ready and may_block is true, waiting for a source to become ready, then dispatching the highest priority events sources that are ready. Note that even when may_block is true, it is still possible for iteration() to return FALSE, since the the wait may be interrupted for other reasons than an event source becoming ready.
    * @param may_block Whether the call may block.
    * @return true if events were dispatched.
    */
@@ -360,26 +329,21 @@ public:
   void wakeup();
 
   /** Tries to become the owner of the specified context. 
-   * If some other context is the owner of the context, returns FALSE immediately. Ownership is properly recursive: 
-   * the owner can require ownership again and will release ownership when release() is called as many times as 
-   * acquire().
+   * If some other context is the owner of the context, returns FALSE immediately. Ownership is properly recursive: the owner can require ownership again and will release ownership when release() is called as many times as acquire().
    * You must be the owner of a context before you can call prepare(), query(), check(), dispatch().
    * @return true if the operation succeeded, and this thread is now the owner of context.
    */
   bool acquire();
 
 
-  /** Tries to become the owner of the specified context, as with acquire(). But if another thread is the owner, 
-   * atomically drop mutex and wait on cond until that owner releases ownership or until cond is signaled, then try 
-   * again (once) to become the owner.
+  /** Tries to become the owner of the specified context, as with acquire(). But if another thread is the owner, atomically drop mutex and wait on cond until that owner releases ownership or until cond is signaled, then try again (once) to become the owner.
    * @param cond A condition variable.
    * @param mutex A mutex, currently held.
    * @return true if the operation succeeded, and this thread is now the owner of context.
    */
   bool wait(Glib::Cond& cond, Glib::Mutex& mutex);
 
-  /** Releases ownership of a context previously acquired by this thread with acquire(). If the context was acquired 
-   * multiple times, the only release ownership when release() is called as many times as it was acquired.
+  /** Releases ownership of a context previously acquired by this thread with acquire(). If the context was acquired multiple times, the only release ownership when release() is called as many times as it was acquired.
    */
   void release();
 
@@ -451,11 +415,6 @@ public:
    * @return A signal proxy; you want to use SignalIO::connect().
    */
   SignalIO signal_io();
-
-  /** child watch signal, attached to this MainContext.
-   * @return A signal proxy; you want to use SignalChildWatch::connect().
-   */
-  SignalChildWatch signal_child_watch();
 
   void reference()   const;
   void unreference() const;

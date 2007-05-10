@@ -51,10 +51,8 @@ template <class T_setter, class T_getter>
 struct compose1_functor : public adapts<T_setter>
 {
   typedef typename adapts<T_setter>::adaptor_type adaptor_type;
-  typedef T_setter setter_type;
-  typedef T_getter getter_type;
 
-  template <class T_arg1 = void,class T_arg2 = void,class T_arg3 = void,class T_arg4 = void,class T_arg5 = void,class T_arg6 = void,class T_arg7 = void>
+  template <class T_arg1=void,class T_arg2=void,class T_arg3=void,class T_arg4=void,class T_arg5=void,class T_arg6=void,class T_arg7=void>
   struct deduce_result_type
     { typedef typename adaptor_type::template deduce_result_type<
         typename sigc::deduce_result_type<T_getter, T_arg1,T_arg2,T_arg3,T_arg4,T_arg5,T_arg6,T_arg7>::type
@@ -123,7 +121,7 @@ struct compose1_functor : public adapts<T_setter>
     : adapts<T_setter>(_A_setter), get_(_A_getter)
     {}
 
-  getter_type get_; // public, so that visit_each() can access it
+  T_getter get_; // public, so that visit_each() can access it
 };
 
 template <class T_setter, class T_getter>
@@ -145,10 +143,7 @@ template <class T_setter, class T_getter1, class T_getter2>
 struct compose2_functor : public adapts<T_setter>
 {
   typedef typename adapts<T_setter>::adaptor_type adaptor_type;
-  typedef T_setter setter_type;
-  typedef T_getter1 getter1_type;
-  typedef T_getter2 getter2_type;
-  
+
   template <class T_arg1=void,class T_arg2=void,class T_arg3=void,class T_arg4=void,class T_arg5=void,class T_arg6=void,class T_arg7=void>
   struct deduce_result_type
     { typedef typename adaptor_type::template deduce_result_type<
@@ -228,8 +223,8 @@ struct compose2_functor : public adapts<T_setter>
     : adapts<T_setter>(_A_setter), get1_(_A_getter1), get2_(_A_getter2)
     {}
 
-  getter1_type get1_; // public, so that visit_each() can access it
-  getter2_type get2_; // public, so that visit_each() can access it
+  T_getter1 get1_; // public, so that visit_each() can access it
+  T_getter2 get2_; // public, so that visit_each() can access it
 };
 
 template <class T_setter, class T_getter1, class T_getter2>
@@ -237,7 +232,7 @@ typename compose2_functor<T_setter, T_getter1, T_getter2>::result_type
 compose2_functor<T_setter, T_getter1, T_getter2>::operator()()
   { return this->functor_(get1_(), get2_()); }
 
-//template specialization of visit_each<>(action, functor):
+
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::compose1_functor performs a functor on the
  * functors stored in the sigc::compose1_functor object.
@@ -248,17 +243,10 @@ template <class T_action, class T_setter, class T_getter>
 void visit_each(const T_action& _A_action,
                 const compose1_functor<T_setter, T_getter>& _A_target)
 {
-  typedef compose1_functor<T_setter, T_getter> type_functor;
-  
-  //Note that the AIX compiler needs the actual template types of visit_each to be specified:
-  typedef typename type_functor::setter_type type_functor1;
-  visit_each<T_action, type_functor1>(_A_action, _A_target.functor_);
-  
-  typedef typename type_functor::getter_type type_functor_getter;
-  visit_each<T_action, type_functor_getter>(_A_action, _A_target.get_);
+  visit_each(_A_action, _A_target.functor_);
+  visit_each(_A_action, _A_target.get_);
 }
 
-//template specialization of visit_each<>(action, functor):
 /** Performs a functor on each of the targets of a functor.
  * The function overload for sigc::compose2_functor performs a functor on the
  * functors stored in the sigc::compose2_functor object.
@@ -269,17 +257,9 @@ template <class T_action, class T_setter, class T_getter1, class T_getter2>
 void visit_each(const T_action& _A_action,
                 const compose2_functor<T_setter, T_getter1, T_getter2>& _A_target)
 {
-  typedef compose2_functor<T_setter, T_getter1, T_getter2> type_functor;
-  
-  //Note that the AIX compiler needs the actual template types of visit_each to be specified:
-  typedef typename type_functor::setter_type type_functor1;
-  visit_each<T_action, type_functor1>(_A_action, _A_target.functor_);
-  
-  typedef typename type_functor::getter1_type type_functor_getter1;
-  visit_each<T_action, type_functor_getter1>(_A_action, _A_target.get1_);
-  
-  typedef typename type_functor::getter2_type type_functor_getter2;
-  visit_each<T_action, type_functor_getter2>(_A_action, _A_target.get2_);
+  visit_each(_A_action, _A_target.functor_);
+  visit_each(_A_action, _A_target.get1_);
+  visit_each(_A_action, _A_target.get2_);
 }
 
 

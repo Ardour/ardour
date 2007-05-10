@@ -3,7 +3,6 @@
 #ifndef _GTKMM_SCROLLEDWINDOW_H
 #define _GTKMM_SCROLLEDWINDOW_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -106,17 +105,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -157,8 +150,6 @@ public:
   
   void set_placement(CornerType window_placement);
   
-  void unset_placement();
-  
   /** Gets the placement of the scrollbars for the scrolled window. See 
    * set_placement().
    * @return The current placement value.
@@ -182,56 +173,24 @@ public:
   virtual void add(Gtk::Widget& widget);
   
 
-  /** Returns the vertical scrollbar of @a scrolled_window .
-   * @return The vertical scrollbar of the scrolled window, or
-   * <tt>0</tt> if it does not have one.
-   * 
-   * @newin2p8.
-   */
-  VScrollbar* get_vscrollbar();
-  
-  /** Returns the vertical scrollbar of @a scrolled_window .
-   * @return The vertical scrollbar of the scrolled window, or
-   * <tt>0</tt> if it does not have one.
-   * 
-   * @newin2p8.
-   */
-  const VScrollbar* get_vscrollbar() const;
+  bool get_vscrollbar_visible() const;
+  bool get_hscrollbar_visible() const;
+  Gtk::HScrollbar* get_hscrollbar();
+  const Gtk::HScrollbar* get_hscrollbar() const;
+  Gtk::VScrollbar* get_vscrollbar();
+  const Gtk::VScrollbar* get_vscrollbar() const;
 
-  
-  /** Returns the horizontal scrollbar of @a scrolled_window .
-   * @return The horizontal scrollbar of the scrolled window, or 
-   * <tt>0</tt> if it does not have one.
-   * 
-   * @newin2p8.
-   */
-  HScrollbar* get_hscrollbar();
-  
-  /** Returns the horizontal scrollbar of @a scrolled_window .
-   * @return The horizontal scrollbar of the scrolled window, or 
-   * <tt>0</tt> if it does not have one.
-   * 
-   * @newin2p8.
-   */
-  const HScrollbar* get_hscrollbar() const;
-
-   bool get_vscrollbar_visible() const;
-    bool get_hscrollbar_visible() const;
- 
   //Keybinding signals:
   
   
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The GtkAdjustment for the horizontal position.
+  /** The GtkAdjustment for the horizontal position.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Gtk::Adjustment*> property_hadjustment() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The GtkAdjustment for the horizontal position.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -239,19 +198,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Gtk::Adjustment*> property_hadjustment() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The GtkAdjustment for the vertical position.
+  /** The GtkAdjustment for the vertical position.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Gtk::Adjustment*> property_vadjustment() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The GtkAdjustment for the vertical position.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -259,19 +214,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Gtk::Adjustment*> property_vadjustment() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** When the horizontal scrollbar is displayed.
+  /** When the horizontal scrollbar is displayed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<PolicyType> property_hscrollbar_policy() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** When the horizontal scrollbar is displayed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -279,19 +230,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<PolicyType> property_hscrollbar_policy() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** When the vertical scrollbar is displayed.
+  /** When the vertical scrollbar is displayed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<PolicyType> property_vscrollbar_policy() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** When the vertical scrollbar is displayed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -299,39 +246,31 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<PolicyType> property_vscrollbar_policy() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Where the contents are located with respect to the scrollbars. This property only takes effect if window-placement-set is TRUE.
+  /** Where the contents are located with respect to the scrollbars.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<CornerType> property_window_placement() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
-/** Where the contents are located with respect to the scrollbars. This property only takes effect if window-placement-set is TRUE.
+/** Where the contents are located with respect to the scrollbars.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<CornerType> property_window_placement() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Style of bevel around the contents.
+  /** Style of bevel around the contents.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<ShadowType> property_shadow_type() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Style of bevel around the contents.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -339,7 +278,6 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<ShadowType> property_shadow_type() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -355,8 +293,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::ScrolledWindow* wrap(GtkScrolledWindow* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_SCROLLEDWINDOW_H */
 

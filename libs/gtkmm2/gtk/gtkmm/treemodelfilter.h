@@ -3,7 +3,6 @@
 #ifndef _GTKMM_TREEMODELFILTER_H
 #define _GTKMM_TREEMODELFILTER_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -159,7 +158,7 @@ public:
    * G::TYPE_BOOLEAN, where <tt>true</tt> means that a row is visible, and <tt>false</tt>
    * if not.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param column A <tt>int</tt> which is the column containing the visible information.
    */
   void set_visible_column(const TreeModelColumnBase& column);
@@ -169,7 +168,7 @@ public:
    * G::TYPE_BOOLEAN, where <tt>true</tt> means that a row is visible, and <tt>false</tt>
    * if not.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param column A <tt>int</tt> which is the column containing the visible information.
    */
   void set_visible_column(int column);
@@ -178,14 +177,14 @@ public:
   /** Returns a pointer to the child model of @a filter .
    * @return A pointer to a Gtk::TreeModel.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   Glib::RefPtr<TreeModel> get_model();
   
   /** Returns a pointer to the child model of @a filter .
    * @return A pointer to a Gtk::TreeModel.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   Glib::RefPtr<const TreeModel> get_model() const;
 
@@ -205,38 +204,29 @@ public:
 
   //TODO: Remove these deprecated non-const versions when we can break ABI:
   
-#ifndef GTKMM_DISABLE_DEPRECATED
-
   /** Converts @a child_path  to a path relative to @a filter . That is, @a child_path 
    * points to a path in the child model. The rerturned path will point to the
    * same row in the filtered model. If @a child_path  isn't a valid path on the
    * child model, then <tt>0</tt> is returned.
-   * @deprecated Use convert_child_path_to_path(const Path& child_path) const
    * @param child_path A Gtk::TreePath to convert.
    * @return A newly allocated Gtk::TreePath, or <tt>0</tt>.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   Path convert_child_path_to_path(const Path& child_path);
-#endif // GTKMM_DISABLE_DEPRECATED
-
-
-#ifndef GTKMM_DISABLE_DEPRECATED
-
+  
   /** Converts @a filter_path  to a path on the child model of @a filter . That is,
    *  @a filter_path  points to a location in @a filter . The returned path will
    * point to the same location in the model not being filtered. If @a filter_path 
    * does not point to a location in the child model, <tt>0</tt> is returned.
-   * @deprecated convert_path_to_child_path(const Path& filter_path) const
    * @param filter_path A Gtk::TreePath to convert.
    * @return A newly allocated Gtk::TreePath, or <tt>0</tt>.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   Path convert_path_to_child_path(const Path& filter_path);
-#endif // GTKMM_DISABLE_DEPRECATED
 
-
+  
   /** Converts @a child_path  to a path relative to @a filter . That is, @a child_path 
    * points to a path in the child model. The rerturned path will point to the
    * same row in the filtered model. If @a child_path  isn't a valid path on the
@@ -244,7 +234,7 @@ public:
    * @param child_path A Gtk::TreePath to convert.
    * @return A newly allocated Gtk::TreePath, or <tt>0</tt>.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   Path convert_child_path_to_path(const Path& child_path) const;
   
@@ -255,7 +245,7 @@ public:
    * @param filter_path A Gtk::TreePath to convert.
    * @return A newly allocated Gtk::TreePath, or <tt>0</tt>.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   Path convert_path_to_child_path(const Path& filter_path) const;
 
@@ -263,7 +253,7 @@ public:
   /** Emits ::row_changed for each row in the child model, which causes
    * the filter to re-evaluate whether a row is visible or not.
    * 
-   * @newin2p4
+   * Since: 2.4
    */
   void refilter();
   
@@ -274,7 +264,7 @@ public:
    * a lot of unreffed access to nodes. As a side effect of this function,
    * all unreffed itters will be invalid.
    * 
-   * @newin2p4
+   * Since: 2.4
    */
   void clear_cache();
 
@@ -286,17 +276,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

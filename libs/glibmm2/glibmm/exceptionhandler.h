@@ -24,9 +24,7 @@
  */
 
 #include <sigc++/sigc++.h>
-#include <glibmmconfig.h>
 
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
 
 namespace Glib
 {
@@ -42,7 +40,6 @@ void exception_handlers_invoke() throw();
 
 } // namespace Glib
 
-#endif //GLIBMM_EXCEPTIONS_ENABLED
 
 #endif /* _GLIBMM_EXCEPTIONHANDLER_H */
 

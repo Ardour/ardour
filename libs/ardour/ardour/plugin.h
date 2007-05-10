@@ -28,6 +28,7 @@
 
 #include <jack/types.h>
 #include <ardour/types.h>
+#include <ardour/plugin_state.h>
 #include <ardour/cycles.h>
 
 #include <vector>
@@ -43,6 +44,7 @@ namespace ARDOUR {
 
 class AudioEngine;
 class Session;
+class BufferSet;
 
 class Plugin;
 
@@ -116,8 +118,11 @@ class Plugin : public PBD::StatefulDestructible
 	virtual void deactivate () = 0;
 	virtual void set_block_size (nframes_t nframes) = 0;
 
-	virtual int connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, int32_t& out, nframes_t nframes, nframes_t offset) = 0;
+	virtual int connect_and_run (BufferSet& bufs, uint32_t& in, uint32_t& out, nframes_t nframes, nframes_t offset) = 0;
+	
 	virtual std::set<uint32_t> automatable() const = 0;
+	virtual void store_state (ARDOUR::PluginState&) = 0;
+	virtual void restore_state (ARDOUR::PluginState&) = 0;
 	virtual string describe_parameter (uint32_t) = 0;
 	virtual string state_node_name() const = 0;
 	virtual void print_parameter (uint32_t, char*, uint32_t len) const = 0;

@@ -3,7 +3,6 @@
 #ifndef _GTKMM_MENUSHELL_H
 #define _GTKMM_MENUSHELL_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -155,19 +154,13 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_deactivate();
   virtual void on_selection_done();
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -199,7 +192,7 @@ public:
    * don't select tearoff items unless the only item is a tearoff
    * item.
    * 
-   * @newin2p2
+   * Since: 2.2
    * @param search_sensitive If <tt>true</tt>, search for the first selectable
    * menu item, otherwise select nothing if
    * the first item isn't sensitive. This
@@ -212,24 +205,14 @@ public:
   
   /** Cancels the selection within the menu shell.  
    * 
-   * @newin2p4
+   * Since: 2.4
    */
   void cancel();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %deactivate()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_deactivate();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %selection_done()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_selection_done();
 
 
@@ -276,66 +259,6 @@ public:
    */
   void accelerate(Widget& parent);
 
-  
-  /** Returns <tt>true</tt> if the menu shell will take the keyboard focus on popup.
-   * @return <tt>true</tt> if the menu shell will take the keyboard focus on popup.
-   * 
-   * @newin2p8.
-   */
-  bool get_take_focus() const;
-  
-  /** If @a take_focus  is <tt>true</tt> (the default) the menu shell will take the keyboard 
-   * focus so that it will receive all keyboard events which is needed to enable
-   * keyboard navigation in menus.
-   * 
-   * Setting @a take_focus  to <tt>false</tt> is useful only for special applications
-   * like virtual keyboard implementations which should not take keyboard
-   * focus.
-   * 
-   * The @a take_focus  state of a menu or menu bar is automatically propagated
-   * to submenus whenever a submenu is popped up, so you don't have to worry
-   * about recursively setting it for your entire menu hierarchy. Only when
-   * programmatically picking a submenu and popping it up manually, the
-   *  @a take_focus  property of the submenu needs to be set explicitely.
-   * 
-   * Note that setting it to <tt>false</tt> has side-effects:
-   * 
-   * If the focus is in some other app, it keeps the focus and keynav in
-   * the menu doesn't work. Consequently, keynav on the menu will only
-   * work if the focus is on some toplevel owned by the onscreen keyboard.
-   * 
-   * To avoid confusing the user, menus with @a take_focus  set to <tt>false</tt>
-   * should not display mnemonics or accelerators, since it cannot be
-   * guaranteed that they will work.
-   * 
-   * See also gdk_keyboard_grab()
-   * 
-   * @newin2p8
-   * @param take_focus <tt>true</tt> if the menu shell should take the keyboard focus on popup.
-   */
-  void set_take_focus(bool take_focus = true);
-  
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** A boolean that determines whether the menu grabs the keyboard focus.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy<bool> property_take_focus() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-#ifdef GLIBMM_PROPERTIES_ENABLED
-/** A boolean that determines whether the menu grabs the keyboard focus.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy_ReadOnly<bool> property_take_focus() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-
 protected:
   MenuShell();
   
@@ -360,8 +283,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::MenuShell* wrap(GtkMenuShell* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_MENUSHELL_H */
 

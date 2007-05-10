@@ -3,7 +3,6 @@
 #ifndef _ATKMM_COMPONENT_H
 #define _ATKMM_COMPONENT_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -284,76 +283,32 @@ public:
   bool set_size(int width, int height);
 
 protected:
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual guint add_focus_handler_vfunc(AtkFocusHandler handler);
-#endif //GLIBMM_VFUNCS_ENABLED
+    virtual guint add_focus_handler_vfunc(AtkFocusHandler handler);
+    virtual bool contains_vfunc(int x, int y, CoordType coord_type) const;
 
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual bool contains_vfunc(int x, int y, CoordType coord_type) const;
-#endif //GLIBMM_VFUNCS_ENABLED
+    virtual Glib::RefPtr<Atk::Object> get_accessible_at_point_vfunc(int x, int y, CoordType coord_type);
 
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual Glib::RefPtr<Atk::Object> get_accessible_at_point_vfunc(int x, int y, CoordType coord_type);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void get_extents_vfunc(int& x, int& y, int& width, int& height, CoordType coord_type) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void get_position_vfunc(int& x, int& y, CoordType coord_type) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void get_size_vfunc(int& width, int& height) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual Layer get_layer_vfunc() const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual int get_mdi_zorder_vfunc() const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual bool grab_focus_vfunc();
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void remove_focus_handler_vfunc(guint handler_id);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual bool set_extents_vfunc(int x, int y, int width, int height, CoordType coord_type);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual bool set_position_vfunc(int x, int y, CoordType coord_type);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual bool set_size_vfunc(int width, int height);
-#endif //GLIBMM_VFUNCS_ENABLED
+    virtual void get_extents_vfunc(int& x, int& y, int& width, int& height, CoordType coord_type) const;
+    virtual void get_position_vfunc(int& x, int& y, CoordType coord_type) const;
+    virtual void get_size_vfunc(int& width, int& height) const;
+    virtual Layer get_layer_vfunc() const;
+    virtual int get_mdi_zorder_vfunc() const;
+    virtual bool grab_focus_vfunc();
+    virtual void remove_focus_handler_vfunc(guint handler_id);
+    virtual bool set_extents_vfunc(int x, int y, int width, int height, CoordType coord_type);
+    virtual bool set_position_vfunc(int x, int y, CoordType coord_type);
+    virtual bool set_size_vfunc(int width, int height);
 
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };
@@ -371,7 +326,6 @@ namespace Glib
   Glib::RefPtr<Atk::Component> wrap(AtkComponent* object, bool take_copy = false);
 
 } // namespace Glib
-
 
 #endif /* _ATKMM_COMPONENT_H */
 

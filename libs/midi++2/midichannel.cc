@@ -25,61 +25,61 @@
 using namespace sigc;
 using namespace MIDI;
 
-Channel::Channel (byte channelnum, Port &p) : port (p)
+Channel::Channel (byte channelnum, Port &p) : _port (p)
 {
-	channel_number = channelnum;
+	_channel_number = channelnum;
 
-	reset (false);
+	reset (0, 1, false);
 }	
 
 void
 Channel::connect_input_signals ()
 
 {
-	port.input()->channel_pressure[channel_number].connect
+	_port.input()->channel_pressure[_channel_number].connect
 		(mem_fun (*this, &Channel::process_chanpress));
-	port.input()->channel_note_on[channel_number].connect
+	_port.input()->channel_note_on[_channel_number].connect
 		(mem_fun (*this, &Channel::process_note_on));
-	port.input()->channel_note_off[channel_number].connect
+	_port.input()->channel_note_off[_channel_number].connect
 		(mem_fun (*this, &Channel::process_note_off));
-	port.input()->channel_poly_pressure[channel_number].connect
+	_port.input()->channel_poly_pressure[_channel_number].connect
 		(mem_fun (*this, &Channel::process_polypress));
-	port.input()->channel_program_change[channel_number].connect
+	_port.input()->channel_program_change[_channel_number].connect
 		(mem_fun (*this, &Channel::process_program_change));
-	port.input()->channel_controller[channel_number].connect
+	_port.input()->channel_controller[_channel_number].connect
 		(mem_fun (*this, &Channel::process_controller));
-	port.input()->channel_pitchbend[channel_number].connect
+	_port.input()->channel_pitchbend[_channel_number].connect
 		(mem_fun (*this, &Channel::process_pitchbend));
-	port.input()->reset.connect (mem_fun (*this, &Channel::process_reset));
+	_port.input()->reset.connect (mem_fun (*this, &Channel::process_reset));
 }
 
 void
 Channel::connect_output_signals ()
 
 {
-	port.output()->channel_pressure[channel_number].connect
+	_port.output()->channel_pressure[_channel_number].connect
 		(mem_fun (*this, &Channel::process_chanpress));
-	port.output()->channel_note_on[channel_number].connect
+	_port.output()->channel_note_on[_channel_number].connect
 		(mem_fun (*this, &Channel::process_note_on));
-	port.output()->channel_note_off[channel_number].connect
+	_port.output()->channel_note_off[_channel_number].connect
 		(mem_fun (*this, &Channel::process_note_off));
-	port.output()->channel_poly_pressure[channel_number].connect
+	_port.output()->channel_poly_pressure[_channel_number].connect
 		(mem_fun (*this, &Channel::process_polypress));
-	port.output()->channel_program_change[channel_number].connect
+	_port.output()->channel_program_change[_channel_number].connect
 		(mem_fun (*this, &Channel::process_program_change));
-	port.output()->channel_controller[channel_number].connect
+	_port.output()->channel_controller[_channel_number].connect
 		(mem_fun (*this, &Channel::process_controller));
-	port.output()->channel_pitchbend[channel_number].connect
+	_port.output()->channel_pitchbend[_channel_number].connect
 		(mem_fun (*this, &Channel::process_pitchbend));
-	port.output()->reset.connect (mem_fun (*this, &Channel::process_reset));
+	_port.output()->reset.connect (mem_fun (*this, &Channel::process_reset));
 }
 
 void
-Channel::reset (bool notes_off)
+Channel::reset (timestamp_t timestamp, nframes_t nframes, bool notes_off)
 {
-	program_number = channel_number;
-	bank_number = 0;
-	pitch_bend = 0;
+	_program_number = _channel_number;
+	_bank_number = 0;
+	_pitch_bend = 0;
 
 	_last_note_on = 0;
 	_last_note_off = 0;
@@ -87,25 +87,25 @@ Channel::reset (bool notes_off)
 	_last_off_velocity = 0;
 
 	if (notes_off) {
-		all_notes_off ();
+		all_notes_off (timestamp);
 	}
 
-	memset (polypress, 0, sizeof (polypress));
-	memset (controller_msb, 0, sizeof (controller_msb));
-	memset (controller_lsb, 0, sizeof (controller_lsb));
+	memset (_polypress, 0, sizeof (_polypress));
+	memset (_controller_msb, 0, sizeof (_controller_msb));
+	memset (_controller_lsb, 0, sizeof (_controller_lsb));
        
 	/* zero all controllers XXX not necessarily the right thing */
 
-	memset (controller_val, 0, sizeof (controller_val));
+	memset (_controller_val, 0, sizeof (_controller_val));
 
 	for (int n = 0; n < 128; n++) {
-		controller_14bit[n] = false;
+		_controller_14bit[n] = false;
 	}
 
-	rpn_msb = 0;
-	rpn_lsb = 0;
-	nrpn_msb = 0;
-	nrpn_lsb = 0;
+	_rpn_msb = 0;
+	_rpn_lsb = 0;
+	_nrpn_msb = 0;
+	_nrpn_lsb = 0;
 
 	_omni = true;
 	_poly = false;
@@ -155,20 +155,20 @@ Channel::process_controller (Parser &parser, EventTwoBytes *tb)
 		   it directly.
 		*/
 
-		cv = (unsigned short) controller_val[tb->controller_number];
+		cv = (unsigned short) _controller_val[tb->controller_number];
 
-		if (controller_14bit[tb->controller_number]) {
+		if (_controller_14bit[tb->controller_number]) {
 			cv = ((tb->value << 7) | (cv & 0x7f));
 		} else {
 			cv = tb->value;
 		}
 
-		controller_val[tb->controller_number] = (controller_value_t)cv;
+		_controller_val[tb->controller_number] = (controller_value_t)cv;
 
 	} else if ((tb->controller_number >= 32 && 
 		    tb->controller_number <= 63)) {
 		   
-		cv = (unsigned short) controller_val[tb->controller_number];
+		cv = (unsigned short) _controller_val[tb->controller_number];
 
 		/* LSB for CC 0-31 arrived. 
 
@@ -183,20 +183,20 @@ Channel::process_controller (Parser &parser, EventTwoBytes *tb)
 
 		int cn = tb->controller_number - 32;
 		   
-		if (controller_14bit[cn] == false) {
-			controller_14bit[cn] = true;
+		if (_controller_14bit[cn] == false) {
+			_controller_14bit[cn] = true;
 			cv = (cv << 7) | (tb->value & 0x7f);
 		} else {
 			cv = (cv & 0x3f80) | (tb->value & 0x7f);
 		}
 
-		controller_val[tb->controller_number] = 
+		_controller_val[tb->controller_number] = 
 			(controller_value_t) cv;
 	} else {
 
 		/* controller can only take 7 bit values */
 		
-		controller_val[tb->controller_number] = 
+		_controller_val[tb->controller_number] = 
 			(controller_value_t) tb->value;
 	}
 
@@ -204,11 +204,11 @@ Channel::process_controller (Parser &parser, EventTwoBytes *tb)
 	 */
 
 	if (tb->controller_number == 0) {
-		bank_number = (unsigned short) controller_val[0];
-		if (port.input()) {
-			port.input()->bank_change (*port.input(), bank_number);
-			port.input()->channel_bank_change[channel_number] 
-				(*port.input(), bank_number);
+		_bank_number = (unsigned short) _controller_val[0];
+		if (_port.input()) {
+			_port.input()->bank_change (*_port.input(), _bank_number);
+			_port.input()->channel_bank_change[_channel_number] 
+				(*_port.input(), _bank_number);
 		}
 	}
 
@@ -218,45 +218,47 @@ void
 Channel::process_program_change (Parser &parser, byte val) 
 
 {
-	program_number = val;
+	_program_number = val;
 }
 
 void
 Channel::process_chanpress (Parser &parser, byte val) 
 
 {
-	chanpress = val;
+	_chanpress = val;
 }
 
 void
 Channel::process_polypress (Parser &parser, EventTwoBytes *tb) 
 
 {
-	polypress[tb->note_number] = tb->value;
+	_polypress[tb->note_number] = tb->value;
 }
 
 void
 Channel::process_pitchbend (Parser &parser, pitchbend_t val) 
 
 {
-	pitch_bend = val;
+	_pitch_bend = val;
 }
 
 void
 Channel::process_reset (Parser &parser) 
 
 {
-	reset ();
+	reset (0, 1);
 }
 
-int
-Channel::channel_msg (byte id, byte val1, byte val2)
-
+/** Write a message to a channel.
+ * \return true if success
+ */
+bool
+Channel::channel_msg (byte id, byte val1, byte val2, timestamp_t timestamp)
 {
 	unsigned char msg[3];
 	int len = 0;
 
-	msg[0] = id | (channel_number & 0xf);
+	msg[0] = id | (_channel_number & 0xf);
 
 	switch (id) {
 	case off:
@@ -300,5 +302,5 @@ Channel::channel_msg (byte id, byte val1, byte val2)
 		break;
 	}
 
-	return port.midimsg (msg, len);
+	return _port.midimsg (msg, len, timestamp);
 }

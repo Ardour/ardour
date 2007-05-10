@@ -121,7 +121,7 @@ Editor::add_imageframe_marker_time_axis(const string & track_name, TimeAxisView*
 void
 Editor::popup_imageframe_edit_menu(int button, int32_t time, ArdourCanvas::Item* ifv, bool with_item)
 {
-	ImageFrameTimeAxis* ifta = dynamic_cast<ImageFrameTimeAxis*>(clicked_trackview) ;
+	ImageFrameTimeAxis* ifta = dynamic_cast<ImageFrameTimeAxis*>(clicked_axisview) ;
 	
 	if(ifta)
 	{
@@ -138,7 +138,7 @@ Editor::popup_imageframe_edit_menu(int button, int32_t time, ArdourCanvas::Item*
 void
 Editor::popup_marker_time_axis_edit_menu(int button, int32_t time, ArdourCanvas::Item* ifv, bool with_item)
 {
-	MarkerTimeAxis* mta = dynamic_cast<MarkerTimeAxis*>(clicked_trackview) ;
+	MarkerTimeAxis* mta = dynamic_cast<MarkerTimeAxis*>(clicked_axisview) ;
 	
 	if(mta)
 	{
@@ -185,9 +185,9 @@ Editor::canvas_imageframe_item_view_event (GdkEvent *event, ArdourCanvas::Item* 
 		case GDK_BUTTON_PRESS:
 		case GDK_2BUTTON_PRESS:
 		case GDK_3BUTTON_PRESS:
-			clicked_trackview = &ifv->get_time_axis_view();
+			clicked_axisview = &ifv->get_time_axis_view();
 			iftag = ifv->get_time_axis_group() ;
-			dynamic_cast<ImageFrameTimeAxis*>(clicked_trackview)->get_view()->set_selected_imageframe_view(iftag, ifv);
+			dynamic_cast<ImageFrameTimeAxis*>(clicked_axisview)->get_view()->set_selected_imageframe_view(iftag, ifv);
 			ret = button_press_handler (item, event, ImageFrameItem) ;
 			break ;
 		case GDK_BUTTON_RELEASE:
@@ -213,9 +213,9 @@ Editor::canvas_imageframe_start_handle_event (GdkEvent *event, ArdourCanvas::Ite
 		case GDK_BUTTON_PRESS:
 		case GDK_2BUTTON_PRESS:
 		case GDK_3BUTTON_PRESS:
-			clicked_trackview = &ifv->get_time_axis_view() ;
+			clicked_axisview = &ifv->get_time_axis_view() ;
 			iftag = ifv->get_time_axis_group() ;
-			dynamic_cast<ImageFrameTimeAxis*>(clicked_trackview)->get_view()->set_selected_imageframe_view(iftag, ifv);
+			dynamic_cast<ImageFrameTimeAxis*>(clicked_axisview)->get_view()->set_selected_imageframe_view(iftag, ifv);
 			
 			ret = button_press_handler (item, event, ImageFrameHandleStartItem) ;
 			break ;
@@ -248,9 +248,9 @@ Editor::canvas_imageframe_end_handle_event (GdkEvent *event, ArdourCanvas::Item*
 		case GDK_BUTTON_PRESS:
 		case GDK_2BUTTON_PRESS:
 		case GDK_3BUTTON_PRESS:
-			clicked_trackview = &ifv->get_time_axis_view() ;
+			clicked_axisview = &ifv->get_time_axis_view() ;
 			iftag = ifv->get_time_axis_group() ;
-			dynamic_cast<ImageFrameTimeAxis*>(clicked_trackview)->get_view()->set_selected_imageframe_view(iftag, ifv);
+			dynamic_cast<ImageFrameTimeAxis*>(clicked_axisview)->get_view()->set_selected_imageframe_view(iftag, ifv);
 			
 			ret = button_press_handler (item, event, ImageFrameHandleEndItem) ;
 			break ;
@@ -281,7 +281,7 @@ Editor::canvas_imageframe_view_event (GdkEvent* event, ArdourCanvas::Item* item,
 		case GDK_BUTTON_PRESS:
 		case GDK_2BUTTON_PRESS:
 		case GDK_3BUTTON_PRESS:
-			clicked_trackview = ifta ;
+			clicked_axisview = ifta ;
 			ret = button_press_handler (item, event, ImageFrameTimeAxisItem) ;
 			break ;
 		case GDK_BUTTON_RELEASE:
@@ -304,7 +304,7 @@ Editor::canvas_marker_time_axis_view_event (GdkEvent* event, ArdourCanvas::Item*
 		case GDK_BUTTON_PRESS:
 		case GDK_2BUTTON_PRESS:
 		case GDK_3BUTTON_PRESS:
-			clicked_trackview = mta ;
+			clicked_axisview = mta ;
 			ret = button_press_handler(item, event, MarkerTimeAxisItem) ;
 			break ;
 		case GDK_BUTTON_RELEASE:
@@ -327,8 +327,8 @@ Editor::canvas_markerview_item_view_event (GdkEvent* event, ArdourCanvas::Item* 
 		case GDK_BUTTON_PRESS:
 		case GDK_2BUTTON_PRESS:
 		case GDK_3BUTTON_PRESS:
-			clicked_trackview = &mta->get_time_axis_view() ;
-			dynamic_cast<MarkerTimeAxis*>(clicked_trackview)->get_view()->set_selected_time_axis_item(mta);
+			clicked_axisview = &mta->get_time_axis_view() ;
+			dynamic_cast<MarkerTimeAxis*>(clicked_axisview)->get_view()->set_selected_time_axis_item(mta);
 			ret = button_press_handler(item, event, MarkerViewItem) ;
 			break ;
 		case GDK_BUTTON_RELEASE:
@@ -352,8 +352,8 @@ Editor::canvas_markerview_start_handle_event (GdkEvent* event, ArdourCanvas::Ite
 		case GDK_BUTTON_PRESS:
 		case GDK_2BUTTON_PRESS:
 		case GDK_3BUTTON_PRESS:
-			clicked_trackview = &mta->get_time_axis_view() ;
-			dynamic_cast<MarkerTimeAxis*>(clicked_trackview)->get_view()->set_selected_time_axis_item(mta) ;
+			clicked_axisview = &mta->get_time_axis_view() ;
+			dynamic_cast<MarkerTimeAxis*>(clicked_axisview)->get_view()->set_selected_time_axis_item(mta) ;
 			ret = button_press_handler(item, event, MarkerViewHandleStartItem) ;
 			break ;
 		case GDK_BUTTON_RELEASE:
@@ -383,8 +383,8 @@ Editor::canvas_markerview_end_handle_event (GdkEvent* event, ArdourCanvas::Item*
 		case GDK_BUTTON_PRESS:
 		case GDK_2BUTTON_PRESS:
 		case GDK_3BUTTON_PRESS:
-			clicked_trackview = &mta->get_time_axis_view() ;
-			dynamic_cast<MarkerTimeAxis*>(clicked_trackview)->get_view()->set_selected_time_axis_item(mta) ;
+			clicked_axisview = &mta->get_time_axis_view() ;
+			dynamic_cast<MarkerTimeAxis*>(clicked_axisview)->get_view()->set_selected_time_axis_item(mta) ;
 			ret = button_press_handler(item, event, MarkerViewHandleEndItem) ;
 			break ;
 		case GDK_BUTTON_RELEASE:
@@ -422,7 +422,7 @@ Editor::canvas_markerview_end_handle_event (GdkEvent* event, ArdourCanvas::Item*
 void
 Editor::start_imageframe_grab(ArdourCanvas::Item* item, GdkEvent* event)
 {
-	ImageFrameView* ifv = ((ImageFrameTimeAxis*)clicked_trackview)->get_view()->get_selected_imageframe_view() ;
+	ImageFrameView* ifv = ((ImageFrameTimeAxis*)clicked_axisview)->get_view()->get_selected_imageframe_view() ;
 	drag_info.copy = false ;
 	drag_info.item = item ;
 	drag_info.data = ifv ;
@@ -455,7 +455,7 @@ Editor::start_imageframe_grab(ArdourCanvas::Item* item, GdkEvent* event)
 void
 Editor::start_markerview_grab(ArdourCanvas::Item* item, GdkEvent* event)
 {
-	MarkerView* mv = ((MarkerTimeAxis*)clicked_trackview)->get_view()->get_selected_time_axis_item() ;
+	MarkerView* mv = ((MarkerTimeAxis*)clicked_axisview)->get_view()->get_selected_time_axis_item() ;
 	drag_info.copy = false ;
 	drag_info.item = item ;
 	drag_info.data = mv ;
@@ -613,7 +613,7 @@ void
 Editor::imageframe_start_handle_op(ArdourCanvas::Item* item, GdkEvent* event)
 {
 	// get the selected item from the parent time axis
-	ImageFrameTimeAxis* ifta = dynamic_cast<ImageFrameTimeAxis*>(clicked_trackview) ;
+	ImageFrameTimeAxis* ifta = dynamic_cast<ImageFrameTimeAxis*>(clicked_axisview) ;
 	if(ifta)
 	{
 		ImageFrameView* ifv = ifta->get_view()->get_selected_imageframe_view() ;
@@ -641,7 +641,7 @@ void
 Editor::imageframe_end_handle_op(ArdourCanvas::Item* item, GdkEvent* event)
 {
 	// get the selected item from the parent time axis
-	ImageFrameTimeAxis* ifta = dynamic_cast<ImageFrameTimeAxis*>(clicked_trackview) ;
+	ImageFrameTimeAxis* ifta = dynamic_cast<ImageFrameTimeAxis*>(clicked_axisview) ;
 
 	if(ifta)
 	{
@@ -838,7 +838,7 @@ Editor::imageframe_end_handle_end_trim (ArdourCanvas::Item* item, GdkEvent* even
 void
 Editor::markerview_item_start_handle_op(ArdourCanvas::Item* item, GdkEvent* event)
 {
-	MarkerView* mv = reinterpret_cast<MarkerTimeAxis*>(clicked_trackview)->get_view()->get_selected_time_axis_item() ;
+	MarkerView* mv = reinterpret_cast<MarkerTimeAxis*>(clicked_axisview)->get_view()->get_selected_time_axis_item() ;
 
 	if (mv == 0)
 	{
@@ -861,7 +861,7 @@ Editor::markerview_item_start_handle_op(ArdourCanvas::Item* item, GdkEvent* even
 void
 Editor::markerview_item_end_handle_op(ArdourCanvas::Item* item, GdkEvent* event)
 {
-	MarkerView* mv = reinterpret_cast<MarkerTimeAxis*>(clicked_trackview)->get_view()->get_selected_time_axis_item() ;
+	MarkerView* mv = reinterpret_cast<MarkerTimeAxis*>(clicked_axisview)->get_view()->get_selected_time_axis_item() ;
 	if (mv == 0)
 	{
 		fatal << _("programming error: no MarkerView selected") << endmsg ;

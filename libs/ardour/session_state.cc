@@ -17,6 +17,9 @@
     
 */
 
+#define __STDC_FORMAT_MACROS 1
+#include <stdint.h>
+
 #include <algorithm>
 #include <fstream>
 #include <string>
@@ -59,12 +62,17 @@
 #include <ardour/audioengine.h>
 #include <ardour/configuration.h>
 #include <ardour/session.h>
+#include <ardour/buffer.h>
 #include <ardour/audio_diskstream.h>
+#include <ardour/midi_diskstream.h>
 #include <ardour/utils.h>
 #include <ardour/audioplaylist.h>
+#include <ardour/midi_playlist.h>
+#include <ardour/smf_source.h>
 #include <ardour/audiofilesource.h>
 #include <ardour/silentfilesource.h>
 #include <ardour/sndfilesource.h>
+#include <ardour/midi_source.h>
 #include <ardour/sndfile_helpers.h>
 #include <ardour/auditioner.h>
 #include <ardour/export.h>
@@ -75,12 +83,14 @@
 #include <ardour/slave.h>
 #include <ardour/tempo.h>
 #include <ardour/audio_track.h>
+#include <ardour/midi_track.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/utils.h>
 #include <ardour/named_selection.h>
 #include <ardour/version.h>
 #include <ardour/location.h>
 #include <ardour/audioregion.h>
+#include <ardour/midi_region.h>
 #include <ardour/crossfade.h>
 #include <ardour/control_protocol_manager.h>
 #include <ardour/region_factory.h>
@@ -185,10 +195,10 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	first_file_data_format_reset = true;
 	first_file_header_format_reset = true;
 	butler_thread = (pthread_t) 0;
-	midi_thread = (pthread_t) 0;
+	//midi_thread = (pthread_t) 0;
 
 	AudioDiskstream::allocate_working_buffers();
-	
+
 	/* default short fade = 15ms */
 
 	Crossfade::set_short_xfade_length ((nframes_t) floor (Config->get_short_xfade_seconds() * frame_rate()));
@@ -247,11 +257,11 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	PlaylistFactory::PlaylistCreated.connect (mem_fun (*this, &Session::add_playlist));
 	Redirect::RedirectCreated.connect (mem_fun (*this, &Session::add_redirect));
 	NamedSelection::NamedSelectionCreated.connect (mem_fun (*this, &Session::add_named_selection));
-        AutomationList::AutomationListCreated.connect (mem_fun (*this, &Session::add_automation_list));
+	AutomationList::AutomationListCreated.connect (mem_fun (*this, &Session::add_automation_list));
 
 	Controllable::Destroyed.connect (mem_fun (*this, &Session::remove_controllable));
 
-	IO::MoreOutputs.connect (mem_fun (*this, &Session::ensure_passthru_buffers));
+	IO::MoreChannels.connect (mem_fun (*this, &Session::ensure_buffers));
 
 	/* stop IO objects from doing stuff until we're ready for them */
 
@@ -276,9 +286,9 @@ Session::second_stage_init (bool new_session)
 		return -1;
 	}
 
-	if (start_midi_thread ()) {
+	/*if (start_midi_thread ()) {
 		return -1;
-	}
+	}*/
 
 	// set_state() will call setup_raid_path(), but if it's a new session we need
 	// to call setup_raid_path() here.
@@ -329,7 +339,7 @@ Session::second_stage_init (bool new_session)
 		return -1;
 	}
 
-	send_full_time_code ();
+	//send_full_time_code ();
 	_engine.transport_locate (0);
 	deliver_mmc (MIDI::MachineControl::cmdMmcReset, 0);
 	deliver_mmc (MIDI::MachineControl::cmdLocate, 0);
@@ -402,6 +412,7 @@ Session::setup_raid_path (string path)
 		fspath += sound_dir (false);
 		
 		AudioFileSource::set_search_path (fspath);
+		SMFSource::set_search_path (fspath); // FIXME: should be different
 
 		return;
 	}
@@ -445,6 +456,7 @@ Session::setup_raid_path (string path)
 	/* set the AudioFileSource search path */
 
 	AudioFileSource::set_search_path (fspath);
+	SMFSource::set_search_path (fspath); // FIXME: should be different
 
 	/* reset the round-robin soundfile path thingie */
 
@@ -558,15 +570,22 @@ Session::load_diskstreams (const XMLNode& node)
 	clist = node.children();
 
 	for (citer = clist.begin(); citer != clist.end(); ++citer) {
-		
 
 		try {
-			boost::shared_ptr<AudioDiskstream> dstream (new AudioDiskstream (*this, **citer));
-			add_diskstream (dstream);
+			/* diskstreams added automatically by DiskstreamCreated handler */
+			if ((*citer)->name() == "AudioDiskstream" || (*citer)->name() == "DiskStream") {
+				boost::shared_ptr<AudioDiskstream> dstream (new AudioDiskstream (*this, **citer));
+				add_diskstream (dstream);
+			} else if ((*citer)->name() == "MidiDiskstream") {
+				boost::shared_ptr<MidiDiskstream> dstream (new MidiDiskstream (*this, **citer));
+				add_diskstream (dstream);
+			} else {
+				error << _("Session: unknown diskstream type in XML") << endmsg;
+			}
 		} 
 		
 		catch (failed_constructor& err) {
-			error << _("Session: could not load diskstream via XML state")			      << endmsg;
+			error << _("Session: could not load diskstream via XML state") << endmsg;
 			return -1;
 		}
 	}
@@ -947,9 +966,9 @@ Session::state(bool full_state)
 	child = node->add_child ("Sources");
 
 	if (full_state) {
-		Glib::Mutex::Lock sl (audio_source_lock);
+		Glib::Mutex::Lock sl (source_lock);
 
-		for (AudioSourceList::iterator siter = audio_sources.begin(); siter != audio_sources.end(); ++siter) {
+		for (SourceMap::iterator siter = sources.begin(); siter != sources.end(); ++siter) {
 			
 			/* Don't save information about AudioFileSources that are empty */
 			
@@ -957,8 +976,8 @@ Session::state(bool full_state)
 
 			if ((fs = boost::dynamic_pointer_cast<AudioFileSource> (siter->second)) != 0) {
 
-				/* destructive file sources are OK if they are empty, because
-				   we will re-use them every time.
+				/* Don't save sources that are empty, unless they're destructive (which are OK
+				   if they are empty, because we will re-use them every time.)
 				*/
 
 				if (!fs->destructive()) {
@@ -977,7 +996,7 @@ Session::state(bool full_state)
 	if (full_state) { 
 		Glib::Mutex::Lock rl (region_lock);
 
-		for (AudioRegionList::const_iterator i = audio_regions.begin(); i != audio_regions.end(); ++i) {
+		for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
 			
 			/* only store regions not attached to playlists */
 
@@ -1355,12 +1374,26 @@ Session::XMLRouteFactory (const XMLNode& node)
 		return boost::shared_ptr<Route> ((Route*) 0);
 	}
 
-	if (node.property ("diskstream") != 0 || node.property ("diskstream-id") != 0) {
-		boost::shared_ptr<Route> x (new AudioTrack (*this, node));
-		return x;
+	bool has_diskstream = (node.property ("diskstream") != 0 || node.property ("diskstream-id") != 0);
+	
+	DataType type = DataType::AUDIO;
+	const XMLProperty* prop = node.property("default-type");
+	if (prop)
+		type = DataType(prop->value());
+	
+	assert(type != DataType::NIL);
+
+	if (has_diskstream) {
+		if (type == DataType::AUDIO) {
+			boost::shared_ptr<Route> ret (new AudioTrack (*this, node));
+			return ret;
+		} else {
+			boost::shared_ptr<Route> ret (new MidiTrack (*this, node));
+			return ret;
+		}
 	} else {
-		boost::shared_ptr<Route> x (new Route (*this, node));
-		return x;
+		boost::shared_ptr<Route> ret (new Route (*this, node));
+		return ret;
 	}
 }
 
@@ -1369,7 +1402,7 @@ Session::load_regions (const XMLNode& node)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
-	boost::shared_ptr<AudioRegion> region;
+	boost::shared_ptr<Region> region;
 
 	nlist = node.children();
 
@@ -1384,8 +1417,32 @@ Session::load_regions (const XMLNode& node)
 	return 0;
 }
 
-boost::shared_ptr<AudioRegion>
+boost::shared_ptr<Region>
 Session::XMLRegionFactory (const XMLNode& node, bool full)
+{
+	const XMLProperty* type = node.property("type");
+
+	try {
+	
+	if ( !type || type->value() == "audio" ) {
+
+		return boost::shared_ptr<Region>(XMLAudioRegionFactory (node, full));
+	
+	} else if (type->value() == "midi") {
+		
+		return boost::shared_ptr<Region>(XMLMidiRegionFactory (node, full));
+
+	}
+	
+	} catch (failed_constructor& err) {
+		return boost::shared_ptr<Region> ();
+	}
+
+	return boost::shared_ptr<Region> ();
+}
+
+boost::shared_ptr<AudioRegion>
+Session::XMLAudioRegionFactory (const XMLNode& node, bool full)
 {
 	const XMLProperty* prop;
 	boost::shared_ptr<Source> source;
@@ -1476,14 +1533,66 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 	}
 }
 
+boost::shared_ptr<MidiRegion>
+Session::XMLMidiRegionFactory (const XMLNode& node, bool full)
+{
+	const XMLProperty* prop;
+	boost::shared_ptr<Source> source;
+	boost::shared_ptr<MidiSource> ms;
+	MidiRegion::SourceList sources;
+	uint32_t nchans = 1;
+	
+	if (node.name() != X_("Region")) {
+		return boost::shared_ptr<MidiRegion>();
+	}
+
+	if ((prop = node.property (X_("channels"))) != 0) {
+		nchans = atoi (prop->value().c_str());
+	}
+
+	// Multiple midi channels?  that's just crazy talk
+	assert(nchans == 1);
+
+	if ((prop = node.property (X_("source-0"))) == 0) {
+		if ((prop = node.property ("source")) == 0) {
+			error << _("Session: XMLNode describing a MidiRegion is incomplete (no source)") << endmsg;
+			return boost::shared_ptr<MidiRegion>();
+		}
+	}
+
+	PBD::ID s_id (prop->value());
+
+	if ((source = source_by_id (s_id)) == 0) {
+		error << string_compose(_("Session: XMLNode describing a MidiRegion references an unknown source id =%1"), s_id) << endmsg;
+		return boost::shared_ptr<MidiRegion>();
+	}
+
+	ms = boost::dynamic_pointer_cast<MidiSource>(source);
+	if (!ms) {
+		error << string_compose(_("Session: XMLNode describing a MidiRegion references a non-midi source id =%1"), s_id) << endmsg;
+		return boost::shared_ptr<MidiRegion>();
+	}
+
+	sources.push_back (ms);
+
+	try {
+		boost::shared_ptr<MidiRegion> region (boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (sources, node)));
+		return region;
+	}
+
+	catch (failed_constructor& err) {
+		return boost::shared_ptr<MidiRegion>();
+	}
+}
+
 XMLNode&
 Session::get_sources_as_xml ()
 
 {
 	XMLNode* node = new XMLNode (X_("Sources"));
-	Glib::Mutex::Lock lm (audio_source_lock);
+	Glib::Mutex::Lock lm (source_lock);
 
-	for (AudioSourceList::iterator i = audio_sources.begin(); i != audio_sources.end(); ++i) {
+	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
 		node->add_child_nocopy (i->second->get_state());
 	}
 
@@ -1855,7 +1964,6 @@ Session::load_unused_playlists (const XMLNode& node)
 
 	return 0;
 }
-
 
 boost::shared_ptr<Playlist>
 Session::XMLPlaylistFactory (const XMLNode& node)
@@ -2628,9 +2736,9 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 	rep.paths.clear ();
 	rep.space = 0;
 
-	for (AudioSourceList::iterator i = audio_sources.begin(); i != audio_sources.end(); ) {
+	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ) {
 		
-		AudioSourceList::iterator tmp;
+		SourceMap::iterator tmp;
 
 		tmp = i;
 		++tmp;
@@ -2684,7 +2792,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 	/*  add our current source list
 	 */
 	
-	for (AudioSourceList::iterator i = audio_sources.begin(); i != audio_sources.end(); ++i) {
+	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
 		boost::shared_ptr<AudioFileSource> fs;
 		
 		if ((fs = boost::dynamic_pointer_cast<AudioFileSource> (i->second)) != 0) {
@@ -3165,7 +3273,7 @@ Session::config_changed (const char* parameter_name)
 
 	} else if (PARAM_IS ("mmc-control")) {
 
-		poke_midi_thread ();
+		//poke_midi_thread ();
 
 	} else if (PARAM_IS ("mmc-device-id")) {
 
@@ -3175,7 +3283,7 @@ Session::config_changed (const char* parameter_name)
 
 	} else if (PARAM_IS ("midi-control")) {
 		
-		poke_midi_thread ();
+		//poke_midi_thread ();
 
 	} else if (PARAM_IS ("raid-path")) {
 

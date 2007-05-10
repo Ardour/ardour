@@ -3,7 +3,6 @@
 #ifndef _LIBGNOMECANVASMM_POLYGON_H
 #define _LIBGNOMECANVASMM_POLYGON_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -96,13 +95,9 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
 
@@ -113,17 +108,14 @@ public:
   Polygon(Group& parent, const Points& points);
   explicit Polygon(Group& parent);
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** 
+  /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Points> property_points() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -131,7 +123,6 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Points> property_points() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -148,8 +139,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gnome::Canvas::Polygon* wrap(GnomeCanvasPolygon* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _LIBGNOMECANVASMM_POLYGON_H */
 

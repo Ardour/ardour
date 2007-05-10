@@ -19,9 +19,6 @@ gtkardour.Append(DOMAIN=domain, MAJOR=1,MINOR=0,MICRO=2)
 gtkardour.Append(CCFLAGS="-DPACKAGE=\\\"" + domain + "\\\"")
 gtkardour.Append(CXXFLAGS="-DPACKAGE=\\\"" + domain + "\\\"")
 gtkardour.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
-gtkardour.Append(CXXFLAGS="-DGLIBMM_DISABLE_DEPRECATED")
-gtkardour.Append(CXXFLAGS="-DGDKMM_DISABLE_DEPRECATED")
-gtkardour.Append(CXXFLAGS="-DGTKMM_DISABLE_DEPRECATED")
 gtkardour.Append(CPPPATH="#/")  # for top level svn_revision.h
 #gtkardour.Append(CXXFLAGS="-DFLOWCANVAS_AA")
 gtkardour.Append(PACKAGE=domain)
@@ -42,7 +39,6 @@ gtkardour.Merge ([
     libraries['flac'],
     libraries['lrdf'],
     libraries['glibmm2'],
-    libraries['cairomm'],
     libraries['pangomm'],
     libraries['atkmm'],
     libraries['gdkmm2'],
@@ -97,12 +93,14 @@ ardour_ui_ed.cc
 ardour_ui_mixer.cc
 ardour_ui_options.cc
 audio_clock.cc
-route_time_axis.cc
 audio_time_axis.cc
+audio_region_editor.cc
 automation_gain_line.cc
 automation_line.cc
 automation_pan_line.cc
 automation_time_axis.cc
+midi_time_axis.cc
+midi_streamview.cc
 axis_view.cc
 canvas-imageframe.c
 canvas-simpleline.c
@@ -183,11 +181,12 @@ public_editor.cc
 redirect_automation_line.cc
 redirect_automation_time_axis.cc
 redirect_box.cc
-audio_region_editor.cc
 region_gain_line.cc
 region_selection.cc
 region_view.cc
 audio_region_view.cc
+midi_region_view.cc
+tape_region_view.cc
 route_params_ui.cc
 route_redirect_selection.cc
 route_ui.cc
@@ -196,10 +195,10 @@ sfdb_ui.cc
 send_ui.cc
 streamview.cc
 audio_streamview.cc
-tape_region_view.cc
 tempo_dialog.cc
 time_axis_view.cc
 time_axis_view_item.cc
+route_time_axis.cc
 time_selection.cc
 utils.cc
 version.cc

@@ -217,7 +217,7 @@ Editor::set_selected_track (TimeAxisView& view, Selection::Operation op, bool no
 bool
 Editor::set_selected_track_from_click (bool press, Selection::Operation op, bool no_remove)
 {
-	if (!clicked_trackview) {
+	if (!clicked_routeview) {
 		return false;
 	}
 	
@@ -225,7 +225,7 @@ Editor::set_selected_track_from_click (bool press, Selection::Operation op, bool
 		return false;
 	}
 
-	return set_selected_track (*clicked_trackview, op, no_remove);
+	return set_selected_track (*clicked_routeview, op, no_remove);
 }
 
 bool
@@ -249,19 +249,19 @@ Editor::set_selected_control_point_from_click (Selection::Operation op, bool no_
 }
 
 void
-Editor::get_relevant_audio_tracks (set<AudioTimeAxisView*>& relevant_tracks)
+Editor::get_relevant_tracks (set<RouteTimeAxisView*>& relevant_tracks)
 {
 	/* step one: get all selected tracks and all tracks in the relevant edit groups */
 
 	for (TrackSelection::iterator ti = selection->tracks.begin(); ti != selection->tracks.end(); ++ti) {
 
-		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(*ti);
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*ti);
 
-		if (!atv) {
+		if (!rtv) {
 			continue;
 		}
 
-		RouteGroup* group = atv->route()->edit_group();
+		RouteGroup* group = rtv->route()->edit_group();
 
 		if (group && group->is_active()) {
 			
@@ -269,32 +269,32 @@ Editor::get_relevant_audio_tracks (set<AudioTimeAxisView*>& relevant_tracks)
 
 			for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 				
-				AudioTimeAxisView* tatv;
+				RouteTimeAxisView* trtv;
 				
-				if ((tatv = dynamic_cast<AudioTimeAxisView*> (*i)) != 0) {
+				if ((trtv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
 					
-					if (tatv->route()->edit_group() == group) {
-						relevant_tracks.insert (tatv);
+					if (trtv->route()->edit_group() == group) {
+						relevant_tracks.insert (trtv);
 					}
 				}
 			}
 		} else {
-			relevant_tracks.insert (atv);
+			relevant_tracks.insert (rtv);
 		}
 	}
 }
 
 void
-Editor::mapover_audio_tracks (slot<void,AudioTimeAxisView&,uint32_t> sl)
+Editor::mapover_tracks (slot<void,RouteTimeAxisView&,uint32_t> sl)
 {
-	set<AudioTimeAxisView*> relevant_tracks;
+	set<RouteTimeAxisView*> relevant_tracks;
 
-	get_relevant_audio_tracks (relevant_tracks);
+	get_relevant_tracks (relevant_tracks);
 
 	uint32_t sz = relevant_tracks.size();
 
-	for (set<AudioTimeAxisView*>::iterator ati = relevant_tracks.begin(); ati != relevant_tracks.end(); ++ati) {
-		sl (**ati, sz);
+	for (set<RouteTimeAxisView*>::iterator rti = relevant_tracks.begin(); rti != relevant_tracks.end(); ++rti) {
+		sl (**rti, sz);
 	}
 }
 
@@ -330,7 +330,7 @@ Editor::mapped_get_equivalent_regions (RouteTimeAxisView& tv, uint32_t ignored, 
 void
 Editor::get_equivalent_regions (RegionView* basis, vector<RegionView*>& equivalent_regions)
 {
-	mapover_audio_tracks (bind (mem_fun (*this, &Editor::mapped_get_equivalent_regions), basis, &equivalent_regions));
+	mapover_tracks (bind (mem_fun (*this, &Editor::mapped_get_equivalent_regions), basis, &equivalent_regions));
 	
 	/* add clicked regionview since we skipped all other regions in the same track as the one it was in */
 	
@@ -343,7 +343,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 	vector<RegionView*> all_equivalent_regions;
 	bool commit = false;
 
-	if (!clicked_regionview || !clicked_audio_trackview) {
+	if (!clicked_regionview || !clicked_routeview) {
 		return false;
 	}
 
@@ -387,7 +387,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 
 				if (press) {
 
-					if (selection->selected (clicked_audio_trackview)) {
+					if (selection->selected (clicked_routeview)) {
 						get_equivalent_regions (clicked_regionview, all_equivalent_regions);
 					} else {
 						all_equivalent_regions.push_back (clicked_regionview);
@@ -409,7 +409,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 		case Selection::Set:
 			if (!clicked_regionview->get_selected()) {
 
-				if (selection->selected (clicked_audio_trackview)) {
+				if (selection->selected (clicked_routeview)) {
 					get_equivalent_regions (clicked_regionview, all_equivalent_regions);
 				} else {
 					all_equivalent_regions.push_back (clicked_regionview);
@@ -497,11 +497,11 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 		      one that was clicked.
 		*/
 
-		set<AudioTimeAxisView*> relevant_tracks;
+		set<RouteTimeAxisView*> relevant_tracks;
 		
-		get_relevant_audio_tracks (relevant_tracks);
+		get_relevant_tracks (relevant_tracks);
 
-		for (set<AudioTimeAxisView*>::iterator t = relevant_tracks.begin(); t != relevant_tracks.end(); ++t) {
+		for (set<RouteTimeAxisView*>::iterator t = relevant_tracks.begin(); t != relevant_tracks.end(); ++t) {
 			(*t)->get_selectables (first_frame, last_frame, -1.0, -1.0, results);
 		}
 		
@@ -690,11 +690,11 @@ Editor::select_all_in_track (Selection::Operation op)
 {
 	list<Selectable *> touched;
 
-	if (!clicked_trackview) {
+	if (!clicked_routeview) {
 		return;
 	}
 	
-	clicked_trackview->get_selectables (0, max_frames, 0, DBL_MAX, touched);
+	clicked_routeview->get_selectables (0, max_frames, 0, DBL_MAX, touched);
 
 	switch (op) {
 	case Selection::Toggle:
@@ -746,11 +746,11 @@ Editor::invert_selection_in_track ()
 {
 	list<Selectable *> touched;
 
-	if (!clicked_trackview) {
+	if (!clicked_routeview) {
 		return;
 	}
 	
-	clicked_trackview->get_inverted_selectables (*selection, touched);
+	clicked_routeview->get_inverted_selectables (*selection, touched);
 	selection->set (touched);
 }
 

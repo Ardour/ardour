@@ -3,7 +3,6 @@
 #ifndef _GTKMM_COMBOBOX_H
 #define _GTKMM_COMBOBOX_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -66,7 +65,6 @@ namespace Gtk
 class ComboBox
 : public Bin,
   public CellLayout
-//TODO: Since GTK+ 2.6, this should now inherit also from CellEditable, but we can't add this base without breaking ABI.
 {
   public:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -109,18 +107,12 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_changed();
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -139,7 +131,7 @@ public:
    * the preferred number of columns when you want the popup to be layed out
    * in a table.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param width Preferred number of columns.
    */
   void set_wrap_width(int width);
@@ -149,7 +141,7 @@ public:
    * 1, the combo box is in table mode.
    * @return The wrap width.
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
   int get_wrap_width() const;
 
@@ -158,7 +150,7 @@ public:
    * The row span column contains integers which indicate how many rows
    * an item should span.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param row_span A column in the model passed during construction.
    */
   void set_row_span_column(int row_span);
@@ -166,7 +158,7 @@ public:
   /** Returns the column with row span information for @a combo_box .
    * @return The row span column.
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
   int get_row_span_column() const;
 
@@ -175,7 +167,7 @@ public:
    *  @a column_span . The column span column contains integers which indicate
    * how many columns an item should span.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param column_span A column in the model passed during construction.
    */
   void set_column_span_column(int column_span);
@@ -183,7 +175,7 @@ public:
   /** Returns the column with column span information for @a combo_box .
    * @return The column span column.
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
   int get_column_span_column() const;
 
@@ -196,15 +188,10 @@ public:
   /** Sets whether the popup menu should have a tearoff 
    * menu item.
    * 
-   * @newin2p6
+   * Since: 2.6
    * @param add_tearoffs <tt>true</tt> to add tearoff menu items.
    */
   void set_add_tearoffs(bool add_tearoffs = true);
-
-  
-  Glib::ustring get_title() const;
-  
-  void set_title(const Glib::ustring& title);
 
   
   /** Returns whether the combo box grabs focus when it is clicked 
@@ -212,7 +199,7 @@ public:
    * @return <tt>true</tt> if the combo box grabs focus when it is 
    * clicked with the mouse.
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
   bool get_focus_on_click() const;
   
@@ -221,7 +208,7 @@ public:
    * like toolbars where you don't want the keyboard focus removed from 
    * the main area of the application.
    * 
-   * @newin2p6
+   * Since: 2.6
    * @param focus_on_click Whether the combo box grabs focus when clicked 
    * with the mouse.
    */
@@ -237,7 +224,7 @@ public:
    * @return An integer which is the index of the currently active item, or
    * -1 if there's no active item.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   int get_active_row_number() const;
 
@@ -254,7 +241,7 @@ public:
     
   /** Sets the active item of @a combo_box  to be the item at @a index .
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param index An index in the model passed during construction, or -1 to have
    * no active item.
    */
@@ -263,7 +250,7 @@ public:
   /** Sets the current active item to be the one referenced by @a iter . 
    *  @a iter  must correspond to a path of depth one.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param iter The Gtk::TreeIter.
    */
   void set_active(const TreeModel::iterator& iter);
@@ -276,14 +263,14 @@ public:
   /** Returns the Gtk::TreeModel which is acting as data source for @a combo_box .
    * @return A Gtk::TreeModel which was passed during construction.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   Glib::RefPtr<TreeModel> get_model();
   
   /** Returns the Gtk::TreeModel which is acting as data source for @a combo_box .
    * @return A Gtk::TreeModel which was passed during construction.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   Glib::RefPtr<const TreeModel> get_model() const;
   
@@ -294,7 +281,7 @@ public:
    * call gtk_combo_box_cell_layout_clear() yourself if you need to set up 
    * different cell renderers for the new model.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param model A Gtk::TreeModel.
    */
   void set_model(const Glib::RefPtr<TreeModel>& model);
@@ -318,7 +305,7 @@ public:
    * This function is mostly intended for use by accessibility technologies;
    * applications should have little use for it.
    * 
-   * @newin2p4
+   * Since: 2.4
    */
   void popup();
   
@@ -327,10 +314,10 @@ public:
    * This function is mostly intended for use by accessibility technologies;
    * applications should have little use for it.
    * 
-   * @newin2p4
+   * Since: 2.4
    */
   void popdown();
-
+    
   
   /** Gets the accessible object corresponding to the combo box's popup.
    * 
@@ -338,13 +325,9 @@ public:
    * applications should have little use for it.
    * @return The accessible object corresponding to the combo box's popup.
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
-
-#ifdef  GTKMM_ATKMM_ENABLED
   Glib::RefPtr<Atk::Object> get_popup_accessible();
-#endif //  GTKMM_ATKMM_ENABLED
-
   
   /** Gets the accessible object corresponding to the combo box's popup.
    * 
@@ -352,27 +335,20 @@ public:
    * applications should have little use for it.
    * @return The accessible object corresponding to the combo box's popup.
    * 
-   * @newin2p6.
+   * Since: 2.6.
    */
-
-#ifdef  GTKMM_ATKMM_ENABLED
   Glib::RefPtr<const Atk::Object> get_popup_accessible() const;
-#endif //  GTKMM_ATKMM_ENABLED
-
 
    //These are in ComboBoxText.
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The model for the combo box.
+  /** The model for the combo box.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy< Glib::RefPtr<TreeModel> > property_model() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The model for the combo box.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -380,39 +356,31 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly< Glib::RefPtr<TreeModel> > property_model() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Wrap width for laying out the items in a grid.
+  /** Wrap width for layouting the items in a grid.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_wrap_width() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
-/** Wrap width for laying out the items in a grid.
+/** Wrap width for layouting the items in a grid.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_wrap_width() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** TreeModel column containing the row span values.
+  /** TreeModel column containing the row span values.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_row_span_column() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** TreeModel column containing the row span values.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -420,19 +388,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_row_span_column() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** TreeModel column containing the column span values.
+  /** TreeModel column containing the column span values.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_column_span_column() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** TreeModel column containing the column span values.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -440,19 +404,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_column_span_column() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The item which is currently active.
+  /** The item which is currently active.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_active() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The item which is currently active.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -460,19 +420,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_active() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether dropdowns should have a tearoff menu item.
+  /** Whether dropdowns should have a tearoff menu item.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_add_tearoffs() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether dropdowns should have a tearoff menu item.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -480,19 +436,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_add_tearoffs() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether the combo box draws a frame around the child.
+  /** Whether the combo box draws a frame around the child.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_has_frame() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the combo box draws a frame around the child.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -500,19 +452,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_has_frame() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether the combo box grabs focus when it is clicked with the mouse.
+  /** Whether the combo box grabs focus when it is clicked with the mouse.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_focus_on_click() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the combo box grabs focus when it is clicked with the mouse.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -520,39 +468,7 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_focus_on_click() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** A title that may be displayed by the window manager when the popup is torn-off.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy<Glib::ustring> property_tearoff_title() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-#ifdef GLIBMM_PROPERTIES_ENABLED
-/** A title that may be displayed by the window manager when the popup is torn-off.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy_ReadOnly<Glib::ustring> property_tearoff_title() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
-
-
-  /** The changed signal gets emitted when the active
-   * item is changed. This can be due to the user selecting
-   * a different item from the list, or due to a 
-   * call to set_active_iter().
-   */
-  
-/**
-   * @par Prototype:
-   * <tt>void %changed()</tt>
-   */
 
   Glib::SignalProxy0< void > signal_changed();
                                              
@@ -571,8 +487,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::ComboBox* wrap(GtkComboBox* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_COMBOBOX_H */
 

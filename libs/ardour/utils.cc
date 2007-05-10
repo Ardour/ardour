@@ -17,6 +17,9 @@
 
 */
 
+#define __STDC_FORMAT_MACROS 1
+#include <stdint.h>
+
 #include <cstdio> /* for sprintf */
 #include <cmath>
 #include <cctype>
@@ -232,6 +235,12 @@ bool
 path_is_paired (ustring path, ustring& pair_base)
 {
 	ustring::size_type pos;
+
+	/* remove any leading path */
+
+	if ((pos = path.find_last_of ('/')) != string::npos) {
+		path = path.substr(pos+1);
+	}
 
  	/* remove filename suffixes etc. */
 	

@@ -24,7 +24,6 @@
 #include <gtkmm/cellrenderertext.h>
 #include <gtkmm/cellrendererpixbuf.h>
 #include <gtkmm/cellrenderertoggle.h>
-#include <gtkmm/cellrendereraccel.h>
 
 namespace Gtk
 {
@@ -39,12 +38,7 @@ CellRenderer* generate_cellrenderer(bool editable = false)
   CellRendererText* pCellRenderer = new CellRendererText(); //the default - template specializations will use other renderers.
   //CellRendererText can render both strings and numerical values.
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
   pCellRenderer->property_editable() = editable;
-#else
-  pCellRenderer->set_property("editable", editable);
-#endif
-
   return pCellRenderer;
 }
 
@@ -56,9 +50,6 @@ CellRenderer* generate_cellrenderer<bool>(bool editable);
 
 template<>
 CellRenderer* generate_cellrenderer< Glib::RefPtr<Gdk::Pixbuf> >(bool editable);
-
-template<>
-CellRenderer* generate_cellrenderer<AccelKey>(bool editable);
 
 #endif
 

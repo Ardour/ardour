@@ -303,7 +303,7 @@ MIDIControllable::send_feedback ()
 	msg[1] = control_additional;
 	msg[2] = (byte) (controllable.get_value() * 127.0f);
 
-	_port.write (msg, 3);
+	//_port.write (msg, 3);
 }
 
 MIDI::byte*

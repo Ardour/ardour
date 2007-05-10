@@ -67,7 +67,6 @@ public:
    * @throw Glib::FileError
    */
   Dispatcher();
-  
   /** Create new Dispatcher instance using an arbitrary main context.
    * @throw Glib::FileError
    */

@@ -3,7 +3,6 @@
 #ifndef _ATKMM_TEXT_H
 #define _ATKMM_TEXT_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -63,9 +62,9 @@ public:
 
   void swap(Attribute& other);
 
-   Glib::ustring get_name() const;
-    Glib::ustring get_value() const;
- 
+  Glib::ustring get_name() const;
+  Glib::ustring get_value() const;
+
   /// Provides access to the underlying C GObject.
   AtkAttribute*       gobj()       { return &gobject_; }
 
@@ -375,8 +374,7 @@ public:
    * @param offset Position.
    * @param boundary_type An Atk::TextBoundary.
    * @param start_offset The start offset of the returned string.
-   * @param end_offset The offset of the first character after the 
-   * returned substring.
+   * @param end_offset The end offset of the returned string.
    * @return The text after @a offset  bounded by the specified @a boundary_type .
    */
   Glib::ustring get_text_after_offset(int offset, TextBoundary boundary_type, int& start_offset, int& end_offset) const;
@@ -428,8 +426,7 @@ public:
    * @param offset Position.
    * @param boundary_type An Atk::TextBoundary.
    * @param start_offset The start offset of the returned string.
-   * @param end_offset The offset of the first character after the 
-   * returned substring.
+   * @param end_offset The end offset of the returned string.
    * @return The text at @a offset  bounded by the specified @a boundary_type .
    */
   Glib::ustring get_text_at_offset(int offset, TextBoundary boundary_type, int& start_offset, int& end_offset) const;
@@ -479,8 +476,7 @@ public:
    * @param offset Position.
    * @param boundary_type An Atk::TextBoundary.
    * @param start_offset The start offset of the returned string.
-   * @param end_offset The offset of the first character after the 
-   * returned substring.
+   * @param end_offset The end offset of the returned string.
    * @return The text before @a offset  bounded by the specified @a boundary_type .
    */
   Glib::ustring get_text_before_offset(int offset, TextBoundary boundary_type, int& start_offset, int& end_offset) const;
@@ -553,15 +549,14 @@ public:
    * of the text region is assigned the number 0, etc.  Note that adding,
    * moving or deleting a selected region can change the numbering.
    * @param start_offset Passes back the start position of the selected region.
-   * @param end_offset Passes back the end position of (e.g. offset immediately past) 
-   * the selected region.
+   * @param end_offset Passes back the end position of the selected region.
    * @return The selected text.
    */
   Glib::ustring get_selection(int selection_num, int& start_offset, int& end_offset) const;
   
   /** Adds a selection bounded by the specified offsets.
    * @param start_offset The start position of the selected region.
-   * @param end_offset The offset of the first character after the selected region.
+   * @param end_offset The end position of the selected region.
    * @return <tt>true</tt> if success, <tt>false</tt> otherwise.
    */
   bool add_selection(int start_offset, int end_offset);
@@ -583,8 +578,7 @@ public:
    * of the text region is assigned the number 0, etc.  Note that adding,
    * moving or deleting a selected region can change the numbering.
    * @param start_offset The new start position of the selection.
-   * @param end_offset The new end position of (e.g. offset immediately past) 
-   * the selection.
+   * @param end_offset The new end position of the selection.
    * @return <tt>true</tt> if success, <tt>false</tt> otherwise.
    */
   bool set_selection(int selection_num, int start_offset, int end_offset);
@@ -622,109 +616,38 @@ public:
                                                  TextClipType x_clip_type, TextClipType y_clip_type);
                                                            
 
-/**
-   * @par Prototype:
-   * <tt>void %text_changed(int position, int length)</tt>
-   */
-
   Glib::SignalProxy2< void,int,int > signal_text_changed();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %text_caret_moved(int location)</tt>
-   */
-
   Glib::SignalProxy1< void,int > signal_text_caret_moved();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %text_selection_changed()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_text_selection_changed();
 
   
-/**
-   * @par Prototype:
-   * <tt>void %text_attributes_changed()</tt>
-   */
-
   Glib::SignalProxy0< void > signal_text_attributes_changed();
 
 
 protected:
  
 
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual Glib::ustring get_text_vfunc(int start_offset, int end_offset) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual gunichar get_character_at_offset_vfunc(int offset) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual Glib::ustring get_text_after_offset_vfunc(int offset, TextBoundary boundary_type, int& start_offset, int& end_offset) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual Glib::ustring get_text_at_offset_vfunc(int offset, TextBoundary boundary_type, int& start_offset, int& end_offset) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual Glib::ustring get_text_before_offset_vfunc(int offset, TextBoundary boundary_type, int& start_offset, int& end_offset) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual int get_caret_offset_vfunc() const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual void get_character_extents_vfunc(int offset, int& x, int& y, int& width, int& height, CoordType coords) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual AtkAttributeSet* get_run_attributes_vfunc(int offset, int& start_offset, int& end_offset) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual AtkAttributeSet* get_default_attributes_vfunc() const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual int get_character_count_vfunc() const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual int get_offset_at_point_vfunc(int x, int y, CoordType coords) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual int get_n_selections_vfunc() const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual Glib::ustring get_selection_vfunc(int selection_num, int& start_offset, int& end_offset) const;
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual bool add_selection_vfunc(int start_offset, int end_offset);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual bool remove_selection_vfunc(int selection_num);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual bool set_selection_vfunc(int selection_num, int start_offset, int end_offset);
-#endif //GLIBMM_VFUNCS_ENABLED
-
-  #ifdef GLIBMM_VFUNCS_ENABLED
-  virtual bool set_caret_offset_vfunc(int offset);
-#endif //GLIBMM_VFUNCS_ENABLED
-
+    virtual Glib::ustring get_text_vfunc(int start_offset, int end_offset) const;
+    virtual gunichar get_character_at_offset_vfunc(int offset) const;
+    virtual Glib::ustring get_text_after_offset_vfunc(int offset, TextBoundary boundary_type, int& start_offset, int& end_offset) const;
+    virtual Glib::ustring get_text_at_offset_vfunc(int offset, TextBoundary boundary_type, int& start_offset, int& end_offset) const;
+    virtual Glib::ustring get_text_before_offset_vfunc(int offset, TextBoundary boundary_type, int& start_offset, int& end_offset) const;
+    virtual int get_caret_offset_vfunc() const;
+    virtual void get_character_extents_vfunc(int offset, int& x, int& y, int& width, int& height, CoordType coords) const;
+    virtual AtkAttributeSet* get_run_attributes_vfunc(int offset, int& start_offset, int& end_offset) const;
+    virtual AtkAttributeSet* get_default_attributes_vfunc() const;
+    virtual int get_character_count_vfunc() const;
+    virtual int get_offset_at_point_vfunc(int x, int y, CoordType coords) const;
+    virtual int get_n_selections_vfunc() const;
+    virtual Glib::ustring get_selection_vfunc(int selection_num, int& start_offset, int& end_offset) const;
+    virtual bool add_selection_vfunc(int start_offset, int end_offset);
+    virtual bool remove_selection_vfunc(int selection_num);
+    virtual bool set_selection_vfunc(int selection_num, int start_offset, int end_offset);
+    virtual bool set_caret_offset_vfunc(int offset);
   
   //TODO: Add get_range_extents(), and get_bounded_ranges() vfuncs when we can break ABI.
 
@@ -733,21 +656,15 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_text_changed(int position, int length);
   virtual void on_text_caret_moved(int location);
   virtual void on_text_selection_changed();
   virtual void on_text_attributes_changed();
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };
@@ -765,7 +682,6 @@ namespace Glib
   Glib::RefPtr<Atk::Text> wrap(AtkText* object, bool take_copy = false);
 
 } // namespace Glib
-
 
 #endif /* _ATKMM_TEXT_H */
 

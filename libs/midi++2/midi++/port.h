@@ -23,6 +23,7 @@
 
 #include <sigc++/sigc++.h>
 
+#include <pbd/selectable.h>
 #include <midi++/types.h>
 #include <midi++/parser.h>
 
@@ -35,6 +36,7 @@ class Port : public sigc::trackable {
   public:
 	enum Type {
 		Unknown,
+		JACK_Midi,
 		ALSA_RawMidi,
 		ALSA_Sequencer,
 		CoreMidi_MidiPort,
@@ -42,42 +44,64 @@ class Port : public sigc::trackable {
 		FIFO
 	};
 
-
 	Port (PortRequest &);
 	virtual ~Port ();
 
+	// FIXME: make Manager a friend of port so these can be hidden?
+	
+	/* Only for use by MidiManager.  Don't ever call this. */
+	virtual void cycle_start(nframes_t nframes);
+
+	/* Only for use by MidiManager.  Don't ever call this. */
+	virtual void cycle_end();
+
 	/* Direct I/O */
+	
+	/** Read a message from port.
+	 * @param buf Raw MIDI message to send
+	 * @param max Max size to write to @a buf
+	 * @param timestamp Time stamp in frames of this message (relative to cycle start)
+	 * @return number of bytes successfully written to \a buf
+	 */
+	virtual int read(byte *buf, size_t max, timestamp_t timestamp) = 0;
+	
+	/** Write a message to port.
+	 * @param msg Raw MIDI message to send
+	 * @param msglen Size of @a msg
+	 * @param timestamp Time stamp in frames of this message (relative to cycle start)
+	 * @return number of bytes successfully written
+	 */
+	virtual int write(byte *msg, size_t msglen, timestamp_t timestamp) = 0;	
 
-	virtual int write (byte *msg, size_t msglen) = 0;	
-	virtual int read (byte *buf, size_t max) = 0;
+	/** Write a message to port.
+	 * @return true on success.
+	 * FIXME: describe semantics here
+	 */
+	bool midimsg (byte *msg, size_t len, timestamp_t timestamp) {
+		return !(write (msg, len, timestamp) == (int) len);
+	}
 
-	/* slowdown i/o to a loop of single byte emissions
-	   interspersed with a busy loop of 10000 * this value.
+	bool clock (timestamp_t timestamp);
 
-	   This may be ignored by a particular instance
-	   of this virtual class. See FD_MidiPort for an 
-	   example of where it used.  
-	*/
-
+	/** Slow down I/O to a loop of single byte emissions
+	  * interspersed with a busy loop of 10000 * this value.
+	  *
+	  * This may be ignored by a particular instance of this virtual
+	  * class. See FD_MidiPort for an example of where it used. */
 	void set_slowdown (size_t n) { slowdown = n; }
 
 	/* select(2)/poll(2)-based I/O */
 
+	/** Get the file descriptor for port.
+	 * @return File descriptor, or -1 if not selectable. */
 	virtual int selectable() const = 0;
 
-	//void selector_read_callback (Select::Selectable *, Select::Condition);
-
-	static void xforms_read_callback (int cond, int fd, void *ptr);
-	static void gtk_read_callback (void *ptr, int fd, int cond);
-	
-	static void write_callback (byte *msg, unsigned int len, void *);
-	
 	Channel *channel (channel_t chn) { 
 		return _channel[chn&0x7F];
 	}
 	
-	Parser *input()     { return input_parser; }
-	Parser *output()    { return output_parser; }
+	Parser *input()  { return input_parser; }
+	Parser *output() { return output_parser; }
 
 	void iostat (int *written, int *read, 
 		     const size_t **in_counts,
@@ -97,43 +121,31 @@ class Port : public sigc::trackable {
 		}
 	}
 	
-	int midimsg (byte *msg, size_t len) {
-		return !(write (msg, len) == (int) len);
-	} 
-
-	int three_byte_msg (byte a, byte b, byte c) {
-		byte msg[3];
-
-            	msg[0] = a;
-		msg[1] = b;
-		msg[2] = c;
-
-		return !(write (msg, 3) == 3);
-	} 
-	
-	int clock ();
+	bool clock ();
 	
 	const char *device () const { return _devname.c_str(); }
-	const char *name () const   { return _tagname.c_str(); }
-	Type   type () const        { return _type; }
-	int    mode () const        { return _mode; }
-	bool   ok ()   const        { return _ok; }
-	size_t number () const      { return _number; }
+	const char *name ()   const { return _tagname.c_str(); }
+	Type        type ()   const { return _type; }
+	int         mode ()   const { return _mode; }
+	bool        ok ()     const { return _ok; }
+	size_t      number () const { return _number; }
 
   protected:
-	bool _ok;
-	Type _type;
-	std::string _devname;
-	std::string _tagname;
-	int _mode;
-	size_t _number;
-	Channel *_channel[16];
+	bool             _ok;
+	bool             _currently_in_cycle;
+	nframes_t        _nframes_this_cycle;
+	Type             _type;
+	std::string      _devname;
+	std::string      _tagname;
+	int              _mode;
+	size_t           _number;
+	Channel          *_channel[16];
 	sigc::connection thru_connection;
-	unsigned int bytes_written;
-	unsigned int bytes_read;
-	Parser *input_parser;
-	Parser *output_parser;
-	size_t slowdown;
+	unsigned int     bytes_written;
+	unsigned int     bytes_read;
+	Parser           *input_parser;
+	Parser           *output_parser;
+	size_t           slowdown;
 
   private:
 	static size_t nports;

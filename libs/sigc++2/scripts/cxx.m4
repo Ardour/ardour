@@ -47,7 +47,6 @@ AC_TRY_COMPILE(
   AC_MSG_RESULT([$sigcm_cxx_gcc_template_specialization_operator_overload])
 ])
 ])
-
 AC_DEFUN([SIGC_CXX_MSVC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD],[
 AC_MSG_CHECKING([if C++ compiler supports the use of a particular specialization when calling operator() template methods omitting the template keyword.])
 AC_TRY_COMPILE(
@@ -91,32 +90,5 @@ AC_TRY_COMPILE(
 ],[
   sigcm_cxx_msvc_template_specialization_operator_overload=no
   AC_MSG_RESULT([$sigcm_cxx_msvc_template_specialization_operator_overload])
-])
-])
-
-
-AC_DEFUN([SIGC_CXX_SELF_REFERENCE_IN_MEMBER_INITIALIZATION], [
-AC_MSG_CHECKING([if C++ compiler allows usage of member function in initialization of static member field.])
-AC_TRY_COMPILE(
-[
-  struct test
-  {
-    static char  test_function();
-
-    // Doesn't work with e.g. GCC 3.2.  However, if test_function()
-    // is wrapped in a nested structure, it works just fine.
-    static const bool  test_value
-      = (sizeof(test_function()) == sizeof(char));
-  };
-],
-[],
-[
-  sigcm_cxx_self_reference_in_member_initialization=yes
-  AC_DEFINE([SIGC_SELF_REFERENCE_IN_MEMBER_INITIALIZATION],[1],
-            [does c++ compiler allows usage of member function in initialization of static member field.])
-  AC_MSG_RESULT([$sigcm_cxx_self_reference_in_member_initialization])
-],[
-  sigcm_cxx_self_reference_in_member_initialization=no
-  AC_MSG_RESULT([$sigcm_cxx_self_reference_in_member_initialization])
 ])
 ])

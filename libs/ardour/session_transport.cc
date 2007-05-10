@@ -134,6 +134,11 @@ void
 Session::realtime_stop (bool abort)
 {
 	/* assume that when we start, we'll be moving forwards */
+	
+	// FIXME: where should this really be? [DR]
+	//send_full_time_code();
+	deliver_mmc (MIDI::MachineControl::cmdStop, _transport_frame);
+	deliver_mmc (MIDI::MachineControl::cmdLocate, _transport_frame);
 
 	if (_transport_speed < 0.0f) {
 		post_transport_work = PostTransportWork (post_transport_work | PostTransportStop | PostTransportReverse);
@@ -405,15 +410,12 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 				return;
 			}
 		}
+
 #ifdef LEAVE_TRANSPORT_UNADJUSTED
 	}
 #endif
 
 	last_stop_frame = _transport_frame;
-
-	send_full_time_code ();
-	deliver_mmc (MIDI::MachineControl::cmdStop, 0);
-	deliver_mmc (MIDI::MachineControl::cmdLocate, _transport_frame);
 
 	if (did_record) {
 
@@ -625,7 +627,12 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 		return;
 	}
 
+	// Update SMPTE time
+	// [DR] FIXME: find out exactly where this should go below
 	_transport_frame = target_frame;
+	smpte_time(_transport_frame, transmitting_smpte_time);
+	outbound_mtc_smpte_frame = _transport_frame;
+	next_quarter_frame_to_send = 0;
 
 	if (_transport_speed && (!with_loop || loop_changing)) {
 		/* schedule a declick. we'll be called again when its done */
@@ -707,6 +714,8 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 	}
 	
 	loop_changing = false;
+
+	_send_smpte_update = true;
 }
 
 void
@@ -901,11 +910,14 @@ Session::actually_start_transport ()
 		(*i)->realtime_set_speed ((*i)->speed(), true);
 	}
 
-	send_mmc_in_another_thread (MIDI::MachineControl::cmdDeferredPlay, 0);
-	
+	deliver_mmc(MIDI::MachineControl::cmdDeferredPlay, _transport_frame);
+
 	TransportStateChange (); /* EMIT SIGNAL */
 }
 
+/** Do any transport work in the audio thread that needs to be done after the
+ * transport thread is finished.  Audio thread, realtime safe.
+ */
 void
 Session::post_transport ()
 {

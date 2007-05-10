@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2002 Paul Davis
+    Copyright (C) 2000-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
 #include <cmath>
@@ -623,7 +622,7 @@ MixerStrip::add_connection_to_input_menu (ARDOUR::Connection* c)
 
 	MenuList& citems = input_menu.items();
 	
-	if (c->nports() == _route->n_inputs()) {
+	if (c->nports() == _route->n_inputs().get_total()) {
 
 		citems.push_back (CheckMenuElem (c->name(), bind (mem_fun(*this, &MixerStrip::connection_input_chosen), c)));
 		
@@ -646,7 +645,7 @@ MixerStrip::add_connection_to_output_menu (ARDOUR::Connection* c)
 		return;
 	}
 
-	if (c->nports() == _route->n_outputs()) {
+	if (c->nports() == _route->n_outputs().get_total()) {
 
 		MenuList& citems = output_menu.items();
 		citems.push_back (CheckMenuElem (c->name(), bind (mem_fun(*this, &MixerStrip::connection_output_chosen), c)));
@@ -1161,7 +1160,15 @@ MixerStrip::route_active_changed ()
 {
 	RouteUI::route_active_changed ();
 
-	if (is_audio_track()) {
+	if (is_midi_track()) {
+		if (_route->active()) {
+			set_name ("MidiTrackStripBase");
+			gpm.set_meter_strip_name ("MidiTrackStripBase");
+		} else {
+			set_name ("MidiTrackStripBaseInactive");
+			gpm.set_meter_strip_name ("MidiTrackStripBaseInactive");
+		}
+	} else if (is_audio_track()) {
 		if (_route->active()) {
 			set_name ("AudioTrackStripBase");
 			gpm.set_meter_strip_name ("AudioTrackStripBase");
@@ -1170,7 +1177,7 @@ MixerStrip::route_active_changed ()
 			gpm.set_meter_strip_name ("AudioTrackStripBaseInactive");
 		}
 		gpm.set_fader_name ("AudioTrackFader");
-	} else { // FIXME: assumed audio bus
+	} else {
 		if (_route->active()) {
 			set_name ("AudioBusStripBase");
 			gpm.set_meter_strip_name ("AudioBusStripBase");

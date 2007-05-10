@@ -55,7 +55,7 @@ class Track : public Route
 
 	void toggle_monitor_input ();
 
-	virtual bool can_record();
+	bool can_record();
 
 	boost::shared_ptr<Diskstream> diskstream() const { return _diskstream; }
 
@@ -98,11 +98,6 @@ class Track : public Route
 
 	virtual XMLNode& state (bool full) = 0;
 
-	virtual void passthru_silence (nframes_t start_frame, nframes_t end_frame, 
-		nframes_t nframes, nframes_t offset, int declick, bool meter) = 0;
-
-	virtual uint32_t n_process_buffers () = 0;
-	
 	boost::shared_ptr<Diskstream> _diskstream;
 	MeterPoint  _saved_meter_point;
 	TrackMode   _mode;

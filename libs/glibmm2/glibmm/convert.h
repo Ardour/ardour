@@ -67,14 +67,7 @@ public:
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 private:
-
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
   static void throw_func(GError* gobject);
-#else
-  //When not using exceptions, we just pass the Exception object around without throwing it:
-  static std::auto_ptr<Glib::Error> throw_func(GError* gobject);
-#endif //GLIBMM_EXCEPTIONS_ENABLED
-
   friend void wrap_init(); // uses throw_func()
 #endif
 };
@@ -126,11 +119,7 @@ public:
    * @return The converted string.
    * @throw Glib::ConvertError
    */
-  #ifdef GLIBMM_EXCEPTIONS_ENABLED
   std::string convert(const std::string& str);
-  #else
-  std::string convert(const std::string& str, std::auto_ptr<Glib::Error>& error);
-  #endif //GLIBMM_EXCEPTIONS_ENABLED
 
   GIConv gobj() { return gobject_; }
 
@@ -161,15 +150,9 @@ bool get_charset(std::string& charset);
  * @return The converted string.
  * @throw Glib::ConvertError
  */
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
 std::string convert(const std::string& str,
                     const std::string& to_codeset,
                     const std::string& from_codeset);
-#else
-std::string convert(const std::string& str,
-                    const std::string& to_codeset,
-                    const std::string& from_codeset, std::auto_ptr<Glib::Error>& error);
-#endif //GLIBMM_EXCEPTIONS_ENABLED
 
 /** Converts a string from one character set to another, possibly including
  * fallback sequences for characters not representable in the output.
@@ -181,15 +164,9 @@ std::string convert(const std::string& str,
  * @return The converted string.
  * @throw Glib::ConvertError
  */
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
 std::string convert_with_fallback(const std::string& str,
                                   const std::string& to_codeset,
                                   const std::string& from_codeset);
-#else
-std::string convert_with_fallback(const std::string& str,
-                                  const std::string& to_codeset,
-                                  const std::string& from_codeset, std::auto_ptr<Glib::Error>& error);
-#endif //GLIBMM_EXCEPTIONS_ENABLED
 
 /** Converts a string from one character set to another, possibly including
  * fallback sequences for characters not representable in the output.
@@ -207,17 +184,10 @@ std::string convert_with_fallback(const std::string& str,
  * @return The converted string.
  * @throw Glib::ConvertError
  */
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
 std::string convert_with_fallback(const std::string& str,
                                   const std::string& to_codeset,
                                   const std::string& from_codeset,
                                   const Glib::ustring& fallback);
-#else
-std::string convert_with_fallback(const std::string& str,
-                                  const std::string& to_codeset,
-                                  const std::string& from_codeset,
-                                  const Glib::ustring& fallback, std::auto_ptr<Glib::Error>& error);
-#endif //GLIBMM_EXCEPTIONS_ENABLED
 
 /** Convert from the current locale's encoding to UTF-8.
  * Convenience wrapper around Glib::convert().
@@ -226,11 +196,7 @@ std::string convert_with_fallback(const std::string& str,
  * @return The input string converted to UTF-8 encoding.
  * @throw Glib::ConvertError
  */
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
 Glib::ustring locale_to_utf8(const std::string& opsys_string);
-#else
-Glib::ustring locale_to_utf8(const std::string& opsys_string, std::auto_ptr<Glib::Error>& error);
-#endif //GLIBMM_EXCEPTIONS_ENABLED
 
 /** Convert from UTF-8 to the current locale's encoding.
  * Convenience wrapper around Glib::convert().
@@ -239,11 +205,7 @@ Glib::ustring locale_to_utf8(const std::string& opsys_string, std::auto_ptr<Glib
  *  system's current locale.
  * @throw Glib::ConvertError
  */
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
 std::string locale_from_utf8(const Glib::ustring& utf8_string);
-#else
-std::string locale_from_utf8(const Glib::ustring& utf8_string, std::auto_ptr<Glib::Error>& error);
-#endif //GLIBMM_EXCEPTIONS_ENABLED
 
 /** Converts a string which is in the encoding used for filenames into
  * a UTF-8 string.
@@ -251,22 +213,14 @@ std::string locale_from_utf8(const Glib::ustring& utf8_string, std::auto_ptr<Gli
  * @return The converted string.
  * @throw Glib::ConvertError
  */
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
 Glib::ustring filename_to_utf8(const std::string& opsys_string);
-#else
-Glib::ustring filename_to_utf8(const std::string& opsys_string, std::auto_ptr<Glib::Error>& error);
-#endif //GLIBMM_EXCEPTIONS_ENABLED
 
 /** Converts a string from UTF-8 to the encoding used for filenames.
  * @param utf8_string A UTF-8 encoded string.
  * @return The converted string.
  * @throw Glib::ConvertError
  */
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
 std::string filename_from_utf8(const Glib::ustring& utf8_string);
-#else
-std::string filename_from_utf8(const Glib::ustring& utf8_string, std::auto_ptr<Glib::Error>& error);
-#endif //GLIBMM_EXCEPTIONS_ENABLED
 
 /** Converts an escaped UTF-8 encoded URI to a local filename
  * in the encoding used for filenames.
@@ -276,11 +230,7 @@ std::string filename_from_utf8(const Glib::ustring& utf8_string, std::auto_ptr<G
  * @return The resulting filename.
  * @throw Glib::ConvertError
  */
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
 std::string filename_from_uri(const Glib::ustring& uri, Glib::ustring& hostname);
-#else
-std::string filename_from_uri(const Glib::ustring& uri, Glib::ustring& hostname, std::auto_ptr<Glib::Error>& error);
-#endif //GLIBMM_EXCEPTIONS_ENABLED
 
 /** Converts an escaped UTF-8 encoded URI to a local filename in the encoding
  * used for filenames.
@@ -288,11 +238,7 @@ std::string filename_from_uri(const Glib::ustring& uri, Glib::ustring& hostname,
  * @return The resulting filename.
  * @throw Glib::ConvertError
  */
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
 std::string filename_from_uri(const Glib::ustring& uri);
-#else
-std::string filename_from_uri(const Glib::ustring& uri, std::auto_ptr<Glib::Error>& error);
-#endif //GLIBMM_EXCEPTIONS_ENABLED
 
 /** Converts an absolute filename to an escaped UTF-8 encoded URI.
  * @param filename An absolute filename specified in the encoding used
@@ -301,11 +247,7 @@ std::string filename_from_uri(const Glib::ustring& uri, std::auto_ptr<Glib::Erro
  * @return The resulting URI.
  * @throw Glib::ConvertError
  */
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
 Glib::ustring filename_to_uri(const std::string& filename, const Glib::ustring& hostname);
-#else
-Glib::ustring filename_to_uri(const std::string& filename, const Glib::ustring& hostname, std::auto_ptr<Glib::Error>& error);
-#endif //GLIBMM_EXCEPTIONS_ENABLED
 
 /** Converts an absolute filename to an escaped UTF-8 encoded URI.
  * @param filename An absolute filename specified in the encoding used
@@ -313,11 +255,7 @@ Glib::ustring filename_to_uri(const std::string& filename, const Glib::ustring& 
  * @return The resulting URI.
  * @throw Glib::ConvertError
  */
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
 Glib::ustring filename_to_uri(const std::string& filename);
-#else
-Glib::ustring filename_to_uri(const std::string& filename, std::auto_ptr<Glib::Error>& error);
-#endif //GLIBMM_EXCEPTIONS_ENABLED
 
 /** Returns the display basename for the particular filename, guaranteed
  * to be valid UTF-8. The display name might not be identical to the filename,
@@ -350,7 +288,7 @@ Glib::ustring filename_display_basename(const std::string& filename);
  * @param filename: a pathname hopefully in the GLib file name encoding
  * @result A string containing a rendition of the filename in valid UTF-8.
  */
-Glib::ustring filename_display_name(const std::string& filename);
+Glib::ustring filename_display_name(const Glib::ustring& filename);
 
 /** @} group CharsetConv */
 

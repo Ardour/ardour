@@ -99,16 +99,11 @@ class AudioStreamView : public StreamView
 
 	void color_handler (ColorID id, uint32_t val);
 	
-
 	double _amplitude_above_axis;
 	
 	typedef list<CrossfadeView*> CrossfadeViewList;
 	CrossfadeViewList crossfade_views;
 	bool              crossfades_visible;
-
-	list<sigc::connection>     peak_ready_connections;
-	nframes_t             last_rec_peak_frame;
-	map<boost::shared_ptr<ARDOUR::Source>, bool> rec_peak_ready_map;
 
 	WaveformShape     _waveform_shape;
 	WaveformScale     _waveform_scale;

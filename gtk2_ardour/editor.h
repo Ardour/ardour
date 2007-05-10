@@ -72,6 +72,7 @@ namespace ARDOUR {
 	class Session;
 	class AudioFilter;
 	class Crossfade;
+	class ChanCount;
 }
 
 namespace LADSPA {
@@ -79,7 +80,6 @@ namespace LADSPA {
 }
 
 class TimeAxisView;
-class RouteTimeAxisView;
 class AudioTimeAxisView;
 class AutomationTimeAxisView;
 class AudioRegionView;
@@ -410,8 +410,8 @@ class Editor : public PublicEditor
 	void clear_marker_display ();
 	void mouse_add_new_marker (nframes_t where);
 
-	TimeAxisView*      clicked_trackview;
-	AudioTimeAxisView* clicked_audio_trackview;
+	TimeAxisView*      clicked_axisview;
+	RouteTimeAxisView* clicked_routeview;
 	RegionView*        clicked_regionview;
 	RegionView*        latest_regionview;
 	uint32_t           clicked_selection;
@@ -420,16 +420,16 @@ class Editor : public PublicEditor
 
 	void sort_track_selection ();
 
-	void get_relevant_audio_tracks (std::set<AudioTimeAxisView*>& relevant_tracks);
+	void get_relevant_tracks (std::set<RouteTimeAxisView*>& relevant_tracks);
 	void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&);
-	void mapover_audio_tracks (sigc::slot<void,AudioTimeAxisView&,uint32_t> sl);
+	void mapover_tracks (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl);
 
-	/* functions to be passed to mapover_audio_tracks(), possibly with sigc::bind()-supplied arguments */
+	/* functions to be passed to mapover_tracks(), possibly with sigc::bind()-supplied arguments */
 
 	void mapped_get_equivalent_regions (RouteTimeAxisView&, uint32_t, RegionView*, vector<RegionView*>*);
-	void mapped_use_new_playlist (AudioTimeAxisView&, uint32_t);
-	void mapped_use_copy_playlist (AudioTimeAxisView&, uint32_t);
-	void mapped_clear_playlist (AudioTimeAxisView&, uint32_t);
+	void mapped_use_new_playlist (RouteTimeAxisView&, uint32_t);
+	void mapped_use_copy_playlist (RouteTimeAxisView&, uint32_t);
+	void mapped_clear_playlist (RouteTimeAxisView&, uint32_t);
 
 	/* end */
 
@@ -852,14 +852,14 @@ class Editor : public PublicEditor
 
 	int ensure_cursor (nframes_t* pos);
 
-	void handle_new_audio_region (boost::weak_ptr<ARDOUR::AudioRegion>);
-	void handle_audio_region_removed (boost::weak_ptr<ARDOUR::AudioRegion>);
-	void add_audio_region_to_region_display (boost::shared_ptr<ARDOUR::AudioRegion>);
+	void handle_new_region (boost::weak_ptr<ARDOUR::Region>);
+	void handle_region_removed (boost::weak_ptr<ARDOUR::Region>);
+	void add_region_to_region_display (boost::shared_ptr<ARDOUR::Region>);
 	void region_hidden (boost::shared_ptr<ARDOUR::Region>);
 	void redisplay_regions ();
-	void insert_into_tmp_audio_regionlist(boost::shared_ptr<ARDOUR::AudioRegion>);
+	void insert_into_tmp_regionlist(boost::shared_ptr<ARDOUR::Region>);
 
-	list<boost::shared_ptr<ARDOUR::AudioRegion> > tmp_audio_region_list;
+	list<boost::shared_ptr<ARDOUR::Region> > tmp_region_list;
 
 	void cut_copy (Editing::CutCopyOp);
 	void cut_copy_points (Editing::CutCopyOp);
@@ -952,7 +952,7 @@ class Editor : public PublicEditor
 	void amplitude_zoom (gdouble scale);
 	void amplitude_zoom_step (bool in);
 
-	void insert_region_list_drag (boost::shared_ptr<ARDOUR::AudioRegion>, int x, int y);
+	void insert_region_list_drag (boost::shared_ptr<ARDOUR::Region>, int x, int y);
 	void insert_region_list_selection (float times);
 
 	void add_external_audio_action (Editing::ImportMode);
@@ -1626,7 +1626,7 @@ class Editor : public PublicEditor
 	void external_edit_region ();
 
 	int write_audio_selection (TimeSelection&);
-	bool write_audio_range (ARDOUR::AudioPlaylist&, uint32_t channels, list<ARDOUR::AudioRange>&);
+	bool write_audio_range (ARDOUR::AudioPlaylist&, const ARDOUR::ChanCount& channels, list<ARDOUR::AudioRange>&);
 
 	void write_selection ();
 
@@ -1634,7 +1634,8 @@ class Editor : public PublicEditor
 
 	UndoAction get_memento() const;
 
-        XMLNode *before; /* used in *_reversible_command */
+	XMLNode *before; /* used in *_reversible_command */
+
 	void begin_reversible_command (string cmd_name);
 	void commit_reversible_command ();
 

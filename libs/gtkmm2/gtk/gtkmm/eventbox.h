@@ -3,7 +3,6 @@
 #ifndef _GTKMM_EVENTBOX_H
 #define _GTKMM_EVENTBOX_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -97,17 +96,11 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
-#ifdef GLIBMM_VFUNCS_ENABLED
-#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
-#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -120,7 +113,7 @@ public:
    * See set_visible_window() for details.
    * @return <tt>true</tt> if the event box window is visible
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   bool get_visible_window() const;
   
@@ -160,7 +153,7 @@ public:
    * descendant windows, not just at the same place on the screen.
    * &lt;/note&gt;
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param visible_window Boolean value.
    */
   void set_visible_window(bool visible_window = true);
@@ -171,7 +164,7 @@ public:
    * @return <tt>true</tt> if the event box window is above the window
    * of its child.
    * 
-   * @newin2p4.
+   * Since: 2.4.
    */
   bool get_above_child() const;
   
@@ -183,22 +176,19 @@ public:
    * 
    * The default is to keep the window below the child.
    * 
-   * @newin2p4
+   * Since: 2.4
    * @param above_child <tt>true</tt> if the event box window is above the windows of its child.
    */
   void set_above_child(bool above_child = true);
 
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether the event box is visible
+  /** Whether the event box is visible
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_visible_window() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the event box is visible
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -206,19 +196,15 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_visible_window() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
  
-  #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Whether the event-trapping window of the eventbox is above the window of the child widget as opposed to below it.
+  /** Whether the event-trapping window of the eventbox is above the window of the child widget as opposed to below it.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_above_child() ;
-#endif //#GLIBMM_PROPERTIES_ENABLED
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the event-trapping window of the eventbox is above the window of the child widget as opposed to below it.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -226,7 +212,6 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_above_child() const;
-#endif //#GLIBMM_PROPERTIES_ENABLED
  
 
 };
@@ -242,8 +227,6 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::EventBox* wrap(GtkEventBox* object, bool take_copy = false);
-} //namespace Glib
-
-
+}
 #endif /* _GTKMM_EVENTBOX_H */
 

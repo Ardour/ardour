@@ -3,7 +3,6 @@
 #ifndef _GDKMM_RECTANGLE_H
 #define _GDKMM_RECTANGLE_H
 
-
 #include <glibmm.h>
 
 /* $Id$ */
@@ -72,15 +71,15 @@ public:
 
   bool has_zero_area() const;
 
-   int get_x() const;
-    void set_x(const int& value);
-    int get_y() const;
-    void set_y(const int& value);
-    int get_width() const;
-    void set_width(const int& value);
-    int get_height() const;
-    void set_height(const int& value);
- 
+  int get_x() const;
+  void set_x(const int& value);
+  int get_y() const;
+  void set_y(const int& value);
+  int get_width() const;
+  void set_width(const int& value);
+  int get_height() const;
+  void set_height(const int& value);
+
 
 };
 
@@ -109,7 +108,6 @@ class Value<Gdk::Rectangle> : public Glib::Value_Boxed<Gdk::Rectangle>
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 } // namespace Glib
-
 
 #endif /* _GDKMM_RECTANGLE_H */
 
