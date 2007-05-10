@@ -263,7 +263,7 @@ PannerUI::update_pan_state ()
 void
 PannerUI::setup_pan ()
 {
-	uint32_t nouts = _io->n_outputs ().get(ARDOUR::DataType::AUDIO);
+	uint32_t nouts = _io->n_outputs ().n_audio();
 
 	if (nouts == 0 || nouts == 1) {
 
@@ -362,7 +362,7 @@ PannerUI::setup_pan ()
 		}
 		
 		update_pan_sensitive ();
-		panner->reset (_io->n_inputs().get(ARDOUR::DataType::AUDIO));
+		panner->reset (_io->n_inputs().n_audio());
 		panner->set_size_request (-1, 61);
 
 		/* and finally, add it to the panner frame */
@@ -449,7 +449,7 @@ PannerUI::effective_pan_display ()
 		return;
 	}
 
-	switch (_io->n_outputs().get(ARDOUR::DataType::AUDIO)) {
+	switch (_io->n_outputs().n_audio()) {
 	case 0: 
 	case 1:
 		/* relax */
@@ -486,7 +486,7 @@ PannerUI::pan_changed (void *src)
 		panning_link_button.set_sensitive (true);
 	}
 
-	uint32_t nouts = _io->n_outputs().get(ARDOUR::DataType::AUDIO);
+	uint32_t nouts = _io->n_outputs().n_audio();
 
 	switch (nouts) {
 	case 0:
@@ -543,7 +543,7 @@ PannerUI::pan_value_changed (uint32_t which)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &PannerUI::pan_value_changed), which));
 							   
-	if (_io->n_outputs().get(ARDOUR::DataType::AUDIO) > 1 && which < _io->panner().size()) {
+	if (_io->n_outputs().n_audio() > 1 && which < _io->panner().size()) {
 		float xpos;
 		float val = pan_adjustments[which]->get_value ();
 
@@ -613,7 +613,7 @@ PannerUI::update_pan_sensitive ()
 {
 	bool sensitive = !(_io->panner().automation_state() & Play);
 
-	switch (_io->n_outputs().get(ARDOUR::DataType::AUDIO)) {
+	switch (_io->n_outputs().n_audio()) {
 	case 0:
 	case 1:
 		break;

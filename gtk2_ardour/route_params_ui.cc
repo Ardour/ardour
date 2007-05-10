@@ -261,13 +261,13 @@ RouteParams_UI::setup_io_frames()
 	// input
 	_input_iosel = new IOSelector (*session, _route, true);
 	_input_iosel->redisplay ();
-        input_frame.add (*_input_iosel);
+	input_frame.add (*_input_iosel);
 	input_frame.show_all();
 	
 	// output
 	_output_iosel = new IOSelector (*session, _route, false);
 	_output_iosel->redisplay ();
-        output_frame.add (*_output_iosel);
+	output_frame.add (*_output_iosel);
 	output_frame.show_all();
 }
 
