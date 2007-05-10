@@ -158,8 +158,8 @@ VSTPlugin::get_state()
 		string path;
 		struct stat sbuf;
 
-		path = getenv ("HOME");
-		path += "/.ardour/vst";
+		path = get_user_ardour_path ();
+		path += "vst";
 
 		if (stat (path.c_str(), &sbuf)) {
 			if (errno == ENOENT) {
