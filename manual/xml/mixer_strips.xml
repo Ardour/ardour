@@ -109,17 +109,8 @@
       leaving the number of ports untouched.
     </para>
   </section>
-
-  <section id="mixer-strip-polarity-button">
-    <title>Polarity Button</title>
-    <para>
-      The polarity button, when pressed, inverts the phase of the signal as
-      it leaves the track and enters the mixer strip. it has no effect on
-      the signal being recorded to disk. It has no effect on the timing of
-      the signal, either.
-    </para>
-  </section>
-
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
+	  href="invert_polarity.xml" />
   <section id="mixer-strip-solo-button">
     <title>Solo Button</title>
     <para>
