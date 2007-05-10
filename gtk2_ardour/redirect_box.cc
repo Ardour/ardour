@@ -294,7 +294,7 @@ RedirectBox::redirect_button_press_event (GdkEventButton *ev)
 		
 	}
 
-	if (redirect && (Keyboard::is_edit_event (ev) || (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS && ev->state == 0))) {
+	if (redirect && (Keyboard::is_edit_event (ev) || (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS))) {
 		
 		if (_session.engine().connected()) {
 			/* XXX giving an error message here is hard, because we may be in the midst of a button press */
@@ -339,7 +339,7 @@ RedirectBox::redirect_button_release_event (GdkEventButton *ev)
 		show_redirect_menu(ev->time);
 		ret = true;
 
-	} else if (redirect && ev->button == 2 && ev->state == GDK_BUTTON2_MASK) {
+	} else if (redirect && ev->button == 2 && Keyboard::modifier_state_equals (ev->state, Gdk::BUTTON2_MASK)) {
 		
 		redirect->set_active (!redirect->active(), this);
 		ret = true;
@@ -1071,6 +1071,7 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 			send_ui->get_window()->raise ();
 		} else {
 			send_ui->show_all ();
+			send_ui->present ();
 		}
 		
 	} else {
@@ -1115,6 +1116,7 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 					plugin_ui->get_window()->raise ();
 				} else {
 					plugin_ui->show_all ();
+					plugin_ui->present ();
 				}
 #ifdef HAVE_AUDIOUNIT
 			} else if (type == ARDOUR::AudioUnit) {
@@ -1125,7 +1127,12 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 					plugin_ui = reinterpret_cast<AUPluginUI*> (plugin_insert->get_gui());
 				}
 				
-				// raise window, somehow
+				if (plugin_ui->is_visible()) {
+					plugin_ui->get_window()->raise ();
+				} else {
+					plugin_ui->show_all ();
+					plugin_ui->present ();
+				}
 #endif				
 			} else {
 				warning << "Unsupported plugin sent to RedirectBox::edit_redirect()" << endmsg;
@@ -1153,7 +1160,7 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 			if (io_selector->is_visible()) {
 				io_selector->get_window()->raise ();
 			} else {
-				io_selector->show_all ();
+				io_selector->present ();
 			}
 		}
 	}

@@ -255,18 +255,30 @@ IO::deliver_output (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame,
 	
 	// Use the panner to distribute audio to output port buffers
 	if (_panner && !_panner->empty() && !_panner->bypassed()) {
-		_panner->distribute(bufs, output_buffers(), start_frame, end_frame, nframes, offset);
+		_panner->distribute (bufs, output_buffers(), start_frame, end_frame, nframes, offset);
 	} else {
 		const DataType type = DataType::AUDIO;
-
+		
 		// Copy any audio 1:1 to outputs
-		assert(bufs.count().get(DataType::AUDIO) == output_buffers().count().get(DataType::AUDIO));
+		
 		BufferSet::iterator o = output_buffers().begin(type);
-		for (BufferSet::iterator i = bufs.begin(type); i != bufs.end(type); ++i, ++o) {
+		BufferSet::iterator i = bufs.begin(type);
+		BufferSet::iterator prev = i;
+		
+		while (i != bufs.end(type) && o != output_buffers().end (type)) {
 			o->read_from(*i, nframes, offset);
+			prev = i;
+			++i;
+			++o;
+		}
+
+		/* extra outputs get a copy of the last buffer */
+
+		while (o != output_buffers().end(type)) {
+			o->read_from(*prev, nframes, offset);
+			++o;
 		}
 	}
-
 
 	/* ********** MIDI ********** */
 

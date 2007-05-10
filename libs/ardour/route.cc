@@ -431,7 +431,6 @@ Route::process_output_buffers (BufferSet& bufs,
 		} else {
 
 			co->deliver_output (bufs, start_frame, end_frame, nframes, offset);
-			
 		} 
 	} 
 	
@@ -588,7 +587,7 @@ Route::process_output_buffers (BufferSet& bufs,
 			(no_monitor && record_enabled() && (!Config->get_auto_input() || _session.actively_recording()))
 
 			) {
-
+			
 			co->silence (nframes, offset);
 			
 		} else {
@@ -645,7 +644,7 @@ Route::process_output_buffers (BufferSet& bufs,
 			if (_meter_point == MeterPostFader) {
 				peak_meter().reset();
 			}
-			
+
 			IO::silence (nframes, offset);
 			
 		} else {
@@ -1763,11 +1762,17 @@ Route::set_control_outs (const vector<string>& ports)
 {
 	Glib::Mutex::Lock lm (control_outs_lock);
 	vector<string>::const_iterator i;
-
+	size_t limit;
+	
  	if (_control_outs) {
  		delete _control_outs;
  		_control_outs = 0;
  	}
+
+	if (control() || master()) {
+		/* no control outs for these two special busses */
+		return 0;
+	}
  	
  	if (ports.empty()) {
  		return 0;
@@ -1781,8 +1786,23 @@ Route::set_control_outs (const vector<string>& ports)
 	/* our control outs need as many outputs as we
 	   have audio outputs. we track the changes in ::output_change_handler().
 	*/
+	
+	// XXX its stupid that we have to get this value twice
 
-	_control_outs->ensure_io (ChanCount::ZERO, ChanCount(DataType::AUDIO, n_outputs().get(DataType::AUDIO)), true, this);
+	limit = n_outputs().get(DataType::AUDIO);
+	
+	if (_control_outs->ensure_io (ChanCount::ZERO, ChanCount (DataType::AUDIO, n_outputs().get (DataType::AUDIO)), true, this)) {
+		return -1;
+	}
+	
+	/* now connect to the named ports */
+	
+	for (size_t n = 0; n < limit; ++n) {
+		if (_control_outs->connect_output (_control_outs->output (n), ports[n], this)) {
+			error << string_compose (_("could not connect %1 to %2"), _control_outs->output(n)->name(), ports[n]) << endmsg;
+			return -1;
+		}
+	}
  
  	return 0;
 }	

@@ -120,6 +120,7 @@ public:
 		iterator& operator++() { ++_index; return *this; } // yes, prefix only
 		bool operator==(const iterator& other) { return (_index == other._index); }
 		bool operator!=(const iterator& other) { return (_index != other._index); }
+		iterator operator=(const iterator& other) { _set = other._set; _type = other._type; _index = other._index; return *this; }
 
 	private:
 		friend class BufferSet;
