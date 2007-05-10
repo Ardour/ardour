@@ -128,25 +128,6 @@
     </para>
   </section>
 
-  <section id="mixer-strip-track-speed-control">
-    <title>Track Speed Control</title>
-    <para>
-      The track speed allows a varispeed setting to be applied to the track.
-      a setting of <literal>1.0</literal> corresponds to the normal playback
-      speed of the session. a setting of <literal>0.5</literal> will play at
-      half normal playback speed. when altered, the track will be redrawn to
-      reflect the new position of the audio resulting from the speed change.
-      The Track Speed Control has three decimal places of precision. A left
-      or right click on the displayed number will raise or lower the track
-      speed by 0.1%. when the speed is not exactly 1, the display will be
-      coloured red. Hovering over the displayed number will allow you to use
-      the mouse wheel to set the desired speed. A middle click on the
-      displayed number will return the speed to exactly 1.
-    </para>
-
-    <para></para>
-  </section>
-
   <section id="mixer-strip-record-enable-button">
     <title>Record Enable Button</title>
     <para>
