@@ -39,10 +39,15 @@ Amp::run (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t target, boo
 	// assert(bufs.buffer_capacity(DataType::AUDIO) >= nframes);
 
 	// if we don't need to declick, defer to apply_simple_gain
-
 	if (initial == target) {
-		for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
-			apply_gain_to_buffer (i->data (), nframes, target);
+		if (target == 0.0) {
+			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+				memset (i->data(), 0, sizeof (Sample) * nframes);
+			}
+		} else if (target != 1.0) {
+			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+				apply_gain_to_buffer (i->data(), nframes, target);
+			}
 		}
 		return;
 	}
