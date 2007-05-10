@@ -140,10 +140,7 @@ public:
 	};
 
 	audio_iterator audio_begin() { return audio_iterator(*this, 0); }
-	audio_iterator audio_end()   { return audio_iterator(*this, _count.get(DataType::AUDIO)); }
-
-
-
+	audio_iterator audio_end()   { return audio_iterator(*this, _count.n_audio()); }
 
 private:	
 	// Prevent copies (undefined)

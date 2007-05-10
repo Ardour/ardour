@@ -35,7 +35,7 @@ namespace ARDOUR {
 void
 PeakMeter::run (BufferSet& bufs, nframes_t nframes, nframes_t offset)
 {
-	size_t meterable = std::min(bufs.count().get(DataType::AUDIO), _peak_power.size());
+	size_t meterable = std::min(bufs.count().n_audio(), _peak_power.size());
 
 	// Meter what we have
 	for (size_t n = 0; n < meterable; ++n) {
@@ -67,7 +67,7 @@ PeakMeter::reset_max ()
 void
 PeakMeter::setup (const ChanCount& in)
 {
-	uint32_t limit = in.get(DataType::AUDIO);
+	uint32_t limit = in.n_audio();
 
 	while (_peak_power.size() > limit) {
 		_peak_power.pop_back();

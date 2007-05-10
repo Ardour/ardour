@@ -389,7 +389,7 @@ GainMeter::hide_all_meters ()
 void
 GainMeter::setup_meters ()
 {
-	uint32_t nmeters = _io->n_outputs().get(DataType::AUDIO);
+	uint32_t nmeters = _io->n_outputs().n_audio();
 	guint16 width;
 
 	hide_all_meters ();
@@ -401,16 +401,16 @@ GainMeter::setup_meters ()
 		switch (r->meter_point()) {
 		case MeterPreFader:
 		case MeterInput:
-			nmeters = r->n_inputs().get(DataType::AUDIO);
+			nmeters = r->n_inputs().n_audio();
 			break;
 		case MeterPostFader:
-			nmeters = r->n_outputs().get(DataType::AUDIO);
+			nmeters = r->n_outputs().n_audio();
 			break;
 		}
 
 	} else {
 
-		nmeters = _io->n_outputs().get(DataType::AUDIO);
+		nmeters = _io->n_outputs().n_audio();
 
 	}
 

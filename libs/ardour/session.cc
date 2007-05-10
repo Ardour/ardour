@@ -804,8 +804,8 @@ Session::when_engine_running ()
 			
 			_master_out->defer_pan_reset ();
 			
-			while (_master_out->n_inputs().get(DataType::AUDIO)
-					< _master_out->input_maximum().get(DataType::AUDIO)) {
+			while (_master_out->n_inputs().n_audio()
+					< _master_out->input_maximum().n_audio()) {
 				if (_master_out->add_input_port ("", this, DataType::AUDIO)) {
 					error << _("cannot setup master inputs") 
 					      << endmsg;
@@ -813,8 +813,8 @@ Session::when_engine_running ()
 				}
 			}
 			n = 0;
-			while (_master_out->n_outputs().get(DataType::AUDIO)
-					< _master_out->output_maximum().get(DataType::AUDIO)) {
+			while (_master_out->n_outputs().n_audio()
+					< _master_out->output_maximum().n_audio()) {
 				if (_master_out->add_output_port (_engine.get_nth_physical_output (DataType::AUDIO, n), this, DataType::AUDIO)) {
 					error << _("cannot setup master outputs")
 					      << endmsg;
@@ -915,7 +915,7 @@ Session::hookup_io ()
 		uint32_t n;
 		vector<string> cports;
 
-		while (_control_out->n_inputs().get(DataType::AUDIO) < _control_out->input_maximum().get(DataType::AUDIO)) {
+		while (_control_out->n_inputs().n_audio() < _control_out->input_maximum().n_audio()) {
 			if (_control_out->add_input_port ("", this)) {
 				error << _("cannot setup control inputs")
 				      << endmsg;
@@ -923,7 +923,7 @@ Session::hookup_io ()
 			}
 		}
 		n = 0;
-		while (_control_out->n_outputs().get(DataType::AUDIO) < _control_out->output_maximum().get(DataType::AUDIO)) {
+		while (_control_out->n_outputs().n_audio() < _control_out->output_maximum().n_audio()) {
 			if (_control_out->add_output_port (_engine.get_nth_physical_output (DataType::AUDIO, n), this)) {
 				error << _("cannot set up master outputs")
 				      << endmsg;
@@ -1633,7 +1633,7 @@ Session::new_midi_track (TrackMode mode, uint32_t how_many)
 			if (dynamic_cast<MidiTrack*>((*i).get()) != 0) {
 				if (!(*i)->hidden()) {
 					n++;
-					channels_used += (*i)->n_inputs().get(DataType::MIDI);
+					channels_used += (*i)->n_inputs().n_midi();
 				}
 			}
 		}
@@ -1666,7 +1666,7 @@ Session::new_midi_track (TrackMode mode, uint32_t how_many)
 				error << "cannot configure 1 in/1 out configuration for new midi track" << endmsg;
 			}
 			
-			channels_used += track->n_inputs ().get(DataType::MIDI);
+			channels_used += track->n_inputs ().n_midi();
 
 			track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
 			track->set_remote_control_id (ntracks());
@@ -1714,7 +1714,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			if (dynamic_cast<AudioTrack*>((*i).get()) != 0) {
 				if (!(*i)->hidden()) {
 					n++;
-					channels_used += (*i)->n_inputs().get(DataType::AUDIO);
+					channels_used += (*i)->n_inputs().n_audio();
 				}
 			}
 		}
@@ -1774,7 +1774,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			}
 
 			if (nphysical_in) {
-				for (uint32_t x = 0; x < track->n_inputs().get(DataType::AUDIO) && x < nphysical_in; ++x) {
+				for (uint32_t x = 0; x < track->n_inputs().n_audio() && x < nphysical_in; ++x) {
 					
 					port = "";
 					
@@ -1788,7 +1788,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 				}
 			}
 			
-			for (uint32_t x = 0; x < track->n_outputs().get(DataType::MIDI); ++x) {
+			for (uint32_t x = 0; x < track->n_outputs().n_midi(); ++x) {
 				
 				port = "";
 				
@@ -1796,7 +1796,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 					port = physoutputs[(channels_used+x)%nphysical_out];
 				} else if (Config->get_output_auto_connect() & AutoConnectMaster) {
 					if (_master_out) {
-						port = _master_out->input (x%_master_out->n_inputs().get(DataType::AUDIO))->name();
+						port = _master_out->input (x%_master_out->n_inputs().n_audio())->name();
 					}
 				}
 				
@@ -1805,7 +1805,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 				}
 			}
 			
-			channels_used += track->n_inputs ().get(DataType::AUDIO);
+			channels_used += track->n_inputs ().n_audio();
 
 			track->audio_diskstream()->non_realtime_input_change();
 			
@@ -1939,7 +1939,7 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 				goto failure;
 			}
 			
-			for (uint32_t x = 0; n_physical_inputs && x < bus->n_inputs().get(DataType::AUDIO); ++x) {
+			for (uint32_t x = 0; n_physical_inputs && x < bus->n_inputs().n_audio(); ++x) {
 				
 				port = "";
 
@@ -1952,7 +1952,7 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 				}
 			}
 			
-			for (uint32_t x = 0; n_physical_outputs && x < bus->n_outputs().get(DataType::AUDIO); ++x) {
+			for (uint32_t x = 0; n_physical_outputs && x < bus->n_outputs().n_audio(); ++x) {
 				
 				port = "";
 				
@@ -1960,7 +1960,7 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 					port = physoutputs[((n+x)%n_physical_outputs)];
 				} else if (Config->get_output_auto_connect() & AutoConnectMaster) {
 					if (_master_out) {
-						port = _master_out->input (x%_master_out->n_inputs().get(DataType::AUDIO))->name();
+						port = _master_out->input (x%_master_out->n_inputs().n_audio())->name();
 					}
 				}
 				
@@ -2031,7 +2031,7 @@ Session::add_routes (RouteList& new_routes, bool save)
 	if (_control_out && IO::connecting_legal) {
 
 		vector<string> cports;
-		uint32_t ni = _control_out->n_inputs().get(DataType::AUDIO);
+		uint32_t ni = _control_out->n_inputs().n_audio();
 
 		for (uint32_t n = 0; n < ni; ++n) {
 			cports.push_back (_control_out->input(n)->name());
@@ -3121,7 +3121,7 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 boost::shared_ptr<AudioFileSource>
 Session::create_audio_source_for_session (AudioDiskstream& ds, uint32_t chan, bool destructive)
 {
-	string spath = audio_path_from_name (ds.name(), ds.n_channels().get(DataType::AUDIO), chan, destructive);
+	string spath = audio_path_from_name (ds.name(), ds.n_channels().n_audio(), chan, destructive);
 	return boost::dynamic_pointer_cast<AudioFileSource> (
 		SourceFactory::createWritable (DataType::AUDIO, *this, spath, destructive, frame_rate()));
 }
@@ -3817,7 +3817,7 @@ Session::ensure_buffers (ChanCount howmany)
 	_send_buffers->ensure_buffers(howmany, current_block_size);
 	_silent_buffers->ensure_buffers(howmany, current_block_size);
 	
-	allocate_pan_automation_buffers (current_block_size, howmany.get(DataType::AUDIO), false);
+	allocate_pan_automation_buffers (current_block_size, howmany.n_audio(), false);
 }
 
 uint32_t
@@ -4049,7 +4049,7 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t le
 	
 	dir = discover_best_sound_dir ();
 
-	for (uint32_t chan_n=0; chan_n < nchans.get(DataType::AUDIO); ++chan_n) {
+	for (uint32_t chan_n=0; chan_n < nchans.n_audio(); ++chan_n) {
 
 		for (x = 0; x < 99999; ++x) {
 			snprintf (buf, sizeof(buf), "%s/%s-%d-bounce-%" PRIu32 ".wav", dir.c_str(), playlist->name().c_str(), chan_n, x+1);

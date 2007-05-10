@@ -271,7 +271,7 @@ BaseStereoPanner::load (istream& in, string path, uint32_t& linecnt)
 void
 BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes)
 {
-	assert(obufs.count().get(DataType::AUDIO) == 2);
+	assert(obufs.count().n_audio() == 2);
 
 	pan_t delta;
 	Sample* dst;
@@ -430,7 +430,7 @@ EqualPowerStereoPanner::distribute_automated (AudioBuffer& srcbuf, BufferSet& ob
 					      nframes_t start, nframes_t end, nframes_t nframes,
 					      pan_t** buffers)
 {
-	assert(obufs.count().get(DataType::AUDIO) == 2);
+	assert(obufs.count().n_audio() == 2);
 
 	Sample* dst;
 	pan_t* pbuf;
@@ -1335,9 +1335,9 @@ Panner::set_position (float xpos, float ypos, float zpos, StreamPanner& orig)
 void
 Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, nframes_t nframes, nframes_t offset, gain_t gain_coeff)
 {
-	if (outbufs.count().get(DataType::AUDIO) == 0) {
+	if (outbufs.count().n_audio() == 0) {
 		// Don't want to lose audio...
-		assert(inbufs.count().get(DataType::AUDIO) == 0);
+		assert(inbufs.count().n_audio() == 0);
 		return;
 	}
 
@@ -1346,7 +1346,7 @@ Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, nframes
 	assert(!empty());
 
 	
-	if (outbufs.count().get(DataType::AUDIO) == 1) {
+	if (outbufs.count().n_audio() == 1) {
 
 		AudioBuffer& dst = outbufs.get_audio(0);
 
@@ -1402,9 +1402,9 @@ Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, nframes
 void
 Panner::distribute (BufferSet& inbufs, BufferSet& outbufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset)
 {	
-	if (outbufs.count().get(DataType::AUDIO) == 0) {
+	if (outbufs.count().n_audio() == 0) {
 		// Failing to deliver audio we were asked to deliver is a bug
-		assert(inbufs.count().get(DataType::AUDIO) == 0);
+		assert(inbufs.count().n_audio() == 0);
 		return;
 	}
 
@@ -1428,7 +1428,7 @@ Panner::distribute (BufferSet& inbufs, BufferSet& outbufs, nframes_t start_frame
 
 	// Otherwise.. let the automation flow, baby
 	
-	if (outbufs.count().get(DataType::AUDIO) == 1) {
+	if (outbufs.count().n_audio() == 1) {
 
 		AudioBuffer& dst = outbufs.get_audio(0);
 
@@ -1447,7 +1447,7 @@ Panner::distribute (BufferSet& inbufs, BufferSet& outbufs, nframes_t start_frame
 	}
 
 	// More than 1 output, we should have 1 panner for each input
-	assert(size() == inbufs.count().get(DataType::AUDIO));
+	assert(size() == inbufs.count().n_audio());
 	
 	/* the terrible silence ... */
 	for (BufferSet::audio_iterator i = outbufs.audio_begin(); i != outbufs.audio_end(); ++i) {

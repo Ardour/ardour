@@ -482,7 +482,7 @@ AudioStreamView::setup_rec_box ()
 				boost::shared_ptr<AudioDiskstream> ads = boost::dynamic_pointer_cast<AudioDiskstream>(_trackview.get_diskstream());
 				assert(ads);
 
-				for (uint32_t n=0; n < ads->n_channels().get(DataType::AUDIO); ++n) {
+				for (uint32_t n=0; n < ads->n_channels().n_audio(); ++n) {
 					boost::shared_ptr<AudioFileSource> src = boost::static_pointer_cast<AudioFileSource> (ads->write_source (n));
 					if (src) {
 						sources.push_back (src);
@@ -638,7 +638,7 @@ AudioStreamView::rec_peak_range_ready (nframes_t start, nframes_t cnt, boost::we
 	
 	rec_data_ready_map[src] = true;
 	
-	if (rec_data_ready_map.size() == _trackview.get_diskstream()->n_channels().get(DataType::AUDIO)) {
+	if (rec_data_ready_map.size() == _trackview.get_diskstream()->n_channels().n_audio()) {
 		this->update_rec_regions ();
 		rec_data_ready_map.clear();
 	}

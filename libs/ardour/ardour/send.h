@@ -53,7 +53,7 @@ class Send : public Redirect
 	XMLNode& get_state(void);
 	int set_state(const XMLNode& node);
 
-	uint32_t pans_required() const { return _expected_inputs.get(DataType::AUDIO); }
+	uint32_t pans_required() const { return _expected_inputs.n_audio(); }
 	void expect_inputs (const ChanCount&);
 
 	static uint32_t how_many_sends();

@@ -283,14 +283,14 @@ IO::deliver_output (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame,
 	/* ********** MIDI ********** */
 
 	// No MIDI, we're done here
-	if (bufs.count().get(DataType::MIDI) == 0) {
+	if (bufs.count().n_midi() == 0) {
 		return;
 	}
 
 	const DataType type = DataType::MIDI;
 
 	// Copy any MIDI 1:1 to outputs
-	assert(bufs.count().get(DataType::MIDI) == output_buffers().count().get(DataType::MIDI));
+	assert(bufs.count().n_midi() == output_buffers().count().n_midi());
 	BufferSet::iterator o = output_buffers().begin(type);
 	for (BufferSet::iterator i = bufs.begin(type); i != bufs.end(type); ++i, ++o) {
 		o->read_from(*i, nframes, offset);
@@ -1143,7 +1143,7 @@ IO::reset_panner ()
 {
 	if (panners_legal) {
 		if (!no_panner_reset) {
-			_panner->reset (n_outputs().get(DataType::AUDIO), pans_required());
+			_panner->reset (n_outputs().n_audio(), pans_required());
 		}
 	} else {
 		panner_legal_c.disconnect ();
@@ -1154,7 +1154,7 @@ IO::reset_panner ()
 int
 IO::panners_became_legal ()
 {
-	_panner->reset (n_outputs().get(DataType::AUDIO), pans_required());
+	_panner->reset (n_outputs().n_audio(), pans_required());
 	_panner->load (); // automation
 	panner_legal_c.disconnect ();
 	return 0;

@@ -184,7 +184,7 @@ MidiDiskstream::non_realtime_input_change ()
 void
 MidiDiskstream::get_input_sources ()
 {
-	uint32_t ni = _io->n_inputs().get(DataType::MIDI);
+	uint32_t ni = _io->n_inputs().n_midi();
 
 	if (ni == 0) {
 		return;

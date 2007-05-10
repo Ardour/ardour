@@ -494,7 +494,7 @@ ExportDialog::set_state()
 			}
 
 			TreeModel::Children rows = master_selector.get_model()->children();
-			for (uint32_t r = 0; r < session->master_out()->n_outputs().get(DataType::AUDIO); ++r) {
+			for (uint32_t r = 0; r < session->master_out()->n_outputs().n_audio(); ++r) {
 				if (nchns == 2) {
 					if (r % 2) {
 						rows[r][exp_cols.right] = true;
@@ -1096,9 +1096,9 @@ ExportDialog::fill_lists ()
 			continue;
 		}
 
-		for (uint32_t i=0; i < route->n_outputs().get(DataType::AUDIO); ++i) {
+		for (uint32_t i=0; i < route->n_outputs().n_audio(); ++i) {
 			string name;
-			if (route->n_outputs().get(DataType::AUDIO) == 1) {
+			if (route->n_outputs().n_audio() == 1) {
 				name = route->name();
 			} else {
 				name = string_compose("%1: out-%2", route->name(), i+1);

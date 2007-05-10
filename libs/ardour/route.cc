@@ -1789,7 +1789,7 @@ Route::set_control_outs (const vector<string>& ports)
 	
 	// XXX its stupid that we have to get this value twice
 
-	limit = n_outputs().get(DataType::AUDIO);
+	limit = n_outputs().n_audio();
 	
 	if (_control_outs->ensure_io (ChanCount::ZERO, ChanCount (DataType::AUDIO, n_outputs().get (DataType::AUDIO)), true, this)) {
 		return -1;
@@ -2018,7 +2018,7 @@ Route::output_change_handler (IOChange change, void *ignored)
 {
 	if (change & ConfigurationChanged) {
 		if (_control_outs) {
-			_control_outs->ensure_io (ChanCount::ZERO, ChanCount(DataType::AUDIO, n_outputs().get(DataType::AUDIO)), true, this);
+			_control_outs->ensure_io (ChanCount::ZERO, ChanCount(DataType::AUDIO, n_outputs().n_audio()), true, this);
 		}
 		
 		reset_plugin_counts (0);
@@ -2028,11 +2028,11 @@ Route::output_change_handler (IOChange change, void *ignored)
 uint32_t
 Route::pans_required () const
 {
-	if (n_outputs().get(DataType::AUDIO) < 2) {
+	if (n_outputs().n_audio() < 2) {
 		return 0;
 	}
 	
-	return max (n_inputs ().get(DataType::AUDIO), static_cast<size_t>(redirect_max_outs.get(DataType::AUDIO)));
+	return max (n_inputs ().n_audio(), static_cast<size_t>(redirect_max_outs.n_audio()));
 }
 
 int 

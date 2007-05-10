@@ -170,10 +170,10 @@ AudioDiskstream::non_realtime_input_change ()
 			
 			_n_channels.set(DataType::AUDIO, c->size());
 			
-			if (_io->n_inputs().get(DataType::AUDIO) > _n_channels.get(DataType::AUDIO)) {
-				add_channel_to (c, _io->n_inputs().get(DataType::AUDIO) - _n_channels.get(DataType::AUDIO));
-			} else if (_io->n_inputs().get(DataType::AUDIO) < _n_channels.get(DataType::AUDIO)) {
-				remove_channel_from (c, _n_channels.get(DataType::AUDIO) - _io->n_inputs().get(DataType::AUDIO));
+			if (_io->n_inputs().n_audio() > _n_channels.n_audio()) {
+				add_channel_to (c, _io->n_inputs().n_audio() - _n_channels.n_audio());
+			} else if (_io->n_inputs().n_audio() < _n_channels.n_audio()) {
+				remove_channel_from (c, _n_channels.n_audio() - _io->n_inputs().n_audio());
 			}
 		}
 		
@@ -212,7 +212,7 @@ AudioDiskstream::get_input_sources ()
 
 	uint32_t n;
 	ChannelList::iterator chan;
-	uint32_t ni = _io->n_inputs().get(DataType::AUDIO);
+	uint32_t ni = _io->n_inputs().n_audio();
 
 	for (n = 0, chan = c->begin(); chan != c->end() && n < ni; ++chan, ++n) {
 		
@@ -612,7 +612,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 
 	if (nominally_recording || rec_nframes) {
 
-		uint32_t limit = _io->n_inputs ().get(DataType::AUDIO);
+		uint32_t limit = _io->n_inputs ().n_audio();
 
 		/* one or more ports could already have been removed from _io, but our
 		   channel setup hasn't yet been updated. prevent us from trying to
@@ -1691,7 +1691,7 @@ AudioDiskstream::finish_capture (bool rec_monitors_input, boost::shared_ptr<Chan
 void
 AudioDiskstream::set_record_enabled (bool yn)
 {
-	if (!recordable() || !_session.record_enabling_legal() || _io->n_inputs().get(DataType::AUDIO) == 0) {
+	if (!recordable() || !_session.record_enabling_legal() || _io->n_inputs().n_audio() == 0) {
 		return;
 	}
 
@@ -1873,13 +1873,13 @@ AudioDiskstream::set_state (const XMLNode& node)
 
 	_n_channels.set(DataType::AUDIO, channels.reader()->size());
 	
-	if (nchans > _n_channels.get(DataType::AUDIO)) {
+	if (nchans > _n_channels.n_audio()) {
 
-		add_channel (nchans - _n_channels.get(DataType::AUDIO));
+		add_channel (nchans - _n_channels.n_audio());
 
-	} else if (nchans < _n_channels.get(DataType::AUDIO)) {
+	} else if (nchans < _n_channels.n_audio()) {
 
-		remove_channel (_n_channels.get(DataType::AUDIO) - nchans);
+		remove_channel (_n_channels.n_audio() - nchans);
 	}
 
 	if ((prop = node.property ("playlist")) == 0) {
@@ -2227,7 +2227,7 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 		return 1;
 	}
 
-	if (pending_sources.size() != _n_channels.get(DataType::AUDIO)) {
+	if (pending_sources.size() != _n_channels.n_audio()) {
 		error << string_compose (_("%1: incorrect number of pending sources listed - ignoring them all"), _name)
 		      << endmsg;
 		return -1;

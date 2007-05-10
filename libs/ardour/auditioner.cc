@@ -110,7 +110,7 @@ Auditioner::audition_current_playlist ()
 
 	/* force a panner reset now that we have all channels */
 
-	_panner->reset (n_outputs().get(DataType::AUDIO), _diskstream->n_channels().get(DataType::AUDIO));
+	_panner->reset (n_outputs().n_audio(), _diskstream->n_channels().n_audio());
 
 	g_atomic_int_set (&_active, 1);
 }
@@ -140,10 +140,10 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 	_diskstream->playlist()->clear ();
 	_diskstream->playlist()->add_region (the_region, 0, 1);
 
-	if (_diskstream->n_channels().get(DataType::AUDIO) < the_region->n_channels()) {
-		audio_diskstream()->add_channel (the_region->n_channels() - _diskstream->n_channels().get(DataType::AUDIO));
-	} else if (_diskstream->n_channels().get(DataType::AUDIO) > the_region->n_channels()) {
-		audio_diskstream()->remove_channel (_diskstream->n_channels().get(DataType::AUDIO) - the_region->n_channels());
+	if (_diskstream->n_channels().n_audio() < the_region->n_channels()) {
+		audio_diskstream()->add_channel (the_region->n_channels() - _diskstream->n_channels().n_audio());
+	} else if (_diskstream->n_channels().n_audio() > the_region->n_channels()) {
+		audio_diskstream()->remove_channel (_diskstream->n_channels().n_audio() - the_region->n_channels());
 	}
 
 	/* force a panner reset now that we have all channels */

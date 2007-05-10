@@ -2397,7 +2397,7 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	AutoConnectOption oac = Config->get_output_auto_connect();
 
 	if (oac & AutoConnectMaster) {
-		output_chan = (session->master_out() ? session->master_out()->n_inputs().get(DataType::AUDIO) : input_chan);
+		output_chan = (session->master_out() ? session->master_out()->n_inputs().n_audio() : input_chan);
 	} else {
 		output_chan = input_chan;
 	}

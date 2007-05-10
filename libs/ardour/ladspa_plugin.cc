@@ -536,7 +536,7 @@ LadspaPlugin::connect_and_run (BufferSet& bufs, uint32_t& in_index, uint32_t& ou
 
 	then = get_cycles ();
 
-	const uint32_t nbufs = bufs.count().get(DataType::AUDIO);
+	const uint32_t nbufs = bufs.count().n_audio();
 
 	while (port_index < parameter_count()) {
 		if (LADSPA_IS_PORT_AUDIO (port_descriptor(port_index))) {

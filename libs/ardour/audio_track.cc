@@ -579,7 +579,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 		
 		/* copy the diskstream data to all output buffers */
 		
-		const size_t limit = n_process_buffers().get(DataType::AUDIO);
+		const size_t limit = n_process_buffers().n_audio();
 		BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
 		
 		uint32_t n;
@@ -587,7 +587,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 
 		for (i = 0, n = 1; i < limit; ++i, ++n) {
 			memcpy (bufs.get_audio(i).data(), b, sizeof (Sample) * nframes); 
-			if (n < diskstream->n_channels().get(DataType::AUDIO)) {
+			if (n < diskstream->n_channels().n_audio()) {
 				tmpb = diskstream->playback_buffer(n);
 				if (tmpb!=0) {
 					b = tmpb;
@@ -657,13 +657,13 @@ AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes
 		return -1;
 	}
 
-	assert(buffers.count().get(DataType::AUDIO) >= 1);
+	assert(buffers.count().n_audio() >= 1);
 	uint32_t n=1;
 	Sample* b = buffers.get_audio(0).data();
 	BufferSet::audio_iterator bi = buffers.audio_begin();
 	++bi;
 	for ( ; bi != buffers.audio_end(); ++bi, ++n) {
-		if (n < diskstream->n_channels().get(DataType::AUDIO)) {
+		if (n < diskstream->n_channels().n_audio()) {
 			if (apl->read (bi->data(), mix_buffer, gain_buffer, start, nframes, n) != nframes) {
 				return -1;
 			}

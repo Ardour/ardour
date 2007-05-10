@@ -33,7 +33,7 @@ Amp::run (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t target, boo
 	if (nframes == 0)
 		return;
 
-	if (bufs.count().get(DataType::AUDIO) == 0)
+	if (bufs.count().n_audio() == 0)
 		return;
 
 	// assert(bufs.buffer_capacity(DataType::AUDIO) >= nframes);

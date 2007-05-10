@@ -316,7 +316,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 	string path;
 	vector<boost::shared_ptr<AudioFileSource> > sources;
 
-	uint32_t channels = count.get(DataType::AUDIO);
+	uint32_t channels = count.n_audio();
 
 	for (uint32_t n=0; n < channels; ++n) {
 		

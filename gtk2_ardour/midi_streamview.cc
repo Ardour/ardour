@@ -378,7 +378,7 @@ MidiStreamView::rec_data_range_ready (jack_nframes_t start, jack_nframes_t cnt, 
 
 	rec_data_ready_map[src] = true;
 
-	if (rec_data_ready_map.size() == _trackview.get_diskstream()->n_channels().get(DataType::MIDI)) {
+	if (rec_data_ready_map.size() == _trackview.get_diskstream()->n_channels().n_midi()) {
 		this->update_rec_regions ();
 		rec_data_ready_map.clear();
 	}

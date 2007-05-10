@@ -355,7 +355,7 @@ int
 MidiTrack::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
 		     bool session_state_changing, bool can_record, bool rec_monitors_input)
 {
-	if (n_outputs().get(DataType::MIDI) == 0) {
+	if (n_outputs().n_midi() == 0) {
 		//return 0;
 		throw; // FIXME
 	}
@@ -493,7 +493,7 @@ MidiTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 
 		/* copy the diskstream data to all output buffers */
 
-		//const size_t limit = n_process_buffers().get(DataType::AUDIO);
+		//const size_t limit = n_process_buffers().n_audio();
 		BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
 
 		diskstream->get_playback(bufs.get_midi(0), start_frame, end_frame);
@@ -510,7 +510,7 @@ int
 MidiTrack::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
 			 bool can_record, bool rec_monitors_input)
 {
-	if (n_outputs().get(DataType::MIDI) == 0 && _redirects.empty()) {
+	if (n_outputs().n_midi() == 0 && _redirects.empty()) {
 		return 0;
 	}
 

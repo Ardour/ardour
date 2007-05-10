@@ -436,7 +436,7 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_fi
 										  Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External)));
 
 	if (Config->get_output_auto_connect() & AutoConnectMaster) {
-		output_chan = (session->master_out() ? session->master_out()->n_inputs().get(DataType::AUDIO) : input_chan);
+		output_chan = (session->master_out() ? session->master_out()->n_inputs().n_audio() : input_chan);
 	} else {
 		output_chan = input_chan;
 	}

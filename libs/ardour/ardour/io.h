@@ -292,7 +292,7 @@ class IO : public PBD::StatefulDestructible
 	void reset_panner ();
 
 	virtual uint32_t pans_required() const
-		{ return _inputs.count().get(DataType::AUDIO); }
+		{ return _inputs.count().n_audio(); }
 
 	struct GainControllable : public PBD::Controllable {
 	    GainControllable (std::string name, IO& i) : Controllable (name), io (i) {}
