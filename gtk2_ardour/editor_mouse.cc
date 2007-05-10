@@ -330,22 +330,8 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	
 	switch (item_type) {
 	case RegionItem:
-		if (mouse_mode != MouseRange) {
-			commit = set_selected_regionview_from_click (press, op, true);
-		} else if (event->type == GDK_BUTTON_PRESS) {
-			commit = set_selected_track_from_click (press, op, false);
-		}
-		break;
-		
 	case RegionViewNameHighlight:
 	case RegionViewName:
-		if (mouse_mode != MouseRange) {
-			commit = set_selected_regionview_from_click (press, op, true);
-		} else if (event->type == GDK_BUTTON_PRESS) {
-			commit = set_selected_track_from_click (press, op, false);
-		}
-		break;
-
 	case FadeInHandleItem:
 	case FadeInItem:
 	case FadeOutHandleItem:
@@ -356,7 +342,11 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 			commit = set_selected_track_from_click (press, op, false);
 		}
 		break;
-		
+
+	case CrossfadeViewItem:
+		commit = set_selected_track_from_click (press, op, false);
+		break;
+			
 	case GainAutomationControlPointItem:
 	case PanAutomationControlPointItem:
 	case RedirectAutomationControlPointItem:
@@ -825,21 +815,13 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 
 			case StreamItem:
-				popup_track_context_menu (1, event->button.time, item_type, false, where);
-				break;
-				
 			case RegionItem:
 			case RegionViewNameHighlight:
 			case RegionViewName:
-				popup_track_context_menu (1, event->button.time, item_type, false, where);
-				break;
-				
 			case SelectionItem:
-				popup_track_context_menu (1, event->button.time, item_type, true, where);
-				break;
-
 			case AutomationTrackItem:
-				popup_track_context_menu (1, event->button.time, item_type, false, where);
+			case CrossfadeViewItem:
+				popup_track_context_menu (1, event->button.time, where);
 				break;
 
 			case MarkerBarItem: 
@@ -860,10 +842,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				
 			case MeterMarkerItem:
 				tm_marker_context_menu (&event->button, item);
-				break;
-
-			case CrossfadeViewItem:
-				popup_track_context_menu (1, event->button.time, item_type, false, where);
 				break;
 
 			/* <CMT Additions> */

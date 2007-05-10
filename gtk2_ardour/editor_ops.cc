@@ -143,6 +143,8 @@ Editor::split_regions_at (nframes_t where, RegionSelection& regions)
 	_new_regionviews_show_envelope = false;
 }
 
+
+/** Remove `clicked_regionview' */
 void
 Editor::remove_clicked_region ()
 {
@@ -160,47 +162,29 @@ Editor::remove_clicked_region ()
 	commit_reversible_command ();
 }
 
+
+/** Remove the selected regions */
 void
-Editor::destroy_clicked_region ()
+Editor::remove_selected_regions ()
 {
-	uint32_t selected = selection->regions.size();
-
-	if (!session || !selected) {
+	if (selection->regions.empty()) {
 		return;
 	}
 
-	vector<string> choices;
-	string prompt;
+	/* XXX: should be called remove regions if we're removing more than one */
+	begin_reversible_command (_("remove region"));
 	
-	prompt  = string_compose (_(" This is destructive, will possibly delete audio files\n\
-It cannot be undone\n\
-Do you really want to destroy %1 ?"),
-			   (selected > 1 ? 
-			    _("these regions") : _("this region")));
-
-	choices.push_back (_("No, do nothing."));
-
-	if (selected > 1) {
-		choices.push_back (_("Yes, destroy them."));
-	} else {
-		choices.push_back (_("Yes, destroy it."));
-	}
-
-	Gtkmm2ext::Choice prompter (prompt, choices);
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		boost::shared_ptr<Region> region = (*i)->region ();
+		boost::shared_ptr<Playlist> playlist = region->playlist ();
 	
-	if (prompter.run() == 0) { /* first choice */
-		return;
+		XMLNode &before = playlist->get_state();
+		playlist->remove_region (region);
+		XMLNode &after = playlist->get_state();
+		session->add_command(new MementoCommand<Playlist>(*playlist, &before, &after));
 	}
-
-	if (selected) {
-		list<boost::shared_ptr<Region> > r;
-
-		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-			r.push_back ((*i)->region());
-		}
-
-		session->destroy_regions (r);
-	} 
+	
+	commit_reversible_command ();
 }
 
 boost::shared_ptr<Region>
@@ -1534,13 +1518,11 @@ Editor::insert_region_list_selection (float times)
 	RouteTimeAxisView *tv = 0;
 	boost::shared_ptr<Playlist> playlist;
 
-	if (clicked_routeview != 0) {
-		tv = clicked_routeview;
-	} else if (!selection->tracks.empty()) {
-		if ((tv = dynamic_cast<RouteTimeAxisView*>(selection->tracks.front())) == 0) {
-			return;
-		}
-	} else {
+	if (selection->tracks.empty()) {
+		return;
+	}
+
+	if ((tv = dynamic_cast<RouteTimeAxisView*>(selection->tracks.front())) == 0) {
 		return;
 	}
 
@@ -1748,14 +1730,11 @@ Editor::lower_region_to_bottom ()
 	selection->foreach_region (&Region::lower_to_bottom);
 }
 
+/** Show the region editor for the selected regions */
 void
 Editor::edit_region ()
 {
-	if (clicked_regionview == 0) {
-		return;
-	}
-	
-	clicked_regionview->show_region_editor ();
+	selection->foreach_regionview (&RegionView::show_region_editor);
 }
 
 void
@@ -1832,6 +1811,7 @@ Editor::audition_playlist_region_via_route (boost::shared_ptr<Region> region, Ro
 	/* XXX how to unset the solo state ? */
 }
 
+/** Start an audition of the first selected region */
 void
 Editor::audition_selected_region ()
 {
@@ -2270,39 +2250,50 @@ Editor::set_a_regions_sync_position (boost::shared_ptr<Region> region, nframes_t
 	commit_reversible_command ();
 }
 
+/** Set the sync position of the selection using the position of the edit cursor */
 void
 Editor::set_region_sync_from_edit_cursor ()
 {
-	if (clicked_regionview == 0) {
-		return;
+	/* Check that at the edit cursor is in at least one of the selected regions */
+	RegionSelection::const_iterator i = selection->regions.begin();
+	while (i != selection->regions.end() && !(*i)->region()->covers (edit_cursor->current_frame)) {
+		++i;
 	}
 
-	if (!clicked_regionview->region()->covers (edit_cursor->current_frame)) {
+	/* Give the user a hint if not */
+	if (i == selection->regions.end()) {
 		error << _("Place the edit cursor at the desired sync point") << endmsg;
 		return;
 	}
 
-	boost::shared_ptr<Region> region (clicked_regionview->region());
 	begin_reversible_command (_("set sync from edit cursor"));
-        XMLNode &before = region->playlist()->get_state();
-	region->set_sync_position (edit_cursor->current_frame);
-        XMLNode &after = region->playlist()->get_state();
-	session->add_command(new MementoCommand<Playlist>(*(region->playlist()), &before, &after));
+	
+	for (RegionSelection::iterator j = selection->regions.begin(); j != selection->regions.end(); ++j) {
+		boost::shared_ptr<Region> r = (*j)->region();
+		XMLNode &before = r->playlist()->get_state();
+		r->set_sync_position (edit_cursor->current_frame);
+		XMLNode &after = r->playlist()->get_state();
+		session->add_command(new MementoCommand<Playlist>(*(r->playlist()), &before, &after));
+	}
+	
 	commit_reversible_command ();
 }
 
+/** Remove the sync positions of the selection */
 void
 Editor::remove_region_sync ()
 {
-	if (clicked_regionview) {
-		boost::shared_ptr<Region> region (clicked_regionview->region());
-		begin_reversible_command (_("remove sync"));
-                XMLNode &before = region->playlist()->get_state();
-		region->clear_sync_position ();
-                XMLNode &after = region->playlist()->get_state();
-		session->add_command(new MementoCommand<Playlist>(*(region->playlist()), &before, &after));
-		commit_reversible_command ();
+	begin_reversible_command (_("remove sync"));
+
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		boost::shared_ptr<Region> r = (*i)->region();
+		XMLNode &before = r->playlist()->get_state();
+		r->clear_sync_position ();
+                XMLNode &after = r->playlist()->get_state();
+		session->add_command(new MementoCommand<Playlist>(*(r->playlist()), &before, &after));
 	}
+
+	commit_reversible_command ();
 }
 
 void
@@ -2447,66 +2438,80 @@ Editor::align_region_internal (boost::shared_ptr<Region> region, RegionPoint poi
 	session->add_command(new MementoCommand<Playlist>(*(region->playlist()), &before, &after));
 }	
 
+/** Trim the end of the selected regions to the position of the edit cursor */
 void
 Editor::trim_region_to_edit_cursor ()
 {
-	if (clicked_regionview == 0) {
+	if (selection->regions.empty()) {
 		return;
 	}
 
-	boost::shared_ptr<Region> region (clicked_regionview->region());
-
-	float speed = 1.0f;
-	RouteTimeAxisView *rtav;
-
-	if ( clicked_axisview != 0 && (rtav = dynamic_cast<RouteTimeAxisView*>(clicked_axisview)) != 0 ) {
-		if (rtav->get_diskstream() != 0) {
-			speed = rtav->get_diskstream()->speed();
-		}
-	}
-
 	begin_reversible_command (_("trim to edit"));
-        XMLNode &before = region->playlist()->get_state();
-	region->trim_end( session_frame_to_track_frame(edit_cursor->current_frame, speed), this);
-        XMLNode &after = region->playlist()->get_state();
-	session->add_command(new MementoCommand<Playlist>(*(region->playlist()), &before, &after));
+	
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		boost::shared_ptr<Region> region ((*i)->region());
+
+		float speed = 1.0f;
+		RouteTimeAxisView *rtav;
+
+		/* XXX I don't think clicked_axisview should be used here! */
+		if ( clicked_axisview != 0 && (rtav = dynamic_cast<RouteTimeAxisView*>(clicked_axisview)) != 0 ) {
+			if (rtav->get_diskstream() != 0) {
+				speed = rtav->get_diskstream()->speed();
+			}
+		}
+		
+		XMLNode &before = region->playlist()->get_state();
+		region->trim_end( session_frame_to_track_frame(edit_cursor->current_frame, speed), this);
+		XMLNode &after = region->playlist()->get_state();
+		session->add_command(new MementoCommand<Playlist>(*(region->playlist()), &before, &after));
+	}
+	
 	commit_reversible_command ();
 }
 
+/** Trim the start of the selected regions to the position of the edit cursor */
 void
 Editor::trim_region_from_edit_cursor ()
 {
-	if (clicked_regionview == 0) {
+	if (selection->regions.empty()) {
 		return;
-	}
-
-	boost::shared_ptr<Region> region (clicked_regionview->region());
-
-	float speed = 1.0f;
-	RouteTimeAxisView *rtav;
-
-	if ( clicked_axisview != 0 && (rtav = dynamic_cast<RouteTimeAxisView*>(clicked_axisview)) != 0 ) {
-		if (rtav->get_diskstream() != 0) {
-			speed = rtav->get_diskstream()->speed();
-		}
 	}
 
 	begin_reversible_command (_("trim to edit"));
-        XMLNode &before = region->playlist()->get_state();
-	region->trim_front ( session_frame_to_track_frame(edit_cursor->current_frame, speed), this);
-        XMLNode &after = region->playlist()->get_state();
-	session->add_command(new MementoCommand<Playlist>(*(region->playlist()), &before, &after));
+
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		boost::shared_ptr<Region> region ((*i)->region());
+		
+		float speed = 1.0f;
+		RouteTimeAxisView *rtav;
+
+		/* XXX: not sure about clicked_axisview here */
+		if ( clicked_axisview != 0 && (rtav = dynamic_cast<RouteTimeAxisView*>(clicked_axisview)) != 0 ) {
+			if (rtav->get_diskstream() != 0) {
+				speed = rtav->get_diskstream()->speed();
+			}
+		}
+
+		XMLNode &before = region->playlist()->get_state();
+		region->trim_front ( session_frame_to_track_frame(edit_cursor->current_frame, speed), this);
+		XMLNode &after = region->playlist()->get_state();
+		session->add_command(new MementoCommand<Playlist>(*(region->playlist()), &before, &after));
+	}
+	
 	commit_reversible_command ();
 }
 
+/** Unfreeze selected routes */
 void
-Editor::unfreeze_route ()
+Editor::unfreeze_routes ()
 {
-	if (clicked_routeview == 0 || !clicked_routeview->is_track()) {
-		return;
+	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(*i);
+		if (atv && atv->is_audio_track()) {
+			atv->audio_track()->unfreeze ();
+		}
 	}
-	
-	clicked_routeview->track()->unfreeze ();
 }
 
 void*
@@ -2519,7 +2524,15 @@ Editor::_freeze_thread (void* arg)
 void*
 Editor::freeze_thread ()
 {
-	clicked_routeview->audio_track()->freeze (*current_interthread_info);
+	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(*i);
+		if (atv && atv->is_audio_track()) {
+			atv->audio_track()->freeze (*current_interthread_info);
+		}
+	}
+
+	current_interthread_info->done = true;
+	
 	return 0;
 }
 
@@ -2530,13 +2543,10 @@ Editor::freeze_progress_timeout (void *arg)
 	return !(current_interthread_info->done || current_interthread_info->cancel);
 }
 
+/** Freeze selected routes */
 void
-Editor::freeze_route ()
+Editor::freeze_routes ()
 {
-	if (clicked_routeview == 0 || !clicked_routeview->is_track()) {
-		return;
-	}
-	
 	InterThreadInfo itt;
 
 	if (interthread_progress_window == 0) {
@@ -2624,18 +2634,50 @@ Editor::bounce_range_selection ()
 	commit_reversible_command ();
 }
 
+/** Cut selected regions, automation points or a time range */
 void
 Editor::cut ()
 {
 	cut_copy (Cut);
 }
 
+/** Copy selected regions, automation points or a time range */
 void
 Editor::copy ()
 {
 	cut_copy (Copy);
 }
 
+
+/** @return true if a Cut, Copy or Clear is possible */
+bool
+Editor::can_cut_copy () const
+{
+	switch (current_mouse_mode()) {
+		
+	case MouseObject:
+		if (!selection->regions.empty() || !selection->points.empty()) {
+			return true;
+		}
+		break;
+		
+	case MouseRange:
+		if (!selection->time.empty()) {
+			return true;
+		}
+		break;
+		
+	default:
+		break;
+	}
+
+	return false;
+}
+
+
+/** Cut, copy or clear selected regions, automation points or a time range.
+ * @param op Operation (Cut, Copy or Clear)
+ */
 void 
 Editor::cut_copy (CutCopyOp op)
 {
@@ -2703,6 +2745,9 @@ Editor::cut_copy (CutCopyOp op)
 	}
 }
 
+/** Cut, copy or clear selected automation points.
+ * @param op Operation (Cut, Copy or Clear)
+ */
 void
 Editor::cut_copy_points (CutCopyOp op)
 {
@@ -2734,6 +2779,10 @@ struct PlaylistMapping {
     PlaylistMapping (TimeAxisView* tvp) : tv (tvp) {}
 };
 
+
+/** Cut, copy or clear selected regions.
+ * @param op Operation (Cut, Copy or Clear)
+ */
 void
 Editor::cut_copy_regions (CutCopyOp op)
 {	
@@ -3109,7 +3158,7 @@ Editor::clear_playlist (boost::shared_ptr<Playlist> playlist)
 }
 
 void
-Editor::nudge_track (bool use_edit_cursor, bool forwards)
+Editor::nudge_selected_tracks (bool use_edit_cursor, bool forwards)
 {
 	boost::shared_ptr<Playlist> playlist; 
 	nframes_t distance;
@@ -3176,7 +3225,7 @@ Editor::remove_last_capture ()
 }
 
 void
-Editor::normalize_region ()
+Editor::normalize_regions ()
 {
 	if (!session) {
 		return;
@@ -3206,7 +3255,7 @@ Editor::normalize_region ()
 
 
 void
-Editor::denormalize_region ()
+Editor::denormalize_regions ()
 {
 	if (!session) {
 		return;
@@ -3232,7 +3281,7 @@ Editor::denormalize_region ()
 
 
 void
-Editor::reverse_region ()
+Editor::reverse_regions ()
 {
 	if (!session) {
 		return;
@@ -3317,10 +3366,6 @@ Editor::region_selection_op (void (Region::*pmf)(bool), bool yn)
 void
 Editor::external_edit_region ()
 {
-	if (!clicked_regionview) {
-		return;
-	}
-
 	/* more to come */
 }
 
@@ -3368,71 +3413,75 @@ Editor::reset_region_gain_envelopes ()
 	session->commit_reversible_command ();
 }
 
+/** Set whether or not gain envelopes are visible for the selected regions.
+ * @param yn true to make visible, false to make invisible.
+ */
 void
-Editor::toggle_gain_envelope_visibility ()
+Editor::set_gain_envelope_visibility (bool yn)
 {
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
 		if (arv) {
-			bool x = region_envelope_visible_item->get_active();
-			if (x != arv->envelope_visible()) {
-				arv->set_envelope_visible (x);
+			if (arv->envelope_visible() != yn) {
+				arv->set_envelope_visible (yn);
+			}
+		}
+	}
+}
+
+/** Set whether or not gain envelopes are active for the selected regions.
+ * @param yn true to make active, false to make inactive.
+ */
+void
+Editor::set_gain_envelope_active (bool yn)
+{
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+		if (arv) {
+			if (arv->audio_region()->envelope_active() != yn) {
+				arv->audio_region()->set_envelope_active (yn);
+			}
+		}
+	}
+}
+
+/** Set the locked state of all selected regions to a particular value.
+ * @param yn true to make locked, false to make unlocked.
+ */
+void
+Editor::set_region_lock (bool yn)
+{
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+		if (arv) {
+			if (arv->audio_region()->locked() != yn) {
+				arv->audio_region()->set_locked (yn);
 			}
 		}
 	}
 }
 
 void
-Editor::toggle_gain_envelope_active ()
+Editor::set_region_mute (bool yn)
 {
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
 		if (arv) {
-			bool x = region_envelope_active_item->get_active();
-			if (x != arv->audio_region()->envelope_active()) {
-				arv->audio_region()->set_envelope_active (x);
+			if (arv->audio_region()->muted() != yn) {
+				arv->audio_region()->set_muted (yn);
 			}
 		}
 	}
 }
 
 void
-Editor::toggle_region_lock ()
+Editor::set_region_opaque (bool yn)
 {
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
 		if (arv) {
-			bool x = region_lock_item->get_active();
-			if (x != arv->audio_region()->locked()) {
-				arv->audio_region()->set_locked (x);
-			}
-		}
-	}
-}
-
-void
-Editor::toggle_region_mute ()
-{
-	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-		if (arv) {
-			bool x = region_mute_item->get_active();
-			if (x != arv->audio_region()->muted()) {
-				arv->audio_region()->set_muted (x);
-			}
-		}
-	}
-}
-
-void
-Editor::toggle_region_opaque ()
-{
-	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-		if (arv) {
-			bool x = region_opaque_item->get_active();
-			if (x != arv->audio_region()->opaque()) {
-				arv->audio_region()->set_opaque (x);
+			if (arv->audio_region()->opaque() != yn) {
+				arv->audio_region()->set_opaque (yn);
 			}
 		}
 	}

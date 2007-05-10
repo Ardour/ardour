@@ -4164,8 +4164,6 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t le
 
 	g_atomic_int_set (&processing_prohibited, 0);
 
-	itt.done = true;
-
 	return ret;
 }
 

@@ -248,9 +248,9 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "insert-region", _("Insert Region"), mem_fun(*this, &Editor::keyboard_insert_region_list_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "reverse-region", _("Reverse Region"), mem_fun(*this, &Editor::reverse_region));
+	act = ActionManager::register_action (editor_actions, "reverse-region", _("Reverse Regions"), mem_fun(*this, &Editor::reverse_regions));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "normalize-region", _("Normalize Region"), mem_fun(*this, &Editor::normalize_region));
+	act = ActionManager::register_action (editor_actions, "normalize-region", _("Normalize Regions"), mem_fun(*this, &Editor::normalize_regions));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "crop", _("crop"), mem_fun(*this, &Editor::crop_region_to_selection));
 	ActionManager::session_sensitive_actions.push_back (act);

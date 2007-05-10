@@ -741,6 +741,7 @@ AudioTrack::bounce (InterThreadInfo& itt)
 {
 	vector<boost::shared_ptr<Source> > srcs;
 	_session.write_one_audio_track (*this, 0, _session.current_end_frame(), false, srcs, itt);
+	itt.done = true;
 }
 
 
@@ -749,6 +750,7 @@ AudioTrack::bounce_range (nframes_t start, nframes_t end, InterThreadInfo& itt)
 {
 	vector<boost::shared_ptr<Source> > srcs;
 	_session.write_one_audio_track (*this, start, end, false, srcs, itt);
+	itt.done = true;
 }
 
 void

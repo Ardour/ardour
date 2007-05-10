@@ -38,6 +38,13 @@ Selection::foreach_region (void (ARDOUR::Region::*method)(void)) {
 	}
 }
 
+inline void
+Selection::foreach_regionview (void (RegionView::*method)(void)) {
+	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
+		((*i)->*(method))();
+	}
+}
+
 template<class A> inline void 
 Selection::foreach_region (void (ARDOUR::Region::*method)(A), A arg) {
 	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {

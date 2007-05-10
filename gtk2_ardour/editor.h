@@ -140,7 +140,7 @@ class Editor : public PublicEditor
 
 	void set_mouse_mode (Editing::MouseMode, bool force=true);
 	void step_mouse_mode (bool next);
-	Editing::MouseMode current_mouse_mode () { return mouse_mode; }
+	Editing::MouseMode current_mouse_mode () const { return mouse_mode; }
 
 	void add_imageframe_time_axis(const std::string & track_name, void*) ;
 	void add_imageframe_marker_time_axis(const std::string & track_name, TimeAxisView* marked_track, void*) ;
@@ -216,9 +216,9 @@ class Editor : public PublicEditor
 	bool extend_selection_to_track (TimeAxisView&);
 
 	void play_selection ();
-	void select_all_in_track (Selection::Operation op);
+	void select_all_in_selected_tracks (Selection::Operation op);
 	void select_all (Selection::Operation op);
-	void invert_selection_in_track ();
+	void invert_selection_in_selected_tracks ();
 	void invert_selection ();
 
 	/* tempo */
@@ -412,7 +412,12 @@ class Editor : public PublicEditor
 
 	TimeAxisView*      clicked_axisview;
 	RouteTimeAxisView* clicked_routeview;
+        /** The last RegionView that was clicked on, or 0 if the last click was not
+         * on a RegionView.  This is set up by the canvas event handlers in
+         * editor_canvas_events.cc
+         */
 	RegionView*        clicked_regionview;
+	
 	RegionView*        latest_regionview;
 	uint32_t           clicked_selection;
 	CrossfadeView*     clicked_crossfadeview;
@@ -446,31 +451,16 @@ class Editor : public PublicEditor
 	bool set_selected_regionview_from_click (bool press, Selection::Operation op = Selection::Set, bool no_track_remove=false);
 
 	void set_selected_regionview_from_region_list (boost::shared_ptr<ARDOUR::Region> region, Selection::Operation op = Selection::Set);
-	bool set_selected_regionview_from_map_event (GdkEventAny*, StreamView*, boost::weak_ptr<ARDOUR::Region>);
 	void collect_new_region_view (RegionView *);
 
-	Gtk::Menu track_context_menu;
-	Gtk::Menu track_region_context_menu;
-	Gtk::Menu track_selection_context_menu;
-	Gtk::Menu track_crossfade_context_menu;
-
-	Gtk::MenuItem* region_edit_menu_split_item;
-	Gtk::MenuItem* region_edit_menu_split_multichannel_item;
-	Gtk::Menu * track_region_edit_playlist_menu;
-	Gtk::Menu * track_edit_playlist_submenu;
-	Gtk::Menu * track_selection_edit_playlist_submenu;
-	
-	void popup_track_context_menu (int, int, ItemType, bool, nframes_t);
+	void popup_track_context_menu (int, int, nframes_t);
 	Gtk::Menu* build_track_context_menu (nframes_t);
-	Gtk::Menu* build_track_bus_context_menu (nframes_t);
-	Gtk::Menu* build_track_region_context_menu (nframes_t frame);
-	Gtk::Menu* build_track_crossfade_context_menu (nframes_t);
-	Gtk::Menu* build_track_selection_context_menu (nframes_t);
-	void add_dstream_context_items (Gtk::Menu_Helpers::MenuList&);
-	void add_bus_context_items (Gtk::Menu_Helpers::MenuList&);
-	void add_region_context_items (AudioStreamView*, boost::shared_ptr<ARDOUR::Region>, Gtk::Menu_Helpers::MenuList&);
+	void add_bus_or_audio_track_context_items (Gtk::Menu_Helpers::MenuList&);
+	void add_region_context_items (Gtk::Menu_Helpers::MenuList&);
 	void add_crossfade_context_items (AudioStreamView*, boost::shared_ptr<ARDOUR::Crossfade>, Gtk::Menu_Helpers::MenuList&, bool many);
 	void add_selection_context_items (Gtk::Menu_Helpers::MenuList&);
+
+	void add_item_with_sensitivity (Gtk::Menu_Helpers::MenuList&, Gtk::Menu_Helpers::MenuElem, bool) const;
 
 	void handle_new_route (ARDOUR::Session::RouteList&);
 	void remove_route (TimeAxisView *);
@@ -862,6 +852,7 @@ class Editor : public PublicEditor
 	list<boost::shared_ptr<ARDOUR::Region> > tmp_region_list;
 
 	void cut_copy (Editing::CutCopyOp);
+	bool can_cut_copy () const;
 	void cut_copy_points (Editing::CutCopyOp);
 	void cut_copy_regions (Editing::CutCopyOp);
 	void cut_copy_ranges (Editing::CutCopyOp);
@@ -872,9 +863,9 @@ class Editor : public PublicEditor
 	/* EDITING OPERATIONS */
 	
 	void reset_point_selection ();
-	void toggle_region_mute ();
-	void toggle_region_lock ();
-	void toggle_region_opaque ();
+	void set_region_mute (bool);
+	void set_region_lock (bool);
+	void set_region_opaque (bool);
 	void raise_region ();
 	void raise_region_to_top ();
 	void lower_region ();
@@ -890,8 +881,8 @@ class Editor : public PublicEditor
 	void align_selection_relative (ARDOUR::RegionPoint point, nframes_t position);
 	void align_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, nframes_t position);
 	void align_region_internal (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, nframes_t position);
+	void remove_selected_regions ();
 	void remove_clicked_region ();
-	void destroy_clicked_region ();
 	void edit_region ();
 	void duplicate_some_regions (RegionSelection&, float times);
 	void duplicate_selection (float times);
@@ -901,9 +892,9 @@ class Editor : public PublicEditor
 	void audition_playlist_region_standalone (boost::shared_ptr<ARDOUR::Region>);
 	void audition_playlist_region_via_route (boost::shared_ptr<ARDOUR::Region>, ARDOUR::Route&);
 	void split_multichannel_region();
-	void reverse_region ();
-	void normalize_region ();
-	void denormalize_region ();
+	void reverse_regions ();
+	void normalize_regions ();
+	void denormalize_regions ();
 
 	void audition_region_from_region_list ();
 	void hide_region_from_region_list ();
@@ -1670,8 +1661,8 @@ class Editor : public PublicEditor
 	static void* _freeze_thread (void*);
 	void* freeze_thread ();
 
-	void freeze_route ();
-	void unfreeze_route ();
+	void freeze_routes ();
+	void unfreeze_routes ();
 
 	/* edit-group solo + mute */
 
@@ -1734,7 +1725,7 @@ class Editor : public PublicEditor
 
 	/* nudging tracks */
 
-	void nudge_track (bool use_edit_cursor, bool forwards);
+	void nudge_selected_tracks (bool use_edit_cursor, bool forwards);
 
 	/* xfades */
 
@@ -1827,8 +1818,8 @@ class Editor : public PublicEditor
 
 	bool _new_regionviews_show_envelope;
 
-	void toggle_gain_envelope_visibility ();
-	void toggle_gain_envelope_active ();
+	void set_gain_envelope_visibility (bool);
+	void set_gain_envelope_active (bool);
 	void reset_region_gain_envelopes ();
 
 	Gtk::CheckMenuItem* region_envelope_visible_item;

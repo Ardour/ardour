@@ -91,7 +91,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void redo (uint32_t n = 1) = 0;
 	virtual void set_mouse_mode (Editing::MouseMode, bool force = false) = 0;
 	virtual void step_mouse_mode (bool next) = 0;
-	virtual Editing::MouseMode current_mouse_mode () = 0;
+	virtual Editing::MouseMode current_mouse_mode () const = 0;
 	virtual void add_imageframe_time_axis(const std::string & track_name, void*)  = 0;
 	virtual void add_imageframe_marker_time_axis(const std::string & track_name, TimeAxisView* marked_track, void*)  = 0;
 	virtual void connect_to_image_compositor()  = 0;

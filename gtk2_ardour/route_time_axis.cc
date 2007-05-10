@@ -1048,6 +1048,9 @@ RouteTimeAxisView::set_selected_regionviews (RegionSelection& regions)
 	}
 }
 
+/** Add the selectable things that we have to a list.
+ * @param results List to add things to.
+ */
 void
 RouteTimeAxisView::get_selectables (nframes_t start, nframes_t end, double top, double bot, list<Selectable*>& results)
 {

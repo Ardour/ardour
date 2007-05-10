@@ -87,19 +87,20 @@ Editor::export_range (nframes_t start, nframes_t end)
 	}
 }	
 
+/** Export the first selected region */
 void
 Editor::export_region ()
 {
-	if (clicked_regionview == 0) {
+	if (selection->regions.empty()) {
 		return;
 	}
 
-	ExportDialog* dialog = new ExportRegionDialog (*this, clicked_regionview->region());
+	boost::shared_ptr<Region> r = selection->regions.front()->region();
+	
+	ExportDialog* dialog = new ExportRegionDialog (*this, r);
 		
 	dialog->connect_to_session (session);
-	dialog->set_range (
-		clicked_regionview->region()->first_frame(), 
-		clicked_regionview->region()->last_frame());
+	dialog->set_range (r->first_frame(), r->last_frame());
 	dialog->start_export();
 }
 

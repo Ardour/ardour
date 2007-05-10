@@ -45,6 +45,10 @@ namespace ARDOUR {
 	class AutomationList;
 }
 
+/// Lists of selected things
+
+/** The Selection class holds lists of selected items (tracks, regions, etc. etc.). */
+
 class Selection : public sigc::trackable 
 {
   public:
@@ -149,6 +153,7 @@ class Selection : public sigc::trackable
 	void clear_points ();
 
 	void foreach_region (void (ARDOUR::Region::*method)(void));
+	void foreach_regionview (void (RegionView::*method)(void));
 	template<class A> void foreach_region (void (ARDOUR::Region::*method)(A), A arg);
 
   private:
