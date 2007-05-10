@@ -6,9 +6,12 @@
 
 <section id="sn-mackie">
   <title>Using the Mackie driver for MCU and BCF2000</title>
-  <para>
-		Note: Mackie support is available only for ardour 2.0 beta12 or newer.
-	</para>
+  <note>
+	  <para>
+		  Mackie support is available only for ardour 2.0 beta12 or newer.
+	  </para>
+  </note>
+
   <para>
     This will walk you through the process of configuring and using Mackie
     MCU, or a BCF2000 in
