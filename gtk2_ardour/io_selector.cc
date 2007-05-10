@@ -335,7 +335,7 @@ IOSelector::rescan ()
 
 	/* get relevant current JACK ports */
 
-	ports = session.engine().get_ports ("", JACK_DEFAULT_AUDIO_TYPE, for_input ? JackPortIsOutput : JackPortIsInput);
+	ports = session.engine().get_ports ("", io->default_type().to_jack_type(), for_input ? JackPortIsOutput : JackPortIsInput);
 
 	if (ports == 0) {
 		return;
