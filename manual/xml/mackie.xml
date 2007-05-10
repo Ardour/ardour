@@ -7,9 +7,9 @@
 <section id="sn-mackie">
   <title>Using the Mackie driver for MCU and BCF2000</title>
   <note>
-	  <para>
-		  Mackie support is available only for ardour 2.0 beta12 or newer.
-	  </para>
+    <para>
+      Mackie support is available only for ardour 2.0 beta12 or newer.
+    </para>
   </note>
 
   <para>
@@ -161,9 +161,17 @@
               </entry>
 
               <entry>
-                <para>loop</para>
-								<para>shift 1: marker</para>
-								<para>shift 2: punch in</para>
+                <para>
+                  loop
+                </para>
+
+                <para>
+                  shift 1: marker
+                </para>
+
+                <para>
+                  shift 2: punch in
+                </para>
               </entry>
             </row>
 
@@ -181,8 +189,13 @@
               </entry>
 
               <entry>
-                <para>click</para>
-								<para>shift 2: punch out</para>
+                <para>
+                  click
+                </para>
+
+                <para>
+                  shift 2: punch out
+                </para>
               </entry>
             </row>
 
@@ -216,13 +229,23 @@
 
             <row>
               <entry>
-                <para>previous bank</para>
-								<para>shift 1: previous route</para>
+                <para>
+                  previous bank
+                </para>
+
+                <para>
+                  shift 1: previous route
+                </para>
               </entry>
 
               <entry>
-                <para>next bank</para>
-								<para>shift 1: next route</para>
+                <para>
+                  next bank
+                </para>
+
+                <para>
+                  shift 1: next route
+                </para>
               </entry>
             </row>
 
