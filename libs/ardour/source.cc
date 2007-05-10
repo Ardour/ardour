@@ -116,7 +116,9 @@ Source::set_state (const XMLNode& node)
 	if ((prop = node.property ("timestamp")) != 0) {
 		sscanf (prop->value().c_str(), "%ld", &_timestamp);
 	}
-	assert(_name.find("/") == string::npos);
+	
+	// Don't think this is valid, absolute paths fail
+	//assert(_name.find("/") == string::npos);
 
 	return 0;
 }
