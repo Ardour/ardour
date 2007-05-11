@@ -44,6 +44,7 @@
 #include <ardour/session.h>
 #include <ardour/audioengine.h>
 #include <ardour/vst_plugin.h>
+#include <ardour/buffer_set.h>
 
 #include <pbd/stl_delete.h>
 
@@ -365,19 +366,21 @@ VSTPlugin::automatable () const
 }
 
 int
-VSTPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in_index, int32_t& out_index, nframes_t nframes, nframes_t offset)
+VSTPlugin::connect_and_run (BufferSet& bufs, uint32_t& in_index, uint32_t& out_index, nframes_t nframes, nframes_t offset)
 {
 	float *ins[_plugin->numInputs];
 	float *outs[_plugin->numOutputs];
 	int32_t i;
 
+	const uint32_t nbufs = bufs.count().n_audio();
+
 	for (i = 0; i < (int32_t) _plugin->numInputs; ++i) {
-		ins[i] = bufs[min((uint32_t) in_index,maxbuf - 1)] + offset;
+		ins[i] = bufs.get_audio(min((uint32_t) in_index, nbufs - 1)).data() + offset;
 		in_index++;
 	}
 
 	for (i = 0; i < (int32_t) _plugin->numOutputs; ++i) {
-		outs[i] = bufs[min((uint32_t) out_index,maxbuf - 1)] + offset;
+		outs[i] = bufs.get_audio(min((uint32_t) out_index, nbufs - 1)).data() + offset;
 
 		/* unbelievably, several VST plugins still rely on Cubase
 		   behaviour and do not silence the buffer in processReplacing 
@@ -497,4 +500,16 @@ VSTPluginInfo::load (Session& session)
 	catch (failed_constructor &err) {
 		return PluginPtr ((Plugin*) 0);
 	}
+}
+
+void
+VSTPlugin::store_state (ARDOUR::PluginState& s)
+{
+
+}
+
+void
+VSTPlugin::restore_state (ARDOUR::PluginState& s)
+{
+
 }
