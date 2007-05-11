@@ -1160,6 +1160,7 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 			if (io_selector->is_visible()) {
 				io_selector->get_window()->raise ();
 			} else {
+				io_selector->show_all ();
 				io_selector->present ();
 			}
 		}
