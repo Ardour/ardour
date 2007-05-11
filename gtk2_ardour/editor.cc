@@ -17,6 +17,8 @@
 
 */
 
+/* Note: public Editor methods are documented in public_editor.h */
+
 #include <unistd.h>
 #include <cstdlib>
 #include <cmath>

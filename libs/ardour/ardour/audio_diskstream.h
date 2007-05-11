@@ -192,7 +192,8 @@ class AudioDiskstream : public Diskstream
 	    
 	    boost::shared_ptr<AudioFileSource> fades_source;
 	    boost::shared_ptr<AudioFileSource> write_source;
-	    
+
+	    /// the Port that our audio data comes from
 	    Port         *source;
 	    Sample       *current_capture_buffer;
 	    Sample       *current_playback_buffer;

@@ -762,6 +762,9 @@ class Session : public PBD::StatefulDestructible
 
 	/* History (for editors, mixers, UIs etc.) */
 
+	/** Undo some transactions.
+	 * @param n Number of transactions to undo.
+	 */
 	void undo (uint32_t n) {
 		_history.undo (n);
 	}
@@ -983,6 +986,7 @@ class Session : public PBD::StatefulDestructible
 
 	AudioEngine            &_engine;
 	mutable gint            processing_prohibited;
+	/// the function called when the main JACK process callback happens
 	process_function_type    process_function;
 	process_function_type    last_process_function;
 	bool                     waiting_for_sync_offset;

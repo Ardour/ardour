@@ -551,7 +551,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 
 	for (chan = c->begin(); chan != c->end(); ++chan) {
 		(*chan)->current_capture_buffer = 0;
-		(*chan)->current_playback_buffer  = 0;
+		(*chan)->current_playback_buffer = 0;
 	}
 
 	if (nominally_recording || (_session.get_record_enabled() && Config->get_punch_in())) {

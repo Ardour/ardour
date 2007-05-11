@@ -67,6 +67,7 @@ operator== (const Selection& a, const Selection& b)
 		a.redirects == b.redirects;
 }
 
+/** Clear everything from the Selection */
 void
 Selection::clear ()
 {

@@ -22,11 +22,13 @@
 
 PublicEditor* PublicEditor::_instance = 0;
 
+/** PublicEditor constructor */
 PublicEditor::PublicEditor ()
   	: Window (Gtk::WINDOW_TOPLEVEL)
 {
 }
 
+/** PublicEditor destructor */
 PublicEditor::~PublicEditor()
 {
 }

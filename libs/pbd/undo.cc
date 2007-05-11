@@ -174,6 +174,9 @@ UndoHistory::remove (UndoTransaction* const ut)
 	Changed (); /* EMIT SIGNAL */
 }
 
+/** Undo some transactions.
+ * @param n Number of transactions to undo.
+ */
 void
 UndoHistory::undo (unsigned int n)
 {

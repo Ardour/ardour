@@ -718,6 +718,10 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 	_send_smpte_update = true;
 }
 
+/** Set the transport speed.
+ * @param speed New speed
+ * @param abort
+ */
 void
 Session::set_transport_speed (float speed, bool abort)
 {
@@ -732,6 +736,8 @@ Session::set_transport_speed (float speed, bool abort)
 	}
 
 	if (transport_rolling() && speed == 0.0) {
+
+		/* we are rolling and we want to stop */
 
 		if (Config->get_monitoring_model() == HardwareMonitoring)
 		{
@@ -752,6 +758,8 @@ Session::set_transport_speed (float speed, bool abort)
 		}
 		
 	} else if (transport_stopped() && speed == 1.0) {
+
+		/* we are stopped and we want to start rolling at speed 1 */
 
 		if (!get_record_enabled() && Config->get_stop_at_session_end() && _transport_frame >= current_end_frame()) {
 			return;
@@ -825,6 +833,8 @@ Session::set_transport_speed (float speed, bool abort)
 	}
 }
 
+
+/** Stop the transport.  */
 void
 Session::stop_transport (bool abort)
 {

@@ -348,7 +348,8 @@ class Editor : public PublicEditor
 	void on_realize();
 
   private:
-	
+
+	/// The session that we are editing, or 0
 	ARDOUR::Session     *session;
 	bool                 constructed;
 
@@ -1048,6 +1049,8 @@ class Editor : public PublicEditor
 
 	Editing::SnapType snap_type;
 	Editing::SnapMode snap_mode;
+
+	/// Snap threshold in pixels
 	double snap_threshold;
 
 	void handle_gui_changes (const string &, void *);
@@ -1206,8 +1209,11 @@ class Editor : public PublicEditor
 	/* display control */
 	
 	bool _show_measures;
+	/// true to show waveforms, otherwise false
 	bool _show_waveforms;
+	/// true if the editor should follow the playhead, otherwise false
 	bool _follow_playhead;
+	/// true if waveforms should be shown while recording audio tracks, otherwise false
 	bool _show_waveforms_recording;
 	
 	ARDOUR::TempoMap::BBTPointList *current_bbt_points;

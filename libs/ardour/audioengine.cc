@@ -255,6 +255,11 @@ AudioEngine::_graph_order_callback (void *arg)
 	return 0;
 }
 
+/** Wrapped which is called by JACK as its process callback.  It is just
+ * here to get us back into C++ land by calling AudioEngine::process_callback()
+ * @param nframes Number of frames passed by JACK.
+ * @param arg User argument passed by JACK, which will be the AudioEngine*.
+ */
 int
 AudioEngine::_process_callback (nframes_t nframes, void *arg)
 {
@@ -267,11 +272,17 @@ AudioEngine::_freewheel_callback (int onoff, void *arg)
 	static_cast<AudioEngine*>(arg)->_freewheeling = onoff;
 }
 
+/** Method called by JACK (via _process_callback) which says that there
+ * is work to be done.
+ * @param nframes Number of frames to process.
+ */
 int
 AudioEngine::process_callback (nframes_t nframes)
 {
 	// CycleTimer ct ("AudioEngine::process");
 	Glib::Mutex::Lock tm (_process_lock, Glib::TRY_LOCK);
+
+	/// The number of frames that will have been processed when we've finished
 	nframes_t next_processed_frames;
 	
 	/* handle wrap around of total frames counter */
@@ -281,13 +292,15 @@ AudioEngine::process_callback (nframes_t nframes)
 	} else {
 		next_processed_frames = _processed_frames + nframes;
 	}
-	
+
 	if (!tm.locked() || session == 0) {
+		/* return having done nothing */
 		_processed_frames = next_processed_frames;
 		return 0;
 	}
 
 	if (session_remove_pending) {
+		/* perform the actual session removal */
 		session = 0;
 		session_remove_pending = false;
 		session_removed.signal();
@@ -296,6 +309,7 @@ AudioEngine::process_callback (nframes_t nframes)
 	}
 
 	if (_freewheeling) {
+		/* emit the Freewheel signal and stop freewheeling in the event of trouble */
 		if (Freewheel (nframes)) {
 			cerr << "Freewheeling returned non-zero!\n";
 			_freewheeling = false;

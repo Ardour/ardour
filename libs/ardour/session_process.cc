@@ -44,6 +44,9 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
+/** Called by the audio engine when there is work to be done with JACK.
+ * @param nframes Number of frames to process.
+ */
 void
 Session::process (nframes_t nframes)
 {
@@ -255,7 +258,7 @@ Session::commit_diskstreams (nframes_t nframes, bool &needs_butler)
 	}
 }
 
-
+/** Process callback used when the auditioner is not active */
 void
 Session::process_with_events (nframes_t nframes)
 {
@@ -354,6 +357,8 @@ Session::process_with_events (nframes_t nframes)
 
 		offset = 0;
 
+		/* yes folks, here it is, the actual loop where we really truly
+		   process some audio */
 		while (nframes) {
 
 			this_nframes = nframes; /* real (jack) time relative */
@@ -804,6 +809,9 @@ Session::process_without_events (nframes_t nframes)
 		summon_butler ();
 }
 
+/** Process callback used when the auditioner is active.
+ * @param nframes number of frames to process.
+ */
 void
 Session::process_audition (nframes_t nframes)
 {
@@ -840,6 +848,7 @@ Session::process_audition (nframes_t nframes)
 	}
 
 	if (!auditioner->active()) {
+		/* auditioner no longer active, so go back to the normal process callback */
 		process_function = &Session::process_with_events;
 	}
 }
