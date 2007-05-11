@@ -102,7 +102,6 @@ automation_time_axis.cc
 midi_time_axis.cc
 midi_streamview.cc
 axis_view.cc
-canvas-imageframe.c
 canvas-simpleline.c
 simpleline.cc
 canvas-simplerect.c
@@ -124,7 +123,6 @@ editor_cursors.cc
 editor_edit_groups.cc
 editor_export_audio.cc
 editor_hscroller.cc
-editor_imageframe.cc
 editor_keyboard.cc
 editor_keys.cc
 editor_markers.cc
@@ -149,21 +147,12 @@ gain_meter.cc
 ghostregion.cc
 gtk-custom-hruler.c
 gtk-custom-ruler.c
-imageframe.cc
-imageframe_socket_handler.cc
-imageframe_time_axis.cc
-imageframe_time_axis_group.cc
-imageframe_time_axis_view.cc
-imageframe_view.cc
 io_selector.cc
 keyboard.cc
 ladspa_pluginui.cc
 location_ui.cc
 main.cc
 marker.cc
-marker_time_axis.cc
-marker_time_axis_view.cc
-marker_view.cc
 mixer_strip.cc
 mixer_ui.cc
 new_session_dialog.cc
@@ -202,7 +191,6 @@ route_time_axis.cc
 time_selection.cc
 utils.cc
 version.cc
-visual_time_axis.cc
 waveview.cc
 """)
 
@@ -245,6 +233,25 @@ vst_files = [ 'vst_pluginui.cc' ]
 if env['VST']:
 	extra_sources += vst_files
 	gtkardour.Append (CCFLAGS="-DVST_SUPPORT", CPPPATH="#libs/fst")
+
+cmt_files=Split("""
+canvas-imageframe.c
+editor_imageframe.cc
+imageframe.cc
+imageframe_socket_handler.cc
+imageframe_time_axis.cc
+imageframe_time_axis_group.cc
+imageframe_time_axis_view.cc
+imageframe_view.cc
+marker_time_axis.cc
+marker_time_axis_view.cc
+marker_view.cc
+visual_time_axis.cc
+""")
+
+if env['CMT']:
+    extra_sources += cmt_files
+    gtkardour.Append (CCFLAGS="-DWITH_CMT")
 
 if gtkardour['AUDIOUNITS']:
     extra_sources += audiounit_files

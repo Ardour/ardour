@@ -555,7 +555,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 					start_rubberband_select (item, event);
 					break;
 					
-				/* <CMT Additions> */
+#ifdef WITH_CMT
 				case ImageFrameHandleStartItem:
 					imageframe_start_handle_op(item, event) ;
 					return(true) ;
@@ -572,16 +572,13 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 					markerview_item_end_handle_op(item, event) ;
 					return(true) ;
 					break ;
-				/* </CMT Additions> */
-				
-				/* <CMT Additions> */
 				case MarkerViewItem:
 					start_markerview_grab(item, event) ;
 					break ;
 				case ImageFrameItem:
 					start_imageframe_grab(item, event) ;
 					break ;
-				/* </CMT Additions> */
+#endif
 
 				case MarkerBarItem:
 					
@@ -844,7 +841,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				tm_marker_context_menu (&event->button, item);
 				break;
 
-			/* <CMT Additions> */
+#ifdef WITH_CMT
 			case ImageFrameItem:
 				popup_imageframe_edit_menu(1, event->button.time, item, true) ;
 				break ;
@@ -857,8 +854,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case MarkerTimeAxisItem:
 				popup_marker_time_axis_edit_menu(1, event->button.time, item, false) ;
 				break ;
-			/* <CMT Additions> */
-
+#endif
 				
 			default:
 				break;
@@ -1140,12 +1136,13 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 	case StartSelectionTrimItem:
 	case EndSelectionTrimItem:
-	/* <CMT Additions> */
+
+#ifdef WITH_CMT
 	case ImageFrameHandleStartItem:
 	case ImageFrameHandleEndItem:
 	case MarkerViewHandleStartItem:
 	case MarkerViewHandleEndItem:
-	/* </CMT Additions> */
+#endif
 
 		if (is_drawable()) {
 			track_canvas.get_window()->set_cursor (*trimmer_cursor);
@@ -1295,12 +1292,14 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case EndSelectionTrimItem:
 	case EditCursorItem:
 	case PlayheadCursorItem:
-	/* <CMT Additions> */
+
+#ifdef WITH_CMT
 	case ImageFrameHandleStartItem:
 	case ImageFrameHandleEndItem:
 	case MarkerViewHandleStartItem:
 	case MarkerViewHandleEndItem:
-	/* </CMT Additions> */
+#endif
+
 		if (is_drawable()) {
 			track_canvas.get_window()->set_cursor (*current_canvas_cursor);
 		}
@@ -1466,12 +1465,14 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 	case PanAutomationLineItem:
 	case FadeInHandleItem:
 	case FadeOutHandleItem:
-	/* <CMT Additions> */
+
+#ifdef WITH_CMT
 	case ImageFrameHandleStartItem:
 	case ImageFrameHandleEndItem:
 	case MarkerViewHandleStartItem:
 	case MarkerViewHandleEndItem:
-	/* </CMT Additions> */
+#endif
+
 	  if (drag_info.item && (event->motion.state & Gdk::BUTTON1_MASK ||
 				 (event->motion.state & Gdk::BUTTON2_MASK))) {
 		  if (!from_autoscroll) {

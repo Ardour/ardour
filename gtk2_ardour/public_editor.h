@@ -92,11 +92,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void set_mouse_mode (Editing::MouseMode, bool force = false) = 0;
 	virtual void step_mouse_mode (bool next) = 0;
 	virtual Editing::MouseMode current_mouse_mode () const = 0;
-	virtual void add_imageframe_time_axis(const std::string & track_name, void*)  = 0;
-	virtual void add_imageframe_marker_time_axis(const std::string & track_name, TimeAxisView* marked_track, void*)  = 0;
-	virtual void connect_to_image_compositor()  = 0;
-	virtual void scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item)  = 0;
-	virtual TimeAxisView* get_named_time_axis(const std::string & name)  = 0;
 	virtual void consider_auditioning (boost::shared_ptr<ARDOUR::Region>) = 0;
 	virtual void set_show_waveforms (bool yn) = 0;
 	virtual bool show_waveforms() const = 0;
@@ -156,6 +151,14 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void restore_editing_space() = 0;
 	virtual nframes_t edit_cursor_position(bool sync) = 0;
 
+#ifdef WITH_CMT
+	virtual void add_imageframe_time_axis(const std::string & track_name, void*)  = 0;
+	virtual void add_imageframe_marker_time_axis(const std::string & track_name, TimeAxisView* marked_track, void*)  = 0;
+	virtual void connect_to_image_compositor()  = 0;
+	virtual void scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item)  = 0;
+	virtual TimeAxisView* get_named_time_axis(const std::string & name)  = 0;
+#endif
+
 	sigc::signal<void> ZoomFocusChanged;
 	sigc::signal<void> ZoomChanged;
 	sigc::signal<void> Resized;
@@ -192,6 +195,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual bool canvas_range_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 	virtual bool canvas_transport_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 
+#ifdef WITH_CMT
 	virtual bool canvas_imageframe_item_view_event(GdkEvent* event, ArdourCanvas::Item*,ImageFrameView*) = 0;
 	virtual bool canvas_imageframe_view_event(GdkEvent* event, ArdourCanvas::Item*,ImageFrameTimeAxis*) = 0;
 	virtual bool canvas_imageframe_start_handle_event(GdkEvent* event, ArdourCanvas::Item*,ImageFrameView*) = 0;
@@ -200,6 +204,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual bool canvas_markerview_item_view_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*) = 0;
 	virtual bool canvas_markerview_start_handle_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*) = 0;
 	virtual bool canvas_markerview_end_handle_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*) = 0;
+#endif
 
 	static PublicEditor* _instance;
 

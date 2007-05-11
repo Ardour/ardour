@@ -81,9 +81,9 @@
 
 #include "i18n.h"
 
-/* <CMT Additions> */
+#ifdef WITH_CMT
 #include "imageframe_socket_handler.h"
-/* </CMT Additions> */
+#endif
 
 using namespace std;
 using namespace sigc;
@@ -206,9 +206,9 @@ Editor::Editor ()
 	  automation_mode_button (_("mode")),
 	  global_automation_button (_("automation")),
 
-	  /* <CMT Additions> */
+#ifdef WITH_CMT
 	  image_socket_listener(0),
-	  /* </CMT Additions> */
+#endif
 
 	  /* nudge */
 
@@ -740,7 +740,7 @@ Editor::Editor ()
 
 Editor::~Editor()
 {
-	/* <CMT Additions> */
+#ifdef WITH_CMT
 	if(image_socket_listener)
 	{
 		if(image_socket_listener->is_connected())
@@ -751,7 +751,7 @@ Editor::~Editor()
 		delete image_socket_listener ;
 		image_socket_listener = 0 ;
 	}
-	/* </CMT Additions> */
+#endif
 }
 
 void

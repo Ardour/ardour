@@ -108,7 +108,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	
-	/* <CMT Additions> */
+#ifdef WITH_CMT
 
 	PathScanner scanner;
 	vector<string*>* results = scanner (getenv ("PATH"), "AniComp", false, false);
@@ -121,7 +121,7 @@ ARDOUR_UI::install_actions ()
 		delete results;
 	}
 
-	/* </CMT Additions> */
+#endif
 
 	act = ActionManager::register_action (main_actions, X_("Snapshot"), _("Snapshot"),  mem_fun(*this, &ARDOUR_UI::snapshot_session));
 	ActionManager::session_sensitive_actions.push_back (act);

@@ -142,11 +142,13 @@ class Editor : public PublicEditor
 	void step_mouse_mode (bool next);
 	Editing::MouseMode current_mouse_mode () const { return mouse_mode; }
 
+#ifdef WITH_CMT
 	void add_imageframe_time_axis(const std::string & track_name, void*) ;
 	void add_imageframe_marker_time_axis(const std::string & track_name, TimeAxisView* marked_track, void*) ;
 	void connect_to_image_compositor() ;
 	void scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item) ;
 	TimeAxisView* get_named_time_axis(const std::string & name) ;
+#endif
 
 	void consider_auditioning (boost::shared_ptr<ARDOUR::Region>);
 	void hide_a_region (boost::shared_ptr<ARDOUR::Region>);
@@ -1731,7 +1733,7 @@ class Editor : public PublicEditor
 
 	bool _xfade_visibility;
 	
-	/* <CMT Additions> */
+#ifdef WITH_CMT
 	void handle_new_imageframe_time_axis_view(const string & track_name, void* src) ;
 	void handle_new_imageframe_marker_time_axis_view(const string & track_name, TimeAxisView* marked_track) ;
 
@@ -1770,7 +1772,7 @@ class Editor : public PublicEditor
 	void popup_marker_time_axis_edit_menu(int button, int32_t time, ArdourCanvas::Item* ifv, bool with_frame) ;
 
 	ImageFrameSocketHandler* image_socket_listener ;
-	/* </CMT Additions> */
+#endif
 
 	void toggle_xfade_active (boost::weak_ptr<ARDOUR::Crossfade>);
 	void toggle_xfade_length (boost::weak_ptr<ARDOUR::Crossfade>);

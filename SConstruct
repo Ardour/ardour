@@ -45,7 +45,8 @@ opts.AddOptions(
     BoolOption('VERSIONED', 'Add revision information to ardour/gtk executable name inside the build directory', 0),
     BoolOption('VST', 'Compile with support for VST', 0),
     BoolOption('GPROFILE', 'Compile with support for gprofile (Developers only)', 0),
-    BoolOption('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 1)
+    BoolOption('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 1),
+    BoolOption('CMT', 'Compile with support for CMT Additions', 1)
 )
 
 #----------------------------------------------------------------------

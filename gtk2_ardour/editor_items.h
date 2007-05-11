@@ -52,7 +52,7 @@ enum ItemType {
 	FadeOutItem,
 	FadeOutHandleItem,
 	
-	/* <CMT Additions> */
+#ifdef WITH_CMT
 	MarkerViewItem,
 	MarkerTimeAxisItem,
 	MarkerViewHandleStartItem,
@@ -61,8 +61,8 @@ enum ItemType {
 	ImageFrameTimeAxisItem,
 	ImageFrameHandleStartItem,
 	ImageFrameHandleEndItem,
-	/* </CMT Additions> */
-	
+#endif
+
 	CrossfadeViewItem,
 	
 	/* don't remove this */
