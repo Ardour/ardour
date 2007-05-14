@@ -21,6 +21,7 @@
 ; (gtk_accel_path "<Actions>/RegionList/SortByRegionPosition" "")
 ; (gtk_accel_path "<Actions>/Editor/ZoomFocus" "")
 ; (gtk_accel_path "<Actions>/options/MeterFalloffSlow" "")
+(gtk_accel_path "<Actions>/options/ABAllPlugins" "<Control><Alt>p")
 ; (gtk_accel_path "<Actions>/RegionList/rlHide" "")
 ; (gtk_accel_path "<Actions>/Main/Metering" "")
 (gtk_accel_path "<Actions>/Editor/playhead-to-next-region-end" "<Control>period")
