@@ -1489,13 +1489,16 @@ Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items)
 
 	items.push_back (MenuElem (_("Lock"), bind (mem_fun (*this, &Editor::set_region_lock), true)));
 	items.push_back (MenuElem (_("Unlock"), bind (mem_fun (*this, &Editor::set_region_lock), false)));
+	items.push_back (MenuElem (_("Lock Position"), bind (mem_fun (*this, &Editor::set_region_position_lock), true)));
+	items.push_back (MenuElem (_("Unlock Position"), bind (mem_fun (*this, &Editor::set_region_position_lock), false)));
 	items.push_back (MenuElem (_("Mute"), bind (mem_fun (*this, &Editor::set_region_mute), true)));
 	items.push_back (MenuElem (_("Unmute"), bind (mem_fun (*this, &Editor::set_region_mute), false)));
 	items.push_back (MenuElem (_("Opaque"), bind (mem_fun (*this, &Editor::set_region_opaque), true)));
 	items.push_back (MenuElem (_("Transparent"), bind (mem_fun (*this, &Editor::set_region_opaque), false)));
 
 	/* We allow "Original position" if at least one region is not at its
-	   natural position */
+	   natural position 
+	*/
 	RegionSelection::iterator i = selection->regions.begin();
 	while (i != selection->regions.end() && (*i)->region()->at_natural_position() == true) {
 		++i;

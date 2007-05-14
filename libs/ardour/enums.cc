@@ -330,6 +330,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Region, DefaultFadeIn);
 	REGISTER_CLASS_ENUM (Region, DefaultFadeOut);
 	REGISTER_CLASS_ENUM (Region, Locked);
+	REGISTER_CLASS_ENUM (Region, PositionLocked);
 	REGISTER_CLASS_ENUM (Region, Automatic);
 	REGISTER_CLASS_ENUM (Region, WholeFile);
 	REGISTER_CLASS_ENUM (Region, FadeIn);

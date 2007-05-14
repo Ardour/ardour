@@ -868,6 +868,7 @@ class Editor : public PublicEditor
 	void reset_point_selection ();
 	void set_region_mute (bool);
 	void set_region_lock (bool);
+	void set_region_position_lock (bool);
 	void set_region_opaque (bool);
 	void raise_region ();
 	void raise_region_to_top ();

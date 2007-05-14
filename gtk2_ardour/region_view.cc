@@ -405,25 +405,36 @@ RegionView::hide_region_editor()
 	}
 }
 
-void
-RegionView::region_renamed ()
+Glib::ustring
+RegionView::make_name () const
 {
-	string str;
+	Glib::ustring str;
+
+	// XXX nice to have some good icons for this
 
 	if (_region->locked()) {
 		str += '>';
 		str += _region->name();
 		str += '<';
+	} else if (_region->position_locked()) {
+		str += '{';
+		str += _region->name();
+		str += '}';
 	} else {
 		str = _region->name();
 	}
 
-	// speed mismatch handled in audio_region_view.cc
-	// FIXME: come up with more elegant solution for this
-	
 	if (_region->muted()) {
 		str = string ("!") + str;
 	}
+
+	return str;
+}
+
+void
+RegionView::region_renamed ()
+{
+	Glib::ustring str = make_name ();
 
 	set_item_name (str, this);
 	set_name_text (str);
@@ -483,7 +494,7 @@ RegionView::region_sync_changed ()
 void
 RegionView::move (double x_delta, double y_delta)
 {
-	if (_region->locked() || (x_delta == 0 && y_delta == 0)) {
+	if (!_region->can_move() || (x_delta == 0 && y_delta == 0)) {
 		return;
 	}
 

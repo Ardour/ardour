@@ -3454,12 +3454,18 @@ void
 Editor::set_region_lock (bool yn)
 {
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-		if (arv) {
-			if (arv->audio_region()->locked() != yn) {
-				arv->audio_region()->set_locked (yn);
-			}
-		}
+		(*i)->region()->set_locked (yn);
+	}
+}
+
+/** Set the position-locked state of all selected regions to a particular value.
+ * @param yn true to make locked, false to make unlocked.
+ */
+void
+Editor::set_region_position_lock (bool yn)
+{
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		(*i)->region()->set_position_locked (yn);
 	}
 }
 
@@ -3467,12 +3473,7 @@ void
 Editor::set_region_mute (bool yn)
 {
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-		if (arv) {
-			if (arv->audio_region()->muted() != yn) {
-				arv->audio_region()->set_muted (yn);
-			}
-		}
+		(*i)->region()->set_muted (yn);
 	}
 }
 
@@ -3480,12 +3481,7 @@ void
 Editor::set_region_opaque (bool yn)
 {
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-		if (arv) {
-			if (arv->audio_region()->opaque() != yn) {
-				arv->audio_region()->set_opaque (yn);
-			}
-		}
+		(*i)->region()->set_opaque (yn);
 	}
 }
 

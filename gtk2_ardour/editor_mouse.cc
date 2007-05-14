@@ -3387,10 +3387,9 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 			rv = (*i);
 
-			if (rv->region()->locked()) {
+			if (!rv->region()->can_move()) {
 				continue;
 			}
-			
 
 			if (regionview_x_movement) {
 				double ownspeed = 1.0;
@@ -3445,10 +3444,6 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 					selection->add (latest_regionview);
 				}
 				
-				/* if the original region was locked, we don't care for the new one */
-				
-				newregion->set_locked (false);			
-
 			} else {
 
 				/* just change the model */

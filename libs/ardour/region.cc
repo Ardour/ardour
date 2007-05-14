@@ -111,7 +111,7 @@ Region::Region (SourceList& srcs, nframes_t start, nframes_t length, const strin
 Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: _name(name)
 	, _type(other->data_type())
-	, _flags(Flag(flags & ~(Locked|WholeFile|Hidden)))
+	, _flags(Flag(flags & ~(Locked|PositionLocked|WholeFile|Hidden)))
 	, _start(other->_start + offset) 
 	, _length(length) 
 	, _position(0) 
@@ -152,7 +152,7 @@ Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes
 Region::Region (boost::shared_ptr<const Region> other)
 	: _name(other->_name)
 	, _type(other->data_type())
-	, _flags(Flag(other->_flags & ~Locked))
+	, _flags(Flag(other->_flags & ~(Locked|PositionLocked)))
 	, _start(other->_start) 
 	, _length(other->_length) 
 	, _position(other->_position) 
@@ -415,7 +415,7 @@ Region::special_set_position (nframes_t pos)
 void
 Region::set_position (nframes_t pos, void *src)
 {
-	if (_flags & Locked) {
+	if (!can_move()) {
 		return;
 	}
 
@@ -495,7 +495,7 @@ Region::nudge_position (long n, void *src)
 void
 Region::set_start (nframes_t pos, void *src)
 {
-	if (_flags & Locked) {
+	if (_flags & (Locked|PositionLocked)) {
 		return;
 	}
 	/* This just sets the start, nothing else. It effectively shifts
@@ -520,7 +520,7 @@ Region::set_start (nframes_t pos, void *src)
 void
 Region::trim_start (nframes_t new_position, void *src)
 {
-	if (_flags & Locked) {
+	if (_flags & (Locked|PositionLocked)) {
 		return;
 	}
 	nframes_t new_start;
@@ -751,6 +751,19 @@ Region::set_locked (bool yn)
 			_flags = Flag (_flags|Locked);
 		} else {
 			_flags = Flag (_flags & ~Locked);
+		}
+		send_change (LockChanged);
+	}
+}
+
+void
+Region::set_position_locked (bool yn)
+{
+	if (position_locked() != yn) {
+		if (yn) {
+			_flags = Flag (_flags|PositionLocked);
+		} else {
+			_flags = Flag (_flags & ~PositionLocked);
 		}
 		send_change (LockChanged);
 	}

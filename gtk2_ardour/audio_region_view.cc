@@ -196,8 +196,6 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 	fade_in_active_changed ();
 	fade_out_active_changed ();
 
-	_region->StateChanged.connect (mem_fun(*this, &AudioRegionView::region_changed));
-
 	fade_in_shape->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_in_event), fade_in_shape, this));
 	fade_in_handle->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_in_handle_event), fade_in_handle, this));
 	fade_out_shape->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_out_event), fade_out_shape, this));
@@ -325,19 +323,8 @@ AudioRegionView::region_scale_amplitude_changed ()
 void
 AudioRegionView::region_renamed ()
 {
-	// FIXME: ugly duplication with RegionView...
+	Glib::ustring str = RegionView::make_name ();
 	
-	string str;
-
-	if (_region->locked()) {
-		str += '>';
-		str += _region->name();
-		str += '<';
-	} else {
-		str = _region->name();
-	}
-
-	// ... because of this
 	if (audio_region()->speed_mismatch (trackview.session().frame_rate())) {
 		str = string ("*") + str;
 	}

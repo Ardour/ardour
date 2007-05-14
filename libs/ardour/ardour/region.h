@@ -66,6 +66,7 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 		RightOfSplit = 0x8000,
 		Hidden = 0x10000,
 		DoNotSaveState = 0x20000,
+		PositionLocked = 0x40000,
 		//
 		range_guarantoor = USHRT_MAX
 	};
@@ -111,9 +112,11 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	bool muted()      const { return _flags & Muted; }
 	bool opaque ()    const { return _flags & Opaque; }
 	bool locked()     const { return _flags & Locked; }
+	bool position_locked() const { return _flags & PositionLocked; }
 	bool automatic()  const { return _flags & Automatic; }
 	bool whole_file() const { return _flags & WholeFile ; }
 	bool captured()   const { return !(_flags & (Region::Flag (Region::Import|Region::External))); }
+	bool can_move()   const { return !(_flags & (Locked|PositionLocked)); }
 
 	virtual bool should_save_state () const { return !(_flags & DoNotSaveState); };
 
@@ -163,6 +166,7 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	void set_muted (bool yn);
 	void set_opaque (bool yn);
 	void set_locked (bool yn);
+	void set_position_locked (bool yn);
 
 	virtual uint32_t read_data_count() const { return _read_data_count; }
 
