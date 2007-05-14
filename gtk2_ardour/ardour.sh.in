@@ -13,6 +13,8 @@ if [ "$MLOCK_LIMIT" != "unlimited" ]; then
 
 fi
 
+ulimit -c unlimited
+
 exec %INSTALL_PREFIX%/%LIBDIR%/ardour2/ardour-%VERSION% $*
 
 
