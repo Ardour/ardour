@@ -91,6 +91,7 @@ class RedirectBox : public Gtk::HBox
 	boost::shared_ptr<ARDOUR::Route>  _route;
 	ARDOUR::Session &   _session;
 	bool                _owner_is_mixer;
+	bool                 ab_direction;
 
 	ARDOUR::Placement   _placement;
 
@@ -170,6 +171,8 @@ class RedirectBox : public Gtk::HBox
 	void redirect_drag_begin (GdkDragContext*);
 	void redirect_drag_end (GdkDragContext*);
 	void all_redirects_active(bool state);
+	void all_plugins_active(bool state);
+	void ab_plugins ();
 
 	void cut_redirects ();
 	void copy_redirects ();
@@ -217,6 +220,8 @@ class RedirectBox : public Gtk::HBox
 	static void rb_activate_all ();
 	static void rb_deactivate_all ();
 	static void rb_edit ();
+	static void rb_ab_plugins ();
+	static void rb_deactivate_plugins ();
 	
 	void route_name_changed (void* src, PluginUIWindow* plugin_ui, boost::weak_ptr<ARDOUR::PluginInsert> pi);
 	std::string generate_redirect_title (boost::shared_ptr<ARDOUR::PluginInsert> pi);

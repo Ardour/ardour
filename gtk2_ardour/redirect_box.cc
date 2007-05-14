@@ -105,6 +105,7 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, boost::shared_ptr<Rout
 	redirect_drag_in_progress = false;
 	no_redirect_redisplay = false;
 	ignore_delete = false;
+	ab_direction = true;
 
 	model = ListStore::create(columns);
 
@@ -628,7 +629,11 @@ RedirectBox::build_redirect_tooltip (EventBox& box, string start)
 	for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
   		Gtk::TreeModel::Row row = *iter;
 		tip += '\n';
-  		tip += row[columns.text];
+
+		/* don't use the column text, since it may be narrowed */
+
+		boost::shared_ptr<Redirect> r = row[columns.redirect];
+  		tip += r->name();
 	}
 	ARDOUR_UI::instance()->tooltips().set_tip (box, tip);
 }
@@ -996,6 +1001,23 @@ RedirectBox::all_redirects_active (bool state)
 }
 
 void
+RedirectBox::all_plugins_active (bool state)
+{
+	if (state) {
+		// XXX not implemented
+	} else {
+		_route->disable_plugins (_placement);
+	}
+}
+
+void
+RedirectBox::ab_plugins ()
+{
+	_route->ab_plugins (ab_direction);
+	ab_direction = !ab_direction;
+}
+
+void
 RedirectBox::clear_redirects ()
 {
 	string prompt;
@@ -1223,6 +1245,9 @@ RedirectBox::register_actions ()
 	ActionManager::register_action (popup_act_grp, X_("activate_all"), _("Activate all"),  sigc::ptr_fun (RedirectBox::rb_activate_all));
 	ActionManager::register_action (popup_act_grp, X_("deactivate_all"), _("Deactivate all"),  sigc::ptr_fun (RedirectBox::rb_deactivate_all));
 
+	ActionManager::register_action (popup_act_grp, X_("a_b_plugins"), _("A/B plugins"),  sigc::ptr_fun (RedirectBox::rb_ab_plugins));
+	ActionManager::register_action (popup_act_grp, X_("deactivate_plugins"), _("Deactivate plugins"),  sigc::ptr_fun (RedirectBox::rb_deactivate_plugins));
+
 	/* show editors */
 	act = ActionManager::register_action (popup_act_grp, X_("edit"), _("Edit"),  sigc::ptr_fun (RedirectBox::rb_edit));
 	ActionManager::plugin_selection_sensitive_actions.push_back(act);
@@ -1374,6 +1399,27 @@ RedirectBox::rb_deactivate_all ()
 	}
 	_current_redirect_box->all_redirects_active (false);
 }
+
+void
+RedirectBox::rb_deactivate_plugins ()
+{
+	if (_current_redirect_box == 0) {
+		return;
+	}
+	_current_redirect_box->all_plugins_active (false);
+}
+
+
+void
+RedirectBox::rb_ab_plugins ()
+{
+	if (_current_redirect_box == 0) {
+		return;
+	}
+
+	_current_redirect_box->ab_plugins ();
+}
+
 
 void
 RedirectBox::rb_edit ()

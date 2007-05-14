@@ -108,6 +108,9 @@ class Redirect : public IO
 	bool find_next_event (nframes_t, nframes_t, ControlEvent&) const;
 
 	virtual void transport_stopped (nframes_t frame) {};
+
+	bool get_next_ab_is_active () const { return _next_ab_is_active; }
+	void set_next_ab_is_active (bool yn);
 	
   protected:
 	/* children may use this stuff as they see fit */
@@ -127,6 +130,7 @@ class Redirect : public IO
 	
   private:
 	bool _active;
+	bool _next_ab_is_active;
 	Placement _placement;
 	uint32_t _sort_key;
 	void* _gui;  /* generic, we don't know or care what this is */

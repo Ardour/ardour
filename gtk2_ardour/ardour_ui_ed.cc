@@ -90,6 +90,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (main_actions, X_("AudioFileFormatHeader"), _("Header"));
 	ActionManager::register_action (main_actions, X_("AudioFileFormatData"), _("Data"));
 	ActionManager::register_action (main_actions, X_("ControlSurfaces"), _("Control Surfaces"));
+	ActionManager::register_action (main_actions, X_("Plugins"), _("Plugins"));
 	ActionManager::register_action (main_actions, X_("Metering"), _("Metering"));
 	ActionManager::register_action (main_actions, X_("MeteringFallOffRate"), _("Fall off rate"));
 	ActionManager::register_action (main_actions, X_("MeteringHoldTime"), _("Hold Time"));
@@ -421,6 +422,11 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_toggle_action (option_actions, X_("LatchedSolo"), _("Latched solo"), mem_fun (*this, &ARDOUR_UI::toggle_LatchedSolo));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (option_actions, X_("ShowSoloMutes"), _("Show solo muting"), mem_fun (*this, &ARDOUR_UI::toggle_ShowSoloMutes));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (option_actions, X_("DisableAllPlugins"), _("Disable All Plugins"), mem_fun (*this, &ARDOUR_UI::disable_all_plugins));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (option_actions, X_("ABAllPlugins"), _("A/B All Plugins"), mem_fun (*this, &ARDOUR_UI::ab_all_plugins));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	/* !!! REMEMBER THAT RADIO ACTIONS HAVE TO BE HANDLED WITH MORE FINESSE THAN SIMPLE TOGGLES !!! */

@@ -168,7 +168,11 @@ class Route : public IO
 	int remove_redirect (boost::shared_ptr<Redirect>, void *src, uint32_t* err_streams = 0);
 	int copy_redirects (const Route&, Placement, uint32_t* err_streams = 0);
 	int sort_redirects (uint32_t* err_streams = 0);
-
+	void disable_redirects (Placement);
+	void disable_redirects ();
+	void disable_plugins (Placement);
+	void disable_plugins ();
+	void ab_plugins (bool forward);
 	void clear_redirects (Placement, void *src);
 	void all_redirects_flip();
 	void all_redirects_active (Placement, bool state);
@@ -201,6 +205,9 @@ class Route : public IO
 	XMLNode& get_state();
 	int set_state(const XMLNode& node);
 	virtual XMLNode& get_template();
+
+	XMLNode& get_redirect_state ();
+	int set_redirect_state (const XMLNode&);
 
 	sigc::signal<void,void*> SelectedChanged;
 

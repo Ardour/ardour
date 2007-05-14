@@ -716,6 +716,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void no_memory_warning ();
 	void check_memory_locking ();
+
+	bool ab_direction;
+	void disable_all_plugins ();
+	void ab_all_plugins ();
 };
 
 #endif /* __ardour_gui_h__ */

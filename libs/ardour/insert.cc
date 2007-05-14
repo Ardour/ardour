@@ -613,13 +613,13 @@ PluginInsert::state (bool full)
 	/* add port automation state */
 	XMLNode *autonode = new XMLNode(port_automation_node_name);
 	set<uint32_t> automatable = _plugins[0]->automatable();
-
+	
 	for (set<uint32_t>::iterator x =  automatable.begin(); x != automatable.end(); ++x) {
-
+		
 		XMLNode* child = new XMLNode("port");
 		snprintf(buf, sizeof(buf), "%" PRIu32, *x);
 		child->add_property("number", string(buf));
-
+		
 		child->add_child_nocopy (automation_list (*x).state (full));
 		autonode->add_child_nocopy (*child);
 	}

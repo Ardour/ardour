@@ -883,6 +883,110 @@ Route::add_redirects (const RedirectList& others, void *src, uint32_t* err_strea
 	return 0;
 }
 
+/** Turn off all redirects with a given placement
+ * @param p Placement of redirects to disable
+ */
+
+void
+Route::disable_redirects (Placement p)
+{
+	Glib::RWLock::ReaderLock lm (redirect_lock);
+	
+	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+		if ((*i)->placement() == p) {
+			(*i)->set_active (false, this);
+		}
+	}
+}
+
+/** Turn off all redirects 
+ */
+
+void
+Route::disable_redirects ()
+{
+	Glib::RWLock::ReaderLock lm (redirect_lock);
+	
+	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+		(*i)->set_active (false, this);
+	}
+}
+
+/** Turn off all redirects with a given placement
+ * @param p Placement of redirects to disable
+ */
+
+void
+Route::disable_plugins (Placement p)
+{
+	Glib::RWLock::ReaderLock lm (redirect_lock);
+	
+	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+		if (boost::dynamic_pointer_cast<PluginInsert> (*i) && (*i)->placement() == p) {
+			(*i)->set_active (false, this);
+		}
+	}
+}
+
+/** Turn off all plugins
+ */
+
+void
+Route::disable_plugins ()
+{
+	Glib::RWLock::ReaderLock lm (redirect_lock);
+	
+	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+		if (boost::dynamic_pointer_cast<PluginInsert> (*i)) {
+			(*i)->set_active (false, this);
+		}
+	}
+}
+
+
+void
+Route::ab_plugins (bool forward)
+{
+	Glib::RWLock::ReaderLock lm (redirect_lock);
+			
+	if (forward) {
+
+		/* forward = turn off all active redirects, and mark them so that the next time
+		   we go the other way, we will revert them
+		*/
+
+		for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+			if (!boost::dynamic_pointer_cast<PluginInsert> (*i)) {
+				continue;
+			}
+
+			if ((*i)->active()) {
+				(*i)->set_active (false, this);
+				(*i)->set_next_ab_is_active (true);
+			} else {
+				(*i)->set_next_ab_is_active (false);
+			}
+		}
+
+	} else {
+
+		/* backward = if the redirect was marked to go active on the next ab, do so */
+
+		for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+
+			if (!boost::dynamic_pointer_cast<PluginInsert> (*i)) {
+				continue;
+			}
+
+			if ((*i)->get_next_ab_is_active()) {
+				(*i)->set_active (true, this);
+			} else {
+				(*i)->set_active (false, this);
+			}
+		}
+	}
+}
+
 /** Remove redirects with a given placement.
  * @param p Placement of redirects to remove.
  */
@@ -1422,6 +1526,74 @@ Route::state(bool full_state)
 	}
 	
 	return *node;
+}
+
+XMLNode&
+Route::get_redirect_state ()
+{
+	XMLNode* root = new XMLNode (X_("redirects"));
+	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+		root->add_child_nocopy ((*i)->state (true));
+	}
+
+	return *root;
+}
+
+int
+Route::set_redirect_state (const XMLNode& root)
+{
+	if (root.name() != X_("redirects")) {
+		return -1;
+	}
+
+	XMLNodeList nlist;
+	XMLNodeList nnlist;
+	XMLNodeConstIterator iter;
+	XMLNodeConstIterator niter;
+	Glib::RWLock::ReaderLock lm (redirect_lock);
+
+	nlist = root.children();
+	
+	for (iter = nlist.begin(); iter != nlist.end(); ++iter){
+
+		/* iter now points to a Redirect state node */
+		
+		nnlist = (*iter)->children ();
+
+		for (niter = nnlist.begin(); niter != nnlist.end(); ++niter) {
+
+			/* find the IO child node, since it contains the ID we need */
+
+			/* XXX OOP encapsulation violation, ugh */
+
+			if ((*niter)->name() == IO::state_node_name) {
+
+				XMLProperty* prop = (*niter)->property (X_("id"));
+				
+				if (!prop) {
+					warning << _("Redirect node has no ID, ignored") << endmsg;
+					break;
+				}
+
+				ID id = prop->value ();
+
+				/* now look for a redirect with that ID */
+	
+				for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+					if ((*i)->id() == id) {
+						(*i)->set_state (**iter);
+						break;
+					}
+				}
+				
+				break;
+				
+			}
+		}
+
+	}
+
+	return 0;
 }
 
 void

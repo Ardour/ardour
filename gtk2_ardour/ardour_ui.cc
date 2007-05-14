@@ -40,7 +40,8 @@
 #include <pbd/pathscanner.h>
 #include <pbd/failed_constructor.h>
 #include <pbd/enumwriter.h>
-#include <pbd/stacktrace.h>
+#include <pbd/memento_command.h>
+
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/click_box.h>
@@ -189,6 +190,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	session_loaded = false;
 	last_speed_displayed = -1.0f;
 	keybindings_path = ARDOUR::find_config_file ("ardour.bindings");
+	ab_direction = true;
 
 	can_save_keybindings = false;
 
@@ -2841,4 +2843,43 @@ ARDOUR_UI::setup_profile ()
 	if (gdk_screen_width() < 1200) {
 		Profile->set_small_screen ();
 	}
+}
+
+void
+ARDOUR_UI::disable_all_plugins ()
+{
+	if (!session) {
+		return;
+	}
+
+	// session->begin_reversible_command (_("Disable all plugins"));
+
+	boost::shared_ptr<Session::RouteList> routes = session->get_routes ();
+
+	for (Session::RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+		// XMLNode& before = (*i)->get_redirect_state ();
+		// session->add_command (new MementoCommand<Route>(**i, &before, 0));
+		(*i)->disable_plugins ();
+		// XMLNode& after = (*i)->get_redirect_state ();
+		// session->add_command (new MementoCommand<Route>(**i, 0, &after));
+				      
+	}
+
+	// session->commit_reversible_command ();
+}
+
+void
+ARDOUR_UI::ab_all_plugins ()
+{
+	if (!session) {
+		return;
+	}
+
+	boost::shared_ptr<Session::RouteList> routes = session->get_routes ();
+
+	for (Session::RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+		(*i)->ab_plugins (ab_direction);
+	}
+	
+	ab_direction = !ab_direction;
 }

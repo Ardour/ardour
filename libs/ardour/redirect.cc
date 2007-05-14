@@ -51,6 +51,7 @@ Redirect::Redirect (Session& s, const string& name, Placement p,
 {
 	_placement = p;
 	_active = false;
+	_next_ab_is_active = false;
 	_sort_key = 0;
 	_gui = 0;
 	_extra_xml = 0;
@@ -477,3 +478,8 @@ Redirect::set_active (bool yn, void* src)
 	_session.set_dirty ();
 }
 
+void
+Redirect::set_next_ab_is_active (bool yn)
+{
+	_next_ab_is_active = yn;
+}
