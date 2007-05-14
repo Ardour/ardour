@@ -385,7 +385,7 @@ AudioClock::on_realize ()
 }
 
 void
-AudioClock::set (nframes_t when, bool force, nframes_t offset, int which)
+AudioClock::set (nframes_t when, bool force, nframes_t offset, char which)
 {
 
  	if ((!force && !is_visible()) || session == 0) {
@@ -399,23 +399,22 @@ AudioClock::set (nframes_t when, bool force, nframes_t offset, int which)
 	bool pdelta = Config->get_primary_clock_delta_edit_cursor();
 	bool sdelta = Config->get_secondary_clock_delta_edit_cursor();
 
-	if (offset && which == 1 && pdelta) {
+	if (offset && which == 'p' && pdelta) {
 		when = (when > offset) ? when - offset : offset - when;
-	} else if (offset && which == 2 && sdelta) {
+	} else if (offset && which == 's' && sdelta) {
 		when = (when > offset) ? when - offset : offset - when;
 	}
 
-	if (which == 1 && pdelta && !last_pdelta) {
-		cout << "set_widget_name() called" << endl;
+	if (which == 'p' && pdelta && !last_pdelta) {
 		set_widget_name("TransportClockDisplayDelta");
 		last_pdelta = true;
-	} else if (which == 1 && !pdelta && last_pdelta) {
+	} else if (which == 'p' && !pdelta && last_pdelta) {
 		set_widget_name("TransportClockDisplay");
 		last_pdelta = false;
-	} else if (which == 2  && sdelta && !last_sdelta) {
+	} else if (which == 's'  && sdelta && !last_sdelta) {
 		set_widget_name("SecondaryClockDisplayDelta");
 		last_sdelta = true;
-	} else if (which == 2 && !sdelta && last_sdelta) {
+	} else if (which == 's' && !sdelta && last_sdelta) {
 		set_widget_name("SecondaryClockDisplay");
 		last_sdelta = false;
 	}

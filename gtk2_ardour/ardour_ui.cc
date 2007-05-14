@@ -2655,13 +2655,13 @@ void
 ARDOUR_UI::update_transport_clocks (nframes_t pos)
 {
 	if (Config->get_primary_clock_delta_edit_cursor()) {
-		primary_clock.set (pos, false, editor->edit_cursor_position(false), 1);
+		primary_clock.set (pos, false, editor->edit_cursor_position(false), 'p');
 	} else {
 		primary_clock.set (pos, 0, true);
 	}
 
 	if (Config->get_secondary_clock_delta_edit_cursor()) {
-		secondary_clock.set (pos, false, editor->edit_cursor_position(false), 2);
+		secondary_clock.set (pos, false, editor->edit_cursor_position(false), 's');
 	} else {
 		secondary_clock.set (pos);
 	}
