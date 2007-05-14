@@ -85,6 +85,7 @@ style "time_axis_view_item_name"
 
 style "default_base" = "medium_text"
 {
+  
   GtkWidget::cursor_color =  {1.0, 1.0, 1.0 }
   GtkButton::default_border = { 0, 0, 0, 0 }
   GtkButton::default_outside_border = { 0, 0, 0, 0 }
@@ -144,7 +145,7 @@ style "transport_base" = "medium_bold_text"
 /*
 style "black_mackie_menu_bar"
 {
-  font_name = "sans bold 9"
+  font_name = "sans bold 8"
   fg[NORMAL] = { 1.0, 1.0, 1.0 }
   bg[NORMAL] = { 0, 0, 0 }
 }
@@ -662,6 +663,11 @@ style "transport_clock_display"
        base[ACTIVE] = { 0.0, 0.0, 0.0 }
        bg[NORMAL] = { 0.0, 0.0, 0.0 }
        bg[ACTIVE] = { 0.0, 0.0, 0.0 }
+}
+
+style "transport_clock_display_delta" = "transport_clock_display"
+{
+	fg[NORMAL] = { 0.30, 0.30, 1.0 }
 }
 
 style "tempo_meter_clock_display"
@@ -1282,6 +1288,8 @@ widget "*BigClockNonRecording" style:highest "non_recording_big_clock_display"
 widget "*BigClockRecording" style:highest "recording_big_clock_display"
 widget "*TransportClockDisplay" style:highest "transport_clock_display"
 widget "*SecondaryClockDisplay" style:highest "transport_clock_display"
+widget "*TransportClockDisplayDelta" style:highest "transport_clock_display_delta"
+widget "*SecondaryClockDisplayDelta" style:highest "transport_clock_display_delta"
 widget "*AudioClockFramesUpperInfo" style:highest "tempo_meter_clock_display"
 widget "*AudioClockFramesLowerInfo" style:highest "tempo_meter_clock_display"
 widget "*AudioClockSMPTEUpperInfo" style:highest "tempo_meter_clock_display"

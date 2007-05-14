@@ -271,8 +271,8 @@ ARDOUR_UI::setup_transport ()
 
 	/* clocks, etc. */
 
-	ARDOUR_UI::Clock.connect (bind (mem_fun (primary_clock, &AudioClock::set), false));
-	ARDOUR_UI::Clock.connect (bind (mem_fun (secondary_clock, &AudioClock::set), false));
+	ARDOUR_UI::Clock.connect (bind (mem_fun (primary_clock, &AudioClock::set), 1));
+	ARDOUR_UI::Clock.connect (bind (mem_fun (secondary_clock, &AudioClock::set), 2));
 
 	primary_clock.ValueChanged.connect (mem_fun(*this, &ARDOUR_UI::primary_clock_value_changed));
 	secondary_clock.ValueChanged.connect (mem_fun(*this, &ARDOUR_UI::secondary_clock_value_changed));

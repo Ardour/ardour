@@ -94,7 +94,7 @@ ARDOUR_UI *ARDOUR_UI::theArdourUI = 0;
 sigc::signal<void,bool> ARDOUR_UI::Blink;
 sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
 sigc::signal<void>      ARDOUR_UI::SuperRapidScreenUpdate;
-sigc::signal<void,nframes_t> ARDOUR_UI::Clock;
+sigc::signal<void,nframes_t, bool, nframes_t> ARDOUR_UI::Clock;
 
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
@@ -1520,7 +1520,7 @@ void
 ARDOUR_UI::update_clocks ()
 {
 	if (!editor || !editor->dragging_playhead()) {
-		Clock (session->audible_frame()); /* EMIT_SIGNAL */
+		Clock (session->audible_frame(), false, editor->edit_cursor_position(false)); /* EMIT_SIGNAL */
 	}
 }
 
@@ -2654,8 +2654,17 @@ ARDOUR_UI::use_config ()
 void
 ARDOUR_UI::update_transport_clocks (nframes_t pos)
 {
-	primary_clock.set (pos);
-	secondary_clock.set (pos);
+	if (Config->get_primary_clock_delta_edit_cursor()) {
+		primary_clock.set (pos, false, editor->edit_cursor_position(false), 1);
+	} else {
+		primary_clock.set (pos, 0, true);
+	}
+
+	if (Config->get_secondary_clock_delta_edit_cursor()) {
+		secondary_clock.set (pos, false, editor->edit_cursor_position(false), 2);
+	} else {
+		secondary_clock.set (pos);
+	}
 
 	if (big_clock_window) {
 		big_clock.set (pos);

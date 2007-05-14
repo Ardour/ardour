@@ -112,6 +112,8 @@ CONFIG_VARIABLE (SlaveSource, slave_source, "slave-source", None)
 CONFIG_VARIABLE (ShuttleBehaviour, shuttle_behaviour, "shuttle-behaviour", Sprung)
 CONFIG_VARIABLE (ShuttleUnits, shuttle_units, "shuttle-units", Percentage)
 CONFIG_VARIABLE (bool, quieten_at_speed, "quieten-at-speed", true)
+CONFIG_VARIABLE (bool, primary_clock_delta_edit_cursor, "primary-clock-delta-edit-cursor", false)
+CONFIG_VARIABLE (bool, secondary_clock_delta_edit_cursor, "secondary-clock-delta-edit-cursor", false)
 
 /* timecode and sync */
 

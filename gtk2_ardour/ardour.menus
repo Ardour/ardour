@@ -354,6 +354,9 @@
                <menuitem action='StopTransportAtEndOfSession'/>
                <menuitem action='GainReduceFastTransport'/>
 	       <separator/>
+				<menuitem action='PrimaryClockDeltaEditCursor'/>
+				<menuitem action='SecondaryClockDeltaEditCursor'/>
+			<separator/>
          </menu>
 	 <menu name='Help' action='Help'>
 	     <menuitem action='About'/>

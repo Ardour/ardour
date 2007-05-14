@@ -156,7 +156,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	static sigc::signal<void,bool> Blink;
 	static sigc::signal<void>      RapidScreenUpdate;
 	static sigc::signal<void>      SuperRapidScreenUpdate;
-	static sigc::signal<void,nframes_t> Clock;
+	static sigc::signal<void,nframes_t, bool, nframes_t> Clock;
 
 	/* this is a helper function to centralize the (complex) logic for
 	   blinking rec-enable buttons.
@@ -690,6 +690,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_ShowSoloMutes();
 	void toggle_LatchedRecordEnable ();
 	void toggle_RegionEquivalentsOverlap ();
+	void toggle_PrimaryClockDeltaEditCursor ();
+	void toggle_SecondaryClockDeltaEditCursor ();
 
 	void mtc_port_changed ();
 	void map_solo_model ();

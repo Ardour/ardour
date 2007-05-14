@@ -435,6 +435,18 @@ ARDOUR_UI::toggle_ShowSoloMutes()
 }
 
 void
+ARDOUR_UI::toggle_PrimaryClockDeltaEditCursor()
+{
+	ActionManager::toggle_config_state ("options", "PrimaryClockDeltaEditCursor", &Configuration::set_primary_clock_delta_edit_cursor, &Configuration::get_primary_clock_delta_edit_cursor);
+}
+
+void
+ARDOUR_UI::toggle_SecondaryClockDeltaEditCursor()
+{
+	ActionManager::toggle_config_state ("options", "SecondaryClockDeltaEditCursor", &Configuration::set_secondary_clock_delta_edit_cursor, &Configuration::get_secondary_clock_delta_edit_cursor);
+}
+
+void
 ARDOUR_UI::mtc_port_changed ()
 {
 	bool have_mtc;
@@ -962,7 +974,11 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		}
 	} else if (PARAM_IS ("use-overlap-equivalency")) {
 		ActionManager::map_some_state ("options", "RegionEquivalentsOverlap", &Configuration::get_use_overlap_equivalency);
-	}
+	} else if (PARAM_IS ("primary-clock-delta-edit-cursor")) {
+		ActionManager::map_some_state ("options",  "PrimaryClockDeltaEditCursor", &Configuration::get_primary_clock_delta_edit_cursor);
+	} else if (PARAM_IS ("secondary-clock-delta-edit-cursor")) {
+		ActionManager::map_some_state ("options",  "SecondaryClockDeltaEditCursor", &Configuration::get_secondary_clock_delta_edit_cursor);
+	} 
 			   
 
 #undef PARAM_IS
