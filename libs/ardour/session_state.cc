@@ -3265,11 +3265,7 @@ Session::config_changed (const char* parameter_name)
 
 	} else if (PARAM_IS ("use-video-sync")) {
 
-		if (transport_stopped()) {
-			if (Config->get_use_video_sync()) {
-				waiting_for_sync_offset = true;
-			}
-		}
+		waiting_for_sync_offset = Config->get_use_video_sync();
 
 	} else if (PARAM_IS ("mmc-control")) {
 

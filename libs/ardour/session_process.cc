@@ -857,7 +857,7 @@ bool
 Session::maybe_sync_start (nframes_t& nframes, nframes_t& offset)
 {
 	nframes_t sync_offset;
-	
+
 	if (!waiting_for_sync_offset) {
 		return false;
 	}
