@@ -2857,7 +2857,6 @@ Session::source_by_path_and_channel (const Glib::ustring& path, uint16_t chn)
 	Glib::Mutex::Lock lm (audio_source_lock);
 
 	for (AudioSourceList::iterator i = audio_sources.begin(); i != audio_sources.end(); ++i) {
-		cerr << "comparing " << path << " with " << i->second->name() << endl;
 		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(i->second);
 
 		if (afs && afs->path() == path && chn == afs->channel()) {
