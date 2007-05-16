@@ -94,7 +94,8 @@ class SoundFileBrowser : public ArdourDialog
 
   protected:
 	Gtk::FileChooserWidget chooser;
-	Gtk::FileFilter filter;
+	Gtk::FileFilter custom_filter;
+	Gtk::FileFilter matchall_filter;
 	SoundFileBox preview;
 
 	static Glib::ustring persistent_folder;

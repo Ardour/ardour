@@ -306,8 +306,14 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s)
 
 	found_list_view.get_selection()->set_mode (Gtk::SELECTION_MULTIPLE);
 
-	filter.add_custom (Gtk::FILE_FILTER_FILENAME, mem_fun(*this, &SoundFileBrowser::on_custom));
-	chooser.set_filter (filter);
+	custom_filter.add_custom (Gtk::FILE_FILTER_FILENAME, mem_fun(*this, &SoundFileBrowser::on_custom));
+	custom_filter.set_name (_("Probable audio files"));
+
+	matchall_filter.add_pattern ("*.*");
+	matchall_filter.set_name (_("All files"));
+
+	chooser.add_filter (custom_filter);
+	chooser.add_filter (matchall_filter);
 	chooser.set_select_multiple (true);
 	chooser.signal_update_preview().connect(mem_fun(*this, &SoundFileBrowser::update_preview));
 
