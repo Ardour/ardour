@@ -179,7 +179,7 @@ protected:
 		    return cmp_nocase(a.first, b.first) == -1;
 	    }
 	};
-	bool entry_key_release (GdkEventKey*);
+	void on_new_session_name_entry_changed();
 	void notebook_page_changed (GtkNotebookPage*, uint);
 	void treeview_selection_changed ();
 	void file_chosen ();

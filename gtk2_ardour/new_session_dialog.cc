@@ -427,7 +427,7 @@ NewSessionDialog::NewSessionDialog()
 	m_limit_output_ports->signal_clicked().connect (mem_fun (*this, &NewSessionDialog::limit_outputs_clicked));
 	m_create_master_bus->signal_clicked().connect (mem_fun (*this, &NewSessionDialog::master_bus_button_clicked));
 	m_create_control_bus->signal_clicked().connect (mem_fun (*this, &NewSessionDialog::monitor_bus_button_clicked));
-	m_name->signal_key_release_event().connect(mem_fun (*this, &NewSessionDialog::entry_key_release));
+	m_name->signal_changed().connect(mem_fun (*this, &NewSessionDialog::on_new_session_name_entry_changed));
 	m_notebook->signal_switch_page().connect (mem_fun (*this, &NewSessionDialog::notebook_page_changed));
 	m_treeview->get_selection()->signal_changed().connect (mem_fun (*this, &NewSessionDialog::treeview_selection_changed));
 	m_treeview->signal_row_activated().connect (mem_fun (*this, &NewSessionDialog::recent_row_activated));
@@ -591,8 +591,8 @@ NewSessionDialog::reset_name()
 	
 }
 
-bool
-NewSessionDialog::entry_key_release (GdkEventKey* ev)
+void
+NewSessionDialog::on_new_session_name_entry_changed ()
 {
 	if (m_name->get_text() != "") {
 		set_response_sensitive (Gtk::RESPONSE_OK, true);
@@ -600,7 +600,6 @@ NewSessionDialog::entry_key_release (GdkEventKey* ev)
 	} else {
 		set_response_sensitive (Gtk::RESPONSE_OK, false);
 	}
-	return true;
 }
 
 void
