@@ -3501,7 +3501,7 @@ Session::remove_empty_sounds ()
 {
 	PathScanner scanner;
 
-	vector<string *>* possible_audiofiles = scanner (sound_dir(), "\\.(wav|aiff|caf|w64)$", false, true);
+	vector<string *>* possible_audiofiles = scanner (sound_dir(), "\\.(wav|aiff|caf|w64|L|R)$", false, true);
 	
 	Glib::Mutex::Lock lm (source_lock);
 	
