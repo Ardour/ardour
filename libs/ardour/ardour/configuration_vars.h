@@ -141,6 +141,7 @@ CONFIG_VARIABLE (uint32_t, saved_history_depth, "save-history-depth", 100)
 CONFIG_VARIABLE (bool, use_overlap_equivalency, "use-overlap-equivalency", false)
 CONFIG_VARIABLE (bool, periodic_safety_backups, "periodic-safety-backups", true)
 CONFIG_VARIABLE (uint32_t, periodic_safety_backup_interval, "periodic-safety-backup-interval", 120)
+CONFIG_VARIABLE (string, possible_audio_file_regexp, "possible-audio-file-regexp", "\\.(wav|aiff|caf|w64|L|R)$")
 
 /* BWAV */
 

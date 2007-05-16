@@ -71,20 +71,20 @@ class AudioRegion : public Region
 	Curve& fade_out() { return _fade_out; }
 	Curve& envelope() { return _envelope; }
 
-	nframes_t read_peaks (PeakData *buf, nframes_t npeaks,
-			nframes_t offset, nframes_t cnt,
-			uint32_t chan_n=0, double samples_per_unit= 1.0) const;
-
+	virtual nframes_t read_peaks (PeakData *buf, nframes_t npeaks,
+				      nframes_t offset, nframes_t cnt,
+				      uint32_t chan_n=0, double samples_per_unit= 1.0) const;
+	
 	virtual nframes_t read_at (Sample *buf, Sample *mixdown_buf,
-			float *gain_buf, nframes_t position, nframes_t cnt, 
-			uint32_t       chan_n      = 0,
-			nframes_t read_frames = 0,
-			nframes_t skip_frames = 0) const;
-
-	nframes_t master_read_at (Sample *buf, Sample *mixdown_buf, 
-			float *gain_buf,
-			nframes_t position, nframes_t cnt, uint32_t chan_n=0) const;
-
+				   float *gain_buf, nframes_t position, nframes_t cnt, 
+				   uint32_t       chan_n      = 0,
+				   nframes_t read_frames = 0,
+				   nframes_t skip_frames = 0) const;
+	
+	virtual nframes_t master_read_at (Sample *buf, Sample *mixdown_buf, 
+					  float *gain_buf,
+					  nframes_t position, nframes_t cnt, uint32_t chan_n=0) const;
+	
 	XMLNode& state (bool);
 	int      set_state (const XMLNode&);
 
@@ -182,6 +182,8 @@ class AudioRegion : public Region
 	virtual bool verify_length (nframes_t);
 	/*virtual void recompute_at_start () = 0;
 	virtual void recompute_at_end () = 0;*/
+
+	virtual nframes_t read_raw_internal (Sample*, nframes_t, nframes_t) const;
 };
 
 } /* namespace ARDOUR */

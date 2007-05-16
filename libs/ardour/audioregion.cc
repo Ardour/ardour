@@ -981,6 +981,12 @@ AudioRegion::apply (AudioFilter& filter)
 	return filter.run (ar);
 }
 
+nframes_t
+AudioRegion::read_raw_internal (Sample* buf, nframes_t pos, nframes_t cnt) const
+{
+	return audio_source()->read  (buf, pos, cnt);
+}
+
 int
 AudioRegion::exportme (Session& session, AudioExportSpecification& spec)
 {
@@ -1006,7 +1012,7 @@ AudioRegion::exportme (Session& session, AudioExportSpecification& spec)
 		
 		if (spec.channels == 1) {
 
-			if (audio_source()->read (spec.dataF, _start + spec.pos, to_read) != to_read) {
+			if (read_raw_internal (spec.dataF, _start + spec.pos, to_read) != to_read) {
 				goto out;
 			}
 
@@ -1096,7 +1102,7 @@ AudioRegion::normalize_to (float target_dB)
 
 			/* read it in */
 
-			if (audio_source (n)->read (buf, fpos, to_read) != to_read) {
+			if (read_raw_internal (buf, fpos, to_read) != to_read) {
 				return;
 			}
 			
