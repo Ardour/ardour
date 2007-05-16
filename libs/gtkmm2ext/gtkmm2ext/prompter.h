@@ -53,10 +53,11 @@ class Prompter : public Gtk::Dialog
 	void change_labels (std::string ok, std::string cancel);
 
 	void get_result (std::string &str, bool strip=true);
-        bool maybe_allow_response (GdkEventKey* );
 
   protected:
 	Gtk::Entry& the_entry() { return entry; }
+
+	void on_entry_changed ();
 
   private:
 	Gtk::Entry entry;
