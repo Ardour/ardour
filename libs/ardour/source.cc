@@ -65,7 +65,6 @@ Source::Source (Session& s, const XMLNode& node)
 	if (set_state (node) || _type == DataType::NIL) {
 		throw failed_constructor();
 	}
-	assert(_name.find("/") == string::npos);
 }
 
 Source::~Source ()
