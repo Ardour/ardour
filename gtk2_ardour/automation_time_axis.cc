@@ -313,7 +313,7 @@ AutomationTimeAxisView::set_height (TrackHeight ht)
 	base_rect->property_y2() = h;
 
 	for (vector<AutomationLine*>::iterator i = lines.begin(); i != lines.end(); ++i) {
-		(*i)->set_height (h);
+		(*i)->set_y_position_and_height (0, h);
 	}
 
 	for (list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
@@ -771,7 +771,7 @@ AutomationTimeAxisView::add_line (AutomationLine& line)
 	}
 
 	lines.push_back (&line);
-	line.set_height (height);
+	line.set_y_position_and_height (0, height);
 
 	if (get) {
 		/* pick up the current state */

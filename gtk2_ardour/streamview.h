@@ -68,10 +68,12 @@ public:
 	void set_zoom_all();
 
 	int set_position (gdouble x, gdouble y);
-	virtual int set_height (gdouble);
+	virtual int set_height (double);
 
 	virtual int set_samples_per_unit (gdouble spp);
 	gdouble     get_samples_per_unit () { return _samples_per_unit; }
+
+	void set_layer_display (LayerDisplay);
 
 	ArdourCanvas::Item* canvas_item() { return canvas_group; }
 
@@ -117,10 +119,12 @@ protected:
 	void         diskstream_changed ();
 	
 	virtual void playlist_changed (boost::shared_ptr<ARDOUR::Diskstream>);
-	virtual void playlist_modified ();
+	virtual void playlist_modified_weak (boost::weak_ptr<ARDOUR::Diskstream>);
+	virtual void playlist_modified (boost::shared_ptr<ARDOUR::Diskstream>);
 	
 	virtual void color_handler (ColorID, uint32_t) = 0;
 
+	virtual void update_contents_y_position_and_height ();
 
 	RouteTimeAxisView&        _trackview;
 	ArdourCanvas::Group*      canvas_group;
@@ -143,6 +147,10 @@ protected:
 
 	vector<sigc::connection> playlist_connections;
 	sigc::connection         playlist_change_connection;
+
+	int layers;
+	double height;
+	LayerDisplay layer_display;
 	
 	list<sigc::connection>                       rec_data_ready_connections;
 	jack_nframes_t                               last_rec_data_frame;

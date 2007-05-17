@@ -63,7 +63,7 @@ class AudioRegionView : public RegionView
 	
 	boost::shared_ptr<ARDOUR::AudioRegion> audio_region() const;
 	
-	void set_height (double);
+	void set_y_position_and_height (double, double);
 	void set_samples_per_unit (double);
 	
 	void set_amplitude_above_axis (gdouble spp);
@@ -132,6 +132,8 @@ class AudioRegionView : public RegionView
     AudioRegionGainLine * gain_line;
 
     double _amplitude_above_axis;
+    double _y_position;
+    double _height;
 
     uint32_t _flags;
     uint32_t fade_color;
@@ -165,6 +167,10 @@ class AudioRegionView : public RegionView
     void color_handler (ColorID, uint32_t);
 
     vector<GnomeCanvasWaveViewCache*> wave_caches;
+
+  private:
+
+    void setup_fade_handle_positions ();
 };
 
 #endif /* __gtk_ardour_audio_region_view_h__ */

@@ -157,19 +157,17 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 		fade_in_handle = new ArdourCanvas::SimpleRect (*group);
 		fade_in_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,0);
 		fade_in_handle->property_outline_pixels() = 0;
-		fade_in_handle->property_y1() = 2.0;
-		fade_in_handle->property_y2() = 7.0;
 		
 		fade_in_handle->set_data ("regionview", this);
 		
 		fade_out_handle = new ArdourCanvas::SimpleRect (*group);
 		fade_out_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,0);
 		fade_out_handle->property_outline_pixels() = 0;
-		fade_out_handle->property_y1() = 2.0;
-		fade_out_handle->property_y2() = 7.0;
 		
 		fade_out_handle->set_data ("regionview", this);
 	}
+
+	setup_fade_handle_positions ();
 
 	string foo = _region->name();
 	foo += ':';
@@ -185,7 +183,7 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	gain_line->reset ();
 
-	set_height (trackview.height);
+	set_y_position_and_height (0, trackview.height);
 
 	region_muted ();
 	region_sync_changed ();
@@ -400,43 +398,65 @@ AudioRegionView::region_muted ()
 }
 
 void
-AudioRegionView::set_height (gdouble height)
+AudioRegionView::set_y_position_and_height (double y, double h)
 {
-	RegionView::set_height(height);
-	
-	uint32_t wcnt = waves.size();
+	RegionView::set_y_position_and_height(y, h - 2);
 
-	for (uint32_t n=0; n < wcnt; ++n) {
-		gdouble ht;
+	_y_position = y;
+	_height = h;
 
-		if ((height) <= NAME_HIGHLIGHT_THRESH) {
-			ht = ((height-2*wcnt) / (double) wcnt);
+	uint32_t const wcnt = waves.size();
+	for (uint32_t n = 0; n < wcnt; ++n) {
+		double ht;
+
+		if (h <= NAME_HIGHLIGHT_THRESH) {
+			ht = ((_height - 2 * wcnt) / (double) wcnt);
 		} else {
-			ht = (((height-2*wcnt) - NAME_HIGHLIGHT_SIZE) / (double) wcnt);
+			ht = (((_height - 2 * wcnt) - NAME_HIGHLIGHT_SIZE) / (double) wcnt);
 		}
 		
-		gdouble yoff = n * (ht+1);
+		double const yoff = n * (ht + 1);
 		
 		waves[n]->property_height() = ht;
-		waves[n]->property_y() = yoff + 2;
+		waves[n]->property_y() = _y_position + yoff + 2;
 	}
 
 	if (gain_line) {
-		if ((height/wcnt) < NAME_HIGHLIGHT_SIZE) {
+		if ((_height / wcnt) < NAME_HIGHLIGHT_SIZE) {
 			gain_line->hide ();
 		} else {
 			if (_flags & EnvelopeVisible) {
 				gain_line->show ();
 			}
 		}
-		gain_line->set_height ((uint32_t) rint (height - NAME_HIGHLIGHT_SIZE));
+		gain_line->set_y_position_and_height ((uint32_t) _y_position, (uint32_t) rint (_height - NAME_HIGHLIGHT_SIZE));
 	}
 
+	setup_fade_handle_positions ();
 	manage_zero_line ();
 	reset_fade_shapes ();
 	
 	if (name_text) {
 		name_text->raise_to_top();
+	}
+}
+
+void
+AudioRegionView::setup_fade_handle_positions()
+{
+	/* position of fade handle offset from the top of the region view */
+	double const handle_pos = 2;
+	/* height of fade handles */
+	double const handle_height = 5;
+
+	if (fade_in_handle) {
+		fade_in_handle->property_y1() = _y_position + handle_pos;
+		fade_in_handle->property_y2() = _y_position + handle_pos + handle_height;
+	}
+	
+	if (fade_out_handle) {
+		fade_out_handle->property_y1() = _y_position + handle_pos;
+		fade_out_handle->property_y2() = _y_position + handle_pos + handle_height;
 	}
 }
 
@@ -448,7 +468,7 @@ AudioRegionView::manage_zero_line ()
 	}
 
 	if (_height >= 100) {
-		gdouble wave_midpoint = (_height - NAME_HIGHLIGHT_SIZE) / 2.0;
+		double const wave_midpoint = _y_position + (_height - NAME_HIGHLIGHT_SIZE) / 2.0;
 		zero_line->property_y1() = wave_midpoint;
 		zero_line->property_y2() = wave_midpoint;
 		zero_line->show();
@@ -529,16 +549,16 @@ AudioRegionView::reset_fade_in_shape_width (nframes_t width)
 
 	for (pi = 0, pc = 0; pc < npoints; ++pc) {
 		(*points)[pi].set_x(1 + (pc * xdelta));
-		(*points)[pi++].set_y(2 + (h - (curve[pc] * h)));
+		(*points)[pi++].set_y(_y_position + 2 + (h - (curve[pc] * h)));
 	}
 	
 	/* fold back */
 
 	(*points)[pi].set_x(pwidth);
-	(*points)[pi++].set_y(2);
+	(*points)[pi++].set_y(_y_position + 2);
 
 	(*points)[pi].set_x(1);
-	(*points)[pi++].set_y(2);
+	(*points)[pi++].set_y(_y_position + 2);
 
 	/* connect the dots ... */
 
@@ -615,16 +635,16 @@ AudioRegionView::reset_fade_out_shape_width (nframes_t width)
 
 	for (pi = 0, pc = 0; pc < npoints; ++pc) {
 		(*points)[pi].set_x(_pixel_width - 1 - pwidth + (pc*xdelta));
-		(*points)[pi++].set_y(2 + (h - (curve[pc] * h)));
+		(*points)[pi++].set_y(_y_position + 2 + (h - (curve[pc] * h)));
 	}
 	
 	/* fold back */
 
 	(*points)[pi].set_x(_pixel_width);
-	(*points)[pi++].set_y(h);
+	(*points)[pi++].set_y(_y_position + h);
 
 	(*points)[pi].set_x(_pixel_width);
-	(*points)[pi++].set_y(2);
+	(*points)[pi++].set_y(_y_position + 2);
 
 	/* connect the dots ... */
 
@@ -912,7 +932,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 
 	/* compute vertical fractional position */
 
-	y = 1.0 - (y / (trackview.height - NAME_HIGHLIGHT_SIZE));
+	y = 1.0 - ((y - _y_position) / (_height - NAME_HIGHLIGHT_SIZE));
 	
 	/* map using gain line */
 

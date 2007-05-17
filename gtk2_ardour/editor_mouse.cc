@@ -1066,7 +1066,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			at_x += 20.0;
 			at_y += 20.0;
 
-			fraction = 1.0 - (cp->get_y() / cp->line.height());
+			fraction = 1.0 - ((cp->get_y() - cp->line.y_position()) / cp->line.height());
 
 			set_verbose_canvas_cursor (cp->line.get_verbose_cursor_string (fraction), at_x, at_y);
 			show_verbose_canvas_cursor ();
@@ -2446,7 +2446,7 @@ void
 Editor::start_control_point_grab (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	ControlPoint* control_point;
-	
+
 	if ((control_point = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"))) == 0) {
 		fatal << _("programming error: control point canvas item has no control point object pointer!") << endmsg;
 		/*NOTREACHED*/
@@ -2461,7 +2461,7 @@ Editor::start_control_point_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	control_point->line.start_drag (control_point, drag_info.grab_frame, 0);
 
-	float fraction = 1.0 - (control_point->get_y() / control_point->line.height());
+	float fraction = 1.0 - ((control_point->get_y() - control_point->line.y_position()) / control_point->line.height());
 	set_verbose_canvas_cursor (control_point->line.get_verbose_cursor_string (fraction), 
 				   drag_info.current_pointer_x + 20, drag_info.current_pointer_y + 20);
 
@@ -2490,7 +2490,7 @@ Editor::control_point_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* 
 
 	cx = max (0.0, cx);
 	cy = max (0.0, cy);
-	cy = min ((double) cp->line.height(), cy);
+	cy = min ((double) (cp->line.y_position() + cp->line.height()), cy);
 
 	//translate cx to frames
 	nframes_t cx_frames = unit_to_frame (cx);
@@ -2499,8 +2499,8 @@ Editor::control_point_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* 
 		snap_to (cx_frames);
 	}
 
-	float fraction = 1.0 - (cy / cp->line.height());
-	
+	float const fraction = 1.0 - ((cy - cp->line.y_position()) / cp->line.height());
+
 	bool push;
 
 	if (Keyboard::modifier_state_contains (event->button.state, Keyboard::Control)) {
@@ -2590,7 +2590,7 @@ Editor::start_line_grab (AutomationLine* line, GdkEvent* event)
 
 	start_grab (event, fader_cursor);
 
-	double fraction = 1.0 - (cy / line->height());
+	double const fraction = 1.0 - ((cy - line->y_position()) / line->height());
 
 	line->start_drag (0, drag_info.grab_frame, fraction);
 	
@@ -2608,8 +2608,7 @@ Editor::line_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 	line->parent_group().w2i (cx, cy);
 	
-	double fraction;
-	fraction = 1.0 - (cy / line->height());
+	double const fraction = 1.0 - ((cy - line->y_position()) / line->height());
 
 	bool push;
 
@@ -3140,7 +3139,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		  
 						tvp2 = trackview_by_y_position (iy1 + y_delta);
 						temp_rtv = dynamic_cast<RouteTimeAxisView*>(tvp2);
-						rv->set_height (temp_rtv->height);
+						rv->set_y_position_and_height (0, temp_rtv->height);
 	
 						/*   if you un-comment the following, the region colours will follow the track colours whilst dragging,
 						     personally, i think this can confuse things, but never mind.

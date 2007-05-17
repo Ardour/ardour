@@ -60,7 +60,6 @@ class RegionView : public TimeAxisViewItem
 
 	void set_valid (bool yn) { valid = yn; }
 	
-	virtual void set_height (double);
 	virtual void set_samples_per_unit (double);
 	virtual bool set_duration (nframes_t, void*);
 	
@@ -134,7 +133,6 @@ class RegionView : public TimeAxisViewItem
 
     bool     valid; ///< see StreamView::redisplay_diskstream() 
     double  _pixel_width;
-    double  _height;
     bool    in_destructor;
     
     bool             wait_for_data;

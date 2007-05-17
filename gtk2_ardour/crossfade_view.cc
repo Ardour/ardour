@@ -68,7 +68,7 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 	fade_out->property_fill_color_rgba() = color_map[cCrossfadeLine];
 	fade_out->property_width_pixels() = 1;
 	
-	set_height (get_time_axis_view().height);
+	set_y_position_and_height (0, get_time_axis_view().height);
 
 	/* no frame around the xfade or overlap rects */
 
@@ -105,13 +105,16 @@ CrossfadeView::reset_width_dependent_items (double pixel_width)
 }
 
 void
-CrossfadeView::set_height (double height)
+CrossfadeView::set_y_position_and_height (double y, double h)
 {
-	if (height == TimeAxisView::hSmaller ||
-	    height == TimeAxisView::hSmall)
-		TimeAxisViewItem::set_height (height - 3 );
-	else
-		TimeAxisViewItem::set_height (height - NAME_HIGHLIGHT_SIZE - 3 );
+	if (h == TimeAxisView::hSmaller || h == TimeAxisView::hSmall) {
+		TimeAxisViewItem::set_y_position_and_height (y, h - 3 );
+	} else {
+		TimeAxisViewItem::set_y_position_and_height (y, h - NAME_HIGHLIGHT_SIZE - 3 );
+	}
+
+	_y_position = y;
+	_height = h;
 
 	redraw_curves ();
 }
@@ -158,9 +161,8 @@ CrossfadeView::redraw_curves ()
 	 At "height - 3.0" the bottom of the crossfade touches the name highlight or the bottom of the track (if the
 	 track is either Small or Smaller.
 	 */
-	double tav_height = get_time_axis_view().height;
-	if (tav_height == TimeAxisView::hSmaller ||
-	    tav_height == TimeAxisView::hSmall) {
+	double const tav_height = get_time_axis_view().height;
+	if (tav_height == TimeAxisView::hSmaller || tav_height == TimeAxisView::hSmall) {
 		h = tav_height - 3.0;
 	} else {
 		h = tav_height - NAME_HIGHLIGHT_SIZE - 3.0;
@@ -190,7 +192,7 @@ CrossfadeView::redraw_curves ()
 	for (int i = 0, pci = 0; i < npoints; ++i) {
 		Art::Point &p = (*points)[pci++];
 		p.set_x(i);
-		p.set_y(2.0 + h - (h * vec[i]));
+		p.set_y(_y_position + 2.0 + h - (h * vec[i]));
 	}
 	fade_in->property_points() = *points;
 
@@ -198,7 +200,7 @@ CrossfadeView::redraw_curves ()
 	for (int i = 0, pci = 0; i < npoints; ++i) {
 		Art::Point &p = (*points)[pci++];
 		p.set_x(i);
-		p.set_y(2.0 + h - (h * vec[i]));
+		p.set_y(_y_position + 2.0 + h - (h * vec[i]));
 	}
 	fade_out->property_points() = *points;
 

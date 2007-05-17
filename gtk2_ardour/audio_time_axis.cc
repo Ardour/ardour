@@ -287,6 +287,18 @@ AudioTimeAxisView::append_extra_display_menu_items ()
 	}
 
 	items.push_back (MenuElem (_("Waveform"), *waveform_menu));
+
+
+	Menu *layers_menu = manage(new Menu);
+	MenuList &layers_items = layers_menu->items();
+	layers_menu->set_name("ArdourContextMenu");
+
+	RadioMenuItem::Group layers_group;
+	
+	layers_items.push_back(RadioMenuElem (layers_group, _("Overlaid"), bind (mem_fun (*this, &AudioTimeAxisView::set_layer_display), Overlaid)));
+	layers_items.push_back(RadioMenuElem (layers_group, _("Stacked"), bind (mem_fun (*this, &AudioTimeAxisView::set_layer_display), Stacked)));
+
+	items.push_back (MenuElem (_("Layers"), *layers_menu));
 }
 
 void
@@ -663,3 +675,11 @@ AudioTimeAxisView::get_child_xml_node (const string & childname)
 	return RouteUI::get_child_xml_node (childname);
 }
 
+void
+AudioTimeAxisView::set_layer_display (LayerDisplay d)
+{
+	AudioStreamView* asv = audio_view ();
+	if (asv) {
+		asv->set_layer_display (d);
+	}
+}

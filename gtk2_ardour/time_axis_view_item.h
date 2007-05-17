@@ -201,12 +201,7 @@ class TimeAxisViewItem : public Selectable
      */
     void set_name_text(const Glib::ustring& new_name) ;
     
-    /**
-     * Set the height of this item
-     *
-     * @param h the new height
-     */
-    virtual void set_height(double h) ;
+  virtual void set_y_position_and_height(double y, double h);
     
     /**
      * 

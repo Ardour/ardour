@@ -46,7 +46,7 @@ struct CrossfadeView : public TimeAxisViewItem
     AudioRegionView& left_view;    // and these too
     AudioRegionView& right_view;
 
-    void set_height (double);
+    void set_y_position_and_height (double, double);
 
     bool valid() const { return _valid; }
     bool visible() const { return _visible; }
@@ -68,6 +68,8 @@ struct CrossfadeView : public TimeAxisViewItem
     bool _visible;
 
     double spu;
+    double _y_position;
+    double _height;
 
     ArdourCanvas::Item *overlap_rect;
     ArdourCanvas::Line *fade_in;

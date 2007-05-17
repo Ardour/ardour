@@ -77,6 +77,7 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	void hide_all_xfades ();
 	void hide_dependent_views (TimeAxisViewItem&);
 	void reveal_dependent_views (TimeAxisViewItem&);
+	void set_layer_display (LayerDisplay d);
 		
 	/* Overridden from parent to store display state */
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);

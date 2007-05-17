@@ -44,6 +44,11 @@ namespace Gnome {
 	}
 }
 
+enum LayerDisplay {
+	Overlaid,
+	Stacked
+};
+
 struct SelectionRect {
     Gnome::Canvas::SimpleRect *rect;
     Gnome::Canvas::SimpleRect *end_trim;

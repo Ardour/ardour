@@ -127,13 +127,14 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	string  name() const { return _name; }
 	bool    visible() const { return _visible; }
 	guint32 height() const { return _height; }
+	guint32 y_position() const { return _y_position; }
 
 	void         set_line_color (uint32_t);
 	uint32_t get_line_color() const { return _line_color; }
 
 	void    show ();
 	void    hide ();
-	void    set_height (guint32);
+	void    set_y_position_and_height (uint32_t, uint32_t);
 	void    set_verbose_cursor_uses_gain_mapping (bool yn);
 
 	TimeAxisView& trackview;
@@ -164,6 +165,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
   protected:
 
 	string _name;
+	guint32 _y_position;
 	guint32 _height;
 	uint32_t _line_color;
 	ARDOUR::AutomationList& alist;

@@ -115,16 +115,14 @@ MarkerTimeAxisView::~MarkerTimeAxisView()
 int
 MarkerTimeAxisView::set_height(gdouble h)
 {
-	if (h < 10.0 || h > 1000.0)
-	{
-		return -1 ;
+	if (h < 10.0 || h > 1000.0) {
+		return -1;
 	}
 	
 	canvas_rect->property_y2() = h;
 
-	for (MarkerViewList::iterator i = marker_view_list.begin(); i != marker_view_list.end(); ++i)
-	{
-		(*i)->set_height(h) ;
+	for (MarkerViewList::iterator i = marker_view_list.begin(); i != marker_view_list.end(); ++i) {
+		(*i)->set_y_position_and_height(0, h);
 	}
 
 	return 0;

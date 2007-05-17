@@ -72,7 +72,6 @@ RegionView::RegionView (ArdourCanvas::Group* parent,
 	  , current_visible_sync_position(0.0)
 	  , valid(false)
 	  , _pixel_width(1.0)
-	  , _height(1.0)
 	  , in_destructor(false)
 	  , wait_for_data(false)
 {
@@ -88,7 +87,6 @@ RegionView::RegionView (const RegionView& other)
 	current_visible_sync_position = other.current_visible_sync_position;
 	valid = false;
 	_pixel_width = other._pixel_width;
-	_height = other._height;
 }
 
 RegionView::RegionView (ArdourCanvas::Group*         parent, 
@@ -104,7 +102,6 @@ RegionView::RegionView (ArdourCanvas::Group*         parent,
 	, current_visible_sync_position(0.0)
 	, valid(false)
 	, _pixel_width(1.0)
-	, _height(1.0)
 	, in_destructor(false)
 	, wait_for_data(false)
 {
@@ -115,7 +112,6 @@ RegionView::init (Gdk::Color& basic_color, bool wfd)
 {
 	valid         = true;
 	in_destructor = false;
-	_height       = 0;
 	wait_for_data = wfd;
 
 	compute_colors (basic_color);
@@ -141,7 +137,7 @@ RegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	reset_width_dependent_items ((double) _region->length() / samples_per_unit);
 
-	set_height (trackview.height);
+	set_y_position_and_height (0, trackview.height);
 
 	_region->StateChanged.connect (mem_fun(*this, &RegionView::region_changed));
 
@@ -252,14 +248,6 @@ RegionView::reset_width_dependent_items (double pixel_width)
 {
 	TimeAxisViewItem::reset_width_dependent_items (pixel_width);
 	_pixel_width = pixel_width;
-}
-
-void
-RegionView::set_height (gdouble height)
-{
-	TimeAxisViewItem::set_height (height - 2);
-	
-	_height = height;
 }
 
 void

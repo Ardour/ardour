@@ -75,7 +75,7 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	reset_width_dependent_items ((double) _region->length() / samples_per_unit);
 
-	set_height (trackview.height);
+	set_y_position_and_height (0, trackview.height);
 
 	region_muted ();
 	region_resized (BoundsChanged);

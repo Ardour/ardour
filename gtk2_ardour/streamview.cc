@@ -56,6 +56,7 @@ StreamView::StreamView (RouteTimeAxisView& tv)
 	, use_rec_regions(tv.editor.show_waveforms_recording())
 	, region_color(_trackview.color())
 	, stream_base_color(0xFFFFFFFF)
+	, layers(1)
 	, last_rec_data_frame(0)
 {
 	/* set_position() will position the group */
@@ -96,7 +97,6 @@ StreamView::attach ()
 
 int
 StreamView::set_position (gdouble x, gdouble y)
-
 {
 	canvas_group->property_x() = x;
 	canvas_group->property_y() = y;
@@ -104,10 +104,9 @@ StreamView::set_position (gdouble x, gdouble y)
 }
 
 int
-StreamView::set_height (gdouble h)
+StreamView::set_height (double h)
 {
 	/* limit the values to something sane-ish */
-
 	if (h < 10.0 || h > 1000.0) {
 		return -1;
 	}
@@ -116,17 +115,8 @@ StreamView::set_height (gdouble h)
 		return 0;
 	}
 
-	canvas_rect->property_y2() = h;
-
-	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-		(*i)->set_height (h);
-	}
-
-	for (vector<RecBoxInfo>::iterator i = rec_rects.begin(); i != rec_rects.end(); ++i) {
-		RecBoxInfo &recbox = (*i);
-		recbox.rectangle->property_y2() = h - 1.0;
-	}
-
+	height = h;
+	update_contents_y_position_and_height ();
 	return 0;
 }
 
@@ -162,6 +152,7 @@ void
 StreamView::add_region_view (boost::shared_ptr<Region> r)
 {
 	add_region_view_internal (r, true);
+	update_contents_y_position_and_height ();
 }
 
 void
@@ -203,9 +194,25 @@ StreamView::display_diskstream (boost::shared_ptr<Diskstream> ds)
 }
 
 void
-StreamView::playlist_modified ()
+StreamView::playlist_modified_weak (boost::weak_ptr<Diskstream> ds)
 {
-	ENSURE_GUI_THREAD (mem_fun (*this, &StreamView::playlist_modified));
+	boost::shared_ptr<Diskstream> sp (ds.lock());
+	if (!sp) {
+		return;
+	}
+
+	playlist_modified (sp);
+}
+
+void
+StreamView::playlist_modified (boost::shared_ptr<Diskstream> ds)
+{
+	/* we do not allow shared_ptr<T> to be bound to slots */
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::playlist_modified_weak), ds));
+
+	/* update layers count and the y positions and heights of our regions */
+	layers = ds->playlist()->top_layer() + 1;
+	update_contents_y_position_and_height ();
 
 	redisplay_diskstream ();
 }
@@ -213,6 +220,7 @@ StreamView::playlist_modified ()
 void
 StreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 {
+	/* XXX: binding to a shared_ptr, is this ok? */
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::playlist_changed), ds));
 
 	/* disconnect from old playlist */
@@ -230,7 +238,11 @@ StreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 
 	/* catch changes */
 
-	playlist_connections.push_back (ds->playlist()->Modified.connect (mem_fun (*this, &StreamView::playlist_modified)));
+	playlist_connections.push_back (ds->playlist()->Modified.connect (bind (mem_fun (*this, &StreamView::playlist_modified_weak), ds)));
+
+	/* update layers count and the y positions and heights of our regions */
+	layers = ds->playlist()->top_layer() + 1;
+	update_contents_y_position_and_height ();
 }
 
 void
@@ -390,3 +402,33 @@ StreamView::get_inverted_selectables (Selection& sel, list<Selectable*>& results
 	}
 }
 
+void
+StreamView::update_contents_y_position_and_height ()
+{
+	canvas_rect->property_y2() = height;
+
+	const double lh = height / layers;
+
+	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+		switch (layer_display) {
+		case Overlaid:
+			(*i)->set_y_position_and_height (0, height);
+			break;
+		case Stacked:
+			double const y = (*i)->region()->layer() * lh;
+			(*i)->set_y_position_and_height (y, lh);
+			break;
+		}
+	}
+
+	for (vector<RecBoxInfo>::iterator i = rec_rects.begin(); i != rec_rects.end(); ++i) {
+		i->rectangle->property_y2() = height - 1.0;
+	}
+}
+
+void
+StreamView::set_layer_display (LayerDisplay d)
+{
+	layer_display = d;
+	update_contents_y_position_and_height ();
+}

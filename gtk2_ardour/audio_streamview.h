@@ -63,7 +63,6 @@ class AudioStreamView : public StreamView
 	void set_waveform_scale (WaveformScale);
 	WaveformScale get_waveform_scale () const { return _waveform_scale; }
 
-	int set_height (gdouble h);
 	int set_samples_per_unit (gdouble spp);
 
 	int     set_amplitude_above_axis (gdouble app);
@@ -90,7 +89,8 @@ class AudioStreamView : public StreamView
 
 	void undisplay_diskstream ();
 	void redisplay_diskstream ();
-	void playlist_modified ();
+	void playlist_modified_weak (boost::weak_ptr<ARDOUR::Diskstream>);
+	void playlist_modified (boost::shared_ptr<ARDOUR::Diskstream>);
 	void playlist_changed (boost::shared_ptr<ARDOUR::Diskstream>);
 
 	void add_crossfade (boost::shared_ptr<ARDOUR::Crossfade>);
@@ -98,6 +98,8 @@ class AudioStreamView : public StreamView
 	void remove_crossfade (boost::shared_ptr<ARDOUR::Crossfade>);
 
 	void color_handler (ColorID id, uint32_t val);
+
+	void update_contents_y_position_and_height ();
 	
 	double _amplitude_above_axis;
 	
