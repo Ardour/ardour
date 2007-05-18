@@ -127,7 +127,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 		_will_create_new_session_automatically = yn;
 	}
 
-        bool new_session(std::string path = string());
+	bool new_session(std::string path = string());
 	gint cmdline_new_session (string path);
 	int  unload_session ();
 	void close_session(); 
@@ -137,7 +137,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void restore_state (string state_name = "");
 
 	static double gain_to_slider_position (ARDOUR::gain_t g);
-        static ARDOUR::gain_t slider_position_to_gain (double pos);
+	static ARDOUR::gain_t slider_position_to_gain (double pos);
 
 	static ARDOUR_UI *instance () { return theArdourUI; }
 
