@@ -126,8 +126,6 @@ Session::Session (AudioEngine &eng,
 	  _click_io ((IO*) 0),
 	  main_outs (0)
 {
-	bool new_session;
-
 	if (!eng.connected()) {
 		throw failed_constructor();
 	}
@@ -138,16 +136,25 @@ Session::Session (AudioEngine &eng,
 	n_physical_inputs =  _engine.n_physical_inputs();
 
 	first_stage_init (fullpath, snapshot_name);
+
+	initialize_start_and_end_locations(0, compute_initial_length ());
 	
-	new_session = !g_file_test (_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
+	bool new_session = !g_file_test (_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
+
 	if (new_session) {
-		if (create (new_session, mix_template, compute_initial_length())) {
-			cerr << "create failed\n";
+		// A mix_template must be specified if using this constructor
+		// to create a new session.
+		assert(mix_template);
+
+		if (create () ||
+				!create_session_file_from_template (*mix_template)) {
 			destroy ();
 			throw failed_constructor ();
 		}
+		// Continue construction like a normal saved session from now on.
+		new_session = false;
 	}
-	
+
 	if (second_stage_init (new_session)) {
 		destroy ();
 		throw failed_constructor ();
@@ -192,8 +199,6 @@ Session::Session (AudioEngine &eng,
 	  main_outs (0)
 
 {
-	bool new_session;
-
 	if (!eng.connected()) {
 		throw failed_constructor();
 	}
@@ -213,13 +218,13 @@ Session::Session (AudioEngine &eng,
 
 	first_stage_init (fullpath, snapshot_name);
 
-	new_session = !g_file_test (_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
+	initialize_start_and_end_locations(0, initial_length);
 
-	if (new_session) {
-		if (create (new_session, 0, initial_length)) {
+	if (g_file_test (_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) ||
+			create () ||
+			!create_session_file ()) {
 			destroy ();
 			throw failed_constructor ();
-		}
 	}
 
 	{
@@ -254,7 +259,7 @@ Session::Session (AudioEngine &eng,
 	Config->set_input_auto_connect (input_ac);
 	Config->set_output_auto_connect (output_ac);
 
-	if (second_stage_init (new_session)) {
+	if (second_stage_init (true)) {
 		destroy ();
 		throw failed_constructor ();
 	}

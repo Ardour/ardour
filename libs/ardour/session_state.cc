@@ -499,7 +499,7 @@ Session::create_session_file_from_template (const string& template_path)
 }
 
 int
-Session::create (bool& new_session, string* mix_template, nframes_t initial_length)
+Session::create ()
 {
 	string dir;
 
@@ -540,19 +540,6 @@ Session::create (bool& new_session, string* mix_template, nframes_t initial_leng
 		error << string_compose(_("Session: cannot create session export dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
 		return -1;
 	}
-
-
-	/* check new_session so we don't overwrite an existing one */
-
-	if (mix_template) {
-		if(!create_session_file_from_template(*mix_template)) return -1;
-		new_session = false;
-		return 0;
-	}
-
-	initialize_start_and_end_locations(0, initial_length);
-
-	if (!create_session_file()) return -1;
 
 	return 0;
 }

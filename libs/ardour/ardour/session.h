@@ -951,7 +951,7 @@ class Session : public PBD::StatefulDestructible
 	void update_latency_compensation (bool, bool);
 	
   private:
-	int  create (bool& new_session, string* mix_template, nframes_t initial_length);
+	int  create ();
 	void destroy ();
 
 	void initialize_start_and_end_locations(nframes_t start, nframes_t end);
