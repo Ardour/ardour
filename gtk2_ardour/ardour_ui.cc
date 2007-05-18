@@ -1991,7 +1991,7 @@ ARDOUR_UI::new_session (std::string predetermined_path)
 					uint32_t nphysin = (uint32_t) new_session_dialog->input_limit_count();
 					uint32_t nphysout = (uint32_t) new_session_dialog->output_limit_count();
 
-					if (build_session (session_path,
+					if (!build_session (session_path,
 								session_name,
 								cchns,
 								mchns,
@@ -2076,7 +2076,7 @@ ARDOUR_UI::load_session (const string & path, const string & snap_name, string* 
 	return 0;
 }
 
-int
+bool
 ARDOUR_UI::build_session (const string & path, const string & snap_name, 
 			  uint32_t control_channels,
 			  uint32_t master_channels, 
@@ -2089,12 +2089,12 @@ ARDOUR_UI::build_session (const string & path, const string & snap_name,
 	Session *new_session;
 
 	if (!check_audioengine()) {
-		return -1;
+		return false;
 	}
 
 	session_loaded = false;
 
-	if (!unload_session ()) return -1;
+	if (!unload_session ()) return false;
 	
 	_session_is_new = true;
 
@@ -2107,13 +2107,13 @@ ARDOUR_UI::build_session (const string & path, const string & snap_name,
 
 		MessageDialog msg (string_compose(_("Could not create session in \"%1\""), path));
 		msg.run ();
-		return -1;
+		return false;
 	}
 
 	connect_to_session (new_session);
 
 	session_loaded = true;
-	return 0;
+	return true;
 }
 
 void

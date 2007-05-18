@@ -107,7 +107,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	
 	int load_session (const string & path, const string & snapshot, string* mix_template = 0);
 	bool session_loaded;
-	int build_session (const string & path, const string & snapshot, 
+	/// @return true if building the session was successful
+	bool build_session (const string & path, const string & snapshot, 
 			   uint32_t ctl_chns, 
 			   uint32_t master_chns,
 			   ARDOUR::AutoConnectOption input_connect,
