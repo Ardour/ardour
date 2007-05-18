@@ -954,6 +954,8 @@ class Session : public PBD::StatefulDestructible
 	int  create (bool& new_session, string* mix_template, nframes_t initial_length);
 	void destroy ();
 
+	void initialize_start_and_end_locations(nframes_t start, nframes_t end);
+
 	nframes_t compute_initial_length ();
 
 	enum SubState {

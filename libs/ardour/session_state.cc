@@ -463,6 +463,16 @@ Session::setup_raid_path (string path)
 	last_rr_session_dir = session_dirs.begin();
 }
 
+void
+Session::initialize_start_and_end_locations(nframes_t start, nframes_t end)
+{
+	start_location->set_end (start);
+	_locations.add (start_location);
+
+	end_location->set_end (end);
+	_locations.add (end_location);
+}
+
 int
 Session::create (bool& new_session, string* mix_template, nframes_t initial_length)
 {
@@ -523,13 +533,7 @@ Session::create (bool& new_session, string* mix_template, nframes_t initial_leng
 		return 0;
 	}
 
-	/* set initial start + end point */
-
-	start_location->set_end (0);
-	_locations.add (start_location);
-
-	end_location->set_end (initial_length);
-	_locations.add (end_location);
+	initialize_start_and_end_locations(0, initial_length);
 
 	_state_of_the_state = Clean;
 
