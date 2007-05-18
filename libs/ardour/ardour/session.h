@@ -955,6 +955,7 @@ class Session : public PBD::StatefulDestructible
 	void destroy ();
 
 	void initialize_start_and_end_locations(nframes_t start, nframes_t end);
+	bool create_session_file();
 
 	nframes_t compute_initial_length ();
 

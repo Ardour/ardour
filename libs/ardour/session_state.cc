@@ -464,13 +464,25 @@ Session::setup_raid_path (string path)
 }
 
 void
-Session::initialize_start_and_end_locations(nframes_t start, nframes_t end)
+Session::initialize_start_and_end_locations (nframes_t start, nframes_t end)
 {
 	start_location->set_end (start);
 	_locations.add (start_location);
 
 	end_location->set_end (end);
 	_locations.add (end_location);
+}
+
+bool
+Session::create_session_file ()
+{
+	_state_of_the_state = Clean;
+
+	if (save_state (_current_snapshot_name)) {
+		error << "Could not create new session file" << endmsg;
+		return false;
+	}
+	return true;
 }
 
 int
@@ -535,11 +547,7 @@ Session::create (bool& new_session, string* mix_template, nframes_t initial_leng
 
 	initialize_start_and_end_locations(0, initial_length);
 
-	_state_of_the_state = Clean;
-
-	if (save_state (_current_snapshot_name)) {
-		return -1;
-	}
+	if (!create_session_file()) return -1;
 
 	return 0;
 }
