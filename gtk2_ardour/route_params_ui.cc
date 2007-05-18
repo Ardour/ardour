@@ -35,8 +35,6 @@
 #include <ardour/audio_track.h>
 #include <ardour/send.h>
 #include <ardour/insert.h>
-#include <ardour/connection.h>
-#include <ardour/session_connection.h>
 
 #include "route_params_ui.h"
 #include "keyboard.h"

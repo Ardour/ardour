@@ -45,8 +45,6 @@
 #include <ardour/send.h>
 #include <ardour/insert.h>
 #include <ardour/ladspa_plugin.h>
-#include <ardour/connection.h>
-#include <ardour/session_connection.h>
 
 #include "ardour_ui.h"
 #include "ardour_dialog.h"

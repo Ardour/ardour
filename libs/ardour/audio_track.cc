@@ -134,22 +134,22 @@ AudioTrack::deprecated_use_diskstream_connections ()
 	}
 
 	if ((prop = node.property ("input-connection")) != 0) {
-		Connection* c = _session.connection_by_name (prop->value());
+		Bundle* c = _session.bundle_by_name (prop->value());
 		
 		if (c == 0) {
-		  	error << string_compose(_("Unknown connection \"%1\" listed for input of %2"), prop->value(), _name) << endmsg;
+		  	error << string_compose(_("Unknown bundle \"%1\" listed for input of %2"), prop->value(), _name) << endmsg;
 			
-			if ((c = _session.connection_by_name (_("in 1"))) == 0) {
-			  	error << _("No input connections available as a replacement")
+			if ((c = _session.bundle_by_name (_("in 1"))) == 0) {
+			  	error << _("No input bundles available as a replacement")
 			        << endmsg;
 				return -1;
 			} else {
-			  	info << string_compose (_("Connection %1 was not available - \"in 1\" used instead"), prop->value())
+			  	info << string_compose (_("Bundle %1 was not available - \"in 1\" used instead"), prop->value())
 			       << endmsg;
 			}
 		}
 
-		use_input_connection (*c, this);
+		use_input_bundle(*c, this);
 
 	} else if ((prop = node.property ("inputs")) != 0) {
 		if (set_inputs (prop->value())) {

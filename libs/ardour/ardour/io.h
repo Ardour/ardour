@@ -50,7 +50,7 @@ namespace ARDOUR {
 
 class Session;
 class AudioEngine;
-class Connection;
+class Bundle;
 class Panner;
 class PeakMeter;
 class Port;
@@ -116,11 +116,11 @@ class IO : public PBD::StatefulDestructible
 	
 	int ensure_io (ChanCount in, ChanCount out, bool clear, void *src);
 
-	int use_input_connection (Connection&, void *src);
-	int use_output_connection (Connection&, void *src);
+	int use_input_bundle (Bundle&, void *src);
+	int use_output_bundle (Bundle&, void *src);
 
-	Connection *input_connection() const { return _input_connection; }
-	Connection *output_connection() const { return _output_connection; }
+	Bundle *input_bundle() const { return _input_bundle; }
+	Bundle *output_bundle() const { return _output_bundle; }
 
 	int add_input_port (string source, void *src, DataType type = DataType::NIL);
 	int add_output_port (string destination, void *src, DataType type = DataType::NIL);
@@ -280,8 +280,8 @@ class IO : public PBD::StatefulDestructible
 	PortSet             _inputs;
 	PeakMeter*          _meter;
 	string              _name;
-	Connection*         _input_connection;
-	Connection*         _output_connection;
+	Bundle*             _input_bundle;
+	Bundle*             _output_bundle;
 	bool                 no_panner_reset;
 	bool                _phase_invert;
 	XMLNode*             deferred_state;
@@ -334,10 +334,10 @@ class IO : public PBD::StatefulDestructible
 
 	/* are these the best variable names ever, or what? */
 
-	sigc::connection input_connection_configuration_connection;
-	sigc::connection output_connection_configuration_connection;
-	sigc::connection input_connection_connection_connection;
-	sigc::connection output_connection_connection_connection;
+	sigc::connection input_bundle_configuration_connection;
+	sigc::connection output_bundle_configuration_connection;
+	sigc::connection input_bundle_connection_connection;
+	sigc::connection output_bundle_connection_connection;
 
 	static bool panners_legal;
 	
@@ -363,13 +363,13 @@ class IO : public PBD::StatefulDestructible
 	int ensure_inputs (ChanCount, bool clear, bool lockit, void *src);
 	int ensure_outputs (ChanCount, bool clear, bool lockit, void *src);
 
-	void drop_input_connection ();
-	void drop_output_connection ();
+	void drop_input_bundle ();
+	void drop_output_bundle ();
 
-	void input_connection_configuration_changed ();
-	void input_connection_connection_changed (int);
-	void output_connection_configuration_changed ();
-	void output_connection_connection_changed (int);
+	void input_bundle_configuration_changed ();
+	void input_bundle_connection_changed (int);
+	void output_bundle_configuration_changed ();
+	void output_bundle_connection_changed (int);
 
 	int create_ports (const XMLNode&);
 	int make_connections (const XMLNode&);

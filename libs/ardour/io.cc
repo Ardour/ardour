@@ -34,7 +34,7 @@
 #include <ardour/port.h>
 #include <ardour/audio_port.h>
 #include <ardour/midi_port.h>
-#include <ardour/connection.h>
+#include <ardour/bundle.h>
 #include <ardour/session.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/panner.h>
@@ -130,8 +130,8 @@ IO::IO (Session& s, string name,
 
 	_gain = 1.0;
 	_desired_gain = 1.0;
-	_input_connection = 0;
-	_output_connection = 0;
+	_input_bundle = 0;
+	_output_bundle = 0;
 	pending_state_node = 0;
 	no_panner_reset = false;
 	_phase_invert = false;
@@ -172,8 +172,8 @@ IO::IO (Session& s, const XMLNode& node, DataType dt)
 	no_panner_reset = false;
 	_desired_gain = 1.0;
 	_gain = 1.0;
-	_input_connection = 0;
-	_output_connection = 0;
+	_input_bundle = 0;
+	_output_bundle = 0;
 
 	apply_gain_automation = false;
 
@@ -329,20 +329,20 @@ IO::just_meter_input (nframes_t start_frame, nframes_t end_frame,
 }
 
 void
-IO::drop_input_connection ()
+IO::drop_input_bundle ()
 {
-	_input_connection = 0;
-	input_connection_configuration_connection.disconnect();
-	input_connection_connection_connection.disconnect();
+	_input_bundle = 0;
+	input_bundle_configuration_connection.disconnect();
+	input_bundle_connection_connection.disconnect();
 	_session.set_dirty ();
 }
 
 void
-IO::drop_output_connection ()
+IO::drop_output_bundle ()
 {
-	_output_connection = 0;
-	output_connection_configuration_connection.disconnect();
-	output_connection_connection_connection.disconnect();
+	_output_bundle = 0;
+	output_bundle_configuration_connection.disconnect();
+	output_bundle_connection_connection.disconnect();
 	_session.set_dirty ();
 }
 
@@ -372,7 +372,7 @@ IO::disconnect_input (Port* our_port, string other_port, void* src)
 				return -1;
 			}
 
-			drop_input_connection();
+			drop_input_bundle ();
 		}
 	}
 
@@ -407,7 +407,7 @@ IO::connect_input (Port* our_port, string other_port, void* src)
 				return -1;
 			}
 			
-			drop_input_connection ();
+			drop_input_bundle ();
 		}
 	}
 
@@ -442,7 +442,7 @@ IO::disconnect_output (Port* our_port, string other_port, void* src)
 				return -1;
 			}
 
-			drop_output_connection ();
+			drop_output_bundle ();
 		}
 	}
 
@@ -477,7 +477,7 @@ IO::connect_output (Port* our_port, string other_port, void* src)
 				return -1;
 			}
 
-			drop_output_connection ();
+			drop_output_bundle ();
 		}
 	}
 
@@ -538,7 +538,7 @@ IO::remove_output_port (Port* port, void* src)
 				} 
 
 				_session.engine().unregister_port (*port);
-				drop_output_connection ();
+				drop_output_bundle ();
 				
 				setup_peak_meters ();
 				reset_panner ();
@@ -596,7 +596,7 @@ IO::add_output_port (string destination, void* src, DataType type)
 			}
 			
 			_outputs.add (our_port);
-			drop_output_connection ();
+			drop_output_bundle ();
 			setup_peak_meters ();
 			reset_panner ();
 		}
@@ -642,7 +642,7 @@ IO::remove_input_port (Port* port, void* src)
 				} 
 
 				_session.engine().unregister_port (*port);
-				drop_input_connection ();
+				drop_input_bundle ();
 				
 				setup_peak_meters ();
 				reset_panner ();
@@ -700,7 +700,7 @@ IO::add_input_port (string source, void* src, DataType type)
 			}
 
 			_inputs.add (our_port);
-			drop_input_connection ();
+			drop_input_bundle ();
 			setup_peak_meters ();
 			reset_panner ();
 		}
@@ -735,7 +735,7 @@ IO::disconnect_inputs (void* src)
 				_session.engine().disconnect (*i);
 			}
 
-			drop_input_connection ();
+			drop_input_bundle ();
 		}
 	}
 	
@@ -757,7 +757,7 @@ IO::disconnect_outputs (void* src)
 				_session.engine().disconnect (*i);
 			}
 
-			drop_output_connection ();
+			drop_output_bundle ();
 		}
 	}
 
@@ -821,7 +821,7 @@ IO::ensure_inputs_locked (ChanCount count, bool clear, void* src)
 	}
 	
 	if (changed) {
-		drop_input_connection ();
+		drop_input_bundle ();
 		setup_peak_meters ();
 		reset_panner ();
 		MoreChannels (n_inputs()); /* EMIT SIGNAL */
@@ -988,12 +988,12 @@ IO::ensure_io (ChanCount in, ChanCount out, bool clear, void* src)
 	}
 
 	if (out_changed) {
-		drop_output_connection ();
+		drop_output_bundle ();
 		output_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
 	}
 	
 	if (in_changed) {
-		drop_input_connection ();
+		drop_input_bundle ();
 		input_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
 	}
 
@@ -1084,7 +1084,7 @@ IO::ensure_outputs_locked (ChanCount count, bool clear, void* src)
 	}
 	
 	if (changed) {
-		drop_output_connection ();
+		drop_output_bundle ();
 		MoreChannels (n_outputs()); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}
@@ -1197,13 +1197,13 @@ IO::state (bool full_state)
 
 	str = "";
 
-	if (_input_connection) {
-		node->add_property ("input-connection", _input_connection->name());
+	if (_input_bundle) {
+		node->add_property ("input-connection", _input_bundle->name());
 		need_ins = false;
 	}
 
-	if (_output_connection) {
-		node->add_property ("output-connection", _output_connection->name());
+	if (_output_bundle) {
+		node->add_property ("output-connection", _output_bundle->name());
 		need_outs = false;
 	}
 
@@ -1554,24 +1554,27 @@ IO::create_ports (const XMLNode& node)
 	int num_inputs = 0;
 	int num_outputs = 0;
 
+	/* XXX: we could change *-connection to *-bundle, but it seems a bit silly to
+	 * break the session file format.
+	 */
 	if ((prop = node.property ("input-connection")) != 0) {
 
-		Connection* c = _session.connection_by_name (prop->value());
+		Bundle* c = _session.bundle_by_name (prop->value());
 		
 		if (c == 0) {
-			error << string_compose(_("Unknown connection \"%1\" listed for input of %2"), prop->value(), _name) << endmsg;
+			error << string_compose(_("Unknown bundle \"%1\" listed for input of %2"), prop->value(), _name) << endmsg;
 
-			if ((c = _session.connection_by_name (_("in 1"))) == 0) {
-				error << _("No input connections available as a replacement")
+			if ((c = _session.bundle_by_name (_("in 1"))) == 0) {
+				error << _("No input bundles available as a replacement")
 				      << endmsg;
 				return -1;
 			}  else {
-				info << string_compose (_("Connection %1 was not available - \"in 1\" used instead"), prop->value())
+				info << string_compose (_("Bundle %1 was not available - \"in 1\" used instead"), prop->value())
 				     << endmsg;
 			}
 		} 
 
-		num_inputs = c->nports();
+		num_inputs = c->nchannels();
 
 	} else if ((prop = node.property ("inputs")) != 0) {
 
@@ -1579,22 +1582,22 @@ IO::create_ports (const XMLNode& node)
 	}
 	
 	if ((prop = node.property ("output-connection")) != 0) {
-		Connection* c = _session.connection_by_name (prop->value());
+		Bundle* c = _session.bundle_by_name (prop->value());
 
 		if (c == 0) {
-			error << string_compose(_("Unknown connection \"%1\" listed for output of %2"), prop->value(), _name) << endmsg;
+			error << string_compose(_("Unknown bundle \"%1\" listed for output of %2"), prop->value(), _name) << endmsg;
 
-			if ((c = _session.connection_by_name (_("out 1"))) == 0) {
-				error << _("No output connections available as a replacement")
+			if ((c = _session.bundle_by_name (_("out 1"))) == 0) {
+				error << _("No output bundles available as a replacement")
 				      << endmsg;
 				return -1;
 			}  else {
-				info << string_compose (_("Connection %1 was not available - \"out 1\" used instead"), prop->value())
+				info << string_compose (_("Bundle %1 was not available - \"out 1\" used instead"), prop->value())
 				     << endmsg;
 			}
 		} 
 
-		num_outputs = c->nports ();
+		num_outputs = c->nchannels ();
 		
 	} else if ((prop = node.property ("outputs")) != 0) {
 		num_outputs = count (prop->value().begin(), prop->value().end(), '{');
@@ -1623,22 +1626,22 @@ IO::make_connections (const XMLNode& node)
 	const XMLProperty* prop;
 
 	if ((prop = node.property ("input-connection")) != 0) {
-		Connection* c = _session.connection_by_name (prop->value());
+		Bundle* c = _session.bundle_by_name (prop->value());
 		
 		if (c == 0) {
 			error << string_compose(_("Unknown connection \"%1\" listed for input of %2"), prop->value(), _name) << endmsg;
 
-			if ((c = _session.connection_by_name (_("in 1"))) == 0) {
+			if ((c = _session.bundle_by_name (_("in 1"))) == 0) {
 				error << _("No input connections available as a replacement")
 				      << endmsg;
 				return -1;
 			} else {
-				info << string_compose (_("Connection %1 was not available - \"in 1\" used instead"), prop->value())
+				info << string_compose (_("Bundle %1 was not available - \"in 1\" used instead"), prop->value())
 				     << endmsg;
 			}
 		} 
 
-		use_input_connection (*c, this);
+		use_input_bundle (*c, this);
 
 	} else if ((prop = node.property ("inputs")) != 0) {
 		if (set_inputs (prop->value())) {
@@ -1647,23 +1650,23 @@ IO::make_connections (const XMLNode& node)
 		}
 	}
 	
-	if ((prop = node.property ("output-connection")) != 0) {
-		Connection* c = _session.connection_by_name (prop->value());
+	if ((prop = node.property ("output-bundle")) != 0) {
+		Bundle* c = _session.bundle_by_name (prop->value());
 		
 		if (c == 0) {
-			error << string_compose(_("Unknown connection \"%1\" listed for output of %2"), prop->value(), _name) << endmsg;
+			error << string_compose(_("Unknown bundle \"%1\" listed for output of %2"), prop->value(), _name) << endmsg;
 
-			if ((c = _session.connection_by_name (_("out 1"))) == 0) {
-				error << _("No output connections available as a replacement")
+			if ((c = _session.bundle_by_name (_("out 1"))) == 0) {
+				error << _("No output bundles available as a replacement")
 				      << endmsg;
 				return -1;
 			}  else {
-				info << string_compose (_("Connection %1 was not available - \"out 1\" used instead"), prop->value())
+				info << string_compose (_("Bundle %1 was not available - \"out 1\" used instead"), prop->value())
 				     << endmsg;
 			}
 		} 
 
-		use_output_connection (*c, this);
+		use_output_bundle (*c, this);
 		
 	} else if ((prop = node.property ("outputs")) != 0) {
 		if (set_outputs (prop->value())) {
@@ -1928,7 +1931,7 @@ IO::input_latency () const
 }
 
 int
-IO::use_input_connection (Connection& c, void* src)
+IO::use_input_bundle (Bundle& c, void* src)
 {
 	uint32_t limit;
 
@@ -1936,11 +1939,11 @@ IO::use_input_connection (Connection& c, void* src)
 		BLOCK_PROCESS_CALLBACK ();
 		Glib::Mutex::Lock lm2 (io_lock);
 		
-		limit = c.nports();
+		limit = c.nchannels();
 		
-		drop_input_connection ();
+		drop_input_bundle ();
 		
-		// FIXME connections only work for audio-only
+		// FIXME bundles only work for audio-only
 		if (ensure_inputs (ChanCount(DataType::AUDIO, limit), false, false, src)) {
 			return -1;
 		}
@@ -1950,9 +1953,9 @@ IO::use_input_connection (Connection& c, void* src)
 		*/
 		
 		for (uint32_t n = 0; n < limit; ++n) {
-			const Connection::PortList& pl = c.port_connections (n);
+			const Bundle::PortList& pl = c.channel_ports (n);
 			
-			for (Connection::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
+			for (Bundle::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
 				
 				if (!_inputs.port(n)->connected_to ((*i))) {
 					
@@ -1980,9 +1983,9 @@ IO::use_input_connection (Connection& c, void* src)
 		/* second pass: connect all requested ports where necessary */
 		
 		for (uint32_t n = 0; n < limit; ++n) {
-			const Connection::PortList& pl = c.port_connections (n);
+			const Bundle::PortList& pl = c.channel_ports (n);
 			
-			for (Connection::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
+			for (Bundle::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
 				
 				if (!_inputs.port(n)->connected_to ((*i))) {
 					
@@ -1994,12 +1997,12 @@ IO::use_input_connection (Connection& c, void* src)
 			}
 		}
 		
-		_input_connection = &c;
+		_input_bundle = &c;
 		
-		input_connection_configuration_connection = c.ConfigurationChanged.connect
-			(mem_fun (*this, &IO::input_connection_configuration_changed));
-		input_connection_connection_connection = c.ConnectionsChanged.connect
-			(mem_fun (*this, &IO::input_connection_connection_changed));
+		input_bundle_configuration_connection = c.ConfigurationChanged.connect
+			(mem_fun (*this, &IO::input_bundle_configuration_changed));
+		input_bundle_connection_connection = c.PortsChanged.connect
+			(mem_fun (*this, &IO::input_bundle_connection_changed));
 	}
 
 	input_changed (IOChange (ConfigurationChanged|ConnectionsChanged), src); /* EMIT SIGNAL */
@@ -2007,7 +2010,7 @@ IO::use_input_connection (Connection& c, void* src)
 }
 
 int
-IO::use_output_connection (Connection& c, void* src)
+IO::use_output_bundle (Bundle& c, void* src)
 {
 	uint32_t limit;	
 
@@ -2015,9 +2018,9 @@ IO::use_output_connection (Connection& c, void* src)
 		BLOCK_PROCESS_CALLBACK ();
 		Glib::Mutex::Lock lm2 (io_lock);
 
-		limit = c.nports();
+		limit = c.nchannels();
 			
-		drop_output_connection ();
+		drop_output_bundle ();
 
 		// FIXME: audio-only
 		if (ensure_outputs (ChanCount(DataType::AUDIO, limit), false, false, src)) {
@@ -2030,9 +2033,9 @@ IO::use_output_connection (Connection& c, void* src)
 			
 		for (uint32_t n = 0; n < limit; ++n) {
 
-			const Connection::PortList& pl = c.port_connections (n);
+			const Bundle::PortList& pl = c.channel_ports (n);
 				
-			for (Connection::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
+			for (Bundle::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
 					
 				if (!_outputs.port(n)->connected_to ((*i))) {
 
@@ -2060,9 +2063,9 @@ IO::use_output_connection (Connection& c, void* src)
 
 		for (uint32_t n = 0; n < limit; ++n) {
 
-			const Connection::PortList& pl = c.port_connections (n);
+			const Bundle::PortList& pl = c.channel_ports (n);
 				
-			for (Connection::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
+			for (Bundle::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
 					
 				if (!_outputs.port(n)->connected_to ((*i))) {
 						
@@ -2073,12 +2076,12 @@ IO::use_output_connection (Connection& c, void* src)
 			}
 		}
 
-		_output_connection = &c;
+		_output_bundle = &c;
 
-		output_connection_configuration_connection = c.ConfigurationChanged.connect
-			(mem_fun (*this, &IO::output_connection_configuration_changed));
-		output_connection_connection_connection = c.ConnectionsChanged.connect
-			(mem_fun (*this, &IO::output_connection_connection_changed));
+		output_bundle_configuration_connection = c.ConfigurationChanged.connect
+			(mem_fun (*this, &IO::output_bundle_configuration_changed));
+		output_bundle_connection_connection = c.PortsChanged.connect
+			(mem_fun (*this, &IO::output_bundle_connection_changed));
 	}
 
 	output_changed (IOChange (ConnectionsChanged|ConfigurationChanged), src); /* EMIT SIGNAL */
@@ -2129,27 +2132,27 @@ IO::reset_panners ()
 }
 
 void
-IO::input_connection_connection_changed (int ignored)
+IO::input_bundle_connection_changed (int ignored)
 {
-	use_input_connection (*_input_connection, this);
+	use_input_bundle (*_input_bundle, this);
 }
 
 void
-IO::input_connection_configuration_changed ()
+IO::input_bundle_configuration_changed ()
 {
-	use_input_connection (*_input_connection, this);
+	use_input_bundle (*_input_bundle, this);
 }
 
 void
-IO::output_connection_connection_changed (int ignored)
+IO::output_bundle_connection_changed (int ignored)
 {
-	use_output_connection (*_output_connection, this);
+	use_output_bundle (*_output_bundle, this);
 }
 
 void
-IO::output_connection_configuration_changed ()
+IO::output_bundle_configuration_changed ()
 {
-	use_output_connection (*_output_connection, this);
+	use_output_bundle (*_output_bundle, this);
 }
 
 void

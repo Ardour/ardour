@@ -69,7 +69,7 @@ namespace ARDOUR {
 	class Insert;
 	class Session;
 	class PortInsert;
-	class Connection;
+	class Bundle;
 	class Plugin;
 }
 namespace Gtk {
@@ -168,13 +168,13 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	gint output_press (GdkEventButton *);
 
 	Gtk::Menu  input_menu;
-	void add_connection_to_input_menu (ARDOUR::Connection *);
+	void add_bundle_to_input_menu (ARDOUR::Bundle *);
 
 	Gtk::Menu output_menu;
-	void add_connection_to_output_menu (ARDOUR::Connection *);
+	void add_bundle_to_output_menu (ARDOUR::Bundle *);
 	
-	void connection_input_chosen (ARDOUR::Connection *);
-	void connection_output_chosen (ARDOUR::Connection *);
+	void bundle_input_chosen (ARDOUR::Bundle *);
+	void bundle_output_chosen (ARDOUR::Bundle *);
 
 	void edit_input_configuration ();
 	void edit_output_configuration ();

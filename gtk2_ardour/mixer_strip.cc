@@ -42,8 +42,8 @@
 #include <ardour/send.h>
 #include <ardour/insert.h>
 #include <ardour/ladspa_plugin.h>
-#include <ardour/connection.h>
-#include <ardour/session_connection.h>
+#include <ardour/bundle.h>
+#include <ardour/session_bundle.h>
 
 #include "ardour_ui.h"
 #include "ardour_dialog.h"
@@ -506,7 +506,7 @@ MixerStrip::output_press (GdkEventButton *ev)
 		citems.push_back (MenuElem (_("Disconnect"), mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::disconnect_output)));
 		citems.push_back (SeparatorElem());
 		
-		_session.foreach_connection (this, &MixerStrip::add_connection_to_output_menu);
+		_session.foreach_bundle (this, &MixerStrip::add_bundle_to_output_menu);
 
 		output_menu.popup (1, ev->time);
 		break;
@@ -568,7 +568,7 @@ MixerStrip::input_press (GdkEventButton *ev)
 		citems.push_back (MenuElem (_("Disconnect"), mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::disconnect_input)));
 		citems.push_back (SeparatorElem());
 		
-		_session.foreach_connection (this, &MixerStrip::add_connection_to_input_menu);
+		_session.foreach_bundle (this, &MixerStrip::add_bundle_to_input_menu);
 
 		input_menu.popup (1, ev->time);
 		break;
@@ -580,53 +580,53 @@ MixerStrip::input_press (GdkEventButton *ev)
 }
 
 void
-MixerStrip::connection_input_chosen (ARDOUR::Connection *c)
+MixerStrip::bundle_input_chosen (ARDOUR::Bundle *c)
 {
 	if (!ignore_toggle) {
 
 		try { 
-			_route->use_input_connection (*c, this);
+			_route->use_input_bundle (*c, this);
 		}
 
 		catch (AudioEngine::PortRegistrationFailure& err) {
-			error << _("could not register new ports required for that connection")
+			error << _("could not register new ports required for that bundle")
 			      << endmsg;
 		}
 	}
 }
 
 void
-MixerStrip::connection_output_chosen (ARDOUR::Connection *c)
+MixerStrip::bundle_output_chosen (ARDOUR::Bundle *c)
 {
 	if (!ignore_toggle) {
 
 		try { 
-			_route->use_output_connection (*c, this);
+			_route->use_output_bundle (*c, this);
 		}
 
 		catch (AudioEngine::PortRegistrationFailure& err) {
-			error << _("could not register new ports required for that connection")
+			error << _("could not register new ports required for that bundle")
 			      << endmsg;
 		}
 	}
 }
 
 void
-MixerStrip::add_connection_to_input_menu (ARDOUR::Connection* c)
+MixerStrip::add_bundle_to_input_menu (ARDOUR::Bundle* c)
 {
 	using namespace Menu_Helpers;
 
-	if (dynamic_cast<InputConnection *> (c) == 0) {
+	if (dynamic_cast<InputBundle *> (c) == 0) {
 		return;
 	}
 
 	MenuList& citems = input_menu.items();
 	
-	if (c->nports() == _route->n_inputs().get_total()) {
+	if (c->nchannels() == _route->n_inputs().get_total()) {
 
-		citems.push_back (CheckMenuElem (c->name(), bind (mem_fun(*this, &MixerStrip::connection_input_chosen), c)));
+		citems.push_back (CheckMenuElem (c->name(), bind (mem_fun(*this, &MixerStrip::bundle_input_chosen), c)));
 		
-		ARDOUR::Connection *current = _route->input_connection();
+		ARDOUR::Bundle *current = _route->input_bundle();
 		
 		if (current == c) {
 			ignore_toggle = true;
@@ -637,20 +637,20 @@ MixerStrip::add_connection_to_input_menu (ARDOUR::Connection* c)
 }
 
 void
-MixerStrip::add_connection_to_output_menu (ARDOUR::Connection* c)
+MixerStrip::add_bundle_to_output_menu (ARDOUR::Bundle* c)
 {
 	using namespace Menu_Helpers;
 
-	if (dynamic_cast<OutputConnection *> (c) == 0) {
+	if (dynamic_cast<OutputBundle *> (c) == 0) {
 		return;
 	}
 
-	if (c->nports() == _route->n_outputs().get_total()) {
+	if (c->nchannels() == _route->n_outputs().get_total()) {
 
 		MenuList& citems = output_menu.items();
-		citems.push_back (CheckMenuElem (c->name(), bind (mem_fun(*this, &MixerStrip::connection_output_chosen), c)));
+		citems.push_back (CheckMenuElem (c->name(), bind (mem_fun(*this, &MixerStrip::bundle_output_chosen), c)));
 		
-		ARDOUR::Connection *current = _route->output_connection();
+		ARDOUR::Bundle *current = _route->output_bundle();
 		
 		if (current == c) {
 			ignore_toggle = true;
@@ -705,9 +705,9 @@ MixerStrip::connect_to_pan ()
 void
 MixerStrip::update_input_display ()
 {
-	ARDOUR::Connection *c;
+	ARDOUR::Bundle *c;
 
-	if ((c = _route->input_connection()) != 0) {
+	if ((c = _route->input_bundle()) != 0) {
 		input_label.set_text (c->name());
 	} else {
 		switch (_width) {
@@ -725,9 +725,9 @@ MixerStrip::update_input_display ()
 void
 MixerStrip::update_output_display ()
 {
-	ARDOUR::Connection *c;
+	ARDOUR::Bundle *c;
 
-	if ((c = _route->output_connection()) != 0) {
+	if ((c = _route->output_bundle()) != 0) {
 		output_label.set_text (c->name());
 	} else {
 		switch (_width) {

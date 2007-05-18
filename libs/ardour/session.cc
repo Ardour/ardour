@@ -58,7 +58,7 @@
 #include <ardour/redirect.h>
 #include <ardour/send.h>
 #include <ardour/insert.h>
-#include <ardour/connection.h>
+#include <ardour/bundle.h>
 #include <ardour/slave.h>
 #include <ardour/tempo.h>
 #include <ardour/audio_track.h>
@@ -458,10 +458,10 @@ Session::destroy ()
 	}
 	
 #ifdef TRACK_DESTRUCTION
-	cerr << "delete connections\n";
+	cerr << "delete bundles\n";
 #endif /* TRACK_DESTRUCTION */
-	for (ConnectionList::iterator i = _connections.begin(); i != _connections.end(); ) {
-		ConnectionList::iterator tmp;
+	for (BundleList::iterator i = _bundles.begin(); i != _bundles.end(); ) {
+		BundleList::iterator tmp;
 
 		tmp = i;
 		++tmp;
@@ -575,7 +575,7 @@ Session::when_engine_running ()
 		// XXX HOW TO ALERT UI TO THIS ? DO WE NEED TO?
 	}
 
-	/* Create a set of Connection objects that map
+	/* Create a set of Bundle objects that map
 	   to the physical outputs currently available
 	*/
 
@@ -585,24 +585,22 @@ Session::when_engine_running ()
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("out %" PRIu32), np+1);
 
-		Connection* c = new OutputConnection (buf, true);
+		Bundle* c = new OutputBundle (buf, true);
+		c->set_nchannels (1);
+		c->add_port_to_channel (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
 
-		c->add_port ();
-		c->add_connection (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
-
-		add_connection (c);
+		add_bundle (c);
 	}
 
 	for (uint32_t np = 0; np < n_physical_inputs; ++np) {
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("in %" PRIu32), np+1);
 
-		Connection* c = new InputConnection (buf, true);
+		Bundle* c = new InputBundle (buf, true);
+		c->set_nchannels (1);
+		c->add_port_to_channel (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
 
-		c->add_port ();
-		c->add_connection (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
-
-		add_connection (c);
+		add_bundle (c);
 	}
 
 	/* TWO: STEREO */
@@ -611,28 +609,24 @@ Session::when_engine_running ()
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("out %" PRIu32 "+%" PRIu32), np+1, np+2);
 
-		Connection* c = new OutputConnection (buf, true);
+		Bundle* c = new OutputBundle (buf, true);
+		c->set_nchannels (2);
+		c->add_port_to_channel (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
+		c->add_port_to_channel (1, _engine.get_nth_physical_output (DataType::AUDIO, np+1));
 
-		c->add_port ();
-		c->add_port ();
-		c->add_connection (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
-		c->add_connection (1, _engine.get_nth_physical_output (DataType::AUDIO, np+1));
-
-		add_connection (c);
+		add_bundle (c);
 	}
 
 	for (uint32_t np = 0; np < n_physical_inputs; np +=2) {
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("in %" PRIu32 "+%" PRIu32), np+1, np+2);
 
-		Connection* c = new InputConnection (buf, true);
+		Bundle* c = new InputBundle (buf, true);
+		c->set_nchannels (2);
+		c->add_port_to_channel (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
+		c->add_port_to_channel (1, _engine.get_nth_physical_input (DataType::AUDIO, np+1));
 
-		c->add_port ();
-		c->add_port ();
-		c->add_connection (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
-		c->add_connection (1, _engine.get_nth_physical_input (DataType::AUDIO, np+1));
-
-		add_connection (c);
+		add_bundle (c);
 	}
 
 	/* THREE MASTER */
@@ -677,13 +671,13 @@ Session::when_engine_running ()
 			
 		}
 
-		Connection* c = new OutputConnection (_("Master Out"), true);
+		Bundle* c = new OutputBundle (_("Master Out"), true);
 
+		c->set_nchannels (_master_out->n_inputs().get_total());
 		for (uint32_t n = 0; n < _master_out->n_inputs ().get_total(); ++n) {
-			c->add_port ();
-			c->add_connection ((int) n, _master_out->input(n)->name());
+			c->add_port_to_channel ((int) n, _master_out->input(n)->name());
 		}
-		add_connection (c);
+		add_bundle (c);
 	} 
 
 	hookup_io ();
@@ -3601,46 +3595,46 @@ Session::available_capture_duration ()
 }
 
 void
-Session::add_connection (ARDOUR::Connection* connection)
+Session::add_bundle (ARDOUR::Bundle* bundle)
 {
 	{
-		Glib::Mutex::Lock guard (connection_lock);
-		_connections.push_back (connection);
+		Glib::Mutex::Lock guard (bundle_lock);
+		_bundles.push_back (bundle);
 	}
 	
-	ConnectionAdded (connection); /* EMIT SIGNAL */
+	BundleAdded (bundle); /* EMIT SIGNAL */
 
 	set_dirty();
 }
 
 void
-Session::remove_connection (ARDOUR::Connection* connection)
+Session::remove_bundle (ARDOUR::Bundle* bundle)
 {
 	bool removed = false;
 
 	{
-		Glib::Mutex::Lock guard (connection_lock);
-		ConnectionList::iterator i = find (_connections.begin(), _connections.end(), connection);
+		Glib::Mutex::Lock guard (bundle_lock);
+		BundleList::iterator i = find (_bundles.begin(), _bundles.end(), bundle);
 		
-		if (i != _connections.end()) {
-			_connections.erase (i);
+		if (i != _bundles.end()) {
+			_bundles.erase (i);
 			removed = true;
 		}
 	}
 
 	if (removed) {
-		 ConnectionRemoved (connection); /* EMIT SIGNAL */
+		 BundleRemoved (bundle); /* EMIT SIGNAL */
 	}
 
 	set_dirty();
 }
 
-ARDOUR::Connection *
-Session::connection_by_name (string name) const
+ARDOUR::Bundle *
+Session::bundle_by_name (string name) const
 {
-	Glib::Mutex::Lock lm (connection_lock);
+	Glib::Mutex::Lock lm (bundle_lock);
 
-	for (ConnectionList::const_iterator i = _connections.begin(); i != _connections.end(); ++i) {
+	for (BundleList::const_iterator i = _bundles.begin(); i != _bundles.end(); ++i) {
 		if ((*i)->name() == name) {
 			return* i;
 		}

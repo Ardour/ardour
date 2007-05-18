@@ -79,7 +79,7 @@
 #include <ardour/redirect.h>
 #include <ardour/send.h>
 #include <ardour/insert.h>
-#include <ardour/connection.h>
+#include <ardour/bundle.h>
 #include <ardour/slave.h>
 #include <ardour/tempo.h>
 #include <ardour/audio_track.h>
@@ -972,9 +972,9 @@ Session::state(bool full_state)
 	
 	child = node->add_child ("Connections");
 	{
-		Glib::Mutex::Lock lm (connection_lock);
-		for (ConnectionList::iterator i = _connections.begin(); i != _connections.end(); ++i) {
-			if (!(*i)->system_dependent()) {
+		Glib::Mutex::Lock lm (bundle_lock);
+		for (BundleList::iterator i = _bundles.begin(); i != _bundles.end(); ++i) {
+			if (!(*i)->dynamic()) {
 				child->add_child_nocopy ((*i)->get_state());
 			}
 		}
@@ -1217,7 +1217,7 @@ Session::set_state (const XMLNode& node)
 	if ((child = find_named_node (node, "Connections")) == 0) {
 		error << _("Session: XML state has no connections section") << endmsg;
 		goto out;
-	} else if (load_connections (*child)) {
+	} else if (load_bundles (*child)) {
 		goto out;
 	}
 
@@ -2106,7 +2106,7 @@ Session::control_protocol_path ()
 }
 
 int
-Session::load_connections (const XMLNode& node)
+Session::load_bundles (const XMLNode& node)
 {
 	XMLNodeList nlist = node.children();
 	XMLNodeConstIterator niter;
@@ -2115,9 +2115,9 @@ Session::load_connections (const XMLNode& node)
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() == "InputConnection") {
-			add_connection (new ARDOUR::InputConnection (**niter));
+			add_bundle (new ARDOUR::InputBundle (**niter));
 		} else if ((*niter)->name() == "OutputConnection") {
-			add_connection (new ARDOUR::OutputConnection (**niter));
+			add_bundle (new ARDOUR::OutputBundle (**niter));
 		} else {
 			error << string_compose(_("Unknown node \"%1\" found in Connections list from state file"), (*niter)->name()) << endmsg;
 			return -1;

@@ -91,7 +91,7 @@ class Send;
 class Redirect;
 class PortInsert;
 class PluginInsert;
-class Connection;
+class Bundle;
 class TempoMap;
 class AudioTrack;
 class NamedSelection;
@@ -714,15 +714,15 @@ class Session : public PBD::StatefulDestructible
 	
 	nframes_t available_capture_duration();
 
-	/* I/O Connections */
+	/* I/O bundles */
 
-	template<class T> void foreach_connection (T *obj, void (T::*func)(Connection *));
-	void add_connection (Connection *);
-	void remove_connection (Connection *);
-	Connection *connection_by_name (string) const;
+	template<class T> void foreach_bundle (T *obj, void (T::*func)(Bundle *));
+	void add_bundle (Bundle *);
+	void remove_bundle (Bundle *);
+	Bundle *bundle_by_name (string) const;
 
-	sigc::signal<void,Connection *> ConnectionAdded;
-	sigc::signal<void,Connection *> ConnectionRemoved;
+	sigc::signal<void,Bundle *> BundleAdded;
+	sigc::signal<void,Bundle *> BundleRemoved;
 
 	/* MIDI */
 
@@ -1567,12 +1567,12 @@ class Session : public PBD::StatefulDestructible
 	mutable gint _playback_load_min;
 	mutable gint _capture_load_min;
 
-	/* I/O Connections */
+	/* I/O bundles */
 
-	typedef list<Connection *> ConnectionList;
-	mutable Glib::Mutex connection_lock;
-	ConnectionList _connections;
-	int load_connections (const XMLNode&);
+	typedef list<Bundle *> BundleList;
+	mutable Glib::Mutex bundle_lock;
+	BundleList  _bundles;
+	int load_bundles (const XMLNode&);
 
 	void reverse_diskstream_buffers ();
 

@@ -27,6 +27,7 @@ ardour.Append(POTFILE = domain + '.pot')
 ardour.Append(CPPPATH = '#libs/surfaces/control_protocol')
 
 ardour_files=Split("""
+bundle.cc
 chan_count.cc
 diskstream.cc
 directory_names.cc
@@ -61,7 +62,6 @@ auditioner.cc
 automation.cc
 automation_event.cc
 configuration.cc
-connection.cc
 control_protocol_manager.cc
 crossfade.cc
 curve.cc

@@ -21,7 +21,7 @@
 
 #include <pbd/failed_constructor.h>
 #include <ardour/ardour.h>
-#include <ardour/connection.h>
+#include <ardour/bundle.h>
 #include <pbd/xml++.h>
 
 #include "i18n.h"
@@ -29,48 +29,72 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-Connection::Connection (const XMLNode& node)
+/** Construct a Bundle from an XML node.
+ * @param node XML node.
+ */
+Bundle::Bundle (const XMLNode& node)
 {
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
 }
 
-InputConnection::InputConnection (const XMLNode& node)
-	: Connection (node)
+/** Construct an InputBundle from an XML node.
+ * @param node XML node.
+ */
+InputBundle::InputBundle (const XMLNode& node)
+	: Bundle (node)
 {
+  
 }
 
-OutputConnection::OutputConnection (const XMLNode& node)
-	: Connection (node)
+/** Construct an OutputBundle from an XML node.
+ * @param node XML node.
+ */
+OutputBundle::OutputBundle (const XMLNode& node)
+	: Bundle (node)
 {
+  
 }
 
+/** Set the name.
+ * @param name New name.
+ */
 void
-Connection::set_name (string name, void *src)
+Bundle::set_name (string name, void *src)
 {
 	_name = name;
 	NameChanged (src);
 }
 
+/** Add an association between one of our channels and a JACK port.
+ * @param ch Channel index.
+ * @param portname JACK port name to associate with.
+ */
 void
-Connection::add_connection (int port, string portname)
+Bundle::add_port_to_channel (int ch, string portname)
 {
 	{
-		Glib::Mutex::Lock lm (port_lock);
-		_ports[port].push_back (portname);
+		Glib::Mutex::Lock lm (channels_lock);
+		_channels[ch].push_back (portname);
 	}
-	 ConnectionsChanged (port); /* EMIT SIGNAL */
+	
+	PortsChanged (ch); /* EMIT SIGNAL */
 }
 
+/** Disassociate a JACK port from one of our channels.
+ * @param ch Channel index.
+ * @param portname JACK port name to disassociate from.
+ */
+
 void
-Connection::remove_connection (int port, string portname)
+Bundle::remove_port_from_channel (int ch, string portname)
 {
 	bool changed = false;
 
 	{
-		Glib::Mutex::Lock lm (port_lock);
-		PortList& pl = _ports[port];
+		Glib::Mutex::Lock lm (channels_lock);
+		PortList& pl = _channels[ch];
 		PortList::iterator i = find (pl.begin(), pl.end(), portname);
 		
 		if (i != pl.end()) {
@@ -80,74 +104,56 @@ Connection::remove_connection (int port, string portname)
 	}
 
 	if (changed) {
-		 ConnectionsChanged (port); /* EMIT SIGNAL */
+		 PortsChanged (ch); /* EMIT SIGNAL */
 	}
 }
 
-const Connection::PortList&
-Connection::port_connections (int port) const
+/**
+ * @param ch Channel index.
+ * @return List of JACK ports that this channel is connected to.
+ */
+const Bundle::PortList&
+Bundle::channel_ports (int ch) const
 {
-	Glib::Mutex::Lock lm (port_lock);
-	return _ports[port];
+	Glib::Mutex::Lock lm (channels_lock);
+	return _channels[ch];
 }
 
+/** operator== for Bundles; they are equal if their channels are the same.
+ * @param other Bundle to compare with this one.
+ */
 bool
-Connection::operator== (const Connection& other) const
+Bundle::operator== (const Bundle& other) const
 {
-	return other._ports == _ports;
+	return other._channels == _channels;
 }
 
-void
-Connection::add_port ()
-{
-	{
-		Glib::Mutex::Lock lm (port_lock);
-		_ports.push_back (PortList());
-	}
-	 ConfigurationChanged(); /* EMIT SIGNAL */
-}
+
+/** Set the number of channels.
+ * @param n New number of channels.
+ */
 
 void
-Connection::remove_port (int which_port)
+Bundle::set_nchannels (int n)
 {
-	bool changed = false;
-
 	{
-		Glib::Mutex::Lock lm (port_lock);
-		vector<PortList>::iterator i;
-		int n;
-		
-		for (n = 0, i = _ports.begin(); i != _ports.end() && n < which_port; ++i, ++n);
-
-		if (i != _ports.end()) {
-			_ports.erase (i);
-			changed = true;
+		Glib::Mutex::Lock lm (channels_lock);
+		_channels.clear ();
+		for (int i = 0; i < n; ++i) {
+			_channels.push_back (PortList());
 		}
 	}
 
-	if (changed) {
-		 ConfigurationChanged(); /* EMIT SIGNAL */
-	}
-}
-
-void 
-Connection::clear ()
-{
-	{
-		Glib::Mutex::Lock lm (port_lock);
-		_ports.clear ();
-	}
-
-	 ConfigurationChanged(); /* EMIT SIGNAL */
+	ConfigurationChanged (); /* EMIT SIGNAL */
 }
 
 XMLNode&
-Connection::get_state ()
+Bundle::get_state ()
 {
 	XMLNode *node;
 	string str;
 
-	if (dynamic_cast<InputConnection *> (this)) {
+	if (dynamic_cast<InputBundle *> (this)) {
 		node = new XMLNode ("InputConnection");
 	} else {
 		node = new XMLNode ("OutputConnection");
@@ -155,7 +161,7 @@ Connection::get_state ()
 
 	node->add_property ("name", _name);
 
-	for (vector<PortList>::iterator i = _ports.begin(); i != _ports.end(); ++i) {
+	for (vector<PortList>::iterator i = _channels.begin(); i != _channels.end(); ++i) {
 
 		str += '{';
 
@@ -174,7 +180,7 @@ Connection::get_state ()
 }
 
 int
-Connection::set_state (const XMLNode& node)
+Bundle::set_state (const XMLNode& node)
 {
 	const XMLProperty *prop;
 
@@ -184,33 +190,35 @@ Connection::set_state (const XMLNode& node)
 	}
 
 	_name = prop->value();
-	_sysdep = false;
+	_dynamic = false;
 	
 	if ((prop = node.property ("connections")) == 0) {
 		error << _("Node for Connection has no \"connections\" property") << endmsg;
 		return -1;
 	}
 	
-	set_connections (prop->value());
+	set_channels (prop->value());
 
 	return 0;
 }
 
+/** Set up channels from an XML property string.
+ * @param str String.
+ * @return 0 on success, -1 on error.
+ */
 int
-Connection::set_connections (const string& str)
+Bundle::set_channels (const string& str)
 {
 	vector<string> ports;
 	int i;
 	int n;
-	int nports;
+	int nchannels;
 	
-	if ((nports = count (str.begin(), str.end(), '{')) == 0) {
+	if ((nchannels = count (str.begin(), str.end(), '{')) == 0) {
 		return 0;
 	}
 
-	for (n = 0; n < nports; ++n) {
-		add_port ();
-	}
+	set_nchannels (nchannels);
 
 	string::size_type start, end, ostart;
 
@@ -235,7 +243,7 @@ Connection::set_connections (const string& str)
 		} else if (n > 0) {
 
 			for (int x = 0; x < n; ++x) {
-				add_connection (i, ports[x]);
+				add_port_to_channel (i, ports[x]);
 			}
 		}
 
@@ -247,7 +255,7 @@ Connection::set_connections (const string& str)
 }
 
 int
-Connection::parse_io_string (const string& str, vector<string>& ports)
+Bundle::parse_io_string (const string& str, vector<string>& ports)
 {
 	string::size_type pos, opos;
 

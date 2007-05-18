@@ -52,7 +52,7 @@ class PluginUIWindow;
 class RouteRedirectSelection;
 
 namespace ARDOUR {
-	class Connection;
+	class Bundle;
 	class Insert;
 	class Plugin;
 	class PluginInsert;

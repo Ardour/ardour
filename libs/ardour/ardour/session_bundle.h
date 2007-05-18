@@ -17,23 +17,23 @@
 
 */
 
-#ifndef __ardour_session_connection_h__
-#define __ardour_session_connection_h__
+#ifndef __ardour_session_bundle_h__
+#define __ardour_session_bundle_h__
 
 #include <ardour/session.h>
-#include <ardour/connection.h>
+#include <ardour/bundle.h>
 
 namespace ARDOUR {
 
 template<class T> void 
-Session::foreach_connection (T *obj, void (T::*func)(Connection *)) 
+Session::foreach_bundle (T *obj, void (T::*func)(Bundle *)) 
 {
-	Glib::Mutex::Lock lm (connection_lock);
-	for (ConnectionList::iterator i = _connections.begin(); i != _connections.end(); i++) {
+	Glib::Mutex::Lock lm (bundle_lock);
+	for (BundleList::iterator i = _bundles.begin(); i != _bundles.end(); i++) {
 		(obj->*func) (*i);
 	}
 }
 
 } /* namespace */
 
-#endif /* __ardour_session_connection_h__ */
+#endif /* __ardour_session_bundle_h__ */
