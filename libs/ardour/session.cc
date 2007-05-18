@@ -146,7 +146,7 @@ Session::Session (AudioEngine &eng,
 		// to create a new session.
 		assert(mix_template);
 
-		if (create () ||
+		if (!create_session_directory () ||
 				!create_session_file_from_template (*mix_template)) {
 			destroy ();
 			throw failed_constructor ();
@@ -221,7 +221,7 @@ Session::Session (AudioEngine &eng,
 	initialize_start_and_end_locations(0, initial_length);
 
 	if (g_file_test (_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) ||
-			create () ||
+			!create_session_directory () ||
 			!create_session_file ()) {
 			destroy ();
 			throw failed_constructor ();

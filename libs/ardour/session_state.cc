@@ -498,21 +498,21 @@ Session::create_session_file_from_template (const string& template_path)
 	return true;
 }
 
-int
-Session::create ()
+bool
+Session::create_session_directory ()
 {
 	string dir;
 
 	if (g_mkdir_with_parents (_path.c_str(), 0755) < 0) {
 		error << string_compose(_("Session: cannot create session dir \"%1\" (%2)"), _path, strerror (errno)) << endmsg;
-		return -1;
+		return false;
 	}
 
 	dir = peak_dir ();
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
 		error << string_compose(_("Session: cannot create session peakfile dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-		return -1;
+		return false;
 	}
 
 	/* if this is is an existing session with an old "sounds" directory, just use it. see Session::sound_dir() for more details */
@@ -523,7 +523,7 @@ Session::create ()
 		
 		if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
 			error << string_compose(_("Session: cannot create session sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-			return -1;
+			return false;
 		}
 	}
 
@@ -531,17 +531,17 @@ Session::create ()
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
 		error << string_compose(_("Session: cannot create session dead sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-		return -1;
+		return false;
 	}
 
 	dir = export_dir ();
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
 		error << string_compose(_("Session: cannot create session export dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-		return -1;
+		return false;
 	}
 
-	return 0;
+	return true;
 }
 
 int
