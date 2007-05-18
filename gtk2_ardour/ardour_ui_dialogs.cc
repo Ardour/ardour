@@ -162,13 +162,14 @@ ARDOUR_UI::connect_to_session (Session *s)
 	point_zero_one_second_connection = Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::every_point_zero_one_seconds), 40);
 }
 
-int
+bool
 ARDOUR_UI::unload_session ()
 {
 	if (session && session->dirty()) {
 		switch (ask_about_saving_session (_("close"))) {
 		case -1:
-			return 1;
+			// cancel
+			return false;
 			
 		case 1:
 			session->save_state ("");
@@ -212,7 +213,7 @@ ARDOUR_UI::unload_session ()
 
 	update_buffer_load ();
 
-	return 0;
+	return true;
 }
 
 int

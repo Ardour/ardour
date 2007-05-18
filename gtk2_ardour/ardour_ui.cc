@@ -2033,20 +2033,13 @@ int
 ARDOUR_UI::load_session (const string & path, const string & snap_name, string* mix_template)
 {
 	Session *new_session;
-	int x;
 	session_loaded = false;
 	
 	if (!check_audioengine()) {
 		return -1;
 	}
 
-	x = unload_session ();
-
-	if (x < 0) {
-		return -1;
-	} else if (x > 0) {
-		return 0;
-	}
+	if(!unload_session ()) return -1;
 
 	/* if it already exists, we must have write access */
 
@@ -2094,7 +2087,6 @@ ARDOUR_UI::build_session (const string & path, const string & snap_name,
 			  nframes_t initial_length)
 {
 	Session *new_session;
-	int x;
 
 	if (!check_audioengine()) {
 		return -1;
@@ -2102,13 +2094,7 @@ ARDOUR_UI::build_session (const string & path, const string & snap_name,
 
 	session_loaded = false;
 
-	x = unload_session ();
-
-	if (x < 0) {
-		return -1;
-	} else if (x > 0) {
-		return 0;
-	}
+	if (!unload_session ()) return -1;
 	
 	_session_is_new = true;
 

@@ -129,7 +129,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	bool new_session(std::string path = string());
 	gint cmdline_new_session (string path);
-	int  unload_session ();
+	
+	/// @return true if session was successfully unloaded.
+	bool unload_session ();
 	void close_session(); 
 
 	int  save_state_canfail (string state_name = "");
