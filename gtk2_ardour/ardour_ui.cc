@@ -186,7 +186,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 	open_session_selector = 0;
 	have_configure_timeout = false;
 	have_disk_speed_dialog_displayed = false;
-	_will_create_new_session_automatically = false;
 	session_loaded = false;
 	last_speed_displayed = -1.0f;
 	keybindings_path = ARDOUR::find_config_file ("ardour.bindings");
@@ -2580,8 +2579,7 @@ ARDOUR_UI::cmdline_new_session (string path)
 	}
 
 	new_session (path);
-
-	_will_create_new_session_automatically = false; /* done it */
+	
 	return FALSE; /* don't call it again */
 }
 

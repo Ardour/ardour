@@ -119,14 +119,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	ARDOUR::Session* the_session() { return session; }
 
-	bool will_create_new_session_automatically() const {
-		return _will_create_new_session_automatically;
-	}
-
-	void set_will_create_new_session_automatically (bool yn) {
-		_will_create_new_session_automatically = yn;
-	}
-
 	bool new_session(std::string path = string());
 	gint cmdline_new_session (string path);
 	
@@ -541,8 +533,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	sigc::connection point_zero_one_second_connection;
 
 	gint session_menu (GdkEventButton *);
-
-	bool _will_create_new_session_automatically;
 
 	NewSessionDialog* new_session_dialog;
 	
