@@ -2,7 +2,7 @@
 
 #include "i18n.h"
 
-namespace ARDOUR {                       
+namespace ARDOUR {
 
 const char* const old_sound_dir_name = X_("sounds");
 const char* const sound_dir_name = X_("audiofiles");

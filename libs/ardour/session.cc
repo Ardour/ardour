@@ -73,6 +73,7 @@
 #include <ardour/source_factory.h>
 #include <ardour/region_factory.h>
 #include <ardour/filename_extensions.h>
+#include <ardour/session_directory.h>
 
 #ifdef HAVE_LIBLO
 #include <ardour/osc.h>
@@ -213,11 +214,11 @@ Session::Session (AudioEngine &eng,
 
 	initialize_start_and_end_locations(0, initial_length);
 
-	if (g_file_test (_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) ||
-			!create_session_directory () ||
-			!create_session_file ()) {
-			destroy ();
-			throw failed_constructor ();
+	SessionDirectory sdir(fullpath);
+	
+	if (!sdir.create () || !create_session_file ())	{
+		destroy ();
+		throw failed_constructor ();
 	}
 
 	{

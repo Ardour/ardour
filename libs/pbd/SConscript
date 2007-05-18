@@ -27,6 +27,7 @@ controllable.cc
 enumwriter.cc
 dmalloc.cc
 error.cc
+filesystem.cc
 id.cc
 mountpoint.cc
 path.cc
