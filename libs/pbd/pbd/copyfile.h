@@ -21,5 +21,8 @@
 
 namespace PBD {
 
-	int copy_file (Glib::ustring from, Glib::ustring to);
+	/**
+	 * @return true if file was successfully copied
+	 */
+	bool copy_file (Glib::ustring from, Glib::ustring to);
 }

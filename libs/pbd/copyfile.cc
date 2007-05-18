@@ -29,7 +29,7 @@
 using namespace PBD;
 using namespace std;
 
-int
+bool
 PBD::copy_file (Glib::ustring from, Glib::ustring to)
 {
 	ifstream in (from.c_str());
@@ -37,12 +37,12 @@ PBD::copy_file (Glib::ustring from, Glib::ustring to)
 	
 	if (!in) {
 		error << string_compose (_("Could not open %1 for copy"), from) << endmsg;
-		return -1;
+		return false;
 	}
 	
 	if (!out) {
 		error << string_compose (_("Could not open %1 as copy"), to) << endmsg;
-		return -1;
+		return false;
 	}
 	
 	out << in.rdbuf();
@@ -50,8 +50,8 @@ PBD::copy_file (Glib::ustring from, Glib::ustring to)
 	if (!in || !out) {
 		error << string_compose (_("Could not copy existing file %1 to %2"), from, to) << endmsg;
 		unlink (to.c_str());
-		return -1;
+		return false;
 	}
 	
-	return 0;
+	return true;
 }
