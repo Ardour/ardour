@@ -125,8 +125,6 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
 	void freeze ();
 	void thaw ();
 
-	void raise_region (boost::shared_ptr<Region>);
-	void lower_region (boost::shared_ptr<Region>);
 	void raise_region_to_top (boost::shared_ptr<Region>);
 	void lower_region_to_bottom (boost::shared_ptr<Region>);
 
@@ -265,8 +263,6 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
 	boost::shared_ptr<Playlist> cut (nframes_t start, nframes_t cnt, bool result_is_hidden);
 	boost::shared_ptr<Playlist> copy (nframes_t start, nframes_t cnt, bool result_is_hidden);
 
-
-	int move_region_to_layer (layer_t, boost::shared_ptr<Region> r, int dir);
 	void relayer ();
 	
 	void unset_freeze_parent (Playlist*);

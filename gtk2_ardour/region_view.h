@@ -65,9 +65,7 @@ class RegionView : public TimeAxisViewItem
 	
 	void move (double xdelta, double ydelta);
 	
-	void raise ();
 	void raise_to_top ();
-	void lower ();
 	void lower_to_bottom ();
 
 	bool set_position(nframes_t pos, void* src, double* delta = 0);

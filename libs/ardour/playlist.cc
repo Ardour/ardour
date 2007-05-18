@@ -1585,33 +1585,61 @@ Playlist::set_edit_mode (EditMode mode)
 void
 Playlist::relayer ()
 {
-	RegionList::iterator i;
-	uint32_t layer = 0;
-
 	/* don't send multiple Modified notifications
 	   when multiple regions are relayered.
 	*/
 
 	freeze ();
 
-	if (Config->get_layer_model() == MoveAddHigher || 
-	    Config->get_layer_model() == AddHigher) {
+	/* build up a new list of regions on each layer */
 
+	std::vector<RegionList> layers;
+
+	/* we want to go through regions from desired lowest to desired highest layer,
+	   which depends on the layer model
+	*/
+	RegionList copy = regions;
+	if (Config->get_layer_model() == MoveAddHigher || Config->get_layer_model() == AddHigher) {
 		RegionSortByLastLayerOp cmp;
-		RegionList copy = regions;
-
 		copy.sort (cmp);
+	}
+	
+	for (RegionList::iterator i = copy.begin(); i != copy.end(); ++i) {
 
-		for (i = copy.begin(); i != copy.end(); ++i) {
-			(*i)->set_layer (layer++);
+		/* find the lowest layer that this region can go on */
+		size_t j = layers.size();
+		while (j > 0) {
+			/* try layer j - 1; it can go on if it overlaps no other region
+			   that is already on that layer
+			*/
+			RegionList::iterator k = layers[j - 1].begin();
+			while (k != layers[j - 1].end()) {
+				if ((*k)->overlap_equivalent (*i)) {
+					break;
+				}
+				k++;
+			}
+
+			if (k != layers[j - 1].end()) {
+				/* no overlap, so we can use this layer */
+				break;
+			}
+					
+			j--;
 		}
 
-	} else {
-		
-		/* Session::LaterHigher model */
+		if (j == layers.size()) {
+			/* we need a new layer for this region */
+			layers.push_back (RegionList ());
+		}
 
-		for (i = regions.begin(); i != regions.end(); ++i) {
-			(*i)->set_layer (layer++);
+		layers[j].push_back (*i);
+	}
+
+	/* set up the layer numbers in the regions */
+	for (size_t j = 0; j < layers.size(); ++j) {
+		for (RegionList::iterator i = layers[j].begin(); i != layers[j].end(); ++i) {
+			(*i)->set_layer (j);
 		}
 	}
 
@@ -1629,33 +1657,6 @@ Playlist::relayer ()
 }
 
 /* XXX these layer functions are all deprecated */
-
-void
-Playlist::raise_region (boost::shared_ptr<Region> region)
-{
-	uint32_t rsz = regions.size();
-	layer_t target = region->layer() + 1U;
-
-	if (target >= rsz) {
-		/* its already at the effective top */
-		return;
-	}
-
-	move_region_to_layer (target, region, 1);
-}
-
-void
-Playlist::lower_region (boost::shared_ptr<Region> region)
-{
-	if (region->layer() == 0) {
-		/* its already at the bottom */
-		return;
-	}
-
-	layer_t target = region->layer() - 1U;
-
-	move_region_to_layer (target, region, -1);
-}
 
 void
 Playlist::raise_region_to_top (boost::shared_ptr<Region> region)
@@ -1677,79 +1678,6 @@ Playlist::lower_region_to_bottom (boost::shared_ptr<Region> region)
 		region->set_last_layer_op (0);
 		relayer ();
 	}
-}
-
-int
-Playlist::move_region_to_layer (layer_t target_layer, boost::shared_ptr<Region> region, int dir)
-{
-	RegionList::iterator i;
-	typedef pair<boost::shared_ptr<Region>,layer_t> LayerInfo;
-	list<LayerInfo> layerinfo;
-	layer_t dest;
-
-	{
-		RegionLock rlock (const_cast<Playlist *> (this));
-		
-		for (i = regions.begin(); i != regions.end(); ++i) {
-			
-			if (region == *i) {
-				continue;
-			}
-
-			if (dir > 0) {
-
-				/* region is moving up, move all regions on intermediate layers
-				   down 1
-				*/
-				
-				if ((*i)->layer() > region->layer() && (*i)->layer() <= target_layer) {
-					dest = (*i)->layer() - 1;
-				} else {
-					/* not affected */
-					continue;
-				}
-			} else {
-
-				/* region is moving down, move all regions on intermediate layers
-				   up 1
-				*/
-
-				if ((*i)->layer() < region->layer() && (*i)->layer() >= target_layer) {
-					dest = (*i)->layer() + 1;
-				} else {
-					/* not affected */
-					continue;
-				}
-			}
-
-			LayerInfo newpair;
-			
-			newpair.first = *i;
-			newpair.second = dest;
-			
-			layerinfo.push_back (newpair);
-		} 
-	}
-
-	/* now reset the layers without holding the region lock */
-
-	for (list<LayerInfo>::iterator x = layerinfo.begin(); x != layerinfo.end(); ++x) {
-		x->first->set_layer (x->second);
-	}
-
-	region->set_layer (target_layer);
-
-#if 0
-	/* now check all dependents */
-
-	for (list<LayerInfo>::iterator x = layerinfo.begin(); x != layerinfo.end(); ++x) {
-		check_dependents (x->first, false);
-	}
-	
-	check_dependents (region, false);
-#endif
-	
-	return 0;
 }
 
 void

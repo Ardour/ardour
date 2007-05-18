@@ -272,21 +272,9 @@ RegionView::region_opacity ()
 }
 
 void
-RegionView::raise ()
-{
-	_region->raise ();
-}
-
-void
 RegionView::raise_to_top ()
 {
 	_region->raise_to_top ();
-}
-
-void
-RegionView::lower ()
-{
-	_region->lower ();
 }
 
 void

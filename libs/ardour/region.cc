@@ -853,24 +853,6 @@ Region::sync_position() const
 
 
 void
-Region::raise ()
-{
-	boost::shared_ptr<Playlist> pl (playlist());
-	if (pl) {
-		pl->raise_region (shared_from_this ());
-	}
-}
-
-void
-Region::lower ()
-{
-	boost::shared_ptr<Playlist> pl (playlist());
-	if (pl) {
-		pl->lower_region (shared_from_this ());
-	}
-}
-
-void
 Region::raise_to_top ()
 {
 	boost::shared_ptr<Playlist> pl (playlist());

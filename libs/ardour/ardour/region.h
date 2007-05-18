@@ -155,8 +155,6 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	void trim_to (nframes_t position, nframes_t length, void *src);
 	
 	void set_layer (layer_t l); /* ONLY Playlist can call this */
-	void raise ();
-	void lower ();
 	void raise_to_top ();
 	void lower_to_bottom ();
 

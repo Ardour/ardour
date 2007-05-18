@@ -870,9 +870,7 @@ class Editor : public PublicEditor
 	void set_region_lock (bool);
 	void set_region_position_lock (bool);
 	void set_region_opaque (bool);
-	void raise_region ();
 	void raise_region_to_top ();
-	void lower_region ();
 	void lower_region_to_bottom ();
 	void split_region ();
 	void split_region_at (nframes_t);

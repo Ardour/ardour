@@ -1709,21 +1709,9 @@ Editor::loop_location (Location& location)
 }
 
 void
-Editor::raise_region ()
-{
-	selection->foreach_region (&Region::raise);
-}
-
-void
 Editor::raise_region_to_top ()
 {
 	selection->foreach_region (&Region::raise_to_top);
-}
-
-void
-Editor::lower_region ()
-{
-	selection->foreach_region (&Region::lower);
 }
 
 void

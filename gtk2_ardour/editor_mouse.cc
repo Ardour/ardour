@@ -1006,25 +1006,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	case 2:
 		switch (mouse_mode) {
 			
-		case MouseObject:
-			switch (item_type) {
-			case RegionItem:
-				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Shift)) {
-					raise_region ();
-				} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask (Keyboard::Shift|Keyboard::Alt))) {
-					lower_region ();
-				} else {
-					// Button2 click is unused
-				}
-				return true;
-				
-				break;
-				
-			default:
-				break;
-			}
-			break;
-			
 		case MouseRange:
 			
 			// x_style_paste (where, 1.0);
