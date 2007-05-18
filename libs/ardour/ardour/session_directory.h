@@ -68,6 +68,12 @@ public:
 	const path dead_sound_path () const;
 
 	/**
+	 * @return The absolute path to the directory that audio
+	 * files are created in by default when exporting.
+	 */
+	const path export_path () const;
+
+	/**
 	 * @return true if session directory and all the required 
 	 * subdirectories exist.
 	 */

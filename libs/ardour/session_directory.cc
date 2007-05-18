@@ -111,6 +111,12 @@ SessionDirectory::dead_sound_path () const
 	return path(m_root_path) /= dead_sound_dir_name;
 }
 
+const path
+SessionDirectory::export_path () const
+{
+	return path(m_root_path) /= export_dir_name;
+}
+
 const vector<path>
 SessionDirectory::sub_directories () const
 {
@@ -119,6 +125,7 @@ SessionDirectory::sub_directories () const
 	tmp_paths.push_back ( sound_path () );
 	tmp_paths.push_back ( peak_path () );
 	tmp_paths.push_back ( dead_sound_path () );
+	tmp_paths.push_back ( export_path () );
 
 	return tmp_paths;
 }
