@@ -951,8 +951,6 @@ class Session : public PBD::StatefulDestructible
 	void update_latency_compensation (bool, bool);
 	
   private:
-	/// @return true in session directory was successfully created
-	bool create_session_directory ();
 	void destroy ();
 
 	void initialize_start_and_end_locations(nframes_t start, nframes_t end);

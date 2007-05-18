@@ -499,52 +499,6 @@ Session::create_session_file_from_template (const string& template_path)
 	return true;
 }
 
-bool
-Session::create_session_directory ()
-{
-	string dir;
-
-	if (g_mkdir_with_parents (_path.c_str(), 0755) < 0) {
-		error << string_compose(_("Session: cannot create session dir \"%1\" (%2)"), _path, strerror (errno)) << endmsg;
-		return false;
-	}
-
-	dir = peak_dir ();
-
-	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
-		error << string_compose(_("Session: cannot create session peakfile dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-		return false;
-	}
-
-	/* if this is is an existing session with an old "sounds" directory, just use it. see Session::sound_dir() for more details */
-
-	if (!Glib::file_test (old_sound_dir(), Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_DIR)) {
-
-		dir = sound_dir ();
-		
-		if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
-			error << string_compose(_("Session: cannot create session sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-			return false;
-		}
-	}
-
-	dir = dead_sound_dir ();
-
-	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
-		error << string_compose(_("Session: cannot create session dead sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-		return false;
-	}
-
-	dir = export_dir ();
-
-	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
-		error << string_compose(_("Session: cannot create session export dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-		return false;
-	}
-
-	return true;
-}
-
 int
 Session::load_diskstreams (const XMLNode& node)
 {
