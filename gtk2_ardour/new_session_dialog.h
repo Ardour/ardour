@@ -81,7 +81,9 @@ public:
 
 	bool connect_outs_to_master() const;
 	bool connect_outs_to_physical() const ;
-	int get_current_page();
+
+	bool on_new_session_page () const;
+	
 	void set_current_page (int);
 	void reset_recent();
 
@@ -192,9 +194,6 @@ protected:
 	void master_bus_button_clicked ();
 	void monitor_bus_button_clicked ();
 
-	bool on_new_session_page;
-
-	
 };
 
 #endif // NEW_SESSION_DIALOG_H

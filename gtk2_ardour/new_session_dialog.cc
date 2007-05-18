@@ -404,7 +404,6 @@ NewSessionDialog::NewSessionDialog()
 	m_folder->set_current_folder(getenv ("HOME"));
 	m_folder->set_title(_("select directory"));
 
-	on_new_session_page = true;
 	m_notebook->set_current_page(0);
 	m_notebook->show();
 	m_notebook->show_all_children();
@@ -460,7 +459,7 @@ NewSessionDialog::session_name() const
 	}	  
 	*/
 
-	if (m_notebook->get_current_page() == 0) {
+	if (on_new_session_page ()) {
 	        return Glib::filename_from_utf8(m_name->get_text());
 	} else {
 		if (m_treeview->get_selection()->count_selected_rows() == 0) {
@@ -474,7 +473,7 @@ NewSessionDialog::session_name() const
 std::string
 NewSessionDialog::session_folder() const
 {
-	if (m_notebook->get_current_page() == 0) {
+	if (on_new_session_page ()) {
 		return Glib::filename_from_utf8(m_folder->get_current_folder());
 	} else {
 	       
@@ -571,10 +570,10 @@ NewSessionDialog::connect_outs_to_physical() const
 	return m_connect_outputs_to_physical->get_active();
 }
 
-int
-NewSessionDialog::get_current_page()
+bool
+NewSessionDialog::on_new_session_page() const
 {
-	return m_notebook->get_current_page();
+	return (m_notebook->get_current_page() == 0);
 }
 
 void
@@ -604,8 +603,7 @@ NewSessionDialog::on_new_session_name_entry_changed ()
 void
 NewSessionDialog::notebook_page_changed (GtkNotebookPage* np, uint pagenum)
 {
-	if (pagenum == 1) {
-		on_new_session_page = false;
+	if (!on_new_session_page ()) {
 		m_okbutton->set_label(_("Open"));
 		set_response_sensitive (Gtk::RESPONSE_NONE, false);
 		m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::OPEN, Gtk::ICON_SIZE_BUTTON)));
@@ -615,7 +613,6 @@ NewSessionDialog::notebook_page_changed (GtkNotebookPage* np, uint pagenum)
 			set_response_sensitive (Gtk::RESPONSE_OK, true);
 		}
 	} else {
-		on_new_session_page = true;
 		if (m_name->get_text() != "") {
 			set_response_sensitive (Gtk::RESPONSE_NONE, true);
 		}
@@ -646,7 +643,7 @@ NewSessionDialog::treeview_selection_changed ()
 void
 NewSessionDialog::file_chosen ()
 {
-	if (on_new_session_page) return;
+	if (on_new_session_page ()) return;
 
 	m_treeview->get_selection()->unselect_all();
 

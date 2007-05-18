@@ -1871,7 +1871,7 @@ ARDOUR_UI::new_session (std::string predetermined_path)
 
 			session_name = new_session_dialog->session_name();
 
-			if (new_session_dialog->get_current_page() == 1) {
+			if (!new_session_dialog->on_new_session_page ()) {
 
 				/* XXX this is a bit of a hack.. 
 				   i really want the new sesion dialog to return RESPONSE_YES
