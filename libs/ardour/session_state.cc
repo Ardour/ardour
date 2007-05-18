@@ -510,38 +510,17 @@ Session::create (bool& new_session, string* mix_template, nframes_t initial_leng
 	/* check new_session so we don't overwrite an existing one */
 
 	if (mix_template) {
-		std::string in_path = *mix_template;
+			
+		string out_path = _path + _name + statefile_suffix;
 
-		ifstream in(in_path.c_str());
-
-		if (in){
-			string out_path = _path;
-			out_path += _name;
-			out_path += statefile_suffix;
-
-			ofstream out(out_path.c_str());
-
-			if (out){
-				out << in.rdbuf();
-
-				// okay, session is set up.  Treat like normal saved
-				// session from now on.
-
-				new_session = false;
-				return 0;
-
-			} else {
-				error << string_compose (_("Could not open %1 for writing mix template"), out_path) 
-					<< endmsg;
-				return -1;
-			}
-
-		} else {
-			error << string_compose (_("Could not open mix template %1 for reading"), in_path) 
+		if(!copy_file (*mix_template, out_path)) {
+			error << string_compose (_("Could not use session template %1 to create new session."), *mix_template) 
 				<< endmsg;
 			return -1;
 		}
 
+		new_session = false;
+		return 0;
 	}
 
 	/* set initial start + end point */
