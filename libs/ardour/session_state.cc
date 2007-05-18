@@ -485,6 +485,19 @@ Session::create_session_file ()
 	return true;
 }
 
+bool
+Session::create_session_file_from_template (const string& template_path)
+{
+	string out_path = _path + _name + statefile_suffix;
+
+	if(!copy_file (template_path, out_path)) {
+		error << string_compose (_("Could not use session template %1 to create new session."), template_path) 
+			<< endmsg;
+		return false;
+	}
+	return true;
+}
+
 int
 Session::create (bool& new_session, string* mix_template, nframes_t initial_length)
 {
@@ -532,15 +545,7 @@ Session::create (bool& new_session, string* mix_template, nframes_t initial_leng
 	/* check new_session so we don't overwrite an existing one */
 
 	if (mix_template) {
-			
-		string out_path = _path + _name + statefile_suffix;
-
-		if(!copy_file (*mix_template, out_path)) {
-			error << string_compose (_("Could not use session template %1 to create new session."), *mix_template) 
-				<< endmsg;
-			return -1;
-		}
-
+		if(!create_session_file_from_template(*mix_template)) return -1;
 		new_session = false;
 		return 0;
 	}

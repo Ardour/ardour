@@ -956,6 +956,7 @@ class Session : public PBD::StatefulDestructible
 
 	void initialize_start_and_end_locations(nframes_t start, nframes_t end);
 	bool create_session_file();
+ 	bool create_session_file_from_template (const string& template_path);
 
 	nframes_t compute_initial_length ();
 
