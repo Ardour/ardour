@@ -29,6 +29,7 @@ ardour.Append(CPPPATH = '#libs/surfaces/control_protocol')
 ardour_files=Split("""
 chan_count.cc
 diskstream.cc
+filename_extensions.cc
 track.cc
 audio_diskstream.cc
 audio_library.cc

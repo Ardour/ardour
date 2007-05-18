@@ -96,7 +96,7 @@
 #include <ardour/region_factory.h>
 #include <ardour/source_factory.h>
 #include <ardour/playlist_factory.h>
-
+#include <ardour/filename_extensions.h>
 #include <control_protocol/control_protocol.h>
 
 #include "i18n.h"
@@ -517,7 +517,7 @@ Session::create (bool& new_session, string* mix_template, nframes_t initial_leng
 		if (in){
 			string out_path = _path;
 			out_path += _name;
-			out_path += _statefile_suffix;
+			out_path += statefile_suffix;
 
 			ofstream out(out_path.c_str());
 
@@ -608,7 +608,7 @@ Session::remove_pending_capture_state ()
 
 	xml_path = _path;
 	xml_path += _current_snapshot_name;
-	xml_path += _pending_suffix;
+	xml_path += pending_suffix;
 
 	unlink (xml_path.c_str());
 }
@@ -624,8 +624,8 @@ Session::rename_state (string old_name, string new_name)
 		return;
 	}
 	
-	const string old_xml_path = _path + old_name + _statefile_suffix;
-	const string new_xml_path = _path + new_name + _statefile_suffix;
+	const string old_xml_path = _path + old_name + statefile_suffix;
+	const string new_xml_path = _path + new_name + statefile_suffix;
 
 	if (rename (old_xml_path.c_str(), new_xml_path.c_str()) != 0) {
 		error << string_compose(_("could not rename snapshot %1 to %2"), old_name, new_name) << endmsg;
@@ -643,7 +643,7 @@ Session::remove_state (string snapshot_name)
 		return;
 	}
 	
-	const string xml_path = _path + snapshot_name + _statefile_suffix;
+	const string xml_path = _path + snapshot_name + statefile_suffix;
 
 	/* make a backup copy of the state file */
 	const string bak_path = xml_path + ".bak";
@@ -680,10 +680,10 @@ Session::save_state (string snapshot_name, bool pending)
 
 	if (!pending) {
 
-		/* proper save: use _statefile_suffix (.ardour in English) */
+		/* proper save: use statefile_suffix (.ardour in English) */
 		xml_path = _path;
 		xml_path += snapshot_name;
-		xml_path += _statefile_suffix;
+		xml_path += statefile_suffix;
 
 		/* make a backup copy of the old file */
 		bak_path = xml_path;
@@ -695,10 +695,10 @@ Session::save_state (string snapshot_name, bool pending)
 
 	} else {
 
-		/* pending save: use _pending_suffix (.pending in English) */
+		/* pending save: use pending_suffix (.pending in English) */
 		xml_path = _path;
 		xml_path += snapshot_name;
-		xml_path += _pending_suffix;
+		xml_path += pending_suffix;
 
 	}
 
@@ -768,7 +768,7 @@ Session::load_state (string snapshot_name)
 
 	xmlpath = _path;
 	xmlpath += snapshot_name;
-	xmlpath += _pending_suffix;
+	xmlpath += pending_suffix;
 
 	if (Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
 
@@ -783,7 +783,7 @@ Session::load_state (string snapshot_name)
 
 		xmlpath = _path;
 		xmlpath += snapshot_name;
-		xmlpath += _statefile_suffix;
+		xmlpath += statefile_suffix;
 	}
 	
 	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
@@ -831,7 +831,7 @@ Session::load_state (string snapshot_name)
 		backup_path = _path;
 		backup_path += snapshot_name;
 		backup_path += "-1";
-		backup_path += _statefile_suffix;
+		backup_path += statefile_suffix;
 
 		info << string_compose (_("Copying old session file %1 to %2\nUse %2 with Ardour versions before 2.0 from now on"),
 					xmlpath, backup_path) 
@@ -1700,7 +1700,7 @@ Session::save_template (string template_name)
 
 	xml_path = dir;
 	xml_path += template_name;
-	xml_path += _template_suffix;
+	xml_path += template_suffix;
 
 	ifstream in(xml_path.c_str());
 	
@@ -1722,8 +1722,8 @@ Session::save_template (string template_name)
 int
 Session::rename_template (string old_name, string new_name) 
 {
-	string old_path = template_dir() + old_name + _template_suffix;
-	string new_path = template_dir() + new_name + _template_suffix;
+	string old_path = template_dir() + old_name + template_suffix;
+	string new_path = template_dir() + new_name + template_suffix;
 
 	return rename (old_path.c_str(), new_path.c_str());
 }
@@ -1733,7 +1733,7 @@ Session::delete_template (string name)
 {
 	string template_path = template_dir();
 	template_path += name;
-	template_path += _template_suffix;
+	template_path += template_suffix;
 
 	return remove (template_path.c_str());
 }
@@ -2228,8 +2228,8 @@ Session::load_route_groups (const XMLNode& node, bool edit)
 static bool
 state_file_filter (const string &str, void *arg)
 {
-	return (str.length() > strlen(Session::statefile_suffix()) &&
-		str.find (Session::statefile_suffix()) == (str.length() - strlen (Session::statefile_suffix())));
+	return (str.length() > strlen(statefile_suffix) &&
+		str.find (statefile_suffix) == (str.length() - strlen (statefile_suffix)));
 }
 
 struct string_cmp {
@@ -2492,8 +2492,8 @@ Session::global_record_enable_memento (void* src)
 static bool
 template_filter (const string &str, void *arg)
 {
-	return (str.length() > strlen(Session::template_suffix()) &&
-		str.find (Session::template_suffix()) == (str.length() - strlen (Session::template_suffix())));
+	return (str.length() > strlen(template_suffix) &&
+		str.find (template_suffix) == (str.length() - strlen (template_suffix)));
 }
 
 void
@@ -2657,7 +2657,7 @@ Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_th
 
 	this_snapshot_path = _path;
 	this_snapshot_path += _current_snapshot_name;
-	this_snapshot_path += _statefile_suffix;
+	this_snapshot_path += statefile_suffix;
 
 	for (vector<string*>::iterator i = state_files->begin(); i != state_files->end(); ++i) {
 

@@ -907,12 +907,6 @@ class Session : public PBD::StatefulDestructible
 	static int read_favorite_dirs (FavoriteDirs&);
 
 	static int write_favorite_dirs (FavoriteDirs&);
-	
-	/* file suffixes */
-
-	static const char* template_suffix() { return _template_suffix; }
-	static const char* statefile_suffix() { return _statefile_suffix; }
-	static const char* pending_suffix() { return _pending_suffix; }
 
 	/* buffers for gain and pan */
 
@@ -964,10 +958,6 @@ class Session : public PBD::StatefulDestructible
 	void destroy ();
 
 	nframes_t compute_initial_length ();
-
-	static const char* _template_suffix;
-	static const char* _statefile_suffix;
-	static const char* _pending_suffix;
 
 	enum SubState {
 		PendingDeclickIn   = 0x1,

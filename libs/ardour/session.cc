@@ -72,6 +72,7 @@
 #include <ardour/buffer_set.h>
 #include <ardour/source_factory.h>
 #include <ardour/region_factory.h>
+#include <ardour/filename_extensions.h>
 
 #ifdef HAVE_LIBLO
 #include <ardour/osc.h>
@@ -90,9 +91,6 @@ static const int CPU_CACHE_ALIGN = 64;
 static const int CPU_CACHE_ALIGN = 16; /* arguably 32 on most arches, but it matters less */
 #endif
 
-const char* Session::_template_suffix = X_(".template");
-const char* Session::_statefile_suffix = X_(".ardour");
-const char* Session::_pending_suffix = X_(".pending");
 const char* Session::old_sound_dir_name = X_("sounds");
 const char* Session::sound_dir_name = X_("audiofiles");
 const char* Session::peak_dir_name = X_("peaks");
@@ -153,7 +151,7 @@ Session::find_session (string str, string& path, string& snapshot, bool& isnew)
 				tmp = str;
 				tmp += '/';
 				tmp += str;
-				tmp += _statefile_suffix;
+				tmp += statefile_suffix;
 
 				/* is it there ? */
 				
@@ -191,7 +189,7 @@ Session::find_session (string str, string& path, string& snapshot, bool& isnew)
 				snapshot = str;
 			}
 
-			suffix = snapshot.find (_statefile_suffix);
+			suffix = snapshot.find (statefile_suffix);
 			
 			if (suffix == string::npos) {
 				error << string_compose (_("%1 is not an Ardour snapshot file"), str) << endmsg;
