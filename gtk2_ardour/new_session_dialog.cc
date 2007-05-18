@@ -366,7 +366,7 @@ NewSessionDialog::NewSessionDialog()
 	std::string path = ARDOUR::get_user_ardour_path();
 	
 	if (path.empty()) {
-	        path = ARDOUR::get_system_data_path();
+		path = ARDOUR::get_system_data_path();
 	}
 
 	const char * const template_dir_name = X_("templates");
@@ -445,7 +445,7 @@ NewSessionDialog::set_session_name(const Glib::ustring& name)
 std::string
 NewSessionDialog::session_name() const
 {
-        std::string str = Glib::filename_from_utf8(m_open_filechooser->get_filename());
+	std::string str = Glib::filename_from_utf8(m_open_filechooser->get_filename());
 	std::string::size_type position = str.find_last_of ('/');
 	str = str.substr (position+1);
 	position = str.find_last_of ('.');
@@ -474,12 +474,12 @@ NewSessionDialog::session_name() const
 std::string
 NewSessionDialog::session_folder() const
 {
-        if (m_notebook->get_current_page() == 0) {
-	        return Glib::filename_from_utf8(m_folder->get_current_folder());
+	if (m_notebook->get_current_page() == 0) {
+		return Glib::filename_from_utf8(m_folder->get_current_folder());
 	} else {
 	       
 		if (m_treeview->get_selection()->count_selected_rows() == 0) {
-		        return Glib::filename_from_utf8(m_open_filechooser->get_current_folder());
+			return Glib::filename_from_utf8(m_open_filechooser->get_current_folder());
 		}
 		Gtk::TreeModel::iterator i = m_treeview->get_selection()->get_selected();
 		return (*i)[recent_columns.fullpath];
@@ -489,7 +489,7 @@ NewSessionDialog::session_folder() const
 bool
 NewSessionDialog::use_session_template() const
 {
-        if(m_template->get_filename().empty() && (m_notebook->get_current_page() == 0)) return false;
+	if(m_template->get_filename().empty() && (m_notebook->get_current_page() == 0)) return false;
 	return true;
 }
 
@@ -588,7 +588,6 @@ NewSessionDialog::reset_name()
 {
 	m_name->set_text("");
 	set_response_sensitive (Gtk::RESPONSE_OK, false);
-	
 }
 
 void
@@ -674,61 +673,61 @@ NewSessionDialog::template_chosen ()
 void
 NewSessionDialog::recent_row_activated (const Gtk::TreePath& path, Gtk::TreeViewColumn* col)
 {
-        response (Gtk::RESPONSE_YES);
+	response (Gtk::RESPONSE_YES);
 }
 
 void
 NewSessionDialog::connect_inputs_clicked ()
 {
-        m_limit_input_ports->set_sensitive(m_connect_inputs->get_active());
+	m_limit_input_ports->set_sensitive(m_connect_inputs->get_active());
 
-		if (m_connect_inputs->get_active() && m_limit_input_ports->get_active()) {
-	        m_input_limit_count->set_sensitive(true);
-		} else {
-	        m_input_limit_count->set_sensitive(false);
-		}
+	if (m_connect_inputs->get_active() && m_limit_input_ports->get_active()) {
+		m_input_limit_count->set_sensitive(true);
+	} else {
+		m_input_limit_count->set_sensitive(false);
+	}
 }
 
 void
 NewSessionDialog::connect_outputs_clicked ()
 {
-        m_limit_output_ports->set_sensitive(m_connect_outputs->get_active());
+	m_limit_output_ports->set_sensitive(m_connect_outputs->get_active());
 
-		if (m_connect_outputs->get_active() && m_limit_output_ports->get_active()) {
-	        m_output_limit_count->set_sensitive(true);
-		} else {
-	        m_output_limit_count->set_sensitive(false);
-		}
+	if (m_connect_outputs->get_active() && m_limit_output_ports->get_active()) {
+		m_output_limit_count->set_sensitive(true);
+	} else {
+		m_output_limit_count->set_sensitive(false);
+	}
 }
 
 void
 NewSessionDialog::limit_inputs_clicked ()
 {
-        m_input_limit_count->set_sensitive(m_limit_input_ports->get_active());
+	m_input_limit_count->set_sensitive(m_limit_input_ports->get_active());
 }
 
 void
 NewSessionDialog::limit_outputs_clicked ()
 {
-        m_output_limit_count->set_sensitive(m_limit_output_ports->get_active());
+	m_output_limit_count->set_sensitive(m_limit_output_ports->get_active());
 }
 
 void
 NewSessionDialog::master_bus_button_clicked ()
 {
-        m_master_bus_channel_count->set_sensitive(m_create_master_bus->get_active());
+	m_master_bus_channel_count->set_sensitive(m_create_master_bus->get_active());
 }
 
 void
 NewSessionDialog::monitor_bus_button_clicked ()
 {
-        m_control_bus_channel_count->set_sensitive(m_create_control_bus->get_active());
+	m_control_bus_channel_count->set_sensitive(m_create_control_bus->get_active());
 }
 
 void
 NewSessionDialog::reset_template()
 {
-        m_template->set_filename("");
+	m_template->set_filename("");
 }
 
 void
@@ -761,14 +760,14 @@ NewSessionDialog::reset_recent()
 		/* remove any trailing / */
 		
 		if (fullpath[fullpath.length()-1] == '/') {
-		        fullpath = fullpath.substr (0, fullpath.length()-1);
+			fullpath = fullpath.substr (0, fullpath.length()-1);
 		}
 	    
 		/* now get available states for this session */
 		  
 		if ((states = ARDOUR::Session::possible_states (fullpath)) == 0) {
-		        /* no state file? */
-		        continue;
+			/* no state file? */
+			continue;
 		}
 	    
 		Gtk::TreeModel::Row row = *(recent_model->append());
@@ -777,16 +776,16 @@ NewSessionDialog::reset_recent()
 		row[recent_columns.fullpath] = fullpath;
 		
 		if (states->size()) {
-		    
-		        /* add the children */
-		    
-		        for (std::vector<std::string*>::iterator i2 = states->begin(); i2 != states->end(); ++i2) {
 
-			        Gtk::TreeModel::Row child_row = *(recent_model->append (row.children()));
-				
+			/* add the children */
+
+			for (std::vector<std::string*>::iterator i2 = states->begin(); i2 != states->end(); ++i2) {
+
+				Gtk::TreeModel::Row child_row = *(recent_model->append (row.children()));
+
 				child_row[recent_columns.visible_name] = **i2;
 				child_row[recent_columns.fullpath] = fullpath;
-				
+
 				delete *i2;
 			}
 		}
