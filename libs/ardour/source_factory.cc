@@ -60,18 +60,20 @@ SourceFactory::createSilent (Session& s, const XMLNode& node, nframes_t nframes,
 	return ret;
 }
 
-#ifdef HAVE_COREAUDIO
 boost::shared_ptr<Source>
 SourceFactory::create (Session& s, const XMLNode& node)
 {
+	/* this is allowed to throw */
+
 	DataType type = DataType::AUDIO;
 	const XMLProperty* prop = node.property("type");
 	if (prop) {
 		type = DataType(prop->value());
 	}
-
+	
 	if (type == DataType::AUDIO) {
-
+		
+#ifdef HAVE_COREAUDIO
 		try {
 			boost::shared_ptr<Source> ret (new CoreAudioSource (s, node));
 			if (setup_peakfile (ret)) {
@@ -92,32 +94,7 @@ SourceFactory::create (Session& s, const XMLNode& node)
 			SourceCreated (ret);
 			return ret;
 		}
-
-	} else if (type == DataType::MIDI) {
-
-		boost::shared_ptr<Source> ret (new SMFSource (node));
-		SourceCreated (ret);
-		return ret;
-	}
-
-	return boost::shared_ptr<Source>();
-}
-
 #else
-
-boost::shared_ptr<Source>
-SourceFactory::create (Session& s, const XMLNode& node)
-{
-	/* this is allowed to throw */
-
-	DataType type = DataType::AUDIO;
-	const XMLProperty* prop = node.property("type");
-	if (prop) {
-		type = DataType(prop->value());
-	}
-	
-	if (type == DataType::AUDIO) {
-		
 		boost::shared_ptr<Source> ret (new SndFileSource (s, node));
 
 		if (setup_peakfile (ret)) {
@@ -126,6 +103,7 @@ SourceFactory::create (Session& s, const XMLNode& node)
 		
 		SourceCreated (ret);
 		return ret;
+#endif
 
 	} else if (type == DataType::MIDI) {
 
@@ -139,43 +117,14 @@ SourceFactory::create (Session& s, const XMLNode& node)
 	return boost::shared_ptr<Source> ();
 }
 
-#endif // HAVE_COREAUDIO
-
-#ifdef HAVE_COREAUDIO
 boost::shared_ptr<Source>
 SourceFactory::createReadable (DataType type, Session& s, string path, int chn, AudioFileSource::Flag flags, bool announce)
 {
 	if (type == DataType::AUDIO) {
-		if (!(flags & Destructive)) {
-
-			try {
-				boost::shared_ptr<Source> ret (new CoreAudioSource (s, path, chn, flags));
-				if (setup_peakfile (ret)) {
-					return boost::shared_ptr<Source>();
-				}
-				if (announce) {
-					SourceCreated (ret);
-				}
-				return ret;
-			}
-
-			catch (failed_constructor& err) {
-				boost::shared_ptr<Source> ret (new SndFileSource (s, path, chn, flags));
-				if (setup_peakfile (ret)) {
-					return boost::shared_ptr<Source>();
-				}
-				if (announce) {
-					SourceCreated (ret);
-				}
-				return ret;
-			}
-
-		} else {
-
-
-			/* this is allowed to throw */
-
-			boost::shared_ptr<Source> ret (new SndFileSource (s, path, chn, flags));
+	
+#ifdef HAVE_COREAUDIO
+		try {
+			boost::shared_ptr<Source> ret (new CoreAudioSource (s, path, chn, flags));
 			if (setup_peakfile (ret)) {
 				return boost::shared_ptr<Source>();
 			}
@@ -185,27 +134,17 @@ SourceFactory::createReadable (DataType type, Session& s, string path, int chn, 
 			return ret;
 		}
 
-		return boost::shared_ptr<Source>();
-	} else if (type == DataType::MIDI) {
-
-		boost::shared_ptr<Source> ret (new SMFSource (s, node));
-		if (announce) {
-			SourceCreated (ret);
+		catch (failed_constructor& err) {
+			boost::shared_ptr<Source> ret (new SndFileSource (s, path, chn, flags));
+			if (setup_peakfile (ret)) {
+				return boost::shared_ptr<Source>();
+			}
+			if (announce) {
+				SourceCreated (ret);
+			}
+			return ret;
 		}
-		return ret;
-
-	}
-
-	return boost::shared_ptr<Source>();
-}
-
 #else
-
-boost::shared_ptr<Source>
-SourceFactory::createReadable (DataType type, Session& s, string path, int chn, AudioFileSource::Flag flags, bool announce)
-{
-	if (type == DataType::AUDIO) {
-	
 		boost::shared_ptr<Source> ret (new SndFileSource (s, path, chn, flags));
 
 		if (setup_peakfile (ret)) {
@@ -217,7 +156,7 @@ SourceFactory::createReadable (DataType type, Session& s, string path, int chn, 
 		}
 
 		return ret;
-
+#endif
 
 	} else if (type == DataType::MIDI) {
 
@@ -233,8 +172,6 @@ SourceFactory::createReadable (DataType type, Session& s, string path, int chn, 
 
 	return boost::shared_ptr<Source>();
 }
-
-#endif // HAVE_COREAUDIO
 
 boost::shared_ptr<Source>
 SourceFactory::createWritable (DataType type, Session& s, std::string path, bool destructive, nframes_t rate, bool announce)
