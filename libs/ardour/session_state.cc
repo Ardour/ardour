@@ -97,6 +97,7 @@
 #include <ardour/source_factory.h>
 #include <ardour/playlist_factory.h>
 #include <ardour/filename_extensions.h>
+#include <ardour/directory_names.h>
 #include <control_protocol/control_protocol.h>
 
 #include "i18n.h"

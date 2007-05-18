@@ -1558,13 +1558,6 @@ class Session : public PBD::StatefulDestructible
 	vector<space_and_path>::iterator last_rr_session_dir;
 	uint32_t _total_free_4k_blocks;
 	Glib::Mutex space_lock;
-
-	static const char* old_sound_dir_name;
-	static const char* sound_dir_name;
-	static const char* dead_sound_dir_name;
-	static const char* interchange_dir_name;
-	static const char* peak_dir_name;
-	static const char* export_dir_name;
 	
 	string old_sound_dir (bool with_path = true) const;
 	string discover_best_sound_dir (bool destructive = false);

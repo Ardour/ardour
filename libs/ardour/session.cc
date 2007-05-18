@@ -91,13 +91,6 @@ static const int CPU_CACHE_ALIGN = 64;
 static const int CPU_CACHE_ALIGN = 16; /* arguably 32 on most arches, but it matters less */
 #endif
 
-const char* Session::old_sound_dir_name = X_("sounds");
-const char* Session::sound_dir_name = X_("audiofiles");
-const char* Session::peak_dir_name = X_("peaks");
-const char* Session::dead_sound_dir_name = X_("dead_sounds");
-const char* Session::interchange_dir_name = X_("interchange");
-const char* Session::export_dir_name = X_("export");
-
 sigc::signal<int> Session::AskAboutPendingState;
 sigc::signal<void> Session::SendFeedback;
 
