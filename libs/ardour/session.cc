@@ -124,32 +124,35 @@ Session::Session (AudioEngine &eng,
 		throw failed_constructor();
 	}
 
-	cerr << "Loading session " << fullpath << " using snapshot " << snapshot_name << " (1)" << endl;
-
 	n_physical_outputs = _engine.n_physical_outputs();
 	n_physical_inputs =  _engine.n_physical_inputs();
 
 	first_stage_init (fullpath, snapshot_name);
 
 	initialize_start_and_end_locations(0, compute_initial_length ());
-	
-	bool new_session = !g_file_test (_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
 
-	if (new_session) {
-		// A mix_template must be specified if using this constructor
-		// to create a new session.
-		assert(mix_template);
+	SessionDirectory sdir(fullpath);
 
-		if (!create_session_directory () ||
-				!create_session_file_from_template (*mix_template)) {
-			destroy ();
-			throw failed_constructor ();
-		}
-		// Continue construction like a normal saved session from now on.
-		new_session = false;
+	if (mix_template &&
+		sdir.create() &&
+		create_session_file_from_template (*mix_template)) {
+
+		cerr << "Creating session " << fullpath
+			<<" using template" << *mix_template
+			<< endl;
+
+	} else if (sdir.is_valid ()) {
+
+		cerr << "Loading session " << fullpath
+			<< " using snapshot " << snapshot_name << " (1)"
+			<< endl;
+
+	} else {
+		destroy ();
+		throw failed_constructor ();
 	}
 
-	if (second_stage_init (new_session)) {
+	if (second_stage_init (false)) {
 		destroy ();
 		throw failed_constructor ();
 	}
