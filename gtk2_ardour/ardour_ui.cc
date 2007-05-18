@@ -227,7 +227,7 @@ ARDOUR_UI::set_engine (AudioEngine& e)
 	engine->Halted.connect (mem_fun(*this, &ARDOUR_UI::engine_halted));
 	engine->SampleRateChanged.connect (mem_fun(*this, &ARDOUR_UI::update_sample_rate));
 
-       	ActionManager::init ();
+	ActionManager::init ();
 	new_session_dialog = new NewSessionDialog();
 
 	_tooltips.enable();
@@ -437,34 +437,34 @@ ARDOUR_UI::save_ardour_state ()
 gint
 ARDOUR_UI::autosave_session ()
 {
-        if (!Config->get_periodic_safety_backups())
-                return 1;
-        
-        if (session) {
-                session->maybe_write_autosave();
-        }
+	if (!Config->get_periodic_safety_backups())
+		return 1;
 
-        return 1;
+	if (session) {
+		session->maybe_write_autosave();
+	}
+
+	return 1;
 }
 
 void
 ARDOUR_UI::update_autosave ()
 {
-        ENSURE_GUI_THREAD (mem_fun (*this, &ARDOUR_UI::update_autosave));
-        
-        if (session->dirty()) {
-                if (_autosave_connection.connected()) {
-                        _autosave_connection.disconnect();
-                }
+	ENSURE_GUI_THREAD (mem_fun (*this, &ARDOUR_UI::update_autosave));
 
-                _autosave_connection = Glib::signal_timeout().connect (mem_fun (*this, &ARDOUR_UI::autosave_session),
-								    Config->get_periodic_safety_backup_interval() * 1000);
+	if (session->dirty()) {
+		if (_autosave_connection.connected()) {
+			_autosave_connection.disconnect();
+		}
 
-        } else {
-                if (_autosave_connection.connected()) {
-                        _autosave_connection.disconnect();
-                }               
-        }
+		_autosave_connection = Glib::signal_timeout().connect (mem_fun (*this, &ARDOUR_UI::autosave_session),
+				Config->get_periodic_safety_backup_interval() * 1000);
+
+	} else {
+		if (_autosave_connection.connected()) {
+			_autosave_connection.disconnect();
+		}               
+	}
 }
 
 void
@@ -1825,13 +1825,13 @@ ARDOUR_UI::new_session (std::string predetermined_path)
 	new_session_dialog->set_current_page (0);
 
 	do {
-	        response = new_session_dialog->run ();
+		response = new_session_dialog->run ();
 
 		if (!check_audioengine()) {
 			new_session_dialog->hide ();
 			return false;
 		}
-		
+
 		_session_is_new = false;
 
 		if (response == Gtk::RESPONSE_CANCEL || response == Gtk::RESPONSE_DELETE_EVENT) {
@@ -1844,55 +1844,55 @@ ARDOUR_UI::new_session (std::string predetermined_path)
 
 		} else if (response == Gtk::RESPONSE_NONE) {
 
-		        /* Clear was pressed */
-		        new_session_dialog->reset();
+			/* Clear was pressed */
+			new_session_dialog->reset();
 
 		} else if (response == Gtk::RESPONSE_YES) {
 
-		        /* YES  == OPEN, but there's no enum for that */
+			/* YES  == OPEN, but there's no enum for that */
 
-		        session_name = new_session_dialog->session_name();
-			
+			session_name = new_session_dialog->session_name();
+
 			if (session_name.empty()) {
 				response = Gtk::RESPONSE_NONE;
 				continue;
 			} 
 
 			if (session_name[0] == '/' || 
-			    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
-			    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
+					(session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
+					(session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
 				load_session (Glib::path_get_dirname (session_name), session_name);
 			} else {
 				session_path = new_session_dialog->session_folder();
 				load_session (session_path, session_name);
 			}
-			
+
 		} else if (response == Gtk::RESPONSE_OK) {
 
 			session_name = new_session_dialog->session_name();
-			
-		        if (new_session_dialog->get_current_page() == 1) {
-		  
-			        /* XXX this is a bit of a hack.. 
+
+			if (new_session_dialog->get_current_page() == 1) {
+
+				/* XXX this is a bit of a hack.. 
 				   i really want the new sesion dialog to return RESPONSE_YES
 				   if we're on page 1 (the load page)
 				   Unfortunately i can't see how atm.. 
 				*/
-				
+
 				if (session_name.empty()) {
 					response = Gtk::RESPONSE_NONE;
 					continue;
 				} 
-				
+
 				if (session_name[0] == '/' || 
-				    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
-				    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
+						(session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
+						(session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
 					load_session (Glib::path_get_dirname (session_name), session_name);
 				} else {
 					session_path = new_session_dialog->session_folder();
 					load_session (session_path, session_name);
 				}
-			
+
 			} else {
 
 				if (session_name.empty()) {
@@ -1901,8 +1901,8 @@ ARDOUR_UI::new_session (std::string predetermined_path)
 				} 
 
 				if (session_name[0] == '/' || 
-				    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
-				    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
+						(session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
+						(session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
 
 					session_path = Glib::path_get_dirname (session_name);
 					session_name = Glib::path_get_basename (session_name);
@@ -1912,74 +1912,74 @@ ARDOUR_UI::new_session (std::string predetermined_path)
 					session_path = new_session_dialog->session_folder();
 
 				}
-				
+
 				//XXX This is needed because session constructor wants a 
 				//non-existant path. hopefully this will be fixed at some point.
-				
+
 				session_path = Glib::build_filename (session_path, session_name);
-						
+
 				if (g_file_test (session_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
 
 					Glib::ustring str = string_compose (_("This session\n%1\nalready exists. Do you want to open it?"), session_path);
 
 					MessageDialog msg (str,
-							   false,
-							   Gtk::MESSAGE_WARNING,
-							   Gtk::BUTTONS_YES_NO,
-							   true);
+							false,
+							Gtk::MESSAGE_WARNING,
+							Gtk::BUTTONS_YES_NO,
+							true);
 
 
 					msg.set_name (X_("CleanupDialog"));
 					msg.set_wmclass (X_("existing_session"), "Ardour");
 					msg.set_position (Gtk::WIN_POS_MOUSE);
-					
+
 					switch (msg.run()) {
-					case RESPONSE_YES:
-						load_session (session_path, session_name);
-						goto done;
-						break;
-					default:
-						response = RESPONSE_NONE;
-						new_session_dialog->reset ();
-						continue;
+						case RESPONSE_YES:
+							load_session (session_path, session_name);
+							goto done;
+							break;
+						default:
+							response = RESPONSE_NONE;
+							new_session_dialog->reset ();
+							continue;
 					}
 				}
 
-			        _session_is_new = true;
+				_session_is_new = true;
 
 				std::string template_name = new_session_dialog->session_template_name();
-						
+
 				if (new_session_dialog->use_session_template()) {
-							
+
 					load_session (session_path, session_name, &template_name);
-			  
+
 				} else {
-							
+
 					uint32_t cchns;
 					uint32_t mchns;
 					AutoConnectOption iconnect;
 					AutoConnectOption oconnect;
-							
+
 					if (new_session_dialog->create_control_bus()) {
 						cchns = (uint32_t) new_session_dialog->control_channel_count();
 					} else {
 						cchns = 0;
 					}
-							
+
 					if (new_session_dialog->create_master_bus()) {
 						mchns = (uint32_t) new_session_dialog->master_channel_count();
 					} else {
 						mchns = 0;
 					}
-							
+
 					if (new_session_dialog->connect_inputs()) {
 						iconnect = AutoConnectPhysical;
 					} else {
 						iconnect = AutoConnectOption (0);
 					}
-							
+
 					/// @todo some minor tweaks.
-							
+
 					if (new_session_dialog->connect_outs_to_master()) {
 						oconnect = AutoConnectMaster;
 					} else if (new_session_dialog->connect_outs_to_physical()) {
@@ -1987,19 +1987,19 @@ ARDOUR_UI::new_session (std::string predetermined_path)
 					} else {
 						oconnect = AutoConnectOption (0);
 					} 
-							
+
 					uint32_t nphysin = (uint32_t) new_session_dialog->input_limit_count();
 					uint32_t nphysout = (uint32_t) new_session_dialog->output_limit_count();
-							
+
 					if (build_session (session_path,
-							   session_name,
-							   cchns,
-							   mchns,
-							   iconnect,
-							   oconnect,
-							   nphysin,
-							   nphysout, 
-							   engine->frame_rate() * 60 * 5)) {
+								session_name,
+								cchns,
+								mchns,
+								iconnect,
+								oconnect,
+								nphysin,
+								nphysout, 
+								engine->frame_rate() * 60 * 5)) {
 
 						response = Gtk::RESPONSE_NONE;
 						new_session_dialog->reset ();
@@ -2008,7 +2008,7 @@ ARDOUR_UI::new_session (std::string predetermined_path)
 				}
 			}
 		}
-		
+
 	} while (response == Gtk::RESPONSE_NONE);
 
   done:
