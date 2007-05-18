@@ -56,6 +56,7 @@
 #include <ardour/ardour.h>
 #include <ardour/profile.h>
 #include <ardour/session_route.h>
+#include <ardour/session_utils.h>
 #include <ardour/port.h>
 #include <ardour/audioengine.h>
 #include <ardour/playlist.h>
@@ -1010,7 +1011,7 @@ ARDOUR_UI::open_session ()
 	bool isnew;
 
 	if (session_path.length() > 0) {
-		if (Session::find_session (session_path, path, name, isnew) == 0) {
+		if (ARDOUR::find_session (session_path, path, name, isnew) == 0) {
 			_session_is_new = isnew;
 			load_session (path, name);
 		}

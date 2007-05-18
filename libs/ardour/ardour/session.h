@@ -240,9 +240,6 @@ class Session : public PBD::StatefulDestructible
 	
 	virtual ~Session ();
 
-
-	static int find_session (string str, string& path, string& snapshot, bool& isnew);
-	
 	string path() const { return _path; }
 	string name() const { return _name; }
 	string snap_name() const { return _current_snapshot_name; }

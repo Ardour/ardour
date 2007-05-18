@@ -32,6 +32,7 @@
 #include <ardour/version.h>
 #include <ardour/ardour.h>
 #include <ardour/audioengine.h>
+#include <ardour/session_utils.h>
 
 #include <gtkmm/main.h>
 #include <gtkmm2ext/popup.h>
@@ -140,7 +141,7 @@ maybe_load_session ()
 
 	bool isnew;
 
-	if (Session::find_session (session_name, path, name, isnew)) {
+	if (find_session (session_name, path, name, isnew)) {
 		error << string_compose(_("could not load command line session \"%1\""), session_name) << endmsg;
 		return false;
 	}

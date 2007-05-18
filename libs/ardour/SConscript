@@ -30,6 +30,7 @@ ardour_files=Split("""
 chan_count.cc
 diskstream.cc
 filename_extensions.cc
+find_session.cc
 track.cc
 audio_diskstream.cc
 audio_library.cc

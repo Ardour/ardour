@@ -44,6 +44,7 @@
 #include "i18n.h"
 
 #include <ardour/session.h>
+#include <ardour/session_utils.h>
 
 #include <unistd.h>
 
@@ -2062,7 +2063,7 @@ ImageFrameSocketHandler::handle_open_session(const char* msg)
 	std::string path, name ;
 	bool isnew;
 
-	if (ARDOUR::Session::find_session(session_name, path, name, isnew) == 0) {
+	if (ARDOUR::find_session(session_name, path, name, isnew) == 0) {
 		if (ARDOUR_UI::instance()->load_session (path, name) == 0) {
 			send_return_success() ;
 		} else {
