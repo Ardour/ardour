@@ -133,14 +133,9 @@ Editor::remove_route (TimeAxisView *tv)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::remove_route), tv));
 
-	
 	TrackViewList::iterator i;
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator ri;
-
-	if ((i = find (track_views.begin(), track_views.end(), tv)) != track_views.end()) {
-		track_views.erase (i);
-	}
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		if ((*ri)[route_display_columns.tv] == tv) {
@@ -148,9 +143,15 @@ Editor::remove_route (TimeAxisView *tv)
 			break;
 		}
 	}
+
+	if ((i = find (track_views.begin(), track_views.end(), tv)) != track_views.end()) {
+		track_views.erase (i);
+	}
+
 	/* since the editor mixer goes away when you remove a route, set the
 	 * button to inactive and untick the menu option
 	 */
+
 	editor_mixer_button.set_active(false);
 	ActionManager::uncheck_toggleaction ("<Actions>/Editor/show-editor-mixer");
 

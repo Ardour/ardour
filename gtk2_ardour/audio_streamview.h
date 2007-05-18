@@ -91,7 +91,7 @@ class AudioStreamView : public StreamView
 	void undisplay_diskstream ();
 	void redisplay_diskstream ();
 	void playlist_modified ();
-	void playlist_changed (boost::shared_ptr<ARDOUR::Diskstream>);
+	void playlist_changed (boost::weak_ptr<ARDOUR::Diskstream>);
 
 	void add_crossfade (boost::shared_ptr<ARDOUR::Crossfade>);
 	void add_crossfade_weak (boost::weak_ptr<ARDOUR::Crossfade>);

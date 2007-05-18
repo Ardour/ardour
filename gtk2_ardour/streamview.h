@@ -111,12 +111,12 @@ protected:
 	virtual void remove_region_view (boost::weak_ptr<ARDOUR::Region> );
 	//void         remove_rec_region (boost::shared_ptr<ARDOUR::Region>); (unused)
 
-	void         display_diskstream (boost::shared_ptr<ARDOUR::Diskstream>);
+	void         display_diskstream (boost::weak_ptr<ARDOUR::Diskstream>);
 	virtual void undisplay_diskstream ();
 	virtual void redisplay_diskstream () = 0;
 	void         diskstream_changed ();
 	
-	virtual void playlist_changed (boost::shared_ptr<ARDOUR::Diskstream>);
+	virtual void playlist_changed (boost::weak_ptr<ARDOUR::Diskstream>);
 	virtual void playlist_modified ();
 	
 	virtual void color_handler (ColorID, uint32_t) = 0;

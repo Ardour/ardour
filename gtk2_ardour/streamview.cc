@@ -194,11 +194,17 @@ StreamView::undisplay_diskstream ()
 }
 
 void
-StreamView::display_diskstream (boost::shared_ptr<Diskstream> ds)
+StreamView::display_diskstream (boost::weak_ptr<Diskstream> wds)
 {
+	boost::shared_ptr<Diskstream> ds = wds.lock();
+
+	if (!ds) {
+		return;
+	}
+		
 	playlist_change_connection.disconnect();
-	playlist_changed (ds);
-	playlist_change_connection = ds->PlaylistChanged.connect (bind (mem_fun (*this, &StreamView::playlist_changed), ds));
+	playlist_changed (wds);
+	playlist_change_connection = ds->PlaylistChanged.connect (bind (mem_fun (*this, &StreamView::playlist_changed), wds));
 }
 
 void
@@ -210,9 +216,15 @@ StreamView::playlist_modified ()
 }
 
 void
-StreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
+StreamView::playlist_changed (boost::weak_ptr<Diskstream> wptr)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::playlist_changed), ds));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::playlist_changed), wptr));
+
+	boost::shared_ptr<Diskstream> ds = wptr.lock();
+	
+	if (!ds) {
+		return;
+	}
 
 	/* disconnect from old playlist */
 
@@ -238,7 +250,7 @@ StreamView::diskstream_changed ()
 	Track *t;
 
 	if ((t = _trackview.track()) != 0) {
-		Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun (*this, &StreamView::display_diskstream), t->diskstream()));
+		Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun (*this, &StreamView::display_diskstream), boost::weak_ptr<Diskstream> (t->diskstream())));
 	} else {
 		Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &StreamView::undisplay_diskstream));
 	}

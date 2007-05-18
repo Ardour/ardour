@@ -279,9 +279,15 @@ AudioStreamView::playlist_modified ()
 }
 
 void
-AudioStreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
+AudioStreamView::playlist_changed (boost::weak_ptr<Diskstream> wptr)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::playlist_changed), ds));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::playlist_changed), wptr));
+
+	boost::shared_ptr<Diskstream> ds  = wptr.lock();
+
+	if (!ds) {
+		return;
+	}
 
 	StreamView::playlist_changed(ds);
 

@@ -60,6 +60,9 @@ Track::Track (Session& sess, const XMLNode& node, DataType default_type)
 
 Track::~Track ()
 {
+	if (_diskstream) {
+		_diskstream->drop_references ();
+	}
 }
 
 void

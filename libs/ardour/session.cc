@@ -986,8 +986,15 @@ Session::playlist_length_changed ()
 }
 
 void
-Session::diskstream_playlist_changed (boost::shared_ptr<Diskstream> dstream)
+Session::diskstream_playlist_changed (boost::weak_ptr<Diskstream> wptr)
 {
+	boost::shared_ptr<Diskstream> dstream = wptr.lock();
+	
+	if (!dstream) {
+		return;
+
+	}
+
 	boost::shared_ptr<Playlist> playlist;
 
 	if ((playlist = dstream->playlist()) != 0) {
@@ -2019,12 +2026,12 @@ Session::add_diskstream (boost::shared_ptr<Diskstream> dstream)
 		/* writer goes out of scope, copies ds back to main */
 	} 
 
-	dstream->PlaylistChanged.connect (sigc::bind (mem_fun (*this, &Session::diskstream_playlist_changed), dstream));
+	dstream->PlaylistChanged.connect (sigc::bind (mem_fun (*this, &Session::diskstream_playlist_changed), 
+						      boost::weak_ptr<Diskstream> (dstream)));
 	/* this will connect to future changes, and check the current length */
 	diskstream_playlist_changed (dstream);
 
 	dstream->prepare ();
-
 }
 
 void
@@ -2077,6 +2084,8 @@ Session::remove_route (shared_ptr<Route> route)
 			boost::shared_ptr<DiskstreamList> d = dsl.get_copy();
 			d->remove (ds);
 		}
+
+		diskstreams.flush ();
 	}
 
 	find_current_end ();
@@ -2085,8 +2094,9 @@ Session::remove_route (shared_ptr<Route> route)
 	set_dirty();
 
 	// We need to disconnect the routes inputs and outputs 
-	route->disconnect_inputs(NULL);
-	route->disconnect_outputs(NULL);
+
+	route->disconnect_inputs (0);
+	route->disconnect_outputs (0);
 	
 	/* get rid of it from the dead wood collection in the route list manager */
 
