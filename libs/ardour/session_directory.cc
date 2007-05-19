@@ -43,23 +43,29 @@ SessionDirectory::SessionDirectory (const string& session_path)
 bool
 SessionDirectory::create ()
 {
-	if (is_directory (m_root_path))
-	{
-		PBD::error << string_compose(_("Cannot create Session directory at path %1 as it already exists"), m_root_path.to_string()) << endmsg;
-		return false;
-	}
+	bool is_new = false;
 
 	vector<path> sub_dirs = sub_directories ();
 	for (vector<path>::const_iterator i = sub_dirs.begin(); i != sub_dirs.end(); ++i)
 	{
-		if (!create_directories(*i))
+		try
 		{
-			PBD::error << string_compose(_("Cannot create Session directory at path %1 Error: %2"), (*i).to_string(), g_strerror (errno)) << endmsg;
-			return false;
+			if(create_directories(*i)) {
+				PBD::info << string_compose(_("Created Session directory at path %1"), (*i).to_string()) << endmsg;
+				is_new = true;
+			}
+		}
+		catch (PBD::sys::filesystem_error& ex)
+		{
+			// log the error
+			PBD::error << string_compose(_("Cannot create Session directory at path %1 Error: %2"), (*i).to_string(), ex.what()) << endmsg;
+
+			// and rethrow
+			throw ex;
 		}
 	}
 
-	return true;
+	return is_new;
 }
 
 bool

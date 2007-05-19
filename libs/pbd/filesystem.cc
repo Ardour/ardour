@@ -21,6 +21,8 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
+#include <cerrno>
+
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
@@ -67,24 +69,28 @@ is_directory (const path & p)
 bool
 create_directory(const path & p)
 {
-	if (g_mkdir (p.to_string().c_str(), S_IRWXU|S_IRWXG|S_IRWXO) != 0)
-	{
-		warning << "Unable to create directory at path: " << p.to_string() << endmsg;
-		return false;
-	}
+	if(is_directory(p)) return false;
 
+	int error = g_mkdir (p.to_string().c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
+
+	if(error == -1)
+	{
+		throw filesystem_error(g_strerror(errno), errno);
+	}
 	return true;
 }
 
 bool
 create_directories(const path & p)
 {
-	if (g_mkdir_with_parents (p.to_string().c_str(), S_IRWXU|S_IRWXG|S_IRWXO) != 0)
-	{
-		warning << "Unable to create directory at path: " << p.to_string() << endmsg;
-		return false;
-	}
+	if(is_directory(p)) return false;
 
+	int error = g_mkdir_with_parents (p.to_string().c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
+
+	if(error == -1)
+	{
+		throw filesystem_error(g_strerror(errno), errno);
+	}
 	return true;
 }
 

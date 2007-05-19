@@ -80,8 +80,15 @@ public:
 	bool is_valid () const;
 
 	/**
-	 * @return true If a new session directory and all the 
-	 * subdirectories were created, otherwise false.
+	 * Create the session directory and all the subdirectories.
+	 *
+	 * @throw PBD::sys::filesystem_error if the directories were
+	 * not able to be created.
+	 *
+	 * @return true If a new session directory was created, otherwise
+	 * (if it already existed) false.
+	 *
+	 * @post is_valid ()
 	 */
 	bool create ();
 

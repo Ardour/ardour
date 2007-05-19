@@ -19,6 +19,7 @@
 #ifndef __filesystem_h__
 #define __filesystem_h__
 
+#include <stdexcept>
 #include <string>
 
 namespace PBD {
@@ -50,11 +51,47 @@ private:
 	string m_path;
 };
 
+class filesystem_error : public std::runtime_error
+{
+	const int m_error_code;
 
+public:
+	explicit filesystem_error(const std::string & what, int error_code=0)
+		: std::runtime_error(what), m_error_code(error_code) { }
+
+	int system_error() const { return m_error_code; }
+};
+
+/// @return true if path at p exists
 bool exists(const path & p);
+
+/// @return true if path at p is a directory.
 bool is_directory(const path & p);
 
+/**
+ * Attempt to create a directory at p as if by the glib function g_mkdir 
+ * with a second argument of S_IRWXU|S_IRWXG|S_IRWXO
+ * 
+ * @throw filesystem_error if mkdir fails for any other reason other than
+ * the directory already exists.
+ *
+ * @return true If the directory p was created, otherwise false
+ *
+ * @post is_directory(p)
+ */
 bool create_directory(const path & p);
+
+/**
+ * Attempt to create a directory at p as if by the glib function 
+ * g_mkdir_with_parents with a second argument of S_IRWXU|S_IRWXG|S_IRWXO
+ * 
+ * @throw filesystem_error if g_mkdir_with_parents fails for any other 
+ * reason other than the directory already exists.
+ *
+ * @return true If the directory at p was created, otherwise false
+ *
+ * @post is_directory(p)
+ */
 bool create_directories(const path & p);
 
 string basename (const path& p);

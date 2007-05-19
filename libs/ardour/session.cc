@@ -133,23 +133,48 @@ Session::Session (AudioEngine &eng,
 
 	SessionDirectory sdir(fullpath);
 
-	if (mix_template &&
-		sdir.create() &&
-		create_session_file_from_template (*mix_template)) {
+	if(mix_template) {
+		// try and create a new session directory
+		try
+		{
+			if(!sdir.create()) {
+				// an existing session.
+				// throw a_more_meaningful_exception()
+				destroy ();
+				throw failed_constructor ();
+			}
+		}
+		catch(sys::filesystem_error& ex)
+		{
+			destroy ();
+			throw failed_constructor ();
+		}
+
+		if(!create_session_file_from_template (*mix_template)) {
+			destroy ();
+			throw failed_constructor ();
+		}
 
 		cerr << "Creating session " << fullpath
 			<<" using template" << *mix_template
 			<< endl;
-
-	} else if (sdir.is_valid ()) {
+	} else {
+		// must be an existing session
+		try
+		{
+			// ensure the necessary session subdirectories exist
+			// in case the directory structure has changed etc.
+			sdir.create();
+		}
+		catch(sys::filesystem_error& ex)
+		{
+			destroy ();
+			throw failed_constructor ();
+		}
 
 		cerr << "Loading session " << fullpath
 			<< " using snapshot " << snapshot_name << " (1)"
 			<< endl;
-
-	} else {
-		destroy ();
-		throw failed_constructor ();
 	}
 
 	if (second_stage_init (false)) {
