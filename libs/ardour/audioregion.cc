@@ -59,6 +59,27 @@ Change AudioRegion::EnvelopeActiveChanged = ARDOUR::new_change();
 Change AudioRegion::ScaleAmplitudeChanged = ARDOUR::new_change();
 Change AudioRegion::EnvelopeChanged       = ARDOUR::new_change();
 
+void
+AudioRegion::init ()
+{
+	_scale_amplitude = 1.0;
+
+	set_default_fades ();
+	set_default_envelope ();
+
+	listen_to_my_curves ();
+}
+
+/* constructor for use by derived types only */
+AudioRegion::AudioRegion (nframes_t start, nframes_t length, string name)
+	: Region (start, length, name, DataType::AUDIO),
+	  _fade_in (0.0, 2.0, 1.0, false),
+	  _fade_out (0.0, 2.0, 1.0, false),
+	  _envelope (0.0, 2.0, 1.0, false)
+{
+	init ();
+}
+
 /** Basic AudioRegion constructor (one channel) */
 AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, nframes_t length)
 	: Region (src, start, length, PBD::basename_nosuffix(src->name()), DataType::AUDIO, 0,  Region::Flag(Region::DefaultFlags|Region::External)),
@@ -71,12 +92,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 		afs->HeaderPositionOffsetChanged.connect (mem_fun (*this, &AudioRegion::source_offset_changed));
 	}
 
-	_scale_amplitude = 1.0;
-
-	set_default_fades ();
-	set_default_envelope ();
-
-	listen_to_my_curves ();
+	init ();
 }
 
 /* Basic AudioRegion constructor (one channel) */
@@ -91,12 +107,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 		afs->HeaderPositionOffsetChanged.connect (mem_fun (*this, &AudioRegion::source_offset_changed));
 	}
 
-	_scale_amplitude = 1.0;
-
-	set_default_fades ();
-	set_default_envelope ();
-
-	listen_to_my_curves ();
+	init ();
 }
 
 /* Basic AudioRegion constructor (many channels) */
@@ -106,12 +117,7 @@ AudioRegion::AudioRegion (SourceList& srcs, nframes_t start, nframes_t length, c
 	, _fade_out (0.0, 2.0, 1.0, false)
 	, _envelope (0.0, 2.0, 1.0, false)
 {
-	_scale_amplitude = 1.0;
-
-	set_default_fades ();
-	set_default_envelope ();
-
-	listen_to_my_curves ();
+	init ();
 }
 
 
@@ -308,24 +314,21 @@ AudioRegion::read_peaks (PeakData *buf, nframes_t npeaks, nframes_t offset, nfra
 }
 
 ARDOUR::nframes_t
-AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nframes_t position, 
-		      nframes_t cnt, 
-		      uint32_t chan_n, nframes_t read_frames, nframes_t skip_frames) const
+AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nframes_t position, nframes_t cnt, uint32_t chan_n) const
 {
-	return _read_at (_sources, buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, read_frames, skip_frames);
+	return _read_at (_sources, buf, mixdown_buffer, gain_buffer, position, cnt, chan_n);
 }
 
 ARDOUR::nframes_t
 AudioRegion::master_read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nframes_t position, 
 			     nframes_t cnt, uint32_t chan_n) const
 {
-	return _read_at (_master_sources, buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, 0, 0);
+	return _read_at (_master_sources, buf, mixdown_buffer, gain_buffer, position, cnt, chan_n);
 }
 
 ARDOUR::nframes_t
 AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
-		       nframes_t position, nframes_t cnt, 
-		       uint32_t chan_n, nframes_t read_frames, nframes_t skip_frames) const
+		       nframes_t position, nframes_t cnt, uint32_t chan_n) const
 {
 	// cerr << _name << "._read_at(" << position << ") - " << _position << endl;
 

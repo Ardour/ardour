@@ -79,7 +79,7 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, stri
 					if ((*xfades)->out() == ar2) {
 						boost::shared_ptr<AudioRegion>in  = boost::dynamic_pointer_cast<AudioRegion>(*in_n);
 						boost::shared_ptr<AudioRegion>out = boost::dynamic_pointer_cast<AudioRegion>(*out_n);
-						boost::shared_ptr<Crossfade> new_fade = boost::shared_ptr<Crossfade> (new Crossfade (*(*xfades), in, out));
+						boost::shared_ptr<Crossfade> new_fade = boost::shared_ptr<Crossfade> (new Crossfade (*xfades, in, out));
 						add_crossfade(new_fade);
 						break;
 					}
@@ -125,8 +125,6 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nf
 {
 	nframes_t ret = cnt;
 	nframes_t end;
-	nframes_t read_frames;
-	nframes_t skip_frames;
 
 	/* optimizing this memset() away involves a lot of conditionals
 	   that may well cause more of a hit due to cache misses 
@@ -151,8 +149,6 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nf
 
 	end =  start + cnt - 1;
 
-	read_frames = 0;
-	skip_frames = 0;
 	_read_data_count = 0;
 
 	map<uint32_t,vector<boost::shared_ptr<Region> > > relevant_regions;
@@ -191,7 +187,7 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nf
 		for (vector<boost::shared_ptr<Region> >::iterator i = r.begin(); i != r.end(); ++i) {
 			boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(*i);
 			assert(ar);
-			ar->read_at (buf, mixdown_buffer, gain_buffer, start, cnt, chan_n, read_frames, skip_frames);
+			ar->read_at (buf, mixdown_buffer, gain_buffer, start, cnt, chan_n);
 			_read_data_count += ar->read_data_count();
 		}
 		
@@ -309,19 +305,19 @@ AudioPlaylist::finalize_split_region (boost::shared_ptr<Region> o, boost::shared
 		
 		if ((*x)->_in == orig) {
 			if (! (*x)->covers(right->position())) {
-				fade = boost::shared_ptr<Crossfade> (new Crossfade (**x, left, (*x)->_out));
+				fade = boost::shared_ptr<Crossfade> (new Crossfade (*x, left, (*x)->_out));
 			} else {
 				// Overlap, the crossfade is copied on the left side of the right region instead
-				fade = boost::shared_ptr<Crossfade> (new Crossfade (**x, right, (*x)->_out));
+				fade = boost::shared_ptr<Crossfade> (new Crossfade (*x, right, (*x)->_out));
 			}
 		}
 		
 		if ((*x)->_out == orig) {
 			if (! (*x)->covers(right->position())) {
-				fade = boost::shared_ptr<Crossfade> (new Crossfade (**x, (*x)->_in, right));
+				fade = boost::shared_ptr<Crossfade> (new Crossfade (*x, (*x)->_in, right));
 			} else {
 				// Overlap, the crossfade is copied on the right side of the left region instead
-				fade = boost::shared_ptr<Crossfade> (new Crossfade (**x, (*x)->_in, left));
+				fade = boost::shared_ptr<Crossfade> (new Crossfade (*x, (*x)->_in, left));
 			}
 		}
 		
@@ -478,9 +474,10 @@ void AudioPlaylist::notify_crossfade_added (boost::shared_ptr<Crossfade> x)
 }
 
 void
-AudioPlaylist::crossfade_invalidated (boost::shared_ptr<Crossfade> xfade)
+AudioPlaylist::crossfade_invalidated (boost::shared_ptr<Region> r)
 {
 	Crossfades::iterator i;
+	boost::shared_ptr<Crossfade> xfade = boost::dynamic_pointer_cast<Crossfade> (r);
 
 	xfade->in()->resume_fade_in ();
 	xfade->out()->resume_fade_out ();

@@ -130,8 +130,6 @@ MidiPlaylist::read (MidiRingBuffer& dst, nframes_t start,
 
 	nframes_t ret         = 0;
 	nframes_t end         = start + dur - 1;
-	//nframes_t read_frames = 0;
-	//nframes_t skip_frames = 0;
 
 	//_read_data_count = 0;
 
@@ -151,7 +149,7 @@ MidiPlaylist::read (MidiRingBuffer& dst, nframes_t start,
 	for (vector<boost::shared_ptr<Region> >::iterator i = regs.begin(); i != regs.end(); ++i) {
 		// FIXME: ensure time is monotonic here
 		boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(*i);
-		mr->read_at (dst, start, dur, chan_n, 0, 0);// FIXME read_frames, skip_frames);
+		mr->read_at (dst, start, dur, chan_n);
 		ret += mr->read_data_count();
 	}
 

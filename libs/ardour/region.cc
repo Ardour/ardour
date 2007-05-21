@@ -49,6 +49,27 @@ Change Region::LockChanged       = ARDOUR::new_change ();
 Change Region::LayerChanged      = ARDOUR::new_change ();
 Change Region::HiddenChanged     = ARDOUR::new_change ();
 
+
+/* derived-from-derived constructor (no sources in constructor) */
+Region::Region (nframes_t start, nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
+	: _name(name)
+	, _type(type)
+	, _flags(flags)
+	, _start(start) 
+	, _length(length) 
+	, _position(0) 
+	, _sync_position(_start)
+	, _layer(layer)
+	, _first_edit(EditChangesNothing)
+	, _frozen(0)
+	, _read_data_count(0)
+	, _pending_changed(Change (0))
+	, _last_layer_op(0)
+{
+	/* no sources at this point */
+}
+
+
 /** Basic Region constructor (single source) */
 Region::Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
 	: _name(name)
@@ -67,6 +88,7 @@ Region::Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length
 {
 	_sources.push_back (src);
 	_master_sources.push_back (src);
+
 	src->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), src));
 
 	assert(_sources.size() > 0);
@@ -244,7 +266,6 @@ Region::Region (boost::shared_ptr<Source> src, const XMLNode& node)
 	, _last_layer_op(0)
 {
 	_sources.push_back (src);
-
 
 	if (set_state (node)) {
 		throw failed_constructor();
@@ -909,7 +930,6 @@ Region::state (bool full_state)
 		fe = X_("id");
 		break;
 	default: /* should be unreachable but makes g++ happy */
-		cerr << "Odd region property found\n";
 		fe = X_("nothing");
 		break;
 	}

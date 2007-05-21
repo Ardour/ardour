@@ -51,11 +51,9 @@ class MidiRegion : public Region
 	boost::shared_ptr<MidiSource> midi_source (uint32_t n=0) const;
 
 	nframes_t read_at (MidiRingBuffer& dst,
-			nframes_t position,
-			nframes_t dur, 
-			uint32_t       chan_n      = 0,
-			nframes_t read_frames = 0,
-			nframes_t skip_frames = 0) const;
+			   nframes_t position,
+			   nframes_t dur, 
+			   uint32_t       chan_n      = 0) const;
 
 	nframes_t master_read_at (MidiRingBuffer& dst,
 			nframes_t position,
@@ -85,11 +83,9 @@ class MidiRegion : public Region
 
   private:
 	nframes_t _read_at (const SourceList&, MidiRingBuffer& dst,
-		nframes_t position,
-		nframes_t dur, 
-		uint32_t chan_n = 0,
-		nframes_t read_frames = 0,
-		nframes_t skip_frames = 0) const;
+			    nframes_t position,
+			    nframes_t dur, 
+			    uint32_t chan_n = 0) const;
 
 	void recompute_at_start ();
 	void recompute_at_end ();

@@ -23,7 +23,6 @@
 #include <vector>
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
 
 #include <sigc++/signal.h>
 
@@ -40,7 +39,7 @@ namespace ARDOUR {
 class AudioRegion;
 class Playlist;
 
-class Crossfade : public PBD::StatefulDestructible, public boost::enable_shared_from_this<ARDOUR::Crossfade>
+class Crossfade : public ARDOUR::AudioRegion
 {
   public:
 
@@ -66,7 +65,7 @@ class Crossfade : public PBD::StatefulDestructible, public boost::enable_shared_
 	/* copy constructor to copy a crossfade with new regions. used (for example)
 	   when a playlist copy is made 
 	*/
-	Crossfade (const Crossfade &, boost::shared_ptr<ARDOUR::AudioRegion>, boost::shared_ptr<ARDOUR::AudioRegion>);
+	Crossfade (boost::shared_ptr<Crossfade>, boost::shared_ptr<ARDOUR::AudioRegion>, boost::shared_ptr<ARDOUR::AudioRegion>);
 	
 	/* the usual XML constructor */
 
@@ -82,10 +81,8 @@ class Crossfade : public PBD::StatefulDestructible, public boost::enable_shared_
 	boost::shared_ptr<ARDOUR::AudioRegion> out() const { return _out; }
 	
 	nframes_t read_at (Sample *buf, Sample *mixdown_buffer, 
-				float *gain_buffer, nframes_t position, nframes_t cnt, 
-				uint32_t chan_n,
-				nframes_t read_frames = 0,
-				nframes_t skip_frames = 0);
+			   float *gain_buffer, nframes_t position, nframes_t cnt, 
+			   uint32_t chan_n) const;
 	
 	bool refresh ();
 
@@ -105,13 +102,11 @@ class Crossfade : public PBD::StatefulDestructible, public boost::enable_shared_
 		return (_in == a && _out == b) || (_in == b && _out == a);
 	}
 
-	nframes_t length() const { return _length; }
 	nframes_t overlap_length() const;
-	nframes_t position() const { return _position; }
 
 	void invalidate();
 
-	sigc::signal<void,boost::shared_ptr<Crossfade> > Invalidated;
+	sigc::signal<void,boost::shared_ptr<Region> > Invalidated;
 	sigc::signal<void,Change>     StateChanged;
 
 	bool covers (nframes_t frame) const {
@@ -133,6 +128,11 @@ class Crossfade : public PBD::StatefulDestructible, public boost::enable_shared_
 	Curve& fade_out() { return _fade_out; }
 
 	nframes_t set_length (nframes_t);
+
+	bool is_dependent() const { return true; }
+	bool depends_on (boost::shared_ptr<Region> other) const { 
+		return other == _in || other == _out; 
+	}
 	
 	static nframes_t short_xfade_length() { return _short_xfade_length; }
 	static void set_short_xfade_length (nframes_t n);
@@ -151,14 +151,14 @@ class Crossfade : public PBD::StatefulDestructible, public boost::enable_shared_
 	bool                 _active;
 	bool                 _in_update;
 	OverlapType           overlap_type;
-	nframes_t       _length;
-	nframes_t       _position;
 	AnchorPoint          _anchor_point;
 	bool                 _follow_overlap;
 	bool                 _fixed;
 	int32_t               layer_relation;
-	Curve _fade_in;
-	Curve _fade_out;
+
+
+	mutable Curve _fade_in;
+	mutable Curve _fade_out;
 
 	static Sample* crossfade_buffer_out;
 	static Sample* crossfade_buffer_in;
@@ -166,6 +166,9 @@ class Crossfade : public PBD::StatefulDestructible, public boost::enable_shared_
 	void initialize ();
 	int  compute (boost::shared_ptr<ARDOUR::AudioRegion>, boost::shared_ptr<ARDOUR::AudioRegion>, CrossfadeModel);
 	bool update ();
+
+  protected:
+	nframes_t read_raw_internal (Sample*, nframes_t, nframes_t) const;	
 };
 
 

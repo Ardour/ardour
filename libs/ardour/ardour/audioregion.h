@@ -77,14 +77,14 @@ class AudioRegion : public Region
 	
 	virtual nframes_t read_at (Sample *buf, Sample *mixdown_buf,
 				   float *gain_buf, nframes_t position, nframes_t cnt, 
-				   uint32_t       chan_n      = 0,
-				   nframes_t read_frames = 0,
-				   nframes_t skip_frames = 0) const;
+				   uint32_t       chan_n      = 0) const;
 	
 	virtual nframes_t master_read_at (Sample *buf, Sample *mixdown_buf, 
 					  float *gain_buf,
 					  nframes_t position, nframes_t cnt, uint32_t chan_n=0) const;
 	
+	virtual nframes_t read_raw_internal (Sample*, nframes_t, nframes_t) const;
+
 	XMLNode& state (bool);
 	int      set_state (const XMLNode&);
 
@@ -137,11 +137,11 @@ class AudioRegion : public Region
 	AudioRegion (boost::shared_ptr<AudioSource>, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
 	AudioRegion (SourceList &, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
 	AudioRegion (boost::shared_ptr<const AudioRegion>, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
-	AudioRegion (boost::shared_ptr<const AudioRegion>);
 	AudioRegion (boost::shared_ptr<AudioSource>, const XMLNode&);
 	AudioRegion (SourceList &, const XMLNode&);
 
   private:
+	void init ();
 	void set_default_fades ();
 	void set_default_fade_in ();
 	void set_default_fade_out ();
@@ -150,10 +150,8 @@ class AudioRegion : public Region
 	void recompute_gain_at_start ();
 
 	nframes_t _read_at (const SourceList&, Sample *buf, Sample *mixdown_buffer, 
-				 float *gain_buffer, nframes_t position, nframes_t cnt, 
-				 uint32_t chan_n = 0,
-				 nframes_t read_frames = 0,
-				 nframes_t skip_frames = 0) const;
+			    float *gain_buffer, nframes_t position, nframes_t cnt, 
+			    uint32_t chan_n = 0) const;
 
 	void recompute_at_start ();
 	void recompute_at_end ();
@@ -174,6 +172,11 @@ class AudioRegion : public Region
 	uint32_t          _fade_out_disabled;
 
   protected:
+	/* default constructor for derived (compound) types */
+
+	AudioRegion (nframes_t, nframes_t, std::string name); 
+	AudioRegion (boost::shared_ptr<const AudioRegion>);
+
 	int set_live_state (const XMLNode&, Change&, bool send);
 	
 	virtual bool verify_start (nframes_t);
@@ -182,8 +185,6 @@ class AudioRegion : public Region
 	virtual bool verify_length (nframes_t);
 	/*virtual void recompute_at_start () = 0;
 	virtual void recompute_at_end () = 0;*/
-
-	virtual nframes_t read_raw_internal (Sample*, nframes_t, nframes_t) const;
 };
 
 } /* namespace ARDOUR */

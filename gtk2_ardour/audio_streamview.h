@@ -95,7 +95,7 @@ class AudioStreamView : public StreamView
 
 	void add_crossfade (boost::shared_ptr<ARDOUR::Crossfade>);
 	void add_crossfade_weak (boost::weak_ptr<ARDOUR::Crossfade>);
-	void remove_crossfade (boost::shared_ptr<ARDOUR::Crossfade>);
+	void remove_crossfade (boost::shared_ptr<ARDOUR::Region>);
 
 	void color_handler (ColorID id, uint32_t val);
 

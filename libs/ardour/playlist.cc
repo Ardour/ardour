@@ -1598,11 +1598,16 @@ Playlist::relayer ()
 	/* we want to go through regions from desired lowest to desired highest layer,
 	   which depends on the layer model
 	*/
+
 	RegionList copy = regions;
+
+	/* sort according to the model */
+
 	if (Config->get_layer_model() == MoveAddHigher || Config->get_layer_model() == AddHigher) {
 		RegionSortByLastLayerOp cmp;
 		copy.sort (cmp);
 	}
+	
 	
 	for (RegionList::iterator i = copy.begin(); i != copy.end(); ++i) {
 
@@ -1636,7 +1641,7 @@ Playlist::relayer ()
 		layers[j].push_back (*i);
 	}
 
-	/* set up the layer numbers in the regions */
+	/* first pass: set up the layer numbers in the regions */
 	for (size_t j = 0; j < layers.size(); ++j) {
 		for (RegionList::iterator i = layers[j].begin(); i != layers[j].end(); ++i) {
 			(*i)->set_layer (j);

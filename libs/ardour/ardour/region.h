@@ -177,7 +177,9 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	uint32_t                  n_channels()          const { return _sources.size(); }
 
 	std::vector<string> master_source_names();
-
+	
+	const SourceList& sources() const { return _sources; }
+	const SourceList& master_sources() const { return _master_sources; }
 
 	/* serialization */
 	
@@ -191,6 +193,9 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	uint64_t last_layer_op() const { return _last_layer_op; }
 	void set_last_layer_op (uint64_t when);
 
+	virtual bool is_dependent() const { return false; }
+	virtual bool depends_on (boost::shared_ptr<Region> other) const { return false; }
+
   protected:
 	friend class RegionFactory;
 
@@ -203,6 +208,10 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	Region (boost::shared_ptr<const Region>);
 	Region (boost::shared_ptr<Source> src, const XMLNode&);
 	Region (SourceList& srcs, const XMLNode&);
+
+	/* this one is for derived types of derived types */
+
+	Region (nframes_t start, nframes_t length, const string& name, DataType, layer_t = 0, Flag flags = DefaultFlags);
 
   protected:
 	XMLNode& get_short_state (); /* used only by Session */
@@ -221,9 +230,7 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	virtual bool verify_length (nframes_t);
 	virtual void recompute_at_start () = 0;
 	virtual void recompute_at_end () = 0;
-	
 
-	PBD::ID                 _id;
 	string                  _name;
 	DataType                _type;
 	Flag                    _flags;

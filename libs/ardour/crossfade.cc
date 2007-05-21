@@ -28,6 +28,7 @@
 #include <ardour/playlist.h>
 #include <ardour/utils.h>
 #include <ardour/session.h>
+#include <ardour/source.h>
 
 #include "i18n.h"
 #include <locale.h>
@@ -76,26 +77,26 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> in, boost::shared_ptr<Audio
 		      nframes_t length,
 		      nframes_t position,
 		      AnchorPoint ap)
-	: _fade_in (0.0, 2.0, 1.0), // linear (gain coefficient) => -inf..+6dB
+	: AudioRegion (position, length, "foobar"),
+	  _fade_in (0.0, 2.0, 1.0), // linear (gain coefficient) => -inf..+6dB
 	  _fade_out (0.0, 2.0, 1.0) // linear (gain coefficient) => -inf..+6dB
+
 {
 	_in = in;
 	_out = out;
 	
-	_length = length;
-	_position = position;
 	_anchor_point = ap;
-
 	_follow_overlap = false;
 
 	_active = Config->get_xfades_active ();
 	_fixed = true;
-		
+
 	initialize ();
 }
 
 Crossfade::Crossfade (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioRegion> b, CrossfadeModel model, bool act)
-	: _fade_in (0.0, 2.0, 1.0), // linear (gain coefficient) => -inf..+6dB
+	: AudioRegion (0, 0, "foobar"),
+	  _fade_in (0.0, 2.0, 1.0), // linear (gain coefficient) => -inf..+6dB
 	  _fade_out (0.0, 2.0, 1.0) // linear (gain coefficient) => -inf..+6dB
 {
 	_in_update = false;
@@ -108,11 +109,15 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioR
 	_active = act;
 
 	initialize ();
+
+
 }
 
 Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
-	:  _fade_in (0.0, 2.0, 1.0), // linear (gain coefficient) => -inf..+6dB
-	   _fade_out (0.0, 2.0, 1.0) // linear (gain coefficient) => -inf..+6dB
+	: AudioRegion (0, 0, "foobar"),
+	  _fade_in (0.0, 2.0, 1.0), // linear (gain coefficient) => -inf..+6dB
+	  _fade_out (0.0, 2.0, 1.0) // linear (gain coefficient) => -inf..+6dB
+
 {
 	boost::shared_ptr<Region> r;
 	XMLProperty* prop;
@@ -162,17 +167,16 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 	}
 }
 
-Crossfade::Crossfade (const Crossfade &orig, boost::shared_ptr<AudioRegion> newin, boost::shared_ptr<AudioRegion> newout)
-	: _fade_in(orig._fade_in),
-	  _fade_out(orig._fade_out)
+Crossfade::Crossfade (boost::shared_ptr<Crossfade> orig, boost::shared_ptr<AudioRegion> newin, boost::shared_ptr<AudioRegion> newout)
+	: AudioRegion (boost::dynamic_pointer_cast<const AudioRegion> (orig)),
+	  _fade_in (orig->_fade_in),
+	  _fade_out (orig->_fade_out)
 {
-	_active           = orig._active;
-	_in_update        = orig._in_update;
-	_length           = orig._length;
-	_position         = orig._position;
-	_anchor_point     = orig._anchor_point;
-	_follow_overlap   = orig._follow_overlap;
-	_fixed            = orig._fixed;
+	_active           = orig->_active;
+	_in_update        = orig->_in_update;
+	_anchor_point     = orig->_anchor_point;
+	_follow_overlap   = orig->_follow_overlap;
+	_fixed            = orig->_fixed;
 	
 	_in = newin;
 	_out = newout;
@@ -199,6 +203,13 @@ Crossfade::~Crossfade ()
 void
 Crossfade::initialize ()
 {
+	/* merge source lists from regions */
+
+	_sources = _in->sources();
+	_sources.insert (_sources.end(), _out->sources().begin(), _out->sources().end());
+	_master_sources = _in->master_sources();
+	_master_sources.insert(_master_sources.end(), _out->master_sources().begin(), _out->master_sources().end());
+	
 	_in_update = false;
 	
 	_out->suspend_fade_out ();
@@ -229,9 +240,26 @@ Crossfade::initialize ()
 }	
 
 nframes_t 
+Crossfade::read_raw_internal (Sample* buf, nframes_t start, nframes_t cnt) const
+{
+#if 0
+	Sample* mixdown = new Sample[cnt];
+	float* gain = new float[cnt];
+	nframes_t ret;
+
+	ret = read_at (buf, mixdown, gain, start, cnt, chan_n, cnt);
+
+	delete [] mixdown;
+	delete [] gain;
+
+	return ret;
+#endif
+	return cnt;
+}
+
+nframes_t 
 Crossfade::read_at (Sample *buf, Sample *mixdown_buffer, 
-		    float *gain_buffer, nframes_t start, nframes_t cnt, uint32_t chan_n,
-		    nframes_t read_frames, nframes_t skip_frames)
+		    float *gain_buffer, nframes_t start, nframes_t cnt, uint32_t chan_n) const
 {
 	nframes_t offset;
 	nframes_t to_write;
@@ -266,8 +294,8 @@ Crossfade::read_at (Sample *buf, Sample *mixdown_buffer,
 
 	offset = start - _position;
 
-	_out->read_at (crossfade_buffer_out, mixdown_buffer, gain_buffer, start, to_write, chan_n, read_frames, skip_frames);
-	_in->read_at (crossfade_buffer_in, mixdown_buffer, gain_buffer, start, to_write, chan_n, read_frames, skip_frames);
+	_out->read_at (crossfade_buffer_out, mixdown_buffer, gain_buffer, start, to_write, chan_n);
+	_in->read_at (crossfade_buffer_in, mixdown_buffer, gain_buffer, start, to_write, chan_n);
 
 	float* fiv = new float[to_write];
 	float* fov = new float[to_write];
@@ -326,7 +354,7 @@ Crossfade::refresh ()
 	/* crossfades must be between non-muted regions */
 	
 	if (_out->muted() || _in->muted()) {
-		Invalidated (shared_from_this());
+		Invalidated (shared_from_this ());
 		return false;
 	}
 
@@ -335,14 +363,14 @@ Crossfade::refresh ()
 	int32_t new_layer_relation = (int32_t) (_in->layer() - _out->layer());
 
 	if (new_layer_relation * layer_relation < 0) { // different sign, layers rotated 
-		Invalidated (shared_from_this());
+		Invalidated (shared_from_this ());
 		return false;
 	}
 
 	OverlapType ot = _in->coverage (_out->first_frame(), _out->last_frame());
 
 	if (ot == OverlapNone) {
-		Invalidated (shared_from_this());
+		Invalidated (shared_from_this ());
 		return false;
 	} 
 
@@ -357,7 +385,7 @@ Crossfade::refresh ()
 			} 
 
 			catch (NoCrossfadeHere& err) {
-				Invalidated (shared_from_this());
+				Invalidated (shared_from_this ());
 				return false;
 			}
 
@@ -365,7 +393,7 @@ Crossfade::refresh ()
 
 		} else {
 
-			Invalidated (shared_from_this());
+			Invalidated (shared_from_this ());
 			return false;
 		}
 
@@ -395,7 +423,7 @@ Crossfade::update ()
 	}
 	
 	if (newlen == 0) {
-		Invalidated (shared_from_this());
+		Invalidated (shared_from_this ());
 		return false;
 	}
 	
@@ -856,5 +884,5 @@ Crossfade::set_short_xfade_length (nframes_t n)
 void
 Crossfade::invalidate ()
 {
-	Invalidated (shared_from_this()); /* EMIT SIGNAL */
+	Invalidated (shared_from_this ()); /* EMIT SIGNAL */
 }

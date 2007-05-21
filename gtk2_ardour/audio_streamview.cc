@@ -348,9 +348,11 @@ AudioStreamView::add_crossfade (boost::shared_ptr<Crossfade> crossfade)
 }
 
 void
-AudioStreamView::remove_crossfade (boost::shared_ptr<Crossfade> xfade)
+AudioStreamView::remove_crossfade (boost::shared_ptr<Region> r)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::remove_crossfade), xfade));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::remove_crossfade), r));
+
+	boost::shared_ptr<Crossfade> xfade = boost::dynamic_pointer_cast<Crossfade> (r);
 
 	for (list<CrossfadeView*>::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
 		if ((*i)->crossfade == xfade) {

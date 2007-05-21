@@ -199,7 +199,7 @@ class AutomationList : public PBD::StatefulDestructible
 	    std::pair<AutomationList::iterator,AutomationList::iterator> range;
 	};
 
-	LookupCache lookup_cache;
+	mutable LookupCache lookup_cache;
 
 	AutoState  _state;
 	AutoStyle  _style;

@@ -75,7 +75,7 @@ class AudioPlaylist : public ARDOUR::Playlist
        Crossfades      _crossfades;
        Crossfades      _pending_xfade_adds;
 
-       void crossfade_invalidated (boost::shared_ptr<Crossfade>);
+       void crossfade_invalidated (boost::shared_ptr<Region>);
        XMLNode& state (bool full_state);
        void dump () const;
 

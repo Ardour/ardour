@@ -1818,18 +1818,12 @@ AudioClock::build_ops_menu ()
 	ops_menu = new Menu;
 	MenuList& ops_items = ops_menu->items();
 	ops_menu->set_name ("ArdourContextMenu");
-
-	Menu *mode_menu = manage (new Menu);
-	MenuList& mode_items = mode_menu->items();
-	mode_menu->set_name ("ArdourContextMenu");
 	
-	mode_items.push_back (MenuElem (_("Timecode"), bind (mem_fun(*this, &AudioClock::set_mode), SMPTE)));
-	mode_items.push_back (MenuElem (_("Bars:Beats"), bind (mem_fun(*this, &AudioClock::set_mode), BBT)));
-	mode_items.push_back (MenuElem (_("Minutes:Seconds"), bind (mem_fun(*this, &AudioClock::set_mode), MinSec)));
-	mode_items.push_back (MenuElem (_("Audio Frames"), bind (mem_fun(*this, &AudioClock::set_mode), Frames)));
-	mode_items.push_back (MenuElem (_("Off"), bind (mem_fun(*this, &AudioClock::set_mode), Off)));
-
-	ops_items.push_back (MenuElem (_("Mode"), *mode_menu));
+	ops_items.push_back (MenuElem (_("Timecode"), bind (mem_fun(*this, &AudioClock::set_mode), SMPTE)));
+	ops_items.push_back (MenuElem (_("Bars:Beats"), bind (mem_fun(*this, &AudioClock::set_mode), BBT)));
+	ops_items.push_back (MenuElem (_("Minutes:Seconds"), bind (mem_fun(*this, &AudioClock::set_mode), MinSec)));
+	ops_items.push_back (MenuElem (_("Audio Frames"), bind (mem_fun(*this, &AudioClock::set_mode), Frames)));
+	ops_items.push_back (MenuElem (_("Off"), bind (mem_fun(*this, &AudioClock::set_mode), Off)));
 }
 
 void
