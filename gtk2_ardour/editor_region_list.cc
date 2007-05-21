@@ -231,12 +231,19 @@ Editor::region_list_selection_changed()
 		TreeView::Selection::ListHandle_Path::iterator i = rows.begin();
 		TreeIter iter;
 
-		/* just set the first selected region (in fact, the selection model might be SINGLE, which
-		   means there can only be one.
-		*/
-		
 		if ((iter = region_list_model->get_iter (*i))) {
-			set_selected_regionview_from_region_list (((*iter)[region_list_columns.region]), Selection::Set);
+			boost::shared_ptr<Region> r = (*iter)[region_list_columns.region];
+			
+			/* they could have clicked on a row that is just a placeholder, like "Hidden" */
+			
+			if (r) {
+				
+				/* just set the first selected region (in fact, the selection model might be SINGLE, which
+				   means there can only be one.
+				*/
+				
+				set_selected_regionview_from_region_list (r, Selection::Set);
+			}
 		}
 	}
 }
