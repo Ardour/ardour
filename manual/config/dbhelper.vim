@@ -84,10 +84,15 @@ imap<leader>fo <footnote><CR><para><CR></para><CR></footnote><esc>kk$a
 imap<leader>sb <sidebar><CR><title></title><CR><para></para><CR></sidebar>
 imap<leader>co <!--  --><esc>bhi
 imap<leader>qt <blockquote><CR><attribution></attribution><CR><literallayout><CR></literallayout><CR></blockquote>
+imap<leader>l <literal></literal><esc>bba
+
+" glossary
 imap<leader>ge <glossentry id=""><CR><glossterm></glossterm><CR><glossdef><CR><para><CR></para><CR></glossdef><CR></glossentry><esc>6k$bla
 imap<leader>gt <glossterm linkend=""></glossterm><esc>bb3la
 imap<leader>gs <glossseealso></glossseealso><esc>bba
-imap<leader>l <literal></literal><esc>bba
+
+" index
+imap<leader>it <indexterm><CR><primary></primary><CR></indexterm><esc>k$bba
 
 " admonitions
 imap<leader>no <note><CR><para></para><CR></note><esc>k$bba
