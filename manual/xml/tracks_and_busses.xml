@@ -96,6 +96,8 @@
 		href="muting_tracks.xml" />
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="soloing_tracks.xml" />
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
+		href="deactivating_tracks.xml" />
   <section id="track-display-size">
     <title>Track Display Size</title>
     <para>
