@@ -6,6 +6,10 @@
 
 <section id="default-track-names">
   <title>Default Track Names</title>
+  <indexterm>
+    <primary>Tracks</primary>
+    <secondary>Names</secondary>
+  </indexterm>
   <para>
     When a track is added to the session it is given a default name based on
     the Track type. For example, the first audio track that is added to the
