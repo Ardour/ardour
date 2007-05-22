@@ -18,13 +18,21 @@
     in the &TRACK_CONTROLS; or the <guibutton>mute</guibutton> button in a
     tracks &MIXER_STRIP;. Muting a track will silence its output,
     right-clicking on a mute button will bring up a pop-up menu that will
-    allow you to choose what will be affected by the mute button.
+    allow you to choose what will be affected when muting.
   </para>
   <mediaobject>
     <imageobject>
       <imagedata fileref="images/mute_options.png"/>
     </imageobject>
   </mediaobject>
+  <note>
+    <para>
+      Muting an Audio Track may slightly reduce the amount of
+      <glossterm linkend="gt-dsp">DSP</glossterm> resources required for the
+      session but the audio data referenced by the tracks &PLAYLIST; will
+      still be read from disk.
+    </para>
+  </note>
 <!-- 
   A more indepth description needed or perhaps a reference to a section i
   on advanced mixing.
