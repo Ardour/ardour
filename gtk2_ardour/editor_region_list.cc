@@ -106,8 +106,6 @@ Editor::add_audio_region_to_region_display (boost::shared_ptr<AudioRegion> regio
 			parent = *(region_list_model->append());
 			
 			parent[region_list_columns.name] = _("Hidden");
-			boost::shared_ptr<Region> proxy = parent[region_list_columns.region];
-			proxy.reset ();
 
 		} else {
 
@@ -115,13 +113,10 @@ Editor::add_audio_region_to_region_display (boost::shared_ptr<AudioRegion> regio
 
 				parent = *(region_list_model->insert(iter));
 				parent[region_list_columns.name] = _("Hidden");
-				boost::shared_ptr<Region> proxy = parent[region_list_columns.region];
-				proxy.reset ();
 
 			} else {
 				parent = *iter;
 			}
-
 		}
 
 		row = *(region_list_model->append (parent.children()));
