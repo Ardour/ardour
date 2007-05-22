@@ -98,25 +98,8 @@
 		href="soloing_tracks.xml" />
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="deactivating_tracks.xml" />
-  <section id="track-display-size">
-    <title>Track Display Size</title>
-    <para>
-      In the editor window, tracks always extend across the full extent of
-      the track display area, but they can have varying heights. In the
-      mixer window, tracks always from the top to the bottom of the mixer
-      (as strips), but they can have varying widths.
-    </para>
-
-    <section id="changing-editor-track-height">
-      <title>Changing editor track height</title>
-      <para></para>
-    </section>
-
-    <section id="changing-mixer-track-width">
-      <title>Changing mixer track width</title>
-      <para></para>
-    </section>
-  </section>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
+		href="resizing_tracks.xml" />
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="track_edit_groups.xml" />
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
