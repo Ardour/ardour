@@ -20,29 +20,8 @@
 		href="adding_tracks.xml" />
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="renaming_tracks.xml" />
-  <section id="deleting-tracks">
-    <title>Deleting Tracks</title>
-    <para>
-      Deleting a track is permanent operation that cannot be undone.
-      However, since the audio, MIDI, automation and other data associated
-      with the track will remain as part of the session, and the actual
-      playlist(s) that were in use by the track are still available. for use
-      by other tracks. As a result, although inadvertently deleting a track
-      is inconvenient, it doesn't result in any significant loss of
-      information.
-    </para>
-
-    <section id="deleting-a-track">
-      <title>deleting a track</title>
-      <para>
-        Click on the name of the track you want to delete. From the menu
-        that appears, select <guimenuitem>Remove</guimenuitem>. A
-        confirmation dialog will appear to ensure that you really meant to
-        remove the track.
-      </para>
-    </section>
-  </section>
-
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
+		href="removing_tracks.xml" />
   <section id="hiding-tracks">
     <title>Hiding Tracks</title>
     <para>
