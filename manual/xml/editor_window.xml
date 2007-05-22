@@ -51,15 +51,8 @@
       sections.
     </para>
   </section>
-
-  <section id="editor-window-track-display">
-    <title>Track Display</title>
-    <para>
-      This is the main area within the editor. Each track or bus is
-      represented by a horizontal "stripe", with a set of controls on the
-      left side, with the timeline above them all.
-    </para>
-  </section>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
+	  	href="track_display.xml" />
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="editor_window_timeline.xml" />
   <section id="editor-window-track-controls">

@@ -2,21 +2,21 @@
 
 <!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
 
+<!ENTITY % BOOK_ENTITIES SYSTEM "./entities.ent">
+%BOOK_ENTITIES;
+
 ]>
 
 <section id="renaming-tracks">
   <title>Renaming Tracks</title>
   <para>
-    Tracks can be renamed from within the
-    <link linkend="sn-editor-window">Editor Window</link> or the
-    <link linkend="sn-mixer-window">Mixer Window</link>.
+    Tracks can be renamed from within the &EDIT_WIN; or the &MIX_WIN;.
   </para>
 
   <para>
     To change the name of a track in the Editor Window click within the
-    track name field in the <link linkend="track-controls">Track
-    Controls</link>, enter the new track name and press the
-    <keycap>Enter</keycap> key to confirm the change.
+    track name field in the &TRACK_CONTROLS;, enter the new track name and
+    press the <keycap>Enter</keycap> key to confirm the change.
   </para>
   <mediaobject>
     <imageobject>

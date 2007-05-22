@@ -14,11 +14,9 @@
     <secondary>Removing</secondary>
   </indexterm>
   <para>
-    A track can be removed from within the
-    <link linkend="sn-editor-window">Editor Window</link> by right-clicking
-    in the empty space in the <link linkend="track-controls">Track
-    Controls</link> to bring up the track context menu and choosing
-    <guimenuitem>Remove</guimenuitem>.
+    A track can be removed from within the &MIX_WIN; by right-clicking in
+    the empty space in the &TRACK_CONTROLS; to bring up the track context
+    menu and choosing <guimenuitem>Remove</guimenuitem>.
   </para>
   <mediaobject>
     <imageobject>
@@ -26,9 +24,9 @@
     </imageobject>
   </mediaobject>
   <para>
-    Alternatively a track can also be removed from within the
-    <link linkend="sn-mixer-window">Mixer Window</link> by clicking on the
-    track name button and choosing <guimenuitem>Remove</guimenuitem>.
+    Alternatively a track can also be removed from within the &MIX_WIN; by
+    clicking on the track name button and choosing
+    <guimenuitem>Remove</guimenuitem>.
   </para>
 
   <note>
