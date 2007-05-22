@@ -9,6 +9,9 @@
 
 <section id="sn-invert-polarity">
   <title>Inverting the Polarity of a Track</title>
+  <indexterm>
+    <primary>Polarity</primary>
+  </indexterm>
   <para>
     The polarity of a track can be inverted in the Mixer Window by clicking
     on the track name button of a Mixer Strip and choosing
