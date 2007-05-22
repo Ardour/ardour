@@ -44,6 +44,8 @@ Send::Send (Session& s, const XMLNode& node)
 	_metering = false;
 	expected_inputs = 0;
 
+	bitslot = 0xffffffff;
+
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
@@ -92,8 +94,12 @@ Send::set_state(const XMLNode& node)
 	if ((prop = node.property ("bitslot")) == 0) {
 		bitslot = _session.next_send_id();
 	} else {
+		uint32_t old_bitslot = bitslot;
 		sscanf (prop->value().c_str(), "%" PRIu32, &bitslot);
-		_session.mark_send_id (bitslot);
+
+		if (bitslot != old_bitslot) {
+			_session.mark_send_id (bitslot);
+		}
 	}
 
 	/* Send has regular IO automation (gain, pan) */

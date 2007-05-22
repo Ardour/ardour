@@ -860,6 +860,7 @@ PortInsert::init ()
 PortInsert::PortInsert (Session& s, const XMLNode& node)
 	: Insert (s, "will change", PreFader)
 {
+	bitslot = 0xffffffff;
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
@@ -943,8 +944,12 @@ PortInsert::set_state(const XMLNode& node)
 	if ((prop = node.property ("bitslot")) == 0) {
 		bitslot = _session.next_insert_id();
 	} else {
+		uint32_t old_bitslot = bitslot;
 		sscanf (prop->value().c_str(), "%" PRIu32, &bitslot);
-		_session.mark_insert_id (bitslot);
+
+		if (old_bitslot != bitslot) {
+			_session.mark_insert_id (bitslot);
+		}
 	}
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
