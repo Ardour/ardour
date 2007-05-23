@@ -1804,34 +1804,27 @@ Route::_set_state (const XMLNode& node, bool call_base)
 			break;
 		}
 	}
+
+	XMLNodeList redirect_nodes;
 			
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
 
 		child = *niter;
 			
-		if (child->name() == X_("Send")) {
+		if (child->name() == X_("Send") || child->name() == X_("Insert")) {
+			redirect_nodes.push_back(child);
+		}
+
+	}
+
+	_set_redirect_states(redirect_nodes);
 
 
-			if (!IO::ports_legal) {
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
+		child = *niter;
+		// All redirects (sends and inserts) have been applied already
 
-				deferred_state->add_child_copy (*child);
-
-			} else {
-				add_redirect_from_xml (*child);
-			}
-
-		} else if (child->name() == X_("Insert")) {
-			
-			if (!IO::ports_legal) {
-				
-				deferred_state->add_child_copy (*child);
-
-			} else {
-				
-				add_redirect_from_xml (*child);
-			}
-
-		} else if (child->name() == X_("Automation")) {
+		if (child->name() == X_("Automation")) {
 			
 			if ((prop = child->property (X_("path"))) != 0)  {
 				load_automation (prop->value());
@@ -1886,6 +1879,102 @@ Route::_set_state (const XMLNode& node, bool call_base)
 	}
 
 	return 0;
+}
+
+void
+Route::_set_redirect_states(const XMLNodeList &nlist)
+{
+	XMLNodeConstIterator niter;
+	char buf[64];
+
+	RedirectList::iterator i, o;
+
+	// Iterate through existing redirects, remove those which are not in the state list
+	for (i = _redirects.begin(); i != _redirects.end(); ) {
+		RedirectList::iterator tmp = i;
+		++tmp;
+
+		bool redirectInStateList = false;
+	
+		(*i)->id().print (buf, sizeof (buf));
+
+
+		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+
+			if (strncmp(buf,(*niter)->child(X_("Redirect"))->child(X_("IO"))->property(X_("id"))->value().c_str(), sizeof(buf)) == 0) {
+				redirectInStateList = true;
+				break;
+			}
+		}
+		
+		if (!redirectInStateList) {
+			remove_redirect ( *i, this);
+		}
+
+
+		i = tmp;
+	}
+
+
+	// Iterate through state list and make sure all redirects are on the track and in the correct order,
+	// set the state of existing redirects according to the new state on the same go
+	i = _redirects.begin();
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter, ++i) {
+
+		// Check whether the next redirect in the list 
+		o = i;
+
+		while (o != _redirects.end()) {
+			(*o)->id().print (buf, sizeof (buf));
+			if ( strncmp(buf, (*niter)->child(X_("Redirect"))->child(X_("IO"))->property(X_("id"))->value().c_str(), sizeof(buf)) == 0)
+				break;
+			++o;
+		}
+
+		if (o == _redirects.end()) {
+			// If the redirect (*niter) is not on the route, we need to create it
+			// and move it to the correct location
+
+			RedirectList::iterator prev_last = _redirects.end();
+			--prev_last; // We need this to check whether adding succeeded
+			
+			add_redirect_from_xml (**niter);
+
+			RedirectList::iterator last = _redirects.end();
+			--last;
+
+			if (prev_last == last) {
+				cerr << "Could not fully restore state as some redirects were not possible to create" << endl;
+				continue;
+
+			}
+
+			boost::shared_ptr<Redirect> tmp = (*last);
+			// remove the redirect from the wrong location
+			_redirects.erase(last);
+			// insert the new redirect at the current location
+			_redirects.insert(i, tmp);
+
+			--i; // move pointer to the newly inserted redirect
+			continue;
+		}
+
+		// We found the redirect (*niter) on the route, first we must make sure the redirect
+		// is at the location provided in the XML state
+		if (i != o) {
+			boost::shared_ptr<Redirect> tmp = (*o);
+			// remove the old copy
+			_redirects.erase(o);
+			// insert the redirect at the correct location
+			_redirects.insert(i, tmp);
+
+			--i; // move pointer so it points to the right redirect
+		}
+
+		(*i)->set_state( (**niter) );
+	}
+	
+	redirects_changed(this);
 }
 
 void

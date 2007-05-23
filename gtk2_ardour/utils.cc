@@ -347,14 +347,14 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 #endif
 
 	if (focus) {
-		if (GTK_IS_ENTRY(focus)) {
+		if (GTK_IS_ENTRY(focus) || Keyboard::some_magic_widget_has_focus()) {
 			special_handling_of_unmodified_accelerators = true;
 		} 
 	} 
 
 #ifdef DEBUG_ACCELERATOR_HANDLING
 	if (debug) {
-		cerr << "Key event: code = " << ev->keyval << " state = " << hex << ev->state << dec << " focus is an entry ? " 
+		cerr << "Win = " << win << " Key event: code = " << ev->keyval << " state = " << hex << ev->state << dec << " special handling ? " 
 		     << special_handling_of_unmodified_accelerators
 		     << endl;
 	}
@@ -456,14 +456,25 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	/* no modifiers, propagate first */
 	
 #ifdef DEBUG_ACCELERATOR_HANDLING
-		if (debug) {
-			cerr << "\tactivate, then propagate\n";
-		}
+	if (debug) {
+		cerr << "\tpropagate, then activate\n";
+	}
 #endif
 	if (!gtk_window_propagate_key_event (win, ev)) {
+#ifdef DEBUG_ACCELERATOR_HANDLING
+		if (debug) {
+			cerr << "\tpropagation didn't handle, so activate\n";
+		}
+#endif
 		return gtk_window_activate_key (win, ev);
-	} 
-
+	} else {
+#ifdef DEBUG_ACCELERATOR_HANDLING
+		if (debug) {
+			cerr << "\thandled by propagate\n";
+		}
+#endif
+		return true;
+	}
 
 #ifdef DEBUG_ACCELERATOR_HANDLING
 	if (debug) {

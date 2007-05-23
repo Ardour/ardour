@@ -324,7 +324,8 @@ class Route : public IO
 	uint32_t pans_required() const;
 	ChanCount n_process_buffers ();
 
-	virtual int _set_state (const XMLNode&, bool call_base);
+	virtual int  _set_state (const XMLNode&, bool call_base);
+	virtual void _set_redirect_states (const XMLNodeList&);
 
   private:
 	void init ();
