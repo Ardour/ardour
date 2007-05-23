@@ -90,6 +90,10 @@ class Keyboard : public sigc::trackable, Stateful
 
 	static Keyboard& the_keyboard() { return *_the_keyboard; }
 
+	static bool some_magic_widget_has_focus ();
+	static void magic_widget_grab_focus ();
+	static void magic_widget_drop_focus ();
+
   private:
 	static Keyboard* _the_keyboard;
 
@@ -104,6 +108,8 @@ class Keyboard : public sigc::trackable, Stateful
 
 	static gint _snooper (GtkWidget*, GdkEventKey*, gpointer);
 	gint snooper (GtkWidget*, GdkEventKey*);
+
+	static bool _some_magic_widget_has_focus;
 };
 
 #endif /* __ardour_keyboard_h__ */

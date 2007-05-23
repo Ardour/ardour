@@ -62,6 +62,8 @@ class AudioClock : public Gtk::HBox
 	static sigc::signal<void> ModeChanged;
 	static std::vector<AudioClock*> clocks;
 
+	static bool has_focus() { return _has_focus; }
+
   private:
 	ARDOUR::Session  *session;
 	Mode             _mode;
@@ -171,9 +173,11 @@ class AudioClock : public Gtk::HBox
 	bool field_button_press_event (GdkEventButton *ev, Field);
 	bool field_button_release_event (GdkEventButton *ev, Field);
 	bool field_button_scroll_event (GdkEventScroll *ev, Field);
+	bool field_key_press_event (GdkEventKey *, Field);
 	bool field_key_release_event (GdkEventKey *, Field);
 	bool field_focus_in_event (GdkEventFocus *, Field);
 	bool field_focus_out_event (GdkEventFocus *, Field);
+	bool drop_focus_handler (GdkEventFocus*);
 
 	void set_smpte (nframes_t, bool);
 	void set_bbt (nframes_t, bool);
@@ -196,6 +200,8 @@ class AudioClock : public Gtk::HBox
 	void set_size_requests ();
 
 	static const uint32_t field_length[(int)AudioFrames+1];
+	static bool _has_focus;
+	
 };
 
 #endif /* __audio_clock_h__ */

@@ -566,7 +566,16 @@ Editor::region_list_selection_mapover (slot<void,boost::shared_ptr<Region> > sl)
 		TreeIter iter;
 
 		if ((iter = region_list_model->get_iter (*i))) {
-			sl (((*iter)[region_list_columns.region]));
+
+			/* some rows don't have a region associated with them, but can still be
+			   selected (XXX maybe prevent them from being selected)
+			*/
+
+			boost::shared_ptr<Region> r = (*iter)[region_list_columns.region];
+
+			if (r) {
+				sl (r);
+			}
 		}
 	}
 }

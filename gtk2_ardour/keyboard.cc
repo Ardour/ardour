@@ -54,6 +54,25 @@ Keyboard* Keyboard::_the_keyboard = 0;
 
 GdkModifierType Keyboard::RelevantModifierKeyMask;
 
+bool Keyboard::_some_magic_widget_has_focus = false;
+
+void
+Keyboard::magic_widget_grab_focus () 
+{
+	_some_magic_widget_has_focus = true;
+}
+
+void
+Keyboard::magic_widget_drop_focus ()
+{
+	_some_magic_widget_has_focus = false;
+}
+
+bool
+Keyboard::some_magic_widget_has_focus ()
+{
+	return _some_magic_widget_has_focus;
+}
 
 Keyboard::Keyboard ()
 {

@@ -335,6 +335,18 @@ AudioClock::setup_events ()
 	ms_minutes_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), MS_Minutes));
 	ms_seconds_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), MS_Seconds));
 
+	hours_ebox.signal_key_press_event().connect (bind (mem_fun(*this, &AudioClock::field_key_press_event), SMPTE_Hours));
+	minutes_ebox.signal_key_press_event().connect (bind (mem_fun(*this, &AudioClock::field_key_press_event), SMPTE_Minutes));
+	seconds_ebox.signal_key_press_event().connect (bind (mem_fun(*this, &AudioClock::field_key_press_event), SMPTE_Seconds));
+	frames_ebox.signal_key_press_event().connect (bind (mem_fun(*this, &AudioClock::field_key_press_event), SMPTE_Frames));
+	audio_frames_ebox.signal_key_press_event().connect (bind (mem_fun(*this, &AudioClock::field_key_press_event), AudioFrames));
+	bars_ebox.signal_key_press_event().connect (bind (mem_fun(*this, &AudioClock::field_key_press_event), Bars));
+	beats_ebox.signal_key_press_event().connect (bind (mem_fun(*this, &AudioClock::field_key_press_event), Beats));
+	ticks_ebox.signal_key_press_event().connect (bind (mem_fun(*this, &AudioClock::field_key_press_event), Ticks));
+	ms_hours_ebox.signal_key_press_event().connect (bind (mem_fun(*this, &AudioClock::field_key_press_event), MS_Hours));
+	ms_minutes_ebox.signal_key_press_event().connect (bind (mem_fun(*this, &AudioClock::field_key_press_event), MS_Minutes));
+	ms_seconds_ebox.signal_key_press_event().connect (bind (mem_fun(*this, &AudioClock::field_key_press_event), MS_Seconds));
+
 	hours_ebox.signal_key_release_event().connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), SMPTE_Hours));
 	minutes_ebox.signal_key_release_event().connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), SMPTE_Minutes));
 	seconds_ebox.signal_key_release_event().connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), SMPTE_Seconds));
@@ -370,6 +382,15 @@ AudioClock::setup_events ()
 	ms_hours_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), MS_Hours));
 	ms_minutes_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), MS_Minutes));
 	ms_seconds_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), MS_Seconds));
+
+	clock_base.signal_focus_in_event().connect (mem_fun (*this, &AudioClock::drop_focus_handler));
+}
+
+bool
+AudioClock::drop_focus_handler (GdkEventFocus* ignored)
+{
+	Keyboard::magic_widget_drop_focus ();
+	return false;
 }
 
 void
@@ -609,6 +630,13 @@ AudioClock::set_session (Session *s)
 }
 
 bool
+AudioClock::field_key_press_event (GdkEventKey *ev, Field field)
+{
+	/* all key activity is handled on key release */
+	return true;
+}
+
+bool
 AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 {
 	Label *label = 0;
@@ -654,7 +682,7 @@ AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 		label = &ticks_label;
 		break;
 	default:
-		return FALSE;
+		return false;
 	}
 
 	switch (ev->keyval) {
@@ -704,22 +732,22 @@ AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 		if (_mode == MinSec && field == MS_Seconds) {
 			new_char = '.';
 		} else {
-			return FALSE;
+			return false;
 		}
 		break;
 
-	case GDK_Return:
-	case GDK_KP_Enter:
 	case GDK_Tab:
 		move_on = true;
 		break;
 
 	case GDK_Escape:
+	case GDK_Return:
+	case GDK_KP_Enter:
 		clock_base.grab_focus ();
-		return TRUE;
+		return true;
 
 	default:
-		return FALSE;
+		return false;
 	}
 
 	if (!move_on) {
@@ -840,13 +868,15 @@ AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 
 	}
 
-	return TRUE;
+	return true;
 }
 
 bool
 AudioClock::field_focus_in_event (GdkEventFocus *ev, Field field)
 {
 	key_entry_state = 0;
+
+	Keyboard::magic_widget_grab_focus ();
 
 	switch (field) {
 	case SMPTE_Hours:
@@ -897,7 +927,7 @@ AudioClock::field_focus_in_event (GdkEventFocus *ev, Field field)
 		break;
 	}
 
-	return FALSE;
+	return false;
 }
 
 bool
@@ -954,21 +984,20 @@ AudioClock::field_focus_out_event (GdkEventFocus *ev, Field field)
 		break;
 	}
 
-	return FALSE;
+	Keyboard::magic_widget_drop_focus ();
+
+	return false;
 }
 
 bool
 AudioClock::field_button_release_event (GdkEventButton *ev, Field field)
 {
-
-
 	if (dragging) {
-		gdk_pointer_ungrab(GDK_CURRENT_TIME);
+		gdk_pointer_ungrab (GDK_CURRENT_TIME);
 		dragging = false;
 		if (ev->y > drag_start_y+1 || ev->y < drag_start_y-1 || Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)){
-                  // we actually dragged so return without setting editing focus, or we shift clicked
-
-			return TRUE;
+			// we actually dragged so return without setting editing focus, or we shift clicked
+			return true;
 		}
 	}
 
@@ -977,7 +1006,7 @@ AudioClock::field_button_release_event (GdkEventButton *ev, Field field)
 			build_ops_menu ();
 		}
 		ops_menu->popup (1, ev->time);
-		return TRUE;
+		return true;
 	}
 
 	if (Keyboard::is_context_menu_event (ev)) {
@@ -985,7 +1014,7 @@ AudioClock::field_button_release_event (GdkEventButton *ev, Field field)
 			build_ops_menu ();
 		}
 		ops_menu->popup (1, ev->time);
-		return TRUE;
+		return true;
 	} 
 
 	switch (ev->button) {
@@ -1034,13 +1063,13 @@ AudioClock::field_button_release_event (GdkEventButton *ev, Field field)
 		break;
 	}
 
-	return TRUE;
+	return true;
 }
 
 bool
 AudioClock::field_button_press_event (GdkEventButton *ev, Field field)
 {
-	if (session == 0) return FALSE;
+	if (session == 0) return false;
 
 	nframes_t frames = 0;
 
@@ -1052,7 +1081,7 @@ AudioClock::field_button_press_event (GdkEventButton *ev, Field field)
 					}
 	
                 /* make absolutely sure that the pointer is grabbed */
-		gdk_pointer_grab(ev->window,FALSE ,
+		gdk_pointer_grab(ev->window,false ,
 				 GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK), 
 				 NULL,NULL,ev->time);
 		dragging = true;
@@ -1070,21 +1099,23 @@ AudioClock::field_button_press_event (GdkEventButton *ev, Field field)
 
 	case 3:
 		/* used for context sensitive menu */
-		return FALSE;
+		return false;
 		break;
 
 	default:
-		return FALSE;
+		return false;
 		break;
 	}
 	
-	return TRUE;
+	return true;
 }
 
 bool
 AudioClock::field_button_scroll_event (GdkEventScroll *ev, Field field)
 {
-	if (session == 0) return FALSE;
+	if (session == 0) {
+		return false;
+	}
 
 	nframes_t frames = 0;
 
@@ -1119,18 +1150,18 @@ AudioClock::field_button_scroll_event (GdkEventScroll *ev, Field field)
 	       break;
 
 	default:
-		return FALSE;
+		return false;
 		break;
 	}
 	
-	return TRUE;
+	return true;
 }
 
 bool
 AudioClock::field_motion_notify_event (GdkEventMotion *ev, Field field)
 {
 	if (session == 0 || !dragging) {
-		return FALSE;
+		return false;
 	}
 	
 	float pixel_frame_scale_factor = 0.2f;
@@ -1177,7 +1208,7 @@ AudioClock::field_motion_notify_event (GdkEventMotion *ev, Field field)
 
 	}
 
-	return TRUE;
+	return true;
 }
 
 nframes_t
