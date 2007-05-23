@@ -242,7 +242,7 @@ aconnect "$ARD_ID"0 "$BCF_ID"0
       </para>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="qjopt.jpg"/>
+          <imagedata fileref="images/qjopt.jpg"/>
         </imageobject>
       </mediaobject>
     </section>
