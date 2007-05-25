@@ -10,6 +10,7 @@
     <Option name="mute-affects-post-fader" value="yes"/>
     <Option name="mute-affects-control-outs" value="yes"/>
     <Option name="mute-affects-main-outs" value="yes"/>
+	<Option name="monitoring-model" value="2"/>
     <Option name="solo-latch" value="yes"/>
     <Option name="mtc-port" value="%MIDITAG%"/>
     <Option name="mmc-port" value="%MIDITAG%"/>
@@ -36,6 +37,7 @@
     <Option name="destructive-xfade-msecs" value="20"/>
     <Option name="periodic-safety-backups" value="1"/>
     <Option name="periodic-safety-backup-interval" value="120"/>
+	<Option name="ui-rc-file" value="ardour2_ui_dark.rc"/>
   </Config>
   <extra>
     <Keyboard edit-button="3" edit-modifier="4" delete-button="3" delete-modifier="1" snap-modifier="32"/>
