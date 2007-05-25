@@ -26,6 +26,8 @@
 #include <ardour/session_route.h>
 #include <ardour/dB.h>
 
+#include <gtkmm/style.h>
+#include <gdkmm/color.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/fastmeter.h>
 #include <gtkmm2ext/stop_signal.h>
@@ -101,6 +103,7 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	gain_display.signal_focus_in_event().connect (mem_fun (*this, &GainMeter::gain_focused), false);
 	gain_display.signal_focus_out_event().connect (mem_fun (*this, &GainMeter::gain_focused), false);
 
+	gain_display_box.set_name ("MeterMetricsStrip");
 	gain_display_box.set_homogeneous (true);
 	gain_display_box.set_spacing (2);
 	gain_display_box.pack_start (gain_display, true, true);
@@ -227,6 +230,7 @@ GainMeter::set_width (Width w)
 Glib::RefPtr<Gdk::Pixmap>
 GainMeter::render_metrics (Gtk::Widget& w)
 {
+	cerr << "GainMeter::render_metrics() called, red = " << w.get_style()->get_bg(Gtk::STATE_NORMAL).get_red() << endl;//DEBUG
 	Glib::RefPtr<Gdk::Window> win (w.get_window());
 	Glib::RefPtr<Gdk::GC> fg_gc (w.get_style()->get_fg_gc (Gtk::STATE_NORMAL));
 	Glib::RefPtr<Gdk::GC> bg_gc (w.get_style()->get_bg_gc (Gtk::STATE_NORMAL));
@@ -268,9 +272,21 @@ GainMeter::render_metrics (Gtk::Widget& w)
 gint
 GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 {
+	static Glib::RefPtr<Gtk::Style> meter_style;
+	bool style_changed = false;
+	
+	if (!meter_style || 
+	meter_style->get_bg(Gtk::STATE_NORMAL).get_red() != meter_metric_area.get_style()->get_bg(Gtk::STATE_NORMAL).get_red() || 
+	meter_style->get_bg(Gtk::STATE_NORMAL).get_green() != meter_metric_area.get_style()->get_bg(Gtk::STATE_NORMAL).get_green() ||
+	meter_style->get_bg(Gtk::STATE_NORMAL).get_blue() != meter_metric_area.get_style()->get_bg(Gtk::STATE_NORMAL).get_blue()) {
+		meter_style = meter_metric_area.get_style();
+		style_changed = true;
+	}
+		
 	Glib::RefPtr<Gdk::Window> win (meter_metric_area.get_window());
-	Glib::RefPtr<Gdk::GC> fg_gc (meter_metric_area.get_style()->get_fg_gc (Gtk::STATE_NORMAL));
-	Glib::RefPtr<Gdk::GC> bg_gc (meter_metric_area.get_style()->get_bg_gc (Gtk::STATE_NORMAL));
+	Glib::RefPtr<Gdk::GC> fg_gc (meter_style->get_fg_gc (Gtk::STATE_NORMAL));
+	Glib::RefPtr<Gdk::GC> bg_gc (meter_style->get_bg_gc (Gtk::STATE_NORMAL));
+
 	GdkRectangle base_rect;
 	GdkRectangle draw_rect;
 	gint width, height;
@@ -285,7 +301,7 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 	Glib::RefPtr<Gdk::Pixmap> pixmap;
 	std::map<string,Glib::RefPtr<Gdk::Pixmap> >::iterator i = metric_pixmaps.find (meter_metric_area.get_name());
 
-	if (i == metric_pixmaps.end()) {
+	if (i == metric_pixmaps.end() || style_changed) {
 		pixmap = render_metrics (meter_metric_area);
 	} else {
 		pixmap = i->second;
@@ -293,7 +309,7 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 
 	gdk_rectangle_intersect (&ev->area, &base_rect, &draw_rect);
 	win->draw_rectangle (bg_gc, true, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
-	win->draw_drawable (bg_gc, pixmap, draw_rect.x, draw_rect.y, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
+	win->draw_drawable (fg_gc, pixmap, draw_rect.x, draw_rect.y, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
 	
 	return true;
 }

@@ -107,7 +107,6 @@ simpleline.cc
 canvas-simplerect.c
 simplerect.cc
 canvas-waveview.c
-color_manager.cc
 crossfade_edit.cc
 crossfade_view.cc
 curvetest.cc
@@ -185,6 +184,7 @@ send_ui.cc
 streamview.cc
 audio_streamview.cc
 tempo_dialog.cc
+theme_manager.cc
 time_axis_view.cc
 time_axis_view_item.cc
 route_time_axis.cc
@@ -325,7 +325,8 @@ if env['NLS']:
 	i18n (gtkardour, gtkardour_files+skipped_files+fft_analysis_files, env)
     
 # configuration files
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour2_ui.rc'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour2_ui_dark.rc'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour2_ui_light.rc'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.menus'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.bindings'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.colors'))
@@ -343,7 +344,7 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
 					'ardour.sh.in',
 					'ardev_common.sh.in',
 					'ardev', 'ardbg',
-                                        'ardour2_ui.rc', 'splash.png',
+                                        'ardour2_ui_dark.rc', 'ardour2_ui_light.rc', 'splash.png',
                                         'ardour.menus', 'ardour.bindings.in', 'ardour.colors',
 					'editor_xpms'
                                         ] +

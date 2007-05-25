@@ -73,7 +73,7 @@ class About;
 class AddRouteDialog;
 class NewSessionDialog;
 class LocationUI;
-class ColorManager;
+class ThemeManager;
 
 namespace Gtkmm2ext {
 	class TearOff;
@@ -91,12 +91,14 @@ namespace ALSA {
 	class MultiChannelDevice;
 }
 
+extern sigc::signal<int,string> ThemeChanged;
+
 #define FRAME_NAME "BaseFrame"
 
 class ARDOUR_UI : public Gtkmm2ext::UI
 {
   public:
-	ARDOUR_UI (int *argcp, char **argvp[], string rcfile);
+	ARDOUR_UI (int *argcp, char **argvp[]);
 	~ARDOUR_UI();
 
 	void show ();
@@ -140,7 +142,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Mixer_UI* the_mixer() { return mixer; }
 	
 	void toggle_location_window ();
-	void toggle_color_manager ();
+	void toggle_theme_manager ();
 	void toggle_big_clock_window ();
 	void toggle_connection_editor ();
 	void toggle_route_params_window ();
@@ -214,6 +216,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void save_keybindings ();
 
 	void setup_profile ();
+	void setup_theme ();
 
   protected:
 	friend class PublicEditor;
@@ -595,7 +598,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	int         create_location_ui ();
 	void        handle_locations_change (ARDOUR::Location*);
 
-	ColorManager* color_manager;
+	ThemeManager* theme_manager;
 
 	/* Options window */
 	

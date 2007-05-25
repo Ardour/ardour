@@ -24,17 +24,22 @@
 #include <gtkmm/liststore.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/colorselection.h>
+#include <gtkmm/radiobutton.h>
+#include <gtkmm/rc.h>
 #include "ardour_dialog.h"
 #include "color.h"
 
-class ColorManager : public ArdourDialog
+
+class ThemeManager : public ArdourDialog
 {
   public:
-	ColorManager();
-	~ColorManager();
+	ThemeManager();
+	~ThemeManager();
 
 	int load (std::string path);
 	int save (std::string path);
+	void load_rc (int which);
+	void setup_theme_buttons ();
 
   private:
 	struct ColorDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
@@ -58,6 +63,9 @@ class ColorManager : public ArdourDialog
 	Glib::RefPtr<Gtk::ListStore> color_list;
 	Gtk::ColorSelectionDialog color_dialog;
 	Gtk::ScrolledWindow scroller;
+	Gtk::HBox theme_selection_hbox;
+	Gtk::RadioButton dark_button;
+	Gtk::RadioButton light_button;
 
 	bool button_press_event (GdkEventButton*);
 };

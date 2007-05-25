@@ -238,7 +238,7 @@
                <menuitem action='ToggleOptionsEditor'/>
                <menuitem action='ToggleInspector'/>
                <menuitem action='ToggleLocations'/>
-               <menuitem action='ToggleColorManager'/>
+               <menuitem action='ToggleThemeManager'/>
                <menuitem action='ToggleBigClock'/>
    	       <separator/>
         </menu>

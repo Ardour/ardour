@@ -81,7 +81,7 @@
 #include "about.h"
 #include "utils.h"
 #include "gui_thread.h"
-#include "color_manager.h"
+#include "theme_manager.h"
 
 #include "i18n.h"
 
@@ -97,10 +97,11 @@ sigc::signal<void,bool> ARDOUR_UI::Blink;
 sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
 sigc::signal<void>      ARDOUR_UI::SuperRapidScreenUpdate;
 sigc::signal<void,nframes_t, bool, nframes_t> ARDOUR_UI::Clock;
+sigc::signal<int,string> ThemeChanged;
 
-ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
+ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
-	: Gtkmm2ext::UI (X_("Ardour"), argcp, argvp, rcfile),
+	: Gtkmm2ext::UI (X_("Ardour"), argcp, argvp),
 	  
 	  primary_clock (X_("primary"), false, X_("TransportClockDisplay"), true, false, true),
 	  secondary_clock (X_("secondary"), false, X_("SecondaryClockDisplay"), true, false, true),
@@ -166,11 +167,11 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
 	/* load colors */
 
-	color_manager = new ColorManager();
+	theme_manager = new ThemeManager();
 
 	std::string color_file = ARDOUR::find_config_file("ardour.colors");
 
-	color_manager->load (color_file);
+	theme_manager->load (color_file);
 
 	editor = 0;
 	mixer = 0;
@@ -206,6 +207,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 
 	gettimeofday (&last_peak_grab, 0);
 	gettimeofday (&last_shuttle_request, 0);
+
+	ThemeChanged.connect (mem_fun(*this, &ARDOUR_UI::load_rcfile));
 
 	ARDOUR::Diskstream::DiskOverrun.connect (mem_fun(*this, &ARDOUR_UI::disk_overrun_handler));
 	ARDOUR::Diskstream::DiskUnderrun.connect (mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
@@ -1501,6 +1504,30 @@ ARDOUR_UI::do_engine_start ()
 	}
 	
 	return 0;
+}
+
+void
+ARDOUR_UI::setup_theme ()
+{
+	string rcfile;
+	char* env;
+
+	if ((env = getenv ("ARDOUR2_UI_RC")) != 0 && strlen (env)) {
+		rcfile = env;
+	} else {
+		rcfile = Config->get_ui_rc_file();
+	}
+
+	rcfile = find_config_file (rcfile);
+	
+	if (rcfile.empty()) {
+		warning << _("Without a UI style file, ardour will look strange.\n Please set ARDOUR2_UI_RC to point to a valid UI style file") << endmsg;
+	} else {
+		cerr << "Loading ui configuration file " << rcfile << endl;
+	}
+
+	ThemeChanged (rcfile); //EMIT SIGNAL
+	theme_manager->setup_theme_buttons();
 }
 
 gint

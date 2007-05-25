@@ -87,7 +87,7 @@ struct UIRequest : public BaseUI::BaseRequestObject {
 class UI : public Receiver, public AbstractUI<UIRequest>
 {
   public:
-	UI (string name, int *argc, char **argv[], string rcfile);
+	UI (string name, int *argc, char **argv[]);
 	virtual ~UI ();
 
 	static UI *instance() { return theGtkUI; }

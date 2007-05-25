@@ -23,15 +23,21 @@
 #include <errno.h>
 
 #include <gtkmm/stock.h>
+#include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm/settings.h>
 
-#include "color_manager.h"
+#include <ardour/configuration.h>
+
+#include "theme_manager.h"
 #include "rgb_macros.h"
+#include "ardour_ui.h"
 
 #include "i18n.h"
 
 using namespace std;
 using namespace Gtk;
 using namespace PBD;
+using namespace ARDOUR;
 
 /* the global color map */
 
@@ -51,8 +57,10 @@ static const char *color_id_strs[] = {
 sigc::signal<void> ColorsChanged;
 sigc::signal<void,ColorID,uint32_t> ColorChanged;
 
-ColorManager::ColorManager()
-	: ArdourDialog ("ColorManager")
+ThemeManager::ThemeManager()
+	: ArdourDialog ("ThemeManager"),
+	dark_button ("Dark Theme"),
+	light_button ("Light Theme")
 {
 	color_list = ListStore::create (columns);
 	color_display.set_model (color_list);
@@ -70,26 +78,36 @@ ColorManager::ColorManager()
 	
 	scroller.add (color_display);
 	scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
+	
+	RadioButton::Group group = dark_button.get_group();
+	light_button.set_group(group);
+	theme_selection_hbox.set_homogeneous(false);
+	theme_selection_hbox.pack_start (dark_button);
+	theme_selection_hbox.pack_start (light_button);
 
+	get_vbox()->set_homogeneous(false);
+	get_vbox()->pack_start (theme_selection_hbox, PACK_SHRINK);
 	get_vbox()->pack_start (scroller);
 
-	color_display.signal_button_press_event().connect (mem_fun (*this, &ColorManager::button_press_event), false);
+	color_display.signal_button_press_event().connect (mem_fun (*this, &ThemeManager::button_press_event), false);
 
 	color_dialog.get_colorsel()->set_has_opacity_control (true);
 	color_dialog.get_colorsel()->set_has_palette (true);
 
 	color_dialog.get_ok_button()->signal_clicked().connect (bind (mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_ACCEPT));
 	color_dialog.get_cancel_button()->signal_clicked().connect (bind (mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_CANCEL));
+	dark_button.signal_clicked().connect (bind (mem_fun (*this, &ThemeManager::load_rc), 1));
+	light_button.signal_clicked().connect (bind (mem_fun (*this, &ThemeManager::load_rc), 2));
 
 	set_size_request (-1, 400);
 }
 
-ColorManager::~ColorManager()
+ThemeManager::~ThemeManager()
 {
 }
 
 int
-ColorManager::load (string path)
+ThemeManager::load (string path)
 {
 	ifstream in (path.c_str());
 
@@ -151,17 +169,18 @@ ColorManager::load (string path)
 	}
 	
 	ColorsChanged(); /* emit signal */
+
 	return 0;
 }
 
 int
-ColorManager::save (string path)
+ThemeManager::save (string path)
 {
 	return 0;
 }
 
 bool
-ColorManager::button_press_event (GdkEventButton* ev)
+ThemeManager::button_press_event (GdkEventButton* ev)
 {
 	TreeIter iter;
 	TreeModel::Path path;
@@ -223,3 +242,33 @@ ColorManager::button_press_event (GdkEventButton* ev)
 
 	return false;
 }
+
+
+void
+ThemeManager::load_rc(int which)
+{
+		
+	if (which == 1) {
+		Config->set_ui_rc_file("ardour2_ui_dark.rc");
+		cerr << "dark theme selected" << endl;
+		
+	} else {
+		Config->set_ui_rc_file("ardour2_ui_light.rc");
+		cerr << "light theme selected" << endl;
+	}
+
+	ThemeChanged(find_config_file(Config->get_ui_rc_file())); //EMIT SIGNAL
+	
+	cerr << "load_rc() called " << find_config_file(Config->get_ui_rc_file()) << endl;
+}
+
+void
+ThemeManager::setup_theme_buttons ()
+{
+	if (Config->get_ui_rc_file() == "ardour2_ui_dark.rc") {
+		dark_button.set_active();
+	} else {
+		light_button.set_active();
+	}
+}
+

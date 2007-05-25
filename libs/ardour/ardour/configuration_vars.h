@@ -78,7 +78,7 @@ CONFIG_VARIABLE (bool, mute_affects_pre_fader, "mute-affects-pre-fader", true)
 CONFIG_VARIABLE (bool, mute_affects_post_fader, "mute-affects-post-fader", true)
 CONFIG_VARIABLE (bool, mute_affects_control_outs, "mute-affects-control-outs", true)
 CONFIG_VARIABLE (bool, mute_affects_main_outs, "mute-affects-main-outs", true)
-CONFIG_VARIABLE (MonitorModel, monitoring_model, "monitoring-model", SoftwareMonitoring)
+CONFIG_VARIABLE (MonitorModel, monitoring_model, "monitoring-model", ExternalMonitoring)
 CONFIG_VARIABLE (SoloModel, solo_model, "solo-model", InverseMute)
 CONFIG_VARIABLE (bool, solo_latched, "solo-latched", true)
 CONFIG_VARIABLE (bool, latched_record_enable, "latched-record-enable", false)
@@ -142,6 +142,9 @@ CONFIG_VARIABLE (bool, use_overlap_equivalency, "use-overlap-equivalency", false
 CONFIG_VARIABLE (bool, periodic_safety_backups, "periodic-safety-backups", true)
 CONFIG_VARIABLE (uint32_t, periodic_safety_backup_interval, "periodic-safety-backup-interval", 120)
 CONFIG_VARIABLE (string, possible_audio_file_regexp, "possible-audio-file-regexp", "\\.(wav|aiff|caf|w64|L|R)$")
+
+/* Theme */
+CONFIG_VARIABLE (string, ui_rc_file, "ui-rc-file", "ardour2_ui_dark.rc")
 
 /* BWAV */
 

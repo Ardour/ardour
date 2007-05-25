@@ -30,6 +30,7 @@
 #include <gtkmm/button.h>
 #include <gtkmm/table.h>
 #include <gtkmm/drawingarea.h>
+#include <gdkmm/colormap.h>
 
 #include <ardour/types.h>
 

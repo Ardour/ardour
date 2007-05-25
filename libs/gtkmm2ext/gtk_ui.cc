@@ -61,7 +61,7 @@ BaseUI::RequestType Gtkmm2ext::AddTimeout = BaseUI::new_request_type();
 #include <pbd/abstract_ui.cc>  /* instantiate the template */
 
 
-UI::UI (string namestr, int *argc, char ***argv, string rcfile) 
+UI::UI (string namestr, int *argc, char ***argv) 
 	: AbstractUI<UIRequest> (namestr, true)
 {
 	theMain = new Main (argc, argv);
@@ -99,7 +99,7 @@ UI::UI (string namestr, int *argc, char ***argv, string rcfile)
 
 	register_thread (pthread_self(), X_("GUI"));
 
-	load_rcfile (rcfile);
+	//load_rcfile (rcfile);
 }
 
 UI::~UI ()
@@ -129,76 +129,7 @@ UI::load_rcfile (string path)
 	}
 	
 	RC rc (path.c_str());
-
-	/* have to pack widgets into a toplevel window so that styles will stick */
-
-	Window temp_window (WINDOW_TOPLEVEL);
-	HBox box;
-	Label a_widget1;
-	Label a_widget2;
-	Label a_widget3;
-	Label a_widget4;
-	RefPtr<Gtk::Style> style;
-	RefPtr<TextBuffer> buffer (errors->text().get_buffer());
-
-	box.pack_start (a_widget1);
-	box.pack_start (a_widget2);
-	box.pack_start (a_widget3);
-	box.pack_start (a_widget4);
-
-	error_ptag = buffer->create_tag();
-	error_mtag = buffer->create_tag();
-	fatal_ptag = buffer->create_tag();
-	fatal_mtag = buffer->create_tag();
-	warning_ptag = buffer->create_tag();
-	warning_mtag = buffer->create_tag();
-	info_ptag = buffer->create_tag();
-	info_mtag = buffer->create_tag();
-
-	a_widget1.set_name ("FatalMessage");
-	a_widget1.ensure_style ();
-	style = a_widget1.get_style();
-
-	fatal_ptag->property_font_desc().set_value(style->get_font());
-	fatal_ptag->property_foreground_gdk().set_value(style->get_fg(STATE_ACTIVE));
-	fatal_ptag->property_background_gdk().set_value(style->get_bg(STATE_ACTIVE));
-	fatal_mtag->property_font_desc().set_value(style->get_font());
-	fatal_mtag->property_foreground_gdk().set_value(style->get_fg(STATE_NORMAL));
-	fatal_mtag->property_background_gdk().set_value(style->get_bg(STATE_NORMAL));
-
-	a_widget2.set_name ("ErrorMessage");
-	a_widget2.ensure_style ();
-	style = a_widget2.get_style();
-
-	error_ptag->property_font_desc().set_value(style->get_font());
-	error_ptag->property_foreground_gdk().set_value(style->get_fg(STATE_ACTIVE));
-	error_ptag->property_background_gdk().set_value(style->get_bg(STATE_ACTIVE));
-	error_mtag->property_font_desc().set_value(style->get_font());
-	error_mtag->property_foreground_gdk().set_value(style->get_fg(STATE_NORMAL));
-	error_mtag->property_background_gdk().set_value(style->get_bg(STATE_NORMAL));
-
-	a_widget3.set_name ("WarningMessage");
-	a_widget3.ensure_style ();
-	style = a_widget3.get_style();
-
-	warning_ptag->property_font_desc().set_value(style->get_font());
-	warning_ptag->property_foreground_gdk().set_value(style->get_fg(STATE_ACTIVE));
-	warning_ptag->property_background_gdk().set_value(style->get_bg(STATE_ACTIVE));
-	warning_mtag->property_font_desc().set_value(style->get_font());
-	warning_mtag->property_foreground_gdk().set_value(style->get_fg(STATE_NORMAL));
-	warning_mtag->property_background_gdk().set_value(style->get_bg(STATE_NORMAL));
-
-	a_widget4.set_name ("InfoMessage");
-	a_widget4.ensure_style ();
-	style = a_widget4.get_style();
-
-	info_ptag->property_font_desc().set_value(style->get_font());
-	info_ptag->property_foreground_gdk().set_value(style->get_fg(STATE_ACTIVE));
-	info_ptag->property_background_gdk().set_value(style->get_bg(STATE_ACTIVE));
-	info_mtag->property_font_desc().set_value(style->get_font());
-	info_mtag->property_foreground_gdk().set_value(style->get_fg(STATE_NORMAL));
-	info_mtag->property_background_gdk().set_value(style->get_bg(STATE_NORMAL));
-
+	RC::reset_styles(Gtk::Settings::get_default());
 	return 0;
 }
 
