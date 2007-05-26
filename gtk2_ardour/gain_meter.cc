@@ -317,6 +317,7 @@ int
 GainMeter::redraw_pixmaps(string blah)
 {
 	style_changed = true;
+	return 0;
 }
 
 GainMeter::~GainMeter ()
