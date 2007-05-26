@@ -86,6 +86,7 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	ignore_toggle = false;
 	meter_menu = 0;
 	next_release_selects = false;
+	style_changed = true;
 
 	gain_slider = manage (new VSliderController (slider,
 						     &gain_adjustment,
@@ -209,6 +210,8 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	
 	ResetAllPeakDisplays.connect (mem_fun(*this, &GainMeter::reset_peak_display));
 	ResetGroupPeakDisplays.connect (mem_fun(*this, &GainMeter::reset_group_peak_display));
+
+	ThemeChanged.connect (mem_fun(*this, &GainMeter::redraw_pixmaps));
 }
 
 void
@@ -273,14 +276,9 @@ gint
 GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 {
 	static Glib::RefPtr<Gtk::Style> meter_style;
-	bool style_changed = false;
 	
-	if (!meter_style || 
-	meter_style->get_bg(Gtk::STATE_NORMAL).get_red() != meter_metric_area.get_style()->get_bg(Gtk::STATE_NORMAL).get_red() || 
-	meter_style->get_bg(Gtk::STATE_NORMAL).get_green() != meter_metric_area.get_style()->get_bg(Gtk::STATE_NORMAL).get_green() ||
-	meter_style->get_bg(Gtk::STATE_NORMAL).get_blue() != meter_metric_area.get_style()->get_bg(Gtk::STATE_NORMAL).get_blue()) {
+	if (style_changed) {
 		meter_style = meter_metric_area.get_style();
-		style_changed = true;
 	}
 		
 	Glib::RefPtr<Gdk::Window> win (meter_metric_area.get_window());
@@ -311,7 +309,14 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 	win->draw_rectangle (bg_gc, true, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
 	win->draw_drawable (fg_gc, pixmap, draw_rect.x, draw_rect.y, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
 	
+	style_changed = false;
 	return true;
+}
+
+int
+GainMeter::redraw_pixmaps(string blah)
+{
+	style_changed = true;
 }
 
 GainMeter::~GainMeter ()
