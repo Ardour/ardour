@@ -265,9 +265,14 @@ ThemeManager::load_rc(int which)
 void
 ThemeManager::setup_theme_buttons ()
 {
+
+	if (getenv ("ARDOUR2_UI_RC")) {
+		return;
+	}
+
 	if (Config->get_ui_rc_file() == "ardour2_ui_dark.rc") {
 		dark_button.set_active();
-	} else {
+	} else if (Config->get_ui_rc_file() == "ardour2_ui_light.rc") {
 		light_button.set_active();
 	}
 }
