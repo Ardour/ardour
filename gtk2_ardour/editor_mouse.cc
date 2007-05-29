@@ -1449,8 +1449,8 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 		*/
 		if (!drag_info.move_threshold_passed) {
 
-			bool x_threshold_passed =  (abs ((int) (drag_info.current_pointer_x - drag_info.grab_x)) > 4);
-			bool y_threshold_passed =  (abs ((int) (drag_info.current_pointer_y - drag_info.grab_y)) > 4);
+			bool x_threshold_passed =  (abs ((int64_t) (drag_info.current_pointer_x - drag_info.grab_x)) > 4LL);
+			bool y_threshold_passed =  (abs ((int64_t) (drag_info.current_pointer_y - drag_info.grab_y)) > 4LL);
 
 			drag_info.move_threshold_passed = (x_threshold_passed || y_threshold_passed);
 			
@@ -1707,7 +1707,7 @@ Editor::fade_in_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	nframes_t pos;
 	nframes_t fade_length;
 
-	if ((int32_t)drag_info.current_pointer_frame > drag_info.pointer_frame_offset) {
+	if (drag_info.current_pointer_frame > drag_info.pointer_frame_offset) {
 		pos = drag_info.current_pointer_frame - drag_info.pointer_frame_offset;
 	}
 	else {
@@ -1752,7 +1752,7 @@ Editor::fade_in_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* even
 
 	if (drag_info.first_move) return;
 
-	if ((int32_t)drag_info.current_pointer_frame > drag_info.pointer_frame_offset) {
+	if (drag_info.current_pointer_frame > drag_info.pointer_frame_offset) {
 		pos = drag_info.current_pointer_frame - drag_info.pointer_frame_offset;
 	} else {
 		pos = 0;
@@ -1862,7 +1862,7 @@ Editor::fade_out_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* eve
 	nframes_t pos;
 	nframes_t fade_length;
 
-	if ((long)drag_info.current_pointer_frame > drag_info.pointer_frame_offset) {
+	if (drag_info.current_pointer_frame > drag_info.pointer_frame_offset) {
 		pos = drag_info.current_pointer_frame - drag_info.pointer_frame_offset;
 	}
 	else {
@@ -1944,7 +1944,7 @@ Editor::cursor_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	Cursor* cursor = (Cursor *) drag_info.data;
 	nframes_t adjusted_frame;
 	
-	if ((long)drag_info.current_pointer_frame > drag_info.pointer_frame_offset) {
+	if (drag_info.current_pointer_frame > drag_info.pointer_frame_offset) {
 		adjusted_frame = drag_info.current_pointer_frame - drag_info.pointer_frame_offset;
 	}
 	else {
@@ -2060,7 +2060,7 @@ Editor::marker_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 
 	nframes_t newframe;
-	if (drag_info.pointer_frame_offset <= (long) drag_info.current_pointer_frame) {
+	if (drag_info.pointer_frame_offset <= drag_info.current_pointer_frame) {
 		newframe = drag_info.current_pointer_frame - drag_info.pointer_frame_offset;
 	}
 	else {
@@ -2241,7 +2241,7 @@ Editor::meter_marker_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* e
 	MeterMarker* marker = (MeterMarker *) drag_info.data;
 	nframes_t adjusted_frame;
 
-	if ((long)drag_info.current_pointer_frame > drag_info.pointer_frame_offset) {
+	if (drag_info.current_pointer_frame > drag_info.pointer_frame_offset) {
 		adjusted_frame = drag_info.current_pointer_frame - drag_info.pointer_frame_offset;
 	}
 	else {
@@ -2372,7 +2372,7 @@ Editor::tempo_marker_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* e
 	TempoMarker* marker = (TempoMarker *) drag_info.data;
 	nframes_t adjusted_frame;
 	
-	if ((long)drag_info.current_pointer_frame > drag_info.pointer_frame_offset) {
+	if (drag_info.current_pointer_frame > drag_info.pointer_frame_offset) {
 		adjusted_frame = drag_info.current_pointer_frame - drag_info.pointer_frame_offset;
 	}
 	else {
@@ -2988,14 +2988,14 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 	if (drag_info.move_threshold_passed) {
 
-		if ((int32_t)drag_info.current_pointer_frame > drag_info.pointer_frame_offset) {
+		if (drag_info.current_pointer_frame > drag_info.pointer_frame_offset) {
 
 			nframes_t sync_frame;
 			nframes_t sync_offset;
 			int32_t sync_dir;
 	    
 			pending_region_position = drag_info.current_pointer_frame - drag_info.pointer_frame_offset;
-	    
+			
 			sync_offset = rv->region()->sync_offset (sync_dir);
 			sync_frame = rv->region()->adjust_to_sync (pending_region_position);
 
@@ -3027,7 +3027,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			/* now compute the canvas unit distance we need to move the regiondrag_info.last_trackview->order
 			   to make it appear at the new location.
 			*/
-	    
+
 			if (pending_region_position > drag_info.last_frame_position) {
 				x_delta = ((double) (pending_region_position - drag_info.last_frame_position) / frames_per_unit);
 			} else {
@@ -3179,7 +3179,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 				if (-x_delta > ix1) {
 					x_delta = -ix1;
 				}
-			} else if ((x_delta > 0) &&(rv->region()->last_frame() > max_frames - x_delta)) {
+			} else if ((x_delta > 0) && (rv->region()->last_frame() > max_frames - x_delta)) {
 				x_delta = max_frames - rv->region()->last_frame();
 			}
 
@@ -3802,10 +3802,9 @@ Editor::drag_selection (ArdourCanvas::Item* item, GdkEvent* event)
 	nframes_t length;
 	nframes_t pending_position;
 
-	if ((int32_t) drag_info.current_pointer_frame > drag_info.pointer_frame_offset) {
+	if (drag_info.current_pointer_frame > drag_info.pointer_frame_offset) {
 		pending_position = drag_info.current_pointer_frame - drag_info.pointer_frame_offset;
-	}
-	else {
+	} else {
 		pending_position = 0;
 	}
 	

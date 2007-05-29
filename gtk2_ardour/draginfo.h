@@ -40,7 +40,7 @@ struct DragInfo {
     ItemType            item_type;
     void* data;
     nframes_t last_frame_position;
-    int32_t pointer_frame_offset;
+    int64_t pointer_frame_offset;
     nframes_t grab_frame;
     nframes_t last_pointer_frame;
     nframes_t current_pointer_frame;
