@@ -101,7 +101,11 @@ Editor::add_audio_region_to_region_display (boost::shared_ptr<AudioRegion> regio
 		TreeModel::Row parent;
 		TreeModel::Row child;
 
+		cerr << "Region " << region->name() << " is hidden\n";
+
 		if (iter == region_list_model->children().end()) {
+
+			cerr << "no parent node for hidden regions yet, add one\n";
 			
 			parent = *(region_list_model->append());
 			
@@ -109,15 +113,24 @@ Editor::add_audio_region_to_region_display (boost::shared_ptr<AudioRegion> regio
 
 		} else {
 
+			cerr << "first node exists, check its name\n";
+
 			if ((*iter)[region_list_columns.name] != _("Hidden")) {
+
+				cerr << "its not hidden, add another node before it\n";
 
 				parent = *(region_list_model->insert(iter));
 				parent[region_list_columns.name] = _("Hidden");
 
 			} else {
+				
+				cerr << "thats the one\n";
+
 				parent = *iter;
 			}
 		}
+
+		cerr << "now have a parent, append a new child\n";
 
 		row = *(region_list_model->append (parent.children()));
 
