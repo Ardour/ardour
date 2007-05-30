@@ -47,6 +47,12 @@ typedef int intptr_t;
 
 typedef uint32_t                    nframes_t;
 
+/* eventually, we'd like everything (including JACK) to 
+   move to this. for now, its a dedicated type.
+*/
+
+typedef int64_t                    nframes64_t;
+
 namespace ARDOUR {
 
 	class Source;

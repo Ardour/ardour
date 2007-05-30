@@ -2236,7 +2236,7 @@ Editor::trackview_by_y_position (double y)
 }
 
 void
-Editor::snap_to (nframes_t& start, int32_t direction, bool for_mark)
+Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
 {
 	Location* before = 0;
 	Location* after = 0;
@@ -2245,11 +2245,11 @@ Editor::snap_to (nframes_t& start, int32_t direction, bool for_mark)
 		return;
 	}
 
-	const nframes_t one_second = session->frame_rate();
-	const nframes_t one_minute = session->frame_rate() * 60;
-	const nframes_t one_smpte_second = (nframes_t)(rint(session->smpte_frames_per_second()) * session->frames_per_smpte_frame());
-	nframes_t one_smpte_minute = (nframes_t)(rint(session->smpte_frames_per_second()) * session->frames_per_smpte_frame() * 60);
-	nframes_t presnap = start;
+	const nframes64_t one_second = session->frame_rate();
+	const nframes64_t one_minute = session->frame_rate() * 60;
+	const nframes64_t one_smpte_second = (nframes64_t)(rint(session->smpte_frames_per_second()) * session->frames_per_smpte_frame());
+	nframes64_t one_smpte_minute = (nframes64_t)(rint(session->smpte_frames_per_second()) * session->frames_per_smpte_frame() * 60);
+	nframes64_t presnap = start;
 
 	switch (snap_type) {
 	case SnapToFrame:

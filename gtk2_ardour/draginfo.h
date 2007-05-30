@@ -39,11 +39,11 @@ struct DragInfo {
     ArdourCanvas::Item* item;
     ItemType            item_type;
     void* data;
-    nframes_t last_frame_position;
-    int64_t pointer_frame_offset;
-    nframes_t grab_frame;
-    nframes_t last_pointer_frame;
-    nframes_t current_pointer_frame;
+    nframes64_t last_frame_position;
+    nframes64_t pointer_frame_offset;
+    nframes64_t grab_frame;
+    nframes64_t last_pointer_frame;
+    nframes64_t current_pointer_frame;
     double grab_x, grab_y;
     double cumulative_x_drag;
     double cumulative_y_drag;
