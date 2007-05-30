@@ -721,6 +721,20 @@ CrossfadeEditor::redraw ()
 void
 CrossfadeEditor::apply_preset (Preset *preset)
 {
+  
+	WhichFade wf =  find(fade_in_presets->begin(), fade_in_presets->end(), preset) != fade_in_presets->end() ? In : Out;
+	
+	if (current != wf) {
+	  
+	      	if (wf == In) {
+			select_in_button.clicked();
+		} else {
+			select_out_button.clicked();
+		}
+		
+		curve_select_clicked (wf);
+	}  
+	
 	for (list<Point*>::iterator i = fade[current].points.begin(); i != fade[current].points.end(); ++i) {
 		delete *i;
 	}
@@ -820,6 +834,8 @@ CrossfadeEditor::reset ()
 {
 	set (xfade->fade_in(),  In);
 	set (xfade->fade_out(), Out);
+
+        curve_select_clicked (current);
 }
 
 void
@@ -980,14 +996,6 @@ CrossfadeEditor::curve_select_clicked (WhichFade wf)
 			(*i)->box->show ();
 		}
 
-		for (vector<Button*>::iterator i = fade_out_buttons.begin(); i != fade_out_buttons.end(); ++i) {
-			(*i)->set_sensitive (false);
-		}
-
-		for (vector<Button*>::iterator i = fade_in_buttons.begin(); i != fade_in_buttons.end(); ++i) {
-			(*i)->set_sensitive (true);
-		}
-
 	} else {
 
 		for (vector<ArdourCanvas::WaveView*>::iterator i = fade[In].waves.begin(); i != fade[In].waves.end(); ++i) {
@@ -1009,14 +1017,6 @@ CrossfadeEditor::curve_select_clicked (WhichFade wf)
 		
 		for (list<Point*>::iterator i = fade[Out].points.begin(); i != fade[Out].points.end(); ++i) {
 			(*i)->box->show();
-		}
-
-		for (vector<Button*>::iterator i = fade_out_buttons.begin(); i != fade_out_buttons.end(); ++i) {
-			(*i)->set_sensitive (true);
-		}
-
-		for (vector<Button*>::iterator i = fade_in_buttons.begin(); i != fade_in_buttons.end(); ++i) {
-			(*i)->set_sensitive (false);
 		}
 
 	}
