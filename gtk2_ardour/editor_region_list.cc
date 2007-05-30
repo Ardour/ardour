@@ -103,7 +103,7 @@ Editor::add_audio_region_to_region_display (boost::shared_ptr<AudioRegion> regio
 
 		cerr << "Region " << region->name() << " is hidden\n";
 
-		if (iter == region_list_model->children().end()) {
+		if (!iter) {
 
 			cerr << "no parent node for hidden regions yet, add one\n";
 			
