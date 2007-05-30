@@ -101,36 +101,24 @@ Editor::add_audio_region_to_region_display (boost::shared_ptr<AudioRegion> regio
 		TreeModel::Row parent;
 		TreeModel::Row child;
 
-		cerr << "Region " << region->name() << " is hidden\n";
-
 		if (!iter) {
 
-			cerr << "no parent node for hidden regions yet, add one\n";
-			
 			parent = *(region_list_model->append());
 			
 			parent[region_list_columns.name] = _("Hidden");
 
 		} else {
 
-			cerr << "first node exists, check its name\n";
-
 			if ((*iter)[region_list_columns.name] != _("Hidden")) {
-
-				cerr << "its not hidden, add another node before it\n";
 
 				parent = *(region_list_model->insert(iter));
 				parent[region_list_columns.name] = _("Hidden");
 
 			} else {
-				
-				cerr << "thats the one\n";
 
 				parent = *iter;
 			}
 		}
-
-		cerr << "now have a parent, append a new child\n";
 
 		row = *(region_list_model->append (parent.children()));
 
@@ -602,7 +590,6 @@ Editor::hide_a_region (boost::shared_ptr<Region> r)
 void
 Editor::remove_a_region (boost::shared_ptr<Region> r)
 {
-	cerr << "remove " << r->name();
 	session->remove_region_from_region_list (r);
 }
 
@@ -621,7 +608,6 @@ Editor::hide_region_from_region_list ()
 void
 Editor::remove_region_from_region_list ()
 {
-	cerr << "Mapping remove over region selection\n";
 	region_list_selection_mapover (mem_fun (*this, &Editor::remove_a_region));
 }
 
@@ -644,8 +630,15 @@ bool
 Editor::region_list_selection_filter (const RefPtr<TreeModel>& model, const TreeModel::Path& path, bool yn)
 {
 	/* not possible to select rows that do not represent regions, like "Hidden" */
+	
+	TreeModel::iterator iter = model->get_iter (path);
 
-	/// XXXX FIXME boost::shared_ptr<Region> r = ((model->get_iter (path)))[region_list_columns.region];
-	/// return r != 0;
+	if (iter) {
+		boost::shared_ptr<Region> r =(*iter)[region_list_columns.region];
+		if (!r) {
+			return false;
+		}
+	} 
+
 	return true;
 }
