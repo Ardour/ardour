@@ -1265,3 +1265,8 @@ Region::get_parent() const
 	return boost::shared_ptr<Region>();
 }
 
+string
+Region::node_name ()
+{
+	return X_("Region");
+}

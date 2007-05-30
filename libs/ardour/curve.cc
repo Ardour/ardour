@@ -72,7 +72,7 @@ Curve::~Curve ()
 void
 Curve::solve ()
 {
-	uint32_t npoints;
+	uint64_t npoints;
 
 	if (!_dirty) {
 		return;
@@ -87,7 +87,7 @@ Curve::solve ()
 
 		double x[npoints];
 		double y[npoints];
-		uint32_t i;
+		uint64_t i;
 		AutomationEventList::iterator xx;
 
 		for (i = 0, xx = events.begin(); xx != events.end(); ++xx, ++i) {
@@ -206,7 +206,7 @@ Curve::solve ()
 }
 
 bool
-Curve::rt_safe_get_vector (double x0, double x1, float *vec, int32_t veclen)
+Curve::rt_safe_get_vector (double x0, double x1, float *vec, int64_t veclen)
 {
 	Glib::Mutex::Lock lm (lock, Glib::TRY_LOCK);
 
@@ -219,19 +219,19 @@ Curve::rt_safe_get_vector (double x0, double x1, float *vec, int32_t veclen)
 }
 
 void
-Curve::get_vector (double x0, double x1, float *vec, int32_t veclen)
+Curve::get_vector (double x0, double x1, float *vec, int64_t veclen)
 {
 	Glib::Mutex::Lock lm (lock);
 	_get_vector (x0, x1, vec, veclen);
 }
 
 void
-Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
+Curve::_get_vector (double x0, double x1, float *vec, int64_t veclen)
 {
 	double rx, dx, lx, hx, max_x, min_x;
-	int32_t i;
-	int32_t original_veclen;
-	int32_t npoints;
+	int64_t i;
+	int64_t original_veclen;
+	int64_t npoints;
 
         if ((npoints = events.size()) == 0) {
                  for (i = 0; i < veclen; ++i) {
@@ -262,7 +262,7 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 		*/
 
 		double frac = (min_x - x0) / (x1 - x0);
-		int32_t subveclen = (int32_t) floor (veclen * frac);
+		int64_t subveclen = (int64_t) floor (veclen * frac);
 		
 		subveclen = min (subveclen, veclen);
 
@@ -280,7 +280,7 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 
 		double frac = (x1 - max_x) / (x1 - x0);
 
-		int32_t subveclen = (int32_t) floor (original_veclen * frac);
+		int64_t subveclen = (int64_t) floor (original_veclen * frac);
 
 		float val;
 		
@@ -437,7 +437,7 @@ Curve::point_factory (const ControlEvent& other) const
 extern "C" {
 
 void 
-curve_get_vector_from_c (void *arg, double x0, double x1, float* vec, int32_t vecsize)
+curve_get_vector_from_c (void *arg, double x0, double x1, float* vec, int64_t vecsize)
 {
 	static_cast<Curve*>(arg)->get_vector (x0, x1, vec, vecsize);
 }

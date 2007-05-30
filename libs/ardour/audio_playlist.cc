@@ -65,6 +65,7 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, stri
 		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(*in_o);
 
 		// We look only for crossfades which begin with the current region, so we don't get doubles
+
 		for (Crossfades::const_iterator xfades = other->_crossfades.begin(); xfades != other->_crossfades.end(); ++xfades) {
 			if ((*xfades)->in() == ar) {
 				// We found one! Now copy it!
@@ -112,6 +113,21 @@ AudioPlaylist::~AudioPlaylist ()
 	
 	_crossfades.clear ();
 }
+
+void
+AudioPlaylist::copy_regions (RegionList& newlist) const
+{
+	RegionLock rlock (const_cast<Playlist *> (this));
+
+	Playlist::copy_regions (newlist, false);
+
+	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
+		if (!(*i)->is_dependent()) {
+			newlist.push_back (RegionFactory::RegionFactory::create (*i));
+		}
+	}
+}
+
 
 struct RegionSortByLayer {
     bool operator() (boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
@@ -218,11 +234,11 @@ AudioPlaylist::remove_dependents (boost::shared_ptr<Region> region)
 		      << endmsg;
 		return;
 	}
-
-	for (Crossfades::iterator i = _crossfades.begin(); i != _crossfades.end(); ) {
+	
+	for (RegionList::iterator i = regions.begin(); i != regions.end(); ) {
 		
-		if ((*i)->involves (r)) {
-			i = _crossfades.erase (i);
+		if ((*i)->depends_on (r)) {
+			i = regions.erase (i);
 		} else {
 			++i;
 		}
@@ -261,16 +277,16 @@ AudioPlaylist::refresh_dependents (boost::shared_ptr<Region> r)
 		return;
 	}
 
-	for (Crossfades::iterator x = _crossfades.begin(); x != _crossfades.end();) {
-
-		Crossfades::iterator tmp;
+	for (RegionList::iterator x = regions.begin(); x != regions.end();) {
+		
+		RegionList::iterator tmp;
 		
 		tmp = x;
 		++tmp;
 
 		/* only update them once */
 
-		if ((*x)->involves (ar)) {
+		if ((*x)->depends_on (ar)) {
 
 			if (find (updated.begin(), updated.end(), *x) == updated.end()) {
 				try { 
@@ -296,35 +312,43 @@ AudioPlaylist::finalize_split_region (boost::shared_ptr<Region> o, boost::shared
 	boost::shared_ptr<AudioRegion> left  = boost::dynamic_pointer_cast<AudioRegion>(l);
 	boost::shared_ptr<AudioRegion> right = boost::dynamic_pointer_cast<AudioRegion>(r);
 
-	for (Crossfades::iterator x = _crossfades.begin(); x != _crossfades.end();) {
+	for (RegionList::iterator x = regions.begin(); x !=regions.end();) {
 		Crossfades::iterator tmp;
+		boost::shared_ptr<Crossfade> xfade = boost::dynamic_pointer_cast<Crossfade>(*x);
+
+		if (!xfade) {
+			++x;
+			continue;
+		}
+
 		tmp = x;
 		++tmp;
 
 		boost::shared_ptr<Crossfade> fade;
 		
-		if ((*x)->_in == orig) {
-			if (! (*x)->covers(right->position())) {
-				fade = boost::shared_ptr<Crossfade> (new Crossfade (*x, left, (*x)->_out));
+		if (xfade->_in == orig) {
+			if (! xfade->covers(right->position())) {
+				fade = boost::shared_ptr<Crossfade> (new Crossfade (*xfade, left, xfade->_out));
 			} else {
 				// Overlap, the crossfade is copied on the left side of the right region instead
-				fade = boost::shared_ptr<Crossfade> (new Crossfade (*x, right, (*x)->_out));
+				fade = boost::shared_ptr<Crossfade> (new Crossfade (*xfade, right, xfade->_out));
 			}
 		}
 		
-		if ((*x)->_out == orig) {
-			if (! (*x)->covers(right->position())) {
-				fade = boost::shared_ptr<Crossfade> (new Crossfade (*x, (*x)->_in, right));
+		if (xfade->_out == orig) {
+			if (! xfade->covers(right->position())) {
+				fade = boost::shared_ptr<Crossfade> (new Crossfade (*xfade, xfade->_in, right));
 			} else {
 				// Overlap, the crossfade is copied on the right side of the left region instead
-				fade = boost::shared_ptr<Crossfade> (new Crossfade (*x, (*x)->_in, left));
+				fade = boost::shared_ptr<Crossfade> (new Crossfade (*xfade, xfade->_in, left));
 			}
 		}
 		
 		if (fade) {
-			_crossfades.remove (*x);
+			regions.erase (*x);
 			add_crossfade (fade);
 		}
+
 		x = tmp;
 	}
 }
@@ -442,25 +466,29 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 }
 
 void
-AudioPlaylist::add_crossfade (boost::shared_ptr<Crossfade> xfade)
+AudioPlaylist::add_crossfade (boost::shared_ptr<Crossfade> new_xfade)
 {
-	Crossfades::iterator ci;
+	RegionList::iterator r;
+	boost::shared_ptr<Crossfade> xfade;
 
-	for (ci = _crossfades.begin(); ci != _crossfades.end(); ++ci) {
-		if (*(*ci) == *xfade) { // Crossfade::operator==()
-			break;
+	for (r = regions.begin(); r != regions.end(); ++r) {
+		
+		if ((xfade = boost::dynamic_pointer_cast<Crossfade>(*r))) {
+			if (*xfade == *new_xfade) { // Crossfade::operator==()
+				break;
+			}
 		}
 	}
 	
-	if (ci != _crossfades.end()) {
+	if (r != regions.end()) {
 		// it will just go away
 	} else {
-		_crossfades.push_back (xfade);
+		add_region_internal (new_xfade);
 
-		xfade->Invalidated.connect (mem_fun (*this, &AudioPlaylist::crossfade_invalidated));
-		xfade->StateChanged.connect (mem_fun (*this, &AudioPlaylist::crossfade_changed));
+		new_xfade->Invalidated.connect (mem_fun (*this, &AudioPlaylist::crossfade_invalidated));
+		new_xfade->StateChanged.connect (mem_fun (*this, &AudioPlaylist::crossfade_changed));
 
-		notify_crossfade_added (xfade);
+		notify_crossfade_added (new_xfade);
 	}
 }
 	
@@ -476,15 +504,12 @@ void AudioPlaylist::notify_crossfade_added (boost::shared_ptr<Crossfade> x)
 void
 AudioPlaylist::crossfade_invalidated (boost::shared_ptr<Region> r)
 {
-	Crossfades::iterator i;
 	boost::shared_ptr<Crossfade> xfade = boost::dynamic_pointer_cast<Crossfade> (r);
-
+	
 	xfade->in()->resume_fade_in ();
 	xfade->out()->resume_fade_out ();
 
-	if ((i = find (_crossfades.begin(), _crossfades.end(), xfade)) != _crossfades.end()) {
-		_crossfades.erase (i);
-	}
+	remove_region_internal (r);
 }
 
 int
@@ -505,13 +530,14 @@ AudioPlaylist::set_state (const XMLNode& node)
 
 		child = *niter;
 
-		if (child->name() != "Crossfade") {
+		if (child->name() != Crossfade::node_name()) {
 			continue;
 		}
-
+		
 		try {
-			boost::shared_ptr<Crossfade> xfade = boost::shared_ptr<Crossfade> (new Crossfade (*((const Playlist *)this), *child));
-			_crossfades.push_back (xfade);
+			boost::shared_ptr<Crossfade> xfade = boost::dynamic_pointer_cast<Crossfade> (RegionFactory::create (*((const Playlist *) this), *child));
+			assert (xfade);
+			add_region_internal (xfade);
 			xfade->Invalidated.connect (mem_fun (*this, &AudioPlaylist::crossfade_invalidated));
 			xfade->StateChanged.connect (mem_fun (*this, &AudioPlaylist::crossfade_changed));
 			NewCrossfade(xfade);
@@ -534,22 +560,7 @@ AudioPlaylist::set_state (const XMLNode& node)
 void
 AudioPlaylist::clear (bool with_signals)
 {
-	_crossfades.clear ();
 	Playlist::clear (with_signals);
-}
-
-XMLNode&
-AudioPlaylist::state (bool full_state)
-{
-	XMLNode& node = Playlist::state (full_state);
-
-	if (full_state) {
-		for (Crossfades::iterator i = _crossfades.begin(); i != _crossfades.end(); ++i) {
-			node.add_child_nocopy ((*i)->get_state());
-		}
-	}
-	
-	return node;
 }
 
 void
@@ -560,33 +571,32 @@ AudioPlaylist::dump () const
 
 	cerr << "Playlist \"" << _name << "\" " << endl
 	     << regions.size() << " regions "
-	     << _crossfades.size() << " crossfades"
 	     << endl;
 
 	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
 		r = *i;
-		cerr << "  " << r->name() << " @ " << r << " [" 
-		     << r->start() << "+" << r->length() 
-		     << "] at " 
-		     << r->position()
-		     << " on layer "
-		     << r->layer ()
-		     << endl;
-	}
 
-	for (Crossfades::const_iterator i = _crossfades.begin(); i != _crossfades.end(); ++i) {
-		x = *i;
-		cerr << "  xfade [" 
-		     << x->out()->name()
-		     << ','
-		     << x->in()->name()
-		     << " @ "
-		     << x->position()
-		     << " length = " 
-		     << x->length ()
-		     << " active ? "
-		     << (x->active() ? "yes" : "no")
-		     << endl;
+		if ((x = boost::dynamic_pointer_cast<Crossfade> (r))) {
+			cerr << "  xfade [" 
+			     << x->out()->name()
+			     << ','
+			     << x->in()->name()
+			     << " @ "
+			     << x->position()
+			     << " length = " 
+			     << x->length ()
+			     << " active ? "
+			     << (x->active() ? "yes" : "no")
+			     << endl;
+		} else {
+			cerr << "  " << r->name() << " @ " << r << " [" 
+			     << r->start() << "+" << r->length() 
+			     << "] at " 
+			     << r->position()
+			     << " on layer "
+			     << r->layer ()
+			     << endl;
+		}
 	}
 }
 
@@ -595,8 +605,6 @@ AudioPlaylist::destroy_region (boost::shared_ptr<Region> region)
 {
 	boost::shared_ptr<AudioRegion> r = boost::dynamic_pointer_cast<AudioRegion> (region);
 	bool changed = false;
-	Crossfades::iterator c, ctmp;
-	set<boost::shared_ptr<Crossfade> > unique_xfades;
 
 	if (r == 0) {
 		fatal << _("programming error: non-audio Region passed to remove_overlap in audio playlist")
@@ -616,6 +624,9 @@ AudioPlaylist::destroy_region (boost::shared_ptr<Region> region)
 			if ((*i) == region) {
 				regions.erase (i);
 				changed = true;
+			} else if ((*i)->depends_on (region)) {
+				regions.erase (i);
+				changed = true;
 			}
 			
 			i = tmp;
@@ -629,24 +640,15 @@ AudioPlaylist::destroy_region (boost::shared_ptr<Region> region)
 			if ((*x) == region) {
 				all_regions.erase (x);
 				changed = true;
+			} else if ((*x)->depends_on (region)) {
+				all_regions.erase (x);
+				changed = true;
 			}
 			
 			x = xtmp;
 		}
 
 		region->set_playlist (boost::shared_ptr<Playlist>());
-	}
-
-	for (c = _crossfades.begin(); c != _crossfades.end(); ) {
-		ctmp = c;
-		++ctmp;
-
-		if ((*c)->involves (r)) {
-			unique_xfades.insert (*c);
-			_crossfades.erase (c);
-		}
-		
-		c = ctmp;
 	}
 
 	if (changed) {
@@ -696,22 +698,5 @@ AudioPlaylist::region_changed (Change what_changed, boost::shared_ptr<Region> re
 	}
 
 	return true; 
-}
-
-void
-AudioPlaylist::crossfades_at (nframes_t frame, Crossfades& clist)
-{
-	RegionLock rlock (this);
-
-	for (Crossfades::iterator i = _crossfades.begin(); i != _crossfades.end(); ++i) {
-		nframes_t start, end;
-
-		start = (*i)->position();
-		end = start + (*i)->overlap_length(); // not length(), important difference
-
-		if (frame >= start && frame <= end) {
-			clist.push_back (*i);
-		} 
-	}
 }
 

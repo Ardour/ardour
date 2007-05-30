@@ -90,6 +90,24 @@ RegionFactory::create (boost::shared_ptr<Region> region)
 }
 
 boost::shared_ptr<Region>
+RegionFactory::create (const Playlist& playlist, boost::shared_ptr<Region> region)
+{
+	boost::shared_ptr<Crossfade> xfade;
+	boost::shared_ptr<MidiRegion> mr;
+	
+	if ((xfade = boost::dynamic_pointer_cast<Crossfade>(region)) != 0) {
+		boost::shared_ptr<Region> ret (new Crossfade (playlist, xfade));
+		/* pure copy constructor - no CheckNewRegion emitted */
+		return ret;
+	} else {
+		fatal << _("programming error: RegionFactory::create(Playlist,Region) called with unknown Region type")
+		      << endmsg;
+		/*NOTREACHED*/
+		return boost::shared_ptr<Region>();
+	}
+}
+
+boost::shared_ptr<Region>
 RegionFactory::create (boost::shared_ptr<AudioRegion> region, nframes_t start, 
 			     nframes_t length, std::string name, 
 			     layer_t layer, Region::Flag flags, bool announce)
@@ -136,6 +154,22 @@ RegionFactory::create (SourceList& srcs, nframes_t start, nframes_t length, cons
 
 	return boost::shared_ptr<Region> ();
 }	
+
+boost::shared_ptr<Region> 
+RegionFactory::create (const Playlist& playlist, const XMLNode& node)
+{
+	/* this is a constructor for "dependent" region types.
+	   these objects require a playlist so that they can
+	   look up the region instances that they depend upon.
+	*/
+
+	if (node.name() == Crossfade::node_name()) {
+		boost::shared_ptr<Region> ret (new Crossfade (playlist, node));
+		return ret;
+	}
+
+	return boost::shared_ptr<Region> ();
+}
 
 boost::shared_ptr<Region> 
 RegionFactory::create (SourceList& srcs, const XMLNode& node)

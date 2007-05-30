@@ -72,11 +72,9 @@ class AudioPlaylist : public ARDOUR::Playlist
         void remove_dependents (boost::shared_ptr<Region> region);
 
     private:
-       Crossfades      _crossfades;
        Crossfades      _pending_xfade_adds;
 
        void crossfade_invalidated (boost::shared_ptr<Region>);
-       XMLNode& state (bool full_state);
        void dump () const;
 
        bool region_changed (Change, boost::shared_ptr<Region>);

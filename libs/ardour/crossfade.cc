@@ -194,6 +194,11 @@ Crossfade::Crossfade (boost::shared_ptr<Crossfade> orig, boost::shared_ptr<Audio
 	set_length(_length);
 }
 
+Crossfade::Crossfade (boost::shared_ptr<Playlist> pl, boost::shared_ptr<Crossfade> other)
+{
+
+}
+
 
 Crossfade::~Crossfade ()
 {
@@ -624,7 +629,7 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 XMLNode&
 Crossfade::get_state () 
 {
-	XMLNode* node = new XMLNode (X_("Crossfade"));
+	XMLNode* node = new XMLNode (node_name());
 	XMLNode* child;
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
@@ -885,4 +890,10 @@ void
 Crossfade::invalidate ()
 {
 	Invalidated (shared_from_this ()); /* EMIT SIGNAL */
+}
+
+string
+Crossfade::node_name ()
+{
+	return X_("Crossfade");
 }
