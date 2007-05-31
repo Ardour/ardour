@@ -18,6 +18,7 @@
 
 #include <cmath>
 #include <cassert>
+#include <utility>
 
 #include <gtkmm.h>
 
@@ -45,6 +46,7 @@
 #include "utils.h"
 #include "color.h"
 
+using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
@@ -69,15 +71,13 @@ MidiStreamView::~MidiStreamView ()
 }
 
 
-void
+RegionView*
 MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait_for_waves)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &MidiStreamView::add_region_view), r));
-
 	boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion> (r);
 
 	if (region == 0) {
-		return;
+		return NULL;
 	}
 
 	MidiRegionView *region_view;
@@ -89,7 +89,7 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait
 			/* great. we already have a MidiRegionView for this Region. use it again. */
 
 			(*i)->set_valid (true);
-			return;
+			return NULL;
 		}
 	}
 	
@@ -112,6 +112,8 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait
 	region->GoingAway.connect (bind (mem_fun (*this, &MidiStreamView::remove_region_view), region));
 	
 	RegionViewAdded (region_view);
+
+	return region_view;
 }
 
 // FIXME: code duplication with AudioStreamVIew
@@ -164,6 +166,11 @@ MidiStreamView::setup_rec_box ()
 				/* add a new region, but don't bother if they set use_rec_regions mid-record */
 
 				MidiRegion::SourceList sources;
+				
+				for (list<sigc::connection>::iterator prc = rec_data_ready_connections.begin(); prc != rec_data_ready_connections.end(); ++prc) {
+					(*prc).disconnect();
+				}
+				rec_data_ready_connections.clear();
 
 				// FIXME
 				boost::shared_ptr<MidiDiskstream> mds = boost::dynamic_pointer_cast<MidiDiskstream>(_trackview.get_diskstream());
@@ -171,20 +178,20 @@ MidiStreamView::setup_rec_box ()
 
 				sources.push_back(mds->write_source());
 				
-				rec_data_ready_connections.push_back (mds->write_source()->ViewDataRangeReady.connect (bind (mem_fun (*this, &MidiStreamView::rec_data_range_ready), mds->write_source()))); 
+				rec_data_ready_connections.push_back (mds->write_source()->ViewDataRangeReady.connect (bind (mem_fun (*this, &MidiStreamView::rec_data_range_ready), boost::weak_ptr<Source>(mds->write_source())))); 
 
 				// handle multi
 				
 				jack_nframes_t start = 0;
 				if (rec_regions.size() > 0) {
-					start = rec_regions.back()->start() + _trackview.get_diskstream()->get_captured_frames(rec_regions.size()-1);
+					start = rec_regions.back().first->start() + _trackview.get_diskstream()->get_captured_frames(rec_regions.size()-1);
 				}
 				
 				boost::shared_ptr<MidiRegion> region (boost::dynamic_pointer_cast<MidiRegion>
 					(RegionFactory::create (sources, start, 1 , "", 0, (Region::Flag)(Region::DefaultFlags | Region::DoNotSaveState), false)));
 				assert(region);
 				region->set_position (_trackview.session().transport_frame(), this);
-				rec_regions.push_back (region);
+				rec_regions.push_back (make_pair(region, (RegionView*)0));
 				
 				// rec regions are destroyed in setup_rec_box
 
@@ -212,6 +219,7 @@ MidiStreamView::setup_rec_box ()
 			rec_rect->property_y2() = (double) _trackview.height - 1;
 			rec_rect->property_outline_color_rgba() = color_map[cRecordingRectOutline];
 			rec_rect->property_fill_color_rgba() = fill_color;
+			rec_rect->lower_to_bottom();
 			
 			RecBoxInfo recbox;
 			recbox.rectangle = rec_rect;
@@ -251,15 +259,17 @@ MidiStreamView::setup_rec_box ()
 
 			rec_updating = false;
 			rec_active = false;
-			last_rec_data_frame = 0;
 			
 			/* remove temp regions */
 			
-			for (list<boost::shared_ptr<Region> >::iterator iter = rec_regions.begin(); iter != rec_regions.end();) {
-				list<boost::shared_ptr<Region> >::iterator tmp;
+			for (list<pair<boost::shared_ptr<Region>,RegionView*> >::iterator iter = rec_regions.begin(); iter != rec_regions.end();) {
+				list<pair<boost::shared_ptr<Region>,RegionView*> >::iterator tmp;
+				
 				tmp = iter;
 				++tmp;
-				(*iter)->drop_references ();
+
+				(*iter).first->drop_references ();
+
 				iter = tmp;
 			}
 			
@@ -280,16 +290,17 @@ MidiStreamView::setup_rec_box ()
 }
 
 void
-MidiStreamView::update_rec_regions ()
+MidiStreamView::update_rec_regions (boost::shared_ptr<MidiBuffer> data, nframes_t start, nframes_t dur)
 {
-	if (use_rec_regions) {
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &MidiStreamView::update_rec_regions), data, start, dur));
 
+	if (use_rec_regions) {
 
 		uint32_t n = 0;
 
-		for (list<boost::shared_ptr<Region> >::iterator iter = rec_regions.begin(); iter != rec_regions.end(); n++) {
+		for (list<pair<boost::shared_ptr<Region>,RegionView*> >::iterator iter = rec_regions.begin(); iter != rec_regions.end(); n++) {
 
-			list<boost::shared_ptr<Region> >::iterator tmp;
+			list<pair<boost::shared_ptr<Region>,RegionView*> >::iterator tmp;
 
 			tmp = iter;
 			++tmp;
@@ -300,16 +311,21 @@ MidiStreamView::update_rec_regions ()
 				continue;
 			}
 			
-			boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion>(*iter);
-			assert(region);
+			boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion>(iter->first);
+			if (!region) {
+				continue;
+			}
 
-			jack_nframes_t origlen = region->length();
+			nframes_t origlen = region->length();
+			
+			//cerr << "MIDI URR: " << start << " * " << dur
+			//	<< " (origlen " << origlen << ")" << endl;
 
-			if (region == rec_regions.back() && rec_active) {
+			if (region == rec_regions.back().first && rec_active) {
 
-				if (last_rec_data_frame > region->start()) {
+				if (start >= region->start()) {
 
-					jack_nframes_t nlen = last_rec_data_frame - region->start();
+					nframes_t nlen = start + dur - region->start();
 
 					if (nlen != region->length()) {
 
@@ -320,7 +336,7 @@ MidiStreamView::update_rec_regions ()
 
 						if (origlen == 1) {
 							/* our special initial length */
-							add_region_view_internal (region, false);
+							iter->second = add_region_view_internal (region, false);
 						}
 
 						/* also update rect */
@@ -332,7 +348,7 @@ MidiStreamView::update_rec_regions ()
 
 			} else {
 
-				jack_nframes_t nlen = _trackview.get_diskstream()->get_captured_frames(n);
+				nframes_t nlen = _trackview.get_diskstream()->get_captured_frames(n);
 
 				if (nlen != region->length()) {
 
@@ -345,7 +361,7 @@ MidiStreamView::update_rec_regions ()
 						
 						if (origlen == 1) {
 							/* our special initial length */
-							add_region_view_internal (region, false);
+							iter->second = add_region_view_internal (region, false);
 						}
 						
 						/* also hide rect */
@@ -362,26 +378,18 @@ MidiStreamView::update_rec_regions ()
 }
 
 void
-MidiStreamView::rec_data_range_ready (jack_nframes_t start, jack_nframes_t cnt, boost::shared_ptr<Source> src)
+MidiStreamView::rec_data_range_ready (boost::shared_ptr<MidiBuffer> data, jack_nframes_t start, jack_nframes_t dur, boost::weak_ptr<Source> weak_src)
 {
 	// this is called from the butler thread for now
-	// yeah we need a "peak" building thread or something, though there's not really any
-	// work for it to do...  whatever. :)
 	
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &MidiStreamView::rec_data_range_ready), start, cnt, src));
+	ENSURE_GUI_THREAD(bind (mem_fun (*this, &MidiStreamView::rec_data_range_ready), data, start, dur, weak_src));
 	
-	//cerr << "REC DATA: " << start << " --- " << cnt << endl;
-
-	if (rec_data_ready_map.size() == 0 || start+cnt > last_rec_data_frame) {
-		last_rec_data_frame = start + cnt;
-	}
-
-	rec_data_ready_map[src] = true;
-
-	if (rec_data_ready_map.size() == _trackview.get_diskstream()->n_channels().n_midi()) {
-		this->update_rec_regions ();
-		rec_data_ready_map.clear();
-	}
+	boost::shared_ptr<SMFSource> src (boost::dynamic_pointer_cast<SMFSource>(weak_src.lock()));
+	
+	//cerr << src.get() << " MIDI READY: " << start << " * " << dur
+	//	<< " -- " << data->size() << " events!" << endl;
+	
+	this->update_rec_regions (data, start, dur);
 }
 
 void

@@ -21,61 +21,67 @@
 
 #include <algorithm>
 #include <ardour/types.h>
-#include <pbd/ringbufferNPT.h>
 #include <ardour/buffer.h>
 
 namespace ARDOUR {
 
-/** A MIDI RingBuffer
- * (necessary because MIDI events are variable sized so a generic RB won't do).
+
+/** A RingBuffer.
+ * Read/Write realtime safe.
+ * Single-reader Single-writer thread safe.
  *
- * ALL publically accessible sizes refer to event COUNTS.  What actually goes
- * on in here is none of the callers business :)
+ * This is Raul::RingBuffer, lifted for MIDIRingBuffer to inherit from as it works
+ * a bit differently than PBD::Ringbuffer.  This could/should be replaced with
+ * the PBD ringbuffer to decrease code size, but this code is tested and known to
+ * work, so here it sits for now...
+ *
+ * Ignore this class, use MidiRingBuffer.
  */
-class MidiRingBuffer {
+template <typename T>
+class MidiRingBufferBase {
 public:
-	MidiRingBuffer (size_t size)
+
+	/** @param size Size in bytes.
+	 */
+	MidiRingBufferBase(size_t size)
 		: _size(size)
-		, _max_event_size(MidiBuffer::max_event_size())
-		, _ev_buf(new MidiEvent[size])
-		, _raw_buf(new RawMidi[size * _max_event_size])
+		, _buf(new T[size])
 	{
-		reset ();
+		reset();
 		assert(read_space() == 0);
 		assert(write_space() == size - 1);
 	}
 	
-	virtual ~MidiRingBuffer() {
-		delete[] _ev_buf;
-		delete[] _raw_buf;
+	virtual ~MidiRingBufferBase() {
+		delete[] _buf;
 	}
 
-	void reset () {
-		/* !!! NOT THREAD SAFE !!! */
-		g_atomic_int_set (&_write_ptr, 0);
-		g_atomic_int_set (&_read_ptr, 0);
+	/** Reset(empty) the ringbuffer.
+	 * NOT thread safe.
+	 */
+	void reset() {
+		g_atomic_int_set(&_write_ptr, 0);
+		g_atomic_int_set(&_read_ptr, 0);
 	}
 
-	size_t write_space () {
-		size_t w, r;
+	size_t write_space() const {
 		
-		w = g_atomic_int_get (&_write_ptr);
-		r = g_atomic_int_get (&_read_ptr);
+		const size_t w = g_atomic_int_get(&_write_ptr);
+		const size_t r = g_atomic_int_get(&_read_ptr);
 		
 		if (w > r) {
 			return ((r - w + _size) % _size) - 1;
-		} else if (w < r) {
+		} else if(w < r) {
 			return (r - w) - 1;
 		} else {
 			return _size - 1;
 		}
 	}
 	
-	size_t read_space () {
-		size_t w, r;
+	size_t read_space() const {
 		
-		w = g_atomic_int_get (&_write_ptr);
-		r = g_atomic_int_get (&_read_ptr);
+		const size_t w = g_atomic_int_get(&_write_ptr);
+		const size_t r = g_atomic_int_get(&_read_ptr);
 		
 		if (w > r) {
 			return w - r;
@@ -86,80 +92,175 @@ public:
 
 	size_t capacity() const { return _size; }
 
-	/** Read one event and appends it to @a out. */
-	//size_t read(MidiBuffer& out);
+	size_t peek(size_t size, T* dst);
+	bool   full_peek(size_t size, T* dst);
 
-	/** Write one event (@a in) */
-	size_t write(const MidiEvent& in); // deep copies in
+	size_t read(size_t size, T* dst);
+	bool   full_read(size_t size, T* dst);
+	
+	void   write(size_t size, const T* src);
 
-	/** Read events all events up to time @a end into @a out, leaving stamps intact.
-	 * Any events before @a start will be dropped. */
-	size_t read(MidiBuffer& out, nframes_t start, nframes_t end);
-
-	/** Write all events from @a in, applying @a offset to all time stamps */
-	size_t write(const MidiBuffer& in, nframes_t offset = 0);
-
-	inline void clear_event(size_t index);
-
-private:
-
-	// _event_ indices
+protected:
 	mutable gint _write_ptr;
 	mutable gint _read_ptr;
 	
-	size_t     _size;           // size (capacity) in events
-	size_t     _max_event_size; // ratio of raw_buf size to ev_buf size
-	MidiEvent* _ev_buf;         // these point into...
-	RawMidi*   _raw_buf;        // this
-
+	size_t _size; ///< Size (capacity) in bytes
+	T*  _buf;  ///< size, event, size, event...
 };
 
-/** Just for sanity checking */
-inline void
-MidiRingBuffer::clear_event(size_t index)
-{
-	memset(&_ev_buf[index].buffer, 0, _max_event_size);
-	_ev_buf[index].time = 0;
-	_ev_buf[index].size = 0;
-	_ev_buf[index].buffer = 0;
 
+/** Peek at the ringbuffer (read w/o advancing read pointer).
+ *
+ * Note that a full read may not be done if the data wraps around.
+ * Caller must check return value and call again if necessary, or use the 
+ * full_peek method which does this automatically.
+ */
+template<typename T>
+size_t
+MidiRingBufferBase<T>::peek(size_t size, T* dst)
+{
+	const size_t priv_read_ptr = g_atomic_int_get(&_read_ptr);
+
+	const size_t read_size = (priv_read_ptr + size < _size)
+			? size
+			: _size - priv_read_ptr;
+	
+	memcpy(dst, &_buf[priv_read_ptr], read_size);
+        
+	return read_size;
 }
 
-inline size_t
-MidiRingBuffer::write (const MidiEvent& ev)
+
+template<typename T>
+bool
+MidiRingBufferBase<T>::full_peek(size_t size, T* dst)
 {
-	//static nframes_t last_write_time = 0;
+	if (read_space() < size)
+		return false;
+
+	const size_t read_size = peek(size, dst);
 	
-	assert(ev.size > 0);
+	if (read_size < size)
+		peek(size - read_size, dst + read_size);
 
-	size_t priv_write_ptr = g_atomic_int_get(&_write_ptr);
+	return true;
+}
 
-	if (write_space () == 0) {
-		return 0;
+
+/** Read from the ringbuffer.
+ *
+ * Note that a full read may not be done if the data wraps around.
+ * Caller must check return value and call again if necessary, or use the 
+ * full_read method which does this automatically.
+ */
+template<typename T>
+size_t
+MidiRingBufferBase<T>::read(size_t size, T* dst)
+{
+	const size_t priv_read_ptr = g_atomic_int_get(&_read_ptr);
+
+	const size_t read_size = (priv_read_ptr + size < _size)
+			? size
+			: _size - priv_read_ptr;
+	
+	memcpy(dst, &_buf[priv_read_ptr], read_size);
+        
+	g_atomic_int_set(&_read_ptr, (priv_read_ptr + read_size) % _size);
+
+	return read_size;
+}
+
+
+template<typename T>
+bool
+MidiRingBufferBase<T>::full_read(size_t size, T* dst)
+{
+	if (read_space() < size)
+		return false;
+
+	const size_t read_size = read(size, dst);
+	
+	if (read_size < size)
+		read(size - read_size, dst + read_size);
+
+	return true;
+}
+
+
+template<typename T>
+inline void
+MidiRingBufferBase<T>::write(size_t size, const T* src)
+{
+	const size_t priv_write_ptr = g_atomic_int_get(&_write_ptr);
+	
+	if (priv_write_ptr + size <= _size) {
+		memcpy(&_buf[priv_write_ptr], src, size);
+        g_atomic_int_set(&_write_ptr, (priv_write_ptr + size) % _size);
 	} else {
-		//assert(ev.time >= last_write_time);
-
-		const size_t raw_index = priv_write_ptr * _max_event_size;
-
-		MidiEvent* const write_ev = &_ev_buf[priv_write_ptr];
-		*write_ev = ev;
-
-		memcpy(&_raw_buf[raw_index], ev.buffer, ev.size);
-		write_ev->buffer = &_raw_buf[raw_index];
-        g_atomic_int_set(&_write_ptr, (priv_write_ptr + 1) % _size);
-		
-		//printf("MRB - wrote %xd %d %d with time %u at index %zu (raw index %zu)\n",
-		//	write_ev->buffer[0], write_ev->buffer[1], write_ev->buffer[2], write_ev->time,
-		//	priv_write_ptr, raw_index);
-		
-		assert(write_ev->size = ev.size);
-
-		//last_write_time = ev.time;
-		//printf("(W) read space: %zu\n", read_space());
-
-		return 1;
+		const size_t this_size = _size - priv_write_ptr;
+		assert(this_size < size);
+		assert(priv_write_ptr + this_size <= _size);
+		memcpy(&_buf[priv_write_ptr], src, this_size);
+		memcpy(&_buf[0], src+this_size, size - this_size);
+        g_atomic_int_set(&_write_ptr, size - this_size);
 	}
 }
+
+
+/* ******************************************************************** */
+	
+
+/** A MIDI RingBuffer.
+ *
+ * This is timestamps and MIDI packed sequentially into a single buffer, similarly
+ * to LV2 MIDI.  The buffer looks like this:
+ *
+ * [timestamp][size][size bytes of raw MIDI][timestamp][size][etc..]
+ */
+class MidiRingBuffer : public MidiRingBufferBase<Byte> {
+public:
+
+	/** @param size Size in bytes.
+	 */
+	MidiRingBuffer(size_t size)
+		: MidiRingBufferBase<Byte>(size)
+	{}
+
+	size_t write(nframes_t time, size_t size, const Byte* buf);
+	bool   read(nframes_t time, size_t* size, Byte* buf);
+
+	size_t read(MidiBuffer& dst, nframes_t start, nframes_t end);
+};
+
+
+inline bool
+MidiRingBuffer::read(nframes_t time, size_t* size, Byte* buf)
+{
+	bool success = MidiRingBufferBase<Byte>::full_read(sizeof(nframes_t), (Byte*)time);
+	if (success)
+		success = MidiRingBufferBase<Byte>::full_read(sizeof(size_t), (Byte*)size);
+	if (success)
+		success = MidiRingBufferBase<Byte>::full_read(*size, buf);
+
+	return success;
+}
+
+
+inline size_t
+MidiRingBuffer::write(nframes_t time, size_t size, const Byte* buf)
+{
+	assert(size > 0);
+
+	if (write_space() < (sizeof(nframes_t) + sizeof(size_t) + size)) {
+		return 0;
+	} else {
+		MidiRingBufferBase<Byte>::write(sizeof(nframes_t), (Byte*)&time);
+		MidiRingBufferBase<Byte>::write(sizeof(size_t), (Byte*)&size);
+		MidiRingBufferBase<Byte>::write(size, buf);
+		return size;
+	}
+}
+
 
 inline size_t
 MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end)
@@ -167,58 +268,53 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end)
 	if (read_space() == 0)
 		return 0;
 
-	size_t         priv_read_ptr = g_atomic_int_get(&_read_ptr);
-	nframes_t time          = _ev_buf[priv_read_ptr].time;
-	size_t         count         = 0;
-	size_t         limit         = read_space();
+	MidiEvent ev;
 
-	while (time <= end && limit > 0) {
-		MidiEvent* const read_ev = &_ev_buf[priv_read_ptr];
-		if (time >= start) {
-			dst.push_back(*read_ev);
+	size_t count = 0;
+
+	while (read_space() > sizeof(nframes_t) + sizeof(size_t)) {
+	
+		full_peek(sizeof(nframes_t), (Byte*)&ev.time);
+	
+		if (ev.time > end)
+			break;
+
+		bool success = MidiRingBufferBase<Byte>::full_read(sizeof(nframes_t), (Byte*)&ev.time);
+		if (success)
+			success = MidiRingBufferBase<Byte>::full_read(sizeof(size_t), (Byte*)&ev.size);
+		
+		if (!success) {
+			cerr << "MRB: READ ERROR (time/size)" << endl;
+			continue;
+		}
+
+		if (ev.time >= start) {
+			Byte* write_loc = dst.reserve(ev.time, ev.size);
+			success = MidiRingBufferBase<Byte>::full_read(ev.size, write_loc);
+		
+			if (!success)
+				cerr << "MRB: READ ERROR (data)" << endl;
+			
 			//printf("MRB - read %#X %d %d with time %u at index %zu\n",
-			//	read_ev->buffer[0], read_ev->buffer[1], read_ev->buffer[2], read_ev->time,
+			//	ev.buffer[0], ev.buffer[1], ev.buffer[2], ev.time,
 			//	priv_read_ptr);
+			//
 		} else {
-			printf("MRB - SKIPPING - %#X %d %d with time %u at index %zu\n",
-				read_ev->buffer[0], read_ev->buffer[1], read_ev->buffer[2], read_ev->time,
-				priv_read_ptr);
+			printf("MRB - SKIPPING - %#X %d %d with time %u\n",
+					ev.buffer[0], ev.buffer[1], ev.buffer[2], ev.time);
 			break;
 		}
 
-		clear_event(priv_read_ptr);
-
 		++count;
-		--limit;
-		
-		priv_read_ptr = (priv_read_ptr + 1) % _size;
-		
-		assert(read_ev->time <= end);
-		time = _ev_buf[priv_read_ptr].time;
+
+		assert(ev.time <= end);
 	}
-	
-	g_atomic_int_set(&_read_ptr, priv_read_ptr);
 	
 	//printf("(R) read space: %zu\n", read_space());
 
 	return count;
 }
 
-inline size_t
-MidiRingBuffer::write(const MidiBuffer& in, nframes_t offset)
-{
-	size_t num_events = in.size();
-	size_t to_write = std::min(write_space(), num_events);
-
-	// FIXME: double copy :/
-	for (size_t i=0; i < to_write; ++i) {
-		MidiEvent ev = in[i];
-		ev.time += offset;
-		write(ev);
-	}
-
-	return to_write;
-}
 
 } // namespace ARDOUR
 

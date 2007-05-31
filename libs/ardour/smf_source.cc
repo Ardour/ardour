@@ -147,7 +147,7 @@ SMFSource::open()
 		uint32_t track_size_be = 0;
 		fread(&track_size_be, 4, 1, _fd);
 		_track_size = GUINT32_FROM_BE(track_size_be);
-		cerr << "SMF - read track size " << _track_size;
+		cerr << "SMF - read track size " << _track_size << endl;
 
 	// We're making a new file
 	} else {
@@ -294,6 +294,8 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, n
 
 	nframes_t time = 0;
 
+	_read_data_count = 0;
+
 	// FIXME: ugh
 	unsigned char ev_buf[MidiBuffer::max_event_size()];
 	MidiEvent ev;
@@ -326,9 +328,11 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, n
 				break;
 			} else {
 				ev.time += stamp_offset;
-				dst.write(ev);
+				dst.write(ev.time, ev.size, ev.buffer);
 			}
 		}
+
+		_read_data_count += ev.size;
 	}
 	
 	return cnt;
@@ -337,9 +341,10 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, n
 nframes_t
 SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 {
-	//cerr << "SMF WRITE -- " << _length << "--" << cnt << endl;
-	
-	MidiBuffer buf(1024); // FIXME: allocation, size?
+	_write_data_count = 0;
+
+	boost::shared_ptr<MidiBuffer> buf_ptr(new MidiBuffer(1024)); // FIXME: size?
+	MidiBuffer& buf = *buf_ptr.get();
 	src.read(buf, /*_length*/0, _length + cnt); // FIXME?
 
 	fseek(_fd, 0, SEEK_END);
@@ -362,15 +367,17 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 		fwrite(ev.buffer, 1, ev.size, _fd);
 		_last_ev_time += delta_time;
 		_track_size += stamp_size + ev.size;
+
+		_write_data_count += ev.size;
 	}
 
 	fflush(_fd);
 
-	if (buf.size() > 0) {
-		ViewDataRangeReady (_length, cnt); /* EMIT SIGNAL */
-	}
+	const nframes_t oldlen = _length;
+	update_length(oldlen, cnt);
 
-	update_length(_length, cnt);
+	ViewDataRangeReady (buf_ptr, oldlen, cnt); /* EMIT SIGNAL */
+	
 	return cnt;
 }
 

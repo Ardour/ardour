@@ -60,7 +60,7 @@ namespace ARDOUR {
 	typedef uint32_t                    nframes_t;
 
 	typedef jack_midi_event_t MidiEvent;
-	typedef unsigned char     RawMidi;
+	typedef unsigned char     Byte;
 
 	enum IOChange {
 		NoChange = 0,

@@ -20,7 +20,6 @@
 #define __ardour_midi_streamview_h__
 
 #include <list>
-#include <map>
 #include <cmath>
 
 #include <ardour/location.h>
@@ -62,10 +61,10 @@ class MidiStreamView : public StreamView
 
   private:
 	void setup_rec_box ();
-	void rec_data_range_ready (jack_nframes_t start, jack_nframes_t cnt, boost::shared_ptr<ARDOUR::Source> src); 
-	void update_rec_regions ();
+	void rec_data_range_ready (boost::shared_ptr<ARDOUR::MidiBuffer> data, jack_nframes_t start, jack_nframes_t dur, boost::weak_ptr<ARDOUR::Source> src); 
+	void update_rec_regions (boost::shared_ptr<ARDOUR::MidiBuffer> data, jack_nframes_t start, jack_nframes_t dur);
 	
-	void add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves);
+	RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves);
 
 	void redisplay_diskstream ();
 

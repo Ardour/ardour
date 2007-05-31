@@ -86,6 +86,8 @@ class SMFSource : public MidiSource {
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
 
+	void seek_to(nframes_t time);
+
   private:
 
 	int init (string idstr, bool must_exist);
@@ -96,9 +98,9 @@ class SMFSource : public MidiSource {
 	bool find (std::string path, bool must_exist, bool& is_new);
 	bool removable() const;
 	bool writable() const { return _flags & Writable; }
-	
+
 	int open();
-	
+
 	void     write_chunk_header(char id[4], uint32_t length);
 	void     write_chunk(char id[4], uint32_t length, void* data);
 	size_t   write_var_len(uint32_t val);

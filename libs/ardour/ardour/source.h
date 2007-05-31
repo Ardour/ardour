@@ -76,18 +76,18 @@ class Source : public PBD::StatefulDestructible
   protected:
 	void update_length (nframes_t pos, nframes_t cnt);
 	
-	Session&          _session;
-	string            _name;
-	DataType          _type;
-	time_t            _timestamp;
-	nframes_t    _length;
+	Session&  _session;
+	string    _name;
+	DataType  _type;
+	time_t    _timestamp;
+	nframes_t _length;
 
 	Glib::Mutex playlist_lock;
 	typedef std::map<boost::shared_ptr<ARDOUR::Playlist>, uint32_t > PlaylistMap;
 	PlaylistMap _playlists;
 
   private:
-	uint32_t          _in_use;
+	uint32_t _in_use;
 };
 
 }

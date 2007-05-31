@@ -80,10 +80,10 @@ MidiBuffer::MidiBuffer(size_t capacity)
 
 #ifdef NO_POSIX_MEMALIGN
 	_events =  (MidiEvent *) malloc(sizeof(MidiEvent) * capacity);
-	_data =  (RawMidi *) malloc(sizeof(RawMidi) * capacity * MAX_EVENT_SIZE);
+	_data =  (Byte *) malloc(sizeof(Byte) * capacity * MAX_EVENT_SIZE);
 #else
 	posix_memalign((void**)&_events, CPU_CACHE_ALIGN, sizeof(MidiEvent) * capacity);
-	posix_memalign((void**)&_data, CPU_CACHE_ALIGN, sizeof(RawMidi) * capacity * MAX_EVENT_SIZE);
+	posix_memalign((void**)&_data, CPU_CACHE_ALIGN, sizeof(Byte) * capacity * MAX_EVENT_SIZE);
 #endif	
 	assert(_data);
 	assert(_events);
@@ -138,7 +138,7 @@ MidiBuffer::push_back(const MidiEvent& ev)
 	if (_size == _capacity)
 		return false;
 
-	RawMidi* const write_loc = _data + (_size * MAX_EVENT_SIZE);
+	Byte* const write_loc = _data + (_size * MAX_EVENT_SIZE);
 
 	memcpy(write_loc, ev.buffer, ev.size);
 	_events[_size] = ev;
@@ -153,6 +153,36 @@ MidiBuffer::push_back(const MidiEvent& ev)
 }
 
 
+/** Reserve space for a new event in the buffer.
+ *
+ * This call is for copying MIDI directly into the buffer, the data location
+ * (of sufficient size to write \a size bytes) is returned, or NULL on failure.
+ * This call MUST be immediately followed by a write to the returned data
+ * location, or the buffer will be corrupted and very nasty things will happen.
+ */
+Byte*
+MidiBuffer::reserve(nframes_t time, size_t size)
+{
+	assert(size < MAX_EVENT_SIZE);
+
+	if (_size == _capacity)
+		return NULL;
+
+	Byte* const write_loc = _data + (_size * MAX_EVENT_SIZE);
+
+	_events[_size].time = time;
+	_events[_size].size = size;
+	_events[_size].buffer = write_loc;
+	++_size;
+
+	//cerr << "MidiBuffer: reserved, size = " << _size << endl;
+
+	_silent = false;
+
+	return write_loc;
+}
+
+
 void
 MidiBuffer::silence(nframes_t dur, nframes_t offset)
 {
@@ -161,7 +191,7 @@ MidiBuffer::silence(nframes_t dur, nframes_t offset)
 	//assert(dur == _capacity);
 
 	memset(_events, 0, sizeof(MidiEvent) * _capacity);
-	memset(_data, 0, sizeof(RawMidi) * _capacity * MAX_EVENT_SIZE);
+	memset(_data, 0, sizeof(Byte) * _capacity * MAX_EVENT_SIZE);
 	_size = 0;
 	_silent = true;
 }

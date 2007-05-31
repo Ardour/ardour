@@ -1587,7 +1587,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 
 		// cerr << _name << ": there are " << capture_info.size() << " capture_info records\n";
 		
-                XMLNode &before = _playlist->get_state();
+		XMLNode &before = _playlist->get_state();
 		_playlist->freeze ();
 		
 		for (buffer_position = c->front()->write_source->last_capture_start_frame(), ci = capture_info.begin(); ci != capture_info.end(); ++ci) {

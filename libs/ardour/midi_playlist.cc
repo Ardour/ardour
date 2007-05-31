@@ -128,10 +128,9 @@ MidiPlaylist::read (MidiRingBuffer& dst, nframes_t start,
 
 	Glib::Mutex::Lock rm (region_lock);
 
-	nframes_t ret         = 0;
-	nframes_t end         = start + dur - 1;
+	nframes_t end = start + dur - 1;
 
-	//_read_data_count = 0;
+	_read_data_count = 0;
 
 	// relevent regions overlapping start <--> end
 	vector<boost::shared_ptr<Region> > regs;
@@ -150,12 +149,9 @@ MidiPlaylist::read (MidiRingBuffer& dst, nframes_t start,
 		// FIXME: ensure time is monotonic here
 		boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(*i);
 		mr->read_at (dst, start, dur, chan_n);
-		ret += mr->read_data_count();
+		_read_data_count += mr->read_data_count();
 	}
 
-	_read_data_count += ret;
-	
-	//return ret; FIXME?
 	return dur;
 }
 

@@ -123,7 +123,6 @@ ARDOUR::nframes_t
 AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nframes_t start,
 		     nframes_t cnt, unsigned chan_n)
 {
-	nframes_t ret = cnt;
 	nframes_t end;
 
 	/* optimizing this memset() away involves a lot of conditionals
@@ -200,7 +199,7 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nf
 		}
 	}
 
-	return ret;
+	return cnt;
 }
 
 

@@ -165,7 +165,7 @@ MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer& dst, nframes_t pos
 		return 0; /* "read nothing" */
 	}
 
-	_read_data_count += src->read_data_count(); // FIXME: semantics?
+	_read_data_count += src->read_data_count();
 
 	return to_read;
 }

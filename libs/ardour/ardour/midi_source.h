@@ -30,6 +30,7 @@
 
 #include <ardour/source.h>
 #include <ardour/ardour.h>
+#include <ardour/buffer.h>
 #include <pbd/stateful.h>
 #include <pbd/xml++.h>
 
@@ -62,9 +63,7 @@ class MidiSource : public Source
 	static sigc::signal<void,MidiSource*> MidiSourceCreated;
 	       
 	// The MIDI equivalent to "peaks"
-	static int  start_view_data_thread ();
-	static void stop_view_data_thread ();
-	mutable sigc::signal<void,nframes_t,nframes_t> ViewDataRangeReady;
+	mutable sigc::signal<void,boost::shared_ptr<MidiBuffer>,nframes_t,nframes_t> ViewDataRangeReady;
 	
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);

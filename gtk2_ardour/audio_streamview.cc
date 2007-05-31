@@ -18,6 +18,7 @@
 
 #include <cmath>
 #include <cassert>
+#include <utility>
 
 #include <gtkmm.h>
 
@@ -50,6 +51,7 @@
 
 #include "i18n.h"
 
+using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
@@ -111,17 +113,15 @@ AudioStreamView::set_amplitude_above_axis (gdouble app)
 	return 0;
 }
 
-void
+RegionView*
 AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait_for_waves)
 {
 	AudioRegionView *region_view = 0;
 
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::add_region_view), r));
-
 	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (r);
 
 	if (region == 0) {
-		return;
+		return NULL;
 	}
 
 	for (list<RegionView *>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
@@ -138,7 +138,7 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 				arv->set_waveform_shape (_waveform_shape);
 			}
 				
-			return;
+			return NULL;
 		}
 	}
 
@@ -199,6 +199,8 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 	region->GoingAway.connect (bind (mem_fun (*this, &AudioStreamView::remove_region_view), boost::weak_ptr<Region> (r)));
 
 	RegionViewAdded (region_view);
+
+	return region_view;
 }
 
 void
@@ -493,7 +495,7 @@ AudioStreamView::setup_rec_box ()
 				
 				nframes_t start = 0;
 				if (rec_regions.size() > 0) {
-					start = rec_regions.back()->start() + _trackview.get_diskstream()->get_captured_frames(rec_regions.size()-1);
+					start = rec_regions.back().first->start() + _trackview.get_diskstream()->get_captured_frames(rec_regions.size()-1);
 				}
 				
 				boost::shared_ptr<AudioRegion> region (boost::dynamic_pointer_cast<AudioRegion>
@@ -501,7 +503,7 @@ AudioStreamView::setup_rec_box ()
 				assert(region);
 				region->set_position (_trackview.session().transport_frame(), this);
 
-				rec_regions.push_back (region);
+				rec_regions.push_back (make_pair(region, (RegionView*)0));
 			}
 			
 			/* start a new rec box */
@@ -538,6 +540,7 @@ AudioStreamView::setup_rec_box ()
 			rec_rect->property_y2() = (double) _trackview.height - 1;
 			rec_rect->property_outline_color_rgba() = color_map[cRecordingRectOutline];
 			rec_rect->property_fill_color_rgba() = fill_color;
+			rec_rect->lower_to_bottom();
 			
 			RecBoxInfo recbox;
 			recbox.rectangle = rec_rect;
@@ -577,17 +580,16 @@ AudioStreamView::setup_rec_box ()
 
 			rec_updating = false;
 			rec_active = false;
-			last_rec_data_frame = 0;
 			
 			/* remove temp regions */
 
-			for (list<boost::shared_ptr<Region> >::iterator iter = rec_regions.begin(); iter != rec_regions.end(); ) {
-				list<boost::shared_ptr<Region> >::iterator tmp;
+			for (list<pair<boost::shared_ptr<Region>,RegionView*> >::iterator iter = rec_regions.begin(); iter != rec_regions.end(); ) {
+				list<pair<boost::shared_ptr<Region>,RegionView*> >::iterator tmp;
 
 				tmp = iter;
 				++tmp;
 
-				(*iter)->drop_references ();
+				(*iter).first->drop_references ();
 
 				iter = tmp;
 			}
@@ -648,9 +650,9 @@ AudioStreamView::update_rec_regions ()
 
 		uint32_t n = 0;
 
-		for (list<boost::shared_ptr<Region> >::iterator iter = rec_regions.begin(); iter != rec_regions.end(); n++) {
+		for (list<pair<boost::shared_ptr<Region>,RegionView*> >::iterator iter = rec_regions.begin(); iter != rec_regions.end(); n++) {
 
-			list<boost::shared_ptr<Region> >::iterator tmp;
+			list<pair<boost::shared_ptr<Region>,RegionView*> >::iterator tmp;
 
 			tmp = iter;
 			++tmp;
@@ -661,14 +663,14 @@ AudioStreamView::update_rec_regions ()
 				continue;
 			}
 			
-			boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion>(*iter);
+			boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion>(iter->first);
 			if (!region) {
 				continue;
 			}
 
 			nframes_t origlen = region->length();
 
-			if (region == rec_regions.back() && rec_active) {
+			if (region == rec_regions.back().first && rec_active) {
 
 				if (last_rec_data_frame > region->start()) {
 

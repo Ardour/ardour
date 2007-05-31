@@ -20,7 +20,6 @@
 #define __ardour_streamview_h__
 
 #include <list>
-#include <map>
 #include <cmath>
 
 #include <ardour/location.h>
@@ -107,9 +106,9 @@ protected:
 	void         sess_rec_enable_changed();
 	virtual void setup_rec_box () = 0;
 	void         update_rec_box ();
-	virtual void update_rec_regions () = 0;
+	//virtual void update_rec_regions () = 0;
 	
-	virtual void add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves) = 0;
+	virtual RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves) = 0;
 	virtual void remove_region_view (boost::weak_ptr<ARDOUR::Region> );
 	//void         remove_rec_region (boost::shared_ptr<ARDOUR::Region>); (unused)
 
@@ -137,7 +136,7 @@ protected:
 
 	sigc::connection       screen_update_connection;
 	vector<RecBoxInfo>     rec_rects;
-	list<boost::shared_ptr<ARDOUR::Region> > rec_regions;
+	list< std::pair<boost::shared_ptr<ARDOUR::Region>,RegionView* > > rec_regions;
 	bool                   rec_updating;
 	bool                   rec_active;
 	bool                   use_rec_regions;
@@ -151,10 +150,9 @@ protected:
 	int layers;
 	double height;
 	LayerDisplay layer_display;
-	
-	list<sigc::connection>                       rec_data_ready_connections;
-	jack_nframes_t                               last_rec_data_frame;
-	map<boost::shared_ptr<ARDOUR::Source>, bool> rec_data_ready_map;
+
+	list<sigc::connection> rec_data_ready_connections;
+	jack_nframes_t         last_rec_data_frame;
 };
 
 #endif /* __ardour_streamview_h__ */

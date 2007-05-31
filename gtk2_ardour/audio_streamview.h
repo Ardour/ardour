@@ -83,7 +83,7 @@ class AudioStreamView : public StreamView
 	void rec_peak_range_ready (nframes_t start, nframes_t cnt, boost::weak_ptr<ARDOUR::Source> src); 
 	void update_rec_regions ();
 	
-	void add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves);
+	RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves);
 	void remove_region_view (boost::weak_ptr<ARDOUR::Region> );
 	void remove_audio_region_view (boost::shared_ptr<ARDOUR::AudioRegion> );
 
@@ -109,6 +109,8 @@ class AudioStreamView : public StreamView
 
 	WaveformShape     _waveform_shape;
 	WaveformScale     _waveform_scale;
+	
+	map<boost::shared_ptr<ARDOUR::Source>, bool> rec_data_ready_map;
 };
 
 #endif /* __ardour_audio_streamview_h__ */

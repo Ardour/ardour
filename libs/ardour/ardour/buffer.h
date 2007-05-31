@@ -197,17 +197,13 @@ public:
 	
 	void read_from(const Buffer& src, nframes_t nframes, nframes_t offset);
 
-	bool push_back(const MidiEvent& event);
+	bool  push_back(const MidiEvent& event);
+	Byte* reserve(nframes_t time, size_t size);
 	
 	const MidiEvent& operator[](size_t i) const { assert(i < _size); return _events[i]; }
 	MidiEvent& operator[](size_t i) { assert(i < _size); return _events[i]; }
 
 	static size_t max_event_size() { return MAX_EVENT_SIZE; }
-
-	//void set_size(size_t size) { _size = size; }
-
-	//const RawMidi* data() const { return _data; }
-	//RawMidi*       data()       { return _data; }
 
 private:
 	// These are undefined (prevent copies)
@@ -221,8 +217,8 @@ private:
 	 * (_size * MAX_EVENT_SIZE)
 	 */
 
-	MidiEvent* _events;     ///< Event structs that point to offsets in _data
-	RawMidi*   _data;       ///< MIDI, straight up.  No time stamps.
+	MidiEvent* _events; ///< Event structs that point to offsets in _data
+	Byte*      _data;   ///< MIDI, straight up.  No time stamps.
 };
 
 } // namespace ARDOUR

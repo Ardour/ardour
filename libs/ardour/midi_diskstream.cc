@@ -121,8 +121,6 @@ MidiDiskstream::init (Diskstream::Flag f)
 	set_block_size (_session.get_block_size());
 	allocate_temporary_buffers ();
 
-	//_playback_wrap_buffer = new RawMidi[wrap_buffer_size];
-	//_capture_wrap_buffer = new RawMidi[wrap_buffer_size];
 	_playback_buf = new MidiRingBuffer (_session.diskstream_buffer_size());
 	_capture_buf = new MidiRingBuffer (_session.diskstream_buffer_size());
 	_capture_transition_buf = new RingBufferNPT<CaptureTransition> (128);
@@ -148,7 +146,6 @@ MidiDiskstream::non_realtime_input_change ()
 		}
 
 		if (input_change_pending & ConfigurationChanged) {
-
 			assert(_io->n_inputs() == _n_channels);
 		} 
 
@@ -163,6 +160,8 @@ MidiDiskstream::non_realtime_input_change ()
 		}
 
 		input_change_pending = NoChange;
+		
+		/* implicit unlock */
 	}
 
 	/* reset capture files */
@@ -353,7 +352,7 @@ MidiDiskstream::check_record_status (nframes_t transport_frame, nframes_t nframe
 			} else {
 				first_recordable_frame += _roll_delay;
   			}
-
+		
 		} else {
 
 			/* was rolling, but record state changed */
@@ -434,15 +433,12 @@ int
 MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_t offset, bool can_record, bool rec_monitors_input)
 {
 	// FIXME: waay too much code to duplicate (AudioDiskstream::process)
-	int            ret = -1;
+	int       ret = -1;
 	nframes_t rec_offset = 0;
 	nframes_t rec_nframes = 0;
-	bool           nominally_recording;
-	bool           re = record_enabled ();
-	bool           collect_playback = false;
-
-	/*_current_capture_buffer = 0;
-	  _current_playback_buffer = 0;*/
+	bool      nominally_recording;
+	bool      re = record_enabled ();
+	bool      collect_playback = false;
 
 	/* if we've already processed the frames corresponding to this call,
 	   just return. this allows multiple routes that are taking input
@@ -455,6 +451,8 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_t
 	if (_processed) {
 		return 0;
 	}
+	
+	commit_should_unlock = false;
 
 	check_record_status (transport_frame, nframes, can_record);
 
@@ -474,7 +472,7 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_t
 	if (!state_lock.trylock()) {
 		return 1;
 	}
-
+	commit_should_unlock = true;
 	adjust_capture_position = 0;
 
 	if (nominally_recording || (_session.get_record_enabled() && Config->get_punch_in())) {
@@ -537,19 +535,16 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_t
 
 		assert(_source_port);
 
-		// Pump entire port buffer into the ring buffer (FIXME!)
-		_capture_buf->write(_source_port->get_midi_buffer(), transport_frame);
+		// Pump entire port buffer into the ring buffer (FIXME: split cycles?)
+		//_capture_buf->write(_source_port->get_midi_buffer(), transport_frame);
+		size_t num_events = _source_port->get_midi_buffer().size();
+		size_t to_write = std::min(_capture_buf->write_space(), num_events);
 
-		// FIXME: hackitty hack, don't come back
-		//_write_source->ViewDataRangeReady (_write_source->length(), rec_nframes); /* EMIT SIGNAL */
-		/*
-		   for (size_t i=0; i < _source_port->size(); ++i) {
-		   cerr << "DISKSTREAM GOT EVENT(1) " << i << "!!\n";
-		   }
-
-		   if (_source_port->size() == 0)
-		   cerr << "No events :/ (1)\n";
-		   */
+		for (size_t i=0; i < to_write; ++i) {
+			MidiEvent& ev = _source_port->get_midi_buffer()[i];
+			_capture_buf->write(ev.time + transport_frame, ev.size, ev.buffer);
+		}
+	
 	} else {
 
 		if (was_recording) {
@@ -561,15 +556,22 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_t
 	if (rec_nframes) {
 
 		/* XXX XXX XXX XXX XXX XXX XXX XXX */
+		
 		/* data will be written to disk */
+
+		if (rec_nframes == nframes && rec_offset == 0) {
+
+			playback_distance = nframes;
+		} else {
+		
+			collect_playback = true;
+		}
 
 		adjust_capture_position = rec_nframes;
 
 	} else if (nominally_recording) {
 
 		/* can't do actual capture yet - waiting for latency effects to finish before we start*/
-
-		// Ummm.. well, I suppose we'll just hang out for a bit?
 
 		playback_distance = nframes;
 
@@ -593,7 +595,8 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_t
 		}
 
 		// XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX
-		// Write into playback buffer here, and whatnot
+		// Write into playback buffer here, and whatnot?
+		cerr << "MDS FIXME: collect playback" << endl;
 
 	}
 
@@ -607,14 +610,11 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_t
 		   be called. unlock the state lock.
 		   */
 
+		commit_should_unlock = false;
 		state_lock.unlock();
 	} 
 
 	return ret;
-
-	_processed = true;
-
-	return 0;
 }
 
 bool
@@ -628,15 +628,6 @@ MidiDiskstream::commit (nframes_t nframes)
 		playback_sample += playback_distance;
 	}
 
-	/* XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX */
-
-	/*
-	_playback_buf->increment_read_ptr (playback_distance);
-
-	if (adjust_capture_position) {
-		_capture_buf->increment_write_ptr (adjust_capture_position);
-	}
-*/
 	if (adjust_capture_position != 0) {
 		capture_captured += adjust_capture_position;
 		adjust_capture_position = 0;
@@ -649,7 +640,9 @@ MidiDiskstream::commit (nframes_t nframes)
 			|| _capture_buf->read_space() >= disk_io_chunk_frames;
 	}
 	
-	state_lock.unlock();
+	if (commit_should_unlock) {
+		state_lock.unlock();
+	}
 
 	_processed = false;
 
@@ -684,7 +677,6 @@ MidiDiskstream::seek (nframes_t frame, bool complete_refill)
 
 	playback_sample = frame;
 	file_frame = frame;
-	_last_flush_frame = frame;
 
 	if (complete_refill) {
 		while ((ret = do_refill_with_alloc ()) > 0) ;
@@ -781,8 +773,9 @@ MidiDiskstream::read (nframes_t& start, nframes_t dur, bool reversed)
 		
 		if (reversed) {
 
-			cerr << "Reversed MIDI.. that's just crazy talk." << endl;
-			// Swap note ons with note offs here
+			// Swap note ons with note offs here.  etc?
+			// Fully reversing MIDI required look-ahead (well, behind) to find previous
+			// CC values etc.  hard.
 
 		} else {
 			
@@ -796,6 +789,7 @@ MidiDiskstream::read (nframes_t& start, nframes_t dur, bool reversed)
 		} 
 
 		dur -= this_read;
+		//offset += this_read;
 	}
 
 	return 0;
@@ -825,6 +819,8 @@ MidiDiskstream::do_refill ()
 	   */
 
 	// FIXME: using disk_io_chunk_frames as an event count, not good
+	// count vs duration semantic differences are nonexistant for audio,
+	// which makes translating for MIDI code confusing...
 	if (_playback_buf->write_space() >= (_slaved?3:2) * disk_io_chunk_frames) {
 		ret = 1;
 	}
@@ -921,16 +917,14 @@ MidiDiskstream::do_flush (Session::RunContext context, bool force_flush)
 
 	_write_data_count = 0;
 
-	if (_last_flush_frame > _session.transport_frame()) {
+	if (_last_flush_frame > _session.transport_frame()
+			|| _last_flush_frame < capture_start_frame) {
 		_last_flush_frame = _session.transport_frame();
 	}
 
 	total = _session.transport_frame() - _last_flush_frame;
 
-
-	// FIXME: put this condition back in! (removed for testing)
-	if (total == 0 || (total < disk_io_chunk_frames && !force_flush && was_recording)) {
-		//cerr << "MDS - no flush 1\n";
+	if (total == 0 || _capture_buf->read_space() == 0  && _session.transport_speed() == 0 || (total < disk_io_chunk_frames && !force_flush && was_recording)) {
 		goto out;
 	}
 
@@ -954,20 +948,18 @@ MidiDiskstream::do_flush (Session::RunContext context, bool force_flush)
 
 	assert(!destructive());
 
-	if ((!_write_source) || _write_source->write (*_capture_buf, to_write) != to_write) {
-		//cerr << "MDS - no flush 2\n";
-		error << string_compose(_("MidiDiskstream %1: cannot write to disk"), _id) << endmsg;
-		return -1;
-	} else {
-		_last_flush_frame = _session.transport_frame();
-		//cerr << "MDS - flushed\n";
+	if (record_enabled() && _session.transport_frame() - _last_flush_frame > disk_io_chunk_frames) {
+		if ((!_write_source) || _write_source->write (*_capture_buf, to_write) != to_write) {
+			error << string_compose(_("MidiDiskstream %1: cannot write to disk"), _id) << endmsg;
+			return -1;
+		} else {
+			_last_flush_frame = _session.transport_frame();
+		}
 	}
-
-	//(*chan).curr_capture_cnt += to_write;
 
 out:
 	//return ret;
-	return 0;
+	return 0; // FIXME: everything's fine!  always!  honest!
 }
 
 void
@@ -1029,30 +1021,21 @@ MidiDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_cap
 		}
 
 		/* figure out the name for this take */
-
-		boost::shared_ptr<SMFSource> s = _write_source;
-
-		if (s) {
-
-			srcs.push_back (s);
-
-			cerr << "MidiDiskstream: updating source after capture\n";
-			s->update_header (capture_info.front()->start, when, twhen);
-
-			s->set_captured_for (_name);
-
-		}
+	
+		srcs.push_back (_write_source);
+		_write_source->update_header (capture_info.front()->start, when, twhen);
+		_write_source->set_captured_for (_name);
 
 		string whole_file_region_name;
 		whole_file_region_name = region_name_from_path (_write_source->name(), true);
+
 		/* Register a new region with the Session that
 		   describes the entire source. Do this first
 		   so that any sub-regions will obviously be
 		   children of this one (later!)
 		   */
+
 		try {
-			assert(_write_source);
-			
 			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, _write_source->last_capture_start_frame(), total_capture, 
 									     whole_file_region_name, 
 									     0, Region::Flag (Region::DefaultFlags|Region::Automatic|Region::WholeFile)));
@@ -1077,6 +1060,7 @@ MidiDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_cap
 		for (buffer_position = _write_source->last_capture_start_frame(), ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 
 			string region_name;
+
 			_session.region_name (region_name, _write_source->name(), false);
 
 			// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add a region\n";
@@ -1090,6 +1074,8 @@ MidiDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_cap
 				error << _("MidiDiskstream: could not create region for captured midi!") << endmsg;
 				continue; /* XXX is this OK? */
 			}
+			
+			region->GoingAway.connect (bind (mem_fun (*this, &Diskstream::remove_region_from_last_capture), boost::weak_ptr<Region>(region)));
 
 			_last_capture_regions.push_back (region);
 
@@ -1106,11 +1092,11 @@ MidiDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_cap
 		XMLNode &after = _playlist->get_state();
 		_session.add_command (new MementoCommand<Playlist>(*_playlist, &before, &after));
 
-		mark_write_completed = true;
-
-		reset_write_sources (mark_write_completed);
-
 	}
+
+	mark_write_completed = true;
+
+	reset_write_sources (mark_write_completed);
 
 	for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 		delete *ci;
@@ -1394,9 +1380,10 @@ MidiDiskstream::reset_write_sources (bool mark_write_complete, bool force)
 	if (_write_source && mark_write_complete) {
 		_write_source->mark_streaming_write_completed ();
 	}
-
-	if (!_write_source) {
-		use_new_write_source ();
+	use_new_write_source (0);
+			
+	if (record_enabled()) {
+		//_capturing_sources.push_back (_write_source);
 	}
 }
 
@@ -1473,8 +1460,8 @@ MidiDiskstream::use_pending_capture_data (XMLNode& node)
 	return 0;
 }
 
-/** Writes playback events in the given range to dst, translating time stamps
- * so that an event at start has time = 0
+/** Writes playback events in the given range to \a dst, translating time stamps
+ * so that an event at \a start has time = 0
  */
 void
 MidiDiskstream::get_playback(MidiBuffer& dst, nframes_t start, nframes_t end)
@@ -1491,7 +1478,7 @@ MidiDiskstream::get_playback(MidiBuffer& dst, nframes_t start, nframes_t end)
 	cerr << "MIDI Diskstream pretending to read" << endl;
 
 	MidiEvent ev;
-	RawMidi data[4];
+	Byte data[4];
 
 	const char note = rand()%30 + 30;
 	
