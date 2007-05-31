@@ -1805,24 +1805,19 @@ Route::_set_state (const XMLNode& node, bool call_base)
 		}
 	}
 
-	if (ports_legal) {
+	XMLNodeList redirect_nodes;
+			
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
 
-		/* if ports are not legal, this will happen in set_deferred_state() */
-
-		XMLNodeList redirect_nodes;
-		
-		for (niter = nlist.begin(); niter != nlist.end(); ++niter){
+		child = *niter;
 			
-			child = *niter;
-			
-			if (child->name() == X_("Send") || child->name() == X_("Insert")) {
-				redirect_nodes.push_back(child);
-			}
-			
+		if (child->name() == X_("Send") || child->name() == X_("Insert")) {
+			redirect_nodes.push_back(child);
 		}
-		
-		_set_redirect_states (redirect_nodes);
+
 	}
+
+	_set_redirect_states(redirect_nodes);
 
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
@@ -1947,9 +1942,9 @@ Route::_set_redirect_states(const XMLNodeList &nlist)
 
 			RedirectList::iterator last = _redirects.end();
 			--last;
-			
+
 			if (prev_last == last) {
-				warning << _name << ": could not fully restore state as some redirects were not possible to create" << endmsg;
+				cerr << "Could not fully restore state as some redirects were not possible to create" << endl;
 				continue;
 
 			}

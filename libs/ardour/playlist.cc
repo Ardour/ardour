@@ -217,9 +217,7 @@ Playlist::copy_regions (RegionList& newlist) const
 	RegionLock rlock (const_cast<Playlist *> (this));
 
 	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-		if (!(*i)->is_dependent()) {
-			newlist.push_back (RegionFactory::RegionFactory::create (*i));
-		}
+		newlist.push_back (RegionFactory::RegionFactory::create (*i));
 	}
 }
 
@@ -1387,7 +1385,7 @@ Playlist::set_state (const XMLNode& node)
 
 		child = *niter;
 		
-		if (child->name() == Region::node_name()) {
+		if (child->name() == "Region") {
 
 			if ((prop = child->property ("id")) == 0) {
 				error << _("region state node has no ID, ignored") << endmsg;
@@ -1613,11 +1611,6 @@ Playlist::relayer ()
 	
 	for (RegionList::iterator i = copy.begin(); i != copy.end(); ++i) {
 
-		if ((*i)->is_dependent()) {
-			/* handle dependent regions in a later pass */
-			continue;
-		}
-
 		/* find the lowest layer that this region can go on */
 		size_t j = layers.size();
 		while (j > 0) {
@@ -1652,50 +1645,6 @@ Playlist::relayer ()
 	for (size_t j = 0; j < layers.size(); ++j) {
 		for (RegionList::iterator i = layers[j].begin(); i != layers[j].end(); ++i) {
 			(*i)->set_layer (j);
-		}
-	}
-
-	/* second pass: set up layer numbers for all dependent regions */
-
-	for (RegionList::iterator i = copy.begin(); i != copy.end(); ++i) {
-		
-		cerr << "pass 2, looking at " << (*i)->name() << " dep? " << (*i)->is_dependent() << endl;
-
-		if ((*i)->is_dependent()) {
-			
-			size_t one_higher = (*i)->upper_layer() + 1;
-
-			cerr << "Setting xfade to " << one_higher << endl;
-
-			(*i)->set_layer (one_higher);
-
-			if (one_higher < layers.size()) {
-
-				/* find the layer list representing the next higher layer */
-				
-				vector<RegionList>::iterator x = layers.begin();
-				for (size_t n = 0; n < one_higher; ++n) {
-					++x;
-				}
-				
-				/* add a new layer list containing just the dependent region
-				   we set the layer for
-				*/
-
-				layers.insert (x, RegionList());
-				layers[one_higher].push_back (*i);
-
-				/* move everything on higher layers one layer higher */
-
-				for (size_t j = one_higher; j < layers.size(); ++j) {
-					for (RegionList::iterator i = layers[j].begin(); i != layers[j].end(); ++i) {
-						cerr << "Bumping " << (*i)->name() << " to " << j << endl;
-						(*i)->set_layer (j);
-					}
-				}
-			}
-
-			
 		}
 	}
 

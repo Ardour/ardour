@@ -253,7 +253,7 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
 	
 	int remove_region_internal (boost::shared_ptr<Region>);
 	RegionList *find_regions_at (nframes_t frame);
-	virtual void copy_regions (RegionList&) const;
+	void copy_regions (RegionList&) const;
 	void partition_internal (nframes_t start, nframes_t end, bool cutting, RegionList& thawlist);
 
 	nframes_t _get_maximum_extent() const;

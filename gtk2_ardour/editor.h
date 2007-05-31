@@ -1286,7 +1286,14 @@ class Editor : public PublicEditor
 	void tempo_map_changed (ARDOUR::Change);
 	void redisplay_tempo (bool immediate_redraw);
 	
-	void snap_to (nframes_t& first, int32_t direction = 0, bool for_mark = false);
+	void snap_to (nframes64_t& first, int32_t direction = 0, bool for_mark = false);
+	void snap_to (nframes_t& first, int32_t direction = 0, bool for_mark = false) {
+		/* XXX remove this function when everything moves to 64 bit frame counts */
+		nframes64_t first64 = first;
+		snap_to (first64, direction, for_mark);
+		first = (nframes_t) first64;
+	}
+
 	uint32_t bbt_beat_subdivision;
 
 	/* toolbar */

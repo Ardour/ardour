@@ -96,8 +96,6 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	nframes_t start ()    const { return _start; }
 	nframes_t length()    const { return _length; }
 	layer_t   layer ()    const { return _layer; }
-	virtual layer_t lower_layer () const { return _layer; }
-	virtual layer_t upper_layer () const { return _layer; }
 	
 	nframes_t sync_offset(int& dir) const;
 	nframes_t sync_position() const;
@@ -189,8 +187,6 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	virtual XMLNode& state (bool);
 	virtual int      set_state (const XMLNode&);
 	virtual int      set_live_state (const XMLNode&, Change&, bool send);
-
-	static std::string node_name();
 
 	virtual boost::shared_ptr<Region> get_parent() const;
 	

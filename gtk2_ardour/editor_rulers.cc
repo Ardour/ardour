@@ -268,8 +268,7 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 	nframes_t where = leftmost_frame + pixel_to_frame (x);
 
 	/// ripped from maybe_autoscroll, and adapted to work here
-	nframes_t one_page = (nframes_t) rint (canvas_width * frames_per_unit);
-	nframes_t rightmost_frame = leftmost_frame + one_page;
+	nframes_t rightmost_frame = leftmost_frame + current_page_frames ();
 
 	jack_nframes_t frame = pixel_to_frame (cx);
 
@@ -730,12 +729,7 @@ Editor::update_just_smpte ()
 		return;
 	}
 
-	/* XXX Note the potential loss of accuracy here as we convert from
-	   an uint32_t (or larger) to a float ... what to do ?
-	*/
-
-	nframes_t page = (nframes_t) floor (canvas_width * frames_per_unit);
-	nframes_t rightmost_frame = leftmost_frame + page;
+	nframes_t rightmost_frame = leftmost_frame + current_page_frames();
 
 	if (ruler_shown[ruler_metric_smpte]) {
 		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_smpte_ruler), leftmost_frame, rightmost_frame,
@@ -752,17 +746,11 @@ Editor::update_fixed_rulers ()
 		return;
 	}
 
-	/* XXX Note the potential loss of accuracy here as we convert from
-	   an uint32_t (or larger) to a float ... what to do ?
-	*/
-
-	nframes_t page = (nframes_t) floor (canvas_width * frames_per_unit);
-
 	ruler_metrics[ruler_metric_smpte].units_per_pixel = frames_per_unit;
 	ruler_metrics[ruler_metric_frames].units_per_pixel = frames_per_unit;
 	ruler_metrics[ruler_metric_minsec].units_per_pixel = frames_per_unit;
 
-	rightmost_frame = leftmost_frame + page;
+	rightmost_frame = leftmost_frame + current_page_frames ();
 
 	/* these force a redraw, which in turn will force execution of the metric callbacks
 	   to compute the relevant ticks to display.
@@ -791,15 +779,10 @@ Editor::update_tempo_based_rulers ()
 		return;
 	}
 
-	/* XXX Note the potential loss of accuracy here as we convert from
-	   an uint32_t (or larger) to a float ... what to do ?
-	*/
-
-	nframes_t page = (nframes_t) floor (canvas_width * frames_per_unit);
 	ruler_metrics[ruler_metric_bbt].units_per_pixel = frames_per_unit;
 
 	if (ruler_shown[ruler_metric_bbt]) {
-		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_bbt_ruler), leftmost_frame, leftmost_frame+page, 
+		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_bbt_ruler), leftmost_frame, leftmost_frame+current_page_frames(),
 					    leftmost_frame, session->current_end_frame());
 	}
 }

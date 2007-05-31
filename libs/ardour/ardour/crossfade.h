@@ -61,10 +61,10 @@ class Crossfade : public ARDOUR::AudioRegion
 	
 	Crossfade (boost::shared_ptr<ARDOUR::AudioRegion> in, boost::shared_ptr<ARDOUR::AudioRegion> out, CrossfadeModel, bool active);
 
+
 	/* copy constructor to copy a crossfade with new regions. used (for example)
 	   when a playlist copy is made 
 	*/
-
 	Crossfade (boost::shared_ptr<Crossfade>, boost::shared_ptr<ARDOUR::AudioRegion>, boost::shared_ptr<ARDOUR::AudioRegion>);
 	
 	/* the usual XML constructor */
@@ -77,8 +77,6 @@ class Crossfade : public ARDOUR::AudioRegion
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&);
 
-	static std::string node_name();
-
 	boost::shared_ptr<ARDOUR::AudioRegion> in() const { return _in; }
 	boost::shared_ptr<ARDOUR::AudioRegion> out() const { return _out; }
 	
@@ -88,11 +86,11 @@ class Crossfade : public ARDOUR::AudioRegion
 	
 	bool refresh ();
 
-	layer_t upper_layer () const {
+	uint32_t upper_layer () const {
 		return std::max (_in->layer(), _out->layer());
 	}
 
-	layer_t lower_layer () const {
+	uint32_t lower_layer () const {
 		return std::min (_in->layer(), _out->layer());
 	}
 

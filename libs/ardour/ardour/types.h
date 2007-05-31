@@ -41,6 +41,12 @@
 typedef int intptr_t;
 #endif
 
+/* eventually, we'd like everything (including JACK) to 
+   move to this. for now, its a dedicated type.
+*/
+
+typedef int64_t                    nframes64_t;
+
 namespace ARDOUR {
 
 	class Source;
