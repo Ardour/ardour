@@ -76,6 +76,12 @@ ARDOUR_UI::toggle_send_midi_feedback ()
 }
 
 void
+ARDOUR_UI::toggle_denormal_protection ()
+{
+	ActionManager::toggle_config_state ("options", "DenormalProtection", &Configuration::set_denormal_protection, &Configuration::get_denormal_protection);
+}
+
+void
 ARDOUR_UI::set_native_file_header_format (HeaderFormat hf)
 {
 	const char *action = 0;
@@ -293,6 +299,45 @@ ARDOUR_UI::set_monitor_model (MonitorModel model)
 }
 
 void
+ARDOUR_UI::set_denormal_model (DenormalModel model)
+{
+	const char* action = 0;
+
+	switch (model) {
+	case DenormalNone:
+		action = X_("DenormalNone");
+		break;
+
+	case DenormalFTZ:
+		action = X_("DenormalFTZ");
+		break;
+		
+	case DenormalDAZ:
+		action = X_("DenormalDAZ");
+		break;
+
+	case DenormalFTZDAZ:
+		action = X_("DenormalFTZDAZ");
+		break;
+
+	default:
+		fatal << string_compose (_("programming error: unknown denormal model in ARDOUR_UI::set_denormal_model: %1"), model) << endmsg;
+		/*NOTREACHED*/
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action ("options", action);
+
+	if (act) {
+		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
+
+		if (ract && ract->get_active() && Config->get_denormal_model() != model) {
+			Config->set_denormal_model (model);
+		}
+	}
+
+}
+
+void
 ARDOUR_UI::toggle_auto_input ()
 {
 	ActionManager::toggle_config_state ("Transport", "ToggleAutoInput", &Configuration::set_auto_input, &Configuration::get_auto_input);
@@ -503,6 +548,36 @@ ARDOUR_UI::map_monitor_model ()
 		break;
 	case ExternalMonitoring:
 		on = X_("UseExternalMonitoring");
+		break;
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action ("options", on);
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+
+		if (tact && !tact->get_active()) {
+			tact->set_active (true);
+		}
+	}
+}
+
+void
+ARDOUR_UI::map_denormal_model ()
+{
+	const char* on = 0;
+
+	switch (Config->get_denormal_model()) {
+	case DenormalNone:
+		on = X_("DenormalNone");
+		break;
+	case DenormalFTZ:
+		on = X_("DenormalFTZ");
+		break;
+	case DenormalDAZ:
+		on = X_("DenormalDAZ");
+		break;
+	case DenormalFTZDAZ:
+		on = X_("DenormalFTZDAZ");
 		break;
 	}
 
@@ -905,6 +980,8 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		ActionManager::map_some_state ("options",  "StopTransportAtEndOfSession", &Configuration::get_stop_at_session_end);
 	} else if (PARAM_IS ("monitoring-model")) {
 		map_monitor_model ();
+	} else if (PARAM_IS ("denormal-model")) {
+		map_denormal_model ();
 	} else if (PARAM_IS ("remote-model")) {
 		map_remote_model ();
 	} else if (PARAM_IS ("use-video-sync")) {

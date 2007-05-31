@@ -142,6 +142,10 @@ class RouteUI : public virtual AxisView
 	void toggle_polarity ();
 	virtual void polarity_changed ();
 
+	Gtk::CheckMenuItem *denormal_menu_item;
+	void toggle_denormal_protection();
+	virtual void denormal_protection_changed ();
+
 	void disconnect_input ();
 	void disconnect_output ();
 

@@ -36,6 +36,7 @@ opts.AddOptions(
     BoolOption('EXTRA_WARN', 'Compile with -Wextra, -ansi, and -pedantic.  Might break compilation.  For pedants', 0),
     BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 0),
     BoolOption('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1),
+    BoolOption('USE_XMMINTRIN', 'Use gcc XMM intrinsics where possible', 1),
     BoolOption('LIBLO', 'Compile with support for liblo library', 1),
     BoolOption('NLS', 'Set to turn on i18n support', 1),
     PathOption('PREFIX', 'Set the install "prefix"', '/usr/local'),
@@ -624,8 +625,8 @@ elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_6
                 opt_flags.append ("-march=i686")
     
     if ((env['DIST_TARGET'] == 'i686') or (env['DIST_TARGET'] == 'x86_64')) and build_host_supports_sse:
-        opt_flags.extend (["-msse", "-mfpmath=sse"])
-        debug_flags.extend (["-msse", "-mfpmath=sse"])
+        opt_flags.extend (["-msse", "-mfpmath=sse", "-DUSE_XMMINTRIN"])
+        debug_flags.extend (["-msse", "-mfpmath=sse", "-DUSE_XMMINTRIN"])
 # end of processor-specific section
 
 # optimization section

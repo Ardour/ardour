@@ -666,11 +666,14 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void toggle_use_osc ();
 
+	void toggle_denormal_protection ();
+
 	void set_input_auto_connect (ARDOUR::AutoConnectOption);
 	void set_output_auto_connect (ARDOUR::AutoConnectOption);
 	void set_solo_model (ARDOUR::SoloModel);
 	void set_monitor_model (ARDOUR::MonitorModel);
 	void set_remote_model (ARDOUR::RemoteModel);
+	void set_denormal_model (ARDOUR::DenormalModel);
 
 	void toggle_StopPluginsWithTransport();
 	void toggle_DoNotRunPluginsWhileRecording();
@@ -687,6 +690,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void mtc_port_changed ();
 	void map_solo_model ();
 	void map_monitor_model ();
+	void map_denormal_model ();
 	void map_remote_model ();
 	void map_file_header_format ();
 	void map_file_data_format ();

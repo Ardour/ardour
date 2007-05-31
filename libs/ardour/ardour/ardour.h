@@ -75,6 +75,8 @@ namespace ARDOUR {
 	};
 
 	static const double SHUTTLE_FRACT_SPEED1=0.48412291827; /* derived from A1,A2 */
+
+	void setup_fpu ();
 }
 
 /* how do we make these be within the Ardour namespace? */

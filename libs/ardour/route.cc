@@ -48,7 +48,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-
 uint32_t Route::order_key_cnt = 0;
 
 
@@ -78,6 +77,7 @@ Route::init ()
 	_soloed = false;
 	_solo_safe = false;
 	_phase_invert = false;
+	_denormal_protection = false;
 	order_keys[strdup (N_("signal"))] = order_key_cnt++;
 	_active = true;
 	_silent = false;
@@ -340,6 +340,22 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 			
 		} 
 	} 
+
+	/* -----------------------------------------------------------------------------------------------------
+	   DENORMAL CONTROL
+	   -------------------------------------------------------------------------------------------------- */
+
+	if (_denormal_protection || Config->get_denormal_protection()) {
+
+		for (n = 0; n < nbufs; ++n)  {
+			Sample *sp = bufs[n];
+			
+			for (nframes_t nx = offset; nx < nframes + offset; ++nx) {
+				sp[nx] += 1.0e-27f;
+			}
+		}
+	}
+
 
 	/* ----------------------------------------------------------------------------------------------------
 	   PRE-FADER REDIRECTS
@@ -724,8 +740,17 @@ Route::set_phase_invert (bool yn, void *src)
 {
 	if (_phase_invert != yn) {
 		_phase_invert = yn;
+		//  phase_invert_changed (src); /* EMIT SIGNAL */
 	}
-	//  phase_invert_changed (src); /* EMIT SIGNAL */
+}
+
+void
+Route::set_denormal_protection (bool yn, void *src)
+{
+	if (_denormal_protection != yn) {
+		_denormal_protection = yn;
+		//  denormal_protection_changed (src); /* EMIT SIGNAL */
+	}
 }
 
 void
@@ -1404,6 +1429,7 @@ Route::state(bool full_state)
 	node->add_property("muted", _muted?"yes":"no");
 	node->add_property("soloed", _soloed?"yes":"no");
 	node->add_property("phase-invert", _phase_invert?"yes":"no");
+	node->add_property("denormal-protection", _denormal_protection?"yes":"no");
 	node->add_property("mute-affects-pre-fader", _mute_affects_pre_fader?"yes":"no"); 
 	node->add_property("mute-affects-post-fader", _mute_affects_post_fader?"yes":"no"); 
 	node->add_property("mute-affects-control-outs", _mute_affects_control_outs?"yes":"no"); 
@@ -1571,7 +1597,11 @@ Route::_set_state (const XMLNode& node, bool call_base)
 	}
 
 	if ((prop = node.property (X_("phase-invert"))) != 0) {
-		set_phase_invert(prop->value()=="yes"?true:false, this);
+		set_phase_invert (prop->value()=="yes"?true:false, this);
+	}
+
+	if ((prop = node.property (X_("denormal-protection"))) != 0) {
+		set_denormal_protection (prop->value()=="yes"?true:false, this);
 	}
 
 	if ((prop = node.property (X_("active"))) != 0) {

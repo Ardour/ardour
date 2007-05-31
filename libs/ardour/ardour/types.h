@@ -272,6 +272,13 @@ namespace ARDOUR {
 		ExternalMonitoring,
 	};
 
+	enum DenormalModel {
+		DenormalNone,
+		DenormalFTZ,
+		DenormalDAZ,
+		DenormalFTZDAZ
+	};
+
 	enum RemoteModel {
 		UserOrdered,
 		MixerOrdered,
@@ -368,6 +375,7 @@ std::istream& operator>>(std::istream& o, ARDOUR::SlaveSource& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ShuttleBehaviour& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ShuttleUnits& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::SmpteFormat& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::DenormalModel& sf);
 
 static inline nframes_t
 session_frame_to_track_frame (nframes_t session_frame, double speed)

@@ -28,6 +28,10 @@
 #include <fst.h>
 #endif
 
+#ifdef __SSE__
+#include <xmmintrin.h>
+#endif
+
 #include <lrdf.h>
 
 #include <pbd/error.h>
@@ -228,8 +232,9 @@ setup_hardware_optimization (bool try_optimization)
 			 : "%rax", "%rcx", "%rdx", "memory");
 
 #endif /* USE_X86_64_ASM */
+
 		use_sse &= (1 << 25); // bit 25 = SSE support
-		
+
 		if (use_sse) {
 			info << "Using SSE optimized routines" << endmsg;
 	
@@ -274,6 +279,9 @@ setup_hardware_optimization (bool try_optimization)
 		
 		info << "No H/W specific optimizations in use" << endmsg;
 	}
+
+	setup_fpu ();
+
 }
 
 int
@@ -527,6 +535,55 @@ ARDOUR::LocaleGuard::~LocaleGuard ()
 	free ((char*)old);
 }
 
+void
+ARDOUR::setup_fpu ()
+{
+#ifdef USE_XMMINTRIN
+	int MXCSR;
+
+	/* XXX use real code to determine if the processor supports
+	   DenormalsAreZero and FlushToZero
+	*/
+	
+	bool has_daz = false;
+	bool can_ftz = true;
+
+	if (!can_ftz && !has_daz) {
+		return;
+	}
+
+	MXCSR  = _mm_getcsr();
+
+	switch (Config->get_denormal_model()) {
+	case DenormalNone:
+		MXCSR &= ~_MM_FLUSH_ZERO_ON;
+		break;
+
+	case DenormalFTZ:
+		MXCSR |= _MM_FLUSH_ZERO_ON;
+		break;
+
+	case DenormalDAZ:
+		MXCSR &= ~_MM_FLUSH_ZERO_ON;
+		if (has_daz) {
+			MXCSR |= 0x8000;
+		}
+		break;
+		
+	case DenormalFTZDAZ:
+		if (has_daz) {
+			MXCSR |= _MM_FLUSH_ZERO_ON | 0x8000;
+		} else {
+			MXCSR |= _MM_FLUSH_ZERO_ON;
+		}
+		break;
+	}
+
+	_mm_setcsr (MXCSR);
+
+#endif
+}
+
 ARDOUR::OverlapType
 ARDOUR::coverage (nframes_t sa, nframes_t ea, 
 		  nframes_t sb, nframes_t eb)
@@ -629,4 +686,5 @@ std::istream& operator>>(std::istream& o, SlaveSource& var) { return int_to_type
 std::istream& operator>>(std::istream& o, ShuttleBehaviour& var) { return int_to_type<ShuttleBehaviour> (o, var); }
 std::istream& operator>>(std::istream& o, ShuttleUnits& var) { return int_to_type<ShuttleUnits> (o, var); }
 std::istream& operator>>(std::istream& o, SmpteFormat& var) { return int_to_type<SmpteFormat> (o, var); }
+std::istream& operator>>(std::istream& o, DenormalModel& var) { return int_to_type<DenormalModel> (o, var); }
 

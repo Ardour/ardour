@@ -353,7 +353,13 @@
                <menuitem action='StopRecordingOnXrun'/>
                <menuitem action='StopTransportAtEndOfSession'/>
                <menuitem action='GainReduceFastTransport'/>
-	       <separator/>
+	       <menu name='Denormals' action='Denormals'>
+	                      <menuitem action='DenormalProtection'/>
+	                      <menuitem action='DenormalNone'/>
+	                      <menuitem action='DenormalFTZ'/>
+	                      <menuitem action='DenormalDAZ'/>
+	                      <menuitem action='DenormalFTZDAZ'/>
+                </menu>
          </menu>
 	 <menu name='Help' action='Help'>
 	     <menuitem action='About'/>

@@ -93,6 +93,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (main_actions, X_("Metering"), _("Metering"));
 	ActionManager::register_action (main_actions, X_("MeteringFallOffRate"), _("Fall off rate"));
 	ActionManager::register_action (main_actions, X_("MeteringHoldTime"), _("Hold Time"));
+	ActionManager::register_action (main_actions, X_("Denormals"), _("Denormal Handling"));
 
 	/* the real actions */
 
@@ -408,6 +409,15 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_toggle_action (option_actions, X_("GainReduceFastTransport"), _("-12dB gain reduce ffwd/rewind"), mem_fun (*this, &ARDOUR_UI::toggle_GainReduceFastTransport));
 	ActionManager::register_toggle_action (option_actions, X_("LatchedRecordEnable"), _("Rec-enable stays engaged at stop"), mem_fun (*this, &ARDOUR_UI::toggle_LatchedRecordEnable));
 	ActionManager::register_toggle_action (option_actions, X_("RegionEquivalentsOverlap"), _("Region equivalents overlap"), mem_fun (*this, &ARDOUR_UI::toggle_RegionEquivalentsOverlap));
+
+	RadioAction::Group denormal_group;
+
+	ActionManager::register_toggle_action (option_actions, X_("DenormalProtection"), _("Use DC bias"), mem_fun (*this, &ARDOUR_UI::toggle_denormal_protection));
+
+	ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalNone"), _("No processor handling"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalNone));
+	ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalFTZ"), _("Use FlushToZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalFTZ));
+	ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalDAZ"), _("Use DenormalsAreZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalDAZ));
+	ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalFTZDAZ"), _("Use FlushToZero & DenormalsAreZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalFTZDAZ));
 
 	act = ActionManager::register_toggle_action (option_actions, X_("DoNotRunPluginsWhileRecording"), _("Do not run plugins while recording"), mem_fun (*this, &ARDOUR_UI::toggle_DoNotRunPluginsWhileRecording));
 	ActionManager::session_sensitive_actions.push_back (act);

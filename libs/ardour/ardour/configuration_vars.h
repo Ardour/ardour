@@ -140,6 +140,11 @@ CONFIG_VARIABLE (bool, use_overlap_equivalency, "use-overlap-equivalency", false
 CONFIG_VARIABLE (bool, periodic_safety_backups, "periodic-safety-backups", true)
 CONFIG_VARIABLE (uint32_t, periodic_safety_backup_interval, "periodic-safety-backup-interval", 120)
 
+/* denormal management */
+
+CONFIG_VARIABLE (bool, denormal_protection, "denormal-protection", false)
+CONFIG_VARIABLE (DenormalModel, denormal_model, "denormal-model", DenormalNone)
+
 /* BWAV */
 
 CONFIG_VARIABLE (string, bwf_country_code, "bwf-country-code", "US")
