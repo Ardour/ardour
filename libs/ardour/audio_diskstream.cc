@@ -1001,6 +1001,8 @@ AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, 
 	nframes_t loop_start = 0;
 	nframes_t loop_length = 0;
 	nframes_t offset = 0;
+	nframes_t xfade_samples = 0;
+	Sample    xfade_buf[128];
 	Location *loc = 0;
 
 	/* XXX we don't currently play loops in reverse. not sure why */
@@ -1063,6 +1065,26 @@ AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, 
 			return -1;
 		}
 
+		// xfade loop boundary if appropriate
+
+		if (xfade_samples > 0) {
+			// just do a linear xfade for this short bit
+
+			xfade_samples = min(xfade_samples, this_read);
+
+			float delta = 1.0f / xfade_samples;
+			float scale = 0.0f;
+			Sample * tmpbuf = buf+offset;
+
+			for (size_t i=0; i < xfade_samples; ++i) {
+				*tmpbuf = (*tmpbuf * scale) + xfade_buf[i]*(1.0f - scale);
+				++tmpbuf;
+				scale += delta; 
+			}
+
+			xfade_samples = 0;
+		}
+
 		_read_data_count = _playlist->read_data_count();
 		
 		if (reversed) {
@@ -1070,13 +1092,22 @@ AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, 
 			swap_by_ptr (buf, buf + this_read - 1);
 			
 		} else {
-			
+			start += this_read;
+		
 			/* if we read to the end of the loop, go back to the beginning */
 			
 			if (reloop) {
+				// read crossfade samples to apply to the next read
+
+				xfade_samples = min((nframes_t) 128, cnt-this_read);
+
+				if (audio_playlist()->read (xfade_buf, mixdown_buffer, gain_buffer, start, xfade_samples, channel) != xfade_samples) {
+					error << string_compose(_("AudioDiskstream %1: cannot read xfade samples %2 from playlist at frame %3"), 
+								_id, xfade_samples,start) << endmsg;
+					memset(xfade_buf, 0, xfade_samples * sizeof(Sample)); // just in case
+				}
+
 				start = loop_start;
-			} else {
-				start += this_read;
 			}
 		} 
 
