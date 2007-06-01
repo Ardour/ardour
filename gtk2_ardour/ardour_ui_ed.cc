@@ -24,6 +24,7 @@
 */
 
 #include <pbd/pathscanner.h>
+#include <pbd/fpu.h>
 
 #include <glibmm/miscutils.h>
 
@@ -420,11 +421,23 @@ ARDOUR_UI::install_actions ()
 	RadioAction::Group denormal_group;
 
 	ActionManager::register_toggle_action (option_actions, X_("DenormalProtection"), _("Use DC bias"), mem_fun (*this, &ARDOUR_UI::toggle_denormal_protection));
+	
+	FPU fpu;
 
 	ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalNone"), _("No processor handling"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalNone));
-	ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalFTZ"), _("Use FlushToZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalFTZ));
-	ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalDAZ"), _("Use DenormalsAreZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalDAZ));
-	ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalFTZDAZ"), _("Use FlushToZero & DenormalsAreZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalFTZDAZ));
+
+	act = ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalFTZ"), _("Use FlushToZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalFTZ));
+	if (!fpu.has_flush_to_zero()) {
+		act->set_sensitive (false);
+	}
+	act = ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalDAZ"), _("Use DenormalsAreZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalDAZ));
+	if (!fpu.has_denormals_are_zero()) {
+		act->set_sensitive (false);
+	}
+	act = ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalFTZDAZ"), _("Use FlushToZero & DenormalsAreZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalFTZDAZ));
+	if (!fpu.has_flush_to_zero() || !fpu.has_denormals_are_zero()) {
+		act->set_sensitive (false);
+	}
 
 	act = ActionManager::register_toggle_action (option_actions, X_("DoNotRunPluginsWhileRecording"), _("Do not run plugins while recording"), mem_fun (*this, &ARDOUR_UI::toggle_DoNotRunPluginsWhileRecording));
 	ActionManager::session_sensitive_actions.push_back (act);

@@ -36,7 +36,6 @@ opts.AddOptions(
     BoolOption('EXTRA_WARN', 'Compile with -Wextra, -ansi, and -pedantic.  Might break compilation.  For pedants', 0),
     BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 0),
     BoolOption('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1),
-    BoolOption('USE_XMMINTRIN', 'Use gcc XMM intrinsics where possible', 1),
     BoolOption('LIBLO', 'Compile with support for liblo library', 1),
     BoolOption('NLS', 'Set to turn on i18n support', 1),
     PathOption('PREFIX', 'Set the install "prefix"', '/usr/local'),
@@ -737,8 +736,14 @@ libraries['flac'] = LibraryInfo ()
 prep_libcheck(env, libraries['flac'])
 libraries['flac'].Append(CCFLAGS="-I/usr/local/include", LINKFLAGS="-L/usr/local/lib")
 
+#
+# june 1st 2007: look for a function that is in FLAC 1.1.2 and not in later versions
+#                since the version of libsndfile we have internally does not support
+#                the new API that libFLAC has adopted
+#
+
 conf = Configure (libraries['flac'])
-if conf.CheckLib ('FLAC', 'FLAC__stream_decoder_new', language='CXX'):
+if conf.CheckLib ('FLAC', 'FLAC__seekable_stream_decoder_set_read_callback', language='CXX'):
     conf.env.Append(CCFLAGS='-DHAVE_FLAC')
 libraries['flac'] = conf.Finish ()
 
