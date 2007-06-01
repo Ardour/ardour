@@ -3278,6 +3278,8 @@ Session::config_changed (const char* parameter_name)
 		set_slave_source (Config->get_slave_source());
 	} else if (PARAM_IS ("remote-model")) {
 		set_remote_control_ids ();
+	}  else if (PARAM_IS ("denormal-model")) {
+		setup_fpu ();
 	}
 
 	set_dirty ();

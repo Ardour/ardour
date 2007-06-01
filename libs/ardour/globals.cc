@@ -37,6 +37,7 @@
 #include <pbd/error.h>
 #include <pbd/id.h>
 #include <pbd/strsplit.h>
+#include <pbd/fpu.h>
 
 #include <midi++/port.h>
 #include <midi++/port_request.h>
@@ -200,42 +201,14 @@ void
 setup_hardware_optimization (bool try_optimization)
 {
         bool generic_mix_functions = true;
-
+	FPU fpu;
 
 	if (try_optimization) {
 
 #if defined (ARCH_X86) && defined (BUILD_SSE_OPTIMIZATIONS)
-	
-		unsigned long use_sse = 0;
+		
+		if (fpu.has_sse()) {
 
-#ifndef USE_X86_64_ASM
-		asm (
-				 "mov $1, %%eax\n"
-				 "pushl %%ebx\n"
-				 "cpuid\n"
-				 "movl %%edx, %0\n"
-				 "popl %%ebx\n"
-		 	     : "=r" (use_sse)
-	   		     : 
- 	    		 : "%eax", "%ecx", "%edx", "memory");
-
-#else
-
-		asm (
-				 "pushq %%rbx\n"
-				 "movq $1, %%rax\n"
-				 "cpuid\n"
-				 "movq %%rdx, %0\n"
-				 "popq %%rbx\n"
-		 	     : "=r" (use_sse)
-	   		     : 
-			 : "%rax", "%rcx", "%rdx", "memory");
-
-#endif /* USE_X86_64_ASM */
-
-		use_sse &= (1 << 25); // bit 25 = SSE support
-
-		if (use_sse) {
 			info << "Using SSE optimized routines" << endmsg;
 	
 			// SSE SET
@@ -538,17 +511,16 @@ ARDOUR::LocaleGuard::~LocaleGuard ()
 void
 ARDOUR::setup_fpu ()
 {
-#ifdef USE_XMMINTRIN
+#if defined(ARCH_X86) && defined(USE_XMMINTRIN)
+
 	int MXCSR;
+	FPU fpu;
 
 	/* XXX use real code to determine if the processor supports
 	   DenormalsAreZero and FlushToZero
 	*/
 	
-	bool has_daz = false;
-	bool can_ftz = true;
-
-	if (!can_ftz && !has_daz) {
+	if (!fpu.has_flush_to_zero() && !fpu.has_denormals_are_zero()) {
 		return;
 	}
 
@@ -556,25 +528,29 @@ ARDOUR::setup_fpu ()
 
 	switch (Config->get_denormal_model()) {
 	case DenormalNone:
-		MXCSR &= ~_MM_FLUSH_ZERO_ON;
+		MXCSR &= ~(_MM_FLUSH_ZERO_ON|0x8000);
 		break;
 
 	case DenormalFTZ:
-		MXCSR |= _MM_FLUSH_ZERO_ON;
+		if (fpu.has_flush_to_zero()) {
+			MXCSR |= _MM_FLUSH_ZERO_ON;
+		}
 		break;
 
 	case DenormalDAZ:
 		MXCSR &= ~_MM_FLUSH_ZERO_ON;
-		if (has_daz) {
+		if (fpu.has_denormals_are_zero()) {
 			MXCSR |= 0x8000;
 		}
 		break;
 		
 	case DenormalFTZDAZ:
-		if (has_daz) {
-			MXCSR |= _MM_FLUSH_ZERO_ON | 0x8000;
-		} else {
-			MXCSR |= _MM_FLUSH_ZERO_ON;
+		if (fpu.has_flush_to_zero()) {
+			if (fpu.has_denormals_are_zero()) {
+				MXCSR |= _MM_FLUSH_ZERO_ON | 0x8000;
+			} else {
+				MXCSR |= _MM_FLUSH_ZERO_ON;
+			}
 		}
 		break;
 	}
