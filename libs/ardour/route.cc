@@ -79,6 +79,7 @@ Route::init ()
 	_soloed = false;
 	_solo_safe = false;
 	_phase_invert = false;
+	_denormal_protection = false;
 	order_keys[strdup (N_("signal"))] = order_key_cnt++;
 	_active = true;
 	_silent = false;
@@ -234,9 +235,9 @@ Route::set_gain (gain_t val, void *src)
  */
 void
 Route::process_output_buffers (BufferSet& bufs,
-		nframes_t start_frame, nframes_t end_frame, 
-        nframes_t nframes, nframes_t offset, bool with_redirects, int declick,
-		bool meter)
+			       nframes_t start_frame, nframes_t end_frame, 
+			       nframes_t nframes, nframes_t offset, bool with_redirects, int declick,
+			       bool meter)
 {
 	// This is definitely very audio-only for now
 	assert(_default_type == DataType::AUDIO);
@@ -351,7 +352,22 @@ Route::process_output_buffers (BufferSet& bufs,
 		} 
 	} 
 
-	/* ---------------------------------------------------------------------------------------------------
+	/* -----------------------------------------------------------------------------------------------------
+	   DENORMAL CONTROL
+	   -------------------------------------------------------------------------------------------------- */
+
+	if (_denormal_protection || Config->get_denormal_protection()) {
+
+		for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+			Sample* const sp = i->data();
+			
+			for (nframes_t nx = offset; nx < nframes + offset; ++nx) {
+				sp[nx] += 1.0e-27f;
+			}
+		}
+	}
+
+	/* ----------------------------------------------------------------------------------------------------
 	   PRE-FADER REDIRECTS
 	   -------------------------------------------------------------------------------------------------- */
 
@@ -1466,6 +1482,7 @@ Route::state(bool full_state)
 	node->add_property("muted", _muted?"yes":"no");
 	node->add_property("soloed", _soloed?"yes":"no");
 	node->add_property("phase-invert", _phase_invert?"yes":"no");
+	node->add_property("denormal-protection", _denormal_protection?"yes":"no");
 	node->add_property("mute-affects-pre-fader", _mute_affects_pre_fader?"yes":"no"); 
 	node->add_property("mute-affects-post-fader", _mute_affects_post_fader?"yes":"no"); 
 	node->add_property("mute-affects-control-outs", _mute_affects_control_outs?"yes":"no"); 
@@ -1701,7 +1718,11 @@ Route::_set_state (const XMLNode& node, bool call_base)
 	}
 
 	if ((prop = node.property (X_("phase-invert"))) != 0) {
-		set_phase_invert(prop->value()=="yes"?true:false, this);
+		set_phase_invert (prop->value()=="yes"?true:false, this);
+	}
+
+	if ((prop = node.property (X_("denormal-protection"))) != 0) {
+		set_denormal_protection (prop->value()=="yes"?true:false, this);
 	}
 
 	if ((prop = node.property (X_("active"))) != 0) {

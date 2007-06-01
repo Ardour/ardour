@@ -107,6 +107,9 @@ class IO : public PBD::StatefulDestructible
 	gain_t         gain () const { return _desired_gain; }
 	virtual gain_t effective_gain () const;
 	
+	void set_denormal_protection (bool yn, void *src);
+	bool denormal_protection() const { return _denormal_protection; }
+	
 	void set_phase_invert (bool yn, void *src);
 	bool phase_invert() const { return _phase_invert; }
 
@@ -284,6 +287,7 @@ class IO : public PBD::StatefulDestructible
 	Bundle*             _output_bundle;
 	bool                 no_panner_reset;
 	bool                _phase_invert;
+	bool                _denormal_protection;
 	XMLNode*             deferred_state;
 	DataType            _default_type;
 	

@@ -2436,7 +2436,17 @@ IO::set_phase_invert (bool yn, void *src)
 {
 	if (_phase_invert != yn) {
 		_phase_invert = yn;
+		//  phase_invert_changed (src); /* EMIT SIGNAL */
 	}
-	//  phase_invert_changed (src); /* EMIT SIGNAL */
 }
+
+void
+IO::set_denormal_protection (bool yn, void *src)
+{
+	if (_denormal_protection != yn) {
+		_denormal_protection = yn;
+		//  denormal_protection_changed (src); /* EMIT SIGNAL */
+	}
+}
+
 

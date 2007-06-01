@@ -124,7 +124,7 @@ class Route : public IO
 
 	void set_mute_config (mute_type, bool, void *src);
 	bool get_mute_config (mute_type);
-	
+
 	void       set_edit_group (RouteGroup *, void *);
 	void       drop_edit_group (void *);
 	RouteGroup *edit_group () { return _edit_group; }

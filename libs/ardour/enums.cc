@@ -51,6 +51,7 @@ setup_enum_writer ()
 	Placement _Placement;
 	MonitorModel _MonitorModel;
 	RemoteModel _RemoteModel;
+	DenormalModel _DenormalModel;
 	CrossfadeModel _CrossfadeModel;
 	LayerModel _LayerModel;
 	SoloModel _SoloModel;
@@ -161,6 +162,12 @@ setup_enum_writer ()
 	REGISTER_ENUM (SoftwareMonitoring);
 	REGISTER_ENUM (ExternalMonitoring);
 	REGISTER (_MonitorModel);
+
+	REGISTER_ENUM (DenormalNone);
+	REGISTER_ENUM (DenormalFTZ);
+	REGISTER_ENUM (DenormalDAZ);
+	REGISTER_ENUM (DenormalFTZDAZ);
+	REGISTER (_DenormalModel);
 
 	REGISTER_ENUM (UserOrdered);
 	REGISTER_ENUM (MixerOrdered);

@@ -65,6 +65,8 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 	wait_for_release = false;
 	route_active_menu_item = 0;
 	was_solo_safe = false;
+	polarity_menu_item = 0;
+	denormal_menu_item = 0;
 
 	if (set_color_from_route()) {
 		set_color (unique_random_color());
@@ -877,6 +879,28 @@ RouteUI::polarity_changed ()
 {
 	/* no signal for this yet */
 }
+
+void
+RouteUI::toggle_denormal_protection ()
+{
+	if (denormal_menu_item) {
+
+		bool x;
+
+		ENSURE_GUI_THREAD(mem_fun (*this, &RouteUI::toggle_denormal_protection));
+		
+		if ((x = denormal_menu_item->get_active()) != _route->denormal_protection()) {
+			_route->set_denormal_protection (x, this);
+		}
+	}
+}
+
+void
+RouteUI::denormal_protection_changed ()
+{
+	/* no signal for this yet */
+}
+
 
 void
 RouteUI::solo_safe_toggle(void* src, Gtk::CheckMenuItem* check)

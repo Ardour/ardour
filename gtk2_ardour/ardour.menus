@@ -340,7 +340,15 @@
 		     <menuitem action='LayerLaterHigher'/>
 		     <menuitem action='LayerMoveAddHigher'/>
 		     <menuitem action='LayerAddHigher'/>
-           </menu>
+	       </menu>
+	       <menu name='Denormals' action='Denormals'>
+                      <menuitem action='DenormalProtection'/>
+		      <separator/>
+                      <menuitem action='DenormalNone'/>
+                      <menuitem action='DenormalFTZ'/>
+                      <menuitem action='DenormalDAZ'/>
+	              <menuitem action='DenormalFTZDAZ'/>
+               </menu>
                <separator/>
                <menuitem action='SendMTC'/>
                <menuitem action='SendMMC'/>
@@ -357,10 +365,8 @@
                <menuitem action='StopRecordingOnXrun'/>
                <menuitem action='StopTransportAtEndOfSession'/>
                <menuitem action='GainReduceFastTransport'/>
-	       <separator/>
-				<menuitem action='PrimaryClockDeltaEditCursor'/>
-				<menuitem action='SecondaryClockDeltaEditCursor'/>
-			<separator/>
+	       <menuitem action='PrimaryClockDeltaEditCursor'/>
+	       <menuitem action='SecondaryClockDeltaEditCursor'/>
          </menu>
 	 <menu name='Help' action='Help'>
 	     <menuitem action='About'/>

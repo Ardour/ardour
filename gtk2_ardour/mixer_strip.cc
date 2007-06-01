@@ -984,6 +984,9 @@ MixerStrip::build_route_ops_menu ()
 	items.push_back (CheckMenuElem (_("Invert Polarity"), mem_fun (*this, &RouteUI::toggle_polarity)));
 	polarity_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
 	polarity_menu_item->set_active (_route->phase_invert());
+	items.push_back (CheckMenuElem (_("Protect against denormals"), mem_fun (*this, &RouteUI::toggle_denormal_protection)));
+	denormal_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
+	denormal_menu_item->set_active (_route->denormal_protection());
 
 	build_remote_control_menu ();
 	
