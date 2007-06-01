@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include <cassert>
 #include <iostream>
+#include <boost/utility.hpp>
 #include <ardour/types.h>
 #include <ardour/data_type.h>
 #include <ardour/runtime_functions.h>
@@ -38,7 +39,7 @@ namespace ARDOUR {
  * 
  * To actually read/write buffer contents, use the appropriate derived class.
  */
-class Buffer
+class Buffer : public boost::noncopyable
 {
 public:
 	virtual ~Buffer() {}
@@ -76,11 +77,6 @@ protected:
 	size_t   _capacity;
 	size_t   _size;
 	bool     _silent;
-
-private:
-	// Prevent copies (undefined)
-	Buffer(const Buffer& copy);
-	void operator=(const Buffer& other);
 };
 
 
@@ -175,10 +171,6 @@ public:
 		{ assert(offset + nframes <= _capacity); return _data + offset; }
 
 private:
-	// These are undefined (prevent copies)
-	AudioBuffer(const AudioBuffer& copy);            
-	AudioBuffer& operator=(const AudioBuffer& copy);
-
 	bool    _owns_data;
 	Sample* _data; ///< Actual buffer contents
 };
@@ -197,7 +189,7 @@ public:
 	
 	void read_from(const Buffer& src, nframes_t nframes, nframes_t offset);
 
-	bool  push_back(const MidiEvent& event);
+	bool  push_back(const ARDOUR::MidiEvent& event);
 	Byte* reserve(nframes_t time, size_t size);
 	
 	const MidiEvent& operator[](size_t i) const { assert(i < _size); return _events[i]; }
@@ -206,10 +198,6 @@ public:
 	static size_t max_event_size() { return MAX_EVENT_SIZE; }
 
 private:
-	// These are undefined (prevent copies)
-	MidiBuffer(const MidiBuffer& copy);            
-	MidiBuffer& operator=(const MidiBuffer& copy);
-
 	// FIXME: Jack needs to tell us this
 	static const size_t MAX_EVENT_SIZE = 4; // bytes
 	

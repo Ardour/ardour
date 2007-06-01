@@ -31,6 +31,7 @@
 #include <ardour/source.h>
 #include <ardour/ardour.h>
 #include <ardour/buffer.h>
+#include <ardour/midi_model.h>
 #include <pbd/stateful.h>
 #include <pbd/xml++.h>
 
@@ -62,11 +63,13 @@ class MidiSource : public Source
 
 	static sigc::signal<void,MidiSource*> MidiSourceCreated;
 	       
-	// The MIDI equivalent to "peaks"
+	// The MIDI equivalent to "peaks" (but complete data)
 	mutable sigc::signal<void,boost::shared_ptr<MidiBuffer>,nframes_t,nframes_t> ViewDataRangeReady;
 	
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
+
+	MidiModel& model() { return _model; }
 
   protected:
 	virtual nframes_t read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset) const = 0;
@@ -76,6 +79,8 @@ class MidiSource : public Source
 	string              _captured_for;
 	mutable uint32_t    _read_data_count;  ///< modified in read()
 	mutable uint32_t    _write_data_count; ///< modified in write()
+
+	MidiModel _model;
 
   private:
 	bool file_changed (string path);

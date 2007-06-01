@@ -28,6 +28,7 @@
 #include <ardour/midi_region.h>
 #include <ardour/midi_source.h>
 #include <ardour/midi_diskstream.h>
+#include <ardour/midi_events.h>
 
 #include "streamview.h"
 #include "midi_region_view.h"
@@ -35,7 +36,6 @@
 #include "simplerect.h"
 #include "simpleline.h"
 #include "public_editor.h"
-//#include "midi_region_editor.h"
 #include "ghostregion.h"
 #include "midi_time_axis.h"
 #include "utils.h"
@@ -53,12 +53,14 @@ using namespace ArdourCanvas;
 MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<MidiRegion> r, double spu,
 				  Gdk::Color& basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
+	, _active_notes(0)
 {
 }
 
 MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<MidiRegion> r, double spu, 
 				  Gdk::Color& basic_color, TimeAxisViewItem::Visibility visibility)
 	: RegionView (parent, tv, r, spu, basic_color, visibility)
+	, _active_notes(0)
 {
 }
 
@@ -89,6 +91,7 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 MidiRegionView::~MidiRegionView ()
 {
 	in_destructor = true;
+	end_write();
 
 	RegionViewGoingAway (this); /* EMIT_SIGNAL */
 }
@@ -112,4 +115,68 @@ MidiRegionView::add_ghost (AutomationTimeAxisView& atv)
 	throw; // FIXME
 	return NULL;
 }
+
+
+/** Begin tracking note state for successive calls to add_event
+ */
+void
+MidiRegionView::begin_write()
+{
+	_active_notes = new ArdourCanvas::SimpleRect*[127];
+}
+
+
+/** Destroy note state for add_event
+ */
+void
+MidiRegionView::end_write()
+{
+	delete[] _active_notes;
+	_active_notes = NULL;
+}
+
+
+void
+MidiRegionView::add_event (const MidiEvent& ev)
+{
+	/*printf("Event, time = %u, size = %zu, data = ",
+	  ev.time, ev.size);
+	  for (size_t i=0; i < ev.size; ++i) {
+	  printf("%X ", ev.buffer[i]);
+	  }
+	  printf("\n");*/
+	double y1 = trackview.height / 2.0;
+	if ((ev.buffer[0] & 0xF0) == MIDI_CMD_NOTE_ON) {
+		const Byte& note = ev.buffer[1];
+		y1 = (trackview.height / 127.0) * note;
+
+		ArdourCanvas::SimpleRect * ev_rect = new Gnome::Canvas::SimpleRect(
+				*(ArdourCanvas::Group*)get_canvas_group());
+		ev_rect->property_x1() = trackview.editor.frame_to_pixel (
+				ev.time);
+		ev_rect->property_y1() = y1;
+		ev_rect->property_x2() = trackview.editor.frame_to_pixel (
+				_region->length());
+		ev_rect->property_y2() = y1 + (trackview.height / 127.0);
+		ev_rect->property_outline_color_rgba() = 0xFFFFFFAA;
+		/* outline all but right edge */
+		ev_rect->property_outline_what() = (guint32) (0x1 & 0x4 & 0x8);
+		ev_rect->property_fill_color_rgba() = 0xFFFFFF66;
+
+		_events.push_back(ev_rect);
+		if (_active_notes)
+			_active_notes[note] = ev_rect;
+
+	} else if ((ev.buffer[0] & 0xF0) == MIDI_CMD_NOTE_OFF) {
+		const Byte& note = ev.buffer[1];
+		if (_active_notes && _active_notes[note]) {
+			_active_notes[note]->property_x2() = trackview.editor.frame_to_pixel(ev.time);
+			_active_notes[note]->property_outline_what() = (guint32) 0xF; // all edges
+			_active_notes[note] = NULL;
+		}
+	}
+
+}
+
+
 

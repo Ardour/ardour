@@ -45,6 +45,7 @@
 #include "gui_thread.h"
 #include "utils.h"
 #include "color.h"
+#include "simplerect.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -107,8 +108,13 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait
 	// FIXME
 	//region_view->set_waveform_visible(_trackview.editor.show_waveforms());
 
-	/* catch regionview going away */
+	/* display events */
+	region_view->begin_write();
+	for (size_t i=0; i < region->midi_source(0)->model().n_events(); ++i)
+		region_view->add_event(region->midi_source(0)->model().event_at(i));
+	region_view->end_write();
 
+	/* catch regionview going away */
 	region->GoingAway.connect (bind (mem_fun (*this, &MidiStreamView::remove_region_view), region));
 	
 	RegionViewAdded (region_view);
@@ -337,12 +343,21 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiBuffer> data, nframes_
 						if (origlen == 1) {
 							/* our special initial length */
 							iter->second = add_region_view_internal (region, false);
+							((MidiRegionView*)iter->second)->begin_write();
 						}
 
 						/* also update rect */
 						ArdourCanvas::SimpleRect * rect = rec_rects[n].rectangle;
 						gdouble xend = _trackview.editor.frame_to_pixel (region->position() + region->length());
 						rect->property_x2() = xend;
+
+						/* draw events */
+						MidiRegionView* mrv = (MidiRegionView*)iter->second;
+						for (size_t i = 0; i < data->size(); ++i) {
+							const MidiEvent& ev = (*data.get())[i];
+							mrv->add_event(ev);
+						}
+
 					}
 				}
 

@@ -352,9 +352,10 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 	// FIXME: start of source time?
 	
 	for (size_t i=0; i < buf.size(); ++i) {
-		const MidiEvent& ev = buf[i];
+		MidiEvent& ev = buf[i];
 		assert(ev.time >= _timeline_position);
-		uint32_t delta_time = (ev.time - _timeline_position) - _last_ev_time;
+		ev.time -= _timeline_position;
+		uint32_t delta_time = ev.time - _last_ev_time;
 		
 		/*printf("SMF - writing event, delta = %u, size = %zu, data = ",
 			delta_time, ev.size);
@@ -375,6 +376,8 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 
 	const nframes_t oldlen = _length;
 	update_length(oldlen, cnt);
+
+	_model.append(buf);
 
 	ViewDataRangeReady (buf_ptr, oldlen, cnt); /* EMIT SIGNAL */
 	
