@@ -3203,7 +3203,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	   motion handler. 
 	*/
 
-	if (drag_info.first_move && !(drag_info.copy && drag_info.x_constrained)) {
+	if (drag_info.first_move) {
 		/* just a click */
 		goto out;
 	}
