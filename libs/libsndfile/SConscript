@@ -6,9 +6,10 @@ import glob
 
 sndfile_files = glob.glob('src/*.c') + glob.glob('src/GSM610/*.c') + glob.glob('src/G72x/*.c')
 
-Import('env install_prefix libraries')
+Import('env install_prefix libraries use_flac')
 sndfile = env.Copy()
-sndfile.Merge([libraries['flac'] ])
+if use_flac:
+    sndfile.Merge([libraries['flac'] ])
 
 domain = 'libsndfile'
 
