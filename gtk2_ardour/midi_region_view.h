@@ -66,6 +66,7 @@ class MidiRegionView : public RegionView
 
 	void begin_write();
 	void end_write();
+	void extend_active_notes();
 
   protected:
 

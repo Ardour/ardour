@@ -51,7 +51,7 @@ MidiModel::append(const MidiBuffer& buf)
 {
 	for (size_t i=0; i < buf.size(); ++i) {
 		const MidiEvent& buf_event = buf[i];
-		assert(buf_event.time >= _events.back().time);
+		assert(_events.empty() || buf_event.time >= _events.back().time);
 
 		_events.push_back(buf_event);
 		MidiEvent& my_event = _events.back();

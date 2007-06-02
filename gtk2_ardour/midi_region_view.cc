@@ -122,7 +122,9 @@ MidiRegionView::add_ghost (AutomationTimeAxisView& atv)
 void
 MidiRegionView::begin_write()
 {
-	_active_notes = new ArdourCanvas::SimpleRect*[127];
+	_active_notes = new ArdourCanvas::SimpleRect*[128];
+	for (unsigned i=0; i < 128; ++i)
+		_active_notes[i] = NULL;
 }
 
 
@@ -148,7 +150,7 @@ MidiRegionView::add_event (const MidiEvent& ev)
 	double y1 = trackview.height / 2.0;
 	if ((ev.buffer[0] & 0xF0) == MIDI_CMD_NOTE_ON) {
 		const Byte& note = ev.buffer[1];
-		y1 = (trackview.height / 127.0) * note;
+		y1 = trackview.height - ((trackview.height / 127.0) * note);
 
 		ArdourCanvas::SimpleRect * ev_rect = new Gnome::Canvas::SimpleRect(
 				*(ArdourCanvas::Group*)get_canvas_group());
@@ -176,6 +178,20 @@ MidiRegionView::add_event (const MidiEvent& ev)
 		}
 	}
 
+}
+
+
+/** Extend active notes to rightmost edge of region (if length is changed)
+ */
+void
+MidiRegionView::extend_active_notes()
+{
+	if (!_active_notes)
+		return;
+
+	for (unsigned i=0; i < 128; ++i)
+		if (_active_notes[i])
+			_active_notes[i]->property_x2() = trackview.editor.frame_to_pixel(_region->length());
 }
 
 
