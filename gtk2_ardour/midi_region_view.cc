@@ -159,7 +159,7 @@ MidiRegionView::add_event (const MidiEvent& ev)
 		ev_rect->property_y1() = y1;
 		ev_rect->property_x2() = trackview.editor.frame_to_pixel (
 				_region->length());
-		ev_rect->property_y2() = y1 + (trackview.height / 127.0);
+		ev_rect->property_y2() = y1 + ceil(trackview.height / 127.0);
 		ev_rect->property_outline_color_rgba() = 0xFFFFFFAA;
 		/* outline all but right edge */
 		ev_rect->property_outline_what() = (guint32) (0x1 & 0x4 & 0x8);
