@@ -69,6 +69,9 @@ class MidiSource : public Source
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
 
+	virtual void load_model(bool lock=true) = 0;
+	virtual void destroy_model() = 0;
+
 	MidiModel& model() { return _model; }
 
   protected:

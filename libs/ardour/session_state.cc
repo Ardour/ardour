@@ -1110,7 +1110,7 @@ Session::set_state (const XMLNode& node)
 
 	/* Object loading order:
 
-	MIDI
+	MIDI Control
 	Path
 	extra
 	Options/Config
@@ -1397,7 +1397,6 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool full)
 		nchans = atoi (prop->value().c_str());
 	}
 
-
 	if ((prop = node.property ("name")) == 0) {
 		cerr << "no name for this region\n";
 		abort ();
@@ -1461,7 +1460,6 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool full)
 			}
 		}
 
-
 		return region;
 						       
 	}
@@ -1477,7 +1475,7 @@ Session::XMLMidiRegionFactory (const XMLNode& node, bool full)
 	const XMLProperty* prop;
 	boost::shared_ptr<Source> source;
 	boost::shared_ptr<MidiSource> ms;
-	MidiRegion::SourceList sources;
+	SourceList sources;
 	uint32_t nchans = 1;
 	
 	if (node.name() != X_("Region")) {
@@ -1486,6 +1484,11 @@ Session::XMLMidiRegionFactory (const XMLNode& node, bool full)
 
 	if ((prop = node.property (X_("channels"))) != 0) {
 		nchans = atoi (prop->value().c_str());
+	}
+	
+	if ((prop = node.property ("name")) == 0) {
+		cerr << "no name for this region\n";
+		abort ();
 	}
 
 	// Multiple midi channels?  that's just crazy talk
@@ -1515,6 +1518,17 @@ Session::XMLMidiRegionFactory (const XMLNode& node, bool full)
 
 	try {
 		boost::shared_ptr<MidiRegion> region (boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (sources, node)));
+		/* a final detail: this is the one and only place that we know how long missing files are */
+
+		if (region->whole_file()) {
+			for (SourceList::iterator sx = sources.begin(); sx != sources.end(); ++sx) {
+				boost::shared_ptr<SilentFileSource> sfp = boost::dynamic_pointer_cast<SilentFileSource> (*sx);
+				if (sfp) {
+					sfp->set_length (region->length());
+				}
+			}
+		}
+
 		return region;
 	}
 
@@ -1533,8 +1547,6 @@ Session::get_sources_as_xml ()
 	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
 		node->add_child_nocopy (i->second->get_state());
 	}
-
-	/* XXX get MIDI and other sources here */
 
 	return *node;
 }

@@ -75,10 +75,11 @@ public:
 
 protected:
 	XMLNode& state (bool full);
+	
+	int _set_state (const XMLNode&, bool call_base);
 
 private:
 	int set_diskstream (boost::shared_ptr<MidiDiskstream> ds);
-
 	void set_state_part_two ();
 	void set_state_part_three ();
 };

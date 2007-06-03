@@ -35,8 +35,13 @@ public:
 	MidiModel(size_t size=0);
 	~MidiModel();
 
+	void clear() { _events.clear(); }
+
 	/** Resizes vector if necessary (NOT realtime safe) */
 	void append(const MidiBuffer& data);
+	
+	/** Resizes vector if necessary (NOT realtime safe) */
+	void append(const MidiEvent& ev);
 	
 	inline const MidiEvent& event_at(unsigned i) const { return _events[i]; }
 

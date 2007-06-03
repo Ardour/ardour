@@ -57,7 +57,6 @@ public:
 protected:
 
 	/* playlist "callbacks" */
-	void flush_notifications ();
 
 	void finalize_split_region (boost::shared_ptr<Region> original, boost::shared_ptr<Region> left, boost::shared_ptr<Region> right);
 	
@@ -66,7 +65,6 @@ protected:
 	void remove_dependents (boost::shared_ptr<Region> region);
 
 private:
-	XMLNode& state (bool full_state);
 	void dump () const;
 
 	bool region_changed (Change, boost::shared_ptr<Region>);

@@ -21,6 +21,8 @@
 #include <sigc++/retype_return.h>
 #include <sigc++/bind.h>
 
+#include <pbd/enumwriter.h>
+
 #include <ardour/midi_track.h>
 #include <ardour/midi_diskstream.h>
 #include <ardour/session.h>
@@ -72,10 +74,7 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 MidiTrack::MidiTrack (Session& sess, const XMLNode& node)
 	: Track (sess, node)
 {
-	_freeze_record.state = NoFreeze;
-	set_state (node);
-	_declickable = true;
-	_saved_meter_point = _meter_point;
+	_set_state(node, false);
 	
 	set_input_minimum(ChanCount(DataType::MIDI, 1));
 	set_input_maximum(ChanCount(DataType::MIDI, 1));
@@ -141,22 +140,21 @@ MidiTrack::midi_diskstream() const
 int
 MidiTrack::set_state (const XMLNode& node)
 {
+	return _set_state (node, true);
+}
+
+int
+MidiTrack::_set_state (const XMLNode& node, bool call_base)
+{
 	const XMLProperty *prop;
 	XMLNodeConstIterator iter;
 
-	if (Route::set_state (node)) {
+	if (Route::_set_state (node, call_base)) {
 		return -1;
 	}
-
+	
 	if ((prop = node.property (X_("mode"))) != 0) {
-		if (prop->value() == X_("normal")) {
-			_mode = Normal;
-		} else if (prop->value() == X_("destructive")) {
-			_mode = Destructive;
-		} else {
-			warning << string_compose ("unknown midi track mode \"%1\" seen and ignored", prop->value()) << endmsg;
-			_mode = Normal;
-		}
+		_mode = TrackMode (string_2_enum (prop->value(), _mode));
 	} else {
 		_mode = Normal;
 	}
@@ -193,12 +191,9 @@ MidiTrack::set_state (const XMLNode& node)
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
 		child = *niter;
 
-		if (child->name() == X_("remote_control")) {
-			if ((prop = child->property (X_("id"))) != 0) {
-				int32_t x;
-				sscanf (prop->value().c_str(), "%d", &x);
-				set_remote_control_id (x);
-			}
+		if (child->name() == X_("recenable")) {
+			_rec_enable_control.set_state (*child);
+			_session.add_controllable (&_rec_enable_control);
 		}
 	}
 
@@ -221,8 +216,7 @@ MidiTrack::state(bool full_state)
 
 		freeze_node = new XMLNode (X_("freeze-info"));
 		freeze_node->add_property ("playlist", _freeze_record.playlist->name());
-		snprintf (buf, sizeof (buf), "%d", (int) _freeze_record.state);
-		freeze_node->add_property ("state", buf);
+		freeze_node->add_property ("state", enum_2_string (_freeze_record.state));
 
 		for (vector<FreezeRecordInsertInfo*>::iterator i = _freeze_record.insert_info.begin(); i != _freeze_record.insert_info.end(); ++i) {
 			inode = new XMLNode (X_("insert"));
@@ -239,31 +233,12 @@ MidiTrack::state(bool full_state)
 	/* Alignment: act as a proxy for the diskstream */
 	
 	XMLNode* align_node = new XMLNode (X_("alignment"));
-	switch (_diskstream->alignment_style()) {
-	case ExistingMaterial:
-		snprintf (buf, sizeof (buf), X_("existing"));
-		break;
-	case CaptureTime:
-		snprintf (buf, sizeof (buf), X_("capture"));
-		break;
-	}
-	align_node->add_property (X_("style"), buf);
+	AlignStyle as = _diskstream->alignment_style ();
+	align_node->add_property (X_("style"), enum_2_string (as));
 	root.add_child_nocopy (*align_node);
 
-	XMLNode* remote_control_node = new XMLNode (X_("remote_control"));
-	snprintf (buf, sizeof (buf), "%d", _remote_control_id);
-	remote_control_node->add_property (X_("id"), buf);
-	root.add_child_nocopy (*remote_control_node);
-
-	switch (_mode) {
-	case Normal:
-		root.add_property (X_("mode"), X_("normal"));
-		break;
-	case Destructive:
-		root.add_property (X_("mode"), X_("destructive"));
-		break;
-	}
-
+	root.add_property (X_("mode"), enum_2_string (_mode));
+	
 	/* we don't return diskstream state because we don't
 	   own the diskstream exclusively. control of the diskstream
 	   state is ceded to the Session, even if we create the
@@ -272,6 +247,8 @@ MidiTrack::state(bool full_state)
 
 	_diskstream->id().print (buf, sizeof(buf));
 	root.add_property ("diskstream-id", buf);
+	
+	root.add_child_nocopy (_rec_enable_control.get_state());
 
 	return root;
 }
@@ -314,7 +291,7 @@ MidiTrack::set_state_part_two ()
 		}
 		
 		if ((prop = fnode->property (X_("state"))) != 0) {
-			_freeze_record.state = (FreezeState) atoi (prop->value().c_str());
+			_freeze_record.state = FreezeState (string_2_enum (prop->value(), _freeze_record.state));
 		}
 		
 		XMLNodeConstIterator citer;
@@ -341,11 +318,21 @@ MidiTrack::set_state_part_two ()
 	if ((fnode = find_named_node (*pending_state, X_("alignment"))) != 0) {
 
 		if ((prop = fnode->property (X_("style"))) != 0) {
-			if (prop->value() == "existing") {
-				_diskstream->set_persistent_align_style (ExistingMaterial);
-			} else if (prop->value() == "capture") {
-				_diskstream->set_persistent_align_style (CaptureTime);
+
+			/* fix for older sessions from before EnumWriter */
+
+			string pstr;
+
+			if (prop->value() == "capture") {
+				pstr = "CaptureTime";
+			} else if (prop->value() == "existing") {
+				pstr = "ExistingMaterial";
+			} else {
+				pstr = prop->value();
 			}
+
+			AlignStyle as = AlignStyle (string_2_enum (pstr, as));
+			_diskstream->set_persistent_align_style (as);
 		}
 	}
 	return;

@@ -754,3 +754,33 @@ SMFSource::read_var_len() const
 
 	return value;
 }
+
+void
+SMFSource::load_model(bool lock)
+{
+	if (lock)
+		Glib::Mutex::Lock lm (_lock);
+
+	_model.clear();
+	
+	fseek(_fd, _header_size, 0);
+
+	nframes_t time = 0;
+	MidiEvent ev;
+	
+	int ret;
+	while ((ret = read_event(ev)) >= 0) {
+		time += ev.time;
+		ev.time = time;
+		if (ret > 0) { // didn't skip (meta) event
+			_model.append(ev);
+		}
+	}
+}
+
+void
+SMFSource::destroy_model()
+{
+	_model.clear();
+}
+

@@ -87,6 +87,9 @@ class SMFSource : public MidiSource {
 	int set_state (const XMLNode&);
 
 	void seek_to(nframes_t time);
+	
+	void load_model(bool lock=true);
+	void destroy_model();
 
   private:
 

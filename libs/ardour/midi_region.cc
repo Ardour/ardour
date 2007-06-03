@@ -31,6 +31,7 @@
 
 #include <pbd/basename.h>
 #include <pbd/xml++.h>
+#include <pbd/enumwriter.h>
 
 #include <ardour/midi_region.h>
 #include <ardour/session.h>
@@ -174,27 +175,16 @@ XMLNode&
 MidiRegion::state (bool full)
 {
 	XMLNode& node (Region::state (full));
-	XMLNode *child;
 	char buf[64];
 	char buf2[64];
 	LocaleGuard lg (X_("POSIX"));
 	
-	snprintf (buf, sizeof (buf), "0x%x", (int) _flags);
-	node.add_property ("flags", buf);
-
+	node.add_property ("flags", enum_2_string (_flags));
+	
 	for (uint32_t n=0; n < _sources.size(); ++n) {
 		snprintf (buf2, sizeof(buf2), "source-%d", n);
 		_sources[n]->id().print (buf, sizeof(buf));
 		node.add_property (buf2, buf);
-	}
-
-	snprintf (buf, sizeof (buf), "%u", (uint32_t) _sources.size());
-	node.add_property ("channels", buf);
-
-	child = node.add_child ("Envelope");
-
-	if ( ! full) {
-		child->add_property ("default", "yes");
 	}
 
 	if (full && _extra_xml) {
@@ -205,30 +195,50 @@ MidiRegion::state (bool full)
 }
 
 int
-MidiRegion::set_state (const XMLNode& node)
+MidiRegion::set_live_state (const XMLNode& node, Change& what_changed, bool send)
 {
-	const XMLNodeList& nlist = node.children();
 	const XMLProperty *prop;
 	LocaleGuard lg (X_("POSIX"));
 
-	Region::set_state (node);
+	Region::set_live_state (node, what_changed, false);
 
+	uint32_t old_flags = _flags;
+		
 	if ((prop = node.property ("flags")) != 0) {
-		_flags = Flag (strtol (prop->value().c_str(), (char **) 0, 16));
+		_flags = Flag (string_2_enum (prop->value(), _flags));
+
+		//_flags = Flag (strtol (prop->value().c_str(), (char **) 0, 16));
+
+		_flags = Flag (_flags & ~Region::LeftOfSplit);
+		_flags = Flag (_flags & ~Region::RightOfSplit);
 	}
 
-	/* Now find child items */
-	for (XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		
-		XMLNode *child;
-		//XMLProperty *prop;
-		
-		child = (*niter);
-		
-		/** Hello, children */
+	if ((old_flags ^ _flags) & Muted) {
+		what_changed = Change (what_changed|MuteChanged);
+	}
+	if ((old_flags ^ _flags) & Opaque) {
+		what_changed = Change (what_changed|OpacityChanged);
+	}
+	if ((old_flags ^ _flags) & Locked) {
+		what_changed = Change (what_changed|LockChanged);
+	}
+
+	if (send) {
+		send_change (what_changed);
 	}
 
 	return 0;
+}
+
+int
+MidiRegion::set_state (const XMLNode& node)
+{
+	/* Region::set_state() calls the virtual set_live_state(),
+	   which will get us back to AudioRegion::set_live_state()
+	   to handle the relevant stuff.
+	*/
+
+	return Region::set_state (node);
 }
 
 void

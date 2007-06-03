@@ -63,3 +63,26 @@ MidiModel::append(const MidiBuffer& buf)
 	}
 }
 
+
+/** Append \a in_event to model.  NOT (even remotely) realtime safe.
+ *
+ * Timestamps of events in \a buf are expected to be relative to
+ * the start of this model (t=0) and MUST be monotonically increasing
+ * and MUST be >= the latest event currently in the model.
+ *
+ * Events in buf are deep copied.
+ */
+void
+MidiModel::append(const MidiEvent& in_event)
+{
+	assert(_events.empty() || in_event.time >= _events.back().time);
+
+	_events.push_back(in_event);
+	MidiEvent& my_event = _events.back();
+	assert(my_event.time == in_event.time);
+	assert(my_event.size == in_event.size);
+
+	my_event.buffer = new Byte[my_event.size];
+	memcpy(my_event.buffer, in_event.buffer, my_event.size);
+}
+

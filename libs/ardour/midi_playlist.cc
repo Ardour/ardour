@@ -46,9 +46,9 @@ MidiPlaylist::MidiPlaylist (Session& session, const XMLNode& node, bool hidden)
 	const XMLProperty* prop = node.property("type");
 	assert(prop && DataType(prop->value()) == DataType::MIDI);
 
-	in_set_state = true;
+	in_set_state++;
 	set_state (node);
-	in_set_state = false;
+	in_set_state--;
 }
 
 MidiPlaylist::MidiPlaylist (Session& session, string name, bool hidden)
@@ -109,6 +109,10 @@ MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, nframes
 MidiPlaylist::~MidiPlaylist ()
 {
   	GoingAway (); /* EMIT SIGNAL */
+	
+	/* drop connections to signals */
+	
+	notify_callbacks ();
 }
 
 struct RegionSortByLayer {
@@ -159,26 +163,14 @@ MidiPlaylist::read (MidiRingBuffer& dst, nframes_t start,
 void
 MidiPlaylist::remove_dependents (boost::shared_ptr<Region> region)
 {
+	/* MIDI regions have no dependents (crossfades) */
 }
 
-
-void
-MidiPlaylist::flush_notifications ()
-{
-	Playlist::flush_notifications();
-
-	if (in_flush) {
-		return;
-	}
-
-	in_flush = true;
-
-	in_flush = false;
-}
 
 void
 MidiPlaylist::refresh_dependents (boost::shared_ptr<Region> r)
 {
+	/* MIDI regions have no dependents (crossfades) */
 }
 
 void
@@ -226,36 +218,22 @@ MidiPlaylist::finalize_split_region (boost::shared_ptr<Region> original, boost::
 void
 MidiPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 {
+	/* MIDI regions have no dependents (crossfades) */
 }
 
 
 int
 MidiPlaylist::set_state (const XMLNode& node)
 {
-	if (!in_set_state) {
-		Playlist::set_state (node);
-	}
+	in_set_state++;
+	freeze ();
 
-	// Actually Charles, I don't much care for children
-	
-	/*
-	XMLNodeList nlist = node.children();
+	Playlist::set_state (node);
 
-	for (XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
-
-		XMLNode* const child = *niter;
-
-	}*/
+	thaw();
+	in_set_state--;
 
 	return 0;
-}
-
-XMLNode&
-MidiPlaylist::state (bool full_state)
-{
-	XMLNode& node = Playlist::state (full_state);
-
-	return node;
 }
 
 void
