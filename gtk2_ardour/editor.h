@@ -574,13 +574,6 @@ class Editor : public PublicEditor
 	ArdourCanvas::SimpleRect* range_marker_bar;
 	ArdourCanvas::SimpleRect* transport_marker_bar;
 
-	
-	ArdourCanvas::SimpleLine* tempo_line;
-	ArdourCanvas::SimpleLine* meter_line;
-	ArdourCanvas::SimpleLine* marker_line;
-	ArdourCanvas::SimpleLine* range_marker_line;
-	ArdourCanvas::SimpleLine* transport_marker_line;
-
 	Gtk::Label  minsec_label;
 	Gtk::Label  bbt_label;
 	Gtk::Label  smpte_label;

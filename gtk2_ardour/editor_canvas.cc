@@ -161,24 +161,34 @@ Editor::initialize_canvas ()
 	
 	tempo_bar = new ArdourCanvas::SimpleRect (*tempo_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
 	tempo_bar->property_fill_color_rgba() = color_map[cTempoBar];
-	tempo_bar->property_outline_pixels() = 0;
+	tempo_bar->property_outline_what() = (0x1 | 0x8);
+	tempo_bar->property_outline_pixels() = 1;
+	tempo_bar->property_outline_color_rgba() = color_map[cTempoSeparator];
 	
 	meter_bar = new ArdourCanvas::SimpleRect (*meter_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
 	meter_bar->property_fill_color_rgba() = color_map[cMeterBar];
-	meter_bar->property_outline_pixels() = 0;
+	meter_bar->property_outline_what() = (0x1 | 0x8);
+	meter_bar->property_outline_pixels() = 1;
+	meter_bar->property_outline_color_rgba() = color_map[cMeterSeparator];
 	
 	marker_bar = new ArdourCanvas::SimpleRect (*marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
 	marker_bar->property_fill_color_rgba() = color_map[cMarkerBar];
-	marker_bar->property_outline_pixels() = 0;
+	marker_bar->property_outline_what() = (0x1 | 0x8);
+	marker_bar->property_outline_pixels() = 1;
+	marker_bar->property_outline_color_rgba() = color_map[cMarkerSeparator];
 	
 	range_marker_bar = new ArdourCanvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
 	range_marker_bar->property_fill_color_rgba() = color_map[cRangeMarkerBar];
-	range_marker_bar->property_outline_pixels() = 0;
+	range_marker_bar->property_outline_what() = (0x1 | 0x8);
+	range_marker_bar->property_outline_pixels() = 1;
+	range_marker_bar->property_outline_color_rgba() = color_map[cRangeMarkerSeparator];
 	
 	transport_marker_bar = new ArdourCanvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
 	transport_marker_bar->property_fill_color_rgba() = color_map[cTransportMarkerBar];
-	transport_marker_bar->property_outline_pixels() = 0;
-	
+	transport_marker_bar->property_outline_what() = (0x1 | 0x8);
+	transport_marker_bar->property_outline_pixels() = 1;
+	transport_marker_bar->property_outline_color_rgba() = color_map[cTransportMarkerSeparator];
+
 	range_bar_drag_rect = new ArdourCanvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
 	range_bar_drag_rect->property_fill_color_rgba() = color_map[cRangeDragBarRectFill];
 	range_bar_drag_rect->property_outline_color_rgba() = color_map[cRangeDragBarRect];
@@ -257,23 +267,6 @@ Editor::initialize_canvas ()
 	range_marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_range_marker_bar_event), range_marker_bar));
 	transport_marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_transport_marker_bar_event), transport_marker_bar));
 	
-	/* separator lines */
-	
-	tempo_line = new ArdourCanvas::SimpleLine (*tempo_group, 0, timebar_height, max_canvas_coordinate, timebar_height);
-	tempo_line->property_color_rgba() = RGBA_TO_UINT (0,0,0,255);
-
-	meter_line = new ArdourCanvas::SimpleLine (*meter_group, 0, timebar_height, max_canvas_coordinate, timebar_height);
-	meter_line->property_color_rgba() = RGBA_TO_UINT (0,0,0,255);
-
-	marker_line = new ArdourCanvas::SimpleLine (*marker_group, 0, timebar_height, max_canvas_coordinate, timebar_height);
-	marker_line->property_color_rgba() = RGBA_TO_UINT (0,0,0,255);
-	
-	range_marker_line = new ArdourCanvas::SimpleLine (*range_marker_group, 0, timebar_height, max_canvas_coordinate, timebar_height);
-	range_marker_line->property_color_rgba() = RGBA_TO_UINT (0,0,0,255);
-
-	transport_marker_line = new ArdourCanvas::SimpleLine (*transport_marker_group, 0, timebar_height, max_canvas_coordinate, timebar_height);
-	transport_marker_line->property_color_rgba() = RGBA_TO_UINT (0,0,0,255);
-
 	ZoomChanged.connect (bind (mem_fun(*this, &Editor::update_loop_range_view), false));
 	ZoomChanged.connect (bind (mem_fun(*this, &Editor::update_punch_range_view), false));
 	
