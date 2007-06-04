@@ -893,6 +893,8 @@ Route::add_redirects (const RedirectList& others, void *src, uint32_t* err_strea
 {
 	uint32_t old_rmo = redirect_max_outs;
 
+	assert (ports_legal);
+
 	if (!_session.engine().connected()) {
 		return 1;
 	}
@@ -993,6 +995,8 @@ int
 Route::remove_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* err_streams)
 {
 	uint32_t old_rmo = redirect_max_outs;
+
+	assert (ports_legal);
 
 	if (!_session.engine().connected()) {
 		return 1;
@@ -1705,25 +1709,20 @@ Route::_set_state (const XMLNode& node, bool call_base)
 		}
 	}
 
-	if (ports_legal) {
 
-		/* if ports are not legal, this will happen in set_deferred_state() */
-
-		XMLNodeList redirect_nodes;
+	XMLNodeList redirect_nodes;
+	
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
 		
-		for (niter = nlist.begin(); niter != nlist.end(); ++niter){
-			
-			child = *niter;
-			
-			if (child->name() == X_("Send") || child->name() == X_("Insert")) {
-				redirect_nodes.push_back(child);
-			}
-			
+		child = *niter;
+		
+		if (child->name() == X_("Send") || child->name() == X_("Insert")) {
+			redirect_nodes.push_back(child);
 		}
 		
-		_set_redirect_states (redirect_nodes);
 	}
-
+	
+	_set_redirect_states (redirect_nodes);
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
 		child = *niter;
@@ -1794,19 +1793,27 @@ Route::_set_redirect_states(const XMLNodeList &nlist)
 
 	RedirectList::iterator i, o;
 
+	if (!ports_legal) {
+
+		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+			deferred_state->add_child_copy (**niter);
+		}
+
+		return;
+	}
+
 	// Iterate through existing redirects, remove those which are not in the state list
 	for (i = _redirects.begin(); i != _redirects.end(); ) {
 		RedirectList::iterator tmp = i;
 		++tmp;
 
 		bool redirectInStateList = false;
-	
-		(*i)->id().print (buf, sizeof (buf));
 
+		(*i)->id().print (buf, sizeof (buf));
 
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
-			if (strncmp(buf,(*niter)->child(X_("Redirect"))->child(X_("IO"))->property(X_("id"))->value().c_str(), sizeof(buf)) == 0) {
+			if (strncmp (buf,(*niter)->child(X_("Redirect"))->child(X_("IO"))->property(X_("id"))->value().c_str(), sizeof(buf)) == 0) {
 				redirectInStateList = true;
 				break;
 			}
