@@ -233,7 +233,7 @@ GainMeter::set_width (Width w)
 Glib::RefPtr<Gdk::Pixmap>
 GainMeter::render_metrics (Gtk::Widget& w)
 {
-	cerr << "GainMeter::render_metrics() called, red = " << w.get_style()->get_bg(Gtk::STATE_NORMAL).get_red() << endl;//DEBUG
+	//cerr << "GainMeter::render_metrics() called, red = " << w.get_style()->get_bg(Gtk::STATE_NORMAL).get_red() << endl;//DEBUG
 	Glib::RefPtr<Gdk::Window> win (w.get_window());
 	Glib::RefPtr<Gdk::GC> fg_gc (w.get_style()->get_fg_gc (Gtk::STATE_NORMAL));
 	Glib::RefPtr<Gdk::GC> bg_gc (w.get_style()->get_bg_gc (Gtk::STATE_NORMAL));
@@ -275,6 +275,10 @@ GainMeter::render_metrics (Gtk::Widget& w)
 gint
 GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 {
+	/* Only draw dB scale if we're metering audio */
+	if (_io->n_inputs().n_audio() + _io->n_outputs().n_audio() == 0)
+		return true;
+
 	static Glib::RefPtr<Gtk::Style> meter_style;
 	
 	if (style_changed) {
@@ -423,10 +427,10 @@ GainMeter::setup_meters ()
 		switch (r->meter_point()) {
 		case MeterPreFader:
 		case MeterInput:
-			nmeters = r->n_inputs().n_audio();
+			nmeters = r->n_inputs().n_total();
 			break;
 		case MeterPostFader:
-			nmeters = r->n_outputs().n_audio();
+			nmeters = r->n_outputs().n_total();
 			break;
 		}
 

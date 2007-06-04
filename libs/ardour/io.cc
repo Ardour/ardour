@@ -164,7 +164,6 @@ IO::IO (Session& s, const XMLNode& node, DataType dt)
 	  _gain_control (X_("gaincontrol"), *this),
 	  _gain_automation_curve (0, 0, 0) // all reset in set_state()
 {
-	// FIXME: hack
 	_meter = new PeakMeter (_session);
 
 	_panner = 0;

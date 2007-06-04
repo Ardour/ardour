@@ -699,18 +699,12 @@ Route::passthru (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, 
 
 	collect_input (bufs, nframes, offset);
 
-#define meter_stream meter_first
-
 	if (meter_first) {
 		_meter->run(bufs, nframes);
-		meter_stream = false;
-	} else {
-		meter_stream = true;
+		meter_first = false;
 	}
 		
-	process_output_buffers (bufs, start_frame, end_frame, nframes, offset, true, declick, meter_stream);
-
-#undef meter_stream
+	process_output_buffers (bufs, start_frame, end_frame, nframes, offset, true, declick, meter_first);
 }
 
 void

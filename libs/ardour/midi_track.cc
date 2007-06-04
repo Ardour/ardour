@@ -35,6 +35,7 @@
 #include <ardour/panner.h>
 #include <ardour/utils.h>
 #include <ardour/buffer_set.h>
+#include <ardour/meter.h>
 
 #include "i18n.h"
 
@@ -524,6 +525,10 @@ MidiTrack::process_output_buffers (BufferSet& bufs,
 	 * too much until the SoC settles down.  We'll do all the MIDI route work here for now,
 	 * but the long-term goal is to have Route::process_output_buffers handle everything */
 	
+	if (meter && (_meter_point == MeterInput || _meter_point == MeterPreFader)) {
+		_meter->run(bufs, nframes);
+	}
+
 	// Run all redirects
 	if (with_redirects) {
 		Glib::RWLock::ReaderLock rm (redirect_lock, Glib::TRY_LOCK);
@@ -532,6 +537,10 @@ MidiTrack::process_output_buffers (BufferSet& bufs,
 				(*i)->run (bufs, start_frame, end_frame, nframes, offset);
 			}
 		} 
+	}
+	
+	if (meter && (_meter_point == MeterPostFader)) {
+		_meter->run(bufs, nframes);
 	}
 	
 	// Main output stage

@@ -23,22 +23,48 @@
 #include <ardour/peak.h>
 #include <ardour/dB.h>
 #include <ardour/session.h>
+#include <ardour/midi_events.h>
 
 namespace ARDOUR {
 
 
 /** Get peaks from @a bufs
- * Input acceptance is lenient - the first n audio buffers from @a bufs will
+ * Input acceptance is lenient - the first n buffers from @a bufs will
  * be metered, where n was set by the last call to setup(), excess meters will
  * be set to 0.
  */
 void
 PeakMeter::run (BufferSet& bufs, nframes_t nframes, nframes_t offset)
 {
-	size_t meterable = std::min(bufs.count().n_audio(), _peak_power.size());
+	size_t meterable = std::min(bufs.count().n_total(), _peak_power.size());
 
-	// Meter what we have
-	for (size_t n = 0; n < meterable; ++n) {
+	size_t n = 0;
+
+	// Meter what we have (midi)
+	for ( ; n < meterable && n < bufs.count().n_midi(); ++n) {
+		
+		float val = 0;
+		
+		// GUI needs a better MIDI meter, not much information can be
+		// expressed through peaks alone
+		const unsigned n_events = bufs.get_midi(n).size();
+		for (size_t i=0; i < n_events; ++i) {
+			const MidiEvent& ev = bufs.get_midi(n)[i];
+			if ((ev.buffer[0] & 0xF0) == MIDI_CMD_NOTE_ON) {
+				const float normal_vel = ev.buffer[2] / 127.0;
+				if (normal_vel > val)
+					val += normal_vel;
+			} else {
+				val += 1.0 / bufs.get_midi(n).capacity();
+			}
+		}
+			
+		_peak_power[n] = val;
+
+	}
+	
+	// Meter what we have (audio)
+	for ( ; n < meterable && n < bufs.count().n_audio(); ++n) {
 		_peak_power[n] = compute_peak (bufs.get_audio(n).data(nframes, offset), nframes, _peak_power[n]); 
 	}
 
@@ -67,7 +93,7 @@ PeakMeter::reset_max ()
 void
 PeakMeter::setup (const ChanCount& in)
 {
-	uint32_t limit = in.n_audio();
+	uint32_t limit = in.n_total();
 
 	while (_peak_power.size() > limit) {
 		_peak_power.pop_back();

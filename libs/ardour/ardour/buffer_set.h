@@ -149,7 +149,7 @@ private:
 	/// Available counts (number of buffers actually allocated)
 	ChanCount _available;
 
-	/// Whether we (don't) 'own' the contained buffers (are a mirror of a PortSet)
+	/// Whether we (don't) 'own' the contained buffers (otherwise we mirror a PortSet)
 	bool _is_mirror;
 };
 
