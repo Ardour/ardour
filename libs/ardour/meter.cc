@@ -53,7 +53,7 @@ PeakMeter::run (BufferSet& bufs, nframes_t nframes, nframes_t offset)
 			if ((ev.buffer[0] & 0xF0) == MIDI_CMD_NOTE_ON) {
 				const float normal_vel = ev.buffer[2] / 127.0;
 				if (normal_vel > val)
-					val += normal_vel;
+					val = normal_vel;
 			} else {
 				val += 1.0 / bufs.get_midi(n).capacity();
 			}
