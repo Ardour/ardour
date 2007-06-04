@@ -63,7 +63,7 @@ public:
 
 	const ChanCount& count() const { return _count; }
 
-	bool empty() const { return (_count.get_total() == 0); }
+	bool empty() const { return (_count.n_total() == 0); }
 
 	// ITERATORS
 	
@@ -95,7 +95,7 @@ public:
 	iterator end(DataType type = DataType::NIL)
 	{
 		return iterator(*this, type,
-			(type == DataType::NIL) ? _count.get_total() : _count.get(type));
+			(type == DataType::NIL) ? _count.n_total() : _count.get(type));
 	}
 	
 	// FIXME: typeify
@@ -118,7 +118,7 @@ public:
 	};
 
 	const_iterator begin() const { return const_iterator(*this, 0); }
-	const_iterator end()   const { return const_iterator(*this, _count.get_total()); }
+	const_iterator end()   const { return const_iterator(*this, _count.n_total()); }
 
 
 	class audio_iterator {

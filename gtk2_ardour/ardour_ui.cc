@@ -724,7 +724,7 @@ ARDOUR_UI::count_recenabled_streams (Route& route)
 {
 	Track* track = dynamic_cast<Track*>(&route);
 	if (track && track->diskstream()->record_enabled()) {
-		rec_enabled_streams += track->n_inputs().get_total();
+		rec_enabled_streams += track->n_inputs().n_total();
 	}
 }
 
@@ -1620,7 +1620,7 @@ ARDOUR_UI::name_io_setup (AudioEngine& engine,
 			  bool in)
 {
 	if (in) {
-		if (io.n_inputs().get_total() == 0) {
+		if (io.n_inputs().n_total() == 0) {
 			buf = _("none");
 			return;
 		}
@@ -1639,7 +1639,7 @@ ARDOUR_UI::name_io_setup (AudioEngine& engine,
 
 	} else {
 
-		if (io.n_outputs().get_total() == 0) {
+		if (io.n_outputs().n_total() == 0) {
 			buf = _("none");
 			return;
 		}

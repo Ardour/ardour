@@ -698,8 +698,8 @@ Session::when_engine_running ()
 
 		Bundle* c = new OutputBundle (_("Master Out"), true);
 
-		c->set_nchannels (_master_out->n_inputs().get_total());
-		for (uint32_t n = 0; n < _master_out->n_inputs ().get_total(); ++n) {
+		c->set_nchannels (_master_out->n_inputs().n_total());
+		for (uint32_t n = 0; n < _master_out->n_inputs ().n_total(); ++n) {
 			c->add_port_to_channel ((int) n, _master_out->input(n)->name());
 		}
 		add_bundle (c);

@@ -622,7 +622,7 @@ MixerStrip::add_bundle_to_input_menu (ARDOUR::Bundle* c)
 
 	MenuList& citems = input_menu.items();
 	
-	if (c->nchannels() == _route->n_inputs().get_total()) {
+	if (c->nchannels() == _route->n_inputs().n_total()) {
 
 		citems.push_back (CheckMenuElem (c->name(), bind (mem_fun(*this, &MixerStrip::bundle_input_chosen), c)));
 		
@@ -645,7 +645,7 @@ MixerStrip::add_bundle_to_output_menu (ARDOUR::Bundle* c)
 		return;
 	}
 
-	if (c->nchannels() == _route->n_outputs().get_total()) {
+	if (c->nchannels() == _route->n_outputs().n_total()) {
 
 		MenuList& citems = output_menu.items();
 		citems.push_back (CheckMenuElem (c->name(), bind (mem_fun(*this, &MixerStrip::bundle_output_chosen), c)));
@@ -1171,6 +1171,7 @@ MixerStrip::route_active_changed ()
 			set_name ("MidiTrackStripBaseInactive");
 			gpm.set_meter_strip_name ("MidiTrackStripBaseInactive");
 		}
+		gpm.set_fader_name ("MidiTrackFader");
 	} else if (is_audio_track()) {
 		if (_route->active()) {
 			set_name ("AudioTrackStripBase");
@@ -1189,6 +1190,8 @@ MixerStrip::route_active_changed ()
 			gpm.set_meter_strip_name ("AudioBusStripBaseInactive");
 		}
 		gpm.set_fader_name ("AudioBusFader");
+		
+		/* (no MIDI busses yet) */
 	}
 }
 
@@ -1214,20 +1217,20 @@ MixerStrip::meter_changed (void *src)
 
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &MixerStrip::meter_changed), src));
 
-		switch (_route->meter_point()) {
+	switch (_route->meter_point()) {
 		case MeterInput:
 			meter_point_label.set_text (_("input"));
 			break;
-			
+
 		case MeterPreFader:
 			meter_point_label.set_text (_("pre"));
 			break;
-			
+
 		case MeterPostFader:
 			meter_point_label.set_text (_("post"));
 			break;
-		}
+	}
 
-		gpm.setup_meters ();
+	gpm.setup_meters ();
 }
 

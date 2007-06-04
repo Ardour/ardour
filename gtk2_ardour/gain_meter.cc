@@ -411,7 +411,7 @@ GainMeter::hide_all_meters ()
 void
 GainMeter::setup_meters ()
 {
-	uint32_t nmeters = _io->n_outputs().n_audio();
+	uint32_t nmeters = _io->n_outputs().n_total();
 	guint16 width;
 
 	hide_all_meters ();
@@ -432,7 +432,7 @@ GainMeter::setup_meters ()
 
 	} else {
 
-		nmeters = _io->n_outputs().n_audio();
+		nmeters = _io->n_outputs().n_total();
 
 	}
 
@@ -453,7 +453,7 @@ GainMeter::setup_meters ()
 	/* pack them backwards */
 
 	if (_width == Wide) {
-	        meter_packer.pack_end (meter_metric_area, false, false);
+		meter_packer.pack_end (meter_metric_area, false, false);
 		meter_metric_area.show_all ();
 	}
 

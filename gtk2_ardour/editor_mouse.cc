@@ -3404,12 +3404,12 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 				boost::shared_ptr<Region> newregion;
 				boost::shared_ptr<Region> ar;
+				boost::shared_ptr<Region> mr;
 
 				if ((ar = boost::dynamic_pointer_cast<AudioRegion>(rv->region())) != 0) {
 					newregion = RegionFactory::create (ar);
-				} else {
-					/* XXX MIDI HERE drobilla */
-					continue;
+				} else if ((mr = boost::dynamic_pointer_cast<MidiRegion>(rv->region())) != 0) {
+					newregion = RegionFactory::create (mr);
 				}
 
 				/* add it */

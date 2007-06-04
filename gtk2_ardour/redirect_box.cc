@@ -452,8 +452,8 @@ RedirectBox::weird_plugin_dialog (Plugin& p, uint32_t streams, boost::shared_ptr
 					 p.name(),
 					 p.get_info()->n_inputs,
 					 p.get_info()->n_outputs,
-					 io->n_inputs().get_total(),
-					 io->n_outputs().get_total(),
+					 io->n_inputs().n_total(),
+					 io->n_outputs().n_total(),
 					 streams));
 	}
 

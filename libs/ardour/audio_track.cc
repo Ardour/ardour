@@ -427,7 +427,7 @@ int
 AudioTrack::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
 		     bool session_state_changing, bool can_record, bool rec_monitors_input)
 {
-	if (n_outputs().get_total() == 0) {
+	if (n_outputs().n_total() == 0) {
 		return 0;
 	}
 
@@ -523,7 +523,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 	}
 
 	
-	if (n_outputs().get_total() == 0 && _redirects.empty()) {
+	if (n_outputs().n_total() == 0 && _redirects.empty()) {
 		return 0;
 	}
 
@@ -619,7 +619,7 @@ int
 AudioTrack::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
 			 bool can_record, bool rec_monitors_input)
 {
-	if (n_outputs().get_total() == 0 && _redirects.empty()) {
+	if (n_outputs().n_total() == 0 && _redirects.empty()) {
 		return 0;
 	}
 

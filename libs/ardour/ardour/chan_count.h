@@ -47,11 +47,8 @@ public:
 	// -1 is what to_index does.  inlined for speed.  this should maybe be changed..
 	inline size_t n_audio() const { return _counts[DataType::AUDIO-1]; }
 	inline size_t n_midi()  const { return _counts[DataType::MIDI-1]; }
-
-	void   set(DataType type, size_t count) { _counts[type.to_index()] = count; }
-	size_t get(DataType type) const { return _counts[type.to_index()]; }
 	
-	size_t get_total() const
+	size_t n_total() const
 	{
 		size_t ret = 0;
 		for (size_t i=0; i < DataType::num_types; ++i)
@@ -59,6 +56,9 @@ public:
 
 		return ret;
 	}
+
+	void   set(DataType type, size_t count) { _counts[type.to_index()] = count; }
+	size_t get(DataType type) const { return _counts[type.to_index()]; }
 
 	bool operator==(const ChanCount& other) const
 	{

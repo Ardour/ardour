@@ -2159,8 +2159,8 @@ Route::feeds (boost::shared_ptr<Route> other)
 	uint32_t i, j;
 
 	IO& self = *this;
-	uint32_t no = self.n_outputs().get_total();
-	uint32_t ni = other->n_inputs ().get_total();
+	uint32_t no = self.n_outputs().n_total();
+	uint32_t ni = other->n_inputs ().n_total();
 
 	for (i = 0; i < no; ++i) {
 		for (j = 0; j < ni; ++j) {
@@ -2174,7 +2174,7 @@ Route::feeds (boost::shared_ptr<Route> other)
 
 	for (RedirectList::iterator r = _redirects.begin(); r != _redirects.end(); r++) {
 
-		no = (*r)->n_outputs().get_total();
+		no = (*r)->n_outputs().n_total();
 
 		for (i = 0; i < no; ++i) {
 			for (j = 0; j < ni; ++j) {
@@ -2189,7 +2189,7 @@ Route::feeds (boost::shared_ptr<Route> other)
 
 	if (_control_outs) {
 
-		no = _control_outs->n_outputs().get_total();
+		no = _control_outs->n_outputs().n_total();
 		
 		for (i = 0; i < no; ++i) {
 			for (j = 0; j < ni; ++j) {
@@ -2321,7 +2321,7 @@ int
 Route::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
 		   bool session_state_changing, bool can_record, bool rec_monitors_input)
 {
-	if (n_outputs().get_total() == 0) {
+	if (n_outputs().n_total() == 0) {
 		return 0;
 	}
 
@@ -2332,7 +2332,7 @@ Route::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, n
 
 	apply_gain_automation = false;
 	
-	if (n_inputs().get_total()) {
+	if (n_inputs().n_total()) {
 		passthru (start_frame, end_frame, nframes, offset, 0, false);
 	} else {
 		silence (nframes, offset);
@@ -2379,7 +2379,7 @@ Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nfra
 		}
 	}
 
-	if ((n_outputs().get_total() == 0 && _redirects.empty()) || n_inputs().get_total() == 0 || !_active) {
+	if ((n_outputs().n_total() == 0 && _redirects.empty()) || n_inputs().n_total() == 0 || !_active) {
 		silence (nframes, offset);
 		return 0;
 	}

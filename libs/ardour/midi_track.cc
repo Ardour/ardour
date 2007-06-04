@@ -426,7 +426,7 @@ MidiTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 	int dret;
 	boost::shared_ptr<MidiDiskstream> diskstream = midi_diskstream();
 
-	if (n_outputs().get_total() == 0 && _redirects.empty()) {
+	if (n_outputs().n_total() == 0 && _redirects.empty()) {
 		return 0;
 	}
 

@@ -133,10 +133,10 @@ Editor::show_editor_mixer (bool yn)
 void
 Editor::set_selected_mixer_strip (TimeAxisView& view)
 {
-	AudioTimeAxisView* at;
+	RouteTimeAxisView* rt;
 	bool show = false;
 
-	if (!session || (at = dynamic_cast<AudioTimeAxisView*>(&view)) == 0) {
+	if (!session || (rt = dynamic_cast<RouteTimeAxisView*>(&view)) == 0) {
 		return;
 	}
 	
@@ -144,7 +144,7 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 
 		/* might be nothing to do */
 
-		if (current_mixer_strip->route() == at->route()) {
+		if (current_mixer_strip->route() == rt->route()) {
 			return;
 		}
 
@@ -157,7 +157,7 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 
 	current_mixer_strip = new MixerStrip (*ARDOUR_UI::instance()->the_mixer(),
 					      *session,
-					      at->route());
+					      rt->route());
 	current_mixer_strip->GoingAway.connect (mem_fun(*this, &Editor::cms_deleted));
 	
 	if (show) {

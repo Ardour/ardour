@@ -493,7 +493,7 @@ IO::set_input (Port* other_port, void* src)
 	   to the specified source.
 	*/
 
-	if (_input_minimum.get_total() > 1) {
+	if (_input_minimum.n_total() > 1) {
 		/* sorry, you can't do this */
 		return -1;
 	}
