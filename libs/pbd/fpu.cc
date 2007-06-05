@@ -59,7 +59,12 @@ FPU::FPU ()
 		
 		char* fxbuf = 0;
 		
-		if (posix_memalign ((void**)&fxbuf, 16, 512)) {
+#ifdef NO_POSIX_MEMALIGN
+		if ((fxbuf = (char *) malloc(512)) == 0)
+#else
+		if (posix_memalign ((void**)&fxbuf, 16, 512)) 
+#endif			
+		{
 			error << _("cannot allocate 16 byte aligned buffer for h/w feature detection") << endmsg;
 		} else {
 			
