@@ -256,6 +256,7 @@ class Session : public PBD::StatefulDestructible
 	sigc::signal<void> DirtyChanged;
 
 	std::string sound_dir (bool with_path = true) const;
+	std::string midi_dir (bool with_path = true) const;
 	std::string peak_dir () const;
 	std::string dead_sound_dir () const;
 	std::string automation_dir () const;

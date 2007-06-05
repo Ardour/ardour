@@ -36,6 +36,8 @@
 #include <ardour/session.h>
 #include <ardour/midi_ring_buffer.h>
 #include <ardour/midi_util.h>
+#include <ardour/tempo.h>
+#include <ardour/audioengine.h>
 
 #include "i18n.h"
 
@@ -178,9 +180,9 @@ SMFSource::flush_header ()
 
 	assert(_fd);
 
-	const uint16_t type     = GUINT16_TO_BE(0);    // SMF Type 0 (single track)
-	const uint16_t ntracks  = GUINT16_TO_BE(1);    // Number of tracks (always 1 for Type 0)
-	const uint16_t division = GUINT16_TO_BE(1920); // FIXME FIXME FIXME PPQN
+	const uint16_t type     = GUINT16_TO_BE(0);     // SMF Type 0 (single track)
+	const uint16_t ntracks  = GUINT16_TO_BE(1);     // Number of tracks (always 1 for Type 0)
+	const uint16_t division = GUINT16_TO_BE(_ppqn); // Pulses per beat
 
 	char data[6];
 	memcpy(data, &type, 2);
@@ -241,8 +243,8 @@ SMFSource::find_first_event_after(nframes_t start)
  *
  * File position MUST be at the beginning of a delta time, or this will die very messily.
  * ev.buffer must be of size ev.size, and large enough for the event.  The returned event
- * will have it's time field set to it's delta time (so it's the caller's responsibility
- * to calculate a real time for the event).
+ * will have it's time field set to it's delta time, in SMF tempo-based ticks, using the
+ * rate given by ppqn() (it is the caller's responsibility to calculate a real time).
  *
  * Returns event length (including status byte) on success, 0 if event was
  * skipped (eg a meta event), or -1 on EOF (or end of track).
@@ -287,12 +289,14 @@ SMFSource::read_event(MidiEvent& ev) const
 	return ev.size;
 }
 
+/** All stamps in audio frames */
 nframes_t
 SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset) const
 {
 	//cerr << "SMF - read " << start << ", count=" << cnt << ", offset=" << stamp_offset << endl;
 
-	nframes_t time = 0;
+	// 64 bits ought to be enough for anybody
+	uint64_t time = 0; // in SMF ticks, 1 tick per _ppqn
 
 	_read_data_count = 0;
 
@@ -307,6 +311,12 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, n
 	
 	fseek(_fd, _header_size, 0);
 	
+	// FIXME: assumes tempo never changes after start
+	const double frames_per_beat = _session.tempo_map().tempo_at(_timeline_position).frames_per_beat(
+			_session.engine().frame_rate());
+	
+	uint64_t start_ticks = (uint64_t)((start / frames_per_beat) * _ppqn);
+
 	while (!feof(_fd)) {
 		int ret = read_event(ev);
 		if (ret == -1) { // EOF
@@ -323,11 +333,12 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, n
 		time += ev.time; // accumulate delta time
 		ev.time = time; // set ev.time to actual time (relative to source start)
 
-		if (ev.time >= start) {
-			if (ev.time > start + cnt) {
+		if (ev.time >= start_ticks) {
+			if (ev.time < start_ticks + (cnt / frames_per_beat)) {
 				break;
 			} else {
-				ev.time += stamp_offset;
+				ev.time = (nframes_t)(((ev.time / (double)_ppqn) * frames_per_beat)) + stamp_offset;
+				// write event time in absolute frames
 				dst.write(ev.time, ev.size, ev.buffer);
 			}
 		}
@@ -338,6 +349,7 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, n
 	return cnt;
 }
 
+/** All stamps in audio frames */
 nframes_t
 SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 {
@@ -349,13 +361,16 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 
 	fseek(_fd, 0, SEEK_END);
 
-	// FIXME: start of source time?
+	// FIXME: assumes tempo never changes after start
+	const double frames_per_beat = _session.tempo_map().tempo_at(_timeline_position).frames_per_beat(
+			_session.engine().frame_rate());
 	
 	for (size_t i=0; i < buf.size(); ++i) {
 		MidiEvent& ev = buf[i];
 		assert(ev.time >= _timeline_position);
 		ev.time -= _timeline_position;
-		uint32_t delta_time = ev.time - _last_ev_time;
+		assert(ev.time >= _last_ev_time);
+		const uint32_t delta_time = (uint32_t)(ev.time - _last_ev_time) / frames_per_beat * _ppqn;
 		
 		/*printf("SMF - writing event, delta = %u, size = %zu, data = ",
 			delta_time, ev.size);
@@ -366,10 +381,11 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 		*/
 		size_t stamp_size = write_var_len(delta_time);
 		fwrite(ev.buffer, 1, ev.size, _fd);
-		_last_ev_time += delta_time;
-		_track_size += stamp_size + ev.size;
 
+		_track_size += stamp_size + ev.size;
 		_write_data_count += ev.size;
+		
+		_last_ev_time = ev.time;
 	}
 
 	fflush(_fd);
@@ -765,7 +781,7 @@ SMFSource::load_model(bool lock)
 	
 	fseek(_fd, _header_size, 0);
 
-	nframes_t time = 0;
+	double    time = 0;
 	MidiEvent ev;
 	
 	int ret;

@@ -91,6 +91,8 @@ class SMFSource : public MidiSource {
 	void load_model(bool lock=true);
 	void destroy_model();
 
+	uint16_t ppqn() const { return _ppqn; }
+
   private:
 
 	int init (string idstr, bool must_exist);
@@ -109,6 +111,8 @@ class SMFSource : public MidiSource {
 	size_t   write_var_len(uint32_t val);
 	uint32_t read_var_len() const;
 	int      read_event(MidiEvent& ev) const;
+
+	static const uint16_t _ppqn = 19200;
 
 	uint16_t       _channel;
 	string         _path;

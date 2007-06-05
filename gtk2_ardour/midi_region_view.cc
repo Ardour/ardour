@@ -87,13 +87,14 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	set_colors ();
 
-	boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion> (_region);
-	mr->midi_source(0)->load_model();
+	if (wfd) {
+		midi_region()->midi_source(0)->load_model();
 
-	begin_write();
-	for (size_t i=0; i < mr->midi_source(0)->model().n_events(); ++i)
-		add_event(mr->midi_source(0)->model().event_at(i));
-	end_write();
+		begin_write();
+		for (size_t i=0; i < midi_region()->midi_source(0)->model().n_events(); ++i)
+			add_event(midi_region()->midi_source(0)->model().event_at(i));
+		end_write();
+	}
 }
 
 MidiRegionView::~MidiRegionView ()

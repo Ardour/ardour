@@ -57,6 +57,8 @@ StreamView::StreamView (RouteTimeAxisView& tv)
 	, region_color(_trackview.color())
 	, stream_base_color(0xFFFFFFFF)
 	, layers(1)
+	, height(tv.height)
+	, layer_display(Overlaid)
 	, last_rec_data_frame(0)
 {
 	/* set_position() will position the group */

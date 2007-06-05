@@ -106,6 +106,19 @@ SessionDirectory::sound_path () const
 }
 
 const path
+SessionDirectory::midi_path () const
+{
+	// the new style sound directory
+	path l_midi_path(m_root_path);
+
+	l_midi_path /= interchange_dir_name;
+	l_midi_path /= basename(m_root_path);
+	l_midi_path /= midi_dir_name;
+
+	return l_midi_path;
+}
+
+const path
 SessionDirectory::peak_path () const
 {
 	return path(m_root_path) /= peak_dir_name;

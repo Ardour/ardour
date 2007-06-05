@@ -71,6 +71,8 @@ bool TimeAxisView::need_size_info = true;
 TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* rent, Canvas& canvas) 
 	: AxisView (sess), 
 	  editor (ed),
+	  y_position(0),
+	  order(0),
 	  controls_table (2, 8)
 {
 	if (need_size_info) {

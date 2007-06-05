@@ -195,7 +195,7 @@ class TempoMap : public PBD::StatefulDestructible
 
 	BBTPointList *get_points (nframes_t start, nframes_t end) const;
 
-	void           bbt_time (nframes_t when, BBT_Time&) const;
+	void      bbt_time (nframes_t when, BBT_Time&) const;
 	nframes_t frame_time (const BBT_Time&) const;
 	nframes_t bbt_duration_at (nframes_t, const BBT_Time&, int dir) const;
 

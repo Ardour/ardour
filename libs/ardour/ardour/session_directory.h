@@ -53,6 +53,13 @@ public:
 	 * of root_path()/interchange/session_name/audiofiles
 	 */
 	const path sound_path () const;
+	
+	/**
+	 * @return the absolute path to the directory in which 
+	 * the session stores MIDI files, ie
+	 * root_path()/interchange/session_name/midifiles
+	 */
+	const path midi_path () const;
 
 	/**
 	 * @return The absolute path to the directory in which all
