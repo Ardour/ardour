@@ -2037,33 +2037,6 @@ Session::sound_dir (bool with_path) const
 }
 
 string
-Session::midi_dir (bool with_path) const
-{
-	string res;
-	string full;
-
-	if (with_path) {
-		res = _path;
-	} else {
-		full = _path;
-	}
-
-	res += interchange_dir_name;
-	res += '/';
-	res += legalize_for_path (_name);
-	res += '/';
-	res += midi_dir_name;
-
-	if (with_path) {
-		full = res;
-	} else {
-		full += res;
-	}
-	
-	return res;
-}
-
-string
 Session::peak_dir () const
 {
 	string res = _path;

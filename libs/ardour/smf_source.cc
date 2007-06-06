@@ -370,7 +370,7 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 		assert(ev.time >= _timeline_position);
 		ev.time -= _timeline_position;
 		assert(ev.time >= _last_ev_time);
-		const uint32_t delta_time = (uint32_t)(ev.time - _last_ev_time) / frames_per_beat * _ppqn;
+		const uint32_t delta_time = (uint32_t)((ev.time - _last_ev_time) / frames_per_beat * _ppqn);
 		
 		/*printf("SMF - writing event, delta = %u, size = %zu, data = ",
 			delta_time, ev.size);
@@ -781,7 +781,7 @@ SMFSource::load_model(bool lock)
 	
 	fseek(_fd, _header_size, 0);
 
-	double    time = 0;
+	nframes_t time = 0;
 	MidiEvent ev;
 	
 	int ret;

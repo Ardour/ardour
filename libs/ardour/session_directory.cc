@@ -142,6 +142,7 @@ SessionDirectory::sub_directories () const
 	vector<path> tmp_paths; 
 
 	tmp_paths.push_back ( sound_path () );
+	tmp_paths.push_back ( midi_path () );
 	tmp_paths.push_back ( peak_path () );
 	tmp_paths.push_back ( dead_sound_path () );
 	tmp_paths.push_back ( export_path () );
