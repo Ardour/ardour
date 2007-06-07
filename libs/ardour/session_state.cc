@@ -2508,12 +2508,11 @@ Session::find_all_sources (string path, set<string>& result)
 			continue;
 		}
 
-		string path = _path; /* /-terminated */
-		path += sound_dir_name;
-		path += '/';
-		path += prop->value();
+		sys::path source_path = _session_dir.sound_path ();
 
-		result.insert (path);
+		source_path /= prop->value ();
+
+		result.insert (source_path.to_string ());
 	}
 
 	return 0;
