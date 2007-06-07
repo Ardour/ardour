@@ -35,6 +35,7 @@ pathscanner.cc
 pool.cc
 pthread_utils.cc
 receiver.cc
+search_path.cc
 shortpath.cc
 stacktrace.cc
 stateful.cc
