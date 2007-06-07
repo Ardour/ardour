@@ -1961,15 +1961,6 @@ Session::XMLNamedSelectionFactory (const XMLNode& node)
 }
 
 string
-Session::dead_sound_dir () const
-{
-	string res = _path;
-	res += dead_sound_dir_name;
-
-	return res;
-}
-
-string
 Session::old_sound_dir (bool with_path) const
 {
 	string res;
