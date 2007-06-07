@@ -55,6 +55,7 @@
 #include <glibmm/thread.h>
 #include <pbd/pathscanner.h>
 #include <pbd/pthread_utils.h>
+#include <pbd/search_path.h>
 #include <pbd/strsplit.h>
 #include <pbd/stacktrace.h>
 #include <pbd/copyfile.h>
@@ -359,108 +360,54 @@ Session::second_stage_init (bool new_session)
 string
 Session::raid_path () const
 {
-	string path;
+	SearchPath raid_search_path;
 
 	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-		path += (*i).path;
-		path += ':';
+		raid_search_path += sys::path((*i).path);
 	}
 	
-	return path.substr (0, path.length() - 1); // drop final colon
+	return raid_search_path.get_string ();
 }
 
 void
 Session::setup_raid_path (string path)
 {
-	string::size_type colon;
-	string remaining;
-	space_and_path sp;
-	string fspath;
-	string::size_type len = path.length();
-	int colons;
-
-	colons = 0;
-
-	if (path.length() == 0) {
+	if (path.empty()) {
 		return;
 	}
+	
+	space_and_path sp;
+	string fspath;
 
 	session_dirs.clear ();
 
-	for (string::size_type n = 0; n < len; ++n) {
-		if (path[n] == ':') {
-			colons++;
-		}
-	}
+	SearchPath search_path(path);
+	SearchPath sound_search_path;
+	SearchPath midi_search_path;
 
-	if (colons == 0) {
-
-		/* no multiple search path, just one location (common case) */
-
-		sp.path = path;
-		sp.blocks = 0;
+	for (
+			SearchPath::const_iterator i = search_path.begin();
+			i != search_path.end();
+			++i
+		)
+	{
+		sp.path = (*i).to_string ();
+		sp.blocks = 0; // not needed
 		session_dirs.push_back (sp);
 
-		string fspath;
+		SessionDirectory sdir(sp.path);
 
-		/* sounds dir */
-
-		fspath += sp.path;
-		if (fspath[fspath.length()-1] != '/') {
-			fspath += '/';
-		}
-
-		fspath += sound_dir (false);
-		
-		AudioFileSource::set_search_path (fspath);
-		SMFSource::set_search_path (fspath); // FIXME: should be different
-
-		return;
+		sound_search_path += sdir.sound_path ();
+		midi_search_path += sdir.midi_path ();
 	}
 
-	remaining = path;
+	// set the AudioFileSource and SMFSource search path
 
-	while ((colon = remaining.find_first_of (':')) != string::npos) {
-		
-		sp.blocks = 0;
-		sp.path = remaining.substr (0, colon);
-		session_dirs.push_back (sp);
+	AudioFileSource::set_search_path (sound_search_path.get_string ());
+	SMFSource::set_search_path (midi_search_path.get_string ());
 
-		/* add sounds to file search path */
-
-		fspath += sp.path;
-		if (fspath[fspath.length()-1] != '/') {
-			fspath += '/';
-		}
-		fspath += sound_dir (false);
-		fspath += ':';
-
-		remaining = remaining.substr (colon+1);
-	}
-
-	if (remaining.length()) {
-
-		sp.blocks = 0;
-		sp.path = remaining;
-
-		fspath += ':';
-		fspath += sp.path;
-		if (fspath[fspath.length()-1] != '/') {
-			fspath += '/';
-		}
-		fspath += sound_dir (false);
-		fspath += ':';
-
-		session_dirs.push_back (sp);
-	}
-
-	/* set the AudioFileSource search path */
-
-	AudioFileSource::set_search_path (fspath);
-	SMFSource::set_search_path (fspath); // FIXME: should be different
-
-	/* reset the round-robin soundfile path thingie */
-
+	// reset the round-robin soundfile path thingie
+	
 	last_rr_session_dir = session_dirs.begin();
 }
 
