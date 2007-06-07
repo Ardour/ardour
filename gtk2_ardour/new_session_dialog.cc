@@ -22,6 +22,7 @@
 
 #include <ardour/recent_sessions.h>
 #include <ardour/session.h>
+#include <ardour/directory_names.h>
 
 #include <gtkmm/entry.h>
 #include <gtkmm/filechooserbutton.h>
@@ -369,10 +370,8 @@ NewSessionDialog::NewSessionDialog()
 		path = ARDOUR::get_system_data_path();
 	}
 
-	const char * const template_dir_name = X_("templates");
-
 	if (!path.empty()) {
-		string user_template_path = path + template_dir_name;
+		string user_template_path = path + ARDOUR::templates_dir_name;
 
 		if (Glib::file_test(user_template_path, Glib::FILE_TEST_IS_DIR))
 		{
@@ -380,7 +379,7 @@ NewSessionDialog::NewSessionDialog()
 		}
 	}
 
-	const std::string sys_templates_dir = ARDOUR::get_system_data_path() + template_dir_name;
+	const std::string sys_templates_dir = ARDOUR::get_system_data_path() + ARDOUR::templates_dir_name;
 	
 	if (Glib::file_test(sys_templates_dir, Glib::FILE_TEST_IS_DIR))
 	{
