@@ -72,7 +72,7 @@ class MidiSource : public Source
 	virtual void load_model(bool lock=true) = 0;
 	virtual void destroy_model() = 0;
 
-	MidiModel& model() { return _model; }
+	MidiModel* model() { return _model; }
 
   protected:
 	virtual nframes_t read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset) const = 0;
@@ -83,7 +83,7 @@ class MidiSource : public Source
 	mutable uint32_t    _read_data_count;  ///< modified in read()
 	mutable uint32_t    _write_data_count; ///< modified in write()
 
-	MidiModel _model;
+	MidiModel* _model;
 
   private:
 	bool file_changed (string path);

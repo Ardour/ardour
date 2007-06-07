@@ -110,8 +110,8 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait
 
 	/* display events */
 	region_view->begin_write();
-	for (size_t i=0; i < region->midi_source(0)->model().n_events(); ++i)
-		region_view->add_event(region->midi_source(0)->model().event_at(i));
+	for (size_t i=0; i < region->midi_source(0)->model()->n_events(); ++i)
+		region_view->add_event(region->midi_source(0)->model()->event_at(i));
 	region_view->end_write();
 
 	/* catch regionview going away */

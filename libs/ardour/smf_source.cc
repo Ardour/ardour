@@ -259,6 +259,7 @@ SMFSource::read_event(MidiEvent& ev) const
 	}
 
 	uint32_t delta_time = read_var_len();
+	assert(!feof(_fd));
 	int status = fgetc(_fd);
 	assert(status != EOF); // FIXME die gracefully
 	if (status == 0xFF) {
@@ -273,11 +274,15 @@ SMFSource::read_event(MidiEvent& ev) const
 			return 0;
 		}
 	}
+	
+	ev.time = delta_time;
+	ev.size = midi_event_size((unsigned char)status) + 1;
+
+	if (ev.buffer == NULL)
+		ev.buffer = (Byte*)malloc(sizeof(Byte) * ev.size);
 
 	ev.buffer[0] = (unsigned char)status;
-	ev.size = midi_event_size(ev.buffer[0]) + 1;
 	fread(ev.buffer+1, 1, ev.size - 1, _fd);
-	ev.time = delta_time;
 
 	/*printf("SMF - read event, delta = %u, size = %zu, data = ",
 		delta_time, ev.size);
@@ -393,7 +398,7 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 	const nframes_t oldlen = _length;
 	update_length(oldlen, cnt);
 
-	_model.append(buf);
+	_model->append(buf);
 
 	ViewDataRangeReady (buf_ptr, oldlen, cnt); /* EMIT SIGNAL */
 	
@@ -777,8 +782,9 @@ SMFSource::load_model(bool lock)
 	if (lock)
 		Glib::Mutex::Lock lm (_lock);
 
-	_model.clear();
-	
+	destroy_model();
+	_model = new MidiModel();
+
 	fseek(_fd, _header_size, 0);
 
 	nframes_t time = 0;
@@ -789,14 +795,17 @@ SMFSource::load_model(bool lock)
 		time += ev.time;
 		ev.time = time;
 		if (ret > 0) { // didn't skip (meta) event
-			_model.append(ev);
+			cerr << "ADDING EVENT TO MODEL: " << ev.time << endl;
+			_model->append(ev);
 		}
 	}
 }
 
+
 void
 SMFSource::destroy_model()
 {
-	_model.clear();
+	delete _model;
+	_model = NULL;
 }
 

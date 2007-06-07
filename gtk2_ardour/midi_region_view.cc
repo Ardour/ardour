@@ -91,8 +91,8 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 		midi_region()->midi_source(0)->load_model();
 
 		begin_write();
-		for (size_t i=0; i < midi_region()->midi_source(0)->model().n_events(); ++i)
-			add_event(midi_region()->midi_source(0)->model().event_at(i));
+		for (size_t i=0; i < midi_region()->midi_source(0)->model()->n_events(); ++i)
+			add_event(midi_region()->midi_source(0)->model()->event_at(i));
 		end_write();
 	}
 }

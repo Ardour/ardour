@@ -19,6 +19,7 @@
 */
 
 #include <cmath>
+#include <cassert>
 #include <fcntl.h>
 #include <signal.h>
 #include <unistd.h>
@@ -429,6 +430,9 @@ UI::toggle_errors ()
 void
 UI::display_message (const char *prefix, gint prefix_len, RefPtr<TextBuffer::Tag> ptag, RefPtr<TextBuffer::Tag> mtag, const char *msg)
 {
+	assert(ptag);
+	assert(mtag);
+
 	RefPtr<TextBuffer> buffer (errors->text().get_buffer());
 
 	buffer->insert_with_tag(buffer->end(), prefix, ptag);

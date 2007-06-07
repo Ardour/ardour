@@ -59,8 +59,11 @@ namespace ARDOUR {
 	typedef uint64_t                    microseconds_t;
 	typedef uint32_t                    nframes_t;
 
-	typedef jack_midi_event_t MidiEvent;
-	typedef unsigned char     Byte;
+	typedef unsigned char Byte;
+
+	struct MidiEvent : public jack_midi_event_t {
+		MidiEvent() { time = 0; size = 0; buffer = NULL; }
+	};
 
 	enum IOChange {
 		NoChange = 0,
