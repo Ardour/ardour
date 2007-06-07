@@ -2703,8 +2703,8 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		nexti = i;
 		++nexti;
 
-		sound_path += (*i).path;
-		sound_path += sound_dir (false);
+		SessionDirectory sdir ((*i).path);
+		sound_path += sdir.sound_path().to_string();
 
 		if (nexti != session_dirs.end()) {
 			sound_path += ':';
