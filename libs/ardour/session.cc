@@ -2769,7 +2769,7 @@ Session::peak_path_from_audio_path (string audio_path) const
 
 	res = peak_dir ();
 	res += PBD::basename_nosuffix (audio_path);
-	res += ".peak";
+	res += peakfile_suffix;
 
 	return res;
 }

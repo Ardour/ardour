@@ -2519,7 +2519,7 @@ Session::write_favorite_dirs (FavoriteDirs & favs)
 static bool
 accept_all_non_peak_files (const string& path, void *arg)
 {
-	return (path.length() > 5 && path.find (".peak") != (path.length() - 5));
+	return (path.length() > 5 && path.find (peakfile_suffix) != (path.length() - 5));
 }
 
 static bool
@@ -2851,7 +2851,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		 */
 
 		string peakpath = (*x).substr (0, (*x).find_last_of ('.'));
-		peakpath += ".peak";
+		peakpath += peakfile_suffix;
 
 		if (access (peakpath.c_str(), W_OK) == 0) {
 			if (::unlink (peakpath.c_str()) != 0) {
