@@ -114,11 +114,9 @@ public:
 	 * @return a search path string.
 	 *
 	 * The string that is returned contains the platform specific
-	 * path separator. The verbosity and "explicitness" of this 
-	 * method is indicitive that I don't think it should be used
-	 * that often.
+	 * path separator.
 	 */
-	const string get_search_path_string () const;
+	const string get_string () const;
 
 	/**
 	 * Assignment of another SearchPath to this.
