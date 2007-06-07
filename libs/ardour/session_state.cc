@@ -2108,7 +2108,7 @@ Session::suffixed_search_path (string suffix, bool data)
 string
 Session::template_path ()
 {
-	return suffixed_search_path (X_("templates"), true);
+	return suffixed_search_path (templates_dir_name, true);
 }
 
 string
