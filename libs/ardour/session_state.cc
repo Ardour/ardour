@@ -1707,6 +1707,44 @@ Session::ensure_sound_dir (string path, string& result)
 	return 0;
 }	
 
+int
+Session::ensure_midi_dir (string path, string& result)
+{
+	string dead;
+
+	/* Ensure that the parent directory exists */
+	
+	if (g_mkdir_with_parents (path.c_str(), 0775)) {
+		error << string_compose(_("cannot create session directory \"%1\"; ignored"), path) << endmsg;
+		return -1;
+	}
+	
+	/* Ensure that the sounds directory exists */
+	
+	result = path;
+	result += '/';
+	result += midi_dir_name;
+	
+	if (g_mkdir_with_parents (result.c_str(), 0775)) {
+		error << string_compose(_("cannot create sounds directory \"%1\"; ignored"), result) << endmsg;
+		return -1;
+	}
+
+	dead = path;
+	dead += '/';
+	dead += dead_midi_dir_name;
+	
+	if (g_mkdir_with_parents (dead.c_str(), 0775)) {
+		error << string_compose(_("cannot create dead sounds directory \"%1\"; ignored"), dead) << endmsg;
+		return -1;
+	}
+
+	/* callers expect this to be terminated ... */
+			
+	result += '/';
+	return 0;
+}	
+
 string
 Session::discover_best_sound_dir (bool destructive)
 {
@@ -1809,6 +1847,114 @@ Session::discover_best_sound_dir (bool destructive)
 		
 		if (i == sorted.end()) {
 			return sound_dir();
+		} 
+	}
+
+	return result;
+}
+
+string
+Session::discover_best_midi_dir ()
+{
+	vector<space_and_path>::iterator i;
+	string result;
+
+	/* handle common case without system calls */
+
+	if (session_dirs.size() == 1) {
+		return midi_dir();
+	}
+
+	/* OK, here's the algorithm we're following here:
+	   
+	We want to select which directory to use for 
+	the next file source to be created. Ideally,
+	we'd like to use a round-robin process so as to
+	get maximum performance benefits from splitting
+	the files across multiple disks.
+
+	However, in situations without much diskspace, an
+	RR approach may end up filling up a filesystem
+	with new files while others still have space.
+	Its therefore important to pay some attention to
+	the freespace in the filesystem holding each
+	directory as well. However, if we did that by
+	itself, we'd keep creating new files in the file
+	system with the most space until it was as full
+	as all others, thus negating any performance
+	benefits of this RAID-1 like approach.
+
+	So, we use a user-configurable space threshold. If
+	there are at least 2 filesystems with more than this
+	much space available, we use RR selection between them. 
+	If not, then we pick the filesystem with the most space.
+
+	This gets a good balance between the two
+	approaches.  
+	*/
+	
+	refresh_disk_space ();
+	
+	int free_enough = 0;
+
+	for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+		if ((*i).blocks * 4096 >= Config->get_disk_choice_space_threshold()) {
+			free_enough++;
+		}
+	}
+
+	if (free_enough >= 2) {
+
+		bool found_it = false;
+
+		/* use RR selection process, ensuring that the one
+		   picked works OK.
+		*/
+
+		i = last_rr_session_dir;
+
+		do {
+			if (++i == session_dirs.end()) {
+				i = session_dirs.begin();
+			}
+
+			if ((*i).blocks * 4096 >= Config->get_disk_choice_space_threshold()) {
+				if (ensure_midi_dir ((*i).path, result) == 0) {
+					last_rr_session_dir = i;
+					found_it = true;
+					break;
+				}
+			}
+
+		} while (i != last_rr_session_dir);
+
+		if (!found_it) {
+			result = midi_dir();
+		}
+
+	} else {
+
+		/* pick FS with the most freespace (and that
+		   seems to actually work ...)
+		*/
+		
+		vector<space_and_path> sorted;
+		space_and_path_ascending_cmp cmp;
+
+		sorted = session_dirs;
+		sort (sorted.begin(), sorted.end(), cmp);
+		
+		for (i = sorted.begin(); i != sorted.end(); ++i) {
+			if (ensure_midi_dir ((*i).path, result) == 0) {
+				last_rr_session_dir = i;
+				break;
+			}
+		}
+		
+		/* if the above fails, fall back to the most simplistic solution */
+		
+		if (i == sorted.end()) {
+			return midi_dir();
 		} 
 	}
 
@@ -1971,6 +2117,33 @@ Session::sound_dir (bool with_path) const
 	
 	/* ok, old "sounds" directory isn't there, return the new path */
 
+	return res;
+}
+
+string
+Session::midi_dir (bool with_path) const
+{
+	string res;
+	string full;
+
+	if (with_path) {
+		res = _path;
+	} else {
+		full = _path;
+	}
+
+	res += interchange_dir_name;
+	res += '/';
+	res += legalize_for_path (_name);
+	res += '/';
+	res += midi_dir_name;
+
+	if (with_path) {
+		full = res;
+	} else {
+		full += res;
+	}
+	
 	return res;
 }
 
@@ -2518,6 +2691,8 @@ struct RegionCounter {
 int
 Session::cleanup_sources (Session::cleanup_report& rep)
 {
+	// FIXME: needs adaptation to midi
+	
 	vector<boost::shared_ptr<Source> > dead_sources;
 	vector<boost::shared_ptr<Playlist> > playlists_tbd;
 	PathScanner scanner;
@@ -2777,6 +2952,8 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 int
 Session::cleanup_trash_sources (Session::cleanup_report& rep)
 {
+	// FIXME: needs adaptation for MIDI
+	
 	vector<space_and_path>::iterator i;
 	string dead_sound_dir;
 	struct dirent* dentry;

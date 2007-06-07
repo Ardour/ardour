@@ -795,7 +795,7 @@ SMFSource::load_model(bool lock)
 		time += ev.time;
 		ev.time = time;
 		if (ret > 0) { // didn't skip (meta) event
-			cerr << "ADDING EVENT TO MODEL: " << ev.time << endl;
+			//cerr << "ADDING EVENT TO MODEL: " << ev.time << endl;
 			_model->append(ev);
 		}
 	}

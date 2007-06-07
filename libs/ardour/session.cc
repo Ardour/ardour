@@ -3135,8 +3135,7 @@ Session::midi_path_from_name (string name)
 
 			spath = (*i).path;
 
-			// FIXME: different directory from audio?
-			spath += sound_dir(false) + "/" + legalized;
+			spath += midi_dir(false) + "/" + legalized;
 
 			snprintf (buf, sizeof(buf), "%s-%u.mid", spath.c_str(), cnt);
 
@@ -3161,8 +3160,7 @@ Session::midi_path_from_name (string name)
 
 	string foo = buf;
 
-	// FIXME: different directory than audio?
-	spath = discover_best_sound_dir ();
+	spath = discover_best_midi_dir ();
 	spath += '/';
 
 	string::size_type pos = foo.find_last_of ('/');
@@ -3179,9 +3177,9 @@ Session::midi_path_from_name (string name)
 boost::shared_ptr<MidiSource>
 Session::create_midi_source_for_session (MidiDiskstream& ds)
 {
-	string spath = midi_path_from_name (ds.name());
+	string mpath = midi_path_from_name (ds.name());
 	
-	return boost::dynamic_pointer_cast<SMFSource> (SourceFactory::createWritable (DataType::MIDI, *this, spath, false, frame_rate()));
+	return boost::dynamic_pointer_cast<SMFSource> (SourceFactory::createWritable (DataType::MIDI, *this, mpath, false, frame_rate()));
 }
 
 

@@ -73,6 +73,13 @@ public:
 	 * session.
 	 */
 	const path dead_sound_path () const;
+	
+	/**
+	 * @return The absolute path to the directory that midi
+	 * files are moved to when they are no longer part of the
+	 * session.
+	 */
+	const path dead_midi_path () const;
 
 	/**
 	 * @return The absolute path to the directory that audio

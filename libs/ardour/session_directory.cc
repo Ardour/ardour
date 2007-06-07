@@ -131,6 +131,12 @@ SessionDirectory::dead_sound_path () const
 }
 
 const path
+SessionDirectory::dead_midi_path () const
+{
+	return path(m_root_path) /= dead_midi_dir_name;
+}
+
+const path
 SessionDirectory::export_path () const
 {
 	return path(m_root_path) /= export_dir_name;
@@ -145,6 +151,7 @@ SessionDirectory::sub_directories () const
 	tmp_paths.push_back ( midi_path () );
 	tmp_paths.push_back ( peak_path () );
 	tmp_paths.push_back ( dead_sound_path () );
+	tmp_paths.push_back ( dead_midi_path () );
 	tmp_paths.push_back ( export_path () );
 
 	return tmp_paths;
