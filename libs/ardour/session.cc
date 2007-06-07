@@ -111,6 +111,7 @@ Session::Session (AudioEngine &eng,
 	  _mmc_port (default_mmc_port),
 	  _mtc_port (default_mtc_port),
 	  _midi_port (default_midi_port),
+	  _session_dir (fullpath),
 	  pending_events (2048),
 	  //midi_requests (128), // the size of this should match the midi request pool size
 	  _send_smpte_update (false),
@@ -131,13 +132,11 @@ Session::Session (AudioEngine &eng,
 
 	initialize_start_and_end_locations(0, compute_initial_length ());
 
-	SessionDirectory sdir(fullpath);
-
 	if(mix_template) {
 		// try and create a new session directory
 		try
 		{
-			if(!sdir.create()) {
+			if(!_session_dir.create()) {
 				// an existing session.
 				// throw a_more_meaningful_exception()
 				destroy ();
@@ -164,7 +163,7 @@ Session::Session (AudioEngine &eng,
 		{
 			// ensure the necessary session subdirectories exist
 			// in case the directory structure has changed etc.
-			sdir.create();
+			_session_dir.create();
 		}
 		catch(sys::filesystem_error& ex)
 		{
@@ -213,6 +212,7 @@ Session::Session (AudioEngine &eng,
 	  _mmc_port (default_mmc_port),
 	  _mtc_port (default_mtc_port),
 	  _midi_port (default_midi_port),
+	  _session_dir (fullpath),
 	  pending_events (2048),
 	  //midi_requests (16),
 	  _send_smpte_update (false),
@@ -242,9 +242,9 @@ Session::Session (AudioEngine &eng,
 
 	initialize_start_and_end_locations(0, initial_length);
 
-	SessionDirectory sdir(fullpath);
+	SessionDirectory _session_dir(fullpath);
 	
-	if (!sdir.create () || !create_session_file ())	{
+	if (!_session_dir.create () || !create_session_file ())	{
 		destroy ();
 		throw failed_constructor ();
 	}

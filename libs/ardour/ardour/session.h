@@ -53,6 +53,7 @@
 #include <ardour/location.h>
 #include <ardour/gain.h>
 #include <ardour/io.h>
+#include <ardour/session_directory.h>
 
 #include <ardour/smpte.h>
 
@@ -1099,6 +1100,8 @@ class Session : public PBD::StatefulDestructible
 	bool                     play_loop;
 	bool                     loop_changing;
 	nframes_t           last_loopend;
+
+	SessionDirectory         _session_dir;
 
 	RingBuffer<Event*> pending_events;
 
