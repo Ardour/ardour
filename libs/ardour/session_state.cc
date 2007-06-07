@@ -2462,60 +2462,6 @@ Session::get_template_list (list<string> &template_names)
 	}
 }
 
-int
-Session::read_favorite_dirs (FavoriteDirs & favs)
-{
-	string path = get_user_ardour_path();
-	path += "/favorite_dirs";
-
-	ifstream fav (path.c_str());
-
-	favs.clear();
-	
-	if (!fav) {
-		if (errno != ENOENT) {
-			//error << string_compose (_("cannot open favorite file %1 (%2)"), path, strerror (errno)) << endmsg;
-			return -1;
-		} else {
-			return 1;
-		}
-	}
-
-	while (true) {
-
-	        string newfav;
-
-		getline(fav, newfav);
-
-		if (!fav.good()) {
-			break;
-		}
-
-		favs.push_back (newfav);
-	}
-
-	return 0;
-}
-
-int
-Session::write_favorite_dirs (FavoriteDirs & favs)
-{
-	string path = get_user_ardour_path();
-	path += "/favorite_dirs";
-
-	ofstream fav (path.c_str());
-
-	if (!fav) {
-		return -1;
-	}
-
-	for (FavoriteDirs::iterator i = favs.begin(); i != favs.end(); ++i) {
-		fav << (*i) << endl;
-	}
-	
-	return 0;
-}
-
 static bool
 accept_all_non_peak_files (const string& path, void *arg)
 {

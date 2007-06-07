@@ -898,13 +898,6 @@ class Session : public PBD::StatefulDestructible
 	void request_play_range (bool yn);
 	bool get_play_range () const { return _play_range; }
 
-	/* favorite dirs */
-	typedef vector<string> FavoriteDirs;
-
-	static int read_favorite_dirs (FavoriteDirs&);
-
-	static int write_favorite_dirs (FavoriteDirs&);
-
 	/* buffers for gain and pan */
 
 	gain_t* gain_automation_buffer () const { return _gain_automation_buffer; }
