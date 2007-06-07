@@ -2911,9 +2911,9 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 
 		for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 
-			spath = (*i).path;
+			SessionDirectory sdir((*i).path);
 
-			spath += sound_dir (false);
+			spath = sdir.sound_path().to_string();
 
 			if (destructive) {
 				if (nchan < 2) {
