@@ -51,11 +51,14 @@ PeakMeter::run (BufferSet& bufs, nframes_t nframes, nframes_t offset)
 		for (size_t i=0; i < n_events; ++i) {
 			const MidiEvent& ev = bufs.get_midi(n)[i];
 			if ((ev.buffer[0] & 0xF0) == MIDI_CMD_NOTE_ON) {
-				const float normal_vel = ev.buffer[2] / 127.0;
-				if (normal_vel > val)
-					val = normal_vel;
+				const float this_vel = log(ev.buffer[2] / 127.0 * (M_E*M_E-M_E) + M_E) - 1.0;
+				//printf("V %d -> %f\n", (int)((Byte)ev.buffer[2]), this_vel);
+				if (this_vel > val)
+					val = this_vel;
 			} else {
 				val += 1.0 / bufs.get_midi(n).capacity();
+				if (val > 1.0)
+					val = 1.0;
 			}
 		}
 			
