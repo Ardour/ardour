@@ -31,7 +31,6 @@ filesystem.cc
 fpu.cc
 id.cc
 mountpoint.cc
-path.cc
 pathscanner.cc
 pool.cc
 pthread_utils.cc
