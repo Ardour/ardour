@@ -132,9 +132,6 @@ SearchPath::operator+ (const SearchPath& spath)
 SearchPath&
 SearchPath::add_subdirectory_to_paths (const string& subdir)
 {
-	vector<sys::path> tmp;
-	string directory_path;
-
 	for (vector<sys::path>::iterator i = m_dirs.begin(); i != m_dirs.end(); ++i)
 	{
 		// should these new paths just be added to the end of 
