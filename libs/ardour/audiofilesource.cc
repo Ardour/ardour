@@ -42,6 +42,7 @@
 #include <ardour/sndfilesource.h>
 #include <ardour/session.h>
 #include <ardour/source_factory.h>
+#include <ardour/filename_extensions.h>
 
 // if these headers come before sigc++ is included
 // the parser throws ObjC++ errors. (nil is a keyword)
@@ -171,13 +172,14 @@ AudioFileSource::old_peak_path (ustring audio_path)
 
 	char buf[32];
 #ifdef __APPLE__
-	snprintf (buf, sizeof (buf), "%u-%u-%d.peak", stat_mount.st_ino, stat_file.st_ino, _channel);
+	snprintf (buf, sizeof (buf), "%u-%u-%d", stat_mount.st_ino, stat_file.st_ino, _channel);
 #else
-	snprintf (buf, sizeof (buf), "%ld-%ld-%d.peak", stat_mount.st_ino, stat_file.st_ino, _channel);
+	snprintf (buf, sizeof (buf), "%ld-%ld-%d", stat_mount.st_ino, stat_file.st_ino, _channel);
 #endif
 
 	ustring res = peak_dir;
 	res += buf;
+	res += peakfile_suffix;
 
 	return res;
 }
