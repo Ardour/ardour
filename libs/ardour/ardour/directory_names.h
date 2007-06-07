@@ -13,6 +13,7 @@ extern const char* const dead_sound_dir_name;
 extern const char* const interchange_dir_name;
 extern const char* const peak_dir_name;
 extern const char* const export_dir_name;
+extern const char* const templates_dir_name;
 
 };
 
