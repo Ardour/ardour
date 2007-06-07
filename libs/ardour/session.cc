@@ -3370,7 +3370,8 @@ Session::remove_empty_sounds ()
 {
 	PathScanner scanner;
 
-	vector<string *>* possible_audiofiles = scanner (sound_dir(), Config->get_possible_audio_file_regexp (), false, true);
+	vector<string *>* possible_audiofiles = scanner (_session_dir.sound_path().to_string (),
+			Config->get_possible_audio_file_regexp (), false, true);
 	
 	Glib::Mutex::Lock lm (source_lock);
 	
