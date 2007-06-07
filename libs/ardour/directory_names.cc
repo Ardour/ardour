@@ -12,5 +12,6 @@ const char* const dead_sound_dir_name = X_("dead_sounds");
 const char* const interchange_dir_name = X_("interchange");
 const char* const export_dir_name = X_("export");
 const char* const templates_dir_name = X_("templates");
+const char* const surfaces_dir_name = X_("surfaces");
 
 }

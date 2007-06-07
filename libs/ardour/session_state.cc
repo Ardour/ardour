@@ -2114,7 +2114,7 @@ Session::template_path ()
 string
 Session::control_protocol_path ()
 {
-	return suffixed_search_path (X_("surfaces"), false);
+	return suffixed_search_path (surfaces_dir_name, false);
 }
 
 int
