@@ -300,8 +300,7 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end)
 			//	priv_read_ptr);
 			//
 		} else {
-			printf("MRB - SKIPPING - %#X %d %d with time %u\n",
-					ev.buffer[0], ev.buffer[1], ev.buffer[2], ev.time);
+			printf("MRB - SKIPPING EVENT (with time %u)\n", ev.time);
 			break;
 		}
 

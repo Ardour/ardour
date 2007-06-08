@@ -790,10 +790,17 @@ SMFSource::load_model(bool lock)
 	nframes_t time = 0;
 	MidiEvent ev;
 	
+	// FIXME: assumes tempo never changes after start
+	const double frames_per_beat = _session.tempo_map().tempo_at(_timeline_position).frames_per_beat(
+			_session.engine().frame_rate());
+	
 	int ret;
 	while ((ret = read_event(ev)) >= 0) {
 		time += ev.time;
 		ev.time = time;
+
+		ev.time = (nframes_t)(ev.time * frames_per_beat / (double)_ppqn);
+
 		if (ret > 0) { // didn't skip (meta) event
 			//cerr << "ADDING EVENT TO MODEL: " << ev.time << endl;
 			_model->append(ev);

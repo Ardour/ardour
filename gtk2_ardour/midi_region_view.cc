@@ -150,12 +150,13 @@ MidiRegionView::end_write()
 void
 MidiRegionView::add_event (const MidiEvent& ev)
 {
-	/*printf("Event, time = %u, size = %zu, data = ",
+	printf("Event, time = %u, size = %zu, data = ",
 	  ev.time, ev.size);
 	  for (size_t i=0; i < ev.size; ++i) {
 	  printf("%X ", ev.buffer[i]);
 	  }
-	  printf("\n");*/
+	  printf("\n\n");
+
 	double y1 = trackview.height / 2.0;
 	if ((ev.buffer[0] & 0xF0) == MIDI_CMD_NOTE_ON) {
 		const Byte& note = ev.buffer[1];
