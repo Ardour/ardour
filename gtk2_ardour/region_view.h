@@ -100,7 +100,6 @@ class RegionView : public TimeAxisViewItem
 		TimeAxisViewItem::Visibility);
     
     virtual void region_resized (ARDOUR::Change);
-    void         region_moved (void *);
     virtual void region_muted ();
     void         region_locked ();
     void         region_opacity ();

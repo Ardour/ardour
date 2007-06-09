@@ -147,7 +147,6 @@ class AudioRegionView : public RegionView
     void fade_out_active_changed ();
 
     void region_resized (ARDOUR::Change);
-    void region_moved (void *);
     void region_muted ();
     void region_scale_amplitude_changed ();
 	void region_renamed ();

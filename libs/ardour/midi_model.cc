@@ -75,7 +75,7 @@ MidiModel::append(double time, size_t size, Byte* in_buffer)
 {
 	assert(_events.empty() || time >= _events.back().time);
 
-	cerr << "Model event: time = " << time << endl;
+	//cerr << "Model event: time = " << time << endl;
 
 	Byte* my_buffer = new Byte[size];
 	memcpy(my_buffer, in_buffer, size);

@@ -137,7 +137,7 @@ RegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	reset_width_dependent_items ((double) _region->length() / samples_per_unit);
 
-	set_y_position_and_height (0, trackview.height);
+	set_y_position_and_height (0, trackview.height - 2);
 
 	_region->StateChanged.connect (mem_fun(*this, &RegionView::region_changed));
 

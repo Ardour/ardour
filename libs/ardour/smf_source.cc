@@ -137,7 +137,7 @@ SMFSource::init (string pathstr, bool must_exist)
 int
 SMFSource::open()
 {
-	cerr << "Opening SMF file " << path() << " writeable: " << writable() << endl;
+	//cerr << "Opening SMF file " << path() << " writeable: " << writable() << endl;
 
 	assert(writable()); // FIXME;
 
@@ -149,7 +149,7 @@ SMFSource::open()
 		uint32_t track_size_be = 0;
 		fread(&track_size_be, 4, 1, _fd);
 		_track_size = GUINT32_FROM_BE(track_size_be);
-		cerr << "SMF - read track size " << _track_size << endl;
+		//cerr << "SMF - read track size " << _track_size << endl;
 
 	// We're making a new file
 	} else {

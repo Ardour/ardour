@@ -57,6 +57,8 @@ class MidiRegionView : public RegionView
 	virtual void init (Gdk::Color& base_color, bool wait_for_data = false);
 	
 	boost::shared_ptr<ARDOUR::MidiRegion> midi_region() const;
+	
+	void set_y_position_and_height (double, double);
     
     void show_region_editor ();
 
@@ -82,12 +84,16 @@ class MidiRegionView : public RegionView
 	                Gdk::Color& basic_color,
 	                TimeAxisViewItem::Visibility);
     
-    void region_moved (void *);
+    void region_resized (ARDOUR::Change);
 
     void set_flags (XMLNode *);
     void store_flags ();
+    
+	void reset_width_dependent_items (double pixel_width);
 
   private:
+
+	void display_events();
 
 	std::vector<ArdourCanvas::Item*> _events;
 	ArdourCanvas::SimpleRect**       _active_notes;

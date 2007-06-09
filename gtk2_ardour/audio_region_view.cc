@@ -400,7 +400,7 @@ AudioRegionView::region_muted ()
 void
 AudioRegionView::set_y_position_and_height (double y, double h)
 {
-	RegionView::set_y_position_and_height(y, h - 2);
+	RegionView::set_y_position_and_height(y, h - 1);
 
 	_y_position = y;
 	_height = h;

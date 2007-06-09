@@ -89,13 +89,26 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	if (wfd) {
 		midi_region()->midi_source(0)->load_model();
-
-		begin_write();
-		for (size_t i=0; i < midi_region()->midi_source(0)->model()->n_events(); ++i)
-			add_event(midi_region()->midi_source(0)->model()->event_at(i));
-		end_write();
+		display_events();
 	}
 }
+
+
+void
+MidiRegionView::display_events()
+{
+	for (std::vector<ArdourCanvas::Item*>::iterator i = _events.begin(); i != _events.end(); ++i)
+		delete *i;
+	
+	_events.clear();
+	begin_write();
+
+	for (size_t i=0; i < midi_region()->midi_source(0)->model()->n_events(); ++i)
+		add_event(midi_region()->midi_source(0)->model()->event_at(i));
+
+	end_write();
+}
+
 
 MidiRegionView::~MidiRegionView ()
 {
@@ -110,6 +123,47 @@ MidiRegionView::midi_region() const
 {
 	// "Guaranteed" to succeed...
 	return boost::dynamic_pointer_cast<MidiRegion>(_region);
+}
+
+void
+MidiRegionView::region_resized (Change what_changed)
+{
+	RegionView::region_resized(what_changed);
+
+	if (what_changed & ARDOUR::PositionChanged) {
+	
+		display_events();
+	
+	} else if (what_changed & Change (StartChanged)) {
+
+		//cerr << "MIDI RV START CHANGED" << endl;
+
+	} else if (what_changed & Change (LengthChanged)) {
+		
+		//cerr << "MIDI RV LENGTH CHANGED" << endl;
+	
+	}
+}
+
+void
+MidiRegionView::reset_width_dependent_items (double pixel_width)
+{
+	RegionView::reset_width_dependent_items(pixel_width);
+	assert(_pixel_width == pixel_width);
+		
+	display_events();
+}
+
+void
+MidiRegionView::set_y_position_and_height (double y, double h)
+{
+	RegionView::set_y_position_and_height(y, h - 1);
+		
+	display_events();
+
+	if (name_text) {
+		name_text->raise_to_top();
+	}
 }
 
 void
@@ -150,11 +204,11 @@ MidiRegionView::end_write()
 void
 MidiRegionView::add_event (const MidiEvent& ev)
 {
-	printf("Event, time = %f, size = %zu, data = ", ev.time, ev.size);
+	/*printf("Event, time = %f, size = %zu, data = ", ev.time, ev.size);
 	for (size_t i=0; i < ev.size; ++i) {
 		printf("%X ", ev.buffer[i]);
 	}
-	printf("\n\n");
+	printf("\n\n");*/
 
 	double y1 = trackview.height / 2.0;
 	if ((ev.buffer[0] & 0xF0) == MIDI_CMD_NOTE_ON) {
