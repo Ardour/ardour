@@ -41,7 +41,7 @@ public:
 	void append(const MidiBuffer& data);
 	
 	/** Resizes vector if necessary (NOT realtime safe) */
-	void append(const MidiEvent& ev);
+	void append(double time, size_t size, Byte* in_buffer);
 	
 	inline const MidiEvent& event_at(unsigned i) const { return _events[i]; }
 

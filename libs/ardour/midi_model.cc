@@ -38,7 +38,7 @@ MidiModel::~MidiModel()
 }
 
 
-/** Append contents of \a buf to model.  NOT (even remotely) realtime safe.
+/** Append contents of \a buf to model.  NOT realtime safe.
  *
  * Timestamps of events in \a buf are expected to be relative to
  * the start of this model (t=0) and MUST be monotonically increasing
@@ -64,25 +64,21 @@ MidiModel::append(const MidiBuffer& buf)
 }
 
 
-/** Append \a in_event to model.  NOT (even remotely) realtime safe.
+/** Append \a in_event to model.  NOT realtime safe.
  *
  * Timestamps of events in \a buf are expected to be relative to
  * the start of this model (t=0) and MUST be monotonically increasing
  * and MUST be >= the latest event currently in the model.
- *
- * Events in buf are deep copied.
  */
 void
-MidiModel::append(const MidiEvent& in_event)
+MidiModel::append(double time, size_t size, Byte* in_buffer)
 {
-	assert(_events.empty() || in_event.time >= _events.back().time);
+	assert(_events.empty() || time >= _events.back().time);
 
-	_events.push_back(in_event);
-	MidiEvent& my_event = _events.back();
-	assert(my_event.time == in_event.time);
-	assert(my_event.size == in_event.size);
+	cerr << "Model event: time = " << time << endl;
 
-	my_event.buffer = new Byte[my_event.size];
-	memcpy(my_event.buffer, in_event.buffer, my_event.size);
+	Byte* my_buffer = new Byte[size];
+	memcpy(my_buffer, in_buffer, size);
+	_events.push_back(MidiEvent(time, size, my_buffer));
 }
 

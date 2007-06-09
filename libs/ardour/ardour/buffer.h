@@ -190,7 +190,8 @@ public:
 	void read_from(const Buffer& src, nframes_t nframes, nframes_t offset);
 
 	bool  push_back(const ARDOUR::MidiEvent& event);
-	Byte* reserve(nframes_t time, size_t size);
+	bool  push_back(const jack_midi_event_t& event);
+	Byte* reserve(double time, size_t size);
 	
 	const MidiEvent& operator[](size_t i) const { assert(i < _size); return _events[i]; }
 	MidiEvent& operator[](size_t i) { assert(i < _size); return _events[i]; }

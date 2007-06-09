@@ -153,6 +153,35 @@ MidiBuffer::push_back(const MidiEvent& ev)
 }
 
 
+/** Push an event into the buffer.
+ *
+ * Note that the raw MIDI pointed to by ev will be COPIED and unmodified.
+ * That is, the caller still owns it, if it needs freeing it's Not My Problem(TM).
+ * Realtime safe.
+ * @return false if operation failed (not enough room)
+ */
+bool
+MidiBuffer::push_back(const jack_midi_event_t& ev)
+{
+	if (_size == _capacity)
+		return false;
+
+	Byte* const write_loc = _data + (_size * MAX_EVENT_SIZE);
+
+	memcpy(write_loc, ev.buffer, ev.size);
+	_events[_size].time = (double)ev.time;
+	_events[_size].size = ev.size;
+	_events[_size].buffer = write_loc;
+	++_size;
+
+	//cerr << "MidiBuffer: pushed, size = " << _size << endl;
+
+	_silent = false;
+
+	return true;
+}
+
+
 /** Reserve space for a new event in the buffer.
  *
  * This call is for copying MIDI directly into the buffer, the data location
@@ -161,7 +190,7 @@ MidiBuffer::push_back(const MidiEvent& ev)
  * location, or the buffer will be corrupted and very nasty things will happen.
  */
 Byte*
-MidiBuffer::reserve(nframes_t time, size_t size)
+MidiBuffer::reserve(double time, size_t size)
 {
 	assert(size < MAX_EVENT_SIZE);
 

@@ -250,7 +250,7 @@ SMFSource::find_first_event_after(nframes_t start)
  * skipped (eg a meta event), or -1 on EOF (or end of track).
  */
 int
-SMFSource::read_event(MidiEvent& ev) const
+SMFSource::read_event(jack_midi_event_t& ev) const
 {
 	// - 4 is for the EOT event, which we don't actually want to read
 	//if (feof(_fd) || ftell(_fd) >= _header_size + _track_size - 4) {
@@ -307,13 +307,12 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, n
 
 	// FIXME: ugh
 	unsigned char ev_buf[MidiBuffer::max_event_size()];
-	MidiEvent ev;
+	jack_midi_event_t ev; // time in SMF ticks
 	ev.time = 0;
 	ev.size = MidiBuffer::max_event_size();
 	ev.buffer = ev_buf;
 
-	// FIXME: it would be an impressive feat to actually make this any slower :)
-	
+	// FIXME: don't seek to start every read
 	fseek(_fd, _header_size, 0);
 	
 	// FIXME: assumes tempo never changes after start
@@ -787,8 +786,11 @@ SMFSource::load_model(bool lock)
 
 	fseek(_fd, _header_size, 0);
 
-	nframes_t time = 0;
-	MidiEvent ev;
+	uint64_t time = 0; /* in SMF ticks */
+	jack_midi_event_t ev;
+	ev.time = 0;
+	ev.size = 0;
+	ev.buffer = NULL;
 	
 	// FIXME: assumes tempo never changes after start
 	const double frames_per_beat = _session.tempo_map().tempo_at(_timeline_position).frames_per_beat(
@@ -797,13 +799,12 @@ SMFSource::load_model(bool lock)
 	int ret;
 	while ((ret = read_event(ev)) >= 0) {
 		time += ev.time;
-		ev.time = time;
-
-		ev.time = (nframes_t)(ev.time * frames_per_beat / (double)_ppqn);
+		
+		const double ev_time = (double)(time * frames_per_beat / (double)_ppqn); // in frames
 
 		if (ret > 0) { // didn't skip (meta) event
 			//cerr << "ADDING EVENT TO MODEL: " << ev.time << endl;
-			_model->append(ev);
+			_model->append(ev_time, ev.size, ev.buffer);
 		}
 	}
 }

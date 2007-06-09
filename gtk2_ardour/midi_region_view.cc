@@ -150,12 +150,11 @@ MidiRegionView::end_write()
 void
 MidiRegionView::add_event (const MidiEvent& ev)
 {
-	printf("Event, time = %u, size = %zu, data = ",
-	  ev.time, ev.size);
-	  for (size_t i=0; i < ev.size; ++i) {
-	  printf("%X ", ev.buffer[i]);
-	  }
-	  printf("\n\n");
+	printf("Event, time = %f, size = %zu, data = ", ev.time, ev.size);
+	for (size_t i=0; i < ev.size; ++i) {
+		printf("%X ", ev.buffer[i]);
+	}
+	printf("\n\n");
 
 	double y1 = trackview.height / 2.0;
 	if ((ev.buffer[0] & 0xF0) == MIDI_CMD_NOTE_ON) {
@@ -165,7 +164,7 @@ MidiRegionView::add_event (const MidiEvent& ev)
 		ArdourCanvas::SimpleRect * ev_rect = new Gnome::Canvas::SimpleRect(
 				*(ArdourCanvas::Group*)get_canvas_group());
 		ev_rect->property_x1() = trackview.editor.frame_to_pixel (
-				ev.time);
+				(nframes_t)ev.time);
 		ev_rect->property_y1() = y1;
 		ev_rect->property_x2() = trackview.editor.frame_to_pixel (
 				_region->length());
@@ -182,7 +181,7 @@ MidiRegionView::add_event (const MidiEvent& ev)
 	} else if ((ev.buffer[0] & 0xF0) == MIDI_CMD_NOTE_OFF) {
 		const Byte& note = ev.buffer[1];
 		if (_active_notes && _active_notes[note]) {
-			_active_notes[note]->property_x2() = trackview.editor.frame_to_pixel(ev.time);
+			_active_notes[note]->property_x2() = trackview.editor.frame_to_pixel((nframes_t)ev.time);
 			_active_notes[note]->property_outline_what() = (guint32) 0xF; // all edges
 			_active_notes[note] = NULL;
 		}

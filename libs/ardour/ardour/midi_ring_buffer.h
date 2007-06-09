@@ -26,6 +26,9 @@
 namespace ARDOUR {
 
 
+/* FIXME: this is probably too much inlined code */
+
+
 /** A RingBuffer.
  * Read/Write realtime safe.
  * Single-reader Single-writer thread safe.
@@ -226,17 +229,17 @@ public:
 		: MidiRingBufferBase<Byte>(size)
 	{}
 
-	size_t write(nframes_t time, size_t size, const Byte* buf);
-	bool   read(nframes_t time, size_t* size, Byte* buf);
+	size_t write(double time, size_t size, const Byte* buf);
+	bool   read(double* time, size_t* size, Byte* buf);
 
 	size_t read(MidiBuffer& dst, nframes_t start, nframes_t end);
 };
 
 
 inline bool
-MidiRingBuffer::read(nframes_t time, size_t* size, Byte* buf)
+MidiRingBuffer::read(double* time, size_t* size, Byte* buf)
 {
-	bool success = MidiRingBufferBase<Byte>::full_read(sizeof(nframes_t), (Byte*)time);
+	bool success = MidiRingBufferBase<Byte>::full_read(sizeof(double), (Byte*)time);
 	if (success)
 		success = MidiRingBufferBase<Byte>::full_read(sizeof(size_t), (Byte*)size);
 	if (success)
@@ -247,14 +250,14 @@ MidiRingBuffer::read(nframes_t time, size_t* size, Byte* buf)
 
 
 inline size_t
-MidiRingBuffer::write(nframes_t time, size_t size, const Byte* buf)
+MidiRingBuffer::write(double time, size_t size, const Byte* buf)
 {
 	assert(size > 0);
 
-	if (write_space() < (sizeof(nframes_t) + sizeof(size_t) + size)) {
+	if (write_space() < (sizeof(double) + sizeof(size_t) + size)) {
 		return 0;
 	} else {
-		MidiRingBufferBase<Byte>::write(sizeof(nframes_t), (Byte*)&time);
+		MidiRingBufferBase<Byte>::write(sizeof(double), (Byte*)&time);
 		MidiRingBufferBase<Byte>::write(sizeof(size_t), (Byte*)&size);
 		MidiRingBufferBase<Byte>::write(size, buf);
 		return size;
@@ -262,6 +265,11 @@ MidiRingBuffer::write(nframes_t time, size_t size, const Byte* buf)
 }
 
 
+/** Read a block of MIDI events from buffer.
+ *
+ * Timestamps of events returned are relative to start (ie event with stamp 0
+ * occurred at start).
+ */
 inline size_t
 MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end)
 {
@@ -272,14 +280,14 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end)
 
 	size_t count = 0;
 
-	while (read_space() > sizeof(nframes_t) + sizeof(size_t)) {
+	while (read_space() > sizeof(double) + sizeof(size_t)) {
 	
-		full_peek(sizeof(nframes_t), (Byte*)&ev.time);
+		full_peek(sizeof(double), (Byte*)&ev.time);
 	
 		if (ev.time > end)
 			break;
 
-		bool success = MidiRingBufferBase<Byte>::full_read(sizeof(nframes_t), (Byte*)&ev.time);
+		bool success = MidiRingBufferBase<Byte>::full_read(sizeof(double), (Byte*)&ev.time);
 		if (success)
 			success = MidiRingBufferBase<Byte>::full_read(sizeof(size_t), (Byte*)&ev.size);
 		
@@ -300,13 +308,14 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end)
 			//	priv_read_ptr);
 			//
 		} else {
-			printf("MRB - SKIPPING EVENT (with time %u)\n", ev.time);
+			printf("MRB - SKIPPING EVENT (with time %f)\n", ev.time);
 			break;
 		}
 
 		++count;
 
 		assert(ev.time <= end);
+		ev.time -= start;
 	}
 	
 	//printf("(R) read space: %zu\n", read_space());

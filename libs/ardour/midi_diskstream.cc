@@ -1471,44 +1471,10 @@ MidiDiskstream::get_playback(MidiBuffer& dst, nframes_t start, nframes_t end)
 	
 	// I think this happens with reverse varispeed?  maybe?
 	if (end <= start) {
+		cerr << "MDS: Reverse?  Skipping" << endl;
 		return;
 	}
 
-/*
-	cerr << "MIDI Diskstream pretending to read" << endl;
-
-	MidiEvent ev;
-	Byte data[4];
-
-	const char note = rand()%30 + 30;
-	
-	ev.buffer = data;
-	ev.time = 0;
-	ev.size = 3;
-
-	data[0] = 0x90;
-	data[1] = note;
-	data[2] = 120;
-
-	dst.push_back(ev);
-	
-	ev.buffer = data;
-	ev.time = (end - start) / 2;
-	ev.size = 3;
-
-	data[0] = 0x80;
-	data[1] = note;
-	data[2] = 64;
-*/
+	// Translates stamps to be relative to start
 	_playback_buf->read(dst, start, end);
-
-	// Translate time stamps to be relative to the start of this cycle
-	for (size_t i=0; i < dst.size(); ++i) {
-		assert(dst[i].time >= start);
-		assert(dst[i].time <= end);
-		//cerr << "Translating event stamp " << dst[i].time << " to ";
-		dst[i].time -= start;
-		//cerr << dst[i].time << endl;
-
-	}
 }

@@ -110,7 +110,7 @@ class SMFSource : public MidiSource {
 	void     write_chunk(char id[4], uint32_t length, void* data);
 	size_t   write_var_len(uint32_t val);
 	uint32_t read_var_len() const;
-	int      read_event(MidiEvent& ev) const;
+	int      read_event(jack_midi_event_t& ev) const;
 
 	static const uint16_t _ppqn = 19200;
 
@@ -121,7 +121,7 @@ class SMFSource : public MidiSource {
 	bool           _allow_remove_if_empty;
 	uint64_t       _timeline_position;
 	FILE*          _fd;
-	nframes_t _last_ev_time; // last frame time written, relative to source start
+	double         _last_ev_time; // last frame time written, relative to source start
 	uint32_t       _track_size;
 	uint32_t       _header_size; // size of SMF header, including MTrk chunk header
 

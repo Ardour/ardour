@@ -66,19 +66,13 @@ MidiPort::cycle_start (nframes_t nframes)
 
 	assert(event_count < _buffer.capacity());
 
-	MidiEvent ev;
+	jack_midi_event_t ev;
 
-	// FIXME: too slow, event struct is copied twice (here and MidiBuffer::push_back)
 	for (nframes_t i=0; i < event_count; ++i) {
 
-		// This will fail to compile if we change MidiEvent to our own class
-		jack_midi_event_get(static_cast<jack_midi_event_t*>(&ev), jack_buffer, i);
+		jack_midi_event_get(&ev, jack_buffer, i);
 
 		_buffer.push_back(ev);
-		// Convert note ons with velocity 0 to proper note offs
-		// FIXME: Jack MIDI should guarantee this - does it?
-		//if (ev->buffer[0] == MIDI_CMD_NOTE_ON && ev->buffer[2] == 0)
-		//	ev->buffer[0] = MIDI_CMD_NOTE_OFF;
 	}
 
 	assert(_buffer.size() == event_count);
@@ -106,9 +100,11 @@ MidiPort::cycle_end()
 
 	jack_midi_clear_buffer(jack_buffer);
 	for (nframes_t i=0; i < event_count; ++i) {
-		const jack_midi_event_t& ev = _buffer[i];
+		const MidiEvent& ev = _buffer[i];
+		// event times should be frames, relative to cycle start
+		assert(ev.time >= 0);
 		assert(ev.time < _nframes_this_cycle);
-		jack_midi_event_write(jack_buffer, ev.time, ev.buffer, ev.size);
+		jack_midi_event_write(jack_buffer, (jack_nframes_t)ev.time, ev.buffer, ev.size);
 	}
 	
 	_nframes_this_cycle = 0;
