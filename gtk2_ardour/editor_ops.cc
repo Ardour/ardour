@@ -1975,7 +1975,7 @@ Editor::separate_region_from_selection ()
 		
 		if ((rtv = dynamic_cast<RouteTimeAxisView*> ((*i))) != 0) {
 
-			Track* t = dynamic_cast<Track*>(rtv->track());
+			boost::shared_ptr<Track> t = rtv->track();
 
 			if (t != 0 && ! t->diskstream()->destructive()) {
 				
@@ -2032,7 +2032,7 @@ Editor::separate_regions_using_location (Location& loc)
 		
 		if ((rtv = dynamic_cast<RouteTimeAxisView*> ((*i))) != 0) {
 
-			Track* t = dynamic_cast<Track*>(rtv->track());
+			boost::shared_ptr<Track> t = rtv->track();
 
 			if (t != 0 && ! t->diskstream()->destructive()) {
 				
@@ -2081,7 +2081,7 @@ Editor::crop_region_to_selection ()
 		
 		if ((rtv = dynamic_cast<RouteTimeAxisView*> ((*i))) != 0) {
 
-			Track* t = dynamic_cast<Track*>(rtv->track());
+			boost::shared_ptr<Track> t = rtv->track();
 
 			if (t != 0 && ! t->diskstream()->destructive()) {
 				

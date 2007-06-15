@@ -65,7 +65,7 @@ void
 Editor::add_external_audio_action (ImportMode mode)
 {
 	nframes_t& pos = edit_cursor->current_frame;
-	AudioTrack* track = 0;
+	boost::shared_ptr<AudioTrack> track;
 
 	if (!selection->tracks.empty()) {
 		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(selection->tracks.front());
@@ -74,7 +74,7 @@ Editor::add_external_audio_action (ImportMode mode)
 		}
 	}
 
-	bring_in_external_audio (mode, track, pos, false);
+	bring_in_external_audio (mode, track.get(), pos, false);
 }
 
 void

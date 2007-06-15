@@ -505,7 +505,7 @@ Mixer_UI::set_all_audio_visibility (int tracks, bool yn)
 			continue;
 		}
 
-		AudioTrack* at = strip->audio_track();
+		boost::shared_ptr<AudioTrack> at = strip->audio_track();
 
 		switch (tracks) {
 		case 0:

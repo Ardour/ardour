@@ -970,37 +970,37 @@ RouteUI::disconnect_output ()
 bool
 RouteUI::is_track () const
 {
-	return dynamic_cast<Track*>(_route.get()) != 0;
+	return boost::dynamic_pointer_cast<Track>(_route) != 0;
 }
 
-Track*
+boost::shared_ptr<Track>
 RouteUI::track() const
 {
-	return dynamic_cast<Track*>(_route.get());
+	return boost::dynamic_pointer_cast<Track>(_route);
 }
 
 bool
 RouteUI::is_audio_track () const
 {
-	return dynamic_cast<AudioTrack*>(_route.get()) != 0;
+	return boost::dynamic_pointer_cast<AudioTrack>(_route) != 0;
 }
 
-AudioTrack*
+boost::shared_ptr<AudioTrack>
 RouteUI::audio_track() const
 {
-	return dynamic_cast<AudioTrack*>(_route.get());
+	return boost::dynamic_pointer_cast<AudioTrack>(_route);
 }
 
 bool
 RouteUI::is_midi_track () const
 {
-	return dynamic_cast<MidiTrack*>(_route.get()) != 0;
+	return boost::dynamic_pointer_cast<MidiTrack>(_route) != 0;
 }
 
-MidiTrack*
+boost::shared_ptr<MidiTrack>
 RouteUI::midi_track() const
 {
-	return dynamic_cast<MidiTrack*>(_route.get());
+	return boost::dynamic_pointer_cast<MidiTrack>(_route);
 }
 
 boost::shared_ptr<Diskstream>

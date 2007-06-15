@@ -523,7 +523,7 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 		/* check that its an audio track, not a bus */
 		
 		if (tv->get_diskstream()) {
-			do_embed (paths, false, ImportToTrack, tv->audio_track(), frame, true);
+			do_embed (paths, false, ImportToTrack, tv->audio_track().get(), frame, true);
 		}
 	}
 

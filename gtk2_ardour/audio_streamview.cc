@@ -508,7 +508,7 @@ AudioStreamView::setup_rec_box ()
 			
 			/* start a new rec box */
 
-			AudioTrack* at;
+			boost::shared_ptr<AudioTrack> at;
 
 			at = _trackview.audio_track(); /* we know what it is already */
 			boost::shared_ptr<AudioDiskstream> ds = at->audio_diskstream();

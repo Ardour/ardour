@@ -245,7 +245,7 @@ PlaylistSelector::selection_changed ()
 
 	if ((playlist = ((*iter)[columns.playlist])) != 0) {
 		
-		AudioTrack* at;
+		boost::shared_ptr<AudioTrack> at;
 		boost::shared_ptr<AudioPlaylist> apl;
 		
 		if ((at = rui->audio_track()) == 0) {

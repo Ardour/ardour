@@ -184,7 +184,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 
 		rec_enable_button->set_name ("MixerRecordEnableButton");
 
-		AudioTrack* at = audio_track();
+		boost::shared_ptr<AudioTrack> at = audio_track();
 
 		at->FreezeChange.connect (mem_fun(*this, &MixerStrip::map_frozen));
 
@@ -1133,7 +1133,7 @@ MixerStrip::map_frozen ()
 {
 	ENSURE_GUI_THREAD (mem_fun(*this, &MixerStrip::map_frozen));
 
-	AudioTrack* at = audio_track();
+	boost::shared_ptr<AudioTrack> at = audio_track();
 
 	if (at) {
 		switch (at->freeze_state()) {

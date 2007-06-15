@@ -503,7 +503,7 @@ RouteTimeAxisView::set_track_mode (TrackMode mode)
 	}
 
 	if (item->get_active () && track()->mode() != mode) {
-		_set_track_mode (track(), mode, other_item);
+		_set_track_mode (track().get(), mode, other_item);
 	}
 }
 
