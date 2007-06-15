@@ -197,7 +197,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	}
 
 	editor.ZoomChanged.connect (mem_fun(*this, &RouteTimeAxisView::reset_samples_per_unit));
-	ColorChanged.connect (mem_fun (*this, &RouteTimeAxisView::color_handler));
+	ColorsChanged.connect (mem_fun (*this, &RouteTimeAxisView::color_handler));
 }
 
 RouteTimeAxisView::~RouteTimeAxisView ()
@@ -599,8 +599,8 @@ RouteTimeAxisView::show_timestretch (nframes_t start, nframes_t end)
 		timestretch_rect->property_y1() =  0.0;
 		timestretch_rect->property_x2() =  0.0;
 		timestretch_rect->property_y2() =  0.0;
-		timestretch_rect->property_fill_color_rgba() =  color_map[cTimeStretchFill];
-		timestretch_rect->property_outline_color_rgba() = color_map[cTimeStretchOutline];
+		timestretch_rect->property_fill_color_rgba() =  Config->canvasvar_TimeStretchFill.get();
+		timestretch_rect->property_outline_color_rgba() = Config->canvasvar_TimeStretchOutline.get();
 	}
 
 	timestretch_rect->show ();
@@ -1367,18 +1367,17 @@ RouteTimeAxisView::map_frozen ()
 }
 
 void
-RouteTimeAxisView::color_handler (ColorID id, uint32_t val)
+RouteTimeAxisView::color_handler ()
 {
-	switch (id) {
-	case cTimeStretchOutline:
-		timestretch_rect->property_outline_color_rgba() = val;
-		break;
-	case cTimeStretchFill:
-		timestretch_rect->property_fill_color_rgba() = val;
-		break;
-	default:
-		break;
+	//case cTimeStretchOutline:
+	if (timestretch_rect) {
+		timestretch_rect->property_outline_color_rgba() = Config->canvasvar_TimeStretchOutline.get();
 	}
+	//case cTimeStretchFill:
+	if (timestretch_rect) {
+		timestretch_rect->property_fill_color_rgba() = Config->canvasvar_TimeStretchFill.get();
+	}
+
 }
 
 void
@@ -1549,7 +1548,7 @@ RouteTimeAxisView::add_redirect_automation_curve (boost::shared_ptr<Redirect> re
 					  *redirect, what, _session, *ran->view,
 					  *ran->view->canvas_display, redirect->automation_list (what));
 	
-	ral->set_line_color (color_map[cRedirectAutomationLine]);
+	ral->set_line_color (Config->canvasvar_RedirectAutomationLine.get());
 	ral->queue_reset ();
 
 	ran->view->add_line (*ral);

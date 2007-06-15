@@ -39,23 +39,9 @@ using namespace Gtk;
 using namespace PBD;
 using namespace ARDOUR;
 
-/* the global color map */
-
-ColorMap color_map;
-
-/* lookup table of color IDs as strings */
-
-#undef COLORID
-#define COLORID(s) #s,
-static const char *color_id_strs[] = {
-	#include "colors.h"
-};
-#undef COLORID
-
-/* global color change signals */
 
 sigc::signal<void> ColorsChanged;
-sigc::signal<void,ColorID,uint32_t> ColorChanged;
+sigc::signal<void,uint32_t> ColorChanged;
 
 ThemeManager::ThemeManager()
 	: ArdourDialog ("ThemeManager"),
@@ -107,73 +93,6 @@ ThemeManager::~ThemeManager()
 }
 
 int
-ThemeManager::load (string path)
-{
-	ifstream in (path.c_str());
-
-	if (!in) {
-		error << string_compose (_("cannot open color definition file %1: %2"), path, strerror(errno)) << endmsg;
-		return -1;
-	}
-
-	cerr << "Loading color definition file " << path << endl;
-
-	while (in) {
-		string name;
-		double r, g, b, a;
-
-		in >> name; if (!in) break;
-		in >> r; if (!in) break;
-		in >> g; if (!in) break;
-		in >> b; if (!in) break;
-		in >> a; if (!in) break;
-
-		for (uint32_t i = 0; i < sizeof (color_id_strs)/sizeof(color_id_strs[0]); ++i) {
-			if (name == color_id_strs[i]) {
-
-				/* set color map */
-
-				int ir,ig,ib,ia;
-				int rgba;
-
-				ir = (int) floor (r * 255.0);
-				ig = (int) floor (g * 255.0);
-				ib = (int) floor (b * 255.0);
-				ia = (int) floor (a * 255.0);
-				rgba = RGBA_TO_UINT (ir, ig, ib, ia);
-
-				color_map[(ColorID)i] = rgba;
-
-				/* set up list entry */
-
-				Gdk::Color col;
-				col.set_rgb_p (r,g,b);
-
-				TreeModel::Row row = *(color_list->append());
-
-				/* all the color names are prefixed by 'c' to avoid
-				   naming collisions when used as enums. trim
-				   this leading character from the displayed
-				   value.
-				*/
-
-				row[columns.name] = name.substr (1);
-				row[columns.color] = "";
-				row[columns.id] = (ColorID) i;
-				row[columns.gdkcolor] = col;
-				row[columns.rgba] = rgba;
-
-				break;
-			}
-		}
-	}
-	
-	ColorsChanged(); /* emit signal */
-
-	return 0;
-}
-
-int
 ThemeManager::save (string path)
 {
 	return 0;
@@ -187,6 +106,8 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 	TreeViewColumn* column;
 	int cellx;
 	int celly;
+
+	ARDOUR::ConfigVariable<uint32_t> *ccvar;
 	
 	if (!color_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		return false;
@@ -200,11 +121,16 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 	case 1: /* color */
 		if ((iter = color_list->get_iter (path))) {
 
-			ColorID edit_color_id = (*iter)[columns.id];
 			int r,g, b, a;
-			uint32_t rgba;
+			uint32_t rgba = (*iter)[columns.rgba];
 			Gdk::Color color;
 
+			UINT_TO_RGBA (rgba, &r, &g, &b, &a);
+			color.set_rgb_p (r / 255.0, g / 255.0, b / 255.0);
+			color_dialog.get_colorsel()->set_current_color (color);
+			color_dialog.get_colorsel()->set_previous_color (color);
+			color_dialog.get_colorsel()->set_current_alpha (a * 256);
+			color_dialog.get_colorsel()->set_previous_alpha (a * 256);
 			ResponseType result = (ResponseType) color_dialog.run();
 
 			switch (result) {
@@ -218,13 +144,15 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 				b = (int) floor (color.get_blue_p() * 255.0);
 
 				rgba = RGBA_TO_UINT(r,g,b,a);
-				
+				cerr << (*iter)[columns.name] << " == " << hex << rgba << endl;
 				(*iter)[columns.rgba] = rgba;
 				(*iter)[columns.gdkcolor] = color;
 
-				color_map[edit_color_id] = rgba;
+				ccvar = (*iter)[columns.pVar];
+				ccvar->set(rgba);
 
-				ColorChanged (edit_color_id, rgba);
+				//ColorChanged (rgba);
+				ColorsChanged();//EMIT SIGNAL
 				break;
 
 			default:
@@ -260,12 +188,34 @@ ThemeManager::load_rc(int which)
 	ThemeChanged(find_config_file(Config->get_ui_rc_file())); //EMIT SIGNAL
 	
 	cerr << "load_rc() called " << find_config_file(Config->get_ui_rc_file()) << endl;
+
 }
 
 void
-ThemeManager::setup_theme_buttons ()
+ThemeManager::setup_theme ()
 {
+	int r, g, b, a;
+	for (std::vector<ConfigVariable<uint32_t> *>::iterator i = Config->canvas_colors.begin(); i != Config->canvas_colors.end(); i++) {
+		
+		TreeModel::Row row = *(color_list->append());
 
+		Gdk::Color col;
+		uint32_t rgba = (*i)->get();
+		UINT_TO_RGBA (rgba, &r, &g, &b, &a);
+		cerr << (*i)->name() << " == " << hex << rgba << ": " << hex << r << " " << hex << g << " " << hex << b << endl;
+		col.set_rgb_p (r / 255.0, g / 255.0, b / 255.0);
+
+		row[columns.name] = (*i)->name();
+		row[columns.color] = "";
+		row[columns.pVar] = *i;
+		row[columns.rgba] = rgba;
+		row[columns.gdkcolor] = col;
+
+		//cerr << (*i)->name() << " == " << rgba << endl;
+	}
+	cerr << "ThemeManager::setup_theme () called" << endl;
+	ColorsChanged(); //EMIT SIGNAL
+		
 	if (getenv ("ARDOUR2_UI_RC")) {
 		return;
 	}
@@ -275,5 +225,6 @@ ThemeManager::setup_theme_buttons ()
 	} else if (Config->get_ui_rc_file() == "ardour2_ui_light.rc") {
 		light_button.set_active();
 	}
+	
 }
 

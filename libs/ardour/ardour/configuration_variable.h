@@ -65,7 +65,7 @@ class ConfigVariable : public ConfigVariableBase
 	ConfigVariable (std::string str) : ConfigVariableBase (str) {}
 	ConfigVariable (std::string str, T val) : ConfigVariableBase (str), value (val) {}
 
-	virtual bool set (T val, Owner owner) {
+	virtual bool set (T val, Owner owner = ARDOUR::ConfigVariableBase::Config) {
 		if (val == value) {
 			miss ();
 			return false;
@@ -92,7 +92,7 @@ class ConfigVariable : public ConfigVariableBase
 
 	bool set_from_node (const XMLNode& node, Owner owner) {
 
-		if (node.name() == "Config") {
+		if (node.name() == "Config" || node.name() == "Canvas") {
 
 			/* ardour.rc */
 

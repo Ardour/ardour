@@ -69,8 +69,8 @@ ControlPoint::ControlPoint (AutomationLine& al)
 	item = new Canvas::SimpleRect (line.canvas_group());
 	item->property_draw() = true;
 	item->property_fill() = false;
-	item->property_fill_color_rgba() =  color_map[cControlPointFill];
-	item->property_outline_color_rgba() = color_map[cControlPointOutline];
+	item->property_fill_color_rgba() =  Config->canvasvar_ControlPointFill.get();
+	item->property_outline_color_rgba() = Config->canvasvar_ControlPointOutline.get();
 	item->property_outline_pixels() = 1;
 	item->set_data ("control_point", this);
 	item->signal_event().connect (mem_fun (this, &ControlPoint::event_handler));
@@ -97,7 +97,7 @@ ControlPoint::ControlPoint (const ControlPoint& other, bool dummy_arg_to_force_s
 
 	item = new Canvas::SimpleRect (line.canvas_group());
 	item->property_fill() = false;
-	item->property_outline_color_rgba() = color_map[cEnteredControlPointOutline];
+	item->property_outline_color_rgba() = Config->canvasvar_EnteredControlPointOutline.get();
 	item->property_outline_pixels() = 1;
 	
 	/* NOTE: no event handling in copied ControlPoints */
@@ -148,10 +148,10 @@ ControlPoint::show_color (bool entered, bool hide_too)
 {
 	if (entered) {
 		if (selected) {
-			item->property_outline_color_rgba() = color_map[cEnteredControlPointSelected];
+			item->property_outline_color_rgba() = Config->canvasvar_EnteredControlPointSelected.get();
 			set_visible(true);
 		} else {
-			item->property_outline_color_rgba() = color_map[cEnteredControlPoint];
+			item->property_outline_color_rgba() = Config->canvasvar_EnteredControlPoint.get();
 			if (hide_too) {
 				set_visible(false);
 			}
@@ -159,10 +159,10 @@ ControlPoint::show_color (bool entered, bool hide_too)
 
 	} else {
 		if (selected) {
-			item->property_outline_color_rgba() = color_map[cControlPointSelected];
+			item->property_outline_color_rgba() = Config->canvasvar_ControlPointSelected.get();
 			set_visible(true);
 		} else {
-			item->property_outline_color_rgba() = color_map[cControlPoint];
+			item->property_outline_color_rgba() = Config->canvasvar_ControlPoint.get();
 			if (hide_too) {
 				set_visible(false);
 			}
@@ -1148,7 +1148,7 @@ AutomationLine::set_selected_points (PointSelection& points)
 }
 
 void AutomationLine::set_colors() {
-	set_line_color( color_map[cAutomationLine] );
+	set_line_color( Config->canvasvar_AutomationLine.get() );
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 		(*i)->show_color (false, !points_visible);
 	}

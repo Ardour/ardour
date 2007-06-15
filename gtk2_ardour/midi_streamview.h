@@ -68,7 +68,7 @@ class MidiStreamView : public StreamView
 
 	void redisplay_diskstream ();
 
-	void color_handler (ColorID id, uint32_t val);
+	void color_handler ();
 };
 
 #endif /* __ardour_midi_streamview_h__ */

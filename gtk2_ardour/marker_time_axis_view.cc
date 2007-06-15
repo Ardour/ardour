@@ -49,7 +49,7 @@ MarkerTimeAxisView::MarkerTimeAxisView(MarkerTimeAxis& tv)
 	: _trackview (tv)
 {
 	region_color = _trackview.color();
-	stream_base_color = color_map[cMarkerTrackBase];
+	stream_base_color = Config->canvasvar_MarkerTrack.get();
 
 	canvas_group = new ArdourCanvas::Group (*_trackview.canvas_display);
 
@@ -58,7 +58,7 @@ MarkerTimeAxisView::MarkerTimeAxisView(MarkerTimeAxis& tv)
 	canvas_rect->property_y1() = 0.0;
 	canvas_rect->property_x2() = max_frames;
 	canvas_rect->property_y2() = (double)20;
-	canvas_rect->property_outline_color_rgba() = color_map[cMarkerTrackOutline];
+	canvas_rect->property_outline_color_rgba() = Config->canvasvar_MarkerTrack.get();
 	canvas_rect->property_fill_color_rgba() = stream_base_color;
 		   
 	canvas_rect->signal_event().connect (bind (mem_fun (_trackview.editor, &PublicEditor::canvas_marker_time_axis_view_event), canvas_rect, &_trackview));

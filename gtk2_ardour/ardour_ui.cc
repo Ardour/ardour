@@ -169,9 +169,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	theme_manager = new ThemeManager();
 
-	std::string color_file = ARDOUR::find_config_file("ardour.colors");
+	//std::string color_file = ARDOUR::find_config_file("ardour.colors");
 
-	theme_manager->load (color_file);
+	//theme_manager->load (color_file);
 
 	editor = 0;
 	mixer = 0;
@@ -1527,7 +1527,7 @@ ARDOUR_UI::setup_theme ()
 	}
 
 	ThemeChanged (rcfile); //EMIT SIGNAL
-	theme_manager->setup_theme_buttons();
+	theme_manager->setup_theme();
 }
 
 gint

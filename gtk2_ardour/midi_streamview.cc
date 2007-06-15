@@ -56,12 +56,12 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	: StreamView (tv)
 {
 	if (tv.is_track())
-		stream_base_color = color_map[cMidiTrackBase];
+		stream_base_color = Config->canvasvar_MidiTrackBase.get();
 	else
-		stream_base_color = color_map[cMidiBusBase];
+		stream_base_color = Config->canvasvar_MidiBusBase.get();
 	
 	canvas_rect->property_fill_color_rgba() = stream_base_color;
-	canvas_rect->property_outline_color_rgba() = color_map[cAudioTrackOutline];
+	canvas_rect->property_outline_color_rgba() = RGBA_BLACK;
 
 	//use_rec_regions = tv.editor.show_waveforms_recording ();
 	use_rec_regions = true;
@@ -216,14 +216,14 @@ MidiStreamView::setup_rec_box ()
 			assert(_trackview.midi_track()->mode() == Normal);
 			
 			xend = xstart;
-			fill_color = color_map[cRecordingRectFill];
+			fill_color = Config->canvasvar_RecordingRect.get();
 			
 			ArdourCanvas::SimpleRect * rec_rect = new Gnome::Canvas::SimpleRect (*canvas_group);
 			rec_rect->property_x1() = xstart;
 			rec_rect->property_y1() = 1.0;
 			rec_rect->property_x2() = xend;
 			rec_rect->property_y2() = (double) _trackview.height - 1;
-			rec_rect->property_outline_color_rgba() = color_map[cRecordingRectOutline];
+			rec_rect->property_outline_color_rgba() = Config->canvasvar_RecordingRect.get();
 			rec_rect->property_fill_color_rgba() = fill_color;
 			rec_rect->lower_to_bottom();
 			
@@ -409,24 +409,17 @@ MidiStreamView::rec_data_range_ready (boost::shared_ptr<MidiBuffer> data, jack_n
 }
 
 void
-MidiStreamView::color_handler (ColorID id, uint32_t val)
+MidiStreamView::color_handler ()
 {
-	switch (id) {
-	case cMidiTrackBase:
-		if (_trackview.is_midi_track()) {
-			canvas_rect->property_fill_color_rgba() = val;
-		} 
-		break;
-	case cMidiBusBase:
-		if (!_trackview.is_midi_track()) {
-			canvas_rect->property_fill_color_rgba() = val;
-		}
-		break;
-	case cMidiTrackOutline:
-		canvas_rect->property_outline_color_rgba() = val;
-		break;
 
-	default:
-		break;
+	//case cMidiTrackBase:
+	if (_trackview.is_midi_track()) {
+		canvas_rect->property_fill_color_rgba() = Config->canvasvar_MidiTrackBase.get();
+	} 
+
+	//case cMidiBusBase:
+	if (!_trackview.is_midi_track()) {
+		canvas_rect->property_fill_color_rgba() = Config->canvasvar_MidiBusBase.get();;
 	}
 }
+

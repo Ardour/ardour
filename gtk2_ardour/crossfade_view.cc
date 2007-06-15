@@ -61,11 +61,11 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 	_visible = true;
 
 	fade_in = new Line (*group);
-	fade_in->property_fill_color_rgba() = color_map[cCrossfadeLine];
+	fade_in->property_fill_color_rgba() = Config->canvasvar_CrossfadeLine.get();
 	fade_in->property_width_pixels() = 1;
 
 	fade_out = new Line (*group);
-	fade_out->property_fill_color_rgba() = color_map[cCrossfadeLine];
+	fade_out->property_fill_color_rgba() = Config->canvasvar_CrossfadeLine.get();
 	fade_out->property_width_pixels() = 1;
 	
 	set_y_position_and_height (0, get_time_axis_view().height);
@@ -84,6 +84,7 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 	crossfade_changed (Change (~0));
 
 	crossfade->StateChanged.connect (mem_fun(*this, &CrossfadeView::crossfade_changed));
+	ColorsChanged.connect (mem_fun (*this, &CrossfadeView::color_handler));
 }
 
 CrossfadeView::~CrossfadeView ()
@@ -219,12 +220,18 @@ void
 CrossfadeView::active_changed ()
 {
 	if (crossfade->active()) {
-		frame->property_fill_color_rgba() = color_map[cActiveCrossfade];
+		frame->property_fill_color_rgba() = Config->canvasvar_ActiveCrossfade.get();
 	} else {
-		frame->property_fill_color_rgba() = color_map[cInactiveCrossfade];
+		frame->property_fill_color_rgba() = Config->canvasvar_InactiveCrossfade.get();
 	}
 
 	redraw_curves ();
+}
+
+void
+CrossfadeView::color_handler ()
+{
+	active_changed ();
 }
 
 void
@@ -262,3 +269,4 @@ CrossfadeView::fake_hide ()
 {
 	group->hide();
 }
+

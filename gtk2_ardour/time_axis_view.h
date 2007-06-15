@@ -305,7 +305,7 @@ class TimeAxisView : public virtual AxisView
 	static bool need_size_info;
 
 	void set_height_pixels (uint32_t h);
-	void color_handler (ColorID, uint32_t);
+	void color_handler ();
 
 }; /* class TimeAxisView */
 

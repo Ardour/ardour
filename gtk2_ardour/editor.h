@@ -351,6 +351,7 @@ class Editor : public PublicEditor
   private:
 
 	/// The session that we are editing, or 0
+	void color_handler ();
 	ARDOUR::Session     *session;
 	bool                 constructed;
 

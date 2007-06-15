@@ -121,7 +121,7 @@ protected:
 	virtual void playlist_modified_weak (boost::weak_ptr<ARDOUR::Diskstream>);
 	virtual void playlist_modified (boost::shared_ptr<ARDOUR::Diskstream>);
 	
-	virtual void color_handler (ColorID, uint32_t) = 0;
+	virtual void color_handler () = 0;
 
 	virtual void update_contents_y_position_and_height ();
 

@@ -80,7 +80,7 @@ StreamView::StreamView (RouteTimeAxisView& tv)
 		_trackview.session().RecordStateChanged.connect (mem_fun (*this, &StreamView::sess_rec_enable_changed));
 	} 
 
-	ColorChanged.connect (mem_fun (*this, &StreamView::color_handler));
+	ColorsChanged.connect (mem_fun (*this, &StreamView::color_handler));
 }
 
 StreamView::~StreamView ()

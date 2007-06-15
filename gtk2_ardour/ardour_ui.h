@@ -57,6 +57,7 @@
 #include <gtkmm2ext/bindable_button.h>
 #include <ardour/ardour.h>
 #include <ardour/session.h>
+#include <ardour/configuration.h>
 
 #include "audio_clock.h"
 #include "ardour_dialog.h"

@@ -160,3 +160,4 @@ CONFIG_VARIABLE (string, bwf_organization_code, "bwf-organization-code", "US")
 /* these variables have custom set() methods (e.g. path globbing) */
 
 CONFIG_VARIABLE_SPECIAL(Glib::ustring, raid_path, "raid-path", "", path_expand)
+

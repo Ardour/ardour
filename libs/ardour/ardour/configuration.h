@@ -54,6 +54,8 @@ class Configuration : public Stateful
 
 	std::map<std::string,MidiPortDescriptor *> midi_ports;
 
+	std::vector<ConfigVariable<uint32_t> *> canvas_colors;
+
 	void map_parameters (sigc::slot<void,const char*> theSlot);
 
 	int load_state ();
@@ -61,8 +63,9 @@ class Configuration : public Stateful
 
 	int set_state (const XMLNode&);
 	XMLNode& get_state (void);
-	XMLNode& get_variables (sigc::slot<bool,ConfigVariableBase::Owner>);
+	XMLNode& get_variables (sigc::slot<bool,ConfigVariableBase::Owner>, std::string which_node = "Config");
 	void set_variables (const XMLNode&, ConfigVariableBase::Owner owner);
+	void pack_canvasvars ();
 
 	void set_current_owner (ConfigVariableBase::Owner);
 
@@ -83,7 +86,12 @@ class Configuration : public Stateful
 #include "ardour/configuration_vars.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
-	
+
+#undef  CANVAS_VARIABLE
+#define CANVAS_VARIABLE(var,name,value) ConfigVariable<uint32_t> var;  // <-- is this really so bad?
+#include "ardour/canvas_vars.h"
+#undef  CANVAS_VARIABLE
+
   private:
 
         /* declare variables */

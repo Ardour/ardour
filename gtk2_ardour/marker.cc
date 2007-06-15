@@ -28,6 +28,8 @@
 
 #include "i18n.h"
 
+using namespace ARDOUR;
+
 Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, const string& annotation, 
 		Type type, nframes_t frame, bool handle_events)
 
@@ -253,7 +255,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	}
 	text->property_y() = 0.0;
 	text->property_anchor() = Gtk::ANCHOR_NW;
-	text->property_fill_color_rgba() = color_map[cMarkerLabel];
+	text->property_fill_color_rgba() = Config->canvasvar_MarkerLabel.get();
 
 	editor.ZoomChanged.connect (mem_fun (*this, &Marker::reposition));
 

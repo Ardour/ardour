@@ -26,8 +26,8 @@
 #include <gtkmm/colorselection.h>
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/rc.h>
+#include <ardour/configuration.h>
 #include "ardour_dialog.h"
-#include "color.h"
 
 
 class ThemeManager : public ArdourDialog
@@ -36,10 +36,9 @@ class ThemeManager : public ArdourDialog
 	ThemeManager();
 	~ThemeManager();
 
-	int load (std::string path);
 	int save (std::string path);
 	void load_rc (int which);
-	void setup_theme_buttons ();
+	void setup_theme ();
 
   private:
 	struct ColorDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
@@ -47,14 +46,14 @@ class ThemeManager : public ArdourDialog
 		    add (name);
 		    add (color);
 		    add (gdkcolor);
-		    add (id);
+			add (pVar);
 		    add (rgba);
 	    }
 	    
 	    Gtk::TreeModelColumn<Glib::ustring>  name;
 	    Gtk::TreeModelColumn<Glib::ustring>  color;
 	    Gtk::TreeModelColumn<Gdk::Color>     gdkcolor;
-	    Gtk::TreeModelColumn<ColorID> id;
+	    Gtk::TreeModelColumn<ARDOUR::ConfigVariable<uint32_t> *> pVar;
 	    Gtk::TreeModelColumn<uint32_t>       rgba;
 	};
 

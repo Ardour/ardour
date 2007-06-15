@@ -312,11 +312,11 @@ Editor::Editor ()
 	_dragging_playhead = false;
 	_dragging_hscrollbar = false;
 
-	location_marker_color = color_map[cLocationMarker];
-	location_range_color = color_map[cLocationRange];
-	location_cd_marker_color = color_map[cLocationCDMarker];
-	location_loop_color = color_map[cLocationLoop];
-	location_punch_color = color_map[cLocationPunch];
+	location_marker_color = Config->canvasvar_LocationMarker.get();
+	location_range_color = Config->canvasvar_LocationRange.get();
+	location_cd_marker_color = Config->canvasvar_LocationCDMarker.get();
+	location_loop_color = Config->canvasvar_LocationLoop.get();
+	location_punch_color = Config->canvasvar_LocationPunch.get();
 
 	range_marker_drag_rect = 0;
 	marker_drag_line = 0;
@@ -3649,3 +3649,4 @@ Editor::edit_cursor_position(bool sync)
 
 	return edit_cursor->current_frame;
 }
+

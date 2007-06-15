@@ -80,7 +80,7 @@ style "marker_text"
 
 style "time_axis_view_item_name"
 {
-	font_name = "sans 9"
+	font_name = "sans 6"
 }
 
 style "default_base" = "medium_text"
@@ -122,9 +122,6 @@ style "default_base" = "medium_text"
   engine "clearlooks" 
   {
     menubarstyle      = 0       # 0 = flat, 1 = sunken, 2 = flat gradient
-    menuitemstyle     = 0       # 0 = flat, 1 = 3d-ish (gradient), 2 = 3d-ish (button)
-    listviewitemstyle = 0       # 0 = flat, 1 = 3d-ish (gradient)
-    progressbarstyle  = 1       # 0 = candy bar, 1 = fancy candy bar, 2 = flat
   }
 }
 

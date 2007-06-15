@@ -146,7 +146,7 @@ RegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	set_colors ();
 
-	ColorChanged.connect (mem_fun (*this, &RegionView::color_handler));
+	ColorsChanged.connect (mem_fun (*this, &RegionView::color_handler));
 
 	/* XXX sync mark drag? */
 }

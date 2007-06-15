@@ -199,7 +199,7 @@ protected:
 	
 	void map_frozen ();
 
-	void color_handler (ColorID, uint32_t);
+	void color_handler ();
 
 	void region_view_added (RegionView*);
 	void add_ghost_to_redirect (RegionView*, AutomationTimeAxisView*);

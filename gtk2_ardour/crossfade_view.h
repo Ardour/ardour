@@ -79,6 +79,7 @@ struct CrossfadeView : public TimeAxisViewItem
     void crossfade_changed (ARDOUR::Change);
     void active_changed ();
     void redraw_curves ();
+	void color_handler ();
 };
 
 #endif /* __gtk_ardour_crossfade_view_h__ */

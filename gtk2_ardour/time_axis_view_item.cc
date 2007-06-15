@@ -39,6 +39,7 @@ using namespace std;
 using namespace Editing;
 using namespace Glib;
 using namespace PBD;
+using namespace ARDOUR;
 
 //------------------------------------------------------------------------------
 /** Initialize const static memeber data */
@@ -133,7 +134,7 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 	frame_position = start ;
 	item_duration = duration ;
 	name_connected = false;
-	fill_opacity = 60;
+	// why? fill_opacity = 60;
 	position_locked = false ;
 	max_item_duration = ARDOUR::max_frames;
 	min_item_duration = 0 ;
@@ -150,8 +151,8 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 	vestigial_frame->property_y1() = (double) 1.0;
 	vestigial_frame->property_x2() = 2.0;
 	vestigial_frame->property_y2() = (double) trackview.height;
-	vestigial_frame->property_outline_color_rgba() = color_map[cVestigialFrameOutline];
-	vestigial_frame->property_fill_color_rgba() = color_map[cVestigialFrameFill];
+	vestigial_frame->property_outline_color_rgba() = Config->canvasvar_VestigialFrame.get();
+	vestigial_frame->property_fill_color_rgba() = Config->canvasvar_VestigialFrame.get();
 	vestigial_frame->hide ();
 
 	if (visibility & ShowFrame) {
@@ -160,8 +161,8 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 		frame->property_y1() = (double) 1.0;
 		frame->property_x2() = (double) trackview.editor.frame_to_pixel(duration);
 		frame->property_y2() = (double) trackview.height;
-		frame->property_outline_color_rgba() = color_map[cTimeAxisFrameOutline];
-		frame->property_fill_color_rgba() = color_map[cTimeAxisFrameFill];
+		frame->property_outline_color_rgba() = Config->canvasvar_TimeAxisFrame.get();
+		frame->property_fill_color_rgba() = Config->canvasvar_TimeAxisFrame.get();
 
 		/* by default draw all 4 edges */
 
@@ -196,8 +197,8 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 		}
 		name_highlight->property_y1() = (double) (trackview.height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE);
 		name_highlight->property_y2() = (double) (trackview.height - 1);
-		name_highlight->property_outline_color_rgba() = color_map[cNameHighlightFill];
-		name_highlight->property_fill_color_rgba() = color_map[cNameHighlightOutline];
+		name_highlight->property_outline_color_rgba() = Config->canvasvar_NameHighlightFill.get();
+		name_highlight->property_fill_color_rgba() = Config->canvasvar_NameHighlightOutline.get();
 
 		name_highlight->set_data ("timeaxisviewitem", this);
 
@@ -229,16 +230,16 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 		frame_handle_start->property_x2() = (double) TimeAxisViewItem::GRAB_HANDLE_LENGTH;
 		frame_handle_start->property_y1() = (double) 1.0;
 		frame_handle_start->property_y2() = (double) TimeAxisViewItem::GRAB_HANDLE_LENGTH+1;
-		frame_handle_start->property_outline_color_rgba() = color_map[cFrameHandleStartOutline];
-		frame_handle_start->property_fill_color_rgba() = color_map[cFrameHandleStartFill];
+		frame_handle_start->property_outline_color_rgba() = Config->canvasvar_FrameHandle.get();
+		frame_handle_start->property_fill_color_rgba() = Config->canvasvar_FrameHandle.get();
 		
 		frame_handle_end = new ArdourCanvas::SimpleRect (*group);
 		frame_handle_end->property_x1() = (double) (trackview.editor.frame_to_pixel(get_duration())) - (TimeAxisViewItem::GRAB_HANDLE_LENGTH);
 		frame_handle_end->property_x2() = (double) trackview.editor.frame_to_pixel(get_duration());
 		frame_handle_end->property_y1() = (double) 1;
 		frame_handle_end->property_y2() = (double) TimeAxisViewItem::GRAB_HANDLE_LENGTH + 1;
-		frame_handle_end->property_outline_color_rgba() = color_map[cFrameHandleEndOutline];
-		frame_handle_end->property_fill_color_rgba() = color_map[cFrameHandleEndFill];
+		frame_handle_end->property_outline_color_rgba() = Config->canvasvar_FrameHandle.get();
+		frame_handle_end->property_fill_color_rgba() = Config->canvasvar_FrameHandle.get();
 
 	} else {
 		frame_handle_start = 0;
@@ -797,11 +798,11 @@ TimeAxisViewItem::set_frame_color()
 		uint32_t r,g,b,a;
 		
 		if (_selected && should_show_selection) {
-			UINT_TO_RGBA(color_map[cSelectedFrameBase], &r, &g, &b, &a);
-			frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, fill_opacity);
+			UINT_TO_RGBA(Config->canvasvar_SelectedFrameBase.get(), &r, &g, &b, &a);
+			frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, a);
 		} else {
-			UINT_TO_RGBA(color_map[cFrameBase], &r, &g, &b, &a);
-			frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, fill_opacity);
+			UINT_TO_RGBA(Config->canvasvar_FrameBase.get(), &r, &g, &b, &a);
+			frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, a);
 		}
 	}
 }
@@ -815,11 +816,11 @@ TimeAxisViewItem::set_trim_handle_colors()
 {
 	if (frame_handle_start) {
 		if (position_locked) {
-			frame_handle_start->property_fill_color_rgba() = color_map[cTrimHandleLockedStart];
-			frame_handle_end->property_fill_color_rgba() = color_map[cTrimHandleLockedEnd];
+			frame_handle_start->property_fill_color_rgba() = Config->canvasvar_TrimHandleLocked.get();
+			frame_handle_end->property_fill_color_rgba() = Config->canvasvar_TrimHandleLocked.get();
 		} else {
-			frame_handle_start->property_fill_color_rgba() = color_map[cTrimHandleStart];
-			frame_handle_end->property_fill_color_rgba() = color_map[cTrimHandleEnd];
+			frame_handle_start->property_fill_color_rgba() = Config->canvasvar_TrimHandle.get();
+			frame_handle_end->property_fill_color_rgba() = Config->canvasvar_TrimHandle.get();
 		}
 	}
 }

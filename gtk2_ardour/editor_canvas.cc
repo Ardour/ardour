@@ -138,7 +138,6 @@ Editor::initialize_canvas ()
 	verbose_canvas_cursor = new ArdourCanvas::Text (*track_canvas.root());
 	verbose_canvas_cursor->property_font_desc() = font;
 	verbose_canvas_cursor->property_anchor() = ANCHOR_NW;
-	verbose_canvas_cursor->property_fill_color_rgba() = color_map[cVerboseCanvasCursor];
 	
 	verbose_cursor_visible = false;
 	
@@ -160,44 +159,30 @@ Editor::initialize_canvas ()
 	transport_marker_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height * 4.0);
 	
 	tempo_bar = new ArdourCanvas::SimpleRect (*tempo_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
-	tempo_bar->property_fill_color_rgba() = color_map[cTempoBar];
 	tempo_bar->property_outline_what() = (0x1 | 0x8);
 	tempo_bar->property_outline_pixels() = 1;
-	tempo_bar->property_outline_color_rgba() = color_map[cTempoSeparator];
 	
 	meter_bar = new ArdourCanvas::SimpleRect (*meter_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
-	meter_bar->property_fill_color_rgba() = color_map[cMeterBar];
 	meter_bar->property_outline_what() = (0x1 | 0x8);
 	meter_bar->property_outline_pixels() = 1;
-	meter_bar->property_outline_color_rgba() = color_map[cMeterSeparator];
 	
 	marker_bar = new ArdourCanvas::SimpleRect (*marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
-	marker_bar->property_fill_color_rgba() = color_map[cMarkerBar];
 	marker_bar->property_outline_what() = (0x1 | 0x8);
 	marker_bar->property_outline_pixels() = 1;
-	marker_bar->property_outline_color_rgba() = color_map[cMarkerSeparator];
 	
 	range_marker_bar = new ArdourCanvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
-	range_marker_bar->property_fill_color_rgba() = color_map[cRangeMarkerBar];
 	range_marker_bar->property_outline_what() = (0x1 | 0x8);
 	range_marker_bar->property_outline_pixels() = 1;
-	range_marker_bar->property_outline_color_rgba() = color_map[cRangeMarkerSeparator];
 	
 	transport_marker_bar = new ArdourCanvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
-	transport_marker_bar->property_fill_color_rgba() = color_map[cTransportMarkerBar];
 	transport_marker_bar->property_outline_what() = (0x1 | 0x8);
 	transport_marker_bar->property_outline_pixels() = 1;
-	transport_marker_bar->property_outline_color_rgba() = color_map[cTransportMarkerSeparator];
 
 	range_bar_drag_rect = new ArdourCanvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
-	range_bar_drag_rect->property_fill_color_rgba() = color_map[cRangeDragBarRectFill];
-	range_bar_drag_rect->property_outline_color_rgba() = color_map[cRangeDragBarRect];
 	range_bar_drag_rect->property_outline_pixels() = 0;
 	range_bar_drag_rect->hide ();
 	
 	transport_bar_drag_rect = new ArdourCanvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
-	transport_bar_drag_rect ->property_fill_color_rgba() = color_map[cTransportDragRectFill];
-	transport_bar_drag_rect->property_outline_color_rgba() = color_map[cTransportDragRect];
 	transport_bar_drag_rect->property_outline_pixels() = 0;
 	transport_bar_drag_rect->hide ();
 	
@@ -206,24 +191,17 @@ Editor::initialize_canvas ()
 
 	marker_drag_line = new ArdourCanvas::Line (*track_canvas.root());
 	marker_drag_line->property_width_pixels() = 1;
-	marker_drag_line->property_fill_color_rgba() = color_map[cMarkerDragLine];
 	marker_drag_line->property_points() = marker_drag_line_points;
 	marker_drag_line->hide();
 
 	range_marker_drag_rect = new ArdourCanvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
-	range_marker_drag_rect->property_fill_color_rgba() = color_map[cRangeDragRectFill];
-	range_marker_drag_rect->property_outline_color_rgba() = color_map[cRangeDragRect];
 	range_marker_drag_rect->hide ();
 	
 	transport_loop_range_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
-	transport_loop_range_rect->property_fill_color_rgba() = color_map[cTransportLoopRectFill];
-	transport_loop_range_rect->property_outline_color_rgba() = color_map[cTransportLoopRect];
 	transport_loop_range_rect->property_outline_pixels() = 1;
 	transport_loop_range_rect->hide();
 
 	transport_punch_range_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
-	transport_punch_range_rect->property_fill_color_rgba() = color_map[cTransportPunchRectFill];
-	transport_punch_range_rect->property_outline_color_rgba() = color_map[cTransportPunchRect];
 	transport_punch_range_rect->property_outline_pixels() = 0;
 	transport_punch_range_rect->hide();
 	
@@ -234,7 +212,6 @@ Editor::initialize_canvas ()
 	transport_punchin_line->property_y1() = 0.0;
 	transport_punchin_line->property_x2() = 0.0;
 	transport_punchin_line->property_y2() = 0.0;
-	transport_punchin_line->property_color_rgba() = color_map[cPunchInLine];
 	transport_punchin_line->hide ();
 	
 	transport_punchout_line  = new ArdourCanvas::SimpleLine (*time_line_group);
@@ -242,13 +219,10 @@ Editor::initialize_canvas ()
 	transport_punchout_line->property_y1() = 0.0;
 	transport_punchout_line->property_x2() = 0.0;
 	transport_punchout_line->property_y2() = 0.0;
-	transport_punchout_line->property_color_rgba() = color_map[cPunchOutLine];
 	transport_punchout_line->hide();
 	
 	// used to show zoom mode active zooming
 	zoom_rect = new ArdourCanvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
-	zoom_rect->property_fill_color_rgba() = color_map[cZoomRectFill];
-	zoom_rect->property_outline_color_rgba() = color_map[cZoomRect];
 	zoom_rect->property_outline_pixels() = 1;
 	zoom_rect->hide();
 	
@@ -256,8 +230,6 @@ Editor::initialize_canvas ()
 	
 	// used as rubberband rect
 	rubberband_rect = new ArdourCanvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
-	rubberband_rect->property_outline_color_rgba() = color_map[cRubberBandRect];
-	rubberband_rect->property_fill_color_rgba() = (guint32) color_map[cRubberBandRectFill];
 	rubberband_rect->property_outline_pixels() = 1;
 	rubberband_rect->hide();
 	
@@ -273,24 +245,15 @@ Editor::initialize_canvas ()
 	double time_height = timebar_height * 5;
 	double time_width = FLT_MAX/frames_per_unit;
 	time_canvas.set_scroll_region(0.0, 0.0, time_width, time_height);
-	
-	if (!color_map[cEditCursor]) {
-		 warning << _("edit cursor color not defined, check your ardour.colors file!") << endmsg;
-		color_map[cEditCursor] = RGBA_TO_UINT (30,30,30,255);
-	}
-
-	if (!color_map[cPlayHead]) {
-		warning << _("playhead color not defined, check your ardour.colors file!") << endmsg;
-		color_map[cPlayHead] = RGBA_TO_UINT (0,0,0,255);
-	}
 
 	edit_cursor = new Cursor (*this, &Editor::canvas_edit_cursor_event);
-	edit_cursor->canvas_item.property_fill_color_rgba() = color_map[cEditCursor];
 	playhead_cursor = new Cursor (*this, &Editor::canvas_playhead_cursor_event);
-	playhead_cursor->canvas_item.property_fill_color_rgba() = color_map[cPlayHead];
 
 	initial_ruler_update_required = true;
 	track_canvas.signal_size_allocate().connect (mem_fun(*this, &Editor::track_canvas_allocate));
+
+	ColorsChanged.connect (mem_fun (*this, &Editor::color_handler));
+	color_handler();
 
 }
 
@@ -732,5 +695,66 @@ Editor::canvas_horizontally_scrolled ()
 	update_fixed_rulers ();
 
 	redisplay_tempo (!_dragging_hscrollbar);
+}
+
+void
+Editor::color_handler()
+{
+	edit_cursor->canvas_item.property_fill_color_rgba() = Config->canvasvar_EditCursor.get();
+	playhead_cursor->canvas_item.property_fill_color_rgba() = Config->canvasvar_PlayHead.get();
+	verbose_canvas_cursor->property_fill_color_rgba() = Config->canvasvar_VerboseCanvasCursor.get();
+	
+	meter_bar->property_fill_color_rgba() = Config->canvasvar_MeterBar.get();
+	meter_bar->property_outline_color_rgba() = Config->canvasvar_MeterBar.get();
+
+	tempo_bar->property_fill_color_rgba() = Config->canvasvar_TempoBar.get();
+	tempo_bar->property_outline_color_rgba() = Config->canvasvar_TempoBar.get();
+
+	marker_bar->property_fill_color_rgba() = Config->canvasvar_MarkerBar.get();
+	marker_bar->property_outline_color_rgba() = Config->canvasvar_MarkerBar.get();
+
+	range_marker_bar->property_fill_color_rgba() = Config->canvasvar_RangeMarkerBar.get();
+	range_marker_bar->property_outline_color_rgba() = Config->canvasvar_RangeMarkerBar.get();
+
+	transport_marker_bar->property_fill_color_rgba() = Config->canvasvar_TransportMarkerBar.get();
+	transport_marker_bar->property_outline_color_rgba() = Config->canvasvar_TransportMarkerBar.get();
+
+	range_bar_drag_rect->property_fill_color_rgba() = Config->canvasvar_RangeDragBarRect.get();
+	range_bar_drag_rect->property_outline_color_rgba() = Config->canvasvar_RangeDragBarRect.get();
+
+	transport_bar_drag_rect->property_fill_color_rgba() = Config->canvasvar_TransportDragRect.get();
+	transport_bar_drag_rect->property_outline_color_rgba() = Config->canvasvar_TransportDragRect.get();
+
+	marker_drag_line->property_fill_color_rgba() = Config->canvasvar_MarkerDragLine.get();
+
+	range_marker_drag_rect->property_fill_color_rgba() = Config->canvasvar_RangeDragRect.get();
+	range_marker_drag_rect->property_outline_color_rgba() = Config->canvasvar_RangeDragRect.get();
+
+	transport_loop_range_rect->property_fill_color_rgba() = Config->canvasvar_TransportLoopRect.get();
+	transport_loop_range_rect->property_outline_color_rgba() = Config->canvasvar_TransportLoopRect.get();
+
+	transport_punch_range_rect->property_fill_color_rgba() = Config->canvasvar_TransportPunchRect.get();
+	transport_punch_range_rect->property_outline_color_rgba() = Config->canvasvar_TransportPunchRect.get();
+
+	transport_punchin_line->property_color_rgba() = Config->canvasvar_PunchLine.get();
+	transport_punchout_line->property_color_rgba() = Config->canvasvar_PunchLine.get();
+
+	zoom_rect->property_fill_color_rgba() = Config->canvasvar_ZoomRect.get();
+	zoom_rect->property_outline_color_rgba() = Config->canvasvar_ZoomRect.get();
+
+	rubberband_rect->property_outline_color_rgba() = Config->canvasvar_RubberBandRect.get();
+	rubberband_rect->property_fill_color_rgba() = (guint32) Config->canvasvar_RubberBandRect.get();
+
+	location_marker_color = Config->canvasvar_LocationMarker.get();
+	location_range_color = Config->canvasvar_LocationRange.get();
+	location_cd_marker_color = Config->canvasvar_LocationCDMarker.get();
+	location_loop_color = Config->canvasvar_LocationLoop.get();
+	location_punch_color = Config->canvasvar_LocationPunch.get();
+
+	refresh_location_display ();
+	redisplay_tempo (true);
+
+	if (session)
+		session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
 }
 
