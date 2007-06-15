@@ -447,7 +447,7 @@ Editor::Editor ()
 	edit_packer.attach (edit_vscrollbar,         3, 4, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
 
 	edit_packer.attach (time_button_frame,       0, 2, 0, 1,    FILL,        FILL, 0, 0);
-	edit_packer.attach (time_canvas_event_box,   2, 3, 0, 1,    FILL|EXPAND, FILL, 0, 0);
+	edit_packer.attach (time_canvas_event_box,   2, 4, 0, 1,    FILL|EXPAND, FILL, 0, 0);
 
 	edit_packer.attach (controls_layout,         1, 2, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
 	edit_packer.attach (track_canvas_event_box,  2, 3, 1, 2,    FILL|EXPAND, FILL|EXPAND, 0, 0);
