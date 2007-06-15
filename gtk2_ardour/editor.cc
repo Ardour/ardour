@@ -628,10 +628,10 @@ Editor::Editor ()
 
 	nlabel = manage (new Label (_("Regions")));
 	nlabel->set_angle (-90);
-       	the_notebook.append_page (region_list_scroller, *nlabel);
+	the_notebook.append_page (region_list_scroller, *nlabel);
 	nlabel = manage (new Label (_("Tracks/Busses")));
 	nlabel->set_angle (-90);
-       	the_notebook.append_page (route_list_scroller, *nlabel);
+	the_notebook.append_page (route_list_scroller, *nlabel);
 	nlabel = manage (new Label (_("Snapshots")));
 	nlabel->set_angle (-90);
 	the_notebook.append_page (snapshot_display_scroller, *nlabel);
@@ -812,6 +812,9 @@ Editor::show_window ()
 {
 	show_all ();
 	present ();
+	
+	/* re-hide editor list if necessary */
+	editor_list_button_toggled ();
 
 	/* now reset all audio_time_axis heights, because widgets might need
 	   to be re-hidden
@@ -1966,6 +1969,22 @@ Editor::set_state (const XMLNode& node)
 			tact->set_active (yn);
 		}
 	}
+	
+	if ((prop = node.property ("show-editor-list"))) {
+
+		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-list"));
+		assert(act);
+		if (act) {
+
+			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+			bool yn = (prop->value() == X_("yes"));
+
+			/* do it twice to force the change */
+			
+			tact->set_active (!yn);
+			tact->set_active (yn);
+		}
+	}
 
 
 	return 0;
@@ -2036,6 +2055,12 @@ Editor::get_state ()
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 		node->add_property (X_("show-editor-mixer"), tact->get_active() ? "yes" : "no");
+	}
+	
+	act = ActionManager::get_action (X_("Editor"), X_("show-editor-list"));
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		node->add_property (X_("show-editor-list"), tact->get_active() ? "yes" : "no");
 	}
 
 	return *node;

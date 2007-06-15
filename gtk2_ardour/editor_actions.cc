@@ -69,6 +69,8 @@ Editor::register_actions ()
 
 	act = ActionManager::register_toggle_action (editor_actions, "show-editor-mixer", _("Show Editor Mixer"), mem_fun (*this, &Editor::editor_mixer_button_toggled));
 	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (editor_actions, "show-editor-list", _("Show Editor List"), mem_fun (*this, &Editor::editor_list_button_toggled));
+	ActionManager::session_sensitive_actions.push_back (act);
 
 	RadioAction::Group crossfade_model_group;
 

@@ -268,6 +268,7 @@ class Editor : public PublicEditor
 	Width editor_mixer_strip_width;
 	void maybe_add_mixer_strip_width (XMLNode&);
 	void show_editor_mixer (bool yn);
+	void show_editor_list (bool yn);
 	void set_selected_mixer_strip (TimeAxisView&);
 	void hide_track_in_display (TimeAxisView& tv);
 	void show_track_in_display (TimeAxisView& tv);
@@ -721,7 +722,6 @@ class Editor : public PublicEditor
 
 	Gtk::Menu          *region_list_menu;
 	Gtk::ScrolledWindow region_list_scroller;
-	Gtk::Frame          region_list_frame;
 
 	bool region_list_display_key_press (GdkEventKey *);
 	bool region_list_display_key_release (GdkEventKey *);
@@ -1291,9 +1291,11 @@ class Editor : public PublicEditor
 
 	/* toolbar */
 	
-	Gtk::ToggleButton        editor_mixer_button;
+	Gtk::ToggleButton editor_mixer_button;
+	Gtk::ToggleButton editor_list_button;
 
 	void editor_mixer_button_toggled ();
+	void editor_list_button_toggled ();
 
 	AudioClock               edit_cursor_clock;
 	AudioClock               zoom_range_clock;

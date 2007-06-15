@@ -48,6 +48,16 @@ Editor::editor_mixer_button_toggled ()
 }
 
 void
+Editor::editor_list_button_toggled ()
+{
+	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-list"));
+	if (act) {
+		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic(act);
+		show_editor_list (tact->get_active());
+	}
+}
+
+void
 Editor::cms_deleted ()
 {
 	current_mixer_strip = 0;
@@ -127,6 +137,16 @@ Editor::show_editor_mixer (bool yn)
 				global_hpacker.remove (*current_mixer_strip);
 			}
 		}
+	}
+}
+
+void
+Editor::show_editor_list (bool yn)
+{
+	if (yn) {
+		the_notebook.show();
+	} else {
+		the_notebook.hide();
 	}
 }
 
@@ -335,6 +355,9 @@ Editor::session_going_away ()
 
 	editor_mixer_button.set_active(false);
 	editor_mixer_button.set_sensitive(false);
+	editor_list_button.set_active(false);
+	editor_list_button.set_sensitive(false);
+	
 	/* clear tempo/meter rulers */
 
 	remove_metric_marks ();

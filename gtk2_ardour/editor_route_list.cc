@@ -124,6 +124,7 @@ Editor::handle_new_route (Session::RouteList& routes)
 	}
 
 	editor_mixer_button.set_sensitive(true);
+	editor_list_button.set_sensitive(true);
 }
 
 void
@@ -167,6 +168,10 @@ Editor::remove_route (TimeAxisView *tv)
 
 	if (track_views.size() == 0) {
 		editor_mixer_button.set_sensitive(false);
+		
+		editor_list_button.set_active(false);
+		ActionManager::uncheck_toggleaction ("<Actions>/Editor/show-editor-list");
+		editor_list_button.set_sensitive(false);
 	}
 }
 
