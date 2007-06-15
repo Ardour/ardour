@@ -116,13 +116,12 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 		_view->RegionViewAdded.connect (mem_fun(*this, &MidiTimeAxisView::region_view_added));
 		_view->attach ();
 
-	} else { /* bus */
+	} /*else { // no MIDI busses yet
 
-		throw; // what the?
 		controls_ebox.set_name ("MidiBusControlsBaseUnselected");
 		controls_base_selected_name = "MidiBusControlsBaseSelected";
 		controls_base_unselected_name = "MidiBusControlsBaseUnselected";
-	}
+	}*/
 }
 
 MidiTimeAxisView::~MidiTimeAxisView ()

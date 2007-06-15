@@ -865,11 +865,11 @@ style "track_controls_inactive"
 
 style "edit_controls_base_selected"
 {
-	bg[NORMAL] = { 0.60, 0.54, 0.60 }
-	bg[ACTIVE] = { 0.60, 0.54, 0.60 }
-	bg[INSENSITIVE] = { 0.60, 0.54, 0.60 }
-	bg[SELECTED] = { 0.60, 0.54, 0.60 }
-	bg[PRELIGHT] = { 0.60, 0.54, 0.60 }
+	bg[NORMAL] = { 0.32, 0.32, 0.54 }
+	bg[ACTIVE] = { 0.32, 0.32, 0.54 }
+	bg[INSENSITIVE] = { 0.32, 0.32, 0.54 }
+	bg[SELECTED] = { 0.32, 0.32, 0.54 }
+	bg[PRELIGHT] = { 0.32, 0.32, 0.54 }
 }
 
 style "automation_track_controls_base"
@@ -1327,8 +1327,10 @@ widget "*FramesRuler" style:highest "editor_time_ruler"
 widget "*MinSecRuler" style:highest "editor_time_ruler"
 widget "*BaseFrame" style:highest "base_frame"
 widget "*AudioTrackStripBase" style:highest "audio_track_base"
+widget "*MidiTrackStripBase" style:highest "midi_track_base"
 widget "*TimeAxisViewControlsBaseUnselected" style:highest "audio_track_base"
 widget "*AudioTrackControlsBaseUnselected" style:highest "audio_track_base"
+widget "*MidiTrackControlsBaseUnselected" style:highest "midi_track_base"
 widget "*AudioTrackFader" style:highest "gain_fader"
 widget "*AudioBusStripBase" style:highest "audio_bus_base"
 widget "*BusControlsBaseUnselected" style:highest "audio_bus_base"
@@ -1363,8 +1365,10 @@ widget "*AudioTrackControlsBaseInactiveSelected" style:highest "track_controls_i
 widget "*BusControlsBaseInactiveSelected" style:highest "track_controls_inactive"
 widget "*AutomationTrackControlsBaseInactiveSelected" style:highest "track_controls_inactive"
 widget "*AudioTrackStripBaseInactive" style:highest "track_controls_inactive"
+widget "*MidiTrackStripBaseInactive" style:highest "track_controls_inactive"
 widget "*AudioBusStripBaseInactive" style:highest "track_controls_inactive"
 widget "*AudioTrackControlsBaseSelected" style:highest "edit_controls_base_selected"
+widget "*MidiTrackControlsBaseSelected" style:highest "edit_controls_base_selected"
 widget "*BusControlsBaseSelected" style:highest "edit_controls_base_selected"
 widget "*AutomationTrackControlsBase" style:highest "automation_track_controls_base"
 widget "*AutomationTrackControlsBaseSelected" style:highest "edit_controls_base_selected"
