@@ -42,11 +42,11 @@
   <Canvas>
     <Option name="waveform" value="000000cc"/>
     <Option name="clipped waveform" value="ff0000e5"/>
-    <Option name="region base" value="bfbfc1ff"/>
+    <Option name="region base" value="bfbfc1aa"/>
     <Option name="selected region base" value="b591a8ff"/>
     <Option name="audio track base" value="c6d3d868"/>
     <Option name="audio bus base" value="dbd1ea68"/>
-    <Option name="midi track base" value="00000033"/>
+    <Option name="midi track base" value="ff8f8f3d"/>
     <Option name="midi bus base" value="ff0000ee"/>
     <Option name="time-stretch-fill" value="e2b5b596"/>
     <Option name="time-stretch-outline" value="63636396"/>
