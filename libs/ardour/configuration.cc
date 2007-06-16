@@ -54,7 +54,7 @@ Configuration::Configuration ()
 #undef  CONFIG_VARIABLE_SPECIAL
 
 #undef  CANVAS_VARIABLE
-#define CANVAS_VARIABLE(var,name,value) var (name,value),  // <-- is this really so bad?
+#define CANVAS_VARIABLE(var,name) var (name),  // <-- is this really so bad?
 #include "ardour/canvas_vars.h"
 #undef  CANVAS_VARIABLE
 
@@ -76,6 +76,8 @@ Configuration::set_current_owner (ConfigVariableBase::Owner owner)
 int
 Configuration::load_state ()
 {
+	bool found = false;
+
 	string rcfile;
 	
 	/* load system configuration first */
@@ -85,6 +87,7 @@ Configuration::load_state ()
 	if (rcfile.length()) {
 
 		XMLTree tree;
+		found = true;
 
 		cerr << string_compose (_("loading system configuration file %1"), rcfile) << endl;
 		
@@ -109,6 +112,7 @@ Configuration::load_state ()
 	if (rcfile.length()) {
 
 		XMLTree tree;
+		found = true;
 		
 		cerr << string_compose (_("loading user configuration file %1"), rcfile) << endl;
 
@@ -124,6 +128,9 @@ Configuration::load_state ()
 			return -1;
 		}
 	}
+
+	if (!found)
+		error << "Ardour: could not find configuration file (ardour.rc), canvas will look broken." << endmsg;
 
 	pack_canvasvars();
 	return 0;
@@ -199,7 +206,7 @@ Configuration::get_variables (sigc::slot<bool,ConfigVariableBase::Owner> predica
 #undef  CONFIG_VARIABLE_SPECIAL	
 
 #undef  CANVAS_VARIABLE
-#define CANVAS_VARIABLE(var,Name,value) if (node->name() == "Canvas") { if (predicate (ConfigVariableBase::Config)) { var.add_to_node (*node); }}
+#define CANVAS_VARIABLE(var,Name) if (node->name() == "Canvas") { if (predicate (ConfigVariableBase::Config)) { var.add_to_node (*node); }}
 #include "ardour/canvas_vars.h"
 #undef  CANVAS_VARIABLE
 
@@ -270,7 +277,7 @@ Configuration::set_variables (const XMLNode& node, ConfigVariableBase::Owner own
 #undef  CONFIG_VARIABLE_SPECIAL	
 
 #undef  CANVAS_VARIABLE
-#define CANVAS_VARIABLE(var,name,value) \
+#define CANVAS_VARIABLE(var,name) \
          if (var.set_from_node (node, owner)) { \
 		 ParameterChanged (name); \
 		 }
@@ -283,7 +290,7 @@ void
 Configuration::pack_canvasvars ()
 {
 #undef  CANVAS_VARIABLE
-#define CANVAS_VARIABLE(var,name,value) canvas_colors.push_back(&var); 
+#define CANVAS_VARIABLE(var,name) canvas_colors.push_back(&var); 
 #include "ardour/canvas_vars.h"
 #undef  CANVAS_VARIABLE
 	cerr << "Configuration::pack_canvasvars () called, canvas_colors.size() = " << canvas_colors.size() << endl;

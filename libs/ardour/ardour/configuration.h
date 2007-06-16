@@ -43,13 +43,13 @@ class Configuration : public Stateful
 	virtual ~Configuration();
 
 	struct MidiPortDescriptor {
-	    std::string tag;
-	    std::string device;
-	    std::string type;
-	    std::string mode;
+		std::string tag;
+		std::string device;
+		std::string type;
+		std::string mode;
 
-	    MidiPortDescriptor (const XMLNode&);
-	    XMLNode& get_state();
+		MidiPortDescriptor (const XMLNode&);
+		XMLNode& get_state();
 	};
 
 	std::map<std::string,MidiPortDescriptor *> midi_ports;
@@ -73,7 +73,7 @@ class Configuration : public Stateful
 
 	sigc::signal<void,const char*> ParameterChanged;
 
-        /* define accessor methods */
+	/* define accessor methods */
 
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
@@ -88,13 +88,13 @@ class Configuration : public Stateful
 #undef  CONFIG_VARIABLE_SPECIAL
 
 #undef  CANVAS_VARIABLE
-#define CANVAS_VARIABLE(var,name,value) ConfigVariable<uint32_t> var;  // <-- is this really so bad?
+#define CANVAS_VARIABLE(var,name) ConfigVariable<uint32_t> var;  // <-- is this really so bad?
 #include "ardour/canvas_vars.h"
 #undef  CANVAS_VARIABLE
 
   private:
 
-        /* declare variables */
+	/* declare variables */
 
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL	

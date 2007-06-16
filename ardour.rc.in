@@ -39,6 +39,89 @@
     <Option name="periodic-safety-backup-interval" value="120"/>
 	<Option name="ui-rc-file" value="ardour2_ui_dark.rc"/>
   </Config>
+  <Canvas>
+    <Option name="waveform" value="000000cc"/>
+    <Option name="clipped waveform" value="ff0000e5"/>
+    <Option name="region base" value="bfbfc1ff"/>
+    <Option name="selected region base" value="b591a8ff"/>
+    <Option name="audio track base" value="c6d3d868"/>
+    <Option name="audio bus base" value="dbd1ea68"/>
+    <Option name="midi track base" value="00000033"/>
+    <Option name="midi bus base" value="ff0000ee"/>
+    <Option name="time-stretch-fill" value="e2b5b596"/>
+    <Option name="time-stretch-outline" value="63636396"/>
+    <Option name="automation line" value="44bc59ff"/>
+    <Option name="redirect automation line" value="7aa3f9ff"/>
+    <Option name="control point fill" value="000000ff"/>
+    <Option name="control point outline" value="000000ff"/>
+    <Option name="entered control point outline" value="ff0000ee"/>
+    <Option name="entered control point selected" value="ff3535ff"/>
+    <Option name="entered control point" value="000000cc"/>
+    <Option name="control point selected" value="00ff00ff"/>
+    <Option name="control point" value="ff0000ff"/>
+    <Option name="automation track fill" value="a0a0ce68"/>
+    <Option name="automation track outline" value="282828ff"/>
+    <Option name="crossfade editor base" value="282d49ff"/>
+    <Option name="crossfade editor line" value="000000ff"/>
+    <Option name="selected crossfade editor line" value="00dbdbff"/>
+    <Option name="crossfade editor line shading" value="00a0d154"/>
+    <Option name="crossfade editor point fill" value="00ff00ff"/>
+    <Option name="crossfade editor point outline" value="0000ffff"/>
+    <Option name="crossfade editor wave" value="ffffff28"/>
+    <Option name="selected crossfade editor wave" value="f9ea14a0"/>
+    <Option name="crossfade line" value="000000ff"/>
+    <Option name="active crossfade" value="e8ed3d77"/>
+    <Option name="inactive crossfade" value="e8ed3d77"/>
+    <Option name="location marker" value="c4f411ff"/>
+    <Option name="location range" value="497a59ff"/>
+    <Option name="location cd marker" value="1ee8c4ff"/>
+    <Option name="location loop" value="35964fff"/>
+    <Option name="location punch" value="7c3a3aff"/>
+    <Option name="verbose canvas cursor" value="f4f214bc"/>
+    <Option name="marker label" value="000000ff"/>
+    <Option name="tempo bar" value="72727fff"/>
+    <Option name="meterbar" value="666672ff"/>
+    <Option name="markerbar" value="7f7f8cff"/>
+    <Option name="rangemarker bar" value="8c8c96ff"/>
+    <Option name="TransportMarkerBar" value="9898a3ff"/>
+    <Option name="RangeDragBarRect" value="969696c6"/>
+    <Option name="RangeDragRect" value="82c696c6"/>
+    <Option name="TransportDragRect" value="969696c6"/>
+    <Option name="MarkerDragLine" value="004f00f9"/>
+    <Option name="TransportLoopRect" value="1e7728f9"/>
+    <Option name="TransportPunchRect" value="6d2828e5"/>
+    <Option name="PunchLine" value="a80000ff"/>
+    <Option name="ZoomRect" value="c6d1b26d"/>
+    <Option name="RubberBandRect" value="c6c6c659"/>
+    <Option name="EnteredGainLine" value="dd6363ff"/>
+    <Option name="EnteredAutomationLine" value="dd6363ff"/>
+    <Option name="EnteredMarker" value="dd6363ff"/>
+    <Option name="MeterMarker" value="f2425bff"/>
+    <Option name="TempoMarker" value="f2425bff"/>
+    <Option name="MeasureLineBeat" value="72727266"/>
+    <Option name="MeasureLineBar" value="8c8c988c"/>
+    <Option name="GhostTrackBase" value="44007c7f"/>
+    <Option name="GhostTrackWave" value="02fd004c"/>
+    <Option name="GhostTrackWaveClip" value="ff000000"/>
+    <Option name="GhostTrackZeroLine" value="e500e566"/>
+    <Option name="ImageTrack" value="ddddd8ff"/>
+    <Option name="MarkerTrack" value="ddddd8ff"/>
+    <Option name="ZeroLine" value="b5b5b5ff"/>
+    <Option name="GainLine" value="ff00ff00"/>
+    <Option name="GainLineInactive" value="f0f0ffff"/>
+    <Option name="RecordingRect" value="e5c6c6ff"/>
+    <Option name="SelectionRect" value="e8f4d377"/>
+    <Option name="Selection" value="636363b2"/>
+    <Option name="VestigialFrame" value="44007c0f"/>
+    <Option name="TimeAxisFrame" value="44007c0f"/>
+    <Option name="NameHighlightFill" value="0000ffff"/>
+    <Option name="NameHighlightOutline" value="7c00ff96"/>
+    <Option name="FrameHandle" value="7c00ff96"/>
+    <Option name="TrimHandleLocked" value="ea0f0f28"/>
+    <Option name="TrimHandle" value="1900ff44"/>
+    <Option name="EditCursor" value="0000ffff"/>
+    <Option name="PlayHead" value="ff0000ff"/>
+  </Canvas>
   <extra>
     <Keyboard edit-button="3" edit-modifier="4" delete-button="3" delete-modifier="1" snap-modifier="32"/>
   </extra>

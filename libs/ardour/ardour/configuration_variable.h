@@ -82,6 +82,11 @@ class ConfigVariable : public ConfigVariableBase
 
 	void add_to_node (XMLNode& node) {
 		std::stringstream ss;
+		if (node.name() == "Canvas") {
+			ss << std::hex;
+			ss.fill(0);
+			ss.width(8);
+		}
 		ss << value;
 		show_stored_value (ss.str());
 		XMLNode* child = new XMLNode ("Option");
@@ -89,7 +94,7 @@ class ConfigVariable : public ConfigVariableBase
 		child->add_property ("value", ss.str());
 		node.add_child_nocopy (*child);
 	}
-
+	
 	bool set_from_node (const XMLNode& node, Owner owner) {
 
 		if (node.name() == "Config" || node.name() == "Canvas") {
@@ -112,6 +117,8 @@ class ConfigVariable : public ConfigVariableBase
 						if (prop->value() == _name) {
 							if ((prop = child->property ("value")) != 0) {
 								std::stringstream ss;
+								if (node.name() == "Canvas")
+									ss << std::hex;
 								ss << prop->value();
 								ss >> value;
 								_owner = (ConfigVariableBase::Owner)(_owner |owner);
