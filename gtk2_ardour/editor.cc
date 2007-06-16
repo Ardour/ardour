@@ -137,8 +137,8 @@ static const gchar *_zoom_focus_strings[] = {
 	N_("Left"),
 	N_("Right"),
 	N_("Center"),
-	N_("Playhead"),
- 	N_("Edit Cursor"),
+	N_("Play"),
+ 	N_("Edit"),
 	0
 };
 
@@ -2419,7 +2419,7 @@ Editor::setup_toolbar ()
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_full_button, _("Zoom to Session"));
 
 	zoom_focus_selector.set_name ("ZoomFocusSelector");
-	Gtkmm2ext::set_size_request_to_display_given_text (zoom_focus_selector, "Edit Cursor", FUDGE, 0);
+	Gtkmm2ext::set_size_request_to_display_given_text (zoom_focus_selector, "Center", FUDGE, 0);
 	set_popdown_strings (zoom_focus_selector, zoom_focus_strings);
 	zoom_focus_selector.signal_changed().connect (mem_fun(*this, &Editor::zoom_focus_selection_done));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_focus_selector, _("Zoom focus"));
@@ -2887,9 +2887,9 @@ Editor::zoom_focus_selection_done ()
 		focus_type = ZoomFocusRight;
 	} else if (choice == _("Center")) {
 		focus_type = ZoomFocusCenter;
-	} else if (choice == _("Playhead")) {
+	} else if (choice == _("Play")) {
 		focus_type = ZoomFocusPlayhead;
-	} else if (choice == _("Edit Cursor")) {
+	} else if (choice == _("Edit")) {
 		focus_type = ZoomFocusEdit;
 	} 
 	

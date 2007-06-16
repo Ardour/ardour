@@ -665,7 +665,6 @@ class Editor : public PublicEditor
 	Gtk::VBox           track_canvas_vbox;
 	Gtk::VBox           time_canvas_vbox;
 	Gtk::VBox           edit_controls_vbox;
-	Gtk::HBox           edit_controls_hbox;
 
 	void control_scroll (float);
 	bool deferred_control_scroll (nframes_t);
