@@ -705,19 +705,19 @@ Editor::color_handler()
 	verbose_canvas_cursor->property_fill_color_rgba() = Config->canvasvar_VerboseCanvasCursor.get();
 	
 	meter_bar->property_fill_color_rgba() = Config->canvasvar_MeterBar.get();
-	meter_bar->property_outline_color_rgba() = Config->canvasvar_MeterBar.get();
+	meter_bar->property_outline_color_rgba() = Config->canvasvar_MarkerBarSeparator.get();
 
 	tempo_bar->property_fill_color_rgba() = Config->canvasvar_TempoBar.get();
-	tempo_bar->property_outline_color_rgba() = Config->canvasvar_TempoBar.get();
+	tempo_bar->property_outline_color_rgba() = Config->canvasvar_MarkerBarSeparator.get();
 
 	marker_bar->property_fill_color_rgba() = Config->canvasvar_MarkerBar.get();
-	marker_bar->property_outline_color_rgba() = Config->canvasvar_MarkerBar.get();
+	marker_bar->property_outline_color_rgba() = Config->canvasvar_MarkerBarSeparator.get();
 
 	range_marker_bar->property_fill_color_rgba() = Config->canvasvar_RangeMarkerBar.get();
-	range_marker_bar->property_outline_color_rgba() = Config->canvasvar_RangeMarkerBar.get();
+	range_marker_bar->property_outline_color_rgba() = Config->canvasvar_MarkerBarSeparator.get();
 
 	transport_marker_bar->property_fill_color_rgba() = Config->canvasvar_TransportMarkerBar.get();
-	transport_marker_bar->property_outline_color_rgba() = Config->canvasvar_TransportMarkerBar.get();
+	transport_marker_bar->property_outline_color_rgba() = Config->canvasvar_MarkerBarSeparator.get();
 
 	range_bar_drag_rect->property_fill_color_rgba() = Config->canvasvar_RangeDragBarRect.get();
 	range_bar_drag_rect->property_outline_color_rgba() = Config->canvasvar_RangeDragBarRect.get();

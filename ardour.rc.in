@@ -79,6 +79,7 @@
     <Option name="location punch" value="7c3a3aff"/>
     <Option name="verbose canvas cursor" value="f4f214bc"/>
     <Option name="marker label" value="000000ff"/>
+    <Option name="marker bar separator" value="30303088"/>
     <Option name="tempo bar" value="72727fff"/>
     <Option name="meterbar" value="666672ff"/>
     <Option name="markerbar" value="7f7f8cff"/>
