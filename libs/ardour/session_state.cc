@@ -1868,15 +1868,6 @@ Session::template_dir ()
 }
 
 string
-Session::export_dir () const
-{
-	string res = _path;
-	res += export_dir_name;
-	res += '/';
-	return res;
-}
-
-string
 Session::suffixed_search_path (string suffix, bool data)
 {
 	string path;

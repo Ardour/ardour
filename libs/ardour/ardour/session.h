@@ -247,7 +247,6 @@ class Session : public PBD::StatefulDestructible
 	string name() const { return _name; }
 	string snap_name() const { return _current_snapshot_name; }
 	string raid_path () const;
-	string export_dir () const;
 
 	void set_snap_name ();
 
