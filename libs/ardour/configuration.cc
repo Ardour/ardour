@@ -22,6 +22,7 @@
 
 #include <pbd/failed_constructor.h>
 #include <pbd/xml++.h>
+#include <pbd/filesystem.h>
 
 #include <ardour/ardour.h>
 #include <ardour/configuration.h>

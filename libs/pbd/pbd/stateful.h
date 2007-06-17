@@ -27,6 +27,10 @@ class XMLNode;
 
 namespace PBD {
 
+namespace sys {
+	class path;
+}
+
 class Stateful {
   public:
 	Stateful();
@@ -45,8 +49,8 @@ class Stateful {
 
   protected:
 
-	void add_instant_xml (XMLNode&, const std::string& dir);
-	XMLNode *instant_xml (const std::string& str, const std::string& dir);
+	void add_instant_xml (XMLNode&, const sys::path& directory_path);
+	XMLNode *instant_xml (const std::string& str, const sys::path& directory_path);
 
 	XMLNode *_extra_xml;
 	XMLNode *_instant_xml;

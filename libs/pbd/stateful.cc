@@ -21,6 +21,7 @@
 #include <unistd.h>
 
 #include <pbd/stateful.h>
+#include <pbd/filesystem.h>
 #include <pbd/xml++.h>
 #include <pbd/error.h>
 
@@ -75,7 +76,7 @@ Stateful::extra_xml (const string& str)
 }
 
 void
-Stateful::add_instant_xml (XMLNode& node, const string& dir)
+Stateful::add_instant_xml (XMLNode& node, const sys::path& directory_path)
 {
 	if (_instant_xml == 0) {
 		_instant_xml = new XMLNode ("instant");
@@ -83,9 +84,13 @@ Stateful::add_instant_xml (XMLNode& node, const string& dir)
 
 	_instant_xml->remove_nodes_and_delete (node.name());
 	_instant_xml->add_child_copy (node);
+
+	sys::path instant_xml_path(directory_path);
+
+	instant_xml_path /= "instant.xml";
 	
 	XMLTree tree;
-	tree.set_filename(dir+"/instant.xml");
+	tree.set_filename(instant_xml_path.to_string());
 
 	/* Important: the destructor for an XMLTree deletes
 	   all of its nodes, starting at _root. We therefore
@@ -101,21 +106,24 @@ Stateful::add_instant_xml (XMLNode& node, const string& dir)
 	tree.set_root (copy);
 
 	if (!tree.write()) {
-		error << string_compose(_("Error: could not write %1"), dir+"/instant.xml") << endmsg;
+		error << string_compose(_("Error: could not write %1"), instant_xml_path.to_string()) << endmsg;
 	}
 }
 
 XMLNode *
-Stateful::instant_xml (const string& str, const string& dir)
+Stateful::instant_xml (const string& str, const sys::path& directory_path)
 {
 	if (_instant_xml == 0) {
-		string instant_file = dir + "/instant.xml";
-		if (access(instant_file.c_str(), F_OK) == 0) {
+
+		sys::path instant_xml_path(directory_path);
+		instant_xml_path /= "instant.xml";
+
+		if (exists(instant_xml_path)) {
 			XMLTree tree;
-			if (tree.read(dir+"/instant.xml")) {
+			if (tree.read(instant_xml_path.to_string())) {
 				_instant_xml = new XMLNode(*(tree.root()));
 			} else {
-				warning << string_compose(_("Could not understand XML file %1"), instant_file) << endmsg;
+				warning << string_compose(_("Could not understand XML file %1"), instant_xml_path.to_string()) << endmsg;
 				return 0;
 			}
 		} else {
