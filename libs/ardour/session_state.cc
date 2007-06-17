@@ -2740,12 +2740,17 @@ Session::controllable_by_id (const PBD::ID& id)
 }
 
 void 
-Session::add_instant_xml (XMLNode& node, const std::string& dir)
+Session::add_instant_xml (XMLNode& node)
 {
-	Stateful::add_instant_xml (node, dir);
-	Config->add_instant_xml (node, get_user_ardour_path());
+	Stateful::add_instant_xml (node, _path);
+	Config->add_instant_xml (node);
 }
 
+XMLNode*
+Session::instant_xml (const string& node_name)
+{
+	return Stateful::instant_xml (node_name, _path);
+}
 
 int 
 Session::save_history (string snapshot_name)

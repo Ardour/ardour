@@ -431,7 +431,7 @@ ExportDialog::connect_to_session (Session *s)
 void
 ExportDialog::set_state()
 {
-	XMLNode* node = session->instant_xml(X_("ExportDialog"), session->path());
+	XMLNode* node = session->instant_xml(X_("ExportDialog"));
 	XMLProperty* prop;
 
 	if (node) {
@@ -582,7 +582,7 @@ ExportDialog::save_state()
 	}
 	node->add_child_nocopy(*tracks);
 	
-	session->add_instant_xml(*node, session->path());
+	session->add_instant_xml(*node);
 }
 
 void

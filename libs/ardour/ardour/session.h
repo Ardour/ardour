@@ -440,8 +440,10 @@ class Session : public PBD::StatefulDestructible
 	XMLNode& get_state();
 	int      set_state(const XMLNode& node); // not idempotent
 	XMLNode& get_template();
-	
-	void add_instant_xml (XMLNode&, const std::string& dir);
+
+	/// The instant xml file is written to the session directory
+	void add_instant_xml (XMLNode&);
+	XMLNode * instant_xml (const std::string& str);
 
 	enum StateOfTheState {
 		Clean = 0x0,

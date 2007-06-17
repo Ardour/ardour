@@ -156,6 +156,19 @@ Configuration::save_state()
 	return 0;
 }
 
+void
+Configuration::add_instant_xml(XMLNode& node)
+{
+	Stateful::add_instant_xml (node, get_user_ardour_path());
+}
+
+XMLNode*
+Configuration::instant_xml(const string& node_name)
+{
+	return Stateful::instant_xml (node_name, get_user_ardour_path());
+}
+
+
 bool
 Configuration::save_config_options_predicate (ConfigVariableBase::Owner owner)
 {

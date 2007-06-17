@@ -845,9 +845,9 @@ Editor::instant_save ()
 	}
 
 	if (session) {
-		session->add_instant_xml(get_state(), session->path());
+		session->add_instant_xml(get_state());
 	} else {
-		Config->add_instant_xml(get_state(), get_user_ardour_path());
+		Config->add_instant_xml(get_state());
 	}
 }
 

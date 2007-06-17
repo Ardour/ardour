@@ -428,11 +428,11 @@ ARDOUR_UI::save_ardour_state ()
 	XMLNode mnode(mixer->get_state());
 
 	if (session) {
-		session->add_instant_xml (enode, session->path());
-		session->add_instant_xml (mnode, session->path());
+		session->add_instant_xml (enode);
+		session->add_instant_xml (mnode);
 	} else {
-		Config->add_instant_xml (enode, get_user_ardour_path());
-		Config->add_instant_xml (mnode, get_user_ardour_path());
+		Config->add_instant_xml (enode);
+		Config->add_instant_xml (mnode);
 	}
 
 	save_keybindings ();
@@ -481,7 +481,7 @@ void
 ARDOUR_UI::no_memory_warning ()
 {
 	XMLNode node (X_("no-memory-warning"));
-	Config->add_instant_xml (node, get_user_ardour_path());
+	Config->add_instant_xml (node);
 }
 
 void
@@ -492,7 +492,7 @@ ARDOUR_UI::check_memory_locking ()
 	return;
 #else // !__APPLE__
 
-	XMLNode* memory_warning_node = Config->instant_xml (X_("no-memory-warning"), get_user_ardour_path());
+	XMLNode* memory_warning_node = Config->instant_xml (X_("no-memory-warning"));
 
 	if (engine->is_realtime() && memory_warning_node == 0) {
 
@@ -2446,9 +2446,9 @@ ARDOUR_UI::mixer_settings () const
 	XMLNode* node = 0;
 
 	if (session) {
-		node = session->instant_xml(X_("Mixer"), session->path());
+		node = session->instant_xml(X_("Mixer"));
 	} else {
-		node = Config->instant_xml(X_("Mixer"), get_user_ardour_path());
+		node = Config->instant_xml(X_("Mixer"));
 	}
 
 	if (!node) {
@@ -2464,9 +2464,9 @@ ARDOUR_UI::editor_settings () const
 	XMLNode* node = 0;
 
 	if (session) {
-		node = session->instant_xml(X_("Editor"), session->path());
+		node = session->instant_xml(X_("Editor"));
 	} else {
-		node = Config->instant_xml(X_("Editor"), get_user_ardour_path());
+		node = Config->instant_xml(X_("Editor"));
 	}
 
 	if (!node) {

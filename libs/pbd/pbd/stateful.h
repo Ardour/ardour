@@ -41,11 +41,13 @@ class Stateful {
 	void add_extra_xml (XMLNode&);
 	XMLNode *extra_xml (const std::string& str);
 
-	virtual void add_instant_xml (XMLNode&, const std::string& dir);
-	XMLNode *instant_xml (const std::string& str, const std::string& dir);
 	const PBD::ID& id() const { return _id; }
 
   protected:
+
+	void add_instant_xml (XMLNode&, const std::string& dir);
+	XMLNode *instant_xml (const std::string& str, const std::string& dir);
+
 	XMLNode *_extra_xml;
 	XMLNode *_instant_xml;
 	PBD::ID _id;
