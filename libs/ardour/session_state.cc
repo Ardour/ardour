@@ -1851,15 +1851,6 @@ Session::XMLNamedSelectionFactory (const XMLNode& node)
 }
 
 string
-Session::peak_dir () const
-{
-	string res = _path;
-	res += peak_dir_name;
-	res += '/';
-	return res;
-}
-	
-string
 Session::automation_dir () const
 {
 	string res = _path;

@@ -260,7 +260,6 @@ class Session : public PBD::StatefulDestructible
 
 	const SessionDirectory& session_directory () const { return *(_session_dir.get()); }
 
-	std::string peak_dir () const;
 	std::string automation_dir () const;
 
 	static string suffixed_search_path (std::string suffix, bool data);
