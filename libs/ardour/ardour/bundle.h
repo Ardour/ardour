@@ -36,7 +36,7 @@ namespace ARDOUR {
  *  JACK ports.
  */
 
-class Bundle : public Stateful, public sigc::trackable {
+class Bundle : public PBD::Stateful, public sigc::trackable {
   public:
 	/**
 	 *  Bundle constructor.

@@ -37,7 +37,7 @@ class Parser;
 
 }
 
-class MIDIControllable : public Stateful
+class MIDIControllable : public PBD::Stateful
 {
   public:
 	MIDIControllable (MIDI::Port&, PBD::Controllable&, bool bistate = false);

@@ -38,7 +38,7 @@ class Track;
 class AudioTrack;
 class Session;
 
-class RouteGroup : public Stateful, public sigc::trackable {
+class RouteGroup : public PBD::Stateful, public sigc::trackable {
   public:
     enum Flag {
 	    Relative = 0x1,

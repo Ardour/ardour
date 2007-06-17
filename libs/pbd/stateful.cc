@@ -26,7 +26,7 @@
 
 #include "i18n.h"
 
-using namespace PBD;
+namespace PBD {
 
 Stateful::Stateful ()
 {
@@ -134,3 +134,5 @@ Stateful::instant_xml (const string& str, const string& dir)
 
 	return 0;
 }
+
+} // namespace PBD

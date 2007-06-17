@@ -36,7 +36,7 @@ class XMLNode;
 
 namespace ARDOUR {
 
-class Configuration : public Stateful
+class Configuration : public PBD::Stateful
 {
   public:
 	Configuration();

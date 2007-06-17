@@ -49,7 +49,7 @@ struct ControlProtocolInfo {
     ~ControlProtocolInfo() { if (state) { delete state; } }
 };
 
- class ControlProtocolManager : public sigc::trackable, public Stateful
+ class ControlProtocolManager : public sigc::trackable, public PBD::Stateful
 {
   public:
 	ControlProtocolManager ();

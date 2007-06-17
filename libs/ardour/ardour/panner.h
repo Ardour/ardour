@@ -42,7 +42,7 @@ class Panner;
 class BufferSet;
 class AudioBuffer;
 
-class StreamPanner : public sigc::trackable, public Stateful
+class StreamPanner : public sigc::trackable, public PBD::Stateful
 {
   public:
 	StreamPanner (Panner& p);
@@ -226,7 +226,7 @@ class Multi2dPanner : public StreamPanner
 	void update ();
 };
 
-class Panner : public std::vector<StreamPanner*>, public Stateful, public sigc::trackable
+class Panner : public std::vector<StreamPanner*>, public PBD::Stateful, public sigc::trackable
 {
   public:
 	struct Output {

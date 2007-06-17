@@ -33,7 +33,7 @@ namespace ARDOUR
 class Session;
 class Playlist;
 
-struct NamedSelection : public Stateful
+struct NamedSelection : public PBD::Stateful
 {
     NamedSelection (std::string, std::list<boost::shared_ptr<Playlist> >&);
     NamedSelection (Session&, const XMLNode&);

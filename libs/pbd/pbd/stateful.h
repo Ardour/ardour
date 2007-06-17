@@ -25,6 +25,8 @@
 
 class XMLNode;
 
+namespace PBD {
+
 class Stateful {
   public:
 	Stateful();
@@ -48,6 +50,8 @@ class Stateful {
 	XMLNode *_instant_xml;
 	PBD::ID _id;
 };
+
+} // namespace PBD
 
 #endif /* __pbd_stateful_h__ */
 

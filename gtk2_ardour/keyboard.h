@@ -34,7 +34,7 @@
 using std::vector;
 using std::string;
 
-class Keyboard : public sigc::trackable, Stateful
+class Keyboard : public sigc::trackable, PBD::Stateful
 {
   public:
 	Keyboard ();
