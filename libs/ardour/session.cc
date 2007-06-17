@@ -3165,7 +3165,7 @@ Session::midi_path_from_name (string name)
 
 	SessionDirectory sdir(get_best_session_directory_for_new_source ());
 
-	spath = sdir.sound_path().to_string();
+	spath = sdir.midi_path().to_string();
 	spath += '/';
 
 	string::size_type pos = foo.find_last_of ('/');
