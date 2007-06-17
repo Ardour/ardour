@@ -55,6 +55,7 @@
 
 #include <ardour/ardour.h>
 #include <ardour/profile.h>
+#include <ardour/session_directory.h>
 #include <ardour/session_route.h>
 #include <ardour/session_utils.h>
 #include <ardour/port.h>
@@ -2239,17 +2240,19 @@ require some unused files to continue to exist."));
 
 	dimage->set_alignment(ALIGN_LEFT, ALIGN_TOP);
 
+	const string dead_sound_directory = session->session_directory().dead_sound_path().to_string();
+
 	if (rep.space < 1048576.0f) {
 		if (removed > 1) {
-		  txt.set_text (string_compose (msg, removed, _("files were"), session->path() + "dead_sounds", (float) rep.space / 1024.0f, "kilo"));
+			txt.set_text (string_compose (msg, removed, _("files were"), dead_sound_directory, (float) rep.space / 1024.0f, "kilo"));
 		} else {
-			txt.set_text (string_compose (msg, removed, _("file was"), session->path() + "dead_sounds", (float) rep.space / 1024.0f, "kilo"));
+			txt.set_text (string_compose (msg, removed, _("file was"), dead_sound_directory, (float) rep.space / 1024.0f, "kilo"));
 		}
 	} else {
 		if (removed > 1) {
-			txt.set_text (string_compose (msg, removed, _("files were"), session->path() + "dead_sounds", (float) rep.space / 1048576.0f, "mega"));
+			txt.set_text (string_compose (msg, removed, _("files were"), dead_sound_directory, (float) rep.space / 1048576.0f, "mega"));
 		} else {
-			txt.set_text (string_compose (msg, removed, _("file was"), session->path() + "dead_sounds", (float) rep.space / 1048576.0f, "mega"));
+			txt.set_text (string_compose (msg, removed, _("file was"), dead_sound_directory, (float) rep.space / 1048576.0f, "mega"));
 		}
 	}
 
