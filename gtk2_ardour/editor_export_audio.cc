@@ -43,6 +43,7 @@
 #include <ardour/audioregion.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/chan_count.h>
+#include <ardour/session_directory.h>
 #include <ardour/source_factory.h>
 #include <ardour/audiofilesource.h>
 
@@ -173,7 +174,9 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 	uint32_t cnt;
 	vector<boost::shared_ptr<AudioFileSource> > sources;
 	uint32_t nchans;
-	
+
+	const string sound_directory = session->session_directory().sound_path().to_string();
+
 	nchans = region->n_channels();
 	
 	/* don't do duplicate of the entire source if that's what is going on here */
@@ -189,11 +192,11 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 			
 			for (cnt = 0; cnt < 999999; ++cnt) {
 				if (nchans == 1) {
-					snprintf (s, sizeof(s), "%s/%s_%" PRIu32 ".wav", session->sound_dir().c_str(),
+					snprintf (s, sizeof(s), "%s/%s_%" PRIu32 ".wav", sound_directory.c_str(),
 						  legalize_for_path(region->name()).c_str(), cnt);
 				}
 				else {
-					snprintf (s, sizeof(s), "%s/%s_%" PRIu32 "-%" PRId32 ".wav", session->sound_dir().c_str(),
+					snprintf (s, sizeof(s), "%s/%s_%" PRIu32 "-%" PRId32 ".wav", sound_directory.c_str(),
 						  legalize_for_path(region->name()).c_str(), cnt, n);
 				}
 
@@ -319,17 +322,19 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 	string path;
 	vector<boost::shared_ptr<AudioFileSource> > sources;
 
+	const string sound_directory = session->session_directory().sound_path().to_string();
+
 	uint32_t channels = count.n_audio();
 
 	for (uint32_t n=0; n < channels; ++n) {
 		
 		for (cnt = 0; cnt < 999999; ++cnt) {
 			if (channels == 1) {
-				snprintf (s, sizeof(s), "%s/%s_%" PRIu32 ".wav", session->sound_dir().c_str(),
+				snprintf (s, sizeof(s), "%s/%s_%" PRIu32 ".wav", sound_directory.c_str(),
 					  legalize_for_path(playlist.name()).c_str(), cnt);
 			}
 			else {
-				snprintf (s, sizeof(s), "%s/%s_%" PRIu32 "-%" PRId32 ".wav", session->sound_dir().c_str(),
+				snprintf (s, sizeof(s), "%s/%s_%" PRIu32 "-%" PRId32 ".wav", sound_directory.c_str(),
 					  legalize_for_path(playlist.name()).c_str(), cnt, n);
 			}
 			
