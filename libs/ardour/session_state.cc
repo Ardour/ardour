@@ -63,6 +63,7 @@
 #include <ardour/audioengine.h>
 #include <ardour/configuration.h>
 #include <ardour/session.h>
+#include <ardour/session_directory.h>
 #include <ardour/buffer.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/midi_diskstream.h>
@@ -2628,7 +2629,7 @@ Session::find_all_sources (string path, set<string>& result)
 			continue;
 		}
 
-		sys::path source_path = _session_dir.sound_path ();
+		sys::path source_path = _session_dir->sound_path ();
 
 		source_path /= prop->value ();
 

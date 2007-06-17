@@ -33,6 +33,7 @@ using PBD::sys::path;
 class SessionDirectory
 {
 public:
+
 	/**
 	 * @param session_path An absolute path to a session directory.
 	 */

@@ -27,6 +27,7 @@
 #include <set>
 #include <stack>
 
+#include <boost/scoped_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/dynamic_bitset.hpp>
 
@@ -53,7 +54,6 @@
 #include <ardour/location.h>
 #include <ardour/gain.h>
 #include <ardour/io.h>
-#include <ardour/session_directory.h>
 
 #include <ardour/smpte.h>
 
@@ -106,6 +106,8 @@ class ControlProtocolInfo;
 class MidiTrack;
 class MidiRegion;
 class SMFSource;
+
+class SessionDirectory;
 
 struct AudioExportSpecification;
 struct RouteGroup;
@@ -1095,7 +1097,7 @@ class Session : public PBD::StatefulDestructible
 	bool                     loop_changing;
 	nframes_t           last_loopend;
 
-	SessionDirectory         _session_dir;
+	boost::scoped_ptr<SessionDirectory>        _session_dir;
 
 	RingBuffer<Event*> pending_events;
 

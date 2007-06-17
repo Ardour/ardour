@@ -44,6 +44,7 @@
 #include <ardour/audioengine.h>
 #include <ardour/configuration.h>
 #include <ardour/session.h>
+#include <ardour/session_directory.h>
 #include <ardour/utils.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/audioplaylist.h>
@@ -111,7 +112,7 @@ Session::Session (AudioEngine &eng,
 	  _mmc_port (default_mmc_port),
 	  _mtc_port (default_mtc_port),
 	  _midi_port (default_midi_port),
-	  _session_dir (fullpath),
+	  _session_dir (new SessionDirectory(fullpath)),
 	  pending_events (2048),
 	  //midi_requests (128), // the size of this should match the midi request pool size
 	  _send_smpte_update (false),
@@ -136,7 +137,7 @@ Session::Session (AudioEngine &eng,
 		// try and create a new session directory
 		try
 		{
-			if(!_session_dir.create()) {
+			if(!_session_dir->create()) {
 				// an existing session.
 				// throw a_more_meaningful_exception()
 				destroy ();
@@ -163,7 +164,7 @@ Session::Session (AudioEngine &eng,
 		{
 			// ensure the necessary session subdirectories exist
 			// in case the directory structure has changed etc.
-			_session_dir.create();
+			_session_dir->create();
 		}
 		catch(sys::filesystem_error& ex)
 		{
@@ -212,7 +213,7 @@ Session::Session (AudioEngine &eng,
 	  _mmc_port (default_mmc_port),
 	  _mtc_port (default_mtc_port),
 	  _midi_port (default_midi_port),
-	  _session_dir (fullpath),
+	  _session_dir ( new SessionDirectory(fullpath)),
 	  pending_events (2048),
 	  //midi_requests (16),
 	  _send_smpte_update (false),
@@ -242,7 +243,7 @@ Session::Session (AudioEngine &eng,
 
 	initialize_start_and_end_locations(0, initial_length);
 	
-	if (!_session_dir.create () || !create_session_file ())	{
+	if (!_session_dir->create () || !create_session_file ())	{
 		destroy ();
 		throw failed_constructor ();
 	}
@@ -3366,7 +3367,7 @@ Session::remove_empty_sounds ()
 {
 	PathScanner scanner;
 
-	vector<string *>* possible_audiofiles = scanner (_session_dir.sound_path().to_string (),
+	vector<string *>* possible_audiofiles = scanner (_session_dir->sound_path().to_string (),
 			Config->get_possible_audio_file_regexp (), false, true);
 	
 	Glib::Mutex::Lock lm (source_lock);
