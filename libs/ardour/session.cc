@@ -2764,13 +2764,11 @@ Session::source_by_path_and_channel (const Glib::ustring& path, uint16_t chn)
 string
 Session::peak_path_from_audio_path (string audio_path) const
 {
-	string res;
+	sys::path peakfile_path(_session_dir->peak_path());
 
-	res = peak_dir ();
-	res += PBD::basename_nosuffix (audio_path);
-	res += peakfile_suffix;
+	peakfile_path /= basename_nosuffix (audio_path) + peakfile_suffix;
 
-	return res;
+	return peakfile_path.to_string();
 }
 
 string
