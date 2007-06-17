@@ -30,6 +30,7 @@
 #include <gtkmm2ext/window_title.h>
 
 #include <ardour/session.h>
+#include <ardour/session_directory.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/audioregion.h>
 #include <ardour/audio_diskstream.h>
@@ -293,10 +294,11 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_fi
 		ustring path = *p;
 
 		/* lets see if we can link it into the session */
-		
-		linked_path = session->sound_dir();
-		linked_path += '/';
-		linked_path += Glib::path_get_basename (path);
+
+		sys::path tmp = session->session_directory().sound_path();
+
+		tmp /= Glib::path_get_basename(path);
+		linked_path = tmp.to_string();
 		
 		if (link (path.c_str(), linked_path.c_str()) == 0) {
 
