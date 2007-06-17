@@ -258,6 +258,8 @@ class Session : public PBD::StatefulDestructible
 	bool deletion_in_progress() const { return _state_of_the_state & Deletion; }
 	sigc::signal<void> DirtyChanged;
 
+	const SessionDirectory& session_directory () const { return *(_session_dir.get()); }
+
 	std::string sound_dir (bool with_path = true) const;
 	std::string peak_dir () const;
 	std::string automation_dir () const;
