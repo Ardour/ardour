@@ -329,7 +329,7 @@ env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour2_ui_light.rc'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.menus'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.bindings'))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.colors'))
+#env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.colors'))
 # data files
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour2'), 'splash.png'))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour2', 'pixmaps'), pixmap_files))
@@ -345,7 +345,7 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
 					'ardev_common.sh.in',
 					'ardev', 'ardbg',
                                         'ardour2_ui_dark.rc', 'ardour2_ui_light.rc', 'splash.png',
-                                        'ardour.menus', 'ardour.bindings.in', 'ardour.colors',
+                                        'ardour.menus', 'ardour.bindings.in',# 'ardour.colors',
 					'editor_xpms'
                                         ] +
                                       gtkardour_files +
