@@ -421,8 +421,8 @@ class Session : public PBD::StatefulDestructible
 	int save_state (string snapshot_name, bool pending = false);
 	int restore_state (string snapshot_name);
 	int save_template (string template_name);
-        int save_history (string snapshot_name = "");
-        int restore_history (string snapshot_name);
+	int save_history (string snapshot_name = "");
+	int restore_history (string snapshot_name);
 	void remove_state (string snapshot_name);
 	void rename_state (string old_name, string new_name);
 	
