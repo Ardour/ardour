@@ -1620,15 +1620,6 @@ Session::save_template (string template_name)
 }
 
 int
-Session::rename_template (string old_name, string new_name) 
-{
-	string old_path = template_dir() + old_name + template_suffix;
-	string new_path = template_dir() + new_name + template_suffix;
-
-	return rename (old_path.c_str(), new_path.c_str());
-}
-
-int
 Session::delete_template (string name) 
 {
 	string template_path = template_dir();
