@@ -1840,15 +1840,6 @@ Session::automation_dir () const
 }
 
 string
-Session::template_dir ()
-{
-	string path = get_user_ardour_path();
-	path += "templates/";
-
-	return path;
-}
-
-string
 Session::suffixed_search_path (string suffix, bool data)
 {
 	string path;
