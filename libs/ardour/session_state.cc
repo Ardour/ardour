@@ -101,6 +101,8 @@
 #include <ardour/playlist_factory.h>
 #include <ardour/filename_extensions.h>
 #include <ardour/directory_names.h>
+#include <ardour/template_utils.h>
+
 #include <control_protocol/control_protocol.h>
 
 #include "i18n.h"
@@ -1584,34 +1586,32 @@ Session::save_template (string template_name)
 		return -1;
 	}
 
-	DIR* dp;
-	string dir = template_dir();
+	sys::path user_template_dir(user_template_directory());
 
-	if ((dp = opendir (dir.c_str()))) {
-		closedir (dp);
-	} else {
-		if (g_mkdir_with_parents (dir.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH)) {
-			error << string_compose(_("Could not create mix templates directory \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-			return -1;
-		}
+	try
+	{
+		sys::create_directories (user_template_dir);
+	}
+	catch(sys::filesystem_error& ex)
+	{
+		error << string_compose(_("Could not create mix templates directory \"%1\" (%2)"),
+				user_template_dir.to_string(), ex.what()) << endmsg;
+		return -1;
 	}
 
 	tree.set_root (&get_template());
 
-	xml_path = dir;
-	xml_path += template_name;
-	xml_path += template_suffix;
+	sys::path template_file_path(user_template_dir);
+	template_file_path /= template_name + template_suffix;
 
-	ifstream in(xml_path.c_str());
-	
-	if (in) {
-		warning << string_compose(_("Template \"%1\" already exists - new version not created"), template_name) << endmsg;
+	if (sys::exists (template_file_path))
+	{
+		warning << string_compose(_("Template \"%1\" already exists - new version not created"),
+				template_file_path.to_string()) << endmsg;
 		return -1;
-	} else {
-		in.close();
 	}
 
-	if (!tree.write (xml_path)) {
+	if (!tree.write (template_file_path.to_string())) {
 		error << _("mix template not saved") << endmsg;
 		return -1;
 	}
