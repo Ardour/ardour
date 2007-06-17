@@ -3134,9 +3134,13 @@ Session::midi_path_from_name (string name)
 
 		for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 
-			spath = (*i).path;
+			SessionDirectory sdir((*i).path);
+		
+			sys::path p = sdir.midi_path();
 
-			spath += midi_dir(false) + "/" + legalized;
+			p /= legalized;
+
+			spath = p.to_string();
 
 			snprintf (buf, sizeof(buf), "%s-%u.mid", spath.c_str(), cnt);
 
