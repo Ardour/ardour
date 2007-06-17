@@ -32,6 +32,7 @@
 #include <gtkmm2ext/window_title.h>
 
 #include <ardour/export.h>
+#include <ardour/session_directory.h>
 #include <ardour/sndfile_helpers.h>
 #include <ardour/audio_track.h>
 #include <ardour/audioregion.h>
@@ -957,18 +958,14 @@ ExportDialog::start_export ()
 	*/
 	
 	if (file_entry.get_text().length() == 0) {
-		string dir = session->export_dir();
-		string::size_type last_slash;
-		
-		if ((last_slash = dir.find_last_of ('/')) != string::npos && last_slash != 0) {
-			dir = dir.substr (0, last_slash+1);
-		}
+
+		sys::path export_file_path = session->session_directory().export_path();
 
 		if (!wants_dir()) {
-			dir = dir + "export.wav";
+			export_file_path /= "export.wav";
 		}
 		
-		file_entry.set_text (dir);
+		file_entry.set_text (export_file_path.to_string());
 	}
 	
 	progress_bar.set_fraction (0);
