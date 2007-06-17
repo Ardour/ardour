@@ -33,6 +33,7 @@ diskstream.cc
 directory_names.cc
 filename_extensions.cc
 find_session.cc
+template_utils.cc
 track.cc
 audio_diskstream.cc
 audio_library.cc
