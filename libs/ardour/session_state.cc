@@ -277,7 +277,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 int
 Session::second_stage_init (bool new_session)
 {
-	AudioFileSource::set_peak_dir (peak_dir());
+	AudioFileSource::set_peak_dir (_session_dir->peak_path().to_string());
 
 	if (!new_session) {
 		if (load_state (_current_snapshot_name)) {
