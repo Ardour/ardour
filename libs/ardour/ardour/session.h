@@ -1556,10 +1556,7 @@ class Session : public PBD::StatefulDestructible
 	Glib::Mutex space_lock;
 	
 	string old_sound_dir (bool with_path = true) const;
-	string discover_best_sound_dir (bool destructive = false);
-	string discover_best_midi_dir ();
-	int ensure_sound_dir (string, string&);
-	int ensure_midi_dir (string, string&);
+	string get_best_session_directory_for_new_source ();
 	void refresh_disk_space ();
 
 	mutable gint _playback_load;

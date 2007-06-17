@@ -2972,7 +2972,9 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 
 	string foo = buf;
 
-	spath = discover_best_sound_dir ();
+	SessionDirectory sdir(get_best_session_directory_for_new_source ());
+
+	spath = sdir.sound_path().to_string();
 	spath += '/';
 
 	string::size_type pos = foo.find_last_of ('/');
@@ -3159,7 +3161,9 @@ Session::midi_path_from_name (string name)
 
 	string foo = buf;
 
-	spath = discover_best_midi_dir ();
+	SessionDirectory sdir(get_best_session_directory_for_new_source ());
+
+	spath = sdir.sound_path().to_string();
 	spath += '/';
 
 	string::size_type pos = foo.find_last_of ('/');
@@ -3890,12 +3894,13 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t le
 	boost::shared_ptr<AudioFileSource> fsource;
 	uint32_t x;
 	char buf[PATH_MAX+1];
-	string dir;
 	ChanCount nchans(track.audio_diskstream()->n_channels());
 	nframes_t position;
 	nframes_t this_chunk;
 	nframes_t to_do;
 	BufferSet buffers;
+	SessionDirectory sdir(get_best_session_directory_for_new_source ());
+	const string sound_dir = sdir.sound_path().to_string();
 
 	// any bigger than this seems to cause stack overflows in called functions
 	const nframes_t chunk_size = (128 * 1024)/4;
@@ -3913,13 +3918,11 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t le
 	if (track.has_external_redirects()) {
 		goto out;
 	}
-	
-	dir = discover_best_sound_dir ();
 
 	for (uint32_t chan_n=0; chan_n < nchans.n_audio(); ++chan_n) {
 
 		for (x = 0; x < 99999; ++x) {
-			snprintf (buf, sizeof(buf), "%s/%s-%d-bounce-%" PRIu32 ".wav", dir.c_str(), playlist->name().c_str(), chan_n, x+1);
+			snprintf (buf, sizeof(buf), "%s/%s-%d-bounce-%" PRIu32 ".wav", sound_dir.c_str(), playlist->name().c_str(), chan_n, x+1);
 			if (access (buf, F_OK) != 0) {
 				break;
 			}

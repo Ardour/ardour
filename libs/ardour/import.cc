@@ -36,6 +36,7 @@
 #include <ardour/ardour.h>
 #include <ardour/types.h>
 #include <ardour/session.h>
+#include <ardour/session_directory.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/sndfilesource.h>
 #include <ardour/sndfile_helpers.h>
@@ -147,7 +148,9 @@ Session::import_audiofile (import_status& status)
 		newfiles.push_back (boost::shared_ptr<AudioFileSource>());
 	}
 
-	sounds_dir = discover_best_sound_dir ();
+	SessionDirectory sdir(get_best_session_directory_for_new_source ());
+	sounds_dir = sdir.sound_path().to_string();
+
 	basepath = PBD::basename_nosuffix (status.paths.front());
 
 	for (int n = 0; n < info.channels; ++n) {
