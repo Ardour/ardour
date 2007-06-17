@@ -265,7 +265,6 @@ class Session : public PBD::StatefulDestructible
 	static string control_protocol_path ();
 	static string template_path ();
 	static string template_dir ();
-	static void get_template_list (list<string>&);
 	
 	static string change_audio_path_by_name (string oldpath, string oldname, string newname, bool destructive);
 	static string change_midi_path_by_name (string oldpath, string oldname, string newname, bool destructive);

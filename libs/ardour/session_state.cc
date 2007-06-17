@@ -2236,38 +2236,6 @@ Session::global_record_enable_memento (void* src)
 #endif
 
 static bool
-template_filter (const string &str, void *arg)
-{
-	return (str.length() > strlen(template_suffix) &&
-		str.find (template_suffix) == (str.length() - strlen (template_suffix)));
-}
-
-void
-Session::get_template_list (list<string> &template_names)
-{
-	vector<string *> *templates;
-	PathScanner scanner;
-	string path;
-
-	path = template_path ();
-
-	templates = scanner (path, template_filter, 0, false, true);
-	
-	vector<string*>::iterator i;
-	for (i = templates->begin(); i != templates->end(); ++i) {
-		string fullpath = *(*i);
-		int start, end;
-
-		start = fullpath.find_last_of ('/') + 1;
-		if ((end = fullpath.find_last_of ('.')) <0) {
-			end = fullpath.length();
-		}
-		
-		template_names.push_back(fullpath.substr(start, (end-start)));
-	}
-}
-
-static bool
 accept_all_non_peak_files (const string& path, void *arg)
 {
 	return (path.length() > 5 && path.find (peakfile_suffix) != (path.length() - 5));
