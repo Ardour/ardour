@@ -425,8 +425,6 @@ class Session : public PBD::StatefulDestructible
         int restore_history (string snapshot_name);
 	void remove_state (string snapshot_name);
 	void rename_state (string old_name, string new_name);
-
-	static int delete_template (string name);
 	
 	sigc::signal<void,string> StateSaved;
 	sigc::signal<void> StateReady;

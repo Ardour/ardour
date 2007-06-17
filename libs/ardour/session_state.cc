@@ -1619,16 +1619,6 @@ Session::save_template (string template_name)
 	return 0;
 }
 
-int
-Session::delete_template (string name) 
-{
-	string template_path = template_dir();
-	template_path += name;
-	template_path += template_suffix;
-
-	return remove (template_path.c_str());
-}
-
 void
 Session::refresh_disk_space ()
 {
