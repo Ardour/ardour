@@ -22,7 +22,7 @@
 
 #include <ardour/recent_sessions.h>
 #include <ardour/session.h>
-#include <ardour/directory_names.h>
+#include <ardour/template_utils.h>
 
 #include <gtkmm/entry.h>
 #include <gtkmm/filechooserbutton.h>
@@ -36,6 +36,8 @@
 #include <gtkmm2ext/window_title.h>
 
 using namespace Gtkmm2ext;
+using namespace ARDOUR;
+using namespace PBD;
 
 #include "opts.h"
 
@@ -364,26 +366,18 @@ NewSessionDialog::NewSessionDialog()
 	m_treeview->set_headers_visible (false);
 	m_treeview->get_selection()->set_mode (Gtk::SELECTION_SINGLE);
 
-	std::string path = ARDOUR::get_user_ardour_path();
-	
-	if (path.empty()) {
-		path = ARDOUR::get_system_data_path();
-	}
-
-	if (!path.empty()) {
-		string user_template_path = path + ARDOUR::templates_dir_name;
-
-		if (Glib::file_test(user_template_path, Glib::FILE_TEST_IS_DIR))
-		{
-			m_template->set_current_folder (user_template_path);
-		}
-	}
-
-	const std::string sys_templates_dir = ARDOUR::get_system_data_path() + ARDOUR::templates_dir_name;
-	
-	if (Glib::file_test(sys_templates_dir, Glib::FILE_TEST_IS_DIR))
+	if (is_directory (user_template_directory ()))
 	{
-		m_template->add_shortcut_folder(sys_templates_dir);
+		m_template->set_current_folder (user_template_directory().to_string());
+	}
+	else if (is_directory (system_template_directory ()))
+	{
+		m_template->set_current_folder (system_template_directory().to_string());
+	}
+
+	if (is_directory (system_template_directory ()))
+	{
+		m_template->add_shortcut_folder (system_template_directory().to_string());
 	}
 
 	m_template->set_title(_("select template"));
