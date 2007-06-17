@@ -241,8 +241,6 @@ Session::Session (AudioEngine &eng,
 	first_stage_init (fullpath, snapshot_name);
 
 	initialize_start_and_end_locations(0, initial_length);
-
-	SessionDirectory _session_dir(fullpath);
 	
 	if (!_session_dir.create () || !create_session_file ())	{
 		destroy ();
