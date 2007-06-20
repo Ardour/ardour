@@ -253,18 +253,18 @@ PluginManager::ladspa_discover (string path)
 		info->category = get_ladspa_category(descriptor->UniqueID);
 		info->path = path;
 		info->index = i;
-		info->n_inputs = 0;
-		info->n_outputs = 0;
+		info->n_inputs = ChanCount();
+		info->n_outputs = ChanCount();
 		info->type = ARDOUR::LADSPA;
 		info->unique_id = descriptor->UniqueID;
 		
 		for (uint32_t n=0; n < descriptor->PortCount; ++n) {
 			if ( LADSPA_IS_PORT_AUDIO (descriptor->PortDescriptors[n]) ) {
 				if ( LADSPA_IS_PORT_INPUT (descriptor->PortDescriptors[n]) ) {
-					info->n_inputs++;
+					info->n_inputs.set_audio(info->n_inputs.n_audio() + 1);
 				}
 				else if ( LADSPA_IS_PORT_OUTPUT (descriptor->PortDescriptors[n]) ) {
-					info->n_outputs++;
+					info->n_outputs.set_audio(info->n_outputs.n_audio() + 1);
 				}
 			}
 		}

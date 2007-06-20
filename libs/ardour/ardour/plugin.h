@@ -28,6 +28,7 @@
 
 #include <jack/types.h>
 #include <ardour/types.h>
+#include <ardour/chan_count.h>
 #include <ardour/plugin_state.h>
 #include <ardour/cycles.h>
 
@@ -60,8 +61,8 @@ class PluginInfo {
 
 	string name;
 	string category;
-	uint32_t n_inputs;
-	uint32_t n_outputs;
+	ChanCount n_inputs;
+	ChanCount n_outputs;
 	ARDOUR::PluginType type;
 
 	long unique_id;

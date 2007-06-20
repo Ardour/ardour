@@ -53,11 +53,13 @@ using namespace PBD;
  * Inserts are still definitely audio only */
 Insert::Insert(Session& s, string name, Placement p)
 	: Redirect (s, name, p)
+	, _configured(false)
 {
 }
 
 Insert::Insert(Session& s, string name, Placement p, int imin, int imax, int omin, int omax)
 	: Redirect (s, name, p, imin, imax, omin, omax)
+	, _configured(false)
 {
 }
 
@@ -121,7 +123,7 @@ PluginInsert::PluginInsert (const PluginInsert& other)
 	RedirectCreated (this); /* EMIT SIGNAL */
 }
 
-int
+bool
 PluginInsert::set_count (uint32_t num)
 {
 	bool require_state = !_plugins.empty();
@@ -131,7 +133,7 @@ PluginInsert::set_count (uint32_t num)
 	*/
 
 	if (num == 0) { 
-		return -1;
+		return false;
 	} else if (num > _plugins.size()) {
 		uint32_t diff = num - _plugins.size();
 
@@ -150,7 +152,7 @@ PluginInsert::set_count (uint32_t num)
 		}
 	}
 
-	return 0;
+	return true;
 }
 
 void
@@ -185,29 +187,31 @@ PluginInsert::auto_state_changed (uint32_t which)
 ChanCount
 PluginInsert::output_streams() const
 {
-	// FIXME: TYPE
-	return ChanCount(DataType::AUDIO, _plugins[0]->get_info()->n_outputs * _plugins.size());
+	if (_configured)
+		return output_for_input_configuration(_configured_input);
+	else
+		return natural_output_streams();
 }
 
 ChanCount
 PluginInsert::input_streams() const
 {
-	// FIXME: TYPE
-	return ChanCount(DataType::AUDIO, _plugins[0]->get_info()->n_inputs * _plugins.size());
+	if (_configured)
+		return _configured_input;
+	else
+		return natural_input_streams();
 }
 
 ChanCount
 PluginInsert::natural_output_streams() const
 {
-	// FIXME: TYPE
-	return ChanCount(DataType::AUDIO, _plugins[0]->get_info()->n_outputs);
+	return _plugins[0]->get_info()->n_outputs;
 }
 
 ChanCount
 PluginInsert::natural_input_streams() const
 {
-	// FIXME: TYPE
-	return ChanCount(DataType::AUDIO, _plugins[0]->get_info()->n_inputs);
+	return _plugins[0]->get_info()->n_inputs;
 }
 
 bool
@@ -217,7 +221,7 @@ PluginInsert::is_generator() const
 	   a specific "instrument" flag, for example.
 	 */
 
-	return _plugins[0]->get_info()->n_inputs == 0;
+	return _plugins[0]->get_info()->n_inputs.n_audio() == 0;
 }
 
 void
@@ -349,12 +353,9 @@ PluginInsert::silence (nframes_t nframes, nframes_t offset)
 	uint32_t in_index = 0;
 	uint32_t out_index = 0;
 
-	uint32_t n;
-
 	if (active()) {
 		for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-			n = (*i) -> get_info()->n_inputs;
-			(*i)->connect_and_run (_session.get_silent_buffers (ChanCount(DataType::AUDIO, n)), in_index, out_index, nframes, offset);
+			(*i)->connect_and_run (_session.get_silent_buffers ((*i)->get_info()->n_inputs), in_index, out_index, nframes, offset);
 		}
 	}
 }
@@ -370,8 +371,8 @@ PluginInsert::run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, 
 			connect_and_run (bufs, nframes, offset, false);
 		}
 	} else {
-		uint32_t in = _plugins[0]->get_info()->n_inputs;
-		uint32_t out = _plugins[0]->get_info()->n_outputs;
+		uint32_t in = _plugins[0]->get_info()->n_inputs.n_audio();
+		uint32_t out = _plugins[0]->get_info()->n_outputs.n_audio();
 
 		if (out > in) {
 
@@ -382,7 +383,7 @@ PluginInsert::run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, 
 			}
 		}
 
-		bufs.count().set(DataType::AUDIO, out);
+		bufs.count().set(_default_type, out);
 	}
 }
 
@@ -534,36 +535,98 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 	return boost::shared_ptr<Plugin> ((Plugin*) 0);
 }
 
-int32_t
-PluginInsert::compute_output_streams (int32_t cnt) const
+bool
+PluginInsert::configure_io (ChanCount in, ChanCount out)
 {
-	return _plugins[0]->get_info()->n_outputs * cnt;
+	ChanCount matching_out = output_for_input_configuration(out);
+	if (matching_out != out) {
+		_configured = false;
+		return false;
+	} else {
+		bool success = set_count (count_for_configuration(in, out));
+		if (success) {
+			_configured = true;
+			_configured_input = in;
+		}
+		return success;
+	}
 }
 
-int32_t
-PluginInsert::configure_io (int32_t magic, int32_t in, int32_t out)
+bool
+PluginInsert::can_support_input_configuration (ChanCount in_count) const
 {
-	return set_count (magic);
+	int32_t outputs = _plugins[0]->get_info()->n_outputs.get(_default_type);
+	int32_t inputs = _plugins[0]->get_info()->n_inputs.get(_default_type);
+	int32_t in = in_count.get(_default_type);
+
+	/* see output_for_input_configuration below */
+	if ((inputs == 0)
+			|| (outputs == 1 && inputs == 1)
+			|| (inputs == in)
+			|| ((inputs < in) && (inputs % in == 0))) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
-int32_t 
-PluginInsert::can_support_input_configuration (int32_t in) const
+ChanCount
+PluginInsert::output_for_input_configuration (ChanCount in) const
 {
-	int32_t outputs = _plugins[0]->get_info()->n_outputs;
-	int32_t inputs = _plugins[0]->get_info()->n_inputs;
+	ChanCount outputs = _plugins[0]->get_info()->n_outputs;
+	ChanCount inputs = _plugins[0]->get_info()->n_inputs;
 
-	if (inputs == 0) {
+	if (inputs.n_total() == 0) {
+		/* instrument plugin, always legal, but throws away any existing streams */
+		return outputs;
+	}
 
-		/* instrument plugin, always legal, but it throws
-		   away any existing active streams.
+	if (inputs.n_total() == 1 && outputs == inputs) {
+		/* mono plugin, replicate as needed to match in */
+		return in;
+	}
+
+	if (inputs == in) {
+		/* exact match */
+		return outputs;
+	}
+
+	// FIXME: single type plugins only.  can we do this for instruments?
+	if ((inputs.n_total() == inputs.get(_default_type))
+			&& ((in.n_total() == in.get(_default_type))
+			&& (inputs.n_total() < in.n_total())
+			&& (inputs.n_total() % in.n_total() == 0))) {
+
+		/* number of inputs is a factor of the requested input
+		   configuration, so we can replicate.
 		*/
 
+		return ChanCount(_default_type, in.n_total() / inputs.n_total());
+	}
+
+	/* sorry */
+	return ChanCount();
+}
+
+/* Number of plugin instances required to support a given channel configuration.
+ * (private helper)
+ */
+int32_t
+PluginInsert::count_for_configuration (ChanCount in, ChanCount out) const
+{
+	// FIXME: take 'out' into consideration
+	
+	ChanCount outputs = _plugins[0]->get_info()->n_outputs;
+	ChanCount inputs = _plugins[0]->get_info()->n_inputs;
+
+	if (inputs.n_total() == 0) {
+		/* instrument plugin, always legal, but throws away any existing streams */
 		return 1;
 	}
 
-	if (outputs == 1 && inputs == 1) {
-		/* mono plugin, replicate as needed */
-		return in;
+	if (inputs.n_total() == 1 && outputs == inputs) {
+		/* mono plugin, replicate as needed to match in */
+		return in.n_total();
 	}
 
 	if (inputs == in) {
@@ -571,18 +634,21 @@ PluginInsert::can_support_input_configuration (int32_t in) const
 		return 1;
 	}
 
-	if ((inputs < in) && (inputs % in == 0)) {
+	// FIXME: single type plugins only.  can we do this for instruments?
+	if ((inputs.n_total() == inputs.get(_default_type))
+			&& ((in.n_total() == in.get(_default_type))
+			&& (inputs.n_total() < in.n_total())
+			&& (inputs.n_total() % in.n_total() == 0))) {
 
 		/* number of inputs is a factor of the requested input
 		   configuration, so we can replicate.
 		*/
 
-		return in/inputs;
+		return in.n_total() / inputs.n_total();
 	}
 
 	/* sorry */
-
-	return -1;
+	return 0;
 }
 
 XMLNode&
@@ -970,14 +1036,14 @@ PortInsert::latency()
 	return _session.engine().frames_per_cycle() + input_latency();
 }
 
-int32_t
-PortInsert::can_support_input_configuration (int32_t in) const
+bool
+PortInsert::can_support_input_configuration (ChanCount in) const
 {
 	if (input_maximum() == ChanCount::INFINITE && output_maximum() == ChanCount::INFINITE) {
 
 		/* not configured yet */
 
-		return 1; /* we can support anything the first time we're asked */
+		return true; /* we can support anything the first time we're asked */
 
 	} else {
 
@@ -985,16 +1051,23 @@ PortInsert::can_support_input_configuration (int32_t in) const
 		   many output ports it will have.
 		*/
 
-		if (output_maximum().get(_default_type) == static_cast<uint32_t>(in)) {
-			return 1;
+		if (output_maximum() == in) {
+
+			return true;
 		} 
 	}
 
-	return -1;
+	return false;
 }
 
-int32_t
-PortInsert::configure_io (int32_t ignored_magic, int32_t in, int32_t out)
+ChanCount
+PortInsert::output_for_input_configuration (ChanCount in) const
+{
+	return in;
+}
+
+bool
+PortInsert::configure_io (ChanCount in, ChanCount out)
 {
 	/* do not allow configuration to be changed outside the range of
 	   the last request config. or something like that.
@@ -1010,27 +1083,12 @@ PortInsert::configure_io (int32_t ignored_magic, int32_t in, int32_t out)
 	   to the number of input ports we need.
 	*/
 
-	set_output_maximum (ChanCount(_default_type, in));
-	set_output_minimum (ChanCount(_default_type, in));
-	set_input_maximum (ChanCount(_default_type, out));
-	set_input_minimum (ChanCount(_default_type, out));
+	set_output_maximum (in);
+	set_output_minimum (in);
+	set_input_maximum (out);
+	set_input_minimum (out);
 
-	if (in < 0) {
-		in = n_outputs ().get(_default_type);
-	} 
-
-	if (out < 0) {
-		out = n_inputs ().get(_default_type);
-	}
-
-	return ensure_io (ChanCount(_default_type, out), ChanCount(_default_type, in), false, this);
-}
-
-int32_t
-PortInsert::compute_output_streams (int32_t cnt) const
-{
-	/* puzzling, eh? think about it ... */
-	return n_inputs ().get(_default_type);
+	return (ensure_io (out, in, false, this) == 0);
 }
 
 ChanCount

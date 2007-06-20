@@ -396,24 +396,24 @@ RedirectBox::insert_plugin_chosen (boost::shared_ptr<Plugin> plugin)
 		
 		redirect->active_changed.connect (bind (mem_fun (*this, &RedirectBox::show_redirect_active_r), boost::weak_ptr<Redirect>(redirect)));
 
-		uint32_t err_streams;
+		Route::InsertStreams err;
 
-		if (_route->add_redirect (redirect, this, &err_streams)) {
-			weird_plugin_dialog (*plugin, err_streams, _route);
+		if (_route->add_redirect (redirect, this, &err)) {
+			weird_plugin_dialog (*plugin, err, _route);
 			// XXX SHAREDPTR delete plugin here .. do we even need to care? 
 		}
 	}
 }
 
 void
-RedirectBox::weird_plugin_dialog (Plugin& p, uint32_t streams, boost::shared_ptr<IO> io)
+RedirectBox::weird_plugin_dialog (Plugin& p, Route::InsertStreams streams, boost::shared_ptr<IO> io)
 {
 	ArdourDialog dialog (_("ardour: weird plugin dialog"));
 	Label label;
 
 	/* i hate this kind of code */
 
-	if (streams > p.get_info()->n_inputs) {
+	if (streams.count > p.get_info()->n_inputs) {
 		label.set_text (string_compose (_(
 "You attempted to add a plugin (%1).\n"
 "The plugin has %2 inputs\n"
@@ -423,9 +423,9 @@ RedirectBox::weird_plugin_dialog (Plugin& p, uint32_t streams, boost::shared_ptr
 "This makes no sense - you are throwing away\n"
 "part of the signal."),
 					 p.name(),
-					 p.get_info()->n_inputs,
-					 streams));
-	} else if (streams < p.get_info()->n_inputs) {
+					 p.get_info()->n_inputs.n_total(),
+					 streams.count.n_total()));
+	} else if (streams.count < p.get_info()->n_inputs) {
 		label.set_text (string_compose (_(
 "You attempted to add a plugin (%1).\n"
 "The plugin has %2 inputs\n"
@@ -436,8 +436,8 @@ RedirectBox::weird_plugin_dialog (Plugin& p, uint32_t streams, boost::shared_ptr
 "side-chain inputs. A future version of Ardour will\n"
 "support this type of configuration."),
 					 p.name(),
-					 p.get_info()->n_inputs,
-					 streams));
+					 p.get_info()->n_inputs.n_total(),
+					 streams.count.n_total()));
 	} else {
 		label.set_text (string_compose (_(
 "You attempted to add a plugin (%1).\n"
@@ -450,11 +450,11 @@ RedirectBox::weird_plugin_dialog (Plugin& p, uint32_t streams, boost::shared_ptr
 "\n"
 "Ardour does not understand what to do in such situations.\n"),
 					 p.name(),
-					 p.get_info()->n_inputs,
-					 p.get_info()->n_outputs,
+					 p.get_info()->n_inputs.n_total(),
+					 p.get_info()->n_outputs.n_total(),
 					 io->n_inputs().n_total(),
 					 io->n_outputs().n_total(),
-					 streams));
+					 streams.count.n_total()));
 	}
 
 	dialog.get_vbox()->pack_start (label);

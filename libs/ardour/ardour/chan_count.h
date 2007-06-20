@@ -47,6 +47,8 @@ public:
 	// -1 is what to_index does.  inlined for speed.  this should maybe be changed..
 	inline size_t n_audio() const { return _counts[DataType::AUDIO-1]; }
 	inline size_t n_midi()  const { return _counts[DataType::MIDI-1]; }
+	inline void set_audio(size_t a) { _counts[DataType::AUDIO-1] = a; }
+	inline void set_midi(size_t m)  { _counts[DataType::MIDI-1] = m; }
 	
 	size_t n_total() const
 	{

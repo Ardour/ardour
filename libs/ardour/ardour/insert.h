@@ -55,9 +55,13 @@ class Insert : public Redirect
 	virtual void activate () {}
 	virtual void deactivate () {}
 
-	virtual int32_t can_support_input_configuration (int32_t in) const = 0;
-	virtual int32_t configure_io (int32_t magic, int32_t in, int32_t out) = 0;
-	virtual int32_t compute_output_streams (int32_t cnt) const = 0;
+	virtual bool      can_support_input_configuration (ChanCount in) const = 0;
+	virtual ChanCount output_for_input_configuration (ChanCount in) const = 0;
+	virtual bool      configure_io (ChanCount in, ChanCount out) = 0;
+
+protected:
+	bool      _configured;
+	ChanCount _configured_input;
 };
 
 class PortInsert : public Insert 
@@ -81,9 +85,9 @@ class PortInsert : public Insert
 	ChanCount output_streams() const;
 	ChanCount input_streams() const;
 
-	int32_t can_support_input_configuration (int32_t) const;
-	int32_t configure_io (int32_t magic, int32_t in, int32_t out);
-	int32_t compute_output_streams (int32_t cnt) const;
+	virtual bool      can_support_input_configuration (ChanCount in) const;
+	virtual ChanCount output_for_input_configuration (ChanCount in) const;
+	virtual bool      configure_io (ChanCount in, ChanCount out);
 
 	uint32_t bit_slot() const { return bitslot; }
 
@@ -118,12 +122,12 @@ class PluginInsert : public Insert
 	ChanCount natural_output_streams() const;
 	ChanCount natural_input_streams() const;
 
-	int      set_count (uint32_t num);
+	bool     set_count (uint32_t num);
 	uint32_t get_count () const { return _plugins.size(); }
 
-	int32_t can_support_input_configuration (int32_t) const;
-	int32_t configure_io (int32_t magic, int32_t in, int32_t out);
-	int32_t compute_output_streams (int32_t cnt) const;
+	virtual bool      can_support_input_configuration (ChanCount in) const;
+	virtual ChanCount output_for_input_configuration (ChanCount in) const;
+	virtual bool      configure_io (ChanCount in, ChanCount out);
 
 	bool is_generator() const;
 
@@ -165,6 +169,8 @@ class PluginInsert : public Insert
 	void set_automatable ();
 	void auto_state_changed (uint32_t which);
 	void automation_list_creation_callback (uint32_t, AutomationList&);
+
+	int32_t count_for_configuration (ChanCount in, ChanCount out) const;
 
 	boost::shared_ptr<Plugin> plugin_factory (boost::shared_ptr<Plugin>);
 };

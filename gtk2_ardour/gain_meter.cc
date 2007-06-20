@@ -425,9 +425,11 @@ GainMeter::setup_meters ()
 	if ((r = dynamic_cast<Route*> (_io.get())) != 0) {
 
 		switch (r->meter_point()) {
-		case MeterPreFader:
 		case MeterInput:
 			nmeters = r->n_inputs().n_total();
+			break;
+		case MeterPreFader:
+			nmeters = r->pre_fader_streams().n_total();
 			break;
 		case MeterPostFader:
 			nmeters = r->n_outputs().n_total();

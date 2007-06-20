@@ -773,7 +773,7 @@ Route::set_mute (bool yn, void *src)
 }
 
 int
-Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* err_streams)
+Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, InsertStreams* err)
 {
 	ChanCount old_rmo = redirect_max_outs;
 
@@ -792,7 +792,7 @@ Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* 
 		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(redirect)) != 0) {
 			pi->set_count (1);
 
-			if (pi->input_streams() == ChanCount::ZERO) {
+			if (pi->natural_input_streams() == ChanCount::ZERO) {
 				/* generator plugin */
 				_have_internal_generator = true;
 			}
@@ -814,17 +814,18 @@ Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* 
 			porti->ensure_io (n_outputs (), n_inputs(), false, this);
 		}
 		
-		// Ensure peak vector sizes before the plugin is activated
-		ChanCount potential_max_streams = max(redirect->input_streams(), redirect->output_streams());
-		_meter->setup(potential_max_streams);
-
 		_redirects.push_back (redirect);
 
-		if (_reset_plugin_counts (err_streams)) {
+		// Set up redirect list channels.  This will set redirect->[input|output]_streams()
+		if (_reset_plugin_counts (err)) {
 			_redirects.pop_back ();
 			_reset_plugin_counts (0); // it worked before we tried to add it ...
 			return -1;
 		}
+
+		// Ensure peak vector sizes before the plugin is activated
+		ChanCount potential_max_streams = max(redirect->input_streams(), redirect->output_streams());
+		_meter->setup(potential_max_streams);
 
 		redirect->activate ();
 		redirect->active_changed.connect (mem_fun (*this, &Route::redirect_active_proxy));
@@ -840,7 +841,7 @@ Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* 
 }
 
 int
-Route::add_redirects (const RedirectList& others, void *src, uint32_t* err_streams)
+Route::add_redirects (const RedirectList& others, void *src, InsertStreams* err)
 {
 	ChanCount old_rmo = redirect_max_outs;
 
@@ -873,7 +874,7 @@ Route::add_redirects (const RedirectList& others, void *src, uint32_t* err_strea
 
 			_redirects.push_back (*i);
 			
-			if (_reset_plugin_counts (err_streams)) {
+			if (_reset_plugin_counts (err)) {
 				++existing_end;
 				_redirects.erase (existing_end, _redirects.end());
 				_reset_plugin_counts (0); // it worked before we tried to add it ...
@@ -996,6 +997,28 @@ Route::ab_plugins (bool forward)
 		}
 	}
 }
+	
+	
+/* Figure out the streams that will feed into PreFader */
+ChanCount
+Route::pre_fader_streams() const
+{
+	boost::shared_ptr<Redirect> redirect;
+
+	// Find the last pre-fader redirect
+	for (RedirectList::const_iterator r = _redirects.begin(); r != _redirects.end(); ++r) {
+		if ((*r)->placement() == PreFader) {
+			redirect = *r;
+		}
+	}
+	
+	if (redirect) {
+		return redirect->output_streams();
+	} else {
+		return n_inputs ();
+	}
+}
+
 
 /** Remove redirects with a given placement.
  * @param p Placement of redirects to remove.
@@ -1037,7 +1060,7 @@ Route::clear_redirects (Placement p, void *src)
 }
 
 int
-Route::remove_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* err_streams)
+Route::remove_redirect (boost::shared_ptr<Redirect> redirect, void *src, InsertStreams* err)
 {
 	ChanCount old_rmo = redirect_max_outs;
 
@@ -1093,7 +1116,7 @@ Route::remove_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_
 			return 1;
 		}
 
-		if (_reset_plugin_counts (err_streams)) {
+		if (_reset_plugin_counts (err)) {
 			/* get back to where we where */
 			_redirects.insert (i, redirect);
 			/* we know this will work, because it worked before :) */
@@ -1127,92 +1150,52 @@ Route::remove_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_
 }
 
 int
-Route::reset_plugin_counts (uint32_t* lpc)
+Route::reset_plugin_counts (InsertStreams* err)
 {
 	Glib::RWLock::WriterLock lm (redirect_lock);
-	return _reset_plugin_counts (lpc);
+	return _reset_plugin_counts (err);
 }
 
 
 int
-Route::_reset_plugin_counts (uint32_t* err_streams)
+Route::_reset_plugin_counts (InsertStreams* err)
 {
 	RedirectList::iterator r;
-	uint32_t i_cnt;
-	uint32_t s_cnt;
 	map<Placement,list<InsertCount> > insert_map;
-	nframes_t initial_streams;
+	ChanCount initial_streams;
 
-	redirect_max_outs.reset();
-	i_cnt = 0;
-	s_cnt = 0;
-
+	/* Process each placement in order, checking to see if we 
+	   can really do what has been requested.
+	*/
+	
 	/* divide inserts up by placement so we get the signal flow
 	   properly modelled. we need to do this because the _redirects
-	   list is not sorted by placement, and because other reasons may 
-	   exist now or in the future for this separate treatment.
+	   list is not sorted by placement
 	*/
+
+	/* ... but it should/will be... */
 	
 	for (r = _redirects.begin(); r != _redirects.end(); ++r) {
 
 		boost::shared_ptr<Insert> insert;
 
-		/* do this here in case we bomb out before we get to the end of
-		   this function.
-		*/
-
-		redirect_max_outs = max ((*r)->output_streams (), redirect_max_outs);
-
 		if ((insert = boost::dynamic_pointer_cast<Insert>(*r)) != 0) {
-			++i_cnt;
 			insert_map[insert->placement()].push_back (InsertCount (insert));
-
-			/* reset plugin counts back to one for now so
-			   that we have a predictable, controlled
-			   state to try to configure.
-			*/
-
-			boost::shared_ptr<PluginInsert> pi;
-		
-			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(insert)) != 0) {
-				pi->set_count (1);
-			}
-
-		} else if (boost::dynamic_pointer_cast<Send> (*r) != 0) {
-			++s_cnt;
 		}
 	}
 	
-	if (i_cnt == 0) {
-		if (s_cnt) {
-			goto recompute;
-		} else {
-			return 0;
-		}
-	}
-
-	/* Now process each placement in order, checking to see if we 
-	   can really do what has been requested.
-	*/
 
 	/* A: PreFader */
 	
-	if (check_some_plugin_counts (insert_map[PreFader], n_inputs ().get(_default_type), err_streams)) {
+	if ( ! check_some_plugin_counts (insert_map[PreFader], n_inputs (), err)) {
 		return -1;
 	}
 
-	/* figure out the streams that will feed into PreFader */
-
-	if (!insert_map[PreFader].empty()) {
-		InsertCount& ic (insert_map[PreFader].back());
-		initial_streams = ic.insert->compute_output_streams (ic.cnt);
-	} else {
-		initial_streams = n_inputs ().get(_default_type);
-	}
+	ChanCount post_fader_input = (err ? err->count : n_inputs());
 
 	/* B: PostFader */
 
-	if (check_some_plugin_counts (insert_map[PostFader], initial_streams, err_streams)) {
+	if ( ! check_some_plugin_counts (insert_map[PostFader], post_fader_input, err)) {
 		return -1;
 	}
 
@@ -1222,8 +1205,6 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 	apply_some_plugin_counts (insert_map[PostFader]);
 
 	/* recompute max outs of any redirect */
-
-  recompute:
 
 	redirect_max_outs.reset();
 	RedirectList::iterator prev = _redirects.end();
@@ -1261,7 +1242,7 @@ Route::apply_some_plugin_counts (list<InsertCount>& iclist)
 
 	for (i = iclist.begin(); i != iclist.end(); ++i) {
 		
-		if ((*i).insert->configure_io ((*i).cnt, (*i).in, (*i).out)) {
+		if ((*i).insert->configure_io ((*i).in, (*i).out)) {
 			return -1;
 		}
 		/* make sure that however many we have, they are all active */
@@ -1271,37 +1252,54 @@ Route::apply_some_plugin_counts (list<InsertCount>& iclist)
 	return 0;
 }
 
-int32_t
-Route::check_some_plugin_counts (list<InsertCount>& iclist, int32_t required_inputs, uint32_t* err_streams)
+/** Returns whether \a iclist can be configured and run starting with
+ * \a required_inputs at the first insert's inputs.
+ * If false is returned, \a iclist can not be run with \a required_inputs, and \a err is set.
+ * Otherwise, \a err is set to the output of the list.
+ */
+bool
+Route::check_some_plugin_counts (list<InsertCount>& iclist, ChanCount required_inputs, InsertStreams* err)
 {
 	list<InsertCount>::iterator i;
-	
+	size_t index = 0;
+			
+	if (err) {
+		err->index = 0;
+		err->count = required_inputs;
+	}
+
 	for (i = iclist.begin(); i != iclist.end(); ++i) {
 
-		if (((*i).cnt = (*i).insert->can_support_input_configuration (required_inputs)) < 0) {
-			if (err_streams) {
-				*err_streams = required_inputs;
+		if ((*i).insert->can_support_input_configuration (required_inputs) < 0) {
+			if (err) {
+				err->index = index;
+				err->count = required_inputs;
 			}
-			return -1;
+			return false;
 		}
 		
 		(*i).in = required_inputs;
-		(*i).out = (*i).insert->compute_output_streams ((*i).cnt);
+		(*i).out = (*i).insert->output_for_input_configuration (required_inputs);
 
 		required_inputs = (*i).out;
+		
+		++index;
+	}
+			
+	if (err) {
+		if (!iclist.empty()) {
+			err->index = index;
+			err->count = iclist.back().insert->output_for_input_configuration(required_inputs);
+		}
 	}
 
-	return 0;
+	return true;
 }
 
 int
-Route::copy_redirects (const Route& other, Placement placement, uint32_t* err_streams)
+Route::copy_redirects (const Route& other, Placement placement, InsertStreams* err)
 {
 	ChanCount old_rmo = redirect_max_outs;
-
-	if (err_streams) {
-		*err_streams = 0;
-	}
 
 	RedirectList to_be_deleted;
 
@@ -1336,7 +1334,7 @@ Route::copy_redirects (const Route& other, Placement placement, uint32_t* err_st
 
 		/* reset plugin stream handling */
 
-		if (_reset_plugin_counts (err_streams)) {
+		if (_reset_plugin_counts (err)) {
 
 			/* FAILED COPY ATTEMPT: we have to restore order */
 
@@ -1421,7 +1419,7 @@ struct RedirectSorter {
 };
 
 int
-Route::sort_redirects (uint32_t* err_streams)
+Route::sort_redirects (InsertStreams* err)
 {
 	{
 		RedirectSorter comparator;
@@ -1434,7 +1432,7 @@ Route::sort_redirects (uint32_t* err_streams)
 
 		_redirects.sort (comparator);
 	
-		if (_reset_plugin_counts (err_streams)) {
+		if (_reset_plugin_counts (err)) {
 			_redirects = as_it_was_before;
 			redirect_max_outs = old_rmo;
 			return -1;

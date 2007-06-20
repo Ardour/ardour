@@ -159,15 +159,23 @@ class Route : public IO
 	}
 	
 	ChanCount max_redirect_outs () const { return redirect_max_outs; }
+	ChanCount pre_fader_streams() const;
 	
-	// FIXME: remove/replace err_streams parameters with something appropriate
-	// they are used by 'wierd_plugin_dialog'(sic) to display the number of input streams
-	// at the insertion point if the insert fails
-	int add_redirect (boost::shared_ptr<Redirect>, void *src, uint32_t* err_streams = 0);
-	int add_redirects (const RedirectList&, void *src, uint32_t* err_streams = 0);
-	int remove_redirect (boost::shared_ptr<Redirect>, void *src, uint32_t* err_streams = 0);
-	int copy_redirects (const Route&, Placement, uint32_t* err_streams = 0);
-	int sort_redirects (uint32_t* err_streams = 0);
+	/** A record of the stream configuration at some point in the redirect list.
+	 * Used to return where and why a redirect list configuration request failed.
+	 */
+	struct InsertStreams {
+		InsertStreams(size_t i=0, ChanCount c=ChanCount()) : index(i), count(c) {}
+
+		size_t    index; ///< Index of redirect where configuration failed
+		ChanCount count; ///< Input requested of redirect
+	};
+
+	int add_redirect (boost::shared_ptr<Redirect>, void *src, InsertStreams* err = 0);
+	int add_redirects (const RedirectList&, void *src, InsertStreams* err = 0);
+	int remove_redirect (boost::shared_ptr<Redirect>, void *src, InsertStreams* err = 0);
+	int copy_redirects (const Route&, Placement, InsertStreams* err = 0);
+	int sort_redirects (InsertStreams* err = 0);
 	void disable_redirects (Placement);
 	void disable_redirects ();
 	void disable_plugins (Placement);
@@ -347,22 +355,21 @@ class Route : public IO
 	void output_change_handler (IOChange, void *src);
 
 	bool legal_redirect (Redirect&);
-	int reset_plugin_counts (uint32_t*); /* locked */
-	int _reset_plugin_counts (uint32_t*); /* unlocked */
+	int reset_plugin_counts (InsertStreams*); /* locked */
+	int _reset_plugin_counts (InsertStreams*); /* unlocked */
 
-	/* plugin count handling */
+	/* insert I/O channels and plugin count handling */
 
 	struct InsertCount {
 	    boost::shared_ptr<ARDOUR::Insert> insert;
-	    int32_t cnt;
-	    int32_t in;
-	    int32_t out;
+	    ChanCount in;
+	    ChanCount out;
 
-	    InsertCount (boost::shared_ptr<ARDOUR::Insert> ins) : insert (ins), cnt (-1) {}
+	    InsertCount (boost::shared_ptr<ARDOUR::Insert> ins) : insert(ins) {}
 	};
 	
 	int32_t apply_some_plugin_counts (std::list<InsertCount>& iclist);
-	int32_t check_some_plugin_counts (std::list<InsertCount>& iclist, int32_t required_inputs, uint32_t* err_streams);
+	bool    check_some_plugin_counts (std::list<InsertCount>& iclist, ChanCount required_inputs, InsertStreams* err_streams);
 
 	void set_deferred_state ();
 	void add_redirect_from_xml (const XMLNode&);
