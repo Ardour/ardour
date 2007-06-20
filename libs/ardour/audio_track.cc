@@ -33,6 +33,7 @@
 #include <ardour/region_factory.h>
 #include <ardour/route_group_specialized.h>
 #include <ardour/insert.h>
+#include <ardour/plugin_insert.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/playlist_factory.h>
 #include <ardour/panner.h>

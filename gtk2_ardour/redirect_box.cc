@@ -43,7 +43,8 @@
 #include <ardour/audio_track.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/send.h>
-#include <ardour/insert.h>
+#include <ardour/plugin_insert.h>
+#include <ardour/port_insert.h>
 #include <ardour/ladspa_plugin.h>
 
 #include "ardour_ui.h"

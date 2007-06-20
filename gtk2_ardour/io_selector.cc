@@ -30,7 +30,7 @@
 #include <ardour/route.h>
 #include <ardour/audioengine.h>
 #include <ardour/port.h>
-#include <ardour/insert.h>
+#include <ardour/port_insert.h>
 #include <ardour/session.h>
 #include <ardour/audio_diskstream.h>
 

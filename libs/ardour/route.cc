@@ -30,6 +30,8 @@
 #include <ardour/route.h>
 #include <ardour/buffer.h>
 #include <ardour/insert.h>
+#include <ardour/plugin_insert.h>
+#include <ardour/port_insert.h>
 #include <ardour/send.h>
 #include <ardour/session.h>
 #include <ardour/utils.h>

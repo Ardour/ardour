@@ -24,7 +24,7 @@
 
 #include <ardour/session.h>
 #include <ardour/ladspa_plugin.h>
-#include <ardour/insert.h>
+#include <ardour/plugin_insert.h>
 #include <ardour/curve.h>
 
 #include "i18n.h"

@@ -75,6 +75,8 @@ gdither.cc
 globals.cc
 import.cc
 insert.cc
+plugin_insert.cc
+port_insert.cc
 io.cc
 jack_slave.cc
 ladspa_plugin.cc

@@ -59,6 +59,8 @@
 #include <ardour/redirect.h>
 #include <ardour/send.h>
 #include <ardour/insert.h>
+#include <ardour/plugin_insert.h>
+#include <ardour/port_insert.h>
 #include <ardour/bundle.h>
 #include <ardour/slave.h>
 #include <ardour/tempo.h>

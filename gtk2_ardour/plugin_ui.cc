@@ -37,7 +37,7 @@
 #include <midi++/manager.h>
 
 #include <ardour/plugin.h>
-#include <ardour/insert.h>
+#include <ardour/plugin_insert.h>
 #include <ardour/ladspa_plugin.h>
 #ifdef VST_SUPPORT
 #include <ardour/vst_plugin.h>

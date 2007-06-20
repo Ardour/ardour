@@ -32,15 +32,9 @@
 
 class XMLNode;
 
-namespace MIDI {
-	class Port;
-}
-
 namespace ARDOUR {
 
 class Session;
-class Route;
-class Plugin;
 
 class Insert : public Redirect
 {
@@ -62,117 +56,6 @@ class Insert : public Redirect
 protected:
 	bool      _configured;
 	ChanCount _configured_input;
-};
-
-class PortInsert : public Insert 
-{
-  public:
-	PortInsert (Session&, Placement);
-	PortInsert (Session&, const XMLNode&);
-	PortInsert (const PortInsert&);
-	~PortInsert ();
-
-	XMLNode& state(bool full);
-	XMLNode& get_state(void);
-	int set_state(const XMLNode&);
-
-	void init ();
-	
-	void run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset);
-
-	nframes_t latency();
-	
-	ChanCount output_streams() const;
-	ChanCount input_streams() const;
-
-	virtual bool      can_support_input_configuration (ChanCount in) const;
-	virtual ChanCount output_for_input_configuration (ChanCount in) const;
-	virtual bool      configure_io (ChanCount in, ChanCount out);
-
-	uint32_t bit_slot() const { return bitslot; }
-
-  private:
-	uint32_t bitslot;
-};
-
-class PluginInsert : public Insert
-{
-  public:
-	PluginInsert (Session&, boost::shared_ptr<Plugin>, Placement);
-	PluginInsert (Session&, const XMLNode&);
-	PluginInsert (const PluginInsert&);
-	~PluginInsert ();
-
-	static const string port_automation_node_name;
-	
-	XMLNode& state(bool);
-	XMLNode& get_state(void);
-	int set_state(const XMLNode&);
-
-	void run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset);
-	void silence (nframes_t nframes, nframes_t offset);
-	
-	void activate ();
-	void deactivate ();
-
-	void set_block_size (nframes_t nframes);
-
-	ChanCount output_streams() const;
-	ChanCount input_streams() const;
-	ChanCount natural_output_streams() const;
-	ChanCount natural_input_streams() const;
-
-	bool     set_count (uint32_t num);
-	uint32_t get_count () const { return _plugins.size(); }
-
-	virtual bool      can_support_input_configuration (ChanCount in) const;
-	virtual ChanCount output_for_input_configuration (ChanCount in) const;
-	virtual bool      configure_io (ChanCount in, ChanCount out);
-
-	bool is_generator() const;
-
-	void set_parameter (uint32_t port, float val);
-
-	AutoState get_port_automation_state (uint32_t port);
-	void set_port_automation_state (uint32_t port, AutoState);
-	void protect_automation ();
-
-	float default_parameter_value (uint32_t which);
-
-	boost::shared_ptr<Plugin> plugin(uint32_t num=0) const {
-		if (num < _plugins.size()) { 
-			return _plugins[num];
-		} else {
-			return _plugins[0]; // we always have one
-		}
-	}
-
-	PluginType type ();
-
-	string describe_parameter (uint32_t);
-
-	nframes_t latency();
-
-	void transport_stopped (nframes_t now);
-	void automation_snapshot (nframes_t now);
-
-  private:
-
-	void parameter_changed (uint32_t, float);
-	
-	vector<boost::shared_ptr<Plugin> > _plugins;
-	
-	void automation_run (BufferSet& bufs, nframes_t nframes, nframes_t offset);
-	void connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t offset, bool with_auto, nframes_t now = 0);
-
-	void init ();
-	void set_automatable ();
-	void auto_state_changed (uint32_t which);
-	void automation_list_creation_callback (uint32_t, AutomationList&);
-
-	int32_t count_for_configuration (ChanCount in, ChanCount out) const;
-
-	boost::shared_ptr<Plugin> plugin_factory (boost::shared_ptr<Plugin>);
 };
 
 } // namespace ARDOUR

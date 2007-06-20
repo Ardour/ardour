@@ -33,7 +33,8 @@
 #include <ardour/session.h>
 #include <ardour/utils.h>
 #include <ardour/send.h>
-#include <ardour/insert.h>
+#include <ardour/port_insert.h>
+#include <ardour/plugin_insert.h>
 
 #include "i18n.h"
 
