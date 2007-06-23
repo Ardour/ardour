@@ -109,11 +109,6 @@ Send::set_state(const XMLNode& node)
 	
 	Redirect::set_state (*insert_node);
 
-	if (niter == nlist.end()) {
-		error << _("XML node describing a send is missing a Redirect node") << endmsg;
-		return -1;
-	}
-
 	return 0;
 }
 

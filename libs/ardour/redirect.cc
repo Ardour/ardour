@@ -72,12 +72,9 @@ Redirect::state (bool full_state)
 int
 Redirect::set_state (const XMLNode& node)
 {
-	Insert::set_state(node);
+	const XMLProperty *prop;
 
-	if (node.name() != "Insert" && node.name() != "Redirect") {
-		error << string_compose(_("incorrect XML node \"%1\" passed to Redirect object"), node.name()) << endmsg;
-		return -1;
-	}
+	Insert::set_state(node);
 
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
@@ -87,6 +84,11 @@ Redirect::set_state (const XMLNode& node)
 		if ((*niter)->name() == IO::state_node_name) {
 			have_io = true;
 			_io->set_state(**niter);
+
+			// legacy sessions: use IO name
+			if ((prop = node.property ("name")) == 0) {
+				set_name(_io->name());
+			}
 		}
 	}
 

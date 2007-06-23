@@ -128,7 +128,7 @@ PortInsert::set_state(const XMLNode& node)
 	const XMLProperty *prop;
 
 	if ((prop = node.property ("type")) == 0) {
-		error << _("XML node describing insert is missing the `type' field") << endmsg;
+		error << _("XML node describing port insert is missing the `type' field") << endmsg;
 		return -1;
 	}
 	

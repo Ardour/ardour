@@ -131,7 +131,7 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 
 	mark_dirty ();
 
-        AutomationListCreated(this);
+	AutomationListCreated(this);
 }
 
 AutomationList::AutomationList (const XMLNode& node)

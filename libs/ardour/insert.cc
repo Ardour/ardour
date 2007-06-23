@@ -55,7 +55,7 @@ using namespace PBD;
 
 sigc::signal<void,Insert*> Insert::InsertCreated;
 
-// Always saved as Insert, but may be Redirect in legacy sessions
+// Always saved as Insert, but may be Redirect or Send in legacy sessions
 const string Insert::state_node_name = "Insert";
 
 Insert::Insert(Session& session, const string& name, Placement p)
@@ -177,14 +177,8 @@ Insert::set_state (const XMLNode& node)
 {
 	const XMLProperty *prop;
 
-	if (node.name() != state_node_name) {
-		error << string_compose(_("incorrect XML node \"%1\" passed to Redirect object"), node.name()) << endmsg;
-		return -1;
-	}
-	
-	if ((prop = node.property ("name")) == 0) {
-		warning << _("XML node describing an insert is missing the `name' field") << endmsg;
-	} else {
+	// may not exist for legacy sessions
+	if ((prop = node.property ("name")) != 0) {
 		set_name(prop->value());
 	}
 
@@ -202,7 +196,7 @@ Insert::set_state (const XMLNode& node)
 			if ((prop = (*niter)->property ("path")) != 0) {
 				old_set_automation_state (*(*niter));
 			} else {
-				Automatable::set_automation_state (*(*niter));
+				set_automation_state (*(*niter));
 			}
 
 			if ((prop = (*niter)->property ("visible")) != 0) {
