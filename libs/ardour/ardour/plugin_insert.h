@@ -22,13 +22,13 @@
 
 #include <vector>
 #include <string>
-#include <exception>
 
 #include <sigc++/signal.h>
 #include <ardour/ardour.h>
 #include <ardour/plugin_state.h>
 #include <ardour/types.h>
 #include <ardour/insert.h>
+#include <ardour/automation_event.h>
 
 class XMLNode;
 
@@ -105,7 +105,7 @@ class PluginInsert : public Insert
 
 	void parameter_changed (uint32_t, float);
 	
-	vector<boost::shared_ptr<Plugin> > _plugins;
+	std::vector<boost::shared_ptr<Plugin> > _plugins;
 	
 	void automation_run (BufferSet& bufs, nframes_t nframes, nframes_t offset);
 	void connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t offset, bool with_auto, nframes_t now = 0);

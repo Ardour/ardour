@@ -24,9 +24,9 @@
 #include <boost/shared_ptr.hpp>
 
 namespace ARDOUR {
-	class Redirect;
+	class Insert;
 }
 
-struct RedirectSelection : list<boost::shared_ptr<ARDOUR::Redirect> > {};
+struct InsertSelection : list<boost::shared_ptr<ARDOUR::Insert> > {};
 
 #endif /* __ardour_gtk_redirect_selection_h__ */

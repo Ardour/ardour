@@ -34,6 +34,7 @@
 #include <pbd/controllable.h>
 
 #include <ardour/ardour.h>
+#include <ardour/session_object.h>
 #include <ardour/utils.h>
 #include <ardour/curve.h>
 #include <ardour/types.h>
@@ -63,13 +64,13 @@ class BufferSet;
  * An IO can contain ports of varying types, making routes/inserts/etc with
  * varied combinations of types (eg MIDI and audio) possible.
  */
-class IO : public PBD::StatefulDestructible
+class IO : public SessionObject
 {
 
   public:
 	static const string state_node_name;
 
-	IO (Session&, string name, 
+	IO (Session&, const string& name, 
 	    int input_min = -1, int input_max = -1, 
 	    int output_min = -1, int output_max = -1,
 	    DataType default_type = DataType::AUDIO);
@@ -90,10 +91,9 @@ class IO : public PBD::StatefulDestructible
 	
 	DataType default_type() const         { return _default_type; }
 	void     set_default_type(DataType t) { _default_type = t; }
-
-	const string& name() const { return _name; }
-	virtual int set_name (string str, void *src);
 	
+	bool set_name (const string& str);
+
 	virtual void silence  (nframes_t, nframes_t offset);
 
 	void collect_input  (BufferSet& bufs, nframes_t nframes, nframes_t offset);
@@ -179,7 +179,6 @@ class IO : public PBD::StatefulDestructible
 	sigc::signal<void,IOChange,void*> output_changed;
 
 	sigc::signal<void,void*> gain_changed;
-	sigc::signal<void,void*> name_changed;
 
 	virtual XMLNode& state (bool full);
 	XMLNode& get_state (void);
@@ -229,26 +228,16 @@ class IO : public PBD::StatefulDestructible
 
 	void clear_automation ();
 
-	bool gain_automation_recording() const { 
-		return (_gain_automation_curve.automation_state() & (Write|Touch));
-	}
-
-	bool gain_automation_playback() const {
-		return (_gain_automation_curve.automation_state() & Play) ||
-			((_gain_automation_curve.automation_state() & Touch) && 
-			 !_gain_automation_curve.touching());
-	}
-
 	virtual void set_gain_automation_state (AutoState);
 	AutoState gain_automation_state() const { return _gain_automation_curve.automation_state(); }
-	sigc::signal<void> gain_automation_state_changed;
+	//sigc::signal<void> gain_automation_state_changed;
 
 	virtual void set_gain_automation_style (AutoStyle);
 	AutoStyle gain_automation_style () const { return _gain_automation_curve.automation_style(); }
-	sigc::signal<void> gain_automation_style_changed;
+	//sigc::signal<void> gain_automation_style_changed;
 
-	virtual void transport_stopped (nframes_t now);
-	void automation_snapshot (nframes_t now);
+	virtual void transport_stopped (nframes_t now); // interface: matches Insert
+	void automation_snapshot (nframes_t now); // interface: matches Automatable
 
 	ARDOUR::Curve& gain_automation_curve () { return _gain_automation_curve; }
 
@@ -272,7 +261,6 @@ class IO : public PBD::StatefulDestructible
 	mutable Glib::Mutex io_lock;
 
   protected:
-	Session&            _session;
 	Panner*             _panner;
 	BufferSet*          _output_buffers; //< Set directly to output port buffers
 	gain_t              _gain;
@@ -282,7 +270,6 @@ class IO : public PBD::StatefulDestructible
 	PortSet             _outputs;
 	PortSet             _inputs;
 	PeakMeter*          _meter;
-	string              _name;
 	Bundle*             _input_bundle;
 	Bundle*             _output_bundle;
 	bool                 no_panner_reset;
@@ -335,6 +322,8 @@ class IO : public PBD::StatefulDestructible
 	BufferSet& output_buffers() { return *_output_buffers; }
 
   private:
+
+	friend class Send;
 
 	/* are these the best variable names ever, or what? */
 

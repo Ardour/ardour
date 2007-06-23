@@ -64,7 +64,7 @@ operator== (const Selection& a, const Selection& b)
 		a.time == b.time &&
 		a.lines == b.lines &&
 		a.playlists == b.playlists &&
-		a.redirects == b.redirects;
+		a.inserts == b.inserts;
 }
 
 /** Clear everything from the Selection */
@@ -77,7 +77,7 @@ Selection::clear ()
 	clear_lines();
 	clear_time ();
 	clear_playlists ();
-	clear_redirects ();
+	clear_inserts ();
 }
 
 void
@@ -91,11 +91,11 @@ Selection::dump_region_layers()
 
 
 void
-Selection::clear_redirects ()
+Selection::clear_inserts ()
 {
-	if (!redirects.empty()) {
-		redirects.clear ();
-		RedirectsChanged ();
+	if (!inserts.empty()) {
+		inserts.clear ();
+		InsertsChanged ();
 	}
 }
 
@@ -154,16 +154,16 @@ Selection::clear_lines ()
 }
 
 void
-Selection::toggle (boost::shared_ptr<Redirect> r)
+Selection::toggle (boost::shared_ptr<Insert> r)
 {
-	RedirectSelection::iterator i;
+	InsertSelection::iterator i;
 
-	if ((i = find (redirects.begin(), redirects.end(), r)) == redirects.end()) {
-		redirects.push_back (r);
+	if ((i = find (inserts.begin(), inserts.end(), r)) == inserts.end()) {
+		inserts.push_back (r);
 	} else {
-		redirects.erase (i);
+		inserts.erase (i);
 	}
-	RedirectsChanged();
+	InsertsChanged();
 
 }
 
@@ -254,11 +254,11 @@ Selection::toggle (nframes_t start, nframes_t end)
 
 
 void
-Selection::add (boost::shared_ptr<Redirect> r)
+Selection::add (boost::shared_ptr<Insert> i)
 {
-	if (find (redirects.begin(), redirects.end(), r) == redirects.end()) {
-		redirects.push_back (r);
-		RedirectsChanged();
+	if (find (inserts.begin(), inserts.end(), i) == inserts.end()) {
+		inserts.push_back (i);
+		InsertsChanged();
 	}
 }
 
@@ -395,12 +395,12 @@ Selection::add (AutomationList* ac)
 }
 
 void
-Selection::remove (boost::shared_ptr<Redirect> r)
+Selection::remove (boost::shared_ptr<Insert> r)
 {
-	RedirectSelection::iterator i;
-	if ((i = find (redirects.begin(), redirects.end(), r)) != redirects.end()) {
-		redirects.erase (i);
-		RedirectsChanged ();
+	InsertSelection::iterator i;
+	if ((i = find (inserts.begin(), inserts.end(), r)) != inserts.end()) {
+		inserts.erase (i);
+		InsertsChanged ();
 	}
 }
 
@@ -510,10 +510,10 @@ Selection::remove (AutomationList *ac)
 }
 
 void
-Selection::set (boost::shared_ptr<Redirect> r)
+Selection::set (boost::shared_ptr<Insert> i)
 {
-	clear_redirects ();
-	add (r);
+	clear_inserts ();
+	add (i);
 }
 
 void
@@ -625,7 +625,7 @@ Selection::empty ()
 		lines.empty () &&
 		time.empty () &&
 		playlists.empty () &&
-		redirects.empty ()
+		inserts.empty ()
 		;
 }
 

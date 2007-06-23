@@ -98,12 +98,11 @@ static double direct_gain_to_control (gain_t gain) {
 /** @param default_type The type of port that will be created by ensure_io
  * and friends if no type is explicitly requested (to avoid breakage).
  */
-IO::IO (Session& s, string name,
+IO::IO (Session& s, const string& name,
 	int input_min, int input_max, int output_min, int output_max,
 	DataType default_type)
-	: _session (s),
+	: SessionObject(s, name),
       _output_buffers(new BufferSet()),
-	  _name (name),
 	  _default_type(default_type),
 	  _gain_control (X_("gaincontrol"), *this),
 	  _gain_automation_curve (0.0, 2.0, 1.0),
@@ -158,7 +157,7 @@ IO::IO (Session& s, string name,
 }
 
 IO::IO (Session& s, const XMLNode& node, DataType dt)
-	: _session (s),
+	: SessionObject(s, "unnamed io"),
       _output_buffers(new BufferSet()),
 	  _default_type (dt),
 	  _gain_control (X_("gaincontrol"), *this),
@@ -324,7 +323,7 @@ IO::just_meter_input (nframes_t start_frame, nframes_t end_frame,
 
 	collect_input (bufs, nframes, offset);
 
-	_meter->run(bufs, nframes);
+	_meter->run(bufs, start_frame, end_frame, nframes, offset);
 }
 
 void
@@ -1130,7 +1129,7 @@ IO::ensure_outputs (ChanCount count, bool clear, bool lockit, void* src)
 gain_t
 IO::effective_gain () const
 {
-	if (gain_automation_playback()) {
+	if (_gain_automation_curve.automation_playback()) {
 		return _effective_gain;
 	} else {
 		return _desired_gain;
@@ -1826,14 +1825,15 @@ IO::parse_gain_string (const string& str, vector<string>& ports)
 	return ports.size();
 }
 
-int
-IO::set_name (string name, void* src)
+bool
+IO::set_name (const string& str)
 {
-	if (name == _name) {
-		return 0;
+	if (str == _name) {
+		return true;
 	}
-
+	
 	/* replace all colons in the name. i wish we didn't have to do this */
+	string name = str;
 
 	if (replace_all (name, ":", "-")) {
 		warning << _("you cannot use colons to name objects with I/O connections") << endmsg;
@@ -1851,10 +1851,7 @@ IO::set_name (string name, void* src)
 		i->set_name (current_name);
 	}
 
-	_name = name;
-	 name_changed (src); /* EMIT SIGNAL */
-
-	 return 0;
+	return SessionObject::set_name(name);
 }
 
 void
@@ -2169,7 +2166,8 @@ IO::GainControllable::get_value (void) const
 void
 IO::setup_peak_meters()
 {
-	_meter->setup(std::max(_inputs.count(), _outputs.count()));
+	ChanCount max_streams = std::max(_inputs.count(), _outputs.count());
+	_meter->configure_io(max_streams, max_streams);
 }
 
 /**
@@ -2226,28 +2224,17 @@ IO::set_gain_automation_state (AutoState state)
 
 	if (changed) {
 		_session.set_dirty ();
-		gain_automation_state_changed (); /* EMIT SIGNAL */
+		//gain_automation_state_changed (); /* EMIT SIGNAL */
 	}
 }
 
 void
 IO::set_gain_automation_style (AutoStyle style)
 {
-	bool changed = false;
-
-	{
-		Glib::Mutex::Lock lm (automation_lock);
-
-		if (style != _gain_automation_curve.automation_style()) {
-			changed = true;
-			_gain_automation_curve.set_automation_style (style);
-		}
-	}
-
-	if (changed) {
-		gain_automation_style_changed (); /* EMIT SIGNAL */
-	}
+	Glib::Mutex::Lock lm (automation_lock);
+	_gain_automation_curve.set_automation_style (style);
 }
+
 void
 IO::inc_gain (gain_t factor, void *src)
 {
@@ -2276,7 +2263,7 @@ IO::set_gain (gain_t val, void *src)
 	gain_changed (src);
 	_gain_control.Changed (); /* EMIT SIGNAL */
 	
-	if (_session.transport_stopped() && src != 0 && src != this && gain_automation_recording()) {
+	if (_session.transport_stopped() && src != 0 && src != this && _gain_automation_curve.automation_write()) {
 		_gain_automation_curve.add (_session.transport_frame(), val);
 		
 	}
@@ -2318,7 +2305,7 @@ IO::automation_snapshot (nframes_t now)
 {
 	if (last_automation_snapshot > now || (now - last_automation_snapshot) > _automation_interval) {
 
-		if (gain_automation_recording()) {
+		if (_gain_automation_curve.automation_write()) {
 			_gain_automation_curve.rt_add (now, gain());
 		}
 		

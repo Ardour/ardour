@@ -76,7 +76,7 @@ Route::Route (Session& sess, const XMLNode& node, DataType default_type)
 void
 Route::init ()
 {
-	redirect_max_outs.reset();
+	insert_max_outs.reset();
 	_muted = false;
 	_soloed = false;
 	_solo_safe = false;
@@ -115,8 +115,8 @@ Route::init ()
 
 Route::~Route ()
 {
-	clear_redirects (PreFader, this);
-	clear_redirects (PostFader, this);
+	clear_inserts (PreFader);
+	clear_inserts (PostFader);
 
 	for (OrderKeys::iterator i = order_keys.begin(); i != order_keys.end(); ++i) {
 		free ((void*)(i->first));
@@ -238,13 +238,13 @@ Route::set_gain (gain_t val, void *src)
 void
 Route::process_output_buffers (BufferSet& bufs,
 			       nframes_t start_frame, nframes_t end_frame, 
-			       nframes_t nframes, nframes_t offset, bool with_redirects, int declick,
+			       nframes_t nframes, nframes_t offset, bool with_inserts, int declick,
 			       bool meter)
 {
 	// This is definitely very audio-only for now
 	assert(_default_type == DataType::AUDIO);
 	
-	RedirectList::iterator i;
+	InsertList::iterator i;
 	bool post_fader_work = false;
 	bool mute_declick_applied = false;
 	gain_t dmg, dsg, dg;
@@ -315,7 +315,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	   -------------------------------------------------------------------------------------------------- */
 
 	if (meter && (_meter_point == MeterInput)) {
-		_meter->run(bufs, nframes);
+		_meter->run(bufs, start_frame, end_frame, nframes, offset);
 	}
 
 	if (!_soloed && _mute_affects_pre_fader && (mute_gain != dmg)) {
@@ -373,15 +373,11 @@ Route::process_output_buffers (BufferSet& bufs,
 	   PRE-FADER REDIRECTS
 	   -------------------------------------------------------------------------------------------------- */
 
-	/* FIXME: Somewhere in these loops is where bufs.count() should go from n_inputs() to redirect_max_outs()
-	 * (if they differ).  Something explicit needs to be done here to make sure the list of redirects will
-	 * give us what we need (possibly by inserting transparent 'translators' into the list to make it work) */
-
-	if (with_redirects) {
-		Glib::RWLock::ReaderLock rm (redirect_lock, Glib::TRY_LOCK);
+	if (with_inserts) {
+		Glib::RWLock::ReaderLock rm (insert_lock, Glib::TRY_LOCK);
 		if (rm.locked()) {
 			if (mute_gain > 0 || !_mute_affects_pre_fader) {
-				for (i = _redirects.begin(); i != _redirects.end(); ++i) {
+				for (i = _inserts.begin(); i != _inserts.end(); ++i) {
 					switch ((*i)->placement()) {
 					case PreFader:
 						(*i)->run (bufs, start_frame, end_frame, nframes, offset);
@@ -392,7 +388,7 @@ Route::process_output_buffers (BufferSet& bufs,
 					}
 				}
 			} else {
-				for (i = _redirects.begin(); i != _redirects.end(); ++i) {
+				for (i = _inserts.begin(); i != _inserts.end(); ++i) {
 					switch ((*i)->placement()) {
 					case PreFader:
 						(*i)->silence (nframes, offset);
@@ -406,9 +402,8 @@ Route::process_output_buffers (BufferSet& bufs,
 		} 
 	}
 
-	// FIXME: for now, just hope the redirects list did what it was supposed to
-	bufs.set_count(n_process_buffers());
-
+	// This really should already be true...
+	bufs.set_count(pre_fader_streams());
 	
 	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_post_fader) {
 		Amp::run (bufs, nframes, mute_gain, dmg, false);
@@ -421,7 +416,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	   -------------------------------------------------------------------------------------------------- */
 
 	if (meter && (_meter_point == MeterPreFader)) {
-		_meter->run(bufs, nframes);
+		_meter->run(bufs, start_frame, end_frame, nframes, offset);
 	}
 
 	
@@ -543,14 +538,14 @@ Route::process_output_buffers (BufferSet& bufs,
 	   POST-FADER REDIRECTS
 	   -------------------------------------------------------------------------------------------------- */
 
-	/* note that post_fader_work cannot be true unless with_redirects was also true, so don't test both */
+	/* note that post_fader_work cannot be true unless with_inserts was also true, so don't test both */
 
 	if (post_fader_work) {
 
-		Glib::RWLock::ReaderLock rm (redirect_lock, Glib::TRY_LOCK);
+		Glib::RWLock::ReaderLock rm (insert_lock, Glib::TRY_LOCK);
 		if (rm.locked()) {
 			if (mute_gain > 0 || !_mute_affects_post_fader) {
-				for (i = _redirects.begin(); i != _redirects.end(); ++i) {
+				for (i = _inserts.begin(); i != _inserts.end(); ++i) {
 					switch ((*i)->placement()) {
 					case PreFader:
 						break;
@@ -560,7 +555,7 @@ Route::process_output_buffers (BufferSet& bufs,
 					}
 				}
 			} else {
-				for (i = _redirects.begin(); i != _redirects.end(); ++i) {
+				for (i = _inserts.begin(); i != _inserts.end(); ++i) {
 					switch ((*i)->placement()) {
 					case PreFader:
 						break;
@@ -681,7 +676,7 @@ Route::process_output_buffers (BufferSet& bufs,
 		if ((_gain == 0 && !apply_gain_automation) || dmg == 0) {
 			_meter->reset();
 		} else {
-			_meter->run(output_buffers(), nframes, offset);
+			_meter->run(output_buffers(), start_frame, end_frame, nframes, offset);
 		}
 	}
 }
@@ -689,7 +684,7 @@ Route::process_output_buffers (BufferSet& bufs,
 ChanCount
 Route::n_process_buffers ()
 {
-	return max (n_inputs(), redirect_max_outs);
+	return max (n_inputs(), insert_max_outs);
 }
 
 void
@@ -702,7 +697,7 @@ Route::passthru (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, 
 	collect_input (bufs, nframes, offset);
 
 	if (meter_first) {
-		_meter->run(bufs, nframes);
+		_meter->run(bufs, start_frame, end_frame, nframes, offset);
 		meter_first = false;
 	}
 		
@@ -775,23 +770,23 @@ Route::set_mute (bool yn, void *src)
 }
 
 int
-Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, InsertStreams* err)
+Route::add_insert (boost::shared_ptr<Insert> insert, InsertStreams* err)
 {
-	ChanCount old_rmo = redirect_max_outs;
+	ChanCount old_rmo = insert_max_outs;
 
 	if (!_session.engine().connected()) {
 		return 1;
 	}
 
 	{
-		Glib::RWLock::WriterLock lm (redirect_lock);
+		Glib::RWLock::WriterLock lm (insert_lock);
 
 		boost::shared_ptr<PluginInsert> pi;
 		boost::shared_ptr<PortInsert> porti;
 
-		redirect->set_default_type(_default_type);
+		//insert->set_default_type(_default_type);
 
-		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(redirect)) != 0) {
+		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(insert)) != 0) {
 			pi->set_count (1);
 
 			if (pi->natural_input_streams() == ChanCount::ZERO) {
@@ -799,67 +794,53 @@ Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, InsertStre
 				_have_internal_generator = true;
 			}
 			
-		} else if ((porti = boost::dynamic_pointer_cast<PortInsert>(redirect)) != 0) {
-
-			/* force new port inserts to start out with an i/o configuration
-			   that matches this route's i/o configuration.
-
-			   the "inputs" for the port are supposed to match the output
-			   of this route.
-
-			   the "outputs" of the route should match the inputs of this
-			   route. XXX shouldn't they match the number of active signal
-			   streams at the point of insertion?
-			*/
-			// FIXME: (yes, they should)
-
-			porti->ensure_io (n_outputs (), n_inputs(), false, this);
 		}
 		
-		_redirects.push_back (redirect);
+		_inserts.push_back (insert);
 
-		// Set up redirect list channels.  This will set redirect->[input|output]_streams()
+		// Set up insert list channels.  This will set insert->[input|output]_streams(),
+		// configure redirect ports properly, etc.
 		if (_reset_plugin_counts (err)) {
-			_redirects.pop_back ();
+			_inserts.pop_back ();
 			_reset_plugin_counts (0); // it worked before we tried to add it ...
 			return -1;
 		}
 
 		// Ensure peak vector sizes before the plugin is activated
-		ChanCount potential_max_streams = max(redirect->input_streams(), redirect->output_streams());
-		_meter->setup(potential_max_streams);
+		ChanCount potential_max_streams = max(insert->input_streams(), insert->output_streams());
+		_meter->configure_io(potential_max_streams, potential_max_streams);
 
-		redirect->activate ();
-		redirect->active_changed.connect (mem_fun (*this, &Route::redirect_active_proxy));
+		insert->activate ();
+		insert->ActiveChanged.connect (bind (mem_fun (_session, &Session::update_latency_compensation), false, false));
 	}
 	
-	if (redirect_max_outs != old_rmo || old_rmo == ChanCount::ZERO) {
+	if (insert_max_outs != old_rmo || old_rmo == ChanCount::ZERO) {
 		reset_panner ();
 	}
 
 
-	redirects_changed (src); /* EMIT SIGNAL */
+	inserts_changed (); /* EMIT SIGNAL */
 	return 0;
 }
 
 int
-Route::add_redirects (const RedirectList& others, void *src, InsertStreams* err)
+Route::add_inserts (const InsertList& others, InsertStreams* err)
 {
-	ChanCount old_rmo = redirect_max_outs;
+	ChanCount old_rmo = insert_max_outs;
 
 	if (!_session.engine().connected()) {
 		return 1;
 	}
 
 	{
-		Glib::RWLock::WriterLock lm (redirect_lock);
+		Glib::RWLock::WriterLock lm (insert_lock);
 
-		RedirectList::iterator existing_end = _redirects.end();
+		InsertList::iterator existing_end = _inserts.end();
 		--existing_end;
 
 		ChanCount potential_max_streams;
 
-		for (RedirectList::const_iterator i = others.begin(); i != others.end(); ++i) {
+		for (InsertList::const_iterator i = others.begin(); i != others.end(); ++i) {
 			
 			boost::shared_ptr<PluginInsert> pi;
 			
@@ -872,57 +853,61 @@ Route::add_redirects (const RedirectList& others, void *src, InsertStreams* err)
 			}
 
 			// Ensure peak vector sizes before the plugin is activated
-			_meter->setup(potential_max_streams);
+			_meter->configure_io(potential_max_streams, potential_max_streams);
 
-			_redirects.push_back (*i);
+			_inserts.push_back (*i);
 			
 			if (_reset_plugin_counts (err)) {
 				++existing_end;
-				_redirects.erase (existing_end, _redirects.end());
+				_inserts.erase (existing_end, _inserts.end());
 				_reset_plugin_counts (0); // it worked before we tried to add it ...
 				return -1;
 			}
 			
 			(*i)->activate ();
-			(*i)->active_changed.connect (mem_fun (*this, &Route::redirect_active_proxy));
+			(*i)->ActiveChanged.connect (bind (mem_fun (_session, &Session::update_latency_compensation), false, false));
 		}
 	}
 	
-	if (redirect_max_outs != old_rmo || old_rmo == ChanCount::ZERO) {
+	if (insert_max_outs != old_rmo || old_rmo == ChanCount::ZERO) {
 		reset_panner ();
 	}
 
-	redirects_changed (src); /* EMIT SIGNAL */
+	inserts_changed (); /* EMIT SIGNAL */
 	return 0;
 }
 
-/** Turn off all redirects with a given placement
- * @param p Placement of redirects to disable
+/** Turn off all inserts with a given placement
+ * @param p Placement of inserts to disable
  */
 
 void
-Route::disable_redirects (Placement p)
+Route::disable_inserts (Placement p)
 {
-	Glib::RWLock::ReaderLock lm (redirect_lock);
+	Glib::RWLock::ReaderLock lm (insert_lock);
 	
-	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
 		if ((*i)->placement() == p) {
-			(*i)->set_active (false, this);
+			(*i)->set_active (false);
 		}
 	}
+
+	_session.set_dirty ();
 }
 
 /** Turn off all redirects 
  */
 
 void
-Route::disable_redirects ()
+Route::disable_inserts ()
 {
-	Glib::RWLock::ReaderLock lm (redirect_lock);
+	Glib::RWLock::ReaderLock lm (insert_lock);
 	
-	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
-		(*i)->set_active (false, this);
+	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
+		(*i)->set_active (false);
 	}
+	
+	_session.set_dirty ();
 }
 
 /** Turn off all redirects with a given placement
@@ -932,13 +917,15 @@ Route::disable_redirects ()
 void
 Route::disable_plugins (Placement p)
 {
-	Glib::RWLock::ReaderLock lm (redirect_lock);
+	Glib::RWLock::ReaderLock lm (insert_lock);
 	
-	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
 		if (boost::dynamic_pointer_cast<PluginInsert> (*i) && (*i)->placement() == p) {
-			(*i)->set_active (false, this);
+			(*i)->set_active (false);
 		}
 	}
+	
+	_session.set_dirty ();
 }
 
 /** Turn off all plugins
@@ -947,20 +934,22 @@ Route::disable_plugins (Placement p)
 void
 Route::disable_plugins ()
 {
-	Glib::RWLock::ReaderLock lm (redirect_lock);
+	Glib::RWLock::ReaderLock lm (insert_lock);
 	
-	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
 		if (boost::dynamic_pointer_cast<PluginInsert> (*i)) {
-			(*i)->set_active (false, this);
+			(*i)->set_active (false);
 		}
 	}
+	
+	_session.set_dirty ();
 }
 
 
 void
 Route::ab_plugins (bool forward)
 {
-	Glib::RWLock::ReaderLock lm (redirect_lock);
+	Glib::RWLock::ReaderLock lm (insert_lock);
 			
 	if (forward) {
 
@@ -968,13 +957,13 @@ Route::ab_plugins (bool forward)
 		   we go the other way, we will revert them
 		*/
 
-		for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+		for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
 			if (!boost::dynamic_pointer_cast<PluginInsert> (*i)) {
 				continue;
 			}
 
 			if ((*i)->active()) {
-				(*i)->set_active (false, this);
+				(*i)->set_active (false);
 				(*i)->set_next_ab_is_active (true);
 			} else {
 				(*i)->set_next_ab_is_active (false);
@@ -985,19 +974,21 @@ Route::ab_plugins (bool forward)
 
 		/* backward = if the redirect was marked to go active on the next ab, do so */
 
-		for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+		for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
 
 			if (!boost::dynamic_pointer_cast<PluginInsert> (*i)) {
 				continue;
 			}
 
 			if ((*i)->get_next_ab_is_active()) {
-				(*i)->set_active (true, this);
+				(*i)->set_active (true);
 			} else {
-				(*i)->set_active (false, this);
+				(*i)->set_active (false);
 			}
 		}
 	}
+	
+	_session.set_dirty ();
 }
 	
 	
@@ -1005,40 +996,40 @@ Route::ab_plugins (bool forward)
 ChanCount
 Route::pre_fader_streams() const
 {
-	boost::shared_ptr<Redirect> redirect;
+	boost::shared_ptr<Insert> insert;
 
 	// Find the last pre-fader redirect
-	for (RedirectList::const_iterator r = _redirects.begin(); r != _redirects.end(); ++r) {
-		if ((*r)->placement() == PreFader) {
-			redirect = *r;
+	for (InsertList::const_iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
+		if ((*i)->placement() == PreFader) {
+			insert = *i;
 		}
 	}
 	
-	if (redirect) {
-		return redirect->output_streams();
+	if (insert) {
+		return insert->output_streams();
 	} else {
 		return n_inputs ();
 	}
 }
 
 
-/** Remove redirects with a given placement.
- * @param p Placement of redirects to remove.
+/** Remove inserts with a given placement.
+ * @param p Placement of inserts to remove.
  */
 void
-Route::clear_redirects (Placement p, void *src)
+Route::clear_inserts (Placement p)
 {
-	const ChanCount old_rmo = redirect_max_outs;
+	const ChanCount old_rmo = insert_max_outs;
 
 	if (!_session.engine().connected()) {
 		return;
 	}
 
 	{
-		Glib::RWLock::WriterLock lm (redirect_lock);
-		RedirectList new_list;
+		Glib::RWLock::WriterLock lm (insert_lock);
+		InsertList new_list;
 		
-		for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+		for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
 			if ((*i)->placement() == p) {
 				/* it's the placement we want to get rid of */
 				(*i)->drop_references ();
@@ -1048,42 +1039,42 @@ Route::clear_redirects (Placement p, void *src)
 			}
 		}
 		
-		_redirects = new_list;
+		_inserts = new_list;
 	}
 
 	/* FIXME: can't see how this test can ever fire */
-	if (redirect_max_outs != old_rmo) {
+	if (insert_max_outs != old_rmo) {
 		reset_panner ();
 	}
 	
-	redirect_max_outs.reset();
+	insert_max_outs.reset();
 	_have_internal_generator = false;
-	redirects_changed (src); /* EMIT SIGNAL */
+	inserts_changed (); /* EMIT SIGNAL */
 }
 
 int
-Route::remove_redirect (boost::shared_ptr<Redirect> redirect, void *src, InsertStreams* err)
+Route::remove_insert (boost::shared_ptr<Insert> insert, InsertStreams* err)
 {
-	ChanCount old_rmo = redirect_max_outs;
+	ChanCount old_rmo = insert_max_outs;
 
 	if (!_session.engine().connected()) {
 		return 1;
 	}
 
-	redirect_max_outs.reset();
+	insert_max_outs.reset();
 
 	{
-		Glib::RWLock::WriterLock lm (redirect_lock);
-		RedirectList::iterator i;
+		Glib::RWLock::WriterLock lm (insert_lock);
+		InsertList::iterator i;
 		bool removed = false;
 
-		for (i = _redirects.begin(); i != _redirects.end(); ++i) {
-			if (*i == redirect) {
+		for (i = _inserts.begin(); i != _inserts.end(); ++i) {
+			if (*i == insert) {
 
-				RedirectList::iterator tmp;
+				InsertList::iterator tmp;
 
 				/* move along, see failure case for reset_plugin_counts()
-				   where we may need to reinsert the redirect.
+				   where we may need to reinsert the insert.
 				*/
 
 				tmp = i;
@@ -1094,18 +1085,14 @@ Route::remove_redirect (boost::shared_ptr<Redirect> redirect, void *src, InsertS
 				   run.
 				*/
 
-				boost::shared_ptr<Send> send;
-				boost::shared_ptr<PortInsert> port_insert;
+				boost::shared_ptr<Redirect> redirect;
 				
-				if ((send = boost::dynamic_pointer_cast<Send> (*i)) != 0) {
-					send->disconnect_inputs (this);
-					send->disconnect_outputs (this);
-				} else if ((port_insert = boost::dynamic_pointer_cast<PortInsert> (*i)) != 0) {
-					port_insert->disconnect_inputs (this);
-					port_insert->disconnect_outputs (this);
+				if ((redirect = boost::dynamic_pointer_cast<Redirect> (*i)) != 0) {
+					redirect->io()->disconnect_inputs (this);
+					redirect->io()->disconnect_outputs (this);
 				}
 
-				_redirects.erase (i);
+				_inserts.erase (i);
 
 				i = tmp;
 				removed = true;
@@ -1120,7 +1107,7 @@ Route::remove_redirect (boost::shared_ptr<Redirect> redirect, void *src, InsertS
 
 		if (_reset_plugin_counts (err)) {
 			/* get back to where we where */
-			_redirects.insert (i, redirect);
+			_inserts.insert (i, insert);
 			/* we know this will work, because it worked before :) */
 			_reset_plugin_counts (0);
 			return -1;
@@ -1128,7 +1115,7 @@ Route::remove_redirect (boost::shared_ptr<Redirect> redirect, void *src, InsertS
 
 		bool foo = false;
 
-		for (i = _redirects.begin(); i != _redirects.end(); ++i) {
+		for (i = _inserts.begin(); i != _inserts.end(); ++i) {
 			boost::shared_ptr<PluginInsert> pi;
 			
 			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
@@ -1141,20 +1128,20 @@ Route::remove_redirect (boost::shared_ptr<Redirect> redirect, void *src, InsertS
 		_have_internal_generator = foo;
 	}
 
-	if (old_rmo != redirect_max_outs) {
+	if (old_rmo != insert_max_outs) {
 		reset_panner ();
 	}
 
-	redirect->drop_references ();
+	insert->drop_references ();
 
-	redirects_changed (src); /* EMIT SIGNAL */
+	inserts_changed (); /* EMIT SIGNAL */
 	return 0;
 }
 
 int
 Route::reset_plugin_counts (InsertStreams* err)
 {
-	Glib::RWLock::WriterLock lm (redirect_lock);
+	Glib::RWLock::WriterLock lm (insert_lock);
 	return _reset_plugin_counts (err);
 }
 
@@ -1162,7 +1149,7 @@ Route::reset_plugin_counts (InsertStreams* err)
 int
 Route::_reset_plugin_counts (InsertStreams* err)
 {
-	RedirectList::iterator r;
+	InsertList::iterator r;
 	map<Placement,list<InsertCount> > insert_map;
 	ChanCount initial_streams;
 
@@ -1171,13 +1158,13 @@ Route::_reset_plugin_counts (InsertStreams* err)
 	*/
 	
 	/* divide inserts up by placement so we get the signal flow
-	   properly modelled. we need to do this because the _redirects
+	   properly modelled. we need to do this because the _inserts
 	   list is not sorted by placement
 	*/
 
 	/* ... but it should/will be... */
 	
-	for (r = _redirects.begin(); r != _redirects.end(); ++r) {
+	for (r = _inserts.begin(); r != _inserts.end(); ++r) {
 
 		boost::shared_ptr<Insert> insert;
 
@@ -1206,30 +1193,13 @@ Route::_reset_plugin_counts (InsertStreams* err)
 	apply_some_plugin_counts (insert_map[PreFader]);
 	apply_some_plugin_counts (insert_map[PostFader]);
 
-	/* recompute max outs of any redirect */
+	/* recompute max outs of any insert */
 
-	redirect_max_outs.reset();
-	RedirectList::iterator prev = _redirects.end();
+	insert_max_outs.reset();
+	InsertList::iterator prev = _inserts.end();
 
-	for (r = _redirects.begin(); r != _redirects.end(); prev = r, ++r) {
-		boost::shared_ptr<Send> s;
-
-		if ((s = boost::dynamic_pointer_cast<Send> (*r)) != 0) {
-			if (r == _redirects.begin()) {
-				s->expect_inputs (n_inputs());
-			} else {
-				s->expect_inputs ((*prev)->output_streams());
-			}
-
-		} else {
-			
-			/* don't pay any attention to send output configuration, since it doesn't
-			   affect the route.
-			 */
-
-			redirect_max_outs = max ((*r)->output_streams (), redirect_max_outs);
-			
-		}
+	for (r = _inserts.begin(); r != _inserts.end(); prev = r, ++r) {
+		insert_max_outs = max ((*r)->output_streams (), insert_max_outs);
 	}
 
 	/* we're done */
@@ -1299,28 +1269,28 @@ Route::check_some_plugin_counts (list<InsertCount>& iclist, ChanCount required_i
 }
 
 int
-Route::copy_redirects (const Route& other, Placement placement, InsertStreams* err)
+Route::copy_inserts (const Route& other, Placement placement, InsertStreams* err)
 {
-	ChanCount old_rmo = redirect_max_outs;
+	ChanCount old_rmo = insert_max_outs;
 
-	RedirectList to_be_deleted;
+	InsertList to_be_deleted;
 
 	{
-		Glib::RWLock::WriterLock lm (redirect_lock);
-		RedirectList::iterator tmp;
-		RedirectList the_copy;
+		Glib::RWLock::WriterLock lm (insert_lock);
+		InsertList::iterator tmp;
+		InsertList the_copy;
 
-		the_copy = _redirects;
+		the_copy = _inserts;
 		
-		/* remove all relevant redirects */
+		/* remove all relevant inserts */
 
-		for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ) {
+		for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ) {
 			tmp = i;
 			++tmp;
 
 			if ((*i)->placement() == placement) {
 				to_be_deleted.push_back (*i);
-				_redirects.erase (i);
+				_inserts.erase (i);
 			}
 
 			i = tmp;
@@ -1328,9 +1298,9 @@ Route::copy_redirects (const Route& other, Placement placement, InsertStreams* e
 
 		/* now copy the relevant ones from "other" */
 		
-		for (RedirectList::const_iterator i = other._redirects.begin(); i != other._redirects.end(); ++i) {
+		for (InsertList::const_iterator i = other._inserts.begin(); i != other._inserts.end(); ++i) {
 			if ((*i)->placement() == placement) {
-				_redirects.push_back (Redirect::clone (*i));
+				_inserts.push_back (Redirect::clone (*i));
 			}
 		}
 
@@ -1340,15 +1310,15 @@ Route::copy_redirects (const Route& other, Placement placement, InsertStreams* e
 
 			/* FAILED COPY ATTEMPT: we have to restore order */
 
-			/* delete all cloned redirects */
+			/* delete all cloned inserts */
 
-			for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ) {
+			for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ) {
 
 				tmp = i;
 				++tmp;
 
 				if ((*i)->placement() == placement) {
-					_redirects.erase (i);
+					_inserts.erase (i);
 				}
 				
 				i = tmp;
@@ -1356,8 +1326,8 @@ Route::copy_redirects (const Route& other, Placement placement, InsertStreams* e
 
 			/* restore the natural order */
 
-			_redirects = the_copy;
-			redirect_max_outs = old_rmo;
+			_inserts = the_copy;
+			insert_max_outs = old_rmo;
 
 			/* we failed, even though things are OK again */
 
@@ -1365,84 +1335,88 @@ Route::copy_redirects (const Route& other, Placement placement, InsertStreams* e
 
 		} else {
 			
-			/* SUCCESSFUL COPY ATTEMPT: delete the redirects we removed pre-copy */
+			/* SUCCESSFUL COPY ATTEMPT: delete the inserts we removed pre-copy */
 			to_be_deleted.clear ();
 		}
 	}
 
-	if (redirect_max_outs != old_rmo || old_rmo == ChanCount::ZERO) {
+	if (insert_max_outs != old_rmo || old_rmo == ChanCount::ZERO) {
 		reset_panner ();
 	}
 
-	redirects_changed (this); /* EMIT SIGNAL */
+	inserts_changed (); /* EMIT SIGNAL */
 	return 0;
 }
 
 void
-Route::all_redirects_flip ()
+Route::all_inserts_flip ()
 {
-	Glib::RWLock::ReaderLock lm (redirect_lock);
+	Glib::RWLock::ReaderLock lm (insert_lock);
 
-	if (_redirects.empty()) {
+	if (_inserts.empty()) {
 		return;
 	}
 
-	bool first_is_on = _redirects.front()->active();
+	bool first_is_on = _inserts.front()->active();
 	
-	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
-		(*i)->set_active (!first_is_on, this);
+	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
+		(*i)->set_active (!first_is_on);
 	}
+	
+	_session.set_dirty ();
 }
 
-/** Set all redirects with a given placement to a given active state.
- * @param p Placement of redirects to change.
- * @param state New active state for those redirects.
+/** Set all inserts with a given placement to a given active state.
+ * @param p Placement of inserts to change.
+ * @param state New active state for those inserts.
  */
 void
-Route::all_redirects_active (Placement p, bool state)
+Route::all_inserts_active (Placement p, bool state)
 {
-	Glib::RWLock::ReaderLock lm (redirect_lock);
+	Glib::RWLock::ReaderLock lm (insert_lock);
 
-	if (_redirects.empty()) {
+	if (_inserts.empty()) {
 		return;
 	}
 
-	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
 		if ((*i)->placement() == p) {
-			(*i)->set_active (state, this);
+			(*i)->set_active (state);
 		}
 	}
+	
+	_session.set_dirty ();
 }
 
-struct RedirectSorter {
-    bool operator() (boost::shared_ptr<const Redirect> a, boost::shared_ptr<const Redirect> b) {
+struct InsertSorter {
+    bool operator() (boost::shared_ptr<const Insert> a, boost::shared_ptr<const Insert> b) {
 	    return a->sort_key() < b->sort_key();
     }
 };
 
 int
-Route::sort_redirects (InsertStreams* err)
+Route::sort_inserts (InsertStreams* err)
 {
 	{
-		RedirectSorter comparator;
-		Glib::RWLock::WriterLock lm (redirect_lock);
-		ChanCount old_rmo = redirect_max_outs;
+		InsertSorter comparator;
+		Glib::RWLock::WriterLock lm (insert_lock);
+		ChanCount old_rmo = insert_max_outs;
 
 		/* the sweet power of C++ ... */
 
-		RedirectList as_it_was_before = _redirects;
+		InsertList as_it_was_before = _inserts;
 
-		_redirects.sort (comparator);
+		_inserts.sort (comparator);
 	
 		if (_reset_plugin_counts (err)) {
-			_redirects = as_it_was_before;
-			redirect_max_outs = old_rmo;
+			_inserts = as_it_was_before;
+			insert_max_outs = old_rmo;
 			return -1;
 		} 
 	} 
 
 	reset_panner ();
-	redirects_changed (this); /* EMIT SIGNAL */
+	inserts_changed (); /* EMIT SIGNAL */
 
 	return 0;
 }
@@ -1463,7 +1437,7 @@ XMLNode&
 Route::state(bool full_state)
 {
 	XMLNode *node = new XMLNode("Route");
-	RedirectList:: iterator i;
+	InsertList:: iterator i;
 	char buf[32];
 
 	if (_flags) {
@@ -1528,7 +1502,7 @@ Route::state(bool full_state)
 		cmt->add_content (_comment);
 	}
 
-	for (i = _redirects.begin(); i != _redirects.end(); ++i) {
+	for (i = _inserts.begin(); i != _inserts.end(); ++i) {
 		node->add_child_nocopy((*i)->state (full_state));
 	}
 
@@ -1540,10 +1514,10 @@ Route::state(bool full_state)
 }
 
 XMLNode&
-Route::get_redirect_state ()
+Route::get_insert_state ()
 {
 	XMLNode* root = new XMLNode (X_("redirects"));
-	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
 		root->add_child_nocopy ((*i)->state (true));
 	}
 
@@ -1551,7 +1525,7 @@ Route::get_redirect_state ()
 }
 
 int
-Route::set_redirect_state (const XMLNode& root)
+Route::set_insert_state (const XMLNode& root)
 {
 	if (root.name() != X_("redirects")) {
 		return -1;
@@ -1561,7 +1535,7 @@ Route::set_redirect_state (const XMLNode& root)
 	XMLNodeList nnlist;
 	XMLNodeConstIterator iter;
 	XMLNodeConstIterator niter;
-	Glib::RWLock::ReaderLock lm (redirect_lock);
+	Glib::RWLock::ReaderLock lm (insert_lock);
 
 	nlist = root.children();
 	
@@ -1588,9 +1562,9 @@ Route::set_redirect_state (const XMLNode& root)
 
 				ID id = prop->value ();
 
-				/* now look for a redirect with that ID */
+				/* now look for a insert with that ID */
 	
-				for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+				for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
 					if ((*i)->id() == id) {
 						(*i)->set_state (**iter);
 						break;
@@ -1620,7 +1594,7 @@ Route::set_deferred_state ()
 	nlist = deferred_state->children();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
-		add_redirect_from_xml (**niter);
+		add_insert_from_xml (**niter);
 	}
 
 	delete deferred_state;
@@ -1628,16 +1602,16 @@ Route::set_deferred_state ()
 }
 
 void
-Route::add_redirect_from_xml (const XMLNode& node)
+Route::add_insert_from_xml (const XMLNode& node)
 {
 	const XMLProperty *prop;
 
+	// legacy sessions use a different node name for sends
 	if (node.name() == "Send") {
-		
-
+	
 		try {
 			boost::shared_ptr<Send> send (new Send (_session, node));
-			add_redirect (send, this);
+			add_insert (send);
 		} 
 		
 		catch (failed_constructor &err) {
@@ -1658,15 +1632,18 @@ Route::add_redirect_from_xml (const XMLNode& node)
 					
 				} else if (prop->value() == "port") {
 
-
 					insert.reset (new PortInsert (_session, node));
+				
+				} else if (prop->value() == "send") {
+
+					insert.reset (new Send (_session, node));
 
 				} else {
 
 					error << string_compose(_("unknown Insert type \"%1\"; ignored"), prop->value()) << endmsg;
 				}
 
-				add_redirect (insert, this);
+				add_insert (insert);
 				
 			} else {
 				error << _("Insert XML node has no type property") << endmsg;
@@ -1820,24 +1797,24 @@ Route::_set_state (const XMLNode& node, bool call_base)
 		}
 	}
 
-	XMLNodeList redirect_nodes;
+	XMLNodeList insert_nodes;
 			
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
 
 		child = *niter;
 			
 		if (child->name() == X_("Send") || child->name() == X_("Insert")) {
-			redirect_nodes.push_back(child);
+			insert_nodes.push_back(child);
 		}
 
 	}
 
-	_set_redirect_states(redirect_nodes);
+	_set_insert_states(insert_nodes);
 
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
 		child = *niter;
-		// All redirects (sends and inserts) have been applied already
+		// All inserts have been applied already
 
 		if (child->name() == X_("Automation")) {
 			
@@ -1897,33 +1874,37 @@ Route::_set_state (const XMLNode& node, bool call_base)
 }
 
 void
-Route::_set_redirect_states(const XMLNodeList &nlist)
+Route::_set_insert_states(const XMLNodeList &nlist)
 {
 	XMLNodeConstIterator niter;
 	char buf[64];
 
-	RedirectList::iterator i, o;
+	InsertList::iterator i, o;
 
-	// Iterate through existing redirects, remove those which are not in the state list
-	for (i = _redirects.begin(); i != _redirects.end(); ) {
-		RedirectList::iterator tmp = i;
+	// Iterate through existing inserts, remove those which are not in the state list
+	for (i = _inserts.begin(); i != _inserts.end(); ) {
+		InsertList::iterator tmp = i;
 		++tmp;
 
-		bool redirectInStateList = false;
+		bool insertInStateList = false;
 	
 		(*i)->id().print (buf, sizeof (buf));
 
 
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
+			// legacy sessions (Redirect as a child of Insert, both is-a IO)
 			if (strncmp(buf,(*niter)->child(X_("Redirect"))->child(X_("IO"))->property(X_("id"))->value().c_str(), sizeof(buf)) == 0) {
-				redirectInStateList = true;
+				insertInStateList = true;
+				break;
+			} else if (strncmp(buf,(*niter)->property(X_("id"))->value().c_str(), sizeof(buf)) == 0) {
+				insertInStateList = true;
 				break;
 			}
 		}
 		
-		if (!redirectInStateList) {
-			remove_redirect ( *i, this);
+		if (!insertInStateList) {
+			remove_insert (*i);
 		}
 
 
@@ -1931,65 +1912,68 @@ Route::_set_redirect_states(const XMLNodeList &nlist)
 	}
 
 
-	// Iterate through state list and make sure all redirects are on the track and in the correct order,
-	// set the state of existing redirects according to the new state on the same go
-	i = _redirects.begin();
+	// Iterate through state list and make sure all inserts are on the track and in the correct order,
+	// set the state of existing inserts according to the new state on the same go
+	i = _inserts.begin();
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter, ++i) {
 
-		// Check whether the next redirect in the list 
+		// Check whether the next insert in the list 
 		o = i;
 
-		while (o != _redirects.end()) {
+		while (o != _inserts.end()) {
 			(*o)->id().print (buf, sizeof (buf));
 			if ( strncmp(buf, (*niter)->child(X_("Redirect"))->child(X_("IO"))->property(X_("id"))->value().c_str(), sizeof(buf)) == 0)
 				break;
+			else if (strncmp(buf,(*niter)->property(X_("id"))->value().c_str(), sizeof(buf)) == 0)
+				break;
+			
 			++o;
 		}
 
-		if (o == _redirects.end()) {
-			// If the redirect (*niter) is not on the route, we need to create it
+		if (o == _inserts.end()) {
+			// If the insert (*niter) is not on the route, we need to create it
 			// and move it to the correct location
 
-			RedirectList::iterator prev_last = _redirects.end();
+			InsertList::iterator prev_last = _inserts.end();
 			--prev_last; // We need this to check whether adding succeeded
 			
-			add_redirect_from_xml (**niter);
+			add_insert_from_xml (**niter);
 
-			RedirectList::iterator last = _redirects.end();
+			InsertList::iterator last = _inserts.end();
 			--last;
 
 			if (prev_last == last) {
-				cerr << "Could not fully restore state as some redirects were not possible to create" << endl;
+				cerr << "Could not fully restore state as some inserts were not possible to create" << endl;
 				continue;
 
 			}
 
-			boost::shared_ptr<Redirect> tmp = (*last);
-			// remove the redirect from the wrong location
-			_redirects.erase(last);
-			// insert the new redirect at the current location
-			_redirects.insert(i, tmp);
+			boost::shared_ptr<Insert> tmp = (*last);
+			// remove the insert from the wrong location
+			_inserts.erase(last);
+			// insert the new insert at the current location
+			_inserts.insert(i, tmp);
 
-			--i; // move pointer to the newly inserted redirect
+			--i; // move pointer to the newly inserted insert
 			continue;
 		}
 
-		// We found the redirect (*niter) on the route, first we must make sure the redirect
+		// We found the insert (*niter) on the route, first we must make sure the insert
 		// is at the location provided in the XML state
 		if (i != o) {
-			boost::shared_ptr<Redirect> tmp = (*o);
+			boost::shared_ptr<Insert> tmp = (*o);
 			// remove the old copy
-			_redirects.erase(o);
-			// insert the redirect at the correct location
-			_redirects.insert(i, tmp);
+			_inserts.erase(o);
+			// insert the insert at the correct location
+			_inserts.insert(i, tmp);
 
-			--i; // move pointer so it points to the right redirect
+			--i; // move pointer so it points to the right insert
 		}
 
 		(*i)->set_state( (**niter) );
 	}
 	
-	redirects_changed(this);
+	inserts_changed ();
 }
 
 void
@@ -2011,10 +1995,10 @@ Route::silence (nframes_t nframes, nframes_t offset)
 		}
 
 		{ 
-			Glib::RWLock::ReaderLock lm (redirect_lock, Glib::TRY_LOCK);
+			Glib::RWLock::ReaderLock lm (insert_lock, Glib::TRY_LOCK);
 			
 			if (lm.locked()) {
-				for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+				for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
 					boost::shared_ptr<PluginInsert> pi;
 					if (!_active && (pi = boost::dynamic_pointer_cast<PluginInsert> (*i)) != 0) {
 						// skip plugins, they don't need anything when we're not active
@@ -2166,13 +2150,20 @@ Route::feeds (boost::shared_ptr<Route> other)
 
 	/* check Redirects which may also interconnect Routes */
 
-	for (RedirectList::iterator r = _redirects.begin(); r != _redirects.end(); r++) {
+	for (InsertList::iterator r = _inserts.begin(); r != _inserts.end(); r++) {
 
-		no = (*r)->n_outputs().n_total();
+		boost::shared_ptr<Redirect> redirect = boost::dynamic_pointer_cast<Redirect>(*r);
+
+		if ( ! redirect)
+			continue;
+
+		// TODO: support internal redirects here
+
+		no = redirect->io()->n_outputs().n_total();
 
 		for (i = 0; i < no; ++i) {
 			for (j = 0; j < ni; ++j) {
-				if ((*r)->output(i)->connected_to (other->input (j)->name())) {
+				if (redirect->io()->output(i)->connected_to (other->input (j)->name())) {
 					return true;
 				}
 			}
@@ -2250,24 +2241,24 @@ void
 Route::set_active (bool yn)
 {
 	_active = yn; 
-	 active_changed(); /* EMIT SIGNAL */
+	active_changed(); /* EMIT SIGNAL */
 }
 
 void
-Route::handle_transport_stopped (bool abort_ignored, bool did_locate, bool can_flush_redirects)
+Route::handle_transport_stopped (bool abort_ignored, bool did_locate, bool can_flush_inserts)
 {
 	nframes_t now = _session.transport_frame();
 
 	{
-		Glib::RWLock::ReaderLock lm (redirect_lock);
+		Glib::RWLock::ReaderLock lm (insert_lock);
 
 		if (!did_locate) {
 			automation_snapshot (now);
 		}
 
-		for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+		for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
 			
-			if (Config->get_plugins_stop_with_transport() && can_flush_redirects) {
+			if (Config->get_plugins_stop_with_transport() && can_flush_inserts) {
 				(*i)->deactivate ();
 				(*i)->activate ();
 			}
@@ -2308,7 +2299,7 @@ Route::pans_required () const
 		return 0;
 	}
 	
-	return max (n_inputs ().n_audio(), static_cast<size_t>(redirect_max_outs.n_audio()));
+	return max (n_inputs ().n_audio(), static_cast<size_t>(insert_max_outs.n_audio()));
 }
 
 int 
@@ -2365,15 +2356,15 @@ Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nfra
 	     bool can_record, bool rec_monitors_input)
 {
 	{
-		Glib::RWLock::ReaderLock lm (redirect_lock, Glib::TRY_LOCK);
+		Glib::RWLock::ReaderLock lm (insert_lock, Glib::TRY_LOCK);
 		if (lm.locked()) {
 			// automation snapshot can also be called from the non-rt context
-			// and it uses the redirect list, so we take the lock out here
+			// and it uses the insert list, so we take the lock out here
 			automation_snapshot (_session.transport_frame());
 		}
 	}
 
-	if ((n_outputs().n_total() == 0 && _redirects.empty()) || n_inputs().n_total() == 0 || !_active) {
+	if ((n_outputs().n_total() == 0 && _inserts.empty()) || n_inputs().n_total() == 0 || !_active) {
 		silence (nframes, offset);
 		return 0;
 	}
@@ -2393,7 +2384,7 @@ Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nfra
 		
 		if (am.locked() && _session.transport_rolling()) {
 			
-			if (gain_automation_playback()) {
+			if (_gain_automation_curve.automation_playback()) {
 				apply_gain_automation = _gain_automation_curve.rt_safe_get_vector (start_frame, end_frame, _session.gain_automation_buffer(), nframes);
 			}
 		}
@@ -2423,13 +2414,15 @@ Route::toggle_monitor_input ()
 bool
 Route::has_external_redirects () const
 {
+	// FIXME: what about sends?
+
 	boost::shared_ptr<const PortInsert> pi;
 	
-	for (RedirectList::const_iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+	for (InsertList::const_iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
 		if ((pi = boost::dynamic_pointer_cast<const PortInsert>(*i)) != 0) {
 
-			for (PortSet::const_iterator port = pi->outputs().begin();
-					port != pi->outputs().end(); ++port) {
+			for (PortSet::const_iterator port = pi->io()->outputs().begin();
+					port != pi->io()->outputs().end(); ++port) {
 				
 				string port_name = port->name();
 				string client_name = port_name.substr (0, port_name.find(':'));
@@ -2447,15 +2440,15 @@ Route::has_external_redirects () const
 }
 
 void
-Route::flush_redirects ()
+Route::flush_inserts ()
 {
 	/* XXX shouldn't really try to take this lock, since
 	   this is called from the RT audio thread.
 	*/
 
-	Glib::RWLock::ReaderLock lm (redirect_lock);
+	Glib::RWLock::ReaderLock lm (insert_lock);
 
-	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
 		(*i)->deactivate ();
 		(*i)->activate ();
 	}
@@ -2476,7 +2469,7 @@ Route::update_total_latency ()
 {
 	_own_latency = 0;
 
-	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
 		if ((*i)->active ()) {
 			_own_latency += (*i)->latency ();
 		}
@@ -2511,7 +2504,7 @@ Route::automation_snapshot (nframes_t now)
 {
 	IO::automation_snapshot (now);
 
-	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
 		(*i)->automation_snapshot (now);
 	}
 }
@@ -2561,15 +2554,9 @@ Route::ToggleControllable::get_value (void) const
 void 
 Route::set_block_size (nframes_t nframes)
 {
-	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
 		(*i)->set_block_size (nframes);
 	}
-}
-
-void
-Route::redirect_active_proxy (Redirect* ignored, void* ignored_src)
-{
-	_session.update_latency_compensation (false, false);
 }
 
 void
@@ -2596,7 +2583,7 @@ Route::protect_automation ()
 		break;
 	}
 	
-	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
 		boost::shared_ptr<PluginInsert> pi;
 		if ((pi = boost::dynamic_pointer_cast<PluginInsert> (*i)) != 0) {
 			pi->protect_automation ();

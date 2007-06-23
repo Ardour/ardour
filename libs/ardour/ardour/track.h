@@ -37,7 +37,7 @@ class Track : public Route
 
 	virtual ~Track ();
 	
-	int set_name (string str, void *src);
+	bool set_name (const std::string& str);
 
 	TrackMode mode () const { return _mode; }
 	virtual int set_mode (TrackMode m) { return false; }

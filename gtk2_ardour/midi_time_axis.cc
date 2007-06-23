@@ -98,13 +98,13 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 
 	/* map current state of the route */
 
-	redirects_changed (0);
+	inserts_changed ();
 
 	ensure_xml_node ();
 
 	set_state (*xml_node);
 	
-	_route->redirects_changed.connect (mem_fun(*this, &MidiTimeAxisView::redirects_changed));
+	_route->inserts_changed.connect (mem_fun(*this, &MidiTimeAxisView::inserts_changed));
 
 	if (is_track()) {
 
@@ -173,25 +173,6 @@ MidiTimeAxisView::set_state (const XMLNode& node)
 		// uh... do stuff..
 	}
 }
-
-// FIXME: duplicated in audio_time_axis.cc
-/*static string 
-legalize_for_xml_node (string str)
-{
-	string::size_type pos;
-	string legal_chars = "abcdefghijklmnopqrtsuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_+=:";
-	string legal;
-
-	legal = str;
-	pos = 0;
-
-	while ((pos = legal.find_first_not_of (legal_chars, pos)) != string::npos) {
-		legal.replace (pos, 1, "_");
-		pos += 1;
-	}
-
-	return legal;
-}*/
 
 void
 MidiTimeAxisView::route_active_changed ()

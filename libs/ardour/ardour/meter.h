@@ -21,6 +21,7 @@
 
 #include <vector>
 #include <ardour/types.h>
+#include <ardour/insert.h>
 #include <pbd/fastlog.h>
 
 namespace ARDOUR {
@@ -32,16 +33,17 @@ class Session;
 
 /** Meters peaks on the input and stores them for access.
  */
-class PeakMeter {
+class PeakMeter : public Insert {
 public:
-	PeakMeter(Session& s) : _session(s) {}
+	PeakMeter(Session& s) : Insert(s, "meter", PreFader) {}
 
-	void setup (const ChanCount& in);
 	void reset ();
 	void reset_max ();
-
+	
+	bool configure_io (ChanCount in, ChanCount out);
+	
 	/** Compute peaks */
-	void run (BufferSet& bufs, nframes_t nframes, nframes_t offset=0);
+	void run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset);
 	
 	float peak_power (uint32_t n) { 
 		if (n < _visible_peak_power.size()) {
@@ -64,7 +66,6 @@ private:
 	friend class IO;
 	void meter();
 
-	Session&           _session;
 	std::vector<float> _peak_power;
 	std::vector<float> _visible_peak_power;
 	std::vector<float> _max_peak_power;

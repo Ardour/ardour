@@ -679,7 +679,7 @@ SMFSource::set_allow_remove_if_empty (bool yn)
 }
 
 int
-SMFSource::set_name (string newname, bool destructive)
+SMFSource::set_source_name (string newname, bool destructive)
 {
 	//Glib::Mutex::Lock lm (_lock); FIXME
 	string oldpath = _path;

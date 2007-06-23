@@ -32,6 +32,7 @@
 #include <pbd/undo.h>
 
 #include <ardour/ardour.h>
+#include <ardour/insert.h>
 #include <ardour/io.h>
 #include <ardour/automation_event.h>
 
@@ -46,97 +47,37 @@ namespace ARDOUR {
 
 class Session;
 
-class Redirect : public IO
+/** A mixer strip element (Insert) with Jack ports (IO).
+ */
+class Redirect : public Insert
 {
   public:
-	static const string state_node_name;
-
 	Redirect (Session&, const string& name, Placement,
 		  int input_min = -1, int input_max = -1, int output_min = -1, int output_max = -1);
 	Redirect (const Redirect&);
 	virtual ~Redirect ();
+	
+	virtual ChanCount output_streams() const { return _io->n_outputs(); }
+	virtual ChanCount input_streams () const { return _io->n_inputs(); }
+	virtual ChanCount natural_output_streams() const { return _io->n_outputs(); }
+	virtual ChanCount natural_input_streams () const { return _io->n_inputs(); }
 
-	static boost::shared_ptr<Redirect> clone (boost::shared_ptr<const Redirect>);
-
-	bool active () const { return _active; }
-	void set_active (bool yn, void *src);
-
-	virtual ChanCount output_streams() const { return n_outputs(); }
-	virtual ChanCount input_streams () const { return n_inputs(); }
-	virtual ChanCount natural_output_streams() const { return n_outputs(); }
-	virtual ChanCount natural_input_streams () const { return n_inputs(); }
-
-	uint32_t sort_key() const { return _sort_key; }
-	void set_sort_key (uint32_t key);
-
-	Placement placement() const { return _placement; }
-	void set_placement (Placement, void *src);
+	boost::shared_ptr<IO>       io()       { return _io; }
+	boost::shared_ptr<const IO> io() const { return _io; }
+	
+	virtual void automation_snapshot (nframes_t now) { _io->automation_snapshot(now); }
 
 	virtual void run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset) = 0;
-	virtual void activate () = 0;
-	virtual void deactivate () = 0;
-	virtual nframes_t latency() { return 0; }
+	void silence (nframes_t nframes, nframes_t offset);
 
-	virtual void set_block_size (nframes_t nframes) {}
-
-	sigc::signal<void,Redirect*,void*> active_changed;
-	sigc::signal<void,Redirect*,void*> placement_changed;
-	sigc::signal<void,Redirect*,bool>  AutomationPlaybackChanged;
+	sigc::signal<void,Redirect*,bool> AutomationPlaybackChanged;
 	sigc::signal<void,Redirect*,uint32_t> AutomationChanged;
-
-	static sigc::signal<void,Redirect*> RedirectCreated;
 	
-	XMLNode& state (bool full);
-	XMLNode& get_state (void);
+	XMLNode& state (bool full_state);
 	int set_state (const XMLNode&);
-
-	void *get_gui () const { return _gui; }
-	void  set_gui (void *p) { _gui = p; }
-
-	virtual string describe_parameter (uint32_t which);
-	virtual float default_parameter_value (uint32_t which) {
-		return 1.0f;
-	}
-
-	void what_has_automation (set<uint32_t>&) const;
-	void what_has_visible_automation (set<uint32_t>&) const;
-	const set<uint32_t>& what_can_be_automated () const { return can_automate_list; }
-
-	void mark_automation_visible (uint32_t, bool);
-	
-	AutomationList& automation_list (uint32_t);
-	bool find_next_event (nframes_t, nframes_t, ControlEvent&) const;
-
-	virtual void transport_stopped (nframes_t frame) {};
-
-	bool get_next_ab_is_active () const { return _next_ab_is_active; }
-	void set_next_ab_is_active (bool yn);
 	
   protected:
-	/* children may use this stuff as they see fit */
-
-	map<uint32_t,AutomationList*> parameter_automation;
-	set<uint32_t> visible_parameter_automation;
-
-	mutable Glib::Mutex _automation_lock;
-
-	void can_automate (uint32_t);
-	set<uint32_t> can_automate_list;
-
-	virtual void automation_list_creation_callback (uint32_t, AutomationList&) {}
-
-	int set_automation_state (const XMLNode&);
-	XMLNode& get_automation_state ();
-	
-  private:
-	bool _active;
-	bool _next_ab_is_active;
-	Placement _placement;
-	uint32_t _sort_key;
-	void* _gui;  /* generic, we don't know or care what this is */
-
-	int old_set_automation_state (const XMLNode&);
-	int load_automation (std::string path);
+	boost::shared_ptr<IO> _io;
 };
 
 } // namespace ARDOUR

@@ -42,20 +42,20 @@ using std::max;
 
 using namespace ARDOUR;
 
-Source::Source (Session& s, string name, DataType type)
-	: _session (s)
+Source::Source (Session& s, const string& name, DataType type)
+	: SessionObject(s, name)
 	, _type(type)
 {
-	assert(_name.find("/") == string::npos);
+	// not true.. is this supposed to be an assertion?
+	//assert(_name.find("/") == string::npos);
 
-	_name = name;
 	_timestamp = 0;
 	_length = 0;
 	_in_use = 0;
 }
 
 Source::Source (Session& s, const XMLNode& node) 
-	: _session (s)
+	: SessionObject(s, "unnamed source")
 	, _type(DataType::AUDIO)
 {
 	_timestamp = 0;

@@ -114,10 +114,10 @@ class AutomationList : public PBD::StatefulDestructible
         AutoStyle automation_style() const { return _style; }
 	sigc::signal<void> automation_state_changed;
 
-	bool automation_playback() {
+	bool automation_playback() const {
 		return (_state & Play) || ((_state & Touch) && !_touching);
 	}
-	bool automation_write () {
+	bool automation_write () const {
 		return (_state & Write) || ((_state & Touch) && _touching);
 	}
 

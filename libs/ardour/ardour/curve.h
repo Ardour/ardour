@@ -60,7 +60,7 @@ class Curve : public AutomationList
 
 	void solve ();
 
-        static sigc::signal<void, Curve*> CurveCreated;
+	static sigc::signal<void, Curve*> CurveCreated;
 		
   protected:
 	ControlEvent* point_factory (double,double) const;

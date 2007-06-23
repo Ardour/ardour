@@ -98,7 +98,7 @@ class RouteUI : public virtual AxisView
 	void solo_changed(void*);
 	void solo_changed_so_update_mute ();
 	void mute_changed(void*);
-	virtual void redirects_changed (void *) {}
+	virtual void inserts_changed () {}
 	void route_rec_enable_changed();
 	void session_rec_enable_changed();
 
@@ -133,7 +133,7 @@ class RouteUI : public virtual AxisView
 
 	void route_rename();
 	
-	virtual void name_changed (void *src);
+	virtual void name_changed ();
 	void route_removed ();
 
 	Gtk::CheckMenuItem *route_active_menu_item;

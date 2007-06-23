@@ -42,6 +42,9 @@ class Send : public Redirect
 
 	uint32_t bit_slot() const { return bitslot; }
 	
+	ChanCount output_streams() const;
+	ChanCount input_streams () const;
+	
 	void run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset);
 	
 	void activate() {}
@@ -54,7 +57,10 @@ class Send : public Redirect
 	int set_state(const XMLNode& node);
 
 	uint32_t pans_required() const { return _expected_inputs.n_audio(); }
-	void expect_inputs (const ChanCount&);
+	
+	virtual bool      can_support_input_configuration (ChanCount in) const;
+	virtual ChanCount output_for_input_configuration (ChanCount in) const;
+	virtual bool      configure_io (ChanCount in, ChanCount out);
 
 	static uint32_t how_many_sends();
 

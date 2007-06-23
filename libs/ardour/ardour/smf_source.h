@@ -61,7 +61,8 @@ class SMFSource : public MidiSource {
 	virtual void           mark_capture_end () {}
 	virtual void           clear_capture_marks() {}
 
-	int set_name (string newname, bool destructive);
+	bool set_name (const std::string& newname) { return (set_source_name(newname, false) == 0); }
+	int set_source_name (string newname, bool destructive);
 
 	string path() const { return _path; }
 

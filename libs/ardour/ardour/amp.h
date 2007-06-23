@@ -28,6 +28,8 @@ class BufferSet;
 
 /** Applies a declick operation to all audio inputs, passing the same number of
  * audio outputs, and passing through any other types unchanged.
+ *
+ * FIXME: make this an insert.
  */
 class Amp {
 public:

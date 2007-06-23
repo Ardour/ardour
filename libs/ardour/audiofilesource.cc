@@ -573,7 +573,7 @@ AudioFileSource::set_allow_remove_if_empty (bool yn)
 }
 
 int
-AudioFileSource::set_name (ustring newname, bool destructive)
+AudioFileSource::set_source_name (ustring newname, bool destructive)
 {
 	Glib::Mutex::Lock lm (_lock);
 	ustring oldpath = _path;

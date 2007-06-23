@@ -208,6 +208,6 @@ PlugUIBase::bypass_toggled ()
 	bool x;
 
 	if ((x = bypass_button.get_active()) == insert->active()) {
-		insert->set_active (!x, this);
+		insert->set_active (!x);
 	}
 }

@@ -53,7 +53,7 @@ class Session;
 class Playlist;
 class IO;
 
-class Diskstream : public PBD::StatefulDestructible
+class Diskstream : public SessionObject
 {	
   public:
 	enum Flag {
@@ -65,9 +65,8 @@ class Diskstream : public PBD::StatefulDestructible
 	Diskstream (Session &, const string& name, Flag f = Recordable);
 	Diskstream (Session &, const XMLNode&);
 	virtual ~Diskstream();
-
-	string      name () const { return _name; }
-	virtual int set_name (string str);
+	
+	bool set_name (const string& str);
 
 	ARDOUR::IO* io() const { return _io; }
 	void set_io (ARDOUR::IO& io);
@@ -238,8 +237,6 @@ class Diskstream : public PBD::StatefulDestructible
 
 	uint32_t i_am_the_modifier;
 
-	string            _name;
-	ARDOUR::Session&  _session;
 	ARDOUR::IO*       _io;
 	ChanCount         _n_channels;
 

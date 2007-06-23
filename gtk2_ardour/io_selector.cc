@@ -250,7 +250,7 @@ IOSelector::IOSelector (Session& sess, boost::shared_ptr<IO> ior, bool input)
 		io->output_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
 	}
 
-	io->name_changed.connect (mem_fun(*this, &IOSelector::name_changed));
+	io->NameChanged.connect (mem_fun(*this, &IOSelector::name_changed));
 }
 
 IOSelector::~IOSelector ()
@@ -298,9 +298,9 @@ IOSelector::set_button_sensitivity ()
 
 
 void
-IOSelector::name_changed (void* src)
+IOSelector::name_changed ()
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &IOSelector::name_changed), src));
+	ENSURE_GUI_THREAD(mem_fun(*this, &IOSelector::name_changed));
 	
 	display_ports ();
 }
@@ -765,8 +765,8 @@ IOSelector::redisplay ()
 }
 
 PortInsertUI::PortInsertUI (Session& sess, boost::shared_ptr<PortInsert> pi)
-	: input_selector (sess, pi, true),
-	  output_selector (sess, pi, false)
+	: input_selector (sess, pi->io(), true),
+	  output_selector (sess, pi->io(), false)
 {
 	hbox.pack_start (output_selector, true, true);
 	hbox.pack_start (input_selector, true, true);

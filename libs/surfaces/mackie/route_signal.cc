@@ -38,7 +38,7 @@ void RouteSignal::connect()
 	if ( _strip.has_gain() )
 		_gain_changed_connection = _route.gain_control().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_gain_changed ), this ) );
 		
-	_name_changed_connection = _route.name_changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_name_changed ), this ) );
+	_name_changed_connection = _route.NameChanged.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_name_changed ), this ) );
 	
 	if ( _route.panner().size() == 1 )
 	{
@@ -85,7 +85,7 @@ void RouteSignal::notify_all()
 	if ( _strip.has_gain() )
 		_mcp.notify_gain_changed( this );
 	
-	_mcp.notify_name_changed( &_route, this );
+	_mcp.notify_name_changed( this );
 	
 	if ( _strip.has_vpot() )
 		_mcp.notify_panner_changed( this );

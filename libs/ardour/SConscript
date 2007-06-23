@@ -74,6 +74,7 @@ gain.cc
 gdither.cc
 globals.cc
 import.cc
+automatable.cc
 insert.cc
 plugin_insert.cc
 port_insert.cc

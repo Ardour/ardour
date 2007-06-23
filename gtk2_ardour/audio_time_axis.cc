@@ -106,8 +106,8 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	/* map current state of the route */
 
-	redirects_changed (0);
-	reset_redirect_automation_curves ();
+	inserts_changed ();
+	reset_insert_automation_curves ();
 
 	ensure_xml_node ();
 

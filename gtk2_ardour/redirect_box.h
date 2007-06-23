@@ -62,6 +62,8 @@ namespace ARDOUR {
 	class Session;
 }
 
+
+// FIXME: change name to InsertBox
 class RedirectBox : public Gtk::HBox
 {
   public:
@@ -73,14 +75,13 @@ class RedirectBox : public Gtk::HBox
 
 	void update();
 
-	void select_all_redirects ();
-	void deselect_all_redirects ();
-	void select_all_plugins ();
 	void select_all_inserts ();
+	void deselect_all_inserts ();
+	void select_all_plugins ();
 	void select_all_sends ();
 	
-	sigc::signal<void,boost::shared_ptr<ARDOUR::Redirect> > RedirectSelected;
-	sigc::signal<void,boost::shared_ptr<ARDOUR::Redirect> > RedirectUnselected;
+	sigc::signal<void,boost::shared_ptr<ARDOUR::Insert> > InsertSelected;
+	sigc::signal<void,boost::shared_ptr<ARDOUR::Insert> > InsertUnselected;
 	
 	static void register_actions();
 
@@ -103,11 +104,11 @@ class RedirectBox : public Gtk::HBox
 	struct ModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    ModelColumns () {
 		    add (text);
-		    add (redirect);
+		    add (insert);
 		    add (color);
 	    }
 	    Gtk::TreeModelColumn<std::string>       text;
-	    Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Redirect> > redirect;
+	    Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Insert> > insert;
 	    Gtk::TreeModelColumn<Gdk::Color>        color;
 	};
 
@@ -117,15 +118,15 @@ class RedirectBox : public Gtk::HBox
 	void selection_changed ();
 
 	static bool get_colors;
-	static Gdk::Color* active_redirect_color;
-	static Gdk::Color* inactive_redirect_color;
+	static Gdk::Color* active_insert_color;
+	static Gdk::Color* inactive_insert_color;
 	
-	Gtk::EventBox	       redirect_eventbox;
-	Gtk::HBox              redirect_hpacker;
-	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Redirect> > redirect_display;
-	Gtk::ScrolledWindow    redirect_scroller;
+	Gtk::EventBox	       insert_eventbox;
+	Gtk::HBox              insert_hpacker;
+	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Insert> > insert_display;
+	Gtk::ScrolledWindow    insert_scroller;
 
-	void object_drop (std::string type, uint32_t cnt, const boost::shared_ptr<ARDOUR::Redirect>*);
+	void object_drop (std::string type, uint32_t cnt, const boost::shared_ptr<ARDOUR::Insert>*);
 
 	Width _width;
 	
@@ -135,72 +136,71 @@ class RedirectBox : public Gtk::HBox
 	void new_send ();
 	void show_send_controls ();
 
-	Gtk::Menu *redirect_menu;
-	gint redirect_menu_map_handler (GdkEventAny *ev);
-	Gtk::Menu * build_redirect_menu ();
-	void build_redirect_tooltip (Gtk::EventBox&, string);
-	void show_redirect_menu (gint arg);
+	Gtk::Menu *insert_menu;
+	gint insert_menu_map_handler (GdkEventAny *ev);
+	Gtk::Menu * build_insert_menu ();
+	void build_insert_tooltip (Gtk::EventBox&, string);
+	void show_insert_menu (gint arg);
 
 	void choose_send ();
-	void send_io_finished (IOSelector::Result, boost::weak_ptr<ARDOUR::Redirect>, IOSelectorWindow*);
+	void send_io_finished (IOSelector::Result, boost::shared_ptr<ARDOUR::Send>, IOSelectorWindow*);
 	void choose_insert ();
 	void choose_plugin ();
 	void insert_plugin_chosen (boost::shared_ptr<ARDOUR::Plugin>);
 
-	bool no_redirect_redisplay;
+	bool no_insert_redisplay;
 	bool ignore_delete;
 
-	bool redirect_button_press_event (GdkEventButton *);
-	bool redirect_button_release_event (GdkEventButton *);
-	void redisplay_redirects (void* src);
-	void add_redirect_to_display (boost::shared_ptr<ARDOUR::Redirect>);
+	bool insert_button_press_event (GdkEventButton *);
+	bool insert_button_release_event (GdkEventButton *);
+	void redisplay_inserts ();
+	void add_insert_to_display (boost::shared_ptr<ARDOUR::Insert>);
 	void row_deleted (const Gtk::TreeModel::Path& path);
-	void show_redirect_active_r (ARDOUR::Redirect*, void *, boost::weak_ptr<ARDOUR::Redirect>);
-	void show_redirect_active (boost::weak_ptr<ARDOUR::Redirect>);
-	void show_redirect_name (void* src, boost::weak_ptr<ARDOUR::Redirect>);
-	string redirect_name (boost::weak_ptr<ARDOUR::Redirect>);
+	void show_insert_active (boost::weak_ptr<ARDOUR::Insert>);
+	void show_insert_name (boost::weak_ptr<ARDOUR::Insert>);
+	string insert_name (boost::weak_ptr<ARDOUR::Insert>);
 
-	void remove_redirect_gui (boost::shared_ptr<ARDOUR::Redirect>);
+	void remove_insert_gui (boost::shared_ptr<ARDOUR::Insert>);
 
-	void redirects_reordered (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator&, int*);
-	void compute_redirect_sort_keys ();
-	vector<sigc::connection> redirect_active_connections;
-	vector<sigc::connection> redirect_name_connections;
+	void inserts_reordered (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator&, int*);
+	void compute_insert_sort_keys ();
+	vector<sigc::connection> insert_active_connections;
+	vector<sigc::connection> insert_name_connections;
 	
-	bool redirect_drag_in_progress;
-	void redirect_drag_begin (GdkDragContext*);
-	void redirect_drag_end (GdkDragContext*);
-	void all_redirects_active(bool state);
+	bool insert_drag_in_progress;
+	void insert_drag_begin (GdkDragContext*);
+	void insert_drag_end (GdkDragContext*);
+	void all_inserts_active(bool state);
 	void all_plugins_active(bool state);
 	void ab_plugins ();
 
-	void cut_redirects ();
-	void copy_redirects ();
-	void paste_redirects ();
-	void delete_redirects ();
-	void clear_redirects ();
-	void clone_redirects ();
-	void rename_redirects ();
+	void cut_inserts ();
+	void copy_inserts ();
+	void paste_inserts ();
+	void delete_inserts ();
+	void clear_inserts ();
+	void clone_inserts ();
+	void rename_inserts ();
 
-	void for_selected_redirects (void (RedirectBox::*pmf)(boost::shared_ptr<ARDOUR::Redirect>));
-	void get_selected_redirects (vector<boost::shared_ptr<ARDOUR::Redirect> >&);
+	void for_selected_inserts (void (RedirectBox::*pmf)(boost::shared_ptr<ARDOUR::Insert>));
+	void get_selected_inserts (vector<boost::shared_ptr<ARDOUR::Insert> >&);
 
 	static Glib::RefPtr<Gtk::Action> paste_action;
-	void paste_redirect_list (std::list<boost::shared_ptr<ARDOUR::Redirect> >& redirects);
+	void paste_insert_list (std::list<boost::shared_ptr<ARDOUR::Insert> >& inserts);
 	
-	void activate_redirect (boost::shared_ptr<ARDOUR::Redirect>);
-	void deactivate_redirect (boost::shared_ptr<ARDOUR::Redirect>);
-	void cut_redirect (boost::shared_ptr<ARDOUR::Redirect>);
-	void copy_redirect (boost::shared_ptr<ARDOUR::Redirect>);
-	void edit_redirect (boost::shared_ptr<ARDOUR::Redirect>);
-	void hide_redirect_editor (boost::shared_ptr<ARDOUR::Redirect>);
-	void rename_redirect (boost::shared_ptr<ARDOUR::Redirect>);
+	void activate_insert (boost::shared_ptr<ARDOUR::Insert>);
+	void deactivate_insert (boost::shared_ptr<ARDOUR::Insert>);
+	void cut_insert (boost::shared_ptr<ARDOUR::Insert>);
+	void copy_insert (boost::shared_ptr<ARDOUR::Insert>);
+	void edit_insert (boost::shared_ptr<ARDOUR::Insert>);
+	void hide_insert_editor (boost::shared_ptr<ARDOUR::Insert>);
+	void rename_insert (boost::shared_ptr<ARDOUR::Insert>);
 
-	gint idle_delete_redirect (boost::weak_ptr<ARDOUR::Redirect>);
+	gint idle_delete_insert (boost::weak_ptr<ARDOUR::Insert>);
 
 	void weird_plugin_dialog (ARDOUR::Plugin& p, ARDOUR::Route::InsertStreams streams, boost::shared_ptr<ARDOUR::IO> io);
 
-	static RedirectBox* _current_redirect_box;
+	static RedirectBox* _current_insert_box;
 	static bool enter_box (GdkEventCrossing*, RedirectBox*);
 	static bool leave_box (GdkEventCrossing*, RedirectBox*);
 
@@ -223,8 +223,8 @@ class RedirectBox : public Gtk::HBox
 	static void rb_ab_plugins ();
 	static void rb_deactivate_plugins ();
 	
-	void route_name_changed (void* src, PluginUIWindow* plugin_ui, boost::weak_ptr<ARDOUR::PluginInsert> pi);
-	std::string generate_redirect_title (boost::shared_ptr<ARDOUR::PluginInsert> pi);
+	void route_name_changed (PluginUIWindow* plugin_ui, boost::weak_ptr<ARDOUR::PluginInsert> pi);
+	std::string generate_insert_title (boost::shared_ptr<ARDOUR::PluginInsert> pi);
 };
 
 #endif /* __ardour_gtk_redirect_box__ */

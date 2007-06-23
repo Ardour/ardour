@@ -515,7 +515,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
 	
 	{
-		Glib::RWLock::ReaderLock lm (redirect_lock, Glib::TRY_LOCK);
+		Glib::RWLock::ReaderLock lm (insert_lock, Glib::TRY_LOCK);
 		if (lm.locked()) {
 			// automation snapshot can also be called from the non-rt context
 			// and it uses the redirect list, so we take the lock out here
@@ -524,7 +524,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 	}
 
 	
-	if (n_outputs().n_total() == 0 && _redirects.empty()) {
+	if (n_outputs().n_total() == 0 && _inserts.empty()) {
 		return 0;
 	}
 
@@ -601,7 +601,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 		if (!diskstream->record_enabled() && _session.transport_rolling()) {
 			Glib::Mutex::Lock am (automation_lock, Glib::TRY_LOCK);
 			
-			if (am.locked() && gain_automation_playback()) {
+			if (am.locked() && _gain_automation_curve.automation_playback()) {
 				apply_gain_automation = _gain_automation_curve.rt_safe_get_vector (start_frame, end_frame, _session.gain_automation_buffer(), nframes);
 			}
 		}
@@ -620,7 +620,7 @@ int
 AudioTrack::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
 			 bool can_record, bool rec_monitors_input)
 {
-	if (n_outputs().n_total() == 0 && _redirects.empty()) {
+	if (n_outputs().n_total() == 0 && _inserts.empty()) {
 		return 0;
 	}
 
@@ -643,12 +643,12 @@ AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes
 	gain_t  gain_automation[nframes];
 	gain_t  gain_buffer[nframes];
 	float   mix_buffer[nframes];
-	RedirectList::iterator i;
+	InsertList::iterator i;
 	bool post_fader_work = false;
 	gain_t this_gain = _gain;
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
 	
-	Glib::RWLock::ReaderLock rlock (redirect_lock);
+	Glib::RWLock::ReaderLock rlock (insert_lock);
 
 	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(diskstream->playlist());
 	assert(apl);
@@ -681,7 +681,7 @@ AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes
 	   will already have checked that there are no external port inserts.
 	*/
 	
-	for (i = _redirects.begin(); i != _redirects.end(); ++i) {
+	for (i = _inserts.begin(); i != _inserts.end(); ++i) {
 		boost::shared_ptr<Insert> insert;
 		
 		if ((insert = boost::dynamic_pointer_cast<Insert>(*i)) != 0) {
@@ -719,7 +719,7 @@ AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes
 
 	if (post_fader_work) {
 
-		for (i = _redirects.begin(); i != _redirects.end(); ++i) {
+		for (i = _inserts.begin(); i != _inserts.end(); ++i) {
 			boost::shared_ptr<PluginInsert> insert;
 			
 			if ((insert = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
@@ -800,9 +800,9 @@ AudioTrack::freeze (InterThreadInfo& itt)
 	_freeze_record.have_mementos = true;
 
 	{
-		Glib::RWLock::ReaderLock lm (redirect_lock);
+		Glib::RWLock::ReaderLock lm (insert_lock);
 		
-		for (RedirectList::iterator r = _redirects.begin(); r != _redirects.end(); ++r) {
+		for (InsertList::iterator r = _inserts.begin(); r != _inserts.end(); ++r) {
 			
 			boost::shared_ptr<Insert> insert;
 
@@ -816,7 +816,8 @@ AudioTrack::freeze (InterThreadInfo& itt)
 				
 				/* now deactivate the insert */
 				
-				insert->set_active (false, this);
+				insert->set_active (false);
+				_session.set_dirty ();
 			}
 		}
 	}
@@ -857,8 +858,8 @@ AudioTrack::unfreeze ()
 
 		} else {
 
-			Glib::RWLock::ReaderLock lm (redirect_lock); // should this be a write lock? jlc
-			for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+			Glib::RWLock::ReaderLock lm (insert_lock); // should this be a write lock? jlc
+			for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
 				for (vector<FreezeRecordInsertInfo*>::iterator ii = _freeze_record.insert_info.begin(); ii != _freeze_record.insert_info.end(); ++ii) {
 					if ((*ii)->id == (*i)->id()) {
 						(*i)->set_state (((*ii)->state));

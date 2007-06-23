@@ -89,8 +89,8 @@ class RouteParams_UI : public ArdourDialog
 	Gtk::HBox                route_hpacker;
 	Gtk::VBox                route_vpacker;
 
-	RedirectBox              * pre_redirect_box;
-	RedirectBox              * post_redirect_box;
+	RedirectBox              * pre_insert_box;
+	RedirectBox              * post_insert_box;
 	
 	Gtk::HPaned		 list_hpane;
 
@@ -121,11 +121,11 @@ class RouteParams_UI : public ArdourDialog
 	sigc::connection            _route_conn;
 	sigc::connection            _route_ds_conn;
 
-	boost::shared_ptr<ARDOUR::Redirect> _pre_redirect;
-	sigc::connection            _pre_plugin_conn;
+	boost::shared_ptr<ARDOUR::Insert> _pre_insert;
+	sigc::connection                  _pre_plugin_conn;
 
-	boost::shared_ptr<ARDOUR::Redirect> _post_redirect;
-	sigc::connection            _post_plugin_conn;
+	boost::shared_ptr<ARDOUR::Insert> _post_insert;
+	sigc::connection                  _post_plugin_conn;
 	
 	
 	enum ConfigView {
@@ -157,7 +157,7 @@ class RouteParams_UI : public ArdourDialog
 	
 	void add_routes (ARDOUR::Session::RouteList&);
 
-	void route_name_changed (void *src, boost::shared_ptr<ARDOUR::Route> route);
+	void route_name_changed (boost::shared_ptr<ARDOUR::Route> route);
 	void route_removed (boost::shared_ptr<ARDOUR::Route> route);
 
 
@@ -171,15 +171,15 @@ class RouteParams_UI : public ArdourDialog
 
 	
 	
-	void redirects_changed (void *src);
+	void inserts_changed ();
 	
 	void setup_redirect_boxes();
 	void cleanup_redirect_boxes();
 
-	void redirect_selected (boost::shared_ptr<ARDOUR::Redirect>, ARDOUR::Placement);
+	void redirect_selected (boost::shared_ptr<ARDOUR::Insert>, ARDOUR::Placement);
 	
 	void plugin_going_away (ARDOUR::Placement);
-	void redirect_going_away (boost::shared_ptr<ARDOUR::Redirect>);
+	void redirect_going_away (boost::shared_ptr<ARDOUR::Insert>);
 
 	gint edit_input_configuration (GdkEventButton *ev);
 	gint edit_output_configuration (GdkEventButton *ev);

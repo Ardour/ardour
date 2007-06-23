@@ -292,7 +292,7 @@ Mixer_UI::add_strip (Session::RouteList& routes)
 		no_track_list_redisplay = false;
 		redisplay_track_list ();
 		
-		route->name_changed.connect (bind (mem_fun(*this, &Mixer_UI::strip_name_changed), strip));
+		route->NameChanged.connect (bind (mem_fun(*this, &Mixer_UI::strip_name_changed), strip));
 		strip->GoingAway.connect (bind (mem_fun(*this, &Mixer_UI::remove_strip), strip));
 		
 		strip->signal_button_release_event().connect (bind (mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
@@ -738,9 +738,9 @@ Mixer_UI::build_track_menu ()
 }
 
 void
-Mixer_UI::strip_name_changed (void* src, MixerStrip* mx)
+Mixer_UI::strip_name_changed (MixerStrip* mx)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::strip_name_changed), src, mx));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::strip_name_changed), mx));
 	
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator i;

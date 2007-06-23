@@ -28,6 +28,7 @@
 #include <pbd/statefuldestructible.h> 
 
 #include <ardour/ardour.h>
+#include <ardour/session_object.h>
 #include <ardour/data_type.h>
 
 namespace ARDOUR {
@@ -35,17 +36,14 @@ namespace ARDOUR {
 class Session;
 class Playlist;
 
-class Source : public PBD::StatefulDestructible
+class Source : public SessionObject
 {
   public:
-	Source (Session&, std::string name, DataType type);
+	Source (Session&, const std::string& name, DataType type);
 	Source (Session&, const XMLNode&);
 	
 	virtual ~Source ();
-
-	std::string name() const { return _name; }
-	int set_name (std::string str, bool destructive);
-
+	
 	DataType type() { return _type; }
 
 	time_t timestamp() const { return _timestamp; }
@@ -76,8 +74,6 @@ class Source : public PBD::StatefulDestructible
   protected:
 	void update_length (nframes_t pos, nframes_t cnt);
 	
-	Session&  _session;
-	string    _name;
 	DataType  _type;
 	time_t    _timestamp;
 	nframes_t _length;

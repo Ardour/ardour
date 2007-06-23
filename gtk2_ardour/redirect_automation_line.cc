@@ -33,7 +33,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-RedirectAutomationLine::RedirectAutomationLine (const string & name, Redirect& rd, uint32_t port, Session& s,
+RedirectAutomationLine::RedirectAutomationLine (const string & name, Insert& i, uint32_t port, Session& s,
 						
 						TimeAxisView& tv, ArdourCanvas::Group& parent,
 						
@@ -41,16 +41,16 @@ RedirectAutomationLine::RedirectAutomationLine (const string & name, Redirect& r
   
         : AutomationLine (name, tv, parent, l),
 	  session (s),
-	  _redirect (rd),
+	  _insert (i),
 	  _port (port)
 {
-        set_verbose_cursor_uses_gain_mapping (false);
+	set_verbose_cursor_uses_gain_mapping (false);
 
 	PluginInsert *pi;
 	Plugin::ParameterDescriptor desc;
 
-	if ((pi  = dynamic_cast<PluginInsert*>(&_redirect)) == 0) {
-		fatal << _("redirect automation created for non-plugin") << endmsg;
+	if ((pi  = dynamic_cast<PluginInsert*>(&_insert)) == 0) {
+		fatal << _("insert automation created for non-plugin") << endmsg;
 		/*NOTREACHED*/
 	}
 

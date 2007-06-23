@@ -75,11 +75,11 @@ using namespace Gtk;
 using namespace Glib;
 using namespace Gtkmm2ext;
 
-RedirectBox* RedirectBox::_current_redirect_box = 0;
+RedirectBox* RedirectBox::_current_insert_box = 0;
 RefPtr<Action> RedirectBox::paste_action;
 bool RedirectBox::get_colors = true;
-Gdk::Color* RedirectBox::active_redirect_color;
-Gdk::Color* RedirectBox::inactive_redirect_color;
+Gdk::Color* RedirectBox::active_insert_color;
+Gdk::Color* RedirectBox::inactive_insert_color;
 
 RedirectBox::RedirectBox (Placement pcmnt, Session& sess, boost::shared_ptr<Route> rt, PluginSelector &plugsel, 
 			  RouteRedirectSelection & rsel, bool owner_is_mixer)
@@ -91,60 +91,60 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, boost::shared_ptr<Rout
 	  _rr_selection(rsel)
 {
 	if (get_colors) {
-		active_redirect_color = new Gdk::Color;
-		inactive_redirect_color = new Gdk::Color;
-		set_color (*active_redirect_color, rgba_from_style ("RedirectSelector", 0xff, 0, 0, 0, "fg", Gtk::STATE_ACTIVE, false ));
-		set_color (*inactive_redirect_color, rgba_from_style ("RedirectSelector", 0xff, 0, 0, 0, "fg", Gtk::STATE_NORMAL, false ));
+		active_insert_color = new Gdk::Color;
+		inactive_insert_color = new Gdk::Color;
+		set_color (*active_insert_color, rgba_from_style ("RedirectSelector", 0xff, 0, 0, 0, "fg", Gtk::STATE_ACTIVE, false ));
+		set_color (*inactive_insert_color, rgba_from_style ("RedirectSelector", 0xff, 0, 0, 0, "fg", Gtk::STATE_NORMAL, false ));
 		get_colors = false;
 	}
 
 	_width = Wide;
-	redirect_menu = 0;
+	insert_menu = 0;
 	send_action_menu = 0;
-	redirect_drag_in_progress = false;
-	no_redirect_redisplay = false;
+	insert_drag_in_progress = false;
+	no_insert_redisplay = false;
 	ignore_delete = false;
 	ab_direction = true;
 
 	model = ListStore::create(columns);
 
-	RefPtr<TreeSelection> selection = redirect_display.get_selection();
+	RefPtr<TreeSelection> selection = insert_display.get_selection();
 	selection->set_mode (Gtk::SELECTION_MULTIPLE);
 	selection->signal_changed().connect (mem_fun (*this, &RedirectBox::selection_changed));
 
-	redirect_display.set_model (model);
-	redirect_display.append_column (X_("notshown"), columns.text);
-	redirect_display.set_name ("RedirectSelector");
-	redirect_display.set_headers_visible (false);
-	redirect_display.set_reorderable (true);
-	redirect_display.set_size_request (-1, 40);
-	redirect_display.get_column(0)->set_sizing(TREE_VIEW_COLUMN_FIXED);
-	redirect_display.get_column(0)->set_fixed_width(48);
-	redirect_display.add_object_drag (columns.redirect.index(), "redirects");
-	redirect_display.signal_object_drop.connect (mem_fun (*this, &RedirectBox::object_drop));
+	insert_display.set_model (model);
+	insert_display.append_column (X_("notshown"), columns.text);
+	insert_display.set_name ("RedirectSelector");
+	insert_display.set_headers_visible (false);
+	insert_display.set_reorderable (true);
+	insert_display.set_size_request (-1, 40);
+	insert_display.get_column(0)->set_sizing(TREE_VIEW_COLUMN_FIXED);
+	insert_display.get_column(0)->set_fixed_width(48);
+	insert_display.add_object_drag (columns.insert.index(), "redirects");
+	insert_display.signal_object_drop.connect (mem_fun (*this, &RedirectBox::object_drop));
 
-	TreeViewColumn* name_col = redirect_display.get_column(0);
-	CellRendererText* renderer = dynamic_cast<CellRendererText*>(redirect_display.get_column_cell_renderer (0));
+	TreeViewColumn* name_col = insert_display.get_column(0);
+	CellRendererText* renderer = dynamic_cast<CellRendererText*>(insert_display.get_column_cell_renderer (0));
 	name_col->add_attribute(renderer->property_foreground_gdk(), columns.color);
 
-	redirect_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	insert_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	
 	model->signal_row_deleted().connect (mem_fun (*this, &RedirectBox::row_deleted));
 
-	redirect_scroller.add (redirect_display);
-	redirect_eventbox.add (redirect_scroller);
+	insert_scroller.add (insert_display);
+	insert_eventbox.add (insert_scroller);
 	
-	redirect_scroller.set_size_request (-1, 40);
+	insert_scroller.set_size_request (-1, 40);
 
-	pack_start (redirect_eventbox, true, true);
+	pack_start (insert_eventbox, true, true);
 
-	_route->redirects_changed.connect (mem_fun(*this, &RedirectBox::redisplay_redirects));
+	_route->inserts_changed.connect (mem_fun(*this, &RedirectBox::redisplay_inserts));
 	_route->GoingAway.connect (mem_fun (*this, &RedirectBox::route_going_away));
 
-	redirect_eventbox.signal_enter_notify_event().connect (bind (sigc::ptr_fun (RedirectBox::enter_box), this));
+	insert_eventbox.signal_enter_notify_event().connect (bind (sigc::ptr_fun (RedirectBox::enter_box), this));
 
-	redirect_display.signal_button_press_event().connect (mem_fun(*this, &RedirectBox::redirect_button_press_event), false);
-	redirect_display.signal_button_release_event().connect (mem_fun(*this, &RedirectBox::redirect_button_release_event));
+	insert_display.signal_button_press_event().connect (mem_fun(*this, &RedirectBox::insert_button_press_event), false);
+	insert_display.signal_button_release_event().connect (mem_fun(*this, &RedirectBox::insert_button_release_event));
 
 	/* start off as a passthru strip. we'll correct this, if necessary,
 	   in update_diskstream_display().
@@ -152,7 +152,7 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, boost::shared_ptr<Rout
 
 	/* now force an update of all the various elements */
 
-	redisplay_redirects (0);
+	redisplay_inserts ();
 }
 
 RedirectBox::~RedirectBox ()
@@ -162,32 +162,32 @@ RedirectBox::~RedirectBox ()
 void
 RedirectBox::route_going_away ()
 {
-	/* don't keep updating display as redirects are deleted */
-	no_redirect_redisplay = true;
+	/* don't keep updating display as inserts are deleted */
+	no_insert_redisplay = true;
 }
 
 void
-RedirectBox::object_drop (string type, uint32_t cnt, const boost::shared_ptr<Redirect>* ptr)
+RedirectBox::object_drop (string type, uint32_t cnt, const boost::shared_ptr<Insert>* ptr)
 {
 	if (type != "redirects" || cnt == 0 || !ptr) {
 		return;
 	}
 
-	/* do something with the dropped redirects */
+	/* do something with the dropped inserts */
 
-	list<boost::shared_ptr<Redirect> > redirects;
+	list<boost::shared_ptr<Insert> > inserts;
 	
 	for (uint32_t n = 0; n < cnt; ++n) {
-		redirects.push_back (ptr[n]);
+		inserts.push_back (ptr[n]);
 	}
 	
-	paste_redirect_list (redirects);
+	paste_insert_list (inserts);
 }
 
 void
 RedirectBox::update()
 {
-	redisplay_redirects (0);
+	redisplay_inserts ();
 }
 
 
@@ -199,24 +199,19 @@ RedirectBox::set_width (Width w)
 	}
 	_width = w;
 
-	redisplay_redirects (0);
+	redisplay_inserts ();
 }
 
 void
-RedirectBox::remove_redirect_gui (boost::shared_ptr<Redirect> redirect)
+RedirectBox::remove_insert_gui (boost::shared_ptr<Insert> insert)
 {
-	boost::shared_ptr<Insert> insert;
 	boost::shared_ptr<Send> send;
 	boost::shared_ptr<PortInsert> port_insert;
 
-	if ((insert = boost::dynamic_pointer_cast<Insert> (redirect)) != 0) {
-
-		if ((port_insert = boost::dynamic_pointer_cast<PortInsert> (insert)) != 0) {
+	if ((port_insert = boost::dynamic_pointer_cast<PortInsert> (insert)) != 0) {
 			PortInsertUI *io_selector = reinterpret_cast<PortInsertUI *> (port_insert->get_gui());
 			port_insert->set_gui (0);
 			delete io_selector;
-		} 
-
 	} else if ((send = boost::dynamic_pointer_cast<Send> (insert)) != 0) {
 		SendUIWindow *sui = reinterpret_cast<SendUIWindow*> (send->get_gui());
 		send->set_gui (0);
@@ -251,97 +246,97 @@ RedirectBox::new_send ()
 }
 
 void
-RedirectBox::show_redirect_menu (gint arg)
+RedirectBox::show_insert_menu (gint arg)
 {
-	if (redirect_menu == 0) {
-		redirect_menu = build_redirect_menu ();
+	if (insert_menu == 0) {
+		insert_menu = build_insert_menu ();
 	}
 
-	paste_action->set_sensitive (!_rr_selection.redirects.empty());
+	paste_action->set_sensitive (!_rr_selection.inserts.empty());
 
-	redirect_menu->popup (1, arg);
+	insert_menu->popup (1, arg);
 }
 
 void
-RedirectBox::redirect_drag_begin (GdkDragContext *context)
+RedirectBox::insert_drag_begin (GdkDragContext *context)
 {
-	redirect_drag_in_progress = true;
+	insert_drag_in_progress = true;
 }
 
 void
-RedirectBox::redirect_drag_end (GdkDragContext *context)
+RedirectBox::insert_drag_end (GdkDragContext *context)
 {
-	redirect_drag_in_progress = false;
+	insert_drag_in_progress = false;
 }
 
 bool
-RedirectBox::redirect_button_press_event (GdkEventButton *ev)
+RedirectBox::insert_button_press_event (GdkEventButton *ev)
 {
 	TreeIter iter;
 	TreeModel::Path path;
 	TreeViewColumn* column;
 	int cellx;
 	int celly;
-	boost::shared_ptr<Redirect> redirect;
+	boost::shared_ptr<Insert> insert;
 	int ret = false;
 	bool selected = false;
 
-	if (redirect_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
+	if (insert_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		if ((iter = model->get_iter (path))) {
-			redirect = (*iter)[columns.redirect];
-			selected = redirect_display.get_selection()->is_selected (iter);
+			insert = (*iter)[columns.insert];
+			selected = insert_display.get_selection()->is_selected (iter);
 		}
 		
 	}
 
-	if (redirect && (Keyboard::is_edit_event (ev) || (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS))) {
+	if (insert && (Keyboard::is_edit_event (ev) || (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS))) {
 		
 		if (_session.engine().connected()) {
 			/* XXX giving an error message here is hard, because we may be in the midst of a button press */
-			edit_redirect (redirect);
+			edit_insert (insert);
 		}
 		ret = true;
 		
-	} else if (redirect && ev->button == 1 && selected) {
+	} else if (insert && ev->button == 1 && selected) {
 
 		// this is purely informational but necessary
-		RedirectSelected (redirect); // emit
+		InsertSelected (insert); // emit
 	}
 	
 	return ret;
 }
 
 bool
-RedirectBox::redirect_button_release_event (GdkEventButton *ev)
+RedirectBox::insert_button_release_event (GdkEventButton *ev)
 {
 	TreeIter iter;
 	TreeModel::Path path;
 	TreeViewColumn* column;
 	int cellx;
 	int celly;
-	boost::shared_ptr<Redirect> redirect;
+	boost::shared_ptr<Insert> insert;
 	int ret = false;
 
 
-	if (redirect_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
+	if (insert_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		if ((iter = model->get_iter (path))) {
-			redirect = (*iter)[columns.redirect];
+			insert = (*iter)[columns.insert];
 		}
 	}
 
-	if (redirect && Keyboard::is_delete_event (ev)) {
+	if (insert && Keyboard::is_delete_event (ev)) {
 		
-		Glib::signal_idle().connect (bind (mem_fun(*this, &RedirectBox::idle_delete_redirect), boost::weak_ptr<Redirect>(redirect)));
+		Glib::signal_idle().connect (bind (mem_fun(*this, &RedirectBox::idle_delete_insert), boost::weak_ptr<Insert>(insert)));
 		ret = true;
 		
 	} else if (Keyboard::is_context_menu_event (ev)) {
 
-		show_redirect_menu(ev->time);
+		show_insert_menu(ev->time);
 		ret = true;
 
-	} else if (redirect && (ev->button == 2) && (ev->state == Gdk::BUTTON2_MASK)) {
+	} else if (insert && (ev->button == 2) && (ev->state == Gdk::BUTTON2_MASK)) {
 		
-		redirect->set_active (!redirect->active(), this);
+		insert->set_active (!insert->active());
 		ret = true;
 
 	} 
@@ -350,33 +345,33 @@ RedirectBox::redirect_button_release_event (GdkEventButton *ev)
 }
 
 Menu *
-RedirectBox::build_redirect_menu ()
+RedirectBox::build_insert_menu ()
 {
-	redirect_menu = dynamic_cast<Gtk::Menu*>(ActionManager::get_widget("/redirectmenu") );
-	redirect_menu->set_name ("ArdourContextMenu");
+	insert_menu = dynamic_cast<Gtk::Menu*>(ActionManager::get_widget("/redirectmenu") );
+	insert_menu->set_name ("ArdourContextMenu");
 
 	show_all_children();
 
-	return redirect_menu;
+	return insert_menu;
 }
 
 void
 RedirectBox::selection_changed ()
 {
-	bool sensitive = (redirect_display.get_selection()->count_selected_rows()) ? true : false;
+	bool sensitive = (insert_display.get_selection()->count_selected_rows()) ? true : false;
 	ActionManager::set_sensitive (ActionManager::plugin_selection_sensitive_actions, sensitive);
 }
 
 void
-RedirectBox::select_all_redirects ()
+RedirectBox::select_all_inserts ()
 {
-	redirect_display.get_selection()->select_all();
+	insert_display.get_selection()->select_all();
 }
 
 void
-RedirectBox::deselect_all_redirects ()
+RedirectBox::deselect_all_inserts ()
 {
-	redirect_display.get_selection()->unselect_all();
+	insert_display.get_selection()->unselect_all();
 }
 
 void
@@ -393,13 +388,13 @@ RedirectBox::insert_plugin_chosen (boost::shared_ptr<Plugin> plugin)
 {
 	if (plugin) {
 
-		boost::shared_ptr<Redirect> redirect (new PluginInsert (_session, plugin, _placement));
+		boost::shared_ptr<Insert> insert (new PluginInsert (_session, plugin, _placement));
 		
-		redirect->active_changed.connect (bind (mem_fun (*this, &RedirectBox::show_redirect_active_r), boost::weak_ptr<Redirect>(redirect)));
+		insert->ActiveChanged.connect (bind (mem_fun (*this, &RedirectBox::show_insert_active), boost::weak_ptr<Insert>(insert)));
 
 		Route::InsertStreams err;
 
-		if (_route->add_redirect (redirect, this, &err)) {
+		if (_route->add_insert (insert, &err)) {
 			weird_plugin_dialog (*plugin, err, _route);
 			// XXX SHAREDPTR delete plugin here .. do we even need to care? 
 		}
@@ -472,46 +467,43 @@ RedirectBox::weird_plugin_dialog (Plugin& p, Route::InsertStreams streams, boost
 void
 RedirectBox::choose_insert ()
 {
-	boost::shared_ptr<Redirect> redirect (new PortInsert (_session, _placement));
-	redirect->active_changed.connect (bind (mem_fun(*this, &RedirectBox::show_redirect_active_r), boost::weak_ptr<Redirect>(redirect)));
-	_route->add_redirect (redirect, this);
+	boost::shared_ptr<Insert> insert (new PortInsert (_session, _placement));
+	insert->ActiveChanged.connect (bind (mem_fun(*this, &RedirectBox::show_insert_active), boost::weak_ptr<Insert>(insert)));
+	_route->add_insert (insert);
 }
 
 void
 RedirectBox::choose_send ()
 {
 	boost::shared_ptr<Send> send (new Send (_session, _placement));
-	send->set_default_type(_route->default_type());
+	//send->set_default_type(_route->default_type());
 
 	/* XXX need redirect lock on route */
 
-	send->ensure_io (ChanCount::ZERO, _route->max_redirect_outs(), false, this);
+	// This will be set properly in route->add_insert
+	send->configure_io (_route->max_insert_outs(), _route->max_insert_outs());
 	
-	IOSelectorWindow *ios = new IOSelectorWindow (_session, send, false, true);
+	IOSelectorWindow *ios = new IOSelectorWindow (_session, send->io(), false, true);
 	
 	ios->show_all ();
 
-	boost::shared_ptr<Redirect> r = boost::static_pointer_cast<Redirect>(send);
-
-	ios->selector().Finished.connect (bind (mem_fun(*this, &RedirectBox::send_io_finished), boost::weak_ptr<Redirect>(r), ios));
+	ios->selector().Finished.connect (bind (mem_fun(*this, &RedirectBox::send_io_finished), send, ios));
 }
 
 void
-RedirectBox::send_io_finished (IOSelector::Result r, boost::weak_ptr<Redirect> weak_redirect, IOSelectorWindow* ios)
+RedirectBox::send_io_finished (IOSelector::Result r, boost::shared_ptr<Send> send, IOSelectorWindow* ios)
 {
-	boost::shared_ptr<Redirect> redirect (weak_redirect.lock());
-
-	if (!redirect) {
+	if (!send) {
 		return;
 	}
 
 	switch (r) {
 	case IOSelector::Cancelled:
-		// redirect will go away when all shared_ptrs to it vanish
+		// send will go away when all shared_ptrs to it vanish
 		break;
 
 	case IOSelector::Accepted:
-		_route->add_redirect (redirect, this);
+		_route->add_insert (send);
 		break;
 	}
 
@@ -519,11 +511,11 @@ RedirectBox::send_io_finished (IOSelector::Result r, boost::weak_ptr<Redirect> w
 }
 
 void
-RedirectBox::redisplay_redirects (void *src)
+RedirectBox::redisplay_inserts ()
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RedirectBox::redisplay_redirects), src));
+	ENSURE_GUI_THREAD(mem_fun(*this, &RedirectBox::redisplay_inserts));
 
-	if (no_redirect_redisplay) {
+	if (no_insert_redisplay) {
 		return;
 	}
 	
@@ -531,56 +523,56 @@ RedirectBox::redisplay_redirects (void *src)
 	model->clear ();
 	ignore_delete = false;
 
-	redirect_active_connections.clear ();
-	redirect_name_connections.clear ();
+	insert_active_connections.clear ();
+	insert_name_connections.clear ();
 
-	void (RedirectBox::*pmf)(boost::shared_ptr<Redirect>) = &RedirectBox::add_redirect_to_display;
-	_route->foreach_redirect (this, pmf);
+	void (RedirectBox::*pmf)(boost::shared_ptr<Insert>) = &RedirectBox::add_insert_to_display;
+	_route->foreach_insert (this, pmf);
 
 	switch (_placement) {
 	case PreFader:
-		build_redirect_tooltip(redirect_eventbox, _("Pre-fader inserts, sends & plugins:"));
+		build_insert_tooltip(insert_eventbox, _("Pre-fader inserts, sends & plugins:"));
 		break;
 	case PostFader:
-		build_redirect_tooltip(redirect_eventbox, _("Post-fader inserts, sends & plugins:"));
+		build_insert_tooltip(insert_eventbox, _("Post-fader inserts, sends & plugins:"));
 		break;
 	}
 }
 
 void
-RedirectBox::add_redirect_to_display (boost::shared_ptr<Redirect> redirect)
+RedirectBox::add_insert_to_display (boost::shared_ptr<Insert> insert)
 {
-	if (redirect->placement() != _placement) {
+	if (insert->placement() != _placement) {
 		return;
 	}
 	
 	Gtk::TreeModel::Row row = *(model->append());
-	row[columns.text] = redirect_name (redirect);
-	row[columns.redirect] = redirect;
+	row[columns.text] = insert_name (insert);
+	row[columns.insert] = insert;
 
-	show_redirect_active (redirect);
+	show_insert_active (insert);
 
-	redirect_active_connections.push_back (redirect->active_changed.connect (bind (mem_fun(*this, &RedirectBox::show_redirect_active_r), boost::weak_ptr<Redirect>(redirect))));
-	redirect_name_connections.push_back (redirect->name_changed.connect (bind (mem_fun(*this, &RedirectBox::show_redirect_name), boost::weak_ptr<Redirect>(redirect))));
+	insert_active_connections.push_back (insert->ActiveChanged.connect (bind (mem_fun(*this, &RedirectBox::show_insert_active), boost::weak_ptr<Insert>(insert))));
+	insert_name_connections.push_back (insert->NameChanged.connect (bind (mem_fun(*this, &RedirectBox::show_insert_name), boost::weak_ptr<Insert>(insert))));
 }
 
 string
-RedirectBox::redirect_name (boost::weak_ptr<Redirect> weak_redirect)
+RedirectBox::insert_name (boost::weak_ptr<Insert> weak_insert)
 {
-	boost::shared_ptr<Redirect> redirect (weak_redirect.lock());
+	boost::shared_ptr<Insert> insert (weak_insert.lock());
 
-	if (!redirect) {
+	if (!insert) {
 		return string();
 	}
 
 	boost::shared_ptr<Send> send;
 	string name_display;
 
-	if (!redirect->active()) {
+	if (!insert->active()) {
 		name_display = " (";
 	}
 
-	if ((send = boost::dynamic_pointer_cast<Send> (redirect)) != 0) {
+	if ((send = boost::dynamic_pointer_cast<Send> (insert)) != 0) {
 
 		name_display += '>';
 
@@ -603,16 +595,16 @@ RedirectBox::redirect_name (boost::weak_ptr<Redirect> weak_redirect)
 
 		switch (_width) {
 		case Wide:
-			name_display += redirect->name();
+			name_display += insert->name();
 			break;
 		case Narrow:
-			name_display += PBD::short_version (redirect->name(), 5);
+			name_display += PBD::short_version (insert->name(), 5);
 			break;
 		}
 
 	}
 
-	if (!redirect->active()) {
+	if (!insert->active()) {
 		name_display += ')';
 	}
 
@@ -620,7 +612,7 @@ RedirectBox::redirect_name (boost::weak_ptr<Redirect> weak_redirect)
 }
 
 void
-RedirectBox::build_redirect_tooltip (EventBox& box, string start)
+RedirectBox::build_insert_tooltip (EventBox& box, string start)
 {
 	string tip(start);
 
@@ -631,33 +623,27 @@ RedirectBox::build_redirect_tooltip (EventBox& box, string start)
 
 		/* don't use the column text, since it may be narrowed */
 
-		boost::shared_ptr<Redirect> r = row[columns.redirect];
-  		tip += r->name();
+		boost::shared_ptr<Insert> i = row[columns.insert];
+  		tip += i->name();
 	}
 	ARDOUR_UI::instance()->tooltips().set_tip (box, tip);
 }
 
 void
-RedirectBox::show_redirect_name (void* src, boost::weak_ptr<Redirect> redirect)
+RedirectBox::show_insert_name (boost::weak_ptr<Insert> insert)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RedirectBox::show_redirect_name), src, redirect));
-	show_redirect_active (redirect);
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RedirectBox::show_insert_name), insert));
+	show_insert_active (insert);
 }
 
 void
-RedirectBox::show_redirect_active_r (Redirect* r, void *src, boost::weak_ptr<Redirect> weak_redirect)
+RedirectBox::show_insert_active (boost::weak_ptr<Insert> weak_insert)
 {
-	show_redirect_active (weak_redirect);
-}
-
-void
-RedirectBox::show_redirect_active (boost::weak_ptr<Redirect> weak_redirect)
-{
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RedirectBox::show_redirect_active), weak_redirect));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RedirectBox::show_insert_active), weak_insert));
 	
-	boost::shared_ptr<Redirect> redirect (weak_redirect.lock());
+	boost::shared_ptr<Insert> insert (weak_insert.lock());
 	
-	if (!redirect) {
+	if (!insert) {
 		return;
 	}
 
@@ -666,15 +652,15 @@ RedirectBox::show_redirect_active (boost::weak_ptr<Redirect> weak_redirect)
 
 	while (iter != children.end()) {
 
-		boost::shared_ptr<Redirect> r = (*iter)[columns.redirect];
+		boost::shared_ptr<Insert> r = (*iter)[columns.insert];
 
-		if (r == redirect) {
-			(*iter)[columns.text] = redirect_name (r);
+		if (r == insert) {
+			(*iter)[columns.text] = insert_name (r);
 			
-			if (redirect->active()) {
-				(*iter)[columns.color] = *active_redirect_color;
+			if (insert->active()) {
+				(*iter)[columns.color] = *active_insert_color;
 			} else {
-				(*iter)[columns.color] = *inactive_redirect_color;
+				(*iter)[columns.color] = *inactive_insert_color;
 			}
 			break;
 		}
@@ -687,25 +673,25 @@ void
 RedirectBox::row_deleted (const Gtk::TreeModel::Path& path)
 {
 	if (!ignore_delete) {
-		compute_redirect_sort_keys ();
+		compute_insert_sort_keys ();
 	}
 }
 
 void
-RedirectBox::compute_redirect_sort_keys ()
+RedirectBox::compute_insert_sort_keys ()
 {
 	uint32_t sort_key = 0;
 	Gtk::TreeModel::Children children = model->children();
 
 	for (Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
-		boost::shared_ptr<Redirect> r = (*iter)[columns.redirect];
-		r->set_sort_key (sort_key);
+		boost::shared_ptr<Insert> i = (*iter)[columns.insert];
+		i->set_sort_key (sort_key);
 		sort_key++;
 	}
 
-	if (_route->sort_redirects ()) {
+	if (_route->sort_inserts ()) {
 
-		redisplay_redirects (0);
+		redisplay_inserts ();
 
 		/* now tell them about the problem */
 
@@ -713,7 +699,7 @@ RedirectBox::compute_redirect_sort_keys ()
 		Label label;
 
 		label.set_text (_("\
-You cannot reorder this set of redirects\n\
+You cannot reorder this set of inserts\n\
 in that way because the inputs and\n\
 outputs do not work correctly."));
 
@@ -730,41 +716,41 @@ outputs do not work correctly."));
 }
 
 void
-RedirectBox::rename_redirects ()
+RedirectBox::rename_inserts ()
 {
-	vector<boost::shared_ptr<Redirect> > to_be_renamed;
+	vector<boost::shared_ptr<Insert> > to_be_renamed;
 	
-	get_selected_redirects (to_be_renamed);
+	get_selected_inserts (to_be_renamed);
 
 	if (to_be_renamed.empty()) {
 		return;
 	}
 
-	for (vector<boost::shared_ptr<Redirect> >::iterator i = to_be_renamed.begin(); i != to_be_renamed.end(); ++i) {
-		rename_redirect (*i);
+	for (vector<boost::shared_ptr<Insert> >::iterator i = to_be_renamed.begin(); i != to_be_renamed.end(); ++i) {
+		rename_insert (*i);
 	}
 }
 
 void
-RedirectBox::cut_redirects ()
+RedirectBox::cut_inserts ()
 {
-	vector<boost::shared_ptr<Redirect> > to_be_removed;
+	vector<boost::shared_ptr<Insert> > to_be_removed;
 	
-	get_selected_redirects (to_be_removed);
+	get_selected_inserts (to_be_removed);
 
 	if (to_be_removed.empty()) {
 		return;
 	}
 
-	/* this essentially transfers ownership of the redirect
-	   of the redirect from the route to the mixer
+	/* this essentially transfers ownership of the insert
+	   of the insert from the route to the mixer
 	   selection.
 	*/
 	
 	_rr_selection.set (to_be_removed);
 
-	no_redirect_redisplay = true;
-	for (vector<boost::shared_ptr<Redirect> >::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i) {
+	no_insert_redisplay = true;
+	for (vector<boost::shared_ptr<Insert> >::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i) {
 		// Do not cut inserts or sends
 		if (boost::dynamic_pointer_cast<PluginInsert>((*i)) != 0) {
 			void* gui = (*i)->get_gui ();
@@ -773,7 +759,7 @@ RedirectBox::cut_redirects ()
 				static_cast<Gtk::Widget*>(gui)->hide ();
 			}
 		
-			if (_route->remove_redirect (*i, this)) {
+			if (_route->remove_insert (*i)) {
 				/* removal failed */
 				_rr_selection.remove (*i);
 			}
@@ -782,26 +768,26 @@ RedirectBox::cut_redirects ()
 		}
 
 	}
-	no_redirect_redisplay = false;
-	redisplay_redirects (this);
+	no_insert_redisplay = false;
+	redisplay_inserts ();
 }
 
 void
-RedirectBox::copy_redirects ()
+RedirectBox::copy_inserts ()
 {
-	vector<boost::shared_ptr<Redirect> > to_be_copied;
-	vector<boost::shared_ptr<Redirect> > copies;
+	vector<boost::shared_ptr<Insert> > to_be_copied;
+	vector<boost::shared_ptr<Insert> > copies;
 
-	get_selected_redirects (to_be_copied);
+	get_selected_inserts (to_be_copied);
 
 	if (to_be_copied.empty()) {
 		return;
 	}
 
-	for (vector<boost::shared_ptr<Redirect> >::iterator i = to_be_copied.begin(); i != to_be_copied.end(); ++i) {
+	for (vector<boost::shared_ptr<Insert> >::iterator i = to_be_copied.begin(); i != to_be_copied.end(); ++i) {
 		// Do not copy inserts or sends
 		if (boost::dynamic_pointer_cast<PluginInsert>((*i)) != 0) {
-			copies.push_back (Redirect::clone (*i));
+			copies.push_back (Insert::clone (*i));
 		}
   	}
 
@@ -810,17 +796,17 @@ RedirectBox::copy_redirects ()
 }
 
 void
-RedirectBox::delete_redirects ()
+RedirectBox::delete_inserts ()
 {
-	vector<boost::shared_ptr<Redirect> > to_be_deleted;
+	vector<boost::shared_ptr<Insert> > to_be_deleted;
 	
-	get_selected_redirects (to_be_deleted);
+	get_selected_inserts (to_be_deleted);
 
 	if (to_be_deleted.empty()) {
 		return;
 	}
 
-	for (vector<boost::shared_ptr<Redirect> >::iterator i = to_be_deleted.begin(); i != to_be_deleted.end(); ++i) {
+	for (vector<boost::shared_ptr<Insert> >::iterator i = to_be_deleted.begin(); i != to_be_deleted.end(); ++i) {
 		
 		void* gui = (*i)->get_gui ();
 		
@@ -828,39 +814,39 @@ RedirectBox::delete_redirects ()
 			static_cast<Gtk::Widget*>(gui)->hide ();
 		}
 
-		_route->remove_redirect( *i, this);
+		_route->remove_insert(*i);
 	}
 
-	no_redirect_redisplay = false;
-	redisplay_redirects (this);
+	no_insert_redisplay = false;
+	redisplay_inserts ();
 }
 
 gint
-RedirectBox::idle_delete_redirect (boost::weak_ptr<Redirect> weak_redirect)
+RedirectBox::idle_delete_insert (boost::weak_ptr<Insert> weak_insert)
 {
-	boost::shared_ptr<Redirect> redirect (weak_redirect.lock());
+	boost::shared_ptr<Insert> insert (weak_insert.lock());
 
-	if (!redirect) {
+	if (!insert) {
 		return false;
 	}
 
 	/* NOT copied to _mixer.selection() */
 
-	no_redirect_redisplay = true;
-	_route->remove_redirect (redirect, this);
-	no_redirect_redisplay = false;
-	redisplay_redirects (this);
+	no_insert_redisplay = true;
+	_route->remove_insert (insert);
+	no_insert_redisplay = false;
+	redisplay_inserts ();
 
 	return false;
 }
 
 void
-RedirectBox::rename_redirect (boost::shared_ptr<Redirect> redirect)
+RedirectBox::rename_insert (boost::shared_ptr<Insert> insert)
 {
 	ArdourPrompter name_prompter (true);
 	string result;
-	name_prompter.set_prompt (_("rename redirect"));
-	name_prompter.set_initial_text (redirect->name());
+	name_prompter.set_prompt (_("rename insert"));
+	name_prompter.set_initial_text (insert->name());
 	name_prompter.add_button (_("Rename"), Gtk::RESPONSE_ACCEPT);
 	name_prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
 	name_prompter.show_all ();
@@ -870,7 +856,7 @@ RedirectBox::rename_redirect (boost::shared_ptr<Redirect> redirect)
 	case Gtk::RESPONSE_ACCEPT:
         name_prompter.get_result (result);
         if (result.length()) {
-			redirect->set_name (result, this);
+			insert->set_name (result);
 		}	
 		break;
 	}
@@ -879,63 +865,63 @@ RedirectBox::rename_redirect (boost::shared_ptr<Redirect> redirect)
 }
 
 void
-RedirectBox::cut_redirect (boost::shared_ptr<Redirect> redirect)
+RedirectBox::cut_insert (boost::shared_ptr<Insert> insert)
 {
-	/* this essentially transfers ownership of the redirect
-	   of the redirect from the route to the mixer
+	/* this essentially transfers ownership of the insert
+	   of the insert from the route to the mixer
 	   selection.
 	*/
 
-	_rr_selection.add (redirect);
+	_rr_selection.add (insert);
 	
-	void* gui = redirect->get_gui ();
+	void* gui = insert->get_gui ();
 
 	if (gui) {
 		static_cast<Gtk::Widget*>(gui)->hide ();
 	}
 	
-	no_redirect_redisplay = true;
-	if (_route->remove_redirect (redirect, this)) {
-		_rr_selection.remove (redirect);
+	no_insert_redisplay = true;
+	if (_route->remove_insert (insert)) {
+		_rr_selection.remove (insert);
 	}
-	no_redirect_redisplay = false;
-	redisplay_redirects (this);
+	no_insert_redisplay = false;
+	redisplay_inserts ();
 }
 
 void
-RedirectBox::copy_redirect (boost::shared_ptr<Redirect> redirect)
+RedirectBox::copy_insert (boost::shared_ptr<Insert> insert)
 {
-	boost::shared_ptr<Redirect> copy = Redirect::clone (redirect);
+	boost::shared_ptr<Insert> copy = Insert::clone (insert);
 	_rr_selection.add (copy);
 }
 
 void
-RedirectBox::paste_redirects ()
+RedirectBox::paste_inserts ()
 {
-	if (_rr_selection.redirects.empty()) {
+	if (_rr_selection.inserts.empty()) {
 		return;
 	}
 
-	paste_redirect_list (_rr_selection.redirects);
+	paste_insert_list (_rr_selection.inserts);
 }
 
 void
-RedirectBox::paste_redirect_list (list<boost::shared_ptr<Redirect> >& redirects)
+RedirectBox::paste_insert_list (list<boost::shared_ptr<Insert> >& inserts)
 {
-	list<boost::shared_ptr<Redirect> > copies;
+	list<boost::shared_ptr<Insert> > copies;
 
-	for (list<boost::shared_ptr<Redirect> >::iterator i = redirects.begin(); i != redirects.end(); ++i) {
+	for (list<boost::shared_ptr<Insert> >::iterator i = inserts.begin(); i != inserts.end(); ++i) {
 
-		boost::shared_ptr<Redirect> copy = Redirect::clone (*i);
+		boost::shared_ptr<Insert> copy = Insert::clone (*i);
 
-		copy->set_placement (_placement, this);
+		copy->set_placement (_placement);
 		copies.push_back (copy);
 	}
 
-	if (_route->add_redirects (copies, this)) {
+	if (_route->add_inserts (copies)) {
 
 		string msg = _(
-			"Copying the set of redirects on the clipboard failed,\n\
+			"Copying the set of inserts on the clipboard failed,\n\
 probably because the I/O configuration of the plugins\n\
 could not match the configuration of this track.");
 		MessageDialog am (msg);
@@ -944,47 +930,47 @@ could not match the configuration of this track.");
 }
 
 void
-RedirectBox::activate_redirect (boost::shared_ptr<Redirect> r)
+RedirectBox::activate_insert (boost::shared_ptr<Insert> r)
 {
-	r->set_active (true, 0);
+	r->set_active (true);
 }
 
 void
-RedirectBox::deactivate_redirect (boost::shared_ptr<Redirect> r)
+RedirectBox::deactivate_insert (boost::shared_ptr<Insert> r)
 {
-	r->set_active (false, 0);
+	r->set_active (false);
 }
 
 void
-RedirectBox::get_selected_redirects (vector<boost::shared_ptr<Redirect> >& redirects)
+RedirectBox::get_selected_inserts (vector<boost::shared_ptr<Insert> >& inserts)
 {
-    vector<Gtk::TreeModel::Path> pathlist = redirect_display.get_selection()->get_selected_rows();
+    vector<Gtk::TreeModel::Path> pathlist = insert_display.get_selection()->get_selected_rows();
  
     for (vector<Gtk::TreeModel::Path>::iterator iter = pathlist.begin(); iter != pathlist.end(); ++iter) {
-	    redirects.push_back ((*(model->get_iter(*iter)))[columns.redirect]);
+	    inserts.push_back ((*(model->get_iter(*iter)))[columns.insert]);
     }
 }
 
 void
-RedirectBox::for_selected_redirects (void (RedirectBox::*pmf)(boost::shared_ptr<Redirect>))
+RedirectBox::for_selected_inserts (void (RedirectBox::*pmf)(boost::shared_ptr<Insert>))
 {
-    vector<Gtk::TreeModel::Path> pathlist = redirect_display.get_selection()->get_selected_rows();
+    vector<Gtk::TreeModel::Path> pathlist = insert_display.get_selection()->get_selected_rows();
 
 	for (vector<Gtk::TreeModel::Path>::iterator iter = pathlist.begin(); iter != pathlist.end(); ++iter) {
-		boost::shared_ptr<Redirect> redirect = (*(model->get_iter(*iter)))[columns.redirect];
-		(this->*pmf)(redirect);
+		boost::shared_ptr<Insert> insert = (*(model->get_iter(*iter)))[columns.insert];
+		(this->*pmf)(insert);
 	}
 }
 
 void
-RedirectBox::clone_redirects ()
+RedirectBox::clone_inserts ()
 {
 	RouteSelection& routes (_rr_selection.routes);
 
 	if (!routes.empty()) {
-		if (_route->copy_redirects (*routes.front(), _placement)) {
+		if (_route->copy_inserts (*routes.front(), _placement)) {
 			string msg = _(
-"Copying the set of redirects on the clipboard failed,\n\
+"Copying the set of inserts on the clipboard failed,\n\
 probably because the I/O configuration of the plugins\n\
 could not match the configuration of this track.");
 			MessageDialog am (msg);
@@ -994,9 +980,9 @@ could not match the configuration of this track.");
 }
 
 void
-RedirectBox::all_redirects_active (bool state)
+RedirectBox::all_inserts_active (bool state)
 {
-	_route->all_redirects_active (_placement, state);
+	_route->all_inserts_active (_placement, state);
 }
 
 void
@@ -1017,25 +1003,25 @@ RedirectBox::ab_plugins ()
 }
 
 void
-RedirectBox::clear_redirects ()
+RedirectBox::clear_inserts ()
 {
 	string prompt;
 	vector<string> choices;
 
 	if (boost::dynamic_pointer_cast<AudioTrack>(_route) != 0) {
 		if (_placement == PreFader) {
-			prompt = _("Do you really want to remove all pre-fader redirects from this track?\n"
+			prompt = _("Do you really want to remove all pre-fader inserts from this track?\n"
 				   "(this cannot be undone)");
 		} else {
-			prompt = _("Do you really want to remove all post-fader redirects from this track?\n"
+			prompt = _("Do you really want to remove all post-fader inserts from this track?\n"
 				   "(this cannot be undone)");
 		}
 	} else {
 		if (_placement == PreFader) {
-			prompt = _("Do you really want to remove all pre-fader redirects from this bus?\n"
+			prompt = _("Do you really want to remove all pre-fader inserts from this bus?\n"
 				   "(this cannot be undone)");
 		} else {
-			prompt = _("Do you really want to remove all post-fader redirects from this bus?\n"
+			prompt = _("Do you really want to remove all post-fader inserts from this bus?\n"
 				   "(this cannot be undone)");
 		}
 	}
@@ -1046,14 +1032,16 @@ RedirectBox::clear_redirects ()
 	Gtkmm2ext::Choice prompter (prompt, choices);
 
 	if (prompter.run () == 1) {
-		_route->clear_redirects (_placement, this);
+		_route->clear_inserts (_placement);
 	}
 }
 
 void
-RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
+RedirectBox::edit_insert (boost::shared_ptr<Insert> insert)
 {
-	boost::shared_ptr<Insert> insert;
+	boost::shared_ptr<Send> send;
+	boost::shared_ptr<PluginInsert> plugin_insert;
+	boost::shared_ptr<PortInsert> port_insert;
 
 	if (boost::dynamic_pointer_cast<AudioTrack>(_route) != 0) {
 
@@ -1062,16 +1050,12 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 		}
 	}
 	
-	if ((insert = boost::dynamic_pointer_cast<Insert> (redirect)) == 0) {
-		
-		/* it's a send */
+	if ((send = boost::dynamic_pointer_cast<Send> (send)) == 0) {
 		
 		if (!_session.engine().connected()) {
 			return;
 		}
 
-		boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (redirect);
-		
 		SendUIWindow *send_ui;
 		
 		if (send->get_gui() == 0) {
@@ -1095,14 +1079,7 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 			send_ui->present ();
 		}
 		
-	} else {
-		
-		/* it's an insert */
-		
-		boost::shared_ptr<PluginInsert> plugin_insert;
-		boost::shared_ptr<PortInsert> port_insert;
-		
-		if ((plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (insert)) != 0) {
+	} else if ((plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (insert)) != 0) {
 			
 			ARDOUR::PluginType type = plugin_insert->type();
 
@@ -1120,13 +1097,13 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 					}
 
 					WindowTitle title(Glib::get_application_name());
-					title += generate_redirect_title (plugin_insert);
+					title += generate_insert_title (plugin_insert);
 					plugin_ui->set_title (title.get_string());
 
 					plugin_insert->set_gui (plugin_ui);
 					
 					// change window title when route name is changed
-					_route->name_changed.connect (bind (mem_fun(*this, &RedirectBox::route_name_changed), plugin_ui, boost::weak_ptr<PluginInsert> (plugin_insert)));
+					_route->NameChanged.connect (bind (mem_fun(*this, &RedirectBox::route_name_changed), plugin_ui, boost::weak_ptr<PluginInsert> (plugin_insert)));
 					
 				
 				} else {
@@ -1156,34 +1133,33 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 				}
 #endif				
 			} else {
-				warning << "Unsupported plugin sent to RedirectBox::edit_redirect()" << endmsg;
+				warning << "Unsupported plugin sent to RedirectBox::edit_insert()" << endmsg;
 				return;
 			}
 
-		} else if ((port_insert = boost::dynamic_pointer_cast<PortInsert> (insert)) != 0) {
-			
-			if (!_session.engine().connected()) {
-				MessageDialog msg ( _("Not connected to JACK - no I/O changes are possible"));
-				msg.run ();
-				return;
-			}
+	} else if ((port_insert = boost::dynamic_pointer_cast<PortInsert> (insert)) != 0) {
 
-			PortInsertWindow *io_selector;
+		if (!_session.engine().connected()) {
+			MessageDialog msg ( _("Not connected to JACK - no I/O changes are possible"));
+			msg.run ();
+			return;
+		}
 
-			if (port_insert->get_gui() == 0) {
-				io_selector = new PortInsertWindow (_session, port_insert);
-				port_insert->set_gui (io_selector);
-				
-			} else {
-				io_selector = reinterpret_cast<PortInsertWindow *> (port_insert->get_gui());
-			}
-			
-			if (io_selector->is_visible()) {
-				io_selector->get_window()->raise ();
-			} else {
-				io_selector->show_all ();
-				io_selector->present ();
-			}
+		PortInsertWindow *io_selector;
+
+		if (port_insert->get_gui() == 0) {
+			io_selector = new PortInsertWindow (_session, port_insert);
+			port_insert->set_gui (io_selector);
+
+		} else {
+			io_selector = reinterpret_cast<PortInsertWindow *> (port_insert->get_gui());
+		}
+
+		if (io_selector->is_visible()) {
+			io_selector->get_window()->raise ();
+		} else {
+			io_selector->show_all ();
+			io_selector->present ();
 		}
 	}
 }
@@ -1199,7 +1175,7 @@ RedirectBox::enter_box (GdkEventCrossing *ev, RedirectBox* rb)
 		/* fallthru */
 
 	default:
-		_current_redirect_box = rb;
+		_current_insert_box = rb;
 	}
 
 	return false;
@@ -1259,193 +1235,193 @@ RedirectBox::register_actions ()
 void
 RedirectBox::rb_choose_plugin ()
 {
-	if (_current_redirect_box == 0) {
+	if (_current_insert_box == 0) {
 		return;
 	}
-	_current_redirect_box->choose_plugin ();
+	_current_insert_box->choose_plugin ();
 }
 
 void
 RedirectBox::rb_choose_insert ()
 {
-	if (_current_redirect_box == 0) {
+	if (_current_insert_box == 0) {
 		return;
 	}
-	_current_redirect_box->choose_insert ();
+	_current_insert_box->choose_insert ();
 }
 
 void
 RedirectBox::rb_choose_send ()
 {
-	if (_current_redirect_box == 0) {
+	if (_current_insert_box == 0) {
 		return;
 	}
-	_current_redirect_box->choose_send ();
+	_current_insert_box->choose_send ();
 }
 
 void
 RedirectBox::rb_clear ()
 {
-	if (_current_redirect_box == 0) {
+	if (_current_insert_box == 0) {
 		return;
 	}
 
-	_current_redirect_box->clear_redirects ();
+	_current_insert_box->clear_inserts ();
 }
 
 void
 RedirectBox::rb_cut ()
 {
-	if (_current_redirect_box == 0) {
+	if (_current_insert_box == 0) {
 		return;
 	}
 
-	_current_redirect_box->cut_redirects ();
+	_current_insert_box->cut_inserts ();
 }
 
 void
 RedirectBox::rb_delete ()
 {
-	if (_current_redirect_box == 0) {
+	if (_current_insert_box == 0) {
 		return;
 	}
 
-	_current_redirect_box->delete_redirects ();
+	_current_insert_box->delete_inserts ();
 }
 
 void
 RedirectBox::rb_copy ()
 {
-	if (_current_redirect_box == 0) {
+	if (_current_insert_box == 0) {
 		return;
 	}
-	_current_redirect_box->copy_redirects ();
+	_current_insert_box->copy_inserts ();
 }
 
 void
 RedirectBox::rb_paste ()
 {
-	if (_current_redirect_box == 0) {
+	if (_current_insert_box == 0) {
 		return;
 	}
 
-	_current_redirect_box->paste_redirects ();
+	_current_insert_box->paste_inserts ();
 }
 
 void
 RedirectBox::rb_rename ()
 {
-	if (_current_redirect_box == 0) {
+	if (_current_insert_box == 0) {
 		return;
 	}
-	_current_redirect_box->rename_redirects ();
+	_current_insert_box->rename_inserts ();
 }
 
 void
 RedirectBox::rb_select_all ()
 {
-	if (_current_redirect_box == 0) {
+	if (_current_insert_box == 0) {
 		return;
 	}
 
-	_current_redirect_box->select_all_redirects ();
+	_current_insert_box->select_all_inserts ();
 }
 
 void
 RedirectBox::rb_deselect_all ()
 {
-	if (_current_redirect_box == 0) {
+	if (_current_insert_box == 0) {
 		return;
 	}
 
-	_current_redirect_box->deselect_all_redirects ();
+	_current_insert_box->deselect_all_inserts ();
 }
 
 void
 RedirectBox::rb_activate ()
 {
-	if (_current_redirect_box == 0) {
+	if (_current_insert_box == 0) {
 		return;
 	}
 
-	_current_redirect_box->for_selected_redirects (&RedirectBox::activate_redirect);
+	_current_insert_box->for_selected_inserts (&RedirectBox::activate_insert);
 }
 
 void
 RedirectBox::rb_deactivate ()
 {
-	if (_current_redirect_box == 0) {
+	if (_current_insert_box == 0) {
 		return;
 	}
-	_current_redirect_box->for_selected_redirects (&RedirectBox::deactivate_redirect);
+	_current_insert_box->for_selected_inserts (&RedirectBox::deactivate_insert);
 }
 
 void
 RedirectBox::rb_activate_all ()
 {
-	if (_current_redirect_box == 0) {
+	if (_current_insert_box == 0) {
 		return;
 	}
 
-	_current_redirect_box->all_redirects_active (true);
+	_current_insert_box->all_inserts_active (true);
 }
 
 void
 RedirectBox::rb_deactivate_all ()
 {
-	if (_current_redirect_box == 0) {
+	if (_current_insert_box == 0) {
 		return;
 	}
-	_current_redirect_box->all_redirects_active (false);
+	_current_insert_box->all_inserts_active (false);
 }
 
 void
 RedirectBox::rb_deactivate_plugins ()
 {
-	if (_current_redirect_box == 0) {
+	if (_current_insert_box == 0) {
 		return;
 	}
-	_current_redirect_box->all_plugins_active (false);
+	_current_insert_box->all_plugins_active (false);
 }
 
 
 void
 RedirectBox::rb_ab_plugins ()
 {
-	if (_current_redirect_box == 0) {
+	if (_current_insert_box == 0) {
 		return;
 	}
 
-	_current_redirect_box->ab_plugins ();
+	_current_insert_box->ab_plugins ();
 }
 
 
 void
 RedirectBox::rb_edit ()
 {
-	if (_current_redirect_box == 0) {
+	if (_current_insert_box == 0) {
 		return;
 	}
 
-	_current_redirect_box->for_selected_redirects (&RedirectBox::edit_redirect);
+	_current_insert_box->for_selected_inserts (&RedirectBox::edit_insert);
 }
 
 void
-RedirectBox::route_name_changed (void* src, PluginUIWindow* plugin_ui, boost::weak_ptr<PluginInsert> wpi)
+RedirectBox::route_name_changed (PluginUIWindow* plugin_ui, boost::weak_ptr<PluginInsert> wpi)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &RedirectBox::route_name_changed), src, plugin_ui, wpi));
+	ENSURE_GUI_THREAD(bind (mem_fun (*this, &RedirectBox::route_name_changed), plugin_ui, wpi));
 	boost::shared_ptr<PluginInsert> pi (wpi.lock());
 	
 
 	if (pi) {
 		WindowTitle title(Glib::get_application_name());
-		title += generate_redirect_title (pi);
+		title += generate_insert_title (pi);
 		plugin_ui->set_title (title.get_string());
 	}
 }
 
 string 
-RedirectBox::generate_redirect_title (boost::shared_ptr<PluginInsert> pi)
+RedirectBox::generate_insert_title (boost::shared_ptr<PluginInsert> pi)
 {
 	string maker = pi->plugin()->maker();
 	string::size_type email_pos;

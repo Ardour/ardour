@@ -59,7 +59,8 @@ class Route : public IO
 {
   protected:
 
-        typedef list<boost::shared_ptr<Redirect> > RedirectList;
+	typedef list<boost::shared_ptr<Insert> > InsertList;
+
   public:
 
 	enum Flag {
@@ -99,7 +100,7 @@ class Route : public IO
 	virtual bool can_record() { return false; }
 	virtual void set_record_enable (bool yn, void *src) {}
 	virtual bool record_enabled() const { return false; }
-	virtual void handle_transport_stopped (bool abort, bool did_locate, bool flush_redirects);
+	virtual void handle_transport_stopped (bool abort, bool did_locate, bool flush_inserts);
 	virtual void set_pending_declick (int);
 
 	/* end of vfunc-based API */
@@ -136,54 +137,54 @@ class Route : public IO
 	virtual void  set_meter_point (MeterPoint, void *src);
 	MeterPoint  meter_point() const { return _meter_point; }
 
-	/* Redirects */
+	/* Inserts */
 
-	void flush_redirects ();
+	void flush_inserts ();
 
-	template<class T> void foreach_redirect (T *obj, void (T::*func)(boost::shared_ptr<Redirect>)) {
-		Glib::RWLock::ReaderLock lm (redirect_lock);
-		for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+	template<class T> void foreach_insert (T *obj, void (T::*func)(boost::shared_ptr<Insert>)) {
+		Glib::RWLock::ReaderLock lm (insert_lock);
+		for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
 			(obj->*func) (*i);
 		}
 	}
 
-	boost::shared_ptr<Redirect> nth_redirect (uint32_t n) {
-		Glib::RWLock::ReaderLock lm (redirect_lock);
-		RedirectList::iterator i;
-		for (i = _redirects.begin(); i != _redirects.end() && n; ++i, --n);
-		if (i == _redirects.end()) {
+	boost::shared_ptr<Insert> nth_insert (uint32_t n) {
+		Glib::RWLock::ReaderLock lm (insert_lock);
+		InsertList::iterator i;
+		for (i = _inserts.begin(); i != _inserts.end() && n; ++i, --n);
+		if (i == _inserts.end()) {
 			return boost::shared_ptr<Redirect> ();
 		} else {
 			return *i;
 		}
 	}
 	
-	ChanCount max_redirect_outs () const { return redirect_max_outs; }
+	ChanCount max_insert_outs () const { return insert_max_outs; }
 	ChanCount pre_fader_streams() const;
 	
-	/** A record of the stream configuration at some point in the redirect list.
-	 * Used to return where and why a redirect list configuration request failed.
+	/** A record of the stream configuration at some point in the insert list.
+	 * Used to return where and why an insert list configuration request failed.
 	 */
 	struct InsertStreams {
 		InsertStreams(size_t i=0, ChanCount c=ChanCount()) : index(i), count(c) {}
 
-		size_t    index; ///< Index of redirect where configuration failed
-		ChanCount count; ///< Input requested of redirect
+		size_t    index; ///< Index of insert where configuration failed
+		ChanCount count; ///< Input requested of insert
 	};
 
-	int add_redirect (boost::shared_ptr<Redirect>, void *src, InsertStreams* err = 0);
-	int add_redirects (const RedirectList&, void *src, InsertStreams* err = 0);
-	int remove_redirect (boost::shared_ptr<Redirect>, void *src, InsertStreams* err = 0);
-	int copy_redirects (const Route&, Placement, InsertStreams* err = 0);
-	int sort_redirects (InsertStreams* err = 0);
-	void disable_redirects (Placement);
-	void disable_redirects ();
+	int add_insert (boost::shared_ptr<Insert>, InsertStreams* err = 0);
+	int add_inserts (const InsertList&, InsertStreams* err = 0);
+	int remove_insert (boost::shared_ptr<Insert>, InsertStreams* err = 0);
+	int copy_inserts (const Route&, Placement, InsertStreams* err = 0);
+	int sort_inserts (InsertStreams* err = 0);
+	void disable_inserts (Placement);
+	void disable_inserts ();
 	void disable_plugins (Placement);
 	void disable_plugins ();
 	void ab_plugins (bool forward);
-	void clear_redirects (Placement, void *src);
-	void all_redirects_flip();
-	void all_redirects_active (Placement, bool state);
+	void clear_inserts (Placement);
+	void all_inserts_flip();
+	void all_inserts_active (Placement, bool state);
 
 	virtual nframes_t update_total_latency();
 	nframes_t signal_latency() const { return _own_latency; }
@@ -197,7 +198,7 @@ class Route : public IO
 	sigc::signal<void,void*> post_fader_changed;
 	sigc::signal<void,void*> control_outs_changed;
 	sigc::signal<void,void*> main_outs_changed;
-	sigc::signal<void,void*> redirects_changed;
+	sigc::signal<void>       inserts_changed;
 	sigc::signal<void,void*> record_enable_changed;
 	sigc::signal<void,void*> edit_group_changed;
 	sigc::signal<void,void*> mix_group_changed;
@@ -214,8 +215,8 @@ class Route : public IO
 	int set_state(const XMLNode& node);
 	virtual XMLNode& get_template();
 
-	XMLNode& get_redirect_state ();
-	int set_redirect_state (const XMLNode&);
+	XMLNode& get_insert_state ();
+	int set_insert_state (const XMLNode&);
 
 	sigc::signal<void,void*> SelectedChanged;
 
@@ -294,8 +295,8 @@ class Route : public IO
 	nframes_t           _initial_delay;
 	nframes_t           _roll_delay;
 	nframes_t           _own_latency;
-	RedirectList             _redirects;
-	Glib::RWLock      redirect_lock;
+	InsertList             _inserts;
+	Glib::RWLock      insert_lock;
 	IO                      *_control_outs;
 	Glib::Mutex      control_outs_lock;
 	RouteGroup              *_edit_group;
@@ -311,7 +312,7 @@ class Route : public IO
 
 	virtual void process_output_buffers (BufferSet& bufs,
 				     nframes_t start_frame, nframes_t end_frame,
-				     nframes_t nframes, nframes_t offset, bool with_redirects, int declick,
+				     nframes_t nframes, nframes_t offset, bool with_inserts, int declick,
 				     bool meter);
 
   protected:
@@ -326,14 +327,14 @@ class Route : public IO
 	
 	sigc::connection input_signal_connection;
 
-	ChanCount redirect_max_outs;
+	ChanCount insert_max_outs;
 	uint32_t _remote_control_id;
 
 	uint32_t pans_required() const;
 	ChanCount n_process_buffers ();
 
 	virtual int  _set_state (const XMLNode&, bool call_base);
-	virtual void _set_redirect_states (const XMLNodeList&);
+	virtual void _set_insert_states (const XMLNodeList&);
 
   private:
 	void init ();
@@ -354,7 +355,6 @@ class Route : public IO
 	void input_change_handler (IOChange, void *src);
 	void output_change_handler (IOChange, void *src);
 
-	bool legal_redirect (Redirect&);
 	int reset_plugin_counts (InsertStreams*); /* locked */
 	int _reset_plugin_counts (InsertStreams*); /* unlocked */
 
@@ -372,8 +372,7 @@ class Route : public IO
 	bool    check_some_plugin_counts (std::list<InsertCount>& iclist, ChanCount required_inputs, InsertStreams* err_streams);
 
 	void set_deferred_state ();
-	void add_redirect_from_xml (const XMLNode&);
-	void redirect_active_proxy (Redirect*, void*);
+	void add_insert_from_xml (const XMLNode&);
 };
 
 } // namespace ARDOUR

@@ -261,7 +261,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	RegionFactory::CheckNewRegion.connect (mem_fun (*this, &Session::add_region));
 	SourceFactory::SourceCreated.connect (mem_fun (*this, &Session::add_source));
 	PlaylistFactory::PlaylistCreated.connect (mem_fun (*this, &Session::add_playlist));
-	Redirect::RedirectCreated.connect (mem_fun (*this, &Session::add_redirect));
+	Insert::InsertCreated.connect (mem_fun (*this, &Session::add_insert));
 	NamedSelection::NamedSelectionCreated.connect (mem_fun (*this, &Session::add_named_selection));
 	AutomationList::AutomationListCreated.connect (mem_fun (*this, &Session::add_automation_list));
 

@@ -103,28 +103,28 @@ public:
 protected:
 	friend class StreamView;
 	
-	struct RedirectAutomationNode {
+	struct InsertAutomationNode {
 	    uint32_t                what;
 	    Gtk::CheckMenuItem*     menu_item;
 	    AutomationTimeAxisView* view;
 	    RouteTimeAxisView&      parent;
 
-	    RedirectAutomationNode (uint32_t w, Gtk::CheckMenuItem* mitem, RouteTimeAxisView& p)
+	    InsertAutomationNode (uint32_t w, Gtk::CheckMenuItem* mitem, RouteTimeAxisView& p)
 		    : what (w), menu_item (mitem), view (0), parent (p) {}
 
-	    ~RedirectAutomationNode ();
+	    ~InsertAutomationNode ();
 	};
 
-	struct RedirectAutomationInfo {
-	    boost::shared_ptr<ARDOUR::Redirect> redirect;
-	    bool                                valid;
-	    Gtk::Menu*                          menu;
-	    vector<RedirectAutomationNode*>     lines;
+	struct InsertAutomationInfo {
+	    boost::shared_ptr<ARDOUR::Insert> insert;
+	    bool                              valid;
+	    Gtk::Menu*                        menu;
+	    vector<InsertAutomationNode*>     lines;
 
-	    RedirectAutomationInfo (boost::shared_ptr<ARDOUR::Redirect> r) 
-		    : redirect (r), valid (true), menu (0) {}
+	    InsertAutomationInfo (boost::shared_ptr<ARDOUR::Insert> i) 
+		    : insert (i), valid (true), menu (0) {}
 
-	    ~RedirectAutomationInfo ();
+	    ~InsertAutomationInfo ();
 	};
 	
 
@@ -133,30 +133,30 @@ protected:
 	
 	gint edit_click  (GdkEventButton *);
 
-	void redirects_changed (void *);
+	void inserts_changed ();
 	
-	void add_redirect_to_subplugin_menu (boost::shared_ptr<ARDOUR::Redirect>);
-	void remove_ran (RedirectAutomationNode* ran);
+	void add_insert_to_subplugin_menu (boost::shared_ptr<ARDOUR::Insert>);
+	void remove_ran (InsertAutomationNode* ran);
 
-	void redirect_menu_item_toggled (RouteTimeAxisView::RedirectAutomationInfo*,
-	                                 RouteTimeAxisView::RedirectAutomationNode*);
+	void insert_menu_item_toggled (RouteTimeAxisView::InsertAutomationInfo*,
+	                                 RouteTimeAxisView::InsertAutomationNode*);
 	
-	void redirect_automation_track_hidden (RedirectAutomationNode*,
-	                                       boost::shared_ptr<ARDOUR::Redirect>);
+	void insert_automation_track_hidden (InsertAutomationNode*,
+	                                       boost::shared_ptr<ARDOUR::Insert>);
 
-	RedirectAutomationNode*
-	find_redirect_automation_node (boost::shared_ptr<ARDOUR::Redirect> r, uint32_t);
+	InsertAutomationNode*
+	find_insert_automation_node (boost::shared_ptr<ARDOUR::Insert> i, uint32_t);
 	
 	RedirectAutomationLine*
-	find_redirect_automation_curve (boost::shared_ptr<ARDOUR::Redirect> r, uint32_t);
+	find_insert_automation_curve (boost::shared_ptr<ARDOUR::Insert> i, uint32_t);
 
-	void add_redirect_automation_curve (boost::shared_ptr<ARDOUR::Redirect> r, uint32_t);
-	void add_existing_redirect_automation_curves (boost::shared_ptr<ARDOUR::Redirect>);
+	void add_insert_automation_curve (boost::shared_ptr<ARDOUR::Insert> r, uint32_t);
+	void add_existing_insert_automation_curves (boost::shared_ptr<ARDOUR::Insert>);
 	
-	void reset_redirect_automation_curves ();
+	void reset_insert_automation_curves ();
 
-	void take_name_changed (void *);
-	void route_name_changed (void *);
+	void take_name_changed (void *src);
+	void route_name_changed ();
 	void name_entry_changed ();
 
 	void update_rec_display ();
@@ -202,7 +202,7 @@ protected:
 	void color_handler ();
 
 	void region_view_added (RegionView*);
-	void add_ghost_to_redirect (RegionView*, AutomationTimeAxisView*);
+	void add_ghost_to_insert (RegionView*, AutomationTimeAxisView*);
 	
 	
 	StreamView*           _view;
@@ -211,7 +211,7 @@ protected:
   
 	Gtk::HBox   other_button_hbox;
 	Gtk::Table  button_table;
-	Gtk::Button redirect_button;
+	Gtk::Button insert_button;
 	Gtk::Button edit_group_button;
 	Gtk::Button playlist_button;
 	Gtk::Button size_button;
@@ -238,8 +238,8 @@ protected:
 	void _set_track_mode (ARDOUR::Track* track, ARDOUR::TrackMode mode, Gtk::RadioMenuItem* reset_item);
 	void track_mode_changed ();
 
-	list<RedirectAutomationInfo*>   redirect_automation;
-	vector<RedirectAutomationLine*> redirect_automation_curves;
+	list<InsertAutomationInfo*>   insert_automation;
+	vector<RedirectAutomationLine*> insert_automation_curves;
 
 	sigc::connection modified_connection;
 

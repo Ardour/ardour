@@ -41,41 +41,41 @@ using namespace ARDOUR;
 using namespace PBD;
 
 PortInsert::PortInsert (Session& s, Placement p)
-	: Insert (s, string_compose (_("insert %1"), (bitslot = s.next_insert_id()) + 1), p, 1, -1, 1, -1)
+	: Redirect (s, string_compose (_("insert %1"), (bitslot = s.next_insert_id()) + 1), p, 1, -1, 1, -1)
 {
 	init ();
-	RedirectCreated (this); /* EMIT SIGNAL */
+	InsertCreated (this); /* EMIT SIGNAL */
 }
 
 PortInsert::PortInsert (const PortInsert& other)
-	: Insert (other._session, string_compose (_("insert %1"), (bitslot = other._session.next_insert_id()) + 1), other.placement(), 1, -1, 1, -1)
+	: Redirect (other._session, string_compose (_("insert %1"), (bitslot = other._session.next_insert_id()) + 1), other.placement(), 1, -1, 1, -1)
 {
 	init ();
-	RedirectCreated (this); /* EMIT SIGNAL */
+	InsertCreated (this); /* EMIT SIGNAL */
 }
 
 void
 PortInsert::init ()
 {
-	if (add_input_port ("", this)) {
+	if (_io->add_input_port ("", this)) {
 		error << _("PortInsert: cannot add input port") << endmsg;
 		throw failed_constructor();
 	}
 	
-	if (add_output_port ("", this)) {
+	if (_io->add_output_port ("", this)) {
 		error << _("PortInsert: cannot add output port") << endmsg;
 		throw failed_constructor();
 	}
 }
 
 PortInsert::PortInsert (Session& s, const XMLNode& node)
-	: Insert (s, "will change", PreFader)
+	: Redirect (s, "unnamed port insert", PreFader)
 {
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
 
-	RedirectCreated (this); /* EMIT SIGNAL */
+	InsertCreated (this); /* EMIT SIGNAL */
 }
 
 PortInsert::~PortInsert ()
@@ -86,19 +86,19 @@ PortInsert::~PortInsert ()
 void
 PortInsert::run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset)
 {
-	if (n_outputs().get(_default_type) == 0) {
+	if (_io->n_outputs().n_total() == 0) {
 		return;
 	}
 
 	if (!active()) {
 		/* deliver silence */
-		silence (nframes, offset);
+		_io->silence (nframes, offset);
 		return;
 	}
 
-	deliver_output(bufs, start_frame, end_frame, nframes, offset);
+	_io->deliver_output(bufs, start_frame, end_frame, nframes, offset);
 
-	collect_input(bufs, nframes, offset);
+	_io->collect_input(bufs, nframes, offset);
 }
 
 XMLNode&
@@ -110,14 +110,13 @@ PortInsert::get_state(void)
 XMLNode&
 PortInsert::state (bool full)
 {
-	XMLNode *node = new XMLNode("Insert");
+	XMLNode& node = Redirect::state(full);
 	char buf[32];
-	node->add_child_nocopy (Redirect::state(full));	
-	node->add_property ("type", "port");
+	node.add_property ("type", "port");
 	snprintf (buf, sizeof (buf), "%" PRIu32, bitslot);
-	node->add_property ("bitslot", buf);
+	node.add_property ("bitslot", buf);
 
-	return *node;
+	return node;
 }
 
 int
@@ -145,17 +144,17 @@ PortInsert::set_state(const XMLNode& node)
 		_session.mark_insert_id (bitslot);
 	}
 
+	const XMLNode* insert_node = &node;
+
+	// legacy sessions: search for child Redirect node
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() == Redirect::state_node_name) {
-			Redirect::set_state (**niter);
+		if ((*niter)->name() == "Redirect") {
+			insert_node = *niter;
 			break;
 		}
 	}
-
-	if (niter == nlist.end()) {
-		error << _("XML node describing insert is missing a Redirect node") << endmsg;
-		return -1;
-	}
+	
+	Redirect::set_state (*insert_node);
 
 	return 0;
 }
@@ -170,13 +169,13 @@ PortInsert::latency()
 	   need to take that into account too.
 	*/
 
-	return _session.engine().frames_per_cycle() + input_latency();
+	return _session.engine().frames_per_cycle() + _io->input_latency();
 }
 
 bool
 PortInsert::can_support_input_configuration (ChanCount in) const
 {
-	if (input_maximum() == ChanCount::INFINITE && output_maximum() == ChanCount::INFINITE) {
+	if (_io->input_maximum() == ChanCount::INFINITE && _io->output_maximum() == ChanCount::INFINITE) {
 
 		/* not configured yet */
 
@@ -188,7 +187,7 @@ PortInsert::can_support_input_configuration (ChanCount in) const
 		   many output ports it will have.
 		*/
 
-		if (output_maximum() == in) {
+		if (_io->output_maximum() == in) {
 
 			return true;
 		} 
@@ -220,23 +219,28 @@ PortInsert::configure_io (ChanCount in, ChanCount out)
 	   to the number of input ports we need.
 	*/
 
-	set_output_maximum (in);
-	set_output_minimum (in);
-	set_input_maximum (out);
-	set_input_minimum (out);
+	_io->set_output_maximum (in);
+	_io->set_output_minimum (in);
+	_io->set_input_maximum (out);
+	_io->set_input_minimum (out);
 
-	return (ensure_io (out, in, false, this) == 0);
+	bool success = (_io->ensure_io (out, in, false, this) == 0);
+
+	if (success)
+		return Insert::configure_io(in, out);
+	else
+		return false;
 }
 
 ChanCount
 PortInsert::output_streams() const
 {
-	return n_inputs ();
+	return _io->n_inputs ();
 }
 
 ChanCount
 PortInsert::input_streams() const
 {
-	return n_outputs ();
+	return _io->n_outputs ();
 }
 

@@ -71,7 +71,7 @@ struct RegionSortByLastLayerOp {
 };
 
 Playlist::Playlist (Session& sess, string nom, DataType type, bool hide)
-	: _session (sess)
+	: SessionObject(sess, nom)
 	, _type(type)
 {
 	init (hide);
@@ -81,7 +81,7 @@ Playlist::Playlist (Session& sess, string nom, DataType type, bool hide)
 }
 
 Playlist::Playlist (Session& sess, const XMLNode& node, DataType type, bool hide)
-	: _session (sess)
+	: SessionObject(sess, "unnamed playlist")
 	, _type(type)
 {
 	const XMLProperty* prop = node.property("type");
@@ -94,7 +94,7 @@ Playlist::Playlist (Session& sess, const XMLNode& node, DataType type, bool hide
 }
 
 Playlist::Playlist (boost::shared_ptr<const Playlist> other, string namestr, bool hide)
-	: _name (namestr), _session (other->_session), _type(other->_type), _orig_diskstream_id(other->_orig_diskstream_id)
+	: SessionObject(other->_session, namestr), _type(other->_type), _orig_diskstream_id(other->_orig_diskstream_id)
 {
 	init (hide);
 
@@ -126,7 +126,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, string namestr, boo
 }
 
 Playlist::Playlist (boost::shared_ptr<const Playlist> other, nframes_t start, nframes_t cnt, string str, bool hide)
-	: _name (str), _session (other->_session), _type(other->_type), _orig_diskstream_id(other->_orig_diskstream_id)
+	: SessionObject(other->_session, str), _type(other->_type), _orig_diskstream_id(other->_orig_diskstream_id)
 {
 	RegionLock rlock2 (const_cast<Playlist*> (other.get()));
 
@@ -247,14 +247,14 @@ Playlist::init (bool hide)
 }
 
 Playlist::Playlist (const Playlist& pl)
-	: _session (pl._session)
+	: SessionObject(pl._session, pl._name)
 	, _type(pl.data_type())
 {
 	fatal << _("playlist const copy constructor called") << endmsg;
 }
 
 Playlist::Playlist (Playlist& pl)
-	: _session (pl._session)
+	: SessionObject(pl._session, pl._name)
 	, _type(pl.data_type())
 {
 	fatal << _("playlist non-const copy constructor called") << endmsg;
@@ -273,8 +273,8 @@ Playlist::~Playlist ()
 	/* GoingAway must be emitted by derived classes */
 }
 
-void
-Playlist::set_name (string str)
+bool
+Playlist::set_name (const string& str)
 {
 	/* in a typical situation, a playlist is being used
 	   by one diskstream and also is referenced by the
@@ -283,11 +283,10 @@ Playlist::set_name (string str)
 	*/
 
 	if (_refcnt > 2) {
-		return;
+		return false;
+	} else {
+		return SessionObject::set_name(str);
 	}
-
-	_name = str; 
-	NameChanged(); /* EMIT SIGNAL */
 }
 
 /***********************************************************************

@@ -379,7 +379,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	if ((Config->get_slave_source() == None && Config->get_auto_return()) || (post_transport_work & PostTransportLocate) || synced_to_jack()) {
 		
 		if (pending_locate_flush) {
-			flush_all_redirects ();
+			flush_all_inserts ();
 		}
 		
 		if (((Config->get_slave_source() == None && Config->get_auto_return()) || synced_to_jack()) && !(post_transport_work & PostTransportLocate)) {
@@ -573,12 +573,12 @@ Session::set_play_loop (bool yn)
 }
 
 void
-Session::flush_all_redirects ()
+Session::flush_all_inserts ()
 {
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		(*i)->flush_redirects ();
+		(*i)->flush_inserts ();
 	}
 }
 
@@ -1264,12 +1264,6 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		(*i)->set_capture_offset ();
 	}
-}
-
-void
-Session::update_latency_compensation_proxy (void* ignored)
-{
-	update_latency_compensation (false, false);
 }
 
 void

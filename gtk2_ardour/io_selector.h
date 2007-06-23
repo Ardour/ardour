@@ -119,7 +119,7 @@ class IOSelector : public Gtk::VBox {
 	bool port_selection_changed(GdkEventButton *, Gtk::TreeView*);
 
 	void ports_changed (ARDOUR::IOChange, void *);
-	void name_changed (void*);
+	void name_changed ();
 
 	void add_port ();
 	void remove_port ();

@@ -1391,7 +1391,7 @@ int
 MidiDiskstream::rename_write_sources ()
 {
 	if (_write_source != 0) {
-		_write_source->set_name (_name, destructive());
+		_write_source->set_source_name (_name, destructive());
 		/* XXX what to do if this fails ? */
 	}
 	return 0;

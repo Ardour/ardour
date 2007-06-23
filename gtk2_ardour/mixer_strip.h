@@ -236,10 +236,10 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	void speed_adjustment_changed ();
 	void speed_changed ();
-	void name_changed (void *src);
+	void name_changed ();
 	void update_speed_display ();
 	void map_frozen ();
-	void hide_redirect_editor (boost::shared_ptr<ARDOUR::Redirect> redirect);
+	void hide_insert_editor (boost::shared_ptr<ARDOUR::Insert> insert);
 
 	bool ignore_speed_adjustment;
 

@@ -39,7 +39,7 @@ class RedirectAutomationTimeAxisView : public AutomationTimeAxisView
 					ArdourCanvas::Canvas& canvas,
 					std::string name,
 					uint32_t port,
-					ARDOUR::Redirect& rd,
+					ARDOUR::Insert& i,
 					std::string state_name);
 
 	~RedirectAutomationTimeAxisView();
@@ -51,7 +51,7 @@ class RedirectAutomationTimeAxisView : public AutomationTimeAxisView
 
 	
    private:
-	ARDOUR::Redirect& redirect;
+	ARDOUR::Insert& insert;
         uint32_t port;
 
 	XMLNode *xml_node;

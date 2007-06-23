@@ -26,7 +26,7 @@
 
 namespace ARDOUR {
 	class Session;
-	class Redirect;
+	class Insert;
 }
 
 class TimeAxisView;
@@ -34,17 +34,17 @@ class TimeAxisView;
 class RedirectAutomationLine : public AutomationLine
 {
   public:
-	RedirectAutomationLine (const string & name, ARDOUR::Redirect&, uint32_t port, ARDOUR::Session&, TimeAxisView&, 
+	RedirectAutomationLine (const string & name, ARDOUR::Insert&, uint32_t port, ARDOUR::Session&, TimeAxisView&, 
 				ArdourCanvas::Group& parent, ARDOUR::AutomationList&);
 	
 	uint32_t port() const { return _port; }
-	ARDOUR::Redirect& redirect() const { return _redirect; }
+	ARDOUR::Insert& insert() const { return _insert; }
 
 	string get_verbose_cursor_string (float);
 
   private:
 	ARDOUR::Session& session;
-	ARDOUR::Redirect& _redirect;
+	ARDOUR::Insert& _insert;
 	uint32_t _port;
 	float upper;
 	float lower;

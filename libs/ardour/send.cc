@@ -36,7 +36,7 @@ Send::Send (Session& s, Placement p)
 	: Redirect (s, string_compose (_("send %1"), (bitslot = s.next_send_id()) + 1), p)
 {
 	_metering = false;
-	RedirectCreated (this); /* EMIT SIGNAL */
+	InsertCreated (this); /* EMIT SIGNAL */
 }
 
 Send::Send (Session& s, const XMLNode& node)
@@ -48,14 +48,14 @@ Send::Send (Session& s, const XMLNode& node)
 		throw failed_constructor();
 	}
 
-	RedirectCreated (this); /* EMIT SIGNAL */
+	InsertCreated (this); /* EMIT SIGNAL */
 }
 
 Send::Send (const Send& other)
 	: Redirect (other._session, string_compose (_("send %1"), (bitslot = other._session.next_send_id()) + 1), other.placement())
 {
 	_metering = false;
-	RedirectCreated (this); /* EMIT SIGNAL */
+	InsertCreated (this); /* EMIT SIGNAL */
 }
 
 Send::~Send ()
@@ -72,12 +72,13 @@ Send::get_state(void)
 XMLNode&
 Send::state(bool full)
 {
-	XMLNode *node = new XMLNode("Send");
+	XMLNode& node = Redirect::state(full);
 	char buf[32];
-	node->add_child_nocopy (Redirect::state (full));
+	node.add_property ("type", "send");
 	snprintf (buf, sizeof (buf), "%" PRIu32, bitslot);
-	node->add_property ("bitslot", buf);
-	return *node;
+	node.add_property ("bitslot", buf);
+
+	return node;
 }
 
 int
@@ -94,16 +95,19 @@ Send::set_state(const XMLNode& node)
 		_session.mark_send_id (bitslot);
 	}
 
+	const XMLNode* insert_node = &node;
+
 	/* Send has regular IO automation (gain, pan) */
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() == Redirect::state_node_name) {
-			Redirect::set_state (**niter);
-			break;
+		if ((*niter)->name() == "Redirect") {
+			insert_node = *niter;
 		} else if ((*niter)->name() == X_("Automation")) {
-			IO::set_automation_state (*(*niter));
+			_io->set_automation_state (*(*niter));
 		}
 	}
+	
+	Redirect::set_state (*insert_node);
 
 	if (niter == nlist.end()) {
 		error << _("XML node describing a send is missing a Redirect node") << endmsg;
@@ -126,21 +130,21 @@ Send::run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_
 		sendbufs.read_from(bufs, nframes);
 		assert(sendbufs.count() == bufs.count());
 
-		IO::deliver_output (sendbufs, start_frame, end_frame, nframes, offset);
+		_io->deliver_output (sendbufs, start_frame, end_frame, nframes, offset);
 
 		if (_metering) {
-			if (_gain == 0) {
-				_meter->reset();
+			if (_io->_gain == 0) {
+				_io->_meter->reset();
 			} else {
-				_meter->run(output_buffers(), nframes, offset);
+				_io->_meter->run(_io->output_buffers(), start_frame, end_frame, nframes, offset);
 			}
 		}
 
 	} else {
-		silence (nframes, offset);
+		_io->silence (nframes, offset);
 		
 		if (_metering) {
-			_meter->reset();
+			_io->_meter->reset();
 		}
 	}
 }
@@ -152,15 +156,72 @@ Send::set_metering (bool yn)
 
 	if (!_metering) {
 		/* XXX possible thread hazard here */
-		peak_meter().reset();
+		_io->peak_meter().reset();
 	}
 }
 
-void
-Send::expect_inputs (const ChanCount& expected)
+bool
+Send::can_support_input_configuration (ChanCount in) const
 {
-	if (expected != _expected_inputs) {
-		_expected_inputs = expected;
-		reset_panner ();
+	if (_io->input_maximum() == ChanCount::INFINITE && _io->output_maximum() == ChanCount::INFINITE) {
+
+		/* not configured yet */
+
+		return true; /* we can support anything the first time we're asked */
+
+	} else {
+
+		/* the "input" config for a port insert corresponds to how
+		   many output ports it will have.
+		*/
+
+		if (_io->output_maximum() == in) {
+
+			return true;
+		} 
 	}
+
+	return false;
+}
+
+ChanCount
+Send::output_for_input_configuration (ChanCount in) const
+{
+	// from the internal (Insert) perspective a Send does not modify its input whatsoever
+	return in;
+}
+
+bool
+Send::configure_io (ChanCount in, ChanCount out)
+{
+	/* we're transparent no matter what.  fight the power. */
+	if (out != in)
+		return false;
+
+	_io->set_output_maximum (in);
+	_io->set_output_minimum (in);
+	_io->set_input_maximum (ChanCount::ZERO);
+	_io->set_input_minimum (ChanCount::ZERO);
+
+	bool success = _io->ensure_io (ChanCount::ZERO, in, false, this) == 0;
+
+	if (success) {
+		Insert::configure_io(in, out);
+		_io->reset_panner();
+		return true;
+	} else {
+		return false;
+	}
+}
+
+ChanCount
+Send::output_streams() const
+{
+	return _io->n_outputs ();
+}
+
+ChanCount
+Send::input_streams() const
+{
+	return _io->n_outputs (); // (sic)
 }

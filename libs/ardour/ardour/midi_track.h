@@ -37,8 +37,6 @@ public:
 	MidiTrack (Session&, const XMLNode&);
 	~MidiTrack ();
 	
-	int set_name (string str, void *src);
-
 	int roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 		nframes_t offset, int declick, bool can_record, bool rec_monitors_input);
 	

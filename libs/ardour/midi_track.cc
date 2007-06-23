@@ -427,7 +427,7 @@ MidiTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 	int dret;
 	boost::shared_ptr<MidiDiskstream> diskstream = midi_diskstream();
 
-	if (n_outputs().n_total() == 0 && _redirects.empty()) {
+	if (n_outputs().n_total() == 0 && _inserts.empty()) {
 		return 0;
 	}
 
@@ -498,7 +498,7 @@ int
 MidiTrack::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
 			 bool can_record, bool rec_monitors_input)
 {
-	if (n_outputs().n_midi() == 0 && _redirects.empty()) {
+	if (n_outputs().n_midi() == 0 && _inserts.empty()) {
 		return 0;
 	}
 
@@ -518,29 +518,29 @@ MidiTrack::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_
 void
 MidiTrack::process_output_buffers (BufferSet& bufs,
 			       nframes_t start_frame, nframes_t end_frame, 
-			       nframes_t nframes, nframes_t offset, bool with_redirects, int declick,
+			       nframes_t nframes, nframes_t offset, bool with_inserts, int declick,
 			       bool meter)
 {
-	/* There's no such thing as a MIDI bus for the time being, to avoid diverging from trunk
-	 * too much until the SoC settles down.  We'll do all the MIDI route work here for now,
-	 * but the long-term goal is to have Route::process_output_buffers handle everything */
+	/* There's no such thing as a MIDI bus for the time being.
+	 * We'll do all the MIDI route work here for now, but the long-term goal is to have
+	 * Route::process_output_buffers handle everything */
 	
 	if (meter && (_meter_point == MeterInput || _meter_point == MeterPreFader)) {
-		_meter->run(bufs, nframes);
+		_meter->run(bufs, start_frame, end_frame, nframes, offset);
 	}
 
-	// Run all redirects
-	if (with_redirects) {
-		Glib::RWLock::ReaderLock rm (redirect_lock, Glib::TRY_LOCK);
+	// Run all inserts
+	if (with_inserts) {
+		Glib::RWLock::ReaderLock rm (insert_lock, Glib::TRY_LOCK);
 		if (rm.locked()) {
-			for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+			for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
 				(*i)->run (bufs, start_frame, end_frame, nframes, offset);
 			}
 		} 
 	}
 	
 	if (meter && (_meter_point == MeterPostFader)) {
-		_meter->run(bufs, nframes);
+		_meter->run(bufs, start_frame, end_frame, nframes, offset);
 	}
 	
 	// Main output stage
@@ -549,28 +549,6 @@ MidiTrack::process_output_buffers (BufferSet& bufs,
 	} else {
 		deliver_output(bufs, start_frame, end_frame, nframes, offset);
 	}
-}
-
-int
-MidiTrack::set_name (string str, void *src)
-{
-	int ret;
-
-	if (record_enabled() && _session.actively_recording()) {
-		/* this messes things up if done while recording */
-		return -1;
-	}
-
-	if (_diskstream->set_name (str)) {
-		return -1;
-	}
-
-	/* save state so that the statefile fully reflects any filename changes */
-
-	if ((ret = IO::set_name (str, src)) == 0) {
-		_session.save_state ("");
-	}
-	return ret;
 }
 
 int

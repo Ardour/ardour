@@ -29,30 +29,30 @@
 class RouteRedirectSelection : public sigc::trackable 
 {
   public:
-	RedirectSelection    redirects;
+	InsertSelection      inserts;
 	RouteSelection       routes;
 
 	RouteRedirectSelection() {}
 
 	RouteRedirectSelection& operator= (const RouteRedirectSelection& other);
 
-	sigc::signal<void> RedirectsChanged;
+	sigc::signal<void> InsertsChanged;
 	sigc::signal<void> RoutesChanged;
 
 	void clear ();
 	bool empty();
 
-	void set (boost::shared_ptr<ARDOUR::Redirect>);
-	void set (const std::vector<boost::shared_ptr<ARDOUR::Redirect> >&);
-	void add (boost::shared_ptr<ARDOUR::Redirect>);
-	void add (const std::vector<boost::shared_ptr<ARDOUR::Redirect> >&);
-	void remove (boost::shared_ptr<ARDOUR::Redirect>);
+	void set (boost::shared_ptr<ARDOUR::Insert>);
+	void set (const std::vector<boost::shared_ptr<ARDOUR::Insert> >&);
+	void add (boost::shared_ptr<ARDOUR::Insert>);
+	void add (const std::vector<boost::shared_ptr<ARDOUR::Insert> >&);
+	void remove (boost::shared_ptr<ARDOUR::Insert>);
 
 	void set (boost::shared_ptr<ARDOUR::Route>);
 	void add (boost::shared_ptr<ARDOUR::Route>);
 	void remove (boost::shared_ptr<ARDOUR::Route>);
 
-	void clear_redirects ();
+	void clear_inserts ();
 	void clear_routes ();
 
 	bool selected (boost::shared_ptr<ARDOUR::Route>);

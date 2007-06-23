@@ -178,7 +178,7 @@ class Mixer_UI : public Gtk::Window
 
 	PluginSelector    *_plugin_selector;
 
-	void strip_name_changed (void *src, MixerStrip *);
+	void strip_name_changed (MixerStrip *);
 
 	void group_flags_changed (void *src, ARDOUR::RouteGroup *);
 

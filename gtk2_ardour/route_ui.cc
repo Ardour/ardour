@@ -817,7 +817,7 @@ RouteUI::route_rename ()
 	case Gtk::RESPONSE_ACCEPT:
         name_prompter.get_result (result);
         if (result.length()) {
-			_route->set_name (result, this);
+			_route->set_name (result);
 		}	
 		break;
 	}
@@ -827,9 +827,9 @@ RouteUI::route_rename ()
 }
 
 void
-RouteUI::name_changed (void *src)
+RouteUI::name_changed ()
 {
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &RouteUI::name_changed), src));
+	ENSURE_GUI_THREAD(sigc::mem_fun(*this, &RouteUI::name_changed));
 
 	name_label.set_text (_route->name());
 }

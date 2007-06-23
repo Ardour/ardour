@@ -30,6 +30,7 @@
 #include <ardour/route.h>
 #include <ardour/ladspa_plugin.h>
 #include <ardour/buffer_set.h>
+#include <ardour/automation_event.h>
 
 #ifdef VST_SUPPORT
 #include <ardour/vst_plugin.h>
@@ -67,11 +68,11 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug, Placemen
 		IO::MoreChannels (max(input_streams(), output_streams()));
 	}
 
-	RedirectCreated (this); /* EMIT SIGNAL */
+	InsertCreated (this); /* EMIT SIGNAL */
 }
 
 PluginInsert::PluginInsert (Session& s, const XMLNode& node)
-	: Insert (s, "will change", PreFader)
+	: Insert (s, "unnamed plugin insert", PreFader)
 {
 	if (set_state (node)) {
 		throw failed_constructor();
@@ -88,7 +89,7 @@ PluginInsert::PluginInsert (Session& s, const XMLNode& node)
 }
 
 PluginInsert::PluginInsert (const PluginInsert& other)
-	: Insert (other._session, other.plugin()->name(), other.placement())
+	: Insert (other._session, other._name, other.placement())
 {
 	uint32_t count = other._plugins.size();
 
@@ -102,7 +103,7 @@ PluginInsert::PluginInsert (const PluginInsert& other)
 
 	init ();
 
-	RedirectCreated (this); /* EMIT SIGNAL */
+	InsertCreated (this); /* EMIT SIGNAL */
 }
 
 bool
@@ -272,7 +273,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t off
 		map<uint32_t,AutomationList*>::iterator li;
 		uint32_t n;
 		
-		for (n = 0, li = parameter_automation.begin(); li != parameter_automation.end(); ++li, ++n) {
+		for (n = 0, li = _parameter_automation.begin(); li != _parameter_automation.end(); ++li, ++n) {
 			
 			AutomationList& alist (*((*li).second));
 
@@ -302,14 +303,14 @@ PluginInsert::automation_snapshot (nframes_t now)
 {
 	map<uint32_t,AutomationList*>::iterator li;
 	
-	for (li = parameter_automation.begin(); li != parameter_automation.end(); ++li) {
+	for (li =_parameter_automation.begin(); li !=_parameter_automation.end(); ++li) {
 		
 		AutomationList *alist = ((*li).second);
 		if (alist != 0 && alist->automation_write ()) {
 			
 			float val = _plugins[0]->get_parameter ((*li).first);
 			alist->rt_add (now, val);
-			last_automation_snapshot = now;
+			_last_automation_snapshot = now;
 		}
 	}
 }
@@ -319,7 +320,7 @@ PluginInsert::transport_stopped (nframes_t now)
 {
 	map<uint32_t,AutomationList*>::iterator li;
 
-	for (li = parameter_automation.begin(); li != parameter_automation.end(); ++li) {
+	for (li =_parameter_automation.begin(); li !=_parameter_automation.end(); ++li) {
 		AutomationList& alist (*(li->second));
 		alist.reposition_for_rt_add (now);
 
@@ -353,6 +354,9 @@ PluginInsert::run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, 
 			connect_and_run (bufs, nframes, offset, false);
 		}
 	} else {
+
+		/* FIXME: type, audio only */
+
 		uint32_t in = _plugins[0]->get_info()->n_inputs.n_audio();
 		uint32_t out = _plugins[0]->get_info()->n_outputs.n_audio();
 
@@ -365,7 +369,7 @@ PluginInsert::run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, 
 			}
 		}
 
-		bufs.count().set(_default_type, out);
+		bufs.count().set_audio(out);
 	}
 }
 
@@ -526,26 +530,41 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 		return false;
 	} else {
 		bool success = set_count (count_for_configuration(in, out));
-		if (success) {
-			_configured = true;
-			_configured_input = in;
-		}
+		if (success)
+			Insert::configure_io(in, out);
 		return success;
 	}
 }
 
 bool
-PluginInsert::can_support_input_configuration (ChanCount in_count) const
+PluginInsert::can_support_input_configuration (ChanCount in) const
 {
-	int32_t outputs = _plugins[0]->get_info()->n_outputs.get(_default_type);
-	int32_t inputs = _plugins[0]->get_info()->n_inputs.get(_default_type);
-	int32_t in = in_count.get(_default_type);
+	ChanCount outputs = _plugins[0]->get_info()->n_outputs;
+	ChanCount inputs = _plugins[0]->get_info()->n_inputs;
 
 	/* see output_for_input_configuration below */
-	if ((inputs == 0)
-			|| (outputs == 1 && inputs == 1)
-			|| (inputs == in)
-			|| ((inputs < in) && (inputs % in == 0))) {
+	if ((inputs.n_total() == 0)
+			|| (inputs.n_total() == 1 && outputs == inputs)
+			|| (inputs.n_total() == 1 && outputs == inputs
+				&& ((inputs.n_audio() == 0 && in.n_audio() == 0)
+					|| (inputs.n_midi() == 0 && in.n_midi() == 0)))
+			|| (inputs == in)) {
+		return true;
+	}
+
+	bool can_replicate = true;
+
+	/* if number of inputs is a factor of the requested input
+	   configuration for every type, we can replicate.
+	*/
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		if (inputs.get(*t) >= in.get(*t) || (inputs.get(*t) % in.get(*t) != 0)) {
+			can_replicate = false;
+			break;
+		}
+	}
+
+	if (can_replicate && (in.n_total() % inputs.n_total() == 0)) {
 		return true;
 	} else {
 		return false;
@@ -563,7 +582,9 @@ PluginInsert::output_for_input_configuration (ChanCount in) const
 		return outputs;
 	}
 
-	if (inputs.n_total() == 1 && outputs == inputs) {
+	if (inputs.n_total() == 1 && outputs == inputs
+			&& ((inputs.n_audio() == 0 && in.n_audio() == 0)
+				|| (inputs.n_midi() == 0 && in.n_midi() == 0))) {
 		/* mono plugin, replicate as needed to match in */
 		return in;
 	}
@@ -573,17 +594,26 @@ PluginInsert::output_for_input_configuration (ChanCount in) const
 		return outputs;
 	}
 
-	// FIXME: single type plugins only.  can we do this for instruments?
-	if ((inputs.n_total() == inputs.get(_default_type))
-			&& ((in.n_total() == in.get(_default_type))
-			&& (inputs.n_total() < in.n_total())
-			&& (inputs.n_total() % in.n_total() == 0))) {
+	bool can_replicate = true;
 
-		/* number of inputs is a factor of the requested input
-		   configuration, so we can replicate.
-		*/
+	/* if number of inputs is a factor of the requested input
+	   configuration for every type, we can replicate.
+	*/
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		if (inputs.get(*t) >= in.get(*t) || (in.get(*t) % inputs.get(*t) != 0)) {
+			can_replicate = false;
+			break;
+		}
+	}
 
-		return ChanCount(_default_type, in.n_total() / inputs.n_total());
+	if (can_replicate && (inputs.n_total() % in.n_total() == 0)) {
+		ChanCount output;
+		
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			output.set(*t, outputs.get(*t) * (in.get(*t) / inputs.get(*t)));
+		}
+
+		return output;
 	}
 
 	/* sorry */
@@ -606,7 +636,9 @@ PluginInsert::count_for_configuration (ChanCount in, ChanCount out) const
 		return 1;
 	}
 
-	if (inputs.n_total() == 1 && outputs == inputs) {
+	if (inputs.n_total() == 1 && outputs == inputs
+			&& ((inputs.n_audio() == 0 && in.n_audio() == 0)
+				|| (inputs.n_midi() == 0 && in.n_midi() == 0))) {
 		/* mono plugin, replicate as needed to match in */
 		return in.n_total();
 	}
@@ -616,20 +648,14 @@ PluginInsert::count_for_configuration (ChanCount in, ChanCount out) const
 		return 1;
 	}
 
-	// FIXME: single type plugins only.  can we do this for instruments?
-	if ((inputs.n_total() == inputs.get(_default_type))
-			&& ((in.n_total() == in.get(_default_type))
-			&& (inputs.n_total() < in.n_total())
-			&& (inputs.n_total() % in.n_total() == 0))) {
-
-		/* number of inputs is a factor of the requested input
-		   configuration, so we can replicate.
-		*/
+	// assumes in is valid, so we must be replicating
+	if (inputs.n_total() < in.n_total()
+			&& (in.n_total() % inputs.n_total() == 0)) {
 
 		return in.n_total() / inputs.n_total();
 	}
 
-	/* sorry */
+	/* err... */
 	return 0;
 }
 
@@ -643,20 +669,18 @@ XMLNode&
 PluginInsert::state (bool full)
 {
 	char buf[256];
-	XMLNode *node = new XMLNode("Insert");
+	XMLNode& node = Insert::state (full);
 
-	node->add_child_nocopy (Redirect::state (full));
-
-	node->add_property ("type", _plugins[0]->state_node_name());
+	node.add_property ("type", _plugins[0]->state_node_name());
 	snprintf(buf, sizeof(buf), "%s", _plugins[0]->name());
-	node->add_property("id", string(buf));
+	node.add_property("id", string(buf));
 	if (_plugins[0]->state_node_name() == "ladspa") {
 		char buf[32];
 		snprintf (buf, sizeof (buf), "%ld", _plugins[0]->get_info()->unique_id); 
-		node->add_property("unique-id", string(buf));
+		node.add_property("unique-id", string(buf));
 	}
-	node->add_property("count", string_compose("%1", _plugins.size()));
-	node->add_child_nocopy (_plugins[0]->get_state());
+	node.add_property("count", string_compose("%1", _plugins.size()));
+	node.add_child_nocopy (_plugins[0]->get_state());
 
 	/* add port automation state */
 	XMLNode *autonode = new XMLNode(port_automation_node_name);
@@ -672,9 +696,9 @@ PluginInsert::state (bool full)
 		autonode->add_child_nocopy (*child);
 	}
 
-	node->add_child_nocopy (*autonode);
+	node.add_child_nocopy (*autonode);
 	
-	return *node;
+	return node;
 }
 
 int
@@ -752,23 +776,18 @@ PluginInsert::set_state(const XMLNode& node)
 		}
 	} 
 
+	const XMLNode* insert_node = &node;
+
+	// legacy sessions: search for child Redirect node
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() == Redirect::state_node_name) {
-			Redirect::set_state (**niter);
+		if ((*niter)->name() == "Redirect") {
+			insert_node = *niter;
 			break;
 		}
 	}
-
-	if (niter == nlist.end()) {
-		error << _("XML node describing insert is missing a Redirect node") << endmsg;
-		return -1;
-	}
-
-	if (niter == nlist.end()) {
-		error << string_compose(_("XML node describing a plugin insert is missing the `%1' information"), plugin->state_node_name()) << endmsg;
-		return -1;
-	}
 	
+	Insert::set_state (*insert_node);
+
 	/* look for port automation node */
 	
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
@@ -835,7 +854,7 @@ PluginInsert::set_state(const XMLNode& node)
 	}
 	
 	// The name of the PluginInsert comes from the plugin, nothing else
-	set_name(plugin->get_info()->name,this);
+	_name = plugin->get_info()->name;
 	
 	return 0;
 }

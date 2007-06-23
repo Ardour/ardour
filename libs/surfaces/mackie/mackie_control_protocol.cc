@@ -980,7 +980,7 @@ void MackieControlProtocol::notify_gain_changed( RouteSignal * route_signal )
 	}
 }
 
-void MackieControlProtocol::notify_name_changed( void *, RouteSignal * route_signal )
+void MackieControlProtocol::notify_name_changed( RouteSignal * route_signal )
 {
 	try
 	{

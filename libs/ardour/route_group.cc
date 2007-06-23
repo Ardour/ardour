@@ -149,7 +149,6 @@ RouteGroup::set_state (const XMLNode& node)
 
 void
 RouteGroup::set_active (bool yn, void *src)
-
 {
 	if (is_active() == yn) {
 		return;

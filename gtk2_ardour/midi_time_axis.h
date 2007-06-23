@@ -44,21 +44,13 @@ namespace ARDOUR {
 	class Session;
 	class MidiDiskstream;
 	class RouteGroup;
-	class Redirect;
+	class Insert;
 	class Insert;
 	class Location;
 	class MidiPlaylist;
 }
 
 class PublicEditor;
-class Selection;
-class Selectable;
-class AutomationLine;
-class AutomationGainLine;
-class AutomationPanLine;
-class RedirectAutomationLine;
-class TimeSelection;
-class AutomationTimeAxisView;
 
 class MidiTimeAxisView : public RouteTimeAxisView
 {
@@ -76,9 +68,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
   private:
 	void route_active_changed ();
 
-	//void redirects_changed (void *); FIXME?
-
-	void add_redirect_to_subplugin_menu (ARDOUR::Redirect *);
+	void add_insert_to_subplugin_menu (ARDOUR::Insert *);
 	
 	Gtk::Menu subplugin_menu;
 };

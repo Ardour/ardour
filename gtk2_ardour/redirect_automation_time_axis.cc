@@ -17,7 +17,7 @@
 
 */
 
-#include <ardour/redirect.h>
+#include <ardour/insert.h>
 #include <ardour/session.h>
 #include <cstdlib>
 #include <pbd/memento_command.h>
@@ -34,11 +34,11 @@ using namespace Gtk;
 
 RedirectAutomationTimeAxisView::RedirectAutomationTimeAxisView (Session& s, boost::shared_ptr<Route> r, 
 								PublicEditor& e, TimeAxisView& parent, Canvas& canvas, std::string n,
-								uint32_t prt, Redirect& rd, string state_name)
+								uint32_t prt, Insert& i, string state_name)
 
 	: AxisView (s),
-	  AutomationTimeAxisView (s, r, e, parent, canvas, n, state_name, rd.name()),
-	  redirect (rd),
+	  AutomationTimeAxisView (s, r, e, parent, canvas, n, state_name, i.name()),
+	  insert (i),
 	  port (prt)
 	
 {
@@ -91,9 +91,9 @@ RedirectAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, 
 	/* map to model space */
 
 	if (!lines.empty()) {
-		AutomationList& alist (redirect.automation_list(port));
+		AutomationList& alist (insert.automation_list(port));
 		string description = _("add automation event to ");
-		description += redirect.describe_parameter (port);
+		description += insert.describe_parameter (port);
 
 		lines.front()->view_to_model_y (y);
 		
@@ -111,9 +111,9 @@ void
 RedirectAutomationTimeAxisView::ensure_xml_node ()
 {
 	if (xml_node == 0) {
-		if ((xml_node = redirect.extra_xml ("GUI")) == 0) {
+		if ((xml_node = insert.extra_xml ("GUI")) == 0) {
 			xml_node = new XMLNode ("GUI");
-			redirect.add_extra_xml (*xml_node);
+			insert.add_extra_xml (*xml_node);
 		}
 	}
 }
@@ -168,6 +168,6 @@ void
 RedirectAutomationTimeAxisView::set_automation_state (AutoState state)
 {
 	if (!ignore_state_request) {
-		redirect.automation_list (port).set_automation_state (state);
+		insert.automation_list (port).set_automation_state (state);
 	}
 }

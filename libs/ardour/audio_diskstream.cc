@@ -2024,7 +2024,7 @@ AudioDiskstream::rename_write_sources ()
 
 	for (chan = c->begin(), n = 0; chan != c->end(); ++chan, ++n) {
 		if ((*chan)->write_source != 0) {
-			(*chan)->write_source->set_name (_name, destructive());
+			(*chan)->write_source->set_source_name (_name, destructive());
 			/* XXX what to do if one of them fails ? */
 		}
 	}

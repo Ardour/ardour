@@ -32,8 +32,8 @@ using namespace PBD;
 SendUI::SendUI (boost::shared_ptr<Send> s, Session& se)
 	: _send (s),
 	  _session (se),
-	  gpm (s, se),
-	  panners (s, se)
+	  gpm (s->io(), se),
+	  panners (s->io(), se)
 {
 	hbox.pack_start (gpm, true, true);
 	set_name ("SendUIFrame");
@@ -44,7 +44,7 @@ SendUI::SendUI (boost::shared_ptr<Send> s, Session& se)
 	vbox.pack_start (hbox, false, false, false);
 	vbox.pack_start (panners, false,false);
 
-	io = new IOSelector (se, s, false);
+	io = new IOSelector (se, s->io(), false);
 	
 	pack_start (vbox, false, false);
 
@@ -54,8 +54,8 @@ SendUI::SendUI (boost::shared_ptr<Send> s, Session& se)
 
 	_send->set_metering (true);
 
-	_send->output_changed.connect (mem_fun (*this, &SendUI::ins_changed));
-	_send->output_changed.connect (mem_fun (*this, &SendUI::outs_changed));
+	_send->io()->output_changed.connect (mem_fun (*this, &SendUI::ins_changed));
+	_send->io()->output_changed.connect (mem_fun (*this, &SendUI::outs_changed));
 	
 	panners.set_width (Wide);
 	panners.setup_pan ();

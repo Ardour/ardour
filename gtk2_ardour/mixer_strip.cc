@@ -303,7 +303,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 		get_diskstream()->SpeedChanged.connect (mem_fun(*this, &MixerStrip::speed_changed));
 	}
 
-	_route->name_changed.connect (mem_fun(*this, &RouteUI::name_changed));
+	_route->NameChanged.connect (mem_fun(*this, &RouteUI::name_changed));
 	_route->comment_changed.connect (mem_fun(*this, &MixerStrip::comment_changed));
 	_route->gui_changed.connect (mem_fun(*this, &MixerStrip::route_gui_changed));
 
@@ -336,7 +336,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	post_redirect_box.update();
 	mute_changed (0);
 	solo_changed (0);
-	name_changed (0);
+	name_changed ();
 	comment_changed (0);
 	mix_group_changed (0);
 
@@ -469,7 +469,7 @@ MixerStrip::set_width (Width w, void* owner)
 	update_input_display ();
 	update_output_display ();
 	mix_group_changed (0);
-	name_changed (0);
+	name_changed ();
 
 }
 
@@ -1078,11 +1078,11 @@ MixerStrip::set_selected (bool yn)
 }
 
 void
-MixerStrip::name_changed (void *src)
+MixerStrip::name_changed ()
 {
 	switch (_width) {
 	case Wide:
-		RouteUI::name_changed (src);
+		RouteUI::name_changed ();
 		break;
 	case Narrow:
 	        name_label.set_text (PBD::short_version (_route->name(), 5));
@@ -1149,13 +1149,13 @@ MixerStrip::map_frozen ()
 			break;
 		}
 	}
-	_route->foreach_redirect (this, &MixerStrip::hide_redirect_editor);
+	_route->foreach_insert (this, &MixerStrip::hide_insert_editor);
 }
 
 void
-MixerStrip::hide_redirect_editor (boost::shared_ptr<Redirect> redirect)
+MixerStrip::hide_insert_editor (boost::shared_ptr<Insert> insert)
 {
-	void* gui = redirect->get_gui ();
+	void* gui = insert->get_gui ();
 	
 	if (gui) {
 		static_cast<Gtk::Widget*>(gui)->hide ();

@@ -24,11 +24,16 @@
 #include <string>
 #include <exception>
 
+#include <pbd/statefuldestructible.h> 
+
 #include <sigc++/signal.h>
-#include <ardour/ardour.h>
-#include <ardour/redirect.h>
-#include <ardour/plugin_state.h>
+
 #include <ardour/types.h>
+#include <ardour/ardour.h>
+#include <ardour/plugin_state.h>
+#include <ardour/buffer_set.h>
+#include <ardour/automatable.h>
+
 
 class XMLNode;
 
@@ -36,26 +41,71 @@ namespace ARDOUR {
 
 class Session;
 
-class Insert : public Redirect
+/* A mixer strip element - plugin, send, meter, etc.
+ */
+class Insert : public Automatable
 {
   public:
-	Insert(Session& s, std::string name, Placement p);
-	Insert(Session& s, std::string name, Placement p, int imin, int imax, int omin, int omax);
+	static const string state_node_name;
+
+	Insert(Session&, const string& name, Placement p); // TODO: remove placement in favour of sort key
 	
 	virtual ~Insert() { }
+	
+	static boost::shared_ptr<Insert> clone (boost::shared_ptr<const Insert>);
+
+	uint32_t sort_key() const { return _sort_key; }
+	void set_sort_key (uint32_t key);
+
+	Placement placement() const { return _placement; }
+	void set_placement (Placement);
+	
+	bool active () const { return _active; }
+	void set_active (bool yn);
+	
+	bool get_next_ab_is_active () const { return _next_ab_is_active; }
+	void set_next_ab_is_active (bool yn) { _next_ab_is_active = yn; }
+	
+	virtual nframes_t latency() { return 0; }
+	
+	virtual void transport_stopped (nframes_t frame) {}
+	
+	virtual void set_block_size (nframes_t nframes) {}
 
 	virtual void run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset) = 0;
+	virtual void silence (nframes_t nframes, nframes_t offset) {}
 	
-	virtual void activate () {}
-	virtual void deactivate () {}
+	virtual void activate () { _active = true; ActiveChanged.emit(); }
+	virtual void deactivate () { _active = false; ActiveChanged.emit(); }
+	
+	virtual bool configure_io (ChanCount in, ChanCount out) { _configured_input = in; return (_configured = true); }
 
-	virtual bool      can_support_input_configuration (ChanCount in) const = 0;
-	virtual ChanCount output_for_input_configuration (ChanCount in) const = 0;
-	virtual bool      configure_io (ChanCount in, ChanCount out) = 0;
+	/* Act as a pass through, if not overridden */
+	virtual bool      can_support_input_configuration (ChanCount in) const { return true; }
+	virtual ChanCount output_for_input_configuration (ChanCount in) const { return in; }
+	virtual ChanCount output_streams() const { return _configured_input; }
+	virtual ChanCount input_streams () const { return _configured_input; }
+
+	virtual XMLNode& state (bool full);
+	virtual XMLNode& get_state (void);
+	virtual int set_state (const XMLNode&);
+	
+	void *get_gui () const { return _gui; }
+	void  set_gui (void *p) { _gui = p; }
+
+	static sigc::signal<void,Insert*> InsertCreated;
+
+	sigc::signal<void> ActiveChanged;
+	sigc::signal<void> PlacementChanged;
 
 protected:
+	bool      _active;
+	bool      _next_ab_is_active;
 	bool      _configured;
 	ChanCount _configured_input;
+	Placement _placement;
+	uint32_t  _sort_key;
+	void*     _gui;  /* generic, we don't know or care what this is */
 };
 
 } // namespace ARDOUR

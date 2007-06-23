@@ -40,7 +40,7 @@ using namespace PBD;
 
 Track::Track (Session& sess, string name, Route::Flag flag, TrackMode mode, DataType default_type)
 	: Route (sess, name, 1, -1, -1, -1, flag, default_type)
-	,  _rec_enable_control (*this)
+	, _rec_enable_control (*this)
 {
 	_declickable = true;
 	_freeze_record.state = NoFreeze;
@@ -49,8 +49,8 @@ Track::Track (Session& sess, string name, Route::Flag flag, TrackMode mode, Data
 }
 
 Track::Track (Session& sess, const XMLNode& node, DataType default_type)
-	: Route (sess, node),
-	  _rec_enable_control (*this)
+	: Route (sess, node)
+	, _rec_enable_control (*this)
 {
 	_freeze_record.state = NoFreeze;
 	_declickable = true;
@@ -92,7 +92,7 @@ Track::update_total_latency ()
 {
 	_own_latency = 0;
 
-	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
+	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
 		if ((*i)->active ()) {
 			_own_latency += (*i)->latency ();
 		}
@@ -182,25 +182,27 @@ Track::set_record_enable (bool yn, void *src)
 	_rec_enable_control.Changed ();
 }
 
-int
-Track::set_name (string str, void *src)
+
+bool
+Track::set_name (const string& str)
 {
-	int ret;
+	bool ret;
 
 	if (record_enabled() && _session.actively_recording()) {
 		/* this messes things up if done while recording */
-		return -1;
+		return false;
 	}
 
 	if (_diskstream->set_name (str)) {
-		return -1;
+		return false;
 	}
 
 	/* save state so that the statefile fully reflects any filename changes */
 
-	if ((ret = IO::set_name (str, src)) == 0) {
+	if ((ret = IO::set_name (str)) == 0) {
 		_session.save_state ("");
 	}
+
 	return ret;
 }
 

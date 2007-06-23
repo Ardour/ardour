@@ -95,7 +95,7 @@ class MackieControlProtocol
 	/// Signal handler for Route::gain_changed ( from IO )
 	void notify_gain_changed( Mackie::RouteSignal * );
 	/// Signal handler for Route::name_change
-	void notify_name_changed( void *, Mackie::RouteSignal * );
+	void notify_name_changed( Mackie::RouteSignal * );
 	/// Signal handler from Panner::Change
 	void notify_panner_changed( Mackie::RouteSignal * );
 	/// Signal handler for new routes added

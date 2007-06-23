@@ -179,8 +179,8 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	_route->mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed));
 	_route->solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
-	_route->redirects_changed.connect (mem_fun(*this, &RouteTimeAxisView::redirects_changed));
-	_route->name_changed.connect (mem_fun(*this, &RouteTimeAxisView::route_name_changed));
+	_route->inserts_changed.connect (mem_fun(*this, &RouteTimeAxisView::inserts_changed));
+	_route->NameChanged.connect (mem_fun(*this, &RouteTimeAxisView::route_name_changed));
 	_route->solo_safe_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
 
 
@@ -204,9 +204,9 @@ RouteTimeAxisView::~RouteTimeAxisView ()
 {
 	GoingAway (); /* EMIT_SIGNAL */
 
-	vector_delete (&redirect_automation_curves);
+	vector_delete (&insert_automation_curves);
 
-	for (list<RedirectAutomationInfo*>::iterator i = redirect_automation.begin(); i != redirect_automation.end(); ++i) {
+	for (list<InsertAutomationInfo*>::iterator i = insert_automation.begin(); i != insert_automation.end(); ++i) {
 		delete *i;
 	}
 
@@ -232,9 +232,9 @@ RouteTimeAxisView::post_construct ()
 	/* map current state of the route */
 
 	update_diskstream_display ();
-	_route->foreach_redirect (this, &RouteTimeAxisView::add_redirect_to_subplugin_menu);
-	_route->foreach_redirect (this, &RouteTimeAxisView::add_existing_redirect_automation_curves);
-	reset_redirect_automation_curves ();
+	_route->foreach_insert (this, &RouteTimeAxisView::add_insert_to_subplugin_menu);
+	_route->foreach_insert (this, &RouteTimeAxisView::add_existing_insert_automation_curves);
+	reset_insert_automation_curves ();
 }
 
 void
@@ -322,7 +322,7 @@ RouteTimeAxisView::label_view ()
 }
 
 void
-RouteTimeAxisView::route_name_changed (void *src)
+RouteTimeAxisView::route_name_changed ()
 {
 	editor.route_name_changed (this);
 	label_view ();
@@ -1135,7 +1135,7 @@ RouteTimeAxisView::name_entry_changed ()
 	}
 
 	if (_session.route_name_unique (x)) {
-		_route->set_name (x, this);
+		_route->set_name (x);
 	} else {
 		ARDOUR_UI::instance()->popup_error (_("A track already exists with that name"));
 		name_entry.set_text (_route->name());
@@ -1253,8 +1253,7 @@ RouteTimeAxisView::paste (nframes_t pos, float times, Selection& selection, size
 list<TimeAxisView*>
 RouteTimeAxisView::get_child_list()
 {
-  
-	list<TimeAxisView*>redirect_children;
+	list<TimeAxisView*> redirect_children;
 	
 	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
 		if (!(*i)->hidden()) {
@@ -1385,10 +1384,10 @@ RouteTimeAxisView::show_all_automation ()
 {
 	no_redraw = true;
 
-	for (list<RedirectAutomationInfo*>::iterator i = redirect_automation.begin(); i != redirect_automation.end(); ++i) {
-		for (vector<RedirectAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
+	for (list<InsertAutomationInfo*>::iterator i = insert_automation.begin(); i != insert_automation.end(); ++i) {
+		for (vector<InsertAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
 			if ((*ii)->view == 0) {
-				add_redirect_automation_curve ((*i)->redirect, (*ii)->what);
+				add_insert_automation_curve ((*i)->insert, (*ii)->what);
 			} 
 
 			(*ii)->menu_item->set_active (true);
@@ -1405,8 +1404,8 @@ RouteTimeAxisView::show_existing_automation ()
 {
 	no_redraw = true;
 
-	for (list<RedirectAutomationInfo*>::iterator i = redirect_automation.begin(); i != redirect_automation.end(); ++i) {
-		for (vector<RedirectAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
+	for (list<InsertAutomationInfo*>::iterator i = insert_automation.begin(); i != insert_automation.end(); ++i) {
+		for (vector<InsertAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
 			if ((*ii)->view != 0) {
 				(*ii)->menu_item->set_active (true);
 			}
@@ -1423,8 +1422,8 @@ RouteTimeAxisView::hide_all_automation ()
 {
 	no_redraw = true;
 
-	for (list<RedirectAutomationInfo*>::iterator i = redirect_automation.begin(); i != redirect_automation.end(); ++i) {
-		for (vector<RedirectAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
+	for (list<InsertAutomationInfo*>::iterator i = insert_automation.begin(); i != insert_automation.end(); ++i) {
+		for (vector<InsertAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
 			(*ii)->menu_item->set_active (false);
 		}
 	}
@@ -1447,20 +1446,20 @@ RouteTimeAxisView::region_view_added (RegionView* rv)
 }
 
 void
-RouteTimeAxisView::add_ghost_to_redirect (RegionView* rv, AutomationTimeAxisView* atv)
+RouteTimeAxisView::add_ghost_to_insert (RegionView* rv, AutomationTimeAxisView* atv)
 {
 	rv->add_ghost (*atv);
 }
 
-RouteTimeAxisView::RedirectAutomationInfo::~RedirectAutomationInfo ()
+RouteTimeAxisView::InsertAutomationInfo::~InsertAutomationInfo ()
 {
-	for (vector<RedirectAutomationNode*>::iterator i = lines.begin(); i != lines.end(); ++i) {
+	for (vector<InsertAutomationNode*>::iterator i = lines.begin(); i != lines.end(); ++i) {
 		delete *i;
 	}
 }
 
 
-RouteTimeAxisView::RedirectAutomationNode::~RedirectAutomationNode ()
+RouteTimeAxisView::InsertAutomationNode::~InsertAutomationNode ()
 {
 	parent.remove_ran (this);
 
@@ -1470,21 +1469,21 @@ RouteTimeAxisView::RedirectAutomationNode::~RedirectAutomationNode ()
 }
 
 void
-RouteTimeAxisView::remove_ran (RedirectAutomationNode* ran)
+RouteTimeAxisView::remove_ran (InsertAutomationNode* ran)
 {
 	if (ran->view) {
 		remove_child (ran->view);
 	}
 }
 
-RouteTimeAxisView::RedirectAutomationNode*
-RouteTimeAxisView::find_redirect_automation_node (boost::shared_ptr<Redirect> redirect, uint32_t what)
+RouteTimeAxisView::InsertAutomationNode*
+RouteTimeAxisView::find_insert_automation_node (boost::shared_ptr<Insert> insert, uint32_t what)
 {
-	for (list<RedirectAutomationInfo*>::iterator i = redirect_automation.begin(); i != redirect_automation.end(); ++i) {
+	for (list<InsertAutomationInfo*>::iterator i = insert_automation.begin(); i != insert_automation.end(); ++i) {
 
-		if ((*i)->redirect == redirect) {
+		if ((*i)->insert == insert) {
 
-			for (vector<RedirectAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
+			for (vector<InsertAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
 				if ((*ii)->what == what) {
 					return *ii;
 				}
@@ -1495,7 +1494,6 @@ RouteTimeAxisView::find_redirect_automation_node (boost::shared_ptr<Redirect> re
 	return 0;
 }
 
-// FIXME: duplicated in midi_time_axis.cc
 static string 
 legalize_for_xml_node (string str)
 {
@@ -1516,16 +1514,16 @@ legalize_for_xml_node (string str)
 
 
 void
-RouteTimeAxisView::add_redirect_automation_curve (boost::shared_ptr<Redirect> redirect, uint32_t what)
+RouteTimeAxisView::add_insert_automation_curve (boost::shared_ptr<Insert> insert, uint32_t what)
 {
 	RedirectAutomationLine* ral;
 	string name;
-	RedirectAutomationNode* ran;
+	InsertAutomationNode* ran;
 
-	if ((ran = find_redirect_automation_node (redirect, what)) == 0) {
+	if ((ran = find_insert_automation_node (insert, what)) == 0) {
 		fatal << _("programming error: ")
-		      << string_compose (X_("redirect automation curve for %1:%2 not registered with audio track!"),
-				  redirect->name(), what)
+		      << string_compose (X_("insert automation curve for %1:%2 not registered with audio track!"),
+				  insert->name(), what)
 		      << endmsg;
 		/*NOTREACHED*/
 		return;
@@ -1535,25 +1533,25 @@ RouteTimeAxisView::add_redirect_automation_curve (boost::shared_ptr<Redirect> re
 		return;
 	}
 
-	name = redirect->describe_parameter (what);
+	name = insert->describe_parameter (what);
 
 	/* create a string that is a legal XML node name that can be used to refer to this redirect+port combination */
 
 	char state_name[256];
-	snprintf (state_name, sizeof (state_name), "Redirect-%s-%" PRIu32, legalize_for_xml_node (redirect->name()).c_str(), what);
+	snprintf (state_name, sizeof (state_name), "Redirect-%s-%" PRIu32, legalize_for_xml_node (insert->name()).c_str(), what);
 
-	ran->view = new RedirectAutomationTimeAxisView (_session, _route, editor, *this, parent_canvas, name, what, *redirect, state_name);
+	ran->view = new RedirectAutomationTimeAxisView (_session, _route, editor, *this, parent_canvas, name, what, *insert, state_name);
 
 	ral = new RedirectAutomationLine (name, 
-					  *redirect, what, _session, *ran->view,
-					  *ran->view->canvas_display, redirect->automation_list (what));
+					  *insert, what, _session, *ran->view,
+					  *ran->view->canvas_display, insert->automation_list (what));
 	
 	ral->set_line_color (Config->canvasvar_RedirectAutomationLine.get());
 	ral->queue_reset ();
 
 	ran->view->add_line (*ral);
 
-	ran->view->Hiding.connect (bind (mem_fun(*this, &RouteTimeAxisView::redirect_automation_track_hidden), ran, redirect));
+	ran->view->Hiding.connect (bind (mem_fun(*this, &RouteTimeAxisView::insert_automation_track_hidden), ran, insert));
 
 	if (!ran->view->marked_for_display()) {
 		ran->view->hide ();
@@ -1564,68 +1562,68 @@ RouteTimeAxisView::add_redirect_automation_curve (boost::shared_ptr<Redirect> re
 	add_child (ran->view);
 
 	if (_view) {
-		_view->foreach_regionview (bind (mem_fun(*this, &RouteTimeAxisView::add_ghost_to_redirect), ran->view));
+		_view->foreach_regionview (bind (mem_fun(*this, &RouteTimeAxisView::add_ghost_to_insert), ran->view));
 	}
 
-	redirect->mark_automation_visible (what, true);
+	insert->mark_automation_visible (what, true);
 }
 
 void
-RouteTimeAxisView::redirect_automation_track_hidden (RouteTimeAxisView::RedirectAutomationNode* ran, boost::shared_ptr<Redirect> r)
+RouteTimeAxisView::insert_automation_track_hidden (RouteTimeAxisView::InsertAutomationNode* ran, boost::shared_ptr<Insert> i)
 {
 	if (!_hidden) {
 		ran->menu_item->set_active (false);
 	}
 
-	r->mark_automation_visible (ran->what, false);
+	i->mark_automation_visible (ran->what, false);
 
 	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 }
 
 void
-RouteTimeAxisView::add_existing_redirect_automation_curves (boost::shared_ptr<Redirect> redirect)
+RouteTimeAxisView::add_existing_insert_automation_curves (boost::shared_ptr<Insert> insert)
 {
 	set<uint32_t> s;
 	RedirectAutomationLine *ral;
 
-	redirect->what_has_visible_automation (s);
+	insert->what_has_visible_automation (s);
 
 	for (set<uint32_t>::iterator i = s.begin(); i != s.end(); ++i) {
 		
-		if ((ral = find_redirect_automation_curve (redirect, *i)) != 0) {
+		if ((ral = find_insert_automation_curve (insert, *i)) != 0) {
 			ral->queue_reset ();
 		} else {
-			add_redirect_automation_curve (redirect, (*i));
+			add_insert_automation_curve (insert, (*i));
 		}
 	}
 }
 
 void
-RouteTimeAxisView::add_redirect_to_subplugin_menu (boost::shared_ptr<Redirect> r)
+RouteTimeAxisView::add_insert_to_subplugin_menu (boost::shared_ptr<Insert> insert)
 {
 	using namespace Menu_Helpers;
-	RedirectAutomationInfo *rai;
-	list<RedirectAutomationInfo*>::iterator x;
+	InsertAutomationInfo *rai;
+	list<InsertAutomationInfo*>::iterator x;
 	
-	const std::set<uint32_t>& automatable = r->what_can_be_automated ();
+	const std::set<uint32_t>& automatable = insert->what_can_be_automated ();
 	std::set<uint32_t> has_visible_automation;
 
-	r->what_has_visible_automation(has_visible_automation);
+	insert->what_has_visible_automation(has_visible_automation);
 
 	if (automatable.empty()) {
 		return;
 	}
 
-	for (x = redirect_automation.begin(); x != redirect_automation.end(); ++x) {
-		if ((*x)->redirect == r) {
+	for (x = insert_automation.begin(); x != insert_automation.end(); ++x) {
+		if ((*x)->insert == insert) {
 			break;
 		}
 	}
 
-	if (x == redirect_automation.end()) {
+	if (x == insert_automation.end()) {
 
-		rai = new RedirectAutomationInfo (r);
-		redirect_automation.push_back (rai);
+		rai = new InsertAutomationInfo (insert);
+		insert_automation.push_back (rai);
 
 	} else {
 
@@ -1633,7 +1631,7 @@ RouteTimeAxisView::add_redirect_to_subplugin_menu (boost::shared_ptr<Redirect> r
 
 	}
 
-	/* any older menu was deleted at the top of redirects_changed()
+	/* any older menu was deleted at the top of inserts_changed()
 	   when we cleared the subplugin menu.
 	*/
 
@@ -1645,10 +1643,10 @@ RouteTimeAxisView::add_redirect_to_subplugin_menu (boost::shared_ptr<Redirect> r
 
 	for (std::set<uint32_t>::const_iterator i = automatable.begin(); i != automatable.end(); ++i) {
 
-		RedirectAutomationNode* ran;
+		InsertAutomationNode* ran;
 		CheckMenuItem* mitem;
 		
-		string name = r->describe_parameter (*i);
+		string name = insert->describe_parameter (*i);
 		
 		items.push_back (CheckMenuElem (name));
 		mitem = dynamic_cast<CheckMenuItem*> (&items.back());
@@ -1657,11 +1655,11 @@ RouteTimeAxisView::add_redirect_to_subplugin_menu (boost::shared_ptr<Redirect> r
 			mitem->set_active(true);
 		}
 
-		if ((ran = find_redirect_automation_node (r, *i)) == 0) {
+		if ((ran = find_insert_automation_node (insert, *i)) == 0) {
 
 			/* new item */
 			
-			ran = new RedirectAutomationNode (*i, mitem, *this);
+			ran = new InsertAutomationNode (*i, mitem, *this);
 			
 			rai->lines.push_back (ran);
 
@@ -1671,28 +1669,28 @@ RouteTimeAxisView::add_redirect_to_subplugin_menu (boost::shared_ptr<Redirect> r
 
 		}
 
-		mitem->signal_toggled().connect (bind (mem_fun(*this, &RouteTimeAxisView::redirect_menu_item_toggled), rai, ran));
+		mitem->signal_toggled().connect (bind (mem_fun(*this, &RouteTimeAxisView::insert_menu_item_toggled), rai, ran));
 	}
 
-	/* add the menu for this redirect, because the subplugin
-	   menu is always cleared at the top of redirects_changed().
+	/* add the menu for this insert, because the subplugin
+	   menu is always cleared at the top of inserts_changed().
 	   this is the result of some poor design in gtkmm and/or
 	   GTK+.
 	*/
 
-	subplugin_menu.items().push_back (MenuElem (r->name(), *rai->menu));
+	subplugin_menu.items().push_back (MenuElem (insert->name(), *rai->menu));
 	rai->valid = true;
 }
 
 void
-RouteTimeAxisView::redirect_menu_item_toggled (RouteTimeAxisView::RedirectAutomationInfo* rai,
-					       RouteTimeAxisView::RedirectAutomationNode* ran)
+RouteTimeAxisView::insert_menu_item_toggled (RouteTimeAxisView::InsertAutomationInfo* rai,
+					       RouteTimeAxisView::InsertAutomationNode* ran)
 {
 	bool showit = ran->menu_item->get_active();
 	bool redraw = false;
 
 	if (ran->view == 0 && showit) {
-		add_redirect_automation_curve (rai->redirect, ran->what);
+		add_insert_automation_curve (rai->insert, ran->what);
 		redraw = true;
 	}
 
@@ -1702,7 +1700,7 @@ RouteTimeAxisView::redirect_menu_item_toggled (RouteTimeAxisView::RedirectAutoma
 			ran->view->set_marked_for_display (true);
 			ran->view->canvas_display->show();
 		} else {
-			rai->redirect->mark_automation_visible (ran->what, true);
+			rai->insert->mark_automation_visible (ran->what, true);
 			ran->view->set_marked_for_display (false);
 			ran->view->hide ();
 		}
@@ -1721,22 +1719,22 @@ RouteTimeAxisView::redirect_menu_item_toggled (RouteTimeAxisView::RedirectAutoma
 }
 
 void
-RouteTimeAxisView::redirects_changed (void *src)
+RouteTimeAxisView::inserts_changed ()
 {
 	using namespace Menu_Helpers;
 
-	for (list<RedirectAutomationInfo*>::iterator i = redirect_automation.begin(); i != redirect_automation.end(); ++i) {
+	for (list<InsertAutomationInfo*>::iterator i = insert_automation.begin(); i != insert_automation.end(); ++i) {
 		(*i)->valid = false;
 	}
 
 	subplugin_menu.items().clear ();
 
-	_route->foreach_redirect (this, &RouteTimeAxisView::add_redirect_to_subplugin_menu);
-	_route->foreach_redirect (this, &RouteTimeAxisView::add_existing_redirect_automation_curves);
+	_route->foreach_insert (this, &RouteTimeAxisView::add_insert_to_subplugin_menu);
+	_route->foreach_insert (this, &RouteTimeAxisView::add_existing_insert_automation_curves);
 
-	for (list<RedirectAutomationInfo*>::iterator i = redirect_automation.begin(); i != redirect_automation.end(); ) {
+	for (list<InsertAutomationInfo*>::iterator i = insert_automation.begin(); i != insert_automation.end(); ) {
 
-		list<RedirectAutomationInfo*>::iterator tmp;
+		list<InsertAutomationInfo*>::iterator tmp;
 
 		tmp = i;
 		++tmp;
@@ -1744,7 +1742,7 @@ RouteTimeAxisView::redirects_changed (void *src)
 		if (!(*i)->valid) {
 
 			delete *i;
-			redirect_automation.erase (i);
+			insert_automation.erase (i);
 
 		} 
 
@@ -1757,11 +1755,11 @@ RouteTimeAxisView::redirects_changed (void *src)
 }
 
 RedirectAutomationLine *
-RouteTimeAxisView::find_redirect_automation_curve (boost::shared_ptr<Redirect> redirect, uint32_t what)
+RouteTimeAxisView::find_insert_automation_curve (boost::shared_ptr<Insert> insert, uint32_t what)
 {
-	RedirectAutomationNode* ran;
+	InsertAutomationNode* ran;
 
-	if ((ran = find_redirect_automation_node (redirect, what)) != 0) {
+	if ((ran = find_insert_automation_node (insert, what)) != 0) {
 		if (ran->view) {
 			return dynamic_cast<RedirectAutomationLine*> (ran->view->lines.front());
 		} 
@@ -1771,9 +1769,9 @@ RouteTimeAxisView::find_redirect_automation_curve (boost::shared_ptr<Redirect> r
 }
 
 void
-RouteTimeAxisView::reset_redirect_automation_curves ()
+RouteTimeAxisView::reset_insert_automation_curves ()
 {
-	for (vector<RedirectAutomationLine*>::iterator i = redirect_automation_curves.begin(); i != redirect_automation_curves.end(); ++i) {
+	for (vector<RedirectAutomationLine*>::iterator i = insert_automation_curves.begin(); i != insert_automation_curves.end(); ++i) {
 		(*i)->reset();
 	}
 }

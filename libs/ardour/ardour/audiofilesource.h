@@ -56,7 +56,8 @@ class AudioFileSource : public AudioSource {
 
 	virtual ~AudioFileSource ();
 
-	int set_name (Glib::ustring newname, bool destructive);
+	bool set_name (const std::string& newname) { return (set_source_name(newname, destructive()) == 0); }
+	int set_source_name (Glib::ustring newname, bool destructive);
 	
 	Glib::ustring path() const { return _path; }
 	Glib::ustring peak_path (Glib::ustring audio_path);

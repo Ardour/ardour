@@ -1887,7 +1887,7 @@ Session::add_routes (RouteList& new_routes, bool save)
 		(*x)->solo_changed.connect (sigc::bind (mem_fun (*this, &Session::route_solo_changed), wpr));
 		(*x)->mute_changed.connect (mem_fun (*this, &Session::route_mute_changed));
 		(*x)->output_changed.connect (mem_fun (*this, &Session::set_worst_io_latencies_x));
-		(*x)->redirects_changed.connect (mem_fun (*this, &Session::update_latency_compensation_proxy));
+		(*x)->inserts_changed.connect (bind (mem_fun (*this, &Session::update_latency_compensation), false, false));
 		
 		if ((*x)->master()) {
 			_master_out = (*x);
@@ -3529,65 +3529,51 @@ Session::record_enable_change_all (bool yn)
 }
 
 void
-Session::add_redirect (Redirect* redirect)
+Session::add_insert (Insert* insert)
 {
 	Send* send;
-	Insert* insert;
 	PortInsert* port_insert;
 	PluginInsert* plugin_insert;
 
-	if ((insert = dynamic_cast<Insert *> (redirect)) != 0) {
-		if ((port_insert = dynamic_cast<PortInsert *> (insert)) != 0) {
-			_port_inserts.insert (_port_inserts.begin(), port_insert);
-		} else if ((plugin_insert = dynamic_cast<PluginInsert *> (insert)) != 0) {
-			_plugin_inserts.insert (_plugin_inserts.begin(), plugin_insert);
-		} else {
-			fatal << _("programming error: unknown type of Insert created!") << endmsg;
-			/*NOTREACHED*/
-		}
-	} else if ((send = dynamic_cast<Send *> (redirect)) != 0) {
+	if ((port_insert = dynamic_cast<PortInsert *> (insert)) != 0) {
+		_port_inserts.insert (_port_inserts.begin(), port_insert);
+	} else if ((plugin_insert = dynamic_cast<PluginInsert *> (insert)) != 0) {
+		_plugin_inserts.insert (_plugin_inserts.begin(), plugin_insert);
+	} else if ((send = dynamic_cast<Send *> (insert)) != 0) {
 		_sends.insert (_sends.begin(), send);
 	} else {
-		fatal << _("programming error: unknown type of Redirect created!") << endmsg;
+		fatal << _("programming error: unknown type of Insert created!") << endmsg;
 		/*NOTREACHED*/
 	}
 
-	redirect->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_redirect), redirect));
+	insert->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_insert), insert));
 
 	set_dirty();
 }
 
 void
-Session::remove_redirect (Redirect* redirect)
+Session::remove_insert (Insert* insert)
 {
 	Send* send;
-	Insert* insert;
 	PortInsert* port_insert;
 	PluginInsert* plugin_insert;
 	
-	if ((insert = dynamic_cast<Insert *> (redirect)) != 0) {
-		if ((port_insert = dynamic_cast<PortInsert *> (insert)) != 0) {
-			list<PortInsert*>::iterator x = find (_port_inserts.begin(), _port_inserts.end(), port_insert);
-			if (x != _port_inserts.end()) {
-				insert_bitset[port_insert->bit_slot()] = false;
-				_port_inserts.erase (x);
-			}
-		} else if ((plugin_insert = dynamic_cast<PluginInsert *> (insert)) != 0) {
-			_plugin_inserts.remove (plugin_insert);
-		} else {
-			fatal << string_compose (_("programming error: %1"),
-						 X_("unknown type of Insert deleted!")) 
-			      << endmsg;
-			/*NOTREACHED*/
+	if ((port_insert = dynamic_cast<PortInsert *> (insert)) != 0) {
+		list<PortInsert*>::iterator x = find (_port_inserts.begin(), _port_inserts.end(), port_insert);
+		if (x != _port_inserts.end()) {
+			insert_bitset[port_insert->bit_slot()] = false;
+			_port_inserts.erase (x);
 		}
-	} else if ((send = dynamic_cast<Send *> (redirect)) != 0) {
+	} else if ((plugin_insert = dynamic_cast<PluginInsert *> (insert)) != 0) {
+		_plugin_inserts.remove (plugin_insert);
+	} else if ((send = dynamic_cast<Send *> (insert)) != 0) {
 		list<Send*>::iterator x = find (_sends.begin(), _sends.end(), send);
 		if (x != _sends.end()) {
 			send_bitset[send->bit_slot()] = false;
 			_sends.erase (x);
 		}
 	} else {
-		fatal << _("programming error: unknown type of Redirect deleted!") << endmsg;
+		fatal << _("programming error: unknown type of Insert deleted!") << endmsg;
 		/*NOTREACHED*/
 	}
 

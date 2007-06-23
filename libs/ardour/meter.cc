@@ -34,7 +34,7 @@ namespace ARDOUR {
  * be set to 0.
  */
 void
-PeakMeter::run (BufferSet& bufs, nframes_t nframes, nframes_t offset)
+PeakMeter::run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset)
 {
 	size_t meterable = std::min(bufs.count().n_total(), _peak_power.size());
 
@@ -93,9 +93,13 @@ PeakMeter::reset_max ()
 	}
 }
 
-void
-PeakMeter::setup (const ChanCount& in)
+bool
+PeakMeter::configure_io (ChanCount in, ChanCount out)
 {
+	/* we're transparent no matter what.  fight the power. */
+	if (out != in)
+		return false;
+
 	uint32_t limit = in.n_total();
 
 	while (_peak_power.size() > limit) {
@@ -113,6 +117,10 @@ PeakMeter::setup (const ChanCount& in)
 	assert(_peak_power.size() == limit);
 	assert(_visible_peak_power.size() == limit);
 	assert(_max_peak_power.size() == limit);
+
+	Insert::configure_io(in, out);
+
+	return true;
 }
 
 /** To be driven by the Meter signal from IO.

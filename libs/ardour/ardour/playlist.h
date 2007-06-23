@@ -38,6 +38,7 @@
 #include <pbd/statefuldestructible.h> 
 
 #include <ardour/ardour.h>
+#include <ardour/session_object.h>
 #include <ardour/crossfade_compare.h>
 #include <ardour/location.h>
 #include <ardour/data_type.h>
@@ -47,7 +48,7 @@ namespace ARDOUR  {
 class Session;
 class Region;
 
-class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_from_this<Playlist> {
+class Playlist : public SessionObject, public boost::enable_shared_from_this<Playlist> {
   public:
 	typedef list<boost::shared_ptr<Region> >    RegionList;
 
@@ -67,8 +68,7 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
 	void release();
 	bool used () const { return _refcnt != 0; }
 
-	std::string name() const { return _name; }
-	void set_name (std::string str);
+	bool set_name (const string& str);
 
 	const DataType& data_type() const { return _type; }
 
@@ -130,8 +130,6 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
 
 	uint32_t read_data_count() const { return _read_data_count; }
 
-	Session& session() { return _session; }
-
 	const PBD::ID& get_orig_diskstream_id () const { return _orig_diskstream_id; }
 	void set_orig_diskstream_id (const PBD::ID& did) { _orig_diskstream_id = did; }  
 
@@ -170,8 +168,6 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
 
 	RegionList       regions;  /* the current list of regions in the playlist */
 	std::set<boost::shared_ptr<Region> > all_regions; /* all regions ever added to this playlist */
-	string          _name;
-	Session&        _session;
 	DataType        _type;
 	mutable gint    block_notifications;
 	mutable gint    ignore_state_changes;

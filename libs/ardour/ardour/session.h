@@ -1374,7 +1374,7 @@ class Session : public PBD::StatefulDestructible
 
 	void set_play_loop (bool yn);
 	void overwrite_some_buffers (Diskstream*);
-	void flush_all_redirects ();
+	void flush_all_inserts ();
 	void locate (nframes_t, bool with_roll, bool with_flush, bool with_loop=false);
 	void start_locate (nframes_t, bool with_roll, bool with_flush, bool with_loop=false);
 	void force_locate (nframes_t frame, bool with_roll = false);
@@ -1521,8 +1521,8 @@ class Session : public PBD::StatefulDestructible
 	uint32_t          insert_cnt;
 
 
-	void add_redirect (Redirect *);
-	void remove_redirect (Redirect *);
+	void add_insert (Insert *);
+	void remove_insert (Insert *);
 
 	/* S/W RAID */
 

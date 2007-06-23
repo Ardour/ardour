@@ -67,14 +67,13 @@ sigc::signal<void>                Diskstream::DiskOverrun;
 sigc::signal<void>                Diskstream::DiskUnderrun;
 
 Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
-	: _name (name)
-	, _session (sess)
+	: SessionObject(sess, name)
 {
 	init (flag);
 }
 	
 Diskstream::Diskstream (Session& sess, const XMLNode& node)
-	: _session (sess)
+	: SessionObject(sess, "unnamed diskstream")
 {
 	init (Recordable);
 }
@@ -377,23 +376,24 @@ Diskstream::playlist_deleted (boost::weak_ptr<Playlist> wpl)
 	}
 }
 
-int
-Diskstream::set_name (string str)
+bool
+Diskstream::set_name (const string& str)
 {
 	if (str != _name) {
 		assert(playlist());
 		playlist()->set_name (str);
-		_name = str;
+		
+		SessionObject::set_name(str);
 		
 		if (!in_set_state && recordable()) {
 			/* rename existing capture files so that they have the correct name */
 			return rename_write_sources ();
 		} else {
-			return -1;
+			return false;
 		}
 	}
 
-	return 0;
+	return true;
 }
 
 void
