@@ -144,7 +144,7 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 				b = (int) floor (color.get_blue_p() * 255.0);
 
 				rgba = RGBA_TO_UINT(r,g,b,a);
-				cerr << (*iter)[columns.name] << " == " << hex << rgba << endl;
+				//cerr << (*iter)[columns.name] << " == " << hex << rgba << endl;
 				(*iter)[columns.rgba] = rgba;
 				(*iter)[columns.gdkcolor] = color;
 
@@ -202,7 +202,7 @@ ThemeManager::setup_theme ()
 		Gdk::Color col;
 		uint32_t rgba = (*i)->get();
 		UINT_TO_RGBA (rgba, &r, &g, &b, &a);
-		cerr << (*i)->name() << " == " << hex << rgba << ": " << hex << r << " " << hex << g << " " << hex << b << endl;
+		//cerr << (*i)->name() << " == " << hex << rgba << ": " << hex << r << " " << hex << g << " " << hex << b << endl;
 		col.set_rgb_p (r / 255.0, g / 255.0, b / 255.0);
 
 		row[columns.name] = (*i)->name();
