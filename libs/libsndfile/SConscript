@@ -29,7 +29,10 @@ sndfile = conf.Finish()
 
 libsndfile = sndfile.SharedLibrary('sndfile-ardour', sndfile_files)
 
-sndfile_h = sndfile.Command('src/sndfile.h', ['src/sndfile.h.in'], 'cd libs/libsndfile && ./configure && cd -', ENV=os.environ)
+if use_flac:
+	sndfile_h = sndfile.Command('src/sndfile.h', ['src/sndfile.h.in'], 'cd libs/libsndfile && ./configure && cd -', ENV=os.environ)
+else:
+	sndfile_h = sndfile.Command('src/sndfile.h', ['src/sndfile.h.in'], 'cd libs/libsndfile && ./configure --disable-flac && cd -', ENV=os.environ)
 
 Default([sndfile_h,libsndfile])
 
