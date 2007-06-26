@@ -1107,6 +1107,35 @@ MidiDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_cap
 }
 
 void
+MidiDiskstream::transport_looped (nframes_t transport_frame)
+{
+	if (was_recording) {
+
+		// adjust the capture length knowing that the data will be recorded to disk
+		// only necessary after the first loop where we're recording
+		if (capture_info.size() == 0) {
+			capture_captured += _capture_offset;
+
+			if (_alignment_style == ExistingMaterial) {
+				capture_captured += _session.worst_output_latency();
+			} else {
+				capture_captured += _roll_delay;
+			}
+		}
+
+		finish_capture (true);
+
+		// the next region will start recording via the normal mechanism
+		// we'll set the start position to the current transport pos
+		// no latency adjustment or capture offset needs to be made, as that already happened the first time
+		capture_start_frame = transport_frame;
+		first_recordable_frame = transport_frame; // mild lie
+		last_recordable_frame = max_frames;
+		was_recording = true;
+	}
+}
+
+void
 MidiDiskstream::finish_capture (bool rec_monitors_input)
 {
 	was_recording = false;

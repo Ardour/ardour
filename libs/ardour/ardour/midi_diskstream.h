@@ -127,6 +127,7 @@ class MidiDiskstream : public Diskstream
 
 	void finish_capture (bool rec_monitors_input);
 	void transport_stopped (struct tm&, time_t, bool abort);
+	void transport_looped (nframes_t transport_frame);
 
 	void init (Diskstream::Flag);
 
@@ -145,6 +146,8 @@ class MidiDiskstream : public Diskstream
 	void engage_record_enable ();
 	void disengage_record_enable ();
 	
+	/* FIXME: too much code duplication in this class because of lack of ChannelInfo */
+
 	MidiRingBuffer*                   _playback_buf;
 	MidiRingBuffer*                   _capture_buf;
 	MidiPort*                         _source_port;
