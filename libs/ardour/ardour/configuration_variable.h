@@ -22,6 +22,7 @@
 
 #include <sstream>
 #include <ostream>
+#include <iostream>
 
 #include <pbd/xml++.h>
 
@@ -84,7 +85,7 @@ class ConfigVariable : public ConfigVariableBase
 		std::stringstream ss;
 		if (node.name() == "Canvas") {
 			ss << std::hex;
-			ss.fill(0);
+			ss.fill('0');
 			ss.width(8);
 		}
 		ss << value;
