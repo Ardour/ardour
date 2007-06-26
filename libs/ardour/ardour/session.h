@@ -351,6 +351,7 @@ class Session : public PBD::StatefulDestructible
 	sigc::signal<void,nframes_t> PositionChanged; /* sent after any non-sequential motion */
 	sigc::signal<void> DurationChanged;
 	sigc::signal<void> HaltOnXrun;
+	sigc::signal<void> TransportLooped;
 
 	sigc::signal<void,RouteList&> RouteAdded;
 

@@ -489,7 +489,7 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 	cerr << "delta = " << (int) (dir * this_delta)
 	     << " speed = " << slave_speed 
 	     << " ts = " << _transport_speed 
-	     << " M@"<< slave_transport_frame << " S@" << _transport_frame 
+	     << " M@ "<< slave_transport_frame << " S@ " << _transport_frame 
 	     << " avgdelta = " << average_slave_delta 
 	     << endl;
 #endif	

@@ -465,7 +465,7 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
 			
 		}
 
-		if (_flags & Recordable) {
+		if (recordable() && destructive()) {
 			boost::shared_ptr<ChannelList> c = channels.reader();
 			for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 				
@@ -594,7 +594,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 			/*    |--------|    recrange
                             --------------  transrange
 			*/
-			rec_nframes = last_recordable_frame - last_recordable_frame;
+			rec_nframes = last_recordable_frame - first_recordable_frame;
 			rec_offset = first_recordable_frame - transport_frame;
 			break;
 		}
@@ -1640,6 +1640,57 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 }
 
 void
+AudioDiskstream::transport_looped (nframes_t transport_frame)
+{
+	if (was_recording) {
+		// all we need to do is finish this capture, with modified capture length
+		boost::shared_ptr<ChannelList> c = channels.reader();
+
+		// adjust the capture length knowing that the data will be recorded to disk
+		// only necessary after the first loop where we're recording
+		if (capture_info.size() == 0) {
+			capture_captured += _capture_offset;
+
+			if (_alignment_style == ExistingMaterial) {
+				capture_captured += _session.worst_output_latency();
+			} else {
+				capture_captured += _roll_delay;
+			}
+		}
+
+		finish_capture (true, c);
+
+		// the next region will start recording via the normal mechanism
+		// we'll set the start position to the current transport pos
+		// no latency adjustment or capture offset needs to be made, as that already happened the first time
+		capture_start_frame = transport_frame;
+		first_recordable_frame = transport_frame; // mild lie
+		last_recordable_frame = max_frames;
+		was_recording = true;
+
+		if (recordable() && destructive()) {
+			for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+				
+				RingBufferNPT<CaptureTransition>::rw_vector transvec;
+				(*chan)->capture_transition_buf->get_write_vector(&transvec);
+				
+				if (transvec.len[0] > 0) {
+					transvec.buf[0]->type = CaptureStart;
+					transvec.buf[0]->capture_val = capture_start_frame;
+					(*chan)->capture_transition_buf->increment_write_ptr(1);
+				}
+				else {
+					// bad!
+					fatal << X_("programming error: capture_transition_buf is full on rec loop!  inconceivable!") 
+					      << endmsg;
+				}
+ 			}
+		}
+
+	}
+}
+
+void
 AudioDiskstream::finish_capture (bool rec_monitors_input, boost::shared_ptr<ChannelList> c)
 {
 	was_recording = false;
@@ -1653,7 +1704,6 @@ AudioDiskstream::finish_capture (bool rec_monitors_input, boost::shared_ptr<Chan
 			
 			RingBufferNPT<CaptureTransition>::rw_vector transvec;
 			(*chan)->capture_transition_buf->get_write_vector(&transvec);
-			
 			
 			if (transvec.len[0] > 0) {
 				transvec.buf[0]->type = CaptureEnd;
@@ -2348,7 +2398,7 @@ AudioDiskstream::ChannelInfo::ChannelInfo (nframes_t bufsize, nframes_t speed_si
 
 	playback_buf = new RingBufferNPT<Sample> (bufsize);
 	capture_buf = new RingBufferNPT<Sample> (bufsize);
-	capture_transition_buf = new RingBufferNPT<CaptureTransition> (128);
+	capture_transition_buf = new RingBufferNPT<CaptureTransition> (256);
 	
 	/* touch the ringbuffer buffers, which will cause
 	   them to be mapped into locked physical RAM if

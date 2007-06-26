@@ -1120,7 +1120,7 @@ Session::disable_record (bool rt_context, bool force)
 
 	if ((rs = (RecordState) g_atomic_int_get (&_record_status)) != Disabled) {
 
-		if (!Config->get_latched_record_enable () || force) {
+		if ((!Config->get_latched_record_enable () && !play_loop) || force) {
 			g_atomic_int_set (&_record_status, Disabled);
 		} else {
 			if (rs == Recording) {
@@ -1155,15 +1155,18 @@ Session::disable_record (bool rt_context, bool force)
 void
 Session::step_back_from_record ()
 {
-	g_atomic_int_set (&_record_status, Enabled);
+	/* XXX really atomic compare+swap here */
+	if (g_atomic_int_get (&_record_status) == Recording) {
+		g_atomic_int_set (&_record_status, Enabled);
 
-	if (Config->get_monitoring_model() == HardwareMonitoring) {
-		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-		
-		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-		        if (Config->get_auto_input() && (*i)->record_enabled ()) {
-			        //cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
-		                (*i)->monitor_input (false);   
+		if (Config->get_monitoring_model() == HardwareMonitoring) {
+			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+			
+			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
+				if (Config->get_auto_input() && (*i)->record_enabled ()) {
+					//cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
+					(*i)->monitor_input (false);   
+				}
 			}
 		}
 	}
