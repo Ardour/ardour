@@ -72,6 +72,7 @@ StreamView::StreamView (RouteTimeAxisView& tv)
 	if (_trackview.is_track()) {
 		_trackview.track()->DiskstreamChanged.connect (mem_fun (*this, &StreamView::diskstream_changed));
 		_trackview.session().TransportStateChange.connect (mem_fun (*this, &StreamView::transport_changed));
+		_trackview.session().TransportLooped.connect (mem_fun (*this, &StreamView::transport_looped));
 		_trackview.get_diskstream()->RecordEnableChanged.connect (mem_fun (*this, &StreamView::rec_enable_changed));
 		_trackview.session().RecordStateChanged.connect (mem_fun (*this, &StreamView::sess_rec_enable_changed));
 	} 
@@ -308,6 +309,14 @@ StreamView::sess_rec_enable_changed ()
 void
 StreamView::transport_changed()
 {
+	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &StreamView::setup_rec_box));
+}
+
+void
+StreamView::transport_looped()
+{
+	// to force a new rec region
+	rec_active = false;
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &StreamView::setup_rec_box));
 }
 

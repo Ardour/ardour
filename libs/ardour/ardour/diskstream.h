@@ -207,6 +207,7 @@ class Diskstream : public PBD::StatefulDestructible
 	virtual void playlist_deleted (boost::weak_ptr<Playlist>);
 
 	virtual void transport_stopped (struct tm&, time_t, bool abort) = 0;
+	virtual void transport_looped (nframes_t transport_frame) = 0;
 
 	struct CaptureInfo {
 	    uint32_t start;

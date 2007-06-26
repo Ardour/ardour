@@ -381,7 +381,8 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 			_transport_frame = last_stop_frame;
 
-			if (synced_to_jack()) {
+			if (synced_to_jack() && !play_loop) {
+				// cerr << "non-realtimestop: transport locate to " << _transport_frame << endl;
 				_engine.transport_locate (_transport_frame);
 			}
 		} 
@@ -420,14 +421,16 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		/* XXX its a little odd that we're doing this here
 		   when realtime_stop(), which has already executed,
 		   will have done this.
+		   JLC - so let's not because it seems unnecessary and breaks loop record
 		*/
-		
+#if 0
 		if (!Config->get_latched_record_enable()) {
 			g_atomic_int_set (&_record_status, Disabled);
 		} else {
 			g_atomic_int_set (&_record_status, Enabled);
 		}
 		RecordStateChanged (); /* emit signal */
+#endif
 	}
 	
 	if ((post_transport_work & PostTransportLocate) && get_record_enabled()) {
@@ -613,7 +616,7 @@ Session::start_locate (nframes_t target_frame, bool with_roll, bool with_flush, 
 void
 Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool with_loop)
 {
-	if (actively_recording()) {
+	if (actively_recording() && !with_loop) {
 		return;
 	}
 
@@ -703,6 +706,22 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 		if (al && (_transport_frame < al->start() || _transport_frame > al->end())) {
 			// cancel looping directly, this is called from event handling context
 			set_play_loop (false);
+		}
+		else if (al && _transport_frame == al->start()) {
+			if (with_loop) {
+				// this is only necessary for seamless looping
+
+				boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+				
+				for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
+					if ((*i)->record_enabled ()) {
+						// tell it we've looped, so it can deal with the record state
+						(*i)->transport_looped(_transport_frame);
+					}
+				}
+			}
+
+			TransportLooped(); // EMIT SIGNAL
 		}
 	}
 	
@@ -874,7 +893,9 @@ Session::start_transport ()
 		break;
 
 	case Recording:
-		disable_record (false);
+		if (!play_loop) {
+			disable_record (false);
+		}
 		break;
 
 	default:

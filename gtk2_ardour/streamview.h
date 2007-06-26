@@ -101,6 +101,7 @@ protected:
 //private: (FIXME?)
 
 	void         transport_changed();
+	void         transport_looped();
 	void         rec_enable_changed();
 	void         sess_rec_enable_changed();
 	virtual void setup_rec_box () = 0;
