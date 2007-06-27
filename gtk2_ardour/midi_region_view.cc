@@ -175,8 +175,21 @@ MidiRegionView::show_region_editor ()
 GhostRegion*
 MidiRegionView::add_ghost (AutomationTimeAxisView& atv)
 {
-	throw; // FIXME
-	return NULL;
+	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&trackview);
+	assert(rtv);
+
+	double unit_position = _region->position () / samples_per_unit;
+	GhostRegion* ghost = new GhostRegion (atv, unit_position);
+
+	cerr << "FIXME: add notes to MIDI region ghost." << endl;
+
+	ghost->set_height ();
+	ghost->set_duration (_region->length() / samples_per_unit);
+	ghosts.push_back (ghost);
+
+	ghost->GoingAway.connect (mem_fun(*this, &MidiRegionView::remove_ghost));
+
+	return ghost;
 }
 
 

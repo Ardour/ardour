@@ -84,6 +84,7 @@ gtkardour_files=Split("""
 about.cc
 actions.cc
 add_route_dialog.cc
+add_midi_cc_track_dialog.cc
 ardour_dialog.cc
 ardour_ui.cc
 ardour_ui2.cc

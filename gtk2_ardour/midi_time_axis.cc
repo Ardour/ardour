@@ -49,6 +49,7 @@
 #include "midi_time_axis.h"
 #include "automation_time_axis.h"
 #include "automation_midi_cc_line.h"
+#include "add_midi_cc_track_dialog.h"
 #include "canvas_impl.h"
 #include "crossfade_view.h"
 #include "enums.h"
@@ -168,10 +169,13 @@ MidiTimeAxisView::build_automation_action_menu ()
 void
 MidiTimeAxisView::add_controller_track()
 {
-	/* TODO: fancy controller selection dialog here... */
-
-	ParamID param(MidiCCAutomation, 7);
-	create_automation_child(param);
+	AddMidiCCTrackDialog dialog;
+	dialog.set_transient_for(editor);
+	int response = dialog.run();
+	if (response == Gtk::RESPONSE_ACCEPT) {
+		ParamID param = dialog.parameter();
+		create_automation_child(param);
+	}
 }
 
 void

@@ -117,7 +117,7 @@ AddRouteDialog::AddRouteDialog ()
 	VBox *dvbox = manage (new VBox);
 	HBox *dhbox = manage (new HBox);
 
-        ccframe.set_label (_("Channel Configuration"));
+	ccframe.set_label (_("Channel Configuration"));
 	ccframe.set_shadow_type (SHADOW_IN);
 
 	dvbox->pack_start (channel_combo, true, false, 5);

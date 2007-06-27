@@ -1786,7 +1786,7 @@ RouteTimeAxisView::add_automation_child(ParamID param, AutomationTimeAxisView* t
 
 	track->Hiding.connect (bind (mem_fun (*this, &RouteTimeAxisView::automation_track_hidden), param));
 
-	bool hideit = true;
+	bool hideit = false;
 	
 	XMLNode* node;
 
@@ -1797,14 +1797,17 @@ RouteTimeAxisView::add_automation_child(ParamID param, AutomationTimeAxisView* t
 			}
 		} 
 	}
+	
+	_automation_tracks.insert(std::make_pair(param, new RouteAutomationNode(param, NULL, track)));
 
 	if (hideit) {
 		track->hide ();
 	} else {
 		_show_automation.insert(param);
+		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 	}
-		
-	_automation_tracks.insert(std::make_pair(param, new RouteAutomationNode(param, NULL, track)));
+
+	build_automation_action_menu();
 }
 
 
