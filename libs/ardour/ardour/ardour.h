@@ -54,7 +54,6 @@ namespace ARDOUR {
 	std::string get_user_ardour_path ();
 	std::string get_system_data_path ();
 
-	std::string find_config_file (std::string name);
 	std::string find_data_file (std::string name, std::string subdir = "" );
 
 	const layer_t max_layer = UCHAR_MAX;
