@@ -62,7 +62,7 @@ class Configuration : public PBD::Stateful
 	int save_state ();
 
 	/// calls Stateful::*instant_xml methods using 
-	/// ARDOUR::get_user_ardour_path for the directory
+	/// ARDOUR::user_config_directory for the directory argument
 	void add_instant_xml (XMLNode&);
 	XMLNode * instant_xml (const std::string& str);
 

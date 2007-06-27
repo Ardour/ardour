@@ -78,6 +78,8 @@ Stateful::extra_xml (const string& str)
 void
 Stateful::add_instant_xml (XMLNode& node, const sys::path& directory_path)
 {
+	sys::create_directories (directory_path); // may throw
+
 	if (_instant_xml == 0) {
 		_instant_xml = new XMLNode ("instant");
 	}

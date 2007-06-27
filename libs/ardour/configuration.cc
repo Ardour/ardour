@@ -28,6 +28,7 @@
 #include <ardour/configuration.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/control_protocol_manager.h>
+#include <ardour/filesystem_paths.h>
 
 #include "i18n.h"
 
@@ -160,13 +161,13 @@ Configuration::save_state()
 void
 Configuration::add_instant_xml(XMLNode& node)
 {
-	Stateful::add_instant_xml (node, get_user_ardour_path());
+	Stateful::add_instant_xml (node, user_config_directory ());
 }
 
 XMLNode*
 Configuration::instant_xml(const string& node_name)
 {
-	return Stateful::instant_xml (node_name, get_user_ardour_path());
+	return Stateful::instant_xml (node_name, user_config_directory ());
 }
 
 
