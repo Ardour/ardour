@@ -37,8 +37,10 @@ class ThemeManager : public ArdourDialog
 	~ThemeManager();
 
 	int save (std::string path);
-	void load_rc (int which);
 	void setup_theme ();
+	
+	void on_dark_theme_button_toggled ();
+	void on_light_theme_button_toggled ();
 
   private:
 	struct ColorDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {

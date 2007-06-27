@@ -84,8 +84,8 @@ ThemeManager::ThemeManager()
 
 	color_dialog.get_ok_button()->signal_clicked().connect (bind (mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_ACCEPT));
 	color_dialog.get_cancel_button()->signal_clicked().connect (bind (mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_CANCEL));
-	dark_button.signal_clicked().connect (bind (mem_fun (*this, &ThemeManager::load_rc), 1));
-	light_button.signal_clicked().connect (bind (mem_fun (*this, &ThemeManager::load_rc), 2));
+	dark_button.signal_toggled().connect (mem_fun (*this, &ThemeManager::on_dark_theme_button_toggled));
+	light_button.signal_toggled().connect (mem_fun (*this, &ThemeManager::on_light_theme_button_toggled));
 
 	set_size_request (-1, 400);
 }
@@ -196,14 +196,20 @@ load_rc_file (const string& filename)
 }
 
 void
-ThemeManager::load_rc(int which)
+ThemeManager::on_dark_theme_button_toggled()
 {
-	if (which == 1) {
-		Config->set_ui_rc_file("ardour2_ui_dark.rc");
-	} else {
-		Config->set_ui_rc_file("ardour2_ui_light.rc");
-	}
+	if (!dark_button.get_active()) return;
 
+	Config->set_ui_rc_file("ardour2_ui_dark.rc");
+	load_rc_file (Config->get_ui_rc_file());
+}
+
+void
+ThemeManager::on_light_theme_button_toggled()
+{
+	if (!light_button.get_active()) return;
+
+	Config->set_ui_rc_file("ardour2_ui_light.rc");
 	load_rc_file (Config->get_ui_rc_file());
 }
 
