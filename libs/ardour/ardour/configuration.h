@@ -92,11 +92,6 @@ class Configuration : public PBD::Stateful
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
 
-#undef  CANVAS_VARIABLE
-#define CANVAS_VARIABLE(var,name) ConfigVariable<uint32_t> var;  // <-- is this really so bad?
-#include "ardour/canvas_vars.h"
-#undef  CANVAS_VARIABLE
-
   private:
 
 	/* declare variables */
@@ -109,6 +104,13 @@ class Configuration : public PBD::Stateful
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL	
 
+  public: /* ugh */
+#undef  CANVAS_VARIABLE
+#define CANVAS_VARIABLE(var,name) ConfigVariable<uint32_t> var;  // <-- is this really so bad?
+#include "ardour/canvas_vars.h"
+#undef  CANVAS_VARIABLE
+
+  private:
 	ConfigVariableBase::Owner current_owner;
 	XMLNode* _control_protocol_state;
 
