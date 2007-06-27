@@ -40,9 +40,9 @@
 
 #include <vst/aeffectx.h>
 
-#include <ardour/ardour.h>
 #include <ardour/session.h>
 #include <ardour/audioengine.h>
+#include <ardour/filesystem_paths.h>
 #include <ardour/vst_plugin.h>
 #include <ardour/buffer_set.h>
 
@@ -159,8 +159,11 @@ VSTPlugin::get_state()
 		string path;
 		struct stat sbuf;
 
-		path = get_user_ardour_path ();
-		path += "vst";
+		sys::path user_vst_directory(user_config_directory());
+	
+		user_vst_directory /= "vst";
+
+		path = user_vst_directory.to_string();
 
 		if (stat (path.c_str(), &sbuf)) {
 			if (errno == ENOENT) {
