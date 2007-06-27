@@ -139,6 +139,7 @@ class AudioEngine : public sigc::trackable
 
 	nframes_t get_port_total_latency (const Port&);
 	void update_total_latencies ();
+	void update_total_latency (const Port&);
 
 	/** Caller may not delete the object pointed to by the return value
 	*/

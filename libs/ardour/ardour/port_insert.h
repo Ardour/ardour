@@ -54,7 +54,7 @@ class PortInsert : public IOProcessor
 	
 	void run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset);
 
-	nframes_t latency();
+	nframes_t signal_latency() const;
 	
 	ChanCount output_streams() const;
 	ChanCount input_streams() const;

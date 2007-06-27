@@ -491,7 +491,6 @@ LadspaPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& des
 	return 0;
 }
 
-
 string
 LadspaPlugin::describe_parameter (ParamID which)
 {
@@ -503,8 +502,12 @@ LadspaPlugin::describe_parameter (ParamID which)
 }
 
 ARDOUR::nframes_t
-LadspaPlugin::latency () const
+LadspaPlugin::signal_latency () const
 {
+	if (_user_latency) {
+		return _user_latency;
+	}
+
 	if (latency_control_port) {
 		return (nframes_t) floor (*latency_control_port);
 	} else {

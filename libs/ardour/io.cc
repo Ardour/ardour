@@ -1899,7 +1899,7 @@ IO::input_latency () const
 	for (PortSet::const_iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
 		if ((latency = _session.engine().get_port_total_latency (*i)) > max_latency) {
 			max_latency = latency;
-		}
+		} 
 	}
 
 	return max_latency;
@@ -2411,4 +2411,16 @@ IO::set_denormal_protection (bool yn, void *src)
 	}
 }
 
+void
+IO::update_port_total_latencies ()
+{
+	/* io_lock, not taken: function must be called from Session::process() calltree */
 
+	for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
+		_session.engine().update_total_latency (*i);
+	}
+
+	for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
+		_session.engine().update_total_latency (*i);
+	}
+}

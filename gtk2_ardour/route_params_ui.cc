@@ -18,6 +18,8 @@
 */
 
 #include <algorithm>
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
 
 #include <glibmm/thread.h>
 #include <gtkmm2ext/utils.h>
@@ -58,7 +60,9 @@ using namespace sigc;
 
 RouteParams_UI::RouteParams_UI ()
 	: ArdourDialog ("track/bus inspector"),
+	  latency_apply_button (Stock::APPLY),
 	  track_menu(0)
+	
 {
 	pre_insert_box = 0;
 	post_insert_box = 0;
@@ -66,12 +70,14 @@ RouteParams_UI::RouteParams_UI ()
 	_output_iosel = 0;
 	_active_pre_view = 0;
 	_active_post_view = 0;
-	
+	latency_widget = 0;
+
 	using namespace Notebook_Helpers;
 
 	input_frame.set_shadow_type(Gtk::SHADOW_NONE);
 	output_frame.set_shadow_type(Gtk::SHADOW_NONE);
-	
+	latency_frame.set_shadow_type (Gtk::SHADOW_NONE);
+
 	notebook.set_show_tabs (true);
 	notebook.set_show_border (true);
 	notebook.set_name ("RouteParamNotebook");
@@ -92,7 +98,6 @@ RouteParams_UI::RouteParams_UI ()
 	route_select_scroller.add(route_display);
 	route_select_scroller.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-
 	route_select_frame.set_name("RouteSelectBaseFrame");
 	route_select_frame.set_shadow_type (Gtk::SHADOW_IN);
 	route_select_frame.add(route_select_scroller);
@@ -103,19 +108,23 @@ RouteParams_UI::RouteParams_UI ()
 	notebook.pages().push_back (TabElem (output_frame, _("Outputs")));
 	notebook.pages().push_back (TabElem (pre_redir_hpane, _("Pre-fader Redirects")));
 	notebook.pages().push_back (TabElem (post_redir_hpane, _("Post-fader Redirects")));
+	notebook.pages().push_back (TabElem (latency_frame, _("Latency")));
 
 	notebook.set_name ("InspectorNotebook");
 	
 	title_label.set_name ("RouteParamsTitleLabel");
 	update_title();
 	
+	latency_packer.set_spacing (18);
+	latency_button_box.pack_start (latency_apply_button);
+	delay_label.set_alignment (0, 0.5);
+
 	// changeable area
 	route_param_frame.set_name("RouteParamsBaseFrame");
 	route_param_frame.set_shadow_type (Gtk::SHADOW_IN);
 	
 	
 	route_hpacker.pack_start (notebook, true, true);
-	
 	
 	route_vpacker.pack_start (title_label, false, false);
 	route_vpacker.pack_start (route_hpacker, true, true);
@@ -141,6 +150,7 @@ RouteParams_UI::RouteParams_UI ()
 	WindowTitle title(Glib::get_application_name());
 	title += _("Track/Bus Inspector"); 
 	set_title (title.get_string());
+
 
 	// events
 	route_display.get_selection()->signal_changed().connect(mem_fun(*this, &RouteParams_UI::route_selected));
@@ -250,6 +260,55 @@ RouteParams_UI::cleanup_processor_boxes()
 		delete post_insert_box;
 		post_insert_box = 0;
 	}
+}
+
+void
+RouteParams_UI::refresh_latency ()
+{
+	if (latency_widget) {
+		latency_widget->refresh();
+
+		char buf[128];
+		snprintf (buf, sizeof (buf), _("Playback delay: %u samples"), _route->initial_delay());
+		delay_label.set_text (buf);
+	}
+}
+
+void
+RouteParams_UI::cleanup_latency_frame ()
+{
+	if (latency_widget) {
+		latency_frame.remove ();
+		latency_packer.remove (*latency_widget);
+		latency_packer.remove (latency_button_box);
+		latency_packer.remove (delay_label);
+		delete latency_widget;
+		latency_widget = 0;
+		latency_conn.disconnect ();
+		delay_conn.disconnect ();
+		latency_apply_conn.disconnect ();
+	}
+}
+
+void
+RouteParams_UI::setup_latency_frame ()
+{
+	latency_widget = new LatencyGUI (*(_route.get()), session->frame_rate(), session->engine().frames_per_cycle());
+
+	char buf[128];
+	snprintf (buf, sizeof (buf), _("Playback delay: %u samples"), _route->initial_delay());
+	delay_label.set_text (buf);
+
+	latency_packer.pack_start (*latency_widget, false, false);
+	latency_packer.pack_start (latency_button_box, false, false);
+	latency_packer.pack_start (delay_label);
+
+	latency_apply_conn = latency_apply_button.signal_clicked().connect (mem_fun (*latency_widget, &LatencyGUI::finish));
+	latency_conn = _route->signal_latency_changed.connect (mem_fun (*this, &RouteParams_UI::refresh_latency));
+	delay_conn = _route->initial_delay_changed.connect (mem_fun (*this, &RouteParams_UI::refresh_latency));
+	
+	latency_frame.add (latency_packer);
+	latency_frame.show_all ();
 }
 
 void
@@ -387,6 +446,7 @@ RouteParams_UI::session_gone ()
 	cleanup_pre_view();
 	cleanup_post_view();
 	cleanup_processor_boxes();
+	cleanup_latency_frame ();
 
 	_route.reset ((Route*) 0);
 	_pre_processor.reset ((Processor*) 0);
@@ -402,6 +462,7 @@ RouteParams_UI::route_selected()
 {
 	Glib::RefPtr<TreeSelection> selection = route_display.get_selection();
 	TreeModel::iterator iter = selection->get_selected(); // only used with Gtk::SELECTION_SINGLE
+
 	if(iter) {
 		//If anything is selected
 		boost::shared_ptr<Route> route = (*iter)[route_display_columns.route] ;
@@ -419,6 +480,7 @@ RouteParams_UI::route_selected()
 			cleanup_pre_view();
 			cleanup_post_view();
 			cleanup_io_frames();
+			cleanup_latency_frame ();
 		}
 
 		// update the other panes with the correct info
@@ -427,6 +489,7 @@ RouteParams_UI::route_selected()
 
 		setup_io_frames();
 		setup_processor_boxes();
+		setup_latency_frame ();
 
 		// bind to redirects changed event for this route
 		_route_conn = route->processors_changed.connect (mem_fun(*this, &RouteParams_UI::processors_changed));
@@ -434,6 +497,7 @@ RouteParams_UI::route_selected()
 		track_input_label.set_text (_route->name());
 
 		update_title();
+
 	} else {
 		// no selection
 		if (_route) {
@@ -444,6 +508,7 @@ RouteParams_UI::route_selected()
 			cleanup_pre_view();
 			cleanup_post_view();
 			cleanup_processor_boxes();
+			cleanup_latency_frame ();
 
 			_route.reset ((Route*) 0);
 			_pre_processor.reset ((Processor*) 0);
@@ -454,51 +519,18 @@ RouteParams_UI::route_selected()
 	}
 }
 
-//void
-//RouteParams_UI::route_unselected (gint row, gint col, GdkEvent *ev)
-//{
-//	if (_route) {
-//		_route_conn.disconnect();
-
-		// remove from view
-//		cleanup_io_frames();
-//		cleanup_pre_view();
-//		cleanup_post_view();
-//		cleanup_processor_boxes();
-		
-//		_route.reset ((Route*)0);
-//		_pre_processor = 0;
-//		_post_processor = 0;
-//		track_input_label.set_text(_("NO TRACK"));
-//		update_title();
-//	}
-//}
-
 void
 RouteParams_UI::processors_changed ()
-
 {
 	ENSURE_GUI_THREAD(mem_fun(*this, &RouteParams_UI::processors_changed));
-	
-// 	pre_insert_list.freeze ();
-// 	pre_insert_list.clear ();
-// 	post_insert_list.freeze ();
-// 	post_insert_list.clear ();
-// 	if (_route) {
-// 		_route->foreach_redirect (this, &RouteParams_UI::add_redirect_to_display);
-// 	}
-// 	pre_insert_list.thaw ();
-// 	post_insert_list.thaw ();
-
 	cleanup_pre_view();
 	cleanup_post_view();
 	
 	_pre_processor.reset ((Processor*) 0);
 	_post_processor.reset ((Processor*) 0);
+
 	//update_title();
 }
-
-
 
 void
 RouteParams_UI::show_track_menu()
@@ -514,8 +546,6 @@ RouteParams_UI::show_track_menu()
 	}
 	track_menu->popup (1, gtk_get_current_event_time());
 }
-
-
 
 void
 RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> insert, ARDOUR::Placement place)
@@ -658,7 +688,7 @@ RouteParams_UI::update_title ()
 		// 		}
 
 		title_label.set_text(_route->name());
-		
+
 		title += _route->name();
 
 		set_title(title.get_string());
@@ -669,7 +699,6 @@ RouteParams_UI::update_title ()
 		set_title(title.get_string());
 	}	
 }
-
 
 void
 RouteParams_UI::start_updating ()

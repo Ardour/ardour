@@ -152,6 +152,7 @@ gtk-custom-ruler.c
 io_selector.cc
 keyboard.cc
 ladspa_pluginui.cc
+latency_gui.cc
 location_ui.cc
 main.cc
 marker.cc

@@ -160,7 +160,7 @@ PortInsert::set_state(const XMLNode& node)
 }
 
 ARDOUR::nframes_t 
-PortInsert::latency() 
+PortInsert::signal_latency() const
 {
 	/* because we deliver and collect within the same cycle,
 	   all I/O is necessarily delayed by at least frames_per_cycle().

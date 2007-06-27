@@ -931,6 +931,27 @@ AudioEngine::get_port_total_latency (const Port& port)
 	return jack_port_get_total_latency (_jack, port._port);
 }
 
+
+void
+AudioEngine::update_total_latency (const Port& port)
+{
+	if (!_jack) {
+		fatal << _("update_total_latency() called with no JACK client connection") << endmsg;
+		/*NOTREACHED*/
+	}
+
+	if (!_running) {
+		if (!_has_run) {
+			fatal << _("update_total_latency() called before engine was started") << endmsg;
+			/*NOTREACHED*/
+		} 
+	}
+
+#ifdef HAVE_JACK_RECOMPUTE_LATENCY
+	jack_recompute_total_latency (_jack, port._port);
+#endif
+}
+
 void
 AudioEngine::transport_stop ()
 {

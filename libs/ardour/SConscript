@@ -199,6 +199,25 @@ def CheckJackVideoFrameOffset(context):
 	context.Result(result)
 	return result
 
+
+#
+# See if JACK supports jack_recompute_total_latency() (single port version)
+#
+
+jack_port_latency_test = """
+#include <jack/jack.h>
+int main(int argc, char **argv)
+{
+    jack_recompute_total_latency ((jack_client_t*) 0, (jack_port_t*) 0);
+    return 0;
+}
+"""
+def CheckJackRecomputeLatency(context):
+        context.Message('Checking for jack_recompute_total_latency()...')
+        result = context.TryLink(jack_port_latency_test, '.c')
+        context.Result(result)
+        return result
+
 #
 # See if JACK supports jack_port_ensure_monitor_input()
 #
@@ -223,6 +242,7 @@ def CheckJackEnsureMonitorInput(context):
 conf = Configure(ardour, custom_tests = {
 	'CheckJackClientOpen' : CheckJackClientOpen,
 	'CheckJackRecomputeLatencies' : CheckJackRecomputeLatencies,
+	'CheckJackRecomputeLatency' : CheckJackRecomputeLatency,
 	'CheckJackVideoFrameOffset' : CheckJackVideoFrameOffset,
 	'CheckJackEnsureMonitorInput' : CheckJackEnsureMonitorInput
 })
@@ -232,6 +252,9 @@ if conf.CheckJackClientOpen():
 
 if conf.CheckJackRecomputeLatencies():
     ardour.Append(CXXFLAGS="-DHAVE_JACK_RECOMPUTE_LATENCIES")
+
+if conf.CheckJackRecomputeLatency():
+    ardour.Append(CXXFLAGS="-DHAVE_JACK_RECOMPUTE_LATENCY")
 
 if conf.CheckJackVideoFrameOffset():
 	ardour.Append(CXXFLAGS="-DHAVE_JACK_VIDEO_SUPPORT")

@@ -836,11 +836,15 @@ PluginInsert::describe_parameter (ParamID param)
 }
 
 ARDOUR::nframes_t 
-PluginInsert::latency() 
+PluginInsert::signal_latency() const
 {
-	return _plugins[0]->latency ();
+	if (_user_latency) {
+		return _user_latency;
+	}
+
+	return _plugins[0]->signal_latency ();
 }
-	
+
 ARDOUR::PluginType
 PluginInsert::type ()
 {
@@ -869,5 +873,4 @@ PluginInsert::type ()
 		return (ARDOUR::PluginType) 0;
 	}
 }
-
 

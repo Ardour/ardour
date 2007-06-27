@@ -984,6 +984,11 @@ MixerStrip::build_route_ops_menu ()
 	items.push_back (CheckMenuElem (_("Active"), mem_fun (*this, &RouteUI::toggle_route_active)));
 	route_active_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
 	route_active_menu_item->set_active (_route->active());
+
+	items.push_back (SeparatorElem());
+
+	items.push_back (MenuElem (_("Adjust latency"), mem_fun (*this, &RouteUI::adjust_latency)));
+
 	items.push_back (SeparatorElem());
 	items.push_back (CheckMenuElem (_("Invert Polarity"), mem_fun (*this, &RouteUI::toggle_polarity)));
 	polarity_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());

@@ -187,8 +187,9 @@ class Route : public IO
 	void all_processors_active (Placement, bool state);
 
 	virtual nframes_t update_total_latency();
-	nframes_t signal_latency() const { return _own_latency; }
-	virtual void set_latency_delay (nframes_t);
+	void set_latency_delay (nframes_t);
+	void set_user_latency (nframes_t);
+	nframes_t initial_delay() const { return _initial_delay; }
 
 	sigc::signal<void,void*> solo_changed;
 	sigc::signal<void,void*> solo_safe_changed;
@@ -204,6 +205,8 @@ class Route : public IO
 	sigc::signal<void,void*> mix_group_changed;
 	sigc::signal<void>       active_changed;
 	sigc::signal<void,void*> meter_change;
+	sigc::signal<void>       signal_latency_changed;
+	sigc::signal<void>       initial_delay_changed;
 
 	/* gui's call this for their own purposes. */
 
@@ -294,7 +297,6 @@ class Route : public IO
 
 	nframes_t           _initial_delay;
 	nframes_t           _roll_delay;
-	nframes_t           _own_latency;
 	ProcessorList       _processors;
 	Glib::RWLock        _processor_lock;
 	IO                 *_control_outs;

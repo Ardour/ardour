@@ -31,6 +31,7 @@
 #include <ardour/chan_count.h>
 #include <ardour/plugin_state.h>
 #include <ardour/cycles.h>
+#include <ardour/latent.h>
 #include <ardour/param_id.h>
 
 #include <vector>
@@ -79,7 +80,7 @@ class PluginInfo {
 typedef boost::shared_ptr<PluginInfo> PluginInfoPtr;
 typedef std::list<PluginInfoPtr> PluginInfoList;
 
-class Plugin : public PBD::StatefulDestructible
+class Plugin : public PBD::StatefulDestructible, public Latent
 {
   public:
 	Plugin (ARDOUR::AudioEngine&, ARDOUR::Session&);
@@ -110,7 +111,6 @@ class Plugin : public PBD::StatefulDestructible
 	virtual const char * maker() const = 0;
 	virtual uint32_t parameter_count () const = 0;
 	virtual float default_value (uint32_t port) = 0;
-	virtual nframes_t latency() const = 0;
 	virtual void set_parameter (uint32_t which, float val) = 0;
 	virtual float get_parameter(uint32_t which) const = 0;
 

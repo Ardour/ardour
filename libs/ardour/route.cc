@@ -89,6 +89,7 @@ Route::init ()
 	_initial_delay = 0;
 	_roll_delay = 0;
 	_own_latency = 0;
+	_user_latency = 0;
 	_have_internal_generator = false;
 	_declickable = false;
 	_pending_declick = true;
@@ -812,6 +813,8 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* 
 
 		processor->activate ();
 		processor->ActiveChanged.connect (bind (mem_fun (_session, &Session::update_latency_compensation), false, false));
+
+		_user_latency = 0;
 	}
 	
 	if (processor_max_outs != old_rmo || old_rmo == ChanCount::ZERO) {
@@ -867,6 +870,8 @@ Route::add_processors (const ProcessorList& others, ProcessorStreams* err)
 			(*i)->activate ();
 			(*i)->ActiveChanged.connect (bind (mem_fun (_session, &Session::update_latency_compensation), false, false));
 		}
+
+		_user_latency = 0;
 	}
 	
 	if (processor_max_outs != old_rmo || old_rmo == ChanCount::ZERO) {
@@ -1098,6 +1103,8 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 				removed = true;
 				break;
 			}
+
+			_user_latency = 0;
 		}
 
 		if (!removed) {
@@ -1337,6 +1344,7 @@ Route::copy_processors (const Route& other, Placement placement, ProcessorStream
 			
 			/* SUCCESSFUL COPY ATTEMPT: delete the processors we removed pre-copy */
 			to_be_deleted.clear ();
+			_user_latency = 0;
 		}
 	}
 
@@ -2470,32 +2478,62 @@ Route::set_meter_point (MeterPoint p, void *src)
 nframes_t
 Route::update_total_latency ()
 {
-	_own_latency = 0;
+	nframes_t old = _own_latency;
 
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if ((*i)->active ()) {
-			_own_latency += (*i)->latency ();
+	if (_user_latency) {
+		_own_latency = _user_latency;
+	} else {
+		_own_latency = 0;
+
+		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+			if ((*i)->active ()) {
+				_own_latency += (*i)->signal_latency ();
+			}
 		}
 	}
 
 	set_port_latency (_own_latency);
+	
+	if (!_user_latency) {
+		/* this (virtual) function is used for pure Routes,
+		   not derived classes like AudioTrack.  this means
+		   that the data processed here comes from an input
+		   port, not prerecorded material, and therefore we
+		   have to take into account any input latency.
+		*/
 
-	/* this (virtual) function is used for pure Routes,
-	   not derived classes like AudioTrack.  this means
-	   that the data processed here comes from an input
-	   port, not prerecorded material, and therefore we
-	   have to take into account any input latency.
-	*/
 
-	_own_latency += input_latency ();
+		_own_latency += input_latency ();
+	}
 
+	if (old != _own_latency) {
+		signal_latency_changed (); /* EMIT SIGNAL */
+	}
+	
 	return _own_latency;
+}
+
+void
+Route::set_user_latency (nframes_t nframes)
+{
+	Latent::set_user_latency (nframes);
+	_session.update_latency_compensation (false, false);
 }
 
 void
 Route::set_latency_delay (nframes_t longest_session_latency)
 {
-	_initial_delay = longest_session_latency - _own_latency;
+	nframes_t old = _initial_delay;
+
+	if (_own_latency < longest_session_latency) {
+		_initial_delay = longest_session_latency - _own_latency;
+	} else {
+		_initial_delay = 0;
+	}
+
+	if (_initial_delay != old) {
+		initial_delay_changed (); /* EMIT SIGNAL */
+	}
 
 	if (_session.transport_stopped()) {
 		_roll_delay = _initial_delay;

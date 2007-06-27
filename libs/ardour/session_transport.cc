@@ -1248,31 +1248,31 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		
 		if (with_stop) {
 			(*i)->handle_transport_stopped (abort, (post_transport_work & PostTransportLocate), 
 							(!(post_transport_work & PostTransportLocate) || pending_locate_flush));
 		}
-
+		
 		nframes_t old_latency = (*i)->signal_latency ();
 		nframes_t track_latency = (*i)->update_total_latency ();
-
+		
 		if (old_latency != track_latency) {
+			(*i)->update_port_total_latencies ();
 			update_jack = true;
 		}
-		
-		if (!(*i)->hidden() && ((*i)->active())) {
+
+ 		if (!(*i)->hidden() && ((*i)->active())) {
 			_worst_track_latency = max (_worst_track_latency, track_latency);
 		}
+	} 
+
+	if (update_jack) {
+		_engine.update_total_latencies ();
 	}
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		(*i)->set_latency_delay (_worst_track_latency);
-	}
-
-	/* tell JACK to play catch up */
-
-	if (update_jack) {
-		_engine.update_total_latencies ();
 	}
 
 	set_worst_io_latencies ();

@@ -113,8 +113,12 @@ AUPlugin::default_value (uint32_t port)
 }
 
 nframes_t
-AUPlugin::latency () const
+AUPlugin::signal_latency () const
 {
+	if (_user_latency) {
+		return _user_latency;
+	}
+
 	return unit->Latency ();
 }
 

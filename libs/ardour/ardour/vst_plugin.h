@@ -62,7 +62,7 @@ class VSTPlugin : public ARDOUR::Plugin
 	const char * maker() const;
 	uint32_t parameter_count() const;
 	float default_value (uint32_t port);
-	nframes_t latency() const;
+	nframes_t signal_latency() const;
 	void set_parameter (uint32_t port, float val);
 	float get_parameter (uint32_t port) const;
 	int get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;

@@ -351,8 +351,12 @@ VSTPlugin::describe_parameter (uint32_t param)
 }
 
 nframes_t
-VSTPlugin::latency () const
+VSTPlugin::signal_latency () const
 {
+	if (_user_latency) {
+		return _user_latency;
+	}
+
 	return _plugin->initialDelay;
 }
 

@@ -163,6 +163,8 @@ class RouteUI : public virtual AxisView
 
 	void reversibly_apply_route_boolean (string name, void (ARDOUR::Route::*func)(bool, void*), bool, void *);
 	void reversibly_apply_track_boolean (string name, void (ARDOUR::Track::*func)(bool, void*), bool, void *);
+
+	void adjust_latency ();
 };
 
 #endif /* __ardour_route_ui__ */

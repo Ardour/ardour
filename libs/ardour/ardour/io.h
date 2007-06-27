@@ -41,6 +41,7 @@
 #include <ardour/data_type.h>
 #include <ardour/port_set.h>
 #include <ardour/chan_count.h>
+#include <ardour/latent.h>
 
 using std::string;
 using std::vector;
@@ -64,7 +65,8 @@ class BufferSet;
  * An IO can contain ports of varying types, making routes/inserts/etc with
  * varied combinations of types (eg MIDI and audio) possible.
  */
-class IO : public Automatable
+
+class IO : public Automatable, public Latent
 {
   public:
 	static const string state_node_name;
@@ -141,9 +143,12 @@ class IO : public Automatable
 	int disconnect_inputs (void *src);
 	int disconnect_outputs (void *src);
 
+	nframes_t signal_latency() const { return _own_latency; }
 	nframes_t output_latency() const;
 	nframes_t input_latency() const;
-	void           set_port_latency (nframes_t);
+	void      set_port_latency (nframes_t);
+
+	void update_port_total_latencies ();
 
 	const PortSet& inputs()  const { return _inputs; }
 	const PortSet& outputs() const { return _outputs; }

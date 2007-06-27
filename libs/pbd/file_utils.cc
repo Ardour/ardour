@@ -41,7 +41,7 @@ get_files_in_directory (const sys::path& directory_path, vector<string>& result)
 	}
 	catch (Glib::FileError& err)
 	{
-		warning << err.what();
+		warning << err.what() << endmsg;
 	}
 }
 
@@ -113,6 +113,7 @@ find_file_in_search_path(const SearchPath& search_path,
 		return false;
 	}
 
+#if 0
 	if (tmp.size() != 1)
 	{
 		info << string_compose
@@ -123,6 +124,7 @@ find_file_in_search_path(const SearchPath& search_path,
 			)
 			<< endmsg;
 	}
+#endif
 
 	result = tmp.front();
 

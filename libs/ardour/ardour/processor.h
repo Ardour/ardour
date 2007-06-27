@@ -33,7 +33,7 @@
 #include <ardour/plugin_state.h>
 #include <ardour/buffer_set.h>
 #include <ardour/automatable.h>
-
+#include <ardour/latent.h>
 
 class XMLNode;
 
@@ -43,7 +43,7 @@ class Session;
 
 /* A mixer strip element - plugin, send, meter, etc.
  */
-class Processor : public Automatable
+class Processor : public Automatable, public Latent
 {
   public:
 	static const string state_node_name;
@@ -66,7 +66,7 @@ class Processor : public Automatable
 	bool get_next_ab_is_active () const { return _next_ab_is_active; }
 	void set_next_ab_is_active (bool yn) { _next_ab_is_active = yn; }
 	
-	virtual nframes_t latency() { return 0; }
+	virtual nframes_t signal_latency() const { return 0; }
 	
 	virtual void transport_stopped (nframes_t frame) {}
 	

@@ -22,17 +22,21 @@
 #include <gtkmm2ext/choice.h>
 #include <gtkmm2ext/doi.h>
 #include <gtkmm2ext/bindable_button.h>
+#include <gtkmm2ext/barcontroller.h>
 
 #include <ardour/route_group.h>
 #include <pbd/memento_command.h>
 #include <pbd/stacktrace.h>
 #include <pbd/shiva.h>
+#include <pbd/controllable.h>
 
 #include "route_ui.h"
 #include "keyboard.h"
 #include "utils.h"
 #include "prompter.h"
 #include "gui_thread.h"
+#include "ardour_dialog.h"
+#include "latency_gui.h"
 
 #include <ardour/route.h>
 #include <ardour/session.h>
@@ -451,7 +455,7 @@ RouteUI::update_rec_display ()
 		rec_enable_button->set_active (model);
 		ignore_toggle = false;
 	}
-
+	
 	/* now make sure its color state is correct */
 
 	if (model) {
@@ -1040,3 +1044,8 @@ RouteUI::map_frozen ()
 	}
 }
 
+void
+RouteUI::adjust_latency ()
+{
+	LatencyDialog dialog (_route->name() + _("latency"), *(_route.get()), _session.frame_rate(), _session.engine().frames_per_cycle());
+}

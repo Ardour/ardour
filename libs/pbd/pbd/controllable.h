@@ -70,6 +70,21 @@ class Controllable : public PBD::StatefulDestructible {
 	static Controllables registry;
 };
 
+/* a utility class for the occasions when you need but do not have
+   a Controllable
+*/
+
+class IgnorableControllable : public Controllable 
+{
+  public: 
+    IgnorableControllable () : PBD::Controllable ("ignoreMe") {}
+    ~IgnorableControllable () {}
+    
+    void set_value (float v){}
+    float get_value () const { return 0.0; }
+    bool can_send_feedback () const { return false; }
+};
+
 }
 
 #endif /* __pbd_controllable_h__ */

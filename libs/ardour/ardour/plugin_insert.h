@@ -92,7 +92,7 @@ class PluginInsert : public Processor
 
 	string describe_parameter (ParamID param);
 
-	nframes_t latency();
+	nframes_t signal_latency() const;
 
 	void transport_stopped (nframes_t now);
 	void automation_snapshot (nframes_t now);

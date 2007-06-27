@@ -90,19 +90,28 @@ Track::toggle_monitor_input ()
 ARDOUR::nframes_t
 Track::update_total_latency ()
 {
-	_own_latency = 0;
+	nframes_t old = _own_latency;
 
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if ((*i)->active ()) {
-			_own_latency += (*i)->latency ();
+	if (_user_latency) {
+		_own_latency = _user_latency;
+	} else {
+		_own_latency = 0;
+
+		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+			if ((*i)->active ()) {
+				_own_latency += (*i)->signal_latency ();
+			}
 		}
 	}
 
 	set_port_latency (_own_latency);
 
+	if (old != _own_latency) {
+		signal_latency_changed (); /* EMIT SIGNAL */
+	}
+
 	return _own_latency;
 }
-
 
 Track::FreezeRecord::~FreezeRecord ()
 {
