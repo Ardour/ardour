@@ -1514,25 +1514,6 @@ ARDOUR_UI::do_engine_start ()
 void
 ARDOUR_UI::setup_theme ()
 {
-	string rcfile;
-	char* env;
-
-	if ((env = getenv ("ARDOUR2_UI_RC")) != 0 && strlen (env)) {
-		rcfile = env;
-	} else {
-		rcfile = Config->get_ui_rc_file();
-	}
-
-	rcfile = find_config_file (rcfile);
-	
-	if (rcfile.empty()) {
-		warning << _("Without a UI style file, ardour will look strange.\n Please set ARDOUR2_UI_RC to point to a valid UI style file") << endmsg;
-	} else {
-		cerr << "Loading ui configuration file " << rcfile << endl;
-	}
-
-	load_rcfile(rcfile);
-
 	theme_manager->setup_theme();
 }
 

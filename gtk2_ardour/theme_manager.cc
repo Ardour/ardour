@@ -173,6 +173,27 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 	return false;
 }
 
+void
+load_rc_file (const string& filename)
+{
+	sys::path rc_file_path;
+
+	SearchPath spath (ardour_search_path());
+	spath += user_config_directory();
+	spath += system_config_search_path();
+
+	if(!find_file_in_search_path (spath, filename, rc_file_path))
+	{
+		warning << string_compose(_("Unable to find UI style file %1 in search path %2. Ardour will look strange"),
+				filename, spath.get_string()) 
+			<< endmsg;
+		return;
+	}
+
+	info << "Loading ui configuration file " << rc_file_path.to_string() << endmsg;
+
+	Gtkmm2ext::UI::instance()->load_rcfile (rc_file_path.to_string());
+}
 
 void
 ThemeManager::load_rc(int which)
@@ -182,13 +203,8 @@ ThemeManager::load_rc(int which)
 	} else {
 		Config->set_ui_rc_file("ardour2_ui_light.rc");
 	}
-	
-	sys::path rc_file_path;
 
-	find_file_in_search_path (ardour_search_path() + system_config_search_path(),
-			Config->get_ui_rc_file(), rc_file_path);
-
-	Gtkmm2ext::UI::instance()->load_rcfile (rc_file_path.to_string());
+	load_rc_file (Config->get_ui_rc_file());
 }
 
 void
@@ -213,18 +229,22 @@ ThemeManager::setup_theme ()
 
 		//cerr << (*i)->name() << " == " << rgba << endl;
 	}
-	cerr << "ThemeManager::setup_theme () called" << endl;
-	ColorsChanged(); //EMIT SIGNAL
-		
-	if (getenv ("ARDOUR2_UI_RC")) {
-		return;
+
+	ColorsChanged.emit();
+
+	bool env_defined = false;
+	string rcfile = Glib::getenv("ARDOUR2_UI_RC", env_defined);
+
+	if(!env_defined) {
+		rcfile = Config->get_ui_rc_file();
 	}
 
-	if (Config->get_ui_rc_file() == "ardour2_ui_dark.rc") {
+	if (rcfile == "ardour2_ui_dark.rc") {
 		dark_button.set_active();
-	} else if (Config->get_ui_rc_file() == "ardour2_ui_light.rc") {
+	} else if (rcfile == "ardour2_ui_light.rc") {
 		light_button.set_active();
 	}
-	
+
+	load_rc_file(rcfile);
 }
 
