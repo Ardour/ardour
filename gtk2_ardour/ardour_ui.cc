@@ -37,7 +37,6 @@
 
 #include <pbd/error.h>
 #include <pbd/compose.h>
-#include <pbd/pathscanner.h>
 #include <pbd/failed_constructor.h>
 #include <pbd/enumwriter.h>
 #include <pbd/memento_command.h>
