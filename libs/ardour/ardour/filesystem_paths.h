@@ -39,7 +39,9 @@ namespace ARDOUR {
 	 */
 	sys::path ardour_module_directory ();
 
-	SearchPath config_search_path ();
+	SearchPath ardour_search_path ();
+
+	SearchPath system_config_search_path ();
 
 } // namespace ARDOUR
 

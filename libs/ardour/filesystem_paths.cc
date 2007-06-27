@@ -27,10 +27,6 @@
 
 #define WITH_STATIC_PATHS 1
 
-namespace {
-	const char * const config_env_variable_name = "ARDOUR_CONFIG_PATH";
-}
-
 namespace ARDOUR {
 
 using std::string;
@@ -65,29 +61,28 @@ ardour_module_directory ()
 }
 
 SearchPath
-config_search_path ()
+ardour_search_path ()
 {
-	bool config_path_defined = false;
-	SearchPath spath_env(Glib::getenv(config_env_variable_name, config_path_defined));
+	SearchPath spath_env(Glib::getenv("ARDOUR_PATH"));
+	return spath_env;
+}
 
-	if (config_path_defined)
-	{
-		return spath_env;
-	}
-
+SearchPath
+system_config_search_path ()
+{
 #ifdef WITH_STATIC_PATHS
 
-	SearchPath spath(string(CONFIG_DIR));
+	SearchPath config_path(string(CONFIG_DIR));
 
 #else
 
-	SearchPath spath(system_config_directories());
+	SearchPath config_path(system_config_directories());
 
 #endif
 
-	spath.add_subdirectory_to_paths("ardour2");
+	config_path.add_subdirectory_to_paths("ardour2");
 
-	return spath;
+	return config_path;
 }
 
 } // namespace ARDOUR

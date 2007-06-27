@@ -23,8 +23,8 @@
 #include <pbd/failed_constructor.h>
 #include <pbd/xml++.h>
 #include <pbd/filesystem.h>
+#include <pbd/file_utils.h>
 
-#include <ardour/ardour.h>
 #include <ardour/configuration.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/control_protocol_manager.h>
@@ -80,16 +80,17 @@ Configuration::load_state ()
 {
 	bool found = false;
 
-	string rcfile;
+	sys::path system_rc_file;
 	
 	/* load system configuration first */
-
-	rcfile = find_config_file ("ardour_system.rc");
-
-	if (rcfile.length()) {
-
+	
+	if ( find_file_in_search_path (ardour_search_path() + system_config_search_path(),
+			"ardour_system.rc", system_rc_file) )
+	{
 		XMLTree tree;
 		found = true;
+
+		string rcfile = system_rc_file.to_string();
 
 		cerr << string_compose (_("loading system configuration file %1"), rcfile) << endl;
 		
@@ -106,16 +107,18 @@ Configuration::load_state ()
 		}
 	}
 
-
 	/* now load configuration file for user */
-	
-	rcfile = find_config_file ("ardour.rc");
 
-	if (rcfile.length()) {
+	sys::path user_rc_file;
 
+	if (find_file_in_search_path (ardour_search_path() + user_config_directory(),
+			"ardour.rc", user_rc_file))
+	{
 		XMLTree tree;
 		found = true;
-		
+	
+		string rcfile = user_rc_file.to_string();
+
 		cerr << string_compose (_("loading user configuration file %1"), rcfile) << endl;
 
 		if (!tree.read (rcfile)) {
