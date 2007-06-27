@@ -70,25 +70,6 @@ AudioLibrary::save_changes ()
 }
 
 string
-AudioLibrary::path2uri (string path)
-{
-	xmlURI temp;
-	memset(&temp, 0, sizeof(temp));
-	
-	xmlChar *cal = xmlCanonicPath((xmlChar*) path.c_str());
-	temp.path = (char *) cal;
-	xmlChar *ret = xmlSaveUri(&temp);
-	xmlFree(cal);
-	
-	stringstream uri;
-	uri << "file:" << (const char*) ret;
-	
-	xmlFree (ret);
-	
-	return uri.str();
-}
-
-string
 AudioLibrary::uri2path (string uri)
 {
 	string path = xmlURIUnescapeString(uri.c_str(), 0, 0);
@@ -101,7 +82,7 @@ AudioLibrary::set_tags (string member, vector<string> tags)
 	sort (tags.begin(), tags.end());
 	tags.erase (unique(tags.begin(), tags.end()), tags.end());
 	
-	string file_uri(path2uri(member));
+	const string file_uri(Glib::filename_to_uri (member));
 	
 	lrdf_remove_uri_matches (file_uri.c_str());
 	
@@ -116,7 +97,7 @@ AudioLibrary::get_tags (string member)
 	vector<string> tags;
 	
 	lrdf_statement pattern;
-	pattern.subject = strdup(path2uri(member).c_str());
+	pattern.subject = strdup(Glib::filename_to_uri(member).c_str());
 	pattern.predicate = TAG;
 	pattern.object = 0;
 	pattern.object_type = lrdf_literal;
