@@ -97,7 +97,6 @@ sigc::signal<void,bool> ARDOUR_UI::Blink;
 sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
 sigc::signal<void>      ARDOUR_UI::SuperRapidScreenUpdate;
 sigc::signal<void,nframes_t, bool, nframes_t> ARDOUR_UI::Clock;
-sigc::signal<int,string> ThemeChanged;
 
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
@@ -207,8 +206,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	gettimeofday (&last_peak_grab, 0);
 	gettimeofday (&last_shuttle_request, 0);
-
-	ThemeChanged.connect (mem_fun(*this, &ARDOUR_UI::load_rcfile));
 
 	ARDOUR::Diskstream::DiskOverrun.connect (mem_fun(*this, &ARDOUR_UI::disk_overrun_handler));
 	ARDOUR::Diskstream::DiskUnderrun.connect (mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
@@ -1526,7 +1523,8 @@ ARDOUR_UI::setup_theme ()
 		cerr << "Loading ui configuration file " << rcfile << endl;
 	}
 
-	ThemeChanged (rcfile); //EMIT SIGNAL
+	load_rcfile(rcfile);
+
 	theme_manager->setup_theme();
 }
 

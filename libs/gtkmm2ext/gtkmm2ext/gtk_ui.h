@@ -132,6 +132,8 @@ class UI : public Receiver, public AbstractUI<UIRequest>
 	sigc::signal<void> starting;
 	sigc::signal<void> stopping;
 
+	sigc::signal<void> theme_changed;
+
 	static bool just_hide_it (GdkEventAny *, Gtk::Window *);
 
 	static pthread_t the_gui_thread() { return gui_thread; }

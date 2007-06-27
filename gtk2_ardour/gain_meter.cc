@@ -32,6 +32,7 @@
 #include <gtkmm2ext/fastmeter.h>
 #include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/barcontroller.h>
+#include <gtkmm2ext/gtk_ui.h>
 #include <midi++/manager.h>
 #include <pbd/fastlog.h>
 
@@ -211,7 +212,7 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	ResetAllPeakDisplays.connect (mem_fun(*this, &GainMeter::reset_peak_display));
 	ResetGroupPeakDisplays.connect (mem_fun(*this, &GainMeter::reset_group_peak_display));
 
-	ThemeChanged.connect (mem_fun(*this, &GainMeter::redraw_pixmaps));
+	UI::instance()->theme_changed.connect (mem_fun(*this, &GainMeter::on_theme_changed));
 }
 
 void
@@ -317,11 +318,10 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 	return true;
 }
 
-int
-GainMeter::redraw_pixmaps(string blah)
+void
+GainMeter::on_theme_changed()
 {
 	style_changed = true;
-	return 0;
 }
 
 GainMeter::~GainMeter ()

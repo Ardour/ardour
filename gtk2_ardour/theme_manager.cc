@@ -33,7 +33,6 @@
 
 #include "theme_manager.h"
 #include "rgb_macros.h"
-#include "ardour_ui.h"
 
 #include "i18n.h"
 
@@ -178,14 +177,10 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 void
 ThemeManager::load_rc(int which)
 {
-		
 	if (which == 1) {
 		Config->set_ui_rc_file("ardour2_ui_dark.rc");
-		cerr << "dark theme selected" << endl;
-		
 	} else {
 		Config->set_ui_rc_file("ardour2_ui_light.rc");
-		cerr << "light theme selected" << endl;
 	}
 	
 	sys::path rc_file_path;
@@ -193,10 +188,7 @@ ThemeManager::load_rc(int which)
 	find_file_in_search_path (ardour_search_path() + system_config_search_path(),
 			Config->get_ui_rc_file(), rc_file_path);
 
-	ThemeChanged(rc_file_path.to_string()); //EMIT SIGNAL
-	
-	cerr << "load_rc() called " << rc_file_path.to_string() << endl;
-
+	Gtkmm2ext::UI::instance()->load_rcfile (rc_file_path.to_string());
 }
 
 void

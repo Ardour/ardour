@@ -201,6 +201,9 @@ UI::load_rcfile (string path)
 
 
 	RC::reset_styles(Gtk::Settings::get_default());
+	
+	theme_changed.emit();
+
 	return 0;
 }
 

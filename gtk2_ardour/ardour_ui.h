@@ -92,8 +92,6 @@ namespace ALSA {
 	class MultiChannelDevice;
 }
 
-extern sigc::signal<int,string> ThemeChanged;
-
 #define FRAME_NAME "BaseFrame"
 
 class ARDOUR_UI : public Gtkmm2ext::UI
