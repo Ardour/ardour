@@ -1,8 +1,9 @@
+#include <algorithm>
 
 #include <pbd/filesystem.h>
+#include <pbd/error.h>
 
 #include <ardour/template_utils.h>
-#include <ardour/ardour.h>
 #include <ardour/directory_names.h>
 #include <ardour/filesystem_paths.h>
 
@@ -11,10 +12,19 @@ namespace ARDOUR {
 sys::path
 system_template_directory ()
 {
-	sys::path p(get_system_data_path());
-	p /= templates_dir_name;
+	SearchPath spath(system_data_search_path());
+	spath.add_subdirectory_to_paths(templates_dir_name);
 
-	return p;
+	// just return the first directory in the search path that exists
+	SearchPath::const_iterator i = std::find_if(spath.begin(), spath.end(), sys::exists);
+
+	if (i == spath.end())
+	{
+		warning << "System template directory does not exist" << endmsg;
+		return sys::path("");
+	}
+
+	return *i;
 }
 
 sys::path
