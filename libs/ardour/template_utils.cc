@@ -4,6 +4,7 @@
 #include <ardour/template_utils.h>
 #include <ardour/ardour.h>
 #include <ardour/directory_names.h>
+#include <ardour/filesystem_paths.h>
 
 namespace ARDOUR {
 
@@ -19,7 +20,7 @@ system_template_directory ()
 sys::path
 user_template_directory ()
 {
-	sys::path p(get_user_ardour_path());
+	sys::path p(user_config_directory());
 	p /= templates_dir_name;
 
 	return p;
