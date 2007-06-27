@@ -23,19 +23,30 @@
 #include <algorithm>
 #include <pbd/error.h>
 #include <ardour/configuration.h>
+#include <ardour/filesystem_paths.h>
 #include <ardour/recent_sessions.h>
 #include <ardour/utils.h>
+
 #include "i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+namespace {
+
+	const char * const recent_file_name = "recent";
+
+} // anonymous
+
 int
 ARDOUR::read_recent_sessions (RecentSessions& rs)
 {
-	string path = get_user_ardour_path();
-	path += "/recent";
+	sys::path recent_file_path(user_config_directory());
+
+	recent_file_path /= recent_file_name;
+	
+	const string path = recent_file_path.to_string();
 
 	ifstream recent (path.c_str());
 	
@@ -82,8 +93,11 @@ ARDOUR::read_recent_sessions (RecentSessions& rs)
 int
 ARDOUR::write_recent_sessions (RecentSessions& rs)
 {
-	string path = get_user_ardour_path();
-	path += "/recent";
+	sys::path recent_file_path(user_config_directory());
+
+	recent_file_path /= recent_file_name;
+	
+	const string path = recent_file_path.to_string();
 
 	ofstream recent (path.c_str());
 
