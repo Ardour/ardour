@@ -40,6 +40,7 @@
 #include <pbd/failed_constructor.h>
 #include <pbd/enumwriter.h>
 #include <pbd/memento_command.h>
+#include <pbd/file_utils.h>
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
@@ -67,6 +68,7 @@
 #include <ardour/port.h>
 #include <ardour/audio_track.h>
 #include <ardour/midi_track.h>
+#include <ardour/filesystem_paths.h>
 
 #include "actions.h"
 #include "ardour_ui.h"
@@ -189,8 +191,14 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	have_disk_speed_dialog_displayed = false;
 	session_loaded = false;
 	last_speed_displayed = -1.0f;
-	keybindings_path = ARDOUR::find_config_file ("ardour.bindings");
 	ab_direction = true;
+
+	sys::path key_bindings_file;
+
+	find_file_in_search_path (ardour_search_path() + system_config_search_path(),
+			"ardour.bindings", key_bindings_file);
+
+	keybindings_path = key_bindings_file.to_string();
 
 	can_save_keybindings = false;
 
