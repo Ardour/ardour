@@ -516,14 +516,18 @@ get_icon (const char* cname)
 	string name = cname;
 	name += X_(".png");
 
-	string path = ARDOUR::find_data_file (name, "icons");
+	SearchPath spath(ARDOUR::ardour_search_path());
+	spath += ARDOUR::system_data_search_path();
 
-	if (path.empty()) {
+	spath.add_subdirectory_to_paths("icons");
+
+	sys::path data_file_path;
+
+	if(!find_file_in_search_path (spath, name, data_file_path)) {
 		fatal << string_compose (_("cannot find icon image for %1"), name) << endmsg;
-		/*NOTREACHED*/
 	}
 
-	return Gdk::Pixbuf::create_from_file (path);
+	return Gdk::Pixbuf::create_from_file (data_file_path.to_string());
 }
 
 string
