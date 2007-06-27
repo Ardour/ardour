@@ -32,6 +32,7 @@ chan_count.cc
 diskstream.cc
 directory_names.cc
 filename_extensions.cc
+filesystem_paths.cc
 find_session.cc
 template_utils.cc
 track.cc
