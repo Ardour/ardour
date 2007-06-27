@@ -142,11 +142,23 @@ int
 Configuration::save_state()
 {
 	XMLTree tree;
-	string rcfile;
 
-	rcfile = get_user_ardour_path ();
-	rcfile += "ardour.rc";
+	try
+	{
+		sys::create_directories (user_config_directory ());
+	}
+	catch (const sys::filesystem_error& ex)
+	{
+		error << "Could not create user configuration directory" << endmsg;
+		return -1;
+	}
+	
+	sys::path rcfile_path(user_config_directory());
 
+	rcfile_path /= "ardour.rc";
+	const string rcfile = rcfile_path.to_string();
+
+	// this test seems bogus?
 	if (rcfile.length()) {
 		tree.set_root (&get_state());
 		if (!tree.write (rcfile.c_str())){
