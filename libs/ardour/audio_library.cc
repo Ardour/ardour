@@ -69,13 +69,6 @@ AudioLibrary::save_changes ()
 	}
 }
 
-string
-AudioLibrary::uri2path (string uri)
-{
-	string path = xmlURIUnescapeString(uri.c_str(), 0, 0);
-	return path.substr(5);
-}
-
 void
 AudioLibrary::set_tags (string member, vector<string> tags)
 {
@@ -141,8 +134,8 @@ AudioLibrary::search_members_and (vector<string>& members, const vector<string> 
 	if (*head != 0) {
 		lrdf_uris* ulist = lrdf_match_multi(*head);
 		for (uint32_t j = 0; ulist && j < ulist->count; ++j) {
-//			cerr << "AND: " << uri2path(ulist->items[j]) << endl;
-			members.push_back(uri2path(ulist->items[j]));
+//			cerr << "AND: " << Glib::filename_from_uri(ulist->items[j]) << endl;
+			members.push_back(Glib::filename_from_uri(ulist->items[j]));
 		}
 		lrdf_free_uris(ulist);
 
