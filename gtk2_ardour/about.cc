@@ -25,8 +25,11 @@
 #include <ctime>
 #include <cstdlib>
 
+#include <pbd/file_utils.h>
+
 #include <ardour/ardour.h>
 #include <ardour/version.h>
+#include <ardour/filesystem_paths.h>
 
 #include "utils.h"
 #include "version.h"
@@ -179,11 +182,16 @@ About::About ()
 	string path;
 	string t;
 
-	path = find_data_file ("splash.png");
+	sys::path splash_file;
 
-	Glib::RefPtr<Pixbuf> pixbuf = Gdk::Pixbuf::create_from_file (path);
+	SearchPath spath(ardour_search_path() + system_data_search_path());
 
-	set_logo (Gdk::Pixbuf::create_from_file (path));
+	if (find_file_in_search_path (spath, "splash.png", splash_file)) {
+		set_logo (Gdk::Pixbuf::create_from_file (splash_file.to_string()));
+	} else {
+		error << "Could not find splash file" << endmsg;
+	}
+
 	set_authors (authors);
 
 	for (int n = 0; translators[n]; ++n) {
