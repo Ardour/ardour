@@ -48,8 +48,6 @@ static inline float f_max(float x, float a) {
 
 int cmp_nocase (const std::string& s, const std::string& s2);
 
-int tokenize_fullpath (std::string fullpath, std::string& path, std::string& name);
-
 int touch_file(Glib::ustring path);
 
 Glib::ustring path_expand (Glib::ustring);

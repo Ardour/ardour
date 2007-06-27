@@ -174,32 +174,6 @@ cmp_nocase (const string& s, const string& s2)
 }
 
 int
-tokenize_fullpath (string fullpath, string& path, string& name)
-{
-	string::size_type m = fullpath.find_last_of("/");
-	
-	if (m == string::npos) {
-		path = fullpath;
-		name = fullpath;
-		return 1;
-	}
-
-	// does it look like just a directory?
-	if (m == fullpath.length()-1) {
-		return -1;
-	}
-	path = fullpath.substr(0, m+1);
-	
-	string::size_type n = fullpath.find(".ardour", m);
-	// no .ardour?
-	if (n == string::npos) {
-		return -1;
-	}
-	name = fullpath.substr(m+1, n - m - 1);
-	return 1;
-}
-
-int
 touch_file (ustring path)
 {
 	int fd = open (path.c_str(), O_RDWR|O_CREAT, 0660);
