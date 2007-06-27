@@ -18,11 +18,18 @@
 */
 
 #include <pbd/error.h>
+#include <pbd/filesystem_paths.h>
 
 #include <glibmm/miscutils.h>
 
 #include <ardour/directory_names.h>
 #include <ardour/filesystem_paths.h>
+
+#define WITH_STATIC_PATHS 1
+
+namespace {
+	const char * const config_env_variable_name = "ARDOUR_CONFIG_PATH";
+}
 
 namespace ARDOUR {
 
@@ -55,6 +62,32 @@ ardour_module_directory ()
 	sys::path module_directory(MODULE_DIR);
 	module_directory /= "ardour2";
 	return module_directory;
+}
+
+SearchPath
+config_search_path ()
+{
+	bool config_path_defined = false;
+	SearchPath spath_env(Glib::getenv(config_env_variable_name, config_path_defined));
+
+	if (config_path_defined)
+	{
+		return spath_env;
+	}
+
+#ifdef WITH_STATIC_PATHS
+
+	SearchPath spath(string(CONFIG_DIR));
+
+#else
+
+	SearchPath spath(system_config_directories());
+
+#endif
+
+	spath.add_subdirectory_to_paths("ardour2");
+
+	return spath;
 }
 
 } // namespace ARDOUR

@@ -21,11 +21,12 @@
 #define ARDOUR_FILESYSTEM_PATHS_INCLUDED
 
 #include <pbd/filesystem.h>
+#include <pbd/search_path.h>
 
 namespace ARDOUR {
 
 	using namespace PBD;
-	
+
 	/**
 	 * @return the path to the directory used to store user specific ardour
 	 * configuration files.
@@ -37,6 +38,8 @@ namespace ARDOUR {
 	 * modules.
 	 */
 	sys::path ardour_module_directory ();
+
+	SearchPath config_search_path ();
 
 } // namespace ARDOUR
 
