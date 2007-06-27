@@ -152,18 +152,21 @@ PluginInsert::~PluginInsert ()
 }
 
 void
-PluginInsert::automation_list_creation_callback (uint32_t which, AutomationList& alist)
+PluginInsert::automation_list_creation_callback (ParamID which, AutomationList& alist)
 {
   alist.automation_state_changed.connect (sigc::bind (mem_fun (*this, &PluginInsert::auto_state_changed), (which)));
 }
 
 void
-PluginInsert::auto_state_changed (uint32_t which)
+PluginInsert::auto_state_changed (ParamID which)
 {
-	AutomationList& alist (automation_list (which));
+	if (which.type() != PluginAutomation)
+		return;
 
-	if (alist.automation_state() != Off) {
-		_plugins[0]->set_parameter (which, alist.eval (_session.transport_frame()));
+	AutomationList* alist = automation_list (which);
+
+	if (alist && alist->automation_state() != Off) {
+		_plugins[0]->set_parameter (which.id(), alist->eval (_session.transport_frame()));
 	}
 }
 
@@ -210,18 +213,21 @@ PluginInsert::is_generator() const
 void
 PluginInsert::set_automatable ()
 {
-	set<uint32_t> a;
+	set<ParamID> a;
 	
 	a = _plugins.front()->automatable ();
 
-	for (set<uint32_t>::iterator i = a.begin(); i != a.end(); ++i) {
+	for (set<ParamID>::iterator i = a.begin(); i != a.end(); ++i) {
 		can_automate (*i);
 	}
 }
 
 void
-PluginInsert::parameter_changed (uint32_t which, float val)
+PluginInsert::parameter_changed (ParamID which, float val)
 {
+	if (which.type() != PluginAutomation)
+		return;
+
 	vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin();
 
 	/* don't set the first plugin, just all the slaves */
@@ -270,14 +276,14 @@ PluginInsert::connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t off
 
 	if (with_auto) {
 
-		map<uint32_t,AutomationList*>::iterator li;
+		map<ParamID,AutomationList*>::iterator li;
 		uint32_t n;
 		
 		for (n = 0, li = _parameter_automation.begin(); li != _parameter_automation.end(); ++li, ++n) {
 			
 			AutomationList& alist (*((*li).second));
 
-			if (alist.automation_playback()) {
+			if (alist.param_id().type() == PluginAutomation && alist.automation_playback()) {
 				bool valid;
 
 				float val = alist.rt_safe_eval (now, valid);				
@@ -301,12 +307,13 @@ PluginInsert::connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t off
 void
 PluginInsert::automation_snapshot (nframes_t now)
 {
-	map<uint32_t,AutomationList*>::iterator li;
+	map<ParamID,AutomationList*>::iterator li;
 	
 	for (li =_parameter_automation.begin(); li !=_parameter_automation.end(); ++li) {
 		
 		AutomationList *alist = ((*li).second);
-		if (alist != 0 && alist->automation_write ()) {
+		if (alist != 0 && alist->param_id().type() == PluginAutomation
+				&& alist->automation_write ()) {
 			
 			float val = _plugins[0]->get_parameter ((*li).first);
 			alist->rt_add (now, val);
@@ -318,13 +325,13 @@ PluginInsert::automation_snapshot (nframes_t now)
 void
 PluginInsert::transport_stopped (nframes_t now)
 {
-	map<uint32_t,AutomationList*>::iterator li;
+	map<ParamID,AutomationList*>::iterator li;
 
 	for (li =_parameter_automation.begin(); li !=_parameter_automation.end(); ++li) {
 		AutomationList& alist (*(li->second));
 		alist.reposition_for_rt_add (now);
 
-		if (alist.automation_state() != Off) {
+		if (alist.param_id().type() == PluginAutomation && alist.automation_state() != Off) {
 			_plugins[0]->set_parameter (li->first, alist.eval (now));
 		}
 	}
@@ -374,14 +381,17 @@ PluginInsert::run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, 
 }
 
 void
-PluginInsert::set_parameter (uint32_t port, float val)
+PluginInsert::set_parameter (ParamID param, float val)
 {
+	if (param.type() != PluginAutomation)
+		return;
+
 	/* the others will be set from the event triggered by this */
 
-	_plugins[0]->set_parameter (port, val);
+	_plugins[0]->set_parameter (param.id(), val);
 	
-	if (automation_list (port).automation_write()) {
-		automation_list (port).add (_session.audible_frame(), val);
+	if (automation_list (param) && automation_list (param)->automation_write()) {
+		automation_list (param)->add (_session.audible_frame(), val);
 	}
 
 	_session.set_dirty();
@@ -432,63 +442,18 @@ PluginInsert::automation_run (BufferSet& bufs, nframes_t nframes, nframes_t offs
 }	
 
 float
-PluginInsert::default_parameter_value (uint32_t port)
+PluginInsert::default_parameter_value (ParamID param)
 {
+	if (param.type() != PluginAutomation)
+		return 1.0;
+
 	if (_plugins.empty()) {
 		fatal << _("programming error: ") << X_("PluginInsert::default_parameter_value() called with no plugin")
 		      << endmsg;
 		/*NOTREACHED*/
 	}
 
-	return _plugins[0]->default_value (port);
-}
-	
-void
-PluginInsert::set_port_automation_state (uint32_t port, AutoState s)
-{
-	if (port < _plugins[0]->parameter_count()) {
-		
-		AutomationList& al = automation_list (port);
-
-		if (s != al.automation_state()) {
-			al.set_automation_state (s);
-			_session.set_dirty ();
-		}
-	}
-}
-
-AutoState
-PluginInsert::get_port_automation_state (uint32_t port)
-{
-	if (port < _plugins[0]->parameter_count()) {
-		return automation_list (port).automation_state();
-	} else {
-		return Off;
-	}
-}
-
-void
-PluginInsert::protect_automation ()
-{
-	set<uint32_t> automated_params;
-
-	what_has_automation (automated_params);
-
-	for (set<uint32_t>::iterator i = automated_params.begin(); i != automated_params.end(); ++i) {
-
-		AutomationList& al = automation_list (*i);
-
-		switch (al.automation_state()) {
-		case Write:
-			al.set_automation_state (Off);
-			break;
-		case Touch:
-			al.set_automation_state (Play);
-			break;
-		default:
-			break;
-		}
-	}
+	return _plugins[0]->default_value (param.id());
 }
 
 boost::shared_ptr<Plugin>
@@ -684,16 +649,18 @@ PluginInsert::state (bool full)
 
 	/* add port automation state */
 	XMLNode *autonode = new XMLNode(port_automation_node_name);
-	set<uint32_t> automatable = _plugins[0]->automatable();
+	set<ParamID> automatable = _plugins[0]->automatable();
 	
-	for (set<uint32_t>::iterator x =  automatable.begin(); x != automatable.end(); ++x) {
+	for (set<ParamID>::iterator x = automatable.begin(); x != automatable.end(); ++x) {
 		
-		XMLNode* child = new XMLNode("port");
+		/*XMLNode* child = new XMLNode("port");
 		snprintf(buf, sizeof(buf), "%" PRIu32, *x);
 		child->add_property("number", string(buf));
 		
 		child->add_child_nocopy (automation_list (*x).state (full));
 		autonode->add_child_nocopy (*child);
+		*/
+		autonode->add_child_nocopy (automation_list (*x)->state (full));
 	}
 
 	node.add_child_nocopy (*autonode);
@@ -824,7 +791,7 @@ PluginInsert::set_state(const XMLNode& node)
 			}
 
 			if (!child->children().empty()) {
-				automation_list (port_id).set_state (*child->children().front());
+				automation_list (ParamID(PluginAutomation, port_id), true)->set_state (*child->children().front());
 			} else {
 				if ((cprop = child->property("auto")) != 0) {
 					
@@ -832,13 +799,13 @@ PluginInsert::set_state(const XMLNode& node)
 
 					int x;
 					sscanf (cprop->value().c_str(), "0x%x", &x);
-					automation_list (port_id).set_automation_state (AutoState (x));
+					automation_list (ParamID(PluginAutomation, port_id), true)->set_automation_state (AutoState (x));
 
 				} else {
 					
 					/* missing */
 					
-					automation_list (port_id).set_automation_state (Off);
+					automation_list (ParamID(PluginAutomation, port_id), true)->set_automation_state (Off);
 				}
 			}
 
@@ -860,9 +827,12 @@ PluginInsert::set_state(const XMLNode& node)
 }
 
 string
-PluginInsert::describe_parameter (uint32_t what)
+PluginInsert::describe_parameter (ParamID param)
 {
-	return _plugins[0]->describe_parameter (what);
+	if (param.type() != PluginAutomation)
+		return Automatable::describe_parameter(param);
+
+	return _plugins[0]->describe_parameter (param);
 }
 
 ARDOUR::nframes_t 

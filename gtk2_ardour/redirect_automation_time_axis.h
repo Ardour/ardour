@@ -24,6 +24,7 @@
 
 #include "canvas.h"
 #include "automation_time_axis.h"
+#include <ardour/param_id.h>
 
 namespace ARDOUR {
 	class Redirect;
@@ -38,7 +39,7 @@ class RedirectAutomationTimeAxisView : public AutomationTimeAxisView
 					TimeAxisView& parent,
 					ArdourCanvas::Canvas& canvas,
 					std::string name,
-					uint32_t port,
+					ARDOUR::ParamID param,
 					ARDOUR::Insert& i,
 					std::string state_name);
 
@@ -52,7 +53,7 @@ class RedirectAutomationTimeAxisView : public AutomationTimeAxisView
 	
    private:
 	ARDOUR::Insert& insert;
-        uint32_t port;
+	ARDOUR::ParamID param;
 
 	XMLNode *xml_node;
 	void ensure_xml_node();

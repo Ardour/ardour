@@ -76,13 +76,9 @@ class PluginInsert : public Insert
 
 	bool is_generator() const;
 
-	void set_parameter (uint32_t port, float val);
+	void set_parameter (ParamID param, float val);
 
-	AutoState get_port_automation_state (uint32_t port);
-	void set_port_automation_state (uint32_t port, AutoState);
-	void protect_automation ();
-
-	float default_parameter_value (uint32_t which);
+	float default_parameter_value (ParamID param);
 
 	boost::shared_ptr<Plugin> plugin(uint32_t num=0) const {
 		if (num < _plugins.size()) { 
@@ -94,7 +90,7 @@ class PluginInsert : public Insert
 
 	PluginType type ();
 
-	string describe_parameter (uint32_t);
+	string describe_parameter (ParamID param);
 
 	nframes_t latency();
 
@@ -103,7 +99,7 @@ class PluginInsert : public Insert
 
   private:
 
-	void parameter_changed (uint32_t, float);
+	void parameter_changed (ParamID, float);
 	
 	std::vector<boost::shared_ptr<Plugin> > _plugins;
 	
@@ -112,8 +108,8 @@ class PluginInsert : public Insert
 
 	void init ();
 	void set_automatable ();
-	void auto_state_changed (uint32_t which);
-	void automation_list_creation_callback (uint32_t, AutomationList&);
+	void auto_state_changed (ParamID which);
+	void automation_list_creation_callback (ParamID, AutomationList&);
 
 	int32_t count_for_configuration (ChanCount in, ChanCount out) const;
 

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2003 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,37 +17,28 @@
 
 */
 
-#include <sigc++/signal.h>
+#ifndef __ardour_gtk_automation_midi_cc_line_h__
+#define __ardour_gtk_automation_midi_cc_line_h__
 
-#include <ardour/curve.h>
+#include <ardour/ardour.h>
 
-#include "canvas_impl.h"
-#include "public_editor.h"
-#include "automation_pan_line.h"
-#include "utils.h"
-#include <cmath>
+#include "canvas.h"
+#include "automation_line.h"
 
-using namespace ARDOUR;
-using namespace PBD;
+class TimeAxisView;
 
-AutomationPanLine::AutomationPanLine (const string & name, TimeAxisView& tv, ArdourCanvas::Group& parent, AutomationList& l)
-
-	: AutomationLine (name, tv, parent, l)
+class AutomationMidiCCLine : public AutomationLine
 {
-}
+  public:
+	AutomationMidiCCLine (const string & name, TimeAxisView&, ArdourCanvas::Group& parent, ARDOUR::AutomationList&);
+	
+	void view_to_model_y (double&);
+	void model_to_view_y (double&);
+	
+	string get_verbose_cursor_string (float);
+};
 
-void
-AutomationPanLine::view_to_model_y (double& y)
-{
-	// vertical coordinate axis reversal
-	y = 1.0 - y;
-}
 
-void
-AutomationPanLine::model_to_view_y (double& y)
-{
-	// vertical coordinate axis reversal
-	y = 1.0 - y;
-}
+#endif /* __ardour_gtk_automation_midi_cc_line_h__ */
 
 

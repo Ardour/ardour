@@ -48,6 +48,7 @@
 #include "ardour_ui.h"
 #include "midi_time_axis.h"
 #include "automation_time_axis.h"
+#include "automation_midi_cc_line.h"
 #include "canvas_impl.h"
 #include "crossfade_view.h"
 #include "enums.h"
@@ -61,6 +62,7 @@
 #include "public_editor.h"
 #include "redirect_automation_line.h"
 #include "redirect_automation_time_axis.h"
+#include "midi_controller_time_axis.h"
 #include "region_view.h"
 #include "rgb_macros.h"
 #include "selection.h"
@@ -147,30 +149,67 @@ MidiTimeAxisView::hide ()
 }
 
 void
-MidiTimeAxisView::set_state (const XMLNode& node)
+MidiTimeAxisView::build_automation_action_menu ()
 {
-	const XMLProperty *prop;
+	using namespace Menu_Helpers;
+
+	RouteTimeAxisView::build_automation_action_menu ();
+
+	MenuList& automation_items = automation_action_menu->items();
 	
-	TimeAxisView::set_state (node);
+	automation_items.push_back (SeparatorElem());
+
+	automation_items.push_back (MenuElem (_("Controller..."), 
+						   mem_fun(*this, &MidiTimeAxisView::add_controller_track)));
+}
+
+/** Prompt for a controller with a dialog and add an automation track for it
+ */
+void
+MidiTimeAxisView::add_controller_track()
+{
+	/* TODO: fancy controller selection dialog here... */
+
+	ParamID param(MidiCCAutomation, 7);
+	create_automation_child(param);
+}
+
+void
+MidiTimeAxisView::create_automation_child (ParamID param)
+{
+	if (param.type() == MidiCCAutomation) {
 	
-	if ((prop = node.property ("shown_editor")) != 0) {
-		if (prop->value() == "no") {
-			_marked_for_display = false;
-		} else {
-			_marked_for_display = true;
-		}
+		/* FIXME: this all probably leaks */
+
+		ARDOUR::AutomationList* al = _route->automation_list(param);
+
+		if (!al)
+			al = new ARDOUR::AutomationList(param, 0, 127, 64);
+
+		_route->add_automation_parameter(al);
+
+		MidiControllerTimeAxisView* track = new MidiControllerTimeAxisView (_session,
+				_route,
+				editor,
+				*this,
+				parent_canvas,
+				_route->describe_parameter(param),
+				param,
+				*al);
+
+		AutomationMidiCCLine* line = new AutomationMidiCCLine (param.to_string(),
+				*track,
+				*track->canvas_display,
+				*al);
+
+		line->set_line_color (Config->canvasvar_AutomationLine.get());
+
+		track->add_line(*line);
+
+		add_automation_child(param, track);
+
 	} else {
-		_marked_for_display = true;
-	}
-	
-	XMLNodeList nlist = node.children();
-	XMLNodeConstIterator niter;
-	XMLNode *child_node;
-	
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		child_node = *niter;
-		
-		// uh... do stuff..
+		error << "MidiTimeAxisView: unknown automation child " << param.to_string() << endmsg;
 	}
 }
 
@@ -203,11 +242,5 @@ MidiTimeAxisView::route_active_changed ()
 			controls_base_unselected_name = "BusControlsBaseInactiveUnselected";
 		}
 	}
-}
-
-XMLNode* 
-MidiTimeAxisView::get_child_xml_node (const string & childname)
-{
-	return RouteUI::get_child_xml_node (childname);
 }
 

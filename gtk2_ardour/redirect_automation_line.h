@@ -34,10 +34,10 @@ class TimeAxisView;
 class RedirectAutomationLine : public AutomationLine
 {
   public:
-	RedirectAutomationLine (const string & name, ARDOUR::Insert&, uint32_t port, ARDOUR::Session&, TimeAxisView&, 
+	RedirectAutomationLine (const string & name, ARDOUR::Insert&, ARDOUR::ParamID param, ARDOUR::Session&, TimeAxisView&, 
 				ArdourCanvas::Group& parent, ARDOUR::AutomationList&);
 	
-	uint32_t port() const { return _port; }
+	ARDOUR::ParamID param() const { return _param; }
 	ARDOUR::Insert& insert() const { return _insert; }
 
 	string get_verbose_cursor_string (float);
@@ -45,7 +45,7 @@ class RedirectAutomationLine : public AutomationLine
   private:
 	ARDOUR::Session& session;
 	ARDOUR::Insert& _insert;
-	uint32_t _port;
+	ARDOUR::ParamID _param;
 	float upper;
 	float lower;
 	float range;

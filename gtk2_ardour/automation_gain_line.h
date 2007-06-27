@@ -25,23 +25,15 @@
 #include "canvas.h"
 #include "automation_line.h"
 
-namespace ARDOUR {
-	class Session;
-}
-
 class TimeAxisView;
 
 class AutomationGainLine : public AutomationLine
 {
   public:
-	AutomationGainLine (const string & name, ARDOUR::Session&, TimeAxisView&, ArdourCanvas::Group& parent, ARDOUR::Curve&);
+	AutomationGainLine (const string & name, TimeAxisView&, ArdourCanvas::Group& parent, ARDOUR::AutomationList&);
 	
 	void view_to_model_y (double&);
 	void model_to_view_y (double&);
-
-  private:
-	ARDOUR::Session& session;
-
 };
 
 

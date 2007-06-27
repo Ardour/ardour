@@ -1019,7 +1019,7 @@ void MackieControlProtocol::notify_panner_changed( RouteSignal * route_signal )
 // TODO handle plugin automation polling
 void MackieControlProtocol::update_automation( RouteSignal & rs )
 {
-	ARDOUR::AutoState gain_state = rs.route().gain_automation_state();
+	ARDOUR::AutoState gain_state = rs.route().gain_automation().automation_state();
 	if ( gain_state == Touch || gain_state == Play )
 	{
 		notify_gain_changed( &rs );

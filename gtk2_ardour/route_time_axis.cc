@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+#include <utility>
 
 #include <sigc++/bind.h>
 
@@ -50,6 +51,7 @@
 #include <ardour/session.h>
 #include <ardour/session_playlist.h>
 #include <ardour/utils.h>
+#include <ardour/param_id.h>
 
 #include "ardour_ui.h"
 #include "route_time_axis.h"
@@ -80,6 +82,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
 using namespace Editing;
+using namespace sigc;
 
 
 RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::shared_ptr<Route> rt, Canvas& canvas)
@@ -252,6 +255,58 @@ RouteTimeAxisView::playlist_modified ()
 {
 }
 
+void
+RouteTimeAxisView::set_state (const XMLNode& node)
+{
+	const XMLProperty *prop;
+	
+	TimeAxisView::set_state (node);
+	
+	if ((prop = node.property ("shown_editor")) != 0) {
+		if (prop->value() == "no") {
+			_marked_for_display = false;
+		} else {
+			_marked_for_display = true;
+		}
+	} else {
+		_marked_for_display = true;
+	}
+	
+	XMLNodeList nlist = node.children();
+	XMLNodeConstIterator niter;
+	XMLNode *child_node;
+	
+	_show_automation.clear();
+	
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		child_node = *niter;
+		
+		ParamID param(child_node->name());
+
+		if (param) {
+		
+			cerr << "RTAV::set_state parameter: " << param.to_string() << endl;
+			
+			XMLProperty* prop = child_node->property ("shown");
+			
+			if (_automation_tracks.find(param) == _automation_tracks.end())
+				create_automation_child(param);
+
+			if (prop != 0 && prop->value() == "yes")
+				_show_automation.insert(ParamID(GainAutomation));
+
+		} else {
+			cerr << "RTAV: no parameter " << child_node->name() << endl;
+		}
+	}
+}
+
+XMLNode* 
+RouteTimeAxisView::get_child_xml_node (const string & childname)
+{
+	return RouteUI::get_child_xml_node (childname);
+}
+
 gint
 RouteTimeAxisView::edit_click (GdkEventButton *ev)
 {
@@ -386,6 +441,24 @@ RouteTimeAxisView::build_automation_action_menu ()
 					      mem_fun(*this, &RouteTimeAxisView::hide_all_automation)));
 
 	automation_items.push_back (MenuElem (_("Plugins"), subplugin_menu));
+	
+	map<ARDOUR::ParamID, RouteAutomationNode*>::iterator i;
+	for (i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
+
+		automation_items.push_back (SeparatorElem());
+
+		if ( ! i->second->menu_item) {
+			automation_items.push_back(CheckMenuElem (_route->describe_parameter(i->second->param), 
+					bind (mem_fun(*this, &RouteTimeAxisView::toggle_automation_track), i->second->param)));
+
+			i->second->menu_item = static_cast<Gtk::CheckMenuItem*>(&automation_items.back());
+
+		} else {
+			automation_items.push_back (*i->second->menu_item);
+		}
+		
+		i->second->menu_item->set_active(show_automation(i->second->param));
+	}
 }
 
 void
@@ -1092,6 +1165,33 @@ RouteTimeAxisView::get_inverted_selectables (Selection& sel, list<Selectable*>& 
 	return;
 }
 
+bool
+RouteTimeAxisView::show_automation(ParamID param)
+{
+	return (_show_automation.find(param) != _show_automation.end());
+}
+
+/** Retuns NULL if track for \a param doesn't exist.
+ */
+RouteTimeAxisView::RouteAutomationNode*
+RouteTimeAxisView::automation_track(ParamID param)
+{
+	map<ARDOUR::ParamID, RouteAutomationNode*>::iterator i = _automation_tracks.find(param);
+
+	if (i != _automation_tracks.end())
+		return i->second;
+	else
+		return NULL;
+}
+
+/** Shorthand for GainAutomation, etc.
+ */	
+RouteTimeAxisView::RouteAutomationNode*
+RouteTimeAxisView::automation_track(AutomationType type)
+{
+	return automation_track(ParamID(type));
+}
+
 RouteGroup*
 RouteTimeAxisView::edit_group() const
 {
@@ -1380,9 +1480,69 @@ RouteTimeAxisView::color_handler ()
 }
 
 void
+RouteTimeAxisView::toggle_automation_track (ParamID param)
+{
+	RouteAutomationNode* node = automation_track(param);
+
+	if (!node)
+		return;
+
+	bool showit = node->menu_item->get_active();
+
+	if (showit != node->track->marked_for_display()) {
+		if (showit) {
+			node->track->set_marked_for_display (true);
+			node->track->canvas_display->show();
+			node->track->get_state_node()->add_property ("shown", X_("yes"));
+		} else {
+			node->track->set_marked_for_display (false);
+			node->track->hide ();
+			node->track->get_state_node()->add_property ("shown", X_("no"));
+		}
+
+		/* now trigger a redisplay */
+		
+		if (!no_redraw) {
+			 _route->gui_changed (X_("track_height"), (void *) 0); /* EMIT_SIGNAL */
+		}
+	}
+}
+
+void
+RouteTimeAxisView::automation_track_hidden (ParamID param)
+{
+	RouteAutomationNode* ran = automation_track(param);
+	if (!ran)
+		return;
+
+	_show_automation.erase(param);
+	ran->track->get_state_node()->add_property (X_("shown"), X_("no"));
+
+	if (ran->menu_item && !_hidden) {
+		ran->menu_item->set_active (false);
+	}
+
+	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+}
+
+
+void
 RouteTimeAxisView::show_all_automation ()
 {
 	no_redraw = true;
+	
+	/* Show our automation */
+
+	map<ARDOUR::ParamID, RouteAutomationNode*>::iterator i;
+	for (i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
+		i->second->track->set_marked_for_display (true);
+		i->second->track->canvas_display->show();
+		i->second->track->get_state_node()->add_property ("shown", X_("yes"));
+		i->second->menu_item->set_active(true);
+	}
+
+
+	/* Show insert automation */
 
 	for (list<InsertAutomationInfo*>::iterator i = insert_automation.begin(); i != insert_automation.end(); ++i) {
 		for (vector<InsertAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
@@ -1396,6 +1556,9 @@ RouteTimeAxisView::show_all_automation ()
 
 	no_redraw = false;
 
+
+	/* Redraw */
+
 	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 }
 
@@ -1403,6 +1566,22 @@ void
 RouteTimeAxisView::show_existing_automation ()
 {
 	no_redraw = true;
+	
+	/* Show our automation */
+
+	map<ARDOUR::ParamID, RouteAutomationNode*>::iterator i;
+	for (i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
+		// FIXME: only shown if /first/ line has points
+		if (!i->second->track->lines.empty() && i->second->track->lines[0]->npoints() > 0) {
+			i->second->track->set_marked_for_display (true);
+			i->second->track->canvas_display->show();
+			i->second->track->get_state_node()->add_property ("shown", X_("yes"));
+			i->second->menu_item->set_active(true);
+		}
+	}
+
+
+	/* Show insert automation */
 
 	for (list<InsertAutomationInfo*>::iterator i = insert_automation.begin(); i != insert_automation.end(); ++i) {
 		for (vector<InsertAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
@@ -1477,7 +1656,7 @@ RouteTimeAxisView::remove_ran (InsertAutomationNode* ran)
 }
 
 RouteTimeAxisView::InsertAutomationNode*
-RouteTimeAxisView::find_insert_automation_node (boost::shared_ptr<Insert> insert, uint32_t what)
+RouteTimeAxisView::find_insert_automation_node (boost::shared_ptr<Insert> insert, ParamID what)
 {
 	for (list<InsertAutomationInfo*>::iterator i = insert_automation.begin(); i != insert_automation.end(); ++i) {
 
@@ -1514,7 +1693,7 @@ legalize_for_xml_node (string str)
 
 
 void
-RouteTimeAxisView::add_insert_automation_curve (boost::shared_ptr<Insert> insert, uint32_t what)
+RouteTimeAxisView::add_insert_automation_curve (boost::shared_ptr<Insert> insert, ParamID what)
 {
 	RedirectAutomationLine* ral;
 	string name;
@@ -1538,13 +1717,13 @@ RouteTimeAxisView::add_insert_automation_curve (boost::shared_ptr<Insert> insert
 	/* create a string that is a legal XML node name that can be used to refer to this redirect+port combination */
 
 	char state_name[256];
-	snprintf (state_name, sizeof (state_name), "Redirect-%s-%" PRIu32, legalize_for_xml_node (insert->name()).c_str(), what);
+	snprintf (state_name, sizeof (state_name), "Redirect-%s-%" PRIu32, legalize_for_xml_node (insert->name()).c_str(), what.id());
 
 	ran->view = new RedirectAutomationTimeAxisView (_session, _route, editor, *this, parent_canvas, name, what, *insert, state_name);
 
 	ral = new RedirectAutomationLine (name, 
 					  *insert, what, _session, *ran->view,
-					  *ran->view->canvas_display, insert->automation_list (what));
+					  *ran->view->canvas_display, *insert->automation_list (what, true));
 	
 	ral->set_line_color (Config->canvasvar_RedirectAutomationLine.get());
 	ral->queue_reset ();
@@ -1583,12 +1762,12 @@ RouteTimeAxisView::insert_automation_track_hidden (RouteTimeAxisView::InsertAuto
 void
 RouteTimeAxisView::add_existing_insert_automation_curves (boost::shared_ptr<Insert> insert)
 {
-	set<uint32_t> s;
+	set<ParamID> s;
 	RedirectAutomationLine *ral;
 
 	insert->what_has_visible_automation (s);
 
-	for (set<uint32_t>::iterator i = s.begin(); i != s.end(); ++i) {
+	for (set<ParamID>::iterator i = s.begin(); i != s.end(); ++i) {
 		
 		if ((ral = find_insert_automation_curve (insert, *i)) != 0) {
 			ral->queue_reset ();
@@ -1599,14 +1778,47 @@ RouteTimeAxisView::add_existing_insert_automation_curves (boost::shared_ptr<Inse
 }
 
 void
+RouteTimeAxisView::add_automation_child(ParamID param, AutomationTimeAxisView* track)
+{
+	using namespace Menu_Helpers;
+
+	XMLProperty* prop;
+
+	add_child (track);
+
+	track->Hiding.connect (bind (mem_fun (*this, &RouteTimeAxisView::automation_track_hidden), param));
+
+	bool hideit = true;
+	
+	XMLNode* node;
+
+	if ((node = track->get_state_node()) != 0) {
+		if  ((prop = node->property ("shown")) != 0) {
+			if (prop->value() == "yes") {
+				hideit = false;
+			}
+		} 
+	}
+
+	if (hideit) {
+		track->hide ();
+	} else {
+		_show_automation.insert(param);
+	}
+		
+	_automation_tracks.insert(std::make_pair(param, new RouteAutomationNode(param, NULL, track)));
+}
+
+
+void
 RouteTimeAxisView::add_insert_to_subplugin_menu (boost::shared_ptr<Insert> insert)
 {
 	using namespace Menu_Helpers;
 	InsertAutomationInfo *rai;
 	list<InsertAutomationInfo*>::iterator x;
 	
-	const std::set<uint32_t>& automatable = insert->what_can_be_automated ();
-	std::set<uint32_t> has_visible_automation;
+	const std::set<ParamID>& automatable = insert->what_can_be_automated ();
+	std::set<ParamID> has_visible_automation;
 
 	insert->what_has_visible_automation(has_visible_automation);
 
@@ -1641,7 +1853,7 @@ RouteTimeAxisView::add_insert_to_subplugin_menu (boost::shared_ptr<Insert> inser
 
 	items.clear ();
 
-	for (std::set<uint32_t>::const_iterator i = automatable.begin(); i != automatable.end(); ++i) {
+	for (std::set<ParamID>::const_iterator i = automatable.begin(); i != automatable.end(); ++i) {
 
 		InsertAutomationNode* ran;
 		CheckMenuItem* mitem;
@@ -1755,7 +1967,7 @@ RouteTimeAxisView::inserts_changed ()
 }
 
 RedirectAutomationLine *
-RouteTimeAxisView::find_insert_automation_curve (boost::shared_ptr<Insert> insert, uint32_t what)
+RouteTimeAxisView::find_insert_automation_curve (boost::shared_ptr<Insert> insert, ParamID what)
 {
 	InsertAutomationNode* ran;
 

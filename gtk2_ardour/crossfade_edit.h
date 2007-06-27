@@ -33,7 +33,7 @@
 namespace ARDOUR
 {
 	class Session;
-	class Curve;
+	class AutomationList;
 	class Crossfade;
 }
 
@@ -105,8 +105,8 @@ class CrossfadeEditor : public ArdourDialog
 	    ArdourCanvas::Line*     line;
 	    ArdourCanvas::Polygon*  shading;
 	    list<Point*>            points;
-	    ARDOUR::Curve           normative_curve; /* 0 - 1.0, linear */
-	    ARDOUR::Curve           gain_curve;      /* 0 - 2.0, gain mapping */
+	    ARDOUR::AutomationList  normative_curve; /* 0 - 1.0, linear */
+	    ARDOUR::AutomationList  gain_curve;      /* 0 - 2.0, gain mapping */
 	    vector<ArdourCanvas::WaveView*>  waves;
 	    
 	    Half();
@@ -176,7 +176,7 @@ class CrossfadeEditor : public ArdourDialog
 	double x_coordinate (double& xfract) const;
 	double y_coordinate (double& yfract) const;
     
-	void set (const ARDOUR::Curve& alist, WhichFade);
+	void set (const ARDOUR::AutomationList& alist, WhichFade);
 
 	sigc::connection peaks_ready_connection;
 

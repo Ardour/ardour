@@ -25,7 +25,7 @@
 
 namespace ARDOUR {
 
-struct Gain : public Curve {
+struct Gain : public AutomationList {
 
     Gain();
     Gain (const Gain&);

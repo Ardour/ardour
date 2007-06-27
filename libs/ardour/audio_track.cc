@@ -599,10 +599,10 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 		/* don't waste time with automation if we're recording or we've just stopped (yes it can happen) */
 
 		if (!diskstream->record_enabled() && _session.transport_rolling()) {
-			Glib::Mutex::Lock am (automation_lock, Glib::TRY_LOCK);
+			Glib::Mutex::Lock am (_automation_lock, Glib::TRY_LOCK);
 			
-			if (am.locked() && _gain_automation_curve.automation_playback()) {
-				apply_gain_automation = _gain_automation_curve.rt_safe_get_vector (start_frame, end_frame, _session.gain_automation_buffer(), nframes);
+			if (am.locked() && gain_automation().automation_playback()) {
+				apply_gain_automation = gain_automation().curve().rt_safe_get_vector (start_frame, end_frame, _session.gain_automation_buffer(), nframes);
 			}
 		}
 
@@ -696,9 +696,9 @@ AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes
 		}
 	}
 	
-	if (_gain_automation_curve.automation_state() == Play) {
+	if (IO::gain_automation().automation_state() == Play) {
 		
-		_gain_automation_curve.get_vector (start, start + nframes, gain_automation, nframes);
+		IO::gain_automation().curve().get_vector (start, start + nframes, gain_automation, nframes);
 
 		for (BufferSet::audio_iterator bi = buffers.audio_begin(); bi != buffers.audio_end(); ++bi) {
 			Sample *b = bi->data();

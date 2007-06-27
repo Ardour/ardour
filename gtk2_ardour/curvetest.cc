@@ -33,7 +33,7 @@ curvetest (string filename)
 {
 	ifstream in (filename.c_str());
 	stringstream line;
-	Curve c (-1.0, +1.0, 0, true);
+	AutomationList al (ParamID(), -1.0, +1.0, 0);
 	double minx = DBL_MAX;
 	double maxx = DBL_MIN;
 
@@ -55,13 +55,13 @@ curvetest (string filename)
 			maxx = x;
 		}
 		
-		c.add (x, y);
+		al.add (x, y);
 	}
 
 
 	float foo[1024];
 
-	c.get_vector (minx, maxx, foo, 1024);
+	al.curve().get_vector (minx, maxx, foo, 1024);
 	
 	for (int i = 0; i < 1024; ++i) {
 	        cout << minx + (((double) i / 1024.0) * (maxx - minx)) << ' ' << foo[i] << endl;

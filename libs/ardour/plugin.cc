@@ -94,7 +94,7 @@ Plugin::get_nth_control (uint32_t n)
 
 		get_parameter_descriptor (n, desc);
 	
-		controls[n] = new PortControllable (describe_parameter (n), *this, n, 
+		controls[n] = new PortControllable (describe_parameter (ParamID(PluginAutomation, n)), *this, n, 
 						    desc.lower, desc.upper, desc.toggled, desc.logarithmic);
 	} 
 

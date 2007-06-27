@@ -93,12 +93,20 @@ namespace ARDOUR {
 	OverlapType coverage (nframes_t start_a, nframes_t end_a,
 			      nframes_t start_b, nframes_t end_b);
 
+	/** See param_id.h
+	 * XXX: I don't think/hope these hex values matter anymore.
+	 */
 	enum AutomationType {
+		NullAutomation = 0x0,
 		GainAutomation = 0x1,
 		PanAutomation = 0x2,
 		PluginAutomation = 0x4,
 		SoloAutomation = 0x8,
-		MuteAutomation = 0x10
+		MuteAutomation = 0x10,
+		MidiCCAutomation = 0x20,
+		FadeInAutomation = 0x40,
+		FadeOutAutomation = 0x80,
+		EnvelopeAutomation = 0x100
 	};
 
 	enum AutoState {

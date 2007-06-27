@@ -31,6 +31,7 @@
 #include <ardour/chan_count.h>
 #include <ardour/plugin_state.h>
 #include <ardour/cycles.h>
+#include <ardour/param_id.h>
 
 #include <vector>
 #include <set>
@@ -121,10 +122,10 @@ class Plugin : public PBD::StatefulDestructible
 
 	virtual int connect_and_run (BufferSet& bufs, uint32_t& in, uint32_t& out, nframes_t nframes, nframes_t offset) = 0;
 	
-	virtual std::set<uint32_t> automatable() const = 0;
+	virtual std::set<ParamID> automatable() const = 0;
 	virtual void store_state (ARDOUR::PluginState&) = 0;
 	virtual void restore_state (ARDOUR::PluginState&) = 0;
-	virtual string describe_parameter (uint32_t) = 0;
+	virtual string describe_parameter (ParamID) = 0;
 	virtual string state_node_name() const = 0;
 	virtual void print_parameter (uint32_t, char*, uint32_t len) const = 0;
 
@@ -139,7 +140,7 @@ class Plugin : public PBD::StatefulDestructible
 
 	virtual bool has_editor() const = 0;
 
-	sigc::signal<void,uint32_t,float> ParameterChanged;
+	sigc::signal<void,ParamID,float> ParameterChanged;
 	
 	PBD::Controllable *get_nth_control (uint32_t);
 

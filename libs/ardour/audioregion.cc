@@ -73,9 +73,9 @@ AudioRegion::init ()
 /* constructor for use by derived types only */
 AudioRegion::AudioRegion (nframes_t start, nframes_t length, string name)
 	: Region (start, length, name, DataType::AUDIO),
-	  _fade_in (0.0, 2.0, 1.0, false),
-	  _fade_out (0.0, 2.0, 1.0, false),
-	  _envelope (0.0, 2.0, 1.0, false)
+	  _fade_in (ParamID(FadeInAutomation), 0.0, 2.0, 1.0),
+	  _fade_out (ParamID(FadeOutAutomation), 0.0, 2.0, 1.0),
+	  _envelope (ParamID(EnvelopeAutomation), 0.0, 2.0, 1.0)
 {
 	init ();
 }
@@ -83,9 +83,9 @@ AudioRegion::AudioRegion (nframes_t start, nframes_t length, string name)
 /** Basic AudioRegion constructor (one channel) */
 AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, nframes_t length)
 	: Region (src, start, length, PBD::basename_nosuffix(src->name()), DataType::AUDIO, 0,  Region::Flag(Region::DefaultFlags|Region::External)),
-	  _fade_in (0.0, 2.0, 1.0, false),
-	  _fade_out (0.0, 2.0, 1.0, false),
-	  _envelope (0.0, 2.0, 1.0, false)
+	  _fade_in (ParamID(FadeInAutomation), 0.0, 2.0, 1.0),
+	  _fade_out (ParamID(FadeOutAutomation), 0.0, 2.0, 1.0),
+	  _envelope (ParamID(EnvelopeAutomation), 0.0, 2.0, 1.0)
 {
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 	if (afs) {
@@ -98,9 +98,9 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 /* Basic AudioRegion constructor (one channel) */
 AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (src, start, length, name, DataType::AUDIO, layer, flags)
-	, _fade_in (0.0, 2.0, 1.0, false)
-	, _fade_out (0.0, 2.0, 1.0, false)
-	, _envelope (0.0, 2.0, 1.0, false)
+	, _fade_in (ParamID(FadeInAutomation), 0.0, 2.0, 1.0)
+	, _fade_out (ParamID(FadeOutAutomation), 0.0, 2.0, 1.0)
+	, _envelope (ParamID(EnvelopeAutomation), 0.0, 2.0, 1.0)
 {
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 	if (afs) {
@@ -113,9 +113,9 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 /* Basic AudioRegion constructor (many channels) */
 AudioRegion::AudioRegion (SourceList& srcs, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (srcs, start, length, name, DataType::AUDIO, layer, flags)
-	, _fade_in (0.0, 2.0, 1.0, false)
-	, _fade_out (0.0, 2.0, 1.0, false)
-	, _envelope (0.0, 2.0, 1.0, false)
+	, _fade_in (ParamID(FadeInAutomation), 0.0, 2.0, 1.0)
+	, _fade_out (ParamID(FadeOutAutomation), 0.0, 2.0, 1.0)
+	, _envelope (ParamID(EnvelopeAutomation), 0.0, 2.0, 1.0)
 {
 	init ();
 }
@@ -179,9 +179,9 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 
 AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& node)
 	: Region (src, node)
-	, _fade_in (0.0, 2.0, 1.0, false)
-	, _fade_out (0.0, 2.0, 1.0, false)
-	, _envelope (0.0, 2.0, 1.0, false)
+	, _fade_in (ParamID(FadeInAutomation), 0.0, 2.0, 1.0)
+	, _fade_out (ParamID(FadeOutAutomation), 0.0, 2.0, 1.0)
+	, _envelope (ParamID(EnvelopeAutomation), 0.0, 2.0, 1.0)
 {
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 	if (afs) {
@@ -200,10 +200,10 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& nod
 }
 
 AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
-	: Region (srcs, node),
-	  _fade_in (0.0, 2.0, 1.0, false),
-	  _fade_out (0.0, 2.0, 1.0, false),
-	  _envelope (0.0, 2.0, 1.0, false)
+	: Region (srcs, node)
+	, _fade_in (ParamID(FadeInAutomation), 0.0, 2.0, 1.0)
+	, _fade_out (ParamID(FadeOutAutomation), 0.0, 2.0, 1.0)
+	, _envelope (ParamID(EnvelopeAutomation), 0.0, 2.0, 1.0)
 {
 	set_default_fades ();
 	_scale_amplitude = 1.0;
@@ -405,7 +405,7 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 
 			limit = min (to_read, fade_in_length - internal_offset);
 
-			_fade_in.get_vector (internal_offset, internal_offset+limit, gain_buffer, limit);
+			_fade_in.curve().get_vector (internal_offset, internal_offset+limit, gain_buffer, limit);
 
 			for (nframes_t n = 0; n < limit; ++n) {
 				mixdown_buffer[n] *= gain_buffer[n];
@@ -447,7 +447,7 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 			nframes_t curve_offset = fade_interval_start - (_length-fade_out_length);
 			nframes_t fade_offset = fade_interval_start - internal_offset;
 								       
-			_fade_out.get_vector (curve_offset,curve_offset+limit, gain_buffer, limit);
+			_fade_out.curve().get_vector (curve_offset,curve_offset+limit, gain_buffer, limit);
 
 			for (nframes_t n = 0, m = fade_offset; n < limit; ++n, ++m) {
 				mixdown_buffer[m] *= gain_buffer[n];
@@ -459,7 +459,7 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 	/* Regular gain curves */
 
 	if (envelope_active())  {
-		_envelope.get_vector (internal_offset, internal_offset + to_read, gain_buffer, to_read);
+		_envelope.curve().get_vector (internal_offset, internal_offset + to_read, gain_buffer, to_read);
 		
 		if (_scale_amplitude != 1.0f) {
 			for (nframes_t n = 0; n < to_read; ++n) {

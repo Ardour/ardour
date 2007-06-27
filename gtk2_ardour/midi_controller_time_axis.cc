@@ -21,7 +21,7 @@
 #include <ardour/route.h>
 #include <pbd/memento_command.h>
 
-#include "gain_automation_time_axis.h"
+#include "midi_controller_time_axis.h"
 #include "automation_line.h"
 #include "canvas.h"
 
@@ -31,23 +31,24 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
 
-GainAutomationTimeAxisView::GainAutomationTimeAxisView (Session& s, boost::shared_ptr<Route> r, 
+MidiControllerTimeAxisView::MidiControllerTimeAxisView (Session& s, boost::shared_ptr<Route> r, 
 							PublicEditor& e, TimeAxisView& parent, 
-							ArdourCanvas::Canvas& canvas, const string & n, ARDOUR::AutomationList& l)
+							ArdourCanvas::Canvas& canvas, const string & n,
+							ParamID param, ARDOUR::AutomationList& l)
 
 	: AxisView (s),
-	  AutomationTimeAxisView (s, r, e, parent, canvas, n, X_("gain"), ""),
-	  list (l)
-	
+	  AutomationTimeAxisView (s, r, e, parent, canvas, n, param.to_string(), ""),
+	  _list (l),
+	  _param (param)
 {
 }
 
-GainAutomationTimeAxisView::~GainAutomationTimeAxisView ()
+MidiControllerTimeAxisView::~MidiControllerTimeAxisView ()
 {
 }
 
 void
-GainAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkEvent* event, nframes_t when, double y)
+MidiControllerTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkEvent* event, nframes_t when, double y)
 {
 	double x = 0;
 
@@ -61,18 +62,20 @@ GainAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkE
 
 	lines.front()->view_to_model_y (y);
 
-	_session.begin_reversible_command (_("add gain automation event"));
-	XMLNode& before = list.get_state();
-	list.add (when, y);
-	XMLNode& after = list.get_state();
-	_session.commit_reversible_command (new MementoCommand<ARDOUR::AutomationList>(list, &before, &after));
+	_session.begin_reversible_command (_("add midi controller automation event"));
+	XMLNode& before = _list.get_state();
+	_list.add (when, y);
+	XMLNode& after = _list.get_state();
+	_session.commit_reversible_command (new MementoCommand<ARDOUR::AutomationList>(_list, &before, &after));
 	_session.set_dirty ();
 }
 
 void
-GainAutomationTimeAxisView::set_automation_state (AutoState state)
+MidiControllerTimeAxisView::set_automation_state (AutoState state)
 {
 	if (!ignore_state_request) {
-		route->set_parameter_automation_state (ParamID(GainAutomation), state);
+		cerr << "FIXME: set midi controller automation state" << endl;
+		//route->set_midi_controller_state (state);
 	}
 }
+

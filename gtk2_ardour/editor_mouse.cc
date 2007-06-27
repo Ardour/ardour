@@ -350,6 +350,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	case GainAutomationControlPointItem:
 	case PanAutomationControlPointItem:
 	case RedirectAutomationControlPointItem:
+	case MidiCCAutomationControlPointItem:
 		commit = set_selected_track_from_click (press, op, true);
 		if (mouse_mode != MouseRange) {
 			commit |= set_selected_control_point_from_click (op, false);
@@ -539,6 +540,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				case GainAutomationControlPointItem:
 				case PanAutomationControlPointItem:
 				case RedirectAutomationControlPointItem:
+				case MidiCCAutomationControlPointItem:
 					start_control_point_grab (item, event);
 					return true;
 					break;
@@ -546,6 +548,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				case GainAutomationLineItem:
 				case PanAutomationLineItem:
 				case RedirectAutomationLineItem:
+				case MidiCCAutomationLineItem:
 					start_line_grab_from_line (item, event);
 					return true;
 					break;
@@ -608,6 +611,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			case GainAutomationControlPointItem:
 			case PanAutomationControlPointItem:
 			case RedirectAutomationControlPointItem:
+			case MidiCCAutomationControlPointItem:
 				start_control_point_grab (item, event);
 				return true;
 				break;
@@ -622,12 +626,14 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			case GainAutomationControlPointItem:
 			case PanAutomationControlPointItem:
 			case RedirectAutomationControlPointItem:
+			case MidiCCAutomationControlPointItem:
 				start_control_point_grab (item, event);
 				break;
 
 			case GainAutomationLineItem:
 			case PanAutomationLineItem:
 			case RedirectAutomationLineItem:
+			case MidiCCAutomationLineItem:
 				start_line_grab_from_line (item, event);
 				break;
 
@@ -682,6 +688,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				case GainAutomationControlPointItem:
 				case PanAutomationControlPointItem:
 				case RedirectAutomationControlPointItem:
+				case MidiCCAutomationControlPointItem:
 					start_control_point_grab (item, event);
 					return true;
 					break;
@@ -896,6 +903,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case GainAutomationControlPointItem:
 		case PanAutomationControlPointItem:
 		case RedirectAutomationControlPointItem:
+		case MidiCCAutomationControlPointItem:
 			remove_control_point (item, event);
 			break;
 
@@ -917,6 +925,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case GainAutomationLineItem:
 		case PanAutomationLineItem:
 		case RedirectAutomationLineItem:
+		case MidiCCAutomationLineItem:
 		case StartSelectionTrimItem:
 		case EndSelectionTrimItem:
 			return true;
@@ -1061,6 +1070,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case GainAutomationControlPointItem:
 	case PanAutomationControlPointItem:
 	case RedirectAutomationControlPointItem:
+	case MidiCCAutomationControlPointItem:
 		if (mouse_mode == MouseGain || mouse_mode == MouseObject) {
 			cp = static_cast<ControlPoint*>(item->get_data ("control_point"));
 			cp->set_visible (true);
@@ -1096,6 +1106,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			
 	case GainAutomationLineItem:
 	case RedirectAutomationLineItem:
+	case MidiCCAutomationLineItem:
 	case PanAutomationLineItem:
 		if (mouse_mode == MouseGain || mouse_mode == MouseObject) {
 			{
@@ -1218,11 +1229,13 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case GainLineItem:
 	case GainAutomationLineItem:
 	case RedirectAutomationLineItem:
+	case MidiCCAutomationLineItem:
 	case PanAutomationLineItem:
 	case GainControlPointItem:
 	case GainAutomationControlPointItem:
 	case PanAutomationControlPointItem:
 	case RedirectAutomationControlPointItem:
+	case MidiCCAutomationControlPointItem:
 		/* these do not affect the current entered track state */
 		clear_entered_track = false;
 		break;
@@ -1254,6 +1267,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case GainAutomationControlPointItem:
 	case PanAutomationControlPointItem:
 	case RedirectAutomationControlPointItem:
+	case MidiCCAutomationControlPointItem:
 		cp = reinterpret_cast<ControlPoint*>(item->get_data ("control_point"));
 		if (cp->line.npoints() > 1) {
 			if (!cp->selected) {
@@ -1289,6 +1303,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case GainLineItem:
 	case GainAutomationLineItem:
 	case RedirectAutomationLineItem:
+	case MidiCCAutomationLineItem:
 	case PanAutomationLineItem:
 		al = reinterpret_cast<AutomationLine*> (item->get_data ("line"));
 		{
@@ -1432,6 +1447,7 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 	case MarkerItem:
 	case GainControlPointItem:
 	case RedirectAutomationControlPointItem:
+	case MidiCCAutomationControlPointItem:
 	case GainAutomationControlPointItem:
 	case PanAutomationControlPointItem:
 	case TempoMarkerItem:
@@ -1442,6 +1458,7 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 	case SelectionItem:
 	case GainLineItem:
 	case RedirectAutomationLineItem:
+	case MidiCCAutomationLineItem:
 	case GainAutomationLineItem:
 	case PanAutomationLineItem:
 	case FadeInHandleItem:

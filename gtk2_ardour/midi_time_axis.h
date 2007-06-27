@@ -61,11 +61,14 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	/* overridden from parent to store display state */
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	void hide ();
-	
-	void set_state (const XMLNode&);
-	XMLNode* get_child_xml_node (const string & childname);
+
+	void add_controller_track ();
+	void create_automation_child (ARDOUR::ParamID param);
 
   private:
+	
+	void build_automation_action_menu ();
+	
 	void route_active_changed ();
 
 	void add_insert_to_subplugin_menu (ARDOUR::Insert *);

@@ -83,16 +83,14 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	void hide ();
 	
-	void set_state (const XMLNode&);
-	XMLNode* get_child_xml_node (const string & childname);
-
+	void create_automation_child (ARDOUR::ParamID param);
+	
   private:
 	friend class AudioStreamView;
 	friend class AudioRegionView;
 	
 	void route_active_changed ();
 
-	void build_automation_action_menu ();
 	void append_extra_display_menu_items ();
 	
 	void toggle_show_waveforms ();
@@ -104,26 +102,12 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	void show_existing_automation ();
 	void hide_all_automation ();
 
-	void add_gain_automation_child ();
-	void add_pan_automation_child ();
-	void add_parameter_automation_child ();
-
-	void toggle_gain_track ();
-	void toggle_pan_track ();
-
 	void gain_hidden ();
 	void pan_hidden ();
 
 	void update_pans ();
 	void update_control_names ();
 
-	AutomationTimeAxisView* gain_track;
-	AutomationTimeAxisView* pan_track;
-
-	// Set from XML so context menu automation buttons can be correctly initialized
-	bool show_gain_automation;
-	bool show_pan_automation;
-	
 	Gtk::CheckMenuItem* waveform_item;
 	Gtk::RadioMenuItem* traditional_item;
 	Gtk::RadioMenuItem* rectified_item;

@@ -189,7 +189,7 @@ CrossfadeView::redraw_curves ()
 	points = get_canvas_points ("xfade edit redraw", npoints);
 	vec = new float[npoints];
 
-	crossfade->fade_in().get_vector (0, crossfade->length(), vec, npoints);
+	crossfade->fade_in().curve().get_vector (0, crossfade->length(), vec, npoints);
 	for (int i = 0, pci = 0; i < npoints; ++i) {
 		Art::Point &p = (*points)[pci++];
 		p.set_x(i);
@@ -197,7 +197,7 @@ CrossfadeView::redraw_curves ()
 	}
 	fade_in->property_points() = *points;
 
-	crossfade->fade_out().get_vector (0, crossfade->length(), vec, npoints);
+	crossfade->fade_out().curve().get_vector (0, crossfade->length(), vec, npoints);
 	for (int i = 0, pci = 0; i < npoints; ++i) {
 		Art::Point &p = (*points)[pci++];
 		p.set_x(i);

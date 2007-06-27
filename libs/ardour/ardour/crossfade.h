@@ -124,8 +124,8 @@ class Crossfade : public ARDOUR::AudioRegion
 	bool can_follow_overlap() const;
 	void set_follow_overlap (bool yn);
 
-	Curve& fade_in() { return _fade_in; } 
-	Curve& fade_out() { return _fade_out; }
+	AutomationList& fade_in() { return _fade_in; } 
+	AutomationList& fade_out() { return _fade_out; }
 
 	nframes_t set_length (nframes_t);
 
@@ -157,8 +157,8 @@ class Crossfade : public ARDOUR::AudioRegion
 	int32_t               layer_relation;
 
 
-	mutable Curve _fade_in;
-	mutable Curve _fade_out;
+	mutable AutomationList _fade_in;
+	mutable AutomationList _fade_out;
 
 	static Sample* crossfade_buffer_out;
 	static Sample* crossfade_buffer_in;

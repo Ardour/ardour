@@ -190,7 +190,7 @@ StreamPanner::add_state (XMLNode& node)
 /*---------------------------------------------------------------------- */
 
 BaseStereoPanner::BaseStereoPanner (Panner& p)
-	: StreamPanner (p), _automation (0.0, 1.0, 0.5)
+	: StreamPanner (p), _automation (ParamID(PanAutomation), 0.0, 1.0, 0.5)
 {
 }
 
@@ -438,7 +438,7 @@ EqualPowerStereoPanner::distribute_automated (AudioBuffer& srcbuf, BufferSet& ob
 
 	/* fetch positional data */
 
-	if (!_automation.rt_safe_get_vector (start, end, buffers[0], nframes)) {
+	if (!_automation.curve().rt_safe_get_vector (start, end, buffers[0], nframes)) {
 		/* fallback */
 		if (!_muted) {
 			distribute (srcbuf, obufs, 1.0, nframes);
@@ -565,7 +565,7 @@ EqualPowerStereoPanner::set_state (const XMLNode& node)
 /*----------------------------------------------------------------------*/
 
 Multi2dPanner::Multi2dPanner (Panner& p)
-	: StreamPanner (p), _automation (0.0, 1.0, 0.5) // XXX useless
+	: StreamPanner (p), _automation (ParamID(PanAutomation), 0.0, 1.0, 0.5) // XXX useless
 {
 	update ();
 }

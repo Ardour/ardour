@@ -31,6 +31,7 @@
 #include <sigc++/bind.h>
 
 #include "ardour/curve.h"
+#include "ardour/automation_event.h"
 
 #include "i18n.h"
 
@@ -39,31 +40,35 @@ using namespace ARDOUR;
 using namespace sigc;
 using namespace PBD;
 
-Curve::Curve (double minv, double maxv, double canv, bool nostate)
-	: AutomationList (canv)
+Curve::Curve (const AutomationList& al)
+	: _list (al)
+	, _dirty (true)
 {
-	min_yval = minv;
-	max_yval = maxv;
+	_list.Dirty.connect(mem_fun(*this, &Curve::on_list_dirty));
 }
 
 Curve::Curve (const Curve& other)
-	: AutomationList (other)
+	: _list (other._list)
+	, _dirty (true)
 {
-	min_yval = other.min_yval;
-	max_yval = other.max_yval;
+	_list.Dirty.connect(mem_fun(*this, &Curve::on_list_dirty));
 }
-
+#if 0
 Curve::Curve (const Curve& other, double start, double end)
-	: AutomationList (other, start, end)
+	: _list (other._list)
 {
-	min_yval = other.min_yval;
-	max_yval = other.max_yval;
+	_min_yval = other._min_yval;
+	_max_yval = other._max_yval;
 }
 
-Curve::Curve (const XMLNode& node)
-	: AutomationList (node)
+/** \a id is used for legacy sessions where the type is not present
+ * in or below the <AutomationList> node.  It is used if \a id is non-null.
+ */
+Curve::Curve (const XMLNode& node, ParamID id)
+	: AutomationList (node, id)
 {
 }
+#endif
 
 Curve::~Curve ()
 {
@@ -78,7 +83,7 @@ Curve::solve ()
 		return;
 	}
 	
-	if ((npoints = events.size()) > 2) {
+	if ((npoints = _list.events().size()) > 2) {
 		
 		/* Compute coefficients needed to efficiently compute a constrained spline
 		   curve. See "Constrained Cubic Spline Interpolation" by CJC Kruger
@@ -88,9 +93,9 @@ Curve::solve ()
 		double x[npoints];
 		double y[npoints];
 		uint32_t i;
-		AutomationEventList::iterator xx;
+		AutomationList::EventList::const_iterator xx;
 
-		for (i = 0, xx = events.begin(); xx != events.end(); ++xx, ++i) {
+		for (i = 0, xx = _list.events().begin(); xx != _list.events().end(); ++xx, ++i) {
 			x[i] = (double) (*xx)->when;
 			y[i] = (double) (*xx)->value;
 		}
@@ -108,16 +113,7 @@ Curve::solve ()
 
 		double fplast = 0;
 
-		for (i = 0, xx = events.begin(); xx != events.end(); ++xx, ++i) {
-			
-			CurvePoint* cp = dynamic_cast<CurvePoint*>(*xx);
-
-			if (cp == 0) {
-				fatal  << _("programming error: ")
-				       << X_("non-CurvePoint event found in event list for a Curve")
-				       << endmsg;
-				/*NOTREACHED*/
-			}
+		for (i = 0, xx = _list.events().begin(); xx != _list.events().end(); ++xx, ++i) {
 			
 			double xdelta;   /* gcc is wrong about possible uninitialized use */
 			double xdelta2;  /* ditto */
@@ -192,10 +188,10 @@ Curve::solve ()
 
 			/* store */
 
-			cp->coeff[0] = y[i-1] - (b * x[i-1]) - (c * xim12) - (d * xim13);
-			cp->coeff[1] = b;
-			cp->coeff[2] = c;
-			cp->coeff[3] = d;
+			(*xx)->coeff[0] = y[i-1] - (b * x[i-1]) - (c * xim12) - (d * xim13);
+			(*xx)->coeff[1] = b;
+			(*xx)->coeff[2] = c;
+			(*xx)->coeff[3] = d;
 
 			fplast = fpi;
 		}
@@ -208,7 +204,7 @@ Curve::solve ()
 bool
 Curve::rt_safe_get_vector (double x0, double x1, float *vec, int32_t veclen)
 {
-	Glib::Mutex::Lock lm (lock, Glib::TRY_LOCK);
+	Glib::Mutex::Lock lm(_list.lock(), Glib::TRY_LOCK);
 
 	if (!lm.locked()) {
 		return false;
@@ -221,7 +217,7 @@ Curve::rt_safe_get_vector (double x0, double x1, float *vec, int32_t veclen)
 void
 Curve::get_vector (double x0, double x1, float *vec, int32_t veclen)
 {
-	Glib::Mutex::Lock lm (lock);
+	Glib::Mutex::Lock lm(_list.lock());
 	_get_vector (x0, x1, vec, veclen);
 }
 
@@ -233,22 +229,22 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 	int32_t original_veclen;
 	int32_t npoints;
 
-        if ((npoints = events.size()) == 0) {
-                 for (i = 0; i < veclen; ++i) {
-                         vec[i] = default_value;
-                 }
-                 return;
+	if ((npoints = _list.events().size()) == 0) {
+		for (i = 0; i < veclen; ++i) {
+			vec[i] = _list.default_value();
+		}
+		return;
 	}
 
 	/* events is now known not to be empty */
 
-	max_x = events.back()->when;
-	min_x = events.front()->when;
+	max_x = _list.events().back()->when;
+	min_x = _list.events().front()->when;
 
 	lx = max (min_x, x0);
 
 	if (x1 < 0) {
-		x1 = events.back()->when;
+		x1 = _list.events().back()->when;
 	}
 
 	hx = min (max_x, x1);
@@ -267,7 +263,7 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 		subveclen = min (subveclen, veclen);
 
 		for (i = 0; i < subveclen; ++i) {
-			vec[i] = events.front()->value;
+			vec[i] = _list.events().front()->value;
 		}
 
 		veclen -= subveclen;
@@ -286,7 +282,7 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 		
 		subveclen = min (subveclen, veclen);
 
-		val = events.back()->value;
+		val = _list.events().back()->value;
 
 		i = veclen - subveclen;
 
@@ -304,7 +300,7 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
  	if (npoints == 1 ) {
  	
  		for (i = 0; i < veclen; ++i) {
- 			vec[i] = events.front()->value;
+ 			vec[i] = _list.events().front()->value;
  		}
  		return;
  	}
@@ -325,11 +321,11 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
  			dx = 0; // not used
  		}
  	
- 		double slope = (events.back()->value - events.front()->value)/  
-			(events.back()->when - events.front()->when);
+ 		double slope = (_list.events().back()->value - _list.events().front()->value)/  
+			(_list.events().back()->when - _list.events().front()->when);
  		double yfrac = dx*slope;
  
- 		vec[0] = events.front()->value + slope * (lx - events.front()->when);
+ 		vec[0] = _list.events().front()->value + slope * (lx - _list.events().front()->when);
  
  		for (i = 1; i < veclen; ++i) {
  			vec[i] = vec[i-1] + yfrac;
@@ -357,27 +353,31 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 double
 Curve::unlocked_eval (double x)
 {
+	// I don't see the point of this...
+
 	if (_dirty) {
 		solve ();
 	}
 
-	return shared_eval (x);
+	return _list.unlocked_eval (x);
 }
 
 double
 Curve::multipoint_eval (double x)
 {	
-	pair<AutomationEventList::iterator,AutomationEventList::iterator> range;
+	pair<AutomationList::EventList::const_iterator,AutomationList::EventList::const_iterator> range;
+
+	AutomationList::LookupCache& lookup_cache = _list.lookup_cache();
 
 	if ((lookup_cache.left < 0) ||
 	    ((lookup_cache.left > x) || 
-	     (lookup_cache.range.first == events.end()) || 
+	     (lookup_cache.range.first == _list.events().end()) || 
 	     ((*lookup_cache.range.second)->when < x))) {
 		
-		TimeComparator cmp;
+		AutomationList::TimeComparator cmp;
 		ControlEvent cp (x, 0.0);
 
-		lookup_cache.range = equal_range (events.begin(), events.end(), &cp, cmp);
+		lookup_cache.range = equal_range (_list.events().begin(), _list.events().end(), &cp, cmp);
 	}
 
 	range = lookup_cache.range;
@@ -399,39 +399,27 @@ Curve::multipoint_eval (double x)
 		
 		lookup_cache.left = x;
 
-		if (range.first == events.begin()) {
+		if (range.first == _list.events().begin()) {
 			/* we're before the first point */
 			// return default_value;
-			events.front()->value;
+			_list.events().front()->value;
 		}
 		
-		if (range.second == events.end()) {
+		if (range.second == _list.events().end()) {
 			/* we're after the last point */
-			return events.back()->value;
+			return _list.events().back()->value;
 		}
 
 		double x2 = x * x;
-		CurvePoint* cp = dynamic_cast<CurvePoint*> (*range.second);
+		ControlEvent* ev = *range.second;
 
-		return cp->coeff[0] + (cp->coeff[1] * x) + (cp->coeff[2] * x2) + (cp->coeff[3] * x2 * x);
+		return ev->coeff[0] + (ev->coeff[1] * x) + (ev->coeff[2] * x2) + (ev->coeff[3] * x2 * x);
 	} 
 
 	/* x is a control point in the data */
 	/* invalidate the cached range because its not usable */
 	lookup_cache.left = -1;
 	return (*range.first)->value;
-}
-
-ControlEvent*
-Curve::point_factory (double when, double val) const
-{
-	return new CurvePoint (when, val);
-}
-
-ControlEvent*
-Curve::point_factory (const ControlEvent& other) const
-{
-	return new CurvePoint (other.when, other.value);
 }
 
 extern "C" {

@@ -2380,12 +2380,14 @@ Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nfra
 	apply_gain_automation = false;
 
 	{ 
-		Glib::Mutex::Lock am (automation_lock, Glib::TRY_LOCK);
+		Glib::Mutex::Lock am (_automation_lock, Glib::TRY_LOCK);
 		
 		if (am.locked() && _session.transport_rolling()) {
 			
-			if (_gain_automation_curve.automation_playback()) {
-				apply_gain_automation = _gain_automation_curve.rt_safe_get_vector (start_frame, end_frame, _session.gain_automation_buffer(), nframes);
+			ARDOUR::AutomationList& gain_auto = gain_automation();
+			
+			if (gain_auto.automation_playback()) {
+				apply_gain_automation = gain_auto.curve().rt_safe_get_vector (start_frame, end_frame, _session.gain_automation_buffer(), nframes);
 			}
 		}
 	}
@@ -2562,33 +2564,10 @@ Route::set_block_size (nframes_t nframes)
 void
 Route::protect_automation ()
 {
-	switch (gain_automation_state()) {
-	case Write:
-		set_gain_automation_state (Off);
-	case Touch:
-		set_gain_automation_state (Play);
-		break;
-	default:
-		break;
-	}
-
-	switch (panner().automation_state ()) {
-	case Write:
-		panner().set_automation_state (Off);
-		break;
-	case Touch:
-		panner().set_automation_state (Play);
-		break;
-	default:
-		break;
-	}
+	Automatable::protect_automation();
 	
-	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
-		boost::shared_ptr<PluginInsert> pi;
-		if ((pi = boost::dynamic_pointer_cast<PluginInsert> (*i)) != 0) {
-			pi->protect_automation ();
-		}
-	}
+	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i)
+		(*i)->protect_automation();
 }
 
 void

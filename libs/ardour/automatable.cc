@@ -62,7 +62,7 @@ Automatable::old_set_automation_state (const XMLNode& node)
 			if (sstr.fail()) {
 				break;
 			}
-			mark_automation_visible (what, true);
+			mark_automation_visible (ParamID(PluginAutomation, what), true);
 		}
 	}
 
@@ -88,7 +88,7 @@ Automatable::load_automation (const string& path)
 	}
 
 	Glib::Mutex::Lock lm (_automation_lock);
-	set<uint32_t> tosave;
+	set<ParamID> tosave;
 	_parameter_automation.clear ();
 
 	while (in) {
@@ -100,9 +100,10 @@ Automatable::load_automation (const string& path)
 		in >> when;  if (!in) goto bad;
 		in >> value; if (!in) goto bad;
 		
-		AutomationList& al = automation_list (port);
-		al.add (when, value);
-		tosave.insert (port);
+		/* FIXME: this is legacy and only used for plugin inserts?  I think? */
+		AutomationList* al = automation_list (ParamID(PluginAutomation, port), true);
+		al->add (when, value);
+		tosave.insert (ParamID(PluginAutomation, port));
 	}
 	
 	return 0;
@@ -113,12 +114,27 @@ Automatable::load_automation (const string& path)
 	return -1;
 }
 
+void
+Automatable::add_automation_parameter(AutomationList* al)
+{
+	_parameter_automation[al->param_id()] = al;
+	
+	/* let derived classes do whatever they need with this */
+	automation_list_creation_callback (al->param_id(), *al);
+
+	cerr << _name << ": added (visible, can_automate) parameter " << al->param_id().to_string() << ", # params = "
+		<< _parameter_automation.size() << endl;
+
+	// FIXME: sane default behaviour?
+	_visible_parameter_automation.insert(al->param_id());
+	_can_automate_list.insert(al->param_id());
+}
 
 void
-Automatable::what_has_automation (set<uint32_t>& s) const
+Automatable::what_has_automation (set<ParamID>& s) const
 {
 	Glib::Mutex::Lock lm (_automation_lock);
-	map<uint32_t,AutomationList*>::const_iterator li;
+	map<ParamID,AutomationList*>::const_iterator li;
 	
 	for (li = _parameter_automation.begin(); li != _parameter_automation.end(); ++li) {
 		s.insert  ((*li).first);
@@ -126,49 +142,79 @@ Automatable::what_has_automation (set<uint32_t>& s) const
 }
 
 void
-Automatable::what_has_visible_automation (set<uint32_t>& s) const
+Automatable::what_has_visible_automation (set<ParamID>& s) const
 {
 	Glib::Mutex::Lock lm (_automation_lock);
-	set<uint32_t>::const_iterator li;
+	set<ParamID>::const_iterator li;
 	
 	for (li = _visible_parameter_automation.begin(); li != _visible_parameter_automation.end(); ++li) {
 		s.insert  (*li);
 	}
 }
-AutomationList&
-Automatable::automation_list (uint32_t parameter)
+
+/** Returns NULL if we don't have an AutomationList for \a parameter.
+ */
+AutomationList*
+Automatable::automation_list (ParamID parameter, bool create_if_missing)
 {
-	AutomationList* al = _parameter_automation[parameter];
+	std::map<ParamID,AutomationList*>::iterator i = _parameter_automation.find(parameter);
 
-	if (al == 0) {
-		al = _parameter_automation[parameter] = new AutomationList (default_parameter_value (parameter));
-		/* let derived classes do whatever they need with this */
-		automation_list_creation_callback (parameter, *al);
+	if (i != _parameter_automation.end()) {
+		return i->second;
+
+	} else if (create_if_missing) {
+		AutomationList* al = new AutomationList (parameter, FLT_MIN, FLT_MAX, default_parameter_value (parameter));
+		add_automation_parameter(al);
+		return al;
+
+	} else {
+		warning << "AutomationList " << parameter.to_string() << " not found for " << _name << endmsg;
+		return NULL;
 	}
-
-	return *al;
 }
 
-string
-Automatable::describe_parameter (uint32_t which)
+const AutomationList*
+Automatable::automation_list (ParamID parameter) const
 {
-	/* derived classes will override this */
-	return "";
+	std::map<ParamID,AutomationList*>::const_iterator i = _parameter_automation.find(parameter);
+
+	if (i != _parameter_automation.end()) {
+		return i->second;
+	} else {
+		warning << "AutomationList " << parameter.to_string() << " not found for " << _name << endmsg;
+		return NULL;
+	}
+}
+
+
+string
+Automatable::describe_parameter (ParamID param)
+{
+	/* derived classes like PluginInsert should override this */
+
+	if (param == ParamID(GainAutomation))
+		return _("Fader");
+	else if (param == ParamID(PanAutomation))
+		return _("Pan");
+	else if (param.type() == MidiCCAutomation)
+		return string_compose("MIDI CC %1", param.id());
+	else
+		return param.to_string();
 }
 
 void
-Automatable::can_automate (uint32_t what)
+Automatable::can_automate (ParamID what)
 {
 	_can_automate_list.insert (what);
 }
 
 void
-Automatable::mark_automation_visible (uint32_t what, bool yn)
+Automatable::mark_automation_visible (ParamID what, bool yn)
 {
 	if (yn) {
 		_visible_parameter_automation.insert (what);
 	} else {
-		set<uint32_t>::iterator i;
+		set<ParamID>::iterator i;
 
 		if ((i = _visible_parameter_automation.find (what)) != _visible_parameter_automation.end()) {
 			_visible_parameter_automation.erase (i);
@@ -179,7 +225,7 @@ Automatable::mark_automation_visible (uint32_t what, bool yn)
 bool
 Automatable::find_next_event (nframes_t now, nframes_t end, ControlEvent& next_event) const
 {
-	map<uint32_t,AutomationList*>::const_iterator li;	
+	map<ParamID,AutomationList*>::const_iterator li;	
 	AutomationList::TimeComparator cmp;
 
 	next_event.when = max_frames;
@@ -207,36 +253,50 @@ Automatable::find_next_event (nframes_t now, nframes_t end, ControlEvent& next_e
  	return next_event.when != max_frames;
 }
 
+/** \a legacy_param is used for loading legacy sessions where an object (IO, Panner)
+ * had a single automation parameter, with it's type implicit.  Derived objects should
+ * pass that type and it will be used for the untyped AutomationList found.
+ */
 int
-Automatable::set_automation_state (const XMLNode& node)
+Automatable::set_automation_state (const XMLNode& node, ParamID legacy_param)
 {	
 	Glib::Mutex::Lock lm (_automation_lock);
 
 	_parameter_automation.clear ();
+	_visible_parameter_automation.clear ();
 
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
-
+	
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		uint32_t param;
 
-		if (sscanf ((*niter)->name().c_str(), "parameter-%" PRIu32, &param) != 1) {
-			error << string_compose (_("%2: badly formatted node name in XML automation state, ignored"), _name) << endmsg;
-			continue;
-		}
+		/*if (sscanf ((*niter)->name().c_str(), "parameter-%" PRIu32, &param) != 1) {
+		  error << string_compose (_("%2: badly formatted node name in XML automation state, ignored"), _name) << endmsg;
+		  continue;
+		  }*/
 
-		AutomationList& al = automation_list (param);
-		if (al.set_state (*(*niter)->children().front())) {
-			goto bad;
+		if ((*niter)->name() == "AutomationList") {
+
+			const XMLProperty* id_prop = (*niter)->property("automation-id");
+
+			ParamID param = (id_prop ? ParamID(id_prop->value()) : legacy_param);
+			
+			AutomationList* al = new AutomationList(**niter, param);
+			
+			if (!id_prop) {
+				warning << "AutomationList node without automation-id property, "
+					<< "using default: " << legacy_param.to_string() << endmsg;
+				al->set_param_id(legacy_param);
+			}
+
+			add_automation_parameter(al);
+
+		} else {
+			error << "Expected AutomationList node, got '" << (*niter)->name() << endmsg;
 		}
 	}
 
 	return 0;
-
-  bad:
-	error << string_compose(_("%1: cannot load automation data from XML"), _name) << endmsg;
-	_parameter_automation.clear ();
-	return -1;
 }
 
 XMLNode&
@@ -244,24 +304,108 @@ Automatable::get_automation_state ()
 {
 	Glib::Mutex::Lock lm (_automation_lock);
 	XMLNode* node = new XMLNode (X_("Automation"));
-	string fullpath;
+	
+	cerr << "'" << _name << "'->get_automation_state, # params = " << _parameter_automation.size() << endl;
 
 	if (_parameter_automation.empty()) {
 		return *node;
 	}
 
-	map<uint32_t,AutomationList*>::iterator li;
+	map<ParamID,AutomationList*>::iterator li;
 	
 	for (li = _parameter_automation.begin(); li != _parameter_automation.end(); ++li) {
-	
-		XMLNode* child;
-		
-		char buf[64];
-		stringstream str;
-		snprintf (buf, sizeof (buf), "parameter-%" PRIu32, li->first);
-		child = new XMLNode (buf);
-		child->add_child_nocopy (li->second->get_state ());
+		node->add_child_nocopy (li->second->get_state ());
 	}
 
 	return *node;
 }
+
+void
+Automatable::clear_automation ()
+{
+	Glib::Mutex::Lock lm (_automation_lock);
+
+	map<ParamID,AutomationList*>::iterator li;
+
+	for (li = _parameter_automation.begin(); li != _parameter_automation.end(); ++li)
+		li->second->clear();
+}
+	
+void
+Automatable::set_parameter_automation_state (ParamID param, AutoState s)
+{
+	Glib::Mutex::Lock lm (_automation_lock);
+	
+	AutomationList* al = automation_list (param, true);
+
+	if (s != al->automation_state()) {
+		al->set_automation_state (s);
+		_session.set_dirty ();
+	}
+}
+
+AutoState
+Automatable::get_parameter_automation_state (ParamID param)
+{
+	Glib::Mutex::Lock lm (_automation_lock);
+
+	AutomationList* al = automation_list(param);
+
+	if (al) {
+		return al->automation_state();
+	} else {
+		return Off;
+	}
+}
+
+void
+Automatable::set_parameter_automation_style (ParamID param, AutoStyle s)
+{
+	Glib::Mutex::Lock lm (_automation_lock);
+	
+	AutomationList* al = automation_list (param, true);
+
+	if (s != al->automation_style()) {
+		al->set_automation_style (s);
+		_session.set_dirty ();
+	}
+}
+
+AutoStyle
+Automatable::get_parameter_automation_style (ParamID param)
+{
+	Glib::Mutex::Lock lm (_automation_lock);
+
+	AutomationList* al = automation_list(param);
+
+	if (al) {
+		return al->automation_style();
+	} else {
+		return Absolute; // whatever
+	}
+}
+
+void
+Automatable::protect_automation ()
+{
+	set<ParamID> automated_params;
+
+	what_has_automation (automated_params);
+
+	for (set<ParamID>::iterator i = automated_params.begin(); i != automated_params.end(); ++i) {
+
+		AutomationList* al = automation_list (*i);
+
+		switch (al->automation_state()) {
+		case Write:
+			al->set_automation_state (Off);
+			break;
+		case Touch:
+			al->set_automation_state (Play);
+			break;
+		default:
+			break;
+		}
+	}
+}
+

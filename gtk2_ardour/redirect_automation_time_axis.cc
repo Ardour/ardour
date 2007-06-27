@@ -34,12 +34,12 @@ using namespace Gtk;
 
 RedirectAutomationTimeAxisView::RedirectAutomationTimeAxisView (Session& s, boost::shared_ptr<Route> r, 
 								PublicEditor& e, TimeAxisView& parent, Canvas& canvas, std::string n,
-								uint32_t prt, Insert& i, string state_name)
+								ParamID p, Insert& i, string state_name)
 
 	: AxisView (s),
 	  AutomationTimeAxisView (s, r, e, parent, canvas, n, state_name, i.name()),
 	  insert (i),
-	  port (prt)
+	  param (p)
 	
 {
 	char buf[32];
@@ -53,7 +53,7 @@ RedirectAutomationTimeAxisView::RedirectAutomationTimeAxisView (Session& s, boos
 
 	kids = xml_node->children ();
 
-	snprintf (buf, sizeof(buf), "Port_%" PRIu32, port);
+	snprintf (buf, sizeof(buf), "Port_%" PRIu32, param.id());
 		
 	for (iter = kids.begin(); iter != kids.end(); ++iter) {
 		if ((*iter)->name() == buf) {
@@ -91,17 +91,17 @@ RedirectAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, 
 	/* map to model space */
 
 	if (!lines.empty()) {
-		AutomationList& alist (insert.automation_list(port));
+		AutomationList* alist (insert.automation_list(param, true));
 		string description = _("add automation event to ");
-		description += insert.describe_parameter (port);
+		description += insert.describe_parameter (param);
 
 		lines.front()->view_to_model_y (y);
 		
 		_session.begin_reversible_command (description);
-                XMLNode &before = alist.get_state();
-		alist.add (when, y);
-                XMLNode &after = alist.get_state();
-                _session.add_command(new MementoCommand<AutomationList>(alist, &before, &after));
+		XMLNode &before = alist->get_state();
+		alist->add (when, y);
+		XMLNode &after = alist->get_state();
+		_session.add_command(new MementoCommand<AutomationList>(*alist, &before, &after));
 		_session.commit_reversible_command ();
 		_session.set_dirty ();
 	}
@@ -146,7 +146,7 @@ RedirectAutomationTimeAxisView::update_extra_xml_shown (bool editor_shown)
 	XMLNodeConstIterator i;
 	XMLNode * port_node = 0;
 
-	snprintf (buf, sizeof(buf), "Port_%" PRIu32, port);
+	snprintf (buf, sizeof(buf), "Port_%" PRIu32, param.id());
 
 	for (i = nlist.begin(); i != nlist.end(); ++i) {
 		if ((*i)->name() == buf) {
@@ -168,6 +168,6 @@ void
 RedirectAutomationTimeAxisView::set_automation_state (AutoState state)
 {
 	if (!ignore_state_request) {
-		insert.automation_list (port).set_automation_state (state);
+		insert.automation_list (param, true)->set_automation_state (state);
 	}
 }

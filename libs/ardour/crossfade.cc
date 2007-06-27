@@ -78,8 +78,8 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> in, boost::shared_ptr<Audio
 		      nframes_t position,
 		      AnchorPoint ap)
 	: AudioRegion (position, length, "foobar"),
-	  _fade_in (0.0, 2.0, 1.0), // linear (gain coefficient) => -inf..+6dB
-	  _fade_out (0.0, 2.0, 1.0) // linear (gain coefficient) => -inf..+6dB
+	  _fade_in (ParamID(FadeInAutomation), 0.0, 2.0, 1.0), // linear (gain coefficient) => -inf..+6dB
+	  _fade_out (ParamID(FadeOutAutomation), 0.0, 2.0, 1.0) // linear (gain coefficient) => -inf..+6dB
 
 {
 	_in = in;
@@ -96,8 +96,8 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> in, boost::shared_ptr<Audio
 
 Crossfade::Crossfade (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioRegion> b, CrossfadeModel model, bool act)
 	: AudioRegion (0, 0, "foobar"),
-	  _fade_in (0.0, 2.0, 1.0), // linear (gain coefficient) => -inf..+6dB
-	  _fade_out (0.0, 2.0, 1.0) // linear (gain coefficient) => -inf..+6dB
+	  _fade_in (ParamID(FadeInAutomation), 0.0, 2.0, 1.0), // linear (gain coefficient) => -inf..+6dB
+	  _fade_out (ParamID(FadeOutAutomation), 0.0, 2.0, 1.0) // linear (gain coefficient) => -inf..+6dB
 {
 	_in_update = false;
 	_fixed = false;
@@ -115,8 +115,8 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioR
 
 Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 	: AudioRegion (0, 0, "foobar"),
-	  _fade_in (0.0, 2.0, 1.0), // linear (gain coefficient) => -inf..+6dB
-	  _fade_out (0.0, 2.0, 1.0) // linear (gain coefficient) => -inf..+6dB
+	  _fade_in (ParamID(FadeInAutomation), 0.0, 2.0, 1.0), // linear (gain coefficient) => -inf..+6dB
+	  _fade_out (ParamID(FadeOutAutomation), 0.0, 2.0, 1.0) // linear (gain coefficient) => -inf..+6dB
 
 {
 	boost::shared_ptr<Region> r;
@@ -300,8 +300,8 @@ Crossfade::read_at (Sample *buf, Sample *mixdown_buffer,
 	float* fiv = new float[to_write];
 	float* fov = new float[to_write];
 
-	_fade_in.get_vector (offset, offset+to_write, fiv, to_write);
-	_fade_out.get_vector (offset, offset+to_write, fov, to_write);
+	_fade_in.curve().get_vector (offset, offset+to_write, fiv, to_write);
+	_fade_out.curve().get_vector (offset, offset+to_write, fov, to_write);
 
 	/* note: although we have not explicitly taken into account the return values
 	   from _out->read_at() or _in->read_at(), the length() function does this

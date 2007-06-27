@@ -24,6 +24,7 @@
 #include <map>
 #include <ardour/session_object.h>
 #include <ardour/automation_event.h>
+#include <ardour/param_id.h>
 
 namespace ARDOUR {
 
@@ -36,28 +37,46 @@ public:
 
 	virtual ~Automatable() {}
 
-	virtual AutomationList& automation_list(uint32_t n);
+	// shorthand for gain, pan, etc
+	inline AutomationList* automation_list(AutomationType type, bool create_if_missing=false) {
+		return automation_list(ParamID(type), create_if_missing);
+	}
 
-	virtual void automation_snapshot (nframes_t now) {};
+	virtual AutomationList* automation_list(ParamID id, bool create_if_missing=false);
+	virtual const AutomationList* automation_list(ParamID id) const;
+
+	virtual void add_automation_parameter(AutomationList* al);
+
+	virtual void automation_snapshot(nframes_t now) {};
 
 	virtual bool find_next_event(nframes_t start, nframes_t end, ControlEvent& ev) const;
 	
-	virtual string describe_parameter(uint32_t which);
-	virtual float default_parameter_value(uint32_t which) { return 1.0f; }
+	virtual string describe_parameter(ParamID param);
+	virtual float  default_parameter_value(ParamID param) { return 1.0f; }
+	
+	virtual void clear_automation();
 
-	void what_has_automation(std::set<uint32_t>&) const;
-	void what_has_visible_automation(std::set<uint32_t>&) const;
-	const std::set<uint32_t>& what_can_be_automated() const { return _can_automate_list; }
+	AutoState get_parameter_automation_state (ParamID param);
+	virtual void set_parameter_automation_state (ParamID param, AutoState);
+	
+	AutoStyle get_parameter_automation_style (ParamID param);
+	void set_parameter_automation_style (ParamID param, AutoStyle);
 
-	void mark_automation_visible(uint32_t, bool);
+	void protect_automation ();
+
+	void what_has_automation(std::set<ParamID>&) const;
+	void what_has_visible_automation(std::set<ParamID>&) const;
+	const std::set<ParamID>& what_can_be_automated() const { return _can_automate_list; }
+
+	void mark_automation_visible(ParamID, bool);
 
 protected:
 
-	void can_automate(uint32_t);
+	void can_automate(ParamID);
 
-	virtual void automation_list_creation_callback(uint32_t, AutomationList&) {}
+	virtual void automation_list_creation_callback(ParamID, AutomationList&) {}
 
-	int set_automation_state(const XMLNode&);
+	int set_automation_state(const XMLNode&, ParamID default_param);
 	XMLNode& get_automation_state();
 	
 	int load_automation (const std::string& path);
@@ -65,10 +84,9 @@ protected:
 
 	mutable Glib::Mutex _automation_lock;
 
-	// FIXME:  map with int keys is a bit silly.  this could be O(1)
-	std::map<uint32_t,AutomationList*> _parameter_automation;
-	std::set<uint32_t> _visible_parameter_automation;
-	std::set<uint32_t> _can_automate_list;
+	std::map<ParamID,AutomationList*> _parameter_automation;
+	std::set<ParamID> _visible_parameter_automation;
+	std::set<ParamID> _can_automate_list;
 	
 	nframes_t _last_automation_snapshot;
 };

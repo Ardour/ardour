@@ -33,7 +33,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-RedirectAutomationLine::RedirectAutomationLine (const string & name, Insert& i, uint32_t port, Session& s,
+RedirectAutomationLine::RedirectAutomationLine (const string & name, Insert& i, ParamID param, Session& s,
 						
 						TimeAxisView& tv, ArdourCanvas::Group& parent,
 						
@@ -42,7 +42,7 @@ RedirectAutomationLine::RedirectAutomationLine (const string & name, Insert& i, 
         : AutomationLine (name, tv, parent, l),
 	  session (s),
 	  _insert (i),
-	  _port (port)
+	  _param (param)
 {
 	set_verbose_cursor_uses_gain_mapping (false);
 
@@ -54,7 +54,7 @@ RedirectAutomationLine::RedirectAutomationLine (const string & name, Insert& i, 
 		/*NOTREACHED*/
 	}
 
-	pi->plugin()->get_parameter_descriptor (_port, desc);
+	pi->plugin()->get_parameter_descriptor (_param, desc);
 
 	upper = desc.upper;
 	lower = desc.lower;

@@ -38,8 +38,8 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-AudioRegionGainLine::AudioRegionGainLine (const string & name, Session& s, AudioRegionView& r, ArdourCanvas::Group& parent, Curve& c)
-  : AutomationLine (name, r.get_time_axis_view(), parent, c),
+AudioRegionGainLine::AudioRegionGainLine (const string & name, Session& s, AudioRegionView& r, ArdourCanvas::Group& parent, AutomationList& l)
+  : AutomationLine (name, r.get_time_axis_view(), parent, l),
 	  session (s),
 	  rv (r)
 {

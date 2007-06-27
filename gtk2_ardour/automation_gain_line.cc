@@ -26,16 +26,13 @@
 #include "automation_gain_line.h"
 #include "utils.h"
 
-#include <ardour/session.h>
-
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-AutomationGainLine::AutomationGainLine (const string & name, Session& s, TimeAxisView& tv, ArdourCanvas::Group& parent, Curve& c)
+AutomationGainLine::AutomationGainLine (const string & name, TimeAxisView& tv, ArdourCanvas::Group& parent, AutomationList& l)
 
-	: AutomationLine (name, tv, parent, c),
-	  session (s)
+	: AutomationLine (name, tv, parent, l)
 {
 	set_verbose_cursor_uses_gain_mapping (true);
 }

@@ -25,22 +25,17 @@
 #include "canvas.h"
 #include "automation_line.h"
 
-namespace ARDOUR {
-	class Session;
-}
-
 class TimeAxisView;
 
 class AutomationPanLine : public AutomationLine
 {
   public:
-	AutomationPanLine (const string & name, ARDOUR::Session&, TimeAxisView&, ArdourCanvas::Group& parent, ARDOUR::Curve&);
+	AutomationPanLine (const string & name, TimeAxisView&, ArdourCanvas::Group& parent, ARDOUR::AutomationList&);
 	
 	void view_to_model_y (double&);
 	void model_to_view_y (double&);
 
   private:
-	ARDOUR::Session& session;
 	vector<ArdourCanvas::Item*> lines;
 };
 

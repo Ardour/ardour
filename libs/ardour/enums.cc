@@ -104,6 +104,10 @@ setup_enum_writer ()
 	REGISTER_ENUM (PluginAutomation);
 	REGISTER_ENUM (SoloAutomation);
 	REGISTER_ENUM (MuteAutomation);
+	REGISTER_ENUM (MidiCCAutomation);
+	REGISTER_ENUM (FadeInAutomation);
+	REGISTER_ENUM (FadeOutAutomation);
+	REGISTER_ENUM (EnvelopeAutomation);
 	REGISTER_BITS (_AutomationType);
 
 	REGISTER_ENUM (Off);

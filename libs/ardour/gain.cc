@@ -22,12 +22,12 @@
 using namespace ARDOUR;
 
 Gain::Gain ()
-	: Curve (0.0, 2.0, 1.0f)   /* XXX yuck; clamps gain to -inf .. +6db */
+	: AutomationList (ParamID(GainAutomation), 0.0, 2.0, 1.0f)   /* XXX yuck; clamps gain to -inf .. +6db */
 {
 }
 
 Gain::Gain (const Gain& other)
-	: Curve (other)
+	: AutomationList (other)
 {
 }
 
@@ -35,7 +35,7 @@ Gain&
 Gain::operator= (const Gain& other)
 {
 	if (this != &other) {
-		Curve::operator= (other);
+		AutomationList::operator= (other);
 	}
 	return *this;
 }

@@ -55,6 +55,11 @@ PanAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkEv
 {
 	if (lines.empty()) {
 		/* no data, possibly caused by no outputs/inputs */
+		Gtkmm2ext::PopUp* msg = new Gtkmm2ext::PopUp (Gtk::WIN_POS_MOUSE, 5000, true);
+
+		msg->set_text (_("Pan automation track has no lines, unable to add point\n(is track pannable?)"));
+		msg->touch ();
+
 		return;
 	}
 

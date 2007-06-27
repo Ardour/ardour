@@ -166,13 +166,17 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 		using namespace Menu_Helpers;
 	
 		gain_astate_menu.items().push_back (MenuElem (_("Manual"), 
-						      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Off)));
+						      bind (mem_fun (*_io, &IO::set_parameter_automation_state),
+								  ParamID(GainAutomation), (AutoState) Off)));
 		gain_astate_menu.items().push_back (MenuElem (_("Play"),
-						      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Play)));
+						      bind (mem_fun (*_io, &IO::set_parameter_automation_state),
+								  ParamID(GainAutomation), (AutoState) Play)));
 		gain_astate_menu.items().push_back (MenuElem (_("Write"),
-						      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Write)));
+						      bind (mem_fun (*_io, &IO::set_parameter_automation_state),
+								  ParamID(GainAutomation), (AutoState) Write)));
 		gain_astate_menu.items().push_back (MenuElem (_("Touch"),
-						      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Touch)));
+						      bind (mem_fun (*_io, &IO::set_parameter_automation_state),
+								  ParamID(GainAutomation), (AutoState) Touch)));
 	
 		gain_astyle_menu.items().push_back (MenuElem (_("Trim")));
 		gain_astyle_menu.items().push_back (MenuElem (_("Abs")));
@@ -183,8 +187,8 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 		gain_automation_style_button.signal_button_press_event().connect (mem_fun(*this, &GainMeter::gain_automation_style_button_event), false);
 		gain_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &GainMeter::gain_automation_state_button_event), false);
 		
-		r->gain_automation_curve().automation_state_changed.connect (mem_fun(*this, &GainMeter::gain_automation_state_changed));
-		r->gain_automation_curve().automation_style_changed.connect (mem_fun(*this, &GainMeter::gain_automation_style_changed));
+		r->gain_automation().automation_state_changed.connect (mem_fun(*this, &GainMeter::gain_automation_state_changed));
+		r->gain_automation().automation_style_changed.connect (mem_fun(*this, &GainMeter::gain_automation_style_changed));
 		fader_vbox->pack_start (gain_automation_state_button, false, false, 0);
 
 		gain_automation_state_changed ();
@@ -668,7 +672,7 @@ GainMeter::set_fader_name (const char * name)
 void
 GainMeter::update_gain_sensitive ()
 {
-	static_cast<Gtkmm2ext::SliderController*>(gain_slider)->set_sensitive (!(_io->gain_automation_state() & Play));
+	static_cast<Gtkmm2ext::SliderController*>(gain_slider)->set_sensitive (!(_io->gain_automation().automation_state() & Play));
 }
 
 
@@ -811,14 +815,14 @@ GainMeter::meter_point_clicked ()
 gint
 GainMeter::start_gain_touch (GdkEventButton* ev)
 {
-	_io->start_gain_touch ();
+	_io->gain_automation().start_touch ();
 	return FALSE;
 }
 
 gint
 GainMeter::end_gain_touch (GdkEventButton* ev)
 {
-	_io->end_gain_touch ();
+	_io->gain_automation().stop_touch ();
 	return FALSE;
 }
 
@@ -922,10 +926,10 @@ GainMeter::gain_automation_style_changed ()
   // Route* _route = dynamic_cast<Route*>(&_io);
 	switch (_width) {
 	case Wide:
-	        gain_automation_style_button.set_label (astyle_string(_io->gain_automation_curve().automation_style()));
+	        gain_automation_style_button.set_label (astyle_string(_io->gain_automation().automation_style()));
 		break;
 	case Narrow:
-		gain_automation_style_button.set_label  (short_astyle_string(_io->gain_automation_curve().automation_style()));
+		gain_automation_style_button.set_label  (short_astyle_string(_io->gain_automation().automation_style()));
 		break;
 	}
 }
@@ -940,14 +944,14 @@ GainMeter::gain_automation_state_changed ()
 
 	switch (_width) {
 	case Wide:
-		gain_automation_state_button.set_label (astate_string(_io->gain_automation_curve().automation_state()));
+		gain_automation_state_button.set_label (astate_string(_io->gain_automation().automation_state()));
 		break;
 	case Narrow:
-		gain_automation_state_button.set_label (short_astate_string(_io->gain_automation_curve().automation_state()));
+		gain_automation_state_button.set_label (short_astate_string(_io->gain_automation().automation_state()));
 		break;
 	}
 
-	x = (_io->gain_automation_state() != Off);
+	x = (_io->gain_automation().automation_state() != Off);
 	
 	if (gain_automation_state_button.get_active() != x) {
 		ignore_toggle = true;

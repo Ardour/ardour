@@ -136,6 +136,10 @@ class LadspaPluginUI : public PlugUIBase, public Gtk::VBox
 	static const int32_t initial_output_rows = 1;
 	static const int32_t initial_output_cols = 4;
 
+	/* TODO: pull this out of PluginUI and make it generic.
+	 * Sticking this in the track controls of an automation track would
+	 * make a handy touch controller for anything.
+	 */
 	struct ControlUI : public Gtk::HBox {
 
 	    uint32_t      port_index;

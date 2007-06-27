@@ -66,8 +66,8 @@ CrossfadeEditor::Presets* CrossfadeEditor::fade_out_presets = 0;
 
 CrossfadeEditor::Half::Half ()
 	: line (0), 
-	  normative_curve (0.0, 1.0, 1.0, true),
-	  gain_curve (0.0, 2.0, 1.0, true)
+	  normative_curve (ParamID(GainAutomation), 0.0, 1.0, 1.0), // FIXME: GainAutomation?
+	  gain_curve (ParamID(GainAutomation), 0.0, 2.0, 1.0)
 {
 }
 
@@ -327,10 +327,10 @@ CrossfadeEditor::audition_state_changed (bool yn)
 }
 
 void
-CrossfadeEditor::set (const ARDOUR::Curve& curve, WhichFade which)
+CrossfadeEditor::set (const ARDOUR::AutomationList& curve, WhichFade which)
 {
 	double firstx, endx;
-	ARDOUR::Curve::const_iterator the_end;
+	ARDOUR::AutomationList::const_iterator the_end;
 
 	for (list<Point*>::iterator i = fade[which].points.begin(); i != fade[which].points.end(); ++i) {
 			delete *i;
@@ -350,7 +350,7 @@ CrossfadeEditor::set (const ARDOUR::Curve& curve, WhichFade which)
 	firstx = (*curve.const_begin())->when;
 	endx = (*the_end)->when;
 
-	for (ARDOUR::Curve::const_iterator i = curve.const_begin(); i != curve.const_end(); ++i) {
+	for (ARDOUR::AutomationList::const_iterator i = curve.const_begin(); i != curve.const_end(); ++i) {
 		
 		double xfract = ((*i)->when - firstx) / (endx - firstx);
 		double yfract = ((*i)->value - miny) / (maxy - miny);
@@ -644,7 +644,7 @@ CrossfadeEditor::redraw ()
 	size_t npoints = (size_t) effective_width();
 	float vec[npoints];
 
-	fade[current].normative_curve.get_vector (0, 1.0, vec, npoints);
+	fade[current].normative_curve.curve().get_vector (0, 1.0, vec, npoints);
 	
 	ArdourCanvas::Points pts;
 	ArdourCanvas::Points spts;
@@ -760,13 +760,13 @@ CrossfadeEditor::apply ()
 void
 CrossfadeEditor::_apply_to (boost::shared_ptr<Crossfade> xf)
 {
-	ARDOUR::Curve& in (xf->fade_in());
-	ARDOUR::Curve& out (xf->fade_out());
+	ARDOUR::AutomationList& in (xf->fade_in());
+	ARDOUR::AutomationList& out (xf->fade_out());
 
 	/* IN */
 
 
-	ARDOUR::Curve::const_iterator the_end = in.const_end();
+	ARDOUR::AutomationList::const_iterator the_end = in.const_end();
 	--the_end;
 
 	double firstx = (*in.begin())->when;
@@ -813,8 +813,8 @@ CrossfadeEditor::setup (boost::shared_ptr<Crossfade> xfade)
 {
 	_apply_to (xfade);
 	xfade->set_active (true);
-	xfade->fade_in().solve ();
-	xfade->fade_out().solve ();
+	xfade->fade_in().curve().solve ();
+	xfade->fade_out().curve().solve ();
 }
 
 void

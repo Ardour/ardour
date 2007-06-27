@@ -83,16 +83,12 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	assert(!is_track() || is_audio_track());
 
 	subplugin_menu.set_name ("ArdourContextMenu");
-	gain_track = 0;
-	pan_track = 0;
 	waveform_item = 0;
-	pan_automation_item = 0;
-	gain_automation_item = 0;
 
 	_view = new AudioStreamView (*this);
 
-	add_gain_automation_child ();
-	add_pan_automation_child ();
+	create_automation_child (GainAutomation);
+	create_automation_child (PanAutomation);
 
 	ignore_toggle = false;
 
@@ -153,81 +149,6 @@ AudioTimeAxisView::hide ()
 	xml_node->add_property ("shown_editor", "no");
 
 	TimeAxisView::hide ();
-}
-
-void
-AudioTimeAxisView::set_state (const XMLNode& node)
-{
-	const XMLProperty *prop;
-	
-	TimeAxisView::set_state (node);
-	
-	if ((prop = node.property ("shown_editor")) != 0) {
-		if (prop->value() == "no") {
-			_marked_for_display = false;
-		} else {
-			_marked_for_display = true;
-		}
-	} else {
-		_marked_for_display = true;
-	}
-	
-	XMLNodeList nlist = node.children();
-	XMLNodeConstIterator niter;
-	XMLNode *child_node;
-	
-	
-	show_gain_automation = false;
-	show_pan_automation  = false;
-	
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		child_node = *niter;
-
-		if (child_node->name() == "gain") {
-			XMLProperty *prop=child_node->property ("shown");
-			
-			if (prop != 0) {
-				if (prop->value() == "yes") {
-					show_gain_automation = true;
-				}
-			}
-			continue;
-		}
-		
-		if (child_node->name() == "pan") {
-			XMLProperty *prop=child_node->property ("shown");
-			
-			if (prop != 0) {
-				if (prop->value() == "yes") {
-					show_pan_automation = true;
-				}			
-			}
-			continue;
-		}
-	}
-}
-
-void
-AudioTimeAxisView::build_automation_action_menu ()
-{
-	using namespace Menu_Helpers;
-
-	RouteTimeAxisView::build_automation_action_menu ();
-
-	MenuList& automation_items = automation_action_menu->items();
-	
-	automation_items.push_back (SeparatorElem());
-
-	automation_items.push_back (CheckMenuElem (_("Fader"), 
-						   mem_fun(*this, &AudioTimeAxisView::toggle_gain_track)));
-	gain_automation_item = static_cast<CheckMenuItem*> (&automation_items.back());
-	gain_automation_item->set_active(show_gain_automation);
-
-	automation_items.push_back (CheckMenuElem (_("Pan"),
-						   mem_fun(*this, &AudioTimeAxisView::toggle_pan_track)));
-	pan_automation_item = static_cast<CheckMenuItem*> (&automation_items.back());
-	pan_automation_item->set_active(show_pan_automation);
-	
 }
 
 void
@@ -360,79 +281,45 @@ AudioTimeAxisView::set_waveform_scale (WaveformScale scale)
 }	
 
 void
-AudioTimeAxisView::add_gain_automation_child ()
+AudioTimeAxisView::create_automation_child (ParamID param)
 {
-	XMLProperty* prop;
-	AutomationLine* line;
+	if (param.type() == GainAutomation) {
+		GainAutomationTimeAxisView* gain_track = new GainAutomationTimeAxisView (_session,
+				_route,
+				editor,
+				*this,
+				parent_canvas,
+				_route->describe_parameter(param),
+				_route->gain_automation());
 
-	gain_track = new GainAutomationTimeAxisView (_session,
-						     _route,
-						     editor,
-						     *this,
-						     parent_canvas,
-						     _("gain"),
-						     _route->gain_automation_curve());
-	
-	line = new AutomationGainLine ("automation gain",
-				       _session,
-				       *gain_track,
-				       *gain_track->canvas_display,
-				       _route->gain_automation_curve());
+		AutomationLine* line = new AutomationGainLine ("automation gain",
+				*gain_track,
+				*gain_track->canvas_display,
+				_route->gain_automation());
 
-	line->set_line_color (Config->canvasvar_AutomationLine.get());
-	
+		line->set_line_color (Config->canvasvar_AutomationLine.get());
 
-	gain_track->add_line (*line);
+		gain_track->add_line (*line);
 
-	add_child (gain_track);
+		add_automation_child(ParamID(GainAutomation), gain_track);
 
-	gain_track->Hiding.connect (mem_fun(*this, &AudioTimeAxisView::gain_hidden));
+	} else if (param.type() == PanAutomation) {
 
-	bool hideit = true;
-	
-	XMLNode* node;
+		PanAutomationTimeAxisView* pan_track = new PanAutomationTimeAxisView (_session,
+				 _route,
+				 editor,
+				 *this,
+				 parent_canvas,
+				_route->describe_parameter(param));
 
-	if ((node = gain_track->get_state_node()) != 0) {
-		if  ((prop = node->property ("shown")) != 0) {
-			if (prop->value() == "yes") {
-				hideit = false;
-			}
-		} 
-	}
+		ensure_xml_node ();
 
-	if (hideit) {
-		gain_track->hide ();
-	}
-}
+		add_automation_child(ParamID(PanAutomation), pan_track);
+		
+		update_pans ();
 
-void
-AudioTimeAxisView::add_pan_automation_child ()
-{
-	XMLProperty* prop;
-
-	pan_track = new PanAutomationTimeAxisView (_session, _route, editor, *this, parent_canvas, _("pan"));
-
-	update_pans ();
-	
-	add_child (pan_track);
-
-	pan_track->Hiding.connect (mem_fun(*this, &AudioTimeAxisView::pan_hidden));
-
-	ensure_xml_node ();
-	bool hideit = true;
-	
-	XMLNode* node;
-
-	if ((node = pan_track->get_state_node()) != 0) {
-		if ((prop = node->property ("shown")) != 0) {
-			if (prop->value() == "yes") {
-				hideit = false;
-			}
-		} 
-	}
-
-	if (hideit) {
-		pan_track->hide ();
+	} else {
+		error << "AudioTimeAxisView: unknown automation child " << param.to_string() << endmsg;
 	}
 }
 
@@ -440,6 +327,14 @@ void
 AudioTimeAxisView::update_pans ()
 {
 	Panner::iterator p;
+	
+	RouteAutomationNode* ran = automation_track(PanAutomation);
+	if (!ran) {
+		warning << _route << " has no pan automation track" << endmsg;
+		return;
+	}
+
+	AutomationTimeAxisView* pan_track = ran->track;
 	
 	pan_track->clear_lines ();
 	
@@ -454,7 +349,7 @@ AudioTimeAxisView::update_pans ()
 
 		AutomationLine* line;
 
-		line = new AutomationPanLine ("automation pan", _session, *pan_track,
+		line = new AutomationPanLine ("automation pan", *pan_track,
 					      *pan_track->canvas_display, 
 					      (*p)->automation());
 
@@ -470,79 +365,6 @@ AudioTimeAxisView::update_pans ()
 	}
 }
 		
-void
-AudioTimeAxisView::toggle_gain_track ()
-{
-
-	bool showit = gain_automation_item->get_active();
-
-	if (showit != gain_track->marked_for_display()) {
-		if (showit) {
-			gain_track->set_marked_for_display (true);
-			gain_track->canvas_display->show();
-			gain_track->get_state_node()->add_property ("shown", X_("yes"));
-		} else {
-			gain_track->set_marked_for_display (false);
-			gain_track->hide ();
-			gain_track->get_state_node()->add_property ("shown", X_("no"));
-		}
-
-		/* now trigger a redisplay */
-		
-		if (!no_redraw) {
-			 _route->gui_changed (X_("track_height"), (void *) 0); /* EMIT_SIGNAL */
-		}
-	}
-}
-
-void
-AudioTimeAxisView::gain_hidden ()
-{
-	gain_track->get_state_node()->add_property (X_("shown"), X_("no"));
-
-	if (gain_automation_item && !_hidden) {
-		gain_automation_item->set_active (false);
-	}
-
-	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
-}
-
-void
-AudioTimeAxisView::toggle_pan_track ()
-{
-	bool showit = pan_automation_item->get_active();
-
-	if (showit != pan_track->marked_for_display()) {
-		if (showit) {
-			pan_track->set_marked_for_display (true);
-			pan_track->canvas_display->show();
-			pan_track->get_state_node()->add_property ("shown", X_("yes"));
-		} else {
-			pan_track->set_marked_for_display (false);
-			pan_track->hide ();
-			pan_track->get_state_node()->add_property ("shown", X_("no"));
-		}
-
-		/* now trigger a redisplay */
-		
-		if (!no_redraw) {
-			 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
-		}
-	}
-}
-
-void
-AudioTimeAxisView::pan_hidden ()
-{
-	pan_track->get_state_node()->add_property ("shown", "no");
-
-	if (pan_automation_item && !_hidden) {
-		pan_automation_item->set_active (false);
-	}
-
-	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
-}
-
 void
 AudioTimeAxisView::show_all_automation ()
 {
@@ -667,12 +489,6 @@ AudioTimeAxisView::update_control_names ()
 			controls_base_unselected_name = "BusControlsBaseInactiveUnselected";
 		}
 	}
-}
-
-XMLNode* 
-AudioTimeAxisView::get_child_xml_node (const string & childname)
-{
-	return RouteUI::get_child_xml_node (childname);
 }
 
 void

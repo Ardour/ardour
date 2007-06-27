@@ -32,35 +32,39 @@
 #include <pbd/statefuldestructible.h> 
 
 #include <ardour/ardour.h>
+#include <ardour/param_id.h>
 
 namespace ARDOUR {
-	
+
+class Curve;
+
 struct ControlEvent {
-    double when;
-    double value;
-    
+
     ControlEvent (double w, double v)
-	    : when (w), value (v) { }
+	    : when (w), value (v) { 
+	    coeff[0] = coeff[1] = coeff[2] = coeff[3] = 0.0;
+	}
+
     ControlEvent (const ControlEvent& other) 
-	    : when (other.when), value (other.value) {}
-
-    virtual ~ControlEvent() {}
+	    : when (other.when), value (other.value) {
+	    coeff[0] = coeff[1] = coeff[2] = coeff[3] = 0.0;
+	}
     
-//    bool operator==(const ControlEvent& other) {
-//	    return value == other.value && when == other.when;
-//    }
-
+	double when;
+    double value;
+	double coeff[4]; ///< Used by Curve
 };
+
 
 class AutomationList : public PBD::StatefulDestructible
 {
   public:
-	typedef std::list<ControlEvent*> AutomationEventList;
-	typedef AutomationEventList::iterator iterator;
-	typedef AutomationEventList::const_iterator const_iterator;
+	typedef std::list<ControlEvent*> EventList;
+	typedef EventList::iterator iterator;
+	typedef EventList::const_iterator const_iterator;
 
-	AutomationList (double default_value);
-	AutomationList (const XMLNode&);
+	AutomationList (ParamID id, double min_val, double max_val, double default_val);
+	AutomationList (const XMLNode&, ParamID id);
 	~AutomationList();
 
 	AutomationList (const AutomationList&);
@@ -68,14 +72,17 @@ class AutomationList : public PBD::StatefulDestructible
 	AutomationList& operator= (const AutomationList&);
 	bool operator== (const AutomationList&);
 
+	ParamID param_id() const         { return _param_id; }
+	void    set_param_id(ParamID id) { _param_id = id; }
+
 	void freeze();
 	void thaw ();
 
-	AutomationEventList::size_type size() const { return events.size(); }
-	bool empty() const { return events.empty(); }
+	EventList::size_type size() const { return _events.size(); }
+	bool empty() const { return _events.empty(); }
 
 	void reset_default (double val) {
-		default_value = val;
+		_default_value = val;
 	}
 
 	void clear ();
@@ -111,7 +118,7 @@ class AutomationList : public PBD::StatefulDestructible
 	sigc::signal<void> automation_style_changed;
 
 	void set_automation_style (AutoStyle m);
-        AutoStyle automation_style() const { return _style; }
+	AutoStyle automation_style() const { return _style; }
 	sigc::signal<void> automation_state_changed;
 
 	bool automation_playback() const {
@@ -126,29 +133,29 @@ class AutomationList : public PBD::StatefulDestructible
 	bool touching() const { return _touching; }
 
 	void set_yrange (double min, double max) {
-		min_yval = min;
-		max_yval = max;
+		_min_yval = min;
+		_max_yval = max;
 	}
 
-	double get_max_y() const { return max_yval; }
-	double get_min_y() const { return min_yval; }
+	double get_max_y() const { return _max_yval; }
+	double get_min_y() const { return _min_yval; }
 
 	void truncate_end (double length);
 	void truncate_start (double length);
 	
-	iterator begin() { return events.begin(); }
-	iterator end() { return events.end(); }
+	iterator begin() { return _events.begin(); }
+	iterator end() { return _events.end(); }
 
-	ControlEvent* back() { return events.back(); }
-	ControlEvent* front() { return events.front(); }
+	ControlEvent* back() { return _events.back(); }
+	ControlEvent* front() { return _events.front(); }
 
-	const_iterator const_begin() const { return events.begin(); }
-	const_iterator const_end() const { return events.end(); }
+	const_iterator const_begin() const { return _events.begin(); }
+	const_iterator const_end() const { return _events.end(); }
 
 	std::pair<AutomationList::iterator,AutomationList::iterator> control_points_adjacent (double when);
 
 	template<class T> void apply_to_points (T& obj, void (T::*method)(const AutomationList&)) {
-		Glib::Mutex::Lock lm (lock);
+		Glib::Mutex::Lock lm (_lock);
 		(obj.*method)(*this);
 	}
 
@@ -160,16 +167,16 @@ class AutomationList : public PBD::StatefulDestructible
 	XMLNode& serialize_events ();
 
 	void set_max_xval (double);
-	double get_max_xval() const { return max_xval; }
+	double get_max_xval() const { return _max_xval; }
 
 	double eval (double where) {
-		Glib::Mutex::Lock lm (lock);
+		Glib::Mutex::Lock lm (_lock);
 		return unlocked_eval (where);
 	}
 
 	double rt_safe_eval (double where, bool& ok) {
 
-		Glib::Mutex::Lock lm (lock, Glib::TRY_LOCK);
+		Glib::Mutex::Lock lm (_lock, Glib::TRY_LOCK);
 
 		if ((ok = lm.locked())) {
 			return unlocked_eval (where);
@@ -183,65 +190,66 @@ class AutomationList : public PBD::StatefulDestructible
 			return a->when < b->when;
 		}
 	};
+	
+	struct LookupCache {
+	    double left;  /* leftmost x coordinate used when finding "range" */
+	    std::pair<AutomationList::const_iterator,AutomationList::const_iterator> range;
+	};
 
-        static sigc::signal<void, AutomationList*> AutomationListCreated;
+	static sigc::signal<void, AutomationList*> AutomationListCreated;
+
+	const EventList& events() const { return _events; }
+	double default_value() const { return _default_value; }
+
+	// teeny const violations for Curve
+	mutable sigc::signal<void> Dirty;
+	Glib::Mutex& lock() const { return _lock; }
+	LookupCache& lookup_cache() const { return _lookup_cache; }
+	
+	/** Called by locked entry point and various private
+	 * locations where we already hold the lock.
+	 * 
+	 * FIXME: Should this be private?  Curve needs it..
+	 */
+	double unlocked_eval (double x) const;
+
+	Curve&       curve()       { return *_curve; }
+	const Curve& curve() const { return *_curve; }
 
   protected:
 
-	AutomationEventList events;
-	mutable Glib::Mutex lock;
-	int8_t  _frozen;
-	bool    changed_when_thawed;
-	bool   _dirty;
-
-	struct LookupCache {
-	    double left;  /* leftmost x coordinate used when finding "range" */
-	    std::pair<AutomationList::iterator,AutomationList::iterator> range;
-	};
-
-	mutable LookupCache lookup_cache;
-
-	AutoState  _state;
-	AutoStyle  _style;
-	bool  _touching;
-	bool  _new_touch;
-	double max_xval;
-	double min_yval;
-	double max_yval;
-	double default_value;
-	bool   sort_pending;
-
-	iterator rt_insertion_point;
-	double   rt_pos;
-
-	void maybe_signal_changed ();
-	void mark_dirty ();
-	void _x_scale (double factor);
-
-	/* called by type-specific unlocked_eval() to handle
-	   common case of 0, 1 or 2 control points.
-	*/
-
-	double shared_eval (double x);
-
-	/* called by shared_eval() to handle any case of
-	   3 or more control points.
-	*/
-
-	virtual double multipoint_eval (double x); 
-
-	/* called by locked entry point and various private
-	   locations where we already hold the lock.
-	*/
-
-	virtual double unlocked_eval (double where);
-
-	virtual ControlEvent* point_factory (double,double) const;
-	virtual ControlEvent* point_factory (const ControlEvent&) const;
+	/** Called by unlocked_eval() to handle cases of 3 or more control points.
+	 */
+	virtual double multipoint_eval (double x) const; 
 
 	AutomationList* cut_copy_clear (double, double, int op);
 
 	int deserialize_events (const XMLNode&);
+	
+	void maybe_signal_changed ();
+	void mark_dirty ();
+	void _x_scale (double factor);
+
+	mutable LookupCache _lookup_cache;
+	
+	ParamID             _param_id;
+	EventList           _events;
+	mutable Glib::Mutex _lock;
+	int8_t              _frozen;
+	bool                _changed_when_thawed;
+	AutoState           _state;
+	AutoStyle           _style;
+	bool                _touching;
+	bool                _new_touch;
+	double              _max_xval;
+	double              _min_yval;
+	double              _max_yval;
+	double              _default_value;
+	bool                _sort_pending;
+	iterator            _rt_insertion_point;
+	double              _rt_pos;
+
+	Curve* _curve;
 };
 
 } // namespace

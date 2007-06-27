@@ -34,7 +34,7 @@
 #include <pbd/controllable.h>
 
 #include <ardour/ardour.h>
-#include <ardour/session_object.h>
+#include <ardour/automatable.h>
 #include <ardour/utils.h>
 #include <ardour/curve.h>
 #include <ardour/types.h>
@@ -64,9 +64,8 @@ class BufferSet;
  * An IO can contain ports of varying types, making routes/inserts/etc with
  * varied combinations of types (eg MIDI and audio) possible.
  */
-class IO : public SessionObject
+class IO : public Automatable
 {
-
   public:
 	static const string state_node_name;
 
@@ -227,22 +226,15 @@ class IO : public SessionObject
 	}
 
 	void clear_automation ();
-
-	virtual void set_gain_automation_state (AutoState);
-	AutoState gain_automation_state() const { return _gain_automation_curve.automation_state(); }
-	//sigc::signal<void> gain_automation_state_changed;
-
-	virtual void set_gain_automation_style (AutoStyle);
-	AutoStyle gain_automation_style () const { return _gain_automation_curve.automation_style(); }
-	//sigc::signal<void> gain_automation_style_changed;
+	
+	void set_parameter_automation_state (ParamID, AutoState);
 
 	virtual void transport_stopped (nframes_t now); // interface: matches Insert
 	void automation_snapshot (nframes_t now); // interface: matches Automatable
 
-	ARDOUR::Curve& gain_automation_curve () { return _gain_automation_curve; }
-
-	void start_gain_touch ();
-	void end_gain_touch ();
+	// FIXME: these will probably become unsafe in the near future
+	ARDOUR::AutomationList&       gain_automation()       { return *automation_list(GainAutomation); }
+	const ARDOUR::AutomationList& gain_automation() const { return *automation_list(GainAutomation); }
 
 	void start_pan_touch (uint32_t which);
 	void end_pan_touch (uint32_t which);
@@ -299,16 +291,12 @@ class IO : public SessionObject
 	nframes_t last_automation_snapshot;
 	static nframes_t _automation_interval;
 
-	AutoState      _gain_automation_state;
-	AutoStyle      _gain_automation_style;
+	/*AutoState      _gain_automation_state;
+	AutoStyle      _gain_automation_style;*/
 
-	bool     apply_gain_automation;
-	Curve    _gain_automation_curve;
+	bool apply_gain_automation;
+	//Curve     _gain_automation_curve;
 	
-	Glib::Mutex automation_lock;
-
-	virtual int set_automation_state (const XMLNode&);
-	virtual XMLNode& get_automation_state ();
 	virtual int load_automation (std::string path);
 
 	/* AudioTrack::deprecated_use_diskstream_connections() needs these */

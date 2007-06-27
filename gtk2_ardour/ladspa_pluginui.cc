@@ -177,7 +177,7 @@ LadspaPluginUI::build ()
 			
 			/* Don't show latency control ports */
 
-			if (plugin->describe_parameter (i) == X_("latency")) {
+			if (plugin->describe_parameter (ParamID(PluginAutomation, i)) == X_("latency")) {
 				continue;
 			}
 
@@ -324,7 +324,8 @@ LadspaPluginUI::automation_state_changed (ControlUI* cui)
 {
 	/* update button label */
 
-	switch (insert->get_port_automation_state (cui->port_index) & (Off|Play|Touch|Write)) {
+	switch (insert->get_parameter_automation_state (ParamID(PluginAutomation, cui->port_index))
+			& (Off|Play|Touch|Write)) {
 	case Off:
 		cui->automate_button.set_label (_("Manual"));
 		break;
@@ -491,7 +492,7 @@ LadspaPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontro
 		automation_state_changed (control_ui);
 
 		plugin->ParameterChanged.connect (bind (mem_fun(*this, &LadspaPluginUI::parameter_changed), control_ui));
-		insert->automation_list (port_index).automation_state_changed.connect 
+		insert->automation_list (ParamID(PluginAutomation, port_index))->automation_state_changed.connect 
 			(bind (mem_fun(*this, &LadspaPluginUI::automation_state_changed), control_ui));
 
 	} else if (plugin->parameter_is_output (port_index)) {
@@ -548,13 +549,13 @@ LadspaPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontro
 void
 LadspaPluginUI::start_touch (LadspaPluginUI::ControlUI* cui)
 {
-	insert->automation_list (cui->port_index).start_touch ();
+	insert->automation_list (ParamID(PluginAutomation, cui->port_index))->start_touch ();
 }
 
 void
 LadspaPluginUI::stop_touch (LadspaPluginUI::ControlUI* cui)
 {
-	insert->automation_list (cui->port_index).stop_touch ();
+	insert->automation_list (ParamID(PluginAutomation, cui->port_index))->stop_touch ();
 }
 
 void
@@ -585,7 +586,7 @@ LadspaPluginUI::astate_clicked (ControlUI* cui, uint32_t port)
 void
 LadspaPluginUI::set_automation_state (AutoState state, ControlUI* cui)
 {
-	insert->set_port_automation_state (cui->port_index, state);
+	insert->set_parameter_automation_state (ParamID(PluginAutomation, cui->port_index), state);
 }
 
 void
@@ -601,7 +602,7 @@ LadspaPluginUI::control_adjustment_changed (ControlUI* cui)
 	  	value = exp(value);
 	}
 
-	insert->set_parameter (cui->port_index, (float) value);
+	insert->set_parameter (ParamID(PluginAutomation, cui->port_index), (float) value);
 }
 
 void
@@ -656,7 +657,7 @@ void
 LadspaPluginUI::control_port_toggled (ControlUI* cui)
 {
 	if (!cui->ignore_change) {
-		insert->set_parameter (cui->port_index, cui->button->get_active());
+		insert->set_parameter (ParamID(PluginAutomation, cui->port_index), cui->button->get_active());
 	}
 }
 
@@ -666,7 +667,7 @@ LadspaPluginUI::control_combo_changed (ControlUI* cui)
 	if (!cui->ignore_change) {
 		string value = cui->combo->get_active_text();
 		std::map<string,float> mapping = *cui->combo_map;
-		insert->set_parameter (cui->port_index, mapping[value]);
+		insert->set_parameter (ParamID(PluginAutomation, cui->port_index), mapping[value]);
 	}
 
 }

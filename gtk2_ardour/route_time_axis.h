@@ -79,6 +79,7 @@ public:
 	void set_selected_regionviews (RegionSelection&);
 	void get_selectables (nframes_t start, nframes_t end, double top, double bot, list<Selectable *>&);
 	void get_inverted_selectables (Selection&, list<Selectable*>&);
+	bool show_automation(ARDOUR::ParamID param);
 		
 	boost::shared_ptr<ARDOUR::Region> find_next_region (nframes_t pos, ARDOUR::RegionPoint, int32_t dir);
 
@@ -94,6 +95,8 @@ public:
 	void clear_playlist ();
 	
 	void build_playlist_menu (Gtk::Menu *);
+
+	virtual void create_automation_child (ARDOUR::ParamID param) = 0;
 	
 	string              name() const;
 	StreamView*         view() const { return _view; }
@@ -103,13 +106,22 @@ public:
 protected:
 	friend class StreamView;
 	
+	struct RouteAutomationNode {
+		ARDOUR::ParamID         param;
+	    Gtk::CheckMenuItem*     menu_item;
+	    AutomationTimeAxisView* track;
+	    
+		RouteAutomationNode (ARDOUR::ParamID par, Gtk::CheckMenuItem* mi, AutomationTimeAxisView* tr)
+		    : param (par), menu_item (mi), track (tr) {}
+	};
+
 	struct InsertAutomationNode {
-	    uint32_t                what;
+		ARDOUR::ParamID         what;
 	    Gtk::CheckMenuItem*     menu_item;
 	    AutomationTimeAxisView* view;
 	    RouteTimeAxisView&      parent;
 
-	    InsertAutomationNode (uint32_t w, Gtk::CheckMenuItem* mitem, RouteTimeAxisView& p)
+	    InsertAutomationNode (ARDOUR::ParamID w, Gtk::CheckMenuItem* mitem, RouteTimeAxisView& p)
 		    : what (w), menu_item (mitem), view (0), parent (p) {}
 
 	    ~InsertAutomationNode ();
@@ -143,15 +155,22 @@ protected:
 	
 	void insert_automation_track_hidden (InsertAutomationNode*,
 	                                       boost::shared_ptr<ARDOUR::Insert>);
+	
+	void automation_track_hidden (ARDOUR::ParamID param);
+
+	RouteAutomationNode* automation_track(ARDOUR::ParamID param);
+	RouteAutomationNode* automation_track(ARDOUR::AutomationType type);
 
 	InsertAutomationNode*
-	find_insert_automation_node (boost::shared_ptr<ARDOUR::Insert> i, uint32_t);
+	find_insert_automation_node (boost::shared_ptr<ARDOUR::Insert> i, ARDOUR::ParamID);
 	
 	RedirectAutomationLine*
-	find_insert_automation_curve (boost::shared_ptr<ARDOUR::Insert> i, uint32_t);
+	find_insert_automation_curve (boost::shared_ptr<ARDOUR::Insert> i, ARDOUR::ParamID);
 
-	void add_insert_automation_curve (boost::shared_ptr<ARDOUR::Insert> r, uint32_t);
+	void add_insert_automation_curve (boost::shared_ptr<ARDOUR::Insert> r, ARDOUR::ParamID);
 	void add_existing_insert_automation_curves (boost::shared_ptr<ARDOUR::Insert>);
+
+	void add_automation_child(ARDOUR::ParamID param, AutomationTimeAxisView* track);
 	
 	void reset_insert_automation_curves ();
 
@@ -186,6 +205,7 @@ protected:
 	void rename_current_playlist ();
 	
 	void         automation_click ();
+	void         toggle_automation_track (ARDOUR::ParamID param);
 	virtual void show_all_automation ();
 	virtual void show_existing_automation ();
 	virtual void hide_all_automation ();
@@ -203,7 +223,6 @@ protected:
 
 	void region_view_added (RegionView*);
 	void add_ghost_to_insert (RegionView*, AutomationTimeAxisView*);
-	
 	
 	StreamView*           _view;
 	ArdourCanvas::Canvas& parent_canvas;
@@ -238,12 +257,21 @@ protected:
 	void _set_track_mode (ARDOUR::Track* track, ARDOUR::TrackMode mode, Gtk::RadioMenuItem* reset_item);
 	void track_mode_changed ();
 
-	list<InsertAutomationInfo*>   insert_automation;
+	list<InsertAutomationInfo*>     insert_automation;
 	vector<RedirectAutomationLine*> insert_automation_curves;
+	
+	// Set from XML so context menu automation buttons can be correctly initialized
+	set<ARDOUR::ParamID> _show_automation;
+
+	map<ARDOUR::ParamID, RouteAutomationNode*> _automation_tracks;
 
 	sigc::connection modified_connection;
 
 	void post_construct ();
+	
+	void set_state (const XMLNode&);
+	
+	XMLNode* get_child_xml_node (const string & childname);
 };
 
 #endif /* __ardour_route_time_axis_h__ */

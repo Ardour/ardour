@@ -534,7 +534,7 @@ AudioRegionView::reset_fade_in_shape_width (nframes_t width)
 	fade_in_shape->show();
 
 	float curve[npoints];
-	audio_region()->fade_in().get_vector (0, audio_region()->fade_in().back()->when, curve, npoints);
+	audio_region()->fade_in().curve().get_vector (0, audio_region()->fade_in().back()->when, curve, npoints);
 
 	points = get_canvas_points ("fade in shape", npoints+3);
 
@@ -620,7 +620,7 @@ AudioRegionView::reset_fade_out_shape_width (nframes_t width)
 	fade_out_shape->show();
 
 	float curve[npoints];
-	audio_region()->fade_out().get_vector (0, audio_region()->fade_out().back()->when, curve, npoints);
+	audio_region()->fade_out().curve().get_vector (0, audio_region()->fade_out().back()->when, curve, npoints);
 
 	if (_height > NAME_HIGHLIGHT_THRESH) {
 		h = _height - NAME_HIGHLIGHT_SIZE;
@@ -953,7 +953,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 	audio_region()->envelope().add (fx, y);
 	
 	XMLNode &after = audio_region()->envelope().get_state();
-	trackview.session().add_command (new MementoCommand<Curve>(audio_region()->envelope(), &before, &after));
+	trackview.session().add_command (new MementoCommand<AutomationList>(audio_region()->envelope(), &before, &after));
 	trackview.session().commit_reversible_command ();
 }
 

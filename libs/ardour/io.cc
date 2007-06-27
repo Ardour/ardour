@@ -101,11 +101,10 @@ static double direct_gain_to_control (gain_t gain) {
 IO::IO (Session& s, const string& name,
 	int input_min, int input_max, int output_min, int output_max,
 	DataType default_type)
-	: SessionObject(s, name),
-      _output_buffers(new BufferSet()),
-	  _default_type(default_type),
+	: Automatable (s, name),
+      _output_buffers (new BufferSet()),
+	  _default_type (default_type),
 	  _gain_control (X_("gaincontrol"), *this),
-	  _gain_automation_curve (0.0, 2.0, 1.0),
 	  _input_minimum (ChanCount::ZERO),
 	  _input_maximum (ChanCount::INFINITE),
 	  _output_minimum (ChanCount::ZERO),
@@ -136,12 +135,14 @@ IO::IO (Session& s, const string& name,
 	_phase_invert = false;
 	deferred_state = 0;
 
+	add_automation_parameter(new AutomationList(ParamID(GainAutomation), 0.0, 2.0, 1.0));
+
 	apply_gain_automation = false;
 	
 	last_automation_snapshot = 0;
 
-	_gain_automation_state = Off;
-	_gain_automation_style = Absolute;
+	/*_gain_automation_state = Off;
+	_gain_automation_style = Absolute;*/
 
 	{
 		// IO::Meter is emitted from another thread so the
@@ -157,11 +158,10 @@ IO::IO (Session& s, const string& name,
 }
 
 IO::IO (Session& s, const XMLNode& node, DataType dt)
-	: SessionObject(s, "unnamed io"),
-      _output_buffers(new BufferSet()),
+	: Automatable (s, "unnamed io"),
+      _output_buffers (new BufferSet()),
 	  _default_type (dt),
-	  _gain_control (X_("gaincontrol"), *this),
-	  _gain_automation_curve (0, 0, 0) // all reset in set_state()
+	  _gain_control (X_("gaincontrol"), *this)
 {
 	_meter = new PeakMeter (_session);
 
@@ -1129,7 +1129,7 @@ IO::ensure_outputs (ChanCount count, bool clear, bool lockit, void* src)
 gain_t
 IO::effective_gain () const
 {
-	if (_gain_automation_curve.automation_playback()) {
+	if (gain_automation().automation_playback()) {
 		return _effective_gain;
 	} else {
 		return _desired_gain;
@@ -1288,18 +1288,9 @@ IO::state (bool full_state)
 	node->add_property ("iolimits", buf);
 
 	/* automation */
-
-	if (full_state) {
-
-		XMLNode* autonode = new XMLNode (X_("Automation"));
-		autonode->add_child_nocopy (get_automation_state());
-		node->add_child_nocopy (*autonode);
-
-		snprintf (buf, sizeof (buf), "0x%x", (int) _gain_automation_curve.automation_state());
-	} else {
-		/* never store anything except Off for automation state in a template */
-		snprintf (buf, sizeof (buf), "0x%x", ARDOUR::Off); 
-	}
+	
+	if (full_state)
+		node->add_child_nocopy (get_automation_state());
 
 	return *node;
 }
@@ -1363,7 +1354,7 @@ IO::set_state (const XMLNode& node)
 
 		if ((*iter)->name() == X_("Automation")) {
 
-			set_automation_state (*(*iter)->children().front());
+			set_automation_state (*(*iter), ParamID(GainAutomation));
 		}
 
 		if ((*iter)->name() == X_("controllable")) {
@@ -1408,18 +1399,6 @@ IO::set_state (const XMLNode& node)
 	last_automation_snapshot = 0;
 
 	return 0;
-}
-
-int
-IO::set_automation_state (const XMLNode& node)
-{
-	return _gain_automation_curve.set_state (node);
-}
-
-XMLNode&
-IO::get_automation_state ()
-{
-	return (_gain_automation_curve.get_state ());
 }
 
 int
@@ -1479,7 +1458,7 @@ IO::load_automation (string path)
 
 		switch (type) {
 		case 'g':
-			_gain_automation_curve.fast_simple_add (when, value);
+			gain_automation().fast_simple_add (when, value);
 			break;
 
 		case 's':
@@ -2198,41 +2177,43 @@ IO::meter ()
 void
 IO::clear_automation ()
 {
-	Glib::Mutex::Lock lm (automation_lock);
-	_gain_automation_curve.clear ();
+	Automatable::clear_automation (); // clears gain automation
 	_panner->clear_automation ();
 }
 
 void
-IO::set_gain_automation_state (AutoState state)
+IO::set_parameter_automation_state (ParamID param, AutoState state)
 {
-	bool changed = false;
+	// XXX: would be nice to get rid of this special hack
 
-	{
-		Glib::Mutex::Lock lm (automation_lock);
+	if (param.type() == GainAutomation) {
 
-		if (state != _gain_automation_curve.automation_state()) {
-			changed = true;
-			last_automation_snapshot = 0;
-			_gain_automation_curve.set_automation_state (state);
-			
-			if (state != Off) {
-				set_gain (_gain_automation_curve.eval (_session.transport_frame()), this);
+		bool changed = false;
+
+		{ 
+			Glib::Mutex::Lock lm (_automation_lock);
+
+			ARDOUR::AutomationList& gain_auto = gain_automation();
+
+			if (state != gain_auto.automation_state()) {
+				changed = true;
+				last_automation_snapshot = 0;
+				gain_auto.set_automation_state (state);
+
+				if (state != Off) {
+					// FIXME: shouldn't this use Curve?
+					set_gain (gain_auto.eval (_session.transport_frame()), this);
+				}
 			}
 		}
-	}
 
-	if (changed) {
-		_session.set_dirty ();
-		//gain_automation_state_changed (); /* EMIT SIGNAL */
-	}
-}
+		if (changed) {
+			_session.set_dirty ();
+		}
 
-void
-IO::set_gain_automation_style (AutoStyle style)
-{
-	Glib::Mutex::Lock lm (automation_lock);
-	_gain_automation_curve.set_automation_style (style);
+	} else {
+		Automatable::set_parameter_automation_state(param, state);
+	}
 }
 
 void
@@ -2263,24 +2244,14 @@ IO::set_gain (gain_t val, void *src)
 	gain_changed (src);
 	_gain_control.Changed (); /* EMIT SIGNAL */
 	
-	if (_session.transport_stopped() && src != 0 && src != this && _gain_automation_curve.automation_write()) {
-		_gain_automation_curve.add (_session.transport_frame(), val);
+	ARDOUR::AutomationList& gain_auto = gain_automation();
+
+	if (_session.transport_stopped() && src != 0 && src != this && gain_auto.automation_write()) {
+		gain_auto.add (_session.transport_frame(), val);
 		
 	}
 
 	_session.set_dirty();
-}
-
-void
-IO::start_gain_touch ()
-{
-	_gain_automation_curve.start_touch ();
-}
-
-void
-IO::end_gain_touch ()
-{
-	_gain_automation_curve.stop_touch ();
 }
 
 void
@@ -2305,8 +2276,10 @@ IO::automation_snapshot (nframes_t now)
 {
 	if (last_automation_snapshot > now || (now - last_automation_snapshot) > _automation_interval) {
 
-		if (_gain_automation_curve.automation_write()) {
-			_gain_automation_curve.rt_add (now, gain());
+		ARDOUR::AutomationList& gain_auto = gain_automation();
+
+		if (gain_auto.automation_write()) {
+			gain_auto.rt_add (now, gain());
 		}
 		
 		_panner->snapshot (now);
@@ -2318,15 +2291,18 @@ IO::automation_snapshot (nframes_t now)
 void
 IO::transport_stopped (nframes_t frame)
 {
-	_gain_automation_curve.reposition_for_rt_add (frame);
+	ARDOUR::AutomationList& gain_auto = gain_automation();
 
-	if (_gain_automation_curve.automation_state() != Off) {
+	gain_auto.reposition_for_rt_add (frame);
+
+	if (gain_auto.automation_state() != Off) {
 		
 		/* the src=0 condition is a special signal to not propagate 
 		   automation gain changes into the mix group when locating.
 		*/
 
-		set_gain (_gain_automation_curve.eval (frame), 0);
+		// FIXME: shouldn't this use Curve?
+		set_gain (gain_auto.eval (frame), 0);
 	}
 
 	_panner->transport_stopped (frame);

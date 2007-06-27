@@ -63,7 +63,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 	void set_parameter (uint32_t port, float val);
 	float get_parameter (uint32_t port) const;
 	int get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
-	std::set<uint32_t> automatable() const;
+	std::set<ParamID> automatable() const;
 	uint32_t nth_parameter (uint32_t port, bool& ok) const;
 	void activate () { 
 		if (descriptor->activate) {
@@ -85,7 +85,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 	int connect_and_run (BufferSet& bufs, uint32_t& in, uint32_t& out, nframes_t nframes, nframes_t offset);
 	void store_state (ARDOUR::PluginState&);
 	void restore_state (ARDOUR::PluginState&);
-	string describe_parameter (uint32_t);
+	string describe_parameter (ParamID);
 	string state_node_name() const { return "ladspa"; }
 	void print_parameter (uint32_t, char*, uint32_t len) const;
 

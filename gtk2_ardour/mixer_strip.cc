@@ -435,8 +435,8 @@ MixerStrip::set_width (Width w, void* owner)
 		       ((Gtk::Label*)comment_button.get_child())->set_text (_("*comments*"));
 		}
 
-		((Gtk::Label*)gpm.gain_automation_style_button.get_child())->set_text (gpm.astyle_string(_route->gain_automation_curve().automation_style()));
-		((Gtk::Label*)gpm.gain_automation_state_button.get_child())->set_text (gpm.astate_string(_route->gain_automation_curve().automation_state()));
+		((Gtk::Label*)gpm.gain_automation_style_button.get_child())->set_text (gpm.astyle_string(_route->gain_automation().automation_style()));
+		((Gtk::Label*)gpm.gain_automation_state_button.get_child())->set_text (gpm.astate_string(_route->gain_automation().automation_state()));
 		((Gtk::Label*)panners.pan_automation_style_button.get_child())->set_text (panners.astyle_string(_route->panner().automation_style()));
 		((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (panners.astate_string(_route->panner().automation_state()));
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "long", 2, 2);
@@ -457,8 +457,8 @@ MixerStrip::set_width (Width w, void* owner)
 		       ((Gtk::Label*)comment_button.get_child())->set_text (_("*Cmt*"));
 		}
 
-		((Gtk::Label*)gpm.gain_automation_style_button.get_child())->set_text (gpm.short_astyle_string(_route->gain_automation_curve().automation_style()));
-		((Gtk::Label*)gpm.gain_automation_state_button.get_child())->set_text (gpm.short_astate_string(_route->gain_automation_curve().automation_state()));
+		((Gtk::Label*)gpm.gain_automation_style_button.get_child())->set_text (gpm.short_astyle_string(_route->gain_automation().automation_style()));
+		((Gtk::Label*)gpm.gain_automation_state_button.get_child())->set_text (gpm.short_astate_string(_route->gain_automation().automation_state()));
 		((Gtk::Label*)panners.pan_automation_style_button.get_child())->set_text (panners.short_astyle_string(_route->panner().automation_style()));
 		((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (panners.short_astate_string(_route->panner().automation_state()));
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "longest label", 2, 2);

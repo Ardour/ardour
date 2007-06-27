@@ -30,50 +30,30 @@
 
 namespace ARDOUR {
 
-struct CurvePoint : public ControlEvent 
-{
-    double coeff[4];
-
-    CurvePoint (double w, double v) 
-	    : ControlEvent (w, v) {
-
-	    coeff[0] = coeff[1] = coeff[2] = coeff[3] = 0.0;
-    }
-
-    ~CurvePoint() {}
-};
-
-class Curve : public AutomationList
+class Curve
 {
   public:
-	Curve (double min_yval, double max_yval, double defaultvalue, bool nostate = false);
+	Curve (const AutomationList& al);
 	~Curve ();
 	Curve (const Curve& other);
-	Curve (const Curve& other, double start, double end);
-	Curve (const XMLNode&);
+	//Curve (const Curve& other, double start, double end);
+	/*Curve (const XMLNode&, ParamID id);*/
 
 	bool rt_safe_get_vector (double x0, double x1, float *arg, int32_t veclen);
 	void get_vector (double x0, double x1, float *arg, int32_t veclen);
 
-	AutomationEventList::iterator closest_control_point_before (double xval);
-	AutomationEventList::iterator closest_control_point_after (double xval);
-
 	void solve ();
 
-	static sigc::signal<void, Curve*> CurveCreated;
-		
-  protected:
-	ControlEvent* point_factory (double,double) const;
-	ControlEvent* point_factory (const ControlEvent&) const;
-
   private:
-	AutomationList::iterator last_bound;
-
 	double unlocked_eval (double where);
 	double multipoint_eval (double x);
 
 	void _get_vector (double x0, double x1, float *arg, int32_t veclen);
 
+	const AutomationList& _list;
+
+	void on_list_dirty() { _dirty = true; }
+	bool _dirty;
 };
 
 } // namespace ARDOUR

@@ -17,8 +17,8 @@
 
 */
 
-#ifndef __ardour_gtk_gain_automation_time_axis_h__
-#define __ardour_gtk_gain_automation_time_axis_h__
+#ifndef __ardour_gtk_midi_controller_time_axis_h__
+#define __ardour_gtk_midi_controller_time_axis_h__
 
 #include "canvas.h"
 #include "automation_time_axis.h"
@@ -27,26 +27,28 @@ namespace ARDOUR {
 	class AutomationList;
 }
 
-class GainAutomationTimeAxisView : public AutomationTimeAxisView
+class MidiControllerTimeAxisView : public AutomationTimeAxisView
 {
   public:
-	GainAutomationTimeAxisView (ARDOUR::Session&,
+	MidiControllerTimeAxisView (ARDOUR::Session&,
 				    boost::shared_ptr<ARDOUR::Route>,
 				    PublicEditor&,
 				    TimeAxisView& parent_axis,
 				    ArdourCanvas::Canvas& canvas,
 				    const string & name,
+					ARDOUR::ParamID param,
 				    ARDOUR::AutomationList&);
 	
-	~GainAutomationTimeAxisView();
+	~MidiControllerTimeAxisView();
 
 	void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, nframes_t, double);
 	
    private:
-	ARDOUR::AutomationList& list;
+	ARDOUR::AutomationList& _list;
+	ARDOUR::ParamID _param;
 
 	void automation_changed ();
 	void set_automation_state (ARDOUR::AutoState);
 };
 
-#endif /* __ardour_gtk_gain_automation_time_axis_h__ */
+#endif /* __ardour_gtk_midi_controller_time_axis_h__ */

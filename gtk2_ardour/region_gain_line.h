@@ -35,7 +35,7 @@ class AudioRegionView;
 class AudioRegionGainLine : public AutomationLine
 {
   public:
-  AudioRegionGainLine (const string & name, ARDOUR::Session&, AudioRegionView&, ArdourCanvas::Group& parent, ARDOUR::Curve&);
+  AudioRegionGainLine (const string & name, ARDOUR::Session&, AudioRegionView&, ArdourCanvas::Group& parent, ARDOUR::AutomationList&);
 	
 	void view_to_model_y (double&);
 	void model_to_view_y (double&);

@@ -35,6 +35,7 @@
 #include "region_gain_line.h"
 #include "automation_gain_line.h"
 #include "automation_pan_line.h"
+#include "automation_midi_cc_line.h"
 #include "automation_time_axis.h"
 #include "redirect_automation_line.h"
 #include "canvas_impl.h"
@@ -592,6 +593,8 @@ Editor::canvas_control_point_event (GdkEvent *event, ArdourCanvas::Item* item, C
 		type = PanAutomationControlPointItem;
 	} else if (dynamic_cast<RedirectAutomationLine*> (&cp->line) != 0) {
 		type = RedirectAutomationControlPointItem;
+	} else if (dynamic_cast<AutomationMidiCCLine*> (&cp->line) != 0) {
+		type = MidiCCAutomationControlPointItem;
 	} else {
 		return false;
 	}
@@ -612,6 +615,8 @@ Editor::canvas_line_event (GdkEvent *event, ArdourCanvas::Item* item, Automation
 		type = PanAutomationLineItem;
 	} else if (dynamic_cast<RedirectAutomationLine*> (al) != 0) {
 		type = RedirectAutomationLineItem;
+	} else if (dynamic_cast<AutomationMidiCCLine*> (al) != 0) {
+		type = MidiCCAutomationLineItem;
 	} else {
 		return false;
 	}
