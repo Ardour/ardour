@@ -26,7 +26,10 @@
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm/settings.h>
 
+#include <pbd/file_utils.h>
+
 #include <ardour/configuration.h>
+#include <ardour/filesystem_paths.h>
 
 #include "theme_manager.h"
 #include "rgb_macros.h"
@@ -184,10 +187,15 @@ ThemeManager::load_rc(int which)
 		Config->set_ui_rc_file("ardour2_ui_light.rc");
 		cerr << "light theme selected" << endl;
 	}
-
-	ThemeChanged(find_config_file(Config->get_ui_rc_file())); //EMIT SIGNAL
 	
-	cerr << "load_rc() called " << find_config_file(Config->get_ui_rc_file()) << endl;
+	sys::path rc_file_path;
+
+	find_file_in_search_path (ardour_search_path() + system_config_search_path(),
+			Config->get_ui_rc_file(), rc_file_path);
+
+	ThemeChanged(rc_file_path.to_string()); //EMIT SIGNAL
+	
+	cerr << "load_rc() called " << rc_file_path.to_string() << endl;
 
 }
 
