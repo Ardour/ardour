@@ -50,7 +50,7 @@ user_config_directory ()
 }
 
 sys::path
-system_module_directory ()
+ardour_module_directory ()
 {
 	sys::path module_directory(MODULE_DIR);
 	module_directory /= "ardour2";

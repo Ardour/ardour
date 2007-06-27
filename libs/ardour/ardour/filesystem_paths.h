@@ -36,7 +36,7 @@ namespace ARDOUR {
 	 * @return the path to the directory that contains the system wide ardour
 	 * modules.
 	 */
-	sys::path system_module_directory ();
+	sys::path ardour_module_directory ();
 
 } // namespace ARDOUR
 

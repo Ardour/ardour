@@ -42,7 +42,7 @@ control_protocol_search_path ()
 
 	SearchPath spath(user_config_directory ());
 
-	spath += system_module_directory ();
+	spath += ardour_module_directory ();
 
 	spath.add_subdirectory_to_paths(surfaces_dir_name);
 
