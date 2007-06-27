@@ -28,8 +28,12 @@
 #include <gtkmm/paned.h>
 #include <gtk/gtkpaned.h>
 
+#include <pbd/file_utils.h>
+
 #include <gtkmm2ext/utils.h>
-#include <ardour/ardour.h>
+//#include <ardour/ardour.h>
+
+#include <ardour/filesystem_paths.h>
 
 #include "ardour_ui.h"
 #include "keyboard.h"
@@ -488,7 +492,19 @@ Glib::RefPtr<Gdk::Pixbuf>
 get_xpm (std::string name)
 {
 	if (!xpm_map[name]) {
-		xpm_map[name] = Gdk::Pixbuf::create_from_file (ARDOUR::find_data_file(name, "pixmaps"));
+
+		SearchPath spath(ARDOUR::ardour_search_path());
+		spath += ARDOUR::system_data_search_path();
+
+		spath.add_subdirectory_to_paths("pixmaps");
+
+		sys::path data_file_path;
+
+		if(!find_file_in_search_path (spath, name, data_file_path)) {
+			fatal << string_compose (_("cannot find pixmap %1"), name) << endmsg;
+		}
+
+		xpm_map[name] = Gdk::Pixbuf::create_from_file (data_file_path.to_string());
 	}
 		
 	return (xpm_map[name]);
