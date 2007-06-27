@@ -66,6 +66,7 @@ automation.cc
 automation_event.cc
 configuration.cc
 control_protocol_manager.cc
+control_protocol_search_path.cc
 crossfade.cc
 curve.cc
 cycle_timer.cc

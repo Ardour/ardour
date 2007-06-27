@@ -49,4 +49,12 @@ user_config_directory ()
 	return p;
 }
 
+sys::path
+system_module_directory ()
+{
+	sys::path module_directory(MODULE_DIR);
+	module_directory /= "ardour2";
+	return module_directory;
+}
+
 } // namespace ARDOUR

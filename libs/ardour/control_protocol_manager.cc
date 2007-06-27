@@ -20,13 +20,14 @@
 #include <dlfcn.h>
 
 #include <pbd/compose.h>
+#include <pbd/file_utils.h>
 #include <pbd/error.h>
-#include <pbd/pathscanner.h>
 
 #include <control_protocol/control_protocol.h>
 
 #include <ardour/session.h>
 #include <ardour/control_protocol_manager.h>
+#include <ardour/control_protocol_search_path.h>
 
 using namespace ARDOUR;
 using namespace std;
@@ -168,15 +169,6 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
 	return 0;
 }
 
-static bool protocol_filter (const string& str, void *arg)
-{
-	/* Not a dotfile, has a prefix before a period, suffix is "so", or "dylib" */
-	
-	return str[0] != '.' 
-	  && ((str.length() > 3 && str.find (".so") == (str.length() - 3))
-	      || (str.length() > 6 && str.find (".dylib") == (str.length() - 6)));
-}
-
 void
 ControlProtocolManager::load_mandatory_protocols ()
 {
@@ -193,21 +185,24 @@ ControlProtocolManager::load_mandatory_protocols ()
 }
 
 void
-ControlProtocolManager::discover_control_protocols (string path)
+ControlProtocolManager::discover_control_protocols ()
 {
-	vector<string *> *found;
-	PathScanner scanner;
+	vector<sys::path> cp_modules;
 
-	info << string_compose (_("looking for control protocols in %1"), path) << endmsg;
+	Glib::PatternSpec so_extension_pattern("*.so");
+	Glib::PatternSpec dylib_extension_pattern("*.dylib");
 
-	found = scanner (path, protocol_filter, 0, false, true);
+	find_matching_files_in_search_path (control_protocol_search_path (),
+			so_extension_pattern, cp_modules);
 
-	for (vector<string*>::iterator i = found->begin(); i != found->end(); ++i) {
-		control_protocol_discover (**i);
-		delete *i;
+	find_matching_files_in_search_path (control_protocol_search_path (),
+			dylib_extension_pattern, cp_modules);
+
+	info << string_compose (_("looking for control protocols in %1"), control_protocol_search_path().get_string()) << endmsg;
+
+	for (vector<sys::path>::iterator i = cp_modules.begin(); i != cp_modules.end(); ++i) {
+		control_protocol_discover ((*i).to_string());
 	}
-
-	delete found;
 }
 
 int

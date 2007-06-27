@@ -17,26 +17,25 @@
 
 */
 
-#ifndef ARDOUR_FILESYSTEM_PATHS_INCLUDED
-#define ARDOUR_FILESYSTEM_PATHS_INCLUDED
+#ifndef ARDOUR_CONTROL_PROTOCOL_SEARCH_PATH_INCLUDED
+#define ARDOUR_CONTROL_PROTOCOL_SEARCH_PATH_INCLUDED
 
-#include <pbd/filesystem.h>
+#include <pbd/search_path.h>
 
 namespace ARDOUR {
 
-	using namespace PBD;
-	
-	/**
-	 * @return the path to the directory used to store user specific ardour
-	 * configuration files.
-	 */
-	sys::path user_config_directory ();
+	using PBD::SearchPath;
 
 	/**
-	 * @return the path to the directory that contains the system wide ardour
-	 * modules.
+	 * return a SearchPath containing directories in which to look for 
+	 * control surface plugins.
+	 *
+	 * If ARDOUR_SURFACES_PATH is defined then the SearchPath returned
+	 * will contain only those directories specified in it, otherwise it will
+	 * contain the user and system directories which may contain control
+	 * surface plugins.
 	 */
-	sys::path system_module_directory ();
+	SearchPath control_protocol_search_path ();
 
 } // namespace ARDOUR
 

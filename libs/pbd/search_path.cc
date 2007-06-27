@@ -42,14 +42,15 @@ SearchPath::SearchPath (const string& path)
 {
 	vector<sys::path> tmp;
 
-	if(!tokenize ( path, string(path_delimiter), std::back_inserter (tmp)))
+	if(tokenize (path, string(path_delimiter), std::back_inserter (tmp)))
 	{
-		// log warning(info perhaps?) that the path is empty 
-		warning << "SearchPath contains no tokens" << endmsg;
-
+		add_directories (tmp);
 	}
+}
 
-	add_directories (tmp);
+SearchPath::SearchPath (const sys::path& directory_path)
+{
+	add_directory (directory_path);
 }
 
 SearchPath::SearchPath (const vector<sys::path>& paths)

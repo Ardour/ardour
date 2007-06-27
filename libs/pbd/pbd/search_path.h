@@ -53,12 +53,24 @@ public:
 	SearchPath ();
 
 	/**
-	 * Initialize SearchPath from a string each path may or may not
-	 * exist.
+	 * Initialize SearchPath from a string where the string contains
+	 * one or more absolute paths to directories which are delimited 
+	 * by a path separation character. The path delimeter is a 
+	 * colon(:) on unix and a semi-colon(;) on windows.
+	 *
+	 * Each path contained in the search path may or may not resolve to
+	 * an existing directory in the filesystem.
 	 * 
 	 * @param search_path A path string.
 	 */
 	SearchPath (const string& search_path);
+
+	/**
+	 * Initialize SearchPath from a sys::path.
+	 *
+	 * @param directory_path A directory path.
+	 */
+	SearchPath (const sys::path& directory_path);
 
 	/**
 	 * Initialize SearchPath from a vector of paths that may or may

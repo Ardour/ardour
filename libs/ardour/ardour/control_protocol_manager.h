@@ -58,7 +58,7 @@ struct ControlProtocolInfo {
 	static ControlProtocolManager& instance() { return *_instance; }
 
 	void set_session (Session&);
-	void discover_control_protocols (std::string search_path);
+	void discover_control_protocols ();
 	void foreach_known_protocol (sigc::slot<void,const ControlProtocolInfo*>);
 	void load_mandatory_protocols ();
 

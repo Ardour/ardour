@@ -17,27 +17,36 @@
 
 */
 
-#ifndef ARDOUR_FILESYSTEM_PATHS_INCLUDED
-#define ARDOUR_FILESYSTEM_PATHS_INCLUDED
+#include <glibmm/miscutils.h>
 
-#include <pbd/filesystem.h>
+#include <ardour/control_protocol_search_path.h>
+#include <ardour/directory_names.h>
+#include <ardour/filesystem_paths.h>
+
+namespace {
+	const char * const surfaces_env_variable_name = "ARDOUR_SURFACES_PATH";
+} // anonymous
 
 namespace ARDOUR {
 
-	using namespace PBD;
+SearchPath
+control_protocol_search_path ()
+{
+	bool surfaces_path_defined = false;
+	SearchPath spath_env(Glib::getenv(surfaces_env_variable_name, surfaces_path_defined));
 	
-	/**
-	 * @return the path to the directory used to store user specific ardour
-	 * configuration files.
-	 */
-	sys::path user_config_directory ();
+	if (surfaces_path_defined)
+	{
+		return spath_env;
+	}
 
-	/**
-	 * @return the path to the directory that contains the system wide ardour
-	 * modules.
-	 */
-	sys::path system_module_directory ();
+	SearchPath spath(user_config_directory ());
+
+	spath += system_module_directory ();
+
+	spath.add_subdirectory_to_paths(surfaces_dir_name);
+
+	return spath;
+}
 
 } // namespace ARDOUR
-
-#endif

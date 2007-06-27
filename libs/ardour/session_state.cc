@@ -56,7 +56,6 @@
 #include <pbd/pathscanner.h>
 #include <pbd/pthread_utils.h>
 #include <pbd/search_path.h>
-#include <pbd/strsplit.h>
 #include <pbd/stacktrace.h>
 #include <pbd/copyfile.h>
 
@@ -1837,46 +1836,6 @@ Session::automation_dir () const
 	string res = _path;
 	res += "automation/";
 	return res;
-}
-
-string
-Session::suffixed_search_path (string suffix, bool data)
-{
-	string path;
-
-	path += get_user_ardour_path();
-	if (path[path.length()-1] != ':') {
-		path += ':';
-	}
-
-	if (data) {
-		path += get_system_data_path();
-	} else {
-		path += get_system_module_path();
-	}
-
-	vector<string> split_path;
-	
-	split (path, split_path, ':');
-	path = "";
-
-	for (vector<string>::iterator i = split_path.begin(); i != split_path.end(); ++i) {
-		path += *i;
-		path += suffix;
-		path += '/';
-		
-		if (distance (i, split_path.end()) != 1) {
-			path += ':';
-		}
-	}
-		
-	return path;
-}
-
-string
-Session::control_protocol_path ()
-{
-	return suffixed_search_path (surfaces_dir_name, false);
 }
 
 int

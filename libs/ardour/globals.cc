@@ -307,7 +307,7 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 	
 	/* singleton - first object is "it" */
 	new ControlProtocolManager ();
-	ControlProtocolManager::instance().discover_control_protocols (Session::control_protocol_path());
+	ControlProtocolManager::instance().discover_control_protocols ();
 
 	XMLNode* node;
 	if ((node = Config->control_protocol_state()) != 0) {
@@ -399,22 +399,6 @@ ARDOUR::get_system_data_path ()
 		path = envvar;
 	} else {
 		path += DATA_DIR;
-		path += "/ardour2/";
-	}
-	
-	return path;
-}
-
-string
-ARDOUR::get_system_module_path ()
-{
-	string path;
-	char *envvar;
-
-	if ((envvar = getenv ("ARDOUR_MODULE_PATH")) != 0) {
-		path = envvar;
-	} else {
-		path += MODULE_DIR;
 		path += "/ardour2/";
 	}
 	
