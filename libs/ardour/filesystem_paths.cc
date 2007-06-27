@@ -85,4 +85,22 @@ system_config_search_path ()
 	return config_path;
 }
 
+SearchPath
+system_data_search_path ()
+{
+#ifdef WITH_STATIC_PATHS
+
+	SearchPath data_path(string(DATA_DIR));
+
+#else
+
+	SearchPath data_path(system_data_directories());
+
+#endif
+
+	data_path.add_subdirectory_to_paths("ardour2");
+
+	return data_path;
+}
+
 } // namespace ARDOUR

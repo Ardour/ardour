@@ -43,6 +43,8 @@ namespace ARDOUR {
 
 	SearchPath system_config_search_path ();
 
+	SearchPath system_data_search_path ();
+
 } // namespace ARDOUR
 
 #endif
