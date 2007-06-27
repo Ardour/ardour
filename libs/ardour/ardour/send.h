@@ -28,11 +28,11 @@
 #include <ardour/ardour.h>
 #include <ardour/audioengine.h>
 #include <ardour/io.h>
-#include <ardour/redirect.h>
+#include <ardour/io_processor.h>
 
 namespace ARDOUR {
 
-class Send : public Redirect 
+class Send : public IOProcessor 
 {
   public:	
 	Send (Session&, Placement);

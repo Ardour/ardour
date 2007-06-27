@@ -44,8 +44,7 @@ namespace ARDOUR {
 	class Session;
 	class MidiDiskstream;
 	class RouteGroup;
-	class Insert;
-	class Insert;
+	class Processor;
 	class Location;
 	class MidiPlaylist;
 }
@@ -71,7 +70,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	
 	void route_active_changed ();
 
-	void add_insert_to_subplugin_menu (ARDOUR::Insert *);
+	void add_insert_to_subplugin_menu (ARDOUR::Processor *);
 	
 	Gtk::Menu subplugin_menu;
 };

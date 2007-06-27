@@ -56,9 +56,9 @@
 #include <ardour/smf_source.h>
 #include <ardour/auditioner.h>
 #include <ardour/recent_sessions.h>
-#include <ardour/redirect.h>
+#include <ardour/io_processor.h>
 #include <ardour/send.h>
-#include <ardour/insert.h>
+#include <ardour/processor.h>
 #include <ardour/plugin_insert.h>
 #include <ardour/port_insert.h>
 #include <ardour/bundle.h>
@@ -1890,7 +1890,7 @@ Session::add_routes (RouteList& new_routes, bool save)
 		(*x)->solo_changed.connect (sigc::bind (mem_fun (*this, &Session::route_solo_changed), wpr));
 		(*x)->mute_changed.connect (mem_fun (*this, &Session::route_mute_changed));
 		(*x)->output_changed.connect (mem_fun (*this, &Session::set_worst_io_latencies_x));
-		(*x)->inserts_changed.connect (bind (mem_fun (*this, &Session::update_latency_compensation), false, false));
+		(*x)->processors_changed.connect (bind (mem_fun (*this, &Session::update_latency_compensation), false, false));
 		
 		if ((*x)->master()) {
 			_master_out = (*x);
@@ -3532,44 +3532,44 @@ Session::record_enable_change_all (bool yn)
 }
 
 void
-Session::add_insert (Insert* insert)
+Session::add_processor (Processor* processor)
 {
 	Send* send;
 	PortInsert* port_insert;
 	PluginInsert* plugin_insert;
 
-	if ((port_insert = dynamic_cast<PortInsert *> (insert)) != 0) {
+	if ((port_insert = dynamic_cast<PortInsert *> (processor)) != 0) {
 		_port_inserts.insert (_port_inserts.begin(), port_insert);
-	} else if ((plugin_insert = dynamic_cast<PluginInsert *> (insert)) != 0) {
+	} else if ((plugin_insert = dynamic_cast<PluginInsert *> (processor)) != 0) {
 		_plugin_inserts.insert (_plugin_inserts.begin(), plugin_insert);
-	} else if ((send = dynamic_cast<Send *> (insert)) != 0) {
+	} else if ((send = dynamic_cast<Send *> (processor)) != 0) {
 		_sends.insert (_sends.begin(), send);
 	} else {
 		fatal << _("programming error: unknown type of Insert created!") << endmsg;
 		/*NOTREACHED*/
 	}
 
-	insert->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_insert), insert));
+	processor->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_processor), processor));
 
 	set_dirty();
 }
 
 void
-Session::remove_insert (Insert* insert)
+Session::remove_processor (Processor* processor)
 {
 	Send* send;
 	PortInsert* port_insert;
 	PluginInsert* plugin_insert;
 	
-	if ((port_insert = dynamic_cast<PortInsert *> (insert)) != 0) {
+	if ((port_insert = dynamic_cast<PortInsert *> (processor)) != 0) {
 		list<PortInsert*>::iterator x = find (_port_inserts.begin(), _port_inserts.end(), port_insert);
 		if (x != _port_inserts.end()) {
 			insert_bitset[port_insert->bit_slot()] = false;
 			_port_inserts.erase (x);
 		}
-	} else if ((plugin_insert = dynamic_cast<PluginInsert *> (insert)) != 0) {
+	} else if ((plugin_insert = dynamic_cast<PluginInsert *> (processor)) != 0) {
 		_plugin_inserts.remove (plugin_insert);
-	} else if ((send = dynamic_cast<Send *> (insert)) != 0) {
+	} else if ((send = dynamic_cast<Send *> (processor)) != 0) {
 		list<Send*>::iterator x = find (_sends.begin(), _sends.end(), send);
 		if (x != _sends.end()) {
 			send_bitset[send->bit_slot()] = false;

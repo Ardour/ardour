@@ -26,7 +26,7 @@
 #include <gtkmm/comboboxtext.h>
 
 namespace ARDOUR {
-	class Redirect;
+	class IOProcessor;
 }
 
 class PanAutomationTimeAxisView : public AutomationTimeAxisView

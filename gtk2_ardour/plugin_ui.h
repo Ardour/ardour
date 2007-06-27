@@ -47,7 +47,7 @@ namespace ARDOUR {
 	class PluginInsert;
 	class Plugin;
 	class VSTPlugin;
-	class Redirect;
+	class IOProcessor;
 	class AUPlugin;
 }
 
@@ -184,7 +184,7 @@ class LadspaPluginUI : public PlugUIBase, public Gtk::VBox
 	void control_port_toggled (ControlUI* cui);
 	void control_combo_changed (ControlUI* cui);
 
-	void insert_active_changed (boost::weak_ptr<ARDOUR::Insert>);
+	void processor_active_changed (boost::weak_ptr<ARDOUR::Processor>);
 
 	void astate_clicked (ControlUI*, uint32_t parameter);
 	void automation_state_changed (ControlUI*);

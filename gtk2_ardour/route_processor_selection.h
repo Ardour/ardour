@@ -17,42 +17,42 @@
 
 */
 
-#ifndef __ardour_gtk_route_redirect_selection_h__
-#define __ardour_gtk_route_redirect_selection_h__
+#ifndef __ardour_gtk_route_processor_selection_h__
+#define __ardour_gtk_route_processor_selection_h__
 
 #include <vector>
 #include <sigc++/signal.h>
 
-#include "redirect_selection.h"
+#include "processor_selection.h"
 #include "route_selection.h"
 
 class RouteRedirectSelection : public sigc::trackable 
 {
   public:
-	InsertSelection      inserts;
-	RouteSelection       routes;
+	ProcessorSelection processors;
+	RouteSelection     routes;
 
 	RouteRedirectSelection() {}
 
 	RouteRedirectSelection& operator= (const RouteRedirectSelection& other);
 
-	sigc::signal<void> InsertsChanged;
+	sigc::signal<void> ProcessorsChanged;
 	sigc::signal<void> RoutesChanged;
 
 	void clear ();
 	bool empty();
 
-	void set (boost::shared_ptr<ARDOUR::Insert>);
-	void set (const std::vector<boost::shared_ptr<ARDOUR::Insert> >&);
-	void add (boost::shared_ptr<ARDOUR::Insert>);
-	void add (const std::vector<boost::shared_ptr<ARDOUR::Insert> >&);
-	void remove (boost::shared_ptr<ARDOUR::Insert>);
+	void set (boost::shared_ptr<ARDOUR::Processor>);
+	void set (const std::vector<boost::shared_ptr<ARDOUR::Processor> >&);
+	void add (boost::shared_ptr<ARDOUR::Processor>);
+	void add (const std::vector<boost::shared_ptr<ARDOUR::Processor> >&);
+	void remove (boost::shared_ptr<ARDOUR::Processor>);
 
 	void set (boost::shared_ptr<ARDOUR::Route>);
 	void add (boost::shared_ptr<ARDOUR::Route>);
 	void remove (boost::shared_ptr<ARDOUR::Route>);
 
-	void clear_inserts ();
+	void clear_processors ();
 	void clear_routes ();
 
 	bool selected (boost::shared_ptr<ARDOUR::Route>);
@@ -60,4 +60,4 @@ class RouteRedirectSelection : public sigc::trackable
 
 bool operator==(const RouteRedirectSelection& a, const RouteRedirectSelection& b);
 
-#endif /* __ardour_gtk_route_redirect_selection_h__ */
+#endif /* __ardour_gtk_route_processor_selection_h__ */

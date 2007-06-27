@@ -25,7 +25,7 @@
 #include <pbd/enumwriter.h>
 #include <pbd/xml++.h>
 
-#include <ardour/insert.h>
+#include <ardour/processor.h>
 #include <ardour/plugin.h>
 #include <ardour/port.h>
 #include <ardour/route.h>
@@ -53,12 +53,12 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-sigc::signal<void,Insert*> Insert::InsertCreated;
+sigc::signal<void,Processor*> Processor::ProcessorCreated;
 
-// Always saved as Insert, but may be Redirect or Send in legacy sessions
-const string Insert::state_node_name = "Insert";
+// Always saved as Processor, but may be IOProcessor or Send in legacy sessions
+const string Processor::state_node_name = "Processor";
 
-Insert::Insert(Session& session, const string& name, Placement p)
+Processor::Processor(Session& session, const string& name, Placement p)
 	: Automatable(session, name)
 	, _active(false)
 	, _next_ab_is_active(false)
@@ -68,35 +68,35 @@ Insert::Insert(Session& session, const string& name, Placement p)
 {
 }
 
-boost::shared_ptr<Insert>
-Insert::clone (boost::shared_ptr<const Insert> other)
+boost::shared_ptr<Processor>
+Processor::clone (boost::shared_ptr<const Processor> other)
 {
 	boost::shared_ptr<const Send> send;
 	boost::shared_ptr<const PortInsert> port_insert;
 	boost::shared_ptr<const PluginInsert> plugin_insert;
 
 	if ((send = boost::dynamic_pointer_cast<const Send>(other)) != 0) {
-		return boost::shared_ptr<Insert> (new Send (*send));
+		return boost::shared_ptr<Processor> (new Send (*send));
 	} else if ((port_insert = boost::dynamic_pointer_cast<const PortInsert>(other)) != 0) {
-		return boost::shared_ptr<Insert> (new PortInsert (*port_insert));
+		return boost::shared_ptr<Processor> (new PortInsert (*port_insert));
 	} else if ((plugin_insert = boost::dynamic_pointer_cast<const PluginInsert>(other)) != 0) {
-		return boost::shared_ptr<Insert> (new PluginInsert (*plugin_insert));
+		return boost::shared_ptr<Processor> (new PluginInsert (*plugin_insert));
 	} else {
-		fatal << _("programming error: unknown Insert type in Insert::Clone!\n")
+		fatal << _("programming error: unknown Processor type in Processor::Clone!\n")
 		      << endmsg;
 		/*NOTREACHED*/
 	}
-	return boost::shared_ptr<Insert>();
+	return boost::shared_ptr<Processor>();
 }
 
 void
-Insert::set_sort_key (uint32_t key)
+Processor::set_sort_key (uint32_t key)
 {
 	_sort_key = key;
 }
 	
 void
-Insert::set_placement (Placement p)
+Processor::set_placement (Placement p)
 {
 	if (_placement != p) {
 		_placement = p;
@@ -105,14 +105,14 @@ Insert::set_placement (Placement p)
 }
 
 void
-Insert::set_active (bool yn)
+Processor::set_active (bool yn)
 {
 	_active = yn; 
 	ActiveChanged (); 
 }
 
 XMLNode&
-Insert::get_state (void)
+Processor::get_state (void)
 {
 	return state (true);
 }
@@ -132,7 +132,7 @@ Insert::get_state (void)
 */
 
 XMLNode&
-Insert::state (bool full_state)
+Processor::state (bool full_state)
 {
 	XMLNode* node = new XMLNode (state_node_name);
 	stringstream sstr;
@@ -173,7 +173,7 @@ Insert::state (bool full_state)
 }
 
 int
-Insert::set_state (const XMLNode& node)
+Processor::set_state (const XMLNode& node)
 {
 	const XMLProperty *prop;
 
@@ -184,7 +184,6 @@ Insert::set_state (const XMLNode& node)
 
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
-	bool have_io = false;
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
@@ -221,13 +220,8 @@ Insert::set_state (const XMLNode& node)
 		}
 	}
 
-	if (!have_io && dynamic_cast<IO*>(this)) {
-		error << _("XML node describing a redirect is missing an IO node") << endmsg;
-		return -1;
-	}
-
 	if ((prop = node.property ("active")) == 0) {
-		error << _("XML node describing an insert is missing the `active' field") << endmsg;
+		error << _("XML node describing a processor is missing the `active' field") << endmsg;
 		return -1;
 	}
 
@@ -237,7 +231,7 @@ Insert::set_state (const XMLNode& node)
 	}
 	
 	if ((prop = node.property ("placement")) == 0) {
-		error << _("XML node describing an insert is missing the `placement' field") << endmsg;
+		error << _("XML node describing a processor is missing the `placement' field") << endmsg;
 		return -1;
 	}
 

@@ -77,7 +77,8 @@ gdither.cc
 globals.cc
 import.cc
 automatable.cc
-insert.cc
+processor.cc
+io_processor.cc
 plugin_insert.cc
 port_insert.cc
 io.cc
@@ -92,7 +93,6 @@ playlist_factory.cc
 plugin.cc
 plugin_manager.cc
 recent_sessions.cc
-redirect.cc
 region.cc
 region_factory.cc
 reverse.cc

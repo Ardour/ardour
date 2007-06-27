@@ -32,7 +32,7 @@
 #include <pbd/undo.h>
 
 #include <ardour/ardour.h>
-#include <ardour/insert.h>
+#include <ardour/processor.h>
 #include <ardour/io.h>
 #include <ardour/automation_event.h>
 
@@ -47,15 +47,15 @@ namespace ARDOUR {
 
 class Session;
 
-/** A mixer strip element (Insert) with Jack ports (IO).
+/** A mixer strip element (Processor) with Jack ports (IO).
  */
-class Redirect : public Insert
+class IOProcessor : public Processor
 {
   public:
-	Redirect (Session&, const string& name, Placement,
+	IOProcessor (Session&, const string& name, Placement,
 		  int input_min = -1, int input_max = -1, int output_min = -1, int output_max = -1);
-	Redirect (const Redirect&);
-	virtual ~Redirect ();
+	IOProcessor (const IOProcessor&);
+	virtual ~IOProcessor ();
 	
 	virtual ChanCount output_streams() const { return _io->n_outputs(); }
 	virtual ChanCount input_streams () const { return _io->n_inputs(); }
@@ -70,8 +70,8 @@ class Redirect : public Insert
 	virtual void run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset) = 0;
 	void silence (nframes_t nframes, nframes_t offset);
 
-	sigc::signal<void,Redirect*,bool> AutomationPlaybackChanged;
-	sigc::signal<void,Redirect*,uint32_t> AutomationChanged;
+	sigc::signal<void,IOProcessor*,bool>     AutomationPlaybackChanged;
+	sigc::signal<void,IOProcessor*,uint32_t> AutomationChanged;
 	
 	XMLNode& state (bool full_state);
 	int set_state (const XMLNode&);

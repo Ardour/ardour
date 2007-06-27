@@ -74,7 +74,7 @@ void
 ARDOUR_UI::setup_keybindings ()
 {
 	install_actions ();
-	RedirectBox::register_actions ();
+	ProcessorBox::register_actions ();
 	
 	cerr << "loading bindings from " << keybindings_path << endl;
 

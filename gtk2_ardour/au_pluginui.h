@@ -28,7 +28,7 @@
 namespace ARDOUR {
 	class AUPlugin;
 	class PluginInsert;
-	class Redirect;
+	class IOProcessor;
 }
 
 class AUPluginUI
@@ -41,7 +41,7 @@ class AUPluginUI
 	WindowRef wr;
 	boost::shared_ptr<ARDOUR::AUPlugin> au;
 
-	void plugin_going_away (ARDOUR::Redirect*);
+	void plugin_going_away (ARDOUR::IOProcessor*);
 	Component get_carbon_view_component(OSType subtype);
 };
 

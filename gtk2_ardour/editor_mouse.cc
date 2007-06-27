@@ -547,7 +547,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 					
 				case GainAutomationLineItem:
 				case PanAutomationLineItem:
-				case RedirectAutomationLineItem:
+				case ProcessorAutomationLineItem:
 				case MidiCCAutomationLineItem:
 					start_line_grab_from_line (item, event);
 					return true;
@@ -632,7 +632,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 
 			case GainAutomationLineItem:
 			case PanAutomationLineItem:
-			case RedirectAutomationLineItem:
+			case ProcessorAutomationLineItem:
 			case MidiCCAutomationLineItem:
 				start_line_grab_from_line (item, event);
 				break;
@@ -924,7 +924,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case GainLineItem:
 		case GainAutomationLineItem:
 		case PanAutomationLineItem:
-		case RedirectAutomationLineItem:
+		case ProcessorAutomationLineItem:
 		case MidiCCAutomationLineItem:
 		case StartSelectionTrimItem:
 		case EndSelectionTrimItem:
@@ -1105,7 +1105,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 			
 	case GainAutomationLineItem:
-	case RedirectAutomationLineItem:
+	case ProcessorAutomationLineItem:
 	case MidiCCAutomationLineItem:
 	case PanAutomationLineItem:
 		if (mouse_mode == MouseGain || mouse_mode == MouseObject) {
@@ -1228,7 +1228,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	switch (item_type) {
 	case GainLineItem:
 	case GainAutomationLineItem:
-	case RedirectAutomationLineItem:
+	case ProcessorAutomationLineItem:
 	case MidiCCAutomationLineItem:
 	case PanAutomationLineItem:
 	case GainControlPointItem:
@@ -1302,7 +1302,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 	case GainLineItem:
 	case GainAutomationLineItem:
-	case RedirectAutomationLineItem:
+	case ProcessorAutomationLineItem:
 	case MidiCCAutomationLineItem:
 	case PanAutomationLineItem:
 		al = reinterpret_cast<AutomationLine*> (item->get_data ("line"));
@@ -1457,7 +1457,7 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 	case EndSelectionTrimItem:
 	case SelectionItem:
 	case GainLineItem:
-	case RedirectAutomationLineItem:
+	case ProcessorAutomationLineItem:
 	case MidiCCAutomationLineItem:
 	case GainAutomationLineItem:
 	case PanAutomationLineItem:

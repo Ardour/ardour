@@ -41,17 +41,17 @@ using namespace ARDOUR;
 using namespace PBD;
 
 PortInsert::PortInsert (Session& s, Placement p)
-	: Redirect (s, string_compose (_("insert %1"), (bitslot = s.next_insert_id()) + 1), p, 1, -1, 1, -1)
+	: IOProcessor (s, string_compose (_("insert %1"), (bitslot = s.next_insert_id()) + 1), p, 1, -1, 1, -1)
 {
 	init ();
-	InsertCreated (this); /* EMIT SIGNAL */
+	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
 PortInsert::PortInsert (const PortInsert& other)
-	: Redirect (other._session, string_compose (_("insert %1"), (bitslot = other._session.next_insert_id()) + 1), other.placement(), 1, -1, 1, -1)
+	: IOProcessor (other._session, string_compose (_("insert %1"), (bitslot = other._session.next_insert_id()) + 1), other.placement(), 1, -1, 1, -1)
 {
 	init ();
-	InsertCreated (this); /* EMIT SIGNAL */
+	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
 void
@@ -69,13 +69,13 @@ PortInsert::init ()
 }
 
 PortInsert::PortInsert (Session& s, const XMLNode& node)
-	: Redirect (s, "unnamed port insert", PreFader)
+	: IOProcessor (s, "unnamed port insert", PreFader)
 {
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
 
-	InsertCreated (this); /* EMIT SIGNAL */
+	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
 PortInsert::~PortInsert ()
@@ -110,7 +110,7 @@ PortInsert::get_state(void)
 XMLNode&
 PortInsert::state (bool full)
 {
-	XMLNode& node = Redirect::state(full);
+	XMLNode& node = IOProcessor::state(full);
 	char buf[32];
 	node.add_property ("type", "port");
 	snprintf (buf, sizeof (buf), "%" PRIu32, bitslot);
@@ -146,15 +146,15 @@ PortInsert::set_state(const XMLNode& node)
 
 	const XMLNode* insert_node = &node;
 
-	// legacy sessions: search for child Redirect node
+	// legacy sessions: search for child IOProcessor node
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() == "Redirect") {
+		if ((*niter)->name() == "IOProcessor") {
 			insert_node = *niter;
 			break;
 		}
 	}
 	
-	Redirect::set_state (*insert_node);
+	IOProcessor::set_state (*insert_node);
 
 	return 0;
 }
@@ -227,7 +227,7 @@ PortInsert::configure_io (ChanCount in, ChanCount out)
 	bool success = (_io->ensure_io (out, in, false, this) == 0);
 
 	if (success)
-		return Insert::configure_io(in, out);
+		return Processor::configure_io(in, out);
 	else
 		return false;
 }

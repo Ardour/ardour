@@ -29,7 +29,7 @@
 #include <ardour/audioengine.h>
 #include <ardour/route.h>
 #include <ardour/buffer.h>
-#include <ardour/insert.h>
+#include <ardour/processor.h>
 #include <ardour/plugin_insert.h>
 #include <ardour/port_insert.h>
 #include <ardour/send.h>
@@ -76,7 +76,7 @@ Route::Route (Session& sess, const XMLNode& node, DataType default_type)
 void
 Route::init ()
 {
-	insert_max_outs.reset();
+	processor_max_outs.reset();
 	_muted = false;
 	_soloed = false;
 	_solo_safe = false;
@@ -115,8 +115,8 @@ Route::init ()
 
 Route::~Route ()
 {
-	clear_inserts (PreFader);
-	clear_inserts (PostFader);
+	clear_processors (PreFader);
+	clear_processors (PostFader);
 
 	for (OrderKeys::iterator i = order_keys.begin(); i != order_keys.end(); ++i) {
 		free ((void*)(i->first));
@@ -238,13 +238,13 @@ Route::set_gain (gain_t val, void *src)
 void
 Route::process_output_buffers (BufferSet& bufs,
 			       nframes_t start_frame, nframes_t end_frame, 
-			       nframes_t nframes, nframes_t offset, bool with_inserts, int declick,
+			       nframes_t nframes, nframes_t offset, bool with_processors, int declick,
 			       bool meter)
 {
 	// This is definitely very audio-only for now
 	assert(_default_type == DataType::AUDIO);
 	
-	InsertList::iterator i;
+	ProcessorList::iterator i;
 	bool post_fader_work = false;
 	bool mute_declick_applied = false;
 	gain_t dmg, dsg, dg;
@@ -266,7 +266,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	declick = _pending_declick;
 
 	{
-		Glib::Mutex::Lock cm (control_outs_lock, Glib::TRY_LOCK);
+		Glib::Mutex::Lock cm (_control_outs_lock, Glib::TRY_LOCK);
 		
 		if (cm.locked()) {
 			co = _control_outs;
@@ -373,11 +373,11 @@ Route::process_output_buffers (BufferSet& bufs,
 	   PRE-FADER REDIRECTS
 	   -------------------------------------------------------------------------------------------------- */
 
-	if (with_inserts) {
-		Glib::RWLock::ReaderLock rm (insert_lock, Glib::TRY_LOCK);
+	if (with_processors) {
+		Glib::RWLock::ReaderLock rm (_processor_lock, Glib::TRY_LOCK);
 		if (rm.locked()) {
 			if (mute_gain > 0 || !_mute_affects_pre_fader) {
-				for (i = _inserts.begin(); i != _inserts.end(); ++i) {
+				for (i = _processors.begin(); i != _processors.end(); ++i) {
 					switch ((*i)->placement()) {
 					case PreFader:
 						(*i)->run (bufs, start_frame, end_frame, nframes, offset);
@@ -388,7 +388,7 @@ Route::process_output_buffers (BufferSet& bufs,
 					}
 				}
 			} else {
-				for (i = _inserts.begin(); i != _inserts.end(); ++i) {
+				for (i = _processors.begin(); i != _processors.end(); ++i) {
 					switch ((*i)->placement()) {
 					case PreFader:
 						(*i)->silence (nframes, offset);
@@ -538,14 +538,14 @@ Route::process_output_buffers (BufferSet& bufs,
 	   POST-FADER REDIRECTS
 	   -------------------------------------------------------------------------------------------------- */
 
-	/* note that post_fader_work cannot be true unless with_inserts was also true, so don't test both */
+	/* note that post_fader_work cannot be true unless with_processors was also true, so don't test both */
 
 	if (post_fader_work) {
 
-		Glib::RWLock::ReaderLock rm (insert_lock, Glib::TRY_LOCK);
+		Glib::RWLock::ReaderLock rm (_processor_lock, Glib::TRY_LOCK);
 		if (rm.locked()) {
 			if (mute_gain > 0 || !_mute_affects_post_fader) {
-				for (i = _inserts.begin(); i != _inserts.end(); ++i) {
+				for (i = _processors.begin(); i != _processors.end(); ++i) {
 					switch ((*i)->placement()) {
 					case PreFader:
 						break;
@@ -555,7 +555,7 @@ Route::process_output_buffers (BufferSet& bufs,
 					}
 				}
 			} else {
-				for (i = _inserts.begin(); i != _inserts.end(); ++i) {
+				for (i = _processors.begin(); i != _processors.end(); ++i) {
 					switch ((*i)->placement()) {
 					case PreFader:
 						break;
@@ -651,7 +651,7 @@ Route::process_output_buffers (BufferSet& bufs,
 			) {
 
 			/* don't use Route::silence() here, because that causes
-			   all outputs (sends, port inserts, etc. to be silent).
+			   all outputs (sends, port processors, etc. to be silent).
 			*/
 			
 			if (_meter_point == MeterPostFader) {
@@ -684,7 +684,7 @@ Route::process_output_buffers (BufferSet& bufs,
 ChanCount
 Route::n_process_buffers ()
 {
-	return max (n_inputs(), insert_max_outs);
+	return max (n_inputs(), processor_max_outs);
 }
 
 void
@@ -770,23 +770,23 @@ Route::set_mute (bool yn, void *src)
 }
 
 int
-Route::add_insert (boost::shared_ptr<Insert> insert, InsertStreams* err)
+Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* err)
 {
-	ChanCount old_rmo = insert_max_outs;
+	ChanCount old_rmo = processor_max_outs;
 
 	if (!_session.engine().connected()) {
 		return 1;
 	}
 
 	{
-		Glib::RWLock::WriterLock lm (insert_lock);
+		Glib::RWLock::WriterLock lm (_processor_lock);
 
 		boost::shared_ptr<PluginInsert> pi;
 		boost::shared_ptr<PortInsert> porti;
 
-		//insert->set_default_type(_default_type);
+		//processor->set_default_type(_default_type);
 
-		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(insert)) != 0) {
+		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(processor)) != 0) {
 			pi->set_count (1);
 
 			if (pi->natural_input_streams() == ChanCount::ZERO) {
@@ -796,51 +796,51 @@ Route::add_insert (boost::shared_ptr<Insert> insert, InsertStreams* err)
 			
 		}
 		
-		_inserts.push_back (insert);
+		_processors.push_back (processor);
 
-		// Set up insert list channels.  This will set insert->[input|output]_streams(),
+		// Set up processor list channels.  This will set processor->[input|output]_streams(),
 		// configure redirect ports properly, etc.
 		if (_reset_plugin_counts (err)) {
-			_inserts.pop_back ();
+			_processors.pop_back ();
 			_reset_plugin_counts (0); // it worked before we tried to add it ...
 			return -1;
 		}
 
 		// Ensure peak vector sizes before the plugin is activated
-		ChanCount potential_max_streams = max(insert->input_streams(), insert->output_streams());
+		ChanCount potential_max_streams = max(processor->input_streams(), processor->output_streams());
 		_meter->configure_io(potential_max_streams, potential_max_streams);
 
-		insert->activate ();
-		insert->ActiveChanged.connect (bind (mem_fun (_session, &Session::update_latency_compensation), false, false));
+		processor->activate ();
+		processor->ActiveChanged.connect (bind (mem_fun (_session, &Session::update_latency_compensation), false, false));
 	}
 	
-	if (insert_max_outs != old_rmo || old_rmo == ChanCount::ZERO) {
+	if (processor_max_outs != old_rmo || old_rmo == ChanCount::ZERO) {
 		reset_panner ();
 	}
 
 
-	inserts_changed (); /* EMIT SIGNAL */
+	processors_changed (); /* EMIT SIGNAL */
 	return 0;
 }
 
 int
-Route::add_inserts (const InsertList& others, InsertStreams* err)
+Route::add_processors (const ProcessorList& others, ProcessorStreams* err)
 {
-	ChanCount old_rmo = insert_max_outs;
+	ChanCount old_rmo = processor_max_outs;
 
 	if (!_session.engine().connected()) {
 		return 1;
 	}
 
 	{
-		Glib::RWLock::WriterLock lm (insert_lock);
+		Glib::RWLock::WriterLock lm (_processor_lock);
 
-		InsertList::iterator existing_end = _inserts.end();
+		ProcessorList::iterator existing_end = _processors.end();
 		--existing_end;
 
 		ChanCount potential_max_streams;
 
-		for (InsertList::const_iterator i = others.begin(); i != others.end(); ++i) {
+		for (ProcessorList::const_iterator i = others.begin(); i != others.end(); ++i) {
 			
 			boost::shared_ptr<PluginInsert> pi;
 			
@@ -855,11 +855,11 @@ Route::add_inserts (const InsertList& others, InsertStreams* err)
 			// Ensure peak vector sizes before the plugin is activated
 			_meter->configure_io(potential_max_streams, potential_max_streams);
 
-			_inserts.push_back (*i);
+			_processors.push_back (*i);
 			
 			if (_reset_plugin_counts (err)) {
 				++existing_end;
-				_inserts.erase (existing_end, _inserts.end());
+				_processors.erase (existing_end, _processors.end());
 				_reset_plugin_counts (0); // it worked before we tried to add it ...
 				return -1;
 			}
@@ -869,24 +869,24 @@ Route::add_inserts (const InsertList& others, InsertStreams* err)
 		}
 	}
 	
-	if (insert_max_outs != old_rmo || old_rmo == ChanCount::ZERO) {
+	if (processor_max_outs != old_rmo || old_rmo == ChanCount::ZERO) {
 		reset_panner ();
 	}
 
-	inserts_changed (); /* EMIT SIGNAL */
+	processors_changed (); /* EMIT SIGNAL */
 	return 0;
 }
 
-/** Turn off all inserts with a given placement
- * @param p Placement of inserts to disable
+/** Turn off all processors with a given placement
+ * @param p Placement of processors to disable
  */
 
 void
-Route::disable_inserts (Placement p)
+Route::disable_processors (Placement p)
 {
-	Glib::RWLock::ReaderLock lm (insert_lock);
+	Glib::RWLock::ReaderLock lm (_processor_lock);
 	
-	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if ((*i)->placement() == p) {
 			(*i)->set_active (false);
 		}
@@ -899,11 +899,11 @@ Route::disable_inserts (Placement p)
  */
 
 void
-Route::disable_inserts ()
+Route::disable_processors ()
 {
-	Glib::RWLock::ReaderLock lm (insert_lock);
+	Glib::RWLock::ReaderLock lm (_processor_lock);
 	
-	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		(*i)->set_active (false);
 	}
 	
@@ -917,9 +917,9 @@ Route::disable_inserts ()
 void
 Route::disable_plugins (Placement p)
 {
-	Glib::RWLock::ReaderLock lm (insert_lock);
+	Glib::RWLock::ReaderLock lm (_processor_lock);
 	
-	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if (boost::dynamic_pointer_cast<PluginInsert> (*i) && (*i)->placement() == p) {
 			(*i)->set_active (false);
 		}
@@ -934,9 +934,9 @@ Route::disable_plugins (Placement p)
 void
 Route::disable_plugins ()
 {
-	Glib::RWLock::ReaderLock lm (insert_lock);
+	Glib::RWLock::ReaderLock lm (_processor_lock);
 	
-	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if (boost::dynamic_pointer_cast<PluginInsert> (*i)) {
 			(*i)->set_active (false);
 		}
@@ -949,7 +949,7 @@ Route::disable_plugins ()
 void
 Route::ab_plugins (bool forward)
 {
-	Glib::RWLock::ReaderLock lm (insert_lock);
+	Glib::RWLock::ReaderLock lm (_processor_lock);
 			
 	if (forward) {
 
@@ -957,7 +957,7 @@ Route::ab_plugins (bool forward)
 		   we go the other way, we will revert them
 		*/
 
-		for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
+		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 			if (!boost::dynamic_pointer_cast<PluginInsert> (*i)) {
 				continue;
 			}
@@ -974,7 +974,7 @@ Route::ab_plugins (bool forward)
 
 		/* backward = if the redirect was marked to go active on the next ab, do so */
 
-		for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
+		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
 			if (!boost::dynamic_pointer_cast<PluginInsert> (*i)) {
 				continue;
@@ -996,40 +996,40 @@ Route::ab_plugins (bool forward)
 ChanCount
 Route::pre_fader_streams() const
 {
-	boost::shared_ptr<Insert> insert;
+	boost::shared_ptr<Processor> processor;
 
 	// Find the last pre-fader redirect
-	for (InsertList::const_iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
+	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if ((*i)->placement() == PreFader) {
-			insert = *i;
+			processor = *i;
 		}
 	}
 	
-	if (insert) {
-		return insert->output_streams();
+	if (processor) {
+		return processor->output_streams();
 	} else {
 		return n_inputs ();
 	}
 }
 
 
-/** Remove inserts with a given placement.
- * @param p Placement of inserts to remove.
+/** Remove processors with a given placement.
+ * @param p Placement of processors to remove.
  */
 void
-Route::clear_inserts (Placement p)
+Route::clear_processors (Placement p)
 {
-	const ChanCount old_rmo = insert_max_outs;
+	const ChanCount old_rmo = processor_max_outs;
 
 	if (!_session.engine().connected()) {
 		return;
 	}
 
 	{
-		Glib::RWLock::WriterLock lm (insert_lock);
-		InsertList new_list;
+		Glib::RWLock::WriterLock lm (_processor_lock);
+		ProcessorList new_list;
 		
-		for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
+		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 			if ((*i)->placement() == p) {
 				/* it's the placement we want to get rid of */
 				(*i)->drop_references ();
@@ -1039,42 +1039,42 @@ Route::clear_inserts (Placement p)
 			}
 		}
 		
-		_inserts = new_list;
+		_processors = new_list;
 	}
 
 	/* FIXME: can't see how this test can ever fire */
-	if (insert_max_outs != old_rmo) {
+	if (processor_max_outs != old_rmo) {
 		reset_panner ();
 	}
 	
-	insert_max_outs.reset();
+	processor_max_outs.reset();
 	_have_internal_generator = false;
-	inserts_changed (); /* EMIT SIGNAL */
+	processors_changed (); /* EMIT SIGNAL */
 }
 
 int
-Route::remove_insert (boost::shared_ptr<Insert> insert, InsertStreams* err)
+Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* err)
 {
-	ChanCount old_rmo = insert_max_outs;
+	ChanCount old_rmo = processor_max_outs;
 
 	if (!_session.engine().connected()) {
 		return 1;
 	}
 
-	insert_max_outs.reset();
+	processor_max_outs.reset();
 
 	{
-		Glib::RWLock::WriterLock lm (insert_lock);
-		InsertList::iterator i;
+		Glib::RWLock::WriterLock lm (_processor_lock);
+		ProcessorList::iterator i;
 		bool removed = false;
 
-		for (i = _inserts.begin(); i != _inserts.end(); ++i) {
-			if (*i == insert) {
+		for (i = _processors.begin(); i != _processors.end(); ++i) {
+			if (*i == processor) {
 
-				InsertList::iterator tmp;
+				ProcessorList::iterator tmp;
 
 				/* move along, see failure case for reset_plugin_counts()
-				   where we may need to reinsert the insert.
+				   where we may need to reprocessor the processor.
 				*/
 
 				tmp = i;
@@ -1085,14 +1085,14 @@ Route::remove_insert (boost::shared_ptr<Insert> insert, InsertStreams* err)
 				   run.
 				*/
 
-				boost::shared_ptr<Redirect> redirect;
+				boost::shared_ptr<IOProcessor> redirect;
 				
-				if ((redirect = boost::dynamic_pointer_cast<Redirect> (*i)) != 0) {
+				if ((redirect = boost::dynamic_pointer_cast<IOProcessor> (*i)) != 0) {
 					redirect->io()->disconnect_inputs (this);
 					redirect->io()->disconnect_outputs (this);
 				}
 
-				_inserts.erase (i);
+				_processors.erase (i);
 
 				i = tmp;
 				removed = true;
@@ -1107,7 +1107,7 @@ Route::remove_insert (boost::shared_ptr<Insert> insert, InsertStreams* err)
 
 		if (_reset_plugin_counts (err)) {
 			/* get back to where we where */
-			_inserts.insert (i, insert);
+			_processors.insert (i, processor);
 			/* we know this will work, because it worked before :) */
 			_reset_plugin_counts (0);
 			return -1;
@@ -1115,7 +1115,7 @@ Route::remove_insert (boost::shared_ptr<Insert> insert, InsertStreams* err)
 
 		bool foo = false;
 
-		for (i = _inserts.begin(); i != _inserts.end(); ++i) {
+		for (i = _processors.begin(); i != _processors.end(); ++i) {
 			boost::shared_ptr<PluginInsert> pi;
 			
 			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
@@ -1128,55 +1128,55 @@ Route::remove_insert (boost::shared_ptr<Insert> insert, InsertStreams* err)
 		_have_internal_generator = foo;
 	}
 
-	if (old_rmo != insert_max_outs) {
+	if (old_rmo != processor_max_outs) {
 		reset_panner ();
 	}
 
-	insert->drop_references ();
+	processor->drop_references ();
 
-	inserts_changed (); /* EMIT SIGNAL */
+	processors_changed (); /* EMIT SIGNAL */
 	return 0;
 }
 
 int
-Route::reset_plugin_counts (InsertStreams* err)
+Route::reset_plugin_counts (ProcessorStreams* err)
 {
-	Glib::RWLock::WriterLock lm (insert_lock);
+	Glib::RWLock::WriterLock lm (_processor_lock);
 	return _reset_plugin_counts (err);
 }
 
 
 int
-Route::_reset_plugin_counts (InsertStreams* err)
+Route::_reset_plugin_counts (ProcessorStreams* err)
 {
-	InsertList::iterator r;
-	map<Placement,list<InsertCount> > insert_map;
+	ProcessorList::iterator r;
+	map<Placement,list<ProcessorCount> > processor_map;
 	ChanCount initial_streams;
 
 	/* Process each placement in order, checking to see if we 
 	   can really do what has been requested.
 	*/
 	
-	/* divide inserts up by placement so we get the signal flow
-	   properly modelled. we need to do this because the _inserts
+	/* divide processors up by placement so we get the signal flow
+	   properly modelled. we need to do this because the _processors
 	   list is not sorted by placement
 	*/
 
 	/* ... but it should/will be... */
 	
-	for (r = _inserts.begin(); r != _inserts.end(); ++r) {
+	for (r = _processors.begin(); r != _processors.end(); ++r) {
 
-		boost::shared_ptr<Insert> insert;
+		boost::shared_ptr<Processor> processor;
 
-		if ((insert = boost::dynamic_pointer_cast<Insert>(*r)) != 0) {
-			insert_map[insert->placement()].push_back (InsertCount (insert));
+		if ((processor = boost::dynamic_pointer_cast<Processor>(*r)) != 0) {
+			processor_map[processor->placement()].push_back (ProcessorCount (processor));
 		}
 	}
 	
 
 	/* A: PreFader */
 	
-	if ( ! check_some_plugin_counts (insert_map[PreFader], n_inputs (), err)) {
+	if ( ! check_some_plugin_counts (processor_map[PreFader], n_inputs (), err)) {
 		return -1;
 	}
 
@@ -1184,22 +1184,22 @@ Route::_reset_plugin_counts (InsertStreams* err)
 
 	/* B: PostFader */
 
-	if ( ! check_some_plugin_counts (insert_map[PostFader], post_fader_input, err)) {
+	if ( ! check_some_plugin_counts (processor_map[PostFader], post_fader_input, err)) {
 		return -1;
 	}
 
 	/* OK, everything can be set up correctly, so lets do it */
 
-	apply_some_plugin_counts (insert_map[PreFader]);
-	apply_some_plugin_counts (insert_map[PostFader]);
+	apply_some_plugin_counts (processor_map[PreFader]);
+	apply_some_plugin_counts (processor_map[PostFader]);
 
-	/* recompute max outs of any insert */
+	/* recompute max outs of any processor */
 
-	insert_max_outs.reset();
-	InsertList::iterator prev = _inserts.end();
+	processor_max_outs.reset();
+	ProcessorList::iterator prev = _processors.end();
 
-	for (r = _inserts.begin(); r != _inserts.end(); prev = r, ++r) {
-		insert_max_outs = max ((*r)->output_streams (), insert_max_outs);
+	for (r = _processors.begin(); r != _processors.end(); prev = r, ++r) {
+		processor_max_outs = max ((*r)->output_streams (), processor_max_outs);
 	}
 
 	/* we're done */
@@ -1208,31 +1208,31 @@ Route::_reset_plugin_counts (InsertStreams* err)
 }				   
 
 int32_t
-Route::apply_some_plugin_counts (list<InsertCount>& iclist)
+Route::apply_some_plugin_counts (list<ProcessorCount>& iclist)
 {
-	list<InsertCount>::iterator i;
+	list<ProcessorCount>::iterator i;
 
 	for (i = iclist.begin(); i != iclist.end(); ++i) {
 		
-		if ((*i).insert->configure_io ((*i).in, (*i).out)) {
+		if ((*i).processor->configure_io ((*i).in, (*i).out)) {
 			return -1;
 		}
 		/* make sure that however many we have, they are all active */
-		(*i).insert->activate ();
+		(*i).processor->activate ();
 	}
 
 	return 0;
 }
 
 /** Returns whether \a iclist can be configured and run starting with
- * \a required_inputs at the first insert's inputs.
+ * \a required_inputs at the first processor's inputs.
  * If false is returned, \a iclist can not be run with \a required_inputs, and \a err is set.
  * Otherwise, \a err is set to the output of the list.
  */
 bool
-Route::check_some_plugin_counts (list<InsertCount>& iclist, ChanCount required_inputs, InsertStreams* err)
+Route::check_some_plugin_counts (list<ProcessorCount>& iclist, ChanCount required_inputs, ProcessorStreams* err)
 {
-	list<InsertCount>::iterator i;
+	list<ProcessorCount>::iterator i;
 	size_t index = 0;
 			
 	if (err) {
@@ -1242,7 +1242,7 @@ Route::check_some_plugin_counts (list<InsertCount>& iclist, ChanCount required_i
 
 	for (i = iclist.begin(); i != iclist.end(); ++i) {
 
-		if ((*i).insert->can_support_input_configuration (required_inputs) < 0) {
+		if ((*i).processor->can_support_input_configuration (required_inputs) < 0) {
 			if (err) {
 				err->index = index;
 				err->count = required_inputs;
@@ -1251,7 +1251,7 @@ Route::check_some_plugin_counts (list<InsertCount>& iclist, ChanCount required_i
 		}
 		
 		(*i).in = required_inputs;
-		(*i).out = (*i).insert->output_for_input_configuration (required_inputs);
+		(*i).out = (*i).processor->output_for_input_configuration (required_inputs);
 
 		required_inputs = (*i).out;
 		
@@ -1261,7 +1261,7 @@ Route::check_some_plugin_counts (list<InsertCount>& iclist, ChanCount required_i
 	if (err) {
 		if (!iclist.empty()) {
 			err->index = index;
-			err->count = iclist.back().insert->output_for_input_configuration(required_inputs);
+			err->count = iclist.back().processor->output_for_input_configuration(required_inputs);
 		}
 	}
 
@@ -1269,28 +1269,28 @@ Route::check_some_plugin_counts (list<InsertCount>& iclist, ChanCount required_i
 }
 
 int
-Route::copy_inserts (const Route& other, Placement placement, InsertStreams* err)
+Route::copy_processors (const Route& other, Placement placement, ProcessorStreams* err)
 {
-	ChanCount old_rmo = insert_max_outs;
+	ChanCount old_rmo = processor_max_outs;
 
-	InsertList to_be_deleted;
+	ProcessorList to_be_deleted;
 
 	{
-		Glib::RWLock::WriterLock lm (insert_lock);
-		InsertList::iterator tmp;
-		InsertList the_copy;
+		Glib::RWLock::WriterLock lm (_processor_lock);
+		ProcessorList::iterator tmp;
+		ProcessorList the_copy;
 
-		the_copy = _inserts;
+		the_copy = _processors;
 		
-		/* remove all relevant inserts */
+		/* remove all relevant processors */
 
-		for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ) {
+		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ) {
 			tmp = i;
 			++tmp;
 
 			if ((*i)->placement() == placement) {
 				to_be_deleted.push_back (*i);
-				_inserts.erase (i);
+				_processors.erase (i);
 			}
 
 			i = tmp;
@@ -1298,9 +1298,9 @@ Route::copy_inserts (const Route& other, Placement placement, InsertStreams* err
 
 		/* now copy the relevant ones from "other" */
 		
-		for (InsertList::const_iterator i = other._inserts.begin(); i != other._inserts.end(); ++i) {
+		for (ProcessorList::const_iterator i = other._processors.begin(); i != other._processors.end(); ++i) {
 			if ((*i)->placement() == placement) {
-				_inserts.push_back (Redirect::clone (*i));
+				_processors.push_back (IOProcessor::clone (*i));
 			}
 		}
 
@@ -1310,15 +1310,15 @@ Route::copy_inserts (const Route& other, Placement placement, InsertStreams* err
 
 			/* FAILED COPY ATTEMPT: we have to restore order */
 
-			/* delete all cloned inserts */
+			/* delete all cloned processors */
 
-			for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ) {
+			for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ) {
 
 				tmp = i;
 				++tmp;
 
 				if ((*i)->placement() == placement) {
-					_inserts.erase (i);
+					_processors.erase (i);
 				}
 				
 				i = tmp;
@@ -1326,8 +1326,8 @@ Route::copy_inserts (const Route& other, Placement placement, InsertStreams* err
 
 			/* restore the natural order */
 
-			_inserts = the_copy;
-			insert_max_outs = old_rmo;
+			_processors = the_copy;
+			processor_max_outs = old_rmo;
 
 			/* we failed, even though things are OK again */
 
@@ -1335,51 +1335,51 @@ Route::copy_inserts (const Route& other, Placement placement, InsertStreams* err
 
 		} else {
 			
-			/* SUCCESSFUL COPY ATTEMPT: delete the inserts we removed pre-copy */
+			/* SUCCESSFUL COPY ATTEMPT: delete the processors we removed pre-copy */
 			to_be_deleted.clear ();
 		}
 	}
 
-	if (insert_max_outs != old_rmo || old_rmo == ChanCount::ZERO) {
+	if (processor_max_outs != old_rmo || old_rmo == ChanCount::ZERO) {
 		reset_panner ();
 	}
 
-	inserts_changed (); /* EMIT SIGNAL */
+	processors_changed (); /* EMIT SIGNAL */
 	return 0;
 }
 
 void
-Route::all_inserts_flip ()
+Route::all_processors_flip ()
 {
-	Glib::RWLock::ReaderLock lm (insert_lock);
+	Glib::RWLock::ReaderLock lm (_processor_lock);
 
-	if (_inserts.empty()) {
+	if (_processors.empty()) {
 		return;
 	}
 
-	bool first_is_on = _inserts.front()->active();
+	bool first_is_on = _processors.front()->active();
 	
-	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		(*i)->set_active (!first_is_on);
 	}
 	
 	_session.set_dirty ();
 }
 
-/** Set all inserts with a given placement to a given active state.
- * @param p Placement of inserts to change.
- * @param state New active state for those inserts.
+/** Set all processors with a given placement to a given active state.
+ * @param p Placement of processors to change.
+ * @param state New active state for those processors.
  */
 void
-Route::all_inserts_active (Placement p, bool state)
+Route::all_processors_active (Placement p, bool state)
 {
-	Glib::RWLock::ReaderLock lm (insert_lock);
+	Glib::RWLock::ReaderLock lm (_processor_lock);
 
-	if (_inserts.empty()) {
+	if (_processors.empty()) {
 		return;
 	}
 
-	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if ((*i)->placement() == p) {
 			(*i)->set_active (state);
 		}
@@ -1388,35 +1388,35 @@ Route::all_inserts_active (Placement p, bool state)
 	_session.set_dirty ();
 }
 
-struct InsertSorter {
-    bool operator() (boost::shared_ptr<const Insert> a, boost::shared_ptr<const Insert> b) {
+struct ProcessorSorter {
+    bool operator() (boost::shared_ptr<const Processor> a, boost::shared_ptr<const Processor> b) {
 	    return a->sort_key() < b->sort_key();
     }
 };
 
 int
-Route::sort_inserts (InsertStreams* err)
+Route::sort_processors (ProcessorStreams* err)
 {
 	{
-		InsertSorter comparator;
-		Glib::RWLock::WriterLock lm (insert_lock);
-		ChanCount old_rmo = insert_max_outs;
+		ProcessorSorter comparator;
+		Glib::RWLock::WriterLock lm (_processor_lock);
+		ChanCount old_rmo = processor_max_outs;
 
 		/* the sweet power of C++ ... */
 
-		InsertList as_it_was_before = _inserts;
+		ProcessorList as_it_was_before = _processors;
 
-		_inserts.sort (comparator);
+		_processors.sort (comparator);
 	
 		if (_reset_plugin_counts (err)) {
-			_inserts = as_it_was_before;
-			insert_max_outs = old_rmo;
+			_processors = as_it_was_before;
+			processor_max_outs = old_rmo;
 			return -1;
 		} 
 	} 
 
 	reset_panner ();
-	inserts_changed (); /* EMIT SIGNAL */
+	processors_changed (); /* EMIT SIGNAL */
 
 	return 0;
 }
@@ -1437,7 +1437,7 @@ XMLNode&
 Route::state(bool full_state)
 {
 	XMLNode *node = new XMLNode("Route");
-	InsertList:: iterator i;
+	ProcessorList:: iterator i;
 	char buf[32];
 
 	if (_flags) {
@@ -1502,7 +1502,7 @@ Route::state(bool full_state)
 		cmt->add_content (_comment);
 	}
 
-	for (i = _inserts.begin(); i != _inserts.end(); ++i) {
+	for (i = _processors.begin(); i != _processors.end(); ++i) {
 		node->add_child_nocopy((*i)->state (full_state));
 	}
 
@@ -1514,10 +1514,10 @@ Route::state(bool full_state)
 }
 
 XMLNode&
-Route::get_insert_state ()
+Route::get_processor_state ()
 {
 	XMLNode* root = new XMLNode (X_("redirects"));
-	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		root->add_child_nocopy ((*i)->state (true));
 	}
 
@@ -1525,7 +1525,7 @@ Route::get_insert_state ()
 }
 
 int
-Route::set_insert_state (const XMLNode& root)
+Route::set_processor_state (const XMLNode& root)
 {
 	if (root.name() != X_("redirects")) {
 		return -1;
@@ -1535,13 +1535,13 @@ Route::set_insert_state (const XMLNode& root)
 	XMLNodeList nnlist;
 	XMLNodeConstIterator iter;
 	XMLNodeConstIterator niter;
-	Glib::RWLock::ReaderLock lm (insert_lock);
+	Glib::RWLock::ReaderLock lm (_processor_lock);
 
 	nlist = root.children();
 	
 	for (iter = nlist.begin(); iter != nlist.end(); ++iter){
 
-		/* iter now points to a Redirect state node */
+		/* iter now points to a IOProcessor state node */
 		
 		nnlist = (*iter)->children ();
 
@@ -1556,15 +1556,15 @@ Route::set_insert_state (const XMLNode& root)
 				XMLProperty* prop = (*niter)->property (X_("id"));
 				
 				if (!prop) {
-					warning << _("Redirect node has no ID, ignored") << endmsg;
+					warning << _("IOProcessor node has no ID, ignored") << endmsg;
 					break;
 				}
 
 				ID id = prop->value ();
 
-				/* now look for a insert with that ID */
+				/* now look for a processor with that ID */
 	
-				for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
+				for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 					if ((*i)->id() == id) {
 						(*i)->set_state (**iter);
 						break;
@@ -1594,7 +1594,7 @@ Route::set_deferred_state ()
 	nlist = deferred_state->children();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
-		add_insert_from_xml (**niter);
+		add_processor_from_xml (**niter);
 	}
 
 	delete deferred_state;
@@ -1602,7 +1602,7 @@ Route::set_deferred_state ()
 }
 
 void
-Route::add_insert_from_xml (const XMLNode& node)
+Route::add_processor_from_xml (const XMLNode& node)
 {
 	const XMLProperty *prop;
 
@@ -1611,7 +1611,7 @@ Route::add_insert_from_xml (const XMLNode& node)
 	
 		try {
 			boost::shared_ptr<Send> send (new Send (_session, node));
-			add_insert (send);
+			add_processor (send);
 		} 
 		
 		catch (failed_constructor &err) {
@@ -1619,39 +1619,40 @@ Route::add_insert_from_xml (const XMLNode& node)
 			return;
 		}
 		
-	} else if (node.name() == "Insert") {
+	// use "Processor" in XML?
+	} else if (node.name() == "Processor") {
 		
 		try {
 			if ((prop = node.property ("type")) != 0) {
 
-				boost::shared_ptr<Insert> insert;
+				boost::shared_ptr<Processor> processor;
 
 				if (prop->value() == "ladspa" || prop->value() == "Ladspa" || prop->value() == "vst") {
 
-					insert.reset (new PluginInsert(_session, node));
+					processor.reset (new PluginInsert(_session, node));
 					
 				} else if (prop->value() == "port") {
 
-					insert.reset (new PortInsert (_session, node));
+					processor.reset (new PortInsert (_session, node));
 				
 				} else if (prop->value() == "send") {
 
-					insert.reset (new Send (_session, node));
+					processor.reset (new Send (_session, node));
 
 				} else {
 
-					error << string_compose(_("unknown Insert type \"%1\"; ignored"), prop->value()) << endmsg;
+					error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
 				}
 
-				add_insert (insert);
+				add_processor (processor);
 				
 			} else {
-				error << _("Insert XML node has no type property") << endmsg;
+				error << _("Processor XML node has no type property") << endmsg;
 			}
 		}
 		
 		catch (failed_constructor &err) {
-			warning << _("insert could not be created. Ignored.") << endmsg;
+			warning << _("processor could not be created. Ignored.") << endmsg;
 			return;
 		}
 	}
@@ -1797,24 +1798,24 @@ Route::_set_state (const XMLNode& node, bool call_base)
 		}
 	}
 
-	XMLNodeList insert_nodes;
+	XMLNodeList processor_nodes;
 			
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
 
 		child = *niter;
 			
-		if (child->name() == X_("Send") || child->name() == X_("Insert")) {
-			insert_nodes.push_back(child);
+		if (child->name() == X_("Send") || child->name() == X_("Processor")) {
+			processor_nodes.push_back(child);
 		}
 
 	}
 
-	_set_insert_states(insert_nodes);
+	_set_processor_states(processor_nodes);
 
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
 		child = *niter;
-		// All inserts have been applied already
+		// All processors have been applied already
 
 		if (child->name() == X_("Automation")) {
 			
@@ -1874,37 +1875,37 @@ Route::_set_state (const XMLNode& node, bool call_base)
 }
 
 void
-Route::_set_insert_states(const XMLNodeList &nlist)
+Route::_set_processor_states(const XMLNodeList &nlist)
 {
 	XMLNodeConstIterator niter;
 	char buf[64];
 
-	InsertList::iterator i, o;
+	ProcessorList::iterator i, o;
 
-	// Iterate through existing inserts, remove those which are not in the state list
-	for (i = _inserts.begin(); i != _inserts.end(); ) {
-		InsertList::iterator tmp = i;
+	// Iterate through existing processors, remove those which are not in the state list
+	for (i = _processors.begin(); i != _processors.end(); ) {
+		ProcessorList::iterator tmp = i;
 		++tmp;
 
-		bool insertInStateList = false;
+		bool processorInStateList = false;
 	
 		(*i)->id().print (buf, sizeof (buf));
 
 
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
-			// legacy sessions (Redirect as a child of Insert, both is-a IO)
-			if (strncmp(buf,(*niter)->child(X_("Redirect"))->child(X_("IO"))->property(X_("id"))->value().c_str(), sizeof(buf)) == 0) {
-				insertInStateList = true;
+			// legacy sessions (IOProcessor as a child of Processor, both is-a IO)
+			if (strncmp(buf,(*niter)->child(X_("IOProcessor"))->child(X_("IO"))->property(X_("id"))->value().c_str(), sizeof(buf)) == 0) {
+				processorInStateList = true;
 				break;
 			} else if (strncmp(buf,(*niter)->property(X_("id"))->value().c_str(), sizeof(buf)) == 0) {
-				insertInStateList = true;
+				processorInStateList = true;
 				break;
 			}
 		}
 		
-		if (!insertInStateList) {
-			remove_insert (*i);
+		if (!processorInStateList) {
+			remove_processor (*i);
 		}
 
 
@@ -1912,17 +1913,17 @@ Route::_set_insert_states(const XMLNodeList &nlist)
 	}
 
 
-	// Iterate through state list and make sure all inserts are on the track and in the correct order,
-	// set the state of existing inserts according to the new state on the same go
-	i = _inserts.begin();
+	// Iterate through state list and make sure all processors are on the track and in the correct order,
+	// set the state of existing processors according to the new state on the same go
+	i = _processors.begin();
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter, ++i) {
 
-		// Check whether the next insert in the list 
+		// Check whether the next processor in the list 
 		o = i;
 
-		while (o != _inserts.end()) {
+		while (o != _processors.end()) {
 			(*o)->id().print (buf, sizeof (buf));
-			if ( strncmp(buf, (*niter)->child(X_("Redirect"))->child(X_("IO"))->property(X_("id"))->value().c_str(), sizeof(buf)) == 0)
+			if ( strncmp(buf, (*niter)->child(X_("IOProcessor"))->child(X_("IO"))->property(X_("id"))->value().c_str(), sizeof(buf)) == 0)
 				break;
 			else if (strncmp(buf,(*niter)->property(X_("id"))->value().c_str(), sizeof(buf)) == 0)
 				break;
@@ -1930,50 +1931,50 @@ Route::_set_insert_states(const XMLNodeList &nlist)
 			++o;
 		}
 
-		if (o == _inserts.end()) {
-			// If the insert (*niter) is not on the route, we need to create it
+		if (o == _processors.end()) {
+			// If the processor (*niter) is not on the route, we need to create it
 			// and move it to the correct location
 
-			InsertList::iterator prev_last = _inserts.end();
+			ProcessorList::iterator prev_last = _processors.end();
 			--prev_last; // We need this to check whether adding succeeded
 			
-			add_insert_from_xml (**niter);
+			add_processor_from_xml (**niter);
 
-			InsertList::iterator last = _inserts.end();
+			ProcessorList::iterator last = _processors.end();
 			--last;
 
 			if (prev_last == last) {
-				cerr << "Could not fully restore state as some inserts were not possible to create" << endl;
+				cerr << "Could not fully restore state as some processors were not possible to create" << endl;
 				continue;
 
 			}
 
-			boost::shared_ptr<Insert> tmp = (*last);
-			// remove the insert from the wrong location
-			_inserts.erase(last);
-			// insert the new insert at the current location
-			_inserts.insert(i, tmp);
+			boost::shared_ptr<Processor> tmp = (*last);
+			// remove the processor from the wrong location
+			_processors.erase(last);
+			// processor the new processor at the current location
+			_processors.insert(i, tmp);
 
-			--i; // move pointer to the newly inserted insert
+			--i; // move pointer to the newly processored processor
 			continue;
 		}
 
-		// We found the insert (*niter) on the route, first we must make sure the insert
+		// We found the processor (*niter) on the route, first we must make sure the processor
 		// is at the location provided in the XML state
 		if (i != o) {
-			boost::shared_ptr<Insert> tmp = (*o);
+			boost::shared_ptr<Processor> tmp = (*o);
 			// remove the old copy
-			_inserts.erase(o);
-			// insert the insert at the correct location
-			_inserts.insert(i, tmp);
+			_processors.erase(o);
+			// processor the processor at the correct location
+			_processors.insert(i, tmp);
 
-			--i; // move pointer so it points to the right insert
+			--i; // move pointer so it points to the right processor
 		}
 
 		(*i)->set_state( (**niter) );
 	}
 	
-	inserts_changed ();
+	processors_changed ();
 }
 
 void
@@ -1995,10 +1996,10 @@ Route::silence (nframes_t nframes, nframes_t offset)
 		}
 
 		{ 
-			Glib::RWLock::ReaderLock lm (insert_lock, Glib::TRY_LOCK);
+			Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
 			
 			if (lm.locked()) {
-				for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
+				for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 					boost::shared_ptr<PluginInsert> pi;
 					if (!_active && (pi = boost::dynamic_pointer_cast<PluginInsert> (*i)) != 0) {
 						// skip plugins, they don't need anything when we're not active
@@ -2020,7 +2021,7 @@ Route::silence (nframes_t nframes, nframes_t offset)
 int
 Route::set_control_outs (const vector<string>& ports)
 {
-	Glib::Mutex::Lock lm (control_outs_lock);
+	Glib::Mutex::Lock lm (_control_outs_lock);
 	vector<string>::const_iterator i;
 	size_t limit;
 	
@@ -2148,11 +2149,11 @@ Route::feeds (boost::shared_ptr<Route> other)
 		}
 	}
 
-	/* check Redirects which may also interconnect Routes */
+	/* check IOProcessors which may also interconnect Routes */
 
-	for (InsertList::iterator r = _inserts.begin(); r != _inserts.end(); r++) {
+	for (ProcessorList::iterator r = _processors.begin(); r != _processors.end(); r++) {
 
-		boost::shared_ptr<Redirect> redirect = boost::dynamic_pointer_cast<Redirect>(*r);
+		boost::shared_ptr<IOProcessor> redirect = boost::dynamic_pointer_cast<IOProcessor>(*r);
 
 		if ( ! redirect)
 			continue;
@@ -2245,20 +2246,20 @@ Route::set_active (bool yn)
 }
 
 void
-Route::handle_transport_stopped (bool abort_ignored, bool did_locate, bool can_flush_inserts)
+Route::handle_transport_stopped (bool abort_ignored, bool did_locate, bool can_flush_processors)
 {
 	nframes_t now = _session.transport_frame();
 
 	{
-		Glib::RWLock::ReaderLock lm (insert_lock);
+		Glib::RWLock::ReaderLock lm (_processor_lock);
 
 		if (!did_locate) {
 			automation_snapshot (now);
 		}
 
-		for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
+		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 			
-			if (Config->get_plugins_stop_with_transport() && can_flush_inserts) {
+			if (Config->get_plugins_stop_with_transport() && can_flush_processors) {
 				(*i)->deactivate ();
 				(*i)->activate ();
 			}
@@ -2299,7 +2300,7 @@ Route::pans_required () const
 		return 0;
 	}
 	
-	return max (n_inputs ().n_audio(), static_cast<size_t>(insert_max_outs.n_audio()));
+	return max (n_inputs ().n_audio(), static_cast<size_t>(processor_max_outs.n_audio()));
 }
 
 int 
@@ -2356,15 +2357,15 @@ Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nfra
 	     bool can_record, bool rec_monitors_input)
 {
 	{
-		Glib::RWLock::ReaderLock lm (insert_lock, Glib::TRY_LOCK);
+		Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
 		if (lm.locked()) {
 			// automation snapshot can also be called from the non-rt context
-			// and it uses the insert list, so we take the lock out here
+			// and it uses the processor list, so we take the lock out here
 			automation_snapshot (_session.transport_frame());
 		}
 	}
 
-	if ((n_outputs().n_total() == 0 && _inserts.empty()) || n_inputs().n_total() == 0 || !_active) {
+	if ((n_outputs().n_total() == 0 && _processors.empty()) || n_inputs().n_total() == 0 || !_active) {
 		silence (nframes, offset);
 		return 0;
 	}
@@ -2420,7 +2421,7 @@ Route::has_external_redirects () const
 
 	boost::shared_ptr<const PortInsert> pi;
 	
-	for (InsertList::const_iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
+	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if ((pi = boost::dynamic_pointer_cast<const PortInsert>(*i)) != 0) {
 
 			for (PortSet::const_iterator port = pi->io()->outputs().begin();
@@ -2442,15 +2443,15 @@ Route::has_external_redirects () const
 }
 
 void
-Route::flush_inserts ()
+Route::flush_processors ()
 {
 	/* XXX shouldn't really try to take this lock, since
 	   this is called from the RT audio thread.
 	*/
 
-	Glib::RWLock::ReaderLock lm (insert_lock);
+	Glib::RWLock::ReaderLock lm (_processor_lock);
 
-	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		(*i)->deactivate ();
 		(*i)->activate ();
 	}
@@ -2471,7 +2472,7 @@ Route::update_total_latency ()
 {
 	_own_latency = 0;
 
-	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if ((*i)->active ()) {
 			_own_latency += (*i)->latency ();
 		}
@@ -2506,7 +2507,7 @@ Route::automation_snapshot (nframes_t now)
 {
 	IO::automation_snapshot (now);
 
-	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		(*i)->automation_snapshot (now);
 	}
 }
@@ -2556,7 +2557,7 @@ Route::ToggleControllable::get_value (void) const
 void 
 Route::set_block_size (nframes_t nframes)
 {
-	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		(*i)->set_block_size (nframes);
 	}
 }
@@ -2566,7 +2567,7 @@ Route::protect_automation ()
 {
 	Automatable::protect_automation();
 	
-	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i)
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i)
 		(*i)->protect_automation();
 }
 

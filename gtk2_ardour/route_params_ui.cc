@@ -211,16 +211,16 @@ RouteParams_UI::route_name_changed (boost::shared_ptr<Route> route)
 }
 
 void
-RouteParams_UI::setup_redirect_boxes()
+RouteParams_UI::setup_processor_boxes()
 {
 	if (session && _route) {
 
 		// just in case... shouldn't need this
-		cleanup_redirect_boxes();
+		cleanup_processor_boxes();
 		
 		// construct new redirect boxes
-		pre_insert_box = new RedirectBox(PreFader, *session, _route, *_plugin_selector, _rr_selection);
-		post_insert_box = new RedirectBox(PostFader, *session, _route, *_plugin_selector, _rr_selection);
+		pre_insert_box = new ProcessorBox(PreFader, *session, _route, *_plugin_selector, _rr_selection);
+		post_insert_box = new ProcessorBox(PostFader, *session, _route, *_plugin_selector, _rr_selection);
 
 	        pre_redir_hpane.pack1 (*pre_insert_box);
 		post_redir_hpane.pack1 (*post_insert_box);
@@ -237,7 +237,7 @@ RouteParams_UI::setup_redirect_boxes()
 }
 
 void
-RouteParams_UI::cleanup_redirect_boxes()
+RouteParams_UI::cleanup_processor_boxes()
 {
 	if (pre_insert_box) {
 		pre_redir_hpane.remove(*pre_insert_box);
@@ -344,11 +344,11 @@ RouteParams_UI::route_removed (boost::shared_ptr<Route> route)
 		cleanup_io_frames();
 		cleanup_pre_view();
 		cleanup_post_view();
-		cleanup_redirect_boxes();
+		cleanup_processor_boxes();
 		
 		_route.reset ((Route*) 0);
-		_pre_insert.reset ((Redirect*) 0);
-		_post_insert.reset ((Redirect*) 0);
+		_pre_processor.reset ((Processor*) 0);
+		_post_processor.reset ((Processor*) 0);
 		update_title();
 	}
 }
@@ -386,11 +386,11 @@ RouteParams_UI::session_gone ()
 	cleanup_io_frames();
 	cleanup_pre_view();
 	cleanup_post_view();
-	cleanup_redirect_boxes();
+	cleanup_processor_boxes();
 
 	_route.reset ((Route*) 0);
-	_pre_insert.reset ((Redirect*) 0);
-	_post_insert.reset ((Redirect*) 0);
+	_pre_processor.reset ((Processor*) 0);
+	_post_processor.reset ((Processor*) 0);
 	update_title();
 
 	ArdourDialog::session_gone();
@@ -415,7 +415,7 @@ RouteParams_UI::route_selected()
 		if (_route) {
 			_route_conn.disconnect();
 			_route_ds_conn.disconnect();
-			cleanup_redirect_boxes();
+			cleanup_processor_boxes();
 			cleanup_pre_view();
 			cleanup_post_view();
 			cleanup_io_frames();
@@ -426,10 +426,10 @@ RouteParams_UI::route_selected()
 		//update_routeinfo (route);
 
 		setup_io_frames();
-		setup_redirect_boxes();
+		setup_processor_boxes();
 
 		// bind to redirects changed event for this route
-		_route_conn = route->inserts_changed.connect (mem_fun(*this, &RouteParams_UI::inserts_changed));
+		_route_conn = route->processors_changed.connect (mem_fun(*this, &RouteParams_UI::processors_changed));
 
 		track_input_label.set_text (_route->name());
 
@@ -443,11 +443,11 @@ RouteParams_UI::route_selected()
 			cleanup_io_frames();
 			cleanup_pre_view();
 			cleanup_post_view();
-			cleanup_redirect_boxes();
+			cleanup_processor_boxes();
 
 			_route.reset ((Route*) 0);
-			_pre_insert.reset ((Redirect*) 0);
-			_post_insert.reset ((Redirect *) 0);
+			_pre_processor.reset ((Processor*) 0);
+			_post_processor.reset ((Processor *) 0);
 			track_input_label.set_text(_("NO TRACK"));
 			update_title();
 		}
@@ -464,21 +464,21 @@ RouteParams_UI::route_selected()
 //		cleanup_io_frames();
 //		cleanup_pre_view();
 //		cleanup_post_view();
-//		cleanup_redirect_boxes();
+//		cleanup_processor_boxes();
 		
 //		_route.reset ((Route*)0);
-//		_pre_insert = 0;
-//		_post_insert = 0;
+//		_pre_processor = 0;
+//		_post_processor = 0;
 //		track_input_label.set_text(_("NO TRACK"));
 //		update_title();
 //	}
 //}
 
 void
-RouteParams_UI::inserts_changed ()
+RouteParams_UI::processors_changed ()
 
 {
-	ENSURE_GUI_THREAD(mem_fun(*this, &RouteParams_UI::inserts_changed));
+	ENSURE_GUI_THREAD(mem_fun(*this, &RouteParams_UI::processors_changed));
 	
 // 	pre_insert_list.freeze ();
 // 	pre_insert_list.clear ();
@@ -493,8 +493,8 @@ RouteParams_UI::inserts_changed ()
 	cleanup_pre_view();
 	cleanup_post_view();
 	
-	_pre_insert.reset ((Redirect*) 0);
-	_post_insert.reset ((Redirect*) 0);
+	_pre_processor.reset ((Processor*) 0);
+	_post_processor.reset ((Processor*) 0);
 	//update_title();
 }
 
@@ -518,10 +518,10 @@ RouteParams_UI::show_track_menu()
 
 
 void
-RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Insert> insert, ARDOUR::Placement place)
+RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> insert, ARDOUR::Placement place)
 {
-	if ((place == PreFader && _pre_insert == insert)
-	    || (place == PostFader && _post_insert == insert)){
+	if ((place == PreFader && _pre_processor == insert)
+	    || (place == PostFader && _post_processor == insert)){
 		return;
 	}
 	
@@ -593,9 +593,9 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Insert> insert, ARD
 	}
 				
 	if (place == PreFader) {
-		_pre_insert = insert;
+		_pre_processor = insert;
 	} else {
-		_post_insert = insert;
+		_post_processor = insert;
 	}
 	
 	update_title();
@@ -611,28 +611,28 @@ RouteParams_UI::plugin_going_away (Placement place)
 
 	if (place == PreFader) {
 		cleanup_pre_view (false);
-		_pre_insert.reset ((Redirect*) 0);
+		_pre_processor.reset ((Processor*) 0);
 	}
 	else {
 		cleanup_post_view (false);
-		_post_insert.reset ((Redirect*) 0);
+		_post_processor.reset ((Processor*) 0);
 	}
 }
 
 void
-RouteParams_UI::redirect_going_away (boost::shared_ptr<ARDOUR::Insert> insert)
+RouteParams_UI::redirect_going_away (boost::shared_ptr<ARDOUR::Processor> insert)
 
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RouteParams_UI::redirect_going_away), insert));
 	
 	printf ("redirect going away\n");
 	// delete the current view without calling finish
-	if (insert == _pre_insert) {
+	if (insert == _pre_processor) {
 		cleanup_pre_view (false);
-		_pre_insert.reset ((Redirect*) 0);
-	} else if (insert == _post_insert) {
+		_pre_processor.reset ((Processor*) 0);
+	} else if (insert == _post_processor) {
 		cleanup_post_view (false);
-		_post_insert.reset ((Redirect*) 0);
+		_post_processor.reset ((Processor*) 0);
 	}
 }
 

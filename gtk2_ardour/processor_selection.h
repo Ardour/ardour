@@ -17,16 +17,16 @@
 
 */
 
-#ifndef __ardour_gtk_redirect_selection_h__
-#define __ardour_gtk_redirect_selection_h__
+#ifndef __ardour_gtk_processor_selection_h__
+#define __ardour_gtk_processor_selection_h__
 
 #include <list>
 #include <boost/shared_ptr.hpp>
 
 namespace ARDOUR {
-	class Insert;
+	class Processor;
 }
 
-struct InsertSelection : list<boost::shared_ptr<ARDOUR::Insert> > {};
+struct ProcessorSelection : list<boost::shared_ptr<ARDOUR::Processor> > {};
 
-#endif /* __ardour_gtk_redirect_selection_h__ */
+#endif /* __ardour_gtk_processor_selection_h__ */

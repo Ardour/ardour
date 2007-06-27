@@ -87,9 +87,9 @@ class MidiDiskstream;
 class AudioFileSource;
 class MidiSource;
 class Auditioner;
-class Insert;
+class Processor;
 class Send;
-class Redirect;
+class IOProcessor;
 class PortInsert;
 class PluginInsert;
 class Bundle;
@@ -1519,8 +1519,8 @@ class Session : public PBD::StatefulDestructible
 	uint32_t          insert_cnt;
 
 
-	void add_insert (Insert *);
-	void remove_insert (Insert *);
+	void add_processor (Processor *);
+	void remove_processor (Processor *);
 
 	/* S/W RAID */
 

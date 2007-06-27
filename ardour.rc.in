@@ -51,7 +51,7 @@
     <Option name="time-stretch-fill" value="e2b5b596"/>
     <Option name="time-stretch-outline" value="63636396"/>
     <Option name="automation line" value="44bc59ff"/>
-    <Option name="redirect automation line" value="7aa3f9ff"/>
+    <Option name="processor automation line" value="7aa3f9ff"/>
     <Option name="control point fill" value="000000ff"/>
     <Option name="control point outline" value="000000ff"/>
     <Option name="entered control point outline" value="ff0000ee"/>

@@ -23,11 +23,11 @@
 #include <ardour/track.h>
 #include <ardour/diskstream.h>
 #include <ardour/session.h>
-#include <ardour/redirect.h>
+#include <ardour/io_processor.h>
 #include <ardour/audioregion.h>
 #include <ardour/audiosource.h>
 #include <ardour/route_group_specialized.h>
-#include <ardour/insert.h>
+#include <ardour/processor.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/panner.h>
 #include <ardour/utils.h>
@@ -92,7 +92,7 @@ Track::update_total_latency ()
 {
 	_own_latency = 0;
 
-	for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if ((*i)->active ()) {
 			_own_latency += (*i)->latency ();
 		}
@@ -106,7 +106,7 @@ Track::update_total_latency ()
 
 Track::FreezeRecord::~FreezeRecord ()
 {
-	for (vector<FreezeRecordInsertInfo*>::iterator i = insert_info.begin(); i != insert_info.end(); ++i) {
+	for (vector<FreezeRecordProcessorInfo*>::iterator i = processor_info.begin(); i != processor_info.end(); ++i) {
 		delete *i;
 	}
 }

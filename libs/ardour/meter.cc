@@ -118,7 +118,7 @@ PeakMeter::configure_io (ChanCount in, ChanCount out)
 	assert(_visible_peak_power.size() == limit);
 	assert(_max_peak_power.size() == limit);
 
-	Insert::configure_io(in, out);
+	Processor::configure_io(in, out);
 
 	return true;
 }

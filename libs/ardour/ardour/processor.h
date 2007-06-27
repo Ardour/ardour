@@ -17,8 +17,8 @@
 
 */
 
-#ifndef __ardour_insert_h__
-#define __ardour_insert_h__
+#ifndef __ardour_processor_h__
+#define __ardour_processor_h__
 
 #include <vector>
 #include <string>
@@ -43,16 +43,16 @@ class Session;
 
 /* A mixer strip element - plugin, send, meter, etc.
  */
-class Insert : public Automatable
+class Processor : public Automatable
 {
   public:
 	static const string state_node_name;
 
-	Insert(Session&, const string& name, Placement p); // TODO: remove placement in favour of sort key
+	Processor(Session&, const string& name, Placement p); // TODO: remove placement in favour of sort key
 	
-	virtual ~Insert() { }
+	virtual ~Processor() { }
 	
-	static boost::shared_ptr<Insert> clone (boost::shared_ptr<const Insert>);
+	static boost::shared_ptr<Processor> clone (boost::shared_ptr<const Processor>);
 
 	uint32_t sort_key() const { return _sort_key; }
 	void set_sort_key (uint32_t key);
@@ -93,7 +93,7 @@ class Insert : public Automatable
 	void *get_gui () const { return _gui; }
 	void  set_gui (void *p) { _gui = p; }
 
-	static sigc::signal<void,Insert*> InsertCreated;
+	static sigc::signal<void,Processor*> ProcessorCreated;
 
 	sigc::signal<void> ActiveChanged;
 	sigc::signal<void> PlacementChanged;
@@ -110,4 +110,4 @@ protected:
 
 } // namespace ARDOUR
 
-#endif /* __ardour_insert_h__ */
+#endif /* __ardour_processor_h__ */

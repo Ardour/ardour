@@ -27,12 +27,12 @@
 #include <ardour/audio_track.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/session.h>
-#include <ardour/redirect.h>
+#include <ardour/io_processor.h>
 #include <ardour/audioregion.h>
 #include <ardour/audiosource.h>
 #include <ardour/region_factory.h>
 #include <ardour/route_group_specialized.h>
-#include <ardour/insert.h>
+#include <ardour/processor.h>
 #include <ardour/plugin_insert.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/playlist_factory.h>
@@ -304,8 +304,8 @@ AudioTrack::state(bool full_state)
 		freeze_node->add_property ("playlist", _freeze_record.playlist->name());
 		freeze_node->add_property ("state", enum_2_string (_freeze_record.state));
 
-		for (vector<FreezeRecordInsertInfo*>::iterator i = _freeze_record.insert_info.begin(); i != _freeze_record.insert_info.end(); ++i) {
-			inode = new XMLNode (X_("insert"));
+		for (vector<FreezeRecordProcessorInfo*>::iterator i = _freeze_record.processor_info.begin(); i != _freeze_record.processor_info.end(); ++i) {
+			inode = new XMLNode (X_("processor"));
 			(*i)->id.print (buf, sizeof (buf));
 			inode->add_property (X_("id"), buf);
 			inode->add_child_copy ((*i)->state);
@@ -360,10 +360,10 @@ AudioTrack::set_state_part_two ()
 		_freeze_record.have_mementos = false;
 		_freeze_record.state = Frozen;
 		
-		for (vector<FreezeRecordInsertInfo*>::iterator i = _freeze_record.insert_info.begin(); i != _freeze_record.insert_info.end(); ++i) {
+		for (vector<FreezeRecordProcessorInfo*>::iterator i = _freeze_record.processor_info.begin(); i != _freeze_record.processor_info.end(); ++i) {
 			delete *i;
 		}
-		_freeze_record.insert_info.clear ();
+		_freeze_record.processor_info.clear ();
 		
 		if ((prop = fnode->property (X_("playlist"))) != 0) {
 			boost::shared_ptr<Playlist> pl = _session.playlist_by_name (prop->value());
@@ -384,7 +384,7 @@ AudioTrack::set_state_part_two ()
 		XMLNodeList clist = fnode->children();
 		
 		for (citer = clist.begin(); citer != clist.end(); ++citer) {
-			if ((*citer)->name() != X_("insert")) {
+			if ((*citer)->name() != X_("processor")) {
 				continue;
 			}
 			
@@ -392,10 +392,10 @@ AudioTrack::set_state_part_two ()
 				continue;
 			}
 			
-			FreezeRecordInsertInfo* frii = new FreezeRecordInsertInfo (*((*citer)->children().front()),
-										   boost::shared_ptr<Insert>());
+			FreezeRecordProcessorInfo* frii = new FreezeRecordProcessorInfo (*((*citer)->children().front()),
+										   boost::shared_ptr<Processor>());
 			frii->id = prop->value ();
-			_freeze_record.insert_info.push_back (frii);
+			_freeze_record.processor_info.push_back (frii);
 		}
 	}
 
@@ -515,7 +515,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
 	
 	{
-		Glib::RWLock::ReaderLock lm (insert_lock, Glib::TRY_LOCK);
+		Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
 		if (lm.locked()) {
 			// automation snapshot can also be called from the non-rt context
 			// and it uses the redirect list, so we take the lock out here
@@ -524,7 +524,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 	}
 
 	
-	if (n_outputs().n_total() == 0 && _inserts.empty()) {
+	if (n_outputs().n_total() == 0 && _processors.empty()) {
 		return 0;
 	}
 
@@ -620,7 +620,7 @@ int
 AudioTrack::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
 			 bool can_record, bool rec_monitors_input)
 {
-	if (n_outputs().n_total() == 0 && _inserts.empty()) {
+	if (n_outputs().n_total() == 0 && _processors.empty()) {
 		return 0;
 	}
 
@@ -643,12 +643,12 @@ AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes
 	gain_t  gain_automation[nframes];
 	gain_t  gain_buffer[nframes];
 	float   mix_buffer[nframes];
-	InsertList::iterator i;
+	ProcessorList::iterator i;
 	bool post_fader_work = false;
 	gain_t this_gain = _gain;
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
 	
-	Glib::RWLock::ReaderLock rlock (insert_lock);
+	Glib::RWLock::ReaderLock rlock (_processor_lock);
 
 	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(diskstream->playlist());
 	assert(apl);
@@ -677,17 +677,17 @@ AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes
 	}
 
 
-	/* note: only run inserts during export. other layers in the machinery
-	   will already have checked that there are no external port inserts.
+	/* note: only run processors during export. other layers in the machinery
+	   will already have checked that there are no external port processors.
 	*/
 	
-	for (i = _inserts.begin(); i != _inserts.end(); ++i) {
-		boost::shared_ptr<Insert> insert;
+	for (i = _processors.begin(); i != _processors.end(); ++i) {
+		boost::shared_ptr<Processor> processor;
 		
-		if ((insert = boost::dynamic_pointer_cast<Insert>(*i)) != 0) {
-			switch (insert->placement()) {
+		if ((processor = boost::dynamic_pointer_cast<Processor>(*i)) != 0) {
+			switch (processor->placement()) {
 			case PreFader:
-				insert->run (buffers, start, start+nframes, nframes, 0);
+				processor->run (buffers, start, start+nframes, nframes, 0);
 				break;
 			case PostFader:
 				post_fader_work = true;
@@ -719,15 +719,15 @@ AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes
 
 	if (post_fader_work) {
 
-		for (i = _inserts.begin(); i != _inserts.end(); ++i) {
-			boost::shared_ptr<PluginInsert> insert;
+		for (i = _processors.begin(); i != _processors.end(); ++i) {
+			boost::shared_ptr<PluginInsert> processor;
 			
-			if ((insert = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
+			if ((processor = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
 				switch ((*i)->placement()) {
 				case PreFader:
 					break;
 				case PostFader:
-					insert->run (buffers, start, start+nframes, nframes, 0);
+					processor->run (buffers, start, start+nframes, nframes, 0);
 					break;
 				}
 			}
@@ -796,27 +796,27 @@ AudioTrack::freeze (InterThreadInfo& itt)
 		return;
 	}
 
-	_freeze_record.insert_info.clear ();
+	_freeze_record.processor_info.clear ();
 	_freeze_record.have_mementos = true;
 
 	{
-		Glib::RWLock::ReaderLock lm (insert_lock);
+		Glib::RWLock::ReaderLock lm (_processor_lock);
 		
-		for (InsertList::iterator r = _inserts.begin(); r != _inserts.end(); ++r) {
+		for (ProcessorList::iterator r = _processors.begin(); r != _processors.end(); ++r) {
 			
-			boost::shared_ptr<Insert> insert;
+			boost::shared_ptr<Processor> processor;
 
-			if ((insert = boost::dynamic_pointer_cast<Insert>(*r)) != 0) {
+			if ((processor = boost::dynamic_pointer_cast<Processor>(*r)) != 0) {
 				
-				FreezeRecordInsertInfo* frii  = new FreezeRecordInsertInfo ((*r)->get_state(), insert);
+				FreezeRecordProcessorInfo* frii  = new FreezeRecordProcessorInfo ((*r)->get_state(), processor);
 				
-				frii->id = insert->id();
+				frii->id = processor->id();
 
-				_freeze_record.insert_info.push_back (frii);
+				_freeze_record.processor_info.push_back (frii);
 				
-				/* now deactivate the insert */
+				/* now deactivate the processor */
 				
-				insert->set_active (false);
+				processor->set_active (false);
 				_session.set_dirty ();
 			}
 		}
@@ -852,15 +852,15 @@ AudioTrack::unfreeze ()
 
 		if (_freeze_record.have_mementos) {
 
-			for (vector<FreezeRecordInsertInfo*>::iterator i = _freeze_record.insert_info.begin(); i != _freeze_record.insert_info.end(); ++i) {
+			for (vector<FreezeRecordProcessorInfo*>::iterator i = _freeze_record.processor_info.begin(); i != _freeze_record.processor_info.end(); ++i) {
 				(*i)->memento ();
 			}
 
 		} else {
 
-			Glib::RWLock::ReaderLock lm (insert_lock); // should this be a write lock? jlc
-			for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
-				for (vector<FreezeRecordInsertInfo*>::iterator ii = _freeze_record.insert_info.begin(); ii != _freeze_record.insert_info.end(); ++ii) {
+			Glib::RWLock::ReaderLock lm (_processor_lock); // should this be a write lock? jlc
+			for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+				for (vector<FreezeRecordProcessorInfo*>::iterator ii = _freeze_record.processor_info.begin(); ii != _freeze_record.processor_info.end(); ++ii) {
 					if ((*ii)->id == (*i)->id()) {
 						(*i)->set_state (((*ii)->state));
 						break;

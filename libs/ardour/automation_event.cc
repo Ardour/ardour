@@ -1372,8 +1372,6 @@ AutomationList::set_state (const XMLNode& node)
 		warning << "Legacy session: automation list has no automation-id property.";
 	}
 	
-	cerr << "Loaded automation " << _param_id.to_string() << endl;
-	
 	if ((prop = node.property (X_("default"))) != 0){ 
 		_default_value = atof (prop->value());
 	} else {

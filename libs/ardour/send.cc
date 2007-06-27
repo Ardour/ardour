@@ -33,14 +33,14 @@ using namespace ARDOUR;
 using namespace PBD;
 
 Send::Send (Session& s, Placement p)
-	: Redirect (s, string_compose (_("send %1"), (bitslot = s.next_send_id()) + 1), p)
+	: IOProcessor (s, string_compose (_("send %1"), (bitslot = s.next_send_id()) + 1), p)
 {
 	_metering = false;
-	InsertCreated (this); /* EMIT SIGNAL */
+	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
 Send::Send (Session& s, const XMLNode& node)
-	: Redirect (s,  "send", PreFader)
+	: IOProcessor (s,  "send", PreFader)
 {
 	_metering = false;
 
@@ -48,14 +48,14 @@ Send::Send (Session& s, const XMLNode& node)
 		throw failed_constructor();
 	}
 
-	InsertCreated (this); /* EMIT SIGNAL */
+	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
 Send::Send (const Send& other)
-	: Redirect (other._session, string_compose (_("send %1"), (bitslot = other._session.next_send_id()) + 1), other.placement())
+	: IOProcessor (other._session, string_compose (_("send %1"), (bitslot = other._session.next_send_id()) + 1), other.placement())
 {
 	_metering = false;
-	InsertCreated (this); /* EMIT SIGNAL */
+	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
 Send::~Send ()
@@ -72,7 +72,7 @@ Send::get_state(void)
 XMLNode&
 Send::state(bool full)
 {
-	XMLNode& node = Redirect::state(full);
+	XMLNode& node = IOProcessor::state(full);
 	char buf[32];
 	node.add_property ("type", "send");
 	snprintf (buf, sizeof (buf), "%" PRIu32, bitslot);
@@ -100,14 +100,14 @@ Send::set_state(const XMLNode& node)
 	/* Send has regular IO automation (gain, pan) */
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() == "Redirect") {
+		if ((*niter)->name() == "IOProcessor") {
 			insert_node = *niter;
 		} else if ((*niter)->name() == X_("Automation")) {
 			_io->set_automation_state (*(*niter), ParamID(GainAutomation));
 		}
 	}
 	
-	Redirect::set_state (*insert_node);
+	IOProcessor::set_state (*insert_node);
 
 	return 0;
 }
@@ -201,7 +201,7 @@ Send::configure_io (ChanCount in, ChanCount out)
 	bool success = _io->ensure_io (ChanCount::ZERO, in, false, this) == 0;
 
 	if (success) {
-		Insert::configure_io(in, out);
+		Processor::configure_io(in, out);
 		_io->reset_panner();
 		return true;
 	} else {

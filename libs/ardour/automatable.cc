@@ -122,8 +122,7 @@ Automatable::add_automation_parameter(AutomationList* al)
 	/* let derived classes do whatever they need with this */
 	automation_list_creation_callback (al->param_id(), *al);
 
-	cerr << _name << ": added (visible, can_automate) parameter " << al->param_id().to_string() << ", # params = "
-		<< _parameter_automation.size() << endl;
+	cerr << _name << ": added parameter " << al->param_id().to_string() << endl;
 
 	// FIXME: sane default behaviour?
 	_visible_parameter_automation.insert(al->param_id());
@@ -168,7 +167,7 @@ Automatable::automation_list (ParamID parameter, bool create_if_missing)
 		return al;
 
 	} else {
-		warning << "AutomationList " << parameter.to_string() << " not found for " << _name << endmsg;
+		//warning << "AutomationList " << parameter.to_string() << " not found for " << _name << endmsg;
 		return NULL;
 	}
 }
@@ -181,7 +180,7 @@ Automatable::automation_list (ParamID parameter) const
 	if (i != _parameter_automation.end()) {
 		return i->second;
 	} else {
-		warning << "AutomationList " << parameter.to_string() << " not found for " << _name << endmsg;
+		//warning << "AutomationList " << parameter.to_string() << " not found for " << _name << endmsg;
 		return NULL;
 	}
 }

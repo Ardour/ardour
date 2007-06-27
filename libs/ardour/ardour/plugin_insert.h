@@ -27,7 +27,7 @@
 #include <ardour/ardour.h>
 #include <ardour/plugin_state.h>
 #include <ardour/types.h>
-#include <ardour/insert.h>
+#include <ardour/processor.h>
 #include <ardour/automation_event.h>
 
 class XMLNode;
@@ -40,7 +40,7 @@ class Plugin;
 
 /** Plugin inserts: send data through a plugin
  */
-class PluginInsert : public Insert
+class PluginInsert : public Processor
 {
   public:
 	PluginInsert (Session&, boost::shared_ptr<Plugin>, Placement);

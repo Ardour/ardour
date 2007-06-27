@@ -103,9 +103,9 @@ LadspaPluginUI::LadspaPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrolla
 		pack_start (hpacker, false, false);
 	}
 
-	insert->ActiveChanged.connect (bind(mem_fun(*this, &LadspaPluginUI::insert_active_changed),
-				boost::weak_ptr<Insert>(insert)));
-	bypass_button.set_active (!insert->active());
+	pi->ActiveChanged.connect (bind(mem_fun(*this, &LadspaPluginUI::processor_active_changed),
+				boost::weak_ptr<Processor>(pi)));
+	bypass_button.set_active (!pi->active());
 	
 	build ();
 }
@@ -673,13 +673,13 @@ LadspaPluginUI::control_combo_changed (ControlUI* cui)
 }
 
 void
-LadspaPluginUI::insert_active_changed (boost::weak_ptr<Insert> weak_insert)
+LadspaPluginUI::processor_active_changed (boost::weak_ptr<Processor> weak_processor)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &LadspaPluginUI::insert_active_changed), weak_insert));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &LadspaPluginUI::processor_active_changed), weak_processor));
 	
-	boost::shared_ptr<Insert> insert = weak_insert.lock();
+	boost::shared_ptr<Processor> processor = weak_processor.lock();
 
-	bypass_button.set_active (!insert || !insert->active());
+	bypass_button.set_active (!processor || !processor->active());
 }
 
 bool

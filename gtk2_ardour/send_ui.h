@@ -26,7 +26,7 @@
 namespace ARDOUR {
 	class Send;
 	class Session;
-	class Redirect;
+	class IOProcessor;
 }
 
 class IOSelector;

@@ -21,7 +21,7 @@
 
 #include <vector>
 #include <ardour/types.h>
-#include <ardour/insert.h>
+#include <ardour/processor.h>
 #include <pbd/fastlog.h>
 
 namespace ARDOUR {
@@ -33,9 +33,9 @@ class Session;
 
 /** Meters peaks on the input and stores them for access.
  */
-class PeakMeter : public Insert {
+class PeakMeter : public Processor {
 public:
-	PeakMeter(Session& s) : Insert(s, "meter", PreFader) {}
+	PeakMeter(Session& s) : Processor(s, "meter", PreFader) {}
 
 	void reset ();
 	void reset_max ();

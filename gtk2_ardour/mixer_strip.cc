@@ -40,7 +40,7 @@
 #include <ardour/audio_diskstream.h>
 #include <ardour/panner.h>
 #include <ardour/send.h>
-#include <ardour/insert.h>
+#include <ardour/processor.h>
 #include <ardour/ladspa_plugin.h>
 #include <ardour/bundle.h>
 #include <ardour/session_bundle.h>
@@ -85,8 +85,8 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	: AxisView(sess),
 	  RouteUI (rt, sess, _("Mute"), _("Solo"), _("Record")),
 	  _mixer(mx),
-	  pre_redirect_box (PreFader, sess, rt, mx.plugin_selector(), mx.selection(), in_mixer),
-	  post_redirect_box (PostFader, sess, rt, mx.plugin_selector(), mx.selection(), in_mixer),
+	  pre_processor_box (PreFader, sess, rt, mx.plugin_selector(), mx.selection(), in_mixer),
+	  post_processor_box (PostFader, sess, rt, mx.plugin_selector(), mx.selection(), in_mixer),
 	  gpm (_route, sess),
 	  panners (_route, sess),
 	  button_table (3, 2),
@@ -251,11 +251,11 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 
 	global_vpacker.pack_start (*whvbox, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (button_table,Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (pre_redirect_box, true, true);
+	global_vpacker.pack_start (pre_processor_box, true, true);
 	global_vpacker.pack_start (middle_button_table,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (*gain_meter_alignment,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (bottom_button_table,Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (post_redirect_box, true, true);
+	global_vpacker.pack_start (post_processor_box, true, true);
 	if (!is_midi_track())
 		global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
@@ -332,8 +332,8 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 
 	/* now force an update of all the various elements */
 
-	pre_redirect_box.update();
-	post_redirect_box.update();
+	pre_processor_box.update();
+	post_processor_box.update();
 	mute_changed (0);
 	solo_changed (0);
 	name_changed ();
@@ -400,8 +400,8 @@ MixerStrip::set_width (Width w, void* owner)
 
 	gpm.set_width (w);
 	panners.set_width (w);
-	pre_redirect_box.set_width (w);
-	post_redirect_box.set_width (w);
+	pre_processor_box.set_width (w);
+	post_processor_box.set_width (w);
 
 	_width_owner = owner;
 
@@ -1138,24 +1138,24 @@ MixerStrip::map_frozen ()
 	if (at) {
 		switch (at->freeze_state()) {
 		case AudioTrack::Frozen:
-			pre_redirect_box.set_sensitive (false);
-			post_redirect_box.set_sensitive (false);
+			pre_processor_box.set_sensitive (false);
+			post_processor_box.set_sensitive (false);
 			speed_spinner.set_sensitive (false);
 			break;
 		default:
-			pre_redirect_box.set_sensitive (true);
-			post_redirect_box.set_sensitive (true);
+			pre_processor_box.set_sensitive (true);
+			post_processor_box.set_sensitive (true);
 			speed_spinner.set_sensitive (true);
 			break;
 		}
 	}
-	_route->foreach_insert (this, &MixerStrip::hide_insert_editor);
+	_route->foreach_processor (this, &MixerStrip::hide_processor_editor);
 }
 
 void
-MixerStrip::hide_insert_editor (boost::shared_ptr<Insert> insert)
+MixerStrip::hide_processor_editor (boost::shared_ptr<Processor> processor)
 {
-	void* gui = insert->get_gui ();
+	void* gui = processor->get_gui ();
 	
 	if (gui) {
 		static_cast<Gtk::Widget*>(gui)->hide ();

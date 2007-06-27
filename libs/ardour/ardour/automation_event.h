@@ -93,7 +93,7 @@ class AutomationList : public PBD::StatefulDestructible
 	void reposition_for_rt_add (double when);
 	void rt_add (double when, double value);
 	void add (double when, double value);
-	/* this should be private but old-school automation loading needs it in IO/Redirect */
+	/* this should be private but old-school automation loading needs it in IO/IOProcessor */
 	void fast_simple_add (double when, double value);
 
 	void reset_range (double start, double end);

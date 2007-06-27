@@ -168,9 +168,9 @@ plugin_selector.cc
 plugin_ui.cc
 prompter.cc
 public_editor.cc
-redirect_automation_line.cc
-redirect_automation_time_axis.cc
-redirect_box.cc
+plugin_automation_line.cc
+processor_automation_time_axis.cc
+processor_box.cc
 region_gain_line.cc
 region_selection.cc
 region_view.cc
@@ -178,7 +178,7 @@ audio_region_view.cc
 midi_region_view.cc
 tape_region_view.cc
 route_params_ui.cc
-route_redirect_selection.cc
+route_processor_selection.cc
 route_ui.cc
 selection.cc
 sfdb_ui.cc

@@ -78,9 +78,9 @@
 #include <ardour/sndfile_helpers.h>
 #include <ardour/auditioner.h>
 #include <ardour/export.h>
-#include <ardour/redirect.h>
+#include <ardour/io_processor.h>
 #include <ardour/send.h>
-#include <ardour/insert.h>
+#include <ardour/processor.h>
 #include <ardour/bundle.h>
 #include <ardour/slave.h>
 #include <ardour/tempo.h>
@@ -260,7 +260,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	RegionFactory::CheckNewRegion.connect (mem_fun (*this, &Session::add_region));
 	SourceFactory::SourceCreated.connect (mem_fun (*this, &Session::add_source));
 	PlaylistFactory::PlaylistCreated.connect (mem_fun (*this, &Session::add_playlist));
-	Insert::InsertCreated.connect (mem_fun (*this, &Session::add_insert));
+	Processor::ProcessorCreated.connect (mem_fun (*this, &Session::add_processor));
 	NamedSelection::NamedSelectionCreated.connect (mem_fun (*this, &Session::add_named_selection));
 	AutomationList::AutomationListCreated.connect (mem_fun (*this, &Session::add_automation_list));
 

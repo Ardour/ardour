@@ -17,12 +17,12 @@
 
 */
 
-#include <ardour/insert.h>
+#include <ardour/processor.h>
 #include <ardour/session.h>
 #include <cstdlib>
 #include <pbd/memento_command.h>
 
-#include "redirect_automation_time_axis.h"
+#include "processor_automation_time_axis.h"
 #include "automation_line.h"
 #include "canvas_impl.h"
 
@@ -32,18 +32,18 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
 
-RedirectAutomationTimeAxisView::RedirectAutomationTimeAxisView (Session& s, boost::shared_ptr<Route> r, 
+ProcessorAutomationTimeAxisView::ProcessorAutomationTimeAxisView (Session& s, boost::shared_ptr<Route> r, 
 								PublicEditor& e, TimeAxisView& parent, Canvas& canvas, std::string n,
-								ParamID p, Insert& i, string state_name)
+								ParamID param, Processor& proc, string state_name)
 
 	: AxisView (s),
-	  AutomationTimeAxisView (s, r, e, parent, canvas, n, state_name, i.name()),
-	  insert (i),
-	  param (p)
+	  AutomationTimeAxisView (s, r, e, parent, canvas, n, state_name, proc.name()),
+	  _processor(proc),
+	  _param (param)
 	
 {
 	char buf[32];
-	xml_node = 0;
+	_xml_node = 0;
 	_marked_for_display = false;
 	
 	ensure_xml_node ();
@@ -51,7 +51,7 @@ RedirectAutomationTimeAxisView::RedirectAutomationTimeAxisView (Session& s, boos
 	XMLNodeList kids;
 	XMLNodeConstIterator iter;
 
-	kids = xml_node->children ();
+	kids = _xml_node->children ();
 
 	snprintf (buf, sizeof(buf), "Port_%" PRIu32, param.id());
 		
@@ -68,12 +68,12 @@ RedirectAutomationTimeAxisView::RedirectAutomationTimeAxisView (Session& s, boos
 	}
 }
 
-RedirectAutomationTimeAxisView::~RedirectAutomationTimeAxisView ()
+ProcessorAutomationTimeAxisView::~ProcessorAutomationTimeAxisView ()
 {
 }
 
 void
-RedirectAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkEvent* event, nframes_t when, double y)
+ProcessorAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkEvent* event, nframes_t when, double y)
 {
 	double x = 0;
 
@@ -91,9 +91,9 @@ RedirectAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, 
 	/* map to model space */
 
 	if (!lines.empty()) {
-		AutomationList* alist (insert.automation_list(param, true));
+		AutomationList* alist (_processor.automation_list(_param, true));
 		string description = _("add automation event to ");
-		description += insert.describe_parameter (param);
+		description += _processor.describe_parameter (_param);
 
 		lines.front()->view_to_model_y (y);
 		
@@ -108,18 +108,18 @@ RedirectAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, 
 }
 
 void
-RedirectAutomationTimeAxisView::ensure_xml_node ()
+ProcessorAutomationTimeAxisView::ensure_xml_node ()
 {
-	if (xml_node == 0) {
-		if ((xml_node = insert.extra_xml ("GUI")) == 0) {
-			xml_node = new XMLNode ("GUI");
-			insert.add_extra_xml (*xml_node);
+	if (_xml_node == 0) {
+		if ((_xml_node = _processor.extra_xml ("GUI")) == 0) {
+			_xml_node = new XMLNode ("GUI");
+			_processor.add_extra_xml (*_xml_node);
 		}
 	}
 }
 
 guint32
-RedirectAutomationTimeAxisView::show_at (double y, int& nth, Gtk::VBox *parent)
+ProcessorAutomationTimeAxisView::show_at (double y, int& nth, Gtk::VBox *parent)
 {
 	ensure_xml_node ();
 	update_extra_xml_shown (true);
@@ -128,7 +128,7 @@ RedirectAutomationTimeAxisView::show_at (double y, int& nth, Gtk::VBox *parent)
 }
 
 void
-RedirectAutomationTimeAxisView::hide ()
+ProcessorAutomationTimeAxisView::hide ()
 {
 	ensure_xml_node ();
 	update_extra_xml_shown (false);
@@ -138,15 +138,15 @@ RedirectAutomationTimeAxisView::hide ()
 
 
 void
-RedirectAutomationTimeAxisView::update_extra_xml_shown (bool editor_shown)
+ProcessorAutomationTimeAxisView::update_extra_xml_shown (bool editor_shown)
 {
 	char buf[32];
 
-	XMLNodeList nlist = xml_node->children ();
+	XMLNodeList nlist = _xml_node->children ();
 	XMLNodeConstIterator i;
 	XMLNode * port_node = 0;
 
-	snprintf (buf, sizeof(buf), "Port_%" PRIu32, param.id());
+	snprintf (buf, sizeof(buf), "Port_%" PRIu32, _param.id());
 
 	for (i = nlist.begin(); i != nlist.end(); ++i) {
 		if ((*i)->name() == buf) {
@@ -157,7 +157,7 @@ RedirectAutomationTimeAxisView::update_extra_xml_shown (bool editor_shown)
 
 	if (!port_node) {
 		port_node = new XMLNode(buf);
-		xml_node->add_child_nocopy(*port_node);
+		_xml_node->add_child_nocopy(*port_node);
 	}
 	
 	port_node->add_property ("shown_editor", editor_shown ? "yes": "no");
@@ -165,9 +165,10 @@ RedirectAutomationTimeAxisView::update_extra_xml_shown (bool editor_shown)
 }
 
 void
-RedirectAutomationTimeAxisView::set_automation_state (AutoState state)
+ProcessorAutomationTimeAxisView::set_automation_state (AutoState state)
 {
 	if (!ignore_state_request) {
-		insert.automation_list (param, true)->set_automation_state (state);
+		_processor.automation_list (_param, true)->set_automation_state (state);
 	}
 }
+

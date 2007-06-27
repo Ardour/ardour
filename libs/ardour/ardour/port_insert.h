@@ -26,7 +26,7 @@
 
 #include <sigc++/signal.h>
 #include <ardour/ardour.h>
-#include <ardour/redirect.h>
+#include <ardour/io_processor.h>
 #include <ardour/plugin_state.h>
 #include <ardour/types.h>
 
@@ -37,10 +37,8 @@ namespace ARDOUR {
 class Session;
 
 /** Port inserts: send output to a Jack port, pick up input at a Jack port
- *
- * PortInsert IS-A Redirect IS-A Insert, IO
  */
-class PortInsert : public Redirect
+class PortInsert : public IOProcessor
 {
   public:
 	PortInsert (Session&, Placement);

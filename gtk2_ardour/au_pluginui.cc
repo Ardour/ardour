@@ -19,7 +19,7 @@
 */
 
 #include <ardour/audio_unit.h>
-#include <ardour/insert.h>
+#include <ardour/processor.h>
 
 #include <gtkmm2ext/doi.h>
 
@@ -123,7 +123,7 @@ AUPluginUI::~AUPluginUI ()
 }
 
 void
-AUPluginUI::plugin_going_away (ARDOUR::Redirect* ignored)
+AUPluginUI::plugin_going_away (ARDOUR::IOProcessor* ignored)
 {
         ENSURE_GUI_THREAD(bind (mem_fun(*this, &AUPluginUI::plugin_going_away), ignored));
 

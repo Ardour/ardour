@@ -29,7 +29,7 @@
 #include <pbd/xml++.h>
 #include <pbd/enumwriter.h>
 
-#include <ardour/redirect.h>
+#include <ardour/io_processor.h>
 #include <ardour/session.h>
 #include <ardour/utils.h>
 #include <ardour/send.h>
@@ -42,10 +42,10 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-Redirect::Redirect (Session& s, const string& name, Placement p,
+IOProcessor::IOProcessor (Session& s, const string& name, Placement p,
                     int input_min, int input_max,
                     int output_min, int output_max)
-	: Insert(s, name, p)
+	: Processor(s, name, p)
 	, _io(new IO(s, name, input_min, input_max, output_min, output_max))
 {
 	_active = false;
@@ -54,15 +54,15 @@ Redirect::Redirect (Session& s, const string& name, Placement p,
 	_extra_xml = 0;
 }
 
-Redirect::~Redirect ()
+IOProcessor::~IOProcessor ()
 {
 	notify_callbacks ();
 }
 
 XMLNode&
-Redirect::state (bool full_state)
+IOProcessor::state (bool full_state)
 {
-	XMLNode& node = Insert::state(full_state);
+	XMLNode& node = Processor::state(full_state);
 	
 	node.add_child_nocopy (_io->state (full_state));
 
@@ -70,11 +70,11 @@ Redirect::state (bool full_state)
 }
 
 int
-Redirect::set_state (const XMLNode& node)
+IOProcessor::set_state (const XMLNode& node)
 {
 	const XMLProperty *prop;
 
-	Insert::set_state(node);
+	Processor::set_state(node);
 
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
@@ -101,7 +101,7 @@ Redirect::set_state (const XMLNode& node)
 }
 
 void
-Redirect::silence (nframes_t nframes, nframes_t offset)
+IOProcessor::silence (nframes_t nframes, nframes_t offset)
 {
 	_io->silence(nframes, offset);
 }

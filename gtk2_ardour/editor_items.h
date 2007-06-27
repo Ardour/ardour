@@ -37,7 +37,7 @@ enum ItemType {
 	PanAutomationControlPointItem,
 	PanAutomationLineItem,
 	RedirectAutomationControlPointItem,
-	RedirectAutomationLineItem,
+	ProcessorAutomationLineItem,
 	MidiCCAutomationControlPointItem,
 	MidiCCAutomationLineItem,
 	MeterMarkerItem,

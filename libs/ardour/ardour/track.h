@@ -103,14 +103,14 @@ class Track : public Route
 	TrackMode   _mode;
 
 	//private: (FIXME)
-	struct FreezeRecordInsertInfo {
-	    FreezeRecordInsertInfo(XMLNode& st, boost::shared_ptr<Insert> ins) 
-		    : state (st), insert (ins) {}
+	struct FreezeRecordProcessorInfo {
+	    FreezeRecordProcessorInfo(XMLNode& st, boost::shared_ptr<Processor> proc) 
+		    : state (st), processor (proc) {}
 
-	    XMLNode                   state;
-	    boost::shared_ptr<Insert> insert;
-	    PBD::ID                   id;
-	    UndoAction                memento;
+	    XMLNode                      state;
+	    boost::shared_ptr<Processor> processor;
+	    PBD::ID                      id;
+	    UndoAction                   memento;
 	};
 
 	struct FreezeRecord {
@@ -120,10 +120,10 @@ class Track : public Route
 
 	    ~FreezeRecord();
 
-	    boost::shared_ptr<Playlist>     playlist;
-	    vector<FreezeRecordInsertInfo*> insert_info;
-	    bool                            have_mementos;
-	    FreezeState                     state;
+	    boost::shared_ptr<Playlist>        playlist;
+	    vector<FreezeRecordProcessorInfo*> processor_info;
+	    bool                               have_mementos;
+	    FreezeState                        state;
 	};
 
 	struct RecEnableControllable : public PBD::Controllable {
@@ -134,11 +134,6 @@ class Track : public Route
 
 	    Track& track;
 	};
-
-	//virtual void diskstream_record_enable_changed (void *src) = 0;
-	//virtual void diskstream_input_channel_changed (void *src) = 0;
-
-	//virtual void input_change_handler (void *src) = 0;
 
 	virtual void set_state_part_two () = 0;
 

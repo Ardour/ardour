@@ -39,7 +39,7 @@
 
 #include <ardour/audioplaylist.h>
 #include <ardour/audio_diskstream.h>
-#include <ardour/insert.h>
+#include <ardour/processor.h>
 #include <ardour/location.h>
 #include <ardour/panner.h>
 #include <ardour/playlist.h>
@@ -102,8 +102,8 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	/* map current state of the route */
 
-	inserts_changed ();
-	reset_insert_automation_curves ();
+	processors_changed ();
+	reset_processor_automation_curves ();
 
 	ensure_xml_node ();
 

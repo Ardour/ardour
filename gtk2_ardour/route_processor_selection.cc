@@ -22,10 +22,10 @@
 #include <pbd/error.h>
 
 #include <ardour/playlist.h>
-#include <ardour/insert.h>
+#include <ardour/processor.h>
 #include <ardour/route.h>
 
-#include "route_redirect_selection.h"
+#include "route_processor_selection.h"
 
 #include "i18n.h"
 
@@ -37,7 +37,7 @@ RouteRedirectSelection&
 RouteRedirectSelection::operator= (const RouteRedirectSelection& other)
 {
 	if (&other != this) {
-		inserts = other.inserts;
+		processors = other.processors;
 		routes = other.routes;
 	}
 	return *this;
@@ -46,22 +46,22 @@ RouteRedirectSelection::operator= (const RouteRedirectSelection& other)
 bool
 operator== (const RouteRedirectSelection& a, const RouteRedirectSelection& b)
 {
-	return a.inserts == b.inserts &&
+	return a.processors == b.processors &&
 		a.routes == b.routes;
 }
 
 void
 RouteRedirectSelection::clear ()
 {
-	clear_inserts ();
+	clear_processors ();
 	clear_routes ();
 }
 
 void
-RouteRedirectSelection::clear_inserts ()
+RouteRedirectSelection::clear_processors ()
 {
-	inserts.clear ();
-	InsertsChanged ();
+	processors.clear ();
+	ProcessorsChanged ();
 }
 
 void
@@ -72,27 +72,27 @@ RouteRedirectSelection::clear_routes ()
 }
 
 void
-RouteRedirectSelection::add (boost::shared_ptr<Insert> r)
+RouteRedirectSelection::add (boost::shared_ptr<Processor> r)
 {
-	if (find (inserts.begin(), inserts.end(), r) == inserts.end()) {
-		inserts.push_back (r);
+	if (find (processors.begin(), processors.end(), r) == processors.end()) {
+		processors.push_back (r);
 
 		// XXX SHAREDPTR FIXME
 		// void (RouteRedirectSelection::*pmf)(Redirect*) = &RouteRedirectSelection::remove;
 		// r->GoingAway.connect (mem_fun(*this, pmf));
 
-		InsertsChanged();
+		ProcessorsChanged();
 	}
 }
 
 void
-RouteRedirectSelection::add (const vector<boost::shared_ptr<Insert> >& rlist)
+RouteRedirectSelection::add (const vector<boost::shared_ptr<Processor> >& rlist)
 {
 	bool changed = false;
 
-	for (vector<boost::shared_ptr<Insert> >::const_iterator i = rlist.begin(); i != rlist.end(); ++i) {
-		if (find (inserts.begin(), inserts.end(), *i) == inserts.end()) {
-			inserts.push_back (*i);
+	for (vector<boost::shared_ptr<Processor> >::const_iterator i = rlist.begin(); i != rlist.end(); ++i) {
+		if (find (processors.begin(), processors.end(), *i) == processors.end()) {
+			processors.push_back (*i);
 			
 			// XXX SHAREDPTR FIXME
 
@@ -103,31 +103,31 @@ RouteRedirectSelection::add (const vector<boost::shared_ptr<Insert> >& rlist)
 	}
 
 	if (changed) {
-		InsertsChanged();
+		ProcessorsChanged();
 	}
 }
 
 void
-RouteRedirectSelection::remove (boost::shared_ptr<Insert> r)
+RouteRedirectSelection::remove (boost::shared_ptr<Processor> r)
 {
-	list<boost::shared_ptr<Insert> >::iterator i;
-	if ((i = find (inserts.begin(), inserts.end(), r)) != inserts.end()) {
-		inserts.erase (i);
-		InsertsChanged ();
+	list<boost::shared_ptr<Processor> >::iterator i;
+	if ((i = find (processors.begin(), processors.end(), r)) != processors.end()) {
+		processors.erase (i);
+		ProcessorsChanged ();
 	}
 }
 
 void
-RouteRedirectSelection::set (boost::shared_ptr<Insert> r)
+RouteRedirectSelection::set (boost::shared_ptr<Processor> r)
 {
-	clear_inserts ();
+	clear_processors ();
 	add (r);
 }
 
 void
-RouteRedirectSelection::set (const vector<boost::shared_ptr<Insert> >& rlist)
+RouteRedirectSelection::set (const vector<boost::shared_ptr<Processor> >& rlist)
 {
-	clear_inserts ();
+	clear_processors ();
 	add (rlist);
 }
 
@@ -171,6 +171,6 @@ RouteRedirectSelection::selected (boost::shared_ptr<Route> r)
 bool
 RouteRedirectSelection::empty ()
 {
-	return inserts.empty () && routes.empty ();
+	return processors.empty () && routes.empty ();
 }
 		

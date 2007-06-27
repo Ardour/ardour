@@ -45,8 +45,8 @@ namespace ARDOUR {
 	class Region;
 	class Diskstream;
 	class RouteGroup;
-	class Redirect;
-	class Insert;
+	class IOProcessor;
+	class Processor;
 	class Location;
 	class Playlist;
 }
@@ -59,7 +59,7 @@ class RegionSelection;
 class Selectable;
 class AutomationTimeAxisView;
 class AutomationLine;
-class RedirectAutomationLine;
+class ProcessorAutomationLine;
 class TimeSelection;
 
 class RouteTimeAxisView : public RouteUI, public TimeAxisView
@@ -128,13 +128,13 @@ protected:
 	};
 
 	struct InsertAutomationInfo {
-	    boost::shared_ptr<ARDOUR::Insert> insert;
-	    bool                              valid;
-	    Gtk::Menu*                        menu;
-	    vector<InsertAutomationNode*>     lines;
+	    boost::shared_ptr<ARDOUR::Processor> processor;
+	    bool                                 valid;
+	    Gtk::Menu*                           menu;
+	    vector<InsertAutomationNode*>        lines;
 
-	    InsertAutomationInfo (boost::shared_ptr<ARDOUR::Insert> i) 
-		    : insert (i), valid (true), menu (0) {}
+	    InsertAutomationInfo (boost::shared_ptr<ARDOUR::Processor> i) 
+		    : processor (i), valid (true), menu (0) {}
 
 	    ~InsertAutomationInfo ();
 	};
@@ -145,16 +145,16 @@ protected:
 	
 	gint edit_click  (GdkEventButton *);
 
-	void inserts_changed ();
+	void processors_changed ();
 	
-	void add_insert_to_subplugin_menu (boost::shared_ptr<ARDOUR::Insert>);
+	void add_processor_to_subplugin_menu (boost::shared_ptr<ARDOUR::Processor>);
 	void remove_ran (InsertAutomationNode* ran);
 
-	void insert_menu_item_toggled (RouteTimeAxisView::InsertAutomationInfo*,
+	void processor_menu_item_toggled (RouteTimeAxisView::InsertAutomationInfo*,
 	                                 RouteTimeAxisView::InsertAutomationNode*);
 	
-	void insert_automation_track_hidden (InsertAutomationNode*,
-	                                       boost::shared_ptr<ARDOUR::Insert>);
+	void processor_automation_track_hidden (InsertAutomationNode*,
+	                                       boost::shared_ptr<ARDOUR::Processor>);
 	
 	void automation_track_hidden (ARDOUR::ParamID param);
 
@@ -162,17 +162,17 @@ protected:
 	RouteAutomationNode* automation_track(ARDOUR::AutomationType type);
 
 	InsertAutomationNode*
-	find_insert_automation_node (boost::shared_ptr<ARDOUR::Insert> i, ARDOUR::ParamID);
+	find_processor_automation_node (boost::shared_ptr<ARDOUR::Processor> i, ARDOUR::ParamID);
 	
-	RedirectAutomationLine*
-	find_insert_automation_curve (boost::shared_ptr<ARDOUR::Insert> i, ARDOUR::ParamID);
+	ProcessorAutomationLine*
+	find_processor_automation_curve (boost::shared_ptr<ARDOUR::Processor> i, ARDOUR::ParamID);
 
-	void add_insert_automation_curve (boost::shared_ptr<ARDOUR::Insert> r, ARDOUR::ParamID);
-	void add_existing_insert_automation_curves (boost::shared_ptr<ARDOUR::Insert>);
+	void add_processor_automation_curve (boost::shared_ptr<ARDOUR::Processor> r, ARDOUR::ParamID);
+	void add_existing_processor_automation_curves (boost::shared_ptr<ARDOUR::Processor>);
 
 	void add_automation_child(ARDOUR::ParamID param, AutomationTimeAxisView* track);
 	
-	void reset_insert_automation_curves ();
+	void reset_processor_automation_curves ();
 
 	void take_name_changed (void *src);
 	void route_name_changed ();
@@ -222,7 +222,7 @@ protected:
 	void color_handler ();
 
 	void region_view_added (RegionView*);
-	void add_ghost_to_insert (RegionView*, AutomationTimeAxisView*);
+	void add_ghost_to_processor (RegionView*, AutomationTimeAxisView*);
 	
 	StreamView*           _view;
 	ArdourCanvas::Canvas& parent_canvas;
@@ -230,7 +230,7 @@ protected:
   
 	Gtk::HBox   other_button_hbox;
 	Gtk::Table  button_table;
-	Gtk::Button insert_button;
+	Gtk::Button processor_button;
 	Gtk::Button edit_group_button;
 	Gtk::Button playlist_button;
 	Gtk::Button size_button;
@@ -257,8 +257,8 @@ protected:
 	void _set_track_mode (ARDOUR::Track* track, ARDOUR::TrackMode mode, Gtk::RadioMenuItem* reset_item);
 	void track_mode_changed ();
 
-	list<InsertAutomationInfo*>     insert_automation;
-	vector<RedirectAutomationLine*> insert_automation_curves;
+	list<InsertAutomationInfo*>   processor_automation;
+	vector<ProcessorAutomationLine*> processor_automation_curves;
 	
 	// Set from XML so context menu automation buttons can be correctly initialized
 	set<ARDOUR::ParamID> _show_automation;

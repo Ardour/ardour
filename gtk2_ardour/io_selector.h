@@ -47,7 +47,7 @@ namespace ARDOUR {
 	class Session;
 	class PortInsert;
 	class Port;
-	class Redirect;
+	class IOProcessor;
 }
 
 class IOSelector : public Gtk::VBox {

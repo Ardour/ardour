@@ -26,11 +26,11 @@
 #include <ardour/midi_track.h>
 #include <ardour/midi_diskstream.h>
 #include <ardour/session.h>
-#include <ardour/redirect.h>
+#include <ardour/io_processor.h>
 #include <ardour/midi_region.h>
 #include <ardour/midi_source.h>
 #include <ardour/route_group_specialized.h>
-#include <ardour/insert.h>
+#include <ardour/processor.h>
 #include <ardour/midi_playlist.h>
 #include <ardour/panner.h>
 #include <ardour/utils.h>
@@ -219,8 +219,8 @@ MidiTrack::state(bool full_state)
 		freeze_node->add_property ("playlist", _freeze_record.playlist->name());
 		freeze_node->add_property ("state", enum_2_string (_freeze_record.state));
 
-		for (vector<FreezeRecordInsertInfo*>::iterator i = _freeze_record.insert_info.begin(); i != _freeze_record.insert_info.end(); ++i) {
-			inode = new XMLNode (X_("insert"));
+		for (vector<FreezeRecordProcessorInfo*>::iterator i = _freeze_record.processor_info.begin(); i != _freeze_record.processor_info.end(); ++i) {
+			inode = new XMLNode (X_("processor"));
 			(*i)->id.print (buf, sizeof(buf));
 			inode->add_property (X_("id"), buf);
 			inode->add_child_copy ((*i)->state);
@@ -275,10 +275,10 @@ MidiTrack::set_state_part_two ()
 		_freeze_record.have_mementos = false;
 		_freeze_record.state = Frozen;
 		
-		for (vector<FreezeRecordInsertInfo*>::iterator i = _freeze_record.insert_info.begin(); i != _freeze_record.insert_info.end(); ++i) {
+		for (vector<FreezeRecordProcessorInfo*>::iterator i = _freeze_record.processor_info.begin(); i != _freeze_record.processor_info.end(); ++i) {
 			delete *i;
 		}
-		_freeze_record.insert_info.clear ();
+		_freeze_record.processor_info.clear ();
 		
 		if ((prop = fnode->property (X_("playlist"))) != 0) {
 			boost::shared_ptr<Playlist> pl = _session.playlist_by_name (prop->value());
@@ -299,7 +299,7 @@ MidiTrack::set_state_part_two ()
 		XMLNodeList clist = fnode->children();
 		
 		for (citer = clist.begin(); citer != clist.end(); ++citer) {
-			if ((*citer)->name() != X_("insert")) {
+			if ((*citer)->name() != X_("processor")) {
 				continue;
 			}
 			
@@ -307,10 +307,10 @@ MidiTrack::set_state_part_two ()
 				continue;
 			}
 			
-			FreezeRecordInsertInfo* frii = new FreezeRecordInsertInfo (*((*citer)->children().front()),
-										   boost::shared_ptr<Insert>());
+			FreezeRecordProcessorInfo* frii = new FreezeRecordProcessorInfo (*((*citer)->children().front()),
+										   boost::shared_ptr<Processor>());
 			frii->id = prop->value ();
-			_freeze_record.insert_info.push_back (frii);
+			_freeze_record.processor_info.push_back (frii);
 		}
 	}
 
@@ -427,7 +427,7 @@ MidiTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 	int dret;
 	boost::shared_ptr<MidiDiskstream> diskstream = midi_diskstream();
 
-	if (n_outputs().n_total() == 0 && _inserts.empty()) {
+	if (n_outputs().n_total() == 0 && _processors.empty()) {
 		return 0;
 	}
 
@@ -498,7 +498,7 @@ int
 MidiTrack::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nframes_t offset, 
 			 bool can_record, bool rec_monitors_input)
 {
-	if (n_outputs().n_midi() == 0 && _inserts.empty()) {
+	if (n_outputs().n_midi() == 0 && _processors.empty()) {
 		return 0;
 	}
 
@@ -518,7 +518,7 @@ MidiTrack::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_
 void
 MidiTrack::process_output_buffers (BufferSet& bufs,
 			       nframes_t start_frame, nframes_t end_frame, 
-			       nframes_t nframes, nframes_t offset, bool with_inserts, int declick,
+			       nframes_t nframes, nframes_t offset, bool with_processors, int declick,
 			       bool meter)
 {
 	/* There's no such thing as a MIDI bus for the time being.
@@ -529,11 +529,11 @@ MidiTrack::process_output_buffers (BufferSet& bufs,
 		_meter->run(bufs, start_frame, end_frame, nframes, offset);
 	}
 
-	// Run all inserts
-	if (with_inserts) {
-		Glib::RWLock::ReaderLock rm (insert_lock, Glib::TRY_LOCK);
+	// Run all processors
+	if (with_processors) {
+		Glib::RWLock::ReaderLock rm (_processor_lock, Glib::TRY_LOCK);
 		if (rm.locked()) {
-			for (InsertList::iterator i = _inserts.begin(); i != _inserts.end(); ++i) {
+			for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 				(*i)->run (bufs, start_frame, end_frame, nframes, offset);
 			}
 		} 

@@ -17,38 +17,37 @@
 
 */
 
-#ifndef __ardour_gtk_redirect_automation_line_h__
-#define __ardour_gtk_redirect_automation_line_h__
+#ifndef __ardour_gtk_processor_automation_line_h__
+#define __ardour_gtk_processor_automation_line_h__
 
 #include <ardour/ardour.h>
 
 #include "automation_line.h"
 
 namespace ARDOUR {
-	class Session;
-	class Insert;
+	class Processor;
 }
 
 class TimeAxisView;
 
-class RedirectAutomationLine : public AutomationLine
+class ProcessorAutomationLine : public AutomationLine
 {
   public:
-	RedirectAutomationLine (const string & name, ARDOUR::Insert&, ARDOUR::ParamID param, ARDOUR::Session&, TimeAxisView&, 
-				ArdourCanvas::Group& parent, ARDOUR::AutomationList&);
+	ProcessorAutomationLine (const string & name, ARDOUR::Processor&, ARDOUR::ParamID param,
+			TimeAxisView&, ArdourCanvas::Group& parent, ARDOUR::AutomationList&);
 	
-	ARDOUR::ParamID param() const { return _param; }
-	ARDOUR::Insert& insert() const { return _insert; }
+	ARDOUR::ParamID    param()     const { return _param; }
+	ARDOUR::Processor& processor() const { return _processor; }
 
 	string get_verbose_cursor_string (float);
 
   private:
-	ARDOUR::Session& session;
-	ARDOUR::Insert& _insert;
-	ARDOUR::ParamID _param;
-	float upper;
-	float lower;
-	float range;
+	ARDOUR::Processor& _processor;
+	ARDOUR::ParamID    _param;
+
+	float _upper;
+	float _lower;
+	float _range;
 
 	void view_to_model_y (double&);
 	void model_to_view_y (double&);

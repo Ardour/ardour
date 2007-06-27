@@ -43,8 +43,8 @@
 #include <ardour/types.h>
 #include <ardour/ardour.h>
 #include <ardour/io.h>
-#include <ardour/insert.h>
-#include <ardour/redirect.h>
+#include <ardour/processor.h>
+#include <ardour/io_processor.h>
 
 #include <pbd/fastlog.h>
 
@@ -53,7 +53,7 @@
 #include "gain_meter.h"
 #include "panner_ui.h"
 #include "enums.h"
-#include "redirect_box.h"
+#include "processor_box.h"
 #include "ardour_dialog.h"
 
 class MotionController;
@@ -66,7 +66,7 @@ namespace Gtkmm2ext {
 namespace ARDOUR {
 	class Route;
 	class Send;
-	class Insert;
+	class Processor;
 	class Session;
 	class PortInsert;
 	class Bundle;
@@ -121,8 +121,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::Frame          global_frame;
 	Gtk::VBox           global_vpacker;
 
-	RedirectBox pre_redirect_box;
-	RedirectBox post_redirect_box;
+	ProcessorBox pre_processor_box;
+	ProcessorBox post_processor_box;
 	GainMeter   gpm;
 	PannerUI    panners;
 	
@@ -239,7 +239,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void name_changed ();
 	void update_speed_display ();
 	void map_frozen ();
-	void hide_insert_editor (boost::shared_ptr<ARDOUR::Insert> insert);
+	void hide_processor_editor (boost::shared_ptr<ARDOUR::Processor> processor);
 
 	bool ignore_speed_adjustment;
 

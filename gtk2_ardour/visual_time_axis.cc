@@ -35,7 +35,7 @@
 
 #include <ardour/session.h>
 #include <ardour/utils.h>
-#include <ardour/insert.h>
+#include <ardour/processor.h>
 #include <ardour/location.h>
 
 #include "ardour_ui.h"

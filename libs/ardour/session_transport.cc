@@ -581,7 +581,7 @@ Session::flush_all_inserts ()
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		(*i)->flush_inserts ();
+		(*i)->flush_processors ();
 	}
 }
 

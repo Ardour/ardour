@@ -37,7 +37,7 @@
 
 #include <ardour/midi_playlist.h>
 #include <ardour/midi_diskstream.h>
-#include <ardour/insert.h>
+#include <ardour/processor.h>
 #include <ardour/ladspa_plugin.h>
 #include <ardour/location.h>
 #include <ardour/playlist.h>
@@ -60,8 +60,8 @@
 #include "point_selection.h"
 #include "prompter.h"
 #include "public_editor.h"
-#include "redirect_automation_line.h"
-#include "redirect_automation_time_axis.h"
+#include "plugin_automation_line.h"
+#include "processor_automation_time_axis.h"
 #include "midi_controller_time_axis.h"
 #include "region_view.h"
 #include "rgb_macros.h"
@@ -100,13 +100,13 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 
 	/* map current state of the route */
 
-	inserts_changed ();
+	processors_changed ();
 
 	ensure_xml_node ();
 
 	set_state (*xml_node);
 	
-	_route->inserts_changed.connect (mem_fun(*this, &MidiTimeAxisView::inserts_changed));
+	_route->processors_changed.connect (mem_fun(*this, &MidiTimeAxisView::processors_changed));
 
 	if (is_track()) {
 

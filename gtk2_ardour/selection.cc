@@ -64,7 +64,7 @@ operator== (const Selection& a, const Selection& b)
 		a.time == b.time &&
 		a.lines == b.lines &&
 		a.playlists == b.playlists &&
-		a.inserts == b.inserts;
+		a.processors == b.processors;
 }
 
 /** Clear everything from the Selection */
@@ -77,7 +77,7 @@ Selection::clear ()
 	clear_lines();
 	clear_time ();
 	clear_playlists ();
-	clear_inserts ();
+	clear_processors ();
 }
 
 void
@@ -91,11 +91,11 @@ Selection::dump_region_layers()
 
 
 void
-Selection::clear_inserts ()
+Selection::clear_processors ()
 {
-	if (!inserts.empty()) {
-		inserts.clear ();
-		InsertsChanged ();
+	if (!processors.empty()) {
+		processors.clear ();
+		ProcessorsChanged ();
 	}
 }
 
@@ -154,16 +154,16 @@ Selection::clear_lines ()
 }
 
 void
-Selection::toggle (boost::shared_ptr<Insert> r)
+Selection::toggle (boost::shared_ptr<Processor> r)
 {
-	InsertSelection::iterator i;
+	ProcessorSelection::iterator i;
 
-	if ((i = find (inserts.begin(), inserts.end(), r)) == inserts.end()) {
-		inserts.push_back (r);
+	if ((i = find (processors.begin(), processors.end(), r)) == processors.end()) {
+		processors.push_back (r);
 	} else {
-		inserts.erase (i);
+		processors.erase (i);
 	}
-	InsertsChanged();
+	ProcessorsChanged();
 
 }
 
@@ -254,11 +254,11 @@ Selection::toggle (nframes_t start, nframes_t end)
 
 
 void
-Selection::add (boost::shared_ptr<Insert> i)
+Selection::add (boost::shared_ptr<Processor> i)
 {
-	if (find (inserts.begin(), inserts.end(), i) == inserts.end()) {
-		inserts.push_back (i);
-		InsertsChanged();
+	if (find (processors.begin(), processors.end(), i) == processors.end()) {
+		processors.push_back (i);
+		ProcessorsChanged();
 	}
 }
 
@@ -395,12 +395,12 @@ Selection::add (AutomationList* ac)
 }
 
 void
-Selection::remove (boost::shared_ptr<Insert> r)
+Selection::remove (boost::shared_ptr<Processor> r)
 {
-	InsertSelection::iterator i;
-	if ((i = find (inserts.begin(), inserts.end(), r)) != inserts.end()) {
-		inserts.erase (i);
-		InsertsChanged ();
+	ProcessorSelection::iterator i;
+	if ((i = find (processors.begin(), processors.end(), r)) != processors.end()) {
+		processors.erase (i);
+		ProcessorsChanged ();
 	}
 }
 
@@ -510,9 +510,9 @@ Selection::remove (AutomationList *ac)
 }
 
 void
-Selection::set (boost::shared_ptr<Insert> i)
+Selection::set (boost::shared_ptr<Processor> i)
 {
-	clear_inserts ();
+	clear_processors ();
 	add (i);
 }
 
@@ -625,7 +625,7 @@ Selection::empty ()
 		lines.empty () &&
 		time.empty () &&
 		playlists.empty () &&
-		inserts.empty ()
+		processors.empty ()
 		;
 }
 

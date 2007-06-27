@@ -17,8 +17,8 @@
 
 */
 
-#ifndef __ardour_gtk_redirect_automation_time_axis_h__
-#define __ardour_gtk_redirect_automation_time_axis_h__
+#ifndef __ardour_gtk_processor_automation_time_axis_h__
+#define __ardour_gtk_processor_automation_time_axis_h__
 
 #include <pbd/xml++.h>
 
@@ -27,23 +27,23 @@
 #include <ardour/param_id.h>
 
 namespace ARDOUR {
-	class Redirect;
+	class Processor;
 }
 
-class RedirectAutomationTimeAxisView : public AutomationTimeAxisView
+class ProcessorAutomationTimeAxisView : public AutomationTimeAxisView
 {
   public:
-	RedirectAutomationTimeAxisView (ARDOUR::Session&,
+	ProcessorAutomationTimeAxisView (ARDOUR::Session&,
 					boost::shared_ptr<ARDOUR::Route>,
 					PublicEditor&,
 					TimeAxisView& parent,
 					ArdourCanvas::Canvas& canvas,
 					std::string name,
 					ARDOUR::ParamID param,
-					ARDOUR::Insert& i,
+					ARDOUR::Processor& i,
 					std::string state_name);
 
-	~RedirectAutomationTimeAxisView();
+	~ProcessorAutomationTimeAxisView();
 	
 	void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, nframes_t, double);
 
@@ -52,14 +52,14 @@ class RedirectAutomationTimeAxisView : public AutomationTimeAxisView
 
 	
    private:
-	ARDOUR::Insert& insert;
-	ARDOUR::ParamID param;
+	ARDOUR::Processor& _processor;
+	ARDOUR::ParamID    _param;
+	XMLNode*           _xml_node;
 
-	XMLNode *xml_node;
 	void ensure_xml_node();
 	void update_extra_xml_shown (bool editor_shown);
 
 	void set_automation_state (ARDOUR::AutoState);
 };
 
-#endif /* __ardour_gtk_redirect_automation_time_axis_h__ */
+#endif /* __ardour_gtk_processor_automation_time_axis_h__ */

@@ -36,17 +36,17 @@
 
 #include <ardour/ardour.h>
 #include <ardour/io.h>
-#include <ardour/redirect.h>
+#include <ardour/io_processor.h>
 
 #include "io_selector.h"
 #include "ardour_dialog.h"
-#include "redirect_box.h"
-#include "route_redirect_selection.h"
+#include "processor_box.h"
+#include "route_processor_selection.h"
 
 namespace ARDOUR {
 	class Route;
 	class Send;
-	class Insert;
+	class Processor;
 	class Session;
 	class PortInsert;
 	class Connection;
@@ -89,8 +89,8 @@ class RouteParams_UI : public ArdourDialog
 	Gtk::HBox                route_hpacker;
 	Gtk::VBox                route_vpacker;
 
-	RedirectBox              * pre_insert_box;
-	RedirectBox              * post_insert_box;
+	ProcessorBox              * pre_insert_box;
+	ProcessorBox              * post_insert_box;
 	
 	Gtk::HPaned		 list_hpane;
 
@@ -121,11 +121,11 @@ class RouteParams_UI : public ArdourDialog
 	sigc::connection            _route_conn;
 	sigc::connection            _route_ds_conn;
 
-	boost::shared_ptr<ARDOUR::Insert> _pre_insert;
-	sigc::connection                  _pre_plugin_conn;
+	boost::shared_ptr<ARDOUR::Processor> _pre_processor;
+	sigc::connection                    _pre_plugin_conn;
 
-	boost::shared_ptr<ARDOUR::Insert> _post_insert;
-	sigc::connection                  _post_plugin_conn;
+	boost::shared_ptr<ARDOUR::Processor> _post_processor;
+	sigc::connection                     _post_plugin_conn;
 	
 	
 	enum ConfigView {
@@ -171,15 +171,15 @@ class RouteParams_UI : public ArdourDialog
 
 	
 	
-	void inserts_changed ();
+	void processors_changed ();
 	
-	void setup_redirect_boxes();
-	void cleanup_redirect_boxes();
+	void setup_processor_boxes();
+	void cleanup_processor_boxes();
 
-	void redirect_selected (boost::shared_ptr<ARDOUR::Insert>, ARDOUR::Placement);
+	void redirect_selected (boost::shared_ptr<ARDOUR::Processor>, ARDOUR::Placement);
 	
 	void plugin_going_away (ARDOUR::Placement);
-	void redirect_going_away (boost::shared_ptr<ARDOUR::Insert>);
+	void redirect_going_away (boost::shared_ptr<ARDOUR::Processor>);
 
 	gint edit_input_configuration (GdkEventButton *ev);
 	gint edit_output_configuration (GdkEventButton *ev);

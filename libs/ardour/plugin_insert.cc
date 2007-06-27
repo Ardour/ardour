@@ -53,7 +53,7 @@ using namespace PBD;
 const string PluginInsert::port_automation_node_name = "PortAutomation";
 
 PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug, Placement placement)
-	: Insert (s, plug->name(), placement)
+	: Processor (s, plug->name(), placement)
 {
 	/* the first is the master */
 
@@ -68,11 +68,11 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug, Placemen
 		IO::MoreChannels (max(input_streams(), output_streams()));
 	}
 
-	InsertCreated (this); /* EMIT SIGNAL */
+	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
 PluginInsert::PluginInsert (Session& s, const XMLNode& node)
-	: Insert (s, "unnamed plugin insert", PreFader)
+	: Processor (s, "unnamed plugin insert", PreFader)
 {
 	if (set_state (node)) {
 		throw failed_constructor();
@@ -89,7 +89,7 @@ PluginInsert::PluginInsert (Session& s, const XMLNode& node)
 }
 
 PluginInsert::PluginInsert (const PluginInsert& other)
-	: Insert (other._session, other._name, other.placement())
+	: Processor (other._session, other._name, other.placement())
 {
 	uint32_t count = other._plugins.size();
 
@@ -103,7 +103,7 @@ PluginInsert::PluginInsert (const PluginInsert& other)
 
 	init ();
 
-	InsertCreated (this); /* EMIT SIGNAL */
+	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
 bool
@@ -496,7 +496,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	} else {
 		bool success = set_count (count_for_configuration(in, out));
 		if (success)
-			Insert::configure_io(in, out);
+			Processor::configure_io(in, out);
 		return success;
 	}
 }
@@ -634,7 +634,7 @@ XMLNode&
 PluginInsert::state (bool full)
 {
 	char buf[256];
-	XMLNode& node = Insert::state (full);
+	XMLNode& node = Processor::state (full);
 
 	node.add_property ("type", _plugins[0]->state_node_name());
 	snprintf(buf, sizeof(buf), "%s", _plugins[0]->name());
@@ -745,15 +745,15 @@ PluginInsert::set_state(const XMLNode& node)
 
 	const XMLNode* insert_node = &node;
 
-	// legacy sessions: search for child Redirect node
+	// legacy sessions: search for child IOProcessor node
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() == "Redirect") {
+		if ((*niter)->name() == "IOProcessor") {
 			insert_node = *niter;
 			break;
 		}
 	}
 	
-	Insert::set_state (*insert_node);
+	Processor::set_state (*insert_node);
 
 	/* look for port automation node */
 	
