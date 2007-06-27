@@ -57,7 +57,7 @@
 #include "route_time_axis.h"
 #include "automation_time_axis.h"
 #include "processor_automation_time_axis.h"
-#include "plugin_automation_line.h"
+#include "processor_automation_line.h"
 #include "canvas_impl.h"
 #include "crossfade_view.h"
 #include "enums.h"

@@ -37,7 +37,7 @@
 #include "automation_pan_line.h"
 #include "automation_midi_cc_line.h"
 #include "automation_time_axis.h"
-#include "plugin_automation_line.h"
+#include "processor_automation_line.h"
 #include "canvas_impl.h"
 #include "simplerect.h"
 

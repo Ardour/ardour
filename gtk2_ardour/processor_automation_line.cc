@@ -18,7 +18,7 @@
 */
 
 #include "public_editor.h"
-#include "plugin_automation_line.h"
+#include "processor_automation_line.h"
 #include "audio_time_axis.h"
 #include "utils.h"
 

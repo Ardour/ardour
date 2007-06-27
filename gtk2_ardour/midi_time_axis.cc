@@ -60,7 +60,7 @@
 #include "point_selection.h"
 #include "prompter.h"
 #include "public_editor.h"
-#include "plugin_automation_line.h"
+#include "processor_automation_line.h"
 #include "processor_automation_time_axis.h"
 #include "midi_controller_time_axis.h"
 #include "region_view.h"

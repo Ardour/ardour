@@ -168,7 +168,7 @@ plugin_selector.cc
 plugin_ui.cc
 prompter.cc
 public_editor.cc
-plugin_automation_line.cc
+processor_automation_line.cc
 processor_automation_time_axis.cc
 processor_box.cc
 region_gain_line.cc
