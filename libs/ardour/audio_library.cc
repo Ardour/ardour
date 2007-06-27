@@ -23,25 +23,36 @@
 
 #include <lrdf.h>
 
+#include <glibmm/convert.h>
+
 #include <pbd/compose.h>
 
 #include <ardour/audio_library.h>
 #include <ardour/utils.h>
+#include <ardour/filesystem_paths.h>
 
 #include "i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
 
+namespace {
+	const char* const sfdb_file_name = "sfdb";
+} // anonymous namespace
+
 static char* TAG = "http://ardour.org/ontology/Tag";
 
 AudioLibrary::AudioLibrary ()
 {
-	src = "file:" + get_user_ardour_path() + "sfdb";
+	sys::path sfdb_file_path(user_config_directory ());
 
+	sfdb_file_path /= sfdb_file_name;
+
+	src = Glib::filename_to_uri (sfdb_file_path.to_string ());
+	
 	// workaround for possible bug in raptor that crashes when saving to a
 	// non-existant file.
-	touch_file(get_user_ardour_path() + "sfdb");
+	touch_file(sfdb_file_path.to_string());
 
 	lrdf_read_file(src.c_str());
 }
