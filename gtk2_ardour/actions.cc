@@ -28,8 +28,10 @@
 #include <gtkmm/uimanager.h>
 
 #include <pbd/error.h>
+#include <pbd/file_utils.h>
 
 #include <ardour/ardour.h>
+#include <ardour/filesystem_paths.h>
 
 #include "actions.h"
 #include "i18n.h"
@@ -64,13 +66,17 @@ void
 ActionManager::init ()
 {
 	ui_manager = UIManager::create ();
-	
-	std::string ui_file = ARDOUR::find_config_file("ardour.menus");
+
+	sys::path ui_file;
+
+	SearchPath spath = ardour_search_path() + user_config_directory() + system_config_search_path();
+
+	find_file_in_search_path (spath, "ardour.menus", ui_file);
 
 	bool loaded = false;
 	
 	try {
-		ui_manager->add_ui_from_file (ui_file);
+		ui_manager->add_ui_from_file (ui_file.to_string());
 		loaded = true;
 	} catch (Glib::MarkupError& err) {
 		error << _("badly formatted UI definition file") << endmsg;
