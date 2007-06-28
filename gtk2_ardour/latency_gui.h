@@ -1,3 +1,6 @@
+#ifndef __gtk2_ardour_latency_gui_h__
+#define __gtk2_ardour_latency_gui_h__
+
 #include <vector>
 #include <string>
 
@@ -59,3 +62,5 @@ class LatencyDialog : public ArdourDialog
   private:
 	LatencyGUI lwidget;
 };
+
+#endif /* __gtk2_ardour_latency_gui_h__ */

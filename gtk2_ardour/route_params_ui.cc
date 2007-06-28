@@ -581,7 +581,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> insert, 
 		}
 	} else if ((plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (insert)) != 0) {				
 
-		LadspaPluginUI *plugin_ui = new LadspaPluginUI (plugin_insert, true);
+		LadspaPluginUI *plugin_ui = new LadspaPluginUI (plugin_insert, session->frame_rate(), session->engine().frames_per_cycle(), true);
 
 		if (place == PreFader) {
 			cleanup_pre_view();

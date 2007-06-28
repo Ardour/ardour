@@ -43,6 +43,8 @@
 #include <ardour_dialog.h>
 #include <ardour/types.h>
 
+#include "latency_gui.h"
+
 namespace ARDOUR {
 	class PluginInsert;
 	class Plugin;
@@ -66,7 +68,7 @@ namespace Gtkmm2ext {
 class PlugUIBase : public virtual sigc::trackable
 {
   public:
-	PlugUIBase (boost::shared_ptr<ARDOUR::PluginInsert>);
+	PlugUIBase (boost::shared_ptr<ARDOUR::PluginInsert>, nframes64_t sample_rate, nframes64_t period_size);
 	virtual ~PlugUIBase() {}
 
 	virtual gint get_preferred_height () = 0;
@@ -79,6 +81,7 @@ class PlugUIBase : public virtual sigc::trackable
 	Gtk::ComboBoxText combo;
 	Gtk::Button save_button;
 	Gtk::ToggleButton bypass_button;
+	LatencyGUI latency_gui;
 
 	void setting_selected();
 	void save_plugin_setting (void);
@@ -88,7 +91,7 @@ class PlugUIBase : public virtual sigc::trackable
 class LadspaPluginUI : public PlugUIBase, public Gtk::VBox 
 {
   public:
-	LadspaPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> plug, bool scrollable=false);
+	LadspaPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> plug, nframes64_t sample_rate, nframes64_t period_size, bool scrollable = false);
 	~LadspaPluginUI ();
 	
 	gint get_preferred_height () { return prefheight; }
@@ -198,7 +201,7 @@ class LadspaPluginUI : public PlugUIBase, public Gtk::VBox
 class PluginUIWindow : public ArdourDialog
 {
   public:
-	PluginUIWindow (boost::shared_ptr<ARDOUR::PluginInsert> insert, bool scrollable=false);
+	PluginUIWindow (boost::shared_ptr<ARDOUR::PluginInsert> insert, nframes64_t sample_rate, nframes64_t period_size, bool scrollable = false);
 	~PluginUIWindow ();
 
 	PlugUIBase& pluginui() { return *_pluginui; }
@@ -217,7 +220,7 @@ class PluginUIWindow : public ArdourDialog
 class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 {
   public:
-	VSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert>, boost::shared_ptr<ARDOUR::VSTPlugin>);
+	VSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert>, boost::shared_ptr<ARDOUR::VSTPlugin>, nframes64_t sample_rate, nframes64_t period_size);
 	~VSTPluginUI ();
 
 	gint get_preferred_height ();

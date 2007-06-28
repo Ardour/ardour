@@ -1088,7 +1088,7 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 			
 				if (plugin_processor->get_gui() == 0) {
 								
-					plugin_ui = new PluginUIWindow (plugin_processor);
+					plugin_ui = new PluginUIWindow (plugin_processor, _session.frame_rate(), _session.engine().frames_per_cycle());
 
 					if (_owner_is_mixer) {
 						ARDOUR_UI::instance()->the_mixer()->ensure_float (*plugin_ui);
@@ -1190,7 +1190,7 @@ ProcessorBox::register_actions ()
 	/* new stuff */
 	ActionManager::register_action (popup_act_grp, X_("newplugin"), _("New Plugin ..."),  sigc::ptr_fun (ProcessorBox::rb_choose_plugin));
 
-	act = ActionManager::register_action (popup_act_grp, X_("newprocessor"), _("New Insert"),  sigc::ptr_fun (ProcessorBox::rb_choose_processor));
+	act = ActionManager::register_action (popup_act_grp, X_("newinsert"), _("New Insert"),  sigc::ptr_fun (ProcessorBox::rb_choose_processor));
 	ActionManager::jack_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (popup_act_grp, X_("newsend"), _("New Send ..."),  sigc::ptr_fun (ProcessorBox::rb_choose_send));
 	ActionManager::jack_sensitive_actions.push_back (act);

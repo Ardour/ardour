@@ -61,7 +61,7 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace sigc;
 
-PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, bool scrollable)
+PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, nframes64_t sr, nframes64_t period, bool scrollable)
 	: ArdourDialog ("plugin ui")
 {
 	if (insert->plugin()->has_editor()) {
@@ -73,7 +73,7 @@ PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, bool scr
 		if ((vp = boost::dynamic_pointer_cast<VSTPlugin> (insert->plugin())) != 0) {
 			
 			
-			VSTPluginUI* vpu = new VSTPluginUI (insert, vp);
+			VSTPluginUI* vpu = new VSTPluginUI (insert, vp, session.frame_rate(), session.engine().frames_per_cycle());
 			
 			_pluginui = vpu;
 			get_vbox()->add (*vpu);
@@ -90,7 +90,7 @@ PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, bool scr
 
 	} else {
 
-		LadspaPluginUI*  pu  = new LadspaPluginUI (insert, scrollable);
+		LadspaPluginUI*  pu  = new LadspaPluginUI (insert, sr, period, scrollable);
 		
 		_pluginui = pu;
 		get_vbox()->add (*pu);
@@ -145,11 +145,12 @@ PluginUIWindow::plugin_going_away ()
 	delete_when_idle (this);
 }
 
-PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
+PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi, nframes64_t sr, nframes64_t period)
 	: insert (pi),
 	  plugin (insert->plugin()),
 	  save_button(_("Add")),
-	  bypass_button (_("Bypass"))
+	  bypass_button (_("Bypass")),
+	  latency_gui (*pi, sr, period)
 {
         //combo.set_use_arrows_always(true);
 	set_popdown_strings (combo, plugin->get_presets());

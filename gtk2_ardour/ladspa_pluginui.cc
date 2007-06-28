@@ -56,8 +56,8 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace sigc;
 
-LadspaPluginUI::LadspaPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrollable)
-	: PlugUIBase (pi),
+LadspaPluginUI::LadspaPluginUI (boost::shared_ptr<PluginInsert> pi, nframes64_t sample_rate, nframes64_t period_size, bool scrollable)
+	: PlugUIBase (pi, sample_rate, period_size),
 	  button_table (initial_button_rows, initial_button_cols),
 	  output_table (initial_output_rows, initial_output_cols),
 	  hAdjustment(0.0, 0.0, 0.0),
@@ -77,7 +77,11 @@ LadspaPluginUI::LadspaPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrolla
 	Label* combo_label = manage (new Label (_("<span size=\"large\">Presets</span>")));
 	combo_label->set_use_markup (true);
 
-	smaller_hbox->pack_start (*combo_label, false, false, 10);
+	Label* latency_label = manage (new Label (_("<span size=\"large\">Latency</span>")));
+	latency_label->set_use_markup (true);
+
+	smaller_hbox->pack_start (*latency_label, false, false, 10);
+	smaller_hbox->pack_start (latency_gui, false, false, 10);
 	smaller_hbox->pack_start (combo, false, false);
 	smaller_hbox->pack_start (save_button, false, false);
 
