@@ -479,6 +479,7 @@ Editor::finish_bringing_in_audio (boost::shared_ptr<AudioRegion> region, uint32_
 		if (!at.empty()) {
 			boost::shared_ptr<AudioRegion> copy (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (region)));
 			at.front()->diskstream()->playlist()->add_region (copy, pos);
+			at.front()->set_name(short_path(copy->name(), 32));
 		}
 		break;
 	}
@@ -489,6 +490,7 @@ Editor::finish_bringing_in_audio (boost::shared_ptr<AudioRegion> region, uint32_
 		if (!at.empty()) {
 			boost::shared_ptr<AudioRegion> copy (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (region)));
 			at.front()->diskstream()->playlist()->add_region (copy, pos);
+			at.front()->set_name(short_path(copy->name(), 32));
 		}
 		break;
 	}
