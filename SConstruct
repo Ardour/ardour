@@ -979,7 +979,12 @@ else:
 #   its included in the tarball
 #
 
-surface_subdirs = [ 'libs/surfaces/control_protocol', 'libs/surfaces/generic_midi', 'libs/surfaces/tranzport', 'libs/surfaces/mackie' ]
+surface_subdirs = [ 'libs/surfaces/control_protocol',
+                    'libs/surfaces/generic_midi',
+                    'libs/surfaces/tranzport',
+                    'libs/surfaces/mackie',
+                    'libs/surfaces/powermate'
+                    ]
 
 if env['SURFACES']:
     if have_libusb:
