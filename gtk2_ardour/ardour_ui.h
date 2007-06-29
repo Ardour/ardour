@@ -711,6 +711,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void no_memory_warning ();
 	void check_memory_locking ();
+
+	void audioengine_setup ();
 };
 
 #endif /* __ardour_gui_h__ */

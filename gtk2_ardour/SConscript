@@ -138,6 +138,7 @@ editor_selection.cc
 editor_selection_list.cc
 editor_tempodisplay.cc
 editor_timefx.cc
+engine_dialog.cc
 export_dialog.cc
 export_session_dialog.cc
 export_region_dialog.cc

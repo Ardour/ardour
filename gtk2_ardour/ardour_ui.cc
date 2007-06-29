@@ -76,6 +76,7 @@
 #include "utils.h"
 #include "gui_thread.h"
 #include "color_manager.h"
+#include "engine_dialog.h"
 
 #include "i18n.h"
 
@@ -2783,4 +2784,13 @@ ARDOUR_UI::setup_profile ()
 	if (gdk_screen_width() < 1200) {
 		Profile->set_small_screen ();
 	}
+}
+
+void
+ARDOUR_UI::audioengine_setup ()
+{
+	EngineDialog ed;
+	
+	ed.show_all ();
+	ed.run ();
 }
