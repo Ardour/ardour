@@ -204,7 +204,7 @@ ThemeManager::on_dark_theme_button_toggled()
 {
 	if (!dark_button.get_active()) return;
 
-	ARDOUR_UI::config()->ui_rc_file.set("ardour2_ui_light.rc");
+	ARDOUR_UI::config()->ui_rc_file.set("ardour2_ui_dark.rc");
 	load_rc_file (ARDOUR_UI::config()->ui_rc_file.get());
 }
 
