@@ -270,8 +270,8 @@ PluginSelector::input_refiller ()
 
 	// Insert into GTK list
 	for (row = 0, i=plugs.begin(); i != plugs.end(); ++i, ++row) {
-		snprintf (ibuf, sizeof(ibuf)-1, "%zu", (*i)->n_inputs.n_total());
-		snprintf (obuf, sizeof(obuf)-1, "%zu", (*i)->n_outputs.n_total());		
+		snprintf (ibuf, sizeof(ibuf)-1, "%u", (*i)->n_inputs.n_total());
+		snprintf (obuf, sizeof(obuf)-1, "%u", (*i)->n_outputs.n_total());		
 		
 		Gtk::TreeModel::Row newrow = *(lmodel->append());
 		newrow[lcols.name] = (*i)->name.c_str();

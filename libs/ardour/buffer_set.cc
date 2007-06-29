@@ -67,7 +67,7 @@ BufferSet::attach_buffers(PortSet& ports)
 
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		_buffers.push_back(BufferVec());
-		BufferVec& v = _buffers[(*t).to_index()];
+		BufferVec& v = _buffers[*t];
 
 		for (PortSet::iterator p = ports.begin(*t); p != ports.end(*t); ++p) {
 			assert(p->type() == *t);
@@ -97,13 +97,13 @@ void
 BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capacity)
 {
 	assert(type != DataType::NIL);
-	assert(type.to_index() < _buffers.size());
+	assert(type < _buffers.size());
 
 	if (num_buffers == 0)
 		return;
 
 	// The vector of buffers of the type we care about
-	BufferVec& bufs = _buffers[type.to_index()];
+	BufferVec& bufs = _buffers[type];
 	
 	// If we're a mirror just make sure we're ok
 	if (_is_mirror) {
@@ -146,7 +146,7 @@ size_t
 BufferSet::buffer_capacity(DataType type) const
 {
 	assert(_available.get(type) > 0);
-	return _buffers[type.to_index()][0]->capacity();
+	return _buffers[type][0]->capacity();
 }
 
 // FIXME: make 'in' const

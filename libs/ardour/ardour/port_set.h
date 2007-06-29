@@ -39,7 +39,7 @@ public:
 	PortSet();
 
 	size_t num_ports() const;
-	size_t num_ports(DataType type) const { return _ports[type.to_index()].size(); }
+	size_t num_ports(DataType type) const { return _ports[type].size(); }
 
 	void add(Port* port);
 	bool remove(Port* port);

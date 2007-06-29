@@ -34,17 +34,14 @@ static bool sort_ports_by_name (Port* a, Port* b)
 void
 PortSet::add(Port* port)
 {
-	const size_t list_index = port->type().to_index();
-	assert(list_index < _ports.size());
-	
-	PortVec& v = _ports[list_index];
+	PortVec& v = _ports[port->type()];
 	
 	v.push_back(port);
 	sort(v.begin(), v.end(), sort_ports_by_name);
 
 	_count.set(port->type(), _count.get(port->type()) + 1);
 
-	assert(_count.get(port->type()) == _ports[port->type().to_index()].size());
+	assert(_count.get(port->type()) == _ports[port->type()].size());
 }
 
 bool
@@ -108,7 +105,7 @@ PortSet::port(DataType type, size_t n) const
 	if (type == DataType::NIL) {
 		return port(n);
 	} else {
-		const PortVec& v = _ports[type.to_index()];
+		const PortVec& v = _ports[type];
 		assert(n < v.size());
 		return v[n];
 	}

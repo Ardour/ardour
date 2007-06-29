@@ -36,7 +36,7 @@ namespace ARDOUR {
 void
 PeakMeter::run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset)
 {
-	size_t meterable = std::min(bufs.count().n_total(), _peak_power.size());
+	size_t meterable = std::min((size_t)bufs.count().n_total(), _peak_power.size());
 
 	size_t n = 0;
 

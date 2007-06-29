@@ -1,5 +1,6 @@
 /*
     Copyright (C) 2006 Paul Davis 
+    Author: Dave Robillard
     
     This program is free software; you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the Free
@@ -35,17 +36,25 @@ namespace ARDOUR {
 class DataType
 {
 public:
-	/// WARNING: make REALLY sure you don't mess up indexes if you change this
+	/** Numeric symbol for this DataType.
+	 *
+	 * Castable to int for use as an array index (e.g. by ChanCount).
+	 * Note this means NIL is (ntypes-1) and guaranteed to change when
+	 * types are added, so this number is NOT suitable for serialization,
+	 * network, or binary anything.
+	 *
+	 * WARNING: The number of non-NIL entries here must match num_types.
+	 */
 	enum Symbol {
-		NIL = 0,
-		AUDIO,
-		MIDI
+		AUDIO = 0,
+		MIDI = 1,
+		NIL = 2,
 	};
 	
 	/** Number of types (not including NIL).
 	 * WARNING: make sure this matches Symbol!
 	 */
-	static const size_t num_types = 2;
+	static const uint32_t num_types = 2;
 
 	DataType(const Symbol& symbol)
 	: _symbol(symbol)
@@ -54,17 +63,12 @@ public:
 	/** Construct from a string (Used for loading from XML and Ports)
 	 * The string can be as in an XML file (eg "audio" or "midi"), or a
 	 * Jack type string (from jack_port_type) */
-	DataType(const std::string& str) {
-		if (str == "audio")
+	DataType(const std::string& str)
+	: _symbol(NIL) {
+		if (str == "audio" || str == JACK_DEFAULT_AUDIO_TYPE)
 			_symbol = AUDIO;
-		else if (str == JACK_DEFAULT_AUDIO_TYPE)
-			_symbol = AUDIO;
-		else if (str == "midi")
+		else if (str == "midi" || str == JACK_DEFAULT_MIDI_TYPE)
 			_symbol = MIDI;
-		else if (str == JACK_DEFAULT_MIDI_TYPE)
-			_symbol = MIDI;
-		else
-			_symbol = NIL;
 	}
 
 	/** Get the Jack type this DataType corresponds to */
@@ -85,8 +89,7 @@ public:
 		}
 	}
 
-	//Symbol        to_symbol() const { return _symbol; }
-	inline size_t to_index() const { return (size_t)_symbol - 1; }
+	inline operator uint32_t() const { return (uint32_t)_symbol; }
 
 	/** DataType iterator, for writing generic loops that iterate over all
 	 * available types.
@@ -94,7 +97,7 @@ public:
 	class iterator {
 	public:
 
-		iterator(size_t index) : _index(index) {}
+		iterator(uint32_t index) : _index(index) {}
 
 		DataType  operator*()  { return DataType((Symbol)_index); }
 		iterator& operator++() { ++_index; return *this; } // yes, prefix only
@@ -104,11 +107,11 @@ public:
 	private:
 		friend class DataType;
 
-		size_t _index;
+		uint32_t _index;
 	};
 
-	static iterator begin() { return iterator(1); }
-	static iterator end()   { return iterator(num_types+1); }
+	static iterator begin() { return iterator(0); }
+	static iterator end()   { return iterator(num_types); }
 	
 	bool operator==(const Symbol symbol) { return (_symbol == symbol); }
 	bool operator!=(const Symbol symbol) { return (_symbol != symbol); }
@@ -117,7 +120,7 @@ public:
 	bool operator!=(const DataType other) { return (_symbol != other._symbol); }
 
 private:
-	Symbol _symbol;
+	Symbol _symbol; // could be const if not for the string constructor
 };
 
 

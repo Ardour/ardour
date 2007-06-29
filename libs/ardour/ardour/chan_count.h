@@ -1,5 +1,6 @@
 /*
     Copyright (C) 2006 Paul Davis 
+	Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,24 +15,28 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-    $Id: insert.cc 712 2006-07-28 01:08:57Z drobilla $
 */
 
 #ifndef __ardour_chan_count_h__
 #define __ardour_chan_count_h__
 
 #include <ardour/data_type.h>
+#include <cassert>
 
 namespace ARDOUR {
 
 
+/** A count of channels, possibly with many types.
+ *
+ * Operators are defined so this may safely be used as if it were a simple
+ * (single-typed) integer count of channels.
+ */
 class ChanCount {
 public:
 	ChanCount() { reset(); }
 	
 	// Convenience constructor for making single-typed streams (stereo, mono, etc)
-	ChanCount(DataType type, size_t channels)
+	ChanCount(DataType type, uint32_t channels)
 	{
 		reset();
 		set(type, channels);
@@ -40,31 +45,31 @@ public:
 	void reset()
 	{
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-			_counts[(*t).to_index()] = 0;
+			_counts[*t] = 0;
 		}
 	}
 	
-	// -1 is what to_index does.  inlined for speed.  this should maybe be changed..
-	inline size_t n_audio() const { return _counts[DataType::AUDIO-1]; }
-	inline size_t n_midi()  const { return _counts[DataType::MIDI-1]; }
-	inline void set_audio(size_t a) { _counts[DataType::AUDIO-1] = a; }
-	inline void set_midi(size_t m)  { _counts[DataType::MIDI-1] = m; }
+	void     set(DataType t, uint32_t count) { assert(t != DataType::NIL); _counts[t] = count; }
+	uint32_t get(DataType t) const { assert(t != DataType::NIL); return _counts[t]; }
 	
-	size_t n_total() const
+	inline uint32_t n_audio() const { return _counts[DataType::AUDIO]; }
+	inline void set_audio(uint32_t a) { _counts[DataType::AUDIO] = a; }
+	
+	inline uint32_t n_midi()  const { return _counts[DataType::MIDI]; }
+	inline void set_midi(uint32_t m) { _counts[DataType::MIDI] = m; }
+	
+	uint32_t n_total() const
 	{
-		size_t ret = 0;
-		for (size_t i=0; i < DataType::num_types; ++i)
+		uint32_t ret = 0;
+		for (uint32_t i=0; i < DataType::num_types; ++i)
 			ret += _counts[i];
 
 		return ret;
 	}
 
-	void   set(DataType type, size_t count) { _counts[type.to_index()] = count; }
-	size_t get(DataType type) const { return _counts[type.to_index()]; }
-
 	bool operator==(const ChanCount& other) const
 	{
-		for (size_t i=0; i < DataType::num_types; ++i)
+		for (uint32_t i=0; i < DataType::num_types; ++i)
 			if (_counts[i] != other._counts[i])
 				return false;
 
@@ -79,7 +84,7 @@ public:
 	bool operator<(const ChanCount& other) const
 	{
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-			if (_counts[(*t).to_index()] > other._counts[(*t).to_index()]) {
+			if (_counts[*t] > other._counts[*t]) {
 				return false;
 			}
 		}
@@ -94,7 +99,7 @@ public:
 	bool operator>(const ChanCount& other) const
 	{
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-			if (_counts[(*t).to_index()] < other._counts[(*t).to_index()]) {
+			if (_counts[*t] < other._counts[*t]) {
 				return false;
 			}
 		}
@@ -111,7 +116,7 @@ public:
 
 private:
 	
-	size_t _counts[DataType::num_types];
+	uint32_t _counts[DataType::num_types];
 };
 
 

@@ -33,7 +33,7 @@ infinity_factory()
 	ChanCount ret;
 
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-		ret.set(*t, SIZE_MAX);
+		ret.set(*t, UINT32_MAX);
 	}
 
 	return ret;

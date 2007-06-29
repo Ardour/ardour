@@ -2308,7 +2308,7 @@ Route::pans_required () const
 		return 0;
 	}
 	
-	return max (n_inputs ().n_audio(), static_cast<size_t>(processor_max_outs.n_audio()));
+	return max (n_inputs ().n_audio(), processor_max_outs.n_audio());
 }
 
 int 

@@ -71,7 +71,7 @@ public:
 	Buffer& get(DataType type, size_t i)
 	{
 		assert(i <= _count.get(type));
-		return *_buffers[type.to_index()][i];
+		return *_buffers[type][i];
 	}
 
 	AudioBuffer& get_audio(size_t i)
@@ -140,7 +140,7 @@ public:
 private:
 	typedef std::vector<Buffer*> BufferVec;
 
-	/// Vector of vectors, indexed by DataType::to_index()
+	/// Vector of vectors, indexed by DataType
 	std::vector<BufferVec> _buffers;
 
 	/// Use counts (there may be more actual buffers than this)

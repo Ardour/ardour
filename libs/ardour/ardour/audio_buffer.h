@@ -48,7 +48,7 @@ public:
 	void read_from(const Buffer& src, nframes_t len, nframes_t offset)
 	{
 		assert(_capacity > 0);
-		assert(src.type() == _type == DataType::AUDIO);
+		assert(src.type() == DataType::AUDIO);
 		assert(offset + len <= _capacity);
 		memcpy(_data + offset, ((AudioBuffer&)src).data(), sizeof(Sample) * len);
 		_silent = src.silent();

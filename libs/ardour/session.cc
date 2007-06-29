@@ -3678,7 +3678,12 @@ Session::tempo_map_changed (Change ignored)
 void
 Session::ensure_buffers (ChanCount howmany)
 {
-	// FIXME: NASTY assumption (midi block size == audio block size)
+	// We need at least 1 MIDI scratch buffer to mix/merge
+	if (howmany.n_midi() < 1)
+		howmany.set_midi(1);
+
+	// FIXME: JACK needs to tell us maximum MIDI buffer size
+	// Using nasty assumption (max # events == nframes) for now
 	_scratch_buffers->ensure_buffers(howmany, current_block_size);
 	_send_buffers->ensure_buffers(howmany, current_block_size);
 	_silent_buffers->ensure_buffers(howmany, current_block_size);
