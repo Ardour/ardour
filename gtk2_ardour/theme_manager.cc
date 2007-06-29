@@ -145,7 +145,7 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 				g = (int) floor (color.get_green_p() * 255.0);
 				b = (int) floor (color.get_blue_p() * 255.0);
 
-				rgba = RGBA_TO_UINT(r,g,b,a);
+				rgba = RGBA_TO_UINT(r,g,b,a>>8);
 				//cerr << (*iter)[columns.name] << " == " << hex << rgba << endl;
 				(*iter)[columns.rgba] = rgba;
 				(*iter)[columns.gdkcolor] = color;
