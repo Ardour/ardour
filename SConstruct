@@ -744,6 +744,10 @@ libraries['flac'].Append(CCFLAGS="-I/usr/local/include", LINKFLAGS="-L/usr/local
 conf = Configure (libraries['flac'])
 if conf.CheckLib ('FLAC', 'FLAC__seekable_stream_decoder_set_read_callback', language='CXX'):
     conf.env.Append(CCFLAGS='-DHAVE_FLAC')
+    use_flac = True
+else:
+    use_flac = False
+    
 libraries['flac'] = conf.Finish ()
 
 # or if that fails...
@@ -1074,7 +1078,7 @@ env = conf.Finish()
 if env['NLS'] == 1:
     env.Append(CCFLAGS="-DENABLE_NLS")
 
-Export('env install_prefix final_prefix config_prefix final_config_prefix libraries i18n ardour_version subst_dict')
+Export('env install_prefix final_prefix config_prefix final_config_prefix libraries i18n ardour_version subst_dict use_flac')
 
 #
 # the configuration file may be system dependent
