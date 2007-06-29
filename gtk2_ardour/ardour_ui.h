@@ -62,6 +62,7 @@
 #include "audio_clock.h"
 #include "ardour_dialog.h"
 #include "editing.h"
+#include "ui_config.h"
 
 class AudioClock;
 class PublicEditor;
@@ -93,6 +94,8 @@ namespace ALSA {
 }
 
 #define FRAME_NAME "BaseFrame"
+
+extern sigc::signal<void>  ColorsChanged;
 
 class ARDOUR_UI : public Gtkmm2ext::UI
 {
@@ -136,6 +139,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	static ARDOUR::gain_t slider_position_to_gain (double pos);
 
 	static ARDOUR_UI *instance () { return theArdourUI; }
+	static UIConfiguration *config () { return ui_config; }
 
 	PublicEditor&	  the_editor(){return *editor;}
 	Mixer_UI* the_mixer() { return mixer; }
@@ -597,7 +601,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	int         create_location_ui ();
 	void        handle_locations_change (ARDOUR::Location*);
 
-	ThemeManager* theme_manager;
+	static UIConfiguration *ui_config;
+	ThemeManager *theme_manager;
 
 	/* Options window */
 	

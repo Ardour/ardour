@@ -206,7 +206,7 @@ MidiTimeAxisView::create_automation_child (ParamID param)
 				*track->canvas_display,
 				c->list());
 
-		line->set_line_color (Config->canvasvar_AutomationLine.get());
+		line->set_line_color (ARDOUR_UI::config()->canvasvar_AutomationLine.get());
 
 		track->add_line(*line);
 

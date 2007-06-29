@@ -670,8 +670,8 @@ RouteTimeAxisView::show_timestretch (nframes_t start, nframes_t end)
 		timestretch_rect->property_y1() =  0.0;
 		timestretch_rect->property_x2() =  0.0;
 		timestretch_rect->property_y2() =  0.0;
-		timestretch_rect->property_fill_color_rgba() =  Config->canvasvar_TimeStretchFill.get();
-		timestretch_rect->property_outline_color_rgba() = Config->canvasvar_TimeStretchOutline.get();
+		timestretch_rect->property_fill_color_rgba() =  ARDOUR_UI::config()->canvasvar_TimeStretchFill.get();
+		timestretch_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeStretchOutline.get();
 	}
 
 	timestretch_rect->show ();
@@ -1468,11 +1468,11 @@ RouteTimeAxisView::color_handler ()
 {
 	//case cTimeStretchOutline:
 	if (timestretch_rect) {
-		timestretch_rect->property_outline_color_rgba() = Config->canvasvar_TimeStretchOutline.get();
+		timestretch_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeStretchOutline.get();
 	}
 	//case cTimeStretchFill:
 	if (timestretch_rect) {
-		timestretch_rect->property_fill_color_rgba() = Config->canvasvar_TimeStretchFill.get();
+		timestretch_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeStretchFill.get();
 	}
 
 }
@@ -1725,7 +1725,7 @@ RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> 
 					  *processor, *ran->view, *ran->view->canvas_display,
 					  processor->control (what, true)->list());
 	
-	ral->set_line_color (Config->canvasvar_ProcessorAutomationLine.get());
+	ral->set_line_color (ARDOUR_UI::config()->canvasvar_ProcessorAutomationLine.get());
 	ral->queue_reset ();
 
 	ran->view->add_line (*ral);

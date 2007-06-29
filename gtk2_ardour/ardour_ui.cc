@@ -85,6 +85,7 @@
 #include "gui_thread.h"
 #include "theme_manager.h"
 
+
 #include "i18n.h"
 
 using namespace ARDOUR;
@@ -94,6 +95,7 @@ using namespace Gtk;
 using namespace sigc;
 
 ARDOUR_UI *ARDOUR_UI::theArdourUI = 0;
+UIConfiguration *ARDOUR_UI::ui_config = 0;
 
 sigc::signal<void,bool> ARDOUR_UI::Blink;
 sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
@@ -166,14 +168,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 		theArdourUI = this;
 	}
 
-	/* load colors */
-
+	ui_config = new UIConfiguration();
 	theme_manager = new ThemeManager();
-
-	//std::string color_file = ARDOUR::find_config_file("ardour.colors");
-
-	//theme_manager->load (color_file);
-
+	
 	editor = 0;
 	mixer = 0;
 	session = 0;
@@ -575,6 +572,7 @@ If you still wish to quit, please use the\n\n\
 	}
 	engine->stop (true);
 	Config->save_state();
+	ARDOUR_UI::config()->save_state();
 	quit ();
 }
 

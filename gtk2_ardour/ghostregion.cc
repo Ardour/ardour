@@ -22,6 +22,7 @@
 #include "ghostregion.h"
 #include "automation_time_axis.h"
 #include "rgb_macros.h"
+#include "ardour_ui.h"
 
 using namespace Editing;
 using namespace ArdourCanvas;
@@ -44,8 +45,8 @@ GhostRegion::GhostRegion (AutomationTimeAxisView& atv, double initial_pos)
 	base_rect->property_y1() = (double) 0.0;
 	base_rect->property_y2() = (double) trackview.height;
 	base_rect->property_outline_what() = (guint32) 0;
-	base_rect->property_outline_color_rgba() = Config->canvasvar_GhostTrackBase.get();
-	base_rect->property_fill_color_rgba() = Config->canvasvar_GhostTrackBase.get();
+	base_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_GhostTrackBase.get();
+	base_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_GhostTrackBase.get();
 	group->lower_to_bottom ();
 
 	atv.add_ghost (this);
@@ -92,13 +93,13 @@ GhostRegion::set_height ()
 void
 GhostRegion::set_colors ()
 {
-	base_rect->property_outline_color_rgba() = Config->canvasvar_GhostTrackBase.get();
-	base_rect->property_fill_color_rgba() = Config->canvasvar_GhostTrackBase.get();
+	base_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_GhostTrackBase.get();
+	base_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_GhostTrackBase.get();
 
     for (uint32_t n=0; n < waves.size(); ++n) {
-	waves[n]->property_wave_color() = Config->canvasvar_GhostTrackWave.get();
+	waves[n]->property_wave_color() = ARDOUR_UI::config()->canvasvar_GhostTrackWave.get();
 
-	waves[n]->property_clip_color() = Config->canvasvar_GhostTrackWaveClip.get();
-	waves[n]->property_zero_color() = Config->canvasvar_GhostTrackZeroLine.get();
+	waves[n]->property_clip_color() = ARDOUR_UI::config()->canvasvar_GhostTrackWaveClip.get();
+	waves[n]->property_zero_color() = ARDOUR_UI::config()->canvasvar_GhostTrackZeroLine.get();
     }
 }

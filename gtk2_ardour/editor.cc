@@ -312,11 +312,11 @@ Editor::Editor ()
 	_dragging_playhead = false;
 	_dragging_hscrollbar = false;
 
-	location_marker_color = Config->canvasvar_LocationMarker.get();
-	location_range_color = Config->canvasvar_LocationRange.get();
-	location_cd_marker_color = Config->canvasvar_LocationCDMarker.get();
-	location_loop_color = Config->canvasvar_LocationLoop.get();
-	location_punch_color = Config->canvasvar_LocationPunch.get();
+	location_marker_color = ARDOUR_UI::config()->canvasvar_LocationMarker.get();
+	location_range_color = ARDOUR_UI::config()->canvasvar_LocationRange.get();
+	location_cd_marker_color = ARDOUR_UI::config()->canvasvar_LocationCDMarker.get();
+	location_loop_color = ARDOUR_UI::config()->canvasvar_LocationLoop.get();
+	location_punch_color = ARDOUR_UI::config()->canvasvar_LocationPunch.get();
 
 	range_marker_drag_rect = 0;
 	marker_drag_line = 0;

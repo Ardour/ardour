@@ -78,11 +78,11 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	base_rect->property_x1() = 0.0;
 	base_rect->property_y1() = 0.0;
 	base_rect->property_x2() = editor.frame_to_pixel (max_frames);
-	base_rect->property_outline_color_rgba() = Config->canvasvar_AutomationTrackOutline.get();
+	base_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_AutomationTrackOutline.get();
 	/* outline ends and bottom */
 	base_rect->property_outline_what() = (guint32) (0x1|0x2|0x8);
-	base_rect->property_fill_color_rgba() = Config->canvasvar_AutomationTrackFill.get();
-	//base_rect->property_fill_color_rgba() = Config->canvasvar_EnteredControlPoint.get();
+	base_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_AutomationTrackFill.get();
+	//base_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_EnteredControlPoint.get();
 	
 	base_rect->set_data ("trackview", this);
 

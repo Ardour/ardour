@@ -1097,7 +1097,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		if (mouse_mode == MouseGain) {
 			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
 			if (line)
-				line->property_fill_color_rgba() = Config->canvasvar_EnteredGainLine.get();
+				line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_EnteredGainLine.get();
 			if (is_drawable()) {
 				track_canvas.get_window()->set_cursor (*fader_cursor);
 			}
@@ -1112,7 +1112,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			{
 				ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
 				if (line)
-					line->property_fill_color_rgba() = Config->canvasvar_EnteredAutomationLine.get();
+					line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_EnteredAutomationLine.get();
 			}
 			if (is_drawable()) {
 				track_canvas.get_window()->set_cursor (*fader_cursor);
@@ -1199,7 +1199,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		if ((marker = static_cast<Marker *> (item->get_data ("marker"))) == 0) {
 			break;
 		}
-		marker->set_color_rgba (Config->canvasvar_EnteredMarker.get());
+		marker->set_color_rgba (ARDOUR_UI::config()->canvasvar_EnteredMarker.get());
 		// fall through
 	case MeterMarkerItem:
 	case TempoMarkerItem:
@@ -2196,7 +2196,7 @@ Editor::start_meter_marker_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	// The actual copying is not done before we reach the finish callback.
 	char name[64];
 	snprintf (name, sizeof(name), "%g/%g", meter_marker->meter().beats_per_bar(), meter_marker->meter().note_divisor ());
-	MeterMarker* new_marker = new MeterMarker(*this, *meter_group, Config->canvasvar_MeterMarker.get(), name, 
+	MeterMarker* new_marker = new MeterMarker(*this, *meter_group, ARDOUR_UI::config()->canvasvar_MeterMarker.get(), name, 
 						  *new MeterSection(meter_marker->meter()));
 
 	drag_info.item = &new_marker->the_item();
@@ -2327,7 +2327,7 @@ Editor::start_tempo_marker_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	// The actual copying is not done before we reach the finish callback.
 	char name[64];
 	snprintf (name, sizeof (name), "%.2f", tempo_marker->tempo().beats_per_minute());
-	TempoMarker* new_marker = new TempoMarker(*this, *tempo_group, Config->canvasvar_TempoMarker.get(), name, 
+	TempoMarker* new_marker = new TempoMarker(*this, *tempo_group, ARDOUR_UI::config()->canvasvar_TempoMarker.get(), name, 
 						  *new TempoSection(tempo_marker->tempo()));
 
 	drag_info.item = &new_marker->the_item();

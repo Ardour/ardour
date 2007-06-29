@@ -31,6 +31,7 @@
 #include "audio_region_view.h"
 #include "utils.h"
 #include "canvas_impl.h"
+#include "ardour_ui.h"
 
 using namespace sigc;
 using namespace ARDOUR;
@@ -61,11 +62,11 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 	_visible = true;
 
 	fade_in = new Line (*group);
-	fade_in->property_fill_color_rgba() = Config->canvasvar_CrossfadeLine.get();
+	fade_in->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_CrossfadeLine.get();
 	fade_in->property_width_pixels() = 1;
 
 	fade_out = new Line (*group);
-	fade_out->property_fill_color_rgba() = Config->canvasvar_CrossfadeLine.get();
+	fade_out->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_CrossfadeLine.get();
 	fade_out->property_width_pixels() = 1;
 	
 	set_y_position_and_height (0, get_time_axis_view().height);
@@ -220,9 +221,9 @@ void
 CrossfadeView::active_changed ()
 {
 	if (crossfade->active()) {
-		frame->property_fill_color_rgba() = Config->canvasvar_ActiveCrossfade.get();
+		frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_ActiveCrossfade.get();
 	} else {
-		frame->property_fill_color_rgba() = Config->canvasvar_InactiveCrossfade.get();
+		frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_InactiveCrossfade.get();
 	}
 
 	redraw_curves ();

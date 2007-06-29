@@ -787,20 +787,20 @@ TimeAxisView::get_selection_rect (uint32_t id)
 		rect->rect->property_y1() = 0.0;
 		rect->rect->property_x2() = 0.0;
 		rect->rect->property_y2() = 0.0;
-		rect->rect->property_fill_color_rgba() = Config->canvasvar_SelectionRect.get();
-		rect->rect->property_outline_color_rgba() = Config->canvasvar_Selection.get();
+		rect->rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectionRect.get();
+		rect->rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
 		
 		rect->start_trim = new SimpleRect (*selection_group);
 		rect->start_trim->property_x1() = 0.0;
 		rect->start_trim->property_x2() = 0.0;
-		rect->start_trim->property_fill_color_rgba() = Config->canvasvar_Selection.get();
-		rect->start_trim->property_outline_color_rgba() = Config->canvasvar_Selection.get();
+		rect->start_trim->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
+		rect->start_trim->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
 		
 		rect->end_trim = new SimpleRect (*selection_group);
 		rect->end_trim->property_x1() = 0.0;
 		rect->end_trim->property_x2() = 0.0;
-		rect->end_trim->property_fill_color_rgba() = Config->canvasvar_Selection.get();
-		rect->end_trim->property_outline_color_rgba() = Config->canvasvar_Selection.get();
+		rect->end_trim->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
+		rect->end_trim->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
 
 		free_selection_rects.push_front (rect);
 
@@ -1061,26 +1061,26 @@ TimeAxisView::color_handler ()
 	
 	for (list<SelectionRect*>::iterator i = used_selection_rects.begin(); i != used_selection_rects.end(); ++i) {
 
-		(*i)->rect->property_fill_color_rgba() = Config->canvasvar_SelectionRect.get();
-		(*i)->rect->property_outline_color_rgba() = Config->canvasvar_Selection.get();
+		(*i)->rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectionRect.get();
+		(*i)->rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
 
-		(*i)->start_trim->property_fill_color_rgba() = Config->canvasvar_Selection.get();
-		(*i)->start_trim->property_outline_color_rgba() = Config->canvasvar_Selection.get();
+		(*i)->start_trim->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
+		(*i)->start_trim->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
 
-		(*i)->end_trim->property_fill_color_rgba() = Config->canvasvar_Selection.get();
-		(*i)->end_trim->property_outline_color_rgba() = Config->canvasvar_Selection.get();
+		(*i)->end_trim->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
+		(*i)->end_trim->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
 	}
 
 	for (list<SelectionRect*>::iterator i = free_selection_rects.begin(); i != free_selection_rects.end(); ++i) {
 
-		(*i)->rect->property_fill_color_rgba() = Config->canvasvar_SelectionRect.get();
-		(*i)->rect->property_outline_color_rgba() = Config->canvasvar_Selection.get();
+		(*i)->rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectionRect.get();
+		(*i)->rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
 
-		(*i)->start_trim->property_fill_color_rgba() = Config->canvasvar_Selection.get();
-		(*i)->start_trim->property_outline_color_rgba() = Config->canvasvar_Selection.get();
+		(*i)->start_trim->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
+		(*i)->start_trim->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
 
-		(*i)->end_trim->property_fill_color_rgba() = Config->canvasvar_Selection.get();
-		(*i)->end_trim->property_outline_color_rgba() = Config->canvasvar_Selection.get();
+		(*i)->end_trim->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
+		(*i)->end_trim->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
 	}
 }
 

@@ -304,7 +304,7 @@ AudioTimeAxisView::create_automation_child (ParamID param)
 				*gain_track->canvas_display,
 				c->list());
 
-		line->set_line_color (Config->canvasvar_AutomationLine.get());
+		line->set_line_color (ARDOUR_UI::config()->canvasvar_AutomationLine.get());
 
 		gain_track->add_line (*line);
 
@@ -362,10 +362,10 @@ AudioTimeAxisView::update_pans ()
 
 		if (p == _route->panner().begin()) {
 			/* first line is a nice orange */
-			line->set_line_color (Config->canvasvar_AutomationLine.get());
+			line->set_line_color (ARDOUR_UI::config()->canvasvar_AutomationLine.get());
 		} else {
 			/* second line is a nice blue */
-			line->set_line_color (Config->canvasvar_AutomationLine.get());
+			line->set_line_color (ARDOUR_UI::config()->canvasvar_AutomationLine.get());
 		}
 
 		pan_track->add_line (*line);

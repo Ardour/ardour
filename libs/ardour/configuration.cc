@@ -55,10 +55,6 @@ Configuration::Configuration ()
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
 
-#undef  CANVAS_VARIABLE
-#define CANVAS_VARIABLE(var,name) var (name),  // <-- is this really so bad?
-#include "ardour/canvas_vars.h"
-#undef  CANVAS_VARIABLE
 
 	current_owner (ConfigVariableBase::Default)
 {
@@ -137,7 +133,6 @@ Configuration::load_state ()
 	if (!found)
 		error << "Ardour: could not find configuration file (ardour.rc), canvas will look broken." << endmsg;
 
-	pack_canvasvars();
 	return 0;
 }
 
@@ -206,7 +201,6 @@ Configuration::get_state ()
 	}
 	
 	root->add_child_nocopy (get_variables (sigc::mem_fun (*this, &Configuration::save_config_options_predicate), "Config"));
-	root->add_child_nocopy (get_variables (sigc::mem_fun (*this, &Configuration::save_config_options_predicate), "Canvas"));
 	
 	if (_extra_xml) {
 		root->add_child_copy (*_extra_xml);
@@ -234,11 +228,6 @@ Configuration::get_variables (sigc::slot<bool,ConfigVariableBase::Owner> predica
 #include "ardour/configuration_vars.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL	
-
-#undef  CANVAS_VARIABLE
-#define CANVAS_VARIABLE(var,Name) if (node->name() == "Canvas") { if (predicate (ConfigVariableBase::Config)) { var.add_to_node (*node); }}
-#include "ardour/canvas_vars.h"
-#undef  CANVAS_VARIABLE
 
 	return *node;
 }
@@ -271,7 +260,7 @@ Configuration::set_state (const XMLNode& root)
 				warning << _("ill-formed MIDI port specification in ardour rcfile (ignored)") << endmsg;
 			}
 
-		} else if (node->name() == "Config" || node->name() == "Canvas" ) {
+		} else if (node->name() == "Config") {
 			
 			set_variables (*node, ConfigVariableBase::Config);
 			
@@ -304,26 +293,7 @@ Configuration::set_variables (const XMLNode& node, ConfigVariableBase::Owner own
 
 #include "ardour/configuration_vars.h"
 #undef  CONFIG_VARIABLE
-#undef  CONFIG_VARIABLE_SPECIAL	
-
-#undef  CANVAS_VARIABLE
-#define CANVAS_VARIABLE(var,name) \
-         if (var.set_from_node (node, owner)) { \
-		 ParameterChanged (name); \
-		 }
-#include "ardour/canvas_vars.h"
-#undef  CANVAS_VARIABLE
-	
-}
-
-void
-Configuration::pack_canvasvars ()
-{
-#undef  CANVAS_VARIABLE
-#define CANVAS_VARIABLE(var,name) canvas_colors.push_back(&var); 
-#include "ardour/canvas_vars.h"
-#undef  CANVAS_VARIABLE
-	cerr << "Configuration::pack_canvasvars () called, canvas_colors.size() = " << canvas_colors.size() << endl;
+#undef  CONFIG_VARIABLE_SPECIAL
 	
 }
 

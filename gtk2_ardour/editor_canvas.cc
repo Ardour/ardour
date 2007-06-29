@@ -700,56 +700,56 @@ Editor::canvas_horizontally_scrolled ()
 void
 Editor::color_handler()
 {
-	edit_cursor->canvas_item.property_fill_color_rgba() = Config->canvasvar_EditCursor.get();
-	playhead_cursor->canvas_item.property_fill_color_rgba() = Config->canvasvar_PlayHead.get();
-	verbose_canvas_cursor->property_fill_color_rgba() = Config->canvasvar_VerboseCanvasCursor.get();
+	edit_cursor->canvas_item.property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_EditCursor.get();
+	playhead_cursor->canvas_item.property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_PlayHead.get();
+	verbose_canvas_cursor->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_VerboseCanvasCursor.get();
 	
-	meter_bar->property_fill_color_rgba() = Config->canvasvar_MeterBar.get();
-	meter_bar->property_outline_color_rgba() = Config->canvasvar_MarkerBarSeparator.get();
+	meter_bar->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MeterBar.get();
+	meter_bar->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_MarkerBarSeparator.get();
 
-	tempo_bar->property_fill_color_rgba() = Config->canvasvar_TempoBar.get();
-	tempo_bar->property_outline_color_rgba() = Config->canvasvar_MarkerBarSeparator.get();
+	tempo_bar->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_TempoBar.get();
+	tempo_bar->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_MarkerBarSeparator.get();
 
-	marker_bar->property_fill_color_rgba() = Config->canvasvar_MarkerBar.get();
-	marker_bar->property_outline_color_rgba() = Config->canvasvar_MarkerBarSeparator.get();
+	marker_bar->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MarkerBar.get();
+	marker_bar->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_MarkerBarSeparator.get();
 
-	range_marker_bar->property_fill_color_rgba() = Config->canvasvar_RangeMarkerBar.get();
-	range_marker_bar->property_outline_color_rgba() = Config->canvasvar_MarkerBarSeparator.get();
+	range_marker_bar->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_RangeMarkerBar.get();
+	range_marker_bar->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_MarkerBarSeparator.get();
 
-	transport_marker_bar->property_fill_color_rgba() = Config->canvasvar_TransportMarkerBar.get();
-	transport_marker_bar->property_outline_color_rgba() = Config->canvasvar_MarkerBarSeparator.get();
+	transport_marker_bar->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_TransportMarkerBar.get();
+	transport_marker_bar->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_MarkerBarSeparator.get();
 
-	range_bar_drag_rect->property_fill_color_rgba() = Config->canvasvar_RangeDragBarRect.get();
-	range_bar_drag_rect->property_outline_color_rgba() = Config->canvasvar_RangeDragBarRect.get();
+	range_bar_drag_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_RangeDragBarRect.get();
+	range_bar_drag_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_RangeDragBarRect.get();
 
-	transport_bar_drag_rect->property_fill_color_rgba() = Config->canvasvar_TransportDragRect.get();
-	transport_bar_drag_rect->property_outline_color_rgba() = Config->canvasvar_TransportDragRect.get();
+	transport_bar_drag_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_TransportDragRect.get();
+	transport_bar_drag_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TransportDragRect.get();
 
-	marker_drag_line->property_fill_color_rgba() = Config->canvasvar_MarkerDragLine.get();
+	marker_drag_line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MarkerDragLine.get();
 
-	range_marker_drag_rect->property_fill_color_rgba() = Config->canvasvar_RangeDragRect.get();
-	range_marker_drag_rect->property_outline_color_rgba() = Config->canvasvar_RangeDragRect.get();
+	range_marker_drag_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_RangeDragRect.get();
+	range_marker_drag_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_RangeDragRect.get();
 
-	transport_loop_range_rect->property_fill_color_rgba() = Config->canvasvar_TransportLoopRect.get();
-	transport_loop_range_rect->property_outline_color_rgba() = Config->canvasvar_TransportLoopRect.get();
+	transport_loop_range_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_TransportLoopRect.get();
+	transport_loop_range_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TransportLoopRect.get();
 
-	transport_punch_range_rect->property_fill_color_rgba() = Config->canvasvar_TransportPunchRect.get();
-	transport_punch_range_rect->property_outline_color_rgba() = Config->canvasvar_TransportPunchRect.get();
+	transport_punch_range_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_TransportPunchRect.get();
+	transport_punch_range_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TransportPunchRect.get();
 
-	transport_punchin_line->property_color_rgba() = Config->canvasvar_PunchLine.get();
-	transport_punchout_line->property_color_rgba() = Config->canvasvar_PunchLine.get();
+	transport_punchin_line->property_color_rgba() = ARDOUR_UI::config()->canvasvar_PunchLine.get();
+	transport_punchout_line->property_color_rgba() = ARDOUR_UI::config()->canvasvar_PunchLine.get();
 
-	zoom_rect->property_fill_color_rgba() = Config->canvasvar_ZoomRect.get();
-	zoom_rect->property_outline_color_rgba() = Config->canvasvar_ZoomRect.get();
+	zoom_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_ZoomRect.get();
+	zoom_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_ZoomRect.get();
 
-	rubberband_rect->property_outline_color_rgba() = Config->canvasvar_RubberBandRect.get();
-	rubberband_rect->property_fill_color_rgba() = (guint32) Config->canvasvar_RubberBandRect.get();
+	rubberband_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_RubberBandRect.get();
+	rubberband_rect->property_fill_color_rgba() = (guint32) ARDOUR_UI::config()->canvasvar_RubberBandRect.get();
 
-	location_marker_color = Config->canvasvar_LocationMarker.get();
-	location_range_color = Config->canvasvar_LocationRange.get();
-	location_cd_marker_color = Config->canvasvar_LocationCDMarker.get();
-	location_loop_color = Config->canvasvar_LocationLoop.get();
-	location_punch_color = Config->canvasvar_LocationPunch.get();
+	location_marker_color = ARDOUR_UI::config()->canvasvar_LocationMarker.get();
+	location_range_color = ARDOUR_UI::config()->canvasvar_LocationRange.get();
+	location_cd_marker_color = ARDOUR_UI::config()->canvasvar_LocationCDMarker.get();
+	location_loop_color = ARDOUR_UI::config()->canvasvar_LocationLoop.get();
+	location_punch_color = ARDOUR_UI::config()->canvasvar_LocationPunch.get();
 
 	refresh_location_display ();
 	redisplay_tempo (true);

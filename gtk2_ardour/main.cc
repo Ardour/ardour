@@ -270,7 +270,6 @@ int main (int argc, char *argv[])
 		return -1;
 	} 
 
-	ui->setup_theme ();
 	ui->start_engine ();
 
 	if (maybe_load_session ()) {

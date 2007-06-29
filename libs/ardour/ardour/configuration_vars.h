@@ -143,10 +143,6 @@ CONFIG_VARIABLE (bool, periodic_safety_backups, "periodic-safety-backups", true)
 CONFIG_VARIABLE (uint32_t, periodic_safety_backup_interval, "periodic-safety-backup-interval", 120)
 CONFIG_VARIABLE (string, possible_audio_file_regexp, "possible-audio-file-regexp", "\\.(wav|aiff|caf|w64|L|R)$")
 
-/* Theme */
-
-CONFIG_VARIABLE (string, ui_rc_file, "ui-rc-file", "ardour2_ui_dark.rc")
-
 /* denormal management */
 
 CONFIG_VARIABLE (bool, denormal_protection, "denormal-protection", false)

@@ -64,9 +64,9 @@ AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 	_waveform_shape = Traditional;
 	
 	if (tv.is_track())
-		stream_base_color = Config->canvasvar_AudioTrackBase.get();
+		stream_base_color = ARDOUR_UI::config()->canvasvar_AudioTrackBase.get();
 	else
-		stream_base_color = Config->canvasvar_AudioBusBase.get();
+		stream_base_color = ARDOUR_UI::config()->canvasvar_AudioBusBase.get();
 	
 	canvas_rect->property_fill_color_rgba() = stream_base_color;
 	canvas_rect->property_outline_color_rgba() = RGBA_BLACK;
@@ -520,12 +520,12 @@ AudioStreamView::setup_rec_box ()
 			switch (_trackview.audio_track()->mode()) {
 			case Normal:
 				xend = xstart;
-				fill_color = Config->canvasvar_RecordingRect.get();
+				fill_color = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
 				break;
 
 			case Destructive:
 				xend = xstart + 2;
-				fill_color = Config->canvasvar_RecordingRect.get();
+				fill_color = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
 				/* make the recording rect translucent to allow
 				   the user to see the peak data coming in, etc.
 				*/
@@ -538,7 +538,7 @@ AudioStreamView::setup_rec_box ()
 			rec_rect->property_y1() = 1.0;
 			rec_rect->property_x2() = xend;
 			rec_rect->property_y2() = (double) _trackview.height - 1;
-			rec_rect->property_outline_color_rgba() = Config->canvasvar_RecordingRect.get();
+			rec_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
 			rec_rect->property_fill_color_rgba() = fill_color;
 			rec_rect->lower_to_bottom();
 			
@@ -765,12 +765,12 @@ AudioStreamView::color_handler ()
 {
 	//case cAudioTrackBase:
 	if (_trackview.is_track()) {
-		canvas_rect->property_fill_color_rgba() = Config->canvasvar_AudioTrackBase.get();
+		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_AudioTrackBase.get();
 	} 
 
 	//case cAudioBusBase:
 	if (!_trackview.is_track()) {
-		canvas_rect->property_fill_color_rgba() = Config->canvasvar_AudioBusBase.get();
+		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_AudioBusBase.get();
 	}
 
 }

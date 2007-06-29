@@ -56,9 +56,9 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	: StreamView (tv)
 {
 	if (tv.is_track())
-		stream_base_color = Config->canvasvar_MidiTrackBase.get();
+		stream_base_color = ARDOUR_UI::config()->canvasvar_MidiTrackBase.get();
 	else
-		stream_base_color = Config->canvasvar_MidiBusBase.get();
+		stream_base_color = ARDOUR_UI::config()->canvasvar_MidiBusBase.get();
 	
 	canvas_rect->property_fill_color_rgba() = stream_base_color;
 	canvas_rect->property_outline_color_rgba() = RGBA_BLACK;
@@ -216,14 +216,14 @@ MidiStreamView::setup_rec_box ()
 			assert(_trackview.midi_track()->mode() == Normal);
 			
 			xend = xstart;
-			fill_color = Config->canvasvar_RecordingRect.get();
+			fill_color = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
 			
 			ArdourCanvas::SimpleRect * rec_rect = new Gnome::Canvas::SimpleRect (*canvas_group);
 			rec_rect->property_x1() = xstart;
 			rec_rect->property_y1() = 1.0;
 			rec_rect->property_x2() = xend;
 			rec_rect->property_y2() = (double) _trackview.height - 1;
-			rec_rect->property_outline_color_rgba() = Config->canvasvar_RecordingRect.get();
+			rec_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
 			rec_rect->property_fill_color_rgba() = fill_color;
 			rec_rect->lower_to_bottom();
 			
@@ -414,12 +414,12 @@ MidiStreamView::color_handler ()
 
 	//case cMidiTrackBase:
 	if (_trackview.is_midi_track()) {
-		canvas_rect->property_fill_color_rgba() = Config->canvasvar_MidiTrackBase.get();
+		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiTrackBase.get();
 	} 
 
 	//case cMidiBusBase:
 	if (!_trackview.is_midi_track()) {
-		canvas_rect->property_fill_color_rgba() = Config->canvasvar_MidiBusBase.get();;
+		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiBusBase.get();;
 	}
 }
 

@@ -32,6 +32,7 @@
 #include "public_editor.h"
 #include "rgb_macros.h"
 #include "gui_thread.h"
+#include "ardour_ui.h"
 
 #include "i18n.h"
 
@@ -52,9 +53,9 @@ ImageFrameTimeAxisView::ImageFrameTimeAxisView (ImageFrameTimeAxis& tv)
 	  canvas_rect (canvas_group, 0.0, 0.0, 1000000.0, tv.height)
 {
 	region_color = _trackview.color() ;
-	stream_base_color = Config->canvasvar_ImageTrack.get() ;
+	stream_base_color = ARDOUR_UI::config()->canvasvar_ImageTrack.get() ;
 
-	canvas_rect.property_outline_color_rgba() = Config->canvasvar_ImageTrack.get();
+	canvas_rect.property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_ImageTrack.get();
 	canvas_rect.property_fill_color_rgba() = stream_base_color;
 
 	canvas_rect.signal_event().connect (bind (mem_fun (_trackview.editor, &PublicEditor::canvas_imageframe_view_event), (ArdourCanvas::Item*) &canvas_rect, &tv));

@@ -33,6 +33,7 @@
 
 #include "theme_manager.h"
 #include "rgb_macros.h"
+#include "ardour_ui.h"
 
 #include "i18n.h"
 
@@ -88,6 +89,7 @@ ThemeManager::ThemeManager()
 	light_button.signal_toggled().connect (mem_fun (*this, &ThemeManager::on_light_theme_button_toggled));
 
 	set_size_request (-1, 400);
+	setup_theme ();
 }
 
 ThemeManager::~ThemeManager()
@@ -109,7 +111,7 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 	int cellx;
 	int celly;
 
-	ARDOUR::ConfigVariable<uint32_t> *ccvar;
+	UIConfigVariable<uint32_t> *ccvar;
 	
 	if (!color_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		return false;
@@ -129,10 +131,11 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 
 			UINT_TO_RGBA (rgba, &r, &g, &b, &a);
 			color.set_rgb_p (r / 255.0, g / 255.0, b / 255.0);
-			color_dialog.get_colorsel()->set_current_color (color);
 			color_dialog.get_colorsel()->set_previous_color (color);
-			color_dialog.get_colorsel()->set_current_alpha (a * 256);
+			color_dialog.get_colorsel()->set_current_color (color);
 			color_dialog.get_colorsel()->set_previous_alpha (a * 256);
+			color_dialog.get_colorsel()->set_current_alpha (a * 256);
+
 			ResponseType result = (ResponseType) color_dialog.run();
 
 			switch (result) {
@@ -147,6 +150,7 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 
 				rgba = RGBA_TO_UINT(r,g,b,a>>8);
 				//cerr << (*iter)[columns.name] << " == " << hex << rgba << endl;
+				//cerr << "a = " << a << endl;
 				(*iter)[columns.rgba] = rgba;
 				(*iter)[columns.gdkcolor] = color;
 
@@ -200,8 +204,8 @@ ThemeManager::on_dark_theme_button_toggled()
 {
 	if (!dark_button.get_active()) return;
 
-	Config->set_ui_rc_file("ardour2_ui_dark.rc");
-	load_rc_file (Config->get_ui_rc_file());
+	ARDOUR_UI::config()->ui_rc_file.set("ardour2_ui_light.rc");
+	load_rc_file (ARDOUR_UI::config()->ui_rc_file.get());
 }
 
 void
@@ -209,15 +213,15 @@ ThemeManager::on_light_theme_button_toggled()
 {
 	if (!light_button.get_active()) return;
 
-	Config->set_ui_rc_file("ardour2_ui_light.rc");
-	load_rc_file (Config->get_ui_rc_file());
+	ARDOUR_UI::config()->ui_rc_file.set("ardour2_ui_light.rc");
+	load_rc_file (ARDOUR_UI::config()->ui_rc_file.get());
 }
 
 void
 ThemeManager::setup_theme ()
 {
 	int r, g, b, a;
-	for (std::vector<ConfigVariable<uint32_t> *>::iterator i = Config->canvas_colors.begin(); i != Config->canvas_colors.end(); i++) {
+	for (std::vector<UIConfigVariable<uint32_t> *>::iterator i = ARDOUR_UI::config()->canvas_colors.begin(); i != ARDOUR_UI::config()->canvas_colors.end(); i++) {
 		
 		TreeModel::Row row = *(color_list->append());
 
@@ -233,7 +237,6 @@ ThemeManager::setup_theme ()
 		row[columns.rgba] = rgba;
 		row[columns.gdkcolor] = col;
 
-		//cerr << (*i)->name() << " == " << rgba << endl;
 	}
 
 	ColorsChanged.emit();
@@ -242,7 +245,7 @@ ThemeManager::setup_theme ()
 	string rcfile = Glib::getenv("ARDOUR2_UI_RC", env_defined);
 
 	if(!env_defined) {
-		rcfile = Config->get_ui_rc_file();
+		rcfile = ARDOUR_UI::config()->ui_rc_file.get();
 	}
 
 	if (rcfile == "ardour2_ui_dark.rc") {
