@@ -93,8 +93,9 @@ class UIConfigVariable
 
   protected:
 	T get_for_save() { return value; }
-	T value;
 	std::string _name;
+	T value;
+	
 };
 
 class UIConfiguration : public PBD::Stateful
