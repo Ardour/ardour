@@ -26,7 +26,7 @@
 #include <ardour/ardour.h>
 #include <jack/jack.h>
 #include <ardour/port.h>
-#include <ardour/buffer.h>
+#include <ardour/audio_buffer.h>
 
 namespace ARDOUR {
 

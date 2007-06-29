@@ -21,7 +21,7 @@
 #include <algorithm>
 #include <cmath>
 #include <ardour/buffer_set.h>
-#include <ardour/buffer.h>
+#include <ardour/audio_buffer.h>
 
 namespace ARDOUR {
 

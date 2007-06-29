@@ -21,6 +21,8 @@
 using std::cerr; using std::endl;
 
 #include <ardour/buffer.h>
+#include <ardour/audio_buffer.h>
+#include <ardour/midi_buffer.h>
 
 #ifdef __x86_64__
 static const int CPU_CACHE_ALIGN = 64;

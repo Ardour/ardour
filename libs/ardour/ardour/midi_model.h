@@ -1,7 +1,6 @@
-
 /*
     Copyright (C) 2006 Paul Davis
-	Written by Dave Robillard, 2006
+	Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,7 +23,7 @@
 
 #include <boost/utility.hpp>
 #include <ardour/types.h>
-#include <ardour/buffer.h>
+#include <ardour/midi_buffer.h>
 
 namespace ARDOUR {
 

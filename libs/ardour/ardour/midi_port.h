@@ -27,7 +27,7 @@
 #include <jack/jack.h>
 #include <jack/midiport.h>
 #include <ardour/port.h>
-#include <ardour/buffer.h>
+#include <ardour/midi_buffer.h>
 
 namespace ARDOUR {
 
