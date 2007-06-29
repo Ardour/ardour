@@ -109,7 +109,6 @@ class PluginInsert : public Processor
 	void init ();
 	void set_automatable ();
 	void auto_state_changed (ParamID which);
-	void automation_list_creation_callback (ParamID, AutomationList&);
 
 	int32_t count_for_configuration (ChanCount in, ChanCount out) const;
 

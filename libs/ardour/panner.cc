@@ -71,11 +71,11 @@ static double direct_pan_to_control (pan_t val) {
 
 StreamPanner::StreamPanner (Panner& p)
 	: parent (p),
-	  _control (X_("panner"), *this)
+	  _control (new PanControllable(X_("panner"), *this))
 {
 	_muted = false;
 
-	parent.session().add_controllable (&_control);
+	parent.session().add_controllable (_control);
 
 	x = 0.5;
 	y = 0.5;
@@ -132,7 +132,7 @@ StreamPanner::set_position (float xpos, bool link_call)
 		x = xpos;
 		update ();
 		Changed ();
-		_control.Changed ();
+		_control->Changed ();
 	}
 }
 
@@ -190,7 +190,7 @@ StreamPanner::add_state (XMLNode& node)
 /*---------------------------------------------------------------------- */
 
 BaseStereoPanner::BaseStereoPanner (Panner& p)
-	: StreamPanner (p), _automation (ParamID(PanAutomation), 0.0, 1.0, 0.5)
+	: StreamPanner (p), _automation (new AutomationList(ParamID(PanAutomation), 0.0, 1.0, 0.5))
 {
 }
 
@@ -201,36 +201,36 @@ BaseStereoPanner::~BaseStereoPanner ()
 void
 BaseStereoPanner::snapshot (nframes_t now)
 {
-	if (_automation.automation_state() == Write || _automation.automation_state() == Touch) {
-		_automation.rt_add (now, x);
+	if (_automation->automation_state() == Write || _automation->automation_state() == Touch) {
+		_automation->rt_add (now, x);
 	}
 }
 
 void
 BaseStereoPanner::transport_stopped (nframes_t frame)
 {
-	_automation.reposition_for_rt_add (frame);
+	_automation->reposition_for_rt_add (frame);
 
-	if (_automation.automation_state() != Off) {
-		set_position (_automation.eval (frame));
+	if (_automation->automation_state() != Off) {
+		set_position (_automation->eval (frame));
 	}
 }
 
 void
 BaseStereoPanner::set_automation_style (AutoStyle style)
 {
-	_automation.set_automation_style (style);
+	_automation->set_automation_style (style);
 }
 
 void
 BaseStereoPanner::set_automation_state (AutoState state)
 {
-	if (state != _automation.automation_state()) {
+	if (state != _automation->automation_state()) {
 
-		_automation.set_automation_state (state);
+		_automation->set_automation_state (state);
 		
 		if (state != Off) {
-			set_position (_automation.eval (parent.session().transport_frame()));
+			set_position (_automation->eval (parent.session().transport_frame()));
 		}
 	}
 }
@@ -241,7 +241,7 @@ BaseStereoPanner::load (istream& in, string path, uint32_t& linecnt)
 	char line[128];
 	LocaleGuard lg (X_("POSIX"));
 	
-	_automation.clear ();
+	_automation->clear ();
 
 	while (in.getline (line, sizeof (line), '\n')) {
 		nframes_t when;
@@ -258,12 +258,12 @@ BaseStereoPanner::load (istream& in, string path, uint32_t& linecnt)
 			continue;
 		}
 
-		_automation.fast_simple_add (when, value);
+		_automation->fast_simple_add (when, value);
 	}
 
 	/* now that we are done loading */
 
-	_automation.StateChanged ();
+	_automation->StateChanged ();
 
 	return 0;
 }
@@ -438,7 +438,7 @@ EqualPowerStereoPanner::distribute_automated (AudioBuffer& srcbuf, BufferSet& ob
 
 	/* fetch positional data */
 
-	if (!_automation.curve().rt_safe_get_vector (start, end, buffers[0], nframes)) {
+	if (!_automation->curve().rt_safe_get_vector (start, end, buffers[0], nframes)) {
 		/* fallback */
 		if (!_muted) {
 			distribute (srcbuf, obufs, 1.0, nframes);
@@ -518,12 +518,12 @@ EqualPowerStereoPanner::state (bool full_state)
 	root->add_property (X_("type"), EqualPowerStereoPanner::name);
 
 	XMLNode* autonode = new XMLNode (X_("Automation"));
-	autonode->add_child_nocopy (_automation.state (full_state));
+	autonode->add_child_nocopy (_automation->state (full_state));
 	root->add_child_nocopy (*autonode);
 
 	StreamPanner::add_state (*root);
 
-	root->add_child_nocopy (_control.get_state ());
+	root->add_child_nocopy (_control->get_state ());
 
 	return *root;
 }
@@ -546,15 +546,15 @@ EqualPowerStereoPanner::set_state (const XMLNode& node)
 
 		if ((*iter)->name() == X_("controllable")) {
 			if ((prop = (*iter)->property("name")) != 0 && prop->value() == "panner") {
-				_control.set_state (**iter);
+				_control->set_state (**iter);
 			}
 
 		} else if ((*iter)->name() == X_("Automation")) {
 
-			_automation.set_state (*((*iter)->children().front()));
+			_automation->set_state (*((*iter)->children().front()));
 
-			if (_automation.automation_state() != Off) {
-				set_position (_automation.eval (parent.session().transport_frame()));
+			if (_automation->automation_state() != Off) {
+				set_position (_automation->eval (parent.session().transport_frame()));
 			}
 		}
 	}
@@ -565,7 +565,7 @@ EqualPowerStereoPanner::set_state (const XMLNode& node)
 /*----------------------------------------------------------------------*/
 
 Multi2dPanner::Multi2dPanner (Panner& p)
-	: StreamPanner (p), _automation (ParamID(PanAutomation), 0.0, 1.0, 0.5) // XXX useless
+	: StreamPanner (p), _automation (new AutomationList(ParamID(PanAutomation), 0.0, 1.0, 0.5)) // XXX useless
 {
 	update ();
 }
@@ -930,10 +930,10 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		if (changed || ((left == 0.5) && (right == 0.5))) {
 		
 			front()->set_position (0.0);
-			front()->automation().reset_default (0.0);
+			front()->automation()->reset_default (0.0);
 			
 			back()->set_position (1.0);
-			back()->automation().reset_default (1.0);
+			back()->automation()->reset_default (1.0);
 			
 			changed = true;
 		}
@@ -990,7 +990,7 @@ AutoState
 Panner::automation_state () const
 {
 	if (!empty()) {
-		return front()->automation().automation_state ();
+		return front()->automation()->automation_state ();
 	} else {
 		return Off;
 	}
@@ -1000,7 +1000,7 @@ AutoStyle
 Panner::automation_style () const
 {
 	if (!empty()) {
-		return front()->automation().automation_style ();
+		return front()->automation()->automation_style ();
 	} else {
 		return Absolute;
 	}
@@ -1026,7 +1026,7 @@ void
 Panner::clear_automation ()
 {
 	for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
-		(*i)->automation().clear ();
+		(*i)->automation()->clear ();
 	}
 	_session.set_dirty ();
 }	
@@ -1181,7 +1181,7 @@ bool
 Panner::touching () const
 {
 	for (vector<StreamPanner*>::const_iterator i = begin(); i != end(); ++i) {
-		if ((*i)->automation().touching ()) {
+		if ((*i)->automation()->touching ()) {
 			return true;
 		}
 	}

@@ -496,7 +496,7 @@ LadspaPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontro
 		automation_state_changed (control_ui);
 
 		plugin->ParameterChanged.connect (bind (mem_fun(*this, &LadspaPluginUI::parameter_changed), control_ui));
-		insert->automation_list (ParamID(PluginAutomation, port_index))->automation_state_changed.connect 
+		insert->control (ParamID(PluginAutomation, port_index))->list()->automation_state_changed.connect 
 			(bind (mem_fun(*this, &LadspaPluginUI::automation_state_changed), control_ui));
 
 	} else if (plugin->parameter_is_output (port_index)) {
@@ -553,13 +553,13 @@ LadspaPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontro
 void
 LadspaPluginUI::start_touch (LadspaPluginUI::ControlUI* cui)
 {
-	insert->automation_list (ParamID(PluginAutomation, cui->port_index))->start_touch ();
+	insert->control (ParamID(PluginAutomation, cui->port_index))->list()->start_touch ();
 }
 
 void
 LadspaPluginUI::stop_touch (LadspaPluginUI::ControlUI* cui)
 {
-	insert->automation_list (ParamID(PluginAutomation, cui->port_index))->stop_touch ();
+	insert->control (ParamID(PluginAutomation, cui->port_index))->list()->stop_touch ();
 }
 
 void

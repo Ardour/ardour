@@ -20,6 +20,7 @@
 #include <ardour/route.h>
 #include <ardour/track.h>
 #include <ardour/panner.h>
+#include <ardour/types.h>
 
 #include "mackie_control_protocol.h"
 
@@ -30,13 +31,13 @@ using namespace Mackie;
 void RouteSignal::connect()
 {
 	if ( _strip.has_solo() )
-		_solo_changed_connection = _route.solo_control().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_solo_changed ), this ) );
+		_solo_changed_connection = _route.solo_control()->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_solo_changed ), this ) );
 	
 	if ( _strip.has_mute() )
-		_mute_changed_connection = _route.mute_control().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_mute_changed ), this ) );
+		_mute_changed_connection = _route.mute_control()->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_mute_changed ), this ) );
 	
 	if ( _strip.has_gain() )
-		_gain_changed_connection = _route.gain_control().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_gain_changed ), this ) );
+		_gain_changed_connection = _route.control(ARDOUR::GainAutomation)->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_gain_changed ), this ) );
 		
 	_name_changed_connection = _route.NameChanged.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_name_changed ), this ) );
 	
@@ -48,7 +49,7 @@ void RouteSignal::connect()
 	try
 	{
 		_record_enable_changed_connection =
-			dynamic_cast<ARDOUR::Track&>( _route ).rec_enable_control().Changed
+			dynamic_cast<ARDOUR::Track&>( _route ).rec_enable_control()->Changed
 				.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_record_enable_changed ), this ) )
 		;
 	}

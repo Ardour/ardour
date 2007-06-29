@@ -101,7 +101,7 @@ Session::no_roll (nframes_t nframes, nframes_t offset)
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		
-		if ((*i)->hidden()) {
+		if ((*i)->is_hidden()) {
 			continue;
 		}
 		
@@ -140,7 +140,7 @@ Session::process_routes (nframes_t nframes, nframes_t offset)
 
 		int ret;
 
-		if ((*i)->hidden()) {
+		if ((*i)->is_hidden()) {
 			continue;
 		}
 
@@ -186,7 +186,7 @@ Session::silent_process_routes (nframes_t nframes, nframes_t offset)
 
 		int ret;
 
-		if ((*i)->hidden()) {
+		if ((*i)->is_hidden()) {
 			continue;
 		}
 
@@ -819,7 +819,7 @@ Session::process_audition (nframes_t nframes)
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (!(*i)->hidden()) {
+		if (!(*i)->is_hidden()) {
 			(*i)->silence (nframes, 0);
 		}
 	}

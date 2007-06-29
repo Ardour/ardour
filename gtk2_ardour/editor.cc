@@ -1163,7 +1163,7 @@ Editor::connect_to_session (Session *t)
 			RouteTimeAxisView *rtv;
 			
 			if ((rtv = dynamic_cast<RouteTimeAxisView*>(tv)) != 0) {
-				if (rtv->route()->master()) {
+				if (rtv->route()->is_master()) {
 					route_list_display.get_selection()->unselect (i);
 				}
 			}

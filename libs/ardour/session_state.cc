@@ -939,7 +939,7 @@ Session::state(bool full_state)
 		public_order.sort (cmp);
 		
 		for (RouteList::iterator i = public_order.begin(); i != public_order.end(); ++i) {
-			if (!(*i)->hidden()) {
+			if (!(*i)->is_hidden()) {
 				if (full_state) {
 					child->add_child_nocopy ((*i)->get_state());
 				} else {
@@ -2055,7 +2055,7 @@ Session::get_global_route_boolean (bool (Route::*method)(void) const)
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (!(*i)->hidden()) {
+		if (!(*i)->is_hidden()) {
 			RouteBooleanState v;
 			
 			v.first =* i;
@@ -2076,7 +2076,7 @@ Session::get_global_route_metering ()
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (!(*i)->hidden()) {
+		if (!(*i)->is_hidden()) {
 			RouteMeterState v;
 			
 			v.first =* i;
@@ -2622,7 +2622,7 @@ Session::set_deletion_in_progress ()
 }
 
 void
-Session::add_controllable (Controllable* c)
+Session::add_controllable (boost::shared_ptr<Controllable> c)
 {
 	/* this adds a controllable to the list managed by the Session.
 	   this is a subset of those managed by the Controllable class
@@ -2633,6 +2633,8 @@ Session::add_controllable (Controllable* c)
 	Glib::Mutex::Lock lm (controllables_lock);
 	controllables.insert (c);
 }
+	
+struct null_deleter { void operator()(void const *) const {} };
 
 void
 Session::remove_controllable (Controllable* c)
@@ -2643,14 +2645,15 @@ Session::remove_controllable (Controllable* c)
 
 	Glib::Mutex::Lock lm (controllables_lock);
 
-	Controllables::iterator x = controllables.find (c);
+	Controllables::iterator x = controllables.find(
+		 boost::shared_ptr<Controllable>(c, null_deleter()));
 
 	if (x != controllables.end()) {
 		controllables.erase (x);
 	}
 }	
 
-Controllable*
+boost::shared_ptr<Controllable>
 Session::controllable_by_id (const PBD::ID& id)
 {
 	Glib::Mutex::Lock lm (controllables_lock);
@@ -2661,7 +2664,7 @@ Session::controllable_by_id (const PBD::ID& id)
 		}
 	}
 
-	return 0;
+	return boost::shared_ptr<Controllable>();
 }
 
 void 

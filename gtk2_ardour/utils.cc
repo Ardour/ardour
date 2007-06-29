@@ -31,7 +31,6 @@
 #include <pbd/file_utils.h>
 
 #include <gtkmm2ext/utils.h>
-//#include <ardour/ardour.h>
 
 #include <ardour/filesystem_paths.h>
 

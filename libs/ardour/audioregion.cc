@@ -72,20 +72,20 @@ AudioRegion::init ()
 
 /* constructor for use by derived types only */
 AudioRegion::AudioRegion (nframes_t start, nframes_t length, string name)
-	: Region (start, length, name, DataType::AUDIO),
-	  _fade_in (ParamID(FadeInAutomation), 0.0, 2.0, 1.0),
-	  _fade_out (ParamID(FadeOutAutomation), 0.0, 2.0, 1.0),
-	  _envelope (ParamID(EnvelopeAutomation), 0.0, 2.0, 1.0)
+	: Region (start, length, name, DataType::AUDIO)
+	, _fade_in (new AutomationList(ParamID(FadeInAutomation), 0.0, 2.0, 1.0))
+	, _fade_out (new AutomationList(ParamID(FadeOutAutomation), 0.0, 2.0, 1.0))
+	, _envelope (new AutomationList(ParamID(EnvelopeAutomation), 0.0, 2.0, 1.0))
 {
 	init ();
 }
 
 /** Basic AudioRegion constructor (one channel) */
 AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, nframes_t length)
-	: Region (src, start, length, PBD::basename_nosuffix(src->name()), DataType::AUDIO, 0,  Region::Flag(Region::DefaultFlags|Region::External)),
-	  _fade_in (ParamID(FadeInAutomation), 0.0, 2.0, 1.0),
-	  _fade_out (ParamID(FadeOutAutomation), 0.0, 2.0, 1.0),
-	  _envelope (ParamID(EnvelopeAutomation), 0.0, 2.0, 1.0)
+	: Region (src, start, length, PBD::basename_nosuffix(src->name()), DataType::AUDIO, 0,  Region::Flag(Region::DefaultFlags|Region::External))
+	, _fade_in (new AutomationList(ParamID(FadeInAutomation), 0.0, 2.0, 1.0))
+	, _fade_out (new AutomationList(ParamID(FadeOutAutomation), 0.0, 2.0, 1.0))
+	, _envelope (new AutomationList(ParamID(EnvelopeAutomation), 0.0, 2.0, 1.0))
 {
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 	if (afs) {
@@ -98,9 +98,9 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 /* Basic AudioRegion constructor (one channel) */
 AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (src, start, length, name, DataType::AUDIO, layer, flags)
-	, _fade_in (ParamID(FadeInAutomation), 0.0, 2.0, 1.0)
-	, _fade_out (ParamID(FadeOutAutomation), 0.0, 2.0, 1.0)
-	, _envelope (ParamID(EnvelopeAutomation), 0.0, 2.0, 1.0)
+	, _fade_in (new AutomationList(ParamID(FadeInAutomation), 0.0, 2.0, 1.0))
+	, _fade_out (new AutomationList(ParamID(FadeOutAutomation), 0.0, 2.0, 1.0))
+	, _envelope (new AutomationList(ParamID(EnvelopeAutomation), 0.0, 2.0, 1.0))
 {
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 	if (afs) {
@@ -113,9 +113,9 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 /* Basic AudioRegion constructor (many channels) */
 AudioRegion::AudioRegion (SourceList& srcs, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (srcs, start, length, name, DataType::AUDIO, layer, flags)
-	, _fade_in (ParamID(FadeInAutomation), 0.0, 2.0, 1.0)
-	, _fade_out (ParamID(FadeOutAutomation), 0.0, 2.0, 1.0)
-	, _envelope (ParamID(EnvelopeAutomation), 0.0, 2.0, 1.0)
+	, _fade_in (new AutomationList(ParamID(FadeInAutomation), 0.0, 2.0, 1.0))
+	, _fade_out (new AutomationList(ParamID(FadeOutAutomation), 0.0, 2.0, 1.0))
+	, _envelope (new AutomationList(ParamID(EnvelopeAutomation), 0.0, 2.0, 1.0))
 {
 	init ();
 }
@@ -123,10 +123,10 @@ AudioRegion::AudioRegion (SourceList& srcs, nframes_t start, nframes_t length, c
 
 /** Create a new AudioRegion, that is part of an existing one */
 AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t offset, nframes_t length, const string& name, layer_t layer, Flag flags)
-	: Region (other, offset, length, name, layer, flags),
-	  _fade_in (other->_fade_in),
-	  _fade_out (other->_fade_out),
-	  _envelope (other->_envelope, (double) offset, (double) offset + length) 
+	: Region (other, offset, length, name, layer, flags)
+	, _fade_in (new AutomationList(ParamID(FadeInAutomation), 0.0, 2.0, 1.0))
+	, _fade_out (new AutomationList(ParamID(FadeOutAutomation), 0.0, 2.0, 1.0))
+	, _envelope (new AutomationList(ParamID(EnvelopeAutomation), 0.0, 2.0, 1.0))
 {
 	/* return to default fades if the existing ones are too long */
 	_fade_in_disabled = 0;
@@ -134,7 +134,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t 
 
 
 	if (_flags & LeftOfSplit) {
-		if (_fade_in.back()->when >= _length) {
+		if (_fade_in->back()->when >= _length) {
 			set_default_fade_in ();
 		} else {
 			_fade_in_disabled = other->_fade_in_disabled;
@@ -144,7 +144,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t 
 	}
 
 	if (_flags & RightOfSplit) {
-		if (_fade_out.back()->when >= _length) {
+		if (_fade_out->back()->when >= _length) {
 			set_default_fade_out ();
 		} else {
 			_fade_out_disabled = other->_fade_out_disabled;
@@ -161,10 +161,10 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t 
 }
 
 AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
-	: Region (other),
-	  _fade_in (other->_fade_in),
-	  _fade_out (other->_fade_out),
-	  _envelope (other->_envelope) 
+	: Region (other)
+	, _fade_in (new AutomationList(ParamID(FadeInAutomation), 0.0, 2.0, 1.0))
+	, _fade_out (new AutomationList(ParamID(FadeOutAutomation), 0.0, 2.0, 1.0))
+	, _envelope (new AutomationList(ParamID(EnvelopeAutomation), 0.0, 2.0, 1.0))
 {
 	_scale_amplitude = other->_scale_amplitude;
 	_envelope = other->_envelope;
@@ -179,9 +179,9 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 
 AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& node)
 	: Region (src, node)
-	, _fade_in (ParamID(FadeInAutomation), 0.0, 2.0, 1.0)
-	, _fade_out (ParamID(FadeOutAutomation), 0.0, 2.0, 1.0)
-	, _envelope (ParamID(EnvelopeAutomation), 0.0, 2.0, 1.0)
+	, _fade_in (new AutomationList(ParamID(FadeInAutomation), 0.0, 2.0, 1.0))
+	, _fade_out (new AutomationList(ParamID(FadeOutAutomation), 0.0, 2.0, 1.0))
+	, _envelope (new AutomationList(ParamID(EnvelopeAutomation), 0.0, 2.0, 1.0))
 {
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 	if (afs) {
@@ -201,9 +201,9 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& nod
 
 AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 	: Region (srcs, node)
-	, _fade_in (ParamID(FadeInAutomation), 0.0, 2.0, 1.0)
-	, _fade_out (ParamID(FadeOutAutomation), 0.0, 2.0, 1.0)
-	, _envelope (ParamID(EnvelopeAutomation), 0.0, 2.0, 1.0)
+	, _fade_in (new AutomationList(ParamID(FadeInAutomation), 0.0, 2.0, 1.0))
+	, _fade_out (new AutomationList(ParamID(FadeOutAutomation), 0.0, 2.0, 1.0))
+	, _envelope (new AutomationList(ParamID(EnvelopeAutomation), 0.0, 2.0, 1.0))
 {
 	set_default_fades ();
 	_scale_amplitude = 1.0;
@@ -224,9 +224,9 @@ AudioRegion::~AudioRegion ()
 void
 AudioRegion::listen_to_my_curves ()
 {
-	_envelope.StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
-	_fade_in.StateChanged.connect (mem_fun (*this, &AudioRegion::fade_in_changed));
-	_fade_out.StateChanged.connect (mem_fun (*this, &AudioRegion::fade_out_changed));
+	_envelope->StateChanged.connect (mem_fun (*this, &AudioRegion::envelope_changed));
+	_fade_in->StateChanged.connect (mem_fun (*this, &AudioRegion::fade_in_changed));
+	_fade_out->StateChanged.connect (mem_fun (*this, &AudioRegion::fade_out_changed));
 }
 
 bool
@@ -395,7 +395,7 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 
 	if (_flags & FadeIn) {
 
-		nframes_t fade_in_length = (nframes_t) _fade_in.back()->when;
+		nframes_t fade_in_length = (nframes_t) _fade_in->back()->when;
 		
 		/* see if this read is within the fade in */
 
@@ -405,7 +405,7 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 
 			limit = min (to_read, fade_in_length - internal_offset);
 
-			_fade_in.curve().get_vector (internal_offset, internal_offset+limit, gain_buffer, limit);
+			_fade_in->curve().get_vector (internal_offset, internal_offset+limit, gain_buffer, limit);
 
 			for (nframes_t n = 0; n < limit; ++n) {
 				mixdown_buffer[n] *= gain_buffer[n];
@@ -436,7 +436,7 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 		*/
 
 	
-		nframes_t fade_out_length = (nframes_t) _fade_out.back()->when;
+		nframes_t fade_out_length = (nframes_t) _fade_out->back()->when;
 		nframes_t fade_interval_start = max(internal_offset, _length-fade_out_length);
 		nframes_t fade_interval_end   = min(internal_offset + to_read, _length);
 
@@ -447,7 +447,7 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 			nframes_t curve_offset = fade_interval_start - (_length-fade_out_length);
 			nframes_t fade_offset = fade_interval_start - internal_offset;
 								       
-			_fade_out.curve().get_vector (curve_offset,curve_offset+limit, gain_buffer, limit);
+			_fade_out->curve().get_vector (curve_offset,curve_offset+limit, gain_buffer, limit);
 
 			for (nframes_t n = 0, m = fade_offset; n < limit; ++n, ++m) {
 				mixdown_buffer[m] *= gain_buffer[n];
@@ -459,7 +459,7 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 	/* Regular gain curves */
 
 	if (envelope_active())  {
-		_envelope.curve().get_vector (internal_offset, internal_offset + to_read, gain_buffer, to_read);
+		_envelope->curve().get_vector (internal_offset, internal_offset + to_read, gain_buffer, to_read);
 		
 		if (_scale_amplitude != 1.0f) {
 			for (nframes_t n = 0; n < to_read; ++n) {
@@ -521,7 +521,7 @@ AudioRegion::state (bool full)
 		if ((_flags & DefaultFadeIn)) {
 			child->add_property (X_("default"), X_("yes"));
 		} else {
-			child->add_child_nocopy (_fade_in.get_state ());
+			child->add_child_nocopy (_fade_in->get_state ());
 		}
 
 		child->add_property (X_("active"), _fade_in_disabled ? X_("no") : X_("yes"));
@@ -531,7 +531,7 @@ AudioRegion::state (bool full)
 		if ((_flags & DefaultFadeOut)) {
 			child->add_property (X_("default"), X_("yes"));
 		} else {
-			child->add_child_nocopy (_fade_out.get_state ());
+			child->add_child_nocopy (_fade_out->get_state ());
 		}
 		
 		child->add_property (X_("active"), _fade_out_disabled ? X_("no") : X_("yes"));
@@ -545,10 +545,10 @@ AudioRegion::state (bool full)
 		// If there are only two points, the points are in the start of the region and the end of the region
 		// so, if they are both at 1.0f, that means the default region.
 
-		if (_envelope.size() == 2 &&
-		    _envelope.front()->value == 1.0f &&
-		    _envelope.back()->value==1.0f) {
-			if (_envelope.front()->when == 0 && _envelope.back()->when == _length) {
+		if (_envelope->size() == 2 &&
+		    _envelope->front()->value == 1.0f &&
+		    _envelope->back()->value==1.0f) {
+			if (_envelope->front()->when == 0 && _envelope->back()->when == _length) {
 				default_env = true;
 			}
 		} 
@@ -556,7 +556,7 @@ AudioRegion::state (bool full)
 		if (default_env) {
 			child->add_property ("default", "yes");
 		} else {
-			child->add_child_nocopy (_envelope.get_state ());
+			child->add_child_nocopy (_envelope->get_state ());
 		}
 
 	} else {
@@ -617,28 +617,28 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 		
 		if (child->name() == "Envelope") {
 			
-			_envelope.clear ();
+			_envelope->clear ();
 
-			if ((prop = child->property ("default")) != 0 || _envelope.set_state (*child)) {
+			if ((prop = child->property ("default")) != 0 || _envelope->set_state (*child)) {
 				set_default_envelope ();
 			}
 
-			_envelope.set_max_xval (_length);
-			_envelope.truncate_end (_length);
+			_envelope->set_max_xval (_length);
+			_envelope->truncate_end (_length);
 
 		} else if (child->name() == "FadeIn") {
 			
-			_fade_in.clear ();
+			_fade_in->clear ();
 			
-			if ((prop = child->property ("default")) != 0 || (prop = child->property ("steepness")) != 0 || _fade_in.set_state (*child)) {
+			if ((prop = child->property ("default")) != 0 || (prop = child->property ("steepness")) != 0 || _fade_in->set_state (*child)) {
 				set_default_fade_in ();
 			} 
 
 		} else if (child->name() == "FadeOut") {
 			
-			_fade_out.clear ();
+			_fade_out->clear ();
 
-			if ((prop = child->property ("default")) != 0 || (prop = child->property ("steepness")) != 0 || _fade_out.set_state (*child)) {
+			if ((prop = child->property ("default")) != 0 || (prop = child->property ("steepness")) != 0 || _fade_out->set_state (*child)) {
 				set_default_fade_out ();
 			} 
 		} 
@@ -665,70 +665,70 @@ AudioRegion::set_state (const XMLNode& node)
 void
 AudioRegion::set_fade_in_shape (FadeShape shape)
 {
-	set_fade_in (shape, (nframes_t) _fade_in.back()->when);
+	set_fade_in (shape, (nframes_t) _fade_in->back()->when);
 }
 
 void
 AudioRegion::set_fade_out_shape (FadeShape shape)
 {
-	set_fade_out (shape, (nframes_t) _fade_out.back()->when);
+	set_fade_out (shape, (nframes_t) _fade_out->back()->when);
 }
 
 void
 AudioRegion::set_fade_in (FadeShape shape, nframes_t len)
 {
-	_fade_in.freeze ();
-	_fade_in.clear ();
+	_fade_in->freeze ();
+	_fade_in->clear ();
 
 	switch (shape) {
 	case Linear:
-		_fade_in.fast_simple_add (0.0, 0.0);
-		_fade_in.fast_simple_add (len, 1.0);
+		_fade_in->fast_simple_add (0.0, 0.0);
+		_fade_in->fast_simple_add (len, 1.0);
 		break;
 
 	case Fast:
-		_fade_in.fast_simple_add (0, 0);
-		_fade_in.fast_simple_add (len * 0.389401, 0.0333333);
-		_fade_in.fast_simple_add (len * 0.629032, 0.0861111);
-		_fade_in.fast_simple_add (len * 0.829493, 0.233333);
-		_fade_in.fast_simple_add (len * 0.9447, 0.483333);
-		_fade_in.fast_simple_add (len * 0.976959, 0.697222);
-		_fade_in.fast_simple_add (len, 1);
+		_fade_in->fast_simple_add (0, 0);
+		_fade_in->fast_simple_add (len * 0.389401, 0.0333333);
+		_fade_in->fast_simple_add (len * 0.629032, 0.0861111);
+		_fade_in->fast_simple_add (len * 0.829493, 0.233333);
+		_fade_in->fast_simple_add (len * 0.9447, 0.483333);
+		_fade_in->fast_simple_add (len * 0.976959, 0.697222);
+		_fade_in->fast_simple_add (len, 1);
 		break;
 
 	case Slow:
-		_fade_in.fast_simple_add (0, 0);
-		_fade_in.fast_simple_add (len * 0.0207373, 0.197222);
-		_fade_in.fast_simple_add (len * 0.0645161, 0.525);
-		_fade_in.fast_simple_add (len * 0.152074, 0.802778);
-		_fade_in.fast_simple_add (len * 0.276498, 0.919444);
-		_fade_in.fast_simple_add (len * 0.481567, 0.980556);
-		_fade_in.fast_simple_add (len * 0.767281, 1);
-		_fade_in.fast_simple_add (len, 1);
+		_fade_in->fast_simple_add (0, 0);
+		_fade_in->fast_simple_add (len * 0.0207373, 0.197222);
+		_fade_in->fast_simple_add (len * 0.0645161, 0.525);
+		_fade_in->fast_simple_add (len * 0.152074, 0.802778);
+		_fade_in->fast_simple_add (len * 0.276498, 0.919444);
+		_fade_in->fast_simple_add (len * 0.481567, 0.980556);
+		_fade_in->fast_simple_add (len * 0.767281, 1);
+		_fade_in->fast_simple_add (len, 1);
 		break;
 
 	case LogA:
-		_fade_in.fast_simple_add (0, 0);
-		_fade_in.fast_simple_add (len * 0.0737327, 0.308333);
-		_fade_in.fast_simple_add (len * 0.246544, 0.658333);
-		_fade_in.fast_simple_add (len * 0.470046, 0.886111);
-		_fade_in.fast_simple_add (len * 0.652074, 0.972222);
-		_fade_in.fast_simple_add (len * 0.771889, 0.988889);
-		_fade_in.fast_simple_add (len, 1);
+		_fade_in->fast_simple_add (0, 0);
+		_fade_in->fast_simple_add (len * 0.0737327, 0.308333);
+		_fade_in->fast_simple_add (len * 0.246544, 0.658333);
+		_fade_in->fast_simple_add (len * 0.470046, 0.886111);
+		_fade_in->fast_simple_add (len * 0.652074, 0.972222);
+		_fade_in->fast_simple_add (len * 0.771889, 0.988889);
+		_fade_in->fast_simple_add (len, 1);
 		break;
 
 	case LogB:
-		_fade_in.fast_simple_add (0, 0);
-		_fade_in.fast_simple_add (len * 0.304147, 0.0694444);
-		_fade_in.fast_simple_add (len * 0.529954, 0.152778);
-		_fade_in.fast_simple_add (len * 0.725806, 0.333333);
-		_fade_in.fast_simple_add (len * 0.847926, 0.558333);
-		_fade_in.fast_simple_add (len * 0.919355, 0.730556);
-		_fade_in.fast_simple_add (len, 1);
+		_fade_in->fast_simple_add (0, 0);
+		_fade_in->fast_simple_add (len * 0.304147, 0.0694444);
+		_fade_in->fast_simple_add (len * 0.529954, 0.152778);
+		_fade_in->fast_simple_add (len * 0.725806, 0.333333);
+		_fade_in->fast_simple_add (len * 0.847926, 0.558333);
+		_fade_in->fast_simple_add (len * 0.919355, 0.730556);
+		_fade_in->fast_simple_add (len, 1);
 		break;
 	}
 
-	_fade_in.thaw ();
+	_fade_in->thaw ();
 	_fade_in_shape = shape;
 
 	send_change (FadeInChanged);
@@ -737,56 +737,56 @@ AudioRegion::set_fade_in (FadeShape shape, nframes_t len)
 void
 AudioRegion::set_fade_out (FadeShape shape, nframes_t len)
 {
-	_fade_out.freeze ();
-	_fade_out.clear ();
+	_fade_out->freeze ();
+	_fade_out->clear ();
 
 	switch (shape) {
 	case Fast:
-		_fade_out.fast_simple_add (len * 0, 1);
-		_fade_out.fast_simple_add (len * 0.023041, 0.697222);
-		_fade_out.fast_simple_add (len * 0.0553,   0.483333);
-		_fade_out.fast_simple_add (len * 0.170507, 0.233333);
-		_fade_out.fast_simple_add (len * 0.370968, 0.0861111);
-		_fade_out.fast_simple_add (len * 0.610599, 0.0333333);
-		_fade_out.fast_simple_add (len * 1, 0);
+		_fade_out->fast_simple_add (len * 0, 1);
+		_fade_out->fast_simple_add (len * 0.023041, 0.697222);
+		_fade_out->fast_simple_add (len * 0.0553,   0.483333);
+		_fade_out->fast_simple_add (len * 0.170507, 0.233333);
+		_fade_out->fast_simple_add (len * 0.370968, 0.0861111);
+		_fade_out->fast_simple_add (len * 0.610599, 0.0333333);
+		_fade_out->fast_simple_add (len * 1, 0);
 		break;
 
 	case LogA:
-		_fade_out.fast_simple_add (len * 0, 1);
-		_fade_out.fast_simple_add (len * 0.228111, 0.988889);
-		_fade_out.fast_simple_add (len * 0.347926, 0.972222);
-		_fade_out.fast_simple_add (len * 0.529954, 0.886111);
-		_fade_out.fast_simple_add (len * 0.753456, 0.658333);
-		_fade_out.fast_simple_add (len * 0.9262673, 0.308333);
-		_fade_out.fast_simple_add (len * 1, 0);
+		_fade_out->fast_simple_add (len * 0, 1);
+		_fade_out->fast_simple_add (len * 0.228111, 0.988889);
+		_fade_out->fast_simple_add (len * 0.347926, 0.972222);
+		_fade_out->fast_simple_add (len * 0.529954, 0.886111);
+		_fade_out->fast_simple_add (len * 0.753456, 0.658333);
+		_fade_out->fast_simple_add (len * 0.9262673, 0.308333);
+		_fade_out->fast_simple_add (len * 1, 0);
 		break;
 
 	case Slow:
-		_fade_out.fast_simple_add (len * 0, 1);
-		_fade_out.fast_simple_add (len * 0.305556, 1);
-		_fade_out.fast_simple_add (len * 0.548611, 0.991736);
-		_fade_out.fast_simple_add (len * 0.759259, 0.931129);
-		_fade_out.fast_simple_add (len * 0.918981, 0.68595);
-		_fade_out.fast_simple_add (len * 0.976852, 0.22865);
-		_fade_out.fast_simple_add (len * 1, 0);
+		_fade_out->fast_simple_add (len * 0, 1);
+		_fade_out->fast_simple_add (len * 0.305556, 1);
+		_fade_out->fast_simple_add (len * 0.548611, 0.991736);
+		_fade_out->fast_simple_add (len * 0.759259, 0.931129);
+		_fade_out->fast_simple_add (len * 0.918981, 0.68595);
+		_fade_out->fast_simple_add (len * 0.976852, 0.22865);
+		_fade_out->fast_simple_add (len * 1, 0);
 		break;
 
 	case LogB:
-		_fade_out.fast_simple_add (len * 0, 1);
-		_fade_out.fast_simple_add (len * 0.080645, 0.730556);
-		_fade_out.fast_simple_add (len * 0.277778, 0.289256);
-		_fade_out.fast_simple_add (len * 0.470046, 0.152778);
-		_fade_out.fast_simple_add (len * 0.695853, 0.0694444);
-		_fade_out.fast_simple_add (len * 1, 0);
+		_fade_out->fast_simple_add (len * 0, 1);
+		_fade_out->fast_simple_add (len * 0.080645, 0.730556);
+		_fade_out->fast_simple_add (len * 0.277778, 0.289256);
+		_fade_out->fast_simple_add (len * 0.470046, 0.152778);
+		_fade_out->fast_simple_add (len * 0.695853, 0.0694444);
+		_fade_out->fast_simple_add (len * 1, 0);
 		break;
 
 	case Linear:
-		_fade_out.fast_simple_add (len * 0, 1);
-		_fade_out.fast_simple_add (len * 1, 0);
+		_fade_out->fast_simple_add (len * 0, 1);
+		_fade_out->fast_simple_add (len * 1, 0);
 		break;
 	}
 
-	_fade_out.thaw ();
+	_fade_out->thaw ();
 	_fade_out_shape = shape;
 
 	send_change (FadeOutChanged);
@@ -795,7 +795,7 @@ AudioRegion::set_fade_out (FadeShape shape, nframes_t len)
 void
 AudioRegion::set_fade_in_length (nframes_t len)
 {
-	bool changed = _fade_in.extend_to (len);
+	bool changed = _fade_in->extend_to (len);
 
 	if (changed) {
 		_flags = Flag (_flags & ~DefaultFadeIn);
@@ -806,7 +806,7 @@ AudioRegion::set_fade_in_length (nframes_t len)
 void
 AudioRegion::set_fade_out_length (nframes_t len)
 {
-	bool changed =	_fade_out.extend_to (len);
+	bool changed =	_fade_out->extend_to (len);
 
 	if (changed) {
 		_flags = Flag (_flags & ~DefaultFadeOut);
@@ -848,13 +848,13 @@ AudioRegion::set_fade_out_active (bool yn)
 bool
 AudioRegion::fade_in_is_default () const
 {
-	return _fade_in_shape == Linear && _fade_in.back()->when == 64;
+	return _fade_in_shape == Linear && _fade_in->back()->when == 64;
 }
 
 bool
 AudioRegion::fade_out_is_default () const
 {
-	return _fade_out_shape == Linear && _fade_out.back()->when == 64;
+	return _fade_out_shape == Linear && _fade_out->back()->when == 64;
 }
 
 void
@@ -881,11 +881,11 @@ AudioRegion::set_default_fades ()
 void
 AudioRegion::set_default_envelope ()
 {
-	_envelope.freeze ();
-	_envelope.clear ();
-	_envelope.fast_simple_add (0, 1.0f);
-	_envelope.fast_simple_add (_length, 1.0f);
-	_envelope.thaw ();
+	_envelope->freeze ();
+	_envelope->clear ();
+	_envelope->fast_simple_add (0, 1.0f);
+	_envelope->fast_simple_add (_length, 1.0f);
+	_envelope->thaw ();
 }
 
 void
@@ -895,18 +895,18 @@ AudioRegion::recompute_at_end ()
 	   based on the the existing curve.
 	*/
 	
-	_envelope.freeze ();
-	_envelope.truncate_end (_length);
-	_envelope.set_max_xval (_length);
-	_envelope.thaw ();
+	_envelope->freeze ();
+	_envelope->truncate_end (_length);
+	_envelope->set_max_xval (_length);
+	_envelope->thaw ();
 
-	if (_fade_in.back()->when > _length) {
-		_fade_in.extend_to (_length);
+	if (_fade_in->back()->when > _length) {
+		_fade_in->extend_to (_length);
 		send_change (FadeInChanged);
 	}
 
-	if (_fade_out.back()->when > _length) {
-		_fade_out.extend_to (_length);
+	if (_fade_out->back()->when > _length) {
+		_fade_out->extend_to (_length);
 		send_change (FadeOutChanged);
 	}
 }	
@@ -916,15 +916,15 @@ AudioRegion::recompute_at_start ()
 {
 	/* as above, but the shift was from the front */
 
-	_envelope.truncate_start (_length);
+	_envelope->truncate_start (_length);
 
-	if (_fade_in.back()->when > _length) {
-		_fade_in.extend_to (_length);
+	if (_fade_in->back()->when > _length) {
+		_fade_in->extend_to (_length);
 		send_change (FadeInChanged);
 	}
 
-	if (_fade_out.back()->when > _length) {
-		_fade_out.extend_to (_length);
+	if (_fade_out->back()->when > _length) {
+		_fade_out->extend_to (_length);
 		send_change (FadeOutChanged);
 	}
 }

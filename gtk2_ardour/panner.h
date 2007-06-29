@@ -21,11 +21,12 @@
 #define __gtk_ardour_panner_h__
 
 #include <gtkmm2ext/barcontroller.h>
+#include <boost/shared_ptr.hpp>
 
 class PannerBar : public Gtkmm2ext::BarController
 {
   public:
-	PannerBar (Gtk::Adjustment& adj, PBD::Controllable&);
+	PannerBar (Gtk::Adjustment& adj, boost::shared_ptr<PBD::Controllable>);
 	~PannerBar ();
 
   protected:

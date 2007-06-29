@@ -30,7 +30,7 @@ class TimeAxisView;
 class AutomationMidiCCLine : public AutomationLine
 {
   public:
-	AutomationMidiCCLine (const string & name, TimeAxisView&, ArdourCanvas::Group& parent, ARDOUR::AutomationList&);
+	AutomationMidiCCLine (const string & name, TimeAxisView&, ArdourCanvas::Group& parent, boost::shared_ptr<ARDOUR::AutomationList>);
 	
 	void view_to_model_y (double&);
 	void model_to_view_y (double&);

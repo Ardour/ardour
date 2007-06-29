@@ -149,7 +149,7 @@ class GainMeter : public Gtk::VBox
 	Gtk::HBox   meter_packer;
 
 	void gain_adjusted ();
-	void gain_changed (void *);
+	void gain_changed ();
 	
 	void meter_point_clicked ();
 	void gain_unit_changed ();

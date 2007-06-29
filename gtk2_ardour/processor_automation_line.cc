@@ -32,12 +32,11 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-ProcessorAutomationLine::ProcessorAutomationLine (const string & name, Processor& proc, ParamID param, 
-						TimeAxisView& tv, ArdourCanvas::Group& parent, AutomationList& l)
+ProcessorAutomationLine::ProcessorAutomationLine (const string & name, Processor& proc, 
+						TimeAxisView& tv, ArdourCanvas::Group& parent, boost::shared_ptr<AutomationList> l)
   
 	: AutomationLine (name, tv, parent, l),
-	_processor(proc),
-	_param(param)
+	_processor(proc)
 {
 	set_verbose_cursor_uses_gain_mapping (false);
 
@@ -49,7 +48,7 @@ ProcessorAutomationLine::ProcessorAutomationLine (const string & name, Processor
 		/*NOTREACHED*/
 	}
 
-	pi->plugin()->get_parameter_descriptor (_param, desc);
+	pi->plugin()->get_parameter_descriptor (l->param_id(), desc);
 
 	_upper = desc.upper;
 	_lower = desc.lower;

@@ -33,12 +33,12 @@ using namespace Gtk;
 
 GainAutomationTimeAxisView::GainAutomationTimeAxisView (Session& s, boost::shared_ptr<Route> r, 
 							PublicEditor& e, TimeAxisView& parent, 
-							ArdourCanvas::Canvas& canvas, const string & n, ARDOUR::AutomationList& l)
+							ArdourCanvas::Canvas& canvas, const string & n,
+							boost::shared_ptr<ARDOUR::AutomationControl> c)
 
 	: AxisView (s),
 	  AutomationTimeAxisView (s, r, e, parent, canvas, n, X_("gain"), ""),
-	  list (l)
-	
+	  _control (c)
 {
 }
 
@@ -59,20 +59,13 @@ GainAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkE
 
 	/* map using line */
 
-	lines.front()->view_to_model_y (y);
+	lines.front().first->view_to_model_y (y);
 
 	_session.begin_reversible_command (_("add gain automation event"));
-	XMLNode& before = list.get_state();
-	list.add (when, y);
-	XMLNode& after = list.get_state();
-	_session.commit_reversible_command (new MementoCommand<ARDOUR::AutomationList>(list, &before, &after));
+	XMLNode& before = _control->list()->get_state();
+	_control->list()->add (when, y);
+	XMLNode& after = _control->list()->get_state();
+	_session.commit_reversible_command (new MementoCommand<ARDOUR::AutomationList>(*_control->list(), &before, &after));
 	_session.set_dirty ();
 }
 
-void
-GainAutomationTimeAxisView::set_automation_state (AutoState state)
-{
-	if (!ignore_state_request) {
-		route->set_parameter_automation_state (ParamID(GainAutomation), state);
-	}
-}

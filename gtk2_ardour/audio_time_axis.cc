@@ -284,18 +284,25 @@ void
 AudioTimeAxisView::create_automation_child (ParamID param)
 {
 	if (param.type() == GainAutomation) {
+
+		boost::shared_ptr<AutomationControl> c = _route->gain_control();
+		if (!c) {
+			error << "Route has no gain automation, unable to add automation track view." << endmsg;
+			return;
+		}
+
 		GainAutomationTimeAxisView* gain_track = new GainAutomationTimeAxisView (_session,
 				_route,
 				editor,
 				*this,
 				parent_canvas,
 				_route->describe_parameter(param),
-				_route->gain_automation());
+				c);
 
 		AutomationLine* line = new AutomationGainLine ("automation gain",
 				*gain_track,
 				*gain_track->canvas_display,
-				_route->gain_automation());
+				c->list());
 
 		line->set_line_color (Config->canvasvar_AutomationLine.get());
 
@@ -304,7 +311,7 @@ AudioTimeAxisView::create_automation_child (ParamID param)
 		add_automation_child(ParamID(GainAutomation), gain_track);
 
 	} else if (param.type() == PanAutomation) {
-
+		
 		PanAutomationTimeAxisView* pan_track = new PanAutomationTimeAxisView (_session,
 				 _route,
 				 editor,

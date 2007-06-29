@@ -91,11 +91,11 @@ ProcessorAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item,
 	/* map to model space */
 
 	if (!lines.empty()) {
-		AutomationList* alist (_processor.automation_list(_param, true));
+		boost::shared_ptr<AutomationList> alist (_processor.control(_param, true)->list());
 		string description = _("add automation event to ");
 		description += _processor.describe_parameter (_param);
 
-		lines.front()->view_to_model_y (y);
+		lines.front().first->view_to_model_y (y);
 		
 		_session.begin_reversible_command (description);
 		XMLNode &before = alist->get_state();
@@ -168,7 +168,33 @@ void
 ProcessorAutomationTimeAxisView::set_automation_state (AutoState state)
 {
 	if (!ignore_state_request) {
-		_processor.automation_list (_param, true)->set_automation_state (state);
+		_processor.control (_param, true)->list()->set_automation_state (state);
 	}
+}
+
+void
+ProcessorAutomationTimeAxisView::add_line (AutomationLine& line)
+{
+	bool get = false;
+
+	if (lines.empty()) {
+		/* first line is the Model for automation state */
+		automation_connection = line.the_list()->automation_state_changed.connect
+			(mem_fun(*this, &ProcessorAutomationTimeAxisView::automation_state_changed));
+		get = true;
+	}
+
+	lines.push_back (std::make_pair(&line,
+			AutomationController::create(_session, line.the_list(),
+				_processor.control(line.the_list()->param_id()))));
+
+	line.set_y_position_and_height (0, height);
+
+	if (get) {
+		/* pick up the current state */
+		automation_state_changed ();
+	}
+
+	line.show();
 }
 

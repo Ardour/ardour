@@ -347,7 +347,7 @@ ProcessorBox::processor_button_release_event (GdkEventButton *ev)
 Menu *
 ProcessorBox::build_processor_menu ()
 {
-	processor_menu = dynamic_cast<Gtk::Menu*>(ActionManager::get_widget("/redirectmenu") );
+	processor_menu = dynamic_cast<Gtk::Menu*>(ActionManager::get_widget("/processormenu") );
 	processor_menu->set_name ("ArdourContextMenu");
 
 	show_all_children();
@@ -1184,7 +1184,7 @@ ProcessorBox::enter_box (GdkEventCrossing *ev, ProcessorBox* rb)
 void
 ProcessorBox::register_actions ()
 {
-	Glib::RefPtr<Gtk::ActionGroup> popup_act_grp = Gtk::ActionGroup::create(X_("redirectmenu"));
+	Glib::RefPtr<Gtk::ActionGroup> popup_act_grp = Gtk::ActionGroup::create(X_("processormenu"));
 	Glib::RefPtr<Action> act;
 
 	/* new stuff */

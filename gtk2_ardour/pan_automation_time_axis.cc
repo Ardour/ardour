@@ -88,15 +88,15 @@ PanAutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkEv
 
 	/* map using line */
 
-	lines.front()->view_to_model_y (y);
+	lines.front().first->view_to_model_y (y);
 
-	AutomationList& alist (lines[line_index]->the_list());
+	boost::shared_ptr<AutomationList> alist (lines[line_index].first->the_list());
 
 	_session.begin_reversible_command (_("add pan automation event"));
-	XMLNode &before = alist.get_state();
-	alist.add (when, y);
-	XMLNode &after = alist.get_state();
-        _session.add_command(new MementoCommand<AutomationList>(alist, &before, &after));
+	XMLNode &before = alist->get_state();
+	alist->add (when, y);
+	XMLNode &after = alist->get_state();
+	_session.add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
 	_session.commit_reversible_command ();
 	_session.set_dirty ();
 }
@@ -145,13 +145,5 @@ PanAutomationTimeAxisView::set_height (TimeAxisView::TrackHeight th)
 			} 
 		default:
 			multiline_selector.hide();
-	}
-}
-
-void
-PanAutomationTimeAxisView::set_automation_state (AutoState state)
-{
-	if (!ignore_state_request) {
-		route->panner().set_automation_state (state);
 	}
 }

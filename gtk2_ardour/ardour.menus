@@ -374,7 +374,7 @@
 	</menu>
      </menubar>
 
-     <popup name='redirectmenu'>
+     <popup name='processormenu'>
 	 <menuitem action='newplugin'/>
 	 <menuitem action='newinsert'/>
 	 <menuitem action='newsend'/>

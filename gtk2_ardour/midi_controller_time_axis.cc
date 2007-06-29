@@ -20,6 +20,7 @@
 #include <ardour/automation_event.h>
 #include <ardour/route.h>
 #include <pbd/memento_command.h>
+#include <pbd/controllable.h>
 
 #include "midi_controller_time_axis.h"
 #include "automation_line.h"
@@ -34,12 +35,10 @@ using namespace Gtk;
 MidiControllerTimeAxisView::MidiControllerTimeAxisView (Session& s, boost::shared_ptr<Route> r, 
 							PublicEditor& e, TimeAxisView& parent, 
 							ArdourCanvas::Canvas& canvas, const string & n,
-							ParamID param, ARDOUR::AutomationList& l)
-
+							boost::shared_ptr<AutomationControl> c)
 	: AxisView (s),
-	  AutomationTimeAxisView (s, r, e, parent, canvas, n, param.to_string(), ""),
-	  _list (l),
-	  _param (param)
+	  AutomationTimeAxisView (s, r, e, parent, canvas, n, c->list()->param_id().to_string(), ""),
+	  _control (c)
 {
 }
 
@@ -60,22 +59,13 @@ MidiControllerTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkE
 
 	/* map using line */
 
-	lines.front()->view_to_model_y (y);
+	lines.front().first->view_to_model_y (y);
 
 	_session.begin_reversible_command (_("add midi controller automation event"));
-	XMLNode& before = _list.get_state();
-	_list.add (when, y);
-	XMLNode& after = _list.get_state();
-	_session.commit_reversible_command (new MementoCommand<ARDOUR::AutomationList>(_list, &before, &after));
+	XMLNode& before = _control->list()->get_state();
+	_control->list()->add (when, y);
+	XMLNode& after = _control->list()->get_state();
+	_session.commit_reversible_command (new MementoCommand<ARDOUR::AutomationList>(*_control->list().get(), &before, &after));
 	_session.set_dirty ();
-}
-
-void
-MidiControllerTimeAxisView::set_automation_state (AutoState state)
-{
-	if (!ignore_state_request) {
-		cerr << "FIXME: set midi controller automation state" << endl;
-		//route->set_midi_controller_state (state);
-	}
 }
 

@@ -36,19 +36,16 @@ class MidiControllerTimeAxisView : public AutomationTimeAxisView
 				    TimeAxisView& parent_axis,
 				    ArdourCanvas::Canvas& canvas,
 				    const string & name,
-					ARDOUR::ParamID param,
-				    ARDOUR::AutomationList&);
+					boost::shared_ptr<ARDOUR::AutomationControl> c);
 	
 	~MidiControllerTimeAxisView();
 
 	void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, nframes_t, double);
 	
    private:
-	ARDOUR::AutomationList& _list;
-	ARDOUR::ParamID _param;
+	boost::shared_ptr<ARDOUR::AutomationControl> _control;
 
 	void automation_changed ();
-	void set_automation_state (ARDOUR::AutoState);
 };
 
 #endif /* __ardour_gtk_midi_controller_time_axis_h__ */

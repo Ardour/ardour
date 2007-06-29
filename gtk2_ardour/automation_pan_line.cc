@@ -30,7 +30,7 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-AutomationPanLine::AutomationPanLine (const string & name, TimeAxisView& tv, ArdourCanvas::Group& parent, AutomationList& l)
+AutomationPanLine::AutomationPanLine (const string & name, TimeAxisView& tv, ArdourCanvas::Group& parent, boost::shared_ptr<AutomationList> l)
 
 	: AutomationLine (name, tv, parent, l)
 {

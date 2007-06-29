@@ -596,7 +596,7 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_t
 
 		// XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX
 		// Write into playback buffer here, and whatnot?
-		cerr << "MDS FIXME: collect playback" << endl;
+		//cerr << "MDS FIXME: collect playback" << endl;
 
 	}
 
@@ -1498,9 +1498,8 @@ MidiDiskstream::get_playback(MidiBuffer& dst, nframes_t start, nframes_t end)
 	dst.clear();
 	assert(dst.size() == 0);
 	
-	// I think this happens with reverse varispeed?  maybe?
+	// Reverse.  ... We just don't do reverse, ok?  Back off.
 	if (end <= start) {
-		cerr << "MDS: Reverse?  Skipping" << endl;
 		return;
 	}
 

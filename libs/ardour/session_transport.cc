@@ -363,7 +363,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (!(*i)->hidden()) {
+		if (!(*i)->is_hidden()) {
 			(*i)->set_pending_declick (0);
 		}
 	}
@@ -1262,7 +1262,7 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 			update_jack = true;
 		}
 
- 		if (!(*i)->hidden() && ((*i)->active())) {
+ 		if (!(*i)->is_hidden() && ((*i)->active())) {
 			_worst_track_latency = max (_worst_track_latency, track_latency);
 		}
 	} 

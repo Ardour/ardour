@@ -33,17 +33,15 @@ class TimeAxisView;
 class ProcessorAutomationLine : public AutomationLine
 {
   public:
-	ProcessorAutomationLine (const string & name, ARDOUR::Processor&, ARDOUR::ParamID param,
-			TimeAxisView&, ArdourCanvas::Group& parent, ARDOUR::AutomationList&);
+	ProcessorAutomationLine (const string & name, ARDOUR::Processor&,
+			TimeAxisView&, ArdourCanvas::Group& parent, boost::shared_ptr<ARDOUR::AutomationList>);
 	
-	ARDOUR::ParamID    param()     const { return _param; }
 	ARDOUR::Processor& processor() const { return _processor; }
 
 	string get_verbose_cursor_string (float);
 
   private:
 	ARDOUR::Processor& _processor;
-	ARDOUR::ParamID    _param;
 
 	float _upper;
 	float _lower;

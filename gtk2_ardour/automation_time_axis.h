@@ -23,6 +23,7 @@
 #include <vector>
 #include <list>
 #include <string>
+#include <utility>
 
 #include <boost/shared_ptr.hpp>
 
@@ -31,6 +32,7 @@
 #include "canvas.h"
 #include "time_axis_view.h"
 #include "simplerect.h"
+#include "automation_controller.h"
 
 using std::vector;
 using std::list;
@@ -50,6 +52,8 @@ class GhostRegion;
 class Selection;
 class Selectable;
 
+/** TODO: All the derived types of this can probably be merged into this cleanly.
+ */
 class AutomationTimeAxisView : public TimeAxisView {
   public:
 	AutomationTimeAxisView (ARDOUR::Session&,
@@ -72,7 +76,8 @@ class AutomationTimeAxisView : public TimeAxisView {
 	virtual void clear_lines ();
 	virtual void add_line (AutomationLine&);
 
-	vector<AutomationLine*> lines;
+	typedef vector<std::pair<AutomationLine*,boost::shared_ptr<AutomationController> > > Lines;
+	Lines lines;
 
 	void set_selected_points (PointSelection&);
 	void get_selectables (nframes_t start, nframes_t end, double top, double bot, list<Selectable *>&);
@@ -102,6 +107,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	string _name;
 	string _state_name;
 	bool    in_destructor;
+	bool    ignore_toggle;
 
 	bool    first_call_to_set_height;
 
@@ -132,7 +138,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	bool paste_one (AutomationLine&, nframes_t, float times, Selection&, size_t nth);
 	void reset_objects_one (AutomationLine&, PointSelection&);
 
-	virtual void set_automation_state (ARDOUR::AutoState) = 0;
+	void set_automation_state (ARDOUR::AutoState);
 	bool ignore_state_request;
 
 	void automation_state_changed ();

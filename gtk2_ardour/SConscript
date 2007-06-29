@@ -101,6 +101,7 @@ automation_midi_cc_line.cc
 automation_line.cc
 automation_pan_line.cc
 automation_time_axis.cc
+automation_controller.cc
 midi_time_axis.cc
 midi_streamview.cc
 axis_view.cc

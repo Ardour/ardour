@@ -171,11 +171,11 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	setup_fade_handle_positions ();
 
-	string foo = _region->name();
-	foo += ':';
-	foo += "gain";
+	string line_name = _region->name();
+	line_name += ':';
+	line_name += "gain";
 
-	gain_line = new AudioRegionGainLine (foo, trackview.session(), *this, *group, audio_region()->envelope());
+	gain_line = new AudioRegionGainLine (line_name, trackview.session(), *this, *group, audio_region()->envelope());
 
 	if (!(_flags & EnvelopeVisible)) {
 		gain_line->hide ();
@@ -489,7 +489,7 @@ AudioRegionView::reset_fade_shapes ()
 void
 AudioRegionView::reset_fade_in_shape ()
 {
-	reset_fade_in_shape_width ((nframes_t) audio_region()->fade_in().back()->when);
+	reset_fade_in_shape_width ((nframes_t) audio_region()->fade_in()->back()->when);
 }
 	
 void
@@ -534,7 +534,7 @@ AudioRegionView::reset_fade_in_shape_width (nframes_t width)
 	fade_in_shape->show();
 
 	float curve[npoints];
-	audio_region()->fade_in().curve().get_vector (0, audio_region()->fade_in().back()->when, curve, npoints);
+	audio_region()->fade_in()->curve().get_vector (0, audio_region()->fade_in()->back()->when, curve, npoints);
 
 	points = get_canvas_points ("fade in shape", npoints+3);
 
@@ -573,7 +573,7 @@ AudioRegionView::reset_fade_in_shape_width (nframes_t width)
 void
 AudioRegionView::reset_fade_out_shape ()
 {
-	reset_fade_out_shape_width ((nframes_t) audio_region()->fade_out().back()->when);
+	reset_fade_out_shape_width ((nframes_t) audio_region()->fade_out()->back()->when);
 }
 
 void
@@ -620,7 +620,7 @@ AudioRegionView::reset_fade_out_shape_width (nframes_t width)
 	fade_out_shape->show();
 
 	float curve[npoints];
-	audio_region()->fade_out().curve().get_vector (0, audio_region()->fade_out().back()->when, curve, npoints);
+	audio_region()->fade_out()->curve().get_vector (0, audio_region()->fade_out()->back()->when, curve, npoints);
 
 	if (_height > NAME_HIGHLIGHT_THRESH) {
 		h = _height - NAME_HIGHLIGHT_SIZE;
@@ -941,7 +941,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 	gain_line->view_to_model_y (y);
 
 	trackview.session().begin_reversible_command (_("add gain control point"));
-	XMLNode &before = audio_region()->envelope().get_state();
+	XMLNode &before = audio_region()->envelope()->get_state();
 
 	if (!audio_region()->envelope_active()) {
 		XMLNode &region_before = audio_region()->get_state();
@@ -950,10 +950,10 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 		trackview.session().add_command (new MementoCommand<AudioRegion>(*(audio_region().get()), &region_before, &region_after));
 	}
 
-	audio_region()->envelope().add (fx, y);
+	audio_region()->envelope()->add (fx, y);
 	
-	XMLNode &after = audio_region()->envelope().get_state();
-	trackview.session().add_command (new MementoCommand<AutomationList>(audio_region()->envelope(), &before, &after));
+	XMLNode &after = audio_region()->envelope()->get_state();
+	trackview.session().add_command (new MementoCommand<AutomationList>(*audio_region()->envelope().get(), &before, &after));
 	trackview.session().commit_reversible_command ();
 }
 
@@ -961,7 +961,7 @@ void
 AudioRegionView::remove_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 {
         ControlPoint *cp = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"));
-	audio_region()->envelope().erase (cp->model);
+	audio_region()->envelope()->erase (cp->model);
 }
 
 void

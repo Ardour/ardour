@@ -30,7 +30,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-AutomationGainLine::AutomationGainLine (const string & name, TimeAxisView& tv, ArdourCanvas::Group& parent, AutomationList& l)
+AutomationGainLine::AutomationGainLine (const string & name, TimeAxisView& tv, ArdourCanvas::Group& parent, boost::shared_ptr<AutomationList> l)
 
 	: AutomationLine (name, tv, parent, l)
 {

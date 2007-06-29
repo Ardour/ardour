@@ -30,7 +30,7 @@ class TimeAxisView;
 class AutomationPanLine : public AutomationLine
 {
   public:
-	AutomationPanLine (const string & name, TimeAxisView&, ArdourCanvas::Group& parent, ARDOUR::AutomationList&);
+	AutomationPanLine (const string & name, TimeAxisView&, ArdourCanvas::Group& parent, boost::shared_ptr<ARDOUR::AutomationList>);
 	
 	void view_to_model_y (double&);
 	void model_to_view_y (double&);

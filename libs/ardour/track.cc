@@ -40,7 +40,7 @@ using namespace PBD;
 
 Track::Track (Session& sess, string name, Route::Flag flag, TrackMode mode, DataType default_type)
 	: Route (sess, name, 1, -1, -1, -1, flag, default_type)
-	, _rec_enable_control (*this)
+	, _rec_enable_control (new RecEnableControllable(*this))
 {
 	_declickable = true;
 	_freeze_record.state = NoFreeze;
@@ -50,7 +50,7 @@ Track::Track (Session& sess, string name, Route::Flag flag, TrackMode mode, Data
 
 Track::Track (Session& sess, const XMLNode& node, DataType default_type)
 	: Route (sess, node)
-	, _rec_enable_control (*this)
+	, _rec_enable_control (new RecEnableControllable(*this))
 {
 	_freeze_record.state = NoFreeze;
 	_declickable = true;
@@ -188,7 +188,7 @@ Track::set_record_enable (bool yn, void *src)
 		set_meter_point (_saved_meter_point, this);
 	}
 
-	_rec_enable_control.Changed ();
+	_rec_enable_control->Changed ();
 }
 
 

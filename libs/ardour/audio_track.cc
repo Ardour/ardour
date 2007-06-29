@@ -278,8 +278,8 @@ AudioTrack::_set_state (const XMLNode& node, bool call_base)
 		child = *niter;
 
 		if (child->name() == X_("recenable")) {
-			_rec_enable_control.set_state (*child);
-			_session.add_controllable (&_rec_enable_control);
+			_rec_enable_control->set_state (*child);
+			_session.add_controllable (_rec_enable_control);
 		}
 	}
 
@@ -334,7 +334,7 @@ AudioTrack::state(bool full_state)
 	_diskstream->id().print (buf, sizeof (buf));
 	root.add_property ("diskstream-id", buf);
 
-	root.add_child_nocopy (_rec_enable_control.get_state());
+	root.add_child_nocopy (_rec_enable_control->get_state());
 
 	return root;
 }
@@ -601,8 +601,8 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 		if (!diskstream->record_enabled() && _session.transport_rolling()) {
 			Glib::Mutex::Lock am (_automation_lock, Glib::TRY_LOCK);
 			
-			if (am.locked() && gain_automation().automation_playback()) {
-				apply_gain_automation = gain_automation().curve().rt_safe_get_vector (start_frame, end_frame, _session.gain_automation_buffer(), nframes);
+			if (am.locked() && gain_control()->list()->automation_playback()) {
+				apply_gain_automation = gain_control()->list()->curve().rt_safe_get_vector (start_frame, end_frame, _session.gain_automation_buffer(), nframes);
 			}
 		}
 
@@ -696,9 +696,9 @@ AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes
 		}
 	}
 	
-	if (IO::gain_automation().automation_state() == Play) {
+	if (gain_control()->list()->automation_state() == Play) {
 		
-		IO::gain_automation().curve().get_vector (start, start + nframes, gain_automation, nframes);
+		gain_control()->list()->curve().get_vector (start, start + nframes, gain_automation, nframes);
 
 		for (BufferSet::audio_iterator bi = buffers.audio_begin(); bi != buffers.audio_end(); ++bi) {
 			Sample *b = bi->data();

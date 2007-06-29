@@ -1570,7 +1570,7 @@ RouteTimeAxisView::show_existing_automation ()
 	map<ARDOUR::ParamID, RouteAutomationNode*>::iterator i;
 	for (i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
 		// FIXME: only shown if /first/ line has points
-		if (!i->second->track->lines.empty() && i->second->track->lines[0]->npoints() > 0) {
+		if (!i->second->track->lines.empty() && i->second->track->lines[0].first->npoints() > 0) {
 			i->second->track->set_marked_for_display (true);
 			i->second->track->canvas_display->show();
 			i->second->track->get_state_node()->add_property ("shown", X_("yes"));
@@ -1714,14 +1714,16 @@ RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> 
 
 	/* create a string that is a legal XML node name that can be used to refer to this redirect+port combination */
 
+	/* FIXME: ew */
+
 	char state_name[256];
 	snprintf (state_name, sizeof (state_name), "Redirect-%s-%" PRIu32, legalize_for_xml_node (processor->name()).c_str(), what.id());
 
 	ran->view = new ProcessorAutomationTimeAxisView (_session, _route, editor, *this, parent_canvas, name, what, *processor, state_name);
 
 	ral = new ProcessorAutomationLine (name, 
-					  *processor, what, *ran->view,
-					  *ran->view->canvas_display, *processor->automation_list (what, true));
+					  *processor, *ran->view, *ran->view->canvas_display,
+					  processor->control (what, true)->list());
 	
 	ral->set_line_color (Config->canvasvar_ProcessorAutomationLine.get());
 	ral->queue_reset ();
@@ -1974,7 +1976,7 @@ RouteTimeAxisView::find_processor_automation_curve (boost::shared_ptr<Processor>
 
 	if ((ran = find_processor_automation_node (processor, what)) != 0) {
 		if (ran->view) {
-			return dynamic_cast<ProcessorAutomationLine*> (ran->view->lines.front());
+			return dynamic_cast<ProcessorAutomationLine*> (ran->view->lines.front().first);
 		} 
 	}
 

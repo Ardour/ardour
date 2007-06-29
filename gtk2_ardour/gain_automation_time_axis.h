@@ -25,6 +25,7 @@
 
 namespace ARDOUR {
 	class AutomationList;
+	class AutomationControl;
 }
 
 class GainAutomationTimeAxisView : public AutomationTimeAxisView
@@ -36,17 +37,16 @@ class GainAutomationTimeAxisView : public AutomationTimeAxisView
 				    TimeAxisView& parent_axis,
 				    ArdourCanvas::Canvas& canvas,
 				    const string & name,
-				    ARDOUR::AutomationList&);
+					boost::shared_ptr<ARDOUR::AutomationControl> control);
 	
 	~GainAutomationTimeAxisView();
 
 	void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, nframes_t, double);
 	
    private:
-	ARDOUR::AutomationList& list;
+	boost::shared_ptr<ARDOUR::AutomationControl> _control;
 
 	void automation_changed ();
-	void set_automation_state (ARDOUR::AutoState);
 };
 
 #endif /* __ardour_gtk_gain_automation_time_axis_h__ */

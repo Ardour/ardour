@@ -81,9 +81,9 @@ class Route : public IO
 	long order_key (const char* name) const;
 	void set_order_key (const char* name, long n);
 
-	bool hidden() const { return _flags & Hidden; }
-	bool master() const { return _flags & MasterOut; }
-	bool control() const { return _flags & ControlOut; }
+	bool is_hidden() const { return _flags & Hidden; }
+	bool is_master() const { return _flags & MasterOut; }
+	bool is_control() const { return _flags & ControlOut; }
 
 	/* these are the core of the API of a Route. see the protected sections as well */
 
@@ -243,11 +243,11 @@ class Route : public IO
 	    ToggleType type;
 	};
 
-	PBD::Controllable& solo_control() {
+	boost::shared_ptr<PBD::Controllable> solo_control() {
 		return _solo_control;
 	}
 
-	PBD::Controllable& mute_control() {
+	boost::shared_ptr<PBD::Controllable> mute_control() {
 		return _mute_control;
 	}
 	
@@ -306,8 +306,8 @@ class Route : public IO
 	std::string         _comment;
 	bool                _have_internal_generator;
 
-	ToggleControllable _solo_control;
-	ToggleControllable _mute_control;
+	boost::shared_ptr<ToggleControllable> _solo_control;
+	boost::shared_ptr<ToggleControllable> _mute_control;
 	
 	nframes_t check_initial_delay (nframes_t, nframes_t&, nframes_t&);
 	

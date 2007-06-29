@@ -267,7 +267,7 @@ Mixer_UI::add_strip (Session::RouteList& routes)
 	for (Session::RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
 
-		if (route->hidden()) {
+		if (route->is_hidden()) {
 			return;
 		}
 		
@@ -473,7 +473,7 @@ Mixer_UI::set_all_strips_visibility (bool yn)
 			continue;
 		}
 		
-		if (strip->route()->master() || strip->route()->control()) {
+		if (strip->route()->is_master() || strip->route()->is_control()) {
 			continue;
 		}
 
@@ -501,7 +501,7 @@ Mixer_UI::set_all_audio_visibility (int tracks, bool yn)
 			continue;
 		}
 
-		if (strip->route()->master() || strip->route()->control()) {
+		if (strip->route()->is_master() || strip->route()->is_control()) {
 			continue;
 		}
 
@@ -605,7 +605,7 @@ Mixer_UI::redisplay_track_list ()
 
 			if (strip->packed()) {
 
-				if (strip->route()->master() || strip->route()->control()) {
+				if (strip->route()->is_master() || strip->route()->is_control()) {
 					out_packer.reorder_child (*strip, -1);
 				} else {
 					strip_packer.reorder_child (*strip, -1); /* put at end */
@@ -613,7 +613,7 @@ Mixer_UI::redisplay_track_list ()
 
 			} else {
 
-				if (strip->route()->master() || strip->route()->control()) {
+				if (strip->route()->is_master() || strip->route()->is_control()) {
 					out_packer.pack_start (*strip, false, false);
 				} else {
 					strip_packer.pack_start (*strip, false, false);
@@ -624,7 +624,7 @@ Mixer_UI::redisplay_track_list ()
 
 		} else {
 
-			if (strip->route()->master() || strip->route()->control()) {
+			if (strip->route()->is_master() || strip->route()->is_control()) {
 				/* do nothing, these cannot be hidden */
 			} else {
 				if (strip->packed()) {
@@ -702,7 +702,7 @@ Mixer_UI::track_display_button_press (GdkEventButton* ev)
 			MixerStrip* strip = (*iter)[track_columns.strip];
 			if (strip) {
 
-				if (!strip->route()->master() && !strip->route()->control()) {
+				if (!strip->route()->is_master() && !strip->route()->is_control()) {
 					bool visible = (*iter)[track_columns.visible];
 					(*iter)[track_columns.visible] = !visible;
 				}

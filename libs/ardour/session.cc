@@ -122,7 +122,8 @@ Session::Session (AudioEngine &eng,
 	  routes (new RouteList),
 	  auditioner ((Auditioner*) 0),
 	  _click_io ((IO*) 0),
-	  main_outs (0)
+	  main_outs (0),
+	  _automation_interval (0)
 {
 	if (!eng.connected()) {
 		throw failed_constructor();
@@ -221,7 +222,8 @@ Session::Session (AudioEngine &eng,
 	  _send_smpte_update (false),
 	  diskstreams (new DiskstreamList),
 	  routes (new RouteList),
-	  main_outs (0)
+	  main_outs (0),
+	  _automation_interval (0)
 
 {
 	if (!eng.connected()) {
@@ -1267,7 +1269,7 @@ Session::set_frame_rate (nframes_t frames_per_second)
 
 	sync_time_vars();
 
-	Route::set_automation_interval ((nframes_t) ceil ((double) frames_per_second * 0.25));
+	_automation_interval = ((nframes_t) ceil ((double) frames_per_second * 0.25));
 
 	// XXX we need some equivalent to this, somehow
 	// SndFileSource::setup_standard_crossfades (frames_per_second);
@@ -1504,7 +1506,7 @@ Session::new_midi_track (TrackMode mode, uint32_t how_many)
 
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			if (dynamic_cast<MidiTrack*>((*i).get()) != 0) {
-				if (!(*i)->hidden()) {
+				if (!(*i)->is_hidden()) {
 					n++;
 					channels_used += (*i)->n_inputs().n_midi();
 				}
@@ -1585,7 +1587,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			if (dynamic_cast<AudioTrack*>((*i).get()) != 0) {
-				if (!(*i)->hidden()) {
+				if (!(*i)->is_hidden()) {
 					n++;
 					channels_used += (*i)->n_inputs().n_audio();
 				}
@@ -1775,7 +1777,7 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			if (dynamic_cast<AudioTrack*>((*i).get()) == 0) {
-				if (!(*i)->hidden() && (*i)->name() != _("master")) {
+				if (!(*i)->is_hidden() && (*i)->name() != _("master")) {
 					bus_id++;
 				}
 			}
@@ -1892,11 +1894,11 @@ Session::add_routes (RouteList& new_routes, bool save)
 		(*x)->output_changed.connect (mem_fun (*this, &Session::set_worst_io_latencies_x));
 		(*x)->processors_changed.connect (bind (mem_fun (*this, &Session::update_latency_compensation), false, false));
 		
-		if ((*x)->master()) {
+		if ((*x)->is_master()) {
 			_master_out = (*x);
 		}
 		
-		if ((*x)->control()) {
+		if ((*x)->is_control()) {
 			_control_out = (*x);
 		} 
 	}
@@ -3436,7 +3438,7 @@ Session::set_all_solo (bool yn)
 	shared_ptr<RouteList> r = routes.reader ();
 	
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (!(*i)->hidden()) {
+		if (!(*i)->is_hidden()) {
 			(*i)->set_solo (yn, this);
 		}
 	}
@@ -3450,7 +3452,7 @@ Session::set_all_mute (bool yn)
 	shared_ptr<RouteList> r = routes.reader ();
 	
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (!(*i)->hidden()) {
+		if (!(*i)->is_hidden()) {
 			(*i)->set_mute (yn, this);
 		}
 	}

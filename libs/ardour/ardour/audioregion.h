@@ -67,9 +67,9 @@ class AudioRegion : public Region
 	bool fade_in_active ()  const { return _flags & Region::FadeIn; }
 	bool fade_out_active () const { return _flags & Region::FadeOut; }
 
-	AutomationList& fade_in()  { return _fade_in; }
-	AutomationList& fade_out() { return _fade_out; }
-	AutomationList& envelope() { return _envelope; }
+	boost::shared_ptr<AutomationList> fade_in()  { return _fade_in; }
+	boost::shared_ptr<AutomationList> fade_out() { return _fade_out; }
+	boost::shared_ptr<AutomationList> envelope() { return _envelope; }
 
 	virtual nframes_t read_peaks (PeakData *buf, nframes_t npeaks,
 				      nframes_t offset, nframes_t cnt,
@@ -162,14 +162,14 @@ class AudioRegion : public Region
 	void source_offset_changed ();
 	void listen_to_my_curves ();
 
-	mutable AutomationList _fade_in;
-	FadeShape              _fade_in_shape;
-	mutable AutomationList _fade_out;
-	FadeShape              _fade_out_shape;
-	mutable AutomationList _envelope;
-	gain_t                 _scale_amplitude;
-	uint32_t               _fade_in_disabled;
-	uint32_t               _fade_out_disabled;
+	boost::shared_ptr<AutomationList> _fade_in;
+	FadeShape                         _fade_in_shape;
+	boost::shared_ptr<AutomationList> _fade_out;
+	FadeShape                         _fade_out_shape;
+	boost::shared_ptr<AutomationList> _envelope;
+	gain_t                            _scale_amplitude;
+	uint32_t                          _fade_in_disabled;
+	uint32_t                          _fade_out_disabled;
 
   protected:
 	/* default constructor for derived (compound) types */

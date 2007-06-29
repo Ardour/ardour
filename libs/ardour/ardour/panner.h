@@ -76,14 +76,14 @@ class StreamPanner : public sigc::trackable, public PBD::Stateful
 	virtual void set_automation_state (AutoState) = 0;
 	virtual void set_automation_style (AutoStyle) = 0;
 	
-	PBD::Controllable& control()  { return _control; }
+	boost::shared_ptr<PBD::Controllable> control()  { return _control; }
 	
 	/* XXX this is wrong. for multi-dimensional panners, there
 	   must surely be more than 1 automation curve.
 	*/
 	/* TODO: Panner is-a Automation solves this */
 
-	virtual AutomationList& automation() = 0;
+	virtual boost::shared_ptr<AutomationList> automation() = 0;
 
 	sigc::signal<void> Changed;      /* for position */
 	sigc::signal<void> StateChanged; /* for mute */
@@ -125,7 +125,7 @@ class StreamPanner : public sigc::trackable, public PBD::Stateful
 	    bool can_send_feedback() const;
 	};
 
-	PanControllable  _control;
+	boost::shared_ptr<PanControllable> _control;
 
 	void add_state (XMLNode&);
 	virtual void update () = 0;
@@ -151,7 +151,7 @@ class BaseStereoPanner : public StreamPanner
 	void set_automation_style (AutoStyle);
 
 	/* TODO: StreamPanner is-a Automatable? */
-	AutomationList& automation() { return _automation; }
+	boost::shared_ptr<AutomationList> automation() { return _automation; }
 
 	/* old school automation loading */
 
@@ -165,7 +165,7 @@ class BaseStereoPanner : public StreamPanner
 	float left_interp;
 	float right_interp;
 
-	AutomationList _automation;
+	boost::shared_ptr<AutomationList> _automation;
 };
 
 class EqualPowerStereoPanner : public BaseStereoPanner
@@ -208,7 +208,7 @@ class Multi2dPanner : public StreamPanner
 	
 	/* TODO: StreamPanner is-a Automatable? */
 
-	AutomationList& automation() { return _automation; }
+	boost::shared_ptr<AutomationList> automation() { return _automation; }
 
 	void distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
 	void distribute_automated (AudioBuffer& src, BufferSet& obufs,
@@ -226,7 +226,7 @@ class Multi2dPanner : public StreamPanner
 	int load (istream&, string path, uint32_t&);
 
   private:
-	AutomationList _automation;
+	boost::shared_ptr<AutomationList> _automation;
 	void update ();
 };
 

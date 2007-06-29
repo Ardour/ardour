@@ -17,8 +17,11 @@
 
 */
 
+#include <utility>
 #include <ardour/route.h>
+#include <ardour/automation_control.h>
 #include <pbd/memento_command.h>
+#include <gtkmm2ext/barcontroller.h>
 
 #include "ardour_ui.h"
 #include "automation_time_axis.h"
@@ -38,6 +41,7 @@
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 using namespace Editing;
 
 Pango::FontDescription AutomationTimeAxisView::name_font;
@@ -69,7 +73,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	auto_play_item = 0;
 	ignore_state_request = false;
 	first_call_to_set_height = true;
-
+	
 	base_rect = new SimpleRect(*canvas_display);
 	base_rect->property_x1() = 0.0;
 	base_rect->property_y1() = 0.0;
@@ -217,6 +221,17 @@ AutomationTimeAxisView::auto_clicked ()
 	automation_menu->popup (1, gtk_get_current_event_time());
 }
 
+void
+AutomationTimeAxisView::set_automation_state (AutoState state)
+{
+	if (!ignore_state_request) {
+		for (Lines::iterator i = lines.begin(); i != lines.end(); ++i) {
+			route->set_parameter_automation_state (
+					i->second->controllable()->list()->param_id(),
+					state);
+		}
+	}
+}
 
 void
 AutomationTimeAxisView::automation_state_changed ()
@@ -228,7 +243,7 @@ AutomationTimeAxisView::automation_state_changed ()
 	if (lines.empty()) {
 		state = Off;
 	} else {
-		state = lines.front()->the_list().automation_state ();
+		state = lines.front().first->the_list()->automation_state ();
 	}
 
 	switch (state & (Off|Play|Touch|Write)) {
@@ -292,8 +307,8 @@ void
 AutomationTimeAxisView::clear_clicked ()
 {
 	_session.begin_reversible_command (_("clear automation"));
-	for (vector<AutomationLine*>::iterator i = lines.begin(); i != lines.end(); ++i) {
-		(*i)->clear ();
+	for (Lines::iterator i = lines.begin(); i != lines.end(); ++i) {
+		i->first->clear ();
 	}
 	_session.commit_reversible_command ();
 }
@@ -304,7 +319,7 @@ AutomationTimeAxisView::set_height (TrackHeight ht)
 	uint32_t h = height_to_pixels (ht);
 	bool changed = (height != (uint32_t) h);
 
-	bool changed_between_small_and_normal = ( (ht == Small || ht == Smaller) ^ (height_style == Small || height_style == Smaller) );
+	//bool changed_between_small_and_normal = ( (ht == Small || ht == Smaller) ^ (height_style == Small || height_style == Smaller) );
 
 	TimeAxisView* state_parent = get_parent_with_state ();
 	XMLNode* xml_node = state_parent->get_child_xml_node (_state_name);
@@ -312,8 +327,8 @@ AutomationTimeAxisView::set_height (TrackHeight ht)
 	TimeAxisView::set_height (ht);
 	base_rect->property_y2() = h;
 
-	for (vector<AutomationLine*>::iterator i = lines.begin(); i != lines.end(); ++i) {
-		(*i)->set_y_position_and_height (0, h);
+	for (Lines::iterator i = lines.begin(); i != lines.end(); ++i) {
+		i->first->set_y_position_and_height (0, h);
 	}
 
 	for (list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
@@ -347,12 +362,20 @@ AutomationTimeAxisView::set_height (TrackHeight ht)
 		break;
 	}
 
-	if (changed_between_small_and_normal || first_call_to_set_height) {
+	//if (changed_between_small_and_normal || first_call_to_set_height) {
 		first_call_to_set_height = false;
+		unsigned control_cnt = 0;
 		switch (ht) {
 			case Largest:
 			case Large:
 			case Larger:
+
+				for (Lines::iterator i = lines.begin(); i != lines.end(); ++i) {
+					i->second->show ();
+					controls_table.attach (*i->second.get(), 0, 8, 2 + control_cnt, 3 + control_cnt, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+					++control_cnt;
+				}
+
 			case Normal:
 
 				controls_table.remove (name_hbox);
@@ -400,7 +423,7 @@ AutomationTimeAxisView::set_height (TrackHeight ht)
 				hide_button.hide();
 				break;
 		}
-	}
+	//}
 
 	if (changed) {
 		/* only emit the signal if the height really changed */
@@ -413,8 +436,8 @@ AutomationTimeAxisView::set_samples_per_unit (double spu)
 {
 	TimeAxisView::set_samples_per_unit (editor.get_current_zoom());
 
-	for (vector<AutomationLine*>::iterator i = lines.begin(); i != lines.end(); ++i) {
-		(*i)->reset ();
+	for (Lines::iterator i = lines.begin(); i != lines.end(); ++i) {
+		i->first->reset ();
 	}
 }
  
@@ -486,8 +509,8 @@ AutomationTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 {
 	bool ret = false;
 
-	for (vector<AutomationLine*>::iterator i = lines.begin(); i != lines.end(); ++i) {
-		ret = cut_copy_clear_one ((**i), selection, op);
+	for (Lines::iterator i = lines.begin(); i != lines.end(); ++i) {
+		ret = cut_copy_clear_one (*i->first, selection, op);
 	}
 
 	return ret;
@@ -497,28 +520,28 @@ bool
 AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& selection, CutCopyOp op)
 {
 	AutomationList* what_we_got = 0;
-	AutomationList& alist (line.the_list());
+	boost::shared_ptr<AutomationList> alist (line.the_list());
 	bool ret = false;
 
-        XMLNode &before = alist.get_state();
+	XMLNode &before = alist->get_state();
 
 	switch (op) {
 	case Cut:
-		if ((what_we_got = alist.cut (selection.time.front().start, selection.time.front().end)) != 0) {
+		if ((what_we_got = alist->cut (selection.time.front().start, selection.time.front().end)) != 0) {
 			editor.get_cut_buffer().add (what_we_got);
-			_session.add_command(new MementoCommand<AutomationList>(alist, &before, &alist.get_state()));
+			_session.add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
 			ret = true;
 		}
 		break;
 	case Copy:
-		if ((what_we_got = alist.copy (selection.time.front().start, selection.time.front().end)) != 0) {
+		if ((what_we_got = alist->copy (selection.time.front().start, selection.time.front().end)) != 0) {
 			editor.get_cut_buffer().add (what_we_got);
 		}
 		break;
 
 	case Clear:
-		if ((what_we_got = alist.cut (selection.time.front().start, selection.time.front().end)) != 0) {
-			_session.add_command(new MementoCommand<AutomationList>(alist, &before, &alist.get_state()));
+		if ((what_we_got = alist->cut (selection.time.front().start, selection.time.front().end)) != 0) {
+			_session.add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
 			delete what_we_got;
 			what_we_got = 0;
 			ret = true;
@@ -540,17 +563,17 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 void
 AutomationTimeAxisView::reset_objects (PointSelection& selection)
 {
-	for (vector<AutomationLine*>::iterator i = lines.begin(); i != lines.end(); ++i) {
-		reset_objects_one ((**i), selection);
+	for (Lines::iterator i = lines.begin(); i != lines.end(); ++i) {
+		reset_objects_one (*i->first, selection);
 	}
 }
 
 void
 AutomationTimeAxisView::reset_objects_one (AutomationLine& line, PointSelection& selection)
 {
-	AutomationList& alist (line.the_list());
+	boost::shared_ptr<AutomationList> alist(line.the_list());
 
-	_session.add_command (new MementoCommand<AutomationList>(alist, &alist.get_state(), 0));
+	_session.add_command (new MementoCommand<AutomationList>(*alist.get(), &alist->get_state(), 0));
 
 	for (PointSelection::iterator i = selection.begin(); i != selection.end(); ++i) {
 
@@ -558,7 +581,7 @@ AutomationTimeAxisView::reset_objects_one (AutomationLine& line, PointSelection&
 			continue;
 		}
 		
-		alist.reset_range ((*i).start, (*i).end);
+		alist->reset_range ((*i).start, (*i).end);
 	}
 }
 
@@ -567,8 +590,8 @@ AutomationTimeAxisView::cut_copy_clear_objects (PointSelection& selection, CutCo
 {
 	bool ret = false;
 
-	for (vector<AutomationLine*>::iterator i = lines.begin(); i != lines.end(); ++i) {
-		ret = cut_copy_clear_objects_one ((**i), selection, op);
+	for (Lines::iterator i = lines.begin(); i != lines.end(); ++i) {
+		ret = cut_copy_clear_objects_one (*i->first, selection, op);
 	}
 
 	return ret;
@@ -578,10 +601,10 @@ bool
 AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointSelection& selection, CutCopyOp op)
 {
 	AutomationList* what_we_got = 0;
-	AutomationList& alist (line.the_list());
+	boost::shared_ptr<AutomationList> alist(line.the_list());
 	bool ret = false;
 
-        XMLNode &before = alist.get_state();
+	XMLNode &before = alist->get_state();
 
 	for (PointSelection::iterator i = selection.begin(); i != selection.end(); ++i) {
 
@@ -591,21 +614,21 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 
 		switch (op) {
 		case Cut:
-			if ((what_we_got = alist.cut ((*i).start, (*i).end)) != 0) {
+			if ((what_we_got = alist->cut ((*i).start, (*i).end)) != 0) {
 				editor.get_cut_buffer().add (what_we_got);
-				_session.add_command (new MementoCommand<AutomationList>(alist, new XMLNode (before), &alist.get_state()));
+				_session.add_command (new MementoCommand<AutomationList>(*alist.get(), new XMLNode (before), &alist->get_state()));
 				ret = true;
 			}
 			break;
 		case Copy:
-			if ((what_we_got = alist.copy ((*i).start, (*i).end)) != 0) {
+			if ((what_we_got = alist->copy ((*i).start, (*i).end)) != 0) {
 				editor.get_cut_buffer().add (what_we_got);
 			}
 			break;
 			
 		case Clear:
-			if ((what_we_got = alist.cut ((*i).start, (*i).end)) != 0) {
-				_session.add_command (new MementoCommand<AutomationList>(alist, new XMLNode (before), &alist.get_state()));
+			if ((what_we_got = alist->cut ((*i).start, (*i).end)) != 0) {
+				_session.add_command (new MementoCommand<AutomationList>(*alist.get(), new XMLNode (before), &alist->get_state()));
 				delete what_we_got;
 				what_we_got = 0;
 				ret = true;
@@ -632,8 +655,8 @@ AutomationTimeAxisView::paste (nframes_t pos, float times, Selection& selection,
 {
 	bool ret = true;
 
-	for (vector<AutomationLine*>::iterator i = lines.begin(); i != lines.end(); ++i) {
-		ret = paste_one (**i, pos, times, selection, nth);
+	for (Lines::iterator i = lines.begin(); i != lines.end(); ++i) {
+		ret = paste_one (*i->first, pos, times, selection, nth);
 	}
 
 	return ret;
@@ -643,7 +666,7 @@ bool
 AutomationTimeAxisView::paste_one (AutomationLine& line, nframes_t pos, float times, Selection& selection, size_t nth)
 {
 	AutomationSelection::iterator p;
-	AutomationList& alist (line.the_list());
+	boost::shared_ptr<AutomationList> alist(line.the_list());
 	
 	for (p = selection.lines.begin(); p != selection.lines.end() && nth; ++p, --nth);
 
@@ -664,9 +687,9 @@ AutomationTimeAxisView::paste_one (AutomationLine& line, nframes_t pos, float ti
 		(*x)->value = foo;
 	}
 
-        XMLNode &before = alist.get_state();
-	alist.paste (copy, pos, times);
-	_session.add_command (new MementoCommand<AutomationList>(alist, &before, &alist.get_state()));
+	XMLNode &before = alist->get_state();
+	alist->paste (copy, pos, times);
+	_session.add_command (new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
 
 	return true;
 }
@@ -725,8 +748,8 @@ AutomationTimeAxisView::get_selectables (nframes_t start, nframes_t end, double 
 			botfrac = 1.0 - ((bot - y_position) / height);
 		}
 
-		for (vector<AutomationLine*>::iterator i = lines.begin(); i != lines.end(); ++i) {
-			(*i)->get_selectables (start, end, botfrac, topfrac, results);
+		for (Lines::iterator i = lines.begin(); i != lines.end(); ++i) {
+			i->first->get_selectables (start, end, botfrac, topfrac, results);
 		}
 	}
 }
@@ -734,25 +757,24 @@ AutomationTimeAxisView::get_selectables (nframes_t start, nframes_t end, double 
 void
 AutomationTimeAxisView::get_inverted_selectables (Selection& sel, list<Selectable*>& result)
 {
-	for (vector<AutomationLine*>::iterator i = lines.begin(); i != lines.end(); ++i) {
-		(*i)->get_inverted_selectables (sel, result);
+	for (Lines::iterator i = lines.begin(); i != lines.end(); ++i) {
+		i->first->get_inverted_selectables (sel, result);
 	}
 }
 
 void
 AutomationTimeAxisView::set_selected_points (PointSelection& points)
 {
-	for (vector<AutomationLine*>::iterator i = lines.begin(); i != lines.end(); ++i) {
-		(*i)->set_selected_points (points);
+	for (Lines::iterator i = lines.begin(); i != lines.end(); ++i) {
+		i->first->set_selected_points (points);
 	}
 }
 
 void
 AutomationTimeAxisView::clear_lines ()
 {
-	for (vector<AutomationLine*>::iterator i = lines.begin(); i != lines.end(); ++i) {
-		delete *i;
-	}
+	for (Lines::iterator i = lines.begin(); i != lines.end(); ++i)
+		delete i->first;
 
 	lines.clear ();
 	automation_connection.disconnect ();
@@ -765,33 +787,38 @@ AutomationTimeAxisView::add_line (AutomationLine& line)
 
 	if (lines.empty()) {
 		/* first line is the Model for automation state */
-		automation_connection = line.the_list().automation_state_changed.connect
+		automation_connection = line.the_list()->automation_state_changed.connect
 			(mem_fun(*this, &AutomationTimeAxisView::automation_state_changed));
 		get = true;
 	}
 
-	lines.push_back (&line);
+	lines.push_back (std::make_pair(&line,
+			AutomationController::create(_session, line.the_list(),
+				route->control(line.the_list()->param_id()))));
+
 	line.set_y_position_and_height (0, height);
 
 	if (get) {
 		/* pick up the current state */
 		automation_state_changed ();
 	}
+
+	line.show();
 }
 
 void
 AutomationTimeAxisView::show_all_control_points ()
 {
-	for (vector<AutomationLine*>::iterator i = lines.begin(); i != lines.end(); ++i) {
-		(*i)->show_all_control_points ();
+	for (Lines::iterator i = lines.begin(); i != lines.end(); ++i) {
+		i->first->show_all_control_points ();
 	}
 }
 
 void
 AutomationTimeAxisView::hide_all_but_selected_control_points ()
 {
-	for (vector<AutomationLine*>::iterator i = lines.begin(); i != lines.end(); ++i) {
-		(*i)->hide_all_but_selected_control_points ();
+	for (Lines::iterator i = lines.begin(); i != lines.end(); ++i) {
+		i->first->hide_all_but_selected_control_points ();
 	}
 }
 
@@ -808,35 +835,22 @@ AutomationTimeAxisView::exited ()
 }
 
 void
-AutomationTimeAxisView::set_colors () {
-
-    for( list<GhostRegion *>::iterator i=ghosts.begin(); i != ghosts.end(); i++ ) {
-	(*i)->set_colors();
+AutomationTimeAxisView::set_colors ()
+{
+    for (list<GhostRegion*>::iterator i=ghosts.begin(); i != ghosts.end(); i++ ) {
+		(*i)->set_colors();
     }
     
-    for( vector<AutomationLine *>::iterator i=lines.begin(); i != lines.end(); i++ ) {
-	(*i)->set_colors();
+    for (Lines::iterator i=lines.begin(); i != lines.end(); i++ ) {
+		i->first->set_colors();
     }
-
 }
 
 void
 AutomationTimeAxisView::color_handler () 
 {
-    
-	//case cGhostTrackWave:
-	//case cGhostTrackWaveClip:
-	//case cGhostTrackZeroLine:
-
-	//case cControlPoint:
-	//case cControlPointFill:
-	//case cControlPointOutline:
-	//case cAutomationLine:
 	set_colors ();
-
 }
-
-
 
 void
 AutomationTimeAxisView::set_state (const XMLNode& node)

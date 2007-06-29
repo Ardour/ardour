@@ -185,12 +185,13 @@ MidiTimeAxisView::create_automation_child (ParamID param)
 	
 		/* FIXME: this all probably leaks */
 
-		ARDOUR::AutomationList* al = _route->automation_list(param);
+		boost::shared_ptr<AutomationControl> c =_route->control(param);
 
-		if (!al)
-			al = new ARDOUR::AutomationList(param, 0, 127, 64);
-
-		_route->add_automation_parameter(al);
+		if (!c) {
+			boost::shared_ptr<AutomationList> al(new ARDOUR::AutomationList(param, 0, 127, 64));
+			c = boost::shared_ptr<AutomationControl>(new AutomationControl(_session, al));
+			_route->add_control(c);
+		}
 
 		MidiControllerTimeAxisView* track = new MidiControllerTimeAxisView (_session,
 				_route,
@@ -198,13 +199,12 @@ MidiTimeAxisView::create_automation_child (ParamID param)
 				*this,
 				parent_canvas,
 				_route->describe_parameter(param),
-				param,
-				*al);
+				c);
 
 		AutomationMidiCCLine* line = new AutomationMidiCCLine (param.to_string(),
 				*track,
 				*track->canvas_display,
-				*al);
+				c->list());
 
 		line->set_line_color (Config->canvasvar_AutomationLine.get());
 

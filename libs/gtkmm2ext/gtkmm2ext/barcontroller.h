@@ -32,7 +32,10 @@ namespace Gtkmm2ext {
 class BarController : public Gtk::Frame
 {
   public:
-	BarController (Gtk::Adjustment& adj, PBD::Controllable&, sigc::slot<void,char*,unsigned int>);
+	typedef sigc::slot<void,char*,unsigned int> LabelCallback;
+
+	BarController (Gtk::Adjustment& adj, PBD::Controllable&, LabelCallback lc = LabelCallback());
+
 	virtual ~BarController () {}
 	
 	enum Style {
@@ -40,6 +43,7 @@ class BarController : public Gtk::Frame
 		RightToLeft,
 		Line,
 		CenterOut,
+		
 		TopToBottom,
 		BottomToTop
 	};
@@ -64,7 +68,7 @@ class BarController : public Gtk::Frame
 	Gtk::Adjustment&    adjustment;
 	BindingProxy        binding_proxy;
 	Gtk::DrawingArea    darea;
-	sigc::slot<void,char*,unsigned int> label_callback;
+	LabelCallback       label_callback;
 	Glib::RefPtr<Pango::Layout> layout;
 	Style              _style;
 	bool                grabbed;

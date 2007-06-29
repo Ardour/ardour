@@ -57,7 +57,7 @@ using namespace Gnome; // for Canvas
 ControlPoint::ControlPoint (AutomationLine& al)
 	: line (al)
 {
-	model = al.the_list().end();
+	model = al.the_list()->end();
 	view_index = 0;
 	can_slide = true;
 	_x = 0;
@@ -220,7 +220,7 @@ ControlPoint::move_to (double x, double y, ShapeType shape)
 
 /*****/
 
-AutomationLine::AutomationLine (const string & name, TimeAxisView& tv, ArdourCanvas::Group& parent, AutomationList& al)
+AutomationLine::AutomationLine (const string & name, TimeAxisView& tv, ArdourCanvas::Group& parent, boost::shared_ptr<AutomationList> al)
 	: trackview (tv),
 	  _name (name),
 	  alist (al),
@@ -245,10 +245,9 @@ AutomationLine::AutomationLine (const string & name, TimeAxisView& tv, ArdourCan
 
 	line->signal_event().connect (mem_fun (*this, &AutomationLine::event_handler));
 
-	alist.StateChanged.connect (mem_fun(*this, &AutomationLine::list_changed));
+	alist->StateChanged.connect (mem_fun(*this, &AutomationLine::list_changed));
 
-        trackview.session().register_with_memento_command_factory(alist.id(), this);
-
+	trackview.session().register_with_memento_command_factory(alist->id(), this);
 }
 
 AutomationLine::~AutomationLine ()
@@ -612,7 +611,7 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 
 	view_index = 0;
 
-	for (model = alist.begin(), pi = 0; pi < npoints; ++model, ++pi) {
+	for (model = alist->begin(), pi = 0; pi < npoints; ++model, ++pi) {
 
 		double tx = points[pi].x;
 		double ty = points[pi].y;
@@ -808,7 +807,7 @@ AutomationLine::start_drag (ControlPoint* cp, nframes_t x, float fraction)
 	}
 
 	trackview.editor.current_session()->begin_reversible_command (str);
-	trackview.editor.current_session()->add_command (new MementoCommand<AutomationList>(alist, &get_state(), 0));
+	trackview.editor.current_session()->add_command (new MementoCommand<AutomationList>(*alist.get(), &get_state(), 0));
 	
 	drag_x = x;
 	drag_distance = 0;
@@ -872,7 +871,7 @@ AutomationLine::end_drag (ControlPoint* cp)
 		return;
 	}
 
-	alist.freeze ();
+	alist->freeze ();
 
 	if (cp) {
 		sync_model_with_view_point (*cp, did_push, drag_distance);
@@ -880,11 +879,11 @@ AutomationLine::end_drag (ControlPoint* cp)
 		sync_model_with_view_line (line_drag_cp1, line_drag_cp2);
 	}
 	
-	alist.thaw ();
+	alist->thaw ();
 
 	update_pending = false;
 
-	trackview.editor.current_session()->add_command (new MementoCommand<AutomationList>(alist, 0, &alist.get_state()));
+	trackview.editor.current_session()->add_command (new MementoCommand<AutomationList>(*alist.get(), 0, &alist->get_state()));
 	trackview.editor.current_session()->commit_reversible_command ();
 	trackview.editor.current_session()->set_dirty ();
 }
@@ -919,14 +918,14 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp, bool did_push, int
 		/* interpolate */
 		
 		if (y_delta || x_delta) {
-			alist.modify (i, (*i)->when + x_delta, mr.ymin + y_delta);
+			alist->modify (i, (*i)->when + x_delta, mr.ymin + y_delta);
 		}
 	}
 
 	/* change the primary point */
 
 	update_pending = true;
-	alist.modify (cp.model, mr.xval, mr.yval);
+	alist->modify (cp.model, mr.xval, mr.yval);
 
 
 	/* change later points */
@@ -942,7 +941,7 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp, bool did_push, int
 		/* all later points move by the same distance along the x-axis as the main point */
 		
 		if (delta) {
-			alist.modify (i, (*i)->when + distance, (*i)->value + delta);
+			alist->modify (i, (*i)->when + distance, (*i)->value + delta);
 		}
 		
 		++i;
@@ -954,7 +953,7 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp, bool did_push, int
 		   as the main point moved.
 		*/
 
-		alist.slide (mr.end, drag_distance);
+		alist->slide (mr.end, drag_distance);
 	}
 
 }
@@ -998,7 +997,7 @@ AutomationLine::is_last_point (ControlPoint& cp)
 
 	// If the list is not empty, and the point is the last point in the list
 
-	if (!alist.empty() && mr.end == alist.end()) {
+	if (!alist->empty() && mr.end == alist->end()) {
 		return true;
 	}
 	
@@ -1014,7 +1013,7 @@ AutomationLine::is_first_point (ControlPoint& cp)
 
 	// If the list is not empty, and the point is the first point in the list
 
-	if (!alist.empty() && mr.start == alist.begin()) {
+	if (!alist->empty() && mr.start == alist->begin()) {
 		return true;
 	}
 	
@@ -1030,11 +1029,12 @@ AutomationLine::remove_point (ControlPoint& cp)
 	model_representation (cp, mr);
 
 	trackview.editor.current_session()->begin_reversible_command (_("remove control point"));
-        XMLNode &before = alist.get_state();
+        XMLNode &before = alist->get_state();
 
-	alist.erase (mr.start, mr.end);
+	alist->erase (mr.start, mr.end);
 
-	trackview.editor.current_session()->add_command(new MementoCommand<AutomationList>(alist, &before, &alist.get_state()));
+	trackview.editor.current_session()->add_command(new MementoCommand<AutomationList>(
+			*alist.get(), &before, &alist->get_state()));
 	trackview.editor.current_session()->commit_reversible_command ();
 	trackview.editor.current_session()->set_dirty ();
 }
@@ -1229,7 +1229,7 @@ AutomationLine::reset ()
 		return;
 	}
 
-	alist.apply_to_points (*this, &AutomationLine::reset_callback);
+	alist->apply_to_points (*this, &AutomationLine::reset_callback);
 }
 
 void
@@ -1237,7 +1237,7 @@ AutomationLine::clear ()
 {
 	/* parent must create command */
         XMLNode &before = get_state();
-	alist.clear();
+	alist->clear();
 	trackview.editor.current_session()->add_command (new MementoCommand<AutomationLine>(*this, &before, &get_state()));
 	trackview.editor.current_session()->commit_reversible_command ();
 	trackview.editor.current_session()->set_dirty ();
@@ -1251,7 +1251,7 @@ AutomationLine::change_model (AutomationList::iterator i, double x, double y)
 void
 AutomationLine::change_model_range (AutomationList::iterator start, AutomationList::iterator end, double xdelta, float ydelta)
 {
-	alist.move_range (start, end, xdelta, ydelta);
+	alist->move_range (start, end, xdelta, ydelta);
 }
 
 void
@@ -1281,12 +1281,12 @@ XMLNode &
 AutomationLine::get_state (void)
 {
 	/* function as a proxy for the model */
-	return alist.get_state();
+	return alist->get_state();
 }
 
 int 
 AutomationLine::set_state (const XMLNode &node)
 {
 	/* function as a proxy for the model */
-	return alist.set_state (node);
+	return alist->set_state (node);
 }

@@ -573,9 +573,9 @@ PannerUI::update_pan_bars (bool only_if_aplay)
 		float xpos, val;
 
 		if (only_if_aplay) {
-			AutomationList& alist (_io->panner()[n]->automation());
+			boost::shared_ptr<AutomationList> alist (_io->panner()[n]->automation());
 			
-			if (!alist.automation_playback()) {
+			if (!alist->automation_playback()) {
 				continue;
 			}
 		}
@@ -707,7 +707,7 @@ PannerUI::pan_automation_state_changed ()
 		return;
 	}
 
-	x = (_io->panner().front()->automation().automation_state() != Off);
+	x = (_io->panner().front()->automation()->automation_state() != Off);
 
 	if (pan_automation_state_button.get_active() != x) {
 	ignore_toggle = true;

@@ -27,7 +27,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-AutomationMidiCCLine::AutomationMidiCCLine (const string & name, TimeAxisView& tv, ArdourCanvas::Group& parent, AutomationList& l)
+AutomationMidiCCLine::AutomationMidiCCLine (const string & name, TimeAxisView& tv, ArdourCanvas::Group& parent, boost::shared_ptr<AutomationList> l)
 
 	: AutomationLine (name, tv, parent, l)
 {

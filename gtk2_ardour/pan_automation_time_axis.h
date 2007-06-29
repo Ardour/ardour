@@ -52,7 +52,6 @@ class PanAutomationTimeAxisView : public AutomationTimeAxisView
 
 	private:
 		void automation_changed ();
-		void set_automation_state (ARDOUR::AutoState);
 };
 
 #endif /* __ardour_gtk_pan_automation_time_axis_h__ */

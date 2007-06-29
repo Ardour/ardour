@@ -649,9 +649,11 @@ class Session : public PBD::StatefulDestructible
 	sigc::signal<void> NamedSelectionAdded;
 	sigc::signal<void> NamedSelectionRemoved;
 
-        /* Curves and AutomationLists (TODO when they go away) */
-        void add_curve(Curve*);
-        void add_automation_list(AutomationList*);
+	/* Curves and AutomationLists (TODO when they go away) */
+	void add_curve(Curve*);
+	void add_automation_list(AutomationList*);
+	
+	nframes_t automation_interval () const { return _automation_interval; }
 
 	/* fade curves */
 
@@ -780,9 +782,9 @@ class Session : public PBD::StatefulDestructible
 
 	std::map<PBD::ID, PBD::StatefulThingWithGoingAway*> registry;
 
-        // these commands are implemented in libs/ardour/session_command.cc
+	// these commands are implemented in libs/ardour/session_command.cc
 	Command* memento_command_factory(XMLNode* n);
-        void register_with_memento_command_factory(PBD::ID, PBD::StatefulThingWithGoingAway*);
+	void register_with_memento_command_factory(PBD::ID, PBD::StatefulThingWithGoingAway*);
 
 	Command* global_state_command_factory (const XMLNode& n);
 
@@ -917,9 +919,9 @@ class Session : public PBD::StatefulDestructible
 
 	/* Controllables */
 
-	PBD::Controllable* controllable_by_id (const PBD::ID&);
+	boost::shared_ptr<PBD::Controllable> controllable_by_id (const PBD::ID&);
 
-	void add_controllable (PBD::Controllable*);
+	void add_controllable (boost::shared_ptr<PBD::Controllable>);
 	void remove_controllable (PBD::Controllable*);
 
   protected:
@@ -1648,6 +1650,8 @@ class Session : public PBD::StatefulDestructible
 	void allocate_pan_automation_buffers (nframes_t nframes, uint32_t howmany, bool force);
 	uint32_t _npan_buffers;
 
+	nframes_t _automation_interval;
+
 	/* VST support */
 
 	long _vst_callback (VSTPlugin*,
@@ -1672,7 +1676,7 @@ class Session : public PBD::StatefulDestructible
 	LayerModel layer_model;
 	CrossfadeModel xfade_model;
 
-	typedef std::set<PBD::Controllable*> Controllables;
+	typedef std::set<boost::shared_ptr<PBD::Controllable> > Controllables;
 	Glib::Mutex controllables_lock;
 	Controllables controllables;
 

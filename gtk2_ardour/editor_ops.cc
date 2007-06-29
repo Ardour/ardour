@@ -3392,11 +3392,11 @@ Editor::reset_region_gain_envelopes ()
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
 		if (arv) {
-			AutomationList& alist (arv->audio_region()->envelope());
-			XMLNode& before (alist.get_state());
+			boost::shared_ptr<AutomationList> alist (arv->audio_region()->envelope());
+			XMLNode& before (alist->get_state());
 
 			arv->audio_region()->set_default_envelope ();
-			session->add_command (new MementoCommand<AutomationList>(arv->audio_region()->envelope(), &before, &alist.get_state()));
+			session->add_command (new MementoCommand<AutomationList>(*arv->audio_region()->envelope().get(), &before, &alist->get_state()));
 		}
 	}
 
@@ -3485,13 +3485,13 @@ Editor::set_fade_in_shape (AudioRegion::FadeShape shape)
 			return;
 		}
 
-		AutomationList& alist = tmp->audio_region()->fade_in();
-		XMLNode &before = alist.get_state();
+		boost::shared_ptr<AutomationList> alist = tmp->audio_region()->fade_in();
+		XMLNode &before = alist->get_state();
 
 		tmp->audio_region()->set_fade_in_shape (shape);
 		
-		XMLNode &after = alist.get_state();
-		session->add_command(new MementoCommand<AutomationList>(alist, &before, &after));
+		XMLNode &after = alist->get_state();
+		session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
 	}
 
 	commit_reversible_command ();
@@ -3509,13 +3509,13 @@ Editor::set_fade_out_shape (AudioRegion::FadeShape shape)
 			return;
 		}
 
-		AutomationList& alist = tmp->audio_region()->fade_out();
-		XMLNode &before = alist.get_state();
+		boost::shared_ptr<AutomationList> alist = tmp->audio_region()->fade_out();
+		XMLNode &before = alist->get_state();
 
 		tmp->audio_region()->set_fade_out_shape (shape);
 		
-		XMLNode &after = alist.get_state();
-		session->add_command(new MementoCommand<AutomationList>(alist, &before, &after));
+		XMLNode &after = alist->get_state();
+		session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
 	}
 
 	commit_reversible_command ();

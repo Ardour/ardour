@@ -1089,7 +1089,7 @@ ExportDialog::fill_lists ()
 		
 		boost::shared_ptr<Route> route = (*ri);
 		
-		if (route->hidden()) {
+		if (route->is_hidden()) {
 			continue;
 		}
 

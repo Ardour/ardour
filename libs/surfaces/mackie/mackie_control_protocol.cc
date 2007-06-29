@@ -228,9 +228,9 @@ MackieControlProtocol::Sorted MackieControlProtocol::get_sorted_routes()
 		Route & route = **it;
 		if (
 				route.active()
-				&& !route.master()
-				&& !route.hidden()
-				&& !route.control()
+				&& !route.is_master()
+				&& !route.is_hidden()
+				&& !route.is_control()
 				&& remote_ids.find( route.remote_control_id() ) == remote_ids.end()
 		)
 		{
@@ -1019,7 +1019,7 @@ void MackieControlProtocol::notify_panner_changed( RouteSignal * route_signal )
 // TODO handle plugin automation polling
 void MackieControlProtocol::update_automation( RouteSignal & rs )
 {
-	ARDOUR::AutoState gain_state = rs.route().gain_automation().automation_state();
+	ARDOUR::AutoState gain_state = rs.route().gain_control()->list()->automation_state();
 	if ( gain_state == Touch || gain_state == Play )
 	{
 		notify_gain_changed( &rs );

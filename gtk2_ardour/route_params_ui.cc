@@ -178,7 +178,7 @@ RouteParams_UI::add_routes (Session::RouteList& routes)
 	for (Session::RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
 
-		if (route->hidden()) {
+		if (route->is_hidden()) {
 			return;
 		}
 		

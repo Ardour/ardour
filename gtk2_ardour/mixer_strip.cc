@@ -261,7 +261,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (comment_button, Gtk::PACK_SHRINK);
 
-	if (route()->master() || route()->control()) {
+	if (route()->is_master() || route()->is_control()) {
 		
 		if (scrollbar_height == 0) {
 			HScrollbar scrollbar;
@@ -403,6 +403,8 @@ MixerStrip::set_width (Width w, void* owner)
 	pre_processor_box.set_width (w);
 	post_processor_box.set_width (w);
 
+	boost::shared_ptr<AutomationList> gain_automation = _route->gain_control()->list();
+
 	_width_owner = owner;
 
 	if (_width == w) {
@@ -435,8 +437,8 @@ MixerStrip::set_width (Width w, void* owner)
 		       ((Gtk::Label*)comment_button.get_child())->set_text (_("*comments*"));
 		}
 
-		((Gtk::Label*)gpm.gain_automation_style_button.get_child())->set_text (gpm.astyle_string(_route->gain_automation().automation_style()));
-		((Gtk::Label*)gpm.gain_automation_state_button.get_child())->set_text (gpm.astate_string(_route->gain_automation().automation_state()));
+		((Gtk::Label*)gpm.gain_automation_style_button.get_child())->set_text (gpm.astyle_string(gain_automation->automation_style()));
+		((Gtk::Label*)gpm.gain_automation_state_button.get_child())->set_text (gpm.astate_string(gain_automation->automation_state()));
 		((Gtk::Label*)panners.pan_automation_style_button.get_child())->set_text (panners.astyle_string(_route->panner().automation_style()));
 		((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (panners.astate_string(_route->panner().automation_state()));
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "long", 2, 2);
@@ -457,8 +459,8 @@ MixerStrip::set_width (Width w, void* owner)
 		       ((Gtk::Label*)comment_button.get_child())->set_text (_("*Cmt*"));
 		}
 
-		((Gtk::Label*)gpm.gain_automation_style_button.get_child())->set_text (gpm.short_astyle_string(_route->gain_automation().automation_style()));
-		((Gtk::Label*)gpm.gain_automation_state_button.get_child())->set_text (gpm.short_astate_string(_route->gain_automation().automation_state()));
+		((Gtk::Label*)gpm.gain_automation_style_button.get_child())->set_text (gpm.short_astyle_string(gain_automation->automation_style()));
+		((Gtk::Label*)gpm.gain_automation_state_button.get_child())->set_text (gpm.short_astate_string(gain_automation->automation_state()));
 		((Gtk::Label*)panners.pan_automation_style_button.get_child())->set_text (panners.short_astyle_string(_route->panner().automation_style()));
 		((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (panners.short_astate_string(_route->panner().automation_state()));
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "longest label", 2, 2);
@@ -699,8 +701,8 @@ MixerStrip::connect_to_pan ()
 	if (!_route->panner().empty()) {
 		StreamPanner* sp = _route->panner().front();
 
-		panstate_connection = sp->automation().automation_state_changed.connect (mem_fun(panners, &PannerUI::pan_automation_state_changed));
-		panstyle_connection = sp->automation().automation_style_changed.connect (mem_fun(panners, &PannerUI::pan_automation_style_changed));
+		panstate_connection = sp->automation()->automation_state_changed.connect (mem_fun(panners, &PannerUI::pan_automation_state_changed));
+		panstyle_connection = sp->automation()->automation_style_changed.connect (mem_fun(panners, &PannerUI::pan_automation_style_changed));
 	}
 
 	panners.pan_changed (this);

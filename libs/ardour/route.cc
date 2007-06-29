@@ -58,16 +58,16 @@ uint32_t Route::order_key_cnt = 0;
 Route::Route (Session& sess, string name, int input_min, int input_max, int output_min, int output_max, Flag flg, DataType default_type)
 	: IO (sess, name, input_min, input_max, output_min, output_max, default_type),
 	  _flags (flg),
-	  _solo_control (X_("solo"), *this, ToggleControllable::SoloControl),
-	  _mute_control (X_("mute"), *this, ToggleControllable::MuteControl)
+	  _solo_control (new ToggleControllable (X_("solo"), *this, ToggleControllable::SoloControl)),
+	  _mute_control (new ToggleControllable (X_("mute"), *this, ToggleControllable::MuteControl))
 {
 	init ();
 }
 
 Route::Route (Session& sess, const XMLNode& node, DataType default_type)
 	: IO (sess, *node.child ("IO"), default_type),
-	  _solo_control (X_("solo"), *this, ToggleControllable::SoloControl),
-	  _mute_control (X_("mute"), *this, ToggleControllable::MuteControl)
+	  _solo_control (new ToggleControllable (X_("solo"), *this, ToggleControllable::SoloControl)),
+	  _mute_control (new ToggleControllable (X_("mute"), *this, ToggleControllable::MuteControl))
 {
 	init ();
 	_set_state (node, false);
@@ -177,33 +177,33 @@ Route::set_gain (gain_t val, void *src)
 		
 		if (_mix_group->is_relative()) {
 			
-			
-			gain_t usable_gain  = gain();
+			gain_t usable_gain = gain();
 			if (usable_gain < 0.000001f) {
-				usable_gain=0.000001f;
+				usable_gain = 0.000001f;
 			}
 						
 			gain_t delta = val;
 			if (delta < 0.000001f) {
-				delta=0.000001f;
+				delta = 0.000001f;
 			}
 
 			delta -= usable_gain;
 
-			if (delta == 0.0f) return;
+			if (delta == 0.0f)
+				return;
 
 			gain_t factor = delta / usable_gain;
 
 			if (factor > 0.0f) {
 				factor = _mix_group->get_max_factor(factor);
 				if (factor == 0.0f) {
-					gain_changed (src);
+					_gain_control->Changed(); /* EMIT SIGNAL */
 					return;
 				}
 			} else {
 				factor = _mix_group->get_min_factor(factor);
 				if (factor == 0.0f) {
-					gain_changed (src);
+					_gain_control->Changed(); /* EMIT SIGNAL */
 					return;
 				}
 			}
@@ -726,7 +726,7 @@ Route::set_solo (bool yn, void *src)
 	if (_soloed != yn) {
 		_soloed = yn;
 		solo_changed (src); /* EMIT SIGNAL */
-		_solo_control.Changed (); /* EMIT SIGNAL */
+		_solo_control->Changed (); /* EMIT SIGNAL */
 	}
 }
 
@@ -763,7 +763,7 @@ Route::set_mute (bool yn, void *src)
 		_muted = yn;
 		mute_changed (src); /* EMIT SIGNAL */
 		
-		_mute_control.Changed (); /* EMIT SIGNAL */
+		_mute_control->Changed (); /* EMIT SIGNAL */
 		
 		Glib::Mutex::Lock lm (declick_lock);
 		desired_mute_gain = (yn?0.0f:1.0f);
@@ -1491,8 +1491,8 @@ Route::state(bool full_state)
 	node->add_property ("order-keys", order_string);
 
 	node->add_child_nocopy (IO::state (full_state));
-	node->add_child_nocopy (_solo_control.get_state ());
-	node->add_child_nocopy (_mute_control.get_state ());
+	node->add_child_nocopy (_solo_control->get_state ());
+	node->add_child_nocopy (_mute_control->get_state ());
 
 	XMLNode* remote_control_node = new XMLNode (X_("remote_control"));
 	snprintf (buf, sizeof (buf), "%d", _remote_control_id);
@@ -1853,12 +1853,12 @@ Route::_set_state (const XMLNode& node, bool call_base)
 		} else if (child->name() == X_("controllable") && (prop = child->property("name")) != 0) {
 			
 			if (prop->value() == "solo") {
-				_solo_control.set_state (*child);
-				_session.add_controllable (&_solo_control);
+				_solo_control->set_state (*child);
+				_session.add_controllable (_solo_control);
 			}
 			else if (prop->value() == "mute") {
-				_mute_control.set_state (*child);
-				_session.add_controllable (&_mute_control);
+				_mute_control->set_state (*child);
+				_session.add_controllable (_mute_control);
 			}
 		}
 		else if (child->name() == X_("remote_control")) {
@@ -2038,7 +2038,7 @@ Route::set_control_outs (const vector<string>& ports)
  		_control_outs = 0;
  	}
 
-	if (control() || master()) {
+	if (is_control() || is_master()) {
 		/* no control outs for these two special busses */
 		return 0;
 	}
@@ -2393,10 +2393,9 @@ Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nfra
 		
 		if (am.locked() && _session.transport_rolling()) {
 			
-			ARDOUR::AutomationList& gain_auto = gain_automation();
-			
-			if (gain_auto.automation_playback()) {
-				apply_gain_automation = gain_auto.curve().rt_safe_get_vector (start_frame, end_frame, _session.gain_automation_buffer(), nframes);
+			if (_gain_control->list()->automation_playback()) {
+				apply_gain_automation = _gain_control->list()->curve().rt_safe_get_vector (
+						start_frame, end_frame, _session.gain_automation_buffer(), nframes);
 			}
 		}
 	}

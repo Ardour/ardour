@@ -157,8 +157,8 @@ Processor::state (bool full_state)
 
 		XMLNode& automation = Automatable::get_automation_state(); 
 		
-		for (set<ParamID>::iterator x = _visible_parameter_automation.begin(); x != _visible_parameter_automation.end(); ++x) {
-			if (x != _visible_parameter_automation.begin()) {
+		for (set<ParamID>::iterator x = _visible_controls.begin(); x != _visible_controls.end(); ++x) {
+			if (x != _visible_controls.begin()) {
 				sstr << ' ';
 			}
 			sstr << *x;
@@ -202,7 +202,7 @@ Processor::set_state (const XMLNode& node)
 				uint32_t what;
 				stringstream sstr;
 
-				_visible_parameter_automation.clear ();
+				_visible_controls.clear ();
 				
 				sstr << prop->value();
 				while (1) {

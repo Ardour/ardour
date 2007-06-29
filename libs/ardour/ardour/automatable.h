@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000,2007 Paul Davis 
+    Copyright (C) 2000, 2007 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,13 +22,16 @@
 
 #include <set>
 #include <map>
+#include <boost/shared_ptr.hpp>
 #include <ardour/session_object.h>
 #include <ardour/automation_event.h>
+#include <ardour/automation_control.h>
 #include <ardour/param_id.h>
 
 namespace ARDOUR {
 
 class Session;
+class AutomationControl;
 
 class Automatable : public SessionObject
 {
@@ -38,16 +41,17 @@ public:
 	virtual ~Automatable() {}
 
 	// shorthand for gain, pan, etc
-	inline AutomationList* automation_list(AutomationType type, bool create_if_missing=false) {
-		return automation_list(ParamID(type), create_if_missing);
+	inline boost::shared_ptr<AutomationControl>
+	control(AutomationType type, bool create_if_missing=false) {
+		return control(ParamID(type), create_if_missing);
 	}
 
-	virtual AutomationList* automation_list(ParamID id, bool create_if_missing=false);
-	virtual const AutomationList* automation_list(ParamID id) const;
+	virtual boost::shared_ptr<AutomationControl> control(ParamID id, bool create_if_missing=false);
+	virtual boost::shared_ptr<const AutomationControl> control(ParamID id) const;
 
-	virtual void add_automation_parameter(AutomationList* al);
+	virtual void add_control(boost::shared_ptr<AutomationControl>);
 
-	virtual void automation_snapshot(nframes_t now) {};
+	virtual void automation_snapshot(nframes_t now);
 
 	virtual bool find_next_event(nframes_t start, nframes_t end, ControlEvent& ev) const;
 	
@@ -74,7 +78,7 @@ protected:
 
 	void can_automate(ParamID);
 
-	virtual void automation_list_creation_callback(ParamID, AutomationList&) {}
+	virtual void auto_state_changed (ParamID which) {}
 
 	int set_automation_state(const XMLNode&, ParamID default_param);
 	XMLNode& get_automation_state();
@@ -83,9 +87,11 @@ protected:
 	int old_set_automation_state(const XMLNode&);
 
 	mutable Glib::Mutex _automation_lock;
-
-	std::map<ParamID,AutomationList*> _parameter_automation;
-	std::set<ParamID> _visible_parameter_automation;
+	
+	typedef std::map<ParamID,boost::shared_ptr<AutomationControl> > Controls;
+	
+	Controls          _controls;
+	std::set<ParamID> _visible_controls;
 	std::set<ParamID> _can_automate_list;
 	
 	nframes_t _last_automation_snapshot;

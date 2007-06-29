@@ -1676,7 +1676,7 @@ Editor::start_fade_in_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	AudioRegionView* arv = static_cast<AudioRegionView*>(drag_info.data);
 
-	drag_info.pointer_frame_offset = drag_info.grab_frame - ((nframes_t) arv->audio_region()->fade_in().back()->when + arv->region()->position());	
+	drag_info.pointer_frame_offset = drag_info.grab_frame - ((nframes_t) arv->audio_region()->fade_in()->back()->when + arv->region()->position());	
 }
 
 void
@@ -1755,13 +1755,13 @@ Editor::fade_in_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* even
 			continue;
 		}
 	
-		AutomationList& alist = tmp->audio_region()->fade_in();
-		XMLNode &before = alist.get_state();
+		boost::shared_ptr<AutomationList> alist = tmp->audio_region()->fade_in();
+		XMLNode &before = alist->get_state();
 
 		tmp->audio_region()->set_fade_in_length (fade_length);
 		
-		XMLNode &after = alist.get_state();
-		session->add_command(new MementoCommand<AutomationList>(alist, &before, &after));
+		XMLNode &after = alist->get_state();
+		session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
 	}
 
 	commit_reversible_command ();
@@ -1783,7 +1783,7 @@ Editor::start_fade_out_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	AudioRegionView* arv = static_cast<AudioRegionView*>(drag_info.data);
 
-	drag_info.pointer_frame_offset = drag_info.grab_frame - (arv->region()->length() - (nframes_t) arv->audio_region()->fade_out().back()->when + arv->region()->position());	
+	drag_info.pointer_frame_offset = drag_info.grab_frame - (arv->region()->length() - (nframes_t) arv->audio_region()->fade_out()->back()->when + arv->region()->position());	
 }
 
 void
@@ -1871,13 +1871,13 @@ Editor::fade_out_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* eve
 			continue;
 		}
 	
-		AutomationList& alist = tmp->audio_region()->fade_out();
-		XMLNode &before = alist.get_state();
+		boost::shared_ptr<AutomationList> alist = tmp->audio_region()->fade_out();
+		XMLNode &before = alist->get_state();
 		
 		tmp->audio_region()->set_fade_out_length (fade_length);
 
-		XMLNode &after = alist.get_state();
-		session->add_command(new MementoCommand<AutomationList>(alist, &before, &after));
+		XMLNode &after = alist->get_state();
+		session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
 	}
 
 	commit_reversible_command ();

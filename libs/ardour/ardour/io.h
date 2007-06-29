@@ -42,6 +42,7 @@
 #include <ardour/port_set.h>
 #include <ardour/chan_count.h>
 #include <ardour/latent.h>
+#include <ardour/automation_control.h>
 
 using std::string;
 using std::vector;
@@ -59,6 +60,7 @@ class Port;
 class AudioPort;
 class MidiPort;
 class BufferSet;
+
 
 /** A collection of input and output ports with connections.
  *
@@ -103,8 +105,6 @@ class IO : public Automatable, public Latent
 	void just_meter_input (nframes_t start_frame, nframes_t end_frame, 
 			       nframes_t nframes, nframes_t offset);
 
-	virtual void   set_gain (gain_t g, void *src);
-	void           inc_gain (gain_t delta, void *src);
 	gain_t         gain () const { return _desired_gain; }
 	virtual gain_t effective_gain () const;
 	
@@ -182,8 +182,6 @@ class IO : public Automatable, public Latent
 	sigc::signal<void,IOChange,void*> input_changed;
 	sigc::signal<void,IOChange,void*> output_changed;
 
-	sigc::signal<void,void*> gain_changed;
-
 	virtual XMLNode& state (bool full);
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&);
@@ -206,10 +204,6 @@ class IO : public Automatable, public Latent
 	static sigc::signal<void,ChanCount> MoreChannels;
 	static sigc::signal<int>            PortsCreated;
 
-	PBD::Controllable& gain_control() {
-		return _gain_control;
-	}
-	
     static void update_meters();
 
   private: 
@@ -221,13 +215,24 @@ class IO : public Automatable, public Latent
   public:
 
 	/* automation */
+	
+	struct GainControl : public AutomationControl {
+	    GainControl (std::string name, IO& i, boost::shared_ptr<AutomationList> al)
+			: AutomationControl (i._session, al, name)
+			, _io (i)
+		{}
+	 
+	    void set_value (float val);
+	    float get_value (void) const;
+   
+	    IO& _io;
+	};
 
-	static void set_automation_interval (nframes_t frames) {
-		_automation_interval = frames;
+	boost::shared_ptr<GainControl> gain_control() {
+		return _gain_control;
 	}
-
-	static nframes_t automation_interval() { 
-		return _automation_interval;
+	boost::shared_ptr<const GainControl> gain_control() const {
+		return _gain_control;
 	}
 
 	void clear_automation ();
@@ -236,10 +241,6 @@ class IO : public Automatable, public Latent
 
 	virtual void transport_stopped (nframes_t now); // interface: matches Insert
 	void automation_snapshot (nframes_t now); // interface: matches Automatable
-
-	// FIXME: these will probably become unsafe in the near future
-	ARDOUR::AutomationList&       gain_automation()       { return *automation_list(GainAutomation); }
-	const ARDOUR::AutomationList& gain_automation() const { return *automation_list(GainAutomation); }
 
 	void start_pan_touch (uint32_t which);
 	void end_pan_touch (uint32_t which);
@@ -282,25 +283,12 @@ class IO : public Automatable, public Latent
 	virtual uint32_t pans_required() const
 		{ return _inputs.count().n_audio(); }
 
-	struct GainControllable : public PBD::Controllable {
-	    GainControllable (std::string name, IO& i) : Controllable (name), io (i) {}
-	 
-	    void set_value (float val);
-	    float get_value (void) const;
-   
-	    IO& io;
-	};
+	boost::shared_ptr<GainControl> _gain_control;
 
-	GainControllable _gain_control;
-
-	nframes_t last_automation_snapshot;
-	static nframes_t _automation_interval;
-
-	/*AutoState      _gain_automation_state;
-	AutoStyle      _gain_automation_style;*/
+	virtual void   set_gain (gain_t g, void *src);
+	void           inc_gain (gain_t delta, void *src);
 
 	bool apply_gain_automation;
-	//Curve     _gain_automation_curve;
 	
 	virtual int load_automation (std::string path);
 

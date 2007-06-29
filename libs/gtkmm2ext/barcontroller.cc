@@ -349,7 +349,8 @@ BarController::expose (GdkEventExpose* event)
 		char buf[64];
 		buf[0] = '\0';
 
-		label_callback (buf, 64);
+		if (label_callback)
+			label_callback (buf, 64);
 
 		if (buf[0] != '\0') {
 

@@ -193,8 +193,8 @@ MidiTrack::_set_state (const XMLNode& node, bool call_base)
 		child = *niter;
 
 		if (child->name() == X_("recenable")) {
-			_rec_enable_control.set_state (*child);
-			_session.add_controllable (&_rec_enable_control);
+			_rec_enable_control->set_state (*child);
+			_session.add_controllable (_rec_enable_control);
 		}
 	}
 
@@ -249,7 +249,7 @@ MidiTrack::state(bool full_state)
 	_diskstream->id().print (buf, sizeof(buf));
 	root.add_property ("diskstream-id", buf);
 	
-	root.add_child_nocopy (_rec_enable_control.get_state());
+	root.add_child_nocopy (_rec_enable_control->get_state());
 
 	return root;
 }
@@ -426,6 +426,15 @@ MidiTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 {
 	int dret;
 	boost::shared_ptr<MidiDiskstream> diskstream = midi_diskstream();
+	
+	{
+		Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
+		if (lm.locked()) {
+			// automation snapshot can also be called from the non-rt context
+			// and it uses the redirect list, so we take the lock out here
+			automation_snapshot (start_frame);
+		}
+	}
 
 	if (n_outputs().n_total() == 0 && _processors.empty()) {
 		return 0;

@@ -38,7 +38,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-AudioRegionGainLine::AudioRegionGainLine (const string & name, Session& s, AudioRegionView& r, ArdourCanvas::Group& parent, AutomationList& l)
+AudioRegionGainLine::AudioRegionGainLine (const string & name, Session& s, AudioRegionView& r, ArdourCanvas::Group& parent, boost::shared_ptr<AutomationList> l)
   : AutomationLine (name, r.get_time_axis_view(), parent, l),
 	  session (s),
 	  rv (r)
@@ -67,8 +67,8 @@ AudioRegionGainLine::start_drag (ControlPoint* cp, nframes_t x, float fraction)
 {
 	AutomationLine::start_drag (cp, x, fraction);
 	if (!rv.audio_region()->envelope_active()) {
-                trackview.session().add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), &rv.audio_region()->get_state(), 0));
-                rv.audio_region()->set_envelope_active(false);
+		trackview.session().add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), &rv.audio_region()->get_state(), 0));
+		rv.audio_region()->set_envelope_active(false);
 	} 
 }
 
@@ -81,18 +81,18 @@ AudioRegionGainLine::remove_point (ControlPoint& cp)
 	model_representation (cp, mr);
 
 	trackview.editor.current_session()->begin_reversible_command (_("remove control point"));
-        XMLNode &before = alist.get_state();
+	XMLNode &before = alist->get_state();
 
 	if (!rv.audio_region()->envelope_active()) {
-                XMLNode &region_before = rv.audio_region()->get_state();
+		XMLNode &region_before = rv.audio_region()->get_state();
 		rv.audio_region()->set_envelope_active(true);
-                XMLNode &region_after = rv.audio_region()->get_state();
-                trackview.session().add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), &region_before, &region_after));
+		XMLNode &region_after = rv.audio_region()->get_state();
+		trackview.session().add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), &region_before, &region_after));
 	} 
 	
-	alist.erase (mr.start, mr.end);
+	alist->erase (mr.start, mr.end);
 
-	trackview.editor.current_session()->add_command (new MementoCommand<AutomationList>(alist, &before, &alist.get_state()));
+	trackview.editor.current_session()->add_command (new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
 	trackview.editor.current_session()->commit_reversible_command ();
 	trackview.editor.current_session()->set_dirty ();
 }

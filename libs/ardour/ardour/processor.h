@@ -80,7 +80,7 @@ class Processor : public Automatable, public Latent
 	
 	virtual bool configure_io (ChanCount in, ChanCount out) { _configured_input = in; return (_configured = true); }
 
-	/* Act as a pass through, if not overridden */
+	/* Derived classes should override these, or processor appears as a pass-through */
 	virtual bool      can_support_input_configuration (ChanCount in) const { return true; }
 	virtual ChanCount output_for_input_configuration (ChanCount in) const { return in; }
 	virtual ChanCount output_streams() const { return _configured_input; }

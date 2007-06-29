@@ -46,6 +46,7 @@ class ProcessorAutomationTimeAxisView : public AutomationTimeAxisView
 	~ProcessorAutomationTimeAxisView();
 	
 	void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, nframes_t, double);
+	void add_line (AutomationLine&);
 
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	void hide ();

@@ -98,7 +98,7 @@ class ControlPoint
 class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoingAway
 {
   public:
-	AutomationLine (const string & name, TimeAxisView&, ArdourCanvas::Group&, ARDOUR::AutomationList&);
+	AutomationLine (const string & name, TimeAxisView&, ArdourCanvas::Group&, boost::shared_ptr<ARDOUR::AutomationList>);
 	virtual ~AutomationLine ();
 
 	void queue_reset ();
@@ -150,7 +150,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	virtual void view_to_model_y (double&) = 0;
 	virtual void model_to_view_y (double&) = 0;
 
-	ARDOUR::AutomationList& the_list() const { return alist; }
+	boost::shared_ptr<ARDOUR::AutomationList> the_list() const { return alist; }
 
 	void show_all_control_points ();
 	void hide_all_but_selected_control_points ();
@@ -168,7 +168,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	guint32 _y_position;
 	guint32 _height;
 	uint32_t _line_color;
-	ARDOUR::AutomationList& alist;
+	boost::shared_ptr<ARDOUR::AutomationList> alist;
 
 	bool    _visible  : 1;
 	bool    _vc_uses_gain_mapping : 1;

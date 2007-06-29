@@ -1195,8 +1195,6 @@ AutomationList::get_state ()
 XMLNode&
 AutomationList::state (bool full)
 {
-	cerr << _param_id.to_string() << "->state()" << endl;
-
 	XMLNode* root = new XMLNode (X_("AutomationList"));
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
@@ -1208,11 +1206,11 @@ AutomationList::state (bool full)
 	snprintf (buf, sizeof (buf), "%.12g", _default_value);
 	root->add_property ("default", buf);
 	snprintf (buf, sizeof (buf), "%.12g", _min_yval);
-	root->add_property ("_min_yval", buf);
+	root->add_property ("min_yval", buf);
 	snprintf (buf, sizeof (buf), "%.12g", _max_yval);
-	root->add_property ("_max_yval", buf);
+	root->add_property ("max_yval", buf);
 	snprintf (buf, sizeof (buf), "%.12g", _max_xval);
-	root->add_property ("_max_xval", buf);
+	root->add_property ("max_xval", buf);
 
 	if (full) {
 		root->add_property ("state", auto_state_to_string (_state));
@@ -1390,19 +1388,19 @@ AutomationList::set_state (const XMLNode& node)
 		_state = Off;
 	}
 
-	if ((prop = node.property (X_("_min_yval"))) != 0) {
+	if ((prop = node.property (X_("min_yval"))) != 0) {
 		_min_yval = atof (prop->value ());
 	} else {
 		_min_yval = FLT_MIN;
 	}
 
-	if ((prop = node.property (X_("_max_yval"))) != 0) {
+	if ((prop = node.property (X_("max_yval"))) != 0) {
 		_max_yval = atof (prop->value ());
 	} else {
 		_max_yval = FLT_MAX;
 	}
 
-	if ((prop = node.property (X_("_max_xval"))) != 0) {
+	if ((prop = node.property (X_("max_xval"))) != 0) {
 		_max_xval = atof (prop->value ());
 	} else {
 		_max_xval = 0; // means "no limit ;

@@ -83,7 +83,7 @@ class Track : public Route
 	XMLNode&    get_template();
 	virtual int set_state(const XMLNode& node) = 0;
 
-	PBD::Controllable& rec_enable_control() { return _rec_enable_control; }
+	boost::shared_ptr<PBD::Controllable> rec_enable_control() { return _rec_enable_control; }
 
 	bool record_enabled() const;
 	void set_record_enable (bool yn, void *src);
@@ -141,8 +141,9 @@ class Track : public Route
 	XMLNode*              pending_state;
 	sigc::connection      recenable_connection;
 	sigc::connection      ic_connection;
-	RecEnableControllable _rec_enable_control;
 	bool                  _destructive;
+	
+	boost::shared_ptr<RecEnableControllable> _rec_enable_control;
 };
 
 }; /* namespace ARDOUR*/
