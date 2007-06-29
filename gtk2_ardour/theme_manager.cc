@@ -178,7 +178,7 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 }
 
 void
-load_rc_file (const string& filename)
+load_rc_file (const string& filename, bool themechange)
 {
 	sys::path rc_file_path;
 
@@ -196,7 +196,7 @@ load_rc_file (const string& filename)
 
 	info << "Loading ui configuration file " << rc_file_path.to_string() << endmsg;
 
-	Gtkmm2ext::UI::instance()->load_rcfile (rc_file_path.to_string());
+	Gtkmm2ext::UI::instance()->load_rcfile (rc_file_path.to_string(), themechange);
 }
 
 void
@@ -205,7 +205,7 @@ ThemeManager::on_dark_theme_button_toggled()
 	if (!dark_button.get_active()) return;
 
 	ARDOUR_UI::config()->ui_rc_file.set("ardour2_ui_dark.rc");
-	load_rc_file (ARDOUR_UI::config()->ui_rc_file.get());
+	load_rc_file (ARDOUR_UI::config()->ui_rc_file.get(), true);
 }
 
 void
@@ -214,7 +214,7 @@ ThemeManager::on_light_theme_button_toggled()
 	if (!light_button.get_active()) return;
 
 	ARDOUR_UI::config()->ui_rc_file.set("ardour2_ui_light.rc");
-	load_rc_file (ARDOUR_UI::config()->ui_rc_file.get());
+	load_rc_file (ARDOUR_UI::config()->ui_rc_file.get(), true);
 }
 
 void
@@ -254,6 +254,6 @@ ThemeManager::setup_theme ()
 		light_button.set_active();
 	}
 
-	load_rc_file(rcfile);
+	load_rc_file(rcfile, false);
 }
 

@@ -114,7 +114,7 @@ UI::caller_is_ui_thread ()
 }
 
 int
-UI::load_rcfile (string path)
+UI::load_rcfile (string path, bool themechange)
 {
 	if (path.length() == 0) {
 		return -1;
@@ -129,6 +129,12 @@ UI::load_rcfile (string path)
 	}
 	
 	RC rc (path.c_str());
+	RC::reset_styles(Gtk::Settings::get_default());
+	theme_changed.emit();
+
+	if (themechange) {
+		return 0; //Don't continue on every time there is a theme change
+	}
 
 	/* have to pack widgets into a toplevel window so that styles will stick */
 
@@ -198,11 +204,6 @@ UI::load_rcfile (string path)
 	info_mtag->property_font_desc().set_value(style->get_font());
 	info_mtag->property_foreground_gdk().set_value(style->get_fg(STATE_NORMAL));
 	info_mtag->property_background_gdk().set_value(style->get_bg(STATE_NORMAL));
-
-
-	RC::reset_styles(Gtk::Settings::get_default());
-	
-	theme_changed.emit();
 
 	return 0;
 }

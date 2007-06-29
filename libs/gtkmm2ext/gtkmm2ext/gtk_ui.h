@@ -107,7 +107,7 @@ class UI : public Receiver, public AbstractUI<UIRequest>
 	bool running ();
 	void quit    ();
 	void kill    ();
-	int  load_rcfile (string);
+	int  load_rcfile (string, bool themechange = false);
 	void run (Receiver &old_receiver);
 
 	void set_state (Gtk::Widget *w, Gtk::StateType state);
