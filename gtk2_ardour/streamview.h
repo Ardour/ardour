@@ -26,7 +26,6 @@
 #include "enums.h"
 #include "simplerect.h"
 #include "canvas.h"
-#include "color.h"
 
 namespace Gdk {
 	class Color;

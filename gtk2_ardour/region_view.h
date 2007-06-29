@@ -31,7 +31,6 @@
 #include "enums.h"
 #include "waveview.h"
 #include "canvas.h"
-#include "color.h"
 
 class TimeAxisView;
 class RegionEditor;

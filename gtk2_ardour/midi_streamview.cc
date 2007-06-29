@@ -44,7 +44,6 @@
 #include "rgb_macros.h"
 #include "gui_thread.h"
 #include "utils.h"
-#include "color.h"
 #include "simplerect.h"
 
 using namespace std;

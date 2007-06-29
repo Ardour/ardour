@@ -25,7 +25,6 @@
 #include <ardour/location.h>
 #include "enums.h"
 #include "simplerect.h"
-#include "color.h"
 #include "streamview.h"
 
 namespace Gdk {

@@ -40,7 +40,6 @@
 #include "enums.h"
 #include "editing.h"
 #include "canvas.h"
-#include "color.h"
 
 namespace ARDOUR {
 	class Session;

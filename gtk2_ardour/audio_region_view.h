@@ -33,7 +33,6 @@
 #include "enums.h"
 #include "waveview.h"
 #include "canvas.h"
-#include "color.h"
 
 namespace ARDOUR {
 	class AudioRegion;

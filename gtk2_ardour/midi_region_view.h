@@ -33,7 +33,6 @@
 #include "automation_line.h"
 #include "enums.h"
 #include "canvas.h"
-#include "color.h"
 
 namespace ARDOUR {
 	class MidiRegion;

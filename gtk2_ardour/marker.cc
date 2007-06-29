@@ -24,7 +24,6 @@
 #include "public_editor.h"
 #include "utils.h"
 #include "canvas_impl.h"
-#include "color.h"
 #include "ardour_ui.h"
 
 #include "i18n.h"

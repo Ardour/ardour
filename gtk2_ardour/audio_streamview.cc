@@ -47,7 +47,6 @@
 #include "rgb_macros.h"
 #include "gui_thread.h"
 #include "utils.h"
-#include "color.h"
 
 #include "i18n.h"
 

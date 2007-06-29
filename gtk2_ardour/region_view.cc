@@ -31,6 +31,7 @@
 #include <ardour/audiosource.h>
 #include <ardour/audio_diskstream.h>
 
+#include "ardour_ui.h"
 #include "streamview.h"
 #include "region_view.h"
 #include "route_time_axis.h"

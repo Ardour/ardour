@@ -48,7 +48,6 @@
 #include "canvas_impl.h"
 #include "simplerect.h"
 #include "waveview.h"
-#include "color.h"
 
 using namespace std;
 using namespace ARDOUR;

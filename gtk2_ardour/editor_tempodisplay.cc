@@ -42,7 +42,6 @@
 #include "tempo_dialog.h"
 #include "rgb_macros.h"
 #include "gui_thread.h"
-#include "color.h"
 #include "time_axis_view.h"
 #include "ardour_ui.h"
 
