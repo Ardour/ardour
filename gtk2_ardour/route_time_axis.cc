@@ -56,8 +56,6 @@
 #include "ardour_ui.h"
 #include "route_time_axis.h"
 #include "automation_time_axis.h"
-#include "processor_automation_time_axis.h"
-#include "processor_automation_line.h"
 #include "canvas_impl.h"
 #include "crossfade_view.h"
 #include "enums.h"
@@ -207,9 +205,7 @@ RouteTimeAxisView::~RouteTimeAxisView ()
 {
 	GoingAway (); /* EMIT_SIGNAL */
 
-	vector_delete (&processor_automation_curves);
-
-	for (list<InsertAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
 		delete *i;
 	}
 
@@ -456,6 +452,7 @@ RouteTimeAxisView::build_automation_action_menu ()
 		}
 		
 		i->second->menu_item->set_active(show_automation(i->second->param));
+		//i->second->menu_item->set_active(false);
 	}
 }
 
@@ -1106,7 +1103,7 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
 void
 RouteTimeAxisView::set_selected_points (PointSelection& points)
 {
-	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i)->set_selected_points (points);
 	}
 }
@@ -1140,7 +1137,7 @@ RouteTimeAxisView::get_selectables (nframes_t start, nframes_t end, double top, 
 
 	/* pick up visible automation tracks */
 	
-	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		if (!(*i)->hidden()) {
 			(*i)->get_selectables (start_adjusted, end_adjusted, top, bot, results);
 		}
@@ -1154,7 +1151,7 @@ RouteTimeAxisView::get_inverted_selectables (Selection& sel, list<Selectable*>& 
 		_view->get_inverted_selectables (sel, results);
 	}
 
-	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		if (!(*i)->hidden()) {
 			(*i)->get_inverted_selectables (sel, results);
 		}
@@ -1348,12 +1345,12 @@ RouteTimeAxisView::paste (nframes_t pos, float times, Selection& selection, size
 }
 
 
-list<TimeAxisView*>
+TimeAxisView::Children
 RouteTimeAxisView::get_child_list()
 {
-	list<TimeAxisView*> redirect_children;
+	TimeAxisView::Children redirect_children;
 	
-	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		if (!(*i)->hidden()) {
 			redirect_children.push_back(*i);
 		}
@@ -1542,8 +1539,8 @@ RouteTimeAxisView::show_all_automation ()
 
 	/* Show processor automation */
 
-	for (list<InsertAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
-		for (vector<InsertAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
+	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
 			if ((*ii)->view == 0) {
 				add_processor_automation_curve ((*i)->processor, (*ii)->what);
 			} 
@@ -1569,8 +1566,7 @@ RouteTimeAxisView::show_existing_automation ()
 
 	map<ARDOUR::ParamID, RouteAutomationNode*>::iterator i;
 	for (i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
-		// FIXME: only shown if /first/ line has points
-		if (!i->second->track->lines.empty() && i->second->track->lines[0].first->npoints() > 0) {
+		if (i->second->track->line() && i->second->track->line()->npoints() > 0) {
 			i->second->track->set_marked_for_display (true);
 			i->second->track->canvas_display->show();
 			i->second->track->get_state_node()->add_property ("shown", X_("yes"));
@@ -1581,9 +1577,9 @@ RouteTimeAxisView::show_existing_automation ()
 
 	/* Show processor automation */
 
-	for (list<InsertAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
-		for (vector<InsertAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
-			if ((*ii)->view != 0) {
+	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
+			if ((*ii)->view != 0 && (*i)->processor->control((*ii)->what)->list()->size() > 0) {
 				(*ii)->menu_item->set_active (true);
 			}
 		}
@@ -1599,11 +1595,13 @@ RouteTimeAxisView::hide_all_automation ()
 {
 	no_redraw = true;
 
-	for (list<InsertAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
-		for (vector<InsertAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
+	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
 			(*ii)->menu_item->set_active (false);
 		}
 	}
+
+	_show_automation.clear();
 
 	no_redraw = false;
 	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
@@ -1613,54 +1611,50 @@ RouteTimeAxisView::hide_all_automation ()
 void
 RouteTimeAxisView::region_view_added (RegionView* rv)
 {
-	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
-		AutomationTimeAxisView* atv;
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
+		boost::shared_ptr<AutomationTimeAxisView> atv;
 
-		if ((atv = dynamic_cast<AutomationTimeAxisView*> (*i)) != 0) {
-			rv->add_ghost (*atv);
+		if ((atv = boost::dynamic_pointer_cast<AutomationTimeAxisView> (*i)) != 0) {
+			rv->add_ghost (*atv.get());
 		}
 	}
 }
 
 void
-RouteTimeAxisView::add_ghost_to_processor (RegionView* rv, AutomationTimeAxisView* atv)
+RouteTimeAxisView::add_ghost_to_processor (RegionView* rv, boost::shared_ptr<AutomationTimeAxisView> atv)
 {
-	rv->add_ghost (*atv);
+	rv->add_ghost (*atv.get());
 }
 
-RouteTimeAxisView::InsertAutomationInfo::~InsertAutomationInfo ()
+RouteTimeAxisView::ProcessorAutomationInfo::~ProcessorAutomationInfo ()
 {
-	for (vector<InsertAutomationNode*>::iterator i = lines.begin(); i != lines.end(); ++i) {
+	for (vector<ProcessorAutomationNode*>::iterator i = lines.begin(); i != lines.end(); ++i) {
 		delete *i;
 	}
 }
 
 
-RouteTimeAxisView::InsertAutomationNode::~InsertAutomationNode ()
+RouteTimeAxisView::ProcessorAutomationNode::~ProcessorAutomationNode ()
 {
-	parent.remove_ran (this);
-
-	if (view) {
-		delete view;
-	}
+	parent.remove_processor_automation_node (this);
 }
 
 void
-RouteTimeAxisView::remove_ran (InsertAutomationNode* ran)
+RouteTimeAxisView::remove_processor_automation_node (ProcessorAutomationNode* pan)
 {
-	if (ran->view) {
-		remove_child (ran->view);
+	if (pan->view) {
+		remove_child (pan->view);
 	}
 }
 
-RouteTimeAxisView::InsertAutomationNode*
+RouteTimeAxisView::ProcessorAutomationNode*
 RouteTimeAxisView::find_processor_automation_node (boost::shared_ptr<Processor> processor, ParamID what)
 {
-	for (list<InsertAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
 
 		if ((*i)->processor == processor) {
 
-			for (vector<InsertAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
+			for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
 				if ((*ii)->what == what) {
 					return *ii;
 				}
@@ -1693,11 +1687,10 @@ legalize_for_xml_node (string str)
 void
 RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> processor, ParamID what)
 {
-	ProcessorAutomationLine* ral;
 	string name;
-	InsertAutomationNode* ran;
+	ProcessorAutomationNode* pan;
 
-	if ((ran = find_processor_automation_node (processor, what)) == 0) {
+	if ((pan = find_processor_automation_node (processor, what)) == 0) {
 		fatal << _("programming error: ")
 		      << string_compose (X_("processor automation curve for %1:%2 not registered with track!"),
 				  processor->name(), what)
@@ -1706,7 +1699,7 @@ RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> 
 		return;
 	}
 
-	if (ran->view) {
+	if (pan->view) {
 		return;
 	}
 
@@ -1719,42 +1712,37 @@ RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> 
 	char state_name[256];
 	snprintf (state_name, sizeof (state_name), "Redirect-%s-%" PRIu32, legalize_for_xml_node (processor->name()).c_str(), what.id());
 
-	ran->view = new ProcessorAutomationTimeAxisView (_session, _route, editor, *this, parent_canvas, name, what, *processor, state_name);
+	boost::shared_ptr<AutomationControl> control = processor->control(what, true);
 
-	ral = new ProcessorAutomationLine (name, 
-					  *processor, *ran->view, *ran->view->canvas_display,
-					  processor->control (what, true)->list());
-	
-	ral->set_line_color (ARDOUR_UI::config()->canvasvar_ProcessorAutomationLine.get());
-	ral->queue_reset ();
+	pan->view = boost::shared_ptr<AutomationTimeAxisView>(
+			new AutomationTimeAxisView (_session, _route, processor, control,
+				editor, *this, parent_canvas, name, state_name));
 
-	ran->view->add_line (*ral);
+	pan->view->Hiding.connect (bind (mem_fun(*this, &RouteTimeAxisView::processor_automation_track_hidden), pan, processor));
 
-	ran->view->Hiding.connect (bind (mem_fun(*this, &RouteTimeAxisView::processor_automation_track_hidden), ran, processor));
-
-	if (!ran->view->marked_for_display()) {
-		ran->view->hide ();
+	if (!pan->view->marked_for_display()) {
+		pan->view->hide ();
 	} else {
-		ran->menu_item->set_active (true);
+		pan->menu_item->set_active (true);
 	}
 
-	add_child (ran->view);
+	add_child (pan->view);
 
 	if (_view) {
-		_view->foreach_regionview (bind (mem_fun(*this, &RouteTimeAxisView::add_ghost_to_processor), ran->view));
+		_view->foreach_regionview (bind (mem_fun(*this, &RouteTimeAxisView::add_ghost_to_processor), pan->view));
 	}
 
 	processor->mark_automation_visible (what, true);
 }
 
 void
-RouteTimeAxisView::processor_automation_track_hidden (RouteTimeAxisView::InsertAutomationNode* ran, boost::shared_ptr<Processor> i)
+RouteTimeAxisView::processor_automation_track_hidden (RouteTimeAxisView::ProcessorAutomationNode* pan, boost::shared_ptr<Processor> i)
 {
 	if (!_hidden) {
-		ran->menu_item->set_active (false);
+		pan->menu_item->set_active (false);
 	}
 
-	i->mark_automation_visible (ran->what, false);
+	i->mark_automation_visible (pan->what, false);
 
 	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 }
@@ -1763,14 +1751,14 @@ void
 RouteTimeAxisView::add_existing_processor_automation_curves (boost::shared_ptr<Processor> processor)
 {
 	set<ParamID> s;
-	ProcessorAutomationLine *ral;
+	boost::shared_ptr<AutomationLine> al;
 
 	processor->what_has_visible_automation (s);
 
 	for (set<ParamID>::iterator i = s.begin(); i != s.end(); ++i) {
 		
-		if ((ral = find_processor_automation_curve (processor, *i)) != 0) {
-			ral->queue_reset ();
+		if ((al = find_processor_automation_curve (processor, *i)) != 0) {
+			al->queue_reset ();
 		} else {
 			add_processor_automation_curve (processor, (*i));
 		}
@@ -1778,7 +1766,7 @@ RouteTimeAxisView::add_existing_processor_automation_curves (boost::shared_ptr<P
 }
 
 void
-RouteTimeAxisView::add_automation_child(ParamID param, AutomationTimeAxisView* track)
+RouteTimeAxisView::add_automation_child(ParamID param, boost::shared_ptr<AutomationTimeAxisView> track)
 {
 	using namespace Menu_Helpers;
 
@@ -1817,8 +1805,8 @@ void
 RouteTimeAxisView::add_processor_to_subplugin_menu (boost::shared_ptr<Processor> processor)
 {
 	using namespace Menu_Helpers;
-	InsertAutomationInfo *rai;
-	list<InsertAutomationInfo*>::iterator x;
+	ProcessorAutomationInfo *rai;
+	list<ProcessorAutomationInfo*>::iterator x;
 	
 	const std::set<ParamID>& automatable = processor->what_can_be_automated ();
 	std::set<ParamID> has_visible_automation;
@@ -1837,7 +1825,7 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::shared_ptr<Processor>
 
 	if (x == processor_automation.end()) {
 
-		rai = new InsertAutomationInfo (processor);
+		rai = new ProcessorAutomationInfo (processor);
 		processor_automation.push_back (rai);
 
 	} else {
@@ -1858,7 +1846,7 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::shared_ptr<Processor>
 
 	for (std::set<ParamID>::const_iterator i = automatable.begin(); i != automatable.end(); ++i) {
 
-		InsertAutomationNode* ran;
+		ProcessorAutomationNode* pan;
 		CheckMenuItem* mitem;
 		
 		string name = processor->describe_parameter (*i);
@@ -1870,21 +1858,21 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::shared_ptr<Processor>
 			mitem->set_active(true);
 		}
 
-		if ((ran = find_processor_automation_node (processor, *i)) == 0) {
+		if ((pan = find_processor_automation_node (processor, *i)) == 0) {
 
 			/* new item */
 			
-			ran = new InsertAutomationNode (*i, mitem, *this);
+			pan = new ProcessorAutomationNode (*i, mitem, *this);
 			
-			rai->lines.push_back (ran);
+			rai->lines.push_back (pan);
 
 		} else {
 
-			ran->menu_item = mitem;
+			pan->menu_item = mitem;
 
 		}
 
-		mitem->signal_toggled().connect (bind (mem_fun(*this, &RouteTimeAxisView::processor_menu_item_toggled), rai, ran));
+		mitem->signal_toggled().connect (bind (mem_fun(*this, &RouteTimeAxisView::processor_menu_item_toggled), rai, pan));
 	}
 
 	/* add the menu for this processor, because the subplugin
@@ -1898,26 +1886,26 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::shared_ptr<Processor>
 }
 
 void
-RouteTimeAxisView::processor_menu_item_toggled (RouteTimeAxisView::InsertAutomationInfo* rai,
-					       RouteTimeAxisView::InsertAutomationNode* ran)
+RouteTimeAxisView::processor_menu_item_toggled (RouteTimeAxisView::ProcessorAutomationInfo* rai,
+					       RouteTimeAxisView::ProcessorAutomationNode* pan)
 {
-	bool showit = ran->menu_item->get_active();
+	bool showit = pan->menu_item->get_active();
 	bool redraw = false;
 
-	if (ran->view == 0 && showit) {
-		add_processor_automation_curve (rai->processor, ran->what);
+	if (pan->view == 0 && showit) {
+		add_processor_automation_curve (rai->processor, pan->what);
 		redraw = true;
 	}
 
-	if (showit != ran->view->marked_for_display()) {
+	if (showit != pan->view->marked_for_display()) {
 
 		if (showit) {
-			ran->view->set_marked_for_display (true);
-			ran->view->canvas_display->show();
+			pan->view->set_marked_for_display (true);
+			pan->view->canvas_display->show();
 		} else {
-			rai->processor->mark_automation_visible (ran->what, true);
-			ran->view->set_marked_for_display (false);
-			ran->view->hide ();
+			rai->processor->mark_automation_visible (pan->what, true);
+			pan->view->set_marked_for_display (false);
+			pan->view->hide ();
 		}
 
 		redraw = true;
@@ -1938,7 +1926,7 @@ RouteTimeAxisView::processors_changed ()
 {
 	using namespace Menu_Helpers;
 
-	for (list<InsertAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
 		(*i)->valid = false;
 	}
 
@@ -1947,9 +1935,9 @@ RouteTimeAxisView::processors_changed ()
 	_route->foreach_processor (this, &RouteTimeAxisView::add_processor_to_subplugin_menu);
 	_route->foreach_processor (this, &RouteTimeAxisView::add_existing_processor_automation_curves);
 
-	for (list<InsertAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ) {
+	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ) {
 
-		list<InsertAutomationInfo*>::iterator tmp;
+		list<ProcessorAutomationInfo*>::iterator tmp;
 
 		tmp = i;
 		++tmp;
@@ -1969,24 +1957,24 @@ RouteTimeAxisView::processors_changed ()
 	_route->gui_changed ("track_height", this);
 }
 
-ProcessorAutomationLine *
+boost::shared_ptr<AutomationLine>
 RouteTimeAxisView::find_processor_automation_curve (boost::shared_ptr<Processor> processor, ParamID what)
 {
-	InsertAutomationNode* ran;
+	ProcessorAutomationNode* pan;
 
-	if ((ran = find_processor_automation_node (processor, what)) != 0) {
-		if (ran->view) {
-			return dynamic_cast<ProcessorAutomationLine*> (ran->view->lines.front().first);
+	if ((pan = find_processor_automation_node (processor, what)) != 0) {
+		if (pan->view) {
+			pan->view->line();
 		} 
 	}
 
-	return 0;
+	return boost::shared_ptr<AutomationLine>();
 }
 
 void
 RouteTimeAxisView::reset_processor_automation_curves ()
 {
-	for (vector<ProcessorAutomationLine*>::iterator i = processor_automation_curves.begin(); i != processor_automation_curves.end(); ++i) {
+	for (ProcessorAutomationCurves::iterator i = processor_automation_curves.begin(); i != processor_automation_curves.end(); ++i) {
 		(*i)->reset();
 	}
 }

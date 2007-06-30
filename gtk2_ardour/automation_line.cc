@@ -248,6 +248,9 @@ AutomationLine::AutomationLine (const string & name, TimeAxisView& tv, ArdourCan
 	alist->StateChanged.connect (mem_fun(*this, &AutomationLine::list_changed));
 
 	trackview.session().register_with_memento_command_factory(alist->id(), this);
+
+	if (alist->param_id().type() == GainAutomation)
+		set_verbose_cursor_uses_gain_mapping (true);
 }
 
 AutomationLine::~AutomationLine ()
@@ -1290,3 +1293,34 @@ AutomationLine::set_state (const XMLNode &node)
 	/* function as a proxy for the model */
 	return alist->set_state (node);
 }
+
+void
+AutomationLine::view_to_model_y (double& y)
+{
+	if (alist->param_id().type() == GainAutomation) {
+		y = slider_position_to_gain (y);
+		y = max (0.0, y);
+		y = min (2.0, y);
+	} else if (alist->param_id().type() == PanAutomation) {
+		// vertical coordinate axis reversal
+		y = 1.0 - y;
+	} else if (alist->param_id().type() == MidiCCAutomation) {
+		y = (int)(y * 127.0);
+	}
+}
+
+void
+AutomationLine::model_to_view_y (double& y)
+{
+	if (alist->param_id().type() == GainAutomation) {
+		y = gain_to_slider_position (y);
+	} else if (alist->param_id().type() == PanAutomation) {
+		// vertical coordinate axis reversal
+		y = 1.0 - y;
+	} else if (alist->param_id().type() == MidiCCAutomation) {
+		y = y / 127.0;
+	} else if (alist->param_id().type() == PluginAutomation) {
+		y = (y - alist->get_min_y()) / (double)(alist->get_max_y()- alist->get_min_y());
+	}
+}
+

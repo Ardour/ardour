@@ -59,8 +59,6 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug, Placemen
 
 	_plugins.push_back (plug);
 
-	_plugins[0]->ParameterChanged.connect (mem_fun (*this, &PluginInsert::parameter_changed));
-	
 	init ();
 
 	{
@@ -80,8 +78,6 @@ PluginInsert::PluginInsert (Session& s, const XMLNode& node)
 
 	set_automatable ();
 
-	_plugins[0]->ParameterChanged.connect (mem_fun (*this, &PluginInsert::parameter_changed));
-
 	{
 		Glib::Mutex::Lock em (_session.engine().process_lock());
 		IO::MoreChannels (max(input_streams(), output_streams()));
@@ -97,9 +93,6 @@ PluginInsert::PluginInsert (const PluginInsert& other)
 	for (uint32_t n = 0; n < count; ++n) {
 		_plugins.push_back (plugin_factory (other.plugin (n)));
 	}
-
-
-	_plugins[0]->ParameterChanged.connect (mem_fun (*this, &PluginInsert::parameter_changed));
 
 	init ();
 
@@ -215,12 +208,13 @@ PluginInsert::set_automatable ()
 			_plugins.front()->get_parameter_descriptor(i->id(), desc);
 			boost::shared_ptr<AutomationList> list(new AutomationList(
 					*i,
-					(desc.min_unbound ? FLT_MIN : desc.lower),
-					(desc.max_unbound ? FLT_MAX : desc.upper),
+					//(desc.min_unbound ? FLT_MIN : desc.lower),
+					//(desc.max_unbound ? FLT_MAX : desc.upper),
+					desc.lower, desc.upper,
 					_plugins.front()->default_value(i->id())));
 
 			add_control(boost::shared_ptr<AutomationControl>(
-					new AutomationControl(_session, list)));
+					new PluginControl(*this, list)));
 		}
 	}
 }
@@ -288,11 +282,10 @@ PluginInsert::connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t off
 			if (c->list()->param_id().type() == PluginAutomation && c->list()->automation_playback()) {
 				bool valid;
 
-				float val = c->list()->rt_safe_eval (now, valid);				
+				const float val = c->list()->rt_safe_eval (now, valid);				
 
 				if (valid) {
-					/* set the first plugin, the others will be set via signals */
-					_plugins[0]->set_parameter (c->list()->param_id(), val);
+					c->set_value(val);
 				}
 
 			} 
@@ -304,38 +297,6 @@ PluginInsert::connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t off
 	}
 
 	/* leave remaining channel buffers alone */
-}
-
-void
-PluginInsert::automation_snapshot (nframes_t now)
-{
-	for (Controls::iterator li = _controls.begin(); li != _controls.end(); ++li) {
-		
-		boost::shared_ptr<AutomationControl> c = li->second;
-		
-		if (c->list() != 0 && c->list()->param_id().type() == PluginAutomation
-				&& c->list()->automation_write ()) {
-			
-			float val = _plugins[0]->get_parameter (c->list()->param_id());
-			c->list()->rt_add (now, val);
-			_last_automation_snapshot = now;
-		}
-	}
-}
-
-void
-PluginInsert::transport_stopped (nframes_t now)
-{
-	for (Controls::iterator li = _controls.begin(); li != _controls.end(); ++li) {
-		
-		boost::shared_ptr<AutomationControl> c = li->second;
-		
-		c->list()->reposition_for_rt_add (now);
-
-		if (c->list()->param_id().type() == PluginAutomation && c->list()->automation_state() != Off) {
-			_plugins[0]->set_parameter (li->first, c->list()->eval (now));
-		}
-	}
 }
 
 void
@@ -393,11 +354,20 @@ PluginInsert::set_parameter (ParamID param, float val)
 	
 	boost::shared_ptr<AutomationControl> c = control (param);
 	
-	if (c && c->list()->automation_write()) {
-		c->list()->add (_session.audible_frame(), val);
-	}
+	if (c)
+		c->set_value(val);
 
 	_session.set_dirty();
+}
+
+float
+PluginInsert::get_parameter (ParamID param)
+{
+	if (param.type() != PluginAutomation)
+		return 0.0;
+	else
+		return
+		_plugins[0]->get_parameter (param.id());
 }
 
 void
@@ -875,5 +845,76 @@ PluginInsert::type ()
 		/* NOT REACHED */
 		return (ARDOUR::PluginType) 0;
 	}
+}
+
+PluginInsert::PluginControl::PluginControl (PluginInsert& p, boost::shared_ptr<AutomationList> list)
+	: AutomationControl (p.session(), list, p.describe_parameter(list->param_id()))
+	, _plugin (p)
+	, _list (list)
+{
+	Plugin::ParameterDescriptor desc;
+	p.plugin(0)->get_parameter_descriptor (list->param_id().id(), desc);
+	_logarithmic = desc.logarithmic;
+	_toggled = desc.toggled;
+}
+	 
+void
+PluginInsert::PluginControl::set_value (float val)
+{
+	/* FIXME: probably should be taking out some lock here.. */
+	
+	if (_toggled) {
+		if (val > 0.5) {
+			val = 1.0;
+		} else {
+			val = 0.0;
+		}
+	} else {
+			
+		/*const float range = _list->get_max_y() - _list->get_min_y();
+		const float lower = _list->get_min_y();
+
+		if (!_logarithmic) {
+			val = lower + (range * val);
+		} else {
+			float log_lower = 0.0f;
+			if (lower > 0.0f) {
+				log_lower = log(lower);
+			}
+
+			val = exp(log_lower + log(range) * val);
+		}*/
+
+	}
+
+	for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugin._plugins.begin();
+			i != _plugin._plugins.end(); ++i) {
+		(*i)->set_parameter (_list->param_id().id(), val);
+	}
+
+	AutomationControl::set_value(val);
+}
+
+float
+PluginInsert::PluginControl::get_value (void) const
+{
+	/* FIXME: probably should be taking out some lock here.. */
+	
+	float val = _plugin.get_parameter (_list->param_id());
+
+	return val;
+
+	/*if (_toggled) {
+		
+		return val;
+		
+	} else {
+		
+		if (_logarithmic) {
+			val = log(val);
+		}
+		
+		return ((val - lower) / range);
+	}*/
 }
 

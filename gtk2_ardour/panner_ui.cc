@@ -314,7 +314,7 @@ PannerUI::setup_pan ()
 			}
 
 			pan_adjustments.push_back (new Adjustment (x, 0, 1.0, 0.05, 0.1));
-			bc = new PannerBar (*pan_adjustments[asz], _io->panner()[asz]->control());
+			bc = new PannerBar (*pan_adjustments[asz], _io->panner()[asz]->pan_control());
 
 			/* now set adjustment with current value of panner, then connect the signals */
 			pan_adjustments.back()->set_value(rx);
@@ -573,7 +573,7 @@ PannerUI::update_pan_bars (bool only_if_aplay)
 		float xpos, val;
 
 		if (only_if_aplay) {
-			boost::shared_ptr<AutomationList> alist (_io->panner()[n]->automation());
+			boost::shared_ptr<AutomationList> alist (_io->panner()[n]->pan_control()->list());
 			
 			if (!alist->automation_playback()) {
 				continue;
@@ -707,7 +707,7 @@ PannerUI::pan_automation_state_changed ()
 		return;
 	}
 
-	x = (_io->panner().front()->automation()->automation_state() != Off);
+	x = (_io->panner().front()->pan_control()->list()->automation_state() != Off);
 
 	if (pan_automation_state_button.get_active() != x) {
 	ignore_toggle = true;

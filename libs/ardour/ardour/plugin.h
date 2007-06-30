@@ -111,7 +111,6 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	virtual const char * maker() const = 0;
 	virtual uint32_t parameter_count () const = 0;
 	virtual float default_value (uint32_t port) = 0;
-	virtual void set_parameter (uint32_t which, float val) = 0;
 	virtual float get_parameter(uint32_t which) const = 0;
 
 	virtual int get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const = 0;
@@ -140,10 +139,6 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 
 	virtual bool has_editor() const = 0;
 
-	sigc::signal<void,ParamID,float> ParameterChanged;
-	
-	PBD::Controllable *get_nth_control (uint32_t);
-
 	PluginInfoPtr get_info() { return _info; }
 	void set_info (const PluginInfoPtr inf) { _info = inf; }
 
@@ -154,32 +149,15 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	cycles_t cycles() const { return _cycles; }
 
   protected:
+	friend class PluginInsert;
+	virtual void set_parameter (uint32_t which, float val) = 0;
+
 	ARDOUR::AudioEngine& _engine;
 	ARDOUR::Session& _session;
 	PluginInfoPtr _info;
 	uint32_t _cycles;
 	map<string,string> 	 presets;
 	bool save_preset(string name, string domain /* vst, ladspa etc. */);
-
-	void setup_controls ();
-
-	struct PortControllable : public PBD::Controllable {
-	    PortControllable (std::string name, Plugin&, uint32_t abs_port_id,
-			      float lower, float upper, bool toggled, bool logarithmic);
-
-	    void set_value (float);
-	    float get_value () const;
-
-	    Plugin& plugin;
-	    uint32_t absolute_port;
-	    float upper;
-	    float lower;
-	    float range;
-	    bool  toggled;
-	    bool  logarithmic;
-	};
-
-	vector<PortControllable*> controls;
 };
 
 PluginPtr find_plugin(ARDOUR::Session&, string name, long unique_id, ARDOUR::PluginType);

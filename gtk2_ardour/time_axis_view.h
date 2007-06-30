@@ -209,6 +209,8 @@ class TimeAxisView : public virtual AxisView
 	/* call this on the parent */
 
 	virtual XMLNode* get_child_xml_node (const string & childname) { return 0; }
+	
+	typedef std::vector<boost::shared_ptr<TimeAxisView> > Children;
 
   protected:
 
@@ -279,11 +281,11 @@ class TimeAxisView : public virtual AxisView
 	/** Find the parent with state */
 	TimeAxisView* get_parent_with_state();
 
-	std::vector<TimeAxisView*> children;
+	Children children;
 	bool is_child (TimeAxisView*);
 
-	void remove_child (TimeAxisView*);
-	void add_child (TimeAxisView*);
+	void remove_child (boost::shared_ptr<TimeAxisView>);
+	void add_child (boost::shared_ptr<TimeAxisView>);
 
 	/* selection display */
 

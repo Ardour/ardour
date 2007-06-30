@@ -31,6 +31,7 @@
 
 #include <ardour/types.h>
 #include <ardour/curve.h>
+#include <ardour/automation_control.h>
 
 using std::istream;
 using std::ostream;
@@ -69,22 +70,8 @@ class StreamPanner : public sigc::trackable, public PBD::Stateful
 	virtual void distribute_automated (AudioBuffer& src, BufferSet& obufs,
 				     nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers) = 0;
 
-	/* automation */
-
-	virtual void snapshot (nframes_t now) = 0;
-	virtual void transport_stopped (nframes_t frame) = 0;
-	virtual void set_automation_state (AutoState) = 0;
-	virtual void set_automation_style (AutoStyle) = 0;
+	boost::shared_ptr<AutomationControl> pan_control()  { return _control; }
 	
-	boost::shared_ptr<PBD::Controllable> control()  { return _control; }
-	
-	/* XXX this is wrong. for multi-dimensional panners, there
-	   must surely be more than 1 automation curve.
-	*/
-	/* TODO: Panner is-a Automation solves this */
-
-	virtual boost::shared_ptr<AutomationList> automation() = 0;
-
 	sigc::signal<void> Changed;      /* for position */
 	sigc::signal<void> StateChanged; /* for mute */
 
@@ -115,8 +102,11 @@ class StreamPanner : public sigc::trackable, public PBD::Stateful
 
 	bool             _muted;
 
-	struct PanControllable : public PBD::Controllable {
-	    PanControllable (std::string name, StreamPanner& p) : Controllable (name), panner (p) {}
+	struct PanControllable : public AutomationControl {
+	    PanControllable (Session& s, std::string name, StreamPanner& p)
+			: AutomationControl (s, boost::shared_ptr<AutomationList>(new AutomationList(
+						ParamID(PanAutomation), 0.0, 1.0, 0.5)), name)
+			, panner (p) {}
 	    
 	    StreamPanner& panner;
 	    
@@ -145,14 +135,6 @@ class BaseStereoPanner : public StreamPanner
 
 	void distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
 
-	void snapshot (nframes_t now);
-	void transport_stopped (nframes_t frame);
-	void set_automation_state (AutoState);
-	void set_automation_style (AutoStyle);
-
-	/* TODO: StreamPanner is-a Automatable? */
-	boost::shared_ptr<AutomationList> automation() { return _automation; }
-
 	/* old school automation loading */
 
 	int load (istream&, string path, uint32_t&);
@@ -164,8 +146,6 @@ class BaseStereoPanner : public StreamPanner
 	float desired_right;
 	float left_interp;
 	float right_interp;
-
-	boost::shared_ptr<AutomationList> _automation;
 };
 
 class EqualPowerStereoPanner : public BaseStereoPanner
@@ -197,19 +177,6 @@ class Multi2dPanner : public StreamPanner
 	Multi2dPanner (Panner& parent);
 	~Multi2dPanner ();
 
-	void snapshot (nframes_t now);
-	void transport_stopped (nframes_t frame);
-	void set_automation_state (AutoState);
-	void set_automation_style (AutoStyle);
-
-	/* XXX this is wrong. for multi-dimensional panners, there
-	   must surely be more than 1 automation curve.
-	*/
-	
-	/* TODO: StreamPanner is-a Automatable? */
-
-	boost::shared_ptr<AutomationList> automation() { return _automation; }
-
 	void distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
 	void distribute_automated (AudioBuffer& src, BufferSet& obufs,
 				   nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
@@ -226,7 +193,6 @@ class Multi2dPanner : public StreamPanner
 	int load (istream&, string path, uint32_t&);
 
   private:
-	boost::shared_ptr<AutomationList> _automation;
 	void update ();
 };
 

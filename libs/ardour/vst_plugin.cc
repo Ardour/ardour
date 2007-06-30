@@ -120,7 +120,7 @@ void
 VSTPlugin::set_parameter (uint32_t which, float val)
 {
 	_plugin->setParameter (_plugin, which, val);
-	ParameterChanged (which, val); /* EMIT SIGNAL */
+	//ParameterChanged (which, val); /* EMIT SIGNAL */
 }
 
 float

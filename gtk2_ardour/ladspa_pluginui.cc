@@ -46,6 +46,7 @@
 #include "plugin_ui.h"
 #include "utils.h"
 #include "gui_thread.h"
+#include "automation_controller.h"
 
 #include "i18n.h"
 
@@ -205,7 +206,7 @@ LadspaPluginUI::build ()
 				}
 			}
 
-			if ((cui = build_control_ui (i, plugin->get_nth_control (i))) == 0) {
+			if ((cui = build_control_ui (i, insert->control(ParamID(PluginAutomation, i)))) == 0) {
 				error << string_compose(_("Plugin Editor: could not build control element for port %1"), i) << endmsg;
 				continue;
 			}
@@ -305,18 +306,12 @@ LadspaPluginUI::ControlUI::ControlUI ()
 	ignore_change = 0;
 	display = 0;
 	button = 0;
-	control = 0;
 	clickbox = 0;
-	adjustment = 0;
 	meterinfo = 0;
 }
 
 LadspaPluginUI::ControlUI::~ControlUI() 
 {
-	if (adjustment) {
-		delete adjustment;
-	}
-
 	if (meterinfo) {
 		delete meterinfo->meter;
 		delete meterinfo;
@@ -328,7 +323,9 @@ LadspaPluginUI::automation_state_changed (ControlUI* cui)
 {
 	/* update button label */
 
-	switch (insert->get_parameter_automation_state (ParamID(PluginAutomation, cui->port_index))
+	// don't lock to avoid deadlock because we're triggered by
+	// AutomationControl::Changed() while the automation lock is taken
+	switch (insert->get_parameter_automation_state (cui->param_id(), false)
 			& (Off|Play|Touch|Write)) {
 	case Off:
 		cui->automate_button.set_label (_("Manual"));
@@ -361,8 +358,7 @@ LadspaPluginUI::print_parameter (char *buf, uint32_t len, uint32_t param)
 }
 
 LadspaPluginUI::ControlUI*
-LadspaPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontrol)
-
+LadspaPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<AutomationControl> mcontrol)
 {
 	ControlUI* control_ui;
 	Plugin::ParameterDescriptor desc;
@@ -370,10 +366,9 @@ LadspaPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontro
 	plugin->get_parameter_descriptor (port_index, desc);
 
 	control_ui = manage (new ControlUI ());
-	control_ui->adjustment = 0;
 	control_ui->combo = 0;
 	control_ui->combo_map = 0;
-	control_ui->port_index = port_index;
+	control_ui->control = mcontrol;
 	control_ui->update_pending = false;
 	control_ui->label.set_text (desc.label);
 	control_ui->label.set_alignment (0.0, 0.5);
@@ -397,7 +392,7 @@ LadspaPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontro
 				//control_ui->combo->set_value_in_list(true, false);
 				set_popdown_strings (*control_ui->combo, setup_scale_values(port_index, control_ui));
 				control_ui->combo->signal_changed().connect (bind (mem_fun(*this, &LadspaPluginUI::control_combo_changed), control_ui));
-				plugin->ParameterChanged.connect (bind (mem_fun (*this, &LadspaPluginUI::parameter_changed), control_ui));
+				mcontrol->Changed.connect (bind (mem_fun (*this, &LadspaPluginUI::parameter_changed), control_ui));
 				control_ui->pack_start(control_ui->label, true, true);
 				control_ui->pack_start(*control_ui->combo, false, true);
 				
@@ -429,52 +424,53 @@ LadspaPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontro
 			return control_ui;
 		}
 	
-		control_ui->adjustment = new Adjustment (0, 0, 0, 0, 0);
-
 		/* XXX this code is not right yet, because it doesn't handle
 		   the absence of bounds in any sensible fashion.
 		*/
 
-		control_ui->adjustment->set_lower (desc.lower);
-		control_ui->adjustment->set_upper (desc.upper);
+#if 0
+		control_ui->controller->adjustment()->set_lower (desc.lower);
+		control_ui->controller->adjustment()->set_upper (desc.upper);
 
 		control_ui->logarithmic = desc.logarithmic;
 		if (control_ui->logarithmic) {
-			if (control_ui->adjustment->get_lower() == 0.0) {
-				control_ui->adjustment->set_lower (control_ui->adjustment->get_upper()/10000);
+			if (control_ui->controller->adjustment()->get_lower() == 0.0) {
+				control_ui->controller->adjustment()->set_lower (control_ui->controller->adjustment()->get_upper()/10000);
 			}
-			control_ui->adjustment->set_upper (log(control_ui->adjustment->get_upper()));
-			control_ui->adjustment->set_lower (log(control_ui->adjustment->get_lower()));
+			control_ui->controller->adjustment()->set_upper (log(control_ui->controller->adjustment()->get_upper()));
+			control_ui->controller->adjustment()->set_lower (log(control_ui->controller->adjustment()->get_lower()));
 		}
+		
 	
 		float delta = desc.upper - desc.lower;
 
-		control_ui->adjustment->set_page_size (delta/100.0);
-		control_ui->adjustment->set_step_increment (desc.step);
-		control_ui->adjustment->set_page_increment (desc.largestep);
+		control_ui->controller->adjustment()->set_page_size (delta/100.0);
+		control_ui->controller->adjustment()->set_step_increment (desc.step);
+		control_ui->controller->adjustment()->set_page_increment (desc.largestep);
+#endif
 
 		if (desc.integer_step) {
-			control_ui->clickbox = new ClickBox (control_ui->adjustment, "PluginUIClickBox");
+			control_ui->clickbox = new ClickBox (control_ui->controller->adjustment(), "PluginUIClickBox");
 			Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->clickbox, "g9999999", 2, 2);
 			control_ui->clickbox->set_print_func (integer_printer, 0);
 		} else {
-			sigc::slot<void,char*,uint32_t> pslot = sigc::bind (mem_fun(*this, &LadspaPluginUI::print_parameter), (uint32_t) port_index);
+			//sigc::slot<void,char*,uint32_t> pslot = sigc::bind (mem_fun(*this, &LadspaPluginUI::print_parameter), (uint32_t) port_index);
 
-			control_ui->control = new BarController (*control_ui->adjustment, *mcontrol, pslot);
-			control_ui->control->set_size_request (200, req.height);
-			control_ui->control->set_name (X_("PluginSlider"));
-			control_ui->control->set_style (BarController::LeftToRight);
-			control_ui->control->set_use_parent (true);
+			control_ui->controller = AutomationController::create(insert->session(), mcontrol->list(), mcontrol);
+			control_ui->controller->set_size_request (200, req.height);
+			control_ui->controller->set_name (X_("PluginSlider"));
+			control_ui->controller->set_style (BarController::LeftToRight);
+			control_ui->controller->set_use_parent (true);
 
-			control_ui->control->StartGesture.connect (bind (mem_fun(*this, &LadspaPluginUI::start_touch), control_ui));
-			control_ui->control->StopGesture.connect (bind (mem_fun(*this, &LadspaPluginUI::stop_touch), control_ui));
+			control_ui->controller->StartGesture.connect (bind (mem_fun(*this, &LadspaPluginUI::start_touch), control_ui));
+			control_ui->controller->StopGesture.connect (bind (mem_fun(*this, &LadspaPluginUI::stop_touch), control_ui));
 			
 		}
 
 		if (control_ui->logarithmic) {
-			control_ui->adjustment->set_value(log(plugin->get_parameter(port_index)));
+			control_ui->controller->adjustment()->set_value(log(plugin->get_parameter(port_index)));
 		} else{
-			control_ui->adjustment->set_value(plugin->get_parameter(port_index));
+			control_ui->controller->adjustment()->set_value(plugin->get_parameter(port_index));
 		}
 
 		/* XXX memory leak: SliderController not destroyed by ControlUI
@@ -486,17 +482,16 @@ LadspaPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontro
 		if (desc.integer_step) {
 			control_ui->pack_start (*control_ui->clickbox, false, false);
 		} else {
-			control_ui->pack_start (*control_ui->control, false, false);
+			control_ui->pack_start (*control_ui->controller, false, false);
 		}
 
 		control_ui->pack_start (control_ui->automate_button, false, false);
-		control_ui->adjustment->signal_value_changed().connect (bind (mem_fun(*this, &LadspaPluginUI::control_adjustment_changed), control_ui));
 		control_ui->automate_button.signal_clicked().connect (bind (mem_fun(*this, &LadspaPluginUI::astate_clicked), control_ui, (uint32_t) port_index));
 
 		automation_state_changed (control_ui);
 
-		plugin->ParameterChanged.connect (bind (mem_fun(*this, &LadspaPluginUI::parameter_changed), control_ui));
-		insert->control (ParamID(PluginAutomation, port_index))->list()->automation_state_changed.connect 
+		mcontrol->Changed.connect (bind (mem_fun (*this, &LadspaPluginUI::parameter_changed), control_ui));
+		mcontrol->list()->automation_state_changed.connect 
 			(bind (mem_fun(*this, &LadspaPluginUI::automation_state_changed), control_ui));
 
 	} else if (plugin->parameter_is_output (port_index)) {
@@ -546,20 +541,21 @@ LadspaPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontro
 		output_controls.push_back (control_ui);
 	}
 	
-	plugin->ParameterChanged.connect (bind (mem_fun(*this, &LadspaPluginUI::parameter_changed), control_ui));
+	mcontrol->Changed.connect (bind (mem_fun (*this, &LadspaPluginUI::parameter_changed), control_ui));
+	
 	return control_ui;
 }
 
 void
 LadspaPluginUI::start_touch (LadspaPluginUI::ControlUI* cui)
 {
-	insert->control (ParamID(PluginAutomation, cui->port_index))->list()->start_touch ();
+	cui->control->list()->start_touch ();
 }
 
 void
 LadspaPluginUI::stop_touch (LadspaPluginUI::ControlUI* cui)
 {
-	insert->control (ParamID(PluginAutomation, cui->port_index))->list()->stop_touch ();
+	cui->control->list()->stop_touch ();
 }
 
 void
@@ -590,33 +586,15 @@ LadspaPluginUI::astate_clicked (ControlUI* cui, uint32_t port)
 void
 LadspaPluginUI::set_automation_state (AutoState state, ControlUI* cui)
 {
-	insert->set_parameter_automation_state (ParamID(PluginAutomation, cui->port_index), state);
+	insert->set_parameter_automation_state (cui->param_id(), state);
 }
 
 void
-LadspaPluginUI::control_adjustment_changed (ControlUI* cui)
+LadspaPluginUI::parameter_changed (ControlUI* cui)
 {
-	if (cui->ignore_change) {
-		return;
-	}
-
-	double value = cui->adjustment->get_value();
-
-	if (cui->logarithmic) {
-	  	value = exp(value);
-	}
-
-	insert->set_parameter (ParamID(PluginAutomation, cui->port_index), (float) value);
-}
-
-void
-LadspaPluginUI::parameter_changed (uint32_t abs_port_id, float val, ControlUI* cui)
-{
-	if (cui->port_index == abs_port_id) {
-		if (!cui->update_pending) {
-			cui->update_pending = true;
-			Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &LadspaPluginUI::update_control_display), cui));
-		}
+	if (!cui->update_pending) {
+		cui->update_pending = true;
+		Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &LadspaPluginUI::update_control_display), cui));
 	}
 }
 
@@ -627,7 +605,7 @@ LadspaPluginUI::update_control_display (ControlUI* cui)
 	
 	cui->update_pending = false;
 
-	float val = plugin->get_parameter (cui->port_index);
+	float val = cui->control->get_value();
 
 	cui->ignore_change++;
 	if (cui->combo) {
@@ -638,22 +616,26 @@ LadspaPluginUI::update_control_display (ControlUI* cui)
 				break;
 			}
 		}
-	} else if (cui->adjustment == 0) {
+	} else if (cui->button) {
 
 		if (val > 0.5) {
 			cui->button->set_active (true);
 		} else {
 			cui->button->set_active (false);
 		}
+	}
 
-	} else {
+	cui->controller->display_effective_value();
+
+
+	/*} else {
 		if (cui->logarithmic) {
 			val = log(val);
 		}
 		if (val != cui->adjustment->get_value()) {
 			cui->adjustment->set_value (val);
 		}
-	}
+	}*/
 	cui->ignore_change--;
 }
 
@@ -661,7 +643,7 @@ void
 LadspaPluginUI::control_port_toggled (ControlUI* cui)
 {
 	if (!cui->ignore_change) {
-		insert->set_parameter (ParamID(PluginAutomation, cui->port_index), cui->button->get_active());
+		insert->set_parameter (cui->param_id(), cui->button->get_active());
 	}
 }
 
@@ -671,7 +653,7 @@ LadspaPluginUI::control_combo_changed (ControlUI* cui)
 	if (!cui->ignore_change) {
 		string value = cui->combo->get_active_text();
 		std::map<string,float> mapping = *cui->combo_map;
-		insert->set_parameter (ParamID(PluginAutomation, cui->port_index), mapping[value]);
+		insert->set_parameter (cui->param_id(), mapping[value]);
 	}
 
 }
@@ -710,7 +692,7 @@ void
 LadspaPluginUI::output_update ()
 {
 	for (vector<ControlUI*>::iterator i = output_controls.begin(); i != output_controls.end(); ++i) {
-		float val = plugin->get_parameter ((*i)->port_index);
+		float val = plugin->get_parameter ((*i)->param_id().id());
 		char buf[32];
 		snprintf (buf, sizeof(buf), "%.2f", val);
 		(*i)->display_label->set_text (buf);

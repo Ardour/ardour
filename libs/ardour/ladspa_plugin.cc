@@ -136,8 +136,6 @@ LadspaPlugin::init (void *mod, uint32_t index, nframes_t rate)
 		}
 	}
 
-	Plugin::setup_controls ();
-
 	latency_compute_run ();
 }
 
@@ -318,11 +316,13 @@ LadspaPlugin::set_parameter (uint32_t which, float val)
 {
 	if (which < descriptor->PortCount) {
 		shadow_data[which] = (LADSPA_Data) val;
+#if 0
 		ParameterChanged (ParamID(PluginAutomation, which), val); /* EMIT SIGNAL */
 
 		if (which < parameter_count() && controls[which]) {
 			controls[which]->Changed ();
 		}
+#endif
 		
 	} else {
 		warning << string_compose (_("illegal parameter number used with plugin \"%1\". This may"

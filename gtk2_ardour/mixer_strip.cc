@@ -701,8 +701,8 @@ MixerStrip::connect_to_pan ()
 	if (!_route->panner().empty()) {
 		StreamPanner* sp = _route->panner().front();
 
-		panstate_connection = sp->automation()->automation_state_changed.connect (mem_fun(panners, &PannerUI::pan_automation_state_changed));
-		panstyle_connection = sp->automation()->automation_style_changed.connect (mem_fun(panners, &PannerUI::pan_automation_style_changed));
+		panstate_connection = sp->pan_control()->list()->automation_state_changed.connect (mem_fun(panners, &PannerUI::pan_automation_state_changed));
+		panstyle_connection = sp->pan_control()->list()->automation_style_changed.connect (mem_fun(panners, &PannerUI::pan_automation_style_changed));
 	}
 
 	panners.pan_changed (this);

@@ -34,7 +34,6 @@
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/label.h>
 #include <gtkmm/menu.h>
-#include <gtkmm/adjustment.h>
 #include <gtkmm/togglebutton.h>
 #include <gtkmm/socket.h>
 #include <gtkmm/comboboxtext.h>
@@ -44,6 +43,7 @@
 #include <ardour/types.h>
 
 #include "latency_gui.h"
+#include "automation_controller.h"
 
 namespace ARDOUR {
 	class PluginInsert;
@@ -139,21 +139,19 @@ class LadspaPluginUI : public PlugUIBase, public Gtk::VBox
 	static const int32_t initial_output_rows = 1;
 	static const int32_t initial_output_cols = 4;
 
-	/* TODO: pull this out of PluginUI and make it generic.
-	 * Sticking this in the track controls of an automation track would
-	 * make a handy touch controller for anything.
-	 */
+	/* FIXME: Unify with AutomationController */
 	struct ControlUI : public Gtk::HBox {
 
-	    uint32_t      port_index;
+		boost::shared_ptr<ARDOUR::AutomationControl> control;
+
+		ARDOUR::ParamID param_id() { return control->list()->param_id(); }
 	    
 	    /* input */
 	    
-	    Gtk::Adjustment* 	      adjustment;
 	    Gtk::ComboBoxText* 	      combo;
   	    std::map<string, float>*  combo_map;
 	    Gtk::ToggleButton*        button;
-	    Gtkmm2ext::BarController*  control;
+		boost::shared_ptr<AutomationController>  controller;
 	    Gtkmm2ext::ClickBox*       clickbox;
 	    Gtk::Label         label;
 	    bool               logarithmic;
@@ -179,10 +177,9 @@ class LadspaPluginUI : public PlugUIBase, public Gtk::VBox
 	void output_update();
 	
 	void build ();
-	ControlUI* build_control_ui (guint32 port_index, PBD::Controllable *);
+	ControlUI* build_control_ui (guint32 port_index, boost::shared_ptr<ARDOUR::AutomationControl>);
 	std::vector<string> setup_scale_values(guint32 port_index, ControlUI* cui);
-	void control_adjustment_changed (ControlUI* cui);
-	void parameter_changed (uint32_t, float, ControlUI* cui);
+	void parameter_changed (ControlUI* cui);
 	void update_control_display (ControlUI* cui);
 	void control_port_toggled (ControlUI* cui);
 	void control_combo_changed (ControlUI* cui);

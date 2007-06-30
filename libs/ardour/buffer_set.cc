@@ -98,6 +98,7 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 {
 	assert(type != DataType::NIL);
 	assert(type < _buffers.size());
+	assert(buffer_capacity > 0);
 
 	if (num_buffers == 0)
 		return;

@@ -28,6 +28,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <ardour/types.h>
+#include <ardour/automatable.h>
 
 #include "canvas.h"
 #include "time_axis_view.h"
@@ -52,12 +53,13 @@ class GhostRegion;
 class Selection;
 class Selectable;
 
-/** TODO: All the derived types of this can probably be merged into this cleanly.
- */
+
 class AutomationTimeAxisView : public TimeAxisView {
   public:
 	AutomationTimeAxisView (ARDOUR::Session&,
 				boost::shared_ptr<ARDOUR::Route>,
+				boost::shared_ptr<ARDOUR::Automatable>,
+				boost::shared_ptr<ARDOUR::AutomationControl>,
 				PublicEditor&,
 				TimeAxisView& parent,
 				ArdourCanvas::Canvas& canvas,
@@ -67,17 +69,14 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	~AutomationTimeAxisView();
 	
-	virtual void set_height (TimeAxisView::TrackHeight);
+	void set_height (TimeAxisView::TrackHeight);
 	void set_samples_per_unit (double);
 	std::string name() const { return _name; }
 
-	virtual void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, nframes_t, double) = 0;
+	void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, nframes_t, double);
 
-	virtual void clear_lines ();
-	virtual void add_line (AutomationLine&);
-
-	typedef vector<std::pair<AutomationLine*,boost::shared_ptr<AutomationController> > > Lines;
-	Lines lines;
+	void clear_lines ();
+	boost::shared_ptr<AutomationLine> line() { return _line; }
 
 	void set_selected_points (PointSelection&);
 	void get_selectables (nframes_t start, nframes_t end, double top, double bot, list<Selectable *>&);
@@ -100,10 +99,22 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void hide_all_but_selected_control_points ();
 	void set_state (const XMLNode&);
 	XMLNode* get_state_node ();
+	
+	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
+	void hide ();
 
   protected:
-	boost::shared_ptr<ARDOUR::Route> route;
-	ArdourCanvas::SimpleRect* base_rect;
+	boost::shared_ptr<ARDOUR::Route> _route; ///< Parent route
+	boost::shared_ptr<ARDOUR::AutomationControl> _control; ///< Control
+	boost::shared_ptr<ARDOUR::Automatable> _automatable; ///< Control owner, maybe = _route
+	
+	boost::shared_ptr<AutomationController> _controller;
+	
+	ArdourCanvas::SimpleRect* _base_rect;
+	boost::shared_ptr<AutomationLine> _line;
+	
+	XMLNode* _xml_node;
+
 	string _name;
 	string _state_name;
 	bool    in_destructor;
@@ -124,12 +135,14 @@ class AutomationTimeAxisView : public TimeAxisView {
 	Gtk::CheckMenuItem*     auto_touch_item;
 	Gtk::CheckMenuItem*     auto_write_item;
 
+	void add_line (boost::shared_ptr<AutomationLine>);
+	
 	void clear_clicked ();
 	void height_clicked ();
 	void hide_clicked ();
 	void auto_clicked ();
 
-	virtual void build_display_menu ();
+	void build_display_menu ();
 
 	list<GhostRegion*> ghosts;
 
@@ -143,6 +156,9 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	void automation_state_changed ();
 	sigc::connection automation_connection;
+
+	void ensure_xml_node ();
+	void update_extra_xml_shown (bool editor_shown);
 
 	void entered ();
 	void exited ();

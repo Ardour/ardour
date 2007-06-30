@@ -71,7 +71,7 @@ static double direct_pan_to_control (pan_t val) {
 
 StreamPanner::StreamPanner (Panner& p)
 	: parent (p),
-	  _control (new PanControllable(X_("panner"), *this))
+	  _control (new PanControllable(p.session(), X_("panner"), *this))
 {
 	_muted = false;
 
@@ -190,49 +190,12 @@ StreamPanner::add_state (XMLNode& node)
 /*---------------------------------------------------------------------- */
 
 BaseStereoPanner::BaseStereoPanner (Panner& p)
-	: StreamPanner (p), _automation (new AutomationList(ParamID(PanAutomation), 0.0, 1.0, 0.5))
+	: StreamPanner (p)
 {
 }
 
 BaseStereoPanner::~BaseStereoPanner ()
 {
-}
-
-void
-BaseStereoPanner::snapshot (nframes_t now)
-{
-	if (_automation->automation_state() == Write || _automation->automation_state() == Touch) {
-		_automation->rt_add (now, x);
-	}
-}
-
-void
-BaseStereoPanner::transport_stopped (nframes_t frame)
-{
-	_automation->reposition_for_rt_add (frame);
-
-	if (_automation->automation_state() != Off) {
-		set_position (_automation->eval (frame));
-	}
-}
-
-void
-BaseStereoPanner::set_automation_style (AutoStyle style)
-{
-	_automation->set_automation_style (style);
-}
-
-void
-BaseStereoPanner::set_automation_state (AutoState state)
-{
-	if (state != _automation->automation_state()) {
-
-		_automation->set_automation_state (state);
-		
-		if (state != Off) {
-			set_position (_automation->eval (parent.session().transport_frame()));
-		}
-	}
 }
 
 int
@@ -241,7 +204,7 @@ BaseStereoPanner::load (istream& in, string path, uint32_t& linecnt)
 	char line[128];
 	LocaleGuard lg (X_("POSIX"));
 	
-	_automation->clear ();
+	_control->list()->clear ();
 
 	while (in.getline (line, sizeof (line), '\n')) {
 		nframes_t when;
@@ -258,12 +221,12 @@ BaseStereoPanner::load (istream& in, string path, uint32_t& linecnt)
 			continue;
 		}
 
-		_automation->fast_simple_add (when, value);
+		_control->list()->fast_simple_add (when, value);
 	}
 
 	/* now that we are done loading */
 
-	_automation->StateChanged ();
+	_control->list()->StateChanged ();
 
 	return 0;
 }
@@ -438,7 +401,7 @@ EqualPowerStereoPanner::distribute_automated (AudioBuffer& srcbuf, BufferSet& ob
 
 	/* fetch positional data */
 
-	if (!_automation->curve().rt_safe_get_vector (start, end, buffers[0], nframes)) {
+	if (!_control->list()->curve().rt_safe_get_vector (start, end, buffers[0], nframes)) {
 		/* fallback */
 		if (!_muted) {
 			distribute (srcbuf, obufs, 1.0, nframes);
@@ -518,7 +481,7 @@ EqualPowerStereoPanner::state (bool full_state)
 	root->add_property (X_("type"), EqualPowerStereoPanner::name);
 
 	XMLNode* autonode = new XMLNode (X_("Automation"));
-	autonode->add_child_nocopy (_automation->state (full_state));
+	autonode->add_child_nocopy (_control->list()->state (full_state));
 	root->add_child_nocopy (*autonode);
 
 	StreamPanner::add_state (*root);
@@ -551,10 +514,10 @@ EqualPowerStereoPanner::set_state (const XMLNode& node)
 
 		} else if ((*iter)->name() == X_("Automation")) {
 
-			_automation->set_state (*((*iter)->children().front()));
+			_control->list()->set_state (*((*iter)->children().front()));
 
-			if (_automation->automation_state() != Off) {
-				set_position (_automation->eval (parent.session().transport_frame()));
+			if (_control->list()->automation_state() != Off) {
+				set_position (_control->list()->eval (parent.session().transport_frame()));
 			}
 		}
 	}
@@ -565,37 +528,13 @@ EqualPowerStereoPanner::set_state (const XMLNode& node)
 /*----------------------------------------------------------------------*/
 
 Multi2dPanner::Multi2dPanner (Panner& p)
-	: StreamPanner (p), _automation (new AutomationList(ParamID(PanAutomation), 0.0, 1.0, 0.5)) // XXX useless
+	: StreamPanner (p)
 {
 	update ();
 }
 
 Multi2dPanner::~Multi2dPanner ()
 {
-}
-
-void
-Multi2dPanner::snapshot (nframes_t now)
-{
-	// how?
-}
-
-void
-Multi2dPanner::transport_stopped (nframes_t frame)
-{
-	//what?
-}
-
-void
-Multi2dPanner::set_automation_style (AutoStyle style)
-{
-	//what?
-}
-
-void
-Multi2dPanner::set_automation_state (AutoState state)
-{
-	// what?
 }
 
 void
@@ -930,10 +869,10 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		if (changed || ((left == 0.5) && (right == 0.5))) {
 		
 			front()->set_position (0.0);
-			front()->automation()->reset_default (0.0);
+			front()->pan_control()->list()->reset_default (0.0);
 			
 			back()->set_position (1.0);
-			back()->automation()->reset_default (1.0);
+			back()->pan_control()->list()->reset_default (1.0);
 			
 			changed = true;
 		}
@@ -972,7 +911,7 @@ void
 Panner::set_automation_style (AutoStyle style)
 {
 	for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
-		(*i)->set_automation_style (style);
+		(*i)->pan_control()->list()->set_automation_style (style);
 	}
 	_session.set_dirty ();
 }	
@@ -981,7 +920,7 @@ void
 Panner::set_automation_state (AutoState state)
 {
 	for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
-		(*i)->set_automation_state (state);
+		(*i)->pan_control()->list()->set_automation_state (state);
 	}
 	_session.set_dirty ();
 }	
@@ -990,7 +929,7 @@ AutoState
 Panner::automation_state () const
 {
 	if (!empty()) {
-		return front()->automation()->automation_state ();
+		return front()->pan_control()->list()->automation_state ();
 	} else {
 		return Off;
 	}
@@ -1000,7 +939,7 @@ AutoStyle
 Panner::automation_style () const
 {
 	if (!empty()) {
-		return front()->automation()->automation_style ();
+		return front()->pan_control()->list()->automation_style ();
 	} else {
 		return Absolute;
 	}
@@ -1010,7 +949,7 @@ void
 Panner::transport_stopped (nframes_t frame)
 {
 	for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
-		(*i)->transport_stopped (frame);
+		(*i)->pan_control()->list()->reposition_for_rt_add (frame);
 	}
 }	
 
@@ -1018,7 +957,9 @@ void
 Panner::snapshot (nframes_t now)
 {
 	for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
-		(*i)->snapshot (now);
+		boost::shared_ptr<AutomationList> list = (*i)->pan_control()->list();
+		if (list->automation_write())
+			list->rt_add(now, (*i)->pan_control()->get_value());
 	}
 }	
 
@@ -1026,7 +967,7 @@ void
 Panner::clear_automation ()
 {
 	for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
-		(*i)->automation()->clear ();
+		(*i)->pan_control()->list()->clear ();
 	}
 	_session.set_dirty ();
 }	
@@ -1181,7 +1122,7 @@ bool
 Panner::touching () const
 {
 	for (vector<StreamPanner*>::const_iterator i = begin(); i != end(); ++i) {
-		if ((*i)->automation()->touching ()) {
+		if ((*i)->pan_control()->list()->touching ()) {
 			return true;
 		}
 	}

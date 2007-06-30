@@ -48,7 +48,7 @@
 #include "ardour_ui.h"
 #include "midi_time_axis.h"
 #include "automation_time_axis.h"
-#include "automation_midi_cc_line.h"
+#include "automation_line.h"
 #include "add_midi_cc_track_dialog.h"
 #include "canvas_impl.h"
 #include "crossfade_view.h"
@@ -61,9 +61,6 @@
 #include "point_selection.h"
 #include "prompter.h"
 #include "public_editor.h"
-#include "processor_automation_line.h"
-#include "processor_automation_time_axis.h"
-#include "midi_controller_time_axis.h"
 #include "region_view.h"
 #include "rgb_macros.h"
 #include "selection.h"
@@ -193,23 +190,13 @@ MidiTimeAxisView::create_automation_child (ParamID param)
 			_route->add_control(c);
 		}
 
-		MidiControllerTimeAxisView* track = new MidiControllerTimeAxisView (_session,
-				_route,
+		boost::shared_ptr<AutomationTimeAxisView> track(new AutomationTimeAxisView (_session,
+				_route, _route, c,
 				editor,
 				*this,
 				parent_canvas,
 				_route->describe_parameter(param),
-				c);
-
-		AutomationMidiCCLine* line = new AutomationMidiCCLine (param.to_string(),
-				*track,
-				*track->canvas_display,
-				c->list());
-
-		line->set_line_color (ARDOUR_UI::config()->canvasvar_AutomationLine.get());
-
-		track->add_line(*line);
-
+				c->list()->param_id().to_string() /* FIXME: correct state name? */));
 		add_automation_child(param, track);
 
 	} else {

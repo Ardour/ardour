@@ -157,10 +157,6 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 
 TimeAxisView::~TimeAxisView()
 {
-	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
-		delete *i;
-	}
-
 	for (list<SelectionRect*>::iterator i = free_selection_rects.begin(); i != free_selection_rects.end(); ++i) {
 		delete (*i)->rect;
 		delete (*i)->start_trim;
@@ -231,7 +227,7 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 
 	/* now show children */
 	
-	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		
 		if ((*i)->marked_for_display()) {
 			(*i)->canvas_display->show();
@@ -315,7 +311,7 @@ TimeAxisView::hide ()
 	
 	/* now hide children */
 	
-	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i)->hide ();
 	}
 	
@@ -572,7 +568,7 @@ TimeAxisView::set_selected (bool yn)
 		   have to do this here.
 		*/
 
-		for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
+		for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 			(*i)->set_selected (false);
 		}
 
@@ -611,7 +607,7 @@ TimeAxisView::build_display_menu ()
 void
 TimeAxisView::set_samples_per_unit (double spu)
 {
-	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i)->set_samples_per_unit (spu);
 	}
 }
@@ -619,7 +615,7 @@ TimeAxisView::set_samples_per_unit (double spu)
 void
 TimeAxisView::show_timestretch (nframes_t start, nframes_t end)
 {
-	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i)->show_timestretch (start, end);
 	}
 }
@@ -627,7 +623,7 @@ TimeAxisView::show_timestretch (nframes_t start, nframes_t end)
 void
 TimeAxisView::hide_timestretch ()
 {
-	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i)->hide_timestretch ();
 	}
 }
@@ -640,7 +636,7 @@ TimeAxisView::show_selection (TimeSelection& ts)
 	double y2;
 	SelectionRect *rect;
 
-	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i)->show_selection (ts);
 	}
 
@@ -706,7 +702,7 @@ TimeAxisView::reshow_selection (TimeSelection& ts)
 {
 	show_selection (ts);
 
-	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i)->show_selection (ts);
 	}
 }
@@ -725,7 +721,7 @@ TimeAxisView::hide_selection ()
 		selection_group->hide();
 	}
 	
-	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i)->hide_selection ();
 	}
 }
@@ -815,22 +811,24 @@ TimeAxisView::get_selection_rect (uint32_t id)
 	return rect;
 }
 
+struct null_deleter { void operator()(void const *) const {} };
+
 bool
 TimeAxisView::is_child (TimeAxisView* tav)
 {
-	return find (children.begin(), children.end(), tav) != children.end();
+	return find (children.begin(), children.end(), boost::shared_ptr<TimeAxisView>(tav, null_deleter())) != children.end();
 }
 
 void
-TimeAxisView::add_child (TimeAxisView* child)
+TimeAxisView::add_child (boost::shared_ptr<TimeAxisView> child)
 {
 	children.push_back (child);
 }
 
 void
-TimeAxisView::remove_child (TimeAxisView* child)
+TimeAxisView::remove_child (boost::shared_ptr<TimeAxisView> child)
 {
-	vector<TimeAxisView*>::iterator i;
+	Children::iterator i;
 
 	if ((i = find (children.begin(), children.end(), child)) != children.end()) {
 		children.erase (i);
@@ -923,7 +921,7 @@ TimeAxisView::reset_height()
 {
 	set_height_pixels (height);
 
-	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i)->set_height_pixels ((TrackHeight)(*i)->height);
 	}
 }
@@ -1095,7 +1093,7 @@ TimeAxisView::covers_y_position (double y)
 		return this;
 	}
 
-	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		TimeAxisView* tv;
 
 		if ((tv = (*i)->covers_y_position (y)) != 0) {

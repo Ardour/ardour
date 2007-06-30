@@ -19,11 +19,12 @@
 */
 
 #include <pbd/error.h>
-#include "automation_controller.h"
 #include "ardour/automation_event.h"
 #include "ardour/automation_control.h"
 #include "ardour_ui.h"
 #include "utils.h"
+#include "automation_controller.h"
+#include "gui_thread.h"
 
 #include "i18n.h"
 
@@ -51,6 +52,8 @@ AutomationController::AutomationController(boost::shared_ptr<AutomationControl> 
 		
 	_screen_update_connection = ARDOUR_UI::RapidScreenUpdate.connect (
 			mem_fun (*this, &AutomationController::display_effective_value));
+	
+	ac->Changed.connect (mem_fun(*this, &AutomationController::value_changed));
 }
 
 AutomationController::~AutomationController()
@@ -71,14 +74,15 @@ AutomationController::create(Session& s, boost::shared_ptr<AutomationList> al, b
 void
 AutomationController::update_label(char* label, int label_len)
 {
-	//cerr << "Controller label: " << label << endl;
+	if (label && label_len)
+		snprintf(label, label_len, "%.3f", _controllable->get_value());
 }
 
 void
 AutomationController::display_effective_value()
 {
-	if ( ! _controllable->list()->automation_playback())
-		return;
+	//if ( ! _controllable->list()->automation_playback())
+	//	return;
 
 	float value = _controllable->get_value();
 	
@@ -108,3 +112,28 @@ AutomationController::end_touch()
 {
 	_controllable->list()->stop_touch();
 }
+
+void
+AutomationController::automation_state_changed ()
+{
+	ENSURE_GUI_THREAD(mem_fun(*this, &AutomationController::automation_state_changed));
+
+	bool x = (_controllable->list()->automation_state() != Off);
+	
+	/* start watching automation so that things move */
+	
+	_screen_update_connection.disconnect();
+
+	if (x) {
+		_screen_update_connection = ARDOUR_UI::RapidScreenUpdate.connect (
+				mem_fun (*this, &AutomationController::display_effective_value));
+	}
+}
+
+void
+AutomationController::value_changed ()
+{
+	Gtkmm2ext::UI::instance()->call_slot (
+			mem_fun(*this, &AutomationController::display_effective_value));
+}
+

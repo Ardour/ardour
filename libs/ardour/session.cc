@@ -3678,6 +3678,9 @@ Session::tempo_map_changed (Change ignored)
 void
 Session::ensure_buffers (ChanCount howmany)
 {
+	if (current_block_size == 0)
+		return; // too early? (is this ok?)
+
 	// We need at least 1 MIDI scratch buffer to mix/merge
 	if (howmany.n_midi() < 1)
 		howmany.set_midi(1);

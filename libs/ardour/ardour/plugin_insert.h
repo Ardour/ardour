@@ -77,8 +77,22 @@ class PluginInsert : public Processor
 	bool is_generator() const;
 
 	void set_parameter (ParamID param, float val);
+	float get_parameter (ParamID param);
 
 	float default_parameter_value (ParamID param);
+	
+	struct PluginControl : public AutomationControl {
+	    PluginControl (PluginInsert& p, boost::shared_ptr<AutomationList> list);
+	    
+		void set_value (float val);
+	    float get_value (void) const;
+	
+	private:
+		PluginInsert& _plugin;
+		boost::shared_ptr<AutomationList> _list;
+		bool _logarithmic;
+		bool _toggled;
+	};
 
 	boost::shared_ptr<Plugin> plugin(uint32_t num=0) const {
 		if (num < _plugins.size()) { 
@@ -93,9 +107,6 @@ class PluginInsert : public Processor
 	string describe_parameter (ParamID param);
 
 	nframes_t signal_latency() const;
-
-	void transport_stopped (nframes_t now);
-	void automation_snapshot (nframes_t now);
 
   private:
 

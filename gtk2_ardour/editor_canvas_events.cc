@@ -33,11 +33,9 @@
 #include "crossfade_view.h"
 #include "audio_time_axis.h"
 #include "region_gain_line.h"
-#include "automation_gain_line.h"
-#include "automation_pan_line.h"
-#include "automation_midi_cc_line.h"
+#include "automation_line.h"
 #include "automation_time_axis.h"
-#include "processor_automation_line.h"
+#include "automation_line.h"
 #include "canvas_impl.h"
 #include "simplerect.h"
 
@@ -563,8 +561,6 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 bool
 Editor::canvas_control_point_event (GdkEvent *event, ArdourCanvas::Item* item, ControlPoint* cp)
 {
-	ItemType type;
-
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
 	case GDK_2BUTTON_PRESS:
@@ -585,21 +581,7 @@ Editor::canvas_control_point_event (GdkEvent *event, ArdourCanvas::Item* item, C
 		break;
 	}
 
-	if (dynamic_cast<AudioRegionGainLine*> (&cp->line) != 0) {
-		type = GainControlPointItem;
-	} else if (dynamic_cast<AutomationGainLine*> (&cp->line) != 0) {
-		type = GainAutomationControlPointItem;
-	} else if (dynamic_cast<AutomationPanLine*> (&cp->line) != 0) {
-		type = PanAutomationControlPointItem;
-	} else if (dynamic_cast<ProcessorAutomationLine*> (&cp->line) != 0) {
-		type = RedirectAutomationControlPointItem;
-	} else if (dynamic_cast<AutomationMidiCCLine*> (&cp->line) != 0) {
-		type = MidiCCAutomationControlPointItem;
-	} else {
-		return false;
-	}
-
-	return typed_event (item, event, type);
+	return typed_event (item, event, ControlPointItem);
 }
 
 bool
@@ -609,16 +591,8 @@ Editor::canvas_line_event (GdkEvent *event, ArdourCanvas::Item* item, Automation
 
 	if (dynamic_cast<AudioRegionGainLine*> (al) != 0) {
 		type = GainLineItem;
-	} else if (dynamic_cast<AutomationGainLine*> (al) != 0) {
-		type = GainAutomationLineItem;
-	} else if (dynamic_cast<AutomationPanLine*> (al) != 0) {
-		type = PanAutomationLineItem;
-	} else if (dynamic_cast<ProcessorAutomationLine*> (al) != 0) {
-		type = ProcessorAutomationLineItem;
-	} else if (dynamic_cast<AutomationMidiCCLine*> (al) != 0) {
-		type = MidiCCAutomationLineItem;
 	} else {
-		return false;
+		type = AutomationLineItem;
 	}
 
 	return typed_event (item, event, type);

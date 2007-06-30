@@ -147,8 +147,8 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	void hide_selection ();
 
 	virtual string  get_verbose_cursor_string (float);
-	virtual void view_to_model_y (double&) = 0;
-	virtual void model_to_view_y (double&) = 0;
+	virtual void view_to_model_y (double&);
+	virtual void model_to_view_y (double&);
 
 	boost::shared_ptr<ARDOUR::AutomationList> the_list() const { return alist; }
 

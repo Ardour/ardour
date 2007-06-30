@@ -96,10 +96,7 @@ ardour_ui_options.cc
 audio_clock.cc
 audio_time_axis.cc
 audio_region_editor.cc
-automation_gain_line.cc
-automation_midi_cc_line.cc
 automation_line.cc
-automation_pan_line.cc
 automation_time_axis.cc
 automation_controller.cc
 midi_time_axis.cc
@@ -144,8 +141,6 @@ export_dialog.cc
 export_session_dialog.cc
 export_region_dialog.cc
 export_range_markers_dialog.cc
-gain_automation_time_axis.cc
-midi_controller_time_axis.cc
 gain_meter.cc
 ghostregion.cc
 gtk-custom-hruler.c
@@ -162,7 +157,6 @@ mixer_ui.cc
 new_session_dialog.cc
 option_editor.cc
 opts.cc
-pan_automation_time_axis.cc
 panner.cc
 panner2d.cc
 panner_ui.cc
@@ -171,8 +165,6 @@ plugin_selector.cc
 plugin_ui.cc
 prompter.cc
 public_editor.cc
-processor_automation_line.cc
-processor_automation_time_axis.cc
 processor_box.cc
 region_gain_line.cc
 region_selection.cc

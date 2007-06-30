@@ -2271,7 +2271,7 @@ void
 IO::start_pan_touch (uint32_t which)
 {
 	if (which < _panner->size()) {
-		(*_panner)[which]->automation()->start_touch();
+		(*_panner)[which]->pan_control()->list()->start_touch();
 	}
 }
 
@@ -2279,7 +2279,7 @@ void
 IO::end_pan_touch (uint32_t which)
 {
 	if (which < _panner->size()) {
-		(*_panner)[which]->automation()->stop_touch();
+		(*_panner)[which]->pan_control()->list()->stop_touch();
 	}
 
 }

@@ -48,10 +48,14 @@ public:
 
 	virtual boost::shared_ptr<AutomationControl> control(ParamID id, bool create_if_missing=false);
 	virtual boost::shared_ptr<const AutomationControl> control(ParamID id) const;
+	
+	typedef std::map<ParamID,boost::shared_ptr<AutomationControl> > Controls;
+	Controls controls() { return _controls; }
 
 	virtual void add_control(boost::shared_ptr<AutomationControl>);
 
 	virtual void automation_snapshot(nframes_t now);
+	virtual void transport_stopped(nframes_t now);
 
 	virtual bool find_next_event(nframes_t start, nframes_t end, ControlEvent& ev) const;
 	
@@ -60,7 +64,7 @@ public:
 	
 	virtual void clear_automation();
 
-	AutoState get_parameter_automation_state (ParamID param);
+	AutoState get_parameter_automation_state (ParamID param, bool lock = true);
 	virtual void set_parameter_automation_state (ParamID param, AutoState);
 	
 	AutoStyle get_parameter_automation_style (ParamID param);
@@ -87,8 +91,6 @@ protected:
 	int old_set_automation_state(const XMLNode&);
 
 	mutable Glib::Mutex _automation_lock;
-	
-	typedef std::map<ParamID,boost::shared_ptr<AutomationControl> > Controls;
 	
 	Controls          _controls;
 	std::set<ParamID> _visible_controls;

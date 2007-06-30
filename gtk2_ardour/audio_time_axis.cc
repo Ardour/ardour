@@ -49,14 +49,12 @@
 
 #include "ardour_ui.h"
 #include "audio_time_axis.h"
-#include "automation_gain_line.h"
-#include "automation_pan_line.h"
+#include "automation_line.h"
 #include "canvas_impl.h"
 #include "crossfade_view.h"
 #include "enums.h"
-#include "gain_automation_time_axis.h"
+#include "automation_time_axis.h"
 #include "keyboard.h"
-#include "pan_automation_time_axis.h"
 #include "playlist_selector.h"
 #include "prompter.h"
 #include "public_editor.h"
@@ -291,38 +289,19 @@ AudioTimeAxisView::create_automation_child (ParamID param)
 			return;
 		}
 
-		GainAutomationTimeAxisView* gain_track = new GainAutomationTimeAxisView (_session,
-				_route,
+		boost::shared_ptr<AutomationTimeAxisView> gain_track(new AutomationTimeAxisView (_session,
+				_route, _route, c,
 				editor,
 				*this,
 				parent_canvas,
 				_route->describe_parameter(param),
-				c);
-
-		AutomationLine* line = new AutomationGainLine ("automation gain",
-				*gain_track,
-				*gain_track->canvas_display,
-				c->list());
-
-		line->set_line_color (ARDOUR_UI::config()->canvasvar_AutomationLine.get());
-
-		gain_track->add_line (*line);
+				c->list()->param_id().to_string() /* FIXME: correct state name? */));
 
 		add_automation_child(ParamID(GainAutomation), gain_track);
 
 	} else if (param.type() == PanAutomation) {
-		
-		PanAutomationTimeAxisView* pan_track = new PanAutomationTimeAxisView (_session,
-				 _route,
-				 editor,
-				 *this,
-				 parent_canvas,
-				_route->describe_parameter(param));
 
 		ensure_xml_node ();
-
-		add_automation_child(ParamID(PanAutomation), pan_track);
-		
 		update_pans ();
 
 	} else {
@@ -334,41 +313,33 @@ void
 AudioTimeAxisView::update_pans ()
 {
 	Panner::iterator p;
-	
-	RouteAutomationNode* ran = automation_track(PanAutomation);
-	if (!ran) {
-		warning << _route << " has no pan automation track" << endmsg;
-		return;
-	}
 
-	AutomationTimeAxisView* pan_track = ran->track;
-	
-	pan_track->clear_lines ();
-	
-	/* we don't draw lines for "greater than stereo" panning.
-	 */
+	/* This is a filthy kludge until the panner stuff gets up to speed. */
 
-	if (_route->n_outputs().n_audio() > 2) {
-		return;
-	}
-
-	for (p = _route->panner().begin(); p != _route->panner().end(); ++p) {
-
-		AutomationLine* line;
-
-		line = new AutomationPanLine ("automation pan", *pan_track,
-					      *pan_track->canvas_display, 
-					      (*p)->automation());
-
-		if (p == _route->panner().begin()) {
-			/* first line is a nice orange */
-			line->set_line_color (ARDOUR_UI::config()->canvasvar_AutomationLine.get());
-		} else {
-			/* second line is a nice blue */
-			line->set_line_color (ARDOUR_UI::config()->canvasvar_AutomationLine.get());
+	/* Remove all our old automation tracks.  Slowly. */
+	while (true) {
+		bool found = false;
+		for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
+			if (i->first.type() == PanAutomation) {
+				_automation_tracks.erase(i);
+				found = true;
+				break;
+			}
 		}
 
-		pan_track->add_line (*line);
+		if ( ! found)
+			break;
+	}
+	
+	/* Man I hate that damn stereo->stereo panner */
+	for (p = _route->panner().begin(); p != _route->panner().end(); ++p) {
+		boost::shared_ptr<AutomationTimeAxisView> pan_track(new AutomationTimeAxisView (_session,
+					_route, _route/*FIXME*/, (*p)->pan_control(), 
+					editor,
+					*this,
+					parent_canvas,
+					_route->describe_parameter((*p)->pan_control()->list()->param_id()),
+					(*p)->pan_control()->list()->param_id().to_string() /* FIXME: correct state name? */));
 	}
 }
 		

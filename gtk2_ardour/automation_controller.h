@@ -42,6 +42,8 @@ public:
 	~AutomationController();
 	
 	boost::shared_ptr<ARDOUR::AutomationControl> controllable() { return _controllable; }
+
+	Gtk::Adjustment* adjustment() { return _adjustment; }
 	
 	void update_label(char* label, int label_len);
 	void display_effective_value();
@@ -51,6 +53,9 @@ private:
 	AutomationController(boost::shared_ptr<ARDOUR::AutomationControl> ac, Gtk::Adjustment* adj);
 	void start_touch();
 	void end_touch();
+
+	void value_changed();
+	void automation_state_changed();
 
 	bool                                         _ignore_change;
 	boost::shared_ptr<ARDOUR::AutomationControl> _controllable;

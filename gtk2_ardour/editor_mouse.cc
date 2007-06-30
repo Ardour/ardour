@@ -347,10 +347,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		commit = set_selected_track_from_click (press, op, false);
 		break;
 			
-	case GainAutomationControlPointItem:
-	case PanAutomationControlPointItem:
-	case RedirectAutomationControlPointItem:
-	case MidiCCAutomationControlPointItem:
+	case ControlPointItem:
 		commit = set_selected_track_from_click (press, op, true);
 		if (mouse_mode != MouseRange) {
 			commit |= set_selected_control_point_from_click (op, false);
@@ -537,18 +534,12 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 						return true;
 					break;
 
-				case GainAutomationControlPointItem:
-				case PanAutomationControlPointItem:
-				case RedirectAutomationControlPointItem:
-				case MidiCCAutomationControlPointItem:
+				case ControlPointItem:
 					start_control_point_grab (item, event);
 					return true;
 					break;
 					
-				case GainAutomationLineItem:
-				case PanAutomationLineItem:
-				case ProcessorAutomationLineItem:
-				case MidiCCAutomationLineItem:
+				case AutomationLineItem:
 					start_line_grab_from_line (item, event);
 					return true;
 					break;
@@ -600,18 +591,11 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				// start_line_grab_from_regionview (item, event);
 				break;
 
-			case GainControlPointItem:
-				start_control_point_grab (item, event);
-				return true;
-				
 			case GainLineItem:
 				start_line_grab_from_line (item, event);
 				return true;
 
-			case GainAutomationControlPointItem:
-			case PanAutomationControlPointItem:
-			case RedirectAutomationControlPointItem:
-			case MidiCCAutomationControlPointItem:
+			case ControlPointItem:
 				start_control_point_grab (item, event);
 				return true;
 				break;
@@ -623,17 +607,11 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			break;
 
 			switch (item_type) {
-			case GainAutomationControlPointItem:
-			case PanAutomationControlPointItem:
-			case RedirectAutomationControlPointItem:
-			case MidiCCAutomationControlPointItem:
+			case ControlPointItem:
 				start_control_point_grab (item, event);
 				break;
 
-			case GainAutomationLineItem:
-			case PanAutomationLineItem:
-			case ProcessorAutomationLineItem:
-			case MidiCCAutomationLineItem:
+			case AutomationLineItem:
 				start_line_grab_from_line (item, event);
 				break;
 
@@ -685,10 +663,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 					}
 					
 					break;
-				case GainAutomationControlPointItem:
-				case PanAutomationControlPointItem:
-				case RedirectAutomationControlPointItem:
-				case MidiCCAutomationControlPointItem:
+				case ControlPointItem:
 					start_control_point_grab (item, event);
 					return true;
 					break;
@@ -894,17 +869,12 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			}
 			break;
 			
-		case GainControlPointItem:
+		case ControlPointItem:
 			if (mouse_mode == MouseGain) {
 				remove_gain_control_point (item, event);
+			} else {
+				remove_control_point (item, event);
 			}
-			break;
-
-		case GainAutomationControlPointItem:
-		case PanAutomationControlPointItem:
-		case RedirectAutomationControlPointItem:
-		case MidiCCAutomationControlPointItem:
-			remove_control_point (item, event);
 			break;
 
 		default:
@@ -922,10 +892,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case PlayheadCursorItem:
 		case MarkerItem:
 		case GainLineItem:
-		case GainAutomationLineItem:
-		case PanAutomationLineItem:
-		case ProcessorAutomationLineItem:
-		case MidiCCAutomationLineItem:
+		case AutomationLineItem:
 		case StartSelectionTrimItem:
 		case EndSelectionTrimItem:
 			return true;
@@ -1044,33 +1011,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	double fraction;
 	
 	switch (item_type) {
-	case GainControlPointItem:
-		if (mouse_mode == MouseGain) {
-			cp = static_cast<ControlPoint*>(item->get_data ("control_point"));
-			cp->set_visible (true);
-
-			double at_x, at_y;
-			at_x = cp->get_x();
-			at_y = cp->get_y ();
-			cp->item->i2w (at_x, at_y);
-			at_x += 20.0;
-			at_y += 20.0;
-
-			fraction = 1.0 - ((cp->get_y() - cp->line.y_position()) / cp->line.height());
-
-			set_verbose_canvas_cursor (cp->line.get_verbose_cursor_string (fraction), at_x, at_y);
-			show_verbose_canvas_cursor ();
-
-			if (is_drawable()) {
-			        track_canvas.get_window()->set_cursor (*fader_cursor);
-			}
-		}
-		break;
-
-	case GainAutomationControlPointItem:
-	case PanAutomationControlPointItem:
-	case RedirectAutomationControlPointItem:
-	case MidiCCAutomationControlPointItem:
+	case ControlPointItem:
 		if (mouse_mode == MouseGain || mouse_mode == MouseObject) {
 			cp = static_cast<ControlPoint*>(item->get_data ("control_point"));
 			cp->set_visible (true);
@@ -1104,10 +1045,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		}
 		break;
 			
-	case GainAutomationLineItem:
-	case ProcessorAutomationLineItem:
-	case MidiCCAutomationLineItem:
-	case PanAutomationLineItem:
+	case AutomationLineItem:
 		if (mouse_mode == MouseGain || mouse_mode == MouseObject) {
 			{
 				ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
@@ -1227,15 +1165,8 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 	switch (item_type) {
 	case GainLineItem:
-	case GainAutomationLineItem:
-	case ProcessorAutomationLineItem:
-	case MidiCCAutomationLineItem:
-	case PanAutomationLineItem:
-	case GainControlPointItem:
-	case GainAutomationControlPointItem:
-	case PanAutomationControlPointItem:
-	case RedirectAutomationControlPointItem:
-	case MidiCCAutomationControlPointItem:
+	case AutomationLineItem:
+	case ControlPointItem:
 		/* these do not affect the current entered track state */
 		clear_entered_track = false;
 		break;
@@ -1263,11 +1194,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	bool is_start;
 
 	switch (item_type) {
-	case GainControlPointItem:
-	case GainAutomationControlPointItem:
-	case PanAutomationControlPointItem:
-	case RedirectAutomationControlPointItem:
-	case MidiCCAutomationControlPointItem:
+	case ControlPointItem:
 		cp = reinterpret_cast<ControlPoint*>(item->get_data ("control_point"));
 		if (cp->line.npoints() > 1) {
 			if (!cp->selected) {
@@ -1301,10 +1228,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 
 	case GainLineItem:
-	case GainAutomationLineItem:
-	case ProcessorAutomationLineItem:
-	case MidiCCAutomationLineItem:
-	case PanAutomationLineItem:
+	case AutomationLineItem:
 		al = reinterpret_cast<AutomationLine*> (item->get_data ("line"));
 		{
 			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
@@ -1445,11 +1369,7 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 	case PlayheadCursorItem:
 	case EditCursorItem:
 	case MarkerItem:
-	case GainControlPointItem:
-	case RedirectAutomationControlPointItem:
-	case MidiCCAutomationControlPointItem:
-	case GainAutomationControlPointItem:
-	case PanAutomationControlPointItem:
+	case ControlPointItem:
 	case TempoMarkerItem:
 	case MeterMarkerItem:
 	case RegionViewNameHighlight:
@@ -1457,10 +1377,7 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 	case EndSelectionTrimItem:
 	case SelectionItem:
 	case GainLineItem:
-	case ProcessorAutomationLineItem:
-	case MidiCCAutomationLineItem:
-	case GainAutomationLineItem:
-	case PanAutomationLineItem:
+	case AutomationLineItem:
 	case FadeInHandleItem:
 	case FadeOutHandleItem:
 
@@ -2823,7 +2740,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			TimeAxisView *tracklist_timeview;
 			tracklist_timeview = (*i);
 			RouteTimeAxisView* rtv2 = dynamic_cast<RouteTimeAxisView*>(tracklist_timeview);
-			list<TimeAxisView*> children_list;
+			TimeAxisView::Children children_list;
 	      
 			/* zeroes are audio tracks. ones are other types. */
 	      
@@ -2843,7 +2760,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 				height_list[rtv2->order] = (*i)->height;
 				children = 1;
 				if ((children_list = rtv2->get_child_list()).size() > 0) {
-					for (list<TimeAxisView*>::iterator j = children_list.begin(); j != children_list.end(); ++j) { 
+					for (TimeAxisView::Children::iterator j = children_list.begin(); j != children_list.end(); ++j) { 
 						tracks = tracks |= (0x01 << (rtv2->order + children));
 						height_list[rtv2->order + children] =  (*j)->height;		    
 						numtracks++;

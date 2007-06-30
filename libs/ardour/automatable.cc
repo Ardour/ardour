@@ -127,8 +127,6 @@ Automatable::add_control(boost::shared_ptr<AutomationControl> ac)
 	
 	cerr << _name << ": added parameter " << param.to_string() << endl;
 
-	// FIXME: sane default behaviour?
-	_visible_controls.insert(param);
 	_can_automate_list.insert(param);
 
 	// Sync everything (derived classes) up to initial values
@@ -355,17 +353,22 @@ Automatable::set_parameter_automation_state (ParamID param, AutoState s)
 }
 
 AutoState
-Automatable::get_parameter_automation_state (ParamID param)
+Automatable::get_parameter_automation_state (ParamID param, bool lock)
 {
-	Glib::Mutex::Lock lm (_automation_lock);
+	AutoState result = Off;
+
+	if (lock)
+		_automation_lock.lock();
 
 	boost::shared_ptr<AutomationControl> c = control(param);
 
-	if (c) {
-		return c->list()->automation_state();
-	} else {
-		return Off;
-	}
+	if (c)
+		result = c->list()->automation_state();
+	
+	if (lock)
+		_automation_lock.unlock();
+
+	return result;
 }
 
 void
@@ -431,6 +434,21 @@ Automatable::automation_snapshot (nframes_t now)
 		}
 		
 		_last_automation_snapshot = now;
+	}
+}
+
+void
+Automatable::transport_stopped (nframes_t now)
+{
+	for (Controls::iterator li = _controls.begin(); li != _controls.end(); ++li) {
+		
+		boost::shared_ptr<AutomationControl> c = li->second;
+		
+		c->list()->reposition_for_rt_add (now);
+
+		if (c->list()->automation_state() != Off) {
+			c->set_value(c->list()->eval(now));
+		}
 	}
 }
 
