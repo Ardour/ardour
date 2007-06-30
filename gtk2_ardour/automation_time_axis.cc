@@ -170,6 +170,9 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 
 	controls_table.attach (auto_button, 5, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 	controls_table.attach (clear_button, 5, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	
+	/* add bar controller */
+	controls_table.attach (*_controller.get(), 0, 8, 2, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 
 	controls_table.show_all ();
 
@@ -382,14 +385,8 @@ AutomationTimeAxisView::set_height (TrackHeight ht)
 	//if (changed_between_small_and_normal || first_call_to_set_height) {
 		first_call_to_set_height = false;
 		switch (ht) {
-			case Largest:
-			case Large:
-			case Larger:
-
-				_controller->show ();
-				controls_table.attach (*_controller.get(), 0, 8, 2, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-
 			case Normal:
+				_controller->hide();
 
 				controls_table.remove (name_hbox);
 
@@ -413,8 +410,16 @@ AutomationTimeAxisView::set_height (TrackHeight ht)
 				clear_button.show();
 				hide_button.show_all();
 				break;
+			
+			case Large:
+			case Larger:
+			case Largest:
+				_controller->show ();
+				break;
 
 			case Smaller:
+				_controller->hide();
+			
 			case Small:
 
 				controls_table.remove (name_hbox);
@@ -436,6 +441,7 @@ AutomationTimeAxisView::set_height (TrackHeight ht)
 				hide_button.hide();
 				break;
 		}
+
 	//}
 
 	if (changed) {

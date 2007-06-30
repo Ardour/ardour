@@ -69,9 +69,9 @@ static double direct_pan_to_control (pan_t val) {
 	return val;
 }
 
-StreamPanner::StreamPanner (Panner& p)
-	: parent (p),
-	  _control (new PanControllable(p.session(), X_("panner"), *this))
+StreamPanner::StreamPanner (Panner& p, ParamID param)
+	: parent (p)
+	, _control (new PanControllable(p.session(), X_("panner"), *this, param))
 {
 	_muted = false;
 
@@ -190,7 +190,7 @@ StreamPanner::add_state (XMLNode& node)
 /*---------------------------------------------------------------------- */
 
 BaseStereoPanner::BaseStereoPanner (Panner& p)
-	: StreamPanner (p)
+	: StreamPanner (p, ParamID(PanAutomation, 0))
 {
 }
 
@@ -386,6 +386,7 @@ EqualPowerStereoPanner::update ()
 	desired_right = panR * (scale * panR + 1.0f - scale);
 
 	effective_x = x;
+	_control->set_value(x);
 }
 
 void
@@ -411,8 +412,10 @@ EqualPowerStereoPanner::distribute_automated (AudioBuffer& srcbuf, BufferSet& ob
 
 	/* store effective pan position. do this even if we are muted */
 
-	if (nframes > 0) 
+	if (nframes > 0) {
 		effective_x = buffers[0][nframes-1];
+		_control->set_value(effective_x); // signal, update UI
+	}
 
 	if (_muted) {
 		return;
@@ -458,7 +461,7 @@ EqualPowerStereoPanner::distribute_automated (AudioBuffer& srcbuf, BufferSet& ob
 }
 
 StreamPanner*
-EqualPowerStereoPanner::factory (Panner& parent)
+EqualPowerStereoPanner::factory (Panner& parent, ParamID who_cares)
 {
 	return new EqualPowerStereoPanner (parent);
 }
@@ -527,8 +530,8 @@ EqualPowerStereoPanner::set_state (const XMLNode& node)
 
 /*----------------------------------------------------------------------*/
 
-Multi2dPanner::Multi2dPanner (Panner& p)
-	: StreamPanner (p)
+Multi2dPanner::Multi2dPanner (Panner& p, ParamID param)
+	: StreamPanner (p, param)
 {
 	update ();
 }
@@ -567,6 +570,7 @@ Multi2dPanner::update ()
 	}
 
 	effective_x = x;
+	_control->set_value(x);
 }
 
 void
@@ -644,9 +648,9 @@ Multi2dPanner::distribute_automated (AudioBuffer& src, BufferSet& obufs,
 }
 
 StreamPanner*
-Multi2dPanner::factory (Panner& p)
+Multi2dPanner::factory (Panner& p, ParamID param)
 {
-	return new Multi2dPanner (p);
+	return new Multi2dPanner (p, param);
 }
 
 int
@@ -804,7 +808,7 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		outputs.push_back (Output  (1.0, 1.0));
 
 		for (n = 0; n < npans; ++n) {
-			push_back (new Multi2dPanner (*this));
+			push_back (new Multi2dPanner (*this, ParamID(PanAutomation, n)));
 		}
 
 		break; 
@@ -816,7 +820,7 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		outputs.push_back (Output  (0, 1.0));
 
 		for (n = 0; n < npans; ++n) {
-			push_back (new Multi2dPanner (*this));
+			push_back (new Multi2dPanner (*this, ParamID(PanAutomation, n)));
 		}
 
 		break;	
@@ -829,7 +833,7 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		outputs.push_back (Output  (0.5, 0.75));
 
 		for (n = 0; n < npans; ++n) {
-			push_back (new Multi2dPanner (*this));
+			push_back (new Multi2dPanner (*this, ParamID(PanAutomation, n)));
 		}
 
 		break;
@@ -841,7 +845,7 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		}
 
 		for (n = 0; n < npans; ++n) {
-			push_back (new Multi2dPanner (*this));
+			push_back (new Multi2dPanner (*this, ParamID(PanAutomation, n)));
 		}
 
 		break;
@@ -975,7 +979,7 @@ Panner::clear_automation ()
 struct PanPlugins {
     string name;
     uint32_t nouts;
-    StreamPanner* (*factory)(Panner&);
+    StreamPanner* (*factory)(Panner&, ParamID);
 };
 
 PanPlugins pan_plugins[] = {
@@ -1077,7 +1081,7 @@ Panner::set_state (const XMLNode& node)
 						   assumption, but its still an assumption.
 						*/
 						
-						sp = pan_plugins[i].factory (*this);
+						sp = pan_plugins[i].factory (*this, ParamID(PanAutomation, 0));
 						
 						if (sp->set_state (**niter) == 0) {
 							push_back (sp);

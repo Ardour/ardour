@@ -70,11 +70,11 @@ public:
 		} else if (str.length() > 10 && str.substr(0, 10) == "parameter-") {
 			_type = PluginAutomation;
 			_id = atoi(str.c_str()+10);
-			PBD::info << "Parameter: " << str << " -> " << _id << endl;
+			//PBD::info << "Parameter: " << str << " -> " << _id << endl;
 		} else if (str.length() > 7 && str.substr(0, 7) == "midicc-") {
 			_type = MidiCCAutomation;
 			_id = atoi(str.c_str()+7);
-			PBD::info << "MIDI CC: " << str << " -> " << _id << endl;
+			//PBD::info << "MIDI CC: " << str << " -> " << _id << endl;
 		} else {
 			PBD::warning << "Unknown ParamID '" << str << "'" << endmsg;
 		}
@@ -103,7 +103,7 @@ public:
 		if (_type == GainAutomation) {
 			return "gain";
 		} else if (_type == PanAutomation) {
-			return "pan";
+			return string_compose("pan-%1", _id);
 		} else if (_type == SoloAutomation) {
 			return "solo";
 		} else if (_type == MuteAutomation) {

@@ -46,7 +46,7 @@ class AudioBuffer;
 class StreamPanner : public sigc::trackable, public PBD::Stateful
 {
   public:
-	StreamPanner (Panner& p);
+	StreamPanner (Panner& p, ParamID param);
 	~StreamPanner ();
 
 	void set_muted (bool yn);
@@ -79,7 +79,7 @@ class StreamPanner : public sigc::trackable, public PBD::Stateful
 	virtual XMLNode& state (bool full_state) = 0;
 	
 	Panner & get_parent() { return parent; }
-	
+
 	/* old school automation loading */
 
 	virtual int load (istream&, string path, uint32_t&) = 0;
@@ -103,9 +103,9 @@ class StreamPanner : public sigc::trackable, public PBD::Stateful
 	bool             _muted;
 
 	struct PanControllable : public AutomationControl {
-	    PanControllable (Session& s, std::string name, StreamPanner& p)
+	    PanControllable (Session& s, std::string name, StreamPanner& p, ParamID param)
 			: AutomationControl (s, boost::shared_ptr<AutomationList>(new AutomationList(
-						ParamID(PanAutomation), 0.0, 1.0, 0.5)), name)
+					param, 0.0, 1.0, 0.5)), name)
 			, panner (p) {}
 	    
 	    StreamPanner& panner;
@@ -160,7 +160,7 @@ class EqualPowerStereoPanner : public BaseStereoPanner
 	void get_current_coefficients (pan_t*) const;
 	void get_desired_coefficients (pan_t*) const;
 
-	static StreamPanner* factory (Panner&);
+	static StreamPanner* factory (Panner&, ParamID param);
 	static string name;
 
 	XMLNode& state (bool full_state); 
@@ -174,14 +174,14 @@ class EqualPowerStereoPanner : public BaseStereoPanner
 class Multi2dPanner : public StreamPanner
 {
   public:
-	Multi2dPanner (Panner& parent);
+	Multi2dPanner (Panner& parent, ParamID);
 	~Multi2dPanner ();
 
 	void distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
 	void distribute_automated (AudioBuffer& src, BufferSet& obufs,
 				   nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
 
-	static StreamPanner* factory (Panner&);
+	static StreamPanner* factory (Panner&, ParamID);
 	static string name;
 
 	XMLNode& state (bool full_state); 

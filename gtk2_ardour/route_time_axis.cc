@@ -451,8 +451,8 @@ RouteTimeAxisView::build_automation_action_menu ()
 			automation_items.push_back (*i->second->menu_item);
 		}
 		
-		i->second->menu_item->set_active(show_automation(i->second->param));
-		//i->second->menu_item->set_active(false);
+		//i->second->menu_item->set_active(show_automation(i->second->param));
+		i->second->menu_item->set_active(false);
 	}
 }
 
@@ -1796,8 +1796,6 @@ RouteTimeAxisView::add_automation_child(ParamID param, boost::shared_ptr<Automat
 		_show_automation.insert(param);
 		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 	}
-
-	build_automation_action_menu();
 }
 
 

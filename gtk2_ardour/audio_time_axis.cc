@@ -317,10 +317,12 @@ AudioTimeAxisView::update_pans ()
 	/* This is a filthy kludge until the panner stuff gets up to speed. */
 
 	/* Remove all our old automation tracks.  Slowly. */
-	while (true) {
+	/*while (true) {
 		bool found = false;
 		for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
 			if (i->first.type() == PanAutomation) {
+				remove_child(i->second->track);
+				delete i->second;
 				_automation_tracks.erase(i);
 				found = true;
 				break;
@@ -329,9 +331,10 @@ AudioTimeAxisView::update_pans ()
 
 		if ( ! found)
 			break;
-	}
+	}*/
 	
 	/* Man I hate that damn stereo->stereo panner */
+	uint32_t i = 0;
 	for (p = _route->panner().begin(); p != _route->panner().end(); ++p) {
 		boost::shared_ptr<AutomationTimeAxisView> pan_track(new AutomationTimeAxisView (_session,
 					_route, _route/*FIXME*/, (*p)->pan_control(), 
@@ -339,7 +342,9 @@ AudioTimeAxisView::update_pans ()
 					*this,
 					parent_canvas,
 					_route->describe_parameter((*p)->pan_control()->list()->param_id()),
-					(*p)->pan_control()->list()->param_id().to_string() /* FIXME: correct state name? */));
+					ParamID(PanAutomation, i).to_string()/* FIXME: correct state name? */));
+		add_automation_child(ParamID(PanAutomation, i), pan_track);
+		++i;
 	}
 }
 		
