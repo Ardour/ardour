@@ -218,7 +218,6 @@
         <menu name='JACK' action='JACK'>
                <menuitem action='JACKDisconnect'/>
                <menuitem action='JACKReconnect'/>
-               <menuitem action='AudioEngineSetup'/>
                <menu name='Latency' action='Latency'>
                    <menuitem action='JACKLatency32'/>
                    <menuitem action='JACKLatency64'/>

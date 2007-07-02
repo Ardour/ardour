@@ -364,6 +364,7 @@ AutomationList::rt_add (double when, double value)
 		
 		if (!done) {
 			last_rt_insertion_point = events.insert (where, point_factory (when, value));
+			// cerr << "\tINSERTED\n";
 		}
 		
 		_new_touch = false;
