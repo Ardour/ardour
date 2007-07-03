@@ -18,7 +18,8 @@ FPU::FPU ()
 
 #ifndef ARCH_X86
 	return;
-#endif
+
+#else
 	
 #ifndef USE_X86_64_ASM
 	asm volatile (
@@ -90,6 +91,7 @@ FPU::FPU ()
 			free (fxbuf);
 		}
 	}
+#endif  // ARCH_X86
 }			
 
 FPU::~FPU ()
