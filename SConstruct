@@ -727,6 +727,12 @@ if conf.CheckLib ('usb', 'usb_interrupt_write'):
 else:
     have_libusb = False
 
+# check for linux/input.h while we're at it for powermate
+if conf.CheckHeader('linux/input.h'):
+    have_linux_input = True
+else:
+    have_linux_input = False
+
 libraries['usb'] = conf.Finish ()
 
 #
@@ -1002,8 +1008,18 @@ if env['SURFACES']:
     else:
         env['TRANZPORT'] = 0
         print 'Disabled building Tranzport code because libusb could not be found'
+
+    if have_linux_input:
+        env['POWERMATE'] = 1
+    else:
+        env['POWERMATE'] = 0
+        print 'Disabled building Powermate code because linux/input.h could not be found'
+
     if os.access ('libs/surfaces/sony9pin', os.F_OK):
         surface_subdirs += [ 'libs/surfaces/sony9pin' ]
+else:
+    env['POWERMATE'] = 0
+    env['TRANZPORT'] = 0
 
 opts.Save('scache.conf', env)
 Help(opts.GenerateHelpText(env))
