@@ -45,7 +45,7 @@ using namespace ARDOUR;
 //------------------------------------------------------------------------------
 /** Initialize const static memeber data */
 
-Pango::FontDescription TimeAxisViewItem::NAME_FONT;
+Pango::FontDescription* TimeAxisViewItem::NAME_FONT = 0;
 bool TimeAxisViewItem::have_name_font = false;
 const double TimeAxisViewItem::NAME_X_OFFSET = 15.0;
 const double TimeAxisViewItem::GRAB_HANDLE_LENGTH = 6 ;
@@ -88,7 +88,7 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 		int width;
 		int height;
 
-		layout->set_font_description (NAME_FONT);
+		layout->set_font_description (*NAME_FONT);
 		Gtkmm2ext::get_ink_pixel_size (layout, width, height);
 
 		NAME_Y_OFFSET = height + 6;
@@ -128,7 +128,7 @@ void
 TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_color, nframes_t start, nframes_t duration, Visibility vis)
 {
 	item_name = it_name ;
-	name_text_width = ::pixel_width (it_name, NAME_FONT);
+	name_text_width = ::pixel_width (it_name, *NAME_FONT);
 	last_name_text_width = 0;
 	samples_per_unit = spu ;
 	should_show_selection = true;
@@ -214,7 +214,7 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 		   then NAME_Y_OFFSET to position the text in the vertical center of the highlight
 		*/
 		name_text->property_y() = (double) trackview.height - 1.0 - TimeAxisViewItem::NAME_Y_OFFSET;
-		name_text->property_font_desc() = NAME_FONT;
+		name_text->property_font_desc() = *NAME_FONT;
 		name_text->property_anchor() = Gtk::ANCHOR_NW;
 
 		name_text->set_data ("timeaxisviewitem", this);
@@ -493,7 +493,7 @@ TimeAxisViewItem::set_item_name(std::string new_name, void* src)
 	if (new_name != item_name) {
 		std::string temp_name = item_name ;
 		item_name = new_name ;
-		name_text_width = ::pixel_width (new_name, NAME_FONT);
+		name_text_width = ::pixel_width (new_name, *NAME_FONT);
 		NameChanged (item_name, temp_name, src) ; /* EMIT_SIGNAL */
 	}
 }
@@ -563,7 +563,7 @@ TimeAxisViewItem::set_name_text(const ustring& new_name)
 {
 	if (name_text) {
 		name_text->property_text() = new_name;
-		name_text_width = pixel_width (new_name, NAME_FONT);
+		name_text_width = pixel_width (new_name, *NAME_FONT);
 		name_text_size_cache.clear ();
 	}
 }

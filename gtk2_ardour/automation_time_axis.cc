@@ -44,7 +44,7 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace Editing;
 
-Pango::FontDescription AutomationTimeAxisView::name_font;
+Pango::FontDescription* AutomationTimeAxisView::name_font = 0;
 bool AutomationTimeAxisView::have_name_font = false;
 
 AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Route> r,
@@ -124,7 +124,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	bool shortened = false;
 
 	int ignore_width;
-	shortpname = fit_to_pixels (_name, 60, name_font, ignore_width, true);
+	shortpname = fit_to_pixels (_name, 60, *name_font, ignore_width, true);
 
 	if (shortpname != _name ){
 		shortened = true;
@@ -137,7 +137,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 
 		/* limit the plug name string */
 
-		string pname = fit_to_pixels (nomparent, 60, name_font, ignore_width, true);
+		string pname = fit_to_pixels (nomparent, 60, *name_font, ignore_width, true);
 		if (pname != nomparent) {
 			shortened = true;
 		}

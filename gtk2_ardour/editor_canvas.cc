@@ -133,12 +133,14 @@ Editor::initialize_canvas ()
 
 	/* stuff for the verbose canvas cursor */
 
-	Pango::FontDescription font = get_font_for_style (N_("VerboseCanvasCursor"));
+	Pango::FontDescription* font = get_font_for_style (N_("VerboseCanvasCursor"));
 
 	verbose_canvas_cursor = new ArdourCanvas::Text (*track_canvas.root());
-	verbose_canvas_cursor->property_font_desc() = font;
+	verbose_canvas_cursor->property_font_desc() = *font;
 	verbose_canvas_cursor->property_anchor() = ANCHOR_NW;
 	
+	delete font;
+
 	verbose_cursor_visible = false;
 	
 	/* a group to hold time (measure) lines */

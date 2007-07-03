@@ -261,7 +261,7 @@ class TimeAxisViewItem : public Selectable
     bool name_active() const { return name_connected; }
 
     // Default sizes, font and spacing
-    static Pango::FontDescription NAME_FONT ;
+    static Pango::FontDescription* NAME_FONT ;
     static bool have_name_font;
     static const double NAME_X_OFFSET ;
     static const double GRAB_HANDLE_LENGTH ;

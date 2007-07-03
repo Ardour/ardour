@@ -237,7 +237,7 @@ get_canvas_points (string who, uint32_t npoints)
 	return new ArdourCanvas::Points (npoints);
 }
 
-Pango::FontDescription
+Pango::FontDescription*
 get_font_for_style (string widgetname)
 {
 	Gtk::Window window (WINDOW_TOPLEVEL);
@@ -260,10 +260,10 @@ get_font_for_style (string widgetname)
 
 		PangoContext* ctxt = (PangoContext*) pango_layout_get_context ((PangoLayout*) layout->gobj());
 		pfd =  pango_context_get_font_description (ctxt);
-		return Pango::FontDescription (pfd, true); /* make a copy */
+		return new Pango::FontDescription (pfd, true); /* make a copy */
 	} 
 
-	return Pango::FontDescription (pfd, true); /* make a copy */
+	return new Pango::FontDescription (pfd, true); /* make a copy */
 }
 
 uint32_t

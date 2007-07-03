@@ -743,7 +743,7 @@ libraries['flac'].Append(CCFLAGS="-I/usr/local/include", LINKFLAGS="-L/usr/local
 #
 
 conf = Configure (libraries['flac'])
-if conf.CheckLib ('FLAC', 'FLAC__seekable_stream_decoder_init', language='CXX'):
+if conf.CheckLib ('FLAC', 'FLAC__seekable_stream_decoder_set_read_callback', language='CXX'):
     conf.env.Append(CCFLAGS='-DHAVE_FLAC')
     use_flac = True
 else:
