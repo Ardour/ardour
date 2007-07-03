@@ -63,7 +63,7 @@ unsigned char* xpm2rgba (const char** xpm, uint32_t& w, uint32_t& h);
 
 ArdourCanvas::Points* get_canvas_points (std::string who, uint32_t npoints);
 
-Pango::FontDescription get_font_for_style (std::string widgetname);
+Pango::FontDescription* get_font_for_style (std::string widgetname);
 
 uint32_t rgba_from_style (std::string, uint32_t, uint32_t, uint32_t, uint32_t, std::string = "fg", int = Gtk::STATE_NORMAL, bool = true);
 
