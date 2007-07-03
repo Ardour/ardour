@@ -29,12 +29,12 @@ using namespace PBD;
 
 
 AutomationControl::AutomationControl(Session& session, boost::shared_ptr<AutomationList> list, string name)
-	: Controllable((name == "unnamed controllable") ? list->param_id().to_string() : name)
+	: Controllable((name == "unnamed controllable") ? list->parameter().to_string() : name)
 	, _session(session)
 	, _list(list)
 	, _user_value(list->default_value())
 {
-	cerr << "Created AutomationControl " << name << "(" << list->param_id().to_string() << ")" << endl;
+	cerr << "Created AutomationControl " << name << "(" << list->parameter().to_string() << ")" << endl;
 }
 
 

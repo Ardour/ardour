@@ -32,7 +32,7 @@
 #include <pbd/statefuldestructible.h> 
 
 #include <ardour/ardour.h>
-#include <ardour/param_id.h>
+#include <ardour/parameter.h>
 
 namespace ARDOUR {
 
@@ -63,8 +63,8 @@ class AutomationList : public PBD::StatefulDestructible
 	typedef EventList::iterator iterator;
 	typedef EventList::const_iterator const_iterator;
 
-	AutomationList (ParamID id, double min_val, double max_val, double default_val);
-	AutomationList (const XMLNode&, ParamID id);
+	AutomationList (Parameter id, double min_val, double max_val, double default_val);
+	AutomationList (const XMLNode&, Parameter id);
 	~AutomationList();
 
 	AutomationList (const AutomationList&);
@@ -72,8 +72,8 @@ class AutomationList : public PBD::StatefulDestructible
 	AutomationList& operator= (const AutomationList&);
 	bool operator== (const AutomationList&);
 
-	ParamID param_id() const         { return _param_id; }
-	void    set_param_id(ParamID id) { _param_id = id; }
+	Parameter parameter() const         { return _param_id; }
+	void    set_param_id(Parameter id) { _param_id = id; }
 
 	void freeze();
 	void thaw ();
@@ -232,7 +232,7 @@ class AutomationList : public PBD::StatefulDestructible
 
 	mutable LookupCache _lookup_cache;
 	
-	ParamID             _param_id;
+	Parameter             _param_id;
 	EventList           _events;
 	mutable Glib::Mutex _lock;
 	int8_t              _frozen;

@@ -82,7 +82,7 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	void hide ();
 	
-	void create_automation_child (ARDOUR::ParamID param);
+	void create_automation_child (ARDOUR::Parameter param);
 	
   private:
 	friend class AudioStreamView;

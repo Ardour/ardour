@@ -65,7 +65,7 @@ AutomationController::create(Session& s, boost::shared_ptr<AutomationList> al, b
 {
 	Gtk::Adjustment* adjustment = manage(new Gtk::Adjustment(al->default_value(), al->get_min_y(), al->get_max_y()));
 	if (!ac) {
-		PBD::warning << "Creating AutomationController for " << al->param_id().to_string() << endmsg;
+		PBD::warning << "Creating AutomationController for " << al->parameter().to_string() << endmsg;
 		ac = boost::shared_ptr<AutomationControl>(new AutomationControl(s, al));
 	}
 	return boost::shared_ptr<AutomationController>(new AutomationController(ac, adjustment));
@@ -76,7 +76,7 @@ AutomationController::update_label(char* label, int label_len)
 {
 	if (label && label_len)
 		// Hack to display CC rounded to int
-		if (_controllable->list()->param_id().type() == MidiCCAutomation)
+		if (_controllable->list()->parameter().type() == MidiCCAutomation)
 			snprintf(label, label_len, "%d", (int)_controllable->get_value());
 		else
 			snprintf(label, label_len, "%.3f", _controllable->get_value());

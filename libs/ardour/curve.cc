@@ -64,7 +64,7 @@ Curve::Curve (const Curve& other, double start, double end)
 /** \a id is used for legacy sessions where the type is not present
  * in or below the <AutomationList> node.  It is used if \a id is non-null.
  */
-Curve::Curve (const XMLNode& node, ParamID id)
+Curve::Curve (const XMLNode& node, Parameter id)
 	: AutomationList (node, id)
 {
 }

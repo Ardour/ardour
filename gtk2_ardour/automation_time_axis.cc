@@ -194,7 +194,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	} 
 		
 	boost::shared_ptr<AutomationLine> line(new AutomationLine (
-				_control->list()->param_id().to_string(),
+				_control->list()->parameter().to_string(),
 				*this,
 				*canvas_display,
 				_control->list()));
@@ -247,7 +247,7 @@ AutomationTimeAxisView::set_automation_state (AutoState state)
 	if (!ignore_state_request) {
 		if (_route == _automatable) { // FIXME: ew
 			_route->set_parameter_automation_state (
-					_control->list()->param_id(),
+					_control->list()->parameter(),
 					state);
 		}
 
@@ -869,7 +869,7 @@ AutomationTimeAxisView::set_state (const XMLNode& node)
 	//snprintf (buf, sizeof(buf), "Port_%" PRIu32, param.id());
 		
 	for (iter = kids.begin(); iter != kids.end(); ++iter) {
-		if ((*iter)->name() == _control->list()->param_id().to_string()) {
+		if ((*iter)->name() == _control->list()->parameter().to_string()) {
 		
 			XMLProperty *shown = (*iter)->property("shown_editor");
 			
@@ -929,7 +929,7 @@ AutomationTimeAxisView::update_extra_xml_shown (bool editor_shown)
 
 	for (i = nlist.begin(); i != nlist.end(); ++i) {
 		/* FIXME: legacy session loading */
-		if ((*i)->name() == _control->list()->param_id().to_string()) {
+		if ((*i)->name() == _control->list()->parameter().to_string()) {
 			port_node = (*i);
 			break;
 		}

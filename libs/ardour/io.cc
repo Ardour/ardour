@@ -134,7 +134,7 @@ IO::IO (Session& s, const string& name,
 	deferred_state = 0;
 
 	boost::shared_ptr<AutomationList> gl(
-			new AutomationList(ParamID(GainAutomation), 0.0, 2.0, 1.0));
+			new AutomationList(Parameter(GainAutomation), 0.0, 2.0, 1.0));
 
 	_gain_control = boost::shared_ptr<GainControl>(
 			new GainControl(X_("gaincontrol"), *this, gl));
@@ -174,7 +174,7 @@ IO::IO (Session& s, const XMLNode& node, DataType dt)
 	apply_gain_automation = false;
 	
 	boost::shared_ptr<AutomationList> gl(
-			new AutomationList(ParamID(GainAutomation), 0.0, 2.0, 1.0));
+			new AutomationList(Parameter(GainAutomation), 0.0, 2.0, 1.0));
 
 	_gain_control = boost::shared_ptr<GainControl>(
 			new GainControl(X_("gaincontrol"), *this, gl));
@@ -1360,7 +1360,7 @@ IO::set_state (const XMLNode& node)
 
 		if ((*iter)->name() == X_("Automation")) {
 
-			set_automation_state (*(*iter), ParamID(GainAutomation));
+			set_automation_state (*(*iter), Parameter(GainAutomation));
 		}
 
 		if ((*iter)->name() == X_("controllable")) {
@@ -2193,7 +2193,7 @@ IO::clear_automation ()
 }
 
 void
-IO::set_parameter_automation_state (ParamID param, AutoState state)
+IO::set_parameter_automation_state (Parameter param, AutoState state)
 {
 	// XXX: would be nice to get rid of this special hack
 

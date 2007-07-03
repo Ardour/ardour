@@ -78,7 +78,7 @@ public:
 	void set_selected_regionviews (RegionSelection&);
 	void get_selectables (nframes_t start, nframes_t end, double top, double bot, list<Selectable *>&);
 	void get_inverted_selectables (Selection&, list<Selectable*>&);
-	bool show_automation(ARDOUR::ParamID param);
+	bool show_automation(ARDOUR::Parameter param);
 		
 	boost::shared_ptr<ARDOUR::Region> find_next_region (nframes_t pos, ARDOUR::RegionPoint, int32_t dir);
 
@@ -95,7 +95,7 @@ public:
 	
 	void build_playlist_menu (Gtk::Menu *);
 
-	virtual void create_automation_child (ARDOUR::ParamID param) = 0;
+	virtual void create_automation_child (ARDOUR::Parameter param) = 0;
 	
 	string              name() const;
 	StreamView*         view() const { return _view; }
@@ -106,21 +106,21 @@ protected:
 	friend class StreamView;
 	
 	struct RouteAutomationNode {
-		ARDOUR::ParamID                           param;
+		ARDOUR::Parameter                           param;
 	    Gtk::CheckMenuItem*                       menu_item;
 		boost::shared_ptr<AutomationTimeAxisView> track;
 	    
-		RouteAutomationNode (ARDOUR::ParamID par, Gtk::CheckMenuItem* mi, boost::shared_ptr<AutomationTimeAxisView> tr)
+		RouteAutomationNode (ARDOUR::Parameter par, Gtk::CheckMenuItem* mi, boost::shared_ptr<AutomationTimeAxisView> tr)
 		    : param (par), menu_item (mi), track (tr) {}
 	};
 
 	struct ProcessorAutomationNode {
-		ARDOUR::ParamID                           what;
+		ARDOUR::Parameter                           what;
 	    Gtk::CheckMenuItem*                       menu_item;
 		boost::shared_ptr<AutomationTimeAxisView> view;
 	    RouteTimeAxisView&                        parent;
 
-	    ProcessorAutomationNode (ARDOUR::ParamID w, Gtk::CheckMenuItem* mitem, RouteTimeAxisView& p)
+	    ProcessorAutomationNode (ARDOUR::Parameter w, Gtk::CheckMenuItem* mitem, RouteTimeAxisView& p)
 		    : what (w), menu_item (mitem), parent (p) {}
 
 	    ~ProcessorAutomationNode ();
@@ -155,21 +155,21 @@ protected:
 	void processor_automation_track_hidden (ProcessorAutomationNode*,
 	                                       boost::shared_ptr<ARDOUR::Processor>);
 	
-	void automation_track_hidden (ARDOUR::ParamID param);
+	void automation_track_hidden (ARDOUR::Parameter param);
 
-	RouteAutomationNode* automation_track(ARDOUR::ParamID param);
+	RouteAutomationNode* automation_track(ARDOUR::Parameter param);
 	RouteAutomationNode* automation_track(ARDOUR::AutomationType type);
 
 	ProcessorAutomationNode*
-	find_processor_automation_node (boost::shared_ptr<ARDOUR::Processor> i, ARDOUR::ParamID);
+	find_processor_automation_node (boost::shared_ptr<ARDOUR::Processor> i, ARDOUR::Parameter);
 	
 	boost::shared_ptr<AutomationLine>
-	find_processor_automation_curve (boost::shared_ptr<ARDOUR::Processor> i, ARDOUR::ParamID);
+	find_processor_automation_curve (boost::shared_ptr<ARDOUR::Processor> i, ARDOUR::Parameter);
 
-	void add_processor_automation_curve (boost::shared_ptr<ARDOUR::Processor> r, ARDOUR::ParamID);
+	void add_processor_automation_curve (boost::shared_ptr<ARDOUR::Processor> r, ARDOUR::Parameter);
 	void add_existing_processor_automation_curves (boost::shared_ptr<ARDOUR::Processor>);
 
-	void add_automation_child(ARDOUR::ParamID param, boost::shared_ptr<AutomationTimeAxisView> track);
+	void add_automation_child(ARDOUR::Parameter param, boost::shared_ptr<AutomationTimeAxisView> track);
 	
 	void reset_processor_automation_curves ();
 
@@ -204,7 +204,7 @@ protected:
 	void rename_current_playlist ();
 	
 	void         automation_click ();
-	void         toggle_automation_track (ARDOUR::ParamID param);
+	void         toggle_automation_track (ARDOUR::Parameter param);
 	virtual void show_all_automation ();
 	virtual void show_existing_automation ();
 	virtual void hide_all_automation ();
@@ -262,9 +262,9 @@ protected:
 	ProcessorAutomationCurves processor_automation_curves;
 	
 	// Set from XML so context menu automation buttons can be correctly initialized
-	set<ARDOUR::ParamID> _show_automation;
+	set<ARDOUR::Parameter> _show_automation;
 
-	typedef map<ARDOUR::ParamID, RouteAutomationNode*> AutomationTracks;
+	typedef map<ARDOUR::Parameter, RouteAutomationNode*> AutomationTracks;
 	AutomationTracks _automation_tracks;
 
 	sigc::connection modified_connection;

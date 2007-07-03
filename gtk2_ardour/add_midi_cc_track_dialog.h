@@ -27,14 +27,14 @@
 #include <gtkmm/spinbutton.h>
 #include <ardour/types.h>
 #include <ardour/data_type.h>
-#include <ardour/param_id.h>
+#include <ardour/parameter.h>
 
 class AddMidiCCTrackDialog : public Gtk::Dialog
 {
   public:
 	AddMidiCCTrackDialog ();
 
-	ARDOUR::ParamID parameter ();
+	ARDOUR::Parameter parameter ();
 
   private:
 	Gtk::Adjustment _cc_num_adjustment;

@@ -317,7 +317,7 @@ LadspaPlugin::set_parameter (uint32_t which, float val)
 	if (which < descriptor->PortCount) {
 		shadow_data[which] = (LADSPA_Data) val;
 #if 0
-		ParameterChanged (ParamID(PluginAutomation, which), val); /* EMIT SIGNAL */
+		ParameterChanged (Parameter(PluginAutomation, which), val); /* EMIT SIGNAL */
 
 		if (which < parameter_count() && controls[which]) {
 			controls[which]->Changed ();
@@ -492,7 +492,7 @@ LadspaPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& des
 }
 
 string
-LadspaPlugin::describe_parameter (ParamID which)
+LadspaPlugin::describe_parameter (Parameter which)
 {
 	if (which.type() == PluginAutomation && which.id() < parameter_count()) {
 		return port_names()[which.id()];
@@ -515,16 +515,16 @@ LadspaPlugin::signal_latency () const
 	}
 }
 
-set<ParamID>
+set<Parameter>
 LadspaPlugin::automatable () const
 {
-	set<ParamID> ret;
+	set<Parameter> ret;
 
 	for (uint32_t i = 0; i < parameter_count(); ++i){
 		if (LADSPA_IS_PORT_INPUT(port_descriptor (i)) && 
 		    LADSPA_IS_PORT_CONTROL(port_descriptor (i))){
 			
-			ret.insert (ret.end(), ParamID(PluginAutomation, i));
+			ret.insert (ret.end(), Parameter(PluginAutomation, i));
 		}
 	}
 

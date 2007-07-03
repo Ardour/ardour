@@ -26,7 +26,7 @@
 #include <ardour/session_object.h>
 #include <ardour/automation_event.h>
 #include <ardour/automation_control.h>
-#include <ardour/param_id.h>
+#include <ardour/parameter.h>
 
 namespace ARDOUR {
 
@@ -43,13 +43,13 @@ public:
 	// shorthand for gain, pan, etc
 	inline boost::shared_ptr<AutomationControl>
 	control(AutomationType type, bool create_if_missing=false) {
-		return control(ParamID(type), create_if_missing);
+		return control(Parameter(type), create_if_missing);
 	}
 
-	virtual boost::shared_ptr<AutomationControl> control(ParamID id, bool create_if_missing=false);
-	virtual boost::shared_ptr<const AutomationControl> control(ParamID id) const;
+	virtual boost::shared_ptr<AutomationControl> control(Parameter id, bool create_if_missing=false);
+	virtual boost::shared_ptr<const AutomationControl> control(Parameter id) const;
 	
-	typedef std::map<ParamID,boost::shared_ptr<AutomationControl> > Controls;
+	typedef std::map<Parameter,boost::shared_ptr<AutomationControl> > Controls;
 	Controls controls() { return _controls; }
 
 	virtual void add_control(boost::shared_ptr<AutomationControl>);
@@ -59,32 +59,32 @@ public:
 
 	virtual bool find_next_event(nframes_t start, nframes_t end, ControlEvent& ev) const;
 	
-	virtual string describe_parameter(ParamID param);
-	virtual float  default_parameter_value(ParamID param) { return 1.0f; }
+	virtual string describe_parameter(Parameter param);
+	virtual float  default_parameter_value(Parameter param) { return 1.0f; }
 	
 	virtual void clear_automation();
 
-	AutoState get_parameter_automation_state (ParamID param, bool lock = true);
-	virtual void set_parameter_automation_state (ParamID param, AutoState);
+	AutoState get_parameter_automation_state (Parameter param, bool lock = true);
+	virtual void set_parameter_automation_state (Parameter param, AutoState);
 	
-	AutoStyle get_parameter_automation_style (ParamID param);
-	void set_parameter_automation_style (ParamID param, AutoStyle);
+	AutoStyle get_parameter_automation_style (Parameter param);
+	void set_parameter_automation_style (Parameter param, AutoStyle);
 
 	void protect_automation ();
 
-	void what_has_automation(std::set<ParamID>&) const;
-	void what_has_visible_automation(std::set<ParamID>&) const;
-	const std::set<ParamID>& what_can_be_automated() const { return _can_automate_list; }
+	void what_has_automation(std::set<Parameter>&) const;
+	void what_has_visible_automation(std::set<Parameter>&) const;
+	const std::set<Parameter>& what_can_be_automated() const { return _can_automate_list; }
 
-	void mark_automation_visible(ParamID, bool);
+	void mark_automation_visible(Parameter, bool);
 
 protected:
 
-	void can_automate(ParamID);
+	void can_automate(Parameter);
 
-	virtual void auto_state_changed (ParamID which) {}
+	virtual void auto_state_changed (Parameter which) {}
 
-	int set_automation_state(const XMLNode&, ParamID default_param);
+	int set_automation_state(const XMLNode&, Parameter default_param);
 	XMLNode& get_automation_state();
 	
 	int load_automation (const std::string& path);
@@ -93,8 +93,8 @@ protected:
 	mutable Glib::Mutex _automation_lock;
 	
 	Controls          _controls;
-	std::set<ParamID> _visible_controls;
-	std::set<ParamID> _can_automate_list;
+	std::set<Parameter> _visible_controls;
+	std::set<Parameter> _can_automate_list;
 	
 	nframes_t _last_automation_snapshot;
 };

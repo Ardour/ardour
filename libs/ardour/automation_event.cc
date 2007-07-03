@@ -24,7 +24,7 @@
 #include <sstream>
 #include <algorithm>
 #include <sigc++/bind.h>
-#include <ardour/param_id.h>
+#include <ardour/parameter.h>
 #include <ardour/automation_event.h>
 #include <ardour/curve.h>
 #include <pbd/stacktrace.h>
@@ -54,7 +54,7 @@ static void dumpit (const AutomationList& al, string prefix = "")
 }
 #endif
 
-AutomationList::AutomationList (ParamID id, double min_val, double max_val, double default_val)
+AutomationList::AutomationList (Parameter id, double min_val, double max_val, double default_val)
 	: _param_id(id)
 	, _curve(new Curve(*this))
 {	
@@ -143,7 +143,7 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 /** \a id is used for legacy sessions where the type is not present
  * in or below the <AutomationList> node.  It is used if \a id is non-null.
  */
-AutomationList::AutomationList (const XMLNode& node, ParamID id)
+AutomationList::AutomationList (const XMLNode& node, Parameter id)
 	: _curve(new Curve(*this))
 {
 	_frozen = 0;
@@ -1368,7 +1368,7 @@ AutomationList::set_state (const XMLNode& node)
 	}
 	
 	if ((prop = node.property (X_("automation-id"))) != 0){ 
-		_param_id = ParamID(prop->value());
+		_param_id = Parameter(prop->value());
 	} else {
 		warning << "Legacy session: automation list has no automation-id property.";
 	}

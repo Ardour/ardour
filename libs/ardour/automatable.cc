@@ -62,7 +62,7 @@ Automatable::old_set_automation_state (const XMLNode& node)
 			if (sstr.fail()) {
 				break;
 			}
-			mark_automation_visible (ParamID(PluginAutomation, what), true);
+			mark_automation_visible (Parameter(PluginAutomation, what), true);
 		}
 	}
 	
@@ -90,7 +90,7 @@ Automatable::load_automation (const string& path)
 	}
 
 	Glib::Mutex::Lock lm (_automation_lock);
-	set<ParamID> tosave;
+	set<Parameter> tosave;
 	_controls.clear ();
 	
 	_last_automation_snapshot = 0;
@@ -105,9 +105,9 @@ Automatable::load_automation (const string& path)
 		in >> value; if (!in) goto bad;
 		
 		/* FIXME: this is legacy and only used for plugin inserts?  I think? */
-		boost::shared_ptr<AutomationControl> c = control (ParamID(PluginAutomation, port), true);
+		boost::shared_ptr<AutomationControl> c = control (Parameter(PluginAutomation, port), true);
 		c->list()->add (when, value);
-		tosave.insert (ParamID(PluginAutomation, port));
+		tosave.insert (Parameter(PluginAutomation, port));
 	}
 	
 	return 0;
@@ -121,7 +121,7 @@ Automatable::load_automation (const string& path)
 void
 Automatable::add_control(boost::shared_ptr<AutomationControl> ac)
 {
-	ParamID param = ac->list()->param_id();
+	Parameter param = ac->list()->parameter();
 
 	_controls[param] = ac;
 	
@@ -134,7 +134,7 @@ Automatable::add_control(boost::shared_ptr<AutomationControl> ac)
 }
 
 void
-Automatable::what_has_automation (set<ParamID>& s) const
+Automatable::what_has_automation (set<Parameter>& s) const
 {
 	Glib::Mutex::Lock lm (_automation_lock);
 	Controls::const_iterator li;
@@ -146,10 +146,10 @@ Automatable::what_has_automation (set<ParamID>& s) const
 }
 
 void
-Automatable::what_has_visible_automation (set<ParamID>& s) const
+Automatable::what_has_visible_automation (set<Parameter>& s) const
 {
 	Glib::Mutex::Lock lm (_automation_lock);
-	set<ParamID>::const_iterator li;
+	set<Parameter>::const_iterator li;
 	
 	for (li = _visible_controls.begin(); li != _visible_controls.end(); ++li) {
 		s.insert  (*li);
@@ -159,7 +159,7 @@ Automatable::what_has_visible_automation (set<ParamID>& s) const
 /** Returns NULL if we don't have an AutomationList for \a parameter.
  */
 boost::shared_ptr<AutomationControl>
-Automatable::control (ParamID parameter, bool create_if_missing)
+Automatable::control (Parameter parameter, bool create_if_missing)
 {
 	Controls::iterator i = _controls.find(parameter);
 
@@ -181,7 +181,7 @@ Automatable::control (ParamID parameter, bool create_if_missing)
 }
 
 boost::shared_ptr<const AutomationControl>
-Automatable::control (ParamID parameter) const
+Automatable::control (Parameter parameter) const
 {
 	Controls::const_iterator i = _controls.find(parameter);
 
@@ -195,11 +195,11 @@ Automatable::control (ParamID parameter) const
 
 
 string
-Automatable::describe_parameter (ParamID param)
+Automatable::describe_parameter (Parameter param)
 {
 	/* derived classes like PluginInsert should override this */
 
-	if (param == ParamID(GainAutomation))
+	if (param == Parameter(GainAutomation))
 		return _("Fader");
 	else if (param.type() == PanAutomation)
 		return (string_compose(_("Pan %1"), param.id()));
@@ -210,18 +210,18 @@ Automatable::describe_parameter (ParamID param)
 }
 
 void
-Automatable::can_automate (ParamID what)
+Automatable::can_automate (Parameter what)
 {
 	_can_automate_list.insert (what);
 }
 
 void
-Automatable::mark_automation_visible (ParamID what, bool yn)
+Automatable::mark_automation_visible (Parameter what, bool yn)
 {
 	if (yn) {
 		_visible_controls.insert (what);
 	} else {
-		set<ParamID>::iterator i;
+		set<Parameter>::iterator i;
 
 		if ((i = _visible_controls.find (what)) != _visible_controls.end()) {
 			_visible_controls.erase (i);
@@ -265,7 +265,7 @@ Automatable::find_next_event (nframes_t now, nframes_t end, ControlEvent& next_e
  * pass that type and it will be used for the untyped AutomationList found.
  */
 int
-Automatable::set_automation_state (const XMLNode& node, ParamID legacy_param)
+Automatable::set_automation_state (const XMLNode& node, Parameter legacy_param)
 {	
 	Glib::Mutex::Lock lm (_automation_lock);
 
@@ -287,7 +287,7 @@ Automatable::set_automation_state (const XMLNode& node, ParamID legacy_param)
 
 			const XMLProperty* id_prop = (*niter)->property("automation-id");
 
-			ParamID param = (id_prop ? ParamID(id_prop->value()) : legacy_param);
+			Parameter param = (id_prop ? Parameter(id_prop->value()) : legacy_param);
 			
 			boost::shared_ptr<AutomationList> al (new AutomationList(**niter, param));
 			
@@ -340,7 +340,7 @@ Automatable::clear_automation ()
 }
 	
 void
-Automatable::set_parameter_automation_state (ParamID param, AutoState s)
+Automatable::set_parameter_automation_state (Parameter param, AutoState s)
 {
 	Glib::Mutex::Lock lm (_automation_lock);
 	
@@ -353,7 +353,7 @@ Automatable::set_parameter_automation_state (ParamID param, AutoState s)
 }
 
 AutoState
-Automatable::get_parameter_automation_state (ParamID param, bool lock)
+Automatable::get_parameter_automation_state (Parameter param, bool lock)
 {
 	AutoState result = Off;
 
@@ -372,7 +372,7 @@ Automatable::get_parameter_automation_state (ParamID param, bool lock)
 }
 
 void
-Automatable::set_parameter_automation_style (ParamID param, AutoStyle s)
+Automatable::set_parameter_automation_style (Parameter param, AutoStyle s)
 {
 	Glib::Mutex::Lock lm (_automation_lock);
 	
@@ -385,7 +385,7 @@ Automatable::set_parameter_automation_style (ParamID param, AutoStyle s)
 }
 
 AutoStyle
-Automatable::get_parameter_automation_style (ParamID param)
+Automatable::get_parameter_automation_style (Parameter param)
 {
 	Glib::Mutex::Lock lm (_automation_lock);
 
@@ -401,11 +401,11 @@ Automatable::get_parameter_automation_style (ParamID param)
 void
 Automatable::protect_automation ()
 {
-	set<ParamID> automated_params;
+	set<Parameter> automated_params;
 
 	what_has_automation (automated_params);
 
-	for (set<ParamID>::iterator i = automated_params.begin(); i != automated_params.end(); ++i) {
+	for (set<Parameter>::iterator i = automated_params.begin(); i != automated_params.end(); ++i) {
 
 		boost::shared_ptr<AutomationControl> c = control(*i);
 

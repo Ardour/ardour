@@ -167,16 +167,16 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	
 		gain_astate_menu.items().push_back (MenuElem (_("Manual"), 
 						      bind (mem_fun (*_io, &IO::set_parameter_automation_state),
-								  ParamID(GainAutomation), (AutoState) Off)));
+								  Parameter(GainAutomation), (AutoState) Off)));
 		gain_astate_menu.items().push_back (MenuElem (_("Play"),
 						      bind (mem_fun (*_io, &IO::set_parameter_automation_state),
-								  ParamID(GainAutomation), (AutoState) Play)));
+								  Parameter(GainAutomation), (AutoState) Play)));
 		gain_astate_menu.items().push_back (MenuElem (_("Write"),
 						      bind (mem_fun (*_io, &IO::set_parameter_automation_state),
-								  ParamID(GainAutomation), (AutoState) Write)));
+								  Parameter(GainAutomation), (AutoState) Write)));
 		gain_astate_menu.items().push_back (MenuElem (_("Touch"),
 						      bind (mem_fun (*_io, &IO::set_parameter_automation_state),
-								  ParamID(GainAutomation), (AutoState) Touch)));
+								  Parameter(GainAutomation), (AutoState) Touch)));
 	
 		gain_astyle_menu.items().push_back (MenuElem (_("Trim")));
 		gain_astyle_menu.items().push_back (MenuElem (_("Abs")));

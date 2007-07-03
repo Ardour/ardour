@@ -157,7 +157,7 @@ Processor::state (bool full_state)
 
 		XMLNode& automation = Automatable::get_automation_state(); 
 		
-		for (set<ParamID>::iterator x = _visible_controls.begin(); x != _visible_controls.end(); ++x) {
+		for (set<Parameter>::iterator x = _visible_controls.begin(); x != _visible_controls.end(); ++x) {
 			if (x != _visible_controls.begin()) {
 				sstr << ' ';
 			}
@@ -195,7 +195,7 @@ Processor::set_state (const XMLNode& node)
 			if ((prop = (*niter)->property ("path")) != 0) {
 				old_set_automation_state (*(*niter));
 			} else {
-				set_automation_state (*(*niter), ParamID(PluginAutomation));
+				set_automation_state (*(*niter), Parameter(PluginAutomation));
 			}
 
 			if ((prop = (*niter)->property ("visible")) != 0) {
@@ -211,7 +211,7 @@ Processor::set_state (const XMLNode& node)
 						break;
 					}
 					// FIXME: other automation types?
-					mark_automation_visible (ParamID(PluginAutomation, what), true);
+					mark_automation_visible (Parameter(PluginAutomation, what), true);
 				}
 			}
 

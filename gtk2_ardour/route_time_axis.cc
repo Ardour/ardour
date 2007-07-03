@@ -51,7 +51,7 @@
 #include <ardour/session.h>
 #include <ardour/session_playlist.h>
 #include <ardour/utils.h>
-#include <ardour/param_id.h>
+#include <ardour/parameter.h>
 
 #include "ardour_ui.h"
 #include "route_time_axis.h"
@@ -277,7 +277,7 @@ RouteTimeAxisView::set_state (const XMLNode& node)
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		child_node = *niter;
 		
-		ParamID param(child_node->name());
+		Parameter param(child_node->name());
 
 		if (param) {
 		
@@ -287,7 +287,7 @@ RouteTimeAxisView::set_state (const XMLNode& node)
 				create_automation_child(param);
 
 			if (prop != 0 && prop->value() == "yes")
-				_show_automation.insert(ParamID(GainAutomation));
+				_show_automation.insert(Parameter(GainAutomation));
 
 		} else {
 			warning << "GUI info exists, but no parameter " << child_node->name() << " found." << endmsg;
@@ -439,7 +439,7 @@ RouteTimeAxisView::build_automation_action_menu ()
 
 	automation_items.push_back (MenuElem (_("Plugins"), subplugin_menu));
 	
-	map<ARDOUR::ParamID, RouteAutomationNode*>::iterator i;
+	map<ARDOUR::Parameter, RouteAutomationNode*>::iterator i;
 	for (i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
 
 		automation_items.push_back (SeparatorElem());
@@ -1162,7 +1162,7 @@ RouteTimeAxisView::get_inverted_selectables (Selection& sel, list<Selectable*>& 
 }
 
 bool
-RouteTimeAxisView::show_automation(ParamID param)
+RouteTimeAxisView::show_automation(Parameter param)
 {
 	return (_show_automation.find(param) != _show_automation.end());
 }
@@ -1170,9 +1170,9 @@ RouteTimeAxisView::show_automation(ParamID param)
 /** Retuns NULL if track for \a param doesn't exist.
  */
 RouteTimeAxisView::RouteAutomationNode*
-RouteTimeAxisView::automation_track(ParamID param)
+RouteTimeAxisView::automation_track(Parameter param)
 {
-	map<ARDOUR::ParamID, RouteAutomationNode*>::iterator i = _automation_tracks.find(param);
+	map<ARDOUR::Parameter, RouteAutomationNode*>::iterator i = _automation_tracks.find(param);
 
 	if (i != _automation_tracks.end())
 		return i->second;
@@ -1185,7 +1185,7 @@ RouteTimeAxisView::automation_track(ParamID param)
 RouteTimeAxisView::RouteAutomationNode*
 RouteTimeAxisView::automation_track(AutomationType type)
 {
-	return automation_track(ParamID(type));
+	return automation_track(Parameter(type));
 }
 
 RouteGroup*
@@ -1476,7 +1476,7 @@ RouteTimeAxisView::color_handler ()
 }
 
 void
-RouteTimeAxisView::toggle_automation_track (ParamID param)
+RouteTimeAxisView::toggle_automation_track (Parameter param)
 {
 	RouteAutomationNode* node = automation_track(param);
 
@@ -1505,7 +1505,7 @@ RouteTimeAxisView::toggle_automation_track (ParamID param)
 }
 
 void
-RouteTimeAxisView::automation_track_hidden (ParamID param)
+RouteTimeAxisView::automation_track_hidden (Parameter param)
 {
 	RouteAutomationNode* ran = automation_track(param);
 	if (!ran)
@@ -1529,7 +1529,7 @@ RouteTimeAxisView::show_all_automation ()
 	
 	/* Show our automation */
 
-	map<ARDOUR::ParamID, RouteAutomationNode*>::iterator i;
+	map<ARDOUR::Parameter, RouteAutomationNode*>::iterator i;
 	for (i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
 		i->second->track->set_marked_for_display (true);
 		i->second->track->canvas_display->show();
@@ -1565,7 +1565,7 @@ RouteTimeAxisView::show_existing_automation ()
 	
 	/* Show our automation */
 
-	map<ARDOUR::ParamID, RouteAutomationNode*>::iterator i;
+	map<ARDOUR::Parameter, RouteAutomationNode*>::iterator i;
 	for (i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
 		if (i->second->track->line() && i->second->track->line()->npoints() > 0) {
 			i->second->track->set_marked_for_display (true);
@@ -1649,7 +1649,7 @@ RouteTimeAxisView::remove_processor_automation_node (ProcessorAutomationNode* pa
 }
 
 RouteTimeAxisView::ProcessorAutomationNode*
-RouteTimeAxisView::find_processor_automation_node (boost::shared_ptr<Processor> processor, ParamID what)
+RouteTimeAxisView::find_processor_automation_node (boost::shared_ptr<Processor> processor, Parameter what)
 {
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
 
@@ -1686,7 +1686,7 @@ legalize_for_xml_node (string str)
 
 
 void
-RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> processor, ParamID what)
+RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> processor, Parameter what)
 {
 	string name;
 	ProcessorAutomationNode* pan;
@@ -1751,12 +1751,12 @@ RouteTimeAxisView::processor_automation_track_hidden (RouteTimeAxisView::Process
 void
 RouteTimeAxisView::add_existing_processor_automation_curves (boost::shared_ptr<Processor> processor)
 {
-	set<ParamID> s;
+	set<Parameter> s;
 	boost::shared_ptr<AutomationLine> al;
 
 	processor->what_has_visible_automation (s);
 
-	for (set<ParamID>::iterator i = s.begin(); i != s.end(); ++i) {
+	for (set<Parameter>::iterator i = s.begin(); i != s.end(); ++i) {
 		
 		if ((al = find_processor_automation_curve (processor, *i)) != 0) {
 			al->queue_reset ();
@@ -1767,7 +1767,7 @@ RouteTimeAxisView::add_existing_processor_automation_curves (boost::shared_ptr<P
 }
 
 void
-RouteTimeAxisView::add_automation_child(ParamID param, boost::shared_ptr<AutomationTimeAxisView> track)
+RouteTimeAxisView::add_automation_child(Parameter param, boost::shared_ptr<AutomationTimeAxisView> track)
 {
 	using namespace Menu_Helpers;
 
@@ -1809,8 +1809,8 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::shared_ptr<Processor>
 	ProcessorAutomationInfo *rai;
 	list<ProcessorAutomationInfo*>::iterator x;
 	
-	const std::set<ParamID>& automatable = processor->what_can_be_automated ();
-	std::set<ParamID> has_visible_automation;
+	const std::set<Parameter>& automatable = processor->what_can_be_automated ();
+	std::set<Parameter> has_visible_automation;
 
 	processor->what_has_visible_automation(has_visible_automation);
 
@@ -1845,7 +1845,7 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::shared_ptr<Processor>
 
 	items.clear ();
 
-	for (std::set<ParamID>::const_iterator i = automatable.begin(); i != automatable.end(); ++i) {
+	for (std::set<Parameter>::const_iterator i = automatable.begin(); i != automatable.end(); ++i) {
 
 		ProcessorAutomationNode* pan;
 		CheckMenuItem* mitem;
@@ -1959,7 +1959,7 @@ RouteTimeAxisView::processors_changed ()
 }
 
 boost::shared_ptr<AutomationLine>
-RouteTimeAxisView::find_processor_automation_curve (boost::shared_ptr<Processor> processor, ParamID what)
+RouteTimeAxisView::find_processor_automation_curve (boost::shared_ptr<Processor> processor, Parameter what)
 {
 	ProcessorAutomationNode* pan;
 

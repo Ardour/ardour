@@ -33,7 +33,7 @@ curvetest (string filename)
 {
 	ifstream in (filename.c_str());
 	stringstream line;
-	AutomationList al (ParamID(), -1.0, +1.0, 0);
+	AutomationList al (Parameter(), -1.0, +1.0, 0);
 	double minx = DBL_MAX;
 	double maxx = DBL_MIN;
 

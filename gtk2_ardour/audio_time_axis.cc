@@ -279,7 +279,7 @@ AudioTimeAxisView::set_waveform_scale (WaveformScale scale)
 }	
 
 void
-AudioTimeAxisView::create_automation_child (ParamID param)
+AudioTimeAxisView::create_automation_child (Parameter param)
 {
 	if (param.type() == GainAutomation) {
 
@@ -295,9 +295,9 @@ AudioTimeAxisView::create_automation_child (ParamID param)
 				*this,
 				parent_canvas,
 				_route->describe_parameter(param),
-				c->list()->param_id().to_string() /* FIXME: correct state name? */));
+				c->list()->parameter().to_string() /* FIXME: correct state name? */));
 
-		add_automation_child(ParamID(GainAutomation), gain_track);
+		add_automation_child(Parameter(GainAutomation), gain_track);
 
 	} else if (param.type() == PanAutomation) {
 
@@ -338,7 +338,7 @@ AudioTimeAxisView::update_pans ()
 	for (p = _route->panner().begin(); p != _route->panner().end(); ++p) {
 		boost::shared_ptr<AutomationControl> pan_control = (*p)->pan_control();
 		
-		if (pan_control->list()->param_id().type() == NullAutomation) {
+		if (pan_control->list()->parameter().type() == NullAutomation) {
 			error << "Pan control has NULL automation type!" << endmsg;
 			continue;
 		}
@@ -348,9 +348,9 @@ AudioTimeAxisView::update_pans ()
 					editor,
 					*this,
 					parent_canvas,
-					_route->describe_parameter(pan_control->list()->param_id()),
-					pan_control->list()->param_id().to_string()/* FIXME: correct state name? */));
-		add_automation_child(ParamID(PanAutomation, i), pan_track);
+					_route->describe_parameter(pan_control->list()->parameter()),
+					pan_control->list()->parameter().to_string()/* FIXME: correct state name? */));
+		add_automation_child(Parameter(PanAutomation, i), pan_track);
 		++i;
 	}
 }

@@ -32,7 +32,7 @@
 #include <ardour/plugin_state.h>
 #include <ardour/cycles.h>
 #include <ardour/latent.h>
-#include <ardour/param_id.h>
+#include <ardour/parameter.h>
 
 #include <vector>
 #include <set>
@@ -121,10 +121,10 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 
 	virtual int connect_and_run (BufferSet& bufs, uint32_t& in, uint32_t& out, nframes_t nframes, nframes_t offset) = 0;
 	
-	virtual std::set<ParamID> automatable() const = 0;
+	virtual std::set<Parameter> automatable() const = 0;
 	virtual void store_state (ARDOUR::PluginState&) = 0;
 	virtual void restore_state (ARDOUR::PluginState&) = 0;
-	virtual string describe_parameter (ParamID) = 0;
+	virtual string describe_parameter (Parameter) = 0;
 	virtual string state_node_name() const = 0;
 	virtual void print_parameter (uint32_t, char*, uint32_t len) const = 0;
 

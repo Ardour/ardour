@@ -76,10 +76,10 @@ class PluginInsert : public Processor
 
 	bool is_generator() const;
 
-	void set_parameter (ParamID param, float val);
-	float get_parameter (ParamID param);
+	void set_parameter (Parameter param, float val);
+	float get_parameter (Parameter param);
 
-	float default_parameter_value (ParamID param);
+	float default_parameter_value (Parameter param);
 	
 	struct PluginControl : public AutomationControl {
 	    PluginControl (PluginInsert& p, boost::shared_ptr<AutomationList> list);
@@ -104,13 +104,13 @@ class PluginInsert : public Processor
 
 	PluginType type ();
 
-	string describe_parameter (ParamID param);
+	string describe_parameter (Parameter param);
 
 	nframes_t signal_latency() const;
 
   private:
 
-	void parameter_changed (ParamID, float);
+	void parameter_changed (Parameter, float);
 	
 	std::vector<boost::shared_ptr<Plugin> > _plugins;
 	
@@ -119,7 +119,7 @@ class PluginInsert : public Processor
 
 	void init ();
 	void set_automatable ();
-	void auto_state_changed (ParamID which);
+	void auto_state_changed (Parameter which);
 
 	int32_t count_for_configuration (ChanCount in, ChanCount out) const;
 

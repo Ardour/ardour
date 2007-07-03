@@ -237,7 +237,7 @@ class IO : public Automatable, public Latent
 
 	void clear_automation ();
 	
-	void set_parameter_automation_state (ParamID, AutoState);
+	void set_parameter_automation_state (Parameter, AutoState);
 
 	virtual void transport_stopped (nframes_t now); // interface: matches Insert
 	void automation_snapshot (nframes_t now); // interface: matches Automatable

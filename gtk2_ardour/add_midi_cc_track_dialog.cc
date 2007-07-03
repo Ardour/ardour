@@ -62,11 +62,11 @@ AddMidiCCTrackDialog::AddMidiCCTrackDialog ()
 }
 
 
-ARDOUR::ParamID
+ARDOUR::Parameter
 AddMidiCCTrackDialog::parameter ()
 {
 	int cc_num = _cc_num_spinner.get_value_as_int();
 
-	return ParamID(MidiCCAutomation, cc_num);
+	return Parameter(MidiCCAutomation, cc_num);
 }
 

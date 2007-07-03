@@ -1,5 +1,6 @@
 /*
     Copyright (C) 2007 Paul Davis 
+    Author: Dave Robillard
     
     This program is free software; you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the Free
@@ -16,8 +17,8 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __ardour_param_id_h__
-#define __ardour_param_id_h__
+#ifndef __ardour_parameter_h__
+#define __ardour_parameter_h__
 
 #include <string>
 #include <pbd/compose.h>
@@ -44,15 +45,15 @@ namespace ARDOUR {
  * comparable anything may be added.  ints are best as these should be fast to
  * copy and compare with one another.
  */
-class ParamID
+class Parameter
 {
 public:
-	inline ParamID(AutomationType type = NullAutomation, uint32_t id=0) : _type(type), _id(id) {}
+	inline Parameter(AutomationType type = NullAutomation, uint32_t id=0) : _type(type), _id(id) {}
 	
-	/** Construct an ParamID from a string returned from ParamID::to_string
+	/** Construct an Parameter from a string returned from Parameter::to_string
 	 * (AutomationList automation-id property)
 	 */
-	ParamID(const std::string& str) : _type(NullAutomation), _id(0) {
+	Parameter(const std::string& str) : _type(NullAutomation), _id(0) {
 		if (str == "gain") {
 			_type = GainAutomation;
 		} else if (str == "solo") {
@@ -77,21 +78,21 @@ public:
 			_type = MidiCCAutomation;
 			_id = atoi(str.c_str()+7);
 		} else {
-			PBD::warning << "Unknown ParamID '" << str << "'" << endmsg;
+			PBD::warning << "Unknown Parameter '" << str << "'" << endmsg;
 		}
 	}
 
 	inline AutomationType type() const { return _type; }
 	inline uint32_t       id()   const { return _id; }
 
-	inline bool operator==(const ParamID& id) const
+	inline bool operator==(const Parameter& id) const
 		{ return (_type == id._type && _id == id._id); }
 	
 	/** Arbitrary but fixed ordering, so we're comparable (usable in std::map) */
-	inline bool operator<(const ParamID& id) const {
+	inline bool operator<(const Parameter& id) const {
 		// FIXME: branch a performance problem?  #ifdef DEBUG?
 		if (_type == NullAutomation)
-			PBD::warning << "Uninitialized ParamID compared." << endmsg;
+			PBD::warning << "Uninitialized Parameter compared." << endmsg;
 		return (_type < id._type || _id < id._id);
 	}
 	
@@ -121,7 +122,7 @@ public:
 			return string_compose("midicc-%1", _id);
 		} else {
 			assert(false);
-			PBD::warning << "Uninitialized ParamID to_string() called." << endmsg;
+			PBD::warning << "Uninitialized Parameter to_string() called." << endmsg;
 			return "";
 		}
 	}
@@ -135,5 +136,5 @@ private:
 
 } // namespace ARDOUR
 
-#endif // __ardour_param_id_h__
+#endif // __ardour_parameter_h__
 

@@ -167,7 +167,7 @@ void
 MidiTimeAxisView::add_controller_track()
 {
 	int response;
-	ParamID param;
+	Parameter param;
 
 	{
 		AddMidiCCTrackDialog dialog;
@@ -183,7 +183,7 @@ MidiTimeAxisView::add_controller_track()
 }
 
 void
-MidiTimeAxisView::create_automation_child (ParamID param)
+MidiTimeAxisView::create_automation_child (Parameter param)
 {
 	if (param.type() == MidiCCAutomation) {
 	
@@ -203,7 +203,7 @@ MidiTimeAxisView::create_automation_child (ParamID param)
 				*this,
 				parent_canvas,
 				_route->describe_parameter(param),
-				c->list()->param_id().to_string() /* FIXME: correct state name? */));
+				c->list()->parameter().to_string() /* FIXME: correct state name? */));
 		
 		add_automation_child(param, track);
 

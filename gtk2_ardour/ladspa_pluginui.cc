@@ -182,7 +182,7 @@ LadspaPluginUI::build ()
 			
 			/* Don't show latency control ports */
 
-			if (plugin->describe_parameter (ParamID(PluginAutomation, i)) == X_("latency")) {
+			if (plugin->describe_parameter (Parameter(PluginAutomation, i)) == X_("latency")) {
 				continue;
 			}
 
@@ -206,7 +206,7 @@ LadspaPluginUI::build ()
 				}
 			}
 
-			if ((cui = build_control_ui (i, insert->control(ParamID(PluginAutomation, i)))) == 0) {
+			if ((cui = build_control_ui (i, insert->control(Parameter(PluginAutomation, i)))) == 0) {
 				error << string_compose(_("Plugin Editor: could not build control element for port %1"), i) << endmsg;
 				continue;
 			}
@@ -325,7 +325,7 @@ LadspaPluginUI::automation_state_changed (ControlUI* cui)
 
 	// don't lock to avoid deadlock because we're triggered by
 	// AutomationControl::Changed() while the automation lock is taken
-	switch (insert->get_parameter_automation_state (cui->param_id(), false)
+	switch (insert->get_parameter_automation_state (cui->parameter(), false)
 			& (Off|Play|Touch|Write)) {
 	case Off:
 		cui->automate_button.set_label (_("Manual"));
@@ -586,7 +586,7 @@ LadspaPluginUI::astate_clicked (ControlUI* cui, uint32_t port)
 void
 LadspaPluginUI::set_automation_state (AutoState state, ControlUI* cui)
 {
-	insert->set_parameter_automation_state (cui->param_id(), state);
+	insert->set_parameter_automation_state (cui->parameter(), state);
 }
 
 void
@@ -643,7 +643,7 @@ void
 LadspaPluginUI::control_port_toggled (ControlUI* cui)
 {
 	if (!cui->ignore_change) {
-		insert->set_parameter (cui->param_id(), cui->button->get_active());
+		insert->set_parameter (cui->parameter(), cui->button->get_active());
 	}
 }
 
@@ -653,7 +653,7 @@ LadspaPluginUI::control_combo_changed (ControlUI* cui)
 	if (!cui->ignore_change) {
 		string value = cui->combo->get_active_text();
 		std::map<string,float> mapping = *cui->combo_map;
-		insert->set_parameter (cui->param_id(), mapping[value]);
+		insert->set_parameter (cui->parameter(), mapping[value]);
 	}
 
 }
@@ -692,7 +692,7 @@ void
 LadspaPluginUI::output_update ()
 {
 	for (vector<ControlUI*>::iterator i = output_controls.begin(); i != output_controls.end(); ++i) {
-		float val = plugin->get_parameter ((*i)->param_id().id());
+		float val = plugin->get_parameter ((*i)->parameter().id());
 		char buf[32];
 		snprintf (buf, sizeof(buf), "%.2f", val);
 		(*i)->display_label->set_text (buf);

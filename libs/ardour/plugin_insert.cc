@@ -143,7 +143,7 @@ PluginInsert::~PluginInsert ()
 }
 
 void
-PluginInsert::auto_state_changed (ParamID which)
+PluginInsert::auto_state_changed (Parameter which)
 {
 	if (which.type() != PluginAutomation)
 		return;
@@ -198,11 +198,11 @@ PluginInsert::is_generator() const
 void
 PluginInsert::set_automatable ()
 {
-	set<ParamID> a = _plugins.front()->automatable ();
+	set<Parameter> a = _plugins.front()->automatable ();
 
 	Plugin::ParameterDescriptor desc;
 
-	for (set<ParamID>::iterator i = a.begin(); i != a.end(); ++i) {
+	for (set<Parameter>::iterator i = a.begin(); i != a.end(); ++i) {
 		if (i->type() == PluginAutomation) {
 			can_automate (*i);
 			_plugins.front()->get_parameter_descriptor(i->id(), desc);
@@ -220,7 +220,7 @@ PluginInsert::set_automatable ()
 }
 
 void
-PluginInsert::parameter_changed (ParamID which, float val)
+PluginInsert::parameter_changed (Parameter which, float val)
 {
 	if (which.type() != PluginAutomation)
 		return;
@@ -279,7 +279,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t off
 			
 			boost::shared_ptr<AutomationControl> c = li->second;
 
-			if (c->list()->param_id().type() == PluginAutomation && c->list()->automation_playback()) {
+			if (c->list()->parameter().type() == PluginAutomation && c->list()->automation_playback()) {
 				bool valid;
 
 				const float val = c->list()->rt_safe_eval (now, valid);				
@@ -343,7 +343,7 @@ PluginInsert::run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, 
 }
 
 void
-PluginInsert::set_parameter (ParamID param, float val)
+PluginInsert::set_parameter (Parameter param, float val)
 {
 	if (param.type() != PluginAutomation)
 		return;
@@ -361,7 +361,7 @@ PluginInsert::set_parameter (ParamID param, float val)
 }
 
 float
-PluginInsert::get_parameter (ParamID param)
+PluginInsert::get_parameter (Parameter param)
 {
 	if (param.type() != PluginAutomation)
 		return 0.0;
@@ -415,7 +415,7 @@ PluginInsert::automation_run (BufferSet& bufs, nframes_t nframes, nframes_t offs
 }	
 
 float
-PluginInsert::default_parameter_value (ParamID param)
+PluginInsert::default_parameter_value (Parameter param)
 {
 	if (param.type() != PluginAutomation)
 		return 1.0;
@@ -622,9 +622,9 @@ PluginInsert::state (bool full)
 
 	/* add port automation state */
 	XMLNode *autonode = new XMLNode(port_automation_node_name);
-	set<ParamID> automatable = _plugins[0]->automatable();
+	set<Parameter> automatable = _plugins[0]->automatable();
 	
-	for (set<ParamID>::iterator x = automatable.begin(); x != automatable.end(); ++x) {
+	for (set<Parameter>::iterator x = automatable.begin(); x != automatable.end(); ++x) {
 		
 		/*XMLNode* child = new XMLNode("port");
 		snprintf(buf, sizeof(buf), "%" PRIu32, *x);
@@ -764,7 +764,7 @@ PluginInsert::set_state(const XMLNode& node)
 			}
 
 			if (!child->children().empty()) {
-				control (ParamID(PluginAutomation, port_id), true)->list()->set_state (*child->children().front());
+				control (Parameter(PluginAutomation, port_id), true)->list()->set_state (*child->children().front());
 			} else {
 				if ((cprop = child->property("auto")) != 0) {
 					
@@ -772,13 +772,13 @@ PluginInsert::set_state(const XMLNode& node)
 
 					int x;
 					sscanf (cprop->value().c_str(), "0x%x", &x);
-					control (ParamID(PluginAutomation, port_id), true)->list()->set_automation_state (AutoState (x));
+					control (Parameter(PluginAutomation, port_id), true)->list()->set_automation_state (AutoState (x));
 
 				} else {
 					
 					/* missing */
 					
-					control (ParamID(PluginAutomation, port_id), true)->list()->set_automation_state (Off);
+					control (Parameter(PluginAutomation, port_id), true)->list()->set_automation_state (Off);
 				}
 			}
 
@@ -800,7 +800,7 @@ PluginInsert::set_state(const XMLNode& node)
 }
 
 string
-PluginInsert::describe_parameter (ParamID param)
+PluginInsert::describe_parameter (Parameter param)
 {
 	if (param.type() != PluginAutomation)
 		return Automatable::describe_parameter(param);
@@ -848,12 +848,12 @@ PluginInsert::type ()
 }
 
 PluginInsert::PluginControl::PluginControl (PluginInsert& p, boost::shared_ptr<AutomationList> list)
-	: AutomationControl (p.session(), list, p.describe_parameter(list->param_id()))
+	: AutomationControl (p.session(), list, p.describe_parameter(list->parameter()))
 	, _plugin (p)
 	, _list (list)
 {
 	Plugin::ParameterDescriptor desc;
-	p.plugin(0)->get_parameter_descriptor (list->param_id().id(), desc);
+	p.plugin(0)->get_parameter_descriptor (list->parameter().id(), desc);
 	_logarithmic = desc.logarithmic;
 	_toggled = desc.toggled;
 }
@@ -889,7 +889,7 @@ PluginInsert::PluginControl::set_value (float val)
 
 	for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugin._plugins.begin();
 			i != _plugin._plugins.end(); ++i) {
-		(*i)->set_parameter (_list->param_id().id(), val);
+		(*i)->set_parameter (_list->parameter().id(), val);
 	}
 
 	AutomationControl::set_value(val);
@@ -900,7 +900,7 @@ PluginInsert::PluginControl::get_value (void) const
 {
 	/* FIXME: probably should be taking out some lock here.. */
 	
-	float val = _plugin.get_parameter (_list->param_id());
+	float val = _plugin.get_parameter (_list->parameter());
 
 	return val;
 

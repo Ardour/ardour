@@ -643,7 +643,7 @@ MidiTrack::MidiControl::set_value(float val)
 	boost::shared_ptr<MidiTrack> midi_track = _route.lock();
 
 	if (midi_track && !_list->automation_playback()) {
-		Byte ev[3] = { MIDI_CMD_CONTROL, _list->param_id().id(), (int)val };
+		Byte ev[3] = { MIDI_CMD_CONTROL, _list->parameter().id(), (int)val };
 		midi_track->write_immediate_event(3,  ev);
 	}
 
