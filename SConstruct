@@ -1011,7 +1011,10 @@ if env['SURFACES']:
 
     if os.access ('libs/surfaces/sony9pin', os.F_OK):
         surface_subdirs += [ 'libs/surfaces/sony9pin' ]
-
+else:
+    env['POWERMATE'] = 0
+    env['TRANZPORT'] = 0
+    
 opts.Save('scache.conf', env)
 Help(opts.GenerateHelpText(env))
 
