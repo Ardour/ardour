@@ -44,12 +44,13 @@ powermate.Merge ([
 
 libardour_powermate = powermate.SharedLibrary('ardour_powermate', powermate_files)
 
-Default(libardour_powermate)
+if powermate['POWERMATE']:
+    Default(libardour_powermate)
 
-if env['NLS']:
-	i18n (powermate, powermate_files, env)
+    if env['NLS']:
+	    i18n (powermate, powermate_files, env)
 	      
-env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2/surfaces'), libardour_powermate))
+    env.Alias('install', env.Install(os.path.join(install_prefix, 'lib/ardour2/surfaces'), libardour_powermate))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
 				     [ 'SConscript' ] +
