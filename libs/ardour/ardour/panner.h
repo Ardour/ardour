@@ -21,6 +21,7 @@
 #define __ardour_panner_h__
 
 #include <cmath>
+#include <cassert>
 #include <vector>
 #include <string>
 #include <iostream>
@@ -106,7 +107,7 @@ class StreamPanner : public sigc::trackable, public PBD::Stateful
 	    PanControllable (Session& s, std::string name, StreamPanner& p, ParamID param)
 			: AutomationControl (s, boost::shared_ptr<AutomationList>(new AutomationList(
 					param, 0.0, 1.0, 0.5)), name)
-			, panner (p) {}
+			, panner (p) { assert(param.type() != NullAutomation); }
 	    
 	    StreamPanner& panner;
 	    
@@ -124,7 +125,7 @@ class StreamPanner : public sigc::trackable, public PBD::Stateful
 class BaseStereoPanner : public StreamPanner
 {
   public:
-	BaseStereoPanner (Panner&);
+	BaseStereoPanner (Panner&, ParamID param);
 	~BaseStereoPanner ();
 
 	/* this class just leaves the pan law itself to be defined
@@ -151,7 +152,7 @@ class BaseStereoPanner : public StreamPanner
 class EqualPowerStereoPanner : public BaseStereoPanner
 {
   public:
-	EqualPowerStereoPanner (Panner&);
+	EqualPowerStereoPanner (Panner&, ParamID param);
 	~EqualPowerStereoPanner ();
 
 	void distribute_automated (AudioBuffer& src, BufferSet& obufs, 

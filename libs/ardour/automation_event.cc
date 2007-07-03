@@ -57,7 +57,7 @@ static void dumpit (const AutomationList& al, string prefix = "")
 AutomationList::AutomationList (ParamID id, double min_val, double max_val, double default_val)
 	: _param_id(id)
 	, _curve(new Curve(*this))
-{
+{	
 	_param_id = id;
 	_frozen = 0;
 	_changed_when_thawed = false;
@@ -73,7 +73,7 @@ AutomationList::AutomationList (ParamID id, double min_val, double max_val, doub
 	_lookup_cache.range.first = _events.end();
 	_sort_pending = false;
 
-
+	assert(_param_id.type() != NullAutomation);
 	AutomationListCreated(this);
 }
 
@@ -100,6 +100,7 @@ AutomationList::AutomationList (const AutomationList& other)
 	}
 
 	mark_dirty ();
+	assert(_param_id.type() != NullAutomation);
 	AutomationListCreated(this);
 }
 
@@ -135,6 +136,7 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 
 	mark_dirty ();
 
+	assert(_param_id.type() != NullAutomation);
 	AutomationListCreated(this);
 }
 
@@ -162,6 +164,7 @@ AutomationList::AutomationList (const XMLNode& node, ParamID id)
 	if (id)
 		_param_id = id;
 
+	assert(_param_id.type() != NullAutomation);
 	AutomationListCreated(this);
 }
 

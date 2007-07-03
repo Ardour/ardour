@@ -167,11 +167,11 @@ Automatable::control (ParamID parameter, bool create_if_missing)
 		return i->second;
 
 	} else if (create_if_missing) {
-		assert(parameter.type() != GainAutomation);
 		boost::shared_ptr<AutomationList> al (new AutomationList (
 					parameter, FLT_MIN, FLT_MAX, default_parameter_value (parameter)));
 		boost::shared_ptr<AutomationControl> ac (new AutomationControl(_session, al));
 		add_control(ac);
+		cerr << "WARNING: Default AutomationControl created for " << parameter.to_string() << endl;
 		return ac;
 
 	} else {

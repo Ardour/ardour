@@ -166,13 +166,20 @@ MidiTimeAxisView::build_automation_action_menu ()
 void
 MidiTimeAxisView::add_controller_track()
 {
-	AddMidiCCTrackDialog dialog;
-	dialog.set_transient_for(editor);
-	int response = dialog.run();
-	if (response == Gtk::RESPONSE_ACCEPT) {
-		ParamID param = dialog.parameter();
-		create_automation_child(param);
+	int response;
+	ParamID param;
+
+	{
+		AddMidiCCTrackDialog dialog;
+		dialog.set_transient_for(editor);
+		response = dialog.run();
+		
+		if (response == Gtk::RESPONSE_ACCEPT)
+			param = dialog.parameter();
 	}
+
+	if (response == Gtk::RESPONSE_ACCEPT)
+		create_automation_child(param);
 }
 
 void
@@ -182,11 +189,11 @@ MidiTimeAxisView::create_automation_child (ParamID param)
 	
 		/* FIXME: this all probably leaks */
 
-		boost::shared_ptr<AutomationControl> c =_route->control(param);
+		boost::shared_ptr<AutomationControl> c = _route->control(param);
 
 		if (!c) {
 			boost::shared_ptr<AutomationList> al(new ARDOUR::AutomationList(param, 0, 127, 64));
-			c = boost::shared_ptr<AutomationControl>(new AutomationControl(_session, al));
+			c = boost::shared_ptr<AutomationControl>(new MidiTrack::MidiControl(midi_track(), al));
 			_route->add_control(c);
 		}
 
@@ -197,6 +204,7 @@ MidiTimeAxisView::create_automation_child (ParamID param)
 				parent_canvas,
 				_route->describe_parameter(param),
 				c->list()->param_id().to_string() /* FIXME: correct state name? */));
+		
 		add_automation_child(param, track);
 
 	} else {

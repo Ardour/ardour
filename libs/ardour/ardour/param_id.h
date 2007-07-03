@@ -55,8 +55,6 @@ public:
 	ParamID(const std::string& str) : _type(NullAutomation), _id(0) {
 		if (str == "gain") {
 			_type = GainAutomation;
-		} else if (str == "pan") {
-			_type = PanAutomation;
 		} else if (str == "solo") {
 			_type = SoloAutomation;
 		} else if (str == "mute") {
@@ -67,14 +65,17 @@ public:
 			_type = FadeOutAutomation;
 		} else if (str == "envelope") {
 			_type = EnvelopeAutomation;
+		} else if (str == "pan") {
+			_type = PanAutomation;
+		} else if (str.length() > 4 && str.substr(0, 4) == "pan-") {
+			_type = PanAutomation;
+			_id = atoi(str.c_str()+4);
 		} else if (str.length() > 10 && str.substr(0, 10) == "parameter-") {
 			_type = PluginAutomation;
 			_id = atoi(str.c_str()+10);
-			//PBD::info << "Parameter: " << str << " -> " << _id << endl;
 		} else if (str.length() > 7 && str.substr(0, 7) == "midicc-") {
 			_type = MidiCCAutomation;
 			_id = atoi(str.c_str()+7);
-			//PBD::info << "MIDI CC: " << str << " -> " << _id << endl;
 		} else {
 			PBD::warning << "Unknown ParamID '" << str << "'" << endmsg;
 		}
@@ -119,6 +120,7 @@ public:
 		} else if (_type == MidiCCAutomation) {
 			return string_compose("midicc-%1", _id);
 		} else {
+			assert(false);
 			PBD::warning << "Uninitialized ParamID to_string() called." << endmsg;
 			return "";
 		}

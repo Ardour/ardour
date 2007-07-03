@@ -232,7 +232,7 @@ public:
 	size_t write(double time, size_t size, const Byte* buf);
 	bool   read(double* time, size_t* size, Byte* buf);
 
-	size_t read(MidiBuffer& dst, nframes_t start, nframes_t end);
+	size_t read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t offset=0);
 };
 
 
@@ -268,10 +268,10 @@ MidiRingBuffer::write(double time, size_t size, const Byte* buf)
 /** Read a block of MIDI events from buffer.
  *
  * Timestamps of events returned are relative to start (ie event with stamp 0
- * occurred at start).
+ * occurred at start), with offset added.
  */
 inline size_t
-MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end)
+MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t offset)
 {
 	if (read_space() == 0)
 		return 0;

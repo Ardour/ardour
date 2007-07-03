@@ -434,6 +434,9 @@ RouteTimeAxisView::build_automation_action_menu ()
 	automation_items.push_back (MenuElem (_("Hide all automation"),
 					      mem_fun(*this, &RouteTimeAxisView::hide_all_automation)));
 
+	if (subplugin_menu.get_parent())
+		subplugin_menu.detach();
+
 	automation_items.push_back (MenuElem (_("Plugins"), subplugin_menu));
 	
 	map<ARDOUR::ParamID, RouteAutomationNode*>::iterator i;
@@ -441,18 +444,16 @@ RouteTimeAxisView::build_automation_action_menu ()
 
 		automation_items.push_back (SeparatorElem());
 
-		if ( ! i->second->menu_item) {
-			automation_items.push_back(CheckMenuElem (_route->describe_parameter(i->second->param), 
-					bind (mem_fun(*this, &RouteTimeAxisView::toggle_automation_track), i->second->param)));
+		if (i->second->menu_item)
+			delete i->second->menu_item;
 
-			i->second->menu_item = static_cast<Gtk::CheckMenuItem*>(&automation_items.back());
+		automation_items.push_back(CheckMenuElem (_route->describe_parameter(i->second->param), 
+				bind (mem_fun(*this, &RouteTimeAxisView::toggle_automation_track), i->second->param)));
 
-		} else {
-			automation_items.push_back (*i->second->menu_item);
-		}
-		
-		//i->second->menu_item->set_active(show_automation(i->second->param));
-		i->second->menu_item->set_active(false);
+		i->second->menu_item = static_cast<Gtk::CheckMenuItem*>(&automation_items.back());
+
+		i->second->menu_item->set_active(show_automation(i->second->param));
+		//i->second->menu_item->set_active(false);
 	}
 }
 
@@ -1796,6 +1797,8 @@ RouteTimeAxisView::add_automation_child(ParamID param, boost::shared_ptr<Automat
 		_show_automation.insert(param);
 		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 	}
+
+	build_display_menu();
 }
 
 

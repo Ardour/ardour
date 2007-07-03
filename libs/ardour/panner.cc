@@ -73,6 +73,8 @@ StreamPanner::StreamPanner (Panner& p, ParamID param)
 	: parent (p)
 	, _control (new PanControllable(p.session(), X_("panner"), *this, param))
 {
+	assert(param.type() != NullAutomation);
+
 	_muted = false;
 
 	parent.session().add_controllable (_control);
@@ -189,8 +191,8 @@ StreamPanner::add_state (XMLNode& node)
 
 /*---------------------------------------------------------------------- */
 
-BaseStereoPanner::BaseStereoPanner (Panner& p)
-	: StreamPanner (p, ParamID(PanAutomation, 0))
+BaseStereoPanner::BaseStereoPanner (Panner& p, ParamID param)
+	: StreamPanner (p, param)
 {
 }
 
@@ -346,8 +348,8 @@ BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 
 /*---------------------------------------------------------------------- */
 
-EqualPowerStereoPanner::EqualPowerStereoPanner (Panner& p)
-	: BaseStereoPanner (p)
+EqualPowerStereoPanner::EqualPowerStereoPanner (Panner& p, ParamID param)
+	: BaseStereoPanner (p, param)
 {
 	update ();
 
@@ -461,9 +463,9 @@ EqualPowerStereoPanner::distribute_automated (AudioBuffer& srcbuf, BufferSet& ob
 }
 
 StreamPanner*
-EqualPowerStereoPanner::factory (Panner& parent, ParamID who_cares)
+EqualPowerStereoPanner::factory (Panner& parent, ParamID param)
 {
-	return new EqualPowerStereoPanner (parent);
+	return new EqualPowerStereoPanner (parent, param);
 }
 
 XMLNode&
@@ -798,7 +800,7 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		outputs.push_back (Output (1.0, 0));
 
 		for (n = 0; n < npans; ++n) {
-			push_back (new EqualPowerStereoPanner (*this));
+			push_back (new EqualPowerStereoPanner (*this, ParamID(PanAutomation, n)));
 		}
 		break;
 

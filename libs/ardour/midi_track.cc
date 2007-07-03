@@ -36,6 +36,7 @@
 #include <ardour/utils.h>
 #include <ardour/buffer_set.h>
 #include <ardour/meter.h>
+#include <ardour/midi_events.h>
 
 #include "i18n.h"
 
@@ -45,6 +46,7 @@ using namespace PBD;
 
 MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mode)
 	: Track (sess, name, flag, mode, DataType::MIDI)
+	, _immediate_events(1024) // FIXME: size?
 {
 	MidiDiskstream::Flag dflags = MidiDiskstream::Flag (0);
 
@@ -74,6 +76,7 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 
 MidiTrack::MidiTrack (Session& sess, const XMLNode& node)
 	: Track (sess, node)
+	, _immediate_events(1024) // FIXME: size?
 {
 	_set_state(node, false);
 	
@@ -556,6 +559,8 @@ MidiTrack::process_output_buffers (BufferSet& bufs,
 	if (muted()) {
 		IO::silence(nframes, offset);
 	} else {
+		MidiBuffer& out_buf = bufs.get_midi(0);
+		_immediate_events.read(out_buf, 0, 0, offset + nframes-1); // all stamps = 0
 		deliver_output(bufs, start_frame, end_frame, nframes, offset);
 	}
 }
@@ -620,3 +625,28 @@ MidiTrack::set_mode (TrackMode m)
 
 	return 0;
 }
+	
+/** \return true on success, false on failure (no buffer space left)
+ */
+bool
+MidiTrack::write_immediate_event(size_t size, const Byte* buf)
+{
+	return (_immediate_events.write(0, size, buf) == size);
+}
+
+void
+MidiTrack::MidiControl::set_value(float val)
+{
+	assert(val >= 0);
+	assert(val <= 127.0);
+
+	boost::shared_ptr<MidiTrack> midi_track = _route.lock();
+
+	if (midi_track && !_list->automation_playback()) {
+		Byte ev[3] = { MIDI_CMD_CONTROL, _list->param_id().id(), (int)val };
+		midi_track->write_immediate_event(3,  ev);
+	}
+
+	AutomationControl::set_value(val);
+} 
+

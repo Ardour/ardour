@@ -75,7 +75,11 @@ void
 AutomationController::update_label(char* label, int label_len)
 {
 	if (label && label_len)
-		snprintf(label, label_len, "%.3f", _controllable->get_value());
+		// Hack to display CC rounded to int
+		if (_controllable->list()->param_id().type() == MidiCCAutomation)
+			snprintf(label, label_len, "%d", (int)_controllable->get_value());
+		else
+			snprintf(label, label_len, "%.3f", _controllable->get_value());
 }
 
 void

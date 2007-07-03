@@ -336,13 +336,20 @@ AudioTimeAxisView::update_pans ()
 	/* Man I hate that damn stereo->stereo panner */
 	uint32_t i = 0;
 	for (p = _route->panner().begin(); p != _route->panner().end(); ++p) {
+		boost::shared_ptr<AutomationControl> pan_control = (*p)->pan_control();
+		
+		if (pan_control->list()->param_id().type() == NullAutomation) {
+			error << "Pan control has NULL automation type!" << endmsg;
+			continue;
+		}
+
 		boost::shared_ptr<AutomationTimeAxisView> pan_track(new AutomationTimeAxisView (_session,
-					_route, _route/*FIXME*/, (*p)->pan_control(), 
+					_route, _route/*FIXME*/, pan_control, 
 					editor,
 					*this,
 					parent_canvas,
-					_route->describe_parameter((*p)->pan_control()->list()->param_id()),
-					ParamID(PanAutomation, i).to_string()/* FIXME: correct state name? */));
+					_route->describe_parameter(pan_control->list()->param_id()),
+					pan_control->list()->param_id().to_string()/* FIXME: correct state name? */));
 		add_automation_child(ParamID(PanAutomation, i), pan_track);
 		++i;
 	}

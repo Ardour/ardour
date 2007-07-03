@@ -21,6 +21,7 @@
 #define __ardour_midi_track_h__
 
 #include <ardour/track.h>
+#include <ardour/midi_ring_buffer.h>
 
 namespace ARDOUR
 {
@@ -71,6 +72,19 @@ public:
 
 	int set_state(const XMLNode& node);
 
+	bool write_immediate_event(size_t size, const Byte* buf);
+	
+	struct MidiControl : public AutomationControl {
+	    MidiControl(boost::shared_ptr<MidiTrack> route, boost::shared_ptr<AutomationList> al)
+			: AutomationControl (route->session(), al, al->param_id().to_string())
+			, _route (route)
+		{}
+	 
+	    void set_value (float val);
+   
+		boost::weak_ptr<MidiTrack> _route;
+	};
+
 protected:
 	XMLNode& state (bool full);
 	
@@ -80,6 +94,8 @@ private:
 	int set_diskstream (boost::shared_ptr<MidiDiskstream> ds);
 	void set_state_part_two ();
 	void set_state_part_three ();
+
+	MidiRingBuffer _immediate_events;
 };
 
 } /* namespace ARDOUR*/
