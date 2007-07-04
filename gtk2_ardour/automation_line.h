@@ -146,7 +146,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	void show_selection();
 	void hide_selection ();
 
-	virtual string  get_verbose_cursor_string (float);
+	virtual string get_verbose_cursor_string (double);
 	virtual void view_to_model_y (double&);
 	virtual void model_to_view_y (double&);
 

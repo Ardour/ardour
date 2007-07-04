@@ -2374,7 +2374,7 @@ Editor::start_control_point_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	control_point->line.start_drag (control_point, drag_info.grab_frame, 0);
 
-	float fraction = 1.0 - ((control_point->get_y() - control_point->line.y_position()) / control_point->line.height());
+	double fraction = 1.0 - ((control_point->get_y() - control_point->line.y_position()) / (double)control_point->line.height());
 	set_verbose_canvas_cursor (control_point->line.get_verbose_cursor_string (fraction), 
 				   drag_info.current_pointer_x + 20, drag_info.current_pointer_y + 20);
 
@@ -2412,7 +2412,7 @@ Editor::control_point_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* 
 		snap_to (cx_frames);
 	}
 
-	float const fraction = 1.0 - ((cy - cp->line.y_position()) / cp->line.height());
+	const double fraction = 1.0 - ((cy - cp->line.y_position()) / (double)cp->line.height());
 
 	bool push;
 
@@ -2503,7 +2503,7 @@ Editor::start_line_grab (AutomationLine* line, GdkEvent* event)
 
 	start_grab (event, fader_cursor);
 
-	double const fraction = 1.0 - ((cy - line->y_position()) / line->height());
+	const double fraction = 1.0 - ((cy - line->y_position()) / (double)line->height());
 
 	line->start_drag (0, drag_info.grab_frame, fraction);
 	
@@ -2521,7 +2521,7 @@ Editor::line_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 	line->parent_group().w2i (cx, cy);
 	
-	double const fraction = 1.0 - ((cy - line->y_position()) / line->height());
+	const double fraction = 1.0 - ((cy - line->y_position()) / (double)line->height());
 
 	bool push;
 

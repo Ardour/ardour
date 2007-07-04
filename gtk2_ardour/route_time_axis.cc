@@ -1905,7 +1905,7 @@ RouteTimeAxisView::processor_menu_item_toggled (RouteTimeAxisView::ProcessorAuto
 		redraw = true;
 	}
 
-	if (showit != pan->view->marked_for_display()) {
+	if (pan->view && showit != pan->view->marked_for_display()) {
 
 		if (showit) {
 			pan->view->set_marked_for_display (true);

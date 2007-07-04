@@ -764,7 +764,7 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 }
 
 string
-AutomationLine::get_verbose_cursor_string (float fraction)
+AutomationLine::get_verbose_cursor_string (double fraction)
 {
 	char buf[32];
 
@@ -775,7 +775,11 @@ AutomationLine::get_verbose_cursor_string (float fraction)
 			snprintf (buf, sizeof (buf), "%.1fdB", coefficient_to_dB (slider_position_to_gain (fraction)));
 		}
 	} else {
-		snprintf (buf, sizeof (buf), "%.2f", fraction);
+		view_to_model_y(fraction);
+		if (alist->parameter().type() == MidiCCAutomation)
+			snprintf (buf, sizeof (buf), "%d", (int)fraction);
+		else
+			snprintf (buf, sizeof (buf), "%.2f", fraction);
 	}
 
 	return buf;
@@ -1306,6 +1310,8 @@ AutomationLine::view_to_model_y (double& y)
 		y = 1.0 - y;
 	} else if (alist->parameter().type() == MidiCCAutomation) {
 		y = (int)(y * 127.0);
+	} else if (alist->parameter().type() == PluginAutomation) {
+		y = y * (double)(alist->get_max_y()- alist->get_min_y()) + alist->get_min_y();
 	}
 }
 
