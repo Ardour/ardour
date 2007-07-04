@@ -71,7 +71,7 @@ MidiByteArray SurfacePort::read()
 		
 	if ( !lock.locked() )
 	{
-		//cout << "SurfacePort::read not locked" << endl;
+		cout << "SurfacePort::read not locked" << endl;
 		return retval;
 	}
 	
@@ -101,13 +101,18 @@ MidiByteArray SurfacePort::read()
 			throw MackieControlException( os.str() );
 		}
 	}
+#ifdef DEBUG
+	cout << "SurfacePort::read: " << retval << endl;
+#endif
 	return retval;
 }
 
 void SurfacePort::write( const MidiByteArray & mba )
 {
+#ifdef DEBUG
 	//if ( mba[0] == 0xf0 ) cout << "SurfacePort::write: " << mba << endl;
-	//cout << "SurfacePort::write: " << mba << endl;
+	cout << "SurfacePort::write: " << mba << endl;
+#endif
 	
 	// check active before and after lock - to make sure
 	// that the destructor doesn't destroy the mutex while
@@ -130,7 +135,9 @@ void SurfacePort::write( const MidiByteArray & mba )
 			throw MackieControlException( os.str() );
 		}
 	}
-	//if ( mba[0] == 0xf0 ) cout << "SurfacePort::write " << count << endl;
+#ifdef DEBUG
+	if ( mba[0] == 0xf0 ) cout << "SurfacePort::write " << count << endl;
+#endif
 }
 
 void SurfacePort::write_sysex( const MidiByteArray & mba )

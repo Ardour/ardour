@@ -18,6 +18,8 @@
 #ifndef mackie_types_h
 #define mackie_types_h
 
+#define DEBUG 1
+
 namespace Mackie
 {
 
