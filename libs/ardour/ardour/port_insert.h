@@ -52,7 +52,7 @@ class PortInsert : public IOProcessor
 
 	void init ();
 	
-	void run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset);
+	void run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset);
 
 	nframes_t signal_latency() const;
 	

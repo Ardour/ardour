@@ -295,17 +295,17 @@ Route::process_output_buffers (BufferSet& bufs,
 	   -------------------------------------------------------------------------------------------------- */
 
 	if (declick > 0) {
-		Amp::run (bufs, nframes, 0.0, 1.0, false);
+		Amp::run_in_place (bufs, nframes, 0.0, 1.0, false);
 		_pending_declick = 0;
 	} else if (declick < 0) {
-		Amp::run (bufs, nframes, 1.0, 0.0, false);
+		Amp::run_in_place (bufs, nframes, 1.0, 0.0, false);
 		_pending_declick = 0;
 	} else {
 
 		/* no global declick */
 
 		if (solo_gain != dsg) {
-			Amp::run (bufs, nframes, solo_gain, dsg, false);
+			Amp::run_in_place (bufs, nframes, solo_gain, dsg, false);
 			solo_gain = dsg;
 		}
 	}
@@ -320,7 +320,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	}
 
 	if (!_soloed && _mute_affects_pre_fader && (mute_gain != dmg)) {
-		Amp::run (bufs, nframes, mute_gain, dmg, false);
+		Amp::run_in_place (bufs, nframes, mute_gain, dmg, false);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}
@@ -381,7 +381,7 @@ Route::process_output_buffers (BufferSet& bufs,
 				for (i = _processors.begin(); i != _processors.end(); ++i) {
 					switch ((*i)->placement()) {
 					case PreFader:
-						(*i)->run (bufs, start_frame, end_frame, nframes, offset);
+						(*i)->run_in_place (bufs, start_frame, end_frame, nframes, offset);
 						break;
 					case PostFader:
 						post_fader_work = true;
@@ -407,7 +407,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	bufs.set_count(pre_fader_streams());
 	
 	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_post_fader) {
-		Amp::run (bufs, nframes, mute_gain, dmg, false);
+		Amp::run_in_place (bufs, nframes, mute_gain, dmg, false);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}
@@ -417,7 +417,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	   -------------------------------------------------------------------------------------------------- */
 
 	if (meter && (_meter_point == MeterPreFader)) {
-		_meter->run(bufs, start_frame, end_frame, nframes, offset);
+		_meter->run_in_place(bufs, start_frame, end_frame, nframes, offset);
 	}
 
 	
@@ -498,7 +498,7 @@ Route::process_output_buffers (BufferSet& bufs,
 			
 			if (_gain != dg) {
 				
-				Amp::run (bufs, nframes, _gain, dg, _phase_invert);
+				Amp::run_in_place (bufs, nframes, _gain, dg, _phase_invert);
 				_gain = dg;
 				
 			} else if (_gain != 0 && (_phase_invert || _gain != 1.0)) {
@@ -551,7 +551,7 @@ Route::process_output_buffers (BufferSet& bufs,
 					case PreFader:
 						break;
 					case PostFader:
-						(*i)->run (bufs, start_frame, end_frame, nframes, offset);
+						(*i)->run_in_place (bufs, start_frame, end_frame, nframes, offset);
 						break;
 					}
 				}
@@ -570,7 +570,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	}
 
 	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_control_outs) {
-		Amp::run (bufs, nframes, mute_gain, dmg, false);
+		Amp::run_in_place (bufs, nframes, mute_gain, dmg, false);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}
@@ -615,7 +615,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	   ----------------------------------------------------------------------*/
 
 	if (!_soloed && (mute_gain != dmg) && !mute_declick_applied && _mute_affects_main_outs) {
-		Amp::run (bufs, nframes, mute_gain, dmg, false);
+		Amp::run_in_place (bufs, nframes, mute_gain, dmg, false);
 		mute_gain = dmg;
 		mute_declick_applied = true;
 	}
@@ -677,7 +677,7 @@ Route::process_output_buffers (BufferSet& bufs,
 		if ((_gain == 0 && !apply_gain_automation) || dmg == 0) {
 			_meter->reset();
 		} else {
-			_meter->run(output_buffers(), start_frame, end_frame, nframes, offset);
+			_meter->run_in_place(output_buffers(), start_frame, end_frame, nframes, offset);
 		}
 	}
 }
@@ -698,7 +698,7 @@ Route::passthru (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, 
 	collect_input (bufs, nframes, offset);
 
 	if (meter_first) {
-		_meter->run(bufs, start_frame, end_frame, nframes, offset);
+		_meter->run_in_place(bufs, start_frame, end_frame, nframes, offset);
 		meter_first = false;
 	}
 		

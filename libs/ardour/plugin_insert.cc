@@ -313,7 +313,7 @@ PluginInsert::silence (nframes_t nframes, nframes_t offset)
 }
 	
 void
-PluginInsert::run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset)
+PluginInsert::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset)
 {
 	if (active()) {
 

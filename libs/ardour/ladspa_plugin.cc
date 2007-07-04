@@ -562,7 +562,7 @@ LadspaPlugin::connect_and_run (BufferSet& bufs, uint32_t& in_index, uint32_t& ou
 		port_index++;
 	}
 	
-	run (nframes);
+	run_in_place (nframes);
 	now = get_cycles ();
 	set_cycles ((uint32_t) (now - then));
 
@@ -606,7 +606,7 @@ LadspaPlugin::print_parameter (uint32_t param, char *buf, uint32_t len) const
 }
 
 void
-LadspaPlugin::run (nframes_t nframes)
+LadspaPlugin::run_in_place (nframes_t nframes)
 {
 	for (uint32_t i = 0; i < parameter_count(); ++i) {
 		if (LADSPA_IS_PORT_INPUT(port_descriptor (i)) && LADSPA_IS_PORT_CONTROL(port_descriptor (i))) {
@@ -656,7 +656,7 @@ LadspaPlugin::latency_compute_run ()
 		port_index++;
 	}
 	
-	run (bufsize);
+	run_in_place (bufsize);
 	deactivate ();
 }
 

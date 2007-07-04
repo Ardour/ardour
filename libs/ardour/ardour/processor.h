@@ -72,7 +72,10 @@ class Processor : public Automatable, public Latent
 	
 	virtual void set_block_size (nframes_t nframes) {}
 
-	virtual void run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset) = 0;
+	virtual void run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset) { assert(is_in_place()); }
+	
+	virtual void run_out_of_place (BufferSet& input, BufferSet& output, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset) { assert(is_out_of_place()); }
+	
 	virtual void silence (nframes_t nframes, nframes_t offset) {}
 	
 	virtual void activate () { _active = true; ActiveChanged.emit(); }
@@ -80,7 +83,15 @@ class Processor : public Automatable, public Latent
 	
 	virtual bool configure_io (ChanCount in, ChanCount out) { _configured_input = in; return (_configured = true); }
 
-	/* Derived classes should override these, or processor appears as a pass-through */
+	/* Derived classes should override these, or processor appears as an in-place pass-through */
+
+	/** In-place processors implement run_in_place and modify thee input buffer parameter */
+	virtual bool is_in_place () const { return true; }
+
+	/* Out-Of-Place processors implement run_out_of_place, don't modify the input parameter
+	 * and write to their output parameter */
+	virtual bool is_out_of_place () const { return false; }
+
 	virtual bool      can_support_input_configuration (ChanCount in) const { return true; }
 	virtual ChanCount output_for_input_configuration (ChanCount in) const { return in; }
 	virtual ChanCount output_streams() const { return _configured_input; }

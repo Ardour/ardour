@@ -29,11 +29,11 @@ class BufferSet;
 /** Applies a declick operation to all audio inputs, passing the same number of
  * audio outputs, and passing through any other types unchanged.
  *
- * FIXME: make this an insert.
+ * FIXME: make this a Processor.
  */
 class Amp {
 public:
-	static void run (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t target, bool invert_polarity);
+	static void run_in_place (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t target, bool invert_polarity);
 
 	static void apply_simple_gain(BufferSet& bufs, nframes_t nframes, gain_t target);
 };

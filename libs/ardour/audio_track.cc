@@ -687,7 +687,7 @@ AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes
 		if ((processor = boost::dynamic_pointer_cast<Processor>(*i)) != 0) {
 			switch (processor->placement()) {
 			case PreFader:
-				processor->run (buffers, start, start+nframes, nframes, 0);
+				processor->run_in_place (buffers, start, start+nframes, nframes, 0);
 				break;
 			case PostFader:
 				post_fader_work = true;
@@ -727,7 +727,7 @@ AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes
 				case PreFader:
 					break;
 				case PostFader:
-					processor->run (buffers, start, start+nframes, nframes, 0);
+					processor->run_in_place (buffers, start, start+nframes, nframes, 0);
 					break;
 				}
 			}

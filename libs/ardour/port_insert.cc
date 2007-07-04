@@ -84,7 +84,7 @@ PortInsert::~PortInsert ()
 }
 
 void
-PortInsert::run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset)
+PortInsert::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset)
 {
 	if (_io->n_outputs().n_total() == 0) {
 		return;

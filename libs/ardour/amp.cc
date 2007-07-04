@@ -28,7 +28,7 @@ namespace ARDOUR {
 
 /** Apply a declicked gain to the audio buffers of @a bufs */
 void
-Amp::run (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t target, bool invert_polarity)
+Amp::run_in_place (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t target, bool invert_polarity)
 {
 	if (nframes == 0)
 		return;

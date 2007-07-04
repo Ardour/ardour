@@ -45,7 +45,7 @@ class Send : public IOProcessor
 	ChanCount output_streams() const;
 	ChanCount input_streams () const;
 	
-	void run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset);
+	void run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset);
 	
 	void activate() {}
 	void deactivate () {}
