@@ -99,14 +99,18 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, pfd( 0 )
 	, nfds( 0 )
 {
-	//cout << "MackieControlProtocol::MackieControlProtocol" << endl;
+#ifdef DEBUG
+	cout << "MackieControlProtocol::MackieControlProtocol" << endl;
+#endif
 	// will start reading from ports, as soon as there are some
 	pthread_create_and_store (X_("mackie monitor"), &thread, 0, _monitor_work, this);
 }
 
 MackieControlProtocol::~MackieControlProtocol()
 {
-	//cout << "~MackieControlProtocol::MackieControlProtocol" << endl;
+#ifdef DEBUG
+	cout << "~MackieControlProtocol::MackieControlProtocol" << endl;
+#endif
 	try
 	{
 		close();
@@ -119,7 +123,9 @@ MackieControlProtocol::~MackieControlProtocol()
 	{
 		cout << "~MackieControlProtocol caught unknown" << endl;
 	}
-	//cout << "finished ~MackieControlProtocol::MackieControlProtocol" << endl;
+#ifdef DEBUG
+	cout << "finished ~MackieControlProtocol::MackieControlProtocol" << endl;
+#endif
 }
 
 Mackie::Surface & MackieControlProtocol::surface()
@@ -275,7 +281,9 @@ void MackieControlProtocol::switch_banks( int initial )
 		uint32_t end_pos = min( route_table.size(), sorted.size() );
 		Sorted::iterator it = sorted.begin() + _current_initial_bank;
 		Sorted::iterator end = sorted.begin() + _current_initial_bank + end_pos;
-		//cout << "switch to " << _current_initial_bank << ", " << end_pos << endl;
+#ifdef DEBUG
+		cout << "switch to " << _current_initial_bank << ", " << end_pos << endl;
+#endif
 		
 		// link routes to strips
 		uint32_t i = 0;
@@ -283,7 +291,9 @@ void MackieControlProtocol::switch_banks( int initial )
 		{
 			boost::shared_ptr<Route> route = *it;
 			Strip & strip = *surface().strips[i];
-			//cout << "remote id " << route->remote_control_id() << " connecting " << route->name() << " to " << strip.name() << " with port " << port_for_id(i) << endl;
+#ifdef DEBUG
+			cout << "remote id " << route->remote_control_id() << " connecting " << route->name() << " to " << strip.name() << " with port " << port_for_id(i) << endl;
+#endif
 			route_table[i] = route;
 			RouteSignal * rs = new RouteSignal( *route, *this, strip, port_for_id(i) );
 			route_signals.push_back( rs );
@@ -737,7 +747,9 @@ void* MackieControlProtocol::_monitor_work (void* arg)
 
 XMLNode & MackieControlProtocol::get_state()
 {
-	//cout << "MackieControlProtocol::get_state" << endl;
+#ifdef DEBUG
+	cout << "MackieControlProtocol::get_state" << endl;
+#endif
 	
 	// add name of protocol
 	XMLNode* node = new XMLNode( X_("Protocol") );
@@ -753,7 +765,9 @@ XMLNode & MackieControlProtocol::get_state()
 
 int MackieControlProtocol::set_state( const XMLNode & node )
 {
-	//cout << "MackieControlProtocol::set_state: active " << _active << endl;
+#ifdef DEBUG
+	cout << "MackieControlProtocol::set_state: active " << _active << endl;
+#endif
 	int retval = 0;
 	
 	// fetch current bank
@@ -1155,6 +1169,87 @@ LedState MackieControlProtocol::ffwd_release( Button & button )
 	return off;
 }
 
+LedState MackieControlProtocol::loop_press( Button & button )
+{
+	session->request_play_loop( !session->get_play_loop() );
+	return on;
+}
+
+LedState MackieControlProtocol::loop_release( Button & button )
+{
+	return session->get_play_loop();
+}
+
+LedState MackieControlProtocol::punch_in_press( Button & button )
+{
+	bool state = !Config->get_punch_in();
+	Config->set_punch_in( state );
+	return state;
+}
+
+LedState MackieControlProtocol::punch_in_release( Button & button )
+{
+	return Config->get_punch_in();
+}
+
+LedState MackieControlProtocol::punch_out_press( Button & button )
+{
+	bool state = !Config->get_punch_out();
+	Config->set_punch_out( state );
+	return state;
+}
+
+LedState MackieControlProtocol::punch_out_release( Button & button )
+{
+	return Config->get_punch_out();
+}
+
+LedState MackieControlProtocol::home_press( Button & button )
+{
+	session->goto_start();
+	return on;
+}
+
+LedState MackieControlProtocol::home_release( Button & button )
+{
+	return off;
+}
+
+LedState MackieControlProtocol::end_press( Button & button )
+{
+	session->goto_end();
+	return on;
+}
+
+LedState MackieControlProtocol::end_release( Button & button )
+{
+	return off;
+}
+
+LedState MackieControlProtocol::clicking_press( Button & button )
+{
+	bool state = !Config->get_clicking();
+	Config->set_clicking( state );
+	return state;
+}
+
+LedState MackieControlProtocol::clicking_release( Button & button )
+{
+	return Config->get_clicking();
+}
+
+LedState MackieControlProtocol::global_solo_press( Button & button )
+{
+	bool state = !session->soloing();
+	session->set_all_solo ( state );
+	return state;
+}
+
+LedState MackieControlProtocol::global_solo_release( Button & button )
+{
+	return session->soloing();
+}
+
 ///////////////////////////////////////////
 // Session signals
 ///////////////////////////////////////////
@@ -1248,87 +1343,6 @@ void MackieControlProtocol::notify_transport_state_changed()
 	// rec is special because it's tristate
 	Button * rec = reinterpret_cast<Button*>( surface().controls_by_name["record"] );
 	mcu_port().write( builder.build_led( *rec, record_release( *rec ) ) );
-}
-
-LedState MackieControlProtocol::loop_press( Button & button )
-{
-	session->request_play_loop( !session->get_play_loop() );
-	return on;
-}
-
-LedState MackieControlProtocol::loop_release( Button & button )
-{
-	return session->get_play_loop();
-}
-
-LedState MackieControlProtocol::punch_in_press( Button & button )
-{
-	bool state = !Config->get_punch_in();
-	Config->set_punch_in( state );
-	return state;
-}
-
-LedState MackieControlProtocol::punch_in_release( Button & button )
-{
-	return Config->get_punch_in();
-}
-
-LedState MackieControlProtocol::punch_out_press( Button & button )
-{
-	bool state = !Config->get_punch_out();
-	Config->set_punch_out( state );
-	return state;
-}
-
-LedState MackieControlProtocol::punch_out_release( Button & button )
-{
-	return Config->get_punch_out();
-}
-
-LedState MackieControlProtocol::home_press( Button & button )
-{
-	session->goto_start();
-	return on;
-}
-
-LedState MackieControlProtocol::home_release( Button & button )
-{
-	return off;
-}
-
-LedState MackieControlProtocol::end_press( Button & button )
-{
-	session->goto_end();
-	return on;
-}
-
-LedState MackieControlProtocol::end_release( Button & button )
-{
-	return off;
-}
-
-LedState MackieControlProtocol::clicking_press( Button & button )
-{
-	bool state = !Config->get_clicking();
-	Config->set_clicking( state );
-	return state;
-}
-
-LedState MackieControlProtocol::clicking_release( Button & button )
-{
-	return Config->get_clicking();
-}
-
-LedState MackieControlProtocol::global_solo_press( Button & button )
-{
-	bool state = !session->soloing();
-	session->set_all_solo ( state );
-	return state;
-}
-
-LedState MackieControlProtocol::global_solo_release( Button & button )
-{
-	return session->soloing();
 }
 
 /////////////////////////////////////
