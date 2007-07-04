@@ -1153,7 +1153,7 @@ Editor::connect_to_session (Session *t)
 
 	if (ARDOUR_UI::instance()->session_is_new ()) {
 
-	        TreeModel::Children rows = route_display_model->children();
+		TreeModel::Children rows = route_display_model->children();
 		TreeModel::Children::iterator i;
 	
 		no_route_list_redisplay = true;
@@ -1173,9 +1173,9 @@ Editor::connect_to_session (Session *t)
 		redisplay_route_list ();
 	}
 
-        /* register for undo history */
+	/* register for undo history */
 
-        session->register_with_memento_command_factory(_id, this);
+	session->register_with_memento_command_factory(_id, this);
 }
 
 void

@@ -422,7 +422,7 @@ Locations::next_available_name(string& result,string base)
 		location =* i;
 		temp = location->name();
 		if (l && !temp.find(base,0)) {
-			suffix = atoi(temp.substr(l,3));
+			suffix = atoi(temp.substr(l,3).c_str());
 			if (suffix) available[suffix] = false;
 		}
 	}

@@ -23,6 +23,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <pbd/controllable.h>
+#include <ardour/parameter.h>
 
 namespace ARDOUR {
 
@@ -46,6 +47,8 @@ public:
 
 	boost::shared_ptr<ARDOUR::AutomationList>       list()       { return _list; }
 	boost::shared_ptr<const ARDOUR::AutomationList> list() const { return _list; }
+
+	Parameter parameter() const;
 
 protected:
 	ARDOUR::Session&                          _session;

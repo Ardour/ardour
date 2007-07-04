@@ -1374,7 +1374,7 @@ AutomationList::set_state (const XMLNode& node)
 	}
 	
 	if ((prop = node.property (X_("default"))) != 0){ 
-		_default_value = atof (prop->value());
+		_default_value = atof (prop->value().c_str());
 	} else {
 		_default_value = 0.0;
 	}
@@ -1392,19 +1392,19 @@ AutomationList::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property (X_("min_yval"))) != 0) {
-		_min_yval = atof (prop->value ());
+		_min_yval = atof (prop->value ().c_str());
 	} else {
 		_min_yval = FLT_MIN;
 	}
 
 	if ((prop = node.property (X_("max_yval"))) != 0) {
-		_max_yval = atof (prop->value ());
+		_max_yval = atof (prop->value ().c_str());
 	} else {
 		_max_yval = FLT_MAX;
 	}
 
 	if ((prop = node.property (X_("max_xval"))) != 0) {
-		_max_xval = atof (prop->value ());
+		_max_xval = atof (prop->value ().c_str());
 	} else {
 		_max_xval = 0; // means "no limit ;
 	}

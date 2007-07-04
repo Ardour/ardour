@@ -61,7 +61,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void hide ();
 
 	void add_controller_track ();
-	void create_automation_child (ARDOUR::Parameter param);
+	void create_automation_child (ARDOUR::Parameter param, bool show);
 
   private:
 	

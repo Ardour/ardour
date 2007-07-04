@@ -144,7 +144,7 @@ class LadspaPluginUI : public PlugUIBase, public Gtk::VBox
 
 		boost::shared_ptr<ARDOUR::AutomationControl> control;
 
-		ARDOUR::Parameter parameter() { return control->list()->parameter(); }
+		ARDOUR::Parameter parameter() { return control->parameter(); }
 	    
 	    /* input */
 	    

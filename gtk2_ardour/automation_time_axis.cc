@@ -25,6 +25,7 @@
 
 #include "ardour_ui.h"
 #include "automation_time_axis.h"
+#include "route_time_axis.h"
 #include "automation_line.h"
 #include "public_editor.h"
 #include "simplerect.h"
@@ -46,12 +47,12 @@ using namespace Editing;
 
 Pango::FontDescription* AutomationTimeAxisView::name_font = 0;
 bool AutomationTimeAxisView::have_name_font = false;
+const string AutomationTimeAxisView::state_node_name = "AutomationChild";
 
 AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Route> r,
 		boost::shared_ptr<Automatable> a, boost::shared_ptr<AutomationControl> c,
 		PublicEditor& e, TimeAxisView& rent, 
-		ArdourCanvas::Canvas& canvas, const string & nom, 
-		const string & state_name, const string & nomparent)
+		ArdourCanvas::Canvas& canvas, const string & nom, const string & nomparent)
 
 	: AxisView (s), 
 	  TimeAxisView (s, e, &rent, canvas),
@@ -60,9 +61,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	  _automatable (a),
 	  _controller(AutomationController::create(s, c->list(), c)),
 	  _base_rect (0),
-	  _xml_node (0),
 	  _name (nom),
-	  _state_name (state_name),
 	  height_button (_("h")),
 	  clear_button (_("clear")),
 	  auto_button (X_("")) /* force addition of a label */
@@ -187,14 +186,15 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 
 	controls_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
 
-	XMLNode* xml_node = get_parent_with_state()->get_child_xml_node (_state_name);
+	XMLNode* xml_node = get_parent_with_state()->get_automation_child_xml_node (
+			_control->parameter());
 
 	if (xml_node) {
 		set_state (*xml_node);
 	} 
 		
 	boost::shared_ptr<AutomationLine> line(new AutomationLine (
-				_control->list()->parameter().to_string(),
+				_control->parameter().to_string(),
 				*this,
 				*canvas_display,
 				_control->list()));
@@ -247,7 +247,7 @@ AutomationTimeAxisView::set_automation_state (AutoState state)
 	if (!ignore_state_request) {
 		if (_route == _automatable) { // FIXME: ew
 			_route->set_parameter_automation_state (
-					_control->list()->parameter(),
+					_control->parameter(),
 					state);
 		}
 
@@ -338,12 +338,10 @@ void
 AutomationTimeAxisView::set_height (TrackHeight ht)
 {
 	uint32_t h = height_to_pixels (ht);
-	bool changed = (height != (uint32_t) h);
-
-	//bool changed_between_small_and_normal = ( (ht == Small || ht == Smaller) ^ (height_style == Small || height_style == Smaller) );
-
-	TimeAxisView* state_parent = get_parent_with_state ();
-	XMLNode* xml_node = state_parent->get_child_xml_node (_state_name);
+	bool changed = (height != (uint32_t) h) || first_call_to_set_height;
+	
+	if (first_call_to_set_height)
+		first_call_to_set_height = false;
 
 	TimeAxisView::set_height (ht);
 	_base_rect->property_y2() = h;
@@ -355,6 +353,11 @@ AutomationTimeAxisView::set_height (TrackHeight ht)
 		(*i)->set_height ();
 	}
 
+	TimeAxisView* state_parent = get_parent_with_state ();
+	assert(state_parent);
+
+	XMLNode* xml_node = state_parent->get_automation_child_xml_node(_control->parameter());
+	assert(xml_node);
 
 	switch (ht) {
 	case Largest:
@@ -382,67 +385,63 @@ AutomationTimeAxisView::set_height (TrackHeight ht)
 		break;
 	}
 
-	//if (changed_between_small_and_normal || first_call_to_set_height) {
-		first_call_to_set_height = false;
-		switch (ht) {
-			case Normal:
+	switch (ht) {
+		case Large:
+		case Larger:
+		case Largest:
+			_controller->show ();
+
+		case Normal:
+			if (ht == Normal)
 				_controller->hide();
 
-				controls_table.remove (name_hbox);
+			controls_table.remove (name_hbox);
 
-				if (plugname) {
-					if (plugname_packed) {
-						controls_table.remove (*plugname);
-						plugname_packed = false;
-					}
-					controls_table.attach (*plugname, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-					plugname_packed = true;
-					controls_table.attach (name_hbox, 1, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-				} else {
-					controls_table.attach (name_hbox, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+			if (plugname) {
+				if (plugname_packed) {
+					controls_table.remove (*plugname);
+					plugname_packed = false;
 				}
-				hide_name_entry ();
-				show_name_label ();
-				name_hbox.show_all ();
-
-				auto_button.show();
-				height_button.show();
-				clear_button.show();
-				hide_button.show_all();
-				break;
-			
-			case Large:
-			case Larger:
-			case Largest:
-				_controller->show ();
-				break;
-
-			case Smaller:
-				_controller->hide();
-			
-			case Small:
-
-				controls_table.remove (name_hbox);
-				if (plugname) {
-					if (plugname_packed) {
-						controls_table.remove (*plugname);
-						plugname_packed = false;
-					}
-				}
+				controls_table.attach (*plugname, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+				plugname_packed = true;
+				controls_table.attach (name_hbox, 1, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+			} else {
 				controls_table.attach (name_hbox, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-				controls_table.hide_all ();
-				hide_name_entry ();
-				show_name_label ();
-				name_hbox.show_all ();
+			}
+			hide_name_entry ();
+			show_name_label ();
+			name_hbox.show_all ();
 
-				auto_button.hide();
-				height_button.hide();
-				clear_button.hide();
-				hide_button.hide();
-				break;
-		}
+			auto_button.show();
+			height_button.show();
+			clear_button.show();
+			hide_button.show_all();
+			break;
 
-	//}
+		case Smaller:
+			_controller->hide();
+
+		case Small:
+
+			controls_table.remove (name_hbox);
+			if (plugname) {
+				if (plugname_packed) {
+					controls_table.remove (*plugname);
+					plugname_packed = false;
+				}
+			}
+			controls_table.attach (name_hbox, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+			controls_table.hide_all ();
+			hide_name_entry ();
+			show_name_label ();
+			name_hbox.show_all ();
+
+			auto_button.hide();
+			height_button.hide();
+			clear_button.hide();
+			hide_button.hide();
+			break;
+	}
 
 	if (changed) {
 		/* only emit the signal if the height really changed */
@@ -866,25 +865,25 @@ AutomationTimeAxisView::set_state (const XMLNode& node)
 
 	kids = node.children ();
 
-	//snprintf (buf, sizeof(buf), "Port_%" PRIu32, param.id());
-		
 	for (iter = kids.begin(); iter != kids.end(); ++iter) {
-		if ((*iter)->name() == _control->list()->parameter().to_string()) {
 		
-			XMLProperty *shown = (*iter)->property("shown_editor");
-			
-			if (shown && shown->value() == "yes") {
-				set_marked_for_display(true);
-				canvas_display->show(); /* FIXME: necessary? show_at? */
+		if ((*iter)->name() == state_node_name) {
+			XMLProperty* type = (*iter)->property("automation-id");
+
+			if (type && type->value() == _control->parameter().to_string()) {
+				XMLProperty *shown = (*iter)->property("shown_editor");
+
+				if (shown && shown->value() == "yes") {
+					set_marked_for_display(true);
+					canvas_display->show(); /* FIXME: necessary? show_at? */
+				}
+				break;
 			}
-			break;
 		}
 	}
 
 	if (!_marked_for_display)
 		hide();
-
-	// FIXME: _xml_node = &node?
 }
 
 XMLNode*
@@ -893,54 +892,17 @@ AutomationTimeAxisView::get_state_node ()
 	TimeAxisView* state_parent = get_parent_with_state ();
 
 	if (state_parent) {
-		return state_parent->get_child_xml_node (_state_name);
+		return state_parent->get_automation_child_xml_node (_control->parameter());
 	} else {
 		return 0;
 	}
 }
 
 void
-AutomationTimeAxisView::ensure_xml_node ()
-{
-	if ((_automatable != _route) && _xml_node == 0) {
-		if ((_xml_node = _automatable->extra_xml ("GUI")) == 0) {
-			_xml_node = new XMLNode ("GUI");
-			_automatable->add_extra_xml (*_xml_node);
-		}
-	}
-}
-
-void
 AutomationTimeAxisView::update_extra_xml_shown (bool editor_shown)
 {
-	if (_automatable == _route)
-		return;
-
-	char buf[32];
-	
-	ensure_xml_node ();
-
-	XMLNodeList nlist = _xml_node->children ();
-	XMLNodeConstIterator i;
-	XMLNode * port_node = 0;
-
-	/* FIXME: these parsed XML node names need to go */
-	//snprintf (buf, sizeof(buf), "Port_%" PRIu32, _param.id());
-
-	for (i = nlist.begin(); i != nlist.end(); ++i) {
-		/* FIXME: legacy session loading */
-		if ((*i)->name() == _control->list()->parameter().to_string()) {
-			port_node = (*i);
-			break;
-		}
-	}
-
-	if (!port_node) {
-		port_node = new XMLNode(buf);
-		_xml_node->add_child_nocopy(*port_node);
-	}
-	
-	port_node->add_property ("shown_editor", editor_shown ? "yes": "no");
+	XMLNode* xml_node = get_state_node();
+	xml_node->add_property ("shown", editor_shown ? "yes" : "no");
 }
 
 guint32

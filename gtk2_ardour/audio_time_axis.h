@@ -82,7 +82,7 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	void hide ();
 	
-	void create_automation_child (ARDOUR::Parameter param);
+	void create_automation_child (ARDOUR::Parameter param, bool show);
 	
   private:
 	friend class AudioStreamView;
@@ -104,7 +104,7 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	void gain_hidden ();
 	void pan_hidden ();
 
-	void update_pans ();
+	void update_pans (bool show=true);
 	void update_control_names ();
 
 	Gtk::CheckMenuItem* waveform_item;

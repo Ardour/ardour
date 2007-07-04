@@ -64,7 +64,6 @@ class AutomationTimeAxisView : public TimeAxisView {
 				TimeAxisView& parent,
 				ArdourCanvas::Canvas& canvas,
 				const string & name, /* translatable */
-				const string & state_name, /* not translatable */
 				const string & plug_name = "");
 
 	~AutomationTimeAxisView();
@@ -98,10 +97,12 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void show_all_control_points ();
 	void hide_all_but_selected_control_points ();
 	void set_state (const XMLNode&);
-	XMLNode* get_state_node ();
 	
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	void hide ();
+	
+	static const string state_node_name;
+	XMLNode* get_state_node();
 
   protected:
 	boost::shared_ptr<ARDOUR::Route> _route; ///< Parent route
@@ -113,10 +114,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	ArdourCanvas::SimpleRect* _base_rect;
 	boost::shared_ptr<AutomationLine> _line;
 	
-	XMLNode* _xml_node;
-
 	string _name;
-	string _state_name;
 	bool    in_destructor;
 	bool    ignore_toggle;
 
@@ -157,7 +155,6 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void automation_state_changed ();
 	sigc::connection automation_connection;
 
-	void ensure_xml_node ();
 	void update_extra_xml_shown (bool editor_shown);
 
 	void entered ();

@@ -85,8 +85,7 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	_view = new AudioStreamView (*this);
 
-	create_automation_child (GainAutomation);
-	create_automation_child (PanAutomation);
+	create_automation_child (GainAutomation, false);
 
 	ignore_toggle = false;
 
@@ -107,7 +106,7 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	set_state (*xml_node);
 	
-	_route->panner().Changed.connect (mem_fun(*this, &AudioTimeAxisView::update_pans));
+	_route->panner().Changed.connect (bind (mem_fun(*this, &AudioTimeAxisView::update_pans), false));
 
 	update_control_names ();
 
@@ -279,7 +278,7 @@ AudioTimeAxisView::set_waveform_scale (WaveformScale scale)
 }	
 
 void
-AudioTimeAxisView::create_automation_child (Parameter param)
+AudioTimeAxisView::create_automation_child (Parameter param, bool show)
 {
 	if (param.type() == GainAutomation) {
 
@@ -294,15 +293,14 @@ AudioTimeAxisView::create_automation_child (Parameter param)
 				editor,
 				*this,
 				parent_canvas,
-				_route->describe_parameter(param),
-				c->list()->parameter().to_string() /* FIXME: correct state name? */));
+				_route->describe_parameter(param)));
 
-		add_automation_child(Parameter(GainAutomation), gain_track);
+		add_automation_child(Parameter(GainAutomation), gain_track, show);
 
 	} else if (param.type() == PanAutomation) {
 
 		ensure_xml_node ();
-		update_pans ();
+		update_pans (show);
 
 	} else {
 		error << "AudioTimeAxisView: unknown automation child " << param.to_string() << endmsg;
@@ -310,35 +308,15 @@ AudioTimeAxisView::create_automation_child (Parameter param)
 }
 
 void
-AudioTimeAxisView::update_pans ()
+AudioTimeAxisView::update_pans (bool show)
 {
 	Panner::iterator p;
 
-	/* This is a filthy kludge until the panner stuff gets up to speed. */
-
-	/* Remove all our old automation tracks.  Slowly. */
-	/*while (true) {
-		bool found = false;
-		for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
-			if (i->first.type() == PanAutomation) {
-				remove_child(i->second->track);
-				delete i->second;
-				_automation_tracks.erase(i);
-				found = true;
-				break;
-			}
-		}
-
-		if ( ! found)
-			break;
-	}*/
-	
-	/* Man I hate that damn stereo->stereo panner */
 	uint32_t i = 0;
 	for (p = _route->panner().begin(); p != _route->panner().end(); ++p) {
 		boost::shared_ptr<AutomationControl> pan_control = (*p)->pan_control();
 		
-		if (pan_control->list()->parameter().type() == NullAutomation) {
+		if (pan_control->parameter().type() == NullAutomation) {
 			error << "Pan control has NULL automation type!" << endmsg;
 			continue;
 		}
@@ -348,9 +326,8 @@ AudioTimeAxisView::update_pans ()
 					editor,
 					*this,
 					parent_canvas,
-					_route->describe_parameter(pan_control->list()->parameter()),
-					pan_control->list()->parameter().to_string()/* FIXME: correct state name? */));
-		add_automation_child(Parameter(PanAutomation, i), pan_track);
+					_route->describe_parameter(pan_control->parameter())));
+		add_automation_child(Parameter(PanAutomation, i), pan_track, show);
 		++i;
 	}
 }

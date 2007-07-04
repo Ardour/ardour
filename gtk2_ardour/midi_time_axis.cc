@@ -179,11 +179,11 @@ MidiTimeAxisView::add_controller_track()
 	}
 
 	if (response == Gtk::RESPONSE_ACCEPT)
-		create_automation_child(param);
+		create_automation_child(param, true);
 }
 
 void
-MidiTimeAxisView::create_automation_child (Parameter param)
+MidiTimeAxisView::create_automation_child (Parameter param, bool show)
 {
 	if (param.type() == MidiCCAutomation) {
 	
@@ -202,10 +202,9 @@ MidiTimeAxisView::create_automation_child (Parameter param)
 				editor,
 				*this,
 				parent_canvas,
-				_route->describe_parameter(param),
-				c->list()->parameter().to_string() /* FIXME: correct state name? */));
+				_route->describe_parameter(param)));
 		
-		add_automation_child(param, track);
+		add_automation_child(param, track, show);
 
 	} else {
 		error << "MidiTimeAxisView: unknown automation child " << param.to_string() << endmsg;

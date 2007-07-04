@@ -37,6 +37,7 @@
 #include "gui_thread.h"
 #include "ardour_dialog.h"
 #include "latency_gui.h"
+#include "automation_time_axis.h"
 
 #include <ardour/route.h>
 #include <ardour/session.h>
@@ -648,10 +649,10 @@ void
 RouteUI::reversibly_apply_route_boolean (string name, void (Route::*func)(bool, void *), bool yn, void *arg)
 {
 	_session.begin_reversible_command (name);
-        XMLNode &before = _route->get_state();
-        bind(mem_fun(*_route, func), yn, arg)();
-        XMLNode &after = _route->get_state();
-        _session.add_command (new MementoCommand<Route>(*_route, &before, &after));
+	XMLNode &before = _route->get_state();
+	bind(mem_fun(*_route, func), yn, arg)();
+	XMLNode &after = _route->get_state();
+	_session.add_command (new MementoCommand<Route>(*_route, &before, &after));
 	_session.commit_reversible_command ();
 }
 
@@ -659,9 +660,9 @@ void
 RouteUI::reversibly_apply_track_boolean (string name, void (Track::*func)(bool, void *), bool yn, void *arg)
 {
 	_session.begin_reversible_command (name);
-        XMLNode &before = track()->get_state();
+	XMLNode &before = track()->get_state();
 	bind (mem_fun (*track(), func), yn, arg)();
-        XMLNode &after = track()->get_state();
+	XMLNode &after = track()->get_state();
 	_session.add_command (new MementoCommand<Track>(*track(), &before, &after));
 	_session.commit_reversible_command ();
 }
@@ -743,17 +744,25 @@ RouteUI::ensure_xml_node ()
 }
 
 XMLNode*
-RouteUI::get_child_xml_node (const string & childname)
+RouteUI::get_automation_child_xml_node (Parameter param)
 {
-	XMLNode* child;
-
 	ensure_xml_node ();
 	
-	
-	if ((child = find_named_node (*xml_node, childname)) == 0) {
-		child = new XMLNode (childname);
-		xml_node->add_child_nocopy (*child);
+	XMLNodeList kids = xml_node->children();
+	XMLNodeConstIterator iter;
+
+	for (iter = kids.begin(); iter != kids.end(); ++iter) {
+		if ((*iter)->name() == AutomationTimeAxisView::state_node_name) {
+			XMLProperty* type = (*iter)->property("automation-id");
+			if (type && type->value() == param.to_string())
+				return *iter;
+		}
 	}
+
+	// Didn't find it, make a new one
+	XMLNode* child = new XMLNode (AutomationTimeAxisView::state_node_name);
+	child->add_property("automation-id", param.to_string());
+	xml_node->add_child_nocopy (*child);
 
 	return child;
 }

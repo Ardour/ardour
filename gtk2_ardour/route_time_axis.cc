@@ -276,29 +276,36 @@ RouteTimeAxisView::set_state (const XMLNode& node)
 	
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		child_node = *niter;
+
+		if (child_node->name() != AutomationTimeAxisView::state_node_name)
+			continue;
+
+		XMLProperty* prop = child_node->property ("automation-id");
+		if (!prop)
+			continue;
+
+		Parameter param(prop->value());
+		if (!param)
+			continue;
 		
-		Parameter param(child_node->name());
+		bool show = false;
 
-		if (param) {
-		
-			XMLProperty* prop = child_node->property ("shown");
-			
-			if (_automation_tracks.find(param) == _automation_tracks.end())
-				create_automation_child(param);
+		prop = child_node->property ("shown");
 
-			if (prop != 0 && prop->value() == "yes")
-				_show_automation.insert(Parameter(GainAutomation));
-
-		} else {
-			warning << "GUI info exists, but no parameter " << child_node->name() << " found." << endmsg;
+		if (prop && prop->value() == "yes") {
+			show = true;
+			_show_automation.insert(param);
 		}
+		
+		if (_automation_tracks.find(param) == _automation_tracks.end())
+			create_automation_child(param, show);
 	}
 }
 
 XMLNode* 
-RouteTimeAxisView::get_child_xml_node (const string & childname)
+RouteTimeAxisView::get_automation_child_xml_node (Parameter param)
 {
-	return RouteUI::get_child_xml_node (childname);
+	return RouteUI::get_automation_child_xml_node (param);
 }
 
 gint
@@ -1767,7 +1774,7 @@ RouteTimeAxisView::add_existing_processor_automation_curves (boost::shared_ptr<P
 }
 
 void
-RouteTimeAxisView::add_automation_child(Parameter param, boost::shared_ptr<AutomationTimeAxisView> track)
+RouteTimeAxisView::add_automation_child(Parameter param, boost::shared_ptr<AutomationTimeAxisView> track, bool show)
 {
 	using namespace Menu_Helpers;
 
@@ -1777,7 +1784,7 @@ RouteTimeAxisView::add_automation_child(Parameter param, boost::shared_ptr<Autom
 
 	track->Hiding.connect (bind (mem_fun (*this, &RouteTimeAxisView::automation_track_hidden), param));
 
-	bool hideit = false;
+	bool hideit = (!show);
 	
 	XMLNode* node;
 

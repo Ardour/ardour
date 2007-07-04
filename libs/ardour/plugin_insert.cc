@@ -279,7 +279,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t off
 			
 			boost::shared_ptr<AutomationControl> c = li->second;
 
-			if (c->list()->parameter().type() == PluginAutomation && c->list()->automation_playback()) {
+			if (c->parameter().type() == PluginAutomation && c->list()->automation_playback()) {
 				bool valid;
 
 				const float val = c->list()->rt_safe_eval (now, valid);				

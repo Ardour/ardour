@@ -707,7 +707,7 @@ Session::load_state (string snapshot_name)
 		is_old = true;
 	} else {
 		int major_version;
-		major_version = atoi (prop->value()); // grab just the first number before the period
+		major_version = atoi (prop->value().c_str()); // grab just the first number before the period
 		if (major_version < 2) {
 			is_old = true;
 		}

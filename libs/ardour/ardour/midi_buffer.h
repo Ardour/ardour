@@ -54,6 +54,8 @@ private:
 	 * (_size * MAX_EVENT_SIZE)
 	 */
 
+	/* FIXME: this is utter crap.  rewrite as a flat/packed buffer like MidiRingBuffer */
+
 	MidiEvent* _events; ///< Event structs that point to offsets in _data
 	Byte*      _data;   ///< MIDI, straight up.  No time stamps.
 };

@@ -34,6 +34,7 @@
 
 #include <ardour/types.h>
 #include <ardour/region.h>
+#include <ardour/parameter.h>
 
 #include "prompter.h"
 #include "axis_view.h"
@@ -208,7 +209,7 @@ class TimeAxisView : public virtual AxisView
 
 	/* call this on the parent */
 
-	virtual XMLNode* get_child_xml_node (const string & childname) { return 0; }
+	virtual XMLNode* get_automation_child_xml_node (ARDOUR::Parameter param) { return 0; }
 	
 	typedef std::vector<boost::shared_ptr<TimeAxisView> > Children;
 

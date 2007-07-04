@@ -228,7 +228,7 @@ AudioFileSource::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property (X_("channel"))) != 0) {
-		_channel = atoi (prop->value());
+		_channel = atoi (prop->value().c_str());
 	} else {
 		_channel = 0;
 	}
@@ -433,7 +433,7 @@ AudioFileSource::find (ustring& pathstr, bool must_exist, bool& isnew, uint16_t&
 						fullpath += shorter;
 
 						if (Glib::file_test (pathstr, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
-							chan = atoi (pathstr.substr (pos+1));
+							chan = atoi (pathstr.substr (pos+1).c_str());
 							pathstr = shorter;
 							keeppath = fullpath;
 							++cnt;
@@ -485,7 +485,7 @@ AudioFileSource::find (ustring& pathstr, bool must_exist, bool& isnew, uint16_t&
 			ustring shorter = pathstr.substr (0, pos);
 
 			if (Glib::file_test (shorter, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
-				chan = atoi (pathstr.substr (pos+1));
+				chan = atoi (pathstr.substr (pos+1).c_str());
 				pathstr = shorter;
 			}
 		}

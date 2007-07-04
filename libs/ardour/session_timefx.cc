@@ -192,7 +192,7 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 	} else {
 
 		if (tsr.region->name()[len] == 't') {
-			c = atoi (tsr.region->name().substr(len+1));
+			c = atoi (tsr.region->name().substr(len+1).c_str());
 
 			snprintf (buf, sizeof (buf), "t%03d", ++c);
 			region_name = tsr.region->name().substr (0, len) + buf;

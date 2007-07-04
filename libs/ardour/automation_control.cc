@@ -83,3 +83,9 @@ AutomationControl::set_list(boost::shared_ptr<ARDOUR::AutomationList> list)
 	Changed();  /* EMIT SIGNAL */
 }
 
+	
+Parameter
+AutomationControl::parameter() const
+{
+	return _list->parameter();
+}

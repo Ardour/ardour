@@ -95,7 +95,7 @@ public:
 	
 	void build_playlist_menu (Gtk::Menu *);
 
-	virtual void create_automation_child (ARDOUR::Parameter param) = 0;
+	virtual void create_automation_child (ARDOUR::Parameter param, bool show) = 0;
 	
 	string              name() const;
 	StreamView*         view() const { return _view; }
@@ -169,7 +169,7 @@ protected:
 	void add_processor_automation_curve (boost::shared_ptr<ARDOUR::Processor> r, ARDOUR::Parameter);
 	void add_existing_processor_automation_curves (boost::shared_ptr<ARDOUR::Processor>);
 
-	void add_automation_child(ARDOUR::Parameter param, boost::shared_ptr<AutomationTimeAxisView> track);
+	void add_automation_child(ARDOUR::Parameter param, boost::shared_ptr<AutomationTimeAxisView> track, bool show=true);
 	
 	void reset_processor_automation_curves ();
 
@@ -273,7 +273,7 @@ protected:
 	
 	void set_state (const XMLNode&);
 	
-	XMLNode* get_child_xml_node (const string & childname);
+	XMLNode* get_automation_child_xml_node (ARDOUR::Parameter param);
 };
 
 #endif /* __ardour_route_time_axis_h__ */

@@ -121,7 +121,7 @@ Automatable::load_automation (const string& path)
 void
 Automatable::add_control(boost::shared_ptr<AutomationControl> ac)
 {
-	Parameter param = ac->list()->parameter();
+	Parameter param = ac->parameter();
 
 	_controls[param] = ac;
 	
