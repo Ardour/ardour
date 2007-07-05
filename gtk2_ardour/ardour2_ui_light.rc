@@ -703,7 +703,7 @@ style "editor_time_ruler" = "small_text"
 style "audio_bus_base"
 {
   font_name = "sans 6"
-  fg[NORMAL] = { 0.7, 0.8, 0.2 }	
+  fg[NORMAL] = { 0, 0, 0 }	
   bg[NORMAL] = { 0.65, 0.65, 0.65 }	
 }
 
