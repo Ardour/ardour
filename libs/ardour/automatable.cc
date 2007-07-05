@@ -294,7 +294,7 @@ Automatable::set_automation_state (const XMLNode& node, Parameter legacy_param)
 			if (!id_prop) {
 				warning << "AutomationList node without automation-id property, "
 					<< "using default: " << legacy_param.to_string() << endmsg;
-				al->set_param_id(legacy_param);
+				al->set_parameter(legacy_param);
 			}
 
 			boost::shared_ptr<AutomationControl> existing = control(param);

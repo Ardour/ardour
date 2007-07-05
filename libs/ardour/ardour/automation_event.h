@@ -72,8 +72,8 @@ class AutomationList : public PBD::StatefulDestructible
 	AutomationList& operator= (const AutomationList&);
 	bool operator== (const AutomationList&);
 
-	Parameter parameter() const         { return _param_id; }
-	void    set_param_id(Parameter id) { _param_id = id; }
+	Parameter parameter() const          { return _parameter; }
+	void      set_parameter(Parameter p) { _parameter = p; }
 
 	void freeze();
 	void thaw ();
@@ -232,7 +232,7 @@ class AutomationList : public PBD::StatefulDestructible
 
 	mutable LookupCache _lookup_cache;
 	
-	Parameter             _param_id;
+	Parameter           _parameter;
 	EventList           _events;
 	mutable Glib::Mutex _lock;
 	int8_t              _frozen;

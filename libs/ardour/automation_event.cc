@@ -55,10 +55,10 @@ static void dumpit (const AutomationList& al, string prefix = "")
 #endif
 
 AutomationList::AutomationList (Parameter id, double min_val, double max_val, double default_val)
-	: _param_id(id)
+	: _parameter(id)
 	, _curve(new Curve(*this))
 {	
-	_param_id = id;
+	_parameter = id;
 	_frozen = 0;
 	_changed_when_thawed = false;
 	_state = Off;
@@ -73,12 +73,12 @@ AutomationList::AutomationList (Parameter id, double min_val, double max_val, do
 	_lookup_cache.range.first = _events.end();
 	_sort_pending = false;
 
-	assert(_param_id.type() != NullAutomation);
+	assert(_parameter.type() != NullAutomation);
 	AutomationListCreated(this);
 }
 
 AutomationList::AutomationList (const AutomationList& other)
-	: _param_id(other._param_id)
+	: _parameter(other._parameter)
 	, _curve(new Curve(*this))
 {
 	_frozen = 0;
@@ -100,12 +100,12 @@ AutomationList::AutomationList (const AutomationList& other)
 	}
 
 	mark_dirty ();
-	assert(_param_id.type() != NullAutomation);
+	assert(_parameter.type() != NullAutomation);
 	AutomationListCreated(this);
 }
 
 AutomationList::AutomationList (const AutomationList& other, double start, double end)
-	: _param_id(other._param_id)
+	: _parameter(other._parameter)
 	, _curve(new Curve(*this))
 {
 	_frozen = 0;
@@ -136,7 +136,7 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 
 	mark_dirty ();
 
-	assert(_param_id.type() != NullAutomation);
+	assert(_parameter.type() != NullAutomation);
 	AutomationListCreated(this);
 }
 
@@ -162,9 +162,9 @@ AutomationList::AutomationList (const XMLNode& node, Parameter id)
 	set_state (node);
 
 	if (id)
-		_param_id = id;
+		_parameter = id;
 
-	assert(_param_id.type() != NullAutomation);
+	assert(_parameter.type() != NullAutomation);
 	AutomationListCreated(this);
 }
 
@@ -1010,7 +1010,7 @@ AutomationList::multipoint_eval (double x) const
 AutomationList*
 AutomationList::cut (iterator start, iterator end)
 {
-	AutomationList* nal = new AutomationList (_param_id, _min_yval, _max_yval, _default_value);
+	AutomationList* nal = new AutomationList (_parameter, _min_yval, _max_yval, _default_value);
 
 	{
 		Glib::Mutex::Lock lm (_lock);
@@ -1040,7 +1040,7 @@ AutomationList::cut (iterator start, iterator end)
 AutomationList*
 AutomationList::cut_copy_clear (double start, double end, int op)
 {
-	AutomationList* nal = new AutomationList (_param_id, _min_yval, _max_yval, _default_value);
+	AutomationList* nal = new AutomationList (_parameter, _min_yval, _max_yval, _default_value);
 	iterator s, e;
 	ControlEvent cp (start, 0.0);
 	TimeComparator cmp;
@@ -1103,7 +1103,7 @@ AutomationList::cut_copy_clear (double start, double end, int op)
 AutomationList*
 AutomationList::copy (iterator start, iterator end)
 {
-	AutomationList* nal = new AutomationList (_param_id, _min_yval, _max_yval, _default_value);
+	AutomationList* nal = new AutomationList (_parameter, _min_yval, _max_yval, _default_value);
 
 	{
 		Glib::Mutex::Lock lm (_lock);
@@ -1202,7 +1202,7 @@ AutomationList::state (bool full)
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
 
-	root->add_property ("automation-id", _param_id.to_string());
+	root->add_property ("automation-id", _parameter.to_string());
 
 	root->add_property ("id", _id.to_s());
 
@@ -1368,7 +1368,7 @@ AutomationList::set_state (const XMLNode& node)
 	}
 	
 	if ((prop = node.property (X_("automation-id"))) != 0){ 
-		_param_id = Parameter(prop->value());
+		_parameter = Parameter(prop->value());
 	} else {
 		warning << "Legacy session: automation list has no automation-id property.";
 	}
