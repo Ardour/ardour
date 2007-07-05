@@ -28,7 +28,6 @@
 #include <ardour/location.h>
 #include "enums.h"
 #include "simplerect.h"
-#include "color.h"
 #include "streamview.h"
 
 namespace Gdk {
@@ -97,7 +96,7 @@ class AudioStreamView : public StreamView
 	void add_crossfade_weak (boost::weak_ptr<ARDOUR::Crossfade>);
 	void remove_crossfade (boost::shared_ptr<ARDOUR::Crossfade>);
 
-	void color_handler (ColorID id, uint32_t val);
+	void color_handler ();
 	
 
 	double _amplitude_above_axis;

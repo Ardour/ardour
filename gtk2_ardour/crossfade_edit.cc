@@ -48,7 +48,6 @@
 #include "canvas_impl.h"
 #include "simplerect.h"
 #include "waveview.h"
-#include "color.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -129,23 +128,23 @@ CrossfadeEditor::CrossfadeEditor (Session& s, boost::shared_ptr<Crossfade> xf, d
 	toplevel->property_x2() =  10.0;
 	toplevel->property_y2() =  10.0;
 	toplevel->property_fill() =  true;
-	toplevel->property_fill_color_rgba() = color_map[cCrossfadeEditorBase];
+	toplevel->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_CrossfadeEditorBase.get();
 	toplevel->property_outline_pixels() =  0;
 	toplevel->signal_event().connect (mem_fun (*this, &CrossfadeEditor::canvas_event));
 	
 	fade[Out].line = new ArdourCanvas::Line (*(canvas->root()));
 	fade[Out].line->property_width_pixels() = 1;
-	fade[Out].line->property_fill_color_rgba() = color_map[cCrossfadeEditorLine];
+	fade[Out].line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_CrossfadeEditorLine.get();
 		
 	fade[Out].shading = new ArdourCanvas::Polygon (*(canvas->root()));
-	fade[Out].shading->property_fill_color_rgba() = color_map[cCrossfadeEditorLineShading];
+	fade[Out].shading->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_CrossfadeEditorLineShading.get();
 
 	fade[In].line = new ArdourCanvas::Line (*(canvas->root()));
 	fade[In].line->property_width_pixels() = 1;
-	fade[In].line->property_fill_color_rgba() = color_map[cCrossfadeEditorLine];
+	fade[In].line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_CrossfadeEditorLine.get();
 		
 	fade[In].shading = new ArdourCanvas::Polygon (*(canvas->root()));
-	fade[In].shading->property_fill_color_rgba() = color_map[cCrossfadeEditorLineShading];
+	fade[In].shading->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_CrossfadeEditorLineShading.get();
 	
 	fade[In].shading->signal_event().connect (mem_fun (*this, &CrossfadeEditor::canvas_event));
 	fade[In].line->signal_event().connect (mem_fun (*this, &CrossfadeEditor::curve_event));
@@ -454,8 +453,8 @@ CrossfadeEditor::make_point ()
 
 	p->box = new ArdourCanvas::SimpleRect (*(canvas->root()));
 	p->box->property_fill() = true;
-	p->box->property_fill_color_rgba() = color_map[cCrossfadeEditorPointFill];
-	p->box->property_outline_color_rgba() = color_map[cCrossfadeEditorPointOutline];
+	p->box->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_CrossfadeEditorPointFill.get();
+	p->box->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_CrossfadeEditorPointOutline.get();
 	p->box->property_outline_pixels() = 1;
 
 	p->curve = fade[current].line;
@@ -976,15 +975,15 @@ CrossfadeEditor::curve_select_clicked (WhichFade wf)
 	if (wf == In) {
 		
 		for (vector<ArdourCanvas::WaveView*>::iterator i = fade[In].waves.begin(); i != fade[In].waves.end(); ++i) {
-			(*i)->property_wave_color() = color_map[cSelectedCrossfadeEditorWave];
+			(*i)->property_wave_color() = ARDOUR_UI::config()->canvasvar_SelectedCrossfadeEditorWave.get();
 		}
 
 		for (vector<ArdourCanvas::WaveView*>::iterator i = fade[Out].waves.begin(); i != fade[Out].waves.end(); ++i) {
-			(*i)->property_wave_color() = color_map[cCrossfadeEditorWave];
+			(*i)->property_wave_color() = ARDOUR_UI::config()->canvasvar_CrossfadeEditorWave.get();
 		}
 
-		fade[In].line->property_fill_color_rgba() = color_map[cSelectedCrossfadeEditorLine];
-		fade[Out].line->property_fill_color_rgba() = color_map[cCrossfadeEditorLine];
+		fade[In].line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectedCrossfadeEditorLine.get();
+		fade[Out].line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_CrossfadeEditorLine.get();
 		fade[Out].shading->hide();
 		fade[In].shading->show();
 
@@ -999,15 +998,15 @@ CrossfadeEditor::curve_select_clicked (WhichFade wf)
 	} else {
 
 		for (vector<ArdourCanvas::WaveView*>::iterator i = fade[In].waves.begin(); i != fade[In].waves.end(); ++i) {
-			(*i)->property_wave_color() = color_map[cCrossfadeEditorWave];
+			(*i)->property_wave_color() = ARDOUR_UI::config()->canvasvar_CrossfadeEditorWave.get();
 		}
 
 		for (vector<ArdourCanvas::WaveView*>::iterator i = fade[Out].waves.begin(); i != fade[Out].waves.end(); ++i) {
-			(*i)->property_wave_color() = color_map[cSelectedCrossfadeEditorWave];
+			(*i)->property_wave_color() = ARDOUR_UI::config()->canvasvar_SelectedCrossfadeEditorWave.get();
 		}
 
-		fade[Out].line->property_fill_color_rgba() = color_map[cSelectedCrossfadeEditorLine];
-		fade[In].line->property_fill_color_rgba() = color_map[cCrossfadeEditorLine];
+		fade[Out].line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectedCrossfadeEditorLine.get();
+		fade[In].line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_CrossfadeEditorLine.get();
 		fade[In].shading->hide();
 		fade[Out].shading->show();
 
@@ -1049,9 +1048,9 @@ CrossfadeEditor::make_waves (boost::shared_ptr<AudioRegion> region, WhichFade wh
 	double spu;
 
 	if (which == In) {
-		color = color_map[cSelectedCrossfadeEditorWave];
+		color = ARDOUR_UI::config()->canvasvar_SelectedCrossfadeEditorWave.get();
 	} else {
-		color = color_map[cCrossfadeEditorWave];
+		color = ARDOUR_UI::config()->canvasvar_CrossfadeEditorWave.get();
 	}
 
 	ht = canvas->get_allocation().get_height() / (double) nchans;

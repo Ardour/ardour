@@ -46,8 +46,11 @@
 #include "utils.h"
 #include "rgb_macros.h"
 #include "gui_thread.h"
+#include "ardour_ui.h"
 
 #include "i18n.h"
+
+#define MUTED_ALPHA 0x50
 
 using namespace sigc;
 using namespace ARDOUR;
@@ -378,9 +381,9 @@ AudioRegionView::region_muted ()
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
 		if (_region->muted()) {
-			waves[n]->property_wave_color() = color_map[cMutedWaveForm];
+			waves[n]->property_wave_color() = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_WaveForm.get(), MUTED_ALPHA);
 		} else {
-			waves[n]->property_wave_color() = color_map[cWaveForm];
+			waves[n]->property_wave_color() = ARDOUR_UI::config()->canvasvar_WaveForm.get();
 		}
 	}
 }
@@ -669,18 +672,18 @@ AudioRegionView::set_colors ()
 	RegionView::set_colors();
 	
 	if (gain_line) {
-		gain_line->set_line_color (audio_region()->envelope_active() ? color_map[cGainLine] : color_map[cGainLineInactive]);
+		gain_line->set_line_color (audio_region()->envelope_active() ? ARDOUR_UI::config()->canvasvar_GainLine.get() : ARDOUR_UI::config()->canvasvar_GainLineInactive.get());
 	}
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
 		if (_region->muted()) {
-			waves[n]->property_wave_color() = color_map[cMutedWaveForm];
+			waves[n]->property_wave_color() = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_WaveForm.get(), MUTED_ALPHA);
 		} else {
-			waves[n]->property_wave_color() = color_map[cWaveForm];
+			waves[n]->property_wave_color() = ARDOUR_UI::config()->canvasvar_WaveForm.get();
 		}
 
-		waves[n]->property_clip_color() = color_map[cWaveFormClip];
-		waves[n]->property_zero_color() = color_map[cZeroLine];
+		waves[n]->property_clip_color() = ARDOUR_UI::config()->canvasvar_WaveFormClip.get();
+		waves[n]->property_zero_color() = ARDOUR_UI::config()->canvasvar_ZeroLine.get();
 	}
 }
 
@@ -818,9 +821,9 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 	wave->property_height() =  (double) ht;
 	wave->property_samples_per_unit() =  samples_per_unit;
 	wave->property_amplitude_above_axis() =  _amplitude_above_axis;
-	wave->property_wave_color() = _region->muted() ? color_map[cMutedWaveForm] : color_map[cWaveForm];
-	wave->property_clip_color() = color_map[cWaveFormClip];
-	wave->property_zero_color() = color_map[cZeroLine];
+	wave->property_wave_color() = _region->muted() ? UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_WaveForm.get(), MUTED_ALPHA) : ARDOUR_UI::config()->canvasvar_WaveForm.get();
+	wave->property_clip_color() = ARDOUR_UI::config()->canvasvar_WaveFormClip.get();
+	wave->property_zero_color() = ARDOUR_UI::config()->canvasvar_ZeroLine.get();
 	wave->property_region_start() = _region->start();
 	wave->property_rectified() = (bool) (_flags & WaveformRectified);
 	wave->property_logscaled() = (bool) (_flags & WaveformLogScaled);
@@ -864,7 +867,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 			zero_line = new ArdourCanvas::SimpleLine (*group);
 			zero_line->property_x1() = (gdouble) 1.0;
 			zero_line->property_x2() = (gdouble) (_region->length() / samples_per_unit) - 1.0;
-			zero_line->property_color_rgba() = (guint) color_map[cZeroLine];
+			zero_line->property_color_rgba() = (guint) ARDOUR_UI::config()->canvasvar_ZeroLine.get();
 			manage_zero_line ();
 		}
 	}
@@ -1066,9 +1069,9 @@ AudioRegionView::add_ghost (AutomationTimeAxisView& atv)
 		wave->property_x() =  0.0;
 		wave->property_samples_per_unit() =  samples_per_unit;
 		wave->property_amplitude_above_axis() =  _amplitude_above_axis;
-		wave->property_wave_color() = color_map[cGhostTrackWave];
-		wave->property_clip_color() = color_map[cGhostTrackWaveClip];
-		wave->property_zero_color() = color_map[cGhostTrackZeroLine];
+		wave->property_wave_color() = ARDOUR_UI::config()->canvasvar_GhostTrackWave.get();
+		wave->property_clip_color() = ARDOUR_UI::config()->canvasvar_GhostTrackWaveClip.get();
+		wave->property_zero_color() = ARDOUR_UI::config()->canvasvar_GhostTrackZeroLine.get();
 		wave->property_region_start() = _region->start();
 
 		ghost->waves.push_back(wave);
@@ -1121,7 +1124,7 @@ void
 AudioRegionView::envelope_active_changed ()
 {
 	if (gain_line) {
-		gain_line->set_line_color (audio_region()->envelope_active() ? color_map[cGainLine] : color_map[cGainLineInactive]);
+		gain_line->set_line_color (audio_region()->envelope_active() ? ARDOUR_UI::config()->canvasvar_GainLine.get() : ARDOUR_UI::config()->canvasvar_GainLineInactive.get());
 	}
 }
 
@@ -1148,22 +1151,9 @@ AudioRegionView::set_waveview_data_src()
 }
 
 void
-AudioRegionView::color_handler (ColorID id, uint32_t val)
+AudioRegionView::color_handler ()
 {
-	switch (id) {
-	case cMutedWaveForm:
-	case cWaveForm:
-	case cWaveFormClip:
-	case cZeroLine:
-		set_colors ();
-		break;
-
-	case cGainLineInactive:
-	case cGainLine:
-		envelope_active_changed();
-		break;
-
-	default:
-		break;
-	}
+	set_colors ();
+	envelope_active_changed();
 }
+

@@ -185,6 +185,9 @@ class GainMeter : public Gtk::VBox
 	static Glib::RefPtr<Gdk::Pixbuf> slider;
 	static Glib::RefPtr<Gdk::Pixbuf> rail;
 	static int setup_slider_pix ();
+
+	void on_theme_changed ();
+	bool style_changed;
 };
 
 #endif /* __ardour_gtk_gain_meter_h__ */

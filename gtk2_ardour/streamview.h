@@ -27,7 +27,6 @@
 #include "enums.h"
 #include "simplerect.h"
 #include "canvas.h"
-#include "color.h"
 
 namespace Gdk {
 	class Color;
@@ -120,7 +119,7 @@ protected:
 	virtual void playlist_changed (boost::weak_ptr<ARDOUR::Diskstream>);
 	virtual void playlist_modified ();
 	
-	virtual void color_handler (ColorID, uint32_t) = 0;
+	virtual void color_handler () = 0;
 
 
 	RouteTimeAxisView&        _trackview;

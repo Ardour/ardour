@@ -31,7 +31,6 @@
 #include "enums.h"
 #include "waveview.h"
 #include "canvas.h"
-#include "color.h"
 
 class TimeAxisView;
 class RegionEditor;
@@ -73,7 +72,7 @@ class RegionView : public TimeAxisViewItem
 
 	bool set_position(nframes_t pos, void* src, double* delta = 0);
 	void fake_set_opaque (bool yn);
-	
+
 	virtual void show_region_editor () = 0;
 	virtual void hide_region_editor();
 	
@@ -106,7 +105,7 @@ class RegionView : public TimeAxisViewItem
     void         region_moved (void *);
     virtual void region_muted ();
     void         region_locked ();
-    void         region_opacity ();
+	void         region_opacity ();
     void         region_layered ();
     void         region_renamed ();
     void         region_sync_changed ();
@@ -119,7 +118,7 @@ class RegionView : public TimeAxisViewItem
     virtual void set_frame_color ();
     virtual void reset_width_dependent_items (double pixel_width);
     
-    virtual void color_handler (ColorID, uint32_t) {}
+    virtual void color_handler () {}
 	
     boost::shared_ptr<ARDOUR::Region> _region;
     

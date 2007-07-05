@@ -586,7 +586,7 @@ Region::set_opaque (bool yn)
 		} else {
 			_flags = Flag (_flags & ~Opaque);
 		}
-		send_change (OpacityChanged);
+			send_change (OpacityChanged);
 	}
 }
 

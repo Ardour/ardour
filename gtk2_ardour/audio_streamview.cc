@@ -46,7 +46,6 @@
 #include "rgb_macros.h"
 #include "gui_thread.h"
 #include "utils.h"
-#include "color.h"
 
 #include "i18n.h"
 
@@ -62,12 +61,12 @@ AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 	_waveform_shape = Traditional;
 	
 	if (tv.is_audio_track())
-		stream_base_color = color_map[cAudioTrackBase];
+		stream_base_color = ARDOUR_UI::config()->canvasvar_AudioTrackBase.get();
 	else
-		stream_base_color = color_map[cAudioBusBase];
+		stream_base_color = ARDOUR_UI::config()->canvasvar_AudioBusBase.get();
 	
 	canvas_rect->property_fill_color_rgba() = stream_base_color;
-	canvas_rect->property_outline_color_rgba() = color_map[cAudioTrackOutline];
+	canvas_rect->property_outline_color_rgba() = RGBA_BLACK;
 
 	_amplitude_above_axis = 1.0;
 
@@ -526,12 +525,12 @@ AudioStreamView::setup_rec_box ()
 			switch (_trackview.audio_track()->mode()) {
 			case Normal:
 				xend = xstart;
-				fill_color = color_map[cRecordingRectFill];
+				fill_color = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
 				break;
 
 			case Destructive:
 				xend = xstart + 2;
-				fill_color = color_map[cRecordingRectFill];
+				fill_color = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
 				/* make the recording rect translucent to allow
 				   the user to see the peak data coming in, etc.
 				*/
@@ -544,7 +543,7 @@ AudioStreamView::setup_rec_box ()
 			rec_rect->property_y1() = 1.0;
 			rec_rect->property_x2() = xend;
 			rec_rect->property_y2() = (double) _trackview.height - 1;
-			rec_rect->property_outline_color_rgba() = color_map[cRecordingRectOutline];
+			rec_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
 			rec_rect->property_fill_color_rgba() = fill_color;
 			
 			RecBoxInfo recbox;
@@ -767,25 +766,15 @@ AudioStreamView::reveal_xfades_involving (AudioRegionView& rv)
 }
 
 void
-AudioStreamView::color_handler (ColorID id, uint32_t val)
+AudioStreamView::color_handler ()
 {
-	switch (id) {
-	case cAudioTrackBase:
-		if (_trackview.is_track()) {
-			canvas_rect->property_fill_color_rgba() = val;
-		} 
-		break;
-	case cAudioBusBase:
-		if (!_trackview.is_track()) {
-			canvas_rect->property_fill_color_rgba() = val;
-		}
-		break;
-	case cAudioTrackOutline:
-		canvas_rect->property_outline_color_rgba() = val;
-		break;
-
-	default:
-		break;
+	if (_trackview.is_track()) {
+		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_AudioTrackBase.get();
 	}
+
+	if (!_trackview.is_track()) {
+		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_AudioBusBase.get();
+	}
+ 
 }
 

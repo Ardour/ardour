@@ -1851,6 +1851,7 @@ class Editor : public PublicEditor
 	Glib::RefPtr<Gtk::Action>              redo_action;
 
 	void history_changed ();
+	void color_handler ();
 };
 
 #endif /* __ardour_editor_h__ */

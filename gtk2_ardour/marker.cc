@@ -24,6 +24,7 @@
 #include "public_editor.h"
 #include "utils.h"
 #include "canvas_impl.h"
+#include "ardour_ui.h"
 
 #include "i18n.h"
 
@@ -255,7 +256,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	}
 	text->property_y() = 0.0;
 	text->property_anchor() = Gtk::ANCHOR_NW;
-	text->property_fill_color() = "black";
+	text->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MarkerLabel.get();
 
 	editor.ZoomChanged.connect (mem_fun (*this, &Marker::reposition));
 

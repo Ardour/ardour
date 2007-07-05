@@ -42,7 +42,7 @@
 #include "tempo_dialog.h"
 #include "rgb_macros.h"
 #include "gui_thread.h"
-#include "color.h"
+#include "ardour_ui.h"
 #include "time_axis_view.h"
 
 #include "i18n.h"
@@ -80,11 +80,11 @@ Editor::draw_metric_marks (const Metrics& metrics)
 		
 		if ((ms = dynamic_cast<const MeterSection*>(*i)) != 0) {
 			snprintf (buf, sizeof(buf), "%g/%g", ms->beats_per_bar(), ms->note_divisor ());
-			metric_marks.push_back (new MeterMarker (*this, *meter_group, color_map[cMeterMarker], buf, 
+			metric_marks.push_back (new MeterMarker (*this, *meter_group, ARDOUR_UI::config()->canvasvar_MeterMarker.get(), buf, 
 								 *(const_cast<MeterSection*>(ms))));
 		} else if ((ts = dynamic_cast<const TempoSection*>(*i)) != 0) {
 			snprintf (buf, sizeof (buf), "%.2f", ts->beats_per_minute());
-			metric_marks.push_back (new TempoMarker (*this, *tempo_group, color_map[cTempoMarker], buf, 
+			metric_marks.push_back (new TempoMarker (*this, *tempo_group, ARDOUR_UI::config()->canvasvar_TempoMarker.get(), buf, 
 								 *(const_cast<TempoSection*>(ts))));
 		}
 		
@@ -249,9 +249,9 @@ Editor::draw_measures ()
 		case TempoMap::Beat:
 			
 			if ((*i).beat == 1) {
-				color = color_map[cMeasureLineBar];
+				color = ARDOUR_UI::config()->canvasvar_MeasureLineBar.get();
 			} else {
-				color = color_map[cMeasureLineBeat];
+				color = ARDOUR_UI::config()->canvasvar_MeasureLineBeat.get();
 
 				if (beat_density > 2.0) {
 					/* only draw beat lines if the gaps between beats are large.

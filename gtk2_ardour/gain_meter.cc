@@ -83,6 +83,7 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	ignore_toggle = false;
 	meter_menu = 0;
 	next_release_selects = false;
+	style_changed = true;
 
 	gain_slider = manage (new VSliderController (slider,
 						     &gain_adjustment,
@@ -202,6 +203,8 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	
 	ResetAllPeakDisplays.connect (mem_fun(*this, &GainMeter::reset_peak_display));
 	ResetGroupPeakDisplays.connect (mem_fun(*this, &GainMeter::reset_group_peak_display));
+
+	UI::instance()->theme_changed.connect (mem_fun(*this, &GainMeter::on_theme_changed));
 }
 
 void
@@ -264,9 +267,14 @@ GainMeter::render_metrics (Gtk::Widget& w)
 gint
 GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 {
+	static Glib::RefPtr<Gtk::Style> meter_style;
+
+	if (style_changed) {
+		meter_style = meter_metric_area.get_style();
+	}
 	Glib::RefPtr<Gdk::Window> win (meter_metric_area.get_window());
-	Glib::RefPtr<Gdk::GC> fg_gc (meter_metric_area.get_style()->get_fg_gc (Gtk::STATE_NORMAL));
-	Glib::RefPtr<Gdk::GC> bg_gc (meter_metric_area.get_style()->get_bg_gc (Gtk::STATE_NORMAL));
+	Glib::RefPtr<Gdk::GC> fg_gc (meter_style->get_fg_gc (Gtk::STATE_NORMAL));
+	Glib::RefPtr<Gdk::GC> bg_gc (meter_style->get_fg_gc (Gtk::STATE_NORMAL));
 	GdkRectangle base_rect;
 	GdkRectangle draw_rect;
 	gint width, height;
@@ -281,7 +289,7 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 	Glib::RefPtr<Gdk::Pixmap> pixmap;
 	std::map<string,Glib::RefPtr<Gdk::Pixmap> >::iterator i = metric_pixmaps.find (meter_metric_area.get_name());
 
-	if (i == metric_pixmaps.end()) {
+	if (i == metric_pixmaps.end() || style_changed) {
 		pixmap = render_metrics (meter_metric_area);
 	} else {
 		pixmap = i->second;
@@ -289,9 +297,16 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 
 	gdk_rectangle_intersect (&ev->area, &base_rect, &draw_rect);
 	win->draw_rectangle (bg_gc, true, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
-	win->draw_drawable (bg_gc, pixmap, draw_rect.x, draw_rect.y, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
+	win->draw_drawable (fg_gc, pixmap, draw_rect.x, draw_rect.y, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
 	
+	style_changed = false;
 	return true;
+}
+
+void
+GainMeter::on_theme_changed()
+{
+	style_changed = true;
 }
 
 GainMeter::~GainMeter ()

@@ -44,6 +44,7 @@
 #include "utils.h"
 #include "rgb_macros.h"
 #include "gui_thread.h"
+#include "ardour_ui.h"
 
 #include "i18n.h"
 
@@ -150,7 +151,7 @@ RegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	set_colors ();
 
-	ColorChanged.connect (mem_fun (*this, &RegionView::color_handler));
+	ColorsChanged.connect (mem_fun (*this, &RegionView::color_handler));
 
 	/* XXX sync mark drag? */
 }
@@ -371,7 +372,7 @@ RegionView::set_frame_color ()
 	if (_region->opaque()) {
 		fill_opacity = 130;
 	} else {
-		fill_opacity = 60;
+		fill_opacity = 0;
 	}
 
 	TimeAxisViewItem::set_frame_color ();
@@ -383,7 +384,7 @@ RegionView::fake_set_opaque (bool yn)
        if (yn) {
                fill_opacity = 130;
        } else {
-               fill_opacity = 60;
+               fill_opacity = 0;
        }
 
        TimeAxisViewItem::set_frame_color ();

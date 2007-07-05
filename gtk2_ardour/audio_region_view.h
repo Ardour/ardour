@@ -33,7 +33,6 @@
 #include "enums.h"
 #include "waveview.h"
 #include "canvas.h"
-#include "color.h"
 
 namespace ARDOUR {
 	class AudioRegion;
@@ -145,7 +144,7 @@ class AudioRegionView : public RegionView
     void reset_width_dependent_items (double pixel_width);
     void set_waveview_data_src();
     
-    void color_handler (ColorID, uint32_t);
+    void color_handler ();
 
     vector<GnomeCanvasWaveViewCache*> wave_caches;
     vector<ArdourCanvas::WaveView *>  waves;

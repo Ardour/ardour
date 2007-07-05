@@ -34,7 +34,7 @@
 #include "svn_revision.h"
 #include "about.h"
 #include "rgb_macros.h"
-#include "ardour_ui.h"
+//#include "ardour_ui.h"
 
 #include "i18n.h"
 

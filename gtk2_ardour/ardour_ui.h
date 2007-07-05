@@ -61,6 +61,7 @@
 #include "audio_clock.h"
 #include "ardour_dialog.h"
 #include "editing.h"
+#include "ui_config.h"
 
 class AudioClock;
 class PublicEditor;
@@ -73,7 +74,7 @@ class About;
 class AddRouteDialog;
 class NewSessionDialog;
 class LocationUI;
-class ColorManager;
+class ThemeManager;
 
 namespace Gtkmm2ext {
 	class TearOff;
@@ -93,10 +94,12 @@ namespace ALSA {
 
 #define FRAME_NAME "BaseFrame"
 
+extern sigc::signal<void>  ColorsChanged;
+
 class ARDOUR_UI : public Gtkmm2ext::UI
 {
   public:
-	ARDOUR_UI (int *argcp, char **argvp[], string rcfile);
+	ARDOUR_UI (int *argcp, char **argvp[]);
 	~ARDOUR_UI();
 
 	void show ();
@@ -127,7 +130,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 		_will_create_new_session_automatically = yn;
 	}
 
-        bool new_session(std::string path = string());
+	bool new_session(std::string path = string());
 	gint cmdline_new_session (string path);
 	int  unload_session ();
 	void close_session(); 
@@ -140,12 +143,13 @@ class ARDOUR_UI : public Gtkmm2ext::UI
         static ARDOUR::gain_t slider_position_to_gain (double pos);
 
 	static ARDOUR_UI *instance () { return theArdourUI; }
+	static UIConfiguration *config () { return ui_config; }
 
 	PublicEditor&	  the_editor(){return *editor;}
 	Mixer_UI* the_mixer() { return mixer; }
 	
 	void toggle_location_window ();
-	void toggle_color_manager ();
+	void toggle_theme_manager ();
 	void toggle_big_clock_window ();
 	void toggle_connection_editor ();
 	void toggle_route_params_window ();
@@ -213,6 +217,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void save_keybindings ();
 
 	void setup_profile ();
+	void setup_theme ();
 
   protected:
 	friend class PublicEditor;
@@ -595,7 +600,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	int         create_location_ui ();
 	void        handle_locations_change (ARDOUR::Location*);
 
-	ColorManager* color_manager;
+	static UIConfiguration *ui_config;
+	ThemeManager *theme_manager;
 
 	/* Options window */
 	

@@ -149,7 +149,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	controls_frame.set_name ("TimeAxisViewControlsBaseUnselected");
 	controls_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
 
-	ColorChanged.connect (mem_fun (*this, &TimeAxisView::color_handler));
+	ColorsChanged.connect (mem_fun (*this, &TimeAxisView::color_handler));
 }
 
 TimeAxisView::~TimeAxisView()
@@ -784,20 +784,20 @@ TimeAxisView::get_selection_rect (uint32_t id)
 		rect->rect->property_y1() = 0.0;
 		rect->rect->property_x2() = 0.0;
 		rect->rect->property_y2() = 0.0;
-		rect->rect->property_fill_color_rgba() = color_map[cSelectionRectFill];
-		rect->rect->property_outline_color_rgba() = color_map[cSelectionRectOutline];
+		rect->rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectionRect.get();
+		rect->rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectionRect.get();
 		
 		rect->start_trim = new SimpleRect (*selection_group);
 		rect->start_trim->property_x1() = 0.0;
 		rect->start_trim->property_x2() = 0.0;
-		rect->start_trim->property_fill_color_rgba() = color_map[cSelectionStartFill];
-		rect->start_trim->property_outline_color_rgba() = color_map[cSelectionStartOutline];
+		rect->start_trim->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
+		rect->start_trim->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
 		
 		rect->end_trim = new SimpleRect (*selection_group);
 		rect->end_trim->property_x1() = 0.0;
 		rect->end_trim->property_x2() = 0.0;
-		rect->end_trim->property_fill_color_rgba() = color_map[cSelectionEndFill];
-		rect->end_trim->property_outline_color_rgba() = color_map[cSelectionEndOutline];
+		rect->end_trim->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
+		rect->end_trim->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
 
 		free_selection_rects.push_front (rect);
 
@@ -1053,23 +1053,30 @@ TimeAxisView::hide_name_entry ()
 }
 
 void
-TimeAxisView::color_handler (ColorID id, uint32_t val)
+TimeAxisView::color_handler ()
 {
-	switch (id) {
-	case cSelectionRectFill:
-		break;
-	case cSelectionRectOutline:
-		break;
-	case cSelectionStartFill:
-		break;
-	case cSelectionStartOutline:
-		break;
-	case cSelectionEndFill:
-		break;
-	case cSelectionEndOutline:
-		break;
-	default:
-		break;
+	for (list<SelectionRect*>::iterator i = used_selection_rects.begin(); i != used_selection_rects.end(); ++i) {
+
+		(*i)->rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectionRect.get();
+		(*i)->rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
+
+		(*i)->start_trim->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
+		(*i)->start_trim->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
+
+		(*i)->end_trim->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
+		(*i)->end_trim->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
+	}
+
+	for (list<SelectionRect*>::iterator i = free_selection_rects.begin(); i != free_selection_rects.end(); ++i) {
+
+		(*i)->rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectionRect.get();
+		(*i)->rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
+
+		(*i)->start_trim->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
+		(*i)->start_trim->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
+
+		(*i)->end_trim->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
+		(*i)->end_trim->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
 	}
 }
 

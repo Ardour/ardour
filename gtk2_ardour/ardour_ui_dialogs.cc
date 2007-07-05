@@ -34,7 +34,7 @@
 #include "public_editor.h"
 #include "route_params_ui.h"
 #include "sfdb_ui.h"
-#include "color_manager.h"
+#include "theme_manager.h"
 
 #include "i18n.h"
 
@@ -324,17 +324,17 @@ ARDOUR_UI::toggle_location_window ()
 }
 
 void
-ARDOUR_UI::toggle_color_manager ()
+ARDOUR_UI::toggle_theme_manager ()
 {
-	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleColorManager"));
+	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleThemeManager"));
 	if (act) {
 		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
 	
 		if (tact->get_active()) {
-			color_manager->show_all ();
-			color_manager->present ();
+			theme_manager->show_all ();
+			theme_manager->present ();
 		} else {
-			color_manager->hide ();
+			theme_manager->hide ();
 		} 
 	}
 }

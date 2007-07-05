@@ -748,7 +748,7 @@ libraries['flac'].Append(CCFLAGS="-I/usr/local/include", LINKFLAGS="-L/usr/local
 #
 
 conf = Configure (libraries['flac'])
-if conf.CheckLib ('FLAC', 'FLAC__seekable_stream_decoder_set_read_callback', language='CXX'):
+if conf.CheckLib ('FLAC', 'FLAC__seekable_stream_decoder_init', language='CXX'):
     conf.env.Append(CCFLAGS='-DHAVE_FLAC')
     use_flac = True
 else:
@@ -1119,7 +1119,6 @@ env = conf.Finish()
 
 # generate the per-user and system rc files from the same source
 
-rcbuild = env.SubstInFile ('ardour.rc','ardour.rc.in', SUBST_DICT = subst_dict)
 sysrcbuild = env.SubstInFile ('ardour_system.rc','ardour.rc.in', SUBST_DICT = subst_dict)
 
 # add to the substitution dictionary
@@ -1136,9 +1135,7 @@ the_revision = env.Command ('frobnicatory_decoy', [], create_stored_revision)
 
 env.Alias('revision', the_revision)
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour_system.rc'))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.rc'))
 
-Default (rcbuild)
 Default (sysrcbuild)
 
 # source tarball

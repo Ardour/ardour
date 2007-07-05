@@ -57,29 +57,6 @@ extern int curvetest (string);
 
 static ARDOUR_UI  *ui = 0;
 
-string
-which_ui_rcfile ()
-{
-	string rcfile;
-	char* env;
-
-	if ((env = getenv ("ARDOUR2_UI_RC")) != 0 && strlen (env)) {
-		rcfile = env;
-	} else {
-		rcfile = "ardour2_ui.rc";
-	}
-
-	rcfile = find_config_file (rcfile);
-	
-	if (rcfile.empty()) {
-		warning << _("Without a UI style file, ardour will look strange.\n Please set ARDOUR2_UI_RC to point to a valid UI style file") << endmsg;
-	} else {
-		cerr << "Loading ui configuration file " << rcfile << endl;
-	}
-	
-	return rcfile;
-}
-
 gint
 show_ui_callback (void *arg)
 {
@@ -252,7 +229,7 @@ int main (int argc, char *argv[])
 	PBD::ID::init ();
 
         try { 
-		ui = new ARDOUR_UI (&argc, &argv, which_ui_rcfile());
+		ui = new ARDOUR_UI (&argc, &argv);
 	} catch (failed_constructor& err) {
 		error << _("could not create ARDOUR GUI") << endmsg;
 		exit (1);

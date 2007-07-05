@@ -156,7 +156,7 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	void clear_sync_position ();
 	void set_hidden (bool yn);
 	void set_muted (bool yn);
-	void set_opaque (bool yn);
+	 void set_opaque (bool yn);
 	void set_locked (bool yn);
 
 	virtual uint32_t read_data_count() const { return _read_data_count; }

@@ -435,8 +435,7 @@ class TimeAxisViewItem : public Selectable
      */
 
     bool show_vestigial;
-
-    uint32_t fill_opacity;
+	uint32_t fill_opacity;
     uint32_t fill_color ;
     uint32_t frame_color_r ;
     uint32_t frame_color_g ;

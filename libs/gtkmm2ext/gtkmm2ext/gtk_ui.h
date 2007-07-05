@@ -87,7 +87,7 @@ struct UIRequest : public BaseUI::BaseRequestObject {
 class UI : public Receiver, public AbstractUI<UIRequest>
 {
   public:
-	UI (string name, int *argc, char **argv[], string rcfile);
+	UI (string name, int *argc, char **argv[]);
 	virtual ~UI ();
 
 	static UI *instance() { return theGtkUI; }
@@ -107,7 +107,7 @@ class UI : public Receiver, public AbstractUI<UIRequest>
 	bool running ();
 	void quit    ();
 	void kill    ();
-	int  load_rcfile (string);
+	int  load_rcfile (string, bool themechange = false);
 	void run (Receiver &old_receiver);
 
 	void set_state (Gtk::Widget *w, Gtk::StateType state);
@@ -131,6 +131,8 @@ class UI : public Receiver, public AbstractUI<UIRequest>
 
 	sigc::signal<void> starting;
 	sigc::signal<void> stopping;
+
+	sigc::signal<void> theme_changed;
 
 	static bool just_hide_it (GdkEventAny *, Gtk::Window *);
 

@@ -311,11 +311,11 @@ Editor::Editor ()
 	_dragging_playhead = false;
 	_dragging_hscrollbar = false;
 
-	location_marker_color = color_map[cLocationMarker];
-	location_range_color = color_map[cLocationRange];
-	location_cd_marker_color = color_map[cLocationCDMarker];
-	location_loop_color = color_map[cLocationLoop];
-	location_punch_color = color_map[cLocationPunch];
+	location_marker_color = ARDOUR_UI::config()->canvasvar_LocationMarker.get();
+	location_range_color = ARDOUR_UI::config()->canvasvar_LocationRange.get();
+	location_cd_marker_color = ARDOUR_UI::config()->canvasvar_LocationCDMarker.get();
+	location_loop_color = ARDOUR_UI::config()->canvasvar_LocationLoop.get();
+	location_punch_color = ARDOUR_UI::config()->canvasvar_LocationPunch.get();
 
 	range_marker_drag_rect = 0;
 	marker_drag_line = 0;
@@ -1649,7 +1649,7 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 		region_mute_item->set_active();
 		fooc.block (false);
 	}
-
+	
 	items.push_back (CheckMenuElem (_("Opaque")));
 	region_opaque_item = static_cast<CheckMenuItem*>(&items.back());
 	fooc = region_opaque_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_opaque));
@@ -1658,7 +1658,7 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 		region_opaque_item->set_active();
 		fooc.block (false);
 	}
-	
+
 	items.push_back (CheckMenuElem (_("Original position"), mem_fun(*this, &Editor::naturalize)));
 	if (region->at_natural_position()) {
 		items.back().set_sensitive (false);

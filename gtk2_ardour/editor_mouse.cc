@@ -1130,7 +1130,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		if (mouse_mode == MouseGain) {
 			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
 			if (line)
-				line->property_fill_color_rgba() = color_map[cEnteredGainLine];
+				line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_EnteredGainLine.get();
 			if (is_drawable()) {
 				track_canvas.get_window()->set_cursor (*fader_cursor);
 			}
@@ -1144,7 +1144,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			{
 				ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
 				if (line)
-					line->property_fill_color_rgba() = color_map[cEnteredAutomationLine];
+					line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_EnteredAutomationLine.get();
 			}
 			if (is_drawable()) {
 				track_canvas.get_window()->set_cursor (*fader_cursor);
@@ -1230,7 +1230,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		if ((marker = static_cast<Marker *> (item->get_data ("marker"))) == 0) {
 			break;
 		}
-		marker->set_color_rgba (color_map[cEnteredMarker]);
+		marker->set_color_rgba (ARDOUR_UI::config()->canvasvar_EnteredMarker.get());
 		// fall through
 	case MeterMarkerItem:
 	case TempoMarkerItem:
@@ -2217,7 +2217,7 @@ Editor::start_meter_marker_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	// The actual copying is not done before we reach the finish callback.
 	char name[64];
 	snprintf (name, sizeof(name), "%g/%g", meter_marker->meter().beats_per_bar(), meter_marker->meter().note_divisor ());
-	MeterMarker* new_marker = new MeterMarker(*this, *meter_group, color_map[cMeterMarker], name, 
+	MeterMarker* new_marker = new MeterMarker(*this, *meter_group, ARDOUR_UI::config()->canvasvar_MeterMarker.get(), name, 
 						  *new MeterSection(meter_marker->meter()));
 
 	drag_info.item = &new_marker->the_item();
@@ -2348,7 +2348,7 @@ Editor::start_tempo_marker_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	// The actual copying is not done before we reach the finish callback.
 	char name[64];
 	snprintf (name, sizeof (name), "%.2f", tempo_marker->tempo().beats_per_minute());
-	TempoMarker* new_marker = new TempoMarker(*this, *tempo_group, color_map[cTempoMarker], name, 
+	TempoMarker* new_marker = new TempoMarker(*this, *tempo_group, ARDOUR_UI::config()->canvasvar_TempoMarker.get(), name, 
 						  *new TempoSection(tempo_marker->tempo()));
 
 	drag_info.item = &new_marker->the_item();
@@ -3198,7 +3198,6 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 				rv->get_canvas_group()->raise_to_top();
 				rv->get_time_axis_view().canvas_display->raise_to_top();
 				cursor_group->raise_to_top();
-
 				rv->fake_set_opaque (true);
 			}
 			
@@ -4050,7 +4049,7 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		begin_reversible_command (trim_type);
 
 		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
-			(*i)->fake_set_opaque(false);
+			(*i)->fake_set_opaque(false);			
 			(*i)->region()->freeze ();
 		
 			AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);

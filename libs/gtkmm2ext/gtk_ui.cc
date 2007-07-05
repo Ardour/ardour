@@ -61,7 +61,7 @@ BaseUI::RequestType Gtkmm2ext::AddTimeout = BaseUI::new_request_type();
 #include <pbd/abstract_ui.cc>  /* instantiate the template */
 
 
-UI::UI (string namestr, int *argc, char ***argv, string rcfile) 
+UI::UI (string namestr, int *argc, char ***argv) 
 	: AbstractUI<UIRequest> (namestr, true)
 {
 	theMain = new Main (argc, argv);
@@ -99,7 +99,6 @@ UI::UI (string namestr, int *argc, char ***argv, string rcfile)
 
 	register_thread (pthread_self(), X_("GUI"));
 
-	load_rcfile (rcfile);
 }
 
 UI::~UI ()
@@ -114,7 +113,7 @@ UI::caller_is_ui_thread ()
 }
 
 int
-UI::load_rcfile (string path)
+UI::load_rcfile (string path, bool themechange)
 {
 	if (path.length() == 0) {
 		return -1;
@@ -129,6 +128,12 @@ UI::load_rcfile (string path)
 	}
 	
 	RC rc (path.c_str());
+	RC::reset_styles(Gtk::Settings::get_default());
+	theme_changed.emit();
+
+	if (themechange) {
+		return 0; //Don't continue on every time there is a theme change
+	}
 
 	/* have to pack widgets into a toplevel window so that styles will stick */
 

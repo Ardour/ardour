@@ -75,7 +75,7 @@
 #include "about.h"
 #include "utils.h"
 #include "gui_thread.h"
-#include "color_manager.h"
+#include "theme_manager.h"
 #include "engine_dialog.h"
 
 #include "i18n.h"
@@ -87,15 +87,16 @@ using namespace Gtk;
 using namespace sigc;
 
 ARDOUR_UI *ARDOUR_UI::theArdourUI = 0;
+UIConfiguration *ARDOUR_UI::ui_config = 0;
 
 sigc::signal<void,bool> ARDOUR_UI::Blink;
 sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
 sigc::signal<void>      ARDOUR_UI::SuperRapidScreenUpdate;
 sigc::signal<void,nframes_t> ARDOUR_UI::Clock;
 
-ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
+ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
-	: Gtkmm2ext::UI (X_("Ardour"), argcp, argvp, rcfile),
+	: Gtkmm2ext::UI (X_("Ardour"), argcp, argvp),
 	  
 	  primary_clock (X_("primary"), false, X_("TransportClockDisplay"), true, false, true),
 	  secondary_clock (X_("secondary"), false, X_("SecondaryClockDisplay"), true, false, true),
@@ -159,13 +160,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], string rcfile)
 		theArdourUI = this;
 	}
 
-	/* load colors */
-
-	color_manager = new ColorManager();
-
-	std::string color_file = ARDOUR::find_config_file("ardour.colors");
-
-	color_manager->load (color_file);
+	ui_config = new UIConfiguration();
+	theme_manager = new ThemeManager();
 
 	editor = 0;
 	mixer = 0;
@@ -562,6 +558,7 @@ If you still wish to quit, please use the\n\n\
 	}
 	engine->stop (true);
 	Config->save_state();
+	ARDOUR_UI::config()->save_state();
 	quit ();
 }
 
@@ -1462,6 +1459,12 @@ ARDOUR_UI::do_engine_start ()
 	}
 	
 	return 0;
+}
+
+void
+ARDOUR_UI::setup_theme ()
+{
+	theme_manager->setup_theme();
 }
 
 gint
