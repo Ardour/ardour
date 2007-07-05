@@ -32,6 +32,7 @@
 
 #include "streamview.h"
 #include "midi_region_view.h"
+#include "midi_streamview.h"
 #include "midi_time_axis.h"
 #include "simplerect.h"
 #include "simpleline.h"
@@ -158,7 +159,7 @@ void
 MidiRegionView::set_y_position_and_height (double y, double h)
 {
 	RegionView::set_y_position_and_height(y, h - 1);
-		
+
 	display_events();
 
 	if (name_text) {
@@ -223,10 +224,17 @@ MidiRegionView::add_event (const MidiEvent& ev)
 	}
 	printf("\n\n");*/
 
-	double y1 = trackview.height / 2.0;
+	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
+	MidiStreamView* const view = mtv->midi_view();
+
+	const uint8_t note_range = view->highest_note() - view->lowest_note() + 1;
+	const double footer_height = name_highlight->property_y2() - name_highlight->property_y1();
+	const double pixel_range = (trackview.height - footer_height - 5.0) / (double)note_range;
+
 	if ((ev.buffer[0] & 0xF0) == MIDI_CMD_NOTE_ON) {
 		const Byte& note = ev.buffer[1];
-		y1 = trackview.height - ((trackview.height / 127.0) * note);
+		const double y1 = trackview.height - (pixel_range * (note - view->lowest_note() + 1))
+			- footer_height - 3.0;
 
 		ArdourCanvas::SimpleRect * ev_rect = new Gnome::Canvas::SimpleRect(
 				*(ArdourCanvas::Group*)get_canvas_group());
@@ -235,7 +243,7 @@ MidiRegionView::add_event (const MidiEvent& ev)
 		ev_rect->property_y1() = y1;
 		ev_rect->property_x2() = trackview.editor.frame_to_pixel (
 				_region->length());
-		ev_rect->property_y2() = y1 + ceil(trackview.height / 127.0);
+		ev_rect->property_y2() = y1 + ceil(pixel_range);
 		ev_rect->property_outline_color_rgba() = 0xFFFFFFAA;
 		/* outline all but right edge */
 		ev_rect->property_outline_what() = (guint32) (0x1 & 0x4 & 0x8);

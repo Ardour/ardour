@@ -58,16 +58,23 @@ class MidiStreamView : public StreamView
 	void get_selectables (jack_nframes_t start, jack_nframes_t end, list<Selectable* >&);
 	void get_inverted_selectables (Selection&, list<Selectable* >& results);
 
+	uint8_t lowest_note()  const { return _lowest_note; }
+	uint8_t highest_note() const { return _highest_note; }
+
   private:
 	void setup_rec_box ();
 	void rec_data_range_ready (boost::shared_ptr<ARDOUR::MidiBuffer> data, jack_nframes_t start, jack_nframes_t dur, boost::weak_ptr<ARDOUR::Source> src); 
 	void update_rec_regions (boost::shared_ptr<ARDOUR::MidiBuffer> data, jack_nframes_t start, jack_nframes_t dur);
 	
 	RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves);
+	void        display_region(MidiRegionView* region_view, bool redisplay_events);
 
 	void redisplay_diskstream ();
 
 	void color_handler ();
+
+	uint8_t _lowest_note;
+	uint8_t _highest_note;
 };
 
 #endif /* __ardour_midi_streamview_h__ */

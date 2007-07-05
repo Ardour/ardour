@@ -128,6 +128,12 @@ MidiTimeAxisView::~MidiTimeAxisView ()
 {
 }
 
+MidiStreamView*
+MidiTimeAxisView::midi_view()
+{
+	return dynamic_cast<MidiStreamView*>(_view);
+}
+
 guint32
 MidiTimeAxisView::show_at (double y, int& nth, Gtk::VBox *parent)
 {

@@ -49,12 +49,15 @@ namespace ARDOUR {
 }
 
 class PublicEditor;
+class MidiStreamView;
 
 class MidiTimeAxisView : public RouteTimeAxisView
 {
   public:
  	MidiTimeAxisView (PublicEditor&, ARDOUR::Session&, boost::shared_ptr<ARDOUR::Route>, ArdourCanvas::Canvas& canvas);
  	virtual ~MidiTimeAxisView ();
+
+	MidiStreamView* midi_view();
 
 	/* overridden from parent to store display state */
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);

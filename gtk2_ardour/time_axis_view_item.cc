@@ -91,7 +91,7 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 		layout->set_font_description (*NAME_FONT);
 		Gtkmm2ext::get_ink_pixel_size (layout, width, height);
 
-		NAME_Y_OFFSET = height + 6;
+		NAME_Y_OFFSET = height + 5;
 		NAME_HIGHLIGHT_SIZE = height + 6;
 		NAME_HIGHLIGHT_THRESH = NAME_HIGHLIGHT_SIZE * 2;
 
@@ -683,7 +683,7 @@ TimeAxisViewItem::compute_colors(Gdk::Color& base_color)
 	r = base_color.get_red()/256 ;
 	g = base_color.get_green()/256 ;
 	b = base_color.get_blue()/256 ;
-	fill_color = RGBA_TO_UINT(r,g,b,255) ;
+	fill_color = RGBA_TO_UINT(r,g,b,160) ;
 
 	/*  for minor colors:
 		if the overall saturation is strong, make the minor colors light.

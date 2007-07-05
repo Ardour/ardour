@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001, 2006 Paul Davis 
+    Copyright (C) 2001-2007 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 #include <ardour/midi_source.h>
 #include <ardour/midi_diskstream.h>
 #include <ardour/midi_track.h>
+#include <ardour/midi_events.h>
 #include <ardour/smf_source.h>
 #include <ardour/region_factory.h>
 
@@ -53,6 +54,8 @@ using namespace Editing;
 
 MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	: StreamView (tv)
+	, _lowest_note(0)
+	, _highest_note(127)
 {
 	if (tv.is_track())
 		stream_base_color = ARDOUR_UI::config()->canvasvar_MidiTrackBase.get();
@@ -89,6 +92,8 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait
 			/* great. we already have a MidiRegionView for this Region. use it again. */
 
 			(*i)->set_valid (true);
+			display_region(dynamic_cast<MidiRegionView*>(*i), false);
+
 			return NULL;
 		}
 	}
@@ -107,11 +112,11 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait
 	// FIXME
 	//region_view->set_waveform_visible(_trackview.editor.show_waveforms());
 
-	/* display events */
-	region_view->begin_write();
-	for (size_t i=0; i < region->midi_source(0)->model()->n_events(); ++i)
-		region_view->add_event(region->midi_source(0)->model()->event_at(i));
-	region_view->end_write();
+	/* display events and find note range */
+	display_region(region_view, false);
+
+	/* always display at least 1 octave range */
+	_highest_note = max(_highest_note, static_cast<uint8_t>(_lowest_note + 11));
 
 	/* catch regionview going away */
 	region->GoingAway.connect (bind (mem_fun (*this, &MidiStreamView::remove_region_view), region));
@@ -121,7 +126,35 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait
 	return region_view;
 }
 
-// FIXME: code duplication with AudioStreamVIew
+void
+MidiStreamView::display_region(MidiRegionView* region_view, bool redisplay_events)
+{
+	if ( ! region_view)
+		return;
+
+	if (redisplay_events)
+		region_view->begin_write();
+	
+	boost::shared_ptr<MidiSource> source(region_view->midi_region()->midi_source(0));
+
+	for (size_t i=0; i < source->model()->n_events(); ++i) {
+		const MidiEvent& ev = source->model()->event_at(i);
+		
+		// Look at all note on events to find our note range
+		if ((ev.buffer[0] & 0xF0) == MIDI_CMD_NOTE_ON) {
+			_lowest_note = min(_lowest_note, ev.buffer[1]);
+			_highest_note = max(_highest_note, ev.buffer[1]);
+		}
+
+		if (redisplay_events)
+			region_view->add_event(ev);
+	}
+	
+	if (redisplay_events)
+		region_view->end_write();
+}
+
+// FIXME: code duplication with AudioStreamView
 void
 MidiStreamView::redisplay_diskstream ()
 {
@@ -130,11 +163,14 @@ MidiStreamView::redisplay_diskstream ()
 	for (i = region_views.begin(); i != region_views.end(); ++i) {
 		(*i)->set_valid (false);
 	}
+	
+	_lowest_note = 60; // middle C
+	_highest_note = _lowest_note + 11;
 
 	if (_trackview.is_midi_track()) {
 		_trackview.get_diskstream()->playlist()->foreach_region (static_cast<StreamView*>(this), &StreamView::add_region_view);
 	}
-
+	
 	for (i = region_views.begin(); i != region_views.end(); ) {
 		tmp = i;
 		tmp++;
@@ -142,7 +178,9 @@ MidiStreamView::redisplay_diskstream ()
 		if (!(*i)->is_valid()) {
 			delete *i;
 			region_views.erase (i);
-		} 
+		} else {
+			(*i)->set_y_position_and_height(0, height); // apply note range
+		}
 
 		i = tmp;
 	}

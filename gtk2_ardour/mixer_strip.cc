@@ -669,7 +669,7 @@ MixerStrip::add_bundle_to_output_menu (ARDOUR::Bundle* c)
 void
 MixerStrip::update_diskstream_display ()
 {
-	if (is_audio_track()) {
+	if (is_track()) {
 
 		map_frozen ();
 
