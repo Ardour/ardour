@@ -46,7 +46,7 @@ class AudioClock : public Gtk::HBox
 
 	Mode mode() const { return _mode; }
 	
-	void set (nframes_t, bool force = false);
+	void set (nframes_t, bool force = false, nframes_t offset = 0, int which = 0);
 	void set_mode (Mode);
 	
 	void set_widget_name (std::string);
@@ -151,6 +151,8 @@ class AudioClock : public Gtk::HBox
 	Gtk::Frame     clock_frame;
 
 	nframes_t last_when;
+	bool last_pdelta;
+	bool last_sdelta;
 
 	uint32_t last_hrs;
 	uint32_t last_mins;
