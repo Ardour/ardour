@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001-2003 Paul Davis 
+    Copyright (C) 2001-2007 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 #define __ardour_curve_h__
 
 #include <sys/types.h>
+#include <boost/utility.hpp>
 #include <sigc++/signal.h>
 #include <glibmm/thread.h>
 #include <pbd/undo.h>
@@ -30,14 +31,10 @@
 
 namespace ARDOUR {
 
-class Curve
+class Curve : public boost::noncopyable
 {
   public:
 	Curve (const AutomationList& al);
-	~Curve ();
-	Curve (const Curve& other);
-	//Curve (const Curve& other, double start, double end);
-	/*Curve (const XMLNode&, Parameter id);*/
 
 	bool rt_safe_get_vector (double x0, double x1, float *arg, int32_t veclen);
 	void get_vector (double x0, double x1, float *arg, int32_t veclen);
@@ -50,10 +47,10 @@ class Curve
 
 	void _get_vector (double x0, double x1, float *arg, int32_t veclen);
 
-	const AutomationList& _list;
-
 	void on_list_dirty() { _dirty = true; }
-	bool _dirty;
+	
+	bool                  _dirty;
+	const AutomationList& _list;
 };
 
 } // namespace ARDOUR

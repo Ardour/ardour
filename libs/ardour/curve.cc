@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001-2003 Paul Davis 
+    Copyright (C) 2001-2007 Paul Davis 
 
     Contains ideas derived from "Constrained Cubic Spline Interpolation" 
     by CJC Kruger (www.korf.co.uk/spline.pdf).
@@ -41,37 +41,10 @@ using namespace sigc;
 using namespace PBD;
 
 Curve::Curve (const AutomationList& al)
-	: _list (al)
-	, _dirty (true)
+	: _dirty (true)
+	, _list (al)
 {
 	_list.Dirty.connect(mem_fun(*this, &Curve::on_list_dirty));
-}
-
-Curve::Curve (const Curve& other)
-	: _list (other._list)
-	, _dirty (true)
-{
-	_list.Dirty.connect(mem_fun(*this, &Curve::on_list_dirty));
-}
-#if 0
-Curve::Curve (const Curve& other, double start, double end)
-	: _list (other._list)
-{
-	_min_yval = other._min_yval;
-	_max_yval = other._max_yval;
-}
-
-/** \a id is used for legacy sessions where the type is not present
- * in or below the <AutomationList> node.  It is used if \a id is non-null.
- */
-Curve::Curve (const XMLNode& node, Parameter id)
-	: AutomationList (node, id)
-{
-}
-#endif
-
-Curve::~Curve ()
-{
 }
 
 void
