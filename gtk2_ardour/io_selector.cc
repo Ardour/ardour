@@ -98,6 +98,12 @@ IOSelectorWindow::IOSelectorWindow (Session& sess, boost::shared_ptr<IO> ior, bo
 	set_title (title);
 	set_position (WIN_POS_MOUSE);
 
+	ok_button.show();
+	cancel_button.show();
+	rescan_button.show();
+	button_box.show();
+	get_vbox()->show();
+
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));
 }
 
@@ -251,6 +257,24 @@ IOSelector::IOSelector (Session& sess, boost::shared_ptr<IO> ior, bool input)
 	}
 
 	io->NameChanged.connect (mem_fun(*this, &IOSelector::name_changed));
+
+	main_box.show();
+	port_and_selector_box.show();
+	notebook.show();
+	selector_frame.show();
+	selector_box.show();
+	selector_button_box.show();
+	port_box.show();
+	port_button_box.show();
+	port_and_button_box.show();
+	port_frame.show();
+	add_port_button.show();
+	remove_port_button.show();
+	clear_connections_button.show();
+	port_display_scroller.show();
+
+	show();
+	
 }
 
 IOSelector::~IOSelector ()

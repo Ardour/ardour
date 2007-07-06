@@ -353,6 +353,34 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	update_output_display ();
 
 	add_events (Gdk::BUTTON_RELEASE_MASK);
+
+	whvbox->show();
+	
+	hide_button.show();
+	width_button.show();
+	width_hide_box.show();
+	global_frame.show();
+	global_vpacker.show();
+	button_table.show();
+	middle_button_table.show();
+	bottom_button_table.show();
+	gain_unit_button.show();
+	gain_unit_label.show();
+	meter_point_button.show();
+	meter_point_label.show();
+	diskstream_button.show();
+	diskstream_label.show();
+	input_button.show();
+	input_label.show();
+	output_button.show();
+	output_label.show();
+	name_button.show();
+	comment_button.show();
+	group_button.show();
+	group_label.show();
+	speed_spinner.show();
+	speed_label.show();
+	speed_frame.show();
 }
 
 MixerStrip::~MixerStrip ()
@@ -533,7 +561,7 @@ MixerStrip::edit_output_configuration ()
 	if (output_selector->is_visible()) {
 		output_selector->get_toplevel()->get_window()->raise();
 	} else {
-		output_selector->show_all ();
+		output_selector->present ();
 	}
 }
 
@@ -547,7 +575,7 @@ MixerStrip::edit_input_configuration ()
 	if (input_selector->is_visible()) {
 		input_selector->get_toplevel()->get_window()->raise();
 	} else {
-		input_selector->show_all ();
+		input_selector->present ();
 	}
 }
 
