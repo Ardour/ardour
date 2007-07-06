@@ -61,12 +61,12 @@ AutomationController::~AutomationController()
 }
 
 boost::shared_ptr<AutomationController>
-AutomationController::create(Session& s, boost::shared_ptr<AutomationList> al, boost::shared_ptr<AutomationControl> ac)
+AutomationController::create(boost::shared_ptr<Automatable> parent, boost::shared_ptr<AutomationList> al, boost::shared_ptr<AutomationControl> ac)
 {
 	Gtk::Adjustment* adjustment = manage(new Gtk::Adjustment(al->default_value(), al->get_min_y(), al->get_max_y()));
 	if (!ac) {
 		PBD::warning << "Creating AutomationController for " << al->parameter().to_string() << endmsg;
-		ac = boost::shared_ptr<AutomationControl>(new AutomationControl(s, al));
+		ac = parent->control_factory(al);
 	}
 	return boost::shared_ptr<AutomationController>(new AutomationController(ac, adjustment));
 }

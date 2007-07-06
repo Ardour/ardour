@@ -199,7 +199,7 @@ MidiTimeAxisView::create_automation_child (Parameter param, bool show)
 
 		if (!c) {
 			boost::shared_ptr<AutomationList> al(new ARDOUR::AutomationList(param, 0, 127, 64));
-			c = boost::shared_ptr<AutomationControl>(new MidiTrack::MidiControl(midi_track(), al));
+			c = boost::shared_ptr<AutomationControl>(_route->control_factory(al));
 			_route->add_control(c);
 		}
 

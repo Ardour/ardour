@@ -49,6 +49,8 @@ public:
 	virtual boost::shared_ptr<AutomationControl> control(Parameter id, bool create_if_missing=false);
 	virtual boost::shared_ptr<const AutomationControl> control(Parameter id) const;
 	
+	boost::shared_ptr<AutomationControl> control_factory(boost::shared_ptr<AutomationList> list);
+	
 	typedef std::map<Parameter,boost::shared_ptr<AutomationControl> > Controls;
 	Controls controls() { return _controls; }
 

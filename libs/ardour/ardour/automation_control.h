@@ -29,6 +29,7 @@ namespace ARDOUR {
 
 class AutomationList;
 class Session;
+class Automatable;
 
 
 /** A PBD:Controllable with associated automation data (AutomationList)
@@ -36,7 +37,8 @@ class Session;
 class AutomationControl : public PBD::Controllable
 {
 public:
-	AutomationControl(ARDOUR::Session&, boost::shared_ptr<ARDOUR::AutomationList>,
+	AutomationControl(ARDOUR::Session&,
+			boost::shared_ptr<ARDOUR::AutomationList>,
 			std::string name="unnamed controllable");
 
 	void set_value(float val);

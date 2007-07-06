@@ -26,13 +26,13 @@
 #include <pbd/enumwriter.h>
 #include <ardour/session.h>
 #include <ardour/automatable.h>
+#include <ardour/midi_track.h>
 
 #include "i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
-
 
 Automatable::Automatable(Session& _session, const string& name)
 	: SessionObject(_session, name)
@@ -169,9 +169,8 @@ Automatable::control (Parameter parameter, bool create_if_missing)
 	} else if (create_if_missing) {
 		boost::shared_ptr<AutomationList> al (new AutomationList (
 					parameter, FLT_MIN, FLT_MAX, default_parameter_value (parameter)));
-		boost::shared_ptr<AutomationControl> ac (new AutomationControl(_session, al));
+		boost::shared_ptr<AutomationControl> ac(control_factory(al));
 		add_control(ac);
-		cerr << "WARNING: Default AutomationControl created for " << parameter.to_string() << endl;
 		return ac;
 
 	} else {
@@ -301,7 +300,7 @@ Automatable::set_automation_state (const XMLNode& node, Parameter legacy_param)
 			if (existing)
 				existing->set_list(al);
 			else
-				add_control(boost::shared_ptr<AutomationControl>(new AutomationControl(_session, al)));
+				add_control(control_factory(al));
 
 		} else {
 			error << "Expected AutomationList node, got '" << (*niter)->name() << endmsg;
@@ -452,3 +451,15 @@ Automatable::transport_stopped (nframes_t now)
 	}
 }
 
+/* FIXME: this probably doesn't belong here */
+boost::shared_ptr<AutomationControl>
+Automatable::control_factory(boost::shared_ptr<AutomationList> list)
+{
+	if (list->parameter().type() == MidiCCAutomation) {
+		// FIXME: this will die horribly if this is not a MidiTrack
+		return boost::shared_ptr<AutomationControl>(new MidiTrack::MidiControl((MidiTrack*)this, list));
+	} else {
+		cerr << "WARNING: Default AutomationControl created for " << list->parameter().to_string() << endl;
+		return boost::shared_ptr<AutomationControl>(new AutomationControl(_session, list));
+	}
+}

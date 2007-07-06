@@ -456,7 +456,7 @@ LadspaPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automati
 		} else {
 			//sigc::slot<void,char*,uint32_t> pslot = sigc::bind (mem_fun(*this, &LadspaPluginUI::print_parameter), (uint32_t) port_index);
 
-			control_ui->controller = AutomationController::create(insert->session(), mcontrol->list(), mcontrol);
+			control_ui->controller = AutomationController::create(insert, mcontrol->list(), mcontrol);
 			control_ui->controller->set_size_request (200, req.height);
 			control_ui->controller->set_name (X_("PluginSlider"));
 			control_ui->controller->set_style (BarController::LeftToRight);

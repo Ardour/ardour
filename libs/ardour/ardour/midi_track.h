@@ -75,17 +75,18 @@ public:
 	bool write_immediate_event(size_t size, const Byte* buf);
 	
 	struct MidiControl : public AutomationControl {
-	    MidiControl(boost::shared_ptr<MidiTrack> route, boost::shared_ptr<AutomationList> al)
+	    MidiControl(MidiTrack* route, boost::shared_ptr<AutomationList> al)
 			: AutomationControl (route->session(), al, al->parameter().to_string())
 			, _route (route)
 		{}
 	 
 	    void set_value (float val);
    
-		boost::weak_ptr<MidiTrack> _route;
+		MidiTrack* _route;
 	};
-
+	
 protected:
+
 	XMLNode& state (bool full);
 	
 	int _set_state (const XMLNode&, bool call_base);

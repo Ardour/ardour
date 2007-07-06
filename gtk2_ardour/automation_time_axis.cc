@@ -59,7 +59,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	  _route (r),
 	  _control (c),
 	  _automatable (a),
-	  _controller(AutomationController::create(s, c->list(), c)),
+	  _controller(AutomationController::create(a, c->list(), c)),
 	  _base_rect (0),
 	  _name (nom),
 	  height_button (_("h")),

@@ -22,6 +22,7 @@
 #include <ardour/automation_control.h>
 #include <ardour/session.h>
 #include <ardour/automatable.h>
+#include <ardour/midi_track.h>
 
 using namespace std;
 using namespace ARDOUR;
