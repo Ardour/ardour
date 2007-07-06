@@ -530,7 +530,9 @@ ARDOUR_UI::check_memory_locking ()
 				
 				hbox.pack_start (cb, true, false);
 				vbox->pack_start (hbox);
-				hbox.show_all ();
+				cb.show();
+				vbox->show();
+				hbox.show ();
 				
 				editor->ensure_float (msg);
 				msg.run ();
@@ -624,7 +626,11 @@ ARDOUR_UI::ask_about_saving_session (const string & what)
 	window.set_position (Gtk::WIN_POS_MOUSE);
 	window.set_modal (true);
 	window.set_resizable (false);
-	window.show_all ();
+
+	dhbox.show();
+	prompt_label.show();
+	dimage->show();
+	window.show();
 
 	save_the_session = 0;
 
@@ -887,7 +893,10 @@ ARDOUR_UI::build_session_selector ()
 	session_selector_window->set_name ("SessionSelectorWindow");
 	session_selector_window->set_size_request (200, 400);
 	session_selector_window->get_vbox()->pack_start (*scroller);
-	session_selector_window->show_all_children();
+
+	recent_session_display.show();
+	scroller->show();
+	//session_selector_window->get_vbox()->show();
 }
 
 void
@@ -2261,7 +2270,16 @@ require some unused files to continue to exist."));
 	results.add_button (Stock::CLOSE, RESPONSE_CLOSE);
 	results.set_default_response (RESPONSE_CLOSE);
 	results.set_position (Gtk::WIN_POS_MOUSE);
-	results.show_all_children ();
+
+	results_display.show();
+	list_scroller.show();
+	txt.show();
+	dvbox.show();
+	dhbox.show();
+	ddhbox.show();
+	dimage->show();
+
+	//results.get_vbox()->show();
 	results.set_resizable (false);
 
 	results.run ();
@@ -2496,7 +2514,7 @@ was not able to keep up with Ardour.\n\
 Specifically, it failed to write data to disk\n\
 quickly enough to keep up with recording.\n"));
 		msg->signal_response().connect (bind (mem_fun (*this, &ARDOUR_UI::disk_speed_dialog_gone), msg));
-		msg->show_all ();
+		msg->show ();
 	}
 }
 
@@ -2514,7 +2532,7 @@ was not able to keep up with Ardour.\n\
 Specifically, it failed to read data from disk\n\
 quickly enough to keep up with playback.\n"));
 		msg->signal_response().connect (bind (mem_fun (*this, &ARDOUR_UI::disk_speed_dialog_gone), msg));
-		msg->show_all ();
+		msg->show ();
 	} 
 }
 
@@ -2543,7 +2561,8 @@ what you would like to do.\n"));
 	dialog.add_button (_("Ignore crash data"), RESPONSE_REJECT);
 
 	dialog.set_position (WIN_POS_CENTER);
-	dialog.show_all ();
+	message.show();
+	//dialog.get_vbox()->show();
 	
 	switch (dialog.run ()) {
 	case RESPONSE_ACCEPT:

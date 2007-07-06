@@ -146,8 +146,6 @@ AnalysisWindow::AnalysisWindow()
 	// And last we pack the hbox
 	get_vbox()->pack_start(hbox);
 
-	track_list.show_all();
-
 	hbox.show();
 	vbox.show();
 	track_list.show();
