@@ -132,10 +132,23 @@ AddRouteDialog::AddRouteDialog ()
 	get_vbox()->pack_start (*hbnt, false, false);
 #endif
 
-	get_vbox()->show_all ();
-
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (Stock::ADD, RESPONSE_ACCEPT);
+
+	name_template_entry.show();
+	track_button.show();
+	bus_button.show();
+	routes_spinner.show();
+	channel_combo.show();
+	track_mode_combo.show();
+	aframe.show();
+	ccframe.show();
+
+	hbrb->show();
+	dvbox->show();
+	dhbox->show();
+
+	//get_vbox()->show();  why isnt this needed?
 }
 
 AddRouteDialog::~AddRouteDialog ()
