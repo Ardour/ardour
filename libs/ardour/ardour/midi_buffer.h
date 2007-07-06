@@ -30,12 +30,13 @@ class MidiBuffer : public Buffer
 {
 public:
 	MidiBuffer(size_t capacity);
-	
 	~MidiBuffer();
 
 	void silence(nframes_t dur, nframes_t offset=0);
 	
 	void read_from(const Buffer& src, nframes_t nframes, nframes_t offset);
+	
+	void copy(const MidiBuffer& copy);
 
 	bool  push_back(const ARDOUR::MidiEvent& event);
 	bool  push_back(const jack_midi_event_t& event);
@@ -45,6 +46,8 @@ public:
 	MidiEvent& operator[](size_t i) { assert(i < _size); return _events[i]; }
 
 	static size_t max_event_size() { return MAX_EVENT_SIZE; }
+
+	bool merge(const MidiBuffer& a, const MidiBuffer& b);
 
 private:
 	// FIXME: Jack needs to tell us this

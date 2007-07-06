@@ -91,6 +91,10 @@ protected:
 	int _set_state (const XMLNode&, bool call_base);
 
 private:
+
+	void write_controller_messages(MidiBuffer& buf,
+			nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset);
+
 	int set_diskstream (boost::shared_ptr<MidiDiskstream> ds);
 	void set_state_part_two ();
 	void set_state_part_three ();

@@ -46,6 +46,8 @@ audio_port.cc
 midi_port.cc
 port_set.cc
 buffer.cc
+audio_buffer.cc
+midi_buffer.cc
 buffer_set.cc
 meter.cc
 amp.cc

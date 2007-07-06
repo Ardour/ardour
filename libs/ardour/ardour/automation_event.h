@@ -191,8 +191,18 @@ class AutomationList : public PBD::StatefulDestructible
 		}
 	};
 	
+	/** Lookup cache for eval functions, range contains equivalent values */
 	struct LookupCache {
+		LookupCache() : left(-1) {}
 	    double left;  /* leftmost x coordinate used when finding "range" */
+	    std::pair<AutomationList::const_iterator,AutomationList::const_iterator> range;
+	};
+	
+	/** Lookup cache for point finding, range contains points between left and right */
+	struct SearchCache {
+		SearchCache() : left(-1), right(-1) {}
+	    double left;  /* leftmost x coordinate used when finding "range" */
+		double right; /* rightmost x coordinate used when finding "range" */
 	    std::pair<AutomationList::const_iterator,AutomationList::const_iterator> range;
 	};
 
@@ -205,6 +215,7 @@ class AutomationList : public PBD::StatefulDestructible
 	mutable sigc::signal<void> Dirty;
 	Glib::Mutex& lock() const { return _lock; }
 	LookupCache& lookup_cache() const { return _lookup_cache; }
+	SearchCache& search_cache() const { return _search_cache; }
 	
 	/** Called by locked entry point and various private
 	 * locations where we already hold the lock.
@@ -212,6 +223,8 @@ class AutomationList : public PBD::StatefulDestructible
 	 * FIXME: Should this be private?  Curve needs it..
 	 */
 	double unlocked_eval (double x) const;
+	
+	bool rt_safe_earliest_event (double start, double end, double& x, double& y) const;
 
 	Curve&       curve()       { return *_curve; }
 	const Curve& curve() const { return *_curve; }
@@ -220,7 +233,7 @@ class AutomationList : public PBD::StatefulDestructible
 
 	/** Called by unlocked_eval() to handle cases of 3 or more control points.
 	 */
-	virtual double multipoint_eval (double x) const; 
+	double multipoint_eval (double x) const; 
 
 	AutomationList* cut_copy_clear (double, double, int op);
 
@@ -231,6 +244,7 @@ class AutomationList : public PBD::StatefulDestructible
 	void _x_scale (double factor);
 
 	mutable LookupCache _lookup_cache;
+	mutable SearchCache _search_cache;
 	
 	Parameter           _parameter;
 	EventList           _events;

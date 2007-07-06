@@ -110,7 +110,7 @@ Session::Session (AudioEngine &eng,
 	: _engine (eng),
 	  _scratch_buffers(new BufferSet()),
 	  _silent_buffers(new BufferSet()),
-	  _send_buffers(new BufferSet()),
+	  _mix_buffers(new BufferSet()),
 	  _mmc_port (default_mmc_port),
 	  _mtc_port (default_mtc_port),
 	  _midi_port (default_midi_port),
@@ -212,7 +212,7 @@ Session::Session (AudioEngine &eng,
 	: _engine (eng),
 	  _scratch_buffers(new BufferSet()),
 	  _silent_buffers(new BufferSet()),
-	  _send_buffers(new BufferSet()),
+	  _mix_buffers(new BufferSet()),
 	  _mmc_port (default_mmc_port),
 	  _mtc_port (default_mtc_port),
 	  _midi_port (default_midi_port),
@@ -350,7 +350,7 @@ Session::destroy ()
 
 	delete _scratch_buffers;
 	delete _silent_buffers;
-	delete _send_buffers;
+	delete _mix_buffers;
 
 	AudioDiskstream::free_working_buffers();
 	
@@ -3681,14 +3681,14 @@ Session::ensure_buffers (ChanCount howmany)
 	if (current_block_size == 0)
 		return; // too early? (is this ok?)
 
-	// We need at least 1 MIDI scratch buffer to mix/merge
-	if (howmany.n_midi() < 1)
-		howmany.set_midi(1);
+	// We need at least 2 MIDI scratch buffers to mix/merge
+	if (howmany.n_midi() < 2)
+		howmany.set_midi(2);
 
 	// FIXME: JACK needs to tell us maximum MIDI buffer size
 	// Using nasty assumption (max # events == nframes) for now
 	_scratch_buffers->ensure_buffers(howmany, current_block_size);
-	_send_buffers->ensure_buffers(howmany, current_block_size);
+	_mix_buffers->ensure_buffers(howmany, current_block_size);
 	_silent_buffers->ensure_buffers(howmany, current_block_size);
 	
 	allocate_pan_automation_buffers (current_block_size, howmany.n_audio(), false);
@@ -4064,11 +4064,11 @@ Session::get_scratch_buffers (ChanCount count)
 }
 
 BufferSet&
-Session::get_send_buffers (ChanCount count)
+Session::get_mix_buffers (ChanCount count)
 {
-	assert(_send_buffers->available() >= count);
-	_send_buffers->set_count(count);
-	return *_send_buffers;
+	assert(_mix_buffers->available() >= count);
+	_mix_buffers->set_count(count);
+	return *_mix_buffers;
 }
 
 uint32_t 

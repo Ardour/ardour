@@ -272,7 +272,7 @@ class Session : public PBD::StatefulDestructible
 
 	BufferSet& get_silent_buffers (ChanCount count = ChanCount::ZERO);
 	BufferSet& get_scratch_buffers (ChanCount count = ChanCount::ZERO);
-	BufferSet& get_send_buffers (ChanCount count = ChanCount::ZERO);
+	BufferSet& get_mix_buffers (ChanCount count = ChanCount::ZERO);
 	
 	void add_diskstream (boost::shared_ptr<Diskstream>);
 	boost::shared_ptr<Diskstream> diskstream_by_id (const PBD::ID& id);
@@ -986,7 +986,7 @@ class Session : public PBD::StatefulDestructible
 	nframes_t           last_stop_frame;
 	BufferSet*              _scratch_buffers;
 	BufferSet*              _silent_buffers;
-	BufferSet*              _send_buffers;
+	BufferSet*              _mix_buffers;
 	nframes_t           current_block_size;
 	nframes_t          _worst_output_latency;
 	nframes_t          _worst_input_latency;

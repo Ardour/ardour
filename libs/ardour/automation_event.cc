@@ -71,6 +71,8 @@ AutomationList::AutomationList (Parameter id, double min_val, double max_val, do
 	_rt_insertion_point = _events.end();
 	_lookup_cache.left = -1;
 	_lookup_cache.range.first = _events.end();
+	_search_cache.left = -1;
+	_search_cache.range.first = _events.end();
 	_sort_pending = false;
 
 	assert(_parameter.type() != NullAutomation);
@@ -91,8 +93,8 @@ AutomationList::AutomationList (const AutomationList& other)
 	_state = other._state;
 	_touching = other._touching;
 	_rt_insertion_point = _events.end();
-	_lookup_cache.left = -1;
 	_lookup_cache.range.first = _events.end();
+	_search_cache.range.first = _events.end();
 	_sort_pending = false;
 
 	for (const_iterator i = other._events.begin(); i != other._events.end(); ++i) {
@@ -118,8 +120,8 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 	_state = other._state;
 	_touching = other._touching;
 	_rt_insertion_point = _events.end();
-	_lookup_cache.left = -1;
 	_lookup_cache.range.first = _events.end();
+	_search_cache.range.first = _events.end();
 	_sort_pending = false;
 
 	/* now grab the relevant points, and shift them back if necessary */
@@ -127,7 +129,7 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 	AutomationList* section = const_cast<AutomationList*>(&other)->copy (start, end);
 
 	if (!section->empty()) {
-		for (AutomationList::iterator i = section->begin(); i != section->end(); ++i) {
+		for (iterator i = section->begin(); i != section->end(); ++i) {
 			_events.push_back (new ControlEvent ((*i)->when, (*i)->value));
 		}
 	}
@@ -155,8 +157,8 @@ AutomationList::AutomationList (const XMLNode& node, Parameter id)
 	_state = Off;
 	_style = Absolute;
 	_rt_insertion_point = _events.end();
-	_lookup_cache.left = -1;
 	_lookup_cache.range.first = _events.end();
+	_search_cache.range.first = _events.end();
 	_sort_pending = false;
 	
 	set_state (node);
@@ -283,7 +285,7 @@ AutomationList::extend_to (double when)
 
 void AutomationList::_x_scale (double factor)
 {
-	for (AutomationList::iterator i = _events.begin(); i != _events.end(); ++i) {
+	for (iterator i = _events.begin(); i != _events.end(); ++i) {
 		(*i)->when = floor ((*i)->when * factor);
 	}
 
@@ -334,17 +336,17 @@ AutomationList::rt_add (double when, double value)
 					++far;
 				}
 
-                                if(_new_touch) {
-                                        where = far;
-                                        _rt_insertion_point = where;
-                                                                                             
-                                        if((*where)->when == when) {
-                                                (*where)->value = value;
-                                                done = true;
-                                        }
-                                } else {
-                                        where = _events.erase (after, far);
-                                }
+				if (_new_touch) {
+					where = far;
+					_rt_insertion_point = where;
+
+					if ((*where)->when == when) {
+						(*where)->value = value;
+						done = true;
+					}
+				} else {
+					where = _events.erase (after, far);
+				}
 
 			} else {
 
@@ -432,7 +434,7 @@ AutomationList::add (double when, double value)
 }
 
 void
-AutomationList::erase (AutomationList::iterator i)
+AutomationList::erase (iterator i)
 {
 	{
 		Glib::Mutex::Lock lm (_lock);
@@ -444,7 +446,7 @@ AutomationList::erase (AutomationList::iterator i)
 }
 
 void
-AutomationList::erase (AutomationList::iterator start, AutomationList::iterator end)
+AutomationList::erase (iterator start, iterator end)
 {
 	{
 		Glib::Mutex::Lock lm (_lock);
@@ -673,6 +675,7 @@ void
 AutomationList::mark_dirty ()
 {
 	_lookup_cache.left = -1;
+	_search_cache.left = -1;
 	Dirty (); /* EMIT SIGNAL */
 }
 
@@ -782,7 +785,7 @@ AutomationList::truncate_start (double overall_length)
 {
 	{
 		Glib::Mutex::Lock lm (_lock);
-		AutomationList::iterator i;
+		iterator i;
 		double first_legal_value;
 		double first_legal_coordinate;
 
@@ -947,27 +950,24 @@ AutomationList::unlocked_eval (double x) const
 double
 AutomationList::multipoint_eval (double x) const
 {
-	pair<AutomationList::const_iterator,AutomationList::const_iterator> range;
 	double upos, lpos;
 	double uval, lval;
 	double fraction;
 
-	/* only do the range lookup if x is in a different range than last time
-	   this was called (or if the lookup cache has been marked "dirty" (left<0)
-	*/
-
+	/* Only do the range lookup if x is in a different range than last time
+	 * this was called (or if the lookup cache has been marked "dirty" (left<0) */
 	if ((_lookup_cache.left < 0) ||
 	    ((_lookup_cache.left > x) || 
 	     (_lookup_cache.range.first == _events.end()) || 
 	     ((*_lookup_cache.range.second)->when < x))) {
 
-		ControlEvent cp (x, 0);
+		const ControlEvent cp (x, 0);
 		TimeComparator cmp;
 		
 		_lookup_cache.range = equal_range (_events.begin(), _events.end(), &cp, cmp);
 	}
 	
-	range = _lookup_cache.range;
+	pair<const_iterator,const_iterator> range = _lookup_cache.range;
 
 	if (range.first == range.second) {
 
@@ -1005,6 +1005,71 @@ AutomationList::multipoint_eval (double x) const
 	/* x is a control point in the data */
 	_lookup_cache.left = -1;
 	return (*range.first)->value;
+}
+
+/** Get the earliest event between \a start and \a end.
+ *
+ * If an event is found, \a x and \a y are set to its coordinates.
+ * \return true if event is found (and \a x and \a y are valid).
+ */
+bool
+AutomationList::rt_safe_earliest_event (double start, double end, double& x, double& y) const
+{
+	// FIXME: It would be nice if this was unnecessary..
+	Glib::Mutex::Lock lm(_lock, Glib::TRY_LOCK);
+	if (!lm.locked()) {
+		return false;
+	}
+	
+	/* Only do the range lookup if x is in a different range than last time
+	 * this was called (or if the search cache has been marked "dirty" (left<0) */
+	if ((_search_cache.left < 0) ||
+	    ((_search_cache.left > start) ||
+		 (_search_cache.right < end))) {
+
+		const ControlEvent start_point (start, 0);
+		const ControlEvent end_point (end, 0);
+		TimeComparator cmp;
+
+		//cerr << "REBUILD: (" << _search_cache.left << ".." << _search_cache.right << ") -> ("
+		//	<< start << ".." << end << ")" << endl;
+
+		_search_cache.range.first = lower_bound (_events.begin(), _events.end(), &start_point, cmp);
+		_search_cache.range.second = upper_bound (_events.begin(), _events.end(), &end_point, cmp);
+
+		_search_cache.left = start;
+		_search_cache.right = end;
+	}
+	
+	pair<const_iterator,const_iterator> range = _search_cache.range;
+
+	if (range.first != _events.end()) {
+		const ControlEvent* const first = *range.first;
+
+		/* Earliest points is in range, return it */
+		if (first->when >= start && first->when < end) {
+
+			x = first->when;
+			y = first->value;
+
+			/* Move left of cache to this point
+			 * (Optimize for immediate call this cycle within range) */
+			_search_cache.left = x;
+			++_search_cache.range.first;
+
+			assert(x >= start);
+			assert(x < end);
+			return true;
+
+		} else {
+				
+			return false;
+		}
+	
+	/* No points in range */
+	} else {
+		return false;
+	}
 }
 
 AutomationList*

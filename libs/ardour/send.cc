@@ -120,7 +120,7 @@ Send::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame,
 		// we have to copy the input, because IO::deliver_output may alter the buffers
 		// in-place, which a send must never do.
 
-		BufferSet& sendbufs = _session.get_send_buffers(bufs.count());
+		BufferSet& sendbufs = _session.get_mix_buffers(bufs.count());
 
 		sendbufs.read_from(bufs, nframes);
 		assert(sendbufs.count() == bufs.count());

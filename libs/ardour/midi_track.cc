@@ -72,6 +72,8 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 	set_input_maximum(ChanCount(DataType::MIDI, 1));
 	set_output_minimum(ChanCount(DataType::MIDI, 1));
 	set_output_maximum(ChanCount(DataType::MIDI, 1));
+
+	MoreChannels(ChanCount(DataType::MIDI, 2)); /* EMIT SIGNAL */
 }
 
 MidiTrack::MidiTrack (Session& sess, const XMLNode& node)
@@ -84,6 +86,8 @@ MidiTrack::MidiTrack (Session& sess, const XMLNode& node)
 	set_input_maximum(ChanCount(DataType::MIDI, 1));
 	set_output_minimum(ChanCount(DataType::MIDI, 1));
 	set_output_maximum(ChanCount(DataType::MIDI, 1));
+	
+	MoreChannels(ChanCount(DataType::MIDI, 2)); /* EMIT SIGNAL */
 }
 
 MidiTrack::~MidiTrack ()
@@ -559,10 +563,82 @@ MidiTrack::process_output_buffers (BufferSet& bufs,
 	if (muted()) {
 		IO::silence(nframes, offset);
 	} else {
-		MidiBuffer& out_buf = bufs.get_midi(0);
-		_immediate_events.read(out_buf, 0, 0, offset + nframes-1); // all stamps = 0
+
+		MidiBuffer& output_buf = bufs.get_midi(0);
+		write_controller_messages(output_buf, start_frame, end_frame, nframes, offset);
+
 		deliver_output(bufs, start_frame, end_frame, nframes, offset);
 	}
+}
+
+void
+MidiTrack::write_controller_messages(MidiBuffer& output_buf, nframes_t start_frame, nframes_t end_frame, 
+			       nframes_t nframes, nframes_t offset)
+{
+	BufferSet& mix_buffers = _session.get_mix_buffers(ChanCount(DataType::MIDI, 2));
+
+	/* FIXME: this could be more realtimey */
+
+	// Write immediate events (UI controls)
+	MidiBuffer& cc_buf = mix_buffers.get_midi(0);
+	cc_buf.silence(nframes, offset);
+	MidiEvent ev;
+	ev.size = 3; // CC = 3 bytes
+	Byte buf[ev.size];
+	buf[0] = MIDI_CMD_CONTROL;
+	ev.buffer = buf;
+
+	// Write controller automation
+	if (_session.transport_rolling()) {
+		for (Controls::const_iterator i = _controls.begin(); i != _controls.end(); ++i) {
+			const boost::shared_ptr<AutomationList> list = (*i).second->list();
+
+			if ( (!list->automation_playback())
+					|| (list->parameter().type() != MidiCCAutomation))
+				continue;
+
+			double start = start_frame;
+			double x, y;
+			while ((*i).second->list()->rt_safe_earliest_event(start, end_frame, x, y)) {
+				assert(x >= start_frame);
+				assert(x <= end_frame);
+
+				const nframes_t stamp = (nframes_t)floor(x - start_frame);
+				assert(stamp < nframes);
+
+				assert(y >= 0.0);
+				assert(y <= 127.0);
+
+				ev.time = stamp;
+				ev.buffer[1] = (Byte)list->parameter().id();
+				ev.buffer[2] = (Byte)y;
+
+				cc_buf.push_back(ev);
+
+				start = x;
+			}
+		}
+	}
+
+	/* FIXME: too much copying! */
+
+	// Merge cc buf into output
+	if (cc_buf.size() > 0) {
+
+		// Both CC and route, must merge
+		if (output_buf.size() > 0) {
+
+			MidiBuffer& mix_buf = mix_buffers.get_midi(1);
+			mix_buf.merge(output_buf, cc_buf);
+			output_buf.copy(mix_buf);
+
+		} else {
+			output_buf.copy(cc_buf);
+		}
+	}
+
+	// Append immediate events (UI controls)
+	_immediate_events.read(output_buf, 0, 0, offset + nframes-1); // all stamps = 0
 }
 
 int
