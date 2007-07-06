@@ -24,6 +24,9 @@
 #include <list>
 #include <cmath>
 
+#include <boost/pool/pool.hpp>
+#include <boost/pool/pool_alloc.hpp>
+
 #include <sigc++/signal.h>
 #include <glibmm/thread.h>
 
@@ -35,7 +38,8 @@
 
 namespace ARDOUR {
 	
-struct ControlEvent {
+class ControlEvent {
+  public:
     double when;
     double value;
     
@@ -49,13 +53,21 @@ struct ControlEvent {
 //    bool operator==(const ControlEvent& other) {
 //	    return value == other.value && when == other.when;
 //    }
-
 };
+
+/* automation lists use a pool allocator that does not use a lock and 
+   allocates 8k of new pointers at a time
+*/
+
+typedef boost::fast_pool_allocator<ControlEvent,
+	boost::default_user_allocator_new_delete,
+	boost::details::pool::null_mutex,
+	8192> ControlEventAllocator;
 
 class AutomationList : public PBD::StatefulDestructible
 {
   public:
-	typedef std::list<ControlEvent*> AutomationEventList;
+	typedef std::list<ControlEvent*,ControlEventAllocator> AutomationEventList;
 	typedef AutomationEventList::iterator iterator;
 	typedef AutomationEventList::const_iterator const_iterator;
 

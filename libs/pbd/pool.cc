@@ -83,37 +83,37 @@ Pool::release (void *ptr)
 
 MultiAllocSingleReleasePool::MultiAllocSingleReleasePool (string n, unsigned long isize, unsigned long nitems) 
 	: Pool (n, isize, nitems),
-        m_lock(0)
+	  m_lock(0)
 {
 }
 
 MultiAllocSingleReleasePool::~MultiAllocSingleReleasePool ()
 {
-    if(m_lock) delete m_lock;
+	if (m_lock) delete m_lock;
 }
 
 SingleAllocMultiReleasePool::SingleAllocMultiReleasePool (string n, unsigned long isize, unsigned long nitems) 
 	: Pool (n, isize, nitems),
-    m_lock(0)
+	  m_lock(0)
 {
 }
 
 SingleAllocMultiReleasePool::~SingleAllocMultiReleasePool ()
 {
-    if(m_lock) delete m_lock;
+	if (m_lock) delete m_lock;
 }
 
 void*
 MultiAllocSingleReleasePool::alloc ()
 {
 	void *ptr;
-    if(!m_lock) {
-        m_lock = new Glib::Mutex();
-        // umm, I'm not sure that this doesn't also allocate memory.
-        if(!m_lock) error << "cannot create Glib::Mutex in pool.cc" << endmsg;
-    }
+
+	if (!m_lock && (m_lock = new Glib::Mutex()) == 0) {
+		fatal << "cannot create Glib::Mutex in pool.cc" << endmsg;
+		/*NOTREACHED*/
+	}
     
-    Glib::Mutex::Lock guard(*m_lock);
+	Glib::Mutex::Lock guard(*m_lock);
 	ptr = Pool::alloc ();
 	return ptr;
 }
@@ -133,12 +133,12 @@ SingleAllocMultiReleasePool::alloc ()
 void
 SingleAllocMultiReleasePool::release (void* ptr)
 {
-    if(!m_lock) {
-        m_lock = new Glib::Mutex();
-        // umm, I'm not sure that this doesn't also allocate memory.
-        if(!m_lock) error << "cannot create Glib::Mutex in pool.cc" << endmsg;
-    }
-    Glib::Mutex::Lock guard(*m_lock);
+	if (!m_lock && (m_lock = new Glib::Mutex()) == 0) {
+		fatal << "cannot create Glib::Mutex in pool.cc" << endmsg;
+		/*NOTREACHED*/
+	}
+
+	Glib::Mutex::Lock guard(*m_lock);
 	Pool::release (ptr);
 }
 

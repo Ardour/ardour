@@ -350,7 +350,9 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_fi
 				
 				switch (resx) {
 				case 0: /* stop a multi-file import */
-				case 1: /* don't import this one */
+					ret = -2;
+					goto out;
+				case 1: /* don't embed this one */
 					ret = -1;
 					goto out;
 				case 2: /* do it, and the rest without asking */

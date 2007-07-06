@@ -2589,7 +2589,6 @@ IO::set_gain (gain_t val, void *src)
 	
 	if (_session.transport_stopped() && src != 0 && src != this && gain_automation_recording()) {
 		_gain_automation_curve.add (_session.transport_frame(), val);
-		
 	}
 
 	_session.set_dirty();

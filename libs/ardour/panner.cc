@@ -205,11 +205,11 @@ BaseStereoPanner::snapshot (nframes_t now)
 void
 BaseStereoPanner::transport_stopped (nframes_t frame)
 {
-	_automation.reposition_for_rt_add (frame);
-
 	if (_automation.automation_state() != Off) {
 		set_position (_automation.eval (frame));
 	}
+
+	_automation.reposition_for_rt_add (frame);
 }
 
 void
