@@ -148,7 +148,20 @@ AnalysisWindow::AnalysisWindow()
 
 	track_list.show_all();
 
-	get_vbox()->show_all();
+	hbox.show();
+	vbox.show();
+	track_list.show();
+	source_selection_label.show();
+	source_selection_ranges_rb.show();
+	source_selection_regions_rb.show();
+	hseparator1.show();
+	display_model_label.show();
+	display_model_composite_separate_rb.show();
+	display_model_composite_all_tracks_rb.show();
+	hseparator2.show();
+	refresh_button.show();
+
+	//get_vbox()->show();
 }
 
 AnalysisWindow::~AnalysisWindow()
