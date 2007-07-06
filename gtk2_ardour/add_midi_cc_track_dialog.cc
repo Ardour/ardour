@@ -49,16 +49,19 @@ AddMidiCCTrackDialog::AddMidiCCTrackDialog ()
 	_cc_num_spinner.set_name ("AddMidiCCTrackDialogSpinner");
 	
 	HBox *hbox = manage (new HBox());
+	Label *label = manage(new Label("Controller Number: "));
 
-	hbox->pack_start(*manage(new Label("Controller Number: ")), true, true, 4);
+	hbox->pack_start(*label, true, true, 4);
 	hbox->pack_start(_cc_num_spinner, false, false, 4);
 
 	get_vbox()->pack_start(*hbox, true, true, 4);
 
-	show_all();
-
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (Stock::ADD, RESPONSE_ACCEPT);
+
+	_cc_num_spinner.show();
+	hbox->show();
+	label->show();
 }
 
 
