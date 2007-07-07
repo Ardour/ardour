@@ -166,9 +166,7 @@ MidiTrack::_set_state (const XMLNode& node, bool call_base)
 	
 	if ((prop = node.property (X_("note-mode"))) != 0) {
 		_note_mode = NoteMode (string_2_enum (prop->value(), _note_mode));
-		cerr << "NOTE MODE: " << prop->value() << " -> " << _note_mode << endl;
 	} else {
-		cerr << "NO NOTE MODE" << endl;
 		_note_mode = Note;
 	}
 
@@ -620,7 +618,7 @@ MidiTrack::write_controller_messages(MidiBuffer& output_buf, nframes_t start_fra
 
 				cc_buf.push_back(ev);
 
-				start = x;
+				start = x + 1; // FIXME?  maybe?
 			}
 		}
 	}

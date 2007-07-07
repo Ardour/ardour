@@ -1031,25 +1031,14 @@ AutomationList::multipoint_eval (double x) const
 	return (*range.first)->value;
 }
 
-/** Get the earliest event between \a start and \a end.
- *
- * If an event is found, \a x and \a y are set to its coordinates.
- * \return true if event is found (and \a x and \a y are valid).
- */
-bool
-AutomationList::rt_safe_earliest_event (double start, double end, double& x, double& y) const
+void
+AutomationList::build_search_cache_if_necessary(double start, double end) const
 {
-	// FIXME: It would be nice if this was unnecessary..
-	Glib::Mutex::Lock lm(_lock, Glib::TRY_LOCK);
-	if (!lm.locked()) {
-		return false;
-	}
-	
 	/* Only do the range lookup if x is in a different range than last time
 	 * this was called (or if the search cache has been marked "dirty" (left<0) */
 	if ((_search_cache.left < 0) ||
-	    ((_search_cache.left > start) ||
-		 (_search_cache.right < end))) {
+			((_search_cache.left > start) ||
+			 (_search_cache.right < end))) {
 
 		const ControlEvent start_point (start, 0);
 		const ControlEvent end_point (end, 0);
@@ -1064,7 +1053,38 @@ AutomationList::rt_safe_earliest_event (double start, double end, double& x, dou
 		_search_cache.left = start;
 		_search_cache.right = end;
 	}
+}
+
+/** Get the earliest event between \a start and \a end, using the current interpolation style.
+ *
+ * If an event is found, \a x and \a y are set to its coordinates.
+ * \return true if event is found (and \a x and \a y are valid).
+ */
+bool
+AutomationList::rt_safe_earliest_event(double start, double end, double& x, double& y) const
+{
+	if (_interpolation == Discrete)
+		return rt_safe_earliest_event_discrete(start, end, x, y);
+	else
+		return rt_safe_earliest_event_linear(start, end, x, y);
+} 
+
+/** Get the earliest event between \a start and \a end (Discrete (lack of) interpolation)
+ *
+ * If an event is found, \a x and \a y are set to its coordinates.
+ * \return true if event is found (and \a x and \a y are valid).
+ */
+bool
+AutomationList::rt_safe_earliest_event_discrete (double start, double end, double& x, double& y) const
+{
+	// FIXME: It would be nice if this was unnecessary..
+	Glib::Mutex::Lock lm(_lock, Glib::TRY_LOCK);
+	if (!lm.locked()) {
+		return false;
+	}
 	
+	build_search_cache_if_necessary(start, end);
+
 	pair<const_iterator,const_iterator> range = _search_cache.range;
 
 	if (range.first != _events.end()) {
@@ -1091,6 +1111,96 @@ AutomationList::rt_safe_earliest_event (double start, double end, double& x, dou
 		}
 	
 	/* No points in range */
+	} else {
+		return false;
+	}
+}
+
+/** Get the earliest time the line crosses an integer (Linear interpolation).
+ *
+ * If an event is found, \a x and \a y are set to its coordinates.
+ * \return true if event is found (and \a x and \a y are valid).
+ */
+bool
+AutomationList::rt_safe_earliest_event_linear (double start, double end, double& x, double& y) const
+{
+	// FIXME: It would be nice if this was unnecessary..
+	Glib::Mutex::Lock lm(_lock, Glib::TRY_LOCK);
+	if (!lm.locked()) {
+		return false;
+	}
+
+	if (_events.size() < 2)
+		return false;
+
+	build_search_cache_if_necessary(start, end);
+	
+	pair<const_iterator,const_iterator> range = _search_cache.range;
+
+	if (range.first != _events.end()) {
+
+		const ControlEvent* first = NULL;
+		const ControlEvent* next = NULL;
+
+		/* Step is after first */
+		if (range.first == _events.begin() || (*range.first)->when == start) {
+			first = *range.first;
+			next = *(++range.first);
+
+		/* Step is before first */
+		} else {
+			const_iterator prev = range.first;
+			--prev;
+			first = *prev;
+			next = *range.first;
+		}
+		
+		if (first->when == start) {
+			x = start;
+			y = first->value;
+			/* Move left of cache to this point
+			 * (Optimize for immediate call this cycle within range) */
+			_search_cache.left = x;
+			++_search_cache.range.first;
+			return true;
+		}
+
+		/*cerr << first->value << " @ " << first->when << " ---> "
+				<< next->value << " @ " << next->when << endl;*/
+
+		const double slope = (next->value - first->value) / (double)(next->when - first->when);
+
+		const double start_y = first->value + (slope * (start - first->when));
+		//cerr << "start y: " << start_y << endl;
+
+		if (start_y >= first->value) {
+			x = first->when + ((ceil(start_y) - first->value) / (double)slope);
+			y = ceil(start_y);
+		} else {
+			x = first->when + ((floor(start_y) - first->value) / (double)slope);
+			y = floor(start_y);
+		}
+
+		if (x >= start && x < end) {
+			//cerr << y << " @ " << x << endl;
+
+			x = floor(x);
+
+			/* Move left of cache to this point
+			 * (Optimize for immediate call this cycle within range) */
+			_search_cache.left = x;
+			
+			if (x >= next->when)
+				++_search_cache.range.first;
+
+			return true;
+
+		} else {
+			//cerr << "\tNo: " << start_y << ", " << x << endl;
+			return false;
+		}
+	
+	/* No points in the future, so no steps (towards them) in the future */
 	} else {
 		return false;
 	}

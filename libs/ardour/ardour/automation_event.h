@@ -238,11 +238,16 @@ class AutomationList : public PBD::StatefulDestructible
 	InterpolationStyle interpolation() const { return _interpolation; }
 	void set_interpolation(InterpolationStyle style) { _interpolation = style; }
 
-  protected:
+  private:
 
 	/** Called by unlocked_eval() to handle cases of 3 or more control points.
 	 */
 	double multipoint_eval (double x) const; 
+
+	void build_search_cache_if_necessary(double start, double end) const;
+	
+	bool rt_safe_earliest_event_discrete (double start, double end, double& x, double& y) const;
+	bool rt_safe_earliest_event_linear (double start, double end, double& x, double& y) const;
 
 	AutomationList* cut_copy_clear (double, double, int op);
 
