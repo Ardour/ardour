@@ -359,6 +359,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	whvbox->show();
 	hide_icon->show();
 	width_icon->show();
+	gain_meter_alignment->show();
 
 	pre_processor_box.show();
 	hide_button.show();
@@ -379,6 +380,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	input_label.show();
 	output_button.show();
 	output_label.show();
+	name_label.show();
 	name_button.show();
 	comment_button.show();
 	group_button.show();

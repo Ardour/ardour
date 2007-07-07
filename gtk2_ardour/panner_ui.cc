@@ -150,6 +150,20 @@ PannerUI::PannerUI (boost::shared_ptr<IO> io, Session& s)
 	update_pan_sensitive ();
 	update_pan_linkage ();
 	pan_automation_state_changed ();
+
+	pan_bar_packer.show();
+	panning_viewport.show();
+	panning_up.show();
+	panning_up_arrow.show();
+	panning_down.show();
+	panning_down_arrow.show();
+	pan_vbox.show();
+	panning_link_button.show();
+	panning_link_direction_button.show();
+	panning_link_box.show();
+	pan_automation_style_button.show();
+	pan_automation_state_button.show();
+	show();
 }
 
 bool

@@ -218,11 +218,20 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 
 	UI::instance()->theme_changed.connect (mem_fun(*this, &GainMeter::on_theme_changed));
 
+	fader_centering_box->show();
+	fader_vbox->show();
+	gain_slider->show();
+
+	hbox.show();
+	meter_packer.show();
 	gain_display.show();
 	peak_display.show();
 	gain_display_box.show();
 	fader_box.show();
 	meter_metric_area.show();
+	gain_automation_style_button.show();
+	gain_automation_state_button.show();
+	show();
 }
 
 void

@@ -121,7 +121,7 @@ class ProcessorBox : public Gtk::HBox
 	static Gdk::Color* inactive_processor_color;
 	
 	Gtk::EventBox	       processor_eventbox;
-	Gtk::HBox              processor_hpacker;
+	//Gtk::HBox              processor_hpacker;
 	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Processor> > processor_display;
 	Gtk::ScrolledWindow    processor_scroller;
 

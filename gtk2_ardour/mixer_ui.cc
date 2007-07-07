@@ -619,7 +619,7 @@ Mixer_UI::redisplay_track_list ()
 					strip_packer.pack_start (*strip, false, false);
 				}
 				strip->set_packed (true);
-				strip->show_all();
+				//strip->show_all();
 			}
 
 		} else {
