@@ -217,6 +217,12 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	ResetGroupPeakDisplays.connect (mem_fun(*this, &GainMeter::reset_group_peak_display));
 
 	UI::instance()->theme_changed.connect (mem_fun(*this, &GainMeter::on_theme_changed));
+
+	gain_display.show();
+	peak_display.show();
+	gain_display_box.show();
+	fader_box.show();
+	meter_metric_area.show();
 }
 
 void

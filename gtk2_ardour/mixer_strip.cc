@@ -114,8 +114,10 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	comment_area = 0;
 	_width_owner = 0;
 
-	width_button.add (*(manage (new Gtk::Image (::get_icon("strip_width")))));
-	hide_button.add (*(manage (new Gtk::Image (::get_icon("hide")))));
+	Gtk::Image *width_icon = manage (new Gtk::Image (::get_icon("strip_width")));
+	Gtk::Image *hide_icon = manage (new Gtk::Image (::get_icon("hide")));
+	width_button.add (*width_icon);
+	hide_button.add (*hide_icon);
 
 	input_label.set_text (_("Input"));
 	input_button.add (input_label);
@@ -355,7 +357,10 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	add_events (Gdk::BUTTON_RELEASE_MASK);
 
 	whvbox->show();
-	
+	hide_icon->show();
+	width_icon->show();
+
+	pre_processor_box.show();
 	hide_button.show();
 	width_button.show();
 	width_hide_box.show();
@@ -381,6 +386,8 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	speed_spinner.show();
 	speed_label.show();
 	speed_frame.show();
+
+	show();
 }
 
 MixerStrip::~MixerStrip ()

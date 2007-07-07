@@ -108,13 +108,17 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 		rec_enable_button = manage (new BindableToggleButton (*t->rec_enable_control().get(), r_name ));
 		rec_enable_button->set_name ("RecordEnableButton");
 		rec_enable_button->set_self_managed (true);
-
+		
+		rec_enable_button->show();
 		update_rec_display ();
 	} 
 
 	mute_button->unset_flags (Gtk::CAN_FOCUS);
 	solo_button->unset_flags (Gtk::CAN_FOCUS);
 	
+	mute_button->show();
+	solo_button->show();
+
 	_route->RemoteControlIDChanged.connect (mem_fun(*this, &RouteUI::refresh_remote_control_menu));
 
 	/* map the current state */

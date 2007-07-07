@@ -153,6 +153,10 @@ ProcessorBox::ProcessorBox (Placement pcmnt, Session& sess, boost::shared_ptr<Ro
 	/* now force an update of all the various elements */
 
 	redisplay_processors ();
+
+	processor_scroller.show();
+	processor_display.show();
+	show();
 }
 
 ProcessorBox::~ProcessorBox ()
