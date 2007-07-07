@@ -29,6 +29,7 @@
 #include "audio_region_view.h"
 #include "audio_streamview.h"
 #include "automation_line.h"
+#include "control_point.h"
 
 #include "i18n.h"
 

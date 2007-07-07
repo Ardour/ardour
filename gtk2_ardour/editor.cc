@@ -2754,15 +2754,15 @@ Editor::duplicate_dialog (bool dup_region)
 void
 Editor::show_verbose_canvas_cursor ()
 {
-        verbose_canvas_cursor->raise_to_top();
-        verbose_canvas_cursor->show();
+	verbose_canvas_cursor->raise_to_top();
+	verbose_canvas_cursor->show();
 	verbose_cursor_visible = true;
 }
 
 void
 Editor::hide_verbose_canvas_cursor ()
 {
-        verbose_canvas_cursor->hide();
+	verbose_canvas_cursor->hide();
 	verbose_cursor_visible = false;
 }
 

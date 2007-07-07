@@ -93,6 +93,8 @@ public:
 	void add_region_view (boost::shared_ptr<ARDOUR::Region>);
 	void region_layered (RegionView*);
 	
+	virtual void redisplay_diskstream () = 0;
+	
 	sigc::signal<void,RegionView*> RegionViewAdded;
 
 protected:
@@ -114,7 +116,6 @@ protected:
 
 	void         display_diskstream (boost::shared_ptr<ARDOUR::Diskstream>);
 	virtual void undisplay_diskstream ();
-	virtual void redisplay_diskstream () = 0;
 	void         diskstream_changed ();
 	
 	virtual void playlist_changed (boost::shared_ptr<ARDOUR::Diskstream>);

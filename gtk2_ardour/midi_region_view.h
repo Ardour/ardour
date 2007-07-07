@@ -93,6 +93,7 @@ class MidiRegionView : public RegionView
   private:
 
 	void display_events();
+	void clear_events();
 
 	std::vector<ArdourCanvas::Item*> _events;
 	ArdourCanvas::SimpleRect**       _active_notes;

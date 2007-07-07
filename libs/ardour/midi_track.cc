@@ -161,10 +161,15 @@ MidiTrack::_set_state (const XMLNode& node, bool call_base)
 		return -1;
 	}
 	
-	if ((prop = node.property (X_("mode"))) != 0) {
-		_mode = TrackMode (string_2_enum (prop->value(), _mode));
+	// No destructive MIDI tracks (yet?)
+	_mode = Normal;
+	
+	if ((prop = node.property (X_("note-mode"))) != 0) {
+		_note_mode = NoteMode (string_2_enum (prop->value(), _note_mode));
+		cerr << "NOTE MODE: " << prop->value() << " -> " << _note_mode << endl;
 	} else {
-		_mode = Normal;
+		cerr << "NO NOTE MODE" << endl;
+		_note_mode = Note;
 	}
 
 	if ((prop = node.property ("diskstream-id")) == 0) {
@@ -245,7 +250,7 @@ MidiTrack::state(bool full_state)
 	align_node->add_property (X_("style"), enum_2_string (as));
 	root.add_child_nocopy (*align_node);
 
-	root.add_property (X_("mode"), enum_2_string (_mode));
+	root.add_property (X_("note-mode"), enum_2_string (_note_mode));
 	
 	/* we don't return diskstream state because we don't
 	   own the diskstream exclusively. control of the diskstream
@@ -682,7 +687,7 @@ MidiTrack::unfreeze ()
 	_freeze_record.state = UnFrozen;
 	FreezeChange (); /* EMIT SIGNAL */
 }
-
+#if 0
 int
 MidiTrack::set_mode (TrackMode m)
 {
@@ -701,7 +706,8 @@ MidiTrack::set_mode (TrackMode m)
 
 	return 0;
 }
-	
+#endif
+
 /** \return true on success, false on failure (no buffer space left)
  */
 bool

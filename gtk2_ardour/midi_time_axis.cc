@@ -79,8 +79,10 @@ using namespace Editing;
 
 
 MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shared_ptr<Route> rt, Canvas& canvas)
-	: AxisView(sess), // FIXME: won't compile without this, why??
-	RouteTimeAxisView(ed, sess, rt, canvas)
+	: AxisView(sess) // FIXME: won't compile without this, why??
+	, RouteTimeAxisView(ed, sess, rt, canvas)
+	, _note_mode_item(NULL)
+	, _percussion_mode_item(NULL)
 {
 	subplugin_menu.set_name ("ArdourContextMenu");
 
@@ -91,10 +93,12 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 	mute_button->set_active (false);
 	solo_button->set_active (false);
 	
-	if (is_midi_track())
+	if (is_midi_track()) {
 		controls_ebox.set_name ("MidiTimeAxisViewControlsBaseUnselected");
-	else // bus
+		_note_mode = midi_track()->note_mode();
+	} else { // MIDI bus (which doesn't exist yet..)
 		controls_ebox.set_name ("MidiBusControlsBaseUnselected");
+	}
 
 	/* map current state of the route */
 
@@ -165,6 +169,39 @@ MidiTimeAxisView::build_automation_action_menu ()
 
 	automation_items.push_back (MenuElem (_("Controller..."), 
 						   mem_fun(*this, &MidiTimeAxisView::add_controller_track)));
+}
+
+Gtk::Menu*
+MidiTimeAxisView::build_mode_menu()
+{
+	using namespace Menu_Helpers;
+
+	Menu* mode_menu = manage (new Menu);
+	MenuList& items = mode_menu->items();
+	mode_menu->set_name ("ArdourContextMenu");
+
+	RadioMenuItem::Group mode_group;
+	items.push_back (RadioMenuElem (mode_group, _("Note"),
+				bind (mem_fun (*this, &MidiTimeAxisView::set_note_mode), Note)));
+	_note_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	_note_mode_item->set_active(_note_mode == Note);
+
+	items.push_back (RadioMenuElem (mode_group, _("Percussion"),
+				bind (mem_fun (*this, &MidiTimeAxisView::set_note_mode), Percussion)));
+	_percussion_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	_percussion_mode_item->set_active(_note_mode == Percussion);
+
+	return mode_menu;
+}
+	
+void
+MidiTimeAxisView::set_note_mode(NoteMode mode)
+{
+	if (_note_mode != mode) {
+		_note_mode = mode;
+		midi_track()->set_note_mode(mode);
+		_view->redisplay_diskstream();
+	}
 }
 
 /** Prompt for a controller with a dialog and add an automation track for it

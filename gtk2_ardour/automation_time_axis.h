@@ -94,8 +94,6 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void add_ghost (GhostRegion*);
 	void remove_ghost (GhostRegion*);
 
-	void show_all_control_points ();
-	void hide_all_but_selected_control_points ();
 	void set_state (const XMLNode&);
 	
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
@@ -133,6 +131,9 @@ class AutomationTimeAxisView : public TimeAxisView {
 	Gtk::CheckMenuItem*     auto_touch_item;
 	Gtk::CheckMenuItem*     auto_write_item;
 
+	Gtk::CheckMenuItem* mode_discrete_item;
+	Gtk::CheckMenuItem* mode_line_item;
+
 	void add_line (boost::shared_ptr<AutomationLine>);
 	
 	void clear_clicked ();
@@ -153,6 +154,10 @@ class AutomationTimeAxisView : public TimeAxisView {
 	bool ignore_state_request;
 
 	void automation_state_changed ();
+
+	void set_interpolation (ARDOUR::AutomationList::InterpolationStyle);
+	void interpolation_changed ();
+
 	sigc::connection automation_connection;
 
 	void update_extra_xml_shown (bool editor_shown);

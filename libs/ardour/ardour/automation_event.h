@@ -229,6 +229,15 @@ class AutomationList : public PBD::StatefulDestructible
 	Curve&       curve()       { return *_curve; }
 	const Curve& curve() const { return *_curve; }
 
+	enum InterpolationStyle {
+		Discrete,
+		Linear,
+		Curved
+	};
+
+	InterpolationStyle interpolation() const { return _interpolation; }
+	void set_interpolation(InterpolationStyle style) { _interpolation = style; }
+
   protected:
 
 	/** Called by unlocked_eval() to handle cases of 3 or more control points.
@@ -247,6 +256,7 @@ class AutomationList : public PBD::StatefulDestructible
 	mutable SearchCache _search_cache;
 	
 	Parameter           _parameter;
+	InterpolationStyle  _interpolation;
 	EventList           _events;
 	mutable Glib::Mutex _lock;
 	int8_t              _frozen;

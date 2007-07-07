@@ -28,6 +28,7 @@
 #include <ardour/route_group.h>
 #include <ardour/panner.h>
 #include <ardour/track.h>
+#include <ardour/midi_track.h>
 
 using namespace std;
 using namespace PBD;
@@ -44,6 +45,7 @@ setup_enum_writer ()
 	AlignStyle _AlignStyle;
 	MeterPoint _MeterPoint;
 	TrackMode _TrackMode;
+	NoteMode _NoteMode;
 	MeterFalloff _MeterFalloff;
 	MeterHold _MeterHold;
 	EditMode _EditMode;
@@ -81,6 +83,7 @@ setup_enum_writer ()
 	RouteGroup::Flag _RouteGroup_Flag;
 	Region::Flag _Region_Flag;
 	Track::FreezeState _Track_FreezeState;
+	AutomationList::InterpolationStyle _AutomationList_InterpolationStyle;
 
 #define REGISTER(e) enum_writer->register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer->register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -132,6 +135,10 @@ setup_enum_writer ()
 	REGISTER_ENUM (Normal);
 	REGISTER_ENUM (Destructive);
 	REGISTER (_TrackMode);
+	
+	REGISTER_ENUM (Note);
+	REGISTER_ENUM (Percussion);
+	REGISTER (_NoteMode);
 
 	REGISTER_ENUM (MeterFalloffOff);
 	REGISTER_ENUM (MeterFalloffSlowest);
@@ -360,5 +367,10 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Track, Frozen);
 	REGISTER_CLASS_ENUM (Track, UnFrozen);
 	REGISTER (_Track_FreezeState);
+	
+	REGISTER_CLASS_ENUM (AutomationList, Discrete);
+	REGISTER_CLASS_ENUM (AutomationList, Linear);
+	REGISTER_CLASS_ENUM (AutomationList, Curved);
+	REGISTER (_AutomationList_InterpolationStyle);
 	
 }

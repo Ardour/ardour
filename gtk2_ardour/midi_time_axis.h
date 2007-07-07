@@ -66,15 +66,24 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void add_controller_track ();
 	void create_automation_child (ARDOUR::Parameter param, bool show);
 
+	ARDOUR::NoteMode note_mode() const { return _note_mode; }
+
   private:
 	
 	void build_automation_action_menu ();
-	
+	Gtk::Menu* build_mode_menu();
+
+	void set_note_mode(ARDOUR::NoteMode mode);
+
 	void route_active_changed ();
 
 	void add_insert_to_subplugin_menu (ARDOUR::Processor *);
 	
-	Gtk::Menu subplugin_menu;
+	Gtk::Menu _subplugin_menu;
+
+	ARDOUR::NoteMode    _note_mode;
+	Gtk::RadioMenuItem* _note_mode_item;
+	Gtk::RadioMenuItem* _percussion_mode_item;
 };
 
 #endif /* __ardour_midi_time_axis_h__ */

@@ -57,7 +57,7 @@ public:
 	int use_diskstream (string name);
 	int use_diskstream (const PBD::ID& id);
 
-	int set_mode (TrackMode m);
+	//int set_mode (TrackMode m);
 
 	void set_latency_delay (nframes_t);
 
@@ -85,6 +85,9 @@ public:
 		MidiTrack* _route;
 	};
 	
+	NoteMode note_mode() const { return _note_mode; }
+	void set_note_mode (NoteMode m) { _note_mode = m; }
+	
 protected:
 
 	XMLNode& state (bool full);
@@ -101,6 +104,7 @@ private:
 	void set_state_part_three ();
 
 	MidiRingBuffer _immediate_events;
+	NoteMode       _note_mode;
 };
 
 } /* namespace ARDOUR*/

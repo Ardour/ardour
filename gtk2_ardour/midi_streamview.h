@@ -60,6 +60,8 @@ class MidiStreamView : public StreamView
 
 	uint8_t lowest_note()  const { return _lowest_note; }
 	uint8_t highest_note() const { return _highest_note; }
+	
+	void redisplay_diskstream ();
 
   private:
 	void setup_rec_box ();
@@ -68,8 +70,6 @@ class MidiStreamView : public StreamView
 	
 	RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves);
 	void        display_region(MidiRegionView* region_view, bool redisplay_events);
-
-	void redisplay_diskstream ();
 
 	void color_handler ();
 

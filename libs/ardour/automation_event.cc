@@ -28,6 +28,7 @@
 #include <ardour/automation_event.h>
 #include <ardour/curve.h>
 #include <pbd/stacktrace.h>
+#include <pbd/enumwriter.h>
 
 #include "i18n.h"
 
@@ -56,6 +57,7 @@ static void dumpit (const AutomationList& al, string prefix = "")
 
 AutomationList::AutomationList (Parameter id, double min_val, double max_val, double default_val)
 	: _parameter(id)
+	, _interpolation(Linear)
 	, _curve(new Curve(*this))
 {	
 	_parameter = id;
@@ -81,6 +83,7 @@ AutomationList::AutomationList (Parameter id, double min_val, double max_val, do
 
 AutomationList::AutomationList (const AutomationList& other)
 	: _parameter(other._parameter)
+	, _interpolation(Linear)
 	, _curve(new Curve(*this))
 {
 	_frozen = 0;
@@ -108,6 +111,7 @@ AutomationList::AutomationList (const AutomationList& other)
 
 AutomationList::AutomationList (const AutomationList& other, double start, double end)
 	: _parameter(other._parameter)
+	, _interpolation(Linear)
 	, _curve(new Curve(*this))
 {
 	_frozen = 0;
@@ -146,7 +150,8 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
  * in or below the <AutomationList> node.  It is used if \a id is non-null.
  */
 AutomationList::AutomationList (const XMLNode& node, Parameter id)
-	: _curve(new Curve(*this))
+	: _interpolation(Linear)
+	, _curve(new Curve(*this))
 {
 	_frozen = 0;
 	_changed_when_thawed = false;
@@ -925,6 +930,9 @@ AutomationList::unlocked_eval (double x) const
 		upos = _events.back()->when;
 		uval = _events.back()->value;
 		
+		if (_interpolation == Discrete)
+			return lval;
+
 		/* linear interpolation betweeen the two points
 		*/
 
@@ -953,6 +961,22 @@ AutomationList::multipoint_eval (double x) const
 	double upos, lpos;
 	double uval, lval;
 	double fraction;
+	
+	/* "Stepped" lookup (no interpolation) */
+	/* FIXME: no cache.  significant? */
+	if (_interpolation == Discrete) {
+		const ControlEvent cp (x, 0);
+		TimeComparator cmp;
+		EventList::const_iterator i = lower_bound (_events.begin(), _events.end(), &cp, cmp);
+
+		// shouldn't have made it to multipoint_eval
+		assert(i != _events.end());
+
+		if (i == _events.begin() || (*i)->when == x)
+			return (*i)->value;
+		else
+			return (*(--i))->value;
+	}
 
 	/* Only do the range lookup if x is in a different range than last time
 	 * this was called (or if the lookup cache has been marked "dirty" (left<0) */
@@ -1279,6 +1303,8 @@ AutomationList::state (bool full)
 	root->add_property ("max_yval", buf);
 	snprintf (buf, sizeof (buf), "%.12g", _max_xval);
 	root->add_property ("max_xval", buf);
+	
+	root->add_property ("interpolation-style", enum_2_string (_interpolation));
 
 	if (full) {
 		root->add_property ("state", auto_state_to_string (_state));
@@ -1436,6 +1462,12 @@ AutomationList::set_state (const XMLNode& node)
 		_parameter = Parameter(prop->value());
 	} else {
 		warning << "Legacy session: automation list has no automation-id property.";
+	}
+	
+	if ((prop = node.property (X_("interpolation-style"))) != 0) {
+		_interpolation = (InterpolationStyle)string_2_enum(prop->value(), _interpolation);
+	} else {
+		_interpolation = Linear;
 	}
 	
 	if ((prop = node.property (X_("default"))) != 0){ 

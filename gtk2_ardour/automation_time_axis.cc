@@ -77,6 +77,9 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	auto_touch_item = 0;
 	auto_write_item = 0;
 	auto_play_item = 0;
+	mode_discrete_item = 0;
+	mode_line_item = 0;
+
 	ignore_state_request = false;
 	first_call_to_set_height = true;
 	
@@ -321,6 +324,31 @@ AutomationTimeAxisView::automation_state_changed ()
 }
 
 void
+AutomationTimeAxisView::interpolation_changed ()
+{	
+	AutomationList::InterpolationStyle style = _control->list()->interpolation();
+	
+	if (mode_line_item && mode_discrete_item) {
+		if (style == AutomationList::Discrete) {
+			mode_discrete_item->set_active(true);
+			mode_line_item->set_active(false);
+		} else {
+			mode_line_item->set_active(true);
+			mode_discrete_item->set_active(false);
+		}
+	}
+	
+	_line->set_interpolation(style);
+}
+
+void
+AutomationTimeAxisView::set_interpolation (AutomationList::InterpolationStyle style)
+{
+	_control->list()->set_interpolation(style);
+	_line->set_interpolation(style);
+}
+
+void
 AutomationTimeAxisView::height_clicked ()
 {
 	popup_size_menu (0);
@@ -493,6 +521,8 @@ AutomationTimeAxisView::build_display_menu ()
 	items.push_back (MenuElem (_("Clear"), mem_fun(*this, &AutomationTimeAxisView::clear_clicked)));
 	items.push_back (SeparatorElem());
 
+	/* state menu */
+
 	Menu* auto_state_menu = manage (new Menu);
 	auto_state_menu->set_name ("ArdourContextMenu");
 	MenuList& as_items = auto_state_menu->items();
@@ -514,10 +544,35 @@ AutomationTimeAxisView::build_display_menu ()
 	auto_touch_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
 
 	items.push_back (MenuElem (_("State"), *auto_state_menu));
+	
+	/* mode menu */
+	
+	if (_control->parameter().type() == MidiCCAutomation) {
+		Menu* auto_mode_menu = manage (new Menu);
+		auto_mode_menu->set_name ("ArdourContextMenu");
+		MenuList& am_items = auto_mode_menu->items();
+	
+		RadioMenuItem::Group group;
+
+		am_items.push_back (RadioMenuElem (group, _("Discrete"), bind (
+						mem_fun(*this, &AutomationTimeAxisView::set_interpolation),
+						AutomationList::Discrete)));
+		mode_discrete_item = dynamic_cast<CheckMenuItem*>(&am_items.back());
+		//mode_discrete_item->set_active(_control->list()->interpolation() == AutomationList::Discrete);
+
+		am_items.push_back (RadioMenuElem (group, _("Line"), bind (
+						mem_fun(*this, &AutomationTimeAxisView::set_interpolation),
+						AutomationList::Linear)));
+		mode_line_item = dynamic_cast<CheckMenuItem*>(&am_items.back());
+		//mode_line_item->set_active(_control->list()->interpolation() == AutomationList::Linear);
+
+		items.push_back (MenuElem (_("Mode"), *auto_mode_menu));
+	}
 
 	/* make sure the automation menu state is correct */
 
 	automation_state_changed ();
+	interpolation_changed ();
 }
 
 void
@@ -816,27 +871,15 @@ AutomationTimeAxisView::add_line (boost::shared_ptr<AutomationLine> line)
 }
 
 void
-AutomationTimeAxisView::show_all_control_points ()
-{
-	_line->show_all_control_points ();
-}
-
-void
-AutomationTimeAxisView::hide_all_but_selected_control_points ()
-{
-	_line->hide_all_but_selected_control_points ();
-}
-
-void
 AutomationTimeAxisView::entered()
 {
-	show_all_control_points ();
+	_line->track_entered();
 }
 
 void
 AutomationTimeAxisView::exited ()
 {
-	hide_all_but_selected_control_points ();
+	_line->track_exited();
 }
 
 void

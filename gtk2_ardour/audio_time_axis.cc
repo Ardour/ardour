@@ -218,6 +218,35 @@ AudioTimeAxisView::append_extra_display_menu_items ()
 
 	items.push_back (MenuElem (_("Layers"), *layers_menu));
 }
+	
+Gtk::Menu*
+AudioTimeAxisView::build_mode_menu()
+{
+	using namespace Menu_Helpers;
+
+	Menu* mode_menu = manage (new Menu);
+	MenuList& items = mode_menu->items();
+	mode_menu->set_name ("ArdourContextMenu");
+
+	RadioMenuItem::Group mode_group;
+	items.push_back (RadioMenuElem (mode_group, _("Normal"),
+				bind (mem_fun (*this, &AudioTimeAxisView::set_track_mode), ARDOUR::Normal)));
+	normal_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	items.push_back (RadioMenuElem (mode_group, _("Tape"),
+				bind (mem_fun (*this, &AudioTimeAxisView::set_track_mode), ARDOUR::Destructive)));
+	destructive_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
+
+	switch (track()->mode()) {
+		case ARDOUR::Destructive:
+			destructive_track_mode_item->set_active ();
+			break;
+		case ARDOUR::Normal:
+			normal_track_mode_item->set_active ();
+			break;
+	}
+
+	return mode_menu;
+}
 
 void
 AudioTimeAxisView::toggle_waveforms ()

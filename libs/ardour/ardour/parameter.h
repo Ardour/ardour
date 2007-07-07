@@ -127,6 +127,28 @@ public:
 		}
 	}
 
+	/* The below properties are only used for CC right now, but unchanging properties
+	 * of parameters (rather than changing parameters of automation lists themselves)
+	 * should be moved here */
+
+	inline double min() const {
+		if (_type == MidiCCAutomation)
+			return 0.0;
+		else
+			return DBL_MIN;
+	}
+	
+	inline double max() const {
+		if (_type == MidiCCAutomation)
+			return 127.0;
+		else
+			return DBL_MAX;
+	}
+
+	inline bool is_integer() const {
+		return (_type == MidiCCAutomation);
+	}
+
 private:
 	// default copy constructor is ok
 	AutomationType _type;

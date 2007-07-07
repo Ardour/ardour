@@ -521,25 +521,11 @@ RouteTimeAxisView::build_display_menu ()
 		items.push_back (MenuElem (_("Alignment"), *alignment_menu));
 
 		get_diskstream()->AlignmentStyleChanged.connect (
-			mem_fun(*this, &RouteTimeAxisView::align_style_changed));
-
-		RadioMenuItem::Group mode_group;
-		items.push_back (RadioMenuElem (mode_group, _("Normal mode"),
-						bind (mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::Normal)));
-		normal_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
-		items.push_back (RadioMenuElem (mode_group, _("Tape mode"),
-						bind (mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::Destructive)));
-		destructive_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
-				 
+				mem_fun(*this, &RouteTimeAxisView::align_style_changed));
 		
-		switch (track()->mode()) {
-		case ARDOUR::Destructive:
-			destructive_track_mode_item->set_active ();
-			break;
-		case ARDOUR::Normal:
-			normal_track_mode_item->set_active ();
-			break;
-		}
+		mode_menu = build_mode_menu();
+		if (mode_menu)
+			items.push_back (MenuElem (_("Mode"), *mode_menu));
 	}
 
 	items.push_back (SeparatorElem());

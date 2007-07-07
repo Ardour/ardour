@@ -39,6 +39,7 @@
 #include "streamview.h"
 #include "region_gain_line.h"
 #include "automation_time_axis.h"
+#include "control_point.h"
 #include "prompter.h"
 #include "utils.h"
 #include "selection.h"
@@ -1019,13 +1020,13 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			double at_x, at_y;
 			at_x = cp->get_x();
 			at_y = cp->get_y ();
-			cp->item->i2w (at_x, at_y);
+			cp->item()->i2w (at_x, at_y);
 			at_x += 20.0;
 			at_y += 20.0;
 
-			fraction = 1.0 - (cp->get_y() / cp->line.height());
+			fraction = 1.0 - (cp->get_y() / cp->line().height());
 
-			set_verbose_canvas_cursor (cp->line.get_verbose_cursor_string (fraction), at_x, at_y);
+			set_verbose_canvas_cursor (cp->line().get_verbose_cursor_string (fraction), at_x, at_y);
 			show_verbose_canvas_cursor ();
 
 			if (is_drawable()) {
@@ -1196,8 +1197,8 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	switch (item_type) {
 	case ControlPointItem:
 		cp = reinterpret_cast<ControlPoint*>(item->get_data ("control_point"));
-		if (cp->line.npoints() > 1) {
-			if (!cp->selected) {
+		if (cp->line().the_list()->interpolation() != AutomationList::Discrete) {
+			if (cp->line().npoints() > 1 && !cp->selected()) {
 				cp->set_visible (false);
 			}
 		}
@@ -2334,16 +2335,16 @@ Editor::remove_gain_control_point (ArdourCanvas::Item*item, GdkEvent* event)
 	}
 
 	// We shouldn't remove the first or last gain point
-	if (control_point->line.is_last_point(*control_point) ||
-		control_point->line.is_first_point(*control_point)) {	
+	if (control_point->line().is_last_point(*control_point) ||
+		control_point->line().is_first_point(*control_point)) {	
 		return;
 	}
 
-	control_point->line.remove_point (*control_point);
+	control_point->line().remove_point (*control_point);
 }
 
 void
-Editor::remove_control_point (ArdourCanvas::Item*item, GdkEvent* event)
+Editor::remove_control_point (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	ControlPoint* control_point;
 
@@ -2352,7 +2353,7 @@ Editor::remove_control_point (ArdourCanvas::Item*item, GdkEvent* event)
 		/*NOTREACHED*/
 	}
 
-	control_point->line.remove_point (*control_point);
+	control_point->line().remove_point (*control_point);
 }
 
 void
@@ -2372,10 +2373,10 @@ Editor::start_control_point_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	start_grab (event, fader_cursor);
 
-	control_point->line.start_drag (control_point, drag_info.grab_frame, 0);
+	control_point->line().start_drag (control_point, drag_info.grab_frame, 0);
 
-	double fraction = 1.0 - ((control_point->get_y() - control_point->line.y_position()) / (double)control_point->line.height());
-	set_verbose_canvas_cursor (control_point->line.get_verbose_cursor_string (fraction), 
+	double fraction = 1.0 - ((control_point->get_y() - control_point->line().y_position()) / (double)control_point->line().height());
+	set_verbose_canvas_cursor (control_point->line().get_verbose_cursor_string (fraction), 
 				   drag_info.current_pointer_x + 20, drag_info.current_pointer_y + 20);
 
 	show_verbose_canvas_cursor ();
@@ -2399,11 +2400,11 @@ Editor::control_point_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* 
 		cy = drag_info.grab_y;
 	}
 
-	cp->line.parent_group().w2i (cx, cy);
+	cp->line().parent_group().w2i (cx, cy);
 
 	cx = max (0.0, cx);
 	cy = max (0.0, cy);
-	cy = min ((double) (cp->line.y_position() + cp->line.height()), cy);
+	cy = min ((double) (cp->line().y_position() + cp->line().height()), cy);
 
 	//translate cx to frames
 	nframes_t cx_frames = unit_to_frame (cx);
@@ -2412,7 +2413,7 @@ Editor::control_point_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* 
 		snap_to (cx_frames);
 	}
 
-	const double fraction = 1.0 - ((cy - cp->line.y_position()) / (double)cp->line.height());
+	const double fraction = 1.0 - ((cy - cp->line().y_position()) / (double)cp->line().height());
 
 	bool push;
 
@@ -2422,9 +2423,9 @@ Editor::control_point_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* 
 		push = false;
 	}
 
-	cp->line.point_drag (*cp, cx_frames , fraction, push);
+	cp->line().point_drag (*cp, cx_frames , fraction, push);
 	
-	set_verbose_canvas_cursor_text (cp->line.get_verbose_cursor_string (fraction));
+	set_verbose_canvas_cursor_text (cp->line().get_verbose_cursor_string (fraction));
 
 	drag_info.first_move = false;
 }
@@ -2445,7 +2446,7 @@ Editor::control_point_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent
 	} else {
 		control_point_drag_motion_callback (item, event);
 	}
-	cp->line.end_drag (cp);
+	cp->line().end_drag (cp);
 }
 
 void

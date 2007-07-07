@@ -463,3 +463,4 @@ Automatable::control_factory(boost::shared_ptr<AutomationList> list)
 		return boost::shared_ptr<AutomationControl>(new AutomationControl(_session, list));
 	}
 }
+

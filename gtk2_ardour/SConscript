@@ -96,6 +96,7 @@ ardour_ui_options.cc
 audio_clock.cc
 audio_time_axis.cc
 audio_region_editor.cc
+control_point.cc
 automation_line.cc
 automation_time_axis.cc
 automation_controller.cc
@@ -107,6 +108,7 @@ simpleline.cc
 canvas-simplerect.c
 simplerect.cc
 canvas-waveview.c
+diamond.cc
 crossfade_edit.cc
 crossfade_view.cc
 curvetest.cc

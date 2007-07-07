@@ -36,6 +36,7 @@
 #include "automation_line.h"
 #include "automation_time_axis.h"
 #include "automation_line.h"
+#include "control_point.h"
 #include "canvas_impl.h"
 #include "simplerect.h"
 
@@ -566,7 +567,7 @@ Editor::canvas_control_point_event (GdkEvent *event, ArdourCanvas::Item* item, C
 	case GDK_2BUTTON_PRESS:
 	case GDK_3BUTTON_PRESS:
 		clicked_control_point = cp;
-		clicked_axisview = &cp->line.trackview;
+		clicked_axisview = &cp->line().trackview;
 		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 		clicked_regionview = 0;
 		break;

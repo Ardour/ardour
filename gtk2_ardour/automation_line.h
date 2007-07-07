@@ -53,48 +53,6 @@ namespace Gnome {
 	}
 }
 
-class ControlPoint 
-{
-  public:
-	ControlPoint (AutomationLine& al);
-	ControlPoint (const ControlPoint&, bool dummy_arg_to_force_special_copy_constructor);
-	virtual ~ControlPoint ();
-
-	enum ShapeType {
-		Full,
-		Start,
-		End
-	};
-	
-	void move_to (double x, double y, ShapeType);
-	void reset (double x, double y, ARDOUR::AutomationList::iterator, uint32_t, ShapeType);
-	double get_x() const { return _x; }
-	double get_y() const { return _y; }
-
-	void hide (); 
-	void show ();
-	void show_color (bool entered, bool hide_too);
-
-	void set_size (double);
-	void set_visible (bool);
-
-	ArdourCanvas::SimpleRect* item;
-	AutomationLine& line;
-	uint32_t view_index;
-	ARDOUR::AutomationList::iterator model;
-	bool can_slide;
-	bool selected;
-	
-  protected:
-	virtual bool event_handler (GdkEvent*);
-
-  private:
-	double _x;
-	double _y;
-	double _size;
-	ShapeType _shape;
-};
-
 class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoingAway
 {
   public:
@@ -129,8 +87,10 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	guint32 height() const { return _height; }
 	guint32 y_position() const { return _y_position; }
 
-	void         set_line_color (uint32_t);
+	void     set_line_color (uint32_t);
 	uint32_t get_line_color() const { return _line_color; }
+
+	void set_interpolation(ARDOUR::AutomationList::InterpolationStyle style);
 
 	void    show ();
 	void    hide ();
@@ -154,6 +114,9 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 
 	void show_all_control_points ();
 	void hide_all_but_selected_control_points ();
+
+	void track_entered();
+	void track_exited();
 
 	bool is_last_point (ControlPoint &);
 	bool is_first_point (ControlPoint &);
@@ -215,6 +178,8 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	uint32_t line_drag_cp2;
 	int64_t  drag_x;
 	int64_t  drag_distance;
+	
+	ARDOUR::AutomationList::InterpolationStyle _interpolation;
 
 	void modify_view_point(ControlPoint&, double, double, bool with_push);
 	void reset_line_coords (ControlPoint&);

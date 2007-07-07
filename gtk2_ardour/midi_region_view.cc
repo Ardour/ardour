@@ -36,6 +36,7 @@
 #include "midi_time_axis.h"
 #include "simplerect.h"
 #include "simpleline.h"
+#include "diamond.h"
 #include "public_editor.h"
 #include "ghostregion.h"
 #include "midi_time_axis.h"
@@ -96,12 +97,20 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 
 
 void
-MidiRegionView::display_events()
+MidiRegionView::clear_events()
 {
 	for (std::vector<ArdourCanvas::Item*>::iterator i = _events.begin(); i != _events.end(); ++i)
 		delete *i;
 	
 	_events.clear();
+}
+
+
+void
+MidiRegionView::display_events()
+{
+	clear_events();
+	
 	begin_write();
 
 	for (size_t i=0; i < midi_region()->midi_source(0)->model()->n_events(); ++i)
@@ -182,8 +191,6 @@ MidiRegionView::add_ghost (AutomationTimeAxisView& atv)
 	double unit_position = _region->position () / samples_per_unit;
 	GhostRegion* ghost = new GhostRegion (atv, unit_position);
 
-	cerr << "FIXME: add notes to MIDI region ghost." << endl;
-
 	ghost->set_height ();
 	ghost->set_duration (_region->length() / samples_per_unit);
 	ghosts.push_back (ghost);
@@ -226,42 +233,56 @@ MidiRegionView::add_event (const MidiEvent& ev)
 
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 	MidiStreamView* const view = mtv->midi_view();
-
+	ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
+	
 	const uint8_t note_range = view->highest_note() - view->lowest_note() + 1;
 	const double footer_height = name_highlight->property_y2() - name_highlight->property_y1();
 	const double pixel_range = (trackview.height - footer_height - 5.0) / (double)note_range;
 
-	if ((ev.buffer[0] & 0xF0) == MIDI_CMD_NOTE_ON) {
+	if (mtv->note_mode() == Note) {
+		if ((ev.buffer[0] & 0xF0) == MIDI_CMD_NOTE_ON) {
+			const Byte& note = ev.buffer[1];
+			const double y1 = trackview.height - (pixel_range * (note - view->lowest_note() + 1))
+				- footer_height - 3.0;
+
+			ArdourCanvas::SimpleRect * ev_rect = new Gnome::Canvas::SimpleRect(*group);
+			ev_rect->property_x1() = trackview.editor.frame_to_pixel (
+					(nframes_t)ev.time);
+			ev_rect->property_y1() = y1;
+			ev_rect->property_x2() = trackview.editor.frame_to_pixel (
+					_region->length());
+			ev_rect->property_y2() = y1 + ceil(pixel_range);
+			ev_rect->property_outline_color_rgba() = 0xFFFFFFAA;
+			/* outline all but right edge */
+			ev_rect->property_outline_what() = (guint32) (0x1 & 0x4 & 0x8);
+			ev_rect->property_fill_color_rgba() = 0xFFFFFF66;
+
+			_events.push_back(ev_rect);
+			if (_active_notes)
+				_active_notes[note] = ev_rect;
+
+		} else if ((ev.buffer[0] & 0xF0) == MIDI_CMD_NOTE_OFF) {
+			const Byte& note = ev.buffer[1];
+			if (_active_notes && _active_notes[note]) {
+				_active_notes[note]->property_x2() = trackview.editor.frame_to_pixel((nframes_t)ev.time);
+				_active_notes[note]->property_outline_what() = (guint32) 0xF; // all edges
+				_active_notes[note] = NULL;
+			}
+		}
+	
+	} else if (mtv->note_mode() == Percussion) {
 		const Byte& note = ev.buffer[1];
-		const double y1 = trackview.height - (pixel_range * (note - view->lowest_note() + 1))
+		const double x = trackview.editor.frame_to_pixel((nframes_t)ev.time);
+		const double y = trackview.height - (pixel_range * (note - view->lowest_note() + 1))
 			- footer_height - 3.0;
 
-		ArdourCanvas::SimpleRect * ev_rect = new Gnome::Canvas::SimpleRect(
-				*(ArdourCanvas::Group*)get_canvas_group());
-		ev_rect->property_x1() = trackview.editor.frame_to_pixel (
-				(nframes_t)ev.time);
-		ev_rect->property_y1() = y1;
-		ev_rect->property_x2() = trackview.editor.frame_to_pixel (
-				_region->length());
-		ev_rect->property_y2() = y1 + ceil(pixel_range);
-		ev_rect->property_outline_color_rgba() = 0xFFFFFFAA;
-		/* outline all but right edge */
-		ev_rect->property_outline_what() = (guint32) (0x1 & 0x4 & 0x8);
-		ev_rect->property_fill_color_rgba() = 0xFFFFFF66;
-
-		_events.push_back(ev_rect);
-		if (_active_notes)
-			_active_notes[note] = ev_rect;
-
-	} else if ((ev.buffer[0] & 0xF0) == MIDI_CMD_NOTE_OFF) {
-		const Byte& note = ev.buffer[1];
-		if (_active_notes && _active_notes[note]) {
-			_active_notes[note]->property_x2() = trackview.editor.frame_to_pixel((nframes_t)ev.time);
-			_active_notes[note]->property_outline_what() = (guint32) 0xF; // all edges
-			_active_notes[note] = NULL;
-		}
+		Diamond* ev_diamond = new Diamond(*group, std::min(pixel_range, 5.0));
+		ev_diamond->move(x, y);
+		ev_diamond->show();
+		ev_diamond->property_outline_color_rgba() = 0xFFFFFFDD;
+		ev_diamond->property_fill_color_rgba() = 0xFFFFFF66;
+		_events.push_back(ev_diamond);
 	}
-
 }
 
 

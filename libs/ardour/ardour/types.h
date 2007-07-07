@@ -143,6 +143,11 @@ namespace ARDOUR {
 		Destructive
 	};
 	
+	enum NoteMode {
+		Note,
+		Percussion
+	};
+	
 	struct BBT_Time {
 	    uint32_t bars;
 	    uint32_t beats;

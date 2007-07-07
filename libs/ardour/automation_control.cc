@@ -35,7 +35,6 @@ AutomationControl::AutomationControl(Session& session, boost::shared_ptr<Automat
 	, _list(list)
 	, _user_value(list->default_value())
 {
-	cerr << "Created AutomationControl " << name << "(" << list->parameter().to_string() << ")" << endl;
 }
 
 

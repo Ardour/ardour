@@ -91,6 +91,7 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	void route_active_changed ();
 
 	void append_extra_display_menu_items ();
+	Gtk::Menu* build_mode_menu();
 	
 	void toggle_show_waveforms ();
 	void set_waveform_shape (WaveformShape);

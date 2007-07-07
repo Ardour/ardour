@@ -40,6 +40,7 @@
 #include "public_editor.h"
 #include "audio_region_editor.h"
 #include "region_gain_line.h"
+#include "control_point.h"
 #include "ghostregion.h"
 #include "audio_time_axis.h"
 #include "utils.h"
@@ -961,8 +962,8 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 void
 AudioRegionView::remove_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 {
-        ControlPoint *cp = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"));
-	audio_region()->envelope()->erase (cp->model);
+	ControlPoint *cp = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"));
+	audio_region()->envelope()->erase (cp->model());
 }
 
 void

@@ -247,6 +247,9 @@ protected:
 	Gtk::Menu*          playlist_menu;
 	Gtk::Menu*          playlist_action_menu;
 	Gtk::MenuItem*      playlist_item;
+	Gtk::Menu*          mode_menu;
+
+	virtual Gtk::Menu* build_mode_menu() { return NULL; }
 
 	void use_playlist (boost::weak_ptr<ARDOUR::Playlist>);
 
