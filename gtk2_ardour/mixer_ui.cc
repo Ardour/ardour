@@ -219,6 +219,31 @@ Mixer_UI::Mixer_UI ()
 	signal_configure_event().connect (mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
 
 	_selection.RoutesChanged.connect (mem_fun(*this, &Mixer_UI::follow_strip_selection));
+	
+	mix_group_display_button_box->show();
+	mix_group_add_button->show();
+	mix_group_remove_button->show();
+
+	global_hpacker.show();
+	global_vpacker.show();
+	scroller.show();
+	scroller_base.show();
+	scroller_hpacker.show();
+	mixer_scroller_vpacker.show();
+	list_vpacker.show();
+	group_display_button_label.show();
+	group_display_button.show();
+	track_display_scroller.show();
+	group_display_scroller.show();
+	group_display_vbox.show();
+	track_display_frame.show();
+	group_display_frame.show();
+	rhs_pane1.show();
+	strip_packer.show();
+	out_packer.show();
+	list_hpane.show();
+	track_display.show();
+	group_display.show();
 }
 
 Mixer_UI::~Mixer_UI ()
@@ -234,7 +259,7 @@ Mixer_UI::ensure_float (Window& win)
 void
 Mixer_UI::show_window ()
 {
-	show_all ();
+	present ();
 
 	/* now reset each strips width so the right widgets are shown */
 	MixerStrip* ms;
@@ -619,7 +644,7 @@ Mixer_UI::redisplay_track_list ()
 					strip_packer.pack_start (*strip, false, false);
 				}
 				strip->set_packed (true);
-				//strip->show_all();
+				//strip->show();
 			}
 
 		} else {

@@ -81,26 +81,26 @@ class Mixer_UI : public Gtk::Window
   private:
 	ARDOUR::Session         *session;
 
-	bool _visible;
+	bool					_visible;
 	
-	Gtk::HBox                global_hpacker;
-	Gtk::VBox                global_vpacker;
-	Gtk::ScrolledWindow      scroller;
-	Gtk::EventBox            scroller_base;
-	Gtk::HBox                scroller_hpacker;
-	Gtk::VBox                mixer_scroller_vpacker;
-	Gtk::VBox                list_vpacker;
-	Gtk::Label               group_display_button_label;
-	Gtk::Button              group_display_button;
-	Gtk::ScrolledWindow      track_display_scroller;
-	Gtk::ScrolledWindow      group_display_scroller;
-	Gtk::VBox		 group_display_vbox;
-	Gtk::Frame 		 track_display_frame;
-	Gtk::Frame		 group_display_frame;
-	Gtk::VPaned		 rhs_pane1;
-	Gtk::HBox                strip_packer;
-	Gtk::HBox                out_packer;
-	Gtk::HPaned		 list_hpane;
+	Gtk::HBox				global_hpacker;
+	Gtk::VBox				global_vpacker;
+	Gtk::ScrolledWindow		scroller;
+	Gtk::EventBox			scroller_base;
+	Gtk::HBox				scroller_hpacker;
+	Gtk::VBox				mixer_scroller_vpacker;
+	Gtk::VBox				list_vpacker;
+	Gtk::Label				group_display_button_label;
+	Gtk::Button				group_display_button;
+	Gtk::ScrolledWindow		track_display_scroller;
+	Gtk::ScrolledWindow		group_display_scroller;
+	Gtk::VBox				group_display_vbox;
+	Gtk::Frame				track_display_frame;
+	Gtk::Frame				group_display_frame;
+	Gtk::VPaned				rhs_pane1;
+	Gtk::HBox				strip_packer;
+	Gtk::HBox				out_packer;
+	Gtk::HPaned				list_hpane;
 
 	bool on_key_press_event (GdkEventKey*);
 
@@ -204,10 +204,10 @@ class Mixer_UI : public Gtk::Window
 		    add (text);
 		    add (group);
 	    }
-	    Gtk::TreeModelColumn<bool>                active;
-	    Gtk::TreeModelColumn<bool>  visible;
-	    Gtk::TreeModelColumn<Glib::ustring>       text;
-	    Gtk::TreeModelColumn<ARDOUR::RouteGroup*> group;
+	    Gtk::TreeModelColumn<bool>					active;
+	    Gtk::TreeModelColumn<bool>					visible;
+	    Gtk::TreeModelColumn<Glib::ustring>			text;
+	    Gtk::TreeModelColumn<ARDOUR::RouteGroup*>	group;
 	};
 
 	TrackDisplayModelColumns    track_columns;

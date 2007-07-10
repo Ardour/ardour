@@ -579,7 +579,7 @@ UI::flush_pending ()
 bool
 UI::just_hide_it (GdkEventAny *ev, Window *win)
 {
-	win->hide_all ();
+	win->hide ();
 	return true;
 }
 

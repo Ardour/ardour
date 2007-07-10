@@ -205,7 +205,7 @@ ARDOUR_UI::unload_session ()
 	}
 
 	if (mixer) {
-		mixer->hide_all ();
+		mixer->hide ();
 	}
 
 	delete session;
