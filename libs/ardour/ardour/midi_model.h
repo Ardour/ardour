@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis
+    Copyright (C) 2007 Paul Davis
     Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -27,14 +27,30 @@
 
 namespace ARDOUR {
 
-/** A dynamically resizable collection of MIDI events, sorted by time
+/** This is a slightly higher level (than MidiBuffer) model of MIDI note data.
+ * Currently it only represents note data, which is represented as complete
+ * note events (ie with a start time and a duration) rather than separate
+ * note on and off events (controller data is not here since it's represented
+ * as an AutomationList)
  */
 class MidiModel : public boost::noncopyable {
 public:
-	MidiModel(size_t size=0);
-	~MidiModel();
+	struct Note {
+		Note(double s=0, double d=0, uint8_t n=0, uint8_t v=0)
+		: start(s), duration(d), note(n), velocity(v) {}
 
-	void clear() { _events.clear(); }
+		double start;
+		double duration;
+		uint8_t note;
+		uint8_t velocity;
+	};
+
+	MidiModel(size_t size=0);
+
+	void clear() { _notes.clear(); }
+
+	void start_write();
+	void end_write(bool delete_stuck=false);
 
 	/** Resizes vector if necessary (NOT realtime safe) */
 	void append(const MidiBuffer& data);
@@ -42,12 +58,28 @@ public:
 	/** Resizes vector if necessary (NOT realtime safe) */
 	void append(double time, size_t size, Byte* in_buffer);
 	
-	inline const MidiEvent& event_at(unsigned i) const { return _events[i]; }
+	inline const Note& note_at(unsigned i) const { return _notes[i]; }
 
-	inline size_t n_events() const { return _events.size(); }
+	inline size_t n_notes() const { return _notes.size(); }
+
+	typedef std::vector<Note> Notes;
+	
+	struct NoteTimeComparator {
+		inline bool operator() (const Note& a, const Note& b) const { 
+			return a.start < b.start;
+		}
+	};
+
+	inline       Notes& notes()       { return _notes; }
+	inline const Notes& notes() const { return _notes; }
 
 private:
-	std::vector<MidiEvent> _events;
+
+	void append_note_on(double time, uint8_t note, uint8_t velocity);
+	void append_note_off(double time, uint8_t note);
+
+	Notes _notes;
+	Notes _write_notes;
 };
 
 } /* namespace ARDOUR */

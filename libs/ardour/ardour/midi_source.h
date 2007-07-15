@@ -69,7 +69,7 @@ class MidiSource : public Source
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
 
-	virtual void load_model(bool lock=true) = 0;
+	virtual void load_model(bool lock=true, bool force_reload=false) = 0;
 	virtual void destroy_model() = 0;
 
 	MidiModel* model() { return _model; }
@@ -84,6 +84,7 @@ class MidiSource : public Source
 	mutable uint32_t    _write_data_count; ///< modified in write()
 
 	MidiModel* _model;
+	bool       _model_loaded;
 
   private:
 	bool file_changed (string path);

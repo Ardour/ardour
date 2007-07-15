@@ -79,6 +79,7 @@ public:
 	void get_selectables (nframes_t start, nframes_t end, double top, double bot, list<Selectable *>&);
 	void get_inverted_selectables (Selection&, list<Selectable*>&);
 	bool show_automation(ARDOUR::Parameter param);
+	void set_layer_display (LayerDisplay d);
 		
 	boost::shared_ptr<ARDOUR::Region> find_next_region (nframes_t pos, ARDOUR::RegionPoint, int32_t dir);
 

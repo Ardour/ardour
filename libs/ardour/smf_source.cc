@@ -776,13 +776,20 @@ SMFSource::read_var_len() const
 }
 
 void
-SMFSource::load_model(bool lock)
+SMFSource::load_model(bool lock, bool force_reload)
 {
 	if (lock)
 		Glib::Mutex::Lock lm (_lock);
 
-	destroy_model();
-	_model = new MidiModel();
+	if (_model && _model_loaded && ! force_reload) {
+		assert(_model);
+		return;
+	}
+
+	if (! _model)
+		_model = new MidiModel();
+
+	_model->start_write();
 
 	fseek(_fd, _header_size, 0);
 
@@ -807,6 +814,10 @@ SMFSource::load_model(bool lock)
 			_model->append(ev_time, ev.size, ev.buffer);
 		}
 	}
+	
+	_model->end_write(false); /* FIXME: delete stuck notes iff percussion? */
+
+	_model_loaded = true;
 }
 
 

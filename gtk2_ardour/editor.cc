@@ -152,6 +152,7 @@ Gdk::Cursor* Editor::zoom_cursor = 0;
 Gdk::Cursor* Editor::time_fx_cursor = 0;
 Gdk::Cursor* Editor::fader_cursor = 0;
 Gdk::Cursor* Editor::speaker_cursor = 0;
+Gdk::Cursor* Editor::note_cursor = 0;
 Gdk::Cursor* Editor::wait_cursor = 0;
 Gdk::Cursor* Editor::timebar_cursor = 0;
 
@@ -1210,7 +1211,7 @@ Editor::build_cursors ()
 		mask = Bitmap::create (speaker_cursor_mask_bits, speaker_cursor_width, speaker_cursor_height);
 		speaker_cursor = new Gdk::Cursor (source, mask, ffg, fbg, speaker_cursor_x_hot, speaker_cursor_y_hot);
 	}
-
+	
 	grabber_cursor = new Gdk::Cursor (HAND2);
 	cross_hair_cursor = new Gdk::Cursor (CROSSHAIR);
 	trimmer_cursor =  new Gdk::Cursor (SB_H_DOUBLE_ARROW);
@@ -1218,6 +1219,7 @@ Editor::build_cursors ()
 	time_fx_cursor = new Gdk::Cursor (SIZING);
 	wait_cursor = new Gdk::Cursor  (WATCH);
 	timebar_cursor = new Gdk::Cursor(LEFT_PTR);
+	note_cursor = new Gdk::Cursor (PENCIL);
 }
 
 /** Pop up a context menu for when the user clicks on a fade in or fade out */
@@ -2322,6 +2324,9 @@ Editor::setup_toolbar ()
 	mouse_mode_buttons.push_back (&mouse_timefx_button);
 	mouse_audition_button.add (*(manage (new Image (::get_icon("tool_audition")))));
 	mouse_audition_button.set_relief(Gtk::RELIEF_NONE);
+	mouse_note_button.add (*(manage (new Image (::get_icon("tool_note")))));
+	mouse_note_button.set_relief(Gtk::RELIEF_NONE);
+	mouse_mode_buttons.push_back (&mouse_note_button);
 	mouse_mode_buttons.push_back (&mouse_audition_button);
 	
 	mouse_mode_button_set = new GroupedButtons (mouse_mode_buttons);
@@ -2336,6 +2341,7 @@ Editor::setup_toolbar ()
 	mouse_mode_button_box.pack_start(mouse_gain_button, true, true);
 	mouse_mode_button_box.pack_start(mouse_timefx_button, true, true);
 	mouse_mode_button_box.pack_start(mouse_audition_button, true, true);
+	mouse_mode_button_box.pack_start(mouse_note_button, true, true);
 	mouse_mode_button_box.set_homogeneous(true);
 
 	vector<string> edit_mode_strings;
@@ -2368,6 +2374,7 @@ Editor::setup_toolbar ()
 	mouse_zoom_button.set_name ("MouseModeButton");
 	mouse_timefx_button.set_name ("MouseModeButton");
 	mouse_audition_button.set_name ("MouseModeButton");
+	mouse_note_button.set_name ("MouseModeButton");
 
 	ARDOUR_UI::instance()->tooltips().set_tip (mouse_move_button, _("Select/Move Objects"));
 	ARDOUR_UI::instance()->tooltips().set_tip (mouse_select_button, _("Select/Move Ranges"));
@@ -2375,6 +2382,7 @@ Editor::setup_toolbar ()
 	ARDOUR_UI::instance()->tooltips().set_tip (mouse_zoom_button, _("Select Zoom Range"));
 	ARDOUR_UI::instance()->tooltips().set_tip (mouse_timefx_button, _("Stretch/Shrink Regions"));
 	ARDOUR_UI::instance()->tooltips().set_tip (mouse_audition_button, _("Listen to Specific Regions"));
+	ARDOUR_UI::instance()->tooltips().set_tip (mouse_note_button, _("Edit MIDI Notes"));
 
 	mouse_move_button.unset_flags (CAN_FOCUS);
 	mouse_select_button.unset_flags (CAN_FOCUS);
@@ -2382,6 +2390,7 @@ Editor::setup_toolbar ()
 	mouse_zoom_button.unset_flags (CAN_FOCUS);
 	mouse_timefx_button.unset_flags (CAN_FOCUS);
 	mouse_audition_button.unset_flags (CAN_FOCUS);
+	mouse_note_button.unset_flags (CAN_FOCUS);
 
 	mouse_select_button.signal_toggled().connect (bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseRange));
 	mouse_select_button.signal_button_release_event().connect (mem_fun(*this, &Editor::mouse_select_button_release));
@@ -2391,6 +2400,7 @@ Editor::setup_toolbar ()
 	mouse_zoom_button.signal_toggled().connect (bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseZoom));
 	mouse_timefx_button.signal_toggled().connect (bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseTimeFX));
 	mouse_audition_button.signal_toggled().connect (bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseAudition));
+	mouse_note_button.signal_toggled().connect (bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseNote));
 
 	// mouse_move_button.set_active (true);
 	

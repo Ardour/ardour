@@ -57,8 +57,6 @@ public:
 	int use_diskstream (string name);
 	int use_diskstream (const PBD::ID& id);
 
-	//int set_mode (TrackMode m);
-
 	void set_latency_delay (nframes_t);
 
 	int export_stuff (BufferSet& bufs,

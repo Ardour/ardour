@@ -21,6 +21,7 @@
 #define __ardour_midi_buffer_h__
 
 #include <ardour/buffer.h>
+#include <ardour/midi_event.h>
 
 namespace ARDOUR {
 

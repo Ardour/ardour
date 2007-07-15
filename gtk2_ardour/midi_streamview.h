@@ -58,8 +58,18 @@ class MidiStreamView : public StreamView
 	void get_selectables (jack_nframes_t start, jack_nframes_t end, list<Selectable* >&);
 	void get_inverted_selectables (Selection&, list<Selectable* >& results);
 
-	uint8_t lowest_note()  const { return _lowest_note; }
-	uint8_t highest_note() const { return _highest_note; }
+	enum VisibleNoteRange {
+		FullRange,
+		ContentsRange
+	};
+
+	VisibleNoteRange note_range() { return _range; }
+	void set_note_range(VisibleNoteRange r) { _range = r; }
+
+	uint8_t lowest_note()  const { return (_range == FullRange) ? 0 : _lowest_note; }
+	uint8_t highest_note() const { return (_range == FullRange) ? 127 : _highest_note; }
+	
+	void update_bounds(uint8_t note_num);
 	
 	void redisplay_diskstream ();
 
@@ -73,8 +83,9 @@ class MidiStreamView : public StreamView
 
 	void color_handler ();
 
-	uint8_t _lowest_note;
-	uint8_t _highest_note;
+	VisibleNoteRange _range;
+	uint8_t          _lowest_note;
+	uint8_t          _highest_note;
 };
 
 #endif /* __ardour_midi_streamview_h__ */

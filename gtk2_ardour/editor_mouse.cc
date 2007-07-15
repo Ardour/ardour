@@ -160,6 +160,12 @@ Editor::mouse_mode_toggled (MouseMode m)
 			set_mouse_mode (m);
 		}
 		break;
+	
+	case MouseNote:
+		if (mouse_note_button.get_active()) {
+			set_mouse_mode (m);
+		}
+		break;
 
 	default:
 		break;
@@ -244,6 +250,11 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 		mouse_audition_button.set_active (true);
 		current_canvas_cursor = speaker_cursor;
 		break;
+	
+	case MouseNote:
+		mouse_note_button.set_active (true);
+		current_canvas_cursor = note_cursor;
+		break;
 	}
 
 	ignore_mouse_mode_toggle = false;
@@ -285,6 +296,11 @@ Editor::step_mouse_mode (bool next)
 	case MouseAudition:
 		if (next) set_mouse_mode (MouseObject);
 		else set_mouse_mode (MouseTimeFX);
+		break;
+	
+	case MouseNote:
+		if (next) set_mouse_mode (MouseObject);
+		else set_mouse_mode (MouseAudition);
 		break;
 	}
 }

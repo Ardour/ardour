@@ -25,6 +25,7 @@
 #include <libgnomecanvasmm/polygon.h>
 #include <sigc++/signal.h>
 #include <ardour/midi_region.h>
+#include <ardour/midi_model.h>
 #include <ardour/types.h>
 
 #include "region_view.h"
@@ -64,6 +65,7 @@ class MidiRegionView : public RegionView
     GhostRegion* add_ghost (AutomationTimeAxisView&);
 
 	void add_event(const ARDOUR::MidiEvent& ev);
+	void add_note(const ARDOUR::MidiModel::Note& note);
 
 	void begin_write();
 	void end_write();
@@ -94,6 +96,8 @@ class MidiRegionView : public RegionView
 
 	void display_events();
 	void clear_events();
+
+	bool canvas_event(GdkEvent* ev);
 
 	std::vector<ArdourCanvas::Item*> _events;
 	ArdourCanvas::SimpleRect**       _active_notes;

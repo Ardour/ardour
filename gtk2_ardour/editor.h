@@ -808,6 +808,7 @@ class Editor : public PublicEditor
 	static Gdk::Cursor* time_fx_cursor;
 	static Gdk::Cursor* fader_cursor;
 	static Gdk::Cursor* speaker_cursor;
+	static Gdk::Cursor* note_cursor;
 	static Gdk::Cursor* wait_cursor;
 	static Gdk::Cursor* timebar_cursor;
 
@@ -1317,6 +1318,7 @@ class Editor : public PublicEditor
 	Gtk::ToggleButton        mouse_zoom_button;
 	Gtk::ToggleButton        mouse_timefx_button;
 	Gtk::ToggleButton        mouse_audition_button;
+	Gtk::ToggleButton        mouse_note_button;
 	GroupedButtons          *mouse_mode_button_set;
 	void                     mouse_mode_toggled (Editing::MouseMode m);
 	bool                     ignore_mouse_mode_toggle;

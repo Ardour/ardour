@@ -500,29 +500,42 @@ RouteTimeAxisView::build_display_menu ()
 	
 	if (is_track()) {
 
+		Menu *layers_menu = manage(new Menu);
+		MenuList &layers_items = layers_menu->items();
+		layers_menu->set_name("ArdourContextMenu");
+
+		RadioMenuItem::Group layers_group;
+
+		layers_items.push_back(RadioMenuElem (layers_group, _("Overlaid"),
+				bind (mem_fun (*this, &RouteTimeAxisView::set_layer_display), Overlaid)));
+		layers_items.push_back(RadioMenuElem (layers_group, _("Stacked"),
+				bind (mem_fun (*this, &RouteTimeAxisView::set_layer_display), Stacked)));
+
+		items.push_back (MenuElem (_("Layers"), *layers_menu));
+
 		Menu* alignment_menu = manage (new Menu);
 		MenuList& alignment_items = alignment_menu->items();
 		alignment_menu->set_name ("ArdourContextMenu");
 
 		RadioMenuItem::Group align_group;
-		
+
 		alignment_items.push_back (RadioMenuElem (align_group, _("Align with existing material"),
-			bind (mem_fun(*this, &RouteTimeAxisView::set_align_style), ExistingMaterial)));
+					bind (mem_fun(*this, &RouteTimeAxisView::set_align_style), ExistingMaterial)));
 		align_existing_item = dynamic_cast<RadioMenuItem*>(&alignment_items.back());
 		if (get_diskstream()->alignment_style() == ExistingMaterial)
 			align_existing_item->set_active();
-		
+
 		alignment_items.push_back (RadioMenuElem (align_group, _("Align with capture time"),
-			bind (mem_fun(*this, &RouteTimeAxisView::set_align_style), CaptureTime)));
+					bind (mem_fun(*this, &RouteTimeAxisView::set_align_style), CaptureTime)));
 		align_capture_item = dynamic_cast<RadioMenuItem*>(&alignment_items.back());
 		if (get_diskstream()->alignment_style() == CaptureTime)
 			align_capture_item->set_active();
-		
+
 		items.push_back (MenuElem (_("Alignment"), *alignment_menu));
 
 		get_diskstream()->AlignmentStyleChanged.connect (
 				mem_fun(*this, &RouteTimeAxisView::align_style_changed));
-		
+
 		mode_menu = build_mode_menu();
 		if (mode_menu)
 			items.push_back (MenuElem (_("Mode"), *mode_menu));
@@ -1980,3 +1993,8 @@ RouteTimeAxisView::update_rec_display ()
 	name_entry.set_sensitive (!_route->record_enabled());
 }
 		
+void
+RouteTimeAxisView::set_layer_display (LayerDisplay d)
+{
+	_view->set_layer_display (d);
+}

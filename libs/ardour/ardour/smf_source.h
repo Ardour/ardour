@@ -89,7 +89,7 @@ class SMFSource : public MidiSource {
 
 	void seek_to(nframes_t time);
 	
-	void load_model(bool lock=true);
+	void load_model(bool lock=true, bool force_reload=false);
 	void destroy_model();
 
 	uint16_t ppqn() const { return _ppqn; }

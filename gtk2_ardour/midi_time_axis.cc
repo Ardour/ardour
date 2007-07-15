@@ -157,6 +157,31 @@ MidiTimeAxisView::hide ()
 }
 
 void
+MidiTimeAxisView::append_extra_display_menu_items ()
+{
+	using namespace Menu_Helpers;
+
+	MenuList& items = display_menu->items();
+
+	// Note range
+	Menu *range_menu = manage(new Menu);
+	MenuList& range_items = range_menu->items();
+	range_menu->set_name ("ArdourContextMenu");
+	
+	RadioMenuItem::Group range_group;
+
+	range_items.push_back (RadioMenuElem (range_group, _("Show Full Range"), bind (
+			mem_fun(*this, &MidiTimeAxisView::set_note_range),
+			MidiStreamView::FullRange)));
+	
+	range_items.push_back (RadioMenuElem (range_group, _("Fit Contents"), bind (
+			mem_fun(*this, &MidiTimeAxisView::set_note_range),
+			MidiStreamView::ContentsRange)));
+
+	items.push_back (MenuElem (_("Note range"), *range_menu));
+}
+
+void
 MidiTimeAxisView::build_automation_action_menu ()
 {
 	using namespace Menu_Helpers;
@@ -203,6 +228,17 @@ MidiTimeAxisView::set_note_mode(NoteMode mode)
 		_view->redisplay_diskstream();
 	}
 }
+
+
+void
+MidiTimeAxisView::set_note_range(MidiStreamView::VisibleNoteRange range)
+{
+	//if (midi_view()->note_range() != range) {
+		midi_view()->set_note_range(range);
+		midi_view()->redisplay_diskstream();
+	//}
+}
+
 
 /** Prompt for a controller with a dialog and add an automation track for it
  */
@@ -284,4 +320,5 @@ MidiTimeAxisView::route_active_changed ()
 		}
 	}
 }
+
 

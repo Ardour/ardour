@@ -61,21 +61,6 @@ namespace ARDOUR {
 
 	typedef unsigned char Byte;
 
-	/** Identical to jack_midi_event_t, but with double timestamp
-	 *
-	 * time is either a frame time (from/to Jack) or a beat time (internal
-	 * tempo time, used in MidiModel) depending on context.
-	 */
-	struct MidiEvent {
-		MidiEvent(double t=0, size_t s=0, Byte* b=NULL)
-		: time(t), size(s), buffer(b)
-		{}
-		
-		double time;   /**< Sample index (or beat time) at which event is valid */
-		size_t size;   /**< Number of bytes of data in \a buffer */
-		Byte*  buffer; /**< Raw MIDI data */
-	};
-
 	enum IOChange {
 		NoChange = 0,
 		ConfigurationChanged = 0x1,

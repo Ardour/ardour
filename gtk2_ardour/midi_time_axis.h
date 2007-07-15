@@ -38,6 +38,7 @@
 #include "enums.h"
 #include "route_time_axis.h"
 #include "canvas.h"
+#include "midi_streamview.h"
 
 namespace ARDOUR {
 	class Session;
@@ -67,13 +68,15 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void create_automation_child (ARDOUR::Parameter param, bool show);
 
 	ARDOUR::NoteMode note_mode() const { return _note_mode; }
-
+	
   private:
 	
+	void append_extra_display_menu_items ();
 	void build_automation_action_menu ();
 	Gtk::Menu* build_mode_menu();
 
 	void set_note_mode(ARDOUR::NoteMode mode);
+	void set_note_range(MidiStreamView::VisibleNoteRange range);
 
 	void route_active_changed ();
 

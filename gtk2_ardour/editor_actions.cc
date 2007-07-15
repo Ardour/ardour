@@ -301,6 +301,7 @@ Editor::register_actions ()
 	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-gain", _("Gain Tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseGain, false));
 	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-zoom", _("Zoom Tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseZoom, false));
 	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Timefx Tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseTimeFX, false));
+	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-note", _("Note Tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseNote, false));
 
 	ActionManager::register_action (editor_actions, X_("SnapTo"), _("Snap To"));
 	ActionManager::register_action (editor_actions, X_("SnapMode"), _("Snap Mode"));

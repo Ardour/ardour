@@ -60,6 +60,7 @@ MOUSEMODE(MouseRange)
 MOUSEMODE(MouseTimeFX)
 MOUSEMODE(MouseZoom)
 MOUSEMODE(MouseAudition)
+MOUSEMODE(MouseNote)
 
 /* Changing this order will break the menu */
 ZOOMFOCUS(ZoomFocusLeft)
