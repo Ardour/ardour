@@ -248,6 +248,7 @@
                    <menu action='AudioFileFormatData'>
 		        <menuitem action='FileDataFormatFloat'/>
 		        <menuitem action='FileDataFormat24bit'/>
+		        <menuitem action='FileDataFormat16bit'/>
 		   </menu>
                    <menu action='AudioFileFormatHeader'>
 		        <menuitem action='FileHeaderFormatBWF'/>

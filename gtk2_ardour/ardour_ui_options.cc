@@ -135,6 +135,9 @@ ARDOUR_UI::set_native_file_data_format (SampleFormat sf)
 	case FormatInt24:
 		action = X_("FileDataFormat24bit");
 		break;
+	case FormatInt16:
+		action = X_("FileDataFormat16bit");
+		break;
 	default:
 		fatal << string_compose (_("programming error: %1"), "illegal file data format in ::set_native_file_data_format") << endmsg;
 		/*NOTREACHED*/
@@ -690,6 +693,10 @@ ARDOUR_UI::map_file_data_format ()
 
 	case FormatInt24:
 		action = X_("FileDataFormat24bit");
+		break;
+
+	case FormatInt16:
+		action = X_("FileDataFormat16bit");
 		break;
 
 	default:

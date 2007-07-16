@@ -483,6 +483,7 @@ ARDOUR_UI::install_actions ()
 
 	act = ActionManager::register_radio_action (option_actions, file_data_group, X_("FileDataFormatFloat"), X_("32-bit floating point"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_data_format), ARDOUR::FormatFloat));
 	act = ActionManager::register_radio_action (option_actions, file_data_group, X_("FileDataFormat24bit"), X_("24-bit signed integer"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_data_format), ARDOUR::FormatInt24));
+	act = ActionManager::register_radio_action (option_actions, file_data_group, X_("FileDataFormat16bit"), X_("16-bit signed integer"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_data_format), ARDOUR::FormatInt16));
 
 	RadioAction::Group monitoring_group;
 
