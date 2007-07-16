@@ -23,7 +23,7 @@
 
 XMLNode &Command::get_state()
 {
-    XMLNode *node = new XMLNode ("Command");
-    node->add_content("WARNING: Somebody forgot to subclass Command.");
-    return *node;
+	XMLNode *node = new XMLNode ("Command");
+	node->add_content("WARNING: Somebody forgot to subclass Command.");
+	return *node;
 }

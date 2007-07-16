@@ -1,5 +1,5 @@
 /* 
-   Copyright (C) 2002 Brett Viren & Paul Davis
+    Copyright (C) 2002 Brett Viren & Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ class UndoTransaction : public Command
 	void add_command (Command* const);
 	void remove_command (Command* const);
 
-        void operator() ();
+	void operator() ();
 	void undo();
 	void redo();
 
@@ -93,8 +93,8 @@ class UndoHistory : public sigc::trackable
 	void clear_undo ();
 	void clear_redo ();
 
-        XMLNode &get_state(uint32_t depth = 0);
-        void save_state();
+	XMLNode &get_state(uint32_t depth = 0);
+	void save_state();
 
 	sigc::signal<void> Changed;
 

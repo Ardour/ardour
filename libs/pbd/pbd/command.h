@@ -1,5 +1,6 @@
 /* 
-   Copyright (C) 2006 Hans Fugal & Paul Davis
+    Copyright (C) 2006 Paul Davis
+    Author: Hans Fugal
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,13 +25,16 @@
 
 class Command : public PBD::StatefulDestructible
 {
-    public:
+public:
 	virtual ~Command() {}
+
 	virtual void operator() () = 0;
-        virtual void undo() = 0;
-        virtual void redo() { (*this)(); }
-        virtual XMLNode &get_state();
-        virtual int set_state(const XMLNode&) { /* noop */ return 0; }
+	
+	virtual void undo() = 0;
+	virtual void redo() { (*this)(); }
+	
+	virtual XMLNode &get_state();
+	virtual int set_state(const XMLNode&) { /* noop */ return 0; }
 };
 
 #endif // __lib_pbd_command_h_

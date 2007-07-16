@@ -1,5 +1,6 @@
 /* 
-   Copyright (C) 2006 Hans Fugal & Paul Davis
+    Copyright (C) 2006 Paul Davis
+    Author: Hans Fugal
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,8 +22,6 @@
 #define __lib_pbd_memento_command_h__
 
 #include <iostream>
-using std::cerr;
-using std::endl;
 
 #include <pbd/command.h>
 #include <pbd/stacktrace.h>
@@ -36,66 +35,67 @@ using std::endl;
  * (from Stateful::get_state()), so undo becomes restoring the before
  * memento, and redo is restoring the after memento.
  */
-
 template <class obj_T>
 class MementoCommand : public Command
 {
-    public:
-        MementoCommand(obj_T &object, 
-                       XMLNode *before,
-                       XMLNode *after
-                       ) 
-            : obj(object), before(before), after(after) {
+public:
+	MementoCommand(obj_T &object, XMLNode *before, XMLNode *after) 
+		: obj(object), before(before), after(after)
+	{
 		/* catch destruction of the object */
 		new PBD::Shiva<obj_T,MementoCommand<obj_T> > (object, *this);
 	}
 
-	~MementoCommand () {
-		GoingAway();
-		if (before) {
+	~MementoCommand ()
+	{
+		GoingAway(); /* EMIT SIGNAL */
+		
+		if (before)
 			delete before;
-		}
-		if (after) {
+		
+		if (after)
 			delete after;
-		}
 	}
-        void operator() () 
-        {
-            if (after)
-                obj.set_state(*after); 
-        }
-        void undo() 
-        { 
-            if (before)
-                obj.set_state(*before); 
-        }
-        virtual XMLNode &get_state() 
-        {
-            string name;
-            if (before && after)
-                name = "MementoCommand";
-            else if (before)
-                name = "MementoUndoCommand";
-            else
-                name = "MementoRedoCommand";
 
-	    
-            XMLNode *node = new XMLNode(name);
+	void operator() () 
+	{
+		if (after)
+			obj.set_state(*after); 
+	}
 
-	    node->add_property("obj_id", obj.id().to_s());
-	    node->add_property("type_name", typeid(obj).name());
-	    
-	    if (before)
-		    node->add_child_copy(*before);
-	    if (after)
-		    node->add_child_copy(*after);
+	void undo() 
+	{ 
+		if (before)
+			obj.set_state(*before); 
+	}
 
-            return *node;
-        }
+	virtual XMLNode &get_state() 
+	{
+		string name;
+		if (before && after)
+			name = "MementoCommand";
+		else if (before)
+			name = "MementoUndoCommand";
+		else
+			name = "MementoRedoCommand";
 
-    protected:
-        obj_T &obj;
-        XMLNode *before, *after;
+		XMLNode *node = new XMLNode(name);
+
+		node->add_property("obj_id", obj.id().to_s());
+		node->add_property("type_name", typeid(obj).name());
+
+		if (before)
+			node->add_child_copy(*before);
+		
+		if (after)
+			node->add_child_copy(*after);
+
+		return *node;
+	}
+
+protected:
+	obj_T &obj;
+	XMLNode *before, *after;
 };
 
 #endif // __lib_pbd_memento_h__
