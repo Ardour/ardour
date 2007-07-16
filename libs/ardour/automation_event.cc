@@ -379,7 +379,7 @@ AutomationList::rt_add (double when, double value)
 				}
 			}
 		}
-		
+
 		if (!done) {
 			_rt_insertion_point = _events.insert (where, new ControlEvent (when, value));
 		}

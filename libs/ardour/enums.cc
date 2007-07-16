@@ -204,6 +204,7 @@ setup_enum_writer ()
 
 	REGISTER_ENUM (FormatFloat);
 	REGISTER_ENUM (FormatInt24);
+	REGISTER_ENUM (FormatInt16);
 	REGISTER (_SampleFormat);
 
 	REGISTER_ENUM (BWF);

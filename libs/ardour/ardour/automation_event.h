@@ -50,9 +50,9 @@ struct ControlEvent {
 	    coeff[0] = coeff[1] = coeff[2] = coeff[3] = 0.0;
 	}
     
-	double when;
+    double when;
     double value;
-	double coeff[4]; ///< Used by Curve
+    double coeff[4]; ///< Used by Curve
 };
 
 
