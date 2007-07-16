@@ -191,6 +191,11 @@ class Surface
         end
         
         # add the new control to the various lookups
+        if @controls_by_id.has_key?( row.id ) && control.group.class != Strip
+          duplicated = @controls_by_id[row.id]
+          puts "duplicate id #{control.id}:#{control.name} of #{duplicated.id}:#{duplicated.name}"
+        end
+        
         @controls_by_id[row.id] = control
         @controls << control
         group << control

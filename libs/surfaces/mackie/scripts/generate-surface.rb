@@ -1,18 +1,20 @@
 #! /usr/bin/ruby
 
+this_dir = File.dirname(__FILE__)
+
 require 'erb'
 
-require File.dirname(__FILE__) + '/controls.rb'
+require this_dir + '/controls.rb'
 
 cc_template = ''
-File.open( File.dirname(__FILE__) + "/surface-cc-template.erb", "r" ) { |f| cc_template = f.read }
+File.open( this_dir + "/surface-cc-template.erb", "r" ) { |f| cc_template = f.read }
 
 h_template = ''
-File.open( File.dirname(__FILE__) + "/surface-h-template.erb", "r" ) { |f| h_template = f.read }
+File.open( this_dir + "/surface-h-template.erb", "r" ) { |f| h_template = f.read }
 
 sf = Surface.new( ARGV[0] )
 control_data = ''
-File.open( File.dirname(__FILE__) + "/#{sf.name.downcase}-controls.csv", "r") { |f| control_data = f.read }
+File.open( this_dir + "/#{sf.name.downcase}-controls.csv", "r") { |f| control_data = f.read }
 sf.parse control_data
 
 @result = ""
