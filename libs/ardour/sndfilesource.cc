@@ -122,6 +122,10 @@ SndFileSource::SndFileSource (Session& s, ustring path, SampleFormat sfmt, Heade
 	case FormatInt24:
 		fmt |= SF_FORMAT_PCM_24;
 		break;
+
+	case FormatInt16:
+		fmt |= SF_FORMAT_PCM_16;
+		break;
 	}
 	
 	_info.channels = 1;

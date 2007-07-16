@@ -315,7 +315,8 @@ namespace ARDOUR {
 
 	enum SampleFormat {
 		FormatFloat = 0,
-		FormatInt24
+		FormatInt24,
+		FormatInt16
 	};
 
 

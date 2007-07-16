@@ -3529,6 +3529,10 @@ Session::available_capture_duration ()
 		sample_bytes_on_disk = 3.0;
 		break;
 
+	case FormatInt16:
+		sample_bytes_on_disk = 2.0;
+		break;
+
 	default: 
 		/* impossible, but keep some gcc versions happy */
 		fatal << string_compose (_("programming error: %1"),

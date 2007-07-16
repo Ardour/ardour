@@ -2564,6 +2564,9 @@ ARDOUR_UI::use_config ()
 	case FormatInt24:
 		act = ActionManager::get_action (X_("options"), X_("FileDataFormat24bit"));
 		break;
+	case FormatInt16:
+		act = ActionManager::get_action (X_("options"), X_("FileDataFormat16bit"));
+		break;
 	}
 
 	if (act) {
