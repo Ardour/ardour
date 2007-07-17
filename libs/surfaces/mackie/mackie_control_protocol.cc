@@ -876,7 +876,7 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 			{
 				if ( route != 0 )
 				{
-					if ( route->panner().size() == 1 )
+					if ( route->panner().size() == 1 || ( route->panner().size() == 2 && route->panner().linked() ) )
 					{
 						// assume pan for now
 						float xpos;
@@ -1006,18 +1006,18 @@ void MackieControlProtocol::notify_name_changed( void *, RouteSignal * route_sig
 	}
 }
 
-// TODO deal with > 1 channel being panned
 void MackieControlProtocol::notify_panner_changed( RouteSignal * route_signal )
 {
 	try
 	{
 		Pot & pot = route_signal->strip().vpot();
-		
-		if ( route_signal->route().panner().size() == 1 )
+		const Panner & panner = route_signal->route().panner();
+		cout << "panner from ardour" << panner.size() << " " << boolalpha << panner.linked() << endl;
+		if ( panner.size() == 1 || ( panner.size() == 2 && panner.linked() ) )
 		{
 			float pos;
-			route_signal->route().panner()[0]->get_effective_position( pos);
-			route_signal->port().write( builder.build_led_ring( pot, ControlState( on, pos ) ) );
+			route_signal->route().panner()[0]->get_effective_position( pos );
+			route_signal->port().write( builder.build_led_ring( pot, ControlState( on, pos ), MackieMidiBuilder::midi_pot_mode_dot ) );
 		}
 		else
 		{

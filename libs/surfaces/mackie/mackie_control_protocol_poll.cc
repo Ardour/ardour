@@ -88,7 +88,9 @@ void MackieControlProtocol::update_ports()
 
 			for( MackiePorts::iterator it = _ports.begin(); it != _ports.end(); ++it )
 			{
-				//cout << "adding port " << (*it)->port().name() << " to pollfd" << endl;
+#ifdef DEBUG
+				cout << "adding port " << (*it)->port().name() << " to pollfd" << endl;
+#endif
 				pfd[nfds].fd = (*it)->port().selectable();
 				pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
 				++nfds;
@@ -179,14 +181,18 @@ void MackieControlProtocol::handle_port_active( SurfacePort * port )
 	// finally update session state to the surface
 	// TODO but this is also done in set_active, and
 	// in fact update_surface won't execute unless
+#ifdef DEBUG
+	cout << "update_surface in handle_port_active" << endl;
+#endif
 	// _active == true
-	//cout << "update_surface in handle_port_active" << endl;
 	update_surface();
 }
 
 void MackieControlProtocol::handle_port_init( Mackie::SurfacePort * sport )
 {
-	//cout << "MackieControlProtocol::handle_port_init" << endl;
+#ifdef DEBUG
+	cout << "MackieControlProtocol::handle_port_init" << endl;
+#endif
 	_ports_changed = true;
 	update_ports();
 }

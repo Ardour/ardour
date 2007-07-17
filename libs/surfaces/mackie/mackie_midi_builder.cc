@@ -44,12 +44,12 @@ MIDI::byte MackieMidiBuilder::calculate_pot_value( midi_pot_mode mode, const Con
 	return retval;
 }
 
-MidiByteArray MackieMidiBuilder::build_led_ring( const Pot & pot, const ControlState & state )
+MidiByteArray MackieMidiBuilder::build_led_ring( const Pot & pot, const ControlState & state, midi_pot_mode mode  )
 {
-	return build_led_ring( pot.led_ring(), state );
+	return build_led_ring( pot.led_ring(), state, mode );
 }
 
-MidiByteArray MackieMidiBuilder::build_led_ring( const LedRing & led_ring, const ControlState & state )
+MidiByteArray MackieMidiBuilder::build_led_ring( const LedRing & led_ring, const ControlState & state, midi_pot_mode mode )
 {
 	// The other way of doing this:
 	// 0x30 + pot/ring number (0-7)
@@ -60,7 +60,7 @@ MidiByteArray MackieMidiBuilder::build_led_ring( const LedRing & led_ring, const
 		// the id
 		, 0x20 + led_ring.raw_id()
 		// the value
-		, calculate_pot_value( midi_pot_mode_dot, state )
+		, calculate_pot_value( mode, state )
 	);
 }
 

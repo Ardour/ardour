@@ -7,11 +7,6 @@
 #include "controls.h"
 #include "mackie_button_handler.h"
 
-#ifdef DEBUG
-#include <iostream>
-using namespace std;
-#endif
-
 using namespace Mackie;
 
 void Mackie::BcfSurface::init_controls()
@@ -936,9 +931,6 @@ void Mackie::BcfSurface::handle_button( MackieButtonHandler & mbh, ButtonState b
 	}
 	
 	LedState ls;
-#ifdef DEBUG
-	cout << button << " switching on " << hex << button.id() << endl;
-#endif
 	switch ( button.id() )
 	{
 

@@ -64,26 +64,6 @@ void Surface::init_strips( uint32_t max_strips, uint32_t unit_strips )
 	}
 }
 
-ostream & Mackie::operator << ( ostream & os, const Mackie::Control & control )
-{
-	os << typeid( control ).name();
-	os << " { ";
-	os << "name: " << control.name();
-	os << ", ";
-	os << "id: " << "0x" << setw(4) << setfill('0') << hex << control.id() << setfill(' ');
-	os << ", ";
-	os << "type: " << "0x" << setw(2) << setfill('0') << hex << control.type() << setfill(' ');
-	os << ", ";
-	os << "raw_id: " << "0x" << setw(2) << setfill('0') << hex << control.raw_id() << setfill(' ');
-	os << ", ";
-	os << "ordinal: " << dec << control.ordinal();
-	os << ", ";
-	os << "group: " << control.group().name();
-	os << " }";
-	
-	return os;
-}
-
 /**
 	TODO could optimise this to use enum, but it's only
 	called during the protocol class instantiation.

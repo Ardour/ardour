@@ -107,3 +107,23 @@ Button & Strip::fader_touch()
 		throw MackieControlException( "fader_touch is null" );
 	return *_fader_touch;
 }
+
+ostream & Mackie::operator << ( ostream & os, const Mackie::Control & control )
+{
+	os << typeid( control ).name();
+	os << " { ";
+	os << "name: " << control.name();
+	os << ", ";
+	os << "id: " << "0x" << setw(4) << setfill('0') << hex << control.id() << setfill(' ');
+	os << ", ";
+	os << "type: " << "0x" << setw(2) << setfill('0') << hex << control.type() << setfill(' ');
+	os << ", ";
+	os << "raw_id: " << "0x" << setw(2) << setfill('0') << hex << control.raw_id() << setfill(' ');
+	os << ", ";
+	os << "ordinal: " << dec << control.ordinal();
+	os << ", ";
+	os << "group: " << control.group().name();
+	os << " }";
+	
+	return os;
+}

@@ -20,6 +20,8 @@
 
 #include <sigc++/sigc++.h>
 
+#include <vector>
+
 class MackieControlProtocol;
 
 namespace ARDOUR {
@@ -68,12 +70,8 @@ private:
 	Strip & _strip;
 	MackiePort & _port;	
 
-	sigc::connection _solo_changed_connection;
-	sigc::connection _mute_changed_connection;
-	sigc::connection _record_enable_changed_connection;
-	sigc::connection _gain_changed_connection;
-	sigc::connection _name_changed_connection;
-	sigc::connection _panner_changed_connection;
+	typedef std::vector<sigc::connection> Connections;
+	Connections _connections;
 };
 
 }

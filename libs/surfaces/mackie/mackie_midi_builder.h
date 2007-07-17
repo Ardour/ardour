@@ -53,8 +53,8 @@ public:
 		, midi_pot_mode_spread = 3
 	};
 
-	MidiByteArray build_led_ring( const Pot & pot, const ControlState & );
-	MidiByteArray build_led_ring( const LedRing & led_ring, const ControlState & );
+	MidiByteArray build_led_ring( const Pot & pot, const ControlState &, midi_pot_mode mode = midi_pot_mode_dot );
+	MidiByteArray build_led_ring( const LedRing & led_ring, const ControlState &, midi_pot_mode mode = midi_pot_mode_dot );
 
   	MidiByteArray build_led( const Led & led, LedState ls );
   	MidiByteArray build_led( const Button & button, LedState ls );
