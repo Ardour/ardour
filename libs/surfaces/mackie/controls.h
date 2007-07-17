@@ -151,7 +151,7 @@ class Led;
 class Control
 {
 public:
-	enum type_t { type_fader, type_button, type_pot, type_led, type_led_ring };
+	enum type_t { type_led, type_led_ring, type_fader = 0xe0, type_button = 0x90, type_pot = 0xb0 };
 	
 	Control( int id, int ordinal, std::string name, Group & group )
 	: _id( id ), _ordinal( ordinal ), _name( name ), _group( group )
@@ -165,17 +165,20 @@ public:
 		throw MackieControlException( "no led available" );
 	}
 
-	/// The midi id of the control
+	/// type() << 8 + midi id of the control. This
+	/// provides a unique id of any control on the surface.
 	int id() const
 	{
-		return _id;
+		return ( type() << 8 ) + _id;
 	}
 	
+	/// the value of the second bytes of the message. It's
+	/// the id of the control, but only guaranteed to be
+	/// unique within the control type.
+	int raw_id() const { return _id; }
+	
 	/// The 1-based number of the control
-	int ordinal() const
-	{
-		return _ordinal;
-	}
+	int ordinal() const { return _ordinal; }
 	
 	const std::string & name() const
 	{

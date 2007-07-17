@@ -82,7 +82,7 @@ void Mackie::<%= sf.name %>Surface::handle_button( MackieButtonHandler & mbh, Bu
 buttons = sf.controls.find_all{|x| x.class == Button && x.group.class != Strip}
 buttons.each do |button|
 %>
-		case 0x<%= button.id.to_hex %>: // <%= button.name %>
+		case 0x<%= ( button.class.midi_zero_byte << 8 | button.id ).to_hex %>: // <%= button.name %>
 			switch ( bs ) {
 				case press: ls = mbh.<%= button.name %>_press( button ); break;
 				case release: ls = mbh.<%= button.name %>_release( button ); break;

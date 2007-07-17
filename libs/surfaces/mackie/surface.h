@@ -53,6 +53,8 @@ public:
 		These are alternative addressing schemes
 		They use maps because the indices aren't always
 		0-based.
+		
+		Indexed by raw_id not by id. @see Control for the distinction.
 	*/
 	std::map<int,Control*> faders;
 	std::map<int,Control*> pots;

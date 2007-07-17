@@ -987,7 +987,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 	switch ( button.id() )
 	{
 
-		case 0x28: // io
+		case 0x9028: // io
 			switch ( bs ) {
 				case press: ls = mbh.io_press( button ); break;
 				case release: ls = mbh.io_release( button ); break;
@@ -995,7 +995,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x29: // sends
+		case 0x9029: // sends
 			switch ( bs ) {
 				case press: ls = mbh.sends_press( button ); break;
 				case release: ls = mbh.sends_release( button ); break;
@@ -1003,7 +1003,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x2a: // pan
+		case 0x902a: // pan
 			switch ( bs ) {
 				case press: ls = mbh.pan_press( button ); break;
 				case release: ls = mbh.pan_release( button ); break;
@@ -1011,7 +1011,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x2b: // plugin
+		case 0x902b: // plugin
 			switch ( bs ) {
 				case press: ls = mbh.plugin_press( button ); break;
 				case release: ls = mbh.plugin_release( button ); break;
@@ -1019,7 +1019,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x2c: // eq
+		case 0x902c: // eq
 			switch ( bs ) {
 				case press: ls = mbh.eq_press( button ); break;
 				case release: ls = mbh.eq_release( button ); break;
@@ -1027,7 +1027,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x2d: // dyn
+		case 0x902d: // dyn
 			switch ( bs ) {
 				case press: ls = mbh.dyn_press( button ); break;
 				case release: ls = mbh.dyn_release( button ); break;
@@ -1035,7 +1035,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x2e: // left
+		case 0x902e: // left
 			switch ( bs ) {
 				case press: ls = mbh.left_press( button ); break;
 				case release: ls = mbh.left_release( button ); break;
@@ -1043,7 +1043,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x2f: // right
+		case 0x902f: // right
 			switch ( bs ) {
 				case press: ls = mbh.right_press( button ); break;
 				case release: ls = mbh.right_release( button ); break;
@@ -1051,7 +1051,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x30: // channel_left
+		case 0x9030: // channel_left
 			switch ( bs ) {
 				case press: ls = mbh.channel_left_press( button ); break;
 				case release: ls = mbh.channel_left_release( button ); break;
@@ -1059,7 +1059,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x31: // channel_right
+		case 0x9031: // channel_right
 			switch ( bs ) {
 				case press: ls = mbh.channel_right_press( button ); break;
 				case release: ls = mbh.channel_right_release( button ); break;
@@ -1067,7 +1067,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x32: // flip
+		case 0x9032: // flip
 			switch ( bs ) {
 				case press: ls = mbh.flip_press( button ); break;
 				case release: ls = mbh.flip_release( button ); break;
@@ -1075,7 +1075,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x33: // edit
+		case 0x9033: // edit
 			switch ( bs ) {
 				case press: ls = mbh.edit_press( button ); break;
 				case release: ls = mbh.edit_release( button ); break;
@@ -1083,7 +1083,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x34: // name_value
+		case 0x9034: // name_value
 			switch ( bs ) {
 				case press: ls = mbh.name_value_press( button ); break;
 				case release: ls = mbh.name_value_release( button ); break;
@@ -1091,7 +1091,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x35: // smpte_beats
+		case 0x9035: // smpte_beats
 			switch ( bs ) {
 				case press: ls = mbh.smpte_beats_press( button ); break;
 				case release: ls = mbh.smpte_beats_release( button ); break;
@@ -1099,7 +1099,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x36: // F1
+		case 0x9036: // F1
 			switch ( bs ) {
 				case press: ls = mbh.F1_press( button ); break;
 				case release: ls = mbh.F1_release( button ); break;
@@ -1107,7 +1107,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x37: // F2
+		case 0x9037: // F2
 			switch ( bs ) {
 				case press: ls = mbh.F2_press( button ); break;
 				case release: ls = mbh.F2_release( button ); break;
@@ -1115,7 +1115,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x38: // F3
+		case 0x9038: // F3
 			switch ( bs ) {
 				case press: ls = mbh.F3_press( button ); break;
 				case release: ls = mbh.F3_release( button ); break;
@@ -1123,7 +1123,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x39: // F4
+		case 0x9039: // F4
 			switch ( bs ) {
 				case press: ls = mbh.F4_press( button ); break;
 				case release: ls = mbh.F4_release( button ); break;
@@ -1131,7 +1131,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x3a: // F5
+		case 0x903a: // F5
 			switch ( bs ) {
 				case press: ls = mbh.F5_press( button ); break;
 				case release: ls = mbh.F5_release( button ); break;
@@ -1139,7 +1139,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x3b: // F6
+		case 0x903b: // F6
 			switch ( bs ) {
 				case press: ls = mbh.F6_press( button ); break;
 				case release: ls = mbh.F6_release( button ); break;
@@ -1147,7 +1147,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x3c: // F7
+		case 0x903c: // F7
 			switch ( bs ) {
 				case press: ls = mbh.F7_press( button ); break;
 				case release: ls = mbh.F7_release( button ); break;
@@ -1155,7 +1155,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x3d: // F8
+		case 0x903d: // F8
 			switch ( bs ) {
 				case press: ls = mbh.F8_press( button ); break;
 				case release: ls = mbh.F8_release( button ); break;
@@ -1163,7 +1163,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x3e: // F9
+		case 0x903e: // F9
 			switch ( bs ) {
 				case press: ls = mbh.F9_press( button ); break;
 				case release: ls = mbh.F9_release( button ); break;
@@ -1171,7 +1171,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x3f: // F10
+		case 0x903f: // F10
 			switch ( bs ) {
 				case press: ls = mbh.F10_press( button ); break;
 				case release: ls = mbh.F10_release( button ); break;
@@ -1179,7 +1179,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x40: // F11
+		case 0x9040: // F11
 			switch ( bs ) {
 				case press: ls = mbh.F11_press( button ); break;
 				case release: ls = mbh.F11_release( button ); break;
@@ -1187,7 +1187,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x41: // F12
+		case 0x9041: // F12
 			switch ( bs ) {
 				case press: ls = mbh.F12_press( button ); break;
 				case release: ls = mbh.F12_release( button ); break;
@@ -1195,7 +1195,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x42: // F13
+		case 0x9042: // F13
 			switch ( bs ) {
 				case press: ls = mbh.F13_press( button ); break;
 				case release: ls = mbh.F13_release( button ); break;
@@ -1203,7 +1203,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x43: // F14
+		case 0x9043: // F14
 			switch ( bs ) {
 				case press: ls = mbh.F14_press( button ); break;
 				case release: ls = mbh.F14_release( button ); break;
@@ -1211,7 +1211,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x44: // F15
+		case 0x9044: // F15
 			switch ( bs ) {
 				case press: ls = mbh.F15_press( button ); break;
 				case release: ls = mbh.F15_release( button ); break;
@@ -1219,7 +1219,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x45: // F16
+		case 0x9045: // F16
 			switch ( bs ) {
 				case press: ls = mbh.F16_press( button ); break;
 				case release: ls = mbh.F16_release( button ); break;
@@ -1227,7 +1227,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x46: // shift
+		case 0x9046: // shift
 			switch ( bs ) {
 				case press: ls = mbh.shift_press( button ); break;
 				case release: ls = mbh.shift_release( button ); break;
@@ -1235,7 +1235,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x47: // option
+		case 0x9047: // option
 			switch ( bs ) {
 				case press: ls = mbh.option_press( button ); break;
 				case release: ls = mbh.option_release( button ); break;
@@ -1243,7 +1243,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x48: // control
+		case 0x9048: // control
 			switch ( bs ) {
 				case press: ls = mbh.control_press( button ); break;
 				case release: ls = mbh.control_release( button ); break;
@@ -1251,7 +1251,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x49: // cmd_alt
+		case 0x9049: // cmd_alt
 			switch ( bs ) {
 				case press: ls = mbh.cmd_alt_press( button ); break;
 				case release: ls = mbh.cmd_alt_release( button ); break;
@@ -1259,7 +1259,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x4a: // on
+		case 0x904a: // on
 			switch ( bs ) {
 				case press: ls = mbh.on_press( button ); break;
 				case release: ls = mbh.on_release( button ); break;
@@ -1267,7 +1267,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x4b: // rec_ready
+		case 0x904b: // rec_ready
 			switch ( bs ) {
 				case press: ls = mbh.rec_ready_press( button ); break;
 				case release: ls = mbh.rec_ready_release( button ); break;
@@ -1275,7 +1275,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x4c: // undo
+		case 0x904c: // undo
 			switch ( bs ) {
 				case press: ls = mbh.undo_press( button ); break;
 				case release: ls = mbh.undo_release( button ); break;
@@ -1283,7 +1283,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x4d: // snapshot
+		case 0x904d: // snapshot
 			switch ( bs ) {
 				case press: ls = mbh.snapshot_press( button ); break;
 				case release: ls = mbh.snapshot_release( button ); break;
@@ -1291,7 +1291,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x4e: // touch
+		case 0x904e: // touch
 			switch ( bs ) {
 				case press: ls = mbh.touch_press( button ); break;
 				case release: ls = mbh.touch_release( button ); break;
@@ -1299,7 +1299,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x4f: // redo
+		case 0x904f: // redo
 			switch ( bs ) {
 				case press: ls = mbh.redo_press( button ); break;
 				case release: ls = mbh.redo_release( button ); break;
@@ -1307,7 +1307,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x50: // marker
+		case 0x9050: // marker
 			switch ( bs ) {
 				case press: ls = mbh.marker_press( button ); break;
 				case release: ls = mbh.marker_release( button ); break;
@@ -1315,7 +1315,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x51: // enter
+		case 0x9051: // enter
 			switch ( bs ) {
 				case press: ls = mbh.enter_press( button ); break;
 				case release: ls = mbh.enter_release( button ); break;
@@ -1323,7 +1323,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x52: // cancel
+		case 0x9052: // cancel
 			switch ( bs ) {
 				case press: ls = mbh.cancel_press( button ); break;
 				case release: ls = mbh.cancel_release( button ); break;
@@ -1331,7 +1331,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x53: // mixer
+		case 0x9053: // mixer
 			switch ( bs ) {
 				case press: ls = mbh.mixer_press( button ); break;
 				case release: ls = mbh.mixer_release( button ); break;
@@ -1339,7 +1339,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x54: // frm_left
+		case 0x9054: // frm_left
 			switch ( bs ) {
 				case press: ls = mbh.frm_left_press( button ); break;
 				case release: ls = mbh.frm_left_release( button ); break;
@@ -1347,7 +1347,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x55: // frm_right
+		case 0x9055: // frm_right
 			switch ( bs ) {
 				case press: ls = mbh.frm_right_press( button ); break;
 				case release: ls = mbh.frm_right_release( button ); break;
@@ -1355,7 +1355,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x56: // loop
+		case 0x9056: // loop
 			switch ( bs ) {
 				case press: ls = mbh.loop_press( button ); break;
 				case release: ls = mbh.loop_release( button ); break;
@@ -1363,7 +1363,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x57: // punch_in
+		case 0x9057: // punch_in
 			switch ( bs ) {
 				case press: ls = mbh.punch_in_press( button ); break;
 				case release: ls = mbh.punch_in_release( button ); break;
@@ -1371,7 +1371,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x58: // punch_out
+		case 0x9058: // punch_out
 			switch ( bs ) {
 				case press: ls = mbh.punch_out_press( button ); break;
 				case release: ls = mbh.punch_out_release( button ); break;
@@ -1379,7 +1379,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x59: // home
+		case 0x9059: // home
 			switch ( bs ) {
 				case press: ls = mbh.home_press( button ); break;
 				case release: ls = mbh.home_release( button ); break;
@@ -1387,7 +1387,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x5a: // end
+		case 0x905a: // end
 			switch ( bs ) {
 				case press: ls = mbh.end_press( button ); break;
 				case release: ls = mbh.end_release( button ); break;
@@ -1395,7 +1395,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x5b: // rewind
+		case 0x905b: // rewind
 			switch ( bs ) {
 				case press: ls = mbh.rewind_press( button ); break;
 				case release: ls = mbh.rewind_release( button ); break;
@@ -1403,7 +1403,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x5c: // ffwd
+		case 0x905c: // ffwd
 			switch ( bs ) {
 				case press: ls = mbh.ffwd_press( button ); break;
 				case release: ls = mbh.ffwd_release( button ); break;
@@ -1411,7 +1411,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x5d: // stop
+		case 0x905d: // stop
 			switch ( bs ) {
 				case press: ls = mbh.stop_press( button ); break;
 				case release: ls = mbh.stop_release( button ); break;
@@ -1419,7 +1419,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x5e: // play
+		case 0x905e: // play
 			switch ( bs ) {
 				case press: ls = mbh.play_press( button ); break;
 				case release: ls = mbh.play_release( button ); break;
@@ -1427,7 +1427,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x5f: // record
+		case 0x905f: // record
 			switch ( bs ) {
 				case press: ls = mbh.record_press( button ); break;
 				case release: ls = mbh.record_release( button ); break;
@@ -1435,7 +1435,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x60: // cursor_up
+		case 0x9060: // cursor_up
 			switch ( bs ) {
 				case press: ls = mbh.cursor_up_press( button ); break;
 				case release: ls = mbh.cursor_up_release( button ); break;
@@ -1443,7 +1443,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x61: // cursor_down
+		case 0x9061: // cursor_down
 			switch ( bs ) {
 				case press: ls = mbh.cursor_down_press( button ); break;
 				case release: ls = mbh.cursor_down_release( button ); break;
@@ -1451,7 +1451,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x62: // cursor_left
+		case 0x9062: // cursor_left
 			switch ( bs ) {
 				case press: ls = mbh.cursor_left_press( button ); break;
 				case release: ls = mbh.cursor_left_release( button ); break;
@@ -1459,7 +1459,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x63: // cursor_right
+		case 0x9063: // cursor_right
 			switch ( bs ) {
 				case press: ls = mbh.cursor_right_press( button ); break;
 				case release: ls = mbh.cursor_right_release( button ); break;
@@ -1467,7 +1467,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x64: // zoom
+		case 0x9064: // zoom
 			switch ( bs ) {
 				case press: ls = mbh.zoom_press( button ); break;
 				case release: ls = mbh.zoom_release( button ); break;
@@ -1475,7 +1475,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x65: // scrub
+		case 0x9065: // scrub
 			switch ( bs ) {
 				case press: ls = mbh.scrub_press( button ); break;
 				case release: ls = mbh.scrub_release( button ); break;
@@ -1483,7 +1483,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x66: // user_a
+		case 0x9066: // user_a
 			switch ( bs ) {
 				case press: ls = mbh.user_a_press( button ); break;
 				case release: ls = mbh.user_a_release( button ); break;
@@ -1491,7 +1491,7 @@ void Mackie::MackieSurface::handle_button( MackieButtonHandler & mbh, ButtonStat
 			}
 			break;
 
-		case 0x67: // user_b
+		case 0x9067: // user_b
 			switch ( bs ) {
 				case press: ls = mbh.user_b_press( button ); break;
 				case release: ls = mbh.user_b_release( button ); break;

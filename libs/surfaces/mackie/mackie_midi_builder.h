@@ -20,6 +20,7 @@
 
 #include "midi_byte_array.h"
 #include "types.h"
+#include "controls.h"
 
 namespace Mackie
 {
@@ -37,9 +38,9 @@ public:
 		with the control id
 	*/
 	enum midi_types {
-		midi_fader_id = 0xe0
-		, midi_button_id = 0x90
-		, midi_pot_id = 0xb0
+		midi_fader_id = Control::type_fader
+		, midi_button_id = Control::type_button
+		, midi_pot_id = Control::type_pot
 	};
 
 	/**

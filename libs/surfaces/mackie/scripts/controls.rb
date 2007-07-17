@@ -191,6 +191,7 @@ class Surface
         end
         
         # add the new control to the various lookups
+        # but first print a warning if the id is duplicated
         if @controls_by_id.has_key?( row.id ) && control.group.class != Strip
           duplicated = @controls_by_id[row.id]
           puts "duplicate id #{control.id}:#{control.name} of #{duplicated.id}:#{duplicated.name}"
