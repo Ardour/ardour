@@ -787,7 +787,7 @@ SMFSource::load_model(bool lock, bool force_reload)
 	}
 
 	if (! _model)
-		_model = new MidiModel();
+		_model = new MidiModel(_session);
 
 	_model->start_write();
 

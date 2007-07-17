@@ -22,10 +22,14 @@
 #define __ardour_midi_model_h__
 
 #include <boost/utility.hpp>
+#include <pbd/command.h>
 #include <ardour/types.h>
 #include <ardour/midi_buffer.h>
 
 namespace ARDOUR {
+
+class Session;
+
 
 /** This is a slightly higher level (than MidiBuffer) model of MIDI note data.
  * Currently it only represents note data, which is represented as complete
@@ -39,13 +43,16 @@ public:
 		Note(double s=0, double d=0, uint8_t n=0, uint8_t v=0)
 		: start(s), duration(d), note(n), velocity(v) {}
 
+		inline bool operator==(const Note& other)
+			{ return start == other.start && note == other.note; }
+
 		double start;
 		double duration;
 		uint8_t note;
 		uint8_t velocity;
 	};
 
-	MidiModel(size_t size=0);
+	MidiModel(Session& s, size_t size=0);
 
 	void clear() { _notes.clear(); }
 
@@ -73,13 +80,47 @@ public:
 	inline       Notes& notes()       { return _notes; }
 	inline const Notes& notes() const { return _notes; }
 
+	void     begin_command();
+	Command* current_command() { return _command; }
+	void     finish_command();
+
+	// Commands
+	void add_note(const Note& note);
+	void remove_note(const Note& note);
+
+	sigc::signal<void> ContentsChanged;
+	
 private:
+	class MidiEditCommand : public Command
+	{
+	public:
+		MidiEditCommand (MidiModel& m) : _model(m) {}
+		//MidiEditCommand (MidiModel&, const XMLNode& node);
+		
+		void operator()();
+		void undo();
+		
+		/*int set_state (const XMLNode&);
+		XMLNode& get_state ();*/
+
+		void add_note(const Note& note);
+		void remove_note(const Note& note);
+
+	private:
+		MidiModel&      _model;
+		std::list<Note> _added_notes;
+		std::list<Note> _removed_notes;
+	};
 
 	void append_note_on(double time, uint8_t note, uint8_t velocity);
 	void append_note_off(double time, uint8_t note);
 
+	Session& _session;
+
 	Notes _notes;
 	Notes _write_notes;
+
+	MidiEditCommand* _command; ///< In-progress command
 };
 
 } /* namespace ARDOUR */

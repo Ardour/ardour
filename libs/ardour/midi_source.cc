@@ -44,7 +44,7 @@ sigc::signal<void,MidiSource *> MidiSource::MidiSourceCreated;
 
 MidiSource::MidiSource (Session& s, string name)
 	: Source (s, name, DataType::MIDI)
-	, _model(new MidiModel())
+	, _model(new MidiModel(s))
 	, _model_loaded (false)
 {
 	_read_data_count = 0;
@@ -53,7 +53,7 @@ MidiSource::MidiSource (Session& s, string name)
 
 MidiSource::MidiSource (Session& s, const XMLNode& node) 
 	: Source (s, node)
-	, _model(new MidiModel())
+	, _model(new MidiModel(s))
 	, _model_loaded (false)
 {
 	_read_data_count = 0;

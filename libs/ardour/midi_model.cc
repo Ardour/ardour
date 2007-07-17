@@ -22,13 +22,16 @@
 #include <ardour/midi_model.h>
 #include <ardour/midi_events.h>
 #include <ardour/types.h>
+#include <ardour/session.h>
 
 using namespace std;
 using namespace ARDOUR;
 
 
-MidiModel::MidiModel(size_t size)
-	: _notes(size)
+MidiModel::MidiModel(Session& s, size_t size)
+	: _session(s)
+	, _notes(size)
+	, _command(NULL)
 {
 }
 
@@ -138,5 +141,100 @@ MidiModel::append_note_off(double time, uint8_t note_num)
 			break;
 		}
 	}
+}
+
+
+void
+MidiModel::add_note(const Note& note)
+{
+	Notes::iterator i = upper_bound(_notes.begin(), _notes.end(), note, NoteTimeComparator());
+	_notes.insert(i, note);
+	if (_command)
+		_command->add_note(note);
+}
+
+
+void
+MidiModel::remove_note(const Note& note)
+{
+	Notes::iterator n = find(_notes.begin(), _notes.end(), note);
+	if (n != _notes.end())
+		_notes.erase(n);
+	
+	if (_command)
+		_command->remove_note(note);
+}
+
+
+
+void
+MidiModel::begin_command()
+{
+	assert(!_command);
+	_session.begin_reversible_command("midi edit");
+	_command = new MidiEditCommand(*this);
+}
+
+
+void
+MidiModel::finish_command()
+{
+	_session.commit_reversible_command(_command);
+	_command = NULL;
+}
+
+
+// MidiEditCommand
+
+
+void
+MidiModel::MidiEditCommand::add_note(const Note& note)
+{
+	//cerr << "MEC: apply" << endl;
+
+	_removed_notes.remove(note);
+	_added_notes.push_back(note);
+}
+
+
+void
+MidiModel::MidiEditCommand::remove_note(const Note& note)
+{
+	//cerr << "MEC: remove" << endl;
+
+	_added_notes.remove(note);
+	_removed_notes.push_back(note);
+}
+
+		
+void 
+MidiModel::MidiEditCommand::operator()()
+{
+	//cerr << "MEC: apply" << endl;
+	assert(!_model.current_command());
+	
+	for (std::list<Note>::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i)
+		_model.add_note(*i);
+	
+	for (std::list<Note>::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i)
+		_model.remove_note(*i);
+
+	_model.ContentsChanged(); /* EMIT SIGNAL */
+}
+
+
+void
+MidiModel::MidiEditCommand::undo()
+{
+	//cerr << "MEC: undo" << endl;
+	assert(!_model.current_command());
+
+	for (std::list<Note>::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i)
+		_model.remove_note(*i);
+	
+	for (std::list<Note>::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i)
+		_model.add_note(*i);
+	
+	_model.ContentsChanged(); /* EMIT SIGNAL */
 }
 

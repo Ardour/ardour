@@ -23,7 +23,6 @@
 
 #include <libgnomecanvasmm.h>
 #include <libgnomecanvasmm/polygon.h>
-#include <sigc++/signal.h>
 #include <ardour/midi_region.h>
 #include <ardour/midi_model.h>
 #include <ardour/types.h>
@@ -94,6 +93,7 @@ class MidiRegionView : public RegionView
 
   private:
 
+	void redisplay_model();
 	void display_events();
 	void clear_events();
 

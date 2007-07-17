@@ -1,5 +1,6 @@
 /*
-    Copyright (C) 2001-2006 Paul Davis 
+    Copyright (C) 2001-2007 Paul Davis 
+    Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,6 +24,8 @@
 #include <gtkmm.h>
 
 #include <gtkmm2ext/gtk_ui.h>
+
+#include <sigc++/signal.h>
 
 #include <ardour/playlist.h>
 #include <ardour/tempo.h>
@@ -95,6 +98,9 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 		midi_region()->midi_source(0)->load_model();
 		display_events();
 	}
+		
+	midi_region()->midi_source(0)->model()->ContentsChanged.connect(sigc::mem_fun(
+			this, &MidiRegionView::redisplay_model));
 	
 	group->signal_event().connect (mem_fun (this, &MidiRegionView::canvas_event));
 }
@@ -127,13 +133,15 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 			const Tempo& t = trackview.session().tempo_map().tempo_at(stamp);
 			double dur = m.frames_per_bar(t, trackview.session().frame_rate()) / m.beats_per_bar();
 			
+			MidiModel* model = midi_region()->midi_source(0)->model();
+			
 			// Add a 1 beat long note (for now)
 			const MidiModel::Note new_note(stamp, dur, (uint8_t)note, 0x40);
+			
+			model->begin_command();
+			model->add_note(new_note);
+			model->finish_command();
 
-			MidiModel::Notes& notes = midi_region()->midi_source(0)->model()->notes();
-			MidiModel::Notes::iterator i = upper_bound(notes.begin(), notes.end(), new_note,
-					MidiModel::NoteTimeComparator());
-			notes.insert(i, new_note);
 			view->update_bounds(new_note.note);
 
 			add_note(new_note);
@@ -141,6 +149,14 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 	}
 	
 	return false;
+}
+
+
+void
+MidiRegionView::redisplay_model()
+{
+	clear_events();
+	display_events();
 }
 
 

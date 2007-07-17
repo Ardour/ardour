@@ -487,7 +487,7 @@ class Session : public PBD::StatefulDestructible
 	void   resort_routes ();
 	void   resort_routes_using (boost::shared_ptr<RouteList>);
 	
-	void	set_remote_control_ids();
+	void   set_remote_control_ids();
 
 	AudioEngine &engine() { return _engine; };
 
@@ -538,7 +538,7 @@ class Session : public PBD::StatefulDestructible
 	void        request_slave_source (SlaveSource);
 	bool        synced_to_jack() const { return Config->get_slave_source() == JACK; }
 
-   	float       transport_speed() const { return _transport_speed; }
+	float       transport_speed() const { return _transport_speed; }
 	bool        transport_stopped() const { return _transport_speed == 0.0f; }
 	bool        transport_rolling() const { return _transport_speed != 0.0f; }
 
@@ -595,8 +595,8 @@ class Session : public PBD::StatefulDestructible
 	void remove_source (boost::weak_ptr<Source>);
 
 	struct cleanup_report {
-	    vector<string> paths;
-	    int64_t space;
+		vector<string> paths;
+		int64_t        space;
 	};
 
 	int  cleanup_sources (cleanup_report&);
@@ -673,8 +673,9 @@ class Session : public PBD::StatefulDestructible
 
 	/* flattening stuff */
 
-	int write_one_audio_track (AudioTrack&, nframes_t start, nframes_t cnt, bool overwrite, vector<boost::shared_ptr<Source> >&,
-				   InterThreadInfo& wot);
+	int write_one_audio_track (AudioTrack&, nframes_t start, nframes_t cnt, bool overwrite,
+			vector<boost::shared_ptr<Source> >&, InterThreadInfo& wot);
+
 	int freeze (InterThreadInfo&);
 
 	/* session-wide solo/mute/rec-enable */
@@ -803,8 +804,8 @@ class Session : public PBD::StatefulDestructible
 		
 	};
 
-        class GlobalSoloStateCommand : public GlobalRouteStateCommand
-        {
+	class GlobalSoloStateCommand : public GlobalRouteStateCommand
+	{
 	  public:
 		GlobalSoloStateCommand (Session &, void *src);
 		GlobalSoloStateCommand (Session&, const XMLNode&);
@@ -812,10 +813,10 @@ class Session : public PBD::StatefulDestructible
 		void undo();
 		XMLNode &get_state();
 		void mark();
-        };
+	};
 
-        class GlobalMuteStateCommand : public GlobalRouteStateCommand
-        {
+	class GlobalMuteStateCommand : public GlobalRouteStateCommand
+	{
 	  public:
 		GlobalMuteStateCommand(Session &, void *src);
 		GlobalMuteStateCommand (Session&, const XMLNode&);
@@ -823,10 +824,10 @@ class Session : public PBD::StatefulDestructible
 		void undo();
 		XMLNode &get_state();
 		void mark();
-        };
+	};
 
-        class GlobalRecordEnableStateCommand : public GlobalRouteStateCommand
-        {
+	class GlobalRecordEnableStateCommand : public GlobalRouteStateCommand
+	{
 	  public:
 		GlobalRecordEnableStateCommand(Session &, void *src);
 		GlobalRecordEnableStateCommand (Session&, const XMLNode&);
@@ -834,10 +835,10 @@ class Session : public PBD::StatefulDestructible
 		void undo();
 		XMLNode &get_state();
 		void mark();
-        };
+	};
 
-        class GlobalMeteringStateCommand : public Command
-        {
+	class GlobalMeteringStateCommand : public Command
+	{
 	  public:
 		GlobalMeteringStateCommand(Session &, void *src);
 		GlobalMeteringStateCommand (Session&, const XMLNode&);
@@ -852,7 +853,7 @@ class Session : public PBD::StatefulDestructible
 		void* src;
 		GlobalRouteMeterState before;
 		GlobalRouteMeterState after;
-        };
+	};
 
 	/* clicking */
 
@@ -861,14 +862,14 @@ class Session : public PBD::StatefulDestructible
 	/* tempo FX */
 
 	struct TimeStretchRequest {
-	    boost::shared_ptr<ARDOUR::AudioRegion> region;
-	    float                fraction; /* session: read ; GUI: write */
-	    float                progress; /* session: write ; GUI: read */
-	    bool                 running;  /* read/write */
-	    bool                 quick_seek; /* GUI: write */
-	    bool                 antialias;  /* GUI: write */
+		boost::shared_ptr<ARDOUR::AudioRegion> region;
+		float fraction; /* session: read ; GUI: write */
+		float progress; /* session: write ; GUI: read */
+		bool  running;  /* read/write */
+		bool  quick_seek; /* GUI: write */
+		bool  antialias;  /* GUI: write */
 
-	    TimeStretchRequest () {} 
+		TimeStretchRequest () {} 
 	};
 
 	boost::shared_ptr<AudioRegion> tempoize_region (TimeStretchRequest&);
@@ -1088,9 +1089,9 @@ class Session : public PBD::StatefulDestructible
 	bool                     session_midi_feedback;
 	bool                     play_loop;
 	bool                     loop_changing;
-	nframes_t           last_loopend;
+	nframes_t                last_loopend;
 
-	boost::scoped_ptr<SessionDirectory>        _session_dir;
+	boost::scoped_ptr<SessionDirectory> _session_dir;
 
 	RingBuffer<Event*> pending_events;
 
@@ -1110,11 +1111,11 @@ class Session : public PBD::StatefulDestructible
 	int      load_state (string snapshot_name);
 	bool     save_config_options_predicate (ConfigVariableBase::Owner owner) const;
 
-	nframes_t   _last_roll_location;
-	nframes_t   _last_record_location;
-	bool              pending_locate_roll;
-	nframes_t    pending_locate_frame;
+	nframes_t _last_roll_location;
+	nframes_t _last_record_location;
 
+	bool              pending_locate_roll;
+	nframes_t         pending_locate_frame;
 	bool              pending_locate_flush;
 	bool              pending_abort;
 	bool              pending_auto_loop;
@@ -1123,7 +1124,7 @@ class Session : public PBD::StatefulDestructible
 	float*            butler_gain_buffer;
 	pthread_t         butler_thread;
 	Glib::Mutex       butler_request_lock;
-        Glib::Cond        butler_paused;
+	Glib::Cond        butler_paused;
 	bool              butler_should_run;
 	mutable gint      butler_should_do_transport_work;
 	int               butler_request_pipe[2];
@@ -1512,13 +1513,13 @@ class Session : public PBD::StatefulDestructible
 
 	/* INSERT AND SEND MANAGEMENT */
 	
-	list<PortInsert *>   _port_inserts;
-	list<PluginInsert *> _plugin_inserts;
-	list<Send *>         _sends;
-	boost::dynamic_bitset<uint32_t>  send_bitset;
-	boost::dynamic_bitset<uint32_t>  insert_bitset;
-	uint32_t          send_cnt;
-	uint32_t          insert_cnt;
+	list<PortInsert *>              _port_inserts;
+	list<PluginInsert *>            _plugin_inserts;
+	list<Send *>                    _sends;
+	boost::dynamic_bitset<uint32_t> send_bitset;
+	boost::dynamic_bitset<uint32_t> insert_bitset;
+	uint32_t                        send_cnt;
+	uint32_t                        insert_cnt;
 
 
 	void add_processor (Processor *);
@@ -1605,7 +1606,7 @@ class Session : public PBD::StatefulDestructible
 		    pool.release (ptr);
 	    }
 
-          private:
+	  private:
 	    static Pool pool;
 	};
  
@@ -1620,9 +1621,9 @@ class Session : public PBD::StatefulDestructible
 	nframes_t  click_emphasis_length;
 	mutable Glib::RWLock click_lock;
 
-	static const Sample         default_click[];
+	static const Sample    default_click[];
 	static const nframes_t default_click_length;
-	static const Sample         default_click_emphasis[];
+	static const Sample    default_click_emphasis[];
 	static const nframes_t default_click_emphasis_length;
 
 	Click *get_click();
