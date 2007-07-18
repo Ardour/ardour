@@ -35,6 +35,7 @@
 #include "route_signal.h"
 #include "mackie_button_handler.h"
 #include "mackie_port.h"
+#include "timer.h"
 
 namespace MIDI {
 	class Port;
@@ -314,6 +315,9 @@ class MackieControlProtocol
 	int nfds;
 	
 	bool _transport_previously_rolling;
+	
+	// timer for two quick marker left presses
+	Mackie::Timer _frm_left_last;
 };
 
 #endif // ardour_mackie_control_protocol_h

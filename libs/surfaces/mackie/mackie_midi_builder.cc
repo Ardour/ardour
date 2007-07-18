@@ -191,8 +191,11 @@ MidiByteArray MackieMidiBuilder::strip_display( unsigned int strip_index, unsign
 	retval << 0x12;
 	// offset (0 to 0x37 first line, 0x38 to 0x6f for second line )
 	retval << ( strip_index * 7 + ( line_number * 0x38 ) );
+	// ascii data to display
 	retval << line;
-	if ( strip_index != 7 )
+	
+	// column spacer, unless it's the right-hand column
+	if ( strip_index < 7 )
 	{
 		retval << ' ';
 	}

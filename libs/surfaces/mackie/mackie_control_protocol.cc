@@ -1095,10 +1095,28 @@ void MackieControlProtocol::poll_automation()
 LedState MackieControlProtocol::frm_left_press( Button & button )
 {
 	// can use first_mark_before/after as well
+	unsigned long elapsed = _frm_left_last.restart();
+	
 	Location * loc = session->locations()->first_location_before (
 		session->transport_frame()
 	);
-	if ( loc != 0 ) session->request_locate( loc->start(), session->transport_rolling() );
+	
+	// allow a quick double to go past a previous mark 
+	if ( elapsed < 500 && loc != 0)
+	{
+		Location * loc_two_back = session->locations()->first_location_before ( loc->start() );
+		if ( loc_two_back != 0 )
+		{
+			loc = loc_two_back;
+		}
+	}
+	
+	// move to the location, if it's valid
+	if ( loc != 0 )
+	{
+		session->request_locate( loc->start(), session->transport_rolling() );
+	}
+	
 	return on;
 }
 
