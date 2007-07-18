@@ -123,4 +123,3 @@ void Strip::add( Control & control )
 		throw MackieControlException( os.str() );
 	}
 }
-

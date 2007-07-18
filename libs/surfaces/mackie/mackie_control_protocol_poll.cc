@@ -29,7 +29,15 @@ const char * MackieControlProtocol::default_port_name = "mcu";
 
 bool MackieControlProtocol::probe()
 {
-	return MIDI::Manager::instance()->port( default_port_name ) != 0;
+	if ( MIDI::Manager::instance()->port( default_port_name ) == 0 )
+	{
+		error << "No port called mcu. Add it to ardour.rc." << endmsg;
+		return false;
+	}
+	else
+	{
+		return true;
+	}
 }
 
 void * MackieControlProtocol::monitor_work()
@@ -47,6 +55,8 @@ void * MackieControlProtocol::monitor_work()
 		{
 			if ( poll_ports() )
 			{
+	cout << "--------------------------------------" << endl;
+	cout << "MackieControlProtocol::read_ports _ports: " << _ports.size() << ", nfds: " << nfds << endl;
 				try { read_ports(); }
 				catch ( exception & e ) {
 					cout << "MackieControlProtocol::poll_ports caught exception: " << e.what() << endl;
@@ -82,14 +92,14 @@ void MackieControlProtocol::update_ports()
 		{
 			// create new pollfd structures
 			if ( pfd != 0 ) delete[] pfd;
-			// TODO This might be a memory leak. How does thread cancellation cleanup work?
 			pfd = new pollfd[_ports.size()];
 			nfds = 0;
-
 			for( MackiePorts::iterator it = _ports.begin(); it != _ports.end(); ++it )
 			{
+				// add the port any handler
+				(*it)->connect_any();
 #ifdef DEBUG
-				cout << "adding port " << (*it)->port().name() << " to pollfd" << endl;
+				cout << "adding pollfd for port " << (*it)->port().name() << " to pollfd" << endl;
 #endif
 				pfd[nfds].fd = (*it)->port().selectable();
 				pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
@@ -108,6 +118,8 @@ void MackieControlProtocol::read_ports()
 	for ( int p = 0; p < nfds; ++p )
 	{
 		// this will cause handle_midi_any in the MackiePort to be triggered
+		// for alsa/raw ports
+		// alsa/sequencer ports trigger the midi parser off poll
 		if ( pfd[p].revents & POLLIN > 0 )
 		{
 			// avoid deadlocking?
@@ -129,12 +141,14 @@ bool MackieControlProtocol::poll_ports()
 	if ( nfds < 1 )
 	{
 		lock.release();
-		//cout << "poll_ports no ports" << endl;
+#ifdef DEBUG
+		cout << "poll_ports no ports" << endl;
+#endif
 		usleep( no_ports_sleep * 1000 );
 		return false;
 	}
 
-	int retval = poll( pfd, nfds, timeout );
+	int retval = ::poll( pfd, nfds, timeout );
 	if ( retval < 0 )
 	{
 		// gdb at work, perhaps

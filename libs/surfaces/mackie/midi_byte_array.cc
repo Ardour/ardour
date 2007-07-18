@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <cstdarg>
 #include <iomanip>
+#include <stdexcept>
 
 using namespace std;
 
@@ -95,4 +96,13 @@ ostream & operator << ( ostream & os, const MidiByteArray & mba )
 	os << dec;
 	os << "]";
 	return os;
+}
+
+MidiByteArray & operator << ( MidiByteArray & mba, const std::string & st )
+{
+	for ( string::const_iterator it = st.begin(); it != st.end(); ++it )
+	{
+		mba << *it;
+	}
+	return mba;
 }

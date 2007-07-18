@@ -73,6 +73,13 @@ public:
 	MidiByteArray two_char_display( const std::string & msg, const std::string & dots = "  " );
 	MidiByteArray two_char_display( unsigned int value, const std::string & dots = "  " );
 	
+	/// for displaying a particular strip name
+	/// index is zero-based
+	MidiByteArray strip_display( unsigned int strip_index, unsigned int line_number, const std::string & line );
+	
+	/// for generating all strip names
+	MidiByteArray all_strips_display( std::vector<std::string> & lines1, std::vector<std::string> & lines2 );
+	
 protected:
 	static MIDI::byte calculate_pot_value( midi_pot_mode mode, const ControlState & );
 };

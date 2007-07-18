@@ -38,6 +38,7 @@
 #include <pbd/pthread_utils.h>
 #include <pbd/error.h>
 #include <pbd/memento_command.h>
+#include <pbd/convert.h>
 
 #include <ardour/route.h>
 #include <ardour/session.h>
@@ -366,7 +367,7 @@ void MackieControlProtocol::zero_all()
 	}
 }
 
-int MackieControlProtocol::set_active (bool yn)
+int MackieControlProtocol::set_active( bool yn )
 {
 	if ( yn != _active )
 	{
@@ -563,6 +564,10 @@ void MackieControlProtocol::connect_session_signals()
 
 void MackieControlProtocol::add_port( MIDI::Port & midi_port, int number )
 {
+#ifdef DEBUG
+		cout << "add port " << midi_port.name() << ", " << midi_port.device() << endl;
+#endif
+
 	MackiePort * sport = new MackiePort( *this, midi_port, number );
 	_ports.push_back( sport );
 
@@ -998,7 +1003,30 @@ void MackieControlProtocol::notify_name_changed( void *, RouteSignal * route_sig
 {
 	try
 	{
-		// TODO implement MackieControlProtocol::notify_name_changed
+		Strip & strip = route_signal->strip();
+		if ( !strip.is_master() )
+		{
+			string line1;
+			string line2;
+			string fullname = route_signal->route().name();
+			
+			if ( fullname.length() <= 6 )
+			{
+				line1 = fullname;
+			}
+			else
+			{
+				line1 = PBD::short_version( fullname, 6 );
+				line2 = fullname.substr( fullname.length() - 6, 6 );
+			}
+			
+			route_signal->port().write_sysex(
+				builder.strip_display( strip.index(), 0, line1 )
+			);
+			route_signal->port().write_sysex(
+				builder.strip_display( strip.index(), 1, line2 )
+			);
+		}
 	}
 	catch( exception & e )
 	{
@@ -1012,7 +1040,6 @@ void MackieControlProtocol::notify_panner_changed( RouteSignal * route_signal )
 	{
 		Pot & pot = route_signal->strip().vpot();
 		const Panner & panner = route_signal->route().panner();
-		cout << "panner from ardour" << panner.size() << " " << boolalpha << panner.linked() << endl;
 		if ( panner.size() == 1 || ( panner.size() == 2 && panner.linked() ) )
 		{
 			float pos;

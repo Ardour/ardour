@@ -171,3 +171,40 @@ MidiByteArray MackieMidiBuilder::two_char_display( unsigned int value, const std
 	os << setfill('0') << setw(2) << value % 100;
 	return two_char_display( os.str() );
 }
+
+MidiByteArray MackieMidiBuilder::strip_display( unsigned int strip_index, unsigned int line_number, const std::string & line )
+{
+	if ( line_number > 1 )
+	{
+		throw runtime_error( "line_number must be 0 or 1" );
+	}
+	
+	if ( strip_index > 7 )
+	{
+		throw runtime_error( "strip_index must be between 0 and 7" );
+	}
+	
+	cout << "MackieMidiBuilder::strip_display index: " << strip_index << ", line " << line_number << ": " << line << endl;
+	
+	MidiByteArray retval;
+	// code for display
+	retval << 0x12;
+	// offset (0 to 0x37 first line, 0x38 to 0x6f for second line )
+	retval << ( strip_index * 7 + ( line_number * 0x38 ) );
+	retval << line;
+	if ( strip_index != 7 )
+	{
+		retval << ' ';
+	}
+	
+	cout << "MackieMidiBuilder::strip_display midi: " << retval << endl;
+	return retval;
+}
+	
+MidiByteArray MackieMidiBuilder::all_strips_display( std::vector<std::string> & lines1, std::vector<std::string> & lines2 )
+{
+	MidiByteArray retval;
+	retval << 0x12 << 0;
+	retval << "Not working yet";
+	return retval;
+}

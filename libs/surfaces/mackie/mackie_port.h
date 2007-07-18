@@ -71,6 +71,10 @@ public:
 	
 	emulation_t emulation() const { return _emulation; }
 	
+	/// Connect the any signal from the parser to handle_midi_any
+	/// unless it's already connected
+	void connect_any();
+	
 protected:
 	/**
 		The initialisation sequence is fairly complex. First a lock is acquired

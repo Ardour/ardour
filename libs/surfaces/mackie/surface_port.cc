@@ -67,6 +67,7 @@ MidiByteArray SurfacePort::read()
 	if ( !active() ) return retval;
 	
 	// return nothing read if the lock isn't acquired
+#if 0
 	Glib::RecMutex::Lock lock( _rwlock, Glib::TRY_LOCK );
 		
 	if ( !lock.locked() )
@@ -77,6 +78,7 @@ MidiByteArray SurfacePort::read()
 	
 	// check active again - destructor sequence
 	if ( !active() ) return retval;
+#endif
 	
 	// read port and copy to return value
 	int nread = port().read( buf, sizeof (buf) );
@@ -85,6 +87,9 @@ MidiByteArray SurfacePort::read()
 		retval.copy( nread, buf );
 		if ((size_t) nread == sizeof (buf))
 		{
+#ifdef DEBUG
+			cout << "SurfacePort::read recursive" << endl;
+#endif
 			retval << read();
 		}
 	}
@@ -136,7 +141,7 @@ void SurfacePort::write( const MidiByteArray & mba )
 		}
 	}
 #ifdef DEBUG
-	if ( mba[0] == 0xf0 ) cout << "SurfacePort::write " << count << endl;
+	cout << "SurfacePort::wrote " << count << endl;
 #endif
 }
 

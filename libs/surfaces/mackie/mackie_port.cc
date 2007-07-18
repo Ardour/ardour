@@ -296,11 +296,36 @@ void MackiePort::finalise_init( bool yn )
 		active_event();
 		
 		// start handling messages from controls
-		_any = port().input()->any.connect( ( mem_fun (*this, &MackiePort::handle_midi_any) ) );
+		connect_any();
 	}
 	_initialising = false;
 	init_cond.signal();
 	init_mutex.unlock();
+}
+
+void MackiePort::connect_any()
+{
+/*
+	Doesn't work because there isn't and == operator for slots
+	MIDI::Signal::slot_list_type slots = port().input()->any.slots();
+	
+	if ( find( slots.begin(), slots.end(), mem_fun( *this, &MackiePort::handle_midi_any ) ) == slots.end() )
+*/
+	// but this will break if midi tracing is turned on
+	if ( port().input()->any.empty() )
+	{
+#ifdef DEBUG
+		cout << "connect input parser " << port().input() << " to handle_midi_any" << endl;
+#endif
+		_any = port().input()->any.connect( mem_fun( *this, &MackiePort::handle_midi_any ) );
+#ifdef DEBUG
+		cout << "input parser any connections: " << port().input()->any.size() << endl;
+#endif
+	}
+	else
+	{
+		cout << "MackiePort::connect_any already connected" << endl;
+	}
 }
 
 bool MackiePort::wait_for_init()
@@ -346,6 +371,9 @@ void MackiePort::handle_midi_sysex (MIDI::Parser & parser, MIDI::byte * raw_byte
 void MackiePort::handle_midi_any (MIDI::Parser & parser, MIDI::byte * raw_bytes, size_t count )
 {
 	MidiByteArray bytes( count, raw_bytes );
+#ifdef DEBUG
+	cout << "MackiePort::handle_midi_any " << bytes << endl;
+#endif
 	try
 	{
 		// ignore sysex messages
@@ -394,6 +422,9 @@ void MackiePort::handle_midi_any (MIDI::Parser & parser, MIDI::byte * raw_bytes,
 	}
 	catch( MackieControlException & e )
 	{
-		//cout << bytes << ' ' << e.what() << endl;
+		cout << bytes << ' ' << e.what() << endl;
 	}
+#ifdef DEBUG
+	cout << "finished MackiePort::handle_midi_any " << bytes << endl;
+#endif
 }

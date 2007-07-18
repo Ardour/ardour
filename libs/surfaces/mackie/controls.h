@@ -83,6 +83,9 @@ class Fader;
 class Strip : public Group
 {
 public:
+	/**
+		\param is the index of the strip. 0-based.
+	*/
 	Strip( const std::string & name, int index );
 	
 	virtual bool is_strip() const
@@ -92,10 +95,11 @@ public:
 	
 	virtual void add( Control & control );
 	
-	/// This is the index of the strip
+	/// This is the index of the strip. zero-based.
 	int index() const { return _index; }
 	
 	/// This is for Surface only
+	/// index is zero-based
 	void index( int rhs ) { _index = rhs; }
 	
 	Button & solo();
