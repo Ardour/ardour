@@ -261,6 +261,8 @@ Mixer_UI::show_window ()
 {
 	present ();
 
+	set_window_pos_and_size ();
+
 	/* now reset each strips width so the right widgets are shown */
 	MixerStrip* ms;
 
@@ -277,6 +279,8 @@ Mixer_UI::show_window ()
 bool
 Mixer_UI::hide_window (GdkEventAny *ev)
 {
+	get_window_pos_and_size ();
+
 	_visible = false;
 	return just_hide_it(ev, static_cast<Gtk::Window *>(this));
 }
@@ -1072,37 +1076,42 @@ Mixer_UI::set_strip_width (Width w)
 	}
 }
 
+void
+Mixer_UI::set_window_pos_and_size ()
+{
+	resize (m_width, m_height);
+	move (m_root_x, m_root_y);
+}
+
+	void
+Mixer_UI::get_window_pos_and_size ()
+{
+	get_position(m_root_x, m_root_y);
+	get_size(m_width, m_height);
+}
 
 int
 Mixer_UI::set_state (const XMLNode& node)
 {
 	const XMLProperty* prop;
 	XMLNode* geometry;
-	Gdk::Geometry g;
-	int x, y, xoff, yoff;
 	
 	if ((geometry = find_named_node (node, "geometry")) == 0) {
 
-		g.base_width = default_width;
-		g.base_height = default_height;
-		x = 1;
-		y = 1;
-		xoff = 0;
-		yoff = 21;
+		m_width = default_width;
+		m_height = default_height;
+		m_root_x = 1;
+		m_root_y = 1;
 
 	} else {
 
-		g.base_width = atoi(geometry->property("x_size")->value().c_str());
-		g.base_height = atoi(geometry->property("y_size")->value().c_str());
-		x = atoi(geometry->property("x_pos")->value().c_str());
-		y = atoi(geometry->property("y_pos")->value().c_str());
-		xoff = atoi(geometry->property("x_off")->value().c_str());
-		yoff = atoi(geometry->property("y_off")->value().c_str());
+		m_width = atoi(geometry->property("x_size")->value().c_str());
+		m_height = atoi(geometry->property("y_size")->value().c_str());
+		m_root_x = atoi(geometry->property("x_pos")->value().c_str());
+		m_root_y = atoi(geometry->property("y_pos")->value().c_str());
 	}
 
-	set_geometry_hints (global_vpacker, g, Gdk::HINT_BASE_SIZE);
-	set_default_size(g.base_width, g.base_height);
-	move (x, y);
+	set_window_pos_and_size ();
 
 	if ((prop = node.property ("narrow-strips"))) {
 		if (prop->value() == "yes") {
@@ -1128,25 +1137,24 @@ Mixer_UI::get_state (void)
 
 	if (is_realized()) {
 		Glib::RefPtr<Gdk::Window> win = get_window();
-		
-		int x, y, xoff, yoff, width, height;
-		win->get_root_origin(x, y);
-		win->get_position(xoff, yoff);
-		win->get_size(width, height);
+	
+		get_window_pos_and_size ();
 
 		XMLNode* geometry = new XMLNode ("geometry");
 		char buf[32];
-		snprintf(buf, sizeof(buf), "%d", width);
+		snprintf(buf, sizeof(buf), "%d", m_width);
 		geometry->add_property(X_("x_size"), string(buf));
-		snprintf(buf, sizeof(buf), "%d", height);
+		snprintf(buf, sizeof(buf), "%d", m_height);
 		geometry->add_property(X_("y_size"), string(buf));
-		snprintf(buf, sizeof(buf), "%d", x);
+		snprintf(buf, sizeof(buf), "%d", m_root_x);
 		geometry->add_property(X_("x_pos"), string(buf));
-		snprintf(buf, sizeof(buf), "%d", y);
+		snprintf(buf, sizeof(buf), "%d", m_root_y);
 		geometry->add_property(X_("y_pos"), string(buf));
-		snprintf(buf, sizeof(buf), "%d", xoff);
+		
+		// written only for compatibility, they are not used.
+		snprintf(buf, sizeof(buf), "%d", 0);
 		geometry->add_property(X_("x_off"), string(buf));
-		snprintf(buf, sizeof(buf), "%d", yoff);
+		snprintf(buf, sizeof(buf), "%d", 0);
 		geometry->add_property(X_("y_off"), string(buf));
 
 		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&rhs_pane1)->gobj()));
