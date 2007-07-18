@@ -7,10 +7,7 @@
 <section id="sn-mackie">
   <title>Using the Mackie driver for MCU and BCF2000</title>
   <para>
-		Note: Mackie support is available only for ardour 2.0 beta12 or newer.
-	</para>
-  <para>
-    This will walk you through the process of configuring and using Mackie
+    For Ardour 2, this will walk you through the process of configuring and using Mackie
     MCU, or a BCF2000 in
     <ulink url="http://www.behringerdownload.de/BCF2000/BCF2000_Emulation_modes.pdf">Logic
     Control emulation mode</ulink>.
@@ -41,18 +38,13 @@
 <programlisting>
 &lt;MIDI-port tag="mcu" device="/dev/snd/midiC2D0" type="alsa/raw" mode="duplex"/&gt;
 </programlisting>
-      If you have a BCF2000, and you'd like to use
-      <link linkend="mackie-bcf-mode">BCF mode</link>, you can also add
-      under the &lt;Config&gt; tag:
-<programlisting>
-&lt;Option name="mackie-emulation" value="bcf"/&gt;
-</programlisting>
     </para>
 
     <para>
-      It is also possible to add MCU extenders, although this is untested
-      because nobody we know has access to one right now. To do this, add
-      the following lines to <filename>~/.ardour2/ardour.rc</filename>
+      It is also possible to add MCU extenders or other BCF2000 units,
+      although this is untested because nobody we know has access to one
+      right now. To do this, add the following lines to
+      <filename>~/.ardour2/ardour.rc</filename>
 <programlisting>
 &lt;MIDI-port tag="mcu_xt_1" device="/dev/snd/midiC3D0" type="alsa/raw" mode="duplex"/&gt;
 &lt;MIDI-port tag="mcu_xt_2" device="/dev/snd/midiC4D0" type="alsa/raw" mode="duplex"/&gt;
@@ -62,19 +54,33 @@
     </para>
   </section>
 
-  <section id="mackie-connecting-to-ardour">
-    <title>Connecting to Ardour</title>
+  <section id="mackie-mackie-mode">
+    <title>Mackie Mode</title>
     <para>
-      Start up ardour. Go to Options/Control Surfaces. You should see
-      "Mackie" as one of the menu items. Turn it on. The faders on the
-      surface should jump to the correct positions. The mackie should work
-      as normal, except that any buttons not on the BCF won't work.
+      If you have a Mackie MCU make sure that you have the following under
+      the &lt;Config&gt; tag:
+<programlisting>
+&lt;Option name="mackie-emulation" value="mcu"/&gt;
+</programlisting>
+    </para>
+
+    <para>
+      In this mode, the original mappings are used. Note that many of the
+      buttons have not yet been implemented.
     </para>
   </section>
 
   <section id="mackie-bcf-mode">
     <title>BCF mode</title>
     <para>
+      If you have a BCF2000 you must add under the &lt;Config&gt; tag:
+<programlisting>
+&lt;Option name="mackie-emulation" value="bcf"/&gt;
+</programlisting>
+    </para>
+
+    <para>
+      The following are different in BCF mode:
       <itemizedlist>
         <listitem>
           <para>
@@ -158,9 +164,17 @@
               </entry>
 
               <entry>
-                <para>loop</para>
-								<para>shift 1: marker</para>
-								<para>shift 2: punch in</para>
+                <para>
+                  loop
+                </para>
+
+                <para>
+                  shift 1: marker
+                </para>
+
+                <para>
+                  shift 2: punch in
+                </para>
               </entry>
             </row>
 
@@ -178,8 +192,13 @@
               </entry>
 
               <entry>
-                <para>click</para>
-								<para>shift 2: punch out</para>
+                <para>
+                  click
+                </para>
+
+                <para>
+                  shift 2: punch out
+                </para>
               </entry>
             </row>
 
@@ -213,13 +232,23 @@
 
             <row>
               <entry>
-                <para>previous bank</para>
-								<para>shift 1: previous route</para>
+                <para>
+                  previous bank
+                </para>
+
+                <para>
+                  shift 1: previous route
+                </para>
               </entry>
 
               <entry>
-                <para>next bank</para>
-								<para>shift 1: next route</para>
+                <para>
+                  next bank
+                </para>
+
+                <para>
+                  shift 1: next route
+                </para>
               </entry>
             </row>
 
@@ -247,6 +276,23 @@
       </table>
     </para>
   </section>
+
+  <section id="mackie-connecting-to-ardour">
+    <title>Connecting to Ardour</title>
+		<note>
+			<para>
+				Currently (as of 18-jul-2007 and ardour-2.0.3) support for alsa/sequencer ports
+				is borked. You're better off using alsa/raw as documented above.
+			</para>
+		</note>
+    <para>
+      Start up ardour. Go to Options/Control Surfaces. You should see
+      "Mackie" as one of the menu items. Turn it on. The faders on the
+      surface should jump to the correct positions. The mackie should work
+      as normal, except that any buttons not on the BCF won't work.
+    </para>
+  </section>
+
 <!--
 	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="Some_Subsection.xml" />
