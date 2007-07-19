@@ -27,6 +27,7 @@
 
 #include <alsa/asoundlib.h>
 #include <midi++/port.h>
+#include <midi++/port_request.h>
 
 namespace MIDI {
 
@@ -40,6 +41,8 @@ class ALSA_SequencerMidiPort : public Port
 	/* select(2)/poll(2)-based I/O */
 
 	virtual int selectable() const;
+	
+	static int discover (std::vector<PortSet>&);
 
   protected:
 	/* Direct I/O */

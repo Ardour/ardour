@@ -704,8 +704,11 @@ ARDOUR_UI::build_menu_bar ()
 	 * until the Menu GObject class is registered, which happens
 	 * when the first menu instance is created.
 	 */
-	Gtk::Settings::get_default()->property_gtk_can_change_accels() = true;	
-	
+	// XXX bug in gtkmm causes this to popup an error message
+	// Gtk::Settings::get_default()->property_gtk_can_change_accels() = true;	
+	// so use this instead ...
+	gtk_settings_set_long_property (gtk_settings_get_default(), "gtk-can-change-accels", 1, "Ardour:designers");
+
 	wall_clock_box.add (wall_clock_label);
 	wall_clock_box.set_name ("WallClock");
 	wall_clock_label.set_name ("WallClock");

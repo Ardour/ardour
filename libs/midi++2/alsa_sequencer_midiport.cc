@@ -170,7 +170,10 @@ ALSA_SequencerMidiPort::CreatePorts (PortRequest &req)
 	if (req.mode == O_RDONLY  ||  req.mode == O_RDWR)
 		caps |= SND_SEQ_PORT_CAP_READ | SND_SEQ_PORT_CAP_SUBS_READ;
 	
-	if (0 <= (err = snd_seq_create_simple_port (seq, req.tagname, caps, SND_SEQ_PORT_TYPE_MIDI_GENERIC))) {
+	if (0 <= (err = snd_seq_create_simple_port (seq, req.tagname, caps, 
+						    (SND_SEQ_PORT_TYPE_MIDI_GENERIC|
+						     SND_SEQ_PORT_TYPE_SOFTWARE|
+						     SND_SEQ_PORT_TYPE_APPLICATION)))) {
 		
 		port_id = err;
 
@@ -204,4 +207,75 @@ ALSA_SequencerMidiPort::init_client (std::string name)
 			<< endmsg;
 		return -1;
 	}
+}
+
+int
+ALSA_SequencerMidiPort::discover (vector<PortSet>& ports)
+{
+	 int n = 0;
+
+	 snd_seq_client_info_t *client_info;
+	 snd_seq_port_info_t   *port_info;
+
+	 snd_seq_client_info_alloca (&client_info);
+	 snd_seq_port_info_alloca (&port_info);
+	 snd_seq_client_info_set_client (client_info, -1);
+
+	 while (snd_seq_query_next_client(seq, client_info) >= 0) {
+
+		 int alsa_client;
+
+		 if ((alsa_client = snd_seq_client_info_get_client(client_info)) <= 0) {
+			 break;
+		 }
+
+		 snd_seq_port_info_set_client(port_info, alsa_client);
+		 snd_seq_port_info_set_port(port_info, -1);
+
+		 char client[256];
+		 snprintf (client, sizeof (client), "%d:%s", alsa_client, snd_seq_client_info_get_name(client_info));
+
+		 ports.push_back (PortSet (client));
+
+		 while (snd_seq_query_next_port(seq, port_info) >= 0) {
+
+#if 0
+			 int type = snd_seq_port_info_get_type(pinfo);
+			 if (!(type & SND_SEQ_PORT_TYPE_PORT)) {
+				 continue;
+			 }
+#endif
+
+			 unsigned int port_capability = snd_seq_port_info_get_capability(port_info);
+
+			 if ((port_capability & SND_SEQ_PORT_CAP_NO_EXPORT) == 0) {
+
+				 int alsa_port = snd_seq_port_info_get_port(port_info);
+
+				 char port[256];
+				 snprintf (port, sizeof (port), "%d:%s", alsa_port, snd_seq_port_info_get_name(port_info));
+
+				 std::string mode;
+
+				 if (port_capability & SND_SEQ_PORT_CAP_READ) {
+					 if (port_capability & SND_SEQ_PORT_CAP_WRITE) {
+							 mode = "duplex";
+						 } else {
+							 mode = "output";
+						 } 
+					 } else if (port_capability & SND_SEQ_PORT_CAP_WRITE) {
+						 if (port_capability & SND_SEQ_PORT_CAP_READ) {
+							 mode = "duplex";
+						 } else {
+							 mode = "input";
+						 } 
+					 }
+
+					 ports.back().ports.push_back (PortRequest (client, port, mode, "alsa/sequencer"));
+					 ++n;
+				 }
+		 }
+	 }
+	 
+	 return n;
 }

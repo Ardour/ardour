@@ -380,3 +380,9 @@ Manager::parse_port_request (string str, Port::Type type)
 
 	return 0;
 }
+
+int
+Manager::get_known_ports (vector<PortSet>& ports)
+{
+	return PortFactory::get_known_ports (ports);
+}

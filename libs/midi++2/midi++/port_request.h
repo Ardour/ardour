@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999 Paul Barton-Davis 
+    Copyright (C) 1999-2007 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 #ifndef __midi_port_request_h__
 #define __midi_port_request_h__
 
+#include <list>
 #include <string>
 
 namespace MIDI {
@@ -51,6 +52,13 @@ struct PortRequest {
 		 const std::string &xtag, 
 		 const std::string &xmode,
 		 const std::string &xtype);
+};
+
+struct PortSet {
+    PortSet (std::string str) : owner (str) { }
+    
+    std::string owner;
+    std::list<PortRequest> ports;
 };
 
 } // namespace MIDI

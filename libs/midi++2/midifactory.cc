@@ -17,6 +17,8 @@
     $Id$
 */
 
+#include <pbd/error.h>
+
 #include <midi++/types.h>
 #include <midi++/factory.h>
 #include <midi++/nullmidi.h>
@@ -101,3 +103,32 @@ PortFactory::ignore_duplicate_devices (Port::Type type)
 	return ret;
 }
 
+int
+PortFactory::get_known_ports (vector<PortSet>& ports)
+{
+	int n = 0;
+#ifdef WITH_ALSA
+	n += ALSA_SequencerMidiPort::discover (ports);
+#endif // WITH_ALSA
+
+#if WITH_COREMIDI
+	n += CoreMidi_MidiPort::discover (ports);
+#endif // WITH_COREMIDI
+	
+	return n;
+}
+
+std::string
+PortFactory::default_port_type ()
+{
+
+#ifdef WITH_ALSA
+	return "alsa/sequencer";
+#endif
+
+#ifdef WITH_COREMIDI
+	return "coremidi";
+#endif // WITH_COREMIDI
+	
+	PBD::fatal << "programming error: no default port type defined in midifactory.cc" << endmsg;
+}

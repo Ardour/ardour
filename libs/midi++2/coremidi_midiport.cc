@@ -142,3 +142,10 @@ void CoreMidi_MidiPort::read_proc (const MIDIPacketList *pktlist, void *refCon, 
     }
 }
 
+int
+CoreMidi_MidiPort::discover (vector<PortSet>& ports)
+{
+	/* XXX do dynamic port discovery here */
+
+	return 0;
+}

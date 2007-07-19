@@ -23,6 +23,7 @@
 #include <string>
 
 #include <midi++/port.h>
+#include <midi++/port_request.h>
 
 namespace MIDI {
 
@@ -31,6 +32,8 @@ class PortFactory {
 	Port *create_port (PortRequest &req);
 
 	static bool ignore_duplicate_devices (Port::Type);
+	static int get_known_ports (std::vector<PortSet>&);
+	static std::string default_port_type ();
 };
 
 } // namespace MIDI

@@ -26,6 +26,7 @@
 #include <ardour/sndfilesource.h>
 #include <ardour/crossfade.h>
 #include <midi++/manager.h>
+#include <midi++/factory.h>
 #include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/window_title.h>
@@ -40,6 +41,7 @@
 #include "utils.h"
 #include "editing.h"
 #include "option_editor.h"
+#include "midi_port_dialog.h"
 
 #include "i18n.h"
 
@@ -75,8 +77,10 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 
 	  /* MIDI */
 
+	  midi_port_table (4, 10),
 	  mmc_device_id_adjustment (0.0, 0.0, (double) 0x7f, 1.0, 16.0),
 	  mmc_device_id_spinner (mmc_device_id_adjustment),
+	  add_midi_port_button (_("Add new MIDI port")),
 
 	  /* Click */
 
@@ -134,10 +138,8 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	notebook.pages().push_back (TabElem (audition_packer, _("Audition")));
 	notebook.pages().push_back (TabElem (fade_packer, _("Layers & Fades")));
 
-	if (!MIDI::Manager::instance()->get_midi_ports().empty()) {
-		setup_midi_options ();
-		notebook.pages().push_back (TabElem (midi_packer, _("MIDI")));
-	}
+	setup_midi_options ();
+	notebook.pages().push_back (TabElem (midi_packer, _("MIDI")));
 
 	set_session (0);
 	show_all_children();
@@ -368,41 +370,108 @@ void
 OptionEditor::setup_midi_options ()
 {
 	HBox* hbox;
+
+	midi_port_table.set_row_spacings (6);
+	midi_port_table.set_col_spacings (10);
+
+	redisplay_midi_ports ();
+
+	mmc_device_id_adjustment.signal_value_changed().connect (mem_fun (*this, &OptionEditor::mmc_device_id_adjusted));
+
+	hbox = manage (new HBox);
+	hbox->set_border_width (6);
+	hbox->pack_start (midi_port_table, true, false);
+
+	midi_packer.pack_start (*hbox, false, false);
+	midi_packer.pack_start (add_midi_port_button, false, false);
+
+	add_midi_port_button.signal_clicked().connect (mem_fun (*this, &OptionEditor::add_midi_port));
+}
+
+void
+OptionEditor::redisplay_midi_ports ()
+{
 	MIDI::Manager::PortMap::const_iterator i;
 	const MIDI::Manager::PortMap& ports = MIDI::Manager::instance()->get_midi_ports();
 	int n;
-	ToggleButton* tb;
-	RadioButton* rb;
 
-	Gtk::Table* table = manage (new Table (ports.size() + 4, 10));
+	/* remove all existing widgets */
 
-	table->set_row_spacings (6);
-	table->set_col_spacings (10);
+	// XXX broken in gtkmm 2.10
+	// midi_port_table.clear ();
 
-	table->attach (*(manage (new Label (_("Port")))), 0, 1, 0, 1);
-	table->attach (*(manage (new Label (_("Offline")))), 1, 2, 0, 1);
-	table->attach (*(manage (new Label (_("Trace\nInput")))), 2, 3, 0, 1);
-	table->attach (*(manage (new Label (_("Trace\nOutput")))), 3, 4, 0, 1);
-	table->attach (*(manage (new Label (_("MTC")))), 4, 5, 0, 1);
-	table->attach (*(manage (new Label (_("MMC")))), 6, 7, 0, 1);
-	table->attach (*(manage (new Label (_("MIDI Parameter\nControl")))), 8, 9, 0, 1);
+	for (vector<Widget*>::iterator w = midi_port_table_widgets.begin(); w != midi_port_table_widgets.end(); ++w) {
+		midi_port_table.remove (**w);
+	}
 
-	table->attach (*(manage (new HSeparator())), 0, 9, 1, 2);
-	table->attach (*(manage (new VSeparator())), 5, 6, 0, 8);
-	table->attach (*(manage (new VSeparator())), 7, 8, 0, 8);
+	midi_port_table_widgets.clear ();
+
+	midi_port_table.resize (ports.size() + 4, 10);
+
+	Gtk::Label* label;
+
+	label = (manage (new Label (_("Port")))); 
+	label->show ();
+	midi_port_table_widgets.push_back (label);
+	midi_port_table.attach (*label, 0, 1, 0, 1);
+	label = (manage (new Label (_("Offline")))); 
+	label->show ();
+	midi_port_table_widgets.push_back (label);
+	midi_port_table.attach (*label, 1, 2, 0, 1);
+	label = (manage (new Label (_("Trace\nInput")))); 
+	label->show ();
+	midi_port_table_widgets.push_back (label);
+	midi_port_table.attach (*label, 2, 3, 0, 1);
+	label = (manage (new Label (_("Trace\nOutput")))); 
+	label->show ();
+	midi_port_table_widgets.push_back (label);
+	midi_port_table.attach (*label, 3, 4, 0, 1);
+	label = (manage (new Label (_("MTC")))); 
+	label->show ();
+	midi_port_table_widgets.push_back (label);
+	midi_port_table.attach (*label, 4, 5, 0, 1);
+	label = (manage (new Label (_("MMC")))); 
+	label->show ();
+	midi_port_table_widgets.push_back (label);
+	midi_port_table.attach (*label, 6, 7, 0, 1);
+	label = (manage (new Label (_("MIDI Parameter\nControl")))); 
+	label->show ();
+	midi_port_table_widgets.push_back (label);
+	midi_port_table.attach (*label, 8, 9, 0, 1);
+
+	Gtk::HSeparator* hsep = (manage (new HSeparator())); 
+	hsep->show ();
+	midi_port_table_widgets.push_back (hsep);
+	midi_port_table.attach (*hsep, 0, 9, 1, 2);
+	Gtk::VSeparator* vsep = (manage (new VSeparator())); 
+	vsep->show ();
+	midi_port_table_widgets.push_back (vsep);
+	midi_port_table.attach (*vsep, 5, 6, 0, 8);
+	vsep = (manage (new VSeparator())); 
+	vsep->show ();
+	midi_port_table_widgets.push_back (vsep);
+	midi_port_table.attach (*vsep, 7, 8, 0, 8);
 	
-	table->attach (*(manage (new Label (_("MMC Device ID")))), 9, 10, 0, 1);
-	table->attach (mmc_device_id_spinner, 9, 10, 1, 2);
-	
-	mmc_device_id_adjustment.signal_value_changed().connect (mem_fun (*this, &OptionEditor::mmc_device_id_adjusted));
+	label = (manage (new Label (_("MMC Device ID")))); 
+	label->show ();
+	midi_port_table_widgets.push_back (label);
+	midi_port_table.attach (*label, 9, 10, 0, 1);
+	midi_port_table_widgets.push_back (&mmc_device_id_spinner);
+	midi_port_table.attach (mmc_device_id_spinner, 9, 10, 1, 2);
 
 	for (n = 0, i = ports.begin(); i != ports.end(); ++n, ++i) {
 
 		pair<MIDI::Port*,vector<RadioButton*> > newpair;
+		ToggleButton* tb;
+		RadioButton* rb;
 
 		newpair.first = i->second;
 
-		table->attach (*(manage (new Label (i->first))), 0, 1, n+2, n+3,FILL|EXPAND, FILL );
+		label = (manage (new Label (i->first))); 
+		label->show ();
+		midi_port_table_widgets.push_back (label);
+		midi_port_table.attach (*label, 0, 1, n+2, n+3,FILL|EXPAND, FILL );
+		
 		tb = manage (new ToggleButton (_("online")));
 		tb->set_name ("OptionEditorToggleButton");
 
@@ -416,22 +485,29 @@ OptionEditor::setup_midi_options ()
 			set_size_request_to_display_given_text (*tb, _("online"), 15, 12);
 		}
 
-		tb->set_active (!(*i).second->input()->offline());
-		tb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::port_online_toggled), (*i).second, tb));
-		(*i).second->input()->OfflineStatusChanged.connect (bind (mem_fun(*this, &OptionEditor::map_port_online), (*i).second, tb));
-		table->attach (*tb, 1, 2, n+2, n+3, FILL|EXPAND, FILL);
+		if (i->second->input()) {
+			tb->set_active (!i->second->input()->offline());
+			tb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::port_online_toggled), i->second, tb));
+			i->second->input()->OfflineStatusChanged.connect (bind (mem_fun(*this, &OptionEditor::map_port_online), (*i).second, tb));
+		}
+		tb->show ();
+		midi_port_table_widgets.push_back (tb);
+		midi_port_table.attach (*tb, 1, 2, n+2, n+3, FILL|EXPAND, FILL);
 
 		tb = manage (new ToggleButton ());
 		tb->set_name ("OptionEditorToggleButton");
 		tb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::port_trace_in_toggled), (*i).second, tb));
 		tb->set_size_request (10, 10);
-		table->attach (*tb, 2, 3, n+2, n+3, FILL|EXPAND, FILL);
+		tb->show ();
+		midi_port_table_widgets.push_back (tb);
+		midi_port_table.attach (*tb, 2, 3, n+2, n+3, FILL|EXPAND, FILL);
 
 		tb = manage (new ToggleButton ());
 		tb->set_name ("OptionEditorToggleButton");
 		tb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::port_trace_out_toggled), (*i).second, tb));
 		tb->set_size_request (10, 10);
-		table->attach (*tb, 3, 4, n+2, n+3, FILL|EXPAND, FILL);
+		tb->show ();
+		midi_port_table.attach (*tb, 3, 4, n+2, n+3, FILL|EXPAND, FILL);
 
 		rb = manage (new RadioButton ());
 		newpair.second.push_back (rb);
@@ -442,10 +518,12 @@ OptionEditor::setup_midi_options ()
 			rb->set_group (mtc_button_group);
 
 		}
-		table->attach (*rb, 4, 5, n+2, n+3, FILL|EXPAND, FILL);
+		rb->show ();
+		midi_port_table_widgets.push_back (rb);
+		midi_port_table.attach (*rb, 4, 5, n+2, n+3, FILL|EXPAND, FILL);
 		rb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::mtc_port_chosen), (*i).second, rb));
 
-		if (Config->get_mtc_port_name() == i->first) {
+		if (session && i->second == session->mtc_port()) {
 			rb->set_active (true);
 		}
 		
@@ -457,10 +535,12 @@ OptionEditor::setup_midi_options ()
 		} else {
 			rb->set_group (mmc_button_group);
 		}
-		table->attach (*rb, 6, 7, n+2, n+3, FILL|EXPAND, FILL);
+		rb->show ();
+		midi_port_table_widgets.push_back (rb);
+		midi_port_table.attach (*rb, 6, 7, n+2, n+3, FILL|EXPAND, FILL);
 		rb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::mmc_port_chosen), (*i).second, rb));
 
-		if (Config->get_mmc_port_name() == i->first) {
+		if (session && i->second == session->mmc_port()) {
 			rb->set_active (true);
 		}
 
@@ -472,22 +552,60 @@ OptionEditor::setup_midi_options ()
 		} else {
 			rb->set_group (midi_button_group);
 		}
-		table->attach (*rb, 8, 9, n+2, n+3, FILL|EXPAND, FILL);
+		rb->show ();
+		midi_port_table_widgets.push_back (rb);
+		midi_port_table.attach (*rb, 8, 9, n+2, n+3, FILL|EXPAND, FILL);
 		rb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::midi_port_chosen), (*i).second, rb));
 
-		if (Config->get_midi_port_name() == i->first) {
+		if (session && i->second == session->midi_port()) {
 			rb->set_active (true);
 		}
 		
 		port_toggle_buttons.insert (newpair);
 	}
 
-	table->show_all ();
+	midi_port_table.show();
+}
 
-	hbox = manage (new HBox);
-	hbox->set_border_width (6);
-	hbox->pack_start (*table, true, false);
-	midi_packer.pack_start (*hbox, false, false);
+void
+OptionEditor::add_midi_port ()
+{
+	MidiPortDialog dialog;
+
+	dialog.set_position (WIN_POS_MOUSE);
+	dialog.set_transient_for (*this);
+
+	dialog.show ();
+
+	int ret = dialog.run ();
+
+	switch (ret) {
+	case RESPONSE_ACCEPT:
+		break;
+	default:
+		return;
+		break;
+	}
+
+	Glib::ustring mode = dialog.port_mode_combo.get_active_text();
+	std::string smod;
+
+	if (mode == _("input")) {
+		smod = X_("input");
+	} else if (mode == (_("output"))) {
+		smod = X_("output");
+	} else {
+		smod = "duplex";
+	}
+
+	MIDI::PortRequest req (X_("ardour"),
+			       dialog.port_name.get_text(),
+			       smod,
+			       MIDI::PortFactory::default_port_type());
+
+	if (MIDI::Manager::instance()->add_port (req) != 0) {
+		redisplay_midi_ports ();
+	}
 }
 
 void
@@ -543,23 +661,27 @@ OptionEditor::port_online_toggled (MIDI::Port* port, ToggleButton* tb)
 {
 	bool wanted = tb->get_active();
 
-	if (wanted != port->input()->offline()) {
-		port->input()->set_offline (wanted);
-	} 
+	if (port->input()) {
+		if (wanted != port->input()->offline()) {
+			port->input()->set_offline (wanted);
+		} 
+	}
 }
 
 void
 OptionEditor::map_port_online (MIDI::Port* port, ToggleButton* tb)
 {
 	bool bstate = tb->get_active ();
-
-	if (bstate != port->input()->offline()) {
-		if (port->input()->offline()) {
-			tb->set_label (_("offline"));
-			tb->set_active (false);
-		} else {
-			tb->set_label (_("online"));
-			tb->set_active (true);
+	
+	if (port->input()) {
+		if (bstate != port->input()->offline()) {
+			if (port->input()->offline()) {
+				tb->set_label (_("offline"));
+				tb->set_active (false);
+			} else {
+				tb->set_label (_("online"));
+				tb->set_active (true);
+			}
 		}
 	}
 }
@@ -579,8 +701,10 @@ OptionEditor::port_trace_in_toggled (MIDI::Port* port, ToggleButton* tb)
 {
 	bool trace = tb->get_active();
 
-	if (port->input()->tracing() != trace) {
-		port->input()->trace (trace, &cerr, string (port->name()) + string (" input: "));
+	if (port->input()) {
+		if (port->input()->tracing() != trace) {
+			port->input()->trace (trace, &cerr, string (port->name()) + string (" input: "));
+		}
 	}
 }
 
@@ -589,8 +713,10 @@ OptionEditor::port_trace_out_toggled (MIDI::Port* port, ToggleButton* tb)
 {
 	bool trace = tb->get_active();
 
-	if (port->output()->tracing() != trace) {
-		port->output()->trace (trace, &cerr, string (port->name()) + string (" output: "));
+	if (port->output()) {
+		if (port->output()->tracing() != trace) {
+			port->output()->trace (trace, &cerr, string (port->name()) + string (" output: "));
+		}
 	}
 }
 

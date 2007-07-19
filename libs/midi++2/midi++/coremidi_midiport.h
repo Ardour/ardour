@@ -40,6 +40,9 @@ namespace MIDI {
 	virtual int selectable() const {
 	    return -1;
 	}
+
+	static int discover (std::vector<PortSet>&);
+
       protected:
 	/* Direct I/O */
 	int write(byte * msg, size_t msglen);
