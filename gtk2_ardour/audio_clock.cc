@@ -1873,16 +1873,8 @@ AudioClock::set_mode (Mode m)
 	if (_mode == m) {
 		return;
 	}
-	switch (_mode) {
-	case SMPTE:
-	case BBT:
-	case MinSec:
-	case Frames:
-		clock_base.remove ();
-		break;
-	case Off:
-		break;
-	}
+	
+	clock_base.remove ();
 	
 	_mode = m;
 
@@ -1904,6 +1896,7 @@ AudioClock::set_mode (Mode m)
 		break;
 
 	case Off:
+		clock_base.add (off_hbox);
 		break;
 	}
 
@@ -1948,6 +1941,7 @@ AudioClock::set_size_requests ()
 		break;
 
 	case Off:
+		Gtkmm2ext::set_size_request_to_display_given_text (off_hbox, "00000", 5, 5);
 		break;
 		
 	}
