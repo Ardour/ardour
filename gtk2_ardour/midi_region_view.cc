@@ -152,6 +152,15 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 }
 
 
+bool
+MidiRegionView::note_canvas_event(GdkEvent* ev)
+{
+	cerr << "NOTE CANVAS EVENT" << endl;
+
+	return true;
+}
+
+
 void
 MidiRegionView::redisplay_model()
 {
@@ -326,6 +335,10 @@ MidiRegionView::add_event (const MidiEvent& ev)
 			ev_rect->property_outline_what() = (guint32) (0x1 & 0x4 & 0x8);
 			ev_rect->property_fill_color_rgba() = 0xFFFFFF66;
 
+			ev_rect->signal_event().connect(sigc::mem_fun(this, &MidiRegionView::note_canvas_event));
+
+			ev_rect->raise_to_top();
+
 			_events.push_back(ev_rect);
 			if (_active_notes)
 				_active_notes[note] = ev_rect;
@@ -350,6 +363,9 @@ MidiRegionView::add_event (const MidiEvent& ev)
 		ev_diamond->show();
 		ev_diamond->property_outline_color_rgba() = 0xFFFFFFDD;
 		ev_diamond->property_fill_color_rgba() = 0xFFFFFF66;
+			
+		ev_diamond->signal_event().connect(sigc::mem_fun(this, &MidiRegionView::note_canvas_event));
+
 		_events.push_back(ev_diamond);
 	}
 }

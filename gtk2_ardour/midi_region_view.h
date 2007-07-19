@@ -98,6 +98,7 @@ class MidiRegionView : public RegionView
 	void clear_events();
 
 	bool canvas_event(GdkEvent* ev);
+	bool note_canvas_event(GdkEvent* ev);
 
 	std::vector<ArdourCanvas::Item*> _events;
 	ArdourCanvas::SimpleRect**       _active_notes;
