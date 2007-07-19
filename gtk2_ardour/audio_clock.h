@@ -104,6 +104,8 @@ class AudioClock : public Gtk::HBox
 	Gtk::EventBox  audio_frames_ebox;
 	Gtk::Label     audio_frames_label;
 
+	Gtk::HBox      off_hbox;
+
 	Gtk::EventBox  hours_ebox;
 	Gtk::EventBox  minutes_ebox;
 	Gtk::EventBox  seconds_ebox;
