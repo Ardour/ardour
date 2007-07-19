@@ -55,8 +55,6 @@ void * MackieControlProtocol::monitor_work()
 		{
 			if ( poll_ports() )
 			{
-	cout << "--------------------------------------" << endl;
-	cout << "MackieControlProtocol::read_ports _ports: " << _ports.size() << ", nfds: " << nfds << endl;
 				try { read_ports(); }
 				catch ( exception & e ) {
 					cout << "MackieControlProtocol::poll_ports caught exception: " << e.what() << endl;
@@ -66,6 +64,9 @@ void * MackieControlProtocol::monitor_work()
 			}
 			// poll for automation data from the routes
 			poll_automation();
+			
+			// check if we need to stop scrubbing
+			_jog_wheel.check_scrubbing();
 		}
 		catch ( exception & e )
 		{

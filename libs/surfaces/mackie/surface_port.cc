@@ -87,7 +87,7 @@ MidiByteArray SurfacePort::read()
 		retval.copy( nread, buf );
 		if ((size_t) nread == sizeof (buf))
 		{
-#ifdef DEBUG
+#ifdef PORT_DEBUG
 			cout << "SurfacePort::read recursive" << endl;
 #endif
 			retval << read();
@@ -106,7 +106,7 @@ MidiByteArray SurfacePort::read()
 			throw MackieControlException( os.str() );
 		}
 	}
-#ifdef DEBUG
+#ifdef PORT_DEBUG
 	cout << "SurfacePort::read: " << retval << endl;
 #endif
 	return retval;
@@ -114,7 +114,7 @@ MidiByteArray SurfacePort::read()
 
 void SurfacePort::write( const MidiByteArray & mba )
 {
-#ifdef DEBUG
+#ifdef PORT_DEBUG
 	//if ( mba[0] == 0xf0 ) cout << "SurfacePort::write: " << mba << endl;
 	cout << "SurfacePort::write: " << mba << endl;
 #endif
@@ -140,7 +140,7 @@ void SurfacePort::write( const MidiByteArray & mba )
 			throw MackieControlException( os.str() );
 		}
 	}
-#ifdef DEBUG
+#ifdef PORT_DEBUG
 	cout << "SurfacePort::wrote " << count << endl;
 #endif
 }

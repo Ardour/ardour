@@ -408,9 +408,9 @@ void MackiePort::handle_midi_any (MIDI::Parser & parser, MIDI::byte * raw_bytes,
 					ControlState state;
 					
 					// bytes[2] & 0b01000000 (0x40) give sign
-					int sign = ( bytes[2] & 0x40 ) == 0 ? 1 : -1; 
+					state.sign = ( bytes[2] & 0x40 ) == 0 ? 1 : -1; 
 					// bytes[2] & 0b00111111 (0x3f) gives delta
-					state.ticks = ( bytes[2] & 0x3f) * sign;
+					state.ticks = ( bytes[2] & 0x3f);
 					state.delta = float( state.ticks ) / float( 0x3f );
 					
 					control_event( *this, control, state );

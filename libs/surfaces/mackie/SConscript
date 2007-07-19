@@ -35,6 +35,7 @@ surface.cc
 mackie_control_protocol.cc
 bcf_surface.cc
 mackie_surface.cc
+mackie_jog_wheel.cc
 """)
 
 mackie.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")

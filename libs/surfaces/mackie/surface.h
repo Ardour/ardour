@@ -56,10 +56,10 @@ public:
 		
 		Indexed by raw_id not by id. @see Control for the distinction.
 	*/
-	std::map<int,Control*> faders;
-	std::map<int,Control*> pots;
-	std::map<int,Control*> buttons;
-	std::map<int,Control*> leds;
+	std::map<int,Fader*> faders;
+	std::map<int,Pot*> pots;
+	std::map<int,Button*> buttons;
+	std::map<int,Led*> leds;
 
 	/// no strip controls in here because they usually
 	/// have the same names.

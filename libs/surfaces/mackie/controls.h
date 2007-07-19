@@ -267,9 +267,13 @@ public:
 	}
 	
 	virtual type_t type() const { return type_button; };
+	
+	bool pressed() const { return _pressed; }
+	Button & pressed( bool rhs ) { _pressed = rhs; return *this; }
 
 private:
 	Led _led;
+	bool _pressed;
 };
 
 class LedRing : public Led

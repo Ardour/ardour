@@ -35,6 +35,7 @@
 #include "route_signal.h"
 #include "mackie_button_handler.h"
 #include "mackie_port.h"
+#include "mackie_jog_wheel.h"
 #include "timer.h"
 
 namespace MIDI {
@@ -184,6 +185,19 @@ class MackieControlProtocol
 	virtual Mackie::LedState marker_press( Mackie::Button & );
 	virtual Mackie::LedState marker_release( Mackie::Button & );
 
+	// jog wheel states
+	virtual Mackie::LedState zoom_press( Mackie::Button & );
+	virtual Mackie::LedState zoom_release( Mackie::Button & );
+
+	virtual Mackie::LedState scrub_press( Mackie::Button & );
+	virtual Mackie::LedState scrub_release( Mackie::Button & );
+	
+   /// This is the main MCU port, ie not an extender port
+	/// Only for use by JogWheel
+	const Mackie::MackiePort & mcu_port() const;
+	Mackie::MackiePort & mcu_port();
+	ARDOUR::Session & get_session() { return *session; }
+ 
   protected:
 	// create instances of MackiePort, depending on what's found in ardour.rc
 	void create_ports();
@@ -222,10 +236,6 @@ class MackieControlProtocol
    // delete all RouteSignal objects connecting Routes to Strips
    void clear_route_signals();
 	
-   /// This is the main MCU port, ie not an extender port
-	const Mackie::MackiePort & mcu_port() const;
-	Mackie::MackiePort & mcu_port();
- 
 	typedef std::vector<Mackie::RouteSignal*> RouteSignals;
 	RouteSignals route_signals;
 	
@@ -318,6 +328,8 @@ class MackieControlProtocol
 	
 	// timer for two quick marker left presses
 	Mackie::Timer _frm_left_last;
+	
+	Mackie::JogWheel _jog_wheel;
 };
 
 #endif // ardour_mackie_control_protocol_h

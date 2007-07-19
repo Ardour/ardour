@@ -99,6 +99,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _polling( true )
 	, pfd( 0 )
 	, nfds( 0 )
+	, _jog_wheel( *this )
 {
 #ifdef DEBUG
 	cout << "MackieControlProtocol::MackieControlProtocol" << endl;
@@ -907,27 +908,17 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 			{
 				if ( control.name() == "jog" )
 				{
-					// TODO use current snap-to setting?
-					long delta = state.ticks * 1000;
-					nframes_t next = session->transport_frame() + delta;
-					if ( delta < 0 && session->transport_frame() < (nframes_t) abs( delta )  )
-					{
-						next = session->current_start_frame();
-					}
-					else if ( next > session->current_end_frame() )
-					{
-						next = session->current_end_frame();
-					}
-					
-					// doesn't work very well
-					session->request_locate( next, session->transport_rolling() );
+					_jog_wheel.jog_event( port, control, state );
 					
 					// turn off the led ring, for bcf emulation mode
-					port.write( builder.build_led_ring( dynamic_cast<Pot &>( control ), off ) );
+					if ( mcu_port().emulation() == MackiePort::bcf2000 )
+					{
+						port.write( builder.build_led_ring( dynamic_cast<Pot &>( control ), off ) );
+					}
 				}
 				else
 				{
-					cout << "external controller" << state.ticks << endl;
+					cout << "external controller" << state.ticks * state.sign << endl;
 				}
 			}
 			break;
@@ -1186,12 +1177,16 @@ LedState MackieControlProtocol::record_release( Button & button )
 
 LedState MackieControlProtocol::rewind_press( Button & button )
 {
-	session->request_transport_speed( -4.0 );
+	_jog_wheel.push( JogWheel::speed );
+	_jog_wheel.transport_direction( -1 );
+	session->request_transport_speed( -_jog_wheel.transport_speed() );
 	return on;
 }
 
 LedState MackieControlProtocol::rewind_release( Button & button )
 {
+	_jog_wheel.pop();
+	_jog_wheel.transport_direction( 0 );
 	if ( _transport_previously_rolling )
 		session->request_transport_speed( 1.0 );
 	else
@@ -1201,12 +1196,16 @@ LedState MackieControlProtocol::rewind_release( Button & button )
 
 LedState MackieControlProtocol::ffwd_press( Button & button )
 {
-	session->request_transport_speed( 4.0 );
+	_jog_wheel.push( JogWheel::speed );
+	_jog_wheel.transport_direction( 1 );
+	session->request_transport_speed( _jog_wheel.transport_speed() );
 	return on;
 }
 
 LedState MackieControlProtocol::ffwd_release( Button & button )
 {
+	_jog_wheel.pop();
+	_jog_wheel.transport_direction( 0 );
 	if ( _transport_previously_rolling )
 		session->request_transport_speed( 1.0 );
 	else
@@ -1505,4 +1504,51 @@ LedState MackieControlProtocol::marker_press( Button & button )
 LedState MackieControlProtocol::marker_release( Button & button )
 {
 	return off;
+}
+
+void jog_wheel_state_display( JogWheel::State state, MackiePort & port )
+{
+	switch( state )
+	{
+		case JogWheel::zoom: port.write( builder.two_char_display( "Zm" ) ); break;
+		case JogWheel::scroll: port.write( builder.two_char_display( "Sc" ) ); break;
+		case JogWheel::scrub: port.write( builder.two_char_display( "Sb" ) ); break;
+		case JogWheel::shuttle: port.write( builder.two_char_display( "Sh" ) ); break;
+		case JogWheel::speed: port.write( builder.two_char_display( "Sp" ) ); break;
+		case JogWheel::select: port.write( builder.two_char_display( "Se" ) ); break;
+	}
+}
+
+Mackie::LedState MackieControlProtocol::zoom_press( Mackie::Button & )
+{
+	_jog_wheel.zoom_state_toggle();
+	update_global_button( "scrub", _jog_wheel.jog_wheel_state() == JogWheel::scrub );
+	jog_wheel_state_display( _jog_wheel.jog_wheel_state(), mcu_port() );
+	return _jog_wheel.jog_wheel_state() == JogWheel::zoom;
+}
+
+Mackie::LedState MackieControlProtocol::zoom_release( Mackie::Button & )
+{
+	return _jog_wheel.jog_wheel_state() == JogWheel::zoom;
+}
+
+Mackie::LedState MackieControlProtocol::scrub_press( Mackie::Button & )
+{
+	_jog_wheel.scrub_state_cycle();
+	update_global_button( "zoom", _jog_wheel.jog_wheel_state() == JogWheel::zoom );
+	jog_wheel_state_display( _jog_wheel.jog_wheel_state(), mcu_port() );
+	return
+		_jog_wheel.jog_wheel_state() == JogWheel::scrub
+		||
+		_jog_wheel.jog_wheel_state() == JogWheel::shuttle
+	;
+}
+
+Mackie::LedState MackieControlProtocol::scrub_release( Mackie::Button & )
+{
+	return
+		_jog_wheel.jog_wheel_state() == JogWheel::scrub
+		||
+		_jog_wheel.jog_wheel_state() == JogWheel::shuttle
+	;
 }

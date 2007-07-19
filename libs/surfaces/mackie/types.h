@@ -18,7 +18,7 @@
 #ifndef mackie_types_h
 #define mackie_types_h
 
-#define DEBUG 1
+#include <iostream>
 
 namespace Mackie
 {
@@ -71,15 +71,26 @@ struct ControlState
 	// Note that this sets both pos and delta to the flt value
 	ControlState( LedState ls, float flt ): pos(flt), delta(flt), ticks(0), led_state(ls), button_state(neither) {}
 	ControlState( float flt ): pos(flt), delta(flt), ticks(0), led_state(none), button_state(neither) {}
-	ControlState( float flt, int tcks ): pos(flt), delta(flt), ticks(tcks), led_state(none), button_state(neither) {}
+	ControlState( float flt, unsigned int tcks ): pos(flt), delta(flt), ticks(tcks), led_state(none), button_state(neither) {}
 	ControlState( ButtonState bs ): pos(0.0), delta(0.0), ticks(0), led_state(none), button_state(bs) {}
 	
+	/// For faders. Between 0 and 1.
 	float pos;
+		
+	/// For pots. Sign. Either -1 or 1;
+	int sign;
+
+	/// For pots. Signed value of total movement. Between 0 and 1
 	float delta;
-	int ticks;
+		
+	/// For pots. Unsigned number of ticks. Usually between 1 and 16.
+	unsigned int ticks;
+		
 	LedState led_state;
 	ButtonState button_state;
 };
+
+std::ostream & operator << ( std::ostream &, const ControlState & );
 
 class Control;
 class Fader;

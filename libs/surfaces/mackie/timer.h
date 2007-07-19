@@ -44,7 +44,7 @@ public:
 		if ( shouldStart )
 			start();
 	}
-
+	
 	/**
 		Start the timer running. Return the current timestamp, in milliseconds
 	*/

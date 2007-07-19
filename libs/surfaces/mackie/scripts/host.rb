@@ -99,7 +99,7 @@ while bytes = mck.file.read( 3 )
   control = sf.midis[midi_type][control_id]
   
   print " Control Type: %-7s, " % sf.types[midi_type]
-  print "id: %4i" % control_id
+  print "id: %4x" % control_id
   print ", control: %15s" % ( control ? control.name : "nil control" )
   print ", %15s" % ( control ? control.group.name : "nil group" )
   print "\n"

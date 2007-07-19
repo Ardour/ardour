@@ -52,17 +52,20 @@ void Mackie::<%= sf.name %>Surface::init_controls()
 % end
 
 	// initialise controls
-	Control * control = 0;
+	Fader * fader = 0;
+	Pot * pot = 0;
+	Button * button = 0;
+	Led * led = 0;
 
 % sf.controls.each do |control|
 	group = groups["<%=control.group.name%>"];
-	control = new <%= control.class.name %> ( <%= control.id %>, <%= control.ordinal %>, "<%=control.name%>", *group );
-	<%=control.class.name.downcase%>s[0x<%=control.id.to_hex %>] = control;
-	controls.push_back( control );
+	<%= control.class.name.downcase %> = new <%= control.class.name %> ( <%= control.id %>, <%= control.ordinal %>, "<%=control.name%>", *group );
+	<%=control.class.name.downcase%>s[0x<%=control.id.to_hex %>] = <%= control.class.name.downcase %>;
+	controls.push_back( <%= control.class.name.downcase %> );
 	<%- if control.group.class != Strip -%>
-	controls_by_name["<%= control.name %>"] = control;
+	controls_by_name["<%= control.name %>"] = <%= control.class.name.downcase %>;
 	<%- end -%>
-	group->add( *control );
+	group->add( *<%= control.class.name.downcase %> );
 
 % end
 }
