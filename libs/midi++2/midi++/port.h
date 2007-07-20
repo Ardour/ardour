@@ -20,6 +20,7 @@
 #define  __libmidi_port_h__
 
 #include <string>
+#include <iostream>
 
 #include <sigc++/sigc++.h>
 
@@ -142,6 +143,8 @@ class Port : public sigc::trackable {
   private:
 	static size_t nports;
 };
+
+std::ostream & operator << ( std::ostream & os, const Port & port );
 
 } // namespace MIDI
 

@@ -145,3 +145,21 @@ Port::write_callback (byte *msg, unsigned int len, void *ptr)
 	((Port *)ptr)->write (msg, len);
 }
 
+std::ostream & MIDI::operator << ( std::ostream & os, const MIDI::Port & port )
+{
+	using namespace std;
+	os << "MIDI::Port { ";
+	os << "device: " << port.device();
+	os << "; ";
+	os << "name: " << port.name();
+	os << "; ";
+	os << "type: " << port.type();
+	os << "; ";
+	os << "mode: " << port.mode();
+	os << "; ";
+	os << "ok: " << port.ok();
+	os << "; ";
+	os << " }";
+	return os;
+}
+
