@@ -23,6 +23,8 @@
 #include <string>
 #include <algorithm>
 
+#include <boost/none.hpp>
+
 #include <sigc++/bind.h>
 
 #include <pbd/convert.h>
@@ -175,7 +177,6 @@ check_adjustment (Gtk::Adjustment* adj)
 Editor::Editor ()
 	: 
 	  /* time display buttons */
-
 	  minsec_label (_("Mins:Secs")),
 	  bbt_label (_("Bars:Beats")),
 	  smpte_label (_("Timecode")),
@@ -886,40 +887,62 @@ Editor::control_scroll (float fraction)
 	}
 
 	double step = fraction * current_page_frames();
-	nframes_t target;
+	/*
+		_control_scroll_target is an optional<T>
+	
+		it acts like a pointer to an nframes_t, with a operator conversion to boolean
+		to check that it has a value
+		could possibly use playhead_cursor->current_frame to store
+		the value and a boolean in the class to know when it's out of date
+	*/
+	if ( !_control_scroll_target )
+	{
+		_control_scroll_target = session->transport_frame();
+		_dragging_playhead = true;
+	}
 
-	if ((fraction < 0.0f) && (session->transport_frame() < (nframes_t) fabs(step))) {
-		target = 0;
-	} else if ((fraction > 0.0f) && (max_frames - session->transport_frame() < step)) {
-		target = (max_frames - (current_page_frames()*2)); // allow room for slop in where the PH is on the screen
+	if ((fraction < 0.0f) && (*_control_scroll_target < (nframes_t) fabs(step))) {
+		*_control_scroll_target = 0;
+	} else if ((fraction > 0.0f) && (max_frames - *_control_scroll_target < step)) {
+		*_control_scroll_target = max_frames - (current_page_frames()*2); // allow room for slop in where the PH is on the screen
 	} else {
-		target = (session->transport_frame() + (nframes_t) floor ((fraction * current_page_frames())));
+		*_control_scroll_target += (nframes_t) floor (step);
 	}
 
 	/* move visuals, we'll catch up with it later */
 
-	playhead_cursor->set_position (target);
-
-	if (target > (current_page_frames() / 2)) {
+	playhead_cursor->set_position (*_control_scroll_target);
+	UpdateAllTransportClocks (*_control_scroll_target);
+	
+	if (*_control_scroll_target > (current_page_frames() / 2)) {
 		/* try to center PH in window */
-		reset_x_origin (target - (current_page_frames()/2));
+		reset_x_origin (*_control_scroll_target - (current_page_frames()/2));
 	} else {
 		reset_x_origin (0);
 	}
 
-	/* cancel the existing */
+	/*
+		Now we do a timeout to actually bring the session to the right place
+		according to the playhead. This is to avoid reading disk buffers on every
+		call to control_scroll, which is driven by ScrollTimeline and therefore
+		probably by a control surface wheel which can generate lots of events.
+	*/
+	/* cancel the existing timeout */
 
 	control_scroll_connection.disconnect ();
 
-	/* add the next one */
+	/* add the next timeout */
 
-	control_scroll_connection = Glib::signal_timeout().connect (bind (mem_fun (*this, &Editor::deferred_control_scroll), target), 50);
+	control_scroll_connection = Glib::signal_timeout().connect (bind (mem_fun (*this, &Editor::deferred_control_scroll), *_control_scroll_target), 250);
 }
 
 bool
 Editor::deferred_control_scroll (nframes_t target)
 {
-	session->request_locate (target);
+	session->request_locate (*_control_scroll_target, session->transport_rolling());
+	// reset for next stream
+	_control_scroll_target = boost::none;
+	_dragging_playhead = false;
 	return false;
 }
 

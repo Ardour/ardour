@@ -26,6 +26,8 @@
 #include <string>
 #include <sys/time.h>
 
+#include <boost/optional.hpp>
+
 #include <libgnomecanvasmm/canvas.h>
 #include <libgnomecanvasmm/group.h>
 #include <libgnomecanvasmm/line.h>
@@ -349,6 +351,9 @@ class Editor : public PublicEditor
 	
 	ARDOUR::Session     *session;
 	bool                 constructed;
+  
+	// to keep track of the playhead position for control_scroll
+	boost::optional<nframes_t> _control_scroll_target;
 
 	PlaylistSelector* _playlist_selector;
 
