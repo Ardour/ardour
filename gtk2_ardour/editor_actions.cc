@@ -429,8 +429,10 @@ Editor::register_actions ()
 
 	RadioAction::Group subframe_group;
 
-	ActionManager::register_radio_action (editor_actions, pullup_group,  X_("Subframes80"), _("80 per frame"), bind (mem_fun (*this, &Editor::subframes_per_frame_chosen), 80));
-	ActionManager::register_radio_action (editor_actions, pullup_group,  X_("Subframes100"), _("100 per frame"), bind (mem_fun (*this, &Editor::subframes_per_frame_chosen), 100));
+	ActionManager::register_radio_action (editor_actions, subframe_group,  X_("Subframes80"), _("80 per frame"), bind (mem_fun (*this, 
+&Editor::subframes_per_frame_chosen), 80));
+	ActionManager::register_radio_action (editor_actions, subframe_group,  X_("Subframes100"), _("100 per frame"), bind (mem_fun (*this, 
+&Editor::subframes_per_frame_chosen), 100));
 
 	ActionManager::add_action_group (rl_actions);
 	ActionManager::add_action_group (zoom_actions);
