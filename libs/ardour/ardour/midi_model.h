@@ -63,7 +63,7 @@ public:
 	void append(const MidiBuffer& data);
 	
 	/** Resizes vector if necessary (NOT realtime safe) */
-	void append(double time, size_t size, Byte* in_buffer);
+	void append(double time, size_t size, const Byte* in_buffer);
 	
 	inline const Note& note_at(unsigned i) const { return _notes[i]; }
 

@@ -104,7 +104,7 @@ MidiModel::append(const MidiBuffer& buf)
  * and MUST be >= the latest event currently in the model.
  */
 void
-MidiModel::append(double time, size_t size, Byte* buf)
+MidiModel::append(double time, size_t size, const Byte* buf)
 {
 	assert(_notes.empty() || time >= _notes.back().start);
 

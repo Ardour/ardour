@@ -275,11 +275,17 @@ SMFSource::read_event(jack_midi_event_t& ev) const
 		}
 	}
 	
+	size_t event_size = midi_event_size((unsigned char)status) + 1;
+	
+	// Make sure we have enough scratch buffer
+	if (ev.size < event_size)
+		ev.buffer = (Byte*)realloc(ev.buffer, event_size);
+	
 	ev.time = delta_time;
-	ev.size = midi_event_size((unsigned char)status) + 1;
+	ev.size = event_size;
 
-	if (ev.buffer == NULL)
-		ev.buffer = (Byte*)malloc(sizeof(Byte) * ev.size);
+	/*if (ev.buffer == NULL)
+		ev.buffer = (Byte*)malloc(sizeof(Byte) * ev.size);*/
 
 	ev.buffer[0] = (unsigned char)status;
 	fread(ev.buffer+1, 1, ev.size - 1, _fd);
@@ -305,12 +311,12 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, n
 
 	_read_data_count = 0;
 
-	// FIXME: ugh
-	unsigned char ev_buf[MidiBuffer::max_event_size()];
 	jack_midi_event_t ev; // time in SMF ticks
 	ev.time = 0;
-	ev.size = MidiBuffer::max_event_size();
-	ev.buffer = ev_buf;
+	ev.size = 0;
+	ev.buffer = NULL; // read_event will allocate scratch as needed
+
+	size_t scratch_size = 0; // keep track of scratch and minimize reallocs
 
 	// FIXME: don't seek to start every read
 	fseek(_fd, _header_size, 0);
@@ -348,6 +354,11 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, n
 		}
 
 		_read_data_count += ev.size;
+
+		if (ev.size > scratch_size)
+			scratch_size = ev.size;
+		else
+			ev.size = scratch_size;
 	}
 	
 	return cnt;
@@ -786,8 +797,12 @@ SMFSource::load_model(bool lock, bool force_reload)
 		return;
 	}
 
-	if (! _model)
+	if (! _model) {
 		_model = new MidiModel(_session);
+	} else {
+		cerr << "SMFSource: Reloading model." << endl;
+		_model->clear();
+	}
 
 	_model->start_write();
 
@@ -799,12 +814,15 @@ SMFSource::load_model(bool lock, bool force_reload)
 	ev.size = 0;
 	ev.buffer = NULL;
 	
+	size_t scratch_size = 0; // keep track of scratch and minimize reallocs
+	
 	// FIXME: assumes tempo never changes after start
 	const double frames_per_beat = _session.tempo_map().tempo_at(_timeline_position).frames_per_beat(
 			_session.engine().frame_rate());
 	
 	int ret;
 	while ((ret = read_event(ev)) >= 0) {
+		
 		time += ev.time;
 		
 		const double ev_time = (double)(time * frames_per_beat / (double)_ppqn); // in frames
@@ -813,9 +831,16 @@ SMFSource::load_model(bool lock, bool force_reload)
 			//cerr << "ADDING EVENT TO MODEL: " << ev.time << endl;
 			_model->append(ev_time, ev.size, ev.buffer);
 		}
+
+		if (ev.size > scratch_size)
+			scratch_size = ev.size;
+		else
+			ev.size = scratch_size;
 	}
 	
 	_model->end_write(false); /* FIXME: delete stuck notes iff percussion? */
+
+	free(ev.buffer);
 
 	_model_loaded = true;
 }

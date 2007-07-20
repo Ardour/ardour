@@ -46,8 +46,6 @@ public:
 	const MidiEvent& operator[](size_t i) const { assert(i < _size); return _events[i]; }
 	MidiEvent& operator[](size_t i) { assert(i < _size); return _events[i]; }
 
-	static size_t max_event_size() { return MAX_EVENT_SIZE; }
-
 	bool merge(const MidiBuffer& a, const MidiBuffer& b);
 
 private:
