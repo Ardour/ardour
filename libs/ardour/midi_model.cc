@@ -149,7 +149,7 @@ MidiModel::append_note_off(double time, uint8_t note_num)
 void
 MidiModel::add_note(const Note& note)
 {
-	Notes::iterator i = upper_bound(_notes.begin(), _notes.end(), note, NoteTimeComparator());
+	Notes::iterator i = upper_bound(_notes.begin(), _notes.end(), note, note_time_comparator);
 	_notes.insert(i, note);
 	if (_command)
 		_command->add_note(note);

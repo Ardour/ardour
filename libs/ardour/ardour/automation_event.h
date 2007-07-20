@@ -185,11 +185,9 @@ class AutomationList : public PBD::StatefulDestructible
 		}
 	}
 
-	struct TimeComparator {
-		bool operator() (const ControlEvent* a, const ControlEvent* b) { 
-			return a->when < b->when;
-		}
-	};
+	static inline bool time_comparator (const ControlEvent* a, const ControlEvent* b) { 
+		return a->when < b->when;
+	}
 	
 	/** Lookup cache for eval functions, range contains equivalent values */
 	struct LookupCache {

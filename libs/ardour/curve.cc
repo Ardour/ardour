@@ -347,10 +347,9 @@ Curve::multipoint_eval (double x)
 	     (lookup_cache.range.first == _list.events().end()) || 
 	     ((*lookup_cache.range.second)->when < x))) {
 		
-		AutomationList::TimeComparator cmp;
 		ControlEvent cp (x, 0.0);
 
-		lookup_cache.range = equal_range (_list.events().begin(), _list.events().end(), &cp, cmp);
+		lookup_cache.range = equal_range (_list.events().begin(), _list.events().end(), &cp, AutomationList::time_comparator);
 	}
 
 	range = lookup_cache.range;

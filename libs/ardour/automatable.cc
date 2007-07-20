@@ -232,7 +232,6 @@ bool
 Automatable::find_next_event (nframes_t now, nframes_t end, ControlEvent& next_event) const
 {
 	Controls::const_iterator li;	
-	AutomationList::TimeComparator cmp;
 
 	next_event.when = max_frames;
 	
@@ -242,7 +241,8 @@ Automatable::find_next_event (nframes_t now, nframes_t end, ControlEvent& next_e
 		boost::shared_ptr<const AutomationList> alist (li->second->list());
 		ControlEvent cp (now, 0.0f);
 		
- 		for (i = lower_bound (alist->const_begin(), alist->const_end(), &cp, cmp); i != alist->const_end() && (*i)->when < end; ++i) {
+ 		for (i = lower_bound (alist->const_begin(), alist->const_end(), &cp, AutomationList::time_comparator);
+				i != alist->const_end() && (*i)->when < end; ++i) {
  			if ((*i)->when > now) {
  				break; 
  			}

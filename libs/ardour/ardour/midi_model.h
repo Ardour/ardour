@@ -71,11 +71,9 @@ public:
 
 	typedef std::vector<Note> Notes;
 	
-	struct NoteTimeComparator {
-		inline bool operator() (const Note& a, const Note& b) const { 
-			return a.start < b.start;
-		}
-	};
+	inline static bool note_time_comparator (const Note& a, const Note& b) { 
+		return a.start < b.start;
+	}
 
 	inline       Notes& notes()       { return _notes; }
 	inline const Notes& notes() const { return _notes; }

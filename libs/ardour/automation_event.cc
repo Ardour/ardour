@@ -318,7 +318,6 @@ AutomationList::rt_add (double when, double value)
 		Glib::Mutex::Lock lm (_lock);
 
 		iterator where;
-		TimeComparator cmp;
 		ControlEvent cp (when, 0.0);
 		bool done = false;
 
@@ -370,7 +369,7 @@ AutomationList::rt_add (double when, double value)
 			
 		} else {
 
-			where = lower_bound (_events.begin(), _events.end(), &cp, cmp);
+			where = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
 
 			if (where != _events.end()) {
 				if ((*where)->when == when) {
@@ -405,12 +404,11 @@ AutomationList::add (double when, double value)
 
 	{
 		Glib::Mutex::Lock lm (_lock);
-		TimeComparator cmp;
 		ControlEvent cp (when, 0.0f);
 		bool insert = true;
 		iterator insertion_point;
 
-		for (insertion_point = lower_bound (_events.begin(), _events.end(), &cp, cmp); insertion_point != _events.end(); ++insertion_point) {
+		for (insertion_point = lower_bound (_events.begin(), _events.end(), &cp, time_comparator); insertion_point != _events.end(); ++insertion_point) {
 
 			/* only one point allowed per time point */
 
@@ -469,15 +467,14 @@ AutomationList::reset_range (double start, double endt)
 
 	{
         Glib::Mutex::Lock lm (_lock);
-		TimeComparator cmp;
 		ControlEvent cp (start, 0.0f);
 		iterator s;
 		iterator e;
 		
-		if ((s = lower_bound (_events.begin(), _events.end(), &cp, cmp)) != _events.end()) {
+		if ((s = lower_bound (_events.begin(), _events.end(), &cp, time_comparator)) != _events.end()) {
 
 			cp.when = endt;
-			e = upper_bound (_events.begin(), _events.end(), &cp, cmp);
+			e = upper_bound (_events.begin(), _events.end(), &cp, time_comparator);
 
 			for (iterator i = s; i != e; ++i) {
 				(*i)->value = _default_value;
@@ -501,14 +498,13 @@ AutomationList::erase_range (double start, double endt)
 
 	{
 		Glib::Mutex::Lock lm (_lock);
-		TimeComparator cmp;
 		ControlEvent cp (start, 0.0f);
 		iterator s;
 		iterator e;
 
-		if ((s = lower_bound (_events.begin(), _events.end(), &cp, cmp)) != _events.end()) {
+		if ((s = lower_bound (_events.begin(), _events.end(), &cp, time_comparator)) != _events.end()) {
 			cp.when = endt;
-			e = upper_bound (_events.begin(), _events.end(), &cp, cmp);
+			e = upper_bound (_events.begin(), _events.end(), &cp, time_comparator);
 			_events.erase (s, e);
 			reposition_for_rt_add (0);
 			erased = true;
@@ -608,14 +604,13 @@ AutomationList::control_points_adjacent (double xval)
 {
 	Glib::Mutex::Lock lm (_lock);
 	iterator i;
-	TimeComparator cmp;
 	ControlEvent cp (xval, 0.0f);
 	std::pair<iterator,iterator> ret;
 
 	ret.first = _events.end();
 	ret.second = _events.end();
 
-	for (i = lower_bound (_events.begin(), _events.end(), &cp, cmp); i != _events.end(); ++i) {
+	for (i = lower_bound (_events.begin(), _events.end(), &cp, time_comparator); i != _events.end(); ++i) {
 		
 		if (ret.first == _events.end()) {
 			if ((*i)->when >= xval) {
@@ -966,8 +961,7 @@ AutomationList::multipoint_eval (double x) const
 	/* FIXME: no cache.  significant? */
 	if (_interpolation == Discrete) {
 		const ControlEvent cp (x, 0);
-		TimeComparator cmp;
-		EventList::const_iterator i = lower_bound (_events.begin(), _events.end(), &cp, cmp);
+		EventList::const_iterator i = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
 
 		// shouldn't have made it to multipoint_eval
 		assert(i != _events.end());
@@ -986,9 +980,8 @@ AutomationList::multipoint_eval (double x) const
 	     ((*_lookup_cache.range.second)->when < x))) {
 
 		const ControlEvent cp (x, 0);
-		TimeComparator cmp;
 		
-		_lookup_cache.range = equal_range (_events.begin(), _events.end(), &cp, cmp);
+		_lookup_cache.range = equal_range (_events.begin(), _events.end(), &cp, time_comparator);
 	}
 	
 	pair<const_iterator,const_iterator> range = _lookup_cache.range;
@@ -1042,13 +1035,12 @@ AutomationList::build_search_cache_if_necessary(double start, double end) const
 
 		const ControlEvent start_point (start, 0);
 		const ControlEvent end_point (end, 0);
-		TimeComparator cmp;
 
 		//cerr << "REBUILD: (" << _search_cache.left << ".." << _search_cache.right << ") -> ("
 		//	<< start << ".." << end << ")" << endl;
 
-		_search_cache.range.first = lower_bound (_events.begin(), _events.end(), &start_point, cmp);
-		_search_cache.range.second = upper_bound (_events.begin(), _events.end(), &end_point, cmp);
+		_search_cache.range.first = lower_bound (_events.begin(), _events.end(), &start_point, time_comparator);
+		_search_cache.range.second = upper_bound (_events.begin(), _events.end(), &end_point, time_comparator);
 
 		_search_cache.left = start;
 		_search_cache.right = end;
@@ -1242,18 +1234,17 @@ AutomationList::cut_copy_clear (double start, double end, int op)
 	AutomationList* nal = new AutomationList (_parameter, _min_yval, _max_yval, _default_value);
 	iterator s, e;
 	ControlEvent cp (start, 0.0);
-	TimeComparator cmp;
 	bool changed = false;
 	
 	{
 		Glib::Mutex::Lock lm (_lock);
 
-		if ((s = lower_bound (_events.begin(), _events.end(), &cp, cmp)) == _events.end()) {
+		if ((s = lower_bound (_events.begin(), _events.end(), &cp, time_comparator)) == _events.end()) {
 			return nal;
 		}
 
 		cp.when = end;
-		e = upper_bound (_events.begin(), _events.end(), &cp, cmp);
+		e = upper_bound (_events.begin(), _events.end(), &cp, time_comparator);
 
 		if (op != 2 && (*s)->when != start) {
 			nal->_events.push_back (new ControlEvent (0, unlocked_eval (start)));
@@ -1353,9 +1344,8 @@ AutomationList::paste (AutomationList& alist, double pos, float times)
 		iterator prev;
 		double end = 0;
 		ControlEvent cp (pos, 0.0);
-		TimeComparator cmp;
 
-		where = upper_bound (_events.begin(), _events.end(), &cp, cmp);
+		where = upper_bound (_events.begin(), _events.end(), &cp, time_comparator);
 
 		for (iterator i = alist.begin();i != alist.end(); ++i) {
 			_events.insert (where, new ControlEvent( (*i)->when+pos,( *i)->value));
