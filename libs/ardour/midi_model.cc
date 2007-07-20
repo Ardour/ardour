@@ -83,9 +83,9 @@ MidiModel::end_write(bool delete_stuck)
  */
 void
 MidiModel::append(const MidiBuffer& buf)
-{
-	for (size_t i=0; i < buf.size(); ++i) {
-		const MidiEvent& ev = buf[i];
+{ 
+	for (MidiBuffer::const_iterator i = buf.begin(); i != buf.end(); ++i) {
+		const MidiEvent& ev = *i;
 		
 		assert(_notes.empty() || ev.time >= _notes.back().start);
 

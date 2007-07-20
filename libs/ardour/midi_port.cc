@@ -93,14 +93,14 @@ MidiPort::cycle_end()
 	
 	void* jack_buffer = jack_port_get_buffer(_port, _nframes_this_cycle);
 
-	const nframes_t event_count = _buffer.size();
-	
+	//const nframes_t event_count = _buffer.size();
 	//if (event_count > 0)
 	//	cerr << "MIDIPort writing " << event_count << " events." << endl;
 
 	jack_midi_clear_buffer(jack_buffer);
-	for (nframes_t i=0; i < event_count; ++i) {
-		const MidiEvent& ev = _buffer[i];
+
+	for (MidiBuffer::iterator i = _buffer.begin(); i != _buffer.end(); ++i) {
+		const MidiEvent& ev = *i;
 		// event times should be frames, relative to cycle start
 		assert(ev.time >= 0);
 		assert(ev.time < _nframes_this_cycle);

@@ -380,8 +380,8 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 	const double frames_per_beat = _session.tempo_map().tempo_at(_timeline_position).frames_per_beat(
 			_session.engine().frame_rate());
 	
-	for (size_t i=0; i < buf.size(); ++i) {
-		MidiEvent& ev = buf[i];
+	for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
+		MidiEvent& ev = *i;
 		assert(ev.time >= _timeline_position);
 		ev.time -= _timeline_position;
 		assert(ev.time >= _last_ev_time);

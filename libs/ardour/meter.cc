@@ -47,9 +47,8 @@ PeakMeter::run (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nfr
 		
 		// GUI needs a better MIDI meter, not much information can be
 		// expressed through peaks alone
-		const unsigned n_events = bufs.get_midi(n).size();
-		for (size_t i=0; i < n_events; ++i) {
-			const MidiEvent& ev = bufs.get_midi(n)[i];
+		for (MidiBuffer::iterator i = bufs.get_midi(n).begin(); i != bufs.get_midi(n).end(); ++i) {
+			const MidiEvent& ev = *i;
 			if ((ev.buffer[0] & 0xF0) == MIDI_CMD_NOTE_ON) {
 				const float this_vel = log(ev.buffer[2] / 127.0 * (M_E*M_E-M_E) + M_E) - 1.0;
 				//printf("V %d -> %f\n", (int)((Byte)ev.buffer[2]), this_vel);

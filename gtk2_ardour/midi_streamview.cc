@@ -393,8 +393,8 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiBuffer> data, nframes_
 
 						/* draw events */
 						MidiRegionView* mrv = (MidiRegionView*)iter->second;
-						for (size_t i = 0; i < data->size(); ++i) {
-							const MidiEvent& ev = (*data.get())[i];
+						for (MidiBuffer::iterator i = data->begin(); i != data->end(); ++i) {
+							const MidiEvent& ev = *i;
 							mrv->add_event(ev);
 							mrv->extend_active_notes();
 						}

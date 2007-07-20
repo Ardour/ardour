@@ -43,12 +43,44 @@ public:
 	bool  push_back(const jack_midi_event_t& event);
 	Byte* reserve(double time, size_t size);
 	
+	bool merge(const MidiBuffer& a, const MidiBuffer& b);
+	
+	struct iterator {
+		iterator(MidiBuffer& b, size_t i) : buffer(b), index(i) {}
+
+		inline MidiEvent& operator*() const { return buffer[index]; }
+		inline iterator& operator++() { ++index; return *this; } // prefix
+		inline bool operator!=(const iterator& other) const { return index != other.index; }
+		
+		MidiBuffer& buffer;
+		size_t      index;
+	};
+	
+	struct const_iterator {
+		const_iterator(const MidiBuffer& b, size_t i) : buffer(b), index(i) {}
+
+		inline const MidiEvent& operator*() const { return buffer[index]; }
+		inline const_iterator& operator++() { ++index; return *this; } // prefix
+		inline bool operator!=(const const_iterator& other) const { return index != other.index; }
+		
+		const MidiBuffer& buffer;
+		size_t            index;
+	};
+
+	iterator begin() { return iterator(*this, 0); }
+	iterator end()   { return iterator(*this, _size); }
+
+	const_iterator begin() const { return const_iterator(*this, 0); }
+	const_iterator end()   const { return const_iterator(*this, _size); }
+
+private:
+
+	friend class iterator;
+	friend class const_iterator;
+	
 	const MidiEvent& operator[](size_t i) const { assert(i < _size); return _events[i]; }
 	MidiEvent& operator[](size_t i) { assert(i < _size); return _events[i]; }
 
-	bool merge(const MidiBuffer& a, const MidiBuffer& b);
-
-private:
 	// FIXME: Jack needs to tell us this
 	static const size_t MAX_EVENT_SIZE = 4; // bytes
 	

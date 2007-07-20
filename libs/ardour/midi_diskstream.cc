@@ -540,9 +540,12 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_t
 		size_t num_events = _source_port->get_midi_buffer().size();
 		size_t to_write = std::min(_capture_buf->write_space(), num_events);
 
+		MidiBuffer::iterator port_iter = _source_port->get_midi_buffer().begin();
+
 		for (size_t i=0; i < to_write; ++i) {
-			MidiEvent& ev = _source_port->get_midi_buffer()[i];
+			const MidiEvent& ev = *port_iter;
 			_capture_buf->write(ev.time + transport_frame, ev.size, ev.buffer);
+			++port_iter;
 		}
 	
 	} else {
