@@ -117,15 +117,17 @@ class OptionEditor : public Gtk::Dialog
 	Gtk::Button     add_midi_port_button;
 
 	void add_midi_port ();
+	void remove_midi_port (MIDI::Port*);
 	void redisplay_midi_ports ();
 
 	void port_online_toggled (MIDI::Port*,Gtk::ToggleButton*);
 	void port_trace_in_toggled (MIDI::Port*,Gtk::ToggleButton*);
 	void port_trace_out_toggled (MIDI::Port*,Gtk::ToggleButton*);
 	
-	void mmc_port_chosen (MIDI::Port*,Gtk::RadioButton*);
-	void mtc_port_chosen (MIDI::Port*,Gtk::RadioButton*);
-	void midi_port_chosen (MIDI::Port*,Gtk::RadioButton*);
+	void mmc_port_chosen (MIDI::Port*,Gtk::RadioButton*, Gtk::Button*);
+	void mtc_port_chosen (MIDI::Port*,Gtk::RadioButton*, Gtk::Button*);
+	void midi_port_chosen (MIDI::Port*,Gtk::RadioButton*, Gtk::Button*);
+	bool port_removable (MIDI::Port*);
 
 	void mmc_device_id_adjusted ();
 

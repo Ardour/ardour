@@ -18,10 +18,9 @@
     $Id$
 */
 
-#include <fcntl.h>
-#include <string.h>
 #include <midi++/port.h>
 #include <midi++/port_request.h>
+#include <midi++/factory.h>
 
 using namespace std;
 using namespace MIDI;
@@ -36,45 +35,7 @@ PortRequest::PortRequest (const string &xdev,
 	
 	devname = strdup (xdev.c_str());
 	tagname = strdup (xtag.c_str());
-
-	if (xmode == "output" ||
-	    xmode == "out" || 
-	    xmode == "OUTPUT" ||
-	    xmode == "OUT") {
-		mode = O_WRONLY;
-
-	} else if (xmode == "input" ||
-		   xmode == "in" ||
-		   xmode == "INPUT" ||
-		   xmode == "IN") {
-		mode = O_RDONLY;
-
-	} else if (xmode == "duplex" ||
-		   xmode == "DUPLEX" ||
-		   xmode == "inout" || 
-		   xmode == "INOUT") {
-		mode = O_RDWR;
-	} else {
-		status = Unknown;
-	}
-
-	if (xtype == "ALSA/RAW" ||
-		   xtype == "alsa/raw") {
-		type = Port::ALSA_RawMidi;
-	} else if (xtype == "ALSA/SEQUENCER" ||
-		   xtype == "alsa/sequencer") {
-		type = Port::ALSA_Sequencer;
-	} else if (xtype == "COREMIDI" ||
-		   xtype == "coremidi") {
-		type = Port::CoreMidi_MidiPort;
-	} else if (xtype == "NULL" ||
-		   xtype == "null") {
-		type = Port::Null;
-	} else if (xtype == "FIFO" ||
-		   xtype == "fifo") {
-		type = Port::FIFO;
-	} else {
-		status = Unknown;
-	}
+	mode = PortFactory::string_to_mode (xmode);
+	type = PortFactory::string_to_type (xtype);
 }
 

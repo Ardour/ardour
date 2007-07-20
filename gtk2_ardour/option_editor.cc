@@ -77,7 +77,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 
 	  /* MIDI */
 
-	  midi_port_table (4, 10),
+	  midi_port_table (4, 11),
 	  mmc_device_id_adjustment (0.0, 0.0, (double) 0x7f, 1.0, 16.0),
 	  mmc_device_id_spinner (mmc_device_id_adjustment),
 	  add_midi_port_button (_("Add new MIDI port")),
@@ -179,27 +179,7 @@ OptionEditor::set_session (Session *s)
 
 	smpte_offset_negative_button.set_active (session->smpte_offset_negative());
 
-	/* set up port assignments */
-
-	std::map<MIDI::Port*,vector<RadioButton*> >::iterator res;
-
-	if (session->mtc_port()) {
-		if ((res = port_toggle_buttons.find (session->mtc_port())) != port_toggle_buttons.end()) {
-			(*res).second[MtcIndex]->set_active (true);
-		}
-	} 
-
-	if (session->mmc_port ()) {
-		if ((res = port_toggle_buttons.find (session->mmc_port())) != port_toggle_buttons.end()) {
-			(*res).second[MmcIndex]->set_active (true);
-		} 
-	}
-
-	if (session->midi_port()) {
-		if ((res = port_toggle_buttons.find (session->midi_port())) != port_toggle_buttons.end()) {
-			(*res).second[MidiIndex]->set_active (true);
-		}
-	}
+	redisplay_midi_ports ();
 
 	setup_click_editor ();
 	connect_audition_editor ();
@@ -406,7 +386,7 @@ OptionEditor::redisplay_midi_ports ()
 
 	midi_port_table_widgets.clear ();
 
-	midi_port_table.resize (ports.size() + 4, 10);
+	midi_port_table.resize (ports.size() + 4, 11);
 
 	Gtk::Label* label;
 
@@ -461,11 +441,19 @@ OptionEditor::redisplay_midi_ports ()
 
 	for (n = 0, i = ports.begin(); i != ports.end(); ++n, ++i) {
 
-		pair<MIDI::Port*,vector<RadioButton*> > newpair;
 		ToggleButton* tb;
 		RadioButton* rb;
+		Button* bb;
 
-		newpair.first = i->second;
+		/* the remove button. create early so we can pass it to various callbacks */
+		
+		bb = manage (new Button (Stock::REMOVE));
+		bb->set_name ("OptionEditorToggleButton");
+		bb->show ();
+		midi_port_table_widgets.push_back (bb);
+		midi_port_table.attach (*bb, 9, 10, n+2, n+3, FILL|EXPAND, FILL);
+		bb->signal_clicked().connect (bind (mem_fun(*this, &OptionEditor::remove_midi_port), i->second));
+		bb->set_sensitive (port_removable (i->second));
 
 		label = (manage (new Label (i->first))); 
 		label->show ();
@@ -507,10 +495,10 @@ OptionEditor::redisplay_midi_ports ()
 		tb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::port_trace_out_toggled), (*i).second, tb));
 		tb->set_size_request (10, 10);
 		tb->show ();
+		midi_port_table_widgets.push_back (tb);
 		midi_port_table.attach (*tb, 3, 4, n+2, n+3, FILL|EXPAND, FILL);
 
 		rb = manage (new RadioButton ());
-		newpair.second.push_back (rb);
 		rb->set_name ("OptionEditorToggleButton");
 		if (n == 0) {
 			mtc_button_group = rb->get_group();
@@ -521,14 +509,13 @@ OptionEditor::redisplay_midi_ports ()
 		rb->show ();
 		midi_port_table_widgets.push_back (rb);
 		midi_port_table.attach (*rb, 4, 5, n+2, n+3, FILL|EXPAND, FILL);
-		rb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::mtc_port_chosen), (*i).second, rb));
+		rb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::mtc_port_chosen), (*i).second, rb, bb));
 
 		if (session && i->second == session->mtc_port()) {
 			rb->set_active (true);
 		}
 		
 		rb = manage (new RadioButton ());
-		newpair.second.push_back (rb);
 		rb->set_name ("OptionEditorToggleButton");
 		if (n == 0) {
 			mmc_button_group = rb->get_group();
@@ -538,14 +525,13 @@ OptionEditor::redisplay_midi_ports ()
 		rb->show ();
 		midi_port_table_widgets.push_back (rb);
 		midi_port_table.attach (*rb, 6, 7, n+2, n+3, FILL|EXPAND, FILL);
-		rb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::mmc_port_chosen), (*i).second, rb));
+		rb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::mmc_port_chosen), (*i).second, rb, bb));
 
 		if (session && i->second == session->mmc_port()) {
 			rb->set_active (true);
 		}
 
 		rb = manage (new RadioButton ());
-		newpair.second.push_back (rb);
 		rb->set_name ("OptionEditorToggleButton");
 		if (n == 0) {
 			midi_button_group = rb->get_group();
@@ -555,16 +541,22 @@ OptionEditor::redisplay_midi_ports ()
 		rb->show ();
 		midi_port_table_widgets.push_back (rb);
 		midi_port_table.attach (*rb, 8, 9, n+2, n+3, FILL|EXPAND, FILL);
-		rb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::midi_port_chosen), (*i).second, rb));
+		rb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::midi_port_chosen), (*i).second, rb, bb));
 
 		if (session && i->second == session->midi_port()) {
 			rb->set_active (true);
 		}
-		
-		port_toggle_buttons.insert (newpair);
+
 	}
 
 	midi_port_table.show();
+}
+
+void
+OptionEditor::remove_midi_port (MIDI::Port* port)
+{
+	MIDI::Manager::instance()->remove_port (port);
+	redisplay_midi_ports ();
 }
 
 void
@@ -608,51 +600,60 @@ OptionEditor::add_midi_port ()
 	}
 }
 
+bool
+OptionEditor::port_removable (MIDI::Port *port)
+{
+	if (!session) {
+		return true;
+	}
+
+	if (port == session->mtc_port() ||
+	    port == session->mmc_port() ||
+	    port == session->midi_port()) {
+		return false;
+	}
+	return true;
+}
+
 void
-OptionEditor::mtc_port_chosen (MIDI::Port *port, Gtk::RadioButton* rb) 
+OptionEditor::mtc_port_chosen (MIDI::Port *port, Gtk::RadioButton* rb, Gtk::Button* bb) 
 {
 	if (session) {
 		if (rb->get_active()) {
-			if (port) {
-				session->set_mtc_port (port->name());
-				Config->set_mtc_port_name (port->name());
-			} else {
-				session->set_mtc_port ("");
-			}
-			rb->set_active (true);
+			session->set_mtc_port (port->name());
+			Config->set_mtc_port_name (port->name());
+		} else {
+			session->set_mtc_port ("");
 		}
+		bb->set_sensitive (port_removable (port));
 	}
 }
 
 void
-OptionEditor::mmc_port_chosen (MIDI::Port* port, Gtk::RadioButton* rb)
+OptionEditor::mmc_port_chosen (MIDI::Port* port, Gtk::RadioButton* rb, Gtk::Button* bb)
 {
 	if (session) {
 		if (rb->get_active()) {
-			if (port) {
-				session->set_mmc_port (port->name());
-				Config->set_mtc_port_name (port->name());
-			} else {
-				session->set_mmc_port ("");
-			}
-			rb->set_active (true);
+			session->set_mmc_port (port->name());
+			Config->set_mtc_port_name (port->name());
+		} else {
+			session->set_mmc_port ("");
 		}
+		bb->set_sensitive (port_removable (port));
 	}
 }
 
 void
-OptionEditor::midi_port_chosen (MIDI::Port* port, Gtk::RadioButton* rb)
+OptionEditor::midi_port_chosen (MIDI::Port* port, Gtk::RadioButton* rb, Gtk::Button* bb)
 {
 	if (session) {
 		if (rb->get_active()) {
-			if (port) {
-				session->set_midi_port (port->name());
-				Config->set_midi_port_name (port->name());
-			} else {
-				session->set_midi_port ("");
-			}
-			rb->set_active (true);
+			session->set_midi_port (port->name());
+			Config->set_midi_port_name (port->name());
+		} else {
+			session->set_midi_port ("");
 		}
+		bb->set_sensitive (port_removable (port));
 	}
 }
 

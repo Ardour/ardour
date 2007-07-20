@@ -23,6 +23,8 @@
 #include <pbd/failed_constructor.h>
 #include <pbd/xml++.h>
 
+#include <midi++/manager.h>
+
 #include <ardour/ardour.h>
 #include <ardour/configuration.h>
 #include <ardour/audio_diskstream.h>
@@ -157,9 +159,12 @@ Configuration::get_state ()
 	LocaleGuard lg (X_("POSIX"));
 
 	root = new XMLNode("Ardour");
-	typedef map<string, MidiPortDescriptor*>::const_iterator CI;
-	for(CI m = midi_ports.begin(); m != midi_ports.end(); ++m){
-		root->add_child_nocopy(m->second->get_state());
+
+	MIDI::Manager::PortMap::const_iterator i;
+	const MIDI::Manager::PortMap& ports = MIDI::Manager::instance()->get_midi_ports();
+
+	for(i = ports.begin(); i != ports.end(); ++i) {
+		root->add_child_nocopy(i->second->get_state());
 	}
 	
 	root->add_child_nocopy (get_variables (sigc::mem_fun (*this, &Configuration::save_config_options_predicate)));

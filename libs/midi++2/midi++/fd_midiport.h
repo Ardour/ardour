@@ -46,6 +46,7 @@ class FD_MidiPort : public Port
 	}
 
 	virtual int selectable() const;
+
 	static std::vector<std::string *> *list_devices ();
 
   protected:

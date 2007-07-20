@@ -17,25 +17,39 @@
     $Id$
 */
 
+#include <fcntl.h>
+
 #include <pbd/error.h>
+#include <pbd/convert.h>
 
 #include <midi++/types.h>
 #include <midi++/factory.h>
 #include <midi++/nullmidi.h>
 #include <midi++/fifomidi.h>
 
+std::string MIDI::Null_MidiPort::typestring = "null";
+std::string MIDI::FIFO_MidiPort::typestring = "fifo";
+
 #ifdef WITH_ALSA
 #include <midi++/alsa_sequencer.h>
 #include <midi++/alsa_rawmidi.h>
+
+std::string MIDI::ALSA_SequencerMidiPort::typestring = "alsa/sequencer";
+std::string MIDI::ALSA_RawMidiPort::typestring = "alsa/raw";
+
 #endif // WITH_ALSA
 
 #ifdef WITH_COREMIDI
 #include <midi++/coremidi_midiport.h>
+
+std::string MIDI::CoreMidi_MidiPort::typestring = "coremidi";
+
 #endif // WITH_COREMIDI
 
 
 using namespace std;
 using namespace MIDI;
+using namespace PBD;
 
 Port *
 PortFactory::create_port (PortRequest &req)
@@ -131,4 +145,51 @@ PortFactory::default_port_type ()
 #endif // WITH_COREMIDI
 	
 	PBD::fatal << "programming error: no default port type defined in midifactory.cc" << endmsg;
+}
+
+Port::Type
+PortFactory::string_to_type (const string& xtype)
+{
+	if (0){ 
+#ifdef WITH_ALSA
+	} else if (strings_equal_ignore_case (xtype, ALSA_RawMidiPort::typestring)) {
+		return Port::ALSA_RawMidi;
+	} else if (strings_equal_ignore_case (xtype, ALSA_SequencerMidiPort::typestring)) {
+		return Port::ALSA_Sequencer;
+#endif 
+#ifdef WITH_COREMIDI
+	} else if (strings_equal_ignore_case (xtype, CoreMidi_MidiPort::typestring)) {
+		return Port::CoreMidi_MidiPort;
+#endif
+	} else if (strings_equal_ignore_case (xtype, Null_MidiPort::typestring)) {
+		return Port::Null;
+	} else if (strings_equal_ignore_case (xtype, FIFO_MidiPort::typestring)) {
+		return Port::FIFO;
+	} 
+
+	return Port::Unknown;
+}
+
+string
+PortFactory::mode_to_string (int mode)
+{
+	if (mode == O_RDONLY) {
+		return "input";
+	} else if (mode == O_WRONLY) {
+		return "output";
+	} 
+
+	return "duplex";
+}
+
+int
+PortFactory::string_to_mode (const string& str)
+{
+	if (strings_equal_ignore_case (str, "output") || strings_equal_ignore_case (str, "out")) {
+		return O_WRONLY;
+	} else if (strings_equal_ignore_case (str, "input") || strings_equal_ignore_case (str, "in")) {
+		return O_RDONLY;
+	}
+
+	return O_RDWR;
 }

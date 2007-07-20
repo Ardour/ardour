@@ -26,6 +26,8 @@
 #include <midi++/types.h>
 #include <midi++/parser.h>
 
+class XMLNode;
+
 namespace MIDI {
 
 class Channel;
@@ -45,6 +47,8 @@ class Port : public sigc::trackable {
 
 	Port (PortRequest &);
 	virtual ~Port ();
+
+	virtual XMLNode& get_state () const;
 
 	/* Direct I/O */
 
@@ -118,7 +122,6 @@ class Port : public sigc::trackable {
 	Type   type () const        { return _type; }
 	int    mode () const        { return _mode; }
 	bool   ok ()   const        { return _ok; }
-	size_t number () const      { return _number; }
 
   protected:
 	bool _ok;
@@ -126,7 +129,6 @@ class Port : public sigc::trackable {
 	std::string _devname;
 	std::string _tagname;
 	int _mode;
-	size_t _number;
 	Channel *_channel[16];
 	sigc::connection thru_connection;
 	unsigned int bytes_written;
@@ -134,6 +136,8 @@ class Port : public sigc::trackable {
 	Parser *input_parser;
 	Parser *output_parser;
 	size_t slowdown;
+
+	virtual std::string get_typestring () const = 0;
 
   private:
 	static size_t nports;

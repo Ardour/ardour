@@ -145,18 +145,32 @@ Manager::add_port (PortRequest &req)
 }
 
 int 
-Manager::remove_port (string name)
+Manager::remove_port (Port* port)
 {
 	PortMap::iterator res;
 
-	if ((res = ports_by_device.find (name)) == ports_by_device.end()) {
-		return -1;
+	for (res = ports_by_device.begin(); res != ports_by_device.end(); ) {
+		PortMap::iterator tmp;
+		tmp = res;
+		++tmp;
+		if (res->second == port) {
+			ports_by_device.erase (res);
+		} 
+		res = tmp;
+	}
+
+
+	for (res = ports_by_tag.begin(); res != ports_by_tag.end(); ) {
+		PortMap::iterator tmp;
+		tmp = res;
+		++tmp;
+		if (res->second == port) {
+			ports_by_tag.erase (res);
+		} 
+		res = tmp;
 	}
 	
-	ports_by_device.erase (res);
-	ports_by_device.erase ((*res).second->name());
-
-	delete (*res).second;
+	delete port;
 
 	return 0;
 }
@@ -181,22 +195,6 @@ Manager::set_input_port (string tag)
 	inputPort = (*res).second;
 
 	return 0;
-}
-
-int
-Manager::set_input_port (size_t portnum)
-
-{
-	PortMap::iterator res;
-
-	for (res = ports_by_tag.begin(); res != ports_by_tag.end(); res++) {
-		if ((*res).second->number() == portnum) {
-			inputPort = (*res).second;
-			return 0;
-		}
-	}
-
-	return -1;
 }
 
 int
@@ -231,22 +229,6 @@ Manager::set_output_port (string tag)
 	return 0;
 }
 
-int
-Manager::set_output_port (size_t portnum)
-
-{
-	PortMap::iterator res;
-
-	for (res = ports_by_tag.begin(); res != ports_by_tag.end(); res++) {
-		if ((*res).second->number() == portnum) {
-			outputPort = (*res).second;
-			return 0;
-		}
-	}
-
-	return -1;
-}
-
 Port *
 Manager::port (string name)
 {
@@ -261,25 +243,9 @@ Manager::port (string name)
 	return 0;
 }
 
-Port *
-Manager::port (size_t portnum)
-
-{
-	PortMap::iterator res;
-
-	for (res = ports_by_tag.begin(); res != ports_by_tag.end(); res++) {
-		if ((*res).second->number() == portnum) {
-			return (*res).second;
-		}
-	}
-
-	return 0;
-}
-
 int
 Manager::foreach_port (int (*func)(const Port &, size_t, void *),
 			   void *arg)
-
 {
 	PortMap::const_iterator i;
 	int retval;

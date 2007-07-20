@@ -49,6 +49,15 @@ CoreMidi_MidiPort::CoreMidi_MidiPort (PortRequest &req) : Port (req)
 
 CoreMidi_MidiPort::~CoreMidi_MidiPort () {Close();}
 
+XMLNode&
+CoreMidi::MidiPort::get_state() const
+{
+	XMLNode& node (Port::get_state());
+	node.add_property ("type", "coremidi");
+	return node;
+}
+
+
 void CoreMidi_MidiPort::Close ()
 {
  	if (midi_destination) MIDIEndpointDispose(midi_destination);

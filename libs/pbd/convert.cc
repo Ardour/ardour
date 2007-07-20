@@ -18,6 +18,8 @@
 */
 
 #include <cmath>
+#include <locale>
+#include <algorithm>
 #include <stdint.h>
 #ifndef __STDC_FORMAT_MACROS
 #define __STDC_FORMAT_MACROS
@@ -233,5 +235,23 @@ length2string (const int64_t frames, const double sample_rate)
 	
 	return duration_str;
 }
+
+static bool 
+chars_equal_ignore_case(char x, char y)
+{
+	static std::locale loc;
+	return toupper(x, loc) == toupper(y, loc);
+}
+
+bool 
+strings_equal_ignore_case (const string& a, const string& b)
+{
+	if (a.length() == b.length()) {
+		return std::equal (a.begin(), a.end(), b.begin(), chars_equal_ignore_case);
+	}
+	return false;
+}
+
+
 
 } // namespace PBD

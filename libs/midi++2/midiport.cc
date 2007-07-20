@@ -21,10 +21,13 @@
 #include <cstdio>
 #include <fcntl.h>
 
+#include <pbd/xml++.h>
+
 #include <midi++/types.h>
 #include <midi++/port.h>
 #include <midi++/channel.h>
 #include <midi++/port_request.h>
+#include <midi++/factory.h>
 
 //using namespace Select;
 using namespace MIDI;
@@ -47,7 +50,6 @@ Port::Port (PortRequest &req)
 	_devname = req.devname;
 	_tagname = req.tagname;
 	_mode = req.mode;
-	_number = nports++;
 
 	if (_mode == O_RDONLY || _mode == O_RDWR) {
 		input_parser = new Parser (*this);
@@ -81,6 +83,18 @@ Port::~Port ()
 	for (int i = 0; i < 16; i++) {
 		delete _channel[i];
 	}
+}
+
+XMLNode&
+Port::get_state () const
+{
+	XMLNode* node = new XMLNode ("MIDI-port");
+	node->add_property ("tag", _tagname);
+	node->add_property ("device", _devname);
+	node->add_property ("mode", PortFactory::mode_to_string (_mode));
+	node->add_property ("type", get_typestring());
+
+	return *node;
 }
 
 int

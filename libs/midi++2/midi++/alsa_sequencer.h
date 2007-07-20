@@ -43,12 +43,17 @@ class ALSA_SequencerMidiPort : public Port
 	virtual int selectable() const;
 	
 	static int discover (std::vector<PortSet>&);
+	static std::string typestring;
 
   protected:
 	/* Direct I/O */
 	
 	int write (byte *msg, size_t msglen);	
 	int read (byte *buf, size_t max);
+
+	std::string get_typestring () const {
+		return typestring;
+	}
 
   private:
 	snd_midi_event_t *decoder, *encoder;

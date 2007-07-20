@@ -137,6 +137,10 @@ setup_midi ()
 		nports++;
 	}
 
+	MIDI::Port* first;
+	const MIDI::Manager::PortMap& ports = MIDI::Manager::instance()->get_midi_ports();
+	first = ports.begin()->second;
+
 	if (nports > 1) {
 
 		/* More than one port, so try using specific names for each port */
@@ -158,22 +162,22 @@ setup_midi ()
 		/* If that didn't work, just use the first listed port */
 
 		if (default_mmc_port == 0) {
-			default_mmc_port = MIDI::Manager::instance()->port (0);
+			default_mmc_port = first;
 		}
 
 		if (default_mtc_port == 0) {
-			default_mtc_port = MIDI::Manager::instance()->port (0);
+			default_mtc_port = first;
 		}
 
 		if (default_midi_port == 0) {
-			default_midi_port = MIDI::Manager::instance()->port (0);
+			default_midi_port = first;
 		}
 		
 	} else {
 
 		/* Only one port described, so use it for both MTC and MMC */
 
-		default_mmc_port = MIDI::Manager::instance()->port (0);
+		default_mmc_port = first;
 		default_mtc_port = default_mmc_port;
 		default_midi_port = default_mmc_port;
 	}

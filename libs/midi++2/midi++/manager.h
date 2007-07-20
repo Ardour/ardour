@@ -36,10 +36,9 @@ class Manager {
 	~Manager ();
 	
 	Port *add_port (PortRequest &);
-	int   remove_port (std::string port);
+	int   remove_port (Port*);
 
 	Port *port (std::string name);
-	Port *port (size_t number);
 
 	size_t    nports () { return ports_by_device.size(); }
 
@@ -50,9 +49,7 @@ class Manager {
 	channel_t inputChannelNumber;
 	channel_t outputChannelNumber;
 
-	int set_input_port (size_t port);
 	int set_input_port (std::string);
-	int set_output_port (size_t port);
 	int set_output_port (std::string);
 	int set_input_channel (channel_t);
 	int set_output_channel (channel_t);

@@ -34,6 +34,9 @@ class PortFactory {
 	static bool ignore_duplicate_devices (Port::Type);
 	static int get_known_ports (std::vector<PortSet>&);
 	static std::string default_port_type ();
+	static Port::Type string_to_type (const std::string&);
+	static std::string mode_to_string (int);
+	static int string_to_mode (const std::string&);
 };
 
 } // namespace MIDI

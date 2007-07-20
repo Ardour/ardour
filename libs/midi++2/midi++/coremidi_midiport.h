@@ -42,15 +42,23 @@ namespace MIDI {
 	}
 
 	static int discover (std::vector<PortSet>&);
+	static std::string typestring;
 
       protected:
 	/* Direct I/O */
 	int write(byte * msg, size_t msglen);
+
 	int read(byte * buf, size_t max) {
 	    return 0;
-	} /* CoreMidi callback */
-	    static void read_proc(const MIDIPacketList * pktlist,
-				  void *refCon, void *connRefCon);
+	} 
+
+        /* CoreMidi callback */
+	static void read_proc(const MIDIPacketList * pktlist,
+			      void *refCon, void *connRefCon);
+	
+	std::string get_typestring () const {
+		return typestring;
+	}
 
       private:
 	byte midi_buffer[1024];
@@ -63,6 +71,7 @@ namespace MIDI {
 	static MIDITimeStamp MIDIGetCurrentHostTime();
 
 	bool firstrecv;
+	
     };
 
 } // namespace MIDI

@@ -54,6 +54,13 @@ class Null_MidiPort : public Port
 	}
 	
 	virtual int selectable() const { return -1; }
+
+	static std::string typestring;
+
+  protected:
+	std::string get_typestring () const {
+		return typestring;
+	}
 };
 
 } // namespace MIDI
