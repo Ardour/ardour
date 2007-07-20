@@ -102,6 +102,12 @@ class Mixer_UI : public Gtk::Window
 	Gtk::HBox                out_packer;
 	Gtk::HPaned		 list_hpane;
 
+	// for restoring window geometry.
+	int m_root_x, m_root_y, m_width, m_height;
+	
+	void set_window_pos_and_size ();
+	void get_window_pos_and_size ();
+
 	bool on_key_press_event (GdkEventKey*);
 
 	void pane_allocation_handler (Gtk::Allocation&, Gtk::Paned*);

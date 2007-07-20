@@ -172,8 +172,6 @@ ostream & operator << ( ostream & os, const MIDI::Port & port )
 	os << "; ";
 	os << "ok: " << port.ok();
 	os << "; ";
-	os << "number: " << port.number();
-	os << "; ";
 	return os;
 }
 
@@ -184,7 +182,6 @@ ostream & Mackie::operator << ( ostream & os, const SurfacePort & port )
 	os << "; ";
 	os << "name: " << port.port().name();
 	os << "; ";
-	os << "number: " << port.number();
 	os << " }";
 	return os;
 }
