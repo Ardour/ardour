@@ -1,24 +1,23 @@
 * update manual with jog wheel states
-* alsa/sequencer ports unstable
-* crash when mmc port set to mcu
+* alsa/sequencer ports unstable. possibly problems with use of ::poll
+* use glib::timeout for check_scrubbing
+* crash when mmc port set to mcu?
 * remappable buttons
 * how long can UI signal callbacks take to execute? What happens if they block?
   where ENSURE_CORRECT_THREAD is a macro that is modelled on ENSURE_GUI_THREAD
   if the handler is not called in the "correct thread", it will use a pseudo-RT-safe-enough technique to get the correct thread to recall "handler" later on, and return.
 
-* jog with transport rolling doesn't work properly. My use of ScrollTimeline also doesn't work.
-* use jog to increase/decrease ffwd/rew speed
-* make loop button sensitive to current transport state
-* finish button mapping. Only shifted buttons left for bcf.
+* finish button implementations.
 * concurrency for bank switching? And make sure "old" events aren't sent to "new" faders
 * TODOs in code
 * removal of a route results in a strip that isn't dead, but doesn't have any effect on the session
 * use i18n. see string_compose
-* docs in manual, including button assignment diagram
 
 Later
 -----
 * remove commented couts
+* talk to route plugins
+* check for excessiveness (ie too many events making other subsystems work too hard)
 * Queueing of writes?
 * Generic surface code to common location
 * bulk remote id changes cause too many surface updates. use Config->remote_model.
@@ -33,7 +32,7 @@ Need UI integration
 -------------------
 * Some indication on the UI of currently bank-switched-in routes?
   Useful for surfaces that don't have a scribble strip.
-* use current zoom setting and snap state for shuttle wheel
+* use current zoom setting and snap state for jog wheel
 
 Actual Mackie
 -------------

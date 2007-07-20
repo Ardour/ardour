@@ -67,15 +67,10 @@ void JogWheel::jog_event( SurfacePort & port, Control & control, const ControlSt
 	switch ( jog_wheel_state() )
 	{
 	case scroll:
-		//ScrollTimeline causes crashes
-		if ( _mcp.mcu_port().emulation() == MackiePort::bcf2000 )
-			_mcp.ScrollTimeline( state.ticks * state.sign / 100.0 );
-		else
-			_mcp.ScrollTimeline( state.ticks * state.sign / 100.0 );
+		_mcp.ScrollTimeline( state.delta * state.sign );
 		break;
 	
 	case zoom:
-		// TODO do a for loop for each, to number of ticks
 		if ( state.sign > 0 )
 			for ( unsigned int i = 0; i < state.ticks; ++i ) _mcp.ZoomIn();
 		else
@@ -83,27 +78,23 @@ void JogWheel::jog_event( SurfacePort & port, Control & control, const ControlSt
 		break;
 		
 	case speed:
-	{
-		// block because we initialize a variable
-			// locally, _transport_speed is an absolute value...
-			// fairly arbitrary scaling function
-			_transport_speed += scaled_delta( state, _mcp.get_session().transport_speed() );
+		// locally, _transport_speed is an positive value
+		// fairly arbitrary scaling function
+		_transport_speed += scaled_delta( state, _mcp.get_session().transport_speed() );
 
-			// make sure not weirdness get so the session
-			if ( _transport_speed < 0 || isnan( _transport_speed ) )
-			{
-				_transport_speed = 0.0;
-			}
-			
-			// translated current speed to a signed transport velocity
-			_mcp.get_session().request_transport_speed( transport_speed() * transport_direction() );
+		// make sure not weirdness get so the session
+		if ( _transport_speed < 0 || isnan( _transport_speed ) )
+		{
+			_transport_speed = 0.0;
+		}
+		
+		// translate _transport_speed speed to a signed transport velocity
+		_mcp.get_session().request_transport_speed( transport_speed() * transport_direction() );
 		break;
-	}
 	
 	case scrub:
 	{
 		add_scrub_interval( _scrub_timer.restart() );
-		// copied from tranzport driver
 		float speed = 0.0;
 		
 		// This should really be part of the surface object
