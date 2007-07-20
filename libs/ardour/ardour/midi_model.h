@@ -118,7 +118,9 @@ private:
 	Session& _session;
 
 	Notes _notes;
-	Notes _write_notes;
+	
+	typedef std::vector<size_t> WriteNotes;
+	WriteNotes _write_notes;
 
 	MidiEditCommand* _command; ///< In-progress command
 };

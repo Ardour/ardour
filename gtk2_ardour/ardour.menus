@@ -140,6 +140,7 @@
 			<menuitem action='set-mouse-mode-gain'/>
 			<menuitem action='set-mouse-mode-zoom'/>
 			<menuitem action='set-mouse-mode-timefx'/>
+			<menuitem action='set-mouse-mode-note'/>
           </menu>
         </menu>         
         <menu name='View' action = 'View'>

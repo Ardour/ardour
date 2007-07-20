@@ -176,7 +176,7 @@ SMFSource::flush_header ()
 {
 	// FIXME: write timeline position somehow?
 	
-	cerr << "SMF Flushing header\n";
+	//cerr << "SMF Flushing header\n";
 
 	assert(_fd);
 
@@ -205,7 +205,7 @@ SMFSource::flush_header ()
 int
 SMFSource::flush_footer()
 {
-	cerr << "SMF - Writing EOT\n";
+	//cerr << "SMF - Writing EOT\n";
 
 	fseek(_fd, 0, SEEK_END);
 	write_var_len(1); // whatever...

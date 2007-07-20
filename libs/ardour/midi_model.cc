@@ -59,17 +59,17 @@ void
 MidiModel::end_write(bool delete_stuck)
 {
 	if (delete_stuck) {
-		_write_notes.clear();
-	} else {
-		cerr << "FIXME: Stuck notes lost" << endl;
-		_write_notes.clear();
-		/* Merge _write_events into _events */
-		/*size_t ev_index = 0
-		size_t write_index = 0;
-		while ( ! _write_events.empty()) {
-			// do stuff
-		}*/
+		for (Notes::iterator n = _notes.begin(); n != _notes.end() ; ) {
+			if (n->duration == 0) {
+				cerr << "WARNING: Stuck note lost: " << n->note << endl;
+				n = _notes.erase(n);
+			} else {
+				++n;
+			}
+		}
 	}
+
+	_write_notes.clear();
 }
 
 
@@ -87,7 +87,7 @@ MidiModel::append(const MidiBuffer& buf)
 	for (size_t i=0; i < buf.size(); ++i) {
 		const MidiEvent& ev = buf[i];
 		
-		assert(_write_notes.empty() || ev.time >= _write_notes.back().start);
+		assert(_notes.empty() || ev.time >= _notes.back().start);
 
 		if (ev.type() == MIDI_CMD_NOTE_ON)
 			append_note_on(ev.time, ev.note(), ev.velocity());
@@ -106,7 +106,7 @@ MidiModel::append(const MidiBuffer& buf)
 void
 MidiModel::append(double time, size_t size, Byte* buf)
 {
-	assert(_write_notes.empty() || time >= _write_notes.back().start);
+	assert(_notes.empty() || time >= _notes.back().start);
 
 	if ((buf[0] & 0xF0) == MIDI_CMD_NOTE_ON)
 		append_note_on(time, buf[1], buf[2]);
@@ -116,9 +116,10 @@ MidiModel::append(double time, size_t size, Byte* buf)
 
 
 void
-MidiModel::append_note_on(double time, uint8_t note, uint8_t velocity)
+MidiModel::append_note_on(double time, uint8_t note_num, uint8_t velocity)
 {
-	_write_notes.push_back(Note(time, 0, note, velocity));
+	_notes.push_back(Note(time, 0, note_num, velocity));
+	_write_notes.push_back(_notes.size() - 1);
 }
 
 
@@ -132,12 +133,13 @@ MidiModel::append_note_off(double time, uint8_t note_num)
 	/* FIXME: note off velocity for that one guy out there who actually has
 	 * keys that send it */
 
-	for (size_t i=0; i < _write_notes.size(); ++i) {
-		Note& note = _write_notes[i];
+	for (WriteNotes::iterator n = _write_notes.begin(); n != _write_notes.end(); ++n) {
+		Note& note = _notes[*n];
 		if (note.note == note_num) {
 			assert(time > note.start);
 			note.duration = time - note.start;
-			cerr << "MidiModel resolved note, duration: " << note.duration << endl;
+			_write_notes.erase(n);
+			//cerr << "MidiModel resolved note, duration: " << note.duration << endl;
 			break;
 		}
 	}
