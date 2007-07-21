@@ -58,14 +58,23 @@ void Mackie::<%= sf.name %>Surface::init_controls()
 	Led * led = 0;
 
 % sf.controls.each do |control|
+	<%-
+		variable_name = control.class.name.downcase
+		class_name =
+		if control.name == 'jog'
+			'Jog'
+		else
+			control.class.name
+		end
+	-%>
 	group = groups["<%=control.group.name%>"];
-	<%= control.class.name.downcase %> = new <%= control.class.name %> ( <%= control.id %>, <%= control.ordinal %>, "<%=control.name%>", *group );
-	<%=control.class.name.downcase%>s[0x<%=control.id.to_hex %>] = <%= control.class.name.downcase %>;
-	controls.push_back( <%= control.class.name.downcase %> );
+	<%= variable_name %> = new <%= class_name %> ( <%= control.id %>, <%= control.ordinal %>, "<%=control.name%>", *group );
+	<%= variable_name %>s[0x<%=control.id.to_hex %>] = <%= variable_name %>;
+	controls.push_back( <%= variable_name %> );
 	<%- if control.group.class != Strip -%>
-	controls_by_name["<%= control.name %>"] = <%= control.class.name.downcase %>;
+	controls_by_name["<%= control.name %>"] = <%= variable_name %>;
 	<%- end -%>
-	group->add( *<%= control.class.name.downcase %> );
+	group->add( *<%= variable_name %> );
 
 % end
 }

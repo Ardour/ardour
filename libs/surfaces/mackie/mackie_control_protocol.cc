@@ -535,6 +535,13 @@ void MackieControlProtocol::update_surface()
 		// update strip from route
 		master_route_signal->notify_all();
 		
+		// turn off the led ring, for bcf emulation mode
+		if ( mcu_port().emulation() == MackiePort::bcf2000 )
+		{
+			Control & control = *surface().controls_by_name["jog"];
+			mcu_port().write( builder.build_led_ring( dynamic_cast<Pot &>( control ), off ) );
+		}
+		
 		// update global buttons and displays
 		notify_record_state_changed();
 		notify_transport_state_changed();
@@ -800,6 +807,7 @@ int MackieControlProtocol::set_state( const XMLNode & node )
 
 void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & control, const ControlState & state )
 {
+	// fetch a RouteSignal so we know what route to update
 	uint32_t index = control.ordinal() - 1 + ( port.number() * port.strips() );
 	boost::shared_ptr<Route> route;
 	if ( control.group().is_strip() )
@@ -906,15 +914,9 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 			}
 			else
 			{
-				if ( control.name() == "jog" )
+				if ( control.is_jog() )
 				{
 					_jog_wheel.jog_event( port, control, state );
-					
-					// turn off the led ring, for bcf emulation mode
-					if ( mcu_port().emulation() == MackiePort::bcf2000 )
-					{
-						port.write( builder.build_led_ring( dynamic_cast<Pot &>( control ), off ) );
-					}
 				}
 				else
 				{

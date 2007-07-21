@@ -113,50 +113,53 @@ const MidiByteArray & MackiePort::sysex_hdr() const
 	return mackie_sysex_hdr;
 }
 
-Control & MackiePort::lookup_control( const MidiByteArray & bytes )
+Control & MackiePort::lookup_control( MIDI::byte * bytes, size_t count )
 {
 	Control * control = 0;
-	int midi_id = -1;
 	MIDI::byte midi_type = bytes[0] & 0xf0; //0b11110000
 	switch( midi_type )
 	{
 		// fader
 		case MackieMidiBuilder::midi_fader_id:
-			midi_id = bytes[0] & 0x0f;
+		{
+			int midi_id = bytes[0] & 0x0f;
 			control = _mcp.surface().faders[midi_id];
 			if ( control == 0 )
 			{
+				MidiByteArray mba( count, bytes );
 				ostringstream os;
-				os << "control for fader" << midi_id << " is null";
+				os << "control for fader" << bytes << " id " << midi_id << " is null";
 				throw MackieControlException( os.str() );
 			}
 			break;
+		}
 			
 		// button
 		case MackieMidiBuilder::midi_button_id:
-			midi_id = bytes[1];
-			control = _mcp.surface().buttons[midi_id];
+			control = _mcp.surface().buttons[bytes[1]];
 			if ( control == 0 )
 			{
+				MidiByteArray mba( count, bytes );
 				ostringstream os;
-				os << "control for button" << midi_id << " is null";
+				os << "control for button " << bytes << " is null";
 				throw MackieControlException( os.str() );
 			}
 			break;
 			
 		// pot (jog wheel, external control)
 		case MackieMidiBuilder::midi_pot_id:
-			midi_id = bytes[1] & 0x1f;
-			control = _mcp.surface().pots[midi_id];
+			control = _mcp.surface().pots[bytes[1]];
 			if ( control == 0 )
 			{
+				MidiByteArray mba( count, bytes );
 				ostringstream os;
-				os << "control for button" << midi_id << " is null";
+				os << "control for rotary " << mba << " is null";
 				throw MackieControlException( os.str() );
 			}
 			break;
 		
 		default:
+			MidiByteArray mba( count, bytes );
 			ostringstream os;
 			os << "Cannot find control for " << bytes;
 			throw MackieControlException( os.str() );
@@ -370,16 +373,25 @@ void MackiePort::handle_midi_sysex (MIDI::Parser & parser, MIDI::byte * raw_byte
 // converts midi messages into control_event signals
 void MackiePort::handle_midi_any (MIDI::Parser & parser, MIDI::byte * raw_bytes, size_t count )
 {
-	MidiByteArray bytes( count, raw_bytes );
 #ifdef DEBUG
+	MidiByteArray bytes( count, raw_bytes );
 	cout << "MackiePort::handle_midi_any " << bytes << endl;
 #endif
 	try
 	{
 		// ignore sysex messages
-		if ( bytes[0] == MIDI::sysex ) return;
+		if ( raw_bytes[0] == MIDI::sysex ) return;
 
-		Control & control = lookup_control( bytes );
+		// sanity checking
+		if ( count != 3 )
+		{
+			ostringstream os;
+			MidiByteArray mba( count, raw_bytes );
+			os << "MackiePort::handle_midi_any needs 3 bytes, but received " << mba;
+			throw MackieControlException( os.str() );
+		}
+		
+		Control & control = lookup_control( raw_bytes, count );
 		
 		// This handles incoming bytes. Outgoing bytes
 		// are sent by the signal handlers.
@@ -392,14 +404,14 @@ void MackiePort::handle_midi_any (MIDI::Parser & parser, MIDI::byte * raw_bytes,
 					// According to the Logic docs, these should both be 0x7f.
 					// Although it does mention something about only the top-order
 					// 10 bits out of 14 being used
-					int midi_pos = ( bytes[2] << 7 ) + bytes[1];
+					int midi_pos = ( raw_bytes[2] << 7 ) + raw_bytes[1];
 					control_event( *this, control, float(midi_pos) / float(0x3fff) );
 				}
 				break;
 				
 			// button
 			case Control::type_button:
-				control_event( *this, control, bytes[2] == 0x7f ? press : release );
+				control_event( *this, control, raw_bytes[2] == 0x7f ? press : release );
 				break;
 				
 			// pot (jog wheel, external control)
@@ -408,9 +420,9 @@ void MackiePort::handle_midi_any (MIDI::Parser & parser, MIDI::byte * raw_bytes,
 					ControlState state;
 					
 					// bytes[2] & 0b01000000 (0x40) give sign
-					state.sign = ( bytes[2] & 0x40 ) == 0 ? 1 : -1; 
+					state.sign = ( raw_bytes[2] & 0x40 ) == 0 ? 1 : -1; 
 					// bytes[2] & 0b00111111 (0x3f) gives delta
-					state.ticks = ( bytes[2] & 0x3f);
+					state.ticks = ( raw_bytes[2] & 0x3f);
 					state.delta = float( state.ticks ) / float( 0x3f );
 					
 					control_event( *this, control, state );
@@ -422,6 +434,7 @@ void MackiePort::handle_midi_any (MIDI::Parser & parser, MIDI::byte * raw_bytes,
 	}
 	catch( MackieControlException & e )
 	{
+		MidiByteArray bytes( count, raw_bytes );
 		cout << bytes << ' ' << e.what() << endl;
 	}
 #ifdef DEBUG

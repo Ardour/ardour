@@ -25,17 +25,8 @@ while !File.exist? ARGV[0]
 end
 
 file = File.open( ARGV[0], 'r+' )
-mck = Mackie.new( file )
-
-# faders to minimum. bcf2000 doesn't respond
-mck.write_sysex "\x61"
-
-# all leds off. bcf2000 doesn't respond
-mck.write_sysex "\x62"
-
-# get version. comes back as ASCII bytes
-version = mck.sysex "\x13\x00"
-puts "version: #{version.map{|x| x.chr}}"
+#mck = Mackie.new( file )
+device = false
 
 # respond to control movements
 while bytes = file.read( 3 )
@@ -121,7 +112,7 @@ while bytes = file.read( 3 )
   end
   
   # output bytes
-  if output
+  if device && output
     #sleep 0.1
     puts "sending: %02.x %02.x %02.x" % [ output[0], output[1], output[2] ]
     begin

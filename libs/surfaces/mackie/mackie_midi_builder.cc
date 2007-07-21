@@ -208,6 +208,7 @@ MidiByteArray MackieMidiBuilder::all_strips_display( std::vector<std::string> & 
 {
 	MidiByteArray retval;
 	retval << 0x12 << 0;
+	// NOTE remember max 112 bytes per message, including sysex headers
 	retval << "Not working yet";
 	return retval;
 }

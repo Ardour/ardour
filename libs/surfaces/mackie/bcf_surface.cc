@@ -177,7 +177,7 @@ void Mackie::BcfSurface::init_controls()
 	group->add( *pot );
 
 	group = groups["none"];
-	pot = new Pot ( 23, 1, "jog", *group );
+	pot = new Jog ( 23, 1, "jog", *group );
 	pots[0x17] = pot;
 	controls.push_back( pot );
 	controls_by_name["jog"] = pot;

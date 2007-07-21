@@ -55,12 +55,12 @@ public:
 	virtual const MidiByteArray & sysex_hdr() const;
 
 	/// Handle device initialisation
-	void handle_midi_sysex( MIDI::Parser &, MIDI::byte *, size_t );
+	void handle_midi_sysex( MIDI::Parser &, MIDI::byte *, size_t count );
 
 	/// Handle all control messags
-	void handle_midi_any( MIDI::Parser &, MIDI::byte *, size_t );
+	void handle_midi_any( MIDI::Parser &, MIDI::byte *, size_t count );
 	
-	Control & lookup_control( const MidiByteArray & bytes );
+	Control & lookup_control( MIDI::byte *, size_t count );
 	
 	/// return the number of strips associated with this port
 	virtual int strips() const;

@@ -159,22 +159,6 @@ void SurfacePort::write_sysex( MIDI::byte msg )
 	write( buf );
 }
 
-// This should be moved to midi++ at some point
-ostream & operator << ( ostream & os, const MIDI::Port & port )
-{
-	os << "device: " << port.device();
-	os << "; ";
-	os << "name: " << port.name();
-	os << "; ";
-	os << "type: " << port.type();
-	os << "; ";
-	os << "mode: " << port.mode();
-	os << "; ";
-	os << "ok: " << port.ok();
-	os << "; ";
-	return os;
-}
-
 ostream & Mackie::operator << ( ostream & os, const SurfacePort & port )
 {
 	os << "{ ";

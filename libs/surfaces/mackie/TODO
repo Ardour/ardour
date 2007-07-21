@@ -1,3 +1,5 @@
+* if mackie wheel moves too fast, it's ignored.
+* need to put scaling functions and multipliers in subclasses.
 * update manual with jog wheel states
 * alsa/sequencer ports unstable. possibly problems with use of ::poll
 * use glib::timeout for check_scrubbing
@@ -16,6 +18,7 @@
 Later
 -----
 * remove commented couts
+* Perhaps MackieControlProtocol shouldn't implement MackieButtonHandler
 * talk to route plugins
 * check for excessiveness (ie too many events making other subsystems work too hard)
 * Queueing of writes?

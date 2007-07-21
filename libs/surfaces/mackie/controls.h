@@ -170,7 +170,7 @@ public:
 	}
 
 	/// type() << 8 + midi id of the control. This
-	/// provides a unique id of any control on the surface.
+	/// provides a unique id for any control on the surface.
 	int id() const
 	{
 		return ( type() << 8 ) + _id;
@@ -211,6 +211,10 @@ public:
 	
 	virtual type_t type() const = 0;
 	
+	/// Return true if this control is the one and only
+	/// Jog Wheel
+	virtual bool is_jog() const { return false; }
+
 private:
 	int _id;
 	int _ordinal;
@@ -305,6 +309,17 @@ public:
 
 private:
 	LedRing _led_ring;
+};
+
+class Jog : public Pot
+{
+public:
+	Jog( int id, int ordinal, std::string name, Group & group )
+	: Pot( id, ordinal, name, group )
+	{
+	}
+
+	virtual bool is_jog() const { return true; }
 };
 
 }

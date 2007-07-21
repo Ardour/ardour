@@ -193,7 +193,7 @@ void Mackie::MackieSurface::init_controls()
 	group->add( *pot );
 
 	group = groups["none"];
-	pot = new Pot ( 60, 1, "jog", *group );
+	pot = new Jog ( 60, 1, "jog", *group );
 	pots[0x3c] = pot;
 	controls.push_back( pot );
 	controls_by_name["jog"] = pot;
