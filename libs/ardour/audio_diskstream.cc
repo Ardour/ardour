@@ -555,6 +555,12 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 	if (nominally_recording || (_session.get_record_enabled() && Config->get_punch_in())) {
 		OverlapType ot;
 		
+		// Safeguard against situations where process() goes haywire when autopunching and last_recordable_frame < first_recordable_frame
+		if (last_recordable_frame < first_recordable_frame) {
+                        last_recordable_frame = max_frames;
+
+		}
+		
 		ot = coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
 
 		switch (ot) {
