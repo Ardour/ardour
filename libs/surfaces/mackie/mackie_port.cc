@@ -399,15 +399,12 @@ void MackiePort::handle_midi_any (MIDI::Parser & parser, MIDI::byte * raw_bytes,
 		{
 			// fader
 			case Control::type_fader:
-				{
-					// for a BCF2000, max is 7f for high-order byte and 0x70 for low-order byte
-					// According to the Logic docs, these should both be 0x7f.
-					// Although it does mention something about only the top-order
-					// 10 bits out of 14 being used
-					int midi_pos = ( raw_bytes[2] << 7 ) + raw_bytes[1];
-					control_event( *this, control, float(midi_pos) / float(0x3fff) );
-				}
-				break;
+			{
+				// only the top-order 10 bits out of 14 are used
+				int midi_pos = ( ( raw_bytes[2] << 7 ) + raw_bytes[1] ) >> 4;
+				control_event( *this, control, float(midi_pos) / float(0x3ff) );
+			}
+			break;
 				
 			// button
 			case Control::type_button:
@@ -416,18 +413,18 @@ void MackiePort::handle_midi_any (MIDI::Parser & parser, MIDI::byte * raw_bytes,
 				
 			// pot (jog wheel, external control)
 			case Control::type_pot:
-				{
-					ControlState state;
-					
-					// bytes[2] & 0b01000000 (0x40) give sign
-					state.sign = ( raw_bytes[2] & 0x40 ) == 0 ? 1 : -1; 
-					// bytes[2] & 0b00111111 (0x3f) gives delta
-					state.ticks = ( raw_bytes[2] & 0x3f);
-					state.delta = float( state.ticks ) / float( 0x3f );
-					
-					control_event( *this, control, state );
-				}
+			{
+				ControlState state;
+				
+				// bytes[2] & 0b01000000 (0x40) give sign
+				state.sign = ( raw_bytes[2] & 0x40 ) == 0 ? 1 : -1; 
+				// bytes[2] & 0b00111111 (0x3f) gives delta
+				state.ticks = ( raw_bytes[2] & 0x3f);
+				state.delta = float( state.ticks ) / float( 0x3f );
+				
+				control_event( *this, control, state );
 				break;
+			}
 			default:
 				cerr << "Do not understand control type " << control;
 		}
