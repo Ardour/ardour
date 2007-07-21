@@ -897,7 +897,7 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 						route->panner()[0]->get_effective_position (xpos);
 						
 						// calculate new value, and trim
-						xpos += state.delta;
+						xpos += state.delta * state.sign;
 						if ( xpos > 1.0 )
 							xpos = 1.0;
 						else if ( xpos < 0.0 )
