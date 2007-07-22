@@ -43,23 +43,7 @@ void JogWheel::scroll_event( SurfacePort & port, Control & control, const Contro
 
 void JogWheel::jog_event( SurfacePort & port, Control & control, const ControlState & state )
 {
-// TODO use current snap-to setting?
-#if 0
-	long delta = state.ticks * sign * 1000;
-	nframes_t next = session->transport_frame() + delta;
-	if ( delta < 0 && session->transport_frame() < (nframes_t) abs( delta )	)
-	{
-		next = session->current_start_frame();
-	}
-	else if ( next > session->current_end_frame() )
-	{
-		next = session->current_end_frame();
-	}
-	
-	// doesn't work very well
-	session->request_locate( next, session->transport_rolling() );
-#endif
-	
+	// TODO use current snap-to setting?
 	switch ( jog_wheel_state() )
 	{
 	case scroll:
@@ -67,6 +51,9 @@ void JogWheel::jog_event( SurfacePort & port, Control & control, const ControlSt
 		break;
 	
 	case zoom:
+		// Chunky Zoom.
+		// TODO implement something similar to ScrollTimeline which
+		// ends up in Editor::control_scroll for smoother zooming.
 		if ( state.sign > 0 )
 			for ( unsigned int i = 0; i < state.ticks; ++i ) _mcp.ZoomIn();
 		else
@@ -75,10 +62,9 @@ void JogWheel::jog_event( SurfacePort & port, Control & control, const ControlSt
 		
 	case speed:
 		// locally, _transport_speed is an positive value
-		// fairly arbitrary scaling function
 		_transport_speed += _mcp.surface().scaled_delta( state, _mcp.get_session().transport_speed() );
 
-		// make sure not weirdness get so the session
+		// make sure no weirdness gets to the session
 		if ( _transport_speed < 0 || isnan( _transport_speed ) )
 		{
 			_transport_speed = 0.0;
