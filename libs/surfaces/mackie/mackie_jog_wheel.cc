@@ -3,6 +3,7 @@
 #include "mackie_control_protocol.h"
 #include "surface_port.h"
 #include "controls.h"
+#include "surface.h"
 
 #include <algorithm>
 
@@ -40,11 +41,6 @@ void JogWheel::scroll_event( SurfacePort & port, Control & control, const Contro
 {
 }
 
-float scaled_delta( const ControlState & state, float current_speed )
-{
-	return state.sign * ( pow( state.ticks + 1, 2 ) + current_speed ) / 100.0;
-}
-
 void JogWheel::jog_event( SurfacePort & port, Control & control, const ControlState & state )
 {
 // TODO use current snap-to setting?
@@ -80,7 +76,7 @@ void JogWheel::jog_event( SurfacePort & port, Control & control, const ControlSt
 	case speed:
 		// locally, _transport_speed is an positive value
 		// fairly arbitrary scaling function
-		_transport_speed += scaled_delta( state, _mcp.get_session().transport_speed() );
+		_transport_speed += _mcp.surface().scaled_delta( state, _mcp.get_session().transport_speed() );
 
 		// make sure not weirdness get so the session
 		if ( _transport_speed < 0 || isnan( _transport_speed ) )
@@ -95,23 +91,15 @@ void JogWheel::jog_event( SurfacePort & port, Control & control, const ControlSt
 	case scrub:
 	{
 		add_scrub_interval( _scrub_timer.restart() );
-		float speed = 0.0;
-		
-		// This should really be part of the surface object
-		if ( _mcp.mcu_port().emulation() == MackiePort::bcf2000 )
-			// 5 clicks per second => speed == 1.0
-			speed = 50.0 / average_scrub_interval() * state.ticks;
-		else
-			// 10 clicks per second => speed == 1.0
-			speed = 100.0 / average_scrub_interval() * state.ticks;
-		
+		// x clicks per second => speed == 1.0
+		float speed = _mcp.surface().scrub_scaling_factor() / average_scrub_interval() * state.ticks;
 		_mcp.get_session().request_transport_speed( speed * state.sign );
 		break;
 	}
 	
 	case shuttle:
 		_shuttle_speed = _mcp.get_session().transport_speed();
-		_shuttle_speed += scaled_delta( state, _mcp.get_session().transport_speed() );
+		_shuttle_speed += _mcp.surface().scaled_delta( state, _mcp.get_session().transport_speed() );
 		_mcp.get_session().request_transport_speed( _shuttle_speed );
 		break;
 	

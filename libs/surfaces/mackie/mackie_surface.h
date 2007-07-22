@@ -20,6 +20,9 @@ public:
 	
 	virtual void handle_button( MackieButtonHandler & mbh, ButtonState bs, Button & button );
 	virtual void init_controls();
+
+	virtual float scrub_scaling_factor() { return 100.0; }
+	virtual float scaled_delta( const ControlState & state, float current_speed );
 };
 
 }

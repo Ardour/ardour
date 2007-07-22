@@ -15,8 +15,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
+this_dir = File.dirname(__FILE__)
+
 require 'faster_csv'
-require 'mackie.rb'
+require "#{this_dir}/mackie.rb"
 
 class Control
   attr_accessor :id, :led, :group, :name, :ordinal, :switch

@@ -1,0 +1,64 @@
+#! /usr/bin/ruby
+
+require 'getoptlong'
+require 'csv'
+require 'erb'
+this_dir = File.dirname(__FILE__)
+require this_dir + '/mackie.rb'
+require this_dir + '/controls.rb'
+
+read_opts = GetoptLong.new(
+[ "--headers", '-e', GetoptLong::NO_ARGUMENT ],
+
+[ "--version","-v", GetoptLong::NO_ARGUMENT ],
+[ "--help",   "-h", "-?", GetoptLong::NO_ARGUMENT ]
+)
+
+# process the parsed options
+read_opts.each do |opt, arg|
+  case opt
+    when "--headers"
+      $generate_headers = true
+    else
+      $generate_headers = false
+  end
+end
+
+cc_template = ''
+File.open( this_dir + "/surface-cc-template.erb", "r" ) { |f| cc_template = f.read }
+
+h_template = ''
+File.open( this_dir + "/surface-h-template.erb", "r" ) { |f| h_template = f.read }
+
+# needs to be defined outside the loop otherwise ERB can't find it
+sf = nil
+
+files =
+if ARGV.size == 0
+  Dir.glob "#{this_dir}/*csv"
+else
+  ARGV
+end
+
+files.each do |csv_file|
+  csv_file =~ /(\w+)-controls.csv/
+  sf = Surface.new( $1.capitalize )
+  
+  control_data = ''
+  File.open( csv_file, "r") { |f| control_data = f.read }
+  sf.parse control_data
+
+  @result = ""
+  
+  erb = ERB.new( cc_template , 0, "%<>-", "@result" )
+  erb.result
+  File.open( "#{sf.name.downcase}_surface_generated.cc", "w" ) { |f| f.write @result }
+
+  if $generate_headers
+    erb = ERB.new( h_template , 0, "%<>-", "@result" )
+    erb.result
+    File.open( "#{sf.name.downcase}_surface.h", "w" ) { |f| f.write @result }
+  end
+  
+end
+

@@ -81,7 +81,24 @@ public:
 	
 	/// map button ids to calls to press_ and release_ in mbh
 	virtual void handle_button( MackieButtonHandler & mbh, ButtonState bs, Button & button ) = 0;
-	
+
+public:
+	/**
+		This is used to calculate the clicks per second that define
+		a transport speed of 1.0 for the jog wheel. 100.0 is 10 clicks
+		per second, 50.5 is 5 clicks per second.
+	*/
+	virtual float scrub_scaling_factor() = 0;
+
+	/**
+		The scaling factor function for speed increase and decrease. At
+		low transport speeds this should return a small value, for high transport
+		speeds, this should return an exponentially larger value. This provides
+		high definition control at low speeds and quick speed changes to/from
+		higher speeds.
+	*/
+	virtual float scaled_delta( const ControlState & state, float current_speed ) = 0;
+
 protected:
 	virtual void init_controls() = 0;
 	virtual void init_strips( uint32_t max_strips, uint32_t unit_strips );

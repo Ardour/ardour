@@ -34,7 +34,9 @@ types.cc
 surface.cc
 mackie_control_protocol.cc
 bcf_surface.cc
+bcf_surface_generated.cc
 mackie_surface.cc
+mackie_surface_generated.cc
 mackie_jog_wheel.cc
 """)
 

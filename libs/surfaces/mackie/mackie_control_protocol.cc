@@ -486,23 +486,26 @@ bool MackieControlProtocol::handle_strip_button( Control & control, ButtonState 
 
 void MackieControlProtocol::update_led( Mackie::Button & button, Mackie::LedState ls )
 {
-	MackiePort * port = 0;
-	if ( button.group().is_strip() )
+	if ( ls != none )
 	{
-		if ( button.group().is_master() )
+		MackiePort * port = 0;
+		if ( button.group().is_strip() )
 		{
-			port = &mcu_port();
+			if ( button.group().is_master() )
+			{
+				port = &mcu_port();
+			}
+			else
+			{
+				port = &port_for_id( dynamic_cast<const Strip&>( button.group() ).index() );
+			}
 		}
 		else
 		{
-			port = &port_for_id( dynamic_cast<const Strip&>( button.group() ).index() );
+			port = &mcu_port();
 		}
+		port->write( builder.build_led( button, ls ) );
 	}
-	else
-	{
-		port = &mcu_port();
-	}
-	if ( ls != none ) port->write( builder.build_led( button, ls ) );
 }
 
 void MackieControlProtocol::update_global_button( const string & name, LedState ls )
@@ -517,7 +520,7 @@ void MackieControlProtocol::update_global_button( const string & name, LedState 
 #ifdef DEBUG
 		cout << "Button " << name << " not found" << endl;
 #endif
-		}
+	}
 }
 
 // send messages to surface to set controls to correct values

@@ -113,60 +113,6 @@ const MidiByteArray & MackiePort::sysex_hdr() const
 	return mackie_sysex_hdr;
 }
 
-Control & MackiePort::lookup_control( MIDI::byte * bytes, size_t count )
-{
-	Control * control = 0;
-	MIDI::byte midi_type = bytes[0] & 0xf0; //0b11110000
-	switch( midi_type )
-	{
-		// fader
-		case MackieMidiBuilder::midi_fader_id:
-		{
-			int midi_id = bytes[0] & 0x0f;
-			control = _mcp.surface().faders[midi_id];
-			if ( control == 0 )
-			{
-				MidiByteArray mba( count, bytes );
-				ostringstream os;
-				os << "control for fader" << bytes << " id " << midi_id << " is null";
-				throw MackieControlException( os.str() );
-			}
-			break;
-		}
-			
-		// button
-		case MackieMidiBuilder::midi_button_id:
-			control = _mcp.surface().buttons[bytes[1]];
-			if ( control == 0 )
-			{
-				MidiByteArray mba( count, bytes );
-				ostringstream os;
-				os << "control for button " << bytes << " is null";
-				throw MackieControlException( os.str() );
-			}
-			break;
-			
-		// pot (jog wheel, external control)
-		case MackieMidiBuilder::midi_pot_id:
-			control = _mcp.surface().pots[bytes[1]];
-			if ( control == 0 )
-			{
-				MidiByteArray mba( count, bytes );
-				ostringstream os;
-				os << "control for rotary " << mba << " is null";
-				throw MackieControlException( os.str() );
-			}
-			break;
-		
-		default:
-			MidiByteArray mba( count, bytes );
-			ostringstream os;
-			os << "Cannot find control for " << bytes;
-			throw MackieControlException( os.str() );
-	}
-	return *control;
-}
-
 MidiByteArray calculate_challenge_response( MidiByteArray::iterator begin, MidiByteArray::iterator end )
 {
 	MidiByteArray l;
@@ -266,11 +212,16 @@ void MackiePort::init()
 
 void MackiePort::finalise_init( bool yn )
 {
-	//cout << "MackiePort::finalise_init" << endl;
+#ifdef PORT_DEBUG
+	cout << "MackiePort::finalise_init" << endl;
+#endif
 	bool emulation_ok = false;
 	
 	// probing doesn't work very well, so just use a config variable
 	// to set the emulation mode
+	// TODO This might have to be specified on a per-port basis
+	// in the config file
+	// if an mcu and a bcf are needed to work as one surface
 	if ( _emulation == none )
 	{
 		if ( ARDOUR::Config->get_mackie_emulation() == "bcf" )
@@ -314,7 +265,7 @@ void MackiePort::connect_any()
 	
 	if ( find( slots.begin(), slots.end(), mem_fun( *this, &MackiePort::handle_midi_any ) ) == slots.end() )
 */
-	// but this will break if midi tracing is turned on
+	// TODO but this will break if midi tracing is turned on
 	if ( port().input()->any.empty() )
 	{
 #ifdef DEBUG
@@ -370,7 +321,66 @@ void MackiePort::handle_midi_sysex (MIDI::Parser & parser, MIDI::byte * raw_byte
 	}
 }
 
+Control & MackiePort::lookup_control( MIDI::byte * bytes, size_t count )
+{
+	// Don't instantiate a MidiByteArray here unless it's needed for exceptions.
+	// Reason being that this method is called for every single incoming
+	// midi event, and it needs to be as efficient as possible.
+	Control * control = 0;
+	MIDI::byte midi_type = bytes[0] & 0xf0; //0b11110000
+	switch( midi_type )
+	{
+		// fader
+		case MackieMidiBuilder::midi_fader_id:
+		{
+			int midi_id = bytes[0] & 0x0f;
+			control = _mcp.surface().faders[midi_id];
+			if ( control == 0 )
+			{
+				MidiByteArray mba( count, bytes );
+				ostringstream os;
+				os << "control for fader" << bytes << " id " << midi_id << " is null";
+				throw MackieControlException( os.str() );
+			}
+			break;
+		}
+			
+		// button
+		case MackieMidiBuilder::midi_button_id:
+			control = _mcp.surface().buttons[bytes[1]];
+			if ( control == 0 )
+			{
+				MidiByteArray mba( count, bytes );
+				ostringstream os;
+				os << "control for button " << bytes << " is null";
+				throw MackieControlException( os.str() );
+			}
+			break;
+			
+		// pot (jog wheel, external control)
+		case MackieMidiBuilder::midi_pot_id:
+			control = _mcp.surface().pots[bytes[1]];
+			if ( control == 0 )
+			{
+				MidiByteArray mba( count, bytes );
+				ostringstream os;
+				os << "control for rotary " << mba << " is null";
+				throw MackieControlException( os.str() );
+			}
+			break;
+		
+		default:
+			MidiByteArray mba( count, bytes );
+			ostringstream os;
+			os << "Cannot find control for " << bytes;
+			throw MackieControlException( os.str() );
+	}
+	return *control;
+}
+
 // converts midi messages into control_event signals
+// it might be worth combining this with lookup_control
+// because they have similar logic flows.
 void MackiePort::handle_midi_any (MIDI::Parser & parser, MIDI::byte * raw_bytes, size_t count )
 {
 #ifdef DEBUG
@@ -402,12 +412,14 @@ void MackiePort::handle_midi_any (MIDI::Parser & parser, MIDI::byte * raw_bytes,
 			{
 				// only the top-order 10 bits out of 14 are used
 				int midi_pos = ( ( raw_bytes[2] << 7 ) + raw_bytes[1] ) >> 4;
+				// relies on implicit ControlState constructor
 				control_event( *this, control, float(midi_pos) / float(0x3ff) );
 			}
 			break;
 				
 			// button
 			case Control::type_button:
+				// relies on implicit ControlState constructor
 				control_event( *this, control, raw_bytes[2] == 0x7f ? press : release );
 				break;
 				
