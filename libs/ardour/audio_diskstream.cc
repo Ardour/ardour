@@ -2279,6 +2279,12 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 				continue;
 			}
 
+			// This protects sessions from errant CapturingSources in stored sessions
+			struct stat sbuf;
+			if (stat (prop->value().c_str(), &sbuf)) {
+				continue;
+			}
+
 			try {
 				fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (_session, prop->value(), false, _session.frame_rate()));
 			}
