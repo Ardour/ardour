@@ -53,6 +53,8 @@ public:
 	UndoAction get_memento() const;
 
 	bool destroy_region (boost::shared_ptr<Region>);
+	
+	void set_note_mode (NoteMode m) { _note_mode = m; }
 
 protected:
 
@@ -68,6 +70,8 @@ private:
 	void dump () const;
 
 	bool region_changed (Change, boost::shared_ptr<Region>);
+	
+	NoteMode _note_mode;  
 };
 
 } /* namespace ARDOUR */

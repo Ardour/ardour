@@ -110,19 +110,19 @@ MidiRegion::~MidiRegion ()
 }
 
 nframes_t
-MidiRegion::read_at (MidiRingBuffer& out, nframes_t position, nframes_t dur, uint32_t chan_n) const
+MidiRegion::read_at (MidiRingBuffer& out, nframes_t position, nframes_t dur, uint32_t chan_n, NoteMode mode) const
 {
-	return _read_at (_sources, out, position, dur, chan_n);
+	return _read_at (_sources, out, position, dur, chan_n, mode);
 }
 
 nframes_t
-MidiRegion::master_read_at (MidiRingBuffer& out, nframes_t position, nframes_t dur, uint32_t chan_n) const
+MidiRegion::master_read_at (MidiRingBuffer& out, nframes_t position, nframes_t dur, uint32_t chan_n, NoteMode mode) const
 {
-	return _read_at (_master_sources, out, position, dur, chan_n);
+	return _read_at (_master_sources, out, position, dur, chan_n, mode);
 }
 
 nframes_t
-MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer& dst, nframes_t position, nframes_t dur, uint32_t chan_n) const
+MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer& dst, nframes_t position, nframes_t dur, uint32_t chan_n, NoteMode mode) const
 {
 	// cerr << _name << "._read_at(" << position << ") - " << _position << endl;
 
@@ -162,6 +162,8 @@ MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer& dst, nframes_t pos
 	_read_data_count = 0;
 
 	boost::shared_ptr<MidiSource> src = midi_source(chan_n);
+	src->set_note_mode(mode);
+
 	if (src->read (dst, _start + internal_offset, to_read, _position) != to_read) {
 		return 0; /* "read nothing" */
 	}

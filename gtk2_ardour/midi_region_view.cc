@@ -410,6 +410,10 @@ MidiRegionView::add_note (const MidiModel::Note& note)
 	const uint8_t note_range = view->highest_note() - view->lowest_note() + 1;
 	const double footer_height = name_highlight->property_y2() - name_highlight->property_y1();
 	const double pixel_range = (trackview.height - footer_height - 5.0) / (double)note_range;
+	const uint8_t fill_alpha = 0x20 + (uint8_t)(note.velocity() * 1.5); 
+	const uint32_t fill = RGBA_TO_UINT(0xE0 + note.velocity()/127.0 * 0x10, 0xE0, 0xE0, fill_alpha);
+	const uint8_t outline_alpha = 0x80 + (uint8_t)(note.velocity()); 
+	const uint32_t outline = RGBA_TO_UINT(0xE0 + note.velocity()/127.0 * 0x10, 0xE0, 0xE0, outline_alpha);
 
 	if (mtv->note_mode() == Sustained) {
 		const double y1 = trackview.height - (pixel_range * (note.note() - view->lowest_note() + 1))
@@ -418,11 +422,11 @@ MidiRegionView::add_note (const MidiModel::Note& note)
 		ArdourCanvas::SimpleRect * ev_rect = new Gnome::Canvas::SimpleRect(*group);
 		ev_rect->property_x1() = trackview.editor.frame_to_pixel((nframes_t)note.time());
 		ev_rect->property_y1() = y1;
-		ev_rect->property_x2() = trackview.editor.frame_to_pixel((nframes_t)(note.time() + note.duration()));
+		ev_rect->property_x2() = trackview.editor.frame_to_pixel((nframes_t)(note.end_time()));
 		ev_rect->property_y2() = y1 + ceil(pixel_range);
 
-		ev_rect->property_fill_color_rgba() = 0xFFFFFF66;
-		ev_rect->property_outline_color_rgba() = 0xFFFFFFAA;
+		ev_rect->property_fill_color_rgba() = fill;
+		ev_rect->property_outline_color_rgba() = outline;
 		ev_rect->property_outline_what() = (guint32) 0xF; // all edges
 
 		ev_rect->show();
@@ -436,8 +440,8 @@ MidiRegionView::add_note (const MidiModel::Note& note)
 		Diamond* ev_diamond = new Diamond(*group, std::min(pixel_range, 5.0));
 		ev_diamond->move(x, y);
 		ev_diamond->show();
-		ev_diamond->property_outline_color_rgba() = 0xFFFFFFDD;
-		ev_diamond->property_fill_color_rgba() = 0xFFFFFF66;
+		ev_diamond->property_fill_color_rgba() = fill;
+		ev_diamond->property_outline_color_rgba() = outline;
 		_events.push_back(ev_diamond);
 	}
 }

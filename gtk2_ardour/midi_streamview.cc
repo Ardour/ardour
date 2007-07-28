@@ -54,6 +54,7 @@ using namespace Editing;
 
 MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	: StreamView (tv)
+	, _range(ContentsRange)
 	, _lowest_note(60)
 	, _highest_note(60)
 {

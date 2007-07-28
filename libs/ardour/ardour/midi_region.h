@@ -53,12 +53,14 @@ class MidiRegion : public Region
 	nframes_t read_at (MidiRingBuffer& dst,
 			   nframes_t position,
 			   nframes_t dur, 
-			   uint32_t       chan_n      = 0) const;
+			   uint32_t  chan_n = 0,
+			   NoteMode  mode = Sustained) const;
 
 	nframes_t master_read_at (MidiRingBuffer& dst,
 			nframes_t position,
 			nframes_t dur,
-			uint32_t chan_n=0) const;
+			uint32_t  chan_n = 0,
+			NoteMode  mode = Sustained) const;
 
 	XMLNode& state (bool);
 	int      set_state (const XMLNode&);
@@ -82,7 +84,8 @@ class MidiRegion : public Region
 	nframes_t _read_at (const SourceList&, MidiRingBuffer& dst,
 			    nframes_t position,
 			    nframes_t dur, 
-			    uint32_t chan_n = 0) const;
+			    uint32_t chan_n = 0,
+				NoteMode mode = Sustained) const;
 
 	void recompute_at_start ();
 	void recompute_at_end ();

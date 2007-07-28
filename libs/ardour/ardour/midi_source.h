@@ -74,6 +74,7 @@ class MidiSource : public Source
 	virtual void load_model(bool lock=true, bool force_reload=false) = 0;
 	virtual void destroy_model() = 0;
 
+	void set_note_mode(NoteMode mode) { if (_model) _model->set_note_mode(mode); }
 	virtual bool model_loaded() const { return _model_loaded; }
 
 	MidiModel* model() { return _model; }
