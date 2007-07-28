@@ -99,7 +99,13 @@ nframes_t
 MidiSource::read (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset) const
 {
 	Glib::Mutex::Lock lm (_lock);
-	return read_unlocked (dst, start, cnt, stamp_offset);
+	if (_model_loaded && _model) {
+		/*const size_t n_events = */_model->read(dst, start, cnt, stamp_offset);
+		//cout << "Read " << n_events << " events from model." << endl;
+		return cnt;
+	} else {
+		return read_unlocked (dst, start, cnt, stamp_offset);
+	}
 }
 
 nframes_t
@@ -117,5 +123,28 @@ MidiSource::file_changed (string path)
 	int e1 = stat (path.c_str(), &stat_file);
 	
 	return ( !e1 );
+}
+
+void
+MidiSource::mark_streaming_midi_write_started (NoteMode mode)
+{
+	if (_model) {
+		_model->set_note_mode(mode);
+		_model->start_write();
+	}
+}
+
+void
+MidiSource::mark_streaming_write_started ()
+{
+	if (_model)
+		_model->start_write();
+}
+
+void
+MidiSource::mark_streaming_write_completed ()
+{
+	if (_model)
+		_model->end_write(false); // FIXME: param?
 }
 

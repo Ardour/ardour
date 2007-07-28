@@ -1794,11 +1794,13 @@ AudioDiskstream::engage_record_enable ()
 				(*chan)->source->ensure_monitor_input (!(Config->get_auto_input() && rolling));
 			}
 			capturing_sources.push_back ((*chan)->write_source);
+			(*chan)->write_source->mark_streaming_write_started ();
 		}
 		
 	} else {
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 			capturing_sources.push_back ((*chan)->write_source);
+			(*chan)->write_source->mark_streaming_write_started ();
 		}
 	}
 

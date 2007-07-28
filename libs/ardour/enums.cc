@@ -136,8 +136,8 @@ setup_enum_writer ()
 	REGISTER_ENUM (Destructive);
 	REGISTER (_TrackMode);
 	
-	REGISTER_ENUM (Note);
-	REGISTER_ENUM (Percussion);
+	REGISTER_ENUM (Sustained);
+	REGISTER_ENUM (Percussive);
 	REGISTER (_NoteMode);
 
 	REGISTER_ENUM (MeterFalloffOff);

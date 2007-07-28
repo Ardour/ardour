@@ -91,7 +91,10 @@ MidiBuffer::read_from(const Buffer& src, nframes_t nframes, nframes_t offset)
 	for (size_t i=0; i < src.size(); ++i) {
 		const MidiEvent& ev = msrc[i];
 		if (ev.time >= offset && ev.time < offset+nframes) {
+			//cerr << "MidiBuffer::read_from got event, " << ev.time << endl;
 			push_back(ev);
+		} else {
+			//cerr << "MidiBuffer event out of range, " << ev.time << endl;
 		}
 	}
 
@@ -166,7 +169,7 @@ MidiBuffer::push_back(const jack_midi_event_t& ev)
 Byte*
 MidiBuffer::reserve(double time, size_t size)
 {
-	assert(size < MAX_EVENT_SIZE);
+	assert(size <= MAX_EVENT_SIZE);
 
 	if (_size == _capacity)
 		return NULL;

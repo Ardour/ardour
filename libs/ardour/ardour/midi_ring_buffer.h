@@ -19,6 +19,7 @@
 #ifndef __ardour_midi_ring_buffer_h__
 #define __ardour_midi_ring_buffer_h__
 
+#include <iostream>
 #include <algorithm>
 #include <ardour/types.h>
 #include <ardour/buffer.h>
@@ -252,6 +253,9 @@ MidiRingBuffer::read(double* time, size_t* size, Byte* buf)
 inline size_t
 MidiRingBuffer::write(double time, size_t size, const Byte* buf)
 {
+	//printf("MRB - write %#X %d %d with time %lf\n",
+	//		buf[0], buf[1], buf[2], time);
+
 	assert(size > 0);
 
 	if (write_space() < (sizeof(double) + sizeof(size_t) + size)) {
@@ -280,6 +284,8 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 
 	size_t count = 0;
 
+	//printf("MRB - read %u .. %u + %u\n", start, end, offset);
+
 	while (read_space() > sizeof(double) + sizeof(size_t)) {
 	
 		full_peek(sizeof(double), (Byte*)&ev.time);
@@ -292,30 +298,25 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 			success = MidiRingBufferBase<Byte>::full_read(sizeof(size_t), (Byte*)&ev.size);
 		
 		if (!success) {
-			cerr << "MRB: READ ERROR (time/size)" << endl;
+			std::cerr << "MRB: READ ERROR (time/size)" << std::endl;
 			continue;
 		}
 
 		if (ev.time >= start) {
+			ev.time -= start;
 			Byte* write_loc = dst.reserve(ev.time, ev.size);
 			success = MidiRingBufferBase<Byte>::full_read(ev.size, write_loc);
 		
-			if (!success)
-				cerr << "MRB: READ ERROR (data)" << endl;
+			if (success) {
+				++count;
+				//printf("MRB - read event at time %lf\n", ev.time);
+			} else {
+				std::cerr << "MRB: READ ERROR (data)" << std::endl;
+			}
 			
-			//printf("MRB - read %#X %d %d with time %u at index %zu\n",
-			//	ev.buffer[0], ev.buffer[1], ev.buffer[2], ev.time,
-			//	priv_read_ptr);
-			//
 		} else {
 			printf("MRB - SKIPPING EVENT (with time %f)\n", ev.time);
-			break;
 		}
-
-		++count;
-
-		assert(ev.time <= end);
-		ev.time -= start;
 	}
 	
 	//printf("(R) read space: %zu\n", read_space());

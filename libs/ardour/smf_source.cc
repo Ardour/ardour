@@ -408,7 +408,12 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 	const nframes_t oldlen = _length;
 	update_length(oldlen, cnt);
 
-	_model->append(buf);
+	if (_model) {
+		if ( ! _model->currently_writing()) {
+			_model->start_write();
+		}
+		_model->append(buf);
+	}
 
 	ViewDataRangeReady (buf_ptr, oldlen, cnt); /* EMIT SIGNAL */
 	
@@ -463,6 +468,8 @@ SMFSource::mark_for_remove ()
 void
 SMFSource::mark_streaming_write_completed ()
 {
+	MidiSource::mark_streaming_write_completed();
+
 	if (!writable()) {
 		return;
 	}
@@ -828,7 +835,6 @@ SMFSource::load_model(bool lock, bool force_reload)
 		const double ev_time = (double)(time * frames_per_beat / (double)_ppqn); // in frames
 
 		if (ret > 0) { // didn't skip (meta) event
-			//cerr << "ADDING EVENT TO MODEL: " << ev.time << endl;
 			_model->append(ev_time, ev.size, ev.buffer);
 		}
 

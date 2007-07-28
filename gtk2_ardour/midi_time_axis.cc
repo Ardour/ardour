@@ -206,15 +206,15 @@ MidiTimeAxisView::build_mode_menu()
 	mode_menu->set_name ("ArdourContextMenu");
 
 	RadioMenuItem::Group mode_group;
-	items.push_back (RadioMenuElem (mode_group, _("Note"),
-				bind (mem_fun (*this, &MidiTimeAxisView::set_note_mode), Note)));
+	items.push_back (RadioMenuElem (mode_group, _("Sustained"),
+				bind (mem_fun (*this, &MidiTimeAxisView::set_note_mode), Sustained)));
 	_note_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
-	_note_mode_item->set_active(_note_mode == Note);
+	_note_mode_item->set_active(_note_mode == Sustained);
 
-	items.push_back (RadioMenuElem (mode_group, _("Percussion"),
-				bind (mem_fun (*this, &MidiTimeAxisView::set_note_mode), Percussion)));
+	items.push_back (RadioMenuElem (mode_group, _("Percussive"),
+				bind (mem_fun (*this, &MidiTimeAxisView::set_note_mode), Percussive)));
 	_percussion_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
-	_percussion_mode_item->set_active(_note_mode == Percussion);
+	_percussion_mode_item->set_active(_note_mode == Percussive);
 
 	return mode_menu;
 }

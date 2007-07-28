@@ -25,6 +25,7 @@
 #include <pbd/command.h>
 #include <ardour/types.h>
 #include <ardour/midi_buffer.h>
+#include <ardour/midi_ring_buffer.h>
 
 namespace ARDOUR {
 
@@ -40,24 +41,45 @@ class Session;
 class MidiModel : public boost::noncopyable {
 public:
 	struct Note {
-		Note(double s=0, double d=0, uint8_t n=0, uint8_t v=0)
-		: start(s), duration(d), note(n), velocity(v) {}
+		Note(double time=0, double dur=0, uint8_t note=0, uint8_t vel=0x40);
+		Note(const Note& copy);
 
 		inline bool operator==(const Note& other)
-			{ return start == other.start && note == other.note; }
+			{ return time() == other.time() && note() == other.note(); }
 
-		double start;
-		double duration;
-		uint8_t note;
-		uint8_t velocity;
+		inline double  time()     const { return _on_event.time; }
+		inline double  end_time() const { return _off_event.time; }
+		inline uint8_t note()     const { return _on_event.note(); }
+		inline uint8_t velocity() const { return _on_event.velocity(); }
+		inline double  duration() const { return _off_event.time - _on_event.time; }
+
+		inline void set_duration(double d) { _off_event.time = _on_event.time + d; }
+
+		inline MidiEvent& on_event()  { return _on_event; }
+		inline MidiEvent& off_event() { return _off_event; }
+	
+		inline const MidiEvent& on_event()  const { return _on_event; }
+		inline const MidiEvent& off_event() const { return _off_event; }
+
+	private:
+		MidiEvent _on_event;
+		MidiEvent _off_event;
+		Byte      _on_event_buffer[3];
+		Byte      _off_event_buffer[3];
 	};
 
 	MidiModel(Session& s, size_t size=0);
 
 	void clear() { _notes.clear(); }
 
+	NoteMode note_mode() const            { return _note_mode; }
+	void     set_note_mode(NoteMode mode) { _note_mode = mode; }
+
 	void start_write();
+	bool currently_writing() const { return _writing; }
 	void end_write(bool delete_stuck=false);
+
+	size_t read (MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframes_t stamp_offset) const;
 
 	/** Resizes vector if necessary (NOT realtime safe) */
 	void append(const MidiBuffer& data);
@@ -72,8 +94,15 @@ public:
 	typedef std::vector<Note> Notes;
 	
 	inline static bool note_time_comparator (const Note& a, const Note& b) { 
-		return a.start < b.start;
+		return a.time() < b.time();
 	}
+
+	struct LaterNoteEndComparator {
+		typedef const Note* value_type;
+		inline bool operator()(const Note* const a, const Note* const b) { 
+			return a->end_time() > b->end_time();
+		}
+	};
 
 	inline       Notes& notes()       { return _notes; }
 	inline const Notes& notes() const { return _notes; }
@@ -115,10 +144,12 @@ private:
 
 	Session& _session;
 
-	Notes _notes;
+	Notes    _notes;
+	NoteMode _note_mode;
 	
 	typedef std::vector<size_t> WriteNotes;
 	WriteNotes _write_notes;
+	bool       _writing;
 
 	MidiEditCommand* _command; ///< In-progress command
 };

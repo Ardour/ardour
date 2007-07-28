@@ -142,7 +142,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 			model->add_note(new_note);
 			model->finish_command();
 
-			view->update_bounds(new_note.note);
+			view->update_bounds(new_note.note());
 
 			add_note(new_note);
 		}
@@ -317,7 +317,7 @@ MidiRegionView::add_event (const MidiEvent& ev)
 	const double footer_height = name_highlight->property_y2() - name_highlight->property_y1();
 	const double pixel_range = (trackview.height - footer_height - 5.0) / (double)note_range;
 
-	if (mtv->note_mode() == Note) {
+	if (mtv->note_mode() == Sustained) {
 		if ((ev.buffer[0] & 0xF0) == MIDI_CMD_NOTE_ON) {
 			const Byte& note = ev.buffer[1];
 			const double y1 = trackview.height - (pixel_range * (note - view->lowest_note() + 1))
@@ -352,7 +352,7 @@ MidiRegionView::add_event (const MidiEvent& ev)
 			}
 		}
 	
-	} else if (mtv->note_mode() == Percussion) {
+	} else if (mtv->note_mode() == Percussive) {
 		const Byte& note = ev.buffer[1];
 		const double x = trackview.editor.frame_to_pixel((nframes_t)ev.time);
 		const double y = trackview.height - (pixel_range * (note - view->lowest_note() + 1))
@@ -393,9 +393,9 @@ MidiRegionView::extend_active_notes()
 void
 MidiRegionView::add_note (const MidiModel::Note& note)
 {
-	assert(note.start >= 0);
-	assert(note.start < _region->length());
-	//assert(note.start + note.duration < _region->length());
+	assert(note.time() >= 0);
+	assert(note.time() < _region->length());
+	//assert(note.time() + note.duration < _region->length());
 
 	/*printf("Event, time = %f, size = %zu, data = ", ev.time, ev.size);
 	for (size_t i=0; i < ev.size; ++i) {
@@ -411,14 +411,14 @@ MidiRegionView::add_note (const MidiModel::Note& note)
 	const double footer_height = name_highlight->property_y2() - name_highlight->property_y1();
 	const double pixel_range = (trackview.height - footer_height - 5.0) / (double)note_range;
 
-	if (mtv->note_mode() == Note) {
-		const double y1 = trackview.height - (pixel_range * (note.note - view->lowest_note() + 1))
+	if (mtv->note_mode() == Sustained) {
+		const double y1 = trackview.height - (pixel_range * (note.note() - view->lowest_note() + 1))
 			- footer_height - 3.0;
 
 		ArdourCanvas::SimpleRect * ev_rect = new Gnome::Canvas::SimpleRect(*group);
-		ev_rect->property_x1() = trackview.editor.frame_to_pixel((nframes_t)note.start);
+		ev_rect->property_x1() = trackview.editor.frame_to_pixel((nframes_t)note.time());
 		ev_rect->property_y1() = y1;
-		ev_rect->property_x2() = trackview.editor.frame_to_pixel((nframes_t)(note.start + note.duration));
+		ev_rect->property_x2() = trackview.editor.frame_to_pixel((nframes_t)(note.time() + note.duration()));
 		ev_rect->property_y2() = y1 + ceil(pixel_range);
 
 		ev_rect->property_fill_color_rgba() = 0xFFFFFF66;
@@ -428,9 +428,9 @@ MidiRegionView::add_note (const MidiModel::Note& note)
 		ev_rect->show();
 		_events.push_back(ev_rect);
 
-	} else if (mtv->note_mode() == Percussion) {
-		const double x = trackview.editor.frame_to_pixel((nframes_t)note.start);
-		const double y = trackview.height - (pixel_range * (note.note - view->lowest_note() + 1))
+	} else if (mtv->note_mode() == Percussive) {
+		const double x = trackview.editor.frame_to_pixel((nframes_t)note.time());
+		const double y = trackview.height - (pixel_range * (note.note() - view->lowest_note() + 1))
 			- footer_height - 3.0;
 
 		Diamond* ev_diamond = new Diamond(*group, std::min(pixel_range, 5.0));

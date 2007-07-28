@@ -68,6 +68,7 @@ MidiDiskstream::MidiDiskstream (Session &sess, const string &name, Diskstream::F
 	, _source_port(0)
 	, _capture_transition_buf(0)
 	, _last_flush_frame(0)
+	, _note_mode(Sustained)
 {
 	/* prevent any write sources from being created */
 
@@ -92,6 +93,7 @@ MidiDiskstream::MidiDiskstream (Session& sess, const XMLNode& node)
 	, _source_port(0)
 	, _capture_transition_buf(0)
 	, _last_flush_frame(0)
+	, _note_mode(Sustained)
 {
 	in_set_state = true;
 	init (Recordable);
@@ -304,6 +306,14 @@ MidiDiskstream::set_destructive (bool yn)
 	assert( ! destructive());
 	assert( ! yn);
 	return -1;
+}
+	
+void
+MidiDiskstream::set_note_mode (NoteMode m)
+{
+	_note_mode = m;
+	if (_write_source && _write_source->model())
+		_write_source->model()->set_note_mode(m);
 }
 
 void
@@ -1211,6 +1221,8 @@ MidiDiskstream::engage_record_enable ()
 	if (_source_port && Config->get_monitoring_model() == HardwareMonitoring) {
 		_source_port->request_monitor_input (!(Config->get_auto_input() && rolling));
 	}
+
+	_write_source->mark_streaming_midi_write_started (_note_mode);
 
 	RecordEnableChanged (); /* EMIT SIGNAL */
 }

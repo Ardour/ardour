@@ -53,7 +53,9 @@ class MidiSource : public Source
 	virtual nframes_t write (MidiRingBuffer& src, nframes_t cnt);
 
 	virtual void mark_for_remove() = 0;
-	virtual void mark_streaming_write_completed () {}
+	virtual void mark_streaming_midi_write_started (NoteMode mode);
+	virtual void mark_streaming_write_started ();
+	virtual void mark_streaming_write_completed ();
 
 	string captured_for() const { return _captured_for; }
 	void   set_captured_for (string str) { _captured_for = str; }
@@ -71,6 +73,8 @@ class MidiSource : public Source
 
 	virtual void load_model(bool lock=true, bool force_reload=false) = 0;
 	virtual void destroy_model() = 0;
+
+	virtual bool model_loaded() const { return _model_loaded; }
 
 	MidiModel* model() { return _model; }
 

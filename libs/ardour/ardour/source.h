@@ -55,6 +55,7 @@ class Source : public SessionObject
 	virtual nframes_t natural_position() const { return 0; }
 
 	virtual void mark_for_remove() = 0;
+	virtual void mark_streaming_write_started () {}
 	virtual void mark_streaming_write_completed () = 0;
 	
 	XMLNode& get_state ();

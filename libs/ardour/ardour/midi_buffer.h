@@ -81,7 +81,7 @@ private:
 	const MidiEvent& operator[](size_t i) const { assert(i < _size); return _events[i]; }
 	MidiEvent& operator[](size_t i) { assert(i < _size); return _events[i]; }
 
-	// FIXME: Jack needs to tell us this
+	// FIXME: Eliminate this
 	static const size_t MAX_EVENT_SIZE = 4; // bytes
 	
 	/* We use _size as "number of events", so the size of _data is

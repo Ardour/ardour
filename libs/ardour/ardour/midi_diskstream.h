@@ -88,6 +88,8 @@ class MidiDiskstream : public Diskstream
 	boost::shared_ptr<SMFSource> write_source () { return _write_source; }
 	
 	int set_destructive (bool yn); // doom!
+	
+	void set_note_mode (NoteMode m);
 
   protected:
 	friend class Session;
@@ -154,6 +156,7 @@ class MidiDiskstream : public Diskstream
 	boost::shared_ptr<SMFSource>      _write_source;
 	RingBufferNPT<CaptureTransition>* _capture_transition_buf;
 	nframes_t                         _last_flush_frame;
+	NoteMode                          _note_mode;  
 };
 
 }; /* namespace ARDOUR */

@@ -167,7 +167,7 @@ MidiTrack::_set_state (const XMLNode& node, bool call_base)
 	if ((prop = node.property (X_("note-mode"))) != 0) {
 		_note_mode = NoteMode (string_2_enum (prop->value(), _note_mode));
 	} else {
-		_note_mode = Note;
+		_note_mode = Sustained;
 	}
 
 	if ((prop = node.property ("diskstream-id")) == 0) {
@@ -569,7 +569,6 @@ MidiTrack::process_output_buffers (BufferSet& bufs,
 
 		MidiBuffer& output_buf = bufs.get_midi(0);
 		write_controller_messages(output_buf, start_frame, end_frame, nframes, offset);
-
 		deliver_output(bufs, start_frame, end_frame, nframes, offset);
 	}
 }
@@ -685,26 +684,13 @@ MidiTrack::unfreeze ()
 	_freeze_record.state = UnFrozen;
 	FreezeChange (); /* EMIT SIGNAL */
 }
-#if 0
-int
-MidiTrack::set_mode (TrackMode m)
+
+void
+MidiTrack::set_note_mode (NoteMode m)
 {
-	assert(_diskstream);
-
-	if (m != _mode) {
-
-		if (_diskstream->set_destructive (m == Destructive)) {
-			return -1;
-		}
-
-		_mode = m;
-		
-		TrackModeChanged (); /* EMIT SIGNAL */
-	}
-
-	return 0;
+	_note_mode = m;
+	midi_diskstream()->set_note_mode(m);
 }
-#endif
 
 /** \return true on success, false on failure (no buffer space left)
  */

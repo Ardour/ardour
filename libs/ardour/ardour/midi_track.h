@@ -84,7 +84,7 @@ public:
 	};
 	
 	NoteMode note_mode() const { return _note_mode; }
-	void set_note_mode (NoteMode m) { _note_mode = m; }
+	void set_note_mode (NoteMode m);
 	
 protected:
 

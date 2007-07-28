@@ -129,8 +129,8 @@ namespace ARDOUR {
 	};
 	
 	enum NoteMode {
-		Note,
-		Percussion
+		Sustained,
+		Percussive
 	};
 	
 	struct BBT_Time {

@@ -140,7 +140,7 @@ MidiStreamView::display_region(MidiRegionView* region_view, bool redisplay_event
 	for (size_t i=0; i < source->model()->n_notes(); ++i) {
 		const MidiModel::Note& note = source->model()->note_at(i);
 		
-		update_bounds(note.note);
+		update_bounds(note.note());
 
 		if (redisplay_events)
 			region_view->add_note(note);
