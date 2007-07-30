@@ -168,9 +168,9 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 
 	table->attach (*filter_box, 0, 7, 5, 6, FILL|EXPAND, FILL, 5, 5);
 
-	table->attach(*btn_add, 1, 2, 6, 7, FILL, FILL, 5, 5);
+	table->attach(*btn_add, 1, 2, 6, 7, FILL, FILL, 5, 5); 
 	table->attach(*btn_remove, 3, 4, 6, 7, FILL, FILL, 5, 5);
-	table->attach(*btn_update, 5, 6, 7, 7, FILL, FILL, 5, 5);
+	table->attach(*btn_update, 5, 6, 7, 8, FILL, FILL, 5, 5);
 
 	table->attach(ascroller, 0, 7, 8, 10);
 
