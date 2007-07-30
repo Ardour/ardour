@@ -128,7 +128,8 @@ UI::load_rcfile (string path, bool themechange)
 	}
 	
 	RC rc (path.c_str());
-	RC::reset_styles(Gtk::Settings::get_default());
+	// RC::reset_styles (Gtk::Settings::get_default());
+	gtk_rc_reset_styles (gtk_settings_get_default());
 	theme_changed.emit();
 
 	if (themechange) {

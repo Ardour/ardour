@@ -20,10 +20,16 @@
 #include <cstdio>
 #include <lrdf.h>
 
+#include <algorithm>
+
 #include <gtkmm/table.h>
 #include <gtkmm/stock.h>
 #include <gtkmm/button.h>
 #include <gtkmm/notebook.h>
+
+#include <gtkmm2ext/utils.h>
+
+#include <pbd/convert.h>
 
 #include <ardour/plugin_manager.h>
 #include <ardour/plugin.h>
@@ -38,9 +44,18 @@
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
+using namespace std;
+
+static const char* _filter_mode_strings[] = {
+	N_("Plugin name"),
+	N_("Plugin type"),
+	N_("Plugin creator"),
+	0
+};
 
 PluginSelector::PluginSelector (PluginManager *mgr)
-	: ArdourDialog (_("ardour: plugins"), true, false)
+	: ArdourDialog (_("ardour: plugins"), true, false),
+	  filter_button (_("Clear"))
 {
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("PluginSelectorWindow");
@@ -58,6 +73,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	ladspa_display.append_column (_("# Inputs"),lcols.ins);
 	ladspa_display.append_column (_("# Outputs"), lcols.outs);
 	ladspa_display.set_headers_visible (true);
+	ladspa_display.set_headers_clickable (true);
 	ladspa_display.set_reorderable (false);
 	lscroller.set_border_width(10);
 	lscroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
@@ -81,6 +97,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	vst_display.append_column (_("# Inputs"), vcols.ins);
 	vst_display.append_column (_("# Outputs"), vcols.outs);
 	vst_display.set_headers_visible (true);
+	vst_display.set_headers_clickable (true);
 	vst_display.set_reorderable (false);
 	vscroller.set_border_width(10);
 	vscroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
@@ -99,6 +116,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	au_display.append_column (_("# Inputs"), aucols.ins);
 	au_display.append_column (_("# Outputs"), aucols.outs);
 	au_display.set_headers_visible (true);
+	au_display.set_headers_clickable (true);
 	au_display.set_reorderable (false);
 	auscroller.set_border_width(10);
 	auscroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
@@ -125,15 +143,36 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	btn_add->set_name("PluginSelectorButton");
 	btn_remove->set_name("PluginSelectorButton");
 
-	Gtk::Table* table = manage(new Gtk::Table(7, 10));
+	Gtk::Table* table = manage(new Gtk::Table(7, 11));
 	table->set_size_request(750, 500);
 	table->attach(notebook, 0, 7, 0, 5);
 
-	table->attach(*btn_add, 1, 2, 5, 6, Gtk::FILL, Gtk::FILL, 5, 5);
-	table->attach(*btn_remove, 3, 4, 5, 6, Gtk::FILL, Gtk::FILL, 5, 5);
-	table->attach(*btn_update, 5, 6, 5, 6, Gtk::FILL, Gtk::FILL, 5, 5);
+	HBox* filter_box = manage (new HBox);
 
-	table->attach(ascroller, 0, 7, 7, 9);
+	vector<string> filter_strings = I18N (_filter_mode_strings);
+	Gtkmm2ext::set_popdown_strings (filter_mode, filter_strings);
+	filter_mode.set_active_text (filter_strings.front());
+
+	filter_box->pack_start (filter_mode, false, false);
+	filter_box->pack_start (filter_entry, true, true);
+	filter_box->pack_start (filter_button, false, false);
+
+	filter_entry.signal_changed().connect (mem_fun (*this, &PluginSelector::filter_entry_changed));
+	filter_button.signal_clicked().connect (mem_fun (*this, &PluginSelector::filter_button_clicked));
+	filter_mode.signal_changed().connect (mem_fun (*this, &PluginSelector::filter_mode_changed));
+
+	filter_box->show ();
+	filter_mode.show ();
+	filter_entry.show ();
+	filter_button.show ();
+
+	table->attach (*filter_box, 0, 7, 5, 6, FILL|EXPAND, FILL, 5, 5);
+
+	table->attach(*btn_add, 1, 2, 6, 7, FILL, FILL, 5, 5);
+	table->attach(*btn_remove, 3, 4, 6, 7, FILL, FILL, 5, 5);
+	table->attach(*btn_update, 5, 6, 7, 8, FILL, FILL, 5, 5);
+
+	table->attach(ascroller, 0, 7, 8, 10);
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (Stock::CONNECT, RESPONSE_APPLY);
@@ -141,8 +180,9 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	set_response_sensitive (RESPONSE_APPLY, false);
 	get_vbox()->pack_start (*table);
 
+
 	// Notebook tab order must be the same in here as in set_correct_focus()
-	using namespace Gtk::Notebook_Helpers;
+	using namespace Notebook_Helpers;
 	notebook.pages().push_back (TabElem (lscroller, _("LADSPA")));
 
 #ifdef VST_SUPPORT
@@ -181,7 +221,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	btn_remove->signal_clicked().connect(mem_fun(*this, &PluginSelector::btn_remove_clicked));
 	added_list.get_selection()->signal_changed().connect (mem_fun(*this, &PluginSelector::added_list_selection_changed));
 
-	input_refiller ();
+	ladspa_refiller ();
 	
 #ifdef VST_SUPPORT
 	vst_refiller ();
@@ -249,39 +289,63 @@ PluginSelector::set_session (Session* s)
 }
 
 void
-PluginSelector::_input_refiller (void *arg)
-{
-	((PluginSelector *) arg)->input_refiller ();
-}
-
-int compare(const void *left, const void *right)
-{
-  return strcmp(*((char**)left), *((char**)right));
-}
-
-void
-PluginSelector::input_refiller ()
+PluginSelector::ladspa_refiller ()
 {
 	guint row;
 	PluginInfoList &plugs = manager->ladspa_plugin_info ();
 	PluginInfoList::iterator i;
 	char ibuf[16], obuf[16];
+
 	lmodel->clear();
+	
+	string mode = filter_mode.get_active_text ();
+	std::string compstr;
+	std::string filterstr = filter_entry.get_text ();
+
+	transform (filterstr.begin(), filterstr.end(), filterstr.begin(), ::toupper);
 
 	// Insert into GTK list
+
 	for (row = 0, i=plugs.begin(); i != plugs.end(); ++i, ++row) {
 		snprintf (ibuf, sizeof(ibuf)-1, "%d", (*i)->n_inputs);
 		snprintf (obuf, sizeof(obuf)-1, "%d", (*i)->n_outputs);		
+
+		bool add;
+
+		add = false;
+
+		if (!filterstr.empty()) {
 		
-		Gtk::TreeModel::Row newrow = *(lmodel->append());
-		newrow[lcols.name] = (*i)->name.c_str();
-		newrow[lcols.type] = (*i)->category.c_str();
-		newrow[lcols.ins] = ibuf;
-		newrow[lcols.outs] = obuf;
-		newrow[lcols.plugin] = *i;
+			if (mode == _("Plugin name")) {
+				compstr = (*i)->name;
+			} else if (mode == _("Plugin type")) {
+				compstr = (*i)->category;
+			} else if (mode == _("Plugin creator")) {
+				compstr == "foo";
+			}
+			
+			transform (compstr.begin(), compstr.end(), compstr.begin(), ::toupper);
+
+			if (compstr.find (filterstr) != string::npos) {
+				add = true;
+			}
+
+		} else {
+			add = true;
+		}
+
+		if (add) {
+
+			TreeModel::Row newrow = *(lmodel->append());
+			newrow[lcols.name] = (*i)->name.c_str();
+			newrow[lcols.type] = (*i)->category.c_str();
+			newrow[lcols.ins] = ibuf;
+			newrow[lcols.outs] = obuf;
+			newrow[lcols.plugin] = *i;
+		}
 	}
 
-	lmodel->set_sort_column (0, Gtk::SORT_ASCENDING);
+	lmodel->set_sort_column (0, SORT_ASCENDING);
 }
 
 #ifdef VST_SUPPORT
@@ -307,13 +371,13 @@ PluginSelector::vst_refiller ()
 		snprintf (ibuf, sizeof(ibuf)-1, "%d", (*i)->n_inputs);
 		snprintf (obuf, sizeof(obuf)-1, "%d", (*i)->n_outputs);		
 		
-		Gtk::TreeModel::Row newrow = *(vmodel->append());
+		TreeModel::Row newrow = *(vmodel->append());
 		newrow[vcols.name] = (*i)->name.c_str();
 		newrow[vcols.ins] = ibuf;
 		newrow[vcols.outs] = obuf;
 		newrow[vcols.plugin] = *i;
 	}
-	vmodel->set_sort_column (0, Gtk::SORT_ASCENDING);
+	vmodel->set_sort_column (0, SORT_ASCENDING);
 }
 
 void
@@ -353,13 +417,13 @@ PluginSelector::au_refiller ()
 		snprintf (ibuf, sizeof(ibuf)-1, "%d", (*i)->n_inputs);
 		snprintf (obuf, sizeof(obuf)-1, "%d", (*i)->n_outputs);		
 		
-		Gtk::TreeModel::Row newrow = *(aumodel->append());
+		TreeModel::Row newrow = *(aumodel->append());
 		newrow[aucols.name] = (*i)->name.c_str();
 		newrow[aucols.ins] = ibuf;
 		newrow[aucols.outs] = obuf;
 		newrow[aucols.plugin] = *i;
 	}
-	aumodel->set_sort_column (0, Gtk::SORT_ASCENDING);
+	aumodel->set_sort_column (0, SORT_ASCENDING);
 }
 
 void
@@ -395,9 +459,9 @@ PluginSelector::btn_add_clicked()
 {
 	std::string name;
 	PluginInfoPtr pi;
-	Gtk::TreeModel::Row newrow = *(amodel->append());
+	TreeModel::Row newrow = *(amodel->append());
 	
-	Gtk::TreeModel::Row row;
+	TreeModel::Row row;
 
 	switch (current_selection) {
 		case ARDOUR::LADSPA:
@@ -435,7 +499,7 @@ PluginSelector::btn_add_clicked()
 void
 PluginSelector::btn_remove_clicked()
 {
-	Gtk::TreeModel::iterator iter = added_list.get_selection()->get_selected();
+	TreeModel::iterator iter = added_list.get_selection()->get_selected();
 	
 	amodel->erase(iter);
 	if (amodel->children().empty()) {
@@ -447,7 +511,13 @@ void
 PluginSelector::btn_update_clicked()
 {
 	manager->refresh ();
-	input_refiller ();
+	refill();
+}
+
+void
+PluginSelector::refill()
+{
+	ladspa_refiller ();
 #ifdef VST_SUPPORT
 	vst_refiller ();
 #endif	
@@ -508,3 +578,22 @@ PluginSelector::cleanup ()
 	hide();
 	amodel->clear();
 }
+
+void
+PluginSelector::filter_button_clicked ()
+{
+	filter_entry.set_text ("");
+}
+
+void
+PluginSelector::filter_entry_changed ()
+{
+	refill ();
+}
+
+void 
+PluginSelector::filter_mode_changed ()
+{
+	refill ();
+}
+

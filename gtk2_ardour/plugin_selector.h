@@ -49,6 +49,14 @@ class PluginSelector : public ArdourDialog
 	Gtk::ScrolledWindow vscroller;  // vst
 	Gtk::ScrolledWindow auscroller; // AudioUnit
 	Gtk::ScrolledWindow ascroller;  // Added plugins
+
+	Gtk::ComboBoxText filter_mode;
+	Gtk::Entry filter_entry;
+	Gtk::Button filter_button;
+
+	void filter_button_clicked ();
+	void filter_entry_changed ();
+	void filter_mode_changed ();
 	
 	ARDOUR::PluginType current_selection;
 
@@ -135,9 +143,9 @@ class PluginSelector : public ArdourDialog
 
 	ARDOUR::PluginManager *manager;
 
-	static void _input_refiller (void *);
+	static void _ladspa_refiller (void *);
 	
-	void input_refiller ();
+	void ladspa_refiller ();
 	void row_clicked(GdkEventButton *);
 	void btn_add_clicked();
 	void btn_remove_clicked();
@@ -147,6 +155,7 @@ class PluginSelector : public ArdourDialog
 	void btn_apply_clicked();
 	void use_plugin (ARDOUR::PluginInfoPtr);
 	void cleanup ();
+	void refill ();
 
 	void set_correct_focus();
 };
