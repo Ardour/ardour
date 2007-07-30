@@ -22,7 +22,7 @@
 #include "midi_region_view.h"
 #include "public_editor.h"
 #include "editing_syms.h"
-
+#include "keyboard.h"
 
 using namespace std;
 
@@ -48,13 +48,21 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 		return false;
 
 	switch (ev->type) {
-	/*case GDK_ENTER_NOTIFY:
+	case GDK_ENTER_NOTIFY:
 		cerr << "ENTERED: " << ev->crossing.state << endl;
-		if ( (ev->crossing.state & GDK_BUTTON2_MASK) ) {
+		Keyboard::magic_widget_grab_focus();
+		_item->grab_focus();
+		/*if ( (ev->crossing.state & GDK_BUTTON2_MASK) ) {
 
-		}
+		}*/
 		break;
-	*/
+
+	case GDK_LEAVE_NOTIFY:
+		cerr << "LEAVE: " << ev->crossing.state << endl;
+		Keyboard::magic_widget_drop_focus();
+		//_item->drop_focus();
+		break;
+	
 	case GDK_KEY_PRESS:
 		cerr << "EVENT KEY PRESS\n"; // doesn't work :/
 		break;
