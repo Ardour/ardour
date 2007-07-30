@@ -102,7 +102,7 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 	midi_region()->midi_source(0)->model()->ContentsChanged.connect(sigc::mem_fun(
 			this, &MidiRegionView::redisplay_model));
 	
-	group->signal_event().connect (mem_fun (this, &MidiRegionView::canvas_event));
+	group->signal_event().connect (mem_fun (this, &MidiRegionView::canvas_event), false);
 }
 
 bool
@@ -116,7 +116,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 	
 	if (trackview.editor.current_mouse_mode() != MouseNote)
 		return false;
-	
+
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
 		//group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK, ev->button.time);
@@ -128,7 +128,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		return true;
 	
 	case GDK_MOTION_NOTIFY:
-		cerr << "MOTION\n";
+		cerr << "MOTION, _state = " << _state << endl;
 		event_x = ev->motion.x;
 		event_y = ev->motion.y;
 		group->w2i(event_x, event_y);
@@ -136,8 +136,8 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		switch (_state) {
 		case Pressed:
 			cerr << "SELECT DRAG START\n";
-			//group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
-			//		Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
+			group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
+				    Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
 			_state = Dragging;
 			last_x = event_x;
 			last_y = event_y;
@@ -166,7 +166,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 	
 	case GDK_BUTTON_RELEASE:
 		cerr << "RELEASE\n";
-		//group->ungrab(ev->button.time);
+		group->ungrab(ev->button.time);
 		switch (_state) {
 		case Pressed:
 			cerr << "CLICK\n";

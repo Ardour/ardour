@@ -74,6 +74,7 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 	case GDK_MOTION_NOTIFY:
 		event_x = ev->motion.x;
 		event_y = ev->motion.y;
+		cerr << "MOTION @ " << event_x << ", " << event_y << endl;
 		_item->property_parent().get_value()->w2i(event_x, event_y);
 
 		switch (_state) {
