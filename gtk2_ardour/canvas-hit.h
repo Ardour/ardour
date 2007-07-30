@@ -17,23 +17,25 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __ardour_diamond_h__
-#define __ardour_diamond_h__
+#ifndef __gtk_ardour_canvas_hit_h__
+#define __gtk_ardour_canvas_hit_h__
 
-#include <libgnomecanvasmm/polygon.h>
-#include "canvas-midi-event.h"
+#include <iostream>
+#include "simplerect.h"
+#include "diamond.h"
 
 namespace Gnome {
 namespace Canvas {
 
-
-class Diamond : public Polygon {
+class CanvasHit : public Diamond, public CanvasMidiEvent {
 public:
-	Diamond(Group& group, double height);
+	CanvasHit(MidiRegionView& region, Group& group, double size)
+		: Diamond(group, size), CanvasMidiEvent(region, this) {}
+
+	bool on_event(GdkEvent* ev) { return CanvasMidiEvent::on_event(ev); }
 };
 
-
-} // namespace Canvas
 } // namespace Gnome
+} // namespace Canvas
 
-#endif /* __ardour_diamond_h__ */
+#endif /* __gtk_ardour_canvas_hit_h__ */

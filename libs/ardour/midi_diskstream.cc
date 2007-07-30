@@ -827,18 +827,6 @@ MidiDiskstream::do_refill ()
 		return 0;
 	}
 
-	/* if there are 2+ chunks of disk i/o possible for
-	   this track, let the caller know so that it can arrange
-	   for us to be called again, ASAP.
-	   */
-
-	// FIXME: using disk_io_chunk_frames as an event count, not good
-	// count vs duration semantic differences are nonexistant for audio,
-	// which makes translating for MIDI code confusing...
-	if (_playback_buf->write_space() >= (_slaved?3:2) * disk_io_chunk_frames) {
-		ret = 1;
-	}
-
 	/* if we're running close to normal speed and there isn't enough 
 	   space to do disk_io_chunk_frames of I/O, then don't bother.  
 
@@ -847,7 +835,7 @@ MidiDiskstream::do_refill ()
 	   */
 
 	if ((write_space < disk_io_chunk_frames) && fabs (_actual_speed) < 2.0f) {
-		cerr << "No refill 1\n";
+		//cerr << "No refill 1\n";
 		return 0;
 	}
 
@@ -857,12 +845,12 @@ MidiDiskstream::do_refill ()
 	   */
 
 	if (_slaved && write_space < (_playback_buf->capacity() / 2)) {
-		cerr << "No refill 2\n";
+		//cerr << "No refill 2\n";
 		return 0;
 	}
 
 	if (reversed) {
-		cerr << "No refill 3 (reverse)\n";
+		//cerr << "No refill 3 (reverse)\n";
 		return 0;
 	}
 
@@ -874,26 +862,10 @@ MidiDiskstream::do_refill ()
 		return 0;
 	}
 
-#if 0
-	// or this
-	if (file_frame > max_frames - total_space) {
-
-		/* to close to the end: read what we can, and zero fill the rest */
-
-		zero_fill = total_space - (max_frames - file_frame);
-		total_space = max_frames - file_frame;
-
-	} else {
-		zero_fill = 0;
-	}
-#endif
-
-	// At this point we:
+	// At this point we...
 	assert(_playback_buf->write_space() > 0); // ... have something to write to, and
 	assert(file_frame <= max_frames); // ... something to write
 
-	// So (read it, then) write it:
-	
 	nframes_t file_frame_tmp = file_frame;
 	nframes_t to_read = min(disk_io_chunk_frames, (max_frames - file_frame));
 	

@@ -109,6 +109,7 @@ canvas-simplerect.c
 simplerect.cc
 canvas-waveview.c
 diamond.cc
+canvas-midi-event.cc
 crossfade_edit.cc
 crossfade_view.cc
 curvetest.cc

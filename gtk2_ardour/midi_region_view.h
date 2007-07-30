@@ -33,6 +33,7 @@
 #include "automation_line.h"
 #include "enums.h"
 #include "canvas.h"
+#include "canvas-note.h"
 
 namespace ARDOUR {
 	class MidiRegion;
@@ -70,6 +71,8 @@ class MidiRegionView : public RegionView
 	void end_write();
 	void extend_active_notes();
 
+	void create_note_at(double x, double y);
+
   protected:
 
     /* this constructor allows derived types
@@ -101,7 +104,7 @@ class MidiRegionView : public RegionView
 	bool note_canvas_event(GdkEvent* ev);
 
 	std::vector<ArdourCanvas::Item*> _events;
-	ArdourCanvas::SimpleRect**       _active_notes;
+	ArdourCanvas::CanvasNote**       _active_notes;
 };
 
 #endif /* __gtk_ardour_midi_region_view_h__ */

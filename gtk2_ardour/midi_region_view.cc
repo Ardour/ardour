@@ -41,7 +41,7 @@
 #include "midi_time_axis.h"
 #include "simplerect.h"
 #include "simpleline.h"
-#include "diamond.h"
+#include "canvas-hit.h"
 #include "public_editor.h"
 #include "ghostregion.h"
 #include "midi_time_axis.h"
@@ -108,56 +108,124 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 bool
 MidiRegionView::canvas_event(GdkEvent* ev)
 {
-	if (trackview.editor.current_mouse_mode() == MouseNote) {
-		if (ev->type == GDK_BUTTON_PRESS) {
-			MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
-			MidiStreamView* const view = mtv->midi_view();
-			
-			const uint8_t note_range = view->highest_note() - view->lowest_note() + 1;
-			const double footer_height = name_highlight->property_y2() - name_highlight->property_y1();
-			const double roll_height = trackview.height - footer_height;
-			
-			double x = ev->button.x;
-			double y = ev->button.y;
-			get_canvas_group()->w2i(x, y);
+	enum State { None, Pressed, Dragging };
+	static State _state;
 
-			double note = floor((roll_height - y) / roll_height * (double)note_range) + view->lowest_note();
-			assert(note >= 0.0);
-			assert(note <= 127.0);
-
-			const nframes_t stamp = trackview.editor.pixel_to_frame (x);
-			assert(stamp >= 0);
-			//assert(stamp <= _region->length());
-			
-			const Meter& m = trackview.session().tempo_map().meter_at(stamp);
-			const Tempo& t = trackview.session().tempo_map().tempo_at(stamp);
-			double dur = m.frames_per_bar(t, trackview.session().frame_rate()) / m.beats_per_bar();
-			
-			MidiModel* model = midi_region()->midi_source(0)->model();
-			
-			// Add a 1 beat long note (for now)
-			const MidiModel::Note new_note(stamp, dur, (uint8_t)note, 0x40);
-			
-			model->begin_command();
-			model->add_note(new_note);
-			model->finish_command();
-
-			view->update_bounds(new_note.note());
-
-			add_note(new_note);
-		}
-	}
+	static double last_x, last_y;
+	double event_x, event_y;
 	
+	if (trackview.editor.current_mouse_mode() != MouseNote)
+		return false;
+	
+	switch (ev->type) {
+	case GDK_BUTTON_PRESS:
+		//group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK, ev->button.time);
+		// This should happen on release...
+		if (ev->button.button == 1)
+			create_note_at(ev->button.x, ev->button.y);
+
+		_state = Pressed;
+		return true;
+	
+	case GDK_MOTION_NOTIFY:
+		cerr << "MOTION\n";
+		event_x = ev->motion.x;
+		event_y = ev->motion.y;
+		group->w2i(event_x, event_y);
+
+		switch (_state) {
+		case Pressed:
+			cerr << "SELECT DRAG START\n";
+			//group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
+			//		Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
+			_state = Dragging;
+			last_x = event_x;
+			last_y = event_y;
+			return true;
+		case Dragging:
+			if (ev->motion.is_hint) {
+				int t_x;
+				int t_y;
+				GdkModifierType state;
+				gdk_window_get_pointer(ev->motion.window, &t_x, &t_y, &state);
+				event_x = t_x;
+				event_y = t_y;
+			}
+
+			cerr << "SELECT DRAG" << endl;
+			//move(event_x - last_x, event_y - last_y);
+
+			last_x = event_x;
+			last_y = event_y;
+
+			return true;
+		default:
+			break;
+		}
+		break;
+	
+	case GDK_BUTTON_RELEASE:
+		cerr << "RELEASE\n";
+		//group->ungrab(ev->button.time);
+		switch (_state) {
+		case Pressed:
+			cerr << "CLICK\n";
+			//create_note_at(ev->button.x, ev->button.y);
+			_state = None;
+			return true;
+		case Dragging:
+			cerr << "SELECT RECT DONE\n";
+			_state = None;
+			return true;
+		default:
+			break;
+		}
+	
+	default:
+		break;
+	}
+
 	return false;
 }
 
 
-bool
-MidiRegionView::note_canvas_event(GdkEvent* ev)
+/** Add a note to the model, and the view, at a canvas (click) coordinate */
+void
+MidiRegionView::create_note_at(double x, double y)
 {
-	cerr << "NOTE CANVAS EVENT" << endl;
+	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
+	MidiStreamView* const view = mtv->midi_view();
 
-	return true;
+	const uint8_t note_range = view->highest_note() - view->lowest_note() + 1;
+	const double footer_height = name_highlight->property_y2() - name_highlight->property_y1();
+	const double roll_height = trackview.height - footer_height;
+
+	get_canvas_group()->w2i(x, y);
+
+	double note = floor((roll_height - y) / roll_height * (double)note_range) + view->lowest_note();
+	assert(note >= 0.0);
+	assert(note <= 127.0);
+
+	const nframes_t stamp = trackview.editor.pixel_to_frame (x);
+	assert(stamp >= 0);
+	//assert(stamp <= _region->length());
+
+	const Meter& m = trackview.session().tempo_map().meter_at(stamp);
+	const Tempo& t = trackview.session().tempo_map().tempo_at(stamp);
+	double dur = m.frames_per_bar(t, trackview.session().frame_rate()) / m.beats_per_bar();
+
+	MidiModel* model = midi_region()->midi_source(0)->model();
+
+	// Add a 1 beat long note (for now)
+	const MidiModel::Note new_note(stamp, dur, (uint8_t)note, 0x40);
+
+	model->begin_command();
+	model->add_note(new_note);
+	model->finish_command();
+
+	view->update_bounds(new_note.note());
+
+	add_note(new_note);
 }
 
 
@@ -279,7 +347,7 @@ MidiRegionView::add_ghost (AutomationTimeAxisView& atv)
 void
 MidiRegionView::begin_write()
 {
-	_active_notes = new ArdourCanvas::SimpleRect*[128];
+	_active_notes = new CanvasNote*[128];
 	for (unsigned i=0; i < 128; ++i)
 		_active_notes[i] = NULL;
 }
@@ -323,7 +391,7 @@ MidiRegionView::add_event (const MidiEvent& ev)
 			const double y1 = trackview.height - (pixel_range * (note - view->lowest_note() + 1))
 				- footer_height - 3.0;
 
-			ArdourCanvas::SimpleRect * ev_rect = new Gnome::Canvas::SimpleRect(*group);
+			CanvasNote* ev_rect = new CanvasNote(*this, *group);
 			ev_rect->property_x1() = trackview.editor.frame_to_pixel (
 					(nframes_t)ev.time);
 			ev_rect->property_y1() = y1;
@@ -334,8 +402,6 @@ MidiRegionView::add_event (const MidiEvent& ev)
 			/* outline all but right edge */
 			ev_rect->property_outline_what() = (guint32) (0x1 & 0x4 & 0x8);
 			ev_rect->property_fill_color_rgba() = 0xFFFFFF66;
-
-			ev_rect->signal_event().connect(sigc::mem_fun(this, &MidiRegionView::note_canvas_event));
 
 			ev_rect->raise_to_top();
 
@@ -358,14 +424,12 @@ MidiRegionView::add_event (const MidiEvent& ev)
 		const double y = trackview.height - (pixel_range * (note - view->lowest_note() + 1))
 			- footer_height - 3.0;
 
-		Diamond* ev_diamond = new Diamond(*group, std::min(pixel_range, 5.0));
+		CanvasHit* ev_diamond = new CanvasHit(*this, *group, std::min(pixel_range, 5.0));
 		ev_diamond->move(x, y);
 		ev_diamond->show();
 		ev_diamond->property_outline_color_rgba() = 0xFFFFFFDD;
 		ev_diamond->property_fill_color_rgba() = 0xFFFFFF66;
 			
-		ev_diamond->signal_event().connect(sigc::mem_fun(this, &MidiRegionView::note_canvas_event));
-
 		_events.push_back(ev_diamond);
 	}
 }
@@ -385,7 +449,7 @@ MidiRegionView::extend_active_notes()
 }
 
 
-/** Add a MIDI note (with duration).
+/** Add a MIDI note to the view (with duration).
  *
  * This does no 'realtime' note resolution, notes from a MidiModel have a
  * duration so they can be drawn in full immediately.
@@ -419,7 +483,7 @@ MidiRegionView::add_note (const MidiModel::Note& note)
 		const double y1 = trackview.height - (pixel_range * (note.note() - view->lowest_note() + 1))
 			- footer_height - 3.0;
 
-		ArdourCanvas::SimpleRect * ev_rect = new Gnome::Canvas::SimpleRect(*group);
+		ArdourCanvas::SimpleRect * ev_rect = new CanvasNote(*this, *group);
 		ev_rect->property_x1() = trackview.editor.frame_to_pixel((nframes_t)note.time());
 		ev_rect->property_y1() = y1;
 		ev_rect->property_x2() = trackview.editor.frame_to_pixel((nframes_t)(note.end_time()));
@@ -437,7 +501,7 @@ MidiRegionView::add_note (const MidiModel::Note& note)
 		const double y = trackview.height - (pixel_range * (note.note() - view->lowest_note() + 1))
 			- footer_height - 3.0;
 
-		Diamond* ev_diamond = new Diamond(*group, std::min(pixel_range, 5.0));
+		CanvasHit* ev_diamond = new CanvasHit(*this, *group, std::min(pixel_range, 5.0));
 		ev_diamond->move(x, y);
 		ev_diamond->show();
 		ev_diamond->property_fill_color_rgba() = fill;
