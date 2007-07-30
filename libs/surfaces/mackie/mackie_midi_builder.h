@@ -62,6 +62,7 @@ public:
 	MidiByteArray build_fader( const Fader & fader, float pos );
 	
 	/// return bytes that will reset all controls to their zero positions
+	/// And blank the display for the strip
 	MidiByteArray zero_strip( const Strip & strip );
 	
 	// provide bytes to zero the given control
@@ -73,9 +74,11 @@ public:
 	MidiByteArray two_char_display( const std::string & msg, const std::string & dots = "  " );
 	MidiByteArray two_char_display( unsigned int value, const std::string & dots = "  " );
 	
-	/// for displaying a particular strip name
-	/// index is zero-based
-	MidiByteArray strip_display( unsigned int strip_index, unsigned int line_number, const std::string & line );
+	/// for displaying characters on the strip LCD
+	MidiByteArray strip_display( const Strip & strip, unsigned int line_number, const std::string & line );
+	
+	/// blank the strip LCD, ie write all spaces
+	MidiByteArray strip_display_blank( const Strip & strip, unsigned int line_number );
 	
 	/// for generating all strip names
 	MidiByteArray all_strips_display( std::vector<std::string> & lines1, std::vector<std::string> & lines2 );

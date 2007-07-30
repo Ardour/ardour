@@ -1003,7 +1003,6 @@ void MackieControlProtocol::notify_name_changed( void *, RouteSignal * route_sig
 		if ( !strip.is_master() )
 		{
 			string line1;
-			string line2;
 			string fullname = route_signal->route().name();
 			
 			if ( fullname.length() <= 6 )
@@ -1013,14 +1012,13 @@ void MackieControlProtocol::notify_name_changed( void *, RouteSignal * route_sig
 			else
 			{
 				line1 = PBD::short_version( fullname, 6 );
-				line2 = fullname.substr( fullname.length() - 6, 6 );
 			}
 			
 			route_signal->port().write_sysex(
-				builder.strip_display( strip.index(), 0, line1 )
+				builder.strip_display( strip, 0, line1 )
 			);
 			route_signal->port().write_sysex(
-				builder.strip_display( strip.index(), 1, line2 )
+				builder.strip_display_blank( strip, 1 )
 			);
 		}
 	}

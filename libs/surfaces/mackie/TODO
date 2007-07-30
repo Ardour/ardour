@@ -1,4 +1,5 @@
 * if mackie wheel moves too fast, it's ignored.
+* active (pressed?) state for controls, including timeout
 * update manual with jog wheel states
 * alsa/sequencer ports unstable. possibly problems with use of ::poll
 * use glib::timeout for check_scrubbing

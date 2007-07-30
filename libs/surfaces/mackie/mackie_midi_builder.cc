@@ -110,6 +110,8 @@ MidiByteArray MackieMidiBuilder::zero_strip( const Strip & strip )
 		if ( control.accepts_feedback() )
 			retval << zero_control( control );
 	}
+	retval << strip_display_blank( strip, 0 );
+	retval << strip_display_blank( strip, 1 );
 	return retval;
 }
 
@@ -172,30 +174,35 @@ MidiByteArray MackieMidiBuilder::two_char_display( unsigned int value, const std
 	return two_char_display( os.str() );
 }
 
-MidiByteArray MackieMidiBuilder::strip_display( unsigned int strip_index, unsigned int line_number, const std::string & line )
+MidiByteArray MackieMidiBuilder::strip_display_blank( const Strip & strip, unsigned int line_number )
+{
+	// 6 spaces, not 7 because strip_display adds a space where appropriate
+	return strip_display( strip, line_number, "      " );
+}
+
+MidiByteArray MackieMidiBuilder::strip_display( const Strip & strip, unsigned int line_number, const std::string & line )
 {
 	if ( line_number > 1 )
 	{
 		throw runtime_error( "line_number must be 0 or 1" );
 	}
 	
-	if ( strip_index > 7 )
+	if ( strip.index() > 7 )
 	{
-		throw runtime_error( "strip_index must be between 0 and 7" );
+		throw runtime_error( "strip.index() must be between 0 and 7" );
 	}
 	
-	cout << "MackieMidiBuilder::strip_display index: " << strip_index << ", line " << line_number << ": " << line << endl;
+	cout << "MackieMidiBuilder::strip_display index: " << strip.index() << ", line " << line_number << ": " << line << endl;
 	
 	MidiByteArray retval;
 	// code for display
 	retval << 0x12;
 	// offset (0 to 0x37 first line, 0x38 to 0x6f for second line )
-	retval << ( strip_index * 7 + ( line_number * 0x38 ) );
+	retval << ( strip.index() * 7 + ( line_number * 0x38 ) );
 	// ascii data to display
 	retval << line;
-	
 	// column spacer, unless it's the right-hand column
-	if ( strip_index < 7 )
+	if ( strip.index() < 7 )
 	{
 		retval << ' ';
 	}
