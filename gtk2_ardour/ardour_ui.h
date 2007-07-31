@@ -576,6 +576,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void we_have_dependents ();
 	
 	std::string keybindings_path;
+	std::string user_keybindings_path;
 
 	void setup_keybindings ();
 	void setup_session_options ();

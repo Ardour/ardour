@@ -90,6 +90,8 @@ ARDOUR_UI::setup_keybindings ()
 	GtkAccelMap* accelmap = gtk_accel_map_get();
 	g_signal_connect (accelmap, "changed", (GCallback) accel_map_changed, this);
 
+	
+
 }
 
 void

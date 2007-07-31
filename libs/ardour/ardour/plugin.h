@@ -53,8 +53,14 @@ class PluginInfo {
   public:
 	PluginInfo () { }
 	PluginInfo (const PluginInfo &o)
-		: name(o.name), n_inputs(o.n_inputs), n_outputs(o.n_outputs),
-		path (o.path), unique_id(o.unique_id), index(o.index) {}
+		: name(o.name),
+		category (o.category), 
+		creator (o.creator),
+		path (o.path), 
+		n_inputs(o.n_inputs), 
+		n_outputs(o.n_outputs),
+		unique_id(o.unique_id), 
+		index(o.index) {}
 	virtual ~PluginInfo () { }
 
 	string name;

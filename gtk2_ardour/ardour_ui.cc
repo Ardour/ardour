@@ -181,7 +181,12 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	_will_create_new_session_automatically = false;
 	session_loaded = false;
 	last_speed_displayed = -1.0f;
+
 	keybindings_path = ARDOUR::find_config_file ("ardour.bindings");
+	/* all changes go to the user directory */
+	user_keybindings_path = get_user_ardour_path ();
+	user_keybindings_path += '/';
+	user_keybindings_path += "ardour.bindings";
 
 	can_save_keybindings = false;
 
@@ -2659,7 +2664,7 @@ void
 ARDOUR_UI::save_keybindings ()
 {
 	if (can_save_keybindings) {
-		AccelMap::save (keybindings_path);
+		AccelMap::save (user_keybindings_path);
 	} 
 }
 
