@@ -113,7 +113,6 @@ class PluginSelector : public ArdourDialog
 	Glib::RefPtr<Gtk::ListStore> vmodel;
 	Glib::RefPtr<Gtk::TreeSelection> vselection;
 	Gtk::TreeView vst_display;
-	static void _vst_refiller (void *);
 	void vst_refiller ();
 	void vst_display_selection_changed();
 #endif // VST_SUPPORT
@@ -136,7 +135,6 @@ class PluginSelector : public ArdourDialog
 	Glib::RefPtr<Gtk::ListStore> aumodel;
 	Glib::RefPtr<Gtk::TreeSelection> auselection;
 	Gtk::TreeView au_display;
-	static void _au_refiller (void *);
 	void au_refiller ();
 	void au_display_selection_changed();
 #endif //HAVE_AUDIOUNIT
@@ -156,6 +154,8 @@ class PluginSelector : public ArdourDialog
 	void use_plugin (ARDOUR::PluginInfoPtr);
 	void cleanup ();
 	void refill ();
+	bool show_this_plugin (ARDOUR::PluginInfoPtr&, const std::string&);
+	void setup_filter_string (std::string&);
 
 	void set_correct_focus();
 };

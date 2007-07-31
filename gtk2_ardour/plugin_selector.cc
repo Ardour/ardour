@@ -47,15 +47,16 @@ using namespace Gtk;
 using namespace std;
 
 static const char* _filter_mode_strings[] = {
-	N_("Plugin name"),
-	N_("Plugin type"),
-	N_("Plugin creator"),
+	N_("Name contains"),
+	N_("Type contains"),
+	N_("Author contains"),
+	N_("Library contains"),
 	0
 };
 
 PluginSelector::PluginSelector (PluginManager *mgr)
 	: ArdourDialog (_("ardour: plugins"), true, false),
-	  filter_button (_("Clear"))
+	  filter_button (Stock::CLEAR)
 {
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("PluginSelectorWindow");
@@ -81,7 +82,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 
 	amodel = Gtk::ListStore::create(acols);
 	added_list.set_model (amodel);
-	added_list.append_column (_("Plugins to be Connected to Insert"), acols.text);
+	added_list.append_column (_("Plugins to be connected"), acols.text);
 	added_list.set_headers_visible (true);
 	added_list.set_reorderable (false);
 
@@ -170,7 +171,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 
 	table->attach(*btn_add, 1, 2, 6, 7, FILL, FILL, 5, 5);
 	table->attach(*btn_remove, 3, 4, 6, 7, FILL, FILL, 5, 5);
-	table->attach(*btn_update, 5, 6, 7, 8, FILL, FILL, 5, 5);
+	table->attach(*btn_update, 5, 6, 6, 7, FILL, FILL, 5, 5);
 
 	table->attach(ascroller, 0, 7, 8, 10);
 
@@ -288,6 +289,44 @@ PluginSelector::set_session (Session* s)
 	}
 }
 
+bool
+PluginSelector::show_this_plugin (PluginInfoPtr& info, const std::string& filterstr)
+{
+	std::string compstr;
+	std::string mode = filter_mode.get_active_text ();
+
+	if (!filterstr.empty()) {
+		
+		if (mode == _("Name contains")) {
+			compstr = info->name;
+		} else if (mode == _("Type contains")) {
+			compstr = info->category;
+		} else if (mode == _("Author contains")) {
+			compstr = info->creator;
+		} else if (mode == _("Library contains")) {
+			compstr = info->path;
+		}
+		
+		transform (compstr.begin(), compstr.end(), compstr.begin(), ::toupper);
+
+		if (compstr.find (filterstr) != string::npos) {
+			return true;
+		} else {
+			return false;
+		}
+		
+	}
+
+	return true;
+}
+
+void
+PluginSelector::setup_filter_string (string& filterstr)
+{
+	filterstr = filter_entry.get_text ();
+	transform (filterstr.begin(), filterstr.end(), filterstr.begin(), ::toupper);
+}	
+
 void
 PluginSelector::ladspa_refiller ()
 {
@@ -298,44 +337,15 @@ PluginSelector::ladspa_refiller ()
 
 	lmodel->clear();
 	
-	string mode = filter_mode.get_active_text ();
-	std::string compstr;
-	std::string filterstr = filter_entry.get_text ();
-
-	transform (filterstr.begin(), filterstr.end(), filterstr.begin(), ::toupper);
-
-	// Insert into GTK list
+	std::string filterstr;
+	setup_filter_string (filterstr);
 
 	for (row = 0, i=plugs.begin(); i != plugs.end(); ++i, ++row) {
-		snprintf (ibuf, sizeof(ibuf)-1, "%d", (*i)->n_inputs);
-		snprintf (obuf, sizeof(obuf)-1, "%d", (*i)->n_outputs);		
 
-		bool add;
+		if (show_this_plugin (*i, filterstr)) {
 
-		add = false;
-
-		if (!filterstr.empty()) {
-		
-			if (mode == _("Plugin name")) {
-				compstr = (*i)->name;
-			} else if (mode == _("Plugin type")) {
-				compstr = (*i)->category;
-			} else if (mode == _("Plugin creator")) {
-				compstr == "foo";
-			}
-			
-			transform (compstr.begin(), compstr.end(), compstr.begin(), ::toupper);
-
-			if (compstr.find (filterstr) != string::npos) {
-				add = true;
-			}
-
-		} else {
-			add = true;
-		}
-
-		if (add) {
-
+			snprintf (ibuf, sizeof(ibuf)-1, "%d", (*i)->n_inputs);
+			snprintf (obuf, sizeof(obuf)-1, "%d", (*i)->n_outputs);		
 			TreeModel::Row newrow = *(lmodel->append());
 			newrow[lcols.name] = (*i)->name.c_str();
 			newrow[lcols.type] = (*i)->category.c_str();
@@ -351,12 +361,6 @@ PluginSelector::ladspa_refiller ()
 #ifdef VST_SUPPORT
 
 void
-PluginSelector::_vst_refiller (void *arg)
-{
-	((PluginSelector *) arg)->vst_refiller ();
-}
-
-void
 PluginSelector::vst_refiller ()
 {
 	guint row;
@@ -365,17 +369,21 @@ PluginSelector::vst_refiller ()
 	char ibuf[16], obuf[16];
 	vmodel->clear();
 	
-	// Insert into GTK list
+	std::string filterstr;
+	setup_filter_string (filterstr);
+	
 	for (row = 0, i=plugs.begin(); i != plugs.end(); ++i, ++row) {
 
-		snprintf (ibuf, sizeof(ibuf)-1, "%d", (*i)->n_inputs);
-		snprintf (obuf, sizeof(obuf)-1, "%d", (*i)->n_outputs);		
-		
-		TreeModel::Row newrow = *(vmodel->append());
-		newrow[vcols.name] = (*i)->name.c_str();
-		newrow[vcols.ins] = ibuf;
-		newrow[vcols.outs] = obuf;
-		newrow[vcols.plugin] = *i;
+		if (show_this_plugin (*i, filterstr)) {
+			snprintf (ibuf, sizeof(ibuf)-1, "%d", (*i)->n_inputs);
+			snprintf (obuf, sizeof(obuf)-1, "%d", (*i)->n_outputs);		
+			
+			TreeModel::Row newrow = *(vmodel->append());
+			newrow[vcols.name] = (*i)->name.c_str();
+			newrow[vcols.ins] = ibuf;
+			newrow[vcols.outs] = obuf;
+			newrow[vcols.plugin] = *i;
+		}
 	}
 	vmodel->set_sort_column (0, SORT_ASCENDING);
 }
@@ -397,12 +405,6 @@ PluginSelector::vst_display_selection_changed()
 #ifdef HAVE_AUDIOUNIT
 
 void
-PluginSelector::_au_refiller (void *arg)
-{
-	((PluginSelector *) arg)->au_refiller ();
-}
-
-void
 PluginSelector::au_refiller ()
 {
 	guint row;
@@ -411,18 +413,24 @@ PluginSelector::au_refiller ()
 	char ibuf[16], obuf[16];
 	aumodel->clear();
 	
-	// Insert into GTK list
+	std::string filterstr;
+	setup_filter_string (filterstr);
+	
 	for (row = 0, i=plugs.begin(); i != plugs.end(); ++i, ++row) {
 
-		snprintf (ibuf, sizeof(ibuf)-1, "%d", (*i)->n_inputs);
-		snprintf (obuf, sizeof(obuf)-1, "%d", (*i)->n_outputs);		
-		
-		TreeModel::Row newrow = *(aumodel->append());
-		newrow[aucols.name] = (*i)->name.c_str();
-		newrow[aucols.ins] = ibuf;
-		newrow[aucols.outs] = obuf;
-		newrow[aucols.plugin] = *i;
+		if (show_this_plugin (*i, filterstr)) {
+
+			snprintf (ibuf, sizeof(ibuf)-1, "%d", (*i)->n_inputs);
+			snprintf (obuf, sizeof(obuf)-1, "%d", (*i)->n_outputs);		
+			
+			TreeModel::Row newrow = *(aumodel->append());
+			newrow[aucols.name] = (*i)->name.c_str();
+			newrow[aucols.ins] = ibuf;
+			newrow[aucols.outs] = obuf;
+			newrow[aucols.plugin] = *i;
+		}
 	}
+
 	aumodel->set_sort_column (0, SORT_ASCENDING);
 }
 
