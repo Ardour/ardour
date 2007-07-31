@@ -76,7 +76,7 @@ void JogWheel::jog_event( SurfacePort & port, Control & control, const ControlSt
 	
 	case scrub:
 	{
-		if ( state.delta != 0.0 )
+		if ( state.sign != 0 )
 		{
 			add_scrub_interval( _scrub_timer.restart() );
 			// x clicks per second => speed == 1.0

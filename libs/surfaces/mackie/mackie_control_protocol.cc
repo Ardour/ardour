@@ -810,8 +810,7 @@ int MackieControlProtocol::set_state( const XMLNode & node )
 
 void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & control, const ControlState & state )
 {
-	// fetch a RouteSignal so we know what route to update
-	uint32_t index = control.ordinal() - 1 + ( port.number() * port.strips() );
+	// find the route for the control, if there is one
 	boost::shared_ptr<Route> route;
 	if ( control.group().is_strip() )
 	{
@@ -819,10 +818,14 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 		{
 			route = master_route();
 		}
-		else if ( index < route_table.size() )
-			route = route_table[index];
 		else
-			cerr << "Warning: index is " << index << " which is not in the route table, size: " << route_table.size() << endl;
+		{
+			uint32_t index = control.ordinal() - 1 + ( port.number() * port.strips() );
+			if ( index < route_table.size() )
+				route = route_table[index];
+			else
+				cerr << "Warning: index is " << index << " which is not in the route table, size: " << route_table.size() << endl;
+		}
 	}
 	
 	// This handles control element events from the surface
@@ -831,31 +834,17 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 	switch ( control.type() )
 	{
 		case Control::type_fader:
-			// TODO this seems to be a duplicate of the above if
-			if ( control.group().is_strip() )
+			// find the route in the route table for the id
+			// if the route isn't available, skip it
+			// at which point the fader should just reset itself
+			if ( route != 0 )
 			{
-				// find the route in the route table for the id
-				// if the route isn't available, skip it
-				// at which point the fader should just reset itself
-				if ( route != 0 )
-				{
-					route->set_gain( slider_position_to_gain( state.pos ), this );
-					
-					// must echo bytes back to slider now, because
-					// the notifier only works if the fader is not being
-					// touched. Which it is if we're getting input.
-					port.write( builder.build_fader( (Fader&)control, state.pos ) );
-				}
-			}
-			else
-			{
-				// master fader
-				boost::shared_ptr<Route> route = master_route();
-				if ( route )
-				{
-					route->set_gain( slider_position_to_gain( state.pos ), this );
-					port.write( builder.build_fader( (Fader&)control, state.pos ) );
-				}
+				route->set_gain( slider_position_to_gain( state.pos ), this );
+				
+				// must echo bytes back to slider now, because
+				// the notifier only works if the fader is not being
+				// touched. Which it is if we're getting input.
+				port.write( builder.build_fader( (Fader&)control, state.pos ) );
 			}
 			break;
 			
@@ -877,9 +866,10 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 			else if ( control.group().is_master() )
 			{
 				// master fader touch
-				boost::shared_ptr<Route> route = master_route();
-				if ( route )
+				if ( route != 0 )
+				{
 					handle_strip_button( control, state.button_state, route );
+				}
 			}
 			else
 			{
@@ -894,6 +884,7 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 			{
 				if ( route != 0 )
 				{
+					// pan for mono input routes, or stereo linked panners
 					if ( route->panner().size() == 1 || ( route->panner().size() == 2 && route->panner().linked() ) )
 					{
 						// assume pan for now
