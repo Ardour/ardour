@@ -33,7 +33,7 @@
 
     <para>
       While ardour is not running, edit your
-      <filename>.ardour2/ardour.rc</filename> and add at the top, with the
+      <filename>.ardour2/ardour.rc</filename> (and for now <filename>etc/ardour2/ardour_system.rc</filename> and <filename>etc/ardour2/ardour.rc</filename>) and add at the top, with the
       other ports:
 <programlisting>
 &lt;MIDI-port tag="mcu" device="/dev/snd/midiC2D0" type="alsa/raw" mode="duplex"/&gt;
@@ -64,8 +64,18 @@
 </programlisting>
     </para>
 
+		<note>
+			<para>
+				The Mackie must be in Logic Control mode, otherwise the LCD display
+				does not work. To put the unit in Logic Control mode: press and hold
+				channel 1+2 SELECT while turning the unit on and through calibration;
+				and then press the VPOT under whichever mode you wish to use. 
+			</para>
+		</note>
+		
     <para>
-      In this mode, the original mappings are used. Note that many of the
+      In this mode, the original mappings are used.
+			Note that many of the
       buttons have not yet been implemented.
     </para>
   </section>
@@ -133,16 +143,13 @@
           <tbody>
             <row>
               <entry>
-                pan / solo if pressed
+								<para>vpot: pan</para>
+								<para>button: solo</para>
               </entry>
 
               <entry>
-                transport <footnote>
-                <para>
-                  Making a pot pretend to be a shuttle wheel doesn't work
-                  very well.
-                </para>
-                </footnote> / global solo
+                <para>vpot: jog wheel</para>
+								<para>button: all solo</para>
               </entry>
 
               <entry namest="Buttons 1" nameend="Buttons 2">
@@ -197,6 +204,10 @@
                 </para>
 
                 <para>
+                  shift 1: jog wheel scrub/shuttle/scroll
+                </para>
+								
+                <para>
                   shift 2: punch out
                 </para>
               </entry>
@@ -216,7 +227,11 @@
               </entry>
 
               <entry>
-                ffwd
+								<para>ffwd</para>
+                <para>
+                  shift 1: jog wheel zoom
+                </para>
+								
               </entry>
             </row>
 
@@ -254,11 +269,11 @@
 
             <row>
               <entry>
-                previous marker
+                frm_prev (previous marker)
               </entry>
 
               <entry>
-                next marker
+                frm_next (next marker)
               </entry>
             </row>
 
@@ -281,7 +296,7 @@
     <title>Connecting to Ardour</title>
 		<note>
 			<para>
-				Currently (as of 18-jul-2007 and ardour-2.0.3) support for alsa/sequencer ports
+				Currently (ardour-2.0.4) support for alsa/sequencer ports
 				is borked. You're better off using alsa/raw as documented above.
 			</para>
 		</note>
@@ -291,6 +306,65 @@
       surface should jump to the correct positions. The mackie should work
       as normal, except that any buttons not on the BCF won't work.
     </para>
+  </section>
+
+  <section id="mackie-usage">
+    <title>Usage</title>
+    <para>
+			Strips (faders,pots,rec-enable,mute,solo) etc are fairly obvious.
+    </para>
+		<para>
+			The Jog wheel has various modes:
+      <itemizedlist>
+        <listitem>
+          <para>
+            Scroll mode. Part of the Scrub button cycle. The default. Scrolls the playhead. Displays "SC"
+						in the 2 character LED.
+          </para>
+        </listitem>
+				
+        <listitem>
+          <para>
+            Scrub mode. Part of the Scrub button cycle.
+						Rate of rotation of the Jog wheel controls
+						the direction and speed of the transport.
+						Displays "Sb" in the 2 character LED.
+          </para>
+        </listitem>
+
+        <listitem>
+          <para>
+            Shuttle mode. Part of the Scrub button cycle. 
+						Jog wheel controls speed and direction of transport.
+						Displays "Sh" in the 2 character LED.
+          </para>
+        </listitem>
+
+        <listitem>
+          <para>
+            Zoom mode. Toggled by the Zoom button. Mutually exclusive
+						with the Scrub cycle.
+						Jog wheel controls zoom level.
+						Displays "Zm" in the 2 character LED.
+          </para>
+        </listitem>
+			</itemizedlist>
+		</para>
+		
+		<para>
+			When holding ffwd or rew, the Jog wheel will adjust the speed.
+		</para>
+		
+		<para>
+			frm_next and frm_prev will jump to next or previous markers. Markers
+			can be set at the current playhead position with the marker button.
+		</para>
+		
+		<para>
+			The pot will pan single panners, and linked stereo panners. It won't
+			pan unlinked stereo panners, or 3 or more channel panners.
+		</para>
+		
   </section>
 
 <!--
