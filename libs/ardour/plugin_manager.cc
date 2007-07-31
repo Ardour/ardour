@@ -251,6 +251,7 @@ PluginManager::ladspa_discover (string path)
 		PluginInfoPtr info(new LadspaPluginInfo);
 		info->name = descriptor->Name;
 		info->category = get_ladspa_category(descriptor->UniqueID);
+		info->creator = descriptor->Maker;
 		info->path = path;
 		info->index = i;
 		info->n_inputs = ChanCount();
@@ -396,6 +397,7 @@ PluginManager::vst_discover (string path)
 
 	info->category = "VST";
 	info->path = path;
+	// need to set info->creator but FST doesn't provide it
 	info->index = 0;
 	info->n_inputs = finfo->numInputs;
 	info->n_outputs = finfo->numOutputs;

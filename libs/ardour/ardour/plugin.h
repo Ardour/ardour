@@ -22,6 +22,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <sigc++/signal.h>
+#include <glibmm/ustring.h>
 
 #include <pbd/statefuldestructible.h> 
 #include <pbd/controllable.h>
@@ -59,22 +60,23 @@ class PluginInfo {
 	PluginInfo () { }
 	PluginInfo (const PluginInfo &o)
 		: name(o.name), n_inputs(o.n_inputs), n_outputs(o.n_outputs),
-		unique_id(o.unique_id), path (o.path), index(o.index) {}
+		path (o.path), unique_id(o.unique_id), index(o.index) {}
 	virtual ~PluginInfo () { }
 
 	string name;
 	string category;
+	Glib::ustring creator;
+	Glib::ustring path;
 	ChanCount n_inputs;
 	ChanCount n_outputs;
 	ARDOUR::PluginType type;
-
+	
 	long unique_id;
 
 	virtual PluginPtr load (Session& session) = 0;
 
   protected:
 	friend class PluginManager;
-	string path;
 	uint32_t index;
 };
 
