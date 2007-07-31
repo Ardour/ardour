@@ -33,6 +33,7 @@
 #include <ardour/cycles.h>
 #include <ardour/latent.h>
 #include <ardour/parameter.h>
+#include <ardour/plugin_insert.h>
 
 #include <vector>
 #include <set>
@@ -150,6 +151,7 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 
   protected:
 	friend class PluginInsert;
+	friend struct PluginInsert::PluginControl;
 	virtual void set_parameter (uint32_t which, float val) = 0;
 
 	ARDOUR::AudioEngine& _engine;

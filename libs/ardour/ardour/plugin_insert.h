@@ -81,13 +81,14 @@ class PluginInsert : public Processor
 
 	float default_parameter_value (Parameter param);
 	
-	struct PluginControl : public AutomationControl {
+	struct PluginControl : public AutomationControl 
+	{
 	    PluginControl (PluginInsert& p, boost::shared_ptr<AutomationList> list);
 	    
 		void set_value (float val);
 	    float get_value (void) const;
 	
-	private:
+	  private:
 		PluginInsert& _plugin;
 		boost::shared_ptr<AutomationList> _list;
 		bool _logarithmic;

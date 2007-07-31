@@ -28,6 +28,7 @@ opts = Options('scache.conf')
 opts.AddOptions(
     ('ARCH', 'Set architecture-specific compilation flags by hand (all flags as 1 argument)',''),
     BoolOption('AUDIOUNITS', 'Compile with Apple\'s AudioUnit library. (experimental)', 0),
+    BoolOption('CMT', 'Compile with support for CMT Additions', 1),
     BoolOption('COREAUDIO', 'Compile with Apple\'s CoreAudio library', 0),
     BoolOption('DEBUG', 'Set to build with debugging information and no optimizations', 1),
     PathOption('DESTDIR', 'Set the intermediate install "prefix"', '/'),
@@ -36,17 +37,16 @@ opts.AddOptions(
     BoolOption('EXTRA_WARN', 'Compile with -Wextra, -ansi, and -pedantic.  Might break compilation.  For pedants', 0),
     BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 0),
     BoolOption('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1),
+    BoolOption('GPROFILE', 'Compile with support for gprofile (Developers only)', 0),
     BoolOption('LIBLO', 'Compile with support for liblo library', 1),
     BoolOption('NLS', 'Set to turn on i18n support', 1),
     PathOption('PREFIX', 'Set the install "prefix"', '/usr/local'),
     BoolOption('SURFACES', 'Build support for control surfaces', 1),
     BoolOption('SYSLIBS', 'USE AT YOUR OWN RISK: CANCELS ALL SUPPORT FROM ARDOUR AUTHORS: Use existing system versions of various libraries instead of internal ones', 0),
+    BoolOption('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 1),
     BoolOption('UNIVERSAL', 'Compile as universal binary.  Requires that external libraries are already universal.', 0),
     BoolOption('VERSIONED', 'Add revision information to ardour/gtk executable name inside the build directory', 0),
     BoolOption('VST', 'Compile with support for VST', 0),
-    BoolOption('GPROFILE', 'Compile with support for gprofile (Developers only)', 0),
-    BoolOption('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 1),
-    BoolOption('CMT', 'Compile with support for CMT Additions', 1)
 )
 
 #----------------------------------------------------------------------
