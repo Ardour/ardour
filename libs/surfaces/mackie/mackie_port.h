@@ -109,6 +109,10 @@ protected:
 	*/
 	void probe_emulation( const MidiByteArray & bytes );
 
+	/// Handle timeout events set for controls that don't emit
+	/// an off event
+	bool handle_control_timeout_event ( Control * );
+
 private:
 	MackieControlProtocol & _mcp;
 	port_type_t _port_type;

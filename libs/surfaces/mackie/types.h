@@ -64,7 +64,7 @@ enum ButtonState { neither = -1, release = 0, press = 1 };
 */
 struct ControlState
 {
-	ControlState(): pos(0.0), delta(0.0), button_state(neither) {}
+	ControlState(): pos(0.0), sign(0), delta(0.0), ticks(0), led_state(off), button_state(neither) {}
 	
 	ControlState( LedState ls ): pos(0.0), delta(0.0), led_state(ls), button_state(neither) {}
 	

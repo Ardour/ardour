@@ -64,9 +64,6 @@ void * MackieControlProtocol::monitor_work()
 			}
 			// poll for automation data from the routes
 			poll_automation();
-			
-			// check if we need to stop scrubbing
-			_jog_wheel.check_scrubbing();
 		}
 		catch ( exception & e )
 		{

@@ -45,6 +45,15 @@ Strip::Strip( const std::string & name, int index )
 {
 }
 
+Control::Control( int id, int ordinal, std::string name, Group & group )
+: _id( id )
+, _ordinal( ordinal )
+, _name( name )
+, _group( group )
+, _in_use_timeout( 250 )
+{
+}
+
 /**
  generated with
 
@@ -106,6 +115,17 @@ Button & Strip::fader_touch()
 	if ( _fader_touch == 0 )
 		throw MackieControlException( "fader_touch is null" );
 	return *_fader_touch;
+}
+
+bool Control::in_use() const
+{
+	return _in_use;
+}
+
+Control & Control::in_use( bool rhs )
+{
+	_in_use = rhs;
+	return *this;
 }
 
 ostream & Mackie::operator << ( ostream & os, const Mackie::Control & control )

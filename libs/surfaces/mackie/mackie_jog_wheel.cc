@@ -76,10 +76,18 @@ void JogWheel::jog_event( SurfacePort & port, Control & control, const ControlSt
 	
 	case scrub:
 	{
-		add_scrub_interval( _scrub_timer.restart() );
-		// x clicks per second => speed == 1.0
-		float speed = _mcp.surface().scrub_scaling_factor() / average_scrub_interval() * state.ticks;
-		_mcp.get_session().request_transport_speed( speed * state.sign );
+		if ( state.delta != 0.0 )
+		{
+			add_scrub_interval( _scrub_timer.restart() );
+			// x clicks per second => speed == 1.0
+			float speed = _mcp.surface().scrub_scaling_factor() / average_scrub_interval() * state.ticks;
+			_mcp.get_session().request_transport_speed( speed * state.sign );
+		}
+		else
+		{
+			// we have a stop event
+			check_scrubbing();
+		}
 		break;
 	}
 	

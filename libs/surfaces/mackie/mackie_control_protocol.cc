@@ -478,7 +478,7 @@ bool MackieControlProtocol::handle_strip_button( Control & control, ButtonState 
 	if ( control.name() == "fader_touch" )
 	{
 		state = bs == press;
-		control.strip().gain().touch( state );
+		control.strip().gain().in_use( state );
 	}
 	
 	return state;
@@ -831,6 +831,7 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 	switch ( control.type() )
 	{
 		case Control::type_fader:
+			// TODO this seems to be a duplicate of the above if
 			if ( control.group().is_strip() )
 			{
 				// find the route in the route table for the id
@@ -984,7 +985,7 @@ void MackieControlProtocol::notify_gain_changed( RouteSignal * route_signal )
 	try
 	{
 		Fader & fader = route_signal->strip().gain();
-		if ( !fader.touch() )
+		if ( !fader.in_use() )
 		{
 			route_signal->port().write( builder.build_fader( fader, gain_to_slider_position( route_signal->route().effective_gain() ) ) );
 		}

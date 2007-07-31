@@ -23,6 +23,8 @@
 #include "controls.h"
 #include "surface.h"
 
+#include <glibmm/main.h>
+
 #include <midi++/types.h>
 #include <midi++/port.h>
 #include <sigc++/sigc++.h>
@@ -378,6 +380,17 @@ Control & MackiePort::lookup_control( MIDI::byte * bytes, size_t count )
 	return *control;
 }
 
+bool MackiePort::handle_control_timeout_event ( Control * control )
+{
+	// empty control_state
+	ControlState control_state;
+	control->in_use( false );
+	control_event( *this, *control, control_state );
+	
+	// only call this method once from the timer
+	return false;
+}
+
 // converts midi messages into control_event signals
 // it might be worth combining this with lookup_control
 // because they have similar logic flows.
@@ -402,6 +415,7 @@ void MackiePort::handle_midi_any (MIDI::Parser & parser, MIDI::byte * raw_bytes,
 		}
 		
 		Control & control = lookup_control( raw_bytes, count );
+		control.in_use( true );
 		
 		// This handles incoming bytes. Outgoing bytes
 		// are sent by the signal handlers.
@@ -412,6 +426,9 @@ void MackiePort::handle_midi_any (MIDI::Parser & parser, MIDI::byte * raw_bytes,
 			{
 				// only the top-order 10 bits out of 14 are used
 				int midi_pos = ( ( raw_bytes[2] << 7 ) + raw_bytes[1] ) >> 4;
+				
+				// in_use is set by the MackieControlProtocol::handle_strip_button
+				
 				// relies on implicit ControlState constructor
 				control_event( *this, control, float(midi_pos) / float(0x3ff) );
 			}
@@ -419,9 +436,13 @@ void MackiePort::handle_midi_any (MIDI::Parser & parser, MIDI::byte * raw_bytes,
 				
 			// button
 			case Control::type_button:
-				// relies on implicit ControlState constructor
-				control_event( *this, control, raw_bytes[2] == 0x7f ? press : release );
+			{
+				ControlState control_state( raw_bytes[2] == 0x7f ? press : release );
+				control.in_use( control_state.button_state == press );
+				control_event( *this, control, control_state );
+				
 				break;
+			}
 				
 			// pot (jog wheel, external control)
 			case Control::type_pot:
@@ -434,6 +455,29 @@ void MackiePort::handle_midi_any (MIDI::Parser & parser, MIDI::byte * raw_bytes,
 				state.ticks = ( raw_bytes[2] & 0x3f);
 				state.delta = float( state.ticks ) / float( 0x3f );
 				
+				/*
+					Pots only emit events when they move, not when they
+					stop moving. So to get a stop event, we need to use a timeout.
+				*/
+				// this is set to false ...
+				control.in_use( true );
+				
+				// ... by this timeout
+				
+				// first disconnect any previous timeouts
+				control.in_use_connection.disconnect();
+				
+				// now connect a new timeout to call handle_control_timeout_event
+				sigc::slot<bool> timeout_slot = sigc::bind(
+					mem_fun( *this, &MackiePort::handle_control_timeout_event )
+					, &control
+				);
+				control.in_use_connection = Glib::signal_timeout().connect(
+					timeout_slot
+					, control.in_use_timeout()
+				);
+				
+				// emit the control event
 				control_event( *this, control, state );
 				break;
 			}

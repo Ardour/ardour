@@ -79,7 +79,7 @@ protected:
 private:
 	MackieControlProtocol & _mcp;
 
-	// transport speed for ffwd and rew, controller by jog
+	/// transport speed for ffwd and rew, controller by jog
 	float _transport_speed;
 	int _transport_direction;
 

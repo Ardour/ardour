@@ -1,8 +1,7 @@
 * if mackie wheel moves too fast, it's ignored.
-* active (pressed?) state for controls, including timeout
 * update manual with jog wheel states
 * alsa/sequencer ports unstable. possibly problems with use of ::poll
-* use glib::timeout for check_scrubbing
+* use glib::Timer instead of mine
 * crash when mmc port set to mcu?
 * remappable buttons
 * how long can UI signal callbacks take to execute? What happens if they block?
@@ -19,6 +18,7 @@ Later
 -----
 * remove commented couts
 * Perhaps MackieControlProtocol shouldn't implement MackieButtonHandler
+* Need a HostAdapter class to encapsulate ardour calls
 * talk to route plugins
 * check for excessiveness (ie too many events making other subsystems work too hard)
 * Queueing of writes?

@@ -18,6 +18,8 @@
 #ifndef mackie_controls_h
 #define mackie_controls_h
 
+#include <sigc++/sigc++.h>
+
 #include <map>
 #include <vector>
 #include <string>
@@ -157,11 +159,7 @@ class Control
 public:
 	enum type_t { type_led, type_led_ring, type_fader = 0xe0, type_button = 0x90, type_pot = 0xb0 };
 	
-	Control( int id, int ordinal, std::string name, Group & group )
-	: _id( id ), _ordinal( ordinal ), _name( name ), _group( group )
-	{
-	}
-	
+	Control( int id, int ordinal, std::string name, Group & group );
 	virtual ~Control() {}
 	
 	virtual const Led & led() const
@@ -215,11 +213,29 @@ public:
 	/// Jog Wheel
 	virtual bool is_jog() const { return false; }
 
+	/**
+		Return true if the controlis in use, or false otherwise. For buttons
+		this returns true if the button is currently being held down. For
+		faders, the touch button has not been released. For pots, this returns
+		true from the first move event until a timeout after the last move event.
+	*/
+	virtual bool in_use() const;
+	virtual Control & in_use( bool );
+	
+	/// The timeout value for this control. Normally defaulted to 250ms, but
+	/// certain controls (ie jog wheel) may want to override it.
+	virtual unsigned int in_use_timeout() { return _in_use_timeout; }
+
+	/// Keep track of the timeout so it can be updated with more incoming events
+	sigc::connection in_use_connection;
+	
 private:
 	int _id;
 	int _ordinal;
 	std::string _name;
 	Group & _group;
+	bool _in_use;
+	unsigned int _in_use_timeout;
 };
 
 std::ostream & operator << ( std::ostream & os, const Control & control );
@@ -229,18 +245,10 @@ class Fader : public Control
 public:
 	Fader( int id, int ordinal, std::string name, Group & group )
 	: Control( id, ordinal, name, group )
-	, _touch( false )
 	{
 	}
 	
-	bool touch() const { return _touch; }
-	
-	void touch( bool yn ) { _touch = yn; }
-
 	virtual type_t type() const { return type_fader; }
-
-private:
-	bool _touch;
 };
 
 class Led : public Control
@@ -272,12 +280,8 @@ public:
 	
 	virtual type_t type() const { return type_button; };
 	
-	bool pressed() const { return _pressed; }
-	Button & pressed( bool rhs ) { _pressed = rhs; return *this; }
-
 private:
 	Led _led;
-	bool _pressed;
 };
 
 class LedRing : public Led
