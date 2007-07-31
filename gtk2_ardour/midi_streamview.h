@@ -79,7 +79,7 @@ class MidiStreamView : public StreamView
 	void update_rec_regions (boost::shared_ptr<ARDOUR::MidiBuffer> data, jack_nframes_t start, jack_nframes_t dur);
 	
 	RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves);
-	void        display_region(MidiRegionView* region_view, bool redisplay_events);
+	void        display_region(MidiRegionView* region_view);
 
 	void color_handler ();
 

@@ -66,7 +66,6 @@ MidiSource::MidiSource (Session& s, const XMLNode& node)
 
 MidiSource::~MidiSource ()
 {
-	delete _model;
 }
 
 XMLNode&

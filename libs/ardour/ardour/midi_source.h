@@ -77,7 +77,7 @@ class MidiSource : public Source
 	void set_note_mode(NoteMode mode) { if (_model) _model->set_note_mode(mode); }
 	virtual bool model_loaded() const { return _model_loaded; }
 
-	MidiModel* model() { return _model; }
+	boost::shared_ptr<MidiModel> model() { return _model; }
 
   protected:
 	virtual nframes_t read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset) const = 0;
@@ -88,8 +88,8 @@ class MidiSource : public Source
 	mutable uint32_t    _read_data_count;  ///< modified in read()
 	mutable uint32_t    _write_data_count; ///< modified in write()
 
-	MidiModel* _model;
-	bool       _model_loaded;
+	boost::shared_ptr<MidiModel> _model;
+	bool                         _model_loaded;
 
   private:
 	bool file_changed (string path);

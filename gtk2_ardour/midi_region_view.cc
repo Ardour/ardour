@@ -74,10 +74,9 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 void
 MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 {
-	// FIXME: Some redundancy here with RegionView::init.  Need to figure out
-	// where order is important and where it isn't...
+	if (wfd)
+		_model = midi_region()->midi_source(0)->model();
 	
-	// FIXME
 	RegionView::init(basic_color, /*wfd*/false);
 
 	compute_colors (basic_color);
@@ -94,13 +93,10 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	set_colors ();
 
-	if (wfd) {
-		midi_region()->midi_source(0)->load_model();
-		display_events();
-	}
+	if (wfd)
+		redisplay_model();
 		
-	midi_region()->midi_source(0)->model()->ContentsChanged.connect(sigc::mem_fun(
-			this, &MidiRegionView::redisplay_model));
+	_model->ContentsChanged.connect(sigc::mem_fun(this, &MidiRegionView::redisplay_model));
 	
 	group->signal_event().connect (mem_fun (this, &MidiRegionView::canvas_event), false);
 }
@@ -109,10 +105,13 @@ bool
 MidiRegionView::canvas_event(GdkEvent* ev)
 {
 	enum State { None, Pressed, Dragging };
+	static int press_button = 0;
 	static State _state;
 
 	static double last_x, last_y;
 	double event_x, event_y;
+
+	static ArdourCanvas::SimpleRect* select_rect = NULL;
 	
 	if (trackview.editor.current_mouse_mode() != MouseNote)
 		return false;
@@ -120,29 +119,40 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
 		//group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK, ev->button.time);
-		// This should happen on release...
-		if (ev->button.button == 1)
-			create_note_at(ev->button.x, ev->button.y);
-
 		_state = Pressed;
+		press_button = ev->button.button;
+		cerr << "PRESSED: " << press_button << endl;
 		return true;
 	
 	case GDK_MOTION_NOTIFY:
-		cerr << "MOTION, _state = " << _state << endl;
 		event_x = ev->motion.x;
 		event_y = ev->motion.y;
 		group->w2i(event_x, event_y);
 
 		switch (_state) {
-		case Pressed:
-			cerr << "SELECT DRAG START\n";
-			group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
-				    Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
+		case Pressed: // Drag start
+			cerr << "PRESSED MOTION: " << press_button << endl;
+			if (press_button == 1) { // Select rect start
+				group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
+						Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
+				_state = Dragging;
+				last_x = event_x;
+				last_y = event_y;
+
+				select_rect = new ArdourCanvas::SimpleRect(*group);
+				select_rect->property_x1() = event_x;
+				select_rect->property_y1() = event_y;
+				select_rect->property_x2() = event_x;
+				select_rect->property_y2() = event_y;
+				select_rect->property_outline_color_rgba() = 0xFF000099;
+				select_rect->property_fill_color_rgba() = 0xFFDDDD33;
+
+				return true;
+			}
 			_state = Dragging;
-			last_x = event_x;
-			last_y = event_y;
-			return true;
-		case Dragging:
+			break;
+
+		case Dragging: // Select rect motion
 			if (ev->motion.is_hint) {
 				int t_x;
 				int t_y;
@@ -152,30 +162,33 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 				event_y = t_y;
 			}
 
-			cerr << "SELECT DRAG" << endl;
-			//move(event_x - last_x, event_y - last_y);
+			if (select_rect) {
+				select_rect->property_x2() = event_x;
+				select_rect->property_y2() = event_y;
+			}
 
 			last_x = event_x;
 			last_y = event_y;
 
 			return true;
 		default:
+			_state = None;
 			break;
 		}
 		break;
 	
 	case GDK_BUTTON_RELEASE:
-		cerr << "RELEASE\n";
 		group->ungrab(ev->button.time);
 		switch (_state) {
-		case Pressed:
-			cerr << "CLICK\n";
-			//create_note_at(ev->button.x, ev->button.y);
+		case Pressed: // Clicked
+			if (ev->button.button == 1)
+				create_note_at(ev->button.x, ev->button.y);
 			_state = None;
 			return true;
-		case Dragging:
-			cerr << "SELECT RECT DONE\n";
+		case Dragging: // Select rect done
 			_state = None;
+			delete select_rect;
+			select_rect = NULL;
 			return true;
 		default:
 			break;
@@ -214,26 +227,16 @@ MidiRegionView::create_note_at(double x, double y)
 	const Tempo& t = trackview.session().tempo_map().tempo_at(stamp);
 	double dur = m.frames_per_bar(t, trackview.session().frame_rate()) / m.beats_per_bar();
 
-	MidiModel* model = midi_region()->midi_source(0)->model();
-
 	// Add a 1 beat long note (for now)
 	const MidiModel::Note new_note(stamp, dur, (uint8_t)note, 0x40);
 
-	model->begin_command();
-	model->add_note(new_note);
-	model->finish_command();
+	_model->begin_command();
+	_model->add_note(new_note);
+	_model->finish_command();
 
 	view->update_bounds(new_note.note());
 
 	add_note(new_note);
-}
-
-
-void
-MidiRegionView::redisplay_model()
-{
-	clear_events();
-	display_events();
 }
 
 
@@ -248,16 +251,29 @@ MidiRegionView::clear_events()
 
 
 void
-MidiRegionView::display_events()
+MidiRegionView::display_model(boost::shared_ptr<MidiModel> model)
+{
+	_model = model;
+	redisplay_model();
+}
+
+
+void
+MidiRegionView::redisplay_model()
 {
 	clear_events();
 	
-	begin_write();
+	if (_model) {
+		begin_write();
 
-	for (size_t i=0; i < midi_region()->midi_source(0)->model()->n_notes(); ++i)
-		add_note(midi_region()->midi_source(0)->model()->note_at(i));
+		for (size_t i=0; i < _model->n_notes(); ++i)
+			add_note(_model->note_at(i));
 
-	end_write();
+		end_write();
+	} else {
+		assert(false);
+		warning << "MidiRegionView::redisplay_model called without a model" << endmsg;
+	}
 }
 
 
@@ -283,7 +299,7 @@ MidiRegionView::region_resized (Change what_changed)
 
 	if (what_changed & ARDOUR::PositionChanged) {
 	
-		display_events();
+		redisplay_model();
 	
 	} else if (what_changed & Change (StartChanged)) {
 
@@ -302,7 +318,7 @@ MidiRegionView::reset_width_dependent_items (double pixel_width)
 	RegionView::reset_width_dependent_items(pixel_width);
 	assert(_pixel_width == pixel_width);
 		
-	display_events();
+	redisplay_model();
 }
 
 void
@@ -310,7 +326,7 @@ MidiRegionView::set_y_position_and_height (double y, double h)
 {
 	RegionView::set_y_position_and_height(y, h - 1);
 
-	display_events();
+	redisplay_model();
 
 	if (name_text) {
 		name_text->raise_to_top();

@@ -805,7 +805,7 @@ SMFSource::load_model(bool lock, bool force_reload)
 	}
 
 	if (! _model) {
-		_model = new MidiModel(_session);
+		_model = boost::shared_ptr<MidiModel>(new MidiModel(_session));
 	} else {
 		cerr << "SMFSource: Reloading model." << endl;
 		_model->clear();
@@ -855,7 +855,6 @@ SMFSource::load_model(bool lock, bool force_reload)
 void
 SMFSource::destroy_model()
 {
-	delete _model;
-	_model = NULL;
+	_model.reset();
 }
 

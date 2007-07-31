@@ -37,6 +37,7 @@
 
 namespace ARDOUR {
 	class MidiRegion;
+	class MidiModel;
 };
 
 class MidiTimeAxisView;
@@ -54,7 +55,7 @@ class MidiRegionView : public RegionView
 
 	~MidiRegionView ();
 	
-	virtual void init (Gdk::Color& base_color, bool wait_for_data = false);
+	virtual void init (Gdk::Color& basic_color, bool wfd);
 	
 	boost::shared_ptr<ARDOUR::MidiRegion> midi_region() const;
 	
@@ -72,6 +73,8 @@ class MidiRegionView : public RegionView
 	void extend_active_notes();
 
 	void create_note_at(double x, double y);
+
+	void display_model(boost::shared_ptr<ARDOUR::MidiModel> model);
 
   protected:
 
@@ -97,14 +100,14 @@ class MidiRegionView : public RegionView
   private:
 
 	void redisplay_model();
-	void display_events();
 	void clear_events();
 
 	bool canvas_event(GdkEvent* ev);
 	bool note_canvas_event(GdkEvent* ev);
 
-	std::vector<ArdourCanvas::Item*> _events;
-	ArdourCanvas::CanvasNote**       _active_notes;
+	boost::shared_ptr<ARDOUR::MidiModel> _model;
+	std::vector<ArdourCanvas::Item*>     _events;
+	ArdourCanvas::CanvasNote**           _active_notes;
 };
 
 #endif /* __gtk_ardour_midi_region_view_h__ */

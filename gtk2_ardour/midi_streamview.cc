@@ -93,15 +93,12 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait
 			/* great. we already have a MidiRegionView for this Region. use it again. */
 
 			(*i)->set_valid (true);
-			display_region(dynamic_cast<MidiRegionView*>(*i), false);
+			display_region(dynamic_cast<MidiRegionView*>(*i));
 
 			return NULL;
 		}
 	}
 	
-	// can't we all just get along?
-	assert(_trackview.midi_track()->mode() != Destructive);
-
 	region_view = new MidiRegionView (canvas_group, _trackview, region, 
 			_samples_per_unit, region_color);
 
@@ -114,7 +111,7 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait
 	//region_view->set_waveform_visible(_trackview.editor.show_waveforms());
 
 	/* display events and find note range */
-	display_region(region_view, false);
+	display_region(region_view);
 
 	/* always display at least 1 octave range */
 	_highest_note = max(_highest_note, static_cast<uint8_t>(_lowest_note + 11));
@@ -128,27 +125,22 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait
 }
 
 void
-MidiStreamView::display_region(MidiRegionView* region_view, bool redisplay_events)
+MidiStreamView::display_region(MidiRegionView* region_view)
 {
 	if ( ! region_view)
 		return;
 
-	if (redisplay_events)
-		region_view->begin_write();
-	
 	boost::shared_ptr<MidiSource> source(region_view->midi_region()->midi_source(0));
+	source->load_model();
 
+	// Find our note range
 	for (size_t i=0; i < source->model()->n_notes(); ++i) {
 		const MidiModel::Note& note = source->model()->note_at(i);
-		
 		update_bounds(note.note());
-
-		if (redisplay_events)
-			region_view->add_note(note);
 	}
 	
-	if (redisplay_events)
-		region_view->end_write();
+	// Display region contents
+	region_view->display_model(source->model());
 }
 
 // FIXME: code duplication with AudioStreamView
