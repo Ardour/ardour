@@ -2027,7 +2027,7 @@ Session::edit_group_by_name (string name)
 }
 
 void
-Session::begin_reversible_command (string name)
+Session::begin_reversible_command (const string& name)
 {
 	current_trans = new UndoTransaction;
 	current_trans->set_name (name);

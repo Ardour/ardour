@@ -153,8 +153,7 @@ StreamView::set_samples_per_unit (gdouble spp)
 void
 StreamView::add_region_view (boost::shared_ptr<Region> r)
 {
-	add_region_view_internal (r, true);
-	update_contents_y_position_and_height ();
+	add_region_view_internal (r, false);
 }
 
 void

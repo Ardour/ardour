@@ -584,11 +584,10 @@ MidiTrack::write_controller_messages(MidiBuffer& output_buf, nframes_t start_fra
 	// Write immediate events (UI controls)
 	MidiBuffer& cc_buf = mix_buffers.get_midi(0);
 	cc_buf.silence(nframes, offset);
-	MidiEvent ev;
-	ev.size = 3; // CC = 3 bytes
-	Byte buf[ev.size];
+	
+	Byte buf[3]; // CC = 3 bytes
 	buf[0] = MIDI_CMD_CONTROL;
-	ev.buffer = buf;
+	MidiEvent ev(false, 0, 3, buf);
 
 	// Write controller automation
 	if (_session.transport_rolling()) {
@@ -611,9 +610,9 @@ MidiTrack::write_controller_messages(MidiBuffer& output_buf, nframes_t start_fra
 				assert(y >= 0.0);
 				assert(y <= 127.0);
 
-				ev.time = stamp;
-				ev.buffer[1] = (Byte)list->parameter().id();
-				ev.buffer[2] = (Byte)y;
+				ev.time() = stamp;
+				ev.buffer()[1] = (Byte)list->parameter().id();
+				ev.buffer()[2] = (Byte)y;
 
 				cc_buf.push_back(ev);
 

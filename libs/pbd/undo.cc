@@ -32,14 +32,14 @@ using namespace std;
 using namespace sigc;
 
 UndoTransaction::UndoTransaction ()
+	: _clearing(false)
 {
-	_clearing = false;
 }
 
 UndoTransaction::UndoTransaction (const UndoTransaction& rhs)
+	: Command(rhs._name)
+	, _clearing(false)
 {
-	_name = rhs._name;
-	_clearing = false;
 	clear ();
 	actions.insert(actions.end(),rhs.actions.begin(),rhs.actions.end());
 }

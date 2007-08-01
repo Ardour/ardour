@@ -288,24 +288,24 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 
 	while (read_space() > sizeof(double) + sizeof(size_t)) {
 	
-		full_peek(sizeof(double), (Byte*)&ev.time);
+		full_peek(sizeof(double), (Byte*)&ev.time());
 	
-		if (ev.time > end)
+		if (ev.time() > end)
 			break;
 
-		bool success = MidiRingBufferBase<Byte>::full_read(sizeof(double), (Byte*)&ev.time);
+		bool success = MidiRingBufferBase<Byte>::full_read(sizeof(double), (Byte*)&ev.time());
 		if (success)
-			success = MidiRingBufferBase<Byte>::full_read(sizeof(size_t), (Byte*)&ev.size);
+			success = MidiRingBufferBase<Byte>::full_read(sizeof(size_t), (Byte*)&ev.size());
 		
 		if (!success) {
 			std::cerr << "MRB: READ ERROR (time/size)" << std::endl;
 			continue;
 		}
 
-		if (ev.time >= start) {
-			ev.time -= start;
-			Byte* write_loc = dst.reserve(ev.time, ev.size);
-			success = MidiRingBufferBase<Byte>::full_read(ev.size, write_loc);
+		if (ev.time() >= start) {
+			ev.time() -= start;
+			Byte* write_loc = dst.reserve(ev.time(), ev.size());
+			success = MidiRingBufferBase<Byte>::full_read(ev.size(), write_loc);
 		
 			if (success) {
 				++count;
@@ -315,7 +315,7 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 			}
 			
 		} else {
-			printf("MRB - SKIPPING EVENT (with time %f)\n", ev.time);
+			printf("MRB - SKIPPING EVENT (with time %f)\n", ev.time());
 		}
 	}
 	

@@ -774,7 +774,7 @@ class Session : public PBD::StatefulDestructible
 	string next_undo() const { return _history.next_undo(); }
 	string next_redo() const { return _history.next_redo(); }
 
-	void begin_reversible_command (string cmd_name);
+	void begin_reversible_command (const string& cmd_name);
 	void commit_reversible_command (Command* cmd = 0);
 
 	void add_command (Command *const cmd) {

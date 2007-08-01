@@ -382,10 +382,10 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 	
 	for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
 		MidiEvent& ev = *i;
-		assert(ev.time >= _timeline_position);
-		ev.time -= _timeline_position;
-		assert(ev.time >= _last_ev_time);
-		const uint32_t delta_time = (uint32_t)((ev.time - _last_ev_time) / frames_per_beat * _ppqn);
+		assert(ev.time() >= _timeline_position);
+		ev.time() -= _timeline_position;
+		assert(ev.time() >= _last_ev_time);
+		const uint32_t delta_time = (uint32_t)((ev.time() - _last_ev_time) / frames_per_beat * _ppqn);
 		
 		/*printf("SMF - writing event, delta = %u, size = %zu, data = ",
 			delta_time, ev.size);
@@ -395,12 +395,12 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 		printf("\n");
 		*/
 		size_t stamp_size = write_var_len(delta_time);
-		fwrite(ev.buffer, 1, ev.size, _fd);
+		fwrite(ev.buffer(), 1, ev.size(), _fd);
 
-		_track_size += stamp_size + ev.size;
-		_write_data_count += ev.size;
+		_track_size += stamp_size + ev.size();
+		_write_data_count += ev.size();
 		
-		_last_ev_time = ev.time;
+		_last_ev_time = ev.time();
 	}
 
 	fflush(_fd);

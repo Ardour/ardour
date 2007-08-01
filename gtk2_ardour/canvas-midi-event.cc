@@ -60,7 +60,8 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 	case GDK_LEAVE_NOTIFY:
 		cerr << "LEAVE: " << ev->crossing.state << endl;
 		Keyboard::magic_widget_drop_focus();
-		//_item->drop_focus();
+		//_region.get_time_axis_view().editor.reset_focus();
+		_region.get_canvas_group()->grab_focus();
 		break;
 	
 	case GDK_KEY_PRESS:

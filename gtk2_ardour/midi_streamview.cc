@@ -76,7 +76,7 @@ MidiStreamView::~MidiStreamView ()
 
 
 RegionView*
-MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait_for_waves)
+MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wfd)
 {
 	boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion> (r);
 
@@ -93,6 +93,7 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait
 			/* great. we already have a MidiRegionView for this Region. use it again. */
 
 			(*i)->set_valid (true);
+			(*i)->enable_display(wfd);
 			display_region(dynamic_cast<MidiRegionView*>(*i));
 
 			return NULL;
@@ -101,14 +102,14 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait
 	
 	region_view = new MidiRegionView (canvas_group, _trackview, region, 
 			_samples_per_unit, region_color);
-
-	region_view->init (region_color, wait_for_waves);
+		
+	region_view->init (region_color, false);
 	region_views.push_front (region_view);
 	
 	/* follow global waveform setting */
 
-	// FIXME
-	//region_view->set_waveform_visible(_trackview.editor.show_waveforms());
+	if (wfd)
+		region_view->enable_display(true);
 
 	/* display events and find note range */
 	display_region(region_view);
@@ -150,6 +151,7 @@ MidiStreamView::redisplay_diskstream ()
 	list<RegionView *>::iterator i, tmp;
 
 	for (i = region_views.begin(); i != region_views.end(); ++i) {
+		(*i)->enable_display(false);
 		(*i)->set_valid (false);
 	}
 	
@@ -168,6 +170,7 @@ MidiStreamView::redisplay_diskstream ()
 			delete *i;
 			region_views.erase (i);
 		} else {
+			(*i)->enable_display(true);
 			(*i)->set_y_position_and_height(0, height); // apply note range
 		}
 

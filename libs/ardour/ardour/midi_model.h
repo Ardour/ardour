@@ -43,17 +43,19 @@ public:
 	struct Note {
 		Note(double time=0, double dur=0, uint8_t note=0, uint8_t vel=0x40);
 		Note(const Note& copy);
+		
+		const MidiModel::Note& operator=(const MidiModel::Note& copy);
 
 		inline bool operator==(const Note& other)
 			{ return time() == other.time() && note() == other.note(); }
 
-		inline double  time()     const { return _on_event.time; }
-		inline double  end_time() const { return _off_event.time; }
+		inline double  time()     const { return _on_event.time(); }
+		inline double  end_time() const { return _off_event.time(); }
 		inline uint8_t note()     const { return _on_event.note(); }
 		inline uint8_t velocity() const { return _on_event.velocity(); }
-		inline double  duration() const { return _off_event.time - _on_event.time; }
+		inline double  duration() const { return _off_event.time() - _on_event.time(); }
 
-		inline void set_duration(double d) { _off_event.time = _on_event.time + d; }
+		inline void set_duration(double d) { _off_event.time() = _on_event.time() + d; }
 
 		inline MidiEvent& on_event()  { return _on_event; }
 		inline MidiEvent& off_event() { return _off_event; }
@@ -62,10 +64,9 @@ public:
 		inline const MidiEvent& off_event() const { return _off_event; }
 
 	private:
+		// Event buffers are self-contained
 		MidiEvent _on_event;
 		MidiEvent _off_event;
-		Byte      _on_event_buffer[3];
-		Byte      _off_event_buffer[3];
 	};
 
 	MidiModel(Session& s, size_t size=0);
@@ -106,23 +107,18 @@ public:
 
 	inline       Notes& notes()       { return _notes; }
 	inline const Notes& notes() const { return _notes; }
-
-	void     begin_command();
-	Command* current_command() { return _command; }
-	void     finish_command();
-
-	// Commands
-	void add_note(const Note& note);
-	void remove_note(const Note& note);
-
-	sigc::signal<void> ContentsChanged;
 	
-private:
-	class MidiEditCommand : public Command
+	/** Add/Remove notes.
+	 * Technically all operations can be implemented as one of these.
+	 */
+	class DeltaCommand : public Command
 	{
 	public:
-		MidiEditCommand (MidiModel& m) : _model(m) {}
-		//MidiEditCommand (MidiModel&, const XMLNode& node);
+		DeltaCommand (MidiModel& m, const std::string& name)
+			: Command(name), _model(m), _name(name) {}
+		//DeltaCommand (MidiModel&, const XMLNode& node);
+
+		const std::string& name() const { return _name; }
 		
 		void operator()();
 		void undo();
@@ -130,14 +126,27 @@ private:
 		/*int set_state (const XMLNode&);
 		XMLNode& get_state ();*/
 
-		void add_note(const Note& note);
-		void remove_note(const Note& note);
+		void add(const Note& note);
+		void remove(const Note& note);
 
 	private:
 		MidiModel&      _model;
+		std::string     _name;
 		std::list<Note> _added_notes;
 		std::list<Note> _removed_notes;
 	};
+
+	MidiModel::DeltaCommand* new_delta_command(const std::string name="midi edit");
+	void                     apply_command(Command* cmd);
+
+	sigc::signal<void> ContentsChanged;
+	
+private:
+	friend class DeltaCommand;
+	void add_note(const Note& note);
+	void remove_note(const Note& note);
+
+	bool is_sorted() const;
 
 	void append_note_on(double time, uint8_t note, uint8_t velocity);
 	void append_note_off(double time, uint8_t note);
@@ -150,8 +159,6 @@ private:
 	typedef std::vector<size_t> WriteNotes;
 	WriteNotes _write_notes;
 	bool       _writing;
-
-	MidiEditCommand* _command; ///< In-progress command
 };
 
 } /* namespace ARDOUR */

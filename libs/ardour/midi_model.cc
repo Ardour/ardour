@@ -19,6 +19,7 @@
 */
 
 #include <iostream>
+#include <algorithm>
 #include <queue>
 #include <pbd/enumwriter.h>
 #include <ardour/midi_model.h>
@@ -32,21 +33,17 @@ using namespace ARDOUR;
 // Note
 
 MidiModel::Note::Note(double t, double d, uint8_t n, uint8_t v)
+	: _on_event(true, t, 3, NULL)
+	, _off_event(true, t + d, 3, NULL)
 {
-	_on_event.time = t;
-	_on_event.buffer = _on_event_buffer;
-	_on_event.size = 3;
-	_on_event.buffer[0] = MIDI_CMD_NOTE_ON;
-	_on_event.buffer[1] = n;
-	_on_event.buffer[2] = v;
+	_on_event.buffer()[0] = MIDI_CMD_NOTE_ON;
+	_on_event.buffer()[1] = n;
+	_on_event.buffer()[2] = v;
 	
-	_off_event.time = t + d;
-	_off_event.buffer = _off_event_buffer;
-	_off_event.size = 3;
-	_off_event.buffer[0] = MIDI_CMD_NOTE_OFF;
-	_off_event.buffer[1] = n;
-	_off_event.buffer[2] = 0x40;
-
+	_off_event.buffer()[0] = MIDI_CMD_NOTE_OFF;
+	_off_event.buffer()[1] = n;
+	_off_event.buffer()[2] = 0x40;
+	
 	assert(time() == t);
 	assert(duration() == d);
 	assert(note() == n);
@@ -55,15 +52,49 @@ MidiModel::Note::Note(double t, double d, uint8_t n, uint8_t v)
 
 
 MidiModel::Note::Note(const Note& copy)
-	: _on_event(copy._on_event)
-	, _off_event(copy._off_event)
+	: _on_event(copy._on_event, true)
+	, _off_event(copy._off_event, true)
 {
-	memcpy(_on_event_buffer, copy._on_event_buffer, 3);
-	memcpy(_off_event_buffer, copy._off_event_buffer, 3);
+	/*
+	assert(copy._on_event.size == 3);
 	_on_event.buffer = _on_event_buffer;
+	memcpy(_on_event_buffer, copy._on_event_buffer, 3);
+	
+	assert(copy._off_event.size == 3);
 	_off_event.buffer = _off_event_buffer;
+	memcpy(_off_event_buffer, copy._off_event_buffer, 3);
+	*/
+
+	assert(time() == copy.time());
+	assert(end_time() == copy.end_time());
+	assert(note() == copy.note());
+	assert(velocity() == copy.velocity());
+	assert(duration() == copy.duration());
 }
 
+
+const MidiModel::Note&
+MidiModel::Note::operator=(const Note& copy)
+{
+	_on_event = copy._on_event;
+	_off_event = copy._off_event;
+	/*_on_event.time = copy._on_event.time;
+	assert(copy._on_event.size == 3);
+	memcpy(_on_event_buffer, copy._on_event_buffer, 3);
+	
+	_off_event.time = copy._off_event.time;
+	assert(copy._off_event.size == 3);
+	memcpy(_off_event_buffer, copy._off_event_buffer, 3);
+	*/
+	
+	assert(time() == copy.time());
+	assert(end_time() == copy.end_time());
+	assert(note() == copy.note());
+	assert(velocity() == copy.velocity());
+	assert(duration() == copy.duration());
+
+	return *this;
+}
 
 // MidiModel
 
@@ -72,7 +103,6 @@ MidiModel::MidiModel(Session& s, size_t size)
 	, _notes(size)
 	, _note_mode(Sustained)
 	, _writing(false)
-	, _command(NULL)
 {
 }
 
@@ -105,8 +135,8 @@ MidiModel::read (MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframe
 			while ( ! active_notes.empty() ) {
 				const Note* const earliest_off = active_notes.top();
 				const MidiEvent& ev = earliest_off->off_event();
-				if (ev.time < start + nframes && ev.time <= n->time()) {
-					dst.write(ev.time + stamp_offset, ev.size, ev.buffer);
+				if (ev.time() < start + nframes && ev.time() <= n->time()) {
+					dst.write(ev.time() + stamp_offset, ev.size(), ev.buffer());
 					active_notes.pop();
 					++read_events;
 				} else {
@@ -117,7 +147,7 @@ MidiModel::read (MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframe
 			// Note on
 			if (n->time() >= start) {
 				const MidiEvent& ev = n->on_event();
-				dst.write(ev.time + stamp_offset, ev.size, ev.buffer);
+				dst.write(ev.time() + stamp_offset, ev.size(), ev.buffer());
 				active_notes.push(&(*n));
 				++read_events;
 			}
@@ -131,7 +161,7 @@ MidiModel::read (MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframe
 			if (n->time() >= start) {
 				if (n->time() < start + nframes) {
 					const MidiEvent& ev = n->on_event();
-					dst.write(ev.time + stamp_offset, ev.size, ev.buffer);
+					dst.write(ev.time() + stamp_offset, ev.size(), ev.buffer());
 					++read_events;
 				} else {
 					break;
@@ -209,12 +239,12 @@ MidiModel::append(const MidiBuffer& buf)
 	for (MidiBuffer::const_iterator i = buf.begin(); i != buf.end(); ++i) {
 		const MidiEvent& ev = *i;
 		
-		assert(_notes.empty() || ev.time >= _notes.back().time());
+		assert(_notes.empty() || ev.time() >= _notes.back().time());
 
 		if (ev.type() == MIDI_CMD_NOTE_ON)
-			append_note_on(ev.time, ev.note(), ev.velocity());
+			append_note_on(ev.time(), ev.note(), ev.velocity());
 		else if (ev.type() == MIDI_CMD_NOTE_OFF)
-			append_note_off(ev.time, ev.note());
+			append_note_off(ev.time(), ev.note());
 	}
 }
 
@@ -285,42 +315,60 @@ MidiModel::append_note_off(double time, uint8_t note_num)
 void
 MidiModel::add_note(const Note& note)
 {
-	// FIXME: take source lock
 	Notes::iterator i = upper_bound(_notes.begin(), _notes.end(), note, note_time_comparator);
 	_notes.insert(i, note);
-	if (_command)
-		_command->add_note(note);
 }
 
 
 void
 MidiModel::remove_note(const Note& note)
 {
-	// FIXME: take source lock
 	Notes::iterator n = find(_notes.begin(), _notes.end(), note);
 	if (n != _notes.end())
 		_notes.erase(n);
-	
-	if (_command)
-		_command->remove_note(note);
+}
+
+/** Slow!  for debugging only. */
+bool
+MidiModel::is_sorted() const
+{
+	bool t = 0;
+	for (Notes::const_iterator n = _notes.begin(); n != _notes.end(); ++n)
+		if (n->time() < t)
+			return false;
+		else
+			t = n->time();
+
+	return true;
 }
 
 
-
-void
-MidiModel::begin_command()
+/** Start a new command.
+ *
+ * This has no side-effects on the model or Session, the returned command
+ * can be held on to for as long as the caller wishes, or discarded without
+ * formality, until apply_command is called and ownership is taken.
+ */
+MidiModel::DeltaCommand*
+MidiModel::new_delta_command(const string name)
 {
-	assert(!_command);
-	_session.begin_reversible_command("midi edit");
-	_command = new MidiEditCommand(*this);
+	DeltaCommand* cmd =  new DeltaCommand(*this, name);
+	return cmd;
 }
 
 
+/** Apply a command.
+ *
+ * Ownership of cmd is taken, it must not be deleted by the caller.
+ * The command will constitute one item on the undo stack.
+ */
 void
-MidiModel::finish_command()
+MidiModel::apply_command(Command* cmd)
 {
-	_session.commit_reversible_command(_command);
-	_command = NULL;
+	_session.begin_reversible_command(cmd->name());
+	(*cmd)();
+	assert(is_sorted());
+	_session.commit_reversible_command(cmd);
 }
 
 
@@ -328,7 +376,7 @@ MidiModel::finish_command()
 
 
 void
-MidiModel::MidiEditCommand::add_note(const Note& note)
+MidiModel::DeltaCommand::add(const Note& note)
 {
 	//cerr << "MEC: apply" << endl;
 
@@ -338,7 +386,7 @@ MidiModel::MidiEditCommand::add_note(const Note& note)
 
 
 void
-MidiModel::MidiEditCommand::remove_note(const Note& note)
+MidiModel::DeltaCommand::remove(const Note& note)
 {
 	//cerr << "MEC: remove" << endl;
 
@@ -348,26 +396,26 @@ MidiModel::MidiEditCommand::remove_note(const Note& note)
 
 		
 void 
-MidiModel::MidiEditCommand::operator()()
+MidiModel::DeltaCommand::operator()()
 {
-	//cerr << "MEC: apply" << endl;
-	assert(!_model.current_command());
+	// This could be made much faster by using a priority_queue for added and
+	// removed notes (or sort here), and doing a single iteration over _model
 	
 	for (std::list<Note>::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i)
 		_model.add_note(*i);
 	
 	for (std::list<Note>::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i)
 		_model.remove_note(*i);
-
+	
 	_model.ContentsChanged(); /* EMIT SIGNAL */
 }
 
 
 void
-MidiModel::MidiEditCommand::undo()
+MidiModel::DeltaCommand::undo()
 {
-	//cerr << "MEC: undo" << endl;
-	assert(!_model.current_command());
+	// This could be made much faster by using a priority_queue for added and
+	// removed notes (or sort here), and doing a single iteration over _model
 
 	for (std::list<Note>::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i)
 		_model.remove_note(*i);

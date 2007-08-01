@@ -82,6 +82,8 @@ class RegionView : public TimeAxisViewItem
 
 	virtual void entered () {}
 	virtual void exited () {}
+
+	void enable_display(bool yn) { _enable_display = yn; }
 	
 	static sigc::signal<void,RegionView*> RegionViewGoingAway;
 	sigc::signal<void>                    GoingAway;
@@ -127,7 +129,8 @@ class RegionView : public TimeAxisViewItem
     vector<ControlPoint *> control_points;
     double current_visible_sync_position;
 
-    bool     valid; ///< see StreamView::redisplay_diskstream() 
+    bool    valid; ///< see StreamView::redisplay_diskstream() 
+    bool    _enable_display; ///< see StreamView::redisplay_diskstream() 
     double  _pixel_width;
     bool    in_destructor;
     

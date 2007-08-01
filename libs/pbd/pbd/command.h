@@ -30,11 +30,20 @@ public:
 
 	virtual void operator() () = 0;
 	
+	void set_name (const std::string& str) { _name = str; }
+	const std::string& name() const { return _name; }
+	
 	virtual void undo() = 0;
 	virtual void redo() { (*this)(); }
 	
 	virtual XMLNode &get_state();
 	virtual int set_state(const XMLNode&) { /* noop */ return 0; }
+
+protected:
+	Command() {}
+	Command(const std::string& name) : _name(name) {}
+
+	std::string _name;
 };
 
 #endif // __lib_pbd_command_h_

@@ -74,10 +74,10 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 void
 MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 {
-	if (wfd)
-		_model = midi_region()->midi_source(0)->model();
+	_model = midi_region()->midi_source(0)->model();
+	_enable_display = false;
 	
-	RegionView::init(basic_color, /*wfd*/false);
+	RegionView::init(basic_color, false);
 
 	compute_colors (basic_color);
 
@@ -93,12 +93,17 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	set_colors ();
 
-	if (wfd)
-		redisplay_model();
-		
-	_model->ContentsChanged.connect(sigc::mem_fun(this, &MidiRegionView::redisplay_model));
+	_enable_display = true;
+
+	if (_model) {
+		if (wfd) {
+			redisplay_model();
+		}
+		_model->ContentsChanged.connect(sigc::mem_fun(this, &MidiRegionView::redisplay_model));
+	}
 	
 	group->signal_event().connect (mem_fun (this, &MidiRegionView::canvas_event), false);
+
 }
 
 bool
@@ -229,14 +234,14 @@ MidiRegionView::create_note_at(double x, double y)
 
 	// Add a 1 beat long note (for now)
 	const MidiModel::Note new_note(stamp, dur, (uint8_t)note, 0x40);
-
-	_model->begin_command();
-	_model->add_note(new_note);
-	_model->finish_command();
-
+	
 	view->update_bounds(new_note.note());
 
-	add_note(new_note);
+	MidiModel::DeltaCommand* cmd = _model->new_delta_command("add note");
+	cmd->add(new_note);
+	_model->apply_command(cmd);
+	
+	//add_note(new_note);
 }
 
 
@@ -254,7 +259,9 @@ void
 MidiRegionView::display_model(boost::shared_ptr<MidiModel> model)
 {
 	_model = model;
-	redisplay_model();
+
+	if (_enable_display)
+		redisplay_model();
 }
 
 
@@ -271,7 +278,6 @@ MidiRegionView::redisplay_model()
 
 		end_write();
 	} else {
-		assert(false);
 		warning << "MidiRegionView::redisplay_model called without a model" << endmsg;
 	}
 }
@@ -299,7 +305,8 @@ MidiRegionView::region_resized (Change what_changed)
 
 	if (what_changed & ARDOUR::PositionChanged) {
 	
-		redisplay_model();
+		if (_enable_display)
+			redisplay_model();
 	
 	} else if (what_changed & Change (StartChanged)) {
 
@@ -318,7 +325,8 @@ MidiRegionView::reset_width_dependent_items (double pixel_width)
 	RegionView::reset_width_dependent_items(pixel_width);
 	assert(_pixel_width == pixel_width);
 		
-	redisplay_model();
+	if (_enable_display)
+		redisplay_model();
 }
 
 void
@@ -326,7 +334,8 @@ MidiRegionView::set_y_position_and_height (double y, double h)
 {
 	RegionView::set_y_position_and_height(y, h - 1);
 
-	redisplay_model();
+	if (_enable_display)
+		redisplay_model();
 
 	if (name_text) {
 		name_text->raise_to_top();
@@ -402,14 +411,14 @@ MidiRegionView::add_event (const MidiEvent& ev)
 	const double pixel_range = (trackview.height - footer_height - 5.0) / (double)note_range;
 
 	if (mtv->note_mode() == Sustained) {
-		if ((ev.buffer[0] & 0xF0) == MIDI_CMD_NOTE_ON) {
-			const Byte& note = ev.buffer[1];
+		if ((ev.buffer()[0] & 0xF0) == MIDI_CMD_NOTE_ON) {
+			const Byte& note = ev.buffer()[1];
 			const double y1 = trackview.height - (pixel_range * (note - view->lowest_note() + 1))
 				- footer_height - 3.0;
 
 			CanvasNote* ev_rect = new CanvasNote(*this, *group);
 			ev_rect->property_x1() = trackview.editor.frame_to_pixel (
-					(nframes_t)ev.time);
+					(nframes_t)ev.time());
 			ev_rect->property_y1() = y1;
 			ev_rect->property_x2() = trackview.editor.frame_to_pixel (
 					_region->length());
@@ -425,18 +434,18 @@ MidiRegionView::add_event (const MidiEvent& ev)
 			if (_active_notes)
 				_active_notes[note] = ev_rect;
 
-		} else if ((ev.buffer[0] & 0xF0) == MIDI_CMD_NOTE_OFF) {
-			const Byte& note = ev.buffer[1];
+		} else if ((ev.buffer()[0] & 0xF0) == MIDI_CMD_NOTE_OFF) {
+			const Byte& note = ev.buffer()[1];
 			if (_active_notes && _active_notes[note]) {
-				_active_notes[note]->property_x2() = trackview.editor.frame_to_pixel((nframes_t)ev.time);
+				_active_notes[note]->property_x2() = trackview.editor.frame_to_pixel((nframes_t)ev.time());
 				_active_notes[note]->property_outline_what() = (guint32) 0xF; // all edges
 				_active_notes[note] = NULL;
 			}
 		}
 	
 	} else if (mtv->note_mode() == Percussive) {
-		const Byte& note = ev.buffer[1];
-		const double x = trackview.editor.frame_to_pixel((nframes_t)ev.time);
+		const Byte& note = ev.buffer()[1];
+		const double x = trackview.editor.frame_to_pixel((nframes_t)ev.time());
 		const double y = trackview.height - (pixel_range * (note - view->lowest_note() + 1))
 			- footer_height - 3.0;
 
@@ -477,12 +486,6 @@ MidiRegionView::add_note (const MidiModel::Note& note)
 	assert(note.time() < _region->length());
 	//assert(note.time() + note.duration < _region->length());
 
-	/*printf("Event, time = %f, size = %zu, data = ", ev.time, ev.size);
-	for (size_t i=0; i < ev.size; ++i) {
-		printf("%X ", ev.buffer[i]);
-	}
-	printf("\n\n");*/
-
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 	MidiStreamView* const view = mtv->midi_view();
 	ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
@@ -494,6 +497,10 @@ MidiRegionView::add_note (const MidiModel::Note& note)
 	const uint32_t fill = RGBA_TO_UINT(0xE0 + note.velocity()/127.0 * 0x10, 0xE0, 0xE0, fill_alpha);
 	const uint8_t outline_alpha = 0x80 + (uint8_t)(note.velocity()); 
 	const uint32_t outline = RGBA_TO_UINT(0xE0 + note.velocity()/127.0 * 0x10, 0xE0, 0xE0, outline_alpha);
+	
+	//printf("Range: %d\n", note_range);
+	//printf("Event, time = %f, note = %d\n", note.time(), note.note());
+
 
 	if (mtv->note_mode() == Sustained) {
 		const double y1 = trackview.height - (pixel_range * (note.note() - view->lowest_note() + 1))

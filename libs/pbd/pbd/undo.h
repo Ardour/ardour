@@ -50,11 +50,6 @@ class UndoTransaction : public Command
 	void redo();
 
 	XMLNode &get_state();
-	
-	void set_name (const std::string& str) {
-		_name = str;
-	}
-	const std::string& name() const { return _name; }
 
 	void set_timestamp (struct timeval &t) {
 		_timestamp = t;
@@ -67,7 +62,6 @@ class UndoTransaction : public Command
   private:
 	std::list<Command*>    actions;
 	struct timeval        _timestamp;
-	std::string           _name;
 	bool                  _clearing;
 
 	friend void command_death (UndoTransaction*, Command *);

@@ -90,11 +90,11 @@ MidiBuffer::read_from(const Buffer& src, nframes_t nframes, nframes_t offset)
 	// FIXME: slow
 	for (size_t i=0; i < src.size(); ++i) {
 		const MidiEvent& ev = msrc[i];
-		if (ev.time >= offset && ev.time < offset+nframes) {
-			//cerr << "MidiBuffer::read_from got event, " << ev.time << endl;
+		if (ev.time() >= offset && ev.time() < offset+nframes) {
+			//cerr << "MidiBuffer::read_from got event, " << ev.time() << endl;
 			push_back(ev);
 		} else {
-			//cerr << "MidiBuffer event out of range, " << ev.time << endl;
+			//cerr << "MidiBuffer event out of range, " << ev.time() << endl;
 		}
 	}
 
@@ -117,9 +117,9 @@ MidiBuffer::push_back(const MidiEvent& ev)
 
 	Byte* const write_loc = _data + (_size * MAX_EVENT_SIZE);
 
-	memcpy(write_loc, ev.buffer, ev.size);
+	memcpy(write_loc, ev.buffer(), ev.size());
 	_events[_size] = ev;
-	_events[_size].buffer = write_loc;
+	_events[_size].set_buffer(write_loc);
 	++_size;
 
 	//cerr << "MidiBuffer: pushed, size = " << _size << endl;
@@ -146,9 +146,9 @@ MidiBuffer::push_back(const jack_midi_event_t& ev)
 	Byte* const write_loc = _data + (_size * MAX_EVENT_SIZE);
 
 	memcpy(write_loc, ev.buffer, ev.size);
-	_events[_size].time = (double)ev.time;
-	_events[_size].size = ev.size;
-	_events[_size].buffer = write_loc;
+	_events[_size].time() = (double)ev.time;
+	_events[_size].size() = ev.size;
+	_events[_size].set_buffer(write_loc);
 	++_size;
 
 	//cerr << "MidiBuffer: pushed, size = " << _size << endl;
@@ -176,9 +176,9 @@ MidiBuffer::reserve(double time, size_t size)
 
 	Byte* const write_loc = _data + (_size * MAX_EVENT_SIZE);
 
-	_events[_size].time = time;
-	_events[_size].size = size;
-	_events[_size].buffer = write_loc;
+	_events[_size].time() = time;
+	_events[_size].size() = size;
+	_events[_size].set_buffer(write_loc);
 	++_size;
 
 	//cerr << "MidiBuffer: reserved, size = " << _size << endl;
@@ -238,7 +238,7 @@ MidiBuffer::merge(const MidiBuffer& a, const MidiBuffer& b)
 			const MidiEvent& a_ev = a[a_index];
 			const MidiEvent& b_ev = b[b_index];
 
-			if (a_ev.time <= b_ev.time) {
+			if (a_ev.time() <= b_ev.time()) {
 				push_back(a_ev);
 				++a_index;
 			} else {

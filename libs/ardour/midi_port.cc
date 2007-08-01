@@ -102,9 +102,9 @@ MidiPort::cycle_end()
 	for (MidiBuffer::iterator i = _buffer.begin(); i != _buffer.end(); ++i) {
 		const MidiEvent& ev = *i;
 		// event times should be frames, relative to cycle start
-		assert(ev.time >= 0);
-		assert(ev.time < _nframes_this_cycle);
-		jack_midi_event_write(jack_buffer, (jack_nframes_t)ev.time, ev.buffer, ev.size);
+		assert(ev.time() >= 0);
+		assert(ev.time() < _nframes_this_cycle);
+		jack_midi_event_write(jack_buffer, (jack_nframes_t)ev.time(), ev.buffer(), ev.size());
 	}
 	
 	_nframes_this_cycle = 0;

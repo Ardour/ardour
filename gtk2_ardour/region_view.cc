@@ -72,6 +72,7 @@ RegionView::RegionView (ArdourCanvas::Group* parent,
 	  , editor(0)
 	  , current_visible_sync_position(0.0)
 	  , valid(false)
+	  , _enable_display(false)
 	  , _pixel_width(1.0)
 	  , in_destructor(false)
 	  , wait_for_data(false)
@@ -87,6 +88,7 @@ RegionView::RegionView (const RegionView& other)
 	editor = other.editor;
 	current_visible_sync_position = other.current_visible_sync_position;
 	valid = false;
+	_enable_display = false;
 	_pixel_width = other._pixel_width;
 }
 
@@ -102,6 +104,7 @@ RegionView::RegionView (ArdourCanvas::Group*         parent,
 	, editor(0)
 	, current_visible_sync_position(0.0)
 	, valid(false)
+	, _enable_display(false)
 	, _pixel_width(1.0)
 	, in_destructor(false)
 	, wait_for_data(false)
@@ -111,9 +114,10 @@ RegionView::RegionView (ArdourCanvas::Group*         parent,
 void
 RegionView::init (Gdk::Color& basic_color, bool wfd)
 {
-	valid         = true;
-	in_destructor = false;
-	wait_for_data = wfd;
+	valid           = true;
+	_enable_display = false;
+	in_destructor   = false;
+	wait_for_data   = wfd;
 
 	compute_colors (basic_color);
 
@@ -137,6 +141,9 @@ RegionView::init (Gdk::Color& basic_color, bool wfd)
 	sync_mark->hide();
 
 	reset_width_dependent_items ((double) _region->length() / samples_per_unit);
+
+	if (wfd)
+		_enable_display = true;
 
 	set_y_position_and_height (0, trackview.height - 2);
 
