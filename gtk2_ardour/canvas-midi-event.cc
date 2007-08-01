@@ -25,15 +25,17 @@
 #include "keyboard.h"
 
 using namespace std;
+using ARDOUR::MidiModel;
 
 namespace Gnome {
 namespace Canvas {
 
 
-CanvasMidiEvent::CanvasMidiEvent(MidiRegionView& region, Item* item)
+CanvasMidiEvent::CanvasMidiEvent(MidiRegionView& region, Item* item, const ARDOUR::MidiModel::Note* note)
 	: _region(region)
 	, _item(item)
 	, _state(None)
+	, _note(note)
 {	
 }
 
@@ -48,10 +50,27 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 		return false;
 
 	switch (ev->type) {
+	case GDK_KEY_PRESS:
+		if (_note && ev->key.keyval == GDK_Delete) {
+			_region.start_remove_command();
+			_region.command_remove_note(this);
+		}
+		break;
+	
+	case GDK_KEY_RELEASE:
+		if (ev->key.keyval == GDK_Delete) {
+			_region.apply_command();
+		}
+		break;
+	
 	case GDK_ENTER_NOTIFY:
 		cerr << "ENTERED: " << ev->crossing.state << endl;
 		Keyboard::magic_widget_grab_focus();
 		_item->grab_focus();
+		_region.note_entered(this);
+		//if (delete_down)
+		//	cerr << "DELETE ENTER\n" << endl;
+
 		/*if ( (ev->crossing.state & GDK_BUTTON2_MASK) ) {
 
 		}*/
@@ -62,10 +81,6 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 		Keyboard::magic_widget_drop_focus();
 		//_region.get_time_axis_view().editor.reset_focus();
 		_region.get_canvas_group()->grab_focus();
-		break;
-	
-	case GDK_KEY_PRESS:
-		cerr << "EVENT KEY PRESS\n"; // doesn't work :/
 		break;
 
 	case GDK_BUTTON_PRESS:

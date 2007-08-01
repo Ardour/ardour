@@ -29,11 +29,17 @@ namespace Canvas {
 
 class CanvasNote : public SimpleRect, public CanvasMidiEvent {
 public:
-	CanvasNote(MidiRegionView& region, Group& group)
-		: SimpleRect(group), CanvasMidiEvent(region, this)
+	CanvasNote(MidiRegionView& region, Group& group, const ARDOUR::MidiModel::Note* note=NULL)
+		: SimpleRect(group), CanvasMidiEvent(region, this, note)
 	{
 	}
-
+	
+	virtual void selected(bool yn) {
+		// Temporary hack, no reversal for now
+		if (yn)
+			property_outline_color_rgba() = 0xFF000099;
+	}
+	
 	bool on_event(GdkEvent* ev) { return CanvasMidiEvent::on_event(ev); }
 };
 

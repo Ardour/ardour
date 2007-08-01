@@ -34,6 +34,7 @@
 #include "enums.h"
 #include "canvas.h"
 #include "canvas-note.h"
+#include "canvas-midi-event.h"
 
 namespace ARDOUR {
 	class MidiRegion;
@@ -76,6 +77,40 @@ class MidiRegionView : public RegionView
 
 	void display_model(boost::shared_ptr<ARDOUR::MidiModel> model);
 
+	inline void start_remove_command() {
+		_command_mode = Remove;
+		if (!_delta_command)
+			_delta_command = _model->new_delta_command();
+	}
+
+	void command_remove_note(ArdourCanvas::CanvasMidiEvent* ev) {
+		if (_delta_command && ev->note()) {
+			_delta_command->remove(*ev->note());
+			ev->selected(true);
+		}
+	}
+
+	void note_entered(ArdourCanvas::CanvasMidiEvent* ev) {
+		if (_command_mode == Remove && _delta_command && ev->note())
+			_delta_command->remove(*ev->note());
+	}
+
+	//ARDOUR::MidiModel::DeltaCommand* delta_command() { return _delta_command; }
+
+	void abort_command() {
+		delete _delta_command;
+		_delta_command = NULL;
+		_command_mode = None;
+	}
+
+	void apply_command() {
+		if (_delta_command) {
+			_model->apply_command(_delta_command);
+			_delta_command = NULL;
+		}
+		_command_mode = None;
+	}
+
   protected:
 
     /* this constructor allows derived types
@@ -108,6 +143,11 @@ class MidiRegionView : public RegionView
 	boost::shared_ptr<ARDOUR::MidiModel> _model;
 	std::vector<ArdourCanvas::Item*>     _events;
 	ArdourCanvas::CanvasNote**           _active_notes;
+	ARDOUR::MidiModel::DeltaCommand*     _delta_command;
+	
+	enum CommandMode { None, Remove };
+	CommandMode _command_mode;
+
 };
 
 #endif /* __gtk_ardour_midi_region_view_h__ */

@@ -29,8 +29,14 @@ namespace Canvas {
 
 class CanvasHit : public Diamond, public CanvasMidiEvent {
 public:
-	CanvasHit(MidiRegionView& region, Group& group, double size)
-		: Diamond(group, size), CanvasMidiEvent(region, this) {}
+	CanvasHit(MidiRegionView& region, Group& group, double size, const ARDOUR::MidiModel::Note* note=NULL)
+		: Diamond(group, size), CanvasMidiEvent(region, this, note) {}
+	
+	virtual void selected(bool yn) {
+		// Temporary hack, no reversal for now
+		if (yn)
+			property_outline_color_rgba() = 0xFF000099;
+	}
 
 	bool on_event(GdkEvent* ev) { return CanvasMidiEvent::on_event(ev); }
 };

@@ -21,6 +21,7 @@
 #define __gtk_ardour_canvas_midi_event_h__
 
 #include "simplerect.h"
+#include <ardour/midi_model.h>
 
 class Editor;
 class MidiRegionView;
@@ -40,17 +41,22 @@ namespace Canvas {
  */
 class CanvasMidiEvent {
 public:
-	CanvasMidiEvent(MidiRegionView& region, Item* item);
+	CanvasMidiEvent(MidiRegionView& region, Item* item, const ARDOUR::MidiModel::Note* note = NULL);
 	virtual ~CanvasMidiEvent() {} 
 
 	virtual bool on_event(GdkEvent* ev);
 
+	virtual void selected(bool yn) = 0;
+
+	const ARDOUR::MidiModel::Note* note() { return _note; }
+
 private:
 	enum State { None, Pressed, Dragging };
 
-	MidiRegionView& _region;
-	Item* const     _item;
-	State           _state;
+	MidiRegionView&                _region;
+	Item* const                    _item;
+	State                          _state;
+	const ARDOUR::MidiModel::Note* _note;
 };
 
 } // namespace Gnome

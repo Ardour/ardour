@@ -61,6 +61,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 				  Gdk::Color& basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
 	, _active_notes(0)
+	, _command_mode(None)
 {
 }
 
@@ -68,6 +69,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 				  Gdk::Color& basic_color, TimeAxisViewItem::Visibility visibility)
 	: RegionView (parent, tv, r, spu, basic_color, visibility)
 	, _active_notes(0)
+	, _command_mode(None)
 {
 }
 
@@ -122,6 +124,16 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		return false;
 
 	switch (ev->type) {
+	case GDK_KEY_PRESS:
+		if (ev->key.keyval == GDK_Delete)
+			start_remove_command();
+		break;
+	
+	case GDK_KEY_RELEASE:
+		if (_command_mode == Remove && ev->key.keyval == GDK_Delete)
+			apply_command();
+		break;
+
 	case GDK_BUTTON_PRESS:
 		//group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK, ev->button.time);
 		_state = Pressed;
@@ -506,7 +518,7 @@ MidiRegionView::add_note (const MidiModel::Note& note)
 		const double y1 = trackview.height - (pixel_range * (note.note() - view->lowest_note() + 1))
 			- footer_height - 3.0;
 
-		ArdourCanvas::SimpleRect * ev_rect = new CanvasNote(*this, *group);
+		ArdourCanvas::SimpleRect * ev_rect = new CanvasNote(*this, *group, &note);
 		ev_rect->property_x1() = trackview.editor.frame_to_pixel((nframes_t)note.time());
 		ev_rect->property_y1() = y1;
 		ev_rect->property_x2() = trackview.editor.frame_to_pixel((nframes_t)(note.end_time()));
@@ -524,7 +536,7 @@ MidiRegionView::add_note (const MidiModel::Note& note)
 		const double y = trackview.height - (pixel_range * (note.note() - view->lowest_note() + 1))
 			- footer_height - 3.0;
 
-		CanvasHit* ev_diamond = new CanvasHit(*this, *group, std::min(pixel_range, 5.0));
+		CanvasHit* ev_diamond = new CanvasHit(*this, *group, std::min(pixel_range, 5.0), &note);
 		ev_diamond->move(x, y);
 		ev_diamond->show();
 		ev_diamond->property_fill_color_rgba() = fill;
