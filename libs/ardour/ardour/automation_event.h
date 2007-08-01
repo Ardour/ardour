@@ -67,7 +67,7 @@ typedef boost::fast_pool_allocator<ControlEvent*,
 class AutomationList : public PBD::StatefulDestructible
 {
   public:
-	typedef std::list<ControlEvent*> AutomationEventList;
+	typedef std::list<ControlEvent*,ControlEventAllocator> AutomationEventList;
 	typedef AutomationEventList::iterator iterator;
 	typedef AutomationEventList::const_iterator const_iterator;
 
