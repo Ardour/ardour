@@ -61,6 +61,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 				  Gdk::Color& basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
 	, _active_notes(0)
+	, _delta_command(NULL)
 	, _command_mode(None)
 {
 }
@@ -69,6 +70,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 				  Gdk::Color& basic_color, TimeAxisViewItem::Visibility visibility)
 	: RegionView (parent, tv, r, spu, basic_color, visibility)
 	, _active_notes(0)
+	, _delta_command(NULL)
 	, _command_mode(None)
 {
 }
@@ -76,6 +78,9 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 void
 MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 {
+	if (wfd)
+		midi_region()->midi_source(0)->load_model();
+
 	_model = midi_region()->midi_source(0)->model();
 	_enable_display = false;
 	

@@ -46,6 +46,7 @@ MidiSource::MidiSource (Session& s, string name)
 	: Source (s, name, DataType::MIDI)
 	, _model(new MidiModel(s))
 	, _model_loaded (false)
+	, _writing (false)
 {
 	_read_data_count = 0;
 	_write_data_count = 0;
@@ -55,6 +56,7 @@ MidiSource::MidiSource (Session& s, const XMLNode& node)
 	: Source (s, node)
 	, _model(new MidiModel(s))
 	, _model_loaded (false)
+	, _writing (false)
 {
 	_read_data_count = 0;
 	_write_data_count = 0;
@@ -131,6 +133,8 @@ MidiSource::mark_streaming_midi_write_started (NoteMode mode)
 		_model->set_note_mode(mode);
 		_model->start_write();
 	}
+	
+	_writing = true;
 }
 
 void
@@ -138,6 +142,8 @@ MidiSource::mark_streaming_write_started ()
 {
 	if (_model)
 		_model->start_write();
+
+	_writing = true;
 }
 
 void
@@ -145,5 +151,7 @@ MidiSource::mark_streaming_write_completed ()
 {
 	if (_model)
 		_model->end_write(false); // FIXME: param?
+
+	_writing = false;
 }
 

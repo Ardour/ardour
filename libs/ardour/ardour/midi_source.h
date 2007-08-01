@@ -90,6 +90,7 @@ class MidiSource : public Source
 
 	boost::shared_ptr<MidiModel> _model;
 	bool                         _model_loaded;
+	bool                         _writing;
 
   private:
 	bool file_changed (string path);

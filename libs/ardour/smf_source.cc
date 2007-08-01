@@ -796,6 +796,9 @@ SMFSource::read_var_len() const
 void
 SMFSource::load_model(bool lock, bool force_reload)
 {
+	if (_writing)
+		return;
+
 	if (lock)
 		Glib::Mutex::Lock lm (_lock);
 

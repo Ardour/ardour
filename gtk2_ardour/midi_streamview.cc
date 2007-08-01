@@ -108,8 +108,10 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wfd)
 	
 	/* follow global waveform setting */
 
-	if (wfd)
+	if (wfd) {
 		region_view->enable_display(true);
+		region_view->midi_region()->midi_source(0)->load_model();
+	}
 
 	/* display events and find note range */
 	display_region(region_view);
@@ -134,10 +136,12 @@ MidiStreamView::display_region(MidiRegionView* region_view)
 	boost::shared_ptr<MidiSource> source(region_view->midi_region()->midi_source(0));
 	source->load_model();
 
-	// Find our note range
-	for (size_t i=0; i < source->model()->n_notes(); ++i) {
-		const MidiModel::Note& note = source->model()->note_at(i);
-		update_bounds(note.note());
+	if (source->model()) {
+		// Find our note range
+		for (size_t i=0; i < source->model()->n_notes(); ++i) {
+			const MidiModel::Note& note = source->model()->note_at(i);
+			update_bounds(note.note());
+		}
 	}
 	
 	// Display region contents
@@ -151,8 +155,15 @@ MidiStreamView::redisplay_diskstream ()
 	list<RegionView *>::iterator i, tmp;
 
 	for (i = region_views.begin(); i != region_views.end(); ++i) {
-		(*i)->enable_display(false);
+		(*i)->enable_display(true); // FIXME: double display
 		(*i)->set_valid (false);
+		
+		/* FIXME: slow.  MidiRegionView needs a find_note_range method
+		 * that finds the range without wasting time drawing the events */
+
+		// Load model if it isn't already, to get note range
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
+		mrv->midi_region()->midi_source(0)->load_model();
 	}
 	
 	//_lowest_note = 60; // middle C
