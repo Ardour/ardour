@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# run this from the top level to generate a new OS X specific UI RC
+# file. Acts as a stdin/stdout filter
+
+
+sed \
+    -e 's/sans 11/sans 14/g' \
+    -e 's/sans 10/sans 12/g' \
+    -e 's/sans 9/sans 11/g' \
+    -e 's/sans 8/sans 10/g' \
+    -e 's/sans 7/sans 9/g' \
+    -e 's/sans bold 11/sans bold 14/g' \
+    -e 's/sans bold 10/sans bold 12/g' \
+    -e 's/sans bold 9/sans bold 11/g' \
+    -e 's/sans bold 8/sans bold 10/g' \
+    -e 's/sans bold 7/sans bold 9/g' 
