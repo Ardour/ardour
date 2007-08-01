@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "mackie_jog_wheel.h"
 
 #include "mackie_control_protocol.h"
@@ -8,6 +10,7 @@
 #include <algorithm>
 
 using namespace Mackie;
+using std::isnan;
 
 JogWheel::JogWheel( MackieControlProtocol & mcp )
 : _mcp( mcp )

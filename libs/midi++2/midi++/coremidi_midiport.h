@@ -22,11 +22,13 @@
 
 #include <list>
 #include <string>
+#include <vector>
 
 #include <fcntl.h>
 #include <unistd.h>
 
 #include <midi++/port.h>
+#include <midi++/port_request.h>
 
 #include <CoreMIDI/CoreMIDI.h>
 

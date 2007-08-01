@@ -609,7 +609,7 @@ NewSessionDialog::notebook_page_changed (GtkNotebookPage* np, uint pagenum)
 		on_new_session_page = false;
 		m_okbutton->set_label(_("Open"));
 		set_response_sensitive (Gtk::RESPONSE_NONE, false);
-		m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::OPEN, Gtk::ICON_SIZE_BUTTON)));
+		// m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::OPEN, Gtk::ICON_SIZE_BUTTON)));
 		if (m_treeview->get_selection()->count_selected_rows() == 0) {
 			set_response_sensitive (Gtk::RESPONSE_OK, false);
 		} else {
@@ -621,7 +621,7 @@ NewSessionDialog::notebook_page_changed (GtkNotebookPage* np, uint pagenum)
 			set_response_sensitive (Gtk::RESPONSE_NONE, true);
 		}
 		m_okbutton->set_label(_("New"));
-		m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::NEW, Gtk::ICON_SIZE_BUTTON)));
+		// m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::NEW, Gtk::ICON_SIZE_BUTTON)));
 		if (m_name->get_text() == "") {
 			set_response_sensitive (Gtk::RESPONSE_OK, false);
 		} else {

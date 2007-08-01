@@ -59,7 +59,7 @@ class ControlEvent {
    allocates 8k of new pointers at a time
 */
 
-typedef boost::fast_pool_allocator<ControlEvent,
+typedef boost::fast_pool_allocator<ControlEvent*,
 	boost::default_user_allocator_new_delete,
 	boost::details::pool::null_mutex,
 	8192> ControlEventAllocator;
