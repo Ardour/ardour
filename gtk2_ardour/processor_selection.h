@@ -20,13 +20,40 @@
 #ifndef __ardour_gtk_processor_selection_h__
 #define __ardour_gtk_processor_selection_h__
 
-#include <list>
-#include <boost/shared_ptr.hpp>
+#include <pbd/xml++.h>
 
-namespace ARDOUR {
-	class Processor;
-}
+class ProcessorSelection {
+  public:
+    ProcessorSelection() : node (0) {}
+    ~ProcessorSelection() { if (node) { delete node; } }
 
-struct ProcessorSelection : list<boost::shared_ptr<ARDOUR::Processor> > {};
+    void set (XMLNode* n) {
+	    if (node) {
+		    delete node;
+	    }
+	    node = n;
+    }
+
+    void add (XMLNode* newchild) {
+	    if (!node) {
+		    node = new XMLNode ("add");
+	    }
+	    node->add_child_nocopy (*newchild);
+    }
+
+    void clear () { 
+	    if (node) { 
+		    delete node;
+		    node = 0;
+	    }
+    }
+
+    bool empty () const { return node == 0 || node->children().empty(); }
+	    
+    const XMLNode& get_node() const { return *node; }
+
+  private:
+    XMLNode* node;
+};
 
 #endif /* __ardour_gtk_processor_selection_h__ */

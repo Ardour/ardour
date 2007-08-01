@@ -125,8 +125,6 @@ Automatable::add_control(boost::shared_ptr<AutomationControl> ac)
 
 	_controls[param] = ac;
 	
-	cerr << _name << ": added parameter " << param.to_string() << endl;
-
 	_can_automate_list.insert(param);
 
 	// Sync everything (derived classes) up to initial values
@@ -459,7 +457,6 @@ Automatable::control_factory(boost::shared_ptr<AutomationList> list)
 		// FIXME: this will die horribly if this is not a MidiTrack
 		return boost::shared_ptr<AutomationControl>(new MidiTrack::MidiControl((MidiTrack*)this, list));
 	} else {
-		cerr << "WARNING: Default AutomationControl created for " << list->parameter().to_string() << endl;
 		return boost::shared_ptr<AutomationControl>(new AutomationControl(_session, list));
 	}
 }

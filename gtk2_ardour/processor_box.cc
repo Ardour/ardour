@@ -739,39 +739,38 @@ void
 ProcessorBox::cut_processors ()
 {
 	vector<boost::shared_ptr<Processor> > to_be_removed;
-	
+	XMLNode* node = new XMLNode (X_("cut"));
+
 	get_selected_processors (to_be_removed);
 
 	if (to_be_removed.empty()) {
 		return;
 	}
 
-	/* this essentially transfers ownership of the processor
-	   of the processor from the route to the mixer
-	   selection.
-	*/
-	
-	_rr_selection.set (to_be_removed);
-
 	no_processor_redisplay = true;
 	for (vector<boost::shared_ptr<Processor> >::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i) {
-		// Do not cut processors or sends
+		// Do not cut inserts or sends
+
 		if (boost::dynamic_pointer_cast<PluginInsert>((*i)) != 0) {
 			void* gui = (*i)->get_gui ();
 		
 			if (gui) {
 				static_cast<Gtk::Widget*>(gui)->hide ();
 			}
-		
-			if (_route->remove_processor (*i)) {
-				/* removal failed */
-				_rr_selection.remove (*i);
-			}
-		} else {
-			_rr_selection.remove (*i);
-		}
+			
+			XMLNode& child ((*i)->get_state());
 
+			if (_route->remove_processor (*i) == 0) {
+				/* success */
+				node->add_child_nocopy (child);
+			} else {
+				delete &child;
+			}
+		} 
 	}
+
+	_rr_selection.set (node);
+
 	no_processor_redisplay = false;
 	redisplay_processors ();
 }
@@ -780,7 +779,7 @@ void
 ProcessorBox::copy_processors ()
 {
 	vector<boost::shared_ptr<Processor> > to_be_copied;
-	vector<boost::shared_ptr<Processor> > copies;
+	XMLNode* node = new XMLNode (X_("copy"));
 
 	get_selected_processors (to_be_copied);
 
@@ -791,12 +790,11 @@ ProcessorBox::copy_processors ()
 	for (vector<boost::shared_ptr<Processor> >::iterator i = to_be_copied.begin(); i != to_be_copied.end(); ++i) {
 		// Do not copy processors or sends
 		if (boost::dynamic_pointer_cast<PluginInsert>((*i)) != 0) {
-			copies.push_back (Processor::clone (*i));
+			node->add_child_nocopy ((*i)->get_state());
 		}
   	}
 
-	_rr_selection.set (copies);
-
+	_rr_selection.set (node);
 }
 
 void
@@ -869,57 +867,64 @@ ProcessorBox::rename_processor (boost::shared_ptr<Processor> processor)
 }
 
 void
-ProcessorBox::cut_processor (boost::shared_ptr<Processor> processor)
-{
-	/* this essentially transfers ownership of the processor
-	   of the processor from the route to the mixer
-	   selection.
-	*/
-
-	_rr_selection.add (processor);
-	
-	void* gui = processor->get_gui ();
-
-	if (gui) {
-		static_cast<Gtk::Widget*>(gui)->hide ();
-	}
-	
-	no_processor_redisplay = true;
-	if (_route->remove_processor (processor)) {
-		_rr_selection.remove (processor);
-	}
-	no_processor_redisplay = false;
-	redisplay_processors ();
-}
-
-void
-ProcessorBox::copy_processor (boost::shared_ptr<Processor> processor)
-{
-	boost::shared_ptr<Processor> copy = Processor::clone (processor);
-	_rr_selection.add (copy);
-}
-
-void
 ProcessorBox::paste_processors ()
 {
 	if (_rr_selection.processors.empty()) {
 		return;
 	}
 
-	paste_processor_list (_rr_selection.processors);
+	cerr << "paste from node called " << _rr_selection.processors.get_node().name() << endl;
+
+	paste_processor_state (_rr_selection.processors.get_node());
 }
 
 void
 ProcessorBox::paste_processor_list (list<boost::shared_ptr<Processor> >& processors)
 {
-	list<boost::shared_ptr<Processor> > copies;
-
+ 	list<boost::shared_ptr<Processor> > copies;
+	
 	for (list<boost::shared_ptr<Processor> >::iterator i = processors.begin(); i != processors.end(); ++i) {
-
+		
 		boost::shared_ptr<Processor> copy = Processor::clone (*i);
-
+		
 		copy->set_placement (_placement);
 		copies.push_back (copy);
+ 	}
+
+	if (_route->add_processors (copies)) {
+
+		string msg = _(
+			"Copying the set of processors on the clipboard failed,\n\
+probably because the I/O configuration of the plugins\n\
+could not match the configuration of this track.");
+		MessageDialog am (msg);
+		am.run ();
+	}
+}
+
+void
+ProcessorBox::paste_processor_state (const XMLNode& node)
+{
+	XMLNodeList nlist;
+	XMLNodeConstIterator niter;
+	list<boost::shared_ptr<Processor> > copies;
+
+	nlist = node.children();
+
+	cerr << "Pasting processor selection containing " << nlist.size() << endl;
+
+	if (nlist.empty()) {
+		return;
+	}
+
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		cerr << "try using " << (*niter)->name() << endl;
+		try {
+			copies.push_back (boost::shared_ptr<Processor> (new PluginInsert (_session, **niter)));
+		}
+		catch (...) {
+			cerr << "plugin insert constructor failed\n";
+		}
 	}
 
 	if (_route->add_processors (copies)) {

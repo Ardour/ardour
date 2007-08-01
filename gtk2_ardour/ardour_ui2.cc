@@ -835,7 +835,11 @@ void
 ARDOUR_UI::sync_option_changed ()
 {
 	if (session) {
-		session->request_slave_source (string_to_slave_source (sync_option_combo.get_active_text()));
+		ustring txt = sync_option_combo.get_active_text ();
+		if (txt.length()) {
+			cerr << "Changing to slave source based on " << txt << endl;
+			session->request_slave_source (string_to_slave_source (txt));
+		}
 	}
 }
 

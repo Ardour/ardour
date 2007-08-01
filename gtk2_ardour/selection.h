@@ -69,7 +69,6 @@ class Selection : public sigc::trackable
 	TimeSelection        time;
 	AutomationSelection  lines;
 	PlaylistSelection    playlists;
-	ProcessorSelection   processors;
 	PointSelection       points;
 
 	Selection() {
@@ -84,7 +83,6 @@ class Selection : public sigc::trackable
 	sigc::signal<void> TimeChanged;
 	sigc::signal<void> LinesChanged;
 	sigc::signal<void> PlaylistsChanged;
-	sigc::signal<void> ProcessorsChanged;
 	sigc::signal<void> PointsChanged;
 
 	void clear ();
@@ -107,7 +105,6 @@ class Selection : public sigc::trackable
 	void set (ARDOUR::AutomationList*);
 	void set (boost::shared_ptr<ARDOUR::Playlist>);
 	void set (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
-	void set (boost::shared_ptr<ARDOUR::Processor>);
 	void set (AutomationSelectable*);
 
 	void toggle (TimeAxisView*);
@@ -118,7 +115,6 @@ class Selection : public sigc::trackable
 	void toggle (ARDOUR::AutomationList*);
 	void toggle (boost::shared_ptr<ARDOUR::Playlist>);
 	void toggle (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
-	void toggle (boost::shared_ptr<ARDOUR::Processor>);
 	void toggle (const std::vector<AutomationSelectable*>&);
 
 	void add (TimeAxisView*);
@@ -129,7 +125,6 @@ class Selection : public sigc::trackable
 	void add (ARDOUR::AutomationList*);
 	void add (boost::shared_ptr<ARDOUR::Playlist>);
 	void add (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
-	void add (boost::shared_ptr<ARDOUR::Processor>);
 	
 	void remove (TimeAxisView*);
 	void remove (const std::list<TimeAxisView*>&);
@@ -139,7 +134,6 @@ class Selection : public sigc::trackable
 	void remove (ARDOUR::AutomationList*);
 	void remove (boost::shared_ptr<ARDOUR::Playlist>);
 	void remove (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
-	void remove (boost::shared_ptr<ARDOUR::Processor>);
 	void remove (const list<Selectable*>&);
 
 	void replace (uint32_t time_index, nframes_t start, nframes_t end);
@@ -149,7 +143,6 @@ class Selection : public sigc::trackable
 	void clear_time();
 	void clear_lines ();
 	void clear_playlists ();
-	void clear_processors ();
 	void clear_points ();
 
 	void foreach_region (void (ARDOUR::Region::*method)(void));

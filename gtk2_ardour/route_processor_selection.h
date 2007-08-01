@@ -42,11 +42,8 @@ class RouteRedirectSelection : public sigc::trackable
 	void clear ();
 	bool empty();
 
-	void set (boost::shared_ptr<ARDOUR::Processor>);
-	void set (const std::vector<boost::shared_ptr<ARDOUR::Processor> >&);
-	void add (boost::shared_ptr<ARDOUR::Processor>);
-	void add (const std::vector<boost::shared_ptr<ARDOUR::Processor> >&);
-	void remove (boost::shared_ptr<ARDOUR::Processor>);
+	void set (XMLNode* node);
+	void add (XMLNode* node);
 
 	void set (boost::shared_ptr<ARDOUR::Route>);
 	void add (boost::shared_ptr<ARDOUR::Route>);

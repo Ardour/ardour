@@ -63,8 +63,7 @@ operator== (const Selection& a, const Selection& b)
 		a.time.group == b.time.group && 
 		a.time == b.time &&
 		a.lines == b.lines &&
-		a.playlists == b.playlists &&
-		a.processors == b.processors;
+		a.playlists == b.playlists;
 }
 
 /** Clear everything from the Selection */
@@ -77,7 +76,6 @@ Selection::clear ()
 	clear_lines();
 	clear_time ();
 	clear_playlists ();
-	clear_processors ();
 }
 
 void
@@ -89,15 +87,6 @@ Selection::dump_region_layers()
 	}
 }
 
-
-void
-Selection::clear_processors ()
-{
-	if (!processors.empty()) {
-		processors.clear ();
-		ProcessorsChanged ();
-	}
-}
 
 void
 Selection::clear_regions ()
@@ -151,20 +140,6 @@ Selection::clear_lines ()
 		lines.clear ();
 		LinesChanged();
 	}
-}
-
-void
-Selection::toggle (boost::shared_ptr<Processor> r)
-{
-	ProcessorSelection::iterator i;
-
-	if ((i = find (processors.begin(), processors.end(), r)) == processors.end()) {
-		processors.push_back (r);
-	} else {
-		processors.erase (i);
-	}
-	ProcessorsChanged();
-
 }
 
 void
@@ -250,16 +225,6 @@ Selection::toggle (nframes_t start, nframes_t end)
 	TimeChanged ();
 
 	return next_time_id - 1;
-}
-
-
-void
-Selection::add (boost::shared_ptr<Processor> i)
-{
-	if (find (processors.begin(), processors.end(), i) == processors.end()) {
-		processors.push_back (i);
-		ProcessorsChanged();
-	}
 }
 
 void
@@ -395,16 +360,6 @@ Selection::add (AutomationList* ac)
 }
 
 void
-Selection::remove (boost::shared_ptr<Processor> r)
-{
-	ProcessorSelection::iterator i;
-	if ((i = find (processors.begin(), processors.end(), r)) != processors.end()) {
-		processors.erase (i);
-		ProcessorsChanged ();
-	}
-}
-
-void
 Selection::remove (TimeAxisView* track)
 {
 	list<TimeAxisView*>::iterator i;
@@ -507,13 +462,6 @@ Selection::remove (AutomationList *ac)
 		lines.erase (i);
 		LinesChanged();
 	}
-}
-
-void
-Selection::set (boost::shared_ptr<Processor> i)
-{
-	clear_processors ();
-	add (i);
 }
 
 void
@@ -624,8 +572,7 @@ Selection::empty ()
 		playlists.empty () && 
 		lines.empty () &&
 		time.empty () &&
-		playlists.empty () &&
-		processors.empty ()
+		playlists.empty ()
 		;
 }
 

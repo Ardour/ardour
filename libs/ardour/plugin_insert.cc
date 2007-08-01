@@ -76,7 +76,7 @@ PluginInsert::PluginInsert (Session& s, const XMLNode& node)
 		throw failed_constructor();
 	}
 
-	set_automatable ();
+	// set_automatable ();
 
 	{
 		Glib::Mutex::Lock em (_session.engine().process_lock());

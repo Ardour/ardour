@@ -46,8 +46,8 @@ RouteRedirectSelection::operator= (const RouteRedirectSelection& other)
 bool
 operator== (const RouteRedirectSelection& a, const RouteRedirectSelection& b)
 {
-	return a.processors == b.processors &&
-		a.routes == b.routes;
+	// XXX MUST TEST PROCESSORS SOMEHOW
+	return a.routes == b.routes;
 }
 
 void
@@ -72,63 +72,19 @@ RouteRedirectSelection::clear_routes ()
 }
 
 void
-RouteRedirectSelection::add (boost::shared_ptr<Processor> r)
+RouteRedirectSelection::add (XMLNode* node)
 {
-	if (find (processors.begin(), processors.end(), r) == processors.end()) {
-		processors.push_back (r);
-
-		// XXX SHAREDPTR FIXME
-		// void (RouteRedirectSelection::*pmf)(Redirect*) = &RouteRedirectSelection::remove;
-		// r->GoingAway.connect (mem_fun(*this, pmf));
-
-		ProcessorsChanged();
-	}
+	// XXX check for duplicate
+	processors.add (node);
+	ProcessorsChanged();
 }
 
 void
-RouteRedirectSelection::add (const vector<boost::shared_ptr<Processor> >& rlist)
-{
-	bool changed = false;
-
-	for (vector<boost::shared_ptr<Processor> >::const_iterator i = rlist.begin(); i != rlist.end(); ++i) {
-		if (find (processors.begin(), processors.end(), *i) == processors.end()) {
-			processors.push_back (*i);
-			
-			// XXX SHAREDPTR FIXME
-
-			//void (RouteRedirectSelection::*pmf)(Redirect*) = &RouteRedirectSelection::remove;
-			// (*i)->GoingAway.connect (mem_fun(*this, pmf));
-			changed = true;
-		}
-	}
-
-	if (changed) {
-		ProcessorsChanged();
-	}
-}
-
-void
-RouteRedirectSelection::remove (boost::shared_ptr<Processor> r)
-{
-	list<boost::shared_ptr<Processor> >::iterator i;
-	if ((i = find (processors.begin(), processors.end(), r)) != processors.end()) {
-		processors.erase (i);
-		ProcessorsChanged ();
-	}
-}
-
-void
-RouteRedirectSelection::set (boost::shared_ptr<Processor> r)
+RouteRedirectSelection::set (XMLNode* node)
 {
 	clear_processors ();
-	add (r);
-}
-
-void
-RouteRedirectSelection::set (const vector<boost::shared_ptr<Processor> >& rlist)
-{
-	clear_processors ();
-	add (rlist);
+	processors.set (node);
+	ProcessorsChanged ();
 }
 
 void

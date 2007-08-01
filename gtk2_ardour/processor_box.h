@@ -186,11 +186,10 @@ class ProcessorBox : public Gtk::HBox
 
 	static Glib::RefPtr<Gtk::Action> paste_action;
 	void paste_processor_list (std::list<boost::shared_ptr<ARDOUR::Processor> >& processors);
+	void paste_processor_state (const XMLNode&);
 	
 	void activate_processor (boost::shared_ptr<ARDOUR::Processor>);
 	void deactivate_processor (boost::shared_ptr<ARDOUR::Processor>);
-	void cut_processor (boost::shared_ptr<ARDOUR::Processor>);
-	void copy_processor (boost::shared_ptr<ARDOUR::Processor>);
 	void edit_processor (boost::shared_ptr<ARDOUR::Processor>);
 	void hide_processor_editor (boost::shared_ptr<ARDOUR::Processor>);
 	void rename_processor (boost::shared_ptr<ARDOUR::Processor>);

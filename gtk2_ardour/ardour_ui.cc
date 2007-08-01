@@ -197,6 +197,11 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	keybindings_path = key_bindings_file.to_string();
 
+	/* store all bindings changes in per-user file, no matter where they were loaded from */
+ 	user_keybindings_path = user_config_directory().to_string ();
+	user_keybindings_path += '/';
+ 	user_keybindings_path += "ardour.bindings";
+
 	can_save_keybindings = false;
 
 	last_configure_time.tv_sec = 0;
@@ -2724,7 +2729,7 @@ void
 ARDOUR_UI::save_keybindings ()
 {
 	if (can_save_keybindings) {
-		AccelMap::save (keybindings_path);
+		AccelMap::save (user_keybindings_path);
 	} 
 }
 
