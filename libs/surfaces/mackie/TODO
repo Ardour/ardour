@@ -1,21 +1,25 @@
-* if mackie wheel moves too fast, it's ignored.
-* update manual with jog wheel states
-* alsa/sequencer ports unstable. possibly problems with use of ::poll
-* use glib::Timer instead of mine
-* crash when mmc port set to mcu?
 * remappable buttons
-* how long can UI signal callbacks take to execute? What happens if they block?
-  where ENSURE_CORRECT_THREAD is a macro that is modelled on ENSURE_GUI_THREAD
-  if the handler is not called in the "correct thread", it will use a pseudo-RT-safe-enough technique to get the correct thread to recall "handler" later on, and return.
-
+* 7/1 configurable to 8
 * finish button implementations.
 * concurrency for bank switching? And make sure "old" events aren't sent to "new" faders
 * TODOs in code
 * removal of a route results in a strip that isn't dead, but doesn't have any effect on the session
 * use i18n. see string_compose
 
+MCU
+---
+* if mackie wheel moves too fast, it's ignored.
+* timecode displays
+* midi bandwidth?
+
 Later
 -----
+* how long can UI signal callbacks take to execute? What happens if they block?
+  where ENSURE_CORRECT_THREAD is a macro that is modelled on ENSURE_GUI_THREAD
+  if the handler is not called in the "correct thread", it will use a pseudo-RT-safe-enough technique to get the correct thread to recall "handler" later on, and return.
+* alsa/sequencer ports unstable. possibly problems with use of ::poll
+* use glib::Timer instead of mine. Actually don't because it's not very useable.
+* crash when mmc port set to mcu?
 * remove commented couts
 * Perhaps MackieControlProtocol shouldn't implement MackieButtonHandler
 * Need a HostAdapter class to encapsulate ardour calls
@@ -31,20 +35,9 @@ Later
 * mix busses and/or a "bus-only" bank/mode
 * what about surfaces like Mackie C4 and BCR2000?
 
-Need UI integration
--------------------
+UI integration
+--------------
+
+* maybe use current snap state for jog wheel and ffwd/rew
 * Some indication on the UI of currently bank-switched-in routes?
   Useful for surfaces that don't have a scribble strip.
-* use current snap state for jog wheel and ffwd/rew
-
-Actual Mackie
--------------
-* test Mackie surface object. Apparently led rings don't work. Stereo busses?
-* timecode & 55 char displays
-* midi bandwidth
-
-Bugs
-----
-
-* definitely something wrong with remote_id assignment on session create
-  (master strip assigned 0).

@@ -51,14 +51,20 @@ MackiePort::MackiePort( MackieControlProtocol & mcp, MIDI::Port & port, int numb
 , _emulation( none )
 , _initialising( true )
 {
-	//cout << "MackiePort::MackiePort" <<endl;
+#ifdef PORT_DEBUG
+	cout << "MackiePort::MackiePort" <<endl;
+#endif
 }
 
 MackiePort::~MackiePort()
 {
-	//cout << "~MackiePort" << endl;
+#ifdef PORT_DEBUG
+	cout << "~MackiePort" << endl;
+#endif
 	close();
-	//cout << "~MackiePort finished" << endl;
+#ifdef PORT_DEBUG
+	cout << "~MackiePort finished" << endl;
+#endif
 }
 
 int MackiePort::strips() const
@@ -85,7 +91,9 @@ int MackiePort::strips() const
 // should really be in MackiePort
 void MackiePort::open()
 {
-	//cout << "MackiePort::open " << *this << endl;
+#ifdef PORT_DEBUG
+	cout << "MackiePort::open " << *this << endl;
+#endif
 	_sysex = port().input()->sysex.connect( ( mem_fun (*this, &MackiePort::handle_midi_sysex) ) );
 	
 	// make sure the device is connected
@@ -94,14 +102,18 @@ void MackiePort::open()
 
 void MackiePort::close()
 {
-	//cout << "MackiePort::close" << endl;
+#ifdef PORT_DEBUG
+	cout << "MackiePort::close" << endl;
+#endif
 	
 	// disconnect signals
 	_any.disconnect();
 	_sysex.disconnect();
 	
 	// TODO emit a "closing" signal?
-	//cout << "MackiePort::close finished" << endl;
+#ifdef PORT_DEBUG
+	cout << "MackiePort::close finished" << endl;
+#endif
 }
 
 const MidiByteArray & MackiePort::sysex_hdr() const
@@ -137,7 +149,9 @@ MidiByteArray calculate_challenge_response( MidiByteArray::iterator begin, MidiB
 MidiByteArray MackiePort::host_connection_query( MidiByteArray & bytes )
 {
 	// handle host connection query
-	//cout << "host connection query: " << bytes << endl;
+#ifdef PORT_DEBUG
+	cout << "host connection query: " << bytes << endl;
+#endif
 	
 	if ( bytes.size() != 18 )
 	{
@@ -158,7 +172,9 @@ MidiByteArray MackiePort::host_connection_query( MidiByteArray & bytes )
 // not used right now
 MidiByteArray MackiePort::host_connection_confirmation( const MidiByteArray & bytes )
 {
-	//cout << "host_connection_confirmation: " << bytes << endl;
+#ifdef PORT_DEBUG
+	cout << "host_connection_confirmation: " << bytes << endl;
+#endif
 	
 	// decode host connection confirmation
 	if ( bytes.size() != 14 )
@@ -175,10 +191,15 @@ MidiByteArray MackiePort::host_connection_confirmation( const MidiByteArray & by
 
 void MackiePort::probe_emulation( const MidiByteArray & bytes )
 {
-	//cout << "MackiePort::probe_emulation: " << bytes.size() << ", " << bytes << endl;
+#ifdef PORT_DEBUG
+	cout << "MackiePort::probe_emulation: " << bytes.size() << ", " << bytes << endl;
+#endif
+	
 	string version_string;
 	for ( int i = 6; i < 11; ++i ) version_string.append( 1, (char)bytes[i] );
-	//cout << "version_string: " << version_string << endl;
+#ifdef PORT_DEBUG
+	cout << "version_string: " << version_string << endl;
+#endif
 	
 	// TODO investigate using serial number. Also, possibly size of bytes might
 	// give an indication. Also, apparently MCU sends non-documented messages
@@ -194,11 +215,15 @@ void MackiePort::probe_emulation( const MidiByteArray & bytes )
 
 void MackiePort::init()
 {
-	//cout << "MackiePort::init" << endl;
+#ifdef PORT_DEBUG
+	cout << "MackiePort::init" << endl;
+#endif
 	init_mutex.lock();
 	_initialising = true;
 	
-	//cout << "MackiePort::lock acquired" << endl;
+#ifdef PORT_DEBUG
+	cout << "MackiePort::lock acquired" << endl;
+#endif
 	// emit pre-init signal
 	init_event();
 	
@@ -289,18 +314,26 @@ bool MackiePort::wait_for_init()
 	Glib::Mutex::Lock lock( init_mutex );
 	while ( _initialising )
 	{
-		//cout << "MackiePort::wait_for_active waiting" << endl;
+#ifdef PORT_DEBUG
+		cout << "MackiePort::wait_for_active waiting" << endl;
+#endif
 		init_cond.wait( init_mutex );
-		//cout << "MackiePort::wait_for_active released" << endl;
+#ifdef PORT_DEBUG
+		cout << "MackiePort::wait_for_active released" << endl;
+#endif
 	}
-	//cout << "MackiePort::wait_for_active returning" << endl;
+#ifdef PORT_DEBUG
+	cout << "MackiePort::wait_for_active returning" << endl;
+#endif
 	return SurfacePort::active();
 }
 
 void MackiePort::handle_midi_sysex (MIDI::Parser & parser, MIDI::byte * raw_bytes, size_t count )
 {
 	MidiByteArray bytes( count, raw_bytes );
-	//cout << "handle_midi_sysex: " << bytes << endl;
+#ifdef PORT_DEBUG
+	cout << "handle_midi_sysex: " << bytes << endl;
+#endif
 	switch( bytes[5] )
 	{
 		case 0x01:

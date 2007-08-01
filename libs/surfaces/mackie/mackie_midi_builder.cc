@@ -191,9 +191,11 @@ MidiByteArray MackieMidiBuilder::strip_display( const Strip & strip, unsigned in
 	{
 		throw runtime_error( "strip.index() must be between 0 and 7" );
 	}
-	
+
+#ifdef DEBUG	
 	cout << "MackieMidiBuilder::strip_display index: " << strip.index() << ", line " << line_number << ": " << line << endl;
-	
+#endif
+
 	MidiByteArray retval;
 	// code for display
 	retval << 0x12;
@@ -207,7 +209,9 @@ MidiByteArray MackieMidiBuilder::strip_display( const Strip & strip, unsigned in
 		retval << ' ';
 	}
 	
+#ifdef DEBUG	
 	cout << "MackieMidiBuilder::strip_display midi: " << retval << endl;
+#endif
 	return retval;
 }
 	

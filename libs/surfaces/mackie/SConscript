@@ -14,11 +14,15 @@ mackie = env.Copy()
 
 domain = 'ardour_mackie'
 
-mackie.Append(DOMAIN = domain, MAJOR = 1, MINOR = 0, MICRO = 0)
+mackie.Append(DOMAIN = domain, MAJOR = 1, MINOR = 1, MICRO = 0)
 mackie.Append(CXXFLAGS = "-DPACKAGE=\\\"" + domain + "\\\"")
 mackie.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
 mackie.Append(PACKAGE = domain)
 mackie.Append(POTFILE = domain + '.pot')
+
+if mackie['DEBUG'] == 1:
+  mackie.Append(CXXFLAGS="-DDEBUG")
+  #mackie.Append(CXXFLAGS="-DPORT_DEBUG")
 
 mackie_files=Split("""
 interface.cc

@@ -42,11 +42,15 @@ SurfacePort::SurfacePort( MIDI::Port & port, int number )
 
 SurfacePort::~SurfacePort()
 {
-	//cout << "~SurfacePort::SurfacePort()" << endl;
+#ifdef PORT_DEBUG
+	cout << "~SurfacePort::SurfacePort()" << endl;
+#endif
 	// make sure another thread isn't reading or writing as we close the port
 	Glib::RecMutex::Lock lock( _rwlock );
 	_active = false;
-	//cout << "~SurfacePort::SurfacePort() finished" << endl;
+#ifdef PORT_DEBUG
+	cout << "~SurfacePort::SurfacePort() finished" << endl;
+#endif
 }
 
 // wrapper for one day when strerror_r is working properly
@@ -115,7 +119,6 @@ MidiByteArray SurfacePort::read()
 void SurfacePort::write( const MidiByteArray & mba )
 {
 #ifdef PORT_DEBUG
-	//if ( mba[0] == 0xf0 ) cout << "SurfacePort::write: " << mba << endl;
 	cout << "SurfacePort::write: " << mba << endl;
 #endif
 	

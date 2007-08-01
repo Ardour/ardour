@@ -331,7 +331,7 @@ void MackieControlProtocol::switch_banks( int initial )
 
 void MackieControlProtocol::zero_all()
 {
-	// TODO turn off 55-char and SMPTE displays
+	// TODO turn off SMPTE displays
 	
 	if ( mcu_port().emulation() == MackiePort::bcf2000 )
 	{
