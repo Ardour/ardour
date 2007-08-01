@@ -80,7 +80,6 @@ ARDOUR_UI::install_actions ()
 	/* menus + submenus that need action items */
 
 	ActionManager::register_action (main_actions, X_("Session"), _("Session"));
-	ActionManager::register_action (main_actions, X_("Export"), _("Export"));
 	ActionManager::register_action (main_actions, X_("Cleanup"), _("Cleanup"));
 	ActionManager::register_action (main_actions, X_("Sync"), _("Sync"));
 	ActionManager::register_action (main_actions, X_("Options"), _("Options"));

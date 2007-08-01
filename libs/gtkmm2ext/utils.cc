@@ -18,6 +18,7 @@
     $Id$
 */
 
+#include <iostream>
 #include <map>
 
 #include <gtk/gtkpaned.h>

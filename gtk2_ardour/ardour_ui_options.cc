@@ -515,7 +515,7 @@ ARDOUR_UI::mtc_port_changed ()
 		positional_sync_strings.push_back (slave_source_to_string (MTC));
 	}
 	positional_sync_strings.push_back (slave_source_to_string (JACK));
-	
+
 	set_popdown_strings (sync_option_combo, positional_sync_strings);
 }
 
