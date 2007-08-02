@@ -1,7 +1,6 @@
 #
 # This is the GTK style file for Ardour
 #
-#
 
 style "very_small_text"
 {
@@ -48,7 +47,7 @@ style "larger_bold_text"
 
 style "plugin_name_text"
 {
-	font_name = "sans bold 25"
+	font_name = "sans bold 24"
 	fg[NORMAL] = { 0.80, 0.80, 0.80 }
 }
 
@@ -65,7 +64,7 @@ style "automation_track_name"
 
 style "first_action_message" 
 {
-	font_name = "sans medium 34"
+	font_name = "sans 34"
 }
 
 style "verbose_canvas_cursor"
@@ -80,7 +79,7 @@ style "marker_text"
 
 style "time_axis_view_item_name"
 {
-	font_name = "sans 9"
+	font_name = "sans 6"
 }
 
 style "default_base" = "medium_text"
@@ -671,11 +670,6 @@ style "transport_clock_display_delta" = "transport_clock_display"
 	fg[NORMAL] = { 0.30, 0.30, 1.0 }
 }
 
-style "transport_clock_display_delta" = "transport_clock_display"
-{
-	fg[NORMAL] = { 0.30, 0.30, 1.0 }
-}
-
 style "tempo_meter_clock_display"
 {
 	font_name = "sans 7"
@@ -745,7 +739,7 @@ style "midi_track_base" = "default_base"
 
 style "track_name_display"
 {
-	font_name = "sans medium 8"
+	font_name = "sans 8"
 	fg[NORMAL] = { 0.80, 0.80, 0.80 }
 	fg[ACTIVE] = { 0.80, 0.80, 0.80 }
 
@@ -757,7 +751,7 @@ style "track_name_display"
 
 style "active_track_name_display"
 {
-	font_name = "sans medium 8"
+	font_name = "sans 8"
 	text[NORMAL] = { 0.26, 0.26, 0.26 }
 	base[NORMAL] = { 0.89, 0.89, 0.89 }
 }
@@ -864,7 +858,7 @@ style "track_controls_inactive"
 	bg[SELECTED] =    { 0.60, 0.60, 0.66 }
 	bg[PRELIGHT] =    { 0.60, 0.60, 0.66 }
 
-	font_name = "sans medium 10"
+	font_name = "sans 18"
 	fg[NORMAL] = { 0.7, 0.8, 0.2 }	
 }
 
@@ -889,7 +883,7 @@ style "automation_track_controls_base"
 # Plugin Editors
 style "plugin_slider" 
 {
-	font_name ="sans bold 10"
+	font_name ="sans bold 12"
 
 	# the slider itself. the inactive part is INSENSITIVE,
 	# the active part is something else.
@@ -1116,7 +1110,7 @@ style "meter_metrics_strip" = "default_base"
 
 style "location_row_button" = "default_buttons_menus"
 {
-	font_name = "sans 10"
+	font_name = "sans 12"
 }
 
 style "location_rows_clock" = "default_clock_display"
@@ -1527,6 +1521,4 @@ widget "*ChannelCountSelector" style:highest "medium_bold_entry"
 widget "*ChannelCountSelector.GtkArrow" style:highest "default_buttons_menus"
 widget "*RegionListWholeFile" style:highest "treeview_parent_node"
 widget "*EditorHScrollbar" style:highest "editor_hscrollbar"
-widget "*TransportClockDisplayDelta" style:highest "transport_clock_display_delta"
-widget "*SecondaryClockDisplayDelta" style:highest "transport_clock_display_delta"
 

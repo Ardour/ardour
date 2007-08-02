@@ -348,7 +348,7 @@ else:
 	my_font_dict['%FONT_ITALIC_MASSIVE%'] = 'sans italic 60'
 
 ardour_dark_theme = env.SubstInFile ('ardour2_ui_dark.rc', 'ardour2_ui_dark.rc.in', SUBST_DICT = my_font_dict)
-ardour_light = env.SubstInFile ('ardour2_ui_light.rc', 'ardour2_ui_light.rc.in', SUBST_DICT = my_font_dict)
+ardour_light_theme = env.SubstInFile ('ardour2_ui_light.rc', 'ardour2_ui_light.rc.in', SUBST_DICT = my_font_dict)
 
 my_subst_dict = { }
 
@@ -371,6 +371,8 @@ env.AddPostAction (ardourdev, Chmod ('$TARGET', 0755))
 Default(ardourbindings)
 Default(ardourdev)
 Default(ardoursh)
+Default(ardour_dark_theme)
+Default(ardour_light_theme)
 
 if env['VST']:
 	Default(ardourlib)
@@ -394,8 +396,8 @@ if env['NLS']:
 	i18n (gtkardour, gtkardour_files+skipped_files+fft_analysis_files, env)
     
 # configuration files
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour2_ui_dark.rc'))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour2_ui_light.rc'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), ardour_dark_theme))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), ardour_light_theme))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour2_ui_default.conf'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.menus'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.bindings'))
