@@ -1059,7 +1059,7 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 		}
 	}
 	
-	if ((send = boost::dynamic_pointer_cast<Send> (send)) != 0) {
+	if ((send = boost::dynamic_pointer_cast<Send> (processor)) != 0) {
 		
 		if (!_session.engine().connected()) {
 			return;
