@@ -66,8 +66,7 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	canvas_rect->property_fill_color_rgba() = stream_base_color;
 	canvas_rect->property_outline_color_rgba() = RGBA_BLACK;
 
-	//use_rec_regions = tv.editor.show_waveforms_recording ();
-	use_rec_regions = true;
+	use_rec_regions = tv.editor.show_waveforms_recording ();
 }
 
 MidiStreamView::~MidiStreamView ()
@@ -94,7 +93,7 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wfd)
 
 			(*i)->set_valid (true);
 			(*i)->enable_display(wfd);
-			display_region(dynamic_cast<MidiRegionView*>(*i));
+			display_region(dynamic_cast<MidiRegionView*>(*i), wfd);
 
 			return NULL;
 		}
@@ -114,7 +113,7 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wfd)
 	}
 
 	/* display events and find note range */
-	display_region(region_view);
+	display_region(region_view, wfd);
 
 	/* always display at least 1 octave range */
 	_highest_note = max(_highest_note, static_cast<uint8_t>(_lowest_note + 11));
@@ -128,13 +127,15 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wfd)
 }
 
 void
-MidiStreamView::display_region(MidiRegionView* region_view)
+MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
 {
 	if ( ! region_view)
 		return;
 
 	boost::shared_ptr<MidiSource> source(region_view->midi_region()->midi_source(0));
-	source->load_model();
+
+	if (load_model)
+		source->load_model();
 
 	if (source->model()) {
 		// Find our note range

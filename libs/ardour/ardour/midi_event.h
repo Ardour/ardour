@@ -21,6 +21,13 @@
 #ifndef __ardour_midi_event_h__
 #define __ardour_midi_event_h__
 
+#include <ardour/midi_events.h>
+
+/** If this is not defined, all methods of MidiEvent are RT safe
+ * but MidiEvent will never deep copy and (depending on the scenario)
+ * may not be usable in STL containers, signals, etc. */
+#define MIDI_EVENT_ALLOW_ALLOC 1
+
 namespace ARDOUR {
 
 
@@ -30,11 +37,12 @@ namespace ARDOUR {
  * tempo time, used in MidiModel) depending on context.
  */
 struct MidiEvent {
-	MidiEvent(bool owns_buffer=false, double t=0, size_t s=0, Byte* b=NULL)
-		: _owns_buffer(owns_buffer)
-		, _time(t)
+#ifdef MIDI_EVENT_ALLOW_ALLOC
+	MidiEvent(double t=0, size_t s=0, Byte* b=NULL, bool owns_buffer=false)
+		: _time(t)
 		, _size(s)
 		, _buffer(b)
+		, _owns_buffer(owns_buffer)
 	{
 		if (owns_buffer) {
 			_buffer = (Byte*)malloc(_size);
@@ -45,11 +53,17 @@ struct MidiEvent {
 		}
 	}
 	
+	/** Copy \a copy.
+	 * 
+	 * If \a owns_buffer is true, the buffer will be copied and this method
+	 * is NOT REALTIME SAFE.  Otherwise both events share a buffer and
+	 * memory management semantics are the caller's problem.
+	 */
 	MidiEvent(const MidiEvent& copy, bool owns_buffer)
-		: _owns_buffer(owns_buffer)
-		, _time(copy._time)
+		: _time(copy._time)
 		, _size(copy._size)
 		, _buffer(copy._buffer)
+		, _owns_buffer(owns_buffer)
 	{
 		if (owns_buffer) {
 			_buffer = (Byte*)malloc(_size);
@@ -81,24 +95,37 @@ struct MidiEvent {
 		return *this;
 	}
 
-	inline bool        owns_buffer() const { return _owns_buffer; }
+	inline bool owns_buffer() const { return _owns_buffer; }
+	inline void set_buffer(Byte* buf) { assert(!_owns_buffer); _buffer = buf; }
+
+#else
+
+	inline void set_buffer(Byte* buf) { _buffer = buf; }
+
+#endif // MIDI_EVENT_ALLOW_ALLOC
+
 	inline double      time()        const { return _time; }
 	inline double&     time()              { return _time; }
-	inline size_t      size()        const { return _size; }
-	inline size_t&     size()              { return _size; }
+	inline uint32_t    size()        const { return _size; }
+	inline uint32_t&   size()              { return _size; }
 	inline uint8_t     type()        const { return (_buffer[0] & 0xF0); }
+	inline uint8_t     channel()     const { return (_buffer[0] & 0x0F); }
+	inline bool        is_note_on()  const { return (type() == MIDI_CMD_NOTE_ON); }
+	inline bool        is_note_off() const { return (type() == MIDI_CMD_NOTE_OFF); }
+	inline bool        is_note()     const { return (is_note_on() || is_note_off()); }
 	inline uint8_t     note()        const { return (_buffer[1]); }
 	inline uint8_t     velocity()    const { return (_buffer[2]); }
 	inline const Byte* buffer()      const { return _buffer; }
 	inline Byte*       buffer()            { return _buffer; }
 
-	void set_buffer(Byte* buf) { assert(!_owns_buffer); _buffer = buf; }
-
 private:
-	bool   _owns_buffer; /**< Whether buffer is locally allocated */
-	double _time;         /**< Sample index (or beat time) at which event is valid */
-	size_t _size;         /**< Number of bytes of data in \a buffer */
-	Byte*  _buffer;       /**< Raw MIDI data */
+	double   _time;   /**< Sample index (or beat time) at which event is valid */
+	uint32_t _size;   /**< Number of bytes of data in \a buffer */
+	Byte*    _buffer; /**< Raw MIDI data */
+
+#ifdef MIDI_EVENT_ALLOW_ALLOC
+	bool _owns_buffer; /**< Whether buffer is locally allocated */
+#endif
 };
 
 

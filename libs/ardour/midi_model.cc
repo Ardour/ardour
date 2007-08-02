@@ -33,8 +33,8 @@ using namespace ARDOUR;
 // Note
 
 MidiModel::Note::Note(double t, double d, uint8_t n, uint8_t v)
-	: _on_event(true, t, 3, NULL)
-	, _off_event(true, t + d, 3, NULL)
+	: _on_event(t, 3, NULL, true)
+	, _off_event(t + d, 3, NULL, true)
 {
 	_on_event.buffer()[0] = MIDI_CMD_NOTE_ON;
 	_on_event.buffer()[1] = n;

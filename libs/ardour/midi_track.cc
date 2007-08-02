@@ -587,7 +587,7 @@ MidiTrack::write_controller_messages(MidiBuffer& output_buf, nframes_t start_fra
 	
 	Byte buf[3]; // CC = 3 bytes
 	buf[0] = MIDI_CMD_CONTROL;
-	MidiEvent ev(false, 0, 3, buf);
+	MidiEvent ev(0, 3, buf, false);
 
 	// Write controller automation
 	if (_session.transport_rolling()) {
