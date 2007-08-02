@@ -28,7 +28,7 @@
 #include <ardour/types.h>
 
 #include "region_view.h"
-#include "route_time_axis.h"
+#include "midi_time_axis.h"
 #include "time_axis_view_item.h"
 #include "automation_line.h"
 #include "enums.h"
@@ -58,7 +58,31 @@ class MidiRegionView : public RegionView
 	
 	virtual void init (Gdk::Color& basic_color, bool wfd);
 	
-	boost::shared_ptr<ARDOUR::MidiRegion> midi_region() const;
+	inline const boost::shared_ptr<ARDOUR::MidiRegion> midi_region() const
+		{ return boost::dynamic_pointer_cast<ARDOUR::MidiRegion>(_region); }
+
+	inline MidiTimeAxisView* midi_view() const
+		{ return dynamic_cast<MidiTimeAxisView*>(&trackview); }
+
+	inline MidiStreamView* midi_stream_view() const
+		{ return midi_view()->midi_view(); }
+	
+	inline uint8_t contents_note_range() const
+		{ return midi_stream_view()->highest_note() - midi_stream_view()->lowest_note() + 1; }
+
+	inline double footer_height() const
+		{ return name_highlight->property_y2() - name_highlight->property_y1(); }
+
+	inline double contents_height() const
+		{ return (trackview.height - footer_height() - 5.0); }
+	
+	inline double note_height() const
+		{ return contents_height() / (double)contents_note_range(); }
+			
+	inline double note_y(uint8_t note) const
+		{ return trackview.height
+				- (contents_height() * (note - midi_stream_view()->lowest_note() + 1))
+				- footer_height() - 3.0; }
 	
 	void set_y_position_and_height (double, double);
     

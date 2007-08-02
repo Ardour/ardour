@@ -44,7 +44,7 @@ bool
 CanvasMidiEvent::on_event(GdkEvent* ev)
 {
 	static double last_x, last_y;
-	double event_x, event_y;
+	double event_x, event_y, dx, dy;
 
 	if (_region.get_time_axis_view().editor.current_mouse_mode() != Editing::MouseNote)
 		return false;
@@ -64,22 +64,13 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 		break;
 	
 	case GDK_ENTER_NOTIFY:
-		cerr << "ENTERED: " << ev->crossing.state << endl;
 		Keyboard::magic_widget_grab_focus();
 		_item->grab_focus();
 		_region.note_entered(this);
-		//if (delete_down)
-		//	cerr << "DELETE ENTER\n" << endl;
-
-		/*if ( (ev->crossing.state & GDK_BUTTON2_MASK) ) {
-
-		}*/
 		break;
 
 	case GDK_LEAVE_NOTIFY:
-		cerr << "LEAVE: " << ev->crossing.state << endl;
 		Keyboard::magic_widget_drop_focus();
-		//_region.get_time_axis_view().editor.reset_focus();
 		_region.get_canvas_group()->grab_focus();
 		break;
 
@@ -111,10 +102,20 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 				event_y = t_y;
 			}
 
-			_item->move(event_x - last_x, event_y - last_y);
-
+			dx = event_x - last_x;
+			dy = event_y - last_y;
+			
 			last_x = event_x;
-			last_y = event_y;
+
+			// Snap to note rows
+			if (abs(dy) < _region.note_height()) {
+				dy = 0.0;
+			} else {
+				dy = _region.note_height() * ((dy > 0) ? 1 : -1);
+				last_y = event_y;
+			}
+
+			_item->move(dx, dy);
 
 			return true;
 		default:
@@ -130,6 +131,17 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 		case Dragging: // Dropped
 			_item->ungrab(ev->button.time);
 			_state = None;
+			if (_note) {
+				cerr << "Move and stuff." << endl;
+				// This would be nicer with a MoveCommand that doesn't need to copy...
+				/*_region.start_delta_command();
+				_region.command_remove_note(this);
+				Note copy_of_me(*this); 
+				copy_of_me.time = trackview.editor.pixel_to_frame(property_x1());
+				copy_of_me.note = stuff;
+				_region.apply_command();
+				*/
+			}
 			return true;
 		default:
 			break;

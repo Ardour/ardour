@@ -143,7 +143,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		//group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK, ev->button.time);
 		_state = Pressed;
 		press_button = ev->button.button;
-		cerr << "PRESSED: " << press_button << endl;
+		//cerr << "PRESSED: " << press_button << endl;
 		return true;
 	
 	case GDK_MOTION_NOTIFY:
@@ -308,12 +308,6 @@ MidiRegionView::~MidiRegionView ()
 	RegionViewGoingAway (this); /* EMIT_SIGNAL */
 }
 
-boost::shared_ptr<ARDOUR::MidiRegion>
-MidiRegionView::midi_region() const
-{
-	// "Guaranteed" to succeed...
-	return boost::dynamic_pointer_cast<MidiRegion>(_region);
-}
 
 void
 MidiRegionView::region_resized (Change what_changed)
@@ -419,19 +413,12 @@ MidiRegionView::add_event (const MidiEvent& ev)
 	}
 	printf("\n\n");*/
 
-	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
-	MidiStreamView* const view = mtv->midi_view();
 	ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
 	
-	const uint8_t note_range = view->highest_note() - view->lowest_note() + 1;
-	const double footer_height = name_highlight->property_y2() - name_highlight->property_y1();
-	const double pixel_range = (trackview.height - footer_height - 5.0) / (double)note_range;
-
-	if (mtv->note_mode() == Sustained) {
+	if (midi_view()->note_mode() == Sustained) {
 		if ((ev.buffer()[0] & 0xF0) == MIDI_CMD_NOTE_ON) {
 			const Byte& note = ev.buffer()[1];
-			const double y1 = trackview.height - (pixel_range * (note - view->lowest_note() + 1))
-				- footer_height - 3.0;
+			const double y1 = note_y(note);
 
 			CanvasNote* ev_rect = new CanvasNote(*this, *group);
 			ev_rect->property_x1() = trackview.editor.frame_to_pixel (
@@ -439,7 +426,7 @@ MidiRegionView::add_event (const MidiEvent& ev)
 			ev_rect->property_y1() = y1;
 			ev_rect->property_x2() = trackview.editor.frame_to_pixel (
 					_region->length());
-			ev_rect->property_y2() = y1 + ceil(pixel_range);
+			ev_rect->property_y2() = y1 + note_height();
 			ev_rect->property_outline_color_rgba() = 0xFFFFFFAA;
 			/* outline all but right edge */
 			ev_rect->property_outline_what() = (guint32) (0x1 & 0x4 & 0x8);
@@ -460,13 +447,13 @@ MidiRegionView::add_event (const MidiEvent& ev)
 			}
 		}
 	
-	} else if (mtv->note_mode() == Percussive) {
+	} else if (midi_view()->note_mode() == Percussive) {
 		const Byte& note = ev.buffer()[1];
+		const double diamond_size = std::min(note_height(), 5.0);
 		const double x = trackview.editor.frame_to_pixel((nframes_t)ev.time());
-		const double y = trackview.height - (pixel_range * (note - view->lowest_note() + 1))
-			- footer_height - 3.0;
+		const double y = note_y(note) + (diamond_size / 2.0);
 
-		CanvasHit* ev_diamond = new CanvasHit(*this, *group, std::min(pixel_range, 5.0));
+		CanvasHit* ev_diamond = new CanvasHit(*this, *group, diamond_size);
 		ev_diamond->move(x, y);
 		ev_diamond->show();
 		ev_diamond->property_outline_color_rgba() = 0xFFFFFFDD;
