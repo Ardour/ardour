@@ -274,6 +274,82 @@ itest = gtkardour.Program(target = 'itest', source = itest_files)
 rcu = gtkardour.Program(target = 'rcu', source = rcu_files)
 tt = gtkmmtests.Program(target = 'tt', source = tt_files)
 
+my_font_dict = { }
+
+if gtkardour['DIST_TARGET'] == 'panther' or gtkardour['DIST_TARGET'] == 'tiger':
+	#
+	# OS X font rendering is different even with X11
+	#
+	my_font_dict['%FONT_TINY%'] = 'sans 7'
+	my_font_dict['%FONT_SMALLER%'] = 'sans 9'
+	my_font_dict['%FONT_SMALL%'] = 'sans 10'
+	my_font_dict['%FONT_NORMAL%'] = 'sans 11'
+	my_font_dict['%FONT_BIG%'] = 'sans 15'
+	my_font_dict['%FONT_BIGGER%'] = 'sans 16'
+	my_font_dict['%FONT_LARGE%'] = 'sans 20'
+	my_font_dict['%FONT_LARGER%'] = 'sans 28'
+	my_font_dict['%FONT_HUGER%'] = 'sans 36'
+	my_font_dict['%FONT_MASSIVE%'] = 'sans 60'
+	my_font_dict['%FONT_BOLD_TINY%'] = 'sans bold 7'
+	my_font_dict['%FONT_BOLD_SMALLER%'] = 'sans bold 9'
+	my_font_dict['%FONT_BOLD_SMALL%'] = 'sans bold 10'
+	my_font_dict['%FONT_BOLD_NORMAL%'] = 'sans bold 11'
+	my_font_dict['%FONT_BOLD_BIG%'] = 'sans bold 15'
+	my_font_dict['%FONT_BOLD_BIGGER%'] = 'sans bold 16'
+	my_font_dict['%FONT_BOLD_LARGE%'] = 'sans bold 20'
+	my_font_dict['%FONT_BOLD_LARGER%'] = 'sans bold 28'
+	my_font_dict['%FONT_BOLD_HUGER%'] = 'sans bold 36'
+	my_font_dict['%FONT_BOLD_MASSIVE%'] = 'sans bold 60'
+	my_font_dict['%FONT_ITALIC_TINY%'] = 'sans italic 7'
+	my_font_dict['%FONT_ITALIC_SMALLER%'] = 'sans italic 9'
+	my_font_dict['%FONT_ITALIC_SMALL%'] = 'sans italic 10'
+	my_font_dict['%FONT_ITALIC_NORMAL%'] = 'sans italic 11'
+	my_font_dict['%FONT_ITALIC_BIG%'] = 'sans italic 15'
+	my_font_dict['%FONT_ITALIC_BIGGER%'] = 'sans italic 16'
+	my_font_dict['%FONT_ITALIC_LARGE%'] = 'sans italic 20'
+	my_font_dict['%FONT_ITALIC_LARGER%'] = 'sans italic 28'
+	my_font_dict['%FONT_ITALIC_HUGER%'] = 'sans italic 36'
+	my_font_dict['%FONT_ITALIC_MASSIVE%'] = 'sans italic 60'
+else:
+	#
+	# Linux/X11 font rendering
+	#
+	my_font_dict['%FONT_TINY%'] = 'sans 4'
+	my_font_dict['%FONT_SMALLER%'] = 'sans 6'
+	my_font_dict['%FONT_SMALL%'] = 'sans 7'
+	my_font_dict['%FONT_NORMAL%'] = 'sans 8'
+	my_font_dict['%FONT_BIG%'] = 'sans 12'
+	my_font_dict['%FONT_BIGGER%'] = 'sans 14'
+	my_font_dict['%FONT_LARGE%'] = 'sans 18'
+	my_font_dict['%FONT_LARGER%'] = 'sans 24'
+	my_font_dict['%FONT_HUGER%'] = 'sans 34'
+	my_font_dict['%FONT_MASSIVE%'] = 'sans 60'
+	my_font_dict['%FONT_BOLD_TINY%'] = 'sans bold 4'
+	my_font_dict['%FONT_BOLD_SMALLER%'] = 'sans bold 6'
+	my_font_dict['%FONT_BOLD_SMALL%'] = 'sans bold 7'
+	my_font_dict['%FONT_BOLD_NORMAL%'] = 'sans bold 8'
+	my_font_dict['%FONT_BOLD_BIG%'] = 'sans bold 12'
+	my_font_dict['%FONT_BOLD_BIGGER%'] = 'sans bold 14'
+	my_font_dict['%FONT_BOLD_LARGE%'] = 'sans bold 18'
+	my_font_dict['%FONT_BOLD_LARGER%'] = 'sans bold 24'
+	my_font_dict['%FONT_BOLD_HUGE%'] = 'sans bold 25'
+	my_font_dict['%FONT_BOLD_HUGER%'] = 'sans bold 34'
+	my_font_dict['%FONT_BOLD_MASSIVE%'] = 'sans bold 60'
+	my_font_dict['%FONT_ITALIC_TINY%'] = 'sans italic 4'
+	my_font_dict['%FONT_ITALIC_SMALLER%'] = 'sans italic 6'
+	my_font_dict['%FONT_ITALIC_SMALL%'] = 'sans italic 7'
+	my_font_dict['%FONT_ITALIC_NORMAL%'] = 'sans italic 8'
+	my_font_dict['%FONT_ITALIC_BIG%'] = 'sans italic 12'
+	my_font_dict['%FONT_ITALIC_BIGGER%'] = 'sans italic 14'
+	my_font_dict['%FONT_ITALIC_LARGE%'] = 'sans italic 18'
+	my_font_dict['%FONT_ITALIC_LARGER%'] = 'sans italic 24'
+	my_font_dict['%FONT_ITALIC_HUGE%'] = 'sans italic 25'
+	my_font_dict['%FONT_ITALIC_HUGER%'] = 'sans italic 34'
+	my_font_dict['%FONT_ITALIC_MASSIVE%'] = 'sans italic 60'
+
+ardour_dark_theme = env.SubstInFile ('ardour2_ui_dark.rc', 'ardour2_ui_dark.rc.in', SUBST_DICT = my_font_dict)
+ardour_light = env.SubstInFile ('ardour2_ui_light.rc', 'ardour2_ui_light.rc.in', SUBST_DICT = my_font_dict)
+
 my_subst_dict = { }
 
 #
