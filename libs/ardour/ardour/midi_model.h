@@ -55,7 +55,10 @@ public:
 		inline uint8_t velocity() const { return _on_event.velocity(); }
 		inline double  duration() const { return _off_event.time() - _on_event.time(); }
 
-		inline void set_duration(double d) { _off_event.time() = _on_event.time() + d; }
+		inline void set_time(double t)      { _off_event.time() = t + duration(); _on_event.time() = t; }
+		inline void set_note(uint8_t n)     { _on_event.buffer()[1] = n; _off_event.buffer()[1] = n; }
+		inline void set_velocity(uint8_t n) { _on_event.buffer()[2] = n; }
+		inline void set_duration(double d)  { _off_event.time() = _on_event.time() + d; }
 
 		inline MidiEvent& on_event()  { return _on_event; }
 		inline MidiEvent& off_event() { return _off_event; }

@@ -116,7 +116,7 @@ MidiModel::read (MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframe
 {
 	size_t read_events = 0;
 
-	cerr << "MM READ @ " << start << " + " << nframes << endl;
+	//cerr << "MM READ @ " << start << " + " << nframes << endl;
 
 	/* FIXME: cache last lookup value to avoid the search */
 
@@ -170,8 +170,8 @@ MidiModel::read (MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframe
 		}
 	}
 
-	if (read_events > 0)
-		cerr << "MM READ " << read_events << " EVENTS" << endl;
+	//if (read_events > 0)
+	//	cerr << "MM READ " << read_events << " EVENTS" << endl;
 
 	return read_events;
 }
