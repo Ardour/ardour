@@ -1,31 +1,30 @@
 #
 # This is the GTK style file for Ardour
 #
-#
 
 style "very_small_text"
 {
- 	font_name = "sans 9"
+ 	font_name = "%FONT_SMALL%"
 }
 
 style "small_text"
 {
- 	font_name = "sans 10"
+ 	font_name = "%FONT_NORMAL%"
 }
 
 style "small_bold_text"
 {
- 	font_name = "@SANS_BOLD_Big@"
+ 	font_name = "%FONT_BOLD_NORMAL%"
 }
 
 style "medium_bold_text"
 {
- 	font_name = "@SANS_BOLD_BIG@"
+ 	font_name = "%FONT_BOLD_NORMAL%"
 }
 
 style "medium_text"
 {
- 	font_name = "sans 11"
+ 	font_name = "%FONT_NORMAL%"
 }
 
 style "red_medium_text" = "medium_text"
@@ -38,98 +37,99 @@ style "red_medium_text" = "medium_text"
 
 style "large_text"
 {
- 	font_name = "sans 18"
+ 	font_name = "%FONT_LARGE%"
 }
 
 style "larger_bold_text"
 {
- 	font_name = "sans bold 14"
+ 	font_name = "%FONT_BOLD_BIGGER%"
 }
 
 style "plugin_name_text"
 {
-	font_name = "sans bold 25"
+	font_name = "%FONT_BOLD_LARGER%"
 	fg[NORMAL] = { 0.80, 0.80, 0.80 }
 }
 
 style "plugin_maker_text"
 {
-	font_name = "sans bold 14"
+	font_name = "%FONT_BOLD_BIGGER%"
 	fg[NORMAL] = { 0.80, 0.80, 0.80 }
 }
 
 style "automation_track_name"
 {
-	font_name = "sans italic 8"
+	font_name = "%FONT_ITALIC_NORMAL%"
 }
 
 style "first_action_message" 
 {
-	font_name = "sans medium 34"
+	font_name = "%FONT_HUGER%"
 }
 
 style "verbose_canvas_cursor"
 {
-	font_name = "sans bold 24"
+	font_name = "%FONT_BOLD_LARGER%"
 }
 
 style "marker_text" 
 {
-	font_name = "sans 9"
+	font_name = "%FONT_NORMAL%"
 }
 
 style "time_axis_view_item_name"
 {
-	font_name = "sans 10"
+	font_name = "%FONT_SMALLER%"
 }
 
 style "default_base" = "medium_text"
 {
-  GtkWidget::cursor_color =  {1.0, 1.0, 1.0 }
+  
   GtkButton::default_border = { 0, 0, 0, 0 }
   GtkButton::default_outside_border = { 0, 0, 0, 0 }
+  GtkButton::button_relief = GTK_RELIEF_NONE
   GtkTreeView::vertical-padding = 0
   GtkTreeView::horizontal-padding = 0
-  GtkTreeView::even-row-color = { 0, 0, 0 }
-  GtkTreeView::odd-row-color = { 0, 0, 0 }
+  GtkTreeView::even-row-color = { 0.70, 0.70, 0.70 }
+  GtkTreeView::odd-row-color = { 0.70, 0.70, 0.70 }
   
-  fg[NORMAL] = { 0.80, 0.80, 0.80 }	
-  fg[ACTIVE] = { 0.80, 0.80, 0.80 }	
+  fg[NORMAL] = { 0.30, 0.30, 0.40 }	
+  fg[ACTIVE] = { 0.30, 0.30, 0.40 }	
   fg[PRELIGHT] = { 1.0, 1.0, 1.0 }
-  fg[INSENSITIVE] = { 0.80, 0.80, 0.80 }	
-  fg[SELECTED] = { 0.80, 0.80, 0.80 }	
+  fg[INSENSITIVE] = { 0.30, 0.30, 0.40 }	
+  fg[SELECTED] = { 0.30, 0.30, 0.40 }	
   
-  bg[NORMAL] = { 0.35, 0.35, 0.40 }
-  bg[ACTIVE] = { 0.35, 0.35, 0.40 }
-  bg[PRELIGHT] = "#565690"
-  bg[INSENSITIVE] = { 0.10, 0.10, 0.10 }
-  bg[SELECTED] = { 0, 0.40, 0.60 }
+  bg[NORMAL] = { 0.80, 0.80, 0.80 }
+  bg[ACTIVE] = { 0.80, 0.80, 0.80 }
+  bg[PRELIGHT] = { 0.80, 0.80, 0.80 }
+  bg[INSENSITIVE] = { 0.80, 0.80, 0.80 }
+  bg[SELECTED] = { 0.80, 0.80, 0.80 }
   
-  text[NORMAL] = { 0.80, 0.80, 0.80 }	
-  text[ACTIVE] = { 0.80, 0.80, 0.80 }	
-  text[PRELIGHT] = { 0.80, 0.80, 0.80 }	
-  text[INSENSITIVE] = { 0.80, 0.80, 0.80}	
-  text[SELECTED] = { 1.0, 1.0, 1.0 }
+  text[NORMAL] = { 0.30, 0.30, 0.40 }
+  text[ACTIVE] = { 0.30, 0.30, 0.40 }
+  text[PRELIGHT] = { 0.30, 0.30, 0.40 }
+  text[INSENSITIVE] = { 0.30, 0.30, 0.40 }
+  text[SELECTED] = { 0, 0, 0 }
   
-  base[ACTIVE]     = "#272a2f"
-  base[NORMAL]      =  "#1a1e20"
-  base[PRELIGHT]     = { 0.20, 0.20, 0.20 }
+  base[ACTIVE]     = { 0.80, 0.80, 0.80 }
+  base[NORMAL]      =  { 0.80, 0.80, 0.80 }
+  base[PRELIGHT]     = { 0.90, 0.90, 0.90 }
   base[INSENSITIVE]  = "#4c5159"
-  base[SELECTED]     = { 0.25, 0.25, 0.25 }
+  base[SELECTED]     = { 0.60, 0.60, 0.80 }
 
   engine "clearlooks" 
   {
-    menubarstyle      = 2       # 0 = flat, 1 = sunken, 2 = flat gradient
-    menuitemstyle     = 1       # 0 = flat, 1 = 3d-ish (gradient), 2 = 3d-ish (button)
-    listviewitemstyle = 1       # 0 = flat, 1 = 3d-ish (gradient)
+    menubarstyle      = 0       # 0 = flat, 1 = sunken, 2 = flat gradient
+    menuitemstyle     = 0       # 0 = flat, 1 = 3d-ish (gradient), 2 = 3d-ish (button)
+    listviewitemstyle = 0       # 0 = flat, 1 = 3d-ish (gradient)
     progressbarstyle  = 1       # 0 = candy bar, 1 = fancy candy bar, 2 = flat
   }
 }
 
 style "base_frame"
 {
-	fg[NORMAL] = { 0.80, 0.80, 0.80 }
-	bg[NORMAL] = { 0.35, 0.35, 0.40 }
+	bg[NORMAL] = { 0.80, 0.80, 0.80 }
+	fg[NORMAL] = { 0.35, 0.35, 0.40 }
 }
 
 style "transport_base" = "medium_bold_text"
@@ -140,29 +140,29 @@ style "transport_base" = "medium_bold_text"
   bg[INSENSITIVE] = { 0, 0, 0 }
   bg[SELECTED] = { 0, 0, 0 }
 }
-
+/*
 style "black_mackie_menu_bar"
 {
-  font_name = "sans bold 11"
+  font_name = "%FONT_BOLD_NORMAL%"
   fg[NORMAL] = { 1.0, 1.0, 1.0 }
   bg[NORMAL] = { 0, 0, 0 }
 }
-
+*/
 style "default_buttons_menus" 
 {
-  font_name = "sans 11"
+  font_name = "%FONT_NORMAL%"
   fg[ACTIVE] = { 1.0, 1.0, 1.0 }
   
-  bg[NORMAL] = { 0.30, 0.30, 0.35 }
+  bg[NORMAL] = { 0.80, 0.80, 0.80 }
   bg[ACTIVE] = "#565690"
-  bg[PRELIGHT] = { 0.15, 0.15, 0.20 }
-  bg[INSENSITIVE] = { 0.15, 0.15, 0.20 }
-  bg[SELECTED] = { 0.15, 0.15, 0.20 }	
+  bg[PRELIGHT] = { 0.70, 0.70, 0.90 }
+  bg[INSENSITIVE] = { 0.70, 0.70, 0.90 }
+  bg[SELECTED] = { 0.70, 0.70, 0.90 }
 }
 
 style "very_small_button" = "default_buttons_menus"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_SMALL%"
 	ythickness = 0
 	xthickness = 0
 }
@@ -186,8 +186,8 @@ style "small_red_active_and_selected_button" = "small_button"
 
 style "gain_fader"
 {
-	bg[NORMAL] =   { 0.269, 0.269, 0.300}
-	bg[ACTIVE] =   { 0.152, 0.152, 0.168 }
+	bg[NORMAL] =   { 0.80, 0.80, 0.80 }
+	bg[ACTIVE] =   { 0.80, 0.80, 0.80 }
 }
 
 
@@ -223,21 +223,21 @@ style "track_rec_enable_button_alternate" = "small_button"
 
 style "mixer_track_rec_enable_button" = "track_rec_enable_button"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_SMALL%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_track_rec_enable_button_alternate" = "track_rec_enable_button_alternate"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_SMALL%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_track_rec_enable_button_active" = "track_rec_enable_button_active"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_SMALL%"
 	xthickness = 0
 	ythickness = 0
 }
@@ -275,20 +275,20 @@ style "solo_button_active" = "small_button"
 
 style "mixer_solo_button" = "solo_button"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_SMALL%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_solo_button_alternate" = "solo_button_alternate"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_SMALL%"
 	xthickness = 0
 	ythickness = 0
 }
 style "mixer_solo_button_active" = "solo_button_active"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_SMALL%"
 	xthickness = 0
 	ythickness = 0
 }
@@ -326,35 +326,35 @@ style "mute_button_active" = "small_button"
 
 style "mixer_mute_button" = "mute_button"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_SMALL%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_mute_button_alternate" = "mute_button_alternate"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_SMALL%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_mute_button_active" = "mute_button_active"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_SMALL%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "multiline_combo" = "small_button"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_NORMAL%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_mute_button" = "mute_button"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_SMALL%"
 	xthickness = 0
 	ythickness = 0
 }
@@ -371,13 +371,13 @@ style "mixer_red_active_button" = "very_small_button"
 	fg[ACTIVE] = { 0, 1.0, 1.0 }
 	bg[ACTIVE] = { 0.7, 0, 0 }
 
- 	base[INSENSITIVE] = { 0.16, 0.16, 0.21 }
- 	bg[INSENSITIVE] = { 0.16, 0.16, 0.21 }
+ 	base[INSENSITIVE] = { 0.80, 0.80, 0.80 }
+ 	bg[INSENSITIVE] = { 0.80, 0.80, 0.80 }
 }
 
 style "time_button" = "default_buttons_menus"
 {
-	font_name = "sans 10"
+	font_name = "%FONT_NORMAL%"
 }
 
 style "transport_button"
@@ -448,7 +448,7 @@ style "editor_hscrollbar" = "ardour_adjusters"
 	# make it bigger.
 	# 
 	GtkRange::slider_width = 27
-        GtkScrollbar::slider_width = 27
+	GtkScrollbar::slider_width = 27
 }
 
 style "ardour_progressbars" = "default_buttons_menus"
@@ -459,7 +459,7 @@ style "ardour_progressbars" = "default_buttons_menus"
 
 style "options_window"  = "default_base"
 {
-	font_name = "sans 11"
+	font_name = "%FONT_NORMAL%"
 	fg[PRELIGHT] = { 0.80, 0.80, 0.80 }
 }
 
@@ -477,16 +477,16 @@ style "option_entry"  = "default_base"
 
 style "red_when_active" = "medium_text"
 {
-	fg[NORMAL] = { 0.80, 0.80, 0.80 }
-	bg[NORMAL] = { 0.26, 0.26, 0.31 }
+	fg[NORMAL] = { 0, 0, 0 }
+	bg[NORMAL] = { 0.80, 0.80, 0.80 }
 
-	fg[ACTIVE] = { 0.80, 0.80, 0.80 }
+	fg[ACTIVE] = { 0, 0, 0 }
 	bg[ACTIVE] = { 1.0, 0, 0}
 }
 
 style "xrun_warn"  
 {
-	font_name = "sans bold 18"
+	font_name = "%FONT_BOLD_LARGE%"
 
 	fg[NORMAL] = { 1.0, 1.0, 1.0 }
 	fg[ACTIVE] = { 1.0, 1.0, 1.0 }
@@ -497,7 +497,7 @@ style "xrun_warn"
 	bg[NORMAL] = { 1.0, 0.48, 0.46 }
 	bg[ACTIVE] = { 0.09, 1.0, 0.46 }
 }
-
+/*
 style "menu_bar_base" = "default_base"
 {
 	bg[NORMAL] = { 0.2, 0.2, 0.3 }
@@ -506,7 +506,7 @@ style "menu_bar_base" = "default_base"
 	bg[INSENSITIVE] = { 0, 0, 0 }
 	bg[SELECTED] = { 0, 0, 0 }
 }
-
+*/
 style "fatal_message" = "medium_text"
 {
    fg[ACTIVE] = { 1.0, 0, 1.0 }
@@ -549,14 +549,14 @@ style "warning_message" = "medium_text"
 
 style "medium_entry" = "medium_text"
 {
-	fg[NORMAL] = { 0.70, 0.70, 0.70 }
-	fg[ACTIVE] = { 0.70, 0.70, 0.70 }
+	fg[NORMAL] = { 0, 0, 0 }
+	fg[ACTIVE] = { 0, 0, 0 }
 	fg[SELECTED] = { 1.0, 1.0, 1.0 }
 	
-	bg[NORMAL] = { 0.35, 0.35, 0.40 }
+	bg[NORMAL] = { 0.70, 0.70, 0.70 }
 	
-	base[NORMAL] = { 0, 0, 0 }
-	base[ACTIVE] = { 0, 0, 0 }
+	base[NORMAL] = { 0.70, 0.70, 0.70 }
+	base[ACTIVE] = { 0.70, 0.70, 0.70 }
 	base[SELECTED] = { 0.70, 0.70, 0.70 }
 }
 
@@ -572,30 +572,31 @@ style "medium_entry_noselection_bg" = "medium_entry"
 
 style "medium_bold_entry"  = "medium_bold_text"
 {
-	fg[NORMAL] = { 0.70, 0.70, 0.70 }
-	fg[ACTIVE] = { 0.70, 0.70, 0.70 }
+	fg[NORMAL] = { 0, 0, 0 }
+	fg[ACTIVE] = { 0, 0, 0 }
+	fg[SELECTED] = { 1.0, 1.0, 1.0 }
 	
-	bg[NORMAL] = { 0.35, 0.35, 0.40 }
+	bg[NORMAL] = { 0.70, 0.70, 0.70 }
 	
-	base[NORMAL] = { 0, 0, 0 }
-	base[ACTIVE] = { 0, 0, 0 }
-	base[SELECTED] = { 0, 0, 0 }
+	base[NORMAL] = { 0.70, 0.70, 0.70 }
+	base[ACTIVE] = { 0.70, 0.70, 0.70 }
+	base[SELECTED] = { 0.70, 0.70, 0.70 }
 }
 
 style "small_entry" = "small_text"
 {
-	fg[NORMAL] = { 0.70, 0.70, 0.70 }
+	fg[NORMAL] = { 0, 0, 0 }
 	fg[ACTIVE] = { 0, 1.0, 0 }
 	fg[SELECTED] = { 0, 1.0, 0 }
-	text[NORMAL] = { 0.70, 0.70, 0.70 }
+	text[NORMAL] = { 0, 0, 0 }
 	text[ACTIVE] = { 0, 1.0, 0 }
 	text[SELECTED] = { 0, 1.0, 0 }
-	bg[NORMAL] = { 0.0, 0.0, 0.0 }
-	bg[SELECTED] = { 0.0, 0.0, 0.0 }
-	bg[SELECTED] = { 0.0, 0.0, 0.0 }
-	base[NORMAL] = { 0, 0, 0 }
-	base[ACTIVE] = { 0, 0, 0 }
-	base[SELECTED] = { 0, 0, 0 }
+	bg[NORMAL] = { 0.70, 0.70, 0.70 }
+	bg[SELECTED] = { 0.70, 0.70, 0.70 }
+	bg[SELECTED] = { 0.70, 0.70, 0.70 }
+	base[NORMAL] = { 0.70, 0.70, 0.70 }
+	base[ACTIVE] = { 0.70, 0.70, 0.70 }
+	base[SELECTED] = { 0.70, 0.70, 0.70 }
 }
 
 style "red_active_small_entry" = "small_entry"
@@ -606,14 +607,15 @@ style "red_active_small_entry" = "small_entry"
 
 style "small_bold_entry" = "small_bold_text"
 {
-	fg[NORMAL] = { 0.70, 0.70, 0.70 }
-	fg[ACTIVE] = { 0.70, 0.70, 0.70 }
+	fg[NORMAL] = { 0, 0, 0 }
+	fg[ACTIVE] = { 0, 0, 0 }
+	fg[SELECTED] = { 1.0, 1.0, 1.0 }
 	
-	bg[NORMAL] = { 0.35, 0.35, 0.40 }
+	bg[NORMAL] = { 0.70, 0.70, 0.70 }
 	
-	base[NORMAL] = { 0, 0, 0 }
-	base[ACTIVE] = { 0, 0, 0 }
-	base[SELECTED] = { 0, 0, 0 }
+	base[NORMAL] = { 0.70, 0.70, 0.70 }
+	base[ACTIVE] = { 0.70, 0.70, 0.70 }
+	base[SELECTED] = { 0.70, 0.70, 0.70 }
 }
 
 style "small_red_on_black_entry"  = "small_bold_text"
@@ -628,7 +630,7 @@ style "small_red_on_black_entry"  = "small_bold_text"
 
 style "non_recording_big_clock_display" = "medium_entry"
 {
-	font_name = "sans 60"
+	font_name = "%FONT_MASSIVE%"
 
 	fg[NORMAL] = { 0.50, 1.0, 0.50 }
 	fg[ACTIVE] = { 1.0, 0, 0.0 }
@@ -649,7 +651,7 @@ style "recording_big_clock_display" = "non_recording_big_clock_display"
 
 style "transport_clock_display"
 {
-	font_name = "sans bold 14"
+	font_name = "%FONT_BOLD_BIGGER%"
 	
 	fg[NORMAL] = { 0.50, 1.0, 0.50 }
 	fg[ACTIVE] = { 1.0, 0, 0.0 }
@@ -663,9 +665,14 @@ style "transport_clock_display"
        bg[ACTIVE] = { 0.0, 0.0, 0.0 }
 }
 
+style "transport_clock_display_delta" = "transport_clock_display"
+{
+	fg[NORMAL] = { 0.30, 0.30, 1.0 }
+}
+
 style "tempo_meter_clock_display"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_SMALL%"
 	fg[NORMAL] = { 1.0, 1.0, 1.0 }
 	fg[ACTIVE] = { 1.0, 1.0, 0.0 }
 	fg[SELECTED] = { 1.0, 0, 0 }
@@ -688,45 +695,63 @@ style "default_clock_display" = "medium text"
 
 style "editor_time_ruler" = "small_text"
 {
-	fg[NORMAL] = { 0.80, 0.80, 0.80 }
-	bg[NORMAL] = { 0.09, 0.09, 0.09 }
-}
-
-style "audio_track_base" = "default_base"
-{
-  font_name = "sans 8"
-  fg[NORMAL] = { 0.77, 0.77, 0.72 }	
-  bg[NORMAL] = { 0.18, 0.19, 0.22 }
-  bg[ACTIVE] = { 0.20, 0.20, 0.20 }	
-  bg[PRELIGHT] = { 0.20, 0.20, 0.20 }
-  bg[INSENSITIVE] = { 0.20, 0.20, 0.20 }
-  bg[SELECTED] = { 0.20, 0.20, 0.20 }
+	fg[NORMAL] = { 0, 0, 0 }
+	bg[NORMAL] = { 0.74, 0.74, 0.77 }
 }
 
 style "audio_bus_base"
 {
-  font_name = "sans 8"
+  font_name = "%FONT_SMALLER%"
+  fg[NORMAL] = { 0, 0, 0 }	
+  bg[NORMAL] = { 0.65, 0.65, 0.65 }	
+}
+
+style "audio_track_base" = "default_base"
+{
+  font_name = "%FONT_SMALLER%"
+  fg[NORMAL] = { 0.30, 0.30, 0.35 }	
+  bg[NORMAL] = { 0.70, 0.70, 0.70 }
+  bg[ACTIVE] = { 0.80, 0.80, 0.80 }	
+  bg[PRELIGHT] = { 0.80, 0.80, 0.80 }
+  bg[INSENSITIVE] = { 0.80, 0.80, 0.80 }
+  bg[SELECTED] = { 0.80, 0.80, 0.80 }
+}
+
+style "midi_bus_base"
+{
+  font_name = "%FONT_SMALLER%"
   fg[NORMAL] = { 0.77, 0.77, 0.72 }	
   fg[NORMAL] = { 0.7, 0.8, 0.2 }	
   #bg[NORMAL] = {0, 0.36, 0.40 }
   bg[NORMAL] = "#444466"	
 }
 
+style "midi_track_base" = "default_base"
+{
+  font_name = "%FONT_SMALLER%"
+  fg[NORMAL] = { 0.77, 0.77, 0.72 }	
+  bg[NORMAL] = { 0.48, 0.30, 0.32 }
+  bg[ACTIVE] = { 0.70, 0.70, 0.80 }	
+  bg[PRELIGHT] = { 0.70, 0.70, 0.80 }
+  bg[INSENSITIVE] = { 0.70, 0.70, 0.80 }
+  bg[SELECTED] = { 0.70, 0.70, 0.80 } 
+}
+
 style "track_name_display"
 {
-	font_name = "sans medium 11"
+	font_name = "%FONT_NORMAL%"
 	fg[NORMAL] = { 0.80, 0.80, 0.80 }
 	fg[ACTIVE] = { 0.80, 0.80, 0.80 }
 
-	base[NORMAL] = { 0.06, 0.06, 0.06 }
-	base[ACTIVE] = { 0.26, 0.26, 0.26 }
-	bg[NORMAL] = { 0.26, 0.26, 0.26 }
-	bg[ACTIVE] = { 0.26, 0.26, 0.26 }
+	base[NORMAL] = { 0.80, 0.80, 0.80 }
+	base[ACTIVE] = { 0.80, 0.80, 0.80 }
+	bg[NORMAL] = { 0.80, 0.80, 0.80 }
+	bg[ACTIVE] = { 0.80, 0.80, 0.80 }
 }
 
 style "active_track_name_display"
 {
-	font_name = "sans medium 11"
+	font_name = "%FONT_NORMAL%"
 	text[NORMAL] = { 0.26, 0.26, 0.26 }
 	base[NORMAL] = { 0.89, 0.89, 0.89 }
 }
@@ -788,13 +813,13 @@ style "edit_group_3"
 style "treeview_parent_node"
 {
 	# specifies *just* the color used for whole file rows when not selected
-	fg[NORMAL] = { 0.0, 0.6, 0.85 }
+	fg[NORMAL] = { 0.0, 0.0, 1.0 }
 }
 
 style "treeview_display" = "small_bold_text"
 {
 	# expander arrow border and DnD "icon" text
-	fg[NORMAL] = { 0.8, 0.8, 0.8 } 
+	fg[NORMAL] = { 0, 0, 0 } 
 
 	# background with no rows or no selection, plus
 	# expander arrow core and DnD "icon" background
@@ -807,7 +832,7 @@ style "treeview_display" = "small_bold_text"
  	base[SELECTED] = { 0, 0.75, 0.75 }
 
 	# row text when in normal state and not a parent
-	text[NORMAL] = { 0.80, 0.80, 0.80 }
+	text[NORMAL] = { 0, 0, 0 }
 
 	# selected row text with window focus
 	text[SELECTED] = { 0, 1.0, 1.0 }  
@@ -818,11 +843,11 @@ style "treeview_display" = "small_bold_text"
 
 style "main_canvas_area"
 {
-	bg[NORMAL] = { 0.30, 0.30, 0.34 }
-	bg[ACTIVE] = { 0.30, 0.30, 0.34 }
-	bg[INSENSITIVE] = { 0.30, 0.30, 0.34 }
-	bg[SELECTED] = { 0.30, 0.30, 0.34 }
-	bg[PRELIGHT] = { 0.30, 0.30, 0.34 }
+	bg[NORMAL] = { 0.40, 0.40, 0.40 }
+	bg[ACTIVE] = { 0.40, 0.40, 0.40 }
+	bg[INSENSITIVE] = { 0.40, 0.40, 0.40 }
+	bg[SELECTED] = { 0.40, 0.40, 0.40 }
+	bg[PRELIGHT] = { 0.40, 0.40, 0.40 }
 }
 
 style "track_controls_inactive"
@@ -833,7 +858,7 @@ style "track_controls_inactive"
 	bg[SELECTED] =    { 0.60, 0.60, 0.66 }
 	bg[PRELIGHT] =    { 0.60, 0.60, 0.66 }
 
-	font_name = "sans medium 10"
+	font_name = "%FONT_LARGE%"
 	fg[NORMAL] = { 0.7, 0.8, 0.2 }	
 }
 
@@ -858,7 +883,7 @@ style "automation_track_controls_base"
 # Plugin Editors
 style "plugin_slider" 
 {
-	font_name ="@SANS_BOLD_Big@"
+	font_name ="%FONT_BOLD_BIG%"
 
 	# the slider itself. the inactive part is INSENSITIVE,
 	# the active part is something else.
@@ -893,19 +918,19 @@ style "track_list_display" = "small_bold_text"
  	text[INSENSITIVE] = { 0, 0, 0 }
  	text[SELECTED] = { 0.8, 0.8, 0.8 }
 
-	base[NORMAL] = { 0, 0, 0 }
- 	base[ACTIVE] = { 0, 0, 0 }
- 	base[INSENSITIVE] = { 0, 0, 0 }
- 	base[SELECTED] = { 0, 0, 0 }
+	base[NORMAL] = { 0.70, 0.70, 0.70 }
+ 	base[ACTIVE] = { 0.70, 0.70, 0.70 }
+ 	base[INSENSITIVE] = { 0.70, 0.70, 0.70 }
+ 	base[SELECTED] = { 0.70, 0.70, 0.70 }
 }
 
 style "inspector_track_list_display" = "track_list_display"
 {
  	text[ACTIVE] = { 0.8, 0.8, 0.8 }
 
-	base[NORMAL] = { 0, 0, 0 }
+	base[NORMAL] = { 0.70, 0.70, 0.70 }
  	base[ACTIVE] = { 0.2, 0.2, 0.2 }
- 	base[INSENSITIVE] = { 0, 0, 0 }
+ 	base[INSENSITIVE] = { 0.70, 0.70, 0.70 }
  	base[SELECTED] = { 0.3, 0.3, 0.4 }
 }
 
@@ -914,22 +939,22 @@ style "redirect_list_display"
 	GtkTreeView::horizontal-separator = 0
 	GtkTreeView::vertical-separator = 0
 
-	font_name = "sans 10"
+	font_name = "%FONT_SMALL%"
 	text[NORMAL] = { 0.80, 0.80, 0.80 }
  	text[ACTIVE] = { 0.70, 0.70, 0.70 }
  	text[INSENSITIVE] = { 0, 0, 0 }
  	text[SELECTED] = { 0.9, 0.3, 0.3 }
 
-	base[NORMAL] = { 0, 0, 0 }
- 	base[ACTIVE] = { 0, 0, 0 }
- 	base[INSENSITIVE] = { 0, 0, 0 }
- 	base[SELECTED] = { 0, 0, 0 }
+	base[NORMAL] = { 0.70, 0.70, 0.70 }
+ 	base[ACTIVE] = { 0.70, 0.70, 0.70 }
+ 	base[INSENSITIVE] = { 0.70, 0.70, 0.70 }
+ 	base[SELECTED] = { 0.70, 0.70, 0.70 }
 
 	# these two are explicitly used by the cell renderer for the
         # text
 
 	fg[NORMAL] = { 0.5, 0.5, 0.5 }  # used for inactive
-	fg[ACTIVE] = { 1.0, 1.0, 1.0 }  # used for active
+	fg[ACTIVE] = { 0, 0, 0 }  # used for active
 }
 
 style "inspector_redirect_list_display" = "redirect_list_display"
@@ -985,74 +1010,74 @@ style "selected_strip_frame"
 
 style "flashing_alert" = "very_small_text"
 {
-	fg[NORMAL] = { 0.80, 0.80, 0.80 }
-	bg[NORMAL] = { 0.26, 0.26, 0.31 }
+	fg[NORMAL] = { 0, 0, 0 }
+	bg[NORMAL] = { 0.80, 0.80, 0.80 }
 
-	fg[ACTIVE] = { 0.80, 0.80, 0.80 }
+	fg[ACTIVE] = { 0, 0, 0 }
 	bg[ACTIVE] = { 1.0, 0, 0}
 }
 
 style "selected_io_selector_port_list" = "medium_bold_text"
 {
 
-	GtkTreeView::even-row-color = { 0, 0, 0 }
-	GtkTreeView::odd-row-color = { 0, 0, 0 }
+	GtkTreeView::even-row-color = { 0.70, 0.70, 0.70 }
+	GtkTreeView::odd-row-color = { 0.70, 0.70, 0.70 }
 
 # fg is used to color the fg (text) of the column header button
 
-	fg[NORMAL] = { 0.85, 0.85, 0.85 }
-	fg[SELECTED] = { 0.85, 0.85, 0.85 }
-	fg[ACTIVE] = { 0.85, 0.85, 0.85 }
-	fg[PRELIGHT] = { 0.85, 0.85, 0.85 }
-	fg[INSENSITIVE] = { 0.85, 0.85, 0.85 }
+	fg[NORMAL] = { 0.30, 0.30, 0.35 }
+	fg[SELECTED] = { 0.30, 0.30, 0.35 }
+	fg[ACTIVE] = { 0.30, 0.30, 0.35 }
+	fg[PRELIGHT] = { 0.30, 0.30, 0.35 }
+	fg[INSENSITIVE] = { 0.30, 0.30, 0.35 }
 
 # bg is used used to color the background of the column header button
 
-	bg[NORMAL] = { 0.30, 0.30, 0.35 }
-	bg[ACTIVE] = { 0.30, 0.30, 0.35 }
-	bg[PRELIGHT] = { 0.30, 0.30, 0.35 }
-	bg[INSENSITIVE] = { 0.30, 0.30, 0.35 }
-	bg[SELECTED] = { 0.30, 0.30, 0.35 }
+	bg[NORMAL] = { 0.80, 0.80, 0.80 }
+	bg[ACTIVE] = { 0.80, 0.80, 0.80 }
+	bg[PRELIGHT] = { 0.80, 0.80, 0.80 }
+	bg[INSENSITIVE] = { 0.80, 0.80, 0.80 }
+	bg[SELECTED] = { 0.80, 0.80, 0.80 }
 
 # text is used to color the treeview row text
 
-	text[NORMAL] = { 0.85, 0.85, 0.85 }
-	text[SELECTED] = { 0.85, 0.85, 0.85 }
+	text[NORMAL] = { 0.30, 0.30, 0.35 }
+	text[SELECTED] = { 0.30, 0.30, 0.35 }
 
 # base is used to color a treeview with no rows
 
-	base[NORMAL] = { 0.20, 0.20, 0.25 }
-	base[ACTIVE] = { 0.20, 0.20, 0.25 }
-	base[PRELIGHT] = { 0.20, 0.20, 0.25 }
-	base[INSENSITIVE] = { 0.20, 0.20, 0.25 }
-	base[SELECTED] = { 0.20, 0.20, 0.25 }
+	base[NORMAL] = { 0.70, 0.70, 0.70 }
+	base[ACTIVE] = { 0.70, 0.70, 0.70 }
+	base[PRELIGHT] = { 0.70, 0.70, 0.70 }
+	base[INSENSITIVE] = { 0.70, 0.70, 0.70 }
+	base[SELECTED] = { 0.70, 0.70, 0.70 }
 
 }
 
 style "io_selector_port_list" = "medium_text"
 {
-	GtkTreeView::even-row-color = { 0.20, 0.20, 0.25 }
-	GtkTreeView::odd-row-color = { 0.20, 0.20, 0.25 }
+	GtkTreeView::even-row-color = { 0.70, 0.70, 0.70 }
+	GtkTreeView::odd-row-color = { 0.70, 0.70, 0.70 }
 # fg is used to color the fg (text) of the column header button
 
-	fg[NORMAL] = { 0.70, 0.70, 0.70 }
-	fg[SELECTED] = { 0.70, 0.70, 0.70 }
-	fg[ACTIVE] = { 0.70, 0.70, 0.70 }
-	fg[PRELIGHT] = { 0.70, 0.70, 0.70 }
-	fg[INSENSITIVE] = { 0.70, 0.70, 0.70 }
+	fg[NORMAL] = { 0.30, 0.30, 0.35 }
+	fg[SELECTED] = { 0.30, 0.30, 0.35 }
+	fg[ACTIVE] = { 0.30, 0.30, 0.35 }
+	fg[PRELIGHT] = { 0.30, 0.30, 0.35 }
+	fg[INSENSITIVE] = { 0.30, 0.30, 0.35 }
 
 # bg is used used to color the background of the column header button
 
-	bg[NORMAL] = { 0.30, 0.30, 0.35 }
-	bg[ACTIVE] = { 0.30, 0.30, 0.35 }
-	bg[PRELIGHT] = { 0.30, 0.30, 0.35 }
-	bg[INSENSITIVE] = { 0.30, 0.30, 0.35 }
-	bg[SELECTED] = { 0.30, 0.30, 0.35 }
+	bg[NORMAL] = { 0.80, 0.80, 0.80 }
+	bg[ACTIVE] = { 0.80, 0.80, 0.80 }
+	bg[PRELIGHT] = { 0.80, 0.80, 0.80 }
+	bg[INSENSITIVE] = { 0.80, 0.80, 0.80 }
+	bg[SELECTED] = { 0.80, 0.80, 0.80 }
 
 # text is used to color the treeview row text
 
-	text[NORMAL] = { 0.80, 0.80, 0.80 }
-	text[SELECTED] = { 0.80, 0.80, 0.80 }
+	text[NORMAL] = { 0.30, 0.30, 0.35 }
+	text[SELECTED] = { 0.30, 0.30, 0.35 }
 
 # base is used to color a treeview with no rows
 
@@ -1066,7 +1091,7 @@ style "io_selector_port_list" = "medium_text"
 style "io_selector_notebook" = "default_base"
 {
 	fg[NORMAL] = { 1.0, 1.0, 1.0 }
-        font_name ="sans bold 8"
+        font_name ="%FONT_BOLD_NORMAL%"
 }
 
 style "tearoff_arrow" = "medium_bold_entry"
@@ -1079,23 +1104,23 @@ style "tearoff_arrow" = "medium_bold_entry"
 
 style "meter_metrics_strip" = "default_base"
 {
-	font_name = "sans 5"
-	fg[NORMAL] = { 1.0, 0.8, 0.2 }	
+	font_name = "%FONT_TINY%"
+	fg[NORMAL] = { 1.0, 0.8, 0.2 }
 }
 
 style "location_row_button" = "default_buttons_menus"
 {
-	font_name = "sans 10"
+	font_name = "%FONT_BIG%"
 }
 
 style "location_rows_clock" = "default_clock_display"
 {
-	font_name = "sans 12"
+	font_name = "%FONT_BIG%"
 }
 
 style "pan_slider" 
 {
- 	font_name = "sans 8"
+ 	font_name = "%FONT_NORMAL%"
 
 	fg[NORMAL] = { 0.22, 0.73, 0.22 }
 	fg[ACTIVE] = { 0.22, 0.73, 0.22 }
@@ -1253,7 +1278,7 @@ widget "*TransportRecButton-alternate*" style:highest "transport_rec_button_alte
 widget "*TransportRecButton*" style:highest "transport_rec_button"
 widget "*RecordingXrunWarningWindow" style:highest "xrun_warn"
 widget "*RecordingXrunWarningWindow*" style:highest "xrun_warn"
-widget "*MainMenuBar" style:highest "menu_bar_base"
+/*widget "*MainMenuBar" style:highest "menu_bar_base"*/
 widget "*ErrorMessage" style:highest "error_message"
 widget "*FatalMessage" style:highest "fatal_message"
 widget "*InfoMessage" style:highest "info_message"
@@ -1262,6 +1287,8 @@ widget "*BigClockNonRecording" style:highest "non_recording_big_clock_display"
 widget "*BigClockRecording" style:highest "recording_big_clock_display"
 widget "*TransportClockDisplay" style:highest "transport_clock_display"
 widget "*SecondaryClockDisplay" style:highest "transport_clock_display"
+widget "*TransportClockDisplayDelta" style:highest "transport_clock_display_delta"
+widget "*SecondaryClockDisplayDelta" style:highest "transport_clock_display_delta"
 widget "*AudioClockFramesUpperInfo" style:highest "tempo_meter_clock_display"
 widget "*AudioClockFramesLowerInfo" style:highest "tempo_meter_clock_display"
 widget "*AudioClockSMPTEUpperInfo" style:highest "tempo_meter_clock_display"
@@ -1298,7 +1325,7 @@ widget "*BBTRuler" style:highest "editor_time_ruler"
 widget "*FramesRuler" style:highest "editor_time_ruler"
 widget "*MinSecRuler" style:highest "editor_time_ruler"
 widget "*BaseFrame" style:highest "base_frame"
-widget "*AudioTrackStripBase" style:highest "audio_track_base"
+widget "*AudioTrackStripBase*" style:highest "audio_track_base"
 widget "*TimeAxisViewControlsBaseUnselected" style:highest "audio_track_base"
 widget "*AudioTrackControlsBaseUnselected" style:highest "audio_track_base"
 widget "*AudioTrackFader" style:highest "gain_fader"
@@ -1340,8 +1367,9 @@ widget "*AudioTrackControlsBaseSelected" style:highest "edit_controls_base_selec
 widget "*BusControlsBaseSelected" style:highest "edit_controls_base_selected"
 widget "*AutomationTrackControlsBase" style:highest "automation_track_controls_base"
 widget "*AutomationTrackControlsBaseSelected" style:highest "edit_controls_base_selected"
-widget "*EditorMenuBar*" style:highest "black_mackie_menu_bar"
+/*widget "*EditorMenuBar*" style:highest "black_mackie_menu_bar"
 widget "*MainMenuBar*" style:highest "black_mackie_menu_bar"
+*/
 widget "*ZoomClickBox" style:highest "medium_bold_entry"
 widget "*PluginParameterLabel" style:highest "medium_text"
 widget "*PluginNameInfo" style:highest "plugin_name_text"

@@ -1,31 +1,30 @@
 #
 # This is the GTK style file for Ardour
 #
-#
 
 style "very_small_text"
 {
- 	font_name = "sans 9"
+ 	font_name = "%FONT_SMALL%"
 }
 
 style "small_text"
 {
- 	font_name = "sans 10"
+ 	font_name = "%FONT_NORMAL%"
 }
 
 style "small_bold_text"
 {
- 	font_name = "@SANS_BOLD_Big@"
+ 	font_name = "%FONT_BOLD_NORMAL%"
 }
 
 style "medium_bold_text"
 {
- 	font_name = "@SANS_BOLD_BIG@"
+ 	font_name = "%FONT_BOLD_NORMAL%"
 }
 
 style "medium_text"
 {
- 	font_name = "sans 11"
+ 	font_name = "%FONT_NORMAL%"
 }
 
 style "red_medium_text" = "medium_text"
@@ -35,59 +34,60 @@ style "red_medium_text" = "medium_text"
 	fg[SELECTED] = { 1.0, 0, 0 }
 }
 
-
 style "large_text"
 {
- 	font_name = "sans 18"
+ 	font_name = "%FONT_LARGE%"
 }
 
 style "larger_bold_text"
 {
- 	font_name = "sans bold 14"
+ 	font_name = "%FONT_BOLD_BIGGER%"
 }
 
 style "plugin_name_text"
 {
-	font_name = "sans bold 25"
+	font_name = "%FONT_BOLD_LARGER%"
 	fg[NORMAL] = { 0.80, 0.80, 0.80 }
 }
 
 style "plugin_maker_text"
 {
-	font_name = "sans bold 14"
+	font_name = "%FONT_BOLD_BIGGER%"
 	fg[NORMAL] = { 0.80, 0.80, 0.80 }
 }
 
 style "automation_track_name"
 {
-	font_name = "sans italic 8"
+	font_name = "%FONT_ITALIC_NORMAL%"
 }
 
 style "first_action_message" 
 {
-	font_name = "sans medium 34"
+	font_name = "%FONT_HUGER%"
 }
 
 style "verbose_canvas_cursor"
 {
-	font_name = "sans bold 24"
+	font_name = "%FONT_BOLD_LARGER%"
 }
 
 style "marker_text" 
 {
-	font_name = "sans 9"
+	font_name = "%FONT_NORMAL%"
 }
 
 style "time_axis_view_item_name"
 {
-	font_name = "sans 10"
+	font_name = "%FONT_SMALLER%"
 }
 
 style "default_base" = "medium_text"
 {
+  
   GtkWidget::cursor_color =  {1.0, 1.0, 1.0 }
   GtkButton::default_border = { 0, 0, 0, 0 }
   GtkButton::default_outside_border = { 0, 0, 0, 0 }
+  GtkButton::button_relief = GTK_RELIEF_NONE
   GtkTreeView::vertical-padding = 0
   GtkTreeView::horizontal-padding = 0
   GtkTreeView::even-row-color = { 0, 0, 0 }
@@ -119,10 +119,7 @@ style "default_base" = "medium_text"
 
   engine "clearlooks" 
   {
-    menubarstyle      = 2       # 0 = flat, 1 = sunken, 2 = flat gradient
-    menuitemstyle     = 1       # 0 = flat, 1 = 3d-ish (gradient), 2 = 3d-ish (button)
-    listviewitemstyle = 1       # 0 = flat, 1 = 3d-ish (gradient)
-    progressbarstyle  = 1       # 0 = candy bar, 1 = fancy candy bar, 2 = flat
+    menubarstyle      = 0       # 0 = flat, 1 = sunken, 2 = flat gradient
   }
 }
 
@@ -140,17 +137,17 @@ style "transport_base" = "medium_bold_text"
   bg[INSENSITIVE] = { 0, 0, 0 }
   bg[SELECTED] = { 0, 0, 0 }
 }
-
+/*
 style "black_mackie_menu_bar"
 {
-  font_name = "sans bold 11"
+  font_name = "%FONT_BOLD_NORMAL%"
   fg[NORMAL] = { 1.0, 1.0, 1.0 }
   bg[NORMAL] = { 0, 0, 0 }
 }
-
+*/
 style "default_buttons_menus" 
 {
-  font_name = "sans 11"
+  font_name = "%FONT_NORMAL%"
   fg[ACTIVE] = { 1.0, 1.0, 1.0 }
   
   bg[NORMAL] = { 0.30, 0.30, 0.35 }
@@ -162,7 +159,7 @@ style "default_buttons_menus"
 
 style "very_small_button" = "default_buttons_menus"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_SMALL%"
 	ythickness = 0
 	xthickness = 0
 }
@@ -223,21 +220,21 @@ style "track_rec_enable_button_alternate" = "small_button"
 
 style "mixer_track_rec_enable_button" = "track_rec_enable_button"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_SMALL%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_track_rec_enable_button_alternate" = "track_rec_enable_button_alternate"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_SMALL%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_track_rec_enable_button_active" = "track_rec_enable_button_active"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_SMALL%"
 	xthickness = 0
 	ythickness = 0
 }
@@ -275,20 +272,20 @@ style "solo_button_active" = "small_button"
 
 style "mixer_solo_button" = "solo_button"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_SMALL%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_solo_button_alternate" = "solo_button_alternate"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_SMALL%"
 	xthickness = 0
 	ythickness = 0
 }
 style "mixer_solo_button_active" = "solo_button_active"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_SMALL%"
 	xthickness = 0
 	ythickness = 0
 }
@@ -326,35 +323,35 @@ style "mute_button_active" = "small_button"
 
 style "mixer_mute_button" = "mute_button"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_SMALL%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_mute_button_alternate" = "mute_button_alternate"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_SMALL%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_mute_button_active" = "mute_button_active"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_SMALL%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "multiline_combo" = "small_button"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_NORMAL%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_mute_button" = "mute_button"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_SMALL%"
 	xthickness = 0
 	ythickness = 0
 }
@@ -377,7 +374,7 @@ style "mixer_red_active_button" = "very_small_button"
 
 style "time_button" = "default_buttons_menus"
 {
-	font_name = "sans 10"
+	font_name = "%FONT_NORMAL%"
 }
 
 style "transport_button"
@@ -448,7 +445,7 @@ style "editor_hscrollbar" = "ardour_adjusters"
 	# make it bigger.
 	# 
 	GtkRange::slider_width = 27
-        GtkScrollbar::slider_width = 27
+	GtkScrollbar::slider_width = 27
 }
 
 style "ardour_progressbars" = "default_buttons_menus"
@@ -459,7 +456,7 @@ style "ardour_progressbars" = "default_buttons_menus"
 
 style "options_window"  = "default_base"
 {
-	font_name = "sans 11"
+	font_name = "%FONT_NORMAL%"
 	fg[PRELIGHT] = { 0.80, 0.80, 0.80 }
 }
 
@@ -486,7 +483,7 @@ style "red_when_active" = "medium_text"
 
 style "xrun_warn"  
 {
-	font_name = "sans bold 18"
+	font_name = "%FONT_BOLD_LARGE%"
 
 	fg[NORMAL] = { 1.0, 1.0, 1.0 }
 	fg[ACTIVE] = { 1.0, 1.0, 1.0 }
@@ -497,7 +494,7 @@ style "xrun_warn"
 	bg[NORMAL] = { 1.0, 0.48, 0.46 }
 	bg[ACTIVE] = { 0.09, 1.0, 0.46 }
 }
-
+/*
 style "menu_bar_base" = "default_base"
 {
 	bg[NORMAL] = { 0.2, 0.2, 0.3 }
@@ -506,7 +503,7 @@ style "menu_bar_base" = "default_base"
 	bg[INSENSITIVE] = { 0, 0, 0 }
 	bg[SELECTED] = { 0, 0, 0 }
 }
-
+*/
 style "fatal_message" = "medium_text"
 {
    fg[ACTIVE] = { 1.0, 0, 1.0 }
@@ -628,7 +625,7 @@ style "small_red_on_black_entry"  = "small_bold_text"
 
 style "non_recording_big_clock_display" = "medium_entry"
 {
-	font_name = "sans 60"
+	font_name = "%FONT_MASSIVE%"
 
 	fg[NORMAL] = { 0.50, 1.0, 0.50 }
 	fg[ACTIVE] = { 1.0, 0, 0.0 }
@@ -649,7 +646,7 @@ style "recording_big_clock_display" = "non_recording_big_clock_display"
 
 style "transport_clock_display"
 {
-	font_name = "sans bold 14"
+	font_name = "%FONT_BOLD_BIGGER%"
 	
 	fg[NORMAL] = { 0.50, 1.0, 0.50 }
 	fg[ACTIVE] = { 1.0, 0, 0.0 }
@@ -663,9 +660,14 @@ style "transport_clock_display"
        bg[ACTIVE] = { 0.0, 0.0, 0.0 }
 }
 
+style "transport_clock_display_delta" = "transport_clock_display"
+{
+	fg[NORMAL] = { 0.30, 0.30, 1.0 }
+}
+
 style "tempo_meter_clock_display"
 {
-	font_name = "sans 8"
+	font_name = "%FONT_SMALL%"
 	fg[NORMAL] = { 1.0, 1.0, 1.0 }
 	fg[ACTIVE] = { 1.0, 1.0, 0.0 }
 	fg[SELECTED] = { 1.0, 0, 0 }
@@ -692,9 +694,17 @@ style "editor_time_ruler" = "small_text"
 	bg[NORMAL] = { 0.09, 0.09, 0.09 }
 }
 
+style "audio_bus_base"
+{
+  font_name = "%FONT_SMALLER%"
+  fg[NORMAL] = { 0.77, 0.77, 0.72 }	
+  fg[NORMAL] = { 0.7, 0.8, 0.2 }	
+  bg[NORMAL] = { 0.20, 0.20, 0.26 }	
+}
+
 style "audio_track_base" = "default_base"
 {
-  font_name = "sans 8"
+  font_name = "%FONT_SMALLER%"
   fg[NORMAL] = { 0.77, 0.77, 0.72 }	
   bg[NORMAL] = { 0.18, 0.19, 0.22 }
   bg[ACTIVE] = { 0.20, 0.20, 0.20 }	
@@ -703,18 +713,29 @@ style "audio_track_base" = "default_base"
   bg[SELECTED] = { 0.20, 0.20, 0.20 }
 }
 
-style "audio_bus_base"
+style "midi_bus_base"
 {
-  font_name = "sans 8"
+  font_name = "%FONT_SMALLER%"
   fg[NORMAL] = { 0.77, 0.77, 0.72 }	
   fg[NORMAL] = { 0.7, 0.8, 0.2 }	
   #bg[NORMAL] = {0, 0.36, 0.40 }
   bg[NORMAL] = "#444466"	
 }
 
+style "midi_track_base" = "default_base"
+{
+  font_name = "%FONT_SMALLER%"
+  fg[NORMAL] = { 0.77, 0.77, 0.72 }	
+  bg[NORMAL] = { 0.48, 0.30, 0.32 }
+  bg[ACTIVE] = { 0.20, 0.20, 0.20 }	
+  bg[PRELIGHT] = { 0.20, 0.20, 0.20 }
+  bg[INSENSITIVE] = { 0.20, 0.20, 0.20 }
+  bg[SELECTED] = { 0.20, 0.20, 0.20 }
+}
+
 style "track_name_display"
 {
-	font_name = "sans medium 11"
+	font_name = "%FONT_NORMAL%"
 	fg[NORMAL] = { 0.80, 0.80, 0.80 }
 	fg[ACTIVE] = { 0.80, 0.80, 0.80 }
 
@@ -726,7 +747,7 @@ style "track_name_display"
 
 style "active_track_name_display"
 {
-	font_name = "sans medium 11"
+	font_name = "%FONT_NORMAL%"
 	text[NORMAL] = { 0.26, 0.26, 0.26 }
 	base[NORMAL] = { 0.89, 0.89, 0.89 }
 }
@@ -833,17 +854,17 @@ style "track_controls_inactive"
 	bg[SELECTED] =    { 0.60, 0.60, 0.66 }
 	bg[PRELIGHT] =    { 0.60, 0.60, 0.66 }
 
-	font_name = "sans medium 10"
+	font_name = "%FONT_LARGE%"
 	fg[NORMAL] = { 0.7, 0.8, 0.2 }	
 }
 
 style "edit_controls_base_selected"
 {
-	bg[NORMAL] = { 0.60, 0.54, 0.60 }
-	bg[ACTIVE] = { 0.60, 0.54, 0.60 }
-	bg[INSENSITIVE] = { 0.60, 0.54, 0.60 }
-	bg[SELECTED] = { 0.60, 0.54, 0.60 }
-	bg[PRELIGHT] = { 0.60, 0.54, 0.60 }
+	bg[NORMAL] = { 0.32, 0.32, 0.54 }
+	bg[ACTIVE] = { 0.32, 0.32, 0.54 }
+	bg[INSENSITIVE] = { 0.32, 0.32, 0.54 }
+	bg[SELECTED] = { 0.32, 0.32, 0.54 }
+	bg[PRELIGHT] = { 0.32, 0.32, 0.54 }
 }
 
 style "automation_track_controls_base"
@@ -858,7 +879,7 @@ style "automation_track_controls_base"
 # Plugin Editors
 style "plugin_slider" 
 {
-	font_name ="@SANS_BOLD_Big@"
+	font_name ="%FONT_BOLD_BIG%"
 
 	# the slider itself. the inactive part is INSENSITIVE,
 	# the active part is something else.
@@ -914,7 +935,7 @@ style "redirect_list_display"
 	GtkTreeView::horizontal-separator = 0
 	GtkTreeView::vertical-separator = 0
 
-	font_name = "sans 10"
+	font_name = "%FONT_SMALL%"
 	text[NORMAL] = { 0.80, 0.80, 0.80 }
  	text[ACTIVE] = { 0.70, 0.70, 0.70 }
  	text[INSENSITIVE] = { 0, 0, 0 }
@@ -1066,7 +1087,7 @@ style "io_selector_port_list" = "medium_text"
 style "io_selector_notebook" = "default_base"
 {
 	fg[NORMAL] = { 1.0, 1.0, 1.0 }
-        font_name ="sans bold 8"
+        font_name ="%FONT_BOLD_NORMAL%"
 }
 
 style "tearoff_arrow" = "medium_bold_entry"
@@ -1079,23 +1100,23 @@ style "tearoff_arrow" = "medium_bold_entry"
 
 style "meter_metrics_strip" = "default_base"
 {
-	font_name = "sans 5"
+	font_name = "%FONT_TINY%"
 	fg[NORMAL] = { 1.0, 0.8, 0.2 }	
 }
 
 style "location_row_button" = "default_buttons_menus"
 {
-	font_name = "sans 10"
+	font_name = "%FONT_BIG%"
 }
 
 style "location_rows_clock" = "default_clock_display"
 {
-	font_name = "sans 12"
+	font_name = "%FONT_BIG%"
 }
 
 style "pan_slider" 
 {
- 	font_name = "sans 8"
+ 	font_name = "%FONT_NORMAL%"
 
 	fg[NORMAL] = { 0.22, 0.73, 0.22 }
 	fg[ACTIVE] = { 0.22, 0.73, 0.22 }
@@ -1253,7 +1274,7 @@ widget "*TransportRecButton-alternate*" style:highest "transport_rec_button_alte
 widget "*TransportRecButton*" style:highest "transport_rec_button"
 widget "*RecordingXrunWarningWindow" style:highest "xrun_warn"
 widget "*RecordingXrunWarningWindow*" style:highest "xrun_warn"
-widget "*MainMenuBar" style:highest "menu_bar_base"
+/*widget "*MainMenuBar" style:highest "menu_bar_base"*/
 widget "*ErrorMessage" style:highest "error_message"
 widget "*FatalMessage" style:highest "fatal_message"
 widget "*InfoMessage" style:highest "info_message"
@@ -1262,6 +1283,8 @@ widget "*BigClockNonRecording" style:highest "non_recording_big_clock_display"
 widget "*BigClockRecording" style:highest "recording_big_clock_display"
 widget "*TransportClockDisplay" style:highest "transport_clock_display"
 widget "*SecondaryClockDisplay" style:highest "transport_clock_display"
+widget "*TransportClockDisplayDelta" style:highest "transport_clock_display_delta"
+widget "*SecondaryClockDisplayDelta" style:highest "transport_clock_display_delta"
 widget "*AudioClockFramesUpperInfo" style:highest "tempo_meter_clock_display"
 widget "*AudioClockFramesLowerInfo" style:highest "tempo_meter_clock_display"
 widget "*AudioClockSMPTEUpperInfo" style:highest "tempo_meter_clock_display"
@@ -1299,8 +1322,10 @@ widget "*FramesRuler" style:highest "editor_time_ruler"
 widget "*MinSecRuler" style:highest "editor_time_ruler"
 widget "*BaseFrame" style:highest "base_frame"
 widget "*AudioTrackStripBase" style:highest "audio_track_base"
+widget "*MidiTrackStripBase" style:highest "midi_track_base"
 widget "*TimeAxisViewControlsBaseUnselected" style:highest "audio_track_base"
 widget "*AudioTrackControlsBaseUnselected" style:highest "audio_track_base"
+widget "*MidiTrackControlsBaseUnselected" style:highest "midi_track_base"
 widget "*AudioTrackFader" style:highest "gain_fader"
 widget "*AudioBusStripBase" style:highest "audio_bus_base"
 widget "*BusControlsBaseUnselected" style:highest "audio_bus_base"
@@ -1335,13 +1360,16 @@ widget "*AudioTrackControlsBaseInactiveSelected" style:highest "track_controls_i
 widget "*BusControlsBaseInactiveSelected" style:highest "track_controls_inactive"
 widget "*AutomationTrackControlsBaseInactiveSelected" style:highest "track_controls_inactive"
 widget "*AudioTrackStripBaseInactive" style:highest "track_controls_inactive"
+widget "*MidiTrackStripBaseInactive" style:highest "track_controls_inactive"
 widget "*AudioBusStripBaseInactive" style:highest "track_controls_inactive"
 widget "*AudioTrackControlsBaseSelected" style:highest "edit_controls_base_selected"
+widget "*MidiTrackControlsBaseSelected" style:highest "edit_controls_base_selected"
 widget "*BusControlsBaseSelected" style:highest "edit_controls_base_selected"
 widget "*AutomationTrackControlsBase" style:highest "automation_track_controls_base"
 widget "*AutomationTrackControlsBaseSelected" style:highest "edit_controls_base_selected"
-widget "*EditorMenuBar*" style:highest "black_mackie_menu_bar"
+/*widget "*EditorMenuBar*" style:highest "black_mackie_menu_bar"
 widget "*MainMenuBar*" style:highest "black_mackie_menu_bar"
+*/
 widget "*ZoomClickBox" style:highest "medium_bold_entry"
 widget "*PluginParameterLabel" style:highest "medium_text"
 widget "*PluginNameInfo" style:highest "plugin_name_text"
