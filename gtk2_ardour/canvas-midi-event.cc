@@ -43,6 +43,8 @@ CanvasMidiEvent::CanvasMidiEvent(MidiRegionView& region, Item* item, const ARDOU
 bool
 CanvasMidiEvent::on_event(GdkEvent* ev)
 {
+	static uint8_t drag_delta_note = 0;
+	static double  drag_delta_x = 0;
 	static double last_x, last_y;
 	double event_x, event_y, dx, dy;
 
@@ -85,14 +87,17 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 		_item->property_parent().get_value()->w2i(event_x, event_y);
 
 		switch (_state) {
-		case Pressed:
+		case Pressed: // Drag begin
 			_item->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
 					Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
 			_state = Dragging;
 			last_x = event_x;
 			last_y = event_y;
+			drag_delta_x = 0;
+			drag_delta_note = 0;
 			return true;
-		case Dragging:
+
+		case Dragging: // Drag motion
 			if (ev->motion.is_hint) {
 				int t_x;
 				int t_y;
@@ -107,12 +112,20 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 			
 			last_x = event_x;
 
+			drag_delta_x += dx;
+
 			// Snap to note rows
 			if (abs(dy) < _region.note_height()) {
 				dy = 0.0;
 			} else {
-				dy = _region.note_height() * ((dy > 0) ? 1 : -1);
-				last_y = event_y;
+				int8_t this_delta_note;
+				if (dy > 0)
+					this_delta_note = (int8_t)ceil(dy / _region.note_height());
+				else
+					this_delta_note = (int8_t)floor(dy / _region.note_height());
+				drag_delta_note -= this_delta_note;
+				dy = _region.note_height() * this_delta_note;
+				last_y = last_y + dy;
 			}
 
 			_item->move(dx, dy);
@@ -124,6 +137,10 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 		break;
 	
 	case GDK_BUTTON_RELEASE:
+		event_x = ev->button.x;
+		event_y = ev->button.y;
+		_item->property_parent().get_value()->w2i(event_x, event_y);
+
 		switch (_state) {
 		case Pressed: // Clicked
 			_state = None;
@@ -132,15 +149,21 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 			_item->ungrab(ev->button.time);
 			_state = None;
 			if (_note) {
-				cerr << "Move and stuff." << endl;
 				// This would be nicer with a MoveCommand that doesn't need to copy...
-				/*_region.start_delta_command();
+				_region.start_delta_command();
 				_region.command_remove_note(this);
-				Note copy_of_me(*this); 
-				copy_of_me.time = trackview.editor.pixel_to_frame(property_x1());
-				copy_of_me.note = stuff;
+				MidiModel::Note copy(*_note); 
+				
+				double delta_t = _region.midi_view()->editor.pixel_to_frame(
+						abs(drag_delta_x));
+				if (drag_delta_x < 0)
+					delta_t *= -1;
+
+				copy.set_time(_note->time() + delta_t);
+				copy.set_note(_note->note() + drag_delta_note);
+
+				_region.command_add_note(copy);
 				_region.apply_command();
-				*/
 			}
 			return true;
 		default:

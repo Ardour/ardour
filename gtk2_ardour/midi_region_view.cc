@@ -231,13 +231,11 @@ MidiRegionView::create_note_at(double x, double y)
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 	MidiStreamView* const view = mtv->midi_view();
 
-	const uint8_t note_range = view->highest_note() - view->lowest_note() + 1;
-	const double footer_height = name_highlight->property_y2() - name_highlight->property_y1();
-	const double roll_height = trackview.height - footer_height;
-
 	get_canvas_group()->w2i(x, y);
 
-	double note = floor((roll_height - y) / roll_height * (double)note_range) + view->lowest_note();
+	double note = floor((contents_height() - y) / contents_height() * (double)contents_note_range())
+			+ view->lowest_note();
+
 	assert(note >= 0.0);
 	assert(note <= 127.0);
 
@@ -418,7 +416,7 @@ MidiRegionView::add_event (const MidiEvent& ev)
 	if (midi_view()->note_mode() == Sustained) {
 		if ((ev.buffer()[0] & 0xF0) == MIDI_CMD_NOTE_ON) {
 			const Byte& note = ev.buffer()[1];
-			const double y1 = note_y(note);
+			const double y1 = note_to_y(note);
 
 			CanvasNote* ev_rect = new CanvasNote(*this, *group);
 			ev_rect->property_x1() = trackview.editor.frame_to_pixel (
@@ -451,7 +449,7 @@ MidiRegionView::add_event (const MidiEvent& ev)
 		const Byte& note = ev.buffer()[1];
 		const double diamond_size = std::min(note_height(), 5.0);
 		const double x = trackview.editor.frame_to_pixel((nframes_t)ev.time());
-		const double y = note_y(note) + (diamond_size / 2.0);
+		const double y = note_to_y(note) + (diamond_size / 2.0);
 
 		CanvasHit* ev_diamond = new CanvasHit(*this, *group, diamond_size);
 		ev_diamond->move(x, y);

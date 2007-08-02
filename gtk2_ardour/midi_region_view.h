@@ -79,10 +79,14 @@ class MidiRegionView : public RegionView
 	inline double note_height() const
 		{ return contents_height() / (double)contents_note_range(); }
 			
-	inline double note_y(uint8_t note) const
+	inline double note_to_y(uint8_t note) const
 		{ return trackview.height
 				- (contents_height() * (note - midi_stream_view()->lowest_note() + 1))
 				- footer_height() - 3.0; }
+	
+	inline uint8_t y_to_note(double y) const
+		{ return (uint8_t)floor((contents_height() - y)
+				/ contents_height() * (double)contents_note_range()); }
 	
 	void set_y_position_and_height (double, double);
     
@@ -101,8 +105,16 @@ class MidiRegionView : public RegionView
 
 	void display_model(boost::shared_ptr<ARDOUR::MidiModel> model);
 
+	/* This stuff is a bit boilerplatey ATM.  Work in progress. */
+
 	inline void start_remove_command() {
 		_command_mode = Remove;
+		if (!_delta_command)
+			_delta_command = _model->new_delta_command();
+	}
+	
+	inline void start_delta_command() {
+		_command_mode = Delta;
 		if (!_delta_command)
 			_delta_command = _model->new_delta_command();
 	}
@@ -111,6 +123,12 @@ class MidiRegionView : public RegionView
 		if (_delta_command && ev->note()) {
 			_delta_command->remove(*ev->note());
 			ev->selected(true);
+		}
+	}
+	
+	void command_add_note(ARDOUR::MidiModel::Note& note) {
+		if (_delta_command) {
+			_delta_command->add(note);
 		}
 	}
 
@@ -169,7 +187,7 @@ class MidiRegionView : public RegionView
 	ArdourCanvas::CanvasNote**           _active_notes;
 	ARDOUR::MidiModel::DeltaCommand*     _delta_command;
 	
-	enum CommandMode { None, Remove };
+	enum CommandMode { None, Remove, Delta };
 	CommandMode _command_mode;
 
 };
