@@ -4,17 +4,17 @@
 
 style "very_small_text"
 {
- 	font_name = "%FONT_SMALL%"
+ 	font_name = "%FONT_SMALLER%"
 }
 
 style "small_text"
 {
- 	font_name = "%FONT_NORMAL%"
+ 	font_name = "%FONT_SMALL%"
 }
 
 style "small_bold_text"
 {
- 	font_name = "%FONT_BOLD_NORMAL%"
+ 	font_name = "%FONT_BOLD_SMALL%"
 }
 
 style "medium_bold_text"
@@ -73,7 +73,7 @@ style "verbose_canvas_cursor"
 
 style "marker_text" 
 {
-	font_name = "%FONT_NORMAL%"
+	font_name = "%FONT_SMALL%"
 }
 
 style "time_axis_view_item_name"
@@ -159,7 +159,7 @@ style "default_buttons_menus"
 
 style "very_small_button" = "default_buttons_menus"
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLER%"
 	ythickness = 0
 	xthickness = 0
 }
@@ -220,21 +220,21 @@ style "track_rec_enable_button_alternate" = "small_button"
 
 style "mixer_track_rec_enable_button" = "track_rec_enable_button"
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLER%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_track_rec_enable_button_alternate" = "track_rec_enable_button_alternate"
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLER%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_track_rec_enable_button_active" = "track_rec_enable_button_active"
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLER%"
 	xthickness = 0
 	ythickness = 0
 }
@@ -272,20 +272,20 @@ style "solo_button_active" = "small_button"
 
 style "mixer_solo_button" = "solo_button"
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLERER%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_solo_button_alternate" = "solo_button_alternate"
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLERER%"
 	xthickness = 0
 	ythickness = 0
 }
 style "mixer_solo_button_active" = "solo_button_active"
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLERER%"
 	xthickness = 0
 	ythickness = 0
 }
@@ -323,21 +323,21 @@ style "mute_button_active" = "small_button"
 
 style "mixer_mute_button" = "mute_button"
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLERER%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_mute_button_alternate" = "mute_button_alternate"
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLERER%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_mute_button_active" = "mute_button_active"
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLERER%"
 	xthickness = 0
 	ythickness = 0
 }
@@ -351,7 +351,7 @@ style "multiline_combo" = "small_button"
 
 style "mixer_mute_button" = "mute_button"
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLER%"
 	xthickness = 0
 	ythickness = 0
 }
@@ -667,7 +667,7 @@ style "transport_clock_display_delta" = "transport_clock_display"
 
 style "tempo_meter_clock_display"
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLER%"
 	fg[NORMAL] = { 1.0, 1.0, 1.0 }
 	fg[ACTIVE] = { 1.0, 1.0, 0.0 }
 	fg[SELECTED] = { 1.0, 0, 0 }
@@ -1098,10 +1098,10 @@ style "tearoff_arrow" = "medium_bold_entry"
 	bg[PRELIGHT] = { 0.80, 0.80, 0.80 }
 }
 
-style "meter_metrics_strip" = "default_base"
+style "meter_metrics_strip" = "audio_track_base"
 {
 	font_name = "%FONT_TINY%"
-	fg[NORMAL] = { 1.0, 0.8, 0.2 }	
+	fg[NORMAL] = { 1.0, 0.8, 0.6 }	
 }
 
 style "location_row_button" = "default_buttons_menus"

@@ -197,8 +197,8 @@ if File.exist?(ppc_libdir) and File.exist?(i386_libdir) then
   if not File.exist?("Ardour2.app/Contents/Resources/etc/ardour2") then
     Dir.mkdir "Ardour2.app/Contents/Resources/etc/ardour2" 
   end
-  `cp ../../gtk2_ardour/ardour.bindings ../../gtk2_ardour/ardour.colors ../../gtk2_ardour/ardour.menus Ardour2.app/Contents/Resources/etc/ardour2/`
-  `cp ../../ardour.rc ../../ardour_system.rc Ardour2.app/Contents/Resources/etc/ardour2/`
+  `cp ../../gtk2_ardour/ardour.bindings  ../../gtk2_ardour/ardour.menus Ardour2.app/Contents/Resources/etc/ardour2/`
+  `cp ../../ardour_system.rc Ardour2.app/Contents/Resources/etc/ardour2/`
   `cp ../../gtk2_ardour/ardour2_ui_default.conf Ardour2.app/Contents/Resources/etc/ardour2/`
   `cp ../../gtk2_ardour/ardour2_ui_light.rc Ardour2.app/Contents/Resources/etc/ardour2/`
   `cp ../../gtk2_ardour/ardour2_ui_dark.rc Ardour2.app/Contents/Resources/etc/ardour2/`
