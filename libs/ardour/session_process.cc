@@ -450,6 +450,7 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 	_slave->speed_and_position (slave_speed, slave_transport_frame);
 
 	if (!_slave->locked()) {
+		cerr << "Slave not locked, not rolling\n";
 		goto noroll;
 	}
 

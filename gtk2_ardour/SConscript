@@ -417,7 +417,7 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
 					'ardour.sh.in',
 					'ardev_common.sh.in',
 					'ardev', 'ardbg',
-                                        'ardour2_ui_dark.rc', 'ardour2_ui_light.rc', 'splash.png',
+                                        'ardour2_ui_dark.rc.in', 'ardour2_ui_light.rc.in', 'splash.png',
                                         'ardour.menus', 'ardour.bindings.in', 'ardour2_ui_default.conf',
 					'editor_xpms'
                                         ] +
