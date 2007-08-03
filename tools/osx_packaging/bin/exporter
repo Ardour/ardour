@@ -18,7 +18,7 @@ export "GS_LIB=$TOP/share/ghostscript/8.51/lib:$TOP/share/ghostscript/fonts"
 export LANG=`grep '\b'\`defaults read .GlobalPreferences AppleCollationOrder\`_\
        /usr/share/locale/locale.alias | sed -n 's/.*\(.._..\)\..*/\1/p;1q'`
 
-export ARDOUR2_UI_RC=ardour2_ui.rc
+#export ARDOUR2_UI_RC=ardour2_ui.rc
 export ARDOUR_CONFIG_PATH="$TOP/etc"
 export ARDOUR_MODULE_PATH="$TOP/lib/"
 export ARDOUR_DATA_PATH="$TOP/share"
