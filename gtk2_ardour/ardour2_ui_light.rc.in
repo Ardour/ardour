@@ -1105,7 +1105,6 @@ style "tearoff_arrow" = "medium_bold_entry"
 style "meter_metrics_strip" = "audio_track_base"
 {
 	font_name = "%FONT_TINY%"
-	fg[NORMAL] = { 1.0, 0.8, 0.6 }
 }
 
 style "location_row_button" = "default_buttons_menus"

@@ -228,7 +228,6 @@ GainMeter::render_metrics (Gtk::Widget& w)
 {
 	Glib::RefPtr<Gdk::Window> win (w.get_window());
 	Glib::RefPtr<Gdk::GC> fg_gc (w.get_style()->get_fg_gc (Gtk::STATE_NORMAL));
-	Glib::RefPtr<Gdk::GC> text_gc (w.get_style()->get_text_gc (Gtk::STATE_NORMAL));
 	Glib::RefPtr<Gdk::GC> bg_gc (w.get_style()->get_bg_gc (Gtk::STATE_NORMAL));
 	gint width, height;
 	int  db_points[] = { -50, -40, -20, -30, -10, -3, 0, 4 };
