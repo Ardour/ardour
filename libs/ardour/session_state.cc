@@ -3163,10 +3163,16 @@ Session::config_changed (const char* parameter_name)
 
 		poke_midi_thread ();
 
-	} else if (PARAM_IS ("mmc-device-id")) {
+	} else if (PARAM_IS ("mmc-device-id") || PARAM_IS ("mmc-receive-id")) {
 
 		if (mmc) {
-			mmc->set_device_id (Config->get_mmc_device_id());
+			mmc->set_receive_device_id (Config->get_mmc_receive_device_id());
+		}
+
+	} else if (PARAM_IS ("mmc-send-id")) {
+
+		if (mmc) {
+			mmc->set_send_device_id (Config->get_mmc_send_device_id());
 		}
 
 	} else if (PARAM_IS ("midi-control")) {

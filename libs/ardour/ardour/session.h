@@ -731,7 +731,8 @@ class Session : public PBD::StatefulDestructible
 
 	void deliver_midi (MIDI::Port*, MIDI::byte*, int32_t size);
 
-	void set_mmc_device_id (uint32_t id);
+	void set_mmc_receive_device_id (uint32_t id);
+	void set_mmc_send_device_id (uint32_t id);
 	
 	/* Scrubbing */
 

@@ -126,17 +126,26 @@ Session::set_mtc_port (string port_tag)
 }
 
 void
-Session::set_mmc_device_id (uint32_t device_id)
+Session::set_mmc_receive_device_id (uint32_t device_id)
 {
 	if (mmc) {
-		mmc->set_device_id (device_id);
+		mmc->set_receive_device_id (device_id);
+	}
+}
+
+void
+Session::set_mmc_send_device_id (uint32_t device_id)
+{
+	if (mmc) {
+		mmc->set_send_device_id (device_id);
 	}
 }
 
 int
 Session::set_mmc_port (string port_tag)
 {
-	MIDI::byte old_device_id = 0;
+	MIDI::byte old_recv_device_id = 0;
+	MIDI::byte old_send_device_id = 0;
 	bool reset_id = false;
 
 	if (port_tag.length() == 0) {
@@ -156,7 +165,8 @@ Session::set_mmc_port (string port_tag)
 	_mmc_port = port;
 
 	if (mmc) {
-		old_device_id = mmc->device_id();
+		old_recv_device_id = mmc->receive_device_id();
+		old_recv_device_id = mmc->send_device_id();
 		reset_id = true;
 		delete mmc;
 	}
@@ -166,7 +176,8 @@ Session::set_mmc_port (string port_tag)
 					MMC_ResponseSignature);
 
 	if (reset_id) {
-		mmc->set_device_id (old_device_id);
+		mmc->set_receive_device_id (old_recv_device_id);
+		mmc->set_send_device_id (old_send_device_id);
 	}
 
 	mmc->Play.connect 
@@ -385,7 +396,7 @@ Session::setup_midi_control ()
 	
 	mmc_buffer[0] = 0xf0; // SysEx
 	mmc_buffer[1] = 0x7f; // Real Time SysEx ID for MMC
-	mmc_buffer[2] = 0x7f; // "broadcast" device ID
+	mmc_buffer[2] = mmc->send_device_id();
 	mmc_buffer[3] = 0x6;  // MCC
 
 	/* Set up the qtr frame message */

@@ -78,8 +78,10 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	  /* MIDI */
 
 	  midi_port_table (4, 11),
-	  mmc_device_id_adjustment (0.0, 0.0, (double) 0x7f, 1.0, 16.0),
-	  mmc_device_id_spinner (mmc_device_id_adjustment),
+	  mmc_receive_device_id_adjustment (0.0, 0.0, (double) 0x7f, 1.0, 16.0),
+	  mmc_receive_device_id_spinner (mmc_receive_device_id_adjustment),
+	  mmc_send_device_id_adjustment (0.0, 0.0, (double) 0x7f, 1.0, 16.0),
+	  mmc_send_device_id_spinner (mmc_send_device_id_adjustment),
 	  add_midi_port_button (_("Add new MIDI port")),
 
 	  /* Click */
@@ -350,13 +352,15 @@ void
 OptionEditor::setup_midi_options ()
 {
 	HBox* hbox;
+	Label* label;
 
 	midi_port_table.set_row_spacings (6);
 	midi_port_table.set_col_spacings (10);
 
 	redisplay_midi_ports ();
 
-	mmc_device_id_adjustment.signal_value_changed().connect (mem_fun (*this, &OptionEditor::mmc_device_id_adjusted));
+	mmc_receive_device_id_adjustment.signal_value_changed().connect (mem_fun (*this, &OptionEditor::mmc_receive_device_id_adjusted));
+	mmc_send_device_id_adjustment.signal_value_changed().connect (mem_fun (*this, &OptionEditor::mmc_send_device_id_adjusted));
 
 	hbox = manage (new HBox);
 	hbox->set_border_width (6);
@@ -364,6 +368,22 @@ OptionEditor::setup_midi_options ()
 
 	midi_packer.pack_start (*hbox, false, false);
 	midi_packer.pack_start (add_midi_port_button, false, false);
+
+	hbox = manage (new HBox);
+	hbox->set_border_width (6);
+	hbox->set_spacing (6);
+	label = (manage (new Label (_("Inbound MMC Device ID")))); 
+	hbox->pack_start (mmc_receive_device_id_spinner, false, false);
+	hbox->pack_start (*label, false, false);
+	midi_packer.pack_start (*hbox, false, false);
+
+	hbox = manage (new HBox);
+	hbox->set_border_width (6);
+	hbox->set_spacing (6);
+	label = (manage (new Label (_("Outbound MMC Device ID")))); 
+	hbox->pack_start (mmc_send_device_id_spinner, false, false);
+	hbox->pack_start (*label, false, false);
+	midi_packer.pack_start (*hbox, false, false);
 
 	add_midi_port_button.signal_clicked().connect (mem_fun (*this, &OptionEditor::add_midi_port));
 }
@@ -432,13 +452,6 @@ OptionEditor::redisplay_midi_ports ()
 	midi_port_table_widgets.push_back (vsep);
 	midi_port_table.attach (*vsep, 7, 8, 0, 8);
 	
-	label = (manage (new Label (_("MMC Device ID")))); 
-	label->show ();
-	midi_port_table_widgets.push_back (label);
-	midi_port_table.attach (*label, 9, 10, 0, 1);
-	midi_port_table_widgets.push_back (&mmc_device_id_spinner);
-	midi_port_table.attach (mmc_device_id_spinner, 9, 10, 1, 2);
-
 	for (n = 0, i = ports.begin(); i != ports.end(); ++n, ++i) {
 
 		ToggleButton* tb;
@@ -688,12 +701,22 @@ OptionEditor::map_port_online (MIDI::Port* port, ToggleButton* tb)
 }
 
 void
-OptionEditor::mmc_device_id_adjusted ()
+OptionEditor::mmc_receive_device_id_adjusted ()
 {
-	uint8_t id = (uint8_t) mmc_device_id_spinner.get_value();
+	uint8_t id = (uint8_t) mmc_receive_device_id_spinner.get_value();
 
-	if (id != Config->get_mmc_device_id()) {
-		Config->set_mmc_device_id (id);
+	if (id != Config->get_mmc_receive_device_id()) {
+		Config->set_mmc_receive_device_id (id);
+	}
+}
+
+void
+OptionEditor::mmc_send_device_id_adjusted ()
+{
+	uint8_t id = (uint8_t) mmc_send_device_id_spinner.get_value();
+
+	if (id != Config->get_mmc_send_device_id()) {
+		Config->set_mmc_send_device_id (id);
 	}
 }
 

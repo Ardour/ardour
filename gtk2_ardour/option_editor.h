@@ -112,8 +112,10 @@ class OptionEditor : public Gtk::Dialog
 
 	Gtk::Table      midi_port_table;
 	std::vector<Gtk::Widget*> midi_port_table_widgets;
-	Gtk::Adjustment mmc_device_id_adjustment;
-	Gtk::SpinButton mmc_device_id_spinner;
+	Gtk::Adjustment mmc_receive_device_id_adjustment;
+	Gtk::SpinButton mmc_receive_device_id_spinner;
+	Gtk::Adjustment mmc_send_device_id_adjustment;
+	Gtk::SpinButton mmc_send_device_id_spinner;
 	Gtk::Button     add_midi_port_button;
 
 	void add_midi_port ();
@@ -129,7 +131,8 @@ class OptionEditor : public Gtk::Dialog
 	void midi_port_chosen (MIDI::Port*,Gtk::RadioButton*, Gtk::Button*);
 	bool port_removable (MIDI::Port*);
 
-	void mmc_device_id_adjusted ();
+	void mmc_receive_device_id_adjusted ();
+	void mmc_send_device_id_adjusted ();
 
 	void map_port_online (MIDI::Port*, Gtk::ToggleButton*);
 
