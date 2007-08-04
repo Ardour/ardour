@@ -814,13 +814,17 @@ Session::load_state (string snapshot_name)
 		backup_path += "-1";
 		backup_path += _statefile_suffix;
 
-		info << string_compose (_("Copying old session file %1 to %2\nUse %2 with Ardour versions before 2.0 from now on"),
-					xmlpath, backup_path) 
-		     << endmsg;
+		/* don't make another copy if it already exists */
 
-		copy_file (xmlpath, backup_path);
-
-		/* if it fails, don't worry. right? */
+		if (!Glib::file_test (backup_path, Glib::FILE_TEST_EXISTS)) {
+			info << string_compose (_("Copying old session file %1 to %2\nUse %2 with Ardour versions before 2.0 from now on"),
+						xmlpath, backup_path) 
+			     << endmsg;
+			
+			copy_file (xmlpath, backup_path);
+			
+			/* if it fails, don't worry. right? */
+		}
 	}
 
 	return 0;
