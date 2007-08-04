@@ -112,6 +112,9 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	 * @param t Snap threshold in `units'.
 	 */
 	virtual void set_snap_threshold (double t) = 0;
+	
+	/** Snap a value according to the current snap setting. */
+	virtual void snap_to (nframes_t& first, int32_t direction = 0, bool for_mark = false) = 0;
 
 	/** Undo some transactions.
 	 * @param n Number of transactions to undo.

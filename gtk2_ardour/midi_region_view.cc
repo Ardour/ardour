@@ -190,9 +190,12 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 				drag_start_x = event_x;
 				drag_start_y = event_y;
 				
-				drag_rect = new ArdourCanvas::SimpleRect(*group);
-				drag_rect->property_x1() = event_x;
+				nframes_t event_frame = midi_view()->editor.pixel_to_frame(event_x);
+				midi_view()->editor.snap_to(event_frame);
 
+				drag_rect = new ArdourCanvas::SimpleRect(*group);
+				drag_rect->property_x1() = midi_view()->editor.frame_to_pixel(event_frame);
+				
 				drag_rect->property_y1() = midi_stream_view()->note_to_y(midi_stream_view()->y_to_note(event_y));
 				drag_rect->property_x2() = event_x;
 				drag_rect->property_y2() = drag_rect->property_y1() + floor(midi_stream_view()->note_height());
@@ -215,6 +218,12 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 				gdk_window_get_pointer(ev->motion.window, &t_x, &t_y, &state);
 				event_x = t_x;
 				event_y = t_y;
+			}
+
+			if (_state == AddDragging) {
+				nframes_t event_frame = midi_view()->editor.pixel_to_frame(event_x);
+				midi_view()->editor.snap_to(event_frame);
+				event_x = midi_view()->editor.frame_to_pixel(event_frame);
 			}
 
 			if (drag_rect)
@@ -240,8 +249,12 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		group->ungrab(ev->button.time);
 		switch (_state) {
 		case Pressed: // Clicked
-			if (ev->button.button == 3)
+			if (ev->button.button == 3) {
+				nframes_t event_frame = midi_view()->editor.pixel_to_frame(event_x);
+				midi_view()->editor.snap_to(event_frame);
+				event_x = midi_view()->editor.frame_to_pixel(event_frame);
 				create_note_at(event_x, event_y, _default_note_length);
+			}
 			_state = None;
 			return true;
 		case SelectDragging: // Select drag done
