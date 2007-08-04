@@ -47,6 +47,7 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 	static double  drag_delta_x = 0;
 	static double last_x, last_y;
 	double event_x, event_y, dx, dy;
+	nframes_t event_frame;
 
 	if (_region.get_time_axis_view().editor.current_mouse_mode() != Editing::MouseNote)
 		return false;
@@ -106,6 +107,11 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 				event_x = t_x;
 				event_y = t_y;
 			}
+			
+			// Snap
+			event_frame = _region.midi_view()->editor.pixel_to_frame(event_x);
+			_region.midi_view()->editor.snap_to(event_frame);
+			event_x = _region.midi_view()->editor.frame_to_pixel(event_frame);
 
 			dx = event_x - last_x;
 			dy = event_y - last_y;
@@ -120,9 +126,9 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 			} else {
 				int8_t this_delta_note;
 				if (dy > 0)
-					this_delta_note = (int8_t)ceil(dy / _region.midi_stream_view()->note_height());
+					this_delta_note = (int8_t)ceil(dy / _region.midi_stream_view()->note_height() / 2.0);
 				else
-					this_delta_note = (int8_t)floor(dy / _region.midi_stream_view()->note_height());
+					this_delta_note = (int8_t)floor(dy / _region.midi_stream_view()->note_height() / 2.0);
 				drag_delta_note -= this_delta_note;
 				dy = _region.midi_stream_view()->note_height() * this_delta_note;
 				last_y = last_y + dy;
