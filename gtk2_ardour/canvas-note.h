@@ -23,6 +23,7 @@
 #include <iostream>
 #include "simplerect.h"
 #include "canvas-midi-event.h"
+#include "midi_util.h"
 
 namespace Gnome {
 namespace Canvas {
@@ -35,9 +36,13 @@ public:
 	}
 	
 	virtual void selected(bool yn) {
-		// Temporary hack, no reversal for now
-		if (yn)
-			property_outline_color_rgba() = 0xFF000099;
+		if (!_note)
+			return;
+		else if (yn)
+			property_outline_color_rgba()
+					= ARDOUR_UI::config()->canvasvar_MidiNoteSelectedOutline.get();
+		else
+			property_outline_color_rgba() = note_outline_color(_note->velocity());
 	}
 	
 	bool on_event(GdkEvent* ev) { return CanvasMidiEvent::on_event(ev); }

@@ -46,7 +46,7 @@
 #include "ghostregion.h"
 #include "midi_time_axis.h"
 #include "utils.h"
-#include "rgb_macros.h"
+#include "midi_util.h"
 #include "gui_thread.h"
 
 #include "i18n.h"
@@ -176,8 +176,10 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 				drag_rect->property_x2() = event_x;
 				drag_rect->property_y2() = event_y;
 				drag_rect->property_outline_what() = 0xFF;
-				drag_rect->property_outline_color_rgba() = 0xFF000099;
-				drag_rect->property_fill_color_rgba() = 0xFFDDDD33;
+				drag_rect->property_outline_color_rgba()
+					= ARDOUR_UI::config()->canvasvar_MidiSelectRectOutline.get();
+				drag_rect->property_fill_color_rgba()
+					= ARDOUR_UI::config()->canvasvar_MidiSelectRectFill.get();
 
 				_state = SelectDragging;
 				return true;
@@ -483,10 +485,10 @@ MidiRegionView::add_event (const MidiEvent& ev)
 			ev_rect->property_x2() = trackview.editor.frame_to_pixel (
 					_region->length());
 			ev_rect->property_y2() = y1 + floor(midi_stream_view()->note_height());
-			ev_rect->property_outline_color_rgba() = 0xFFFFFFAA;
+			ev_rect->property_fill_color_rgba() = note_fill_color(ev.velocity());
+			ev_rect->property_outline_color_rgba() = note_outline_color(ev.velocity());
 			/* outline all but right edge */
 			ev_rect->property_outline_what() = (guint32) (0x1 & 0x4 & 0x8);
-			ev_rect->property_fill_color_rgba() = 0xFFFFFF66;
 
 			ev_rect->raise_to_top();
 
@@ -512,9 +514,9 @@ MidiRegionView::add_event (const MidiEvent& ev)
 		CanvasHit* ev_diamond = new CanvasHit(*this, *group, diamond_size);
 		ev_diamond->move(x, y);
 		ev_diamond->show();
-		ev_diamond->property_outline_color_rgba() = 0xFFFFFFDD;
-		ev_diamond->property_fill_color_rgba() = 0xFFFFFF66;
-			
+		ev_diamond->property_fill_color_rgba() = note_fill_color(ev.velocity());
+		ev_diamond->property_outline_color_rgba() = note_outline_color(ev.velocity());
+		
 		_events.push_back(ev_diamond);
 	}
 }
@@ -544,17 +546,9 @@ MidiRegionView::add_note (const MidiModel::Note& note)
 {
 	assert(note.time() >= 0);
 	assert(note.time() < _region->length());
-	//assert(note.time() + note.duration < _region->length());
 
 	ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
 	
-	const uint8_t fill_alpha = 0x20 + (uint8_t)(note.velocity() * 1.5); 
-	const uint32_t fill = RGBA_TO_UINT(0xE0 + note.velocity()/127.0 * 0x10, 0xE0, 0xE0, fill_alpha);
-	const uint8_t outline_alpha = 0x80 + (uint8_t)(note.velocity()); 
-	const uint32_t outline = RGBA_TO_UINT(0xE0 + note.velocity()/127.0 * 0x10, 0xE0, 0xE0, outline_alpha);
-	
-	//printf("Event, time = %f, note = %d\n", note.time(), note.note());
-
 	if (midi_view()->note_mode() == Sustained) {
 		const double y1 = midi_stream_view()->note_to_y(note.note());
 
@@ -564,8 +558,8 @@ MidiRegionView::add_note (const MidiModel::Note& note)
 		ev_rect->property_x2() = trackview.editor.frame_to_pixel((nframes_t)(note.end_time()));
 		ev_rect->property_y2() = y1 + floor(midi_stream_view()->note_height());
 
-		ev_rect->property_fill_color_rgba() = fill;
-		ev_rect->property_outline_color_rgba() = outline;
+		ev_rect->property_fill_color_rgba() = note_fill_color(note.velocity());
+		ev_rect->property_outline_color_rgba() = note_outline_color(note.velocity());
 		ev_rect->property_outline_what() = (guint32) 0xF; // all edges
 
 		ev_rect->show();
@@ -579,8 +573,8 @@ MidiRegionView::add_note (const MidiModel::Note& note)
 		CanvasHit* ev_diamond = new CanvasHit(*this, *group, diamond_size);
 		ev_diamond->move(x, y);
 		ev_diamond->show();
-		ev_diamond->property_fill_color_rgba() = fill;
-		ev_diamond->property_outline_color_rgba() = outline;
+		ev_diamond->property_fill_color_rgba() = note_fill_color(note.velocity());
+		ev_diamond->property_outline_color_rgba() = note_outline_color(note.velocity());
 		_events.push_back(ev_diamond);
 	}
 }

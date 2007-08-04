@@ -50,7 +50,7 @@ public:
 
 	const ARDOUR::MidiModel::Note* note() { return _note; }
 
-private:
+protected:
 	enum State { None, Pressed, Dragging };
 
 	MidiRegionView&                _region;
