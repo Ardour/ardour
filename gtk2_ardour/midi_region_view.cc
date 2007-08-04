@@ -507,7 +507,7 @@ MidiRegionView::add_event (const MidiEvent& ev)
 		const Byte& note = ev.buffer()[1];
 		const double diamond_size = midi_stream_view()->note_height() / 2.0;
 		const double x = trackview.editor.frame_to_pixel((nframes_t)ev.time());
-		const double y = midi_stream_view()->note_to_y(note) + (diamond_size / 2.0);
+		const double y = midi_stream_view()->note_to_y(note) + ((diamond_size-2) / 4.0);
 
 		CanvasHit* ev_diamond = new CanvasHit(*this, *group, diamond_size);
 		ev_diamond->move(x, y);
@@ -574,7 +574,7 @@ MidiRegionView::add_note (const MidiModel::Note& note)
 	} else if (midi_view()->note_mode() == Percussive) {
 		const double diamond_size = midi_stream_view()->note_height() / 2.0;
 		const double x = trackview.editor.frame_to_pixel((nframes_t)note.time());
-		const double y = midi_stream_view()->note_to_y(note.note()) + (diamond_size / 2.0) - 2;
+		const double y = midi_stream_view()->note_to_y(note.note()) + ((diamond_size-2) / 4.0);
 
 		CanvasHit* ev_diamond = new CanvasHit(*this, *group, diamond_size);
 		ev_diamond->move(x, y);

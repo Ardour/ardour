@@ -26,7 +26,7 @@ Diamond::Diamond(Group& group, double height)
 	: Polygon(group)
 {
 	Points points;
-	points.push_back(Point(0, height*2));
+	points.push_back(Point(0, height*2.0));
 	points.push_back(Point(height, height));
 	points.push_back(Point(0, 0));
 	points.push_back(Point(-height, height));
