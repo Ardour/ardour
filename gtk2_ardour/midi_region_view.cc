@@ -193,9 +193,9 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 				drag_rect = new ArdourCanvas::SimpleRect(*group);
 				drag_rect->property_x1() = event_x;
 
-				drag_rect->property_y1() = note_to_y(y_to_note(event_y));
+				drag_rect->property_y1() = midi_stream_view()->note_to_y(midi_stream_view()->y_to_note(event_y));
 				drag_rect->property_x2() = event_x;
-				drag_rect->property_y2() = drag_rect->property_y1() + note_height();
+				drag_rect->property_y2() = drag_rect->property_y1() + floor(midi_stream_view()->note_height());
 				drag_rect->property_outline_what() = 0xFF;
 				drag_rect->property_outline_color_rgba() = 0xFFFFFF99;
 				drag_rect->property_fill_color_rgba() = 0xFFFFFF66;
@@ -279,7 +279,7 @@ MidiRegionView::create_note_at(double x, double y, double dur)
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 	MidiStreamView* const view = mtv->midi_view();
 
-	double note = y_to_note(y) - 1;
+	double note = midi_stream_view()->y_to_note(y);
 
 	assert(note >= 0.0);
 	assert(note <= 127.0);
@@ -461,7 +461,7 @@ MidiRegionView::add_event (const MidiEvent& ev)
 	if (midi_view()->note_mode() == Sustained) {
 		if ((ev.buffer()[0] & 0xF0) == MIDI_CMD_NOTE_ON) {
 			const Byte& note = ev.buffer()[1];
-			const double y1 = note_to_y(note);
+			const double y1 = midi_stream_view()->note_to_y(note);
 
 			CanvasNote* ev_rect = new CanvasNote(*this, *group);
 			ev_rect->property_x1() = trackview.editor.frame_to_pixel (
@@ -469,7 +469,7 @@ MidiRegionView::add_event (const MidiEvent& ev)
 			ev_rect->property_y1() = y1;
 			ev_rect->property_x2() = trackview.editor.frame_to_pixel (
 					_region->length());
-			ev_rect->property_y2() = y1 + note_height();
+			ev_rect->property_y2() = y1 + floor(midi_stream_view()->note_height());
 			ev_rect->property_outline_color_rgba() = 0xFFFFFFAA;
 			/* outline all but right edge */
 			ev_rect->property_outline_what() = (guint32) (0x1 & 0x4 & 0x8);
@@ -492,9 +492,9 @@ MidiRegionView::add_event (const MidiEvent& ev)
 	
 	} else if (midi_view()->note_mode() == Percussive) {
 		const Byte& note = ev.buffer()[1];
-		const double diamond_size = std::min(note_height(), 5.0);
+		const double diamond_size = midi_stream_view()->note_height() / 2.0;
 		const double x = trackview.editor.frame_to_pixel((nframes_t)ev.time());
-		const double y = note_to_y(note) + (diamond_size / 2.0);
+		const double y = midi_stream_view()->note_to_y(note) + (diamond_size / 2.0);
 
 		CanvasHit* ev_diamond = new CanvasHit(*this, *group, diamond_size);
 		ev_diamond->move(x, y);
@@ -543,13 +543,13 @@ MidiRegionView::add_note (const MidiModel::Note& note)
 	//printf("Event, time = %f, note = %d\n", note.time(), note.note());
 
 	if (midi_view()->note_mode() == Sustained) {
-		const double y1 = note_to_y(note.note());
+		const double y1 = midi_stream_view()->note_to_y(note.note());
 
 		ArdourCanvas::SimpleRect * ev_rect = new CanvasNote(*this, *group, &note);
 		ev_rect->property_x1() = trackview.editor.frame_to_pixel((nframes_t)note.time());
 		ev_rect->property_y1() = y1;
 		ev_rect->property_x2() = trackview.editor.frame_to_pixel((nframes_t)(note.end_time()));
-		ev_rect->property_y2() = y1 + note_height();
+		ev_rect->property_y2() = y1 + floor(midi_stream_view()->note_height());
 
 		ev_rect->property_fill_color_rgba() = fill;
 		ev_rect->property_outline_color_rgba() = outline;
@@ -559,10 +559,11 @@ MidiRegionView::add_note (const MidiModel::Note& note)
 		_events.push_back(ev_rect);
 
 	} else if (midi_view()->note_mode() == Percussive) {
+		const double diamond_size = midi_stream_view()->note_height() / 2.0;
 		const double x = trackview.editor.frame_to_pixel((nframes_t)note.time());
-		const double y = note_to_y(note.note());
+		const double y = midi_stream_view()->note_to_y(note.note()) + (diamond_size / 2.0) - 2;
 
-		CanvasHit* ev_diamond = new CanvasHit(*this, *group, note_height(), &note);
+		CanvasHit* ev_diamond = new CanvasHit(*this, *group, diamond_size);
 		ev_diamond->move(x, y);
 		ev_diamond->show();
 		ev_diamond->property_fill_color_rgba() = fill;

@@ -67,28 +67,6 @@ class MidiRegionView : public RegionView
 	inline MidiStreamView* midi_stream_view() const
 		{ return midi_view()->midi_view(); }
 	
-	inline uint8_t contents_note_range() const
-		{ return midi_stream_view()->highest_note() - midi_stream_view()->lowest_note() + 1; }
-
-	inline double footer_height() const
-		{ return name_highlight->property_y2() - name_highlight->property_y1(); }
-
-	inline double contents_height() const
-		{ return (trackview.height - footer_height() - 2); }
-	
-	inline double note_height() const
-		{ return contents_height() / (double)contents_note_range(); }
-			
-	inline double note_to_y(uint8_t note) const
-		{ return contents_height()
-			- (note + 1 - midi_stream_view()->lowest_note()) * note_height(); }
-
-
-	inline uint8_t y_to_note(double y) const
-		{ return (uint8_t)floor((contents_height() - y)
-				/ contents_height() * (double)contents_note_range())
-				+ midi_stream_view()->lowest_note(); }
-	
 	void set_y_position_and_height (double, double);
     
     void show_region_editor ();

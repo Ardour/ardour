@@ -46,6 +46,7 @@
 #include "gui_thread.h"
 #include "utils.h"
 #include "simplerect.h"
+#include "simpleline.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -56,7 +57,7 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	: StreamView (tv)
 	, _range(ContentsRange)
 	, _lowest_note(60)
-	, _highest_note(60)
+	, _highest_note(71)
 {
 	if (tv.is_track())
 		stream_base_color = ARDOUR_UI::config()->canvasvar_MidiTrackBase.get();
@@ -67,6 +68,14 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	canvas_rect->property_outline_color_rgba() = RGBA_BLACK;
 
 	use_rec_regions = tv.editor.show_waveforms_recording ();
+	
+	_note_line_group = new ArdourCanvas::Group (*canvas_group);
+	
+	for (uint8_t i=0; i < 127; ++i) {
+		_note_lines[i] = new ArdourCanvas::SimpleLine(*_note_line_group,
+				0, note_to_y(i), 10, note_to_y(i));
+		_note_lines[i]->property_color_rgba() = 0xEEEEEE55;
+	}
 }
 
 MidiStreamView::~MidiStreamView ()
@@ -149,6 +158,13 @@ MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
 	region_view->display_model(source->model());
 }
 
+void
+MidiStreamView::display_diskstream (boost::shared_ptr<Diskstream> ds)
+{
+	StreamView::display_diskstream(ds);
+	draw_note_separators();
+}
+
 // FIXME: code duplication with AudioStreamView
 void
 MidiStreamView::redisplay_diskstream ()
@@ -188,13 +204,41 @@ MidiStreamView::redisplay_diskstream ()
 
 		i = tmp;
 	}
-
+	
 	/* now fix layering */
 
 	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		region_layered (*i);
 	}
+	
+	draw_note_separators();
 }
+
+
+void
+MidiStreamView::update_contents_y_position_and_height ()
+{
+	StreamView::update_contents_y_position_and_height();
+	draw_note_separators();
+}
+	
+void
+MidiStreamView::draw_note_separators()
+{
+	for (uint8_t i=0; i < 127; ++i) {
+		if (i >= _lowest_note-1 && i <= _highest_note) {
+			_note_lines[i]->property_x1() = 0;
+			_note_lines[i]->property_x2() = canvas_rect->property_x2() - 2;
+			_note_lines[i]->property_y1() = note_to_y(i);
+			_note_lines[i]->property_y2() = note_to_y(i);
+			_note_lines[i]->show();
+			_note_lines[i]->raise_to_top();
+		} else {
+			_note_lines[i]->hide();
+		}
+	}
+}
+
 	
 void 
 MidiStreamView::update_bounds(uint8_t note_num)

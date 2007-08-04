@@ -26,6 +26,8 @@
 #include "enums.h"
 #include "simplerect.h"
 #include "streamview.h"
+#include "time_axis_view_item.h"
+#include "route_time_axis.h"
 
 namespace Gdk {
 	class Color;
@@ -72,6 +74,24 @@ class MidiStreamView : public StreamView
 	void update_bounds(uint8_t note_num);
 	
 	void redisplay_diskstream ();
+	
+	inline double contents_height() const
+		{ return (_trackview.height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2); }
+	
+	inline double note_to_y(uint8_t note) const
+		{ return contents_height()
+			- (note + 1 - _lowest_note) * note_height() + 1; }
+	
+	inline uint8_t y_to_note(double y) const
+		{ return (uint8_t)((contents_height() - y - 1)
+				/ contents_height() * (double)contents_note_range())
+				+ _lowest_note; }
+	
+	inline double note_height() const
+		{ return contents_height() / (double)contents_note_range(); }
+	
+	inline uint8_t contents_note_range() const
+		{ return _highest_note - _lowest_note + 1; }
 
   private:
 	void setup_rec_box ();
@@ -80,12 +100,18 @@ class MidiStreamView : public StreamView
 	
 	RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves);
 	void        display_region(MidiRegionView* region_view, bool load_model);
+	void        display_diskstream (boost::shared_ptr<ARDOUR::Diskstream> ds);
+	
+	void update_contents_y_position_and_height ();
+	void draw_note_separators();
 
 	void color_handler ();
 
-	VisibleNoteRange _range;
-	uint8_t          _lowest_note;
-	uint8_t          _highest_note;
+	VisibleNoteRange          _range;
+	uint8_t                   _lowest_note;
+	uint8_t                   _highest_note;
+	ArdourCanvas::Group*      _note_line_group;
+	ArdourCanvas::SimpleLine* _note_lines[127];
 };
 
 #endif /* __ardour_midi_streamview_h__ */

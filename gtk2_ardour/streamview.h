@@ -59,7 +59,8 @@ class StreamView : public sigc::trackable
 public:
 	virtual ~StreamView ();
 
-	RouteTimeAxisView& trackview() { return _trackview; }
+	RouteTimeAxisView&       trackview()       { return _trackview; }
+	const RouteTimeAxisView& trackview() const { return _trackview; }
 
 	void attach ();
 

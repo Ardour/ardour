@@ -115,16 +115,16 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 			drag_delta_x += dx;
 
 			// Snap to note rows
-			if (abs(dy) < _region.note_height()) {
+			if (abs(dy) < _region.midi_stream_view()->note_height()) {
 				dy = 0.0;
 			} else {
 				int8_t this_delta_note;
 				if (dy > 0)
-					this_delta_note = (int8_t)ceil(dy / _region.note_height());
+					this_delta_note = (int8_t)ceil(dy / _region.midi_stream_view()->note_height());
 				else
-					this_delta_note = (int8_t)floor(dy / _region.note_height());
+					this_delta_note = (int8_t)floor(dy / _region.midi_stream_view()->note_height());
 				drag_delta_note -= this_delta_note;
-				dy = _region.note_height() * this_delta_note;
+				dy = _region.midi_stream_view()->note_height() * this_delta_note;
 				last_y = last_y + dy;
 			}
 
