@@ -60,6 +60,7 @@ using namespace ArdourCanvas;
 MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<MidiRegion> r, double spu,
 				  Gdk::Color& basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
+	, _default_note_length(0.0)
 	, _active_notes(0)
 	, _delta_command(NULL)
 	, _command_mode(None)
@@ -69,6 +70,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<MidiRegion> r, double spu, 
 				  Gdk::Color& basic_color, TimeAxisViewItem::Visibility visibility)
 	: RegionView (parent, tv, r, spu, basic_color, visibility)
+	, _default_note_length(0.0)
 	, _active_notes(0)
 	, _delta_command(NULL)
 	, _command_mode(None)
@@ -80,6 +82,11 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 {
 	if (wfd)
 		midi_region()->midi_source(0)->load_model();
+	
+	const Meter& m = trackview.session().tempo_map().meter_at(_region->start());
+	const Tempo& t = trackview.session().tempo_map().tempo_at(_region->start());
+	_default_note_length = m.frames_per_bar(t, trackview.session().frame_rate())
+			/ m.beats_per_bar();
 
 	_model = midi_region()->midi_source(0)->model();
 	_enable_display = false;
@@ -116,14 +123,15 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 bool
 MidiRegionView::canvas_event(GdkEvent* ev)
 {
-	enum State { None, Pressed, Dragging };
+	enum State { None, Pressed, SelectDragging, AddDragging };
 	static int press_button = 0;
 	static State _state;
 
+	static double drag_start_x, drag_start_y;
 	static double last_x, last_y;
 	double event_x, event_y;
 
-	static ArdourCanvas::SimpleRect* select_rect = NULL;
+	static ArdourCanvas::SimpleRect* drag_rect = NULL;
 	
 	if (trackview.editor.current_mouse_mode() != MouseNote)
 		return false;
@@ -153,28 +161,53 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 
 		switch (_state) {
 		case Pressed: // Drag start
-			cerr << "PRESSED MOTION: " << press_button << endl;
-			if (press_button == 1) { // Select rect start
+
+			if (press_button == 1 && _command_mode != Remove) { // Select rect start
 				group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
 						Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
-				_state = Dragging;
 				last_x = event_x;
 				last_y = event_y;
+				drag_start_x = event_x;
+				drag_start_y = event_y;
 
-				select_rect = new ArdourCanvas::SimpleRect(*group);
-				select_rect->property_x1() = event_x;
-				select_rect->property_y1() = event_y;
-				select_rect->property_x2() = event_x;
-				select_rect->property_y2() = event_y;
-				select_rect->property_outline_color_rgba() = 0xFF000099;
-				select_rect->property_fill_color_rgba() = 0xFFDDDD33;
+				drag_rect = new ArdourCanvas::SimpleRect(*group);
+				drag_rect->property_x1() = event_x;
+				drag_rect->property_y1() = event_y;
+				drag_rect->property_x2() = event_x;
+				drag_rect->property_y2() = event_y;
+				drag_rect->property_outline_what() = 0xFF;
+				drag_rect->property_outline_color_rgba() = 0xFF000099;
+				drag_rect->property_fill_color_rgba() = 0xFFDDDD33;
 
+				_state = SelectDragging;
+				return true;
+
+			} else if (press_button == 3) { // Add note drag start
+				group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
+						Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
+				last_x = event_x;
+				last_y = event_y;
+				drag_start_x = event_x;
+				drag_start_y = event_y;
+				
+				drag_rect = new ArdourCanvas::SimpleRect(*group);
+				drag_rect->property_x1() = event_x;
+
+				drag_rect->property_y1() = note_to_y(y_to_note(event_y));
+				drag_rect->property_x2() = event_x;
+				drag_rect->property_y2() = drag_rect->property_y1() + note_height();
+				drag_rect->property_outline_what() = 0xFF;
+				drag_rect->property_outline_color_rgba() = 0xFFFFFF99;
+				drag_rect->property_fill_color_rgba() = 0xFFFFFF66;
+
+				_state = AddDragging;
 				return true;
 			}
-			_state = Dragging;
+
 			break;
 
-		case Dragging: // Select rect motion
+		case SelectDragging: // Select rect motion
+		case AddDragging: // Add note rect motion
 			if (ev->motion.is_hint) {
 				int t_x;
 				int t_y;
@@ -184,10 +217,11 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 				event_y = t_y;
 			}
 
-			if (select_rect) {
-				select_rect->property_x2() = event_x;
-				select_rect->property_y2() = event_y;
-			}
+			if (drag_rect)
+				drag_rect->property_x2() = event_x;
+
+			if (drag_rect && _state == SelectDragging)
+				drag_rect->property_y2() = event_y;
 
 			last_x = event_x;
 			last_y = event_y;
@@ -200,17 +234,31 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		break;
 	
 	case GDK_BUTTON_RELEASE:
+		event_x = ev->motion.x;
+		event_y = ev->motion.y;
+		group->w2i(event_x, event_y);
 		group->ungrab(ev->button.time);
 		switch (_state) {
 		case Pressed: // Clicked
-			if (ev->button.button == 1)
-				create_note_at(ev->button.x, ev->button.y);
+			if (ev->button.button == 3)
+				create_note_at(event_x, event_y, _default_note_length);
 			_state = None;
 			return true;
-		case Dragging: // Select rect done
+		case SelectDragging: // Select drag done
 			_state = None;
-			delete select_rect;
-			select_rect = NULL;
+			delete drag_rect;
+			drag_rect = NULL;
+			return true;
+		case AddDragging: // Add drag done
+			_state = None;
+			if (drag_rect->property_x2() > drag_rect->property_x1() + 2) {
+				create_note_at(drag_rect->property_x1(), drag_rect->property_y1(),
+						trackview.editor.pixel_to_frame(
+						drag_rect->property_x2() - drag_rect->property_x1()));
+			}
+
+			delete drag_rect;
+			drag_rect = NULL;
 			return true;
 		default:
 			break;
@@ -226,15 +274,12 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 
 /** Add a note to the model, and the view, at a canvas (click) coordinate */
 void
-MidiRegionView::create_note_at(double x, double y)
+MidiRegionView::create_note_at(double x, double y, double dur)
 {
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 	MidiStreamView* const view = mtv->midi_view();
 
-	get_canvas_group()->w2i(x, y);
-
-	double note = floor((contents_height() - y) / contents_height() * (double)contents_note_range())
-			+ view->lowest_note();
+	double note = y_to_note(y) - 1;
 
 	assert(note >= 0.0);
 	assert(note <= 127.0);
@@ -243,9 +288,9 @@ MidiRegionView::create_note_at(double x, double y)
 	assert(stamp >= 0);
 	//assert(stamp <= _region->length());
 
-	const Meter& m = trackview.session().tempo_map().meter_at(stamp);
-	const Tempo& t = trackview.session().tempo_map().tempo_at(stamp);
-	double dur = m.frames_per_bar(t, trackview.session().frame_rate()) / m.beats_per_bar();
+	//const Meter& m = trackview.session().tempo_map().meter_at(stamp);
+	//const Tempo& t = trackview.session().tempo_map().tempo_at(stamp);
+	//double dur = m.frames_per_bar(t, trackview.session().frame_rate()) / m.beats_per_bar();
 
 	// Add a 1 beat long note (for now)
 	const MidiModel::Note new_note(stamp, dur, (uint8_t)note, 0x40);
@@ -488,31 +533,23 @@ MidiRegionView::add_note (const MidiModel::Note& note)
 	assert(note.time() < _region->length());
 	//assert(note.time() + note.duration < _region->length());
 
-	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
-	MidiStreamView* const view = mtv->midi_view();
 	ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
 	
-	const uint8_t note_range = view->highest_note() - view->lowest_note() + 1;
-	const double footer_height = name_highlight->property_y2() - name_highlight->property_y1();
-	const double pixel_range = (trackview.height - footer_height - 5.0) / (double)note_range;
 	const uint8_t fill_alpha = 0x20 + (uint8_t)(note.velocity() * 1.5); 
 	const uint32_t fill = RGBA_TO_UINT(0xE0 + note.velocity()/127.0 * 0x10, 0xE0, 0xE0, fill_alpha);
 	const uint8_t outline_alpha = 0x80 + (uint8_t)(note.velocity()); 
 	const uint32_t outline = RGBA_TO_UINT(0xE0 + note.velocity()/127.0 * 0x10, 0xE0, 0xE0, outline_alpha);
 	
-	//printf("Range: %d\n", note_range);
 	//printf("Event, time = %f, note = %d\n", note.time(), note.note());
 
-
-	if (mtv->note_mode() == Sustained) {
-		const double y1 = trackview.height - (pixel_range * (note.note() - view->lowest_note() + 1))
-			- footer_height - 3.0;
+	if (midi_view()->note_mode() == Sustained) {
+		const double y1 = note_to_y(note.note());
 
 		ArdourCanvas::SimpleRect * ev_rect = new CanvasNote(*this, *group, &note);
 		ev_rect->property_x1() = trackview.editor.frame_to_pixel((nframes_t)note.time());
 		ev_rect->property_y1() = y1;
 		ev_rect->property_x2() = trackview.editor.frame_to_pixel((nframes_t)(note.end_time()));
-		ev_rect->property_y2() = y1 + ceil(pixel_range);
+		ev_rect->property_y2() = y1 + note_height();
 
 		ev_rect->property_fill_color_rgba() = fill;
 		ev_rect->property_outline_color_rgba() = outline;
@@ -521,12 +558,11 @@ MidiRegionView::add_note (const MidiModel::Note& note)
 		ev_rect->show();
 		_events.push_back(ev_rect);
 
-	} else if (mtv->note_mode() == Percussive) {
+	} else if (midi_view()->note_mode() == Percussive) {
 		const double x = trackview.editor.frame_to_pixel((nframes_t)note.time());
-		const double y = trackview.height - (pixel_range * (note.note() - view->lowest_note() + 1))
-			- footer_height - 3.0;
+		const double y = note_to_y(note.note());
 
-		CanvasHit* ev_diamond = new CanvasHit(*this, *group, std::min(pixel_range, 5.0), &note);
+		CanvasHit* ev_diamond = new CanvasHit(*this, *group, note_height(), &note);
 		ev_diamond->move(x, y);
 		ev_diamond->show();
 		ev_diamond->property_fill_color_rgba() = fill;

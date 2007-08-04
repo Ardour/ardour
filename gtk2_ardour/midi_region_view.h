@@ -74,19 +74,20 @@ class MidiRegionView : public RegionView
 		{ return name_highlight->property_y2() - name_highlight->property_y1(); }
 
 	inline double contents_height() const
-		{ return (trackview.height - footer_height() - 5.0); }
+		{ return (trackview.height - footer_height() - 2); }
 	
 	inline double note_height() const
 		{ return contents_height() / (double)contents_note_range(); }
 			
 	inline double note_to_y(uint8_t note) const
-		{ return trackview.height
-				- (contents_height() * (note - midi_stream_view()->lowest_note() + 1))
-				- footer_height() - 3.0; }
-	
+		{ return contents_height()
+			- (note + 1 - midi_stream_view()->lowest_note()) * note_height(); }
+
+
 	inline uint8_t y_to_note(double y) const
 		{ return (uint8_t)floor((contents_height() - y)
-				/ contents_height() * (double)contents_note_range()); }
+				/ contents_height() * (double)contents_note_range())
+				+ midi_stream_view()->lowest_note(); }
 	
 	void set_y_position_and_height (double, double);
     
@@ -101,7 +102,7 @@ class MidiRegionView : public RegionView
 	void end_write();
 	void extend_active_notes();
 
-	void create_note_at(double x, double y);
+	void create_note_at(double x, double y, double dur);
 
 	void display_model(boost::shared_ptr<ARDOUR::MidiModel> model);
 
@@ -181,6 +182,8 @@ class MidiRegionView : public RegionView
 
 	bool canvas_event(GdkEvent* ev);
 	bool note_canvas_event(GdkEvent* ev);
+
+	double _default_note_length;
 
 	boost::shared_ptr<ARDOUR::MidiModel> _model;
 	std::vector<ArdourCanvas::Item*>     _events;
