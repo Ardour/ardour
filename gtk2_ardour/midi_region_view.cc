@@ -260,7 +260,9 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		group->ungrab(ev->button.time);
 		switch (_state) {
 		case Pressed: // Clicked
-			if (ev->button.button == 3) {
+			if (ev->button.button == 1) {
+				clear_selection();
+			} else if (ev->button.button == 3) {
 				nframes_t event_frame = midi_view()->editor.pixel_to_frame(event_x);
 				midi_view()->editor.snap_to(event_frame);
 				event_x = midi_view()->editor.frame_to_pixel(event_frame);

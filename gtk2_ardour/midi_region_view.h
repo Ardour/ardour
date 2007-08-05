@@ -168,6 +168,7 @@ class MidiRegionView : public RegionView
 	bool note_canvas_event(GdkEvent* ev);
 	
 	void clear_selection_except(ArdourCanvas::CanvasMidiEvent* ev);
+	void clear_selection() { clear_selection_except(NULL); }
 
 	double _default_note_length;
 
