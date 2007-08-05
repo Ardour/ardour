@@ -48,6 +48,7 @@
 #include "utils.h"
 #include "midi_util.h"
 #include "gui_thread.h"
+#include "keyboard.h"
 
 #include "i18n.h"
 
@@ -143,8 +144,10 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		break;
 	
 	case GDK_KEY_RELEASE:
-		if (_command_mode == Remove && ev->key.keyval == GDK_Delete)
+		if (_command_mode == Remove && ev->key.keyval == GDK_Delete) {
+			delete_selection();
 			apply_command();
+		}
 		break;
 
 	case GDK_BUTTON_PRESS:
@@ -153,6 +156,12 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		press_button = ev->button.button;
 		//cerr << "PRESSED: " << press_button << endl;
 		return true;
+	
+	case GDK_ENTER_NOTIFY:
+		/* FIXME: do this on switch to note tool, too, if the pointer is already in */
+		Keyboard::magic_widget_grab_focus();
+		group->grab_focus();
+		break;
 	
 	case GDK_MOTION_NOTIFY:
 		event_x = ev->motion.x;
@@ -577,6 +586,18 @@ MidiRegionView::add_note (const MidiModel::Note& note)
 		ev_diamond->property_outline_color_rgba() = note_outline_color(note.velocity());
 		_events.push_back(ev_diamond);
 	}
+}
+
+void
+MidiRegionView::delete_selection()
+{
+	assert(_delta_command);
+
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i)
+		if ((*i)->selected())
+			_delta_command->remove(*(*i)->note());
+
+	_selection.clear();
 }
 
 void

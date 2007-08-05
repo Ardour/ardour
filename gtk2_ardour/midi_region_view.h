@@ -135,6 +135,7 @@ class MidiRegionView : public RegionView
 	void   unique_select(ArdourCanvas::CanvasMidiEvent* ev);
 	void   note_selected(ArdourCanvas::CanvasMidiEvent* ev, bool add);
 	void   note_deselected(ArdourCanvas::CanvasMidiEvent* ev, bool add);
+	void   delete_selection();
 	size_t selection_size() { return _selection.size(); }
 
   protected:
