@@ -694,6 +694,31 @@ style "editor_time_ruler" = "small_text"
 	bg[NORMAL] = { 0.09, 0.09, 0.09 }
 }
 
+style "time_bar_label_base" = "default_base"
+{
+  font_name = "sans 6"
+  fg[NORMAL] = { 0.77, 0.77, 0.72 }	
+  bg[NORMAL] = { 0.28, 0.29, 0.34 }
+  bg[ACTIVE] = { 0.30, 0.30, 0.34 }	
+  bg[PRELIGHT] = { 0.30, 0.30, 0.34 }
+  bg[INSENSITIVE] = { 0.30, 0.30, 0.34 }
+  bg[SELECTED] = { 0.30, 0.30, 0.34 }
+}
+
+style "time_bar_padding" = "default_base"
+{
+  fg[NORMAL] = { 0.09, 0.09, 0.09 }
+  fg[ACTIVE] = { 0.09, 0.09, 0.09 }	
+  fg[PRELIGHT] = { 0.09, 0.09, 0.09 }
+  fg[INSENSITIVE] = { 0.09, 0.09, 0.09 }
+  fg[SELECTED] = { 0.09, 0.09, 0.09 }
+  bg[NORMAL] = { 0.09, 0.09, 0.09 }
+  bg[ACTIVE] = { 0.09, 0.09, 0.09 }	
+  bg[PRELIGHT] = { 0.09, 0.09, 0.09 }
+  bg[INSENSITIVE] = { 0.09, 0.09, 0.09 }
+  bg[SELECTED] = { 0.09, 0.09, 0.09 }
+}
+
 style "audio_bus_base"
 {
   font_name = "%FONT_SMALLER%"
@@ -839,11 +864,11 @@ style "treeview_display" = "small_bold_text"
 
 style "main_canvas_area"
 {
-	bg[NORMAL] = { 0.30, 0.30, 0.34 }
-	bg[ACTIVE] = { 0.30, 0.30, 0.34 }
-	bg[INSENSITIVE] = { 0.30, 0.30, 0.34 }
-	bg[SELECTED] = { 0.30, 0.30, 0.34 }
-	bg[PRELIGHT] = { 0.30, 0.30, 0.34 }
+	bg[NORMAL] = { 0.40, 0.40, 0.44 }
+	bg[ACTIVE] = { 0.40, 0.40, 0.44 }
+	bg[INSENSITIVE] = { 0.40, 0.40, 0.44 }
+	bg[SELECTED] = { 0.40, 0.40, 0.44 }
+	bg[PRELIGHT] = { 0.40, 0.40, 0.44 }
 }
 
 style "track_controls_inactive"
@@ -1323,6 +1348,8 @@ widget "*MinSecRuler" style:highest "editor_time_ruler"
 widget "*BaseFrame" style:highest "base_frame"
 widget "*AudioTrackStripBase" style:highest "audio_track_base"
 widget "*MidiTrackStripBase" style:highest "midi_track_base"
+widget "*TimebarLabelBase" style:highest "time_bar_label_base"
+widget "*TimebarPadding" style:highest "time_bar_padding"
 widget "*TimeAxisViewControlsBaseUnselected" style:highest "audio_track_base"
 widget "*AudioTrackControlsBaseUnselected" style:highest "audio_track_base"
 widget "*MidiTrackControlsBaseUnselected" style:highest "midi_track_base"

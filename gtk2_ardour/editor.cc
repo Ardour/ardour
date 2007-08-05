@@ -371,13 +371,20 @@ Editor::Editor ()
 
  	edit_cursor_clock.ValueChanged.connect (mem_fun(*this, &Editor::edit_cursor_clock_changed));
 	
+	ArdourCanvas::Canvas* time_pad = manage(new ArdourCanvas::Canvas());
+	ArdourCanvas::SimpleLine* pad_line_1 = manage(new ArdourCanvas::SimpleLine(*time_pad->root(),
+			0.0, 1.0, 100.0, 1.0));
+	pad_line_1->property_color_rgba() = 0xFF0000FF;
+	pad_line_1->show();
+	time_pad->show();
+
 	time_canvas_vbox.pack_start (*_ruler_separator, false, false);
 	time_canvas_vbox.pack_start (*minsec_ruler, false, false);
 	time_canvas_vbox.pack_start (*smpte_ruler, false, false);
 	time_canvas_vbox.pack_start (*frames_ruler, false, false);
 	time_canvas_vbox.pack_start (*bbt_ruler, false, false);
 	time_canvas_vbox.pack_start (time_canvas, true, true);
-	time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars) + 2);
+	time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars) + 5);
 
 	bbt_label.set_name ("EditorTimeButton");
 	bbt_label.set_size_request (-1, (int)timebar_height);
@@ -425,13 +432,15 @@ Editor::Editor ()
 	time_button_vbox.pack_start (mark_label, false, false);
 
 	time_button_event_box.add (time_button_vbox);
+	time_button_event_box.set_name ("TimebarLabelBase");
+	time_button_frame.set_shadow_type (Gtk::SHADOW_NONE);
 	
 	time_button_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	time_button_event_box.set_name ("TimebarLabelBase");
 	time_button_event_box.signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_label_button_release));
 
-	time_button_frame.add(time_button_event_box);
-	time_button_frame.property_shadow_type() = Gtk::SHADOW_OUT;
+	time_button_frame.add (time_button_event_box);
+	time_button_frame.set_name ("TimebarLabelBase");
+	time_button_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
 
 	/* these enable us to have a dedicated window (for cursor setting, etc.) 
 	   for the canvas areas.
@@ -450,7 +459,7 @@ Editor::Editor ()
 	
 	edit_packer.attach (edit_vscrollbar,         3, 4, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
 
-	edit_packer.attach (time_button_frame,       0, 2, 0, 1,    FILL,        FILL, 0, 0);
+	edit_packer.attach (time_button_frame,       0, 2, 0, 1,    FILL,        SHRINK, 0, 0);
 	edit_packer.attach (time_canvas_event_box,   2, 4, 0, 1,    FILL|EXPAND, FILL, 0, 0);
 
 	edit_packer.attach (controls_layout,         1, 2, 1, 2,    FILL,        FILL|EXPAND, 0, 0);

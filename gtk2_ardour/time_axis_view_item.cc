@@ -152,6 +152,7 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 	vestigial_frame->property_y1() = (double) 1.0;
 	vestigial_frame->property_x2() = 2.0;
 	vestigial_frame->property_y2() = (double) trackview.height;
+	vestigial_frame->property_outline_what() = 0xF;
 	vestigial_frame->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_VestigialFrame.get();
 	vestigial_frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_VestigialFrame.get();
 	vestigial_frame->hide ();
@@ -162,6 +163,7 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 		frame->property_y1() = (double) 1.0;
 		frame->property_x2() = (double) trackview.editor.frame_to_pixel(duration);
 		frame->property_y2() = (double) trackview.height;
+		frame->property_outline_what() = 0xF;
 		frame->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get();
 		frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get();
 

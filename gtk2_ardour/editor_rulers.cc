@@ -57,8 +57,9 @@ Editor::initialize_rulers ()
 	
 	_ruler_separator = new Gtk::HSeparator();
 	_ruler_separator->set_size_request(-1, 2);
+	_ruler_separator->set_name("TimebarPadding");
 	_ruler_separator->show();
-
+	
 	_smpte_ruler = gtk_custom_hruler_new ();
 	smpte_ruler = Glib::wrap (_smpte_ruler);
 	smpte_ruler->set_name ("SMPTERuler");
@@ -608,9 +609,9 @@ Editor::update_ruler_visibility ()
 	bbt_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
 	frames_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
 	minsec_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
-
-	ruler_children.insert (canvaspos, Element(*_ruler_separator, PACK_SHRINK, PACK_START));
 	
+	ruler_children.insert (canvaspos, Element(*_ruler_separator, PACK_SHRINK, PACK_START));
+
 	if (ruler_shown[ruler_metric_minsec]) {
 		lab_children.push_back (Element(minsec_label, PACK_SHRINK, PACK_START));
 		ruler_children.insert (canvaspos, Element(*minsec_ruler, PACK_SHRINK, PACK_START));

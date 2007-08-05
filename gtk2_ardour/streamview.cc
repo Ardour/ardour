@@ -67,7 +67,7 @@ StreamView::StreamView (RouteTimeAxisView& tv)
 	canvas_rect->property_y1() = 0.0;
 	canvas_rect->property_x2() = _trackview.editor.frame_to_pixel (max_frames);
 	canvas_rect->property_y2() = (double) tv.height;
-	canvas_rect->property_outline_what() = (guint32) (0x1|0x2|0x8);  // outline ends and bottom 
+	canvas_rect->property_outline_what() = (guint32) (0x2|0x8);  // outline RHS and bottom 
 	// (Fill/Outline colours set in derived classes)
 
 	canvas_rect->signal_event().connect (bind (mem_fun (_trackview.editor, &PublicEditor::canvas_stream_view_event), canvas_rect, &_trackview));
