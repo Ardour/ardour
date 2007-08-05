@@ -35,15 +35,8 @@ public:
 	{
 	}
 	
-	virtual void selected(bool yn) {
-		if (!_note)
-			return;
-		else if (yn)
-			property_outline_color_rgba()
-					= ARDOUR_UI::config()->canvasvar_MidiNoteSelectedOutline.get();
-		else
-			property_outline_color_rgba() = note_outline_color(_note->velocity());
-	}
+	void set_outline_color(uint32_t c) { property_outline_color_rgba() = c; }
+	void set_fill_color(uint32_t c) { property_fill_color_rgba() = c; }
 	
 	bool on_event(GdkEvent* ev) { return CanvasMidiEvent::on_event(ev); }
 };

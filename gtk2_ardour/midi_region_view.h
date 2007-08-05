@@ -132,6 +132,11 @@ class MidiRegionView : public RegionView
 		_command_mode = None;
 	}
 
+	void   unique_select(ArdourCanvas::CanvasMidiEvent* ev);
+	void   note_selected(ArdourCanvas::CanvasMidiEvent* ev, bool add);
+	void   note_deselected(ArdourCanvas::CanvasMidiEvent* ev, bool add);
+	size_t selection_size() { return _selection.size(); }
+
   protected:
 
     /* this constructor allows derived types
@@ -160,6 +165,8 @@ class MidiRegionView : public RegionView
 
 	bool canvas_event(GdkEvent* ev);
 	bool note_canvas_event(GdkEvent* ev);
+	
+	void clear_selection_except(ArdourCanvas::CanvasMidiEvent* ev);
 
 	double _default_note_length;
 
@@ -167,10 +174,12 @@ class MidiRegionView : public RegionView
 	std::vector<ArdourCanvas::Item*>     _events;
 	ArdourCanvas::CanvasNote**           _active_notes;
 	ARDOUR::MidiModel::DeltaCommand*     _delta_command;
+
+	typedef std::set<ArdourCanvas::CanvasMidiEvent*> Selection;
+	Selection _selection;
 	
 	enum CommandMode { None, Remove, Delta };
 	CommandMode _command_mode;
-
 };
 
 #endif /* __gtk_ardour_midi_region_view_h__ */

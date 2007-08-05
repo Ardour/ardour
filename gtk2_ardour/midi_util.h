@@ -43,13 +43,13 @@ inline static uint32_t note_fill_color(uint8_t vel)
 {
 	if (vel < 64) {
 		return UINT_INTERPOLATE(
-				ARDOUR_UI::config()->canvasvar_MidiNoteOutlineMin.get(),
-				ARDOUR_UI::config()->canvasvar_MidiNoteOutlineMid.get(),
+				ARDOUR_UI::config()->canvasvar_MidiNoteFillMin.get(),
+				ARDOUR_UI::config()->canvasvar_MidiNoteFillMid.get(),
 				(vel / (double)63.0));
 	} else {
 		return UINT_INTERPOLATE(
-				ARDOUR_UI::config()->canvasvar_MidiNoteOutlineMid.get(),
-				ARDOUR_UI::config()->canvasvar_MidiNoteOutlineMax.get(),
+				ARDOUR_UI::config()->canvasvar_MidiNoteFillMid.get(),
+				ARDOUR_UI::config()->canvasvar_MidiNoteFillMax.get(),
 				((vel-64) / (double)63.0));
 	}
 }

@@ -579,4 +579,47 @@ MidiRegionView::add_note (const MidiModel::Note& note)
 	}
 }
 
+void
+MidiRegionView::clear_selection_except(ArdourCanvas::CanvasMidiEvent* ev)
+{
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i)
+		if ((*i)->selected() && (*i) != ev)
+			(*i)->selected(false);
+
+	_selection.clear();
+}
+
+void
+MidiRegionView::unique_select(ArdourCanvas::CanvasMidiEvent* ev)
+{
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i)
+		if ((*i) != ev)
+			(*i)->selected(false);
+
+	_selection.clear();
+	_selection.insert(ev);
+	ev->selected(true);
+}
+	
+void
+MidiRegionView::note_selected(ArdourCanvas::CanvasMidiEvent* ev, bool add)
+{
+	if ( ! add)
+		clear_selection_except(ev);
+	
+	_selection.insert(ev);
+	ev->selected(true);
+}
+
+
+void
+MidiRegionView::note_deselected(ArdourCanvas::CanvasMidiEvent* ev, bool add)
+{
+	if ( ! add)
+		clear_selection_except(ev);
+	
+	_selection.erase(ev);
+	ev->selected(false);
+}
+
 

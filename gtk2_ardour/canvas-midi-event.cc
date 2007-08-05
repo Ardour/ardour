@@ -36,7 +36,25 @@ CanvasMidiEvent::CanvasMidiEvent(MidiRegionView& region, Item* item, const ARDOU
 	, _item(item)
 	, _state(None)
 	, _note(note)
+	, _selected(false)
 {	
+}
+	
+void
+CanvasMidiEvent::selected(bool yn)
+{
+	if (!_note) {
+		return;
+	} else if (yn) {
+		set_fill_color(UINT_INTERPOLATE(note_fill_color(_note->velocity()),
+					ARDOUR_UI::config()->canvasvar_MidiNoteSelectedOutline.get(), 0.85));
+		set_outline_color(ARDOUR_UI::config()->canvasvar_MidiNoteSelectedOutline.get());
+	} else {
+		set_fill_color(note_fill_color(_note->velocity()));
+		set_outline_color(note_outline_color(_note->velocity()));
+	}
+
+	_selected = yn;
 }
 
 
@@ -48,6 +66,7 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 	static double last_x, last_y;
 	double event_x, event_y, dx, dy;
 	nframes_t event_frame;
+	bool select_mod = false;
 
 	if (_region.get_time_axis_view().editor.current_mouse_mode() != Editing::MouseNote)
 		return false;
@@ -67,6 +86,11 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 		break;
 	
 	case GDK_ENTER_NOTIFY:
+		select_mod = (ev->motion.state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK));
+		cerr << "ENTER: " << select_mod << " - " << ev->motion.state << endl;
+		if (select_mod) {
+			_region.note_selected(this, true);
+		}
 		Keyboard::magic_widget_grab_focus();
 		_item->grab_focus();
 		_region.note_entered(this);
@@ -82,6 +106,7 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 		return true;
 
 	case GDK_MOTION_NOTIFY:
+		select_mod = (ev->motion.state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK));
 		event_x = ev->motion.x;
 		event_y = ev->motion.y;
 		//cerr << "MOTION @ " << event_x << ", " << event_y << endl;
@@ -89,13 +114,15 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 
 		switch (_state) {
 		case Pressed: // Drag begin
-			_item->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
-					Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
-			_state = Dragging;
-			last_x = event_x;
-			last_y = event_y;
-			drag_delta_x = 0;
-			drag_delta_note = 0;
+			if (!select_mod) {
+				_item->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
+						Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
+				_state = Dragging;
+				last_x = event_x;
+				last_y = event_y;
+				drag_delta_x = 0;
+				drag_delta_note = 0;
+			}
 			return true;
 
 		case Dragging: // Drag motion
@@ -143,6 +170,7 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 		break;
 	
 	case GDK_BUTTON_RELEASE:
+		select_mod = (ev->motion.state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK));
 		event_x = ev->button.x;
 		event_y = ev->button.y;
 		_item->property_parent().get_value()->w2i(event_x, event_y);
@@ -150,6 +178,14 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 		switch (_state) {
 		case Pressed: // Clicked
 			_state = None;
+			
+			if (_selected && !select_mod && _region.selection_size() > 1)
+				_region.unique_select(this);
+			else if (_selected)
+				_region.note_deselected(this, select_mod);
+			else
+				_region.note_selected(this, select_mod);
+
 			return true;
 		case Dragging: // Dropped
 			_item->ungrab(ev->button.time);

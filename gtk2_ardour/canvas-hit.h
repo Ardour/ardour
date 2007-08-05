@@ -32,11 +32,8 @@ public:
 	CanvasHit(MidiRegionView& region, Group& group, double size, const ARDOUR::MidiModel::Note* note=NULL)
 		: Diamond(group, size), CanvasMidiEvent(region, this, note) {}
 	
-	virtual void selected(bool yn) {
-		// Temporary hack, no reversal for now
-		if (yn)
-			property_outline_color_rgba() = 0xFF000099;
-	}
+	void set_outline_color(uint32_t c) { property_outline_color_rgba() = c; }
+	void set_fill_color(uint32_t c) { property_fill_color_rgba() = c; }
 
 	bool on_event(GdkEvent* ev) { return CanvasMidiEvent::on_event(ev); }
 };

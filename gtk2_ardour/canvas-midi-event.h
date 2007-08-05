@@ -44,9 +44,13 @@ public:
 	CanvasMidiEvent(MidiRegionView& region, Item* item, const ARDOUR::MidiModel::Note* note = NULL);
 	virtual ~CanvasMidiEvent() {} 
 
-	virtual bool on_event(GdkEvent* ev);
+	bool on_event(GdkEvent* ev);
 
-	virtual void selected(bool yn) = 0;
+	bool selected() const { return _selected; }
+	void selected(bool yn);
+
+	virtual void set_outline_color(uint32_t c) = 0;
+	virtual void set_fill_color(uint32_t c) = 0;
 
 	const ARDOUR::MidiModel::Note* note() { return _note; }
 
@@ -57,6 +61,7 @@ protected:
 	Item* const                    _item;
 	State                          _state;
 	const ARDOUR::MidiModel::Note* _note;
+	bool                           _selected;
 };
 
 } // namespace Gnome
