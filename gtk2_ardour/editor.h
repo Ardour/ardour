@@ -55,6 +55,7 @@
 #include "region_selection.h"
 #include "canvas.h"
 #include "draginfo.h"
+#include "tempo_lines.h"
 
 namespace Gtkmm2ext {
 	class TearOff;
@@ -1211,15 +1212,15 @@ class Editor : public PublicEditor
 	
 	ARDOUR::TempoMap::BBTPointList *current_bbt_points;
 	
-	typedef vector<ArdourCanvas::SimpleLine*> TimeLineList;
-	TimeLineList free_measure_lines;
-	TimeLineList used_measure_lines;
-
 	ArdourCanvas::Group* time_line_group;
-	ArdourCanvas::SimpleLine* get_time_line ();
+	ArdourCanvas::Group* marker_time_line_group;
+	
+	TempoLines* tempo_lines;
+	TempoLines* marker_tempo_lines;
+
 	void hide_measures ();
 	void draw_measures ();
-	bool lazy_hide_and_draw_measures ();
+	bool redraw_measures ();
 
 	void new_tempo_section ();
 

@@ -193,6 +193,7 @@ ui_config.cc
 utils.cc
 version.cc
 waveview.cc
+tempo_lines.cc
 """)
 
 fft_analysis_files=Split("""

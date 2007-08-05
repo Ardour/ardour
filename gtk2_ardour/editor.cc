@@ -199,6 +199,9 @@ Editor::Editor ()
 	  vertical_adjustment (0.0, 0.0, 10.0, 400.0),
 	  horizontal_adjustment (0.0, 0.0, 20.0, 1200.0),
 
+	  tempo_lines(0),
+	  marker_tempo_lines(0),
+
 	  /* tool bar related */
 
 	  edit_cursor_clock (X_("editcursor"), false, X_("EditCursorClock"), true),

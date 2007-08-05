@@ -160,7 +160,7 @@ Editor::redisplay_tempo (bool immediate_redraw)
 	} else {
 
 		if (session && current_bbt_points) {
-			Glib::signal_idle().connect (mem_fun (*this, &Editor::lazy_hide_and_draw_measures));
+			Glib::signal_idle().connect (mem_fun (*this, &Editor::redraw_measures));
 		} else {
 			hide_measures ();
 		}
@@ -170,32 +170,12 @@ Editor::redisplay_tempo (bool immediate_redraw)
 void
 Editor::hide_measures ()
 {
-	for (TimeLineList::iterator i = used_measure_lines.begin(); i != used_measure_lines.end(); ++i) {
-      		(*i)->hide();
-		free_measure_lines.push_back (*i);
-	}
-	used_measure_lines.clear ();
-}
-
-ArdourCanvas::SimpleLine *
-Editor::get_time_line ()
-{
-	ArdourCanvas::SimpleLine *line;
-
-	if (free_measure_lines.empty()) {
-		line = new ArdourCanvas::SimpleLine (*time_line_group);
-		used_measure_lines.push_back (line);
-	} else {
-		line = free_measure_lines.front();
-		free_measure_lines.erase (free_measure_lines.begin());
-		used_measure_lines.push_back (line);
-	}
-
-	return line;
+	tempo_lines->hide();
+	marker_tempo_lines->hide();
 }
 
 bool
-Editor::lazy_hide_and_draw_measures ()
+Editor::redraw_measures ()
 {
 	hide_measures ();
 	draw_measures ();
@@ -205,77 +185,21 @@ Editor::lazy_hide_and_draw_measures ()
 void
 Editor::draw_measures ()
 {
-	if (session == 0 || _show_measures == false) {
+	if (session == 0 || _show_measures == false
+			|| !current_bbt_points || current_bbt_points->empty()) {
 		return;
 	}
 
-	TempoMap::BBTPointList::iterator i;
-	ArdourCanvas::SimpleLine *line;
-	gdouble xpos;
-	double x1, x2, y1, y2, beat_density;
-
-	uint32_t beats = 0;
-	uint32_t bars = 0;
-	uint32_t color;
-
-	if (current_bbt_points == 0 || current_bbt_points->empty()) {
-		return;
-	}
-
-	track_canvas.get_scroll_region (x1, y1, x2, y2);
-	y2 = TimeAxisView::hLargest*5000; // five thousand largest tracks should be enough.. :)
-
-	/* get the first bar spacing */
-
-	i = current_bbt_points->end();
-	i--;
-	bars = (*i).bar - (*current_bbt_points->begin()).bar;
-	beats = current_bbt_points->size() - bars;
-
-	beat_density =  (beats * 10.0f) / track_canvas.get_width ();
-
-	if (beat_density > 4.0f) {
-		/* if the lines are too close together, they become useless
-		 */
-		return;
-	}
-	
-	for (i = current_bbt_points->begin(); i != current_bbt_points->end(); ++i) {
-
-		switch ((*i).type) {
-		case TempoMap::Bar:
-			break;
-
-		case TempoMap::Beat:
-			
-			if ((*i).beat == 1) {
-				color = ARDOUR_UI::config()->canvasvar_MeasureLineBar.get();
-			} else {
-				color = ARDOUR_UI::config()->canvasvar_MeasureLineBeat.get();
-
-				if (beat_density > 2.0) {
-					/* only draw beat lines if the gaps between beats are large.
-					*/
-					break;
-				}
-			}
-
-			xpos = frame_to_unit ((*i).frame);
-			line = get_time_line ();
-			line->property_x1() = xpos;
-			line->property_x2() = xpos;
-			line->property_y2() = y2;
-			line->property_color_rgba() = color;
-			//line->raise_to_top();
-			line->show();	
-			break;
-		}
-	}
+	tempo_lines->draw(*current_bbt_points, frames_per_unit);
+	marker_tempo_lines->draw(*current_bbt_points, frames_per_unit);
 
 	/* the cursors are always on top of everything */
 
+	time_line_group->raise_to_top();
+	marker_time_line_group->raise_to_top();
+
 	cursor_group->raise_to_top();
-	time_line_group->lower_to_bottom();
+
 	return;
 }
 

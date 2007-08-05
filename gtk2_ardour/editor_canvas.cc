@@ -143,16 +143,19 @@ Editor::initialize_canvas ()
 
 	verbose_cursor_visible = false;
 	
-	/* a group to hold time (measure) lines */
+	cursor_group = new ArdourCanvas::Group (*track_canvas.root(), 0.0, 0.0);
 	
 	time_line_group = new ArdourCanvas::Group (*track_canvas.root(), 0.0, 0.0);
-	cursor_group = new ArdourCanvas::Group (*track_canvas.root(), 0.0, 0.0);
+	tempo_lines = new TempoLines(track_canvas, time_line_group);
 
 	time_canvas.set_name ("EditorTimeCanvas");
 	time_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK);
 	time_canvas.set_flags (CAN_FOCUS);
 	time_canvas.set_center_scroll_region (false);
 	time_canvas.set_dither  	(Gdk::RGB_DITHER_NONE);
+	
+	marker_time_line_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, 0.0);
+	marker_tempo_lines = new TempoLines(time_canvas, marker_time_line_group);
 	
 	meter_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, 0.0);
 	tempo_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height);

@@ -181,6 +181,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void play_selection () = 0;
 	virtual void set_show_measures (bool yn) = 0;
 	virtual bool show_measures () const = 0;
+	virtual bool redraw_measures () = 0;
 
 	/** Open an export dialogue for the whole session */
 	virtual void export_session () = 0;
