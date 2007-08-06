@@ -38,7 +38,7 @@ namespace ARDOUR {
 class Route;
 class Playlist;
 class Session;
-class AudioFilter;
+class Filter;
 class AudioSource;
 
 class AudioRegion : public Region
@@ -114,10 +114,6 @@ class AudioRegion : public Region
 	void set_default_envelope ();
 
 	int separate_by_channel (ARDOUR::Session&, vector<boost::shared_ptr<AudioRegion> >&) const;
-
-	/* filter */
-
-	int apply (AudioFilter&);
 
 	/* export */
 

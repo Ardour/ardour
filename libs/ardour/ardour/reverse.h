@@ -20,16 +20,16 @@
 #ifndef __ardour_reverse_h__
 #define __ardour_reverse_h__
 
-#include <ardour/audiofilter.h>
+#include <ardour/filter.h>
 
 namespace ARDOUR {
 
-class Reverse : public AudioFilter {
+class Reverse : public Filter {
   public:
 	Reverse (ARDOUR::Session&);
 	~Reverse ();
 
-	int run (boost::shared_ptr<ARDOUR::AudioRegion>);
+	int run (boost::shared_ptr<ARDOUR::Region>);
 };
 
 } /* namespace */

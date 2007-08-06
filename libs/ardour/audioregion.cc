@@ -38,7 +38,6 @@
 #include <ardour/gain.h>
 #include <ardour/dB.h>
 #include <ardour/playlist.h>
-#include <ardour/audiofilter.h>
 #include <ardour/audiofilesource.h>
 #include <ardour/region_factory.h>
 #include <ardour/runtime_functions.h>
@@ -975,13 +974,6 @@ AudioRegion::separate_by_channel (Session& session, vector<boost::shared_ptr<Aud
 	}
 
 	return 0;
-}
-
-int
-AudioRegion::apply (AudioFilter& filter)
-{
-	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (shared_from_this());
-	return filter.run (ar);
 }
 
 nframes_t

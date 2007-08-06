@@ -115,6 +115,9 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	
 	/** Snap a value according to the current snap setting. */
 	virtual void snap_to (nframes_t& first, int32_t direction = 0, bool for_mark = false) = 0;
+	
+	/** Get the current snap value in beats */
+	virtual double snap_length_beats (nframes_t start) = 0;
 
 	/** Undo some transactions.
 	 * @param n Number of transactions to undo.

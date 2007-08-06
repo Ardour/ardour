@@ -33,7 +33,7 @@ using namespace std;
 using namespace ARDOUR;
 
 Reverse::Reverse (Session& s)
-	: AudioFilter (s)
+	: Filter (s)
 {
 }
 
@@ -42,7 +42,7 @@ Reverse::~Reverse ()
 }
 
 int
-Reverse::run (boost::shared_ptr<AudioRegion> region)
+Reverse::run (boost::shared_ptr<Region> r)
 {
 	SourceList nsrcs;
 	SourceList::iterator si;
@@ -52,6 +52,10 @@ Reverse::run (boost::shared_ptr<AudioRegion> region)
 	nframes_t fstart;
 	nframes_t to_read;
 	int ret = -1;
+
+	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion>(r);
+	if (!region)
+		return ret;
 
 	/* create new sources */
 

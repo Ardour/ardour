@@ -1502,19 +1502,24 @@ Session::get_sources_as_xml ()
 }
 
 string
-Session::path_from_region_name (string name, string identifier)
+Session::path_from_region_name (DataType type, string name, string identifier)
 {
 	char buf[PATH_MAX+1];
 	uint32_t n;
 	SessionDirectory sdir(get_best_session_directory_for_new_source());
-	string sound_dir = sdir.sound_path().to_string();
+	string sound_dir = ((type == DataType::AUDIO)
+		? sdir.sound_path().to_string()
+		: sdir.midi_path().to_string());
+
+	string ext = ((type == DataType::AUDIO) ? ".wav" : ".mid");
 
 	for (n = 0; n < 999999; ++n) {
 		if (identifier.length()) {
-			snprintf (buf, sizeof(buf), "%s/%s%s%" PRIu32 ".wav", sound_dir.c_str(), name.c_str(), 
-				  identifier.c_str(), n);
+			snprintf (buf, sizeof(buf), "%s/%s%s%" PRIu32 "%s", sound_dir.c_str(), name.c_str(), 
+				  identifier.c_str(), n, ext.c_str());
 		} else {
-			snprintf (buf, sizeof(buf), "%s/%s-%" PRIu32 ".wav", sound_dir.c_str(), name.c_str(), n);
+			snprintf (buf, sizeof(buf), "%s/%s-%" PRIu32 "%s", sound_dir.c_str(), name.c_str(),
+					n, ext.c_str());
 		}
 
 		if (!Glib::file_test (buf, Glib::FILE_TEST_EXISTS)) {

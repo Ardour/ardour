@@ -68,8 +68,8 @@ class MidiRegionView : public RegionView
 		{ return midi_view()->midi_view(); }
 	
 	void set_y_position_and_height (double, double);
-    
-    void show_region_editor ();
+	
+	void redisplay_model();
 
     GhostRegion* add_ghost (AutomationTimeAxisView&);
 
@@ -164,7 +164,6 @@ class MidiRegionView : public RegionView
 
   private:
 
-	void redisplay_model();
 	void clear_events();
 
 	bool canvas_event(GdkEvent* ev);

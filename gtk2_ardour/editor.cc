@@ -50,7 +50,7 @@
 #include <ardour/location.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/audioregion.h>
-#include <ardour/region.h>
+#include <ardour/midi_region.h>
 #include <ardour/session_route.h>
 #include <ardour/tempo.h>
 #include <ardour/utils.h>
@@ -1531,7 +1531,7 @@ Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items)
 	while (i != selection->regions.end() && boost::dynamic_pointer_cast<AudioRegion>((*i)->region()) == 0) {
 		++i;
 	}
-	bool const have_selected_audio_region = (i != selection->regions.end());
+	const bool have_selected_audio_region = (i != selection->regions.end());
 
 	if (have_selected_audio_region) {
 
@@ -1551,9 +1551,19 @@ Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items)
 		items.push_back (MenuElem (_("Normalize"), mem_fun (*this, &Editor::normalize_regions)));
 	}
 	
-	items.push_back (MenuElem (_("Reverse"), mem_fun(*this, &Editor::reverse_regions)));
-	items.push_back (SeparatorElem());
+	/* Find out if we have a selected MIDI region */
+	i = selection->regions.begin();
+	while (i != selection->regions.end() && boost::dynamic_pointer_cast<MidiRegion>((*i)->region()) == 0) {
+		++i;
+	}
+	const bool have_selected_midi_region = (i != selection->regions.end());
+	
+	if (have_selected_midi_region) {
 
+		items.push_back (MenuElem (_("Quantize"), mem_fun(*this, &Editor::quantize_regions)));
+		items.push_back (SeparatorElem());
+
+	}
 
 	/* range related stuff */
 	
@@ -2200,24 +2210,24 @@ Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
 		break;
 
 	case SnapToAThirtysecondBeat:
-                start = session->tempo_map().round_to_beat_subdivision (start, 32);
-                break;
+		start = session->tempo_map().round_to_beat_subdivision (start, 32);
+		break;
 
 	case SnapToASixteenthBeat:
-                start = session->tempo_map().round_to_beat_subdivision (start, 16);
-                break;
+		start = session->tempo_map().round_to_beat_subdivision (start, 16);
+		break;
 
 	case SnapToAEighthBeat:
-                start = session->tempo_map().round_to_beat_subdivision (start, 8);
-                break;
+		start = session->tempo_map().round_to_beat_subdivision (start, 8);
+		break;
 
 	case SnapToAQuarterBeat:
-                start = session->tempo_map().round_to_beat_subdivision (start, 4);
-                break;
+		start = session->tempo_map().round_to_beat_subdivision (start, 4);
+		break;
 
-        case SnapToAThirdBeat:
-                start = session->tempo_map().round_to_beat_subdivision (start, 3);
-                break;
+	case SnapToAThirdBeat:
+		start = session->tempo_map().round_to_beat_subdivision (start, 3);
+		break;
 
 	case SnapToEditCursor:
 		start = edit_cursor->current_frame;
@@ -2305,6 +2315,52 @@ Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
 	default:
 		return;
 		
+	}
+}
+
+double
+Editor::snap_length_beats (nframes_t start)
+{
+	if (!session) {
+		return 1.0;
+	}
+
+	const nframes64_t one_second = session->frame_rate();
+	const nframes64_t one_minute = session->frame_rate() * 60;
+	const nframes64_t one_smpte_second = (nframes64_t)(rint(session->smpte_frames_per_second()) * session->frames_per_smpte_frame());
+	nframes64_t one_smpte_minute = (nframes64_t)(rint(session->smpte_frames_per_second()) * session->frames_per_smpte_frame() * 60);
+	nframes64_t presnap = start;
+
+	/* FIXME: This could/should also work with non-tempo based snap settings (ie seconds) */
+
+	switch (snap_type) {
+	case SnapToBar:
+		return session->tempo_map().meter_at(start).beats_per_bar();
+
+	case SnapToBeat:
+		return 1.0;
+
+	case SnapToAThirtysecondBeat:
+		return 1.0 / (double)32.0;
+		break;
+
+	case SnapToASixteenthBeat:
+		return 1.0 / (double)16.0;
+		break;
+
+	case SnapToAEighthBeat:
+		return 1.0 / (double)8.0;
+		break;
+
+	case SnapToAQuarterBeat:
+		return 1.0 / (double)4.0;
+		break;
+
+	case SnapToAThirdBeat:
+		return 1.0 / (double)3.0;
+
+	default:
+		return 1.0;
 	}
 }
 

@@ -423,12 +423,6 @@ MidiRegionView::set_y_position_and_height (double y, double h)
 	}
 }
 
-void
-MidiRegionView::show_region_editor ()
-{
-	cerr << "No MIDI region editor." << endl;
-}
-
 GhostRegion*
 MidiRegionView::add_ghost (AutomationTimeAxisView& atv)
 {

@@ -553,7 +553,7 @@ class Session : public PBD::StatefulDestructible
 
 	int region_name (string& result, string base = string(""), bool newlevel = false) const;
 	string new_region_name (string);
-	string path_from_region_name (string name, string identifier);
+	string path_from_region_name (DataType type, string name, string identifier);
 
 	boost::shared_ptr<Region> find_whole_file_parent (boost::shared_ptr<Region const>);
 	

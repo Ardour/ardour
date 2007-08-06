@@ -48,6 +48,7 @@
 #include <ardour/region_factory.h>
 #include <ardour/playlist_factory.h>
 #include <ardour/reverse.h>
+#include <ardour/quantize.h>
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -56,6 +57,7 @@
 #include "automation_time_axis.h"
 #include "streamview.h"
 #include "audio_region_view.h"
+#include "midi_region_view.h"
 #include "rgb_macros.h"
 #include "selection_templates.h"
 #include "selection.h"
@@ -3281,8 +3283,21 @@ Editor::reverse_regions ()
 	apply_filter (rev, _("reverse regions"));
 }
 
+
 void
-Editor::apply_filter (AudioFilter& filter, string command)
+Editor::quantize_regions ()
+{
+	if (!session) {
+		return;
+	}
+
+	// FIXME: varying meter?
+	Quantize quant (*session, snap_length_beats(0));
+	apply_filter (quant, _("quantize regions"));
+}
+
+void
+Editor::apply_filter (Filter& filter, string command)
 {
 	if (selection->regions.empty()) {
 		return;
@@ -3293,26 +3308,31 @@ Editor::apply_filter (AudioFilter& filter, string command)
 	track_canvas.get_window()->set_cursor (*wait_cursor);
 	gdk_flush ();
 
+	/* this is ugly. */
 	for (RegionSelection::iterator r = selection->regions.begin(); r != selection->regions.end(); ) {
-		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*r);
-		if (!arv)
-			continue;
-
-		boost::shared_ptr<Playlist> playlist = arv->region()->playlist();
-
-		RegionSelection::iterator tmp;
-		
-		tmp = r;
+		RegionSelection::iterator tmp = r;
 		++tmp;
 
-		if (arv->audio_region()->apply (filter) == 0) {
+		MidiRegionView* const mrv = dynamic_cast<MidiRegionView*>(*r);
+		if (mrv) {
+			if (mrv->midi_region()->apply(filter) == 0) {
+				mrv->redisplay_model();
+			}
+		}
 
-                        XMLNode &before = playlist->get_state();
-			playlist->replace_region (arv->region(), filter.results.front(), arv->region()->position());
-                        XMLNode &after = playlist->get_state();
-			session->add_command(new MementoCommand<Playlist>(*playlist, &before, &after));
-		} else {
-			goto out;
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*r);
+		if (arv) {
+			boost::shared_ptr<Playlist> playlist = arv->region()->playlist();
+
+			if (arv->audio_region()->apply (filter) == 0) {
+
+				XMLNode &before = playlist->get_state();
+				playlist->replace_region (arv->region(), filter.results.front(), arv->region()->position());
+				XMLNode &after = playlist->get_state();
+				session->add_command(new MementoCommand<Playlist>(*playlist, &before, &after));
+			} else {
+				goto out;
+			}
 		}
 
 		r = tmp;

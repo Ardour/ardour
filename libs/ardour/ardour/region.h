@@ -35,6 +35,7 @@ class XMLNode;
 namespace ARDOUR {
 
 class Playlist;
+class Filter;
 
 enum RegionEditState {
 	EditChangesNothing = 0,
@@ -165,6 +166,8 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	void set_opaque (bool yn);
 	void set_locked (bool yn);
 	void set_position_locked (bool yn);
+	
+	int apply (Filter&);
 
 	virtual uint32_t read_data_count() const { return _read_data_count; }
 

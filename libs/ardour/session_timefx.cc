@@ -85,7 +85,7 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 			rstr = names[i];
 		}
 
-		string path = path_from_region_name (PBD::basename_nosuffix (rstr), ident);
+		string path = path_from_region_name (DataType::AUDIO, PBD::basename_nosuffix (rstr), ident);
 		
 		if (path.length() == 0) {
 			error << string_compose (_("tempoize: error creating name for new audio file based on %1"), tsr.region->name()) 

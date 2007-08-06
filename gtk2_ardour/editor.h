@@ -71,7 +71,7 @@ namespace ARDOUR {
 	class TempoSection;
 	class NamedSelection;
 	class Session;
-	class AudioFilter;
+	class Filter;
 	class Crossfade;
 	class ChanCount;
 }
@@ -746,7 +746,7 @@ class Editor : public PublicEditor
 
 	/* snapshots */
 
-	Gtk::ScrolledWindow      snapshot_display_scroller;
+	Gtk::ScrolledWindow snapshot_display_scroller;
 	struct SnapshotDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    SnapshotDisplayModelColumns() { 
 		    add (visible_name);
@@ -892,6 +892,7 @@ class Editor : public PublicEditor
 	void reverse_regions ();
 	void normalize_regions ();
 	void denormalize_regions ();
+	void quantize_regions ();
 
 	void audition_region_from_region_list ();
 	void hide_region_from_region_list ();
@@ -1288,6 +1289,8 @@ class Editor : public PublicEditor
 		snap_to (first64, direction, for_mark);
 		first = (nframes_t) first64;
 	}
+	
+	double snap_length_beats (nframes_t start);
 
 	uint32_t bbt_beat_subdivision;
 
@@ -1805,7 +1808,7 @@ class Editor : public PublicEditor
 	
 	/* audio filters */
 
-	void apply_filter (ARDOUR::AudioFilter&, string cmd);
+	void apply_filter (ARDOUR::Filter&, string cmd);
 
 	/* handling cleanup */
 

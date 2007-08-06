@@ -70,7 +70,7 @@ class RegionView : public TimeAxisViewItem
 	bool set_position(nframes_t pos, void* src, double* delta = 0);
 	void fake_set_opaque (bool yn);
 	
-	virtual void show_region_editor () = 0;
+	virtual void show_region_editor () {}
 	virtual void hide_region_editor();
 	
 	virtual void region_changed (ARDOUR::Change);

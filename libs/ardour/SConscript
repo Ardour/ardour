@@ -52,8 +52,8 @@ buffer_set.cc
 meter.cc
 amp.cc
 panner.cc
+filter.cc
 audiofilesource.cc
-audiofilter.cc
 audioregion.cc
 audiosource.cc
 midi_source.cc
@@ -99,6 +99,7 @@ recent_sessions.cc
 region.cc
 region_factory.cc
 reverse.cc
+quantize.cc
 route.cc
 route_group.cc
 send.cc

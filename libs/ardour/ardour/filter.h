@@ -1,5 +1,6 @@
 /*
-    Copyright (C) 2004 Paul Davis 
+    Copyright (C) 2007 Paul Davis 
+    Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,34 +18,34 @@
 
 */
 
-#ifndef __ardour_audiofilter_h__
-#define __ardour_audiofilter_h__
+#ifndef __ardour_filter_h__
+#define __ardour_filter_h__
 
 #include <vector>
-#include <ardour/audioregion.h>
+#include <ardour/region.h>
 
 namespace ARDOUR {
 
-class AudioRegion;
+class Region;
 class Session;
 
-class AudioFilter {
+class Filter {
 
   public:
-	AudioFilter (ARDOUR::Session& s)
-		: session (s){}
-	virtual ~AudioFilter() {}
+	virtual ~Filter() {}
 
-	virtual int run (boost::shared_ptr<ARDOUR::AudioRegion>) = 0;
-	std::vector<boost::shared_ptr<ARDOUR::AudioRegion> > results;
+	virtual int run (boost::shared_ptr<ARDOUR::Region>) = 0;
+	std::vector<boost::shared_ptr<ARDOUR::Region> > results;
 
   protected:
-	ARDOUR::Session& session;
+	Filter (ARDOUR::Session& s) : session(s) {}
 
-	int make_new_sources (boost::shared_ptr<ARDOUR::AudioRegion>, ARDOUR::SourceList&);
-	int finish (boost::shared_ptr<ARDOUR::AudioRegion>, ARDOUR::SourceList&);
+	int make_new_sources (boost::shared_ptr<ARDOUR::Region>, ARDOUR::SourceList&);
+	int finish (boost::shared_ptr<ARDOUR::Region>, ARDOUR::SourceList&);
+	
+	ARDOUR::Session& session;
 };
 
 } /* namespace */
 
-#endif /* __ardour_audiofilter_h__ */
+#endif /* __ardour_filter_h__ */

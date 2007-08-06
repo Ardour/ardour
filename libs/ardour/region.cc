@@ -34,6 +34,7 @@
 #include <ardour/session.h>
 #include <ardour/source.h>
 #include <ardour/region_factory.h>
+#include <ardour/filter.h>
 
 #include "i18n.h"
 
@@ -1264,4 +1265,11 @@ Region::get_parent() const
 	
 	return boost::shared_ptr<Region>();
 }
+
+int
+Region::apply (Filter& filter)
+{
+	return filter.run (shared_from_this());
+}
+
 
