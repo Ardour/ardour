@@ -2714,14 +2714,10 @@ Session::remove_source (boost::weak_ptr<Source> src)
 
 	{ 
 		Glib::Mutex::Lock lm (source_lock);
-		
-		{ 
-			Glib::Mutex::Lock lm (source_lock);
-			
-			if ((i = sources.find (source->id())) != sources.end()) {
-				sources.erase (i);
-			} 
-		}
+
+		if ((i = sources.find (source->id())) != sources.end()) {
+			sources.erase (i);
+		} 
 	}
 	
 	if (!_state_of_the_state & InCleanup) {
