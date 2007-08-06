@@ -53,6 +53,13 @@ struct PortRequest {
 		 const std::string &xtype);
 };
 
+struct PortSet {
+    PortSet (std::string str) : owner (str) { }
+    
+    std::string owner;
+    std::list<PortRequest> ports;
+};
+
 } // namespace MIDI
 
 #endif // __midi_port_request_h__

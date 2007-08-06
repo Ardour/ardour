@@ -126,18 +126,32 @@ Manager::add_port (PortRequest &req)
 }
 
 int 
-Manager::remove_port (string name)
+Manager::remove_port (Port* port)
 {
 	PortMap::iterator res;
 
-	if ((res = ports_by_device.find (name)) == ports_by_device.end()) {
-		return -1;
+	for (res = ports_by_device.begin(); res != ports_by_device.end(); ) {
+		PortMap::iterator tmp;
+		tmp = res;
+		++tmp;
+		if (res->second == port) {
+			ports_by_device.erase (res);
+		} 
+		res = tmp;
+	}
+
+
+	for (res = ports_by_tag.begin(); res != ports_by_tag.end(); ) {
+		PortMap::iterator tmp;
+		tmp = res;
+		++tmp;
+		if (res->second == port) {
+			ports_by_tag.erase (res);
+		} 
+		res = tmp;
 	}
 	
-	ports_by_device.erase (res);
-	ports_by_device.erase ((*res).second->name());
-
-	delete (*res).second;
+	delete port;
 
 	return 0;
 }
@@ -149,21 +163,6 @@ Manager::port (string name)
 
 	for (res = ports_by_tag.begin(); res != ports_by_tag.end(); res++) {
 		if (name == (*res).first) {
-			return (*res).second;
-		}
-	}
-
-	return 0;
-}
-
-Port *
-Manager::port (size_t portnum)
-
-{
-	PortMap::iterator res;
-
-	for (res = ports_by_tag.begin(); res != ports_by_tag.end(); res++) {
-		if ((*res).second->number() == portnum) {
 			return (*res).second;
 		}
 	}

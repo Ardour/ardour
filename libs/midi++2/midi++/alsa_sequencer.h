@@ -30,8 +30,9 @@
 
 namespace MIDI {
 
-class ALSA_SequencerMidiPort : public Port
+class PortRequest;
 
+class ALSA_SequencerMidiPort : public Port
 {
   public:
 	ALSA_SequencerMidiPort (PortRequest &req);
@@ -40,6 +41,13 @@ class ALSA_SequencerMidiPort : public Port
 	/* select(2)/poll(2)-based I/O */
 
 	virtual int selectable() const;
+
+	static std::string typestring;
+
+  protected:
+	std::string get_typestring () const {
+		return typestring;
+	}
 
   protected:
 	/* Direct I/O */

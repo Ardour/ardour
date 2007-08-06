@@ -47,6 +47,13 @@ public:
 	
 	virtual void cycle_start(nframes_t nframes);
 
+	static std::string typestring;
+
+  protected:
+	std::string get_typestring () const {
+		return typestring;
+	}
+
 protected:
 	/* Direct I/O */
 	int write(byte *msg, size_t msglen, timestamp_t timestamp);

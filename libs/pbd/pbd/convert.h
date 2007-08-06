@@ -35,6 +35,7 @@ void   url_decode (std::string&);
 std::string length2string (const int64_t frames, const double sample_rate);
 
 std::vector<std::string> internationalize (const char *, const char **);
+bool strings_equal_ignore_case (const std::string& a, const std::string& b);
 
 } //namespace PBD
 

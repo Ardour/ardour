@@ -48,6 +48,13 @@ class FD_MidiPort : public Port
 	virtual int selectable() const;
 	static std::vector<std::string *> *list_devices ();
 
+	static std::string typestring;
+
+  protected:
+	std::string get_typestring () const {
+		return typestring;
+	}
+
   protected:
 	int _fd;
 	virtual void open (PortRequest &req);

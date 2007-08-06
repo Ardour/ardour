@@ -91,8 +91,10 @@ class MachineControl : public sigc::trackable
 
 	Port &port() { return _port; }
 	
-	void set_device_id (byte id);
-	byte device_id () const { return _device_id; }
+	void set_receive_device_id (byte id);
+	void set_send_device_id (byte id);
+	byte receive_device_id () const { return _receive_device_id; }
+	byte send_device_id () const { return _send_device_id; }
 
 	static bool is_mmc (byte *sysex_buf, size_t len);
 
@@ -244,7 +246,8 @@ class MachineControl : public sigc::trackable
 	byte resume;
 
   private:
-	byte _device_id;
+	byte _receive_device_id;
+	byte _send_device_id;
 	MIDI::Port &_port;
 
 	void process_mmc_message (Parser &p, byte *, size_t len);

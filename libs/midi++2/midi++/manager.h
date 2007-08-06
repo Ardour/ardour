@@ -50,10 +50,9 @@ class Manager {
 	void cycle_end();
 
 	Port *add_port (PortRequest &);
-	int   remove_port (std::string port);
+	int   remove_port (Port*);
 
 	Port *port (std::string name);
-	Port *port (size_t number);
 
 	size_t    nports () { return ports_by_device.size(); }
 

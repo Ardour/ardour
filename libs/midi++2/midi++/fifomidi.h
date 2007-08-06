@@ -37,6 +37,13 @@ class FIFO_MidiPort : public MIDI::FD_MidiPort
 	FIFO_MidiPort (PortRequest &req);
 	~FIFO_MidiPort () {};
 
+	static std::string typestring;
+
+  protected:
+	std::string get_typestring () const {
+		return typestring;
+	}
+
   private:
 	void open (PortRequest &req);
 };

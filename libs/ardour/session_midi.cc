@@ -88,97 +88,66 @@ Session::use_config_midi_ports ()
 int
 Session::set_mtc_port (string port_tag)
 {
-#if 0
-	MIDI::byte old_device_id = 0;
-	bool reset_id = false;
+	MTC_Slave *ms;
 
 	if (port_tag.length() == 0) {
-		if (_mmc_port == 0) {
+
+		if (_slave && ((ms = dynamic_cast<MTC_Slave*> (_slave)) != 0)) {
+			error << _("Ardour is slaved to MTC - port cannot be reset") << endmsg;
+			return -1;
+		}
+
+		if (_mtc_port == 0) {
 			return 0;
 		}
-		_mmc_port = 0;
+
+		_mtc_port = 0;
 		goto out;
 	}
 
 	MIDI::Port* port;
 
 	if ((port = MIDI::Manager::instance()->port (port_tag)) == 0) {
+		error << string_compose (_("unknown port %1 requested for MTC"), port_tag) << endl;
 		return -1;
 	}
 
-	_mmc_port = port;
+	_mtc_port = port;
 
-	if (mmc) {
-		old_device_id = mmc->device_id();
-		reset_id = true;
-		delete mmc;
+	if (_slave && ((ms = dynamic_cast<MTC_Slave*> (_slave)) != 0)) {
+		ms->rebind (*port);
 	}
 
-	mmc = new MIDI::MachineControl (*_mmc_port, 1.0, 
-					MMC_CommandSignature,
-					MMC_ResponseSignature);
-
-	if (reset_id) {
-		mmc->set_device_id (old_device_id);
-	}
-
-	mmc->Play.connect 
-		(mem_fun (*this, &Session::mmc_deferred_play));
-	mmc->DeferredPlay.connect 
-		(mem_fun (*this, &Session::mmc_deferred_play));
-	mmc->Stop.connect 
-		(mem_fun (*this, &Session::mmc_stop));
-	mmc->FastForward.connect 
-		(mem_fun (*this, &Session::mmc_fast_forward));
-	mmc->Rewind.connect 
-		(mem_fun (*this, &Session::mmc_rewind));
-	mmc->Pause.connect 
-		(mem_fun (*this, &Session::mmc_pause));
-	mmc->RecordPause.connect 
-		(mem_fun (*this, &Session::mmc_record_pause));
-	mmc->RecordStrobe.connect 
-		(mem_fun (*this, &Session::mmc_record_strobe));
-	mmc->RecordExit.connect 
-		(mem_fun (*this, &Session::mmc_record_exit));
-	mmc->Locate.connect 
-		(mem_fun (*this, &Session::mmc_locate));
-	mmc->Step.connect 
-		(mem_fun (*this, &Session::mmc_step));
-	mmc->Shuttle.connect 
-		(mem_fun (*this, &Session::mmc_shuttle));
-	mmc->TrackRecordStatusChange.connect
-		(mem_fun (*this, &Session::mmc_record_enable));
-
-
-	/* also handle MIDI SPP because its so common */
-
-	_mmc_port->input()->start.connect (mem_fun (*this, &Session::spp_start));
-	_mmc_port->input()->contineu.connect (mem_fun (*this, &Session::spp_continue));
-	_mmc_port->input()->stop.connect (mem_fun (*this, &Session::spp_stop));
-	
-	Config->set_mmc_port_name (port_tag);
+	Config->set_mtc_port_name (port_tag);
 
   out:
-	MMC_PortChanged(); /* EMIT SIGNAL */
+	MTC_PortChanged(); /* EMIT SIGNAL */
 	change_midi_ports ();
 	set_dirty();
-#endif
 	return 0;
 }
 
 void
-Session::set_mmc_device_id (uint32_t device_id)
+Session::set_mmc_receive_device_id (uint32_t device_id)
 {
 	if (mmc) {
-		mmc->set_device_id (device_id);
+		mmc->set_receive_device_id (device_id);
+	}
+}
+
+void
+Session::set_mmc_send_device_id (uint32_t device_id)
+{
+	if (mmc) {
+		mmc->set_send_device_id (device_id);
 	}
 }
 
 int
 Session::set_mmc_port (string port_tag)
 {
-#if 0
-	MIDI::byte old_device_id = 0;
+	MIDI::byte old_recv_device_id = 0;
+	MIDI::byte old_send_device_id = 0;
 	bool reset_id = false;
 
 	if (port_tag.length() == 0) {
@@ -198,7 +167,8 @@ Session::set_mmc_port (string port_tag)
 	_mmc_port = port;
 
 	if (mmc) {
-		old_device_id = mmc->device_id();
+		old_recv_device_id = mmc->receive_device_id();
+		old_recv_device_id = mmc->send_device_id();
 		reset_id = true;
 		delete mmc;
 	}
@@ -208,7 +178,8 @@ Session::set_mmc_port (string port_tag)
 					MMC_ResponseSignature);
 
 	if (reset_id) {
-		mmc->set_device_id (old_device_id);
+		mmc->set_receive_device_id (old_recv_device_id);
+		mmc->set_send_device_id (old_send_device_id);
 	}
 
 	mmc->Play.connect 
@@ -248,7 +219,6 @@ Session::set_mmc_port (string port_tag)
 	Config->set_mmc_port_name (port_tag);
 
   out:
-#endif
 	MMC_PortChanged(); /* EMIT SIGNAL */
 	change_midi_ports ();
 	set_dirty();
@@ -438,7 +408,7 @@ Session::setup_midi_control ()
 	
 	mmc_buffer[0] = 0xf0; // SysEx
 	mmc_buffer[1] = 0x7f; // Real Time SysEx ID for MMC
-	mmc_buffer[2] = 0x7f; // "broadcast" device ID
+	mmc_buffer[2] = mmc->send_device_id();
 	mmc_buffer[3] = 0x6;  // MCC
 
 	/* Set up the qtr frame message */

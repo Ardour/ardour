@@ -32,14 +32,24 @@
 
 namespace MIDI {
 
-class CoreMidi_MidiPort:public Port {
-	public:
-		CoreMidi_MidiPort(PortRequest & req);
-		virtual ~ CoreMidi_MidiPort();
+namespace PortRequest;
 
-		virtual int selectable() const {
-			return -1;
-		}
+class CoreMidi_MidiPort:public Port 
+{
+  public:
+       CoreMidi_MidiPort(PortRequest & req);
+       virtual ~ CoreMidi_MidiPort();
+    
+       virtual int selectable() const {
+	       return -1;
+       }
+       static std::string typestring;
+
+  protected:
+	std::string get_typestring () const {
+		return typestring;
+	}
+
 	protected:
 		/* Direct I/O */
 		int write (byte *msg, size_t msglen, timestamp_t timestamp);	
