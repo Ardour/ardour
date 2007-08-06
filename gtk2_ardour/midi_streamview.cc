@@ -57,7 +57,7 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	: StreamView (tv)
 	, _range(ContentsRange)
 	, _lowest_note(60)
-	, _highest_note(71)
+	, _highest_note(60)
 {
 	if (tv.is_track())
 		stream_base_color = ARDOUR_UI::config()->canvasvar_MidiTrackBase.get();
@@ -189,6 +189,14 @@ MidiStreamView::redisplay_diskstream ()
 	if (_trackview.is_midi_track()) {
 		_trackview.get_diskstream()->playlist()->foreach_region (static_cast<StreamView*>(this), &StreamView::add_region_view);
 	}
+
+	/* Always display at least one octave */
+	if (_highest_note == 127) {
+		if (_lowest_note > (127 - 11))
+			_lowest_note = 127 - 11;
+	} else if (_highest_note < _lowest_note + 11) {
+		_highest_note = _lowest_note + 11;
+	}
 	
 	for (i = region_views.begin(); i != region_views.end(); ) {
 		tmp = i;
@@ -237,6 +245,21 @@ MidiStreamView::draw_note_separators()
 			_note_lines[i]->hide();
 		}
 	}
+}
+	
+
+void
+MidiStreamView::set_note_range(VisibleNoteRange r)
+{
+	_range = r;
+	if (r == FullRange) {
+		_lowest_note = 0;
+		_highest_note = 127;
+	} else {
+		_lowest_note = 60;
+		_highest_note = 60;
+	}
+	redisplay_diskstream();
 }
 
 	

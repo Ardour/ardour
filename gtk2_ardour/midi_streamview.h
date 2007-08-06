@@ -66,7 +66,7 @@ class MidiStreamView : public StreamView
 	};
 
 	VisibleNoteRange note_range() { return _range; }
-	void set_note_range(VisibleNoteRange r) { _range = r; }
+	void set_note_range(VisibleNoteRange r);
 
 	uint8_t lowest_note()  const { return (_range == FullRange) ? 0 : _lowest_note; }
 	uint8_t highest_note() const { return (_range == FullRange) ? 127 : _highest_note; }

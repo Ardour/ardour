@@ -193,11 +193,12 @@ Editor::draw_measures ()
 	tempo_lines->draw(*current_bbt_points, frames_per_unit);
 	marker_tempo_lines->draw(*current_bbt_points, frames_per_unit);
 
-	/* the cursors are always on top of everything */
-
-	time_line_group->raise_to_top();
+	/*time_line_group->raise_to_top();
+	time_line_group->lower(1);*/
 	marker_time_line_group->raise_to_top();
+	//marker_time_line_group->lower(1);
 
+	/* the cursors are always on top of everything */
 	cursor_group->raise_to_top();
 
 	return;
