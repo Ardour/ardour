@@ -167,22 +167,22 @@ ARDOUR::setup_midi (AudioEngine& engine)
 		/* If that didn't work, just use the first listed port */
 
 		if (default_mmc_port == 0) {
-			default_mmc_port = MIDI::Manager::instance()->port (0);
+			default_mmc_port = MIDI::Manager::instance()->port ("");
 		}
 
 		if (default_mtc_port == 0) {
-			default_mtc_port = MIDI::Manager::instance()->port (0);
+			default_mtc_port = MIDI::Manager::instance()->port ("");
 		}
 
 		if (default_midi_port == 0) {
-			default_midi_port = MIDI::Manager::instance()->port (0);
+			default_midi_port = MIDI::Manager::instance()->port ("");
 		}
 		
 	} else {
 
 		/* Only one port described, so use it for both MTC and MMC */
 
-		default_mmc_port = MIDI::Manager::instance()->port (0);
+		default_mmc_port = MIDI::Manager::instance()->port ("");
 		default_mtc_port = default_mmc_port;
 		default_midi_port = default_mmc_port;
 	}
