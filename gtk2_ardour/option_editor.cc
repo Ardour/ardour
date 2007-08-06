@@ -705,9 +705,7 @@ OptionEditor::mmc_receive_device_id_adjusted ()
 {
 	uint8_t id = (uint8_t) mmc_receive_device_id_spinner.get_value();
 
-	if (id != Config->get_mmc_receive_device_id()) {
-		Config->set_mmc_receive_device_id (id);
-	}
+	Config->set_mmc_receive_device_id (id);
 }
 
 void
@@ -715,9 +713,9 @@ OptionEditor::mmc_send_device_id_adjusted ()
 {
 	uint8_t id = (uint8_t) mmc_send_device_id_spinner.get_value();
 
-	if (id != Config->get_mmc_send_device_id()) {
-		Config->set_mmc_send_device_id (id);
-	}
+	cerr << "New send ID = " << (int) id << endl;
+
+	Config->set_mmc_send_device_id (id);
 }
 
 void

@@ -138,6 +138,8 @@ Session::set_mmc_send_device_id (uint32_t device_id)
 {
 	if (mmc) {
 		mmc->set_send_device_id (device_id);
+		/* reset MMC buffer */
+		mmc_buffer[2] = mmc->send_device_id();
 	}
 }
 
@@ -176,8 +178,8 @@ Session::set_mmc_port (string port_tag)
 					MMC_ResponseSignature);
 
 	if (reset_id) {
-		mmc->set_receive_device_id (old_recv_device_id);
-		mmc->set_send_device_id (old_send_device_id);
+		set_mmc_receive_device_id (old_recv_device_id);
+		set_mmc_send_device_id (old_send_device_id);
 	}
 
 	mmc->Play.connect 
