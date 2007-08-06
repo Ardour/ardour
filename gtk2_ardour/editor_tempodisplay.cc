@@ -138,7 +138,7 @@ Editor::redisplay_tempo (bool immediate_redraw)
 	next_beat.ticks = 0;
 	
 	if (current_bbt_points) {
-	        delete current_bbt_points;
+		delete current_bbt_points;
 		current_bbt_points = 0;
 	}
 

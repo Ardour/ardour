@@ -823,8 +823,7 @@ Editor::set_entered_track (TimeAxisView* tav)
 void
 Editor::show_window ()
 {
-	show_all ();
-	present ();
+	show_all_children ();
 	
 	/* re-hide editor list if necessary */
 	editor_list_button_toggled ();
@@ -839,6 +838,8 @@ Editor::show_window ()
 		tv = (static_cast<TimeAxisView*>(*i));
 		tv->reset_height ();
 	}
+
+	present ();
 }
 
 void

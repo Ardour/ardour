@@ -369,8 +369,6 @@ TimeAxisView::set_height_pixels (uint32_t h)
 		/* resize the selection rect */
 		show_selection (editor.get_selection().time);
 	}
-
-	editor.redraw_measures();
 }
 
 bool

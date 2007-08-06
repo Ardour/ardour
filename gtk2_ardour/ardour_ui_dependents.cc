@@ -109,13 +109,11 @@ void
 ARDOUR_UI::goto_editor_window ()
 {
 	editor->show_window ();
-	editor->present();
 }
 void
 ARDOUR_UI::goto_mixer_window ()
 {
 	mixer->show_window ();
-	mixer->present();
 }
 
 gint
