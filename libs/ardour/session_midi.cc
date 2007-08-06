@@ -408,7 +408,7 @@ Session::setup_midi_control ()
 	
 	mmc_buffer[0] = 0xf0; // SysEx
 	mmc_buffer[1] = 0x7f; // Real Time SysEx ID for MMC
-	mmc_buffer[2] = (mmc ? mmc->send_device_id() : 0x00);
+	mmc_buffer[2] = (mmc ? mmc->send_device_id() : 0x7f);
 	mmc_buffer[3] = 0x6;  // MCC
 
 	/* Set up the qtr frame message */

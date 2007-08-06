@@ -1813,6 +1813,10 @@ ARDOUR_UI::save_template ()
 	ArdourPrompter prompter (true);
 	string name;
 
+	if (!check_audioengine()) {
+		return;
+	}
+
 	prompter.set_name (X_("Prompter"));
 	prompter.set_prompt (_("Name for mix template:"));
 	prompter.set_initial_text(session->name() + _("-template"));
