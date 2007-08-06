@@ -74,6 +74,7 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 	switch (ev->type) {
 	case GDK_KEY_PRESS:
 		if (_note && ev->key.keyval == GDK_Delete) {
+			selected(true);
 			_region.start_remove_command();
 			_region.command_remove_note(this);
 		}

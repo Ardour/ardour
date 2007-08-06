@@ -212,6 +212,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 				drag_rect->property_y2() = drag_rect->property_y1() + floor(midi_stream_view()->note_height());
 				drag_rect->property_outline_what() = 0xFF;
 				drag_rect->property_outline_color_rgba() = 0xFFFFFF99;
+
 				drag_rect->property_fill_color_rgba() = 0xFFFFFF66;
 
 				_state = AddDragging;

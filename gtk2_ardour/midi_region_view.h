@@ -112,8 +112,10 @@ class MidiRegionView : public RegionView
 	}
 
 	void note_entered(ArdourCanvas::CanvasMidiEvent* ev) {
-		if (_command_mode == Remove && _delta_command && ev->note())
+		if (_command_mode == Remove && _delta_command && ev->note()) {
+			ev->selected(true);
 			_delta_command->remove(*ev->note());
+		}
 	}
 
 	//ARDOUR::MidiModel::DeltaCommand* delta_command() { return _delta_command; }
@@ -122,6 +124,7 @@ class MidiRegionView : public RegionView
 		delete _delta_command;
 		_delta_command = NULL;
 		_command_mode = None;
+		clear_selection();
 	}
 
 	void apply_command() {
