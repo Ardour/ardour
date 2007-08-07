@@ -32,6 +32,12 @@ public:
 	CanvasHit(MidiRegionView& region, Group& group, double size, const ARDOUR::MidiModel::Note* note=NULL)
 		: Diamond(group, size), CanvasMidiEvent(region, this, note) {}
 	
+	// FIXME
+	double x1() { return 0.0; }
+	double y1() { return 0.0; }
+	double x2() { return 0.0; }
+	double y2() { return 0.0; }
+	
 	void set_outline_color(uint32_t c) { property_outline_color_rgba() = c; }
 	void set_fill_color(uint32_t c) { property_fill_color_rgba() = c; }
 

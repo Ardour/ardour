@@ -241,8 +241,11 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 			if (drag_rect)
 				drag_rect->property_x2() = event_x;
 
-			if (drag_rect && _state == SelectDragging)
+			if (drag_rect && _state == SelectDragging) {
 				drag_rect->property_y2() = event_y;
+
+				update_drag_selection(drag_start_x, event_x, drag_start_y, event_y);
+			}
 
 			last_x = event_x;
 			last_y = event_y;
@@ -335,7 +338,7 @@ MidiRegionView::create_note_at(double x, double y, double dur)
 void
 MidiRegionView::clear_events()
 {
-	for (std::vector<ArdourCanvas::Item*>::iterator i = _events.begin(); i != _events.end(); ++i)
+	for (std::vector<CanvasMidiEvent*>::iterator i = _events.begin(); i != _events.end(); ++i)
 		delete *i;
 	
 	_events.clear();
@@ -558,7 +561,7 @@ MidiRegionView::add_note (const MidiModel::Note& note)
 	if (midi_view()->note_mode() == Sustained) {
 		const double y1 = midi_stream_view()->note_to_y(note.note());
 
-		ArdourCanvas::SimpleRect * ev_rect = new CanvasNote(*this, *group, &note);
+		CanvasNote* ev_rect = new CanvasNote(*this, *group, &note);
 		ev_rect->property_x1() = trackview.editor.frame_to_pixel((nframes_t)note.time());
 		ev_rect->property_y1() = y1;
 		ev_rect->property_x2() = trackview.editor.frame_to_pixel((nframes_t)(note.end_time()));
@@ -638,6 +641,22 @@ MidiRegionView::note_deselected(ArdourCanvas::CanvasMidiEvent* ev, bool add)
 	
 	_selection.erase(ev);
 	ev->selected(false);
+}
+
+
+void
+MidiRegionView::update_drag_selection(double last_x, double x, double last_y, double y)
+{
+	// FIXME: so, so, so much slower than this should be
+	for (std::vector<CanvasMidiEvent*>::iterator i = _events.begin(); i != _events.end(); ++i) {
+		if ((*i)->x1() >= last_x && (*i)->x1() <= x && (*i)->y1() >= last_y && (*i)->y1() <= y) {
+			(*i)->selected(true);
+			_selection.insert(*i);
+		} else {
+			(*i)->selected(false);
+			_selection.erase(*i);
+		}
+	}
 }
 
 

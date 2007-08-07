@@ -38,6 +38,8 @@ namespace Canvas {
  *
  * Note: Because of this, derived classes need to manually bounce events to
  * on_event, it won't happen automatically.
+ *
+ * A newer, better canvas should remove the need for all the ugly here.
  */
 class CanvasMidiEvent {
 public:
@@ -51,6 +53,14 @@ public:
 
 	virtual void set_outline_color(uint32_t c) = 0;
 	virtual void set_fill_color(uint32_t c) = 0;
+	
+	virtual double x1() = 0;
+	virtual double y1() = 0;
+	virtual double x2() = 0;
+	virtual double y2() = 0;
+
+	const Item* item() const { return _item; }
+	Item*       item()       { return _item; }
 
 	const ARDOUR::MidiModel::Note* note() { return _note; }
 

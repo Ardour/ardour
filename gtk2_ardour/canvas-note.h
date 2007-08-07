@@ -35,6 +35,11 @@ public:
 	{
 	}
 	
+	double x1() { return property_x1(); }
+	double y1() { return property_y1(); }
+	double x2() { return property_x2(); }
+	double y2() { return property_y2(); }
+	
 	void set_outline_color(uint32_t c) { property_outline_color_rgba() = c; }
 	void set_fill_color(uint32_t c) { property_fill_color_rgba() = c; }
 	

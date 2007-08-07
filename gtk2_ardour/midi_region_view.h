@@ -171,13 +171,14 @@ class MidiRegionView : public RegionView
 	
 	void clear_selection_except(ArdourCanvas::CanvasMidiEvent* ev);
 	void clear_selection() { clear_selection_except(NULL); }
+	void update_drag_selection(double last_x, double x, double last_y, double y);
 
 	double _default_note_length;
 
-	boost::shared_ptr<ARDOUR::MidiModel> _model;
-	std::vector<ArdourCanvas::Item*>     _events;
-	ArdourCanvas::CanvasNote**           _active_notes;
-	ARDOUR::MidiModel::DeltaCommand*     _delta_command;
+	boost::shared_ptr<ARDOUR::MidiModel>        _model;
+	std::vector<ArdourCanvas::CanvasMidiEvent*> _events;
+	ArdourCanvas::CanvasNote**                  _active_notes;
+	ARDOUR::MidiModel::DeltaCommand*            _delta_command;
 
 	typedef std::set<ArdourCanvas::CanvasMidiEvent*> Selection;
 	Selection _selection;
