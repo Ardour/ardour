@@ -39,11 +39,39 @@
 &lt;MIDI-port tag="mcu" device="/dev/snd/midiC2D0" type="alsa/raw" mode="duplex"/&gt;
 </programlisting>
     </para>
+		
+		<para>
+			Optionally, there is a way to get udev to assign an attached BCF2000 a consistent
+			name under /dev/ however, by adding the following line to the udev rules. On some
+			systems, these reside in <filename>/etc/udev/rules.d/</filename>:
 
-    <para>
-      It is also possible to add MCU extenders or other BCF2000 units,
-      although this is untested because nobody we know has access to one
-      right now. To do this, add the following lines to
+<programlisting>
+KERNEL=="midiC[0-9]D0", ATTRS{product}=="BCF2000", SYMLINK+="midi-bcf2000"
+</programlisting>
+
+			This will cause udev to create a <filename>/dev/midi-bcf2000</filename>
+			for any BCF attached to the system, regardless of which alsa card number
+			it gets assigned. Obviously you'd use <filename>/dev/midi-bcf2000</filename>
+			instead of <filename>/dev/snd/midiC2D0</filename>.
+		</para>
+		<para>
+			See also <ulink url="http://reactivated.net/writing_udev_rules.html">Writing udev rules</ulink>
+		</para>
+  </section>
+
+	<section id="sn-mackie-extenders">
+		<title>Extenders</title>
+		<para>
+			The Logic protocol allows the use of
+			<ulink url="http://www.mackie.com/products/mcupro/index.html">extenders</ulink>
+			or <ulink url="http://www.mackie.com/home/showimage.html?u=/products/mcupro/images/MCU-ExtPro-Top.jpg">Extender image</ulink>.
+			Extenders are essentially banks of 8 faders without the jog wheel and buttons.
+			Once the code is fixed, it will be possible to
+			use either the mackie extenders, or BCF2000 units as extenders.
+		</para>
+<!--
+		<para>
+      To do this, add the following lines to
       <filename>~/.ardour2/ardour.rc</filename>
 <programlisting>
 &lt;MIDI-port tag="mcu_xt_1" device="/dev/snd/midiC3D0" type="alsa/raw" mode="duplex"/&gt;
@@ -52,7 +80,8 @@
       and so on, one for each of your extenders, up to a maximum of 9
       extenders.
     </para>
-  </section>
+-->
+	</section>
 
   <section id="mackie-mackie-mode">
     <title>Mackie Mode</title>
@@ -296,7 +325,7 @@
     <title>Connecting to Ardour</title>
 		<note>
 			<para>
-				Currently (ardour-2.0.4) support for alsa/sequencer ports
+				Currently, support for the mackie using alsa/sequencer ports
 				is borked. You're better off using alsa/raw as documented above.
 			</para>
 		</note>
@@ -366,6 +395,14 @@
 		</para>
 		
   </section>
+	
+	<section id="mackie-thanks">
+		<title>Thanks</title>
+		<para>Thomas Vecchione for help debugging the mackie LCD display, and functionality suggestions.</para>
+		<para>Giso Grimm for help debugging various BCF issues, and functionality suggestions.</para>
+		<para>Josh Parsons for the udev configuration and links.</para>
+		<para>Various other people who provided good bug reports and suggestions and feedback.</para>
+	</section>
 
 <!--
 	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
