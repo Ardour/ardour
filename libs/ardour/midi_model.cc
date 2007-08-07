@@ -20,7 +20,6 @@
 
 #include <iostream>
 #include <algorithm>
-#include <queue>
 #include <pbd/enumwriter.h>
 #include <ardour/midi_model.h>
 #include <ardour/midi_events.h>
@@ -103,6 +102,7 @@ MidiModel::MidiModel(Session& s, size_t size)
 	, _notes(size)
 	, _note_mode(Sustained)
 	, _writing(false)
+	, _active_notes(LaterNoteEndComparator())
 {
 }
 
@@ -121,34 +121,32 @@ MidiModel::read (MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframe
 	/* FIXME: cache last lookup value to avoid the search */
 
 	if (_note_mode == Sustained) {
-		LaterNoteEndComparator cmp;
-		priority_queue<const Note*,vector<const Note*>,LaterNoteEndComparator> active_notes(cmp);
 
 		/* FIXME: cache last lookup value to avoid the search */
 		for (Notes::const_iterator n = _notes.begin(); n != _notes.end(); ++n) {
-	
+
 			//cerr << "MM ON " << n->time() << endl;
 
-			if (n->time() >= start + nframes)
-				break;
-
-			while ( ! active_notes.empty() ) {
-				const Note* const earliest_off = active_notes.top();
+			while ( ! _active_notes.empty() ) {
+				const Note* const earliest_off = _active_notes.top();
 				const MidiEvent& ev = earliest_off->off_event();
 				if (ev.time() < start + nframes && ev.time() <= n->time()) {
 					dst.write(ev.time() + stamp_offset, ev.size(), ev.buffer());
-					active_notes.pop();
+					_active_notes.pop();
 					++read_events;
 				} else {
 					break;
 				}
 			}
 
+			if (n->time() >= start + nframes)
+				break;
+
 			// Note on
 			if (n->time() >= start) {
 				const MidiEvent& ev = n->on_event();
 				dst.write(ev.time() + stamp_offset, ev.size(), ev.buffer());
-				active_notes.push(&(*n));
+				_active_notes.push(&(*n));
 				++read_events;
 			}
 

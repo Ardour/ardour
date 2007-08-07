@@ -21,6 +21,7 @@
 #ifndef __ardour_midi_model_h__ 
 #define __ardour_midi_model_h__
 
+#include <queue>
 #include <boost/utility.hpp>
 #include <pbd/command.h>
 #include <ardour/types.h>
@@ -162,6 +163,13 @@ private:
 	typedef std::vector<size_t> WriteNotes;
 	WriteNotes _write_notes;
 	bool       _writing;
+	
+	// note state for read():
+	
+	typedef std::priority_queue<const Note*,std::vector<const Note*>,
+			LaterNoteEndComparator> ActiveNotes;
+
+	mutable ActiveNotes _active_notes;
 };
 
 } /* namespace ARDOUR */
