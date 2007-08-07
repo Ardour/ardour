@@ -240,7 +240,6 @@ MidiStreamView::draw_note_separators()
 			_note_lines[i]->property_y1() = note_to_y(i);
 			_note_lines[i]->property_y2() = note_to_y(i);
 			_note_lines[i]->show();
-			_note_lines[i]->raise_to_top();
 		} else {
 			_note_lines[i]->hide();
 		}

@@ -23,8 +23,10 @@
 
 #include <libgnomecanvasmm.h>
 #include <libgnomecanvasmm/polygon.h>
+#include <ardour/midi_track.h>
 #include <ardour/midi_region.h>
 #include <ardour/midi_model.h>
+#include <ardour/diskstream.h>
 #include <ardour/types.h>
 
 #include "region_view.h"
@@ -118,8 +120,6 @@ class MidiRegionView : public RegionView
 		}
 	}
 
-	//ARDOUR::MidiModel::DeltaCommand* delta_command() { return _delta_command; }
-
 	void abort_command() {
 		delete _delta_command;
 		_delta_command = NULL;
@@ -133,6 +133,7 @@ class MidiRegionView : public RegionView
 			_delta_command = NULL;
 		}
 		_command_mode = None;
+		midi_view()->midi_track()->diskstream()->playlist_modified();
 	}
 
 	void   unique_select(ArdourCanvas::CanvasMidiEvent* ev);

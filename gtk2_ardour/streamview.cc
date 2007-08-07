@@ -212,10 +212,12 @@ StreamView::playlist_modified (boost::shared_ptr<Diskstream> ds)
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::playlist_modified_weak), ds));
 
 	/* update layers count and the y positions and heights of our regions */
-	layers = ds->playlist()->top_layer() + 1;
-	update_contents_y_position_and_height ();
+	if (ds->playlist()) {
+		layers = ds->playlist()->top_layer() + 1;
+		update_contents_y_position_and_height ();
 
-	redisplay_diskstream ();
+		redisplay_diskstream ();
+	}
 }
 
 void
@@ -292,7 +294,8 @@ StreamView::region_layered (RegionView* rv)
 	/* this used to be + 1, but regions to the left ended up below
 	  ..something.. and couldn't receive events.  why?  good question.
 	*/
-	rv->get_canvas_group()->raise (rv->region()->layer() + 2);
+	/* and now it's + 3 for midi note separator lines */
+	rv->get_canvas_group()->raise (rv->region()->layer() + 3);
 }
 
 void

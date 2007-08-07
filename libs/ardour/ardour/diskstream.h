@@ -82,7 +82,7 @@ class Diskstream : public SessionObject
 	void       set_persistent_align_style (AlignStyle a) { _persistent_alignment_style = a; }
 	
 	nframes_t roll_delay() const { return _roll_delay; }
-	void           set_roll_delay (nframes_t);
+	void      set_roll_delay (nframes_t);
 
 	bool         record_enabled() const { return g_atomic_int_get (&_record_enabled); }
 	virtual void set_record_enabled (bool yn) = 0;
@@ -101,6 +101,7 @@ class Diskstream : public SessionObject
 
 	void set_speed (double);
 	void non_realtime_set_speed ();
+	virtual void playlist_modified ();
 
 	boost::shared_ptr<Playlist> playlist () { return _playlist; }
 
@@ -124,8 +125,8 @@ class Diskstream : public SessionObject
 	
 	virtual void monitor_input (bool) {}
 
-	nframes_t capture_offset() const { return _capture_offset; }
-	virtual void   set_capture_offset ();
+	nframes_t    capture_offset() const { return _capture_offset; }
+	virtual void set_capture_offset ();
 
 	bool slaved() const      { return _slaved; }
 	void set_slaved(bool yn) { _slaved = yn; }
@@ -145,8 +146,8 @@ class Diskstream : public SessionObject
 	sigc::signal<void>            AlignmentStyleChanged;
 	sigc::signal<void,Location *> LoopSet;
 
-	static sigc::signal<void>                DiskOverrun;
-	static sigc::signal<void>                DiskUnderrun;
+	static sigc::signal<void>     DiskOverrun;
+	static sigc::signal<void>     DiskUnderrun;
 
   protected:
 	friend class Session;
@@ -201,7 +202,6 @@ class Diskstream : public SessionObject
 	/* XXX fix this redundancy ... */
 
 	virtual void playlist_changed (Change);
-	virtual void playlist_modified ();
 	virtual void playlist_deleted (boost::weak_ptr<Playlist>);
 
 	virtual void transport_stopped (struct tm&, time_t, bool abort) = 0;

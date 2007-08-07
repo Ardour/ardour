@@ -2325,12 +2325,6 @@ Editor::snap_length_beats (nframes_t start)
 		return 1.0;
 	}
 
-	const nframes64_t one_second = session->frame_rate();
-	const nframes64_t one_minute = session->frame_rate() * 60;
-	const nframes64_t one_smpte_second = (nframes64_t)(rint(session->smpte_frames_per_second()) * session->frames_per_smpte_frame());
-	nframes64_t one_smpte_minute = (nframes64_t)(rint(session->smpte_frames_per_second()) * session->frames_per_smpte_frame() * 60);
-	nframes64_t presnap = start;
-
 	/* FIXME: This could/should also work with non-tempo based snap settings (ie seconds) */
 
 	switch (snap_type) {
