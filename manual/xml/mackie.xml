@@ -7,8 +7,8 @@
 <section id="sn-mackie">
   <title>Using the Mackie driver for MCU and BCF2000</title>
   <para>
-    For Ardour 2, this will walk you through the process of configuring and using Mackie
-    MCU, or a BCF2000 in
+    For Ardour 2, this will walk you through the process of configuring and
+    using Mackie MCU, or a BCF2000 in
     <ulink url="http://www.behringerdownload.de/BCF2000/BCF2000_Emulation_modes.pdf">Logic
     Control emulation mode</ulink>.
   </para>
@@ -33,42 +33,48 @@
 
     <para>
       While ardour is not running, edit your
-      <filename>.ardour2/ardour.rc</filename> (and for now <filename>etc/ardour2/ardour_system.rc</filename> and <filename>etc/ardour2/ardour.rc</filename>) and add at the top, with the
-      other ports:
+      <filename>.ardour2/ardour.rc</filename> (and for now
+      <filename>etc/ardour2/ardour_system.rc</filename> and
+      <filename>etc/ardour2/ardour.rc</filename>) and add at the top, with
+      the other ports:
 <programlisting>
 &lt;MIDI-port tag="mcu" device="/dev/snd/midiC2D0" type="alsa/raw" mode="duplex"/&gt;
 </programlisting>
     </para>
-		
-		<para>
-			Optionally, there is a way to get udev to assign an attached BCF2000 a consistent
-			name under /dev/ however, by adding the following line to the udev rules. On some
-			systems, these reside in <filename>/etc/udev/rules.d/</filename>:
 
+    <para>
+      Optionally, there is a way to get udev to assign an attached BCF2000 a
+      consistent name under /dev/ however, by adding the following line to
+      the udev rules. On some systems, these reside in
+      <filename>/etc/udev/rules.d/</filename>:
 <programlisting>
 KERNEL=="midiC[0-9]D0", ATTRS{product}=="BCF2000", SYMLINK+="midi-bcf2000"
 </programlisting>
+      This will cause udev to create a
+      <filename>/dev/midi-bcf2000</filename> for any BCF attached to the
+      system, regardless of which alsa card number it gets assigned.
+      Obviously you'd use <filename>/dev/midi-bcf2000</filename> instead of
+      <filename>/dev/snd/midiC2D0</filename>.
+    </para>
 
-			This will cause udev to create a <filename>/dev/midi-bcf2000</filename>
-			for any BCF attached to the system, regardless of which alsa card number
-			it gets assigned. Obviously you'd use <filename>/dev/midi-bcf2000</filename>
-			instead of <filename>/dev/snd/midiC2D0</filename>.
-		</para>
-		<para>
-			See also <ulink url="http://reactivated.net/writing_udev_rules.html">Writing udev rules</ulink>
-		</para>
+    <para>
+      See also
+      <ulink url="http://reactivated.net/writing_udev_rules.html">Writing
+      udev rules</ulink>
+    </para>
   </section>
 
-	<section id="sn-mackie-extenders">
-		<title>Extenders</title>
-		<para>
-			The Logic protocol allows the use of
-			<ulink url="http://www.mackie.com/products/mcupro/index.html">extenders</ulink>
-			or <ulink url="http://www.mackie.com/home/showimage.html?u=/products/mcupro/images/MCU-ExtPro-Top.jpg">Extender image</ulink>.
-			Extenders are essentially banks of 8 faders without the jog wheel and buttons.
-			Once the code is fixed, it will be possible to
-			use either the mackie extenders, or BCF2000 units as extenders.
-		</para>
+  <section id="sn-mackie-extenders">
+    <title>Extenders</title>
+    <para>
+      The Logic protocol allows the use of
+      <ulink url="http://www.mackie.com/products/mcupro/index.html">extenders</ulink>
+      or
+      <ulink url="http://www.mackie.com/home/showimage.html?u=/products/mcupro/images/MCU-ExtPro-Top.jpg">Extender
+      image</ulink>. Extenders are essentially banks of 8 faders without the
+      jog wheel and buttons. Once the code is fixed, it will be possible to
+      use either the mackie extenders, or BCF2000 units as extenders.
+    </para>
 <!--
 		<para>
       To do this, add the following lines to
@@ -81,7 +87,7 @@ KERNEL=="midiC[0-9]D0", ATTRS{product}=="BCF2000", SYMLINK+="midi-bcf2000"
       extenders.
     </para>
 -->
-	</section>
+  </section>
 
   <section id="mackie-mackie-mode">
     <title>Mackie Mode</title>
@@ -93,18 +99,18 @@ KERNEL=="midiC[0-9]D0", ATTRS{product}=="BCF2000", SYMLINK+="midi-bcf2000"
 </programlisting>
     </para>
 
-		<note>
-			<para>
-				The Mackie must be in Logic Control mode, otherwise the LCD display
-				does not work. To put the unit in Logic Control mode: press and hold
-				channel 1+2 SELECT while turning the unit on and through calibration;
-				and then press the VPOT under whichever mode you wish to use. 
-			</para>
-		</note>
-		
+    <note>
+      <para>
+        The Mackie must be in Logic Control mode, otherwise the LCD display
+        does not work. To put the unit in Logic Control mode: press and hold
+        channel 1+2 SELECT while turning the unit on and through
+        calibration; and then press the VPOT under whichever mode you wish
+        to use.
+      </para>
+    </note>
+
     <para>
-      In this mode, the original mappings are used.
-			Note that many of the
+      In this mode, the original mappings are used. Note that many of the
       buttons have not yet been implemented.
     </para>
   </section>
@@ -172,13 +178,23 @@ KERNEL=="midiC[0-9]D0", ATTRS{product}=="BCF2000", SYMLINK+="midi-bcf2000"
           <tbody>
             <row>
               <entry>
-								<para>vpot: pan</para>
-								<para>button: solo</para>
+                <para>
+                  vpot: pan
+                </para>
+
+                <para>
+                  button: solo
+                </para>
               </entry>
 
               <entry>
-                <para>vpot: jog wheel</para>
-								<para>button: all solo</para>
+                <para>
+                  vpot: jog wheel
+                </para>
+
+                <para>
+                  button: all solo
+                </para>
               </entry>
 
               <entry namest="Buttons 1" nameend="Buttons 2">
@@ -235,7 +251,7 @@ KERNEL=="midiC[0-9]D0", ATTRS{product}=="BCF2000", SYMLINK+="midi-bcf2000"
                 <para>
                   shift 1: jog wheel scrub/shuttle/scroll
                 </para>
-								
+
                 <para>
                   shift 2: punch out
                 </para>
@@ -256,11 +272,13 @@ KERNEL=="midiC[0-9]D0", ATTRS{product}=="BCF2000", SYMLINK+="midi-bcf2000"
               </entry>
 
               <entry>
-								<para>ffwd</para>
+                <para>
+                  ffwd
+                </para>
+
                 <para>
                   shift 1: jog wheel zoom
                 </para>
-								
               </entry>
             </row>
 
@@ -323,12 +341,13 @@ KERNEL=="midiC[0-9]D0", ATTRS{product}=="BCF2000", SYMLINK+="midi-bcf2000"
 
   <section id="mackie-connecting-to-ardour">
     <title>Connecting to Ardour</title>
-		<note>
-			<para>
-				Currently, support for the mackie using alsa/sequencer ports
-				is borked. You're better off using alsa/raw as documented above.
-			</para>
-		</note>
+    <note>
+      <para>
+        Currently, support for the mackie using alsa/sequencer ports is
+        borked. You're better off using alsa/raw as documented above.
+      </para>
+    </note>
+
     <para>
       Start up ardour. Go to Options/Control Surfaces. You should see
       "Mackie" as one of the menu items. Turn it on. The faders on the
@@ -340,70 +359,81 @@ KERNEL=="midiC[0-9]D0", ATTRS{product}=="BCF2000", SYMLINK+="midi-bcf2000"
   <section id="mackie-usage">
     <title>Usage</title>
     <para>
-			Strips (faders,pots,rec-enable,mute,solo) etc are fairly obvious.
+      Strips (faders,pots,rec-enable,mute,solo) etc are fairly obvious.
     </para>
-		<para>
-			The Jog wheel has various modes:
+
+    <para>
+      The Jog wheel has various modes:
       <itemizedlist>
         <listitem>
           <para>
-            Scroll mode. Part of the Scrub button cycle. The default. Scrolls the playhead. Displays "SC"
-						in the 2 character LED.
-          </para>
-        </listitem>
-				
-        <listitem>
-          <para>
-            Scrub mode. Part of the Scrub button cycle.
-						Rate of rotation of the Jog wheel controls
-						the direction and speed of the transport.
-						Displays "Sb" in the 2 character LED.
+            Scroll mode. Part of the Scrub button cycle. The default.
+            Scrolls the playhead. Displays "SC" in the 2 character LED.
           </para>
         </listitem>
 
         <listitem>
           <para>
-            Shuttle mode. Part of the Scrub button cycle. 
-						Jog wheel controls speed and direction of transport.
-						Displays "Sh" in the 2 character LED.
+            Scrub mode. Part of the Scrub button cycle. Rate of rotation of
+            the Jog wheel controls the direction and speed of the transport.
+            Displays "Sb" in the 2 character LED.
           </para>
         </listitem>
 
         <listitem>
           <para>
-            Zoom mode. Toggled by the Zoom button. Mutually exclusive
-						with the Scrub cycle.
-						Jog wheel controls zoom level.
-						Displays "Zm" in the 2 character LED.
+            Shuttle mode. Part of the Scrub button cycle. Jog wheel controls
+            speed and direction of transport. Displays "Sh" in the 2
+            character LED.
           </para>
         </listitem>
-			</itemizedlist>
-		</para>
-		
-		<para>
-			When holding ffwd or rew, the Jog wheel will adjust the speed.
-		</para>
-		
-		<para>
-			frm_next and frm_prev will jump to next or previous markers. Markers
-			can be set at the current playhead position with the marker button.
-		</para>
-		
-		<para>
-			The pot will pan single panners, and linked stereo panners. It won't
-			pan unlinked stereo panners, or 3 or more channel panners.
-		</para>
-		
+
+        <listitem>
+          <para>
+            Zoom mode. Toggled by the Zoom button. Mutually exclusive with
+            the Scrub cycle. Jog wheel controls zoom level. Displays "Zm" in
+            the 2 character LED.
+          </para>
+        </listitem>
+      </itemizedlist>
+    </para>
+
+    <para>
+      When holding ffwd or rew, the Jog wheel will adjust the speed.
+    </para>
+
+    <para>
+      frm_next and frm_prev will jump to next or previous markers. Markers
+      can be set at the current playhead position with the marker button.
+    </para>
+
+    <para>
+      The pot will pan single panners, and linked stereo panners. It won't
+      pan unlinked stereo panners, or 3 or more channel panners.
+    </para>
   </section>
-	
-	<section id="mackie-thanks">
-		<title>Thanks</title>
-		<para>Thomas Vecchione for help debugging the mackie LCD display, and functionality suggestions.</para>
-		<para>Giso Grimm for help debugging various BCF issues, and functionality suggestions.</para>
-		<para>Josh Parsons for the udev configuration and links.</para>
-		<para>Various other people who provided good bug reports and suggestions and feedback.</para>
-	</section>
 
+  <section id="mackie-thanks">
+    <title>Thanks</title>
+    <para>
+      Thomas Vecchione for help debugging the mackie LCD display, and
+      functionality suggestions.
+    </para>
+
+    <para>
+      Giso Grimm for help debugging various BCF issues, and functionality
+      suggestions.
+    </para>
+
+    <para>
+      Josh Parsons for the udev configuration and links.
+    </para>
+
+    <para>
+      Various other people who provided good bug reports and suggestions and
+      feedback.
+    </para>
+  </section>
 <!--
 	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="Some_Subsection.xml" />
