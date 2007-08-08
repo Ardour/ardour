@@ -659,4 +659,31 @@ MidiRegionView::update_drag_selection(double last_x, double x, double last_y, do
 	}
 }
 
+	
+void
+MidiRegionView::move_selection(double dx, double dy)
+{
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i)
+		(*i)->item()->move(dx, dy);
+}
+
+void
+MidiRegionView::note_dropped(CanvasMidiEvent* ev, double dt, uint8_t dnote)
+{
+	// TODO: This would be faster/nicer with a MoveCommand that doesn't need to copy...
+	if (_selection.find(ev) != _selection.end()) {
+		start_delta_command();
+
+		for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+			command_remove_note(*i);
+			MidiModel::Note copy(*(*i)->note()); 
+
+			copy.set_time((*i)->note()->time() + dt);
+			copy.set_note((*i)->note()->note() + dnote);
+
+			command_add_note(copy);
+		}
+		apply_command();
+	}
+}
 

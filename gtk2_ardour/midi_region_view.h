@@ -142,6 +142,9 @@ class MidiRegionView : public RegionView
 	void   delete_selection();
 	size_t selection_size() { return _selection.size(); }
 
+	void move_selection(double dx, double dy);
+	void note_dropped(ArdourCanvas::CanvasMidiEvent* ev, double dt, uint8_t dnote);
+
   protected:
 
     /* this constructor allows derived types

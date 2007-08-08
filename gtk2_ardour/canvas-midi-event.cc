@@ -162,7 +162,7 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 				last_y = last_y + dy;
 			}
 
-			_item->move(dx, dy);
+			_region.move_selection(dx, dy);
 
 			return true;
 		default:
@@ -191,23 +191,12 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 		case Dragging: // Dropped
 			_item->ungrab(ev->button.time);
 			_state = None;
-			if (_note) {
-				// This would be nicer with a MoveCommand that doesn't need to copy...
-				_region.start_delta_command();
-				_region.command_remove_note(this);
-				MidiModel::Note copy(*_note); 
-				
-				double delta_t = _region.midi_view()->editor.pixel_to_frame(
-						abs(drag_delta_x));
-				if (drag_delta_x < 0)
-					delta_t *= -1;
 
-				copy.set_time(_note->time() + delta_t);
-				copy.set_note(_note->note() + drag_delta_note);
-
-				_region.command_add_note(copy);
-				_region.apply_command();
-			}
+			if (_note)
+				_region.note_dropped(this,
+						_region.midi_view()->editor.pixel_to_frame(abs(drag_delta_x))
+								* ((drag_delta_x < 0.0) ? -1 : 1),
+						drag_delta_note);
 			return true;
 		default:
 			break;
