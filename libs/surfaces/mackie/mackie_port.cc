@@ -191,13 +191,11 @@ MidiByteArray MackiePort::host_connection_confirmation( const MidiByteArray & by
 
 void MackiePort::probe_emulation( const MidiByteArray & bytes )
 {
-#ifdef PORT_DEBUG
+#if 0
 	cout << "MackiePort::probe_emulation: " << bytes.size() << ", " << bytes << endl;
-#endif
-	
-	string version_string;
-	for ( int i = 6; i < 11; ++i ) version_string.append( 1, (char)bytes[i] );
-#ifdef PORT_DEBUG
+
+	MidiByteArray version_string;
+	for ( int i = 6; i < 11; ++i ) version_string << bytes[i];
 	cout << "version_string: " << version_string << endl;
 #endif
 	
@@ -206,7 +204,7 @@ void MackiePort::probe_emulation( const MidiByteArray & bytes )
 	// sometimes.
 	if (!_initialising)
 	{
-		cout << "MackiePort::probe_emulation out of sequence." << endl;
+		//cout << "MackiePort::probe_emulation out of sequence." << endl;
 		return;
 	}
 
@@ -222,7 +220,7 @@ void MackiePort::init()
 	_initialising = true;
 	
 #ifdef PORT_DEBUG
-	cout << "MackiePort::lock acquired" << endl;
+	cout << "MackiePort::init lock acquired" << endl;
 #endif
 	// emit pre-init signal
 	init_event();
@@ -282,12 +280,15 @@ void MackiePort::finalise_init( bool yn )
 	_initialising = false;
 	init_cond.signal();
 	init_mutex.unlock();
+#ifdef PORT_DEBUG
+	cout << "MackiePort::finalise_init lock released" << endl;
+#endif
 }
 
 void MackiePort::connect_any()
 {
 /*
-	Doesn't work because there isn't and == operator for slots
+	Doesn't work because there isn't an == operator for slots
 	MIDI::Signal::slot_list_type slots = port().input()->any.slots();
 	
 	if ( find( slots.begin(), slots.end(), mem_fun( *this, &MackiePort::handle_midi_any ) ) == slots.end() )
