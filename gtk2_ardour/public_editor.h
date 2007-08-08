@@ -145,6 +145,18 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	 * (defined in editing_syms.h)
 	 */
 	virtual Editing::MouseMode current_mouse_mode () const = 0;
+	
+	/** Set the midi edit mode (select, pencil, eraser, etc.)
+	 * @param m Midi edit mode (defined in editing_syms.h)
+	 * @param force Perform the effects of the change even if no change is required
+	 * (ie even if the current midi edit mode is equal to \ref m)
+	 */
+	virtual void set_midi_edit_mode (Editing::MidiEditMode m, bool force = false) = 0;
+	
+	/** @return The current mouse mode (gain, object, range, timefx etc.)
+	 * (defined in editing_syms.h)
+	 */
+	virtual Editing::MidiEditMode current_midi_edit_mode () const = 0;
 
 	/** Possibly start the audition of a region.  If \ref r is 0, or not an AudioRegion
 	 * any current audition is cancelled.  If we are currently auditioning \ref r,

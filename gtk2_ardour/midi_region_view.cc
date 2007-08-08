@@ -139,14 +139,17 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 
 	switch (ev->type) {
 	case GDK_KEY_PRESS:
-		if (ev->key.keyval == GDK_Delete)
+		if (ev->key.keyval == GDK_Delete) {
+			trackview.editor.set_midi_edit_mode(MidiEditErase);
 			start_remove_command();
+		}
 		break;
 	
 	case GDK_KEY_RELEASE:
 		if (_command_mode == Remove && ev->key.keyval == GDK_Delete) {
 			delete_selection();
 			apply_command();
+			trackview.editor.set_midi_edit_mode(MidiEditSelect);
 		}
 		break;
 
@@ -554,7 +557,7 @@ void
 MidiRegionView::add_note (const MidiModel::Note& note)
 {
 	assert(note.time() >= 0);
-	assert(note.time() < _region->length());
+	//assert(note.time() < _region->length());
 
 	ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
 	

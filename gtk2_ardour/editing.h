@@ -30,6 +30,7 @@
 #define SNAPMODE(a) /*empty*/
 #define REGIONLISTSORTTYPE(a) /*empty*/
 #define MOUSEMODE(a) /*empty*/
+#define MIDIEDITMODE(a) /*empty*/
 #define ZOOMFOCUS(a) /*empty*/
 #define DISPLAYCONTROL(a) /*empty*/
 #define IMPORTMODE(a) /*empty*/
@@ -91,6 +92,20 @@ MouseMode str2mousemode(const std::string &);
 
 #undef MOUSEMODE
 #define MOUSEMODE(a) /*empty*/
+
+// MIDIEDITMODE
+#undef MIDIEDITMODE
+#define MIDIEDITMODE(a) a,
+enum MidiEditMode {
+	#include "editing_syms.h"
+};
+
+extern const char *midieditmodestrs[];
+inline const char* enum2str(MidiEditMode m) {return midieditmodestrs[m];}
+MidiEditMode str2midieditmode(const std::string &);
+
+#undef MIDIEDITMODE
+#define MIDIEDITMODE(a) /*empty*/
 
 // ZOOMFOCUS
 #undef ZOOMFOCUS

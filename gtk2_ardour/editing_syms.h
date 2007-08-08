@@ -62,6 +62,10 @@ MOUSEMODE(MouseZoom)
 MOUSEMODE(MouseAudition)
 MOUSEMODE(MouseNote)
 
+MIDIEDITMODE(MidiEditSelect)
+MIDIEDITMODE(MidiEditPencil)
+MIDIEDITMODE(MidiEditErase)
+
 /* Changing this order will break the menu */
 ZOOMFOCUS(ZoomFocusLeft)
 ZOOMFOCUS(ZoomFocusRight)

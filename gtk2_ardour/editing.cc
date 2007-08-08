@@ -31,6 +31,7 @@ using namespace std;
 #define SNAPMODE(a) /*empty*/
 #define REGIONLISTSORTTYPE(a) /*empty*/
 #define MOUSEMODE(a) /*empty*/
+#define MIDIEDITMODE(a) /*empty*/
 #define ZOOMFOCUS(a) /*empty*/
 #define DISPLAYCONTROL(a) /*empty*/
 
@@ -112,6 +113,25 @@ const char *mousemodestrs[] = {
 };
 #undef MOUSEMODE
 #define MOUSEMODE(a) /*empty*/
+
+// MIDIEDITMODE
+#undef MIDIEDITMODE
+#define MIDIEDITMODE(s) if (!strcmp(type, #s)) {return s;}
+MidiEditMode
+str2midieditmode (const string & str) {
+	const char* type = str.c_str();
+	#include "editing_syms.h"
+	return MidiEditSelect;
+}
+
+#undef MIDIEDITMODE
+#define MIDIEDITMODE(s) N_(#s),
+const char *midieditmodestrs[] = {
+	#include "editing_syms.h"
+	0
+};
+#undef MIDIEDITMODE
+#define MIDIEDITMODE(a) /*empty*/
 
 // ZOOMFOCUS
 #undef ZOOMFOCUS

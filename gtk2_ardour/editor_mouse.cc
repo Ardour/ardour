@@ -213,7 +213,7 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 		}
 	}
 
-	/* XXX the hack of unsetting all other buttongs should go 
+	/* XXX the hack of unsetting all other buttons should go 
 	   away once GTK2 allows us to use regular radio buttons drawn like
 	   normal buttons, rather than my silly GroupedButton hack.
 	*/
@@ -256,6 +256,11 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 		current_canvas_cursor = note_cursor;
 		break;
 	}
+
+	if (mouse_mode == MouseNote)
+		midi_toolbar_frame.show();
+	else
+		midi_toolbar_frame.hide();
 
 	ignore_mouse_mode_toggle = false;
 
@@ -303,6 +308,52 @@ Editor::step_mouse_mode (bool next)
 		else set_mouse_mode (MouseAudition);
 		break;
 	}
+}
+
+void
+Editor::set_midi_edit_mode (MidiEditMode m, bool force)
+{
+	if (drag_info.item) {
+		return;
+	}
+
+	if (!force && m == midi_edit_mode) {
+		return;
+	}
+	
+	midi_edit_mode = m;
+
+	instant_save ();
+	
+	//ignore_midi_edit_mode_toggle = true;
+
+	switch (midi_edit_mode) {
+	case MidiEditSelect:
+		midi_tool_select_button.set_active (true);
+		//current_canvas_cursor = selector_cursor;
+		break;
+	
+	case MidiEditPencil:
+		midi_tool_pencil_button.set_active (true);
+		//current_canvas_cursor = selector_cursor;
+		break;
+	
+	case MidiEditErase:
+		midi_tool_erase_button.set_active (true);
+		//current_canvas_cursor = selector_cursor;
+		break;
+	}
+
+	if (mouse_mode == MouseNote)
+		midi_toolbar_frame.show();
+	else
+		midi_toolbar_frame.hide();
+
+	//ignore_midi_edit_mode_toggle = false;
+
+	/*if (is_drawable()) {
+		track_canvas.get_window()->set_cursor(*current_canvas_cursor);
+	}*/
 }
 
 void

@@ -142,6 +142,9 @@ class Editor : public PublicEditor
 	void set_mouse_mode (Editing::MouseMode, bool force=true);
 	void step_mouse_mode (bool next);
 	Editing::MouseMode current_mouse_mode () const { return mouse_mode; }
+	
+	void set_midi_edit_mode (Editing::MidiEditMode, bool force=true);
+	Editing::MidiEditMode current_midi_edit_mode () const { return midi_edit_mode; }
 
 #ifdef WITH_CMT
 	void add_imageframe_time_axis(const std::string & track_name, void*) ;
@@ -360,7 +363,8 @@ class Editor : public PublicEditor
 
 	void          set_frames_per_unit (double);
 
-	Editing::MouseMode mouse_mode;
+	Editing::MouseMode    mouse_mode;
+	Editing::MidiEditMode midi_edit_mode;
 
 	int  post_maximal_editor_width;
 	int  post_maximal_pane_position;
@@ -1371,10 +1375,28 @@ class Editor : public PublicEditor
 	
 	void setup_toolbar ();
 
-	Gtkmm2ext::TearOff*       tools_tearoff;
+	Gtkmm2ext::TearOff*      tools_tearoff;
 	Gtk::HBox                toolbar_hbox;
 	Gtk::EventBox            toolbar_base;
 	Gtk::Frame               toolbar_frame;
+
+	/* midi toolbar */
+
+	Gtk::HBox                midi_tool_button_box;
+	Gtkmm2ext::TearOff*      midi_tool_tearoff;
+	Gtk::ToggleButton        midi_tool_select_button;
+	Gtk::ToggleButton        midi_tool_pencil_button;
+	Gtk::ToggleButton        midi_tool_erase_button;
+	GroupedButtons          *midi_tool_button_set;
+	//void                     midi_tool_toggled (Editing::MouseMode m);
+	//bool                     ignore_midi_tool_toggle;
+
+	Gtkmm2ext::TearOff* midi_tools_tearoff;
+	Gtk::HBox           midi_toolbar_hbox;
+	Gtk::EventBox       midi_toolbar_base;
+	Gtk::Frame          midi_toolbar_frame;
+	
+	void setup_midi_toolbar ();
 
 	/* selection process */
 
