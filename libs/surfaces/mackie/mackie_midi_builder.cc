@@ -23,6 +23,7 @@
 
 #include "controls.h"
 #include "midi_byte_array.h"
+#include "mackie_port.h"
 
 using namespace Mackie;
 using namespace std;
@@ -100,7 +101,7 @@ MidiByteArray MackieMidiBuilder::build_fader( const Fader & fader, float pos )
 	);
 }
 
-MidiByteArray MackieMidiBuilder::zero_strip( const Strip & strip )
+MidiByteArray MackieMidiBuilder::zero_strip( MackiePort & port, const Strip & strip )
 {
 	Group::Controls::const_iterator it = strip.controls().begin();
 	MidiByteArray retval;
@@ -110,8 +111,10 @@ MidiByteArray MackieMidiBuilder::zero_strip( const Strip & strip )
 		if ( control.accepts_feedback() )
 			retval << zero_control( control );
 	}
-	retval << strip_display_blank( strip, 0 );
-	retval << strip_display_blank( strip, 1 );
+	
+	// These must have sysex headers
+	retval << strip_display_blank( port, strip, 0 );
+	retval << strip_display_blank( port, strip, 1 );
 	return retval;
 }
 
@@ -174,13 +177,13 @@ MidiByteArray MackieMidiBuilder::two_char_display( unsigned int value, const std
 	return two_char_display( os.str() );
 }
 
-MidiByteArray MackieMidiBuilder::strip_display_blank( const Strip & strip, unsigned int line_number )
+MidiByteArray MackieMidiBuilder::strip_display_blank( MackiePort & port, const Strip & strip, unsigned int line_number )
 {
 	// 6 spaces, not 7 because strip_display adds a space where appropriate
-	return strip_display( strip, line_number, "      " );
+	return strip_display( port, strip, line_number, "      " );
 }
 
-MidiByteArray MackieMidiBuilder::strip_display( const Strip & strip, unsigned int line_number, const std::string & line )
+MidiByteArray MackieMidiBuilder::strip_display( MackiePort & port, const Strip & strip, unsigned int line_number, const std::string & line )
 {
 	if ( line_number > 1 )
 	{
@@ -197,6 +200,10 @@ MidiByteArray MackieMidiBuilder::strip_display( const Strip & strip, unsigned in
 #endif
 
 	MidiByteArray retval;
+	
+	// sysex header
+	retval << port.sysex_hdr();
+	
 	// code for display
 	retval << 0x12;
 	// offset (0 to 0x37 first line, 0x38 to 0x6f for second line )
@@ -208,6 +215,10 @@ MidiByteArray MackieMidiBuilder::strip_display( const Strip & strip, unsigned in
 	{
 		retval << ' ';
 	}
+
+	// sysex trailer
+	retval << MIDI::eox;
+
 	
 #ifdef DEBUG	
 	cout << "MackieMidiBuilder::strip_display midi: " << retval << endl;
@@ -215,7 +226,7 @@ MidiByteArray MackieMidiBuilder::strip_display( const Strip & strip, unsigned in
 	return retval;
 }
 	
-MidiByteArray MackieMidiBuilder::all_strips_display( std::vector<std::string> & lines1, std::vector<std::string> & lines2 )
+MidiByteArray MackieMidiBuilder::all_strips_display( MackiePort & port, std::vector<std::string> & lines1, std::vector<std::string> & lines2 )
 {
 	MidiByteArray retval;
 	retval << 0x12 << 0;

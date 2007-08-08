@@ -1,5 +1,8 @@
+* fader problem (reported by Giso Grimm). Also with P4 (hyperthread)
+* two bcf doesn't work
 * remappable buttons
 * 7/1 configurable to 8
+* need an object that can encapsulate different port types, ie BCF vs MCU. Not at the surface level.
 * finish button implementations.
 * concurrency for bank switching? And make sure "old" events aren't sent to "new" faders
 * TODOs in code
@@ -41,3 +44,8 @@ UI integration
 * maybe use current snap state for jog wheel and ffwd/rew
 * Some indication on the UI of currently bank-switched-in routes?
   Useful for surfaces that don't have a scribble strip.
+
+Bugs
+----
+* when using alsa/sequencer, some midi events intended for mcu port end up being
+  read by the seq port.

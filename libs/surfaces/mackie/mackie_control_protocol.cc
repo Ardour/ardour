@@ -309,7 +309,8 @@ void MackieControlProtocol::switch_banks( int initial )
 		{
 			Strip & strip = *surface().strips[i];
 			// send zero for this strip
-			port_for_id(i).write( builder.zero_strip( strip ) );
+			MackiePort & port = port_for_id(i);
+			port.write( builder.zero_strip( port, strip ) );
 		}
 	}
 	
@@ -342,11 +343,12 @@ void MackieControlProtocol::zero_all()
 	// zero all strips
 	for ( Surface::Strips::iterator it = surface().strips.begin(); it != surface().strips.end(); ++it )
 	{
-		port_for_id( (*it)->index() ).write( builder.zero_strip( **it ) );
+		MackiePort & port = port_for_id( (*it)->index() );
+		port.write( builder.zero_strip( port, **it ) );
 	}
 	
 	// and the master strip
-	mcu_port().write( builder.zero_strip( master_strip() ) );
+	mcu_port().write( builder.zero_strip( mcu_port(), master_strip() ) );
 	
 	// and the led ring for the master strip, in bcf mode
 	if ( mcu_port().emulation() == MackiePort::bcf2000 )
@@ -1006,12 +1008,9 @@ void MackieControlProtocol::notify_name_changed( void *, RouteSignal * route_sig
 				line1 = PBD::short_version( fullname, 6 );
 			}
 			
-			route_signal->port().write_sysex(
-				builder.strip_display( strip, 0, line1 )
-			);
-			route_signal->port().write_sysex(
-				builder.strip_display_blank( strip, 1 )
-			);
+			MackiePort & port = route_signal->port();
+			port.write( builder.strip_display( port, strip, 0, line1 ) );
+			port.write( builder.strip_display_blank( port, strip, 1 ) );
 		}
 	}
 	catch( exception & e )
