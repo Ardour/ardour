@@ -211,8 +211,7 @@ public:
 	
 	virtual type_t type() const = 0;
 	
-	/// Return true if this control is the one and only
-	/// Jog Wheel
+	/// Return true if this control is the one and only Jog Wheel
 	virtual bool is_jog() const { return false; }
 
 	/**

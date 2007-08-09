@@ -1,4 +1,3 @@
-* fader problem (reported by Giso Grimm). Also with P4 (hyperthread)
 * two bcf doesn't work
 * remappable buttons
 * 7/1 configurable to 8
@@ -13,6 +12,9 @@ MCU
 ---
 * if mackie wheel moves too fast, it's ignored.
 * timecode displays
+* gain/panner display in second line
+* metering on second line
+* per-strip signal led
 * midi bandwidth?
 
 Later
