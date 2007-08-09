@@ -89,13 +89,11 @@ class MidiRegionView : public RegionView
 	/* This stuff is a bit boilerplatey ATM.  Work in progress. */
 
 	inline void start_remove_command() {
-		_command_mode = Remove;
 		if (!_delta_command)
 			_delta_command = _model->new_delta_command();
 	}
 	
 	inline void start_delta_command() {
-		_command_mode = Delta;
 		if (!_delta_command)
 			_delta_command = _model->new_delta_command();
 	}
@@ -114,7 +112,9 @@ class MidiRegionView : public RegionView
 	}
 
 	void note_entered(ArdourCanvas::CanvasMidiEvent* ev) {
-		if (_command_mode == Remove && _delta_command && ev->note()) {
+		cerr << "ENTERED, STATE = " << _mouse_state << endl;
+		if (_mouse_state == EraseDragging) {
+			start_delta_command();
 			ev->selected(true);
 			_delta_command->remove(*ev->note());
 		}
@@ -123,7 +123,6 @@ class MidiRegionView : public RegionView
 	void abort_command() {
 		delete _delta_command;
 		_delta_command = NULL;
-		_command_mode = None;
 		clear_selection();
 	}
 
@@ -132,7 +131,6 @@ class MidiRegionView : public RegionView
 			_model->apply_command(_delta_command);
 			_delta_command = NULL;
 		}
-		_command_mode = None;
 		midi_view()->midi_track()->diskstream()->playlist_modified();
 	}
 
@@ -182,13 +180,15 @@ class MidiRegionView : public RegionView
 	boost::shared_ptr<ARDOUR::MidiModel>        _model;
 	std::vector<ArdourCanvas::CanvasMidiEvent*> _events;
 	ArdourCanvas::CanvasNote**                  _active_notes;
+	ArdourCanvas::Group*                        _note_group;
 	ARDOUR::MidiModel::DeltaCommand*            _delta_command;
+	
+	enum MouseState { None, Pressed, SelectDragging, AddDragging, EraseDragging };
+	MouseState _mouse_state;
+	int _pressed_button;
 
 	typedef std::set<ArdourCanvas::CanvasMidiEvent*> Selection;
 	Selection _selection;
-	
-	enum CommandMode { None, Remove, Delta };
-	CommandMode _command_mode;
 };
 
 #endif /* __gtk_ardour_midi_region_view_h__ */

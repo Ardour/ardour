@@ -1388,8 +1388,8 @@ class Editor : public PublicEditor
 	Gtk::ToggleButton        midi_tool_pencil_button;
 	Gtk::ToggleButton        midi_tool_erase_button;
 	GroupedButtons          *midi_tool_button_set;
-	//void                     midi_tool_toggled (Editing::MouseMode m);
-	//bool                     ignore_midi_tool_toggle;
+	void                     midi_edit_mode_toggled (Editing::MidiEditMode m);
+	bool                     ignore_midi_edit_mode_toggle;
 
 	Gtkmm2ext::TearOff* midi_tools_tearoff;
 	Gtk::HBox           midi_toolbar_hbox;

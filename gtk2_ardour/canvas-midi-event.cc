@@ -73,7 +73,9 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 
 	switch (ev->type) {
 	case GDK_KEY_PRESS:
+		cerr << "EV KEY\n";
 		if (_note && ev->key.keyval == GDK_Delete) {
+			cerr << "EV DELETE KEY\n";
 			selected(true);
 			_region.start_remove_command();
 			_region.command_remove_note(this);
@@ -92,8 +94,8 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 		if (select_mod) {
 			_region.note_selected(this, true);
 		}
-		Keyboard::magic_widget_grab_focus();
 		_item->grab_focus();
+		Keyboard::magic_widget_grab_focus();
 		_region.note_entered(this);
 		break;
 
@@ -123,6 +125,7 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 				last_y = event_y;
 				drag_delta_x = 0;
 				drag_delta_note = 0;
+				_region.note_selected(this, true);
 			}
 			return true;
 
@@ -178,14 +181,20 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 
 		switch (_state) {
 		case Pressed: // Clicked
-			_state = None;
-			
-			if (_selected && !select_mod && _region.selection_size() > 1)
-				_region.unique_select(this);
-			else if (_selected)
-				_region.note_deselected(this, select_mod);
-			else
-				_region.note_selected(this, select_mod);
+			if (_region.midi_view()->editor.current_midi_edit_mode() == Editing::MidiEditSelect) {
+				_state = None;
+
+				if (_selected && !select_mod && _region.selection_size() > 1)
+					_region.unique_select(this);
+				else if (_selected)
+					_region.note_deselected(this, select_mod);
+				else
+					_region.note_selected(this, select_mod);
+			} else if (_region.midi_view()->editor.current_midi_edit_mode() == Editing::MidiEditErase) {
+				_region.start_remove_command();
+				_region.command_remove_note(this);
+				_region.apply_command();
+			}
 
 			return true;
 		case Dragging: // Dropped

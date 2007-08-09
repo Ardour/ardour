@@ -311,6 +311,38 @@ Editor::step_mouse_mode (bool next)
 }
 
 void
+Editor::midi_edit_mode_toggled (MidiEditMode m)
+{
+	if (ignore_midi_edit_mode_toggle) {
+		return;
+	}
+
+	switch (m) {
+	case MidiEditSelect:
+		if (midi_tool_select_button.get_active()) {
+			set_midi_edit_mode (m);
+		}
+		break;
+	
+	case MidiEditPencil:
+		if (midi_tool_pencil_button.get_active()) {
+			set_midi_edit_mode (m);
+		}
+		break;
+	
+	case MidiEditErase:
+		if (midi_tool_erase_button.get_active()) {
+			set_midi_edit_mode (m);
+		}
+		break;
+
+	default:
+		break;
+	}
+}	
+
+
+void
 Editor::set_midi_edit_mode (MidiEditMode m, bool force)
 {
 	if (drag_info.item) {
@@ -325,7 +357,7 @@ Editor::set_midi_edit_mode (MidiEditMode m, bool force)
 
 	instant_save ();
 	
-	//ignore_midi_edit_mode_toggle = true;
+	ignore_midi_edit_mode_toggle = true;
 
 	switch (midi_edit_mode) {
 	case MidiEditSelect:
@@ -349,7 +381,7 @@ Editor::set_midi_edit_mode (MidiEditMode m, bool force)
 	else
 		midi_toolbar_frame.hide();
 
-	//ignore_midi_edit_mode_toggle = false;
+	ignore_midi_edit_mode_toggle = false;
 
 	/*if (is_drawable()) {
 		track_canvas.get_window()->set_cursor(*current_canvas_cursor);

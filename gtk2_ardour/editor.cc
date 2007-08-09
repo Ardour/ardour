@@ -301,6 +301,7 @@ Editor::Editor ()
 	temp_location = 0;
 	leftmost_frame = 0;
 	ignore_mouse_mode_toggle = false;
+	ignore_midi_edit_mode_toggle = false;
 	current_stepping_trackview = 0;
 	entered_track = 0;
 	entered_regionview = 0;
@@ -326,6 +327,7 @@ Editor::Editor ()
 	marker_drag_line = 0;
 	
 	set_mouse_mode (MouseObject, true);
+	set_midi_edit_mode (MidiEditSelect, true);
 
 	frames_per_unit = 2048; /* too early to use reset_zoom () */
 	reset_hscrollbar_stepping ();
@@ -2621,6 +2623,12 @@ Editor::setup_midi_toolbar ()
 	midi_tool_pencil_button.unset_flags (CAN_FOCUS);
 	midi_tool_erase_button.unset_flags (CAN_FOCUS);
 	
+	midi_tool_select_button.signal_toggled().connect (bind (mem_fun(*this,
+				&Editor::midi_edit_mode_toggled), Editing::MidiEditSelect));
+	midi_tool_pencil_button.signal_toggled().connect (bind (mem_fun(*this,
+				&Editor::midi_edit_mode_toggled), Editing::MidiEditPencil));
+	midi_tool_erase_button.signal_toggled().connect (bind (mem_fun(*this,
+				&Editor::midi_edit_mode_toggled), Editing::MidiEditErase));
 	
 	/* Pack everything in... */
 

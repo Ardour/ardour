@@ -63,9 +63,12 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	: RegionView (parent, tv, r, spu, basic_color)
 	, _default_note_length(0.0)
 	, _active_notes(0)
+	, _note_group(new ArdourCanvas::Group(*parent))
 	, _delta_command(NULL)
-	, _command_mode(None)
+	, _mouse_state(None)
+	, _pressed_button(0)
 {
+	_note_group->raise_to_top();
 }
 
 MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<MidiRegion> r, double spu, 
@@ -73,9 +76,12 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	: RegionView (parent, tv, r, spu, basic_color, visibility)
 	, _default_note_length(0.0)
 	, _active_notes(0)
+	, _note_group(new ArdourCanvas::Group(*parent))
 	, _delta_command(NULL)
-	, _command_mode(None)
+	, _mouse_state(None)
+	, _pressed_button(0)
 {
+	_note_group->raise_to_top();
 }
 
 void
@@ -124,39 +130,49 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 bool
 MidiRegionView::canvas_event(GdkEvent* ev)
 {
-	enum State { None, Pressed, SelectDragging, AddDragging };
-	static int press_button = 0;
-	static State _state;
+	static bool delete_mod = false;
+	static Editing::MidiEditMode original_mode;
 
 	static double drag_start_x, drag_start_y;
 	static double last_x, last_y;
 	double event_x, event_y;
+	nframes_t event_frame = 0;
 
 	static ArdourCanvas::SimpleRect* drag_rect = NULL;
 	
 	if (trackview.editor.current_mouse_mode() != MouseNote)
 		return false;
 
+	// Mmmm, spaghetti
+	
 	switch (ev->type) {
 	case GDK_KEY_PRESS:
-		if (ev->key.keyval == GDK_Delete) {
+		if (ev->key.keyval == GDK_Delete && !delete_mod) {
+			delete_mod = true;
+			original_mode = trackview.editor.current_midi_edit_mode();
 			trackview.editor.set_midi_edit_mode(MidiEditErase);
 			start_remove_command();
+			_mouse_state = EraseDragging;
 		}
 		break;
 	
 	case GDK_KEY_RELEASE:
-		if (_command_mode == Remove && ev->key.keyval == GDK_Delete) {
-			delete_selection();
-			apply_command();
-			trackview.editor.set_midi_edit_mode(MidiEditSelect);
+		if (ev->key.keyval == GDK_Delete) {
+			if (_mouse_state == EraseDragging) {
+				delete_selection();
+				apply_command();
+			}
+			if (delete_mod) {
+				trackview.editor.set_midi_edit_mode(original_mode);
+				delete_mod = false;
+			}
 		}
 		break;
 
 	case GDK_BUTTON_PRESS:
 		//group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK, ev->button.time);
-		_state = Pressed;
-		press_button = ev->button.button;
+		_mouse_state = Pressed;
+		_pressed_button = ev->button.button;
 		//cerr << "PRESSED: " << press_button << endl;
 		return true;
 	
@@ -170,11 +186,16 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		event_x = ev->motion.x;
 		event_y = ev->motion.y;
 		group->w2i(event_x, event_y);
+				
+		event_frame = trackview.editor.pixel_to_frame(event_x);
+		trackview.editor.snap_to(event_frame);
 
-		switch (_state) {
+		switch (_mouse_state) {
 		case Pressed: // Drag start
 
-			if (press_button == 1 && _command_mode != Remove) { // Select rect start
+			// Select rect start
+			if (_pressed_button == 1 && trackview.editor.current_midi_edit_mode() == MidiEditSelect) {
+				cerr << "SELECT START\n";
 				group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
 						Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
 				last_x = event_x;
@@ -193,22 +214,21 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 				drag_rect->property_fill_color_rgba()
 					= ARDOUR_UI::config()->canvasvar_MidiSelectRectFill.get();
 
-				_state = SelectDragging;
+				_mouse_state = SelectDragging;
 				return true;
 
-			} else if (press_button == 3) { // Add note drag start
+			// Add note drag start
+			} else if (trackview.editor.current_midi_edit_mode() == MidiEditPencil) {
+				cerr << "PENCIL START\n";
 				group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
 						Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
 				last_x = event_x;
 				last_y = event_y;
 				drag_start_x = event_x;
 				drag_start_y = event_y;
-				
-				nframes_t event_frame = midi_view()->editor.pixel_to_frame(event_x);
-				midi_view()->editor.snap_to(event_frame);
 
 				drag_rect = new ArdourCanvas::SimpleRect(*group);
-				drag_rect->property_x1() = midi_view()->editor.frame_to_pixel(event_frame);
+				drag_rect->property_x1() = trackview.editor.frame_to_pixel(event_frame);
 				
 				drag_rect->property_y1() = midi_stream_view()->note_to_y(midi_stream_view()->y_to_note(event_y));
 				drag_rect->property_x2() = event_x;
@@ -218,8 +238,14 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 
 				drag_rect->property_fill_color_rgba() = 0xFFFFFF66;
 
-				_state = AddDragging;
+				_mouse_state = AddDragging;
 				return true;
+
+			// Eraser drag start
+			} else if (trackview.editor.current_midi_edit_mode() == MidiEditErase) {
+				cerr << "ERASE DRAGGING\n";
+				_mouse_state = EraseDragging;
+				return false; // ?
 			}
 
 			break;
@@ -235,16 +261,13 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 				event_y = t_y;
 			}
 
-			if (_state == AddDragging) {
-				nframes_t event_frame = midi_view()->editor.pixel_to_frame(event_x);
-				midi_view()->editor.snap_to(event_frame);
-				event_x = midi_view()->editor.frame_to_pixel(event_frame);
-			}
+			if (_mouse_state == AddDragging)
+				event_x = trackview.editor.frame_to_pixel(event_frame);
 
 			if (drag_rect)
 				drag_rect->property_x2() = event_x;
 
-			if (drag_rect && _state == SelectDragging) {
+			if (drag_rect && _mouse_state == SelectDragging) {
 				drag_rect->property_y2() = event_y;
 
 				update_drag_selection(drag_start_x, event_x, drag_start_y, event_y);
@@ -253,9 +276,11 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 			last_x = event_x;
 			last_y = event_y;
 
+		case EraseDragging:
 			return true;
+
 		default:
-			_state = None;
+			_mouse_state = None;
 			break;
 		}
 		break;
@@ -265,25 +290,30 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		event_y = ev->motion.y;
 		group->w2i(event_x, event_y);
 		group->ungrab(ev->button.time);
-		switch (_state) {
+		event_frame = trackview.editor.pixel_to_frame(event_x);
+
+		switch (_mouse_state) {
 		case Pressed: // Clicked
-			if (ev->button.button == 1) {
+			switch (trackview.editor.current_midi_edit_mode()) {
+			case MidiEditSelect:
 				clear_selection();
-			} else if (ev->button.button == 3) {
-				nframes_t event_frame = midi_view()->editor.pixel_to_frame(event_x);
-				midi_view()->editor.snap_to(event_frame);
-				event_x = midi_view()->editor.frame_to_pixel(event_frame);
+				break;
+			case MidiEditPencil:
+				trackview.editor.snap_to(event_frame);
+				event_x = trackview.editor.frame_to_pixel(event_frame);
 				create_note_at(event_x, event_y, _default_note_length);
+			default:
+				break;
 			}
-			_state = None;
+			_mouse_state = None;
 			return true;
 		case SelectDragging: // Select drag done
-			_state = None;
+			_mouse_state = None;
 			delete drag_rect;
 			drag_rect = NULL;
 			return true;
 		case AddDragging: // Add drag done
-			_state = None;
+			_mouse_state = None;
 			if (drag_rect->property_x2() > drag_rect->property_x1() + 2) {
 				create_note_at(drag_rect->property_x1(), drag_rect->property_y1(),
 						trackview.editor.pixel_to_frame(
@@ -483,7 +513,8 @@ MidiRegionView::add_event (const MidiEvent& ev)
 	}
 	printf("\n\n");*/
 
-	ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
+	//ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
+	ArdourCanvas::Group* const group = _note_group;
 	
 	if (midi_view()->note_mode() == Sustained) {
 		if ((ev.buffer()[0] & 0xF0) == MIDI_CMD_NOTE_ON) {
@@ -666,6 +697,7 @@ MidiRegionView::update_drag_selection(double last_x, double x, double last_y, do
 void
 MidiRegionView::move_selection(double dx, double dy)
 {
+	cerr << "MOVE SELECTION: " << dx << ", " << dy << endl;
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i)
 		(*i)->item()->move(dx, dy);
 }
