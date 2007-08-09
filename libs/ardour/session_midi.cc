@@ -932,8 +932,6 @@ Session::deliver_mmc (MIDI::MachineControl::Command cmd, nframes_t where)
 		return;
 	}
 
-	cerr << "delivering MMC, ID = " << (int) mmc_buffer[2] << endl;
-
 	mmc_buffer[nbytes++] = cmd;
 
 	// cerr << "delivering MMC, cmd = " << hex << (int) cmd << dec << endl;

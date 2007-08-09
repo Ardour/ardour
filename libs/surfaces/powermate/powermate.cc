@@ -14,12 +14,15 @@
 
 #include <i18n.h>
 #include <pbd/xml++.h>
+#include <pbd/error.h>
+#include <glibmm.h>
 
 #include "powermate.h"
 
 using namespace ARDOUR;
 using namespace std;
 using namespace sigc;
+using namespace PBD;
 
 #define NUM_VALID_PREFIXES 2
 
@@ -32,17 +35,22 @@ static const char *valid_prefix[NUM_VALID_PREFIXES] = {
 
 int open_powermate(const char *dev, int mode)
 {
+  if (!Glib::file_test (dev, Glib::FILE_TEST_EXISTS)) {
+	  return -1;
+  }
   int fd = open(dev, mode);
   int i;
   char name[255];
 
   if(fd < 0){
-    fprintf(stderr, "Unable to open \"%s\": %s\n", dev, strerror(errno));
-    return -1;
+	  if (errno != EACCES) {
+		  error << string_compose ("Unable to open \"%1\": %2", dev, strerror(errno)) << endmsg;
+	  }
+	  return -1;
   }
 
   if(ioctl(fd, EVIOCGNAME(sizeof(name)), name) < 0){
-    fprintf(stderr, "\"%s\": EVIOCGNAME failed: %s\n", dev, strerror(errno));
+    error << string_compose ("\"%1\": EVIOCGNAME failed: %2", dev, strerror(errno)) << endmsg;
     close(fd);
     return -1;
   }
@@ -64,10 +72,10 @@ int find_powermate(int mode)
   for(i=0; i<NUM_EVENT_DEVICES; i++){
     sprintf(devname, "/dev/input/event%d", i);
     r = open_powermate(devname, mode);
-    if(r >= 0)
-      return r;
+    if (r >= 0) {
+	    return r;
+    }
   }
-
   return -1;
 }
 
