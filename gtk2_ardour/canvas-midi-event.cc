@@ -73,7 +73,7 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 
 	switch (ev->type) {
 	case GDK_KEY_PRESS:
-		cerr << "EV KEY\n";
+		cerr << "EV KEY PRESS\n";
 		if (_note && ev->key.keyval == GDK_Delete) {
 			cerr << "EV DELETE KEY\n";
 			selected(true);
@@ -83,6 +83,7 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 		break;
 	
 	case GDK_KEY_RELEASE:
+		cerr << "EV KEY RELEASE\n";
 		if (ev->key.keyval == GDK_Delete) {
 			_region.apply_command();
 		}

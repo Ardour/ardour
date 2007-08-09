@@ -147,6 +147,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 	
 	switch (ev->type) {
 	case GDK_KEY_PRESS:
+		cerr << "REGION KEY PRESS\n";
 		if (ev->key.keyval == GDK_Delete && !delete_mod) {
 			delete_mod = true;
 			original_mode = trackview.editor.current_midi_edit_mode();
@@ -154,9 +155,10 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 			start_remove_command();
 			_mouse_state = EraseDragging;
 		}
-		break;
+		return true;
 	
 	case GDK_KEY_RELEASE:
+		cerr << "REGION KEY RELEASE\n";
 		if (ev->key.keyval == GDK_Delete) {
 			if (_mouse_state == EraseDragging) {
 				delete_selection();
@@ -167,7 +169,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 				delete_mod = false;
 			}
 		}
-		break;
+		return true;
 
 	case GDK_BUTTON_PRESS:
 		//group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK, ev->button.time);
@@ -193,7 +195,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		switch (_mouse_state) {
 		case Pressed: // Drag start
 
-			// Select rect start
+			// Select drag start
 			if (_pressed_button == 1 && trackview.editor.current_midi_edit_mode() == MidiEditSelect) {
 				cerr << "SELECT START\n";
 				group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
@@ -250,8 +252,8 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 
 			break;
 
-		case SelectDragging: // Select rect motion
-		case AddDragging: // Add note rect motion
+		case SelectDragging: // Select drag motion
+		case AddDragging: // Add note drag motion
 			if (ev->motion.is_hint) {
 				int t_x;
 				int t_y;
@@ -265,11 +267,17 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 				event_x = trackview.editor.frame_to_pixel(event_frame);
 
 			if (drag_rect)
-				drag_rect->property_x2() = event_x;
+				if (event_x > drag_start_x)
+					drag_rect->property_x2() = event_x;
+				else
+					drag_rect->property_x1() = event_x;
 
 			if (drag_rect && _mouse_state == SelectDragging) {
-				drag_rect->property_y2() = event_y;
-
+				if (event_y > drag_start_y)
+					drag_rect->property_y2() = event_y;
+				else
+					drag_rect->property_y1() = event_y;
+				
 				update_drag_selection(drag_start_x, event_x, drag_start_y, event_y);
 			}
 
@@ -679,16 +687,32 @@ MidiRegionView::note_deselected(ArdourCanvas::CanvasMidiEvent* ev, bool add)
 
 
 void
-MidiRegionView::update_drag_selection(double last_x, double x, double last_y, double y)
+MidiRegionView::update_drag_selection(double x1, double x2, double y1, double y2)
 {
+	const double last_y = std::min(y1, y2);
+	const double y      = std::max(y1, y2);
+	
 	// FIXME: so, so, so much slower than this should be
-	for (std::vector<CanvasMidiEvent*>::iterator i = _events.begin(); i != _events.end(); ++i) {
-		if ((*i)->x1() >= last_x && (*i)->x1() <= x && (*i)->y1() >= last_y && (*i)->y1() <= y) {
-			(*i)->selected(true);
-			_selection.insert(*i);
-		} else {
-			(*i)->selected(false);
-			_selection.erase(*i);
+
+	if (x1 < x2) {
+		for (std::vector<CanvasMidiEvent*>::iterator i = _events.begin(); i != _events.end(); ++i) {
+			if ((*i)->x1() >= x1 && (*i)->x1() <= x2 && (*i)->y1() >= last_y && (*i)->y1() <= y) {
+				(*i)->selected(true);
+				_selection.insert(*i);
+			} else {
+				(*i)->selected(false);
+				_selection.erase(*i);
+			}
+		}
+	} else {
+		for (std::vector<CanvasMidiEvent*>::iterator i = _events.begin(); i != _events.end(); ++i) {
+			if ((*i)->x2() <= x1 && (*i)->x2() >= x2 && (*i)->y1() >= last_y && (*i)->y1() <= y) {
+				(*i)->selected(true);
+				_selection.insert(*i);
+			} else {
+				(*i)->selected(false);
+				_selection.erase(*i);
+			}
 		}
 	}
 }
