@@ -939,6 +939,9 @@ void MackieControlProtocol::notify_solo_changed( RouteSignal * route_signal )
 	try
 	{
 		Button & button = route_signal->strip().solo();
+#ifdef DEBUG
+		cout << "updating " << button << endl;
+#endif
 		route_signal->port().write( builder.build_led( button, route_signal->route().soloed() ) );
 	}
 	catch( exception & e )
@@ -952,6 +955,9 @@ void MackieControlProtocol::notify_mute_changed( RouteSignal * route_signal )
 	try
 	{
 		Button & button = route_signal->strip().mute();
+#ifdef DEBUG
+		cout << "updating " << button << endl;
+#endif
 		route_signal->port().write( builder.build_led( button, route_signal->route().muted() ) );
 	}
 	catch( exception & e )
@@ -965,6 +971,9 @@ void MackieControlProtocol::notify_record_enable_changed( RouteSignal * route_si
 	try
 	{
 		Button & button = route_signal->strip().recenable();
+#ifdef DEBUG
+		cout << "updating " << button << endl;
+#endif
 		route_signal->port().write( builder.build_led( button, route_signal->route().record_enabled() ) );
 	}
 	catch( exception & e )
@@ -978,6 +987,9 @@ void MackieControlProtocol::notify_gain_changed( RouteSignal * route_signal )
 	try
 	{
 		Fader & fader = route_signal->strip().gain();
+#ifdef DEBUG
+		cout << "updating " << fader << endl;
+#endif
 		if ( !fader.in_use() )
 		{
 			route_signal->port().write( builder.build_fader( fader, gain_to_slider_position( route_signal->route().effective_gain() ) ) );
@@ -1024,6 +1036,9 @@ void MackieControlProtocol::notify_panner_changed( RouteSignal * route_signal )
 	try
 	{
 		Pot & pot = route_signal->strip().vpot();
+#ifdef DEBUG
+		cout << "updating " << pot << endl;
+#endif
 		const Panner & panner = route_signal->route().panner();
 		if ( panner.size() == 1 || ( panner.size() == 2 && panner.linked() ) )
 		{

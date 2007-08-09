@@ -22,7 +22,7 @@ mackie.Append(POTFILE = domain + '.pot')
 
 if mackie['DEBUG'] == 1:
   mackie.Append(CXXFLAGS="-DDEBUG")
-  #mackie.Append(CXXFLAGS="-DPORT_DEBUG")
+  mackie.Append(CXXFLAGS="-DPORT_DEBUG")
 
 mackie_files=Split("""
 interface.cc

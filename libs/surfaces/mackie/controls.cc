@@ -147,3 +147,27 @@ ostream & Mackie::operator << ( ostream & os, const Mackie::Control & control )
 	
 	return os;
 }
+
+std::ostream & Mackie::operator << ( std::ostream & os, const Strip & strip )
+{
+	os << typeid( strip ).name();
+	os << " { ";
+	os << "has_solo: " << boolalpha << strip.has_solo();
+	os << ", ";
+	os << "has_recenable: " << boolalpha << strip.has_recenable();
+	os << ", ";
+	os << "has_mute: " << boolalpha << strip.has_mute();
+	os << ", ";
+	os << "has_select: " << boolalpha << strip.has_select();
+	os << ", ";
+	os << "has_vselect: " << boolalpha << strip.has_vselect();
+	os << ", ";
+	os << "has_fader_touch: " << boolalpha << strip.has_fader_touch();
+	os << ", ";
+	os << "has_vpot: " << boolalpha << strip.has_vpot();
+	os << ", ";
+	os << "has_gain: " << boolalpha << strip.has_gain();
+	os << " }";
+	
+	return os;
+}

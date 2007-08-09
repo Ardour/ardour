@@ -113,14 +113,14 @@ public:
 	Pot & vpot();
 	Fader & gain();
 	
-	bool has_solo() { return _solo != 0; }
-	bool has_recenable() { return _recenable != 0; }
-	bool has_mute() { return _mute != 0; }
-	bool has_select() { return _select != 0; }
-	bool has_vselect() { return _vselect != 0; }
-	bool has_fader_touch() { return _fader_touch != 0; }
-	bool has_vpot() { return _vpot != 0; }
-	bool has_gain() { return _gain != 0; }
+	bool has_solo() const { return _solo != 0; }
+	bool has_recenable() const { return _recenable != 0; }
+	bool has_mute() const { return _mute != 0; }
+	bool has_select() const { return _select != 0; }
+	bool has_vselect() const { return _vselect != 0; }
+	bool has_fader_touch() const { return _fader_touch != 0; }
+	bool has_vpot() const { return _vpot != 0; }
+	bool has_gain() const { return _gain != 0; }
 	
 private:
 	Button * _solo;
@@ -133,6 +133,8 @@ private:
 	Fader * _gain;
 	int _index;
 };
+
+std::ostream & operator << ( std::ostream &, const Strip & );
 
 class MasterStrip : public Strip
 {

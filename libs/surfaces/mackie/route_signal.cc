@@ -79,6 +79,9 @@ void RouteSignal::disconnect()
 
 void RouteSignal::notify_all()
 {
+#ifdef DEBUG
+	cout << "RouteSignal::notify_all for " << _strip << endl;
+#endif
 	if ( _strip.has_solo() )
 		_mcp.notify_solo_changed( this );
 	
@@ -95,4 +98,7 @@ void RouteSignal::notify_all()
 	
 	if ( _strip.has_recenable() )
 		_mcp.notify_record_enable_changed( this );
+#ifdef DEBUG
+	cout << "RouteSignal::notify_all finish" << endl;
+#endif
 }

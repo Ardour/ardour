@@ -14,8 +14,14 @@ Surface::Surface( uint32_t max_strips, uint32_t unit_strips )
 
 void Surface::init()
 {
+#ifdef DEBUG
+	cout << "Surface::init" << endl;
+#endif
 	init_controls();
 	init_strips( _max_strips, _unit_strips );
+#ifdef DEBUG
+	cout << "Surface::init finish" << endl;
+#endif
 }
 
 Surface::~Surface()
