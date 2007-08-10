@@ -721,7 +721,6 @@ MidiRegionView::update_drag_selection(double x1, double x2, double y1, double y2
 void
 MidiRegionView::move_selection(double dx, double dy)
 {
-	cerr << "MOVE SELECTION: " << dx << ", " << dy << endl;
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i)
 		(*i)->item()->move(dx, dy);
 }
