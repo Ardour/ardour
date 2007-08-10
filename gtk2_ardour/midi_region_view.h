@@ -112,11 +112,12 @@ class MidiRegionView : public RegionView
 	}
 
 	void note_entered(ArdourCanvas::CanvasMidiEvent* ev) {
-		cerr << "ENTERED, STATE = " << _mouse_state << endl;
-		if (_mouse_state == EraseDragging) {
+		if (ev->note() && _mouse_state == EraseTouchDragging) {
 			start_delta_command();
 			ev->selected(true);
 			_delta_command->remove(*ev->note());
+		} else if (_mouse_state == SelectTouchDragging) {
+			note_selected(ev, true);
 		}
 	}
 
@@ -142,7 +143,10 @@ class MidiRegionView : public RegionView
 
 	void move_selection(double dx, double dy);
 	void note_dropped(ArdourCanvas::CanvasMidiEvent* ev, double dt, uint8_t dnote);
-
+	
+	enum MouseState { None, Pressed, SelectTouchDragging, SelectRectDragging, AddDragging, EraseTouchDragging };
+	MouseState mouse_state() const { return _mouse_state; }
+	
   protected:
 
     /* this constructor allows derived types
@@ -182,8 +186,7 @@ class MidiRegionView : public RegionView
 	ArdourCanvas::CanvasNote**                  _active_notes;
 	ArdourCanvas::Group*                        _note_group;
 	ARDOUR::MidiModel::DeltaCommand*            _delta_command;
-	
-	enum MouseState { None, Pressed, SelectDragging, AddDragging, EraseDragging };
+		
 	MouseState _mouse_state;
 	int _pressed_button;
 

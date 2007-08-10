@@ -66,7 +66,7 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 	static double last_x, last_y;
 	double event_x, event_y, dx, dy;
 	nframes_t event_frame;
-	bool select_mod = false;
+	bool select_mod;
 
 	if (_region.get_time_axis_view().editor.current_mouse_mode() != Editing::MouseNote)
 		return false;
@@ -90,14 +90,9 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 		break;
 	
 	case GDK_ENTER_NOTIFY:
-		select_mod = (ev->motion.state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK));
-		cerr << "ENTER: " << select_mod << " - " << ev->motion.state << endl;
-		if (select_mod) {
-			_region.note_selected(this, true);
-		}
+		_region.note_entered(this);
 		_item->grab_focus();
 		Keyboard::magic_widget_grab_focus();
-		_region.note_entered(this);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
@@ -110,7 +105,6 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 		return true;
 
 	case GDK_MOTION_NOTIFY:
-		select_mod = (ev->motion.state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK));
 		event_x = ev->motion.x;
 		event_y = ev->motion.y;
 		//cerr << "MOTION @ " << event_x << ", " << event_y << endl;
@@ -118,7 +112,7 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 
 		switch (_state) {
 		case Pressed: // Drag begin
-			if (!select_mod) {
+			if (_region.mouse_state() != MidiRegionView::SelectTouchDragging) {
 				_item->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
 						Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
 				_state = Dragging;
