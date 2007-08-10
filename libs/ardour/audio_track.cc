@@ -653,8 +653,9 @@ AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes
 	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(diskstream->playlist());
 	assert(apl);
 
-	if (apl->read (buffers.get_audio(nframes).data(),
-			mix_buffer, gain_buffer, start, nframes) != nframes) {
+	assert(buffers.get_audio(0).capacity() >= nframes);
+
+	if (apl->read (buffers.get_audio(0).data(), mix_buffer, gain_buffer, start, nframes) != nframes) {
 		return -1;
 	}
 
