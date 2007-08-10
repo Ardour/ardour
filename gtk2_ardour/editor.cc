@@ -152,7 +152,9 @@ Gdk::Cursor* Editor::zoom_cursor = 0;
 Gdk::Cursor* Editor::time_fx_cursor = 0;
 Gdk::Cursor* Editor::fader_cursor = 0;
 Gdk::Cursor* Editor::speaker_cursor = 0;
-Gdk::Cursor* Editor::note_cursor = 0;
+Gdk::Cursor* Editor::midi_select_cursor = 0;
+Gdk::Cursor* Editor::midi_pencil_cursor = 0;
+Gdk::Cursor* Editor::midi_erase_cursor = 0;
 Gdk::Cursor* Editor::wait_cursor = 0;
 Gdk::Cursor* Editor::timebar_cursor = 0;
 
@@ -326,8 +328,8 @@ Editor::Editor ()
 	range_marker_drag_rect = 0;
 	marker_drag_line = 0;
 	
-	set_mouse_mode (MouseObject, true);
 	set_midi_edit_mode (MidiEditSelect, true);
+	set_mouse_mode (MouseObject, true);
 
 	frames_per_unit = 2048; /* too early to use reset_zoom () */
 	reset_hscrollbar_stepping ();
@@ -1236,7 +1238,9 @@ Editor::build_cursors ()
 	time_fx_cursor = new Gdk::Cursor (SIZING);
 	wait_cursor = new Gdk::Cursor  (WATCH);
 	timebar_cursor = new Gdk::Cursor(LEFT_PTR);
-	note_cursor = new Gdk::Cursor (PENCIL);
+	midi_select_cursor = new Gdk::Cursor (CENTER_PTR);
+	midi_pencil_cursor = new Gdk::Cursor (PENCIL);
+	midi_erase_cursor = new Gdk::Cursor (DRAPED_BOX);
 }
 
 /** Pop up a context menu for when the user clicks on a fade in or fade out */

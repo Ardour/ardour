@@ -241,11 +241,6 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 
 				_mouse_state = AddDragging;
 				return true;
-
-			// Eraser drag start
-			} else if (trackview.editor.current_midi_edit_mode() == MidiEditErase) {
-				_mouse_state = EraseTouchDragging;
-				return false; // Don't ask me...
 			}
 
 			return false;
@@ -729,6 +724,7 @@ MidiRegionView::move_selection(double dx, double dy)
 		(*i)->item()->move(dx, dy);
 }
 
+
 void
 MidiRegionView::note_dropped(CanvasMidiEvent* ev, double dt, uint8_t dnote)
 {
@@ -746,6 +742,20 @@ MidiRegionView::note_dropped(CanvasMidiEvent* ev, double dt, uint8_t dnote)
 			command_add_note(copy);
 		}
 		apply_command();
+	}
+}
+	
+
+void
+MidiRegionView::note_entered(ArdourCanvas::CanvasMidiEvent* ev)
+{
+	cerr << "NOTE ENTERED: " << _mouse_state << endl;
+	if (ev->note() && _mouse_state == EraseTouchDragging) {
+		start_delta_command();
+		ev->selected(true);
+		_delta_command->remove(*ev->note());
+	} else if (_mouse_state == SelectTouchDragging) {
+		note_selected(ev, true);
 	}
 }
 

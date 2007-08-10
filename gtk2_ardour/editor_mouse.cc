@@ -253,7 +253,7 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 	
 	case MouseNote:
 		mouse_note_button.set_active (true);
-		current_canvas_cursor = note_cursor;
+		set_midi_edit_cursor (current_midi_edit_mode());
 		break;
 	}
 
@@ -265,7 +265,7 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 	ignore_mouse_mode_toggle = false;
 
 	if (is_drawable()) {
-	        track_canvas.get_window()->set_cursor(*current_canvas_cursor);
+		track_canvas.get_window()->set_cursor(*current_canvas_cursor);
 	}
 }
 
@@ -339,6 +339,8 @@ Editor::midi_edit_mode_toggled (MidiEditMode m)
 	default:
 		break;
 	}
+
+	set_midi_edit_cursor(m);
 }	
 
 
@@ -362,17 +364,14 @@ Editor::set_midi_edit_mode (MidiEditMode m, bool force)
 	switch (midi_edit_mode) {
 	case MidiEditSelect:
 		midi_tool_select_button.set_active (true);
-		//current_canvas_cursor = selector_cursor;
 		break;
 	
 	case MidiEditPencil:
 		midi_tool_pencil_button.set_active (true);
-		//current_canvas_cursor = selector_cursor;
 		break;
 	
 	case MidiEditErase:
 		midi_tool_erase_button.set_active (true);
-		//current_canvas_cursor = selector_cursor;
 		break;
 	}
 
@@ -383,9 +382,27 @@ Editor::set_midi_edit_mode (MidiEditMode m, bool force)
 
 	ignore_midi_edit_mode_toggle = false;
 
-	/*if (is_drawable()) {
+	set_midi_edit_cursor (current_midi_edit_mode());
+
+	if (is_drawable()) {
 		track_canvas.get_window()->set_cursor(*current_canvas_cursor);
-	}*/
+	}
+}
+
+void
+Editor::set_midi_edit_cursor (MidiEditMode m)
+{
+	switch (midi_edit_mode) {
+	case MidiEditSelect:
+		current_canvas_cursor = midi_select_cursor;
+		break;
+	case MidiEditPencil:
+		current_canvas_cursor = midi_pencil_cursor;
+		break;
+	case MidiEditErase:
+		current_canvas_cursor = midi_erase_cursor;
+		break;
+	}
 }
 
 void
@@ -1200,7 +1217,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 	case AutomationTrackItem:
 		if (is_drawable()) {
-		        Gdk::Cursor *cursor;
+			Gdk::Cursor *cursor;
 			switch (mouse_mode) {
 			case MouseRange:
 				cursor = selector_cursor;
@@ -1544,7 +1561,7 @@ Editor::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 		cursor = grabber_cursor;
 	}
 
-        // if dragging with button2, the motion is x constrained, with Alt-button2 it is y constrained
+	// if dragging with button2, the motion is x constrained, with Alt-button2 it is y constrained
 
 	if (event->button.button == 2) {
 		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Alt)) {
@@ -1994,7 +2011,7 @@ Editor::update_marker_drag_item (Location *location)
 	double x2 = frame_to_pixel (location->end());
 
 	if (location->is_mark()) {
-	        marker_drag_line_points.front().set_x(x1);
+		marker_drag_line_points.front().set_x(x1);
 		marker_drag_line_points.back().set_x(x1);
 		marker_drag_line->property_points() = marker_drag_line_points;
 	}
@@ -2272,12 +2289,12 @@ Editor::meter_marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent*
 	
 	if (drag_info.copy == true) {
 		begin_reversible_command (_("copy meter mark"));
-                XMLNode &before = map.get_state();
+		XMLNode &before = map.get_state();
 		map.add_meter (marker->meter(), when);
 		XMLNode &after = map.get_state();
-                session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
+		session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
 		commit_reversible_command ();
-		
+
 		// delete the dummy marker we used for visual representation of copying.
 		// a new visual marker will show up automatically.
 		delete marker;
@@ -2286,7 +2303,7 @@ Editor::meter_marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent*
 		XMLNode &before = map.get_state();
 		map.move_meter (marker->meter(), when);
 		XMLNode &after = map.get_state();
-                session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
+		session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
 		commit_reversible_command ();
 	}
 }
@@ -2415,10 +2432,10 @@ Editor::tempo_marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent*
 		delete marker;
 	} else {
 		begin_reversible_command (_("move tempo mark"));
-                XMLNode &before = map.get_state();
+		XMLNode &before = map.get_state();
 		map.move_tempo (marker->tempo(), when);
-                XMLNode &after = map.get_state();
-                session->add_command (new MementoCommand<TempoMap>(map, &before, &after));
+		XMLNode &after = map.get_state();
+		session->add_command (new MementoCommand<TempoMap>(map, &before, &after));
 		commit_reversible_command ();
 	}
 }
@@ -2820,7 +2837,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	original_pointer_order = drag_info.last_trackview->order;
 		
 	/************************************************************
-                 Y-Delta Computation
+	     Y-Delta Computation
 	************************************************************/	
 
 	if (drag_info.brushing) {
@@ -2975,7 +2992,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	}
 	  
 	/************************************************************
-	                X DELTA COMPUTATION
+	    X DELTA COMPUTATION
 	************************************************************/
 
 	/* compute the amount of pointer motion in frames, and where
@@ -3043,7 +3060,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	}
 
 	/*************************************************************
-                        PREPARE TO MOVE
+	    PREPARE TO MOVE
 	************************************************************/
 
 	if (x_delta == 0 && (pointer_y_span == 0)) {
@@ -3073,7 +3090,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	}
 
 	/*************************************************************
-                        MOTION								      
+	    MOTION								      
 	************************************************************/
 
 	bool do_move;
@@ -3720,7 +3737,7 @@ Editor::start_selection_grab (ArdourCanvas::Item* item, GdkEvent* event)
 void
 Editor::cancel_selection ()
 {
-        for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(*i)->hide_selection ();
 	}
 	begin_reversible_command (_("cancel selection"));
@@ -4053,7 +4070,7 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			boost::shared_ptr<Playlist> pl = (*i)->region()->playlist();
 			insert_result = motion_frozen_playlists.insert (pl);
 			if (insert_result.second) {
-                                session->add_command(new MementoCommand<Playlist>(*pl, &pl->get_state(), 0));
+				session->add_command(new MementoCommand<Playlist>(*pl, &pl->get_state(), 0));
 			}
 		}
 	}
@@ -4068,7 +4085,7 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	case StartTrim:
 		if ((left_direction == false) && (drag_info.current_pointer_frame <= rv->region()->first_frame()/speed)) {
 			break;
-                } else {
+		} else {
 			for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
 				single_start_trim (**i, frame_delta, left_direction, obey_snap);
 			}
@@ -4244,8 +4261,8 @@ Editor::trim_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		
 		for (set<boost::shared_ptr<Playlist> >::iterator p = motion_frozen_playlists.begin(); p != motion_frozen_playlists.end(); ++p) {
 			//(*p)->thaw ();
-                        session->add_command (new MementoCommand<Playlist>(*(*p).get(), 0, &(*p)->get_state()));
-                }
+			session->add_command (new MementoCommand<Playlist>(*(*p).get(), 0, &(*p)->get_state()));
+		}
 		
 		motion_frozen_playlists.clear ();
 
@@ -4279,10 +4296,10 @@ Editor::point_trim (GdkEvent* event)
 			{
 				if (!(*i)->region()->locked()) {
 					boost::shared_ptr<Playlist> pl = (*i)->region()->playlist();
-                                        XMLNode &before = pl->get_state();
+					XMLNode &before = pl->get_state();
 					(*i)->region()->trim_front (new_bound, this);	
-                                        XMLNode &after = pl->get_state();
-                                        session->add_command(new MementoCommand<Playlist>(*pl.get(), &before, &after));
+					XMLNode &after = pl->get_state();
+					session->add_command(new MementoCommand<Playlist>(*pl.get(), &before, &after));
 				}
 			}
 
@@ -4292,7 +4309,7 @@ Editor::point_trim (GdkEvent* event)
 				boost::shared_ptr<Playlist> pl = rv->region()->playlist();
 				XMLNode &before = pl->get_state();
 				rv->region()->trim_front (new_bound, this);	
-                                XMLNode &after = pl->get_state();
+				XMLNode &after = pl->get_state();
 				session->add_command(new MementoCommand<Playlist>(*pl.get(), &before, &after));
 			}
 		}
@@ -4323,7 +4340,7 @@ Editor::point_trim (GdkEvent* event)
 				boost::shared_ptr<Playlist> pl = rv->region()->playlist();
 				XMLNode &before = pl->get_state();
 				rv->region()->trim_end (new_bound, this);
-                                XMLNode &after = pl->get_state();
+				XMLNode &after = pl->get_state();
 				session->add_command (new MementoCommand<Playlist>(*pl.get(), &before, &after));
 			}
 		}
@@ -4346,7 +4363,7 @@ Editor::thaw_region_after_trim (RegionView& rv)
 	}
 
 	region->thaw (_("trimmed region"));
-        XMLNode &after = region->playlist()->get_state();
+	XMLNode &after = region->playlist()->get_state();
 	session->add_command (new MementoCommand<Playlist>(*(region->playlist()), 0, &after));
 
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*>(&rv);
@@ -4489,11 +4506,11 @@ Editor::end_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 		case CreateRangeMarker:
 		    {
 			begin_reversible_command (_("new range marker"));
-                        XMLNode &before = session->locations()->get_state();
+			XMLNode &before = session->locations()->get_state();
 			session->locations()->next_available_name(rangename,"unnamed");
 			newloc = new Location(temp_location->start(), temp_location->end(), rangename, Location::IsRangeMarker);
 			session->locations()->add (newloc, true);
-                        XMLNode &after = session->locations()->get_state();
+			XMLNode &after = session->locations()->get_state();
 			session->add_command(new MementoCommand<Locations>(*(session->locations()), &before, &after));
 			commit_reversible_command ();
 			
@@ -4767,7 +4784,7 @@ Editor::mouse_rename_region (ArdourCanvas::Item* item, GdkEvent* event)
 	prompter.show_all ();
 	switch (prompter.run ()) {
 	case Gtk::RESPONSE_ACCEPT:
-        string str;
+		string str;
 		prompter.get_result(str);
 		if (str.length()) {
 			clicked_regionview->region()->set_name (str);
@@ -4872,9 +4889,9 @@ Editor::mouse_brush_insert_region (RegionView* rv, nframes_t pos)
 	boost::shared_ptr<Playlist> playlist = rtv->playlist();
 	double speed = rtv->get_diskstream()->speed();
 	
-        XMLNode &before = playlist->get_state();
+	XMLNode &before = playlist->get_state();
 	playlist->add_region (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (arv->audio_region())), (nframes_t) (pos * speed));
-        XMLNode &after = playlist->get_state();
+	XMLNode &after = playlist->get_state();
 	session->add_command(new MementoCommand<Playlist>(*playlist.get(), &before, &after));
 	
 	// playlist is frozen, so we have to update manually

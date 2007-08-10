@@ -143,6 +143,7 @@ class Editor : public PublicEditor
 	void step_mouse_mode (bool next);
 	Editing::MouseMode current_mouse_mode () const { return mouse_mode; }
 	
+	void set_midi_edit_cursor (Editing::MidiEditMode);
 	void set_midi_edit_mode (Editing::MidiEditMode, bool force=true);
 	Editing::MidiEditMode current_midi_edit_mode () const { return midi_edit_mode; }
 
@@ -813,7 +814,9 @@ class Editor : public PublicEditor
 	static Gdk::Cursor* time_fx_cursor;
 	static Gdk::Cursor* fader_cursor;
 	static Gdk::Cursor* speaker_cursor;
-	static Gdk::Cursor* note_cursor;
+	static Gdk::Cursor* midi_select_cursor;
+	static Gdk::Cursor* midi_pencil_cursor;
+	static Gdk::Cursor* midi_erase_cursor;
 	static Gdk::Cursor* wait_cursor;
 	static Gdk::Cursor* timebar_cursor;
 

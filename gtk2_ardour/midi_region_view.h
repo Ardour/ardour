@@ -97,27 +97,16 @@ class MidiRegionView : public RegionView
 		if (!_delta_command)
 			_delta_command = _model->new_delta_command();
 	}
+	
+	void command_add_note(ARDOUR::MidiModel::Note& note) {
+		if (_delta_command)
+			_delta_command->add(note);
+	}
 
 	void command_remove_note(ArdourCanvas::CanvasMidiEvent* ev) {
 		if (_delta_command && ev->note()) {
 			_delta_command->remove(*ev->note());
 			ev->selected(true);
-		}
-	}
-	
-	void command_add_note(ARDOUR::MidiModel::Note& note) {
-		if (_delta_command) {
-			_delta_command->add(note);
-		}
-	}
-
-	void note_entered(ArdourCanvas::CanvasMidiEvent* ev) {
-		if (ev->note() && _mouse_state == EraseTouchDragging) {
-			start_delta_command();
-			ev->selected(true);
-			_delta_command->remove(*ev->note());
-		} else if (_mouse_state == SelectTouchDragging) {
-			note_selected(ev, true);
 		}
 	}
 
@@ -134,7 +123,8 @@ class MidiRegionView : public RegionView
 		}
 		midi_view()->midi_track()->diskstream()->playlist_modified();
 	}
-
+	
+	void   note_entered(ArdourCanvas::CanvasMidiEvent* ev);
 	void   unique_select(ArdourCanvas::CanvasMidiEvent* ev);
 	void   note_selected(ArdourCanvas::CanvasMidiEvent* ev, bool add);
 	void   note_deselected(ArdourCanvas::CanvasMidiEvent* ev, bool add);
