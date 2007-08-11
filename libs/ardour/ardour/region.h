@@ -237,10 +237,10 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	string                  _name;
 	DataType                _type;
 	Flag                    _flags;
-	nframes_t          _start;
-	nframes_t          _length;
-	nframes_t          _position;
-	nframes_t          _sync_position;
+	nframes_t               _start;
+	nframes_t               _length;
+	nframes_t               _position;
+	nframes_t               _sync_position;
 	layer_t                 _layer;
 	mutable RegionEditState _first_edit;
 	int                     _frozen;
@@ -248,10 +248,11 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	Change                  _pending_changed;
 	uint64_t                _last_layer_op;  ///< timestamp
 	Glib::Mutex             _lock;
-	boost::weak_ptr<ARDOUR::Playlist> _playlist;
 	SourceList              _sources;
 	/** Used when timefx are applied, so we can always use the original source */
 	SourceList              _master_sources;
+	
+	boost::weak_ptr<ARDOUR::Playlist> _playlist;
 };
 
 } /* namespace ARDOUR */

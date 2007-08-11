@@ -53,6 +53,7 @@ MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, nframes_t start, nfra
 	: Region (src, start, length, PBD::basename_nosuffix(src->name()), DataType::MIDI, 0,  Region::Flag(Region::DefaultFlags|Region::External))
 {
 	assert(_name.find("/") == string::npos);
+	midi_source(0)->Switched.connect(sigc::mem_fun(this, &MidiRegion::switch_source));
 }
 
 /* Basic MidiRegion constructor (one channel) */
@@ -60,6 +61,7 @@ MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, nframes_t start, nfra
 	: Region (src, start, length, name, DataType::MIDI, layer, flags)
 {
 	assert(_name.find("/") == string::npos);
+	midi_source(0)->Switched.connect(sigc::mem_fun(this, &MidiRegion::switch_source));
 }
 
 /* Basic MidiRegion constructor (many channels) */
@@ -67,6 +69,7 @@ MidiRegion::MidiRegion (SourceList& srcs, nframes_t start, nframes_t length, con
 	: Region (srcs, start, length, name, DataType::MIDI, layer, flags)
 {
 	assert(_name.find("/") == string::npos);
+	midi_source(0)->Switched.connect(sigc::mem_fun(this, &MidiRegion::switch_source));
 }
 
 
@@ -75,12 +78,14 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, nframes_t off
 	: Region (other, offset, length, name, layer, flags)
 {
 	assert(_name.find("/") == string::npos);
+	midi_source(0)->Switched.connect(sigc::mem_fun(this, &MidiRegion::switch_source));
 }
 
 MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
 	: Region (other)
 {
 	assert(_name.find("/") == string::npos);
+	midi_source(0)->Switched.connect(sigc::mem_fun(this, &MidiRegion::switch_source));
 }
 
 MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, const XMLNode& node)
@@ -90,6 +95,7 @@ MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, const XMLNode& node)
 		throw failed_constructor();
 	}
 
+	midi_source(0)->Switched.connect(sigc::mem_fun(this, &MidiRegion::switch_source));
 	assert(_name.find("/") == string::npos);
 	assert(_type == DataType::MIDI);
 }
@@ -101,6 +107,7 @@ MidiRegion::MidiRegion (SourceList& srcs, const XMLNode& node)
 		throw failed_constructor();
 	}
 
+	midi_source(0)->Switched.connect(sigc::mem_fun(this, &MidiRegion::switch_source));
 	assert(_name.find("/") == string::npos);
 	assert(_type == DataType::MIDI);
 }
@@ -300,5 +307,20 @@ MidiRegion::midi_source (uint32_t n) const
 {
 	// Guaranteed to succeed (use a static cast?)
 	return boost::dynamic_pointer_cast<MidiSource>(source(n));
+}
+
+
+void
+MidiRegion::switch_source(boost::shared_ptr<Source> src)
+{
+	boost::shared_ptr<MidiSource> msrc = boost::dynamic_pointer_cast<MidiSource>(src);
+	if (!msrc)
+		return;
+
+	// MIDI regions have only one source
+	_sources.clear();
+	_sources.push_back(msrc);
+
+	set_name(msrc->name());
 }
 

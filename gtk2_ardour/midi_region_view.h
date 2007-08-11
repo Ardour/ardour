@@ -161,6 +161,7 @@ class MidiRegionView : public RegionView
   private:
 
 	void clear_events();
+	void switch_source(boost::shared_ptr<ARDOUR::Source> src);
 
 	bool canvas_event(GdkEvent* ev);
 	bool note_canvas_event(GdkEvent* ev);

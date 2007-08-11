@@ -30,9 +30,13 @@
 
 #include <pbd/xml++.h>
 #include <pbd/pthread_utils.h>
+#include <pbd/basename.h>
 
 #include <ardour/midi_source.h>
 #include <ardour/midi_ring_buffer.h>
+#include <ardour/session.h>
+#include <ardour/session_directory.h>
+#include <ardour/source_factory.h>
 
 #include "i18n.h"
 
@@ -44,6 +48,7 @@ sigc::signal<void,MidiSource *> MidiSource::MidiSourceCreated;
 
 MidiSource::MidiSource (Session& s, string name)
 	: Source (s, name, DataType::MIDI)
+	, _timeline_position(0)
 	, _model(new MidiModel(s))
 	, _model_loaded (false)
 	, _writing (false)
@@ -54,6 +59,7 @@ MidiSource::MidiSource (Session& s, string name)
 
 MidiSource::MidiSource (Session& s, const XMLNode& node) 
 	: Source (s, node)
+	, _timeline_position(0)
 	, _model(new MidiModel(s))
 	, _model_loaded (false)
 	, _writing (false)
@@ -158,6 +164,40 @@ MidiSource::mark_streaming_write_completed ()
 void
 MidiSource::session_saved()
 {
-	cerr << "MidiSource saving, name = " << _name << endl;
+	flush();
+
+	if (_model && _model_loaded && _model->edited()) {
+		string newname;
+		const string basename = PBD::basename_nosuffix(_name);
+		string::size_type last_dash = basename.find_last_of("-");
+		if (last_dash == string::npos || last_dash == basename.find_first_of("-")) {
+			newname = basename + "-1";
+		} else {
+			stringstream ss(basename.substr(last_dash+1));
+			unsigned write_count = 0;
+			ss >> write_count;
+			cerr << "WRITE COUNT: " << write_count << endl;
+			++write_count; // start at 1
+			ss.clear();
+			ss << basename.substr(0, last_dash) << "-" << write_count;
+			newname = ss.str();
+		}
+
+		string newpath = _session.session_directory().midi_path().to_string() +"/"+ newname + ".mid";
+
+		boost::shared_ptr<MidiSource> newsrc = boost::dynamic_pointer_cast<MidiSource>(
+				SourceFactory::createWritable(DataType::MIDI, _session, newpath, 1, 0, true));
+
+		newsrc->set_timeline_position(_timeline_position);
+		_model->write_to(newsrc);
+
+		newsrc->set_model(_model);
+		_model.reset();
+		_model_loaded = false;
+		
+		newsrc->flush();
+		
+		Switched.emit(newsrc);
+	}
 }
 

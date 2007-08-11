@@ -375,11 +375,6 @@ Editor::set_midi_edit_mode (MidiEditMode m, bool force)
 		break;
 	}
 
-	if (mouse_mode == MouseNote)
-		midi_toolbar_frame.show();
-	else
-		midi_toolbar_frame.hide();
-
 	ignore_midi_edit_mode_toggle = false;
 
 	set_midi_edit_cursor (current_midi_edit_mode());

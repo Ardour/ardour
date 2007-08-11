@@ -23,6 +23,7 @@
 
 #include <queue>
 #include <boost/utility.hpp>
+#include <glibmm/thread.h>
 #include <pbd/command.h>
 #include <ardour/types.h>
 #include <ardour/midi_buffer.h>
@@ -31,6 +32,7 @@
 namespace ARDOUR {
 
 class Session;
+class MidiSource;
 
 
 /** This is a slightly higher level (than MidiBuffer) model of MIDI note data.
@@ -143,14 +145,15 @@ public:
 	MidiModel::DeltaCommand* new_delta_command(const std::string name="midi edit");
 	void                     apply_command(Command* cmd);
 
-	bool write_new_source(const std::string& path);
+	bool edited() const { return _edited; }
+	bool write_to(boost::shared_ptr<MidiSource> source);
 
 	sigc::signal<void> ContentsChanged;
 	
 private:
 	friend class DeltaCommand;
-	void add_note(const Note& note);
-	void remove_note(const Note& note);
+	void add_note_unlocked(const Note& note);
+	void remove_note_unlocked(const Note& note);
 
 	bool is_sorted() const;
 
@@ -159,12 +162,15 @@ private:
 
 	Session& _session;
 
+	Glib::RWLock _lock;
+
 	Notes    _notes;
 	NoteMode _note_mode;
 	
 	typedef std::vector<size_t> WriteNotes;
 	WriteNotes _write_notes;
 	bool       _writing;
+	bool       _edited;
 	
 	// note state for read():
 	

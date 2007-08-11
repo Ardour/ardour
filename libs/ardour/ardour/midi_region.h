@@ -90,6 +90,8 @@ class MidiRegion : public Region
 	void recompute_at_start ();
 	void recompute_at_end ();
 
+	void switch_source(boost::shared_ptr<Source> source);
+
   protected:
 
 	int set_live_state (const XMLNode&, Change&, bool send);

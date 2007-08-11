@@ -71,8 +71,8 @@ class Source : public SessionObject
 
 	uint32_t used() const;
 
-	
-	static sigc::signal<void,Source*> SourceCreated;
+	static sigc::signal<void,Source*>             SourceCreated;
+	sigc::signal<void,boost::shared_ptr<Source> > Switched;
 
   protected:
 	void update_length (nframes_t pos, nframes_t cnt);

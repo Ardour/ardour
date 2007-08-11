@@ -1009,7 +1009,7 @@ MidiDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_cap
 		/* figure out the name for this take */
 	
 		srcs.push_back (_write_source);
-		_write_source->update_header (capture_info.front()->start, when, twhen);
+		_write_source->set_timeline_position (capture_info.front()->start);
 		_write_source->set_captured_for (_name);
 
 		string whole_file_region_name;

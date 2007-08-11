@@ -122,6 +122,8 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 		}
 		_model->ContentsChanged.connect(sigc::mem_fun(this, &MidiRegionView::redisplay_model));
 	}
+
+	midi_region()->midi_source(0)->Switched.connect(sigc::mem_fun(this, &MidiRegionView::switch_source));
 	
 	group->signal_event().connect (mem_fun (this, &MidiRegionView::canvas_event), false);
 
@@ -393,6 +395,8 @@ void
 MidiRegionView::redisplay_model()
 {
 	clear_events();
+
+	//cerr << "Redisplaying model " << _model << endl;
 	
 	if (_model) {
 		begin_write();
@@ -757,5 +761,14 @@ MidiRegionView::note_entered(ArdourCanvas::CanvasMidiEvent* ev)
 	} else if (_mouse_state == SelectTouchDragging) {
 		note_selected(ev, true);
 	}
+}
+	
+
+void
+MidiRegionView::switch_source(boost::shared_ptr<Source> src)
+{
+	boost::shared_ptr<MidiSource> msrc = boost::dynamic_pointer_cast<MidiSource>(src);
+	if (msrc)
+		display_model(msrc->model());
 }
 

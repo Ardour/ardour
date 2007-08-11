@@ -55,7 +55,6 @@ SMFSource::SMFSource (Session& s, std::string path, Flag flags)
 	, _channel(0)
 	, _flags (Flag(flags | Writable)) // FIXME: this needs to be writable for now
 	, _allow_remove_if_empty(true)
-	, _timeline_position (0)
 	, _fd (0)
 	, _last_ev_time(0)
 	, _track_size(4) // 4 bytes for the ever-present EOT event
@@ -70,6 +69,8 @@ SMFSource::SMFSource (Session& s, std::string path, Flag flags)
 	if (open()) {
 		throw failed_constructor ();
 	}
+
+	cerr << "SMF Source path: " << path << endl;
 	
 	assert(_name.find("/") == string::npos);
 }
@@ -79,7 +80,6 @@ SMFSource::SMFSource (Session& s, const XMLNode& node)
 	, _channel(0)
 	, _flags (Flag (Writable|CanRename))
 	, _allow_remove_if_empty(true)
-	, _timeline_position (0)
 	, _fd (0)
 	, _last_ev_time(0)
 	, _track_size(4) // 4 bytes for the ever-present EOT event
@@ -98,6 +98,8 @@ SMFSource::SMFSource (Session& s, const XMLNode& node)
 	if (open()) {
 		throw failed_constructor ();
 	}
+	
+	cerr << "SMF Source name: " << _name << endl;
 	
 	assert(_name.find("/") == string::npos);
 }
@@ -156,19 +158,14 @@ SMFSource::open()
 		_fd = fopen(path().c_str(), "w+");
 		_track_size = 0;
 
-		// write a tentative header just to pad things out so writing happens in the right spot
+		// Write a tentative header just to pad things out so writing happens in the right spot
+		set_timeline_position(0);
 		flush_header();
-		// FIXME: write the footer here too so it's a valid SMF (screw up writing ATM though)
+
+		// Note file isn't a valid SMF at this point (no footer).  Does it matter?
 	}
 
 	return (_fd == 0) ? -1 : 0;
-}
-
-int
-SMFSource::update_header (nframes_t when, struct tm&, time_t)
-{
-	_timeline_position = when;
-	return flush_header();
 }
 
 int
@@ -205,12 +202,12 @@ SMFSource::flush_header ()
 int
 SMFSource::flush_footer()
 {
-	//cerr << "SMF - Writing EOT\n";
+	cerr << "SMF " << name() << " writing EOT\n";
 
 	fseek(_fd, 0, SEEK_END);
-	write_var_len(1); // whatever...
-	char eot[4] = { 0xFF, 0x2F, 0x00 }; // end-of-track meta-event
-	fwrite(eot, 1, 4, _fd);
+	write_var_len(0);
+	char eot[3] = { 0xFF, 0x2F, 0x00 }; // end-of-track meta-event
+	fwrite(eot, 1, 3, _fd);
 	fflush(_fd);
 	return 0;
 }
@@ -290,8 +287,7 @@ SMFSource::read_event(jack_midi_event_t& ev) const
 	ev.buffer[0] = (unsigned char)status;
 	fread(ev.buffer+1, 1, ev.size - 1, _fd);
 
-	/*printf("SMF - read event, delta = %u, size = %zu, data = ",
-		delta_time, ev.size);
+	/*printf("%s read event: delta = %u, size = %zu, data = ", _name.c_str(), delta_time, ev.size);
 	for (size_t i=0; i < ev.size; ++i) {
 		printf("%X ", ev.buffer[i]);
 	}
@@ -375,32 +371,14 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 	src.read(buf, /*_length*/0, _length + cnt); // FIXME?
 
 	fseek(_fd, 0, SEEK_END);
-
-	// FIXME: assumes tempo never changes after start
-	const double frames_per_beat = _session.tempo_map().tempo_at(_timeline_position).frames_per_beat(
-			_session.engine().frame_rate());
 	
 	for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
 		MidiEvent& ev = *i;
 		assert(ev.time() >= _timeline_position);
 		ev.time() -= _timeline_position;
 		assert(ev.time() >= _last_ev_time);
-		const uint32_t delta_time = (uint32_t)((ev.time() - _last_ev_time) / frames_per_beat * _ppqn);
-		
-		/*printf("SMF - writing event, delta = %u, size = %zu, data = ",
-			delta_time, ev.size);
-		for (size_t i=0; i < ev.size; ++i) {
-			printf("%X ", ev.buffer[i]);
-		}
-		printf("\n");
-		*/
-		size_t stamp_size = write_var_len(delta_time);
-		fwrite(ev.buffer(), 1, ev.size(), _fd);
 
-		_track_size += stamp_size + ev.size();
-		_write_data_count += ev.size();
-		
-		_last_ev_time = ev.time();
+		append_event_unlocked(ev);
 	}
 
 	fflush(_fd);
@@ -419,6 +397,34 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 	
 	return cnt;
 }
+		
+
+void
+SMFSource::append_event_unlocked(const MidiEvent& ev)
+{
+	printf("SMF - writing event, time = %lf, size = %u, data = ", ev.time(), ev.size());
+	for (size_t i=0; i < ev.size(); ++i) {
+		printf("%X ", ev.buffer()[i]);
+	}
+	printf("\n");
+
+	assert(ev.time() >= _last_ev_time);
+	
+	// FIXME: assumes tempo never changes after start
+	const double frames_per_beat = _session.tempo_map().tempo_at
+			(_timeline_position).frames_per_beat(_session.engine().frame_rate());
+	
+	const uint32_t delta_time = (uint32_t)((ev.time() - _last_ev_time) / frames_per_beat * _ppqn);
+
+	const size_t stamp_size = write_var_len(delta_time);
+	fwrite(ev.buffer(), 1, ev.size(), _fd);
+
+	_track_size += stamp_size + ev.size();
+	_write_data_count += ev.size();
+
+	_last_ev_time = ev.time();
+}
+
 
 XMLNode&
 SMFSource::get_state ()
@@ -810,9 +816,10 @@ SMFSource::load_model(bool lock, bool force_reload)
 	}
 
 	if (! _model) {
+		cerr << "SMFSource: Loading new model " << _model.get() << endl;
 		_model = boost::shared_ptr<MidiModel>(new MidiModel(_session));
 	} else {
-		cerr << "SMFSource: Reloading model." << endl;
+		cerr << "SMFSource: Reloading model " << _model.get() << endl;
 		_model->clear();
 	}
 
@@ -860,6 +867,7 @@ SMFSource::load_model(bool lock, bool force_reload)
 void
 SMFSource::destroy_model()
 {
+	cerr << "SMFSource: Destroying model " << _model.get() << endl;
 	_model.reset();
 }
 

@@ -87,7 +87,7 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs)
 		
 		boost::shared_ptr<SMFSource> smfs = boost::dynamic_pointer_cast<SMFSource>(*si);
 		if (smfs) {
-			smfs->update_header (region->position(), *now, xnow);
+			smfs->set_timeline_position (region->position());
 			smfs->flush_footer ();
 		}
 	}

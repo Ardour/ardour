@@ -57,9 +57,9 @@ class SMFSource : public MidiSource {
 	// FIXME and thus are useless for MIDI.. but make MidiDiskstream compile easier! :)
 
 	virtual nframes_t last_capture_start_frame() const { return 0; }
-	virtual void           mark_capture_start (nframes_t) {}
-	virtual void           mark_capture_end () {}
-	virtual void           clear_capture_marks() {}
+	virtual void      mark_capture_start (nframes_t) {}
+	virtual void      mark_capture_end () {}
+	virtual void      clear_capture_marks() {}
 
 	bool set_name (const std::string& newname) { return (set_source_name(newname, false) == 0); }
 	int set_source_name (string newname, bool destructive);
@@ -69,9 +69,12 @@ class SMFSource : public MidiSource {
 	void set_allow_remove_if_empty (bool yn);
 	void mark_for_remove();
 
-	int update_header (nframes_t when, struct tm&, time_t);
+	void append_event_unlocked(const MidiEvent& ev);
+
 	int flush_header ();
 	int flush_footer ();
+	
+	void flush() { flush_header(); flush_footer(); }
 
 	int move_to_trash (const string trash_dir_name);
 
@@ -120,7 +123,6 @@ class SMFSource : public MidiSource {
 	Flag           _flags;
 	string         _take_id;
 	bool           _allow_remove_if_empty;
-	uint64_t       _timeline_position;
 	FILE*          _fd;
 	double         _last_ev_time; // last frame time written, relative to source start
 	uint32_t       _track_size;

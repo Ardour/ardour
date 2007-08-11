@@ -51,11 +51,16 @@ class MidiSource : public Source
 	
 	virtual nframes_t read (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset) const;
 	virtual nframes_t write (MidiRingBuffer& src, nframes_t cnt);
+	virtual void append_event_unlocked(const MidiEvent& ev) = 0;
+
+	virtual void flush() {}
 
 	virtual void mark_for_remove() = 0;
 	virtual void mark_streaming_midi_write_started (NoteMode mode);
 	virtual void mark_streaming_write_started ();
 	virtual void mark_streaming_write_completed ();
+	
+	void set_timeline_position (nframes_t when) { _timeline_position = when; }
 	
 	virtual void session_saved();
 
@@ -80,6 +85,7 @@ class MidiSource : public Source
 	virtual bool model_loaded() const { return _model_loaded; }
 
 	boost::shared_ptr<MidiModel> model() { return _model; }
+	void set_model(boost::shared_ptr<MidiModel> m) { _model = m; _model_loaded = true; }
 
   protected:
 	virtual nframes_t read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset) const = 0;
@@ -87,6 +93,7 @@ class MidiSource : public Source
 	
 	mutable Glib::Mutex _lock;
 	string              _captured_for;
+	uint64_t            _timeline_position;
 	mutable uint32_t    _read_data_count;  ///< modified in read()
 	mutable uint32_t    _write_data_count; ///< modified in write()
 
