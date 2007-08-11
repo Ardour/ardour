@@ -113,7 +113,7 @@ bool
 SMFSource::removable () const
 {
 	return (_flags & Removable) && ((_flags & RemoveAtDestroy) || 
-				      ((_flags & RemovableIfEmpty) && is_empty (_path)));
+				      ((_flags & RemovableIfEmpty) && is_empty()));
 }
 
 int
@@ -720,11 +720,13 @@ SMFSource::set_source_name (string newname, bool destructive)
 }
 
 bool
-SMFSource::is_empty (string path)
+SMFSource::is_empty () const
 {
-	/* XXX fix me */
+	bool ret = (_track_size > 4);
 
-	return false;
+	cerr << name() << " IS EMPTY: " << ret << endl;
+
+	return ret;
 }
 
 

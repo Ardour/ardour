@@ -1361,7 +1361,7 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 
 	if (_write_source) {
 
-		if (SMFSource::is_empty (_write_source->path())) {
+		if (_write_source->is_empty ()) {
 			_write_source->mark_for_remove ();
 			_write_source.reset();
 		} else {

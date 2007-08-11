@@ -75,7 +75,7 @@ class SMFSource : public MidiSource {
 
 	int move_to_trash (const string trash_dir_name);
 
-	static bool is_empty (string path);
+	bool is_empty () const;
 	void mark_streaming_write_completed ();
 
 	void   mark_take (string);

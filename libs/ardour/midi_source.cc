@@ -155,3 +155,9 @@ MidiSource::mark_streaming_write_completed ()
 	_writing = false;
 }
 
+void
+MidiSource::session_saved()
+{
+	cerr << "MidiSource saving, name = " << _name << endl;
+}
+

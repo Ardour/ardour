@@ -57,6 +57,8 @@ class Source : public SessionObject
 	virtual void mark_for_remove() = 0;
 	virtual void mark_streaming_write_started () {}
 	virtual void mark_streaming_write_completed () = 0;
+
+	virtual void session_saved() {}
 	
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);

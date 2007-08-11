@@ -56,6 +56,8 @@ class MidiSource : public Source
 	virtual void mark_streaming_midi_write_started (NoteMode mode);
 	virtual void mark_streaming_write_started ();
 	virtual void mark_streaming_write_completed ();
+	
+	virtual void session_saved();
 
 	string captured_for() const { return _captured_for; }
 	void   set_captured_for (string str) { _captured_for = str; }

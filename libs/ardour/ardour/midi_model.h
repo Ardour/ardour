@@ -143,6 +143,8 @@ public:
 	MidiModel::DeltaCommand* new_delta_command(const std::string name="midi edit");
 	void                     apply_command(Command* cmd);
 
+	bool write_new_source(const std::string& path);
+
 	sigc::signal<void> ContentsChanged;
 	
 private:

@@ -424,3 +424,22 @@ MidiModel::DeltaCommand::undo()
 	_model.ContentsChanged(); /* EMIT SIGNAL */
 }
 
+
+bool
+MidiModel::write_new_source(const std::string& path)
+{
+	cerr << "Writing model to " << path << endl;
+
+#if 0
+		SourceFactory::createWritable (region->data_type(), session, path, false, session.frame_rate());
+
+		catch (failed_constructor& err) {
+			error << string_compose (_("filter: error creating new file %1 (%2)"), path, strerror (errno)) << endmsg;
+			return -1;
+		}
+	}
+#endif
+
+	return true;
+}
+

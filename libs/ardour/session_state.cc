@@ -560,6 +560,11 @@ Session::save_state (string snapshot_name, bool pending)
 		return 1;
 	}
 
+	/* tell sources we're saving first, in case they write out to a new file
+	 * which should be saved with the state rather than the old one */
+	for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i)
+		i->second->session_saved();
+
 	tree.set_root (&get_state());
 
 	if (snapshot_name.empty()) {
@@ -614,16 +619,16 @@ Session::save_state (string snapshot_name, bool pending)
 
 	if (!pending) {
 
-                save_history (snapshot_name);
+		save_history (snapshot_name);
 
 		bool was_dirty = dirty();
 
 		_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
-		
+
 		if (was_dirty) {
 			DirtyChanged (); /* EMIT SIGNAL */
 		}
-		
+
 		StateSaved (snapshot_name); /* EMIT SIGNAL */
 	}
 
