@@ -185,6 +185,10 @@ class IO : public PBD::StatefulDestructible
 		return _gain_control;
 	}
 
+	const PBD::Controllable& gain_control() const {
+		return _gain_control;
+	}
+	
 	/* Peak metering */
 
 	float peak_input_power (uint32_t n) { 

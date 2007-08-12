@@ -69,27 +69,6 @@ using boost::shared_ptr;
 
 MackieMidiBuilder builder;
 
-// Copied from tranzport_control_protocol.cc
-static inline double 
-gain_to_slider_position (ARDOUR::gain_t g)
-{
-	if (g == 0) return 0;
-	return pow((6.0*log(g)/log(2.0)+192.0)/198.0, 8.0);
-}
-
-/*
-	Copied from tranzport_control_protocol.cc
-	TODO this seems to return slightly wrong values, namely
-	with the UI slider at max, we get a 0.99something value.
-*/
-static inline ARDOUR::gain_t 
-slider_position_to_gain (double pos)
-{
-	/* XXX Marcus writes: this doesn't seem right to me. but i don't have a better answer ... */
-	if (pos == 0.0) return 0;
-	return pow (2.0,(sqrt(sqrt(sqrt(pos)))*198.0-192.0)/6.0);
-}
-
 MackieControlProtocol::MackieControlProtocol (Session& session)
 	: ControlProtocol  (session, X_("Mackie"))
 	, _current_initial_bank( 0 )
@@ -841,7 +820,7 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 			// at which point the fader should just reset itself
 			if ( route != 0 )
 			{
-				route->set_gain( slider_position_to_gain( state.pos ), this );
+				route->gain_control().set_value( state.pos );
 				
 				// must echo bytes back to slider now, because
 				// the notifier only works if the fader is not being
@@ -992,7 +971,7 @@ void MackieControlProtocol::notify_gain_changed( RouteSignal * route_signal )
 #endif
 		if ( !fader.in_use() )
 		{
-			route_signal->port().write( builder.build_fader( fader, gain_to_slider_position( route_signal->route().effective_gain() ) ) );
+			route_signal->port().write( builder.build_fader( fader, route_signal->route().gain_control().get_value() ) );
 		}
 	}
 	catch( exception & e )
