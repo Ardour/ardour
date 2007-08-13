@@ -70,7 +70,7 @@ SMFSource::SMFSource (Session& s, std::string path, Flag flags)
 		throw failed_constructor ();
 	}
 
-	cerr << "SMF Source path: " << path << endl;
+	//cerr << "SMF Source path: " << path << endl;
 	
 	assert(_name.find("/") == string::npos);
 }
@@ -99,7 +99,7 @@ SMFSource::SMFSource (Session& s, const XMLNode& node)
 		throw failed_constructor ();
 	}
 	
-	cerr << "SMF Source name: " << _name << endl;
+	//cerr << "SMF Source name: " << _name << endl;
 	
 	assert(_name.find("/") == string::npos);
 }
@@ -402,11 +402,11 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 void
 SMFSource::append_event_unlocked(const MidiEvent& ev)
 {
-	printf("SMF - writing event, time = %lf, size = %u, data = ", ev.time(), ev.size());
+	/*printf("SMF - writing event, time = %lf, size = %u, data = ", ev.time(), ev.size());
 	for (size_t i=0; i < ev.size(); ++i) {
 		printf("%X ", ev.buffer()[i]);
 	}
-	printf("\n");
+	printf("\n");*/
 
 	assert(ev.time() >= _last_ev_time);
 	
@@ -730,7 +730,7 @@ SMFSource::is_empty () const
 {
 	bool ret = (_track_size > 4);
 
-	cerr << name() << " IS EMPTY: " << ret << endl;
+	//cerr << name() << " IS EMPTY: " << ret << endl;
 
 	return ret;
 }

@@ -118,16 +118,11 @@ MidiModel::read (MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframe
 {
 	size_t read_events = 0;
 
-	cerr << "MM READ @ " << start << " + " << nframes << endl;
-
-	/* FIXME: cache last lookup value to avoid the search */
+	/* FIXME: cache last lookup value to avoid O(n) search every time */
 
 	if (_note_mode == Sustained) {
 
-		/* FIXME: cache last lookup value to avoid the search */
 		for (Notes::const_iterator n = _notes.begin(); n != _notes.end(); ++n) {
-
-			cerr << "MM NOTE " << n->time() << endl;
 
 			while ( ! _active_notes.empty() ) {
 				const Note* const earliest_off = _active_notes.top();
@@ -153,6 +148,19 @@ MidiModel::read (MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframe
 			}
 
 		}
+			
+		// Write any trailing note offs
+		while ( ! _active_notes.empty() ) {
+			const Note* const earliest_off = _active_notes.top();
+			const MidiEvent&  off_ev       = earliest_off->off_event();
+			if (off_ev.time() < start + nframes) {
+				dst.write(off_ev.time() + stamp_offset, off_ev.size(), off_ev.buffer());
+				_active_notes.pop();
+				++read_events;
+			} else {
+				break;
+			}
+		}
 
 	// Percussive
 	} else {
@@ -169,9 +177,6 @@ MidiModel::read (MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframe
 			}
 		}
 	}
-
-	//if (read_events > 0)
-	//	cerr << "MM READ " << read_events << " EVENTS" << endl;
 
 	return read_events;
 }
@@ -205,7 +210,7 @@ MidiModel::end_write(bool delete_stuck)
 {
 	assert(_writing);
 	
-	//cerr << "MM END WRITE\n";
+	//cerr << "MM END WRITE: " << _notes.size() << " STUCK NOTES\n";
 
 	if (_note_mode == Sustained && delete_stuck) {
 		for (Notes::iterator n = _notes.begin(); n != _notes.end() ; ) {
@@ -278,10 +283,10 @@ MidiModel::append_note_on(double time, uint8_t note_num, uint8_t velocity)
 	assert(_writing);
 	_notes.push_back(Note(time, 0, note_num, velocity));
 	if (_note_mode == Sustained) {
-		//cerr << "MM Appending note on " << (unsigned)(uint8_t)note_num << endl;
+		//cerr << "MM Sustained: Appending active note on " << (unsigned)(uint8_t)note_num << endl;
 		_write_notes.push_back(_notes.size() - 1);
 	} else {
-		//cerr << "MM NOT appending note on" << endl;
+		//cerr << "MM Percussive: NOT appending active note on" << endl;
 	}
 }
 
@@ -309,7 +314,7 @@ MidiModel::append_note_off(double time, uint8_t note_num)
 			assert(time > note.time());
 			note.set_duration(time - note.time());
 			_write_notes.erase(n);
-			//cerr << "MidiModel resolved note, duration: " << note.duration() << endl;
+			//cerr << "MM resolved note, duration: " << note.duration() << endl;
 			break;
 		}
 	}
@@ -319,7 +324,7 @@ MidiModel::append_note_off(double time, uint8_t note_num)
 void
 MidiModel::add_note_unlocked(const Note& note)
 {
-	cerr << "MidiModel " << this << " add note " << (int)note.note() << " @ " << note.time() << endl;
+	//cerr << "MidiModel " << this << " add note " << (int)note.note() << " @ " << note.time() << endl;
 	Notes::iterator i = upper_bound(_notes.begin(), _notes.end(), note, note_time_comparator);
 	_notes.insert(i, note);
 }
@@ -328,7 +333,7 @@ MidiModel::add_note_unlocked(const Note& note)
 void
 MidiModel::remove_note_unlocked(const Note& note)
 {
-	cerr << "MidiModel " << this << " remove note " << (int)note.note() << " @ " << note.time() << endl;
+	//cerr << "MidiModel " << this << " remove note " << (int)note.note() << " @ " << note.time() << endl;
 	Notes::iterator n = find(_notes.begin(), _notes.end(), note);
 	if (n != _notes.end())
 		_notes.erase(n);
@@ -445,7 +450,7 @@ MidiModel::DeltaCommand::undo()
 bool
 MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 {
-	cerr << "Writing model to " << source->name() << endl;
+	//cerr << "Writing model to " << source->name() << endl;
 
 	/* This could be done using a temporary MidiRingBuffer and using
 	 * MidiModel::read and MidiSource::write, but this is more efficient
@@ -489,6 +494,12 @@ MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 		source->append_event_unlocked(n->on_event());
 		if (n->duration() > 0)
 			active_notes.push(&(*n));
+	}
+		
+	// Write any trailing note offs
+	while ( ! active_notes.empty() ) {
+		source->append_event_unlocked(active_notes.top()->off_event());
+		active_notes.pop();
 	}
 
 	_edited = false;
