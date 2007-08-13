@@ -37,14 +37,10 @@ class AudioRegionGainLine : public AutomationLine
   public:
   AudioRegionGainLine (const string & name, ARDOUR::Session&, AudioRegionView&, ArdourCanvas::Group& parent, boost::shared_ptr<ARDOUR::AutomationList>);
 	
-	void view_to_model_y (double&);
-	void model_to_view_y (double&);
-
 	void start_drag (ControlPoint*, nframes_t x, float fraction);
 	void end_drag (ControlPoint*);
 
 	void remove_point (ControlPoint&);
-
 
   private:
 	ARDOUR::Session& session;

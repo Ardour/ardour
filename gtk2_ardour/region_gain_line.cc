@@ -43,23 +43,12 @@ AudioRegionGainLine::AudioRegionGainLine (const string & name, Session& s, Audio
 	  session (s),
 	  rv (r)
 {
+	// If this isn't true something is horribly wrong, and we'll get catastrophic gain values
+	assert(l->parameter().type() == EnvelopeAutomation);
+
 	group->raise_to_top ();
 	set_verbose_cursor_uses_gain_mapping (true);
 	terminal_points_can_slide = false;
-}
-
-void
-AudioRegionGainLine::view_to_model_y (double& y)
-{
-	y = slider_position_to_gain (y);
-	y = max (0.0, y);
-	y = min (2.0, y);
-}
-
-void
-AudioRegionGainLine::model_to_view_y (double& y)
-{
-	y = gain_to_slider_position (y);
 }
 
 void
@@ -102,7 +91,7 @@ AudioRegionGainLine::end_drag (ControlPoint* cp)
 {
 	if (!rv.audio_region()->envelope_active()) {
 		rv.audio_region()->set_envelope_active(true);
-                trackview.session().add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), 0, &rv.audio_region()->get_state()));
+		trackview.session().add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), 0, &rv.audio_region()->get_state()));
 	} 
 
 	AutomationLine::end_drag(cp);
