@@ -204,6 +204,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	void list_changed ();
 
 	virtual bool event_handler (GdkEvent*);
+	virtual void add_model_point (ALPoints& tmp_points, double frame, double yfract);
 	
   private:
 	uint32_t drags;
@@ -236,6 +237,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 
 	friend class AudioRegionGainLine;
 };
+
 
 #endif /* __ardour_automation_line_h__ */
 

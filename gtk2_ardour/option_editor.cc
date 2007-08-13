@@ -359,6 +359,9 @@ OptionEditor::setup_midi_options ()
 
 	redisplay_midi_ports ();
 
+	mmc_receive_device_id_adjustment.set_value (Config->get_mmc_receive_device_id());
+	mmc_send_device_id_adjustment.set_value (Config->get_mmc_send_device_id());
+
 	mmc_receive_device_id_adjustment.signal_value_changed().connect (mem_fun (*this, &OptionEditor::mmc_receive_device_id_adjusted));
 	mmc_send_device_id_adjustment.signal_value_changed().connect (mem_fun (*this, &OptionEditor::mmc_send_device_id_adjusted));
 
@@ -704,7 +707,6 @@ void
 OptionEditor::mmc_receive_device_id_adjusted ()
 {
 	uint8_t id = (uint8_t) mmc_receive_device_id_spinner.get_value();
-
 	Config->set_mmc_receive_device_id (id);
 }
 
@@ -712,9 +714,6 @@ void
 OptionEditor::mmc_send_device_id_adjusted ()
 {
 	uint8_t id = (uint8_t) mmc_send_device_id_spinner.get_value();
-
-	cerr << "New send ID = " << (int) id << endl;
-
 	Config->set_mmc_send_device_id (id);
 }
 

@@ -34,6 +34,7 @@
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "audio_clock.h"
+#include "engine_dialog.h"
 #include "editor.h"
 #include "actions.h"
 
@@ -80,6 +81,8 @@ ARDOUR_UI::install_actions ()
 	/* menus + submenus that need action items */
 
 	ActionManager::register_action (main_actions, X_("Session"), _("Session"));
+	ActionManager::register_action (main_actions, X_("Files"), _("Files"));
+	ActionManager::register_action (main_actions, X_("Regions"), _("Regions"));
 	ActionManager::register_action (main_actions, X_("Cleanup"), _("Cleanup"));
 	ActionManager::register_action (main_actions, X_("Sync"), _("Sync"));
 	ActionManager::register_action (main_actions, X_("Options"), _("Options"));
@@ -157,7 +160,11 @@ ARDOUR_UI::install_actions ()
 
 	/* not sensitive to the presence or absence of JACK */
 	act = ActionManager::register_action (jack_actions, X_("AudioEngineSetup"), _("Setup"), mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::audioengine_setup));
-	
+
+	if (EngineDialog::engine_running()) {
+		// act->set_sensitive (false);
+	}
+
 	act = ActionManager::register_action (jack_actions, X_("JACKReconnect"), _("Reconnect"), mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::reconnect_to_jack));
 	ActionManager::jack_opposite_sensitive_actions.push_back (act);
 

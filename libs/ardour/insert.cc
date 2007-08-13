@@ -166,7 +166,7 @@ PluginInsert::~PluginInsert ()
 void
 PluginInsert::automation_list_creation_callback (uint32_t which, AutomationList& alist)
 {
-  alist.automation_state_changed.connect (sigc::bind (mem_fun (*this, &PluginInsert::auto_state_changed), (which)));
+	alist.automation_state_changed.connect (sigc::bind (mem_fun (*this, &PluginInsert::auto_state_changed), (which)));
 }
 
 void

@@ -32,6 +32,7 @@
 #include <ardour/ardour.h>
 
 #include "actions.h"
+#include "opts.h"
 #include "i18n.h"
 
 using namespace std;
@@ -65,7 +66,7 @@ ActionManager::init ()
 {
 	ui_manager = UIManager::create ();
 	
-	std::string ui_file = ARDOUR::find_config_file("ardour.menus");
+	std::string ui_file = ARDOUR::find_config_file(GTK_ARDOUR::menus_file);
 
 	bool loaded = false;
 	

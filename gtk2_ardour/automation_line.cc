@@ -1202,11 +1202,17 @@ AutomationLine::reset_callback (const AutomationList& events)
 		double translated_y = (*ai)->value;
 		model_to_view_y (translated_y);
 
-		tmp_points.push_back (ALPoint (trackview.editor.frame_to_unit ((*ai)->when),
-					       _height - (translated_y * _height)));
+		add_model_point (tmp_points, (*ai)->when, translated_y);
 	}
 	
 	determine_visible_control_points (tmp_points);
+}
+
+void
+AutomationLine::add_model_point (ALPoints& tmp_points, double frame, double yfract)
+{
+	tmp_points.push_back (ALPoint (trackview.editor.frame_to_unit (frame),
+				       _height - (yfract * _height)));
 }
 
 void

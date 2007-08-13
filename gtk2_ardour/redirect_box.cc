@@ -395,13 +395,12 @@ RedirectBox::insert_plugin_chosen (boost::shared_ptr<Plugin> plugin)
 
 		boost::shared_ptr<Redirect> redirect (new PluginInsert (_session, plugin, _placement));
 		
-		redirect->active_changed.connect (bind (mem_fun (*this, &RedirectBox::show_redirect_active_r), boost::weak_ptr<Redirect>(redirect)));
-
 		uint32_t err_streams;
 
 		if (_route->add_redirect (redirect, this, &err_streams)) {
 			weird_plugin_dialog (*plugin, err_streams, _route);
-			// XXX SHAREDPTR delete plugin here .. do we even need to care? 
+		} else {
+			redirect->active_changed.connect (bind (mem_fun (*this, &RedirectBox::show_redirect_active_r), boost::weak_ptr<Redirect>(redirect)));
 		}
 	}
 }
@@ -648,14 +647,14 @@ RedirectBox::show_redirect_active_r (Redirect* r, void *src, boost::weak_ptr<Red
 void
 RedirectBox::show_redirect_active (boost::weak_ptr<Redirect> weak_redirect)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RedirectBox::show_redirect_active), weak_redirect));
-	
 	boost::shared_ptr<Redirect> redirect (weak_redirect.lock());
 	
 	if (!redirect) {
 		return;
 	}
 
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RedirectBox::show_redirect_active), weak_redirect));
+	
 	Gtk::TreeModel::Children children = model->children();
 	Gtk::TreeModel::Children::iterator iter = children.begin();
 
