@@ -202,7 +202,7 @@ SMFSource::flush_header ()
 int
 SMFSource::flush_footer()
 {
-	cerr << "SMF " << name() << " writing EOT\n";
+	//cerr << "SMF " << name() << " writing EOT\n";
 
 	fseek(_fd, 0, SEEK_END);
 	write_var_len(0);

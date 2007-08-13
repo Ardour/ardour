@@ -41,18 +41,30 @@ class Curve;
 struct ControlEvent {
 
     ControlEvent (double w, double v)
-	    : when (w), value (v) { 
-	    coeff[0] = coeff[1] = coeff[2] = coeff[3] = 0.0;
+	    : when (w), value (v), coeff (0) { 
 	}
 
     ControlEvent (const ControlEvent& other) 
 	    : when (other.when), value (other.value) {
-	    coeff[0] = coeff[1] = coeff[2] = coeff[3] = 0.0;
+		if (other.coeff) {
+			create_coeffs();
+			for (size_t i=0; i < 4; ++i)
+				coeff[i] = other.coeff[i];
+		}
 	}
-    
-    double when;
-    double value;
-    double coeff[4]; ///< Used by Curve
+
+	~ControlEvent() { if (coeff) delete[] coeff; }
+
+	void create_coeffs() {
+		if (!coeff)
+			coeff = new double[4];
+	    
+		coeff[0] = coeff[1] = coeff[2] = coeff[3] = 0.0;
+	}
+
+    double  when;
+    double  value;
+    double* coeff; ///< double[4] allocated by Curve as needed
 };
 
 

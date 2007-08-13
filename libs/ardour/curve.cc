@@ -75,7 +75,7 @@ Curve::solve ()
 
 		double lp0, lp1, fpone;
 
-		lp0 =(x[1] - x[0])/(y[1] - y[0]);
+		lp0 = (x[1] - x[0])/(y[1] - y[0]);
 		lp1 = (x[2] - x[1])/(y[2] - y[1]);
 
 		if (lp0*lp1 < 0) {
@@ -161,6 +161,7 @@ Curve::solve ()
 
 			/* store */
 
+			(*xx)->create_coeffs();
 			(*xx)->coeff[0] = y[i-1] - (b * x[i-1]) - (c * xim12) - (d * xim13);
 			(*xx)->coeff[1] = b;
 			(*xx)->coeff[2] = c;
