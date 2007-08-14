@@ -45,7 +45,7 @@ struct ControlEvent {
 	}
 
     ControlEvent (const ControlEvent& other) 
-	    : when (other.when), value (other.value) {
+	    : when (other.when), value (other.value), coeff (0) {
 		if (other.coeff) {
 			create_coeffs();
 			for (size_t i=0; i < 4; ++i)
