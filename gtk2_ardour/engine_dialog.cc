@@ -4,6 +4,11 @@
 
 #include <glibmm.h>
 
+#ifdef __APPLE__
+#include <CoreAudio/CoreAudio.h>
+#include <CoreFoundation/CFString.h>
+#endif __APPLE__
+
 #include <ardour/profile.h>
 #include <jack/jack.h>
 
@@ -76,7 +81,7 @@ EngineControl::EngineControl ()
 	basic_packer.set_spacings (6);
 
 	strings.clear ();
-#ifndef __APPLE
+#ifndef __APPLE__
 	strings.push_back (X_("ALSA"));
 	strings.push_back (X_("OSS"));
 	strings.push_back (X_("FFADO"));
@@ -166,7 +171,7 @@ EngineControl::EngineControl ()
 	realtime_button.signal_toggled().connect (mem_fun (*this, &EngineControl::realtime_changed));
 	realtime_changed ();
 
-#ifndef __APPLE
+#ifndef __APPLE__
 	options_packer.attach (no_memory_lock_button, 0, 1, 2, 3, FILL|EXPAND, (AttachOptions) 0);
 	options_packer.attach (unlock_memory_button, 0, 1, 3, 4, FILL|EXPAND, (AttachOptions) 0);
 	options_packer.attach (soft_mode_button, 0, 1, 4, 5, FILL|EXPAND, (AttachOptions) 0);
@@ -460,7 +465,7 @@ EngineControl::enumerate_devices ()
 {
 	/* note: case matters for the map keys */
 
-#ifdef __APPLE
+#ifdef __APPLE__
 	devices["CoreAudio"] = enumerate_coreaudio_devices ();
 #else
 	devices["ALSA"] = enumerate_alsa_devices ();
@@ -471,11 +476,72 @@ EngineControl::enumerate_devices ()
 #endif
 }
 
-#ifdef __APPLE
+#ifdef __APPLE__
 vector<string>
 EngineControl::enumerate_coreaudio_devices ()
 {
 	vector<string> devs;
+	
+	// Find out how many Core Audio devices are there, if any...
+	// (code snippet gently "borrowed" from St?hane Letz jackdmp;)
+	OSStatus err;
+	bool isWritable;
+	size_t outSize = sizeof(isWritable);
+
+	err = AudioHardwareGetPropertyInfo(kAudioHardwarePropertyDevices,
+					   &outSize, &isWritable);
+	if (err == noErr) {
+		// Calculate the number of device available...
+		int numCoreDevices = outSize / sizeof(AudioDeviceID);
+		// Make space for the devices we are about to get...
+		AudioDeviceID *coreDeviceIDs = new AudioDeviceID [numCoreDevices];
+		err = AudioHardwareGetProperty(kAudioHardwarePropertyDevices,
+					       &outSize, (void *) coreDeviceIDs);
+		if (err == noErr) {
+			// Look for the CoreAudio device name...
+			char coreDeviceName[256];
+			size_t nameSize = sizeof (coreDeviceName);
+			for (int i = 0; i < numCoreDevices; i++) {
+				err = AudioDeviceGetPropertyInfo(coreDeviceIDs[i],
+								 0, true, kAudioDevicePropertyDeviceName,
+								 &outSize, &isWritable);
+				if (err == noErr) {
+					err = AudioDeviceGetProperty(coreDeviceIDs[i],
+								     0, true, kAudioDevicePropertyDeviceName,
+								     &nameSize, (void *) coreDeviceName);
+					if (err == noErr) {
+
+						char drivername[128];
+
+						// this returns the unique id for the device
+						// that must be used on the commandline for jack
+
+						if (getDeviceUIDFromID(coreDeviceIDs[i], drivername, sizeof (drivername)) == noErr) {
+							sName = drivername;
+						} else {
+							sName = "Error";
+						}
+
+						devs.push_back (sName);
+#if 0						
+
+						coreaudioIdMap[sName] = coreDeviceIDs[i];
+						// TODO: hide this ugly ID from the user,
+						// only show human readable name
+						// humanreadable \t UID
+						sText = QString(coreDeviceName) + '\t' + sName;
+						pAction = menu.addAction(sText);
+						pAction->setCheckable(true);
+						pAction->setChecked(sCurName == sName);
+						++iCards;
+#endif
+					}
+				}
+			}
+		}
+		delete [] coreDeviceIDs;
+	}
+
 	return devs;
 }
 #else
