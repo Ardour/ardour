@@ -4,6 +4,7 @@
 
 #include <glibmm.h>
 
+#include <ardour/profile.h>
 #include <jack/jack.h>
 
 #include <gtkmm/stock.h>
@@ -197,24 +198,7 @@ EngineControl::EngineControl ()
 
 	strings.clear ();
 
-	if (Glib::file_test ("/usr/bin/jackd", FILE_TEST_EXISTS)) {
-		strings.push_back ("/usr/bin/jackd");
-	}
-	if (Glib::file_test ("/usr/local/bin/jackd", FILE_TEST_EXISTS)) {
-		strings.push_back ("/usr/local/bin/jackd");
-	}
-	if (Glib::file_test ("/opt/bin/jackd", FILE_TEST_EXISTS)) {
-		strings.push_back ("/opt/bin/jackd");
-	}
-	if (Glib::file_test ("/usr/bin/jackdmp", FILE_TEST_EXISTS)) {
-		strings.push_back ("/usr/bin/jackd");
-	}
-	if (Glib::file_test ("/usr/local/bin/jackdmp", FILE_TEST_EXISTS)) {
-		strings.push_back ("/usr/local/bin/jackd");
-	}
-	if (Glib::file_test ("/opt/bin/jackdmp", FILE_TEST_EXISTS)) {
-		strings.push_back ("/opt/bin/jackd");
-	}
+	find_jack_servers (strings);
 
 	if (strings.empty()) {
 		fatal << _("No JACK server found anywhere on this system. Please install JACK and restart") << endmsg;
@@ -586,4 +570,52 @@ EngineControl::audio_mode_changed ()
 		input_device_combo.set_sensitive (true);
 		output_device_combo.set_sensitive (true);
 	}
+}
+
+void
+EngineControl::find_jack_servers (vector<string>& strings)
+{
+#ifdef __APPLE
+	if (Profile->get_single_package()) {
+
+		/* this magic lets us finds the path to the OSX bundle, and then
+		   we infer JACK's location from there
+		*/
+		
+		CFURLRef pluginRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+		CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, 
+							      kCFURLPOSIXPathStyle);
+		std::string path = CFStringGetCStringPtr(macPath, 
+							 CFStringGetSystemEncoding());
+		CFRelease(pluginRef);
+		CFRelease(macPath);
+		
+		path += '/jackd';
+
+		if (Glib::file_test (path, FILE_TEST_EXISTS)) {
+			strings.push_back ();
+		} else {
+			warning << _("JACK appears to be missing from the Ardour bundle") << endmsg;
+		}
+#endif
+
+	if (Glib::file_test ("/usr/bin/jackd", FILE_TEST_EXISTS)) {
+		strings.push_back ("/usr/bin/jackd");
+	}
+	if (Glib::file_test ("/usr/local/bin/jackd", FILE_TEST_EXISTS)) {
+		strings.push_back ("/usr/local/bin/jackd");
+	}
+	if (Glib::file_test ("/opt/bin/jackd", FILE_TEST_EXISTS)) {
+		strings.push_back ("/opt/bin/jackd");
+	}
+	if (Glib::file_test ("/usr/bin/jackdmp", FILE_TEST_EXISTS)) {
+		strings.push_back ("/usr/bin/jackd");
+	}
+	if (Glib::file_test ("/usr/local/bin/jackdmp", FILE_TEST_EXISTS)) {
+		strings.push_back ("/usr/local/bin/jackd");
+	}
+	if (Glib::file_test ("/opt/bin/jackdmp", FILE_TEST_EXISTS)) {
+		strings.push_back ("/opt/bin/jackd");
+	}
+
 }

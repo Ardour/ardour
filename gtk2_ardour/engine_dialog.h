@@ -94,6 +94,7 @@ class EngineControl : public Gtk::VBox {
 	void redisplay_latency ();
 	uint32_t get_rate();
 	void audio_mode_changed ();
+	void find_jack_servers (std::vector<std::string>&);
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */

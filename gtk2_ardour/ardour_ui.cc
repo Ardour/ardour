@@ -2086,43 +2086,59 @@ ARDOUR_UI::new_session (Glib::ustring predetermined_path, bool have_engine)
 					load_session (session_path, session_name, &template_name);
 			  
 				} else {
-							
+
 					uint32_t cchns;
 					uint32_t mchns;
 					AutoConnectOption iconnect;
 					AutoConnectOption oconnect;
-							
-					if (new_session_dialog->create_control_bus()) {
-						cchns = (uint32_t) new_session_dialog->control_channel_count();
-					} else {
+					uint32_t nphysin;
+					uint32_t nphysout;
+					
+					if (Profile->get_sae()) {
+
 						cchns = 0;
-					}
-							
-					if (new_session_dialog->create_master_bus()) {
-						mchns = (uint32_t) new_session_dialog->master_channel_count();
-					} else {
-						mchns = 0;
-					}
-							
-					if (new_session_dialog->connect_inputs()) {
+						mchns = 2;
 						iconnect = AutoConnectPhysical;
-					} else {
-						iconnect = AutoConnectOption (0);
-					}
-							
-					/// @todo some minor tweaks.
-							
-					if (new_session_dialog->connect_outs_to_master()) {
 						oconnect = AutoConnectMaster;
-					} else if (new_session_dialog->connect_outs_to_physical()) {
-						oconnect = AutoConnectPhysical;
+						nphysin = 0; // use all available
+						nphysout = 0; // use all available
+
 					} else {
-						oconnect = AutoConnectOption (0);
-					} 
-							
-					uint32_t nphysin = (uint32_t) new_session_dialog->input_limit_count();
-					uint32_t nphysout = (uint32_t) new_session_dialog->output_limit_count();
-							
+
+						/* get settings from advanced section of NSD */
+						
+						if (new_session_dialog->create_control_bus()) {
+							cchns = (uint32_t) new_session_dialog->control_channel_count();
+						} else {
+							cchns = 0;
+						}
+						
+						if (new_session_dialog->create_master_bus()) {
+							mchns = (uint32_t) new_session_dialog->master_channel_count();
+						} else {
+							mchns = 0;
+						}
+						
+						if (new_session_dialog->connect_inputs()) {
+							iconnect = AutoConnectPhysical;
+						} else {
+							iconnect = AutoConnectOption (0);
+						}
+						
+						/// @todo some minor tweaks.
+						
+						if (new_session_dialog->connect_outs_to_master()) {
+							oconnect = AutoConnectMaster;
+						} else if (new_session_dialog->connect_outs_to_physical()) {
+							oconnect = AutoConnectPhysical;
+						} else {
+							oconnect = AutoConnectOption (0);
+						} 
+						
+						nphysin = (uint32_t) new_session_dialog->input_limit_count();
+						nphysout = (uint32_t) new_session_dialog->output_limit_count();
+					}
+
 					if (build_session (session_path,
 							   session_name,
 							   cchns,
@@ -2132,7 +2148,7 @@ ARDOUR_UI::new_session (Glib::ustring predetermined_path, bool have_engine)
 							   nphysin,
 							   nphysout, 
 							   engine->frame_rate() * 60 * 5)) {
-
+						
 						response = Gtk::RESPONSE_NONE;
 						new_session_dialog->reset ();
 						continue;
@@ -2970,6 +2986,7 @@ ARDOUR_UI::setup_profile ()
 
 	if (getenv ("ARDOUR_SAE")) {
 		Profile->set_sae ();
+		Profile->set_single_package ();
 	}
 }
 
