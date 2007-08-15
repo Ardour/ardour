@@ -29,6 +29,7 @@ opts.AddOptions(
     ('ARCH', 'Set architecture-specific compilation flags by hand (all flags as 1 argument)',''),
     BoolOption('AUDIOUNITS', 'Compile with Apple\'s AudioUnit library. (experimental)', 0),
     BoolOption('COREAUDIO', 'Compile with Apple\'s CoreAudio library', 0),
+    BoolOption('GTKOSX', 'Compile for use with GTK-OSX, not GTK-X11', 0),
     BoolOption('DEBUG', 'Set to build with debugging information and no optimizations', 0),
     PathOption('DESTDIR', 'Set the intermediate install "prefix"', '/'),
     EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'none' ), ignorecase=2),
@@ -816,7 +817,13 @@ if conf.CheckCHeader('alsa/asoundlib.h'):
     subst_dict['%MIDITYPE%'] = "alsa/sequencer"
 elif conf.CheckCHeader('/System/Library/Frameworks/CoreMIDI.framework/Headers/CoreMIDI.h'):
     # this line is needed because scons can't handle -framework in ParseConfig() yet.
-    libraries['sysmidi'] = LibraryInfo (LINKFLAGS= '-framework CoreMIDI -framework CoreFoundation -framework CoreAudio -framework CoreServices -framework AudioUnit -framework AudioToolbox -bind_at_load')
+    if env['GTKOSX']:
+        # We need Carbon as well as the rest
+        libraries['sysmidi'] = LibraryInfo (
+	    	LINKFLAGS = ' -framework CoreMIDI -framework CoreFoundation -framework CoreAudio -framework CoreServices -framework AudioUnit -framework AudioToolbox -framework Carbon -bind_at_load' )
+    else:
+        libraries['sysmidi'] = LibraryInfo (
+		LINKFLAGS = ' -framework CoreMIDI -framework CoreFoundation -framework CoreAudio -framework CoreServices -framework AudioUnit -framework AudioToolbox -bind_at_load' )
     env['SYSMIDI'] = 'CoreMIDI'
     subst_dict['%MIDITAG%'] = "ardour"
     subst_dict['%MIDITYPE%'] = "coremidi"

@@ -80,6 +80,10 @@ audiounit_files=Split("""
 au_pluginui.cc
 """)
 
+gtkosx_files=Split("""
+sync-menu.c
+""")
+
 gtkardour_files=Split("""
 about.cc
 actions.cc
@@ -247,10 +251,13 @@ if env['VST']:
 	extra_sources += vst_files
 	gtkardour.Append (CCFLAGS="-DVST_SUPPORT", CPPPATH="#libs/fst")
 
+if gtkardour['GTKOSX']:
+   extra_sources += gtkosx_files
+   gtkardour.Append (CCFLAGS="-DTOP_MENUBAR -DGTKOSX")
+
 if gtkardour['AUDIOUNITS']:
     extra_sources += audiounit_files
     gtkardour.Append(CCFLAGS='-DHAVE_AUDIOUNITS')
-    gtkardour.Append(LINKFLAGS='-framework Carbon')
     gtkardour.Merge([libraries['appleutility']])
  
 if env['FFT_ANALYSIS']:
@@ -281,37 +288,37 @@ if gtkardour['DIST_TARGET'] == 'panther' or gtkardour['DIST_TARGET'] == 'tiger':
 	#
 	# OS X font rendering is different even with X11
 	#
-	my_font_dict['%FONT_TINY%'] = 'sans 7'
-	my_font_dict['%FONT_SMALLERER%'] = 'sans 8'
-	my_font_dict['%FONT_SMALLER%'] = 'sans 9'
-	my_font_dict['%FONT_SMALL%'] = 'sans 10'
-	my_font_dict['%FONT_NORMAL%'] = 'sans 11'
-	my_font_dict['%FONT_BIG%'] = 'sans 12'
-	my_font_dict['%FONT_BIGGER%'] = 'sans 14'
-	my_font_dict['%FONT_LARGE%'] = 'sans 18'
-	my_font_dict['%FONT_LARGER%'] = 'sans 28'
-	my_font_dict['%FONT_HUGER%'] = 'sans 36'
-	my_font_dict['%FONT_MASSIVE%'] = 'sans 60'
-	my_font_dict['%FONT_BOLD_TINY%'] = 'sans bold 7'
-	my_font_dict['%FONT_BOLD_SMALLER%'] = 'sans bold 9'
-	my_font_dict['%FONT_BOLD_SMALL%'] = 'sans bold 10'
-	my_font_dict['%FONT_BOLD_NORMAL%'] = 'sans bold 11'
-	my_font_dict['%FONT_BOLD_BIG%'] = 'sans bold 13'
-	my_font_dict['%FONT_BOLD_BIGGER%'] = 'sans bold 14'
-	my_font_dict['%FONT_BOLD_LARGE%'] = 'sans bold 20'
-	my_font_dict['%FONT_BOLD_LARGER%'] = 'sans bold 25'
-	my_font_dict['%FONT_BOLD_HUGER%'] = 'sans bold 36'
-	my_font_dict['%FONT_BOLD_MASSIVE%'] = 'sans bold 60'
-	my_font_dict['%FONT_ITALIC_TINY%'] = 'sans italic 7'
-	my_font_dict['%FONT_ITALIC_SMALLER%'] = 'sans italic 9'
-	my_font_dict['%FONT_ITALIC_SMALL%'] = 'sans italic 10'
-	my_font_dict['%FONT_ITALIC_NORMAL%'] = 'sans italic 11'
-	my_font_dict['%FONT_ITALIC_BIG%'] = 'sans italic 15'
-	my_font_dict['%FONT_ITALIC_BIGGER%'] = 'sans italic 16'
-	my_font_dict['%FONT_ITALIC_LARGE%'] = 'sans italic 20'
-	my_font_dict['%FONT_ITALIC_LARGER%'] = 'sans italic 28'
-	my_font_dict['%FONT_ITALIC_HUGER%'] = 'sans italic 36'
-	my_font_dict['%FONT_ITALIC_MASSIVE%'] = 'sans italic 60'
+	my_font_dict['%FONT_TINY%'] = 'Lucida Grande 7'
+	my_font_dict['%FONT_SMALLERER%'] = 'Lucida Grande 8'
+	my_font_dict['%FONT_SMALLER%'] = 'Lucida Grande 9'
+	my_font_dict['%FONT_SMALL%'] = 'Lucida Grande 10'
+	my_font_dict['%FONT_NORMAL%'] = 'Lucida Grande 11'
+	my_font_dict['%FONT_BIG%'] = 'Lucida Grande 12'
+	my_font_dict['%FONT_BIGGER%'] = 'Lucida Grande 14'
+	my_font_dict['%FONT_LARGE%'] = 'Lucida Grande 18'
+	my_font_dict['%FONT_LARGER%'] = 'Lucida Grande 28'
+	my_font_dict['%FONT_HUGER%'] = 'Lucida Grande 36'
+	my_font_dict['%FONT_MASSIVE%'] = 'Lucida Grande 60'
+	my_font_dict['%FONT_BOLD_TINY%'] = 'Lucida Grande bold 7'
+	my_font_dict['%FONT_BOLD_SMALLER%'] = 'Lucida Grande bold 9'
+	my_font_dict['%FONT_BOLD_SMALL%'] = 'Lucida Grande bold 10'
+	my_font_dict['%FONT_BOLD_NORMAL%'] = 'Lucida Grande bold 11'
+	my_font_dict['%FONT_BOLD_BIG%'] = 'Lucida Grande bold 13'
+	my_font_dict['%FONT_BOLD_BIGGER%'] = 'Lucida Grande bold 14'
+	my_font_dict['%FONT_BOLD_LARGE%'] = 'Lucida Grande bold 20'
+	my_font_dict['%FONT_BOLD_LARGER%'] = 'Lucida Grande bold 25'
+	my_font_dict['%FONT_BOLD_HUGER%'] = 'Lucida Grande bold 36'
+	my_font_dict['%FONT_BOLD_MASSIVE%'] = 'Lucida Grande bold 60'
+	my_font_dict['%FONT_ITALIC_TINY%'] = 'Lucida Grande italic 7'
+	my_font_dict['%FONT_ITALIC_SMALLER%'] = 'Lucida Grande italic 9'
+	my_font_dict['%FONT_ITALIC_SMALL%'] = 'Lucida Grande italic 10'
+	my_font_dict['%FONT_ITALIC_NORMAL%'] = 'Lucida Grande italic 11'
+	my_font_dict['%FONT_ITALIC_BIG%'] = 'Lucida Grande italic 15'
+	my_font_dict['%FONT_ITALIC_BIGGER%'] = 'Lucida Grande italic 16'
+	my_font_dict['%FONT_ITALIC_LARGE%'] = 'Lucida Grande italic 20'
+	my_font_dict['%FONT_ITALIC_LARGER%'] = 'Lucida Grande italic 28'
+	my_font_dict['%FONT_ITALIC_HUGER%'] = 'Lucida Grande italic 36'
+	my_font_dict['%FONT_ITALIC_MASSIVE%'] = 'Lucida Grande italic 60'
 else:
 	#
 	# Linux/X11 font rendering
@@ -428,6 +435,7 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
 				      icon_files +
 				      skipped_files +
 				      audiounit_files + 
+				      gtkosx_files +
 				      fft_analysis_files +
 				      glob.glob('po/*.po') + glob.glob('*.h')))
 

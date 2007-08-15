@@ -505,6 +505,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::EventBox menu_bar_base;
 	Gtk::HBox     menu_hbox;
 
+	void use_menubar_as_top_menubar ();
+
 	void build_menu_bar ();
 	void build_control_surface_menu ();
 
