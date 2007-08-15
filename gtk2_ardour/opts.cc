@@ -27,19 +27,19 @@
 
 using namespace std;
 
-string GTK_ARDOUR::session_name = "";
-string GTK_ARDOUR::jack_client_name = "ardour";
-bool  GTK_ARDOUR::show_key_actions = false;
-bool GTK_ARDOUR::no_splash = true;
-bool GTK_ARDOUR::just_version = false;
-bool GTK_ARDOUR::use_vst = true;
-bool GTK_ARDOUR::new_session = false;
-char* GTK_ARDOUR::curvetest_file = 0;
-bool GTK_ARDOUR::try_hw_optimization = true;
-string GTK_ARDOUR::keybindings_path = ""; /* empty means use builtin default */
-string GTK_ARDOUR::menus_file = "ardour.menus";
+Glib::ustring ARDOUR_COMMAND_LINE::session_name = "";
+string ARDOUR_COMMAND_LINE::jack_client_name = "ardour";
+bool  ARDOUR_COMMAND_LINE::show_key_actions = false;
+bool ARDOUR_COMMAND_LINE::no_splash = true;
+bool ARDOUR_COMMAND_LINE::just_version = false;
+bool ARDOUR_COMMAND_LINE::use_vst = true;
+bool ARDOUR_COMMAND_LINE::new_session = false;
+char* ARDOUR_COMMAND_LINE::curvetest_file = 0;
+bool ARDOUR_COMMAND_LINE::try_hw_optimization = true;
+Glib::ustring ARDOUR_COMMAND_LINE::keybindings_path = ""; /* empty means use builtin default */
+Glib::ustring ARDOUR_COMMAND_LINE::menus_file = "ardour.menus";
 
-using namespace GTK_ARDOUR;
+using namespace ARDOUR_COMMAND_LINE;
 
 int
 print_help (const char *execname)
@@ -66,10 +66,14 @@ print_help (const char *execname)
 }
 
 int
-GTK_ARDOUR::parse_opts (int argc, char *argv[])
+ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 {
 	const char *optstring = "U:hSbvVnOc:C:m:N:k:";
 	const char *execname = strrchr (argv[0], '/');
+
+	if (getenv ("ARDOUR_SAE")) {
+		menus_file = "ardour-sae.menus";
+	}
 
 	if (execname == 0) {
 		execname = argv[0];

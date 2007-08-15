@@ -46,7 +46,7 @@
 #include "i18n.h"
 
 using namespace Gtk;
-using namespace GTK_ARDOUR;
+using namespace ARDOUR_COMMAND_LINE;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace sigc;
@@ -67,95 +67,6 @@ show_ui_callback (void *arg)
 	return FALSE;
 }
 
-void
-gui_jack_error ()
-{
-	MessageDialog win (_("Ardour could not connect to JACK."),
-		     false,
-		     Gtk::MESSAGE_INFO,
-		     (Gtk::ButtonsType)(Gtk::BUTTONS_NONE));
-win.set_secondary_text(_("There are several possible reasons:\n\
-\n\
-1) JACK is not running.\n\
-2) JACK is running as another user, perhaps root.\n\
-3) There is already another client called \"ardour\".\n\
-\n\
-Please consider the possibilities, and perhaps (re)start JACK."));
-
-	win.add_button (Stock::QUIT, RESPONSE_CLOSE);
-	win.set_default_response (RESPONSE_CLOSE);
-	
-	win.show_all ();
-	win.set_position (Gtk::WIN_POS_CENTER);
-
-	if (!no_splash) {
-		ui->hide_splash ();
-	}
-
-	/* we just don't care about the result, but we want to block */
-
-	win.run ();
-}
-
-static bool
-maybe_load_session ()
-{
-	/* If no session name is given: we're not loading a session yet, nor creating a new one */
-	if (!session_name.length()) {
-		ui->hide_splash ();
-		if (!Config->get_no_new_session_dialog()) {
-			if (!ui->new_session ()) {
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	/* Load session or start the new session dialog */
-	string name, path;
-
-	bool isnew;
-
-	if (Session::find_session (session_name, path, name, isnew)) {
-		error << string_compose(_("could not load command line session \"%1\""), session_name) << endmsg;
-		return false;
-	}
-
-	if (!new_session) {
-			
-		/* Loading a session, but the session doesn't exist */
-		if (isnew) {
-			error << string_compose (_("\n\nNo session named \"%1\" exists.\n"
-						   "To create it from the command line, start ardour as \"ardour --new %1"), path) 
-			      << endmsg;
-			return false;
-		}
-
-		if (ui->load_session (path, name)) {
-			/* it failed */
-			return false;
-		}
-
-	} else {
-
-		/*  TODO: This bit of code doesn't work properly yet
-		    Glib::signal_idle().connect (bind (mem_fun (*ui, &ARDOUR_UI::cmdline_new_session), path));
-		    ui->set_will_create_new_session_automatically (true); 
-		*/
-		
-		/* Show the NSD */
-		ui->hide_splash ();
-		if (!Config->get_no_new_session_dialog()) {
-			if (!ui->new_session ()) {
-				return false;
-			}
-		}
-	}
-
-	return true;
-}
-
 #ifdef VST_SUPPORT
 /* this is called from the entry point of a wine-compiled
    executable that is linked against gtk2_ardour built
@@ -168,7 +79,6 @@ int main (int argc, char *argv[])
 #endif
 
 {
-	ARDOUR::AudioEngine *engine;
 	vector<Glib::ustring> null_file_list;
 
         Glib::thread_init();
@@ -235,10 +145,6 @@ int main (int argc, char *argv[])
 		exit (1);
 	}
 
-	if (!keybindings_path.empty()) {
-		ui->set_keybindings_path (keybindings_path);
-	}
-
 	if (!no_splash) {
 		ui->show_splash ();
 		if (session_name.length()) {  
@@ -246,45 +152,15 @@ int main (int argc, char *argv[])
 		}
 	}
 
-    	try {
-		ARDOUR::init (use_vst, try_hw_optimization);
-		setup_gtk_ardour_enums ();
-		Config->set_current_owner (ConfigVariableBase::Interface);
-		ui->setup_profile ();
-
-		try { 
-			engine = new ARDOUR::AudioEngine (jack_client_name);
-		} catch (AudioEngine::NoBackendAvailable& err) {
-			gui_jack_error ();
-			error << string_compose (_("Could not connect to JACK server as  \"%1\""), jack_client_name) <<  endmsg;
-			return -1;
-		}
-		
-		ui->set_engine (*engine);
-
-	} catch (failed_constructor& err) {
-		error << _("could not initialize Ardour.") << endmsg;
-		return -1;
-	} 
-
-	ui->start_engine ();
-
-	if (maybe_load_session ()) {
-		ui->run (text_receiver);
-		ui = 0;
+	if (!keybindings_path.empty()) {
+		ui->set_keybindings_path (keybindings_path);
 	}
 
-	delete engine;
+	ui->run (text_receiver);
+	ui = 0;
+
 	ARDOUR::cleanup ();
-
-	if (ui) {
-		ui->kill();
-	}
-		
 	pthread_cancel_all ();
-
-	exit (0);
-
 	return 0;
 }
 #ifdef VST_SUPPORT

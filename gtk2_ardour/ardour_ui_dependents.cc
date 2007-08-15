@@ -47,7 +47,7 @@ void
 ARDOUR_UI::shutdown ()
 {
 	if (session) {
-		delete session;
+		// delete session;
 		session = 0;
 	}
 

@@ -1034,10 +1034,6 @@ AudioEngine::connect_to_jack (string client_name)
 		return -1;
 	}
 
-	if (status & JackServerStarted) {
-		info << _("JACK server started") << endmsg;
-	}
-
 	if (status & JackNameNotUnique) {
 		jack_client_name = jack_get_client_name (_jack);
 	}

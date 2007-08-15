@@ -21,23 +21,22 @@
 #define __ardour_opts_h__
 
 #include <string>
+#include <glibmm/ustring.h>
 
-using std::string;
+namespace ARDOUR_COMMAND_LINE {
 
-namespace GTK_ARDOUR {
-
-extern string session_name;
+extern Glib::ustring session_name;
 extern bool   show_key_actions;
 extern bool   no_splash;
 extern bool   just_version;
-extern string jack_client_name;
+extern std::string jack_client_name;
 extern bool   use_vst;
 extern bool   new_session;
 extern char*  curvetest_file;
 extern bool   try_hw_optimization;
 extern bool   use_gtk_theme;
-extern string keybindings_path;
-extern string menus_file;
+extern Glib::ustring keybindings_path;
+extern Glib::ustring menus_file;
 
 extern int32_t parse_opts (int argc, char *argv[]);
 

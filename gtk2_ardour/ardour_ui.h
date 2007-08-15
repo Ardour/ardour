@@ -72,9 +72,9 @@ class ConnectionEditor;
 class RouteParams_UI;
 class About;
 class AddRouteDialog;
-class NewSessionDialog;
 class LocationUI;
 class ThemeManager;
+class NewSessionDialog;
 
 namespace Gtkmm2ext {
 	class TearOff;
@@ -130,7 +130,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 		_will_create_new_session_automatically = yn;
 	}
 
-	bool new_session(std::string path = string());
+	bool new_session (Glib::ustring path, bool have_engine = false);
 	gint cmdline_new_session (string path);
 	int  unload_session ();
 	void close_session(); 
@@ -202,8 +202,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void session_add_midi_track ();
 
-	void set_engine (ARDOUR::AudioEngine&);
-	gint start_engine ();
+	void create_engine ();
+	void post_engine ();
+	gint start_backend_audio ();
 
 	gint exit_on_main_window_close (GdkEventAny *);
 
@@ -291,6 +292,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	static ARDOUR_UI *theArdourUI;
 
+	void backend_audio_error ();
 	void startup ();
 	void shutdown ();
 

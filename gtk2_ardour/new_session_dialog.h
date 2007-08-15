@@ -38,6 +38,7 @@
 #include <glibmm/refptr.h>
 
 #include "ardour_dialog.h"
+#include "engine_dialog.h"
 
 namespace Gtk {
 	class Entry;
@@ -54,8 +55,10 @@ class NewSessionDialog : public ArdourDialog
 public:
 		
 	NewSessionDialog();
+	~NewSessionDialog ();
 
 	void set_session_name(const Glib::ustring& name);
+	void set_session_folder(const Glib::ustring& folder);
 
 	std::string session_name() const;
 	std::string session_folder() const;
@@ -88,11 +91,14 @@ public:
 	// reset everything to default values.
 	void reset();
 
+	EngineControl engine_control;
+	void set_have_engine (bool yn);
+
 protected:
 
 	void reset_name();
 	void reset_template();
-
+	
 	Gtk::Label * session_name_label;
 	Gtk::Label * session_location_label;
 	Gtk::Label * session_template_label;
@@ -170,6 +176,7 @@ protected:
 
 	RecentSessionModelColumns    recent_columns;
 	Glib::RefPtr<Gtk::TreeStore> recent_model;
+	bool in_destructor;
 
 	void recent_session_selection_changed ();
 	void nsd_redisplay_recent_sessions();
@@ -193,8 +200,7 @@ protected:
 	void monitor_bus_button_clicked ();
 
 	bool on_new_session_page;
-
-	
+	bool have_engine;
 };
 
 #endif // NEW_SESSION_DIALOG_H

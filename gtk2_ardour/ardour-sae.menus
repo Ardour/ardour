@@ -1,0 +1,326 @@
+<ui>
+
+    <menubar name='Main' action='MainMenu'>
+        <menu name='Session' action='Session'>
+           <menuitem action='New'/>
+           <menuitem action='Open'/>
+           <menuitem action='Recent'/>
+           <menuitem action='Close'/>
+           <separator/>
+           <menuitem action='Save'/>
+           <menuitem action='Snapshot'/>
+           <menuitem action='SaveTemplate'/>
+           <separator/>
+           <menuitem action='AddTrackBus'/>	
+           <separator/>
+           <separator/>
+           <menu name='Cleanup' action='Cleanup'>
+               <menuitem action='CleanupUnused'/>
+               <menuitem action='FlushWastebasket'/>
+           </menu>
+           <separator/>
+           <menuitem action='Quit'/>
+        </menu>
+	<menu name='Files' action='Files'>
+           <menu action='addExistingAudioFiles'>
+	       <menuitem action='addExternalAudioAsRegion'/>	       
+	       <menuitem action='addExternalAudioToTrack'/>	       
+               <separator/>
+	       <menuitem action='addExternalAudioAsTrack'/>	       
+	       <menuitem action='addExternalAudioAsTapeTrack'/>	       
+           </menu>
+           <separator/>
+           <menuitem action='ExportSession'/>
+           <menuitem action='ExportSelection'/>
+           <menuitem action='ExportRangeMarkers'/>
+	</menu>
+        <menu name='Transport' action='Transport'>
+               <menuitem action='ToggleRoll'/>
+               <menuitem action='ToggleRollForgetCapture'/>
+               <menuitem action='Loop'/>
+               <menuitem action='PlaySelection'/>
+               <menuitem action='set-playhead'/>
+               <menuitem action='Forward'/>
+               <menuitem action='Rewind'/>
+               <menuitem action='GotoZero'/>
+               <menuitem action='GotoStart'/>
+               <menuitem action='GotoEnd'/>
+	       <separator/>
+               <menuitem action='Record'/>
+               <separator/> 
+               <menuitem action='TransitionToRoll'/>
+               <menuitem action='TransitionToReverse'/>
+               <separator/> 
+               <menuitem action='jump-forward-to-mark'/>
+               <menuitem action='jump-backward-to-mark'/>
+               <menuitem action='add-location-from-playhead'/>
+               <separator/> 
+               <menuitem action='playhead-to-next-region-start'/>
+               <menuitem action='playhead-to-next-region-end'/>
+               <menuitem action='playhead-to-previous-region-start'/>
+               <menuitem action='playhead-to-previous-region-end'/>
+               <menuitem action='playhead-to-next-region-sync'/>
+               <menuitem action='playhead-to-previous-region-sync'/>
+               <menuitem action='center-playhead'/>
+               <menuitem action='playhead-to-edit'/>
+               <separator/>       
+               <menuitem action='playhead-to-range-start'/>
+               <menuitem action='playhead-to-range-end'/>
+               <menu action='TransportOptions'>
+                    <menuitem action='ToggleTimeMaster'/>
+                    <menuitem action='TogglePunchIn'/>
+                    <menuitem action='TogglePunchOut'/>
+                    <menuitem action='ToggleAutoInput'/>
+                    <menuitem action='ToggleAutoPlay'/>
+                    <menuitem action='ToggleAutoReturn'/>
+                    <menuitem action='ToggleClick'/>
+                    <menuitem action='toggle-follow-playhead'/>
+                    <menuitem action='ToggleVideoSync'/>
+               </menu>
+       </menu>
+       <menu name='Edit' action='Edit'>
+               <menuitem action='undo'/>
+               <menuitem action='redo'/>
+               <menuitem action='editor-cut'/>
+               <menuitem action='editor-delete'/>
+               <menuitem action='editor-copy'/>
+               <menuitem action='editor-paste'/>
+               <menuitem action='set-edit-cursor'/>
+	       <menuitem action='remove-last-capture'/>
+               <separator/>       
+               <menu action="EditSelectRangeOptions">
+                   <menuitem action='extend-range-to-start-of-region'/>
+                   <menuitem action='extend-range-to-end-of-region'/>
+                   <menuitem action='start-range'/>
+                   <menuitem action='finish-range'/>
+                   <menuitem action='finish-add-range'/>
+               </menu>
+               <menu action="EditSelectRegionOptions">
+                   <menuitem action='select-all'/>
+                   <menuitem action='select-all-after-edit-cursor'/>
+                   <menuitem action='select-all-before-edit-cursor'/>
+                   <menuitem action='select-all-after-playhead'/>
+                   <menuitem action='select-all-before-playhead'/>
+                   <menuitem action='select-all-between-cursors'/>
+                   <menuitem action='select-all-in-punch-range'/>
+                   <menuitem action='select-all-in-loop-range'/>
+               </menu>
+	       <menu action='EditCursorMovementOptions'>
+                   <menuitem action='edit-cursor-to-next-region-start'/>
+    	           <menuitem action='edit-cursor-to-next-region-end'/>
+       	           <menuitem action='edit-cursor-to-previous-region-start'/>
+            	   <menuitem action='edit-cursor-to-previous-region-end'/>
+	           <menuitem action='edit-cursor-to-next-region-sync'/>
+    	           <menuitem action='edit-cursor-to-previous-region-sync'/>
+        	   <menuitem action='center-edit-cursor'/>
+            	   <menuitem action='edit-to-playhead'/>
+    	           <menuitem action='edit-cursor-to-range-start'/>
+	           <menuitem action='edit-cursor-to-range-end'/>
+	       </menu>
+	       <menu name='KeyMouse Actions' action='KeyMouse Actions'>
+	       		<menuitem action='audition-at-mouse'/>
+               		<menuitem action='brush-at-mouse'/>
+               		<menuitem action='mute-unmute-region'/>
+			<separator/>
+			<menuitem action='set-mouse-mode-object'/>
+			<menuitem action='set-mouse-mode-range'/>
+			<menuitem action='set-mouse-mode-gain'/>
+			<menuitem action='set-mouse-mode-zoom'/>
+			<menuitem action='set-mouse-mode-timefx'/>
+		</menu>
+        </menu>         
+	<menu name='Regions' action='Regions'>
+                   <menuitem action='crop'/>
+                   <menuitem action='duplicate-region'/>
+                   <menuitem action='insert-region'/>
+               	   <menuitem action='normalize-region'/>
+                   <separator/>       
+	           <menuitem action="nudge-forward"/>
+         	   <menuitem action="nudge-next-forward"/>
+	           <menuitem action="nudge-backward"/>
+        	   <menuitem action="nudge-next-backward"/>
+        	   <menuitem action='split-region'/>
+	       	   <menuitem action='set-region-sync-position'/>
+	</menu>
+        <menu name='View' action = 'View'>
+               <menu name='ZoomFocus' action='ZoomFocus'>
+                   <menuitem action='zoom-focus-left'/>
+                   <menuitem action='zoom-focus-right'/>
+                   <menuitem action='zoom-focus-center'/>
+                   <menuitem action='zoom-focus-playhead'/>
+                   <menuitem action='zoom-focus-edit'/>
+               </menu>
+	       <menu name='SnapMode' action='SnapMode'>
+		   <menuitem action='snap-normal'/>
+		   <menuitem action='snap-magnetic'/>
+	       </menu>
+               <menu name='SnapTo' action='SnapTo'>
+		   <menuitem action='snap-to-frame'/>
+		   <menuitem action='snap-to-cd-frame'/>
+		   <menuitem action='snap-to-smpte-frame'/>
+		   <menuitem action='snap-to-smpte-seconds'/>
+		   <menuitem action='snap-to-smpte-minutes'/>
+		   <menuitem action='snap-to-seconds'/>
+		   <menuitem action='snap-to-minutes'/>
+		   <menuitem action='snap-to-thirtyseconds'/>
+		   <menuitem action='snap-to-asixteenthbeat'/>
+		   <menuitem action='snap-to-eighths'/>
+		   <menuitem action='snap-to-quarters'/>
+		   <menuitem action='snap-to-thirds'/>
+		   <menuitem action='snap-to-beat'/>
+		   <menuitem action='snap-to-bar'/>
+		   <menuitem action='snap-to-mark'/>
+		   <menuitem action='snap-to-edit-cursor'/>
+		   <menuitem action='snap-to-region-start'/>
+		   <menuitem action='snap-to-region-end'/>
+		   <menuitem action='snap-to-region-sync'/>
+		   <menuitem action='snap-to-region-boundary'/>
+               </menu>
+               <separator/>
+
+               <menuitem action='temporal-zoom-in'/>
+               <menuitem action='temporal-zoom-out'/>
+               <menuitem action='zoom-to-session'/>
+               <menuitem action='scroll-tracks-down'/>
+               <menuitem action='scroll-tracks-up'/>
+               <menuitem action='scroll-tracks-down'/>
+               <menuitem action='step-tracks-up'/>
+               <menuitem action='step-tracks-down'/>
+   	       <separator/>
+               <menuitem action='scroll-forward'/>
+               <menuitem action='scroll-backward'/>
+   	       <separator/>
+               <menuitem action='scroll-playhead-forward'/>
+               <menuitem action='scroll-playhead-backward'/>
+   	       <separator/>
+	       <menuitem action='show-editor-mixer'/>
+         </menu>
+        <menu name='JACK' action='JACK'>
+               <menuitem action='JACKDisconnect'/>
+               <menuitem action='JACKReconnect'/>
+               <menu name='Latency' action='Latency'>
+                   <menuitem action='JACKLatency32'/>
+                   <menuitem action='JACKLatency64'/>
+                   <menuitem action='JACKLatency128'/>
+                   <menuitem action='JACKLatency256'/>
+                   <menuitem action='JACKLatency512'/>
+                   <menuitem action='JACKLatency1024'/>
+                   <menuitem action='JACKLatency2048'/>
+                   <menuitem action='JACKLatency4096'/>
+                   <menuitem action='JACKLatency8192'/>
+               </menu>
+        </menu>
+        <menu name='Windows' action = 'Windows'>
+	       <menuitem action='ToggleMaximalEditor'/>
+	       <separator/>
+               <menuitem action='goto-editor'/>
+               <menuitem action='goto-mixer'/>
+               <menuitem action='ToggleOptionsEditor'/>
+               <menuitem action='ToggleInspector'/>
+               <menuitem action='ToggleLocations'/>
+               <menuitem action='ToggleThemeManager'/>
+               <menuitem action='ToggleBigClock'/>
+   	       <separator/>
+        </menu>
+        <menu name='Options' action='Options'>
+	       <menu action='AudioFileFormat'>
+                   <menu action='AudioFileFormatData'>
+		        <menuitem action='FileDataFormatFloat'/>
+		        <menuitem action='FileDataFormat24bit'/>
+		        <menuitem action='FileDataFormat16bit'/>
+		   </menu>
+                   <menu action='AudioFileFormatHeader'>
+		        <menuitem action='FileHeaderFormatBWF'/>
+		        <menuitem action='FileHeaderFormatWAVE'/>
+		        <menuitem action='FileHeaderFormatWAVE64'/>
+		        <menuitem action='FileHeaderFormatCAF'/>
+		   </menu>
+               </menu>
+               <menu action='Monitoring'>
+                   <menuitem action='UseHardwareMonitoring'/>
+                   <menuitem action='UseSoftwareMonitoring'/>
+                   <menuitem action='UseExternalMonitoring'/>
+               </menu>
+	       <menu action='Metering'>
+                   <menu action='MeteringFallOffRate'>
+		        <menuitem action='MeterFalloffOff'/>
+   		        <menuitem action='MeterFalloffSlowest'/>
+			<menuitem action='MeterFalloffSlow'/>
+	                <menuitem action='MeterFalloffMedium'/>
+	                <menuitem action='MeterFalloffFast'/>
+	                <menuitem action='MeterFalloffFaster'/>
+	                <menuitem action='MeterFalloffFastest'/>
+                   </menu>
+                   <menu action='MeteringHoldTime'>
+	                <menuitem action='MeterHoldOff'/>
+	                <menuitem action='MeterHoldShort'/>
+	                <menuitem action='MeterHoldMedium'/>
+	                <menuitem action='MeterHoldLong'/>
+                   </menu>
+               </menu>
+               <menu action='Solo'>
+                   <menuitem action='LatchedSolo'/>
+               </menu>
+         </menu>
+	 <menu name='Help' action='Help'>
+	     <menuitem action='About'/>
+	</menu>
+     </menubar>
+
+     <popup name='redirectmenu'>
+	 <menuitem action='newplugin'/>
+	 <menuitem action='newinsert'/>
+	 <menuitem action='newsend'/>
+	  <separator/>
+	 <menuitem action='clear'/>
+	  <separator/>
+	 <menuitem action='cut'/>
+	 <menuitem action='copy'/>
+	 <menuitem action='paste'/>
+	 <menuitem action='delete'/>
+	  <separator/>
+	 <menuitem action='rename'/>
+	  <separator/>
+	 <menuitem action='selectall'/>
+	 <menuitem action='deselectall'/>
+	  <separator/>
+	 <menuitem action='activate'/>
+	 <menuitem action='deactivate'/>
+	  <separator/>
+	 <menuitem action='activate_all'/>
+	 <menuitem action='deactivate_all'/>
+	  <separator/>
+	 <menuitem action='edit'/>
+      </popup>
+
+     <popup name='ShuttleUnitPopup'>
+	 <menuitem action='SetShuttleUnitsPercentage'/>
+	 <menuitem action='SetShuttleUnitsSemitones'/>
+     </popup>
+
+     <popup name='RegionListMenu'>
+         <menuitem action='rlAudition'/>
+         <menuitem action='rlHide'/>
+         <menuitem action='rlRemove'/>
+	  <separator/>
+         <menuitem action='rlShowAll'/>
+         <menuitem action='rlShowAuto'/>
+         <menu name='Sort' action='RegionListSort'>
+               <menuitem action='SortAscending'/>
+               <menuitem action='SortDescending'/>
+       	       <separator/>
+               <menuitem action='SortByRegionName'/>
+               <menuitem action='SortByRegionLength'/>
+               <menuitem action='SortByRegionPosition'/>
+               <menuitem action='SortByRegionTimestamp'/>
+               <menuitem action='SortByRegionStartinFile'/>
+               <menuitem action='SortByRegionEndinFile'/>
+               <menuitem action='SortBySourceFileName'/>
+               <menuitem action='SortBySourceFileLength'/>
+               <menuitem action='SortBySourceFileCreationDate'/>
+               <menuitem action='SortBySourceFilesystem'/>
+         </menu>
+         <separator/>
+         <menuitem action='addExternalAudioToRegionList'/>	       
+     </popup>
+</ui>

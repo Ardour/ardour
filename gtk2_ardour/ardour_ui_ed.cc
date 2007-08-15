@@ -101,7 +101,7 @@ ARDOUR_UI::install_actions ()
 
 	/* the real actions */
 
-	act = ActionManager::register_action (main_actions, X_("New"), _("New"),  hide_return (bind (mem_fun(*this, &ARDOUR_UI::new_session), string ())));
+	act = ActionManager::register_action (main_actions, X_("New"), _("New"),  hide_return (bind (mem_fun(*this, &ARDOUR_UI::new_session), string (), true)));
 
 	ActionManager::register_action (main_actions, X_("Open"), _("Open"),  mem_fun(*this, &ARDOUR_UI::open_session));
 	ActionManager::register_action (main_actions, X_("Recent"), _("Recent"),  mem_fun(*this, &ARDOUR_UI::open_recent_session));
@@ -161,10 +161,6 @@ ARDOUR_UI::install_actions ()
 
 	/* not sensitive to the presence or absence of JACK */
 	act = ActionManager::register_action (jack_actions, X_("AudioEngineSetup"), _("Setup"), mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::audioengine_setup));
-
-	if (EngineDialog::engine_running()) {
-		// act->set_sensitive (false);
-	}
 
 	act = ActionManager::register_action (jack_actions, X_("JACKReconnect"), _("Reconnect"), mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::reconnect_to_jack));
 	ActionManager::jack_opposite_sensitive_actions.push_back (act);
@@ -701,7 +697,9 @@ ARDOUR_UI::build_control_surface_menu ()
 void
 ARDOUR_UI::build_menu_bar ()
 {
-	build_control_surface_menu ();
+	if (!Profile->get_sae()) {
+		build_control_surface_menu ();
+	}
 
 	menu_bar = dynamic_cast<MenuBar*> (ActionManager::get_widget (X_("/Main")));
 	menu_bar->set_name ("MainMenuBar");

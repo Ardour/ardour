@@ -66,7 +66,7 @@ ActionManager::init ()
 {
 	ui_manager = UIManager::create ();
 	
-	std::string ui_file = ARDOUR::find_config_file(GTK_ARDOUR::menus_file);
+	std::string ui_file = ARDOUR::find_config_file (ARDOUR_COMMAND_LINE::menus_file);
 
 	bool loaded = false;
 	

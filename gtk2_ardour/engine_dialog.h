@@ -12,15 +12,17 @@
 #include <gtkmm/table.h>
 #include <gtkmm/expander.h>
 #include <gtkmm/box.h>
+#include <gtkmm/buttonbox.h>
+#include <gtkmm/button.h>
 
-#include "ardour_dialog.h"
-
-class EngineDialog : public ArdourDialog {
+class EngineControl : public Gtk::VBox {
   public:
-	EngineDialog ();
-	~EngineDialog ();
+	EngineControl ();
+	~EngineControl ();
 
 	static bool engine_running ();
+	int start_engine ();
+	int stop_engine ();
 
   private:
 	Gtk::Adjustment periods_adjustment;
@@ -33,6 +35,7 @@ class EngineDialog : public ArdourDialog {
 	Gtk::SpinButton output_channels;
 	Gtk::SpinButton input_latency;
 	Gtk::SpinButton output_latency;
+	Gtk::Label latency_label;
 
 	Gtk::CheckButton realtime_button;
 	Gtk::CheckButton no_memory_lock_button;
@@ -43,6 +46,10 @@ class EngineDialog : public ArdourDialog {
 	Gtk::CheckButton hw_monitor_button;
 	Gtk::CheckButton hw_meter_button;
 	Gtk::CheckButton verbose_output_button;
+	
+	Gtk::Button start_button;
+	Gtk::Button stop_button;
+	Gtk::HButtonBox button_box;
 
 	Gtk::ComboBoxText sample_rate_combo;
 	Gtk::ComboBoxText period_size_combo;
@@ -63,15 +70,10 @@ class EngineDialog : public ArdourDialog {
 
 	Gtk::Notebook notebook;
 
-	Gtk::Button* start_button;
-	Gtk::Button* stop_button;
-
 	void realtime_changed ();
 	void driver_changed ();
 
 	void build_command_line (std::vector<std::string>&);
-	void start_engine ();
-	void stop_engine ();
 	Glib::Pid engine_pid;
 	int engine_stdin;
 	int engine_stdout;
@@ -88,6 +90,10 @@ class EngineDialog : public ArdourDialog {
 	std::vector<std::string> enumerate_ffado_devices ();
 	std::vector<std::string> enumerate_dummy_devices ();
 #endif	
+
+	void redisplay_latency ();
+	uint32_t get_rate();
+	void audio_mode_changed ();
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */

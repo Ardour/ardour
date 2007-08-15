@@ -22,6 +22,7 @@
 
 #include <ardour/recent_sessions.h>
 #include <ardour/session.h>
+#include <ardour/profile.h>
 
 #include <gtkmm/entry.h>
 #include <gtkmm/filechooserbutton.h>
@@ -41,9 +42,10 @@ using namespace Gtkmm2ext;
 NewSessionDialog::NewSessionDialog()
 	: ArdourDialog ("session control")
 {
+	in_destructor = false;
 	session_name_label = Gtk::manage(new class Gtk::Label(_("Name :")));
 	m_name = Gtk::manage(new class Gtk::Entry());
-	m_name->set_text(GTK_ARDOUR::session_name);
+	m_name->set_text(ARDOUR_COMMAND_LINE::session_name);
 
 	chan_count_label_1 = Gtk::manage(new class Gtk::Label(_("channels")));
 	chan_count_label_2 = Gtk::manage(new class Gtk::Label(_("channels")));
@@ -305,7 +307,10 @@ NewSessionDialog::NewSessionDialog()
 	new_session_table->attach(*m_folder, 1, 2, 1, 2, Gtk::EXPAND|Gtk::FILL, Gtk::FILL, 0, 0);
 	new_session_table->attach(*session_template_label, 0, 1, 2, 3, Gtk::FILL, Gtk::FILL, 0, 0);
 	new_session_table->attach(*m_template, 1, 2, 2, 3, Gtk::EXPAND|Gtk::FILL, Gtk::FILL, 0, 0);
-	new_session_table->attach(*advanced_expander, 0, 2, 3, 4, Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 0, 6);
+
+	if (!ARDOUR::Profile->get_sae()) {
+		new_session_table->attach(*advanced_expander, 0, 2, 3, 4, Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 0, 6);
+	}
 
 	open_session_hbox->pack_start(*open_session_file_label, false, false, 12);
 	open_session_hbox->pack_start(*m_open_filechooser, true, true, 12);
@@ -333,12 +338,14 @@ NewSessionDialog::NewSessionDialog()
 	recent_frame->set_label_widget(*recent_sesion_label);
 	open_session_vbox->pack_start(*recent_frame, Gtk::PACK_EXPAND_WIDGET, 0);
 	open_session_vbox->pack_start(*open_session_hbox, Gtk::PACK_SHRINK, 12);
+
 	m_notebook->set_flags(Gtk::CAN_FOCUS);
 	m_notebook->set_scrollable(true);
 	m_notebook->append_page(*new_session_table, _("New Session"));
 	m_notebook->pages().back().set_tab_label_packing(false, true, Gtk::PACK_START);
 	m_notebook->append_page(*open_session_vbox, _("Open Session"));
 	m_notebook->pages().back().set_tab_label_packing(false, true, Gtk::PACK_START);
+	
 	get_vbox()->set_homogeneous(false);
 	get_vbox()->set_spacing(0);
 	get_vbox()->pack_start(*m_notebook, Gtk::PACK_SHRINK, 0);
@@ -355,7 +362,7 @@ NewSessionDialog::NewSessionDialog()
 	// add_button(Gtk::Stock::HELP, Gtk::RESPONSE_HELP);
 	add_button(Gtk::Stock::QUIT, Gtk::RESPONSE_CANCEL);
 	add_button(Gtk::Stock::CLEAR, Gtk::RESPONSE_NONE);
-	m_okbutton = add_button(Gtk::Stock::NEW, Gtk::RESPONSE_OK);
+	m_okbutton = add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
 
 	recent_model = Gtk::TreeStore::create (recent_columns);
 	m_treeview->set_model (recent_model);
@@ -411,7 +418,7 @@ NewSessionDialog::NewSessionDialog()
 
 
 	set_default_response (Gtk::RESPONSE_OK);
-	if (!GTK_ARDOUR::session_name.length()) {
+	if (!ARDOUR_COMMAND_LINE::session_name.length()) {
 		set_response_sensitive (Gtk::RESPONSE_OK, false);
 		set_response_sensitive (Gtk::RESPONSE_NONE, false);
 	} else {
@@ -436,10 +443,34 @@ NewSessionDialog::NewSessionDialog()
 	m_name->grab_focus();
 }
 
+NewSessionDialog::~NewSessionDialog()
+{
+	in_destructor = true;
+}
+
+void
+NewSessionDialog::set_have_engine (bool yn)
+{
+	if (yn) {
+		cerr << "removing audio page\n";
+		m_notebook->remove_page (engine_control);
+	} else {
+		cerr << "appending audio page\n";
+		m_notebook->append_page (engine_control, _("Audio Setup"));
+		m_notebook->show_all_children();
+	}
+}
+
 void
 NewSessionDialog::set_session_name(const Glib::ustring& name)
 {
 	m_name->set_text(name);
+}
+
+void
+NewSessionDialog::set_session_folder(const Glib::ustring& dir)
+{
+	// XXX DO SOMETHING
 }
 
 std::string
@@ -605,11 +636,13 @@ NewSessionDialog::on_new_session_name_entry_changed ()
 void
 NewSessionDialog::notebook_page_changed (GtkNotebookPage* np, uint pagenum)
 {
+	if (in_destructor) {
+		return;
+	}
+
 	if (pagenum == 1) {
 		on_new_session_page = false;
-		m_okbutton->set_label(_("Open"));
 		set_response_sensitive (Gtk::RESPONSE_NONE, false);
-		// m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::OPEN, Gtk::ICON_SIZE_BUTTON)));
 		if (m_treeview->get_selection()->count_selected_rows() == 0) {
 			set_response_sensitive (Gtk::RESPONSE_OK, false);
 		} else {
@@ -620,8 +653,6 @@ NewSessionDialog::notebook_page_changed (GtkNotebookPage* np, uint pagenum)
 		if (m_name->get_text() != "") {
 			set_response_sensitive (Gtk::RESPONSE_NONE, true);
 		}
-		m_okbutton->set_label(_("New"));
-		// m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::NEW, Gtk::ICON_SIZE_BUTTON)));
 		if (m_name->get_text() == "") {
 			set_response_sensitive (Gtk::RESPONSE_OK, false);
 		} else {

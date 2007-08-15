@@ -1,4 +1,6 @@
 #include <vector>
+#include <cmath>
+#include <fstream>
 
 #include <glibmm.h>
 
@@ -8,6 +10,7 @@
 #include <gtkmm2ext/utils.h>
 
 #include <pbd/convert.h>
+#include <pbd/error.h>
 
 #include "engine_dialog.h"
 #include "i18n.h"
@@ -18,9 +21,8 @@ using namespace Gtkmm2ext;
 using namespace PBD;
 using namespace Glib;
 
-EngineDialog::EngineDialog ()
-	: ArdourDialog (_("Audio Engine"), false, true),
-	  periods_adjustment (2, 2, 16, 1, 2),
+EngineControl::EngineControl ()
+	: periods_adjustment (2, 2, 16, 1, 2),
 	  periods_spinner (periods_adjustment),
 	  priority_adjustment (60, 10, 90, 1, 10),
 	  priority_spinner (priority_adjustment),
@@ -35,7 +37,9 @@ EngineDialog::EngineDialog ()
 	  hw_monitor_button (_("H/W monitoring")),
 	  hw_meter_button (_("H/W metering")),
 	  verbose_output_button (_("Verbose output")),
-	  basic_packer (5, 2),
+	  start_button (_("Start")),
+	  stop_button (_("Stop")),
+	  basic_packer (8, 2),
 	  options_packer (12, 2),
 	  device_packer (3, 2)
 {
@@ -86,7 +90,7 @@ EngineDialog::EngineDialog ()
 	/* figure out available devices and set up interface_combo */
 
 	enumerate_devices ();
-	driver_combo.signal_changed().connect (mem_fun (*this, &EngineDialog::driver_changed));
+	driver_combo.signal_changed().connect (mem_fun (*this, &EngineControl::driver_changed));
 	driver_changed ();
 
 	strings.clear ();
@@ -95,6 +99,9 @@ EngineDialog::EngineDialog ()
 	strings.push_back (_("Capture only"));
 	set_popdown_strings (audio_mode_combo, strings);
 	audio_mode_combo.set_active_text (strings.front());
+
+	audio_mode_combo.signal_changed().connect (mem_fun (*this, &EngineControl::audio_mode_changed));
+	audio_mode_changed ();
 
 	label = manage (new Label (_("Driver")));
 	basic_packer.attach (*label, 0, 1, 0, 1, FILL|EXPAND, (AttachOptions) 0);
@@ -108,18 +115,44 @@ EngineDialog::EngineDialog ()
 	basic_packer.attach (*label, 0, 1, 2, 3, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (sample_rate_combo, 1, 2, 2, 3, FILL|EXPAND, (AttachOptions) 0);
 
-	label = manage (new Label (_("Period Size")));
+	label = manage (new Label (_("Buffer size")));
 	basic_packer.attach (*label, 0, 1, 3, 4, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (period_size_combo, 1, 2, 3, 4, FILL|EXPAND, (AttachOptions) 0);
 
-	label = manage (new Label (_("Number of periods")));
+	label = manage (new Label (_("Number of buffers")));
 	basic_packer.attach (*label, 0, 1, 4, 5, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (periods_spinner, 1, 2, 4, 5, FILL|EXPAND, (AttachOptions) 0);
 	periods_spinner.set_value (2);
 
-	label = manage (new Label (_("Audio Mode")));
+	label = manage (new Label (_("Approximate latency")));
 	basic_packer.attach (*label, 0, 1, 5, 6, FILL|EXPAND, (AttachOptions) 0);
-	basic_packer.attach (audio_mode_combo, 1, 2, 5, 6, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (latency_label, 1, 2, 5, 6, FILL|EXPAND, (AttachOptions) 0);
+
+	sample_rate_combo.signal_changed().connect (mem_fun (*this, &EngineControl::redisplay_latency));
+	periods_adjustment.signal_value_changed().connect (mem_fun (*this, &EngineControl::redisplay_latency));
+	period_size_combo.signal_changed().connect (mem_fun (*this, &EngineControl::redisplay_latency));
+	redisplay_latency();
+
+	label = manage (new Label (_("Audio Mode")));
+	basic_packer.attach (*label, 0, 1, 6, 7, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (audio_mode_combo, 1, 2, 6, 7, FILL|EXPAND, (AttachOptions) 0);
+
+	/* 
+
+	if (engine_running()) {
+		start_button.set_sensitive (false);
+	} else {
+		stop_button.set_sensitive (false);
+	}
+
+	start_button.signal_clicked().connect (mem_fun (*this, &EngineControl::start_engine));
+	stop_button.signal_clicked().connect (mem_fun (*this, &EngineControl::start_engine));
+	*/
+
+	button_box.pack_start (start_button, false, false);
+	button_box.pack_start (stop_button, false, false);
+
+	// basic_packer.attach (button_box, 0, 2, 8, 9, FILL|EXPAND, (AttachOptions) 0);
 
 	/* options */
 
@@ -129,7 +162,7 @@ EngineDialog::EngineDialog ()
 	options_packer.attach (priority_spinner, 1, 2, 1, 2, FILL|EXPAND, (AttachOptions) 0);
 	priority_spinner.set_value (60);
 
-	realtime_button.signal_toggled().connect (mem_fun (*this, &EngineDialog::realtime_changed));
+	realtime_button.signal_toggled().connect (mem_fun (*this, &EngineControl::realtime_changed));
 	realtime_changed ();
 
 #ifndef __APPLE
@@ -213,42 +246,29 @@ EngineDialog::EngineDialog ()
 	label = manage (new Label (_("Output channels")));
 	device_packer.attach (*label, 0, 1, 3, 4, FILL|EXPAND, (AttachOptions) 0);
 	device_packer.attach (output_channels, 1, 2, 3, 4, FILL|EXPAND, (AttachOptions) 0);
-	label = manage (new Label (_("Input latency")));
+	label = manage (new Label (_("Input latency (samples)")));
 	device_packer.attach (*label, 0, 1, 4, 5, FILL|EXPAND, (AttachOptions) 0);
 	device_packer.attach (input_latency, 1, 2, 4, 5, FILL|EXPAND, (AttachOptions) 0);
-	label = manage (new Label (_("Output latency")));
+	label = manage (new Label (_("Output latency (samples)")));
 	device_packer.attach (*label, 0, 1, 5, 6, FILL|EXPAND, (AttachOptions) 0);
 	device_packer.attach (output_latency, 1, 2, 5, 6, FILL|EXPAND, (AttachOptions) 0);
 
-	notebook.pages().push_back (TabElem (basic_packer, _("Parameters")));
+	notebook.pages().push_back (TabElem (basic_packer, _("Basics")));
 	notebook.pages().push_back (TabElem (options_packer, _("Options")));
-	notebook.pages().push_back (TabElem (device_packer, _("Device")));
+	notebook.pages().push_back (TabElem (device_packer, _("Device Parameters")));
 
-	get_vbox()->set_border_width (12);
-	get_vbox()->pack_start (notebook);
-
-	add_button (Stock::OK, RESPONSE_ACCEPT);
-	start_button = add_button (_("Start"), RESPONSE_YES);
-	stop_button = add_button (_("Stop"), RESPONSE_NO);
-
-	if (engine_running()) {
-		start_button->set_sensitive (false);
-	} else {
-		stop_button->set_sensitive (false);
-	}
-
-	start_button->signal_clicked().connect (mem_fun (*this, &EngineDialog::start_engine));
-	stop_button->signal_clicked().connect (mem_fun (*this, &EngineDialog::start_engine));
+	set_border_width (12);
+	pack_start (notebook);
 
 }
 
-EngineDialog::~EngineDialog ()
+EngineControl::~EngineControl ()
 {
 
 }
 
 void
-EngineDialog::build_command_line (vector<string>& cmd)
+EngineControl::build_command_line (vector<string>& cmd)
 {
 	string str;
 	bool using_oss = false;
@@ -335,14 +355,15 @@ EngineDialog::build_command_line (vector<string>& cmd)
 	cmd.push_back (to_string ((uint32_t) floor (periods_spinner.get_value()), std::dec));
 
 	cmd.push_back ("-r");
-	/* rate string has "Hz" on the end of it */
-	uint32_t rate = atoi (sample_rate_combo.get_active_text ());
-	cmd.push_back (to_string (rate, std::dec));
+	cmd.push_back (to_string (get_rate(), std::dec));
 	
 	cmd.push_back ("-p");
 	cmd.push_back (period_size_combo.get_active_text());
 
 	if (using_alsa) {
+
+		cmd.push_back ("-d");
+		cmd.push_back (interface_combo.get_active_text());
 
 		if (hw_meter_button.get_active()) {
 			cmd.push_back ("-M");
@@ -383,7 +404,7 @@ EngineDialog::build_command_line (vector<string>& cmd)
 }
 
 bool
-EngineDialog::engine_running ()
+EngineControl::engine_running ()
 {
 	jack_status_t status;
 	jack_client_t* c = jack_client_open ("ardourprobe", JackNoStartServer, &status);
@@ -395,43 +416,60 @@ EngineDialog::engine_running ()
 	return false;
 }
 
-void
-EngineDialog::start_engine ()
+int
+EngineControl::start_engine ()
 {
 	vector<string> args;
-	std::string cwd;
+	std::string cwd = "/tmp";
+	int ret = 0;
 
 	build_command_line (args);
 
-	cerr << "will execute:\n";
-	for (vector<string>::iterator i = args.begin(); i != args.end(); ++i) {
-		cerr << (*i) << ' ';
+	ofstream jackdrc ("/home/paul/.jackdrc");
+	if (!jackdrc) {
+		error << _("cannot open JACK rc file to store parameters") << endmsg;
+		return -1;
 	}
-	cerr << endl;
+
+	for (vector<string>::iterator i = args.begin(); i != args.end(); ++i) {
+		jackdrc << (*i) << ' ';
+	}
+	jackdrc << endl;
+	jackdrc.close ();
+	
+#if 0
 
 	try {
-		// spawn_async_with_pipes (cwd, args, SpawnFlags (0), sigc::slot<void>(), &engine_pid, &engine_stdin, &engine_stdout, &engine_stderr);
+		spawn_async_with_pipes (cwd, args, SpawnFlags (0), sigc::slot<void>(), &engine_pid, &engine_stdin, &engine_stdout, &engine_stderr);
 	}
 	
 	catch (Glib::Exception& err) {
-		cerr << "spawn failed\n";
+		error << _("could not start JACK server: ") << err.what() << endmsg;
+		ret = -1;
 	}
+#endif
+
+	return ret;
 }
 
-void
-EngineDialog::stop_engine ()
+int
+EngineControl::stop_engine ()
 {
+	close (engine_stdin);
+	close (engine_stderr);
+	close (engine_stdout);
 	spawn_close_pid (engine_pid);
+	return 0;
 }
 
 void
-EngineDialog::realtime_changed ()
+EngineControl::realtime_changed ()
 {
 	priority_spinner.set_sensitive (realtime_button.get_active());
 }
 
 void
-EngineDialog::enumerate_devices ()
+EngineControl::enumerate_devices ()
 {
 	/* note: case matters for the map keys */
 
@@ -448,14 +486,14 @@ EngineDialog::enumerate_devices ()
 
 #ifdef __APPLE
 vector<string>
-EngineDialog::enumerate_coreaudio_devices ()
+EngineControl::enumerate_coreaudio_devices ()
 {
 	vector<string> devs;
 	return devs;
 }
 #else
 vector<string>
-EngineDialog::enumerate_alsa_devices ()
+EngineControl::enumerate_alsa_devices ()
 {
 	vector<string> devs;
 	devs.push_back ("hw:0");
@@ -465,25 +503,25 @@ EngineDialog::enumerate_alsa_devices ()
 	return devs;
 }
 vector<string>
-EngineDialog::enumerate_ffado_devices ()
+EngineControl::enumerate_ffado_devices ()
 {
 	vector<string> devs;
 	return devs;
 }
 vector<string>
-EngineDialog::enumerate_oss_devices ()
+EngineControl::enumerate_oss_devices ()
 {
 	vector<string> devs;
 	return devs;
 }
 vector<string>
-EngineDialog::enumerate_dummy_devices ()
+EngineControl::enumerate_dummy_devices ()
 {
 	vector<string> devs;
 	return devs;
 }
 vector<string>
-EngineDialog::enumerate_netjack_devices ()
+EngineControl::enumerate_netjack_devices ()
 {
 	vector<string> devs;
 	return devs;
@@ -491,7 +529,7 @@ EngineDialog::enumerate_netjack_devices ()
 #endif
 
 void
-EngineDialog::driver_changed ()
+EngineControl::driver_changed ()
 {
 	string driver = driver_combo.get_active_text();
 	vector<string>& strings = devices[driver];
@@ -514,5 +552,38 @@ EngineDialog::driver_changed ()
 		hw_monitor_button.set_sensitive (false);
 		hw_meter_button.set_sensitive (false);
 		monitor_button.set_sensitive (false);
+	}
+}
+
+uint32_t
+EngineControl::get_rate ()
+{
+	return atoi (sample_rate_combo.get_active_text ());
+}
+
+void
+EngineControl::redisplay_latency ()
+{
+	uint32_t rate = get_rate();
+	float periods = periods_adjustment.get_value();
+	float period_size = atof (period_size_combo.get_active_text());
+
+	char buf[32];
+	snprintf (buf, sizeof(buf), "%.1fmsec", (periods * period_size) / (rate/1000.0));
+
+	latency_label.set_text (buf);
+}
+
+void
+EngineControl::audio_mode_changed ()
+{
+	Glib::ustring str = audio_mode_combo.get_active_text();
+
+	if (str == _("Duplex")) {
+		input_device_combo.set_sensitive (false);
+		output_device_combo.set_sensitive (false);
+	} else {
+		input_device_combo.set_sensitive (true);
+		output_device_combo.set_sensitive (true);
 	}
 }
