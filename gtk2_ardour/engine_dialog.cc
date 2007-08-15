@@ -409,9 +409,12 @@ EngineControl::start_engine ()
 
 	build_command_line (args);
 
-	ofstream jackdrc ("/home/paul/.jackdrc");
+	Glib::ustring jackdrc_path = Glib::get_home_dir();
+	jackdrc_path += "/.jackdrc";
+
+	ofstream jackdrc (jackdrc_path.c_str());
 	if (!jackdrc) {
-		error << _("cannot open JACK rc file to store parameters") << endmsg;
+		error << string_compose (_("cannot open JACK rc file %1 to store parameters"), jackdrc_path) << endmsg;
 		return -1;
 	}
 
