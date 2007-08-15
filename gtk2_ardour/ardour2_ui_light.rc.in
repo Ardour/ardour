@@ -1096,10 +1096,10 @@ style "io_selector_notebook" = "default_base"
 
 style "tearoff_arrow" = "medium_bold_entry"
 {
-	fg[NORMAL] = { 0.80, 0.80, 0.80 }
-	fg[PRELIGHT] = { 0.80, 0.80, 0.80 }
-	bg[NORMAL] = { 0.80, 0.80, 0.80 }
-	bg[PRELIGHT] = { 0.80, 0.80, 0.80 }
+	fg[NORMAL] = { 0.30, 0.30, 0.30 }
+	fg[PRELIGHT] = { 0.30, 0.30, 0.30 }
+	bg[NORMAL] = { 0.30, 0.30, 0.30 }
+	bg[PRELIGHT] = { 0.30, 0.30, 0.30 }
 }
 
 style "meter_metrics_strip" = "default_base"
