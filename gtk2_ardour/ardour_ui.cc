@@ -257,7 +257,6 @@ ARDOUR_UI::create_engine ()
 		engine = new ARDOUR::AudioEngine (ARDOUR_COMMAND_LINE::jack_client_name);
 	} catch (AudioEngine::NoBackendAvailable& err) {
 		backend_audio_error ();
-		cerr << "engine not started\n";
 		error << string_compose (_("Could not connect to JACK server as  \"%1\""), ARDOUR_COMMAND_LINE::jack_client_name) <<  endmsg;
 		exit (1);
 	}
@@ -1978,8 +1977,6 @@ ARDOUR_UI::new_session (Glib::ustring predetermined_path, bool have_engine)
 			}
 			have_engine = true;
 		}
-
-		cerr << "startingengine\n";
 
 		create_engine ();
 

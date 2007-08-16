@@ -491,7 +491,10 @@ NewSessionDialog::session_name() const
 	}	  
 	*/
 
-	if (m_notebook->get_current_page() == 0) {
+	int page = m_notebook->get_current_page();
+
+	if (page == 0 || page == 2) {
+		/* new or audio setup pages */
 	        return Glib::filename_from_utf8(m_name->get_text());
 	} else {
 		if (m_treeview->get_selection()->count_selected_rows() == 0) {
