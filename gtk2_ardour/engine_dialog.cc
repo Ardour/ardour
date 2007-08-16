@@ -18,6 +18,10 @@
 #include <pbd/convert.h>
 #include <pbd/error.h>
 
+#ifdef __APPLE
+#include <CFBundle.h>
+#endif
+
 #include "engine_dialog.h"
 #include "i18n.h"
 
@@ -81,12 +85,12 @@ EngineControl::EngineControl ()
 	basic_packer.set_spacings (6);
 
 	strings.clear ();
-#ifndef __APPLE__
+#ifdef __APPLE__
+	strings.push_back (X_("CoreAudio"));
+#else
 	strings.push_back (X_("ALSA"));
 	strings.push_back (X_("OSS"));
 	strings.push_back (X_("FFADO"));
-#else
-	strings.push_back (X_("CoreAudio"));
 #endif
 	strings.push_back (X_("NetJACK"));
 	strings.push_back (X_("Dummy"));
@@ -213,6 +217,8 @@ EngineControl::EngineControl ()
 	set_popdown_strings (serverpath_combo, strings);
 	serverpath_combo.set_active_text (strings.front());
 
+	cerr << "we have " << strings.size() << " possible Jack servers\n";
+
 	if (strings.size() > 1) {
 		label = manage (new Label (_("Server:")));
 		options_packer.attach (*label, 0, 1, 11, 12, (AttachOptions) 0, (AttachOptions) 0);
@@ -260,6 +266,7 @@ void
 EngineControl::build_command_line (vector<string>& cmd)
 {
 	string str;
+	string driver;
 	bool using_oss = false;
 	bool using_alsa = false;
 	bool using_coreaudio = false;
@@ -311,20 +318,20 @@ EngineControl::build_command_line (vector<string>& cmd)
 
 	cmd.push_back ("-d");
 
-	str = driver_combo.get_active_text ();
-	if (str == X_("ALSA")) {
+	driver = driver_combo.get_active_text ();
+	if (driver == X_("ALSA")) {
 		using_alsa = true;
 		cmd.push_back ("alsa");
-	} else if (str == X_("OSS")) {
+	} else if (driver == X_("OSS")) {
 		using_oss = true;
 		cmd.push_back ("oss");
-	} else if (str == X_("CoreAudio")) {
+	} else if (driver == X_("CoreAudio")) {
 		using_coreaudio = true;
 		cmd.push_back ("coreaudio");
-	} else if (str == X_("NetJACK")) {
+	} else if (driver == X_("NetJACK")) {
 		using_netjack = true;
 		cmd.push_back ("netjack");
-	} else if (str == X_("FFADO")) {
+	} else if (driver == X_("FFADO")) {
 		using_ffado = true;
 		cmd.push_back ("ffado");
 	}
@@ -340,8 +347,10 @@ EngineControl::build_command_line (vector<string>& cmd)
 		cmd.push_back ("-C");
 	}
 
-	cmd.push_back ("-n");
-	cmd.push_back (to_string ((uint32_t) floor (periods_spinner.get_value()), std::dec));
+	if (!using_coreaudio) {
+		cmd.push_back ("-n");
+		cmd.push_back (to_string ((uint32_t) floor (periods_spinner.get_value()), std::dec));
+	}
 
 	cmd.push_back ("-r");
 	cmd.push_back (to_string (get_rate(), std::dec));
@@ -382,8 +391,26 @@ EngineControl::build_command_line (vector<string>& cmd)
 
 	} else if (using_coreaudio) {
 
-		cmd.push_back ("-I");
-		cmd.push_back (interface_combo.get_active_text());
+#ifdef __APPLE__
+		cmd.push_back ("-n");
+
+		Glib::ustring str = interface_combo.get_active_text();
+		vector<string>::iterator n;
+		vector<string>::iterator i;
+		
+		for (i = devices[driver].begin(), n = coreaudio_devs.begin(); i != devices[driver].end(); ++i, ++n) {
+			if (str == (*i)) {
+				cerr << "for " << str << " use " << (*n) << endl;
+				cmd.push_back (*n);
+				break;
+			}
+		}
+			
+		if (i == devices[driver].end()) {
+			fatal << string_compose (_("programming error: %1"), "coreaudio device ID missing") << endmsg;
+			/*NOTREACHED*/
+		}
+#endif
 
 	} else if (using_oss) {
 
@@ -423,10 +450,13 @@ EngineControl::start_engine ()
 		return -1;
 	}
 
+	cerr << "will execute ...\n";
 	for (vector<string>::iterator i = args.begin(); i != args.end(); ++i) {
 		jackdrc << (*i) << ' ';
+		cerr << (*i) << ' ';
 	}
 	jackdrc << endl;
+	cerr << endl;
 	jackdrc.close ();
 	
 #if 0
@@ -477,6 +507,19 @@ EngineControl::enumerate_devices ()
 }
 
 #ifdef __APPLE__
+static OSStatus 
+getDeviceUIDFromID( AudioDeviceID id, char *name, size_t nsize)
+{
+	UInt32 size = sizeof(CFStringRef);
+	CFStringRef UI;
+	OSStatus res = AudioDeviceGetProperty(id, 0, false,
+		kAudioDevicePropertyDeviceUID, &size, &UI);
+	if (res == noErr) 
+		CFStringGetCString(UI,name,nsize,CFStringGetSystemEncoding());
+	CFRelease(UI);
+	return res;
+}
+
 vector<string>
 EngineControl::enumerate_coreaudio_devices ()
 {
@@ -485,8 +528,10 @@ EngineControl::enumerate_coreaudio_devices ()
 	// Find out how many Core Audio devices are there, if any...
 	// (code snippet gently "borrowed" from St?hane Letz jackdmp;)
 	OSStatus err;
-	bool isWritable;
+	Boolean isWritable;
 	size_t outSize = sizeof(isWritable);
+
+	coreaudio_devs.clear ();
 
 	err = AudioHardwareGetPropertyInfo(kAudioHardwarePropertyDevices,
 					   &outSize, &isWritable);
@@ -515,26 +560,11 @@ EngineControl::enumerate_coreaudio_devices ()
 
 						// this returns the unique id for the device
 						// that must be used on the commandline for jack
-
+						
 						if (getDeviceUIDFromID(coreDeviceIDs[i], drivername, sizeof (drivername)) == noErr) {
-							sName = drivername;
-						} else {
-							sName = "Error";
-						}
-
-						devs.push_back (sName);
-#if 0						
-
-						coreaudioIdMap[sName] = coreDeviceIDs[i];
-						// TODO: hide this ugly ID from the user,
-						// only show human readable name
-						// humanreadable \t UID
-						sText = QString(coreDeviceName) + '\t' + sName;
-						pAction = menu.addAction(sText);
-						pAction->setCheckable(true);
-						pAction->setChecked(sCurName == sName);
-						++iCards;
-#endif
+							devs.push_back (coreDeviceName);
+							coreaudio_devs.push_back (drivername);
+						} 
 					}
 				}
 			}
