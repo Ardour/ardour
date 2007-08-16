@@ -964,7 +964,11 @@ class Editor : public PublicEditor
 
 	void bring_in_external_audio (Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes_t& pos, bool prompt);
 	void do_import (vector<Glib::ustring> paths, bool split, Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes_t&, bool);
+
+	void _do_embed (vector<Glib::ustring> paths, bool split, Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes_t&, bool);
 	void do_embed (vector<Glib::ustring> paths, bool split, Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes_t&, bool);
+	bool idle_do_embed (vector<Glib::ustring> paths, bool split, Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes_t&, bool);
+
 	int  import_sndfile (vector<Glib::ustring> paths, Editing::ImportMode mode, ARDOUR::AudioTrack* track, nframes_t& pos);
 	int  embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode, 
 			    ARDOUR::AudioTrack* track, nframes_t& pos, bool prompt);

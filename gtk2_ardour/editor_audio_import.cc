@@ -130,8 +130,25 @@ Editor::do_import (vector<ustring> paths, bool split, ImportMode mode, AudioTrac
 	interthread_progress_window->hide_all ();
 }
 
+bool
+Editor::idle_do_embed (vector<ustring> paths, bool split, ImportMode mode, AudioTrack* track, nframes_t& pos, bool prompt)
+{
+	_do_embed (paths, split, mode, track, pos, prompt);
+	return false;
+}
+
 void
 Editor::do_embed (vector<ustring> paths, bool split, ImportMode mode, AudioTrack* track, nframes_t& pos, bool prompt)
+{
+#ifdef GTKOSX
+	Glib::signal_idle().connect (bind (mem_fun (*this, &Editor::idle_do_embed), paths, split, mode, track, pos, prompt));
+#else
+	_do_embed (paths, split, mode, track, pos, prompt);
+#endif
+}
+
+void
+Editor::_do_embed (vector<ustring> paths, bool split, ImportMode mode, AudioTrack* track, nframes_t& pos, bool prompt)
 {
 	bool multiple_files = paths.size() > 1;
 	bool check_sample_rate = true;
@@ -139,8 +156,6 @@ Editor::do_embed (vector<ustring> paths, bool split, ImportMode mode, AudioTrack
 
 	for (a = paths.begin(); a != paths.end(); ) {
 
-		cerr << "Considering embed of " << (*a) << endl;
-	
 		Glib::ustring path = *a;
 		Glib::ustring pair_base;
 		vector<ustring> to_embed;
@@ -208,7 +223,7 @@ Editor::do_embed (vector<ustring> paths, bool split, ImportMode mode, AudioTrack
 			}
 
 		} else {
-			
+
 			if (embed_sndfile (to_embed, split, multiple_files, check_sample_rate, mode, track, pos, prompt) < -1) {
 				break;
 			}
@@ -321,15 +336,14 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_fi
 					}
 				}
 			}
-
 		}
 		
 		/* note that we temporarily truncated _id at the colon */
 		
 		string error_msg;
-		
+
 		if (!AudioFileSource::get_soundfile_info (path, finfo, error_msg)) {
-			error << string_compose(_("Editor: cannot open file \"%1\", (%2)"), selection, error_msg ) << endmsg;
+			error << string_compose(_("Editor: cannot open file \"%1\", (%2)"), path, error_msg ) << endmsg;
 			goto out;
 		}
 		
@@ -388,7 +402,7 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_fi
 		}
 		
 		track_canvas.get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
-		ARDOUR_UI::instance()->flush_pending ();
+		// ARDOUR_UI::instance()->flush_pending ();
 	
 		/* make the proper number of channels in the region */
 		

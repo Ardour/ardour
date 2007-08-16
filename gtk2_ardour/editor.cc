@@ -2695,8 +2695,10 @@ Editor::convert_drop_to_paths (vector<ustring>& paths,
 
 	vector<ustring> uris = data.get_uris();
 
+	cerr << "there were " << uris.size() << " in that drag data\n";
+
 	if (uris.empty()) {
-		
+
 		/* This is seriously fucked up. Nautilus doesn't say that its URI lists
 		   are actually URI lists. So do it by hand.
 		*/
@@ -2746,10 +2748,35 @@ Editor::convert_drop_to_paths (vector<ustring>& paths,
 	}
 	
 	for (vector<ustring>::iterator i = uris.begin(); i != uris.end(); ++i) {
+
 		if ((*i).substr (0,7) == "file://") {
-			string p = *i;
+
+			
+			ustring p = *i;
                         PBD::url_decode (p);
-			paths.push_back (p.substr (7));
+
+			// scan forward past three slashes
+			
+			ustring::size_type slashcnt = 0;
+			ustring::size_type n = 0;
+			ustring::iterator x = p.begin();
+
+			while (slashcnt < 3 && x != p.end()) {
+				if ((*x) == '/') {
+					slashcnt++;
+				} else if (slashcnt == 3) {
+					break;
+				}
+				++n;
+				++x;
+			}
+
+			if (slashcnt != 3 || x == p.end()) {
+				error << _("malformed URL passed to drag-n-drop code") << endmsg;
+				continue;
+			}
+
+			paths.push_back (p.substr (n - 1));
 		}
 	}
 

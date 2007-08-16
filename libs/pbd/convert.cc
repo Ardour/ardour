@@ -32,6 +32,7 @@
 
 using std::string;
 using std::vector;
+using Glib::ustring;
 
 namespace PBD {
 
@@ -187,6 +188,52 @@ url_decode (string& url)
 			if (isxdigit (*i) && isxdigit (*next)) {
 				/* replace first digit with char */
 				*i = int_from_hex (*i,*next);
+				++i; /* points at 2nd of 2 digits */
+				url.erase (i);
+			}
+		} else {
+			++i;
+		}
+	}
+}
+
+void
+url_decode (ustring& url)
+{
+	ustring::iterator last;
+	ustring::iterator next;
+
+	for (ustring::iterator i = url.begin(); i != url.end(); ++i) {
+		if ((*i) == '+') {
+			next = i;
+			++next;
+			url.replace (i, next, 1, ' ');
+		}
+	}
+
+	if (url.length() <= 3) {
+		return;
+	}
+
+	last = url.end();
+
+	--last; /* points at last char */
+	--last; /* points at last char - 1 */
+
+	for (ustring::iterator i = url.begin(); i != last; ) {
+
+		if (*i == '%') {
+
+			next = i;
+
+			url.erase (i);
+			
+			i = next;
+			++next;
+			
+			if (isxdigit (*i) && isxdigit (*next)) {
+				/* replace first digit with char */
+				url.replace (i, next, 1, (gunichar) int_from_hex (*i,*next));
 				++i; /* points at 2nd of 2 digits */
 				url.erase (i);
 			}

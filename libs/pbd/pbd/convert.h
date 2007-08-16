@@ -24,6 +24,7 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include <glibmm/ustring.h>
 
 namespace PBD {
 
@@ -32,6 +33,7 @@ std::string short_version (std::string, std::string::size_type target_length);
 int    atoi (const std::string&);
 double atof (const std::string&);
 void   url_decode (std::string&);
+void   url_decode (Glib::ustring&);
 
 // std::string length2string (const int32_t frames, const float sample_rate);
 std::string length2string (const int64_t frames, const double sample_rate);
