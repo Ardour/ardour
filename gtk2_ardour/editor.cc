@@ -1387,7 +1387,7 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 		return;
 	}
 
-	if (clicked_audio_trackview && clicked_audio_trackview->audio_track()) {
+	if (item_type != SelectionItem && clicked_audio_trackview && clicked_audio_trackview->audio_track()) {
 
 		/* Bounce to disk */
 		
@@ -1554,7 +1554,8 @@ Editor::build_track_selection_context_menu (nframes_t ignored)
 	edit_items.clear ();
 
 	add_selection_context_items (edit_items);
-	add_dstream_context_items (edit_items);
+	// edit_items.push_back (SeparatorElem());
+	// add_dstream_context_items (edit_items);
 
 	return &track_selection_context_menu;
 }
@@ -1789,15 +1790,12 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 }
 
 void
-Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
+Editor::add_selection_context_items (Menu_Helpers::MenuList& items)
 {
 	using namespace Menu_Helpers;
-	Menu     *selection_menu = manage (new Menu);
-	MenuList& items       = selection_menu->items();
-	selection_menu->set_name ("ArdourContextMenu");
 
 	items.push_back (MenuElem (_("Play range"), mem_fun(*this, &Editor::play_selection)));
-	items.push_back (MenuElem (_("Loop range"), mem_fun(*this, &Editor::set_route_loop_selection)));
+	items.push_back (MenuElem (_("Loop range"), bind (mem_fun(*this, &Editor::set_loop_from_selection), true)));
 
 #ifdef FFT_ANALYSIS
 	items.push_back (SeparatorElem());
@@ -1805,15 +1803,22 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 #endif
 	
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Separate range to track"), mem_fun(*this, &Editor::separate_region_from_selection)));
-	items.push_back (MenuElem (_("Separate range to region list"), mem_fun(*this, &Editor::new_region_from_selection)));
+	items.push_back (MenuElem (_("Extend Range to End of Region"), bind (mem_fun(*this, &Editor::extend_selection_to_end_of_region), false)));
+	items.push_back (MenuElem (_("Extend Range to Start of Region"), bind (mem_fun(*this, &Editor::extend_selection_to_start_of_region), false)));
+
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Convert to region in-place"), mem_fun(*this, &Editor::separate_region_from_selection)));
+	items.push_back (MenuElem (_("Convert to region in region list"), mem_fun(*this, &Editor::new_region_from_selection)));
 	
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Select all in range"), mem_fun(*this, &Editor::select_all_selectables_using_time_selection)));
+
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Set loop from selection"), bind (mem_fun(*this, &Editor::set_loop_from_selection), false)));
+	items.push_back (MenuElem (_("Set punch from selection"), mem_fun(*this, &Editor::set_punch_from_selection)));
+	
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Add Range Markers"), mem_fun (*this, &Editor::add_location_from_selection)));
-	items.push_back (MenuElem (_("Set range to loop range"), mem_fun(*this, &Editor::set_selection_from_loop)));
-	items.push_back (MenuElem (_("Set range to punch range"), mem_fun(*this, &Editor::set_selection_from_punch)));
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Crop region to range"), mem_fun(*this, &Editor::crop_region_to_selection)));
 	items.push_back (MenuElem (_("Fill range with region"), mem_fun(*this, &Editor::region_fill_selection)));
@@ -1822,9 +1827,6 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Bounce range"), mem_fun(*this, &Editor::bounce_range_selection)));
 	items.push_back (MenuElem (_("Export range"), mem_fun(*this, &Editor::export_selection)));
-
-	edit_items.push_back (MenuElem (_("Range"), *selection_menu));
-	edit_items.push_back (SeparatorElem());
 }
 
 void
@@ -3829,4 +3831,60 @@ Editor::edit_cursor_position(bool sync)
 	}
 
 	return edit_cursor->current_frame;
+}
+
+void
+Editor::set_loop_range (nframes_t start, nframes_t end, string cmd)
+{
+	if (!session) return;
+
+	begin_reversible_command (cmd);
+	
+	Location* tll;
+
+	if ((tll = transport_loop_location()) == 0) {
+		Location* loc = new Location (start, end, _("Loop"),  Location::IsAutoLoop);
+                XMLNode &before = session->locations()->get_state();
+		session->locations()->add (loc, true);
+		session->set_auto_loop_location (loc);
+                XMLNode &after = session->locations()->get_state();
+		session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
+	}
+	else {
+                XMLNode &before = tll->get_state();
+		tll->set_hidden (false, this);
+		tll->set (start, end);
+                XMLNode &after = tll->get_state();
+                session->add_command (new MementoCommand<Location>(*tll, &before, &after));
+	}
+	
+	commit_reversible_command ();
+}
+
+void
+Editor::set_punch_range (nframes_t start, nframes_t end, string cmd)
+{
+	if (!session) return;
+
+	begin_reversible_command (cmd);
+	
+	Location* tpl;
+
+	if ((tpl = transport_punch_location()) == 0) {
+		Location* loc = new Location (start, end, _("Loop"),  Location::IsAutoPunch);
+                XMLNode &before = session->locations()->get_state();
+		session->locations()->add (loc, true);
+		session->set_auto_loop_location (loc);
+                XMLNode &after = session->locations()->get_state();
+		session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
+	}
+	else {
+                XMLNode &before = tpl->get_state();
+		tpl->set_hidden (false, this);
+		tpl->set (start, end);
+                XMLNode &after = tpl->get_state();
+                session->add_command (new MementoCommand<Location>(*tpl, &before, &after));
+	}
+	
+	commit_reversible_command ();
 }

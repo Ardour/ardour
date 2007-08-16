@@ -115,7 +115,23 @@ Editor::split_regions_at (nframes_t where, RegionSelection& regions)
 {
 	begin_reversible_command (_("split"));
 
-	snap_to (where);
+	// if splitting a single region, and snap-to is using
+	// region boundaries, don't pay attention to them
+
+	if (regions.size() == 1) {
+		switch (snap_type) {
+		case SnapToRegionStart:
+		case SnapToRegionSync:
+		case SnapToRegionEnd:
+			break;
+		default:
+			snap_to (where);
+		}
+	} else {
+		snap_to (where);
+	}
+		
+
 	for (RegionSelection::iterator a = regions.begin(); a != regions.end(); ) {
 
 		RegionSelection::iterator tmp;

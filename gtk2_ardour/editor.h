@@ -1039,7 +1039,11 @@ class Editor : public PublicEditor
 
 	void add_location_from_audio_region ();
 	void add_location_from_selection ();
-	void set_route_loop_selection ();
+	void set_loop_from_selection (bool play);
+	void set_punch_from_selection ();
+
+	void set_loop_range (nframes_t start, nframes_t end, std::string cmd);
+	void set_punch_range (nframes_t start, nframes_t end, std::string cmd);
 
 	void add_location_from_playhead_cursor ();
 

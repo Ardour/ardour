@@ -488,12 +488,13 @@ Editor::build_range_marker_menu (bool loop_or_punch)
 	} else {
 		range_marker_menu = markerMenu;
 	}
+
 	MenuList& items = markerMenu->items();
 	markerMenu->set_name ("ArdourContextMenu");
 
 	items.push_back (MenuElem (_("Locate to Range Mark"), mem_fun(*this, &Editor::marker_menu_set_playhead)));
 	items.push_back (MenuElem (_("Play from Range Mark"), mem_fun(*this, &Editor::marker_menu_play_from)));
-	if (! loop_or_punch) {
+	if (!loop_or_punch) {
 		items.push_back (MenuElem (_("Play Range"), mem_fun(*this, &Editor::marker_menu_play_range)));
 		items.push_back (MenuElem (_("Loop Range"), mem_fun(*this, &Editor::marker_menu_loop_range)));
 	}
@@ -503,7 +504,7 @@ Editor::build_range_marker_menu (bool loop_or_punch)
 	items.push_back (SeparatorElem());
 
 	items.push_back (MenuElem (_("Hide Range"), mem_fun(*this, &Editor::marker_menu_hide)));
-	if (! loop_or_punch) {
+	if (!loop_or_punch) {
 		items.push_back (MenuElem (_("Rename Range"), mem_fun(*this, &Editor::marker_menu_rename)));
 		items.push_back (MenuElem (_("Remove Range"), mem_fun(*this, &Editor::marker_menu_remove)));
 	}
@@ -721,8 +722,7 @@ Editor::marker_menu_set_from_selection ()
 
 		if (l->is_mark()) {
 			// nothing for now
-		}
-		else {
+		} else {
 
 			/* if range selection use first to last */
 
@@ -909,56 +909,13 @@ Editor::new_transport_marker_menu_popdown (GdkEventAny *ev)
 void
 Editor::new_transport_marker_menu_set_loop ()
 {
-	if (!session) return;
-	
-	begin_reversible_command (_("set loop range"));
-	
-	Location* tll;
-
-	if ((tll = transport_loop_location()) == 0) {
-		Location* loc = new Location (temp_location->start(), temp_location->end(), _("Loop"),  Location::IsAutoLoop);
-                XMLNode &before = session->locations()->get_state();
-		session->locations()->add (loc, true);
-		session->set_auto_loop_location (loc);
-                XMLNode &after = session->locations()->get_state();
-		session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
-	}
-	else {
-                XMLNode &before = tll->get_state();
-		tll->set_hidden (false, this);
-		tll->set (temp_location->start(), temp_location->end());
-                XMLNode &after = tll->get_state();
-                session->add_command (new MementoCommand<Location>(*tll, &before, &after));
-	}
-	
-	commit_reversible_command ();
+	set_loop_range (temp_location->start(), temp_location->end(), _("set loop range"));
 }
 
 void
 Editor::new_transport_marker_menu_set_punch ()
 {
-	if (!session) return;
-	
-	begin_reversible_command (_("set punch range"));
-	
-	Location* tpl;
-
-	if ((tpl = transport_punch_location()) == 0) {
-		tpl = new Location (temp_location->start(), temp_location->end(), _("Punch"), Location::IsAutoPunch);
-                XMLNode &before = session->locations()->get_state();
-		session->locations()->add (tpl, true);
-		session->set_auto_punch_location (tpl);
-                XMLNode &after = session->locations()->get_state();
-		session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
-	} else {
-                XMLNode &before = tpl->get_state();
-		tpl->set_hidden(false, this);
-		tpl->set(temp_location->start(), temp_location->end());
-                XMLNode &after = tpl->get_state();
-                session->add_command (new MementoCommand<Location>(*tpl, &before, &after));
-	}
-	
-	commit_reversible_command ();
+	set_punch_range (temp_location->start(), temp_location->end(), _("set punch range"));
 }
 
 void
