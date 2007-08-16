@@ -28,6 +28,7 @@
 #include <ardour/types.h>
 #include <ardour/midi_buffer.h>
 #include <ardour/midi_ring_buffer.h>
+#include <ardour/automatable.h>
 
 namespace ARDOUR {
 
@@ -41,7 +42,7 @@ class MidiSource;
  * note on and off events (controller data is not here since it's represented
  * as an AutomationList)
  */
-class MidiModel : public boost::noncopyable {
+class MidiModel : public boost::noncopyable, public Automatable {
 public:
 	struct Note {
 		Note(double time=0, double dur=0, uint8_t note=0, uint8_t vel=0x40);
@@ -92,11 +93,13 @@ public:
 	void append(const MidiBuffer& data);
 	
 	/** Resizes vector if necessary (NOT realtime safe) */
-	void append(double time, size_t size, const Byte* in_buffer);
+	//void append(double time, size_t size, const Byte* in_buffer);
+	void append(const MidiEvent& ev);
 	
 	inline const Note& note_at(unsigned i) const { return _notes[i]; }
 
 	inline size_t n_notes() const { return _notes.size(); }
+	inline bool   empty()   const { return _notes.size() == 0 && _controls.size() == 0; }
 
 	typedef std::vector<Note> Notes;
 	
@@ -146,7 +149,12 @@ public:
 	void                     apply_command(Command* cmd);
 
 	bool edited() const { return _edited; }
+	void set_edited(bool yn) { _edited = yn; }
 	bool write_to(boost::shared_ptr<MidiSource> source);
+		
+	// MidiModel doesn't use the normal AutomationList serialisation code, as CC data is in the .mid
+	XMLNode& get_state();
+	int set_state(const XMLNode&) { return 0; }
 
 	sigc::signal<void> ContentsChanged;
 	
@@ -155,12 +163,13 @@ private:
 	void add_note_unlocked(const Note& note);
 	void remove_note_unlocked(const Note& note);
 
+#ifndef NDEBUG
 	bool is_sorted() const;
+#endif
 
 	void append_note_on(double time, uint8_t note, uint8_t velocity);
 	void append_note_off(double time, uint8_t note);
-
-	Session& _session;
+	void append_cc(double time, uint8_t number, uint8_t value);
 
 	Glib::RWLock _lock;
 

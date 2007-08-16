@@ -233,6 +233,9 @@ public:
 	size_t write(double time, size_t size, const Byte* buf);
 	bool   read(double* time, size_t* size, Byte* buf);
 
+	bool   read_prefix(double* time, size_t* size);
+	bool   read_contents(size_t size, Byte* buf);
+
 	size_t read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t offset=0);
 };
 
@@ -247,6 +250,30 @@ MidiRingBuffer::read(double* time, size_t* size, Byte* buf)
 		success = MidiRingBufferBase<Byte>::full_read(*size, buf);
 
 	return success;
+}
+
+
+/** Read the time and size of an event.  This call MUST be immediately proceeded
+ * by a call to read_contents (or the read pointer will be garabage).
+ */
+inline bool
+MidiRingBuffer::read_prefix(double* time, size_t* size)
+{
+	bool success = MidiRingBufferBase<Byte>::full_read(sizeof(double), (Byte*)time);
+	if (success)
+		success = MidiRingBufferBase<Byte>::full_read(sizeof(size_t), (Byte*)size);
+
+	return success;
+}
+
+
+/** Read the contenst of an event.  This call MUST be immediately preceeded
+ * by a call to read_prefix (or the returned even will be garabage).
+ */
+inline bool
+MidiRingBuffer::read_contents(size_t size, Byte* buf)
+{
+	return MidiRingBufferBase<Byte>::full_read(size, buf);
 }
 
 

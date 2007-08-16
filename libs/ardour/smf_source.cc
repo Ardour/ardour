@@ -156,16 +156,22 @@ SMFSource::open()
 	// We're making a new file
 	} else {
 		_fd = fopen(path().c_str(), "w+");
-		_track_size = 0;
+		_track_size = 4;
 
 		// Write a tentative header just to pad things out so writing happens in the right spot
 		set_timeline_position(0);
 		flush_header();
-
-		// Note file isn't a valid SMF at this point (no footer).  Does it matter?
+		write_footer();
+		seek_to_end();
 	}
 
 	return (_fd == 0) ? -1 : 0;
+}
+
+void
+SMFSource::seek_to_end()
+{
+	fseek(_fd, -4, SEEK_END);
 }
 
 int
@@ -202,14 +208,22 @@ SMFSource::flush_header ()
 int
 SMFSource::flush_footer()
 {
-	//cerr << "SMF " << name() << " writing EOT\n";
+	seek_to_end();
+	write_footer();
+	seek_to_end();
 
-	fseek(_fd, 0, SEEK_END);
+	return 0;
+}
+
+void
+SMFSource::write_footer()
+{
+	//cerr << "SMF " << name() << " writing EOT at byte " << ftell(_fd) << endl;
+	
 	write_var_len(0);
 	char eot[3] = { 0xFF, 0x2F, 0x00 }; // end-of-track meta-event
 	fwrite(eot, 1, 3, _fd);
 	fflush(_fd);
-	return 0;
 }
 
 /** Returns the offset of the first event in the file with a time past @a start,
@@ -243,57 +257,70 @@ SMFSource::find_first_event_after(nframes_t start)
  * will have it's time field set to it's delta time, in SMF tempo-based ticks, using the
  * rate given by ppqn() (it is the caller's responsibility to calculate a real time).
  *
+ * \a size should be the capacity of \a buf.  If it is not large enough, \a buf will
+ * be freed and a new buffer allocated in its place, the size of which will be placed
+ * in size.
+ *
  * Returns event length (including status byte) on success, 0 if event was
  * skipped (eg a meta event), or -1 on EOF (or end of track).
  */
 int
-SMFSource::read_event(jack_midi_event_t& ev) const
+SMFSource::read_event(uint32_t* delta_t, uint32_t* size, Byte** buf) const
 {
-	// - 4 is for the EOT event, which we don't actually want to read
-	//if (feof(_fd) || ftell(_fd) >= _header_size + _track_size - 4) {
 	if (feof(_fd)) {
 		return -1;
 	}
 
-	uint32_t delta_time = read_var_len();
+	assert(delta_t);
+	assert(size);
+	assert(buf);
+
+	*delta_t = read_var_len();
 	assert(!feof(_fd));
-	int status = fgetc(_fd);
+
+	const int status = fgetc(_fd);
 	assert(status != EOF); // FIXME die gracefully
+
+	//printf("Status @ %X = %X\n", (unsigned)ftell(_fd) - 1, status);
+
 	if (status == 0xFF) {
 		assert(!feof(_fd));
-		int type = fgetc(_fd);
+		const int type = fgetc(_fd);
 		if ((unsigned char)type == 0x2F) {
-			//cerr << "SMF - hit EOT" << endl;
-			return -1; // we hit the logical EOF anyway...
+			//cerr << _name << " hit EOT" << endl;
+			return -1;
 		} else {
-			ev.size = 0;
-			ev.time = delta_time; // this is needed regardless
+			*size = 0;
 			return 0;
 		}
 	}
 	
-	size_t event_size = midi_event_size((unsigned char)status) + 1;
+	const int event_size = midi_event_size((unsigned char)status) + 1;
+	if (event_size <= 0) {
+		*size = 0;
+		return 0;
+	}
 	
 	// Make sure we have enough scratch buffer
-	if (ev.size < event_size)
-		ev.buffer = (Byte*)realloc(ev.buffer, event_size);
+	if (*size < (unsigned)event_size)
+		*buf = (Byte*)realloc(*buf, event_size);
 	
-	ev.time = delta_time;
-	ev.size = event_size;
+	*size = event_size;
 
 	/*if (ev.buffer == NULL)
 		ev.buffer = (Byte*)malloc(sizeof(Byte) * ev.size);*/
 
-	ev.buffer[0] = (unsigned char)status;
-	fread(ev.buffer+1, 1, ev.size - 1, _fd);
+	(*buf)[0] = (unsigned char)status;
+	if (event_size > 1)
+		fread((*buf) + 1, 1, *size - 1, _fd);
 
-	/*printf("%s read event: delta = %u, size = %zu, data = ", _name.c_str(), delta_time, ev.size);
-	for (size_t i=0; i < ev.size; ++i) {
-		printf("%X ", ev.buffer[i]);
+	/*printf("%s read event: delta = %u, size = %u, data = ", _name.c_str(), *delta_t, *size);
+	for (size_t i=0; i < *size; ++i) {
+		printf("%X ", (*buf)[i]);
 	}
 	printf("\n");*/
 	
-	return ev.size;
+	return (int)*size;
 }
 
 /** All stamps in audio frames */
@@ -307,24 +334,24 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, n
 
 	_read_data_count = 0;
 
-	jack_midi_event_t ev; // time in SMF ticks
-	ev.time = 0;
-	ev.size = 0;
-	ev.buffer = NULL; // read_event will allocate scratch as needed
+	// Output parameters for read_event (which will allocate scratch in buffer as needed)
+	uint32_t ev_delta_t = 0;
+	uint32_t ev_size = 0;
+	Byte*    ev_buffer = 0;
 
-	size_t scratch_size = 0; // keep track of scratch and minimize reallocs
+	size_t scratch_size = 0; // keep track of scratch to minimize reallocs
 
-	// FIXME: don't seek to start every read
+	// FIXME: don't seek to start and search every read (brutal!)
 	fseek(_fd, _header_size, 0);
 	
 	// FIXME: assumes tempo never changes after start
 	const double frames_per_beat = _session.tempo_map().tempo_at(_timeline_position).frames_per_beat(
 			_session.engine().frame_rate());
 	
-	uint64_t start_ticks = (uint64_t)((start / frames_per_beat) * _ppqn);
+	const uint64_t start_ticks = (uint64_t)((start / frames_per_beat) * _ppqn);
 
 	while (!feof(_fd)) {
-		int ret = read_event(ev);
+		int ret = read_event(&ev_delta_t, &ev_size, &ev_buffer);
 		if (ret == -1) { // EOF
 			//cerr << "SMF - EOF\n";
 			break;
@@ -332,29 +359,28 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, n
 
 		if (ret == 0) { // meta-event (skipped)
 			//cerr << "SMF - META\n";
-			time += ev.time; // just accumulate delta time and ignore event
+			time += ev_delta_t; // just accumulate delta time and ignore event
 			continue;
 		}
 
-		time += ev.time; // accumulate delta time
-		ev.time = time; // set ev.time to actual time (relative to source start)
+		time += ev_delta_t; // accumulate delta time
 
-		if (ev.time >= start_ticks) {
-			if (ev.time < start_ticks + (cnt / frames_per_beat)) {
+		if (time >= start_ticks) {
+			const nframes_t ev_frame_time = (nframes_t)(
+					((time / (double)_ppqn) * frames_per_beat)) + stamp_offset;
+
+			if (ev_frame_time <= start + cnt)
+				dst.write(ev_frame_time, ev_size, ev_buffer);
+			else
 				break;
-			} else {
-				ev.time = (nframes_t)(((ev.time / (double)_ppqn) * frames_per_beat)) + stamp_offset;
-				// write event time in absolute frames
-				dst.write(ev.time, ev.size, ev.buffer);
-			}
 		}
 
-		_read_data_count += ev.size;
+		_read_data_count += ev_size;
 
-		if (ev.size > scratch_size)
-			scratch_size = ev.size;
+		if (ev_size > scratch_size)
+			scratch_size = ev_size;
 		else
-			ev.size = scratch_size;
+			ev_size = scratch_size; // minimize realloc in read_event
 	}
 	
 	return cnt;
@@ -365,35 +391,54 @@ nframes_t
 SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 {
 	_write_data_count = 0;
+		
+	double time;
+	size_t size;
 
-	boost::shared_ptr<MidiBuffer> buf_ptr(new MidiBuffer(1024)); // FIXME: size?
-	MidiBuffer& buf = *buf_ptr.get();
-	src.read(buf, /*_length*/0, _length + cnt); // FIXME?
-
-	fseek(_fd, 0, SEEK_END);
+	size_t buf_capacity = 4;
+	Byte* buf = (Byte*)malloc(buf_capacity);
 	
-	for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
-		MidiEvent& ev = *i;
-		assert(ev.time() >= _timeline_position);
-		ev.time() -= _timeline_position;
-		assert(ev.time() >= _last_ev_time);
+	if (_model && ! _model->currently_writing())
+		_model->start_write();
 
-		append_event_unlocked(ev);
+	while (true) {
+		bool ret = src.full_peek(sizeof(double), (Byte*)&time);
+		if (!ret || time > _length + cnt)
+			break;
+
+		ret = src.read_prefix(&time, &size);
+		if (!ret)
+			break;
+
+		if (size > buf_capacity) {
+			buf_capacity = size;
+			buf = (Byte*)realloc(buf, size);
+		}
+
+		ret = src.read_contents(size, buf);
+		if (!ret) {
+			cerr << "ERROR: Read time/size but not buffer, corrupt MIDI ring buffer" << endl;
+			break;
+		}
+		
+		assert(time >= _timeline_position);
+		time -= _timeline_position;
+		assert(time >= _last_ev_time);
+
+		const MidiEvent ev(time, size, buf);
+		append_event_unlocked(MidiEvent(ev));
+
+		if (_model)
+			_model->append(ev);
 	}
 
 	fflush(_fd);
+	free(buf);
 
 	const nframes_t oldlen = _length;
 	update_length(oldlen, cnt);
 
-	if (_model) {
-		if ( ! _model->currently_writing()) {
-			_model->start_write();
-		}
-		_model->append(buf);
-	}
-
-	ViewDataRangeReady (buf_ptr, oldlen, cnt); /* EMIT SIGNAL */
+	ViewDataRangeReady (oldlen, cnt); /* EMIT SIGNAL */
 	
 	return cnt;
 }
@@ -480,6 +525,7 @@ SMFSource::mark_streaming_write_completed ()
 		return;
 	}
 	
+	flush_header();
 	flush_footer();
 
 #if 0
@@ -784,9 +830,6 @@ SMFSource::read_var_len() const
 {
 	assert(!feof(_fd));
 
-	//int offset = ftell(_fd);
-	//cerr << "SMF - reading var len at " << offset << endl;
-
 	uint32_t value;
 	unsigned char c;
 
@@ -810,16 +853,18 @@ SMFSource::load_model(bool lock, bool force_reload)
 	if (lock)
 		Glib::Mutex::Lock lm (_lock);
 
-	if (_model && _model_loaded && ! force_reload) {
-		assert(_model);
+	if (_model && !force_reload && !_model->empty()) {
+		//cerr << _name << " NOT reloading model " << _model.get() << " (" << _model->n_notes()
+		//	<< " notes)" << endl;
 		return;
 	}
 
 	if (! _model) {
-		cerr << "SMFSource: Loading new model " << _model.get() << endl;
 		_model = boost::shared_ptr<MidiModel>(new MidiModel(_session));
+		cerr << _name << " loaded new model " << _model.get() << endl;
 	} else {
-		cerr << "SMFSource: Reloading model " << _model.get() << endl;
+		cerr << _name << " reloading model " << _model.get()
+			<< " (" << _model->n_notes() << " notes)" <<endl;
 		_model->clear();
 	}
 
@@ -828,10 +873,7 @@ SMFSource::load_model(bool lock, bool force_reload)
 	fseek(_fd, _header_size, 0);
 
 	uint64_t time = 0; /* in SMF ticks */
-	jack_midi_event_t ev;
-	ev.time = 0;
-	ev.size = 0;
-	ev.buffer = NULL;
+	MidiEvent ev;
 	
 	size_t scratch_size = 0; // keep track of scratch and minimize reallocs
 	
@@ -839,35 +881,35 @@ SMFSource::load_model(bool lock, bool force_reload)
 	const double frames_per_beat = _session.tempo_map().tempo_at(_timeline_position).frames_per_beat(
 			_session.engine().frame_rate());
 	
+	uint32_t delta_t = 0;
 	int ret;
-	while ((ret = read_event(ev)) >= 0) {
+	while ((ret = read_event(&delta_t, &ev.size(), &ev.buffer())) >= 0) {
 		
-		time += ev.time;
+		time += delta_t;
 		
-		const double ev_time = (double)(time * frames_per_beat / (double)_ppqn); // in frames
-
 		if (ret > 0) { // didn't skip (meta) event
-			_model->append(ev_time, ev.size, ev.buffer);
+			// make ev.time absolute time in frames
+			ev.time() = (double)time * frames_per_beat / (double)_ppqn;
+
+			_model->append(ev);
 		}
 
-		if (ev.size > scratch_size)
-			scratch_size = ev.size;
+		if (ev.size() > scratch_size)
+			scratch_size = ev.size();
 		else
-			ev.size = scratch_size;
+			ev.size() = scratch_size;
 	}
 	
-	_model->end_write(false); /* FIXME: delete stuck notes iff percussion? */
+	_model->end_write(false);
 
-	free(ev.buffer);
-
-	_model_loaded = true;
+	free(ev.buffer());
 }
 
 
 void
 SMFSource::destroy_model()
 {
-	cerr << "SMFSource: Destroying model " << _model.get() << endl;
+	//cerr << _name << " destroying model " << _model.get() << endl;
 	_model.reset();
 }
 

@@ -50,7 +50,6 @@ MidiSource::MidiSource (Session& s, string name)
 	: Source (s, name, DataType::MIDI)
 	, _timeline_position(0)
 	, _model(new MidiModel(s))
-	, _model_loaded (false)
 	, _writing (false)
 {
 	_read_data_count = 0;
@@ -61,7 +60,6 @@ MidiSource::MidiSource (Session& s, const XMLNode& node)
 	: Source (s, node)
 	, _timeline_position(0)
 	, _model(new MidiModel(s))
-	, _model_loaded (false)
 	, _writing (false)
 {
 	_read_data_count = 0;
@@ -106,7 +104,7 @@ nframes_t
 MidiSource::read (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset) const
 {
 	Glib::Mutex::Lock lm (_lock);
-	if (_model_loaded && _model) {
+	if (_model) {
 		/*const size_t n_events = */_model->read(dst, start, cnt, stamp_offset);
 		//cout << "Read " << n_events << " events from model." << endl;
 		return cnt;
@@ -164,9 +162,10 @@ MidiSource::mark_streaming_write_completed ()
 void
 MidiSource::session_saved()
 {
-	flush();
+	flush_header();
+	flush_footer();
 
-	if (_model && _model_loaded && _model->edited()) {
+	if (_model && _model->edited()) {
 		string newname;
 		const string basename = PBD::basename_nosuffix(_name);
 		string::size_type last_dash = basename.find_last_of("-");
@@ -193,9 +192,9 @@ MidiSource::session_saved()
 
 		newsrc->set_model(_model);
 		_model.reset();
-		_model_loaded = false;
 		
-		newsrc->flush();
+		newsrc->flush_header();
+		newsrc->flush_footer();
 		
 		Switched.emit(newsrc);
 	}

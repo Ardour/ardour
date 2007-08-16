@@ -1445,7 +1445,7 @@ XMLNode&
 Route::state(bool full_state)
 {
 	XMLNode *node = new XMLNode("Route");
-	ProcessorList:: iterator i;
+	ProcessorList::iterator i;
 	char buf[32];
 
 	if (_flags) {

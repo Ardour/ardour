@@ -112,11 +112,14 @@ struct MidiEvent {
 	inline uint8_t     channel()     const { return (_buffer[0] & 0x0F); }
 	inline bool        is_note_on()  const { return (type() == MIDI_CMD_NOTE_ON); }
 	inline bool        is_note_off() const { return (type() == MIDI_CMD_NOTE_OFF); }
+	inline bool        is_cc()       const { return (type() == MIDI_CMD_CONTROL); }
 	inline bool        is_note()     const { return (is_note_on() || is_note_off()); }
 	inline uint8_t     note()        const { return (_buffer[1]); }
 	inline uint8_t     velocity()    const { return (_buffer[2]); }
+	inline uint8_t     cc_number()   const { return (_buffer[1]); }
+	inline uint8_t     cc_value()    const { return (_buffer[2]); }
 	inline const Byte* buffer()      const { return _buffer; }
-	inline Byte*       buffer()            { return _buffer; }
+	inline Byte*&      buffer()           { return _buffer; }
 
 private:
 	double   _time;   /**< Sample index (or beat time) at which event is valid */

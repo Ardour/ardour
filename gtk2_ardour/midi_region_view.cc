@@ -394,11 +394,14 @@ MidiRegionView::display_model(boost::shared_ptr<MidiModel> model)
 void
 MidiRegionView::redisplay_model()
 {
-	clear_events();
-
-	//cerr << "Redisplaying model " << _model << endl;
+	// Don't redisplay the model if we're currently recording and displaying that
+	if (_active_notes)
+		return;
 	
 	if (_model) {
+	
+		clear_events();
+	
 		begin_write();
 
 		for (size_t i=0; i < _model->n_notes(); ++i)
@@ -406,7 +409,7 @@ MidiRegionView::redisplay_model()
 
 		end_write();
 	} else {
-		warning << "MidiRegionView::redisplay_model called without a model" << endmsg;
+		cerr << "MidiRegionView::redisplay_model called without a model" << endmsg;
 	}
 }
 
@@ -414,7 +417,10 @@ MidiRegionView::redisplay_model()
 MidiRegionView::~MidiRegionView ()
 {
 	in_destructor = true;
-	end_write();
+	if (_active_notes)
+		end_write();
+
+	clear_events();
 
 	RegionViewGoingAway (this); /* EMIT_SIGNAL */
 }
@@ -488,6 +494,7 @@ MidiRegionView::add_ghost (AutomationTimeAxisView& atv)
 void
 MidiRegionView::begin_write()
 {
+	assert(!_active_notes);
 	_active_notes = new CanvasNote*[128];
 	for (unsigned i=0; i < 128; ++i)
 		_active_notes[i] = NULL;
@@ -512,9 +519,9 @@ MidiRegionView::end_write()
 void
 MidiRegionView::add_event (const MidiEvent& ev)
 {
-	/*printf("Event, time = %f, size = %zu, data = ", ev.time, ev.size);
-	for (size_t i=0; i < ev.size; ++i) {
-		printf("%X ", ev.buffer[i]);
+	/*printf("MRV add Event, time = %f, size = %u, data = ", ev.time(), ev.size());
+	for (size_t i=0; i < ev.size(); ++i) {
+		printf("%X ", ev.buffer()[i]);
 	}
 	printf("\n\n");*/
 

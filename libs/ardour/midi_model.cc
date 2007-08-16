@@ -99,7 +99,7 @@ MidiModel::Note::operator=(const Note& copy)
 // MidiModel
 
 MidiModel::MidiModel(Session& s, size_t size)
-	: _session(s)
+	: Automatable(s, "midi model")
 	, _notes(size)
 	, _note_mode(Sustained)
 	, _writing(false)
@@ -192,9 +192,10 @@ MidiModel::read (MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframe
 void
 MidiModel::start_write()
 {
-	//cerr << "MM START WRITE, MODE = " << enum_2_string(_note_mode) << endl;
-	_write_notes.clear();
+	//cerr << "MM " << this << " START WRITE, MODE = " << enum_2_string(_note_mode) << endl;
+	_lock.writer_lock();
 	_writing = true;
+	_write_notes.clear();
 }
 
 
@@ -210,7 +211,7 @@ MidiModel::end_write(bool delete_stuck)
 {
 	assert(_writing);
 	
-	//cerr << "MM END WRITE: " << _notes.size() << " STUCK NOTES\n";
+	//cerr << "MM " << this << " END WRITE: " << _notes.size() << " NOTES\n";
 
 	if (_note_mode == Sustained && delete_stuck) {
 		for (Notes::iterator n = _notes.begin(); n != _notes.end() ; ) {
@@ -225,6 +226,7 @@ MidiModel::end_write(bool delete_stuck)
 
 	_write_notes.clear();
 	_writing = false;
+	_lock.writer_unlock();
 }
 
 
@@ -241,20 +243,10 @@ MidiModel::append(const MidiBuffer& buf)
 { 
 	assert(_writing);
 
-	_lock.writer_lock();
-
 	for (MidiBuffer::const_iterator i = buf.begin(); i != buf.end(); ++i) {
-		const MidiEvent& ev = *i;
-		
-		assert(_notes.empty() || ev.time() >= _notes.back().time());
-
-		if (ev.type() == MIDI_CMD_NOTE_ON)
-			append_note_on(ev.time(), ev.note(), ev.velocity());
-		else if (ev.type() == MIDI_CMD_NOTE_OFF)
-			append_note_off(ev.time(), ev.note());
+		assert(_notes.empty() || (*i).time() >= _notes.back().time());
+		append(*i);
 	}
-	
-	_lock.writer_unlock();
 }
 
 
@@ -265,21 +257,27 @@ MidiModel::append(const MidiBuffer& buf)
  * and MUST be >= the latest event currently in the model.
  */
 void
-MidiModel::append(double time, size_t size, const Byte* buf)
+MidiModel::append(const MidiEvent& ev)
 {
-	assert(_notes.empty() || time >= _notes.back().time());
+	assert(_notes.empty() || ev.time() >= _notes.back().time());
 	assert(_writing);
 
-	if ((buf[0] & 0xF0) == MIDI_CMD_NOTE_ON)
-		append_note_on(time, buf[1], buf[2]);
-	else if ((buf[0] & 0xF0) == MIDI_CMD_NOTE_OFF)
-		append_note_off(time, buf[1]);
+	if (ev.is_note_on())
+		append_note_on(ev.time(), ev.note(), ev.velocity());
+	else if (ev.is_note_off())
+		append_note_off(ev.time(), ev.note());
+	else if (ev.is_cc())
+		append_cc(ev.time(), ev.cc_number(), ev.cc_value());
+	else
+		printf("MM Unknown event type %X\n", ev.type());
 }
 
 
 void
 MidiModel::append_note_on(double time, uint8_t note_num, uint8_t velocity)
 {
+	//cerr << "MidiModel " << this << " note " << (int)note_num << " on @ " << time << endl;
+
 	assert(_writing);
 	_notes.push_back(Note(time, 0, note_num, velocity));
 	if (_note_mode == Sustained) {
@@ -294,6 +292,8 @@ MidiModel::append_note_on(double time, uint8_t note_num, uint8_t velocity)
 void
 MidiModel::append_note_off(double time, uint8_t note_num)
 {
+	//cerr << "MidiModel " << this << " note " << (int)note_num << " off @ " << time << endl;
+
 	assert(_writing);
 	if (_note_mode == Percussive) {
 		//cerr << "MM Ignoring note off (percussive mode)" << endl;
@@ -322,6 +322,19 @@ MidiModel::append_note_off(double time, uint8_t note_num)
 
 
 void
+MidiModel::append_cc(double time, uint8_t number, uint8_t value)
+{
+	Parameter param(MidiCCAutomation, number);
+
+	//cerr << "MidiModel " << this << " add CC " << (int)number << " = " << (int)value
+	//	<< " @ " << time << endl;
+	
+	boost::shared_ptr<AutomationControl> control = Automatable::control(param, true);
+	control->list()->fast_simple_add(time, (double)value);
+}
+
+
+void
 MidiModel::add_note_unlocked(const Note& note)
 {
 	//cerr << "MidiModel " << this << " add note " << (int)note.note() << " @ " << note.time() << endl;
@@ -340,6 +353,7 @@ MidiModel::remove_note_unlocked(const Note& note)
 }
 
 /** Slow!  for debugging only. */
+#ifndef NDEBUG
 bool
 MidiModel::is_sorted() const
 {
@@ -352,7 +366,7 @@ MidiModel::is_sorted() const
 
 	return true;
 }
-
+#endif
 
 /** Start a new command.
  *
@@ -507,5 +521,12 @@ MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 	_lock.reader_unlock();
 
 	return true;
+}
+
+XMLNode&
+MidiModel::get_state()
+{
+	XMLNode *node = new XMLNode("MidiModel");
+	return *node;
 }
 

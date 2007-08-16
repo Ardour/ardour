@@ -410,7 +410,7 @@ MidiStreamView::setup_rec_box ()
 }
 
 void
-MidiStreamView::update_rec_regions (boost::shared_ptr<MidiBuffer> data, nframes_t start, nframes_t dur)
+MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t start, nframes_t dur)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &MidiStreamView::update_rec_regions), data, start, dur));
 
@@ -467,11 +467,24 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiBuffer> data, nframes_
 
 						/* draw events */
 						MidiRegionView* mrv = (MidiRegionView*)iter->second;
-						for (MidiBuffer::iterator i = data->begin(); i != data->end(); ++i) {
-							const MidiEvent& ev = *i;
-							mrv->add_event(ev);
-							mrv->extend_active_notes();
+						// FIXME: slow
+						for (size_t i=0; i < data->n_notes(); ++i) {
+							const MidiModel::Note& note = data->note_at(i);
+							if (note.time() > start + dur)
+								break;
+
+							if (note.time() >= start)
+								if (data->note_mode() == Percussive || note.duration() > 0)
+									mrv->add_note(note);
+								else
+									mrv->add_event(note.on_event());
+
+							if (note.duration() > 0 && note.end_time() >= start)
+								mrv->add_event(note.off_event());
+
 						}
+						
+						mrv->extend_active_notes();
 
 					}
 				}
@@ -508,18 +521,18 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiBuffer> data, nframes_
 }
 
 void
-MidiStreamView::rec_data_range_ready (boost::shared_ptr<MidiBuffer> data, jack_nframes_t start, jack_nframes_t dur, boost::weak_ptr<Source> weak_src)
+MidiStreamView::rec_data_range_ready (jack_nframes_t start, jack_nframes_t dur, boost::weak_ptr<Source> weak_src)
 {
 	// this is called from the butler thread for now
 	
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &MidiStreamView::rec_data_range_ready), data, start, dur, weak_src));
+	ENSURE_GUI_THREAD(bind (mem_fun (*this, &MidiStreamView::rec_data_range_ready), start, dur, weak_src));
 	
 	boost::shared_ptr<SMFSource> src (boost::dynamic_pointer_cast<SMFSource>(weak_src.lock()));
 	
 	//cerr << src.get() << " MIDI READY: " << start << " * " << dur
 	//	<< " -- " << data->size() << " events!" << endl;
 	
-	this->update_rec_regions (data, start, dur);
+	this->update_rec_regions (src->model(), start, dur);
 }
 
 void

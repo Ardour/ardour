@@ -53,8 +53,6 @@ class MidiSource : public Source
 	virtual nframes_t write (MidiRingBuffer& src, nframes_t cnt);
 	virtual void append_event_unlocked(const MidiEvent& ev) = 0;
 
-	virtual void flush() {}
-
 	virtual void mark_for_remove() = 0;
 	virtual void mark_streaming_midi_write_started (NoteMode mode);
 	virtual void mark_streaming_write_started ();
@@ -72,8 +70,8 @@ class MidiSource : public Source
 
 	static sigc::signal<void,MidiSource*> MidiSourceCreated;
 	       
-	// The MIDI equivalent to "peaks" (but complete data)
-	mutable sigc::signal<void,boost::shared_ptr<MidiBuffer>,nframes_t,nframes_t> ViewDataRangeReady;
+	// Signal a range of recorded data is available for reading from model()
+	mutable sigc::signal<void,nframes_t,nframes_t> ViewDataRangeReady;
 	
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
@@ -82,12 +80,14 @@ class MidiSource : public Source
 	virtual void destroy_model() = 0;
 
 	void set_note_mode(NoteMode mode) { if (_model) _model->set_note_mode(mode); }
-	virtual bool model_loaded() const { return _model_loaded; }
 
 	boost::shared_ptr<MidiModel> model() { return _model; }
-	void set_model(boost::shared_ptr<MidiModel> m) { _model = m; _model_loaded = true; }
+	void set_model(boost::shared_ptr<MidiModel> m) { _model = m; }
 
   protected:
+	virtual int flush_header() = 0;
+	virtual int flush_footer() = 0;
+	
 	virtual nframes_t read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset) const = 0;
 	virtual nframes_t write_unlocked (MidiRingBuffer& dst, nframes_t cnt) = 0;
 	
@@ -98,7 +98,6 @@ class MidiSource : public Source
 	mutable uint32_t    _write_data_count; ///< modified in write()
 
 	boost::shared_ptr<MidiModel> _model;
-	bool                         _model_loaded;
 	bool                         _writing;
 
   private:

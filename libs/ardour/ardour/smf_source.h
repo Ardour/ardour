@@ -74,8 +74,6 @@ class SMFSource : public MidiSource {
 	int flush_header ();
 	int flush_footer ();
 	
-	void flush() { flush_header(); flush_footer(); }
-
 	int move_to_trash (const string trash_dir_name);
 
 	bool is_empty () const;
@@ -108,13 +106,15 @@ class SMFSource : public MidiSource {
 	bool removable() const;
 	bool writable() const { return _flags & Writable; }
 
-	int open();
+	int  open();
+	void seek_to_end();
+	void write_footer();
 
 	void     write_chunk_header(char id[4], uint32_t length);
 	void     write_chunk(char id[4], uint32_t length, void* data);
 	size_t   write_var_len(uint32_t val);
 	uint32_t read_var_len() const;
-	int      read_event(jack_midi_event_t& ev) const;
+	int      read_event(uint32_t* delta_t, uint32_t* size, Byte** buf) const;
 
 	static const uint16_t _ppqn = 19200;
 

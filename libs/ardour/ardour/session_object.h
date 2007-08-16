@@ -20,6 +20,7 @@
 #ifndef __ardour_session_object_h__
 #define __ardour_session_object_h__
 
+#include <string>
 #include <pbd/statefuldestructible.h> 
 
 namespace ARDOUR {
@@ -36,22 +37,27 @@ class Session;
 class SessionObject : public PBD::StatefulDestructible
 {
 public:
-	SessionObject(Session& session, const string& name)
+	SessionObject(Session& session, const std::string& name)
 		: _session(session)
 		, _name(name)
 	{}
 	
-	Session&      session() const { return _session; }
-	const string& name() const    { return _name; }
+	Session&           session() const { return _session; }
+	const std::string& name()    const { return _name; }
 	
-	virtual bool set_name (const string& str)
-		{ if (_name != str) { _name = str; NameChanged(); } return true; }
+	virtual bool set_name (const std::string& str) {
+		if (_name != str) {
+			_name = str;
+			NameChanged();
+		}
+		return true;
+	}
 	
 	sigc::signal<void> NameChanged;
 
 protected:
-	Session& _session;
-	string   _name;
+	Session&    _session;
+	std::string _name;
 };
 
 } // namespace ARDOUR

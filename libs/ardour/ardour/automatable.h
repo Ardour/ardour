@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000, 2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -94,7 +94,7 @@ protected:
 
 	mutable Glib::Mutex _automation_lock;
 	
-	Controls          _controls;
+	Controls            _controls;
 	std::set<Parameter> _visible_controls;
 	std::set<Parameter> _can_automate_list;
 	

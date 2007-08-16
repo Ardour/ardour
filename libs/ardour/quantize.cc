@@ -79,6 +79,8 @@ Quantize::run (boost::shared_ptr<Region> r)
 		i->set_duration(new_dur);
 	}
 
+	model->set_edited(true);
+
 	return 0;
 #if 0
 	SourceList nsrcs;
