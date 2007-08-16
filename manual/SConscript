@@ -1,0 +1,11 @@
+# -*- python -*-
+
+Import('env ardour_version')
+
+manual_subst_dict = { }
+
+manual_subst_dict['%VERSION%'] = ardour_version
+
+entities = env.SubstInFile ('xml/entities.ent', 'xml/entities.ent.in', SUBST_DICT = manual_subst_dict);
+
+Default(entities)
