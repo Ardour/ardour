@@ -95,8 +95,23 @@ public:
 	void clear_playlist ();
 	
 	void build_playlist_menu (Gtk::Menu *);
+	
+	/* This is a bit nasty to expose :/ */
+	struct RouteAutomationNode {
+		ARDOUR::Parameter                         param;
+	    Gtk::CheckMenuItem*                       menu_item;
+		boost::shared_ptr<AutomationTimeAxisView> track;
+	    
+		RouteAutomationNode (ARDOUR::Parameter par, Gtk::CheckMenuItem* mi, boost::shared_ptr<AutomationTimeAxisView> tr)
+		    : param (par), menu_item (mi), track (tr) {}
+	};
 
 	virtual void create_automation_child (ARDOUR::Parameter param, bool show) = 0;
+	
+	typedef map<ARDOUR::Parameter, RouteAutomationNode*> AutomationTracks;
+	AutomationTracks automation_tracks() { return _automation_tracks; }
+
+	boost::shared_ptr<AutomationTimeAxisView> automation_child(ARDOUR::Parameter param);
 	
 	string              name() const;
 	StreamView*         view() const { return _view; }
@@ -105,18 +120,9 @@ public:
 
 protected:
 	friend class StreamView;
-	
-	struct RouteAutomationNode {
-		ARDOUR::Parameter                           param;
-	    Gtk::CheckMenuItem*                       menu_item;
-		boost::shared_ptr<AutomationTimeAxisView> track;
-	    
-		RouteAutomationNode (ARDOUR::Parameter par, Gtk::CheckMenuItem* mi, boost::shared_ptr<AutomationTimeAxisView> tr)
-		    : param (par), menu_item (mi), track (tr) {}
-	};
 
 	struct ProcessorAutomationNode {
-		ARDOUR::Parameter                           what;
+		ARDOUR::Parameter                         what;
 	    Gtk::CheckMenuItem*                       menu_item;
 		boost::shared_ptr<AutomationTimeAxisView> view;
 	    RouteTimeAxisView&                        parent;
@@ -268,7 +274,6 @@ protected:
 	// Set from XML so context menu automation buttons can be correctly initialized
 	set<ARDOUR::Parameter> _show_automation;
 
-	typedef map<ARDOUR::Parameter, RouteAutomationNode*> AutomationTracks;
 	AutomationTracks _automation_tracks;
 
 	sigc::connection modified_connection;

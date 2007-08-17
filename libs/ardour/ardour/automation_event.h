@@ -170,7 +170,7 @@ class AutomationList : public PBD::StatefulDestructible
 		Glib::Mutex::Lock lm (_lock);
 		(obj.*method)(*this);
 	}
-
+	
 	sigc::signal<void> StateChanged;
 
 	XMLNode& get_state(void); 

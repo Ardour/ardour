@@ -45,6 +45,8 @@
 #include "public_editor.h"
 #include "ghostregion.h"
 #include "midi_time_axis.h"
+#include "automation_time_axis.h"
+#include "automation_region_view.h"
 #include "utils.h"
 #include "midi_util.h"
 #include "gui_thread.h"
@@ -58,8 +60,7 @@ using namespace PBD;
 using namespace Editing;
 using namespace ArdourCanvas;
 
-MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<MidiRegion> r, double spu,
-				  Gdk::Color& basic_color)
+MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<MidiRegion> r, double spu, Gdk::Color& basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
 	, _default_note_length(0.0)
 	, _active_notes(0)
@@ -71,8 +72,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	_note_group->raise_to_top();
 }
 
-MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<MidiRegion> r, double spu, 
-				  Gdk::Color& basic_color, TimeAxisViewItem::Visibility visibility)
+MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<MidiRegion> r, double spu, Gdk::Color& basic_color, TimeAxisViewItem::Visibility visibility)
 	: RegionView (parent, tv, r, spu, basic_color, visibility)
 	, _default_note_length(0.0)
 	, _active_notes(0)
@@ -399,15 +399,47 @@ MidiRegionView::redisplay_model()
 		return;
 	
 	if (_model) {
-	
+
 		clear_events();
-	
 		begin_write();
+		
+		_model->read_lock();
 
 		for (size_t i=0; i < _model->n_notes(); ++i)
 			add_note(_model->note_at(i));
 
 		end_write();
+
+		for (Automatable::Controls::const_iterator i = _model->controls().begin();
+				i != _model->controls().end(); ++i) {
+
+			assert(i->second);
+
+			boost::shared_ptr<AutomationTimeAxisView> at
+				= midi_view()->automation_child(i->second->parameter());
+			if (!at)
+				continue;
+
+			Gdk::Color col = midi_stream_view()->get_region_color();
+				
+			boost::shared_ptr<AutomationRegionView> arv;
+
+			{
+				Glib::Mutex::Lock list_lock (i->second->list()->lock());
+
+				arv = boost::shared_ptr<AutomationRegionView>(
+						new AutomationRegionView(at->canvas_display,
+							*at.get(), _region, i->second->list(),
+							midi_stream_view()->get_samples_per_unit(), col));
+
+				_automation_children.insert(std::make_pair(i->second->parameter(), arv));
+			}
+
+			arv->init(col, true);
+		}
+		
+		_model->read_unlock();
+
 	} else {
 		cerr << "MidiRegionView::redisplay_model called without a model" << endmsg;
 	}

@@ -81,6 +81,7 @@ using namespace Editing;
 MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shared_ptr<Route> rt, Canvas& canvas)
 	: AxisView(sess) // FIXME: won't compile without this, why??
 	, RouteTimeAxisView(ed, sess, rt, canvas)
+	, _note_mode(Sustained)
 	, _note_mode_item(NULL)
 	, _percussion_mode_item(NULL)
 {

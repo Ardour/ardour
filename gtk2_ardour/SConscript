@@ -100,6 +100,7 @@ control_point.cc
 automation_line.cc
 automation_time_axis.cc
 automation_controller.cc
+automation_region_view.cc
 midi_port_dialog.cc
 midi_time_axis.cc
 midi_streamview.cc

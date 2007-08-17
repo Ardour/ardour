@@ -1998,3 +1998,15 @@ RouteTimeAxisView::set_layer_display (LayerDisplay d)
 {
 	_view->set_layer_display (d);
 }
+	
+
+boost::shared_ptr<AutomationTimeAxisView>
+RouteTimeAxisView::automation_child(ARDOUR::Parameter param)
+{
+	AutomationTracks::iterator i = _automation_tracks.find(param);
+	if (i != _automation_tracks.end())
+		return i->second->track;
+	else
+		return boost::shared_ptr<AutomationTimeAxisView>();
+}
+

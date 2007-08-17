@@ -55,7 +55,7 @@ using namespace PBD;
 using namespace Editing;
 using namespace Gnome; // for Canvas
 
-AutomationLine::AutomationLine (const string & name, TimeAxisView& tv, ArdourCanvas::Group& parent, boost::shared_ptr<AutomationList> al)
+AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanvas::Group& parent, boost::shared_ptr<AutomationList> al)
 	: trackview (tv),
 	  _name (name),
 	  alist (al),
@@ -353,7 +353,7 @@ AutomationLine::model_representation (ControlPoint& cp, ModelRepresentation& mr)
 	mr.xval = (nframes_t) floor (cp.get_x());
 	mr.yval = 1.0 - ( (cp.get_y() - _y_position) / _height);
 
-        /* if xval has not changed, set it directly from the model to avoid rounding errors */
+	/* if xval has not changed, set it directly from the model to avoid rounding errors */
 
 	if (mr.xval == trackview.editor.frame_to_unit((*cp.model())->when)) {
 		mr.xval = (nframes_t) (*cp.model())->when;
@@ -879,7 +879,7 @@ AutomationLine::remove_point (ControlPoint& cp)
 	model_representation (cp, mr);
 
 	trackview.editor.current_session()->begin_reversible_command (_("remove control point"));
-        XMLNode &before = alist->get_state();
+	XMLNode &before = alist->get_state();
 
 	alist->erase (mr.start, mr.end);
 
@@ -1044,7 +1044,7 @@ AutomationLine::list_changed ()
 void
 AutomationLine::reset_callback (const AutomationList& events)
 {
-        ALPoints tmp_points;
+	ALPoints tmp_points;
 	uint32_t npoints = events.size();
 
 	if (npoints == 0) {
@@ -1086,7 +1086,7 @@ void
 AutomationLine::clear ()
 {
 	/* parent must create command */
-        XMLNode &before = get_state();
+	XMLNode &before = get_state();
 	alist->clear();
 	trackview.editor.current_session()->add_command (new MementoCommand<AutomationLine>(*this, &before, &get_state()));
 	trackview.editor.current_session()->commit_reversible_command ();

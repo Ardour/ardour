@@ -58,11 +58,11 @@ static const int32_t sync_mark_width = 9;
 
 sigc::signal<void,RegionView*> RegionView::RegionViewGoingAway;
 
-RegionView::RegionView (ArdourCanvas::Group* parent, 
-                        TimeAxisView&        tv,
+RegionView::RegionView (ArdourCanvas::Group*              parent, 
+                        TimeAxisView&                     tv,
                         boost::shared_ptr<ARDOUR::Region> r,
-                        double               spu,
-                        Gdk::Color&          basic_color)
+                        double                            spu,
+                        Gdk::Color&                       basic_color)
 	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(),
 			    TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowNameText|
 							  TimeAxisViewItem::ShowNameHighlight|

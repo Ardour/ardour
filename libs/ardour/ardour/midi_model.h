@@ -77,6 +77,12 @@ public:
 	};
 
 	MidiModel(Session& s, size_t size=0);
+	
+	// This is crap.
+	void write_lock()   { _lock.writer_lock(); _automation_lock.lock(); }
+	void write_unlock() { _lock.writer_unlock(); _automation_lock.unlock(); }
+	void read_lock()    { _lock.reader_lock(); _automation_lock.lock(); }
+	void read_unlock()  { _lock.reader_unlock(); _automation_lock.unlock(); }
 
 	void clear() { _notes.clear(); }
 
@@ -167,9 +173,9 @@ private:
 	bool is_sorted() const;
 #endif
 
-	void append_note_on(double time, uint8_t note, uint8_t velocity);
-	void append_note_off(double time, uint8_t note);
-	void append_cc(double time, uint8_t number, uint8_t value);
+	void append_note_on_unlocked(double time, uint8_t note, uint8_t velocity);
+	void append_note_off_unlocked(double time, uint8_t note);
+	void append_cc_unlocked(double time, uint8_t number, uint8_t value);
 
 	Glib::RWLock _lock;
 

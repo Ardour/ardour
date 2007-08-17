@@ -193,9 +193,10 @@ void
 MidiModel::start_write()
 {
 	//cerr << "MM " << this << " START WRITE, MODE = " << enum_2_string(_note_mode) << endl;
-	_lock.writer_lock();
+	write_lock();
 	_writing = true;
 	_write_notes.clear();
+	write_unlock();
 }
 
 
@@ -209,6 +210,7 @@ MidiModel::start_write()
 void
 MidiModel::end_write(bool delete_stuck)
 {
+	write_lock();
 	assert(_writing);
 	
 	//cerr << "MM " << this << " END WRITE: " << _notes.size() << " NOTES\n";
@@ -226,7 +228,7 @@ MidiModel::end_write(bool delete_stuck)
 
 	_write_notes.clear();
 	_writing = false;
-	_lock.writer_unlock();
+	write_unlock();
 }
 
 
@@ -241,12 +243,16 @@ MidiModel::end_write(bool delete_stuck)
 void
 MidiModel::append(const MidiBuffer& buf)
 { 
+	write_lock();
+
 	assert(_writing);
 
 	for (MidiBuffer::const_iterator i = buf.begin(); i != buf.end(); ++i) {
 		assert(_notes.empty() || (*i).time() >= _notes.back().time());
 		append(*i);
 	}
+	
+	write_unlock();
 }
 
 
@@ -259,22 +265,26 @@ MidiModel::append(const MidiBuffer& buf)
 void
 MidiModel::append(const MidiEvent& ev)
 {
+	write_lock();
+
 	assert(_notes.empty() || ev.time() >= _notes.back().time());
 	assert(_writing);
 
 	if (ev.is_note_on())
-		append_note_on(ev.time(), ev.note(), ev.velocity());
+		append_note_on_unlocked(ev.time(), ev.note(), ev.velocity());
 	else if (ev.is_note_off())
-		append_note_off(ev.time(), ev.note());
+		append_note_off_unlocked(ev.time(), ev.note());
 	else if (ev.is_cc())
-		append_cc(ev.time(), ev.cc_number(), ev.cc_value());
+		append_cc_unlocked(ev.time(), ev.cc_number(), ev.cc_value());
 	else
 		printf("MM Unknown event type %X\n", ev.type());
+	
+	write_unlock();
 }
 
 
 void
-MidiModel::append_note_on(double time, uint8_t note_num, uint8_t velocity)
+MidiModel::append_note_on_unlocked(double time, uint8_t note_num, uint8_t velocity)
 {
 	//cerr << "MidiModel " << this << " note " << (int)note_num << " on @ " << time << endl;
 
@@ -290,7 +300,7 @@ MidiModel::append_note_on(double time, uint8_t note_num, uint8_t velocity)
 
 
 void
-MidiModel::append_note_off(double time, uint8_t note_num)
+MidiModel::append_note_off_unlocked(double time, uint8_t note_num)
 {
 	//cerr << "MidiModel " << this << " note " << (int)note_num << " off @ " << time << endl;
 
@@ -322,7 +332,7 @@ MidiModel::append_note_off(double time, uint8_t note_num)
 
 
 void
-MidiModel::append_cc(double time, uint8_t number, uint8_t value)
+MidiModel::append_cc_unlocked(double time, uint8_t number, uint8_t value)
 {
 	Parameter param(MidiCCAutomation, number);
 
@@ -427,7 +437,7 @@ MidiModel::DeltaCommand::operator()()
 	// This could be made much faster by using a priority_queue for added and
 	// removed notes (or sort here), and doing a single iteration over _model
 	
-	_model._lock.writer_lock();
+	_model.write_lock();
 	
 	for (std::list<Note>::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i)
 		_model.add_note_unlocked(*i);
@@ -435,7 +445,7 @@ MidiModel::DeltaCommand::operator()()
 	for (std::list<Note>::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i)
 		_model.remove_note_unlocked(*i);
 	
-	_model._lock.writer_unlock();
+	_model.write_unlock();
 	
 	_model.ContentsChanged(); /* EMIT SIGNAL */
 }
@@ -447,7 +457,7 @@ MidiModel::DeltaCommand::undo()
 	// This could be made much faster by using a priority_queue for added and
 	// removed notes (or sort here), and doing a single iteration over _model
 	
-	_model._lock.writer_lock();
+	_model.write_lock();
 
 	for (std::list<Note>::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i)
 		_model.remove_note_unlocked(*i);
@@ -455,7 +465,7 @@ MidiModel::DeltaCommand::undo()
 	for (std::list<Note>::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i)
 		_model.add_note_unlocked(*i);
 	
-	_model._lock.writer_unlock();
+	_model.write_unlock();
 	
 	_model.ContentsChanged(); /* EMIT SIGNAL */
 }
@@ -484,7 +494,7 @@ MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 		source->append_event_unlocked(ev);
 	}*/
 
-	_lock.reader_lock();
+	read_lock();
 
 	LaterNoteEndComparator cmp;
 	ActiveNotes active_notes(cmp);
@@ -518,7 +528,7 @@ MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 
 	_edited = false;
 	
-	_lock.reader_unlock();
+	read_unlock();
 
 	return true;
 }
