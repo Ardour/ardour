@@ -29,6 +29,7 @@
 #include <ardour/audioregion.h>
 #include <ardour/audiosource.h>
 #include <ardour/audio_diskstream.h>
+#include <ardour/profile.h>
 #include <pbd/memento_command.h>
 #include <pbd/stacktrace.h>
 
@@ -179,15 +180,17 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 	foo += ':';
 	foo += "gain";
 
-	gain_line = new AudioRegionGainLine (foo, trackview.session(), *this, *group, audio_region()->envelope());
+	if (!Profile->get_sae()) {
+		gain_line = new AudioRegionGainLine (foo, trackview.session(), *this, *group, audio_region()->envelope());
 
-	if (!(_flags & EnvelopeVisible)) {
-		gain_line->hide ();
-	} else {
-		gain_line->show ();
+		if (!(_flags & EnvelopeVisible)) {
+			gain_line->hide ();
+		} else {
+			gain_line->show ();
+		}
+
+		gain_line->reset ();
 	}
-
-	gain_line->reset ();
 
 	set_height (trackview.height);
 

@@ -54,6 +54,7 @@
 #include <ardour/session_route.h>
 #include <ardour/tempo.h>
 #include <ardour/utils.h>
+#include <ardour/profile.h>
 
 #include <control_protocol/control_protocol.h>
 
@@ -1264,12 +1265,17 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 		}
 		
 		items.push_back (SeparatorElem());
-		
-		items.push_back (MenuElem (_("Linear"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Linear)));
-		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Fast)));
-		items.push_back (MenuElem (_("Slow"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::LogB)));
-		items.push_back (MenuElem (_("Fast"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::LogA)));
-		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Slow)));
+
+		if (Profile->get_sae()) {
+			items.push_back (MenuElem (_("Linear"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Linear)));
+			items.push_back (MenuElem (_("Slowest"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Fast)));
+		} else {
+			items.push_back (MenuElem (_("Linear"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Linear)));
+			items.push_back (MenuElem (_("Slowest"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Fast)));
+			items.push_back (MenuElem (_("Slow"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::LogB)));
+			items.push_back (MenuElem (_("Fast"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::LogA)));
+			items.push_back (MenuElem (_("Fastest"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Slow)));
+		}
 		break;
 
 	case FadeOutItem:
@@ -1281,13 +1287,17 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 		}
 		
 		items.push_back (SeparatorElem());
-		
-		items.push_back (MenuElem (_("Linear"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Linear)));
-		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Slow)));
-		items.push_back (MenuElem (_("Slow"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::LogA)));
-		items.push_back (MenuElem (_("Fast"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::LogB)));
-		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Fast)));
 
+		if (Profile->get_sae()) {
+			items.push_back (MenuElem (_("Linear"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Linear)));
+			items.push_back (MenuElem (_("Slowest"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Slow)));
+		} else {
+			items.push_back (MenuElem (_("Linear"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Linear)));
+			items.push_back (MenuElem (_("Slowest"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Slow)));
+			items.push_back (MenuElem (_("Slow"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::LogA)));
+			items.push_back (MenuElem (_("Fast"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::LogB)));
+			items.push_back (MenuElem (_("Fastest"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Fast)));
+		}
 		break;
 
 	default:
@@ -1674,13 +1684,15 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 		fooc.block (false);
 	}
 	
-	items.push_back (CheckMenuElem (_("Opaque")));
-	region_opaque_item = static_cast<CheckMenuItem*>(&items.back());
-	fooc = region_opaque_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_opaque));
-	if (region->opaque()) {
-		fooc.block (true);
-		region_opaque_item->set_active();
-		fooc.block (false);
+	if (!Profile->get_sae()) {
+		items.push_back (CheckMenuElem (_("Opaque")));
+		region_opaque_item = static_cast<CheckMenuItem*>(&items.back());
+		fooc = region_opaque_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_opaque));
+		if (region->opaque()) {
+			fooc.block (true);
+			region_opaque_item->set_active();
+			fooc.block (false);
+		}
 	}
 
 	items.push_back (CheckMenuElem (_("Original position"), mem_fun(*this, &Editor::naturalize)));
@@ -1695,28 +1707,30 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 		RegionView* rv = sv->find_view (ar);
 		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(rv);
 		
-		items.push_back (MenuElem (_("Reset Envelope"), mem_fun(*this, &Editor::reset_region_gain_envelopes)));
-		
-		items.push_back (CheckMenuElem (_("Envelope Visible")));
-		region_envelope_visible_item = static_cast<CheckMenuItem*> (&items.back());
-		fooc = region_envelope_visible_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_gain_envelope_visibility));
-		if (arv->envelope_visible()) {
-			fooc.block (true);
-			region_envelope_visible_item->set_active (true);
-			fooc.block (false);
-		}
-		
-		items.push_back (CheckMenuElem (_("Envelope Active")));
-		region_envelope_active_item = static_cast<CheckMenuItem*> (&items.back());
-		fooc = region_envelope_active_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_gain_envelope_active));
-		
-		if (ar->envelope_active()) {
-			fooc.block (true);
-			region_envelope_active_item->set_active (true);
-			fooc.block (false);
-		}
+		if (!Profile->get_sae()) {
+			items.push_back (MenuElem (_("Reset Envelope"), mem_fun(*this, &Editor::reset_region_gain_envelopes)));
 
-		items.push_back (SeparatorElem());
+			items.push_back (CheckMenuElem (_("Envelope Visible")));
+			region_envelope_visible_item = static_cast<CheckMenuItem*> (&items.back());
+			fooc = region_envelope_visible_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_gain_envelope_visibility));
+			if (arv->envelope_visible()) {
+				fooc.block (true);
+				region_envelope_visible_item->set_active (true);
+				fooc.block (false);
+			}
+		
+			items.push_back (CheckMenuElem (_("Envelope Active")));
+			region_envelope_active_item = static_cast<CheckMenuItem*> (&items.back());
+			fooc = region_envelope_active_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_gain_envelope_active));
+			
+			if (ar->envelope_active()) {
+				fooc.block (true);
+				region_envelope_active_item->set_active (true);
+				fooc.block (false);
+			}
+
+			items.push_back (SeparatorElem());
+		}
 
 		if (ar->scale_amplitude() != 1.0f) {
 			items.push_back (MenuElem (_("DeNormalize"), mem_fun(*this, &Editor::denormalize_region)));
@@ -1724,9 +1738,9 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 			items.push_back (MenuElem (_("Normalize"), mem_fun(*this, &Editor::normalize_region)));
 		}
 	}
+
 	items.push_back (MenuElem (_("Reverse"), mem_fun(*this, &Editor::reverse_region)));
 	items.push_back (SeparatorElem());
-
 
 	/* range related stuff */
 
