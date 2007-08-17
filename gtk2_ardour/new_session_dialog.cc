@@ -452,10 +452,8 @@ void
 NewSessionDialog::set_have_engine (bool yn)
 {
 	if (yn) {
-		cerr << "removing audio page\n";
 		m_notebook->remove_page (engine_control);
 	} else {
-		cerr << "appending audio page\n";
 		m_notebook->append_page (engine_control, _("Audio Setup"));
 		m_notebook->show_all_children();
 	}

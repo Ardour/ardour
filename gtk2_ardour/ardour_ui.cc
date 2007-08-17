@@ -475,6 +475,11 @@ ARDOUR_UI::save_ardour_state ()
 	XMLNode* node = new XMLNode (keyboard->get_state());
 	Config->add_extra_xml (*node);
 	Config->add_extra_xml (get_transport_controllable_state());
+	if (new_session_dialog) {
+		if (new_session_dialog->engine_control.was_used()) {
+			Config->add_extra_xml (new_session_dialog->engine_control.get_state());
+		}
+	}
 	Config->save_state();
 
 	XMLNode enode(static_cast<Stateful*>(editor)->get_state());
@@ -562,7 +567,7 @@ ARDOUR_UI::startup ()
 	bool isnew;
 
 	new_session_dialog = new NewSessionDialog();
-
+	
 	/* If no session name is given: we're not loading a session yet, nor creating a new one */
 
 	if (session_name.length()) {
@@ -609,7 +614,13 @@ ARDOUR_UI::startup ()
 		}
 		
 	} else {
+
+		XMLNode* audio_setup = Config->extra_xml ("AudioSetup");
 		
+		if (audio_setup) {
+			new_session_dialog->engine_control.set_state (*audio_setup);
+		}
+
 		/* no backend audio, must bring up NSD to check configuration */
 		
 		need_nsd = true;

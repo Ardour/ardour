@@ -24,6 +24,10 @@ class EngineControl : public Gtk::VBox {
 	int start_engine ();
 	int stop_engine ();
 
+	bool was_used() const { return _used; }
+	XMLNode& get_state ();
+	void set_state (const XMLNode&);
+
   private:
 	Gtk::Adjustment periods_adjustment;
 	Gtk::SpinButton periods_spinner;
@@ -67,24 +71,21 @@ class EngineControl : public Gtk::VBox {
 	Gtk::Table basic_packer;
 	Gtk::Table options_packer;
 	Gtk::Table device_packer;
-
+	Gtk::HBox basic_hbox;
 	Gtk::Notebook notebook;
+	
+	bool _used;
 
 	void realtime_changed ();
 	void driver_changed ();
-
 	void build_command_line (std::vector<std::string>&);
-	Glib::Pid engine_pid;
-	int engine_stdin;
-	int engine_stdout;
-	int engine_stderr;
 
 	std::map<std::string,std::vector<std::string> > devices;
+	std::vector<std::string> backend_devs;
 	void enumerate_devices ();
 
 #ifdef __APPLE__
 	std::vector<std::string> enumerate_coreaudio_devices ();
-	std::vector<std::string> coreaudio_devs;
 #else
 	std::vector<std::string> enumerate_alsa_devices ();
 	std::vector<std::string> enumerate_oss_devices ();
@@ -97,6 +98,7 @@ class EngineControl : public Gtk::VBox {
 	uint32_t get_rate();
 	void audio_mode_changed ();
 	void find_jack_servers (std::vector<std::string>&);
+	std::string get_device_name (const std::string& driver, const std::string& human_readable_name);
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */

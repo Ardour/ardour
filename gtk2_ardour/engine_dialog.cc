@@ -3,11 +3,14 @@
 #include <fstream>
 
 #include <glibmm.h>
+#include <pbd/xml++.h>
 
 #ifdef __APPLE__
 #include <CoreAudio/CoreAudio.h>
 #include <CoreFoundation/CFString.h>
-#endif __APPLE__
+#else
+#include <alsa/asoundlib.h>
+#endif
 
 #include <ardour/profile.h>
 #include <jack/jack.h>
@@ -50,12 +53,18 @@ EngineControl::EngineControl ()
 	  start_button (_("Start")),
 	  stop_button (_("Stop")),
 	  basic_packer (8, 2),
-	  options_packer (12, 2),
+#ifdef __APPLE__
+	  options_packer (4, 2),
+#else
+	  options_packer (14, 2),
+#endif	  
 	  device_packer (3, 2)
 {
 	using namespace Notebook_Helpers;
 	Label* label;
 	vector<string> strings;
+
+	_used = false;
 
 	strings.push_back (_("8000Hz"));
 	strings.push_back (_("22050Hz"));
@@ -79,6 +88,14 @@ EngineControl::EngineControl ()
 	strings.push_back ("8192");
 	set_popdown_strings (period_size_combo, strings);
 	period_size_combo.set_active_text ("1024");
+
+	strings.clear ();
+	strings.push_back (_("None"));
+	strings.push_back (_("Triangular"));
+	strings.push_back (_("Rectangular"));
+	strings.push_back (_("Shaped"));
+	set_popdown_strings (dither_mode_combo, strings);
+	dither_mode_combo.set_active_text (_("None"));
 
 	/* basic parameters */
 
@@ -104,9 +121,10 @@ EngineControl::EngineControl ()
 	driver_changed ();
 
 	strings.clear ();
-	strings.push_back (_("Duplex"));
+	strings.push_back (_("Playback/Recording on 1 Device"));
+	strings.push_back (_("Playback/Recording on 2 Devices"));
 	strings.push_back (_("Playback only"));
-	strings.push_back (_("Capture only"));
+	strings.push_back (_("Recording only"));
 	set_popdown_strings (audio_mode_combo, strings);
 	audio_mode_combo.set_active_text (strings.front());
 
@@ -135,6 +153,7 @@ EngineControl::EngineControl ()
 	periods_spinner.set_value (2);
 
 	label = manage (new Label (_("Approximate latency")));
+	label->set_alignment (0.0, 0.5);
 	basic_packer.attach (*label, 0, 1, 5, 6, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (latency_label, 1, 2, 5, 6, FILL|EXPAND, (AttachOptions) 0);
 
@@ -145,9 +164,14 @@ EngineControl::EngineControl ()
 
 	label = manage (new Label (_("Audio Mode")));
 	basic_packer.attach (*label, 0, 1, 6, 7, FILL|EXPAND, (AttachOptions) 0);
-	basic_packer.attach (audio_mode_combo, 1, 2, 6, 7, FILL|EXPAND, (AttachOptions) 0);
+	
+	/* no audio mode with CoreAudio, its duplex or nuthin' */
 
-	/* 
+#ifndef __APPLE__
+	basic_packer.attach (audio_mode_combo, 1, 2, 6, 7, FILL|EXPAND, (AttachOptions) 0);
+#endif
+
+	/*
 
 	if (engine_running()) {
 		start_button.set_sensitive (false);
@@ -166,26 +190,41 @@ EngineControl::EngineControl ()
 
 	/* options */
 
-	options_packer.attach (realtime_button, 0, 1, 0, 1, FILL|EXPAND, (AttachOptions) 0);
+	int row = 0;
+	options_packer.set_spacings (6);
+
+	options_packer.attach (realtime_button, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	++row;
 	label = manage (new Label (_("Realtime Priority")));
-	options_packer.attach (*label, 0, 1, 1, 2, FILL|EXPAND, (AttachOptions) 0);
-	options_packer.attach (priority_spinner, 1, 2, 1, 2, FILL|EXPAND, (AttachOptions) 0);
+	label->set_alignment (0.0, 0.5);
+	options_packer.attach (priority_spinner, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	options_packer.attach (*label, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	++row;
 	priority_spinner.set_value (60);
 
 	realtime_button.signal_toggled().connect (mem_fun (*this, &EngineControl::realtime_changed));
 	realtime_changed ();
 
 #ifndef __APPLE__
-	options_packer.attach (no_memory_lock_button, 0, 1, 2, 3, FILL|EXPAND, (AttachOptions) 0);
-	options_packer.attach (unlock_memory_button, 0, 1, 3, 4, FILL|EXPAND, (AttachOptions) 0);
-	options_packer.attach (soft_mode_button, 0, 1, 4, 5, FILL|EXPAND, (AttachOptions) 0);
-	options_packer.attach (monitor_button, 0, 1, 5, 6, FILL|EXPAND, (AttachOptions) 0);
-	options_packer.attach (force16bit_button, 0, 1, 6, 7, FILL|EXPAND, (AttachOptions) 0);
-	options_packer.attach (hw_monitor_button, 0, 1, 7, 8, FILL|EXPAND, (AttachOptions) 0);
-	options_packer.attach (hw_meter_button, 0, 1, 8, 9, FILL|EXPAND, (AttachOptions) 0);
-	options_packer.attach (verbose_output_button, 0, 1, 9, 10, FILL|EXPAND, (AttachOptions) 0);
+	options_packer.attach (no_memory_lock_button, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	++row;
+	options_packer.attach (unlock_memory_button, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	++row;
+	options_packer.attach (soft_mode_button, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	++row;
+	options_packer.attach (monitor_button, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	++row;
+	options_packer.attach (force16bit_button, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	++row;
+	options_packer.attach (hw_monitor_button, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	++row;
+	options_packer.attach (hw_meter_button, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	++row;
+	options_packer.attach (verbose_output_button, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	++row;
 #else 
-	options_packer.attach (verbose_output_button, 0, 1, 2, 3, FILL|EXPAND, (AttachOptions) 0);
+	options_packer.attach (verbose_output_button, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	++row;
 #endif
 
 	strings.clear ();
@@ -198,12 +237,24 @@ EngineControl::EngineControl ()
 	timeout_combo.set_active_text (strings.front ());
 
 	label = manage (new Label (_("Client timeout")));
-	options_packer.attach (*label, 0, 1, 11, 12, (AttachOptions) 0, (AttachOptions) 0);
-	options_packer.attach (timeout_combo, 1, 2, 11, 12, FILL|EXPAND, AttachOptions(0));
+	label->set_alignment (0.0, 0.5);
+	options_packer.attach (timeout_combo, 0, 1, row, row + 1, FILL|EXPAND, AttachOptions(0));
+	options_packer.attach (*label, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	++row;
 
 	label = manage (new Label (_("Number of ports")));
-	options_packer.attach (*label, 0, 1, 12, 13, (AttachOptions) 0, (AttachOptions) 0);
-	options_packer.attach (ports_spinner, 1, 2, 12, 13, FILL|EXPAND, AttachOptions(0));
+	label->set_alignment (0.0, 0.5);
+	options_packer.attach (ports_spinner, 0, 1, row, row + 1, FILL|EXPAND, AttachOptions(0));
+	options_packer.attach (*label, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	++row;
+
+#ifndef __APPLE__
+	label = manage (new Label (_("Dither")));	
+	label->set_alignment (0.0, 0.5);
+	options_packer.attach (dither_mode_combo, 0, 1, row, row + 1, FILL|EXPAND, AttachOptions(0));
+	options_packer.attach (*label, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	++row;
+#endif
 
 	strings.clear ();
 
@@ -217,12 +268,12 @@ EngineControl::EngineControl ()
 	set_popdown_strings (serverpath_combo, strings);
 	serverpath_combo.set_active_text (strings.front());
 
-	cerr << "we have " << strings.size() << " possible Jack servers\n";
-
 	if (strings.size() > 1) {
 		label = manage (new Label (_("Server:")));
-		options_packer.attach (*label, 0, 1, 11, 12, (AttachOptions) 0, (AttachOptions) 0);
-		options_packer.attach (serverpath_combo, 1, 2, 11, 12, FILL|EXPAND, (AttachOptions) 0);
+		options_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+		label->set_alignment (0.0, 0.5);
+		options_packer.attach (serverpath_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+		++row;
 	}
 
 	/* device settings */
@@ -230,25 +281,33 @@ EngineControl::EngineControl ()
 	device_packer.set_spacings (6);
 
 	label = manage (new Label (_("Input device")));
+	label->set_alignment (1.0, 0.5);
 	device_packer.attach (*label, 0, 1, 0, 1, FILL|EXPAND, (AttachOptions) 0);
 	device_packer.attach (input_device_combo, 1, 2, 0, 1, FILL|EXPAND, (AttachOptions) 0);
 	label = manage (new Label (_("Output device")));
+	label->set_alignment (1.0, 0.5);
 	device_packer.attach (*label, 0, 1, 1, 2, FILL|EXPAND, (AttachOptions) 0);
 	device_packer.attach (output_device_combo, 1, 2, 1, 2, FILL|EXPAND, (AttachOptions) 0);	
 	label = manage (new Label (_("Input channels")));
+	label->set_alignment (1.0, 0.5);
 	device_packer.attach (*label, 0, 1, 2, 3, FILL|EXPAND, (AttachOptions) 0);
 	device_packer.attach (input_channels, 1, 2, 2, 3, FILL|EXPAND, (AttachOptions) 0);
 	label = manage (new Label (_("Output channels")));
+	label->set_alignment (1.0, 0.5);
 	device_packer.attach (*label, 0, 1, 3, 4, FILL|EXPAND, (AttachOptions) 0);
 	device_packer.attach (output_channels, 1, 2, 3, 4, FILL|EXPAND, (AttachOptions) 0);
-	label = manage (new Label (_("Input latency (samples)")));
+	label = manage (new Label (_("Hardware input latency (samples)")));
+	label->set_alignment (1.0, 0.5);
 	device_packer.attach (*label, 0, 1, 4, 5, FILL|EXPAND, (AttachOptions) 0);
 	device_packer.attach (input_latency, 1, 2, 4, 5, FILL|EXPAND, (AttachOptions) 0);
-	label = manage (new Label (_("Output latency (samples)")));
+	label = manage (new Label (_("Hardware output latency (samples)")));
+	label->set_alignment (1.0, 0.5);
 	device_packer.attach (*label, 0, 1, 5, 6, FILL|EXPAND, (AttachOptions) 0);
 	device_packer.attach (output_latency, 1, 2, 5, 6, FILL|EXPAND, (AttachOptions) 0);
 
-	notebook.pages().push_back (TabElem (basic_packer, _("Basics")));
+	basic_hbox.pack_start (basic_packer, false, false);
+
+	notebook.pages().push_back (TabElem (basic_hbox, _("Basics")));
 	notebook.pages().push_back (TabElem (options_packer, _("Options")));
 	notebook.pages().push_back (TabElem (device_packer, _("Device Parameters")));
 
@@ -338,16 +397,26 @@ EngineControl::build_command_line (vector<string>& cmd)
 
 	/* driver arguments */
 
-	str = audio_mode_combo.get_active_text();
-	if (str == _("Duplex")) {
-		/* relax */
-	} else if (str == _("Playback only")) {
-		cmd.push_back ("-P");
-	} else if (str == _("Capture only")) {
-		cmd.push_back ("-C");
-	}
-
 	if (!using_coreaudio) {
+		str = audio_mode_combo.get_active_text();
+		
+		if (str == _("Playback/Recording on 1 Device")) {
+			
+			/* relax */
+			
+		} else if (str == _("Playback/Recording on 2 Devices")) {
+			
+			cmd.push_back ("-C");
+			cmd.push_back (get_device_name (driver, input_device_combo.get_active_text()));
+			cmd.push_back ("-P");
+			cmd.push_back (get_device_name (driver, output_device_combo.get_active_text()));
+			
+		} else if (str == _("Playback only")) {
+			cmd.push_back ("-P");
+		} else if (str == _("Recording only")) {
+			cmd.push_back ("-C");
+		}
+
 		cmd.push_back ("-n");
 		cmd.push_back (to_string ((uint32_t) floor (periods_spinner.get_value()), std::dec));
 	}
@@ -359,9 +428,11 @@ EngineControl::build_command_line (vector<string>& cmd)
 	cmd.push_back (period_size_combo.get_active_text());
 
 	if (using_alsa) {
-
-		cmd.push_back ("-d");
-		cmd.push_back (interface_combo.get_active_text());
+		
+		if (audio_mode_combo.get_active_text() != _("Playback/Recording on 2 Devices")) {
+			cmd.push_back ("-d");
+			cmd.push_back (get_device_name (driver, interface_combo.get_active_text()));
+		} 
 
 		if (hw_meter_button.get_active()) {
 			cmd.push_back ("-M");
@@ -372,6 +443,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 		}
 
 		str = dither_mode_combo.get_active_text();
+
 		if (str == _("None")) {
 		} else if (str == _("Triangular")) {
 			cmd.push_back ("-z triangular");
@@ -393,23 +465,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 
 #ifdef __APPLE__
 		cmd.push_back ("-n");
-
-		Glib::ustring str = interface_combo.get_active_text();
-		vector<string>::iterator n;
-		vector<string>::iterator i;
-		
-		for (i = devices[driver].begin(), n = coreaudio_devs.begin(); i != devices[driver].end(); ++i, ++n) {
-			if (str == (*i)) {
-				cerr << "for " << str << " use " << (*n) << endl;
-				cmd.push_back (*n);
-				break;
-			}
-		}
-			
-		if (i == devices[driver].end()) {
-			fatal << string_compose (_("programming error: %1"), "coreaudio device ID missing") << endmsg;
-			/*NOTREACHED*/
-		}
+		cmd.push_back (get_device_name (driver, interface_combo.get_active_text()));
 #endif
 
 	} else if (using_oss) {
@@ -458,6 +514,8 @@ EngineControl::start_engine ()
 	jackdrc << endl;
 	cerr << endl;
 	jackdrc.close ();
+
+	_used = true;
 	
 #if 0
 
@@ -477,10 +535,6 @@ EngineControl::start_engine ()
 int
 EngineControl::stop_engine ()
 {
-	close (engine_stdin);
-	close (engine_stderr);
-	close (engine_stdout);
-	spawn_close_pid (engine_pid);
 	return 0;
 }
 
@@ -531,7 +585,7 @@ EngineControl::enumerate_coreaudio_devices ()
 	Boolean isWritable;
 	size_t outSize = sizeof(isWritable);
 
-	coreaudio_devs.clear ();
+	backend_devs.clear ();
 
 	err = AudioHardwareGetPropertyInfo(kAudioHardwarePropertyDevices,
 					   &outSize, &isWritable);
@@ -563,7 +617,7 @@ EngineControl::enumerate_coreaudio_devices ()
 						
 						if (getDeviceUIDFromID(coreDeviceIDs[i], drivername, sizeof (drivername)) == noErr) {
 							devs.push_back (coreDeviceName);
-							coreaudio_devs.push_back (drivername);
+							backend_devs.push_back (drivername);
 						} 
 					}
 				}
@@ -579,12 +633,63 @@ vector<string>
 EngineControl::enumerate_alsa_devices ()
 {
 	vector<string> devs;
-	devs.push_back ("hw:0");
-	devs.push_back ("hw:1");
-	devs.push_back ("plughw:0");
-	devs.push_back ("plughw:1");
+
+	snd_ctl_t *handle;
+	snd_ctl_card_info_t *info;
+	snd_pcm_info_t *pcminfo;
+	snd_ctl_card_info_alloca(&info);
+	snd_pcm_info_alloca(&pcminfo);
+	string devname;
+	int cardnum = -1;
+	int device = -1;
+
+	backend_devs.clear ();
+
+	while (snd_card_next (&cardnum) >= 0 && cardnum >= 0) {
+
+		devname = "hw:";
+		devname += to_string (cardnum, std::dec);
+
+		if (snd_ctl_open (&handle, devname.c_str(), 0) >= 0 && snd_ctl_card_info (handle, info) >= 0) {
+
+			while (snd_ctl_pcm_next_device (handle, &device) >= 0 && device >= 0) {
+
+				bool have_playback = false;
+				bool have_capture = false;
+
+				/* find duplex devices only */
+
+				snd_pcm_info_set_device (pcminfo, device);
+				snd_pcm_info_set_subdevice (pcminfo, 0);
+				snd_pcm_info_set_stream (pcminfo, SND_PCM_STREAM_CAPTURE);
+
+				if (snd_ctl_pcm_info (handle, pcminfo) >= 0) {
+					have_capture = true;
+				}
+
+				snd_pcm_info_set_device (pcminfo, device);
+				snd_pcm_info_set_subdevice (pcminfo, 0);
+				snd_pcm_info_set_stream (pcminfo, SND_PCM_STREAM_PLAYBACK);
+
+				if (snd_ctl_pcm_info (handle, pcminfo) >= 0) {
+					have_playback = true;
+				}
+
+				if (have_capture && have_playback) {
+					devs.push_back (snd_pcm_info_get_name (pcminfo));
+					devname += ',';
+					devname += to_string (device, std::dec);
+					backend_devs.push_back (devname);
+				}
+			}
+
+			snd_ctl_close(handle);
+		}
+	}
+
 	return devs;
 }
+
 vector<string>
 EngineControl::enumerate_ffado_devices ()
 {
@@ -618,9 +723,13 @@ EngineControl::driver_changed ()
 	vector<string>& strings = devices[driver];
 	
 	set_popdown_strings (interface_combo, strings);
+	set_popdown_strings (input_device_combo, strings);
+	set_popdown_strings (output_device_combo, strings);
 
 	if (!strings.empty()) {
 		interface_combo.set_active_text (strings.front());
+		input_device_combo.set_active_text (strings.front());
+		output_device_combo.set_active_text (strings.front());
 	}
 	
 	if (driver == "ALSA") {
@@ -662,19 +771,23 @@ EngineControl::audio_mode_changed ()
 {
 	Glib::ustring str = audio_mode_combo.get_active_text();
 
-	if (str == _("Duplex")) {
+	if (str == _("Playback/Recording on 1 Device")) {
 		input_device_combo.set_sensitive (false);
 		output_device_combo.set_sensitive (false);
-	} else {
+	} else if (str == _("Playback/Recording on 2 Devices")) {
 		input_device_combo.set_sensitive (true);
 		output_device_combo.set_sensitive (true);
+	} else if (str == _("Playback only")) {
+		output_device_combo.set_sensitive (true);
+	} else if (str == _("Recording only")) {
+		input_device_combo.set_sensitive (true);
 	}
 }
 
 void
 EngineControl::find_jack_servers (vector<string>& strings)
 {
-#ifdef __APPLE
+#ifdef __APPLE__
 	if (Profile->get_single_package()) {
 
 		/* this magic lets us finds the path to the OSX bundle, and then
@@ -696,8 +809,9 @@ EngineControl::find_jack_servers (vector<string>& strings)
 		} else {
 			warning << _("JACK appears to be missing from the Ardour bundle") << endmsg;
 		}
+	}
 #endif
-
+	
 	if (Glib::file_test ("/usr/bin/jackd", FILE_TEST_EXISTS)) {
 		strings.push_back ("/usr/bin/jackd");
 	}
@@ -717,4 +831,245 @@ EngineControl::find_jack_servers (vector<string>& strings)
 		strings.push_back ("/opt/bin/jackd");
 	}
 
+}
+
+string
+EngineControl::get_device_name (const string& driver, const string& human_readable)
+{
+	vector<string>::iterator n;
+	vector<string>::iterator i;
+
+	if (backend_devs.empty()) {
+		return human_readable;
+	}
+	
+	for (i = devices[driver].begin(), n = backend_devs.begin(); i != devices[driver].end(); ++i, ++n) {
+		if (human_readable == (*i)) {
+			return (*n);
+		}
+	}
+	
+	if (i == devices[driver].end()) {
+		fatal << string_compose (_("programming error: %1"), "true hardware name for ID missing") << endmsg;
+		/*NOTREACHED*/
+	}
+
+	/* keep gcc happy */
+
+	return string();
+}
+
+XMLNode&
+EngineControl::get_state ()
+{
+	XMLNode* root = new XMLNode ("AudioSetup");
+	XMLNode* child;
+	Glib::ustring path;
+
+	child = new XMLNode ("periods");
+	child->add_property ("val", to_string (periods_adjustment.get_value(), std::dec));
+	root->add_child_nocopy (*child);
+
+	child = new XMLNode ("priority");
+	child->add_property ("val", to_string (priority_adjustment.get_value(), std::dec));
+	root->add_child_nocopy (*child);
+
+	child = new XMLNode ("ports");
+	child->add_property ("val", to_string (ports_adjustment.get_value(), std::dec));
+	root->add_child_nocopy (*child);
+
+	child = new XMLNode ("inchannels");
+	child->add_property ("val", to_string (input_channels.get_value(), std::dec));
+	root->add_child_nocopy (*child);
+
+	child = new XMLNode ("outchannels");
+	child->add_property ("val", to_string (output_channels.get_value(), std::dec));
+	root->add_child_nocopy (*child);
+
+	child = new XMLNode ("inlatency");
+	child->add_property ("val", to_string (input_latency.get_value(), std::dec));
+	root->add_child_nocopy (*child);
+
+	child = new XMLNode ("outlatency");
+	child->add_property ("val", to_string (output_latency.get_value(), std::dec));
+	root->add_child_nocopy (*child);
+
+	child = new XMLNode ("realtime");
+	child->add_property ("val", to_string (realtime_button.get_active(), std::dec));
+	root->add_child_nocopy (*child);
+
+	child = new XMLNode ("nomemorylock");
+	child->add_property ("val", to_string (no_memory_lock_button.get_active(), std::dec));
+	root->add_child_nocopy (*child);
+
+	child = new XMLNode ("unlockmemory");
+	child->add_property ("val", to_string (unlock_memory_button.get_active(), std::dec));
+	root->add_child_nocopy (*child);
+
+	child = new XMLNode ("softmode");
+	child->add_property ("val", to_string (soft_mode_button.get_active(), std::dec));
+	root->add_child_nocopy (*child);
+
+	child = new XMLNode ("force16bit");
+	child->add_property ("val", to_string (force16bit_button.get_active(), std::dec));
+	root->add_child_nocopy (*child);
+
+	child = new XMLNode ("hwmonitor");
+	child->add_property ("val", to_string (hw_monitor_button.get_active(), std::dec));
+	root->add_child_nocopy (*child);
+
+	child = new XMLNode ("hwmeter");
+	child->add_property ("val", to_string (hw_meter_button.get_active(), std::dec));
+	root->add_child_nocopy (*child);
+
+	child = new XMLNode ("verbose");
+	child->add_property ("val", to_string (verbose_output_button.get_active(), std::dec));
+	root->add_child_nocopy (*child);
+
+	child = new XMLNode ("samplerate");
+	child->add_property ("val", sample_rate_combo.get_active_text());
+	root->add_child_nocopy (*child);
+
+	child = new XMLNode ("periodsize");
+	child->add_property ("val", period_size_combo.get_active_text());
+	root->add_child_nocopy (*child);
+
+	child = new XMLNode ("serverpath");
+	child->add_property ("val", serverpath_combo.get_active_text());
+	root->add_child_nocopy (*child);
+
+	child = new XMLNode ("driver");
+	child->add_property ("val", driver_combo.get_active_text());
+	root->add_child_nocopy (*child);
+
+	child = new XMLNode ("interface");
+	child->add_property ("val", interface_combo.get_active_text());
+	root->add_child_nocopy (*child);
+
+	child = new XMLNode ("timeout");
+	child->add_property ("val", timeout_combo.get_active_text());
+	root->add_child_nocopy (*child);
+
+	child = new XMLNode ("dither");
+	child->add_property ("val", dither_mode_combo.get_active_text());
+	root->add_child_nocopy (*child);
+
+	child = new XMLNode ("audiomode");
+	child->add_property ("val", audio_mode_combo.get_active_text());
+	root->add_child_nocopy (*child);
+
+	child = new XMLNode ("inputdevice");
+	child->add_property ("val", input_device_combo.get_active_text());
+	root->add_child_nocopy (*child);
+
+	child = new XMLNode ("outputdevice");
+	child->add_property ("val", output_device_combo.get_active_text());
+	root->add_child_nocopy (*child);
+	
+	return *root;
+}
+
+void
+EngineControl::set_state (const XMLNode& root)
+{
+	XMLNodeList          clist;
+	XMLNodeConstIterator citer;
+	XMLNode* child;
+	XMLProperty* prop;
+
+	int val;
+	string strval;
+
+	clist = root.children();
+
+	for (citer = clist.begin(); citer != clist.end(); ++citer) {
+
+		child = *citer;
+
+		prop = child->property ("val");
+
+		if (!prop || prop->value().empty()) {
+			error << string_compose (_("AudioSetup value for %1 is missing data"), child->name()) << endmsg;
+			continue;
+		}
+		
+		strval = prop->value();
+
+		/* adjustments/spinners */
+
+		if (child->name() == "periods") {
+			val = atoi (strval);
+			periods_adjustment.set_value(val);
+		} else if (child->name() == "priority") {
+			val = atoi (strval);
+			priority_adjustment.set_value(val);
+		} else if (child->name() == "ports") {
+			val = atoi (strval);
+			ports_adjustment.set_value(val);
+		} else if (child->name() == "inchannels") {
+			val = atoi (strval);
+			input_channels.set_value(val);
+		} else if (child->name() == "outchannels") {
+			val = atoi (strval);
+			output_channels.set_value(val);
+		} else if (child->name() == "inlatency") {
+			val = atoi (strval);
+			input_latency.set_value(val);
+		} else if (child->name() == "outlatency") {
+			val = atoi (strval);
+			output_latency.set_value(val);
+		}
+
+		/* buttons */
+
+		else if (child->name() == "realtime") {
+			val = atoi (strval);
+			realtime_button.set_active(val);
+		} else if (child->name() == "nomemorylock") {
+			val = atoi (strval);
+			no_memory_lock_button.set_active(val);
+		} else if (child->name() == "unlockmemory") {
+			val = atoi (strval);
+			unlock_memory_button.set_active(val);
+		} else if (child->name() == "softmode") {
+			val = atoi (strval);
+			soft_mode_button.set_active(val);
+		} else if (child->name() == "force16bit") {
+			val = atoi (strval);
+			force16bit_button.set_active(val);
+		} else if (child->name() == "hwmonitor") {
+			val = atoi (strval);
+			hw_monitor_button.set_active(val);
+		} else if (child->name() == "hwmeter") {
+			val = atoi (strval);
+			hw_meter_button.set_active(val);
+		} else if (child->name() == "verbose") {
+			val = atoi (strval);
+			verbose_output_button.set_active(val);
+		}
+
+		/* combos */
+
+		else if (child->name() == "samplerate") {
+			sample_rate_combo.set_active_text(strval);
+		} else if (child->name() == "periodsize") {
+			period_size_combo.set_active_text(strval);
+		} else if (child->name() == "serverpath") {
+			serverpath_combo.set_active_text(strval);
+		} else if (child->name() == "driver") {
+			driver_combo.set_active_text(strval);
+		} else if (child->name() == "interface") {
+			interface_combo.set_active_text(strval);
+		} else if (child->name() == "timeout") {
+			timeout_combo.set_active_text(strval);
+		} else if (child->name() == "dither") {
+			dither_mode_combo.set_active_text(strval);
+		} else if (child->name() == "audiomode") {
+			audio_mode_combo.set_active_text(strval);
+		} else if (child->name() == "inputdevice") {
+			input_device_combo.set_active_text(strval);
+		} else if (child->name() == "outputdevice") {
+			output_device_combo.set_active_text(strval);
+		}
+	}
 }

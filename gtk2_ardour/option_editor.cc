@@ -106,13 +106,13 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	session = 0;
 	
 	WindowTitle title(Glib::get_application_name());
-	title += _("Options Editor");
+	title += _("Preferences");
 	set_title(title.get_string());
 
 	set_default_size (300, 300);
-	set_wmclass (X_("ardour_option_editor"), "Ardour");
+	set_wmclass (X_("ardour_preferences"), "Ardour");
 
-	set_name ("OptionsWindow");
+	set_name ("Preferences");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 	
 	VBox *vbox = get_vbox();
