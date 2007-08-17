@@ -130,7 +130,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 		_will_create_new_session_automatically = yn;
 	}
 
-	bool new_session (Glib::ustring path, bool have_engine = false);
+	bool get_session_parameters (Glib::ustring path, bool have_engine = false, bool should_be_new = false);
 	gint cmdline_new_session (string path);
 	int  unload_session ();
 	void close_session(); 

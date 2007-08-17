@@ -628,7 +628,7 @@ ARDOUR_UI::startup ()
 
 	if (need_nsd) {
 
-		if (!new_session (session_name,have_backend)) {
+		if (!get_session_parameters (session_name, have_backend, ARDOUR_COMMAND_LINE::new_session)) {
 			return;
 		}
 
@@ -1943,7 +1943,7 @@ ARDOUR_UI::save_template ()
 }
 
 bool
-ARDOUR_UI::new_session (Glib::ustring predetermined_path, bool have_engine)
+ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_engine, bool should_be_new)
 {
 	string session_name;
 	string session_path;
@@ -1996,7 +1996,7 @@ ARDOUR_UI::new_session (Glib::ustring predetermined_path, bool have_engine)
 
 		if (response == Gtk::RESPONSE_YES) {
 
-		        /* YES == OPEN from the open session tab */
+		        /* YES == OPEN from the session selector */
 
 		        session_name = new_session_dialog->session_name();
 			
@@ -2016,7 +2016,7 @@ ARDOUR_UI::new_session (Glib::ustring predetermined_path, bool have_engine)
 			
 		} else if (response == Gtk::RESPONSE_OK) {
 
-			/* OK == OPEN from new session tab */
+			/* OK == OPEN button */
 
 			session_name = new_session_dialog->session_name();
 			
@@ -2062,8 +2062,8 @@ ARDOUR_UI::new_session (Glib::ustring predetermined_path, bool have_engine)
 				//non-existant path. hopefully this will be fixed at some point.
 				
 				session_path = Glib::build_filename (session_path, session_name);
-						
-				if (Glib::file_test (session_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
+				
+				if (should_be_new && Glib::file_test (session_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
 
 					Glib::ustring str = string_compose (_("This session\n%1\nalready exists. Do you want to open it?"), session_path);
 
@@ -2187,7 +2187,7 @@ ARDOUR_UI::close_session()
 	}
 
 	unload_session();
-	new_session ("", true);
+	get_session_parameters ("", true, false);
 }
 
 int
@@ -2743,7 +2743,7 @@ ARDOUR_UI::cmdline_new_session (string path)
 		path = str;
 	}
 
-	new_session (path);
+	get_session_parameters (path, false, true);
 
 	_will_create_new_session_automatically = false; /* done it */
 	return FALSE; /* don't call it again */
