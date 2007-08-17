@@ -1057,6 +1057,10 @@ class Editor : public PublicEditor
 	void start_scrolling ();
 	void stop_scrolling ();
 
+	bool _scrubbing;
+	nframes64_t last_scrub_frame;
+	uint32_t last_scrub_time;
+
 	void keyboard_selection_begin ();
 	void keyboard_selection_finish (bool add);
 	bool have_pending_keyboard_selection;

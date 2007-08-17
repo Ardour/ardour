@@ -220,6 +220,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void setup_profile ();
 	void setup_theme ();
 
+	void set_shuttle_fract (double);
+
   protected:
 	friend class PublicEditor;
 
@@ -323,6 +325,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void stop_blinking ();
 
 	void about_signal_response(int response);
+
 
   private:
 	Gtk::VBox     top_packer;
@@ -438,7 +441,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	gint shuttle_box_expose (GdkEventExpose*);
 	gint mouse_shuttle (double x, bool force);
 	void use_shuttle_fract (bool force);
-	void set_shuttle_fract (double);
 
 	bool   shuttle_grabbed;
 	double shuttle_fract;

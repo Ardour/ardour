@@ -312,6 +312,7 @@ Editor::Editor ()
 	canvas_idle_queued = false;
 	_dragging_playhead = false;
 	_dragging_hscrollbar = false;
+	_scrubbing = false;
 
 	location_marker_color = ARDOUR_UI::config()->canvasvar_LocationMarker.get();
 	location_range_color = ARDOUR_UI::config()->canvasvar_LocationRange.get();

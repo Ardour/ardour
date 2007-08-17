@@ -669,7 +669,10 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			break;
 
 		case MouseAudition:
-			/* handled in release */
+			_scrubbing = true;
+			last_scrub_frame = 0;
+			last_scrub_time = 0;
+			/* rest handled in motion & release */
 			break;
 
 		default:
@@ -1009,12 +1012,19 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 			
 		case MouseAudition:
-			switch (item_type) {
-			case RegionItem:
-				audition_selected_region ();
-				break;
-			default:
-				break;
+			_scrubbing = false;
+			if (last_scrub_frame == 0) {
+				/* no drag, just a click */
+				switch (item_type) {
+				case RegionItem:
+					audition_selected_region ();
+					break;
+				default:
+					break;
+				}
+			} else {
+				/* make sure we stop */
+				session->request_transport_speed (0.0);
 			}
 			break;
 
@@ -1417,7 +1427,7 @@ bool
 Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type, bool from_autoscroll)
 {
 	gint x, y;
-	
+
 	/* We call this so that MOTION_NOTIFY events continue to be
 	   delivered to the canvas. We need to do this because we set
 	   Gdk::POINTER_MOTION_HINT_MASK on the canvas. This reduces
@@ -1443,6 +1453,48 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 	drag_info.item_type = item_type;
 	drag_info.current_pointer_frame = event_frame (event, &drag_info.current_pointer_x,
 						       &drag_info.current_pointer_y);
+
+	switch (mouse_mode) {
+	case MouseAudition:
+		if (_scrubbing) {
+			if (last_scrub_frame == 0) {
+
+				/* first motion, just set up the variables */
+
+				last_scrub_frame = (nframes64_t) drag_info.current_pointer_frame;
+				last_scrub_time = ((GdkEventMotion*)event)->time;
+				session->request_locate (last_scrub_frame);
+
+			} else {
+
+				/* how fast is the mouse moving ? */
+
+				double speed;
+				nframes_t distance;
+				uint32_t time;
+				double dir;
+	
+				if (last_scrub_frame < (nframes64_t) drag_info.current_pointer_frame) {
+					distance = (nframes64_t) drag_info.current_pointer_frame - last_scrub_frame;
+					dir = 1.0;
+				} else {
+					distance = last_scrub_frame - (nframes64_t) drag_info.current_pointer_frame;
+					dir = -1.0;
+				}
+				
+				time = ((GdkEventMotion*) event)->time - last_scrub_time;
+				last_scrub_frame = drag_info.current_pointer_frame;
+				last_scrub_time = ((GdkEventMotion*)event)->time;
+				speed = (distance * 1000.0) / time; // frames/sec
+				speed /= session->frame_rate();
+				speed *= dir;
+				session->request_transport_speed (speed);
+			}
+		}
+
+	default:
+		break;
+	}
 
 	if (!from_autoscroll && drag_info.item) {
 		/* item != 0 is the best test i can think of for dragging.
