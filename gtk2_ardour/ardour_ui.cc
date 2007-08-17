@@ -1954,6 +1954,7 @@ ARDOUR_UI::new_session (Glib::ustring predetermined_path, bool have_engine)
 	new_session_dialog->set_name (predetermined_path);
 	new_session_dialog->reset_recent();
 	new_session_dialog->show();
+	new_session_dialog->present ();
 	new_session_dialog->set_current_page (0);
 
 	do {

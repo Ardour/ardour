@@ -30,7 +30,7 @@
 //but the GtkToolbar compatibility system is particularly unpleasant, so we just removed it in gtkmm 2.4. murrayc.
 //In future, this GTK_DISABLE_DEPRECATED might be inappropriate because it might cover extra GTK+ API. Just remove it then.
 
-#define GTK_DISABLE_DEPRECATED
+// #define GTK_DISABLE_DEPRECATED
 
 #include <glib.h>
 #include <gtkmm/button.h>

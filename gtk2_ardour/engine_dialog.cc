@@ -52,17 +52,20 @@ EngineControl::EngineControl ()
 	  verbose_output_button (_("Verbose output")),
 	  start_button (_("Start")),
 	  stop_button (_("Stop")),
-	  basic_packer (8, 2),
 #ifdef __APPLE__
+	  basic_packer (5, 2),
 	  options_packer (4, 2),
+	  device_packer (4, 2)
 #else
+	  basic_packer (8, 2),
 	  options_packer (14, 2),
+	  device_packer (6, 2)
 #endif	  
-	  device_packer (3, 2)
 {
 	using namespace Notebook_Helpers;
 	Label* label;
 	vector<string> strings;
+	int row = 0;
 
 	_used = false;
 
@@ -131,44 +134,54 @@ EngineControl::EngineControl ()
 	audio_mode_combo.signal_changed().connect (mem_fun (*this, &EngineControl::audio_mode_changed));
 	audio_mode_changed ();
 
+	row = 0;
+
 	label = manage (new Label (_("Driver")));
-	basic_packer.attach (*label, 0, 1, 0, 1, FILL|EXPAND, (AttachOptions) 0);
-	basic_packer.attach (driver_combo, 1, 2, 0, 1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (driver_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	row++;
 
 	label = manage (new Label (_("Interface")));
-	basic_packer.attach (*label, 0, 1, 1, 2, FILL|EXPAND, (AttachOptions) 0);
-	basic_packer.attach (interface_combo, 1, 2, 1, 2, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (interface_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	row++;
 
 	label = manage (new Label (_("Sample Rate")));
-	basic_packer.attach (*label, 0, 1, 2, 3, FILL|EXPAND, (AttachOptions) 0);
-	basic_packer.attach (sample_rate_combo, 1, 2, 2, 3, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (sample_rate_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	row++;
 
 	label = manage (new Label (_("Buffer size")));
-	basic_packer.attach (*label, 0, 1, 3, 4, FILL|EXPAND, (AttachOptions) 0);
-	basic_packer.attach (period_size_combo, 1, 2, 3, 4, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (period_size_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	row++;
 
+#ifndef __APPLE__
 	label = manage (new Label (_("Number of buffers")));
-	basic_packer.attach (*label, 0, 1, 4, 5, FILL|EXPAND, (AttachOptions) 0);
-	basic_packer.attach (periods_spinner, 1, 2, 4, 5, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (periods_spinner, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	periods_spinner.set_value (2);
+	row++;
+#endif
 
 	label = manage (new Label (_("Approximate latency")));
 	label->set_alignment (0.0, 0.5);
-	basic_packer.attach (*label, 0, 1, 5, 6, FILL|EXPAND, (AttachOptions) 0);
-	basic_packer.attach (latency_label, 1, 2, 5, 6, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (latency_label, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	row++;
 
 	sample_rate_combo.signal_changed().connect (mem_fun (*this, &EngineControl::redisplay_latency));
 	periods_adjustment.signal_value_changed().connect (mem_fun (*this, &EngineControl::redisplay_latency));
 	period_size_combo.signal_changed().connect (mem_fun (*this, &EngineControl::redisplay_latency));
 	redisplay_latency();
-
-	label = manage (new Label (_("Audio Mode")));
-	basic_packer.attach (*label, 0, 1, 6, 7, FILL|EXPAND, (AttachOptions) 0);
-	
+	row++;
 	/* no audio mode with CoreAudio, its duplex or nuthin' */
 
 #ifndef __APPLE__
-	basic_packer.attach (audio_mode_combo, 1, 2, 6, 7, FILL|EXPAND, (AttachOptions) 0);
+	label = manage (new Label (_("Audio Mode")));
+	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (audio_mode_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	row++;
 #endif
 
 	/*
@@ -190,15 +203,15 @@ EngineControl::EngineControl ()
 
 	/* options */
 
-	int row = 0;
 	options_packer.set_spacings (6);
+	row = 0;
 
-	options_packer.attach (realtime_button, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	options_packer.attach (realtime_button, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 	label = manage (new Label (_("Realtime Priority")));
-	label->set_alignment (0.0, 0.5);
-	options_packer.attach (priority_spinner, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-	options_packer.attach (*label, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	label->set_alignment (1.0, 0.5);
+	options_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	options_packer.attach (priority_spinner, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 	priority_spinner.set_value (60);
 
@@ -206,24 +219,24 @@ EngineControl::EngineControl ()
 	realtime_changed ();
 
 #ifndef __APPLE__
-	options_packer.attach (no_memory_lock_button, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	options_packer.attach (no_memory_lock_button, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
-	options_packer.attach (unlock_memory_button, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	options_packer.attach (unlock_memory_button, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
-	options_packer.attach (soft_mode_button, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	options_packer.attach (soft_mode_button, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
-	options_packer.attach (monitor_button, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	options_packer.attach (monitor_button, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
-	options_packer.attach (force16bit_button, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	options_packer.attach (force16bit_button, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
-	options_packer.attach (hw_monitor_button, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	options_packer.attach (hw_monitor_button, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
-	options_packer.attach (hw_meter_button, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	options_packer.attach (hw_meter_button, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
-	options_packer.attach (verbose_output_button, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	options_packer.attach (verbose_output_button, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 #else 
-	options_packer.attach (verbose_output_button, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	options_packer.attach (verbose_output_button, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 #endif
 
@@ -237,22 +250,22 @@ EngineControl::EngineControl ()
 	timeout_combo.set_active_text (strings.front ());
 
 	label = manage (new Label (_("Client timeout")));
-	label->set_alignment (0.0, 0.5);
-	options_packer.attach (timeout_combo, 0, 1, row, row + 1, FILL|EXPAND, AttachOptions(0));
-	options_packer.attach (*label, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	label->set_alignment (1.0, 0.5);
+	options_packer.attach (timeout_combo, 1, 2, row, row + 1, FILL|EXPAND, AttachOptions(0));
+	options_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 
 	label = manage (new Label (_("Number of ports")));
-	label->set_alignment (0.0, 0.5);
-	options_packer.attach (ports_spinner, 0, 1, row, row + 1, FILL|EXPAND, AttachOptions(0));
-	options_packer.attach (*label, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	label->set_alignment (1.0, 0.5);
+	options_packer.attach (ports_spinner, 1, 2, row, row + 1, FILL|EXPAND, AttachOptions(0));
+	options_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 
 #ifndef __APPLE__
 	label = manage (new Label (_("Dither")));	
-	label->set_alignment (0.0, 0.5);
-	options_packer.attach (dither_mode_combo, 0, 1, row, row + 1, FILL|EXPAND, AttachOptions(0));
-	options_packer.attach (*label, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	label->set_alignment (1.0, 0.5);
+	options_packer.attach (dither_mode_combo, 1, 2, row, row + 1, FILL|EXPAND, AttachOptions(0));
+	options_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 #endif
 
@@ -279,41 +292,55 @@ EngineControl::EngineControl ()
 	/* device settings */
 
 	device_packer.set_spacings (6);
+	row = 0;
 
+#ifndef __APPLE__
 	label = manage (new Label (_("Input device")));
 	label->set_alignment (1.0, 0.5);
-	device_packer.attach (*label, 0, 1, 0, 1, FILL|EXPAND, (AttachOptions) 0);
-	device_packer.attach (input_device_combo, 1, 2, 0, 1, FILL|EXPAND, (AttachOptions) 0);
+	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	device_packer.attach (input_device_combo, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	++row;
 	label = manage (new Label (_("Output device")));
 	label->set_alignment (1.0, 0.5);
-	device_packer.attach (*label, 0, 1, 1, 2, FILL|EXPAND, (AttachOptions) 0);
-	device_packer.attach (output_device_combo, 1, 2, 1, 2, FILL|EXPAND, (AttachOptions) 0);	
+	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	device_packer.attach (output_device_combo, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);	
+	++row;
+#endif
 	label = manage (new Label (_("Input channels")));
 	label->set_alignment (1.0, 0.5);
-	device_packer.attach (*label, 0, 1, 2, 3, FILL|EXPAND, (AttachOptions) 0);
-	device_packer.attach (input_channels, 1, 2, 2, 3, FILL|EXPAND, (AttachOptions) 0);
+	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	device_packer.attach (input_channels, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	++row;
 	label = manage (new Label (_("Output channels")));
 	label->set_alignment (1.0, 0.5);
-	device_packer.attach (*label, 0, 1, 3, 4, FILL|EXPAND, (AttachOptions) 0);
-	device_packer.attach (output_channels, 1, 2, 3, 4, FILL|EXPAND, (AttachOptions) 0);
+	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	device_packer.attach (output_channels, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	++row;
 	label = manage (new Label (_("Hardware input latency (samples)")));
 	label->set_alignment (1.0, 0.5);
-	device_packer.attach (*label, 0, 1, 4, 5, FILL|EXPAND, (AttachOptions) 0);
-	device_packer.attach (input_latency, 1, 2, 4, 5, FILL|EXPAND, (AttachOptions) 0);
+	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	device_packer.attach (input_latency, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	++row;
 	label = manage (new Label (_("Hardware output latency (samples)")));
 	label->set_alignment (1.0, 0.5);
-	device_packer.attach (*label, 0, 1, 5, 6, FILL|EXPAND, (AttachOptions) 0);
-	device_packer.attach (output_latency, 1, 2, 5, 6, FILL|EXPAND, (AttachOptions) 0);
+	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	device_packer.attach (output_latency, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	++row;
 
 	basic_hbox.pack_start (basic_packer, false, false);
+	options_hbox.pack_start (options_packer, false, false);
 
-	notebook.pages().push_back (TabElem (basic_hbox, _("Basics")));
-	notebook.pages().push_back (TabElem (options_packer, _("Options")));
-	notebook.pages().push_back (TabElem (device_packer, _("Device Parameters")));
+	device_packer.set_border_width (12);
+	options_packer.set_border_width (12);
+	basic_packer.set_border_width (12);
+
+	notebook.pages().push_back (TabElem (basic_hbox, _("Device")));
+	notebook.pages().push_back (TabElem (options_hbox, _("Options")));
+	notebook.pages().push_back (TabElem (device_packer, _("Advanced")));
+	notebook.set_border_width (12);
 
 	set_border_width (12);
 	pack_start (notebook);
-
 }
 
 EngineControl::~EngineControl ()
@@ -757,7 +784,11 @@ void
 EngineControl::redisplay_latency ()
 {
 	uint32_t rate = get_rate();
+#ifdef __APPLE_
+	float periods = 2;
+#else
 	float periods = periods_adjustment.get_value();
+#endif
 	float period_size = atof (period_size_combo.get_active_text());
 
 	char buf[32];
@@ -788,7 +819,7 @@ void
 EngineControl::find_jack_servers (vector<string>& strings)
 {
 #ifdef __APPLE__
-	if (Profile->get_single_package()) {
+	if (ARDOUR::Profile->get_single_package()) {
 
 		/* this magic lets us finds the path to the OSX bundle, and then
 		   we infer JACK's location from there
@@ -802,10 +833,10 @@ EngineControl::find_jack_servers (vector<string>& strings)
 		CFRelease(pluginRef);
 		CFRelease(macPath);
 		
-		path += '/jackd';
+		path += "/jackd";
 
 		if (Glib::file_test (path, FILE_TEST_EXISTS)) {
-			strings.push_back ();
+			strings.push_back (path);
 		} else {
 			warning << _("JACK appears to be missing from the Ardour bundle") << endmsg;
 		}

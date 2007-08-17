@@ -72,6 +72,8 @@ class EngineControl : public Gtk::VBox {
 	Gtk::Table options_packer;
 	Gtk::Table device_packer;
 	Gtk::HBox basic_hbox;
+	Gtk::HBox options_hbox;
+	Gtk::HBox device_hbox;
 	Gtk::Notebook notebook;
 	
 	bool _used;
