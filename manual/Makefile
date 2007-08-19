@@ -51,7 +51,7 @@ test::
 .PHONY : test
 
 format:: test
-	@for file in `find xml/*.xml`; \
+	@for file in `find xml/ -name '*.xml' -type f`; \
 		do xmlformat/xmlformat.pl --in-place --backup .bak \
 		--config-file xmlformat/xmlformat-ardour.conf $$file; \
 		done
