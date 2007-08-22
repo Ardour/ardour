@@ -110,9 +110,8 @@ static int
 setup_midi ()
 {
 	std::map<string,Configuration::MidiPortDescriptor*>::iterator i;
-	int nports;
-
-	if ((nports = Config->midi_ports.size()) == 0) {
+	
+	if (Config->midi_ports.size() == 0) {
 		warning << _("no MIDI ports specified: no MMC or MTC control possible") << endmsg;
 		return 0;
 	}
@@ -133,15 +132,14 @@ setup_midi ()
 		}
 		
 		MIDI::Manager::instance()->add_port (request);
-
-		nports++;
 	}
 
 	MIDI::Port* first;
 	const MIDI::Manager::PortMap& ports = MIDI::Manager::instance()->get_midi_ports();
-	first = ports.begin()->second;
 
-	if (nports > 1) {
+	if (ports.size() > 1) {
+
+		first = ports.begin()->second;
 
 		/* More than one port, so try using specific names for each port */
 
@@ -173,7 +171,9 @@ setup_midi ()
 			default_midi_port = first;
 		}
 		
-	} else {
+	} else if (ports.size() == 1) {
+
+		first = ports.begin()->second;
 
 		/* Only one port described, so use it for both MTC and MMC */
 

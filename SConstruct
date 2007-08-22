@@ -30,7 +30,6 @@ opts.AddOptions(
     BoolOption('AUDIOUNITS', 'Compile with Apple\'s AudioUnit library. (experimental)', 0),
     BoolOption('COREAUDIO', 'Compile with Apple\'s CoreAudio library', 0),
     BoolOption('GTKOSX', 'Compile for use with GTK-OSX, not GTK-X11', 0),
-    PathOption('GTKOSX_PREFIX', 'Configure-style prefix used to install GTK-Quartz', "/opt/gtk"),
     BoolOption('DEBUG', 'Set to build with debugging information and no optimizations', 0),
     PathOption('DESTDIR', 'Set the intermediate install "prefix"', '/'),
     EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'none' ), ignorecase=2),

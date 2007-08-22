@@ -83,7 +83,6 @@ fixup_bundle_environment ()
 
 	_NSGetExecutablePath (execpath, &pathsz);
 
-	cerr << "EXEC PATH = " << execpath << endl;
 	Glib::ustring exec_path (execpath);
 	Glib::ustring dir_path = Glib::path_get_dirname (exec_path);
 	Glib::ustring path;
@@ -96,7 +95,6 @@ fixup_bundle_environment ()
 	path += "/../Resources/Panners";
 
 	setenv ("ARDOUR_MODULE_PATH", path.c_str(), 1);
-	cerr << "ARDOUR_MODULE_PATH = " << path << endl;
 
 	path = dir_path;
 	path += "/../Resources/icons:";
@@ -110,8 +108,6 @@ fixup_bundle_environment ()
 	setenv ("ARDOUR_PATH", path.c_str(), 1);
 	setenv ("ARDOUR_CONFIG_PATH", path.c_str(), 1);
 	setenv ("ARDOUR_DATA_PATH", path.c_str(), 1);
-
-	cerr << "ARDOUR_PATH, DATA+CONFIG = " << path << endl;
 
 	path = dir_path;
 	path += "/../Frameworks/clearlooks";
@@ -169,9 +165,8 @@ fixup_bundle_environment ()
 extern "C" {
 int ardour_main (int argc, char *argv[])
 #else
-	int main (int argc, char* argv[], char* envp[])
+int main (int argc, char* argv[])
 #endif
-
 {
 	vector<Glib::ustring> null_file_list;
 
@@ -179,14 +174,6 @@ int ardour_main (int argc, char *argv[])
 	fixup_bundle_environment ();
 #endif
 
-	for (int xx = 0; xx < argc; ++xx) {
-		cerr << "argv[" << xx << "] = " << argv[xx] << endl;
-	}
-
-	for (int xx = 0; envp && envp[xx]; ++xx) {
-		cerr << "envp[" << xx << "] = " << envp[xx] << endl;
-	}
-	
         Glib::thread_init();
 	gtk_set_locale ();
 

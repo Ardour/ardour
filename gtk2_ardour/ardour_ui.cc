@@ -562,20 +562,20 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 void
 ARDOUR_UI::startup ()
 {
-	using namespace ARDOUR_COMMAND_LINE;
 	string name, path;
 	bool isnew;
 
 	new_session_dialog = new NewSessionDialog();
 	
 	/* If no session name is given: we're not loading a session yet, nor creating a new one */
-
-	if (session_name.length()) {
+	
+	if (ARDOUR_COMMAND_LINE::session_name.length()) {
 	
 		/* Load session or start the new session dialog */
 		
-		if (Session::find_session (session_name, path, name, isnew)) {
-			error << string_compose(_("could not load command line session \"%1\""), session_name) << endmsg;
+		if (Session::find_session (ARDOUR_COMMAND_LINE::session_name, path, name, isnew)) {
+			error << string_compose(_("could not load command line session \"%1\""), 
+						ARDOUR_COMMAND_LINE::session_name) << endmsg;
 			return;
 		}
 
@@ -606,7 +606,7 @@ ARDOUR_UI::startup ()
 
 		/* backend audio is working */
 
-		if (session_name.empty() || ARDOUR_COMMAND_LINE::new_session) {
+		if (ARDOUR_COMMAND_LINE::session_name.empty() || ARDOUR_COMMAND_LINE::new_session) {
 			/* need NSD to get session name and other info */
 			need_nsd = true;
 		} else {
@@ -628,7 +628,7 @@ ARDOUR_UI::startup ()
 
 	if (need_nsd) {
 
-		if (!get_session_parameters (session_name, have_backend, ARDOUR_COMMAND_LINE::new_session)) {
+		if (!get_session_parameters (ARDOUR_COMMAND_LINE::session_name, have_backend, ARDOUR_COMMAND_LINE::new_session)) {
 			return;
 		}
 
@@ -640,7 +640,7 @@ ARDOUR_UI::startup ()
 	create_engine ();
 
 	if (load_needed) {
-		if (load_session (session_name, name)) {
+		if (load_session (ARDOUR_COMMAND_LINE::session_name, name)) {
 			return;
 		}
 	}
@@ -2041,6 +2041,10 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 					response = Gtk::RESPONSE_NONE;
 					continue;
 				} 
+
+				if (new_session_dialog->get_current_page() == 0 && ARDOUR_COMMAND_LINE::session_name.empty()) {
+					should_be_new = true;
+				}
 
 				/* handle what appear to be paths rather than just a name */
 

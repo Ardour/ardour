@@ -378,7 +378,9 @@ OptionEditor::setup_midi_options ()
 	label = (manage (new Label (_("Inbound MMC Device ID")))); 
 	hbox->pack_start (mmc_receive_device_id_spinner, false, false);
 	hbox->pack_start (*label, false, false);
-	midi_packer.pack_start (*hbox, false, false);
+	midi_packer.pack_start (*hbox, false, false); 
+
+	mmc_receive_device_id_spinner.set_value(Config->get_mmc_receive_device_id ());
 
 	hbox = manage (new HBox);
 	hbox->set_border_width (6);
@@ -387,6 +389,8 @@ OptionEditor::setup_midi_options ()
 	hbox->pack_start (mmc_send_device_id_spinner, false, false);
 	hbox->pack_start (*label, false, false);
 	midi_packer.pack_start (*hbox, false, false);
+
+	mmc_send_device_id_spinner.set_value(Config->get_mmc_send_device_id ());
 
 	add_midi_port_button.signal_clicked().connect (mem_fun (*this, &OptionEditor::add_midi_port));
 }
