@@ -154,6 +154,15 @@ fixup_bundle_environment ()
 	path += "/../Resources/gdk-pixbuf.loaders";
 
 	setenv ("GDK_PIXBUF_MODULE_FILE", path.c_str(), 1);
+
+	if (getenv ("ARDOUR_WITH_JACK")) {
+		// JACK driver dir
+		
+		path = dir_path;
+		path += "/../Frameworks";
+		
+		setenv ("JACK_DRIVER_DIR", path.c_str(), 1);
+	}
 }
 #endif
 
