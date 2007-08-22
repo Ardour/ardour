@@ -23,7 +23,7 @@
 	<key>CFBundleExecutable</key>
 	<string>Ardour2</string>
 	<key>CFBundleGetInfoString</key>
-	<string>Ardour 2.0.5 Copyright 2007 Paul Davis</string>
+	<string>Ardour @VERSION@ Copyright 2007 Paul Davis</string>
 	<key>CFBundleIconFile</key>
 	<string>appIcon.icns</string>
 	<key>CFBundleIdentifier</key>
@@ -35,21 +35,17 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersions</key>
-	<string>2.0.5</string>
+	<string>@VERSION@</string>
 	<key>CFBundleSignature</key>
 	<string>ArDr</string>
 	<key>CFBundleVersion</key>
-	<string>2.0.5</string>
+	<string>@VERSION@</string>
 	<key>LSUIElement</key>
 	<string>0</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
-	<key>LSEnvironment</key>
-	<dict>
-	  <key>ARDOUR_SAE</key>
-	  <string>true</string>
-	</dict>
+	@ENV@
 </dict>
 </plist>

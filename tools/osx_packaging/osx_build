@@ -2,12 +2,29 @@
 
 # script for pulling together a MacOSX app bundle.
 
+GTKQUARTZ_ROOT=/opt/gtk
+
+SAE=
+WITH_JACK=1
+
+while [ $# -gt 0 ] ; do
+    echo "arg = $1"
+    case $1 in
+	--sae) SAE=1 ; shift ;;
+	--nojack) WITH_JACK= ; shift ;;
+    esac
+done
+
 version=`grep -m 1 '^ardour_version' ../../SConstruct | cut -d' ' -f 3 | sed "s/'//g"`
 echo "Version is $version"
 
 # setup directory structure
 
 APPROOT=Ardour2.app/Contents
+Frameworks=$APPROOT/Frameworks
+Resources=$APPROOT/Resources
+Shared=$Resources/share
+Etc=$Resources/etc
 
 echo "Removing old Ardour2.app tree ..."
 
@@ -15,53 +32,65 @@ rm -rf Ardour2.app
 
 echo "Building new app directory structure ..."
 
-mkdir -p Ardour2.app/Contents/MacOS
-mkdir -p Ardour2.app/Contents/Resources
-mkdir -p Ardour2.app/Contents/Frameworks
+# only bother to make the longest paths
+
+mkdir -p $APPROOT/MacOS
+mkdir -p $APPROOT/Resources
+mkdir -p $Frameworks/modules
+mkdir -p $Shared/templates
+mkdir -p $Etc
+
+# maybe set variables
+env=""
+if test x$SAE != x ; then
+    env="$env<key>ARDOUR_SAE</key><string>true</string>"
+fi
+
+if test x$WITH_JACK != x ; then
+    env="$env<key>ARDOUR_WITH_JACK</key><string>true</string>"
+fi
+
+if test "x$env" != x ; then
+    env="<key>LSEnvironment</key><dict>$env</dict>"
+fi
+
+# edit plist
+sed -e "s?@ENV@?$env?g" -e "s?@VERSION@?$version?g" < Info.plist.in > Info.plist
 
 # copy static files
 
 cp Info.plist $APPROOT
-cp PkgInfo $APPROOT
-cp -r Resources/* $APPROOT/Resources
+cp -R Resources $APPROOT
 
-Frameworks=$APPROOT/Frameworks
-Resources=$APPROOT/Resources
-Shared=$Resources/share
-Etc=$Resources/etc
 
-# only bother to make the longest paths
-
-mkdir -p $Frameworks/modules
-mkdir -p $Shared/templates
-mkdir -p $Etc
 
 
 # copy executable
 echo "Copying Ardour executable ..."
 cp ../../gtk2_ardour/ardour-$version $APPROOT/MacOS/Ardour2
+strip $APPROOT/MacOS/Ardour2
 
 # copy everything related to gtk-quartz
 echo "Copying GTK-Quartz tree ..."
-cp -R /opt/gtk/lib/*.dylib $Frameworks/
-cp -R /opt/gtk/etc/* $Etc
+cp -R $GTKQUARTZ_ROOT/lib/*.dylib $Frameworks/
+cp -R $GTKQUARTZ_ROOT/etc/* $Etc
 echo "Copying all Pango modules ..."
-cp -R /opt/gtk/lib/pango/1.6.0/modules/*.so $Frameworks/modules
+cp -R $GTKQUARTZ_ROOT/lib/pango/1.6.0/modules/*.so $Frameworks/modules
 echo "Copying all GDK Pixbuf loaders ..."
-cp -R /opt/gtk/lib/gtk-2.0/2.10.0/loaders/*.so $Frameworks/modules
+cp -R $GTKQUARTZ_ROOT/lib/gtk-2.0/2.10.0/loaders/*.so $Frameworks/modules
 # charset alias file
-cp -R /opt/gtk/lib/charset.alias $Resources
+cp -R $GTKQUARTZ_ROOT/lib/charset.alias $Resources
 
 # generate new Pango module file
 cat > pangorc <<EOF 
 [Pango]
-ModulesPath=/opt/gtk/lib/pango/1.6.0/modules
+ModulesPath=$GTKQUARTZ_ROOT/lib/pango/1.6.0/modules
 EOF
-env PANGO_RC_FILE=pangorc /opt/gtk/bin/pango-querymodules | sed 's?/opt/gtk/lib/pango/1.6.0/modules/?@executable_path/../Frameworks/modules/?' > $Resources/pango.modules
+env PANGO_RC_FILE=pangorc $GTKQUARTZ_ROOT/bin/pango-querymodules | sed "s?$GTKQUARTZ_ROOT/lib/pango/1.6.0/modules/?@executable_path/../Frameworks/modules/?" > $Resources/pango.modules
 rm pangorc
 
 # generate a new GDK pixbufs loaders file
-sed 's?/opt/gtk/lib/gtk-2.0/2.10.0/loaders/?@executable_path/../Frameworks/modules/?' < /opt/gtk/etc/gtk-2.0/gdk-pixbuf.loaders > $Resources/gdk-pixbuf.loaders
+sed "s?$GTKQUARTZ_ROOT/lib/gtk-2.0/2.10.0/loaders/?@executable_path/../Frameworks/modules/?" < $GTKQUARTZ_ROOT/etc/gtk-2.0/gdk-pixbuf.loaders > $Resources/gdk-pixbuf.loaders
 
 echo "Copying Ardour libraries into .app ..."
 cp ../../libs/pbd/libpbd.dylib $Frameworks
@@ -91,10 +120,12 @@ cp /opt/local/lib/libraptor.1.dylib $Frameworks
 cp /opt/local/lib/liblo.0.dylib $Frameworks
 
 # JACK
-
-cp /usr/local/lib/libjack.0.dylib $Frameworks
-cp /usr/local/bin/jackd $APPROOT/MacOS/jackd
-
+if test x$WITH_JACK != x ; then
+    cp /usr/local/lib/libjack.0.dylib $Frameworks
+    cp /usr/local/lib/jack/jack_coreaudio.so $Frameworks
+    cp /usr/local/bin/jackd $APPROOT/MacOS/jackd
+fi
+    
 # XXX STILL NEED TO DO SURFACES AND PANNERS
 
 cp ../../libs/surfaces/control_protocol/libardour_cp.dylib $Frameworks
@@ -123,10 +154,11 @@ for svndir in `find Ardour2.app -name .svn -type dir`; do
 done
 
 # now fix up the executables
+echo "Fixing up executable dependency names ..."
 for exe in Ardour2 jackd ; do
     EXE=$APPROOT/MacOS/$exe
     changes=""
-    for lib in `otool -L $EXE | egrep '(/opt/gtk|/local/|libs/)' | awk '{print $1}'` ; do
+    for lib in `otool -L $EXE | egrep "($GTKQUARTZ_ROOT|/local/|libs/)" | awk '{print $1}'` ; do
 	base=`basename $lib`
 	changes="$changes -change $lib @executable_path/../Frameworks/$base"
     done
@@ -144,7 +176,7 @@ for dylib in $Frameworks/*.dylib $Frameworks/modules/*.so ; do
 	# change all the dependencies
 
 	changes=""
-	for lib in `otool -L $dylib | egrep '(/opt/gtk|/local/|libs/)' | awk '{print $1}'` ; do
+	for lib in `otool -L $dylib | egrep "($GTKQUARTZ_ROOT|/local/|libs/)" | awk '{print $1}'` ; do
 	    base=`basename $lib`
 	    changes="$changes -change $lib @executable_path/../Frameworks/$base"
 	done
@@ -163,19 +195,6 @@ for dylib in $Frameworks/*.dylib $Frameworks/modules/*.so ; do
 	install_name_tool -id @executable_path/../Frameworks/$base $dylib
     fi
 done
-
-exit 0
-
-# make DMG
-rm -rf macdist
-mkdir "macdist"
-cp -r README.rtf COPYING Ardour2.app macdist/
-# reduce size
-strip macdist/Ardour2.app/Contents/MacOS/Ardour2
-dmgname="Ardour-$version"
-rm -f $dmgname.dmg
-echo "Creating DMG"
-hdiutil create -fs HFS+ -volname $dmgname -srcfolder macdist $dmgname.dmg
 
 echo "Done."
 
