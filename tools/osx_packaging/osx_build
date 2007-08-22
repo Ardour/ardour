@@ -30,15 +30,12 @@ Resources=$APPROOT/Resources
 Shared=$Resources/share
 Etc=$Resources/etc
 
-if test ! -d $Frameworks ; then
-    mkdir -p $Frameworks
-fi
-if test ! -d $Shared/templates ; then
-    mkdir -p $Shared/templates
-fi
-if test ! -d $Etc ; then
-    mkdir -p $Etc
-fi
+# only bother to make the longest paths
+
+mkdir -p $Frameworks/modules
+mkdir -p $Shared/templates
+mkdir -p $Etc
+
 
 # copy executable
 echo "Copying Ardour executable ..."
@@ -48,6 +45,23 @@ cp ../../gtk2_ardour/ardour-$version $APPROOT/MacOS/Ardour2
 echo "Copying GTK-Quartz tree ..."
 cp -R /opt/gtk/lib/*.dylib $Frameworks/
 cp -R /opt/gtk/etc/* $Etc
+echo "Copying all Pango modules ..."
+cp -R /opt/gtk/lib/pango/1.6.0/modules/*.so $Frameworks/modules
+echo "Copying all GDK Pixbuf loaders ..."
+cp -R /opt/gtk/lib/gtk-2.0/2.10.0/loaders/*.so $Frameworks/modules
+# charset alias file
+cp -R /opt/gtk/lib/charset.alias $Resources
+
+# generate new Pango module file
+cat > pangorc <<EOF 
+[Pango]
+ModulesPath=/opt/gtk/lib/pango/1.6.0/modules
+EOF
+env PANGO_RC_FILE=pangorc /opt/gtk/bin/pango-querymodules | sed 's?/opt/gtk/lib/pango/1.6.0/modules/?@executable_path/../Frameworks/modules/?' > $Resources/pango.modules
+rm pangorc
+
+# generate a new GDK pixbufs loaders file
+sed 's?/opt/gtk/lib/gtk-2.0/2.10.0/loaders/?@executable_path/../Frameworks/modules/?' < /opt/gtk/etc/gtk-2.0/gdk-pixbuf.loaders > $Resources/gdk-pixbuf.loaders
 
 echo "Copying Ardour libraries into .app ..."
 cp ../../libs/pbd/libpbd.dylib $Frameworks
@@ -123,7 +137,7 @@ done
 
 echo "Fixing up library names ..."
 # now do the same for all the libraries we include
-for dylib in $Frameworks/*.dylib ; do
+for dylib in $Frameworks/*.dylib $Frameworks/modules/*.so ; do
     # skip symlinks
     if test ! -L $dylib ; then
 	
@@ -149,6 +163,8 @@ for dylib in $Frameworks/*.dylib ; do
 	install_name_tool -id @executable_path/../Frameworks/$base $dylib
     fi
 done
+
+exit 0
 
 # make DMG
 rm -rf macdist

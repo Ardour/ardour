@@ -73,6 +73,7 @@ show_ui_callback (void *arg)
 
 #include <mach-o/dyld.h>
 #include <sys/param.h>
+#include <fstream>
 
 void
 fixup_bundle_environment ()
@@ -121,6 +122,42 @@ fixup_bundle_environment ()
 	path += "/../Resources/locale";
 	
 	localedir = strdup (path.c_str());
+
+	/* write a pango.rc file and tell pango to use it */
+
+	path = dir_path;
+	path += "/../Resources/pango.rc";
+
+	std::ofstream pangorc (path.c_str());
+	if (!pangorc) {
+		error << string_compose (_("cannot open pango.rc file %1") , path) << endmsg;
+	} else {
+		pangorc << "[Pango]\nModuleFiles=";
+		Glib::ustring mpath = dir_path;
+		mpath += "/../Resources/pango.modules";
+		pangorc << mpath << endl;
+		
+		pangorc.close ();
+		setenv ("PANGO_RC_FILE", path.c_str(), 1);
+	}
+
+	// gettext charset aliases
+
+	setenv ("CHARSETALIASDIR", path.c_str(), 1);
+
+	// font config
+	
+	path = dir_path;
+	path += "/../Resources/fonts.conf";
+
+	setenv ("FONTCONFIG_FILE", path.c_str(), 1);
+
+	// GDK Pixbuf loader module file
+
+	path = dir_path;
+	path += "/../Resources/gdk-pixbuf.loaders";
+
+	setenv ("GDK_PIXBUF_MODULE_FILE", path.c_str(), 1);
 }
 #endif
 

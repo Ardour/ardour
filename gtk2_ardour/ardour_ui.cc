@@ -702,7 +702,6 @@ ARDOUR_UI::check_memory_locking ()
 				vbox->pack_start (hbox);
 				hbox.show_all ();
 				
-				editor->ensure_float (msg);
 				msg.run ();
 			}
 		}
