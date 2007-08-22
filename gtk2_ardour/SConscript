@@ -24,6 +24,9 @@ gtkardour.Append(CPPPATH="#/")  # for top level svn_revision.h
 gtkardour.Append(PACKAGE=domain)
 gtkardour.Append(POTFILE=domain + '.pot')
 
+if gtkardour['DIST_TARGET'] == 'panther' or gtkardour['DIST_TARGET'] == 'tiger':
+	gtkardour.Append (LINKFLAGS="-Xlinker -headerpad -Xlinker 2048")
+
 gtkardour.Merge ([
     libraries['ardour'],
     libraries['ardour_cp'],

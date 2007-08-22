@@ -21,6 +21,7 @@
 
 #include <sigc++/bind.h>
 #include <gtkmm/settings.h>
+#include <glibmm/ustring.h>
 
 #include <pbd/error.h>
 #include <pbd/textreceiver.h>
@@ -56,6 +57,7 @@ TextReceiver text_receiver ("ardour");
 extern int curvetest (string);
 
 static ARDOUR_UI  *ui = 0;
+static char* localedir = LOCALEDIR;
 
 gint
 show_ui_callback (void *arg)
@@ -67,6 +69,61 @@ show_ui_callback (void *arg)
 	return FALSE;
 }
 
+#ifdef __APPLE__
+
+#include <mach-o/dyld.h>
+#include <sys/param.h>
+
+void
+fixup_bundle_environment ()
+{
+	char execpath[MAXPATHLEN+1];
+	uint32_t pathsz = sizeof (execpath);
+
+	_NSGetExecutablePath (execpath, &pathsz);
+
+	cerr << "EXEC PATH = " << execpath << endl;
+	Glib::ustring exec_path (execpath);
+	Glib::ustring dir_path = Glib::path_get_dirname (exec_path);
+	Glib::ustring path;
+
+	path = dir_path;
+	path += "/../Resources";
+	path += dir_path;
+	path += "/../Resources/Surfaces";
+	path += dir_path;
+	path += "/../Resources/Panners";
+
+	setenv ("ARDOUR_MODULE_PATH", path.c_str(), 1);
+	cerr << "ARDOUR_MODULE_PATH = " << path << endl;
+
+	path = dir_path;
+	path += "/../Resources/icons:";
+	path += dir_path;
+	path += "/../Resources/pixmaps:";
+	path += dir_path;
+	path += "/../Resources/share:";
+	path += dir_path;
+	path += "/../Resources";
+
+	setenv ("ARDOUR_PATH", path.c_str(), 1);
+	setenv ("ARDOUR_CONFIG_PATH", path.c_str(), 1);
+	setenv ("ARDOUR_DATA_PATH", path.c_str(), 1);
+
+	cerr << "ARDOUR_PATH, DATA+CONFIG = " << path << endl;
+
+	path = dir_path;
+	path += "/../Frameworks/clearlooks";
+
+	setenv ("GTK_PATH", path.c_str(), 1);
+
+	path = dir_path;
+	path += "/../Resources/locale";
+	
+	localedir = strdup (path.c_str());
+}
+#endif
+
 #ifdef VST_SUPPORT
 /* this is called from the entry point of a wine-compiled
    executable that is linked against gtk2_ardour built
@@ -75,16 +132,28 @@ show_ui_callback (void *arg)
 extern "C" {
 int ardour_main (int argc, char *argv[])
 #else
-int main (int argc, char *argv[])
+	int main (int argc, char* argv[], char* envp[])
 #endif
 
 {
 	vector<Glib::ustring> null_file_list;
 
+#ifdef __APPLE__
+	fixup_bundle_environment ();
+#endif
+
+	for (int xx = 0; xx < argc; ++xx) {
+		cerr << "argv[" << xx << "] = " << argv[xx] << endl;
+	}
+
+	for (int xx = 0; envp && envp[xx]; ++xx) {
+		cerr << "envp[" << xx << "] = " << envp[xx] << endl;
+	}
+	
         Glib::thread_init();
 	gtk_set_locale ();
 
-	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+	(void) bindtextdomain (PACKAGE, localedir);
 	/* our i18n translations are all in UTF-8, so make sure
 	   that even if the user locale doesn't specify UTF-8,
 	   we use that when handling them.

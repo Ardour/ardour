@@ -68,7 +68,7 @@ print_help (const char *execname)
 int
 ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 {
-	const char *optstring = "U:hSbvVnOc:C:m:N:k:";
+	const char *optstring = "U:hSbvVnOc:C:m:N:k:p:";
 	const char *execname = strrchr (argv[0], '/');
 
 	if (getenv ("ARDOUR_SAE")) {
@@ -93,6 +93,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		{ "no-hw-optimizations", 0, 0, 'O' },
 		{ "sync", 0, 0, 'O' },
 		{ "curvetest", 1, 0, 'C' },
+		{ "sillyAppleUndocumentedFinderFeature", 1, 0, 'p' },
 		{ 0, 0, 0, 0 }
 	};
 
@@ -130,9 +131,13 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		case 'n':
 			no_splash = false;
 			break;
+
+		case 'p':
+			//undocumented OS X finder -psn_XXXXX argument
+			break;
 		
 		case 'S':
-		//	; just pass this through to gtk it will figure it out
+			// just pass this through to gtk it will figure it out
 			break;
 
 		case 'N':

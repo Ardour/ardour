@@ -1,0 +1,4 @@
+CFBundleName = "Ardour2";
+CFBundleShortVersionString = "#{version}";
+CFBundleGetInfoString = "Ardour2 version #{version} Copyright 2007 Paul Davis";
+NSHumanReadableCopyright = "Copyright 2007 Paul Davis.";

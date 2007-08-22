@@ -9,7 +9,6 @@ atkmm_files = glob.glob('atkmm/*.cc')
 Import('env libraries install_prefix')
 atkmm = env.Copy()
 atkmm.Merge([libraries['glibmm2'], libraries['gtk2'], libraries['sigc2'] ])
-
 libatkmm = atkmm.SharedLibrary('atkmm', atkmm_files)
 Default(libatkmm)
 

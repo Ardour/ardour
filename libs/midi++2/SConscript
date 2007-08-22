@@ -12,7 +12,6 @@ midi2.Merge([ libraries['sigc2'], libraries['xml'], libraries['glibmm2'], librar
 domain = 'midipp'
 
 midi2.Append(DOMAIN=domain,MAJOR=2,MINOR=1,MICRO=1)
-
 sources = Split("""
 fd_midiport.cc
 fifomidi.cc

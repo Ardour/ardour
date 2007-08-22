@@ -8,6 +8,8 @@
 #ifdef __APPLE__
 #include <CoreAudio/CoreAudio.h>
 #include <CoreFoundation/CFString.h>
+#include <sys/param.h>
+#include <mach-o/dyld.h>
 #else
 #include <alsa/asoundlib.h>
 #endif
@@ -819,27 +821,33 @@ void
 EngineControl::find_jack_servers (vector<string>& strings)
 {
 #ifdef __APPLE__
+	/* this magic lets us finds the path to the OSX bundle, and then
+	   we infer JACK's location from there
+	*/
+	
+	char execpath[MAXPATHLEN+1];
+	uint32_t pathsz = sizeof (execpath);
+
+	_NSGetExecutablePath (execpath, &pathsz);
+	
+	cerr << " execpath = " << execpath << endl;
+
+	Glib::ustring path (Glib::path_get_dirname (execpath));
+	path += "/jackd";
+
+	if (Glib::file_test (path, FILE_TEST_EXISTS)) {
+		strings.push_back (path);
+		cerr << "Found jack in " << path << endl;
+	} 
+
 	if (ARDOUR::Profile->get_single_package()) {
-
-		/* this magic lets us finds the path to the OSX bundle, and then
-		   we infer JACK's location from there
-		*/
-		
-		CFURLRef pluginRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
-		CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, 
-							      kCFURLPOSIXPathStyle);
-		std::string path = CFStringGetCStringPtr(macPath, 
-							 CFStringGetSystemEncoding());
-		CFRelease(pluginRef);
-		CFRelease(macPath);
-		
-		path += "/jackd";
-
-		if (Glib::file_test (path, FILE_TEST_EXISTS)) {
-			strings.push_back (path);
-		} else {
-			warning << _("JACK appears to be missing from the Ardour bundle") << endmsg;
+		/* no other options - only use the JACK we supply */
+		if (strings.empty()) {
+			// cerr << "OOPS!\n";
+			// fatal << _("JACK appears to be missing from the Ardour bundle") << endmsg;
+			/*NOTREACHED*/
 		}
+		return;
 	}
 #endif
 	
