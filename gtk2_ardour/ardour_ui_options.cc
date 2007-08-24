@@ -577,6 +577,19 @@ ARDOUR_UI::map_monitor_model ()
 }
 
 void
+ARDOUR_UI::map_denormal_protection ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action ("options", X_("DenormalProtection"));
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+
+		if (tact && !tact->get_active()) {
+			tact->set_active (Config->get_denormal_protection());
+		}
+	}
+}
+
+void
 ARDOUR_UI::map_denormal_model ()
 {
 	const char* on = 0;
@@ -1001,6 +1014,8 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		map_monitor_model ();
 	} else if (PARAM_IS ("denormal-model")) {
 		map_denormal_model ();
+	} else if (PARAM_IS ("denormal-protection")) {
+		map_denormal_protection ();
 	} else if (PARAM_IS ("remote-model")) {
 		map_remote_model ();
 	} else if (PARAM_IS ("use-video-sync")) {

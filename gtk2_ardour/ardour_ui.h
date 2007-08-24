@@ -706,6 +706,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void map_solo_model ();
 	void map_monitor_model ();
 	void map_denormal_model ();
+	void map_denormal_protection ();
 	void map_remote_model ();
 	void map_file_header_format ();
 	void map_file_data_format ();
