@@ -22,6 +22,8 @@
 #include <errno.h>
 #include <unistd.h>
 
+#include <sndfile.h>
+
 #include <pbd/pthread_utils.h>
 #include <pbd/basename.h>
 #include <pbd/shortpath.h>
@@ -74,37 +76,86 @@ Editor::add_external_audio_action (ImportMode mode)
 		}
 	}
 
-	bring_in_external_audio (mode, track, pos, false);
+	bring_in_external_audio (mode, track, pos);
 }
 
+
 void
-Editor::bring_in_external_audio (ImportMode mode, AudioTrack* track, nframes_t& pos, bool prompt)
+Editor::external_audio_dialog ()
 {
+	vector<Glib::ustring> paths;
+
 	if (session == 0) {
 		MessageDialog msg (0, _("You can't import or embed an audiofile until you have a session loaded."));
 		msg.run ();
 		return;
 	}
 
-	SoundFileOmega sfdb (_("Add existing audio to session"), session);
-	sfdb.set_mode (mode);
+	SoundFileBrowser browser (_("Add existing audio"), session);
+	SoundFileOptionsDialog* options = 0;
 
-	switch (sfdb.run()) {
-	case SoundFileOmega::ResponseImport:
-		do_import (sfdb.get_paths(), sfdb.get_split(), sfdb.get_mode(), track, pos, prompt);
-		break;
+	browser.show_all ();
+
+	while (!options) {
+
+		int response = browser.run ();
 		
-	case SoundFileOmega::ResponseEmbed:
-		do_embed (sfdb.get_paths(), sfdb.get_split(), sfdb.get_mode(), track, pos, prompt);
-		break;
+		switch (response) {
+		case RESPONSE_OK:
+			break;
+		default:
+			// cancel from the browser - we are done
+			return;
+		}
+		
+		paths = browser.get_paths ();
 
-	default:
-		break;
+		options = new SoundFileOptionsDialog (browser, paths, selection->tracks.size());
+		options->show_all ();
+		
+		response = options->run ();
+		switch (response) {
+		case RESPONSE_OK:
+			// leave options non-null so that we break out of the loop
+			break;
+		default:
+			// back to the browser another try
+			delete options;
+			options = 0;		
+			break;
+		}
 	}
+
+	browser.hide ();
+	options->hide ();
+
+	/* lets do it */
+	
+	AudioTrack* track = 0;
+
+	if (!selection->tracks.empty()) {
+		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(selection->tracks.front());
+		if (atv) {
+			track = atv->audio_track();
+		}
+	}
+
+	if (options->import.get_active()) {
+		do_import (paths, options->split_files.get_active(), options->mode, track, edit_cursor->current_frame);
+	} else {
+		do_embed (paths, options->split_files.get_active(), options->mode, track, edit_cursor->current_frame);
+	}
+
+	delete options;
 }
 
 void
-Editor::do_import (vector<ustring> paths, bool split, ImportMode mode, AudioTrack* track, nframes_t& pos, bool prompt)
+Editor::bring_in_external_audio (ImportMode mode, AudioTrack* track, nframes_t& pos)
+{
+}
+
+void
+Editor::do_import (vector<ustring> paths, bool split, ImportMode mode, AudioTrack* track, nframes_t& pos)
 {
 	/* SFDB sets "multichan" to true to indicate "split channels"
 	   so reverse the setting to match the way libardour
@@ -131,24 +182,24 @@ Editor::do_import (vector<ustring> paths, bool split, ImportMode mode, AudioTrac
 }
 
 bool
-Editor::idle_do_embed (vector<ustring> paths, bool split, ImportMode mode, AudioTrack* track, nframes_t& pos, bool prompt)
+Editor::idle_do_embed (vector<ustring> paths, bool split, ImportMode mode, AudioTrack* track, nframes_t& pos)
 {
-	_do_embed (paths, split, mode, track, pos, prompt);
+	_do_embed (paths, split, mode, track, pos);
 	return false;
 }
 
 void
-Editor::do_embed (vector<ustring> paths, bool split, ImportMode mode, AudioTrack* track, nframes_t& pos, bool prompt)
+Editor::do_embed (vector<ustring> paths, bool split, ImportMode mode, AudioTrack* track, nframes_t& pos)
 {
 #ifdef GTKOSX
-	Glib::signal_idle().connect (bind (mem_fun (*this, &Editor::idle_do_embed), paths, split, mode, track, pos, prompt));
+	Glib::signal_idle().connect (bind (mem_fun (*this, &Editor::idle_do_embed), paths, split, mode, track, pos));
 #else
-	_do_embed (paths, split, mode, track, pos, prompt);
+	_do_embed (paths, split, mode, track, pos);
 #endif
 }
 
 void
-Editor::_do_embed (vector<ustring> paths, bool split, ImportMode mode, AudioTrack* track, nframes_t& pos, bool prompt)
+Editor::_do_embed (vector<ustring> paths, bool split, ImportMode mode, AudioTrack* track, nframes_t& pos)
 {
 	bool multiple_files = paths.size() > 1;
 	bool check_sample_rate = true;
@@ -201,7 +252,7 @@ Editor::_do_embed (vector<ustring> paths, bool split, ImportMode mode, AudioTrac
 				
 				/* keep them paired */
 
-				if (embed_sndfile (to_embed, split, multiple_files, check_sample_rate, mode, track, pos, prompt) < -1) {
+				if (embed_sndfile (to_embed, split, multiple_files, check_sample_rate, mode, track, pos) < -1) {
 					break;
 				}
 
@@ -216,7 +267,7 @@ Editor::_do_embed (vector<ustring> paths, bool split, ImportMode mode, AudioTrac
 					foo.clear ();
 					foo.push_back (*x);
 
-					if (embed_sndfile (foo, split, multiple_files, check_sample_rate, mode, track, pos, prompt) < -1) {
+					if (embed_sndfile (foo, split, multiple_files, check_sample_rate, mode, track, pos) < -1) {
 						break;
 					}
 				}
@@ -224,7 +275,7 @@ Editor::_do_embed (vector<ustring> paths, bool split, ImportMode mode, AudioTrac
 
 		} else {
 
-			if (embed_sndfile (to_embed, split, multiple_files, check_sample_rate, mode, track, pos, prompt) < -1) {
+			if (embed_sndfile (to_embed, split, multiple_files, check_sample_rate, mode, track, pos) < -1) {
 				break;
 			}
 		}
@@ -288,7 +339,7 @@ Editor::import_sndfile (vector<ustring> paths, ImportMode mode, AudioTrack* trac
 
 int
 Editor::embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_files, bool& check_sample_rate, ImportMode mode, 
-		       AudioTrack* track, nframes_t& pos, bool prompt)
+		       AudioTrack* track, nframes_t& pos)
 {
 	boost::shared_ptr<AudioFileSource> source;
 	SourceList sources;

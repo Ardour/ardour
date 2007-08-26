@@ -37,6 +37,7 @@ class ArdourDialog : public Gtk::Dialog
 {
   public:
 	ArdourDialog (std::string title, bool modal = false, bool use_separator = false);
+	ArdourDialog (Gtk::Window& parent, std::string title, bool modal = false, bool use_separator = false);
 	~ArdourDialog();
 
 	bool on_enter_notify_event (GdkEventCrossing*);

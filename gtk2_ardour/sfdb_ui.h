@@ -22,6 +22,7 @@
 
 #include <string>
 #include <vector>
+#include <glibmm/ustring.h>
 
 #include <sigc++/signal.h>
 
@@ -48,11 +49,13 @@ class SoundFileBox : public Gtk::VBox
 	virtual ~SoundFileBox () {};
 	
 	void set_session (ARDOUR::Session* s);
-	bool setup_labels (std::string filename);
+	bool setup_labels (const Glib::ustring& filename);
+
+	void audition();
 
   protected:
 	ARDOUR::Session* _session;
-	std::string path;
+	Glib::ustring path;
 	
 	ARDOUR::SoundFileInfo sf_info;
 	
@@ -77,7 +80,6 @@ class SoundFileBox : public Gtk::VBox
 	Gtk::Button apply_btn;
 	
 	bool tags_entry_left (GdkEventFocus* event);
-	void play_btn_clicked ();
 	void stop_btn_clicked ();
 	void apply_btn_clicked ();
 	
@@ -86,79 +88,94 @@ class SoundFileBox : public Gtk::VBox
 
 class SoundFileBrowser : public ArdourDialog
 {
-  public:
-	SoundFileBrowser (std::string title, ARDOUR::Session* _s = 0);
-	virtual ~SoundFileBrowser ();
-	
-	virtual void set_session (ARDOUR::Session*);
-
-  protected:
-	Gtk::FileChooserWidget chooser;
-	Gtk::FileFilter custom_filter;
-	Gtk::FileFilter matchall_filter;
-	SoundFileBox preview;
-
-	static Glib::ustring persistent_folder;
-
+  private:
 	class FoundTagColumns : public Gtk::TreeModel::ColumnRecord
 	{
 	  public:
-		Gtk::TreeModelColumn<string> pathname;
+		Gtk::TreeModelColumn<Glib::ustring> pathname;
 		
 		FoundTagColumns() { add(pathname); }
 	};
 	
 	FoundTagColumns found_list_columns;
 	Glib::RefPtr<Gtk::ListStore> found_list;
+
+  public:
+	SoundFileBrowser (std::string title, ARDOUR::Session* _s = 0);
+	virtual ~SoundFileBrowser ();
+	
+	virtual void set_session (ARDOUR::Session*);
+	std::vector<Glib::ustring> get_paths ();
+	
+	Gtk::FileChooserWidget chooser;
 	Gtk::TreeView found_list_view;
+
+  protected:
+	Gtk::FileFilter custom_filter;
+	Gtk::FileFilter matchall_filter;
+	SoundFileBox preview;
+
+	static Glib::ustring persistent_folder;
+
 	Gtk::Entry found_entry;
 	Gtk::Button found_search_btn;
-
 	Gtk::Notebook notebook;
-	
+
 	void update_preview ();
 	void found_list_view_selected ();
+	void found_list_view_activated (const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn*);
 	void found_search_clicked ();
+
+	void chooser_file_activated ();
 	
 	bool on_custom (const Gtk::FileFilter::Info& filter_info);
 };
 
-class SoundFileChooser : public SoundFileBrowser
+class SoundFileChooser : public ArdourDialog
 {
   public:
 	SoundFileChooser (std::string title, ARDOUR::Session* _s = 0);
 	virtual ~SoundFileChooser () {};
 	
-	std::string get_filename ();
+	Glib::ustring get_filename ();
+
+  private:
+	SoundFileBrowser browser;
 };
 
-class SoundFileOmega : public SoundFileBrowser
+class SoundFileOptionsDialog : public ArdourDialog
 {
-  public:
-	SoundFileOmega (std::string title, ARDOUR::Session* _s);
-	virtual ~SoundFileOmega () {};
-	
-	/* these are returned by the Dialog::run() method. note
-	   that builtin GTK responses are all negative, leaving
-	   positive values for application-defined responses.
-	*/
-	
-	const static int ResponseImport = 1;
-	const static int ResponseEmbed = 2;
-	
-	std::vector<Glib::ustring> get_paths ();
-	bool get_split ();
-	
-	void set_mode (Editing::ImportMode);
-	Editing::ImportMode get_mode ();
+  private:
+	Gtk::RadioButtonGroup rgroup1;
+	Gtk::RadioButtonGroup rgroup2;
 
-  protected:
-	Gtk::CheckButton  split_check;
-	Gtk::ComboBoxText mode_combo;
+  public:
+	SoundFileOptionsDialog (Gtk::Window& parent, const vector<Glib::ustring>& p, int selected_tracks);
+
+	Editing::ImportMode mode;
+
+	const std::vector<Glib::ustring>&  paths;
+
+	Gtk::CheckButton split_files;
+	Gtk::CheckButton merge_stereo;
 	
+	Gtk::RadioButton as_tracks;
+	Gtk::RadioButton to_tracks;
+	Gtk::RadioButton as_regions;
+	Gtk::RadioButton as_tape_tracks;
+	
+	Gtk::RadioButton import;
+	Gtk::RadioButton embed;
+
+  private:
+	int selected_track_cnt;
+	bool selection_includes_multichannel;
+	Gtk::VBox block_two;
+	Gtk::VBox block_three;
+	Gtk::VBox block_four;
+
+	static bool check_multichannel_status (const std::vector<Glib::ustring>& paths);
 	void mode_changed ();
-	
-	static std::vector<std::string> mode_strings;
 };
 
 #endif // __ardour_sfdb_ui_h__

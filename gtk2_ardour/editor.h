@@ -25,6 +25,7 @@
 #include <set>
 #include <string>
 #include <sys/time.h>
+#include <glibmm/ustring.h>
 
 #include <boost/optional.hpp>
 
@@ -961,17 +962,19 @@ class Editor : public PublicEditor
 	void insert_region_list_selection (float times);
 
 	void add_external_audio_action (Editing::ImportMode);
+	void external_audio_dialog ();
+	bool check_multichannel_status (const std::vector<Glib::ustring>& paths);
 
-	void bring_in_external_audio (Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes_t& pos, bool prompt);
-	void do_import (vector<Glib::ustring> paths, bool split, Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes_t&, bool);
+	void bring_in_external_audio (Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes_t& pos);
+	void do_import (vector<Glib::ustring> paths, bool split, Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes_t&);
 
-	void _do_embed (vector<Glib::ustring> paths, bool split, Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes_t&, bool);
-	void do_embed (vector<Glib::ustring> paths, bool split, Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes_t&, bool);
-	bool idle_do_embed (vector<Glib::ustring> paths, bool split, Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes_t&, bool);
+	void _do_embed (vector<Glib::ustring> paths, bool split, Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes_t&);
+	void do_embed (vector<Glib::ustring> paths, bool split, Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes_t&);
+	bool idle_do_embed (vector<Glib::ustring> paths, bool split, Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes_t&);
 
 	int  import_sndfile (vector<Glib::ustring> paths, Editing::ImportMode mode, ARDOUR::AudioTrack* track, nframes_t& pos);
 	int  embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode, 
-			    ARDOUR::AudioTrack* track, nframes_t& pos, bool prompt);
+			    ARDOUR::AudioTrack* track, nframes_t& pos);
 	int finish_bringing_in_audio (boost::shared_ptr<ARDOUR::AudioRegion> region, uint32_t, uint32_t, ARDOUR::AudioTrack* track, nframes_t& pos, Editing::ImportMode mode);
 
 	/* generic interthread progress window */

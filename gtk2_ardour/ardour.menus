@@ -13,13 +13,7 @@
            <separator/>
            <menuitem action='AddTrackBus'/>	
            <separator/>
-           <menu action='addExistingAudioFiles'>
-	       <menuitem action='addExternalAudioAsRegion'/>	       
-	       <menuitem action='addExternalAudioToTrack'/>	       
-               <separator/>
-	       <menuitem action='addExternalAudioAsTrack'/>	       
-	       <menuitem action='addExternalAudioAsTapeTrack'/>	       
-           </menu>
+           <menuitem action='addExistingAudioFiles'/>
            <separator/>
            <menu name='Export' action='Export'>
                <menuitem action='ExportSession'/>

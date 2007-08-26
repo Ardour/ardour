@@ -400,7 +400,7 @@ ARDOUR_UI::configure_handler (GdkEventConfigure* conf)
 		Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::configure_timeout), 100);
 		have_configure_timeout = true;
 	}
-		
+	
 	return FALSE;
 }
 

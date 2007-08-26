@@ -464,14 +464,14 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 		/* drop onto canvas background: create new tracks */
 
 		nframes_t pos = 0;
-		do_embed (paths, false, ImportAsTrack, 0, pos, false);
+		do_embed (paths, false, ImportAsTrack, 0, pos);
 		
 	} else if ((tv = dynamic_cast<AudioTimeAxisView*>(tvp)) != 0) {
 
 		/* check that its an audio track, not a bus */
 		
 		if (tv->get_diskstream()) {
-			do_embed (paths, false, ImportToTrack, tv->audio_track(), frame, true);
+			do_embed (paths, false, ImportToTrack, tv->audio_track(), frame);
 		}
 	}
 

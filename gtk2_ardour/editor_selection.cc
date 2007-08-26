@@ -561,8 +561,6 @@ Editor::set_selected_regionview_from_region_list (boost::shared_ptr<Region> regi
 		}
 	}
 	
-	begin_reversible_command (_("set selected regions"));
-	
 	switch (op) {
 	case Selection::Toggle:
 		/* XXX this is not correct */
@@ -578,8 +576,6 @@ Editor::set_selected_regionview_from_region_list (boost::shared_ptr<Region> regi
 		selection->add (all_equivalent_regions);
 		break;
 	}
-
-	commit_reversible_command () ;
 }
 
 bool
