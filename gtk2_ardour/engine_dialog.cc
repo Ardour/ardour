@@ -750,10 +750,25 @@ EngineControl::driver_changed ()
 {
 	string driver = driver_combo.get_active_text();
 	vector<string>& strings = devices[driver];
-	
+	string::size_type maxlen = 0;
+	int maxindex = -1;
+	int n = 0;
+
+	for (vector<string>::iterator i = strings.begin(); i != strings.end(); ++i, ++n) {
+		if ((*i).length() > maxlen) {
+			maxlen = (*i).length();
+			maxindex = n;
+		}
+	}
+
 	set_popdown_strings (interface_combo, strings);
 	set_popdown_strings (input_device_combo, strings);
 	set_popdown_strings (output_device_combo, strings);
+
+	const guint32 FUDGE = 18; // Combo's are stupid - they steal space from the entry for the button interface_combo
+	set_size_request_to_display_given_text (interface_combo, strings[maxindex].c_str(), 5+FUDGE, 5);
+	set_size_request_to_display_given_text (input_device_combo, strings[maxindex].c_str(), 5+FUDGE, 5);
+	set_size_request_to_display_given_text (output_device_combo, strings[maxindex].c_str(), 5+FUDGE, 5);
 
 	if (!strings.empty()) {
 		interface_combo.set_active_text (strings.front());
