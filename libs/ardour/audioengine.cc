@@ -151,7 +151,7 @@ AudioEngine::start ()
 			_has_run = true;
 			Running(); /* EMIT SIGNAL */
 		} else {
-			error << _("cannot activate JACK client") << endmsg;
+			// error << _("cannot activate JACK client") << endmsg;
 		}
 	}
 
@@ -1025,12 +1025,7 @@ AudioEngine::connect_to_jack (string client_name)
 	_jack = jack_client_open (jack_client_name.c_str(), options, &status, server_name);
 	
 	if (_jack == NULL) {
-
-		if (status & JackServerFailed) {
-			error << _("Unable to connect to JACK server") << endmsg;
-		}
-		
-		error << string_compose (_("Could not connect to JACK server as  \"%1\""), jack_client_name) <<  endmsg;
+		/* just return without an error message. something else will take care of it */
 		return -1;
 	}
 

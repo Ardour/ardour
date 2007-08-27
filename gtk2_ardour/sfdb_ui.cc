@@ -292,12 +292,22 @@ SoundFileBox::audition_status_changed (bool active)
 	}
 }
 
-SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s)
+SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, int selected_tracks)
 	: ArdourDialog (title, false),
 	  found_list (ListStore::create(found_list_columns)),
 	  chooser (FILE_CHOOSER_ACTION_OPEN),
 	  found_list_view (found_list),
-	  found_search_btn (_("Search"))
+	  found_search_btn (_("Search")),
+	  split_files (_("Split non-mono files")),
+	  merge_stereo (_("Use files as single stereo track")),
+	  as_tracks (rgroup1, _("Use files as new tracks")),
+	  to_tracks (rgroup1, _("Add files to selected tracks")),
+	  as_regions (rgroup1, _("Add files to region list")),
+	  as_tape_tracks (rgroup1, _("Add files as new tape tracks")),
+	  import (rgroup2, _("Copy to Ardour-native files")),
+	  embed (rgroup2, _("Use file without copying")),
+	  mode (ImportAsTrack),
+	  selected_track_cnt (selected_tracks)
 {
 
 	VBox* vbox;
@@ -311,8 +321,12 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s)
 	hbox->set_spacing (6);
 	hbox->pack_start (notebook, true, true);
 	hbox->pack_start (*vbox, false, false);
+
+	build_options ();
+	rebuild_options ();
 	
 	get_vbox()->pack_start (*hbox, true, true);
+	get_vbox()->pack_start (options, false, false);
 
 	hbox = manage(new HBox);
 	hbox->pack_start (found_entry);
@@ -469,6 +483,149 @@ SoundFileBrowser::get_paths ()
 	}
 }
 
+void
+SoundFileBrowser::rebuild_options ()
+{
+	vector<Glib::ustring> paths = get_paths ();
+
+	selection_includes_multichannel = check_multichannel_status (paths);
+	selection_can_be_embedded_with_links = check_link_status (s, paths);
+
+	if (Profile->get_sae()) {
+		if (selection_can_be_embedded_with_links) {
+			block_four.pack_start (import, false, false);
+			block_four.pack_start (embed, false, false);
+		} else {
+			Label* message = manage (new Label);
+			message->set_text (string_compose (_("%1 will be imported into Ardour's native format"),
+							 (selected_track_cnt > 1 ? "These files" : "This file")));
+			
+			block_four.pack_start (*message, false, false);
+		}
+	} else {
+		block_four.pack_start (import, false, false);
+		block_four.pack_start (embed, false, false);
+	}
+
+	if (selected_track_cnt == 0) {
+		to_tracks.set_sensitive (false);
+	} else {
+		to_tracks.set_sensitive (true);
+	}
+	
+	mode_changed ();
+}
+
+void
+SoundFileBrowser::build_options (VBox& options)
+{
+	block_two.set_border_width (12);
+	block_three.set_border_width (12);
+	block_four.set_border_width (12);
+	
+	block_two.pack_start (as_tracks, false, false);
+	block_two.pack_start (to_tracks, false, false);
+	block_two.pack_start (as_regions, false, false);
+	block_two.pack_start (as_tape_tracks, false, false);
+
+	as_tracks.signal_toggled().connect (mem_fun (*this, &SoundFileOptionsDialog::mode_changed));
+	to_tracks.signal_toggled().connect (mem_fun (*this, &SoundFileOptionsDialog::mode_changed));
+	as_regions.signal_toggled().connect (mem_fun (*this, &SoundFileOptionsDialog::mode_changed));
+	as_tape_tracks.signal_toggled().connect (mem_fun (*this, &SoundFileOptionsDialog::mode_changed));
+	
+	block_three.pack_start (merge_stereo, false, false);
+	block_three.pack_start (split_files, false, false);
+
+	options.set_spacing (12);
+	options.pack_start (block_two, false, false);
+	options.pack_start (block_three, false, false);
+	options.pack_start (block_four, false, false);
+}
+
+void
+SoundFileOptionsBrowser::mode_changed ()
+{
+	if (as_tracks.get_active()) {
+		mode = ImportAsTrack;
+	} else if (to_tracks.get_active()) {
+		mode = ImportToTrack;
+	} else if (as_regions.get_active()) {
+		mode = ImportAsRegion;
+	} else {
+		mode = ImportAsTapeTrack;
+	}
+
+	if ((mode == ImportAsTrack || mode == ImportAsTapeTrack) && paths.size() == 2) {
+		merge_stereo.set_sensitive (true);
+	} else {
+		merge_stereo.set_sensitive (false);
+	}
+
+	if (selection_includes_multichannel) {
+		split_files.set_sensitive (true);
+	} else {
+		split_files.set_sensitive (false);
+	}
+}	
+
+
+bool
+SoundFileOptionsBrowser::check_multichannel_status (const vector<Glib::ustring>& paths)
+{
+	SNDFILE* sf;
+	SF_INFO info;
+	
+	for (vector<Glib::ustring>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
+
+		info.format = 0; // libsndfile says to clear this before sf_open().
+		
+		if ((sf = sf_open ((char*) (*i).c_str(), SFM_READ, &info)) != 0) { 
+			sf_close (sf);
+			if (info.channels > 1) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+bool
+SoundFileOptionsBrowser::check_link_status (const Session& s, const vector<Glib::ustring>& paths)
+{
+	string tmpdir = s.sound_dir();
+	bool ret = false;
+
+	tmpdir += "/linktest";
+
+	if (mkdir (tmpdir.c_str(), 0744)) {
+		if (errno != EEXIST) {
+			return false;
+		}
+	}
+	
+	for (vector<Glib::ustring>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
+
+		char tmpc[MAXPATHLEN+1];
+
+		snprintf (tmpc, sizeof(tmpc), "%s/%s", tmpdir.c_str(), Glib::path_get_basename (*i).c_str());
+
+		/* can we link ? */
+
+		if (link ((*i).c_str(), tmpc)) {
+			goto out;
+		}
+		
+		unlink (tmpc);
+	}
+
+	ret = true;
+
+  out:
+	rmdir (tmpdir.c_str());
+	return ret;
+}
+
 SoundFileChooser::SoundFileChooser (string title, ARDOUR::Session* s)
 	: ArdourDialog (title, false),
 	  browser (title, s)
@@ -505,156 +662,5 @@ SoundFileChooser::get_filename ()
 }
 
 
-SoundFileOptionsDialog::SoundFileOptionsDialog (Window& parent, const Session& s, const vector<Glib::ustring>& p, int selected_tracks)
-	: ArdourDialog (parent, _("External Audio Options"), false),
-	  mode (ImportAsTrack),
-	  paths (p),
-	  split_files (_("Split non-mono files")),
-	  merge_stereo (_("Use files as single stereo track")),
-	  as_tracks (rgroup1, _("Use files as new tracks")),
-	  to_tracks (rgroup1, _("Add files to selected tracks")),
-	  as_regions (rgroup1, _("Add files to region list")),
-	  as_tape_tracks (rgroup1, _("Add files as new tape tracks")),
-	  import (rgroup2, _("Copy to Ardour-native files")),
-	  embed (rgroup2, _("Use file without copying")),
-	  session (s),
-	  selected_track_cnt (selected_tracks)
-{
-	selection_includes_multichannel = check_multichannel_status (paths);
-	selection_can_be_embedded_with_links = check_link_status (s, paths);
-
-	block_two.set_border_width (12);
-	block_three.set_border_width (12);
-	block_four.set_border_width (12);
-	
-	block_two.pack_start (as_tracks, false, false);
-	block_two.pack_start (to_tracks, false, false);
-	block_two.pack_start (as_regions, false, false);
-	block_two.pack_start (as_tape_tracks, false, false);
-
-	as_tracks.signal_toggled().connect (mem_fun (*this, &SoundFileOptionsDialog::mode_changed));
-	to_tracks.signal_toggled().connect (mem_fun (*this, &SoundFileOptionsDialog::mode_changed));
-	as_regions.signal_toggled().connect (mem_fun (*this, &SoundFileOptionsDialog::mode_changed));
-	as_tape_tracks.signal_toggled().connect (mem_fun (*this, &SoundFileOptionsDialog::mode_changed));
-	
-	block_three.pack_start (merge_stereo, false, false);
-	block_three.pack_start (split_files, false, false);
-
-	if (Profile->get_sae()) {
-		if (selection_can_be_embedded_with_links) {
-			block_four.pack_start (import, false, false);
-			block_four.pack_start (embed, false, false);
-		} else {
-			Label* message = manage (new Label);
-			message->set_text (string_compose (_("%1 will be imported into Ardour's native format"),
-							 (selected_track_cnt > 1 ? "These files" : "This file")));
-			
-			block_four.pack_start (*message, false, false);
-		}
-	} else {
-		block_four.pack_start (import, false, false);
-		block_four.pack_start (embed, false, false);
-	}
-	
-	get_vbox()->set_spacing (12);
-	get_vbox()->pack_start (block_two, false, false);
-	get_vbox()->pack_start (block_three, false, false);
-	get_vbox()->pack_start (block_four, false, false);
-
-	if (selected_track_cnt == 0) {
-		to_tracks.set_sensitive (false);
-	} else {
-		to_tracks.set_sensitive (true);
-	}
-	
-	mode_changed ();
-	
-	add_button (Stock::OK, RESPONSE_OK);
-	add_button (Stock::CANCEL, RESPONSE_CANCEL);
-}
-
-void
-SoundFileOptionsDialog::mode_changed ()
-{
-	if (as_tracks.get_active()) {
-		mode = ImportAsTrack;
-	} else if (to_tracks.get_active()) {
-		mode = ImportToTrack;
-	} else if (as_regions.get_active()) {
-		mode = ImportAsRegion;
-	} else {
-		mode = ImportAsTapeTrack;
-	}
-
-	if ((mode == ImportAsTrack || mode == ImportAsTapeTrack) && paths.size() == 2) {
-		merge_stereo.set_sensitive (true);
-	} else {
-		merge_stereo.set_sensitive (false);
-	}
-
-	if (selection_includes_multichannel) {
-		split_files.set_sensitive (true);
-	} else {
-		split_files.set_sensitive (false);
-	}
-}	
-
-
-bool
-SoundFileOptionsDialog::check_multichannel_status (const vector<Glib::ustring>& paths)
-{
-	SNDFILE* sf;
-	SF_INFO info;
-	
-	for (vector<Glib::ustring>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
-
-		info.format = 0; // libsndfile says to clear this before sf_open().
-		
-		if ((sf = sf_open ((char*) (*i).c_str(), SFM_READ, &info)) != 0) { 
-			sf_close (sf);
-			if (info.channels > 1) {
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-bool
-SoundFileOptionsDialog::check_link_status (const Session& s, const vector<Glib::ustring>& paths)
-{
-	string tmpdir = s.sound_dir();
-	bool ret = false;
-
-	tmpdir += "/linktest";
-
-	if (mkdir (tmpdir.c_str(), 0744)) {
-		if (errno != EEXIST) {
-			return false;
-		}
-	}
-	
-	for (vector<Glib::ustring>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
-
-		char tmpc[MAXPATHLEN+1];
-
-		snprintf (tmpc, sizeof(tmpc), "%s/%s", tmpdir.c_str(), Glib::path_get_basename (*i).c_str());
-
-		/* can we link ? */
-
-		if (link ((*i).c_str(), tmpc)) {
-			goto out;
-		}
-		
-		unlink (tmpc);
-	}
-
-	ret = true;
-
-  out:
-	rmdir (tmpdir.c_str());
-	return ret;
-}
 
 

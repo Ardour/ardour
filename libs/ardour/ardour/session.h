@@ -416,6 +416,7 @@ class Session : public PBD::StatefulDestructible
         int restore_history (string snapshot_name);
 	void remove_state (string snapshot_name);
 	void rename_state (string old_name, string new_name);
+	void remove_pending_capture_state ();
 
 	static int rename_template (string old_name, string new_name);
 
@@ -1697,8 +1698,6 @@ class Session : public PBD::StatefulDestructible
 
 	uint32_t n_physical_outputs;
 	uint32_t n_physical_inputs;
-
-	void remove_pending_capture_state ();
 
 	int find_all_sources (std::string path, std::set<std::string>& result);
 	int find_all_sources_across_snapshots (std::set<std::string>& result, bool exclude_this_snapshot);

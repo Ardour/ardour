@@ -47,7 +47,8 @@ void
 ARDOUR_UI::shutdown ()
 {
 	if (session) {
-		// delete session;
+		/* we're exiting cleanly, so remove any auto-save data */
+		session->remove_pending_capture_state ();
 		session = 0;
 	}
 
