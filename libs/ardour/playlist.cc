@@ -1170,7 +1170,7 @@ Playlist::region_changed (Change what_changed, boost::shared_ptr<Region> region)
 			save = !(_splicing || _nudging);
 		}
 		
-		if ((what_changed & Region::MuteChanged) && 
+		if ((what_changed & our_interests) && 
 		    !(what_changed &  Change (ARDOUR::PositionChanged|ARDOUR::LengthChanged))) {
 			check_dependents (region, false);
 		}

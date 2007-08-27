@@ -380,6 +380,10 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 			top = other;
 			bottom = region;
 		}
+		
+		if (!(top->opaque())) {
+			continue;
+		}
 
 
 

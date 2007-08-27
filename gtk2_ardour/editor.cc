@@ -889,16 +889,19 @@ Editor::control_scroll (float fraction)
 	}
 
 	double step = fraction * current_page_frames();
+
 	/*
 		_control_scroll_target is an optional<T>
 	
-		it acts like a pointer to an nframes_t, with a operator conversion to boolean
-		to check that it has a value
-		could possibly use playhead_cursor->current_frame to store
-		the value and a boolean in the class to know when it's out of date
+		it acts like a pointer to an nframes_t, with
+		a operator conversion to boolean to check
+		that it has a value could possibly use
+		playhead_cursor->current_frame to store the
+		value and a boolean in the class to know
+		when it's out of date
 	*/
-	if ( !_control_scroll_target )
-	{
+
+	if (!_control_scroll_target) {
 		_control_scroll_target = session->transport_frame();
 		_dragging_playhead = true;
 	}
