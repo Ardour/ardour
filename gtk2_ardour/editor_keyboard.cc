@@ -43,6 +43,14 @@ Editor::kbd_driver (sigc::slot<void,GdkEvent*> theslot, bool use_track_canvas, b
 		doit = true;
 	}
 
+	/* any use of "keyboard mouse buttons" invalidates an existing grab
+	*/
+	
+	if (drag_info.item) {
+		drag_info.item->ungrab (GDK_CURRENT_TIME);
+		drag_info.item = 0;
+	}
+
 	if (doit) {
 
 		if (entered_regionview && can_select) {

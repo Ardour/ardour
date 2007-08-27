@@ -153,8 +153,8 @@ Editor::split_regions_at (nframes_t where, RegionSelection& regions)
 		}
 
 		a = tmp;
-    }
-
+	}
+	
 	commit_reversible_command ();
 	_new_regionviews_show_envelope = false;
 }

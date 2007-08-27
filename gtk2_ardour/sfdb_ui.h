@@ -42,6 +42,10 @@
 #include "ardour_dialog.h"
 #include "editing.h"
 
+namespace ARDOUR {
+	class Session;
+};
+
 class SoundFileBox : public Gtk::VBox
 {
   public:
@@ -150,7 +154,7 @@ class SoundFileOptionsDialog : public ArdourDialog
 	Gtk::RadioButtonGroup rgroup2;
 
   public:
-	SoundFileOptionsDialog (Gtk::Window& parent, const vector<Glib::ustring>& p, int selected_tracks);
+	SoundFileOptionsDialog (Gtk::Window& parent, const ARDOUR::Session&, const vector<Glib::ustring>& p, int selected_tracks);
 
 	Editing::ImportMode mode;
 
@@ -168,13 +172,16 @@ class SoundFileOptionsDialog : public ArdourDialog
 	Gtk::RadioButton embed;
 
   private:
+	const ARDOUR::Session& session;
 	int selected_track_cnt;
 	bool selection_includes_multichannel;
+	bool selection_can_be_embedded_with_links;
 	Gtk::VBox block_two;
 	Gtk::VBox block_three;
 	Gtk::VBox block_four;
-
+	
 	static bool check_multichannel_status (const std::vector<Glib::ustring>& paths);
+	static bool check_link_status (const ARDOUR::Session& s, const std::vector<Glib::ustring>& paths);
 	void mode_changed ();
 };
 

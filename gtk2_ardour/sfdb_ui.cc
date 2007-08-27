@@ -21,7 +21,9 @@
 #include <cerrno>
 #include <sstream>
 
+#include <unistd.h>
 #include <sys/stat.h>
+#include <sys/param.h>
 
 #include <gtkmm/box.h>
 #include <gtkmm/stock.h>
@@ -37,6 +39,7 @@
 #include <ardour/audiofilesource.h>
 #include <ardour/region_factory.h>
 #include <ardour/source_factory.h>
+#include <ardour/profile.h>
 
 #include "ardour_ui.h"
 #include "editing.h"
@@ -71,8 +74,7 @@ SoundFileBox::SoundFileBox ()
 	set_size_request (250, 250);
 	
 	Label* label = manage (new Label);
-	label->set_use_markup (true);
-	label->set_text (_("<b>Soundfile Info</b>"));
+	label->set_markup (_("<b>Soundfile Info</b>"));
 
 	border_frame.set_label_widget (*label);
 	border_frame.add (main_box);
@@ -503,7 +505,7 @@ SoundFileChooser::get_filename ()
 }
 
 
-SoundFileOptionsDialog::SoundFileOptionsDialog (Window& parent, const vector<Glib::ustring>& p, int selected_tracks)
+SoundFileOptionsDialog::SoundFileOptionsDialog (Window& parent, const Session& s, const vector<Glib::ustring>& p, int selected_tracks)
 	: ArdourDialog (parent, _("External Audio Options"), false),
 	  mode (ImportAsTrack),
 	  paths (p),
@@ -515,9 +517,11 @@ SoundFileOptionsDialog::SoundFileOptionsDialog (Window& parent, const vector<Gli
 	  as_tape_tracks (rgroup1, _("Add files as new tape tracks")),
 	  import (rgroup2, _("Copy to Ardour-native files")),
 	  embed (rgroup2, _("Use file without copying")),
+	  session (s),
 	  selected_track_cnt (selected_tracks)
 {
 	selection_includes_multichannel = check_multichannel_status (paths);
+	selection_can_be_embedded_with_links = check_link_status (s, paths);
 
 	block_two.set_border_width (12);
 	block_three.set_border_width (12);
@@ -535,9 +539,22 @@ SoundFileOptionsDialog::SoundFileOptionsDialog (Window& parent, const vector<Gli
 	
 	block_three.pack_start (merge_stereo, false, false);
 	block_three.pack_start (split_files, false, false);
-	
-	block_four.pack_start (import, false, false);
-	block_four.pack_start (embed, false, false);
+
+	if (Profile->get_sae()) {
+		if (selection_can_be_embedded_with_links) {
+			block_four.pack_start (import, false, false);
+			block_four.pack_start (embed, false, false);
+		} else {
+			Label* message = manage (new Label);
+			message->set_text (string_compose (_("%1 will be imported into Ardour's native format"),
+							 (selected_track_cnt > 1 ? "These files" : "This file")));
+			
+			block_four.pack_start (*message, false, false);
+		}
+	} else {
+		block_four.pack_start (import, false, false);
+		block_four.pack_start (embed, false, false);
+	}
 	
 	get_vbox()->set_spacing (12);
 	get_vbox()->pack_start (block_two, false, false);
@@ -603,4 +620,41 @@ SoundFileOptionsDialog::check_multichannel_status (const vector<Glib::ustring>& 
 
 	return false;
 }
+
+bool
+SoundFileOptionsDialog::check_link_status (const Session& s, const vector<Glib::ustring>& paths)
+{
+	string tmpdir = s.sound_dir();
+	bool ret = false;
+
+	tmpdir += "/linktest";
+
+	if (mkdir (tmpdir.c_str(), 0744)) {
+		if (errno != EEXIST) {
+			return false;
+		}
+	}
+	
+	for (vector<Glib::ustring>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
+
+		char tmpc[MAXPATHLEN+1];
+
+		snprintf (tmpc, sizeof(tmpc), "%s/%s", tmpdir.c_str(), Glib::path_get_basename (*i).c_str());
+
+		/* can we link ? */
+
+		if (link ((*i).c_str(), tmpc)) {
+			goto out;
+		}
+		
+		unlink (tmpc);
+	}
+
+	ret = true;
+
+  out:
+	rmdir (tmpdir.c_str());
+	return ret;
+}
+
 

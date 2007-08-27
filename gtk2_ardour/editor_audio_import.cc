@@ -110,7 +110,7 @@ Editor::external_audio_dialog ()
 		
 		paths = browser.get_paths ();
 
-		options = new SoundFileOptionsDialog (browser, paths, selection->tracks.size());
+		options = new SoundFileOptionsDialog (browser, *session, paths, selection->tracks.size());
 		options->show_all ();
 		
 		response = options->run ();
