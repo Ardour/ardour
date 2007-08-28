@@ -73,7 +73,7 @@ class SoundFileBox : public Gtk::VBox
 	
 	Gtk::Frame border_frame;
 	
-	Gtk::Entry tags_entry;
+	Gtk::TextView tags_entry;
 	
 	Gtk::VBox main_box;
 	Gtk::VBox path_box;
@@ -85,7 +85,7 @@ class SoundFileBox : public Gtk::VBox
 	
 	bool tags_entry_left (GdkEventFocus* event);
 	void stop_btn_clicked ();
-	void apply_btn_clicked ();
+	void tags_changed ();
 	
 	void audition_status_changed (bool state);
 };
@@ -104,8 +104,11 @@ class SoundFileBrowser : public ArdourDialog
 	FoundTagColumns found_list_columns;
 	Glib::RefPtr<Gtk::ListStore> found_list;
 
+	Gtk::RadioButtonGroup rgroup1;
+	Gtk::RadioButtonGroup rgroup2;
+
   public:
-	SoundFileBrowser (std::string title, ARDOUR::Session* _s = 0);
+	SoundFileBrowser (Gtk::Window& parent, std::string title, ARDOUR::Session* _s, int selected_tracks);
 	virtual ~SoundFileBrowser ();
 	
 	virtual void set_session (ARDOUR::Session*);
@@ -114,7 +117,19 @@ class SoundFileBrowser : public ArdourDialog
 	Gtk::FileChooserWidget chooser;
 	Gtk::TreeView found_list_view;
 
+	Gtk::CheckButton split_files;
+	Gtk::CheckButton merge_stereo;
+
+	Gtk::ComboBoxText action_combo;
+	Gtk::ComboBoxText where_combo;
+	
+	Gtk::RadioButton import;
+	Gtk::RadioButton embed;
+
+	Editing::ImportMode get_mode() const;
+
   protected:
+	Editing::ImportMode mode;
 	Gtk::FileFilter custom_filter;
 	Gtk::FileFilter matchall_filter;
 	SoundFileBox preview;
@@ -133,56 +148,30 @@ class SoundFileBrowser : public ArdourDialog
 	void chooser_file_activated ();
 	
 	bool on_custom (const Gtk::FileFilter::Info& filter_info);
+
+	int selected_track_cnt;
+
+	Gtk::HBox options;
+	Gtk::VBox block_two;
+	Gtk::VBox block_three;
+	Gtk::VBox block_four;
+
+	static bool check_multichannel_status (const std::vector<Glib::ustring>& paths);
+	static bool check_link_status (const ARDOUR::Session&, const std::vector<Glib::ustring>& paths);
+
+	void reset_options ();
 };
 
-class SoundFileChooser : public ArdourDialog
+class SoundFileChooser : public SoundFileBrowser
 {
   public:
-	SoundFileChooser (std::string title, ARDOUR::Session* _s = 0);
+	SoundFileChooser (Gtk::Window& parent, std::string title, ARDOUR::Session* _s = 0);
 	virtual ~SoundFileChooser () {};
 	
 	Glib::ustring get_filename ();
 
   private:
-	SoundFileBrowser browser;
-};
-
-class SoundFileOptionsDialog : public ArdourDialog
-{
-  private:
-	Gtk::RadioButtonGroup rgroup1;
-	Gtk::RadioButtonGroup rgroup2;
-
-  public:
-	SoundFileOptionsDialog (Gtk::Window& parent, const ARDOUR::Session&, const vector<Glib::ustring>& p, int selected_tracks);
-
-	Editing::ImportMode mode;
-
-	const std::vector<Glib::ustring>&  paths;
-
-	Gtk::CheckButton split_files;
-	Gtk::CheckButton merge_stereo;
-	
-	Gtk::RadioButton as_tracks;
-	Gtk::RadioButton to_tracks;
-	Gtk::RadioButton as_regions;
-	Gtk::RadioButton as_tape_tracks;
-	
-	Gtk::RadioButton import;
-	Gtk::RadioButton embed;
-
-  private:
-	const ARDOUR::Session& session;
-	int selected_track_cnt;
-	bool selection_includes_multichannel;
-	bool selection_can_be_embedded_with_links;
-	Gtk::VBox block_two;
-	Gtk::VBox block_three;
-	Gtk::VBox block_four;
-	
-	static bool check_multichannel_status (const std::vector<Glib::ustring>& paths);
-	static bool check_link_status (const ARDOUR::Session& s, const std::vector<Glib::ustring>& paths);
-	void mode_changed ();
+	// SoundFileBrowser browser;
 };
 
 #endif // __ardour_sfdb_ui_h__

@@ -91,43 +91,21 @@ Editor::external_audio_dialog ()
 		return;
 	}
 
-	SoundFileBrowser browser (_("Add existing audio"), session);
-	SoundFileOptionsDialog* options = 0;
+	SoundFileBrowser browser (*this, _("Add existing audio"), session, selection->tracks.size());
 
 	browser.show_all ();
 
-	while (!options) {
+	int response = browser.run ();
 
-		int response = browser.run ();
-		
-		switch (response) {
-		case RESPONSE_OK:
-			break;
-		default:
-			// cancel from the browser - we are done
-			return;
-		}
-		
-		paths = browser.get_paths ();
-
-		options = new SoundFileOptionsDialog (browser, *session, paths, selection->tracks.size());
-		options->show_all ();
-		
-		response = options->run ();
-		switch (response) {
-		case RESPONSE_OK:
-			// leave options non-null so that we break out of the loop
-			break;
-		default:
-			// back to the browser another try
-			delete options;
-			options = 0;		
-			break;
-		}
+         	switch (response) {
+	case RESPONSE_OK:
+		break;
+	default:
+		// cancel from the browser - we are done
+		return;
 	}
-
+	
 	browser.hide ();
-	options->hide ();
 
 	/* lets do it */
 	
@@ -139,14 +117,13 @@ Editor::external_audio_dialog ()
 			track = atv->audio_track();
 		}
 	}
+	paths = browser.get_paths ();
 
-	if (options->import.get_active()) {
-		do_import (paths, options->split_files.get_active(), options->mode, track, edit_cursor->current_frame);
+	if (browser.import.get_active()) {
+		do_import (paths, browser.split_files.get_active(), browser.get_mode(), track, edit_cursor->current_frame);
 	} else {
-		do_embed (paths, options->split_files.get_active(), options->mode, track, edit_cursor->current_frame);
+		do_embed (paths, browser.split_files.get_active(), browser.get_mode(), track, edit_cursor->current_frame);
 	}
-
-	delete options;
 }
 
 void
