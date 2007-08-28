@@ -1077,7 +1077,7 @@ AutomationList::rt_safe_earliest_event_discrete (double start, double end, doubl
 	
 	build_search_cache_if_necessary(start, end);
 
-	pair<const_iterator,const_iterator> range = _search_cache.range;
+	const pair<const_iterator,const_iterator>& range = _search_cache.range;
 
 	if (range.first != _events.end()) {
 		const ControlEvent* const first = *range.first;

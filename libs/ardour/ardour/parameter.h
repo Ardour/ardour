@@ -90,9 +90,10 @@ public:
 	
 	/** Arbitrary but fixed ordering, so we're comparable (usable in std::map) */
 	inline bool operator<(const Parameter& id) const {
-		// FIXME: branch a performance problem?  #ifdef DEBUG?
+#ifndef NDEBUG
 		if (_type == NullAutomation)
 			PBD::warning << "Uninitialized Parameter compared." << endmsg;
+#endif
 		return (_type < id._type || _id < id._id);
 	}
 	

@@ -398,7 +398,7 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 	size_t buf_capacity = 4;
 	Byte* buf = (Byte*)malloc(buf_capacity);
 	
-	if (_model && ! _model->currently_writing())
+	if (_model && ! _model->writing())
 		_model->start_write();
 
 	while (true) {

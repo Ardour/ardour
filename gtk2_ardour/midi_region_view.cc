@@ -359,7 +359,7 @@ MidiRegionView::create_note_at(double x, double y, double dur)
 	//double dur = m.frames_per_bar(t, trackview.session().frame_rate()) / m.beats_per_bar();
 
 	// Add a 1 beat long note (for now)
-	const MidiModel::Note new_note(stamp, dur, (uint8_t)note, 0x40);
+	const Note new_note(stamp, dur, (uint8_t)note, 0x40);
 	
 	view->update_bounds(new_note.note());
 
@@ -629,7 +629,7 @@ MidiRegionView::extend_active_notes()
  * duration so they can be drawn in full immediately.
  */
 void
-MidiRegionView::add_note (const MidiModel::Note& note)
+MidiRegionView::add_note (const Note& note)
 {
 	assert(note.time() >= 0);
 	//assert(note.time() < _region->length());
@@ -777,7 +777,7 @@ MidiRegionView::note_dropped(CanvasMidiEvent* ev, double dt, uint8_t dnote)
 
 		for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 			command_remove_note(*i);
-			MidiModel::Note copy(*(*i)->note()); 
+			Note copy(*(*i)->note()); 
 
 			copy.set_time((*i)->note()->time() + dt);
 			copy.set_note((*i)->note()->note() + dnote);

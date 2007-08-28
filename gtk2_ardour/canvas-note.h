@@ -30,7 +30,7 @@ namespace Canvas {
 
 class CanvasNote : public SimpleRect, public CanvasMidiEvent {
 public:
-	CanvasNote(MidiRegionView& region, Group& group, const ARDOUR::MidiModel::Note* note=NULL)
+	CanvasNote(MidiRegionView& region, Group& group, const ARDOUR::Note* note=NULL)
 		: SimpleRect(group), CanvasMidiEvent(region, this, note)
 	{
 	}

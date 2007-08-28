@@ -31,7 +31,7 @@ namespace Gnome {
 namespace Canvas {
 
 
-CanvasMidiEvent::CanvasMidiEvent(MidiRegionView& region, Item* item, const ARDOUR::MidiModel::Note* note)
+CanvasMidiEvent::CanvasMidiEvent(MidiRegionView& region, Item* item, const ARDOUR::Note* note)
 	: _region(region)
 	, _item(item)
 	, _state(None)

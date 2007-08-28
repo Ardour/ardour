@@ -77,7 +77,7 @@ class MidiRegionView : public RegionView
     GhostRegion* add_ghost (AutomationTimeAxisView&);
 
 	void add_event(const ARDOUR::MidiEvent& ev);
-	void add_note(const ARDOUR::MidiModel::Note& note);
+	void add_note(const ARDOUR::Note& note);
 
 	void begin_write();
 	void end_write();
@@ -99,7 +99,7 @@ class MidiRegionView : public RegionView
 			_delta_command = _model->new_delta_command();
 	}
 	
-	void command_add_note(ARDOUR::MidiModel::Note& note) {
+	void command_add_note(ARDOUR::Note& note) {
 		if (_delta_command)
 			_delta_command->add(note);
 	}

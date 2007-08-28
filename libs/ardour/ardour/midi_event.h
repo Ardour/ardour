@@ -21,7 +21,9 @@
 #ifndef __ardour_midi_event_h__
 #define __ardour_midi_event_h__
 
+#include <ardour/types.h>
 #include <ardour/midi_events.h>
+#include <stdint.h>
 
 /** If this is not defined, all methods of MidiEvent are RT safe
  * but MidiEvent will never deep copy and (depending on the scenario)
@@ -38,7 +40,7 @@ namespace ARDOUR {
  */
 struct MidiEvent {
 #ifdef MIDI_EVENT_ALLOW_ALLOC
-	MidiEvent(double t=0, size_t s=0, Byte* b=NULL, bool owns_buffer=false)
+	MidiEvent(double t=0, uint32_t s=0, Byte* b=NULL, bool owns_buffer=false)
 		: _time(t)
 		, _size(s)
 		, _buffer(b)
@@ -96,7 +98,15 @@ struct MidiEvent {
 	}
 
 	inline bool owns_buffer() const { return _owns_buffer; }
-	inline void set_buffer(Byte* buf) { assert(!_owns_buffer); _buffer = buf; }
+	
+	inline void set_buffer(Byte* buf) {
+		if (_owns_buffer) {
+			free(_buffer);
+			_buffer = NULL;
+		}
+		_buffer = buf;
+		_owns_buffer = false;
+	}
 
 #else
 

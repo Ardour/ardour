@@ -62,6 +62,7 @@ midi_playlist.cc
 midi_track.cc
 midi_region.cc
 midi_model.cc
+note.cc
 smf_source.cc
 auditioner.cc
 automation.cc

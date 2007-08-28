@@ -84,8 +84,8 @@ class AutomationList : public PBD::StatefulDestructible
 	AutomationList& operator= (const AutomationList&);
 	bool operator== (const AutomationList&);
 
-	Parameter parameter() const          { return _parameter; }
-	void      set_parameter(Parameter p) { _parameter = p; }
+	const Parameter& parameter() const          { return _parameter; }
+	void             set_parameter(Parameter p) { _parameter = p; }
 
 	void freeze();
 	void thaw ();

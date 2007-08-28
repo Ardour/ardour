@@ -29,7 +29,7 @@ namespace Canvas {
 
 class CanvasHit : public Diamond, public CanvasMidiEvent {
 public:
-	CanvasHit(MidiRegionView& region, Group& group, double size, const ARDOUR::MidiModel::Note* note=NULL)
+	CanvasHit(MidiRegionView& region, Group& group, double size, const ARDOUR::Note* note=NULL)
 		: Diamond(group, size), CanvasMidiEvent(region, this, note) {}
 	
 	// FIXME

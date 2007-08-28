@@ -18,8 +18,11 @@
 
 */
 
+#define __STDC_LIMIT_MACROS 1
+
 #include <iostream>
 #include <algorithm>
+#include <stdint.h>
 #include <pbd/enumwriter.h>
 #include <ardour/midi_model.h>
 #include <ardour/midi_events.h>
@@ -30,71 +33,52 @@
 using namespace std;
 using namespace ARDOUR;
 
-// Note
 
-MidiModel::Note::Note(double t, double d, uint8_t n, uint8_t v)
-	: _on_event(t, 3, NULL, true)
-	, _off_event(t + d, 3, NULL, true)
+// Read iterator (const_iterator)
+
+MidiModel::const_iterator::const_iterator(MidiModel& model, double t)
+	: _model(model)
 {
-	_on_event.buffer()[0] = MIDI_CMD_NOTE_ON;
-	_on_event.buffer()[1] = n;
-	_on_event.buffer()[2] = v;
-	
-	_off_event.buffer()[0] = MIDI_CMD_NOTE_OFF;
-	_off_event.buffer()[1] = n;
-	_off_event.buffer()[2] = 0x40;
-	
-	assert(time() == t);
-	assert(duration() == d);
-	assert(note() == n);
-	assert(velocity() == v);
+	model.read_lock();
+
+	_note_iter = model.notes().end();
+	for (MidiModel::Notes::iterator i = model.notes().begin(); i != model.notes().end(); ++i) {
+		if ((*i).time() >= t) {
+			_note_iter = i;
+			break;
+		}
+	}
+
+	MidiControlIterator earliest_control = make_pair(boost::shared_ptr<AutomationList>(), make_pair(DBL_MAX, 0.0));
+
+	_control_iters.reserve(model.controls().size());
+	for (Automatable::Controls::const_iterator i = model.controls().begin();
+			i != model.controls().end(); ++i) {
+		double x, y;
+		i->second->list()->rt_safe_earliest_event(t, DBL_MAX, x, y);
+		
+		const MidiControlIterator new_iter = make_pair(i->second->list(), make_pair(x, y));
+
+		if (x < earliest_control.second.first)
+			earliest_control = new_iter;
+
+		_control_iters.push_back(new_iter);
+	}
+
+	if (_note_iter != model.notes().end())
+		_event = MidiEvent(_note_iter->on_event(), false);
+
+	if (earliest_control.first != 0 && earliest_control.second.first < _event.time())
+		model.control_to_midi_event(_event, earliest_control);
+
 }
 
 
-MidiModel::Note::Note(const Note& copy)
-	: _on_event(copy._on_event, true)
-	, _off_event(copy._off_event, true)
+MidiModel::const_iterator::~const_iterator()
 {
-	/*
-	assert(copy._on_event.size == 3);
-	_on_event.buffer = _on_event_buffer;
-	memcpy(_on_event_buffer, copy._on_event_buffer, 3);
-	
-	assert(copy._off_event.size == 3);
-	_off_event.buffer = _off_event_buffer;
-	memcpy(_off_event_buffer, copy._off_event_buffer, 3);
-	*/
-
-	assert(time() == copy.time());
-	assert(end_time() == copy.end_time());
-	assert(note() == copy.note());
-	assert(velocity() == copy.velocity());
-	assert(duration() == copy.duration());
+	_model.read_unlock();
 }
 
-
-const MidiModel::Note&
-MidiModel::Note::operator=(const Note& copy)
-{
-	_on_event = copy._on_event;
-	_off_event = copy._off_event;
-	/*_on_event.time = copy._on_event.time;
-	assert(copy._on_event.size == 3);
-	memcpy(_on_event_buffer, copy._on_event_buffer, 3);
-	
-	_off_event.time = copy._off_event.time;
-	assert(copy._off_event.size == 3);
-	memcpy(_off_event_buffer, copy._off_event_buffer, 3);
-	*/
-	
-	assert(time() == copy.time());
-	assert(end_time() == copy.end_time());
-	assert(note() == copy.note());
-	assert(velocity() == copy.velocity());
-	assert(duration() == copy.duration());
-
-	return *this;
-}
 
 // MidiModel
 
@@ -180,7 +164,106 @@ MidiModel::read (MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframe
 
 	return read_events;
 }
+	
 
+bool
+MidiModel::control_to_midi_event(MidiEvent& ev, const MidiControlIterator& iter)
+{
+	if (iter.first->parameter().type() == MidiCCAutomation) {
+		if (!ev.owns_buffer() || ev.size() < 3)
+			ev = MidiEvent(iter.second.first, 3, (Byte*)malloc(3), true);
+
+		assert(iter.first);
+		assert(iter.first->parameter().id() <= INT8_MAX);
+		assert(iter.second.second <= INT8_MAX);
+		ev.buffer()[0] = MIDI_CMD_CONTROL;
+		ev.buffer()[1] = (Byte)iter.first->parameter().id();
+		ev.buffer()[2] = (Byte)iter.second.second;
+		ev.time() = iter.second.first; // x
+		ev.size() = 3;
+		return true;
+	} else {
+		return false;
+	}
+}
+
+	
+/** Return the earliest MIDI event in the given range.
+ *
+ * \return true if \a output has been set to the earliest event in the given range.
+ */
+#if 0
+bool
+MidiModel::earliest_note_event(MidiEvent& output, nframes_t start, nframes_t nframes) const
+{
+	/* FIXME: cache last lookup value to avoid O(n) search every time */
+		
+	const Note*      const earliest_on  = NULL;
+	const Note*      const earliest_off = NULL;
+	const MidiEvent* const earliest_cc = NULL;
+
+	/* Notes */
+
+	if (_note_mode == Sustained) {
+				
+		for (Notes::const_iterator n = _notes.begin(); n != _notes.end(); ++n) {
+
+			if ( ! _active_notes.empty() ) {
+				const Note* const earliest_off = _active_notes.top();
+				const MidiEvent&  off_ev       = earliest_off->off_event();
+				if (off_ev.time() < start + nframes && off_ev.time() <= n->time()) {
+					output = off_ev;
+					//dst.write(off_ev.time() + stamp_offset, off_ev.size(), off_ev.buffer());
+					_active_notes.pop();
+					return true;
+				}
+			}
+
+			if (n->time() >= start + nframes)
+				break;
+
+			// Note on
+			if (n->time() >= start) {
+				earliest_on = &n->on_event();
+				//dst.write(on_ev.time() + stamp_offset, on_ev.size(), on_ev.buffer());
+				_active_notes.push(&(*n));
+				return true;
+			}
+
+		}
+			
+		// Write any trailing note offs
+		while ( ! _active_notes.empty() ) {
+			const Note* const earliest_off = _active_notes.top();
+			const MidiEvent&  off_ev       = earliest_off->off_event();
+			if (off_ev.time() < start + nframes) {
+				dst.write(off_ev.time() + stamp_offset, off_ev.size(), off_ev.buffer());
+				_active_notes.pop();
+				++read_events;
+			} else {
+				break;
+			}
+		}
+
+	// Percussive
+	} else {
+		for (Notes::const_iterator n = _notes.begin(); n != _notes.end(); ++n) {
+			// Note on
+			if (n->time() >= start) {
+				if (n->time() < start + nframes) {
+					const MidiEvent& ev = n->on_event();
+					dst.write(ev.time() + stamp_offset, ev.size(), ev.buffer());
+					++read_events;
+				} else {
+					break;
+				}
+			}
+		}
+	}
+
+	return read_events;
+}
+#endif
 
 /** Begin a write of events to the model.
  *

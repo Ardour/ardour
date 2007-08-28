@@ -43,7 +43,7 @@ namespace Canvas {
  */
 class CanvasMidiEvent {
 public:
-	CanvasMidiEvent(MidiRegionView& region, Item* item, const ARDOUR::MidiModel::Note* note = NULL);
+	CanvasMidiEvent(MidiRegionView& region, Item* item, const ARDOUR::Note* note = NULL);
 	virtual ~CanvasMidiEvent() {} 
 
 	bool on_event(GdkEvent* ev);
@@ -62,16 +62,16 @@ public:
 	const Item* item() const { return _item; }
 	Item*       item()       { return _item; }
 
-	const ARDOUR::MidiModel::Note* note() { return _note; }
+	const ARDOUR::Note* note() { return _note; }
 
 protected:
 	enum State { None, Pressed, Dragging };
 
-	MidiRegionView&                _region;
-	Item* const                    _item;
-	State                          _state;
-	const ARDOUR::MidiModel::Note* _note;
-	bool                           _selected;
+	MidiRegionView&     _region;
+	Item* const         _item;
+	State               _state;
+	const ARDOUR::Note* _note;
+	bool                _selected;
 };
 
 } // namespace Gnome

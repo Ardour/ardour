@@ -22,6 +22,7 @@
 #define __ardour_midi_model_h__
 
 #include <queue>
+#include <utility>
 #include <boost/utility.hpp>
 #include <glibmm/thread.h>
 #include <pbd/command.h>
@@ -29,11 +30,16 @@
 #include <ardour/midi_buffer.h>
 #include <ardour/midi_ring_buffer.h>
 #include <ardour/automatable.h>
+#include <ardour/note.h>
 
 namespace ARDOUR {
 
 class Session;
 class MidiSource;
+	
+//                                                                     x   ,  y
+typedef std::pair<boost::shared_ptr<const AutomationList>, std::pair<double,double> >
+		MidiControlIterator;
 
 
 /** This is a slightly higher level (than MidiBuffer) model of MIDI note data.
@@ -44,45 +50,13 @@ class MidiSource;
  */
 class MidiModel : public boost::noncopyable, public Automatable {
 public:
-	struct Note {
-		Note(double time=0, double dur=0, uint8_t note=0, uint8_t vel=0x40);
-		Note(const Note& copy);
-		
-		const MidiModel::Note& operator=(const MidiModel::Note& copy);
-
-		inline bool operator==(const Note& other)
-			{ return time() == other.time() && note() == other.note(); }
-
-		inline double  time()     const { return _on_event.time(); }
-		inline double  end_time() const { return _off_event.time(); }
-		inline uint8_t note()     const { return _on_event.note(); }
-		inline uint8_t velocity() const { return _on_event.velocity(); }
-		inline double  duration() const { return _off_event.time() - _on_event.time(); }
-
-		inline void set_time(double t)      { _off_event.time() = t + duration(); _on_event.time() = t; }
-		inline void set_note(uint8_t n)     { _on_event.buffer()[1] = n; _off_event.buffer()[1] = n; }
-		inline void set_velocity(uint8_t n) { _on_event.buffer()[2] = n; }
-		inline void set_duration(double d)  { _off_event.time() = _on_event.time() + d; }
-
-		inline MidiEvent& on_event()  { return _on_event; }
-		inline MidiEvent& off_event() { return _off_event; }
-	
-		inline const MidiEvent& on_event()  const { return _on_event; }
-		inline const MidiEvent& off_event() const { return _off_event; }
-
-	private:
-		// Event buffers are self-contained
-		MidiEvent _on_event;
-		MidiEvent _off_event;
-	};
-
 	MidiModel(Session& s, size_t size=0);
 	
 	// This is crap.
-	void write_lock()   { _lock.writer_lock(); _automation_lock.lock(); }
-	void write_unlock() { _lock.writer_unlock(); _automation_lock.unlock(); }
-	void read_lock()    { _lock.reader_lock(); _automation_lock.lock(); }
-	void read_unlock()  { _lock.reader_unlock(); _automation_lock.unlock(); }
+	void write_lock()        { _lock.writer_lock(); _automation_lock.lock(); }
+	void write_unlock()      { _lock.writer_unlock(); _automation_lock.unlock(); }
+	void read_lock()   const { _lock.reader_lock(); _automation_lock.lock(); }
+	void read_unlock() const { _lock.reader_unlock(); _automation_lock.unlock(); }
 
 	void clear() { _notes.clear(); }
 
@@ -90,7 +64,7 @@ public:
 	void     set_note_mode(NoteMode mode) { _note_mode = mode; }
 
 	void start_write();
-	bool currently_writing() const { return _writing; }
+	bool writing() const { return _writing; }
 	void end_write(bool delete_stuck=false);
 
 	size_t read (MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframes_t stamp_offset) const;
@@ -99,7 +73,6 @@ public:
 	void append(const MidiBuffer& data);
 	
 	/** Resizes vector if necessary (NOT realtime safe) */
-	//void append(double time, size_t size, const Byte* in_buffer);
 	void append(const MidiEvent& ev);
 	
 	inline const Note& note_at(unsigned i) const { return _notes[i]; }
@@ -164,10 +137,36 @@ public:
 
 	sigc::signal<void> ContentsChanged;
 	
+	/** Read iterator */
+	class const_iterator {
+	public:
+		const_iterator(MidiModel& model, double t);
+		~const_iterator();
+
+		const MidiEvent& operator*() const { return _event; }
+
+		const const_iterator& operator++(); // prefix only
+
+	private:
+		const MidiModel& _model;
+		MidiEvent        _event;
+
+		typedef std::priority_queue<const Note*,std::vector<const Note*>, LaterNoteEndComparator>
+				ActiveNotes;
+		mutable ActiveNotes _active_notes;
+
+		Notes::iterator _note_iter;
+
+		std::vector<MidiControlIterator> _control_iters;
+	};
+	
 private:
 	friend class DeltaCommand;
 	void add_note_unlocked(const Note& note);
 	void remove_note_unlocked(const Note& note);
+
+	friend class const_iterator;
+	bool control_to_midi_event(MidiEvent& ev, const MidiControlIterator& iter);
 
 #ifndef NDEBUG
 	bool is_sorted() const;
@@ -177,7 +176,7 @@ private:
 	void append_note_off_unlocked(double time, uint8_t note);
 	void append_cc_unlocked(double time, uint8_t number, uint8_t value);
 
-	Glib::RWLock _lock;
+	mutable Glib::RWLock _lock;
 
 	Notes    _notes;
 	NoteMode _note_mode;
@@ -188,6 +187,7 @@ private:
 	bool       _edited;
 	
 	// note state for read():
+	// (TODO: Remove and replace with iterator)
 	
 	typedef std::priority_queue<const Note*,std::vector<const Note*>,
 			LaterNoteEndComparator> ActiveNotes;

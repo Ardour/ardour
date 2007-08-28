@@ -149,7 +149,7 @@ MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
 	if (source->model()) {
 		// Find our note range
 		for (size_t i=0; i < source->model()->n_notes(); ++i) {
-			const MidiModel::Note& note = source->model()->note_at(i);
+			const Note& note = source->model()->note_at(i);
 			update_bounds(note.note());
 		}
 	}
@@ -469,7 +469,7 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 						MidiRegionView* mrv = (MidiRegionView*)iter->second;
 						// FIXME: slow
 						for (size_t i=0; i < data->n_notes(); ++i) {
-							const MidiModel::Note& note = data->note_at(i);
+							const Note& note = data->note_at(i);
 							if (note.time() > start + dur)
 								break;
 
