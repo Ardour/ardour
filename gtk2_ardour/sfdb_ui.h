@@ -122,11 +122,14 @@ class SoundFileBrowser : public ArdourDialog
 
 	Gtk::ComboBoxText action_combo;
 	Gtk::ComboBoxText where_combo;
+	Gtk::ComboBoxText channel_combo;
 	
 	Gtk::RadioButton import;
 	Gtk::RadioButton embed;
 
 	Editing::ImportMode get_mode() const;
+	Editing::ImportPosition get_position() const;
+	Editing::ImportChannel get_channel_disposition() const;
 
   protected:
 	Editing::ImportMode mode;

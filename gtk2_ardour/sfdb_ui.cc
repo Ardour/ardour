@@ -293,8 +293,6 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	  found_list (ListStore::create(found_list_columns)),
 	  chooser (FILE_CHOOSER_ACTION_OPEN),
 	  found_list_view (found_list),
-	  split_files (_("Split non-mono files")),
-	  merge_stereo (_("Use files as single stereo track")),
 	  import (rgroup2, _("Copy to Ardour-native files")),
 	  embed (rgroup2, _("Use file without copying")),
 	  mode (ImportAsTrack),
@@ -346,14 +344,24 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	vbox->pack_start (*hbox, false, false);
 	options.pack_start (*vbox, false, false);
 
+
+	l = manage (new Label);
+	l->set_text (_("Mapping:"));
+
+	hbox = manage (new HBox);
+	hbox->set_border_width (12);
+	hbox->set_spacing (6);
+	hbox->pack_start (*l, false, false);
+	hbox->pack_start (channel_combo, false, false);
+	vbox = manage (new VBox);
+	vbox->pack_start (*hbox, false, false);
+	options.pack_start (*vbox, false, false);
+
 	reset_options ();
 	
-	block_three.pack_start (merge_stereo, false, false);
-	block_three.pack_start (split_files, false, false);
 	block_four.pack_start (import, false, false);
 	block_four.pack_start (embed, false, false);
 
-	options.pack_start (block_three, false, false);
 	options.pack_start (block_four, false, false);
 
 	get_vbox()->pack_start (*hpacker, true, true);
@@ -524,6 +532,7 @@ SoundFileBrowser::reset_options ()
 
 	vector<string> action_strings;
 	vector<string> where_strings;
+	vector<string> channel_strings;
 
 	action_strings.push_back (_("as new tracks"));
 	if (selected_track_cnt > 0) {
@@ -531,6 +540,7 @@ SoundFileBrowser::reset_options ()
 	} 
 	action_strings.push_back (_("to the region list"));
 	action_strings.push_back (_("as new tape tracks"));
+
 
 	set_popdown_strings (action_combo, action_strings);
 	action_combo.set_active_text (action_strings.front());
@@ -542,6 +552,23 @@ SoundFileBrowser::reset_options ()
 	
 	set_popdown_strings (where_combo, where_strings);
 	where_combo.set_active_text (where_strings.front());
+
+	if (mode == ImportAsTrack) {
+		channel_strings.push_back (_("one file per track"));
+
+		if (selection_includes_multichannel) {
+			channel_strings.push_back (_("one channel per track"));
+		}
+		if (paths.size() > 1) {
+			channel_strings.push_back (_("all files in one track"));
+		}
+		channel_combo.show();
+	} else {
+		channel_combo.hide();
+	}
+
+	set_popdown_strings (channel_combo, channel_strings);
+	channel_combo.set_active_text (channel_strings.front());
 
 	if (Profile->get_sae()) {
 		if (selection_can_be_embedded_with_links) {
@@ -674,4 +701,32 @@ SoundFileBrowser::get_mode () const
 	}
 }
 
+ImportPosition
+SoundFileBrowser::get_position() const
+{
+	Glib::ustring str = where_combo.get_active_text();
 
+	if (str == _("use file timestamp")) {
+		return ImportAtTimestamp;
+	} else if (str == _("at edit cursor")) {
+		return ImportAtEditCursor;
+	} else if (str == _("at playhead")) {
+		return ImportAtPlayhead;
+	} else {
+		return ImportAtStart;
+	}
+}
+
+ImportChannel
+SoundFileBrowser::get_channel_disposition () const
+{
+	Glib::ustring str = channel_combo.get_active_text();
+
+	if (str == _("one file per track")) {
+		return ImportThingPerFile;
+	} else if (str == _("one channel per track")) {
+		return ImportThingPerChannel;
+	} else {
+		return ImportThingForAll;
+	}
+}
