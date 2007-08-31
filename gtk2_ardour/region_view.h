@@ -36,6 +36,7 @@ class TimeAxisView;
 class RegionEditor;
 class GhostRegion;
 class AutomationTimeAxisView;
+class AutomationRegionView;
 
 class RegionView : public TimeAxisViewItem
 {
@@ -138,6 +139,9 @@ class RegionView : public TimeAxisViewItem
     sigc::connection data_ready_connection;
     
     vector<GhostRegion*> ghosts;
+	
+	typedef std::map<const ARDOUR::Parameter, boost::shared_ptr<AutomationRegionView> > AutomationChildren;
+	AutomationChildren _automation_children;
 };
 
 #endif /* __gtk_ardour_region_view_h__ */

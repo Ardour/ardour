@@ -178,9 +178,6 @@ class MidiRegionView : public RegionView
 	ArdourCanvas::CanvasNote**                  _active_notes;
 	ArdourCanvas::Group*                        _note_group;
 	ARDOUR::MidiModel::DeltaCommand*            _delta_command;
-
-	typedef std::map<const ARDOUR::Parameter, boost::shared_ptr<AutomationRegionView> > AutomationChildren;
-	AutomationChildren _automation_children;
 		
 	MouseState _mouse_state;
 	int _pressed_button;

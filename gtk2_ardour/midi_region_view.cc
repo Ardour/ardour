@@ -432,6 +432,8 @@ MidiRegionView::redisplay_model()
 							*at.get(), _region, i->second->list(),
 							midi_stream_view()->get_samples_per_unit(), col));
 
+				arv->set_duration(_region->length(), this);
+
 				_automation_children.insert(std::make_pair(i->second->parameter(), arv));
 			}
 
