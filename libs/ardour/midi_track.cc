@@ -589,7 +589,10 @@ MidiTrack::write_controller_messages(MidiBuffer& output_buf, nframes_t start_fra
 	buf[0] = MIDI_CMD_CONTROL;
 	MidiEvent ev(0, 3, buf, false);
 
-	// Write controller automation
+	// Write track controller automation
+#if 0
+	// This now lives in MidiModel.  Any need for track automation like this?
+	// Relative Velocity?
 	if (_session.transport_rolling()) {
 		for (Controls::const_iterator i = _controls.begin(); i != _controls.end(); ++i) {
 			const boost::shared_ptr<AutomationList> list = (*i).second->list();
@@ -637,6 +640,7 @@ MidiTrack::write_controller_messages(MidiBuffer& output_buf, nframes_t start_fra
 			output_buf.copy(cc_buf);
 		}
 	}
+#endif
 
 	// Append immediate events (UI controls)
 	_immediate_events.read(output_buf, 0, 0, offset + nframes-1); // all stamps = 0

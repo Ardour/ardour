@@ -119,7 +119,7 @@ MidiBuffer::push_back(const MidiEvent& ev)
 
 	memcpy(write_loc, ev.buffer(), ev.size());
 	_events[_size] = ev;
-	_events[_size].set_buffer(write_loc);
+	_events[_size].set_buffer(write_loc, false);
 	++_size;
 
 	//cerr << "MidiBuffer: pushed, size = " << _size << endl;
@@ -148,7 +148,7 @@ MidiBuffer::push_back(const jack_midi_event_t& ev)
 	memcpy(write_loc, ev.buffer, ev.size);
 	_events[_size].time() = (double)ev.time;
 	_events[_size].size() = ev.size;
-	_events[_size].set_buffer(write_loc);
+	_events[_size].set_buffer(write_loc, false);
 	++_size;
 
 	//cerr << "MidiBuffer: pushed, size = " << _size << endl;
@@ -178,7 +178,7 @@ MidiBuffer::reserve(double time, size_t size)
 
 	_events[_size].time() = time;
 	_events[_size].size() = size;
-	_events[_size].set_buffer(write_loc);
+	_events[_size].set_buffer(write_loc, false);
 	++_size;
 
 	//cerr << "MidiBuffer: reserved, size = " << _size << endl;

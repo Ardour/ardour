@@ -55,8 +55,8 @@ public:
 	// This is crap.
 	void write_lock()        { _lock.writer_lock(); _automation_lock.lock(); }
 	void write_unlock()      { _lock.writer_unlock(); _automation_lock.unlock(); }
-	void read_lock()   const { _lock.reader_lock(); _automation_lock.lock(); }
-	void read_unlock() const { _lock.reader_unlock(); _automation_lock.unlock(); }
+	void read_lock()   const { _lock.reader_lock(); /*_automation_lock.lock();*/ }
+	void read_unlock() const { _lock.reader_unlock(); /*_automation_lock.unlock();*/ }
 
 	void clear() { _notes.clear(); }
 
@@ -140,25 +140,33 @@ public:
 	/** Read iterator */
 	class const_iterator {
 	public:
-		const_iterator(MidiModel& model, double t);
+		const_iterator(const MidiModel& model, double t);
 		~const_iterator();
 
-		const MidiEvent& operator*() const { return _event; }
+		const MidiEvent& operator*()  const { return _event; }
+		const MidiEvent* operator->() const { return &_event; }
 
 		const const_iterator& operator++(); // prefix only
+		bool operator==(const const_iterator& other) const;
+		bool operator!=(const const_iterator& other) const { return ! operator==(other); }
 
 	private:
-		const MidiModel& _model;
+		const MidiModel* _model;
 		MidiEvent        _event;
 
 		typedef std::priority_queue<const Note*,std::vector<const Note*>, LaterNoteEndComparator>
 				ActiveNotes;
 		mutable ActiveNotes _active_notes;
 
-		Notes::iterator _note_iter;
-
-		std::vector<MidiControlIterator> _control_iters;
+		bool                                       _is_end;
+		bool                                       _locked;
+		Notes::const_iterator                      _note_iter;
+		std::vector<MidiControlIterator>           _control_iters;
+		std::vector<MidiControlIterator>::iterator _control_iter;
 	};
+	
+	const_iterator        begin() const { return const_iterator(*this, 0); }
+	const const_iterator& end()   const { return _end_iter; }
 	
 private:
 	friend class DeltaCommand;
@@ -166,7 +174,7 @@ private:
 	void remove_note_unlocked(const Note& note);
 
 	friend class const_iterator;
-	bool control_to_midi_event(MidiEvent& ev, const MidiControlIterator& iter);
+	bool control_to_midi_event(MidiEvent& ev, const MidiControlIterator& iter) const;
 
 #ifndef NDEBUG
 	bool is_sorted() const;
@@ -185,14 +193,19 @@ private:
 	WriteNotes _write_notes;
 	bool       _writing;
 	bool       _edited;
-	
+
+	const const_iterator _end_iter;
+
+	mutable nframes_t     _next_read;
+	mutable const_iterator _read_iter;
+
 	// note state for read():
 	// (TODO: Remove and replace with iterator)
 	
 	typedef std::priority_queue<const Note*,std::vector<const Note*>,
 			LaterNoteEndComparator> ActiveNotes;
 
-	mutable ActiveNotes _active_notes;
+	//mutable ActiveNotes _active_notes;
 };
 
 } /* namespace ARDOUR */

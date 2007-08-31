@@ -342,7 +342,7 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 			}
 			
 		} else {
-			printf("MRB - SKIPPING EVENT (with time %f)\n", ev.time());
+			printf("MRB - SKIPPING EVENT AT TIME %f\n", ev.time());
 		}
 	}
 	

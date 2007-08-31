@@ -96,16 +96,35 @@ struct MidiEvent {
 		_size = copy._size;
 		return *this;
 	}
+	
+	inline bool operator==(const MidiEvent& other) const {
+		if (_time != other._time)
+			return false;
+
+		if (_size != other._size)
+			return false;
+
+		if (_buffer == other._buffer)
+			return true;
+
+		for (size_t i=0; i < _size; ++i)
+			if (_buffer[i] != other._buffer[i])
+				return false;
+
+		return true;
+	}
+	
+	inline bool operator!=(const MidiEvent& other) const { return ! operator==(other); }
 
 	inline bool owns_buffer() const { return _owns_buffer; }
 	
-	inline void set_buffer(Byte* buf) {
+	inline void set_buffer(Byte* buf, bool own) {
 		if (_owns_buffer) {
 			free(_buffer);
 			_buffer = NULL;
 		}
 		_buffer = buf;
-		_owns_buffer = false;
+		_owns_buffer = own;
 	}
 
 #else

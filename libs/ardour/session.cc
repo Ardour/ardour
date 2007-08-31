@@ -2151,7 +2151,7 @@ Session::update_route_solo_state ()
 	
 	shared_ptr<RouteList> r = routes.reader ();
 
-        for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->soloed()) {
 			mute = true;
 			if (dynamic_cast<Track*>((*i).get())) {

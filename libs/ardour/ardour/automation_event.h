@@ -234,7 +234,8 @@ class AutomationList : public PBD::StatefulDestructible
 	 */
 	double unlocked_eval (double x) const;
 	
-	bool rt_safe_earliest_event (double start, double end, double& x, double& y) const;
+	bool rt_safe_earliest_event (double start, double end, double& x, double& y, bool start_inclusive=false) const;
+	bool rt_safe_earliest_event_unlocked (double start, double end, double& x, double& y, bool start_inclusive=false) const;
 
 	Curve&       curve()       { return *_curve; }
 	const Curve& curve() const { return *_curve; }
@@ -256,8 +257,8 @@ class AutomationList : public PBD::StatefulDestructible
 
 	void build_search_cache_if_necessary(double start, double end) const;
 	
-	bool rt_safe_earliest_event_discrete (double start, double end, double& x, double& y) const;
-	bool rt_safe_earliest_event_linear (double start, double end, double& x, double& y) const;
+	bool rt_safe_earliest_event_discrete_unlocked (double start, double end, double& x, double& y, bool inclusive) const;
+	bool rt_safe_earliest_event_linear_unlocked (double start, double end, double& x, double& y, bool inclusive) const;
 
 	AutomationList* cut_copy_clear (double, double, int op);
 
