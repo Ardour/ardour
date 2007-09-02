@@ -22,6 +22,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <glibmm/ustring.h>
 
 #include <sigc++/signal.h>
@@ -117,9 +118,6 @@ class SoundFileBrowser : public ArdourDialog
 	Gtk::FileChooserWidget chooser;
 	Gtk::TreeView found_list_view;
 
-	Gtk::CheckButton split_files;
-	Gtk::CheckButton merge_stereo;
-
 	Gtk::ComboBoxText action_combo;
 	Gtk::ComboBoxText where_combo;
 	Gtk::ComboBoxText channel_combo;
@@ -132,7 +130,6 @@ class SoundFileBrowser : public ArdourDialog
 	Editing::ImportChannel get_channel_disposition() const;
 
   protected:
-	Editing::ImportMode mode;
 	Gtk::FileFilter custom_filter;
 	Gtk::FileFilter matchall_filter;
 	SoundFileBox preview;
@@ -151,18 +148,26 @@ class SoundFileBrowser : public ArdourDialog
 	void chooser_file_activated ();
 	
 	bool on_custom (const Gtk::FileFilter::Info& filter_info);
+	void file_selection_changed ();
 
 	int selected_track_cnt;
 
+	typedef std::map<Glib::ustring,Editing::ImportChannel> DispositionMap;
+	DispositionMap disposition_map;
+
+	bool resetting_ourselves;
+	
 	Gtk::HBox options;
 	Gtk::VBox block_two;
 	Gtk::VBox block_three;
 	Gtk::VBox block_four;
 
-	static bool check_multichannel_status (const std::vector<Glib::ustring>& paths);
+	static bool check_multichannel_status (const std::vector<Glib::ustring>& paths, bool& same_size, bool& err);
 	static bool check_link_status (const ARDOUR::Session&, const std::vector<Glib::ustring>& paths);
 
-	void reset_options ();
+	bool reset_options ();
+	void reset_options_noret ();
+	bool bad_file_message ();
 };
 
 class SoundFileChooser : public SoundFileBrowser

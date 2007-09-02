@@ -1717,6 +1717,7 @@ class Session : public PBD::StatefulDestructible
 
 	XMLNode& get_control_protocol_state ();
 	
+	void set_history_depth (uint32_t depth);
 };
 
 } // namespace ARDOUR

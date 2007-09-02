@@ -148,12 +148,28 @@ XMLNode &UndoTransaction::get_state()
 UndoHistory::UndoHistory ()
 {
 	_clearing = false;
+	_depth = 0;
+}
+
+void
+UndoHistory::set_depth (uint32_t d)
+{
+	_depth = d;
+
+	while (_depth > 0 && UndoList.size() > _depth) {
+		UndoList.pop_front ();
+	}
 }
 
 void
 UndoHistory::add (UndoTransaction* const ut)
 {
 	ut->GoingAway.connect (bind (mem_fun (*this, &UndoHistory::remove), ut));
+
+	while (_depth > 0 && UndoList.size() > _depth) {
+		UndoList.pop_front ();
+	}
+
 	UndoList.push_back (ut);
 
 	/* we are now owners of the transaction */

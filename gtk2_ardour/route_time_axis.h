@@ -234,7 +234,7 @@ protected:
 	ArdourCanvas::SimpleRect* timestretch_rect;
 
 	void set_track_mode (ARDOUR::TrackMode);
-	void _set_track_mode (ARDOUR::Track* track, ARDOUR::TrackMode mode, Gtk::RadioMenuItem* reset_item);
+	void _set_track_mode (boost::shared_ptr<ARDOUR::Track> track, ARDOUR::TrackMode mode, Gtk::RadioMenuItem* reset_item);
 	void track_mode_changed ();
 
 	list<RedirectAutomationInfo*>   redirect_automation;

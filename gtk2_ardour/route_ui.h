@@ -50,12 +50,9 @@ class RouteUI : public virtual AxisView
 	bool is_track() const;
 	bool is_audio_track() const;
 
-	boost::shared_ptr<ARDOUR::Route> route() const { return _route; }
-	
-	// FIXME: make these return shared_ptr
-	ARDOUR::Track*      track() const;
-	ARDOUR::AudioTrack* audio_track() const;
-	
+	boost::shared_ptr<ARDOUR::Route>      route() const { return _route; }
+	boost::shared_ptr<ARDOUR::Track>      track() const;
+	boost::shared_ptr<ARDOUR::AudioTrack> audio_track() const;
 	boost::shared_ptr<ARDOUR::Diskstream> get_diskstream() const;
 
 	string name() const;

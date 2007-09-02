@@ -965,17 +965,18 @@ class Editor : public PublicEditor
 	void external_audio_dialog ();
 	bool check_multichannel_status (const std::vector<Glib::ustring>& paths);
 
-	void bring_in_external_audio (Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes64_t& pos);
-	void do_import (vector<Glib::ustring> paths, Editing::ImportChannel, Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes64_t&);
+	void bring_in_external_audio (Editing::ImportMode mode,  nframes64_t& pos);
+	void do_import (vector<Glib::ustring> paths, Editing::ImportChannel, Editing::ImportMode mode,  nframes64_t&);
 
-	void _do_embed (vector<Glib::ustring> paths, Editing::ImportChannel, Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes64_t&);
-	void do_embed (vector<Glib::ustring> paths, Editing::ImportChannel, Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes64_t&);
-	bool idle_do_embed (vector<Glib::ustring> paths, Editing::ImportChannel, Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes64_t&);
+	void _do_embed (vector<Glib::ustring> paths, Editing::ImportChannel, Editing::ImportMode mode,  nframes64_t&);
+	void do_embed (vector<Glib::ustring> paths, Editing::ImportChannel, Editing::ImportMode mode,  nframes64_t&);
+	bool idle_do_embed (vector<Glib::ustring> paths, Editing::ImportChannel, Editing::ImportMode mode,  nframes64_t&);
 
-	int  import_sndfile (vector<Glib::ustring> paths, Editing::ImportMode mode, ARDOUR::AudioTrack* track, nframes64_t& pos);
+	int  import_sndfile (vector<Glib::ustring> paths, Editing::ImportMode mode,  nframes64_t& pos);
 	int  embed_sndfile (vector<Glib::ustring> paths, Editing::ImportChannel, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode, 
-			    ARDOUR::AudioTrack* track, nframes64_t& pos);
-	int finish_bringing_in_audio (boost::shared_ptr<ARDOUR::AudioRegion> region, uint32_t, uint32_t, ARDOUR::AudioTrack* track, nframes64_t& pos, Editing::ImportMode mode);
+			     nframes64_t& pos);
+	int finish_bringing_in_audio (boost::shared_ptr<ARDOUR::AudioRegion> region, uint32_t, uint32_t,  nframes64_t& pos, Editing::ImportMode mode,
+				      boost::shared_ptr<ARDOUR::AudioTrack>& existing_track, int nth);
 
 	/* generic interthread progress window */
 	

@@ -503,7 +503,7 @@ RouteTimeAxisView::set_track_mode (TrackMode mode)
 }
 
 void
-RouteTimeAxisView::_set_track_mode (Track* track, TrackMode mode, RadioMenuItem* reset_item)
+RouteTimeAxisView::_set_track_mode (boost::shared_ptr<Track> track, TrackMode mode, RadioMenuItem* reset_item)
 {
 	bool needs_bounce;
 

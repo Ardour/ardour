@@ -513,16 +513,14 @@ AudioStreamView::setup_rec_box ()
 			
 			/* start a new rec box */
 
-			AudioTrack* at;
-
-			at = _trackview.audio_track(); /* we know what it is already */
+			boost::shared_ptr<AudioTrack> at = _trackview.audio_track ();
 			boost::shared_ptr<AudioDiskstream> ds = at->audio_diskstream();
 			nframes_t frame_pos = ds->current_capture_start ();
 			gdouble xstart = _trackview.editor.frame_to_pixel (frame_pos);
 			gdouble xend;
 			uint32_t fill_color;
 
-			switch (_trackview.audio_track()->mode()) {
+			switch (at->mode()) {
 			case Normal:
 				xend = xstart;
 				fill_color = ARDOUR_UI::config()->canvasvar_RecordingRect.get();

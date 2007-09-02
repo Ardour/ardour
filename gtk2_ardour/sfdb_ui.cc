@@ -295,7 +295,6 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	  found_list_view (found_list),
 	  import (rgroup2, _("Copy to Ardour-native files")),
 	  embed (rgroup2, _("Use file without copying")),
-	  mode (ImportAsTrack),
 	  found_search_btn (_("Search")),
 	  selected_track_cnt (selected_tracks)
 {
@@ -303,8 +302,9 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	VBox* vbox;
 	HBox* hbox;
 	HBox* hpacker;
-
+	
 	set_session (s);
+	resetting_ourselves = false;
 
 	vpacker = manage (new VBox);
 	vpacker->pack_start (preview, true, true);
@@ -319,6 +319,25 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	block_four.set_border_width (12);
 	
 	options.set_spacing (12);
+
+	vector<string> action_strings;
+	vector<string> where_strings;
+
+	action_strings.push_back (_("as new tracks"));
+	if (selected_track_cnt > 0) {
+		action_strings.push_back (_("to selected tracks"));
+	} 
+	action_strings.push_back (_("to the region list"));
+	action_strings.push_back (_("as new tape tracks"));
+	set_popdown_strings (action_combo, action_strings);
+	action_combo.set_active_text (action_strings.front());
+
+	where_strings.push_back (_("use file timestamp"));
+	where_strings.push_back (_("at edit cursor"));
+	where_strings.push_back (_("at playhead"));
+	where_strings.push_back (_("at session start"));
+	set_popdown_strings (where_combo, where_strings);
+	where_combo.set_active_text (where_strings.front());
 
 	Label* l = manage (new Label);
 	l->set_text (_("Add files:"));
@@ -358,6 +377,8 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	options.pack_start (*vbox, false, false);
 
 	reset_options ();
+
+	action_combo.signal_changed().connect (mem_fun (*this, &SoundFileBrowser::reset_options_noret));
 	
 	block_four.pack_start (import, false, false);
 	block_four.pack_start (embed, false, false);
@@ -394,6 +415,7 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	chooser.add_filter (matchall_filter);
 	chooser.set_select_multiple (true);
 	chooser.signal_update_preview().connect(mem_fun(*this, &SoundFileBrowser::update_preview));
+	chooser.signal_selection_changed().connect (mem_fun (*this, &SoundFileBrowser::file_selection_changed));
 	chooser.signal_file_activated().connect (mem_fun (*this, &SoundFileBrowser::chooser_file_activated));
 
 	if (!persistent_folder.empty()) {
@@ -405,15 +427,42 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	found_search_btn.signal_clicked().connect(mem_fun(*this, &SoundFileBrowser::found_search_clicked));
 	found_entry.signal_activate().connect(mem_fun(*this, &SoundFileBrowser::found_search_clicked));
 
-	add_button (Stock::OK, RESPONSE_OK);
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	add_button (Stock::OK, RESPONSE_OK);
+	
+	/* setup disposition map */
 
-	set_response_sensitive (RESPONSE_OK, false);
+	disposition_map.insert (pair<Glib::ustring,ImportChannel>(_("one track per file"), ImportDistinctFiles));
+	disposition_map.insert (pair<Glib::ustring,ImportChannel>(_("one track per channel"), ImportDistinctChannels));
+	disposition_map.insert (pair<Glib::ustring,ImportChannel>(_("merge files"), ImportMergeFiles));
+	disposition_map.insert (pair<Glib::ustring,ImportChannel>(_("sequence files"), ImportSerializeFiles));
+
+	disposition_map.insert (pair<Glib::ustring,ImportChannel>(_("one region per file"), ImportDistinctFiles));
+	disposition_map.insert (pair<Glib::ustring,ImportChannel>(_("one region per channel"), ImportDistinctChannels));
+	disposition_map.insert (pair<Glib::ustring,ImportChannel>(_("all files in one region"), ImportMergeFiles));
 }
 
 SoundFileBrowser::~SoundFileBrowser ()
 {
 	persistent_folder = chooser.get_current_folder();
+}
+
+void
+SoundFileBrowser::file_selection_changed ()
+{
+	if (resetting_ourselves) {
+		return;
+	}
+
+	if (!reset_options ()) {
+		set_response_sensitive (RESPONSE_OK, false);
+	} else {
+		if (chooser.get_filenames().size() > 0) {
+			set_response_sensitive (RESPONSE_OK, true);
+		} else {
+			set_response_sensitive (RESPONSE_OK, false);
+		}
+	}
 }
 
 void
@@ -438,32 +487,36 @@ SoundFileBrowser::set_session (Session* s)
 bool
 SoundFileBrowser::on_custom (const FileFilter::Info& filter_info)
 {
-	return AudioFileSource::safe_file_extension(filter_info.filename);
+	return AudioFileSource::safe_file_extension (filter_info.filename);
 }
 
 void
 SoundFileBrowser::update_preview ()
 {
 	preview.setup_labels (chooser.get_filename());
-	set_response_sensitive (RESPONSE_OK, true);
-	reset_options ();
 }
 
 void
 SoundFileBrowser::found_list_view_selected ()
 {
-	Glib::ustring file;
-	
-	TreeView::Selection::ListHandle_Path rows = found_list_view.get_selection()->get_selected_rows ();
-	
-	if (!rows.empty()) {
-		TreeIter iter = found_list->get_iter(*rows.begin());
-		file = (*iter)[found_list_columns.pathname];
-		chooser.set_filename (file);
+	if (!reset_options ()) {
+		set_response_sensitive (RESPONSE_OK, false);
+	} else {
+		Glib::ustring file;
+
+		TreeView::Selection::ListHandle_Path rows = found_list_view.get_selection()->get_selected_rows ();
+		
+		if (!rows.empty()) {
+			TreeIter iter = found_list->get_iter(*rows.begin());
+			file = (*iter)[found_list_columns.pathname];
+			chooser.set_filename (file);
+			set_response_sensitive (RESPONSE_OK, true);
+		} else {
+			set_response_sensitive (RESPONSE_OK, false);
+		}
+		
+		preview.setup_labels (file);
 	}
-	preview.setup_labels (file);
-	set_response_sensitive (RESPONSE_OK, true);
-	reset_options ();
 }
 
 void
@@ -524,95 +577,155 @@ SoundFileBrowser::get_paths ()
 }
 
 void
+SoundFileBrowser::reset_options_noret ()
+{
+	(void) reset_options ();
+}
+
+bool
 SoundFileBrowser::reset_options ()
 {
 	vector<Glib::ustring> paths = get_paths ();
-	bool selection_includes_multichannel = check_multichannel_status (paths);
+
+	if (paths.empty()) {
+
+		channel_combo.set_sensitive (false);
+		action_combo.set_sensitive (false);
+		where_combo.set_sensitive (false);
+		import.set_sensitive (false);
+		embed.set_sensitive (false);
+
+		return false;
+
+	} else {
+
+		channel_combo.set_sensitive (true);
+		action_combo.set_sensitive (true);
+		where_combo.set_sensitive (true);
+		import.set_sensitive (true);
+		embed.set_sensitive (true);
+
+	}
+
+	bool same_size;
+	bool err;
+	bool selection_includes_multichannel = check_multichannel_status (paths, same_size, err);
 	bool selection_can_be_embedded_with_links = check_link_status (*session, paths);
+	ImportMode mode;
 
-	vector<string> action_strings;
-	vector<string> where_strings;
+	if (err) {
+		Glib::signal_idle().connect (mem_fun (*this, &SoundFileBrowser::bad_file_message));
+		return false;
+	}
+
+	if ((mode = get_mode()) == ImportAsRegion) {
+		where_combo.set_sensitive (false);
+	} else {
+		where_combo.set_sensitive (true);
+	}
+
 	vector<string> channel_strings;
-
-	action_strings.push_back (_("as new tracks"));
-	if (selected_track_cnt > 0) {
-		action_strings.push_back (_("to selected tracks"));
-	} 
-	action_strings.push_back (_("to the region list"));
-	action_strings.push_back (_("as new tape tracks"));
-
-
-	set_popdown_strings (action_combo, action_strings);
-	action_combo.set_active_text (action_strings.front());
-
-	where_strings.push_back (_("use file timestamp"));
-	where_strings.push_back (_("at edit cursor"));
-	where_strings.push_back (_("at playhead"));
-	where_strings.push_back (_("at session start"));
 	
-	set_popdown_strings (where_combo, where_strings);
-	where_combo.set_active_text (where_strings.front());
-
-	if (mode == ImportAsTrack) {
-		channel_strings.push_back (_("one file per track"));
+	if (mode == ImportAsTrack || mode == ImportAsTapeTrack || mode == ImportToTrack) {
+		channel_strings.push_back (_("one track per file"));
 
 		if (selection_includes_multichannel) {
-			channel_strings.push_back (_("one channel per track"));
+			channel_strings.push_back (_("one track per channel"));
 		}
+
 		if (paths.size() > 1) {
-			channel_strings.push_back (_("all files in one track"));
+			/* tape tracks are a single region per track, so we cannot
+			   sequence multiple files.
+			*/
+			if (mode != ImportAsTapeTrack) {
+				channel_strings.push_back (_("sequence files"));
+			}
+			if (same_size) {
+				channel_strings.push_back (_("all files in one track"));
+			}
+			
 		}
-		channel_combo.show();
+
 	} else {
-		channel_combo.hide();
+		channel_strings.push_back (_("one region per file"));
+
+		if (selection_includes_multichannel) {
+			channel_strings.push_back (_("one region per channel"));
+		}
+
+		if (paths.size() > 1) {
+			if (same_size) {
+				channel_strings.push_back (_("all files in one region"));
+			}
+		}
 	}
 
 	set_popdown_strings (channel_combo, channel_strings);
 	channel_combo.set_active_text (channel_strings.front());
-
+	
 	if (Profile->get_sae()) {
 		if (selection_can_be_embedded_with_links) {
-			block_four.show ();
+			embed.set_sensitive (true);
 		} else {
-			block_four.hide ();
+			embed.set_sensitive (false);
 		}
 	} else {
-		block_four.show ();
+		embed.set_sensitive (true);
 	}
 
-	if ((mode == ImportAsTrack || mode == ImportAsTapeTrack) && paths.size() == 2) {
-		merge_stereo.set_sensitive (true);
-	} else {
-		merge_stereo.set_sensitive (false);
-	}
-
-	if (selection_includes_multichannel) {
-		split_files.set_sensitive (true);
-	} else {
-		split_files.set_sensitive (false);
-	}
+	return true;
 }	
 
 
 bool
-SoundFileBrowser::check_multichannel_status (const vector<Glib::ustring>& paths)
+SoundFileBrowser::bad_file_message()
+{
+	MessageDialog msg (*this, 
+			   _("One or more of the selected files\ncannot be used by Ardour"),
+			   true,
+			   Gtk::MESSAGE_INFO,
+			   Gtk::BUTTONS_OK);
+	msg.run ();
+	resetting_ourselves = true;
+	chooser.unselect_uri (chooser.get_preview_uri());
+	resetting_ourselves = false;
+}
+
+bool
+SoundFileBrowser::check_multichannel_status (const vector<Glib::ustring>& paths, bool& same_size, bool& err)
 {
 	SNDFILE* sf;
 	SF_INFO info;
-	
+	nframes64_t sz = 0;
+	bool some_mult = false;
+
+	same_size = true;
+	err = false;
+
 	for (vector<Glib::ustring>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
 
 		info.format = 0; // libsndfile says to clear this before sf_open().
 		
 		if ((sf = sf_open ((char*) (*i).c_str(), SFM_READ, &info)) != 0) { 
 			sf_close (sf);
+
 			if (info.channels > 1) {
-				return true;
+				some_mult = true;
 			}
+
+			if (sz == 0) {
+				sz = info.frames;
+			} else {
+				if (sz != info.frames) {
+					same_size = false;
+				}
+			}
+		} else {
+			err = true;
 		}
 	}
 
-	return false;
+	return some_mult;
 }
 
 bool
@@ -720,13 +833,18 @@ SoundFileBrowser::get_position() const
 ImportChannel
 SoundFileBrowser::get_channel_disposition () const
 {
-	Glib::ustring str = channel_combo.get_active_text();
+	/* we use a map here because the channel combo can contain different strings
+	   depending on the state of the other combos. the map contains all possible strings
+	   and the ImportDisposition enum that corresponds to it.
+	*/
 
-	if (str == _("one file per track")) {
-		return ImportThingPerFile;
-	} else if (str == _("one channel per track")) {
-		return ImportThingPerChannel;
-	} else {
-		return ImportThingForAll;
+	Glib::ustring str = channel_combo.get_active_text();
+	DispositionMap::const_iterator x = disposition_map.find (str);
+
+	if (x == disposition_map.end()) {
+		fatal << string_compose (_("programming error: %1"), "unknown string for import disposition") << endmsg;
+		/*NOTREACHED*/
 	}
+
+	return x->second;
 }

@@ -117,6 +117,9 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 		_path += '/';
 	}
 
+	set_history_depth (Config->get_history_depth());
+	
+
 	/* these two are just provisional settings. set_state()
 	   will likely override them.
 	*/
@@ -2979,7 +2982,6 @@ Session::add_instant_xml (XMLNode& node, const std::string& dir)
 	Config->add_instant_xml (node, get_user_ardour_path());
 }
 
-
 int 
 Session::save_history (string snapshot_name)
 {
@@ -3284,12 +3286,20 @@ Session::config_changed (const char* parameter_name)
 		set_slave_source (Config->get_slave_source());
 	} else if (PARAM_IS ("remote-model")) {
 		set_remote_control_ids ();
-	}  else if (PARAM_IS ("denormal-model")) {
+	} else if (PARAM_IS ("denormal-model")) {
 		setup_fpu ();
+	} else if (PARAM_IS ("history-depth")) {
+		set_history_depth (Config->get_history_depth());
 	}
 
 	set_dirty ();
 		   
 #undef PARAM_IS
 
+}
+
+void
+Session::set_history_depth (uint32_t d)
+{
+	_history.set_depth (d);
 }

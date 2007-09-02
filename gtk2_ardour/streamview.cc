@@ -247,9 +247,9 @@ StreamView::playlist_changed (boost::weak_ptr<Diskstream> wptr)
 void
 StreamView::diskstream_changed ()
 {
-	Track *t;
+	boost::shared_ptr<Track> t = _trackview.track();
 
-	if ((t = _trackview.track()) != 0) {
+	if (t) {
 		Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun (*this, &StreamView::display_diskstream), boost::weak_ptr<Diskstream> (t->diskstream())));
 	} else {
 		Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &StreamView::undisplay_diskstream));

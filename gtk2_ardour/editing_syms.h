@@ -86,7 +86,8 @@ IMPORTPOSITION(ImportAtPlayhead=2)
 IMPORTPOSITION(ImportAtStart=3)
 
 // if this is changed, remember to update the string table in sfdb_ui.cc
-IMPORTCHANNEL(ImportThingPerFile=0)
-IMPORTCHANNEL(ImportThingPerChannel=1)
-IMPORTCHANNEL(ImportThingForAll=2)
+IMPORTCHANNEL(ImportDistinctFiles=0)
+IMPORTCHANNEL(ImportMergeFiles=1)
+IMPORTCHANNEL(ImportSerializeFiles=2)
+IMPORTCHANNEL(ImportDistinctChannels=3)
 
