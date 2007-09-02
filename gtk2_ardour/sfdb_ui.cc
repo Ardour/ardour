@@ -64,39 +64,73 @@ SoundFileBox::SoundFileBox ()
 	:
 	_session(0),
 	current_pid(0),
-	main_box (false, 3),
-	bottom_box (true, 4),
-	play_btn (Stock::MEDIA_PLAY),
+	table (6, 2),
+	length_clock ("sfboxLengthClock", true, "EditCursorClock", false, true, false),
+	timecode_clock ("sfboxTimecodeClock", true, "EditCursorClock", false, false, false),
+	main_box (false, 6),
+	bottom_box (true, 6),
 	stop_btn (Stock::MEDIA_STOP)
 {
 	set_name (X_("SoundFileBox"));
 	
-	set_size_request (250, 250);
+	// set_size_request (250, 250);
 	
-	Label* label = manage (new Label);
-	label->set_markup (_("<b>Soundfile Info</b>"));
+	preview_label.set_markup (_("<b>Soundfile Info</b>"));
 
-	border_frame.set_label_widget (*label);
+	border_frame.set_label_widget (preview_label);
 	border_frame.add (main_box);
 
 	pack_start (border_frame, true, true);
-	set_border_width (4);
+	set_border_width (6);
 
-	main_box.set_border_width (4);
+	main_box.set_border_width (6);
 
-	main_box.pack_start(length, false, false);
-	main_box.pack_start(format, false, false);
-	main_box.pack_start(channels, false, false);
-	main_box.pack_start(samplerate, false, false);
-	main_box.pack_start(timecode, false, false);
+	length.set_text (_("Length:"));
+	timecode.set_text (_("Timestamp:"));
+	format.set_text (_("Format:"));
+	channels.set_text (_("Channels:"));
+	samplerate.set_text (_("Sample rate:"));
+
+	format_text.set_editable (false);
+	
+	table.set_col_spacings (6);
+	table.set_homogeneous (false);
+
+	table.attach (channels, 0, 1, 0, 1, FILL|EXPAND, (AttachOptions) 0);
+	table.attach (samplerate, 0, 1, 1, 2, FILL|EXPAND, (AttachOptions) 0);
+	table.attach (format, 0, 1, 2, 4, FILL|EXPAND, (AttachOptions) 0);
+	table.attach (length, 0, 1, 4, 5, FILL|EXPAND, (AttachOptions) 0);
+	table.attach (timecode, 0, 1, 5, 6, FILL|EXPAND, (AttachOptions) 0);
+
+	table.attach (channels_value, 1, 2, 0, 1, FILL, (AttachOptions) 0);
+	table.attach (samplerate_value, 1, 2, 1, 2, FILL, (AttachOptions) 0);
+	table.attach (format_text, 1, 2, 2, 4, FILL, AttachOptions (0));
+	table.attach (length_clock, 1, 2, 4, 5, FILL, (AttachOptions) 0);
+	table.attach (timecode_clock, 1, 2, 5, 6, FILL, (AttachOptions) 0);
+
+	length_clock.set_mode (AudioClock::MinSec);
+	timecode_clock.set_mode (AudioClock::SMPTE);
 
 	tags_entry.set_editable (true);
 	tags_entry.signal_focus_out_event().connect (mem_fun (*this, &SoundFileBox::tags_entry_left));
 	HBox* hbox = manage (new HBox);
 	hbox->pack_start (tags_entry, true, true);
 
-	main_box.pack_start(*hbox, true, true);
+	main_box.pack_start (table, false, false);
+
+	VBox* vbox = manage (new VBox);
+
+	Label* label = manage (new Label (_("Tags:")));
+	label->set_alignment (0.0f, 0.5f);
+	vbox->set_spacing (6);
+	vbox->pack_start(*label, false, false);
+	vbox->pack_start(*hbox, true, true);
+
+	main_box.pack_start(*vbox, true, true);
 	main_box.pack_start(bottom_box, false, false);
+
+	play_btn.set_image (*(manage (new Image (Stock::MEDIA_PLAY, ICON_SIZE_BUTTON))));
+	play_btn.set_label (_("Play (double click)"));
 
 	bottom_box.set_homogeneous(true);
 	bottom_box.pack_start(play_btn);
@@ -105,11 +139,14 @@ SoundFileBox::SoundFileBox ()
 	play_btn.signal_clicked().connect (mem_fun (*this, &SoundFileBox::audition));
 	stop_btn.signal_clicked().connect (mem_fun (*this, &SoundFileBox::stop_btn_clicked));
 
-	length.set_alignment (0.0f, 0.0f);
-	format.set_alignment (0.0f, 0.0f);
-	channels.set_alignment (0.0f, 0.0f);
-	samplerate.set_alignment (0.0f, 0.0f);
-	timecode.set_alignment (0.0f, 0.0f);
+	length.set_alignment (0.0f, 0.5f);
+	format.set_alignment (0.0f, 0.5f);
+	channels.set_alignment (0.0f, 0.5f);
+	samplerate.set_alignment (0.0f, 0.5f);
+	timecode.set_alignment (0.0f, 0.5f);
+
+	channels_value.set_alignment (0.0f, 0.5f);
+	samplerate_value.set_alignment (0.0f, 0.5f);
 
 	stop_btn.set_no_show_all (true);
 	stop_btn.hide();
@@ -118,13 +155,18 @@ SoundFileBox::SoundFileBox ()
 void
 SoundFileBox::set_session(Session* s)
 {
+	audition_connection.disconnect ();
+
 	_session = s;
 
 	if (!_session) {
 		play_btn.set_sensitive(false);
 	} else {
-		_session->AuditionActive.connect(mem_fun (*this, &SoundFileBox::audition_status_changed));
+		audition_connection = _session->AuditionActive.connect(mem_fun (*this, &SoundFileBox::audition_status_changed));
 	}
+
+	length_clock.set_session (s);
+	timecode_clock.set_session (s);
 }
 
 bool
@@ -135,12 +177,15 @@ SoundFileBox::setup_labels (const Glib::ustring& filename)
 	string error_msg;
 
 	if(!AudioFileSource::get_soundfile_info (filename, sf_info, error_msg)) {
-		length.set_text (_("Length: n/a"));
-		format.set_text (_("Format: n/a"));
-		channels.set_text (_("Channels: n/a"));
-		samplerate.set_text (_("Sample rate: n/a"));
-		timecode.set_text (_("Timecode: n/a"));
+
+		preview_label.set_markup (_("<b>Soundfile Info</b>"));
+		format_text.get_buffer()->set_text (_("n/a"));
+		channels_value.set_text (_("n/a"));
+		samplerate_value.set_text (_("n/a"));
 		tags_entry.get_buffer()->set_text ("");
+
+		length_clock.set (0);
+		timecode_clock.set (0);
 		
 		tags_entry.set_sensitive (false);
 		play_btn.set_sensitive (false);
@@ -148,11 +193,13 @@ SoundFileBox::setup_labels (const Glib::ustring& filename)
 		return false;
 	}
 
-	length.set_text (string_compose(_("Length: %1"), length2string(sf_info.length, sf_info.samplerate)));
-	format.set_text (sf_info.format_name);
-	channels.set_text (string_compose(_("Channels: %1"), sf_info.channels));
-	samplerate.set_text (string_compose(_("Samplerate: %1"), sf_info.samplerate));
-	timecode.set_text (string_compose (_("Timecode: %1"), length2string(sf_info.timecode, sf_info.samplerate)));
+	preview_label.set_markup (string_compose ("<b>%1</b>", Glib::path_get_basename (filename)));
+	format_text.get_buffer()->set_text (sf_info.format_name);
+	channels_value.set_text (to_string (sf_info.channels, std::dec));
+	samplerate_value.set_text (string_compose (X_("%1 Hz"), sf_info.samplerate));
+
+	length_clock.set (sf_info.length, true);
+	timecode_clock.set (sf_info.timecode, true);
 
 	// this is a hack that is fixed in trunk, i think (august 26th, 2007)
 
@@ -298,7 +345,6 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	  found_search_btn (_("Search")),
 	  selected_track_cnt (selected_tracks)
 {
-	VBox* vpacker;
 	VBox* vbox;
 	HBox* hbox;
 	HBox* hpacker;
@@ -306,13 +352,10 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	set_session (s);
 	resetting_ourselves = false;
 
-	vpacker = manage (new VBox);
-	vpacker->pack_start (preview, true, true);
-	
 	hpacker = manage (new HBox);
 	hpacker->set_spacing (6);
 	hpacker->pack_start (notebook, true, true);
-	hpacker->pack_start (*vpacker, false, false);
+	hpacker->pack_start (preview, false, false);
 
 	block_two.set_border_width (12);
 	block_three.set_border_width (12);
@@ -482,6 +525,7 @@ SoundFileBrowser::set_session (Session* s)
 {
 	ArdourDialog::set_session (s);
 	preview.set_session (s);
+	
 }
 
 bool
@@ -641,7 +685,7 @@ SoundFileBrowser::reset_options ()
 				channel_strings.push_back (_("sequence files"));
 			}
 			if (same_size) {
-				channel_strings.push_back (_("all files in one track"));
+				channel_strings.push_back (_("all files in one region"));
 			}
 			
 		}

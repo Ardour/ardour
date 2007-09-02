@@ -65,15 +65,25 @@ class SoundFileBox : public Gtk::VBox
 	ARDOUR::SoundFileInfo sf_info;
 	
 	pid_t current_pid;
+
+	Gtk::Table table;
 	
 	Gtk::Label length;
 	Gtk::Label format;
 	Gtk::Label channels;
 	Gtk::Label samplerate;
 	Gtk::Label timecode;
+
+	Gtk::Label channels_value;
+	Gtk::Label samplerate_value;
 	
+	Gtk::TextView format_text;
+	AudioClock length_clock;
+	AudioClock timecode_clock;
+
 	Gtk::Frame border_frame;
-	
+	Gtk::Label preview_label;
+
 	Gtk::TextView tags_entry;
 	
 	Gtk::VBox main_box;
@@ -89,6 +99,7 @@ class SoundFileBox : public Gtk::VBox
 	void tags_changed ();
 	
 	void audition_status_changed (bool state);
+	sigc::connection audition_connection;
 };
 
 class SoundFileBrowser : public ArdourDialog

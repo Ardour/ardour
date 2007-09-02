@@ -864,7 +864,7 @@ SndFileSource::get_soundfile_info (const ustring& path, SoundFileInfo& info, str
 	info.samplerate  = sf_info.samplerate;
 	info.channels    = sf_info.channels;
 	info.length      = sf_info.frames;
-	info.format_name = string_compose("Format: %1, %2",
+	info.format_name = string_compose("%1\n%2",
 					   sndfile_major_format(sf_info.format),
 					   sndfile_minor_format(sf_info.format));
 
