@@ -315,6 +315,11 @@ RegionView::set_position (nframes_t pos, void* src, double* ignored)
 		for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 			(*i)->group->move (delta, 0.0);
 		}
+	
+		for (AutomationChildren::iterator i = _automation_children.begin();
+				i != _automation_children.end(); ++i) {
+			i->second->get_canvas_group()->move(delta, 0.0);
+		}
 	}
 
 	return ret;
@@ -494,6 +499,11 @@ RegionView::move (double x_delta, double y_delta)
 
 	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 		(*i)->group->move (x_delta, 0.0);
+	}
+		
+	for (AutomationChildren::iterator i = _automation_children.begin();
+			i != _automation_children.end(); ++i) {
+		i->second->get_canvas_group()->move(x_delta, 0.0);
 	}
 }
 

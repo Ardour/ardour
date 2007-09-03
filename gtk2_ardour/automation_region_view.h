@@ -51,7 +51,9 @@ public:
 	virtual GhostRegion* add_ghost(AutomationTimeAxisView&) { return NULL; }
 
 protected:
-	void set_y_position_and_height (double y, double h);
+	void set_y_position_and_height(double y, double h);
+	void region_resized(ARDOUR::Change what_changed);
+	bool canvas_event(GdkEvent* ev);
 	void entered();
 	void exited();
 

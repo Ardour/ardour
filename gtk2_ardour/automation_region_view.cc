@@ -33,6 +33,17 @@ AutomationRegionView::AutomationRegionView(ArdourCanvas::Group*                 
 	_line.show_all_control_points();
 	
 	group->raise_to_top ();
+	
+	group->signal_event().connect (mem_fun (this, &AutomationRegionView::canvas_event), false);
+}
+
+
+bool
+AutomationRegionView::canvas_event(GdkEvent* ev)
+{
+	cerr << "AUTOMATION EVENT" << endl;
+
+	return false;
 }
 
 
@@ -42,6 +53,12 @@ AutomationRegionView::set_y_position_and_height (double y, double h)
 	RegionView::set_y_position_and_height(y, h - 1);
 
 	_line.set_y_position_and_height ((uint32_t)y, (uint32_t) rint (h - NAME_HIGHLIGHT_SIZE));
+}
+
+void
+AutomationRegionView::region_resized (ARDOUR::Change what_changed)
+{
+	// Do nothing, parent will move us
 }
 
 
