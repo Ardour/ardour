@@ -112,11 +112,10 @@ Session::import_audiofile (import_status& status)
 {
 	SNDFILE *in;
 	vector<boost::shared_ptr<AudioFileSource> > newfiles;
-	SourceList sources;
 	SF_INFO info;
 	float *data = 0;
 	Sample **channel_data = 0;
-	long nfiles = 0;
+	int nfiles = 0;
 	string basepath;
 	string sounds_dir;
 	nframes_t so_far;
@@ -127,173 +126,146 @@ Session::import_audiofile (import_status& status)
 	ImportableSource* importable = 0;
 	const nframes_t nframes = BLOCKSIZE;
 
-	status.new_regions.clear ();
+	status.sources.clear ();
 
-	if ((in = sf_open (status.paths.front().c_str(), SFM_READ, &info)) == 0) {
-		error << string_compose(_("Import: cannot open input sound file \"%1\""), status.paths.front()) << endmsg;
-		status.done = 1;
-		status.cancel = 1;
-		return -1;
-	}
+	for (vector<Glib::ustring>::iterator p = status.paths.begin(); p != status.paths.end(); ++p) {
 
-	if ((nframes_t) info.samplerate != frame_rate()) {
-		importable = new ResampledImportableSource (in, &info, frame_rate());
-	} else {
-		importable = new ImportableSource (in, &info);
-	}
+		if ((in = sf_open ((*p).c_str(), SFM_READ, &info)) == 0) {
+			error << string_compose(_("Import: cannot open input sound file \"%1\""), (*p)) << endmsg;
+			status.done = 1;
+			status.cancel = 1;
+			return -1;
+		}
+		
+		if ((nframes_t) info.samplerate != frame_rate()) {
+			importable = new ResampledImportableSource (in, &info, frame_rate());
+		} else {
+			importable = new ImportableSource (in, &info);
+		}
+		
+		newfiles.clear ();
 
-	for (int n = 0; n < info.channels; ++n) {
-		newfiles.push_back (boost::shared_ptr<AudioFileSource>());
-	}
-
-	sounds_dir = discover_best_sound_dir ();
-	basepath = PBD::basename_nosuffix (status.paths.front());
-
-	for (int n = 0; n < info.channels; ++n) {
-
-		bool goodfile = false;
-
-		do {
-			if (info.channels == 2) {
-				if (n == 0) {
-					snprintf (buf, sizeof(buf), "%s/%s-L.wav", sounds_dir.c_str(), basepath.c_str());
+		for (int n = 0; n < info.channels; ++n) {
+			newfiles.push_back (boost::shared_ptr<AudioFileSource>());
+		}
+		
+		sounds_dir = discover_best_sound_dir ();
+		basepath = PBD::basename_nosuffix ((*p));
+		
+		for (int n = 0; n < info.channels; ++n) {
+			
+			bool goodfile = false;
+			
+			do {
+				if (info.channels == 2) {
+					if (n == 0) {
+						snprintf (buf, sizeof(buf), "%s/%s-L.wav", sounds_dir.c_str(), basepath.c_str());
+					} else {
+						snprintf (buf, sizeof(buf), "%s/%s-R.wav", sounds_dir.c_str(), basepath.c_str());
+					}
+				} else if (info.channels > 1) {
+					snprintf (buf, sizeof(buf), "%s/%s-c%d.wav", sounds_dir.c_str(), basepath.c_str(), n+1);
 				} else {
-					snprintf (buf, sizeof(buf), "%s/%s-R.wav", sounds_dir.c_str(), basepath.c_str());
+					snprintf (buf, sizeof(buf), "%s/%s.wav", sounds_dir.c_str(), basepath.c_str());
 				}
-			} else if (info.channels > 1) {
-				snprintf (buf, sizeof(buf), "%s/%s-c%d.wav", sounds_dir.c_str(), basepath.c_str(), n+1);
-			} else {
-				snprintf (buf, sizeof(buf), "%s/%s.wav", sounds_dir.c_str(), basepath.c_str());
-			}
 
-			if (Glib::file_test (buf, Glib::FILE_TEST_EXISTS)) {
+				if (Glib::file_test (buf, Glib::FILE_TEST_EXISTS)) {
 
-				/* if the file already exists, we must come up with
-				 *  a new name for it.  for now we just keep appending
-				 *  _ to basepath
-				 */
+					/* if the file already exists, we must come up with
+					 *  a new name for it.  for now we just keep appending
+					 *  _ to basepath
+					 */
 				
-				basepath += "_";
+					basepath += "_";
 
-			} else {
+				} else {
 
-				goodfile = true;
+					goodfile = true;
+				}
+
+			} while ( !goodfile);
+
+			try { 
+				newfiles[n] = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (*this, buf, false, frame_rate()));
 			}
 
-		} while ( !goodfile);
+			catch (failed_constructor& err) {
+				error << string_compose(_("Session::import_audiofile: cannot open new file source for channel %1"), n+1) << endmsg;
+				goto out;
+			}
 
-		try { 
-			newfiles[n] = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (*this, buf, false, frame_rate()));
+			new_paths.push_back (buf);
+			nfiles++;
+		}
+	
+		data = new float[nframes * info.channels];
+		channel_data = new Sample * [ info.channels ];
+	
+		for (int n = 0; n < info.channels; ++n) {
+			channel_data[n] = new Sample[nframes];
 		}
 
-		catch (failed_constructor& err) {
-			error << string_compose(_("Session::import_audiofile: cannot open new file source for channel %1"), n+1) << endmsg;
+		so_far = 0;
+
+		status.doing_what = _("converting audio");
+		status.progress = 0.0;
+
+		while (!status.cancel) {
+
+			nframes_t nread, nfread;
+			long x;
+			long chn;
+		
+			if ((nread = importable->read (data, nframes)) == 0) {
+				break;
+			}
+			nfread = nread / info.channels;
+
+			/* de-interleave */
+				
+			for (chn = 0; chn < info.channels; ++chn) {
+
+				nframes_t n;
+				for (x = chn, n = 0; n < nfread; x += info.channels, ++n) {
+					channel_data[chn][n] = (Sample) data[x];
+				}
+			}
+
+			/* flush to disk */
+
+			for (chn = 0; chn < info.channels; ++chn) {
+				newfiles[chn]->write (channel_data[chn], nfread);
+			}
+
+			so_far += nread;
+			status.progress = so_far / (importable->ratio () * info.frames * info.channels);
+		}
+
+		if (status.cancel) {
 			goto out;
 		}
-
-		new_paths.push_back (buf);
-		nfiles++;
-	}
-	
-	data = new float[nframes * info.channels];
-	channel_data = new Sample * [ info.channels ];
-	
-	for (int n = 0; n < info.channels; ++n) {
-		channel_data[n] = new Sample[nframes];
-	}
-
-	so_far = 0;
-
-	status.doing_what = _("converting audio");
-	status.progress = 0.0;
-
-	while (!status.cancel) {
-
-		nframes_t nread, nfread;
-		long x;
-		long chn;
 		
-		if ((nread = importable->read (data, nframes)) == 0) {
-			break;
-		}
-		nfread = nread / info.channels;
-
-		/* de-interleave */
-				
-		for (chn = 0; chn < info.channels; ++chn) {
-
-			nframes_t n;
-			for (x = chn, n = 0; n < nfread; x += info.channels, ++n) {
-				channel_data[chn][n] = (Sample) data[x];
-			}
+		for (int n = 0; n < info.channels; ++n) {
+			status.sources.push_back (newfiles[n]);
 		}
 
-		/* flush to disk */
-
-		for (chn = 0; chn < info.channels; ++chn) {
-			newfiles[chn]->write (channel_data[chn], nfread);
+		if (status.cancel) {
+			goto out;
 		}
-
-		so_far += nread;
-		status.progress = so_far / (importable->ratio () * info.frames * info.channels);
 	}
-
-	if (status.cancel) {
-		goto out;
-	}
-
-	if (status.multichan) {
-		status.doing_what = _("building region");
-	} else {
-		status.doing_what = _("building regions");
-	}
-
+	
 	status.freeze = true;
 
 	time_t xnow;
 	time (&xnow);
 	now = localtime (&xnow);
 
-	if (status.multichan) {
-		/* all sources are used in a single multichannel region */
+	/* flush the final length(s) to the header(s) */
 
-		for (int n = 0; n < nfiles && !status.cancel; ++n) {
-			/* flush the final length to the header */
-			newfiles[n]->update_header(0, *now, xnow);
-			sources.push_back(newfiles[n]);
-		}
-
-		bool strip_paired_suffixes = (newfiles.size() > 1);
-
-		boost::shared_ptr<AudioRegion> r (boost::dynamic_pointer_cast<AudioRegion> 
-						  (RegionFactory::create (sources, 0, 
-									  newfiles[0]->length(), 
-									  region_name_from_path (basepath, strip_paired_suffixes),
-									  0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile))));
-		
-		status.new_regions.push_back (r);
-
-	} else {
-		for (int n = 0; n < nfiles && !status.cancel; ++n) {
-
-			/* flush the final length to the header */
-
-			newfiles[n]->update_header(0, *now, xnow);
-
-			/* The sources had zero-length when created, which means that the Session
-			   did not bother to create whole-file AudioRegions for them. Do it now.
-
-			   Note: leave any trailing paired indicators from the file names as part
-			   of the region name.
-			*/
-		
-			status.new_regions.push_back (boost::dynamic_pointer_cast<AudioRegion> 
-						      (RegionFactory::create (boost::static_pointer_cast<Source> (newfiles[n]), 0, newfiles[n]->length(), 
-									      region_name_from_path (newfiles[n]->name(), false),
-									      0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile | AudioRegion::Import))));
-		}
+	for (SourceList::iterator x = status.sources.begin(); x != status.sources.end() && !status.cancel; ++x) {
+		boost::dynamic_pointer_cast<AudioFileSource>(*x)->update_header(0, *now, xnow);
 	}
-	
+
 	/* save state so that we don't lose these new Sources */
 
 	if (!status.cancel) {
@@ -317,7 +289,7 @@ Session::import_audiofile (import_status& status)
 
 	if (status.cancel) {
 
-		status.new_regions.clear ();
+		status.sources.clear ();
 
 		for (vector<string>::iterator i = new_paths.begin(); i != new_paths.end(); ++i) {
 			unlink ((*i).c_str());

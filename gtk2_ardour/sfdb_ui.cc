@@ -475,14 +475,14 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	
 	/* setup disposition map */
 
-	disposition_map.insert (pair<Glib::ustring,ImportChannel>(_("one track per file"), ImportDistinctFiles));
-	disposition_map.insert (pair<Glib::ustring,ImportChannel>(_("one track per channel"), ImportDistinctChannels));
-	disposition_map.insert (pair<Glib::ustring,ImportChannel>(_("merge files"), ImportMergeFiles));
-	disposition_map.insert (pair<Glib::ustring,ImportChannel>(_("sequence files"), ImportSerializeFiles));
+	disposition_map.insert (pair<Glib::ustring,ImportDisposition>(_("one track per file"), ImportDistinctFiles));
+	disposition_map.insert (pair<Glib::ustring,ImportDisposition>(_("one track per channel"), ImportDistinctChannels));
+	disposition_map.insert (pair<Glib::ustring,ImportDisposition>(_("merge files"), ImportMergeFiles));
+	disposition_map.insert (pair<Glib::ustring,ImportDisposition>(_("sequence files"), ImportSerializeFiles));
 
-	disposition_map.insert (pair<Glib::ustring,ImportChannel>(_("one region per file"), ImportDistinctFiles));
-	disposition_map.insert (pair<Glib::ustring,ImportChannel>(_("one region per channel"), ImportDistinctChannels));
-	disposition_map.insert (pair<Glib::ustring,ImportChannel>(_("all files in one region"), ImportMergeFiles));
+	disposition_map.insert (pair<Glib::ustring,ImportDisposition>(_("one region per file"), ImportDistinctFiles));
+	disposition_map.insert (pair<Glib::ustring,ImportDisposition>(_("one region per channel"), ImportDistinctChannels));
+	disposition_map.insert (pair<Glib::ustring,ImportDisposition>(_("all files in one region"), ImportMergeFiles));
 }
 
 SoundFileBrowser::~SoundFileBrowser ()
@@ -874,7 +874,7 @@ SoundFileBrowser::get_position() const
 	}
 }
 
-ImportChannel
+ImportDisposition
 SoundFileBrowser::get_channel_disposition () const
 {
 	/* we use a map here because the channel combo can contain different strings

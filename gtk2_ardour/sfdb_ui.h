@@ -138,7 +138,7 @@ class SoundFileBrowser : public ArdourDialog
 
 	Editing::ImportMode get_mode() const;
 	Editing::ImportPosition get_position() const;
-	Editing::ImportChannel get_channel_disposition() const;
+	Editing::ImportDisposition get_channel_disposition() const;
 
   protected:
 	Gtk::FileFilter custom_filter;
@@ -163,7 +163,7 @@ class SoundFileBrowser : public ArdourDialog
 
 	int selected_track_cnt;
 
-	typedef std::map<Glib::ustring,Editing::ImportChannel> DispositionMap;
+	typedef std::map<Glib::ustring,Editing::ImportDisposition> DispositionMap;
 	DispositionMap disposition_map;
 
 	bool resetting_ourselves;

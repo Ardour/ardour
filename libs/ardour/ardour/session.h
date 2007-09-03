@@ -563,13 +563,12 @@ class Session : public PBD::StatefulDestructible
 	    string doing_what;
 	    
 	    /* control info */
-	    bool multichan;
 	    bool sample_convert;
 	    volatile bool freeze;
 	    std::vector<Glib::ustring> paths;
 	    
 	    /* result */
-	    std::vector<boost::shared_ptr<AudioRegion> > new_regions;
+	    SourceList sources;
 	    
 	};
 

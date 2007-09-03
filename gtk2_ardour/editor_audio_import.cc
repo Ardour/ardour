@@ -101,7 +101,7 @@ Editor::external_audio_dialog ()
 
 	ImportPosition pos = browser.get_position ();
 	ImportMode mode = browser.get_mode ();
-	ImportChannel chns = browser.get_channel_disposition ();
+	ImportDisposition chns = browser.get_channel_disposition ();
 	nframes64_t where;
 
 	switch (pos) {
@@ -127,45 +127,56 @@ Editor::external_audio_dialog ()
 }
 
 void
-Editor::do_import (vector<ustring> paths, ImportChannel chns, ImportMode mode, nframes64_t& pos)
+Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mode, nframes64_t& pos)
 {
-	switch (chns) {
-	case Editing::ImportDistinctChannels:
-		import_status.multichan = false;
-		break;
-
-	default:
-		import_status.multichan = true;
-		break;
-
-	}
+	vector<ustring> to_import;
+	bool ok = false;
 
 	if (interthread_progress_window == 0) {
 		build_interthread_progress_window ();
 	}
 
-	vector<ustring> to_import;
+	switch (chns) {
+	case Editing::ImportDistinctFiles:
+	case Editing::ImportDistinctChannels:
+		for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
 
-	for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
+			to_import.clear ();
+			to_import.push_back (*a);
 
-		to_import.clear ();
-		to_import.push_back (*a);
+			if (import_sndfiles (to_import, chns, mode, pos)) {
+				goto out;
+			}
+		}
+		break;
 
-		import_sndfile (to_import, mode, pos);
+	case Editing::ImportMergeFiles:
+	case Editing::ImportSerializeFiles:
+		if (import_sndfiles (paths, chns, mode, pos)) {
+			goto out;
+		}
+		break;
+	}
+
+	ok = true;
+	
+  out:	
+	if (ok) {
+		session->save_state ("");
 	}
 
 	interthread_progress_window->hide_all ();
 }
 
 bool
-Editor::idle_do_embed (vector<ustring> paths, ImportChannel chns, ImportMode mode, nframes64_t& pos)
+Editor::idle_do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mode, nframes64_t& pos)
 {
 	_do_embed (paths, chns, mode, pos);
 	return false;
 }
 
 void
-Editor::do_embed (vector<ustring> paths, ImportChannel chns, ImportMode mode, nframes64_t& pos)
+Editor::do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mode, nframes64_t& pos)
 {
 #ifdef GTKOSX
 	Glib::signal_idle().connect (bind (mem_fun (*this, &Editor::idle_do_embed), paths, chns, mode, pos));
@@ -175,14 +186,13 @@ Editor::do_embed (vector<ustring> paths, ImportChannel chns, ImportMode mode, nf
 }
 
 void
-Editor::_do_embed (vector<ustring> paths, ImportChannel chns, ImportMode mode, nframes64_t& pos)
+Editor::_do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mode, nframes64_t& pos)
 {
 	bool multiple_files = paths.size() > 1;
 	bool check_sample_rate = true;
 	bool ok = false;
 	vector<ustring> to_embed;
 	
-
 	switch (chns) {
 	case Editing::ImportDistinctFiles:
 	case Editing::ImportDistinctChannels:
@@ -191,15 +201,15 @@ Editor::_do_embed (vector<ustring> paths, ImportChannel chns, ImportMode mode, n
 			to_embed.clear ();
 			to_embed.push_back (*a);
 
-			if (embed_sndfile (to_embed, chns, multiple_files, check_sample_rate, mode, pos) < -1) {
+			if (embed_sndfiles (to_embed, chns, multiple_files, check_sample_rate, mode, pos) < -1) {
 				goto out;
 			}
 		}
 		break;
 
-	case Editing::ImportSerializeFiles:
 	case Editing::ImportMergeFiles:
-		if (embed_sndfile (paths, chns, multiple_files, check_sample_rate, mode, pos) < -1) {
+	case Editing::ImportSerializeFiles:
+		if (embed_sndfiles (paths, chns, multiple_files, check_sample_rate, mode, pos) < -1) {
 			goto out;
 		}
 		break;
@@ -214,7 +224,7 @@ Editor::_do_embed (vector<ustring> paths, ImportChannel chns, ImportMode mode, n
 }
 
 int
-Editor::import_sndfile (vector<ustring> paths, ImportMode mode, nframes64_t& pos)
+Editor::import_sndfiles (vector<ustring> paths, ImportDisposition chns, ImportMode mode, nframes64_t& pos)
 {
 	WindowTitle title = string_compose (_("importing %1"), paths.front());
 
@@ -256,28 +266,29 @@ Editor::import_sndfile (vector<ustring> paths, ImportMode mode, nframes64_t& pos
 	/* import thread finished - see if we should build a new track */
 
 	boost::shared_ptr<AudioTrack> track;
+	boost::shared_ptr<AudioRegion> r;
 	
-	if (!import_status.new_regions.empty()) {
-		boost::shared_ptr<AudioRegion> region (import_status.new_regions.front());
-		finish_bringing_in_audio (region, region->n_channels(), region->n_channels(), pos, mode, track, 0);
+	if (import_status.cancel || import_status.sources.empty()) {
+		goto out;
 	}
 
+	if (add_sources (paths, import_status.sources, pos, chns, mode) == 0) {
+		session->save_state ("");
+	}
+
+  out:
 	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
 	return 0;
 }
 
 int
-Editor::embed_sndfile (vector<Glib::ustring> paths, Editing::ImportChannel chns, bool multiple_files, bool& check_sample_rate, ImportMode mode, nframes64_t& pos)
+Editor::embed_sndfiles (vector<Glib::ustring> paths, Editing::ImportDisposition chns, bool multiple_files, 
+		       bool& check_sample_rate, ImportMode mode, nframes64_t& pos)
 {
-	boost::shared_ptr<AudioTrack> track;
 	boost::shared_ptr<AudioFileSource> source;
 	SourceList sources;
-	boost::shared_ptr<AudioRegion> region;
 	string linked_path;
 	SoundFileInfo finfo;
-	ustring region_name;
-	uint32_t input_chan = 0;
-	uint32_t output_chan = 0;
 	int ret = 0;
 
 	track_canvas.get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
@@ -382,14 +393,8 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, Editing::ImportChannel chns,
 		}
 		
 		track_canvas.get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
-		// ARDOUR_UI::instance()->flush_pending ();
-	
-		/* make the proper number of channels in the region */
-		
-		input_chan += finfo.channels;
 
-		for (int n = 0; n < finfo.channels; ++n)
-		{
+		for (int n = 0; n < finfo.channels; ++n) {
 			try {
 
 				/* check if we have this thing embedded already */
@@ -422,6 +427,21 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, Editing::ImportChannel chns,
 		goto out;
 	}
 
+	ret = add_sources (paths, sources, pos, chns, mode);
+
+  out:
+	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
+	return ret;
+}
+
+int
+Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64_t pos, ImportDisposition chns, ImportMode mode)
+{
+	boost::shared_ptr<AudioTrack> track;
+	boost::shared_ptr<AudioRegion> region;
+	ustring region_name;
+	uint32_t input_chan = 0;
+	uint32_t output_chan = 0;
 
 	if (pos == -1) { // "use timestamp"
 		if (sources[0]->natural_position() != 0) {
@@ -440,6 +460,8 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, Editing::ImportChannel chns,
 		
 		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (sources, 0, sources[0]->length(), region_name, 0,
 											  Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External)));
+
+		input_chan = sources.size();
 
 		if (Config->get_output_auto_connect() & AutoConnectMaster) {
 			output_chan = (session->master_out() ? session->master_out()->n_inputs() : input_chan);
@@ -497,12 +519,9 @@ Editor::embed_sndfile (vector<Glib::ustring> paths, Editing::ImportChannel chns,
 		}
 	}
 
-	
-  out:
-	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
-	return ret;
+	return 0;
 }
-
+	
 int
 Editor::finish_bringing_in_audio (boost::shared_ptr<AudioRegion> region, uint32_t in_chans, uint32_t out_chans, nframes64_t& pos, 
 				  ImportMode mode, boost::shared_ptr<AudioTrack>& existing_track, int nth)
@@ -519,13 +538,13 @@ Editor::finish_bringing_in_audio (boost::shared_ptr<AudioRegion> region, uint32_
 		if (selection->tracks.empty()) {
 			return -1;
 		}
-
+			
 		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(selection->tracks.front());
-
+		
 		if (!atv) {
 			return -1;
 		}
-
+		
 		track = atv->audio_track();
 		
 		boost::shared_ptr<Playlist> playlist = track->diskstream()->playlist();

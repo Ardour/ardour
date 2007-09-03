@@ -470,9 +470,10 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 	} else if ((tv = dynamic_cast<AudioTimeAxisView*>(tvp)) != 0) {
 
 		/* check that its an audio track, not a bus */
-
+		
 		if (tv->get_diskstream()) {
-			// XXX NEED A WAY TO DROP INTO THIS SPECIFIC TRACK: tv->audio_track()
+			/* select the track, then embed */
+			selection->set (tv);
 			do_embed (paths, Editing::ImportDistinctFiles, ImportToTrack, frame);
 		}
 	}
