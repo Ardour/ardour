@@ -78,6 +78,10 @@ show_ui_callback (void *arg)
 void
 fixup_bundle_environment ()
 {
+	if (!getenv ("ARDOUR_BUNDLED")) {
+		return;
+	}
+
 	char execpath[MAXPATHLEN+1];
 	uint32_t pathsz = sizeof (execpath);
 
@@ -164,6 +168,7 @@ fixup_bundle_environment ()
 		setenv ("JACK_DRIVER_DIR", path.c_str(), 1);
 	}
 }
+
 #endif
 
 #ifdef VST_SUPPORT
