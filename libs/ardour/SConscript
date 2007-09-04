@@ -34,6 +34,7 @@ directory_names.cc
 filename_extensions.cc
 filesystem_paths.cc
 find_session.cc
+tape_file_matcher.cc
 template_utils.cc
 track.cc
 audio_diskstream.cc

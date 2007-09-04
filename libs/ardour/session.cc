@@ -78,6 +78,7 @@
 #include <ardour/region_factory.h>
 #include <ardour/filename_extensions.h>
 #include <ardour/session_directory.h>
+#include <ardour/tape_file_matcher.h>
 
 #ifdef HAVE_LIBLO
 #include <ardour/osc.h>
@@ -3380,27 +3381,13 @@ Session::remove_empty_sounds ()
 	get_files_in_directory (_session_dir->sound_path(), audio_filenames);
 	
 	Glib::Mutex::Lock lm (source_lock);
-	
-	regex_t compiled_tape_track_pattern;
-	int err;
 
-	if ((err = regcomp (&compiled_tape_track_pattern, "/T[0-9][0-9][0-9][0-9]-", REG_EXTENDED|REG_NOSUB))) {
+	TapeFileMatcher tape_file_matcher;
 
-		char msg[256];
-		
-		regerror (err, &compiled_tape_track_pattern, msg, sizeof (msg));
-		
-		error << string_compose (_("Cannot compile tape track regexp for use (%1)"), msg) << endmsg;
-		return;
-	}
+	remove_if (audio_filenames.begin(), audio_filenames.end(),
+			sigc::mem_fun (tape_file_matcher, &TapeFileMatcher::matches));
 
 	for (vector<string>::iterator i = audio_filenames.begin(); i != audio_filenames.end(); ++i) {
-		
-		// never remove files that appear to be a tape track
-
-		if (regexec (&compiled_tape_track_pattern, i->c_str(), 0, 0, 0) == 0) {
-			continue;
-		}
 
 		sys::path audio_file_path (_session_dir->sound_path());
 
