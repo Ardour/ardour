@@ -538,17 +538,20 @@ Session::remove_state (string snapshot_name)
 		/* refuse to remove the current snapshot or the "main" one */
 		return;
 	}
-	
-	const string xml_path = _path + snapshot_name + statefile_suffix;
+
+	sys::path xml_path(_session_dir->root_path());
+
+	xml_path /= snapshot_name + statefile_suffix;
+
+	sys::path backup_path(xml_path.to_string() + backup_suffix);
 
 	/* make a backup copy of the state file */
-	const string bak_path = xml_path + ".bak";
-	if (g_file_test (xml_path.c_str(), G_FILE_TEST_EXISTS)) {
-		copy_file (xml_path, bak_path);
+	if (sys::exists (xml_path)) {
+		copy_file (xml_path.to_string(), backup_path.to_string());
 	}
 
 	/* and delete it */
-	unlink (xml_path.c_str());
+	sys::remove (xml_path);
 }
 
 int

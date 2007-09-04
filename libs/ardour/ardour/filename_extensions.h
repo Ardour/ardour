@@ -8,6 +8,7 @@ extern const char* const template_suffix;
 extern const char* const statefile_suffix;
 extern const char* const pending_suffix;
 extern const char* const peakfile_suffix;
+extern const char* const backup_suffix;
 
 }
 
