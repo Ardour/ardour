@@ -161,7 +161,7 @@ copy_file(const path & from_path, const path & to_path)
 string
 basename (const path & p)
 {
-	string base = Glib::path_get_basename (p.to_string());
+	string base(p.leaf());
 
 	string::size_type n = base.rfind ('.');
 
@@ -171,7 +171,7 @@ basename (const path & p)
 string
 extension (const path & p)
 {
-	string base = Glib::path_get_basename (p.to_string());
+	string base(p.leaf());
 
 	string::size_type n = base.rfind ('.');
 
