@@ -653,15 +653,12 @@ Session::load_state (string snapshot_name)
 		state_tree = 0;
 	}
 
-	string xmlpath;
-	
 	state_was_pending = false;
 
 	/* check for leftover pending state from a crashed capture attempt */
 
-	xmlpath = _path;
-	xmlpath += snapshot_name;
-	xmlpath += pending_suffix;
+	sys::path xmlpath(_session_dir->root_path());
+	xmlpath /= snapshot_name + pending_suffix;
 
 	if (sys::exists (xmlpath)) {
 
@@ -673,14 +670,12 @@ Session::load_state (string snapshot_name)
 	} 
 
 	if (!state_was_pending) {
-
-		xmlpath = _path;
-		xmlpath += snapshot_name;
-		xmlpath += statefile_suffix;
+		xmlpath = _session_dir->root_path();
+		xmlpath /= snapshot_name + statefile_suffix;
 	}
 	
 	if (!sys::exists (xmlpath)) {
-		error << string_compose(_("%1: session state information file \"%2\" doesn't exist!"), _name, xmlpath) << endmsg;
+		error << string_compose(_("%1: session state information file \"%2\" doesn't exist!"), _name, xmlpath.to_string()) << endmsg;
 		return 1;
 	}
 
@@ -688,8 +683,8 @@ Session::load_state (string snapshot_name)
 
 	set_dirty();
 
-	if (!state_tree->read (xmlpath)) {
-		error << string_compose(_("Could not understand ardour file %1"), xmlpath) << endmsg;
+	if (!state_tree->read (xmlpath.to_string())) {
+		error << string_compose(_("Could not understand ardour file %1"), xmlpath.to_string()) << endmsg;
 		delete state_tree;
 		state_tree = 0;
 		return -1;
@@ -698,7 +693,7 @@ Session::load_state (string snapshot_name)
 	XMLNode& root (*state_tree->root());
 	
 	if (root.name() != X_("Session")) {
-		error << string_compose (_("Session file %1 is not an Ardour session"), xmlpath) << endmsg;
+		error << string_compose (_("Session file %1 is not an Ardour session"), xmlpath.to_string()) << endmsg;
 		delete state_tree;
 		state_tree = 0;
 		return -1;
@@ -719,18 +714,16 @@ Session::load_state (string snapshot_name)
 	}
 
 	if (is_old) {
-		string backup_path;
 
-		backup_path = _path;
-		backup_path += snapshot_name;
-		backup_path += "-1";
-		backup_path += statefile_suffix;
+		sys::path backup_path(_session_dir->root_path());
+
+		backup_path /= snapshot_name + "-1" + statefile_suffix;
 
 		info << string_compose (_("Copying old session file %1 to %2\nUse %2 with Ardour versions before 2.0 from now on"),
-					xmlpath, backup_path) 
+					xmlpath.to_string(), backup_path.to_string()) 
 		     << endmsg;
 
-		copy_file (xmlpath, backup_path);
+		copy_file (xmlpath.to_string(), backup_path.to_string());
 
 		/* if it fails, don't worry. right? */
 	}
