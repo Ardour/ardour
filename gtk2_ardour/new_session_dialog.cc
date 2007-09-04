@@ -21,7 +21,7 @@
 #include "new_session_dialog.h"
 
 #include <ardour/recent_sessions.h>
-#include <ardour/session.h>
+#include <ardour/session_state_utils.h>
 #include <ardour/template_utils.h>
 
 #include <gtkmm/entry.h>
@@ -721,9 +721,7 @@ NewSessionDialog::reset_template()
 void
 NewSessionDialog::reset_recent()
 {
-	/* Shamelessly ripped from ardour_ui.cc */
-	std::vector<string *> *sessions;
-	std::vector<string *>::iterator i;
+	std::vector<sys::path> session_directories;
 	RecentSessionsSorter cmp;
 	
 	recent_model->clear ();
@@ -731,56 +729,51 @@ NewSessionDialog::reset_recent()
 	ARDOUR::RecentSessions rs;
 	ARDOUR::read_recent_sessions (rs);
 	
-	/* sort them alphabetically */
+	// sort them alphabetically
 	sort (rs.begin(), rs.end(), cmp);
-	sessions = new std::vector<std::string*>;
 	
 	for (ARDOUR::RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
-	        sessions->push_back (new string ((*i).second));
+	        session_directories.push_back ((*i).second);
 	}
 	
-	for (i = sessions->begin(); i != sessions->end(); ++i) {
-
-		std::vector<std::string*>* states;
-		std::vector<const gchar*> item;
-		std::string fullpath = *(*i);
-		
-		/* remove any trailing / */
-		
-		if (fullpath[fullpath.length()-1] == '/') {
-			fullpath = fullpath.substr (0, fullpath.length()-1);
-		}
+	for (vector<sys::path>::const_iterator i = session_directories.begin();
+			i != session_directories.end(); ++i)
+	{
+		std::vector<sys::path> state_file_paths;
 	    
-		/* now get available states for this session */
-		  
-		if ((states = ARDOUR::Session::possible_states (fullpath)) == 0) {
-			/* no state file? */
+		// now get available states for this session
+
+		get_state_files_in_directory (*i, state_file_paths);
+
+		if (state_file_paths.empty()) {
+			// no state file?
 			continue;
 		}
-	    
+	  
+		std::vector<string> state_file_names(get_file_names_no_extension (state_file_paths));
+
 		Gtk::TreeModel::Row row = *(recent_model->append());
+
+		const string fullpath = (*i).to_string();
 		
 		row[recent_columns.visible_name] = Glib::path_get_basename (fullpath);
 		row[recent_columns.fullpath] = fullpath;
 		
-		if (states->size()) {
+		if (state_file_names.size()) {
 
-			/* add the children */
+			// add the children
 
-			for (std::vector<std::string*>::iterator i2 = states->begin(); i2 != states->end(); ++i2) {
+			for (std::vector<std::string>::iterator i2 = state_file_names.begin();
+					i2 != state_file_names.end(); ++i2)
+			{
 
 				Gtk::TreeModel::Row child_row = *(recent_model->append (row.children()));
 
-				child_row[recent_columns.visible_name] = **i2;
+				child_row[recent_columns.visible_name] = *i2;
 				child_row[recent_columns.fullpath] = fullpath;
-
-				delete *i2;
 			}
 		}
-
-		delete states;
 	}
-	delete sessions;
 }
 
 void
