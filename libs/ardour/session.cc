@@ -2950,7 +2950,7 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 				}
 			}
 
-			if (g_file_test (buf, G_FILE_TEST_EXISTS)) {
+			if (sys::exists(buf)) {
 				existing++;
 			} 
 
@@ -3145,7 +3145,7 @@ Session::midi_path_from_name (string name)
 
 			snprintf (buf, sizeof(buf), "%s-%u.mid", spath.c_str(), cnt);
 
-			if (g_file_test (buf, G_FILE_TEST_EXISTS)) {
+			if (sys::exists (buf)) {
 				existing++;
 			} 
 		}
