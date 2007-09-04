@@ -663,7 +663,7 @@ Session::load_state (string snapshot_name)
 	xmlpath += snapshot_name;
 	xmlpath += pending_suffix;
 
-	if (Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
+	if (sys::exists (xmlpath)) {
 
 		/* there is pending state from a crashed capture attempt */
 
@@ -679,7 +679,7 @@ Session::load_state (string snapshot_name)
 		xmlpath += statefile_suffix;
 	}
 	
-	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
+	if (!sys::exists (xmlpath)) {
 		error << string_compose(_("%1: session state information file \"%2\" doesn't exist!"), _name, xmlpath) << endmsg;
 		return 1;
 	}
