@@ -115,6 +115,9 @@ public:
 	int system_error() const { return m_error_code; }
 };
 
+inline path operator/ (const path& lhs, const path& rhs)
+{ return path(lhs) /= rhs; }
+
 /// @return true if path at p exists
 bool exists(const path & p);
 
