@@ -114,6 +114,7 @@ session_export.cc
 session_midi.cc
 session_process.cc
 session_state.cc
+session_state_utils.cc
 session_time.cc
 session_timefx.cc
 session_transport.cc
