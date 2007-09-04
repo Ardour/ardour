@@ -759,7 +759,7 @@ NewSessionDialog::reset_recent()
 		row[recent_columns.visible_name] = Glib::path_get_basename (fullpath);
 		row[recent_columns.fullpath] = fullpath;
 		
-		if (state_file_names.size()) {
+		if (state_file_names.size() > 1) {
 
 			// add the children
 
