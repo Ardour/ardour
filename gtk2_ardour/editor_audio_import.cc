@@ -87,6 +87,8 @@ Editor::external_audio_dialog ()
 
 	int response = sfbrowser->run ();
 
+	sfbrowser->hide ();
+
 	switch (response) {
 	case RESPONSE_OK:
 		break;
@@ -94,8 +96,6 @@ Editor::external_audio_dialog ()
 		// cancel from the browser - we are done
 		return;
 	}
-	
-	sfbrowser->hide ();
 
 	/* lets do it */
 	
@@ -131,6 +131,7 @@ Editor::external_audio_dialog ()
 void
 Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mode, nframes64_t& pos)
 {
+	boost::shared_ptr<AudioTrack> track;
 	vector<ustring> to_import;
 	bool ok = false;
 
@@ -140,22 +141,63 @@ Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mod
 
 	switch (chns) {
 	case Editing::ImportDistinctFiles:
+		for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
+
+			to_import.clear ();
+			to_import.push_back (*a);
+
+			/* create 1 region from this path, add to 1 track,
+			   ignore "track"
+			*/
+			
+			if (import_sndfiles (to_import, mode, pos, 1, -1, track)) {
+				goto out;
+			}
+
+		}
+		break;
+
 	case Editing::ImportDistinctChannels:
 		for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
 
 			to_import.clear ();
 			to_import.push_back (*a);
 
-			if (import_sndfiles (to_import, chns, mode, pos)) {
+			/* create as many regions as there are channels, add them
+			   to that many tracks, ignore "track"
+			*/
+			
+
+			if (import_sndfiles (to_import, mode, pos, -1, -1, track)) {
 				goto out;
 			}
+
 		}
 		break;
 
 	case Editing::ImportMergeFiles:
-	case Editing::ImportSerializeFiles:
-		if (import_sndfiles (paths, chns, mode, pos)) {
+		/* create 1 region from all paths, add to 1 track,
+		   ignore "track"
+		*/
+		if (import_sndfiles (paths, mode, pos, 1, 1, track)) {
 			goto out;
+		}
+		break;
+
+	case Editing::ImportSerializeFiles:
+		for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
+
+			to_import.clear ();
+			to_import.push_back (*a);
+			
+			/* create 1 region from this path, add to 1 track,
+			   reuse "track" across paths
+			*/
+
+			if (import_sndfiles (to_import, mode, pos, 1, 1, track)) {
+				goto out;
+			}
+
 		}
 		break;
 	}
@@ -190,29 +232,52 @@ Editor::do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mode
 void
 Editor::_do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mode, nframes64_t& pos)
 {
-	bool multiple_files = paths.size() > 1;
+	boost::shared_ptr<AudioTrack> track;
 	bool check_sample_rate = true;
 	bool ok = false;
 	vector<ustring> to_embed;
-	
+	bool multi = paths.size() > 1;
+
 	switch (chns) {
 	case Editing::ImportDistinctFiles:
+		for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
+
+			to_embed.clear ();
+			to_embed.push_back (*a);
+
+			if (embed_sndfiles (to_embed, multi, check_sample_rate, mode, pos, 1, -1, track) < -1) {
+				goto out;
+			}
+		}
+		break;
+		
 	case Editing::ImportDistinctChannels:
 		for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
 
 			to_embed.clear ();
 			to_embed.push_back (*a);
 
-			if (embed_sndfiles (to_embed, chns, multiple_files, check_sample_rate, mode, pos) < -1) {
+			if (embed_sndfiles (to_embed, multi, check_sample_rate, mode, pos, -1, -1, track) < -1) {
 				goto out;
 			}
 		}
 		break;
 
 	case Editing::ImportMergeFiles:
-	case Editing::ImportSerializeFiles:
-		if (embed_sndfiles (paths, chns, multiple_files, check_sample_rate, mode, pos) < -1) {
+		if (embed_sndfiles (paths, multi, check_sample_rate, mode, pos, 1, 1, track) < -1) {
 			goto out;
+		}
+		break;
+
+	case Editing::ImportSerializeFiles:
+		for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
+
+			to_embed.clear ();
+			to_embed.push_back (*a);
+
+			if (embed_sndfiles (to_embed, multi, check_sample_rate, mode, pos, 1, 1, track) < -1) {
+				goto out;
+			}
 		}
 		break;
 	}
@@ -226,7 +291,8 @@ Editor::_do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mod
 }
 
 int
-Editor::import_sndfiles (vector<ustring> paths, ImportDisposition chns, ImportMode mode, nframes64_t& pos)
+Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, nframes64_t& pos, 
+			 int target_regions, int target_tracks, boost::shared_ptr<AudioTrack>& track)
 {
 	WindowTitle title = string_compose (_("importing %1"), paths.front());
 
@@ -267,14 +333,13 @@ Editor::import_sndfiles (vector<ustring> paths, ImportDisposition chns, ImportMo
 	
 	/* import thread finished - see if we should build a new track */
 
-	boost::shared_ptr<AudioTrack> track;
 	boost::shared_ptr<AudioRegion> r;
 	
 	if (import_status.cancel || import_status.sources.empty()) {
 		goto out;
 	}
 
-	if (add_sources (paths, import_status.sources, pos, chns, mode) == 0) {
+	if (add_sources (paths, import_status.sources, pos, mode, target_regions, target_tracks, track) == 0) {
 		session->save_state ("");
 	}
 
@@ -284,8 +349,9 @@ Editor::import_sndfiles (vector<ustring> paths, ImportDisposition chns, ImportMo
 }
 
 int
-Editor::embed_sndfiles (vector<Glib::ustring> paths, Editing::ImportDisposition chns, bool multiple_files, 
-		       bool& check_sample_rate, ImportMode mode, nframes64_t& pos)
+Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
+			bool& check_sample_rate, ImportMode mode, nframes64_t& pos, int target_regions, int target_tracks,
+			boost::shared_ptr<AudioTrack>& track)
 {
 	boost::shared_ptr<AudioFileSource> source;
 	SourceList sources;
@@ -343,7 +409,7 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, Editing::ImportDisposition 
 		if (check_sample_rate  && (finfo.samplerate != (int) session->frame_rate())) {
 			vector<string> choices;
 			
-			if (multiple_files) {
+			if (multifile) {
 				choices.push_back (_("Cancel entire import"));
 				choices.push_back (_("Don't embed it"));
 				choices.push_back (_("Embed all without questions"));
@@ -429,7 +495,7 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, Editing::ImportDisposition 
 		goto out;
 	}
 
-	ret = add_sources (paths, sources, pos, chns, mode);
+	ret = add_sources (paths, sources, pos, mode, target_regions, target_tracks, track);
 
   out:
 	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
@@ -437,10 +503,10 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, Editing::ImportDisposition 
 }
 
 int
-Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64_t pos, ImportDisposition chns, ImportMode mode)
+Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64_t& pos, ImportMode mode, 
+		     int target_regions, int target_tracks, boost::shared_ptr<AudioTrack>& track)
 {
-	boost::shared_ptr<AudioTrack> track;
-	boost::shared_ptr<AudioRegion> region;
+	vector<boost::shared_ptr<AudioRegion> > regions;
 	ustring region_name;
 	uint32_t input_chan = 0;
 	uint32_t output_chan = 0;
@@ -454,71 +520,58 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 		}
 	}
 
-	if (chns == Editing::ImportMergeFiles) {
+	if (target_regions == 1) {
 
 		/* take all the sources we have and package them up as a region */
 
 		region_name = region_name_from_path (paths.front(), (sources.size() > 1));
 		
-		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (sources, 0, sources[0]->length(), region_name, 0,
-											  Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External)));
-
-		input_chan = sources.size();
-
-		if (Config->get_output_auto_connect() & AutoConnectMaster) {
-			output_chan = (session->master_out() ? session->master_out()->n_inputs() : input_chan);
-		} else {
-			output_chan = input_chan;
-		}
+		regions.push_back (boost::dynamic_pointer_cast<AudioRegion> 
+				   (RegionFactory::create (sources, 0, sources[0]->length(), region_name, 0,
+							   Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External))));
 		
-		finish_bringing_in_audio (region, input_chan, output_chan, pos, mode, track, 0);
-		
-	} else { // SerializeFiles, DistinctFiles, DistinctChannels
+	} else if (target_regions == -1) {
 
 		/* take each source and create a region for each one */
 
 		SourceList just_one;
 		SourceList::iterator x;
-		vector<Glib::ustring>::iterator p = paths.begin();
-		vector<Glib::ustring>::iterator next_path;
-		int nth;
 
-		for (nth = 0, x = sources.begin(); x != sources.end(); ++x, ++nth) {
+		for (x = sources.begin(); x != sources.end(); ++x) {
 
 			just_one.clear ();
 			just_one.push_back (*x);
 
-			region_name = region_name_from_path ((*p), false);
+			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (*x);
+
+			region_name = region_name_from_path (afs->path(), false);
 			
-			region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (just_one, 0, (*x)->length(), region_name, 0,
-												  Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External)));
+			regions.push_back (boost::dynamic_pointer_cast<AudioRegion> 
+					   (RegionFactory::create (just_one, 0, (*x)->length(), region_name, 0,
+								   Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External))));
 
-			if (Config->get_output_auto_connect() & AutoConnectMaster) {
-				output_chan = (session->master_out() ? session->master_out()->n_inputs() : input_chan);
-			} else {
-				output_chan = input_chan;
-			}
-		
-			finish_bringing_in_audio (region, 1, output_chan, pos, mode, track, nth);
-
-			if (chns == ImportSerializeFiles) {
-				pos += region->length();
-			}
-
-			if (chns == ImportDistinctChannels || chns == ImportDistinctFiles) {
-				/* make a new track for the next region */
-				track.reset ();
-			}
-
-			/* don't run out of paths */
-			
-			next_path = p;
-			next_path++;
-
-			if (next_path != paths.end()) {
-				p = next_path;
-			}
 		}
+	}
+
+	input_chan = sources.size();
+
+	if (Config->get_output_auto_connect() & AutoConnectMaster) {
+		output_chan = (session->master_out() ? session->master_out()->n_inputs() : input_chan);
+	} else {
+		output_chan = input_chan;
+	}
+
+	int n = 0;
+
+	for (vector<boost::shared_ptr<AudioRegion> >::iterator r = regions.begin(); r != regions.end(); ++r, ++n) {
+
+		finish_bringing_in_audio (*r, input_chan, output_chan, pos, mode, track, n);
+
+		if (target_tracks != 1) {
+			track.reset ();
+		} else {
+			pos += (*r)->length();
+		} 
 	}
 
 	return 0;

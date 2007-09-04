@@ -73,8 +73,6 @@ SoundFileBox::SoundFileBox ()
 {
 	set_name (X_("SoundFileBox"));
 	
-	// set_size_request (250, 250);
-	
 	preview_label.set_markup (_("<b>Soundfile Info</b>"));
 
 	border_frame.set_label_widget (preview_label);
@@ -315,12 +313,6 @@ SoundFileBox::tags_changed ()
 		return;
 	}
 
-	cerr << "save new tags: ";
-	for (vector<string>::iterator x = tags.begin(); x != tags.end(); ++x) {
-		cerr << (*x) << ' ';
-	}
-	cerr << endl;
-	
 	Library->set_tags (string ("//") + path, tags);
 	Library->save_changes ();
 }
@@ -348,6 +340,8 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	VBox* vbox;
 	HBox* hbox;
 	HBox* hpacker;
+	
+	set_size_request (-1, 450);
 	
 	set_session (s);
 	resetting_ourselves = false;
