@@ -443,8 +443,14 @@ Session::create_session_file_from_template (const string& template_path)
 
 	session_file_path /= _name + statefile_suffix;
 
-	if(!copy_file (template_path, session_file_path.to_string())) {
-		error << string_compose (_("Could not use session template %1 to create new session."), template_path) 
+	try
+	{
+		sys::copy_file (template_path, session_file_path);
+	}
+	catch(sys::filesystem_error& ex)
+	{
+		error << string_compose (_("Could not use session template %1 to create new session (%2)."),
+				template_path, ex.what())
 			<< endmsg;
 		return false;
 	}
