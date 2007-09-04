@@ -426,9 +426,6 @@ class Session : public PBD::StatefulDestructible
 	sigc::signal<void,string> StateSaved;
 	sigc::signal<void> StateReady;
 
-	vector<string*>* possible_states() const;
-	static vector<string*>* possible_states(string path);
-
 	XMLNode& get_state();
 	int      set_state(const XMLNode& node); // not idempotent
 	XMLNode& get_template();

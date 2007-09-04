@@ -1915,56 +1915,6 @@ Session::load_route_groups (const XMLNode& node, bool edit)
 	return 0;
 }				
 
-static bool
-state_file_filter (const string &str, void *arg)
-{
-	return (str.length() > strlen(statefile_suffix) &&
-		str.find (statefile_suffix) == (str.length() - strlen (statefile_suffix)));
-}
-
-struct string_cmp {
-	bool operator()(const string* a, const string* b) {
-		return *a < *b;
-	}
-};
-
-static string*
-remove_end(string* state)
-{
-	string statename(*state);
-	
-	string::size_type start,end;
-	if ((start = statename.find_last_of ('/')) != string::npos) {
-		statename = statename.substr (start+1);
-	}
-		
-	if ((end = statename.rfind(".ardour")) == string::npos) {
-		end = statename.length();
-	}
-
-	return new string(statename.substr (0, end));
-}
-
-vector<string *> *
-Session::possible_states (string path) 
-{
-	PathScanner scanner;
-	vector<string*>* states = scanner (path, state_file_filter, 0, false, false);
-	
-	transform(states->begin(), states->end(), states->begin(), remove_end);
-	
-	string_cmp cmp;
-	sort (states->begin(), states->end(), cmp);
-	
-	return states;
-}
-
-vector<string *> *
-Session::possible_states () const
-{
-	return possible_states(_path);
-}
-
 void
 Session::auto_save()
 {
