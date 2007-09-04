@@ -16,6 +16,46 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+/**
+ * @namespace PBD::sys
+ *
+ * The API in this file is intended to be as close as possible to the
+ * boost::filesystem API but implementing only the subset of it that is required
+ * by ardour using the glib/glibmm file utility functions in the implementation.
+ *
+ * More information about boost::filesystem and the TR2 proposal at
+ *
+ * http://www.boost.org/libs/filesystem/doc/tr2_proposal.html
+ *
+ * Hopefully the boost::filesystem API will pass TR2 review etc and become part
+ * of the C++ standard and this code can be removed, or we just end up using
+ * the boost filesystem library when it matures a bit more.
+ * 
+ * My reasons for writing this thin wrapper instead of using glib directly or
+ * using boost::filesystem immediately are:
+ *
+ *  - Using sys::path instead of strings and Glib::build_filename is more
+ *    convenient, terse and forces correct platform agnostic path building.
+ *
+ *  - Using boost::filesystem on windows would mean converting between any UTF-8
+ *    encoded strings(such as when selecting a file/directory in the gtk file
+ *    chooser) and the native file encoding (UTF-16). It would take some time
+ *    and testing to find out when this is required and the glib functions already
+ *    do this if necessary.
+ *
+ *  - Using exceptions to indicate errors is more likely to uncover situations 
+ *    where error conditions are being silently ignored(I've already encounted
+ *    a few examples of this in the ardour code).
+ *
+ *  - Many of the glib file utility functions are not wrapped by glibmm so this
+ *    also provides what I think is a better API.
+ *
+ *  - Using boost::filesystem directly means another library dependence and would
+ *    require more testing on windows because of the character encoding issue.
+ *  
+ *  - The boost::filesystem API changes a bit as part of the TR2 review process etc.
+ */
+
 #ifndef __filesystem_h__
 #define __filesystem_h__
 
