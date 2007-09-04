@@ -106,7 +106,7 @@ find_file_in_search_path(const SearchPath& search_path,
 			(
 			 "Found no file named %1 in search path %2",
 			 filename,
-			 search_path.get_string ()
+			 search_path.to_string ()
 			)
 			<< endmsg;
 
@@ -120,7 +120,7 @@ find_file_in_search_path(const SearchPath& search_path,
 			(
 			 "Found more than one file matching %1 in search path %2",
 			 filename,
-			 search_path.get_string ()
+			 search_path.to_string ()
 			)
 			<< endmsg;
 	}

@@ -198,7 +198,7 @@ ControlProtocolManager::discover_control_protocols ()
 	find_matching_files_in_search_path (control_protocol_search_path (),
 			dylib_extension_pattern, cp_modules);
 
-	info << string_compose (_("looking for control protocols in %1"), control_protocol_search_path().get_string()) << endmsg;
+	info << string_compose (_("looking for control protocols in %1"), control_protocol_search_path().to_string()) << endmsg;
 
 	for (vector<sys::path>::iterator i = cp_modules.begin(); i != cp_modules.end(); ++i) {
 		control_protocol_discover ((*i).to_string());

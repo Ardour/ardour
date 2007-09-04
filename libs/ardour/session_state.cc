@@ -369,7 +369,7 @@ Session::raid_path () const
 		raid_search_path += sys::path((*i).path);
 	}
 	
-	return raid_search_path.get_string ();
+	return raid_search_path.to_string ();
 }
 
 void
@@ -406,8 +406,8 @@ Session::setup_raid_path (string path)
 
 	// set the AudioFileSource and SMFSource search path
 
-	AudioFileSource::set_search_path (sound_search_path.get_string ());
-	SMFSource::set_search_path (midi_search_path.get_string ());
+	AudioFileSource::set_search_path (sound_search_path.to_string ());
+	SMFSource::set_search_path (midi_search_path.to_string ());
 
 	// reset the round-robin soundfile path thingie
 	

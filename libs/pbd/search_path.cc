@@ -80,7 +80,7 @@ SearchPath::add_directories (const vector<sys::path>& paths)
 }
 
 const string
-SearchPath::get_string () const
+SearchPath::to_string () const
 {
 	string path;
 

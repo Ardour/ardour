@@ -128,7 +128,7 @@ public:
 	 * The string that is returned contains the platform specific
 	 * path separator.
 	 */
-	const string get_string () const;
+	const string to_string () const;
 
 	/**
 	 * Assignment of another SearchPath to this.
