@@ -16,11 +16,6 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <cerrno>
-
-#include <glibmm/fileutils.h>
-#include <glibmm/miscutils.h>
-
 #include <pbd/error.h>
 #include <pbd/compose.h>
 #include <pbd/filesystem.h>
