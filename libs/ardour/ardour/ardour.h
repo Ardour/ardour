@@ -51,8 +51,6 @@ namespace ARDOUR {
 	
 	std::string get_ardour_revision ();
 
-	const layer_t max_layer = UCHAR_MAX;
-
 	microseconds_t get_microseconds ();
 
 	Change new_change ();
