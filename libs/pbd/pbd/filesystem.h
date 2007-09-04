@@ -172,6 +172,15 @@ void copy_file(const path & from_path, const path & to_path);
  */ 
 string basename (const path& p);
 
+/**
+ * @return If the filename contains a dot, return a substring of the
+ * filename starting the rightmost dot to the end of the string, otherwise
+ * an empty string.
+ *
+ * @param p a file path.
+ */
+string extension (const path& p);
+
 } // namespace sys
 
 } // namespace PBD
