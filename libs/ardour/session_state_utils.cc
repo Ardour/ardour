@@ -17,7 +17,9 @@
 */
 
 #include <pbd/compose.h>
+#include <pbd/basename.h>
 #include <pbd/error.h>
+#include <pbd/file_utils.h>
 
 #include <ardour/session_state_utils.h>
 #include <ardour/filename_extensions.h>
@@ -45,6 +47,32 @@ create_backup_file (const sys::path & file_path)
 		return false;
 	}
 	return true;
+}
+
+void
+get_state_files_in_directory (const sys::path & directory_path,
+		vector<sys::path> & result)
+{
+	Glib::PatternSpec state_file_pattern('*' + string(statefile_suffix));
+	
+	find_matching_files_in_directory (directory_path, state_file_pattern,
+			result);
+}
+
+vector<string>
+get_file_names_no_extension (const vector<sys::path> & file_paths)
+{
+	vector<string> result;
+
+	for (vector<sys::path>::const_iterator i = file_paths.begin();
+			i != file_paths.end(); ++i)
+	{
+		result.push_back (basename_nosuffix((*i).to_string()));
+	}
+
+	sort (result.begin(), result.end(), std::less<string>());
+
+	return result;
 }
 
 } // namespace ARDOUR

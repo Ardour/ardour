@@ -19,10 +19,15 @@
 #ifndef ARDOUR_SESSION_STATE_UTILS_INCLUDED
 #define ARDOUR_SESSION_STATE_UTILS_INCLUDED
 
+#include <vector>
+#include <string>
+
 #include <pbd/filesystem.h>
 
 namespace ARDOUR {
 
+using std::string;
+using std::vector;
 using namespace PBD;
 
 /**
@@ -34,6 +39,26 @@ using namespace PBD;
  * @return true if successful, false otherwise.
  */
 bool create_backup_file (const sys::path & file_path);
+
+/**
+ * Get the absolute paths to all state files in the directory 
+ * at path directory_path.
+ *
+ * @param directory_path The absolute path to a directory.
+ * @param result vector to contain resulting state files.
+ */
+void get_state_files_in_directory (const sys::path & directory_path,
+		vector<sys::path>& result);
+
+/**
+ * Given a vector of paths to files, return a vector containing
+ * the filenames without any extension.
+ *
+ * @param file_paths a vector containing the file paths
+ * @return a vector containing a list of file names without any 
+ * filename extension.
+ */
+vector<string> get_file_names_no_extension (const vector<sys::path> & file_paths);
 
 } // namespace ARDOUR
 
