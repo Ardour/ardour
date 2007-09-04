@@ -52,6 +52,8 @@
 #include <ardour/audioregion.h>
 #include <ardour/midi_region.h>
 #include <ardour/session_route.h>
+#include <ardour/session_directory.h>
+#include <ardour/session_state_utils.h>
 #include <ardour/tempo.h>
 #include <ardour/utils.h>
 
@@ -3526,16 +3528,21 @@ Editor::redisplay_snapshots ()
 		return;
 	}
 
-	vector<string*>* states;
+	vector<sys::path> state_file_paths;
 
-	if ((states = session->possible_states()) == 0) {
-		return;
-	}
+	get_state_files_in_directory (session->session_directory().root_path(),
+			state_file_paths);
+
+	if (state_file_paths.empty()) return;
+
+	vector<string> state_file_names(get_file_names_no_extension(state_file_paths));
 
 	snapshot_display_model->clear ();
 
-	for (vector<string*>::iterator i = states->begin(); i != states->end(); ++i) {
-		string statename = *(*i);
+	for (vector<string>::iterator i = state_file_names.begin();
+			i != state_file_names.end(); ++i)
+	{
+		string statename = (*i);
 		TreeModel::Row row = *(snapshot_display_model->append());
 		
 		/* this lingers on in case we ever want to change the visible
@@ -3552,8 +3559,6 @@ Editor::redisplay_snapshots ()
 		row[snapshot_display_columns.visible_name] = display_name;
 		row[snapshot_display_columns.real_name] = statename;
 	}
-
-	delete states;
 }
 
 void
