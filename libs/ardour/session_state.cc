@@ -1599,7 +1599,6 @@ int
 Session::save_template (string template_name)
 {
 	XMLTree tree;
-	string xml_path, bak_path, template_path;
 
 	if (_state_of_the_state & CannotSave) {
 		return -1;
