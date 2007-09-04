@@ -40,6 +40,7 @@
 #include <pbd/stl_delete.h>
 #include <pbd/basename.h>
 #include <pbd/stacktrace.h>
+#include <pbd/file_utils.h>
 
 #include <ardour/audioengine.h>
 #include <ardour/configuration.h>
@@ -3374,10 +3375,9 @@ Session::RoutePublicOrderSorter::operator() (boost::shared_ptr<Route> a, boost::
 void
 Session::remove_empty_sounds ()
 {
-	PathScanner scanner;
+	vector<string> audio_filenames;
 
-	vector<string *>* possible_audiofiles = scanner (_session_dir->sound_path().to_string (),
-			Config->get_possible_audio_file_regexp (), false, true);
+	get_files_in_directory (_session_dir->sound_path(), audio_filenames);
 	
 	Glib::Mutex::Lock lm (source_lock);
 	
@@ -3394,27 +3394,26 @@ Session::remove_empty_sounds ()
 		return;
 	}
 
-	for (vector<string *>::iterator i = possible_audiofiles->begin(); i != possible_audiofiles->end(); ++i) {
+	for (vector<string>::iterator i = audio_filenames.begin(); i != audio_filenames.end(); ++i) {
 		
-		/* never remove files that appear to be a tape track */
+		// never remove files that appear to be a tape track
 
-		if (regexec (&compiled_tape_track_pattern, (*i)->c_str(), 0, 0, 0) == 0) {
-			delete *i;
+		if (regexec (&compiled_tape_track_pattern, i->c_str(), 0, 0, 0) == 0) {
 			continue;
 		}
-			
-		if (AudioFileSource::is_empty (*this, *(*i))) {
 
-			unlink ((*i)->c_str());
+		sys::path audio_file_path (_session_dir->sound_path());
+
+		audio_file_path /= *i;
 			
-			string peak_path = peak_path_from_audio_path (**i);
+		if (AudioFileSource::is_empty (*this, audio_file_path.to_string())) {
+
+			unlink (audio_file_path.to_string().c_str());
+			
+			string peak_path = peak_path_from_audio_path (audio_file_path.to_string());
 			unlink (peak_path.c_str());
 		}
-
-		delete* i;
 	}
-
-	delete possible_audiofiles;
 }
 
 bool
