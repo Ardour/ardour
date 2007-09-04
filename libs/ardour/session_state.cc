@@ -57,7 +57,6 @@
 #include <pbd/pthread_utils.h>
 #include <pbd/search_path.h>
 #include <pbd/stacktrace.h>
-#include <pbd/copyfile.h>
 
 #include <ardour/audioengine.h>
 #include <ardour/configuration.h>

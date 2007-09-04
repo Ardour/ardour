@@ -22,7 +22,6 @@ basename.cc
 base_ui.cc
 command.cc
 convert.cc
-copyfile.cc
 controllable.cc
 enumwriter.cc
 dmalloc.cc
