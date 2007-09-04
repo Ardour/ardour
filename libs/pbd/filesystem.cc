@@ -94,6 +94,20 @@ create_directories(const path & p)
 	return true;
 }
 
+bool
+remove(const path & p)
+{
+	if(!exists(p)) return false;
+
+	int error = g_unlink (p.to_string().c_str());
+
+	if(error == -1)
+	{
+		throw filesystem_error(g_strerror(errno), errno);
+	}
+	return true;
+}
+
 string
 basename (const path & p)
 {

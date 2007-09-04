@@ -94,6 +94,18 @@ bool create_directory(const path & p);
  */
 bool create_directories(const path & p);
 
+/**
+ * Attempt to delete the file at path p as if by the glib function
+ * g_unlink.
+ *
+ * @return true if file existed prior to removing it, false if file
+ * at p did not exist.
+ *
+ * @throw filesystem_error if removing the file failed for any other
+ * reason other than the file did not exist.
+ */
+bool remove(const path & p);
+
 string basename (const path& p);
 
 } // namespace sys
