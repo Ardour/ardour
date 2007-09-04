@@ -77,6 +77,7 @@
 #include "canvas_impl.h"
 #include "actions.h"
 #include "gui_thread.h"
+#include "sfdb_ui.h"
 
 #ifdef FFT_ANALYSIS
 #include "analysis_window.h"
@@ -313,6 +314,7 @@ Editor::Editor ()
 	_dragging_playhead = false;
 	_dragging_hscrollbar = false;
 	_scrubbing = false;
+	sfbrowser = 0;
 
 	location_marker_color = ARDOUR_UI::config()->canvasvar_LocationMarker.get();
 	location_range_color = ARDOUR_UI::config()->canvasvar_LocationRange.get();
@@ -1154,6 +1156,10 @@ Editor::connect_to_session (Session *t)
 	session->locations()->changed.connect (mem_fun(*this, &Editor::refresh_location_display));
 	session->locations()->StateChanged.connect (mem_fun(*this, &Editor::refresh_location_display_s));
 	session->locations()->end_location()->changed.connect (mem_fun(*this, &Editor::end_location_changed));
+
+	if (sfbrowser) {
+		sfbrowser->set_session (session);
+	}
 
 	handle_new_duration ();
 

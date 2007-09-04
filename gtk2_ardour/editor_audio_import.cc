@@ -78,14 +78,16 @@ Editor::external_audio_dialog ()
 		msg.run ();
 		return;
 	}
+	
+	if (sfbrowser == 0) {
+		sfbrowser = new SoundFileBrowser (*this, _("Add existing audio"), session, selection->tracks.size());
+	}
 
-	SoundFileBrowser browser (*this, _("Add existing audio"), session, selection->tracks.size());
+	sfbrowser->show_all ();
 
-	browser.show_all ();
+	int response = sfbrowser->run ();
 
-	int response = browser.run ();
-
-         	switch (response) {
+	switch (response) {
 	case RESPONSE_OK:
 		break;
 	default:
@@ -93,15 +95,15 @@ Editor::external_audio_dialog ()
 		return;
 	}
 	
-	browser.hide ();
+	sfbrowser->hide ();
 
 	/* lets do it */
 	
-	paths = browser.get_paths ();
+	paths = sfbrowser->get_paths ();
 
-	ImportPosition pos = browser.get_position ();
-	ImportMode mode = browser.get_mode ();
-	ImportDisposition chns = browser.get_channel_disposition ();
+	ImportPosition pos = sfbrowser->get_position ();
+	ImportMode mode = sfbrowser->get_mode ();
+	ImportDisposition chns = sfbrowser->get_channel_disposition ();
 	nframes64_t where;
 
 	switch (pos) {
@@ -119,7 +121,7 @@ Editor::external_audio_dialog ()
 		break;
 	}
 
-	if (browser.import.get_active()) {
+	if (sfbrowser->import.get_active()) {
 		do_import (paths, chns, mode, where);
 	} else {
 		do_embed (paths, chns, mode, where);
