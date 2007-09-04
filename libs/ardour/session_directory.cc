@@ -99,7 +99,7 @@ SessionDirectory::sound_path () const
 	path l_sound_path(m_root_path);
 
 	l_sound_path /= interchange_dir_name;
-	l_sound_path /= basename(m_root_path);
+	l_sound_path /= m_root_path.leaf();
 	l_sound_path /= sound_dir_name;
 
 	return l_sound_path;
@@ -112,7 +112,7 @@ SessionDirectory::midi_path () const
 	path l_midi_path(m_root_path);
 
 	l_midi_path /= interchange_dir_name;
-	l_midi_path /= basename(m_root_path);
+	l_midi_path /= m_root_path.leaf();
 	l_midi_path /= midi_dir_name;
 
 	return l_midi_path;
