@@ -22,12 +22,16 @@
 #include <glib/gstdio.h>
 
 #include <cerrno>
+#include <fstream>
 
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
 #include <pbd/filesystem.h>
 #include <pbd/error.h>
+#include <pbd/compose.h>
+
+#include "i18n.h"
 
 namespace PBD {
 
@@ -106,6 +110,28 @@ remove(const path & p)
 		throw filesystem_error(g_strerror(errno), errno);
 	}
 	return true;
+}
+
+void
+copy_file(const path & from_path, const path & to_path)
+{
+	// this implementation could use mucho memory
+	// for big files.
+	std::ifstream in(from_path.to_string().c_str());
+	std::ofstream out(to_path.to_string().c_str());
+	
+	if (!in || !out) {
+		throw filesystem_error(string_compose(_("Could not open files %1 and %2 for copying"),
+					from_path.to_string(), to_path.to_string()));
+	}
+	
+	out << in.rdbuf();
+	
+	if (!in || !out) {
+		throw filesystem_error(string_compose(_("Could not copy existing file %1 to %2"),
+					from_path.to_string(), to_path.to_string()));
+		remove (to_path);
+	}
 }
 
 string

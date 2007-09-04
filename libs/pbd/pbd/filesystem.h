@@ -106,6 +106,16 @@ bool create_directories(const path & p);
  */
 bool remove(const path & p);
 
+/**
+ * Attempt to copy the contents of the file from_path to a new file 
+ * at path to_path.
+ *
+ * @throw filesystem_error if from_path.empty() || to_path.empty() ||
+ * !exists(from_path) || !is_regular(from_path) || exists(to_path)
+ */
+void copy_file(const path & from_path, const path & to_path);
+
+
 string basename (const path& p);
 
 } // namespace sys
