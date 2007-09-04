@@ -57,6 +57,7 @@
 #include <ardour/profile.h>
 #include <ardour/session_directory.h>
 #include <ardour/session_route.h>
+#include <ardour/session_state_utils.h>
 #include <ardour/session_utils.h>
 #include <ardour/port.h>
 #include <ardour/audioengine.h>
@@ -805,73 +806,67 @@ ARDOUR_UI::session_menu (GdkEventButton *ev)
 void
 ARDOUR_UI::redisplay_recent_sessions ()
 {
-	vector<string *> *sessions;
-	vector<string *>::iterator i;
+	std::vector<sys::path> session_directories;
 	RecentSessionsSorter cmp;
 	
 	recent_session_display.set_model (Glib::RefPtr<TreeModel>(0));
 	recent_session_model->clear ();
 
-	RecentSessions rs;
+	ARDOUR::RecentSessions rs;
 	ARDOUR::read_recent_sessions (rs);
 
 	if (rs.empty()) {
 		recent_session_display.set_model (recent_session_model);
 		return;
 	}
-
-	/* sort them alphabetically */
+	//
+	// sort them alphabetically
 	sort (rs.begin(), rs.end(), cmp);
-	sessions = new vector<string*>;
-
-	for (RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
-		sessions->push_back (new string ((*i).second));
+	
+	for (ARDOUR::RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
+	        session_directories.push_back ((*i).second);
 	}
+	
+	for (vector<sys::path>::const_iterator i = session_directories.begin();
+			i != session_directories.end(); ++i)
+	{
+		std::vector<sys::path> state_file_paths;
+	    
+		// now get available states for this session
 
-	for (i = sessions->begin(); i != sessions->end(); ++i) {
+		get_state_files_in_directory (*i, state_file_paths);
 
-		vector<string*>* states;
-		vector<const gchar*> item;
-		string fullpath = *(*i);
-		
-		/* remove any trailing / */
-
-		if (fullpath[fullpath.length()-1] == '/') {
-			fullpath = fullpath.substr (0, fullpath.length()-1);
-		}
-
-		/* now get available states for this session */
-
-		if ((states = Session::possible_states (fullpath)) == 0) {
-			/* no state file? */
+		if (state_file_paths.empty()) {
+			// no state file?
 			continue;
 		}
+	  
+		std::vector<string> state_file_names(get_file_names_no_extension (state_file_paths));
 
-		TreeModel::Row row = *(recent_session_model->append());
+		Gtk::TreeModel::Row row = *(recent_session_model->append());
 
+		const string fullpath = (*i).to_string();
+		
 		row[recent_session_columns.visible_name] = Glib::path_get_basename (fullpath);
 		row[recent_session_columns.fullpath] = fullpath;
+		
+		if (state_file_names.size() > 1) {
 
-		if (states->size() > 1) {
+			// add the children
 
-			/* add the children */
-			
-			for (vector<string*>::iterator i2 = states->begin(); i2 != states->end(); ++i2) {
-				
-				TreeModel::Row child_row = *(recent_session_model->append (row.children()));
+			for (std::vector<std::string>::iterator i2 = state_file_names.begin();
+					i2 != state_file_names.end(); ++i2)
+			{
 
-				child_row[recent_session_columns.visible_name] = **i2;
+				Gtk::TreeModel::Row child_row = *(recent_session_model->append (row.children()));
+
+				child_row[recent_session_columns.visible_name] = *i2;
 				child_row[recent_session_columns.fullpath] = fullpath;
-
-				delete *i2;
 			}
 		}
-
-		delete states;
 	}
 
 	recent_session_display.set_model (recent_session_model);
-	delete sessions;
 }
 
 void
