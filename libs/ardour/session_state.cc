@@ -439,9 +439,11 @@ Session::create_session_file ()
 bool
 Session::create_session_file_from_template (const string& template_path)
 {
-	string out_path = _path + _name + statefile_suffix;
+	sys::path session_file_path(_session_dir->root_path());
 
-	if(!copy_file (template_path, out_path)) {
+	session_file_path /= _name + statefile_suffix;
+
+	if(!copy_file (template_path, session_file_path.to_string())) {
 		error << string_compose (_("Could not use session template %1 to create new session."), template_path) 
 			<< endmsg;
 		return false;
