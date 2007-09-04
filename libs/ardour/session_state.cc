@@ -558,8 +558,8 @@ int
 Session::save_state (string snapshot_name, bool pending)
 {
 	XMLTree tree;
-	string xml_path;
-	string bak_path;
+	sys::path xml_path(_session_dir->root_path());
+	sys::path bak_path(xml_path);
 
 	if (_state_of_the_state & CannotSave) {
 		return 1;
@@ -585,45 +585,39 @@ Session::save_state (string snapshot_name, bool pending)
 	if (!pending) {
 
 		/* proper save: use statefile_suffix (.ardour in English) */
-		xml_path = _path;
-		xml_path += snapshot_name;
-		xml_path += statefile_suffix;
+		
+		xml_path /= snapshot_name + statefile_suffix;
 
 		/* make a backup copy of the old file */
-		bak_path = xml_path;
-		bak_path += ".bak";
+		bak_path /= snapshot_name + statefile_suffix + backup_suffix;
 		
-		if (g_file_test (xml_path.c_str(), G_FILE_TEST_EXISTS)) {
-			copy_file (xml_path, bak_path);
+		if (sys::exists (xml_path)) {
+			copy_file (xml_path.to_string(), bak_path.to_string());
 		}
 
 	} else {
 
 		/* pending save: use pending_suffix (.pending in English) */
-		xml_path = _path;
-		xml_path += snapshot_name;
-		xml_path += pending_suffix;
-
+		xml_path /= snapshot_name + pending_suffix;
 	}
 
-	string tmp_path;
+	sys::path tmp_path(_session_dir->root_path());
 
-	tmp_path = _path;
-	tmp_path += snapshot_name;
-	tmp_path += ".tmp";
+	tmp_path /= snapshot_name + temp_suffix;
 
-	// cerr << "actually writing state to " << xml_path << endl;
+	// cerr << "actually writing state to " << xml_path.to_string() << endl;
 
-	if (!tree.write (tmp_path)) {
-		error << string_compose (_("state could not be saved to %1"), tmp_path) << endmsg;
-		unlink (tmp_path.c_str());
+	if (!tree.write (tmp_path.to_string())) {
+		error << string_compose (_("state could not be saved to %1"), tmp_path.to_string()) << endmsg;
+		sys::remove (tmp_path);
 		return -1;
 
 	} else {
 
-		if (rename (tmp_path.c_str(), xml_path.c_str()) != 0) {
-			error << string_compose (_("could not rename temporary session file %1 to %2"), tmp_path, xml_path) << endmsg;
-			unlink (tmp_path.c_str());
+		if (rename (tmp_path.to_string().c_str(), xml_path.to_string().c_str()) != 0) {
+			error << string_compose (_("could not rename temporary session file %1 to %2"),
+					tmp_path.to_string(), xml_path.to_string()) << endmsg;
+			sys::remove (tmp_path);
 			return -1;
 		}
 	}
