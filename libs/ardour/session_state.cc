@@ -754,9 +754,17 @@ Session::load_state (string snapshot_name)
 					xmlpath.to_string(), backup_path.to_string()) 
 		     << endmsg;
 
-		copy_file (xmlpath.to_string(), backup_path.to_string());
-
-		/* if it fails, don't worry. right? */
+		try
+		{
+			sys::copy_file (xmlpath, backup_path);
+		}
+		catch(sys::filesystem_error& ex)
+		{
+			error << string_compose (_("Unable to make backup of state file %1 (%2)"),
+					xmlpath.to_string(), ex.what())
+				<< endmsg;
+			return -1;
+		}
 	}
 
 	return 0;
