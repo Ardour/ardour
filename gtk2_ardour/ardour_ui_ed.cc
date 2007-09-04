@@ -23,7 +23,7 @@
    is to cut down on the nasty compile times for both these classes.
 */
 
-#include <pbd/pathscanner.h>
+#include <pbd/file_utils.h>
 #include <pbd/fpu.h>
 
 #include <glibmm/miscutils.h>
@@ -112,15 +112,11 @@ ARDOUR_UI::install_actions ()
 	
 #ifdef WITH_CMT
 
-	PathScanner scanner;
-	vector<string*>* results = scanner (getenv ("PATH"), "AniComp", false, false);
+	sys::path anicomp_file_path;
 
-	if (results) {
-		if (!results->empty()) {
-			act = ActionManager::register_action (main_actions, X_("aniConnect"), _("Connect"),  (mem_fun (*editor, &PublicEditor::connect_to_image_compositor)));
-			ActionManager::session_sensitive_actions.push_back (act);
-		}
-		delete results;
+	if (PBD::find_file_in_search_path (Glib::getenv("PATH"), "AniComp", anicomp_file_path)) {
+		act = ActionManager::register_action (main_actions, X_("aniConnect"), _("Connect"),  (mem_fun (*editor, &PublicEditor::connect_to_image_compositor)));
+		ActionManager::session_sensitive_actions.push_back (act);
 	}
 
 #endif
