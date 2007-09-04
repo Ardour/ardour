@@ -608,7 +608,17 @@ Session::save_state (string snapshot_name, bool pending)
 		bak_path /= snapshot_name + statefile_suffix + backup_suffix;
 		
 		if (sys::exists (xml_path)) {
-			copy_file (xml_path.to_string(), bak_path.to_string());
+			try
+			{
+				sys::copy_file (xml_path, bak_path);
+			}
+			catch(sys::filesystem_error& ex)
+			{
+				error << string_compose (_("Unable to make backup of state file %1 (%2)"),
+						xml_path.to_string(), ex.what())
+					<< endmsg;
+				return -1;
+			}
 		}
 
 	} else {
