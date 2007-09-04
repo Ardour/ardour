@@ -541,7 +541,7 @@ void
 Session::remove_state (string snapshot_name)
 {
 	if (snapshot_name == _current_snapshot_name || snapshot_name == _name) {
-		/* refuse to remove the current snapshot or the "main" one */
+		// refuse to remove the current snapshot or the "main" one
 		return;
 	}
 
@@ -551,12 +551,22 @@ Session::remove_state (string snapshot_name)
 
 	sys::path backup_path(xml_path.to_string() + backup_suffix);
 
-	/* make a backup copy of the state file */
+	// make a backup copy of the state file
 	if (sys::exists (xml_path)) {
-		copy_file (xml_path.to_string(), backup_path.to_string());
+		try
+		{
+			sys::copy_file (xml_path, backup_path);
+		}
+		catch(sys::filesystem_error& ex)
+		{
+			error << string_compose (_("Not removing state file %1 because a backup could not be made (%2)"),
+					xml_path.to_string(), ex.what())
+				<< endmsg;
+			return;
+		}
 	}
 
-	/* and delete it */
+	// and delete it
 	sys::remove (xml_path);
 }
 
