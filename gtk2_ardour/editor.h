@@ -983,7 +983,9 @@ class Editor : public PublicEditor
 	int add_sources (vector<Glib::ustring> paths, ARDOUR::SourceList& sources, nframes64_t& pos, Editing::ImportMode,
 			 int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>&);
 	int finish_bringing_in_audio (boost::shared_ptr<ARDOUR::AudioRegion> region, uint32_t, uint32_t,  nframes64_t& pos, Editing::ImportMode mode,
-				      boost::shared_ptr<ARDOUR::AudioTrack>& existing_track, int nth);
+				      boost::shared_ptr<ARDOUR::AudioTrack>& existing_track);
+
+	boost::shared_ptr<ARDOUR::AudioTrack> get_nth_selected_audio_track (int nth) const;
 
 	/* generic interthread progress window */
 	
