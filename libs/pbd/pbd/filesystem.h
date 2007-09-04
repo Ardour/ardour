@@ -86,6 +86,13 @@ public:
 
 	const string to_string() const { return m_path; }
 
+	/**
+	 * @returns the directory component of a path without any trailing
+	 * path separator or an empty string if the path has no directory
+	 * component(branch path).
+	 */
+	path branch_path () const;
+
 private:
 
 	string m_path;
