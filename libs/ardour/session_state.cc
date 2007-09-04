@@ -63,6 +63,7 @@
 #include <ardour/session.h>
 #include <ardour/session_directory.h>
 #include <ardour/session_utils.h>
+#include <ardour/session_state_utils.h>
 #include <ardour/buffer.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/midi_diskstream.h>
@@ -548,21 +549,10 @@ Session::remove_state (string snapshot_name)
 
 	xml_path /= snapshot_name + statefile_suffix;
 
-	sys::path backup_path(xml_path.to_string() + backup_suffix);
-
-	// make a backup copy of the state file
-	if (sys::exists (xml_path)) {
-		try
-		{
-			sys::copy_file (xml_path, backup_path);
-		}
-		catch(sys::filesystem_error& ex)
-		{
-			error << string_compose (_("Not removing state file %1 because a backup could not be made (%2)"),
-					xml_path.to_string(), ex.what())
-				<< endmsg;
-			return;
-		}
+	if (!create_backup_file (xml_path)) {
+		// don't remove it if a backup can't be made
+		// create_backup_file will log the error.
+		return;
 	}
 
 	// and delete it
