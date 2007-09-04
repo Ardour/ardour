@@ -87,6 +87,12 @@ public:
 	const string to_string() const { return m_path; }
 
 	/**
+	 * @return the last component of the path, if the path refers to
+	 * a file then it will be the entire filename including any extension.
+	 */
+	string leaf() const; 
+
+	/**
 	 * @returns the directory component of a path without any trailing
 	 * path separator or an empty string if the path has no directory
 	 * component(branch path).
