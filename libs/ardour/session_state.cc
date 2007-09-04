@@ -564,7 +564,6 @@ Session::save_state (string snapshot_name, bool pending)
 {
 	XMLTree tree;
 	sys::path xml_path(_session_dir->root_path());
-	sys::path bak_path(xml_path);
 
 	if (_state_of_the_state & CannotSave) {
 		return 1;
@@ -594,20 +593,10 @@ Session::save_state (string snapshot_name, bool pending)
 		xml_path /= snapshot_name + statefile_suffix;
 
 		/* make a backup copy of the old file */
-		bak_path /= snapshot_name + statefile_suffix + backup_suffix;
-		
-		if (sys::exists (xml_path)) {
-			try
-			{
-				sys::copy_file (xml_path, bak_path);
-			}
-			catch(sys::filesystem_error& ex)
-			{
-				error << string_compose (_("Unable to make backup of state file %1 (%2)"),
-						xml_path.to_string(), ex.what())
-					<< endmsg;
-				return -1;
-			}
+
+		if (sys::exists(xml_path) && !create_backup_file (xml_path)) {
+			// create_backup_file will log the error
+			return -1;
 		}
 
 	} else {
