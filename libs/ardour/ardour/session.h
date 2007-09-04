@@ -1547,7 +1547,6 @@ class Session : public PBD::StatefulDestructible
 	uint32_t _total_free_4k_blocks;
 	Glib::Mutex space_lock;
 	
-	string old_sound_dir (bool with_path = true) const;
 	string get_best_session_directory_for_new_source ();
 	void refresh_disk_space ();
 
