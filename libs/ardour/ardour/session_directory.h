@@ -37,7 +37,7 @@ public:
 	/**
 	 * @param session_path An absolute path to a session directory.
 	 */
-	SessionDirectory (const string& session_path);
+	SessionDirectory (const path& session_path);
 
 	/**
 	 * @return the absolute path to the root directory of the session

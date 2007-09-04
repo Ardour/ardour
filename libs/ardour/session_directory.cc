@@ -34,7 +34,7 @@ namespace ARDOUR {
 
 using namespace PBD::sys;
 
-SessionDirectory::SessionDirectory (const string& session_path)
+SessionDirectory::SessionDirectory (const path& session_path)
 	: m_root_path(session_path)
 {
 
