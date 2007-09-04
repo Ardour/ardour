@@ -494,11 +494,19 @@ Session::maybe_write_autosave()
 void
 Session::remove_pending_capture_state ()
 {
-	sys::path xml_path(_session_dir->root_path());
+	sys::path pending_state_file_path(_session_dir->root_path());
 
-	xml_path /= _current_snapshot_name + pending_suffix;
+	pending_state_file_path /= _current_snapshot_name + pending_suffix;
 
-	unlink (xml_path.to_string().c_str());
+	try
+	{
+		sys::remove (pending_state_file_path);
+	}
+	catch(sys::filesystem_error& ex)
+	{
+		error << string_compose(_("Could remove pending capture state at path \"%1\" (%2)"),
+				pending_state_file_path.to_string(), ex.what()) << endmsg;
+	}
 }
 
 /** Rename a state file.
