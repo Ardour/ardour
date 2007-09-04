@@ -1053,7 +1053,7 @@ Session::set_state (const XMLNode& node)
 		_name = prop->value ();
 	}
 
-	setup_raid_path(_path);
+	setup_raid_path(_session_dir->root_path().to_string());
 
 	if ((prop = node.property (X_("id-counter"))) != 0) {
 		uint64_t x;
