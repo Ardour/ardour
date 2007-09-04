@@ -494,13 +494,11 @@ Session::maybe_write_autosave()
 void
 Session::remove_pending_capture_state ()
 {
-	string xml_path;
+	sys::path xml_path(_session_dir->root_path());
 
-	xml_path = _path;
-	xml_path += _current_snapshot_name;
-	xml_path += pending_suffix;
+	xml_path /= _current_snapshot_name + pending_suffix;
 
-	unlink (xml_path.c_str());
+	unlink (xml_path.to_string().c_str());
 }
 
 /** Rename a state file.
