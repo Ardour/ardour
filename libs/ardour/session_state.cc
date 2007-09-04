@@ -728,6 +728,11 @@ Session::load_state (string snapshot_name)
 
 		backup_path /= snapshot_name + "-1" + statefile_suffix;
 
+		// only create a backup once
+		if (sys::exists (backup_path)) {
+			return 0;
+		}
+
 		info << string_compose (_("Copying old session file %1 to %2\nUse %2 with Ardour versions before 2.0 from now on"),
 					xmlpath.to_string(), backup_path.to_string()) 
 		     << endmsg;
