@@ -49,48 +49,6 @@ using namespace std;
 using namespace PBD;
 using Glib::ustring;
 
-void
-elapsed_time_to_str (char *buf, uint32_t seconds)
-
-{
-	uint32_t days;
-	uint32_t hours;
-	uint32_t minutes;
-	uint32_t s;
-
-	s = seconds;
-	days = s / (3600 * 24);
-	s -= (days * 3600 * 24);
-	hours = s / 3600;
-	s -= (hours * 3600);
-	minutes = s / 60;
-	s -= minutes * 60;
-	
-	if (days) {
-		snprintf (buf, sizeof (buf), "%" PRIu32 " day%s %" PRIu32 " hour%s", 
-			 days, 
-			 days > 1 ? "s" : "",
-			 hours,
-			 hours > 1 ? "s" : "");
-	} else if (hours) {
-		snprintf (buf, sizeof (buf), "%" PRIu32 " hour%s %" PRIu32 " minute%s", 
-			 hours, 
-			 hours > 1 ? "s" : "",
-			 minutes,
-			 minutes > 1 ? "s" : "");
-	} else if (minutes) {
-		snprintf (buf, sizeof (buf), "%" PRIu32 " minute%s", 
-			 minutes,
-			 minutes > 1 ? "s" : "");
-	} else if (s) {
-		snprintf (buf, sizeof (buf), "%" PRIu32 " second%s", 
-			 seconds,
-			 seconds > 1 ? "s" : "");
-	} else {
-		snprintf (buf, sizeof (buf), "no time");
-	}
-}
-
 ustring 
 legalize_for_path (ustring str)
 {

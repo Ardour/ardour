@@ -32,7 +32,6 @@
 
 class XMLNode;
 
-void elapsed_time_to_str (char *buf, uint32_t seconds);
 Glib::ustring legalize_for_path (Glib::ustring str);
 std::ostream& operator<< (std::ostream& o, const ARDOUR::BBT_Time& bbt);
 XMLNode* find_named_node (const XMLNode& node, std::string name);
