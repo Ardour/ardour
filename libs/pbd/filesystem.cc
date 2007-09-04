@@ -155,8 +155,11 @@ copy_file(const path & from_path, const path & to_path)
 string
 basename (const path & p)
 {
-	// I'm not sure if this works quite the same as boost::filesystem::basename
-	return Glib::path_get_basename (p.to_string ());
+	string base = Glib::path_get_basename (p.to_string());
+
+	string::size_type n = base.rfind ('.');
+
+	return base.substr (0, n);
 }
 
 } // namespace sys
