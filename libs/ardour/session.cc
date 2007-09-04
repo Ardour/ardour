@@ -3395,10 +3395,16 @@ Session::remove_empty_sounds ()
 			
 		if (AudioFileSource::is_empty (*this, audio_file_path.to_string())) {
 
-			unlink (audio_file_path.to_string().c_str());
-			
-			string peak_path = peak_path_from_audio_path (audio_file_path.to_string());
-			unlink (peak_path.c_str());
+			try
+			{
+				sys::remove (audio_file_path);
+				const string peak_path = peak_path_from_audio_path (audio_file_path.to_string());
+				sys::remove (peak_path);
+			}
+			catch (const sys::filesystem_error& err)
+			{
+				error << err.what() << endmsg; 
+			}
 		}
 	}
 }
