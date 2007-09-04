@@ -87,7 +87,7 @@ SessionDirectory::is_valid () const
 const path
 SessionDirectory::old_sound_path () const
 {
-	return path(m_root_path) /= old_sound_dir_name;
+	return m_root_path / old_sound_dir_name;
 }
 
 const path
@@ -96,50 +96,38 @@ SessionDirectory::sound_path () const
 	if(is_directory (old_sound_path ())) return old_sound_path();
 
 	// the new style sound directory
-	path l_sound_path(m_root_path);
-
-	l_sound_path /= interchange_dir_name;
-	l_sound_path /= m_root_path.leaf();
-	l_sound_path /= sound_dir_name;
-
-	return l_sound_path;
+	return m_root_path / interchange_dir_name / m_root_path.leaf() / sound_dir_name;
 }
 
 const path
 SessionDirectory::midi_path () const
 {
 	// the new style sound directory
-	path l_midi_path(m_root_path);
-
-	l_midi_path /= interchange_dir_name;
-	l_midi_path /= m_root_path.leaf();
-	l_midi_path /= midi_dir_name;
-
-	return l_midi_path;
+	return m_root_path / interchange_dir_name / m_root_path.leaf() / midi_dir_name;
 }
 
 const path
 SessionDirectory::peak_path () const
 {
-	return path(m_root_path) /= peak_dir_name;
+	return m_root_path / peak_dir_name;
 }
 
 const path
 SessionDirectory::dead_sound_path () const
 {
-	return path(m_root_path) /= dead_sound_dir_name;
+	return m_root_path / dead_sound_dir_name;
 }
 
 const path
 SessionDirectory::dead_midi_path () const
 {
-	return path(m_root_path) /= dead_midi_dir_name;
+	return m_root_path / dead_midi_dir_name;
 }
 
 const path
 SessionDirectory::export_path () const
 {
-	return path(m_root_path) /= export_dir_name;
+	return m_root_path / export_dir_name;
 }
 
 const vector<path>
