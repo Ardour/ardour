@@ -772,13 +772,16 @@ OptionEditor::raid_path_changed ()
 void
 OptionEditor::click_browse_clicked ()
 {
-	// SoundFileChooser sfdb (_("Choose Click"), session);
+	SoundFileChooser sfdb (*this, _("Choose Click"), session);
 	
-	//int result = sfdb.run ();
+	sfdb.show_all ();
+	sfdb.present ();
+
+	int result = sfdb.run ();
  
-	// if (result == Gtk::RESPONSE_OK) {
-	// click_chosen(sfdb.get_filename());
-// }
+	if (result == Gtk::RESPONSE_OK) {
+		click_chosen(sfdb.get_filename());
+	}
 }
 
 void
@@ -791,15 +794,16 @@ OptionEditor::click_chosen (const string & path)
 void
 OptionEditor::click_emphasis_browse_clicked ()
 {
-#if 0
-	SoundFileChooser sfdb (_("Choose Click Emphasis"), session);
+	SoundFileChooser sfdb (*this, _("Choose Click Emphasis"), session);
+
+	sfdb.show_all ();
+	sfdb.present ();
 
 	int result = sfdb.run ();
 
 	if (result == Gtk::RESPONSE_OK) {
 		click_emphasis_chosen (sfdb.get_filename());
 	}
-#endif
 }
 
 void

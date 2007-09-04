@@ -102,7 +102,7 @@ class MixerStrip;
 class StreamView;
 class AudioStreamView;
 class ControlPoint;
-class SoundFileBrowser;
+class SoundFileOmega;
 #ifdef FFT_ANALYSIS
 class AnalysisWindow;
 #endif
@@ -966,8 +966,8 @@ class Editor : public PublicEditor
 	void external_audio_dialog ();
 	bool check_multichannel_status (const std::vector<Glib::ustring>& paths);
 
-	SoundFileBrowser* sfbrowser;
-
+	SoundFileOmega* sfbrowser;
+	
 	void bring_in_external_audio (Editing::ImportMode mode,  nframes64_t& pos);
 	void do_import (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
 

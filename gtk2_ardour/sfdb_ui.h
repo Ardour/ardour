@@ -116,33 +116,19 @@ class SoundFileBrowser : public ArdourDialog
 	FoundTagColumns found_list_columns;
 	Glib::RefPtr<Gtk::ListStore> found_list;
 
-	Gtk::RadioButtonGroup rgroup1;
-	Gtk::RadioButtonGroup rgroup2;
-
   public:
-	SoundFileBrowser (Gtk::Window& parent, std::string title, ARDOUR::Session* _s, int selected_tracks);
+	SoundFileBrowser (Gtk::Window& parent, std::string title, ARDOUR::Session* _s);
 	virtual ~SoundFileBrowser ();
 	
 	virtual void set_session (ARDOUR::Session*);
 	std::vector<Glib::ustring> get_paths ();
 	
-	void reset (int selected_tracks);
-	
 	Gtk::FileChooserWidget chooser;
 	Gtk::TreeView found_list_view;
 
-	Gtk::ComboBoxText action_combo;
-	Gtk::ComboBoxText where_combo;
-	Gtk::ComboBoxText channel_combo;
-	
-	Gtk::RadioButton import;
-	Gtk::RadioButton embed;
-
-	Editing::ImportMode get_mode() const;
-	Editing::ImportPosition get_position() const;
-	Editing::ImportDisposition get_channel_disposition() const;
-
   protected:
+	bool resetting_ourselves;
+	
 	Gtk::FileFilter custom_filter;
 	Gtk::FileFilter matchall_filter;
 	SoundFileBox preview;
@@ -161,26 +147,8 @@ class SoundFileBrowser : public ArdourDialog
 	void chooser_file_activated ();
 	
 	bool on_custom (const Gtk::FileFilter::Info& filter_info);
-	void file_selection_changed ();
 
-	int selected_track_cnt;
-
-	typedef std::map<Glib::ustring,Editing::ImportDisposition> DispositionMap;
-	DispositionMap disposition_map;
-
-	bool resetting_ourselves;
-	
-	Gtk::HBox options;
-	Gtk::VBox block_two;
-	Gtk::VBox block_three;
-	Gtk::VBox block_four;
-
-	static bool check_multichannel_status (const std::vector<Glib::ustring>& paths, bool& same_size, bool& err);
-	static bool check_link_status (const ARDOUR::Session&, const std::vector<Glib::ustring>& paths);
-
-	bool reset_options ();
-	void reset_options_noret ();
-	bool bad_file_message ();
+	virtual bool reset_options() { return true; }
 };
 
 class SoundFileChooser : public SoundFileBrowser
@@ -193,6 +161,48 @@ class SoundFileChooser : public SoundFileBrowser
 
   private:
 	// SoundFileBrowser browser;
+};
+
+class SoundFileOmega : public SoundFileBrowser
+{
+  private:
+	Gtk::RadioButtonGroup rgroup1;
+	Gtk::RadioButtonGroup rgroup2;
+
+  public:
+	SoundFileOmega (Gtk::Window& parent, std::string title, ARDOUR::Session* _s, int selected_tracks);
+	
+	void reset (int selected_tracks);
+	
+	Gtk::ComboBoxText action_combo;
+	Gtk::ComboBoxText where_combo;
+	Gtk::ComboBoxText channel_combo;
+	
+	Gtk::RadioButton import;
+	Gtk::RadioButton embed;
+
+	Editing::ImportMode get_mode() const;
+	Editing::ImportPosition get_position() const;
+	Editing::ImportDisposition get_channel_disposition() const;
+
+  private:
+	uint32_t selected_track_cnt;
+
+	typedef std::map<Glib::ustring,Editing::ImportDisposition> DispositionMap;
+	DispositionMap disposition_map;
+
+	Gtk::HBox options;
+	Gtk::VBox block_two;
+	Gtk::VBox block_three;
+	Gtk::VBox block_four;
+
+	static bool check_multichannel_status (const std::vector<Glib::ustring>& paths, bool& same_size, bool& err);
+	static bool check_link_status (const ARDOUR::Session&, const std::vector<Glib::ustring>& paths);
+
+	void file_selection_changed ();
+	bool reset_options ();
+	void reset_options_noret ();
+	bool bad_file_message ();
 };
 
 #endif // __ardour_sfdb_ui_h__

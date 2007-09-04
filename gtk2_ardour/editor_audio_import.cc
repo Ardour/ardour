@@ -80,7 +80,7 @@ Editor::external_audio_dialog ()
 	}
 	
 	if (sfbrowser == 0) {
-		sfbrowser = new SoundFileBrowser (*this, _("Add existing audio"), session, selection->tracks.size());
+		sfbrowser = new SoundFileOmega (*this, _("Add existing audio"), session, selection->tracks.size());
 	} else {
 		sfbrowser->reset (selection->tracks.size());
 	}
