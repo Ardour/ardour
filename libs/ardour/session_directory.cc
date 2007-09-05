@@ -22,6 +22,7 @@
 
 #include <ardour/directory_names.h>
 #include <ardour/session_directory.h>
+#include <ardour/utils.h>
 
 #include "i18n.h"
 
@@ -86,19 +87,26 @@ SessionDirectory::old_sound_path () const
 }
 
 const path
+SessionDirectory::sources_root () const
+{
+	const string legalized_root(legalize_for_path(m_root_path.leaf()));
+
+	return m_root_path / interchange_dir_name / legalized_root;
+}
+
+const path
 SessionDirectory::sound_path () const
 {
 	if(is_directory (old_sound_path ())) return old_sound_path();
 
 	// the new style sound directory
-	return m_root_path / interchange_dir_name / m_root_path.leaf() / sound_dir_name;
+	return sources_root() / sound_dir_name;
 }
 
 const path
 SessionDirectory::midi_path () const
 {
-	// the new style sound directory
-	return m_root_path / interchange_dir_name / m_root_path.leaf() / midi_dir_name;
+	return sources_root() / midi_dir_name;
 }
 
 const path

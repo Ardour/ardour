@@ -116,6 +116,13 @@ protected:
 	const path old_sound_path () const;
 
 	/**
+	 * @return The path to the directory under which source directories
+	 * are created for different source types.
+	 * i.e root_path()/interchange/session_name
+	 */
+	const path sources_root() const;
+
+	/**
 	 * @return a vector containing the fullpath of all subdirectories.
 	 */
 	const vector<PBD::sys::path> sub_directories () const;
