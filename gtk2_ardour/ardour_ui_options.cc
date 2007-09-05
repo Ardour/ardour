@@ -459,6 +459,12 @@ ARDOUR_UI::toggle_StopRecordingOnXrun()
 }
 
 void
+ARDOUR_UI::toggle_sync_order_keys ()
+{
+	ActionManager::toggle_config_state ("options", "SyncEditorAndMixerTrackOrder", &Configuration::set_sync_all_route_ordering, &Configuration::get_sync_all_route_ordering);
+}
+
+void
 ARDOUR_UI::toggle_StopTransportAtEndOfSession()
 {
 	ActionManager::toggle_config_state ("options", "StopTransportAtEndOfSession", &Configuration::set_stop_at_session_end, &Configuration::get_stop_at_session_end);
@@ -1008,6 +1014,8 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		ActionManager::map_some_state ("options",  "PeriodicSafetyBackups", &Configuration::get_periodic_safety_backups);
 	} else if (PARAM_IS ("stop-recording-on-xrun")) {
 		ActionManager::map_some_state ("options",  "StopRecordingOnXrun", &Configuration::get_stop_recording_on_xrun);
+	} else if (PARAM_IS ("sync-all-route-ordering")) {
+		ActionManager::map_some_state ("options",  "SyncEditorAndMixerTrackOrder", &Configuration::get_sync_all_route_ordering);
 	} else if (PARAM_IS ("stop-at-session-end")) {
 		ActionManager::map_some_state ("options",  "StopTransportAtEndOfSession", &Configuration::get_stop_at_session_end);
 	} else if (PARAM_IS ("monitoring-model")) {

@@ -48,7 +48,8 @@ gint AudioEngine::m_meter_exit;
 static void 
 ardour_jack_error (const char* msg) 
 {
-	error << "JACK: " << msg << endmsg;
+	// throw JACK errors away - they cause visual clutter
+	// error << "JACK: " << msg << endmsg;
 }
 
 AudioEngine::AudioEngine (string client_name) 

@@ -48,6 +48,7 @@ AxisView::AxisView (ARDOUR::Session& sess) : _session(sess)
 {
 	_selected = false;
 	_marked_for_display = true;
+	_old_order_key = 0;
 }
 
 AxisView::~AxisView()

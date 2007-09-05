@@ -451,7 +451,6 @@ AudioTimeAxisView::update_pans ()
 void
 AudioTimeAxisView::toggle_gain_track ()
 {
-
 	bool showit = gain_automation_item->get_active();
 
 	if (showit != gain_track->marked_for_display()) {

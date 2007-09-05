@@ -148,6 +148,7 @@ class Mixer_UI : public Gtk::Window
 	
 	void track_list_change (const Gtk::TreeModel::Path&,const Gtk::TreeModel::iterator&);
 	void track_list_delete (const Gtk::TreeModel::Path&);
+	void track_list_reorder (const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter, int* new_order);
 
 	void initial_track_display ();
 	void show_track_list_menu ();
@@ -233,6 +234,10 @@ class Mixer_UI : public Gtk::Window
 	RouteRedirectSelection _selection;
 
 	Width _strip_width;
+
+	void sync_order_keys ();
+	bool ignore_route_reorder;
+	bool ignore_sync;
 
 	static const int32_t default_width = 478;
 	static const int32_t default_height = 765;

@@ -4052,3 +4052,19 @@ Session::compute_initial_length ()
 	return _engine.frame_rate() * 60 * 5;
 }
 
+void
+Session::sync_order_keys ()
+{
+	if (!Config->get_sync_all_route_ordering()) {
+		/* leave order keys as they are */
+		return;
+	}
+
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		(*i)->sync_order_keys ();
+	}
+
+	Route::SyncOrderKeys (); // EMIT SIGNAL
+}

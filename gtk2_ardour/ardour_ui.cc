@@ -740,8 +740,7 @@ If you still wish to quit, please use the\n\n\
 		session->set_deletion_in_progress ();
 	}
 	engine->stop (true);
-	Config->save_state();
-	ARDOUR_UI::config()->save_state();
+	save_ardour_state ();
 	quit ();
 }
 
@@ -3010,3 +3009,4 @@ void
 ARDOUR_UI::audioengine_setup ()
 {
 }
+

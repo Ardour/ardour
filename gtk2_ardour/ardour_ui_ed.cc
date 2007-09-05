@@ -408,6 +408,7 @@ ARDOUR_UI::install_actions ()
 	act->set_sensitive (false);
 #endif
 
+	ActionManager::register_toggle_action (option_actions, X_("SyncEditorAndMixerTrackOrder"), _("Sync Editor and Mixer track order"), mem_fun (*this, &ARDOUR_UI::toggle_sync_order_keys));
 	ActionManager::register_toggle_action (option_actions, X_("StopPluginsWithTransport"), _("Stop plugins with transport"), mem_fun (*this, &ARDOUR_UI::toggle_StopPluginsWithTransport));
 	ActionManager::register_toggle_action (option_actions, X_("VerifyRemoveLastCapture"), _("Verify remove last capture"), mem_fun (*this, &ARDOUR_UI::toggle_VerifyRemoveLastCapture));
 	ActionManager::register_toggle_action (option_actions, X_("PeriodicSafetyBackups"), _("Make periodic safety backups"), mem_fun (*this, &ARDOUR_UI::toggle_PeriodicSafetyBackups));

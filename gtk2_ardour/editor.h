@@ -1494,10 +1494,12 @@ class Editor : public PublicEditor
 		    add (text);
 		    add (visible);
 		    add (tv);
+		    add (route);
 	    }
 	    Gtk::TreeModelColumn<Glib::ustring>  text;
 	    Gtk::TreeModelColumn<bool>           visible;
 	    Gtk::TreeModelColumn<TimeAxisView*>  tv;
+	    Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> >  route;
 	};
 
 	RouteDisplayModelColumns         route_display_columns;
@@ -1508,14 +1510,18 @@ class Editor : public PublicEditor
 	Gtk::ScrolledWindow                   route_list_scroller;
 	Gtk::Menu*                            route_list_menu;
 
+	void sync_order_keys ();
+	bool ignore_route_order_sync;
+
 	bool route_list_display_button_press (GdkEventButton*);
 	bool route_list_selection_filter (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool yn);
 
 	void route_list_change (const Gtk::TreeModel::Path&,const Gtk::TreeModel::iterator&);
 	void route_list_delete (const Gtk::TreeModel::Path&);
+	void track_list_reorder (const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter, int* new_order);
+
 	void initial_route_list_display ();
 	void redisplay_route_list();
-	void route_list_reordered (const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter, int* what);
 	bool ignore_route_list_reorder;
 	bool no_route_list_redisplay;
 

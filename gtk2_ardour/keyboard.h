@@ -105,6 +105,7 @@ class Keyboard : public sigc::trackable, Stateful
 	static guint     delete_but;
 	static guint     delete_mod;
 	static guint     snap_mod;
+	static Gtk::Window* current_window;
 
 	static gint _snooper (GtkWidget*, GdkEventKey*, gpointer);
 	gint snooper (GtkWidget*, GdkEventKey*);

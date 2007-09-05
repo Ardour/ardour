@@ -45,7 +45,7 @@ class IOSelector;
 class GainMeter;
 class PannerUI;
 
-class OptionEditor : public Gtk::Dialog
+class OptionEditor : public ArdourDialog
 {
   public:
 	OptionEditor (ARDOUR_UI&, PublicEditor&, Mixer_UI&);
@@ -66,6 +66,7 @@ class OptionEditor : public Gtk::Dialog
 
 	gint wm_close (GdkEventAny *);
 	bool focus_out_event_handler (GdkEventFocus*, void (OptionEditor::*pmf)());
+	void parameter_changed (const char* name);
 
 	/* paths */
 
@@ -96,11 +97,13 @@ class OptionEditor : public Gtk::Dialog
 	Gtk::ComboBoxText slave_type_combo;
 	AudioClock smpte_offset_clock;
 	Gtk::CheckButton smpte_offset_negative_button;
+	Gtk::CheckButton synced_timecode_button;
 
 	void setup_sync_options ();
 
 	void smpte_offset_chosen ();
 	void smpte_offset_negative_clicked ();
+	void synced_timecode_toggled ();
 
 	/* MIDI */
 

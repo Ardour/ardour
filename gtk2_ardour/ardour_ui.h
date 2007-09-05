@@ -688,6 +688,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void set_remote_model (ARDOUR::RemoteModel);
 	void set_denormal_model (ARDOUR::DenormalModel);
 
+	void toggle_sync_order_keys ();
 	void toggle_StopPluginsWithTransport();
 	void toggle_DoNotRunPluginsWhileRecording();
 	void toggle_VerifyRemoveLastCapture();

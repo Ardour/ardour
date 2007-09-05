@@ -315,6 +315,7 @@ Editor::Editor ()
 	_dragging_hscrollbar = false;
 	_scrubbing = false;
 	sfbrowser = 0;
+	ignore_route_order_sync = false;
 
 	location_marker_color = ARDOUR_UI::config()->canvasvar_LocationMarker.get();
 	location_range_color = ARDOUR_UI::config()->canvasvar_LocationRange.get();
@@ -480,6 +481,7 @@ Editor::Editor ()
 	
 	route_display_model->signal_row_deleted().connect (mem_fun (*this, &Editor::route_list_delete));
 	route_display_model->signal_row_changed().connect (mem_fun (*this, &Editor::route_list_change));
+	route_display_model->signal_rows_reordered().connect (mem_fun (*this, &Editor::track_list_reorder));
 
 	route_list_display.signal_button_press_event().connect (mem_fun (*this, &Editor::route_list_display_button_press), false);
 
@@ -739,6 +741,7 @@ Editor::Editor ()
 	ControlProtocol::ScrollTimeline.connect (mem_fun (*this, &Editor::control_scroll));
 
 	Config->ParameterChanged.connect (mem_fun (*this, &Editor::parameter_changed));
+	Route::SyncOrderKeys.connect (mem_fun (*this, &Editor::sync_order_keys));
 
 	constructed = true;
 	instant_save ();

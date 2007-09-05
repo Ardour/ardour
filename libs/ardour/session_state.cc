@@ -3290,6 +3290,8 @@ Session::config_changed (const char* parameter_name)
 		setup_fpu ();
 	} else if (PARAM_IS ("history-depth")) {
 		set_history_depth (Config->get_history_depth());
+	} else if (PARAM_IS ("sync-all-route-ordering")) {
+		sync_order_keys ();
 	}
 
 	set_dirty ();

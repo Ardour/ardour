@@ -42,6 +42,7 @@
 #include "editing.h"
 #include "option_editor.h"
 #include "midi_port_dialog.h"
+#include "gui_thread.h"
 
 #include "i18n.h"
 
@@ -55,7 +56,7 @@ using namespace std;
 static vector<string> positional_sync_strings;
 
 OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
-	: Dialog ("options editor"),
+	: ArdourDialog ("options editor", false),
 	  ui (uip),
 	  editor (ed),
 	  mixer (mixui),
@@ -74,6 +75,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 
 	  smpte_offset_clock (X_("smpteoffset"), false, X_("SMPTEOffsetClock"), true, true),
 	  smpte_offset_negative_button (_("SMPTE offset is negative")),
+	  synced_timecode_button (_("Timecode source is sample-clock synced")),
 
 	  /* MIDI */
 
@@ -145,6 +147,9 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 
 	set_session (0);
 	show_all_children();
+
+	Config->map_parameters (mem_fun (*this, &OptionEditor::parameter_changed));
+	Config->ParameterChanged.connect (mem_fun (*this, &OptionEditor::parameter_changed));
 }
 
 void
@@ -326,8 +331,10 @@ OptionEditor::setup_sync_options ()
 	hbox->pack_start (smpte_offset_negative_button, false, false);
 
 	sync_packer.pack_start (*hbox, false, false);
+	sync_packer.pack_start (synced_timecode_button, false, false);
 
 	smpte_offset_negative_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::smpte_offset_negative_clicked));
+	synced_timecode_button.signal_toggled().connect (mem_fun(*this, &OptionEditor::synced_timecode_toggled));
 }
 
 void
@@ -335,6 +342,17 @@ OptionEditor::smpte_offset_negative_clicked ()
 {
 	if (session) {
 		session->set_smpte_offset_negative (smpte_offset_negative_button.get_active());
+	}
+}
+
+void
+OptionEditor::synced_timecode_toggled ()
+{
+	bool x;
+
+	if ((x = synced_timecode_button.get_active()) != Config->get_timecode_source_is_synced()) {
+		Config->set_timecode_source_is_synced (x);
+		Config->save_state();
 	}
 }
 
@@ -1161,3 +1179,14 @@ OptionEditor::fixup_combo_size (Gtk::ComboBoxText& combo, vector<string>& string
 	set_size_request_to_display_given_text (combo, maxstring.c_str(), 10 + FUDGE, 10);
 }
 
+void
+OptionEditor::parameter_changed (const char* parameter_name)
+{
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &OptionEditor::parameter_changed), parameter_name));
+
+#define PARAM_IS(x) (!strcmp (parameter_name, (x)))
+	
+	if (PARAM_IS ("timecode-source-is-synced")) {
+		synced_timecode_button.set_active (Config->get_timecode_source_is_synced());
+	}
+}

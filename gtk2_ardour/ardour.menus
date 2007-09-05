@@ -208,6 +208,7 @@
                <menuitem action='ToggleMeasureVisibility'/>
 	       <separator/>
 	       <menuitem action='show-editor-mixer'/>
+	       <menuitem action='SyncEditorAndMixerTrackOrder'/>
          </menu>
         <menu name='JACK' action='JACK'>
                <menuitem action='JACKDisconnect'/>
