@@ -274,7 +274,7 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 	}
 	Glib::RefPtr<Gdk::Window> win (meter_metric_area.get_window());
 	Glib::RefPtr<Gdk::GC> fg_gc (meter_style->get_fg_gc (Gtk::STATE_NORMAL));
-	Glib::RefPtr<Gdk::GC> bg_gc (meter_style->get_fg_gc (Gtk::STATE_NORMAL));
+	Glib::RefPtr<Gdk::GC> bg_gc (meter_style->get_bg_gc (Gtk::STATE_NORMAL));
 	GdkRectangle base_rect;
 	GdkRectangle draw_rect;
 	gint width, height;
@@ -296,7 +296,7 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 	}
 
 	gdk_rectangle_intersect (&ev->area, &base_rect, &draw_rect);
-	win->draw_rectangle (bg_gc, true, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
+	win->draw_rectangle (bg_gc, false, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
 	win->draw_drawable (fg_gc, pixmap, draw_rect.x, draw_rect.y, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
 	
 	style_changed = false;
