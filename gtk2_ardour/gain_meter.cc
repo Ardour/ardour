@@ -330,7 +330,7 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 	}
 
 	gdk_rectangle_intersect (&ev->area, &base_rect, &draw_rect);
-	win->draw_rectangle (bg_gc, true, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
+	win->draw_rectangle (bg_gc, false, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
 	win->draw_drawable (fg_gc, pixmap, draw_rect.x, draw_rect.y, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
 	
 	style_changed = false;
