@@ -211,7 +211,7 @@ Editor::sync_order_keys ()
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		TimeAxisView* tv = (*ri)[route_display_columns.tv];
 		boost::shared_ptr<Route> route = (*ri)[route_display_columns.route];
-		neworder[route->order_key (X_("signal"))] = tv->old_order_key ();
+		neworder[route->order_key (X_("editor"))] = tv->old_order_key ();
 	}
 
 	ignore_route_list_reorder = true;

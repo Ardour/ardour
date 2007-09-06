@@ -335,6 +335,17 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 	}
 }
 
+const char*
+Mixer_UI::get_order_key() 
+{
+	if (Config->get_sync_all_route_ordering()) {
+		return X_("editor");
+	} else {
+		return X_("signal");
+	}
+}
+
+
 void
 Mixer_UI::sync_order_keys ()
 {
@@ -353,7 +364,7 @@ Mixer_UI::sync_order_keys ()
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
 		MixerStrip* strip = (*ri)[track_columns.strip];
-		neworder[route->order_key (X_("signal"))] = strip->old_order_key ();
+		neworder[route->order_key (get_order_key())] = strip->old_order_key ();
 	}
 
 	ignore_route_reorder = true;
@@ -653,7 +664,7 @@ Mixer_UI::redisplay_track_list ()
 			strip->set_marked_for_display (true);
 
 			if (!ignore_route_reorder) {
-				strip->route()->set_order_key (N_("signal"), order);
+				strip->route()->set_order_key (get_order_key(), order);
 			} 
 
 			strip->set_old_order_key (order);
@@ -700,7 +711,7 @@ Mixer_UI::redisplay_track_list ()
 struct SignalOrderRouteSorter {
     bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
 	    /* use of ">" forces the correct sort order */
-	    return a->order_key ("signal") < b->order_key ("signal");
+	    return a->order_key (Mixer_UI::get_order_key()) < b->order_key (Mixer_UI::get_order_key());
     }
 };
 
