@@ -124,7 +124,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	RedirectBox pre_redirect_box;
 	RedirectBox post_redirect_box;
 	GainMeter   gpm;
-       	PannerUI    panners;
+	PannerUI    panners;
 	
 	Gtk::Table button_table;
 	Gtk::Table middle_button_table;

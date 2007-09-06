@@ -113,7 +113,7 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	peak_display.set_label (_("-inf"));
 	peak_display.unset_flags (Gtk::CAN_FOCUS);
 
-	meter_metric_area.set_name ("MeterMetricsStrip");
+	meter_metric_area.set_name ("AudioTrackMetrics");
 	set_size_request_to_display_given_text (meter_metric_area, "-50", 0, 0);
 
 	meter_packer.set_spacing (2);
@@ -226,6 +226,9 @@ GainMeter::set_width (Width w)
 Glib::RefPtr<Gdk::Pixmap>
 GainMeter::render_metrics (Gtk::Widget& w)
 {
+	//cerr << "name: " << w.get_name();//DEBUG
+	//cerr << " bg_red = " << w.get_style()->get_bg(Gtk::STATE_NORMAL).get_red();//DEBUG
+	//cerr << " fg_red = " << w.get_style()->get_fg(Gtk::STATE_NORMAL).get_red();//DEBUG
 	Glib::RefPtr<Gdk::Window> win (w.get_window());
 	Glib::RefPtr<Gdk::GC> fg_gc (w.get_style()->get_fg_gc (Gtk::STATE_NORMAL));
 	Glib::RefPtr<Gdk::GC> bg_gc (w.get_style()->get_bg_gc (Gtk::STATE_NORMAL));
@@ -268,13 +271,15 @@ gint
 GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 {
 	static Glib::RefPtr<Gtk::Style> meter_style;
-
+	//cerr << "GainMeter::meter_metrics_expose() called on " << meter_metric_area.get_name();//DEBUG
+	//cerr << " style_changed = " << style_changed;//DEBUG
 	if (style_changed) {
 		meter_style = meter_metric_area.get_style();
+	//	cerr << " get_style() called ";//DEBUG
 	}
 	Glib::RefPtr<Gdk::Window> win (meter_metric_area.get_window());
-	Glib::RefPtr<Gdk::GC> fg_gc (meter_style->get_fg_gc (Gtk::STATE_NORMAL));
-	Glib::RefPtr<Gdk::GC> bg_gc (meter_style->get_bg_gc (Gtk::STATE_NORMAL));
+	//Glib::RefPtr<Gdk::GC> fg_gc (meter_style->get_fg_gc (Gtk::STATE_NORMAL));
+	Glib::RefPtr<Gdk::GC> bg_gc (meter_style->get_bg_gc (Gtk::STATE_INSENSITIVE));
 	GdkRectangle base_rect;
 	GdkRectangle draw_rect;
 	gint width, height;
@@ -293,12 +298,13 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 		pixmap = render_metrics (meter_metric_area);
 	} else {
 		pixmap = i->second;
+	//	cerr << " re-used " << i->first;//DEBUG
 	}
 
 	gdk_rectangle_intersect (&ev->area, &base_rect, &draw_rect);
-	win->draw_rectangle (bg_gc, false, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
-	win->draw_drawable (fg_gc, pixmap, draw_rect.x, draw_rect.y, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
-	
+	//win->draw_rectangle (bg_gc, false, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
+	win->draw_drawable (bg_gc, pixmap, draw_rect.x, draw_rect.y, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
+	//cerr << endl;//DEBUG
 	style_changed = false;
 	return true;
 }
@@ -640,7 +646,8 @@ GainMeter::gain_changed (void *src)
 void
 GainMeter::set_meter_strip_name (const char * name)
 {
-	// meter_metric_area.set_name (name);
+	meter_metric_area.set_name (name);
+	style_changed = true;
 }
 
 void

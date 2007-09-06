@@ -737,6 +737,38 @@ style "midi_track_base" = "default_base"
   bg[SELECTED] = { 0.70, 0.70, 0.80 } 
 }
 
+style "track_controls_inactive" 
+{
+	bg[NORMAL] =      { 0.60, 0.60, 0.66 }
+	bg[ACTIVE] =      { 0.60, 0.60, 0.66 }
+	bg[INSENSITIVE] = { 0.60, 0.60, 0.66 }
+	bg[SELECTED] =    { 0.60, 0.60, 0.66 }
+	bg[PRELIGHT] =    { 0.60, 0.60, 0.66 }
+
+	#font_name = "sans 18"
+	fg[NORMAL] = { 0.7, 0.8, 0.2 }	
+}
+
+style "audio_track_metrics" = "audio_track_base"
+{
+	font_name = "%FONT_TINY%"
+}
+
+style "audio_bus_metrics" = "audio_bus_base"
+{
+	font_name = "%FONT_TINY%"
+}
+
+style "audio_track_metrics_inactive" = "track_controls_inactive"
+{
+	font_name = "%FONT_TINY%"
+}
+
+style "audio_bus_metrics_inactive" = "track_controls_inactive"
+{
+	font_name = "%FONT_TINY%"
+}
+
 style "track_name_display"
 {
 	font_name = "%FONT_NORMAL%"
@@ -1102,11 +1134,6 @@ style "tearoff_arrow" = "medium_bold_entry"
 	bg[PRELIGHT] = { 0.30, 0.30, 0.30 }
 }
 
-style "meter_metrics_strip" = "audio_track_base"
-{
-	font_name = "%FONT_TINY%"
-}
-
 style "location_row_button" = "default_buttons_menus"
 {
 	font_name = "%FONT_SMALL%"
@@ -1324,11 +1351,24 @@ widget "*BBTRuler" style:highest "editor_time_ruler"
 widget "*FramesRuler" style:highest "editor_time_ruler"
 widget "*MinSecRuler" style:highest "editor_time_ruler"
 widget "*BaseFrame" style:highest "base_frame"
-widget "*AudioTrackStripBase*" style:highest "audio_track_base"
+
+widget "*AudioTrackStripBase" style:highest "audio_track_base"
+widget "*AudioBusStripBase" style:highest "audio_bus_base"
+widget "*MidiTrackStripBase" style:highest "midi_track_base"
+widget "*AudioTrackStripBaseInactive" style:highest "track_controls_inactive"
+widget "*AudioBusStripBaseInactive" style:highest "track_controls_inactive"
+widget "*MidiTrackStripBaseInactive" style:highest "track_controls_inactive"
+widget "*FaderMetricsStrip" style:highest "audio_track_metrics"
+widget "*AudioTrackMetrics" style:highest "audio_track_metrics"
+widget "*AudioBusMetrics" style:highest "audio_bus_metrics"
+widget "*AudioTrackMetricsInactive" style:highest "audio_track_metrics_inactive"
+widget "*AudioBusMetricsInactive" style:highest "audio_bus_metrics_inactive"
+
 widget "*TimeAxisViewControlsBaseUnselected" style:highest "audio_track_base"
 widget "*AudioTrackControlsBaseUnselected" style:highest "audio_track_base"
+widget "*MidiTrackControlsBaseUnselected" style:highest "midi_track_base"
 widget "*AudioTrackFader" style:highest "gain_fader"
-widget "*AudioBusStripBase" style:highest "audio_bus_base"
+
 widget "*BusControlsBaseUnselected" style:highest "audio_bus_base"
 widget "*AudioBusFader" style:highest "gain_fader"
 widget "*TrackSeparator" style:highest "track_separator"
@@ -1360,9 +1400,8 @@ widget "*AutomationTrackName" style:highest "automation_track_name"
 widget "*AudioTrackControlsBaseInactiveSelected" style:highest "track_controls_inactive"
 widget "*BusControlsBaseInactiveSelected" style:highest "track_controls_inactive"
 widget "*AutomationTrackControlsBaseInactiveSelected" style:highest "track_controls_inactive"
-widget "*AudioTrackStripBaseInactive" style:highest "track_controls_inactive"
-widget "*AudioBusStripBaseInactive" style:highest "track_controls_inactive"
 widget "*AudioTrackControlsBaseSelected" style:highest "edit_controls_base_selected"
+widget "*MidiTrackControlsBaseSelected" style:highest "edit_controls_base_selected"
 widget "*BusControlsBaseSelected" style:highest "edit_controls_base_selected"
 widget "*AutomationTrackControlsBase" style:highest "automation_track_controls_base"
 widget "*AutomationTrackControlsBaseSelected" style:highest "edit_controls_base_selected"
@@ -1457,8 +1496,7 @@ widget "*PluginSaveButton" style:highest "small_button"
 widget "*PluginSaveButton*" style:highest "small_button"
 widget "*PluginLoadButton" style:highest "small_button"
 widget "*PluginLoadButton*" style:highest "small_button"
-widget "*FaderMetricsStrip" style:highest "meter_metrics_strip"
-widget "*MeterMetricsStrip" style:highest "meter_metrics_strip"
+
 widget "*MetricDialogFrame" style:highest "base_frame"
 widget "*MetricEntry" style:highest "medium_bold_entry"
 widget "*MetricButton" style:highest "default_buttons_menus"

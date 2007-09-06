@@ -1167,19 +1167,19 @@ MixerStrip::route_active_changed ()
 	if (is_audio_track()) {
 		if (_route->active()) {
 			set_name ("AudioTrackStripBase");
-			gpm.set_meter_strip_name ("AudioTrackStripBase");
+			gpm.set_meter_strip_name ("AudioTrackMetrics");
 		} else {
 			set_name ("AudioTrackStripBaseInactive");
-			gpm.set_meter_strip_name ("AudioTrackStripBaseInactive");
+			gpm.set_meter_strip_name ("AudioTrackMetricsInactive");
 		}
 		gpm.set_fader_name ("AudioTrackFader");
 	} else { // FIXME: assumed audio bus
 		if (_route->active()) {
 			set_name ("AudioBusStripBase");
-			gpm.set_meter_strip_name ("AudioBusStripBase");
+			gpm.set_meter_strip_name ("AudioBusMetrics");
 		} else {
 			set_name ("AudioBusStripBaseInactive");
-			gpm.set_meter_strip_name ("AudioBusStripBaseInactive");
+			gpm.set_meter_strip_name ("AudioBusMetricsInactive");
 		}
 		gpm.set_fader_name ("AudioBusFader");
 	}
