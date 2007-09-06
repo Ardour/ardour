@@ -61,7 +61,6 @@ AutomationStreamView::AutomationStreamView (AutomationTimeAxisView& tv)
 {
 	//canvas_rect->property_fill_color_rgba() = stream_base_color;
 	canvas_rect->property_outline_color_rgba() = RGBA_BLACK;
-	canvas_rect->lower(2);
 
 	use_rec_regions = tv.editor.show_waveforms_recording ();
 }
@@ -124,7 +123,6 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 		//region_view->midi_region()->midi_source(0)->load_model();
 	}
 
-	/* display events */
 	display_region(region_view);
 
 	/* catch regionview going away */
@@ -139,7 +137,6 @@ void
 AutomationStreamView::display_region(AutomationRegionView* region_view)
 {
 	region_view->line().reset();
-	region_view->raise();
 }
 
 void
