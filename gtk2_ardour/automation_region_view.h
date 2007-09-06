@@ -47,13 +47,24 @@ public:
 
 	~AutomationRegionView() {}
 	
+	void init (Gdk::Color& basic_color, bool wfd);
+	
+	inline AutomationTimeAxisView* automation_view() const
+		{ return dynamic_cast<AutomationTimeAxisView*>(&trackview); }
+	
+	AutomationLine& line() { return _line; }
+	
 	// We are a ghost.  Meta ghosts?  Crazy talk.
 	virtual GhostRegion* add_ghost(AutomationTimeAxisView&) { return NULL; }
+	
+	void reset_width_dependent_items(double pixel_width);
 
 protected:
+	bool set_position(nframes_t pos, void* src, double* ignored);
 	void set_y_position_and_height(double y, double h);
 	void region_resized(ARDOUR::Change what_changed);
 	bool canvas_event(GdkEvent* ev);
+	void add_automation_event (GdkEvent* event, nframes_t when, double y);
 	void entered();
 	void exited();
 

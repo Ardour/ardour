@@ -42,6 +42,7 @@ using std::string;
 namespace ARDOUR {
 	class Session;
 	class Route;
+	class AutomationControl;
 }
 
 class PublicEditor;
@@ -52,6 +53,8 @@ class AutomationLine;
 class GhostRegion;
 class Selection;
 class Selectable;
+class AutomationStreamView;
+class AutomationController;
 
 
 class AutomationTimeAxisView : public TimeAxisView {
@@ -62,6 +65,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 				boost::shared_ptr<ARDOUR::AutomationControl>,
 				PublicEditor&,
 				TimeAxisView& parent,
+				bool show_regions,
 				ArdourCanvas::Canvas& canvas,
 				const string & name, /* translatable */
 				const string & plug_name = "");
@@ -101,6 +105,9 @@ class AutomationTimeAxisView : public TimeAxisView {
 	
 	static const string state_node_name;
 	XMLNode* get_state_node();
+	
+	boost::shared_ptr<ARDOUR::AutomationControl> control()    { return _control; }
+	boost::shared_ptr<AutomationController>      controller() { return _controller; }
 
   protected:
 	boost::shared_ptr<ARDOUR::Route> _route; ///< Parent route
@@ -111,6 +118,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	
 	ArdourCanvas::SimpleRect* _base_rect;
 	boost::shared_ptr<AutomationLine> _line;
+	AutomationStreamView*             _view;
 	
 	string _name;
 	bool    in_destructor;

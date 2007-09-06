@@ -31,6 +31,7 @@
 #include <ardour/gain.h>
 #include <ardour/logcurve.h>
 #include <ardour/export.h>
+#include <ardour/midi_source.h>
 
 class XMLNode;
 
@@ -68,6 +69,17 @@ class MidiRegion : public Region
 	int separate_by_channel (ARDOUR::Session&, vector<MidiRegion*>&) const;
 
 	UndoAction get_memento() const;
+
+	// Act as a proxy for MidiModel automation stuff (for CC)
+	// Yep, this is pretty ugly...
+	Controls&       controls()       { return midi_source()->model()->controls(); }
+	const Controls& controls() const { return midi_source()->model()->controls(); }
+	
+	boost::shared_ptr<AutomationControl> control(Parameter id, bool create_if_missing=false)
+			{ return midi_source()->model()->control(id, create_if_missing); }
+
+	boost::shared_ptr<const AutomationControl> control(Parameter id) const
+			{ return midi_source()->model()->control(id); }
 
   private:
 	friend class RegionFactory;

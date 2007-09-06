@@ -70,8 +70,8 @@ AudioRegion::init ()
 }
 
 /* constructor for use by derived types only */
-AudioRegion::AudioRegion (nframes_t start, nframes_t length, string name)
-	: Region (start, length, name, DataType::AUDIO)
+AudioRegion::AudioRegion (Session& s, nframes_t start, nframes_t length, string name)
+	: Region (s, start, length, name, DataType::AUDIO)
 	, _fade_in (new AutomationList(Parameter(FadeInAutomation), 0.0, 2.0, 1.0))
 	, _fade_out (new AutomationList(Parameter(FadeOutAutomation), 0.0, 2.0, 1.0))
 	, _envelope (new AutomationList(Parameter(EnvelopeAutomation), 0.0, 2.0, 1.0))

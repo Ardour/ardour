@@ -310,6 +310,7 @@ AudioTimeAxisView::create_automation_child (Parameter param, bool show)
 				_route, _route, c,
 				editor,
 				*this,
+				false,
 				parent_canvas,
 				_route->describe_parameter(param)));
 
@@ -343,6 +344,7 @@ AudioTimeAxisView::update_pans (bool show)
 					_route, _route/*FIXME*/, pan_control, 
 					editor,
 					*this,
+					false,
 					parent_canvas,
 					_route->describe_parameter(pan_control->parameter())));
 		add_automation_child(Parameter(PanAutomation, i), pan_track, show);

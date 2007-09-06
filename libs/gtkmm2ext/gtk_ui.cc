@@ -414,7 +414,7 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 	RefPtr<Style> style;
 	RefPtr<TextBuffer::Tag> ptag;
 	RefPtr<TextBuffer::Tag> mtag;
-	char *prefix;
+	const char *prefix;
 	size_t prefix_len;
 	bool fatal_received = false;
 #ifndef OLD_STYLE_ERRORS

@@ -170,7 +170,7 @@ class AudioRegion : public Region
   protected:
 	/* default constructor for derived (compound) types */
 
-	AudioRegion (nframes_t, nframes_t, std::string name); 
+	AudioRegion (Session& s, nframes_t, nframes_t, std::string name); 
 	AudioRegion (boost::shared_ptr<const AudioRegion>);
 
 	int set_live_state (const XMLNode&, Change&, bool send);

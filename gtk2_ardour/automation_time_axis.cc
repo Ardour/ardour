@@ -25,6 +25,7 @@
 
 #include "ardour_ui.h"
 #include "automation_time_axis.h"
+#include "automation_streamview.h"
 #include "route_time_axis.h"
 #include "automation_line.h"
 #include "public_editor.h"
@@ -51,16 +52,17 @@ const string AutomationTimeAxisView::state_node_name = "AutomationChild";
 
 AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Route> r,
 		boost::shared_ptr<Automatable> a, boost::shared_ptr<AutomationControl> c,
-		PublicEditor& e, TimeAxisView& rent, 
+		PublicEditor& e, TimeAxisView& parent, bool show_regions,
 		ArdourCanvas::Canvas& canvas, const string & nom, const string & nomparent)
 
 	: AxisView (s), 
-	  TimeAxisView (s, e, &rent, canvas),
+	  TimeAxisView (s, e, &parent, canvas),
 	  _route (r),
 	  _control (c),
 	  _automatable (a),
 	  _controller(AutomationController::create(a, c->list(), c)),
 	  _base_rect (0),
+	  _view (show_regions ? new AutomationStreamView(*this) : NULL),
 	  _name (nom),
 	  height_button (_("h")),
 	  clear_button (_("clear")),
@@ -196,15 +198,25 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 		set_state (*xml_node);
 	} 
 		
-	boost::shared_ptr<AutomationLine> line(new AutomationLine (
-				_control->parameter().to_string(),
-				*this,
-				*canvas_display,
-				_control->list()));
-		
-	line->set_line_color (ARDOUR_UI::config()->canvasvar_ProcessorAutomationLine.get());
-	line->queue_reset ();
-	add_line (line);
+	/* ask for notifications of any new RegionViews */
+	if (show_regions) {
+
+		assert(_view);
+		_view->attach ();
+	
+	/* no regions, just a single line for the entire track (e.g. bus gain) */
+	} else {
+	
+		boost::shared_ptr<AutomationLine> line(new AutomationLine (
+					_control->parameter().to_string(),
+					*this,
+					*canvas_display,
+					_control->list()));
+
+		line->set_line_color (ARDOUR_UI::config()->canvasvar_ProcessorAutomationLine.get());
+		line->queue_reset ();
+		add_line (line);
+	}
 
 	/* make sure labels etc. are correct */
 
@@ -338,13 +350,15 @@ AutomationTimeAxisView::interpolation_changed ()
 		}
 	}
 	
-	_line->set_interpolation(style);
+	if (_line)
+		_line->set_interpolation(style);
 }
 
 void
 AutomationTimeAxisView::set_interpolation (AutomationList::InterpolationStyle style)
 {
 	_control->list()->set_interpolation(style);
+		if (_line)
 	_line->set_interpolation(style);
 }
 
@@ -358,7 +372,8 @@ void
 AutomationTimeAxisView::clear_clicked ()
 {
 	_session.begin_reversible_command (_("clear automation"));
-	_line->clear ();
+	if (_line)
+		_line->clear ();
 	_session.commit_reversible_command ();
 }
 
@@ -373,9 +388,14 @@ AutomationTimeAxisView::set_height (TrackHeight ht)
 
 	TimeAxisView::set_height (ht);
 	_base_rect->property_y2() = h;
-
+	
 	if (_line)
 		_line->set_y_position_and_height (0, h);
+	
+	if (_view) {
+		_view->set_height(h);
+		_view->update_contents_y_position_and_height();
+	}
 
 	for (list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 		(*i)->set_height ();
@@ -480,9 +500,13 @@ AutomationTimeAxisView::set_height (TrackHeight ht)
 void
 AutomationTimeAxisView::set_samples_per_unit (double spu)
 {
-	TimeAxisView::set_samples_per_unit (editor.get_current_zoom());
+	TimeAxisView::set_samples_per_unit (spu);
 
-	_line->reset ();
+	if (_line)
+		_line->reset ();
+	
+	if (_view)
+		_view->set_samples_per_unit (spu);
 }
  
 void
@@ -578,6 +602,9 @@ AutomationTimeAxisView::build_display_menu ()
 void
 AutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkEvent* event, nframes_t when, double y)
 {
+	if (!_line)
+		return;
+
 	double x = 0;
 
 	canvas_display->w2i (x, y);
@@ -826,20 +853,23 @@ AutomationTimeAxisView::get_selectables (nframes_t start, nframes_t end, double 
 			botfrac = 1.0 - ((bot - y_position) / height);
 		}
 
-		_line->get_selectables (start, end, botfrac, topfrac, results);
+		if (_line)
+			_line->get_selectables (start, end, botfrac, topfrac, results);
 	}
 }
 
 void
 AutomationTimeAxisView::get_inverted_selectables (Selection& sel, list<Selectable*>& result)
 {
-	_line->get_inverted_selectables (sel, result);
+	if (_line)
+		_line->get_inverted_selectables (sel, result);
 }
 
 void
 AutomationTimeAxisView::set_selected_points (PointSelection& points)
 {
-	_line->set_selected_points (points);
+	if (_line)
+		_line->set_selected_points (points);
 }
 
 void
@@ -873,13 +903,15 @@ AutomationTimeAxisView::add_line (boost::shared_ptr<AutomationLine> line)
 void
 AutomationTimeAxisView::entered()
 {
-	_line->track_entered();
+	if (_line)
+		_line->track_entered();
 }
 
 void
 AutomationTimeAxisView::exited ()
 {
-	_line->track_exited();
+	if (_line)
+		_line->track_exited();
 }
 
 void
@@ -889,7 +921,8 @@ AutomationTimeAxisView::set_colors ()
 		(*i)->set_colors();
     }
     
-	_line->set_colors();
+	if (_line)
+		_line->set_colors();
 }
 
 void

@@ -172,7 +172,7 @@ MidiStreamView::redisplay_diskstream ()
 	list<RegionView *>::iterator i, tmp;
 
 	for (i = region_views.begin(); i != region_views.end(); ++i) {
-		(*i)->enable_display(true); // FIXME: double display
+		(*i)->enable_display(true); // FIXME: double display, remove
 		(*i)->set_valid (false);
 		
 		/* FIXME: slow.  MidiRegionView needs a find_note_range method

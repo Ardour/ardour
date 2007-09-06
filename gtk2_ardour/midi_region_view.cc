@@ -410,7 +410,7 @@ MidiRegionView::redisplay_model()
 
 		end_write();
 
-		for (Automatable::Controls::const_iterator i = _model->controls().begin();
+		/*for (Automatable::Controls::const_iterator i = _model->controls().begin();
 				i != _model->controls().end(); ++i) {
 
 			assert(i->second);
@@ -431,14 +431,13 @@ MidiRegionView::redisplay_model()
 						new AutomationRegionView(at->canvas_display,
 							*at.get(), _region, i->second->list(),
 							midi_stream_view()->get_samples_per_unit(), col));
-
-				arv->set_duration(_region->length(), this);
-
-				_automation_children.insert(std::make_pair(i->second->parameter(), arv));
 			}
 
+			arv->set_duration(_region->length(), this);
 			arv->init(col, true);
-		}
+
+			_automation_children.insert(std::make_pair(i->second->parameter(), arv));
+		}*/
 		
 		_model->read_unlock();
 
@@ -794,7 +793,6 @@ MidiRegionView::note_dropped(CanvasMidiEvent* ev, double dt, uint8_t dnote)
 void
 MidiRegionView::note_entered(ArdourCanvas::CanvasMidiEvent* ev)
 {
-	cerr << "NOTE ENTERED: " << _mouse_state << endl;
 	if (ev->note() && _mouse_state == EraseTouchDragging) {
 		start_delta_command();
 		ev->selected(true);

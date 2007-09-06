@@ -783,7 +783,7 @@ SMFSource::is_empty () const
 
 
 void
-SMFSource::write_chunk_header(char id[4], uint32_t length)
+SMFSource::write_chunk_header(const char id[4], uint32_t length)
 {
 	const uint32_t length_be = GUINT32_TO_BE(length);
 
@@ -792,7 +792,7 @@ SMFSource::write_chunk_header(char id[4], uint32_t length)
 }
 
 void
-SMFSource::write_chunk(char id[4], uint32_t length, void* data)
+SMFSource::write_chunk(const char id[4], uint32_t length, void* data)
 {
 	write_chunk_header(id, length);
 	
@@ -857,6 +857,8 @@ SMFSource::load_model(bool lock, bool force_reload)
 		//cerr << _name << " NOT reloading model " << _model.get() << " (" << _model->n_notes()
 		//	<< " notes)" << endl;
 		return;
+	} else {
+		cerr << _name << " loading model" << endl;
 	}
 
 	if (! _model) {

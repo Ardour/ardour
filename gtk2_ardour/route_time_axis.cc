@@ -1723,7 +1723,7 @@ RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> 
 
 	pan->view = boost::shared_ptr<AutomationTimeAxisView>(
 			new AutomationTimeAxisView (_session, _route, processor, control,
-				editor, *this, parent_canvas, name, state_name));
+				editor, *this, false, parent_canvas, name, state_name));
 
 	pan->view->Hiding.connect (bind (mem_fun(*this, &RouteTimeAxisView::processor_automation_track_hidden), pan, processor));
 

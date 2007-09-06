@@ -93,13 +93,14 @@ public:
 
 	void add_region_view (boost::shared_ptr<ARDOUR::Region>);
 	void region_layered (RegionView*);
+	void update_contents_y_position_and_height ();
 	
 	virtual void redisplay_diskstream () = 0;
 	
 	sigc::signal<void,RegionView*> RegionViewAdded;
 
 protected:
-	StreamView (RouteTimeAxisView&);
+	StreamView (RouteTimeAxisView&, ArdourCanvas::Group* group = NULL);
 	
 //private: (FIXME?)
 
@@ -111,7 +112,7 @@ protected:
 	void         update_rec_box ();
 	//virtual void update_rec_regions () = 0;
 	
-	virtual RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves) = 0;
+	virtual RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_data) = 0;
 	virtual void remove_region_view (boost::weak_ptr<ARDOUR::Region> );
 	//void         remove_rec_region (boost::shared_ptr<ARDOUR::Region>); (unused)
 
@@ -124,8 +125,6 @@ protected:
 	virtual void playlist_modified (boost::shared_ptr<ARDOUR::Diskstream>);
 	
 	virtual void color_handler () = 0;
-
-	virtual void update_contents_y_position_and_height ();
 
 	RouteTimeAxisView&        _trackview;
 	ArdourCanvas::Group*      canvas_group;

@@ -258,10 +258,10 @@ RegionView::reset_width_dependent_items (double pixel_width)
 	TimeAxisViewItem::reset_width_dependent_items (pixel_width);
 	_pixel_width = pixel_width;
 
-	for (AutomationChildren::iterator i = _automation_children.begin();
+	/*for (AutomationChildren::iterator i = _automation_children.begin();
 			i != _automation_children.end(); ++i) {
 		i->second->reset_width_dependent_items(pixel_width);
-	}
+	}*/
 }
 
 void

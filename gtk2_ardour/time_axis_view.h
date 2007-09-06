@@ -201,6 +201,7 @@ class TimeAxisView : public virtual AxisView
 
 	/* state/serialization management */
 
+	TimeAxisView* get_parent () { return parent; }
 	void set_parent (TimeAxisView& p);
 	bool has_state () const;
 

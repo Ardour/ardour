@@ -25,10 +25,10 @@
 #include <boost/enable_shared_from_this.hpp>
 
 #include <pbd/undo.h>
-#include <pbd/statefuldestructible.h> 
 
 #include <ardour/ardour.h>
 #include <ardour/data_type.h>
+#include <ardour/automatable.h>
 
 class XMLNode;
 
@@ -43,7 +43,7 @@ enum RegionEditState {
 	EditChangesID      = 2
 };
 
-class Region : public PBD::StatefulDestructible, public boost::enable_shared_from_this<Region>
+class Region : public Automatable, public boost::enable_shared_from_this<Region>
 {
   public:
 	typedef std::vector<boost::shared_ptr<Source> > SourceList;
@@ -86,10 +86,8 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 
 	virtual ~Region();
 
-	/* Note: changing the name of a Region does not constitute an edit */
-
-	string name() const { return _name; }
-	void set_name (string str);
+	/** Note: changing the name of a Region does not constitute an edit */
+	bool set_name (const std::string& str);
 
 	const DataType& data_type() const { return _type; }
 
@@ -214,7 +212,7 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 
 	/* this one is for derived types of derived types */
 
-	Region (nframes_t start, nframes_t length, const string& name, DataType, layer_t = 0, Flag flags = DefaultFlags);
+	Region (Session& s, nframes_t start, nframes_t length, const string& name, DataType, layer_t = 0, Flag flags = DefaultFlags);
 
   protected:
 	XMLNode& get_short_state (); /* used only by Session */
@@ -234,7 +232,6 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	virtual void recompute_at_start () = 0;
 	virtual void recompute_at_end () = 0;
 
-	string                  _name;
 	DataType                _type;
 	Flag                    _flags;
 	nframes_t               _start;

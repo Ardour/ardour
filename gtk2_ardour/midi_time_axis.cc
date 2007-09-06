@@ -118,15 +118,9 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 		controls_base_unselected_name = "MidiTrackControlsBaseUnselected";
 
 		/* ask for notifications of any new RegionViews */
-		_view->RegionViewAdded.connect (mem_fun(*this, &MidiTimeAxisView::region_view_added));
 		_view->attach ();
 
-	} /*else { // no MIDI busses yet
-
-		controls_ebox.set_name ("MidiBusControlsBaseUnselected");
-		controls_base_selected_name = "MidiBusControlsBaseSelected";
-		controls_base_unselected_name = "MidiBusControlsBaseUnselected";
-	}*/
+	}
 }
 
 MidiTimeAxisView::~MidiTimeAxisView ()
@@ -267,7 +261,7 @@ MidiTimeAxisView::create_automation_child (Parameter param, bool show)
 {
 	if (param.type() == MidiCCAutomation) {
 	
-		/* FIXME: this all probably leaks */
+		/* FIXME: don't create AutomationList for track itself */
 
 		boost::shared_ptr<AutomationControl> c = _route->control(param);
 
@@ -281,6 +275,7 @@ MidiTimeAxisView::create_automation_child (Parameter param, bool show)
 				_route, _route, c,
 				editor,
 				*this,
+				true,
 				parent_canvas,
 				_route->describe_parameter(param)));
 		

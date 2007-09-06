@@ -52,8 +52,8 @@ Change Region::HiddenChanged     = ARDOUR::new_change ();
 
 
 /* derived-from-derived constructor (no sources in constructor) */
-Region::Region (nframes_t start, nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
-	: _name(name)
+Region::Region (Session& s, nframes_t start, nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
+	: Automatable(s, name)
 	, _type(type)
 	, _flags(flags)
 	, _start(start) 
@@ -73,7 +73,7 @@ Region::Region (nframes_t start, nframes_t length, const string& name, DataType 
 
 /** Basic Region constructor (single source) */
 Region::Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
-	: _name(name)
+	: Automatable(src->session(), name)
 	, _type(type)
 	, _flags(flags)
 	, _start(start) 
@@ -97,7 +97,7 @@ Region::Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length
 
 /** Basic Region constructor (many sources) */
 Region::Region (SourceList& srcs, nframes_t start, nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
-	: _name(name)
+	: Automatable(srcs.front()->session(), name)
 	, _type(type)
 	, _flags(flags)
 	, _start(start) 
@@ -132,7 +132,7 @@ Region::Region (SourceList& srcs, nframes_t start, nframes_t length, const strin
 
 /** Create a new Region from part of an existing one */
 Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes_t length, const string& name, layer_t layer, Flag flags)
-	: _name(name)
+	: Automatable(other->session(), name)
 	, _type(other->data_type())
 	, _flags(Flag(flags & ~(Locked|PositionLocked|WholeFile|Hidden)))
 	, _start(other->_start + offset) 
@@ -173,7 +173,7 @@ Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes
 
 /** Pure copy constructor */
 Region::Region (boost::shared_ptr<const Region> other)
-	: _name(other->_name)
+	: Automatable(other->session(), other->name())
 	, _type(other->data_type())
 	, _flags(Flag(other->_flags & ~(Locked|PositionLocked)))
 	, _start(other->_start) 
@@ -214,7 +214,7 @@ Region::Region (boost::shared_ptr<const Region> other)
 }
 
 Region::Region (SourceList& srcs, const XMLNode& node)
-	: _name(X_("error: XML did not reset this"))
+	: Automatable(srcs.front()->session(), X_("error: XML did not reset this"))
 	, _type(DataType::NIL) // to be loaded from XML
 	, _flags(Flag(0))
 	, _start(0) 
@@ -252,7 +252,7 @@ Region::Region (SourceList& srcs, const XMLNode& node)
 }
 
 Region::Region (boost::shared_ptr<Source> src, const XMLNode& node)
-	: _name(X_("error: XML did not reset this"))
+	: Automatable(src->session(), X_("error: XML did not reset this"))
 	, _type(DataType::NIL)
 	, _flags(Flag(0))
 	, _start(0) 
@@ -323,13 +323,16 @@ Region::set_playlist (boost::weak_ptr<Playlist> wpl)
 	}
 }
 
-void
-Region::set_name (string str)
+bool
+Region::set_name (const std::string& str)
 {
 	if (_name != str) {
-		_name = str; 
-		send_change (NameChanged);
+		SessionObject::set_name(str); // EMIT SIGNAL NameChanged()
+		assert(_name == str); 
+		send_change (ARDOUR::NameChanged);
 	}
+
+	return true;
 }
 
 void
@@ -383,7 +386,7 @@ Region::first_edit ()
 		_name = pl->session().new_region_name (_name);
 		_first_edit = EditChangesNothing;
 
-		send_change (NameChanged);
+		send_change (ARDOUR::NameChanged);
 		RegionFactory::CheckNewRegion (shared_from_this());
 	}
 }
@@ -907,7 +910,7 @@ Region::state (bool full_state)
 {
 	XMLNode *node = new XMLNode ("Region");
 	char buf[64];
-	char* fe = NULL;
+	const char* fe = NULL;
 
 	_id.print (buf, sizeof (buf));
 	node->add_property ("id", buf);

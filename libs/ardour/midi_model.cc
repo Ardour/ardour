@@ -223,7 +223,7 @@ MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframes
 
 	if (start != _next_read) {
 		_read_iter = const_iterator(*this, (double)start);
-		cerr << "Repositioning iterator from " << _next_read << " to " << start << endl;
+	//	cerr << "Repositioning iterator from " << _next_read << " to " << start << endl;
 	//} else {
 	//	cerr << "Using cached iterator at " << _next_read << endl;
 	}
