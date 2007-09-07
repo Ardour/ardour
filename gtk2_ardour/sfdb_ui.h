@@ -57,6 +57,8 @@ class SoundFileBox : public Gtk::VBox
 	bool setup_labels (const Glib::ustring& filename);
 
 	void audition();
+	bool audition_oneshot();
+	bool autoplay () const;
 
   protected:
 	ARDOUR::Session* _session;
@@ -64,8 +66,6 @@ class SoundFileBox : public Gtk::VBox
 	
 	ARDOUR::SoundFileInfo sf_info;
 	
-	pid_t current_pid;
-
 	Gtk::Table table;
 	
 	Gtk::Label length;
@@ -77,7 +77,7 @@ class SoundFileBox : public Gtk::VBox
 	Gtk::Label channels_value;
 	Gtk::Label samplerate_value;
 	
-	Gtk::TextView format_text;
+	Gtk::Label format_text;
 	AudioClock length_clock;
 	AudioClock timecode_clock;
 
@@ -92,14 +92,13 @@ class SoundFileBox : public Gtk::VBox
 	
 	Gtk::Button play_btn;
 	Gtk::Button stop_btn;
+	Gtk::CheckButton autoplay_btn;
 	Gtk::Button apply_btn;
-	
+
 	bool tags_entry_left (GdkEventFocus* event);
-	void stop_btn_clicked ();
 	void tags_changed ();
-	
-	void audition_status_changed (bool state);
-	sigc::connection audition_connection;
+	void save_tags (const std::vector<std::string>&);
+	void stop_audition ();
 };
 
 class SoundFileBrowser : public ArdourDialog
@@ -165,9 +164,6 @@ class SoundFileChooser : public SoundFileBrowser
 
 class SoundFileOmega : public SoundFileBrowser
 {
-  private:
-	Gtk::RadioButtonGroup rgroup1;
-	Gtk::RadioButtonGroup rgroup2;
 
   public:
 	SoundFileOmega (Gtk::Window& parent, std::string title, ARDOUR::Session* _s, int selected_tracks);
@@ -178,8 +174,7 @@ class SoundFileOmega : public SoundFileBrowser
 	Gtk::ComboBoxText where_combo;
 	Gtk::ComboBoxText channel_combo;
 	
-	Gtk::RadioButton import;
-	Gtk::RadioButton embed;
+	Gtk::CheckButton copy_files_btn;
 
 	Editing::ImportMode get_mode() const;
 	Editing::ImportPosition get_position() const;

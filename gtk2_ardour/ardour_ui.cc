@@ -1951,6 +1951,7 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 	new_session_dialog->set_modal(true);
 	new_session_dialog->set_name (predetermined_path);
 	new_session_dialog->reset_recent();
+	new_session_dialog->set_position (WIN_POS_CENTER);
 	new_session_dialog->show();
 	new_session_dialog->present ();
 	new_session_dialog->set_current_page (0);

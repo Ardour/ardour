@@ -123,7 +123,7 @@ Editor::external_audio_dialog ()
 		break;
 	}
 
-	if (sfbrowser->import.get_active()) {
+	if (sfbrowser->copy_files_btn.get_active()) {
 		do_import (paths, chns, mode, where);
 	} else {
 		do_embed (paths, chns, mode, where);

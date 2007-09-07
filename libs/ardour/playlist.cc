@@ -464,7 +464,7 @@ Playlist::add_region (boost::shared_ptr<Region> region, nframes_t position, floa
 		pos += region->length();
 		--itimes;
 	}
-	
+
 	/* later regions will all be spliced anyway */
 	
 	if (!holding_state ()) {
