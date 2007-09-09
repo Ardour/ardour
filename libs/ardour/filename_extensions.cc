@@ -10,5 +10,6 @@ const char* const pending_suffix = X_(".pending");
 const char* const peakfile_suffix = X_(".peak");
 const char* const backup_suffix = X_(".bak");
 const char* const temp_suffix = X_(".tmp");
+const char* const history_suffix = X_(".history");
 
 }
