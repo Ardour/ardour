@@ -2706,29 +2706,31 @@ Session::save_history (string snapshot_name)
 int
 Session::restore_history (string snapshot_name)
 {
-    XMLTree tree;
-    string xmlpath;
+	XMLTree tree;
 
-    if (snapshot_name.empty()) {
-	    snapshot_name = _current_snapshot_name;
-    }
+	if (snapshot_name.empty()) {
+		snapshot_name = _current_snapshot_name;
+	}
 
-    /* read xml */
-    xmlpath = _path + snapshot_name + ".history";
-    cerr << string_compose(_("Loading history from '%1'."), xmlpath) << endmsg;
+	const string xml_filename = snapshot_name + history_suffix;
+	const sys::path xml_path = _session_dir->root_path() / xml_filename;
 
-    if (access (xmlpath.c_str(), F_OK)) {
-	    info << string_compose (_("%1: no history file \"%2\" for this session."), _name, xmlpath) << endmsg;
-	    return 1;
-    }
+	info << string_compose(_("Loading history from '%1'."), xml_path.to_string()) << endmsg;
 
-    if (!tree.read (xmlpath)) {
-	    error << string_compose (_("Could not understand session history file \"%1\""), xmlpath) << endmsg;
-	    return -1;
-    }
+	if (!sys::exists (xml_path)) {
+		info << string_compose (_("%1: no history file \"%2\" for this session."),
+				_name, xml_path.to_string()) << endmsg;
+		return 1;
+	}
 
-    /* replace history */
-    _history.clear();
+	if (!tree.read (xml_path.to_string())) {
+		error << string_compose (_("Could not understand session history file \"%1\""),
+				xml_path.to_string()) << endmsg;
+		return -1;
+	}
+
+	// replace history
+	_history.clear();
 
     for (XMLNodeConstIterator it  = tree.root()->children().begin(); it != tree.root()->children().end(); it++) {
 	    
