@@ -18,6 +18,8 @@
     $Id$
 */
 
+#include <glibmm/thread.h>
+
 #include <pbd/error.h>
 
 #include <ardour/source_factory.h>
@@ -34,17 +36,22 @@
 using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
+using namespace sigc;
 
 sigc::signal<void,boost::shared_ptr<Source> > SourceFactory::SourceCreated;
 
 int
-SourceFactory::setup_peakfile (boost::shared_ptr<Source> s)
+SourceFactory::setup_peakfile (boost::shared_ptr<Source> s, bool async)
 {
 	boost::shared_ptr<AudioSource> as (boost::dynamic_pointer_cast<AudioSource> (s));
 	if (as) {
-		if (as->setup_peakfile ()) {
-			error << string_compose("SourceFactory: could not set up peakfile for %1", as->name()) << endmsg;
-			return -1;
+		if (async) {
+			Glib::Thread::create (hide_return (mem_fun (*as, &AudioSource::setup_peakfile)), false);
+		} else {
+			if (as->setup_peakfile ()) {
+				error << string_compose("SourceFactory: could not set up peakfile for %1", as->name()) << endmsg;
+				return -1;
+			}
 		}
 	}
 
@@ -61,7 +68,7 @@ SourceFactory::createSilent (Session& s, const XMLNode& node, nframes_t nframes,
 
 #ifdef HAVE_COREAUDIO
 boost::shared_ptr<Source>
-SourceFactory::create (Session& s, const XMLNode& node)
+SourceFactory::create (Session& s, const XMLNode& node, bool async)
 {
 	try {
 		boost::shared_ptr<Source> ret (new CoreAudioSource (s, node));
@@ -78,7 +85,7 @@ SourceFactory::create (Session& s, const XMLNode& node)
 		/* this is allowed to throw */
 
 		boost::shared_ptr<Source> ret (new SndFileSource (s, node));
-		if (setup_peakfile (ret)) {
+		if (setup_peakfile (ret, async)) {
 			return boost::shared_ptr<Source>();
 		}
 		SourceCreated (ret);
@@ -91,13 +98,13 @@ SourceFactory::create (Session& s, const XMLNode& node)
 #else
 
 boost::shared_ptr<Source>
-SourceFactory::create (Session& s, const XMLNode& node)
+SourceFactory::create (Session& s, const XMLNode& node, bool async)
 {
 	/* this is allowed to throw */
 
 	boost::shared_ptr<Source> ret (new SndFileSource (s, node));
 	
-	if (setup_peakfile (ret)) {
+	if (setup_peakfile (ret, async)) {
 		return boost::shared_ptr<Source>();
 	}
 	
@@ -109,13 +116,13 @@ SourceFactory::create (Session& s, const XMLNode& node)
 
 #ifdef HAVE_COREAUDIO
 boost::shared_ptr<Source>
-SourceFactory::createReadable (Session& s, string path, int chn, AudioFileSource::Flag flags, bool announce)
+SourceFactory::createReadable (Session& s, string path, int chn, AudioFileSource::Flag flags, bool announce, bool async)
 {
 	if (!(flags & Destructive)) {
 
 		try {
 			boost::shared_ptr<Source> ret (new CoreAudioSource (s, path, chn, flags));
-			if (setup_peakfile (ret)) {
+			if (setup_peakfile (ret, async)) {
 				return boost::shared_ptr<Source>();
 			}
 			if (announce) {
@@ -141,7 +148,7 @@ SourceFactory::createReadable (Session& s, string path, int chn, AudioFileSource
 	} else {
 
 		boost::shared_ptr<Source> ret (new SndFileSource (s, path, chn, flags));
-		if (setup_peakfile (ret)) {
+		if (setup_peakfile (ret, async)) {
 			return boost::shared_ptr<Source>();
 		}
 		if (announce) {
@@ -156,11 +163,11 @@ SourceFactory::createReadable (Session& s, string path, int chn, AudioFileSource
 #else
 
 boost::shared_ptr<Source>
-SourceFactory::createReadable (Session& s, string path, int chn, AudioFileSource::Flag flags, bool announce)
+SourceFactory::createReadable (Session& s, string path, int chn, AudioFileSource::Flag flags, bool announce, bool async)
 {
 	boost::shared_ptr<Source> ret (new SndFileSource (s, path, chn, flags));
 
-	if (setup_peakfile (ret)) {
+	if (setup_peakfile (ret, async)) {
 		return boost::shared_ptr<Source>();
 	}
 
@@ -174,7 +181,7 @@ SourceFactory::createReadable (Session& s, string path, int chn, AudioFileSource
 #endif // HAVE_COREAUDIO
 
 boost::shared_ptr<Source>
-SourceFactory::createWritable (Session& s, std::string path, bool destructive, nframes_t rate, bool announce)
+SourceFactory::createWritable (Session& s, std::string path, bool destructive, nframes_t rate, bool announce, bool async)
 {
 	/* this might throw failed_constructor(), which is OK */
 
@@ -186,7 +193,7 @@ SourceFactory::createWritable (Session& s, std::string path, bool destructive, n
 					(destructive ? AudioFileSource::Flag (SndFileSource::default_writable_flags | AudioFileSource::Destructive) :
 					 SndFileSource::default_writable_flags)));	
 
-	if (setup_peakfile (ret)) {
+	if (setup_peakfile (ret, async)) {
 		return boost::shared_ptr<Source>();
 	}
 	if (announce) {

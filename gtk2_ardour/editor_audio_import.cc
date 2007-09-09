@@ -511,7 +511,8 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 											       (*session, path,  n,
 												(mode == ImportAsTapeTrack ? 
 												 AudioFileSource::Destructive : 
-												 AudioFileSource::Flag (0))));
+												 AudioFileSource::Flag (0)),
+												true, true));
 				} else {
 					source = boost::dynamic_pointer_cast<AudioFileSource> (s);
 				}

@@ -333,7 +333,7 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 		/* open, read, close */
 
 		if ((_peakfile = ::open (peakpath.c_str(), O_RDONLY, 0664)) < 0) {
-			error << string_compose(_("AudioSource: cannot open peakpath \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
+			error << string_compose(_("AudioSource: cannot open peakpath (a) \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
 			return -1;
 		}
 
@@ -407,7 +407,7 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 		/* open ... close during out: handling */
 
 		if ((_peakfile = ::open (peakpath.c_str(), O_RDONLY, 0664)) < 0) {
-			error << string_compose(_("AudioSource: cannot open peakpath \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
+			error << string_compose(_("AudioSource: cannot open peakpath (b) \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
 			return 0;
 		}
 
@@ -646,7 +646,7 @@ int
 AudioSource::prepare_for_peakfile_writes ()
 {
 	if ((peakfile = ::open (peakpath.c_str(), O_RDWR|O_CREAT, 0664)) < 0) {
-		error << string_compose(_("AudioSource: cannot open peakpath \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
+		error << string_compose(_("AudioSource: cannot open peakpath (c) \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
 		return -1;
 	}
 	return 0;
