@@ -163,6 +163,11 @@ bool create_directories(const path & p);
 bool remove(const path & p);
 
 /**
+ * Renames from_path to to_path as if by the glib function g_rename.
+ */
+void rename (const path& from_path, const path& to_path);
+
+/**
  * Attempt to copy the contents of the file from_path to a new file 
  * at path to_path.
  *

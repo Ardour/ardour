@@ -137,6 +137,19 @@ remove(const path & p)
 }
 
 void
+rename (const path & from_path, const path & to_path)
+{
+	// g_rename is a macro that evaluates to ::rename on
+	// POSIX systems, without the global namespace qualifier
+	// it would evaluate to a recursive call(if it compiled)
+	if ( ::g_rename( from_path.to_string().c_str(),
+				to_path.to_string().c_str() ) == -1 )
+	{
+		throw filesystem_error(g_strerror(errno), errno);
+	}
+}
+
+void
 copy_file(const path & from_path, const path & to_path)
 {
 	// this implementation could use mucho memory
