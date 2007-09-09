@@ -18,7 +18,7 @@
 */
 
 #ifndef __ardour_recent_sessions_h__
-#define __ardour_recent_sessions__h__
+#define __ardour_recent_sessions_h__
 
 #include <deque>
 #include <utility>
