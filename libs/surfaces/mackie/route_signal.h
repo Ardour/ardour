@@ -22,6 +22,8 @@
 
 #include <vector>
 
+#include "midi_byte_array.h"
+
 class MackieControlProtocol;
 
 namespace ARDOUR {
@@ -44,7 +46,7 @@ class RouteSignal
 {
 public:
 	RouteSignal( ARDOUR::Route & route, MackieControlProtocol & mcp, Strip & strip, MackiePort & port )
-	: _route( route ), _mcp( mcp ), _strip( strip ), _port( port ), _last_gain_written(0.0), _last_pan_written(0.0)
+	: _route( route ), _mcp( mcp ), _strip( strip ), _port( port ), _last_gain_written(0.0)
 	{
 		connect();
 	}
@@ -67,8 +69,8 @@ public:
 	float last_gain_written() const { return _last_gain_written; }
 	void last_gain_written( float other ) { _last_gain_written = other; }
 	
-	float last_pan_written() const { return _last_pan_written; }
-	void last_pan_written( float other ) { _last_pan_written = other; }
+	const MidiByteArray & last_pan_written() const { return _last_pan_written; }
+	void last_pan_written( const MidiByteArray & other ) { _last_pan_written = other; }
 	
 private:
 	ARDOUR::Route & _route;
@@ -82,7 +84,7 @@ private:
 	// Last written values for the gain and pan, to avoid overloading
 	// the midi connection to the surface
 	float _last_gain_written;
-	float _last_pan_written;
+	MidiByteArray _last_pan_written;
 };
 
 }

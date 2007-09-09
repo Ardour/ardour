@@ -330,6 +330,9 @@ class MackieControlProtocol
 	Mackie::Timer _frm_left_last;
 	
 	Mackie::JogWheel _jog_wheel;
+	
+	// Timer for controlling midi bandwidth used by automation polls
+	Mackie::Timer _automation_last;
 };
 
 #endif // ardour_mackie_control_protocol_h

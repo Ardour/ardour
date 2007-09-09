@@ -132,11 +132,15 @@ void SurfacePort::write( const MidiByteArray & mba )
 	int count = port().write( mba.bytes().get(), mba.size() );
 	if ( count != (int)mba.size() )
 	{
-		if ( errno != EAGAIN )
+		if ( errno == 0 )
+		{
+			cout << "port overflow on " << port().name() << ". Did not write all of " << mba << endl;
+		}
+		else if ( errno != EAGAIN )
 		{
 			ostringstream os;
 			os << "Surface: couldn't write to port " << port().name();
-			os << ": " << errno << fetch_errmsg( errno );
+			os << ", error: " << fetch_errmsg( errno ) << "(" << errno << ")";
 			
 			cout << os.str();
 			inactive_event();

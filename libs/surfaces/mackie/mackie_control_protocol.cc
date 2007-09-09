@@ -1017,11 +1017,15 @@ void MackieControlProtocol::notify_panner_changed( RouteSignal * route_signal )
 			float pos;
 			route_signal->route().panner()[0]->get_effective_position( pos );
 			
+			// cache the MidiByteArray here, because the mackie led control is much lower
+			// resolution than the panner control. So we save lots of byte
+			// sends in spite of more work on the comparison
+			MidiByteArray bytes = builder.build_led_ring( pot, ControlState( on, pos ), MackieMidiBuilder::midi_pot_mode_dot );
 			// check that something has actually changed
-			if ( pos != route_signal->last_pan_written() )
+			if ( bytes != route_signal->last_pan_written() )
 			{
-				route_signal->port().write( builder.build_led_ring( pot, ControlState( on, pos ), MackieMidiBuilder::midi_pot_mode_dot ) );
-				route_signal->last_pan_written( pos );
+				route_signal->port().write( bytes );
+				route_signal->last_pan_written( bytes );
 			}
 		}
 		else
@@ -1049,11 +1053,12 @@ void MackieControlProtocol::update_automation( RouteSignal & rs )
 	{
 		notify_panner_changed( &rs );
 	}
+	_automation_last.start();
 }
 
 void MackieControlProtocol::poll_automation()
 {
-	if ( _active )
+	if ( _active && _automation_last.elapsed() >= 20 )
 	{
 		// do all currently mapped routes
 		for( RouteSignals::iterator it = route_signals.begin(); it != route_signals.end(); ++it )
@@ -1063,6 +1068,8 @@ void MackieControlProtocol::poll_automation()
 		
 		// and the master strip
 		if ( master_route_signal != 0 ) update_automation( *master_route_signal );
+			
+		_automation_last.start();
 	}
 }
 
