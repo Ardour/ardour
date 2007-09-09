@@ -525,12 +525,21 @@ Session::rename_state (string old_name, string new_name)
 		/* refuse to rename the current snapshot or the "main" one */
 		return;
 	}
-	
-	const string old_xml_path = _path + old_name + statefile_suffix;
-	const string new_xml_path = _path + new_name + statefile_suffix;
 
-	if (rename (old_xml_path.c_str(), new_xml_path.c_str()) != 0) {
-		error << string_compose(_("could not rename snapshot %1 to %2"), old_name, new_name) << endmsg;
+	const string old_xml_filename = old_name + statefile_suffix;
+	const string new_xml_filename = new_name + statefile_suffix;
+
+	const sys::path old_xml_path = _session_dir->root_path() / old_xml_filename;
+	const sys::path new_xml_path = _session_dir->root_path() / new_xml_filename;
+
+	try
+	{
+		sys::rename (old_xml_path, new_xml_path);
+	}
+	catch (const sys::filesystem_error& err)
+	{
+		error << string_compose(_("could not rename snapshot %1 to %2 (%3)"),
+				old_name, new_name, err.what()) << endmsg;
 	}
 }
 
