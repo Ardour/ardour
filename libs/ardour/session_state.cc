@@ -2657,48 +2657,50 @@ Session::instant_xml (const string& node_name)
 int 
 Session::save_history (string snapshot_name)
 {
-    XMLTree tree;
-    string xml_path;
-    string bak_path;
+	XMLTree tree;
+	
+ 	tree.set_root (&_history.get_state (Config->get_saved_history_depth()));
 
-    tree.set_root (&_history.get_state (Config->get_saved_history_depth()));
+ 	if (snapshot_name.empty()) {
+		snapshot_name = _current_snapshot_name;
+	}
+  
+ 	const string history_filename = snapshot_name + history_suffix;
+	const string backup_filename = history_filename + backup_suffix;
+ 	const sys::path xml_path = _session_dir->root_path() / history_filename;
+	const sys::path backup_path = _session_dir->root_path() / backup_filename;
 
-    if (snapshot_name.empty()) {
-	snapshot_name = _current_snapshot_name;
-    }
-
-    xml_path = _path + snapshot_name + ".history"; 
-
-    bak_path = xml_path + ".bak";
-
-    if ((access (xml_path.c_str(), F_OK) == 0) &&
-        (rename (xml_path.c_str(), bak_path.c_str())))
-    {
-        error << _("could not backup old history file, current history not saved.") << endmsg;
-        return -1;
-    }
-
-    if (!tree.write (xml_path))
-    {
-        error << string_compose (_("history could not be saved to %1"), xml_path) << endmsg;
-
-        /* don't leave a corrupt file lying around if it is
-         * possible to fix.
-         */
-
-        if (unlink (xml_path.c_str())) {
-		error << string_compose (_("could not remove corrupt history file %1"), xml_path) << endmsg;
-        } else {
-		if (rename (bak_path.c_str(), xml_path.c_str())) 
+	if (sys::exists (xml_path)) {
+		try
 		{
-			error << string_compose (_("could not restore history file from backup %1"), bak_path) << endmsg;
+			sys::rename (xml_path, backup_path);
 		}
-        }
+		catch (const sys::filesystem_error& err)
+		{
+			error << _("could not backup old history file, current history not saved") << endmsg;
+			return -1;
+		}
+ 	}
 
-        return -1;
-    }
+	if (!tree.write (xml_path.to_string()))
+	{
+		error << string_compose (_("history could not be saved to %1"), xml_path.to_string()) << endmsg;
 
-    return 0;
+		try
+		{
+			sys::remove (xml_path);
+			sys::rename (backup_path, xml_path);
+		}
+		catch (const sys::filesystem_error& err)
+		{
+			error << string_compose (_("could not restore history file from backup %1 (%2)"),
+					backup_path.to_string(), err.what()) << endmsg;
+		}
+
+		return -1;
+	}
+
+	return 0;
 }
 
 int
