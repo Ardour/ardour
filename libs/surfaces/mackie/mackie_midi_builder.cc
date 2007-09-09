@@ -208,17 +208,17 @@ MidiByteArray MackieMidiBuilder::strip_display( MackiePort & port, const Strip &
 	retval << 0x12;
 	// offset (0 to 0x37 first line, 0x38 to 0x6f for second line )
 	retval << ( strip.index() * 7 + ( line_number * 0x38 ) );
+	
 	// ascii data to display
 	retval << line;
+	// pad with " " out to 6 chars
+	for ( int i = line.length(); i < 6; ++i ) retval << ' ';
+	
 	// column spacer, unless it's the right-hand column
-	if ( strip.index() < 7 )
-	{
-		retval << ' ';
-	}
+	if ( strip.index() < 7 ) retval << ' ';
 
 	// sysex trailer
 	retval << MIDI::eox;
-
 	
 #ifdef DEBUG	
 	cout << "MackieMidiBuilder::strip_display midi: " << retval << endl;
