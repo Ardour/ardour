@@ -44,7 +44,7 @@ class RouteSignal
 {
 public:
 	RouteSignal( ARDOUR::Route & route, MackieControlProtocol & mcp, Strip & strip, MackiePort & port )
-	: _route( route ), _mcp( mcp ), _strip( strip ), _port( port )
+	: _route( route ), _mcp( mcp ), _strip( strip ), _port( port ), _last_gain_written(0.0), _last_pan_written(0.0)
 	{
 		connect();
 	}
@@ -64,6 +64,12 @@ public:
 	Strip & strip() { return _strip; }
 	MackiePort & port() { return _port; }
 	
+	float last_gain_written() const { return _last_gain_written; }
+	void last_gain_written( float other ) { _last_gain_written = other; }
+	
+	float last_pan_written() const { return _last_pan_written; }
+	void last_pan_written( float other ) { _last_pan_written = other; }
+	
 private:
 	ARDOUR::Route & _route;
 	MackieControlProtocol & _mcp;
@@ -72,6 +78,11 @@ private:
 
 	typedef std::vector<sigc::connection> Connections;
 	Connections _connections;
+
+	// Last written values for the gain and pan, to avoid overloading
+	// the midi connection to the surface
+	float _last_gain_written;
+	float _last_pan_written;
 };
 
 }

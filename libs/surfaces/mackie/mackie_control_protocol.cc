@@ -663,6 +663,12 @@ void MackieControlProtocol::initialize_surface()
 
 void MackieControlProtocol::close()
 {
+	// stop polling, and wait for it...
+	// must be before other shutdown otherwise polling loop
+	// calls methods on objects that are deleted
+	_polling = false;
+	pthread_join( thread, 0 );
+	
 	// TODO disconnect port active/inactive signals
 	// Or at least put a lock here
 	
@@ -719,10 +725,6 @@ void MackieControlProtocol::close()
 		delete _surface;
 		_surface = 0;
 	}
-	
-	// stop polling, and wait for it...
-	_polling = false;
-	pthread_join( thread, 0 );
 	
 	// shut down MackiePorts
 	for( MackiePorts::iterator it = _ports.begin(); it != _ports.end(); ++it )
@@ -959,7 +961,13 @@ void MackieControlProtocol::notify_gain_changed( RouteSignal * route_signal )
 		Fader & fader = route_signal->strip().gain();
 		if ( !fader.in_use() )
 		{
-			route_signal->port().write( builder.build_fader( fader, route_signal->route().gain_control().get_value() ) );
+			float gain_value = route_signal->route().gain_control().get_value();
+			// check that something has actually changed
+			if ( gain_value != route_signal->last_gain_written() )
+			{
+				route_signal->port().write( builder.build_fader( fader, gain_value ) );
+				route_signal->last_gain_written( gain_value );
+			}
 		}
 	}
 	catch( exception & e )
@@ -1008,7 +1016,13 @@ void MackieControlProtocol::notify_panner_changed( RouteSignal * route_signal )
 		{
 			float pos;
 			route_signal->route().panner()[0]->get_effective_position( pos );
-			route_signal->port().write( builder.build_led_ring( pot, ControlState( on, pos ), MackieMidiBuilder::midi_pot_mode_dot ) );
+			
+			// check that something has actually changed
+			if ( pos != route_signal->last_pan_written() )
+			{
+				route_signal->port().write( builder.build_led_ring( pot, ControlState( on, pos ), MackieMidiBuilder::midi_pot_mode_dot ) );
+				route_signal->last_pan_written( pos );
+			}
 		}
 		else
 		{

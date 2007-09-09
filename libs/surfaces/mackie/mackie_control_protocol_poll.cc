@@ -81,11 +81,17 @@ void * MackieControlProtocol::monitor_work()
 
 void MackieControlProtocol::update_ports()
 {
+#ifdef DEBUG
+	cout << "MackieControlProtocol::update_ports" << endl;
+#endif
 	if ( _ports_changed )
 	{
 		Glib::Mutex::Lock ul( update_mutex );
 		// yes, this is a double-test locking paradigm, or whatever it's called
 		// because we don't *always* need to acquire the lock for the first test
+#ifdef DEBUG
+		cout << "MackieControlProtocol::update_ports lock acquired" << endl;
+#endif
 		if ( _ports_changed )
 		{
 			// create new pollfd structures
@@ -105,8 +111,14 @@ void MackieControlProtocol::update_ports()
 			}
 			_ports_changed = false;
 		}
+#ifdef DEBUG
+		cout << "MackieControlProtocol::update_ports signal" << endl;
+#endif
 		update_cond.signal();
 	}
+#ifdef DEBUG
+	cout << "MackieControlProtocol::update_ports finish" << endl;
+#endif
 }
 
 void MackieControlProtocol::read_ports()
@@ -207,4 +219,7 @@ void MackieControlProtocol::handle_port_init( Mackie::SurfacePort * sport )
 #endif
 	_ports_changed = true;
 	update_ports();
+#ifdef DEBUG
+	cout << "MackieControlProtocol::handle_port_init finish" << endl;
+#endif
 }
