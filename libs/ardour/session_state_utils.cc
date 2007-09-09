@@ -16,8 +16,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <algorithm>
+
 #include <pbd/compose.h>
-#include <pbd/basename.h>
 #include <pbd/error.h>
 #include <pbd/file_utils.h>
 
@@ -64,11 +65,8 @@ get_file_names_no_extension (const vector<sys::path> & file_paths)
 {
 	vector<string> result;
 
-	for (vector<sys::path>::const_iterator i = file_paths.begin();
-			i != file_paths.end(); ++i)
-	{
-		result.push_back (basename_nosuffix((*i).to_string()));
-	}
+	std::transform (file_paths.begin(), file_paths.end(),
+			std::back_inserter(result), sys::basename);
 
 	sort (result.begin(), result.end(), std::less<string>());
 
