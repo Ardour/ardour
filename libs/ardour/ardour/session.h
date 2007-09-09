@@ -1695,8 +1695,8 @@ class Session : public PBD::StatefulDestructible
 	   based on max (requested,available)
 	*/
 
-	uint32_t n_physical_outputs;
-	uint32_t n_physical_inputs;
+	uint32_t n_physical_audio_outputs;
+	uint32_t n_physical_audio_inputs;
 
 	int find_all_sources (std::string path, std::set<std::string>& result);
 	int find_all_sources_across_snapshots (std::set<std::string>& result, bool exclude_this_snapshot);

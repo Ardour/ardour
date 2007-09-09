@@ -87,15 +87,20 @@ Editor::external_audio_dialog ()
 
 	sfbrowser->show_all ();
 
+  again:
 	int response = sfbrowser->run ();
 
-	sfbrowser->hide ();
-
 	switch (response) {
+	case RESPONSE_APPLY:
+		// leave the dialog open
+		break;
+
 	case RESPONSE_OK:
+		sfbrowser->hide ();
 		break;
 	default:
 		// cancel from the browser - we are done
+		sfbrowser->hide ();
 		return;
 	}
 
@@ -127,6 +132,10 @@ Editor::external_audio_dialog ()
 		do_import (paths, chns, mode, where);
 	} else {
 		do_embed (paths, chns, mode, where);
+	}
+
+	if (response == RESPONSE_APPLY) {
+		goto again;
 	}
 }
 

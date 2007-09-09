@@ -396,6 +396,7 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	found_entry.signal_activate().connect(mem_fun(*this, &SoundFileBrowser::found_search_clicked));
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	add_button (Stock::APPLY, RESPONSE_APPLY);
 	add_button (Stock::OK, RESPONSE_OK);
 	
 }

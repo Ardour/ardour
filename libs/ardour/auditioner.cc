@@ -45,11 +45,11 @@ Auditioner::Auditioner (Session& s)
 	string right = Config->get_auditioner_output_right();
 
 	if (left == "default") {
-		left = _session.engine().get_nth_physical_output (0);	
+		left = _session.engine().get_nth_physical_audio_output (0);	
 	}
 
 	if (right == "default") {
-		right = _session.engine().get_nth_physical_output (1);
+		right = _session.engine().get_nth_physical_audio_output (1);
 	}
 	
 	if ((left.length() == 0) && (right.length() == 0)) {
@@ -195,7 +195,7 @@ Auditioner::output_changed (IOChange change, void* src)
 		const char ** connections;
 		connections =  output (0)->get_connections ();
 		if (connections) {
-			phys = _session.engine().get_nth_physical_output (0);
+			phys = _session.engine().get_nth_physical_audio_output (0);
 			if (phys != connections[0]) {
 				Config->set_auditioner_output_left (connections[0]);
 			} else {
@@ -208,7 +208,7 @@ Auditioner::output_changed (IOChange change, void* src)
 		
 		connections = output (1)->get_connections ();
 		if (connections) {
-			phys = _session.engine().get_nth_physical_output (1);
+			phys = _session.engine().get_nth_physical_audio_output (1);
 			if (phys != connections[0]) {
 				Config->set_auditioner_output_right (connections[0]);
 			} else {

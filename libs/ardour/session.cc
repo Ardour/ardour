@@ -282,8 +282,8 @@ Session::Session (AudioEngine &eng,
 
 	cerr << "Loading session " << fullpath << " using snapshot " << snapshot_name << " (1)" << endl;
 
-	n_physical_outputs = _engine.n_physical_outputs();
-	n_physical_inputs =  _engine.n_physical_inputs();
+	n_physical_audio_outputs = _engine.n_physical_audio_outputs();
+	n_physical_audio_inputs =  _engine.n_physical_audio_inputs();
 
 	first_stage_init (fullpath, snapshot_name);
 	
@@ -344,15 +344,15 @@ Session::Session (AudioEngine &eng,
 
 	cerr << "Loading session " << fullpath << " using snapshot " << snapshot_name << " (2)" << endl;
 
-	n_physical_outputs = _engine.n_physical_outputs();
-	n_physical_inputs = _engine.n_physical_inputs();
+	n_physical_audio_outputs = _engine.n_physical_audio_outputs();
+	n_physical_audio_inputs = _engine.n_physical_audio_inputs();
 
-	if (n_physical_inputs) {
-		n_physical_inputs = max (requested_physical_in, n_physical_inputs);
+	if (n_physical_audio_inputs) {
+		n_physical_audio_inputs = max (requested_physical_in, n_physical_audio_inputs);
 	}
 
-	if (n_physical_outputs) {
-		n_physical_outputs = max (requested_physical_out, n_physical_outputs);
+	if (n_physical_audio_outputs) {
+		n_physical_audio_outputs = max (requested_physical_out, n_physical_audio_outputs);
 	}
 
 	first_stage_init (fullpath, snapshot_name);
@@ -707,7 +707,7 @@ Session::when_engine_running ()
 			
 			/* default state for Click */
 
-			first_physical_output = _engine.get_nth_physical_output (0);
+			first_physical_output = _engine.get_nth_physical_audio_output (0);
 			
 			if (first_physical_output.length()) {
 				if (_click_io->add_output_port (first_physical_output, this)) {
@@ -735,33 +735,33 @@ Session::when_engine_running ()
 
 	/* ONE: MONO */
 
-	for (uint32_t np = 0; np < n_physical_outputs; ++np) {
+	for (uint32_t np = 0; np < n_physical_audio_outputs; ++np) {
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("out %" PRIu32), np+1);
 
 		Connection* c = new OutputConnection (buf, true);
 
 		c->add_port ();
-		c->add_connection (0, _engine.get_nth_physical_output (np));
+		c->add_connection (0, _engine.get_nth_physical_audio_output (np));
 
 		add_connection (c);
 	}
 
-	for (uint32_t np = 0; np < n_physical_inputs; ++np) {
+	for (uint32_t np = 0; np < n_physical_audio_inputs; ++np) {
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("in %" PRIu32), np+1);
 
 		Connection* c = new InputConnection (buf, true);
 
 		c->add_port ();
-		c->add_connection (0, _engine.get_nth_physical_input (np));
+		c->add_connection (0, _engine.get_nth_physical_audio_input (np));
 
 		add_connection (c);
 	}
 
 	/* TWO: STEREO */
 
-	for (uint32_t np = 0; np < n_physical_outputs; np +=2) {
+	for (uint32_t np = 0; np < n_physical_audio_outputs; np +=2) {
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("out %" PRIu32 "+%" PRIu32), np+1, np+2);
 
@@ -769,13 +769,13 @@ Session::when_engine_running ()
 
 		c->add_port ();
 		c->add_port ();
-		c->add_connection (0, _engine.get_nth_physical_output (np));
-		c->add_connection (1, _engine.get_nth_physical_output (np+1));
+		c->add_connection (0, _engine.get_nth_physical_audio_output (np));
+		c->add_connection (1, _engine.get_nth_physical_audio_output (np+1));
 
 		add_connection (c);
 	}
 
-	for (uint32_t np = 0; np < n_physical_inputs; np +=2) {
+	for (uint32_t np = 0; np < n_physical_audio_inputs; np +=2) {
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("in %" PRIu32 "+%" PRIu32), np+1, np+2);
 
@@ -783,8 +783,8 @@ Session::when_engine_running ()
 
 		c->add_port ();
 		c->add_port ();
-		c->add_connection (0, _engine.get_nth_physical_input (np));
-		c->add_connection (1, _engine.get_nth_physical_input (np+1));
+		c->add_connection (0, _engine.get_nth_physical_audio_input (np));
+		c->add_connection (1, _engine.get_nth_physical_audio_input (np+1));
 
 		add_connection (c);
 	}
@@ -817,7 +817,7 @@ Session::when_engine_running ()
 			}
 			n = 0;
 			while ((int) _master_out->n_outputs() < _master_out->output_maximum()) {
-				if (_master_out->add_output_port (_engine.get_nth_physical_output (n), this)) {
+				if (_master_out->add_output_port (_engine.get_nth_physical_audio_output (n), this)) {
 					error << _("cannot setup master outputs")
 					      << endmsg;
 					break;
@@ -926,7 +926,7 @@ Session::hookup_io ()
 		}
 		n = 0;
 		while ((int) _control_out->n_outputs() < _control_out->output_maximum()) {
-			if (_control_out->add_output_port (_engine.get_nth_physical_output (n), this)) {
+			if (_control_out->add_output_port (_engine.get_nth_physical_audio_output (n), this)) {
 				error << _("cannot set up master outputs")
 				      << endmsg;
 				break;
@@ -1689,8 +1689,8 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 	uint32_t nphysical_in;
 	uint32_t nphysical_out;
 
-	_engine.get_physical_outputs (physoutputs);
-	_engine.get_physical_inputs (physinputs);
+	_engine.get_physical_audio_outputs (physoutputs);
+	_engine.get_physical_audio_inputs (physinputs);
 	control_id = ntracks() + nbusses() + 1;
 
 	while (how_many) {
@@ -1714,13 +1714,13 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 		} while (track_id < (UINT_MAX-1));
 
 		if (Config->get_input_auto_connect() & AutoConnectPhysical) {
-			nphysical_in = min (n_physical_inputs, (uint32_t) physinputs.size());
+			nphysical_in = min (n_physical_audio_inputs, (uint32_t) physinputs.size());
 		} else {
 			nphysical_in = 0;
 		}
 		
 		if (Config->get_output_auto_connect() & AutoConnectPhysical) {
-			nphysical_out = min (n_physical_outputs, (uint32_t) physinputs.size());
+			nphysical_out = min (n_physical_audio_outputs, (uint32_t) physinputs.size());
 		} else {
 			nphysical_out = 0;
 		}
@@ -1876,8 +1876,8 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 	vector<string> physinputs;
 	vector<string> physoutputs;
 
-	_engine.get_physical_outputs (physoutputs);
-	_engine.get_physical_inputs (physinputs);
+	_engine.get_physical_audio_outputs (physoutputs);
+	_engine.get_physical_audio_inputs (physinputs);
 	control_id = ntracks() + nbusses() + 1;
 
 	while (how_many) {
@@ -1903,12 +1903,12 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 				goto failure;
 			}
 			
-			for (uint32_t x = 0; n_physical_inputs && x < bus->n_inputs(); ++x) {
+			for (uint32_t x = 0; n_physical_audio_inputs && x < bus->n_inputs(); ++x) {
 				
 				port = "";
 
 				if (Config->get_input_auto_connect() & AutoConnectPhysical) {
-						port = physinputs[((n+x)%n_physical_inputs)];
+						port = physinputs[((n+x)%n_physical_audio_inputs)];
 				} 
 				
 				if (port.length() && bus->connect_input (bus->input (x), port, this)) {
@@ -1916,12 +1916,12 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 				}
 			}
 			
-			for (uint32_t x = 0; n_physical_outputs && x < bus->n_outputs(); ++x) {
+			for (uint32_t x = 0; n_physical_audio_outputs && x < bus->n_outputs(); ++x) {
 				
 				port = "";
 				
 				if (Config->get_output_auto_connect() & AutoConnectPhysical) {
-					port = physoutputs[((n+x)%n_physical_outputs)];
+					port = physoutputs[((n+x)%n_physical_audio_outputs)];
 				} else if (Config->get_output_auto_connect() & AutoConnectMaster) {
 					if (_master_out) {
 						port = _master_out->input (x%_master_out->n_inputs())->name();

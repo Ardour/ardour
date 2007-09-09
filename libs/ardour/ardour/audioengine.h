@@ -121,18 +121,18 @@ class AudioEngine : public sigc::trackable
 	
 	const char ** get_ports (const std::string& port_name_pattern, const std::string& type_name_pattern, uint32_t flags);
 
-	uint32_t n_physical_outputs () const;
-	uint32_t n_physical_inputs () const;
+	uint32_t n_physical_audio_outputs () const;
+	uint32_t n_physical_audio_inputs () const;
 
-	void get_physical_outputs (std::vector<std::string>&);
-	void get_physical_inputs (std::vector<std::string>&);
+	void get_physical_audio_outputs (std::vector<std::string>&);
+	void get_physical_audio_inputs (std::vector<std::string>&);
 
-	std::string get_nth_physical_output (uint32_t n) {
-		return get_nth_physical (n, JackPortIsInput);
+	std::string get_nth_physical_audio_output (uint32_t n) {
+		return get_nth_physical_audio (n, JackPortIsInput);
 	}
 
-	std::string get_nth_physical_input (uint32_t n) {
-		return get_nth_physical (n, JackPortIsOutput);
+	std::string get_nth_physical_audio_input (uint32_t n) {
+		return get_nth_physical_audio (n, JackPortIsOutput);
 	}
 
 	nframes_t get_port_total_latency (const Port&);
@@ -225,7 +225,7 @@ class AudioEngine : public sigc::trackable
 	PortConnections port_connections;
 	void   remove_connections_for (Port*);
 
-	std::string get_nth_physical (uint32_t which, int flags);
+	std::string get_nth_physical_audio (uint32_t which, int flags);
 
 	static int  _xrun_callback (void *arg);
 	static int  _graph_order_callback (void *arg);
