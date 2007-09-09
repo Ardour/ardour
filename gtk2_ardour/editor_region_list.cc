@@ -134,21 +134,11 @@ Editor::add_audio_region_to_region_display (boost::shared_ptr<AudioRegion> regio
 
 		if (region->source()->name()[0] == '/') { // external file
 
-			if (region->whole_file()) {
+			/* XXX there was old code here to try to show an abbreviated version
+			   of the path name for whole file regions.
+			*/
 
-				boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(region->source());
-
-				str = ".../";
-
-				if (afs) {
-					str = region_name_from_path (afs->path(), region->n_channels() > 1);
-				} else {
-					str += region->source()->name();
-				}
-
-			} else {
-				str = region->name();
-			}
+			str = region->name();
 
 		} else {
 

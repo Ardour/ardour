@@ -53,7 +53,7 @@ int tokenize_fullpath (std::string fullpath, std::string& path, std::string& nam
 int touch_file(Glib::ustring path);
 
 Glib::ustring path_expand (Glib::ustring);
-Glib::ustring region_name_from_path (Glib::ustring path, bool strip_channels);
+Glib::ustring region_name_from_path (Glib::ustring path, bool strip_channels, bool add_channel_suffix = false, uint32_t total = 0, uint32_t this_one = 0);
 bool path_is_paired (Glib::ustring path, Glib::ustring& pair_base);
 
 void compute_equal_power_fades (nframes_t nframes, float* in, float* out);

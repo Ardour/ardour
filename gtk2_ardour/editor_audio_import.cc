@@ -367,7 +367,7 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, nframes64_t& po
 		goto out;
 	}
 
-	if (add_sources (paths, import_status.sources, pos, mode, target_regions, target_tracks, track) == 0) {
+	if (add_sources (paths, import_status.sources, pos, mode, target_regions, target_tracks, track, false) == 0) {
 		session->save_state ("");
 	}
 
@@ -523,7 +523,7 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 		goto out;
 	}
 
-	ret = add_sources (paths, sources, pos, mode, target_regions, target_tracks, track);
+	ret = add_sources (paths, sources, pos, mode, target_regions, target_tracks, track, true);
 
   out:
 	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
@@ -532,7 +532,7 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 
 int
 Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64_t& pos, ImportMode mode, 
-		     int target_regions, int target_tracks, boost::shared_ptr<AudioTrack>& track)
+		     int target_regions, int target_tracks, boost::shared_ptr<AudioTrack>& track, bool add_channel_suffix)
 {
 	vector<boost::shared_ptr<AudioRegion> > regions;
 	ustring region_name;
@@ -552,7 +552,7 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 
 		/* take all the sources we have and package them up as a region */
 
-		region_name = region_name_from_path (paths.front(), (sources.size() > 1));
+		region_name = region_name_from_path (paths.front(), (sources.size() > 1), false);
 		
 		regions.push_back (boost::dynamic_pointer_cast<AudioRegion> 
 				   (RegionFactory::create (sources, 0, sources[0]->length(), region_name, 0,
@@ -564,15 +564,18 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 
 		SourceList just_one;
 		SourceList::iterator x;
+		uint32_t n;
 
-		for (x = sources.begin(); x != sources.end(); ++x) {
+		for (n = 0, x = sources.begin(); x != sources.end(); ++x, ++n) {
 
 			just_one.clear ();
 			just_one.push_back (*x);
-
+			
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (*x);
 
-			region_name = region_name_from_path (afs->path(), false);
+			region_name = region_name_from_path (afs->path(), false, true, sources.size(), n);
+
+			cerr << "got region name " << region_name << endl;
 			
 			regions.push_back (boost::dynamic_pointer_cast<AudioRegion> 
 					   (RegionFactory::create (just_one, 0, (*x)->length(), region_name, 0,
@@ -597,10 +600,12 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 		output_chan = input_chan;
 	}
 
-	for (vector<boost::shared_ptr<AudioRegion> >::iterator r = regions.begin(); r != regions.end(); ++r) {
+	int n = 0;
+
+	for (vector<boost::shared_ptr<AudioRegion> >::iterator r = regions.begin(); r != regions.end(); ++r, ++n) {
 
 		finish_bringing_in_audio (*r, input_chan, output_chan, pos, mode, track);
-
+		
 		if (target_tracks != 1) {
 			track.reset ();
 		} else {
@@ -652,12 +657,15 @@ Editor::finish_bringing_in_audio (boost::shared_ptr<AudioRegion> region, uint32_
 	{ 
 		if (!existing_track) {
 			list<boost::shared_ptr<AudioTrack> > at (session->new_audio_track (in_chans, out_chans, Normal, 1));
+
 			if (at.empty()) {
 				return -1;
 			}
+
 			existing_track = at.front();
-			existing_track->set_name (basename_nosuffix (region->name()), this);
+			existing_track->set_name (region->name(), this);
 		}
+
 		boost::shared_ptr<AudioRegion> copy (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (region)));
 		existing_track->diskstream()->playlist()->add_region (copy, pos);
 		break;

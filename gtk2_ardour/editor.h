@@ -981,7 +981,7 @@ class Editor : public PublicEditor
 			     nframes64_t& pos, int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>&);
 
 	int add_sources (vector<Glib::ustring> paths, ARDOUR::SourceList& sources, nframes64_t& pos, Editing::ImportMode,
-			 int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>&);
+			 int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>&, bool add_channel_suffix);
 	int finish_bringing_in_audio (boost::shared_ptr<ARDOUR::AudioRegion> region, uint32_t, uint32_t,  nframes64_t& pos, Editing::ImportMode mode,
 				      boost::shared_ptr<ARDOUR::AudioTrack>& existing_track);
 

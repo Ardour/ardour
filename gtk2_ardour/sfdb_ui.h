@@ -158,6 +158,9 @@ class SoundFileChooser : public SoundFileBrowser
 	
 	Glib::ustring get_filename ();
 
+  protected:
+	void on_hide();
+
   private:
 	// SoundFileBrowser browser;
 };
@@ -179,6 +182,9 @@ class SoundFileOmega : public SoundFileBrowser
 	Editing::ImportMode get_mode() const;
 	Editing::ImportPosition get_position() const;
 	Editing::ImportDisposition get_channel_disposition() const;
+
+  protected:
+	void on_hide();
 
   private:
 	uint32_t selected_track_cnt;

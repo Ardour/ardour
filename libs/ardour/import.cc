@@ -32,6 +32,7 @@
 #include <glibmm.h>
 
 #include <pbd/basename.h>
+#include <pbd/convert.h>
 
 #include <ardour/ardour.h>
 #include <ardour/session.h>
@@ -41,71 +42,12 @@
 #include <ardour/audioregion.h>
 #include <ardour/region_factory.h>
 #include <ardour/source_factory.h>
-
+#include <ardour/resampled_source.h>
 
 #include "i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;
-
-#define BLOCKSIZE 4096U
-
-class ImportableSource {
-   public:
-    ImportableSource (SNDFILE* sf, SF_INFO* info) : in (sf), sf_info (info) {}
-    virtual ~ImportableSource() {}
-
-    virtual nframes_t read (Sample* buffer, nframes_t nframes) {
-	    nframes_t per_channel = nframes / sf_info->channels;
-	    per_channel = sf_readf_float (in, buffer, per_channel);
-	    return per_channel * sf_info->channels;
-    }
-
-    virtual float ratio() const { return 1.0f; }
-
-protected:
-       SNDFILE* in;
-       SF_INFO* sf_info;
-};
-
-class ResampledImportableSource : public ImportableSource {
-   public:
-    ResampledImportableSource (SNDFILE* sf, SF_INFO* info, nframes_t rate) : ImportableSource (sf, info) {
-	    int err;
-
-	    sf_seek (in, 0, SEEK_SET) ;
-	    
-	    /* Initialize the sample rate converter. */
-	    
-	    if ((src_state = src_new (SRC_SINC_BEST_QUALITY, sf_info->channels, &err)) == 0) {	
-		    error << string_compose(_("Import: src_new() failed : %1"), src_strerror (err)) << endmsg ;
-		    throw failed_constructor ();
-	    }
-	    
-	    src_data.end_of_input = 0 ; /* Set this later. */
-	    
-	    /* Start with zero to force load in while loop. */
-	    
-	    src_data.input_frames = 0 ;
-	    src_data.data_in = input ;
-	    
-	    src_data.src_ratio = ((float) rate) / sf_info->samplerate ;
-
-    }
-
-    ~ResampledImportableSource () { 
-	src_state = src_delete (src_state) ;
-    }
-
-    nframes_t read (Sample* buffer, nframes_t nframes);
-    
-    float ratio() const { return src_data.src_ratio; }
-
-   private:
-	float input[BLOCKSIZE];
-	SRC_STATE*	src_state;
-	SRC_DATA	src_data;
-};
 
 int
 Session::import_audiofile (import_status& status)
@@ -124,11 +66,12 @@ Session::import_audiofile (import_status& status)
 	vector<string> new_paths;
 	struct tm* now;
 	ImportableSource* importable = 0;
-	const nframes_t nframes = BLOCKSIZE;
+	const nframes_t nframes = ResampledImportableSource::blocksize;
+	uint32_t cnt = 1;
 
 	status.sources.clear ();
 
-	for (vector<Glib::ustring>::iterator p = status.paths.begin(); p != status.paths.end(); ++p) {
+	for (vector<Glib::ustring>::iterator p = status.paths.begin(); p != status.paths.end(); ++p, ++cnt) {
 
 		if ((in = sf_open ((*p).c_str(), SFM_READ, &info)) == 0) {
 			error << string_compose(_("Import: cannot open input sound file \"%1\""), (*p)) << endmsg;
@@ -207,7 +150,20 @@ Session::import_audiofile (import_status& status)
 
 		so_far = 0;
 
-		status.doing_what = _("converting audio");
+		if ((nframes_t) info.samplerate != frame_rate()) {
+			status.doing_what = string_compose (_("converting %1\n(resample from %2KHz to %3KHz)\n(%4 of %5)"),
+							    basepath,
+							    info.samplerate/1000.0f,
+							    frame_rate()/1000.0f,
+							    cnt, status.paths.size());
+							    
+		} else {
+			status.doing_what = string_compose (_("converting %1\n(%2 of %3)"), 
+							    basepath,
+							    cnt, status.paths.size());
+
+		}
+
 		status.progress = 0.0;
 
 		while (!status.cancel) {
@@ -305,50 +261,3 @@ Session::import_audiofile (import_status& status)
 
 	return ret;
 }
-
-nframes_t 
-ResampledImportableSource::read (Sample* output, nframes_t nframes)
-{
-	int err;
-
-	/* If the input buffer is empty, refill it. */
-	
-	if (src_data.input_frames == 0) {	
-
-		src_data.input_frames = ImportableSource::read (input, BLOCKSIZE);
-
-		/* The last read will not be a full buffer, so set end_of_input. */
-
-		if ((nframes_t) src_data.input_frames < BLOCKSIZE) {
-			src_data.end_of_input = SF_TRUE ;
-		}		
-
-		src_data.input_frames /= sf_info->channels;
-		src_data.data_in = input ;
-	} 
-	
-	src_data.data_out = output;
-
-	if (!src_data.end_of_input) {
-		src_data.output_frames = nframes / sf_info->channels ;
-	} else {
-		src_data.output_frames = src_data.input_frames;
-	}
-
-	if ((err = src_process (src_state, &src_data))) {
-		error << string_compose(_("Import: %1"), src_strerror (err)) << endmsg ;
-		return 0 ;
-	} 
-	
-	/* Terminate if at end */
-	
-	if (src_data.end_of_input && src_data.output_frames_gen == 0) {
-		return 0;
-	}
-	
-	src_data.data_in += src_data.input_frames_used * sf_info->channels ;
-	src_data.input_frames -= src_data.input_frames_used ;
-
-	return src_data.output_frames_gen * sf_info->channels;
-}
-

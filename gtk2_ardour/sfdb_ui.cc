@@ -65,8 +65,8 @@ ustring SoundFileBrowser::persistent_folder;
 SoundFileBox::SoundFileBox ()
 	: _session(0),
 	  table (6, 2),
-	  length_clock ("sfboxLengthClock", true, "EditCursorClock", false, true, false),
-	  timecode_clock ("sfboxTimecodeClock", true, "EditCursorClock", false, false, false),
+	  length_clock ("sfboxLengthClock", false, "EditCursorClock", false, true, false),
+	  timecode_clock ("sfboxTimecodeClock", false, "EditCursorClock", false, false, false),
 	  main_box (false, 6),
 	  autoplay_btn (_("Auto-play"))
 	
@@ -110,7 +110,7 @@ SoundFileBox::SoundFileBox ()
 	table.attach (length_clock, 1, 2, 4, 5, FILL, (AttachOptions) 0);
 	table.attach (timecode_clock, 1, 2, 5, 6, FILL, (AttachOptions) 0);
 
-	length_clock.set_mode (AudioClock::MinSec);
+	length_clock.set_mode (ARDOUR_UI::instance()->secondary_clock.mode());
 	timecode_clock.set_mode (AudioClock::SMPTE);
 
 	hbox = manage (new HBox);
@@ -204,7 +204,18 @@ SoundFileBox::setup_labels (const ustring& filename)
 	preview_label.set_markup (string_compose ("<b>%1</b>", Glib::path_get_basename (filename)));
 	format_text.set_text (sf_info.format_name);
 	channels_value.set_text (to_string (sf_info.channels, std::dec));
-	samplerate_value.set_text (string_compose (X_("%1 Hz"), sf_info.samplerate));
+
+	if (_session && sf_info.samplerate != _session->frame_rate()) {
+		samplerate.set_markup (string_compose ("<b>%1</b>", _("Sample rate:")));
+		samplerate_value.set_markup (string_compose (X_("<b>%1 Hz</b>"), sf_info.samplerate));
+		samplerate_value.set_name ("NewSessionSR1Label");
+		samplerate.set_name ("NewSessionSR1Label");
+	} else {
+		samplerate.set_text (_("Sample rate:"));
+		samplerate_value.set_text (string_compose (X_("%1 Hz"), sf_info.samplerate));
+		samplerate_value.set_name ("NewSessionSR2Label");
+		samplerate.set_name ("NewSessionSR2Label");
+	}
 
 	length_clock.set (sf_info.length, true);
 	timecode_clock.set (sf_info.timecode, true);
@@ -781,6 +792,15 @@ SoundFileChooser::SoundFileChooser (Gtk::Window& parent, string title, ARDOUR::S
 	found_list_view.get_selection()->set_mode (SELECTION_SINGLE);
 }
 
+void
+SoundFileChooser::on_hide ()
+{
+	ArdourDialog::on_hide();
+	if (session) {
+		session->cancel_audition();
+	}
+}
+
 ustring
 SoundFileChooser::get_filename ()
 {
@@ -900,6 +920,15 @@ SoundFileOmega::get_mode () const
 		return ImportToTrack;
 	} else {
 		return ImportAsTapeTrack;
+	}
+}
+
+void
+SoundFileOmega::on_hide ()
+{
+	ArdourDialog::on_hide();
+	if (session) {
+		session->cancel_audition();
 	}
 }
 

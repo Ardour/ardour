@@ -208,7 +208,7 @@ touch_file (ustring path)
 }
 
 ustring
-region_name_from_path (ustring path, bool strip_channels)
+region_name_from_path (ustring path, bool strip_channels, bool add_channel_suffix, uint32_t total, uint32_t this_one)
 {
 	path = PBD::basename_nosuffix (path);
 
@@ -222,6 +222,17 @@ region_name_from_path (ustring path, bool strip_channels)
 		    (path[len-1] == 'R' || path[len-1] == 'L' || (islower (path[len-1])))) {
 			
 			path = path.substr (0, path.length() - 2);
+		}
+	}
+
+	if (add_channel_suffix) {
+
+		path += '%';
+		
+		if (total > 2) {
+			path += (char) ('a' + this_one);
+		} else {
+			path += (char) (this_one == 0 ? 'L' : 'R');
 		}
 	}
 
