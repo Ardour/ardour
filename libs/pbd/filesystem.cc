@@ -149,11 +149,10 @@ rename (const path & from_path, const path & to_path)
 	}
 }
 
+// XXX character encoding.
 void
 copy_file(const path & from_path, const path & to_path)
 {
-	// this implementation could use mucho memory
-	// for big files.
 	std::ifstream in(from_path.to_string().c_str());
 	std::ofstream out(to_path.to_string().c_str());
 	
@@ -165,9 +164,9 @@ copy_file(const path & from_path, const path & to_path)
 	out << in.rdbuf();
 	
 	if (!in || !out) {
+		remove (to_path);
 		throw filesystem_error(string_compose(_("Could not copy existing file %1 to %2"),
 					from_path.to_string(), to_path.to_string()));
-		remove (to_path);
 	}
 }
 
