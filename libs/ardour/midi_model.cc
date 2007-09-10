@@ -128,7 +128,7 @@ MidiModel::const_iterator::operator++()
 	assert(_event.is_note() || _event.is_cc());
 
 	// Increment past current control event
-	if (_control_iter->first && _event.is_cc()) {
+	if (_control_iter != _control_iters.end() && _control_iter->first && _event.is_cc()) {
 		double x, y;
 		const bool ret = _control_iter->first->rt_safe_earliest_event_unlocked(
 				_control_iter->second.first, DBL_MAX, x, y, false);
