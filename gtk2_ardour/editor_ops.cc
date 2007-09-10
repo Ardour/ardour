@@ -178,8 +178,8 @@ Editor::remove_selected_regions ()
 	/* XXX: should be called remove regions if we're removing more than one */
 	begin_reversible_command (_("remove region"));
 	
-	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-		boost::shared_ptr<Region> region = (*i)->region ();
+	while (!selection->regions.empty()) {
+		boost::shared_ptr<Region> region = selection->regions.front()->region ();
 		boost::shared_ptr<Playlist> playlist = region->playlist ();
 	
 		XMLNode &before = playlist->get_state();
