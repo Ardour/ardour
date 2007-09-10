@@ -108,15 +108,16 @@ const nframes_t frames_per_peak = 256;
 	virtual int setup_peakfile () { return 0; }
 
 	int prepare_for_peakfile_writes ();
-	void done_with_peakfile_writes ();
+	void done_with_peakfile_writes (bool done = true);
 
   protected:
 	static bool _build_missing_peakfiles;
 	static bool _build_peakfiles;
 
-	bool                _peaks_built;
-	mutable Glib::Mutex _lock;
-	nframes_t           _length;
+	bool                 _peaks_built;
+	mutable Glib::RWLock _lock;
+	mutable Glib::Mutex  _peaks_ready_lock;
+	nframes_t            _length;
 	ustring               peakpath;
 	ustring              _captured_for;
 
@@ -125,7 +126,7 @@ const nframes_t frames_per_peak = 256;
 
 	int initialize_peakfile (bool newfile, ustring path);
 	int build_peaks_from_scratch ();
-	int compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframes_t cnt, bool force);
+	int compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframes_t cnt, bool force, bool intermediate_peaks_ready_signal);
 	void truncate_peakfile();
 
 	mutable off_t _peak_byte_max; // modified in compute_and_write_peak()

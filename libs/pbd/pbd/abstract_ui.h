@@ -56,6 +56,7 @@ class AbstractUI : public BaseUI
 
 	void register_thread (pthread_t, std::string);
 	void register_thread_with_request_count (pthread_t, std::string, uint32_t num_requests);
+	void unregister_thread (pthread_t);
 
   protected:
 	typedef RingBufferNPT<RequestObject> RequestBuffer;

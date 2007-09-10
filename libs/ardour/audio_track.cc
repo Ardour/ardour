@@ -138,14 +138,22 @@ AudioTrack::deprecated_use_diskstream_connections ()
 		
 		if (c == 0) {
 		  	error << string_compose(_("Unknown connection \"%1\" listed for input of %2"), prop->value(), _name) << endmsg;
+
+			string replacement_connection;
+
+			if (prop->value().find ('+') != string::npos) {
+				replacement_connection = _("in 1+2");
+			} else {
+				replacement_connection = _("in 1");
+			}
 			
-			if ((c = _session.connection_by_name (_("in 1"))) == 0) {
+			if ((c = _session.connection_by_name (replacement_connection)) == 0) {
 			  	error << _("No input connections available as a replacement")
 			        << endmsg;
 				return -1;
 			} else {
-			  	info << string_compose (_("Connection %1 was not available - \"in 1\" used instead"), prop->value())
-			       << endmsg;
+			  	info << string_compose (_("Connection %1 was not available - \"%2\" used instead"), prop->value(), replacement_connection)
+				     << endmsg;
 			}
 		}
 

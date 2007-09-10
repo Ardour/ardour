@@ -18,6 +18,7 @@ AbstractUI<RequestObject>::AbstractUI (string name, bool with_signal_pipes)
 	}
 
 	PBD::ThreadCreated.connect (mem_fun (*this, &AbstractUI<RequestObject>::register_thread));
+	PBD::ThreadLeaving.connect (mem_fun (*this, &AbstractUI<RequestObject>::unregister_thread));
 	PBD::ThreadCreatedWithRequestSize.connect (mem_fun (*this, &AbstractUI<RequestObject>::register_thread_with_request_count));
 }
 
@@ -38,6 +39,18 @@ AbstractUI<RequestObject>::register_thread_with_request_count (pthread_t thread_
 	}
 
 	pthread_setspecific (thread_request_buffer_key, b);
+}
+
+template <typename RequestObject> void
+AbstractUI<RequestObject>::unregister_thread (pthread_t thread_id)
+{
+	{
+		Glib::Mutex::Lock lm (request_buffer_map_lock);
+		typename RequestBufferMap::iterator x = request_buffers.find (thread_id);
+		if (x != request_buffers.end()) {
+			request_buffers.erase (x);
+		}
+	}
 }
 
 template <typename RequestObject> RequestObject*

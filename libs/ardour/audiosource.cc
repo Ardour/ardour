@@ -127,16 +127,16 @@ bool
 AudioSource::peaks_ready (sigc::slot<void> the_slot, sigc::connection& conn) const
 {
 	bool ret;
-	Glib::Mutex::Lock lm (_lock);
+	Glib::Mutex::Lock lm (_peaks_ready_lock);
 
 	/* check to see if the peak data is ready. if not
 	   connect the slot while still holding the lock.
 	*/
-
+	
 	if (!(ret = _peaks_built)) {
 		conn = PeaksReady.connect (the_slot);
 	}
-
+	
 	return ret;
 }
 
@@ -246,21 +246,21 @@ AudioSource::initialize_peakfile (bool newfile, ustring audio_path)
 nframes_t
 AudioSource::read (Sample *dst, nframes_t start, nframes_t cnt) const
 {
-	Glib::Mutex::Lock lm (_lock);
+	Glib::RWLock::ReaderLock lm (_lock);
 	return read_unlocked (dst, start, cnt);
 }
 
 nframes_t
 AudioSource::write (Sample *dst, nframes_t cnt)
 {
-	Glib::Mutex::Lock lm (_lock);
+	Glib::RWLock::WriterLock lm (_lock);
 	return write_unlocked (dst, cnt);
 }
 
 int 
 AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nframes_t cnt, double samples_per_visual_peak) const
 {
-	Glib::Mutex::Lock lm (_lock);
+	Glib::RWLock::ReaderLock lm (_lock);
 	double scale;
 	double expected_peaks;
 	PeakData::PeakDatum xmax;
@@ -590,7 +590,7 @@ AudioSource::build_peaks_from_scratch ()
 	{
 		/* hold lock while building peaks */
 
-		Glib::Mutex::Lock lp (_lock);
+		Glib::RWLock::ReaderLock lp (_lock);
 		
 		if (prepare_for_peakfile_writes ()) {
 			goto out;
@@ -606,11 +606,11 @@ AudioSource::build_peaks_from_scratch ()
 
 			if ((frames_read = read_unlocked (buf, current_frame, frames_to_read)) != frames_to_read) {
 				error << string_compose(_("%1: could not write read raw data for peak computation (%2)"), _name, strerror (errno)) << endmsg;
-				done_with_peakfile_writes ();
+				done_with_peakfile_writes (false);
 				goto out;
 			}
 
-			if (compute_and_write_peaks (buf, current_frame, frames_read, true)) {
+			if (compute_and_write_peaks (buf, current_frame, frames_read, true, false)) {
 				break;
 			}
 			
@@ -626,12 +626,15 @@ AudioSource::build_peaks_from_scratch ()
 
 		done_with_peakfile_writes ();
 	}
+	
+	{
+		Glib::Mutex::Lock lm (_peaks_ready_lock);
+		
+		if (_peaks_built) {
+			PeaksReady (); /* EMIT SIGNAL */
 
-	/* lock no longer held, safe to signal */
-
-	if (_peaks_built) {
-		PeaksReady (); /* EMIT SIGNAL */
-		ret = 0;
+			ret = 0;
+		}
 	}
 
   out:
@@ -653,10 +656,14 @@ AudioSource::prepare_for_peakfile_writes ()
 }
 
 void
-AudioSource::done_with_peakfile_writes ()
+AudioSource::done_with_peakfile_writes (bool done)
 {
 	if (peak_leftover_cnt) {
-		compute_and_write_peaks (0, 0, 0, true);
+		compute_and_write_peaks (0, 0, 0, true, false);
+	}
+	
+	if (done) {
+		_peaks_built = true;
 	}
 
 	if (peakfile >= 0) {
@@ -666,7 +673,7 @@ AudioSource::done_with_peakfile_writes ()
 }
 
 int
-AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframes_t cnt, bool force)
+AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframes_t cnt, bool force, bool intermediate_peaks_ready)
 {
 	Sample* buf2 = 0;
 	nframes_t to_do;
@@ -707,8 +714,15 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 
 			_peak_byte_max = max (_peak_byte_max, (off_t) (byte + sizeof(PeakData)));
 
-			PeakRangeReady (peak_leftover_frame, peak_leftover_cnt); /* EMIT SIGNAL */
-			PeaksReady (); /* EMIT SIGNAL */
+			{ 
+				Glib::Mutex::Lock lm (_peaks_ready_lock);
+				PeakRangeReady (peak_leftover_frame, peak_leftover_cnt); /* EMIT SIGNAL */
+				if (intermediate_peaks_ready) {
+					PeaksReady (); /* EMIT SIGNAL */
+				} else {
+					cerr << "skipped PR @ A\n";
+				}
+			}
 
 			/* left overs are done */
 
@@ -815,8 +829,14 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 	_peak_byte_max = max (_peak_byte_max, (off_t) (first_peak_byte + sizeof(PeakData)*peaks_computed));	
 
 	if (frames_done) {
+		Glib::Mutex::Lock lm (_peaks_ready_lock);
 		PeakRangeReady (first_frame, frames_done); /* EMIT SIGNAL */
-		PeaksReady (); /* EMIT SIGNAL */
+		if (intermediate_peaks_ready) {
+			PeaksReady (); /* EMIT SIGNAL */
+		} else {
+			cerr << "skipped PR @ B\n";
+		}
+					
 	}
 
 	ret = 0;

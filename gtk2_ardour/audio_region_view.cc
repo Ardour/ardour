@@ -113,7 +113,7 @@ AudioRegionView::AudioRegionView (const AudioRegionView& other)
 	UINT_TO_RGBA (other.fill_color, &r, &g, &b, &a);
 	c.set_rgb_p (r/255.0, g/255.0, b/255.0);
 	
-	init (c, false);
+	init (c, true);
 }
 
 void
@@ -122,7 +122,7 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 	// FIXME: Some redundancy here with RegionView::init.  Need to figure out
 	// where order is important and where it isn't...
 	
-	RegionView::init(basic_color, false);
+	RegionView::init (basic_color, true);
 	
 	XMLNode *node;
 
@@ -865,7 +865,6 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 		/* all waves created, don't hook into peaks ready anymore */
 		data_ready_connection.disconnect ();		
 
-		if(0)
 		if (!zero_line) {
 			zero_line = new ArdourCanvas::SimpleLine (*group);
 			zero_line->property_x1() = (gdouble) 1.0;
