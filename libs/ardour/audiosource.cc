@@ -582,9 +582,10 @@ AudioSource::build_peaks_from_scratch ()
 {
 	nframes_t current_frame;
 	nframes_t cnt;
-	Sample buf[frames_per_peak];
+	Sample* buf = 0;
 	nframes_t frames_read;
-	nframes_t frames_to_read;
+	nframes_t frames_to_read = 65536; // 256kB reads from disk, roughly ideal
+
 	int ret = -1;
 
 	{
@@ -599,6 +600,7 @@ AudioSource::build_peaks_from_scratch ()
 		current_frame = 0;
 		cnt = _length;
 		_peaks_built = false;
+		buf = new Sample[frames_to_read];
 		
 		while (cnt) {
 			
@@ -609,7 +611,7 @@ AudioSource::build_peaks_from_scratch ()
 				done_with_peakfile_writes (false);
 				goto out;
 			}
-
+			
 			if (compute_and_write_peaks (buf, current_frame, frames_read, true, false)) {
 				break;
 			}
@@ -617,7 +619,7 @@ AudioSource::build_peaks_from_scratch ()
 			current_frame += frames_read;
 			cnt -= frames_read;
 		}
-		
+
 		if (cnt == 0) {
 			/* success */
 			truncate_peakfile();
@@ -640,6 +642,10 @@ AudioSource::build_peaks_from_scratch ()
   out:
 	if (ret) {
 		unlink (peakpath.c_str());
+	}
+
+	if (buf) {
+		delete [] buf;
 	}
 
 	return ret;
@@ -719,9 +725,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 				PeakRangeReady (peak_leftover_frame, peak_leftover_cnt); /* EMIT SIGNAL */
 				if (intermediate_peaks_ready) {
 					PeaksReady (); /* EMIT SIGNAL */
-				} else {
-					cerr << "skipped PR @ A\n";
-				}
+				} 
 			}
 
 			/* left overs are done */
@@ -833,10 +837,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 		PeakRangeReady (first_frame, frames_done); /* EMIT SIGNAL */
 		if (intermediate_peaks_ready) {
 			PeaksReady (); /* EMIT SIGNAL */
-		} else {
-			cerr << "skipped PR @ B\n";
 		}
-					
 	}
 
 	ret = 0;

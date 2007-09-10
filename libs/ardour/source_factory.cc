@@ -41,28 +41,62 @@ using namespace PBD;
 using namespace sigc;
 
 sigc::signal<void,boost::shared_ptr<Source> > SourceFactory::SourceCreated;
+Glib::Cond* SourceFactory::PeaksToBuild;
+Glib::StaticMutex SourceFactory::peak_building_lock;
+std::list<boost::weak_ptr<AudioSource> > SourceFactory::files_with_peaks;
 
-static void setup_peakfile (boost::weak_ptr<AudioSource> was)
+static void 
+peak_thread_work ()
 {
-	boost::shared_ptr<AudioSource> as (was.lock());
+	PBD::ThreadCreated (pthread_self(), string ("peakbuilder-") + to_string (pthread_self(), std::dec));
 
-	if (!as) {
-		return;
+	while (true) {
+
+		SourceFactory::peak_building_lock.lock ();
+
+		SourceFactory::PeaksToBuild->wait (SourceFactory::peak_building_lock);
+
+		if (SourceFactory::files_with_peaks.empty()) {
+			continue;
+		}
+		
+		boost::shared_ptr<AudioSource> as (SourceFactory::files_with_peaks.front().lock());
+		SourceFactory::files_with_peaks.pop_front ();
+		SourceFactory::peak_building_lock.unlock ();
+		
+		if (!as) {
+			continue;
+		}
+		
+		as->setup_peakfile ();
 	}
+}
 
-	PBD::ThreadCreatedWithRequestSize (pthread_self(), string ("peakbuilder-") + to_string (pthread_self(), std::dec), 1024);
-	as->setup_peakfile ();
-	// PBD::ThreadLeaving (pthread_self());
+void
+SourceFactory::init ()
+{
+	PeaksToBuild = new Glib::Cond();
+
+	for (int n = 0; n < 2; ++n) {
+		Glib::Thread::create (sigc::ptr_fun (::peak_thread_work), false);
+	}
 }
 
 int
 SourceFactory::setup_peakfile (boost::shared_ptr<Source> s, bool async)
 {
 	boost::shared_ptr<AudioSource> as (boost::dynamic_pointer_cast<AudioSource> (s));
+
 	if (as) {
+
 		if (async) {
-			Glib::Thread::create (bind (sigc::ptr_fun (::setup_peakfile), boost::weak_ptr<AudioSource>(as)), false);
+
+			Glib::Mutex::Lock lm (peak_building_lock);
+			files_with_peaks.push_back (boost::weak_ptr<AudioSource> (as));
+			PeaksToBuild->signal ();
+
 		} else {
+
 			if (as->setup_peakfile ()) {
 				error << string_compose("SourceFactory: could not set up peakfile for %1", as->name()) << endmsg;
 				return -1;

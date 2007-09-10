@@ -52,6 +52,7 @@
 #include <ardour/audiosource.h>
 #include <ardour/utils.h>
 #include <ardour/session.h>
+#include <ardour/source_factory.h>
 #include <ardour/control_protocol_manager.h>
 
 #ifdef HAVE_LIBLO
@@ -300,6 +301,8 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 #endif
 
 	setup_hardware_optimization (try_optimization);
+
+	SourceFactory::init ();
 
 	/* singleton - first object is "it" */
 	new PluginManager ();
