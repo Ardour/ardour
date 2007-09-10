@@ -155,7 +155,7 @@ MidiModel::const_iterator::operator++()
 		}
 	}
 	
-	enum Type { NIL,  NOTE, CC };
+	enum Type { NIL, NOTE, CC };
 	Type type = NIL;
 
 	if (_note_iter != _model->notes().end())
