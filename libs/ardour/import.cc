@@ -70,7 +70,7 @@ Session::import_audiofile (import_status& status)
 	uint32_t cnt = 1;
 
 	status.sources.clear ();
-
+	
 	for (vector<Glib::ustring>::iterator p = status.paths.begin(); p != status.paths.end(); ++p, ++cnt) {
 
 		if ((in = sf_open ((*p).c_str(), SFM_READ, &info)) == 0) {
@@ -138,6 +138,7 @@ Session::import_audiofile (import_status& status)
 			}
 
 			new_paths.push_back (buf);
+			newfiles[n]->prepare_for_peakfile_writes ();
 			nfiles++;
 		}
 	
@@ -220,6 +221,7 @@ Session::import_audiofile (import_status& status)
 
 	for (SourceList::iterator x = status.sources.begin(); x != status.sources.end() && !status.cancel; ++x) {
 		boost::dynamic_pointer_cast<AudioFileSource>(*x)->update_header(0, *now, xnow);
+		boost::dynamic_pointer_cast<AudioSource>(*x)->done_with_peakfile_writes ();
 	}
 
 	/* save state so that we don't lose these new Sources */

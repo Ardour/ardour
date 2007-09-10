@@ -634,7 +634,6 @@ AudioSource::build_peaks_from_scratch ()
 		
 		if (_peaks_built) {
 			PeaksReady (); /* EMIT SIGNAL */
-
 			ret = 0;
 		}
 	}
@@ -725,7 +724,9 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 				PeakRangeReady (peak_leftover_frame, peak_leftover_cnt); /* EMIT SIGNAL */
 				if (intermediate_peaks_ready) {
 					PeaksReady (); /* EMIT SIGNAL */
-				} 
+				}  else {
+					cerr << "Skip PR at A\n";
+				}
 			}
 
 			/* left overs are done */
@@ -837,7 +838,10 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 		PeakRangeReady (first_frame, frames_done); /* EMIT SIGNAL */
 		if (intermediate_peaks_ready) {
 			PeaksReady (); /* EMIT SIGNAL */
+		} else {
+			cerr << "Skip PR at A\n";
 		}
+
 	}
 
 	ret = 0;
