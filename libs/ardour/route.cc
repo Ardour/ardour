@@ -711,7 +711,6 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 	   -------------------------------------------------------------------------------------------------- */
 
 	if (meter && (_meter_point == MeterPostFader)) {
-//		cerr << "meter post" << endl;
 
 		if ((_gain == 0 && !apply_gain_automation) || dmg == 0) {
 			uint32_t no = n_outputs();

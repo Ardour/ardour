@@ -22,6 +22,7 @@
 
 #include <samplerate.h>
 
+#include <ardour/types.h>
 #include <ardour/importable_source.h>
 
 namespace ARDOUR {
@@ -29,7 +30,7 @@ namespace ARDOUR {
 class ResampledImportableSource : public ImportableSource 
 {
   public:
-	ResampledImportableSource (SNDFILE* sf, SF_INFO* info, nframes_t rate);
+	ResampledImportableSource (SNDFILE* sf, SF_INFO* info, nframes_t rate, SrcQuality);
 	~ResampledImportableSource ();
 	
 	nframes_t read (Sample* buffer, nframes_t nframes);

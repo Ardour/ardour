@@ -47,6 +47,8 @@ namespace ARDOUR {
 	class Session;
 };
 
+class GainMeter;
+
 class SoundFileBox : public Gtk::VBox
 {
   public:
@@ -133,12 +135,22 @@ class SoundFileBrowser : public ArdourDialog
 	Gtk::FileFilter custom_filter;
 	Gtk::FileFilter matchall_filter;
 	SoundFileBox preview;
+	Gtk::HBox hpacker;
 
 	static Glib::ustring persistent_folder;
 
 	Gtk::Entry found_entry;
 	Gtk::Button found_search_btn;
 	Gtk::Notebook notebook;
+
+	GainMeter* gm;
+	Gtk::VBox meter_packer;
+	void add_gain_meter ();
+	void remove_gain_meter ();
+	void meter ();
+	void start_metering ();
+	void stop_metering ();
+	sigc::connection metering_connection;
 
 	void update_preview ();
 	void found_list_view_selected ();
@@ -150,6 +162,10 @@ class SoundFileBrowser : public ArdourDialog
 	bool on_custom (const Gtk::FileFilter::Info& filter_info);
 
 	virtual bool reset_options() { return true; }
+
+  protected:
+	void on_show();
+
 };
 
 class SoundFileChooser : public SoundFileBrowser
@@ -162,9 +178,6 @@ class SoundFileChooser : public SoundFileBrowser
 
   protected:
 	void on_hide();
-
-  private:
-	// SoundFileBrowser browser;
 };
 
 class SoundFileOmega : public SoundFileBrowser
@@ -178,12 +191,14 @@ class SoundFileOmega : public SoundFileBrowser
 	Gtk::ComboBoxText action_combo;
 	Gtk::ComboBoxText where_combo;
 	Gtk::ComboBoxText channel_combo;
-	
+	Gtk::ComboBoxText src_combo;
+
 	Gtk::CheckButton copy_files_btn;
 
 	Editing::ImportMode get_mode() const;
 	Editing::ImportPosition get_position() const;
 	Editing::ImportDisposition get_channel_disposition() const;
+	ARDOUR::SrcQuality get_src_quality() const;
 
   protected:
 	void on_hide();
@@ -199,7 +214,9 @@ class SoundFileOmega : public SoundFileBrowser
 	Gtk::VBox block_three;
 	Gtk::VBox block_four;
 
-	static bool check_multichannel_status (const std::vector<Glib::ustring>& paths, bool& same_size, bool& err);
+	bool check_info (const std::vector<Glib::ustring>& paths, 
+			 bool& same_size, bool& src_needed, bool& multichannel);
+
 	static bool check_link_status (const ARDOUR::Session&, const std::vector<Glib::ustring>& paths);
 
 	void file_selection_changed ();

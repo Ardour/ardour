@@ -969,13 +969,13 @@ class Editor : public PublicEditor
 	SoundFileOmega* sfbrowser;
 	
 	void bring_in_external_audio (Editing::ImportMode mode,  nframes64_t& pos);
-	void do_import (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
+	void do_import (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, nframes64_t&);
 
 	void _do_embed (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
 	void do_embed (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
 	bool idle_do_embed (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
 
-	int  import_sndfiles (vector<Glib::ustring> paths, Editing::ImportMode mode,  nframes64_t& pos,
+	int  import_sndfiles (vector<Glib::ustring> paths, Editing::ImportMode mode,  ARDOUR::SrcQuality, nframes64_t& pos,
 			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>&);
 	int  embed_sndfiles (vector<Glib::ustring> paths, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode, 
 			     nframes64_t& pos, int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>&);

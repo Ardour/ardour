@@ -128,8 +128,10 @@ Editor::external_audio_dialog ()
 		break;
 	}
 
+	SrcQuality quality = sfbrowser->get_src_quality();
+
 	if (sfbrowser->copy_files_btn.get_active()) {
-		do_import (paths, chns, mode, where);
+		do_import (paths, chns, mode, quality, where);
 	} else {
 		do_embed (paths, chns, mode, where);
 	}
@@ -166,7 +168,7 @@ Editor::get_nth_selected_audio_track (int nth) const
 }	
 
 void
-Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mode, nframes64_t& pos)
+Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mode, SrcQuality quality, nframes64_t& pos)
 {
 	boost::shared_ptr<AudioTrack> track;
 	vector<ustring> to_import;
@@ -188,7 +190,7 @@ Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mod
 				track = get_nth_selected_audio_track (nth++);
 			}
 			
-			if (import_sndfiles (to_import, mode, pos, 1, -1, track)) {
+			if (import_sndfiles (to_import, mode, quality, pos, 1, -1, track)) {
 				goto out;
 			}
 
@@ -201,7 +203,7 @@ Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mod
 			to_import.clear ();
 			to_import.push_back (*a);
 
-			if (import_sndfiles (to_import, mode, pos, -1, -1, track)) {
+			if (import_sndfiles (to_import, mode, quality, pos, -1, -1, track)) {
 				goto out;
 			}
 
@@ -212,7 +214,7 @@ Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mod
 		/* create 1 region from all paths, add to 1 track,
 		   ignore "track"
 		*/
-		if (import_sndfiles (paths, mode, pos, 1, 1, track)) {
+		if (import_sndfiles (paths, mode, quality, pos, 1, 1, track)) {
 			goto out;
 		}
 		break;
@@ -227,7 +229,7 @@ Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mod
 			   reuse "track" across paths
 			*/
 
-			if (import_sndfiles (to_import, mode, pos, 1, 1, track)) {
+			if (import_sndfiles (to_import, mode, quality, pos, 1, 1, track)) {
 				goto out;
 			}
 
@@ -329,7 +331,7 @@ Editor::_do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mod
 }
 
 int
-Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, nframes64_t& pos, 
+Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality quality, nframes64_t& pos, 
 			 int target_regions, int target_tracks, boost::shared_ptr<AudioTrack>& track)
 {
 	WindowTitle title = string_compose (_("importing %1"), paths.front());
@@ -346,7 +348,8 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, nframes64_t& po
 	import_status.cancel = false;
 	import_status.freeze = false;
 	import_status.done = 0.0;
-	
+	import_status.quality = quality;
+
 	interthread_progress_connection = Glib::signal_timeout().connect 
 		(bind (mem_fun(*this, &Editor::import_progress_timeout), (gpointer) 0), 100);
 	

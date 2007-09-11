@@ -50,6 +50,7 @@ AudioFilter::make_new_sources (boost::shared_ptr<AudioRegion> region, SourceList
 
 		try {
 			nsrcs.push_back (boost::dynamic_pointer_cast<AudioSource> (SourceFactory::createWritable (session, path, false, session.frame_rate())));
+			nsrcs.back()->prepare_for_peakfile_writes ();
 		} 
 
 		catch (failed_constructor& err) {
@@ -76,6 +77,12 @@ AudioFilter::finish (boost::shared_ptr<AudioRegion> region, SourceList& nsrcs)
 
 	for (SourceList::iterator si = nsrcs.begin(); si != nsrcs.end(); ++si) {
 		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*si);
+		boost::shared_ptr<AudioSource> as = boost::dynamic_pointer_cast<AudioSource>(*si);
+
+		if (as) {
+			as->done_with_peakfile_writes ();
+		}
+
 		if (afs) {
 			afs->update_header (region->position(), *now, xnow);
 			afs->mark_immutable ();

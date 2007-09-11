@@ -564,6 +564,7 @@ class Session : public PBD::StatefulDestructible
 	    
 	    /* control info */
 	    bool sample_convert;
+	    SrcQuality quality;
 	    volatile bool freeze;
 	    std::vector<Glib::ustring> paths;
 	    

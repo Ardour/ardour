@@ -2475,7 +2475,7 @@ IO::meter ()
 {
 	Glib::Mutex::Lock lm (io_lock); // READER: meter thread.
 	uint32_t limit = max (_ninputs, _noutputs);
-	
+
 	for (uint32_t n = 0; n < limit; ++n) {
 
 		/* XXX we should use atomic exchange here */
@@ -2496,7 +2496,6 @@ IO::meter ()
 		/* update max peak */
 		
 		_max_peak_power[n] = max (new_peak, _max_peak_power[n]);
-		
 		
 		if (Config->get_meter_falloff() == 0.0f || new_peak > _visible_peak_power[n]) {
 			_visible_peak_power[n] = new_peak;

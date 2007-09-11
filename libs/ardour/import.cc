@@ -81,7 +81,7 @@ Session::import_audiofile (import_status& status)
 		}
 		
 		if ((nframes_t) info.samplerate != frame_rate()) {
-			importable = new ResampledImportableSource (in, &info, frame_rate());
+			importable = new ResampledImportableSource (in, &info, frame_rate(), status.quality);
 		} else {
 			importable = new ImportableSource (in, &info);
 		}

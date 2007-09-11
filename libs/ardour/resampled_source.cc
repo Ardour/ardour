@@ -28,7 +28,7 @@ using namespace PBD;
 
 const uint32_t ResampledImportableSource::blocksize = 4096U;
 
-ResampledImportableSource::ResampledImportableSource (SNDFILE* sf, SF_INFO* info, nframes_t rate)
+ResampledImportableSource::ResampledImportableSource (SNDFILE* sf, SF_INFO* info, nframes_t rate, SrcQuality srcq)
 	: ImportableSource (sf, info) 
 {
 	int err;
@@ -37,7 +37,27 @@ ResampledImportableSource::ResampledImportableSource (SNDFILE* sf, SF_INFO* info
 	
 	/* Initialize the sample rate converter. */
 	
-	if ((src_state = src_new (SRC_SINC_BEST_QUALITY, sf_info->channels, &err)) == 0) {	
+	int src_type;
+
+	switch (srcq) {
+	case SrcBest:
+		src_type = SRC_SINC_BEST_QUALITY;
+		break;
+	case SrcGood:
+		src_type = SRC_SINC_MEDIUM_QUALITY;
+		break;
+	case SrcQuick:
+		src_type = SRC_SINC_FASTEST;
+		break;
+	case SrcFast:
+		src_type = SRC_ZERO_ORDER_HOLD;
+		break;
+	case SrcFastest:
+		src_type = SRC_LINEAR;
+		break;
+	}
+	
+	if ((src_state = src_new (src_type, sf_info->channels, &err)) == 0) {	
 		error << string_compose(_("Import: src_new() failed : %1"), src_strerror (err)) << endmsg ;
 		throw failed_constructor ();
 	}

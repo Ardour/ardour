@@ -147,39 +147,41 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	if ((r = dynamic_cast<Route*> (_io.get())) != 0) {
 
 	        /* 
-		   if we have a route (ie. we're not the click), 
+		   if we have a non-hidden route (ie. we're not the click or the auditioner), 
 		   pack some route-dependent stuff.
 		*/
 
 	        gain_display_box.pack_end (peak_display, true, true);
-
 		hbox.pack_end (meter_packer, true, true);
 
-		using namespace Menu_Helpers;
-	
-		gain_astate_menu.items().push_back (MenuElem (_("Manual"), 
-						      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Off)));
-		gain_astate_menu.items().push_back (MenuElem (_("Play"),
-						      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Play)));
-		gain_astate_menu.items().push_back (MenuElem (_("Write"),
-						      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Write)));
-		gain_astate_menu.items().push_back (MenuElem (_("Touch"),
-						      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Touch)));
-	
-		gain_astyle_menu.items().push_back (MenuElem (_("Trim")));
-		gain_astyle_menu.items().push_back (MenuElem (_("Abs")));
-	
-		gain_astate_menu.set_name ("ArdourContextMenu");
-		gain_astyle_menu.set_name ("ArdourContextMenu");
+		if (!r->hidden()) {
 
-		gain_automation_style_button.signal_button_press_event().connect (mem_fun(*this, &GainMeter::gain_automation_style_button_event), false);
-		gain_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &GainMeter::gain_automation_state_button_event), false);
-		
-		r->gain_automation_curve().automation_state_changed.connect (mem_fun(*this, &GainMeter::gain_automation_state_changed));
-		r->gain_automation_curve().automation_style_changed.connect (mem_fun(*this, &GainMeter::gain_automation_style_changed));
-		fader_vbox->pack_start (gain_automation_state_button, false, false, 0);
-
-		gain_automation_state_changed ();
+			using namespace Menu_Helpers;
+			
+			gain_astate_menu.items().push_back (MenuElem (_("Manual"), 
+								      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Off)));
+			gain_astate_menu.items().push_back (MenuElem (_("Play"),
+								      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Play)));
+			gain_astate_menu.items().push_back (MenuElem (_("Write"),
+								      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Write)));
+			gain_astate_menu.items().push_back (MenuElem (_("Touch"),
+								      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Touch)));
+			
+			gain_astyle_menu.items().push_back (MenuElem (_("Trim")));
+			gain_astyle_menu.items().push_back (MenuElem (_("Abs")));
+			
+			gain_astate_menu.set_name ("ArdourContextMenu");
+			gain_astyle_menu.set_name ("ArdourContextMenu");
+			
+			gain_automation_style_button.signal_button_press_event().connect (mem_fun(*this, &GainMeter::gain_automation_style_button_event), false);
+			gain_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &GainMeter::gain_automation_state_button_event), false);
+			
+			r->gain_automation_curve().automation_state_changed.connect (mem_fun(*this, &GainMeter::gain_automation_state_changed));
+			r->gain_automation_curve().automation_style_changed.connect (mem_fun(*this, &GainMeter::gain_automation_style_changed));
+			
+			fader_vbox->pack_start (gain_automation_state_button, false, false, 0);
+			gain_automation_state_changed ();
+		}
 	}
 
 	set_spacing (2);
@@ -339,7 +341,7 @@ GainMeter::update_meters ()
 	for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
 		if ((*i).packed) {
 			peak = _io->peak_input_power (n);
-
+			
 			(*i).meter->set (log_meter (peak));
 
 			mpeak = _io->max_peak_power(n);

@@ -95,12 +95,12 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 
 		try {
 			sources.push_back (boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (*this, path, false, frame_rate())));
+			sources.back()->prepare_for_peakfile_writes ();
 
 		} catch (failed_constructor& err) {
 			error << string_compose (_("tempoize: error creating new audio file %1 (%2)"), path, strerror (errno)) << endmsg;
 			goto out;
 		}
-
 	}
 	
 	try {
@@ -166,6 +166,12 @@ Session::tempoize_region (TimeStretchRequest& tsr)
 
 	for (it = sources.begin(); it != sources.end(); ++it) {
 		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*it);
+		boost::shared_ptr<AudioSource> as = boost::dynamic_pointer_cast<AudioSource>(*it);
+		
+		if (as) {
+			as->done_with_peakfile_writes ();
+		}
+
 		if (afs) {
 			afs->update_header (tsr.region->position(), *xnow, now);
 		}

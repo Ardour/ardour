@@ -35,6 +35,7 @@
 #include <gtkmm2ext/utils.h>
 
 #include <ardour/audio_library.h>
+#include <ardour/auditioner.h>
 #include <ardour/audioregion.h>
 #include <ardour/audiofilesource.h>
 #include <ardour/region_factory.h>
@@ -48,6 +49,7 @@
 #include "sfdb_ui.h"
 #include "editing.h"
 #include "utils.h"
+#include "gain_meter.h"
 
 #include "i18n.h"
 
@@ -132,7 +134,7 @@ SoundFileBox::SoundFileBox ()
 
 	main_box.pack_start(*vbox, true, true);
 	main_box.pack_start(bottom_box, false, false);
-
+	
 	play_btn.set_image (*(manage (new Image (Stock::MEDIA_PLAY, ICON_SIZE_BUTTON))));
 	play_btn.set_label (_("Play (double click)"));
 
@@ -167,6 +169,7 @@ SoundFileBox::set_session(Session* s)
 		play_btn.set_sensitive (false);
 		stop_btn.set_sensitive (false);
 	} 
+
 
 	length_clock.set_session (s);
 	timecode_clock.set_session (s);
@@ -345,17 +348,15 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 {
 	VBox* vbox;
 	HBox* hbox;
-	HBox* hpacker;
 	
 	set_session (s);
 	resetting_ourselves = false;
 	
-	hpacker = manage (new HBox);
-	hpacker->set_spacing (6);
-	hpacker->pack_start (notebook, true, true);
-	hpacker->pack_start (preview, false, false);
+	hpacker.set_spacing (6);
+	hpacker.pack_start (notebook, true, true);
+	hpacker.pack_start (preview, false, false);
 
-	get_vbox()->pack_start (*hpacker, true, true);
+	get_vbox()->pack_start (hpacker, true, true);
 
 	hbox = manage(new HBox);
 	hbox->pack_start (found_entry);
@@ -370,6 +371,8 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 
 	notebook.append_page (chooser, _("Browse Files"));
 	notebook.append_page (*vbox, _("Search Tags"));
+
+	notebook.set_size_request (500, -1);
 
 	found_list_view.get_selection()->set_mode (SELECTION_MULTIPLE);
 	found_list_view.signal_row_activated().connect (mem_fun (*this, &SoundFileBrowser::found_list_view_activated));
@@ -406,6 +409,14 @@ SoundFileBrowser::~SoundFileBrowser ()
 	persistent_folder = chooser.get_current_folder();
 }
 
+
+void
+SoundFileBrowser::on_show ()
+{
+	ArdourDialog::on_show ();
+	start_metering ();
+}
+
 void
 SoundFileBrowser::clear_selection ()
 {
@@ -430,7 +441,58 @@ SoundFileBrowser::set_session (Session* s)
 {
 	ArdourDialog::set_session (s);
 	preview.set_session (s);
-	
+	if (s) {
+		add_gain_meter ();
+	} else {
+		remove_gain_meter ();
+	}
+}
+
+void
+SoundFileBrowser::add_gain_meter ()
+{
+	if (gm) {
+		delete gm;
+	}
+
+	gm = new GainMeter (session->the_auditioner(), *session);
+
+	meter_packer.set_border_width (12);
+	meter_packer.pack_start (*gm, false, true);
+	hpacker.pack_end (meter_packer, false, false);
+	meter_packer.show_all ();
+	start_metering ();
+}
+
+void
+SoundFileBrowser::remove_gain_meter ()
+{
+	if (gm) {
+		meter_packer.remove (*gm);
+		hpacker.remove (meter_packer);
+		delete gm;
+		gm = 0;
+	}
+}
+
+void
+SoundFileBrowser::start_metering ()
+{
+	metering_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (mem_fun(*this, &SoundFileBrowser::meter));
+}
+
+void
+SoundFileBrowser::stop_metering ()
+{
+	metering_connection.disconnect();
+}
+
+void
+SoundFileBrowser::meter ()
+{
+	if (is_mapped () && session && gm) {
+		gm->update_meters ();
+	}
 }
 
 bool
@@ -562,12 +624,12 @@ SoundFileOmega::reset_options ()
 	}
 
 	bool same_size;
-	bool err;
-	bool selection_includes_multichannel = check_multichannel_status (paths, same_size, err);
+	bool src_needed;
+	bool selection_includes_multichannel;
 	bool selection_can_be_embedded_with_links = check_link_status (*session, paths);
 	ImportMode mode;
 
-	if (err) {
+	if (check_info (paths, same_size, src_needed, selection_includes_multichannel)) {
 		Glib::signal_idle().connect (mem_fun (*this, &SoundFileOmega::bad_file_message));
 		return false;
 	}
@@ -691,12 +753,18 @@ SoundFileOmega::reset_options ()
 	} else {
 		channel_combo.set_active_text (channel_strings.front());
 	}
+
+	if (src_needed) {
+		src_combo.set_sensitive (true);
+	} else {
+		src_combo.set_sensitive (false);
+	}
 	
 	if (Profile->get_sae()) {
 		if (selection_can_be_embedded_with_links) {
 			copy_files_btn.set_sensitive (true);
 		} else {
-			copy_files_btn.set_sensitive (true);
+			copy_files_btn.set_sensitive (false);
 		}
 	} 
 
@@ -721,15 +789,16 @@ SoundFileOmega::bad_file_message()
 }
 
 bool
-SoundFileOmega::check_multichannel_status (const vector<ustring>& paths, bool& same_size, bool& err)
+SoundFileOmega::check_info (const vector<ustring>& paths, bool& same_size, bool& src_needed, bool& multichannel)
 {
 	SNDFILE* sf;
 	SF_INFO info;
 	nframes64_t sz = 0;
-	bool some_mult = false;
+	bool err = false;
 
 	same_size = true;
-	err = false;
+	src_needed = false;
+	multichannel = false;
 
 	for (vector<ustring>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
 
@@ -739,7 +808,7 @@ SoundFileOmega::check_multichannel_status (const vector<ustring>& paths, bool& s
 			sf_close (sf);
 
 			if (info.channels > 1) {
-				some_mult = true;
+				multichannel = true;
 			}
 
 			if (sz == 0) {
@@ -749,12 +818,17 @@ SoundFileOmega::check_multichannel_status (const vector<ustring>& paths, bool& s
 					same_size = false;
 				}
 			}
+
+			if ((nframes_t) info.samplerate != session->frame_rate()) {
+				src_needed = true;
+			}
+
 		} else {
 			err = true;
 		}
 	}
 
-	return some_mult;
+	return err;
 }
 
 bool
@@ -805,6 +879,8 @@ void
 SoundFileChooser::on_hide ()
 {
 	ArdourDialog::on_hide();
+	stop_metering ();
+
 	if (session) {
 		session->cancel_audition();
 	}
@@ -835,6 +911,7 @@ SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Sessi
 {
 	VBox* vbox;
 	HBox* hbox;
+	vector<string> str;
 
 	set_size_request (-1, 450);
 	
@@ -844,14 +921,13 @@ SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Sessi
 	
 	options.set_spacing (12);
 
-	vector<string> where_strings;
-
-	where_strings.push_back (_("use file timestamp"));
-	where_strings.push_back (_("at edit cursor"));
-	where_strings.push_back (_("at playhead"));
-	where_strings.push_back (_("at session start"));
-	set_popdown_strings (where_combo, where_strings);
-	where_combo.set_active_text (where_strings.front());
+	str.clear ();
+	str.push_back (_("use file timestamp"));
+	str.push_back (_("at edit cursor"));
+	str.push_back (_("at playhead"));
+	str.push_back (_("at session start"));
+	set_popdown_strings (where_combo, str);
+	where_combo.set_active_text (str.front());
 
 	Label* l = manage (new Label);
 	l->set_text (_("Add files:"));
@@ -889,6 +965,35 @@ SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Sessi
 	vbox = manage (new VBox);
 	vbox->pack_start (*hbox, false, false);
 	options.pack_start (*vbox, false, false);
+
+	str.clear ();
+	str.push_back (_("one track per file"));
+	set_popdown_strings (channel_combo, str);
+	channel_combo.set_active_text (str.front());
+	channel_combo.set_sensitive (false);
+
+	l = manage (new Label);
+	l->set_text (_("Conversion Quality:"));
+
+	hbox = manage (new HBox);
+	hbox->set_border_width (12);
+	hbox->set_spacing (6);
+	hbox->pack_start (*l, false, false);
+	hbox->pack_start (src_combo, false, false);
+	vbox = manage (new VBox);
+	vbox->pack_start (*hbox, false, false);
+	options.pack_start (*vbox, false, false);
+
+	str.clear ();
+	str.push_back (_("Best"));
+	str.push_back (_("Good"));
+	str.push_back (_("Quick"));
+	str.push_back (_("Fast"));
+	str.push_back (_("Fastest"));
+
+	set_popdown_strings (src_combo, str);
+	src_combo.set_active_text (str.front());
+	src_combo.set_sensitive (false);
 
 	reset_options ();
 
@@ -954,6 +1059,24 @@ SoundFileOmega::get_position() const
 		return ImportAtPlayhead;
 	} else {
 		return ImportAtStart;
+	}
+}
+
+SrcQuality
+SoundFileOmega::get_src_quality() const
+{
+	ustring str = where_combo.get_active_text();
+
+	if (str == _("Best")) {
+		return SrcBest;
+	} else if (str == _("Good")) {
+		return SrcGood;
+	} else if (str == _("Quick")) {
+		return SrcQuick;
+	} else if (str == _("Fast")) {
+		return SrcFast;
+	} else {
+		return SrcFastest;
 	}
 }
 
