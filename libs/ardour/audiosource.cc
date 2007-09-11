@@ -246,21 +246,21 @@ AudioSource::initialize_peakfile (bool newfile, ustring audio_path)
 nframes_t
 AudioSource::read (Sample *dst, nframes_t start, nframes_t cnt) const
 {
-	Glib::RWLock::ReaderLock lm (_lock);
+	Glib::Mutex::Lock lm (_lock);
 	return read_unlocked (dst, start, cnt);
 }
 
 nframes_t
 AudioSource::write (Sample *dst, nframes_t cnt)
 {
-	Glib::RWLock::WriterLock lm (_lock);
+	Glib::Mutex::Lock lm (_lock);
 	return write_unlocked (dst, cnt);
 }
 
 int 
 AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nframes_t cnt, double samples_per_visual_peak) const
 {
-	Glib::RWLock::ReaderLock lm (_lock);
+	Glib::Mutex::Lock lm (_lock);
 	double scale;
 	double expected_peaks;
 	PeakData::PeakDatum xmax;
@@ -584,14 +584,15 @@ AudioSource::build_peaks_from_scratch ()
 	nframes_t cnt;
 	Sample* buf = 0;
 	nframes_t frames_read;
-	nframes_t frames_to_read = 65536; // 256kB reads from disk, roughly ideal
+	nframes_t frames_to_read;
+	const nframes_t bufsize = 65536; // 256kB per disk read for mono data is about ideal
 
 	int ret = -1;
 
 	{
 		/* hold lock while building peaks */
 
-		Glib::RWLock::ReaderLock lp (_lock);
+		Glib::Mutex::Lock lp (_lock);
 		
 		if (prepare_for_peakfile_writes ()) {
 			goto out;
@@ -600,18 +601,18 @@ AudioSource::build_peaks_from_scratch ()
 		current_frame = 0;
 		cnt = _length;
 		_peaks_built = false;
-		buf = new Sample[frames_to_read];
+		buf = new Sample[bufsize];
 		
 		while (cnt) {
 			
-			frames_to_read = min (frames_per_peak, cnt);
+			frames_to_read = min (bufsize, cnt);
 
 			if ((frames_read = read_unlocked (buf, current_frame, frames_to_read)) != frames_to_read) {
 				error << string_compose(_("%1: could not write read raw data for peak computation (%2)"), _name, strerror (errno)) << endmsg;
 				done_with_peakfile_writes (false);
 				goto out;
 			}
-			
+
 			if (compute_and_write_peaks (buf, current_frame, frames_read, true, false)) {
 				break;
 			}
@@ -623,10 +624,9 @@ AudioSource::build_peaks_from_scratch ()
 		if (cnt == 0) {
 			/* success */
 			truncate_peakfile();
-			_peaks_built = true;
 		} 
 
-		done_with_peakfile_writes ();
+		done_with_peakfile_writes ((cnt == 0));
 	}
 	
 	{
@@ -724,9 +724,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 				PeakRangeReady (peak_leftover_frame, peak_leftover_cnt); /* EMIT SIGNAL */
 				if (intermediate_peaks_ready) {
 					PeaksReady (); /* EMIT SIGNAL */
-				}  else {
-					cerr << "Skip PR at A\n";
-				}
+				} 
 			}
 
 			/* left overs are done */
@@ -838,10 +836,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 		PeakRangeReady (first_frame, frames_done); /* EMIT SIGNAL */
 		if (intermediate_peaks_ready) {
 			PeaksReady (); /* EMIT SIGNAL */
-		} else {
-			cerr << "Skip PR at A\n";
 		}
-
 	}
 
 	ret = 0;

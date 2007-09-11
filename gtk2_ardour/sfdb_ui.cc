@@ -175,7 +175,7 @@ SoundFileBox::set_session(Session* s)
 bool
 SoundFileBox::setup_labels (const ustring& filename) 
 {
-	if (path.empty()) {
+	if (!path.empty()) {
 		// save existing tags
 		tags_changed ();
 	}
@@ -407,6 +407,13 @@ SoundFileBrowser::~SoundFileBrowser ()
 }
 
 void
+SoundFileBrowser::clear_selection ()
+{
+	chooser.unselect_all ();
+	found_list_view.get_selection()->unselect_all ();
+}
+
+void
 SoundFileBrowser::chooser_file_activated ()
 {
 	preview.audition ();
@@ -499,13 +506,13 @@ SoundFileBrowser::get_paths ()
 	if (n == 0) {
 		vector<ustring> filenames = chooser.get_filenames();
 		vector<ustring>::iterator i;
+
 		for (i = filenames.begin(); i != filenames.end(); ++i) {
 			struct stat buf;
 			if ((!stat((*i).c_str(), &buf)) && S_ISREG(buf.st_mode)) {
 				results.push_back (*i);
 			}
 		}
-		return results;
 		
 	} else {
 		
@@ -518,8 +525,9 @@ SoundFileBrowser::get_paths ()
 			
 			results.push_back (str);
 		}
-		return results;
 	}
+
+	return results;
 }
 
 void

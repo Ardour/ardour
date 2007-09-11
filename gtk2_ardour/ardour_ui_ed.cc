@@ -423,22 +423,41 @@ ARDOUR_UI::install_actions ()
 	RadioAction::Group denormal_group;
 
 	ActionManager::register_toggle_action (option_actions, X_("DenormalProtection"), _("Use DC bias"), mem_fun (*this, &ARDOUR_UI::toggle_denormal_protection));
-	
-	FPU fpu;
 
 	ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalNone"), _("No processor handling"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalNone));
 
-	act = ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalFTZ"), _("Use FlushToZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalFTZ));
-	if (!fpu.has_flush_to_zero()) {
+	// as of September 10th 2007, Valgrind cannot handle various FPU flag setting instructions
+	// so avoid them
+
+	if (getenv ("ARDOUR_RUNNING_UNDER_VALGRIND")) {
+
+		/* we still need these actions to exist, but make them all insensitive */
+
+		act = ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalFTZ"), _("Use FlushToZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalFTZ));
 		act->set_sensitive (false);
-	}
-	act = ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalDAZ"), _("Use DenormalsAreZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalDAZ));
-	if (!fpu.has_denormals_are_zero()) {
+		act = ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalDAZ"), _("Use DenormalsAreZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalDAZ));
 		act->set_sensitive (false);
-	}
-	act = ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalFTZDAZ"), _("Use FlushToZero & DenormalsAreZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalFTZDAZ));
-	if (!fpu.has_flush_to_zero() || !fpu.has_denormals_are_zero()) {
+		act = ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalFTZDAZ"), _("Use FlushToZero & DenormalsAreZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalFTZDAZ));
 		act->set_sensitive (false);
+
+	} else {
+
+		FPU fpu;
+
+		act = ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalFTZ"), _("Use FlushToZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalFTZ));
+		if (!fpu.has_flush_to_zero()) {
+			act->set_sensitive (false);
+		}
+
+		act = ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalDAZ"), _("Use DenormalsAreZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalDAZ));
+		if (!fpu.has_denormals_are_zero()) {
+			act->set_sensitive (false);
+		}
+
+		act = ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalFTZDAZ"), _("Use FlushToZero & DenormalsAreZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalFTZDAZ));
+		if (!fpu.has_flush_to_zero() || !fpu.has_denormals_are_zero()) {
+			act->set_sensitive (false);
+		}
 	}
 
 	act = ActionManager::register_toggle_action (option_actions, X_("DoNotRunPluginsWhileRecording"), _("Do not run plugins while recording"), mem_fun (*this, &ARDOUR_UI::toggle_DoNotRunPluginsWhileRecording));

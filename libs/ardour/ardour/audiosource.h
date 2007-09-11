@@ -115,7 +115,7 @@ const nframes_t frames_per_peak = 256;
 	static bool _build_peakfiles;
 
 	bool                 _peaks_built;
-	mutable Glib::RWLock _lock;
+	mutable Glib::Mutex  _lock;
 	mutable Glib::Mutex  _peaks_ready_lock;
 	nframes_t            _length;
 	ustring               peakpath;

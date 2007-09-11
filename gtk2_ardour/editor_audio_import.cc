@@ -135,6 +135,7 @@ Editor::external_audio_dialog ()
 	}
 
 	if (response == RESPONSE_APPLY) {
+		sfbrowser->clear_selection ();
 		goto again;
 	}
 }

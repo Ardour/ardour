@@ -122,6 +122,8 @@ class SoundFileBrowser : public ArdourDialog
 	virtual void set_session (ARDOUR::Session*);
 	std::vector<Glib::ustring> get_paths ();
 	
+	void clear_selection ();
+
 	Gtk::FileChooserWidget chooser;
 	Gtk::TreeView found_list_view;
 

@@ -269,7 +269,7 @@ AudioFileSource::mark_streaming_write_completed ()
 	   but we must hold a solid lock on PeaksReady.
 	*/
 
-	Glib::RWLock::WriterLock lm (_lock);
+	Glib::Mutex::Lock lm (_lock);
 	
 	if (_peaks_built) {
 		PeaksReady (); /* EMIT SIGNAL */
@@ -568,7 +568,7 @@ AudioFileSource::set_allow_remove_if_empty (bool yn)
 int
 AudioFileSource::set_name (ustring newname, bool destructive)
 {
-	Glib::RWLock::WriterLock lm (_lock);
+	Glib::Mutex::Lock lm (_lock);
 	ustring oldpath = _path;
 	ustring newpath = Session::change_audio_path_by_name (oldpath, _name, newname, destructive);
 

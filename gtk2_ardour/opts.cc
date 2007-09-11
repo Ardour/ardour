@@ -91,7 +91,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		{ "novst", 0, 0, 'V' },
 		{ "new", 1, 0, 'N' },
 		{ "no-hw-optimizations", 0, 0, 'O' },
-		{ "sync", 0, 0, 'O' },
+		{ "sync", 0, 0, 'S' },
 		{ "curvetest", 1, 0, 'C' },
 		{ "sillyAppleUndocumentedFinderFeature", 1, 0, 'p' },
 		{ 0, 0, 0, 0 }

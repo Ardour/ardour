@@ -25,6 +25,7 @@
 #include <sys/stat.h>
 
 #include <glibmm/miscutils.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/sndfilesource.h>
 #include <ardour/sndfile_helpers.h>

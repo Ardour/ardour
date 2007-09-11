@@ -206,9 +206,10 @@ void
 setup_hardware_optimization (bool try_optimization)
 {
         bool generic_mix_functions = true;
-	FPU fpu;
 
 	if (try_optimization) {
+
+		FPU fpu;
 
 #if defined (ARCH_X86) && defined (BUILD_SSE_OPTIMIZATIONS)
 		
@@ -245,6 +246,10 @@ setup_hardware_optimization (bool try_optimization)
                         info << "Apple VecLib H/W specific optimizations in use" << endmsg;
                 }
 #endif
+
+		/* consider FPU denormal handling to be "h/w optimization" */
+
+		setup_fpu ();
         }
 
         if (generic_mix_functions) {
@@ -257,8 +262,6 @@ setup_hardware_optimization (bool try_optimization)
 		
 		info << "No H/W specific optimizations in use" << endmsg;
 	}
-
-	setup_fpu ();
 
 }
 
@@ -518,6 +521,12 @@ ARDOUR::LocaleGuard::~LocaleGuard ()
 void
 ARDOUR::setup_fpu ()
 {
+	if (getenv ("ARDOUR_RUNNING_UNDER_VALGRIND")) {
+		// valgrind doesn't understand this assembler stuff
+		// September 10th, 2007
+		return;
+	}
+
 #if defined(ARCH_X86) && defined(USE_XMMINTRIN)
 
 	int MXCSR;
