@@ -27,6 +27,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include <pbd/pthread_utils.h>
+
 #include <ardour/osc.h>
 #include <ardour/session.h>
 #include <ardour/route.h>
@@ -281,6 +283,8 @@ OSC::get_unix_server_url()
 void *
 OSC::_osc_receiver(void * arg)
 {
+	PBD::ThreadCreated (pthread_self(), X_("OSC"));
+
 	static_cast<OSC*> (arg)->osc_receiver();
 	return 0;
 }
