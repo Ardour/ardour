@@ -313,7 +313,15 @@ Editor::Editor ()
 	canvas_idle_queued = false;
 	_dragging_playhead = false;
 	_dragging_hscrollbar = false;
+
 	_scrubbing = false;
+	mouse_direction = 1;
+	mouse_speed_update = -1;
+	mouse_speed_size = 16;
+	mouse_speed = new double[mouse_speed_size];
+	memset (mouse_speed, 0, sizeof(double) * mouse_speed_size);
+	mouse_speed_entries = 0;
+
 	sfbrowser = 0;
 	ignore_route_order_sync = false;
 

@@ -342,6 +342,8 @@ class Editor : public PublicEditor
 	void reposition_and_zoom (nframes_t, double);
 
 	nframes_t edit_cursor_position(bool);
+	bool update_mouse_speed ();
+	bool decelerate_mouse_speed ();
 
   protected:
 	void map_transport_state ();
@@ -1071,8 +1073,16 @@ class Editor : public PublicEditor
 	void stop_scrolling ();
 
 	bool _scrubbing;
+	bool have_full_mouse_speed;
 	nframes64_t last_scrub_frame;
-	uint32_t last_scrub_time;
+	double last_scrub_time;
+	int mouse_speed_update;
+	double mouse_direction;
+	double compute_mouse_speed ();
+	void add_mouse_speed (double, double);
+	double* mouse_speed;
+	size_t mouse_speed_entries;
+	size_t mouse_speed_size;
 
 	void keyboard_selection_begin ();
 	void keyboard_selection_finish (bool add);
