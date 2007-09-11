@@ -601,6 +601,7 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 
 	if ((prop = node.property ("scale-gain")) != 0) {
 		_scale_amplitude = atof (prop->value().c_str());
+		what_changed = Change (what_changed|ScaleAmplitudeChanged);
 	} else {
 		_scale_amplitude = 1.0;
 	}
