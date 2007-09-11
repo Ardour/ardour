@@ -4878,6 +4878,11 @@ Editor::end_time_fx (ArdourCanvas::Item* item, GdkEvent* event)
  	if (drag_info.first_move) {
 		return;
 	}
+
+	if (drag_info.last_pointer_frame < clicked_regionview->region()->position()) {
+		/* backwards drag of the left edge - not usable */
+		return;
+	}
 	
 	nframes_t newlen = drag_info.last_pointer_frame - clicked_regionview->region()->position();
 	float percentage = (float) ((double) newlen - (double) clicked_regionview->region()->length()) / ((double) newlen) * 100.0f;
