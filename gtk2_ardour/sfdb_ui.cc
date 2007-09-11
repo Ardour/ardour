@@ -348,7 +348,9 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 {
 	VBox* vbox;
 	HBox* hbox;
-	
+
+	gm = 0;
+
 	set_session (s);
 	resetting_ourselves = false;
 	
