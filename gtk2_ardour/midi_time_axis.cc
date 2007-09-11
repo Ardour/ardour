@@ -173,6 +173,8 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 			mem_fun(*this, &MidiTimeAxisView::set_note_range),
 			MidiStreamView::ContentsRange)));
 
+	((Gtk::CheckMenuItem&)range_items.back()).set_active(true);
+
 	items.push_back (MenuElem (_("Note range"), *range_menu));
 }
 
