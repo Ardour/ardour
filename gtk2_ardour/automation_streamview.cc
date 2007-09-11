@@ -86,13 +86,9 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 
 	const boost::shared_ptr<AutomationControl> control = region->control(_controller->controllable()->parameter());
 
-	if ( ! control) {
-		cerr << "No " << _controller->controllable()->parameter().to_string()
-			<< " for " << region->name() << endl;
-		return NULL;
-	}
-
-	const boost::shared_ptr<AutomationList> list = control->list();
+	boost::shared_ptr<AutomationList> list;
+	if (control)
+		list = control->list();
 
 	AutomationRegionView *region_view;
 	std::list<RegionView *>::iterator i;

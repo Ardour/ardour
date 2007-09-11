@@ -52,7 +52,7 @@ public:
 	inline AutomationTimeAxisView* automation_view() const
 		{ return dynamic_cast<AutomationTimeAxisView*>(&trackview); }
 	
-	AutomationLine& line() { return _line; }
+	boost::shared_ptr<AutomationLine> line() { return _line; }
 	
 	// We are a ghost.  Meta ghosts?  Crazy talk.
 	virtual GhostRegion* add_ghost(AutomationTimeAxisView&) { return NULL; }
@@ -69,7 +69,7 @@ protected:
 	void exited();
 
 private:
-	AutomationLine _line;
+	boost::shared_ptr<AutomationLine> _line;
 };
 
 #endif /* __gtk_ardour_automation_region_view_h__ */
