@@ -1221,6 +1221,8 @@ Route::apply_some_plugin_counts (list<ProcessorCount>& iclist)
 
 	for (i = iclist.begin(); i != iclist.end(); ++i) {
 		
+		cerr << "now applying for " << (*i).processor->name() << " in = " << (*i).in.n_audio() << " out = " << (*i).out.n_audio() << endl;
+
 		if ((*i).processor->configure_io ((*i).in, (*i).out)) {
 			return -1;
 		}
@@ -1249,6 +1251,9 @@ Route::check_some_plugin_counts (list<ProcessorCount>& iclist, ChanCount require
 
 	for (i = iclist.begin(); i != iclist.end(); ++i) {
 
+
+		cerr << "Checking whether " << (*i).processor->name() << " can support " << required_inputs.n_audio() << " inputs\n";
+
 		if ((*i).processor->can_support_input_configuration (required_inputs) < 0) {
 			if (err) {
 				err->index = index;
@@ -1259,6 +1264,8 @@ Route::check_some_plugin_counts (list<ProcessorCount>& iclist, ChanCount require
 		
 		(*i).in = required_inputs;
 		(*i).out = (*i).processor->output_for_input_configuration (required_inputs);
+
+		cerr << "config looks like " << (*i).processor->name() << " in = " << (*i).in.n_audio() << " out = " << (*i).out.n_audio() << endl;
 
 		required_inputs = (*i).out;
 		

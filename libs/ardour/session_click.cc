@@ -144,7 +144,7 @@ Session::setup_click_sounds (int which)
 			click_data = 0;
 		}
 
-		string path = Config->get_click_emphasis_sound();
+		string path = Config->get_click_sound();
 
 		if (path.empty()) {
 

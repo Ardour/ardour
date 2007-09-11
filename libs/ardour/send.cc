@@ -212,11 +212,17 @@ Send::configure_io (ChanCount in, ChanCount out)
 ChanCount
 Send::output_streams() const
 {
-	return _io->n_outputs ();
+	// this method reflects the idea that from the perspective of the Route's ProcessorList, 
+	// a send is just a passthrough. that doesn't match what the Send actually does with its 
+	// data, but since what it does is invisible to the Route, it appears to be a passthrough.
+	
+	return _configured_input;
 }
 
 ChanCount
 Send::input_streams() const
 {
-	return _io->n_outputs (); // (sic)
+	return _configured_input;
 }
+
+

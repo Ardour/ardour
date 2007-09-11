@@ -56,8 +56,8 @@ class Send : public IOProcessor
 	XMLNode& get_state(void);
 	int set_state(const XMLNode& node);
 
-	uint32_t pans_required() const { return _expected_inputs.n_audio(); }
-	
+	uint32_t pans_required() const { return _configured_input.n_audio(); }
+
 	virtual bool      can_support_input_configuration (ChanCount in) const;
 	virtual ChanCount output_for_input_configuration (ChanCount in) const;
 	virtual bool      configure_io (ChanCount in, ChanCount out);
@@ -66,7 +66,6 @@ class Send : public IOProcessor
 
   private:
 	bool      _metering;
-	ChanCount _expected_inputs;
 	uint32_t bitslot;
 };
 
