@@ -40,7 +40,6 @@
 
 using std::list;
 using std::vector;
-using Glib::ustring;
 
 namespace ARDOUR {
 
@@ -49,7 +48,7 @@ const nframes_t frames_per_peak = 256;
  class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR::AudioSource>
 {
   public:
-	AudioSource (Session&, ustring name);
+	AudioSource (Session&, Glib::ustring name);
 	AudioSource (Session&, const XMLNode&);
 	virtual ~AudioSource ();
 
@@ -78,8 +77,8 @@ const nframes_t frames_per_peak = 256;
 
 	virtual bool can_truncate_peaks() const { return true; }
 
-	void set_captured_for (ustring str) { _captured_for = str; }
-	ustring captured_for() const { return _captured_for; }
+	void set_captured_for (Glib::ustring str) { _captured_for = str; }
+	Glib::ustring captured_for() const { return _captured_for; }
 
 	uint32_t read_data_count() const { return _read_data_count; }
 	uint32_t write_data_count() const { return _write_data_count; }
@@ -94,7 +93,7 @@ const nframes_t frames_per_peak = 256;
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
 
-	int rename_peakfile (ustring newpath);
+	int rename_peakfile (Glib::ustring newpath);
 	void touch_peakfile ();
 
 	static void set_build_missing_peakfiles (bool yn) {
@@ -118,13 +117,13 @@ const nframes_t frames_per_peak = 256;
 	mutable Glib::Mutex  _lock;
 	mutable Glib::Mutex  _peaks_ready_lock;
 	nframes_t            _length;
-	ustring               peakpath;
-	ustring              _captured_for;
+	Glib::ustring               peakpath;
+	Glib::ustring              _captured_for;
 
 	mutable uint32_t _read_data_count;  // modified in read()
 	mutable uint32_t _write_data_count; // modified in write()
 
-	int initialize_peakfile (bool newfile, ustring path);
+	int initialize_peakfile (bool newfile, Glib::ustring path);
 	int build_peaks_from_scratch ();
 	int compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframes_t cnt, bool force, bool intermediate_peaks_ready_signal);
 	void truncate_peakfile();
@@ -133,8 +132,8 @@ const nframes_t frames_per_peak = 256;
 
 	virtual nframes_t read_unlocked (Sample *dst, nframes_t start, nframes_t cnt) const = 0;
 	virtual nframes_t write_unlocked (Sample *dst, nframes_t cnt) = 0;
-	virtual ustring peak_path(ustring audio_path) = 0;
-	virtual ustring old_peak_path(ustring audio_path) = 0;
+	virtual Glib::ustring peak_path(Glib::ustring audio_path) = 0;
+	virtual Glib::ustring find_broken_peakfile (Glib::ustring missing_peak_path, Glib::ustring audio_path) = 0;
 	
 	void update_length (nframes_t pos, nframes_t cnt);
 
@@ -145,7 +144,7 @@ const nframes_t frames_per_peak = 256;
 	Sample* peak_leftovers;
 	nframes_t peak_leftover_frame;
 
-	bool file_changed (ustring path);
+	bool file_changed (Glib::ustring path);
 };
 
 }

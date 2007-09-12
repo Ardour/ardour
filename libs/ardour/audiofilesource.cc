@@ -21,6 +21,7 @@
 
 #include <sys/time.h>
 #include <sys/stat.h>
+#include <stdio.h> // for rename(), sigh
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -155,12 +156,63 @@ AudioFileSource::init (ustring pathstr, bool must_exist)
 ustring
 AudioFileSource::peak_path (ustring audio_path)
 {
+	ustring base;
+
+	base = PBD::basename_nosuffix (audio_path);
+	base += '%';
+	base += (char) ('A' + _channel);
+
+	return _session.peak_path (base);
+}
+
+ustring
+AudioFileSource::find_broken_peakfile (ustring peak_path, ustring audio_path)
+{
+	ustring str;
+
+	/* check for the broken location in use by 2.0 for several months */
+	
+	str = broken_peak_path (audio_path);
+	
+	if (Glib::file_test (str, Glib::FILE_TEST_EXISTS)) {
+		
+		if (is_embedded()) {
+			
+			/* it would be nice to rename it but the nature of 
+			   the bug means that we can't reliably use it.
+			*/
+			
+			peak_path = str;
+			
+		} else {
+			/* all native files are mono, so we can just rename
+			   it.
+			*/
+			::rename (str.c_str(), peak_path.c_str());
+		}
+		
+	} else {
+		/* Nasty band-aid for older sessions that were created before we
+		   used libsndfile for all audio files.
+		*/
+		
+		
+		str = old_peak_path (audio_path);	
+		if (Glib::file_test (str, Glib::FILE_TEST_EXISTS)) {
+			peak_path = str;
+		}
+	}
+
+	return peak_path;
+}
+
+ustring
+AudioFileSource::broken_peak_path (ustring audio_path)
+{
 	ustring res;
 
 	res = _session.peak_dir ();
 	res += PBD::basename_nosuffix (audio_path);
-	res += '%';
-	res += (char) ('A' + _channel);
 	res += ".peak";
 
 	return res;
@@ -607,14 +659,15 @@ AudioFileSource::set_name (ustring newname, bool destructive)
 bool
 AudioFileSource::is_empty (Session& s, ustring path)
 {
-	bool ret = false;
-	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (s, path, 0, NoPeakFile, false));
-
-	if (afs) {
-		ret = (afs->length() == 0);
+	SoundFileInfo info;
+	string err;
+	
+	if (!get_soundfile_info (path, info, err)) {
+		/* dangerous: we can't get info, so assume that its not empty */
+		return false; 
 	}
 
-	return ret;
+	return info.length == 0;
 }
 
 int

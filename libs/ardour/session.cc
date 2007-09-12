@@ -2884,13 +2884,13 @@ Session::source_by_path_and_channel (const Glib::ustring& path, uint16_t chn)
 	return boost::shared_ptr<Source>();
 }
 
-string
-Session::peak_path_from_audio_path (string audio_path) const
+Glib::ustring
+Session::peak_path (Glib::ustring base) const
 {
-	string res;
-
+	Glib::ustring res;
+	
 	res = peak_dir ();
-	res += PBD::basename_nosuffix (audio_path);
+	res += base;
 	res += ".peak";
 
 	return res;
@@ -3327,12 +3327,12 @@ Session::remove_empty_sounds ()
 			continue;
 		}
 			
-		if (AudioFileSource::is_empty (*this, *(*i))) {
+		if (AudioFileSource::is_empty (*this, **i)) {
 
 			unlink ((*i)->c_str());
 			
-			string peak_path = peak_path_from_audio_path (**i);
-			unlink (peak_path.c_str());
+			Glib::ustring peakpath = peak_path (PBD::basename_nosuffix (**i));
+			unlink (peakpath.c_str());
 		}
 
 		delete* i;

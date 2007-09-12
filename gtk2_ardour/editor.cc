@@ -270,6 +270,7 @@ Editor::Editor ()
 	_show_waveforms_recording = true;
 	first_action_message = 0;
 	export_dialog = 0;
+	export_range_markers_dialog = 0;
 	show_gain_after_trim = false;
 	ignore_route_list_reorder = false;
 	no_route_list_redisplay = false;

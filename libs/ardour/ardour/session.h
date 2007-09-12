@@ -252,7 +252,7 @@ class Session : public PBD::StatefulDestructible
 	std::string dead_sound_dir () const;
 	std::string automation_dir () const;
 
-	string peak_path_from_audio_path (string) const;
+	Glib::ustring peak_path (Glib::ustring) const;
 
 	static string suffixed_search_path (std::string suffix, bool data);
 	static string control_protocol_path ();

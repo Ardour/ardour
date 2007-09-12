@@ -60,7 +60,7 @@ class AudioFileSource : public AudioSource {
 	
 	Glib::ustring path() const { return _path; }
 	Glib::ustring peak_path (Glib::ustring audio_path);
-	Glib::ustring old_peak_path (Glib::ustring audio_path);
+	Glib::ustring find_broken_peakfile (Glib::ustring missing_peak_path, Glib::ustring audio_path);
 
 	uint16_t channel() const { return _channel; }
 
@@ -165,6 +165,11 @@ class AudioFileSource : public AudioSource {
 	bool find (Glib::ustring& path, bool must_exist, bool& is_new, uint16_t& chan);
 	bool removable() const;
 	bool writable() const { return _flags & Writable; }
+
+  private:
+	Glib::ustring old_peak_path (Glib::ustring audio_path);
+	Glib::ustring broken_peak_path (Glib::ustring audio_path);
+
 };
 
 } // namespace ARDOUR

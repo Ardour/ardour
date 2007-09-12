@@ -44,6 +44,7 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
+using Glib::ustring;
 
 bool AudioSource::_build_missing_peakfiles = false;
 bool AudioSource::_build_peakfiles = false;
@@ -185,15 +186,10 @@ AudioSource::initialize_peakfile (bool newfile, ustring audio_path)
 
 	peakpath = peak_path (audio_path);
 
-	/* Nasty band-aid for older sessions that were created before we
-	   used libsndfile for all audio files.
-	*/
+	/* if the peak file should be there, but isn't .... */
 	
 	if (!newfile && !Glib::file_test (peakpath.c_str(), Glib::FILE_TEST_EXISTS)) {
-		ustring str = old_peak_path (audio_path);
-		if (access (str.c_str(), R_OK) == 0) {
-			peakpath = str;
-		}
+		peakpath = find_broken_peakfile (peakpath, audio_path);
 	}
 
 	if (newfile) {
