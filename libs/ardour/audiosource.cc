@@ -30,6 +30,8 @@
 #include <algorithm>
 #include <vector>
 
+#include <glibmm/fileutils.h>
+
 #include <pbd/xml++.h>
 #include <pbd/pthread_utils.h>
 
@@ -136,7 +138,7 @@ AudioSource::peaks_ready (sigc::slot<void> the_slot, sigc::connection& conn) con
 	if (!(ret = _peaks_built)) {
 		conn = PeaksReady.connect (the_slot);
 	}
-	
+
 	return ret;
 }
 
@@ -187,7 +189,7 @@ AudioSource::initialize_peakfile (bool newfile, ustring audio_path)
 	   used libsndfile for all audio files.
 	*/
 	
-	if (!newfile && access (peakpath.c_str(), R_OK) != 0) {
+	if (!newfile && !Glib::file_test (peakpath.c_str(), Glib::FILE_TEST_EXISTS)) {
 		ustring str = old_peak_path (audio_path);
 		if (access (str.c_str(), R_OK) == 0) {
 			peakpath = str;

@@ -53,9 +53,11 @@ peak_thread_work ()
 	while (true) {
 
 		SourceFactory::peak_building_lock.lock ();
-
+		
 	  wait:
-		SourceFactory::PeaksToBuild->wait (SourceFactory::peak_building_lock);
+		if (SourceFactory::files_with_peaks.empty()) {
+			SourceFactory::PeaksToBuild->wait (SourceFactory::peak_building_lock);
+		}
 
 		if (SourceFactory::files_with_peaks.empty()) {
 			goto wait;
@@ -94,7 +96,7 @@ SourceFactory::setup_peakfile (boost::shared_ptr<Source> s, bool async)
 
 			Glib::Mutex::Lock lm (peak_building_lock);
 			files_with_peaks.push_back (boost::weak_ptr<AudioSource> (as));
-			PeaksToBuild->signal ();
+			PeaksToBuild->broadcast ();
 
 		} else {
 
@@ -118,12 +120,14 @@ SourceFactory::createSilent (Session& s, const XMLNode& node, nframes_t nframes,
 
 #ifdef HAVE_COREAUDIO
 boost::shared_ptr<Source>
-SourceFactory::create (Session& s, const XMLNode& node, bool async)
+SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 {
 	try {
 		boost::shared_ptr<Source> ret (new CoreAudioSource (s, node));
-		if (setup_peakfile (ret)) {
-			return boost::shared_ptr<Source>();
+		if (!defer_peaks) {
+			if (setup_peakfile (ret, false)) {
+				return boost::shared_ptr<Source>();
+			}
 		}
 		SourceCreated (ret);
 		return ret;
@@ -135,8 +139,10 @@ SourceFactory::create (Session& s, const XMLNode& node, bool async)
 		/* this is allowed to throw */
 
 		boost::shared_ptr<Source> ret (new SndFileSource (s, node));
-		if (setup_peakfile (ret, async)) {
-			return boost::shared_ptr<Source>();
+		if (!defer_peaks) {
+			if (setup_peakfile (ret, false)) {
+				return boost::shared_ptr<Source>();
+			}
 		}
 		SourceCreated (ret);
 		return ret;
@@ -148,14 +154,16 @@ SourceFactory::create (Session& s, const XMLNode& node, bool async)
 #else
 
 boost::shared_ptr<Source>
-SourceFactory::create (Session& s, const XMLNode& node, bool async)
+SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 {
 	/* this is allowed to throw */
 
 	boost::shared_ptr<Source> ret (new SndFileSource (s, node));
 	
-	if (setup_peakfile (ret, async)) {
-		return boost::shared_ptr<Source>();
+	if (!defer_peaks) {
+		if (setup_peakfile (ret, false)) {
+			return boost::shared_ptr<Source>();
+		}
 	}
 	
 	SourceCreated (ret);
@@ -166,14 +174,16 @@ SourceFactory::create (Session& s, const XMLNode& node, bool async)
 
 #ifdef HAVE_COREAUDIO
 boost::shared_ptr<Source>
-SourceFactory::createReadable (Session& s, string path, int chn, AudioFileSource::Flag flags, bool announce, bool async)
+SourceFactory::createReadable (Session& s, string path, int chn, AudioFileSource::Flag flags, bool announce, bool defer_peaks)
 {
 	if (!(flags & Destructive)) {
 
 		try {
 			boost::shared_ptr<Source> ret (new CoreAudioSource (s, path, chn, flags));
-			if (setup_peakfile (ret, async)) {
-				return boost::shared_ptr<Source>();
+			if (!defer_peaks) {
+				if (setup_peakfile (ret, false)) {
+					return boost::shared_ptr<Source>();
+				}
 			}
 			if (announce) {
 				SourceCreated (ret);
@@ -186,8 +196,10 @@ SourceFactory::createReadable (Session& s, string path, int chn, AudioFileSource
 			/* this is allowed to throw */
 
 			boost::shared_ptr<Source> ret (new SndFileSource (s, path, chn, flags));
-			if (setup_peakfile (ret)) {
-				return boost::shared_ptr<Source>();
+			if (!defer_peaks) {
+				if (setup_peakfile (ret, false)) {
+					return boost::shared_ptr<Source>();
+				}
 			}
 			if (announce) {
 				SourceCreated (ret);
@@ -198,8 +210,10 @@ SourceFactory::createReadable (Session& s, string path, int chn, AudioFileSource
 	} else {
 
 		boost::shared_ptr<Source> ret (new SndFileSource (s, path, chn, flags));
-		if (setup_peakfile (ret, async)) {
-			return boost::shared_ptr<Source>();
+		if (!defer_peaks) {
+			if (setup_peakfile (ret, false)) {
+				return boost::shared_ptr<Source>();
+			}
 		}
 		if (announce) {
 			SourceCreated (ret);
@@ -213,12 +227,14 @@ SourceFactory::createReadable (Session& s, string path, int chn, AudioFileSource
 #else
 
 boost::shared_ptr<Source>
-SourceFactory::createReadable (Session& s, string path, int chn, AudioFileSource::Flag flags, bool announce, bool async)
+SourceFactory::createReadable (Session& s, string path, int chn, AudioFileSource::Flag flags, bool announce, bool defer_peaks)
 {
 	boost::shared_ptr<Source> ret (new SndFileSource (s, path, chn, flags));
 
-	if (setup_peakfile (ret, async)) {
-		return boost::shared_ptr<Source>();
+	if (!defer_peaks) {
+		if (setup_peakfile (ret, false)) {
+			return boost::shared_ptr<Source>();
+		}
 	}
 
 	if (announce) {
@@ -231,7 +247,7 @@ SourceFactory::createReadable (Session& s, string path, int chn, AudioFileSource
 #endif // HAVE_COREAUDIO
 
 boost::shared_ptr<Source>
-SourceFactory::createWritable (Session& s, std::string path, bool destructive, nframes_t rate, bool announce, bool async)
+SourceFactory::createWritable (Session& s, std::string path, bool destructive, nframes_t rate, bool announce, bool defer_peaks)
 {
 	/* this might throw failed_constructor(), which is OK */
 
@@ -243,9 +259,12 @@ SourceFactory::createWritable (Session& s, std::string path, bool destructive, n
 					(destructive ? AudioFileSource::Flag (SndFileSource::default_writable_flags | AudioFileSource::Destructive) :
 					 SndFileSource::default_writable_flags)));	
 
-	if (setup_peakfile (ret, async)) {
-		return boost::shared_ptr<Source>();
+	if (!defer_peaks) {
+		if (setup_peakfile (ret, false)) {
+			return boost::shared_ptr<Source>();
+		}
 	}
+
 	if (announce) {
 		SourceCreated (ret);
 	}

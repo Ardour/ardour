@@ -6,4 +6,4 @@ if [ gprofhelper.c -nt gprofhelper.so ] ; then
 fi
 
 . ardev_common.sh
-LDPRELOAD=./gprofhelper.so $EXECUTABLE $*
+LDPRELOAD=./gprofhelper.so $EXECUTABLE "$@"

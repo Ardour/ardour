@@ -27,6 +27,7 @@
 #include <cerrno>
 #include <unistd.h>
 #include <limits.h>
+#include <sys/time.h>
 
 #include <sigc++/bind.h>
 #include <sigc++/retype.h>
@@ -1736,7 +1737,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 				      << endmsg;
 				goto failed;
 			}
-
+	
 			if (nphysical_in) {
 				for (uint32_t x = 0; x < track->n_inputs() && x < nphysical_in; ++x) {
 					
@@ -1779,6 +1780,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 			new_routes.push_back (track);
 			ret.push_back (track);
+
 		}
 
 		catch (failed_constructor &err) {

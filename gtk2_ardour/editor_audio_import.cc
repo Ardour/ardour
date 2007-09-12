@@ -19,6 +19,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <errno.h>
 #include <unistd.h>
 
@@ -589,8 +590,6 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 
 			region_name = region_name_from_path (afs->path(), false, true, sources.size(), n);
 
-			cerr << "got region name " << region_name << endl;
-			
 			regions.push_back (boost::dynamic_pointer_cast<AudioRegion> 
 					   (RegionFactory::create (just_one, 0, (*x)->length(), region_name, 0,
 								   Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External))));
@@ -619,12 +618,18 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 	for (vector<boost::shared_ptr<AudioRegion> >::iterator r = regions.begin(); r != regions.end(); ++r, ++n) {
 
 		finish_bringing_in_audio (*r, input_chan, output_chan, pos, mode, track);
-		
+
 		if (target_tracks != 1) {
 			track.reset ();
 		} else {
 			pos += (*r)->length();
 		} 
+	}
+
+	/* setup peak file building in another thread */
+
+	for (SourceList::iterator x = sources.begin(); x != sources.end(); ++x) {
+		SourceFactory::setup_peakfile (*x, true);
 	}
 
 	return 0;
@@ -634,7 +639,6 @@ int
 Editor::finish_bringing_in_audio (boost::shared_ptr<AudioRegion> region, uint32_t in_chans, uint32_t out_chans, nframes64_t& pos, 
 				  ImportMode mode, boost::shared_ptr<AudioTrack>& existing_track)
 {
-
 	switch (mode) {
 	case ImportAsRegion:
 		/* relax, its been done */

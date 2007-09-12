@@ -55,8 +55,6 @@ class SourceFactory {
 	static Glib::StaticMutex                        peak_building_lock;
 	static std::list<boost::weak_ptr<AudioSource> > files_with_peaks;
 
-  private:
-
 	static int setup_peakfile (boost::shared_ptr<Source>, bool async);
 };
 

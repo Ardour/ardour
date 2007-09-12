@@ -25,6 +25,8 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#include <pbd/convert.h>
+#include <pbd/basename.h>
 #include <pbd/mountpoint.h>
 #include <pbd/pathscanner.h>
 #include <pbd/stl_delete.h>
@@ -153,7 +155,15 @@ AudioFileSource::init (ustring pathstr, bool must_exist)
 ustring
 AudioFileSource::peak_path (ustring audio_path)
 {
-	return _session.peak_path_from_audio_path (audio_path);
+	ustring res;
+
+	res = _session.peak_dir ();
+	res += PBD::basename_nosuffix (audio_path);
+	res += '%';
+	res += (char) ('A' + _channel);
+	res += ".peak";
+
+	return res;
 }
 
 ustring
