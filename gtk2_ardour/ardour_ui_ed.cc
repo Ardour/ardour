@@ -799,9 +799,5 @@ ARDOUR_UI::setup_clock ()
 	big_clock_window->signal_realize().connect (bind (sigc::ptr_fun (set_decoration), big_clock_window,  (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
 	big_clock_window->signal_unmap().connect (bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleBigClock")));
 
-	if (editor) {
-		editor->ensure_float (*big_clock_window);
-	}
-
 	manage_window (*big_clock_window);
 }
