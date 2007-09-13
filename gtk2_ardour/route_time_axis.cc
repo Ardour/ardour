@@ -441,7 +441,7 @@ RouteTimeAxisView::build_automation_action_menu ()
 	automation_items.push_back (MenuElem (_("Hide all automation"),
 					      mem_fun(*this, &RouteTimeAxisView::hide_all_automation)));
 
-	if (subplugin_menu.get_parent())
+	if (subplugin_menu.get_attach_widget())
 		subplugin_menu.detach();
 
 	automation_items.push_back (MenuElem (_("Plugins"), subplugin_menu));
