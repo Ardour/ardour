@@ -916,14 +916,11 @@ SndFileSource::get_interleave_buffer (nframes_t size)
 	if ((ssb = thread_interleave_buffer.get()) == 0) {
 		ssb = new SizedSampleBuffer (size);
 		thread_interleave_buffer.set (ssb);
-		cerr << pthread_self() << " new IB of " << size << endl;
 	}
 
 	if (ssb->size < size) {
-		delete ssb;
 		ssb = new SizedSampleBuffer (size);
 		thread_interleave_buffer.set (ssb);
-		cerr << pthread_self() << " resized IB to " << size << endl;
 	}
 
 	return ssb->buf;
