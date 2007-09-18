@@ -39,14 +39,14 @@ void RouteSignal::connect()
 		cins = _route.mute_control().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_mute_changed ), this ) );
 	
 	if ( _strip.has_gain() )
-		cins = _route.gain_control().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_gain_changed ), this ) );
+		cins = _route.gain_control().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_gain_changed ), this, true ) );
 		
 	cins = _route.name_changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_name_changed ), this ) );
 	
-	cins = _route.panner().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_panner_changed ), this ) );
+	cins = _route.panner().Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_panner_changed ), this, true ) );
 	for ( unsigned int i = 0; i < _route.panner().size(); ++i )
 	{
-		cins = _route.panner()[i]->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_panner_changed ), this ) );
+		cins = _route.panner()[i]->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_panner_changed ), this, true ) );
 	}
 	
 	try

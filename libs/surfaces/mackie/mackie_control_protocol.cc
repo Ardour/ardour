@@ -954,7 +954,7 @@ void MackieControlProtocol::notify_record_enable_changed( RouteSignal * route_si
 	}
 }
 
-void MackieControlProtocol::notify_gain_changed( RouteSignal * route_signal )
+void MackieControlProtocol::notify_gain_changed( RouteSignal * route_signal, bool force_update )
 {
 	try
 	{
@@ -963,7 +963,7 @@ void MackieControlProtocol::notify_gain_changed( RouteSignal * route_signal )
 		{
 			float gain_value = route_signal->route().gain_control().get_value();
 			// check that something has actually changed
-			if ( gain_value != route_signal->last_gain_written() )
+			if ( force_update || gain_value != route_signal->last_gain_written() )
 			{
 				route_signal->port().write( builder.build_fader( fader, gain_value ) );
 				route_signal->last_gain_written( gain_value );
@@ -1006,7 +1006,7 @@ void MackieControlProtocol::notify_name_changed( void *, RouteSignal * route_sig
 	}
 }
 
-void MackieControlProtocol::notify_panner_changed( RouteSignal * route_signal )
+void MackieControlProtocol::notify_panner_changed( RouteSignal * route_signal, bool force_update )
 {
 	try
 	{
@@ -1022,7 +1022,7 @@ void MackieControlProtocol::notify_panner_changed( RouteSignal * route_signal )
 			// sends in spite of more work on the comparison
 			MidiByteArray bytes = builder.build_led_ring( pot, ControlState( on, pos ), MackieMidiBuilder::midi_pot_mode_dot );
 			// check that something has actually changed
-			if ( bytes != route_signal->last_pan_written() )
+			if ( force_update || bytes != route_signal->last_pan_written() )
 			{
 				route_signal->port().write( bytes );
 				route_signal->last_pan_written( bytes );
@@ -1045,13 +1045,13 @@ void MackieControlProtocol::update_automation( RouteSignal & rs )
 	ARDOUR::AutoState gain_state = rs.route().gain_automation_state();
 	if ( gain_state == Touch || gain_state == Play )
 	{
-		notify_gain_changed( &rs );
+		notify_gain_changed( &rs, false );
 	}
 	
 	ARDOUR::AutoState panner_state = rs.route().panner().automation_state();
 	if ( panner_state == Touch || panner_state == Play )
 	{
-		notify_panner_changed( &rs );
+		notify_panner_changed( &rs, false );
 	}
 	_automation_last.start();
 }

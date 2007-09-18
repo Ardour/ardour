@@ -95,11 +95,11 @@ class MackieControlProtocol
 	/// Signal handler for Route::record_enable_changed
 	void notify_record_enable_changed( Mackie::RouteSignal * );
 	/// Signal handler for Route::gain_changed ( from IO )
-	void notify_gain_changed( Mackie::RouteSignal * );
+	void notify_gain_changed( Mackie::RouteSignal *, bool force_update = true );
 	/// Signal handler for Route::name_change
 	void notify_name_changed( void *, Mackie::RouteSignal * );
 	/// Signal handler from Panner::Change
-	void notify_panner_changed( Mackie::RouteSignal * );
+	void notify_panner_changed( Mackie::RouteSignal *, bool force_update = true );
 	/// Signal handler for new routes added
 	void notify_route_added( ARDOUR::Session::RouteList & );
 
