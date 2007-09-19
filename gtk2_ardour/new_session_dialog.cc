@@ -511,7 +511,8 @@ NewSessionDialog::session_folder() const
 	} else {
 	       
 		if (m_treeview->get_selection()->count_selected_rows() == 0) {
-		        return Glib::filename_from_utf8(m_open_filechooser->get_filename());
+			const string filename(Glib::filename_from_utf8(m_open_filechooser->get_filename()));
+			return Glib::path_get_dirname(filename);
 		}
 		Gtk::TreeModel::iterator i = m_treeview->get_selection()->get_selected();
 		return (*i)[recent_columns.fullpath];
