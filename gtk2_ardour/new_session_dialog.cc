@@ -465,7 +465,7 @@ std::string
 NewSessionDialog::session_folder() const
 {
 	if (on_new_session_page ()) {
-		return Glib::filename_from_utf8(m_folder->get_current_folder());
+		return Glib::filename_from_utf8(m_folder->get_filename());
 	} else {
 	       
 		if (m_treeview->get_selection()->count_selected_rows() == 0) {
