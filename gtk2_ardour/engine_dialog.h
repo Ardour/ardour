@@ -99,6 +99,7 @@ class EngineControl : public Gtk::VBox {
 	void redisplay_latency ();
 	uint32_t get_rate();
 	void audio_mode_changed ();
+	std::vector<std::string> server_strings;
 	void find_jack_servers (std::vector<std::string>&);
 	std::string get_device_name (const std::string& driver, const std::string& human_readable_name);
 };

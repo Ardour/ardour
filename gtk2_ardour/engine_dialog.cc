@@ -271,19 +271,17 @@ EngineControl::EngineControl ()
 	++row;
 #endif
 
-	strings.clear ();
+	find_jack_servers (server_strings);
 
-	find_jack_servers (strings);
-
-	if (strings.empty()) {
+	if (server_strings.empty()) {
 		fatal << _("No JACK server found anywhere on this system. Please install JACK and restart") << endmsg;
 		/*NOTREACHED*/
 	}
 	
-	set_popdown_strings (serverpath_combo, strings);
-	serverpath_combo.set_active_text (strings.front());
+	set_popdown_strings (serverpath_combo, server_strings);
+	serverpath_combo.set_active_text (server_strings.front());
 
-	if (strings.size() > 1) {
+	if (server_strings.size() > 1) {
 		label = manage (new Label (_("Server:")));
 		options_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 		label->set_alignment (0.0, 0.5);
@@ -1109,7 +1107,24 @@ EngineControl::set_state (const XMLNode& root)
 		} else if (child->name() == "periodsize") {
 			period_size_combo.set_active_text(strval);
 		} else if (child->name() == "serverpath") {
-			serverpath_combo.set_active_text(strval);
+			/* do not allow us to use a server path that doesn't
+			   exist on this system. this handles cases where
+			   the user has an RC file listing a serverpath
+			   from some other machine.
+			*/
+			vector<string>::iterator x;
+			for (x = server_strings.begin(); x != server_strings.end(); ++x) {
+				if (*x == strval) {
+					break;
+				}
+			}
+			if (x != server_strings.end()) {
+				serverpath_combo.set_active_text (strval);
+			} else {
+				warning << string_compose (_("configuration files contain a JACK server path that doesn't exist (%1)"),
+							     strval)
+					<< endmsg;
+			}
 		} else if (child->name() == "driver") {
 			driver_combo.set_active_text(strval);
 		} else if (child->name() == "interface") {
