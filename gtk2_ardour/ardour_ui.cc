@@ -153,6 +153,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	using namespace Gtk::Menu_Helpers;
 
 	Gtkmm2ext::init();
+
+	if (getenv ("ARDOUR_DEBUG_UPDATES")) {
+		gdk_window_set_debug_updates (true);
+	}
 	
 	about = 0;
 

@@ -74,7 +74,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			
 			nframes_t where = event_frame (&event, 0, 0);
 			temporal_zoom_to_frame (false, where);
-			return true;
+			ret = true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
@@ -84,10 +84,10 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			}
 			gettimeofday (&last_track_height_step_timestamp, 0);
 			current_stepping_trackview->step_height (true);
-			return true;
+			ret = true;
 		} else {
 			scroll_tracks_up_line ();
-			return true;
+			ret = true;
 		}
 		break;
 	case GDK_SCROLL_DOWN:
@@ -105,7 +105,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			
 			nframes_t where = event_frame (&event, 0, 0);
 			temporal_zoom_to_frame (true, where);
-			return true;
+			ret = true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
@@ -115,10 +115,10 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			}
 			gettimeofday (&last_track_height_step_timestamp, 0);
 			current_stepping_trackview->step_height (false);
-			return true;
+			ret = true;
 		} else {
 			scroll_tracks_down_line ();
-			return true;
+			ret = true;
 		}
 		break;	
 
@@ -126,10 +126,9 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		/* no left/right handling yet */
 		break;
 	}
-	
-	return false;
-}
 
+	return ret;
+}
 bool
 Editor::track_canvas_scroll_event (GdkEventScroll *event)
 {

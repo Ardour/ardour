@@ -339,8 +339,10 @@ RedirectBox::redirect_button_release_event (GdkEventButton *ev)
 		show_redirect_menu(ev->time);
 		ret = true;
 
-	} else if (redirect && (ev->button == 2) && (ev->state == Gdk::BUTTON2_MASK)) {
+	} else if (redirect && (ev->button == 2) && (Keyboard::no_modifier_keys_pressed (ev) && ((ev->state & Gdk::BUTTON2_MASK) == Gdk::BUTTON2_MASK))) {
 		
+		/* button2-click with no modifiers */
+
 		redirect->set_active (!redirect->active(), this);
 		ret = true;
 
