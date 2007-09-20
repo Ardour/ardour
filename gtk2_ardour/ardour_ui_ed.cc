@@ -756,18 +756,19 @@ ARDOUR_UI::build_menu_bar ()
 
 #ifndef TOP_MENUBAR
 	menu_hbox.pack_start (*menu_bar, true, true);
+#else
+	use_menubar_as_top_menubar ();
 #endif
 	if (!Profile->get_small_screen()) {
+#ifndef GTKOSX		
+		// OSX provides its own wallclock, thank you very much
 		menu_hbox.pack_end (wall_clock_box, false, false, 2);
+#endif
 		menu_hbox.pack_end (disk_space_box, false, false, 4);
 	}
 	menu_hbox.pack_end (cpu_load_box, false, false, 4);
 	menu_hbox.pack_end (buffer_load_box, false, false, 4);
 	menu_hbox.pack_end (sample_rate_box, false, false, 4);
-
-#ifdef TOP_MENUBAR
-	use_menubar_as_top_menubar ();
-#endif
 
 	menu_bar_base.set_name ("MainMenuBar");
 	menu_bar_base.add (menu_hbox);

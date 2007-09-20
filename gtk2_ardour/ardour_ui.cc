@@ -97,7 +97,7 @@ sigc::signal<void,nframes_t, bool, nframes_t> ARDOUR_UI::Clock;
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	: Gtkmm2ext::UI (X_("Ardour"), argcp, argvp),
-	  
+
 	  primary_clock (X_("primary"), false, X_("TransportClockDisplay"), true, false, true),
 	  secondary_clock (X_("secondary"), false, X_("SecondaryClockDisplay"), true, false, true),
 	  preroll_clock (X_("preroll"), false, X_("PreRollClock"), true, true),
@@ -148,11 +148,16 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	  auditioning_alert_button (_("AUDITION")),
 	  solo_alert_button (_("SOLO")),
-	  shown_flag (false)
+	  shown_flag (false),
+	  error_log_button (_("Errors"))
 {
 	using namespace Gtk::Menu_Helpers;
 
 	Gtkmm2ext::init();
+
+#ifdef TOP_MENUBAR
+	_auto_display_errors = false;
+#endif
 
 	if (getenv ("ARDOUR_DEBUG_UPDATES")) {
 		gdk_window_set_debug_updates (true);
@@ -325,8 +330,10 @@ ARDOUR_UI::post_engine ()
 
 	/* start the time-of-day-clock */
 	
+#ifndef GTKOSX
 	update_wall_clock ();
 	Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::update_wall_clock), 60000);
+#endif
 
 	update_disk_space ();
 	update_cpu_load ();
@@ -819,7 +826,7 @@ ARDOUR_UI::ask_about_saving_session (const string & what)
 	return -1;
 }
 	
-gint
+int
 ARDOUR_UI::every_second ()
 {
 	update_cpu_load ();
@@ -839,6 +846,8 @@ ARDOUR_UI::every_point_one_seconds ()
 gint
 ARDOUR_UI::every_point_zero_one_seconds ()
 {
+	// august 2007: actual update frequency: 40Hz, not 100Hz
+
 	SuperRapidScreenUpdate(); /* EMIT_SIGNAL */
 	return TRUE;
 }

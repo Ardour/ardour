@@ -246,7 +246,6 @@ if ardour['COREAUDIO']:
 
 if env['CONFIG_ARCH'] == 'apple':
     # this next line avoids issues with circular dependencies between libardour and libardour_cp.
-    # it is based on the (entirely reasonable) assumption that a system with CoreAudio is OS X
     #
     ardour.Append(LINKFLAGS='-undefined suppress -flat_namespace') 
 

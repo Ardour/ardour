@@ -13,14 +13,10 @@
            <separator/>
            <menuitem action='AddTrackBus'/>	
            <separator/>
-           <menuitem action='addExistingAudioFiles'/>
-           <separator/>
            <menu name='Cleanup' action='Cleanup'>
                <menuitem action='CleanupUnused'/>
                <menuitem action='FlushWastebasket'/>
            </menu>
-           <separator/>
-           <menuitem action='Quit'/>
         </menu>
 	<menu name='Files' action='Files'>
            <menu action='addExistingAudioFiles'>

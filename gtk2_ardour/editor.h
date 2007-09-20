@@ -244,8 +244,8 @@ class Editor : public PublicEditor
 	void export_session();
 	void export_selection();
 
-
 	void add_toplevel_controls (Gtk::Container&);
+	Gtk::HBox& get_status_bar_packer()  { return status_bar_hpacker; }
 
 	void      set_zoom_focus (Editing::ZoomFocus);
 	Editing::ZoomFocus get_zoom_focus () const { return zoom_focus; }
@@ -1898,6 +1898,8 @@ class Editor : public PublicEditor
 
 	void history_changed ();
 	void color_handler ();
+	
+	Gtk::HBox      status_bar_hpacker;
 };
 
 #endif /* __ardour_editor_h__ */

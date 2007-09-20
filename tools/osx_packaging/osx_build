@@ -51,7 +51,7 @@ if test x$WITH_JACK != x ; then
 fi
 
 if test "x$env" != x ; then
-    env="<key>LSEnvironment</key><dict>$env</dict>"
+    env="<key>LSEnvironment</key><dict><key>ARDOUR_BUNDLED</key><string>true</string>$env</dict>"
 fi
 
 # edit plist

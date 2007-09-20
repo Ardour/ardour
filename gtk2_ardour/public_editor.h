@@ -26,6 +26,7 @@
 #include <glib.h>
 #include <gdk/gdktypes.h>
 #include <gtkmm/window.h>
+#include <gtkmm/box.h>
 #include <gtkmm/actiongroup.h>
 #include <jack/types.h>
 #include <sigc++/signal.h>
@@ -121,6 +122,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void export_range_markers() = 0;
 	virtual void register_actions() = 0;
 	virtual void add_toplevel_controls (Gtk::Container&) = 0;
+	virtual Gtk::HBox& get_status_bar_packer()  = 0;
 	virtual void      set_zoom_focus (Editing::ZoomFocus) = 0;
 	virtual Editing::ZoomFocus get_zoom_focus () const = 0;
 	virtual gdouble   get_current_zoom () = 0;

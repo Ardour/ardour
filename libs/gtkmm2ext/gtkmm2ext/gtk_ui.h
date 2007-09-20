@@ -139,11 +139,14 @@ class UI : public Receiver, public AbstractUI<UIRequest>
 	static pthread_t the_gui_thread() { return gui_thread; }
 
   protected:
+	bool _auto_display_errors;
 	virtual void handle_fatal (const char *);
 	virtual void display_message (const char *prefix, gint prefix_len, 
 				      Glib::RefPtr<Gtk::TextBuffer::Tag> ptag, 
 				      Glib::RefPtr<Gtk::TextBuffer::Tag> mtag, 
 				      const char *msg);
+	void show_error_log ();
+	void hide_error_log ();
 
   private:
 	static UI *theGtkUI;

@@ -29,7 +29,9 @@
 #include <ardour/silentfilesource.h>
 #include <ardour/configuration.h>
 
-#ifdef HAVE_COREAUDIO
+#undef USE_COREAUDIO_FOR_FILES
+
+#ifdef USE_COREAUDIO_FOR_FILES
 #include <ardour/coreaudiosource.h>
 #endif
 
@@ -118,7 +120,7 @@ SourceFactory::createSilent (Session& s, const XMLNode& node, nframes_t nframes,
 	return ret;
 }
 
-#ifdef HAVE_COREAUDIO
+#ifdef USE_COREAUDIO_FOR_FILES
 boost::shared_ptr<Source>
 SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 {
@@ -170,9 +172,9 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 	return ret;
 }
 
-#endif // HAVE_COREAUDIO
+#endif // USE_COREAUDIO_FOR_FILES
 
-#ifdef HAVE_COREAUDIO
+#ifdef USE_COREAUDIO_FOR_FILES
 boost::shared_ptr<Source>
 SourceFactory::createReadable (Session& s, string path, int chn, AudioFileSource::Flag flags, bool announce, bool defer_peaks)
 {
@@ -244,7 +246,7 @@ SourceFactory::createReadable (Session& s, string path, int chn, AudioFileSource
 	return ret;
 }
 
-#endif // HAVE_COREAUDIO
+#endif // USE_COREAUDIO_FOR_FILES
 
 boost::shared_ptr<Source>
 SourceFactory::createWritable (Session& s, std::string path, bool destructive, nframes_t rate, bool announce, bool defer_peaks)

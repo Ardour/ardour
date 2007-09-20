@@ -186,6 +186,10 @@ EngineControl::EngineControl ()
 	row++;
 #endif
 
+	interface_combo.set_size_request (125, -1);
+	input_device_combo.set_size_request (125, -1);
+	output_device_combo.set_size_request (125, -1);
+
 	/*
 
 	if (engine_running()) {
@@ -210,6 +214,11 @@ EngineControl::EngineControl ()
 
 	options_packer.attach (realtime_button, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
+
+	realtime_button.signal_toggled().connect (mem_fun (*this, &EngineControl::realtime_changed));
+	realtime_changed ();
+
+#ifndef __APPLE__
 	label = manage (new Label (_("Realtime Priority")));
 	label->set_alignment (1.0, 0.5);
 	options_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
@@ -217,10 +226,6 @@ EngineControl::EngineControl ()
 	++row;
 	priority_spinner.set_value (60);
 
-	realtime_button.signal_toggled().connect (mem_fun (*this, &EngineControl::realtime_changed));
-	realtime_changed ();
-
-#ifndef __APPLE__
 	options_packer.attach (no_memory_lock_button, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 	options_packer.attach (unlock_memory_button, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
@@ -533,13 +538,13 @@ EngineControl::start_engine ()
 		return -1;
 	}
 
-	cerr << "will execute ...\n";
+	// cerr << "will execute ...\n";
 	for (vector<string>::iterator i = args.begin(); i != args.end(); ++i) {
 		jackdrc << (*i) << ' ';
-		cerr << (*i) << ' ';
+		// cerr << (*i) << ' ';
 	}
 	jackdrc << endl;
-	cerr << endl;
+	// cerr << endl;
 	jackdrc.close ();
 
 	_used = true;
@@ -568,7 +573,9 @@ EngineControl::stop_engine ()
 void
 EngineControl::realtime_changed ()
 {
+#ifndef __APPLE__
 	priority_spinner.set_sensitive (realtime_button.get_active());
+#endif
 }
 
 void
@@ -626,8 +633,11 @@ EngineControl::enumerate_coreaudio_devices ()
 		if (err == noErr) {
 			// Look for the CoreAudio device name...
 			char coreDeviceName[256];
-			size_t nameSize = sizeof (coreDeviceName);
+			size_t nameSize;
 			for (int i = 0; i < numCoreDevices; i++) {
+
+				nameSize = sizeof (coreDeviceName);
+
 				err = AudioDeviceGetPropertyInfo(coreDeviceIDs[i],
 								 0, true, kAudioDevicePropertyDeviceName,
 								 &outSize, &isWritable);
@@ -636,7 +646,6 @@ EngineControl::enumerate_coreaudio_devices ()
 								     0, true, kAudioDevicePropertyDeviceName,
 								     &nameSize, (void *) coreDeviceName);
 					if (err == noErr) {
-
 						char drivername[128];
 
 						// this returns the unique id for the device
@@ -763,11 +772,6 @@ EngineControl::driver_changed ()
 	set_popdown_strings (input_device_combo, strings);
 	set_popdown_strings (output_device_combo, strings);
 
-	const guint32 FUDGE = 18; // Combo's are stupid - they steal space from the entry for the button interface_combo
-	set_size_request_to_display_given_text (interface_combo, strings[maxindex].c_str(), 5+FUDGE, 5);
-	set_size_request_to_display_given_text (input_device_combo, strings[maxindex].c_str(), 5+FUDGE, 5);
-	set_size_request_to_display_given_text (output_device_combo, strings[maxindex].c_str(), 5+FUDGE, 5);
-
 	if (!strings.empty()) {
 		interface_combo.set_active_text (strings.front());
 		input_device_combo.set_active_text (strings.front());
@@ -853,11 +857,10 @@ EngineControl::find_jack_servers (vector<string>& strings)
 		cerr << "Found jack in " << path << endl;
 	} 
 
-	if (ARDOUR::Profile->get_single_package()) {
+	if (getenv ("ARDOUR_WITH_JACK")) {
 		/* no other options - only use the JACK we supply */
 		if (strings.empty()) {
-			// cerr << "OOPS!\n";
-			// fatal << _("JACK appears to be missing from the Ardour bundle") << endmsg;
+			fatal << _("JACK appears to be missing from the Ardour bundle") << endmsg;
 			/*NOTREACHED*/
 		}
 		return;

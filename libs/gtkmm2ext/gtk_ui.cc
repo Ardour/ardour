@@ -68,6 +68,7 @@ UI::UI (string namestr, int *argc, char ***argv)
 	tips = new Tooltips;
 
 	_active = false;
+	_auto_display_errors = true;
 
 	if (!theGtkUI) {
 		theGtkUI = this;
@@ -482,8 +483,8 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 		
 		display_message (prefix, prefix_len, ptag, mtag, str);
 		
-		if (!errors->is_visible()) {
-			toggle_errors();
+		if (_auto_display_errors) {
+			show_error_log ();
 		}
 	}
 
@@ -491,13 +492,26 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 }
 
 void
+UI::show_error_log ()
+{
+	errors->set_position (WIN_POS_CENTER);
+	errors->show_all ();
+	errors->present ();
+}
+
+void
+UI::hide_error_log ()
+{
+	errors->hide ();
+}
+
+void
 UI::toggle_errors ()
 {
 	if (!errors->is_visible()) {
-		errors->set_position (WIN_POS_MOUSE);
-		errors->show ();
+		show_error_log ();
 	} else {
-		errors->hide ();
+		hide_error_log ();
 	}
 }
 

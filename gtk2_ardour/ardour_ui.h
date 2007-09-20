@@ -50,6 +50,7 @@
 #include <gtkmm/togglebutton.h>
 #include <gtkmm/treeview.h>
 #include <gtkmm/menubar.h>
+#include <gtkmm/textbuffer.h>
 #include <gtkmm/adjustment.h>
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/click_box.h>
@@ -730,6 +731,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void check_memory_locking ();
 
 	void audioengine_setup ();
+
+	void display_message (const char *prefix, gint prefix_len, 
+			      Glib::RefPtr<Gtk::TextBuffer::Tag> ptag, Glib::RefPtr<Gtk::TextBuffer::Tag> mtag, const char *msg);
+	Gtk::Label status_bar_label;
+	Gtk::ToggleButton error_log_button;
 };
 
 #endif /* __ardour_gui_h__ */

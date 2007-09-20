@@ -631,7 +631,7 @@ void
 GainMeter::effective_gain_display ()
 {
 	gfloat value = gain_to_slider_position (_io->effective_gain());
-	
+
 	if (gain_adjustment.get_value() != value) {
 		ignore_toggle = true; 
 		gain_adjustment.set_value (value);

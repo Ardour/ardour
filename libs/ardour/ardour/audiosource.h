@@ -104,6 +104,10 @@ const nframes_t frames_per_peak = 256;
 		_build_peakfiles = yn;
 	}
 
+	static bool get_build_peakfiles () {
+		return _build_peakfiles;
+	}
+
 	virtual int setup_peakfile () { return 0; }
 
 	int prepare_for_peakfile_writes ();

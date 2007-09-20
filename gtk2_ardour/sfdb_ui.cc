@@ -64,6 +64,8 @@ using Glib::ustring;
 
 ustring SoundFileBrowser::persistent_folder;
 
+static int reset_depth = 0;
+
 SoundFileBox::SoundFileBox ()
 	: _session(0),
 	  table (6, 2),
@@ -274,7 +276,12 @@ SoundFileBox::audition ()
 	boost::shared_ptr<Region> r;
 	SourceList srclist;
 	boost::shared_ptr<AudioFileSource> afs;
-			
+	bool old_sbp = AudioSource::get_build_peakfiles ();
+
+	/* don't even think of building peakfiles for these files */
+
+	AudioSource::set_build_peakfiles (false);
+
 	for (int n = 0; n < sf_info.channels; ++n) {
 		try {
 			afs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (*_session, path, n, AudioFileSource::Flag (0), false));
@@ -283,9 +290,12 @@ SoundFileBox::audition ()
 			
 		} catch (failed_constructor& err) {
 			error << _("Could not access soundfile: ") << path << endmsg;
+			AudioSource::set_build_peakfiles (old_sbp);
 			return;
 		}
 	}
+
+	AudioSource::set_build_peakfiles (old_sbp);
 			
 	if (srclist.empty()) {
 		return;
@@ -516,6 +526,8 @@ SoundFileBrowser::update_preview ()
 void
 SoundFileBrowser::found_list_view_selected ()
 {
+	cerr << "file selected\n";
+
 	if (!reset_options ()) {
 		set_response_sensitive (RESPONSE_OK, false);
 	} else {
@@ -607,6 +619,14 @@ SoundFileOmega::reset_options ()
 {
 	vector<ustring> paths = get_paths ();
 
+	reset_depth++;
+
+	if (reset_depth > 4) {
+		abort ();
+	}
+
+	cerr << "got " << paths.size() << " paths  at depth = " << reset_depth << endl;
+
 	if (paths.empty()) {
 
 		channel_combo.set_sensitive (false);
@@ -614,6 +634,7 @@ SoundFileOmega::reset_options ()
 		where_combo.set_sensitive (false);
 		copy_files_btn.set_sensitive (false);
 
+		reset_depth--;
 		return false;
 
 	} else {
@@ -633,6 +654,7 @@ SoundFileOmega::reset_options ()
 
 	if (check_info (paths, same_size, src_needed, selection_includes_multichannel)) {
 		Glib::signal_idle().connect (mem_fun (*this, &SoundFileOmega::bad_file_message));
+		reset_depth--;
 		return false;
 	}
 
@@ -668,13 +690,14 @@ SoundFileOmega::reset_options ()
 	action_strings.push_back (_("to the region list"));
 	action_strings.push_back (_("as new tape tracks"));
 
+	resetting_ourselves = true;
+
 	existing_choice = action_combo.get_active_text();
 
 	set_popdown_strings (action_combo, action_strings);
 
 	/* preserve any existing choice, if possible */
 
-	resetting_ourselves = true;
 
 	if (existing_choice.length()) {
 		vector<string>::iterator x;
@@ -769,7 +792,8 @@ SoundFileOmega::reset_options ()
 			copy_files_btn.set_sensitive (false);
 		}
 	} 
-
+	
+	reset_depth--;
 	return true;
 }	
 
@@ -1114,6 +1138,8 @@ SoundFileOmega::file_selection_changed ()
 	if (resetting_ourselves) {
 		return;
 	}
+
+	cerr << "file selection changed\n";
 
 	if (!reset_options ()) {
 		set_response_sensitive (RESPONSE_OK, false);

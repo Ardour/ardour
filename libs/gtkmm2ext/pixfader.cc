@@ -68,7 +68,7 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 					   intersection.width, intersection.height,
 					   Gdk::RGB_DITHER_NONE, 0, 0);
 		
-		get_window()->draw_line (get_style()->get_bg_gc(STATE_ACTIVE), 0, 0, view.width - 1, 0); /* top */
+                get_window()->draw_line (get_style()->get_bg_gc(STATE_ACTIVE), 0, 0, view.width - 1, 0); /* top */
 		get_window()->draw_line (get_style()->get_bg_gc(STATE_ACTIVE), 0, 0, 0, view.height - 1); /* left */
 		get_window()->draw_line (get_style()->get_bg_gc(STATE_NORMAL), view.width - 1, 0, view.width - 1, view.height - 1); /* right */
 		get_window()->draw_line (get_style()->get_bg_gc(STATE_NORMAL), 0, view.height - 1, view.width - 1, view.height - 1); /* bottom */
@@ -238,7 +238,7 @@ PixFader::adjustment_changed ()
 {
 	if (display_height() != last_drawn) {
 		queue_draw ();
-	}
+	} 
 }
 
 int

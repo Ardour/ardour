@@ -17,6 +17,7 @@
 
 */
 
+#include <sys/time.h>
 #include <unistd.h>
 #include <cstdlib>
 #include <cmath>
@@ -349,7 +350,7 @@ Editor::Editor ()
 
 	edit_controls_vbox.set_spacing (0);
 	horizontal_adjustment.signal_value_changed().connect (mem_fun(*this, &Editor::canvas_horizontally_scrolled));
-	vertical_adjustment.signal_value_changed().connect (mem_fun(*this, &Editor::tie_vertical_scrolling));
+	vertical_adjustment.signal_value_changed().connect (mem_fun(*this, &Editor::tie_vertical_scrolling), true);
 	
 	track_canvas.set_hadjustment (horizontal_adjustment);
 	track_canvas.set_vadjustment (vertical_adjustment);
@@ -682,6 +683,9 @@ Editor::Editor ()
 	set_name ("EditorWindow");
 	add_accel_group (ActionManager::ui_manager->get_accel_group());
 
+	status_bar_hpacker.show ();
+
+	vpacker.pack_end (status_bar_hpacker, false, false);
 	vpacker.pack_end (global_hpacker, true, true);
 
 	/* register actions now so that set_state() can find them and set toggles/checks etc */
@@ -845,9 +849,24 @@ void
 Editor::tie_vertical_scrolling ()
 {
 	double y1 = vertical_adjustment.get_value();
+
+	playhead_cursor->set_y_axis (y1);
+	edit_cursor->set_y_axis (y1);
+	
 	controls_layout.get_vadjustment()->set_value (y1);
-	playhead_cursor->set_y_axis(y1);
-	edit_cursor->set_y_axis(y1);
+
+#ifdef GTKOSX
+	/* the way idle updates and immediate window flushing work on GTK-Quartz
+	   requires that we force an immediate redraw right here. The controls
+	   layout will do the same all by itself, as does the canvas widget, but
+	   most of the time, the canvas itself hasn't updated itself because its
+	   idle handler hasn't run. consequently, the call that its layout makes
+	   to gdk_window_process_updates() finds nothing to do. here, we force
+	   the update to happen, then request a flush of the new window state.
+	*/
+	track_canvas.update_now ();
+	gdk_window_process_updates (GTK_LAYOUT(track_canvas.gobj())->bin_window, true);
+#endif
 }
 
 void
@@ -3952,3 +3971,4 @@ Editor::set_punch_range (nframes_t start, nframes_t end, string cmd)
 	
 	commit_reversible_command ();
 }
+
