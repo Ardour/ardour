@@ -13,7 +13,7 @@ gtkmmtests = env.Copy()
 # this defines the version number of the GTK interface to ardour
 #
 
-domain = 'gtk_ardour'
+domain = 'gtk2_ardour'
 
 gtkardour.Append(DOMAIN=domain, MAJOR=1,MINOR=0,MICRO=2)
 gtkardour.Append(CCFLAGS="-DPACKAGE=\\\"" + domain + "\\\"")

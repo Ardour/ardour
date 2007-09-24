@@ -64,8 +64,6 @@ using Glib::ustring;
 
 ustring SoundFileBrowser::persistent_folder;
 
-static int reset_depth = 0;
-
 SoundFileBox::SoundFileBox ()
 	: _session(0),
 	  table (6, 2),
@@ -617,12 +615,6 @@ SoundFileOmega::reset_options ()
 {
 	vector<ustring> paths = get_paths ();
 
-	reset_depth++;
-
-	if (reset_depth > 4) {
-		abort ();
-	}
-
 	if (paths.empty()) {
 
 		channel_combo.set_sensitive (false);
@@ -630,7 +622,6 @@ SoundFileOmega::reset_options ()
 		where_combo.set_sensitive (false);
 		copy_files_btn.set_sensitive (false);
 
-		reset_depth--;
 		return false;
 
 	} else {
@@ -650,7 +641,6 @@ SoundFileOmega::reset_options ()
 
 	if (check_info (paths, same_size, src_needed, selection_includes_multichannel)) {
 		Glib::signal_idle().connect (mem_fun (*this, &SoundFileOmega::bad_file_message));
-		reset_depth--;
 		return false;
 	}
 
@@ -789,7 +779,6 @@ SoundFileOmega::reset_options ()
 		}
 	} 
 	
-	reset_depth--;
 	return true;
 }	
 

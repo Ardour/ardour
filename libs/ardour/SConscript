@@ -12,7 +12,7 @@ ardour = env.Copy()
 # this defines the version number of libardour
 # 
 
-domain = 'libardour'
+domain = 'libardour2'
 
 ardour.Append(DOMAIN = domain, MAJOR = 2, MINOR = 0, MICRO = 0)
 ardour.Append(CXXFLAGS = "-DPACKAGE=\\\"" + domain + "\\\"")

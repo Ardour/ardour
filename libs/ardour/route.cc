@@ -479,13 +479,9 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 		
 	    // OR recording 
 		
-		// h/w monitoring not in use 
+		// AND software monitoring required
 		
-		(!Config->get_monitoring_model() == HardwareMonitoring && 
-
-		 // AND software monitoring required
-
-		 Config->get_monitoring_model() == SoftwareMonitoring)) { 
+		(Config->get_monitoring_model() == SoftwareMonitoring)) {
 		
 		if (apply_gain_automation) {
 			
