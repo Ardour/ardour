@@ -479,6 +479,7 @@ carbon_menu_item_connect (GtkWidget     *menu_item,
 /*
  * carbon event handler
  */
+static int eventcnt = 0;
 
 static OSStatus
 menu_event_handler_func (EventHandlerCallRef  event_handler_call_ref, 

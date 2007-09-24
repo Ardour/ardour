@@ -99,6 +99,7 @@ Editor::external_audio_dialog ()
 	case RESPONSE_OK:
 		sfbrowser->hide ();
 		break;
+
 	default:
 		// cancel from the browser - we are done
 		sfbrowser->hide ();

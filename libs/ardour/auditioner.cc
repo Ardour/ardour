@@ -117,7 +117,6 @@ void
 Auditioner::audition_region (boost::shared_ptr<Region> region)
 {
 	if (g_atomic_int_get (&_active)) {
-		cerr << "re-audition while still active!\n";
 		/* don't go via session for this, because we are going
 		   to remain active.
 		*/
@@ -177,6 +176,7 @@ Auditioner::play_audition (nframes_t nframes)
 	}
 
 	need_butler = _diskstream->commit (this_nframes);
+
 	current_frame += this_nframes;
 
 	if (current_frame >= length) {

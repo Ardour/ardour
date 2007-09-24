@@ -34,6 +34,7 @@
 
 #include <pbd/error.h>
 #include <pbd/compose.h>
+#include <pbd/misc.h>
 #include <pbd/pathscanner.h>
 #include <pbd/failed_constructor.h>
 #include <pbd/enumwriter.h>
@@ -191,6 +192,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	have_disk_speed_dialog_displayed = false;
 	_will_create_new_session_automatically = false;
 	session_loaded = false;
+	loading_dialog = 0;
 	last_speed_displayed = -1.0f;
 
 	keybindings_path = ARDOUR::find_config_file ("ardour.bindings");
@@ -1958,7 +1960,16 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 {
 	string session_name;
 	string session_path;
-	
+	string template_name;
+
+	if (!loading_dialog) {
+		loading_dialog = new MessageDialog (*new_session_dialog, 
+						    _("Starting audio engine"),
+						    false,
+						    Gtk::MESSAGE_INFO,
+						    Gtk::BUTTONS_NONE);
+	}
+		
 	int response = Gtk::RESPONSE_NONE;
 
 	new_session_dialog->set_modal(true);
@@ -2002,6 +2013,9 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 			have_engine = true;
 		}
 
+		loading_dialog->show_all ();
+		flush_pending ();
+		
 		create_engine ();
 
 		/* now handle possible affirmative responses */
@@ -2031,14 +2045,16 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 			/* OK == OPEN button */
 
 			session_name = new_session_dialog->session_name();
-			
-		        if (new_session_dialog->get_current_page() == 1) {
+		
+			if (session_name.empty()) {
+				response = Gtk::RESPONSE_NONE;
+				continue;
+			} 
 				
-				if (session_name.empty()) {
-					response = Gtk::RESPONSE_NONE;
-					continue;
-				} 
-				
+			switch (new_session_dialog->get_current_page()) {
+			case 1: /* recent session selector */
+			case 2: /* audio engine control */
+
 				if (session_name[0] == '/' || 
 				    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
 				    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
@@ -2047,13 +2063,9 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 					session_path = new_session_dialog->session_folder();
 					load_session (session_path, session_name);
 				}
-			
-			} else {
+				break;
 
-				if (session_name.empty()) {
-					response = Gtk::RESPONSE_NONE;
-					continue;
-				} 
+			case 0: /* nominally the "new" session creator, but could be in use for an old session */
 
 				if (new_session_dialog->get_current_page() == 0 && ARDOUR_COMMAND_LINE::session_name.empty()) {
 					should_be_new = true;
@@ -2079,7 +2091,12 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 				
 				session_path = Glib::build_filename (session_path, session_name);
 				
-				if (should_be_new && Glib::file_test (session_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
+				if (!should_be_new) {
+
+					load_session (session_path, session_name);
+					continue; /* leaves while() loop because response != NONE */
+
+				} else if (Glib::file_test (session_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
 
 					Glib::ustring str = string_compose (_("This session\n%1\nalready exists. Do you want to open it?"), session_path);
 
@@ -2096,6 +2113,9 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 					
 					switch (msg.run()) {
 					case RESPONSE_YES:
+						new_session_dialog->hide ();
+						goto_editor_window ();
+						flush_pending ();
 						load_session (session_path, session_name);
 						goto done;
 						break;
@@ -2104,14 +2124,18 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 						new_session_dialog->reset ();
 						continue;
 					}
-				}
+				} 
 
 			        _session_is_new = true;
-
-				std::string template_name = new_session_dialog->session_template_name();
 						
 				if (new_session_dialog->use_session_template()) {
-							
+
+					template_name = new_session_dialog->session_template_name();
+
+					new_session_dialog->hide ();
+					goto_editor_window ();
+					flush_pending ();
+
 					load_session (session_path, session_name, &template_name);
 			  
 				} else {
@@ -2168,6 +2192,10 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 						nphysout = (uint32_t) new_session_dialog->output_limit_count();
 					}
 
+					new_session_dialog->hide ();
+					goto_editor_window ();
+					flush_pending ();
+
 					if (build_session (session_path,
 							   session_name,
 							   cchns,
@@ -2183,6 +2211,10 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 						continue;
 					}
 				}
+				break;
+
+			default:
+				break;
 			}
 		}
 		
@@ -2190,19 +2222,20 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 
   done:
 	show();
-	new_session_dialog->get_window()->set_cursor();
+	loading_dialog->hide ();
 	new_session_dialog->hide();
 	return true;
 }
 
 void
-ARDOUR_UI::close_session()
+ARDOUR_UI::close_session ()
 {
 	if (!check_audioengine()) {
 		return;
 	}
 
-	unload_session();
+	unload_session (true);
+	
 	get_session_parameters ("", true, false);
 }
 
@@ -2210,19 +2243,22 @@ int
 ARDOUR_UI::load_session (const string & path, const string & snap_name, string* mix_template)
 {
 	Session *new_session;
-	int x;
+	int unload_status;
+	int retval = -1;
+
 	session_loaded = false;
-	
+
 	if (!check_audioengine()) {
 		return -1;
 	}
 
-	x = unload_session ();
+	unload_status = unload_session ();
 
-	if (x < 0) {
-		return -1;
-	} else if (x > 0) {
-		return 0;
+	if (unload_status < 0) {
+		goto out;
+	} else if (unload_status > 0) {
+		retval = 0;
+		goto out;
 	}
 
 	/* if it already exists, we must have write access */
@@ -2231,17 +2267,23 @@ ARDOUR_UI::load_session (const string & path, const string & snap_name, string* 
 		MessageDialog msg (*editor, _("You do not have write access to this session.\n"
 					      "This prevents the session from being loaded."));
 		msg.run ();
-		return -1;
+		goto out;
 	}
+
+	if (loading_dialog) {
+		loading_dialog->set_markup (_("Please wait while Ardour loads your session"));
+		flush_pending ();
+	}
+
+	disable_screen_updates ();
 
 	try {
 		new_session = new Session (*engine, path, snap_name, mix_template);
 	}
 
 	catch (...) {
-
 		error << string_compose(_("Session \"%1 (snapshot %2)\" did not load successfully"), path, snap_name) << endmsg;
-		return -1;
+		goto out;
 	}
 
 	connect_to_session (new_session);
@@ -2257,7 +2299,12 @@ ARDOUR_UI::load_session (const string & path, const string & snap_name, string* 
 	}
 
 	editor->edit_cursor_position (true);
-	return 0;
+	enable_screen_updates ();
+	flush_pending ();
+	retval = 0;
+
+  out:
+	return retval;
 }
 
 int

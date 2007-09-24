@@ -29,6 +29,7 @@ dmalloc.cc
 error.cc
 fpu.cc
 id.cc
+misc.c
 mountpoint.cc
 path.cc
 pathscanner.cc

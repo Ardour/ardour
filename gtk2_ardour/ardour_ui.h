@@ -133,7 +133,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	bool get_session_parameters (Glib::ustring path, bool have_engine = false, bool should_be_new = false);
 	gint cmdline_new_session (string path);
-	int  unload_session ();
+	int  unload_session (bool hide_stuff = false);
 	void close_session(); 
 
 	int  save_state_canfail (string state_name = "");
@@ -736,6 +736,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 			      Glib::RefPtr<Gtk::TextBuffer::Tag> ptag, Glib::RefPtr<Gtk::TextBuffer::Tag> mtag, const char *msg);
 	Gtk::Label status_bar_label;
 	Gtk::ToggleButton error_log_button;
+	Gtk::MessageDialog* loading_dialog;
 };
 
 #endif /* __ardour_gui_h__ */

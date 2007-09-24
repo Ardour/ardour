@@ -163,7 +163,7 @@ ARDOUR_UI::connect_to_session (Session *s)
 }
 
 int
-ARDOUR_UI::unload_session ()
+ARDOUR_UI::unload_session (bool hide_stuff)
 {
 	if (session && session->dirty()) {
 		switch (ask_about_saving_session (_("close"))) {
@@ -175,7 +175,12 @@ ARDOUR_UI::unload_session ()
 			break;
 		}
 	}
-	editor->hide ();
+
+	if (hide_stuff) {
+		editor->hide ();
+		mixer->hide ();
+	}
+
 	second_connection.disconnect ();
 	point_one_second_connection.disconnect ();
 	point_oh_five_second_connection.disconnect ();

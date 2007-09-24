@@ -526,8 +526,6 @@ SoundFileBrowser::update_preview ()
 void
 SoundFileBrowser::found_list_view_selected ()
 {
-	cerr << "file selected\n";
-
 	if (!reset_options ()) {
 		set_response_sensitive (RESPONSE_OK, false);
 	} else {
@@ -624,8 +622,6 @@ SoundFileOmega::reset_options ()
 	if (reset_depth > 4) {
 		abort ();
 	}
-
-	cerr << "got " << paths.size() << " paths  at depth = " << reset_depth << endl;
 
 	if (paths.empty()) {
 
@@ -1138,8 +1134,6 @@ SoundFileOmega::file_selection_changed ()
 	if (resetting_ourselves) {
 		return;
 	}
-
-	cerr << "file selection changed\n";
 
 	if (!reset_options ()) {
 		set_response_sensitive (RESPONSE_OK, false);

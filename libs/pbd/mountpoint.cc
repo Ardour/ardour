@@ -141,8 +141,6 @@ mountpoint (string path)
 		}
 	}
 
-	free(mntbufp);
-	
 	return best;
 }
 #endif // HAVE_GETMNTENT
