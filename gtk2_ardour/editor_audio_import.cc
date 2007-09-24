@@ -73,6 +73,7 @@ void
 Editor::external_audio_dialog ()
 {
 	vector<Glib::ustring> paths;
+	uint32_t track_cnt;
 
 	if (session == 0) {
 		MessageDialog msg (0, _("You can't import or embed an audiofile until you have a session loaded."));
@@ -80,10 +81,22 @@ Editor::external_audio_dialog ()
 		return;
 	}
 	
+	track_cnt = 0;
+
+	for (TrackSelection::iterator x = selection->tracks.begin(); x != selection->tracks.end(); ++x) {
+		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(*x);
+		
+		if (!atv) {
+			continue;
+		} else if (atv->is_audio_track()) {
+			track_cnt++;
+		}
+	}
+
 	if (sfbrowser == 0) {
-		sfbrowser = new SoundFileOmega (*this, _("Add existing audio"), session, selection->tracks.size());
+		sfbrowser = new SoundFileOmega (*this, _("Add existing audio"), session, track_cnt);
 	} else {
-		sfbrowser->reset (selection->tracks.size());
+		sfbrowser->reset (track_cnt);
 	}
 
 	sfbrowser->show_all ();
@@ -151,7 +164,12 @@ Editor::get_nth_selected_audio_track (int nth) const
 	TrackSelection::iterator x;
 	
 	for (x = selection->tracks.begin(); nth > 0 && x != selection->tracks.end(); ++x) {
-		if (dynamic_cast<AudioTimeAxisView*>(*x)) {
+
+		atv = dynamic_cast<AudioTimeAxisView*>(*x);
+		
+		if (!atv) {
+			continue;
+		} else if (atv->is_audio_track()) {
 			--nth;
 		}
 	}
@@ -162,7 +180,7 @@ Editor::get_nth_selected_audio_track (int nth) const
 		atv = dynamic_cast<AudioTimeAxisView*>(*x);
 	}
 	
-	if (!atv) {
+	if (!atv || !atv->is_audio_track()) {
 		return boost::shared_ptr<AudioTrack>();
 	}
 	
@@ -649,17 +667,11 @@ Editor::finish_bringing_in_audio (boost::shared_ptr<AudioRegion> region, uint32_
 	{
 		if (!existing_track) {
 
-			if (selection->tracks.empty()) {
+			existing_track = get_nth_selected_audio_track (0);
+
+			if (!existing_track) {
 				return -1;
 			}
-			
-			AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(selection->tracks.front());
-			
-			if (!atv) {
-				return -1;
-			}
-			
-			existing_track = atv->audio_track();
 		}
 
 		boost::shared_ptr<Playlist> playlist = existing_track->diskstream()->playlist();
