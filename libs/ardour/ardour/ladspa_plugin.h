@@ -65,12 +65,18 @@ class LadspaPlugin : public ARDOUR::Plugin
 	std::set<uint32_t> automatable() const;
 	uint32_t nth_parameter (uint32_t port, bool& ok) const;
 	void activate () { 
+		if (was_activated)
+			return;
+
 		if (descriptor->activate) {
 			descriptor->activate (handle);
 		}
 		was_activated = true;
 	}
 	void deactivate () {
+		if (!was_activated)
+			return;
+
 		if (descriptor->deactivate) 
 			descriptor->deactivate (handle);
 	}
