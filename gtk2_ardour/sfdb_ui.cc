@@ -30,7 +30,6 @@
 #include <glibmm/fileutils.h>
 
 #include <pbd/convert.h>
-#include <pbd/fs.h>
 #include <pbd/tokenizer.h>
 
 #include <gtkmm2ext/utils.h>
