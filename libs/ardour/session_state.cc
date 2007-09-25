@@ -902,7 +902,7 @@ Session::state(bool full_state)
 	// store libardour version, just in case
 	char buf[16];
 	snprintf(buf, sizeof(buf)-1, "%d.%d.%d", 
-		 libardour_major_version, libardour_minor_version, libardour_micro_version);
+		 libardour2_major_version, libardour2_minor_version, libardour2_micro_version);
 	node->add_property("version", string(buf));
 		
 	/* store configuration settings */
