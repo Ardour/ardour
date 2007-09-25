@@ -71,17 +71,23 @@ class LadspaPlugin : public ARDOUR::Plugin
 		if (descriptor->activate) {
 			descriptor->activate (handle);
 		}
+
 		was_activated = true;
 	}
 	void deactivate () {
 		if (!was_activated)
 			return;
 
-		if (descriptor->deactivate) 
+		if (descriptor->deactivate) {
 			descriptor->deactivate (handle);
+		}
+	
+		was_activated = false;
 	}
 	void cleanup () {
-		if (was_activated && descriptor->cleanup) {
+		deactivate();
+
+		if (descriptor->cleanup) {
 			descriptor->cleanup (handle);
 		}
 	}
