@@ -28,7 +28,6 @@ enumwriter.cc
 dmalloc.cc
 error.cc
 fpu.cc
-fs.cc
 id.cc
 misc.c
 mountpoint.cc
