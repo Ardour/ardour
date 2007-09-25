@@ -82,6 +82,12 @@ ARDOUR_UI::toggle_denormal_protection ()
 }
 
 void
+ARDOUR_UI::toggle_only_copy_imported_files ()
+{
+	ActionManager::toggle_config_state ("options", "OnlyCopyImportedFiles", &Configuration::set_only_copy_imported_files, &Configuration::get_only_copy_imported_files);
+}
+
+void
 ARDOUR_UI::set_native_file_header_format (HeaderFormat hf)
 {
 	const char *action = 0;
@@ -781,6 +787,20 @@ ARDOUR_UI::map_output_auto_connect ()
 }
 
 void
+ARDOUR_UI::map_only_copy_imported_files ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action ("options", X_("OnlyCopyImportedFiles"));
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+
+		if (tact && !tact->get_active()) {
+			tact->set_active (Config->get_only_copy_imported_files());
+		}
+	}
+
+}
+
+void
 ARDOUR_UI::map_meter_falloff ()
 {
 	const char* action = X_("MeterFalloffMedium");
@@ -1085,7 +1105,9 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		ActionManager::map_some_state ("options",  "PrimaryClockDeltaEditCursor", &Configuration::get_primary_clock_delta_edit_cursor);
 	} else if (PARAM_IS ("secondary-clock-delta-edit-cursor")) {
 		ActionManager::map_some_state ("options",  "SecondaryClockDeltaEditCursor", &Configuration::get_secondary_clock_delta_edit_cursor);
-	} 
+	} else if (PARAM_IS ("only-copy-imported-files")) {
+		map_only_copy_imported_files ();
+	}
 			   
 
 #undef PARAM_IS

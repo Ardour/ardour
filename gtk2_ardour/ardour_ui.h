@@ -703,6 +703,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_RegionEquivalentsOverlap ();
 	void toggle_PrimaryClockDeltaEditCursor ();
 	void toggle_SecondaryClockDeltaEditCursor ();
+	void toggle_only_copy_imported_files ();
 
 	void mtc_port_changed ();
 	void map_solo_model ();
@@ -714,6 +715,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void map_file_data_format ();
 	void map_input_auto_connect ();
 	void map_output_auto_connect ();
+	void map_only_copy_imported_files ();
 	void parameter_changed (const char*);
 
 	void set_meter_hold (ARDOUR::MeterHold);

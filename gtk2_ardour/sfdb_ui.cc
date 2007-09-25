@@ -30,6 +30,7 @@
 #include <glibmm/fileutils.h>
 
 #include <pbd/convert.h>
+#include <pbd/fs.h>
 #include <pbd/tokenizer.h>
 
 #include <gtkmm2ext/utils.h>
@@ -771,13 +772,18 @@ SoundFileOmega::reset_options ()
 		src_combo.set_sensitive (false);
 	}
 	
-	if (Profile->get_sae()) {
+	if (Config->get_only_copy_imported_files()) {
+
 		if (selection_can_be_embedded_with_links) {
 			copy_files_btn.set_sensitive (true);
 		} else {
 			copy_files_btn.set_sensitive (false);
 		}
-	} 
+
+	}  else {
+
+		copy_files_btn.set_sensitive (true);
+	}
 	
 	return true;
 }	
@@ -841,6 +847,7 @@ SoundFileOmega::check_info (const vector<ustring>& paths, bool& same_size, bool&
 
 	return err;
 }
+
 
 bool
 SoundFileOmega::check_link_status (const Session& s, const vector<ustring>& paths)
@@ -951,6 +958,16 @@ SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Sessi
 	vbox = manage (new VBox);
 	vbox->pack_start (*hbox, false, false);
 	options.pack_start (*vbox, false, false);
+
+	/* dummy entry for action combo so that it doesn't look odd if we 
+	   come up with no tracks selected.
+	*/
+
+	str.clear ();
+	str.push_back (_("as new tracks"));
+	set_popdown_strings (action_combo, str);
+	action_combo.set_active_text (str.front());
+	action_combo.set_sensitive (false);
 
 	l = manage (new Label);
 	l->set_text (_("Insert:"));

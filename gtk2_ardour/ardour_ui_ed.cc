@@ -419,6 +419,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_toggle_action (option_actions, X_("RegionEquivalentsOverlap"), _("Region equivalents overlap"), mem_fun (*this, &ARDOUR_UI::toggle_RegionEquivalentsOverlap));
 	ActionManager::register_toggle_action (option_actions, X_("PrimaryClockDeltaEditCursor"), _("Primary Clock delta to edit cursor"), mem_fun (*this, &ARDOUR_UI::toggle_PrimaryClockDeltaEditCursor));
 	ActionManager::register_toggle_action (option_actions, X_("SecondaryClockDeltaEditCursor"), _("Secondary Clock delta to edit cursor"), mem_fun (*this, &ARDOUR_UI::toggle_SecondaryClockDeltaEditCursor));	
+	ActionManager::register_toggle_action (option_actions, X_("OnlyCopyImportedFiles"), _("Always copy imported files"), mem_fun (*this, &ARDOUR_UI::toggle_only_copy_imported_files));	
 
 	RadioAction::Group denormal_group;
 

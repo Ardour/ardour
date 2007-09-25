@@ -260,6 +260,7 @@ Editor::Editor ()
 	autoscroll_active = false;
 	autoscroll_timeout_tag = -1;
 	interthread_progress_window = 0;
+	logo_item = 0;
 
 #ifdef FFT_ANALYSIS
 	analysis_window = 0;
@@ -852,7 +853,10 @@ Editor::tie_vertical_scrolling ()
 
 	playhead_cursor->set_y_axis (y1);
 	edit_cursor->set_y_axis (y1);
-	
+	if (logo_item) {
+		logo_item->property_y() = y1;
+	}
+
 	controls_layout.get_vadjustment()->set_value (y1);
 
 #ifdef GTKOSX

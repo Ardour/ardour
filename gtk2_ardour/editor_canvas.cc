@@ -18,10 +18,12 @@
 */
 
 #include <libgnomecanvasmm/init.h>
+#include <libgnomecanvasmm/pixbuf.h>
 #include <jack/types.h>
 #include <gtkmm2ext/utils.h>
 
 #include <ardour/audioregion.h>
+#include <ardour/profile.h>
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -130,6 +132,18 @@ Editor::initialize_canvas ()
 	delete font;
 	
 	verbose_cursor_visible = false;
+
+	/* on the bottom, an image */
+	
+	if (Profile->get_sae()) {
+		Image img (::get_icon (X_("saelogo")));
+		logo_item = new ArdourCanvas::Pixbuf (*track_canvas.root(), 0.0, 0.0, img.get_pixbuf());
+		logo_item->property_height_in_pixels() = true;
+		logo_item->property_width_in_pixels() = true;
+		logo_item->property_height_set() = true;
+		logo_item->property_width_set() = true;
+		logo_item->show ();
+	}
 	
 	/* a group to hold time (measure) lines */
 	
@@ -237,6 +251,10 @@ Editor::initialize_canvas ()
 	initial_ruler_update_required = true;
 	track_canvas.signal_size_allocate().connect (mem_fun(*this, &Editor::track_canvas_allocate));
 
+	if (logo_item) {
+		logo_item->lower_to_bottom ();
+	}
+
 	ColorsChanged.connect (mem_fun (*this, &Editor::color_handler));
 	color_handler();
 
@@ -328,7 +346,12 @@ Editor::track_canvas_size_allocated ()
 		
 	update_fixed_rulers();
 	redisplay_tempo (true);
-	
+
+	if (logo_item) {
+		logo_item->property_height() = canvas_height;
+		logo_item->property_width() = canvas_width;
+	}
+
 	Resized (); /* EMIT_SIGNAL */
 
 	return false;
@@ -682,7 +705,11 @@ Editor::canvas_horizontally_scrolled ()
 		last_canvas_frame = rightmost_frame;
 		reset_scrolling_region ();
 	}
-	
+
+	if (logo_item) {
+		logo_item->property_x() = horizontal_adjustment.get_value ();
+	}
+
 	update_fixed_rulers ();
 
 	redisplay_tempo (!_dragging_hscrollbar);

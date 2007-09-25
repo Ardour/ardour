@@ -32,6 +32,7 @@
 #include <libgnomecanvasmm/canvas.h>
 #include <libgnomecanvasmm/group.h>
 #include <libgnomecanvasmm/line.h>
+#include <libgnomecanvasmm/pixbuf.h>
 
 #include <cmath>
 
@@ -514,15 +515,16 @@ class Editor : public PublicEditor
 	Gtk::EventBox      time_button_event_box;
 	Gtk::Frame         time_button_frame;
 
-	ArdourCanvas::Group      *minsec_group;
-	ArdourCanvas::Group      *bbt_group;
-	ArdourCanvas::Group      *smpte_group;
-	ArdourCanvas::Group      *frame_group;
-	ArdourCanvas::Group      *tempo_group;
-	ArdourCanvas::Group      *meter_group;
-	ArdourCanvas::Group      *marker_group;
-	ArdourCanvas::Group      *range_marker_group;
-	ArdourCanvas::Group      *transport_marker_group;
+	ArdourCanvas::Pixbuf*     logo_item;
+	ArdourCanvas::Group*      minsec_group;
+	ArdourCanvas::Group*      bbt_group;
+	ArdourCanvas::Group*      smpte_group;
+	ArdourCanvas::Group*      frame_group;
+	ArdourCanvas::Group*      tempo_group;
+	ArdourCanvas::Group*      meter_group;
+	ArdourCanvas::Group*      marker_group;
+	ArdourCanvas::Group*      range_marker_group;
+	ArdourCanvas::Group*      transport_marker_group;
 	
 	enum {
 		ruler_metric_smpte = 0,

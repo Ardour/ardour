@@ -145,6 +145,7 @@ CONFIG_VARIABLE (bool, periodic_safety_backups, "periodic-safety-backups", true)
 CONFIG_VARIABLE (uint32_t, periodic_safety_backup_interval, "periodic-safety-backup-interval", 120)
 CONFIG_VARIABLE (float, automation_interval, "automation-interval", 50)
 CONFIG_VARIABLE (bool, sync_all_route_ordering, "sync-all-route-ordering", true)
+CONFIG_VARIABLE (bool, only_copy_imported_files, "only-copy-imported-files", true)
 
 /* denormal management */
 

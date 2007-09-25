@@ -5045,9 +5045,6 @@ bool
 Editor::update_mouse_speed ()
 {
 	double speed;
-	double rev;
-	double dir;
-	static size_t update_cnt = 0;
 
 	if (!_scrubbing) {
 		session->request_transport_speed (0.0);
