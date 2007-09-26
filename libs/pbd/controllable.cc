@@ -42,6 +42,31 @@ Controllable::Controllable (std::string name)
 	add ();
 }
 
+Controllable::Controllable (const XMLNode& node)
+{
+	const XMLProperty* prop = node.property (X_("name"));
+
+	if (!prop) {
+		fatal << string_compose (_("programming error: %1"), "Controllable (XMLNode&) constructor called without name property")
+		      << endmsg;
+		/*NOTREACHED*/
+	}
+
+	_name = prop->value ();
+
+	prop = node.property (X_("id"));
+
+	if (!prop) {
+		fatal << string_compose (_("programming error: %1"), "Controllable (XMLNode&) constructor called without id property")
+		      << endmsg;
+		/*NOTREACHED*/
+	}
+	
+	_id = prop->value();
+	
+	add ();
+}
+
 void
 Controllable::add ()
 {

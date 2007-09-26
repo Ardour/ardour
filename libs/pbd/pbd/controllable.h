@@ -35,6 +35,7 @@ namespace PBD {
 class Controllable : public PBD::StatefulDestructible {
   public:
 	Controllable (std::string name);
+	Controllable (const XMLNode&);
 	virtual ~Controllable() { Destroyed (this); }
 
 	virtual void set_value (float) = 0;

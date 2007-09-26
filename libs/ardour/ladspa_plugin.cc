@@ -348,6 +348,10 @@ LadspaPlugin::get_state()
 			snprintf(buf, sizeof(buf), "%+f", shadow_data[i]);
 			child->add_property("value", string(buf));
 			root->add_child_nocopy (*child);
+
+			if (i < controls.size() && controls[i]) {
+				root->add_child_nocopy (controls[i]->get_state());
+			}
 		}
 	}
 
@@ -389,6 +393,7 @@ LadspaPlugin::set_state(const XMLNode& node)
 			warning << _("LADSPA: no ladspa port number") << endmsg;
 			continue;
 		}
+
 		if ((prop = child->property("value")) != 0) {
 			data = prop->value().c_str();
 		} else {
@@ -399,7 +404,7 @@ LadspaPlugin::set_state(const XMLNode& node)
 		sscanf (port, "%" PRIu32, &port_id);
 		set_parameter (port_id, atof(data));
 	}
-
+	
 	latency_compute_run ();
 
 	return 0;

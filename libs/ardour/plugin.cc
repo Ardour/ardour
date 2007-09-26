@@ -82,17 +82,35 @@ Plugin::~Plugin ()
 	}
 }
 
+void
+Plugin::make_nth_control (uint32_t n, const XMLNode& node)
+{
+	if (controls[n]) {
+		error << string_compose (_("programming error: %1"),
+					 X_("Plugin::make_nth_control() called too late"))
+		      << endmsg;
+		return;
+	}
+
+	Plugin::ParameterDescriptor desc;
+	
+	get_parameter_descriptor (n, desc);
+	
+	controls[n] = new PortControllable (node, *this, n, 
+					    desc.lower, desc.upper, desc.toggled, desc.logarithmic);
+}
+
 Controllable *
-Plugin::get_nth_control (uint32_t n)
+Plugin::get_nth_control (uint32_t n, bool do_not_create)
 {
 	if (n >= parameter_count()) {
 		return 0;
 	}
 
-	if (controls[n] == 0) {
+	if (controls[n] == 0 && !do_not_create) {
 
 		Plugin::ParameterDescriptor desc;
-
+		
 		get_parameter_descriptor (n, desc);
 	
 		controls[n] = new PortControllable (describe_parameter (n), *this, n, 
@@ -105,6 +123,17 @@ Plugin::get_nth_control (uint32_t n)
 Plugin::PortControllable::PortControllable (string name, Plugin& p, uint32_t port_id, 
 					    float low, float up, bool t, bool loga)
 	: Controllable (name), plugin (p), absolute_port (port_id)
+{
+	toggled = t;
+	logarithmic = loga;
+	lower = low;
+	upper = up;
+	range = upper - lower;
+}
+
+Plugin::PortControllable::PortControllable (const XMLNode& node, Plugin& p, uint32_t port_id, 
+					    float low, float up, bool t, bool loga)
+	: Controllable (node), plugin (p), absolute_port (port_id)
 {
 	toggled = t;
 	logarithmic = loga;

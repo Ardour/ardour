@@ -601,6 +601,20 @@ PluginInsert::state (bool full)
 	node->add_property("count", string_compose("%1", _plugins.size()));
 	node->add_child_nocopy (_plugins[0]->get_state());
 
+	/* add controllables */
+
+	XMLNode* control_node = new XMLNode (X_("controls"));
+
+	for (uint32_t x = 0; x < _plugins[0]->parameter_count(); ++x) {
+		Controllable* c = _plugins[0]->get_nth_control (x, true);
+		if (c) {
+			XMLNode& controllable_state (c->get_state());
+			controllable_state.add_property ("parameter", to_string (x, std::dec));
+			control_node->add_child_nocopy (controllable_state);
+		}
+	}
+	node->add_child_nocopy (*control_node);
+
 	/* add port automation state */
 	XMLNode *autonode = new XMLNode(port_automation_node_name);
 	set<uint32_t> automatable = _plugins[0]->automatable();
@@ -695,6 +709,11 @@ PluginInsert::set_state(const XMLNode& node)
 		}
 	} 
 
+	if (niter == nlist.end()) {
+		error << string_compose(_("XML node describing a plugin insert is missing the `%1' information"), plugin->state_node_name()) << endmsg;
+		return -1;
+	}
+
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() == Redirect::state_node_name) {
 			Redirect::set_state (**niter);
@@ -707,11 +726,30 @@ PluginInsert::set_state(const XMLNode& node)
 		return -1;
 	}
 
-	if (niter == nlist.end()) {
-		error << string_compose(_("XML node describing a plugin insert is missing the `%1' information"), plugin->state_node_name()) << endmsg;
-		return -1;
-	}
+	/* look for controllables node */
 	
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+
+		if ((*niter)->name() != X_("controls")) {
+			continue;
+		}
+		
+		XMLNodeList grandchildren ((*niter)->children());
+		XMLProperty* prop;
+		XMLNodeIterator gciter;
+		uint32_t param;
+		
+		for (gciter = grandchildren.begin(); gciter != grandchildren.end(); ++gciter) {
+			if ((prop = (*gciter)->property (X_("parameter"))) != 0) {
+				param = atoi (prop->value());
+				/* force creation of controllable for this parameter */
+				_plugins[0]->make_nth_control (param, **gciter);
+			} 
+		}
+
+		break;
+	}
+		
 	/* look for port automation node */
 	
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {

@@ -143,7 +143,8 @@ class Plugin : public PBD::StatefulDestructible
 
 	sigc::signal<void,uint32_t,float> ParameterChanged;
 	
-	PBD::Controllable *get_nth_control (uint32_t);
+	PBD::Controllable *get_nth_control (uint32_t, bool do_not_create = false);
+	void make_nth_control (uint32_t, const XMLNode&);
 
 	PluginInfoPtr get_info() { return _info; }
 	void set_info (const PluginInfoPtr inf) { _info = inf; }
@@ -166,6 +167,8 @@ class Plugin : public PBD::StatefulDestructible
 
 	struct PortControllable : public PBD::Controllable {
 	    PortControllable (std::string name, Plugin&, uint32_t abs_port_id,
+			      float lower, float upper, bool toggled, bool logarithmic);
+	    PortControllable (const XMLNode&, Plugin&, uint32_t abs_port_id,
 			      float lower, float upper, bool toggled, bool logarithmic);
 
 	    void set_value (float);
