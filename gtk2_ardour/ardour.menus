@@ -357,9 +357,10 @@
                <menuitem action='StopRecordingOnXrun'/>
                <menuitem action='StopTransportAtEndOfSession'/>
                <menuitem action='GainReduceFastTransport'/>
-				<menuitem action='PrimaryClockDeltaEditCursor'/>
-				<menuitem action='SecondaryClockDeltaEditCursor'/>
-				<separator/>
+	       <menuitem action='PrimaryClockDeltaEditCursor'/>
+	       <menuitem action='SecondaryClockDeltaEditCursor'/>
+	       <menuitem action='OnlyCopyImportedFiles'/>
+	       <separator/>
          </menu>
 	 <menu name='Help' action='Help'>
 	     <menuitem action='About'/>

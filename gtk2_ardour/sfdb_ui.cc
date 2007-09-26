@@ -629,8 +629,17 @@ SoundFileOmega::reset_options ()
 		channel_combo.set_sensitive (true);
 		action_combo.set_sensitive (true);
 		where_combo.set_sensitive (true);
-		copy_files_btn.set_sensitive (true);
 
+		/* if we get through this function successfully, this may be
+		   reset at the end, once we know if we can use hard links
+		   to do embedding
+		*/
+
+		if (Config->get_only_copy_imported_files()) {
+			copy_files_btn.set_sensitive (false);
+		} else {
+			copy_files_btn.set_sensitive (false);
+		}
 	}
 
 	bool same_size;
