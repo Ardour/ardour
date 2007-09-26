@@ -64,12 +64,18 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	  /* Paths */
 	  path_table (11, 2),
 
-	  /* Fades */
+	  /* misc */
 
 	  short_xfade_adjustment (0, 1.0, 500.0, 5.0, 100.0),
 	  short_xfade_slider (short_xfade_adjustment),
 	  destructo_xfade_adjustment (1.0, 1.0, 500.0, 1.0, 100.0),
 	  destructo_xfade_slider (destructo_xfade_adjustment),
+	  history_depth (20, -1, 100, 1.0, 10.0),
+	  saved_history_depth (20, 0, 100, 1.0, 10.0),
+	  history_depth_spinner (history_depth),
+	  saved_history_depth_spinner (saved_history_depth),
+	  limit_history_button (_("Limit undo history")),
+	  save_history_button (_("Save undo history")),
 
 	  /* Sync */
 
@@ -131,7 +137,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 
 	setup_sync_options();
 	setup_path_options();
-	setup_fade_options ();
+	setup_misc_options ();
 	setup_keyboard_options ();
 	setup_auditioner_editor ();
 
@@ -140,7 +146,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	notebook.pages().push_back (TabElem (keyboard_mouse_table, _("Kbd/Mouse")));
 	notebook.pages().push_back (TabElem (click_packer, _("Click")));
 	notebook.pages().push_back (TabElem (audition_packer, _("Audition")));
-	notebook.pages().push_back (TabElem (fade_packer, _("Layers & Fades")));
+	notebook.pages().push_back (TabElem (misc_packer, _("Misc")));
 
 	setup_midi_options ();
 	notebook.pages().push_back (TabElem (midi_packer, _("MIDI")));
@@ -244,7 +250,7 @@ OptionEditor::add_session_paths ()
 }
 
 void
-OptionEditor::setup_fade_options ()
+OptionEditor::setup_misc_options ()
 {
 	Gtk::HBox* hbox;
 	
@@ -256,7 +262,7 @@ OptionEditor::setup_fade_options ()
 	hbox->set_spacing (10);
 	hbox->pack_start (*label, false, false);
 	hbox->pack_start (short_xfade_slider, true, true);
-	fade_packer.pack_start (*hbox, false, false);
+	misc_packer.pack_start (*hbox, false, false);
 
 	short_xfade_adjustment.signal_value_changed().connect (mem_fun(*this, &OptionEditor::short_xfade_adjustment_changed));
 
@@ -268,16 +274,94 @@ OptionEditor::setup_fade_options ()
 	hbox->set_spacing (10);
 	hbox->pack_start (*label, false, false);
 	hbox->pack_start (destructo_xfade_slider, true, true);
-	fade_packer.pack_start (*hbox, false, false);
+	misc_packer.pack_start (*hbox, false, false);
 	
+
 	destructo_xfade_adjustment.signal_value_changed().connect (mem_fun(*this, &OptionEditor::destructo_xfade_adjustment_changed));
 
+	hbox = manage (new HBox);
+	hbox->set_border_width (5);
+	hbox->set_spacing (10);
+	hbox->pack_start (limit_history_button, false, false);
+	misc_packer.pack_start (*hbox, false, false);
+
+	label = manage (new Label (_("History depth (commands)")));
+	label->set_name ("OptionsLabel");
+
+	hbox = manage (new HBox);
+	hbox->set_border_width (5);
+	hbox->set_spacing (10);
+	hbox->pack_start (*label, false, false);
+	hbox->pack_start (history_depth_spinner, false, false);
+	misc_packer.pack_start (*hbox, false, false);
+
+	history_depth.signal_value_changed().connect (mem_fun (*this, &OptionEditor::history_depth_changed));
+	saved_history_depth.signal_value_changed().connect (mem_fun (*this, &OptionEditor::saved_history_depth_changed));
+	save_history_button.signal_toggled().connect (mem_fun (*this, &OptionEditor::save_history_toggled));
+	limit_history_button.signal_toggled().connect (mem_fun (*this, &OptionEditor::limit_history_toggled));
+
+	hbox = manage (new HBox);
+	hbox->set_border_width (5);
+	hbox->set_spacing (10);
+	hbox->pack_start (save_history_button, false, false);
+	misc_packer.pack_start (*hbox, false, false);
+
+	label = manage (new Label (_("Saved history depth (commands)")));
+	label->set_name ("OptionsLabel");
+
+	hbox = manage (new HBox);
+	hbox->set_border_width (5);
+	hbox->set_spacing (10);
+	hbox->pack_start (*label, false, false);
+	hbox->pack_start (saved_history_depth_spinner, false, false);
+	misc_packer.pack_start (*hbox, false, false);
+	
 	short_xfade_slider.set_update_policy (UPDATE_DISCONTINUOUS);
 	destructo_xfade_slider.set_update_policy (UPDATE_DISCONTINUOUS);
 
 	destructo_xfade_adjustment.set_value (Config->get_destructive_xfade_msecs());
 
-	fade_packer.show_all ();
+	misc_packer.show_all ();
+}
+
+void
+OptionEditor::limit_history_toggled ()
+{
+	bool x = limit_history_button.get_active();
+	
+	if (!x) {
+		Config->set_history_depth (0);
+		history_depth_spinner.set_sensitive (false);
+	} else {
+		if (Config->get_history_depth() == 0) {
+			/* get back to a sane default */
+			Config->set_history_depth (20);
+		}
+		history_depth_spinner.set_sensitive (true);
+	}
+}
+
+void
+OptionEditor::save_history_toggled ()
+{
+	bool x = save_history_button.get_active();
+
+	if (x != Config->get_save_history()) {
+		Config->set_save_history (x);
+		saved_history_depth_spinner.set_sensitive (x);
+	}
+}
+
+void
+OptionEditor::history_depth_changed()
+{
+	Config->set_history_depth ((int32_t) floor (history_depth.get_value()));
+}
+
+void
+OptionEditor::saved_history_depth_changed()
+{
+	Config->set_saved_history_depth ((int32_t) floor (saved_history_depth.get_value()));
 }
 
 void
@@ -1188,5 +1272,22 @@ OptionEditor::parameter_changed (const char* parameter_name)
 	
 	if (PARAM_IS ("timecode-source-is-synced")) {
 		synced_timecode_button.set_active (Config->get_timecode_source_is_synced());
+	} else if (PARAM_IS ("history-depth")) {
+		int32_t depth = Config->get_history_depth();
+		
+		history_depth.set_value (depth);
+		history_depth_spinner.set_sensitive (depth != 0);
+		limit_history_button.set_active (depth != 0);
+
+	} else if (PARAM_IS ("saved-history-depth")) {
+
+		saved_history_depth.set_value (Config->get_saved_history_depth());
+
+	} else if (PARAM_IS ("save-history")) {
+
+		bool x = Config->get_save_history();
+
+		save_history_button.set_active (x);
+		saved_history_depth_spinner.set_sensitive (x);
 	}
 }

@@ -2989,8 +2989,6 @@ Session::save_history (string snapshot_name)
     string xml_path;
     string bak_path;
 
-    tree.set_root (&_history.get_state (Config->get_saved_history_depth()));
-
     if (snapshot_name.empty()) {
 	snapshot_name = _current_snapshot_name;
     }
@@ -2999,12 +2997,16 @@ Session::save_history (string snapshot_name)
 
     bak_path = xml_path + ".bak";
 
-    if ((access (xml_path.c_str(), F_OK) == 0) &&
-        (rename (xml_path.c_str(), bak_path.c_str())))
-    {
+    if (Glib::file_test (xml_path, Glib::FILE_TEST_EXISTS) && ::rename (xml_path.c_str(), bak_path.c_str())) {
         error << _("could not backup old history file, current history not saved.") << endmsg;
         return -1;
     }
+
+    if (!Config->get_save_history() || Config->get_saved_history_depth() < 0) {
+	    return 0;
+    }
+
+    tree.set_root (&_history.get_state (Config->get_saved_history_depth()));
 
     if (!tree.write (xml_path))
     {
@@ -3043,8 +3045,7 @@ Session::restore_history (string snapshot_name)
     xmlpath = _path + snapshot_name + ".history";
     cerr << string_compose(_("Loading history from '%1'."), xmlpath) << endmsg;
 
-    if (access (xmlpath.c_str(), F_OK)) {
-	    info << string_compose (_("%1: no history file \"%2\" for this session."), _name, xmlpath) << endmsg;
+    if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
 	    return 1;
     }
 

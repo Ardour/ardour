@@ -93,17 +93,17 @@ class UndoHistory : public sigc::trackable
 	void clear_undo ();
 	void clear_redo ();
 
-        XMLNode &get_state(uint32_t depth = 0);
+        XMLNode &get_state(int32_t depth = 0);
         void save_state();
 
-	void set_depth (uint32_t);
-	uint32_t get_depth() const { return _depth; }
+	void set_depth (int32_t);
+	int32_t get_depth() const { return _depth; }
 
 	sigc::signal<void> Changed;
 	
   private:
 	bool _clearing;
-	uint32_t _depth;
+	int32_t _depth;
 	std::list<UndoTransaction*> UndoList;
 	std::list<UndoTransaction*> RedoList;
 

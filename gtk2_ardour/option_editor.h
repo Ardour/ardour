@@ -78,17 +78,31 @@ class OptionEditor : public ArdourDialog
 	void remove_session_paths ();
 	void raid_path_changed ();
 
-	/* fades */
+	/* misc */
 
-	Gtk::VBox        fade_packer;
+	Gtk::VBox        misc_packer;
+
 	Gtk::Adjustment  short_xfade_adjustment;
 	Gtk::HScale      short_xfade_slider;
 	Gtk::Adjustment  destructo_xfade_adjustment;
 	Gtk::HScale      destructo_xfade_slider;
 
-	void setup_fade_options();
+	void setup_misc_options();
+
 	void short_xfade_adjustment_changed ();
 	void destructo_xfade_adjustment_changed ();
+
+	Gtk::Adjustment history_depth;
+	Gtk::Adjustment saved_history_depth;
+	Gtk::SpinButton     history_depth_spinner;
+	Gtk::SpinButton     saved_history_depth_spinner;
+	Gtk::CheckButton    limit_history_button;
+	Gtk::CheckButton    save_history_button;
+
+	void history_depth_changed();
+	void saved_history_depth_changed();
+	void save_history_toggled ();
+	void limit_history_toggled ();
 
 	/* Sync */
 
