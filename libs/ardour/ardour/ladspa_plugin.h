@@ -86,6 +86,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 		was_activated = false;
 	}
 	void cleanup () {
+		activate();
 		deactivate();
 
 		if (descriptor->cleanup) {
