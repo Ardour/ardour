@@ -379,16 +379,7 @@ Editor::register_actions ()
 
 	ActionManager::register_action (editor_actions, X_("addExistingAudioFiles"), _("Add Existing Audio"), mem_fun (*this, &Editor::external_audio_dialog));
 
-
 	act = ActionManager::register_action (editor_actions, X_("addExternalAudioToRegionList"), _("Add External Audio"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, X_("addExternalAudioAsRegion"), _("as Region(s)"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, X_("addExternalAudioAsTrack"), _("as Tracks"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsTrack));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, X_("addExternalAudioAsTapeTrack"), _("as Tape Tracks"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsTapeTrack));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, X_("addExternalAudioToTrack"), _("to Tracks"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportToTrack));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformVisibility"), _("Show Waveforms"), mem_fun (*this, &Editor::toggle_waveform_visibility));

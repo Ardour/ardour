@@ -31,6 +31,7 @@
 
 #include <pbd/convert.h>
 #include <pbd/tokenizer.h>
+#include <pbd/enumwriter.h>
 
 #include <gtkmm2ext/utils.h>
 
@@ -63,6 +64,39 @@ using namespace Editing;
 using Glib::ustring;
 
 ustring SoundFileBrowser::persistent_folder;
+
+static ImportMode
+string2importmode (string str)
+{
+	if (str == "as new tracks") {
+		return ImportAsTrack;
+	} else if (str == "to selected tracks") {
+		return ImportToTrack;
+	} else if (str == "to region list") {
+		return ImportAsRegion;
+	} else if (str == "as new tape tracks") {
+		return ImportAsTapeTrack;
+	}
+
+	warning << string_compose (_("programming error: unknown import mode string %1"), str) << endmsg;
+	
+	return ImportAsTrack;
+}
+
+static string
+importmode2string (ImportMode mode)
+{
+	switch (mode) {
+	case ImportAsTrack:
+		return _("as new tracks");
+	case ImportToTrack:
+		return _("to selected tracks");
+	case ImportAsRegion:
+		return _("to region list");
+	case ImportAsTapeTrack:
+		return _("as new tape tracks");
+	}
+}
 
 SoundFileBox::SoundFileBox ()
 	: _session(0),
@@ -663,7 +697,7 @@ SoundFileOmega::reset_options ()
 			switch (id) {
 			case Editing::ImportDistinctFiles:
 				if (selected_track_cnt == paths.size()) {
-					action_strings.push_back (_("to selected tracks"));
+					action_strings.push_back (importmode2string (ImportToTrack));
 				}
 				break;
 				
@@ -675,15 +709,15 @@ SoundFileOmega::reset_options ()
 				break;
 				
 			default:
-				action_strings.push_back (_("to selected tracks"));
+				action_strings.push_back (importmode2string (ImportToTrack));
 				break;
 			}
 		} 
 	}
 
-	action_strings.push_back (_("as new tracks"));
-	action_strings.push_back (_("to the region list"));
-	action_strings.push_back (_("as new tape tracks"));
+	action_strings.push_back (importmode2string (ImportAsTrack));
+	action_strings.push_back (importmode2string (ImportAsRegion));
+	action_strings.push_back (importmode2string (ImportAsTapeTrack));
 
 	resetting_ourselves = true;
 
@@ -930,7 +964,7 @@ SoundFileChooser::get_filename ()
 	return paths.front();
 }
 
-SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Session* s, int selected_tracks)
+SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Session* s, int selected_tracks, Editing::ImportMode mode_hint)
 	: SoundFileBrowser (parent, title, s),
 	  copy_files_btn ( _("Copy files to session")),
 	  selected_track_cnt (selected_tracks)
@@ -972,7 +1006,7 @@ SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Sessi
 	*/
 
 	str.clear ();
-	str.push_back (_("as new tracks"));
+	str.push_back (importmode2string (mode_hint));
 	set_popdown_strings (action_combo, str);
 	action_combo.set_active_text (str.front());
 	action_combo.set_sensitive (false);
@@ -1057,20 +1091,16 @@ SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Sessi
 	chooser.signal_selection_changed().connect (mem_fun (*this, &SoundFileOmega::file_selection_changed));
 }
 
+void
+SoundFileOmega::set_mode (ImportMode mode)
+{
+	action_combo.set_active_text (importmode2string (mode));
+}
+
 ImportMode
 SoundFileOmega::get_mode () const
 {
-	ustring str = action_combo.get_active_text();
-
-	if (str == _("as new tracks")) {
-		return ImportAsTrack;
-	} else if (str == _("to the region list")) {
-		return ImportAsRegion;
-	} else if (str == _("to selected tracks")) {
-		return ImportToTrack;
-	} else {
-		return ImportAsTapeTrack;
-	}
+	return string2importmode (action_combo.get_active_text());
 }
 
 void

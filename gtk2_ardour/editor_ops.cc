@@ -525,12 +525,13 @@ Editor::build_region_boundary_cache ()
 		for (vector<RegionPoint>::iterator p = interesting_points.begin(); p != interesting_points.end(); ++p) {
 
 			if ((r = find_next_region (pos, *p, 1, tlist, &ontrack)) == 0) {
-				at_end = true;
+				if (*p == interesting_points.back()) {
+					at_end = true;
+				}
 				/* move to next point type */
 				continue;
 			}
 
-			
 			switch (*p) {
 			case Start:
 				rpos = r->first_frame();

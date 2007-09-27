@@ -184,7 +184,8 @@ class SoundFileOmega : public SoundFileBrowser
 {
 
   public:
-	SoundFileOmega (Gtk::Window& parent, std::string title, ARDOUR::Session* _s, int selected_tracks);
+	SoundFileOmega (Gtk::Window& parent, std::string title, ARDOUR::Session* _s, int selected_tracks, 
+			Editing::ImportMode mode_hint = Editing::ImportAsTrack);
 	
 	void reset (int selected_tracks);
 	
@@ -195,6 +196,7 @@ class SoundFileOmega : public SoundFileBrowser
 
 	Gtk::CheckButton copy_files_btn;
 
+	void set_mode (Editing::ImportMode);
 	Editing::ImportMode get_mode() const;
 	Editing::ImportPosition get_position() const;
 	Editing::ImportDisposition get_channel_disposition() const;

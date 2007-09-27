@@ -151,36 +151,6 @@ const char *displaycontrolstrs[] = {
 #undef DISPLAYCONTROL
 #define DISPLAYCONTROL(a) /*empty*/
 
-//IMPORTMODE
-#undef IMPORTMODE
-#define IMPORTMODE(s) N_(#s),
-const char *importmodestrs[] = {
-	#include "editing_syms.h"
-	0
-};
-#undef IMPORTMODE
-#define IMPORTMODE(a) /*empty*/
-
-//IMPORTPOSITION
-#undef IMPORTPOSITION
-#define IMPORTPOSITION(s) N_(#s),
-const char *importpositionstrs[] = {
-	#include "editing_syms.h"
-	0
-};
-#undef IMPORTPOSITION
-#define IMPORTPOSITION(a) /*empty*/
-
-//IMPORTCHANNEL
-#undef IMPORTCHANNEL
-#define IMPORTCHANNEL(s) N_(#s),
-const char *importchannelstrs[] = {
-	#include "editing_syms.h"
-	0
-};
-#undef IMPORTCHANNEL
-#define IMPORTCHANNEL(a) /*empty*/
-
 
 } // namespace Editing
 

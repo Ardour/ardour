@@ -1174,6 +1174,7 @@ ARDOUR_UI::open_session ()
 		open_session_selector = new Gtk::FileChooserDialog (_("open session"), FILE_CHOOSER_ACTION_OPEN);
 		open_session_selector->add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 		open_session_selector->add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_ACCEPT);
+		open_session_selector->set_default_response(Gtk::RESPONSE_ACCEPT);
 
 		FileFilter session_filter;
 		session_filter.add_pattern ("*.ardour");

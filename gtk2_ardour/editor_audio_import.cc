@@ -65,8 +65,21 @@ using Glib::ustring;
 /* Functions supporting the incorporation of external (non-captured) audio material into ardour */
 
 void
-Editor::add_external_audio_action (ImportMode mode)
+Editor::add_external_audio_action (ImportMode mode_hint)
 {
+	if (session == 0) {
+		MessageDialog msg (0, _("You can't import or embed an audiofile until you have a session loaded."));
+		msg.run ();
+		return;
+	}
+	
+	if (sfbrowser == 0) {
+		sfbrowser = new SoundFileOmega (*this, _("Add existing audio"), session, 0, mode_hint);
+	} else {
+		sfbrowser->set_mode (mode_hint);
+	}
+
+	external_audio_dialog ();
 }
 
 void

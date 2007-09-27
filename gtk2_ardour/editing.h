@@ -139,10 +139,6 @@ enum ImportPosition {
 	#include "editing_syms.h"
 };
 
-extern const char *importpositionstrs[];
-inline const char* enum2str(ImportPosition m) {return importpositionstrs[m];}
-ImportPosition str2importposition (const std::string &);
-
 #undef IMPORTPOSITION
 #define IMPORTPOSITION(a) /*empty*/
 
@@ -152,10 +148,6 @@ ImportPosition str2importposition (const std::string &);
 enum ImportDisposition {
 	#include "editing_syms.h"
 };
-
-extern const char *importdispositionstrs[];
-inline const char* enum2str(ImportDisposition m) {return importdispositionstrs[m];}
-ImportDisposition str2importdisposition (const std::string &);
 
 #undef IMPORTDISPOSITION
 #define IMPORTDISPOSITION(a) /*empty*/
