@@ -96,13 +96,15 @@ importmode2string (ImportMode mode)
 	case ImportAsTapeTrack:
 		return _("as new tape tracks");
 	}
+	/*NOTREACHED*/
+	return _("as new tracks");
 }
 
-SoundFileBox::SoundFileBox ()
+SoundFileBox::SoundFileBox (bool persistent)
 	: _session(0),
 	  table (6, 2),
-	  length_clock ("sfboxLengthClock", false, "EditCursorClock", false, true, false),
-	  timecode_clock ("sfboxTimecodeClock", false, "EditCursorClock", false, false, false),
+	  length_clock ("sfboxLengthClock", !persistent, "EditCursorClock", false, true, false),
+	  timecode_clock ("sfboxTimecodeClock", !persistent, "EditCursorClock", false, false, false),
 	  main_box (false, 6),
 	  autoplay_btn (_("Auto-play"))
 	
@@ -381,12 +383,14 @@ SoundFileBox::save_tags (const vector<string>& tags)
 	Library->save_changes ();
 }
 
-SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::Session* s)
+SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::Session* s, bool persistent)
 	: ArdourDialog (parent, title, false, false),
 	  found_list (ListStore::create(found_list_columns)),
 	  chooser (FILE_CHOOSER_ACTION_OPEN),
 	  found_list_view (found_list),
+	  preview (persistent),
 	  found_search_btn (_("Search"))
+
 {
 	VBox* vbox;
 	HBox* hbox;
@@ -928,7 +932,7 @@ SoundFileOmega::check_link_status (const Session& s, const vector<ustring>& path
 }
 
 SoundFileChooser::SoundFileChooser (Gtk::Window& parent, string title, ARDOUR::Session* s)
-	: SoundFileBrowser (parent, title, s)
+	: SoundFileBrowser (parent, title, s, false)
 {
 	set_size_request (780, 300);
 	chooser.set_select_multiple (false);
@@ -964,8 +968,9 @@ SoundFileChooser::get_filename ()
 	return paths.front();
 }
 
-SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Session* s, int selected_tracks, Editing::ImportMode mode_hint)
-	: SoundFileBrowser (parent, title, s),
+SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Session* s, int selected_tracks, bool persistent,
+				Editing::ImportMode mode_hint)
+	: SoundFileBrowser (parent, title, s, persistent),
 	  copy_files_btn ( _("Copy files to session")),
 	  selected_track_cnt (selected_tracks)
 {

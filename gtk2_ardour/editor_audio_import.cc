@@ -74,7 +74,7 @@ Editor::add_external_audio_action (ImportMode mode_hint)
 	}
 	
 	if (sfbrowser == 0) {
-		sfbrowser = new SoundFileOmega (*this, _("Add existing audio"), session, 0, mode_hint);
+		sfbrowser = new SoundFileOmega (*this, _("Add existing audio"), session, 0, true, mode_hint);
 	} else {
 		sfbrowser->set_mode (mode_hint);
 	}
@@ -107,7 +107,7 @@ Editor::external_audio_dialog ()
 	}
 
 	if (sfbrowser == 0) {
-		sfbrowser = new SoundFileOmega (*this, _("Add existing audio"), session, track_cnt);
+		sfbrowser = new SoundFileOmega (*this, _("Add existing audio"), session, track_cnt, true);
 	} else {
 		sfbrowser->reset (track_cnt);
 	}

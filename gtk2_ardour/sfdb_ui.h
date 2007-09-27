@@ -52,7 +52,7 @@ class GainMeter;
 class SoundFileBox : public Gtk::VBox
 {
   public:
-	SoundFileBox ();
+	SoundFileBox (bool persistent);
 	virtual ~SoundFileBox () {};
 	
 	void set_session (ARDOUR::Session* s);
@@ -118,7 +118,7 @@ class SoundFileBrowser : public ArdourDialog
 	Glib::RefPtr<Gtk::ListStore> found_list;
 
   public:
-	SoundFileBrowser (Gtk::Window& parent, std::string title, ARDOUR::Session* _s);
+	SoundFileBrowser (Gtk::Window& parent, std::string title, ARDOUR::Session* _s, bool persistent);
 	virtual ~SoundFileBrowser ();
 	
 	virtual void set_session (ARDOUR::Session*);
@@ -184,7 +184,7 @@ class SoundFileOmega : public SoundFileBrowser
 {
 
   public:
-	SoundFileOmega (Gtk::Window& parent, std::string title, ARDOUR::Session* _s, int selected_tracks, 
+	SoundFileOmega (Gtk::Window& parent, std::string title, ARDOUR::Session* _s, int selected_tracks, bool persistent, 
 			Editing::ImportMode mode_hint = Editing::ImportAsTrack);
 	
 	void reset (int selected_tracks);
