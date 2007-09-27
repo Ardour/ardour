@@ -23,10 +23,12 @@
 
 #include <pbd/failed_constructor.h>
 #include <pbd/error.h>
+#include <pbd/xml++.h>
 
 #include <midi++/types.h>
 #include <midi++/alsa_sequencer.h>
-#include <midi++/port_request.h>
+
+#include "i18n.h"
 
 //#define DOTRACE 1
 
@@ -44,31 +46,31 @@ using namespace PBD;
 
 snd_seq_t* ALSA_SequencerMidiPort::seq = 0;
 
-ALSA_SequencerMidiPort::ALSA_SequencerMidiPort (PortRequest &req)
-	: Port (req)
+ALSA_SequencerMidiPort::ALSA_SequencerMidiPort (const XMLNode& node)
+	: Port (node)
 	, decoder (0) 
 	, encoder (0) 
 	, port_id (-1)
 {
 	TR_FN();
 	int err;
+	Descriptor desc (node);
 
-	if (!seq && init_client (req.devname) < 0) {
+	if (!seq && init_client (desc.device) < 0) {
 		_ok = false; 
 
 	} else {
 		
-		if (0 <= (err = CreatePorts (req)) &&
+		if (0 <= (err = create_ports (desc)) &&
 		    0 <= (err = snd_midi_event_new (1024, &decoder)) &&	// Length taken from ARDOUR::Session::midi_read ()
 		    0 <= (err = snd_midi_event_new (64, &encoder))) {	// Length taken from ARDOUR::Session::mmc_buffer
 			snd_midi_event_init (decoder);
 			snd_midi_event_init (encoder);
 			_ok = true;
-			req.status = PortRequest::OK;
-		} else {
-			req.status = PortRequest::Unknown;
-		}
+		} 
 	}
+
+	set_state (node);
 }
 
 ALSA_SequencerMidiPort::~ALSA_SequencerMidiPort ()
@@ -160,17 +162,17 @@ ALSA_SequencerMidiPort::read (byte *buf, size_t max)
 }
 
 int 
-ALSA_SequencerMidiPort::CreatePorts (PortRequest &req)
+ALSA_SequencerMidiPort::create_ports (const Port::Descriptor& desc)
 {
 	int err;
 	unsigned int caps = 0;
 
-	if (req.mode == O_WRONLY  ||  req.mode == O_RDWR)
+	if (desc.mode == O_WRONLY  ||  desc.mode == O_RDWR)
 		caps |= SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE;
-	if (req.mode == O_RDONLY  ||  req.mode == O_RDWR)
+	if (desc.mode == O_RDONLY  ||  desc.mode == O_RDWR)
 		caps |= SND_SEQ_PORT_CAP_READ | SND_SEQ_PORT_CAP_SUBS_READ;
 	
-	if (0 <= (err = snd_seq_create_simple_port (seq, req.tagname, caps, 
+	if (0 <= (err = snd_seq_create_simple_port (seq, desc.tag.c_str(), caps, 
 						    (SND_SEQ_PORT_TYPE_MIDI_GENERIC|
 						     SND_SEQ_PORT_TYPE_SOFTWARE|
 						     SND_SEQ_PORT_TYPE_APPLICATION)))) {
@@ -259,23 +261,165 @@ ALSA_SequencerMidiPort::discover (vector<PortSet>& ports)
 
 				 if (port_capability & SND_SEQ_PORT_CAP_READ) {
 					 if (port_capability & SND_SEQ_PORT_CAP_WRITE) {
-							 mode = "duplex";
-						 } else {
-							 mode = "output";
-						 } 
-					 } else if (port_capability & SND_SEQ_PORT_CAP_WRITE) {
-						 if (port_capability & SND_SEQ_PORT_CAP_READ) {
-							 mode = "duplex";
-						 } else {
-							 mode = "input";
-						 } 
-					 }
-
-					 ports.back().ports.push_back (PortRequest (client, port, mode, "alsa/sequencer"));
-					 ++n;
+						 mode = "duplex";
+					 } else {
+						 mode = "output";
+					 } 
+				 } else if (port_capability & SND_SEQ_PORT_CAP_WRITE) {
+					 if (port_capability & SND_SEQ_PORT_CAP_READ) {
+						 mode = "duplex";
+					 } else {
+						 mode = "input";
+					 } 
 				 }
+
+				 XMLNode node (X_("MIDI-port"));
+				 node.add_property ("device", client);
+				 node.add_property ("tag", port);
+				 node.add_property ("mode", mode);
+				 node.add_property ("type", "alsa/sequencer");
+				 
+				 ports.back().ports.push_back (node);
+				 ++n;
+			 }
 		 }
 	 }
 	 
 	 return n;
+}
+
+void
+ALSA_SequencerMidiPort::get_connections (vector<SequencerPortAddress>& connections, int dir) const
+{
+	snd_seq_query_subscribe_t *subs;
+	snd_seq_addr_t seq_addr;
+
+	snd_seq_query_subscribe_alloca (&subs);
+
+	// Get port connections...
+	
+	if (dir) {
+		snd_seq_query_subscribe_set_type(subs, SND_SEQ_QUERY_SUBS_WRITE);
+	} else {
+		snd_seq_query_subscribe_set_type(subs, SND_SEQ_QUERY_SUBS_READ);
+	}
+
+	snd_seq_query_subscribe_set_index(subs, 0);
+	seq_addr.client = snd_seq_client_id (seq);
+	seq_addr.port   = port_id;
+	snd_seq_query_subscribe_set_root(subs, &seq_addr);
+	
+	while (snd_seq_query_port_subscribers(seq, subs) >= 0) {
+
+		seq_addr = *snd_seq_query_subscribe_get_addr (subs);
+		
+		connections.push_back (SequencerPortAddress (seq_addr.client,
+							     seq_addr.port));
+
+		snd_seq_query_subscribe_set_index(subs, snd_seq_query_subscribe_get_index(subs) + 1);
+	}
+}
+
+XMLNode&
+ALSA_SequencerMidiPort::get_state () const
+{
+	XMLNode& root (Port::get_state ());
+	vector<SequencerPortAddress> connections;
+	XMLNode* sub = 0;
+	char buf[256];
+
+	get_connections (connections, 1);
+
+	if (!connections.empty()) {
+		if (!sub) {
+			sub = new XMLNode (X_("connections"));
+		}
+		for (vector<SequencerPortAddress>::iterator i = connections.begin(); i != connections.end(); ++i) {
+			XMLNode* cnode = new XMLNode (X_("read"));
+			snprintf (buf, sizeof (buf), "%d:%d", i->first, i->second);
+			cnode->add_property ("dest", buf);
+			sub->add_child_nocopy (*cnode);
+		}
+	}
+	
+	connections.clear ();
+	get_connections (connections, 0);
+
+	if (!connections.empty()) {
+		if (!sub) {
+			sub = new XMLNode (X_("connections"));
+		}
+		for (vector<SequencerPortAddress>::iterator i = connections.begin(); i != connections.end(); ++i) {
+			XMLNode* cnode = new XMLNode (X_("write"));
+			snprintf (buf, sizeof (buf), "%d:%d", i->first, i->second);
+			cnode->add_property ("dest", buf);
+			sub->add_child_nocopy (*cnode);
+		}
+	}
+
+	if (sub) {
+		root.add_child_nocopy (*sub);
+	}
+
+	return root;
+}
+
+void
+ALSA_SequencerMidiPort::set_state (const XMLNode& node)
+{
+	Port::set_state (node);
+
+	XMLNodeList children (node.children());
+	XMLNodeIterator iter;
+
+	for (iter = children.begin(); iter != children.end(); ++iter) {
+
+		if ((*iter)->name() == X_("connections")) {
+
+			XMLNodeList gchildren ((*iter)->children());
+			XMLNodeIterator gciter;
+
+			for (gciter = gchildren.begin(); gciter != gchildren.end(); ++gciter) {
+				XMLProperty* prop;
+
+				if ((prop = (*gciter)->property ("dest")) != 0) {
+					int client;
+					int port;
+
+					if (sscanf (prop->value().c_str(), "%d:%d", &client, &port) == 2) {
+
+						snd_seq_port_subscribe_t *sub;
+						snd_seq_addr_t seq_addr;
+						
+						snd_seq_port_subscribe_alloca(&sub);
+
+						if ((*gciter)->name() == X_("write")) {
+							
+							seq_addr.client = snd_seq_client_id (seq);
+							seq_addr.port   = port_id;
+							snd_seq_port_subscribe_set_sender(sub, &seq_addr);
+							
+							seq_addr.client = client;
+							seq_addr.port   = port;
+							snd_seq_port_subscribe_set_dest(sub, &seq_addr);
+
+						} else {
+							
+							seq_addr.client = snd_seq_client_id (seq);
+							seq_addr.port   = port_id;
+							snd_seq_port_subscribe_set_dest(sub, &seq_addr);
+							
+							seq_addr.client = client;
+							seq_addr.port   = port;
+							snd_seq_port_subscribe_set_sender(sub, &seq_addr);
+						}
+
+						snd_seq_subscribe_port (seq, sub);
+					}
+				}
+			}
+
+			break;
+		}
+	}
 }

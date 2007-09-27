@@ -52,42 +52,39 @@ using namespace MIDI;
 using namespace PBD;
 
 Port *
-PortFactory::create_port (PortRequest &req)
-
+PortFactory::create_port (const XMLNode& node)
 {
+	Port::Descriptor desc (node);
 	Port *port;
 	
-	switch (req.type) {
+	switch (desc.type) {
 #ifdef WITH_ALSA
 	case Port::ALSA_RawMidi:
-		port = new ALSA_RawMidiPort (req);
+		port = new ALSA_RawMidiPort (node);
 		break;
 
 	case Port::ALSA_Sequencer:
-		port = new ALSA_SequencerMidiPort (req);
+		port = new ALSA_SequencerMidiPort (node);
 		break;
 #endif // WITH_ALSA
 
 #if WITH_COREMIDI
 	case Port::CoreMidi_MidiPort:
-		port = new CoreMidi_MidiPort (req);
+		port = new CoreMidi_MidiPort (node);
 		break;
 #endif // WITH_COREMIDI
 
 	case Port::Null:
-		port = new Null_MidiPort (req);
+		port = new Null_MidiPort (node);
 		break;
 
 	case Port::FIFO:
-		port = new FIFO_MidiPort (req);
+		port = new FIFO_MidiPort (node);
 		break;
 
 	default:
-		req.status = PortRequest::TypeUnsupported;
 		return 0;
 	}
-
-	req.status = PortRequest::OK;
 
 	return port;
 }

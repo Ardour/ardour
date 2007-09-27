@@ -26,19 +26,19 @@
 
 using namespace MIDI;
 
-FIFO_MidiPort::FIFO_MidiPort (PortRequest &req) 
-	: FD_MidiPort (req, ".", "midi")
+FIFO_MidiPort::FIFO_MidiPort (const XMLNode& node) 
+	: FD_MidiPort (node, ".", "midi")
 
 {
 }
 
 void
-FIFO_MidiPort::open (PortRequest &req)
+FIFO_MidiPort::open (const Port::Descriptor& desc)
 
 {
 	/* This is a placeholder for the fun-and-games I think we will
 	   need to do with FIFO's.
 	*/
 
-	_fd = ::open (req.devname, req.mode|O_NDELAY);
+	_fd = ::open (desc.device.c_str(), desc.mode|O_NDELAY);
 }

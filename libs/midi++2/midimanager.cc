@@ -27,7 +27,6 @@
 #include <midi++/manager.h>
 #include <midi++/factory.h>
 #include <midi++/channel.h>
-#include <midi++/port_request.h>
 
 using namespace std;
 using namespace MIDI;
@@ -64,27 +63,27 @@ Manager::~Manager ()
 }
 
 Port *
-Manager::add_port (PortRequest &req)
-
+Manager::add_port (const XMLNode& node)
 {
+	Port::Descriptor desc (node);
 	PortFactory factory;
 	Port *port;
 	PortMap::iterator existing;
 	pair<string, Port *> newpair;
 
-	if (!PortFactory::ignore_duplicate_devices (req.type)) {
+	if (!PortFactory::ignore_duplicate_devices (desc.type)) {
 
-		if ((existing = ports_by_device.find (req.devname)) != ports_by_device.end()) {
+		if ((existing = ports_by_device.find (desc.device)) != ports_by_device.end()) {
 			
 			port = (*existing).second;
 			
-			if (port->mode() == req.mode) {
+			if (port->mode() == desc.mode) {
 				
 				/* Same mode - reuse the port, and just
 				   create a new tag entry.
 				*/
 				
-				newpair.first = req.tagname;
+				newpair.first = desc.tag;
 				newpair.second = port;
 				
 				ports_by_tag.insert (newpair);
@@ -97,10 +96,10 @@ Manager::add_port (PortRequest &req)
 			   operation.
 			*/
 			
-			if ((req.mode == O_RDWR && port->mode() != O_RDWR) ||
-			    (req.mode != O_RDWR && port->mode() == O_RDWR)) {
+			if ((desc.mode == O_RDWR && port->mode() != O_RDWR) ||
+			    (desc.mode != O_RDWR && port->mode() == O_RDWR)) {
 				error << "MIDIManager: port tagged \""
-				      << req.tagname
+				      << desc.tag
 				      << "\" cannot be opened duplex and non-duplex"
 				      << endmsg;
 				return 0;
@@ -110,7 +109,7 @@ Manager::add_port (PortRequest &req)
 		}
 	}
 	
-	port = factory.create_port (req);
+	port = factory.create_port (node);
 	
 	if (port == 0) {
 		return 0;
@@ -262,90 +261,6 @@ Manager::foreach_port (int (*func)(const Port &, size_t, void *),
 	return 0;
 }
 
-int
-Manager::parse_port_request (string str, Port::Type type)
-{
-	PortRequest *req;
-	string::size_type colon;
-	string tag;
-
-	if (str.length() == 0) {
-		error << "MIDI: missing port specification" << endmsg;
-		return -1;
-	}
-
-	/* Port specifications look like:
-
-	   devicename
-	   devicename:tagname
-	   devicename:tagname:mode
-
-	   where 
-
-	   "devicename" is the full path to the requested file
-	   
-	   "tagname" (optional) is the name used to refer to the
-		         port. If not given, g_path_get_basename (devicename)
-			 will be used.
-
-	   "mode" (optional) is either "r" or "w" or something else.
-		        if it is "r", the port will be opened
-			read-only, if "w", the port will be opened
-			write-only. Any other value, or no mode
-			specification at all, will cause the port to
-			be opened for reading and writing.
-	*/
-			
-	req = new PortRequest;
-	colon = str.find_first_of (':');
-
-	if (colon != string::npos) {
-		req->devname = strdup (str.substr (0, colon).c_str());
-	} else {
-		req->devname = strdup (str.c_str());
-	}
-
-	if (colon < str.length()) {
-
-		tag = str.substr (colon+1);
-
-		/* see if there is a mode specification in the tag part */
-		
-		colon = tag.find_first_of (':');
-
-		if (colon != string::npos) {
-			string modestr;
-
-			req->tagname = strdup (tag.substr (0, colon).c_str());
-
-			modestr = tag.substr (colon+1);
-			if (modestr == "r") {
-				req->mode = O_RDONLY;
-			} else if (modestr == "w") {
-				req->mode = O_WRONLY;
-			} else {
-				req->mode = O_RDWR;
-			}
-
-		} else {
-			req->tagname = strdup (tag.c_str());
-			req->mode = O_RDWR;
-		}
-
-	} else {
-                // check when tagname is freed
-		req->tagname = g_path_get_basename (req->devname);
-		req->mode = O_RDWR;
-	}
-
-	req->type = type;
-
-	if (MIDI::Manager::instance()->add_port (*req) == 0) {
-		return -1;
-	}
-
-	return 0;
-}
 
 int
 Manager::get_known_ports (vector<PortSet>& ports)

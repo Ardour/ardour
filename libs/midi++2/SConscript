@@ -23,7 +23,6 @@ midiparser.cc
 midiport.cc
 mmc.cc
 mtc.cc
-port_request.cc
 version.cc
 """)
 

@@ -32,6 +32,8 @@
 #include <xmmintrin.h>
 #endif
 
+#include <glibmm/fileutils.h>
+
 #include <lrdf.h>
 
 #include <pbd/error.h>
@@ -40,7 +42,6 @@
 #include <pbd/fpu.h>
 
 #include <midi++/port.h>
-#include <midi++/port_request.h>
 #include <midi++/manager.h>
 #include <midi++/mmc.h>
 
@@ -110,29 +111,13 @@ setup_osc ()
 static int 
 setup_midi ()
 {
-	std::map<string,Configuration::MidiPortDescriptor*>::iterator i;
-	
 	if (Config->midi_ports.size() == 0) {
 		warning << _("no MIDI ports specified: no MMC or MTC control possible") << endmsg;
 		return 0;
 	}
 
-	for (i = Config->midi_ports.begin(); i != Config->midi_ports.end(); ++i) {
-		Configuration::MidiPortDescriptor* port_descriptor;
-
-		port_descriptor = (*i).second;
-
-		MIDI::PortRequest request (port_descriptor->device, 
-					   port_descriptor->tag, 
-					   port_descriptor->mode, 
-					   port_descriptor->type);
-
-		if (request.status != MIDI::PortRequest::OK) {
-			error << string_compose(_("MIDI port specifications for \"%1\" are not understandable."), port_descriptor->tag) << endmsg;
-			continue;
-		}
-		
-		MIDI::Manager::instance()->add_port (request);
+	for (std::map<string,XMLNode>::iterator i = Config->midi_ports.begin(); i != Config->midi_ports.end(); ++i) {
+		MIDI::Manager::instance()->add_port (i->second);
 	}
 
 	MIDI::Port* first;
@@ -143,8 +128,6 @@ setup_midi ()
 		first = ports.begin()->second;
 
 		/* More than one port, so try using specific names for each port */
-
-		map<string,Configuration::MidiPortDescriptor *>::iterator i;
 
 		if (Config->get_mmc_port_name() != N_("default")) {
 			default_mmc_port =  MIDI::Manager::instance()->port (Config->get_mmc_port_name());
@@ -443,7 +426,7 @@ find_file (string name, string dir, string subdir = "")
 		for (vector<string>::iterator i = split_path.begin(); i != split_path.end(); ++i) {
 			path = *i;
 			path += "/" + name;
-			if (access (path.c_str(), R_OK) == 0) {
+			if (Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
 				// cerr << "Using file " << path << " found in ARDOUR_PATH." << endl;
 				return path;
 			}

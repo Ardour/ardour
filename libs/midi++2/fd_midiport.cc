@@ -34,40 +34,38 @@ using namespace PBD;
 string *FD_MidiPort::midi_dirpath = 0;
 string *FD_MidiPort::midi_filename_pattern = 0;
 
-FD_MidiPort::FD_MidiPort (PortRequest &req, 
+FD_MidiPort::FD_MidiPort (const XMLNode& node,
 			  const string &dirpath,
 			  const string &pattern) 
-	: Port (req)
+	: Port (node)
 {	
-	open (req);
+	Descriptor desc (node);
+
+	open (desc);
 
 	if (_fd < 0) {
 		switch (errno) {
 		case EBUSY:
 			error << "MIDI: port device in use" << endmsg;
-			req.status = PortRequest::Busy;
 			break;
 		case ENOENT:
 			error << "MIDI: no such port device" << endmsg;
-			req.status = PortRequest::NoSuchFile;
 			break;
 		case EACCES:
 			error << "MIDI: access to port denied" << endmsg;
-			req.status = PortRequest::NotAllowed;
 			break;
 		default:
-			req.status = PortRequest::Unknown;
+			break;
 		} 
 	} else {
 		_ok = true;
-		req.status = PortRequest::OK;
 
 		if (midi_dirpath == 0) {
 			midi_dirpath = new string (dirpath);
 			midi_filename_pattern = new string (pattern);
 		}
 
-		if (req.mode & O_NONBLOCK == 0) {
+		if (desc.mode & O_NONBLOCK == 0) {
 			/* we unconditionally set O_NONBLOCK during
 			   open, but the request didn't ask for it,
 			   so remove it.
@@ -80,11 +78,11 @@ FD_MidiPort::FD_MidiPort (PortRequest &req,
 }
 
 void
-FD_MidiPort::open (PortRequest &req)
+FD_MidiPort::open (const Descriptor& desc)
 
 {
-	int mode = req.mode | O_NONBLOCK;
-	_fd = ::open (req.devname, mode);
+	int mode = desc.mode | O_NONBLOCK;
+	_fd = ::open (desc.device.c_str(), mode);
 }
 
 vector<string *> *

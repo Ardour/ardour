@@ -33,6 +33,7 @@
 #include <pbd/error.h>
 #include <pbd/pathscanner.h>
 #include <pbd/xml++.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/ardour.h>
 #include <ardour/session.h>
@@ -112,7 +113,7 @@ Plugin::get_nth_control (uint32_t n, bool do_not_create)
 		Plugin::ParameterDescriptor desc;
 		
 		get_parameter_descriptor (n, desc);
-	
+
 		controls[n] = new PortControllable (describe_parameter (n), *this, n, 
 						    desc.lower, desc.upper, desc.toggled, desc.logarithmic);
 	} 

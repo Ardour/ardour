@@ -25,7 +25,6 @@
 #include <unistd.h>
 
 #include <midi++/port.h>
-#include <midi++/port_request.h>
 #include <midi++/fd_midiport.h>
 
 namespace MIDI {
@@ -34,7 +33,7 @@ class FIFO_MidiPort : public MIDI::FD_MidiPort
 
 {
   public:
-	FIFO_MidiPort (PortRequest &req);
+	FIFO_MidiPort (const XMLNode&);
 	~FIFO_MidiPort () {};
 
 	static std::string typestring;
@@ -45,7 +44,7 @@ class FIFO_MidiPort : public MIDI::FD_MidiPort
 	}
 
   private:
-	void open (PortRequest &req);
+	void open (const Port::Descriptor&);
 };
 
 } // namespace MIDI

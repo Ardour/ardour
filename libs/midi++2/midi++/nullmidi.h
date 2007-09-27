@@ -24,7 +24,6 @@
 #include <string>
 
 #include <midi++/port.h>
-#include <midi++/port_request.h>
 
 namespace MIDI {
 
@@ -32,8 +31,8 @@ class Null_MidiPort : public Port
 
 {
   public:
-	Null_MidiPort (PortRequest &req) 
-		: Port (req) { 
+	Null_MidiPort (const XMLNode& node)
+		: Port (node) { 
 
 		/* reset devname and tagname */
 		

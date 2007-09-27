@@ -29,7 +29,6 @@
 #include <unistd.h>
 
 #include <midi++/port.h>
-#include <midi++/port_request.h>
 
 namespace MIDI {
 
@@ -37,7 +36,7 @@ class FD_MidiPort : public Port
 
 {
   public:
-	FD_MidiPort (PortRequest &req, 
+	FD_MidiPort (const XMLNode& node,
 		     const std::string &dirpath,
 		     const std::string &pattern);
 
@@ -51,7 +50,7 @@ class FD_MidiPort : public Port
 
   protected:
 	int _fd;
-	virtual void open (PortRequest &req);
+	virtual void open (const Port::Descriptor&);
 
 	virtual int write (byte *msg, size_t msglen) {
 		int nwritten;

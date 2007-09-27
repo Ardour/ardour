@@ -28,7 +28,6 @@
 #include <unistd.h>
 
 #include <midi++/port.h>
-#include <midi++/port_request.h>
 
 #include <CoreMIDI/CoreMIDI.h>
 
@@ -36,7 +35,7 @@ namespace MIDI {
 
     class CoreMidi_MidiPort:public Port {
       public:
-	CoreMidi_MidiPort(PortRequest & req);
+	CoreMidi_MidiPort(const XMLNode& node);
 	virtual ~ CoreMidi_MidiPort();
 
 	virtual int selectable() const {
@@ -68,7 +67,7 @@ namespace MIDI {
 	MIDIEndpointRef midi_destination;
 	MIDIEndpointRef midi_source;
 
-	int Open(PortRequest & req);
+	int Open(const Port::Descriptor&);
 	void Close();
 	static MIDITimeStamp MIDIGetCurrentHostTime();
 

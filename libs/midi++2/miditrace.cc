@@ -11,7 +11,6 @@ Transmitter fatal (Transmitter::Fatal);
 TextReceiver text_receiver ("mmctest");
 
 #include "midi++/port.h"
-#include "midi++/port_request.h"
 #include "midi++/manager.h"
 
 using namespace MIDI;

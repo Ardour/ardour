@@ -17,26 +17,27 @@
 
     $Id$
 */
-
+#include <iostream>
 #include <cstdio>
 #include <fcntl.h>
 
 #include <pbd/xml++.h>
+#include <pbd/failed_constructor.h>
 
 #include <midi++/types.h>
 #include <midi++/port.h>
 #include <midi++/channel.h>
-#include <midi++/port_request.h>
 #include <midi++/factory.h>
 
-//using namespace Select;
 using namespace MIDI;
+using namespace std;
 
 size_t Port::nports = 0;
 
-Port::Port (PortRequest &req)
-
+Port::Port (const XMLNode& node)
 {
+	Descriptor desc (node);
+
 	_ok = false;  /* derived class must set to true if constructor
 			 succeeds.
 		      */
@@ -47,9 +48,9 @@ Port::Port (PortRequest &req)
 	output_parser = 0;
 	slowdown = 0;
 
-	_devname = req.devname;
-	_tagname = req.tagname;
-	_mode = req.mode;
+	_devname = desc.device;
+	_tagname = desc.tag;
+	_mode = desc.mode;
 
 	if (_mode == O_RDONLY || _mode == O_RDWR) {
 		input_parser = new Parser (*this);
@@ -95,6 +96,12 @@ Port::get_state () const
 	node->add_property ("type", get_typestring());
 
 	return *node;
+}
+
+void
+Port::set_state (const XMLNode& node)
+{
+	// relax
 }
 
 int
@@ -161,5 +168,38 @@ std::ostream & MIDI::operator << ( std::ostream & os, const MIDI::Port & port )
 	os << "; ";
 	os << " }";
 	return os;
+}
+
+Port::Descriptor::Descriptor (const XMLNode& node)
+{
+	const XMLProperty *prop;
+	bool have_tag = false;
+	bool have_device = false;
+	bool have_type = false;
+	bool have_mode = false;
+
+	if ((prop = node.property ("tag")) != 0) {
+		tag = prop->value();
+		have_tag = true;
+	}
+
+	if ((prop = node.property ("device")) != 0) {
+		device = prop->value();
+		have_device = true;
+	}
+
+	if ((prop = node.property ("type")) != 0) {
+		type = PortFactory::string_to_type (prop->value());
+		have_type = true;
+	}
+
+	if ((prop = node.property ("mode")) != 0) {
+		mode = PortFactory::string_to_mode (prop->value());
+		have_mode = true;
+	}
+
+	if (!have_tag || !have_device || !have_type || !have_mode) {
+		throw failed_constructor();
+	}
 }
 

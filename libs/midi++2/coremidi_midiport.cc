@@ -23,7 +23,6 @@
 
 #include <midi++/coremidi_midiport.h>
 #include <midi++/types.h>
-#include <midi++/port_request.h>
 #include <mach/mach_time.h>
 
 #include <pbd/pthread_utils.h>
@@ -36,15 +35,15 @@ MIDITimeStamp CoreMidi_MidiPort::MIDIGetCurrentHostTime()
 	return mach_absolute_time();
 }
 
-CoreMidi_MidiPort::CoreMidi_MidiPort (PortRequest &req) : Port (req)
+CoreMidi_MidiPort::CoreMidi_MidiPort (const XMLNode& node) : Port (node)
 {
+	Descriptor desc (node);
+
 	firstrecv = true;
 	int err;
-	if (0 == (err = Open(req))) {
+	if (0 == (err = Open(desc))) {
 		_ok = true;
-		req.status = PortRequest::OK;
-	} else
-		req.status = PortRequest::Unknown;
+	}
 }
 
 CoreMidi_MidiPort::~CoreMidi_MidiPort () {Close();}
@@ -77,21 +76,21 @@ int CoreMidi_MidiPort::write (byte *msg, size_t msglen)
 	}
 }
 
-int CoreMidi_MidiPort::Open (PortRequest &req)
+int CoreMidi_MidiPort::Open (const Descriptor& desc)
 {
 	OSStatus err;
 	CFStringRef coutputStr;
 	string str;
-
-	coutputStr = CFStringCreateWithCString(0, req.devname, CFStringGetSystemEncoding());
+	
+	coutputStr = CFStringCreateWithCString(0, desc.device.c_str(), CFStringGetSystemEncoding());
 	err = MIDIClientCreate(coutputStr, 0, 0, &midi_client);
 	CFRelease(coutputStr);
-    if (!midi_client) {
+	if (!midi_client) {
 		//error << "Cannot open CoreMidi client : " << err << endmsg.
-        goto error;
-    }
+		goto error;
+	}
   	
-	str = req.tagname + string("_in");
+	str = desc.tag + string("_in");
 	coutputStr = CFStringCreateWithCString(0, str.c_str(), CFStringGetSystemEncoding());
 	err = MIDIDestinationCreate(midi_client, coutputStr, read_proc, this, &midi_destination);
 	CFRelease(coutputStr);
@@ -100,7 +99,7 @@ int CoreMidi_MidiPort::Open (PortRequest &req)
 		goto error;
 	}
 	
-	str = req.tagname + string("_out");
+	str = desc.tag + string("_out");
 	coutputStr = CFStringCreateWithCString(0, str.c_str(), CFStringGetSystemEncoding());
 	err = MIDISourceCreate(midi_client, coutputStr, &midi_source);
 	CFRelease(coutputStr);

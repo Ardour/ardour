@@ -27,7 +27,6 @@
 
 #include <midi++/types.h>
 #include <midi++/port.h>
-#include <midi++/port_request.h>
 
 namespace MIDI {
 
@@ -35,7 +34,7 @@ class Manager {
   public:
 	~Manager ();
 	
-	Port *add_port (PortRequest &);
+	Port *add_port (const XMLNode& node);
 	int   remove_port (Port*);
 
 	Port *port (std::string name);
@@ -67,8 +66,6 @@ class Manager {
 		}
 		return theManager;
 	}
-
-	static int parse_port_request (std::string str, Port::Type type);
 
 	int get_known_ports (std::vector<PortSet>&);
 

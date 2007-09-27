@@ -23,11 +23,10 @@
 #include <iostream>
 
 #include <sigc++/sigc++.h>
+#include <pbd/xml++.h>
 
 #include <midi++/types.h>
 #include <midi++/parser.h>
-
-class XMLNode;
 
 namespace MIDI {
 
@@ -46,10 +45,11 @@ class Port : public sigc::trackable {
 	};
 
 
-	Port (PortRequest &);
+	Port (const XMLNode&);
 	virtual ~Port ();
 
 	virtual XMLNode& get_state () const;
+	virtual void set_state (const XMLNode&);
 
 	/* Direct I/O */
 
@@ -124,6 +124,16 @@ class Port : public sigc::trackable {
 	int    mode () const        { return _mode; }
 	bool   ok ()   const        { return _ok; }
 
+	struct Descriptor {
+	    std::string tag;
+	    std::string device;
+	    int mode;
+	    Port::Type type;
+
+	    Descriptor (const XMLNode&);
+	    XMLNode& get_state();
+	};
+
   protected:
 	bool _ok;
 	Type _type;
@@ -142,6 +152,13 @@ class Port : public sigc::trackable {
 
   private:
 	static size_t nports;
+};
+
+struct PortSet {
+    PortSet (std::string str) : owner (str) { }
+    
+    std::string owner;
+    std::list<XMLNode> ports;
 };
 
 std::ostream & operator << ( std::ostream & os, const Port & port );

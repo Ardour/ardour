@@ -712,12 +712,15 @@ OptionEditor::add_midi_port ()
 		smod = "duplex";
 	}
 
-	MIDI::PortRequest req (X_("ardour"),
-			       dialog.port_name.get_text(),
-			       smod,
-			       MIDI::PortFactory::default_port_type());
 
-	if (MIDI::Manager::instance()->add_port (req) != 0) {
+	XMLNode node (X_("MIDI-port"));
+
+	node.add_property ("tag", dialog.port_name.get_text());
+	node.add_property ("device", X_("ardour")); // XXX this can't be right for all types
+	node.add_property ("type", MIDI::PortFactory::default_port_type());
+	node.add_property ("mode", smod);
+
+	if (MIDI::Manager::instance()->add_port (node) != 0) {
 		redisplay_midi_ports ();
 	}
 }

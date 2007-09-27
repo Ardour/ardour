@@ -42,17 +42,7 @@ class Configuration : public Stateful
 	Configuration();
 	virtual ~Configuration();
 
-	struct MidiPortDescriptor {
-	    std::string tag;
-	    std::string device;
-	    std::string type;
-	    std::string mode;
-
-	    MidiPortDescriptor (const XMLNode&);
-	    XMLNode& get_state();
-	};
-
-	std::map<std::string,MidiPortDescriptor *> midi_ports;
+	std::map<std::string,XMLNode> midi_ports;
 
 	void map_parameters (sigc::slot<void,const char*> theSlot);
 
