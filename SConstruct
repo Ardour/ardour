@@ -1144,9 +1144,14 @@ if os.path.exists('.svn'):
 # specbuild = env.SubstInFile ('ardour.spec','ardour.spec.in', SUBST_DICT = subst_dict)
 
 the_revision = env.Command ('frobnicatory_decoy', [], create_stored_revision)
+remove_ardour = env.Command ('frobnicatory_decoy2', [],
+                             [ Delete ('$PREFIX/etc/ardour2'),
+                               Delete ('$PREFIX/lib/ardour2'),
+                               Delete ('$PREFIX/bin/ardour2')])
 
 env.Alias('revision', the_revision)
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour_system.rc'))
+env.Alias('uninstall', remove_ardour)
 
 Default (sysrcbuild)
 
