@@ -138,10 +138,10 @@ Editor::initialize_canvas ()
 	if (Profile->get_sae()) {
 		Image img (::get_icon (X_("saelogo")));
 		logo_item = new ArdourCanvas::Pixbuf (*track_canvas.root(), 0.0, 0.0, img.get_pixbuf());
-		logo_item->property_height_in_pixels() = true;
-		logo_item->property_width_in_pixels() = true;
-		logo_item->property_height_set() = true;
-		logo_item->property_width_set() = true;
+		// logo_item->property_height_in_pixels() = true;
+		// logo_item->property_width_in_pixels() = true;
+		// logo_item->property_height_set() = true;
+		// logo_item->property_width_set() = true;
 		logo_item->show ();
 	}
 	
@@ -348,8 +348,8 @@ Editor::track_canvas_size_allocated ()
 	redisplay_tempo (true);
 
 	if (logo_item) {
-		logo_item->property_height() = canvas_height;
-		logo_item->property_width() = canvas_width;
+		// logo_item->property_height() = canvas_height;
+		// logo_item->property_width() = canvas_width;
 	}
 
 	Resized (); /* EMIT_SIGNAL */
