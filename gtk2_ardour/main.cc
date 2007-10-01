@@ -90,6 +90,16 @@ fixup_bundle_environment ()
 	Glib::ustring exec_path (execpath);
 	Glib::ustring dir_path = Glib::path_get_dirname (exec_path);
 	Glib::ustring path;
+	const char *cstr = getenv ("PATH");
+
+	/* ensure that we find any bundled executables (e.g. JACK) */
+
+	path = dir_path;
+	if (cstr) {
+		path += ':';
+		path += cstr;
+	}
+	setenv ("PATH", path._cstr(), 1);
 
 	path = dir_path;
 	path += "/../Resources";
