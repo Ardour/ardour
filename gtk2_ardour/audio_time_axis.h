@@ -112,8 +112,6 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	Gtk::RadioMenuItem* rectified_item;
 	Gtk::RadioMenuItem* linearscale_item;
 	Gtk::RadioMenuItem* logscale_item;
-	Gtk::CheckMenuItem* gain_automation_item;
-	Gtk::CheckMenuItem* pan_automation_item;
 };
 
 #endif /* __ardour_audio_time_axis_h__ */

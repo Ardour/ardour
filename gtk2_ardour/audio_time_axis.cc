@@ -357,9 +357,6 @@ AudioTimeAxisView::show_all_automation ()
 {
 	no_redraw = true;
 
-	pan_automation_item->set_active (true);
-	gain_automation_item->set_active (true);
-	
 	RouteTimeAxisView::show_all_automation ();
 
 	no_redraw = false;
@@ -372,9 +369,6 @@ AudioTimeAxisView::show_existing_automation ()
 {
 	no_redraw = true;
 
-	pan_automation_item->set_active (true);
-	gain_automation_item->set_active (true);
-
 	RouteTimeAxisView::show_existing_automation ();
 
 	no_redraw = false;
@@ -386,9 +380,6 @@ void
 AudioTimeAxisView::hide_all_automation ()
 {
 	no_redraw = true;
-
-	pan_automation_item->set_active (false);
-	gain_automation_item->set_active (false);
 
 	RouteTimeAxisView::hide_all_automation();
 
