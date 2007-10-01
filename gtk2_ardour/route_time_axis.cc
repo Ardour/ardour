@@ -231,6 +231,7 @@ RouteTimeAxisView::post_construct ()
 	/* map current state of the route */
 
 	update_diskstream_display ();
+	subplugin_menu.items().clear ();
 	_route->foreach_processor (this, &RouteTimeAxisView::add_processor_to_subplugin_menu);
 	_route->foreach_processor (this, &RouteTimeAxisView::add_existing_processor_automation_curves);
 	reset_processor_automation_curves ();
