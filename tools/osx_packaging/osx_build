@@ -6,12 +6,14 @@ GTKQUARTZ_ROOT=/opt/gtk
 
 SAE=
 WITH_JACK=1
+WITH_LADSPA=1
 
 while [ $# -gt 0 ] ; do
     echo "arg = $1"
     case $1 in
 	--sae) SAE=1 ; shift ;;
 	--nojack) WITH_JACK= ; shift ;;
+	--noladpsa) WITH_LADSPA= ; shift ;;
     esac
 done
 
@@ -36,6 +38,7 @@ echo "Building new app directory structure ..."
 
 mkdir -p $APPROOT/MacOS
 mkdir -p $APPROOT/Resources
+mkdir -p $APPROOT/Plugins
 mkdir -p $Frameworks/modules
 mkdir -p $Shared/templates
 mkdir -p $Etc
@@ -50,9 +53,7 @@ if test x$WITH_JACK != x ; then
     env="$env<key>ARDOUR_WITH_JACK</key><string>true</string>"
 fi
 
-if test "x$env" != x ; then
-    env="<key>LSEnvironment</key><dict><key>ARDOUR_BUNDLED</key><string>true</string>$env</dict>"
-fi
+env="<key>LSEnvironment</key><dict><key>ARDOUR_BUNDLED</key><string>true</string>$env</dict>"
 
 # edit plist
 sed -e "s?@ENV@?$env?g" -e "s?@VERSION@?$version?g" < Info.plist.in > Info.plist
@@ -62,8 +63,11 @@ sed -e "s?@ENV@?$env?g" -e "s?@VERSION@?$version?g" < Info.plist.in > Info.plist
 cp Info.plist $APPROOT
 cp -R Resources $APPROOT
 
-
-
+# copy all (approved) LADSPA plugins
+if test x$WITH_JACK != x ; then
+    echo "Copying LADSPA plugins ..."
+    cp -r ladspa/* $APPROOT/Plugins
+fi
 
 # copy executable
 echo "Copying Ardour executable ..."
@@ -155,7 +159,12 @@ done
 
 # now fix up the executables
 echo "Fixing up executable dependency names ..."
-for exe in Ardour2 jackd ; do
+executables=Ardour2
+if test x$WITH_JACK != x ; then
+    executables="$executables jackd"
+fi
+
+for exe in $executables; do
     EXE=$APPROOT/MacOS/$exe
     changes=""
     for lib in `otool -L $EXE | egrep "($GTKQUARTZ_ROOT|/local/|libs/)" | awk '{print $1}'` ; do
