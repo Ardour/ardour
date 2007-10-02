@@ -1603,6 +1603,17 @@ RouteTimeAxisView::hide_all_automation ()
 {
 	no_redraw = true;
 
+	/* Hide our automation */
+
+	for (map<ARDOUR::Parameter, RouteAutomationNode*>::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
+		i->second->track->set_marked_for_display (false);
+		i->second->track->hide ();
+		i->second->track->get_state_node()->add_property ("shown", X_("no"));
+		i->second->menu_item->set_active (false);
+	}
+
+	/* Hide processor automation */
+
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
 			(*ii)->menu_item->set_active (false);
@@ -1933,7 +1944,7 @@ void
 RouteTimeAxisView::processors_changed ()
 {
 	using namespace Menu_Helpers;
-
+	
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
 		(*i)->valid = false;
 	}
