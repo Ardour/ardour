@@ -99,7 +99,7 @@ fixup_bundle_environment ()
 		path += ':';
 		path += cstr;
 	}
-	setenv ("PATH", path._cstr(), 1);
+	setenv ("PATH", path.c_str(), 1);
 
 	path = dir_path;
 	path += "/../Resources";
