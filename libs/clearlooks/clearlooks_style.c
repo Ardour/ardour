@@ -1677,14 +1677,18 @@ draw_option (DRAW_ARGS)
 	x += (width - RADIO_SIZE)/2;
 	y += (height - RADIO_SIZE)/2;
 	
+#ifndef GTKOSX
 	gdk_gc_set_clip_mask (gc, clearlooks_style->radio_pixmap_mask);
 	gdk_gc_set_clip_origin (gc, x, y);
+#endif
 	
 	gdk_draw_drawable (window, gc, pixmap, 0, 0, x, y,
 	                   RADIO_SIZE, RADIO_SIZE);
 	
+#ifndef GTKOSX
 	gdk_gc_set_clip_origin (gc, 0, 0);
 	gdk_gc_set_clip_mask (gc, NULL);
+#endif
 	
 	if (area)
 		gdk_gc_set_clip_rectangle (gc, NULL);
