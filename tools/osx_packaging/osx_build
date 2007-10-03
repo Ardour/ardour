@@ -31,6 +31,7 @@ Etc=$Resources/etc
 echo "Removing old Ardour2.app tree ..."
 
 rm -rf Ardour2.app
+rm -rf libstaging
 
 echo "Building new app directory structure ..."
 
@@ -64,19 +65,57 @@ cp Info.plist $APPROOT
 cp -R Resources $APPROOT
 
 # copy all (approved) LADSPA plugins
+#if test x$WITH_JACK != x ; then
+#    echo "Copying LADSPA plugins ..."
+#    cp -r ladspa/* $APPROOT/Plugins
+#fi
+
+mkdir libstaging
+echo "Copying ardour executable ...."
+cp ../../gtk2_ardour/ardour-$version libstaging
 if test x$WITH_JACK != x ; then
-    echo "Copying LADSPA plugins ..."
-    cp -r ladspa/* $APPROOT/Plugins
+    cp /usr/local/lib/jack/jack_coreaudio.so libstaging
+    cp /usr/local/bin/jackd libstaging
 fi
 
-# copy executable
-echo "Copying Ardour executable ..."
-cp ../../gtk2_ardour/ardour-$version $APPROOT/MacOS/Ardour2
-strip $APPROOT/MacOS/Ardour2
+cd libstaging
+echo "Evaluating dependencies ..."
 
-# copy everything related to gtk-quartz
-echo "Copying GTK-Quartz tree ..."
-cp -R $GTKQUARTZ_ROOT/lib/*.dylib $Frameworks/
+while [ true ] ; do 
+    missing=false
+    for file in * ; do 
+	deps=`otool -L $file | awk '{print $1}' | egrep "($GTKQUARTZ_ROOT|/local/|libs/)"`
+	echo -n "."
+	for dep in $deps ; do
+	    if ! test -f `basename $dep` ; then
+		if echo $dep | grep -sq '^libs' ; then
+		    cp ../../../$dep .
+		else
+		    cp $dep .
+		fi
+		missing=true
+	    fi
+	done
+    done
+    if test x$missing = xfalse ; then
+	# everything has been found
+	break
+    fi
+done
+echo
+cd ..
+
+# copy executable
+mv libstaging/ardour-$version $APPROOT/MacOS/Ardour2
+strip $APPROOT/MacOS/Ardour2
+if test x$WITH_JACK != x ; then
+    mv libstaging/jackd $APPROOT/MacOS
+fi
+
+# copy all libraries
+echo "Putting all libraries in place ..."
+mv libstaging/* $Frameworks
+
 cp -R $GTKQUARTZ_ROOT/etc/* $Etc
 echo "Copying all Pango modules ..."
 cp -R $GTKQUARTZ_ROOT/lib/pango/1.6.0/modules/*.so $Frameworks/modules
@@ -96,40 +135,11 @@ rm pangorc
 # generate a new GDK pixbufs loaders file
 sed "s?$GTKQUARTZ_ROOT/lib/gtk-2.0/2.10.0/loaders/?@executable_path/../Frameworks/modules/?" < $GTKQUARTZ_ROOT/etc/gtk-2.0/gdk-pixbuf.loaders > $Resources/gdk-pixbuf.loaders
 
-echo "Copying Ardour libraries into .app ..."
-cp ../../libs/pbd/libpbd.dylib $Frameworks
-cp ../../libs/midi++2/libmidi++.dylib $Frameworks
-cp ../../libs/sigc++2/libsigc++2.dylib $Frameworks
-cp ../../libs/soundtouch/libsoundtouch.dylib $Frameworks
-cp ../../libs/libsndfile/libsndfile-ardour.dylib $Frameworks
-cp ../../libs/libgnomecanvasmm/libgnomecanvasmm.dylib $Frameworks
-cp ../../libs/gtkmm2ext/libgtkmm2ext.dylib $Frameworks
-cp ../../libs/glibmm2/libglibmm2.dylib $Frameworks
-cp ../../libs/gtkmm2/atk/libatkmm.dylib $Frameworks
-cp ../../libs/gtkmm2/gdk/libgdkmm2.dylib $Frameworks
-cp ../../libs/gtkmm2/gtk/libgtkmm2.dylib $Frameworks
-cp ../../libs/gtkmm2/pango/libpangomm.dylib $Frameworks
-cp ../../libs/ardour/libardour.dylib $Frameworks
-
 # this one is special - we will set GTK_PATH to $Frameworks/clearlooks
 cp ../../libs/clearlooks/libclearlooks.dylib $Frameworks
 mkdir -p $Frameworks/clearlooks/engines
 (cd $Frameworks/clearlooks/engines && ln -s ../../libclearlooks.dylib libclearlooks.dylib && ln -s ../../libclearlooks.dylib libclearlooks.so)
 
-# push in ardour-required 3rd party libraries
-
-cp /opt/local/lib/libsamplerate.0.dylib $Frameworks
-cp /opt/local/lib/liblrdf.2.dylib $Frameworks
-cp /opt/local/lib/libraptor.1.dylib $Frameworks
-cp /opt/local/lib/liblo.0.dylib $Frameworks
-
-# JACK
-if test x$WITH_JACK != x ; then
-    cp /usr/local/lib/libjack.0.dylib $Frameworks
-    cp /usr/local/lib/jack/jack_coreaudio.so $Frameworks
-    cp /usr/local/bin/jackd $APPROOT/MacOS/jackd
-fi
-    
 # XXX STILL NEED TO DO SURFACES AND PANNERS
 
 cp ../../libs/surfaces/control_protocol/libardour_cp.dylib $Frameworks
