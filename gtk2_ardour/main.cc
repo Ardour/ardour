@@ -123,6 +123,16 @@ fixup_bundle_environment ()
 	setenv ("ARDOUR_CONFIG_PATH", path.c_str(), 1);
 	setenv ("ARDOUR_DATA_PATH", path.c_str(), 1);
 
+	cstr = getenv ("LADSPA_PATH");
+	if (cstr) {
+		path = cstr;
+		path += ':';
+	}
+	path = dir_path;
+	path += "/../Plugins";
+	
+	setenv ("LADSPA_PATH", path.c_str(), 1);
+
 	path = dir_path;
 	path += "/../Frameworks/clearlooks";
 

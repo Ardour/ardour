@@ -203,9 +203,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void session_add_midi_track ();
 
-	void create_engine ();
+	int  create_engine ();
 	void post_engine ();
-	gint start_backend_audio ();
 
 	gint exit_on_main_window_close (GdkEventAny *);
 
@@ -295,7 +294,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	static ARDOUR_UI *theArdourUI;
 
-	void backend_audio_error ();
+	void backend_audio_error (bool we_set_params, Gtk::Window* toplevel = 0);
 	void startup ();
 	void shutdown ();
 

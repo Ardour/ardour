@@ -496,7 +496,8 @@ EngineControl::build_command_line (vector<string>& cmd)
 	} else if (using_coreaudio) {
 
 #ifdef __APPLE__
-		cmd.push_back ("-n");
+		// note: older versions of the CoreAudio JACK backend use -n instead of -d here
+		cmd.push_back ("-d");
 		cmd.push_back (get_device_name (driver, interface_combo.get_active_text()));
 #endif
 
@@ -521,11 +522,10 @@ EngineControl::engine_running ()
 }
 
 int
-EngineControl::start_engine ()
+EngineControl::setup_engine ()
 {
 	vector<string> args;
 	std::string cwd = "/tmp";
-	int ret = 0;
 
 	build_command_line (args);
 
@@ -538,35 +538,14 @@ EngineControl::start_engine ()
 		return -1;
 	}
 
-	// cerr << "will execute ...\n";
 	for (vector<string>::iterator i = args.begin(); i != args.end(); ++i) {
 		jackdrc << (*i) << ' ';
-		// cerr << (*i) << ' ';
 	}
 	jackdrc << endl;
-	// cerr << endl;
 	jackdrc.close ();
 
 	_used = true;
-	
-#if 0
 
-	try {
-		spawn_async_with_pipes (cwd, args, SpawnFlags (0), sigc::slot<void>(), &engine_pid, &engine_stdin, &engine_stdout, &engine_stderr);
-	}
-	
-	catch (Glib::Exception& err) {
-		error << _("could not start JACK server: ") << err.what() << endmsg;
-		ret = -1;
-	}
-#endif
-
-	return ret;
-}
-
-int
-EngineControl::stop_engine ()
-{
 	return 0;
 }
 

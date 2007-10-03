@@ -454,8 +454,12 @@ NewSessionDialog::set_have_engine (bool yn)
 	if (yn) {
 		m_notebook->remove_page (engine_control);
 	} else {
-		m_notebook->append_page (engine_control, _("Audio Setup"));
-		m_notebook->show_all_children();
+		// XXX this is a bit of crude hack. if we ever add or remove
+		// pages from the notebook, this is going to break.
+		if (m_notebook->get_n_pages () != 3) {
+			m_notebook->append_page (engine_control, _("Audio Setup"));
+			m_notebook->show_all_children();
+		}
 	}
 }
 

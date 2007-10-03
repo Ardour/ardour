@@ -245,31 +245,21 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	stopping.connect (mem_fun(*this, &ARDOUR_UI::shutdown));
 }
 
-gint
-ARDOUR_UI::start_backend_audio ()
-{
-	if (new_session_dialog->engine_control.start_engine ()) {
-		return -1;
-	} 
-
-	return 0;
-}
-
-void
+int
 ARDOUR_UI::create_engine ()
 {
 	// this gets called every time by new_session()
 
 	if (engine) {
-		return;
+		return 0;
 	}
 
 	try { 
 		engine = new ARDOUR::AudioEngine (ARDOUR_COMMAND_LINE::jack_client_name);
-	} catch (AudioEngine::NoBackendAvailable& err) {
-		backend_audio_error ();
-		error << string_compose (_("Could not connect to JACK server as  \"%1\""), ARDOUR_COMMAND_LINE::jack_client_name) <<  endmsg;
-		exit (1);
+
+	} catch (...) {
+
+		return -1;
 	}
 
 	engine->Stopped.connect (mem_fun(*this, &ARDOUR_UI::engine_stopped));
@@ -278,6 +268,8 @@ ARDOUR_UI::create_engine ()
 	engine->SampleRateChanged.connect (mem_fun(*this, &ARDOUR_UI::update_sample_rate));
 
 	post_engine ();
+
+	return 0;
 }
 
 void
@@ -333,6 +325,7 @@ ARDOUR_UI::post_engine ()
 	/* start the time-of-day-clock */
 	
 #ifndef GTKOSX
+	/* OS X provides an always visible wallclock, so don't be stupid */
 	update_wall_clock ();
 	Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::update_wall_clock), 60000);
 #endif
@@ -543,21 +536,47 @@ ARDOUR_UI::update_autosave ()
 }
 
 void
-ARDOUR_UI::backend_audio_error ()
+ARDOUR_UI::backend_audio_error (bool we_set_params, Gtk::Window* toplevel)
 {
-	MessageDialog win (_("Ardour could not connect to JACK."),
-		     false,
-		     Gtk::MESSAGE_INFO,
-		     (Gtk::ButtonsType)(Gtk::BUTTONS_NONE));
-win.set_secondary_text(_("There are several possible reasons:\n\
+	string title;
+	if (we_set_params) {
+		title = _("Ardour could not start JACK");
+	} else {
+		title = _("Ardour could not connect to JACK.");
+	}
+
+	MessageDialog win (title,
+			   false,
+			   Gtk::MESSAGE_INFO,
+			   Gtk::BUTTONS_NONE);
+	
+	if (we_set_params) {
+		win.set_secondary_text(_("There are several possible reasons:\n\
+\n\
+1) You requested audio parameters that are not supported..\n\
+2) JACK is running as another user.\n\
+\n\
+Please consider the possibilities, and perhaps try different parameters."));
+	} else {
+		win.set_secondary_text(_("There are several possible reasons:\n\
 \n\
 1) JACK is not running.\n\
 2) JACK is running as another user, perhaps root.\n\
 3) There is already another client called \"ardour\".\n\
 \n\
 Please consider the possibilities, and perhaps (re)start JACK."));
+	}
 
-	win.add_button (Stock::QUIT, RESPONSE_CLOSE);
+	if (toplevel) {
+		win.set_transient_for (*toplevel);
+	}
+
+	if (we_set_params) {
+		win.add_button (Stock::OK, RESPONSE_CLOSE);
+	} else {
+		win.add_button (Stock::QUIT, RESPONSE_CLOSE);
+	}
+
 	win.set_default_response (RESPONSE_CLOSE);
 	
 	win.show_all ();
@@ -647,11 +666,14 @@ ARDOUR_UI::startup ()
 
 	} else {
 
+		if (create_engine ()) {
+			backend_audio_error (false);
+			exit (1);
+		}
+
 		load_needed = true;
 	}
 	
-	create_engine ();
-
 	if (load_needed) {
 		if (load_session (ARDOUR_COMMAND_LINE::session_name, name)) {
 			return;
@@ -1965,7 +1987,7 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 
 	if (!loading_dialog) {
 		loading_dialog = new MessageDialog (*new_session_dialog, 
-						    _("Starting audio engine"),
+						    "",
 						    false,
 						    Gtk::MESSAGE_INFO,
 						    Gtk::BUTTONS_NONE);
@@ -1977,14 +1999,13 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 	new_session_dialog->set_name (predetermined_path);
 	new_session_dialog->reset_recent();
 	new_session_dialog->set_position (WIN_POS_CENTER);
-	new_session_dialog->show();
-	new_session_dialog->present ();
 	new_session_dialog->set_current_page (0);
 
 	do {
-
 		new_session_dialog->set_have_engine (have_engine);
 
+		new_session_dialog->show();
+		new_session_dialog->present ();
 	        response = new_session_dialog->run ();
 
 		_session_is_new = false;
@@ -2004,21 +2025,56 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 			continue;
 		}
 
-		/* first things first ... we need an audio engine running */
+		/* first things first ... if we're here to help set up audio parameters
+		   this is where want to do that.
+		*/
 
 		if (!have_engine) {
-			if (start_backend_audio ()) {
+			if (new_session_dialog->engine_control.setup_engine ()) {
 				new_session_dialog->hide ();
 				return false;
-			}
-			have_engine = true;
+			} 
 		}
 
+#ifdef GTKOSX
+		/* X11 users will always have fontconfig info around, but new GTK-OSX users 
+		   may not and it can take a while to build it. Warn them.
+		*/
+
+		Glib::ustring fontconfig = Glib::build_filename (Glib::get_home_dir(), ".fontconfig");
+		
+		if (!Glib::file_test (fontconfig, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_DIR)) {
+			MessageDialog msg (*new_session_dialog,
+					   _("Welcome to Ardour.\n\n"
+					     "The program will take a bit longer to start up\n"
+					     "while the system fonts are checked.\n\n"
+					     "This will only be done once, and you will\n"
+					     "not see this message again\n"),
+					   true,
+					   Gtk::MESSAGE_INFO,
+					   Gtk::BUTTONS_OK);
+			msg.show_all ();
+			msg.present ();
+			msg.run ();
+		}
+#endif
+		loading_dialog->set_message (_("Starting audio engine"));
 		loading_dialog->show_all ();
 		flush_pending ();
 		
-		create_engine ();
+		if (create_engine ()) {
+			backend_audio_error (!have_engine, new_session_dialog);
+			loading_dialog->hide ();
+			flush_pending ();
+			/* audio setup page */
+			new_session_dialog->set_current_page (2);
+			/* try again */
+			response = Gtk::RESPONSE_NONE;
+			continue;
+		}
 
+		have_engine = true;		
+			
 		/* now handle possible affirmative responses */
 
 		if (response == Gtk::RESPONSE_YES) {

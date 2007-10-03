@@ -21,8 +21,7 @@ class EngineControl : public Gtk::VBox {
 	~EngineControl ();
 
 	static bool engine_running ();
-	int start_engine ();
-	int stop_engine ();
+	int setup_engine ();
 
 	bool was_used() const { return _used; }
 	XMLNode& get_state ();
