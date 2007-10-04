@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # script for pulling together a MacOSX app bundle.
 
@@ -25,13 +25,13 @@ echo "Version is $version"
 APPROOT=Ardour2.app/Contents
 Frameworks=$APPROOT/Frameworks
 Resources=$APPROOT/Resources
+Plugins=$APPROOT/Plugins
 Shared=$Resources/share
 Etc=$Resources/etc
 
 echo "Removing old Ardour2.app tree ..."
 
 rm -rf Ardour2.app
-rm -rf libstaging
 
 echo "Building new app directory structure ..."
 
@@ -64,57 +64,13 @@ sed -e "s?@ENV@?$env?g" -e "s?@VERSION@?$version?g" < Info.plist.in > Info.plist
 cp Info.plist $APPROOT
 cp -R Resources $APPROOT
 
-# copy all (approved) LADSPA plugins
-#if test x$WITH_JACK != x ; then
-#    echo "Copying LADSPA plugins ..."
-#    cp -r ladspa/* $APPROOT/Plugins
-#fi
-
-mkdir libstaging
 echo "Copying ardour executable ...."
-cp ../../gtk2_ardour/ardour-$version libstaging
-if test x$WITH_JACK != x ; then
-    cp /usr/local/lib/jack/jack_coreaudio.so libstaging
-    cp /usr/local/bin/jackd libstaging
-fi
-
-cd libstaging
-echo "Evaluating dependencies ..."
-
-while [ true ] ; do 
-    missing=false
-    for file in * ; do 
-	deps=`otool -L $file | awk '{print $1}' | egrep "($GTKQUARTZ_ROOT|/local/|libs/)"`
-	echo -n "."
-	for dep in $deps ; do
-	    if ! test -f `basename $dep` ; then
-		if echo $dep | grep -sq '^libs' ; then
-		    cp ../../../$dep .
-		else
-		    cp $dep .
-		fi
-		missing=true
-	    fi
-	done
-    done
-    if test x$missing = xfalse ; then
-	# everything has been found
-	break
-    fi
-done
-echo
-cd ..
-
-# copy executable
-mv libstaging/ardour-$version $APPROOT/MacOS/Ardour2
+cp ../../gtk2_ardour/ardour-$version $APPROOT/MacOS/Ardour2
 strip $APPROOT/MacOS/Ardour2
 if test x$WITH_JACK != x ; then
-    mv libstaging/jackd $APPROOT/MacOS
+    cp /usr/local/lib/jack/jack_coreaudio.so $Frameworks
+    cp /usr/local/bin/jackd $APPROOT/MacOS
 fi
-
-# copy all libraries
-echo "Putting all libraries in place ..."
-mv libstaging/* $Frameworks
 
 cp -R $GTKQUARTZ_ROOT/etc/* $Etc
 echo "Copying all Pango modules ..."
@@ -123,6 +79,13 @@ echo "Copying all GDK Pixbuf loaders ..."
 cp -R $GTKQUARTZ_ROOT/lib/gtk-2.0/2.10.0/loaders/*.so $Frameworks/modules
 # charset alias file
 cp -R $GTKQUARTZ_ROOT/lib/charset.alias $Resources
+
+pwd=`pwd`
+
+if test x$WITH_LADSPA != x ; then
+    echo "Copying `ls ladspa | wc -l` plugins ..."
+    cp -r ladspa/* $Plugins
+fi
 
 # generate new Pango module file
 cat > pangorc <<EOF 
@@ -143,6 +106,33 @@ mkdir -p $Frameworks/clearlooks/engines
 # XXX STILL NEED TO DO SURFACES AND PANNERS
 
 cp ../../libs/surfaces/control_protocol/libardour_cp.dylib $Frameworks
+
+while [ true ] ; do 
+    missing=false
+    for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Plugins/*.so ; do 
+	if ! file $file | grep -qs Mach-O ; then
+	    continue
+	fi
+	deps=`otool -L $file | awk '{print $1}' | egrep "($GTKQUARTZ_ROOT|/local/|libs/)"`
+	echo -n "."
+	for dep in $deps ; do
+	    base=`basename $dep`
+	    if ! test -f $Frameworks/$base; then
+		if echo $dep | grep -sq '^libs' ; then
+		    cp ../../$dep $Frameworks
+		else
+		    cp $dep $Frameworks
+		fi
+		missing=true
+	    fi
+	done
+    done
+    if test x$missing = xfalse ; then
+	# everything has been found
+	break
+    fi
+done
+echo
 
 echo "Copying other stuff to Ardour2.app  ..."
 
